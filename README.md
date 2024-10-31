@@ -166,7 +166,7 @@ This is how the risk scores will be attached to the strategy:
 }
 ```
 
-For more info on how to attach the risk scores to the strategy check [yDaemon](https://github.com/yearn/ydaemon/blob/main/data/meta/vaults/_schema.md#the-risk-score-object). Example of the strategy [`yPT-uniETH Yearn Auto-Rolling Pendle PT`](https://github.com/yearn/ydaemon/blob/6797a0246ba13ac3e8b78f8b9a54b12e8500d603/data/meta/vaults/1.json#L62-L75).
+For more info on how to attach the risk scores to the strategy see [yDaemon schema](https://github.com/yearn/ydaemon/blob/main/data/meta/vaults/_schema.md#the-risk-score-object). Example of the strategy [`yPT-uniETH Yearn Auto-Rolling Pendle PT`](https://github.com/yearn/ydaemon/blob/6797a0246ba13ac3e8b78f8b9a54b12e8500d603/data/meta/vaults/1.json#L62-L75).
 
 ### `riskLevel`
 
@@ -183,3 +183,10 @@ Yearn V3 vaults can be single-strategy or multi-strategy vaults. The risk score 
 - [multi-strategy](https://github.com/yearn/ydaemon/blob/6797a0246ba13ac3e8b78f8b9a54b12e8500d603/data/meta/vaults/1.json#L2606): riskLevel is defined by the highest riskLevel value of all strategies in the vault.
 
 Current risk levels of live strategies are available [here](https://docs.google.com/spreadsheets/d/1X6ABH4dN4WGCWPbvng0xdFoWH-jDhz1-fjaTzP_BW0w/edit?gid=0#gid=0).
+
+## Automation
+
+About the automation of attaching risk scores to strategies see following:
+
+- [Strategy](./strategy/STRATEGY.md)
+- [Factory](./factory/FACTORY.md)
