@@ -47,7 +47,7 @@ The testing coverage of the strategy being evaluated. Note that there are no int
 
 The sLOC count of the strategy being evaluated. Note that the strategy can be complex regardless of the sLOC. In such cases, ySec will provide the justification reason for the score by text if needed.
 
-- 5 -> 750+ sLOC
+- 5 -> 600+ sLOC
 - 4 -> 450-600 sLOC
 - 3 -> 300-450 sLOC
 - 2 -> 150-300 sLOC
