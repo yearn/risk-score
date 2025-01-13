@@ -1,0 +1,14 @@
+{
+    "review": 2,
+    "testing": 3,
+    "complexity": 1,
+    "riskExposure": 3,
+    "protocolIntegration": 1,
+    "centralizationRisk": 1,
+    "externalProtocolAudit": 4,
+    "externalProtocolCentralisation": 3,
+    "externalProtocolTvl": 2,
+    "externalProtocolLongevity": 1,
+    "externalProtocolType": 4,
+    "comment": "Test risk score"
+}
