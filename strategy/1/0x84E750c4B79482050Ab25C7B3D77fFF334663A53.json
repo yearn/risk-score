@@ -1,0 +1,17 @@
+{
+    "riskLevel": 2,
+    "riskScore": {
+        "review": 3,
+        "testing": 1,
+        "complexity": 1,
+        "riskExposure": 4,
+        "protocolIntegration": 2,
+        "centralizationRisk": 2,
+        "externalProtocolAudit": 1,
+        "externalProtocolCentralisation": 3,
+        "externalProtocolTvl": 1,
+        "externalProtocolLongevity": 4,
+        "externalProtocolType": 1,
+        "comment": "Morpho Vault uses a range of Convex-wrapped Curve LPs as collateral types. For more info check: https://www.llamarisk.com/research/morpho-crvusd-vault"
+    }
+}
