@@ -1,0 +1,38 @@
+{
+    "riskLevel": 2,
+    "riskScore": {
+        "review": 3,
+        "testing": 1,
+        "complexity": 1,
+        "riskExposure": 1,
+        "protocolIntegration": 2,
+        "centralizationRisk": 2,
+        "externalProtocolAudit": 1,
+        "externalProtocolCentralisation": 3,
+        "externalProtocolTvl": 1,
+        "externalProtocolLongevity": 4,
+        "externalProtocolType": 1,
+        "comment": ""
+    },
+    "deployEventAbi": [
+        {
+            "anonymous": false,
+            "inputs": [
+                {
+                    "indexed": true,
+                    "internalType": "address",
+                    "name": "strategy",
+                    "type": "address"
+                },
+                {
+                    "indexed": true,
+                    "internalType": "address",
+                    "name": "asset",
+                    "type": "address"
+                }
+            ],
+            "name": "NewMorphoCompounder",
+            "type": "event"
+        }
+    ]
+}
