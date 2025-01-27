@@ -9,4 +9,11 @@ JSON structure:
 - `riskLevel` is the final risk of the strategy displayed on Yearn frontend.
 - `riskScore` is object with detailed values of each risk category.
 
-This data is used by [yDaemon](https://github.com/yearn/ydaemon). yDaemon fetches the strategies from blockchain registry and creates new JSON item for each strategy. In this flow, yDaemon **will be** extended in [this file](https://github.com/yearn/ydaemon/blob/bb7a1365c0fe7a8ddb4f401eb0fd08278ca88d32/internal/fetcher/vaults.go) to fetch the strategy risk score from this folder.
+This data is used by [yDaemon](https://github.com/yearn/ydaemon). yDaemon fetches the strategies from blockchain registry and creates new JSON item for each strategy. yDaemon was extended in [this commit](https://github.com/yearn/ydaemon/commit/b8296457af78cf97f41ef15cb502ff0744fd0a8b) to fetch the strategy risk score from this folder.
+
+## Adding a new strategy
+
+1. Create a new JSON file with name corresponding to the strategy address in the `strategy` folder. File must be in the correct folder. Name of the folder is the chain id, e.g. `1` for Ethereum mainnet.
+2. JSON file must contain `riskLevel` and `riskScore` fields assigned by the SAM team.
+
+For the reference check [file](./1/0x70E75D8053e3Fb0Dda35e80EB16f208c7e4D54F4.json).
