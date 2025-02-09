@@ -17,3 +17,5 @@ This data is used by [yDaemon](https://github.com/yearn/ydaemon). yDaemon fetche
 2. JSON file must contain `riskLevel` and `riskScore` fields assigned by the SAM team.
 
 For the reference check [file](./1/0x70E75D8053e3Fb0Dda35e80EB16f208c7e4D54F4.json).
+
+The scores on yDaemon are updated [daily](https://github.com/yearn/ydaemon/blob/1253cce0cbcccb6b1ea2f0da5e7f4aa9596a384c/internal/main.go#L108) at 12:10 UTC. After adding a new strategy, it will take some time to reflect on yDaemon.
