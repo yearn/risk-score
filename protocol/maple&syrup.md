@@ -159,3 +159,5 @@ Data on 10th Feb 2025.
 | sUSDS    | 2%          | 2,600,000   | $2.6M       |
 
 More than [15%](https://etherscan.io/token/0xD11c452fc99cF405034ee446803b6F6c1F6d5ED8#balances) of all tETH is used as collateral in Syrup(2 addresses), making it the top holder of tETH.
+
+Swapping more than 1000 tETH for wstETH and tETH for weETH will cause more than 2% slippage. tETH allows immediate redemptions of tETH up to a 292.392 tETH limit at any given time for 2% fee. In the case of bigger tETH liquidation, the liquidator would have to accept tETH with 7 days to unwind the position.
