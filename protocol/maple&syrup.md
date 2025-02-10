@@ -14,7 +14,7 @@ If a new lender decided to deposit into the pool during an impairment, their len
 
 "Both Maple and Syrup loans are verifiable onchain with transparent margin call and liquidation levels for each individual loan".
 
-## Collateral Assets
+## Collateral Assets on Syrup
 
 ### BTC
 
@@ -144,7 +144,7 @@ Liquidation Level = 1 / (1176471 / 1000000) = 85%
 
 Asset is not listed on aave, compound or morpho.
 
-### Allocations
+### [Allocations](https://syrup.fi/details)
 
 Data on 10th Feb 2025.
 
@@ -157,3 +157,5 @@ Data on 10th Feb 2025.
 | PT_sUSDe | 10%         | 12,700,000  | $12.5M      |
 | LBTC     | 6.9%        | 95          | $9M         |
 | sUSDS    | 2%          | 2,600,000   | $2.6M       |
+
+More than [15%](https://etherscan.io/token/0xD11c452fc99cF405034ee446803b6F6c1F6d5ED8#balances) of all tETH is used as collateral in Syrup(2 addresses), making it the top holder of tETH.
