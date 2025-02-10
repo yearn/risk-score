@@ -1,0 +1,17 @@
+{
+    "riskLevel": 2,
+    "riskScore": {
+        "review": 3,
+        "testing": 2,
+        "complexity": 1,
+        "riskExposure": 1,
+        "protocolIntegration": 2,
+        "centralizationRisk": 1,
+        "externalProtocolAudit": 1,
+        "externalProtocolCentralisation": 2,
+        "externalProtocolTvl": 2,
+        "externalProtocolLongevity": 5,
+        "externalProtocolType": 3,
+        "comment": "Euler vault controlled by Euler DAO."
+    }
+}
