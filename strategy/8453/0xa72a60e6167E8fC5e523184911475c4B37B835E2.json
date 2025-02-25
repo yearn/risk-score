@@ -1,10 +1,10 @@
 {
-    "riskLevel": 2,
+    "riskLevel": 3,
     "riskScore": {
         "review": 3,
         "testing": 5,
         "complexity": 2,
-        "riskExposure": 3,
+        "riskExposure": 4,
         "protocolIntegration": 3,
         "centralizationRisk": 2,
         "externalProtocolAudit": 1,
@@ -12,6 +12,6 @@
         "externalProtocolTvl": 1,
         "externalProtocolLongevity": 4,
         "externalProtocolType": 1,
-        "comment": ""
+        "comment": "Morpho markets are using risky LRTs as collateral."
     }
 }
