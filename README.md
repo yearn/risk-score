@@ -184,6 +184,46 @@ Yearn V3 vaults can be single-strategy or multi-strategy vaults. The risk score 
 
 Current risk levels of live strategies are available [here](https://docs.google.com/spreadsheets/d/1X6ABH4dN4WGCWPbvng0xdFoWH-jDhz1-fjaTzP_BW0w/edit?gid=0#gid=0).
 
+### Final Score
+
+> This calulcation should be used inside the `riskLevel` calculation.
+
+The final score is calculated by categorizing risk metrics into three main components:
+
+1. **Strategy Score**: Combines all strategy-related metrics (review, testing, complexity, riskExposure, centralizationRisk, protocolIntegration) into a single category score.
+   - Calculated as: `(score_1 + score_2 + ... + score_n) / n`
+
+2. **Asset(Collateral) Score**: Evaluates the risk associated with assets used as collateral in the strategy.
+   - With monitoring: Weighted average of asset allocations and asset risk scores
+     - Calculated as: `Σ(asset_allocation_i × asset_risk_score_i)`
+   - Without monitoring: Uses the highest risk score among all collaterals
+   - If risk monitoring indicates increased risk, the score is adjusted accordingly
+
+3. **Protocol Score**: Combines all external protocol-related metrics (externalProtocolAudit, externalProtocolCentralisation, externalProtocolTvl, externalProtocolLongevity, externalProtocolType) into a single category score.
+   - Calculated as: `(score_1 + score_2 + ... + score_n) / n`
+
+The final risk score is calculated as:
+
+```
+Final Score = (Strategy Score + Asset Score + Protocol Score) / 3
+```
+
+This average approach provides a balanced view of the overall risk. However, in cases where one category presents exceptionally high risk, the maximum approach may be considered:
+
+```
+Final Score = max(Strategy Score, Asset Score, Protocol Score)
+```
+
+Note: The asset(collateral) scoring component requires monitoring infrastructure to function optimally. In the absence of such monitoring, the most conservative score is used to ensure safety.
+
+Final Score is rounded to the nearest integer.
+
+Examples:
+
+- Final Score = (1.3 + 2.5 + 1.7) / 3 = 1.8333333333333333 = 2
+- Final Score = (2.5 + 3 + 3.2) / 3 = 2.9 = 3
+- Final Score = (2.1 + 1.9 + 2.5) / 3 = 2.1666666666666665 = 2
+
 ## Automation
 
 About the automation of attaching risk scores to strategies see following:
