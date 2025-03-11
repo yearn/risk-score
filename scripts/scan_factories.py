@@ -26,7 +26,7 @@ def load_abi(file_path):
 
 class FactoryScanner:
     def __init__(self):
-        self.factory_dir = Path("factory")
+        self.factory_dir = Path("strategy/factory")
         self.strategy_dir = Path("strategy")
         self.providers: Dict[str, Web3] = {}
 
