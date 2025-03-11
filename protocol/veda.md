@@ -1,5 +1,13 @@
 # VEDA Protocol Analysis
 
+## Summary
+
+VEDA Protocol implements a modular DeFi vault system where components interact through a complex role-based authority structure. The system consists of a BoringVault that holds assets and issues shares, a Teller for handling deposits and withdrawals, an Accountant managing exchange rates, a Manager executing actions using vault funds, and an AtomicQueue processing withdrawal requests. This architecture achieves flexibility through decoupling, with each component operating independently while communicating through well-defined interfaces.
+
+The protocol's security is primarily governed by an AuthorityRoles contract that provides granular, function-level permission control across 10 distinct role groups. While this design enables precise access management, it introduces significant centralization risks as the 4/6 multisig controlling the Authority contract for [USDC Boring Vault](https://etherscan.io/address/0x08c6F91e2B681FaF5e17227F2a44C307b3C1364C). It can add access to exit function on vault contract and sweep all funds. User withdrawals can be blocked at any time by changing permissions. Exchange rates can be manipulated within allowed ranges, and multiple pausing mechanisms exist that could trap user funds indefinitely.
+
+Despite these concerns, the system incorporates some positive features such as rate change limitations, multiple withdrawal paths, and multisig governance requirements. However, the lack of interdependencies between modules means permissioned accounts can execute critical functions without cross-component verification, creating potential security vulnerabilities if the controlling entities act maliciously or are compromised. Using timelock as owner of AuthorityRoles would improve security and trust in the protocol governance.
+
 ## Documentation & Resources
 
 - [All off-chain algorithms](https://docs.veda.tech/#flexible-off-chain-algorithms)
@@ -61,7 +69,8 @@
 - Authority contract owner is 4/6 multisig
 - Exchange rates can be manipulated within defined ranges, potentially favoring certain exits or causing accounting errors
 - Exchage rate is updated by 2/4 multisig
-- Exchange rate can be updated every [6 hours](https://etherscan.io/address/0xbe16605b22a7facef247363312121670dfe5afbe#readContract#F1) and only by 0.5% up or down without pausing Accountant. Pausing it will block any withdrawal because calcuclating rate for boring vault will [revert](https://github.com/Se7en-Seas/boring-vault/blob/0e23e7fd3a9a7735bd3fea61dd33c1700e75c528/src/base/Roles/AccountantWithRateProviders.sol#L355).
+- Exchange rate can be updated every [6 hours](https://etherscan.io/address/0xbe16605b22a7facef247363312121670dfe5afbe#readContract#F1) and only by 0.5% down without pausing Accountant contract. Pausing the contract will block any withdrawal because calcuclating rate in [Teller contract](https://github.com/Se7en-Seas/boring-vault/blob/0e23e7fd3a9a7735bd3fea61dd33c1700e75c528/src/base/Roles/TellerWithMultiAssetSupport.sol#L455C55-L455C73) will [revert](https://github.com/Se7en-Seas/boring-vault/blob/0e23e7fd3a9a7735bd3fea61dd33c1700e75c528/src/base/Roles/AccountantWithRateProviders.sol#L388).
+- [ManageRoot](https://github.com/Se7en-Seas/boring-vault/blob/0e23e7fd3a9a7735bd3fea61dd33c1700e75c528/src/base/Roles/ManagerWithMerkleVerification.sol#L33) in ManagerWithMerkleVerification doesn't reveal what actions are allowed.
 
 ## Deployed Examples
 
@@ -70,6 +79,7 @@
 - [Authority Contract Owner (4/6 multisig)](https://etherscan.io/address/0xCEA8039076E35a825854c5C2f85659430b06ec96#code)
 - [Authority Roles Contract](https://etherscan.io/address/0xaBA6bA1E95E0926a6A6b917FE4E2f19ceaE4FF2e#code)
 - [AccountantWithRateProviders](https://etherscan.io/address/0xc315D6e14DDCDC7407784e2Caf815d131Bc1D3E7#code)
+- [ManagerWithMerkleVerification](https://etherscan.io/address/0xcff411d5c54fe0583a984bee1ef43a4776854b9a#code)
 - [AtomicQueue](https://etherscan.io/address/0x3b4acd8879fb60586ccd74bc2f831a4c5e7dbbf8#code)
 - [Deposit Example (Tenderly)](https://dashboard.tenderly.co/tx/0xd48613d3315eed3113dd1c6c2a2cb73f2e416fecb09aa16001251ce26dd0e34a?trace=0.5.2.0)
 - [Exit Example (Tenderly)](https://dashboard.tenderly.co/tx/0xbf5967757dc451eca933a0bc1410a01486a4dbd0a60225b76bdf8604060b23f8?trace=0.5.2.0)
@@ -104,6 +114,7 @@ Solver example:
 ### Group 4
 
 - Can do following: ManagerWithMerkleVerification.manageVaultWithMerkleVerification(): [added](https://etherscan.io/tx/0x8ea3fda57a54ea5a5267156b96e17b12b209073e614b5adbe12e7b639681cb52#eventlog)
+- Merkle(0xcFF411d5C54FE0583A984beE1eF43a4776854B9A): [added](https://etherscan.io/tx/0x8ea3fda57a54ea5a5267156b96e17b12b209073e614b5adbe12e7b639681cb52#eventlog)
 - Merkle(0xcFF411d5C54FE0583A984beE1eF43a4776854B9A): [added](https://etherscan.io/tx/0x71880b64755465bc891a931f0d9653ab2e8c66fa523c06452dee6c41d6083e99#eventlog)
 - ManagerWithMerkleVerification(0xcFF411d5C54FE0583A984beE1eF43a4776854B9A): [added](https://etherscan.io/tx/0x8a297de4d715b1e963d4dc3a18dea6649d70c3d2784ccb6db66cbc762d59de33#eventlog)
 
@@ -226,7 +237,6 @@ LIMIT 10
 ### RoleCapabilityUpdated from AuthorityRoles
 
 ```sql
--- Simple query for RoleCapabilityUpdated events using only standard functions
 SELECT
     block_time,
     block_number,
@@ -241,6 +251,7 @@ FROM ethereum.logs
 WHERE contract_address = 0xaBA6bA1E95E0926a6A6b917FE4E2f19ceaE4FF2e
 -- RoleCapabilityUpdated event signature: keccak256("RoleCapabilityUpdated (index_topic_1 uint8 role, index_topic_2 address target, index_topic_3 bytes4 functionSig, bool enabled)")
 AND topic0 = 0xa52ea92e6e955aa8ac66420b86350f7139959adfcc7e6a14eee1bd116d09860e
+and varbinary_to_uint256(topic1) = 4 -- Group 4 or remove for all
 ORDER BY block_time DESC
 LIMIT 10
 ```
@@ -263,6 +274,26 @@ FROM ethereum.logs
 WHERE contract_address = 0xaBA6bA1E95E0926a6A6b917FE4E2f19ceaE4FF2e
 -- UserRoleUpdated event signature: keccak256("UserRoleUpdated (index_topic_1 address user, index_topic_2 uint8 role, bool enabled)")
 AND topic0 = 0x4c9bdd0c8e073eb5eda2250b18d8e5121ff27b62064fbeeeed4869bb99bc5bf2
+ORDER BY block_time DESC
+LIMIT 10
+```
+
+### BoringVaultManaged from ManagerWithMerkleVerification
+
+```sql
+-- Simple query for BoringVaultManaged events using only standard functions
+SELECT
+    block_time,
+    block_number,
+    tx_hash,
+    index,
+    contract_address,
+    topic0,  -- Event signature
+    topic1   -- callsMade
+FROM ethereum.logs
+WHERE contract_address = 0xcff411d5c54fe0583a984bee1ef43a4776854b9a
+-- BoringVaultManaged event signature: keccak256("BoringVaultManaged(uint256)")
+AND topic0 = 0x53d426e7d80bb2c8674d3b45577e2d464d423faad6531b21f95ac11ac18b1cb6
 ORDER BY block_time DESC
 LIMIT 10
 ```
