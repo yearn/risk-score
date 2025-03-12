@@ -72,6 +72,15 @@ Despite these concerns, the system incorporates some positive features such as r
 - Exchange rate can be updated every [6 hours](https://etherscan.io/address/0xbe16605b22a7facef247363312121670dfe5afbe#readContract#F1) and only by 0.5% down without pausing Accountant contract. Pausing the contract will block any withdrawal because calcuclating rate in [Teller contract](https://github.com/Se7en-Seas/boring-vault/blob/0e23e7fd3a9a7735bd3fea61dd33c1700e75c528/src/base/Roles/TellerWithMultiAssetSupport.sol#L455C55-L455C73) will [revert](https://github.com/Se7en-Seas/boring-vault/blob/0e23e7fd3a9a7735bd3fea61dd33c1700e75c528/src/base/Roles/AccountantWithRateProviders.sol#L388).
 - [ManageRoot](https://github.com/Se7en-Seas/boring-vault/blob/0e23e7fd3a9a7735bd3fea61dd33c1700e75c528/src/base/Roles/ManagerWithMerkleVerification.sol#L33) in ManagerWithMerkleVerification doesn't reveal what actions are allowed.
 
+## Monitroing
+
+Set up monitoring for following to mitigate centralization risks:
+
+- `AuthorityRoles` owner and changes in this contract.
+- `AccountantWithRateProviders.updateExchangeRate()` function and if it will trigger pausing of this contract.
+- `AccountantWithRateProviders` for variables updates like delay and lower/upper bounds. This could be covered by monitoring `AuthorityRoles` owner.
+- `ManagerWithMerkleVerification` for changes in merkle root. This could be covered by monitoring `AuthorityRoles` owner.
+
 ## Deployed Examples
 
 - [USDC Boring Vault](https://etherscan.io/address/0x08c6F91e2B681FaF5e17227F2a44C307b3C1364C)
