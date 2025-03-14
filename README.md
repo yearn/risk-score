@@ -4,7 +4,7 @@ This repository contains risk scores for Yearn strategies, assets, and protocols
 
 ## Strategy Risk Scores
 
-Yearn strategy risk scores are define using [Risk Score Framework](./strategy/RISK_FRAMEWORK.md).
+Yearn strategy risk scores are defined in folder [strategy](./strategy) using [Risk Score Framework](./strategy/RISK_FRAMEWORK.md).
 
 ## Asset Risk Scores
 
