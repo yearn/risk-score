@@ -41,36 +41,36 @@ Potential problems:
 
 | User Name | Target Name | Function Names | User Address | Target Address |
 |-----------|-------------|----------------|--------------|----------------|
-| Multisig 3/5 | ManagerWithMerkleVerification | manageVaultWithMerkleVerification(bytes32[][]) | 0x0792dCb7080466e4Bbc678Bdb873FE7D969832B8 | 0x76fda7A02B616070D3eC5902Fa3C5683AC3cB8B6 |
-| Teller | scUSD BoringVault | exit(address) | 0x358CFACf00d0B4634849821BB3d1965b472c776a | 0xd3DCe716f3eF535C5Ff8d041c1A41C3bd89b97aE |
-| BoringOnChainQueue | BoringSolver | boringSolve(address) | 0x3754480db8b3E607fbE125697EB496a44A1Be720 | 0xE41A255A37C7d5d30a2A20D58f4ecE149b346a61 |
-| ManagerWithMerkleVerification | ManagerWithMerkleVerification | manageVaultWithMerkleVerification(bytes32[][]) | 0x76fda7A02B616070D3eC5902Fa3C5683AC3cB8B6 | 0x76fda7A02B616070D3eC5902Fa3C5683AC3cB8B6 |
-| ManagerWithMerkleVerification | scUSD BoringVault | manage(address[]) | 0x76fda7A02B616070D3eC5902Fa3C5683AC3cB8B6 | 0xd3DCe716f3eF535C5Ff8d041c1A41C3bd89b97aE |
-| Multisig 2/3 | Teller | updateAssetData(address) | 0x7Ad69d482b56062b6e76D6e645FC5bFCB97C93b5 | 0x358CFACf00d0B4634849821BB3d1965b472c776a |
-| Multisig 2/3 | BoringOnChainQueue | stopWithdrawsInAsset(address), cancelUserWithdraws (0x9fff7e2a) | 0x7Ad69d482b56062b6e76D6e645FC5bFCB97C93b5 | 0x3754480db8b3E607fbE125697EB496a44A1Be720 |
-| Multisig 2/3 | ManagerWithMerkleVerification | manageVaultWithMerkleVerification(bytes32[][]) | 0x7Ad69d482b56062b6e76D6e645FC5bFCB97C93b5 | 0x76fda7A02B616070D3eC5902Fa3C5683AC3cB8B6 |
-| Multisig 2/3 | Pauser | pauseAll(), pauseMultiple(address[]), pauseSingle(address) | 0x7Ad69d482b56062b6e76D6e645FC5bFCB97C93b5 | 0x7B49E2ceed55B33C382741eCdfe585878843c1f1 |
+| Multisig 3/5 | ManagerWithMerkleVerification | manageVaultWithMerkleVerification(0x244b0f6a) | 0x0792dCb7080466e4Bbc678Bdb873FE7D969832B8 | 0x76fda7A02B616070D3eC5902Fa3C5683AC3cB8B6 |
+| Teller | scUSD BoringVault | exit(0x18457e61) | 0x358CFACf00d0B4634849821BB3d1965b472c776a | 0xd3DCe716f3eF535C5Ff8d041c1A41C3bd89b97aE |
+| BoringOnChainQueue | BoringSolver | boringSolve(0x67aa0410) | 0x3754480db8b3E607fbE125697EB496a44A1Be720 | 0xE41A255A37C7d5d30a2A20D58f4ecE149b346a61 |
+| ManagerWithMerkleVerification | ManagerWithMerkleVerification | manageVaultWithMerkleVerification(0x244b0f6a) | 0x76fda7A02B616070D3eC5902Fa3C5683AC3cB8B6 | 0x76fda7A02B616070D3eC5902Fa3C5683AC3cB8B6 |
+| ManagerWithMerkleVerification | scUSD BoringVault | manage(0x224d8703) | 0x76fda7A02B616070D3eC5902Fa3C5683AC3cB8B6 | 0xd3DCe716f3eF535C5Ff8d041c1A41C3bd89b97aE |
+| Multisig 2/3 | Teller | updateAssetData(0x8dfd8ba0) | 0x7Ad69d482b56062b6e76D6e645FC5bFCB97C93b5 | 0x358CFACf00d0B4634849821BB3d1965b472c776a |
+| Multisig 2/3 | BoringOnChainQueue | stopWithdrawsInAsset(0x74732720), cancelUserWithdraws(0x9fff7e2a) | 0x7Ad69d482b56062b6e76D6e645FC5bFCB97C93b5 | 0x3754480db8b3E607fbE125697EB496a44A1Be720 |
+| Multisig 2/3 | ManagerWithMerkleVerification | manageVaultWithMerkleVerification(0x244b0f6a) | 0x7Ad69d482b56062b6e76D6e645FC5bFCB97C93b5 | 0x76fda7A02B616070D3eC5902Fa3C5683AC3cB8B6 |
+| Multisig 2/3 | Pauser | pauseAll(0x595c6a60), pauseMultiple(0x1414a730), pauseSingle(0x6fa02010) | 0x7Ad69d482b56062b6e76D6e645FC5bFCB97C93b5 | 0x7B49E2ceed55B33C382741eCdfe585878843c1f1 |
 | Multisig 2/3 | AccountantWithFixedRate | updateExchangeRate(0x3458113d) | 0x7Ad69d482b56062b6e76D6e645FC5bFCB97C93b5 | 0xA76E0F54918E39A63904b51F688513043242a0BE |
-| Multisig 2/4 | Teller | updateAssetData(address) | 0x8D3e2ede20B3Bbe781C88Bdaf472E1e265f38Db8 | 0x358CFACf00d0B4634849821BB3d1965b472c776a |
-| Multisig 2/4 | BoringOnChainQueue | stopWithdrawsInAsset(address), cancelUserWithdraws (0x9fff7e2a) | 0x8D3e2ede20B3Bbe781C88Bdaf472E1e265f38Db8 | 0x3754480db8b3E607fbE125697EB496a44A1Be720 |
-| Multisig 2/4 | ManagerWithMerkleVerification | manageVaultWithMerkleVerification(bytes32[][]) | 0x8D3e2ede20B3Bbe781C88Bdaf472E1e265f38Db8 | 0x76fda7A02B616070D3eC5902Fa3C5683AC3cB8B6 |
-| Multisig 2/4 | Pauser | pauseAll(), pauseMultiple(address[]), pauseSingle(address) | 0x8D3e2ede20B3Bbe781C88Bdaf472E1e265f38Db8 | 0x7B49E2ceed55B33C382741eCdfe585878843c1f1 |
+| Multisig 2/4 | Teller | updateAssetData(0x8dfd8ba0) | 0x8D3e2ede20B3Bbe781C88Bdaf472E1e265f38Db8 | 0x358CFACf00d0B4634849821BB3d1965b472c776a |
+| Multisig 2/4 | BoringOnChainQueue | stopWithdrawsInAsset(0x74732720), cancelUserWithdraws(0x9fff7e2a) | 0x8D3e2ede20B3Bbe781C88Bdaf472E1e265f38Db8 | 0x3754480db8b3E607fbE125697EB496a44A1Be720 |
+| Multisig 2/4 | ManagerWithMerkleVerification | manageVaultWithMerkleVerification(0x244b0f6a) | 0x8D3e2ede20B3Bbe781C88Bdaf472E1e265f38Db8 | 0x76fda7A02B616070D3eC5902Fa3C5683AC3cB8B6 |
+| Multisig 2/4 | Pauser | pauseAll(0x595c6a60), pauseMultiple(0x1414a730), pauseSingle(0x6fa02010) | 0x8D3e2ede20B3Bbe781C88Bdaf472E1e265f38Db8 | 0x7B49E2ceed55B33C382741eCdfe585878843c1f1 |
 | Multisig 2/4 | AccountantWithFixedRate | updateExchangeRate(0x3458113d) | 0x8D3e2ede20B3Bbe781C88Bdaf472E1e265f38Db8 | 0xA76E0F54918E39A63904b51F688513043242a0BE |
-| BoringSolver | Teller | bulkWithdraw(address) | 0xE41A255A37C7d5d30a2A20D58f4ecE149b346a61 | 0x358CFACf00d0B4634849821BB3d1965b472c776a |
+| BoringSolver | Teller | bulkWithdraw(0x3e64ce90) | 0xE41A255A37C7d5d30a2A20D58f4ecE149b346a61 | 0x358CFACf00d0B4634849821BB3d1965b472c776a |
 | BoringSolver | BoringOnChainQueue | solveOnChainWithdraws(0x412638dc) | 0xE41A255A37C7d5d30a2A20D58f4ecE149b346a61 | 0x3754480db8b3E607fbE125697EB496a44A1Be720 |
-| Timelock | Teller | setDelegate(address), setChainGasLimit(uint32) | 0xfb6ec7ccbd77a42922a35d22a94fdf7fd54ee4bc | 0x358CFACf00d0B4634849821BB3d1965b472c776a |
-| Timelock | BoringOnChainQueue | setAuthority(address), transferOwnership(address), rescueTokens(0x0bf6cab7) | 0xfb6ec7ccbd77a42922a35d22a94fdf7fd54ee4bc | 0x3754480db8b3E607fbE125697EB496a44A1Be720 |
-| Timelock | ManagerWithMerkleVerification | setAuthority(address), setManageRoot(address) | 0xfb6ec7ccbd77a42922a35d22a94fdf7fd54ee4bc | 0x76fda7A02B616070D3eC5902Fa3C5683AC3cB8B6 |
-| Timelock | AccountantWithFixedRate | updatePlatformFee(uint16), setRateProviderData(address) | 0xfb6ec7ccbd77a42922a35d22a94fdf7fd54ee4bc | 0xA76E0F54918E39A63904b51F688513043242a0BE |
-| Timelock | BoringSolver | transferOwnership(address), setAuthority(address) | 0xfb6ec7ccbd77a42922a35d22a94fdf7fd54ee4bc | 0xE41A255A37C7d5d30a2A20D58f4ecE149b346a61 |
-| Timelock | scUSD BoringVault | setBeforeTransferHook(address), setAuthority(address), transferOwnership(address) | 0xfb6ec7ccbd77a42922a35d22a94fdf7fd54ee4bc | 0xd3DCe716f3eF535C5Ff8d041c1A41C3bd89b97aE |
-| Pauser | Teller | pause(), unpause() | 0x7B49E2ceed55B33C382741eCdfe585878843c1f1 | 0x358CFACf00d0B4634849821BB3d1965b472c776a |
-| Pauser | BoringOnChainQueue | unpause(), pause() | 0x7B49E2ceed55B33C382741eCdfe585878843c1f1 | 0x3754480db8b3E607fbE125697EB496a44A1Be720 |
-| Pauser | ManagerWithMerkleVerification | unpause(), pause() | 0x7B49E2ceed55B33C382741eCdfe585878843c1f1 | 0x76fda7A02B616070D3eC5902Fa3C5683AC3cB8B6 |
-| Pauser | AccountantWithFixedRate | unpause(), pause() | 0x7B49E2ceed55B33C382741eCdfe585878843c1f1 | 0xA76E0F54918E39A63904b51F688513043242a0BE |
-| Multisig 4/6 | Pauser | unpauseAll(), unpauseMultiple(address[]), unpauseSingle(address) | 0xB77d74f032CfE55190325474E061052685CEccc0 | 0x7B49E2ceed55B33C382741eCdfe585878843c1f1 |
-| EOA | BoringOnChainQueue | solveOnChainWithdraws (0x412638dc) | 0xD23086C4e450cAAF55704EbC03875A04B4716CA2 | 0x3754480db8b3E607fbE125697EB496a44A1Be720 |
-| EOA | BoringSolver | boringRedeemMintSolve (0xff011b62), boringRedeemSolve (0xb7532db2) | 0xD23086C4e450cAAF55704EbC03875A04B4716CA2 | 0xE41A255A37C7d5d30a2A20D58f4ecE149b346a61 |
+| Timelock | Teller | setDelegate(0xca5eb5e1), setChainGasLimit(0x1568fc58) | 0xfb6ec7ccbd77a42922a35d22a94fdf7fd54ee4bc | 0x358CFACf00d0B4634849821BB3d1965b472c776a |
+| Timelock | BoringOnChainQueue | setAuthority(0x7a9e5e4b), transferOwnership(0xf2fde38b), rescueTokens(0x0bf6cab7) | 0xfb6ec7ccbd77a42922a35d22a94fdf7fd54ee4bc | 0x3754480db8b3E607fbE125697EB496a44A1Be720 |
+| Timelock | ManagerWithMerkleVerification | setAuthority(0x7a9e5e4b), setManageRoot(0x21801a99) | 0xfb6ec7ccbd77a42922a35d22a94fdf7fd54ee4bc | 0x76fda7A02B616070D3eC5902Fa3C5683AC3cB8B6 |
+| Timelock | AccountantWithFixedRate | updatePlatformFee(0xafb06952), setRateProviderData(0x4d8be07e) | 0xfb6ec7ccbd77a42922a35d22a94fdf7fd54ee4bc | 0xA76E0F54918E39A63904b51F688513043242a0BE |
+| Timelock | BoringSolver | transferOwnership(0xf2fde38b), setAuthority(0x7a9e5e4b) | 0xfb6ec7ccbd77a42922a35d22a94fdf7fd54ee4bc | 0xE41A255A37C7d5d30a2A20D58f4ecE149b346a61 |
+| Timelock | scUSD BoringVault | setBeforeTransferHook(0x8929565f), setAuthority(0x7a9e5e4b), transferOwnership(0xf2fde38b) | 0xfb6ec7ccbd77a42922a35d22a94fdf7fd54ee4bc | 0xd3DCe716f3eF535C5Ff8d041c1A41C3bd89b97aE |
+| Pauser | Teller | pause(0x8456cb59), unpause(0x3f4ba83a) | 0x7B49E2ceed55B33C382741eCdfe585878843c1f1 | 0x358CFACf00d0B4634849821BB3d1965b472c776a |
+| Pauser | BoringOnChainQueue | unpause(0x3f4ba83a), pause(0x8456cb59) | 0x7B49E2ceed55B33C382741eCdfe585878843c1f1 | 0x3754480db8b3E607fbE125697EB496a44A1Be720 |
+| Pauser | ManagerWithMerkleVerification | unpause(0x3f4ba83a), pause(0x8456cb59) | 0x7B49E2ceed55B33C382741eCdfe585878843c1f1 | 0x76fda7A02B616070D3eC5902Fa3C5683AC3cB8B6 |
+| Pauser | AccountantWithFixedRate | unpause(0x3f4ba83a), pause(0x8456cb59) | 0x7B49E2ceed55B33C382741eCdfe585878843c1f1 | 0xA76E0F54918E39A63904b51F688513043242a0BE |
+| Multisig 4/6 | Pauser | unpauseAll(0x8a2ddd03), unpauseMultiple(0x2a578b90), unpauseSingle(0x4ed1a7e0) | 0xB77d74f032CfE55190325474E061052685CEccc0 | 0x7B49E2ceed55B33C382741eCdfe585878843c1f1 |
+| EOA | BoringOnChainQueue | solveOnChainWithdraws(0x412638dc) | 0xD23086C4e450cAAF55704EbC03875A04B4716CA2 | 0x3754480db8b3E607fbE125697EB496a44A1Be720 |
+| EOA | BoringSolver | boringRedeemMintSolve(0xff011b62), boringRedeemSolve(0xb7532db2) | 0xD23086C4e450cAAF55704EbC03875A04B4716CA2 | 0xE41A255A37C7d5d30a2A20D58f4ecE149b346a61 |
 
 Removed authorities:
 
