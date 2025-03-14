@@ -252,7 +252,7 @@ SELECT
     topic0 as event_signature,  -- Event signature
     varbinary_to_uint256(topic1) as role_id,  -- role
     topic2 as target_address,  -- address target
-    topic3 as function_sig  -- bytes4 functionSig
+    SUBSTRING(topic3 FROM 1 FOR 4)  as function_sig   -- bytes4 functionSig
 FROM ethereum.logs
 WHERE contract_address = 0xaBA6bA1E95E0926a6A6b917FE4E2f19ceaE4FF2e
 -- RoleCapabilityUpdated event signature: keccak256("RoleCapabilityUpdated (index_topic_1 uint8 role, index_topic_2 address target, index_topic_3 bytes4 functionSig, bool enabled)")
