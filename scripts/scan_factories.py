@@ -11,6 +11,12 @@ load_dotenv()
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+BLOCK_TIME = {
+    "1": 12,
+    "137": 2,
+    "8453": 2,
+}
+
 
 # Load ABI files
 def load_abi(file_path):
@@ -75,9 +81,9 @@ class FactoryScanner:
                 f"Event abi should contain only one event, found {factory_config['type']} for {factory_address}"
             )
 
-        # Get block range for the last 25 hours because the script is run daily
+        # Get block range for the last 30 hours because the script is run daily
         latest_block = provider.eth.block_number
-        blocks_per_day = 7500  # 25 * 60 * 60 // 12
+        blocks_per_day = 3600 * 30 // BLOCK_TIME[chain_id]
         from_block = latest_block - blocks_per_day
 
         strategies = []
