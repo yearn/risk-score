@@ -25,6 +25,7 @@ jobs:
           RPC_1: ${{ secrets.RPC_1 }} # mainnet
           RPC_8453: ${{ secrets.RPC_8453 }} # base
           RPC_42161: ${{ secrets.RPC_42161 }} # arbitrum
+          RPC_137: ${{ secrets.RPC_137 }} # polygon
           # Add other chain RPCs as needed
         run: python scripts/scan_factories.py
 
