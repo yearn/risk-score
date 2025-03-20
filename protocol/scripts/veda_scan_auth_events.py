@@ -60,7 +60,7 @@ def get_web3(chain_id: int) -> Web3:
 
 def get_vault_info(vault_address: str, chain_id: int) -> tuple[str, str]:
     """
-    Get vault symbol and authority address from vault contract
+    Get vault symbol, authority address and owner address from vault contract
     Returns: (vault_symbol, authority_address)
     """
     # Load vault ABI
@@ -72,13 +72,39 @@ def get_vault_info(vault_address: str, chain_id: int) -> tuple[str, str]:
         address=Web3.to_checksum_address(vault_address), abi=vault_abi
     )
 
-    try:
-        symbol = vault_contract.functions.symbol().call()
-        authority = vault_contract.functions.authority().call()
+    with w3.batch_requests() as batch:
+        batch.add(vault_contract.functions.symbol())
+        batch.add(vault_contract.functions.authority())
+        batch.add(vault_contract.functions.owner())
+        results = batch.execute()
+        if len(results) != 3:
+            raise ValueError("Expected 3 results from batch requests")
+        symbol = results[0]
+        authority = results[1]
+        owner = results[2]
+        if owner != "0x0000000000000000000000000000000000000000":
+            raise ValueError(
+                "BoringVault owner is not 0x0000000000000000000000000000000000000000"
+            )
         return symbol, authority
-    except Exception as e:
-        logger.error(f"Error getting vault info: {e}")
-        raise
+
+
+def get_authority_owner(authority_address: str, chain_id: int) -> str:
+    """
+    Get owner address from authority contract
+    Returns: owner address
+    """
+    # Load vault ABI
+    with open("protocol/scripts/abi/authority.json") as f:
+        authority_abi = json.load(f)
+
+    w3 = get_web3(chain_id)
+    authority_contract = w3.eth.contract(
+        address=Web3.to_checksum_address(authority_address),
+        abi=authority_abi,
+    )
+    owner = authority_contract.functions.owner().call()
+    return owner
 
 
 def scan_events(
@@ -133,7 +159,7 @@ def scan_events(
 
 def process_events_to_table(
     events: Dict[str, List[dict]], function_signatures: Dict[str, str], chain_id: int
-) -> Tuple[List[dict], str]:
+) -> List[dict]:
     """Process events into table format, handling both cached and fresh events"""
     # Store role -> addresses mapping
     role_addresses: Dict[int, Set[str]] = defaultdict(set)
@@ -175,8 +201,6 @@ def process_events_to_table(
                     role_permissions[role][args["target"]].add(sig)
                 else:
                     role_permissions[role][args["target"]].discard(sig)
-            elif event_name == "OwnershipTransferred":
-                new_owner = args["newOwner"]
 
     # Second pass: generate table rows
     for role, addresses in role_addresses.items():
@@ -196,7 +220,7 @@ def process_events_to_table(
                     }
                     table_rows.append(row)
 
-    return table_rows, new_owner
+    return table_rows
 
 
 def get_etherscan_config(chain_id: int) -> tuple[str, str]:
@@ -241,6 +265,7 @@ def get_contract_name_from_etherscan(address: str, chain_id: int) -> str:
         "BoringSolver": ["BoringSolver", "Solver"],
         "Pauser": ["Pauser"],
         "Accountant": ["AccountantWithFixedRate", "AccountantWithRateProviders"],
+        "Timelock": ["TimelockController"],
         "Queue": [
             "WithdrawQueue",
             "BoringOnChainQueue",
@@ -251,7 +276,6 @@ def get_contract_name_from_etherscan(address: str, chain_id: int) -> str:
             "SafeProxy",
             "GnosisSafeProxy",
         ],  # example where proxy is multisig: https://etherscan.io/address/0x0792dCb7080466e4Bbc678Bdb873FE7D969832B8#code
-        "Timelock": ["TimelockController"],
     }
 
     api_url, etherscan_api_key = get_etherscan_config(chain_id)
@@ -527,7 +551,7 @@ def get_contract_deployment_info(
                     "address": contract_address,
                     "startblock": creation_block,
                     "endblock": creation_block
-                    + 1000000,  # Use a high block number instead of "latest"
+                    + 1000000000,  # Use a high block number instead of "latest"
                     "page": 1,
                     "offset": 1,
                     "sort": "desc",
@@ -562,7 +586,7 @@ if __name__ == "__main__":
 
     # TODO: define these values before running the script
     chain_id = 1
-    boring_vault_address = ""
+    boring_vault_address = "0xd3DCe716f3eF535C5Ff8d041c1A41C3bd89b97aE"
     if boring_vault_address == "":
         raise ValueError("boring_vault_address is not defined")
 
@@ -579,7 +603,7 @@ if __name__ == "__main__":
     )
 
     abi_path = "protocol/scripts/abi/authority.json"
-    event_names = ["UserRoleUpdated", "RoleCapabilityUpdated", "OwnershipTransferred"]
+    event_names = ["UserRoleUpdated", "RoleCapabilityUpdated"]
 
     # Use cache by default, can be disabled with use_cache=False
     events = get_events(
@@ -593,7 +617,9 @@ if __name__ == "__main__":
     )
 
     # Process events into table format
-    table_rows, owner = process_events_to_table(events, function_signatures, chain_id)
+    table_rows = process_events_to_table(events, function_signatures, chain_id)
+
+    owner_address = get_authority_owner(authority_contract_address, chain_id)
 
     # Save to markdown file
     save_markdown_table(
@@ -602,5 +628,5 @@ if __name__ == "__main__":
         boring_vault_address,
         chain_id,
         vault_name,
-        owner,
+        owner_address,
     )
