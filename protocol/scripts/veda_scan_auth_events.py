@@ -161,7 +161,7 @@ def scan_events(
 
 def process_events_to_table(
     events: Dict[str, List[dict]], function_signatures: Dict[str, str], chain_id: int
-) -> List[dict]:
+) -> Tuple[List[dict], str]:
     """Process events into table format, handling both cached and fresh events"""
     # Store role -> addresses mapping
     role_addresses: Dict[int, Set[str]] = defaultdict(set)
@@ -170,6 +170,7 @@ def process_events_to_table(
         lambda: defaultdict(set)
     )
     table_rows = []
+    owner_address = None
 
     # First pass: build mappings
     for event_name, logs in events.items():
@@ -204,6 +205,9 @@ def process_events_to_table(
                 else:
                     role_permissions[role][args["target"]].discard(sig)
 
+            # elif event_name == "OwnershipTransferred":
+            #     owner_address = args["newOwner"]
+
     # Second pass: generate table rows
     for role, addresses in role_addresses.items():
         for target, sigs in role_permissions[role].items():
@@ -221,7 +225,7 @@ def process_events_to_table(
                     }
                     table_rows.append(row)
 
-    return table_rows
+    return table_rows, owner_address
 
 
 def get_etherscan_config(chain_id: int) -> tuple[str, str]:
@@ -581,7 +585,7 @@ if __name__ == "__main__":
 
     # TODO: define these values before running the script
     chain_id = 1
-    boring_vault_address = "0x3bce5cb273f0f148010bbea2470e7b5df84c7812"
+    boring_vault_address = ""
     if boring_vault_address == "":
         raise ValueError("boring_vault_address is not defined")
 
@@ -598,7 +602,10 @@ if __name__ == "__main__":
     )
 
     abi_path = "protocol/scripts/abi/authority.json"
-    event_names = ["UserRoleUpdated", "RoleCapabilityUpdated"]
+    event_names = [
+        "UserRoleUpdated",
+        "RoleCapabilityUpdated",
+    ]  # add if needed "OwnershipTransferred"
 
     # Use cache by default, can be disabled with use_cache=False
     events = get_events(
@@ -607,14 +614,18 @@ if __name__ == "__main__":
         abi_path=abi_path,
         event_names=event_names,
         from_block=from_block_etherscan,
-        to_block=to_block_etherscan,
+        to_block=8823025,
         use_cache=True,  # Set to False to force blockchain scan
     )
 
     # Process events into table format
-    table_rows = process_events_to_table(events, function_signatures, chain_id)
+    table_rows, owner_address = process_events_to_table(
+        events, function_signatures, chain_id
+    )
 
-    owner_address = get_authority_owner(authority_contract_address, chain_id)
+    # Use authority.owner()
+    if owner_address is None:
+        owner_address = get_authority_owner(authority_contract_address, chain_id)
 
     # Save to markdown file
     save_markdown_table(
