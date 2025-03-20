@@ -1,21 +1,30 @@
 """
 Blockchain Event Scanner for Authority Contract
 
-This script scans blockchain events for a given Authority contract address, specifically tracking:
+This script scans blockchain events for a given BoringVault and its Authority contract, specifically tracking:
 1. UserRoleUpdated - Events that assign/remove roles to/from user addresses
 2. RoleCapabilityUpdated - Events that grant/revoke permissions for roles to call specific functions on target contracts
+3. OwnershipTransferred - Events that track changes in contract ownership
 
 The script:
+- Fetches vault info (symbol and authority address) from blockchain
+- Gets contract deployment and last activity blocks from Etherscan
 - Fetches historical events from the blockchain
-- Caches results to minimize RPC calls
-- Resolves contract names via Etherscan API
+- Caches results by contract address and chain ID to minimize RPC calls
+- Resolves contract names via Etherscan API with local fallback
 - Maps function signatures to human-readable names
 - Generates a markdown table showing:
     - Which addresses have which roles
     - What functions each role can call
     - Which contracts (targets) they can interact with
+    - Current owner of the authority contract
 
-Output is saved to auth-roles_{contract_address}.md for easy viewing and tracking of permission changes.
+Supports multiple chains:
+- Ethereum Mainnet (1)
+- Polygon (137)
+- Sonic (146)
+
+Output is saved to protocol/data/{vault_name}-auth-{contract_address}-{chain_id}.md for easy viewing and tracking of permission changes.
 """
 
 import csv
@@ -464,7 +473,7 @@ def save_markdown_table(
                 f"{row['Function Signatures']} | {row['User Address']} | {row['Target Address']} |\n"
             )
 
-    print(f"Table saved to {filename}")
+    logger.info(f"Table saved to {filename}")
 
 
 def get_contract_deployment_info(
