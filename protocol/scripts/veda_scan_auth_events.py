@@ -120,6 +120,8 @@ def scan_events(
     Scan blockchain for specific events with proper error handling and batching
     """
     w3 = get_web3(chain_id)
+    # NOTE: tenderly dont' have restriction on batch size
+    # batch_size = to_block - from_block
 
     # Load ABI
     with open(abi_path) as f:
@@ -206,7 +208,6 @@ def process_events_to_table(
     for role, addresses in role_addresses.items():
         for target, sigs in role_permissions[role].items():
             for sig in sigs:
-                # Ensure we're looking up with 0x prefix
                 name = function_signatures.get(sig, "Unknown Function")
                 for user_address in addresses:
                     row = {
@@ -544,29 +545,23 @@ def get_contract_deployment_info(
                     f"Contract {contract_address} was created at block {creation_block}"
                 )
 
-                # Get latest transaction block
+                # Get latest block
                 params = {
-                    "module": "account",
-                    "action": "txlist",
-                    "address": contract_address,
-                    "startblock": creation_block,
-                    "endblock": creation_block
-                    + 1000000000,  # Use a high block number instead of "latest"
-                    "page": 1,
-                    "offset": 1,
-                    "sort": "desc",
+                    "module": "proxy",
+                    "action": "eth_blockNumber",
                     "apikey": etherscan_api_key,
                 }
 
                 response = requests.get(api_url, params=params)
-                data = response.json()
+                block_data = response.json()
 
-                if data.get("status") == "1" and data.get("result"):
-                    last_block = int(data["result"][0]["blockNumber"])
-                    logger.info(f"Last transaction at block {last_block}")
-                    return creation_block, last_block
-
-                return creation_block, creation_block
+                if block_data.get("result"):
+                    latest_block = int(block_data["result"], 16)  # Convert hex to int
+                    logger.info(f"Current latest block is {latest_block}")
+                    return creation_block, latest_block
+                else:
+                    logger.warning("Could not get latest block")
+                    return creation_block, 0
 
         logger.warning(
             f"Could not get contract creation info: {data.get('message', 'Unknown error')}"
@@ -586,7 +581,7 @@ if __name__ == "__main__":
 
     # TODO: define these values before running the script
     chain_id = 1
-    boring_vault_address = "0xd3DCe716f3eF535C5Ff8d041c1A41C3bd89b97aE"
+    boring_vault_address = "0x3bce5cb273f0f148010bbea2470e7b5df84c7812"
     if boring_vault_address == "":
         raise ValueError("boring_vault_address is not defined")
 
