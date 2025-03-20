@@ -15,44 +15,76 @@ The script:
     - What functions each role can call
     - Which contracts (targets) they can interact with
 
-Output is saved to auth-roles.md for easy viewing and tracking of permission changes.
+Output is saved to auth-roles_{contract_address}.md for easy viewing and tracking of permission changes.
 """
 
-from web3 import Web3
-from typing import List, Dict, Optional, Tuple, Set
+import csv
 import json
 import logging
-from dotenv import load_dotenv
 import os
-import csv
-from pathlib import Path
-import requests
-from functools import lru_cache
 import time
 from collections import defaultdict
+from functools import lru_cache
+from pathlib import Path
+from typing import Dict, List, Optional, Set, Tuple
+
+import requests
+from dotenv import load_dotenv
+from web3 import Web3
 
 load_dotenv()
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
+def get_web3(chain_id: int) -> Web3:
+    """
+    Get Web3 instance for given chain ID
+    Returns: Web3 instance
+    """
+    rpc_url = os.getenv(f"RPC_{chain_id}")
+    if not rpc_url:
+        raise ValueError(f"Missing env variable RPC_{chain_id}")
+
+    return Web3(Web3.HTTPProvider(rpc_url))
+
+
+def get_vault_info(vault_address: str, chain_id: int) -> tuple[str, str]:
+    """
+    Get vault symbol and authority address from vault contract
+    Returns: (vault_symbol, authority_address)
+    """
+    # Load vault ABI
+    with open("protocol/scripts/abi/boring_vault.json") as f:
+        vault_abi = json.load(f)
+
+    w3 = get_web3(chain_id)
+    vault_contract = w3.eth.contract(
+        address=Web3.to_checksum_address(vault_address), abi=vault_abi
+    )
+
+    try:
+        symbol = vault_contract.functions.symbol().call()
+        authority = vault_contract.functions.authority().call()
+        return symbol, authority
+    except Exception as e:
+        logger.error(f"Error getting vault info: {e}")
+        raise
+
+
 def scan_events(
     contract_address: str,
+    chain_id: int,
     abi_path: str,
     event_names: List[str],
     from_block: int,
     to_block: Optional[int] = "latest",
     batch_size: int = 10000,
-    chain_id: str = "1",
 ) -> Dict[str, List[dict]]:
     """
     Scan blockchain for specific events with proper error handling and batching
     """
-    # Setup web3 connection
-    rpc_url = os.getenv(f"RPC_{chain_id}")
-    if not rpc_url:
-        raise ValueError(f"Missing env variable RPC_{chain_id}")
-    w3 = Web3(Web3.HTTPProvider(rpc_url))
+    w3 = get_web3(chain_id)
 
     # Load ABI
     with open(abi_path) as f:
@@ -91,8 +123,8 @@ def scan_events(
 
 
 def process_events_to_table(
-    events: Dict[str, List[dict]], function_signatures: Dict[str, str]
-) -> List[dict]:
+    events: Dict[str, List[dict]], function_signatures: Dict[str, str], chain_id: int
+) -> Tuple[List[dict], str]:
     """Process events into table format, handling both cached and fresh events"""
     # Store role -> addresses mapping
     role_addresses: Dict[int, Set[str]] = defaultdict(set)
@@ -130,11 +162,12 @@ def process_events_to_table(
                         if args["functionSig"].startswith("0x")
                         else "0x" + args["functionSig"]
                     )
-
                 if args["enabled"]:
                     role_permissions[role][args["target"]].add(sig)
                 else:
                     role_permissions[role][args["target"]].discard(sig)
+            elif event_name == "OwnershipTransferred":
+                new_owner = args["newOwner"]
 
     # Second pass: generate table rows
     for role, addresses in role_addresses.items():
@@ -145,8 +178,8 @@ def process_events_to_table(
                 for user_address in addresses:
                     row = {
                         "Role ID": role,
-                        "User Name": get_contract_name(user_address),
-                        "Target Name": get_contract_name(target),
+                        "User Name": get_contract_name(user_address, chain_id),
+                        "Target Name": get_contract_name(target, chain_id),
                         "Function Names": name,
                         "Function Signatures": sig,  # This will always have 0x prefix now
                         "User Address": user_address,
@@ -154,16 +187,40 @@ def process_events_to_table(
                     }
                     table_rows.append(row)
 
-    return table_rows
+    return table_rows, new_owner
+
+
+def get_etherscan_config(chain_id: int) -> tuple[str, str]:
+    """
+    Get Etherscan API URL and API key for given chain ID
+    Returns: (api_url, api_key)
+    """
+    if chain_id == 1:
+        api_url = "https://api.etherscan.io/api"
+        api_key = os.getenv("ETHERSCAN_API_KEY")
+    elif chain_id == 137:
+        api_url = "https://api.polygonscan.com/api"
+        api_key = os.getenv("POLYGONSCAN_API_KEY")
+    elif chain_id == 146:
+        api_url = "https://api.sonicscan.org/api"
+        api_key = os.getenv("SONICSCAN_API_KEY")
+    else:
+        raise ValueError(f"Unsupported chain_id: {chain_id}")
+
+    if api_key is None:
+        raise ValueError(f"Missing API key for chain_id: {chain_id}")
+
+    return api_url, api_key
 
 
 @lru_cache(maxsize=100)
-def get_contract_name_from_etherscan(address: str, chain_id: str = "1") -> str:
+def get_contract_name_from_etherscan(address: str, chain_id: int) -> str:
     """
     Get contract name from Etherscan API by searching source code for known contract names
     """
     # Known contract names we're looking for
     KNOWN_CONTRACT_NAMES = {
+        "BoringVault": ["BoringVault"],
         "Teller": [
             "TellerWithMultiAssetSupport",
             "Teller",
@@ -175,27 +232,20 @@ def get_contract_name_from_etherscan(address: str, chain_id: str = "1") -> str:
         "BoringSolver": ["BoringSolver", "Solver"],
         "Pauser": ["Pauser"],
         "Accountant": ["AccountantWithFixedRate", "AccountantWithRateProviders"],
-        "BoringVault": ["BoringVault"],
         "Queue": [
             "WithdrawQueue",
             "BoringOnChainQueue",
             "BoringOnChainQueueWithTracking",
         ],
-        "Multisig": ["Proxy", "SafeProxy"],
+        "Multisig": [
+            "Proxy",
+            "SafeProxy",
+            "GnosisSafeProxy",
+        ],  # example where proxy is multisig: https://etherscan.io/address/0x0792dCb7080466e4Bbc678Bdb873FE7D969832B8#code
         "Timelock": ["TimelockController"],
     }
 
-    etherscan_api_key = os.getenv("ETHERSCAN_API_KEY")
-    if not etherscan_api_key:
-        raise ValueError("Missing ETHERSCAN_API_KEY in environment variables")
-
-    # Select API URL based on chain
-    if chain_id == "1":
-        api_url = "https://api.etherscan.io/api"
-    elif chain_id == "137":
-        api_url = "https://api.polygonscan.com/api"
-    else:
-        raise ValueError(f"Unsupported chain_id: {chain_id}")
+    api_url, etherscan_api_key = get_etherscan_config(chain_id)
 
     try:
         params = {
@@ -217,29 +267,36 @@ def get_contract_name_from_etherscan(address: str, chain_id: str = "1") -> str:
             return get_contract_name_from_etherscan(address, chain_id)
 
         if data["status"] == "1" and data["result"][0]:
+            # First check if ContractName is provided directly by Etherscan
+            contract_name = data["result"][0].get("ContractName")
+            if contract_name and len(contract_name) > 0:
+                # Check if this contract name maps to one of our known types
+                for display_name, possible_names in KNOWN_CONTRACT_NAMES.items():
+                    if contract_name in possible_names:
+                        logger.info(
+                            f"Found known contract {display_name} ({contract_name}) at {address}"
+                        )
+                        return display_name
+                # If we have a name from Etherscan but it's not in our mapping, log and return it
+                logger.info(
+                    f"Found contract {contract_name} at {address} (not in known mappings)"
+                )
+                return contract_name
+
             source_code = data["result"][0].get("SourceCode", "")
+            logger.info(f"Source code: {source_code}")
             if len(source_code) < 10:
                 return "EOA"
 
-            # Search for contract definitions in the source code
+            # Fallback to finding the contract name in the source code
             for display_name, possible_names in KNOWN_CONTRACT_NAMES.items():
                 for contract_name in possible_names:
                     # Look for "contract ContractName {" pattern
                     if f"contract {contract_name}" in source_code:
-                        logger.info(f"Found contract {display_name} at {address}")
+                        logger.info(
+                            f"Found contract {display_name} at {address} using fallback method"
+                        )
                         return display_name
-
-            # If we found source code but no matching contract, log it
-            if source_code:
-                logger.info(
-                    f"Contract at {address} source code found but no matching known contracts"
-                )
-                # Could extract actual contract name for future mapping updates
-                import re
-
-                contracts = re.findall(r"contract\s+(\w+)", source_code)
-                if contracts:
-                    logger.info(f"Found contracts in source: {contracts}")
 
         elif data["status"] == "0":
             logger.warning(
@@ -254,7 +311,7 @@ def get_contract_name_from_etherscan(address: str, chain_id: str = "1") -> str:
     return "Unknown"
 
 
-def get_contract_name(address: str, chain_id: str = "1") -> str:
+def get_contract_name(address: str, chain_id: int) -> str:
     """
     Get contract name from local mapping or Etherscan
     """
@@ -274,7 +331,7 @@ def get_contract_name(address: str, chain_id: str = "1") -> str:
 
 
 def load_function_signatures(
-    csv_path: str = "protocol/data/veda_function_signatures.csv",
+    csv_path: str = "protocol/scripts/veda_function_signatures.csv",
 ) -> Dict[str, str]:
     """
     Load function signatures from CSV file
@@ -339,15 +396,15 @@ def load_events_from_file(filename: str = "cached_events.json") -> dict:
 
 def get_events(
     contract_address: str,
+    chain_id: int,
     abi_path: str,
     event_names: List[str],
     from_block: int,
     to_block: Optional[int] = "latest",
     use_cache: bool = True,
-    cache_file: str = "cached_events.json",
 ) -> Dict[str, List[dict]]:
     """Get events either from cache or by scanning blockchain"""
-
+    cache_file = f"cached_events_{contract_address}_{chain_id}.json"
     # Try to load from cache if enabled
     if use_cache:
         cached_events = load_events_from_file(cache_file)
@@ -359,6 +416,7 @@ def get_events(
     logger.info("Scanning blockchain for events")
     events = scan_events(
         contract_address=contract_address,
+        chain_id=chain_id,
         abi_path=abi_path,
         event_names=event_names,
         from_block=from_block,
@@ -373,14 +431,25 @@ def get_events(
 
 
 def save_markdown_table(
-    contract_address: str, table_rows: List[dict], filename: str = "auth-roles.md"
+    contract_address: str,
+    table_rows: List[dict],
+    boring_vault_address: str,
+    chain_id: int,
+    vault_name: str,
+    owner: str,
 ):
     """Save the roles and permissions data as a markdown table"""
+    filename = f"protocol/data/{vault_name}-auth-{contract_address}-{chain_id}.md"
     with open(filename, "w") as f:
         # Write table header
         f.write(
-            f"# Authorization Roles and Permissions for contract {contract_address}\n\n"
+            f"# Authorization Roles and Permissions for Authority contract {contract_address}\n\n"
         )
+        f.write(
+            f"BoringVault {vault_name} address: {boring_vault_address} on chain {chain_id}\n\n"
+        )
+        if owner:
+            f.write(f"Last owner of the authority contract is: {owner}\n\n")
         f.write(
             "| User Name | Target Name | Function Names | Function Signatures | User Address | Target Address |\n"
         )
@@ -395,33 +464,134 @@ def save_markdown_table(
                 f"{row['Function Signatures']} | {row['User Address']} | {row['Target Address']} |\n"
             )
 
+    print(f"Table saved to {filename}")
+
+
+def get_contract_deployment_info(
+    contract_address: str, chain_id: int
+) -> tuple[int, int]:
+    """Get contract creation and last activity block using Etherscan API"""
+    api_url, etherscan_api_key = get_etherscan_config(chain_id)
+
+    try:
+        # Get contract creation info
+        params = {
+            "module": "contract",
+            "action": "getcontractcreation",
+            "contractaddresses": contract_address,
+            "apikey": etherscan_api_key,
+        }
+
+        response = requests.get(api_url, params=params)
+        data = response.json()
+
+        if data.get("status") == "1" and data.get("result"):
+            # Get the creation transaction hash
+            tx_hash = data["result"][0]["txHash"]
+            logger.info(f"Creation tx hash: {tx_hash}")
+
+            # Get transaction info to get block number
+            params = {
+                "module": "proxy",
+                "action": "eth_getTransactionByHash",
+                "txhash": tx_hash,
+                "apikey": etherscan_api_key,
+            }
+
+            response = requests.get(api_url, params=params)
+            tx_data = response.json()
+
+            if tx_data.get(
+                "result"
+            ):  # Changed from checking status to checking result directly
+                creation_block = int(
+                    tx_data["result"]["blockNumber"], 16
+                )  # Convert hex to int
+                logger.info(
+                    f"Contract {contract_address} was created at block {creation_block}"
+                )
+
+                # Get latest transaction block
+                params = {
+                    "module": "account",
+                    "action": "txlist",
+                    "address": contract_address,
+                    "startblock": creation_block,
+                    "endblock": creation_block
+                    + 1000000,  # Use a high block number instead of "latest"
+                    "page": 1,
+                    "offset": 1,
+                    "sort": "desc",
+                    "apikey": etherscan_api_key,
+                }
+
+                response = requests.get(api_url, params=params)
+                data = response.json()
+
+                if data.get("status") == "1" and data.get("result"):
+                    last_block = int(data["result"][0]["blockNumber"])
+                    logger.info(f"Last transaction at block {last_block}")
+                    return creation_block, last_block
+
+                return creation_block, creation_block
+
+        logger.warning(
+            f"Could not get contract creation info: {data.get('message', 'Unknown error')}"
+        )
+        return 0, 0
+
+    except Exception as e:
+        logger.error(f"Error getting contract info from Etherscan: {e}")
+        logger.exception("Full traceback:")  # This will log the full stack trace
+        return 0, 0
+
 
 # Usage example
 if __name__ == "__main__":
     # Load function signatures first
     function_signatures = load_function_signatures()
 
-    contract_address = "0x7D5f6108e23c0CB2cfD744E5c46f1aAfFc30A348"
-    abi_path = "protocol/data/abi/authority.json"
-    event_names = ["UserRoleUpdated", "RoleCapabilityUpdated"]
-    from_block = 21363111
-    to_block = 22068858
+    # TODO: define these values before running the script
+    chain_id = 1
+    boring_vault_address = ""
+    if boring_vault_address == "":
+        raise ValueError("boring_vault_address is not defined")
+
+    vault_name, authority_contract_address = get_vault_info(
+        boring_vault_address, chain_id
+    )
+    from_block_etherscan, to_block_etherscan = get_contract_deployment_info(
+        authority_contract_address, chain_id
+    )
+    logger.info(f"vault_name: {vault_name}")
+    logger.info(f"authority_contract_address: {authority_contract_address}")
+    logger.info(
+        f"from_block_etherscan: {from_block_etherscan}, to_block_etherscan: {to_block_etherscan}"
+    )
+
+    abi_path = "protocol/scripts/abi/authority.json"
+    event_names = ["UserRoleUpdated", "RoleCapabilityUpdated", "OwnershipTransferred"]
 
     # Use cache by default, can be disabled with use_cache=False
     events = get_events(
-        contract_address=contract_address,
+        contract_address=authority_contract_address,
+        chain_id=chain_id,
         abi_path=abi_path,
         event_names=event_names,
-        from_block=from_block,
-        to_block=to_block,
+        from_block=from_block_etherscan,
+        to_block=to_block_etherscan,
         use_cache=True,  # Set to False to force blockchain scan
     )
 
     # Process events into table format
-    table_rows = process_events_to_table(events, function_signatures)
+    table_rows, owner = process_events_to_table(events, function_signatures, chain_id)
 
     # Save to markdown file
-    save_markdown_table(contract_address, table_rows, "auth-roles.md")
-
-    # Optionally, still print to console
-    print("Table saved to auth-roles.md")
+    save_markdown_table(
+        authority_contract_address,
+        table_rows,
+        boring_vault_address,
+        chain_id,
+        vault_name,
+        owner,
+    )
