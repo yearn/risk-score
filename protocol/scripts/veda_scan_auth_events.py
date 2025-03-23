@@ -121,7 +121,7 @@ def scan_events(
     """
     w3 = get_web3(chain_id)
     # NOTE: tenderly dont' have restriction on batch size
-    # batch_size = to_block - from_block
+    batch_size = to_block - from_block
 
     # Load ABI
     with open(abi_path) as f:
@@ -314,6 +314,17 @@ def get_contract_name_from_etherscan(address: str, chain_id: int) -> str:
                         logger.info(
                             f"Found known contract {display_name} ({contract_name}) at {address}"
                         )
+                        if display_name == "Multisig":
+                            threshold, owners = multisig_threshold_owners(
+                                address, chain_id
+                            )
+                            logger.info(
+                                f"Multisig threshold: {threshold}, owners: {owners}"
+                            )
+                            display_name = f"{display_name} ({threshold}/{owners})"
+                        elif display_name == "Timelock":
+                            delay = timelock_delay(address, chain_id)
+                            display_name = f"{display_name} ({delay}h)"
                         return display_name
                 # If we have a name from Etherscan but it's not in our mapping, log and return it
                 logger.info(
@@ -347,6 +358,43 @@ def get_contract_name_from_etherscan(address: str, chain_id: int) -> str:
         )
 
     return "Unknown"
+
+
+@lru_cache(maxsize=100)
+def multisig_threshold_owners(address: str, chain_id: int) -> Tuple[int, int]:
+    """
+    Get threshold and owners of multisig contract
+    Returns: (threshold, number_of_owners)
+    """
+    web3 = get_web3(chain_id)
+    with open("protocol/scripts/abi/safe.json") as f:
+        multisig_abi = json.load(f)
+        multisig_contract = web3.eth.contract(address=address, abi=multisig_abi)
+        with web3.batch_requests() as batch:
+            logger.info(f"Getting threshold and owners of multisig {address}")
+            batch.add(multisig_contract.functions.getThreshold())
+            batch.add(multisig_contract.functions.getOwners())
+            results = batch.execute()
+            if len(results) != 2:
+                raise ValueError("Expected 2 results from batch requests")
+            threshold = results[0]
+            owners = len(results[1])
+    return threshold, owners
+
+
+@lru_cache(maxsize=100)
+def timelock_delay(address: str, chain_id: int) -> int:
+    """
+    Get delay of timelock contract
+    Returns: delay in hours
+    """
+    web3 = get_web3(chain_id)
+    with open("protocol/scripts/abi/timelock.json") as f:
+        logger.info(f"Getting delay of timelock {address}")
+        timelock_abi = json.load(f)
+        timelock_contract = web3.eth.contract(address=address, abi=timelock_abi)
+        delay = timelock_contract.functions.getMinDelay().call()
+    return int(delay / 3600)
 
 
 def get_contract_name(address: str, chain_id: int) -> str:
@@ -445,6 +493,7 @@ def get_events(
     cache_file = f"cached_events_{contract_address}_{chain_id}.json"
     # Try to load from cache if enabled
     if use_cache:
+        logger.info(f"Loading events from cache {cache_file}")
         cached_events = load_events_from_file(cache_file)
         if cached_events is not None:
             logger.info("Using cached events")
@@ -614,7 +663,7 @@ if __name__ == "__main__":
         abi_path=abi_path,
         event_names=event_names,
         from_block=from_block_etherscan,
-        to_block=8823025,
+        to_block=to_block_etherscan,
         use_cache=True,  # Set to False to force blockchain scan
     )
 
