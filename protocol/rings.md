@@ -35,6 +35,7 @@ For those seeking a more streamlined experience, the ERC4626 wrapper tokens (wst
 ## Security Concerns
 
 - BTC vaults are fully controlled by the multisig 4/6: [`0x948dd9351D3721489Fe7A4530C55849cF0b4735D`](https://etherscan.io/address/0x948dd9351D3721489Fe7A4530C55849cF0b4735D#code). Multisig can easily drain the funds from two(ethereum and sonic) scBTC vaults and stkscBTC vault on sonic.
+- USD and ETH vaults are controlled by Timelock with 1 day delay.
 - Other concerns related to Veda, listed in [Veda file](/protocol/veda.md#security-concerns).
 
 ## Contracts
@@ -71,7 +72,7 @@ For those seeking a more streamlined experience, the ERC4626 wrapper tokens (wst
 
 #### scUSD
 
-BoringVault scUSD address: 0xd3DCe716f3eF535C5Ff8d041c1A41C3bd89b97aE on chain 1. Full list of authorities is avaliable in file [/protocol/data/scUSD-auth-0xd3DCe716f3eF535C5Ff8d041c1A41C3bd89b97aE-1.md](protocol/data/scUSD-auth-0xd3DCe716f3eF535C5Ff8d041c1A41C3bd89b97aE-1.md).
+BoringVault scUSD address: 0xd3DCe716f3eF535C5Ff8d041c1A41C3bd89b97aE on chain 1. Full list of authorities is avaliable in file [scUSD-auth-0xd3DCe716f3eF535C5Ff8d041c1A41C3bd89b97aE-1.md](/protocol/data/scUSD-auth-0x7D5f6108e23c0CB2cfD744E5c46f1aAfFc30A348-1.md).
 
 Addresses to monitor:
 
@@ -80,7 +81,7 @@ Addresses to monitor:
 
 #### scETH
 
-BoringVault scETH address: 0x3bcE5CB273F0F148010BbEa2470e7b5df84C7812 on chain 146. Full list of authorities is avaliable in file [/protocol/data/scETH-auth-0xA7F4Aec487ca3F3A9b5ADDC058daFD4644725902-146.md](protocol/data/scETH-auth-0xA7F4Aec487ca3F3A9b5ADDC058daFD4644725902-146.md).
+BoringVault scETH address: 0x3bcE5CB273F0F148010BbEa2470e7b5df84C7812 on chain 146. Full list of authorities is avaliable in file [scETH-auth-0xA7F4Aec487ca3F3A9b5ADDC058daFD4644725902-146.md](/protocol/data/scETH-auth-0xA7F4Aec487ca3F3A9b5ADDC058daFD4644725902-146.md).
 
 Addresses to monitor:
 
@@ -89,7 +90,7 @@ Addresses to monitor:
 
 #### scBTC
 
-BoringVault scBTC address: 0x3bcE5CB273F0F148010BbEa2470e7b5df84C7812 on chain 146. Full list of authorities is avaliable in file [/protocol/data/scBTC-auth-0x3bce5cb273f0f148010bbea2470e7b5df84c7812-146.md](protocol/data/scBTC-auth-0x3bce5cb273f0f148010bbea2470e7b5df84c7812-146.md).
+BoringVault scBTC address: 0x3bcE5CB273F0F148010BbEa2470e7b5df84C7812 on chain 146. Full list of authorities is avaliable in file [scBTC-auth-0xe2C7E397b35fF40962eBc205217B6795520Fb264-1.md](/protocol/data/scBTC-auth-0xe2C7E397b35fF40962eBc205217B6795520Fb264-1.md).
 
 Addresses to monitor:
 
@@ -100,7 +101,7 @@ Addresses to monitor:
 
 #### scUSD
 
-BoringVault scUSD address: 0xd3DCe716f3eF535C5Ff8d041c1A41C3bd89b97aE on chain 146. Full list of authorities is avaliable in file [/protocol/data/scUSD-auth-0xd3DCe716f3eF535C5Ff8d041c1A41C3bd89b97aE-146.md](protocol/data/scUSD-auth-0xd3DCe716f3eF535C5Ff8d041c1A41C3bd89b97aE-146.md).
+BoringVault scUSD address: 0xd3DCe716f3eF535C5Ff8d041c1A41C3bd89b97aE on chain 146. Full list of authorities is avaliable in file [scUSD-auth-0x7D5f6108e23c0CB2cfD744E5c46f1aAfFc30A348-146.md](/protocol/data/scUSD-auth-0x7D5f6108e23c0CB2cfD744E5c46f1aAfFc30A348-146.md).
 
 Addresses to monitor:
 
@@ -109,7 +110,7 @@ Addresses to monitor:
 
 #### scETH
 
-BoringVault scETH address: 0x3bcE5CB273F0F148010BbEa2470e7b5df84C7812 on chain 146. Full list of authorities is avaliable in file [/protocol/data/scETH-auth-0xA7F4Aec487ca3F3A9b5ADDC058daFD4644725902-146.md](protocol/data/scETH-auth-0xA7F4Aec487ca3F3A9b5ADDC058daFD4644725902-146.md).
+BoringVault scETH address: 0x3bcE5CB273F0F148010BbEa2470e7b5df84C7812 on chain 146. Full list of authorities is avaliable in file [scETH-auth-0xA7F4Aec487ca3F3A9b5ADDC058daFD4644725902-146.md](/protocol/data/scETH-auth-0xA7F4Aec487ca3F3A9b5ADDC058daFD4644725902-146.md).
 
 Addresses to monitor:
 
@@ -118,16 +119,16 @@ Addresses to monitor:
 
 #### scBTC
 
-BoringVault scBTC address: 0x3bcE5CB273F0F148010BbEa2470e7b5df84C7812 on chain 146. Full list of authorities is avaliable in file [/protocol/data/scBTC-auth-0x3bce5cb273f0f148010bbea2470e7b5df84c7812-146.md](protocol/data/scBTC-auth-0x3bce5cb273f0f148010bbea2470e7b5df84c7812-146.md).
+BoringVault scBTC address: 0x3bcE5CB273F0F148010BbEa2470e7b5df84C7812 on chain 146. Full list of authorities is avaliable in file [scBTC-auth-0xe2C7E397b35fF40962eBc205217B6795520Fb264-146.md](/protocol/data/scBTC-auth-0xe2C7E397b35fF40962eBc205217B6795520Fb264-146.md).
 
 Addresses to monitor:
 
-- Multisig 2/3: [`0x948dd9351D3721489Fe7A4530C55849cF0b4735D`](https://sonicscan.org/address/0x948dd9351D3721489Fe7A4530C55849cF0b4735D#code). Manages vault funds via [ManagerWithMerkleVerification](https://sonicscan.org/address/0x6830046d872604E92f9F95F225fF63f2300bc1e9#code) by calling `manageVaultWithMerkleVerification` function. It can updated exchange rate via [AccountantWithFixedRate](https://sonicscan.org/address/0x3a592F9Ea2463379c4154d03461A73c484993668#code) by calling `updateExchangeRate` function. Also can pause most of the contracts. Manage support of assets to Teller.
+- Multisig 4/6: [`0x948dd9351D3721489Fe7A4530C55849cF0b4735D`](https://sonicscan.org/address/0x948dd9351D3721489Fe7A4530C55849cF0b4735D#code). Manages vault funds via [ManagerWithMerkleVerification](https://sonicscan.org/address/0x6830046d872604E92f9F95F225fF63f2300bc1e9#code) by calling `manageVaultWithMerkleVerification` function. It can updated exchange rate via [AccountantWithFixedRate](https://sonicscan.org/address/0x3a592F9Ea2463379c4154d03461A73c484993668#code) by calling `updateExchangeRate` function. Also can pause most of the contracts. Manage support of assets to Teller.
 - Optionally: Multisig 2/4: [`0xB26AEb430b5Bf6Be55763b42095E82DB9a1838B8`](https://sonicscan.org/address/0xB26AEb430b5Bf6Be55763b42095E82DB9a1838B8#code) and multisig 2/3 [`0xE89CeE9837e6Fce3b1Ebd8E1C779b76fd6E20136`](https://sonicscan.org/address/0xB26AEb430b5Bf6Be55763b42095E82DB9a1838B8#code). Manages vault funds via [ManagerWithMerkleVerification](https://sonicscan.org/address/0x6830046d872604E92f9F95F225fF63f2300bc1e9#code) by calling `manageVaultWithMerkleVerification` function. It can updated exchange rate via [AccountantWithFixedRate](https://sonicscan.org/address/0x3a592F9Ea2463379c4154d03461A73c484993668#code) by calling `updateExchangeRate` function. Also can pause most of the contracts. Manage support of assets to Teller.
 
 #### stkscUSD
 
-BoringVault stkscUSD address: 0x4D85bA8c3918359c78Ed09581E5bc7578ba932ba on chain 146. Full list of authorities is available in file [/protocol/data/stkscUSD-auth-0xFa5b3E35F961229b25Caa108C3D42cEEb20d0122-146.md](protocol/data/stkscUSD-auth-0xFa5b3E35F961229b25Caa108C3D42cEEb20d0122-146.md).
+BoringVault stkscUSD address: 0x4D85bA8c3918359c78Ed09581E5bc7578ba932ba on chain 146. Full list of authorities is available in file [stkscUSD-auth-0xFa5b3E35F961229b25Caa108C3D42cEEb20d0122-146.md](/protocol/data/stkscUSD-auth-0xFa5b3E35F961229b25Caa108C3D42cEEb20d0122-146.md).
 
 Addresses to monitor:
 
@@ -136,9 +137,18 @@ Addresses to monitor:
 
 #### stkscETH
 
-BoringVault stkscETH address: 0x455d5f11Fea33A8fa9D3e285930b478B6bF85265 on chain 146. Full list of authorities is available in file [/protocol/data/stkscUSD-auth-0xc62d74F8F4f7fB799448C763ac3f604d2B888c7a-146.md](protocol/data/stkscUSD-auth-0xc62d74F8F4f7fB799448C763ac3f604d2B888c7a-146.md).
+BoringVault stkscETH address: 0x455d5f11Fea33A8fa9D3e285930b478B6bF85265 on chain 146. Full list of authorities is available in file [stkscETH-auth-0xc62d74F8F4f7fB799448C763ac3f604d2B888c7a-146.md](/protocol/data/stkscETH-auth-0xc62d74F8F4f7fB799448C763ac3f604d2B888c7a-146.md).
 
 Addresses to monitor:
 
 - Timelock contract: [`0x8ba3c92f70aCabAC636b47699b4028E253743745`](https://sonicscan.org/address/0x8ba3c92f70aCabAC636b47699b4028E253743745#code). It controls all the crucial functions. Minimal delay is 24 hours.
 - Optionally: Multisig 2/3: [`0xE89CeE9837e6Fce3b1Ebd8E1C779b76fd6E20136`](https://sonicscan.org/address/0xE89CeE9837e6Fce3b1Ebd8E1C779b76fd6E20136#code) and multisig 2/4 [`0xB26AEb430b5Bf6Be55763b42095E82DB9a1838B8`](https://sonicscan.org/address/0xB26AEb430b5Bf6Be55763b42095E82DB9a1838B8#code). Manages vault funds via Manager by calling `manageVaultWithMerkleVerification` function. It can update exchange rate via Accountant by calling `updateExchangeRate` function. Also can pause most of the contracts. Manage support of assets to Teller.
+
+#### stkscBTC
+
+BoringVault stkscBTC address: 0xD0851030C94433C261B405fEcbf1DEC5E15948d0 on chain 146. Full list of authorities is avaliable in file [stkscBTC-auth-0x8255CeE62568566742248B5eCa3f83B6B4780f98-146.md](/protocol/data/stkscBTC-auth-0x8255CeE62568566742248B5eCa3f83B6B4780f98-146.md).
+
+Addresses to monitor:
+
+- Multisig 4/6: [`0x948dd9351D3721489Fe7A4530C55849cF0b4735D`](https://sonicscan.org/address/0x948dd9351D3721489Fe7A4530C55849cF0b4735D#code). Manages vault funds via [ManagerWithMerkleVerification](https://sonicscan.org/address/0x6830046d872604E92f9F95F225fF63f2300bc1e9#code) by calling `manageVaultWithMerkleVerification` function. It can updated exchange rate via [AccountantWithFixedRate](https://sonicscan.org/address/0x3a592F9Ea2463379c4154d03461A73c484993668#code) by calling `updateExchangeRate` function. Also can pause most of the contracts. Manage support of assets to Teller.
+- Optionally: Multisig 2/4: [`0xB26AEb430b5Bf6Be55763b42095E82DB9a1838B8`](https://sonicscan.org/address/0xB26AEb430b5Bf6Be55763b42095E82DB9a1838B8#code) and multisig 2/3 [`0xE89CeE9837e6Fce3b1Ebd8E1C779b76fd6E20136`](https://sonicscan.org/address/0xB26AEb430b5Bf6Be55763b42095E82DB9a1838B8#code). Manages vault funds via [ManagerWithMerkleVerification](https://sonicscan.org/address/0x6830046d872604E92f9F95F225fF63f2300bc1e9#code) by calling `manageVaultWithMerkleVerification` function. It can updated exchange rate via [AccountantWithFixedRate](https://sonicscan.org/address/0x3a592F9Ea2463379c4154d03461A73c484993668#code) by calling `updateExchangeRate` function. Also can pause most of the contracts. Manage support of assets to Teller.
