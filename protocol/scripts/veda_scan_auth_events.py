@@ -45,6 +45,9 @@ load_dotenv()
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+PUBLIC_ROLE_ID = -1
+PUBLIC_ROLE_NAME = "Public"
+PUBLIC_ADDRESS = "any_address"
 
 def get_web3(chain_id: int) -> Web3:
     """
@@ -204,6 +207,22 @@ def process_events_to_table(
                     role_permissions[role][args["target"]].add(sig)
                 else:
                     role_permissions[role][args["target"]].discard(sig)
+
+            elif event_name == "PublicCapabilityUpdated":
+                if isinstance(args["functionSig"], bytes):
+                    sig = "0x" + args["functionSig"].hex()
+                else:
+                    # If it's a string, ensure it starts with 0x
+                    sig = (
+                        args["functionSig"]
+                        if args["functionSig"].startswith("0x")
+                        else "0x" + args["functionSig"]
+                    )
+                role_permissions[PUBLIC_ROLE_ID][args["target"]].add(sig)
+                if args["enabled"]:
+                    role_addresses[PUBLIC_ROLE_ID].add(PUBLIC_ADDRESS)
+                else:
+                    role_addresses[PUBLIC_ROLE_ID].discard(PUBLIC_ADDRESS)
 
             # elif event_name == "OwnershipTransferred":
             #     owner_address = args["newOwner"]
@@ -405,6 +424,7 @@ def get_contract_name(address: str, chain_id: int) -> str:
     contract_names = {
         "0x358CFACf00d0B4634849821BB3d1965b472c776a": "Teller",
         "0x3754480db8b3E607fbE125697EB496a44A1Be720": "BoringOnChainQueue",
+        PUBLIC_ADDRESS: PUBLIC_ROLE_NAME,
         # ... etc
     }
 
@@ -634,7 +654,7 @@ if __name__ == "__main__":
 
     # TODO: define these values before running the script
     chain_id = 1
-    boring_vault_address = ""
+    boring_vault_address = "0xd3DCe716f3eF535C5Ff8d041c1A41C3bd89b97aE"
     if boring_vault_address == "":
         raise ValueError("boring_vault_address is not defined")
 
@@ -654,6 +674,7 @@ if __name__ == "__main__":
     event_names = [
         "UserRoleUpdated",
         "RoleCapabilityUpdated",
+        "PublicCapabilityUpdated",
     ]  # add if needed "OwnershipTransferred"
 
     # Use cache by default, can be disabled with use_cache=False

@@ -48,3 +48,14 @@ function_sig,function_name
 0x39d6ba32,enter
 0x3458113d,updateExchangeRate
 0x46b563f4,refundDeposit
+0x0efe6a8b,deposit
+0x3d935d9e,depositWithPermit
+0xcab716e8,depositAndBridge
+0x94f51289,depositAndBridgeWithPermit
+0x05921740,bridge
+0x6bb3b476,requestOnChainWithdraw
+0x581b4920,requestOnChainWithdrawWithPermit
+0x4a2dc5e4,cancelOnChainWithdraw
+0xa5672fd7,replaceOnChainWithdraw
+0x8f386608,boringRedeemMintSelfSolve
+0x72faf4a4,boringRedeemSelfSolve
