@@ -654,7 +654,7 @@ if __name__ == "__main__":
 
     # TODO: define these values before running the script
     chain_id = 1
-    boring_vault_address = "0xd3DCe716f3eF535C5Ff8d041c1A41C3bd89b97aE"
+    boring_vault_address = ""
     if boring_vault_address == "":
         raise ValueError("boring_vault_address is not defined")
 
