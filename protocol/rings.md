@@ -25,12 +25,17 @@ The yield distribution for staked scAssets will be implemented through two metho
 
 For those seeking a more streamlined experience, the ERC4626 wrapper tokens (wstkscUSD and wstkscETH) will automatically compound yields. These wrapper tokens represent a user's stake in the underlying scAssets, including accrued yields, making them ideal for users who prefer a "set-and-forget" approach to earning yields on their staked assets.
 
-### Security Measuers
+### Security Measuers By Rings
 
 - 5-day cooldown for scAsset redemptions
 - Maximum time a withdraw asset can take to mature is 30 days
 - 24h timelock delays for protocol changes
 - Minimum requirements for protocol to be in vaults: $100M+ TVL and 6+ months since deployment
+
+## Security Concerns
+
+- BTC vaults are fully controlled by the multisig 4/6: [`0x948dd9351D3721489Fe7A4530C55849cF0b4735D`](https://etherscan.io/address/0x948dd9351D3721489Fe7A4530C55849cF0b4735D#code). Multisig can easily drain the funds from two(ethereum and sonic) scBTC vaults and stkscBTC vault on sonic.
+- Other concerns related to Veda, listed in [Veda file](/protocol/veda.md#security-concerns).
 
 ## Contracts
 
