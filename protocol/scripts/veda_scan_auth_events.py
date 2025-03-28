@@ -31,7 +31,6 @@ import csv
 import json
 import logging
 import os
-import time
 from collections import defaultdict
 from functools import lru_cache
 from pathlib import Path
@@ -48,6 +47,7 @@ logger = logging.getLogger(__name__)
 PUBLIC_ROLE_ID = -1
 PUBLIC_ROLE_NAME = "Public"
 PUBLIC_ADDRESS = "any_address"
+
 
 def get_web3(chain_id: int) -> Web3:
     """
@@ -193,14 +193,18 @@ def process_events_to_table(
 
         match event_name:
             case "UserRoleUpdated":
-                role = int(args["role"]) if isinstance(args["role"], str) else args["role"]
+                role = (
+                    int(args["role"]) if isinstance(args["role"], str) else args["role"]
+                )
                 if args["enabled"]:
                     role_addresses[role].add(args["user"])
                 else:
                     role_addresses[role].discard(args["user"])
 
             case "RoleCapabilityUpdated":
-                role = int(args["role"]) if isinstance(args["role"], str) else args["role"]
+                role = (
+                    int(args["role"]) if isinstance(args["role"], str) else args["role"]
+                )
                 # Ensure function signature always starts with 0x
                 if isinstance(args["functionSig"], bytes):
                     sig = "0x" + args["functionSig"].hex()
@@ -283,7 +287,6 @@ def get_contract_name_from_etherscan(address: str, chain_id: int) -> str:
     """
     Get contract name from Etherscan API by searching source code for known contract names
     """
-    # Known contract names we're looking for
     KNOWN_CONTRACT_NAMES = {
         # "BoringVault": ["BoringVault"],
         # "Teller": [
@@ -295,8 +298,6 @@ def get_contract_name_from_etherscan(address: str, chain_id: int) -> str:
         # ],
         # "BoringOnChainQueue": ["BoringOnChainQueue", "OnChainQueue"],
         "Manager": ["ManagerWithMerkleVerification"],
-        # "BoringSolver": ["BoringSolver", "Solver"],
-        # "Pauser": ["Pauser"],
         # "Accountant": ["AccountantWithFixedRate", "AccountantWithRateProviders"],
         # "Timelock": ["TimelockController"],
         # "Queue": [
@@ -352,23 +353,12 @@ def get_contract_name_from_etherscan(address: str, chain_id: int) -> str:
                 )
                 return contract_name
 
-            # Check if it's an EOA or unverified contract
             if data["result"][0].get("ABI") == "Contract source code not verified":
                 return "Unverified Contract"
 
             source_code = data["result"][0].get("SourceCode", "")
             if not source_code:
                 return "EOA"
-
-            # Fallback to finding the contract name in the source code
-            # for display_name, possible_names in KNOWN_CONTRACT_NAMES.items():
-            #     for contract_name in possible_names:
-            #         # Look for "contract ContractName {" pattern
-            #         if f"contract {contract_name}" in source_code:
-            #             logger.info(
-            #                 f"Found contract {display_name} at {address} using fallback method"
-            #             )
-            #             return display_name
 
         elif data["status"] == "0":
             logger.warning(
@@ -427,9 +417,7 @@ def get_contract_name(address: str, chain_id: int) -> str:
     # Local mapping for known contracts
     contract_names = {
         "0x358CFACf00d0B4634849821BB3d1965b472c776a": "Teller",
-        "0x3754480db8b3E607fbE125697EB496a44A1Be720": "BoringOnChainQueue",
         PUBLIC_ADDRESS: PUBLIC_ROLE_NAME,
-        # ... etc
     }
 
     # Try local mapping first
@@ -534,7 +522,6 @@ def get_events(
         to_block=to_block,
     )
 
-    # Save to cache if enabled
     if use_cache:
         save_events_to_file(events, cache_file)
 
@@ -552,7 +539,6 @@ def save_markdown_table(
     """Save the roles and permissions data as a markdown table"""
     filename = f"protocol/data/{vault_name}-auth-{contract_address}-{chain_id}.md"
     with open(filename, "w") as f:
-        # Write table header
         f.write(
             f"# Authorization Roles and Permissions for Authority contract {contract_address}\n\n"
         )
@@ -651,11 +637,7 @@ def get_contract_deployment_info(
         return 0, 0
 
 
-# Usage example
 if __name__ == "__main__":
-    # Load function signatures first
-    function_signatures = load_function_signatures()
-
     # TODO: define these values before running the script
     chain_id = 1
     boring_vault_address = "0xf0bb20865277aBd641a307eCe5Ee04E79073416C"
@@ -692,6 +674,7 @@ if __name__ == "__main__":
         use_cache=True,  # Set to False to force blockchain scan
     )
 
+    function_signatures = load_function_signatures()
     # Process events into table format
     table_rows, owner_address = process_events_to_table(
         events, function_signatures, chain_id
