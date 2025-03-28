@@ -640,7 +640,7 @@ def get_contract_deployment_info(
 if __name__ == "__main__":
     # TODO: define these values before running the script
     chain_id = 1
-    boring_vault_address = "0xf0bb20865277aBd641a307eCe5Ee04E79073416C"
+    boring_vault_address = ""
     if boring_vault_address == "":
         raise ValueError("boring_vault_address is not defined")
 
