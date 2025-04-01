@@ -124,7 +124,7 @@ def scan_events(
     """
     w3 = get_web3(chain_id)
     # NOTE: tenderly dont' have restriction on batch size
-    batch_size = to_block - from_block
+    # batch_size = to_block - from_block
 
     # Load ABI
     with open(abi_path) as f:
@@ -288,7 +288,6 @@ def get_contract_name_from_etherscan(address: str, chain_id: int) -> str:
     Get contract name from Etherscan API by searching source code for known contract names
     """
     KNOWN_CONTRACT_NAMES = {
-        # "BoringVault": ["BoringVault"],
         # "Teller": [
         #     "TellerWithMultiAssetSupport",
         #     "Teller",
@@ -296,8 +295,6 @@ def get_contract_name_from_etherscan(address: str, chain_id: int) -> str:
         #     "LayerZeroTeller",
         #     "LayerZeroTellerWithRateLimiting"
         # ],
-        # "BoringOnChainQueue": ["BoringOnChainQueue", "OnChainQueue"],
-        "Manager": ["ManagerWithMerkleVerification"],
         # "Accountant": ["AccountantWithFixedRate", "AccountantWithRateProviders"],
         # "Timelock": ["TimelockController"],
         # "Queue": [
@@ -305,6 +302,7 @@ def get_contract_name_from_etherscan(address: str, chain_id: int) -> str:
         #     "BoringOnChainQueue",
         #     "BoringOnChainQueueWithTracking",
         # ],
+        "Manager": ["ManagerWithMerkleVerification"],
         "Multisig": [
             "Proxy",
             "SafeProxy",
