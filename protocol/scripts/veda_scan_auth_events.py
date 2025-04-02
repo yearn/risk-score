@@ -39,6 +39,7 @@ from typing import Dict, List, Optional, Set, Tuple
 import requests
 from dotenv import load_dotenv
 from web3 import Web3
+import argparse
 
 load_dotenv()
 logging.basicConfig(level=logging.INFO)
@@ -636,15 +637,18 @@ def get_contract_deployment_info(
 
 
 if __name__ == "__main__":
-    # TODO: define these values before running the script
-    chain_id = 1
-    boring_vault_address = ""
-    if boring_vault_address == "":
-        raise ValueError("boring_vault_address is not defined")
+    parser = argparse.ArgumentParser(description='Scan blockchain events for BoringVault authority contract')
+    parser.add_argument('--chain-id', type=int, default=1, help='Chain ID (1=Ethereum, 137=Polygon, 146=Sonic). Default: 1')
+    parser.add_argument('--vault', type=str, required=True, help='BoringVault contract address')
+    parser.add_argument('--no-cache', action='store_true', help='Disable cache and force blockchain scan')
 
-    vault_name, authority_contract_address = get_vault_info(
-        boring_vault_address, chain_id
-    )
+    args = parser.parse_args()
+
+    chain_id = args.chain_id
+    boring_vault_address = args.vault
+    use_cache = not args.no_cache  # Convert no-cache to use_cache
+
+    vault_name, authority_contract_address = get_vault_info(boring_vault_address, chain_id)
     from_block_etherscan, to_block_etherscan = get_contract_deployment_info(
         authority_contract_address, chain_id
     )
@@ -661,7 +665,7 @@ if __name__ == "__main__":
         "PublicCapabilityUpdated",
     ]  # add if needed "OwnershipTransferred"
 
-    # Use cache by default, can be disabled with use_cache=False
+    # Use cache based on command line argument
     events = get_events(
         contract_address=authority_contract_address,
         chain_id=chain_id,
@@ -669,7 +673,7 @@ if __name__ == "__main__":
         event_names=event_names,
         from_block=from_block_etherscan,
         to_block=to_block_etherscan,
-        use_cache=True,  # Set to False to force blockchain scan
+        use_cache=use_cache,  # Use the value from command line args
     )
 
     function_signatures = load_function_signatures()
