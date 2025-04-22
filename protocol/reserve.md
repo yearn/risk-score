@@ -66,3 +66,10 @@ Each collateral has an associated plugin address that contains a price feed from
 - The redemption price: [`basketNeeded`](https://etherscan.io/address/0xE72B141DF173b999AE7c1aDcbF60Cc9833Ce56a8#readProxyContract#F9) / [`totalSupply`](https://etherscan.io/address/0xE72B141DF173b999AE7c1aDcbF60Cc9833Ce56a8#readProxyContract#F22)  in the RToken contract. Undercollateralized if the ratio is less than 1.
 - The exchange rate between RSR and StRSR, example [eth+RSR](https://etherscan.io/address/0xffa151Ad0A0e2e40F39f9e5E9F87cF9E45e819dd#readProxyContract#F16). Falling ratio could indicate the risk for RToken.
 - Bonus: Pauser, Freezer and Guardian roles.
+
+Each RToken has its own governance system and each new RToken must have its own monitoring.
+
+## Security
+
+- Bug Bounty set to [$10M](https://immunefi.com/bug-bounty/reserve/information/).
+- [Mutiple audits and contests](https://reserve.org/protocol/security/#smart-contract-security-audits).
