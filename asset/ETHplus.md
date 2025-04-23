@@ -1,15 +1,15 @@
 # ETH+
 
-The ETH+ contract is a Resolve implementation of RToken. For more details see [Reserve Protocol](../protocol/reserve.md).
+The ETH+ contract is a Resolve implementation of RToken, reward-generating Ethereum Liquid Staking Token basket with over-collateralized protection. For more details about implementation see [Reserve Protocol](../protocol/reserve.md).
 
-ETH+ token is collateral basket of following assets on 21st April 2025:
+ETH+ token is [collateral basket](https://app.reserve.org/ethereum/token/0xe72b141df173b999ae7c1adcbf60cc9833ce56a8/overview) of following assets on 21st April 2025:
 
 - 50% wstETH
 - 21% sfraxETH
-- 20% rETH
+- 21% rETH
 - 8% ETHx
 
-Governance can update the basket configuration so it requires monitoring.
+Governance can update the basket configuration and upgrade contacts. Monitoring is recommended.
 
 ## Monitoring
 
