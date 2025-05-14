@@ -1,8 +1,8 @@
 name: Strategy Factory Scanner
 
 on:
-  schedule:
-    - cron: '45 0 * * *'  # Runs at 00:45 UTC daily. yDaemon restarts at 1:00
+#   schedule:
+#     - cron: '45 0 * * *'  # Runs at 00:45 UTC daily. yDaemon restarts at 1:00
   workflow_dispatch:      # Allow manual triggers
 
 jobs:
