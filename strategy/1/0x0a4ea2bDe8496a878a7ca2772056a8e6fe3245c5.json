@@ -1,5 +1,5 @@
 {
-    "riskLevel": 2,
+    "riskLevel": 3,
     "riskScore": {
         "review": 3,
         "testing": 1,
@@ -8,7 +8,7 @@
         "protocolIntegration": 2,
         "centralizationRisk": 3,
         "externalProtocolAudit": 1,
-        "externalProtocolCentralisation": 3,
+        "externalProtocolCentralisation": 4,
         "externalProtocolTvl": 1,
         "externalProtocolLongevity": 4,
         "externalProtocolType": 1,
