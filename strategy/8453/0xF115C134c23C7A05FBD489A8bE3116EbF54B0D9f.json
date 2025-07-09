@@ -1,15 +1,15 @@
 {
-    "riskLevel": 2,
+    "riskLevel": 1,
     "riskScore": {
         "review": 3,
-        "testing": 3,
-        "complexity": 3,
-        "riskExposure": 2,
-        "protocolIntegration": 2,
-        "centralizationRisk": 3,
+        "testing": 1,
+        "complexity": 1,
+        "riskExposure": 1,
+        "protocolIntegration": 1,
+        "centralizationRisk": 1,
         "externalProtocolAudit": 1,
         "externalProtocolCentralisation": 2,
-        "externalProtocolTvl": 2,
+        "externalProtocolTvl": 1,
         "externalProtocolLongevity": 4,
         "externalProtocolType": 1,
         "comment": "Morpho Vault is managed by Yearn"
