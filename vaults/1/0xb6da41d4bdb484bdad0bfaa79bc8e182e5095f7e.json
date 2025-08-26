@@ -1,10 +1,10 @@
 {
-    "riskLevel": 5,
+    "riskLevel": 4,
     "riskScore": {
         "review": 3,
         "testing": 1,
         "complexity": 1,
-        "riskExposure": 4,
+        "riskExposure": 5,
         "protocolIntegration": 2,
         "centralizationRisk": 2,
         "externalProtocolAudit": 1,
@@ -12,6 +12,6 @@
         "externalProtocolTvl": 1,
         "externalProtocolLongevity": 4,
         "externalProtocolType": 1,
-        "comment": "Most of the collateral is tied to USD0. For more info about USD0 check website: https://usual.money/ \nRisk depends heavily on the specific vault configuration and the curator managing the vault."
+        "comment": "Most of the collateral is in USD0 and USD0++."
     }
 }
