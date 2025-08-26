@@ -1,0 +1,17 @@
+{
+    "riskLevel": 2,
+    "riskScore": {
+        "review": 3,
+        "testing": 1,
+        "complexity": 1,
+        "riskExposure": 1,
+        "protocolIntegration": 2,
+        "centralizationRisk": 2,
+        "externalProtocolAudit": 1,
+        "externalProtocolCentralisation": 3,
+        "externalProtocolTvl": 1,
+        "externalProtocolLongevity": 4,
+        "externalProtocolType": 1,
+        "comment": "Most of the collateral is in LRTs. \nRisk depends heavily on the specific vault configuration and the curator managing the vault."
+    }
+}

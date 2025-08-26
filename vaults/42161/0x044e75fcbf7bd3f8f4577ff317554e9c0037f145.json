@@ -1,0 +1,17 @@
+{
+    "riskLevel": 3,
+    "riskScore": {
+        "review": 1,
+        "testing": 5,
+        "complexity": 3,
+        "riskExposure": 5,
+        "protocolIntegration": 1,
+        "centralizationRisk": 3,
+        "externalProtocolAudit": 1,
+        "externalProtocolCentralisation": 3,
+        "externalProtocolTvl": 1,
+        "externalProtocolLongevity": 2,
+        "externalProtocolType": 2,
+        "comment": "Withdrawals can incur losses if the PT-SY exchange rate drops. Waiting for market maturity eliminates potential losses."
+    }
+}
