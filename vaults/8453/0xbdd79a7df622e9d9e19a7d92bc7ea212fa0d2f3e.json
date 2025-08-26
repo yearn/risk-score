@@ -12,6 +12,6 @@
         "externalProtocolTvl": 2,
         "externalProtocolLongevity": 4,
         "externalProtocolType": 1,
-        "comment": "Lends to a Morpho vault curated by Yearn"
+        "comment": "Morpho Vault is managed by Yearn"
     }
 }

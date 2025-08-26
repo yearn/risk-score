@@ -1,17 +1,17 @@
 {
-    "riskLevel": 2,
+    "riskLevel": 1,
     "riskScore": {
         "review": 3,
-        "testing": 5,
-        "complexity": 2,
+        "testing": 1,
+        "complexity": 1,
         "riskExposure": 1,
-        "protocolIntegration": 3,
-        "centralizationRisk": 2,
+        "protocolIntegration": 1,
+        "centralizationRisk": 1,
         "externalProtocolAudit": 1,
-        "externalProtocolCentralisation": 3,
+        "externalProtocolCentralisation": 2,
         "externalProtocolTvl": 1,
         "externalProtocolLongevity": 4,
         "externalProtocolType": 1,
-        "comment": "Risk depends heavily on the specific vault configuration and the curator managing the vault."
+        "comment": "Morpho market with blue chip collaterals"
     }
 }
