@@ -10,7 +10,7 @@ JSON structure:
 - `riskScore` is object with detailed values of each risk category.
 - `deployment` is object with `eventAbi` and `eventStrategyParamName` fields. `eventAbi` is abi of the event that is emitted when the strategy is deployed. `eventStrategyParamName` is the name of the parameter in the event that contains deployed strategy address.
 
-If the strategy is created using factory, the strategy risk score file should be created in the `strategy` folder. This flow is handled by Github Actions. Periodically, Github Actions will fetch all factories from this folder and check on the blockchain if the factory created any new strategy. If the strategy is created, Github Actions will create new JSON file in the `strategy` folder using risk score values from the factory file.
+If the strategy is created using factory, the strategy risk score file should be created in the `vaults` folder. This flow is handled by Github Actions. Periodically, Github Actions will fetch all factories from this folder and check on the blockchain if the factory created any new strategy. If the strategy is created, Github Actions will create new JSON file in the `vaults` folder using risk score values from the factory file.
 
 ## Adding a new factory
 
@@ -22,9 +22,9 @@ For the reference check [file](./1/0x000000000000000000000000000000000000dead.js
 
 ## Strategy Scanner
 
-The strategy scanner is a script that scans the blockchain for new strategies created by factories. It is run by Github Actions every hour. The script fetches all factories from the `factory` folder and checks if the factory created any new strategy. If the strategy is created, the script creates a new JSON file in the `strategy` folder using risk score values from the factory file.
+The strategy scanner is a script that scans the blockchain for new strategies created by factories. It is run by Github Actions every hour. The script fetches all factories from the `factory` folder and checks if the factory created any new strategy. If the strategy is created, the script creates a new JSON file in the `vaults` folder using risk score values from the factory file.
 
-The script is located in the [`scripts/scan_factories.py`](../scripts/scan_factories.py) file.
+The script is located in the [`scripts/scan_factories.py`](../../scripts/scan_factories.py) file.
 
 ### How to run the script manually
 
