@@ -11,6 +11,8 @@ JSON structure:
 
 This data is used by [yDaemon](https://github.com/yearn/ydaemon). yDaemon fetches the vaults from blockchain registry and creates new JSON item for each vault. yDaemon was extended in [this commit](https://github.com/yearn/ydaemon/commit/b8296457af78cf97f41ef15cb502ff0744fd0a8b) to fetch the vault risk score from this folder.
 
+TODO: Make Kong use this data and reference the file/commit where this repo is used.
+
 ## Adding a new vault
 
 1. Create a new JSON file with name corresponding to the vault address in the `vaults` folder. File must be in the correct folder. Name of the folder is the chain id, e.g. `1` for Ethereum mainnet.
