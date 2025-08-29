@@ -23,10 +23,10 @@ jobs:
           # Add other chain RPCs as needed
         run: uv run scripts/scan_factories.py
 
-      - name: Commit new strategy files
+      - name: Commit new vault files
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
-          git add strategy/
-          git commit -m "ci: Add new strategy files" || echo "No changes to commit"
+          git add vaults/
+          git commit -m "ci: Add new vault files" || echo "No changes to commit"
           git push

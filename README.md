@@ -1,10 +1,10 @@
 # Yearn Risk Scores
 
-This repository contains risk scores for Yearn strategies, assets, and protocols.
+This repository contains risk scores for Yearn strategies, vaults, assets, and protocols.
 
 ## Strategy Risk Scores
 
-Yearn strategy risk scores are defined in folder [strategy](./strategy) using [Risk Score Framework](./strategy/RISK_FRAMEWORK.md).
+Yearn vault risk scores are defined in folder [vaults](./vaults) using [Risk Score Framework](./vaults/RISK_FRAMEWORK.md).
 
 ## Asset Risk Scores
 

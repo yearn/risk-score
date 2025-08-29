@@ -21,8 +21,8 @@ BLOCK_TIME = {
 
 class FactoryScanner:
     def __init__(self):
-        self.factory_dir = Path("strategy/factory")
-        self.strategy_dir = Path("strategy")
+        self.factory_dir = Path("vaults/factory")
+        self.strategy_dir = Path("vaults")
         self.providers: Dict[str, Web3] = {}
 
     def get_provider(self, chain_id: str) -> Web3:
