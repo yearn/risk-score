@@ -1,9 +1,7 @@
 export const config = { runtime: 'edge' }
 
-// @ts-ignore
-const REPO_OWNER = process.env.REPO_OWNER || 'yearn'
-// @ts-ignore  
-const REPO_NAME = process.env.REPO_NAME || 'risk-score'
+const REPO_OWNER = 'w84april'
+const REPO_NAME = 'risk-score'
 
 function getPath(url: URL) {
   const schema = url.searchParams.get('schema')
@@ -11,21 +9,18 @@ function getPath(url: URL) {
   if (schema && file) {
     return `${schema}/${file}`
   }
- console.info(url.pathname)
+  
   if (url.pathname.startsWith('/api/cdn/')) {
-    console.info(url.pathname.slice(9))
     return url.pathname.slice(9) // Remove '/api/cdn/'
   }
   if (url.pathname.startsWith('/cdn/')) {
-    console.info(url.pathname.slice(5))
     return url.pathname.slice(5) // Remove '/cdn/'
   }
 
   return undefined
 }
 
-export default async function (req: Request): Promise<Response> {
-  console.info(req.method)
+export default async function handler(req: Request): Promise<Response> {
   if (req.method === 'OPTIONS') {
     return new Response(null, {
       status: 204,
@@ -44,22 +39,23 @@ export default async function (req: Request): Promise<Response> {
 
   try {
     const url = new URL(req.url)
+    console.info(url.pathname)
     const startsWithApiCdn = url.pathname.startsWith('/api/cdn/')
     const startsWithCdn = url.pathname.startsWith('/cdn/')
     console.info(startsWithApiCdn, startsWithCdn)
     if (!(startsWithApiCdn || startsWithCdn)) return new Response('bad path', { status: 400 })
 
     const path = getPath(url)
+    console.info(path)
     if (!path) {
       return new Response('missing path', { status: 400 })
     }
 
-    if (!/^[a-zA-Z0-9/_.-]+$/.test(path) || path.includes('..')) {
+    if (!/^[a-zA-Z0-9/_.-]+$/i.test(path) || path.includes('..')) {
       return new Response('invalid path', { status: 400 })
     }
 
-    // @ts-ignore
-    const HEAD = process.env.VERCEL_GIT_COMMIT_SHA || 'main'
+    const HEAD = 'master'
     const upstream = `https://cdn.jsdelivr.net/gh/${REPO_OWNER}/${REPO_NAME}@${HEAD}/${path}`
 
     const response = await fetch(upstream)
