@@ -1,7 +1,8 @@
 export const config = { runtime: 'edge' }
 
-const REPO_OWNER = 'w84april'
+const REPO_OWNER = 'yearn'
 const REPO_NAME = 'risk-score'
+const HEAD = 'master'
 
 function getPath(url: URL) {
   const schema = url.searchParams.get('schema')
@@ -52,7 +53,6 @@ export default async function handler(req: Request): Promise<Response> {
       return new Response('invalid path', { status: 400 })
     }
 
-    const HEAD = 'master'
     const upstream = `https://cdn.jsdelivr.net/gh/${REPO_OWNER}/${REPO_NAME}@${HEAD}/${path}`
 
     const response = await fetch(upstream)
