@@ -39,14 +39,11 @@ export default async function handler(req: Request): Promise<Response> {
 
   try {
     const url = new URL(req.url)
-    console.info(url.pathname)
     const startsWithApiCdn = url.pathname.startsWith('/api/cdn/')
     const startsWithCdn = url.pathname.startsWith('/cdn/')
-    console.info(startsWithApiCdn, startsWithCdn)
     if (!(startsWithApiCdn || startsWithCdn)) return new Response('bad path', { status: 400 })
 
     const path = getPath(url)
-    console.info(path)
     if (!path) {
       return new Response('missing path', { status: 400 })
     }
