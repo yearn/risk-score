@@ -1,0 +1,12 @@
+{
+  "rewrites": [
+    {
+      "source": "/cdn/:path*",
+      "destination": "/api/cdn"
+    },
+    {
+      "source": "/api/cdn/:path*",
+      "destination": "/api/cdn"
+    }
+  ]
+}
