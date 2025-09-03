@@ -55,66 +55,19 @@ export default async function handler(req: Request): Promise<Response> {
 
     const upstream = `https://cdn.jsdelivr.net/gh/${REPO_OWNER}/${REPO_NAME}@${HEAD}/${path}`
 
-    const response = await fetch(upstream)
+    const upstreamRes = await fetch(upstream)
 
-    if (!response.ok) {
-      if (response.status === 404) {
-        return new Response('file not found', { status: 404 })
-      }
-      return new Response('upstream error', { status: response.status })
-    }
+    if (!upstreamRes.ok || !upstreamRes.body)
+      return new Response(`upstream ${upstreamRes.status}`, { status: upstreamRes.status })
 
-    const content = await response.text()
+    const headers = new Headers()
+    headers.set('content-type', upstreamRes.headers.get('content-type') || 'application/octet-stream')
+    headers.set('cache-control', `public, max-age=60, s-maxage=300, stale-while-revalidate=600`)
+    headers.set('access-control-allow-origin', '*')
     
-    // Determine content type based on file extension
-    const contentType = getContentType(path)
-    
-    return new Response(content, {
-      headers: {
-        'content-type': contentType,
-        'access-control-allow-origin': '*',
-        'cache-control': 'public, max-age=3600',
-      },
-    })
+    return new Response(upstreamRes.body, { status: 200, headers })
   } catch (error) {
     console.error('CDN error:', error)
     return new Response('internal server error', { status: 500 })
-  }
-}
-
-function getContentType(path: string): string {
-  const extension = path.split('.').pop()?.toLowerCase()
-  
-  switch (extension) {
-    case 'json':
-      return 'application/json'
-    case 'js':
-      return 'application/javascript'
-    case 'ts':
-      return 'text/typescript'
-    case 'css':
-      return 'text/css'
-    case 'html':
-      return 'text/html'
-    case 'md':
-      return 'text/markdown'
-    case 'txt':
-      return 'text/plain'
-    case 'xml':
-      return 'application/xml'
-    case 'yaml':
-    case 'yml':
-      return 'text/yaml'
-    case 'png':
-      return 'image/png'
-    case 'jpg':
-    case 'jpeg':
-      return 'image/jpeg'
-    case 'gif':
-      return 'image/gif'
-    case 'svg':
-      return 'image/svg+xml'
-    default:
-      return 'text/plain'
   }
 }
