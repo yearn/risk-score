@@ -1,0 +1,17 @@
+{
+    "riskLevel": 3,
+    "riskScore": {
+        "review": 3,
+        "testing": 1,
+        "complexity": 4,
+        "riskExposure": 4,
+        "protocolIntegration": 1,
+        "centralizationRisk": 5,
+        "externalProtocolAudit": 1,
+        "externalProtocolCentralisation": 1,
+        "externalProtocolTvl": 4,
+        "externalProtocolLongevity": 5,
+        "externalProtocolType": 3,
+        "comment": ""
+    }
+}
