@@ -17,6 +17,8 @@ TODO: Make Kong use this data and reference the file/commit where this repo is u
 
 1. Create a new JSON file with name corresponding to the vault address in the `vaults` folder. File must be in the correct folder. Name of the folder is the chain id, e.g. `1` for Ethereum mainnet.
 2. JSON file must contain `riskLevel` and `riskScore` fields assigned by the SAM team.
+   - Multistrategy vaults contain `riskLevel` field, `riskScore` fields are all 0 and should not be used.
+   - Single-strategy vaults contains both `riskLevel` and `riskScore` fields. `riskScore` fields should be filled with the risk score for the strategy. Check [RISK_FRAMEWORK.md](./RISK_FRAMEWORK.md) for more information on how to fill the `riskScore` fields.
 
 For the reference check [file](./1/0x70E75D8053e3Fb0Dda35e80EB16f208c7e4D54F4.json).
 
