@@ -12,6 +12,6 @@
         "externalProtocolTvl": 1,
         "externalProtocolLongevity": 4,
         "externalProtocolType": 1,
-        "comment": "Morpho markets uses API3 oracles to price assets."
+        "comment": "Morpho markets bluechip collaterals with api3 oracles."
     }
 }
