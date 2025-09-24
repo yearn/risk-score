@@ -1,16 +1,16 @@
 {
-    "riskLevel": 2,
+    "riskLevel": 1,
     "riskScore": {
         "review": 3,
         "testing": 1,
         "complexity": 1,
-        "riskExposure": 3,
+        "riskExposure": 1,
         "protocolIntegration": 2,
         "centralizationRisk": 3,
         "externalProtocolAudit": 1,
-        "externalProtocolCentralisation": 3,
+        "externalProtocolCentralisation": 2,
         "externalProtocolTvl": 1,
-        "externalProtocolLongevity": 4,
+        "externalProtocolLongevity": 2,
         "externalProtocolType": 1,
         "comment": "Morpho markets bluechip collaterals with api3 oracles."
     }
