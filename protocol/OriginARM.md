@@ -17,7 +17,7 @@
 - Price of tokens is set by operator or admin, both sell and buy price for stETH. There is cross price which is set only by admin(timelock controller) which protects the contract from  the ARM making a loss when the base asset is sold at a lower price than it was bought.
 - Deposits are standard, send weth and get shares. Check how cap manager deposit hook works, currently set to [address(0)](https://etherscan.io/address/0x85B78AcA6Deae198fBF201c82DAF6Ca21942acc6#readProxyContract#F10)
 - Withdraw must be requests and there is delay (10min) that must pass before withdrawing. If there is no liquidity in contract and lending market, withdraw can’t be filled. There is no priority in the queue. Funds in the queue don’t earn fees. PPS is defined at requesting withdraw and the shares are burned at that moment.
-- Yield is earned in 3 ways:
+- Yield is earned by:
     - Trading fees from swaps
     - Yield from lending markets
 - New lending markets can be added by admin, but only one market can be active at a time. In stETH ARM, there is a single [lending market](https://etherscan.io/address/0x29c4Bb7B1eBcc53e8CBd16480B5bAe52C69806D3#readProxyContract#F8) on Morpho: [MEV Capital wETH](https://app.morpho.org/ethereum/vault/0x9a8bC3B04b7f3D87cfC09ba407dCED575f2d61D8/mev-capital-weth).
