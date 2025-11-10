@@ -1,0 +1,19 @@
+{
+    "0xb9228370e2fa4908fc2bf559a50bb77ba66fdd66": {
+        "riskLevel": 2,
+        "riskScore": {
+            "centralizationRisk": 0,
+            "comment": "",
+            "complexity": 0,
+            "externalProtocolAudit": 0,
+            "externalProtocolCentralisation": 0,
+            "externalProtocolLongevity": 0,
+            "externalProtocolTvl": 0,
+            "externalProtocolType": 0,
+            "protocolIntegration": 0,
+            "review": 0,
+            "riskExposure": 0,
+            "testing": 0
+        }
+    }
+}
