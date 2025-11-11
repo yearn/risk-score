@@ -4,13 +4,13 @@ const REPO_OWNER = 'yearn'
 const REPO_NAME = 'risk-score'
 const HEAD = 'master'
 
-function getPath(url: URL) {
+export function getPath(url: URL) {
   const schema = url.searchParams.get('schema')
   const file = url.searchParams.get('file')
   if (schema && file) {
     return `${schema}/${file}`
   }
-  
+
   if (url.pathname.startsWith('/api/cdn/')) {
     return url.pathname.slice(9) // Remove '/api/cdn/'
   }
