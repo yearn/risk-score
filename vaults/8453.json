@@ -1,0 +1,495 @@
+{
+    "0x03c5aff0cd5e40889d689fd9d9caff286b1bd7fb": {
+        "riskLevel": 3,
+        "riskScore": {
+            "centralizationRisk": 5,
+            "comment": "Uses cross asset collateral",
+            "complexity": 3,
+            "externalProtocolAudit": 1,
+            "externalProtocolCentralisation": 2,
+            "externalProtocolLongevity": 4,
+            "externalProtocolTvl": 2,
+            "externalProtocolType": 1,
+            "protocolIntegration": 2,
+            "review": 3,
+            "riskExposure": 5,
+            "testing": 2
+        }
+    },
+    "0x0ace53f57a14acfd4d43c7d4c46be4b4a5347eff": {
+        "riskLevel": 2,
+        "riskScore": {
+            "centralizationRisk": 3,
+            "comment": "",
+            "complexity": 3,
+            "externalProtocolAudit": 1,
+            "externalProtocolCentralisation": 2,
+            "externalProtocolLongevity": 4,
+            "externalProtocolTvl": 2,
+            "externalProtocolType": 1,
+            "protocolIntegration": 2,
+            "review": 3,
+            "riskExposure": 2,
+            "testing": 3
+        }
+    },
+    "0x0de119f5790c4ecf6eed80aac7c25d2dcad10f0f": {
+        "riskLevel": 1,
+        "riskScore": {
+            "centralizationRisk": 1,
+            "comment": "",
+            "complexity": 1,
+            "externalProtocolAudit": 1,
+            "externalProtocolCentralisation": 2,
+            "externalProtocolLongevity": 2,
+            "externalProtocolTvl": 1,
+            "externalProtocolType": 3,
+            "protocolIntegration": 1,
+            "review": 2,
+            "riskExposure": 2,
+            "testing": 1
+        }
+    },
+    "0x1d7a8593c249ab84b2733d09a9e4a6b9e42140fe": {
+        "riskLevel": 3,
+        "riskScore": {
+            "centralizationRisk": 3,
+            "comment": "Withdrawals can incur losses if the PT-SY exchange rate drops. Waiting for market maturity eliminates potential losses.",
+            "complexity": 3,
+            "externalProtocolAudit": 1,
+            "externalProtocolCentralisation": 3,
+            "externalProtocolLongevity": 2,
+            "externalProtocolTvl": 1,
+            "externalProtocolType": 2,
+            "protocolIntegration": 1,
+            "review": 1,
+            "riskExposure": 5,
+            "testing": 5
+        }
+    },
+    "0x25f32ec89ce7732a4e9f8f3340a09259f823b7d3": {
+        "riskLevel": 3,
+        "riskScore": {
+            "centralizationRisk": 0,
+            "comment": "Vault consists of multiple strategies. The risk score is the highest risk score of the strategies.",
+            "complexity": 0,
+            "externalProtocolAudit": 0,
+            "externalProtocolCentralisation": 0,
+            "externalProtocolLongevity": 0,
+            "externalProtocolTvl": 0,
+            "externalProtocolType": 0,
+            "protocolIntegration": 0,
+            "review": 0,
+            "riskExposure": 0,
+            "testing": 0
+        }
+    },
+    "0x44da1202285ed9678dab99b55aadb2fa549fdfdc": {
+        "riskLevel": 2,
+        "riskScore": {
+            "centralizationRisk": 3,
+            "comment": "",
+            "complexity": 3,
+            "externalProtocolAudit": 1,
+            "externalProtocolCentralisation": 2,
+            "externalProtocolLongevity": 4,
+            "externalProtocolTvl": 2,
+            "externalProtocolType": 1,
+            "protocolIntegration": 2,
+            "review": 3,
+            "riskExposure": 2,
+            "testing": 3
+        }
+    },
+    "0x4d81c7d534d703e0a0aecadf668c0e0253e1f1c3": {
+        "riskLevel": 3,
+        "riskScore": {
+            "centralizationRisk": 0,
+            "comment": "Vault consists of multiple strategies. The risk score is the highest risk score of the strategies.",
+            "complexity": 0,
+            "externalProtocolAudit": 0,
+            "externalProtocolCentralisation": 0,
+            "externalProtocolLongevity": 0,
+            "externalProtocolTvl": 0,
+            "externalProtocolType": 0,
+            "protocolIntegration": 0,
+            "review": 0,
+            "riskExposure": 0,
+            "testing": 0
+        }
+    },
+    "0x630db4ae19219025df594c943b638b5acb5e9d18": {
+        "riskLevel": 1,
+        "riskScore": {
+            "centralizationRisk": 0,
+            "comment": "",
+            "complexity": 0,
+            "externalProtocolAudit": 0,
+            "externalProtocolCentralisation": 0,
+            "externalProtocolLongevity": 0,
+            "externalProtocolTvl": 0,
+            "externalProtocolType": 0,
+            "protocolIntegration": 0,
+            "review": 0,
+            "riskExposure": 0,
+            "testing": 0
+        }
+    },
+    "0x70fffbacb53ef74903ac074aae769414a70970d1": {
+        "riskLevel": 1,
+        "riskScore": {
+            "centralizationRisk": 1,
+            "comment": "",
+            "complexity": 1,
+            "externalProtocolAudit": 1,
+            "externalProtocolCentralisation": 2,
+            "externalProtocolLongevity": 2,
+            "externalProtocolTvl": 1,
+            "externalProtocolType": 3,
+            "protocolIntegration": 1,
+            "review": 2,
+            "riskExposure": 2,
+            "testing": 1
+        }
+    },
+    "0x7bc9e2d216b22611d9805c12e0c682391720752f": {
+        "riskLevel": 3,
+        "riskScore": {
+            "centralizationRisk": 2,
+            "comment": "Morpho markets are a lot of LRTs as collateral.",
+            "complexity": 2,
+            "externalProtocolAudit": 1,
+            "externalProtocolCentralisation": 3,
+            "externalProtocolLongevity": 4,
+            "externalProtocolTvl": 1,
+            "externalProtocolType": 1,
+            "protocolIntegration": 3,
+            "review": 3,
+            "riskExposure": 3,
+            "testing": 5
+        }
+    },
+    "0x7c0fa3905b38d44c0f29150fd61f182d1e097ec2": {
+        "riskLevel": 2,
+        "riskScore": {
+            "centralizationRisk": 3,
+            "comment": "",
+            "complexity": 3,
+            "externalProtocolAudit": 1,
+            "externalProtocolCentralisation": 2,
+            "externalProtocolLongevity": 4,
+            "externalProtocolTvl": 2,
+            "externalProtocolType": 1,
+            "protocolIntegration": 2,
+            "review": 3,
+            "riskExposure": 2,
+            "testing": 3
+        }
+    },
+    "0x8436027a799ac6c8b512e68b4d3852217c63647d": {
+        "riskLevel": 3,
+        "riskScore": {
+            "centralizationRisk": 5,
+            "comment": "Uses cross asset collateral",
+            "complexity": 3,
+            "externalProtocolAudit": 1,
+            "externalProtocolCentralisation": 2,
+            "externalProtocolLongevity": 4,
+            "externalProtocolTvl": 2,
+            "externalProtocolType": 1,
+            "protocolIntegration": 2,
+            "review": 3,
+            "riskExposure": 5,
+            "testing": 2
+        }
+    },
+    "0x945df73d55557ea23c0c35cd350d8de3b745287e": {
+        "riskLevel": 3,
+        "riskScore": {
+            "centralizationRisk": 5,
+            "comment": "Uses cross asset collateral",
+            "complexity": 3,
+            "externalProtocolAudit": 1,
+            "externalProtocolCentralisation": 2,
+            "externalProtocolLongevity": 4,
+            "externalProtocolTvl": 2,
+            "externalProtocolType": 1,
+            "protocolIntegration": 2,
+            "review": 3,
+            "riskExposure": 5,
+            "testing": 2
+        }
+    },
+    "0x953370e91b70897a0cecc97b58e99d7946c841de": {
+        "riskLevel": 3,
+        "riskScore": {
+            "centralizationRisk": 2,
+            "comment": "Morpho market have moderate exposure to PT-USR market with USR/USD conversion but without USDC/USD conversion.",
+            "complexity": 2,
+            "externalProtocolAudit": 1,
+            "externalProtocolCentralisation": 3,
+            "externalProtocolLongevity": 4,
+            "externalProtocolTvl": 1,
+            "externalProtocolType": 1,
+            "protocolIntegration": 3,
+            "review": 3,
+            "riskExposure": 3,
+            "testing": 5
+        }
+    },
+    "0x985cc9c306bfe075f7c67ec275fb0b80f0b21976": {
+        "riskLevel": 1,
+        "riskScore": {
+            "centralizationRisk": 1,
+            "comment": "Morpho market with blue chip collaterals",
+            "complexity": 1,
+            "externalProtocolAudit": 1,
+            "externalProtocolCentralisation": 2,
+            "externalProtocolLongevity": 4,
+            "externalProtocolTvl": 1,
+            "externalProtocolType": 1,
+            "protocolIntegration": 1,
+            "review": 3,
+            "riskExposure": 1,
+            "testing": 1
+        }
+    },
+    "0x989381f7efb45f97e46be9f390a69c5d94bf9e17": {
+        "riskLevel": 3,
+        "riskScore": {
+            "centralizationRisk": 0,
+            "comment": "Vault consists of multiple strategies. The risk score is the highest risk score of the strategies.",
+            "complexity": 0,
+            "externalProtocolAudit": 0,
+            "externalProtocolCentralisation": 0,
+            "externalProtocolLongevity": 0,
+            "externalProtocolTvl": 0,
+            "externalProtocolType": 0,
+            "protocolIntegration": 0,
+            "review": 0,
+            "riskExposure": 0,
+            "testing": 0
+        }
+    },
+    "0xa72a60e6167e8fc5e523184911475c4b37b835e2": {
+        "riskLevel": 3,
+        "riskScore": {
+            "centralizationRisk": 2,
+            "comment": "Morpho markets are using risky LRTs as collateral.",
+            "complexity": 2,
+            "externalProtocolAudit": 1,
+            "externalProtocolCentralisation": 3,
+            "externalProtocolLongevity": 4,
+            "externalProtocolTvl": 1,
+            "externalProtocolType": 1,
+            "protocolIntegration": 3,
+            "review": 3,
+            "riskExposure": 4,
+            "testing": 5
+        }
+    },
+    "0xb13cf163d916917d9cd6e836905ca5f12a1def4b": {
+        "riskLevel": 1,
+        "riskScore": {
+            "centralizationRisk": 0,
+            "comment": "",
+            "complexity": 0,
+            "externalProtocolAudit": 0,
+            "externalProtocolCentralisation": 0,
+            "externalProtocolLongevity": 0,
+            "externalProtocolTvl": 0,
+            "externalProtocolType": 0,
+            "protocolIntegration": 0,
+            "review": 0,
+            "riskExposure": 0,
+            "testing": 0
+        }
+    },
+    "0xb9acb02818bddd3ac178fa51a0587101e54748b0": {
+        "riskLevel": 3,
+        "riskScore": {
+            "centralizationRisk": 2,
+            "comment": "Morpho markets are using only LBTC as collateral.",
+            "complexity": 2,
+            "externalProtocolAudit": 1,
+            "externalProtocolCentralisation": 3,
+            "externalProtocolLongevity": 4,
+            "externalProtocolTvl": 1,
+            "externalProtocolType": 1,
+            "protocolIntegration": 3,
+            "review": 3,
+            "riskExposure": 3,
+            "testing": 5
+        }
+    },
+    "0xbb808a822dd7aed1635956b85ca5e55478cca957": {
+        "riskLevel": 2,
+        "riskScore": {
+            "centralizationRisk": 3,
+            "comment": "",
+            "complexity": 3,
+            "externalProtocolAudit": 1,
+            "externalProtocolCentralisation": 2,
+            "externalProtocolLongevity": 4,
+            "externalProtocolTvl": 2,
+            "externalProtocolType": 1,
+            "protocolIntegration": 2,
+            "review": 3,
+            "riskExposure": 2,
+            "testing": 3
+        }
+    },
+    "0xbdd79a7df622e9d9e19a7d92bc7ea212fa0d2f3e": {
+        "riskLevel": 2,
+        "riskScore": {
+            "centralizationRisk": 3,
+            "comment": "Morpho Vault is managed by Yearn",
+            "complexity": 3,
+            "externalProtocolAudit": 1,
+            "externalProtocolCentralisation": 2,
+            "externalProtocolLongevity": 4,
+            "externalProtocolTvl": 2,
+            "externalProtocolType": 1,
+            "protocolIntegration": 2,
+            "review": 3,
+            "riskExposure": 2,
+            "testing": 3
+        }
+    },
+    "0xc3bd0a2193c8f027b82dde3611d18589ef3f62a9": {
+        "riskLevel": 3,
+        "riskScore": {
+            "centralizationRisk": 0,
+            "comment": "Vault consists of multiple strategies. The risk score is the highest risk score of the strategies.",
+            "complexity": 0,
+            "externalProtocolAudit": 0,
+            "externalProtocolCentralisation": 0,
+            "externalProtocolLongevity": 0,
+            "externalProtocolTvl": 0,
+            "externalProtocolType": 0,
+            "protocolIntegration": 0,
+            "review": 0,
+            "riskExposure": 0,
+            "testing": 0
+        }
+    },
+    "0xd5428b889621eee8060fc105aa0ab0fa2e344468": {
+        "riskLevel": 1,
+        "riskScore": {
+            "centralizationRisk": 1,
+            "comment": "Morpho market with blue chip collaterals",
+            "complexity": 1,
+            "externalProtocolAudit": 1,
+            "externalProtocolCentralisation": 2,
+            "externalProtocolLongevity": 4,
+            "externalProtocolTvl": 1,
+            "externalProtocolType": 1,
+            "protocolIntegration": 1,
+            "review": 3,
+            "riskExposure": 1,
+            "testing": 1
+        }
+    },
+    "0xd80c675366966ef42b175125bbf1acb1db4151ac": {
+        "riskLevel": 1,
+        "riskScore": {
+            "centralizationRisk": 0,
+            "comment": "",
+            "complexity": 0,
+            "externalProtocolAudit": 0,
+            "externalProtocolCentralisation": 0,
+            "externalProtocolLongevity": 0,
+            "externalProtocolTvl": 0,
+            "externalProtocolType": 0,
+            "protocolIntegration": 0,
+            "review": 0,
+            "riskExposure": 0,
+            "testing": 0
+        }
+    },
+    "0xd89a4f020c8d256a2a4b0dc40b36ee0b27680776": {
+        "riskLevel": 3,
+        "riskScore": {
+            "centralizationRisk": 5,
+            "comment": "Uses cross asset collateral",
+            "complexity": 3,
+            "externalProtocolAudit": 1,
+            "externalProtocolCentralisation": 2,
+            "externalProtocolLongevity": 4,
+            "externalProtocolTvl": 2,
+            "externalProtocolType": 1,
+            "protocolIntegration": 2,
+            "review": 3,
+            "riskExposure": 5,
+            "testing": 2
+        }
+    },
+    "0xdd120ded7c1c9e4978f92847bcb24847a9dbb071": {
+        "riskLevel": 2,
+        "riskScore": {
+            "centralizationRisk": 3,
+            "comment": "",
+            "complexity": 3,
+            "externalProtocolAudit": 1,
+            "externalProtocolCentralisation": 2,
+            "externalProtocolLongevity": 4,
+            "externalProtocolTvl": 2,
+            "externalProtocolType": 1,
+            "protocolIntegration": 2,
+            "review": 3,
+            "riskExposure": 2,
+            "testing": 3
+        }
+    },
+    "0xef34b4dcb851385b8f3a8ff460c34adafd160802": {
+        "riskLevel": 1,
+        "riskScore": {
+            "centralizationRisk": 1,
+            "comment": "Morpho market with blue chip collaterals",
+            "complexity": 1,
+            "externalProtocolAudit": 1,
+            "externalProtocolCentralisation": 2,
+            "externalProtocolLongevity": 4,
+            "externalProtocolTvl": 1,
+            "externalProtocolType": 1,
+            "protocolIntegration": 1,
+            "review": 3,
+            "riskExposure": 1,
+            "testing": 1
+        }
+    },
+    "0xf115c134c23c7a05fbd489a8be3116ebf54b0d9f": {
+        "riskLevel": 1,
+        "riskScore": {
+            "centralizationRisk": 1,
+            "comment": "Morpho Vault is managed by Yearn",
+            "complexity": 1,
+            "externalProtocolAudit": 1,
+            "externalProtocolCentralisation": 2,
+            "externalProtocolLongevity": 4,
+            "externalProtocolTvl": 1,
+            "externalProtocolType": 1,
+            "protocolIntegration": 1,
+            "review": 3,
+            "riskExposure": 1,
+            "testing": 1
+        }
+    },
+    "0xfdb431e661372fa1146efb70bf120ecded944a78": {
+        "riskLevel": 3,
+        "riskScore": {
+            "centralizationRisk": 5,
+            "comment": "Uses cross asset collateral",
+            "complexity": 3,
+            "externalProtocolAudit": 1,
+            "externalProtocolCentralisation": 2,
+            "externalProtocolLongevity": 4,
+            "externalProtocolTvl": 2,
+            "externalProtocolType": 1,
+            "protocolIntegration": 2,
+            "review": 3,
+            "riskExposure": 5,
+            "testing": 2
+        }
+    }
+}

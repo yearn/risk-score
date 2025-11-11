@@ -1,0 +1,665 @@
+{
+    "0x03e6010193c595ec168756af700479d1aff76895": {
+        "riskLevel": 2,
+        "riskScore": {
+            "centralizationRisk": 0,
+            "comment": "",
+            "complexity": 0,
+            "externalProtocolAudit": 0,
+            "externalProtocolCentralisation": 0,
+            "externalProtocolLongevity": 0,
+            "externalProtocolTvl": 0,
+            "externalProtocolType": 0,
+            "protocolIntegration": 0,
+            "review": 0,
+            "riskExposure": 0,
+            "testing": 0
+        }
+    },
+    "0x06ed7c67755344548fafe1822bee365c4208a57f": {
+        "riskLevel": 2,
+        "riskScore": {
+            "centralizationRisk": 1,
+            "comment": "",
+            "complexity": 1,
+            "externalProtocolAudit": 2,
+            "externalProtocolCentralisation": 3,
+            "externalProtocolLongevity": 1,
+            "externalProtocolTvl": 2,
+            "externalProtocolType": 4,
+            "protocolIntegration": 1,
+            "review": 2,
+            "riskExposure": 3,
+            "testing": 1
+        }
+    },
+    "0x0fefee13864c431717f5b2678607b6ce532a170c": {
+        "riskLevel": 1,
+        "riskScore": {
+            "centralizationRisk": 1,
+            "comment": "",
+            "complexity": 1,
+            "externalProtocolAudit": 1,
+            "externalProtocolCentralisation": 1,
+            "externalProtocolLongevity": 1,
+            "externalProtocolTvl": 1,
+            "externalProtocolType": 1,
+            "protocolIntegration": 1,
+            "review": 3,
+            "riskExposure": 1,
+            "testing": 1
+        }
+    },
+    "0x12c3ad898e8eb1c0ec0bb74f9748f36c46593f68": {
+        "riskLevel": 1,
+        "riskScore": {
+            "centralizationRisk": 1,
+            "comment": "",
+            "complexity": 1,
+            "externalProtocolAudit": 1,
+            "externalProtocolCentralisation": 1,
+            "externalProtocolLongevity": 1,
+            "externalProtocolTvl": 1,
+            "externalProtocolType": 1,
+            "protocolIntegration": 1,
+            "review": 3,
+            "riskExposure": 1,
+            "testing": 1
+        }
+    },
+    "0x28f53ba70e5c8ce8d03b1fad41e9df11bb646c36": {
+        "riskLevel": 1,
+        "riskScore": {
+            "centralizationRisk": 0,
+            "comment": "",
+            "complexity": 0,
+            "externalProtocolAudit": 0,
+            "externalProtocolCentralisation": 0,
+            "externalProtocolLongevity": 0,
+            "externalProtocolTvl": 0,
+            "externalProtocolType": 0,
+            "protocolIntegration": 0,
+            "review": 0,
+            "riskExposure": 0,
+            "testing": 0
+        }
+    },
+    "0x2a42a69f48efffdf2d4fb079af60d98d3e34d49c": {
+        "riskLevel": 1,
+        "riskScore": {
+            "centralizationRisk": 0,
+            "comment": "",
+            "complexity": 0,
+            "externalProtocolAudit": 0,
+            "externalProtocolCentralisation": 0,
+            "externalProtocolLongevity": 0,
+            "externalProtocolTvl": 0,
+            "externalProtocolType": 0,
+            "protocolIntegration": 0,
+            "review": 0,
+            "riskExposure": 0,
+            "testing": 0
+        }
+    },
+    "0x2c5d0c3db75d2f8a4957c74be09194a9271cf28d": {
+        "riskLevel": 2,
+        "riskScore": {
+            "centralizationRisk": 1,
+            "comment": "",
+            "complexity": 1,
+            "externalProtocolAudit": 2,
+            "externalProtocolCentralisation": 3,
+            "externalProtocolLongevity": 1,
+            "externalProtocolTvl": 2,
+            "externalProtocolType": 4,
+            "protocolIntegration": 1,
+            "review": 2,
+            "riskExposure": 3,
+            "testing": 1
+        }
+    },
+    "0x305f25377d0a39091e99b975558b1bdfc3975654": {
+        "riskLevel": 1,
+        "riskScore": {
+            "centralizationRisk": 0,
+            "comment": "",
+            "complexity": 0,
+            "externalProtocolAudit": 0,
+            "externalProtocolCentralisation": 0,
+            "externalProtocolLongevity": 0,
+            "externalProtocolTvl": 0,
+            "externalProtocolType": 0,
+            "protocolIntegration": 0,
+            "review": 0,
+            "riskExposure": 0,
+            "testing": 0
+        }
+    },
+    "0x32adfc6170344f848a8c0efe68dad93e5b6964aa": {
+        "riskLevel": 2,
+        "riskScore": {
+            "centralizationRisk": 0,
+            "comment": "",
+            "complexity": 0,
+            "externalProtocolAudit": 0,
+            "externalProtocolCentralisation": 0,
+            "externalProtocolLongevity": 0,
+            "externalProtocolTvl": 0,
+            "externalProtocolType": 0,
+            "protocolIntegration": 0,
+            "review": 0,
+            "riskExposure": 0,
+            "testing": 0
+        }
+    },
+    "0x34b9421fe3d52191b64bc32ec1ab764dcbcdbf5e": {
+        "riskLevel": 1,
+        "riskScore": {
+            "centralizationRisk": 0,
+            "comment": "",
+            "complexity": 0,
+            "externalProtocolAudit": 0,
+            "externalProtocolCentralisation": 0,
+            "externalProtocolLongevity": 0,
+            "externalProtocolTvl": 0,
+            "externalProtocolType": 0,
+            "protocolIntegration": 0,
+            "review": 0,
+            "riskExposure": 0,
+            "testing": 0
+        }
+    },
+    "0x3a58df70f9204bedcd6aee2b51582eb77fe30e02": {
+        "riskLevel": 2,
+        "riskScore": {
+            "centralizationRisk": 0,
+            "comment": "",
+            "complexity": 0,
+            "externalProtocolAudit": 0,
+            "externalProtocolCentralisation": 0,
+            "externalProtocolLongevity": 0,
+            "externalProtocolTvl": 0,
+            "externalProtocolType": 0,
+            "protocolIntegration": 0,
+            "review": 0,
+            "riskExposure": 0,
+            "testing": 0
+        }
+    },
+    "0x3bd8c987286d8ad00c05fdb2ae3e8c9a0f054734": {
+        "riskLevel": 1,
+        "riskScore": {
+            "centralizationRisk": 1,
+            "comment": "",
+            "complexity": 1,
+            "externalProtocolAudit": 1,
+            "externalProtocolCentralisation": 1,
+            "externalProtocolLongevity": 1,
+            "externalProtocolTvl": 1,
+            "externalProtocolType": 1,
+            "protocolIntegration": 1,
+            "review": 3,
+            "riskExposure": 1,
+            "testing": 1
+        }
+    },
+    "0x42908891cbc13301c910b4e71055431bf134aaa0": {
+        "riskLevel": 2,
+        "riskScore": {
+            "centralizationRisk": 0,
+            "comment": "",
+            "complexity": 0,
+            "externalProtocolAudit": 0,
+            "externalProtocolCentralisation": 0,
+            "externalProtocolLongevity": 0,
+            "externalProtocolTvl": 0,
+            "externalProtocolType": 0,
+            "protocolIntegration": 0,
+            "review": 0,
+            "riskExposure": 0,
+            "testing": 0
+        }
+    },
+    "0x4987d1856f93dff29e08aa605a805faf43dc3103": {
+        "riskLevel": 3,
+        "riskScore": {
+            "centralizationRisk": 5,
+            "comment": "",
+            "complexity": 4,
+            "externalProtocolAudit": 1,
+            "externalProtocolCentralisation": 1,
+            "externalProtocolLongevity": 5,
+            "externalProtocolTvl": 4,
+            "externalProtocolType": 3,
+            "protocolIntegration": 1,
+            "review": 3,
+            "riskExposure": 4,
+            "testing": 1
+        }
+    },
+    "0x5136c2f7ab13e202ed42bc1ae82dd63475919653": {
+        "riskLevel": 3,
+        "riskScore": {
+            "centralizationRisk": 0,
+            "comment": "",
+            "complexity": 0,
+            "externalProtocolAudit": 0,
+            "externalProtocolCentralisation": 0,
+            "externalProtocolLongevity": 0,
+            "externalProtocolTvl": 0,
+            "externalProtocolType": 0,
+            "protocolIntegration": 0,
+            "review": 0,
+            "riskExposure": 0,
+            "testing": 0
+        }
+    },
+    "0x52367c8e381edfb068e9fba1e7e9b2c847042897": {
+        "riskLevel": 1,
+        "riskScore": {
+            "centralizationRisk": 1,
+            "comment": "",
+            "complexity": 1,
+            "externalProtocolAudit": 1,
+            "externalProtocolCentralisation": 1,
+            "externalProtocolLongevity": 1,
+            "externalProtocolTvl": 1,
+            "externalProtocolType": 1,
+            "protocolIntegration": 1,
+            "review": 3,
+            "riskExposure": 1,
+            "testing": 1
+        }
+    },
+    "0x54303f18161d9870b0fc66b88b0b129e8e5ff505": {
+        "riskLevel": 2,
+        "riskScore": {
+            "centralizationRisk": 0,
+            "comment": "",
+            "complexity": 0,
+            "externalProtocolAudit": 0,
+            "externalProtocolCentralisation": 0,
+            "externalProtocolLongevity": 0,
+            "externalProtocolTvl": 0,
+            "externalProtocolType": 0,
+            "protocolIntegration": 0,
+            "review": 0,
+            "riskExposure": 0,
+            "testing": 0
+        }
+    },
+    "0x6e9ac188dbcc14632a253aa9ce2783cd712ab3ca": {
+        "riskLevel": 1,
+        "riskScore": {
+            "centralizationRisk": 2,
+            "comment": "The strategy lends assets to Morpho Vaults which are curated by Compound Multisig with 3 days timelock on crucials functions.",
+            "complexity": 2,
+            "externalProtocolAudit": 1,
+            "externalProtocolCentralisation": 2,
+            "externalProtocolLongevity": 3,
+            "externalProtocolTvl": 1,
+            "externalProtocolType": 1,
+            "protocolIntegration": 3,
+            "review": 3,
+            "riskExposure": 1,
+            "testing": 5
+        }
+    },
+    "0x6ed737ef2ef74e04005dc9810366de5ad38cf7d6": {
+        "riskLevel": 1,
+        "riskScore": {
+            "centralizationRisk": 0,
+            "comment": "",
+            "complexity": 0,
+            "externalProtocolAudit": 0,
+            "externalProtocolCentralisation": 0,
+            "externalProtocolLongevity": 0,
+            "externalProtocolTvl": 0,
+            "externalProtocolType": 0,
+            "protocolIntegration": 0,
+            "review": 0,
+            "riskExposure": 0,
+            "testing": 0
+        }
+    },
+    "0x7486325a843590b84c98563c6962c58655569eca": {
+        "riskLevel": 1,
+        "riskScore": {
+            "centralizationRisk": 0,
+            "comment": "",
+            "complexity": 0,
+            "externalProtocolAudit": 0,
+            "externalProtocolCentralisation": 0,
+            "externalProtocolLongevity": 0,
+            "externalProtocolTvl": 0,
+            "externalProtocolType": 0,
+            "protocolIntegration": 0,
+            "review": 0,
+            "riskExposure": 0,
+            "testing": 0
+        }
+    },
+    "0x8bba7afd0f9b1b664c161ec31d812a8ec15f7e1a": {
+        "riskLevel": 2,
+        "riskScore": {
+            "centralizationRisk": 1,
+            "comment": "",
+            "complexity": 1,
+            "externalProtocolAudit": 2,
+            "externalProtocolCentralisation": 3,
+            "externalProtocolLongevity": 1,
+            "externalProtocolTvl": 2,
+            "externalProtocolType": 4,
+            "protocolIntegration": 1,
+            "review": 2,
+            "riskExposure": 3,
+            "testing": 1
+        }
+    },
+    "0x8df66d28914084f44c4046783810cbad662fa633": {
+        "riskLevel": 2,
+        "riskScore": {
+            "centralizationRisk": 0,
+            "comment": "",
+            "complexity": 0,
+            "externalProtocolAudit": 0,
+            "externalProtocolCentralisation": 0,
+            "externalProtocolLongevity": 0,
+            "externalProtocolTvl": 0,
+            "externalProtocolType": 0,
+            "protocolIntegration": 0,
+            "review": 0,
+            "riskExposure": 0,
+            "testing": 0
+        }
+    },
+    "0x90b2f54c6addad41b8f6c4fccd555197bc0f773b": {
+        "riskLevel": 1,
+        "riskScore": {
+            "centralizationRisk": 0,
+            "comment": "",
+            "complexity": 0,
+            "externalProtocolAudit": 0,
+            "externalProtocolCentralisation": 0,
+            "externalProtocolLongevity": 0,
+            "externalProtocolTvl": 0,
+            "externalProtocolType": 0,
+            "protocolIntegration": 0,
+            "review": 0,
+            "riskExposure": 0,
+            "testing": 0
+        }
+    },
+    "0x91e646449a3105e9091e882c9a9a7a81950eebb8": {
+        "riskLevel": 2,
+        "riskScore": {
+            "centralizationRisk": 0,
+            "comment": "",
+            "complexity": 0,
+            "externalProtocolAudit": 0,
+            "externalProtocolCentralisation": 0,
+            "externalProtocolLongevity": 0,
+            "externalProtocolTvl": 0,
+            "externalProtocolType": 0,
+            "protocolIntegration": 0,
+            "review": 0,
+            "riskExposure": 0,
+            "testing": 0
+        }
+    },
+    "0x9d1046cecb0662037b13decf1cd125c4aa3fb65b": {
+        "riskLevel": 1,
+        "riskScore": {
+            "centralizationRisk": 2,
+            "comment": "The strategy lends assets to Morpho Vaults which are curated by Compound Multisig with 3 days timelock on crucials functions.",
+            "complexity": 2,
+            "externalProtocolAudit": 1,
+            "externalProtocolCentralisation": 2,
+            "externalProtocolLongevity": 3,
+            "externalProtocolTvl": 1,
+            "externalProtocolType": 1,
+            "protocolIntegration": 3,
+            "review": 3,
+            "riskExposure": 1,
+            "testing": 5
+        }
+    },
+    "0xa013fbd4b711f9ded6fb09c1c0d358e2fbc2eaa0": {
+        "riskLevel": 1,
+        "riskScore": {
+            "centralizationRisk": 0,
+            "comment": "",
+            "complexity": 0,
+            "externalProtocolAudit": 0,
+            "externalProtocolCentralisation": 0,
+            "externalProtocolLongevity": 0,
+            "externalProtocolTvl": 0,
+            "externalProtocolType": 0,
+            "protocolIntegration": 0,
+            "review": 0,
+            "riskExposure": 0,
+            "testing": 0
+        }
+    },
+    "0xa823ef7df6392800569946c6c1dec0e34356ef18": {
+        "riskLevel": 2,
+        "riskScore": {
+            "centralizationRisk": 0,
+            "comment": "",
+            "complexity": 0,
+            "externalProtocolAudit": 0,
+            "externalProtocolCentralisation": 0,
+            "externalProtocolLongevity": 0,
+            "externalProtocolTvl": 0,
+            "externalProtocolType": 0,
+            "protocolIntegration": 0,
+            "review": 0,
+            "riskExposure": 0,
+            "testing": 0
+        }
+    },
+    "0xa9c3b8f7ab9cc105ac4d27c1bf821ec0c6a9e954": {
+        "riskLevel": 2,
+        "riskScore": {
+            "centralizationRisk": 0,
+            "comment": "",
+            "complexity": 0,
+            "externalProtocolAudit": 0,
+            "externalProtocolCentralisation": 0,
+            "externalProtocolLongevity": 0,
+            "externalProtocolTvl": 0,
+            "externalProtocolType": 0,
+            "protocolIntegration": 0,
+            "review": 0,
+            "riskExposure": 0,
+            "testing": 0
+        }
+    },
+    "0xb1403908f772e4374bb151f7c67e88761a0eb4f1": {
+        "riskLevel": 1,
+        "riskScore": {
+            "centralizationRisk": 1,
+            "comment": "",
+            "complexity": 1,
+            "externalProtocolAudit": 1,
+            "externalProtocolCentralisation": 1,
+            "externalProtocolLongevity": 1,
+            "externalProtocolTvl": 1,
+            "externalProtocolType": 1,
+            "protocolIntegration": 1,
+            "review": 3,
+            "riskExposure": 1,
+            "testing": 1
+        }
+    },
+    "0xb64ce1c06af365424060e2720df46997a4fd3a0a": {
+        "riskLevel": 2,
+        "riskScore": {
+            "centralizationRisk": 0,
+            "comment": "",
+            "complexity": 0,
+            "externalProtocolAudit": 0,
+            "externalProtocolCentralisation": 0,
+            "externalProtocolLongevity": 0,
+            "externalProtocolTvl": 0,
+            "externalProtocolType": 0,
+            "protocolIntegration": 0,
+            "review": 0,
+            "riskExposure": 0,
+            "testing": 0
+        }
+    },
+    "0xbb287e6017d3deb0e2e65061e8684eab21060123": {
+        "riskLevel": 1,
+        "riskScore": {
+            "centralizationRisk": 0,
+            "comment": "",
+            "complexity": 0,
+            "externalProtocolAudit": 0,
+            "externalProtocolCentralisation": 0,
+            "externalProtocolLongevity": 0,
+            "externalProtocolTvl": 0,
+            "externalProtocolType": 0,
+            "protocolIntegration": 0,
+            "review": 0,
+            "riskExposure": 0,
+            "testing": 0
+        }
+    },
+    "0xbeda9a5300393e00229dc15cc54d5185e7646c56": {
+        "riskLevel": 1,
+        "riskScore": {
+            "centralizationRisk": 1,
+            "comment": "",
+            "complexity": 1,
+            "externalProtocolAudit": 1,
+            "externalProtocolCentralisation": 1,
+            "externalProtocolLongevity": 1,
+            "externalProtocolTvl": 1,
+            "externalProtocolType": 1,
+            "protocolIntegration": 1,
+            "review": 3,
+            "riskExposure": 1,
+            "testing": 1
+        }
+    },
+    "0xd4a0aa006e0f70580aaa7ee1fd04fa447c36b259": {
+        "riskLevel": 1,
+        "riskScore": {
+            "centralizationRisk": 2,
+            "comment": "The strategy lends assets to Morpho Vaults which are curated by Compound Multisig with 3 days timelock on crucials functions.",
+            "complexity": 2,
+            "externalProtocolAudit": 1,
+            "externalProtocolCentralisation": 2,
+            "externalProtocolLongevity": 3,
+            "externalProtocolTvl": 1,
+            "externalProtocolType": 1,
+            "protocolIntegration": 3,
+            "review": 3,
+            "riskExposure": 1,
+            "testing": 5
+        }
+    },
+    "0xd811a47cfd17355f47ac49be02c4744a926dd16b": {
+        "riskLevel": 1,
+        "riskScore": {
+            "centralizationRisk": 1,
+            "comment": "",
+            "complexity": 1,
+            "externalProtocolAudit": 1,
+            "externalProtocolCentralisation": 2,
+            "externalProtocolLongevity": 2,
+            "externalProtocolTvl": 1,
+            "externalProtocolType": 3,
+            "protocolIntegration": 1,
+            "review": 2,
+            "riskExposure": 2,
+            "testing": 1
+        }
+    },
+    "0xdb92b89ca415c0dab40dc96e99fc411c08f20780": {
+        "riskLevel": 1,
+        "riskScore": {
+            "centralizationRisk": 1,
+            "comment": "",
+            "complexity": 1,
+            "externalProtocolAudit": 1,
+            "externalProtocolCentralisation": 1,
+            "externalProtocolLongevity": 1,
+            "externalProtocolTvl": 1,
+            "externalProtocolType": 1,
+            "protocolIntegration": 1,
+            "review": 3,
+            "riskExposure": 1,
+            "testing": 1
+        }
+    },
+    "0xe30461f1270ba52d45df1e773aefe594c7e430dc": {
+        "riskLevel": 1,
+        "riskScore": {
+            "centralizationRisk": 1,
+            "comment": "",
+            "complexity": 1,
+            "externalProtocolAudit": 1,
+            "externalProtocolCentralisation": 2,
+            "externalProtocolLongevity": 2,
+            "externalProtocolTvl": 1,
+            "externalProtocolType": 3,
+            "protocolIntegration": 1,
+            "review": 2,
+            "riskExposure": 2,
+            "testing": 1
+        }
+    },
+    "0xf4f9d5697341b4c9b0cc8151413e05a90f7dc24f": {
+        "riskLevel": 1,
+        "riskScore": {
+            "centralizationRisk": 1,
+            "comment": "",
+            "complexity": 1,
+            "externalProtocolAudit": 1,
+            "externalProtocolCentralisation": 1,
+            "externalProtocolLongevity": 1,
+            "externalProtocolTvl": 1,
+            "externalProtocolType": 1,
+            "protocolIntegration": 1,
+            "review": 3,
+            "riskExposure": 1,
+            "testing": 1
+        }
+    },
+    "0xf54a15f6da443041bb075959ea66ee47655ddfca": {
+        "riskLevel": 3,
+        "riskScore": {
+            "centralizationRisk": 0,
+            "comment": "",
+            "complexity": 0,
+            "externalProtocolAudit": 0,
+            "externalProtocolCentralisation": 0,
+            "externalProtocolLongevity": 0,
+            "externalProtocolTvl": 0,
+            "externalProtocolType": 0,
+            "protocolIntegration": 0,
+            "review": 0,
+            "riskExposure": 0,
+            "testing": 0
+        }
+    },
+    "0xf7464410c1ccf86b19711c9b6599336b00641c8f": {
+        "riskLevel": 1,
+        "riskScore": {
+            "centralizationRisk": 0,
+            "comment": "",
+            "complexity": 0,
+            "externalProtocolAudit": 0,
+            "externalProtocolCentralisation": 0,
+            "externalProtocolLongevity": 0,
+            "externalProtocolTvl": 0,
+            "externalProtocolType": 0,
+            "protocolIntegration": 0,
+            "review": 0,
+            "riskExposure": 0,
+            "testing": 0
+        }
+    }
+}

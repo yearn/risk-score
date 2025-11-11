@@ -1,10 +1,23 @@
 # Vault
 
-This folder contains multiple folders, each folder represents a chain, name of the folder is the chain id (e.g. `1` for Ethereum mainnet).
+This folder contains JSON files, one per chain/network. The filename is the chain ID (e.g. `1.json` for Ethereum mainnet, `137.json` for Polygon).
 
-Each folder contains JSON files of review vaults. Name of the file is the vault address. After the vault is reviewed, and deployed contract verified by SAM team, the vault file is added to specific folder depending on the network.
+Each JSON file contains an object where vault addresses (normalized to lowercase) are keys, and the values are objects with `riskLevel` and `riskScore` fields.
 
 JSON structure:
+
+```json
+{
+  "0x7ee351aa702c8fc735d77fb229b7676ac15d7c79": {
+    "riskLevel": 2,
+    "riskScore": {
+      "review": 3,
+      "testing": 1,
+      ...
+    }
+  }
+}
+```
 
 - `riskLevel` is the final risk of the vault displayed on Yearn frontend.
 - `riskScore` is object with detailed values of each risk category.
@@ -15,11 +28,11 @@ TODO: Make Kong use this data and reference the file/commit where this repo is u
 
 ## Adding a new vault
 
-1. Create a new JSON file with name corresponding to the vault address in the `vaults` folder. File must be in the correct folder. Name of the folder is the chain id, e.g. `1` for Ethereum mainnet.
-2. JSON file must contain `riskLevel` and `riskScore` fields assigned by the SAM team.
+1. Open the JSON file for the appropriate chain (e.g. `1.json` for Ethereum mainnet, `137.json` for Polygon).
+2. Add a new entry with the vault address (lowercase) as the key.
+3. The value must contain `riskLevel` and `riskScore` fields assigned by the SAM team.
    - Multistrategy vaults contain `riskLevel` field, `riskScore` fields are all 0 and should not be used.
    - Single-strategy vaults contains both `riskLevel` and `riskScore` fields. `riskScore` fields should be filled with the risk score for the strategy. Check [RISK_FRAMEWORK.md](./RISK_FRAMEWORK.md) for more information on how to fill the `riskScore` fields.
+4. Keep addresses sorted alphabetically for easier maintenance.
 
-For the reference check [file](./1/0x70E75D8053e3Fb0Dda35e80EB16f208c7e4D54F4.json).
-
-The scores on yDaemon are updated [daily](https://github.com/yearn/ydaemon/blob/1253cce0cbcccb6b1ea2f0da5e7f4aa9596a384c/internal/main.go#L108) at 12:10 UTC. After adding a new vault, it will take some time to reflect on yDaemon.
+For reference, check [1.json](./1.json) for examples of vault entries.
