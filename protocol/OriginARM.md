@@ -22,3 +22,6 @@
     - Yield from lending markets
 - New lending markets can be added by admin, but only one market can be active at a time. In stETH ARM, there is a single [lending market](https://etherscan.io/address/0x29c4Bb7B1eBcc53e8CBd16480B5bAe52C69806D3#readProxyContract#F8) on Morpho: [MEV Capital wETH](https://app.morpho.org/ethereum/vault/0x9a8bC3B04b7f3D87cfC09ba407dCED575f2d61D8/mev-capital-weth).
 - [ARMBuffer value](https://etherscan.io/address/0x85B78AcA6Deae198fBF201c82DAF6Ca21942acc6#readProxyContract#F7) defines how much WETH is idle in the contract. When liquidity is above ARMBuffer, idle asset is deposited into lending market, if liquidity is below, WETH is removed from lending market. This action can be triggered by calling permissionsless function `allocate()`. ARMBuffer is currently set to 5%, can be updated by operator or admin.
+- All the shares mech uses balanceOf()
+- Anybody can swap stETH to ETH given rate
+- In order to get the yield in this stETH ARM you are required to be a long term holder
