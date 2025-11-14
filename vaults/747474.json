@@ -238,10 +238,10 @@
         }
     },
     "0xd46dfdaa7caa8739b0e3274e2c085dffc8d4776a": {
-        "riskLevel": 2,
+        "riskLevel": 1,
         "riskScore": {
             "centralizationRisk": 1,
-            "comment": "Morpho vault is using riskier collaterals like yUSD and wsrUSD.",
+            "comment": "",
             "complexity": 1,
             "externalProtocolAudit": 1,
             "externalProtocolCentralisation": 1,
