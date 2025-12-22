@@ -1,7 +1,7 @@
 # Yearn Risk Score Guidelines
 
 ## Development Commands
-- **Run Scripts**: `uv run scripts/scan_factories.py` or `uv run protocol/scripts/veda_scan_auth_events.py`
+- **Run Scripts**: `uv run scripts/scan_factories.py` or `uv run protocol/old/scripts/veda_scan_auth_events.py`
 - **Code Formatting**: `uv run -m ruff format .`
 - **Update Lock File**: `uv lock` (after changing dependencies in pyproject.toml)
 
@@ -28,3 +28,5 @@
 - Prefer batch requests when interacting with blockchain
 - Log important information with appropriate log levels
 - Organize data output in markdown tables for readability
+- Never assume, always verify and provide reference to the source of the data
+- Try to use etherscan for verification of the blockchain data
