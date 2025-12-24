@@ -28,18 +28,19 @@ Score each risk category on a 1-5 scale using the rubrics below.
 
 Evaluates security posture and battle-testing over time.
 
-| Score | Audits | Time in Production | Incident History |
-|-------|--------|-------------------|------------------|
-| **1** | 3+ audits by top firms, active bug bounty >$1M | >2 years, TVL >$100M | No incidents |
-| **2** | 2+ audits by reputable firms, bug bounty >$500K | 1-2 years, TVL >$50M | Minor incidents with excellent response |
-| **3** | 1 audit by reputable firm, bug bounty present | 6-12 months, TVL >$10M | Past incident with good response |
-| **4** | 1 audit by lesser-known firm or dated audit | 3-6 months, TVL <$10M | Past incident with mediocre response |
-| **5** | No audit or failed audit (CRITICAL GATE) | <3 months or no meaningful TVL | Major exploit with poor response (CRITICAL GATE) |
+| Score | Audits | Time in Production |
+|-------|--------|--------------------|
+| **1** | 3+ audits by top firms, active bug bounty >$1M | >2 years, TVL >$100M |
+| **2** | 2+ audits by reputable firms, bug bounty >$500K | 1-2 years, TVL >$50M |
+| **3** | 1 audit by reputable firm, bug bounty present | 6-12 months, TVL >$10M |
+| **4** | 1 audit by lesser-known firm or dated audit | 3-6 months, TVL <$10M |
+| **5** | No audit (CRITICAL GATE) | <3 months or no meaningful TVL |
 
 **Scoring Guidance:**
+
 - High bug bounty (>$5M) can reduce score by 0.5
 - Code complexity should be considered: simple protocols score better
-- Contract upgrades should be re-audited
+- Past incidents should be documented in assessment but don't directly affect this score
 
 ---
 
@@ -51,10 +52,10 @@ Evaluates governance, programmability, and external dependencies. **Highest weig
 
 | Score | Contract Upgradeability | Timelock | Privileged Roles |
 |-------|------------------------|----------|-----------------|
-| **1** | Immutable or fully decentralized DAO | N/A or >7 days | No privileged roles or require multi-party approval |
-| **2** | Multisig 7/11+ with timelock | 48+ hours | Limited roles (pause only), cannot seize funds |
-| **3** | Multisig 5/9 with timelock | 24-48 hours | Some powerful roles but constrained by timelock |
-| **4** | Multisig 3/5 or low threshold | <24 hours | Powerful admin roles with limited constraints |
+| **1** | Immutable or fully decentralized DAO | N/A or >3 days | No privileged roles or require multi-party approval |
+| **2** | Multisig 7/11+ with timelock | 24+ hours | Limited roles (pause only), cannot seize funds |
+| **3** | Multisig 5/9 with timelock | 24+ hours | Some powerful roles but constrained by timelock |
+| **4** | Multisig 3/5 or low threshold | <12 hours | Powerful admin roles with limited constraints |
 | **5** | EOA or <3 signers (CRITICAL GATE) | No timelock | Unlimited admin powers (CRITICAL GATE) |
 
 ### Subcategory B: Programmability
@@ -69,13 +70,13 @@ Evaluates governance, programmability, and external dependencies. **Highest weig
 
 ### Subcategory C: External Dependencies
 
-| Score | Protocol Dependencies | Criticality | Fallback Mechanisms |
-|-------|----------------------|-------------|---------------------|
-| **1** | No external dependencies | N/A | N/A |
-| **2** | 1-2 dependencies on blue-chip protocols | Non-critical or can operate degraded | Multiple fallbacks, graceful degradation |
-| **3** | 2-3 dependencies on established protocols | Some critical functions depend on them | Fallback available but complex |
-| **4** | Many dependencies or deps on newer protocols | Critical functionality depends on them | Limited or no fallbacks |
-| **5** | Single point of failure dependency | Failure breaks entire protocol | No fallback mechanism |
+| Score | Protocol Dependencies | Criticality |
+|-------|----------------------|-------------|
+| **1** | No external dependencies | N/A |
+| **2** | 1-2 dependencies on blue-chip protocols | Non-critical or can operate degraded |
+| **3** | 2-3 dependencies on established protocols | Some critical functions depend on them |
+| **4** | Many dependencies or deps on newer protocols | Critical functionality depends on them |
+| **5** | Single point of failure dependency | Failure breaks entire protocol |
 
 **Centralization Category Score = (Governance + Programmability + Dependencies) / 3**
 
@@ -115,15 +116,16 @@ Evaluates ability for users to exit positions without significant loss.
 
 | Score | Exit Mechanism | Liquidity Depth | Large Holder Impact |
 |-------|---------------|----------------|---------------------|
-| **1** | Direct 1:1 redemption, instant | Deep liquidity (>$10M), <0.5% slippage | Can exit fully with <2% impact |
-| **2** | Direct redemption with minor delays | Good liquidity (>$5M), <1% slippage | Can exit with <5% impact over 1-2 days |
-| **3** | Market-based redemption or short queues | Moderate liquidity (>$1M), 1-3% slippage | Requires 3-7 days for full exit |
+| **1** | Direct 1:1 redemption, instant | Deep liquidity (>$10M), <0.5% slippage | Can exit fully with <0.5% impact |
+| **2** | Direct redemption with minor delays | Good liquidity (>$5M), <1% slippage | Can exit with <1% impact over 1-3 days |
+| **3** | Market-based redemption or short queues | Moderate liquidity (>$1M), 1-3% slippage | Requires 3-7 days for full exit with <1% |
 | **4** | Withdrawal queues or significant restrictions | Limited liquidity (<$1M), >3% slippage | Requires >1 week or >10% impact |
 | **5** | No clear exit mechanism or frozen | No liquidity or cannot exit | Cannot exit without massive losses |
 
 **Adjustments:**
 - Historical stress performance: -0.5 if maintained liquidity during major drawdowns
 - Throttle mechanisms that significantly delay large exits: +0.5
+- Same-value assets can accept higher exit times.
 
 ---
 
@@ -131,28 +133,28 @@ Evaluates ability for users to exit positions without significant loss.
 
 Evaluates team, documentation, and organizational factors. **Lowest weight** - important for long-term sustainability but less critical to immediate fund safety than technical and collateralization factors.
 
-| Score | Team Transparency | Documentation | Development Activity | Legal/Compliance |
-|-------|------------------|---------------|---------------------|-----------------|
-| **1** | Fully doxxed, established reputation | Excellent, comprehensive | Very active, regular updates | Clear legal structure, compliant |
-| **2** | Mostly public team or known anons | Good, mostly complete | Active development | Established entity, some clarity |
-| **3** | Mixed doxxed/anon team | Adequate, some gaps | Moderate activity | Uncertain structure |
-| **4** | Mostly anon team, limited info | Poor or outdated docs | Slow or irregular updates | No clear legal entity |
-| **5** | Fully anon, no reputation | No documentation | Inactive, abandoned | No legal structure, regulatory risk |
+| Score | Team Transparency | Documentation | Legal/Compliance |
+|-------|------------------|---------------|-----------------|
+| **1** | Fully doxxed or wellknown annons, established reputation | Excellent, comprehensive | Clear legal structure, compliant or wellknown and longterm protocol |
+| **2** | Mostly public team or known anons | Good, mostly complete | Established entity, or longterm protocol |
+| **3** | Mixed unknown and known anons | Adequate, some gaps | Uncertain structure |
+| **4** | Mostly unknown anons, limited info | Poor or outdated docs | No clear legal entity |
+| **5** | Fully unknown anons, no reputation | No documentation | No legal structure, regulatory risk |
 
 ---
 
 ## Step 3: Calculate Weighted Final Score
 
 **Category Weights:**
+
 - Centralization & Control: **30%** (governance, programmability, dependencies)
 - Funds Management: **30%** (collateralization, provability)
 - Audits + Historical: **20%** (security track record)
 - Liquidity: **15%** (exit mechanisms)
 - Operational: **5%** (team, docs, communication)
 
-**Rationale:** Centralization and Funds Management are equally critical - together they account for **60% of the total score**. If reserves don't exist or governance is compromised, all other factors are irrelevant.
-
 **Formula:**
+
 ```
 Final Score = (Centralization × 0.30) + (Funds Mgmt × 0.30) + (Audits × 0.20) + (Liquidity × 0.15) + (Operational × 0.05)
 ```
@@ -164,14 +166,9 @@ Final Score = (Centralization × 0.30) + (Funds Mgmt × 0.30) + (Audits × 0.20)
 ## Step 4: Apply Modifiers (Optional)
 
 ### Time Decay Bonus (Reduces Risk Over Time)
-- Protocol live >2 years with no incidents: **-0.5** to final score
-- TVL maintained >$100M for >1 year: **-0.5** to final score
-- Maximum combined bonus: **-1.0**
 
-### Incident Penalty (Increases Risk After Problems)
-- Major exploit <6 months ago: **+1.0** to final score
-- Poor incident response history: **+0.5** to final score
-- Unresolved security issues: **+0.5** to final score
+- Protocol live >2 years with no incidents: **-0.5** to final score
+- TVL maintained >$500M for >1 year: **-0.5** to final score
 
 **Final Score (with modifiers) capped at 1.0 minimum and 5.0 maximum.**
 
@@ -209,7 +206,7 @@ See [reserve-ethplus.md](assessments/reserve-ethplus.md) for complete worked exa
 
 ## Scoring Best Practices
 
-1. **Be Conservative**: When uncertain between two scores, choose the higher (more risky) score
+1. **Be Conservative**: When uncertain between two scores, choose the higher (more risky) score and lower over time
 2. **Document Reasoning**: Explain why each score was assigned
 3. **Update Regularly**: Reassess when protocols change significantly
 4. **Compare Peers**: Look at similar protocols for consistency
@@ -221,9 +218,10 @@ See [reserve-ethplus.md](assessments/reserve-ethplus.md) for complete worked exa
 ## Review and Appeals
 
 All risk scores should be:
+
 1. Peer-reviewed by at least one other team member
-2. Updated quarterly or when material changes occur
-3. Open to challenge with new evidence
+2. Updated yearly or when significant changes occur
+3. Open to challenge if new collaterals are added
 4. Documented with clear reasoning for each category
 
 For questions about scoring methodology, contact the Yearn risk team.

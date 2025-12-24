@@ -22,8 +22,8 @@ ETH+ is a yield-bearing Ethereum Liquid Staking Token basket built on Reserve Pr
 **Total TVL:** ~$108M (~36,246 ETH)
 
 **Links:**
+- [Reserve Protocol Documentation](https://reserve.org/protocol/introduction/)
 - [ETH+ Dashboard](https://app.reserve.org/ethereum/token/0xe72b141df173b999ae7c1adcbf60cc9833ce56a8/overview)
-- [Reserve Protocol Docs](https://reserve.org/protocol/)
 - [Reserve Protocol Security](https://reserve.org/protocol/security/)
 - [LlamaRisk Analysis](https://www.llamarisk.com/research/rtoken-risk-ethplus)
 
@@ -447,8 +447,9 @@ Reserve Protocol operations are largely automated:
 ### Key Findings
 
 **Critical Risks Identified:**
-1. **Governance Risk** - 3-day timelock provides some protection but upgradable contracts introduce code risk; shorter delay than ideal
-2. **Oracle Dependency** - Reliance on Chainlink for accurate pricing; failure could cause issues
+1. **Governance Risk** - 3-day timelock provides protection but upgradable contracts introduce code risk; timelock on the edge of acceptable threshold
+2. **Multiple Dependencies** - Relies on 5 external protocols (Chainlink + 4 LSTs) for critical functionality; 50% concentration in Lido wstETH
+3. **Oracle Dependency** - Critical reliance on Chainlink for accurate pricing; oracle failures could impact system
 
 **Key Strengths:**
 1. **Strong Security** - $10M bug bounty, multiple audits, 2+ years without incidents
@@ -491,34 +492,44 @@ Reserve Protocol operations are largely automated:
 #### 1. Audits & Historical Track Record
 **Score: 1.5**
 
-- Multiple professional audits ✓
-- $10M bug bounty on Immunefi ✓
-- 2.5+ years in production without incidents ✓
-- Stable TVL growth ✓
-- Minor penalty: Moderate contract complexity
+**Audits:**
+- Multiple professional audits (Trail of Bits, Solidified, etc.) ✓
+- $10M bug bounty on Immunefi (>$1M threshold) ✓
+
+**Time in Production:**
+- 2.5+ years in production (>2 years) ✓
+- TVL ~$108M (>$100M threshold) ✓
+
+**Scoring per rubric:** Should be 1.0 (meets all criteria for top tier)
+**Adjustment:** +0.5 for moderate contract complexity
+**Final:** 1.5
 
 #### 2. Centralization & Control Risks
-**Score: 2.75**
+**Score: 2.5**
 
-**Governance:**
-- Upgradable contracts (+0.5)
-- 3-day timelock provides adequate protection (+0.25) - shorter than ideal but still reasonable
-- Decentralized StRSR voting (+0)
-- Emergency roles (Pauser, Freezer) add centralization (+0.5)
+**Governance (using 1-5 rubric):**
+- Decentralized DAO (StRSR voting) ✓
+- 3-day timelock (meets >3 day threshold but just barely)
+- Privileged roles exist (Owner, Pauser, Freezer, Guardian) - constrained by timelock
+- Rubric Score 1-2 range: Has DAO and >3 day timelock (Score 1), but privileged roles push toward Score 2
+- **Subcategory Score: 2.0**
 
-**Programmability:**
-- Highly programmatic operations (+0)
-- On-chain PPS calculation (+0)
-- Oracle upgradeability via governance (+0.5)
-- Minimal off-chain dependencies (+0)
+**Programmability (using 1-5 rubric):**
+- Mostly programmatic with minor admin governance input ✓
+- On-chain PPS calculation with parameters ✓
+- Decentralized oracle (Chainlink), governance can change ✓
+- Matches Score 2 criteria exactly
+- **Subcategory Score: 2.0**
 
-**External Dependencies:**
-- Chainlink oracle dependency (+0.5)
-- Multiple LST protocol dependencies (+0.5)
-- 50% Lido concentration (+0.5)
-- Good fallback mechanisms (-0.5)
+**External Dependencies (using 1-5 rubric):**
+- Chainlink oracles (1 dependency, critical for pricing)
+- 4 LST protocols: Lido, Rocket Pool, Frax, Stader (critical for collateral)
+- Total: 5 dependencies on established/blue-chip protocols
+- All critical for core functionality
+- Rubric Score 3-4 range: Many dependencies (Score 4) but all blue-chip/established (mitigating)
+- **Subcategory Score: 3.0**
 
-**Subtotal:** 2.75
+**Category Average: (2.0 + 2.0 + 3.0) / 3 = 2.33 ≈ 2.5**
 
 #### 3. Funds Management (Collateralization + Provability)
 **Score: 1.5**
@@ -542,12 +553,21 @@ Reserve Protocol operations are largely automated:
 #### 5. Operational Risk
 **Score: 1.5**
 
-- Public, doxxed team ✓
-- Excellent documentation ✓
-- Active development ✓
-- Strong community ✓
-- Established legal structure ✓
-- Minor penalty: Some regulatory uncertainty
+**Team Transparency:**
+- Public, doxxed team with established reputation ✓
+- Rubric Score 1: Fully doxxed, established reputation
+
+**Documentation:**
+- Excellent, comprehensive documentation ✓
+- Rubric Score 1: Excellent, comprehensive
+
+**Legal/Compliance:**
+- Established legal structure (Reserve Labs + Foundation) ✓
+- Long-term protocol (2+ years) ✓
+- Minor concern: Some regulatory uncertainty around stablecoins
+- Rubric Score 1-2 range: Clear structure but some regulatory uncertainty
+
+**Category Average: (1.0 + 1.0 + 2.0) / 3 = 1.33 ≈ 1.5**
 
 ---
 
@@ -562,15 +582,15 @@ Reserve Protocol operations are largely automated:
 
 **Calculation:**
 ```
-Final Score = (2.75 × 0.30) + (1.5 × 0.30) + (1.5 × 0.20) + (2.0 × 0.15) + (1.5 × 0.05)
-            = 0.825 + 0.45 + 0.30 + 0.30 + 0.075
-            = 1.95
-            ≈ 2.0
+Final Score = (2.5 × 0.30) + (1.5 × 0.30) + (1.5 × 0.20) + (2.0 × 0.15) + (1.5 × 0.05)
+            = 0.75 + 0.45 + 0.30 + 0.30 + 0.075
+            = 1.875
+            ≈ 1.9
 ```
 
 ---
 
-## Overall Risk Score: **2.0 / 5.0**
+## Overall Risk Score: **1.9 / 5.0**
 
 ### Risk Tier: **LOW RISK**
 

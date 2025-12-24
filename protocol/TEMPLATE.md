@@ -2,7 +2,14 @@
 
 ## Overview + Links
 
-Explain in short what protocol does, usage and yield sources. Add links to docs.
+Explain in short what protocol does, usage and yield sources.
+
+**Links:** (Always include official project documentation)
+
+- [Protocol Documentation](URL) - Main protocol documentation/introduction
+- [Protocol Dashboard/App](URL) - If applicable
+- [Security/Audits Page](URL) - If available
+- [Third-Party Analysis](URL) - LlamaRisk, etc. if available
 
 ## Audits and Due Diligence Disclosures
 
