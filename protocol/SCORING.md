@@ -1,6 +1,6 @@
 # Risk Scoring Methodology
 
-This document defines the scoring methodology for protocol risk assessments using the Yearn Risk Framework.
+This document defines the scoring methodology for protocol risk reports using the Yearn Risk Framework.
 
 ## Scoring Approach: Critical Gates + Weighted Score
 
@@ -190,7 +190,7 @@ Map final score to risk tier:
 
 ## Scoring Example: ETH+ (Reserve Protocol)
 
-See [reserve-ethplus.md](assessments/reserve-ethplus.md) for complete worked example.
+See [reserve-ethplus.md](report/reserve-ethplus.md) for complete worked example.
 
 **Summary:**
 - Critical Gates: ✅ All passed

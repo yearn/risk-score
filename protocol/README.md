@@ -12,7 +12,7 @@ The protocol risk framework provides a structured approach to evaluating the saf
 protocol/
 ├── TEMPLATE.md           # Risk assessment template
 ├── README.md             # This file
-├── assessments/          # Individual protocol risk assessments
+├── report/               # Individual protocol risk reports
 │   ├── protocol-name.md
 │   └── ...
 └── old/                  # Legacy protocol documentation
@@ -24,7 +24,7 @@ protocol/
 
 1. **Copy the Template**
    ```bash
-   cp protocol/TEMPLATE.md protocol/assessments/[protocol-name].md
+   cp protocol/TEMPLATE.md protocol/report/[protocol-name].md
    ```
 
 2. **Fill Out Each Section**
@@ -62,7 +62,7 @@ The framework evaluates protocols across these dimensions:
 - **Evidence-Based**: Link to contracts, transactions, and documentation
 - **Transparent**: Document both strengths and weaknesses
 - **Actionable**: Focus on risks that can be monitored or mitigated
-- **Living Document**: Update assessments as protocols evolve
+- **Living Document**: Update report as protocols evolve
 
 ## Risk Assessment Philosophy
 
@@ -97,7 +97,7 @@ The framework evaluates protocols across these dimensions:
 
 ## Contributing
 
-When adding or updating protocol assessments:
+When adding or updating protocol report:
 
 1. Use the TEMPLATE.md as your starting point
 2. Be thorough but concise
@@ -114,4 +114,4 @@ When adding or updating protocol assessments:
 
 ## Questions?
 
-For questions about the framework or specific assessments, reach out to the Yearn risk team on Discord or open an issue.
+For questions about the framework or specific report, reach out to the Yearn risk team on Discord or open an issue.
