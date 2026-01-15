@@ -1,21 +1,25 @@
-# Protocol Risk Framework
+# Protocol & Asset Risk Reports
 
-This directory contains Yearn's protocol risk assessment framework and individual protocol evaluations.
+This directory contains Yearn's risk assessment framework for evaluating protocols and assets before integration with Yearn vaults.
 
 ## Framework Purpose
 
-The protocol risk framework provides a structured approach to evaluating the safety and reliability of DeFi protocols before integration with Yearn vaults. It covers technical, operational, and organizational risks that could impact user funds.
+The risk framework provides a structured approach to evaluating the safety and reliability of DeFi protocols and assets. It covers technical, operational, and organizational risks that could impact user funds.
+
+**All assessments—protocols, assets, tokens—use the same template and scoring methodology.**
 
 ## File Structure
 
 ```
-protocol/
+reports/
 ├── TEMPLATE.md           # Risk assessment template
+├── SCORING.md            # Quantitative scoring methodology
 ├── README.md             # This file
-├── report/               # Individual protocol risk reports
-│   ├── protocol-name.md
+├── report/               # All risk assessments
+│   ├── reserve-ethplus.md      # Example: ETH+ asset
+│   ├── origin-arm.md           # Example: Origin ARM protocol
 │   └── ...
-└── old/                  # Legacy protocol documentation
+└── old/                  # Legacy documentation (deprecated format)
 ```
 
 ## How to Use This Framework
@@ -24,7 +28,7 @@ protocol/
 
 1. **Copy the Template**
    ```bash
-   cp protocol/TEMPLATE.md protocol/report/[protocol-name].md
+   cp reports/TEMPLATE.md reports/report/[name].md
    ```
 
 2. **Fill Out Each Section**
@@ -33,29 +37,31 @@ protocol/
    - Be specific with addresses, transaction hashes, and dates
    - Flag unknowns or areas requiring further investigation
 
-3. **Set Up Monitoring**
+3. **Calculate Risk Score**
+   - Use the scoring methodology defined in `SCORING.md`
+   - Follow the step-by-step calculation process
+   - Document reasoning for each category score
+
+4. **Set Up Monitoring**
    - Follow the Monitoring section to set up alerts
    - Add addresses to monitoring scripts
    - Create protocol-specific Telegram group
    - Define monitoring frequency (hourly/daily)
 
-4. **Review and Update**
+5. **Review and Update**
    - Have another team member review the assessment
    - Update when protocol parameters change
    - Reassess after incidents or major upgrades
 
 ### Assessment Categories
 
-The framework evaluates protocols across these dimensions:
+1. **Audits & Historical Track Record** - Security posture, code quality, and past performance (Weight: 20%)
+2. **Centralization & Control Risks** - Governance, programmability, and external dependencies (Weight: 30%)
+3. **Funds Management** - Collateralization, provability, and asset control (Weight: 30%)
+4. **Liquidity Risk** - Exit mechanisms and market depth (Weight: 15%)
+5. **Operational Risk** - Team, documentation, and processes (Weight: 5%)
 
-1. **Audits & Bug Bounties** - Security posture and code quality
-2. **Historical Track Record** - Past performance and incident handling
-3. **Funds Management** - How assets are controlled and deployed
-4. **Dependency Risk** - External protocol and infrastructure dependencies
-5. **Liquidity Risk** - Exit mechanisms and market depth
-6. **Centralization & Control** - Governance and admin powers
-7. **Operational Risk** - Team, documentation, and processes
-8. **Monitoring** - Ongoing surveillance requirements
+Each category receives a score from 1-5 (1 = safest, 5 = highest risk), which are then weighted to produce a final risk score and tier classification.
 
 ### Key Principles
 
@@ -95,23 +101,18 @@ The framework evaluates protocols across these dimensions:
 - Insufficient liquidity for expected TVL
 - Single points of failure in critical infrastructure
 
-## Contributing
+## Migration from Legacy Format
 
-When adding or updating protocol report:
+Previously, protocols and assets were documented separately with different formats. The new framework provides:
+- Unified assessment methodology
+- Quantitative risk scoring (1-5 scale)
+- Weighted category scoring
+- Standardized monitoring requirements
 
-1. Use the TEMPLATE.md as your starting point
-2. Be thorough but concise
-3. Cite sources and link to evidence
-4. Mark sections as "TODO" if information is unavailable
-5. Get peer review before finalizing
-6. Update the monitoring section with actual implementation
+**Legacy documents are in `reports/old/` for reference only. Do not use them as templates.**
 
 ## Related Resources
 
 - [Yearn Monitoring Scripts](https://github.com/yearn/monitoring-scripts-py)
 - [Safe Multisig Monitoring](https://github.com/yearn/monitoring-scripts-py/blob/main/safe/main.py)
 - [Workflow Definitions](https://github.com/yearn/monitoring-scripts-py/tree/main/.github/workflows)
-
-## Questions?
-
-For questions about the framework or specific report, reach out to the Yearn risk team on Discord or open an issue.
