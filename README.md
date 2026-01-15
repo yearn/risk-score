@@ -1,18 +1,23 @@
 # Yearn Risk Scores
 
-This repository contains risk scores for Yearn strategies, vaults, assets, and protocols.
+This repository contains risk scores for Yearn V3 strategies, vaults. Additionally, it contains risk assessments for used protocols and assets.
 
-## Strategy Risk Scores
+## Protocol & Asset Reports
 
-Yearn vault risk scores are defined in folder [vaults](./vaults) using [Risk Score Framework](./vaults/RISK_FRAMEWORK.md).
+Risk assessments for protocols and assets are available in the [reports](./reports) folder. The framework uses a unified methodology to evaluate technical, operational, and organizational risks.
 
-## Asset Risk Scores
+**Features:**
+- Quantitative scoring system (1-5 scale, weighted by category)
+- Comprehensive template covering audits, centralization, funds management, liquidity, and operational risks
+- Standardized monitoring requirements
 
-Analysis of the assets is available in the [asset](./asset) folder.
+**Example reports:**
+- [ETH+ (Reserve)](./reports/report/reserve-ethplus.md)
+- [Origin ARM](./reports/report/origin-arm.md)
 
-## Protocol Risk Scores
+## Yearn Vault Risk Scores
 
-Analysis of the protocols is available in the [protocol](./protocol) folder.
+Yearn Vaults and Strategies risk scores are defined in folder [vaults](./vaults) using internal [Risk Score Framework](./vaults/RISK_FRAMEWORK.md).
 
 ## API
 
