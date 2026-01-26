@@ -20,14 +20,13 @@ The protocol offers three tiers of tokens:
 
 ## Audits and Due Diligence Disclosures
 
-InfiniFi has undergone security assessments by reputable firms.
+InfiniFi had security audits by Certora, Spearbit, Cantina.
 
 - **Certora**: Formal Verification & Security Assessment (March-May 2025). Report published June 4, 2025.
 - **Spearbit**: Conducted a prior audit.
+- **Cantina**: InfiniFi held a public audit/bug bounty competition on **Cantina** in April 2025 with a reward pool of ~$40,000 ($35k + $5k).
 
 ### Bug Bounty
-
-InfiniFi held a public audit/bug bounty competition on **Cantina** in April 2025 with a reward pool of ~$40,000 ($35k + $5k).
 
 - [Bug Bounty Program](https://cantina.xyz/bounties/509e46d0-a107-43aa-b46e-b2fe7e2ea591)
 
@@ -125,7 +124,6 @@ The governance system is split into three branches to check and balance power:
 - **Governance**: 2.5. Separation of powers (Allocators vs Verifiers vs Vetoers) is a strong design. 5 entity Vetoer council is a centralized safeguard.
 - **Programmability**: 3. Active management of allocations by Allocators.
 - **Dependencies**: 3.5. Exposure to multiple external protocols (Aave, Fluid, Pendle, Ethena).
-- _Score rationale_: Complex governance reduces "rogue admin" risk, but active management and high dependency count add risk.
 
 ### 3. Funds Management (Score: 1.5)
 
