@@ -64,7 +64,9 @@ The protocol acts as an asset manager, deploying user funds into other protocols
 
 - **Minting**: Users deposit supported assets (USDC, USDT, USDe, sUSDe) to mint iUSD.
 - **Redemption**:
-  - **Instant**: Users can instantly redeem iUSD for USDC as long as there is sufficient liquidity in the _Liquid Farms_ (currently ~$37.78M).
+
+  - **Instant**: Users can instantly redeem iUSD for USDC as long as there is sufficient liquidity in the _Liquid Farms_ (currently ~$37.78M). No queue, whitelisting not required, anyone can redeem. When this reserve is depleted, there will be a FIFO queue.
+
   - **Queue**: If liquid reserves are depleted, redemption requests enter a **FIFO Queue**. Pending requests are fulfilled as capital is unwound from illiquid strategies or new deposits enter.
   - **Whitelisting**: No whitelist for redemption; anyone holding iUSD can redeem or enter the queue.
 
