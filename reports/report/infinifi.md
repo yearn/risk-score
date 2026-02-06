@@ -134,7 +134,6 @@ The governance system is split into three branches to check and balance power:
 
     Note: All timelock actions require 4/7 multisig approval before being scheduled.
 
-- **Emergency**: The `GOVERNOR` role can bypass delays via `emergencyAction()`.
 - **Capabilities**: Timelocks can execute arbitrary calls (`execute`, `executeBatch`), grant/revoke roles, schedule actions, and pause/unpause the system.
 
 ### Programmability
@@ -193,11 +192,11 @@ Oracle timelock management
 - **Programmability**: 3. Active management of allocations by Allocators.
 - **Dependencies**: 3.5. Exposure to multiple external protocols (Aave, Fluid, Pendle, Ethena).
 
-### 3. Funds Management (Score: 1.5)
+### 3. Funds Management (Score: 2.0)
 
-- **Collateralization**: 1.5. 100% on-chain DeFi assets. "First loss" tranches (liUSD) protect iUSD.
-- **Provability**: 1.5. Verifiable on-chain,
-- _Score rationale_: Solid backing model with risk tranche protection.
+- **Collateralization**: 2.0. 100% on-chain DeFi assets. "First loss" tranches (liUSD) protect iUSD.
+- **Provability**: 2.0. Verifiable on-chain,
+- _Score rationale_: Funds are verifiable and transparent.
 
 ### 4. Liquidity Risk (Score: 2.0)
 
@@ -214,14 +213,14 @@ Oracle timelock management
 ### Calculation
 
 $$
-\text{Final Score} = (3.0 \times 0.3) + (1.5 \times 0.3) + (2.5 \times 0.2) + (2.0 \times 0.15) + (2.5 \times 0.05)
+\text{Final Score} = (3.0 \times 0.3) + (2.0 \times 0.3) + (2.5 \times 0.2) + (2.0 \times 0.15) + (2.5 \times 0.05)
 $$
 
 $$
-\text{Final Score} = 0.9 + 0.45 + 0.5 + 0.3 + 0.125 = 2.275
+\text{Final Score} = 0.9 + 0.6 + 0.5 + 0.3 + 0.125 = 2.425
 $$
 
-**Final Score: 2.3**
+**Final Score: 2.4**
 
 ## Risk Tier: Low/Medium Risk
 
