@@ -132,8 +132,15 @@ Losses are allocated entirely to RLP holders. No losses flow to USR holders unle
 
 ### Accessibility
 
-- **Minting RLP**: Deposit USDC, USDT, or ETH. Minting takes ~1 minute (1-5 blocks). 0% minting fees (currently waived).
-- **Redeeming RLP**: Receive value equivalent in USDC/USDT/ETH at current RLP price. Processed within 24 hours. 0% redemption fees (currently waived).
+- **Minting RLP**: Deposit USDC, USDT, or ETH via `requestMint()` on the `LPExternalRequestsManager`. Minting takes ~1 minute (1-5 blocks). 0% minting fees (currently waived). Backend (`SERVICE_ROLE`) calls `completeMint()` with the mint amount determined off-chain based on current RLP price.
+- **Redeeming RLP**: Uses an **epoch-based batch burn system** (unique to RLP, not shared with USR or wstUSR):
+  1. User calls `requestBurn()` -- RLP tokens are transferred to the contract
+  2. Backend calls `processBurns()` -- groups burn requests into an epoch for batch processing
+  3. Backend calls `completeBurns()` -- determines withdrawal collateral amounts off-chain, supports partial completion across multiple epochs
+  4. User calls `withdrawAvailableCollateral()` -- claims accumulated collateral (USDC/USDT/ETH)
+  - Processed within 24 hours under normal conditions. 0% redemption fees (currently waived).
+  - **No on-chain slippage protection**: Unlike USR burn requests, RLP `requestBurn()` has no `minWithdrawalAmount` parameter.
+  - **No instant redeem**: RLP has no equivalent to USR's `UsrRedemptionExtension` instant redeem function.
 - **Access Control**: Minting/redeeming requires **allowlisted wallets** (users must apply and be verified by Resolv Digital Assets Ltd).
 - **RLP Redemption Gate**: Redemption of RLP is **suspended** if USR Collateralization Ratio (CR) falls below 110%.
 
@@ -167,11 +174,11 @@ Losses are allocated entirely to RLP holders. No losses flow to USR holders unle
 
 ### Governance
 
-- **Current state**: Governance is **not yet live**. The stRESOLV token exists but governance voting has not been initiated.
-- **Planned governance**: Snapshot-based voting with stRESOLV holders, intended to guide decision-making of Resolv Digital Assets Ltd (RDAL).
-- **RDAL discretion**: From the Terms of Service, RDAL has **full discretion** over collateral pool composition, strategy parameters, and operational decisions.
-- **No multisig details disclosed publicly**. The Terms give RDAL unilateral control.
-- **No timelock disclosed for parameter changes**. Price updates and redemptions are processed by a backend system.
+- **Multisig**: All core contracts are controlled by a **3-of-5 Gnosis Safe** at [`0xd6889f307be1b83bb355d5da7d4478fb0d2af547`](https://etherscan.io/address/0xd6889f307be1b83bb355d5da7d4478fb0d2af547). The Safe is `owner()` and `DEFAULT_ADMIN_ROLE` holder for USR, RLP, Treasury, Request Managers, RewardDistributor, and Whitelist. Nonce 366+ indicates significant operational activity. All 5 signers are EOAs (not publicly identified).
+- **Timelock**: A 3-day OpenZeppelin `TimelockController` at [`0x290d9544669c9c7a64f6899a0a3b28d563f6ebee`](https://etherscan.io/address/0x290d9544669c9c7a64f6899a0a3b28d563f6ebee) owns all ProxyAdmin contracts. Contract upgrades require a 3-day delay. The Safe is the sole proposer/executor on the timelock.
+- **Split architecture**: The multisig controls **operational parameters directly** (no delay) -- pausing, role grants, parameter changes, price updates. The timelock only gates **proxy upgrades** (implementation changes).
+- **On-chain governance not yet live**: The stRESOLV token exists but Snapshot voting has not been initiated.
+- **RDAL discretion**: From the Terms of Service, RDAL has **full discretion** over collateral pool composition and strategy parameters.
 - **Whitelist control**: RDAL controls who can mint/redeem by managing the address whitelist.
 
 ### Programmability
@@ -204,14 +211,37 @@ Losses are allocated entirely to RLP holders. No losses flow to USR holders unle
 
 ## Monitoring
 
-- **Collateral Pool**: Monitor collateral composition and delta neutrality at [Apostro dashboard](https://info.apostro.xyz/resolv-reserves) and [app.resolv.xyz/collateral-pool](https://app.resolv.xyz/collateral-pool)
-- **RLP Price Changes**: Monitor the RLP Counter contract [`0xc7ab90c2ea9271efb31f5fa2843eeb4b331eafa0`](https://etherscan.io/address/0xc7ab90c2ea9271efb31f5fa2843eeb4b331eafa0) for price updates
-- **Minting/Redemptions**: Monitor `MintRequestCompleted` and `BurnRequestCompleted` events on the RLP Requests Manager [`0x10f4d4EAd6Bcd4de7849898403d88528e3Dfc872`](https://etherscan.io/address/0x10f4d4EAd6Bcd4de7849898403d88528e3Dfc872)
+### Governance Monitoring
+
+- **Multisig activity**: Monitor the 3-of-5 Gnosis Safe [`0xd6889f307be1b83bb355d5da7d4478fb0d2af547`](https://etherscan.io/address/0xd6889f307be1b83bb355d5da7d4478fb0d2af547) for owner changes, threshold changes, and module additions
+- **Timelock proposals**: Monitor the TimelockController [`0x290d9544669c9c7a64f6899a0a3b28d563f6ebee`](https://etherscan.io/address/0x290d9544669c9c7a64f6899a0a3b28d563f6ebee) for `CallScheduled`, `CallExecuted`, and `Cancelled` events (3-day window to review proxy upgrades)
 - **Whitelist Changes**: Monitor the Whitelist contract [`0x5943026E21E3936538620ba27e01525bBA311255`](https://etherscan.io/address/0x5943026E21E3936538620ba27e01525bBA311255)
-- **Reward Distribution**: Monitor RewardDistributor [`0xbE23BB6D817C08E7EC4Cd0adB0E23156189c1bA9`](https://etherscan.io/address/0xbE23BB6D817C08E7EC4Cd0adB0E23156189c1bA9)
+
+### RLP Liquidity & Redemption Monitoring
+
+- **RLP Requests Manager**: [`0x10f4d4EAd6Bcd4de7849898403d88528e3Dfc872`](https://etherscan.io/address/0x10f4d4EAd6Bcd4de7849898403d88528e3Dfc872)
+  - Monitor `BurnRequestCreated` events -- tracks users requesting RLP redemptions
+  - Monitor `BurnRequestProcessed` events -- tracks when burn requests enter epoch processing
+  - Monitor `BurnRequestCompleted` events -- tracks when redemptions are fulfilled and at what price
+  - Monitor `BurnRequestCancelled` events -- tracks cancellations (may indicate dissatisfaction with processing times)
+  - Track pending burn requests in `CREATED` state vs. `PROCESSING` state to detect processing backlogs
+  - Alert if burn requests remain in `CREATED` state for >24 hours (indicates processing delays)
+- **RLP Price Changes**: Monitor the RLP Counter contract [`0xc7ab90c2ea9271efb31f5fa2843eeb4b331eafa0`](https://etherscan.io/address/0xc7ab90c2ea9271efb31f5fa2843eeb4b331eafa0) for price updates. Alert on >2% daily price drops (may signal collateral pool losses).
+- **Minting activity**: Monitor `MintRequestCompleted` events on RLP Requests Manager for net flow direction (net minting vs. net burning)
+
+### Collateral & Coverage Monitoring
+
+- **Collateral Pool**: Monitor collateral composition and delta neutrality at [Apostro dashboard](https://info.apostro.xyz/resolv-reserves) and [app.resolv.xyz/collateral-pool](https://app.resolv.xyz/collateral-pool)
+- **USR Collateralization Ratio**: Alert at <120% CR (approaching the 110% redemption gate threshold)
+- **RLP/USR coverage ratio**: Track total RLP value vs. USR supply. Alert if coverage drops below 20%
 - **TVL**: Monitor total USR supply and RLP market cap for coverage ratio changes
 - **Exchange exposure**: Monitor Apostro dashboard for changes in CEX margin ratios and delta exposure
-- **Recommended frequency**: Daily for price/TVL; hourly during high volatility
+
+### Operational Monitoring
+
+- **Reward Distribution**: Monitor RewardDistributor [`0xbE23BB6D817C08E7EC4Cd0adB0E23156189c1bA9`](https://etherscan.io/address/0xbE23BB6D817C08E7EC4Cd0adB0E23156189c1bA9) for reward distribution events and yield changes
+- **Treasury flows**: Monitor Treasury [`0xacb7027f271b03b502d65feba617a0d817d62b8e`](https://etherscan.io/address/0xacb7027f271b03b502d65feba617a0d817d62b8e) for large outflows or unexpected transfers
+- **Recommended frequency**: Daily for price/TVL/redemptions; hourly during high volatility; real-time for governance/timelock events
 
 ## Risk Summary
 
@@ -228,14 +258,15 @@ Losses are allocated entirely to RLP holders. No losses flow to USR holders unle
 
 - **Centralized operations**: Backend processes minting/redeeming, RLP price updates are centralized (24h cycle), team has full discretion over collateral pool
 - **CEX counterparty risk**: Futures positions on Binance, Deribit, Bybit create counterparty exposure. A CEX failure directly impacts RLP value.
-- **Governance not yet live**: No on-chain governance, no public multisig, no disclosed timelock. RDAL has unilateral control.
+- **Governance not yet live**: No on-chain governance. 3-of-5 multisig controls operations directly (no delay). 3-day timelock only for proxy upgrades. RDAL retains full discretion over collateral pool.
 - **RLP as first-loss capital**: By design, RLP absorbs all losses. Severe market events or exchange failures could significantly impair RLP value.
 - **Liquidity gate**: RLP redemptions are suspended below 110% CR -- in a stress scenario, RLP holders cannot exit while losses mount.
 - **Whitelisting requirement**: Not permissionless; access controlled by RDAL.
 
 ### Critical Risks
 
-- **No disclosed multisig or timelock**: The absence of publicly verifiable governance controls over protocol operations means RDAL could theoretically make unilateral changes to the collateral pool, pricing, or redemption parameters. TODO: Verify if there is an on-chain governance mechanism not documented publicly.
+- **Operational parameters not timelocked**: While a 3-of-5 multisig exists and proxy upgrades have a 3-day timelock, operational parameters (pausing, role grants, price updates, whitelist changes) are controlled by the multisig **without any timelock delay**. This means 3 of 5 anonymous signers can immediately change critical operational parameters.
+- **RLP price is entirely off-chain**: The backend determines how much collateral to return for burned RLP with no on-chain price oracle or slippage protection in the contract. Users must trust the backend to apply fair pricing.
 
 ---
 
@@ -250,7 +281,7 @@ Losses are allocated entirely to RLP holders. No losses flow to USR holders unle
 
 - [x] **No audit** -- Protocol has been audited by 4 reputable firms across 14+ engagements. **PASS**
 - [x] **Unverifiable reserves** -- Reserves verifiable via on-chain wallets and Apostro third-party dashboard. **PASS**
-- [ ] **Total centralization** -- No public multisig or on-chain governance. However, multiple entities (two companies + foundation) and institutional custodians provide some distribution of control. Not a single EOA. **PASS (borderline)**
+- [x] **Total centralization** -- 3-of-5 Gnosis Safe multisig controls all contracts. 3-day timelock for proxy upgrades. Not a single EOA. **PASS**
 
 **All gates pass.** Proceed to category scoring.
 
@@ -270,13 +301,14 @@ Losses are allocated entirely to RLP holders. No losses flow to USR holders unle
 
 **Subcategory A: Governance**
 
+- **3-of-5 Gnosis Safe** multisig ([`0xd6889...af547`](https://etherscan.io/address/0xd6889f307be1b83bb355d5da7d4478fb0d2af547)) is `owner()` and `DEFAULT_ADMIN_ROLE` for all core contracts.
+- **3-day OpenZeppelin TimelockController** ([`0x290d9...6ebee`](https://etherscan.io/address/0x290d9544669c9c7a64f6899a0a3b28d563f6ebee)) owns all ProxyAdmin contracts (upgrades only).
+- Operational parameters (pause, role grants, price updates, whitelist) controlled by multisig **directly with no timelock**.
 - No on-chain governance live yet. stRESOLV exists but voting not initiated.
-- No public multisig or timelock disclosed.
 - RDAL has full discretion per Terms of Service.
-- Whitelist-controlled access.
-- Backend processes all minting/redeeming operations.
+- All 5 signers are anonymous EOAs.
 
-**Governance Score: 4.5** -- Near-total centralization. No multisig, no timelock, no active governance. Saved from 5.0 by having two distinct legal entities, institutional custodians, and a planned governance system.
+**Governance Score: 3.5** -- 3/5 multisig with 3-day upgrade timelock is a meaningful improvement over EOA control, but operational parameters lack delay. Anonymous signers and no active governance reduce confidence. RDAL retains full discretion per ToS.
 
 **Subcategory B: Programmability**
 
@@ -297,9 +329,9 @@ Losses are allocated entirely to RLP holders. No losses flow to USR holders unle
 
 **Dependencies Score: 3.5** -- Multiple critical dependencies, but well-diversified across venues and custodians. CEX failure is the most acute risk but exposure has been reduced to <15% of collateral pool.
 
-**Centralization Score = (4.5 + 4.0 + 3.5) / 3 = 4.0**
+**Centralization Score = (3.5 + 4.0 + 3.5) / 3 = 3.67**
 
-**Score: 4.0/5** -- Heavy centralization of operational control with no active on-chain governance. Partially mitigated by diversified custodians and exchange venues.
+**Score: 3.7/5** -- Centralized operational control with multisig but no timelocked parameter changes. No active on-chain governance. Partially mitigated by upgrade timelock, diversified custodians, and exchange venues.
 
 #### Category 3: Funds Management (Weight: 30%)
 
@@ -354,13 +386,13 @@ Final Score = (Centralization × 0.30) + (Funds Mgmt × 0.30) + (Audits × 0.20)
 | Category | Score | Weight | Weighted |
 |----------|-------|--------|----------|
 | Audits & Historical | 1.5 | 20% | 0.30 |
-| Centralization & Control | 4.0 | 30% | 1.20 |
+| Centralization & Control | 3.7 | 30% | 1.11 |
 | Funds Management | 2.5 | 30% | 0.75 |
 | Liquidity Risk | 3.0 | 15% | 0.45 |
 | Operational Risk | 2.5 | 5% | 0.125 |
-| **Final Score** | | | **2.825** |
+| **Final Score** | | | **2.735** |
 
-**Final Score: 2.8**
+**Final Score: 2.7**
 
 ### Risk Tier
 
@@ -372,13 +404,13 @@ Final Score = (Centralization × 0.30) + (Funds Mgmt × 0.30) + (Audits × 0.20)
 
 ---
 
-RLP is a well-audited protocol with strong security practices and a clear risk segregation model. The primary concern is the high degree of centralization in operations -- no active on-chain governance, no disclosed multisig or timelock, and backend-managed price updates and redemptions. The dual role of RLP as both a yield product and an insurance layer means that in stress scenarios, RLP holders face both value impairment and potential liquidity lockout (110% CR gate). These centralization and structural risks elevate RLP to a Medium Risk classification despite its strong audit and track record profile.
+RLP is a well-audited protocol with strong security practices and a clear risk segregation model. A 3-of-5 Gnosis Safe multisig controls all contracts and a 3-day timelock gates proxy upgrades, but operational parameters remain untimelocked and no on-chain governance is live. The dual role of RLP as both a yield product and an insurance layer means that in stress scenarios, RLP holders face both value impairment and potential liquidity lockout (110% CR gate). The RLP burn mechanism is epoch-based with no on-chain slippage protection, and pricing is entirely off-chain. These centralization and structural risks place RLP in the Medium Risk classification despite its strong audit and track record profile.
 
 **Key conditions for exposure:**
 - Enhanced monitoring of collateral pool composition and delta exposure via Apostro dashboard
 - Monitor for governance activation (stRESOLV voting)
 - Track RLP/USR coverage ratio; alert at <120%
-- Verify multisig/timelock details with team (TODO)
+- Monitor multisig signer changes and timelock proposals
 
 ---
 
