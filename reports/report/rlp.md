@@ -340,9 +340,10 @@ Losses are allocated entirely to RLP holders. No losses flow to USR holders unle
 - USR >100% collateralized on-chain; excess backs RLP.
 - Collateral: ETH, BTC, stETH, stablecoins, RWAs -- mix of high-quality and newer assets.
 - Majority on-chain, ~15% CEX margin exposure.
-- RLP as first-loss tranche is a strong protective mechanism.
+- **RLP is first-loss capital**: By design, RLP absorbs **all** losses from the delta-neutral strategy (funding rate losses, CEX counterparty failure, liquidation events) before any impact to USR. RLP price is variable and can decrease.
+- No on-chain slippage protection on RLP burns -- backend determines collateral return amounts off-chain.
 
-**Collateralization Score: 2.5** -- Verifiable on-chain collateral with third-party dashboard. Mixing on-chain assets with off-chain futures margin and CEX exposure. Partially custodial.
+**Collateralization Score: 3.5** -- Verifiable on-chain collateral with third-party dashboard, but RLP is explicitly designed as loss-absorbing capital. Price is variable and can decrease. Mixing on-chain assets with off-chain futures margin and CEX exposure. Partially custodial. The first-loss tranche design means depositors face embedded structural risk beyond typical collateralization concerns.
 
 **Subcategory B: Provability**
 
@@ -353,9 +354,9 @@ Losses are allocated entirely to RLP holders. No losses flow to USR holders unle
 
 **Provability Score: 2.5** -- Good transparency with both self-reporting and third-party verification. However, fundamental price is admin-updated, not fully programmatic. Off-chain components (futures positions, custodial balances) require trust.
 
-**Funds Management Score = (2.5 + 2.5) / 2 = 2.5**
+**Funds Management Score = (3.5 + 2.5) / 2 = 3.0**
 
-**Score: 2.5/5** -- Decent transparency and collateral quality, but hybrid on-chain/off-chain nature and admin-controlled pricing add trust requirements.
+**Score: 3.0/5** -- Verifiable collateral with third-party dashboard, but RLP is first-loss capital by design -- holders face embedded loss risk from the delta-neutral strategy. Hybrid on-chain/off-chain nature, admin-controlled pricing, and no on-chain slippage protection add further trust requirements.
 
 #### Category 4: Liquidity Risk (Weight: 15%)
 
@@ -387,12 +388,12 @@ Final Score = (Centralization × 0.30) + (Funds Mgmt × 0.30) + (Audits × 0.20)
 |----------|-------|--------|----------|
 | Audits & Historical | 1.5 | 20% | 0.30 |
 | Centralization & Control | 3.7 | 30% | 1.11 |
-| Funds Management | 2.5 | 30% | 0.75 |
+| Funds Management | 3.0 | 30% | 0.90 |
 | Liquidity Risk | 3.0 | 15% | 0.45 |
 | Operational Risk | 2.5 | 5% | 0.125 |
-| **Final Score** | | | **2.735** |
+| **Final Score** | | | **2.885** |
 
-**Final Score: 2.7**
+**Final Score: 2.9**
 
 ### Risk Tier
 
@@ -404,7 +405,7 @@ Final Score = (Centralization × 0.30) + (Funds Mgmt × 0.30) + (Audits × 0.20)
 
 ---
 
-RLP is a well-audited protocol with strong security practices and a clear risk segregation model. A 3-of-5 Gnosis Safe multisig controls all contracts and a 3-day timelock gates proxy upgrades, but operational parameters remain untimelocked and no on-chain governance is live. The dual role of RLP as both a yield product and an insurance layer means that in stress scenarios, RLP holders face both value impairment and potential liquidity lockout (110% CR gate). The RLP burn mechanism is epoch-based with no on-chain slippage protection, and pricing is entirely off-chain. These centralization and structural risks place RLP in the Medium Risk classification despite its strong audit and track record profile.
+RLP is a well-audited protocol with strong security practices but carries inherent structural risk as a **first-loss tranche** -- by design, RLP absorbs all losses from the delta-neutral strategy before USR is affected, meaning RLP price can decrease. A 3-of-5 Gnosis Safe multisig controls all contracts and a 3-day timelock gates proxy upgrades, but operational parameters remain untimelocked and no on-chain governance is live. In stress scenarios, RLP holders face both value impairment and potential liquidity lockout (110% CR gate). The RLP burn mechanism is epoch-based with no on-chain slippage protection, and pricing is entirely off-chain. These structural and centralization risks place RLP in the Medium Risk classification despite its strong audit and track record profile.
 
 **Key conditions for exposure:**
 - Enhanced monitoring of collateral pool composition and delta exposure via Apostro dashboard
