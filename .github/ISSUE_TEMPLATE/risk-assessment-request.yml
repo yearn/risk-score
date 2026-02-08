@@ -1,0 +1,71 @@
+name: Risk Assessment Request
+description: Request a risk assessment for a protocol or asset
+title: "Risk Assessment: "
+labels: ["risk-assessment"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Request a risk assessment for a protocol or asset before Yearn vault integration.
+        Please provide as much information as possible to help with the assessment.
+
+  - type: input
+    id: protocol-name
+    attributes:
+      label: Protocol Name
+      placeholder: e.g., Lido, Aave, Reserve Protocol
+    validations:
+      required: true
+
+  - type: input
+    id: token
+    attributes:
+      label: Token / Asset to Assess
+      description: The specific token or asset you want evaluated.
+      placeholder: e.g., wstETH, ETH+, sDAI
+    validations:
+      required: true
+
+  - type: dropdown
+    id: chain
+    attributes:
+      label: Chain
+      options:
+        - Ethereum
+        - Arbitrum
+        - Optimism
+        - Polygon
+        - Base
+        - Other (specify in additional context)
+    validations:
+      required: true
+
+  - type: input
+    id: documentation
+    attributes:
+      label: Protocol Documentation
+      description: Link to official protocol documentation or introduction page.
+      placeholder: https://docs.example.com
+    validations:
+      required: true
+
+  - type: textarea
+    id: additional-links
+    attributes:
+      label: Additional Links
+      description: Any other useful links (audits, LlamaRisk reports, dashboards, security page, etc.).
+      placeholder: |
+        - Audit: https://...
+        - LlamaRisk: https://...
+        - Dashboard: https://...
+    validations:
+      required: false
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional Context
+      description: Why is this assessment needed? Any specific concerns or risks you want evaluated?
+      placeholder: e.g., Evaluating for new WETH vault strategy.
+    validations:
+      required: false

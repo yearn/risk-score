@@ -12,12 +12,12 @@ The risk framework provides a structured approach to evaluating the safety and r
 
 ```
 reports/
-├── TEMPLATE.md           # Risk assessment template
-├── SCORING.md            # Quantitative scoring methodology
+├── TEMPLATE.md           # Risk assessment template (includes scoring rubrics)
 ├── README.md             # This file
 ├── report/               # All risk assessments
 │   ├── reserve-ethplus.md      # Example: ETH+ asset
 │   ├── origin-arm.md           # Example: Origin ARM protocol
+│   ├── infinifi.md             # Example: InfiniFi protocol
 │   └── ...
 └── old/                  # Legacy documentation (deprecated format)
 ```
@@ -33,33 +33,41 @@ reports/
 
 2. **Fill Out Each Section**
    - Work through each category systematically
-   - Provide evidence and links for claims
+   - Provide evidence and links for claims (Etherscan links, documentation)
    - Be specific with addresses, transaction hashes, and dates
-   - Flag unknowns or areas requiring further investigation
+   - Sections marked `[Required]` must be completed; `[If Applicable]` sections can be skipped
+   - Flag unknowns as TODO rather than assuming
 
 3. **Calculate Risk Score**
-   - Use the scoring methodology defined in `SCORING.md`
-   - Follow the step-by-step calculation process
+   - The scoring rubrics are embedded in the template itself
+   - Check critical gates first (auto-fail criteria)
+   - Score each category, then compute the weighted final score
    - Document reasoning for each category score
 
-4. **Set Up Monitoring**
-   - Follow the Monitoring section to set up alerts
-   - Add addresses to monitoring scripts
-   - Create protocol-specific Telegram group
-   - Define monitoring frequency (hourly/daily)
-
-5. **Review and Update**
+4. **Review and Update**
    - Have another team member review the assessment
    - Update when protocol parameters change
-   - Reassess after incidents or major upgrades
+   - Reassess based on triggers defined in the report
 
-### Assessment Categories
+### Template Structure
 
-1. **Audits & Historical Track Record** - Security posture, code quality, and past performance (Weight: 20%)
-2. **Centralization & Control Risks** - Governance, programmability, and external dependencies (Weight: 30%)
-3. **Funds Management** - Collateralization, provability, and asset control (Weight: 30%)
-4. **Liquidity Risk** - Exit mechanisms and market depth (Weight: 15%)
-5. **Operational Risk** - Team, documentation, and processes (Weight: 5%)
+The template is self-contained with embedded scoring rubrics. Reports follow this structure:
+
+1. **Analysis Sections** - Investigation and evidence gathering
+   - Overview, Audits, Historical Track Record, Funds Management, Liquidity Risk, Centralization & Control, Operational Risk, Monitoring
+2. **Risk Summary** - Synthesis of key strengths, risks, and critical concerns
+3. **Risk Score Assessment** - Critical gates check, category scoring (1-5 scale), weighted final score, and risk tier classification
+4. **Reassessment Triggers** - Conditions that warrant re-evaluation
+
+### Scoring Categories
+
+| Category | Weight | What it evaluates |
+|----------|--------|-------------------|
+| Audits & Historical Track Record | 20% | Security posture, code quality, past performance |
+| Centralization & Control Risks | 30% | Governance, programmability, external dependencies |
+| Funds Management | 30% | Collateralization, provability, asset control |
+| Liquidity Risk | 15% | Exit mechanisms and market depth |
+| Operational Risk | 5% | Team, documentation, and processes |
 
 Each category receives a score from 1-5 (1 = safest, 5 = highest risk), which are then weighted to produce a final risk score and tier classification.
 
