@@ -7,7 +7,7 @@
 
 ## Overview + Links
 
-Origin's stETH ARM (Automated Redemption Manager) is a yield-generating ETH vault (ERC4626) that earns returns primarily through arbitraging stETH against its redemption value via Lido's withdrawal queue. Users deposit WETH, receive ARM-WETH-stETH LP tokens. The protocol buys discounted stETH, redeems it 1:1 through Lido, and captures the spread as yield. The contract also supports deploying idle capital to Morpho lending markets, though this feature is currently unused (zero allocation on-chain).
+Origin's stETH ARM (Automated Redemption Manager) is a yield-generating ETH vault (ERC4626) that earns returns primarily through arbitraging stETH against its redemption value via Lido's withdrawal queue. Users deposit WETH, receive ARM-WETH-stETH LP tokens. The protocol buys discounted stETH, redeems it 1:1 through Lido, and captures the spread as yield. The contract also supports deploying idle capital to Morpho lending markets, currently using MEV Capital wETH vault.
 
 - **Launch Date:** October 25, 2024
 - **Performance Fee:** 20% (2,000 bps) - mutable by owner (Timelock)
@@ -35,7 +35,7 @@ Origin's stETH ARM (Automated Redemption Manager) is a yield-generating ETH vaul
 | Fee Collector | [`0xBB077E716A5f1F1B63ed5244eBFf5214E50fec8c`](https://etherscan.io/address/0xBB077E716A5f1F1B63ed5244eBFf5214E50fec8c) |
 | xOGN Governance Token | [`0x63898b3b6Ef3d39332082178656E9862bee45C57`](https://etherscan.io/address/0x63898b3b6Ef3d39332082178656E9862bee45C57) |
 | Lido Withdrawal Queue | [`0x889edC2eDab5f40e902b864aD4d7AdE8E412F9B1`](https://etherscan.io/address/0x889edC2eDab5f40e902b864aD4d7AdE8E412F9B1) |
-| Morpho Vault (currently inactive) | [`0x9a8bC3B04b7f3D87cfC09ba407dCED575f2d61D8`](https://etherscan.io/address/0x9a8bC3B04b7f3D87cfC09ba407dCED575f2d61D8) |
+| Morpho Vault (MEV Capital wETH) | [`0x9a8bC3B04b7f3D87cfC09ba407dCED575f2d61D8`](https://etherscan.io/address/0x9a8bC3B04b7f3D87cfC09ba407dCED575f2d61D8) |
 
 ## Audits and Due Diligence Disclosures
 
@@ -70,7 +70,7 @@ Origin Protocol has 30+ audit reports across all products (OpenZeppelin, Trail o
 
 **Strategy:** Buy discounted stETH → redeem 1:1 via Lido withdrawal queue → capture spread. Currently ~99% of assets sit in Lido withdrawal queue with a small WETH buffer.
 
-**Morpho Integration (currently inactive):** The contract supports deploying idle capital to the MEV Capital wETH Morpho vault. On-chain verification shows ARM currently holds **zero shares**. If activated, the Morpho vault has 7 supply markets (ETH+, wstETH, WBTC, rsETH, pufETH, wOETH, idle) governed by a 5-of-10 MEV Capital multisig with 1-day minimum timelock.
+**Morpho Integration :** The contract supports deploying idle capital to the MEV Capital wETH Morpho vault. On-chain verification shows ARM currently holds **zero shares**. The Morpho vault governed by a 5-of-10 MEV Capital multisig with 3 day timelock.
 
 ### Accessibility
 
@@ -142,7 +142,7 @@ ARM Contract (0x85B78A...cc6)
 | Operator | EOA `0x39878...DE7` | None | Set buy/sell prices (traderate0/1), trigger allocate/rebalance |
 | Cap Manager | address(0) (disabled) | - | Could restrict deposits if enabled |
 
-**Key Risk:** Operator is a single EOA (not a multisig). Can adjust buy/sell prices without timelock. Cross-price timelock limits exploitation but a compromised operator key could cause temporary pricing issues.
+**Key Risk:** Operator is a single EOA (not a multisig). Can adjust buy/sell prices without timelock. Cross-price timelock limits exploitation.
 
 ### Programmability
 
@@ -154,7 +154,7 @@ ARM Contract (0x85B78A...cc6)
 ### External Dependencies
 
 1. **Lido (Critical)** - Core value proposition depends on Lido's stETH and withdrawal queue. Failure would halt all operations.
-2. **Morpho (Non-critical)** - Currently inactive (zero allocation). If activated, would add dependency on MEV Capital vault governance.
+2. **Morpho (High)** - Idle capital is deposited into Morpho vault. Additional dependency is vault curator, MEV Capital multisig governance.
 3. **DEX Aggregators (Non-critical)** - 1inch, CoWSwap for stETH acquisition. Not required for core functionality.
 
 No cross-chain dependencies.
@@ -187,7 +187,7 @@ No cross-chain dependencies.
 
 1. Operator is single EOA (not multisig) — can set prices without timelock
 2. Extreme TVL volatility ($782K–$28M) — whale concentration
-3. 2020 OUSD hack ($8M) by same team (different product/codebase)
+3. MEV Capital multisig governance risk
 4. Upgradeable proxy (protected by ~5-day governance cycle)
 5. Critical Lido dependency
 
@@ -207,68 +207,72 @@ No cross-chain dependencies.
 
 ### Category Scores
 
-#### Category 1: Audits & Historical Track Record (Weight: 20%) — **2.5**
+#### Category 1: Audits & Historical Track Record (Weight: 20%) — **2**
 
 | Aspect | Assessment |
 |--------|-----------|
-| Audits | 2x OpenZeppelin + Certora formal verification → Score 2 |
-| Bug Bounty | $1M on Immunefi, ARM in scope → Score 2 |
-| Time in Production | ~16 months, no ARM incidents → Score 2 |
-| Historical | 2020 OUSD hack on different product → +0.5 |
+| Audits | 2x OpenZeppelin + Certora formal verification |
+| Bug Bounty | $1M on Immunefi, ARM in scope |
+| Time in Production | ~16 months, no ARM incidents |
+| TVL | $5M |
 
-#### Category 2: Centralization & Control Risks (Weight: 30%) — **2.33**
+#### Category 2: Centralization & Control Risks (Weight: 30%) — **1.67**
 
-**Subcategory A: Governance — 2.0**
+**Subcategory A: Governance — 1.0**
 - On-chain xOGN token governance with ~5-day cycle
 - 48h timelock, self-administered, GOV Multisig (5/8) cancel-only
 - No admin backdoor. Shorter than ideal 72h+ timelock.
 
-**Subcategory B: Programmability — 2.5**
+**Subcategory B: Programmability — 1.5**
 - PPS on-chain, cross-price timelocked, `allocate()` permissionless
 - Operator is single EOA with no-timelock price setting
 
 **Subcategory C: External Dependencies — 2.5**
-- Single critical dependency on Lido (blue-chip). Morpho inactive.
+- Critical dependency on Lido (blue-chip)
+- Dependency on Morpho code.
+- Dependency on Morpho vualt curator MEV Capital.
 
-**Score: (2.0 + 2.5 + 2.5) / 3 = 2.33**
+**Score: (1.0 + 1.5 + 2.5) / 3 = 1.67**
 
 #### Category 3: Funds Management (Weight: 30%) — **1.75**
 
-**Subcategory A: Collateralization — 1.5**
+**Subcategory A: Collateralization — 2.5**
 - 100% on-chain, same-value assets (ETH/stETH), no leverage
+- Morpho Vault can add riskier markets as collateral to the vault.
 
-**Subcategory B: Provability — 2.0**
+**Subcategory B: Provability — 1.0**
 - Fully transparent on-chain. Minor dependency on operator pricing (bounded by cross-price)
 
-**Score: (1.5 + 2.0) / 2 = 1.75**
+**Score: (2.5 + 1.0) / 2 = 1.75**
 
 #### Category 4: Liquidity Risk (Weight: 15%) — **2.5**
 
 - Direct redemption with PPS lock (no slippage) ✓
-- Limited immediate buffer, larger exits require 1-3 day Lido processing
+- Limited immediate buffer, larger exits require multiple days Lido processing
 - Same-value assets mitigate waiting risk
 
-#### Category 5: Operational Risk (Weight: 5%) — **1.5**
+#### Category 5: Operational Risk (Weight: 5%) — **1.0**
 
 - Established team (2017), public, VC-backed, comprehensive security repo
 
 ### Final Score Calculation
 
 ```
-Final Score = (2.33 × 0.30) + (1.75 × 0.30) + (2.5 × 0.20) + (2.5 × 0.15) + (1.5 × 0.05)
-            = 0.699 + 0.525 + 0.500 + 0.375 + 0.075
-            = 2.174
-            ≈ 2.2
+Final Score = (Audits × 0.20) + (Centralization × 0.30) + (Funds Mgmt × 0.30) + (Liquidity × 0.15) + (Operational × 0.05)
+            = (2.0 × 0.20) + (1.67 × 0.30) + (1.75 × 0.30) + (2.5 × 0.15) + (1.0 × 0.05)
+            = 0.40 + 0.501 + 0.525 + 0.375 + 0.05
+            = 1.851
+            ≈ 1.85
 ```
 
 | Category | Score | Weight | Weighted |
 |----------|-------|--------|----------|
-| Audits & Historical | 2.5 | 20% | 0.50 |
-| Centralization & Control | 2.33 | 30% | 0.70 |
-| Funds Management | 1.75 | 30% | 0.53 |
-| Liquidity Risk | 2.5 | 15% | 0.38 |
-| Operational Risk | 1.5 | 5% | 0.08 |
-| **Final Score** | | | **2.2 / 5.0** |
+| Audits & Historical | 2.0 | 20% | 0.40 |
+| Centralization & Control | 1.67 | 30% | 0.501 |
+| Funds Management | 1.75 | 30% | 0.525 |
+| Liquidity Risk | 2.5 | 15% | 0.375 |
+| Operational Risk | 1.0 | 5% | 0.05 |
+| **Final Score** | | | **1.85 / 5.0** |
 
 ### Risk Tier
 
@@ -288,4 +292,4 @@ Final Score = (2.33 × 0.30) + (1.75 × 0.30) + (2.5 × 0.20) + (2.5 × 0.15) + 
 
 - **Time-based:** Quarterly (next: May 2026)
 - **Incident-based:** Any security incident, pricing anomaly, or withdrawal issues
-- **Change-based:** Morpho allocation activated, operator/role changes, contract upgrade, Lido WQ issues or stETH depeg
+- **Change-based:** Morpho vault curator MEV Capital changes, especially adding new markets. Contract upgrade, Lido WQ issues or stETH depeg
