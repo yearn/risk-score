@@ -215,18 +215,14 @@ The governance system is split into three branches to check and balance power:
 | **Long Timelock** | [`0x3D18480CC32B6AB3B833dCabD80E76CfD41c48a9`](https://etherscan.io/address/0x3D18480CC32B6AB3B833dCabD80E76CfD41c48a9) | All critical governance actions (GOVERNOR role) |
 | **Short Timelock** | [`0x4B174afbeD7b98BA01F50E36109EEE5e6d327c32`](https://etherscan.io/address/0x4B174afbeD7b98BA01F50E36109EEE5e6d327c32) | Parameter changes (PROTOCOL_PARAMETERS, ORACLE_MANAGER) |
 | **Team Multisig** | [`0x80608f852D152024c0a2087b16939235fEc2400c`](https://etherscan.io/address/0x80608f852D152024c0a2087b16939235fEc2400c) | Signer changes + non-timelocked actions |
-| **Gateway (Proxy)** | [`0x3f04b65Ddbd87f9CE0A2e7Eb24d80e7fb87625b5`](https://etherscan.io/address/0x3f04b65Ddbd87f9CE0A2e7Eb24d80e7fb87625b5) | Proxy upgrade confirmation |
 | **EmergencyWithdrawal** | [`0xa406aFC7967C63C5c454AD1f0e0dB9a761fe26e9`](https://etherscan.io/address/0xa406aFC7967C63C5c454AD1f0e0dB9a761fe26e9) | Multisig-direct, no timelock |
 | **ManualRebalancerV2** | [`0x5fEaad299BF772505e79250Ec58E28fdfdc52777`](https://etherscan.io/address/0x5fEaad299BF772505e79250Ec58E28fdfdc52777) | Multisig-direct, no timelock |
 | **ORACLE_IUSD** | [`0x8ABc952f91dB6695E765744ae340BC5eA4B344c1`](https://etherscan.io/address/0x8ABc952f91dB6695E765744ae340BC5eA4B344c1) | De-peg event (autonomous, triggered by loss socialization) |
-| **LockingController** | [`0x1d95cC100D6Cd9C7BbDbD7Cb328d99b3D6037fF7`](https://etherscan.io/address/0x1d95cC100D6Cd9C7BbDbD7Cb328d99b3D6037fF7) | First-loss consumption (autonomous) |
-| **siUSD** | [`0xDBDC1Ef57537E34680B898E1FEBD3D68c7389bCB`](https://etherscan.io/address/0xDBDC1Ef57537E34680B898E1FEBD3D68c7389bCB) | Loss cascade to stakers (autonomous) |
-| **UnwindingModule** | [`0x7092A43aE5407666C78dBEa657a1891f42b3dFcc`](https://etherscan.io/address/0x7092A43aE5407666C78dBEa657a1891f42b3dFcc) | Critical loss events (autonomous) |
-| **RedeemController** | [`0xCb1747E89a43DEdcF4A2b831a0D94859EFeC7601`](https://etherscan.io/address/0xCb1747E89a43DEdcF4A2b831a0D94859EFeC7601) | Redemption queue activation (autonomous) |
-| **YieldSharingV2** | [`0x1cb9ED33924741F500E739e38c3215a76cD1f579`](https://etherscan.io/address/0x1cb9ED33924741F500E739e38c3215a76cD1f579) | Yield accrual / negative yield (autonomous) |
-| **MintController** | [`0x49877d937B9a00d50557bdC3D87287b5c3a4C256`](https://etherscan.io/address/0x49877d937B9a00d50557bdC3D87287b5c3a4C256) | Mint volume tracking |
+| **LockingController** | [`0x1d95cC100D6Cd9C7BbDbD7Cb328d99b3D6037fF7`](https://etherscan.io/address/0x1d95cC100D6Cd9C7BbDbD7Cb328d99b3D6037fF7) | First-loss buffer for liUSD holders. `LossesApplied` = protocol taking damage. Auto-pauses if losses exceed `maxLossPercentage` threshold. |
+| **siUSD** | [`0xDBDC1Ef57537E34680B898E1FEBD3D68c7389bCB`](https://etherscan.io/address/0xDBDC1Ef57537E34680B898E1FEBD3D68c7389bCB) | `VaultLoss` = losses exceeded liUSD first-loss buffer, now hitting siUSD stakers |
+| **UnwindingModule** | [`0x7092A43aE5407666C78dBEa657a1891f42b3dFcc`](https://etherscan.io/address/0x7092A43aE5407666C78dBEa657a1891f42b3dFcc) | Handles forced liquidation of illiquid positions (e.g. Pendle fixed-term). `CriticalLoss` = losses during unwinding exceed module balance. |
 
-Note: Contracts whose state changes only via timelocks (InfiniFiCore, FarmRegistry, Accounting, MinorRolesManager, JCurveSmoother, etc.) do not need separate monitoring — all their changes appear as `CallScheduled`/`CallExecuted` on the timelocks.
+Note: Contracts whose state changes only via timelocks (InfiniFiCore, Gateway, FarmRegistry, Accounting, MintController, RedeemController, YieldSharingV2, MinorRolesManager, JCurveSmoother, etc.) do not need separate monitoring — all their changes appear as `CallScheduled`/`CallExecuted` on the timelocks.
 
 ### Governance Monitoring (Timelocks + Multisig)
 
@@ -254,8 +250,6 @@ These events bypass the timelock and can be triggered directly by the multisig o
 | **EmergencyWithdrawal** | `EmergencyWithdraw(uint256 timestamp, address farm, uint256 amount)` | Multisig (no timelock) | Emergency fund extraction from farm |
 | **EmergencyWithdrawal** | `FarmDeprecationChange(uint256 timestamp, address farm, bool deprecated)` | Multisig (no timelock) | Farm deprecated |
 | **ManualRebalancerV2** | `Allocate(uint256 timestamp, address from, address to, address asset, uint256 amount)` | Multisig (MANUAL_REBALANCER, no timelock) | Funds moved between farms |
-| **Gateway Proxy** | `Upgraded(address implementation)` | Long Timelock execution | Confirms proxy upgrade actually applied |
-| **Any CoreControlled** | `CoreUpdate(address oldCore, address newCore)` | Long Timelock execution | Core reference changed — all permissions affected |
 
 ### Protocol Health Events — Immediate Alert
 
@@ -266,26 +260,12 @@ Autonomous events triggered by protocol state, not governance actions.
 | **ORACLE_IUSD** | `PriceSet(uint256 timestamp, uint256 price)` | iUSD price changed — price below 1.0 = de-peg (loss socialization to iUSD holders) |
 | **LockingController** | `LossesApplied(uint256 timestamp, uint256 amount)` | First-loss tranche consuming — liUSD holders taking losses |
 | **siUSD** | `VaultLoss(uint256 timestamp, uint256 epoch, uint256 assets)` | Losses cascading past first-loss tranche to siUSD holders |
-| **UnwindingModule** | `CriticalLoss(uint256 timestamp, uint256 amount)` | Critical loss exceeding module balance |
-| **RedeemController** | `RedemptionQueued(uint256 timestamp, address recipient, uint256 amount)` | Redemption entered queue — insufficient instant liquidity |
-
-### Operational Events — Daily/Hourly
-
-| Contract | Event | Significance |
-|----------|-------|-------------|
-| **YieldSharingV2** | `YieldAccrued(uint256 timestamp, int256 yield)` | Yield accrued — negative = losses |
-| **Farm contracts** | `AssetsUpdated(uint256 timestamp, uint256 assetsBefore, uint256 assetsAfter)` | Farm asset balance changed |
-| **MintController** | `Mint(uint256 timestamp, address to, address asset, uint256 amountIn, uint256 amountOut)` | New iUSD minted |
-| **RedeemController** | `Redeem(uint256 timestamp, address to, address asset, uint256 amountIn, uint256 amountOut)` | iUSD redeemed |
-| **siUSD** | `VaultProfit(uint256 timestamp, uint256 epoch, uint256 assets)` | Normal yield distribution |
+| **UnwindingModule** | `CriticalLoss(uint256 timestamp, uint256 amount)` | Losses during forced liquidation of illiquid positions exceed module balance |
 
 ### Key State to Poll
 
-- **RedeemController** (`0xCb1747E89a43DEdcF4A2b831a0D94859EFeC7601`):
-  - `liquidity()` — available instant redemption assets
-  - `totalEnqueuedRedemptions` — redemption queue backlog
 - **TVL**: Monitor total protocol TVL via liquid + illiquid farm balances
-- **Liquid Reserve Ratio**: Current $37.78M liquid reserves vs total TVL
+- **Liquid Reserve Ratio**: Liquid reserves vs total TVL
 
 ## Risk Summary
 
