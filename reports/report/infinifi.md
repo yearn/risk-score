@@ -211,91 +211,76 @@ The governance system is split into three branches to check and balance power:
 
 ## Monitoring
 
-### Critical Contracts
+### Contracts to Monitor
 
-| Contract | Address | Purpose |
-|----------|---------|---------|
-| **InfiniFiCore** | [`0xF6d48735EcCf12bDC1DF2674b1ce3fcb3bD25490`](https://etherscan.io/address/0xF6d48735EcCf12bDC1DF2674b1ce3fcb3bD25490) | Central access control (all permissions) |
-| **Gateway (Proxy)** | [`0x3f04b65Ddbd87f9CE0A2e7Eb24d80e7fb87625b5`](https://etherscan.io/address/0x3f04b65Ddbd87f9CE0A2e7Eb24d80e7fb87625b5) | Main entry point (mint/redeem/zap) |
-| **Gateway ProxyAdmin** | [`0x21071E0f9D600571Ffe47873e95fffF2FAc9141c`](https://etherscan.io/address/0x21071E0f9D600571Ffe47873e95fffF2FAc9141c) | Controls proxy upgrades |
-| **Team Multisig** | [`0x80608f852D152024c0a2087b16939235fEc2400c`](https://etherscan.io/address/0x80608f852D152024c0a2087b16939235fEc2400c) | 4/7 governance signer |
-| **Long Timelock** | [`0x3D18480CC32B6AB3B833dCabD80E76CfD41c48a9`](https://etherscan.io/address/0x3D18480CC32B6AB3B833dCabD80E76CfD41c48a9) | 7-day delay for critical changes |
-| **Short Timelock** | [`0x4B174afbeD7b98BA01F50E36109EEE5e6d327c32`](https://etherscan.io/address/0x4B174afbeD7b98BA01F50E36109EEE5e6d327c32) | 1-day delay for parameter changes |
-| **iUSD** | [`0x48f9e38f3070AD8945DFEae3FA70987722E3D89c`](https://etherscan.io/address/0x48f9e38f3070AD8945DFEae3FA70987722E3D89c) | Receipt token |
-| **siUSD** | [`0xDBDC1Ef57537E34680B898E1FEBD3D68c7389bCB`](https://etherscan.io/address/0xDBDC1Ef57537E34680B898E1FEBD3D68c7389bCB) | Staked token (ERC4626) |
-| **MintController** | [`0x49877d937B9a00d50557bdC3D87287b5c3a4C256`](https://etherscan.io/address/0x49877d937B9a00d50557bdC3D87287b5c3a4C256) | Mint logic |
-| **RedeemController** | [`0xCb1747E89a43DEdcF4A2b831a0D94859EFeC7601`](https://etherscan.io/address/0xCb1747E89a43DEdcF4A2b831a0D94859EFeC7601) | Redemption logic + queue |
-| **FarmRegistry** | [`0xF5f2718708f471e43968271956CC01aaA8c46119`](https://etherscan.io/address/0xF5f2718708f471e43968271956CC01aaA8c46119) | Registry of allowed farms |
-| **Accounting** | [`0x7A5C5dbA4fbD0e1e1A2eCDBe752fAe55f6E842B3`](https://etherscan.io/address/0x7A5C5dbA4fbD0e1e1A2eCDBe752fAe55f6E842B3) | Asset accounting + oracle references |
-| **YieldSharingV2** | [`0x1cb9ED33924741F500E739e38c3215a76cD1f579`](https://etherscan.io/address/0x1cb9ED33924741F500E739e38c3215a76cD1f579) | Yield distribution |
-| **LockingController** | [`0x1d95cC100D6Cd9C7BbDbD7Cb328d99b3D6037fF7`](https://etherscan.io/address/0x1d95cC100D6Cd9C7BbDbD7Cb328d99b3D6037fF7) | Lock management + first-loss |
-| **EmergencyWithdrawal** | [`0xa406aFC7967C63C5c454AD1f0e0dB9a761fe26e9`](https://etherscan.io/address/0xa406aFC7967C63C5c454AD1f0e0dB9a761fe26e9) | Emergency fund extraction |
-| **ManualRebalancerV2** | [`0x5fEaad299BF772505e79250Ec58E28fdfdc52777`](https://etherscan.io/address/0x5fEaad299BF772505e79250Ec58E28fdfdc52777) | Fund rebalancing between farms |
-| **ORACLE_IUSD** | [`0x8ABc952f91dB6695E765744ae340BC5eA4B344c1`](https://etherscan.io/address/0x8ABc952f91dB6695E765744ae340BC5eA4B344c1) | Fixed price oracle for iUSD |
-| **MinorRolesManager** | [`0xa08Bf802dCecd3c44E6420a52d5158867366be9b`](https://etherscan.io/address/0xa08Bf802dCecd3c44E6420a52d5158867366be9b) | Grants PAUSE/PERIODIC_REBALANCER/FARM_SWAP_CALLER |
-| **UnwindingModule** | [`0x7092A43aE5407666C78dBEa657a1891f42b3dFcc`](https://etherscan.io/address/0x7092A43aE5407666C78dBEa657a1891f42b3dFcc) | Handles fund unwinding |
-| **JCurveSmoother** | [`0x3C113De75417352875f7BE07B9fC056655eB4021`](https://etherscan.io/address/0x3C113De75417352875f7BE07B9fC056655eB4021) | Yield smoothing |
+| Contract | Address | Why Monitor Directly |
+|----------|---------|---------------------|
+| **Long Timelock** | [`0x3D18480CC32B6AB3B833dCabD80E76CfD41c48a9`](https://etherscan.io/address/0x3D18480CC32B6AB3B833dCabD80E76CfD41c48a9) | All critical governance actions (GOVERNOR role) |
+| **Short Timelock** | [`0x4B174afbeD7b98BA01F50E36109EEE5e6d327c32`](https://etherscan.io/address/0x4B174afbeD7b98BA01F50E36109EEE5e6d327c32) | Parameter changes (PROTOCOL_PARAMETERS, ORACLE_MANAGER) |
+| **Team Multisig** | [`0x80608f852D152024c0a2087b16939235fEc2400c`](https://etherscan.io/address/0x80608f852D152024c0a2087b16939235fEc2400c) | Signer changes + non-timelocked actions |
+| **Gateway (Proxy)** | [`0x3f04b65Ddbd87f9CE0A2e7Eb24d80e7fb87625b5`](https://etherscan.io/address/0x3f04b65Ddbd87f9CE0A2e7Eb24d80e7fb87625b5) | Proxy upgrade confirmation |
+| **EmergencyWithdrawal** | [`0xa406aFC7967C63C5c454AD1f0e0dB9a761fe26e9`](https://etherscan.io/address/0xa406aFC7967C63C5c454AD1f0e0dB9a761fe26e9) | Multisig-direct, no timelock |
+| **ManualRebalancerV2** | [`0x5fEaad299BF772505e79250Ec58E28fdfdc52777`](https://etherscan.io/address/0x5fEaad299BF772505e79250Ec58E28fdfdc52777) | Multisig-direct, no timelock |
+| **ORACLE_IUSD** | [`0x8ABc952f91dB6695E765744ae340BC5eA4B344c1`](https://etherscan.io/address/0x8ABc952f91dB6695E765744ae340BC5eA4B344c1) | De-peg event (autonomous, triggered by loss socialization) |
+| **LockingController** | [`0x1d95cC100D6Cd9C7BbDbD7Cb328d99b3D6037fF7`](https://etherscan.io/address/0x1d95cC100D6Cd9C7BbDbD7Cb328d99b3D6037fF7) | First-loss consumption (autonomous) |
+| **siUSD** | [`0xDBDC1Ef57537E34680B898E1FEBD3D68c7389bCB`](https://etherscan.io/address/0xDBDC1Ef57537E34680B898E1FEBD3D68c7389bCB) | Loss cascade to stakers (autonomous) |
+| **UnwindingModule** | [`0x7092A43aE5407666C78dBEa657a1891f42b3dFcc`](https://etherscan.io/address/0x7092A43aE5407666C78dBEa657a1891f42b3dFcc) | Critical loss events (autonomous) |
+| **RedeemController** | [`0xCb1747E89a43DEdcF4A2b831a0D94859EFeC7601`](https://etherscan.io/address/0xCb1747E89a43DEdcF4A2b831a0D94859EFeC7601) | Redemption queue activation (autonomous) |
+| **YieldSharingV2** | [`0x1cb9ED33924741F500E739e38c3215a76cD1f579`](https://etherscan.io/address/0x1cb9ED33924741F500E739e38c3215a76cD1f579) | Yield accrual / negative yield (autonomous) |
+| **MintController** | [`0x49877d937B9a00d50557bdC3D87287b5c3a4C256`](https://etherscan.io/address/0x49877d937B9a00d50557bdC3D87287b5c3a4C256) | Mint volume tracking |
 
-### Critical Events — Immediate Alert
+Note: Contracts whose state changes only via timelocks (InfiniFiCore, FarmRegistry, Accounting, MinorRolesManager, JCurveSmoother, etc.) do not need separate monitoring — all their changes appear as `CallScheduled`/`CallExecuted` on the timelocks.
+
+### Governance Monitoring (Timelocks + Multisig)
+
+All timelocked actions (GOVERNOR, PROTOCOL_PARAMETERS, ORACLE_MANAGER) are captured by monitoring the timelock events. No need to separately monitor downstream contract events that can only be triggered via timelocks.
 
 | Contract | Event | Significance |
 |----------|-------|-------------|
-| **InfiniFiCore** | `RoleGranted(bytes32 role, address account, address sender)` | Permission change — all protocol access flows through Core |
-| **InfiniFiCore** | `RoleRevoked(bytes32 role, address account, address sender)` | Permission removed |
-| **InfiniFiCore** | `RoleAdminChanged(bytes32 role, bytes32 previousAdminRole, bytes32 newAdminRole)` | Admin hierarchy changed |
-| **Long/Short Timelock** | `CallScheduled(bytes32 id, uint256 index, address target, uint256 value, bytes data, bytes32 predecessor, uint256 delay)` | New governance action proposed — early warning |
-| **Long/Short Timelock** | `CallExecuted(bytes32 id, uint256 index, address target, uint256 value, bytes data)` | Governance action executed |
+| **Long/Short Timelock** | `CallScheduled(bytes32 id, uint256 index, address target, uint256 value, bytes data, bytes32 predecessor, uint256 delay)` | New governance action proposed — decode `data` to understand what will change. Early warning window (7d or 1d). |
+| **Long/Short Timelock** | `CallExecuted(bytes32 id, uint256 index, address target, uint256 value, bytes data)` | Governance action executed — verify expected outcome |
+| **Long/Short Timelock** | `Cancelled(bytes32 id)` | Scheduled action cancelled — may indicate contested governance |
 | **Long/Short Timelock** | `MinDelayChange(uint256 oldDuration, uint256 newDuration)` | Timelock delay changed — reduction is critical |
 | **Multisig** | `AddedOwner(address owner)` / `RemovedOwner(address owner)` | Signer set changed |
 | **Multisig** | `ChangedThreshold(uint256 threshold)` | Signing threshold changed |
-| **Gateway Proxy** | `Upgraded(address implementation)` | Implementation changed — entire protocol interface affected |
-| **Gateway Proxy** | `AdminChanged(address previousAdmin, address newAdmin)` | Proxy admin changed |
-| **Gateway** | `AddressSet(uint256 timestamp, string name, address _address)` | Internal address registry change (redeemController, mintController, etc.) |
-| **ORACLE_IUSD** | `PriceSet(uint256 timestamp, uint256 price)` | iUSD price changed — price below 1.0 = de-peg event (loss socialization) |
-| **Any CoreControlled** | `Paused(address account)` / `Unpaused(address account)` | Emergency pause/unpause |
-| **Any CoreControlled** | `CoreUpdate(address oldCore, address newCore)` | Core reference changed — would change all permissions |
-| **LockingController** | `LossesApplied(uint256 timestamp, uint256 amount)` | First-loss tranche consuming — liUSD holders taking losses |
-| **LockingController** | `MaxLossPercentageUpdated(uint256 timestamp, uint256 maxLossPercentage)` | Auto-pause threshold changed |
-| **siUSD** | `VaultLoss(uint256 timestamp, uint256 epoch, uint256 assets)` | Losses cascading past first-loss tranche to siUSD holders |
-| **EmergencyWithdrawal** | `EmergencyWithdraw(uint256 timestamp, address farm, uint256 amount)` | Emergency fund extraction from farm |
-| **EmergencyWithdrawal** | `FarmDeprecationChange(uint256 timestamp, address farm, bool deprecated)` | Farm deprecated |
-| **EmergencyWithdrawal** | `SafeAddressChange(uint256 timestamp, address safeAddress)` | Emergency safe address changed |
-| **UnwindingModule** | `CriticalLoss(uint256 timestamp, uint256 amount)` | Critical loss exceeding module balance |
-| **Accounting** | `OracleSet(uint256 timestamp, address asset, address oracle)` | Oracle reference changed for an asset |
-| **YieldSharingV2** | `PerformanceFeeSettingsUpdated(uint256 timestamp, uint256 percentage, address recipient)` | Fee changed (max 20%) |
-| **MintController** | `AfterMintHookChanged(uint256 timestamp, address hook)` | Post-mint deployment logic changed |
-| **RedeemController** | `BeforeRedeemHookChanged(uint256 timestamp, address hook)` | Pre-redeem logic changed |
-| **FarmRegistry** | `FarmsAdded(uint256 timestamp, uint256 farmType, address[] farms)` | New farms added — changes where funds can be deployed |
-| **FarmRegistry** | `FarmsRemoved(uint256 timestamp, uint256 farmType, address[] farms)` | Farms removed |
-| **FarmRegistry** | `AssetEnabled(uint256 timestamp, address asset)` / `AssetDisabled(...)` | Asset type enabled/disabled |
-| **LockingController** | `BucketEnabled(uint256 timestamp, uint256 bucket, address shareToken, uint256 multiplier)` | New lock duration enabled |
-
-### High Priority Events — Daily Check
-
-| Contract | Event | Significance |
-|----------|-------|-------------|
-| **Long/Short Timelock** | `Cancelled(bytes32 id)` | Scheduled action cancelled — may indicate contested governance |
 | **Multisig** | `ExecutionSuccess(bytes32 txHash, uint256 payment)` | Multisig transaction executed |
 | **Multisig** | `ExecutionFailure(bytes32 txHash, uint256 payment)` | Multisig transaction failed |
-| **RedeemController** | `RedemptionQueued(uint256 timestamp, address recipient, uint256 amount)` | Redemption entered queue (insufficient instant liquidity) |
-| **ManualRebalancerV2** | `Allocate(uint256 timestamp, address from, address to, address asset, uint256 amount)` | Funds moved between farms |
-| **YieldSharingV2** | `YieldAccrued(uint256 timestamp, int256 yield)` | Yield accrued — negative = losses |
-| **YieldSharingV2** | `SafetyBufferSizeUpdated(...)`, `LiquidMultiplierUpdated(...)`, `TargetIlliquidRatioUpdated(...)` | Yield distribution parameters changed |
-| **Farm contracts** | `AssetsUpdated(uint256 timestamp, uint256 assetsBefore, uint256 assetsAfter)` | Farm asset balance changed |
-| **Farm contracts** | `CapUpdated(uint256 newCap)`, `MaxSlippageUpdated(uint256 newMaxSlippage)` | Farm parameters changed |
-| **LockingController** | `BucketMultiplierUpdated(...)`, `RewardsDeposited(...)` | Lock rewards parameters/deposits |
 
-### Standard Events — Hourly/As-Needed
+### Non-Timelocked Events — Immediate Alert
+
+These events bypass the timelock and can be triggered directly by the multisig or individual role holders.
+
+| Contract | Event | Triggered By | Significance |
+|----------|-------|-------------|-------------|
+| **Any CoreControlled** | `Paused(address account)` | 4 individual PAUSE EOAs | Emergency pause — no multisig or timelock required |
+| **Any CoreControlled** | `Unpaused(address account)` | Multisig (UNPAUSE, no timelock) | System resumed |
+| **EmergencyWithdrawal** | `EmergencyWithdraw(uint256 timestamp, address farm, uint256 amount)` | Multisig (no timelock) | Emergency fund extraction from farm |
+| **EmergencyWithdrawal** | `FarmDeprecationChange(uint256 timestamp, address farm, bool deprecated)` | Multisig (no timelock) | Farm deprecated |
+| **ManualRebalancerV2** | `Allocate(uint256 timestamp, address from, address to, address asset, uint256 amount)` | Multisig (MANUAL_REBALANCER, no timelock) | Funds moved between farms |
+| **Gateway Proxy** | `Upgraded(address implementation)` | Long Timelock execution | Confirms proxy upgrade actually applied |
+| **Any CoreControlled** | `CoreUpdate(address oldCore, address newCore)` | Long Timelock execution | Core reference changed — all permissions affected |
+
+### Protocol Health Events — Immediate Alert
+
+Autonomous events triggered by protocol state, not governance actions.
 
 | Contract | Event | Significance |
 |----------|-------|-------------|
+| **ORACLE_IUSD** | `PriceSet(uint256 timestamp, uint256 price)` | iUSD price changed — price below 1.0 = de-peg (loss socialization to iUSD holders) |
+| **LockingController** | `LossesApplied(uint256 timestamp, uint256 amount)` | First-loss tranche consuming — liUSD holders taking losses |
+| **siUSD** | `VaultLoss(uint256 timestamp, uint256 epoch, uint256 assets)` | Losses cascading past first-loss tranche to siUSD holders |
+| **UnwindingModule** | `CriticalLoss(uint256 timestamp, uint256 amount)` | Critical loss exceeding module balance |
+| **RedeemController** | `RedemptionQueued(uint256 timestamp, address recipient, uint256 amount)` | Redemption entered queue — insufficient instant liquidity |
+
+### Operational Events — Daily/Hourly
+
+| Contract | Event | Significance |
+|----------|-------|-------------|
+| **YieldSharingV2** | `YieldAccrued(uint256 timestamp, int256 yield)` | Yield accrued — negative = losses |
+| **Farm contracts** | `AssetsUpdated(uint256 timestamp, uint256 assetsBefore, uint256 assetsAfter)` | Farm asset balance changed |
 | **MintController** | `Mint(uint256 timestamp, address to, address asset, uint256 amountIn, uint256 amountOut)` | New iUSD minted |
 | **RedeemController** | `Redeem(uint256 timestamp, address to, address asset, uint256 amountIn, uint256 amountOut)` | iUSD redeemed |
-| **RedeemController** | `RedemptionFunded(...)`, `RedemptionClaimed(...)` | Queue processing |
 | **siUSD** | `VaultProfit(uint256 timestamp, uint256 epoch, uint256 assets)` | Normal yield distribution |
-| **siUSD** | `Deposit(...)`, `Withdraw(...)` | Staking/unstaking activity |
-| **iUSD** | Large `Transfer` events (mint from zero / burn to zero) | Significant supply changes |
-| **JCurveSmoother** | `JCurveAccrued(...)`, `JCurveDistribution(...)` | Yield smoothing activity |
 
 ### Key State to Poll
 
