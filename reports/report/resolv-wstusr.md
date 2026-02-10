@@ -200,9 +200,6 @@ The **RewardDistributor** contract ([`0xbE23BB6D817C08E7EC4Cd0adB0E23156189c1bA9
 | Fluid DEX | Ethereum | wstUSR-USDC | $3.7M | $15.8M |
 | Fluid DEX | Arbitrum | wstUSR-USDC | $591K | $1.4M |
 | Fluid DEX | Base | USDC-wstUSR | $403K | $1.5M |
-| Balancer V3 | Ethereum | ECLP-RLP-wstUSR | $100K | TODO |
-| Curve | Ethereum | wstUSR-RLP | $14K | $4.6K |
-| Curve | Ethereum | wstUSR-PT-wstUSR | $86K | -- |
 | **Total DEX** | | | **~$42.2M** | **~$22.5M/7d** |
 
 ### Lending Market Integrations (wstUSR as collateral)
@@ -322,12 +319,12 @@ The **RewardDistributor** contract ([`0xbE23BB6D817C08E7EC4Cd0adB0E23156189c1bA9
 
 - **Curve DOLA-wstUSR pool**: Monitor TVL. Current: ~$37.3M.
   - **Alert**: If pool TVL drops below $10M (liquidity deterioration).
-  - **Alert**: If pool imbalance exceeds 70/30 in either direction (potential depegging pressure).
+  - **Alert**: If pool imbalance exceeds 80/20 in either direction (potential depegging pressure).
 
 - **Fluid lending markets** (Ethereum):
-  - wstUSR/USDC: [`0x1202f5c7...`/`0xa0b86991...`] -- TVL $65.5M
-  - wstUSR/USDT: [`0x1202f5c7...`/`0xdac17f95...`] -- TVL $34.3M
-  - **Alert**: If utilization rate exceeds 90% (liquidity crunch risk).
+  - wstUSR/USDC: TVL $65.5M
+  - wstUSR/USDT: TVL $34.3M
+  - **Alert**: If utilization rate exceeds 98% (liquidity crunch risk).
   - **Alert**: If wstUSR collateral liquidations occur (signals stress).
 
 - **CoinGecko wstUSR price**: Monitor for deviations from expected exchange rate.
@@ -346,15 +343,15 @@ The **RewardDistributor** contract ([`0xbE23BB6D817C08E7EC4Cd0adB0E23156189c1bA9
 
 | Category | Frequency | Priority |
 |----------|-----------|----------|
-| wstUSR exchange rate | Every 6 hours | High |
-| stUSR backing (USR balance) | Every 6 hours | High |
-| RewardDistributor drip events | Daily | High |
 | Timelock scheduled calls | Real-time | Critical |
 | Proxy upgrade events | Real-time | Critical |
 | Multisig signer changes | Real-time | Critical |
-| DEX pool TVL/balance | Daily | Medium |
-| Lending market utilization | Every 6 hours | Medium |
+| wstUSR exchange rate | Every 6 hours | High |
+| stUSR backing (USR balance) | Every 6 hours | High |
+| RewardDistributor drip events | Daily | High |
 | USR peg stability | Hourly | High |
+| DEX pool TVL/balance | Hourly | Medium |
+| Lending market utilization | Hourly | Medium |
 | USR Collateralization Ratio | Daily | Medium |
 
 ## Risk Summary
@@ -530,7 +527,5 @@ wstUSR is a well-audited, programmatically-priced ERC-4626 vault wrapping staked
 
 - **Time-based**: Reassess in 6 months (August 2026)
 - **Governance-based**: Reassess when on-chain governance is activated
-- **TVL-based**: Reassess if wstUSR market cap changes by more than 30%
 - **Incident-based**: Reassess after any exploit, governance change, or collateral modification
-- **Yield-based**: Reassess if stUSR yield drops to 0% for >7 days or changes dramatically (>50% decrease)
 - **Peg-based**: Reassess if USR deviates >2% from $1.00 peg

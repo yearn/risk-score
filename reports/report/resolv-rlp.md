@@ -165,7 +165,7 @@ Losses are allocated entirely to RLP holders. No losses flow to USR holders unle
 - **Exit Mechanism**: RLP can be redeemed at its current price (variable, ~$1.28) within 24 hours for USDC/USDT/ETH. No withdrawal queues under normal conditions.
 - **Redemption Gate**: RLP redemptions are **suspended** if USR Collateralization Ratio drops below 110%. This protects USR holders at the expense of RLP holders' liquidity.
 - **DEX Liquidity**: RLP available on Curve (Ethereum), Uniswap (Ethereum), Aerodrome (Base). TODO: Exact on-chain liquidity depth needs verification.
-- **RLP 24h Trading Volume**: TODO: Verify current DEX volume.
+- **RLP Trading Volume**: 7days on [Fluid Dex](https://fluid.io/stats/1/dex) is $8.5M.
 - **Bridge**: LayerZero OFT standard enables cross-chain transfers via Stargate.
 - **Multi-chain availability**: RLP deployed on 9 chains, with Ethereum as the primary (minting/redeeming only on Ethereum).
 - **Stress scenario**: In a mass redemption event, the 110% CR gate would suspend RLP redemptions, locking RLP holders while USR holders can still exit.
@@ -419,6 +419,4 @@ RLP is a well-audited protocol with strong security practices but carries inhere
 
 - **Time-based**: Reassess in 6 months (August 2026)
 - **Governance-based**: Reassess when on-chain governance is activated
-- **TVL-based**: Reassess if TVL changes by more than 30%
 - **Incident-based**: Reassess after any exploit, governance change, CEX failure, or significant collateral modification
-- **Structural-based**: Reassess if RLP/USR coverage ratio drops below 120% or if the redemption gate is triggered
