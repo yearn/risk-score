@@ -369,7 +369,17 @@ Autonomous events triggered by protocol state, not governance actions.
 
 **Final Score: 2.4**
 
-### Risk Tier: Low/Medium Risk
+### Risk Tier
+
+| Final Score | Risk Tier | Recommendation |
+|-------------|-----------|----------------|
+| 1.0-1.5 | Minimal Risk | Approved, high confidence |
+| 1.5-2.5 | Low Risk | Approved with standard monitoring |
+| 2.5-3.5 | Medium Risk | Approved with enhanced monitoring |
+| 3.5-4.5 | Elevated Risk | Limited approval, strict limits |
+| 4.5-5.0 | High Risk | Not recommended |
+
+**Final Risk Tier: LOW RISK**
 
 InfiniFi is a stablecoin model with a strong focus on risk segmentation (liUSD absorbing first losses). The main risks are from its short operational history (<1 year) so not yet really battle tested, the compounded smart contract risk of its underlying strategies (Pendle, Ethena, etc.), and significant non-timelocked powers held by the anonymous multisig (emergency withdrawal, rebalancing).
 
@@ -380,4 +390,3 @@ InfiniFi is a stablecoin model with a strong focus on risk segmentation (liUSD a
 - **Time-based**: Reassess in 6 months (August 2026) — protocol will have >1 year history
 - **TVL-based**: Reassess if TVL changes by more than 50%
 - **Incident-based**: Reassess after any exploit, governance change, collateral modification, or signer change on the multisig
-- **Certora findings**: Reassess Audits score once full Certora PDF is reviewed for detailed finding severities
