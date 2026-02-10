@@ -37,3 +37,4 @@
 - Mark sections as "TODO" if information is unavailable
 - Try to add Etherscan links to the data you are using
 - Try to use LlamaRisk for additional data
+- For link addresses, use the following format: [`contract Name`](https://etherscan.io/address/0x1202f5c7...)
