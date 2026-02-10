@@ -214,9 +214,7 @@ The governance system is split into three branches to check and balance power:
 |----------|---------|---------------------|
 | **Long Timelock** | [`0x3D18480CC32B6AB3B833dCabD80E76CfD41c48a9`](https://etherscan.io/address/0x3D18480CC32B6AB3B833dCabD80E76CfD41c48a9) | All critical governance actions (GOVERNOR role) |
 | **Short Timelock** | [`0x4B174afbeD7b98BA01F50E36109EEE5e6d327c32`](https://etherscan.io/address/0x4B174afbeD7b98BA01F50E36109EEE5e6d327c32) | Parameter changes (PROTOCOL_PARAMETERS, ORACLE_MANAGER) |
-| **Team Multisig** | [`0x80608f852D152024c0a2087b16939235fEc2400c`](https://etherscan.io/address/0x80608f852D152024c0a2087b16939235fEc2400c) | Signer changes + non-timelocked actions |
 | **EmergencyWithdrawal** | [`0xa406aFC7967C63C5c454AD1f0e0dB9a761fe26e9`](https://etherscan.io/address/0xa406aFC7967C63C5c454AD1f0e0dB9a761fe26e9) | Multisig-direct, no timelock |
-| **ManualRebalancerV2** | [`0x5fEaad299BF772505e79250Ec58E28fdfdc52777`](https://etherscan.io/address/0x5fEaad299BF772505e79250Ec58E28fdfdc52777) | Multisig-direct, no timelock |
 | **ORACLE_IUSD** | [`0x8ABc952f91dB6695E765744ae340BC5eA4B344c1`](https://etherscan.io/address/0x8ABc952f91dB6695E765744ae340BC5eA4B344c1) | De-peg event (autonomous, triggered by loss socialization) |
 | **LockingController** | [`0x1d95cC100D6Cd9C7BbDbD7Cb328d99b3D6037fF7`](https://etherscan.io/address/0x1d95cC100D6Cd9C7BbDbD7Cb328d99b3D6037fF7) | First-loss buffer for liUSD holders. `LossesApplied` = protocol taking damage. Auto-pauses if losses exceed `maxLossPercentage` threshold. |
 | **siUSD** | [`0xDBDC1Ef57537E34680B898E1FEBD3D68c7389bCB`](https://etherscan.io/address/0xDBDC1Ef57537E34680B898E1FEBD3D68c7389bCB) | `VaultLoss` = losses exceeded liUSD first-loss buffer, now hitting siUSD stakers |
@@ -234,10 +232,6 @@ All timelocked actions (GOVERNOR, PROTOCOL_PARAMETERS, ORACLE_MANAGER) are captu
 | **Long/Short Timelock** | `CallExecuted(bytes32 id, uint256 index, address target, uint256 value, bytes data)` | Governance action executed — verify expected outcome |
 | **Long/Short Timelock** | `Cancelled(bytes32 id)` | Scheduled action cancelled — may indicate contested governance |
 | **Long/Short Timelock** | `MinDelayChange(uint256 oldDuration, uint256 newDuration)` | Timelock delay changed — reduction is critical |
-| **Multisig** | `AddedOwner(address owner)` / `RemovedOwner(address owner)` | Signer set changed |
-| **Multisig** | `ChangedThreshold(uint256 threshold)` | Signing threshold changed |
-| **Multisig** | `ExecutionSuccess(bytes32 txHash, uint256 payment)` | Multisig transaction executed |
-| **Multisig** | `ExecutionFailure(bytes32 txHash, uint256 payment)` | Multisig transaction failed |
 
 ### Non-Timelocked Events — Immediate Alert
 
@@ -248,8 +242,6 @@ These events bypass the timelock and can be triggered directly by the multisig o
 | **Any CoreControlled** | `Paused(address account)` | 4 individual PAUSE EOAs | Emergency pause — no multisig or timelock required |
 | **Any CoreControlled** | `Unpaused(address account)` | Multisig (UNPAUSE, no timelock) | System resumed |
 | **EmergencyWithdrawal** | `EmergencyWithdraw(uint256 timestamp, address farm, uint256 amount)` | Multisig (no timelock) | Emergency fund extraction from farm |
-| **EmergencyWithdrawal** | `FarmDeprecationChange(uint256 timestamp, address farm, bool deprecated)` | Multisig (no timelock) | Farm deprecated |
-| **ManualRebalancerV2** | `Allocate(uint256 timestamp, address from, address to, address asset, uint256 amount)` | Multisig (MANUAL_REBALANCER, no timelock) | Funds moved between farms |
 
 ### Protocol Health Events — Immediate Alert
 
