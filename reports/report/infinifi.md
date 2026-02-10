@@ -43,7 +43,7 @@ All contracts verified on Blockscout/Etherscan. Compiled with Solidity 0.8.28 (e
 InfiniFi has undergone extensive security review via Certora, Spearbit/Cantina Code, and a Cantina public competition, plus multiple ongoing upgrade reviews.
 
 - **Spearbit / Cantina Code** (March-April 2025): Main protocol security review. Report published April 1, 2025. Findings: **8 High, 6 Medium, 25 Low, 4 Gas, 24 Informational**. Auditors: Noah Marconi (Lead), R0bert (Lead), Slowfi, Jonatas Martins. [Report PDF](https://raw.githubusercontent.com/spearbit/portfolio/master/pdfs/InfiniFi-Spearbit-Security-Review-March-2025.pdf).
-- **Certora**: Formal Verification & Security Assessment (March 2025). The engagement is confirmed via auditor portfolios and test code referencing "Certora finding". However, **no publicly accessible report PDF** was found (Certora's website returns 404, and their GitHub portfolio does not list it).
+- **Certora**: Formal Verification & Security Assessment (March 21 – May 20, 2025). Report published June 4, 2025. Covers formal verification via Certora Prover and manual review. [Report](https://www.certora.com/reports/infinifi-protocol-formal-verification-report).
 - **Cantina Public Competition** (April 2025): Public audit competition. [Competition link](https://cantina.xyz/competitions/2ac7f906-1661-47eb-bfd6-519f5db0d36b). Reward pool claimed ~$40,000 ($35k + $5k) — amount unconfirmed via automation.
 - **Ongoing Cantina Code / Spearbit Managed Reviews** (6+ additional reviews of upgrades):
   - siUSD rewards interpolation update
@@ -323,7 +323,7 @@ The governance system is split into three branches to check and balance power:
 - 79% of assets in illiquid strategies — a mass redemption exceeding $37.78M liquid reserves would trigger a queue
 - Multisig has significant non-timelocked powers (EMERGENCY_WITHDRAWAL, MANUAL_REBALANCER, UNPAUSE)
 - No disclosed legal entity or incident response plan
-- Certora audit report not publicly accessible (claimed published, but 404 on all known sources)
+- Certora formal verification report published but finding severity breakdown not available on the landing page (full PDF required for detailed review)
 
 ### Critical Risks
 
@@ -343,7 +343,7 @@ The governance system is split into three branches to check and balance power:
 
 #### Category 1: Audits & Historical Track Record (Weight: 20%)
 
-- **Audits**: Strong coverage — Spearbit/Cantina Code main review (8H/6M/25L), Certora formal verification (report not public), Cantina public competition, 6+ upgrade reviews, Balancer ERC4626 review.
+- **Audits**: Strong coverage — Spearbit/Cantina Code main review (8H/6M/25L), Certora formal verification ([report](https://www.certora.com/reports/infinifi-protocol-formal-verification-report)), Cantina public competition, 6+ upgrade reviews, Balancer ERC4626 review.
 - **History**: <1 year in production (Launch June 2025). TVL >$100M.
 - **Bounty**: Active on Cantina (claimed $100k).
 
@@ -426,4 +426,4 @@ InfiniFi is a stablecoin model with a strong focus on risk segmentation (liUSD a
 - **Time-based**: Reassess in 6 months (August 2026) — protocol will have >1 year history
 - **TVL-based**: Reassess if TVL changes by more than 50%
 - **Incident-based**: Reassess after any exploit, governance change, collateral modification, or signer change on the multisig
-- **Certora report**: Reassess Audits score if Certora report becomes publicly accessible
+- **Certora findings**: Reassess Audits score once full Certora PDF is reviewed for detailed finding severities
