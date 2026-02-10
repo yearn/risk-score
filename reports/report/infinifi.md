@@ -17,7 +17,7 @@ The protocol offers three tiers of tokens:
 - [Protocol Analytics](https://stats.infinifi.xyz/)
 - [GitHub](https://github.com/InfiniFi-Labs/infinifi-protocol)
 - [Audits](https://docs.infinifi.xyz/audits)
-- [Balancer ERC4626 Review (siUSD)](https://github.com/balancer/code-review/blob/main/erc4626/StakedinfiniFiUSDErc4626VaultReviewc704.md)
+
 
 ## Contract Addresses
 
@@ -53,14 +53,11 @@ InfiniFi has undergone extensive security review via Certora, Spearbit/Cantina C
   - PR 228: J-Curve Smoother, ReservoirFarm, Fluid rewards
   - PR 224: Crosschain support (CCIP + LayerZero)
   All PDFs accessible via [auditor portfolio](https://r0bert-ethack.github.io/).
-- **Balancer Code Review**: ERC4626 compatibility review of siUSD for Balancer v3 integration. [Review](https://github.com/balancer/code-review/blob/main/erc4626/StakedinfiniFiUSDErc4626VaultReviewc704.md). Verdict: **USABLE**.
-
 Note: The initial Spearbit audit and "Cantina Code" review appear to be the **same engagement** (same auditors, same date, same file size). They should not be counted as separate audits.
 
 ### Bug Bounty
 
-- [Bug Bounty Program on Cantina](https://cantina.xyz/bounties/509e46d0-a107-43aa-b46e-b2fe7e2ea591) — Claimed $100k (amount unverifiable via automation, requires browser visit to confirm).
-- No Immunefi program found.
+- [Bug Bounty Program on Cantina](https://cantina.xyz/bounties/509e46d0-a107-43aa-b46e-b2fe7e2ea591)
 
 ## Historical Track Record
 
@@ -328,11 +325,11 @@ Autonomous events triggered by protocol state, not governance actions.
 
 #### Category 1: Audits & Historical Track Record (Weight: 20%)
 
-- **Audits**: Strong coverage — Spearbit/Cantina Code main review (8H/6M/25L), Certora formal verification ([report](https://www.certora.com/reports/infinifi-protocol-formal-verification-report)), Cantina public competition, 6+ upgrade reviews, Balancer ERC4626 review.
+- **Audits**: Strong coverage — Spearbit/Cantina Code main review (8H/6M/25L), Certora formal verification ([report](https://www.certora.com/reports/infinifi-protocol-formal-verification-report)), Cantina public competition, 6+ upgrade reviews.
 - **History**: <1 year in production (Launch June 2025). TVL >$100M.
-- **Bounty**: Active on Cantina (claimed $100k).
+- **Bounty**: [Active on Cantina](https://cantina.xyz/bounties/509e46d0-a107-43aa-b46e-b2fe7e2ea591).
 
-**Score: 2.5/5** — Extensive audit coverage including ongoing upgrade reviews and formal verification, offset by short production history (<1 year). Bug bounty active but below $500K.
+**Score: 2.5/5** — Extensive audit coverage including ongoing upgrade reviews and formal verification, offset by short production history (<1 year).
 
 #### Category 2: Centralization & Control Risks (Weight: 30%)
 
