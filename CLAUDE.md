@@ -33,8 +33,10 @@
 
 ## Genearing Risk Reports
 
+- For generating a risk report or making any changes to the risk report, always focus only on folder `reports` and check other folders. only `scripts` if you need to use it.
 - If you don't have information or can't find it, ask for it, never assume anything
 - Mark sections as "TODO" if information is unavailable
 - Try to add Etherscan links to the data you are using
 - Try to use LlamaRisk for additional data
 - For link addresses, use the following format: [`contract Name`](https://etherscan.io/address/0x1202f5c7...)
+- Always take time to read the report and understand the context before generating report or making any changes.
