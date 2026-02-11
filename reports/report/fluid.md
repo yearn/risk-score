@@ -114,8 +114,6 @@ No formal verification (Certora, Halmos, etc.) has been performed.
 
 **Payment**: USDC, USDT, or DAI on Ethereum. Medium/Low severity levels are not in scope.
 
-**SEAL Safe Harbor**: **Not adopted** (`isSafeHarborActive: false` on Immunefi). No `SECURITY.md` or safe harbor references found in the GitHub repository.
-
 ## Historical Track Record
 
 - **Production History**: Fluid launched on Ethereum mainnet on **February 20, 2024** (first TVL recorded). The protocol has been in production for approximately **~2 years** (722 days as of February 2026).
@@ -340,13 +338,11 @@ fToken holders face liquidity risk from the **shared Liquidity Layer** architect
 
 ### Key Risks
 
-- **High utilization on Ethereum (95%)**: Significantly limits withdrawal availability for fToken holders. Expandable limits provide gradual access but large exits may be delayed.
 - **Shared Liquidity Layer**: fToken deposits are commingled in the Liquidity Layer with Vault, DEX, and stETH protocol funds. A vulnerability in any protocol on the stack affects fToken holders.
 - **Liquidity Layer upgradeability**: Upgradeable proxy controlled by Timelock with only 1-day delay. Malicious upgrade could affect all deposited funds.
 - **Complex counterparty chain**: fToken yield depends on Vault Protocol borrowers → liquidation mechanism → oracle system. Failure at any point could lead to bad debt.
 - **Concentration risk**: wstUSR is 18.9% of all lending TVL. Top 5 assets = 57.6% of lending TVL.
 - **No formal verification** (Certora, Halmos) has been performed
-- **SEAL Safe Harbor not adopted**
 
 ### Critical Risks
 
@@ -416,14 +412,14 @@ fToken holders face liquidity risk from the **shared Liquidity Layer** architect
 #### Category 4: Liquidity Risk (Weight: 15%)
 
 - **Exit**: fToken withdrawals subject to Liquidity Layer withdrawal limits and available liquidity
-- **Utilization**: Ethereum lending at **95.0%** utilization — very high. Overall cross-chain at 82.9%.
+- **Utilization**: Standard lending utilization dynamics apply — high utilization temporarily limits withdrawals, consistent with all lending protocols (Morpho, Aave, Compound). Kink-based rate model incentivizes rebalancing.
 - **Withdrawal limits**: Expandable limits throttle large exits. Users must wait for limits to expand.
 - **Shared pool risk**: Liquidity Layer serves lending, vaults, DEX, and stETH — fToken withdrawals compete with all other demand
 - **Concentration**: Top 5 assets = 57.6% of lending TVL. wstUSR alone = 18.9%.
 - **Stress test**: Handled August 2024 market stress (only >15% drop) without operational issues
 - **Secondary market**: No significant DEX liquidity for fTokens themselves
 
-**Score: 2.5/5** — High utilization (95% on Ethereum) is a material concern for withdrawal availability. Shared Liquidity Layer adds withdrawal competition. Expandable limits provide gradual access but delay large exits. Partially offset by strong TVL depth ($1.28B).
+**Score: 2.0/5** — Shared Liquidity Layer adds withdrawal competition beyond standard lending protocol dynamics. Concentration risk in top assets. Expandable limits provide gradual access but delay large exits. Offset by strong TVL depth ($1.28B) and kink-based rate model that incentivizes utilization rebalancing.
 
 #### Category 5: Operational Risk (Weight: 5%)
 
@@ -446,15 +442,15 @@ Final Score = (Centralization × 0.30) + (Funds Mgmt × 0.30) + (Audits × 0.20)
 | Audits & Historical | 1.5 | 20% | 0.30 |
 | Centralization & Control | 1.83 | 30% | 0.549 |
 | Funds Management | 1.25 | 30% | 0.375 |
-| Liquidity Risk | 2.5 | 15% | 0.375 |
+| Liquidity Risk | 2.0 | 15% | 0.300 |
 | Operational Risk | 1.5 | 5% | 0.075 |
-| **Final Score** | | | **1.67** |
+| **Final Score** | | | **1.60** |
 
 **Optional Modifiers:**
 - Protocol live >2 years with no incidents: **-0.5** → Not applied yet (1.98 years, borderline — will qualify at reassessment)
 - TVL maintained >$500M for >1 year: **-0.5** → Applied
 
-**Final Score: 1.17** (capped at minimum 1.0)
+**Final Score: 1.10** (capped at minimum 1.0)
 
 ### Risk Tier
 
@@ -468,7 +464,7 @@ Final Score = (Centralization × 0.30) + (Funds Mgmt × 0.30) + (Audits × 0.20)
 
 **Final Risk Tier: MINIMAL RISK**
 
-The Fluid Lending Protocol (fTokens) is a well-designed ERC4626-compliant lending product with strong security properties: 8 audits, on-chain GovernorBravo governance with timelock, monotonically increasing exchange rates, and no admin ability to access user funds. The primary risk is the **high utilization on Ethereum (95%)** which constrains withdrawal availability, and the **shared Liquidity Layer** architecture which means fToken holders are indirectly exposed to risks across the entire Fluid protocol stack (Vaults, DEX, oracles). These risks are substantially mitigated by the breadth of audit coverage, the programmatic nature of the protocol, and the ~2-year track record with zero incidents.
+The Fluid Lending Protocol (fTokens) is a well-designed ERC4626-compliant lending product with strong security properties: 8 audits, on-chain GovernorBravo governance with timelock, monotonically increasing exchange rates, and no admin ability to access user funds. The primary risk is the **shared Liquidity Layer** architecture which means fToken holders are indirectly exposed to risks across the entire Fluid protocol stack (Vaults, DEX, oracles). This is substantially mitigated by the breadth of audit coverage, the programmatic nature of the protocol, and the ~2-year track record with zero incidents.
 
 ---
 
