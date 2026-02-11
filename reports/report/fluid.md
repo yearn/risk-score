@@ -311,7 +311,6 @@ fToken holders face liquidity risk from the **shared Liquidity Layer** architect
 | **Liquidity Layer** | [`0x52Aa899454998Be5b000Ad077a46Bbe360F4e497`](https://etherscan.io/address/0x52Aa899454998Be5b000Ad077a46Bbe360F4e497) | Holds all fToken deposits. Admin changes, implementation upgrades |
 | **Timelock** | [`0x2386DC45AdDed673317eF068992F19421B481F4c`](https://etherscan.io/address/0x2386DC45AdDed673317eF068992F19421B481F4c) | Owner of all core contracts — queued/executed transactions |
 | **GovernorBravo** | [`0x0204Cd037B2ec03605CFdFe482D8e257C765fA1B`](https://etherscan.io/address/0x0204Cd037B2ec03605CFdFe482D8e257C765fA1B) | Governance proposals, voting, execution |
-| **LendingFactory** | [`0x54B91A0D94cb471F37f949c60F7Fa7935b551D03`](https://etherscan.io/address/0x54B91A0D94cb471F37f949c60F7Fa7935b551D03) | New fToken deployments, auth/deployer changes |
 
 ### Key Events to Watch
 
@@ -326,15 +325,6 @@ fToken holders face liquidity risk from the **shared Liquidity Layer** architect
 | **Liquidity Layer** | `LogUpdateUserBorrowConfigs` | Borrow limits changed — affects utilization and withdrawal availability |
 | **Liquidity Layer** | `LogUpdateRateDataV1` / `LogUpdateRateDataV2` | Interest rate parameters changed — affects fToken yield |
 | **LendingFactory** | New fToken creation | New lending market created |
-| **Any fToken** | Exchange rate changes | Should be monotonically increasing; any decrease indicates a problem |
-
-### Key State to Poll
-
-- **fToken exchange rates**: Should only increase. Any decrease is a critical signal.
-- **Per-token utilization rates**: Ethereum USDC at 95% — high utilization restricts withdrawals
-- **Withdrawal limits**: Monitor expansion rates and current available liquidity per token
-- **Rebalancer activity**: Track `rebalance()` calls on fUSDC/fUSDT (the only two with active rebalancers)
-- **TVL trends**: Monitor for sudden outflows that could indicate confidence issues
 
 ## Risk Summary
 
