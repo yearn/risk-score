@@ -471,7 +471,7 @@ The Fluid Lending Protocol (fTokens) is a well-designed ERC4626-compliant lendin
 ## Reassessment Triggers
 
 - **Time-based**: Reassess in 6 months (August 2026) — protocol will have >2.5 years history. Apply >2 year modifier (-0.5) at that time.
-- **Utilization-based**: Reassess if Ethereum utilization drops below 80% (positive) or if withdrawal throttling events are reported (negative)
+- **Utilization-based**: Reassess if Ethereum utilization exceeds 99% (negative — withdrawal availability critically constrained)
 - **TVL-based**: Reassess if lending TVL changes by more than 50%
 - **Incident-based**: Reassess after any exploit, governance change, or significant parameter modification
 - **Governance**: Reassess if GovernorBravo parameters change (quorum, timelock delay, voting period) or if Avocado multisig signers change
