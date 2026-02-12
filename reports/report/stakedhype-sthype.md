@@ -52,7 +52,7 @@ All contracts are deployed on HyperEVM (Hyperliquid L1). Explorer: [Blockscout](
 | wstHYPE ProxyAdmin | [`0xa29a2043b2fcbc9189beb9e6efcb2ba48bb3d586`](https://hyperliquid.cloud.blockscout.com/address/0xa29a2043b2fcbc9189beb9e6efcb2ba48bb3d586) | EIP-1967 Admin |
 | Governance Multisig | [`0x97dee0ea4ca10560f260a0f6f45bdc128a1d51f9`](https://hyperliquid.cloud.blockscout.com/address/0x97dee0ea4ca10560f260a0f6f45bdc128a1d51f9) | Gnosis Safe (3-of-5) |
 
-All contracts are **upgradeable** via EIP-1967 transparent proxy pattern. Each proxy has a separate ProxyAdmin contract. The ProxyAdmin contracts should be checked to verify if they are controlled by the governance multisig. TODO: verify ProxyAdmin ownership on-chain.
+All contracts are **upgradeable** via EIP-1967 transparent proxy pattern. Each proxy has a separate ProxyAdmin contract. All three ProxyAdmin contracts are owned by the governance multisig (`0x97dee0ea...`, verified via `owner()` on each ProxyAdmin). This means the **3-of-5 multisig can upgrade all contract implementations** without timelock.
 
 Source: [docs.stakedhype.fi/technical/contract-addresses](https://docs.stakedhype.fi/technical/contract-addresses) + on-chain verification via `eth_getStorageAt` (EIP-1967 slots).
 
