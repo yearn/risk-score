@@ -563,12 +563,14 @@ Fasanara Capital is a London-based institutional investment manager with $4B+ AU
 
 ---
 
-#### 4. Tokemak autoUSD
+#### 4. Tokemak autoUSD (now "Auto Finance")
 
 **Risk Score: 3.5/5**
 
 **Description:**
-[Tokemak autoUSD](https://blog.tokemak.xyz/post/the-stablecoin-autopool-autousd-is-now-live) is an autonomous liquidity pool that aggregates stablecoin yield opportunities across multiple DeFi protocols. It automatically allocates capital between lending protocols (Aave, Compound), DEXs, and yield-bearing stablecoins to optimize returns.
+[autoUSD](https://blog.auto.finance/post/the-stablecoin-autopool-autousd-is-now-live) is an autonomous liquidity pool that aggregates stablecoin yield opportunities across multiple DeFi protocols. It automatically allocates capital between lending protocols (Aave, Fluid, Morpho), DEXs (Curve, Balancer), and yield-bearing stablecoins (sUSDe, sUSDS, sFRAX, scrvUSD) to optimize returns. Launched April 9, 2025.
+
+**Note on Rebrand:** Tokemak [rebranded to Auto Finance](https://x.com/autopools/status/1968786026190504417) — same team, same protocol, new name. TOKE tokens convert to AUTO at 1:1. The rebrand is framed as product evolution from "liquidity infrastructure" to "automated onchain finance." Tokemak v1 had a known systemic design risk where its "Reactor" model absorbed impermanent loss for depositors — if losses exceeded reserves, depositors could lose funds. TOKE token price declined from ~$40+ (2021) to under $1, reflecting significant loss of market confidence. No confirmed exploits found, but a [privilege escalation vulnerability](https://www.trust-security.xyz/post/tokemak-liquidity-operator-can-steal-funds) was disclosed where a liquidity operator could potentially steal funds.
 
 **Key Risk Factors:**
 
@@ -601,7 +603,9 @@ Fasanara Capital is a London-based institutional investment manager with $4B+ AU
 - What is autoUSD's track record during market stress events?
 
 **References:**
-- [Tokemak Blog - autoUSD Launch](https://blog.tokemak.xyz/post/the-stablecoin-autopool-autousd-is-now-live)
+- [Auto Finance Blog - autoUSD Launch](https://blog.auto.finance/post/the-stablecoin-autopool-autousd-is-now-live)
+- [Auto Finance Rebrand Announcement](https://x.com/autopools/status/1968786026190504417)
+- [Trust Security - Tokemak Vulnerability Disclosure](https://www.trust-security.xyz/post/tokemak-liquidity-operator-can-steal-funds)
 
 ---
 
