@@ -3,7 +3,7 @@
 **Assessment Date:** February 12, 2026
 **Token:** kHYPE
 **Chain:** HyperEVM (Hyperliquid L1 ecosystem)
-**Token Address:** [`0xfd739d4e423301ce9385c1fb8850539d657c296d`](https://hyperliquid.cloud.blockscout.com/address/0xfd739d4e423301ce9385c1fb8850539d657c296d)
+**Token Address:** [`0xfd739d4e423301ce9385c1fb8850539d657c296d`](https://hyperevmscan.io/address/0xfd739d4e423301ce9385c1fb8850539d657c296d)
 
 ## Overview + Links
 
@@ -25,22 +25,22 @@ Kinetiq routes stake through a `StakingPool` contract that manages validator del
 
 ## Contract Addresses
 
-All contracts are deployed on HyperEVM (Hyperliquid L1). Explorer: [Blockscout](https://hyperliquid.cloud.blockscout.com).
+All contracts are deployed on HyperEVM (Hyperliquid L1). Explorer: [HyperEVMScan](https://hyperevmscan.io).
 
 **On-chain verified contracts (have deployed bytecode):**
 
 | Contract | Address | Type |
 |----------|---------|------|
-| kHYPE | [`0xfd739d4e423301ce9385c1fb8850539d657c296d`](https://hyperliquid.cloud.blockscout.com/address/0xfd739d4e423301ce9385c1fb8850539d657c296d) | Proxy (ERC-20 LST) |
-| kHYPE Implementation | [`0xfe3216d46448efd7708435eeb851950742681975`](https://hyperliquid.cloud.blockscout.com/address/0xfe3216d46448efd7708435eeb851950742681975) | Implementation |
-| kHYPE ProxyAdmin | [`0x9c1e8db004d8158a52e83ffdc63e37eabea8304c`](https://hyperliquid.cloud.blockscout.com/address/0x9c1e8db004d8158a52e83ffdc63e37eabea8304c) | EIP-1967 Admin |
-| StakingPool (Minter/Burner) | [`0x393D0B87Ed38fc779FD9611144aE649BA6082109`](https://hyperliquid.cloud.blockscout.com/address/0x393D0B87Ed38fc779FD9611144aE649BA6082109) | Proxy |
-| StakingPool Implementation | [`0x69d4c44398fc95bbe86755ea481b467fc6a09c84`](https://hyperliquid.cloud.blockscout.com/address/0x69d4c44398fc95bbe86755ea481b467fc6a09c84) | Implementation |
-| StakingPool ProxyAdmin | [`0x8194aa9eca9225f96a690072b22a9ad0dd064f64`](https://hyperliquid.cloud.blockscout.com/address/0x8194aa9eca9225f96a690072b22a9ad0dd064f64) | EIP-1967 Admin |
-| PauserRegistry | [`0x752E76ea71960Da08644614E626c9F9Ff5a50547`](https://hyperliquid.cloud.blockscout.com/address/0x752E76ea71960Da08644614E626c9F9Ff5a50547) | Proxy |
-| PauserRegistry ProxyAdmin | [`0xd26c2c4a8bd4f78c64212318424ed794be120ea6`](https://hyperliquid.cloud.blockscout.com/address/0xd26c2c4a8bd4f78c64212318424ed794be120ea6) | EIP-1967 Admin |
-| Governance Multisig | [`0x18A82c968b992D28D4D812920eB7b4305306f8F1`](https://hyperliquid.cloud.blockscout.com/address/0x18A82c968b992D28D4D812920eB7b4305306f8F1) | Gnosis Safe (4-of-7) |
-| Treasury Multisig | [`0x64bD77698Ab7C3Fd0a1F54497b228ED7a02098E3`](https://hyperliquid.cloud.blockscout.com/address/0x64bD77698Ab7C3Fd0a1F54497b228ED7a02098E3) | Gnosis Safe (4-of-7) |
+| kHYPE | [`0xfd739d4e423301ce9385c1fb8850539d657c296d`](https://hyperevmscan.io/address/0xfd739d4e423301ce9385c1fb8850539d657c296d) | Proxy (ERC-20 LST) |
+| kHYPE Implementation | [`0xfe3216d46448efd7708435eeb851950742681975`](https://hyperevmscan.io/address/0xfe3216d46448efd7708435eeb851950742681975) | Implementation |
+| kHYPE ProxyAdmin | [`0x9c1e8db004d8158a52e83ffdc63e37eabea8304c`](https://hyperevmscan.io/address/0x9c1e8db004d8158a52e83ffdc63e37eabea8304c) | EIP-1967 Admin |
+| StakingPool (Minter/Burner) | [`0x393D0B87Ed38fc779FD9611144aE649BA6082109`](https://hyperevmscan.io/address/0x393D0B87Ed38fc779FD9611144aE649BA6082109) | Proxy |
+| StakingPool Implementation | [`0x69d4c44398fc95bbe86755ea481b467fc6a09c84`](https://hyperevmscan.io/address/0x69d4c44398fc95bbe86755ea481b467fc6a09c84) | Implementation |
+| StakingPool ProxyAdmin | [`0x8194aa9eca9225f96a690072b22a9ad0dd064f64`](https://hyperevmscan.io/address/0x8194aa9eca9225f96a690072b22a9ad0dd064f64) | EIP-1967 Admin |
+| PauserRegistry | [`0x752E76ea71960Da08644614E626c9F9Ff5a50547`](https://hyperevmscan.io/address/0x752E76ea71960Da08644614E626c9F9Ff5a50547) | Proxy |
+| PauserRegistry ProxyAdmin | [`0xd26c2c4a8bd4f78c64212318424ed794be120ea6`](https://hyperevmscan.io/address/0xd26c2c4a8bd4f78c64212318424ed794be120ea6) | EIP-1967 Admin |
+| Governance Multisig | [`0x18A82c968b992D28D4D812920eB7b4305306f8F1`](https://hyperevmscan.io/address/0x18A82c968b992D28D4D812920eB7b4305306f8F1) | Gnosis Safe (4-of-7) |
+| Treasury Multisig | [`0x64bD77698Ab7C3Fd0a1F54497b228ED7a02098E3`](https://hyperevmscan.io/address/0x64bD77698Ab7C3Fd0a1F54497b228ED7a02098E3) | Gnosis Safe (4-of-7) |
 
 All three ProxyAdmin contracts are owned by the governance multisig (`0x18A82c...`). The **4-of-7 multisig can upgrade all contract implementations** without timelock.
 
@@ -176,7 +176,7 @@ Given queue dependence and same-ecosystem DEX liquidity, kHYPE liquidity risk is
 
 On-chain verified governance data:
 
-- **Multisig address**: [`0x18A82c968b992D28D4D812920eB7b4305306f8F1`](https://hyperliquid.cloud.blockscout.com/address/0x18A82c968b992D28D4D812920eB7b4305306f8F1) (Gnosis Safe on HyperEVM)
+- **Multisig address**: [`0x18A82c968b992D28D4D812920eB7b4305306f8F1`](https://hyperevmscan.io/address/0x18A82c968b992D28D4D812920eB7b4305306f8F1) (Gnosis Safe on HyperEVM)
 - **Threshold**: **4-of-7** (verified via `getThreshold()`)
 - **Version**: 1.3.0
 - **Nonce**: 32 transactions executed
@@ -184,13 +184,13 @@ On-chain verified governance data:
 - **Signer identities**: All 7 signers are pseudonymous. See detailed analysis below.
 
 Signer addresses (verified via `getOwners()`):
-1. [`0x99ed257a514d81A62C3195934d4e63A1c2C3946A`](https://hyperliquid.cloud.blockscout.com/address/0x99ed257a514d81A62C3195934d4e63A1c2C3946A)
-2. [`0x6FF68aaac208d5765AD48293BeAAfb2c702D5B1d`](https://hyperliquid.cloud.blockscout.com/address/0x6FF68aaac208d5765AD48293BeAAfb2c702D5B1d)
-3. [`0xF0B3a9BfF7b733bbF6B9FDcA20cC954dE5E8Aa77`](https://hyperliquid.cloud.blockscout.com/address/0xF0B3a9BfF7b733bbF6B9FDcA20cC954dE5E8Aa77)
-4. [`0xFCADDD4395fbC10FB6FA024a427561C1841a0849`](https://hyperliquid.cloud.blockscout.com/address/0xFCADDD4395fbC10FB6FA024a427561C1841a0849)
-5. [`0xDc1c4B5d08528a25A96ba036dDD6496FA2fb6947`](https://hyperliquid.cloud.blockscout.com/address/0xDc1c4B5d08528a25A96ba036dDD6496FA2fb6947)
-6. [`0x9bD23f6e1012D490FaEE8C81d3bad9D4e4F71624`](https://hyperliquid.cloud.blockscout.com/address/0x9bD23f6e1012D490FaEE8C81d3bad9D4e4F71624)
-7. [`0x64cbeD11Afe88631b7B6C12D8B50E59E8E07f42e`](https://hyperliquid.cloud.blockscout.com/address/0x64cbeD11Afe88631b7B6C12D8B50E59E8E07f42e)
+1. [`0x99ed257a514d81A62C3195934d4e63A1c2C3946A`](https://hyperevmscan.io/address/0x99ed257a514d81A62C3195934d4e63A1c2C3946A)
+2. [`0x6FF68aaac208d5765AD48293BeAAfb2c702D5B1d`](https://hyperevmscan.io/address/0x6FF68aaac208d5765AD48293BeAAfb2c702D5B1d)
+3. [`0xF0B3a9BfF7b733bbF6B9FDcA20cC954dE5E8Aa77`](https://hyperevmscan.io/address/0xF0B3a9BfF7b733bbF6B9FDcA20cC954dE5E8Aa77)
+4. [`0xFCADDD4395fbC10FB6FA024a427561C1841a0849`](https://hyperevmscan.io/address/0xFCADDD4395fbC10FB6FA024a427561C1841a0849)
+5. [`0xDc1c4B5d08528a25A96ba036dDD6496FA2fb6947`](https://hyperevmscan.io/address/0xDc1c4B5d08528a25A96ba036dDD6496FA2fb6947)
+6. [`0x9bD23f6e1012D490FaEE8C81d3bad9D4e4F71624`](https://hyperevmscan.io/address/0x9bD23f6e1012D490FaEE8C81d3bad9D4e4F71624)
+7. [`0x64cbeD11Afe88631b7B6C12D8B50E59E8E07f42e`](https://hyperevmscan.io/address/0x64cbeD11Afe88631b7B6C12D8B50E59E8E07f42e)
 
 **Role structure (verified via AccessControlEnumerable):**
 
@@ -311,10 +311,10 @@ Source: Hyperliquid L1 API (`POST https://api.hyperliquid.xyz/info`)
 ## Monitoring
 
 Key contracts to monitor:
-- kHYPE Proxy: [`0xfd739d4e423301ce9385c1fb8850539d657c296d`](https://hyperliquid.cloud.blockscout.com/address/0xfd739d4e423301ce9385c1fb8850539d657c296d)
-- StakingPool Proxy: [`0x393D0B87Ed38fc779FD9611144aE649BA6082109`](https://hyperliquid.cloud.blockscout.com/address/0x393D0B87Ed38fc779FD9611144aE649BA6082109)
-- PauserRegistry Proxy: [`0x752E76ea71960Da08644614E626c9F9Ff5a50547`](https://hyperliquid.cloud.blockscout.com/address/0x752E76ea71960Da08644614E626c9F9Ff5a50547)
-- Governance Multisig: [`0x18A82c968b992D28D4D812920eB7b4305306f8F1`](https://hyperliquid.cloud.blockscout.com/address/0x18A82c968b992D28D4D812920eB7b4305306f8F1) (Gnosis Safe 4-of-7)
+- kHYPE Proxy: [`0xfd739d4e423301ce9385c1fb8850539d657c296d`](https://hyperevmscan.io/address/0xfd739d4e423301ce9385c1fb8850539d657c296d)
+- StakingPool Proxy: [`0x393D0B87Ed38fc779FD9611144aE649BA6082109`](https://hyperevmscan.io/address/0x393D0B87Ed38fc779FD9611144aE649BA6082109)
+- PauserRegistry Proxy: [`0x752E76ea71960Da08644614E626c9F9Ff5a50547`](https://hyperevmscan.io/address/0x752E76ea71960Da08644614E626c9F9Ff5a50547)
+- Governance Multisig: [`0x18A82c968b992D28D4D812920eB7b4305306f8F1`](https://hyperevmscan.io/address/0x18A82c968b992D28D4D812920eB7b4305306f8F1) (Gnosis Safe 4-of-7)
 
 ### 1. Governance Monitoring (MANDATORY)
 
