@@ -50,9 +50,14 @@ All three ProxyAdmin contracts are owned by the governance multisig (`0x18A82c..
 
 Hyperliquid staking is validator-based. HYPE is delegated to validators, and rewards depend on validator performance and network-level staking parameters.
 
-Important slashing context (as of February 12, 2026):
-- Hyperliquid docs indicate no automatic validator slashing in base HYPE staking at present.
-- Validator penalties are primarily jailing/operational exclusion mechanisms.
+Important slashing context (as of February 12, 2026, per official Hyperliquid docs):
+- **No automatic slashing is implemented** ("There is currently no automatic slashing implemented").
+- Slashing is "reserved for provably malicious behavior such as double-signing blocks at the same round."
+- Validator penalties are jailing-only: jailed validators produce no rewards for delegators, but no principal loss occurs.
+- Validators may be jailed by peer quorum vote for inadequate latency/frequency of consensus messages.
+- Jailed validators can unjail themselves subject to on-chain rate limits.
+- Self-delegation requirement: 10,000 HYPE (locked 1 year). Delegation lockup: 1 day.
+- Unstaking queue (staking → spot): **7 days**. Max 5 pending withdrawals per address.
 - Governance can still change staking/penalty rules in future.
 
 Implication for kHYPE:
@@ -175,8 +180,8 @@ On-chain verified governance data:
 - **Threshold**: **4-of-7** (verified via `getThreshold()`)
 - **Version**: 1.3.0
 - **Nonce**: 32 transactions executed
-- **Timelock**: No timelock mechanism found on-chain.
-- **Signer identities**: Not individually disclosed.
+- **Timelock**: **None.** Exhaustive on-chain verification confirmed no timelock exists — Safe has no modules (`getModulesPaginated` returns empty), no guard (storage slot `0x4a204f...` is zero), all three ProxyAdmins are standard OpenZeppelin (881 bytes, owned directly by multisig), and no `EnabledModule` events have ever been emitted.
+- **Signer identities**: All 7 signers are pseudonymous. See detailed analysis below.
 
 Signer addresses (verified via `getOwners()`):
 1. [`0x99ed257a514d81A62C3195934d4e63A1c2C3946A`](https://hyperliquid.cloud.blockscout.com/address/0x99ed257a514d81A62C3195934d4e63A1c2C3946A)
@@ -199,7 +204,32 @@ Signer addresses (verified via `getOwners()`):
 | StakingPool | OPERATOR | `0x23A4604cDFe8e9e2e9Cf7C10D7492B0F3f4B4038` (EOA) |
 | PauserRegistry | DEFAULT_ADMIN | Governance Multisig (4/7) |
 
-**Key concern:** The OPERATOR role on the StakingPool is held by a single **EOA** (`0x23A4...`), not the multisig. This role likely controls operational staking/delegation functions. This is a centralization risk point.
+**Key concern:** The OPERATOR role on the StakingPool is held by a single **EOA** (`0x23A4...`), not the multisig. This address is a Kinetiq automated bot (6,421 nonce) that calls `generatePerformance()` and `updateValidatorMetrics()` on a regular basis.
+
+### Multisig Signer Analysis
+
+Deep on-chain investigation of the 7 governance Safe signers revealed:
+
+**Funding chain analysis:**
+- **Signer 1** (`0x99ed...`): Most active signer (13 txs). Funded on ETH mainnet by the Kinetiq deployer (`0x1936Bb3B...`) who performed `acceptOwnership` and `revokeMintRole` on kHYPE contracts. Likely a core team member.
+- **Signer 2** (`0x6FF6...`): Funded by **`gregthedev.eth`** (`0xC5A07c29...`), a known Kinetiq contributor (holds sKNTQ, KNTQ governance tokens). Added later — replaces `0x1a4Fdf8a` from the ETH mainnet Safe deployment.
+- **Signer 3** (`0xF0B3...`): Original signer, present on all Kinetiq Safes (governance, operations, ETH mainnet).
+- **Signer 4** (`0xFCAD...`): **Shares a funder** with Signer 7 (`0x132213ef...` on both HyperEVM and Arbitrum), strongly suggesting same entity or closely associated parties.
+- **Signer 5** (`0xDc1c...`): Most active signer (20 nonce). Acts as a **funding hub** — directly funded Signer 6 (0.69 HYPE) and a Treasury Safe signer (0.3 HYPE). Likely a core team member with operational responsibilities.
+- **Signer 6** (`0x9bD2...`): Funded by Signer 5 on HyperEVM. ETH mainnet gas funded by a major exchange hot wallet (557K nonce, 14.5K ETH).
+- **Signer 7** (`0x64cb...`): **Completely inactive** — 0 nonce on HyperEVM, has never signed any transaction. Shares a funder with Signer 4. ETH funded from a major exchange hot wallet (14M nonce, 27K ETH).
+
+**Cross-chain Safe deployment:** The same Safe address (`0x18a82c...`) exists on ETH mainnet with identical 4/7 threshold and 6 of 7 overlapping signers.
+
+**Additional Safes discovered on HyperEVM:**
+- `0x63e8a067...` — 4/6 threshold Safe for approveHash operations (Signers 1, 3, 5 overlap).
+- `0x64bd7769...` — 4/7 threshold Treasury Safe (Signer 4 + deployer + 5 others).
+
+**Risk assessment implications:**
+- All signers appear to be **team-associated wallets** rather than independent external signers (evidenced by inter-signer funding, shared funders, and exchange-funded gas).
+- **Signer 7 is effectively inactive** (nonce 0), making this practically a 4-of-6 multisig.
+- **Signers 4 and 7 share a funder**, reducing effective signer independence.
+- Multiple signers overlap across governance and operations Safes, suggesting the same team members control multiple protocol functions.
 
 ### Programmability
 
@@ -216,14 +246,65 @@ Critical dependencies:
 3. HyperEVM execution environment.
 4. DEX liquidity conditions for kHYPE/HYPE exits.
 
-Dependency concentration on Hyperliquid ecosystem is structurally high.
+Dependency concentration on Hyperliquid ecosystem is structurally high. **HyperEVM is NOT a separate chain** — it shares the same HyperBFT consensus as HyperCore. There is no bridge risk between HyperCore and HyperEVM; the risk is pure L1 liveness.
+
+### Hyperliquid Validator Set Dependency (Quantified)
+
+Source: Hyperliquid L1 API (`POST https://api.hyperliquid.xyz/info`)
+
+**Network overview (February 2026):**
+
+| Metric | Value |
+|--------|-------|
+| Total validators | 30 (24 active, 5 jailed, 1 inactive) |
+| Total network stake | 436.2M HYPE |
+| Active stake | 431.9M HYPE |
+| Jailed stake | 4.3M HYPE (0.99%) |
+
+**Concentration risk:**
+- **Hyper Foundation operates 5 validators** controlling **56.4%** of active stake (243.4M HYPE). This exceeds the **1/3 blocking minority** for BFT consensus.
+- Top 5 validators (4 HF + Anchorage) = 60.1% of active stake.
+- Top 10 validators = 83.4% of active stake.
+- Kinetiq represents **11.5% of total network stake** — the single largest protocol-level staker on Hyperliquid.
+
+**Kinetiq's delegation strategy:**
+- **ValidatorManager** has 22 pre-approved validators registered; 9 receive active delegations.
+- StakeHub autonomously scores and delegates via algorithmic selection.
+- Total L1 delegated: **21.5M HYPE** (vs 50.0M `totalStaked` on EVM — the ~28.5M gap is likely undelegated buffer or unstaking queue).
+
+| Validator | Delegation (HYPE) | % of Kinetiq | Lock Status |
+|-----------|-------------------|-------------|-------------|
+| **Kinetiq x Hyperion** (own) | 6,003,900 | **27.9%** | Locked |
+| Hyper Foundation 1-5 (×4) | 1,936,320 each | 9.0% each (45.0% total) | Unlocked |
+| infinitefield.xyz | 1,936,320 | 9.0% | Unlocked |
+| Hypurrscanning | 1,936,320 | 9.0% | Unlocked |
+| Nansen x HypurrCollective | 1,936,320 | 9.0% | Unlocked |
+
+- **Delegation HHI: 1,429** (competitive range, below 1,500 threshold).
+- **45.0%** of Kinetiq delegations go to Hyper Foundation validators; **55.0%** to non-HF validators.
+- All delegated validators have 99.9-100% uptime and APR in the 2.16-2.25% range.
+- **Zero exposure to currently jailed validators.**
+
+**Slashing/jailing context:**
+- **No automatic slashing is implemented** on Hyperliquid (per official docs).
+- Jailing = reward cessation only, no principal loss.
+- Validators can be jailed by peer vote for latency/responsiveness issues.
+- Unstaking queue from L1 validators: **7 days**.
+
+**L1 incident history:** No Hyperliquid L1 consensus or liveness incidents found in the DeFiLlama hacks database. Three HyperEVM application-level exploits were recorded (HyperVault $3.6M rugpull, Hyperdrive $773K router exploit, Raga Finance $18.5K exploit) — none affecting L1 itself.
 
 ## Operational Risk
 
 - Docs are present at docs.kinetiq.xyz but use client-side rendering (GitBook), making content verification difficult.
 - Audit depth is reasonable for protocol age (5 core audits from 4 firms).
 - Bug bounty at $5M max is strong and has 294 submissions.
-- Team transparency: TODO — team identities not individually disclosed. Twitter: [@Kinetiq_xyz](https://twitter.com/Kinetiq_xyz).
+- **Team/legal entity:** Two entity names are used inconsistently — **"Kinetiq Labs"** (Terms of Use) vs **"Kinetiq Research"** (Privacy Policy, GitHub org, footer copyright). GitHub org lists **Singapore** as location; Privacy Policy references **Panama** for data transfers. Terms of Use do not name a governing law jurisdiction. No registered address or company registration number is publicly disclosed.
+- **Known team members** (via GitHub commit history on `github.com/kinetiq-research`):
+  - **Justin Greenberg** ([@justingreenberg](https://github.com/justingreenberg), Twitter: @greenbergz) — primary developer on `f1rewall` repo, PGP-signed commits.
+  - **GregTheDev** ([@0xgregthedev](https://github.com/0xgregthedev)) — Rust/Solidity developer, primary contributor to `hl-rs` (Hyperliquid Rust SDK). `gregthedev.eth` funded governance Safe Signer 2.
+  - **mektigboy** ([@mektigboy](https://github.com/mektigboy), Twitter: @mektigboy) — self-identified "driver @kinetiq-research" in GitHub bio. Prior experience with sherlock-audit and security audit orgs.
+- Contact: security@kinetiq.xyz (with PGP key at `kinetiq.xyz/.well-known/pubkey.asc`), contact@kinetiq.xyz, info@kinetiq.xyz.
+- No public "About" or "Team" page exists on kinetiq.xyz or docs.kinetiq.xyz. Twitter: [@Kinetiq_xyz](https://twitter.com/Kinetiq_xyz).
 - Contracts are **not open-source on GitHub** — the Kinetiq GitHub org (`github.com/kinetiq-research`) has only SDK/utility repos, no smart contract code.
 - No public formal verification disclosure found.
 
@@ -305,10 +386,13 @@ Track official Hyperliquid updates for:
 
 1. Queue-based unstake path (7 days on-chain) introduces redemption delay risk.
 2. Multi-contract upgradeable proxy architecture adds integration and control-plane complexity.
-3. OPERATOR role on StakingPool held by single EOA (not multisig).
-4. No timelock on multisig — upgrades can be executed immediately.
-5. Heavy dependence on Hyperliquid validator and chain health.
-6. Contracts not open-sourced on GitHub.
+3. OPERATOR role on StakingPool held by single EOA (automated bot, not multisig-protected).
+4. **No timelock on multisig** — confirmed exhaustively on-chain (no modules, no guard, no timelock contract). Upgrades can be executed immediately.
+5. **Hyper Foundation controls 56.4% of network stake** — exceeds 1/3 BFT blocking minority. Kinetiq delegates 45% of its stake to HF validators.
+6. **Multisig signer independence is questionable** — inter-signer funding chains, shared funders (Signers 4+7), one inactive signer (Signer 7 = 0 nonce), all appear team-associated rather than independent external parties.
+7. Contracts not open-sourced on GitHub.
+8. ~28.5M HYPE gap between EVM `totalStaked` (50M) and L1 actual delegated (21.5M) — needs monitoring.
+9. Legal entity ambiguity: "Kinetiq Labs" (Terms) vs "Kinetiq Research" (Privacy/GitHub) with no specific governing law jurisdiction named.
 
 ### Critical Risks
 
@@ -340,13 +424,13 @@ Track official Hyperliquid updates for:
 #### Category 2: Centralization & Control Risks (Weight: 30%)
 
 Subscores:
-- Governance: **3.5** — 4-of-7 multisig (verified on-chain), but no timelock, signer identities undisclosed, powerful admin functions (emergency withdrawal, rescue, parameter changes). Per rubric: "Multisig 3/5 or low threshold" (4/7 is between 3 and 4 tier) + "No timelock" + "Powerful admin roles" = score 3.5.
-- Programmability: **3.0** — Hybrid on-chain system with upgradeable proxies. Exchange rate is on-chain derived (not admin-set). But OPERATOR EOA and admin parameter controls add centralization.
-- External dependencies: **4.0** — Critical single-ecosystem dependency on Hyperliquid L1. Failure of Hyperliquid would break the entire protocol.
+- Governance: **4.0** — 4-of-7 multisig (verified on-chain), but: **no timelock** (confirmed exhaustively), signer independence is questionable (inter-signer funding, shared funders, 1 inactive signer, all team-associated), powerful admin functions (emergency withdrawal, rescue, parameter changes). Effectively a team-controlled multisig, not an independent governance body. Per rubric: formal structure is 4/7 but real independence is much weaker.
+- Programmability: **3.0** — Hybrid on-chain system with upgradeable proxies. Exchange rate is on-chain derived (not admin-set). But OPERATOR EOA (automated bot) and admin parameter controls add centralization.
+- External dependencies: **4.0** — Critical single-ecosystem dependency on Hyperliquid L1. Hyper Foundation controls 56.4% of validator stake (blocking minority). Kinetiq delegates 45% of its stake to HF validators.
 
-Centralization score = (3.5 + 3.0 + 4.0) / 3 = **3.5**
+Centralization score = (4.0 + 3.0 + 4.0) / 3 = **3.67**
 
-**Score: 3.5/5**
+**Score: 3.7/5**
 
 #### Category 3: Funds Management (Weight: 30%)
 
@@ -381,22 +465,23 @@ Funds management score = (2.0 + 2.5) / 2 = **2.25**
 | Category | Score | Weight | Weighted |
 |----------|-------|--------|----------|
 | Audits & Historical | 2.0 | 20% | 0.40 |
-| Centralization & Control | 3.5 | 30% | 1.05 |
+| Centralization & Control | 3.7 | 30% | 1.11 |
 | Funds Management | 2.25 | 30% | 0.675 |
 | Liquidity Risk | 3.0 | 15% | 0.45 |
 | Operational Risk | 3.0 | 5% | 0.15 |
-| **Final Score** | | | **2.725 / 5.0** |
+| **Final Score** | | | **2.785 / 5.0** |
 
-## Overall Risk Score: **2.7 / 5.0**
+## Overall Risk Score: **2.8 / 5.0**
 
 ### Risk Tier: **MEDIUM RISK**
 
 Rationale:
 - kHYPE is a well-audited LST with significant TVL ($683M) and DeFi adoption.
-- Governance is reasonable (4-of-7 multisig) but lacks timelock and signer transparency.
-- Single-EOA OPERATOR role and powerful emergency functions are centralization concerns.
+- Governance is formally 4-of-7 multisig but signer independence is weak — inter-signer funding, shared funders, 1 inactive signer, all team-associated.
+- No timelock (confirmed exhaustively on-chain) and powerful admin functions (emergency withdrawal, rescue).
+- Hyper Foundation controls 56.4% of network validator stake; Kinetiq delegates 45% of its stake to HF validators.
 - Liquidity is decent for an LST ($44M DEX depth) but all on HyperEVM.
-- Strong single-ecosystem dependency on Hyperliquid L1.
+- Three identified team members via GitHub but no public team page, ambiguous legal entity (Labs vs Research), no specified governing jurisdiction.
 
 ## Reassessment Triggers
 
@@ -429,3 +514,11 @@ Rationale:
 - Hyperliquid validator prison docs: https://hyperliquid.gitbook.io/hyperliquid-docs/hype-staking/validator-prison
 - Hyperliquid risks docs: https://hyperliquid.gitbook.io/hyperliquid-docs/risks
 - On-chain verification via `cast` against HyperEVM RPC (`rpc.hyperliquid.xyz/evm`)
+- Hyperliquid L1 API: `POST https://api.hyperliquid.xyz/info` (validator summaries, delegations)
+- Kinetiq GitHub org: https://github.com/kinetiq-research
+- Kinetiq Terms of Use: https://kinetiq.xyz/terms
+- Kinetiq Privacy Policy: https://kinetiq.xyz/privacy
+- Kinetiq security.txt: https://kinetiq.xyz/.well-known/security.txt
+- ENS reverse lookup via `0x3671aE578E63FdF66ad4F3E12CC0c0d71Ac7510C` (getNames)
+- RouteScan API for HyperEVM (chain 999) transaction tracing
+- Etherscan V2 API for cross-chain address verification
