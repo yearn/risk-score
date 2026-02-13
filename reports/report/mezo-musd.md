@@ -71,13 +71,15 @@ The protocol is built by **Thesis**, the crypto venture studio that previously b
 
 **Mint/Burn Permissions on Ethereum MUSD:**
 
+The MUSD token on Ethereum uses a `mintList`/`burnList` whitelist set via `setSystemContracts()` and `addToMintList()`/`addToBurnList()`. On Ethereum, the Liquity system contracts (TroveManager, StabilityPool, BorrowerOperations, InterestRateManager) are deployed as **NoOp placeholder contracts** — they exist only to satisfy the token's system contract address requirements since the actual CDP logic runs on the Mezo chain. Only the NTT Manager performs real mint/burn operations on Ethereum.
+
 | Address | Can Mint | Can Burn | Role |
 |---------|----------|----------|------|
-| NTT Manager (`0x5293...`) | Yes | Yes | Bridge mint/burn |
-| `0x52b9...` | Yes | Yes | TODO: identify |
-| `0xe9c3...` | Yes | No | TODO: identify |
-| `0x70ce...` | No | Yes | TODO: identify |
-| `0x1d5b...` | No | Yes | TODO: identify |
+| [`0x5293...`](https://etherscan.io/address/0x5293158bf7a81ED05418DA497a80F7e6Dbf4477E) | Yes | Yes | NTT Manager (Wormhole bridge) — **only active minter/burner** |
+| [`0x52b9...`](https://etherscan.io/address/0x52b952d9e77fc89c7a0ab5b766e6560df778c35a) | Yes | Yes | BorrowerOperations (NoOp placeholder) |
+| [`0xe9c3...`](https://etherscan.io/address/0xe9c3d269d259d3a336147714dca60e3ff639079a) | Yes | No | InterestRateManager (NoOp placeholder) |
+| [`0x70ce...`](https://etherscan.io/address/0x70ce34942fa5513ca189ed958f93b0d55eecbd94) | No | Yes | TroveManager or StabilityPool (NoOp placeholder) |
+| [`0x1d5b...`](https://etherscan.io/address/0x1d5b85d4099958de09fee8bc252a546b42590daf) | No | Yes | TroveManager or StabilityPool (NoOp placeholder) |
 
 ## Audits and Due Diligence Disclosures
 
