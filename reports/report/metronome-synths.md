@@ -55,7 +55,17 @@ The protocol was originally launched as Metronome 1.0 in June 2018. It relaunche
 | ProxyAdmin (Synths) | [`0x2fa85a496a9b79c6d50cef590304bdd36efa2dcc`](https://etherscan.io/address/0x2fa85a496a9b79c6d50cef590304bdd36efa2dcc) |
 | ProxyAdmin (Pool) | [`0xd4de85da9f2ca8c7c63dcdb417d0b5ce65a6f1be`](https://etherscan.io/address/0xd4de85da9f2ca8c7c63dcdb417d0b5ce65a6f1be) |
 
-Both ProxyAdmin contracts are owned by [`0xd1DE3F9CD4AE2F23DA941a67cA4C739f8dD9Af33`](https://etherscan.io/address/0xd1DE3F9CD4AE2F23DA941a67cA4C739f8dD9Af33).
+Both ProxyAdmin contracts are owned by [`0xd1DE3F9CD4AE2F23DA941a67cA4C739f8dD9Af33`](https://etherscan.io/address/0xd1DE3F9CD4AE2F23DA941a67cA4C739f8dD9Af33) — a **3/5 Gnosis Safe**. This means contract upgrades on Ethereum **bypass the Governor/Timelock** and are controlled directly by the multisig.
+
+**Ethereum ProxyAdmin Safe Signers (3/5):**
+
+| # | Signer | Also on L2 Safe? |
+|---|--------|------------------|
+| 1 | [`0xa13011197D6793453d86eBCD3B13Cc49A234C339`](https://etherscan.io/address/0xa13011197D6793453d86eBCD3B13Cc49A234C339) | Yes |
+| 2 | [`0xB5AbDABE50b5193d4dB92a16011792B22bA3Ef51`](https://etherscan.io/address/0xB5AbDABE50b5193d4dB92a16011792B22bA3Ef51) | No (Ethereum-only) |
+| 3 | [`0xb3983cDdBa4B127960A4cDD531AB989264509e23`](https://etherscan.io/address/0xb3983cDdBa4B127960A4cDD531AB989264509e23) | Yes |
+| 4 | [`0x25FCe091c5b51edEfc7a4A0E765f10ed032e804F`](https://etherscan.io/address/0x25FCe091c5b51edEfc7a4A0E765f10ed032e804F) | Yes |
+| 5 | [`0xf3e996C8cd4ab3fDad381584D5Bd90C01Ec3C082`](https://etherscan.io/address/0xf3e996C8cd4ab3fDad381584D5Bd90C01Ec3C082) | Yes |
 
 ### Base
 
@@ -92,7 +102,7 @@ Both ProxyAdmin contracts are owned by [`0xd1DE3F9CD4AE2F23DA941a67cA4C739f8dD9A
 | msUSD | Ethereum | ~10,975,073 |
 | msUSD | Base | ~9,646,673 |
 | msUSD | Optimism | ~1,106,899 |
-| msETH | Ethereum | TODO |
+| msETH | Ethereum | ~5,334 ETH |
 | msETH | Base | ~6,634 ETH |
 | msETH | Optimism | ~341 ETH |
 
@@ -393,12 +403,12 @@ An additional **$87.4M** is locked in yield aggregators and lending protocols bu
 - **Deep liquidity**: $75.9M in DEX pools + $87.4M in yield aggregators. Among the deepest synth liquidity in DeFi.
 - **Multi-chain presence**: Deployed on Ethereum, Base, Optimism with significant liquidity on each.
 - **Experienced team**: Bloq Inc. (Jeff Garzik, Matthew Roszak) with 8+ years in crypto infrastructure. Same team behind Vesper Finance.
-- **On-chain governance with timelock**: Compound Governor + 48-hour timelock on Ethereum provides meaningful protection against sudden parameter changes.
+- **On-chain governance with timelock for parameters**: Compound Governor + 48-hour timelock on Ethereum governs protocol parameter changes.
 - **Comprehensive DeFi integration**: Integrated with Convex, Morpho, Stake DAO, Beefy, Yearn, Pendle — indicating trust from major DeFi protocols.
 
 ### Key Risks
 
-- **Upgradeable contracts**: All contracts are upgradeable proxies. ProxyAdmin owner on Ethereum can upgrade contracts (relationship between ProxyAdmin owner and Governor/Timelock needs clarification — TODO).
+- **Upgradeable contracts**: All contracts are upgradeable proxies. The ProxyAdmin owner on Ethereum is a **3/5 multisig** (not the Governor/Timelock), meaning contract upgrades bypass on-chain governance entirely.
 - **3/5 multisig on L2s**: Base and Optimism deployments are governed by a 3/5 multisig with no timelock and anonymous signers.
 - **Vesper Finance dependency**: Productive collateral tokens (vaUSDC, vaETH) introduce smart contract risk from Vesper Finance. Same parent company creates concentration risk.
 - **Modest bug bounty**: $50K max payout is low relative to protocol TVL ($18M) and DEX liquidity ($76M).
@@ -406,7 +416,7 @@ An additional **$87.4M** is locked in yield aggregators and lending protocols bu
 
 ### Critical Risks
 
-- **ProxyAdmin upgrade path**: The ProxyAdmin owner (`0xd1DE...`) controls contract upgrades on Ethereum. If this address is not controlled by the Timelock/Governor, upgrades could bypass governance.
+- **ProxyAdmin bypasses governance**: The ProxyAdmin owner on Ethereum is a 3/5 multisig (`0xd1DE...`), **not** the Governor/Timelock. This means all contract upgrades bypass on-chain governance — the multisig can upgrade any contract without a proposal or timelock delay. 4 of 5 signers overlap with the L2 Safe.
 - **Low governance participation**: Only 3-12 votes per Snapshot proposal suggests governance is effectively centralized among a small group.
 
 ---
@@ -442,12 +452,12 @@ An additional **$87.4M** is locked in yield aggregators and lending protocols bu
 
 **Subcategory A: Governance**
 
-- Ethereum: Compound Governor with esMET voting token + 48-hour Timelock. Good governance structure.
-- Base/Optimism: 3/5 multisig with no timelock and anonymous signers — weaker governance.
-- ProxyAdmin owner controls contract upgrades — relationship to Governor/Timelock unclear.
+- Ethereum: Compound Governor with esMET voting token + 48-hour Timelock for parameter changes. However, **contract upgrades are controlled by a 3/5 multisig that bypasses the Governor/Timelock**.
+- Base/Optimism: 3/5 multisig with no timelock and anonymous signers.
+- All chains effectively governed by the same group of multisig signers (4/5 overlap).
 - Low governance participation (3-12 voters).
 
-**Governance Score: 3/5** - On-chain Governor with 48h timelock on Ethereum is good, but L2 deployments rely on a 3/5 multisig without timelock. Anonymous signers and low participation reduce confidence.
+**Governance Score: 3.5/5** - While an on-chain Governor with 48h timelock exists on Ethereum, contract upgrades bypass it entirely via a 3/5 multisig. All chains are effectively controlled by the same small group of anonymous signers.
 
 **Subcategory B: Programmability**
 
@@ -468,9 +478,9 @@ An additional **$87.4M** is locked in yield aggregators and lending protocols bu
 
 **Dependencies Score: 3/5** - Multiple established dependencies. Chainlink and LayerZero are well-established. Vesper is same-company, adding concentration risk.
 
-**Centralization Score = (3 + 2 + 3) / 3 = 2.67**
+**Centralization Score = (3.5 + 2 + 3) / 3 = 2.83**
 
-**Score: 2.7/5** - Good governance on Ethereum (Governor + Timelock) but weaker on L2s (3/5 multisig). Moderate external dependencies.
+**Score: 2.8/5** - Governor + Timelock exists on Ethereum but contract upgrades bypass it via 3/5 multisig. All chains effectively controlled by same anonymous multisig signers. Moderate external dependencies.
 
 #### Category 3: Funds Management (Weight: 30%)
 
@@ -527,11 +537,11 @@ Final Score = (Centralization × 0.30) + (Funds Mgmt × 0.30) + (Audits × 0.20)
 | Category | Score | Weight | Weighted |
 |----------|-------|--------|----------|
 | Audits & Historical | 2.5 | 20% | 0.50 |
-| Centralization & Control | 2.7 | 30% | 0.81 |
+| Centralization & Control | 2.8 | 30% | 0.84 |
 | Funds Management | 1.75 | 30% | 0.525 |
 | Liquidity Risk | 2.0 | 15% | 0.30 |
 | Operational Risk | 2.0 | 5% | 0.10 |
-| **Final Score** | | | **2.235/5.0** |
+| **Final Score** | | | **2.265/5.0** |
 
 **Optional Modifiers:**
 - Protocol live >2 years with no direct incidents: **-0.0** (Sonne incident was indirect but still affected users)
@@ -546,9 +556,9 @@ Final Score = (Centralization × 0.30) + (Funds Mgmt × 0.30) + (Audits × 0.20)
 | **3.5-4.5** | **Elevated Risk** | Limited approval, strict limits |
 | **4.5-5.0** | **High Risk** | Not recommended |
 
-**Final Risk Tier: Low Risk (2.2/5.0)**
+**Final Risk Tier: Low Risk (2.3/5.0)**
 
-Metronome Synth benefits from deep DEX liquidity ($76M), strong DeFi integration ($87M in yield aggregators), an experienced and public team (Bloq/Garzik), and a fully on-chain over-collateralized model with transparent reserves. The Governor + 48h Timelock on Ethereum provides meaningful governance protection. The main concerns are the 3/5 multisig without timelock on L2 deployments, the relatively modest bug bounty ($50K), the unclear ProxyAdmin upgrade path, and Vesper Finance concentration risk. With ~2 years in production and no direct exploits, the protocol falls into the low risk tier with standard monitoring recommended.
+Metronome Synth benefits from deep DEX liquidity ($76M), strong DeFi integration ($87M in yield aggregators), an experienced and public team (Bloq/Garzik), and a fully on-chain over-collateralized model with transparent reserves. However, all contract upgrades across all chains are controlled by 3/5 multisigs with anonymous signers and no timelock — the on-chain Governor/Timelock on Ethereum only governs parameter changes, not upgrades. The relatively modest bug bounty ($50K) and Vesper Finance concentration risk are additional concerns. With ~2 years in production and no direct exploits, the protocol falls into the low risk tier with standard monitoring recommended.
 
 ---
 
@@ -557,6 +567,6 @@ Metronome Synth benefits from deep DEX liquidity ($76M), strong DeFi integration
 - **Time-based**: Reassess in 6 months (August 2026)
 - **TVL-based**: Reassess if protocol TVL changes by more than 50%
 - **Incident-based**: Reassess after any exploit, governance change, or collateral modification
-- **Governance-based**: Reassess if ProxyAdmin ownership structure changes or if L2 multisig threshold changes
+- **Governance-based**: Reassess if ProxyAdmin ownership is transferred to the Timelock, if multisig threshold/signers change, or if upgrade timelock is added
 - **Dependency-based**: Reassess if Vesper Finance experiences any security incident or significant TVL decline
 - **Audit-based**: Reassess when/if top-tier audit is completed or bug bounty is significantly increased
