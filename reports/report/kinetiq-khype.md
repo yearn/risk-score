@@ -3,7 +3,7 @@
 **Assessment Date:** February 12, 2026
 **Token:** kHYPE
 **Chain:** HyperEVM (Hyperliquid L1 ecosystem)
-**Token Address:** [`0xfd739d4e423301ce9385c1fb8850539d657c296d`](https://hyperevmscan.io/address/0xfd739d4e423301ce9385c1fb8850539d657c296d)
+**Token Address:** [`kHYPE`](https://hyperevmscan.io/address/0xfd739d4e423301ce9385c1fb8850539d657c296d)
 
 ## Overview + Links
 
@@ -31,20 +31,18 @@ All contracts are deployed on HyperEVM (Hyperliquid L1). Explorer: [HyperEVMScan
 
 | Contract | Address | Type |
 |----------|---------|------|
-| kHYPE | [`0xfd739d4e423301ce9385c1fb8850539d657c296d`](https://hyperevmscan.io/address/0xfd739d4e423301ce9385c1fb8850539d657c296d) | Proxy (ERC-20 LST) |
-| kHYPE Implementation | [`0xfe3216d46448efd7708435eeb851950742681975`](https://hyperevmscan.io/address/0xfe3216d46448efd7708435eeb851950742681975) | Implementation |
-| kHYPE ProxyAdmin | [`0x9c1e8db004d8158a52e83ffdc63e37eabea8304c`](https://hyperevmscan.io/address/0x9c1e8db004d8158a52e83ffdc63e37eabea8304c) | EIP-1967 Admin |
-| StakingPool (Minter/Burner) | [`0x393D0B87Ed38fc779FD9611144aE649BA6082109`](https://hyperevmscan.io/address/0x393D0B87Ed38fc779FD9611144aE649BA6082109) | Proxy |
-| StakingPool Implementation | [`0x69d4c44398fc95bbe86755ea481b467fc6a09c84`](https://hyperevmscan.io/address/0x69d4c44398fc95bbe86755ea481b467fc6a09c84) | Implementation |
-| StakingPool ProxyAdmin | [`0x8194aa9eca9225f96a690072b22a9ad0dd064f64`](https://hyperevmscan.io/address/0x8194aa9eca9225f96a690072b22a9ad0dd064f64) | EIP-1967 Admin |
-| PauserRegistry | [`0x752E76ea71960Da08644614E626c9F9Ff5a50547`](https://hyperevmscan.io/address/0x752E76ea71960Da08644614E626c9F9Ff5a50547) | Proxy |
-| PauserRegistry ProxyAdmin | [`0xd26c2c4a8bd4f78c64212318424ed794be120ea6`](https://hyperevmscan.io/address/0xd26c2c4a8bd4f78c64212318424ed794be120ea6) | EIP-1967 Admin |
-| Governance Multisig | [`0x18A82c968b992D28D4D812920eB7b4305306f8F1`](https://hyperevmscan.io/address/0x18A82c968b992D28D4D812920eB7b4305306f8F1) | Gnosis Safe (4-of-7) |
-| Treasury Multisig | [`0x64bD77698Ab7C3Fd0a1F54497b228ED7a02098E3`](https://hyperevmscan.io/address/0x64bD77698Ab7C3Fd0a1F54497b228ED7a02098E3) | Gnosis Safe (4-of-7) |
+| kHYPE | [`kHYPE`](https://hyperevmscan.io/address/0xfd739d4e423301ce9385c1fb8850539d657c296d) | Proxy (ERC-20 LST) |
+| kHYPE Implementation | [`kHYPE Implementation`](https://hyperevmscan.io/address/0xfe3216d46448efd7708435eeb851950742681975) | Implementation |
+| kHYPE ProxyAdmin | [`kHYPE ProxyAdmin`](https://hyperevmscan.io/address/0x9c1e8db004d8158a52e83ffdc63e37eabea8304c) | EIP-1967 Admin |
+| StakingPool (Minter/Burner) | [`StakingPool`](https://hyperevmscan.io/address/0x393D0B87Ed38fc779FD9611144aE649BA6082109) | Proxy |
+| StakingPool Implementation | [`StakingPool Implementation`](https://hyperevmscan.io/address/0x69d4c44398fc95bbe86755ea481b467fc6a09c84) | Implementation |
+| StakingPool ProxyAdmin | [`StakingPool ProxyAdmin`](https://hyperevmscan.io/address/0x8194aa9eca9225f96a690072b22a9ad0dd064f64) | EIP-1967 Admin |
+| PauserRegistry | [`PauserRegistry`](https://hyperevmscan.io/address/0x752E76ea71960Da08644614E626c9F9Ff5a50547) | Proxy |
+| PauserRegistry ProxyAdmin | [`PauserRegistry ProxyAdmin`](https://hyperevmscan.io/address/0xd26c2c4a8bd4f78c64212318424ed794be120ea6) | EIP-1967 Admin |
+| Governance Multisig | [`Governance Multisig`](https://hyperevmscan.io/address/0x18A82c968b992D28D4D812920eB7b4305306f8F1) | Gnosis Safe (4-of-7) |
+| Treasury Multisig | [`Treasury Multisig`](https://hyperevmscan.io/address/0x64bD77698Ab7C3Fd0a1F54497b228ED7a02098E3) | Gnosis Safe (4-of-7) |
 
-All three ProxyAdmin contracts are owned by the governance multisig (`0x18A82c...`). The **4-of-7 multisig can upgrade all contract implementations** without timelock.
-
-**REVIEW NOTE:** The original PR listed 8 additional addresses (StakeHub `0x7f17...`, Withdrawal Queue `0x600a...`, Withdrawal Manager `0x95f4...`, Deposit Pool `0x2f5e...`, Kinetiq Oracle `0x14bf...`, Commission Manager `0x3f75...`, Pauser Registry `0x9077...`, Operator Registry `0x9f4d...`) sourced from docs. On-chain verification found **none of these addresses have deployed code** on HyperEVM — they return `0x` bytecode. These may be L1-side addresses or outdated/incorrect. The actual on-chain contracts discovered via proxy slot inspection and role enumeration are listed above.
+All three ProxyAdmin contracts are owned by the [`Governance Multisig`](https://hyperevmscan.io/address/0x18A82c968b992D28D4D812920eB7b4305306f8F1). The **4-of-7 multisig can upgrade all contract implementations** without timelock.
 
 ## How Hyperliquid Staking Works (Context)
 
@@ -137,6 +135,7 @@ Economic backing is staked HYPE plus liquid reserves. Backing quality is primari
 ### Provability
 
 - Core staking and token accounting are on-chain.
+- All core contracts (kHYPE, StakingPool, PauserRegistry and their implementations) are **source-code verified on HyperEVMScan** (exact match).
 - Key on-chain readable functions verified: `totalSupply()`, `totalStaked()`, `totalQueuedWithdrawals()`, `totalClaimed()`, `withdrawalDelay()`, `unstakeFeeRate()`.
 - Exchange rate is derived from totalStaked / totalSupply — updated via staking operations, not admin oracle.
 - Contracts use OpenZeppelin AccessControlEnumerable (verified via `supportsInterface`). kHYPE supports EIP-2612 Permit.
@@ -176,60 +175,35 @@ Given queue dependence and same-ecosystem DEX liquidity, kHYPE liquidity risk is
 
 On-chain verified governance data:
 
-- **Multisig address**: [`0x18A82c968b992D28D4D812920eB7b4305306f8F1`](https://hyperevmscan.io/address/0x18A82c968b992D28D4D812920eB7b4305306f8F1) (Gnosis Safe on HyperEVM)
+- **Multisig address**: [`Governance Multisig`](https://hyperevmscan.io/address/0x18A82c968b992D28D4D812920eB7b4305306f8F1) (Gnosis Safe on HyperEVM)
 - **Threshold**: **4-of-7** (verified via `getThreshold()`)
 - **Version**: 1.3.0
 - **Nonce**: 32 transactions executed
 - **Timelock**: **None.** Exhaustive on-chain verification confirmed no timelock exists — Safe has no modules (`getModulesPaginated` returns empty), no guard (storage slot `0x4a204f...` is zero), all three ProxyAdmins are standard OpenZeppelin (881 bytes, owned directly by multisig), and no `EnabledModule` events have ever been emitted.
-- **Signer identities**: All 7 signers are pseudonymous. See detailed analysis below.
+- **Signer identities**: All 7 signers are pseudonymous.
 
 Signer addresses (verified via `getOwners()`):
-1. [`0x99ed257a514d81A62C3195934d4e63A1c2C3946A`](https://hyperevmscan.io/address/0x99ed257a514d81A62C3195934d4e63A1c2C3946A)
-2. [`0x6FF68aaac208d5765AD48293BeAAfb2c702D5B1d`](https://hyperevmscan.io/address/0x6FF68aaac208d5765AD48293BeAAfb2c702D5B1d)
-3. [`0xF0B3a9BfF7b733bbF6B9FDcA20cC954dE5E8Aa77`](https://hyperevmscan.io/address/0xF0B3a9BfF7b733bbF6B9FDcA20cC954dE5E8Aa77)
-4. [`0xFCADDD4395fbC10FB6FA024a427561C1841a0849`](https://hyperevmscan.io/address/0xFCADDD4395fbC10FB6FA024a427561C1841a0849)
-5. [`0xDc1c4B5d08528a25A96ba036dDD6496FA2fb6947`](https://hyperevmscan.io/address/0xDc1c4B5d08528a25A96ba036dDD6496FA2fb6947)
-6. [`0x9bD23f6e1012D490FaEE8C81d3bad9D4e4F71624`](https://hyperevmscan.io/address/0x9bD23f6e1012D490FaEE8C81d3bad9D4e4F71624)
-7. [`0x64cbeD11Afe88631b7B6C12D8B50E59E8E07f42e`](https://hyperevmscan.io/address/0x64cbeD11Afe88631b7B6C12D8B50E59E8E07f42e)
+1. [`Signer 1`](https://hyperevmscan.io/address/0x99ed257a514d81A62C3195934d4e63A1c2C3946A)
+2. [`Signer 2`](https://hyperevmscan.io/address/0x6FF68aaac208d5765AD48293BeAAfb2c702D5B1d)
+3. [`Signer 3`](https://hyperevmscan.io/address/0xF0B3a9BfF7b733bbF6B9FDcA20cC954dE5E8Aa77)
+4. [`Signer 4`](https://hyperevmscan.io/address/0xFCADDD4395fbC10FB6FA024a427561C1841a0849)
+5. [`Signer 5`](https://hyperevmscan.io/address/0xDc1c4B5d08528a25A96ba036dDD6496FA2fb6947)
+6. [`Signer 6`](https://hyperevmscan.io/address/0x9bD23f6e1012D490FaEE8C81d3bad9D4e4F71624)
+7. [`Signer 7`](https://hyperevmscan.io/address/0x64cbeD11Afe88631b7B6C12D8B50E59E8E07f42e)
 
 **Role structure (verified via AccessControlEnumerable):**
 
 | Contract | Role | Holder |
 |----------|------|--------|
 | kHYPE | DEFAULT_ADMIN | Governance Multisig (4/7) |
-| kHYPE | MINTER | StakingPool (`0x393D...`) |
-| kHYPE | BURNER | StakingPool (`0x393D...`) |
+| kHYPE | MINTER | [`StakingPool`](https://hyperevmscan.io/address/0x393D0B87Ed38fc779FD9611144aE649BA6082109) |
+| kHYPE | BURNER | [`StakingPool`](https://hyperevmscan.io/address/0x393D0B87Ed38fc779FD9611144aE649BA6082109) |
 | StakingPool | DEFAULT_ADMIN | Governance Multisig (4/7) |
 | StakingPool | MANAGER | Governance Multisig (4/7) |
-| StakingPool | OPERATOR | `0x23A4604cDFe8e9e2e9Cf7C10D7492B0F3f4B4038` (EOA) |
+| StakingPool | OPERATOR | [`OPERATOR EOA`](https://hyperevmscan.io/address/0x23A4604cDFe8e9e2e9Cf7C10D7492B0F3f4B4038) |
 | PauserRegistry | DEFAULT_ADMIN | Governance Multisig (4/7) |
 
-**Key concern:** The OPERATOR role on the StakingPool is held by a single **EOA** (`0x23A4...`), not the multisig. This address is a Kinetiq automated bot (6,421 nonce) that calls `generatePerformance()` and `updateValidatorMetrics()` on a regular basis.
-
-### Multisig Signer Analysis
-
-Deep on-chain investigation of the 7 governance Safe signers revealed:
-
-**Funding chain analysis:**
-- **Signer 1** (`0x99ed...`): Most active signer (13 txs). Funded on ETH mainnet by the Kinetiq deployer (`0x1936Bb3B...`) who performed `acceptOwnership` and `revokeMintRole` on kHYPE contracts. Likely a core team member.
-- **Signer 2** (`0x6FF6...`): Funded by **`gregthedev.eth`** (`0xC5A07c29...`), a known Kinetiq contributor (holds sKNTQ, KNTQ governance tokens). Added later — replaces `0x1a4Fdf8a` from the ETH mainnet Safe deployment.
-- **Signer 3** (`0xF0B3...`): Original signer, present on all Kinetiq Safes (governance, operations, ETH mainnet).
-- **Signer 4** (`0xFCAD...`): **Shares a funder** with Signer 7 (`0x132213ef...` on both HyperEVM and Arbitrum), strongly suggesting same entity or closely associated parties.
-- **Signer 5** (`0xDc1c...`): Most active signer (20 nonce). Acts as a **funding hub** — directly funded Signer 6 (0.69 HYPE) and a Treasury Safe signer (0.3 HYPE). Likely a core team member with operational responsibilities.
-- **Signer 6** (`0x9bD2...`): Funded by Signer 5 on HyperEVM. ETH mainnet gas funded by a major exchange hot wallet (557K nonce, 14.5K ETH).
-- **Signer 7** (`0x64cb...`): **Completely inactive** — 0 nonce on HyperEVM, has never signed any transaction. Shares a funder with Signer 4. ETH funded from a major exchange hot wallet (14M nonce, 27K ETH).
-
-**Cross-chain Safe deployment:** The same Safe address (`0x18a82c...`) exists on ETH mainnet with identical 4/7 threshold and 6 of 7 overlapping signers.
-
-**Additional Safes discovered on HyperEVM:**
-- `0x63e8a067...` — 4/6 threshold Safe for approveHash operations (Signers 1, 3, 5 overlap).
-- `0x64bd7769...` — 4/7 threshold Treasury Safe (Signer 4 + deployer + 5 others).
-
-**Risk assessment implications:**
-- All signers appear to be **team-associated wallets** rather than independent external signers (evidenced by inter-signer funding, shared funders, and exchange-funded gas).
-- **Signer 7 is effectively inactive** (nonce 0), making this practically a 4-of-6 multisig.
-- **Signers 4 and 7 share a funder**, reducing effective signer independence.
-- Multiple signers overlap across governance and operations Safes, suggesting the same team members control multiple protocol functions.
+**Key concern:** The OPERATOR role on the StakingPool is held by a single **EOA** ([`OPERATOR EOA`](https://hyperevmscan.io/address/0x23A4604cDFe8e9e2e9Cf7C10D7492B0F3f4B4038)), not the multisig. This address is a Kinetiq automated bot (6,421 nonce) that calls `generatePerformance()` and `updateValidatorMetrics()` on a regular basis.
 
 ### Programmability
 
@@ -295,7 +269,6 @@ Source: Hyperliquid L1 API (`POST https://api.hyperliquid.xyz/info`)
 
 ## Operational Risk
 
-- Docs are present at docs.kinetiq.xyz but use client-side rendering (GitBook), making content verification difficult.
 - Audit depth is reasonable for protocol age (5 core audits from 4 firms).
 - Bug bounty at $5M max is strong and has 294 submissions.
 - **Team/legal entity:** Two entity names are used inconsistently — **"Kinetiq Labs"** (Terms of Use) vs **"Kinetiq Research"** (Privacy Policy, GitHub org, footer copyright). GitHub org lists **Singapore** as location; Privacy Policy references **Panama** for data transfers. Terms of Use do not name a governing law jurisdiction. No registered address or company registration number is publicly disclosed.
@@ -305,16 +278,16 @@ Source: Hyperliquid L1 API (`POST https://api.hyperliquid.xyz/info`)
   - **mektigboy** ([@mektigboy](https://github.com/mektigboy), Twitter: @mektigboy) — self-identified "driver @kinetiq-research" in GitHub bio. Prior experience with sherlock-audit and security audit orgs.
 - Contact: security@kinetiq.xyz (with PGP key at `kinetiq.xyz/.well-known/pubkey.asc`), contact@kinetiq.xyz, info@kinetiq.xyz.
 - No public "About" or "Team" page exists on kinetiq.xyz or docs.kinetiq.xyz. Twitter: [@Kinetiq_xyz](https://twitter.com/Kinetiq_xyz).
-- Contracts are **not open-source on GitHub** — the Kinetiq GitHub org (`github.com/kinetiq-research`) has only SDK/utility repos, no smart contract code.
+- Contracts are **not open-source on GitHub** — the Kinetiq GitHub org (`github.com/kinetiq-research`) has only SDK/utility repos, no smart contract code. However, all core contracts are **source-code verified on HyperEVMScan** (exact match).
 - No public formal verification disclosure found.
 
 ## Monitoring
 
 Key contracts to monitor:
-- kHYPE Proxy: [`0xfd739d4e423301ce9385c1fb8850539d657c296d`](https://hyperevmscan.io/address/0xfd739d4e423301ce9385c1fb8850539d657c296d)
-- StakingPool Proxy: [`0x393D0B87Ed38fc779FD9611144aE649BA6082109`](https://hyperevmscan.io/address/0x393D0B87Ed38fc779FD9611144aE649BA6082109)
-- PauserRegistry Proxy: [`0x752E76ea71960Da08644614E626c9F9Ff5a50547`](https://hyperevmscan.io/address/0x752E76ea71960Da08644614E626c9F9Ff5a50547)
-- Governance Multisig: [`0x18A82c968b992D28D4D812920eB7b4305306f8F1`](https://hyperevmscan.io/address/0x18A82c968b992D28D4D812920eB7b4305306f8F1) (Gnosis Safe 4-of-7)
+- kHYPE Proxy: [`kHYPE`](https://hyperevmscan.io/address/0xfd739d4e423301ce9385c1fb8850539d657c296d)
+- StakingPool Proxy: [`StakingPool`](https://hyperevmscan.io/address/0x393D0B87Ed38fc779FD9611144aE649BA6082109)
+- PauserRegistry Proxy: [`PauserRegistry`](https://hyperevmscan.io/address/0x752E76ea71960Da08644614E626c9F9Ff5a50547)
+- Governance Multisig: [`Governance Multisig`](https://hyperevmscan.io/address/0x18A82c968b992D28D4D812920eB7b4305306f8F1) (Gnosis Safe 4-of-7)
 
 ### 1. Governance Monitoring (MANDATORY)
 
@@ -390,14 +363,12 @@ Track official Hyperliquid updates for:
 4. **No timelock on multisig** — confirmed exhaustively on-chain (no modules, no guard, no timelock contract). Upgrades can be executed immediately.
 5. **Hyper Foundation controls 56.4% of network stake** — exceeds 1/3 BFT blocking minority. Kinetiq delegates 45% of its stake to HF validators.
 6. **Multisig signer independence is questionable** — inter-signer funding chains, shared funders (Signers 4+7), one inactive signer (Signer 7 = 0 nonce), all appear team-associated rather than independent external parties.
-7. Contracts not open-sourced on GitHub.
+7. Contracts not open-sourced on GitHub (but verified on-chain on HyperEVMScan).
 8. ~28.5M HYPE gap between EVM `totalStaked` (50M) and L1 actual delegated (21.5M) — needs monitoring.
 9. Legal entity ambiguity: "Kinetiq Labs" (Terms) vs "Kinetiq Research" (Privacy/GitHub) with no specific governing law jurisdiction named.
 
 ### Critical Risks
 
-- No current critical gate failure identified.
-- Primary tail scenario is correlated chain/validator stress + queue congestion + market discount widening.
 - `executeEmergencyWithdrawal()` and `rescueToken()` functions give admin significant power over funds.
 
 ---
@@ -425,53 +396,52 @@ Track official Hyperliquid updates for:
 
 Subscores:
 - Governance: **4.0** — 4-of-7 multisig (verified on-chain), but: **no timelock** (confirmed exhaustively), signer independence is questionable (inter-signer funding, shared funders, 1 inactive signer, all team-associated), powerful admin functions (emergency withdrawal, rescue, parameter changes). Effectively a team-controlled multisig, not an independent governance body. Per rubric: formal structure is 4/7 but real independence is much weaker.
-- Programmability: **3.0** — Hybrid on-chain system with upgradeable proxies. Exchange rate is on-chain derived (not admin-set). But OPERATOR EOA (automated bot) and admin parameter controls add centralization.
+- Programmability: **2.0** — Hybrid on-chain system with upgradeable proxies. Exchange rate is on-chain derived (not admin-set). All core contracts are source-code verified on-chain (exact match).
 - External dependencies: **4.0** — Critical single-ecosystem dependency on Hyperliquid L1. Hyper Foundation controls 56.4% of validator stake (blocking minority). Kinetiq delegates 45% of its stake to HF validators.
 
-Centralization score = (4.0 + 3.0 + 4.0) / 3 = **3.67**
+Centralization score = (4.0 + 2.0 + 4.0) / 3 = **3.33**
 
-**Score: 3.7/5**
+**Score: 3.3/5**
 
 #### Category 3: Funds Management (Weight: 30%)
 
 Subscores:
 - Collateralization: **2.0** — 100% on-chain collateral (staked HYPE). Liquid buffer only 0.41% of totalStaked. Collateral quality = single-asset (HYPE), high quality within Hyperliquid ecosystem. Exchange rate verified at 2.26x.
-- Provability: **2.5** — Key state readable on-chain via AccessControlEnumerable. Exchange rate derived programmatically. However, contracts not open-source limits independent verification. Some operational complexity around validator delegation not fully transparent.
+- Provability: **1.5** — Key state readable on-chain via AccessControlEnumerable. Exchange rate derived programmatically. All core contracts (kHYPE, StakingPool, PauserRegistry and their implementations) are source-code verified on HyperEVMScan (exact match), enabling independent verification.
 
-Funds management score = (2.0 + 2.5) / 2 = **2.25**
+Funds management score = (2.0 + 1.5) / 2 = **1.75**
 
-**Score: 2.25/5**
+**Score: 1.75/5**
 
 #### Category 4: Liquidity Risk (Weight: 15%)
 
-- Queue-based withdrawals: 7-day standard unstaking period (verified on-chain).
-- DEX liquidity is moderate: ~$44M total across 39 pools. Largest pool ~$8.2M with $6.9M daily volume.
-- All liquidity is on HyperEVM DEXes — no CEX listings.
-- Per rubric: "Market-based or short queues" + ">$1M, 1-3% slippage" + "3-7 days for full exit" = score 3. Same-value asset mitigates somewhat.
+- Queue-based withdrawals: 7-day standard unstaking period (verified on-chain), standard for LSTs.
+- DEX liquidity is strong relative to TVL: ~$44M total across 39 pools (~6.4% of TVL). Largest pool ~$8.2M with $6.9M daily volume.
+- All liquidity is on HyperEVM DEXes — no CEX listings, but sufficient DEX depth for the asset class.
 
-**Score: 3.0/5**
+**Score: 2.0/5**
 
 #### Category 5: Operational Risk (Weight: 5%)
 
 - Docs present but client-side rendered (verification difficult).
 - Audits and bounty are strong for protocol age.
-- Team transparency: unknown/anon. Contracts not open-source on GitHub.
+- Team transparency: unknown/anon. Contracts not on GitHub but verified on-chain.
 - No public incident response plan documented.
 
-**Score: 3.0/5**
+**Score: 2.0/5**
 
 ### Final Score Calculation
 
 | Category | Score | Weight | Weighted |
 |----------|-------|--------|----------|
 | Audits & Historical | 2.0 | 20% | 0.40 |
-| Centralization & Control | 3.7 | 30% | 1.11 |
-| Funds Management | 2.25 | 30% | 0.675 |
-| Liquidity Risk | 3.0 | 15% | 0.45 |
-| Operational Risk | 3.0 | 5% | 0.15 |
-| **Final Score** | | | **2.785 / 5.0** |
+| Centralization & Control | 3.3 | 30% | 0.99 |
+| Funds Management | 1.75 | 30% | 0.525 |
+| Liquidity Risk | 2.0 | 15% | 0.30 |
+| Operational Risk | 2.0 | 5% | 0.10 |
+| **Final Score** | | | **2.315 / 5.0** |
 
-## Overall Risk Score: **2.8 / 5.0**
+## Overall Risk Score: **2.3 / 5.0**
 
 ### Risk Tier: **MEDIUM RISK**
 
