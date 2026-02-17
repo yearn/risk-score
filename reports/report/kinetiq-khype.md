@@ -1,6 +1,6 @@
 # Protocol Risk Assessment: Kinetiq kHYPE
 
-**Assessment Date:** February 12, 2026
+**Assessment Date:** February 17, 2026
 **Token:** kHYPE
 **Chain:** HyperEVM (Hyperliquid L1 ecosystem)
 **Token Address:** [`kHYPE`](https://hyperevmscan.io/address/0xfd739d4e423301ce9385c1fb8850539d657c296d)
@@ -222,9 +222,13 @@ Critical dependencies:
 
 Dependency concentration on Hyperliquid ecosystem is structurally high. **HyperEVM is NOT a separate chain** — it shares the same HyperBFT consensus as HyperCore. There is no bridge risk between HyperCore and HyperEVM; the risk is pure L1 liveness.
 
+**Important:** Hyperliquid is a highly centralized chain — Hyper Foundation controls 56.4% of validator stake via 5 validators, exceeding the 1/3 BFT blocking minority. HYPE staking cannot be considered as safe as ETH staking, where validator set decentralization is significantly stronger (~1M validators, no single entity near blocking minority). This centralization risk is inherited by kHYPE and should be weighed accordingly.
+
 ### Hyperliquid Validator Set Dependency (Quantified)
 
 Source: Hyperliquid L1 API (`POST https://api.hyperliquid.xyz/info`)
+
+Verify validator data: [Hyperliquid Staking Portal](https://app.hyperliquid.xyz/staking) | [Validator Performance](https://app.hyperliquid.xyz/staking/validatorPerformance) | [HypurrScan Staking](https://hypurrscan.io/staking)
 
 **Network overview (February 2026):**
 
@@ -260,9 +264,9 @@ Source: Hyperliquid L1 API (`POST https://api.hyperliquid.xyz/info`)
 - **Zero exposure to currently jailed validators.**
 
 **Slashing/jailing context:**
-- **No automatic slashing is implemented** on Hyperliquid (per official docs).
-- Jailing = reward cessation only, no principal loss.
-- Validators can be jailed by peer vote for latency/responsiveness issues.
+- **No automatic slashing is implemented** on Hyperliquid (per [official docs](https://hyperliquid.gitbook.io/hyperliquid-docs/hypercore/staking)). However, slashing may be enforced in the future and must be considered a forward-looking risk if Kinetiq delegates to validators that suffer a slashing event (per [Kinetiq risk disclosures](https://kinetiq.xyz/stake-hype#what-are-the-potential-risks)).
+- Jailing = reward cessation only, no principal loss. Jailed validators visible on [Hyperliquid Staking Portal](https://app.hyperliquid.xyz/staking).
+- Validators can be jailed by peer vote for latency/responsiveness issues (see [validator prison docs](https://hyperliquid.gitbook.io/hyperliquid-docs/hypercore/staking)).
 - Unstaking queue from L1 validators: **7 days**.
 
 **L1 incident history:** No Hyperliquid L1 consensus or liveness incidents found in the DeFiLlama hacks database. Three HyperEVM application-level exploits were recorded (HyperVault $3.6M rugpull, Hyperdrive $773K router exploit, Raga Finance $18.5K exploit) — none affecting L1 itself.
