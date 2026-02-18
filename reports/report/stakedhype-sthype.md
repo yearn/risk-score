@@ -389,9 +389,9 @@ Funds management score = (2.5 + 2.0) / 2 = **2.25**
 - DEX liquidity is extremely thin: ~$380K total across all pools (0.3% of $124M TVL). Largest single pool ~$186K with near-zero daily volume.
 - `maxRedeemable()` returned 0 at time of check — no instant redemption buffer available.
 - Protocol unstaking queue is the primary exit mechanism, not secondary market trading.
-- Per rubric: "Withdrawal queues or restrictions" + "<$1M DEX liquidity" + ">1 week potential exit time" = score 4. However, same-value asset (stHYPE/HYPE) mitigates somewhat.
+- Per rubric: "Withdrawal queues or restrictions" + "<$1M DEX liquidity" + ">1 week potential exit time" = score 4. Current DEX liquidity ($380K) with near-zero daily trading volume ($13/day avg) means secondary market exits are effectively unavailable for any meaningful position size. The protocol unstaking queue (7+ days, up to 90 days under stress) is the only realistic exit path.
 
-**Score: 3.5/5**
+**Score: 4.0/5**
 
 #### Category 5: Operational Risk (Weight: 5%)
 
@@ -407,9 +407,9 @@ Funds management score = (2.5 + 2.0) / 2 = **2.25**
 | Audits & Historical | 2.5 | 20% | 0.50 |
 | Centralization & Control | 3.67 | 30% | 1.10 |
 | Funds Management | 2.25 | 30% | 0.68 |
-| Liquidity Risk | 3.5 | 15% | 0.53 |
+| Liquidity Risk | 4.0 | 15% | 0.60 |
 | Operational Risk | 3.0 | 5% | 0.15 |
-| **Final Score** | | | **2.95 / 5.0** |
+| **Final Score** | | | **3.03 / 5.0** |
 
 ## Overall Risk Score: **3.0 / 5.0**
 
