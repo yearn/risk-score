@@ -1,6 +1,6 @@
 # Protocol Risk Assessment: StakedHYPE stHYPE (via Hyperliquid Stake Marketplace)
 
-**Assessment Date:** February 12, 2026
+**Assessment Date:** February 18, 2026
 **Token:** stHYPE
 **Chain:** HyperEVM (Hyperliquid L1 ecosystem)
 **Primary Docs:** https://docs.stakedhype.fi/technical/hyperliquid-stake-marketplace-hsm
@@ -37,20 +37,20 @@ The architecture has two layers:
 
 ## Contract Addresses
 
-All contracts are deployed on HyperEVM (Hyperliquid L1). Explorer: [Blockscout](https://hyperliquid.cloud.blockscout.com).
+All contracts are deployed on HyperEVM (Hyperliquid L1). Explorer: [HyperEVMScan](https://hyperevmscan.io).
 
 | Contract | Address | Type |
 |----------|---------|------|
-| stHYPE | [`0xfFaa4a3D97fE9107Cef8a3F48c069F577Ff76cC1`](https://hyperliquid.cloud.blockscout.com/address/0xfFaa4a3D97fE9107Cef8a3F48c069F577Ff76cC1) | Proxy (ERC-20 LST) |
-| stHYPE Impl | [`0xa2fdc8eca86e3cf2593ec20f42a777984927553c`](https://hyperliquid.cloud.blockscout.com/address/0xa2fdc8eca86e3cf2593ec20f42a777984927553c) | Implementation |
-| stHYPE ProxyAdmin | [`0xe7b0f26e8e20e109441f0ad1c885fffbb27125dc`](https://hyperliquid.cloud.blockscout.com/address/0xe7b0f26e8e20e109441f0ad1c885fffbb27125dc) | EIP-1967 Admin |
-| OverseerV1 | [`0xB96f07367e69e86d6e9C3F29215885104813eeAE`](https://hyperliquid.cloud.blockscout.com/address/0xB96f07367e69e86d6e9C3F29215885104813eeAE) | Proxy (mint/burn controller) |
-| OverseerV1 Impl | [`0xc9dcf086ee9f063bcd4c7d2ec4b82085142a8cee`](https://hyperliquid.cloud.blockscout.com/address/0xc9dcf086ee9f063bcd4c7d2ec4b82085142a8cee) | Implementation |
-| OverseerV1 ProxyAdmin | [`0x943a7e81373423f7bb0fb6a3e55553638264fd6b`](https://hyperliquid.cloud.blockscout.com/address/0x943a7e81373423f7bb0fb6a3e55553638264fd6b) | EIP-1967 Admin |
-| wstHYPE | [`0x94e8396e0869c9F2200760aF0621aFd240E1CF38`](https://hyperliquid.cloud.blockscout.com/address/0x94e8396e0869c9F2200760aF0621aFd240E1CF38) | Proxy (wrapped shares) |
-| wstHYPE Impl | [`0x2936b42d1bfa7298faa44644ddea665c7aa51ef8`](https://hyperliquid.cloud.blockscout.com/address/0x2936b42d1bfa7298faa44644ddea665c7aa51ef8) | Implementation |
-| wstHYPE ProxyAdmin | [`0xa29a2043b2fcbc9189beb9e6efcb2ba48bb3d586`](https://hyperliquid.cloud.blockscout.com/address/0xa29a2043b2fcbc9189beb9e6efcb2ba48bb3d586) | EIP-1967 Admin |
-| Governance Multisig | [`0x97dee0ea4ca10560f260a0f6f45bdc128a1d51f9`](https://hyperliquid.cloud.blockscout.com/address/0x97dee0ea4ca10560f260a0f6f45bdc128a1d51f9) | Gnosis Safe (3-of-5) |
+| stHYPE | [`0xfFaa4a3D97fE9107Cef8a3F48c069F577Ff76cC1`](https://hyperevmscan.io/address/0xfFaa4a3D97fE9107Cef8a3F48c069F577Ff76cC1) | Proxy (ERC-20 LST) |
+| stHYPE Impl | [`0xa2fdc8eca86e3cf2593ec20f42a777984927553c`](https://hyperevmscan.io/address/0xa2fdc8eca86e3cf2593ec20f42a777984927553c) | Implementation |
+| stHYPE ProxyAdmin | [`0xe7b0f26e8e20e109441f0ad1c885fffbb27125dc`](https://hyperevmscan.io/address/0xe7b0f26e8e20e109441f0ad1c885fffbb27125dc) | EIP-1967 Admin |
+| OverseerV1 | [`0xB96f07367e69e86d6e9C3F29215885104813eeAE`](https://hyperevmscan.io/address/0xB96f07367e69e86d6e9C3F29215885104813eeAE) | Proxy (mint/burn controller) |
+| OverseerV1 Impl | [`0xc9dcf086ee9f063bcd4c7d2ec4b82085142a8cee`](https://hyperevmscan.io/address/0xc9dcf086ee9f063bcd4c7d2ec4b82085142a8cee) | Implementation |
+| OverseerV1 ProxyAdmin | [`0x943a7e81373423f7bb0fb6a3e55553638264fd6b`](https://hyperevmscan.io/address/0x943a7e81373423f7bb0fb6a3e55553638264fd6b) | EIP-1967 Admin |
+| wstHYPE | [`0x94e8396e0869c9F2200760aF0621aFd240E1CF38`](https://hyperevmscan.io/address/0x94e8396e0869c9F2200760aF0621aFd240E1CF38) | Proxy (wrapped shares) |
+| wstHYPE Impl | [`0x2936b42d1bfa7298faa44644ddea665c7aa51ef8`](https://hyperevmscan.io/address/0x2936b42d1bfa7298faa44644ddea665c7aa51ef8) | Implementation |
+| wstHYPE ProxyAdmin | [`0xa29a2043b2fcbc9189beb9e6efcb2ba48bb3d586`](https://hyperevmscan.io/address/0xa29a2043b2fcbc9189beb9e6efcb2ba48bb3d586) | EIP-1967 Admin |
+| Governance Multisig | [`0x97dee0ea4ca10560f260a0f6f45bdc128a1d51f9`](https://hyperevmscan.io/address/0x97dee0ea4ca10560f260a0f6f45bdc128a1d51f9) | Gnosis Safe (3-of-5) |
 
 All contracts are **upgradeable** via EIP-1967 transparent proxy pattern. Each proxy has a separate ProxyAdmin contract. All three ProxyAdmin contracts are owned by the governance multisig (`0x97dee0ea...`, verified via `owner()` on each ProxyAdmin). This means the **3-of-5 multisig can upgrade all contract implementations** without timelock.
 
@@ -67,7 +67,7 @@ Hyperliquid’s staking model is validator-based and epoch-driven.
 
 ### Slashing in Hyperliquid (Important for stHYPE)
 
-As of **February 12, 2026**, Hyperliquid docs state that core HYPE staking currently has:
+As of **February 18, 2026**, Hyperliquid docs state that core HYPE staking currently has:
 
 - **No automatic validator slashing mechanism** in live staking.
 - **Jailing** as the immediate validator penalty path for uptime/behavior issues.
@@ -79,7 +79,7 @@ Practical interpretation for stHYPE:
 - **Future risk step-up:** if governance enables validator slashing later, stHYPE loss profile can change meaningfully and requires immediate reassessment.
 
 Historical status:
-- No official Hyperliquid documentation found describing a past **validator slashing event** in HYPE staking as of February 12, 2026.
+- No official Hyperliquid documentation found describing a past **validator slashing event** in HYPE staking as of February 18, 2026.
 - This is an inference from official docs and release/risk pages; absence of a documented event is not proof of impossibility.
 
 For stHYPE specifically, staking operations route through HSM abstractions and StakedHYPE’s queue/buffer logic, which adds additional smart-contract and operational layers on top of base protocol staking.
@@ -118,12 +118,12 @@ Assessment note:
 ## Historical Track Record
 
 - StakedHYPE documentation indicates active production operation with stHYPE issuance and unstaking mechanisms live.
-- Listed on [DeFiLlama](https://defillama.com/protocol/stakedhype) since July 2025 (~7 months at assessment date).
-- **Current TVL**: ~$133M (February 2026, per DeFiLlama).
+- Listed on [DeFiLlama](https://defillama.com/protocol/stakedhype) since July 2025 (~8 months at assessment date).
+- **Current TVL**: ~$124M (February 18, 2026, per DeFiLlama).
 - **Peak TVL**: ~$544M (July 2025).
-- **TVL trend**: Significant decline from peak, currently at ~24% of ATH. Likely driven by broader market conditions and HYPE price movements rather than protocol-specific issues.
+- **TVL trend**: Significant decline from peak, currently at ~23% of ATH. Likely driven by broader market conditions and HYPE price movements rather than protocol-specific issues.
 - No major publicly disclosed exploit was identified in StakedHYPE docs at assessment time. Not listed on [Rekt News](https://rekt.news/) or [DeFiLlama Hacks](https://defillama.com/hacks).
-- Track record is materially shorter and less battle-tested than older LSTs like stETH (~7 months vs 3+ years).
+- Track record is materially shorter and less battle-tested than older LSTs like stETH (~8 months vs 3+ years).
 
 ## Funds Management
 
@@ -144,14 +144,15 @@ stHYPE deposits are managed via HSM-integrated staking operations:
 
 ### Collateralization
 
-On-chain state (verified February 12, 2026):
-- **stHYPE totalSupply**: 4,273,108.50 stHYPE
-- **OverseerV1 liquid reserve**: 316,477.71 HYPE (7.4% of supply held as liquid HYPE)
-- **Exchange rate** (`balancePerShare`): 1.0200 (1.9962% accumulated yield since launch)
+On-chain state (verified February 18, 2026):
+- **stHYPE totalSupply**: 4,252,373.17 stHYPE
+- **Total HYPE backing** (`totalSupply × exchangeRate`): 4,338,882.91 HYPE
+- **OverseerV1 liquid reserve**: 261,728.59 HYPE (6.0% of total backing held as liquid HYPE)
+- **Exchange rate** (`balancePerShare`): 1.0203 (2.03% accumulated yield since launch)
 - **maxRedeemable**: 0 HYPE — no instant redemption buffer available at time of check, all burns go through 7-day unstaking queue
-- **burnCount**: 39,073 total burns processed
+- **burnCount**: 39,113 total burns processed
 
-Economic backing is staked HYPE plus liquid reserves. The remaining ~92.6% of HYPE is staked across validators via HyperCore Staking Modules.
+Economic backing is staked HYPE plus liquid reserves. The remaining ~94.0% of HYPE is staked across validators via HyperCore Staking Modules.
 - Backing quality is primarily dependent on Hyperliquid validator set quality and slashing/operational outcomes.
 - This is not off-chain custodial collateral; risk is on-chain protocol + validator behavior.
 
@@ -161,7 +162,12 @@ Economic backing is staked HYPE plus liquid reserves. The remaining ~92.6% of HY
 - Key on-chain readable functions verified: `totalSupply()`, `balancePerShare()`, `totalShares()`, `maxRedeemable()`, `burnCount()`, `getBurns(address)`, `redeemable(uint256)`.
 - Exchange rate (`balancePerShare`) is programmatically updated on-chain — not reliant on admin oracle updates.
 - Contracts use OpenZeppelin AccessControl with MINTER_ROLE, BURNER_ROLE, PAUSER_ROLE, DEFAULT_ADMIN_ROLE. OverseerV1 holds MINTER_ROLE and BURNER_ROLE on stHYPE. The 3-of-5 multisig holds DEFAULT_ADMIN_ROLE.
-- However, full real-time risk transparency (validator concentration, queue stress) depends on dashboard quality. HSM docs mention staged publication/finalization, so transparency posture should be considered improving but not fully mature.
+- **Transparency gaps remain in several areas:**
+  - **Validator delegation breakdown**: No public dashboard or on-chain mechanism shows per-validator stake distribution. The [operators page](https://docs.stakedhype.fi/governance/operators) lists operator names (ASXN, B-harvest, HypurrCO, etc.) but publishes no addresses, delegation amounts, or performance metrics.
+  - **Queue monitoring**: The only user-facing tool is an estimated withdrawal time at `app.valantis.xyz/staking` ([stake accounts docs](https://docs.stakedhype.fi/technical/stake-accounts)). No real-time queue depth, position, or reserve utilization data is published.
+  - **HSM not yet deployed**: The [HSM specification](https://docs.stakedhype.fi/technical/hyperliquid-stake-marketplace-hsm) uses future tense throughout (*"HSM will be natively integrated"*, *"stHYPE will use a governance process"*), indicating the Hyperliquid Stake Marketplace is still a design document, not a live system.
+  - **Off-chain operational components**: Reserve management relies on *"active liquidity management from the Protocol Delegator"* and *"coordination with custodians / HIP-3 operators"* ([stake accounts docs](https://docs.stakedhype.fi/technical/stake-accounts)) — off-chain processes with no on-chain enforcement or public monitoring.
+  - **1:1 backing unverifiable end-to-end**: The [transparency page](https://docs.stakedhype.fi/info/transparency-and-risks) claims *"stHYPE is always backed 1:1 by native HYPE"*, but no independent verification tool is provided. Users can verify EVM-side state (`totalSupply`, `balancePerShare`) but cannot independently audit the full HyperCore validator delegation breakdown.
 
 ## Liquidity Risk
 
@@ -170,24 +176,24 @@ stHYPE exit risk is higher than a pure wrapper token:
 - There is an unstaking queue design (not instant native redemption in all conditions).
 - Docs disclose a reserve buffer with a [`maxRedeemable()`](https://docs.stakedhype.fi/technical/integrate) function for instant redemptions, a Managed Liquidity Buffer (1M HYPE early-exit threshold, 300k HYPE buffer), and up to a 90-day wind-down horizon for specialized stake accounts in extreme stress conditions.
 
-### DEX Liquidity (per DeFiLlama, February 2026)
+### DEX Liquidity (per DeFiLlama, February 18, 2026)
 
-**Total DEX liquidity: ~$403K** — extremely thin relative to $131M TVL (0.3% of TVL in DEX pools).
+**Total DEX liquidity: ~$380K** — extremely thin relative to $124M TVL (0.3% of TVL in DEX pools).
 
 | DEX | Pair | TVL | Fee | Vol 7D |
 |-----|------|-----|-----|--------|
-| HyperSwap V3 | WHYPE-STHYPE | $196,659 | 0.01% | $53,047 |
-| Project X | WSTHYPE-KHYPE | $104,064 | 0.3% | N/A |
-| HyperSwap V3 | WHYPE-LSTHYPE | $59,804 | 0.3% | $129,923 |
-| Project X | WHYPE-WSTHYPE | $42,904 | 0.01% | $55,348 |
+| HyperSwap V3 | WHYPE-STHYPE | $186,012 | 0.01% | $33,002 |
+| Project X | WSTHYPE-KHYPE | $100,120 | 0.3% | N/A |
+| HyperSwap V3 | WHYPE-LSTHYPE | $54,172 | 0.3% | $57,978 |
+| Project X | WHYPE-WSTHYPE | $39,681 | 0.01% | N/A |
 
 No Curve, Laminar, or KittenSwap pools found for stHYPE despite these DEXes being deployed on HyperEVM.
 
-**Lending protocol deposits** dominate external stHYPE usage: ~$41M across HyperLend ($32M) and Morpho ($8M). Pendle markets hold ~$6M. These are not exit liquidity.
+**Lending protocol deposits** dominate external stHYPE usage: ~$44M across HyperLend ($30.5M), Morpho ($8.1M), and Pendle ($5.7M). These are not exit liquidity.
 
 Practical implications:
 - In normal conditions, protocol reserves/queue support predictable withdrawals (7-day unstaking).
-- **Secondary market exit is severely constrained**: the largest DEX pool is <$200K. Any meaningful position would need to rely on the protocol's native unstaking queue.
+- **Secondary market exit is severely constrained**: the largest DEX pool is ~$186K with near-zero daily volume. Any meaningful position would need to rely on the protocol's native unstaking queue.
 - In stress conditions, exits can be delayed up to 90 days (specialized stake account wind-down) and/or become market-impact sensitive.
 
 ## Centralization & Control Risks
@@ -203,18 +209,18 @@ StakedHYPE docs describe a planned dual-governance model based on a modified [Fr
 The current operational model is a **team-controlled multisig** without the documented veto mechanism.
 
 On-chain verified governance data:
-- **Multisig address**: [`0x97dee0ea4ca10560f260a0f6f45bdc128a1d51f9`](https://hyperliquid.cloud.blockscout.com/address/0x97dee0ea4ca10560f260a0f6f45bdc128a1d51f9) (Gnosis Safe on HyperEVM)
+- **Multisig address**: [`0x97dee0ea4ca10560f260a0f6f45bdc128a1d51f9`](https://hyperevmscan.io/address/0x97dee0ea4ca10560f260a0f6f45bdc128a1d51f9) (Gnosis Safe on HyperEVM)
 - **Threshold**: **3-of-5** (verified via `getThreshold()`)
 - **Nonce**: 20 transactions executed
 - **Timelock**: No timelock mechanism documented or found on-chain.
 - **Signer identities**: Not individually disclosed. Described only as "Thunderhead team, Valantis Team, ecosystem partners."
 
 Signer addresses (verified via `getOwners()`):
-1. [`0x7fa8b1d57d31286377c7103255967da7f682861d`](https://hyperliquid.cloud.blockscout.com/address/0x7fa8b1d57d31286377c7103255967da7f682861d)
-2. [`0x5cd0448cc4aae28e46babdb285b9e3b601872378`](https://hyperliquid.cloud.blockscout.com/address/0x5cd0448cc4aae28e46babdb285b9e3b601872378)
-3. [`0x10f6160f0033700cb55c478826068dad4d210465`](https://hyperliquid.cloud.blockscout.com/address/0x10f6160f0033700cb55c478826068dad4d210465)
-4. [`0x47cb7961d4a9218433023e9d0f3b2e3630a3e10e`](https://hyperliquid.cloud.blockscout.com/address/0x47cb7961d4a9218433023e9d0f3b2e3630a3e10e)
-5. [`0x4993522ee8091cc7a452af7a98d5ef4a269f6fc5`](https://hyperliquid.cloud.blockscout.com/address/0x4993522ee8091cc7a452af7a98d5ef4a269f6fc5)
+1. [`0x7fa8b1d57d31286377c7103255967da7f682861d`](https://hyperevmscan.io/address/0x7fa8b1d57d31286377c7103255967da7f682861d)
+2. [`0x5cd0448cc4aae28e46babdb285b9e3b601872378`](https://hyperevmscan.io/address/0x5cd0448cc4aae28e46babdb285b9e3b601872378)
+3. [`0x10f6160f0033700cb55c478826068dad4d210465`](https://hyperevmscan.io/address/0x10f6160f0033700cb55c478826068dad4d210465)
+4. [`0x47cb7961d4a9218433023e9d0f3b2e3630a3e10e`](https://hyperevmscan.io/address/0x47cb7961d4a9218433023e9d0f3b2e3630a3e10e)
+5. [`0x4993522ee8091cc7a452af7a98d5ef4a269f6fc5`](https://hyperevmscan.io/address/0x4993522ee8091cc7a452af7a98d5ef4a269f6fc5)
 
 Risk implications:
 - Governance is operationally centralized in current phase with no public timelock or threshold disclosure.
@@ -249,10 +255,10 @@ Dependency concentration on Hyperliquid ecosystem is structurally high.
 ## Monitoring
 
 Key contracts to monitor:
-- stHYPE Proxy: [`0xfFaa4a3D97fE9107Cef8a3F48c069F577Ff76cC1`](https://hyperliquid.cloud.blockscout.com/address/0xfFaa4a3D97fE9107Cef8a3F48c069F577Ff76cC1)
-- OverseerV1 Proxy: [`0xB96f07367e69e86d6e9C3F29215885104813eeAE`](https://hyperliquid.cloud.blockscout.com/address/0xB96f07367e69e86d6e9C3F29215885104813eeAE)
-- wstHYPE Proxy: [`0x94e8396e0869c9F2200760aF0621aFd240E1CF38`](https://hyperliquid.cloud.blockscout.com/address/0x94e8396e0869c9F2200760aF0621aFd240E1CF38)
-- Governance Multisig: [`0x97dee0ea4ca10560f260a0f6f45bdc128a1d51f9`](https://hyperliquid.cloud.blockscout.com/address/0x97dee0ea4ca10560f260a0f6f45bdc128a1d51f9) (Gnosis Safe 3-of-5)
+- stHYPE Proxy: [`0xfFaa4a3D97fE9107Cef8a3F48c069F577Ff76cC1`](https://hyperevmscan.io/address/0xfFaa4a3D97fE9107Cef8a3F48c069F577Ff76cC1)
+- OverseerV1 Proxy: [`0xB96f07367e69e86d6e9C3F29215885104813eeAE`](https://hyperevmscan.io/address/0xB96f07367e69e86d6e9C3F29215885104813eeAE)
+- wstHYPE Proxy: [`0x94e8396e0869c9F2200760aF0621aFd240E1CF38`](https://hyperevmscan.io/address/0x94e8396e0869c9F2200760aF0621aFd240E1CF38)
+- Governance Multisig: [`0x97dee0ea4ca10560f260a0f6f45bdc128a1d51f9`](https://hyperevmscan.io/address/0x97dee0ea4ca10560f260a0f6f45bdc128a1d51f9) (Gnosis Safe 3-of-5)
 
 ### 1. Governance Monitoring (MANDATORY)
 
@@ -351,7 +357,7 @@ Track official Hyperliquid staking/validator announcements for:
 
 - 4 disclosed audits across Feb 2025-Nov 2025 (Three Sigma, Pashov x2, Guardian). Governance audit via Trail of Bits (inherited FraxGov).
 - No bug bounty program on any major platform.
-- ~7 months in production, TVL ~$133M (peaked ~$544M).
+- ~8 months in production, TVL ~$124M (peaked ~$544M).
 - Per rubric: 3+ audits -> score 1-2 range for audits, but no bug bounty -> cannot reach score 1. Production time 6-12 months with TVL >$100M fits score 3 for track record.
 
 **Score: 2.5/5**
@@ -370,7 +376,7 @@ Centralization score = (4.0 + 3.0 + 4.0) / 3 = **3.67**
 #### Category 3: Funds Management (Weight: 30%)
 
 Subscores:
-- Collateralization: **2.5** — 100% on-chain collateral (staked HYPE), but not over-collateralized. Liquid reserve only 7.4% of supply. Collateral quality = single-asset (HYPE), not blue-chip.
+- Collateralization: **2.5** — 100% on-chain collateral (staked HYPE), but not over-collateralized. Liquid reserve only 6.0% of total backing. Collateral quality = single-asset (HYPE), not blue-chip.
 - Provability: **2.0** — Key state readable on-chain (`totalSupply`, `balancePerShare`, `maxRedeemable`, `totalShares`). Exchange rate updated programmatically. AccessControl roles verified. Some off-chain complexity around validator delegation not fully transparent.
 
 Funds management score = (2.5 + 2.0) / 2 = **2.25**
@@ -380,7 +386,7 @@ Funds management score = (2.5 + 2.0) / 2 = **2.25**
 #### Category 4: Liquidity Risk (Weight: 15%)
 
 - Queue-based withdrawals: 7-day standard unstaking, up to 90-day for specialized stake account wind-down.
-- DEX liquidity is extremely thin: ~$403K total across all pools (0.3% of $133M TVL). Largest single pool <$200K.
+- DEX liquidity is extremely thin: ~$380K total across all pools (0.3% of $124M TVL). Largest single pool ~$186K with near-zero daily volume.
 - `maxRedeemable()` returned 0 at time of check — no instant redemption buffer available.
 - Protocol unstaking queue is the primary exit mechanism, not secondary market trading.
 - Per rubric: "Withdrawal queues or restrictions" + "<$1M DEX liquidity" + ">1 week potential exit time" = score 4. However, same-value asset (stHYPE/HYPE) mitigates somewhat.
@@ -413,7 +419,7 @@ Rationale:
 - stHYPE is materially more complex/risk-bearing than WHYPE due to delegated staking, queue exits, and governance parameter controls.
 - Audit coverage is decent (4 audits from reputable firms), but no bug bounty.
 - Governance is centralized: 3-of-5 multisig with no timelock, planned dual-governance not yet implemented.
-- DEX liquidity is extremely thin ($403K vs $133M TVL); primary exit is via protocol unstaking queue (7+ days).
+- DEX liquidity is extremely thin ($380K vs $124M TVL); primary exit is via protocol unstaking queue (7+ days).
 - Strong single-ecosystem dependency on Hyperliquid L1.
 - Partially offset by: on-chain verifiable backing, programmatic exchange rate, Thunderhead's multi-LST track record, no incidents to date.
 
