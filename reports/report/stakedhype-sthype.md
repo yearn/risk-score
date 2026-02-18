@@ -196,28 +196,47 @@ stHYPE exit risk is higher than a pure wrapper token:
 
 No stHYPE or wstHYPE pools found on Curve, Laminar, or KittenSwap despite these DEXes being deployed on HyperEVM. **No wstHYPE/USDC or wstHYPE/USDT pairs exist anywhere on HyperEVM** — there is no direct stablecoin exit path via DEX for either token.
 
-### Lending Protocol Usage
+### wstHYPE as Lending Collateral
 
-Lending protocols are the dominant use case for staked HYPE derivatives. Critically, **most lending protocols list wstHYPE (wrapped stHYPE), not native stHYPE**, as the collateral token:
+Lending protocols accept **wstHYPE (wrapped stHYPE)**, not native stHYPE, as collateral for borrowing. This is the primary use case for staked HYPE derivatives and the key risk vector, since liquidation of undercollateralized positions depends on available on-chain liquidity.
 
-| Protocol | Token | Deposits | Note |
-|----------|-------|----------|------|
-| Morpho | wstHYPE | $44.5M | Largest wstHYPE venue |
-| HyperLend | wstHYPE | $30.5M | No native stHYPE market |
-| Pendle | stHYPE | $2.9M | Only protocol using native stHYPE |
-| Felix CDP | wstHYPE | $1.9M | CDP collateral |
-| **Total** | | **$79.8M** | ~64% of $124M TVL |
+**Morpho V1** — isolated lending markets, **$44.0M wstHYPE collateral** across 10 active markets:
+
+| Loan Token | LLTV | wstHYPE Collateral | Borrowed | Utilization |
+|-----------|------|-------------------|----------|-------------|
+| USDC | 77.0% | $35.2M | $8.3M | 100% |
+| WHYPE | 86.0% | $5.95M | $4.07M | 90.4% |
+| USDH | 77.0% | $1.47M | $493K | 91.3% |
+| WHYPE | 86.0% | $744K | $499K | 69.9% |
+| USDT0 | 62.5% | $206K | $74K | 90.4% |
+| USDT0 | 77.0% | $185K | $120K | 88.0% |
+| USDHL | 62.5% | $127K | $45K | 11.4% |
+| Others | — | $71K | $47K | — |
+
+**HyperLend** — pooled lending (Aave-fork), **$30.1M wstHYPE** in pool. In pooled model, wstHYPE depositors can borrow any supported asset (WHYPE, USDC, USDT0, etc.). No native stHYPE market exists.
+
+**Felix CDP** — **$1.9M wstHYPE** collateral used to mint feUSD (synthetic dollar).
+
+| Protocol | Type | wstHYPE Collateral | Borrowable Assets | LLTV Range |
+|----------|------|-------------------|-------------------|------------|
+| Morpho | Isolated markets | $44.0M | USDC, WHYPE, USDH, USDT0, USDe | 62.5%–91.5% |
+| HyperLend | Pooled lending | $30.1M | Any pool asset | TBD |
+| Felix | CDP | $1.9M | feUSD | TBD |
+| **Total** | | **$76.0M** | | |
+
+~60% of stHYPE total supply ($127M) is wrapped and used as lending collateral.
 
 ### Liquidation Risk
 
-**On-chain liquidation of wstHYPE collateral is effectively broken.** ~$77M of wstHYPE is used as lending collateral, but total wstHYPE DEX liquidity is only ~$138K with zero stablecoin pairs. A liquidator acquiring wstHYPE from a distressed position has no viable on-chain path to convert it to stablecoins:
+**On-chain liquidation of wstHYPE collateral positions is effectively broken.** $76M of wstHYPE is used as borrowing collateral, but total wstHYPE DEX liquidity is only ~$138K with zero stablecoin pairs. When a borrower's position becomes undercollateralized, liquidators must acquire and sell wstHYPE — but there is no viable on-chain path to do so efficiently:
 
-1. **No stablecoin exit**: No wstHYPE/USDC or wstHYPE/USDT pools exist. Liquidators must route through HYPE derivatives (wstHYPE → WHYPE → USDC), adding hops and slippage.
-2. **Negligible DEX depth**: $138K total wstHYPE liquidity cannot absorb liquidations from $77M in collateral. Even a small liquidation event would exhaust available pool depth.
+1. **No stablecoin exit**: No wstHYPE/USDC or wstHYPE/USDT pools exist. Liquidators must route through HYPE derivatives (wstHYPE → WHYPE → USDC), adding hops and slippage. The largest Morpho market ($35.2M) is borrowing USDC against wstHYPE — liquidators need a wstHYPE-to-USDC path that doesn't exist on-chain.
+2. **Negligible DEX depth**: $138K total wstHYPE liquidity cannot absorb liquidations from $76M in collateral. Even a small liquidation event would exhaust available pool depth.
 3. **Unwrap delay**: Converting wstHYPE → stHYPE is instant at the contract level, but stHYPE → HYPE requires the 7-day unstaking queue (up to 90 days under stress). Liquidators cannot quickly realize value.
 4. **Correlated stress**: In a HYPE price drawdown, both the collateral value (wstHYPE) and exit liquidity (WHYPE pools) decline simultaneously, creating a liquidation spiral risk where falling prices trigger liquidations that cannot be efficiently executed.
+5. **High utilization**: Most Morpho wstHYPE markets show 88–100% utilization, meaning positions are heavily leveraged relative to available supply.
 
-This creates a structural fragility: lending protocols have accepted $77M of wstHYPE collateral against ~$138K of available exit liquidity — a 560:1 collateral-to-liquidity ratio.
+This creates a structural fragility: $76M of wstHYPE borrowing collateral against ~$138K of DEX exit liquidity — a **550:1 collateral-to-liquidity ratio**.
 
 ### Practical Implications
 
