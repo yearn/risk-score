@@ -82,35 +82,55 @@ The senior tranche always earns at minimum the benchmark rate (floored), with up
 | StrataCDO | [`0xcAb791D0D44eBaC17378fF2AF6356c012F15c9e6`](https://etherscan.io/address/0xcAb791D0D44eBaC17378fF2AF6356c012F15c9e6) |
 | ERC20Cooldown | [`0xeD6c7b379F73DF0618406d263b13b2386E398166`](https://etherscan.io/address/0xeD6c7b379F73DF0618406d263b13b2386E398166) |
 
+### On-Chain Verification (Etherscan, Feb 18, 2026)
+
+All core contracts are **verified on Etherscan**:
+
+| Contract | Etherscan Name | Verified | Proxy |
+|----------|---------------|----------|-------|
+| srUSDe | TransparentUpgradeableProxy → Tranche (impl) | Yes | Yes |
+| jrUSDe | TransparentUpgradeableProxy | Yes | Yes |
+| StrataCDO | TransparentUpgradeableProxy → StrataCDO (impl) | Yes | Yes |
+| sUSDeStrategy | TransparentUpgradeableProxy | Yes | Yes |
+| Accounting | TransparentUpgradeableProxy | Yes | Yes |
+| AccessControlManager | AccessControlManager | Yes | No |
+| Admin Multisig | GnosisSafeProxy | Yes | Yes |
+| Operational Multisig | SafeProxy | Yes | Yes |
+| 48h Timelock | StrataMasterChef (OZ TimelockController) | Yes | No |
+| 24h Timelock | StrataMasterChef (OZ TimelockController) | Yes | No |
+| Guardian | EOA (not a contract) | N/A | N/A |
+
+**Note**: Both timelocks are registered on Etherscan as `StrataMasterChef` but contain standard OpenZeppelin TimelockController functions (`schedule`, `execute`, `cancel`, `getMinDelay`). Delays verified on-chain: 48h = 172,800 seconds, 24h = 86,400 seconds.
+
 ## Audits and Due Diligence Disclosures
 
 Strata has completed an extensive, multi-phased audit process with 3 reputable firms across at least 7 distinct audit engagements:
 
 ### Audit History
 
-**Phase 1 (Concurrent) -- Protocol v1 Core Contracts:**
+| # | Firm | Date | Scope | C | H | M | L | Info | Report |
+|---|------|------|-------|---|---|---|---|------|--------|
+| 1 | **Cyfrin** | Oct 8, 2025 | Protocol v1 (Tranches) | 1 | 2 | 6 | 5 | 12 | [PDF](https://github.com/Cyfrin/cyfrin-audit-reports/blob/main/reports/2025-10-08-cyfrin-strata-tranches-v2.0.pdf) |
+| 2 | **Guardian Audits** | Oct 10, 2025 | Protocol v1 (Tranches) | 1 | 5 | 14 | 5 | 8 | [PDF](https://github.com/GuardianAudits/Audits/blob/main/Strata/Strata_Tranches_report.pdf) |
+| 3 | **Quantstamp** | ~Q4 2025 | Protocol v1 (Tranches) | - | - | - | - | - | [Certificate](https://certificate.quantstamp.com/full/strata-tranches/3c3a4037-2a92-468c-a4f3-5ea498e7b539/index.html) |
+| 4 | **Quantstamp** | ~Q4 2025 | Redemption Fee (Update to Tranches) | - | - | - | - | - | [Certificate](https://certificate.quantstamp.com/full/strata-update-to-tranches/d7a903b7-80cf-42db-8433-79186fdd8be2/index.html) |
+| 5 | **Cyfrin** | Jan 23, 2026 | Shares Cooldown mechanism | 0 | 0 | 6 | 3 | 10 | [PDF](https://github.com/Cyfrin/cyfrin-audit-reports/blob/main/reports/2026-01-23-cyfrin-strata-shares-cooldown-v2.0.pdf) |
+| 6 | **Cyfrin** | Jun 11, 2025 | Pre-Deposit Vaults | 1 | 1 | 3 | 16 | 9 | [PDF](https://github.com/Cyfrin/cyfrin-audit-reports/blob/main/reports/2025-06-11-cyfrin-strata-predeposit-v2.1.pdf) |
+| 7 | **Quantstamp** | ~2025 | Pre-Deposit Vaults | - | - | - | - | - | [Papermark](https://www.papermark.com/view/cmgm9op9b0003l404g395i6a5) |
 
-| # | Firm | Scope | Notes |
-|---|------|-------|-------|
-| 1 | **Cyfrin** | Strata Protocol v1 contracts | Cyfrin has audited zkSync, Chainlink, Lido, Curve, Wormhole |
-| 2 | **Guardian** | Strata Protocol v1 contracts | TODO: Verify findings and dates |
-| 3 | **Quantstamp** | Strata Protocol v1 contracts | Quantstamp has audited Ethereum, Compound, Lido, Ethena |
+*Quantstamp reports hosted on JS-rendered platforms; finding counts require browser access. Dashes indicate data not programmatically extractable.*
 
-**Phase 2 -- Differential Audits (Redemption Fee & Cooldown):**
+**Total findings across Cyfrin + Guardian reports: 3 Critical, 8 High, 29 Medium, 29 Low (all resolved).**
 
-| # | Firm | Scope |
-|---|------|-------|
-| 4 | **Cyfrin** | Redemption fee and cooldown mechanism |
-| 5 | **Quantstamp** | Redemption fee mechanism |
+Notable Critical/High findings (all resolved):
+- **C: Withdrawers of sUSDe always incur a loss** (Cyfrin #1) -- Inverted parameters in `Tranche::_withdraw` caused users to receive significantly less than entitled
+- **C: Reserve withdrawal unit mismatch** (Guardian #2) -- `StrataCDO.reduceReserve` forwarded incorrect amounts, breaking internal accounting
+- **C: Attacker can drain entire protocol sUSDe balance** (Cyfrin #6) -- Incorrect redemption accounting in pre-deposit vault could drain funds
+- **H: Withdrawal active requests DoS** (Cyfrin #1, Guardian #2) -- Spam tiny withdrawal requests on behalf of another user causing out-of-gas during finalization
+- **H: MEV APR front-run** (Guardian #2) -- Front-running of APR changes via `onAprChanged`
+- **H: JR tranche bankrun susceptibility** (Cyfrin #5) -- SharesCooldown finalization bypassed `minimumJrtSrtRatio`
 
-**Phase 3 -- Pre-Deposit Vaults:**
-
-| # | Firm | Scope |
-|---|------|-------|
-| 6 | **Cyfrin** | Pre-Deposit Vaults |
-| 7 | **Quantstamp** | Pre-Deposit Vaults |
-
-TODO: Extract specific finding counts, severity breakdowns, and exact dates from the audit report PDFs at https://docs.strata.markets/technical-documentation/audits (links embedded in JavaScript-rendered page).
+Guardian Audits recommended an independent follow-up review after finding 1 Critical + 5 High issues, which was conducted by Quantstamp.
 
 ### On-Chain Complexity
 
@@ -123,11 +143,11 @@ The architecture is moderately complex:
 
 ### Bug Bounty
 
-TODO: No active bug bounty program was found on Immunefi (returned 404), Safe Harbor (not listed), or other platforms. This is a notable gap for a protocol with >$150M TVL. Needs verification with the team.
+**No active bug bounty program found.** Exhaustive search across Immunefi, Code4rena, Sherlock, HackerOne, Safe Harbor, and the protocol's own documentation and GitHub yielded no bug bounty listing, responsible disclosure policy, or security contact for vulnerability reporting. The [security documentation](https://docs.strata.markets/technical-documentation/security) covers audits, multisigs, and monitoring but does not mention a bug bounty. This is a notable gap for a protocol with >$150M TVL.
 
 ## Historical Track Record
 
-- **Time in Production**: srUSDe launched ~October 13, 2025 (based on deployment data and DeFiLlama). In production for **~4 months** as of February 2026. Pre-deposit vaults with TVL existed from July 2025 (~7 months with TVL).
+- **Time in Production**: srUSDe proxy deployed October 2, 2025 (block [23492392](https://etherscan.io/tx/0x857c511cb166160e9b9acdb8ef47d9306ad5bcef1a311e845b4a2d4b90ea1f6b)). In production for **~4.5 months** as of February 2026. Pre-deposit vaults with TVL existed from July 2025 (~7 months with TVL).
 - **GitHub Repository**: Created September 16, 2025. Public, Solidity-based, actively maintained (last update Feb 17, 2026).
 - **TVL History**:
 
@@ -147,7 +167,11 @@ TODO: No active bug bounty program was found on Immunefi (returned 404), Safe Ha
 
 - **TVL Volatility**: The protocol has experienced significant TVL swings. The sharp January drop (from ~$262M to ~$147M in one week) suggests **large depositor concentration risk**. The TVL remains volatile with multiple >20% swings.
 - **Incidents**: No reported security incidents, exploits, or hacks found.
-- **Peg History**: TODO: srUSDe exchange rate history needs verification via on-chain data. As an ERC-4626 vault, the exchange rate should only increase (denominated in underlying).
+- **Exchange Rate (on-chain verified Feb 18, 2026)**:
+  - `convertToAssets(1e18)` = 1.013728 USDe per srUSDe
+  - `totalAssets()` = 113,838,466 USDe
+  - `totalSupply()` = 112,296,907 srUSDe
+  - As an ERC-4626 vault, the exchange rate should only increase (denominated in underlying). The current 1.37% appreciation over ~4.5 months implies ~3.7% annualized yield to the senior tranche.
 
 ## Funds Management
 
@@ -188,8 +212,9 @@ TODO: No active bug bounty program was found on Immunefi (returned 404), Safe Ha
 ### Primary Exit Mechanisms
 
 1. **Redeem from srUSDe vault**: Initiate withdrawal → cooldown period (tied to Ethena's sUSDe cooldown, currently ~7 days) → finalize. Permissionless but not instant
-2. **DEX swap**: TODO: No information found about dedicated DEX liquidity pools for srUSDe. CoinGecko does not list srUSDe. Needs verification via on-chain data and DEX aggregators
-3. **Morpho markets**: Per the issue description, srUSDe will be used as collateral on Morpho for srUSDe/USDC markets. This could provide some indirect exit liquidity
+2. **DEX swap**: Extremely thin on-chain DEX liquidity. Total across all Uniswap V4 pools: ~$135K. Largest pool is srUSDe/USDe at ~$81K with only $425 in 24h volume. **No Curve or Balancer pools exist.** CoinGecko does not list srUSDe
+3. **Pendle markets**: PT-srUSDe-02APR2026 pool holds ~$21.9M TVL with ~$128K weekly volume. Primary venue for srUSDe trading, but these are fixed-yield PT tokens, not raw srUSDe
+4. **Morpho markets**: PT-srUSDe-2APR2026/USDC market has ~$14.6M supply and 82.4% utilization. A raw srUSDe/USDe market exists on Morpho but is empty ($0 supply/$0 borrow)
 
 ### Withdrawal Restrictions
 
@@ -200,7 +225,7 @@ TODO: No active bug bounty program was found on Immunefi (returned 404), Safe Ha
 ### Liquidity Assessment
 
 - **Primary liquidity**: The main exit path is through the cooldown-based redemption mechanism (not instant)
-- **Secondary market**: TODO: DEX liquidity depth for srUSDe token needs verification
+- **Secondary market**: DEX liquidity is negligible (~$135K total across Uniswap V4 pools). Pendle PT-srUSDe markets (~$21.9M) are the most liquid venue but trade fixed-yield PTs, not raw srUSDe. Morpho lending markets hold ~$14.6M in PT-srUSDe collateral
 - **Large holder impact**: Given the TVL volatility (62.6% drawdown from peak), large holders can exit but it takes time due to cooldowns
 - **Same-value redemption**: srUSDe redeems for USDe (stablecoin-denominated), so price impact risk is minimal for the Morpho use case
 
@@ -257,7 +282,7 @@ Strata uses a layered Role-Based Access Control (RBAC) system with clear separat
 
 - **Team Transparency**: Founding team is **not publicly named** in documentation. Operational team members are not publicly identified. The only publicly named individual is **Patrick Collins** (Cyfrin CEO), who serves as Guardian (security oversight role, not management). Team is classified as **partially anonymous** -- known anons at best
 - **Documentation**: Good quality. Comprehensive docs at docs.strata.markets covering mechanism, technical architecture, contracts, roles, and risks. Actively maintained (last updated Feb 14, 2026)
-- **Legal Structure**: TODO: No legal entity information found in accessible documentation. Needs review of Terms of Service and Privacy Policy
+- **Legal Structure**: **Frontera Labs, Inc.**, a Delaware (USA) corporation, operates the Interface (front-end) only. The company explicitly disclaims ownership or control of the protocol smart contracts. Protocol contracts are licensed under BUSL-1.1. A planned transition to a **Cayman Islands foundation** is referenced in the [Terms of Service](https://docs.strata.markets/resources/terms-of-service) (last updated Nov 28, 2025). US users are geo-blocked. Contact: legal@strata.markets
 - **Incident Response**: Not formally documented, but the protocol has multiple layers of defense:
   - 24/7 monitoring via Hypernative
   - Guardian (Patrick Collins) can cancel timelock transactions
@@ -443,7 +468,7 @@ Strata uses a layered Role-Based Access Control (RBAC) system with clear separat
 #### Category 4: Liquidity Risk (Weight: 15%)
 
 - **Exit mechanism**: Cooldown-based redemption (~7 days via Ethena sUSDe unstaking). Not instant
-- **DEX liquidity**: TODO: No DEX pools found for srUSDe. CoinGecko does not list the token. Limited secondary market
+- **DEX liquidity**: Negligible -- ~$135K total across Uniswap V4 pools with <$500/day volume. No Curve or Balancer pools. Pendle PT markets (~$21.9M) are the most liquid but trade PTs, not raw srUSDe
 - **Withdrawal restrictions**: 105% coverage circuit breaker can temporarily halt operations
 - **Same-value redemption**: srUSDe redeems for USDe (stablecoin-denominated), minimal price change risk
 - **Use case context**: For the Morpho use case (srUSDe as collateral for USDC loans), the collateral/loan price change should be minimal
@@ -454,10 +479,10 @@ Strata uses a layered Role-Based Access Control (RBAC) system with clear separat
 
 - **Team**: Partially anonymous. Founding team not publicly identified. Patrick Collins (Guardian) is the only doxxed individual, in a security oversight role
 - **Documentation**: Good quality, comprehensive, actively maintained
-- **Legal Structure**: TODO: No legal entity information found
+- **Legal Structure**: Frontera Labs, Inc. (Delaware) operates the front-end. Protocol contracts are autonomous and licensed under BUSL-1.1. Planned transition to Cayman Islands foundation. US users geo-blocked
 - **Incident Response**: Not formally documented. 24/7 Hypernative monitoring + Guardian veto capability provide de facto incident response
 
-**Score: 3.0/5** -- Adequate documentation but anonymous team, no known legal entity, and no formal incident response plan. Patrick Collins's involvement adds credibility.
+**Score: 2.5/5** -- Adequate documentation, clear legal entity (Delaware corporation), and US compliance via geo-blocking. Anonymous team and no formal incident response plan are concerns, but Patrick Collins's involvement adds credibility.
 
 ### Final Score Calculation
 
@@ -471,8 +496,8 @@ Final Score = (Centralization × 0.30) + (Funds Mgmt × 0.30) + (Audits × 0.20)
 | Centralization & Control | 3.2 | 30% | 0.96 |
 | Funds Management | 2.25 | 30% | 0.675 |
 | Liquidity Risk | 3.0 | 15% | 0.45 |
-| Operational Risk | 3.0 | 5% | 0.15 |
-| **Final Score** | | | **2.835** |
+| Operational Risk | 2.5 | 5% | 0.125 |
+| **Final Score** | | | **2.81** |
 
 **Final Score: 2.8**
 
