@@ -1,4 +1,4 @@
-# Protocol Risk Assessment: StakedHYPE stHYPE (via Hyperliquid Stake Marketplace)
+# Protocol Risk Assessment: StakedHYPE stHYPE
 
 **Assessment Date:** February 18, 2026
 **Token:** stHYPE
@@ -263,13 +263,6 @@ On-chain verified governance data:
 - **Nonce**: 20 transactions executed
 - **Timelock**: No timelock mechanism documented or found on-chain.
 - **Signer identities**: Not individually disclosed. Described only as "Thunderhead team, Valantis Team, ecosystem partners."
-
-Signer addresses (verified via `getOwners()`):
-1. [`0x7fa8b1d57d31286377c7103255967da7f682861d`](https://hyperevmscan.io/address/0x7fa8b1d57d31286377c7103255967da7f682861d)
-2. [`0x5cd0448cc4aae28e46babdb285b9e3b601872378`](https://hyperevmscan.io/address/0x5cd0448cc4aae28e46babdb285b9e3b601872378)
-3. [`0x10f6160f0033700cb55c478826068dad4d210465`](https://hyperevmscan.io/address/0x10f6160f0033700cb55c478826068dad4d210465)
-4. [`0x47cb7961d4a9218433023e9d0f3b2e3630a3e10e`](https://hyperevmscan.io/address/0x47cb7961d4a9218433023e9d0f3b2e3630a3e10e)
-5. [`0x4993522ee8091cc7a452af7a98d5ef4a269f6fc5`](https://hyperevmscan.io/address/0x4993522ee8091cc7a452af7a98d5ef4a269f6fc5)
 
 Risk implications:
 - Governance is operationally centralized in current phase with no public timelock or threshold disclosure.
