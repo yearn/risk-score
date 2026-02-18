@@ -180,21 +180,51 @@ stHYPE exit risk is higher than a pure wrapper token:
 
 **Total DEX liquidity: ~$380K** — extremely thin relative to $124M TVL (0.3% of TVL in DEX pools).
 
+**stHYPE pools:**
+
 | DEX | Pair | TVL | Fee | Vol 7D |
 |-----|------|-----|-----|--------|
 | HyperSwap V3 | WHYPE-STHYPE | $186,012 | 0.01% | $33,002 |
-| Project X | WSTHYPE-KHYPE | $100,120 | 0.3% | N/A |
 | HyperSwap V3 | WHYPE-LSTHYPE | $54,172 | 0.3% | $57,978 |
-| Project X | WHYPE-WSTHYPE | $39,681 | 0.01% | N/A |
 
-No Curve, Laminar, or KittenSwap pools found for stHYPE despite these DEXes being deployed on HyperEVM.
+**wstHYPE pools:**
 
-**Lending protocol deposits** dominate external stHYPE usage: ~$44M across HyperLend ($30.5M), Morpho ($8.1M), and Pendle ($5.7M). These are not exit liquidity.
+| DEX | Pair | TVL | Fee | Vol 7D |
+|-----|------|-----|-----|--------|
+| Project X | WSTHYPE-KHYPE | $97,690 | 0.3% | $0 |
+| Project X | WHYPE-WSTHYPE | $39,857 | 0.01% | $7,749 |
 
-Practical implications:
+No stHYPE or wstHYPE pools found on Curve, Laminar, or KittenSwap despite these DEXes being deployed on HyperEVM. **No wstHYPE/USDC or wstHYPE/USDT pairs exist anywhere on HyperEVM** — there is no direct stablecoin exit path via DEX for either token.
+
+### Lending Protocol Usage
+
+Lending protocols are the dominant use case for staked HYPE derivatives. Critically, **most lending protocols list wstHYPE (wrapped stHYPE), not native stHYPE**, as the collateral token:
+
+| Protocol | Token | Deposits | Note |
+|----------|-------|----------|------|
+| Morpho | wstHYPE | $44.5M | Largest wstHYPE venue |
+| HyperLend | wstHYPE | $30.5M | No native stHYPE market |
+| Pendle | stHYPE | $2.9M | Only protocol using native stHYPE |
+| Felix CDP | wstHYPE | $1.9M | CDP collateral |
+| **Total** | | **$79.8M** | ~64% of $124M TVL |
+
+### Liquidation Risk
+
+**On-chain liquidation of wstHYPE collateral is effectively broken.** ~$77M of wstHYPE is used as lending collateral, but total wstHYPE DEX liquidity is only ~$138K with zero stablecoin pairs. A liquidator acquiring wstHYPE from a distressed position has no viable on-chain path to convert it to stablecoins:
+
+1. **No stablecoin exit**: No wstHYPE/USDC or wstHYPE/USDT pools exist. Liquidators must route through HYPE derivatives (wstHYPE → WHYPE → USDC), adding hops and slippage.
+2. **Negligible DEX depth**: $138K total wstHYPE liquidity cannot absorb liquidations from $77M in collateral. Even a small liquidation event would exhaust available pool depth.
+3. **Unwrap delay**: Converting wstHYPE → stHYPE is instant at the contract level, but stHYPE → HYPE requires the 7-day unstaking queue (up to 90 days under stress). Liquidators cannot quickly realize value.
+4. **Correlated stress**: In a HYPE price drawdown, both the collateral value (wstHYPE) and exit liquidity (WHYPE pools) decline simultaneously, creating a liquidation spiral risk where falling prices trigger liquidations that cannot be efficiently executed.
+
+This creates a structural fragility: lending protocols have accepted $77M of wstHYPE collateral against ~$138K of available exit liquidity — a 560:1 collateral-to-liquidity ratio.
+
+### Practical Implications
+
 - In normal conditions, protocol reserves/queue support predictable withdrawals (7-day unstaking).
 - **Secondary market exit is severely constrained**: the largest DEX pool is ~$186K with near-zero daily volume. Any meaningful position would need to rely on the protocol's native unstaking queue.
 - In stress conditions, exits can be delayed up to 90 days (specialized stake account wind-down) and/or become market-impact sensitive.
+- **Lending market liquidations are the primary systemic risk vector** due to the collateral-to-liquidity mismatch described above.
 
 ## Centralization & Control Risks
 
@@ -386,9 +416,10 @@ Funds management score = (2.5 + 2.0) / 2 = **2.25**
 #### Category 4: Liquidity Risk (Weight: 15%)
 
 - Queue-based withdrawals: 7-day standard unstaking, up to 90-day for specialized stake account wind-down.
-- DEX liquidity is extremely thin: ~$380K total across all pools (0.3% of $124M TVL). Largest single pool ~$186K with near-zero daily volume.
+- DEX liquidity is extremely thin: ~$380K total across all stHYPE/wstHYPE pools (0.3% of $124M TVL). Largest single pool ~$186K with near-zero daily volume.
 - `maxRedeemable()` returned 0 at time of check — no instant redemption buffer available.
 - Protocol unstaking queue is the primary exit mechanism, not secondary market trading.
+- ~$77M of wstHYPE used as lending collateral (HyperLend, Morpho, Felix) against only ~$138K wstHYPE DEX liquidity and zero stablecoin pairs. Liquidations are effectively unexecutable on-chain.
 - Per rubric: "Withdrawal queues or restrictions" + "<$1M DEX liquidity" + ">1 week potential exit time" = score 4. Current DEX liquidity ($380K) with near-zero daily trading volume ($13/day avg) means secondary market exits are effectively unavailable for any meaningful position size. The protocol unstaking queue (7+ days, up to 90 days under stress) is the only realistic exit path.
 
 **Score: 4.0/5**
@@ -419,7 +450,7 @@ Rationale:
 - stHYPE is materially more complex/risk-bearing than WHYPE due to delegated staking, queue exits, and governance parameter controls.
 - Audit coverage is decent (4 audits from reputable firms), but no bug bounty.
 - Governance is centralized: 3-of-5 multisig with no timelock, planned dual-governance not yet implemented.
-- DEX liquidity is extremely thin ($380K vs $124M TVL); primary exit is via protocol unstaking queue (7+ days).
+- DEX liquidity is extremely thin ($380K vs $124M TVL); primary exit is via protocol unstaking queue (7+ days). ~$77M wstHYPE lending collateral with no stablecoin DEX pairs creates structural liquidation risk.
 - Strong single-ecosystem dependency on Hyperliquid L1.
 - Partially offset by: on-chain verifiable backing, programmatic exchange rate, Thunderhead's multi-LST track record, no incidents to date.
 
