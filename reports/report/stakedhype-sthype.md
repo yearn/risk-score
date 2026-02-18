@@ -487,3 +487,21 @@ Rationale:
 - Hyperliquid staking docs: https://hyperliquid.gitbook.io/hyperliquid-docs/hype-staking
 - Hyperliquid validators docs: https://hyperliquid.gitbook.io/hyperliquid-docs/hype-staking/validators
 - Hyperliquid risks docs: https://hyperliquid.gitbook.io/hyperliquid-docs/risks
+- ASXN HyperScreener (LST data): https://hyperscreener.asxn.xyz/liquid-staking
+
+## Appendix: HyperEVM Liquid Staking Market Share
+
+Source: [ASXN HyperScreener](https://hyperscreener.asxn.xyz/liquid-staking) — February 18, 2026
+
+| Token | Supply | Supply USD | Market Share |
+|-------|--------|-----------|-------------|
+| kHYPE | 21.79M | $661.46M | 77.67% |
+| stHYPE | 4.19M | $127.20M | 14.94% |
+| vHYPE | 1.04M | $31.72M | 3.72% |
+| iHYPE | 499.68K | $15.17M | 1.78% |
+| beHYPE | 484.88K | $14.72M | 1.73% |
+| mHYPE | 37.06K | $1.13M | 0.13% |
+| HYPED | 6.52K | $197.91K | 0.02% |
+| sHYPE | 2.03K | $61.67K | 0.01% |
+
+**Total LST market: ~$851M.** stHYPE is the second-largest LST on HyperEVM at 14.94% market share, behind kHYPE (77.67%). Notably, ~61% of stHYPE supply ($77.9M) is deposited in lending protocols as wstHYPE collateral, indicating high utilization concentration in a single use case.
