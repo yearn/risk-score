@@ -9,7 +9,7 @@
 
 syrupUSDC is Maple Finance's yield-bearing stablecoin (ERC-4626 vault token). Users deposit USDC into the Syrup pool and receive syrupUSDC LP tokens that appreciate over time as yield accrues. Yield is primarily generated from fixed-rate, overcollateralized loans to institutional borrowers who post liquid digital assets (BTC, ETH, LBTC, SOL, tETH) as collateral. Additional yield comes from DeFi strategies deployed via Aave and Sky (MakerDAO) strategy contracts.
 
-The protocol is permissioned — first-time depositors require an ECDSA authorization signature from Maple's permission admin. Subsequent deposits are permissionless. Withdrawals are queue-based (FIFO) and typically processed within minutes to 2 days, with a maximum of 30 days in low-liquidity scenarios.
+Deposits are gated by a permission system for regulatory compliance (first-time authorization required, subsequent deposits permissionless). Withdrawals are queue-based (FIFO) and typically processed within minutes to 2 days, with a maximum of 30 days in low-liquidity scenarios.
 
 - **Current Price:** ~$1.15
 - **Total Supply:** ~1,459M syrupUSDC
@@ -99,7 +99,7 @@ Maple delegates deposited USDC to institutional borrowers via overcollateralized
 
 ### Accessibility
 
-- **Deposits:** Permissioned for first-time depositors (requires ECDSA authorization from Maple). Subsequent deposits are permissionless. Atomic, single-transaction via `SyrupRouter.deposit()` or `depositWithPermit()` (EIP-2612).
+- **Deposits:** Gated by `PoolPermissionManager` — first-time depositors require a one-time on-chain authorization, subsequent deposits are permissionless. Atomic, single-transaction. See [Appendix B — Deposit Flow](#appendix-b--deposit-flow) for details.
 - **Withdrawals:** Queue-based (FIFO). Call `pool.requestRedeem(shares, receiver)` to enter queue. Assets sent directly to wallet when processed. No penalties. Yield stops accruing once withdrawal requested.
 - **Withdrawal Timing:** Typically minutes to 2 days. Maximum 30 days in low-liquidity scenarios.
 - **Fees:** Total management fee of 8.33% on gross borrower interest (Delegate fee: 3.33% + Platform fee: 5.00%, verified on-chain). DeFi strategy performance fees charged on yield generated.
@@ -522,3 +522,29 @@ Final Score = (Audits × 0.20) + (Centralization × 0.30) + (Funds Mgmt × 0.30)
 |---------|------|--------|
 | Dedaub | Nov 2025 | [Report](https://github.com/maple-labs/maple-cross-chain-receiver/blob/main/audits/2025-november/Dedaub-Chainlink-Maple.pdf) |
 | Sigma Prime | Jan 2026 | [Report](https://github.com/maple-labs/maple-cross-chain-receiver/blob/main/audits/2026-january/SigmaPrime-Chainlink-Maple.pdf) |
+
+---
+
+## Appendix B — Deposit Flow
+
+Deposits into syrupUSDC are gated by the [`PoolPermissionManager`](https://etherscan.io/address/0xBe10aDcE8B6E3E02Db384E7FaDA5395DD113D8b3) contract via a permission bitmap system. The [`SyrupRouter`](https://etherscan.io/address/0x134cCaaA4F1e4552eC8aEcb9E4A2360dDcF8df76) handles authorization and deposits.
+
+**First-time deposit flow:**
+
+1. User connects wallet on [syrup.fi](https://syrup.fi) and enters a USDC deposit amount
+2. The frontend requests an ECDSA authorization signature from Maple's backend (checks jurisdiction, sanctions, etc.)
+3. If approved, the backend returns a signature from a permission admin ([`0x54b130c704919320E17F4F1Ffa4832A91AB29Dca`](https://etherscan.io/address/0x54b130c704919320E17F4F1Ffa4832A91AB29Dca))
+4. The frontend calls `SyrupRouter.authorizeAndDeposit()` — a single atomic transaction that:
+   - Verifies the ECDSA signature and sets the user's lender bitmap on `PoolPermissionManager`
+   - Checks `hasPermission(poolManager, owner, "P:deposit")`
+   - Transfers USDC from user → router → pool, returns syrupUSDC shares to user
+
+**Subsequent deposits:**
+
+The lender bitmap is already set on-chain, so the user calls `SyrupRouter.deposit()` or `SyrupRouter.depositWithPermit()` (EIP-2612) directly — no authorization signature needed.
+
+**Alternative (no permission required):**
+
+syrupUSDC can be purchased on Uniswap as a regular token swap, bypassing the permission system entirely. This only applies to buying existing syrupUSDC on the secondary market, not minting new shares.
+
+**Gating mechanism:** Maple can refuse to provide the authorization signature for restricted jurisdictions (US, Australia, 30+ others) or sanctioned addresses. Source: [`SyrupRouter.sol`](https://github.com/maple-labs/syrup-utils/blob/main/contracts/SyrupRouter.sol)
