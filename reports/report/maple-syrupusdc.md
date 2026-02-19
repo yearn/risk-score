@@ -150,7 +150,7 @@ Maple Finance is **not** listed on the SEAL Safe Harbor registry.
 - **Smart Contract Exploits:** None. No smart contract vulnerabilities have been exploited.
 - **Credit Event (V1, Late 2022):** ~$36M in defaults from the Orthogonal Trading pool following the FTX collapse. This was a **credit/counterparty risk event**, not a smart contract exploit. Maple subsequently restructured, launched V2, and shifted entirely to overcollateralized lending.
 - **TVL:** Total Syrup TVL (all pools): ~$3.70B. syrupUSDC pool collateral: ~$1.24B. TVL has shown strong growth since Syrup launch, with some fluctuations.
-- **Concentration Risk:** **EXTREME.** Top 2 holders (both smart contracts) control **68%** of supply. Top 5 holders control **87%**. Top 10 holders control **91%**. Only 2,768 total holders for a $1.68B market cap. Address `0xbbbbbb...ffcb` (rank 4, 4.6%) matches the Morpho Blue contract pattern. A withdrawal from either top-2 entity could severely stress pool liquidity.
+- **Holder Distribution:** Top holders are protocol infrastructure contracts, which is standard for DeFi integrations. Top 5 holders (via Ethplorer): ALMProxy (35.4%, Maple infrastructure), Chainlink CCIP LockReleaseTokenPool (31.9%, backs cross-chain syrupUSDC), ALMProxy (11.7%, Maple infrastructure), Morpho Blue (4.7%, lending protocol integration), Fluid Liquidity Proxy (3.6%, Instadapp integration). Only 2,768 total holders for a $1.68B market cap. No significant external whale concentration risk.
 - **Peg Stability:** syrupUSDC is not pegged 1:1 to USDC — it's a yield-bearing vault token that appreciates over time ($1.055 ATL to $1.16 ATH), reflecting accrued interest. The exchange rate has been monotonically increasing as expected.
 
 ## Funds Management
@@ -462,7 +462,7 @@ Exceptional audit coverage and large TVL. V1 credit event was counterparty risk,
 - Maximum 30 days in extreme scenarios
 - ~$20M Uniswap V4 liquidity as alternative exit — but only $14.9M USDC reserve, $1M swap = ~5.4% slippage
 - DEX liquidity is only 1.2% of market cap — not a viable exit for large holders
-- **Extreme holder concentration:** Top 2 holders control 68% of supply. A single large withdrawal could exhaust pool liquidity.
+- Top holders are protocol infrastructure contracts (Maple ALMProxy, Chainlink CCIP pool, Morpho, Fluid) — not external whale withdrawal risk
 - Same-value asset (USDC-denominated), which mitigates some waiting risk
 - Historical: No V2 stress-test of withdrawal queue during market turmoil
 - Throttle mechanism (30-day max) for large exits: +0.5
