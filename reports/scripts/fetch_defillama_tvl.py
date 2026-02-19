@@ -6,9 +6,9 @@ This script retrieves historical TVL data for protocols tracked by DeFiLlama,
 analyzes key metrics, and optionally saves the raw data to a JSON file.
 
 Usage:
-    uv run scripts/fetch_defillama_tvl.py origin-arm
-    uv run scripts/fetch_defillama_tvl.py origin-arm --save-json
-    uv run scripts/fetch_defillama_tvl.py origin-arm --days 30
+    uv run reports/scripts/fetch_defillama_tvl.py origin-arm
+    uv run reports/scripts/fetch_defillama_tvl.py origin-arm --save-json
+    uv run reports/scripts/fetch_defillama_tvl.py origin-arm --days 30
 """
 
 import argparse

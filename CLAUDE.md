@@ -4,6 +4,7 @@
 - **Run Scripts**: `uv run scripts/scan_factories.py` or `uv run reports/old/scripts/veda_scan_auth_events.py`
 - **Code Formatting**: `uv run -m ruff format .`
 - **Update Lock File**: `uv lock` (after changing dependencies in pyproject.toml)
+- use .env file for environment variables and secrets
 
 ## Dependencies
 - **Core Dependencies**:
@@ -33,10 +34,11 @@
 
 ## Genearing Risk Reports
 
-- For generating a risk report or making any changes to the risk report, always focus only on folder `reports` and check other folders. only `scripts` if you need to use it.
+- For generating a risk assessment report or making any changes to the risk assessment report, always focus only on folder `reports`.
 - If you don't have information or can't find it, ask for it, never assume anything
 - Mark sections as "TODO" if information is unavailable
 - Try to add Etherscan links to the data you are using
 - Try to use LlamaRisk for additional data
-- For link addresses, use the following format: [`contract Name`](https://etherscan.io/address/0x1202f5c7...)
+- For link addresses, use the following format, don't shorten the address: [`0xDEaDbeefdEAdbeefdEadbEEFdeadbeEFdEaDbeeF`](https://etherscan.io/address/0xDEaDbeefdEAdbeefdEadbEEFdeadbeEFdEaDbeeF)
 - Always take time to read the report and understand the context before generating report or making any changes.
+- Use skill `generating-risk-reports` to generate risk assessment reports defined in `reports/SKILL.md`
