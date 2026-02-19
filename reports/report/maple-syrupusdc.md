@@ -54,6 +54,7 @@ The protocol is permissioned — first-time depositors require an ECDSA authoriz
 | DAO Multisig | [`0xd6d4Bcde6c816F17889f1Dd3000aF0261B03a196`](https://etherscan.io/address/0xd6d4Bcde6c816F17889f1Dd3000aF0261B03a196) |
 | Security Admin | [`0x6b1A78C1943b03086F7Ee53360f9b0672bD60818`](https://etherscan.io/address/0x6b1A78C1943b03086F7Ee53360f9b0672bD60818) |
 | Operational Admin | [`0xCe1cE7c7F436DCc4E28Bc8bf86115514d3DC34E8`](https://etherscan.io/address/0xCe1cE7c7F436DCc4E28Bc8bf86115514d3DC34E8) |
+| MapleGlobals (v301) | [`0x804a6F5F667170F545Bf14e5DDB48C70B788390C`](https://etherscan.io/address/0x804a6F5F667170F545Bf14e5DDB48C70B788390C) |
 | SYRUP Token | [`0x643c4e15d7d62ad0abec4a9bd4b001aa3ef52d66`](https://etherscan.io/address/0x643c4e15d7d62ad0abec4a9bd4b001aa3ef52d66) |
 
 ## Audits and Due Diligence Disclosures
@@ -272,7 +273,7 @@ Protocol Contracts (MapleGlobals, PoolManager, etc.)
 
 **Timelock (verified on-chain):** GovernorTimelock contract with `MIN_DELAY = 86400s (24h)` and `MIN_EXECUTION_WINDOW = 86400s (24h)`. Timelocked actions include: `PoolManager.upgrade()`, `LoanManager.upgrade()`, `WithdrawalManager.upgrade()`. Governor can change timelock parameters, but these changes themselves require going through the timelock.
 
-**Important Note (from LlamaRisk):** `globalsV301` introduces **no delay** at `defaultTimelockParameters`. This means the Governor (4/7 multisig) can execute certain administrative actions without mandatory timelock delay. This is a significant centralization concern.
+**MapleGlobals Timelock (verified on-chain, Feb 19 2026):** `defaultTimelockParameters()` on MapleGlobals (`0x804a6F5F667170F545Bf14e5DDB48C70B788390C`) returns **delay = 604800s (7 days)** and **duration = 172800s (2 days)**. This is a second timelock layer on top of the GovernorTimelock, providing robust dual-layer protection for protocol-level admin actions. A prior LlamaRisk assessment flagged `globalsV301` as having no delay at `defaultTimelockParameters` — this concern appears to have been addressed since that assessment.
 
 **Multisig Details (verified on-chain):** DAO Multisig is a **Gnosis Safe v1.3.0** with **4-of-7 threshold**. All 7 signers are EOAs (no nested multisigs). No ENS names registered. Per LlamaRisk, a minority of signers are Maple employees; the majority are long-standing external advisors and investors who have held their seats for >2 years. 922 transactions processed as of Feb 2026.
 
@@ -324,17 +325,18 @@ Callable by Governor or Security Admin.
 
 ### Key Contracts to Monitor
 
-| Contract | Purpose | Key Events/Functions |
-|----------|---------|---------------------|
-| syrupUSDC Pool (`0x80ac24...Cc0b`) | Vault state | `Deposit`, `Withdraw`, `Transfer`, `totalAssets()`, `totalSupply()`, `convertToAssets()` |
-| PoolManager (`0x7aD5fF...158F`) | Pool configuration | Upgrades, parameter changes |
-| WithdrawalManagerQueue (`0x1bc47a...cfE3`) | Withdrawal processing | Queue length, processing delays |
-| Governor Timelock (`0x2eFFf8...426b`) | Governance actions | `CallScheduled`, `CallExecuted`, `Cancelled` |
-| DAO Multisig (`0xd6d4Bc...a196`) | Multisig transactions | Submitted/confirmed/executed transactions |
-| FixedTermLoanManager (`0x4A1c3F...371b`) | Loan health | Loan impairments, defaults, liquidations |
-| OpenTermLoanManager (`0x6ACEb4...0fAc`) | Loan health | Loan impairments, defaults, liquidations |
-| AaveStrategy (`0x560B3A...91d4`) | DeFi allocation | Deposits, withdrawals, allocation changes |
-| SkyStrategy (`0x859C99...8C`) | DeFi allocation | Deposits, withdrawals, allocation changes |
+| Contract | Address | Purpose | Key Events/Functions |
+|----------|---------|---------|---------------------|
+| syrupUSDC Pool | [`0x80ac24aA929eaF5013f6436cdA2a7ba190f5Cc0b`](https://etherscan.io/address/0x80ac24aA929eaF5013f6436cdA2a7ba190f5Cc0b) | Vault state | `Deposit`, `Withdraw`, `Transfer`, `totalAssets()`, `totalSupply()`, `convertToAssets()` |
+| PoolManager | [`0x7aD5fFa5fdF509E30186F4609c2f6269f4B6158F`](https://etherscan.io/address/0x7aD5fFa5fdF509E30186F4609c2f6269f4B6158F) | Pool configuration | Upgrades, parameter changes |
+| WithdrawalManagerQueue | [`0x1bc47a0Dd0FdaB96E9eF982fdf1F34DC6207cfE3`](https://etherscan.io/address/0x1bc47a0Dd0FdaB96E9eF982fdf1F34DC6207cfE3) | Withdrawal processing | Queue length, processing delays |
+| Governor Timelock | [`0x2eFFf88747EB5a3FF00d4d8d0f0800E306C0426b`](https://etherscan.io/address/0x2eFFf88747EB5a3FF00d4d8d0f0800E306C0426b) | Governance actions | `CallScheduled`, `CallExecuted`, `Cancelled` |
+| DAO Multisig | [`0xd6d4Bcde6c816F17889f1Dd3000aF0261B03a196`](https://etherscan.io/address/0xd6d4Bcde6c816F17889f1Dd3000aF0261B03a196) | Multisig transactions | Submitted/confirmed/executed transactions |
+| FixedTermLoanManager | [`0x4A1c3F0D9aD0b3f9dA085bEBfc22dEA54263371b`](https://etherscan.io/address/0x4A1c3F0D9aD0b3f9dA085bEBfc22dEA54263371b) | Loan health | Loan impairments, defaults, liquidations |
+| OpenTermLoanManager | [`0x6ACEb4cAbA81Fa6a8065059f3A944fb066A10fAc`](https://etherscan.io/address/0x6ACEb4cAbA81Fa6a8065059f3A944fb066A10fAc) | Loan health | Loan impairments, defaults, liquidations |
+| MapleGlobals | [`0x804a6F5F667170F545Bf14e5DDB48C70B788390C`](https://etherscan.io/address/0x804a6F5F667170F545Bf14e5DDB48C70B788390C) | Global parameters | `defaultTimelockParameters()`, parameter changes |
+| AaveStrategy | [`0x560B3A85Af1cEF113BB60105d0Cf21e1d05F91d4`](https://etherscan.io/address/0x560B3A85Af1cEF113BB60105d0Cf21e1d05F91d4) | DeFi allocation | Deposits, withdrawals, allocation changes |
+| SkyStrategy | [`0x859C9980931fa0A63765fD8EF2e29918Af5b038C`](https://etherscan.io/address/0x859C9980931fa0A63765fD8EF2e29918Af5b038C) | DeFi allocation | Deposits, withdrawals, allocation changes |
 
 ### Critical Monitoring Points
 
@@ -355,7 +357,7 @@ Callable by Governor or Security Admin.
 2. **Large TVL** ($2B+ protocol, $3.25B syrupUSDC pool) with strong growth trajectory
 3. **No smart contract exploits** in protocol history
 4. **Overcollateralized lending** with on-chain liquidation mechanics and Chainlink oracle integration
-5. **GovernorTimelock** with minimum 1-day delay, three-tier pause system, real-time invariant monitoring via Tenderly
+5. **Dual-layer timelock protection** — GovernorTimelock (MIN_DELAY=1 day) + MapleGlobals defaultTimelockParameters (7-day delay, 2-day execution window), three-tier pause system, real-time invariant monitoring via Tenderly
 
 ### Key Risks
 
@@ -369,7 +371,7 @@ Callable by Governor or Security Admin.
 
 - **V1 Credit Event Precedent:** The ~$36M default from the FTX collapse (2022) demonstrates that credit risk is real despite mitigation measures. V2's overcollateralized model significantly reduces but does not eliminate this risk.
 - **Pool Delegate Power:** The Pool Delegate (`0xC1e1...49f`, EOA) has significant power over loan management, impairments, and collateral decisions without on-chain governance approval.
-- **No default timelock on contract upgrades (per LlamaRisk):** `globalsV301` introduces no delay at `defaultTimelockParameters`, meaning the 4/7 multisig Governor can execute certain actions without mandatory delay.
+- **~~No default timelock on contract upgrades (per LlamaRisk):~~** Previously flagged by LlamaRisk, but verified on-chain (Feb 19, 2026) that `defaultTimelockParameters` is now set to 7-day delay + 2-day execution window. This concern has been addressed.
 - **Fixed USDC price oracle (per LlamaRisk):** Maple uses a hardcoded 1 USD price for USDC in internal collateral liquidations rather than a live market feed, creating risk during depeg events.
 - **Loss socialization:** No tranching or insurance fund exists; all lenders bear equal exposure to defaults via exchange rate reduction.
 
@@ -399,25 +401,26 @@ Exceptional audit coverage and large TVL. V1 credit event was counterparty risk,
 
 **Score: 1.5/5**
 
-#### Category 2: Centralization & Control Risks (Weight: 30%) — **3.0**
+#### Category 2: Centralization & Control Risks (Weight: 30%) — **2.50**
 
-**Subcategory A: Governance — 3.0**
+**Subcategory A: Governance — 2.0**
 
-- GovernorTimelock contract with MIN_DELAY=24h, MIN_EXECUTION_WINDOW=24h (verified on-chain)
+- Dual-layer timelock protection: GovernorTimelock (MIN_DELAY=24h) + MapleGlobals defaultTimelockParameters (7-day delay, 2-day execution window), both verified on-chain
 - DAO Multisig is 4/7 Safe v1.3.0, all EOA signers. Minority are employees; majority external advisors (per LlamaRisk)
 - Snapshot-based voting (off-chain) — less secure than on-chain governance
 - Governor can change timelock parameters (through the timelock itself)
-- Security Admin and Operational Admin have significant powers
-- Emergency pause is a reasonable security measure but represents centralized control
+- Security Admin and Operational Admin have significant powers but constrained by timelock
+- Emergency pause is a reasonable security measure
 
-**Subcategory B: Programmability — 3.5**
+**Subcategory B: Programmability — 3.0**
 
 - Exchange rate (PPS) is on-chain via ERC-4626
-- Loan origination and borrower assessment are fully off-chain
-- Pool Delegate has significant discretionary power over impairments and loan management
-- Strategy fee rates can be changed at any time by protocol admins
-- DeFi strategy allocation decisions made off-chain
-- Hybrid on-chain/off-chain operations with significant manual intervention in lending
+- Collateral is held on-chain with on-chain liquidation mechanics (Keepers + Chainlink oracles)
+- Withdrawal queue is fully on-chain
+- DeFi strategy execution (Aave, Sky) is on-chain
+- Loan origination and borrower assessment are off-chain (Pool Delegate discretion)
+- Impairment decisions and strategy allocation decisions are off-chain
+- Hybrid on-chain/off-chain operations — core protections are programmatic, lending decisions are manual
 
 **Subcategory C: External Dependencies — 2.5**
 
@@ -426,9 +429,9 @@ Exceptional audit coverage and large TVL. V1 credit event was counterparty risk,
 - Borrower counterparty risk (critical dependency on institutional borrowers)
 - CCIP for cross-chain (non-critical for mainnet)
 
-**Score: (3.0 + 3.5 + 2.5) / 3 = 3.0/5**
+**Score: (2.0 + 3.0 + 2.5) / 3 = 2.50/5**
 
-#### Category 3: Funds Management (Weight: 30%) — **3.0**
+#### Category 3: Funds Management (Weight: 30%) — **2.75**
 
 **Subcategory A: Collateralization — 3.0**
 
@@ -440,16 +443,17 @@ Exceptional audit coverage and large TVL. V1 credit event was counterparty risk,
 - Impairment mechanism can reduce pool value at Maple's discretion
 - Credit risk remains despite overcollateralization (V1 precedent)
 
-**Subcategory B: Provability — 3.0**
+**Subcategory B: Provability — 2.5**
 
-- Loans verifiable on-chain with transparent collateral levels
-- Exchange rate computed on-chain (ERC-4626)
-- However, borrower creditworthiness assessment is entirely off-chain
-- Loan origination is off-chain (Pool Delegate discretion)
+- All collateral is held and tracked on-chain — overcollateralization ratios, margin call levels, and liquidation thresholds are transparently verifiable
+- Exchange rate computed on-chain (ERC-4626 `convertToAssets()`/`convertToShares()`)
+- Loan-level data (principal, collateral, rates) is on-chain and verifiable
+- Collateral data can be cross-verified via Maple API and Etherscan
+- DeFi strategy allocations (Aave, Sky) are on-chain and verifiable
+- Borrower selection and creditworthiness assessment are off-chain (Pool Delegate discretion) — but the on-chain collateral protections ensure reserves are provable regardless of borrower quality
 - Impairment decisions are off-chain
-- Hybrid transparency model — on-chain for what's on-chain, opaque for off-chain decisions
 
-**Score: (3.0 + 3.0) / 2 = 3.0/5**
+**Score: (3.0 + 2.5) / 2 = 2.75/5**
 
 #### Category 4: Liquidity Risk (Weight: 15%) — **2.5**
 
@@ -466,47 +470,47 @@ Exceptional audit coverage and large TVL. V1 credit event was counterparty risk,
 
 **Score: 2.5/5**
 
-#### Category 5: Operational Risk (Weight: 5%) — **2.0**
+#### Category 5: Operational Risk (Weight: 5%) — **1.5**
 
-- Established team (founded 2019), public founders, VC-backed ($17.7M raised)
-- Good documentation quality, active GitHub, Dune dashboard
-- Real-time monitoring infrastructure (Tenderly + PagerDuty)
+- Established team (founded 2019, ~7 years), public founders, VC-backed ($17.7M raised from Framework Ventures, Polychain Capital, BlockTower Capital)
+- Comprehensive documentation, active GitHub, Dune dashboard, technical integration guides
+- Real-time monitoring infrastructure (Tenderly Web3 Actions + PagerDuty)
+- Clear multi-entity legal structure: Maple Labs Pty Ltd (AU), Syrup Ltd (offshore), Maple Int'l Ops SPC (Cayman Islands) with segregated portfolios
 - BUSL 1.1 license
-- Multi-entity legal structure: Maple Labs Pty Ltd (AU), Syrup Ltd (offshore), Maple Int'l Ops SPC (Cayman Islands)
-- Learned from V1 credit event and restructured entirely
+- Demonstrated incident response: V1 credit event led to complete restructuring to overcollateralized lending
 
-**Score: 2.0/5**
+**Score: 1.5/5**
 
 ### Final Score Calculation
 
 ```
 Final Score = (Audits × 0.20) + (Centralization × 0.30) + (Funds Mgmt × 0.30) + (Liquidity × 0.15) + (Operational × 0.05)
-            = (1.5 × 0.20) + (3.0 × 0.30) + (3.0 × 0.30) + (2.5 × 0.15) + (2.0 × 0.05)
-            = 0.30 + 0.90 + 0.90 + 0.375 + 0.10
-            = 2.575
-            ≈ 2.58
+            = (1.5 × 0.20) + (2.50 × 0.30) + (2.75 × 0.30) + (2.5 × 0.15) + (1.5 × 0.05)
+            = 0.30 + 0.75 + 0.825 + 0.375 + 0.075
+            = 2.325
+            ≈ 2.33
 ```
 
 | Category | Score | Weight | Weighted |
 |----------|-------|--------|----------|
 | Audits & Historical | 1.5 | 20% | 0.30 |
-| Centralization & Control | 3.0 | 30% | 0.90 |
-| Funds Management | 3.0 | 30% | 0.90 |
+| Centralization & Control | 2.50 | 30% | 0.75 |
+| Funds Management | 2.75 | 30% | 0.825 |
 | Liquidity Risk | 2.5 | 15% | 0.375 |
-| Operational Risk | 2.0 | 5% | 0.10 |
-| **Final Score** | | | **2.58 / 5.0** |
+| Operational Risk | 1.5 | 5% | 0.075 |
+| **Final Score** | | | **2.33 / 5.0** |
 
 ### Risk Tier
 
 | Final Score | Risk Tier | Recommendation |
 |------------|-----------|----------------|
 | 1.0-1.5 | Minimal Risk | Approved, high confidence |
-| 1.5-2.5 | Low Risk | Approved with standard monitoring |
-| **2.5-3.5** | **Medium Risk** | **Approved with enhanced monitoring** |
+| **1.5-2.5** | **Low Risk** | **Approved with standard monitoring** |
+| 2.5-3.5 | Medium Risk | Approved with enhanced monitoring |
 | 3.5-4.5 | Elevated Risk | Limited approval, strict limits |
 | 4.5-5.0 | High Risk | Not recommended |
 
-**Final Risk Tier: MEDIUM RISK**
+**Final Risk Tier: LOW RISK**
 
 ---
 
