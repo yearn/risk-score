@@ -18,7 +18,7 @@ The protocol is permissioned — first-time depositors require an ECDSA authoriz
 - **Total Syrup TVL (all pools):** ~$3.70B
 - **Collateral Ratio:** 168.96%
 - **Current APY:** ~4.42% (base pool: 3.37% + collateral boost: 1.05%)
-- **Performance Fee:** Management fees deducted from gross borrower interest
+- **Management Fee:** 8.33% of gross borrower interest (Delegate: 3.33% + Platform: 5.00%, verified on-chain via PoolManager `delegateManagementFeeRate()` and MapleGlobals `platformManagementFeeRate()`)
 
 **Links:**
 
@@ -59,77 +59,11 @@ The protocol is permissioned — first-time depositors require an ECDSA authoriz
 
 ## Audits and Due Diligence Disclosures
 
-Maple Finance has been extensively audited across 7+ releases by multiple reputable firms. The protocol has accumulated **20+ audit reports from 8+ different auditing firms**.
+Maple Finance has been extensively audited across 7+ releases by multiple reputable firms. The protocol has accumulated **20+ audit reports from 8+ different auditing firms** including Trail of Bits, Spearbit, Sherlock, Three Sigma, 0xMacro, Dedaub, Sigma Prime, PeckShield, and Code4rena. All reported issues have been addressed prior to each release.
 
-### V1 Audits (2021)
-
-| Auditor | Date | Report |
-|---------|------|--------|
-| PeckShield | 2021 | [Report](https://github.com/maple-labs/maple-core/files/6423601/PeckShield-Audit-Report-Maple-v1.0.1.pdf) |
-| Code4rena | Apr 2021 | [Report](https://code423n4.com/reports/2021-04-maple/) |
-| Dedaub | 2021 | [Report](https://github.com/maple-labs/maple-core/files/6423621/Dedaub-Audit-Report-Maple-Core.2.pdf) |
-
-### V2 Audits (Dec 2022)
-
-| Auditor | Date | Report |
-|---------|------|--------|
-| Trail of Bits | Aug 2022 | [Report](https://github.com/maple-labs/maple-core-v2/blob/main/audits/2022-december/TrailOfBits-Maple.pdf) |
-| Spearbit | Oct 2022 | [Report](https://github.com/maple-labs/maple-core-v2/blob/main/audits/2022-december/Spearbit-maple.pdf) |
-| Three Sigma | Oct 2022 | [Report](https://github.com/maple-labs/maple-core-v2/blob/main/audits/2022-december/Three-Sigma-Maple-Finance-Dec-2022.pdf) |
-
-### June 2023 Release
-
-| Auditor | Date | Report |
-|---------|------|--------|
-| Cantina (Spearbit) | Jun 2023 | [Report](https://github.com/maple-labs/maple-core-v2/blob/main/audits/2023-june/Cantina-Maple.pdf) |
-| Three Sigma | Apr 2023 | [Report](https://github.com/maple-labs/maple-core-v2/blob/main/audits/2023-june/Three-Sigma-Maple-Finance-Jun-2023.pdf) |
-
-### December 2023 Release
-
-| Auditor | Date | Report |
-|---------|------|--------|
-| Three Sigma | Nov 2023 | [Report](https://github.com/maple-labs/maple-core-v2/blob/main/audits/2023-december/Three-Sigma-Maple-Finance-Dec-2023.pdf) |
-| 0xMacro | Nov 2023 | [Report](https://github.com/maple-labs/maple-core-v2/blob/main/audits/2023-december/0xMacro-Maple-Finance-Dec-2023.pdf) |
-
-### August 2024 Release (Syrup Contracts)
-
-| Auditor | Date | Report |
-|---------|------|--------|
-| Three Sigma | Aug 2024 | [Report](https://github.com/maple-labs/maple-core-v2/blob/main/audits/2024-august/Three-Sigma-Maple-Finance-Aug-2024.pdf) |
-| 0xMacro | Aug 2024 | [Report](https://github.com/maple-labs/maple-core-v2/blob/main/audits/2024-august/0xMacro-Maple-Finance-Aug-2024.pdf) |
-| Three Sigma (SyrupRouter) | May 2024 | [Report](https://github.com/maple-labs/maple-core-v2/blob/main/audits/2024-august/Three-Sigma-Maple-Finance-Aug-2024-Syrup.pdf) |
-
-### December 2024 Release
-
-| Auditor | Date | Report |
-|---------|------|--------|
-| Three Sigma | Dec 2024 | [Report](https://github.com/maple-labs/maple-core-v2/blob/main/audits/2024-december/Three-Sigma-Maple-Finance-Dec-2024%20.pdf) |
-| 0xMacro | Dec 2024 | [Report](https://github.com/maple-labs/maple-core-v2/blob/main/audits/2024-december/0xMacro-Maple-Finance-Dec-2024.pdf) |
-
-### September 2025 Release (Governor Timelock)
-
-| Auditor | Date | Report |
-|---------|------|--------|
-| Sherlock | Sep 2025 | [Report](https://github.com/maple-labs/maple-core-v2/blob/main/audits/2025-sept-governor-timelock/Sherlock-Maple-Finance-timelock-Sept-2025.pdf) |
-| 0xMacro | Sep 2025 | [Report](https://github.com/maple-labs/maple-core-v2/blob/main/audits/2025-sept-governor-timelock/0xMacro-Maple-Finance-timelock-Sept-2025.pdf) |
-
-### November 2025 Release (Withdrawal Manager)
-
-| Auditor | Date | Report |
-|---------|------|--------|
-| Spearbit | Nov 2025 | [Report](https://github.com/maple-labs/maple-core-v2/blob/main/audits/2025-november/Spearbit-Maple-Finance-WM-Nov-2025.pdf) |
-| Sherlock | Nov 2025 | [Report](https://github.com/maple-labs/maple-core-v2/blob/main/audits/2025-november/Sherlock-Maple-Finance-WM-Nov-2025.pdf) |
-
-### January 2026 Release (CCIP Cross-Chain)
-
-| Auditor | Date | Report |
-|---------|------|--------|
-| Dedaub | Nov 2025 | [Report](https://github.com/maple-labs/maple-cross-chain-receiver/blob/main/audits/2025-november/Dedaub-Chainlink-Maple.pdf) |
-| Sigma Prime | Jan 2026 | [Report](https://github.com/maple-labs/maple-cross-chain-receiver/blob/main/audits/2026-january/SigmaPrime-Chainlink-Maple.pdf) |
+Full audit report list: [Appendix A — Audit Reports](#appendix-a--audit-reports)
 
 **Smart Contract Complexity:** High — Upgradeable proxy pattern, multiple loan managers (fixed-term and open-term), withdrawal queue, permission system, DeFi strategy integrations (Aave, Sky), Chainlink oracles, cross-chain CCIP integration.
-
-All reported issues have been addressed prior to each release.
 
 ### Bug Bounty
 
@@ -168,7 +102,7 @@ Maple delegates deposited USDC to institutional borrowers via overcollateralized
 - **Deposits:** Permissioned for first-time depositors (requires ECDSA authorization from Maple). Subsequent deposits are permissionless. Atomic, single-transaction via `SyrupRouter.deposit()` or `depositWithPermit()` (EIP-2612).
 - **Withdrawals:** Queue-based (FIFO). Call `pool.requestRedeem(shares, receiver)` to enter queue. Assets sent directly to wallet when processed. No penalties. Yield stops accruing once withdrawal requested.
 - **Withdrawal Timing:** Typically minutes to 2 days. Maximum 30 days in low-liquidity scenarios.
-- **Fees:** Management fees deducted from gross borrower interest. DeFi strategy performance fees charged on yield generated.
+- **Fees:** Total management fee of 8.33% on gross borrower interest (Delegate fee: 3.33% + Platform fee: 5.00%, verified on-chain). DeFi strategy performance fees charged on yield generated.
 - **Alternative Exit:** syrupUSDC can be swapped on Uniswap (~$20M liquidity in syrupUSDC/USDC pool).
 
 ### Collateralization
@@ -535,3 +469,73 @@ All original TODOs have been resolved:
 - [x] ~~Check current collateral allocations~~ — **BTC 54%, XRP 25%, USTB 16%, LBTC 2.4%, weETH 1%, HYPE 1% (via Maple GraphQL API)**
 - [x] ~~Verify Uniswap slippage~~ — **$100K: ~0.6%, $1M: ~5.4%, $10M: ~44% (via DexScreener)**
 - [x] ~~Check top holder distribution~~ — **Top 2: 68%, Top 5: 87%, Top 10: 91%. Only 2,768 holders (via Ethplorer)**
+
+---
+
+## Appendix A — Audit Reports
+
+### V1 Audits (2021)
+
+| Auditor | Date | Report |
+|---------|------|--------|
+| PeckShield | 2021 | [Report](https://github.com/maple-labs/maple-core/files/6423601/PeckShield-Audit-Report-Maple-v1.0.1.pdf) |
+| Code4rena | Apr 2021 | [Report](https://code423n4.com/reports/2021-04-maple/) |
+| Dedaub | 2021 | [Report](https://github.com/maple-labs/maple-core/files/6423621/Dedaub-Audit-Report-Maple-Core.2.pdf) |
+
+### V2 Audits (Dec 2022)
+
+| Auditor | Date | Report |
+|---------|------|--------|
+| Trail of Bits | Aug 2022 | [Report](https://github.com/maple-labs/maple-core-v2/blob/main/audits/2022-december/TrailOfBits-Maple.pdf) |
+| Spearbit | Oct 2022 | [Report](https://github.com/maple-labs/maple-core-v2/blob/main/audits/2022-december/Spearbit-maple.pdf) |
+| Three Sigma | Oct 2022 | [Report](https://github.com/maple-labs/maple-core-v2/blob/main/audits/2022-december/Three-Sigma-Maple-Finance-Dec-2022.pdf) |
+
+### June 2023 Release
+
+| Auditor | Date | Report |
+|---------|------|--------|
+| Cantina (Spearbit) | Jun 2023 | [Report](https://github.com/maple-labs/maple-core-v2/blob/main/audits/2023-june/Cantina-Maple.pdf) |
+| Three Sigma | Apr 2023 | [Report](https://github.com/maple-labs/maple-core-v2/blob/main/audits/2023-june/Three-Sigma-Maple-Finance-Jun-2023.pdf) |
+
+### December 2023 Release
+
+| Auditor | Date | Report |
+|---------|------|--------|
+| Three Sigma | Nov 2023 | [Report](https://github.com/maple-labs/maple-core-v2/blob/main/audits/2023-december/Three-Sigma-Maple-Finance-Dec-2023.pdf) |
+| 0xMacro | Nov 2023 | [Report](https://github.com/maple-labs/maple-core-v2/blob/main/audits/2023-december/0xMacro-Maple-Finance-Dec-2023.pdf) |
+
+### August 2024 Release (Syrup Contracts)
+
+| Auditor | Date | Report |
+|---------|------|--------|
+| Three Sigma | Aug 2024 | [Report](https://github.com/maple-labs/maple-core-v2/blob/main/audits/2024-august/Three-Sigma-Maple-Finance-Aug-2024.pdf) |
+| 0xMacro | Aug 2024 | [Report](https://github.com/maple-labs/maple-core-v2/blob/main/audits/2024-august/0xMacro-Maple-Finance-Aug-2024.pdf) |
+| Three Sigma (SyrupRouter) | May 2024 | [Report](https://github.com/maple-labs/maple-core-v2/blob/main/audits/2024-august/Three-Sigma-Maple-Finance-Aug-2024-Syrup.pdf) |
+
+### December 2024 Release
+
+| Auditor | Date | Report |
+|---------|------|--------|
+| Three Sigma | Dec 2024 | [Report](https://github.com/maple-labs/maple-core-v2/blob/main/audits/2024-december/Three-Sigma-Maple-Finance-Dec-2024%20.pdf) |
+| 0xMacro | Dec 2024 | [Report](https://github.com/maple-labs/maple-core-v2/blob/main/audits/2024-december/0xMacro-Maple-Finance-Dec-2024.pdf) |
+
+### September 2025 Release (Governor Timelock)
+
+| Auditor | Date | Report |
+|---------|------|--------|
+| Sherlock | Sep 2025 | [Report](https://github.com/maple-labs/maple-core-v2/blob/main/audits/2025-sept-governor-timelock/Sherlock-Maple-Finance-timelock-Sept-2025.pdf) |
+| 0xMacro | Sep 2025 | [Report](https://github.com/maple-labs/maple-core-v2/blob/main/audits/2025-sept-governor-timelock/0xMacro-Maple-Finance-timelock-Sept-2025.pdf) |
+
+### November 2025 Release (Withdrawal Manager)
+
+| Auditor | Date | Report |
+|---------|------|--------|
+| Spearbit | Nov 2025 | [Report](https://github.com/maple-labs/maple-core-v2/blob/main/audits/2025-november/Spearbit-Maple-Finance-WM-Nov-2025.pdf) |
+| Sherlock | Nov 2025 | [Report](https://github.com/maple-labs/maple-core-v2/blob/main/audits/2025-november/Sherlock-Maple-Finance-WM-Nov-2025.pdf) |
+
+### January 2026 Release (CCIP Cross-Chain)
+
+| Auditor | Date | Report |
+|---------|------|--------|
+| Dedaub | Nov 2025 | [Report](https://github.com/maple-labs/maple-cross-chain-receiver/blob/main/audits/2025-november/Dedaub-Chainlink-Maple.pdf) |
+| Sigma Prime | Jan 2026 | [Report](https://github.com/maple-labs/maple-cross-chain-receiver/blob/main/audits/2026-january/SigmaPrime-Chainlink-Maple.pdf) |
