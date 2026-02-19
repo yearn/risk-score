@@ -140,7 +140,7 @@ Inactive/zero-allocation assets: ETH, SOL, tETH, sUSDS, USR, LP_USR, OrcaLP_PYUS
 - If collateralization reaches liquidation level, Maple has full rights to liquidate collateral
 - Liquidations performed by external Keepers, constrained by protocol rules
 - Chainlink oracles used for price feeds
-- Oracle wrappers provide additional security against oracle manipulation
+- Oracle wrappers add safety checks on top of Chainlink feeds (staleness validation, min/max price bounds, sequence checks) to prevent liquidations at stale or manipulated prices
 - Minimum liquidation price parameter prevents liquidation at unfairly low prices
 
 **Impairment Mechanism:**
@@ -211,9 +211,6 @@ Protocol Contracts (MapleGlobals, PoolManager, etc.)
 
 **Multisig Details (verified on-chain):** DAO Multisig is a **Gnosis Safe v1.3.0** with **4-of-7 threshold**. All 7 signers are EOAs (no nested multisigs). No ENS names registered. Per LlamaRisk, a minority of signers are Maple employees; the majority are long-standing external advisors and investors who have held their seats for >2 years. 922 transactions processed as of Feb 2026.
 
-**DAO Multisig Signers (4-of-7):**
-`0x690A5aCa`, `0x0f4430f1`, `0xF4b33586`, `0xd9c66fc2`, `0x96481CB0`, `0x04eBB820`, `0x588C6eb6`
-
 **Emergency Pause:** Three-tier granular pausing system:
 1. Global pause — single switch for entire system
 2. Per-contract pause — pause specific contract instances
@@ -221,7 +218,7 @@ Protocol Contracts (MapleGlobals, PoolManager, etc.)
 
 Callable by Governor or Security Admin.
 
-**Voting:** Snapshot-based (off-chain). SYRUP must be staked into stSYRUP to participate. 7-day voting window, quorum-based.
+**Voting:** Snapshot-based. SYRUP must be staked into stSYRUP to participate. 7-day voting window, quorum-based.
 
 ### Programmability
 
@@ -341,7 +338,7 @@ Exceptional audit coverage and large TVL. V1 credit event was counterparty risk,
 
 - Dual-layer timelock protection: GovernorTimelock (MIN_DELAY=24h) + MapleGlobals defaultTimelockParameters (7-day delay, 2-day execution window), both verified on-chain
 - DAO Multisig is 4/7 Safe v1.3.0, all EOA signers. Minority are employees; majority external advisors (per LlamaRisk)
-- Snapshot-based voting (off-chain) — less secure than on-chain governance
+- Snapshot-based voting with 7-day window and quorum
 - Governor can change timelock parameters (through the timelock itself)
 - Security Admin and Operational Admin have significant powers but constrained by timelock
 - Emergency pause is a reasonable security measure
@@ -455,20 +452,6 @@ Final Score = (Audits × 0.20) + (Centralization × 0.30) + (Funds Mgmt × 0.30)
 - **Incident-based:** Reassess after any loan impairment, borrower default, smart contract exploit, or governance change
 - **Collateral-based:** Reassess if collateral composition changes significantly (new asset types, concentration changes)
 - **Governance-based:** Reassess if DAO multisig composition changes or timelock parameters are modified
-
----
-
-## Open Questions (TODO)
-
-All original TODOs have been resolved:
-
-- [x] ~~Verify DAO multisig threshold~~ — **4/7 Safe v1.3.0, all EOA signers**
-- [x] ~~Verify Pool Delegate address~~ — **`0xC1e18FFD8825FfB286D177DDEbeba345EC70B49f` (EOA)**
-- [x] ~~Verify legal entity and jurisdiction~~ — **Maple Labs Pty Ltd (AU), Syrup Ltd (offshore), Maple Int'l Ops SPC (Cayman Islands)**
-- [x] ~~Check LlamaRisk analysis~~ — **4 assessments on Aave Governance (Jul, Oct, Dec 2025)**
-- [x] ~~Check current collateral allocations~~ — **BTC 54%, XRP 25%, USTB 16%, LBTC 2.4%, weETH 1%, HYPE 1% (via Maple GraphQL API)**
-- [x] ~~Verify Uniswap slippage~~ — **$100K: ~0.6%, $1M: ~5.4%, $10M: ~44% (via DexScreener)**
-- [x] ~~Check top holder distribution~~ — **Top 2: 68%, Top 5: 87%, Top 10: 91%. Only 2,768 holders (via Ethplorer)**
 
 ---
 
