@@ -1,9 +1,9 @@
 # Protocol Risk Assessment: Maple Finance (syrupUSDC)
 
-**Assessment Date:** February 17, 2026
-**Token:** syrupUSDC
-**Chain:** Ethereum Mainnet
-**Token Address:** [`0x80ac24aA929eaF5013f6436cdA2a7ba190f5Cc0b`](https://etherscan.io/address/0x80ac24aA929eaF5013f6436cdA2a7ba190f5Cc0b)
+- **Assessment Date:** February 17, 2026
+- **Token:** syrupUSDC
+- **Chain:** Ethereum Mainnet
+- **Token Address:** [`0x80ac24aA929eaF5013f6436cdA2a7ba190f5Cc0b`](https://etherscan.io/address/0x80ac24aA929eaF5013f6436cdA2a7ba190f5Cc0b)
 
 ## Overview + Links
 
@@ -548,3 +548,102 @@ The lender bitmap is already set on-chain, so the user calls `SyrupRouter.deposi
 syrupUSDC can be purchased on Uniswap as a regular token swap, bypassing the permission system entirely. This only applies to buying existing syrupUSDC on the secondary market, not minting new shares.
 
 **Gating mechanism:** Maple can refuse to provide the authorization signature for restricted jurisdictions (US, Australia, 30+ others) or sanctioned addresses. Source: [`SyrupRouter.sol`](https://github.com/maple-labs/syrup-utils/blob/main/contracts/SyrupRouter.sol)
+
+| Function | Gated |
+|----------|-------|
+| `deposit` | Yes |
+| `depositWithPermit` | Yes |
+| `mint` | Yes |
+| `mintWithPermit` | Yes |
+| `requestRedeem` | No |
+| `redeem` | No |
+| `requestWithdraw` | Yes |
+| `withdraw` | Yes |
+| `removeShares` | Yes |
+| `transfer` | No |
+| `transferFrom` | No |
+
+```solidity
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.25;
+
+import "forge-std/Test.sol";
+
+interface IPool {
+    function deposit(uint256 assets, address receiver) external returns (uint256 shares);
+    function asset() external view returns (address);
+    function manager() external view returns (address);
+}
+
+interface IPoolManager {
+    function canCall(bytes32 functionId, address caller, bytes calldata data) external view returns (bool, string memory);
+    function poolPermissionManager() external view returns (address);
+}
+
+interface IPoolPermissionManager {
+    function hasPermission(address poolManager, address lender, bytes32 functionId) external view returns (bool);
+}
+
+interface IERC20 {
+    function balanceOf(address) external view returns (uint256);
+    function approve(address spender, uint256 amount) external returns (bool);
+}
+
+contract SyrupUSDCDepositTest is Test {
+    address constant POOL           = 0x80ac24aA929eaF5013f6436cdA2a7ba190f5Cc0b;
+    address constant USDC           = 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48;
+    address constant POOL_MANAGER   = 0x7aD5fFa5fdF509E30186F4609c2f6269f4B6158F;
+    address unauthorized = makeAddr("unauthorized_user");
+    // Existing EOA holder (rank 8) — already has deposit permission bitmap set
+    address constant AUTHORIZED   = 0xdf998bec7943aa893ba8542eE57ea47b78F29007;
+
+    function setUp() public {
+        uint256 mainnetFork = vm.createFork("mainnet");
+        vm.selectFork(mainnetFork);
+        // Give the unauthorized user 10,000 USDC
+        deal(USDC, unauthorized, 10_000e6);
+        deal(USDC, AUTHORIZED, 10_000e6);
+    }
+
+    function test_unauthorized_deposit_reverts() public {
+        vm.startPrank(unauthorized);
+        // Approve pool to spend USDC
+        IERC20(USDC).approve(POOL, type(uint256).max);
+
+        // Verify canCall returns false for unauthorized user
+        IPoolManager pm = IPoolManager(POOL_MANAGER);
+        bytes memory depositData = abi.encode(uint256(1000e6), unauthorized);
+        (bool allowed, string memory reason) = pm.canCall("P:deposit", unauthorized, depositData);
+        assertFalse(allowed, "Unauthorized user should NOT be allowed to deposit");
+        assertEq(reason, "PM:CC:NOT_ALLOWED", "Should fail with permission error");
+        emit log_string("canCall returned false as expected");
+        emit log_string(string.concat("Reason: ", reason));
+
+        // Verify the actual deposit call reverts
+        vm.expectRevert(bytes("PM:CC:NOT_ALLOWED"));
+        IPool(POOL).deposit(1000e6, unauthorized);
+        vm.stopPrank();
+        emit log_string("PASS: Unauthorized deposit correctly reverted");
+    }
+
+    function test_permission_manager_returns_false() public view {
+        IPoolManager pm = IPoolManager(POOL_MANAGER);
+        address ppm = pm.poolPermissionManager();
+        bool hasPermission = IPoolPermissionManager(ppm).hasPermission(POOL_MANAGER, unauthorized, "P:deposit");
+        assertFalse(hasPermission, "Random address should not have deposit permission");
+    }
+
+    // @notice Authorized user (existing holder) can deposit
+    function test_authorized_deposit_succeeds() public {
+        vm.startPrank(AUTHORIZED);
+        IERC20(USDC).approve(POOL, type(uint256).max);
+        uint256 balBefore = IERC20(POOL).balanceOf(AUTHORIZED);
+        uint256 shares = IPool(POOL).deposit(1000e6, AUTHORIZED);
+        uint256 balAfter = IERC20(POOL).balanceOf(AUTHORIZED);
+        assertGt(shares, 0, "Should receive shares");
+        assertEq(balAfter - balBefore, shares, "Balance should increase by shares");
+        vm.stopPrank();
+        emit log_named_uint("Shares received", shares);
+    }
+}
+```
