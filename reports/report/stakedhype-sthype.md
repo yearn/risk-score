@@ -1,9 +1,10 @@
 # Protocol Risk Assessment: StakedHYPE stHYPE
 
-**Assessment Date:** February 18, 2026
-**Token:** stHYPE
-**Chain:** HyperEVM (Hyperliquid L1 ecosystem)
-**Primary Docs:** https://docs.stakedhype.fi/technical/hyperliquid-stake-marketplace-hsm
+- **Assessment Date:** February 18, 2026
+- **Token:** stHYPE
+- **Chain:** HyperEVM (Hyperliquid L1 ecosystem)
+- **Token Address:** [`0xfFaa4a3D97fE9107Cef8a3F48c069F577Ff76cC1`](https://hyperevmscan.io/address/0xfFaa4a3D97fE9107Cef8a3F48c069F577Ff76cC1)
+- **Final Score: 3.03/5.0**
 
 ## Overview + Links
 

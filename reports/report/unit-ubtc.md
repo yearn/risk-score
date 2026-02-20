@@ -5,6 +5,7 @@
 - **Chain:** HyperEVM (Hyperliquid L1 ecosystem)
 - **Token Address:** [`0x9FDBdA0A5e284c32744D2f17Ee5c74B284993463`](https://hyperevmscan.io/address/0x9FDBdA0A5e284c32744D2f17Ee5c74B284993463)
 - **HyperCore Token ID:** [`0x8f254b963e8468305d409b33aa137c67`](https://app.hyperliquid.xyz/explorer/token/0x8f254b963e8468305d409b33aa137c67)
+- **Final Score: 5.0/5.0**
 
 ## Overview + Links
 

@@ -1,5 +1,11 @@
 # Protocol Risk Assessment: Fluid Lending Protocol (fTokens)
 
+- **Assessment Date:** February 12, 2026
+- **Token:** fTokens (fUSDC, fUSDT, fWETH)
+- **Chain:** Ethereum Mainnet
+- **Token Address:** [`0x9Fb7b4477576Fe5B32be4C1843aFB1e55F251B33`](https://etherscan.io/address/0x9Fb7b4477576Fe5B32be4C1843aFB1e55F251B33) (fUSDC)
+- **Final Score: 1.1/5.0**
+
 ## Overview + Links
 
 This assessment focuses on the **Fluid Lending Protocol (fTokens)** — an ERC4626-compliant lending product built on top of Fluid's unified Liquidity Layer. Users supply assets (USDC, USDT, WETH, wstETH, etc.) and receive fTokens representing their share of the lending pool. Yield is generated from borrower interest via the Vault Protocol.

@@ -1,9 +1,10 @@
 # Protocol Risk Assessment: Resolv RLP
 
-**Assessment Date**: February 8, 2026
-**Token**: RLP (Resolv Liquidity Pool)
-**Chain**: Ethereum (primary), multi-chain (Base, BNB, Berachain, Arbitrum, HyperEVM, Soneium, TAC, Plasma)
-**Token Address (Ethereum)**: [`0x4956b52aE2fF65D74CA2d61207523288e4528f96`](https://etherscan.io/address/0x4956b52aE2fF65D74CA2d61207523288e4528f96)
+- **Assessment Date:** February 8, 2026
+- **Token:** RLP (Resolv Liquidity Pool)
+- **Chain:** Ethereum (primary), multi-chain (Base, BNB, Berachain, Arbitrum, HyperEVM, Soneium, TAC, Plasma)
+- **Token Address:** [`0x4956b52aE2fF65D74CA2d61207523288e4528f96`](https://etherscan.io/address/0x4956b52aE2fF65D74CA2d61207523288e4528f96)
+- **Final Score: 2.9/5.0**
 
 ## Overview + Links
 

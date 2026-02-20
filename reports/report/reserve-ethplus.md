@@ -1,9 +1,10 @@
-# Reserve Protocol - ETH+ Risk Assessment
+# Protocol Risk Assessment: Reserve Protocol (ETH+)
 
-**Assessment Date:** December 22, 2025
-**Protocol:** Reserve Protocol (ETH+ RToken)
-**Token Address:** [0xE72B141DF173b999AE7c1aDcbF60Cc9833Ce56a8](https://etherscan.io/address/0xE72B141DF173b999AE7c1aDcbF60Cc9833Ce56a8)
-**Chain:** Ethereum Mainnet
+- **Assessment Date:** December 22, 2025
+- **Token:** ETH+
+- **Chain:** Ethereum Mainnet
+- **Token Address:** [`0xE72B141DF173b999AE7c1aDcbF60Cc9833Ce56a8`](https://etherscan.io/address/0xE72B141DF173b999AE7c1aDcbF60Cc9833Ce56a8)
+- **Final Score: 1.9/5.0**
 
 ## Overview + Links
 

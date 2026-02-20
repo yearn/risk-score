@@ -1,10 +1,10 @@
-# Midas mHYPER Risk Assessment
+# Protocol Risk Assessment: Midas mHYPER
 
-**Assessment Date:** February 7, 2026
-**Protocol:** Midas (Midas Software GmbH)
-**Token Address:** [0x9b5528528656DBC094765E2abB79F293c21191B9](https://etherscan.io/token/0x9b5528528656dbc094765e2abb79f293c21191b9)
-**Token Symbol:** mHYPER
-**Chain:** Ethereum (also deployed on Monad, Plasma)
+- **Assessment Date:** February 7, 2026
+- **Token:** mHYPER
+- **Chain:** Ethereum (also deployed on Monad, Plasma)
+- **Token Address:** [`0x9b5528528656DBC094765E2abB79F293c21191B9`](https://etherscan.io/token/0x9b5528528656dbc094765e2abb79f293c21191b9)
+- **Final Score: 3.3/5.0**
 
 ## Overview + Links
 

@@ -1,9 +1,10 @@
 # Protocol Risk Assessment: Resolv wstUSR (Wrapped Staked USR)
 
-**Assessment Date**: February 9, 2026
-**Token**: wstUSR (Wrapped Staked USR)
-**Chain**: Ethereum (primary), multi-chain (Arbitrum, Base)
-**Token Address (Ethereum)**: [`0x1202F5C7b4B9E47a1A484E8B270be34dbbC75055`](https://etherscan.io/address/0x1202F5C7b4B9E47a1A484E8B270be34dbbC75055)
+- **Assessment Date:** February 9, 2026
+- **Token:** wstUSR (Wrapped Staked USR)
+- **Chain:** Ethereum (primary), multi-chain (Arbitrum, Base)
+- **Token Address:** [`0x1202F5C7b4B9E47a1A484E8B270be34dbbC75055`](https://etherscan.io/address/0x1202F5C7b4B9E47a1A484E8B270be34dbbC75055)
+- **Final Score: 2.2/5.0**
 
 ## Overview + Links
 

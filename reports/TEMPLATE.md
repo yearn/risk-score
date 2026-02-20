@@ -1,5 +1,11 @@
 # Protocol Risk Assessment: [Protocol Name]
 
+- **Assessment Date:** [Date]
+- **Token:** [Token Name]
+- **Chain:** [Chain Name]
+- **Token Address:** [`[Token Address]`]([Token Explorer Link])
+- **Final Score: X/5.0**
+
 ## Overview + Links
 
 Explain what the protocol does, its usage, and yield sources.

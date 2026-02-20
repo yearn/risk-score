@@ -1,9 +1,10 @@
 # Protocol Risk Assessment: Origin ARM (stETH)
 
-**Assessment Date:** February 8, 2026
-**Token**: ARM-WETH-stETH
-**Chain**: Ethereum Mainnet
-**Token Address**: [`0x85B78AcA6Deae198fBF201c82DAF6Ca21942acc6`](https://etherscan.io/address/0x85B78AcA6Deae198fBF201c82DAF6Ca21942acc6)
+- **Assessment Date:** February 8, 2026
+- **Token:** ARM-WETH-stETH
+- **Chain:** Ethereum Mainnet
+- **Token Address:** [`0x85B78AcA6Deae198fBF201c82DAF6Ca21942acc6`](https://etherscan.io/address/0x85B78AcA6Deae198fBF201c82DAF6Ca21942acc6)
+- **Final Score: 1.85/5.0**
 
 ## Overview + Links
 

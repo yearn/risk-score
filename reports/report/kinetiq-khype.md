@@ -1,9 +1,10 @@
 # Protocol Risk Assessment: Kinetiq kHYPE
 
-**Assessment Date:** February 17, 2026
-**Token:** kHYPE
-**Chain:** HyperEVM (Hyperliquid L1 ecosystem)
-**Token Address:** [`kHYPE`](https://hyperevmscan.io/address/0xfd739d4e423301ce9385c1fb8850539d657c296d)
+- **Assessment Date:** February 17, 2026
+- **Token:** kHYPE
+- **Chain:** HyperEVM (Hyperliquid L1 ecosystem)
+- **Token Address:** [`0xfd739d4e423301ce9385c1fb8850539d657c296d`](https://hyperevmscan.io/address/0xfd739d4e423301ce9385c1fb8850539d657c296d)
+- **Final Score: 2.315/5.0**
 
 ## Overview + Links
 
