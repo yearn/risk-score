@@ -1,10 +1,10 @@
 # Protocol Risk Assessment: Unit Bitcoin (UBTC)
 
-**Assessment Date:** February 19, 2026
-**Token:** UBTC (Unit Bitcoin)
-**Chain:** HyperEVM (Hyperliquid L1 ecosystem)
-**Token Address:** [`0x9FDBdA0A5e284c32744D2f17Ee5c74B284993463`](https://hyperevmscan.io/address/0x9FDBdA0A5e284c32744D2f17Ee5c74B284993463)
-**HyperCore Token ID:** [`0x8f254b963e8468305d409b33aa137c67`](https://app.hyperliquid.xyz/explorer/token/0x8f254b963e8468305d409b33aa137c67)
+- **Assessment Date:** February 19, 2026
+- **Token:** UBTC (Unit Bitcoin)
+- **Chain:** HyperEVM (Hyperliquid L1 ecosystem)
+- **Token Address:** [`0x9FDBdA0A5e284c32744D2f17Ee5c74B284993463`](https://hyperevmscan.io/address/0x9FDBdA0A5e284c32744D2f17Ee5c74B284993463)
+- **HyperCore Token ID:** [`0x8f254b963e8468305d409b33aa137c67`](https://app.hyperliquid.xyz/explorer/token/0x8f254b963e8468305d409b33aa137c67)
 
 ## Overview + Links
 
@@ -208,7 +208,7 @@ Per DeFiLlama, 27 UBTC pools on Hyperliquid L1 with ~$35M total TVL:
 
 | Metric | Value |
 |--------|-------|
-| Market ID | `0x45af9c72aa97978e143a646498c8922058b7c6f18b6f7b05d7316c8cf7ab942f` |
+| Market ID | [`0x45af9c72aa97978e143a646498c8922058b7c6f18b6f7b05d7316c8cf7ab942f`](https://app.morpho.org/hyperevm/market/0x45af9c72aa97978e143a646498c8922058b7c6f18b6f7b05d7316c8cf7ab942f/ubtc-usdc) |
 | Loan Asset | USDC |
 | LLTV | 77.0% |
 | Supply | ~$2.72M |
@@ -320,25 +320,19 @@ Key addresses and data to monitor:
 
 1. **Simple architecture** — UBTC is a straightforward 1:1 BTC wrapper with minimal on-chain complexity.
 2. **Significant protocol TVL** (~$447M) and meaningful trading volume (~$34M/day) demonstrating product-market fit.
-3. **2-of-3 MPC Guardian Network** with 3 independent operators (Unit, Hyperliquid, Infinite Field).
-4. **Bitcoin reserves are verifiable** on-chain via the Bitcoin treasury address.
-5. **No protocol fees** — reduces attack surface and misalignment incentives.
-6. **Regulatory compliance measures** — OFAC screening, geofencing, law enforcement cooperation.
-7. **Team from reputable TradFi/crypto backgrounds** (HRT, Jump, Fortress).
+3. **Bitcoin reserves are verifiable** on-chain via the Bitcoin treasury address.
+4. **No protocol fees** — reduces attack surface and misalignment incentives.
+5. **Regulatory compliance measures** — OFAC screening, geofencing, law enforcement cooperation.
 
 ### Key Risks
 
 1. **No public smart contract audits** — no audit reports found anywhere, confirmed by multiple independent sources. This is a critical concern for a bridge holding ~$447M.
 2. **No bug bounty program** — no Immunefi, Sherlock, or Cantina listing found.
-3. **Implementation source code unverified** — the proxy is verified (standard OpenZeppelin ERC1967Proxy), but the actual token implementation at [`0x1a76...34fc`](https://hyperevmscan.io/address/0x1a7689c3b783eb37550efbb9c81e7f468f7034fc) is **not verified**. Bytecode analysis suggests undisclosed allowlist/blacklist features.
+3. **Implementation source code unverified** — the proxy is verified (standard OpenZeppelin ERC1967Proxy), but the actual token implementation at [`0x1a7689c3b783eb37550efbb9c81e7f468f7034fc`](https://hyperevmscan.io/address/0x1a7689c3b783eb37550efbb9c81e7f468f7034fc) is **not verified**. Bytecode analysis suggests undisclosed allowlist/blacklist features.
 4. **EOA ownership on HyperEVM** — the MPC claim is not verifiable on-chain. The contract owner (`Unit: Deployer`) appears as a single EOA that can upgrade the implementation instantly.
 5. **No timelock** on contract upgrades — implementation can be swapped instantly.
-6. **All liquidity within Hyperliquid ecosystem** — no CEX listings. Exit depends on Hyperliquid chain availability.
 7. **2-of-3 MPC** is a relatively low threshold — compromise of any 2 Guardians (one of which is Unit itself) could compromise the system.
 8. **Hyperliquid chain centralization** — Hyper Foundation controls 56.4% of validator stake.
-9. **Only 3 Guardians**, one of which is Unit itself and another is Hyperliquid — potential alignment concern. Currently a single pre-determined leader coordinates.
-10. **Guardian reliability incident** — April 15, 2025 outage caused BTC withdrawal delays, exposing fault tolerance limits.
-11. **Team fully anonymous** — despite claims of HRT/Jump/Fortress backgrounds, no individual team members are publicly identifiable.
 
 ### Critical Risks
 
@@ -442,7 +436,7 @@ For reference, the weighted score without the critical gate would be:
 
 Rationale:
 - **The critical gate "No audit" is triggered.** Unit Protocol has no publicly disclosed audits despite managing ~$447M in TVL.
-- Implementation source code is unverified (proxy is verified as standard OpenZeppelin).
+- Implementation source code is unverified.
 - No bug bounty program exists.
 - HyperEVM contract owner is an EOA (MPC claim not verifiable on-chain) with UUPS upgradeability and no timelock.
 - Without the critical gate, the weighted score would be 3.19/5.0 (Medium Risk), primarily elevated by the audit gap and centralization concerns.
@@ -455,12 +449,10 @@ Rationale:
 1. Publication of any smart contract audit for Unit Protocol / UBTC
 2. Source code verification on block explorers
 3. Launch of a bug bounty program
-4. Any exploit, hack, or peg deviation >5%
-5. Contract implementation upgrade on HyperEVM
-6. Ownership transfer of the UBTC contract
-7. Change in Guardian Network composition (addition/removal of Guardians)
-8. Introduction of timelock governance (positive trigger — would improve score)
-9. Any Hyperliquid L1 consensus or liveness incident
+4. Contract implementation upgrade on HyperEVM
+5. Ownership transfer of the UBTC contract
+6. Change in Guardian Network composition (addition/removal of Guardians)
+7. Introduction of timelock governance (positive trigger — would improve score)
 
 ## Appendix: What Would Improve the Score
 
@@ -471,7 +463,6 @@ If the following were addressed, the score could improve from 5.0 to approximate
 3. **Bug bounty program** → Would reduce audit category score
 4. **On-chain multisig** for contract ownership (replacing EOA) → Would improve governance score
 5. **Timelock** on contract upgrades → Would improve governance score
-6. **Proof of Reserve oracle** (e.g., Chainlink PoR) → Would improve provability score
 
 ## Sources
 
