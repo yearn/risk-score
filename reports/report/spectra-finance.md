@@ -1,4 +1,10 @@
-# Risk Assessment: Spectra Finance
+# Protocol Risk Assessment: Spectra Finance
+
+- **Assessment Date:** February 21, 2026
+- **Token:** PT (Principal Token) / MetaVault shares
+- **Chain:** Ethereum (+ Base, Arbitrum, and others)
+- **Token Address:** N/A (permissionless protocol — multiple PT and MetaVault deployments)
+- **Final Score: 2.25/5.0**
 
 ## Overview + Links
 
