@@ -163,7 +163,10 @@ Both existing MetaVaults are small-scale. No stress-period liquidity data availa
 **Spectra Protocol:**
 - **Token:** $SPECTRA with veSPECTRA for governance voting, gauge allocation, and fee sharing
 - **Core contracts** use AMProxyAdmin and AMTransparentUpgradeableProxy — **upgradeable**
-- TODO: Verify ProxyAdmin owner on-chain (multisig threshold, timelock, signer identities)
+- **AccessManager**: [`0x7EA3097E2AF59eA705398544e0f58EdDb7bd1852`](https://etherscan.io/address/0x7EA3097E2AF59eA705398544e0f58EdDb7bd1852) — central authority controlling upgrade permissions via OpenZeppelin 5.0 AccessManager with 11 defined roles
+- **DAO Multisig**: [`0xDbbfc051D200438dd5847b093B22484B842de9E7`](https://etherscan.io/address/0xDbbfc051D200438dd5847b093B22484B842de9E7) — Gnosis Safe v1.3.0, **3-of-5 threshold**, holds UPGRADE_ROLE (role 1) with **zero execution delay (no timelock)**
+- **Signers**: 5 EOAs — [`0x3152D7e6B0eE11F4F945376b269A65A6c883711F`](https://etherscan.io/address/0x3152D7e6B0eE11F4F945376b269A65A6c883711F), [`0x4B05aC062981D229e8a47DDeAf286eAf65FB4ee0`](https://etherscan.io/address/0x4B05aC062981D229e8a47DDeAf286eAf65FB4ee0), [`0x54E939c5134F237510e1a21b0d42a00D70Ab8213`](https://etherscan.io/address/0x54E939c5134F237510e1a21b0d42a00D70Ab8213), [`0x01Aa68b18960109C34644362F9d619517f864489`](https://etherscan.io/address/0x01Aa68b18960109C34644362F9d619517f864489), [`0xA7499Aa6464c078EeB940da2fc95C6aCd010c3Cc`](https://etherscan.io/address/0xA7499Aa6464c078EeB940da2fc95C6aCd010c3Cc). Identities not publicly labeled on Etherscan. No modules or guard set on Safe
+- **Deployer removed**: Original deployer (`0x020d5ca8bd6451d4c44f784e594f02f352903e61`) has been fully removed from all AccessManager roles — positive security practice
 - Revenue sharing: 60% swap fees to veSPECTRA voters, 20% to LPs, 20% to Curve DAO
 - Pool creation is **permissionless** — anyone can create a Spectra market for any ERC-4626 token
 
@@ -249,9 +252,14 @@ Spectra provides three oracle types, all implementing Chainlink's `AggregatorV3I
 | Contract | Address | Monitor |
 |----------|---------|---------|
 | SPECTRA Token | [`0x6a89228055c7c28430692e342f149f37462b478b`](https://etherscan.io/address/0x6a89228055c7c28430692e342f149f37462b478b) | Supply changes, transfers |
+| DAO Multisig (3/5 Safe) | [`0xDbbfc051D200438dd5847b093B22484B842de9E7`](https://etherscan.io/address/0xDbbfc051D200438dd5847b093B22484B842de9E7) | Signer/threshold changes, upgrade transactions |
+| AccessManager | [`0x7EA3097E2AF59eA705398544e0f58EdDb7bd1852`](https://etherscan.io/address/0x7EA3097E2AF59eA705398544e0f58EdDb7bd1852) | Role grants/revocations, target function changes |
+| Registry | [`0x4973b53b300d64ab72147EFF8C9d962f6b1dA02e`](https://etherscan.io/address/0x4973b53b300d64ab72147EFF8C9d962f6b1dA02e) | Implementation upgrades, fee changes |
 | DAO Treasury | [`0xe59d75C87ED608E4f5F22c9f9AFFb7b6fd02cc7C`](https://etherscan.io/address/0xe59d75C87ED608E4f5F22c9f9AFFb7b6fd02cc7C) | Balance changes |
 
-**MetaVault (to be deployed):**
+**MetaVault (not yet deployed on Ethereum mainnet):**
+
+Existing MetaVaults are on Base (Gami Spectra USDC) and Katana (vbUSDC). Once deployed on Ethereum, monitor:
 
 | Contract | Monitor |
 |----------|---------|
@@ -288,7 +296,7 @@ Spectra provides three oracle types, all implementing Chainlink's `AggregatorV3I
 - **Negative yield risk** — if the underlying IBT vault is exploited, PT holders face proportional losses with no protocol-level backstop
 - **MetaVault curator dependency** — settlement, rollover, and strategy decisions require active manual management. Curator failure can strand assets or delay withdrawals
 - **MetaVault adds async withdrawal layer** — ERC-7540 epoch-based exits add delay on top of any underlying IBT withdrawal mechanism
-- **Core governance details unverified** — ProxyAdmin owner, multisig threshold, and timelock details require on-chain verification (TODO)
+- **No timelock on upgrades** — the 3-of-5 DAO multisig can execute contract upgrades immediately via the AccessManager with zero execution delay
 
 ### Critical Risks
 
@@ -333,12 +341,12 @@ Spectra provides three oracle types, all implementing Chainlink's `AggregatorV3I
 
 | Factor | Assessment |
 |--------|-----------|
-| Core contracts | Upgradeable via AMProxyAdmin. TODO: verify owner, threshold, timelock |
+| Core contracts | Upgradeable via AMProxyAdmin → AccessManager. 3-of-5 DAO multisig, **no timelock**. Deployer removed |
 | MetaVault | SAFE with Zodiac roles. Curator constrained by whitelisted actions. ADMIN can revoke. Time-locked sensitive ops |
 | Pause capability | SAFE can pause/unpause AsyncVault — significant control over user funds |
 | Pool creation | Permissionless — anyone can create Spectra markets |
 
-**Subcategory A Score: 2.5/5** — Zodiac-based MetaVault governance is well-designed with strict curator constraints. However, pause capability is significant, and core protocol governance details need on-chain verification. Assuming reasonable multisig setup (pending TODO).
+**Subcategory A Score: 2.5/5** — Zodiac-based MetaVault governance is well-designed with strict curator constraints. Core protocol governed by 3-of-5 DAO multisig via AccessManager — deployer properly removed. However, **no timelock on upgrades** means the multisig can push changes immediately, and pause capability gives significant control over user funds. Signer identities are not publicly labeled.
 
 **Subcategory B: Programmability**
 
@@ -362,7 +370,7 @@ Spectra provides three oracle types, all implementing Chainlink's `AggregatorV3I
 
 **Centralization Score = (2.5 + 2.0 + 2.5) / 3 = 2.33/5**
 
-**Score: 2.5/5** — Well-structured governance with Zodiac constraints and fully programmatic core. Main concerns are pause authority and unverified core governance details.
+**Score: 2.5/5** — Well-structured governance with Zodiac constraints, fully programmatic core, and deployer properly removed. Main concerns are **no timelock on upgrades** (3-of-5 multisig can upgrade immediately), pause authority over user funds, and anonymous signer identities.
 
 #### Category 3: Funds Management (Weight: 30%)
 
@@ -563,11 +571,9 @@ Curators execute via `execTransactionWithRole` through the Zodiac Roles module (
 4. **Maturity alignment:** Match Morpho market duration with PT maturity to avoid forced pre-maturity liquidations
 5. **Post-expiry handling:** Monitor for `StoreRatesAtExpiry()` call — rates must be frozen for accurate post-expiry pricing
 
-## Appendix C: TODOs
+## Appendix C: Resolved TODOs
 
-Items requiring further on-chain verification or follow-up:
+Items that have been verified on-chain:
 
-- [ ] Verify Spectra core ProxyAdmin owner (multisig threshold, timelock, signer identities)
-- [ ] Identify specific MetaVault contract addresses once deployed
-- [ ] Verify ERC-4626 compliance of chosen IBT for Spectra compatibility (or assess Spectra4626Wrapper necessity)
-- [ ] Confirm Spectra4626Wrapper deployment address on target chain
+- [x] **Verify Spectra core ProxyAdmin owner** — Confirmed: 3-of-5 DAO multisig ([`0xDbbfc051D200438dd5847b093B22484B842de9E7`](https://etherscan.io/address/0xDbbfc051D200438dd5847b093B22484B842de9E7)) via AccessManager ([`0x7EA3097E2AF59eA705398544e0f58EdDb7bd1852`](https://etherscan.io/address/0x7EA3097E2AF59eA705398544e0f58EdDb7bd1852)). No timelock. Deployer removed from all roles. 5 EOA signers (not publicly labeled)
+- [x] **Verify ERC-4626 compliance of chosen IBT** — ESPN vault ([`0xb250c9e0f7be4cff13f94374c993ac445a1385fe`](https://etherscan.io/address/0xb250c9e0f7be4cff13f94374c993ac445a1385fe)) is ERC-4626 compliant with USDS as underlying. Already used in a live Spectra PT pool, confirming factory-level ERC-4626 validation passed. Spectra4626Wrapper not needed for this IBT
