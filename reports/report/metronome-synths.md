@@ -24,7 +24,7 @@ The protocol was originally launched as Metronome 1.0 in June 2018. It relaunche
 - [Snapshot Governance](https://snapshot.org/#/metronome.eth)
 - [Tally On-Chain Governance](https://www.tally.xyz/gov/metronome-dao)
 - [DeFiLlama](https://defillama.com/protocol/metronome)
-- [CoinGecko - msUSD](https://www.coingecko.com/en/coins/metronome-synth-musd)
+- [CoinGecko - msUSD](https://www.coingecko.com/en/coins/metronome-synth-usd)
 - [CoinGecko - msETH](https://www.coingecko.com/en/coins/metronome-synth-eth)
 
 ## Contract Addresses
@@ -138,7 +138,7 @@ All contracts use OpenZeppelin upgradeable proxy pattern (TransparentUpgradeable
 - **Medium**: $1,000-$5,000
 - **KYC Required**: Yes
 - **PoC Required**: Yes
-- **Assets in Scope**: ~20 contracts including AMO, CrossChainDispatcher, deposit tokens
+- **Assets in Scope**: 92 assets across Ethereum, Optimism, and Base (including AMO, CrossChainDispatcher, deposit tokens, and the Metronome dApp)
 
 The $50K max bounty is relatively modest compared to similarly-sized protocols.
 
@@ -158,7 +158,7 @@ The $50K max bounty is relatively modest compared to similarly-sized protocols.
   - No direct smart contract exploits of Metronome Synth contracts found on rekt.news.
 - **Peg Stability** (CoinGecko):
   - msUSD currently trading at $0.9957 (slight discount to $1.00)
-  - Historical ATL of $0.43 and ATH of $3.43 indicate past depeg events (likely related to thin liquidity in early days)
+  - Historical ATL of $0.43 and ATH of $3.43 reflect past depeg events during early thin liquidity periods; current DEX depth ($76M) significantly mitigates this risk
 - **Concentration Risk**: With ~$18M protocol TVL spread across 3 chains, user base is moderately concentrated.
 
 ## Funds Management
@@ -295,7 +295,7 @@ An additional **$87.4M** is locked in yield aggregators and lending protocols bu
 - **Base msUSD/msETH**: ~$39.5M Aerodrome liquidity. Deepest liquidity overall.
 - **24h Volume**: ~$4.08M combined (msUSD: $2.19M, msETH: $1.89M).
 - **Exit Path**: No direct 1:1 redemption. Users must either repay debt + withdraw collateral, or sell on DEX. Market-based exit via DEX pools.
-- **Historical Peg**: msUSD has had historical depeg events (ATL $0.43, ATH $3.43) likely during thin early liquidity, but currently trades at $0.9957.
+- **Historical Peg**: msUSD experienced price deviations in early days (ATL $0.43, ATH $3.43) when liquidity was thin. With current DEX depth of $76M, peg stability risk is substantially reduced. Currently trades at $0.9957.
 - **7d Volume**: Top pools show high utilization — Aerodrome WETH-msETH pool had $69M in 7-day volume against $10M TVL.
 
 ## Centralization & Control Risks
@@ -307,7 +307,7 @@ An additional **$87.4M** is locked in yield aggregators and lending protocols bu
   - Voting token: esMET (MET Escrow) at [`0xA28D70795a61Dc925D4c220762A4344803876bb8`](https://etherscan.io/address/0xA28D70795a61Dc925D4c220762A4344803876bb8)
   - esMET Total Supply: ~8,356,419 esMET
   - Proposal threshold: 25,000 MET
-  - Quorum: ~11,642 MET
+  - Quorum: 4% of esMET total supply (~375,000-575,000 esMET depending on current supply)
   - Voting delay: 5,760 blocks (~19.2 hours)
   - Voting period: 40,320 blocks (~134.4 hours / ~5.6 days)
 - **Timelock**: [`0x4c510878B907d6DDf69E6057ad2f865f60fB7775`](https://etherscan.io/address/0x4c510878B907d6DDf69E6057ad2f865f60fB7775) — **48-hour delay**
@@ -412,7 +412,7 @@ An additional **$87.4M** is locked in yield aggregators and lending protocols bu
 - **3/5 multisig on L2s**: Base and Optimism deployments are governed by a 3/5 multisig with no timelock and anonymous signers.
 - **Vesper Finance dependency**: Productive collateral tokens (vaUSDC, vaETH) introduce smart contract risk from Vesper Finance. Same parent company creates concentration risk.
 - **Modest bug bounty**: $50K max payout is low relative to protocol TVL ($18M) and DEX liquidity ($76M).
-- **Historical depeg events**: msUSD has experienced extreme price deviations ($0.43 - $3.43 historically), though current peg is stable.
+- **Historical depeg events**: msUSD experienced price deviations ($0.43 - $3.43) during early thin-liquidity periods. Current DEX depth ($76M) substantially mitigates future peg risk.
 
 ### Critical Risks
 
@@ -515,9 +515,9 @@ An additional **$87.4M** is locked in yield aggregators and lending protocols bu
 - **Exit Mechanism**: Market-based (DEX swap). No direct 1:1 redemption — users must repay debt or swap on DEX.
 - **Volume**: $4.08M combined 24h volume. High 7d utilization in top pools.
 - **Yield Ecosystem**: $87.4M in yield aggregators shows deep integration.
-- **Historical Peg**: Past depeg events (ATL $0.43) but current peg is stable at $0.9957.
+- **Historical Peg**: Early depeg events (ATL $0.43) occurred during thin liquidity; current $76M DEX depth and stable peg at $0.9957 indicate low ongoing risk.
 
-**Score: 2/5** - Very strong DEX liquidity ($76M) with active trading. Market-based exit only (no 1:1 redemption), but pool depth allows large exits with minimal slippage. Historical depeg events are concerning but occurred during early thin liquidity.
+**Score: 2/5** - Very strong DEX liquidity ($76M) with active trading. Market-based exit only (no 1:1 redemption), but pool depth allows large exits with minimal slippage. Early depeg events occurred during thin liquidity and are largely mitigated by current pool depth.
 
 #### Category 5: Operational Risk (Weight: 5%)
 
