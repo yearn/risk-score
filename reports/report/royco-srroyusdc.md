@@ -4,7 +4,7 @@
 - **Token:** srRoyUSDC (Senior Royco USDC)
 - **Chain:** Ethereum Mainnet
 - **Token Address:** [`0xcD9f5907F92818bC06c9Ad70217f089E190d2a32`](https://etherscan.io/address/0xcD9f5907F92818bC06c9Ad70217f089E190d2a32)
-- **Final Score: 3.80/5.0**
+- **Final Score: 3.9/5.0**
 
 ## Overview + Links
 
@@ -12,9 +12,9 @@ srRoyUSDC is the Senior Vault token of Royco Dawn, an on-chain yield-splitting p
 
 The Senior Vault is curator-managed by the Royco Foundation, which allocates deposited USDC across whitelisted markets including autoUSD (Auto), savUSD (Avant), sNUSD (Neutrl), Aave v3 Core USDC, and stcUSD (Cap Finance, currently paused). Junior capital in each market absorbs losses first, providing a coverage buffer for Senior depositors.
 
-- **Current PPS:** ~1.001074 USDC per srRoyUSDC
-- **Total Supply:** ~6,705,787 srRoyUSDC
-- **Total Assets:** ~$6,712,991 USDC
+- **Current PPS:** ~1.001074 USDC per srRoyUSDC (verified on-chain Feb 21, 2026)
+- **Total Supply:** ~6,726,164 srRoyUSDC
+- **Total Assets:** ~$6,733,390 USDC (of which ~$37,900 held directly in vault, ~$6,695,490 deployed via MultisigStrategy)
 - **Total Holders:** ~5
 - **DeFiLlama TVL (Royco V2, all chains):** ~$7.78M
 - **Management Fee:** 0%
@@ -82,8 +82,8 @@ Royco is **not** listed on the [SEAL Safe Harbor Registry](https://safeharbor.se
 - **Royco Dawn (V2) Launch:** January 6, 2026 (~45 days in production)
 - **Smart Contract Exploits:** None known. Protocol is extremely new.
 - **Security Incidents:** None found in rekt.news, de.fi REKT Database, or other exploit trackers.
-- **TVL:** ~$7.78M across Royco V2 (Ethereum: $4.9M, Avalanche: $2.9M). srRoyUSDC vault: ~$6.71M. TVL history shows only 4 data points starting February 18, 2026 on DeFiLlama.
-- **Holder Distribution:** Only ~5 holders. Extreme concentration risk — this is a very early-stage product. The vault contract itself holds only ~$17,500 USDC; the remaining ~$6.69M is deployed across underlying yield markets.
+- **TVL:** ~$7.78M across Royco V2 (Ethereum: $4.9M, Avalanche: $2.9M). srRoyUSDC vault: ~$6.73M. TVL history shows only 4 data points starting February 18, 2026 on DeFiLlama.
+- **Holder Distribution:** Only ~5 holders. Extreme concentration risk — this is a very early-stage product. The vault contract holds ~$37,900 USDC directly; the remaining ~$6.70M is deployed across underlying yield markets via MultisigStrategy.
 - **Peg Stability:** srRoyUSDC is a yield-bearing vault token priced at ~1.001074 USDC (slightly above 1:1, reflecting accrued yield since January 6). The Curve pool shows a price of ~$0.986 but this pool has only ~$600 in liquidity and is not meaningful.
 - **GitHub Activity:** 548 commits on main branch, 2 contributors (Shivaansh Kapoor and Ankur Dubey). v1.0.0 released February 5, 2026. Repository has 4 stars.
 
@@ -136,17 +136,24 @@ The Senior Vault allocates deposited USDC across whitelisted markets where Junio
 - savUSD (Avant) on Avalanche introduces cross-chain risk
 - sNUSD (Neutrl) and autoUSD (Auto) are relatively unknown protocols — limited public track record
 - Junior buffer size is not publicly disclosed or easily verifiable on-chain for each market
-- Vault holds only ~$17.5K USDC on-chain — the remaining ~$6.69M is deployed externally, creating reliance on underlying protocol solvency
+- Vault holds only ~$37.9K USDC on-chain — the remaining ~$6.70M is deployed externally, creating reliance on underlying protocol solvency and accurate admin-reported accounting
 
 ### Provability
 
 - srRoyUSDC exchange rate is computed on-chain via ERC-4626 (`totalAssets()` / `totalSupply()`)
-- The vault contract's `totalAssets()` reports ~$6.71M, but only ~$17.5K is held directly — the remainder is reported through the MultisigStrategy, which tracks deployed capital
-- Fund deployment is executed by the MultisigStrategy (upgradeable proxy), controlled by the 3/5 multisig
+- `totalAssets()` = USDC held in vault (~$37.9K) + `totalAllocatedValue()` from MultisigStrategy (~$6.70M)
+- **Accounting is admin-reported:** The MultisigStrategy's `totalAllocatedValue()` is updated via `adjustTotalAssets(int256 diff, uint256 nonce)`, called by the 3/5 multisig ([`0x170ff06326eBb64BF609a848Fc143143994AF6c8`](https://etherscan.io/address/0x170ff06326eBb64BF609a848Fc143143994AF6c8)). This is **not** computed from on-chain positions — it is manually reported by the multisig
+- **Accounting constraints (verified on-chain):**
+  - Max change per update: 50 (likely basis points, ~0.5% of deployed value)
+  - Cooldown between updates: 43,200 seconds (12 hours)
+  - Validity period: 2,592,000 seconds (30 days)
+  - Current nonce: 15 (15 updates since launch)
+  - Last updated: February 20, 2026
 - Yield computation and distribution use the AdaptiveCurveYDM model on-chain
 - Junior/Senior coverage ratios are managed per-market, but not easily verifiable by external observers without protocol-specific tooling
 - Underlying market positions must be verified by checking each external protocol individually
-- **Overall provability is limited**: while the vault exchange rate is on-chain, the accuracy depends on the MultisigStrategy correctly reporting deployed asset values
+- No third-party verification mechanism (no Chainlink PoR, no custodian attestations)
+- **Overall provability is limited**: while the vault exchange rate is on-chain, the accuracy depends on the MultisigStrategy correctly reporting deployed asset values. The max change threshold and cooldown provide some protection against sudden malicious adjustments, but do not prevent gradual misreporting
 
 ## Liquidity Risk
 
@@ -215,7 +222,7 @@ All signers are EOAs with no ENS names. The identities of the signers are not pu
 
 2. **Concrete Framework (Medium):** The vault implementation uses the Concrete vault framework (ConcreteAsyncVaultImpl). Bugs in Concrete would affect srRoyUSDC.
 
-3. **Oracles (TODO):** Oracle mechanism for computing totalAssets across deployed markets not fully documented. The Cantina competition excluded oracle/NAV manipulation from scope, suggesting this is a known area of trust.
+3. **Accounting/NAV (High):** `totalAllocatedValue()` on the MultisigStrategy is **manually adjusted** by the 3/5 multisig via `adjustTotalAssets()`. There is no oracle — deployed asset values are admin-reported. The Cantina competition excluded NAV/share price manipulation from scope, confirming this is a known trust assumption. Constraints exist (max 0.5% change per update, 12-hour cooldown, 30-day validity) but the system ultimately relies on the multisig reporting accurate values.
 
 ## Operational Risk
 
@@ -226,7 +233,7 @@ All signers are EOAs with no ENS names. The identities of the signers are not pu
 - **Incident Response:** Hypernative being configured for continuous monitoring. Emergency upgrade system in place. Private security council being assembled. No publicly documented incident response plan yet.
 - **License:** Not specified in contracts.
 
-**Note on Rari Capital history:** Jai Bhavnani co-founded Rari Capital, which suffered a ~$80M exploit in April 2022 via a reentrancy vulnerability in Fuse pools. While this was before the sale to Tribe DAO and the current project is entirely different, it is relevant context for the team's history.
+**Note on Rari Capital history:** Jai Bhavnani co-founded Rari Capital, which suffered a ~$80M exploit in April 2022 via a reentrancy vulnerability in Fuse pools and a ~$15M price manipulation attack in May 2021. Additionally, the [SEC charged Rari Capital and its three co-founders](https://www.sec.gov/newsroom/press-releases/2024-138) (September 2024) with misleading investors about automated rebalancing (was actually manual) and unregistered broker activity. The settlement resulted in **five-year officer-and-director bars** for all three co-founders, civil penalties, and disgorgement. While the current project is architecturally different, the regulatory history and the pattern of misrepresenting automation levels is relevant context — particularly given that srRoyUSDC's `totalAssets()` relies on manual multisig-reported accounting via `adjustTotalAssets()`.
 
 ## Monitoring
 
@@ -244,7 +251,8 @@ All signers are EOAs with no ENS names. The identities of the signers are not pu
 ### Critical Monitoring Points
 
 - **PPS (Price Per Share):** Track `convertToAssets(1e6)` — should be monotonically increasing. Alert on any decrease (indicates loss event or Protection Mode).
-- **Total Assets vs Vault Balance:** Monitor discrepancy between `totalAssets()` and USDC actually held in vault. Large gaps mean funds are deployed externally.
+- **Total Assets vs Vault Balance:** Monitor discrepancy between `totalAssets()` and USDC actually held in vault. The ~$6.70M gap is admin-reported via `adjustTotalAssets()` — monitor for unusual adjustments.
+- **Accounting Updates:** Track `adjustTotalAssets()` calls on MultisigStrategy — verify nonce increments sequentially, changes stay within 0.5% threshold, and 12-hour cooldown is respected.
 - **Governance:** Monitor owner multisig for any proxy upgrade transactions. **No timelock — upgrades take effect immediately.**
 - **Strategy:** Monitor MultisigStrategy for fund movements to/from underlying protocols.
 - **Protection Mode:** Alert on any Protection Mode activation (Senior withdrawal pauses).
@@ -339,7 +347,7 @@ Only 1 completed audit from a single firm (Hexens). Protocol is <3 months old wi
 
 **Score: (4.5 + 3.5 + 4.0) / 3 = 4.0/5**
 
-#### Category 3: Funds Management (Weight: 30%) — **3.5**
+#### Category 3: Funds Management (Weight: 30%) — **3.75**
 
 **Subcategory A: Collateralization — 3.5**
 
@@ -348,20 +356,21 @@ Only 1 completed audit from a single firm (Hexens). Protocol is <3 months old wi
 - Coverage ratio varies per market and is not publicly displayed in real-time
 - Underlying yield comes from newer protocols (Avant, Neutrl, Auto) — collateral quality is mixed
 - Protection Mode mechanism provides structural protection but pauses withdrawals
-- Vault holds only $17.5K directly — $6.69M deployed externally via MultisigStrategy
+- Vault holds only ~$37.9K directly — ~$6.70M deployed externally via MultisigStrategy
 - If Junior coverage is insufficient, Senior absorbs losses
 
-**Subcategory B: Provability — 3.5**
+**Subcategory B: Provability — 4.0**
 
 - ERC-4626 exchange rate is on-chain (PPS verifiable)
-- However, `totalAssets()` depends on MultisigStrategy correctly reporting deployed positions
-- Massive gap between vault USDC balance ($17.5K) and reported totalAssets ($6.71M) — requires trusting strategy contracts
+- However, `totalAssets()` depends on MultisigStrategy's `adjustTotalAssets()` — **manually reported** by the 3/5 multisig (not computed from on-chain positions)
+- Gap between vault USDC balance (~$37.9K) and reported totalAssets (~$6.73M) — requires trusting the multisig's accounting adjustments (constrained by max 0.5% per update, 12-hour cooldown)
 - Individual underlying market positions are not easily auditable without protocol-specific tooling
 - Per-market Junior coverage ratios are not transparently displayed
 - No third-party verification mechanism (no Chainlink PoR, no custodian attestations)
 - Yield computation is on-chain via AdaptiveCurveYDM
+- **Self-reported accounting** with constraints is better than no reporting, but fundamentally depends on multisig honesty — particularly concerning given the SEC settlement for misrepresenting automation at Rari Capital
 
-**Score: (3.5 + 3.5) / 2 = 3.5/5**
+**Score: (3.5 + 4.0) / 2 = 3.75/5**
 
 #### Category 4: Liquidity Risk (Weight: 15%) — **4.0**
 
@@ -396,10 +405,10 @@ Only 1 completed audit from a single firm (Hexens). Protocol is <3 months old wi
 
 ```
 Final Score = (Audits × 0.20) + (Centralization × 0.30) + (Funds Mgmt × 0.30) + (Liquidity × 0.15) + (Operational × 0.05)
-            = (4.0 × 0.20) + (4.0 × 0.30) + (3.5 × 0.30) + (4.0 × 0.15) + (3.0 × 0.05)
-            = 0.80 + 1.20 + 1.05 + 0.60 + 0.15
-            = 3.80
-            ≈ 3.80
+            = (4.0 × 0.20) + (4.0 × 0.30) + (3.75 × 0.30) + (4.0 × 0.15) + (3.0 × 0.05)
+            = 0.80 + 1.20 + 1.125 + 0.60 + 0.15
+            = 3.875
+            ≈ 3.9
 ```
 
 No optional modifiers apply (protocol is <2 years old, TVL <$500M).
@@ -408,10 +417,10 @@ No optional modifiers apply (protocol is <2 years old, TVL <$500M).
 |----------|-------|--------|----------|
 | Audits & Historical | 4.0 | 20% | 0.80 |
 | Centralization & Control | 4.0 | 30% | 1.20 |
-| Funds Management | 3.5 | 30% | 1.05 |
+| Funds Management | 3.75 | 30% | 1.125 |
 | Liquidity Risk | 4.0 | 15% | 0.60 |
 | Operational Risk | 3.0 | 5% | 0.15 |
-| **Final Score** | | | **3.80 / 5.0** |
+| **Final Score** | | | **3.875 / 5.0** |
 
 ### Risk Tier
 
