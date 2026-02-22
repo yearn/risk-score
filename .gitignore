@@ -39,3 +39,7 @@ htmlcov/
 
 .cursorrules
 .vercel
+
+# Astro
+node_modules/
+.astro/
