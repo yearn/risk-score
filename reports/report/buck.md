@@ -4,7 +4,7 @@
 - **Token:** BUCK
 - **Chain:** Ethereum
 - **Token Address:** [`0xdb13997f4D83EF343845d0bAEb27d1173dF8c224`](https://etherscan.io/address/0xdb13997f4D83EF343845d0bAEb27d1173dF8c224)
-- **Final Score: 4.24/5.0**
+- **Final Score: 5.0/5.0**
 
 ## Overview + Links
 
@@ -456,7 +456,9 @@ Final Score = (Audits × 0.20) + (Centralization × 0.30) + (Funds Mgmt × 0.30)
             ≈ 4.22
 ```
 
-**Critical gate (single EOA control) was triggered.** While we scored categories individually, the critical gate indicates the protocol should receive a 5.0. However, given mitigating factors (Ownable2Step, production mode, 24h reserve withdrawal delay, Fireblocks custody, multiple audits), we apply the category-weighted score of **4.22** with the critical gate noted. The final score is adjusted to **4.24** to reflect the gate trigger impact.
+**Critical gate (single EOA control) was triggered.** All contracts are controlled by a single EOA with no multisig or governance — this meets the "Total centralization" critical gate criteria. Per the scoring framework, a triggered critical gate results in an automatic score of **5.0 (High Risk)**.
+
+The category-weighted score (shown below for reference) would have been 4.22, confirming the protocol is high-risk even without the gate override.
 
 | Category | Score | Weight | Weighted |
 |----------|-------|--------|----------|
@@ -465,9 +467,8 @@ Final Score = (Audits × 0.20) + (Centralization × 0.30) + (Funds Mgmt × 0.30)
 | Funds Management | 3.75 | 30% | 1.125 |
 | Liquidity Risk | 4.5 | 15% | 0.675 |
 | Operational Risk | 3.5 | 5% | 0.175 |
-| **Final Score** | | | **4.22 / 5.0** |
-
-**Note:** Critical gate (single EOA control) was triggered → adjusted final score: **4.24 / 5.0**
+| Category-Weighted Score | | | 4.22 |
+| **Final Score (critical gate applied)** | | | **5.0 / 5.0** |
 
 ### Risk Tier
 
@@ -479,9 +480,9 @@ Final Score = (Audits × 0.20) + (Centralization × 0.30) + (Funds Mgmt × 0.30)
 | 3.5-4.5 | Elevated Risk | Limited approval, strict limits |
 | **4.5-5.0** | **High Risk** | **Not recommended** |
 
-**Final Risk Tier: ELEVATED RISK — approaching HIGH RISK**
+**Final Risk Tier: HIGH RISK — Not recommended**
 
-The protocol's single EOA governance triggered a critical gate, and the extremely thin liquidity (~$115K permissionless), very early stage (7 weeks), tiny TVL (~$650K), and off-chain collateral dependency push this firmly into elevated/high risk territory. **Use as Morpho collateral is NOT recommended** at this stage due to insufficient DEX liquidity for liquidations and critical governance centralization risks.
+The protocol's single EOA governance triggered the "Total centralization" critical gate, resulting in an automatic 5.0 score. Additionally, the extremely thin liquidity (~$115K permissionless), very early stage (7 weeks), tiny TVL (~$650K), and off-chain collateral dependency independently confirm the high-risk assessment. **Use as Morpho collateral is NOT recommended** at this stage due to insufficient DEX liquidity for liquidations and critical governance centralization risks.
 
 ---
 
