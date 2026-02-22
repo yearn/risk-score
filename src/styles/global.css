@@ -7,6 +7,18 @@
   --text-secondary: #9d9d9d;
   --border: #424242;
   --max-width: 960px;
+  --logo-invert: 0;
+}
+
+html.light {
+  --bg-primary: #ffffff;
+  --bg-secondary: #f4f4f4;
+  --bg-card: #ebebeb;
+  --text-primary: #0c0c0c;
+  --text-secondary: #5b5b5b;
+  --border: #e1e1e1;
+  --logo-invert: 1;
+  color-scheme: light;
 }
 
 *,
@@ -27,6 +39,7 @@ body {
   font-family: system-ui, -apple-system, sans-serif;
   line-height: 1.6;
   min-height: 100vh;
+  transition: background 0.2s, color 0.2s;
 }
 
 a {
