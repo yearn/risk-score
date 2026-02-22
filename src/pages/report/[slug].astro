@@ -1,0 +1,172 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import ScoreBadge from "../../components/ScoreBadge.astro";
+import ScoreTable from "../../components/ScoreTable.astro";
+import { getAllSlugs, getReportBySlug } from "../../lib/reports";
+import { scoreTier } from "../../lib/colors";
+
+export function getStaticPaths() {
+  return getAllSlugs().map((slug) => ({ params: { slug } }));
+}
+
+const { slug } = Astro.params;
+const report = getReportBySlug(slug!);
+if (!report) return Astro.redirect("/");
+---
+
+<BaseLayout title={`${report.name} — Risk Report`}>
+  <a href="/" class="back-link">&larr; All Reports</a>
+
+  <div class="report-header">
+    <div class="header-top">
+      <h1>{report.name}</h1>
+      <ScoreBadge score={report.finalScore} size="large" />
+    </div>
+    <div class="meta">
+      <span>{report.token}</span>
+      <span class="sep">/</span>
+      <span>{report.chain}</span>
+      <span class="sep">/</span>
+      <span>{report.date}</span>
+      <span class="sep">/</span>
+      <span class={`tag tag-${report.type.toLowerCase()}`}>{report.type}</span>
+    </div>
+    <div class="tier-label">{scoreTier(report.finalScore)}</div>
+  </div>
+
+  <section class="section">
+    <h2>Score Breakdown</h2>
+    <ScoreTable scores={report.scoreTable} finalScore={report.finalScore} />
+  </section>
+
+  <section class="section">
+    <h2>Overview</h2>
+    <div class="prose" set:html={report.overviewHtml} />
+  </section>
+
+  <section class="section">
+    <h2>Risk Summary</h2>
+    <div class="prose" set:html={report.riskSummaryHtml} />
+  </section>
+</BaseLayout>
+
+<style>
+  .back-link {
+    display: inline-block;
+    margin-bottom: 1.5rem;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+  }
+  .report-header {
+    margin-bottom: 2rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .header-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+  h1 {
+    font-size: 1.5rem;
+  }
+  .meta {
+    margin-top: 0.5rem;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+  }
+  .sep {
+    margin: 0 0.25rem;
+    opacity: 0.4;
+  }
+  .tier-label {
+    margin-top: 0.5rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+  }
+  .tag {
+    display: inline-block;
+    padding: 0.1rem 0.4rem;
+    border-radius: 3px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+  }
+  .tag-protocol {
+    background: rgba(6, 117, 249, 0.15);
+    color: #0675f9;
+  }
+  .tag-asset {
+    background: rgba(250, 204, 21, 0.15);
+    color: #facc15;
+  }
+  .section {
+    margin-bottom: 2.5rem;
+  }
+  .section h2 {
+    font-size: 1.2rem;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .prose :global(p) {
+    margin-bottom: 0.75rem;
+  }
+  .prose :global(ul),
+  .prose :global(ol) {
+    margin-bottom: 0.75rem;
+    padding-left: 1.5rem;
+  }
+  .prose :global(li) {
+    margin-bottom: 0.25rem;
+  }
+  .prose :global(a) {
+    color: var(--brand-blue);
+  }
+  .prose :global(strong) {
+    color: var(--text-primary);
+  }
+  .prose :global(code) {
+    background: var(--bg-secondary);
+    padding: 0.15rem 0.35rem;
+    border-radius: 3px;
+    font-size: 0.85em;
+  }
+  .prose :global(pre) {
+    background: var(--bg-secondary);
+    padding: 1rem;
+    border-radius: 6px;
+    overflow-x: auto;
+    margin-bottom: 0.75rem;
+  }
+  .prose :global(pre code) {
+    background: none;
+    padding: 0;
+  }
+  .prose :global(h3) {
+    margin-top: 1.5rem;
+    margin-bottom: 0.5rem;
+    font-size: 1.05rem;
+  }
+  .prose :global(table) {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 0.75rem;
+    font-size: 0.85rem;
+  }
+  .prose :global(th),
+  .prose :global(td) {
+    padding: 0.4rem 0.6rem;
+    border-bottom: 1px solid var(--border);
+    text-align: left;
+  }
+  .prose :global(th) {
+    background: var(--bg-secondary);
+    color: var(--text-secondary);
+    font-weight: 600;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+  }
+</style>

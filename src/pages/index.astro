@@ -1,0 +1,87 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import ScoreBadge from "../components/ScoreBadge.astro";
+import { getAllReports } from "../lib/reports";
+import { scoreTier } from "../lib/colors";
+
+const reports = getAllReports();
+---
+
+<BaseLayout title="Risk Reports — Yearn">
+  <h1>Risk Assessment Reports</h1>
+  <p class="subtitle">{reports.length} protocols and assets evaluated</p>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Protocol / Asset</th>
+          <th>Token</th>
+          <th>Chain</th>
+          <th>Score</th>
+          <th>Risk Tier</th>
+          <th>Type</th>
+        </tr>
+      </thead>
+      <tbody>
+        {
+          reports.map((r) => (
+            <tr>
+              <td>
+                <a href={`/report/${r.slug}/`}>{r.name}</a>
+              </td>
+              <td class="mono">{r.token}</td>
+              <td>{r.chain}</td>
+              <td>
+                <ScoreBadge score={r.finalScore} />
+              </td>
+              <td>{scoreTier(r.finalScore)}</td>
+              <td>
+                <span class={`tag tag-${r.type.toLowerCase()}`}>{r.type}</span>
+              </td>
+            </tr>
+          ))
+        }
+      </tbody>
+    </table>
+  </div>
+</BaseLayout>
+
+<style>
+  h1 {
+    margin-bottom: 0.25rem;
+  }
+  .subtitle {
+    color: var(--text-secondary);
+    margin-bottom: 2rem;
+  }
+  .mono {
+    font-family: "SF Mono", "Fira Code", monospace;
+    font-size: 0.85em;
+  }
+  .tag {
+    display: inline-block;
+    padding: 0.15rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+  }
+  .tag-protocol {
+    background: rgba(6, 117, 249, 0.15);
+    color: #0675f9;
+  }
+  .tag-asset {
+    background: rgba(250, 204, 21, 0.15);
+    color: #facc15;
+  }
+  @media (max-width: 640px) {
+    table {
+      font-size: 0.8rem;
+    }
+    th,
+    td {
+      padding: 0.4rem 0.5rem;
+    }
+  }
+</style>

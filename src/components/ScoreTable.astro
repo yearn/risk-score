@@ -1,0 +1,81 @@
+---
+import { scoreColor } from "../lib/colors";
+import type { CategoryScore } from "../lib/parseReport";
+
+interface Props {
+  scores: CategoryScore[];
+  finalScore: number;
+}
+
+const { scores, finalScore } = Astro.props;
+---
+
+{
+  scores.length > 0 && (
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Category</th>
+            <th>Weight</th>
+            <th>Score</th>
+            <th>Weighted</th>
+            <th class="bar-col">Distribution</th>
+          </tr>
+        </thead>
+        <tbody>
+          {scores.map((s) => (
+            <tr>
+              <td>{s.category}</td>
+              <td>{s.weight}</td>
+              <td style={`color:${scoreColor(s.score)}`}>
+                {s.score.toFixed(2)}
+              </td>
+              <td>{s.weighted.toFixed(3)}</td>
+              <td class="bar-col">
+                <div class="bar-bg">
+                  <div
+                    class="bar-fill"
+                    style={`width:${(s.score / 5) * 100}%;background:${scoreColor(s.score)};`}
+                  />
+                </div>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+        <tfoot>
+          <tr>
+            <td colspan="3">
+              <strong>Final Score</strong>
+            </td>
+            <td style={`color:${scoreColor(finalScore)};font-weight:700;`}>
+              {finalScore.toFixed(1)} / 5.0
+            </td>
+            <td />
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+  )
+}
+
+<style>
+  .bar-col {
+    min-width: 120px;
+  }
+  .bar-bg {
+    width: 100%;
+    height: 8px;
+    background: var(--bg-primary);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  .bar-fill {
+    height: 100%;
+    border-radius: 4px;
+  }
+  tfoot td {
+    border-top: 2px solid var(--border);
+    padding-top: 0.75rem;
+  }
+</style>

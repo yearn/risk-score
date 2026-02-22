@@ -1,0 +1,72 @@
+---
+interface Props {
+  title: string;
+}
+const { title } = Astro.props;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="Yearn Risk Assessment Reports" />
+    <title>{title}</title>
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="container">
+        <a href="/" class="logo-link">
+          <img src="/yearn-logo.svg" alt="Yearn" width="32" height="32" />
+          <span>Risk Reports</span>
+        </a>
+      </div>
+    </header>
+    <main class="container">
+      <slot />
+    </main>
+    <footer class="site-footer">
+      <div class="container">
+        <p>Yearn Risk Assessment Reports</p>
+      </div>
+    </footer>
+  </body>
+</html>
+
+<style is:global>
+  @import "../styles/global.css";
+</style>
+
+<style>
+  .site-header {
+    border-bottom: 1px solid var(--border);
+    padding: 0.75rem 0;
+  }
+  .container {
+    max-width: var(--max-width);
+    margin: 0 auto;
+    padding: 0 1rem;
+  }
+  .logo-link {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--text-primary);
+    font-weight: 700;
+    font-size: 1.1rem;
+  }
+  .logo-link:hover {
+    text-decoration: none;
+  }
+  main.container {
+    padding-top: 2rem;
+    padding-bottom: 4rem;
+  }
+  .site-footer {
+    border-top: 1px solid var(--border);
+    padding: 2rem 0;
+    text-align: center;
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+  }
+</style>
