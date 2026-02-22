@@ -25,9 +25,7 @@ const reports = getAllReports();
         {
           reports.map((r) => (
             <tr onclick={`window.location='/report/${r.slug}/'`}>
-              <td>
-                <a href={`/report/${r.slug}/`}>{r.name}</a>
-              </td>
+              <td>{r.name}</td>
               <td class="mono">{r.token}</td>
               <td>
                 <ScoreBadge score={r.finalScore} />
@@ -58,9 +56,6 @@ const reports = getAllReports();
   }
   tbody tr:hover {
     background: var(--bg-secondary);
-  }
-  tbody tr:hover a {
-    text-decoration: underline;
   }
   @media (max-width: 640px) {
     table {
