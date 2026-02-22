@@ -1,5 +1,5 @@
 ---
-import { scoreColor } from "../lib/colors";
+import { scoreColor, scoreTier, scoreTextColor } from "../lib/colors";
 import type { CategoryScore } from "../lib/parseReport";
 
 interface Props {
@@ -8,74 +8,150 @@ interface Props {
 }
 
 const { scores, finalScore } = Astro.props;
+
+// Build pie chart segments (sized by weight, colored by score)
+const totalWeight = scores.reduce((sum, s) => sum + parseFloat(s.weight), 0);
+let accumulated = 0;
+const segments = scores.map((s) => {
+  const weightNum = parseFloat(s.weight);
+  const startAngle = (accumulated / totalWeight) * 360;
+  accumulated += weightNum;
+  const endAngle = (accumulated / totalWeight) * 360;
+  return { ...s, startAngle, endAngle, color: scoreColor(s.score) };
+});
+
+function polarToCartesian(cx: number, cy: number, r: number, angle: number) {
+  const rad = ((angle - 90) * Math.PI) / 180;
+  return { x: cx + r * Math.cos(rad), y: cy + r * Math.sin(rad) };
+}
+
+function arcPath(cx: number, cy: number, r: number, start: number, end: number) {
+  const s = polarToCartesian(cx, cy, r, start);
+  const e = polarToCartesian(cx, cy, r, end);
+  const largeArc = end - start > 180 ? 1 : 0;
+  return `M ${cx} ${cy} L ${s.x} ${s.y} A ${r} ${r} 0 ${largeArc} 1 ${e.x} ${e.y} Z`;
+}
+
+function labelPos(cx: number, cy: number, r: number, start: number, end: number) {
+  const mid = (start + end) / 2;
+  return polarToCartesian(cx, cy, r * 0.65, mid);
+}
 ---
 
 {
   scores.length > 0 && (
-    <div class="table-wrap">
-      <table>
-        <thead>
-          <tr>
-            <th>Category</th>
-            <th>Weight</th>
-            <th>Score</th>
-            <th>Weighted</th>
-            <th class="bar-col">Distribution</th>
-          </tr>
-        </thead>
-        <tbody>
-          {scores.map((s) => (
+    <div class="score-section">
+      <div class="table-wrap">
+        <table>
+          <thead>
             <tr>
-              <td>{s.category}</td>
-              <td>{s.weight}</td>
-              <td style={`color:${scoreColor(s.score)}`}>
-                {s.score.toFixed(2)}
+              <th>Category</th>
+              <th>Weight</th>
+              <th>Score</th>
+              <th>Weighted</th>
+            </tr>
+          </thead>
+          <tbody>
+            {scores.map((s) => (
+              <tr>
+                <td>
+                  <span class="color-dot" style={`background:${scoreColor(s.score)}`} />
+                  {s.category}
+                </td>
+                <td>{s.weight}</td>
+                <td style={`color:${scoreColor(s.score)}`}>
+                  {s.score.toFixed(2)}
+                </td>
+                <td>{s.weighted.toFixed(3)}</td>
+              </tr>
+            ))}
+          </tbody>
+          <tfoot>
+            <tr>
+              <td colspan="2">
+                <strong>Final Score</strong>
               </td>
-              <td>{s.weighted.toFixed(3)}</td>
-              <td class="bar-col">
-                <div class="bar-bg">
-                  <div
-                    class="bar-fill"
-                    style={`width:${(s.score / 5) * 100}%;background:${scoreColor(s.score)};`}
-                  />
-                </div>
+              <td colspan="2" style={`color:${scoreColor(finalScore)};font-weight:700;`}>
+                {finalScore.toFixed(1)} / 5.0
               </td>
             </tr>
+          </tfoot>
+        </table>
+      </div>
+
+      <div class="chart-area">
+        <svg viewBox="0 0 200 200" class="pie-chart">
+          {segments.map((seg) => (
+            <path d={arcPath(100, 100, 90, seg.startAngle, seg.endAngle)} fill={seg.color} stroke="var(--bg-primary)" stroke-width="2" />
           ))}
-        </tbody>
-        <tfoot>
-          <tr>
-            <td colspan="3">
-              <strong>Final Score</strong>
-            </td>
-            <td style={`color:${scoreColor(finalScore)};font-weight:700;`}>
-              {finalScore.toFixed(1)} / 5.0
-            </td>
-            <td />
-          </tr>
-        </tfoot>
-      </table>
+          {segments.map((seg) => {
+            const pos = labelPos(100, 100, 90, seg.startAngle, seg.endAngle);
+            const weightNum = parseFloat(seg.weight);
+            if (weightNum < 10) return null;
+            return (
+              <text x={pos.x} y={pos.y} text-anchor="middle" dominant-baseline="central" fill={scoreTextColor(seg.score)} font-size="11" font-weight="600">
+                {seg.weight}
+              </text>
+            );
+          })}
+        </svg>
+        <div class="risk-tier-badge" style={`background:${scoreColor(finalScore)};color:${scoreTextColor(finalScore)}`}>
+          {scoreTier(finalScore)}
+        </div>
+      </div>
     </div>
   )
 }
 
 <style>
-  .bar-col {
-    min-width: 120px;
+  .score-section {
+    display: flex;
+    gap: 2rem;
+    align-items: flex-start;
   }
-  .bar-bg {
-    width: 100%;
-    height: 8px;
-    background: var(--bg-primary);
-    border-radius: 4px;
-    overflow: hidden;
+  .table-wrap {
+    flex: 1;
+    min-width: 0;
   }
-  .bar-fill {
-    height: 100%;
-    border-radius: 4px;
+  .color-dot {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    margin-right: 0.5rem;
+    vertical-align: middle;
   }
   tfoot td {
     border-top: 2px solid var(--border);
     padding-top: 0.75rem;
+  }
+  .chart-area {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+    flex-shrink: 0;
+  }
+  .pie-chart {
+    width: 180px;
+    height: 180px;
+  }
+  .risk-tier-badge {
+    padding: 0.3rem 1rem;
+    border-radius: 6px;
+    font-weight: 700;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    white-space: nowrap;
+  }
+  @media (max-width: 640px) {
+    .score-section {
+      flex-direction: column;
+      align-items: stretch;
+    }
+    .chart-area {
+      align-items: center;
+    }
   }
 </style>

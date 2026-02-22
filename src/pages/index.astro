@@ -17,28 +17,22 @@ const reports = getAllReports();
         <tr>
           <th>Protocol / Asset</th>
           <th>Token</th>
-          <th>Chain</th>
           <th>Score</th>
           <th>Risk Tier</th>
-          <th>Type</th>
         </tr>
       </thead>
       <tbody>
         {
           reports.map((r) => (
-            <tr>
+            <tr onclick={`window.location='/report/${r.slug}/'`}>
               <td>
                 <a href={`/report/${r.slug}/`}>{r.name}</a>
               </td>
               <td class="mono">{r.token}</td>
-              <td>{r.chain}</td>
               <td>
                 <ScoreBadge score={r.finalScore} />
               </td>
               <td>{scoreTier(r.finalScore)}</td>
-              <td>
-                <span class={`tag tag-${r.type.toLowerCase()}`}>{r.type}</span>
-              </td>
             </tr>
           ))
         }
@@ -59,21 +53,14 @@ const reports = getAllReports();
     font-family: "SF Mono", "Fira Code", monospace;
     font-size: 0.85em;
   }
-  .tag {
-    display: inline-block;
-    padding: 0.15rem 0.5rem;
-    border-radius: 4px;
-    font-size: 0.75rem;
-    font-weight: 600;
-    text-transform: uppercase;
+  tbody tr {
+    cursor: pointer;
   }
-  .tag-protocol {
-    background: rgba(6, 117, 249, 0.15);
-    color: #0675f9;
+  tbody tr:hover {
+    background: var(--bg-secondary);
   }
-  .tag-asset {
-    background: rgba(250, 204, 21, 0.15);
-    color: #facc15;
+  tbody tr:hover a {
+    text-decoration: underline;
   }
   @media (max-width: 640px) {
     table {

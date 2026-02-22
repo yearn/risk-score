@@ -31,7 +31,14 @@ if (!report) return Astro.redirect("/");
       <span class="sep">/</span>
       <span class={`tag tag-${report.type.toLowerCase()}`}>{report.type}</span>
     </div>
-    <div class="tier-label">{scoreTier(report.finalScore)}</div>
+    <a
+      href={`https://github.com/yearn/risk-score/blob/master/reports/report/${report.slug}.md`}
+      class="github-link"
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      View full report on GitHub &rarr;
+    </a>
   </div>
 
   <section class="section">
@@ -81,10 +88,14 @@ if (!report) return Astro.redirect("/");
     margin: 0 0.25rem;
     opacity: 0.4;
   }
-  .tier-label {
+  .github-link {
+    display: inline-block;
     margin-top: 0.5rem;
-    font-weight: 600;
+    font-size: 0.85rem;
     color: var(--text-secondary);
+  }
+  .github-link:hover {
+    color: var(--brand-blue);
   }
   .tag {
     display: inline-block;
