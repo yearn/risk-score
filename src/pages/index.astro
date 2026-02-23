@@ -9,7 +9,6 @@ const reports = getAllReports();
 
 <BaseLayout title="Risk Reports — Yearn">
   <h1>Risk Assessment Reports</h1>
-  <p class="subtitle">{reports.length} protocols and assets evaluated</p>
 
   <div class="table-wrap">
     <table>
@@ -42,10 +41,6 @@ const reports = getAllReports();
 <style>
   h1 {
     margin-bottom: 0.25rem;
-  }
-  .subtitle {
-    color: var(--text-secondary);
-    margin-bottom: 2rem;
   }
   .mono {
     font-family: "SF Mono", "Fira Code", monospace;
