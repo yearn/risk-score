@@ -1,4 +1,4 @@
-# Protocol Risk Assessment: Origin ARM (stETH)
+# Protocol Risk Assessment: Origin ARM
 
 - **Assessment Date:** February 8, 2026
 - **Token:** ARM-WETH-stETH
