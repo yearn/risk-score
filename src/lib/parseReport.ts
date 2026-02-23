@@ -8,6 +8,7 @@ export interface ReportMeta {
   chain: string;
   finalScore: number;
   type: "Protocol" | "Asset";
+  iconUrl: string;
 }
 
 export interface CategoryScore {
@@ -27,6 +28,23 @@ const TYPE_OVERRIDES: Record<string, "Protocol" | "Asset"> = {
   "unit-ubtc": "Asset",
 };
 
+const DEFILLAMA_SLUG_OVERRIDES: Record<string, string> = {
+  "midas-mhyper": "midas-rwa",
+  "infinifi": "infinifi",
+  "reserve-ethplus": "reserve-protocol",
+};
+
+function parseDefillamaSlug(slug: string, content: string): string {
+  if (DEFILLAMA_SLUG_OVERRIDES[slug]) return DEFILLAMA_SLUG_OVERRIDES[slug];
+  const match = content.match(/defillama\.com\/protocol\/([a-z0-9-]+)/i);
+  return match?.[1] ?? "";
+}
+
+function iconUrl(defillamaSlug: string): string {
+  if (!defillamaSlug) return "";
+  return `https://icons.llamao.fi/icons/protocols/${defillamaSlug}?w=48&h=48`;
+}
+
 function parseMeta(slug: string, content: string): ReportMeta {
   const titleMatch = content.match(
     /^# (?:Protocol|Asset) Risk Assessment:\s*(.+)$/m,
@@ -42,6 +60,8 @@ function parseMeta(slug: string, content: string): ReportMeta {
   const chainMatch = content.match(/\*\*Chain:\*\*\s*(.+)/);
   const scoreMatch = content.match(/\*\*Final Score:\s*([\d.]+)\/5\.0\*\*/);
 
+  const defillamaSlug = parseDefillamaSlug(slug, content);
+
   return {
     slug,
     name,
@@ -50,6 +70,7 @@ function parseMeta(slug: string, content: string): ReportMeta {
     chain: chainMatch?.[1]?.trim() ?? "",
     finalScore: parseFloat(scoreMatch?.[1] ?? "0"),
     type,
+    iconUrl: iconUrl(defillamaSlug),
   };
 }
 
