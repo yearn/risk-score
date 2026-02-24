@@ -1,0 +1,86 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import ScoreBadge from "../components/ScoreBadge.astro";
+import { getAllReports } from "../lib/reports";
+import { scoreTier } from "../lib/colors";
+
+const reports = getAllReports();
+---
+
+<BaseLayout title="Risk Reports — Yearn">
+  <h1>Risk Assessment Reports</h1>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th class="col-icon"></th>
+          <th>Protocol / Asset</th>
+          <th>Token</th>
+          <th>Score</th>
+          <th>Risk Tier</th>
+        </tr>
+      </thead>
+      <tbody>
+        {
+          reports.map((r) => (
+            <tr onclick={`window.location='/report/${r.slug}/'`}>
+              <td class="col-icon">
+                {r.iconUrl ? (
+                  <img src={r.iconUrl} alt="" width="24" height="24" class="protocol-icon" loading="lazy" />
+                ) : (
+                  <div class="icon-placeholder" />
+                )}
+              </td>
+              <td>{r.name}</td>
+              <td class="mono">{r.token}</td>
+              <td>
+                <ScoreBadge score={r.finalScore} />
+              </td>
+              <td>{scoreTier(r.finalScore)}</td>
+            </tr>
+          ))
+        }
+      </tbody>
+    </table>
+  </div>
+</BaseLayout>
+
+<style>
+  h1 {
+    margin-bottom: 1.5rem;
+  }
+  .col-icon {
+    width: 32px;
+    padding-right: 0;
+  }
+  .protocol-icon {
+    display: block;
+    border-radius: 50%;
+  }
+  .icon-placeholder {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: var(--bg-secondary);
+  }
+  .mono {
+    font-family: "SF Mono", "Fira Code", monospace;
+    font-size: 0.85em;
+  }
+  tbody tr {
+    cursor: pointer;
+  }
+  tbody tr:hover {
+    background: var(--bg-secondary);
+  }
+  @media (max-width: 640px) {
+    table {
+      font-size: 0.8rem;
+    }
+    th,
+    td {
+      padding: 0.4rem 0.5rem;
+    }
+  }
+</style>

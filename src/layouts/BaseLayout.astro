@@ -1,0 +1,146 @@
+---
+interface Props {
+  title: string;
+}
+const { title } = Astro.props;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="Yearn Risk Assessment Reports" />
+    <title>{title}</title>
+    <script is:inline>
+      if (localStorage.getItem("theme") === "light") {
+        document.documentElement.classList.add("light");
+      }
+    </script>
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="container header-row">
+        <a href="https://yearn.fi" class="logo-link" aria-label="Yearn Home" target="_blank" rel="noopener noreferrer">
+          <svg viewBox="85 100 390 115" fill="none" xmlns="http://www.w3.org/2000/svg" class="logo-img">
+            <path d="M307.601 124.989C303.535 122.91 298.842 121.867 293.509 121.867C288.177 121.867 283.623 122.973 279.626 125.191C275.63 127.409 272.52 130.544 270.297 134.601C268.074 138.658 266.966 143.41 266.966 148.864C266.966 154.318 268.106 158.969 270.398 163.026C272.685 167.084 275.966 170.199 280.234 172.386C284.503 174.566 289.576 175.659 295.454 175.659C299.963 175.659 303.96 174.857 307.443 173.258C310.927 171.659 313.726 169.46 315.848 166.66C317.963 163.867 319.299 160.726 319.844 157.25H305.6C304.986 159.702 303.706 161.56 301.756 162.824C299.811 164.088 297.367 164.714 294.428 164.714C290.735 164.714 287.835 163.627 285.719 161.44C283.597 159.26 282.369 156.258 282.027 152.441V152.03H320.25C320.522 150.596 320.661 148.965 320.661 147.12C320.592 142.008 319.413 137.559 317.127 133.779C314.841 129.994 311.661 127.068 307.595 124.989H307.601ZM282.343 142.627C282.755 139.562 284.034 137.122 286.188 135.315C288.341 133.508 290.989 132.604 294.13 132.604C297.272 132.604 300.122 133.476 302.275 135.208C304.428 136.946 305.739 139.416 306.221 142.621H282.343V142.627Z" fill="currentColor"/>
+            <path d="M252.43 122.48L239.928 160.214L227.115 122.48H211.744L232.036 175.343L230.706 178.819C229.953 180.589 229.167 181.783 228.35 182.396C227.533 183.009 226.197 183.319 224.354 183.319H216.361V195.49H230.402C233.069 195.49 235.235 195.029 236.907 194.113C238.579 193.19 239.966 191.831 241.055 190.024C242.145 188.216 243.31 185.714 244.539 182.51L267.903 122.486H252.43V122.48Z" fill="currentColor"/>
+            <path d="M465.065 127.593C461.101 123.776 456.047 121.867 449.897 121.867C446.071 121.867 442.86 122.499 440.263 123.757C437.667 125.02 435.45 126.771 433.601 129.021L432.27 122.474H419.667V175.04H434.114V148.15C434.114 143.581 435.14 140.036 437.185 137.514C439.237 134.993 442.138 133.729 445.894 133.729C453 133.729 456.553 138.266 456.553 147.329V175.04H471V146.513C471 137.717 469.018 131.416 465.059 127.599L465.065 127.593Z" fill="currentColor"/>
+            <path d="M403.326 124.477C401.002 125.804 399.058 127.769 397.487 130.354L396.157 122.48H383.04V175.04H397.487V149.275C397.487 145.047 398.443 141.711 400.356 139.252C402.269 136.8 405.277 135.574 409.375 135.574H415.113V122.48H412.656C408.76 122.48 405.651 123.144 403.333 124.471L403.326 124.477Z" fill="currentColor"/>
+            <path d="M367.878 126.727C363.811 123.491 358.054 121.867 350.612 121.867C343.171 121.867 337.8 123.352 333.499 126.316C329.192 129.28 326.805 133.457 326.323 138.841H340.257C340.599 136.863 341.638 135.296 343.386 134.14C345.128 132.983 347.363 132.402 350.099 132.402C353.038 132.402 355.375 133.084 357.117 134.449C358.859 135.814 359.733 137.685 359.733 140.074V142.734H349.384C341.46 142.734 335.431 144.232 331.295 147.234C327.159 150.236 325.095 154.527 325.095 160.119C325.095 165.03 326.817 168.847 330.269 171.571C333.721 174.301 338.344 175.659 344.152 175.659C347.705 175.659 350.764 175.046 353.323 173.82C355.882 172.594 358.156 170.787 360.138 168.398L361.265 175.046H373.97V140.889C373.97 134.683 371.937 129.969 367.871 126.727H367.878ZM359.733 153.364C359.663 156.979 358.536 159.854 356.351 162.003C354.166 164.151 351.189 165.226 347.433 165.226C345.039 165.226 343.145 164.682 341.745 163.589C340.346 162.502 339.643 161.036 339.643 159.19C339.643 157.01 340.479 155.323 342.151 154.128C343.823 152.934 346.166 152.34 349.168 152.34H359.726V153.364H359.733Z" fill="currentColor"/>
+            <path d="M158.023 158.666C158.757 161.099 159.137 163.652 159.137 166.262C159.137 173.271 156.401 179.862 151.436 184.816C146.47 189.771 139.865 192.501 132.841 192.501C125.817 192.501 119.211 189.771 114.239 184.816C109.274 179.862 106.538 173.271 106.538 166.262C106.538 163.652 106.918 161.099 107.652 158.666L94.3138 145.363C90.9254 151.575 89 158.691 89 166.262C89 190.416 108.628 210 132.834 210C157.041 210 176.669 190.416 176.669 166.262C176.669 158.691 174.743 151.575 171.355 145.37L158.023 158.672V158.666Z" fill="currentColor"/>
+            <path d="M124.069 175.008H141.606V147.171L171.45 117.38L159.049 105.006L132.847 131.163L106.62 105L94.2188 117.374L124.069 147.152V175.008Z" fill="currentColor"/>
+          </svg>
+        </a>
+        <button id="theme-toggle" class="theme-toggle" aria-label="Toggle light mode">
+          <svg class="icon-sun" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="5" />
+            <line x1="12" y1="1" x2="12" y2="3" />
+            <line x1="12" y1="21" x2="12" y2="23" />
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
+            <line x1="1" y1="12" x2="3" y2="12" />
+            <line x1="21" y1="12" x2="23" y2="12" />
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
+          </svg>
+          <svg class="icon-moon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+          </svg>
+        </button>
+      </div>
+    </header>
+    <main class="container">
+      <slot />
+    </main>
+    <footer class="site-footer">
+      <div class="container">
+        <p>Risk Assessments by <a href="https://docs.yearn.fi/getting-started/products/curating/introduction" target="_blank" rel="noopener noreferrer">Yearn Curation</a></p>
+      </div>
+    </footer>
+    <script is:inline>
+      document.getElementById("theme-toggle").addEventListener("click", () => {
+        const html = document.documentElement;
+        html.classList.toggle("light");
+        localStorage.setItem(
+          "theme",
+          html.classList.contains("light") ? "light" : "dark"
+        );
+      });
+    </script>
+  </body>
+</html>
+
+<style is:global>
+  @import "../styles/global.css";
+</style>
+
+<style>
+  .site-header {
+    border-bottom: 1px solid var(--border);
+    padding: 0.75rem 0;
+  }
+  .container {
+    max-width: var(--max-width);
+    margin: 0 auto;
+    padding: 0 1rem;
+  }
+  .header-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .logo-link {
+    display: flex;
+    align-items: center;
+    color: #ffffff;
+  }
+  :global(html.light) .logo-link {
+    color: #0657f9;
+  }
+  .logo-link:hover {
+    text-decoration: none;
+  }
+  .logo-img {
+    height: 28px;
+    width: auto;
+    display: block;
+  }
+  .theme-toggle {
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 0.4rem;
+    cursor: pointer;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.2s, border-color 0.2s;
+  }
+  .theme-toggle:hover {
+    color: var(--text-primary);
+    border-color: var(--text-secondary);
+  }
+  /* Show sun in dark mode, moon in light mode */
+  .icon-moon {
+    display: none;
+  }
+  :global(html.light) .icon-sun {
+    display: none;
+  }
+  :global(html.light) .icon-moon {
+    display: block;
+  }
+  main.container {
+    padding-top: 2rem;
+    padding-bottom: 4rem;
+  }
+  .site-footer {
+    border-top: 1px solid var(--border);
+    padding: 2rem 0;
+    text-align: center;
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+  }
+</style>
