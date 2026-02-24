@@ -1,9 +1,10 @@
-# Protocol Risk Assessment: Strata's srUSDe
+# Protocol Risk Assessment: Strata
 
-**Assessment Date**: February 18, 2026
-**Token**: srUSDe (Senior Tranche USDe)
-**Chain**: Ethereum
-**Token Address (Ethereum)**: [`0x3d7d6fdf07EE548B939A80edbc9B2256d0cdc003`](https://etherscan.io/address/0x3d7d6fdf07EE548B939A80edbc9B2256d0cdc003)
+- **Assessment Date:** February 18, 2026
+- **Token:** srUSDe (Senior Tranche USDe)
+- **Chain:** Ethereum
+- **Token Address:** [`0x3d7d6fdf07EE548B939A80edbc9B2256d0cdc003`](https://etherscan.io/address/0x3d7d6fdf07EE548B939A80edbc9B2256d0cdc003)
+- **Final Score: 2.8/5.0**
 
 ## Overview + Links
 
