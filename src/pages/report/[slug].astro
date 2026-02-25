@@ -19,23 +19,13 @@ if (!report) return Astro.redirect("/");
 
   <div class="report-header">
     <div class="header-top">
-      <div class="header-title">
-        {report.iconUrl && (
-          <img src={report.iconUrl} alt="" width="32" height="32" class="report-protocol-icon" loading="lazy" />
-        )}
-        <h1>{report.name}</h1>
-      </div>
+      <h1>{report.name}</h1>
       <ScoreBadge score={report.finalScore} size="large" />
     </div>
     <div class="meta">
       <span>{report.token}</span>
       <span class="sep">/</span>
-      <span class="chain-label">
-        {report.chainIconUrl && (
-          <img src={report.chainIconUrl} alt="" width="16" height="16" class="chain-icon-inline" loading="lazy" />
-        )}
-        {report.chain}
-      </span>
+      <span>{report.chain}</span>
       <span class="sep">/</span>
       <span>{report.date}</span>
     </div>
@@ -84,26 +74,8 @@ if (!report) return Astro.redirect("/");
     gap: 1rem;
     flex-wrap: wrap;
   }
-  .header-title {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-  }
-  .report-protocol-icon {
-    border-radius: 50%;
-    flex-shrink: 0;
-  }
   h1 {
     font-size: 1.5rem;
-  }
-  .chain-label {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.3rem;
-  }
-  .chain-icon-inline {
-    border-radius: 50%;
-    vertical-align: middle;
   }
   .meta {
     margin-top: 0.5rem;
