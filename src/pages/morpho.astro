@@ -1,71 +1,158 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
 import ScoreBadge from "../components/ScoreBadge.astro";
-import { fetchMorphoVaults } from "../lib/morpho";
+import { fetchMorphoVaults, fetchMorphoMarkets } from "../lib/morpho";
 import { scoreTier } from "../lib/colors";
 
-const chains = await fetchMorphoVaults();
-const totalVaults = chains.reduce((sum, c) => sum + c.vaults.length, 0);
+const vaultChains = await fetchMorphoVaults();
+const marketChains = await fetchMorphoMarkets();
+const totalVaults = vaultChains.reduce((sum, c) => sum + c.vaults.length, 0);
+const totalMarkets = marketChains.reduce(
+  (sum, c) => sum + c.markets.length,
+  0,
+);
 ---
 
-<BaseLayout title="Morpho Vaults — Yearn">
+<BaseLayout title="Morpho — Yearn">
   <a href="/" class="back-link">&larr; Risk Reports</a>
-  <h1>Morpho Vault Risk Levels</h1>
-  <p class="subtitle">{totalVaults} vaults across {chains.length} chains</p>
+  <h1>Morpho Risk Levels</h1>
 
-  {
-    chains.map((chain) => (
-      <section class="chain-section">
-        <h2>
-          {chain.chainName}
-          <span class="chain-count">{chain.vaults.length}</span>
-        </h2>
-        <div class="table-wrap">
-          <table>
-            <thead>
-              <tr>
-                <th>Vault</th>
-                <th>Address</th>
-                <th>Risk Level</th>
-                <th>Risk Tier</th>
-              </tr>
-            </thead>
-            <tbody>
-              {chain.vaults
-                .sort((a, b) => a.riskLevel - b.riskLevel)
-                .map((vault) => (
-                  <tr>
-                    <td>
-                      <a
-                        href={`https://app.morpho.org/${chain.morphoSlug}/vault/${vault.address}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        {vault.name}
-                      </a>
-                    </td>
-                    <td class="mono">
-                      <a
-                        href={`${chain.explorerUrl}/address/${vault.address}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        {vault.address.slice(0, 6)}...{vault.address.slice(-4)}
-                      </a>
-                    </td>
-                    <td>
-                      <ScoreBadge score={vault.riskLevel} />
-                    </td>
-                    <td>{scoreTier(vault.riskLevel)}</td>
-                  </tr>
-                ))}
-            </tbody>
-          </table>
-        </div>
-      </section>
-    ))
-  }
+  <div class="tabs">
+    <button class="tab active" data-tab="vaults">
+      Vaults <span class="tab-count">{totalVaults}</span>
+    </button>
+    <button class="tab" data-tab="markets">
+      Markets <span class="tab-count">{totalMarkets}</span>
+    </button>
+  </div>
+
+  <div id="panel-vaults" class="tab-panel">
+    <p class="subtitle">
+      {totalVaults} vaults across {vaultChains.length} chains
+    </p>
+    {
+      vaultChains.map((chain) => (
+        <section class="chain-section">
+          <h2>
+            {chain.chainName}
+            <span class="chain-count">{chain.vaults.length}</span>
+          </h2>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Vault</th>
+                  <th>Address</th>
+                  <th>Risk Level</th>
+                  <th>Risk Tier</th>
+                </tr>
+              </thead>
+              <tbody>
+                {chain.vaults
+                  .sort((a, b) => a.riskLevel - b.riskLevel)
+                  .map((vault) => (
+                    <tr>
+                      <td>
+                        <a
+                          href={`https://app.morpho.org/${chain.morphoSlug}/vault/${vault.address}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          {vault.name}
+                        </a>
+                      </td>
+                      <td class="mono">
+                        <a
+                          href={`${chain.explorerUrl}/address/${vault.address}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          {vault.address.slice(0, 6)}...
+                          {vault.address.slice(-4)}
+                        </a>
+                      </td>
+                      <td>
+                        <ScoreBadge score={vault.riskLevel} />
+                      </td>
+                      <td>{scoreTier(vault.riskLevel)}</td>
+                    </tr>
+                  ))}
+              </tbody>
+            </table>
+          </div>
+        </section>
+      ))
+    }
+  </div>
+
+  <div id="panel-markets" class="tab-panel hidden">
+    <p class="subtitle">
+      {totalMarkets} markets across {marketChains.length} chains
+    </p>
+    {
+      marketChains.map((chain) => (
+        <section class="chain-section">
+          <h2>
+            {chain.chainName}
+            <span class="chain-count">{chain.markets.length}</span>
+          </h2>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Market</th>
+                  <th>Morpho</th>
+                  <th>Risk Level</th>
+                  <th>Risk Tier</th>
+                </tr>
+              </thead>
+              <tbody>
+                {chain.markets
+                  .sort((a, b) => a.riskLevel - b.riskLevel)
+                  .map((market) => (
+                    <tr>
+                      <td>{market.description}</td>
+                      <td class="mono">
+                        <a
+                          href={`https://app.morpho.org/${chain.morphoSlug}/market/${market.uniqueKey}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          {market.uniqueKey.slice(0, 6)}...
+                          {market.uniqueKey.slice(-4)}
+                        </a>
+                      </td>
+                      <td>
+                        <ScoreBadge score={market.riskLevel} />
+                      </td>
+                      <td>{scoreTier(market.riskLevel)}</td>
+                    </tr>
+                  ))}
+              </tbody>
+            </table>
+          </div>
+        </section>
+      ))
+    }
+  </div>
 </BaseLayout>
+
+<script is:inline>
+  document.querySelectorAll(".tab").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      document
+        .querySelectorAll(".tab")
+        .forEach((b) => b.classList.remove("active"));
+      btn.classList.add("active");
+      document
+        .querySelectorAll(".tab-panel")
+        .forEach((p) => p.classList.add("hidden"));
+      document
+        .getElementById("panel-" + btn.dataset.tab)
+        .classList.remove("hidden");
+    });
+  });
+</script>
 
 <style>
   .back-link {
@@ -78,7 +165,44 @@ const totalVaults = chains.reduce((sum, c) => sum + c.vaults.length, 0);
     color: var(--text-primary);
   }
   h1 {
-    margin-bottom: 0.25rem;
+    margin-bottom: 1rem;
+  }
+  .tabs {
+    display: flex;
+    gap: 0;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 1rem;
+  }
+  .tab {
+    background: none;
+    border: none;
+    border-bottom: 2px solid transparent;
+    padding: 0.5rem 1rem;
+    font-size: 0.95rem;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: color 0.2s, border-color 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+  .tab:hover {
+    color: var(--text-primary);
+  }
+  .tab.active {
+    color: var(--text-primary);
+    border-bottom-color: var(--brand-blue);
+  }
+  .tab-count {
+    font-size: 0.75rem;
+    font-weight: 600;
+    background: var(--bg-secondary);
+    color: var(--text-secondary);
+    padding: 0.1rem 0.45rem;
+    border-radius: 10px;
+  }
+  .tab-panel.hidden {
+    display: none;
   }
   .subtitle {
     color: var(--text-secondary);
