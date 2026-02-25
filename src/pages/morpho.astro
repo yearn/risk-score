@@ -1,0 +1,123 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import ScoreBadge from "../components/ScoreBadge.astro";
+import { fetchMorphoVaults } from "../lib/morpho";
+import { scoreTier } from "../lib/colors";
+
+const chains = await fetchMorphoVaults();
+const totalVaults = chains.reduce((sum, c) => sum + c.vaults.length, 0);
+---
+
+<BaseLayout title="Morpho Vaults — Yearn">
+  <a href="/" class="back-link">&larr; Risk Reports</a>
+  <h1>Morpho Vault Risk Levels</h1>
+  <p class="subtitle">{totalVaults} vaults across {chains.length} chains</p>
+
+  {
+    chains.map((chain) => (
+      <section class="chain-section">
+        <h2>
+          {chain.chainName}
+          <span class="chain-count">{chain.vaults.length}</span>
+        </h2>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Vault</th>
+                <th>Address</th>
+                <th>Risk Level</th>
+                <th>Risk Tier</th>
+                <th>Max Allocation</th>
+              </tr>
+            </thead>
+            <tbody>
+              {chain.vaults
+                .sort((a, b) => a.riskLevel - b.riskLevel)
+                .map((vault) => (
+                  <tr>
+                    <td>{vault.name}</td>
+                    <td class="mono">
+                      {chain.explorerUrl ? (
+                        <a
+                          href={`${chain.explorerUrl}/address/${vault.address}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          {vault.address.slice(0, 6)}...
+                          {vault.address.slice(-4)}
+                        </a>
+                      ) : (
+                        <span>
+                          {vault.address.slice(0, 6)}...
+                          {vault.address.slice(-4)}
+                        </span>
+                      )}
+                    </td>
+                    <td>
+                      <ScoreBadge score={vault.riskLevel} />
+                    </td>
+                    <td>{scoreTier(vault.riskLevel)}</td>
+                    <td>{vault.maxAllocation}</td>
+                  </tr>
+                ))}
+            </tbody>
+          </table>
+        </div>
+      </section>
+    ))
+  }
+</BaseLayout>
+
+<style>
+  .back-link {
+    display: inline-block;
+    margin-bottom: 1rem;
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+  }
+  .back-link:hover {
+    color: var(--text-primary);
+  }
+  h1 {
+    margin-bottom: 0.25rem;
+  }
+  .subtitle {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    margin-bottom: 2rem;
+  }
+  .chain-section {
+    margin-bottom: 2.5rem;
+  }
+  .chain-section h2 {
+    font-size: 1.15rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .chain-count {
+    font-size: 0.75rem;
+    font-weight: 600;
+    background: var(--bg-secondary);
+    color: var(--text-secondary);
+    padding: 0.1rem 0.5rem;
+    border-radius: 10px;
+  }
+  .mono {
+    font-family: "SF Mono", "Fira Code", monospace;
+    font-size: 0.85em;
+  }
+  @media (max-width: 640px) {
+    table {
+      font-size: 0.8rem;
+    }
+    th,
+    td {
+      padding: 0.4rem 0.5rem;
+    }
+  }
+</style>

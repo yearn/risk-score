@@ -32,6 +32,10 @@ const { title } = Astro.props;
             <path d="M124.069 175.008H141.606V147.171L171.45 117.38L159.049 105.006L132.847 131.163L106.62 105L94.2188 117.374L124.069 147.152V175.008Z" fill="currentColor"/>
           </svg>
         </a>
+        <nav class="site-nav">
+          <a href="/">Reports</a>
+          <a href="/morpho/">Morpho Vaults</a>
+        </nav>
         <button id="theme-toggle" class="theme-toggle" aria-label="Toggle light mode">
           <svg class="icon-sun" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <circle cx="12" cy="12" r="5" />
@@ -88,7 +92,20 @@ const { title } = Astro.props;
   .header-row {
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    gap: 1.5rem;
+  }
+  .site-nav {
+    display: flex;
+    gap: 1.5rem;
+    font-size: 0.9rem;
+  }
+  .site-nav a {
+    color: var(--text-secondary);
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+  .site-nav a:hover {
+    color: var(--text-primary);
   }
   .logo-link {
     display: flex;
@@ -107,6 +124,7 @@ const { title } = Astro.props;
     display: block;
   }
   .theme-toggle {
+    margin-left: auto;
     background: none;
     border: 1px solid var(--border);
     border-radius: 6px;
