@@ -46,21 +46,23 @@ function iconUrl(defillamaSlug: string): string {
   return `https://icons.llamao.fi/icons/protocols/${defillamaSlug}?w=48&h=48`;
 }
 
-const CHAIN_ID_MAP: Record<string, number> = {
-  ethereum: 1,
-  arbitrum: 42161,
-  base: 8453,
-  polygon: 137,
-  optimism: 10,
-  bnb: 56,
-  avalanche: 43114,
+const CHAIN_SLUG_MAP: Record<string, string> = {
+  ethereum: "ethereum",
+  arbitrum: "arbitrum",
+  base: "base",
+  polygon: "polygon",
+  optimism: "optimism",
+  bnb: "binance",
+  avalanche: "avalanche",
+  hyperliquid: "hyperliquid",
+  hyperev: "hyperliquid",
 };
 
 function chainIconUrl(chain: string): string {
   const lower = chain.toLowerCase();
-  for (const [key, id] of Object.entries(CHAIN_ID_MAP)) {
+  for (const [key, slug] of Object.entries(CHAIN_SLUG_MAP)) {
     if (lower.includes(key)) {
-      return `https://token-assets-one.vercel.app/api/chains/${id}/logo-32.png?fallback=true`;
+      return `https://icons.llamao.fi/icons/chains/rsz_${slug}?w=48&h=48`;
     }
   }
   return "";
