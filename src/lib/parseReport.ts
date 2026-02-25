@@ -9,6 +9,7 @@ export interface ReportMeta {
   finalScore: number;
   type: "Protocol" | "Asset";
   iconUrl: string;
+  chainIconUrl: string;
 }
 
 export interface CategoryScore {
@@ -45,6 +46,29 @@ function iconUrl(defillamaSlug: string): string {
   return `https://icons.llamao.fi/icons/protocols/${defillamaSlug}?w=48&h=48`;
 }
 
+const CHAIN_ID_MAP: Record<string, number> = {
+  ethereum: 1,
+  arbitrum: 42161,
+  base: 8453,
+  polygon: 137,
+  optimism: 10,
+  bnb: 56,
+  avalanche: 43114,
+};
+
+function chainIconUrl(chain: string): string {
+  const lower = chain.toLowerCase();
+  if (lower.includes("hyperliquid") || lower.includes("hyperev")) {
+    return "https://icons.llamao.fi/icons/chains/rsz_hyperliquid?w=48&h=48";
+  }
+  for (const [key, id] of Object.entries(CHAIN_ID_MAP)) {
+    if (lower.includes(key)) {
+      return `https://token-assets-one.vercel.app/api/chains/${id}/logo-32.png?fallback=true`;
+    }
+  }
+  return "";
+}
+
 function parseMeta(slug: string, content: string): ReportMeta {
   const titleMatch = content.match(
     /^# (?:Protocol|Asset) Risk Assessment:\s*(.+)$/m,
@@ -61,16 +85,18 @@ function parseMeta(slug: string, content: string): ReportMeta {
   const scoreMatch = content.match(/\*\*Final Score:\s*([\d.]+)\/5\.0\*\*/);
 
   const defillamaSlug = parseDefillamaSlug(slug, content);
+  const chainStr = chainMatch?.[1]?.trim() ?? "";
 
   return {
     slug,
     name,
     date: dateMatch?.[1]?.trim() ?? "",
     token: tokenMatch?.[1]?.trim() ?? "",
-    chain: chainMatch?.[1]?.trim() ?? "",
+    chain: chainStr,
     finalScore: parseFloat(scoreMatch?.[1] ?? "0"),
     type,
     iconUrl: iconUrl(defillamaSlug),
+    chainIconUrl: chainIconUrl(chainStr),
   };
 }
 

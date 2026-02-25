@@ -7,7 +7,7 @@ import { scoreTier } from "../lib/colors";
 const reports = getAllReports();
 ---
 
-<BaseLayout title="Risk Reports — Yearn">
+<BaseLayout title="Yearn Risk">
   <h1>Risk Assessment Reports</h1>
 
   <div class="table-wrap">
@@ -15,7 +15,7 @@ const reports = getAllReports();
       <thead>
         <tr>
           <th class="col-icon"></th>
-          <th>Protocol / Asset</th>
+          <th>Protocol</th>
           <th>Token</th>
           <th>Score</th>
           <th>Risk Tier</th>
@@ -26,11 +26,16 @@ const reports = getAllReports();
           reports.map((r) => (
             <tr onclick={`window.location='/report/${r.slug}/'`}>
               <td class="col-icon">
-                {r.iconUrl ? (
-                  <img src={r.iconUrl} alt="" width="24" height="24" class="protocol-icon" loading="lazy" />
-                ) : (
-                  <div class="icon-placeholder" />
-                )}
+                <div class="icon-stack">
+                  {r.iconUrl ? (
+                    <img src={r.iconUrl} alt="" width="24" height="24" class="protocol-icon" loading="lazy" />
+                  ) : (
+                    <div class="icon-placeholder" />
+                  )}
+                  {r.chainIconUrl && (
+                    <img src={r.chainIconUrl} alt="" width="14" height="14" class="chain-icon" loading="lazy" />
+                  )}
+                </div>
               </td>
               <td>{r.name}</td>
               <td class="mono">{r.token}</td>
@@ -51,12 +56,25 @@ const reports = getAllReports();
     margin-bottom: 1.5rem;
   }
   .col-icon {
-    width: 32px;
+    width: 36px;
     padding-right: 0;
+  }
+  .icon-stack {
+    position: relative;
+    width: 24px;
+    height: 24px;
   }
   .protocol-icon {
     display: block;
     border-radius: 50%;
+  }
+  .chain-icon {
+    position: absolute;
+    bottom: -4px;
+    right: -6px;
+    border-radius: 50%;
+    border: 1.5px solid var(--bg-primary);
+    background: var(--bg-primary);
   }
   .icon-placeholder {
     width: 24px;

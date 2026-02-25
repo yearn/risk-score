@@ -48,7 +48,6 @@ function labelPos(cx: number, cy: number, r: number, start: number, end: number)
               <th>Category</th>
               <th>Weight</th>
               <th>Score</th>
-              <th>Weighted</th>
             </tr>
           </thead>
           <tbody>
@@ -62,7 +61,6 @@ function labelPos(cx: number, cy: number, r: number, start: number, end: number)
                 <td style={`color:${scoreColor(s.score)}`}>
                   {s.score.toFixed(2)}
                 </td>
-                <td>{s.weighted.toFixed(3)}</td>
               </tr>
             ))}
           </tbody>
@@ -71,7 +69,7 @@ function labelPos(cx: number, cy: number, r: number, start: number, end: number)
               <td colspan="2">
                 <strong>Final Score</strong>
               </td>
-              <td colspan="2" style={`color:${scoreColor(finalScore)};font-weight:700;`}>
+              <td style={`color:${scoreColor(finalScore)};font-weight:700;`}>
                 {finalScore.toFixed(1)} / 5.0
               </td>
             </tr>
@@ -80,21 +78,33 @@ function labelPos(cx: number, cy: number, r: number, start: number, end: number)
       </div>
 
       <div class="chart-area">
-        <svg viewBox="0 0 200 200" class="pie-chart">
-          {segments.map((seg) => (
-            <path d={arcPath(100, 100, 90, seg.startAngle, seg.endAngle)} fill={seg.color} stroke="var(--bg-primary)" stroke-width="2" />
-          ))}
-          {segments.map((seg) => {
-            const pos = labelPos(100, 100, 90, seg.startAngle, seg.endAngle);
-            const weightNum = parseFloat(seg.weight);
-            if (weightNum < 10) return null;
-            return (
-              <text x={pos.x} y={pos.y} text-anchor="middle" dominant-baseline="central" fill={scoreTextColor(seg.score)} font-size="11" font-weight="600">
-                {seg.weight}
-              </text>
-            );
-          })}
-        </svg>
+        <div class="chart-container">
+          <svg viewBox="0 0 200 200" class="pie-chart">
+            {segments.map((seg) => (
+              <path
+                d={arcPath(100, 100, 90, seg.startAngle, seg.endAngle)}
+                fill={seg.color}
+                stroke="var(--bg-primary)"
+                stroke-width="2"
+                class="pie-segment"
+                data-category={seg.category}
+                data-weight={seg.weight}
+                data-score={seg.score.toFixed(2)}
+              />
+            ))}
+            {segments.map((seg) => {
+              const pos = labelPos(100, 100, 90, seg.startAngle, seg.endAngle);
+              const weightNum = parseFloat(seg.weight);
+              if (weightNum < 10) return null;
+              return (
+                <text x={pos.x} y={pos.y} text-anchor="middle" dominant-baseline="central" fill={scoreTextColor(seg.score)} font-size="11" font-weight="600" class="pie-label">
+                  {seg.weight}
+                </text>
+              );
+            })}
+          </svg>
+          <div class="chart-tooltip" id="chart-tooltip"></div>
+        </div>
         <div class="risk-tier-badge" style={`background:${scoreColor(finalScore)};color:${scoreTextColor(finalScore)}`}>
           {scoreTier(finalScore)}
         </div>
@@ -132,9 +142,39 @@ function labelPos(cx: number, cy: number, r: number, start: number, end: number)
     gap: 0.75rem;
     flex-shrink: 0;
   }
+  .chart-container {
+    position: relative;
+  }
   .pie-chart {
     width: 180px;
     height: 180px;
+  }
+  .pie-segment {
+    cursor: pointer;
+    transition: opacity 0.15s;
+  }
+  .pie-segment:hover {
+    opacity: 0.8;
+  }
+  .pie-label {
+    pointer-events: none;
+  }
+  .chart-tooltip {
+    display: none;
+    position: absolute;
+    background: var(--bg-card, #1a1a1a);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.8rem;
+    line-height: 1.4;
+    white-space: nowrap;
+    pointer-events: none;
+    z-index: 10;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  }
+  .chart-tooltip.visible {
+    display: block;
   }
   .risk-tier-badge {
     padding: 0.3rem 1rem;
@@ -155,3 +195,32 @@ function labelPos(cx: number, cy: number, r: number, start: number, end: number)
     }
   }
 </style>
+
+<script is:inline>
+  document.querySelectorAll('.chart-container').forEach(container => {
+    const tooltip = container.querySelector('.chart-tooltip');
+    if (!tooltip) return;
+
+    container.querySelectorAll('.pie-segment').forEach(seg => {
+      seg.addEventListener('mouseenter', (e) => {
+        const cat = seg.getAttribute('data-category');
+        const weight = seg.getAttribute('data-weight');
+        const score = seg.getAttribute('data-score');
+        tooltip.innerHTML = `<strong>${cat}</strong><br>Weight: ${weight}<br>Score: ${score}`;
+        tooltip.classList.add('visible');
+      });
+
+      seg.addEventListener('mousemove', (e) => {
+        const rect = container.getBoundingClientRect();
+        const x = e.clientX - rect.left + 12;
+        const y = e.clientY - rect.top - 10;
+        tooltip.style.left = x + 'px';
+        tooltip.style.top = y + 'px';
+      });
+
+      seg.addEventListener('mouseleave', () => {
+        tooltip.classList.remove('visible');
+      });
+    });
+  });
+</script>
