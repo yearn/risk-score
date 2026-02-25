@@ -2,51 +2,47 @@ export interface MorphoVault {
   name: string;
   address: string;
   riskLevel: number;
-  maxAllocation: string;
 }
 
 export interface ChainVaults {
   chainName: string;
   chainId: number;
-  explorerUrl: string | null;
+  explorerUrl: string;
+  morphoSlug: string;
   vaults: MorphoVault[];
 }
 
 const CHAIN_META: Record<
   string,
-  { chainName: string; chainId: number; explorerUrl: string | null }
+  { chainName: string; chainId: number; explorerUrl: string; morphoSlug: string }
 > = {
   MAINNET: {
     chainName: "Ethereum",
     chainId: 1,
     explorerUrl: "https://etherscan.io",
+    morphoSlug: "ethereum",
   },
   BASE: {
     chainName: "Base",
     chainId: 8453,
     explorerUrl: "https://basescan.org",
+    morphoSlug: "base",
   },
   POLYGON: {
     chainName: "Polygon",
     chainId: 137,
     explorerUrl: "https://polygonscan.com",
+    morphoSlug: "polygon",
   },
   KATANA: {
     chainName: "Katana",
     chainId: 747474,
-    explorerUrl: null,
+    explorerUrl: "https://katanascan.com",
+    morphoSlug: "katana",
   },
 };
 
 const CHAIN_ORDER = ["MAINNET", "BASE", "POLYGON", "KATANA"];
-
-const ALLOCATION_TIERS: Record<number, string> = {
-  1: "101%",
-  2: "30%",
-  3: "10%",
-  4: "5%",
-  5: "1%",
-};
 
 const MARKETS_URL =
   "https://raw.githubusercontent.com/yearn/monitoring-scripts-py/main/morpho/markets.py";
@@ -79,7 +75,6 @@ function parseMorphoVaults(raw: string): ChainVaults[] {
         name: vaultMatch[1],
         address: vaultMatch[2],
         riskLevel,
-        maxAllocation: ALLOCATION_TIERS[riskLevel] ?? "N/A",
       });
     }
 

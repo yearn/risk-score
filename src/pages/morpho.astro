@@ -28,7 +28,6 @@ const totalVaults = chains.reduce((sum, c) => sum + c.vaults.length, 0);
                 <th>Address</th>
                 <th>Risk Level</th>
                 <th>Risk Tier</th>
-                <th>Max Allocation</th>
               </tr>
             </thead>
             <tbody>
@@ -36,29 +35,28 @@ const totalVaults = chains.reduce((sum, c) => sum + c.vaults.length, 0);
                 .sort((a, b) => a.riskLevel - b.riskLevel)
                 .map((vault) => (
                   <tr>
-                    <td>{vault.name}</td>
+                    <td>
+                      <a
+                        href={`https://app.morpho.org/${chain.morphoSlug}/vault/${vault.address}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        {vault.name}
+                      </a>
+                    </td>
                     <td class="mono">
-                      {chain.explorerUrl ? (
-                        <a
-                          href={`${chain.explorerUrl}/address/${vault.address}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                        >
-                          {vault.address.slice(0, 6)}...
-                          {vault.address.slice(-4)}
-                        </a>
-                      ) : (
-                        <span>
-                          {vault.address.slice(0, 6)}...
-                          {vault.address.slice(-4)}
-                        </span>
-                      )}
+                      <a
+                        href={`${chain.explorerUrl}/address/${vault.address}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        {vault.address.slice(0, 6)}...{vault.address.slice(-4)}
+                      </a>
                     </td>
                     <td>
                       <ScoreBadge score={vault.riskLevel} />
                     </td>
                     <td>{scoreTier(vault.riskLevel)}</td>
-                    <td>{vault.maxAllocation}</td>
                   </tr>
                 ))}
             </tbody>
