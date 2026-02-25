@@ -101,7 +101,7 @@ const totalMarkets = marketChains.reduce(
               <thead>
                 <tr>
                   <th>Market</th>
-                  <th>Morpho</th>
+                  <th>Morpho ID</th>
                   <th>Risk Level</th>
                   <th>Risk Tier</th>
                 </tr>
@@ -111,16 +111,17 @@ const totalMarkets = marketChains.reduce(
                   .sort((a, b) => a.riskLevel - b.riskLevel)
                   .map((market) => (
                     <tr>
-                      <td>{market.description}</td>
-                      <td class="mono">
+                      <td>
                         <a
                           href={`https://app.morpho.org/${chain.morphoSlug}/market/${market.uniqueKey}`}
                           target="_blank"
                           rel="noopener noreferrer"
                         >
-                          {market.uniqueKey.slice(0, 6)}...
-                          {market.uniqueKey.slice(-4)}
+                          {market.description}
                         </a>
+                      </td>
+                      <td class="mono">
+                        {market.uniqueKey.slice(0, 6)}...{market.uniqueKey.slice(-4)}
                       </td>
                       <td>
                         <ScoreBadge score={market.riskLevel} />
