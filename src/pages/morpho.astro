@@ -34,8 +34,8 @@ const marketChains = await fetchMorphoMarkets();
               <thead>
                 <tr>
                   <th>Vault</th>
-                  <th>Risk Level</th>
-                  <th>Risk Tier</th>
+                  <th class="col-right">Risk Level</th>
+                  <th class="col-right">Risk Tier</th>
                 </tr>
               </thead>
               <tbody>
@@ -58,10 +58,10 @@ const marketChains = await fetchMorphoMarkets();
                           {vault.name}
                         </a>
                       </td>
-                      <td>
+                      <td class="col-right">
                         <ScoreBadge score={vault.riskLevel} />
                       </td>
-                      <td>{scoreTier(vault.riskLevel)}</td>
+                      <td class="col-right">{scoreTier(vault.riskLevel)}</td>
                     </tr>
                   ))}
               </tbody>
@@ -85,8 +85,8 @@ const marketChains = await fetchMorphoMarkets();
               <thead>
                 <tr>
                   <th>Market</th>
-                  <th>Risk Level</th>
-                  <th>Risk Tier</th>
+                  <th class="col-right">Risk Level</th>
+                  <th class="col-right">Risk Tier</th>
                 </tr>
               </thead>
               <tbody>
@@ -114,10 +114,10 @@ const marketChains = await fetchMorphoMarkets();
                           {market.description}
                         </a>
                       </td>
-                      <td>
+                      <td class="col-right">
                         <ScoreBadge score={market.riskLevel} />
                       </td>
-                      <td>{scoreTier(market.riskLevel)}</td>
+                      <td class="col-right">{scoreTier(market.riskLevel)}</td>
                     </tr>
                   ))}
               </tbody>
@@ -255,6 +255,9 @@ const marketChains = await fetchMorphoMarkets();
     box-sizing: content-box;
     width: 17px;
     height: 17px;
+  }
+  .col-right {
+    text-align: right;
   }
   @media (max-width: 640px) {
     table {
