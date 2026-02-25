@@ -6,11 +6,6 @@ import { scoreTier } from "../lib/colors";
 
 const vaultChains = await fetchMorphoVaults();
 const marketChains = await fetchMorphoMarkets();
-const totalVaults = vaultChains.reduce((sum, c) => sum + c.vaults.length, 0);
-const totalMarkets = marketChains.reduce(
-  (sum, c) => sum + c.markets.length,
-  0,
-);
 ---
 
 <BaseLayout title="Morpho — Yearn">
@@ -19,17 +14,14 @@ const totalMarkets = marketChains.reduce(
 
   <div class="tabs">
     <button class="tab active" data-tab="vaults">
-      Vaults <span class="tab-count">{totalVaults}</span>
+      Vaults <span class="tab-count">{vaultChains.reduce((s, c) => s + c.vaults.length, 0)}</span>
     </button>
     <button class="tab" data-tab="markets">
-      Markets <span class="tab-count">{totalMarkets}</span>
+      Markets <span class="tab-count">{marketChains.reduce((s, c) => s + c.markets.length, 0)}</span>
     </button>
   </div>
 
   <div id="panel-vaults" class="tab-panel">
-    <p class="subtitle">
-      {totalVaults} vaults across {vaultChains.length} chains
-    </p>
     {
       vaultChains.map((chain) => (
         <section class="chain-section">
@@ -86,9 +78,6 @@ const totalMarkets = marketChains.reduce(
   </div>
 
   <div id="panel-markets" class="tab-panel hidden">
-    <p class="subtitle">
-      {totalMarkets} markets across {marketChains.length} chains
-    </p>
     {
       marketChains.map((chain) => (
         <section class="chain-section">
@@ -204,11 +193,6 @@ const totalMarkets = marketChains.reduce(
   }
   .tab-panel.hidden {
     display: none;
-  }
-  .subtitle {
-    color: var(--text-secondary);
-    font-size: 0.9rem;
-    margin-bottom: 2rem;
   }
   .chain-section {
     margin-bottom: 2.5rem;
