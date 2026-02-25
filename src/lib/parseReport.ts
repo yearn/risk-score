@@ -47,6 +47,13 @@ function iconUrl(defillamaSlug: string): string {
 }
 
 const CHAIN_SLUG_MAP: Record<string, string> = {
+  ethereum: "ethereum",
+  arbitrum: "arbitrum",
+  base: "base",
+  polygon: "polygon",
+  optimism: "optimism",
+  bnb: "binance",
+  avalanche: "avalanche",
   hyperliquid: "hyperliquid",
   hyperev: "hyperliquid",
 };
