@@ -19,7 +19,12 @@ if (!report) return Astro.redirect("/");
 
   <div class="report-header">
     <div class="header-top">
-      <h1>{report.name}</h1>
+      <div class="header-title">
+        {report.iconUrl && (
+          <img src={report.iconUrl} alt="" width="32" height="32" class="report-protocol-icon" loading="lazy" />
+        )}
+        <h1>{report.name}</h1>
+      </div>
       <ScoreBadge score={report.finalScore} size="large" />
     </div>
     <div class="meta">
@@ -73,6 +78,15 @@ if (!report) return Astro.redirect("/");
     align-items: flex-start;
     gap: 1rem;
     flex-wrap: wrap;
+  }
+  .header-title {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+  .report-protocol-icon {
+    border-radius: 50%;
+    flex-shrink: 0;
   }
   h1 {
     font-size: 1.5rem;
