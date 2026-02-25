@@ -2,12 +2,15 @@ export interface MorphoVault {
   name: string;
   address: string;
   riskLevel: number;
+  iconUrl: string;
 }
 
 export interface MorphoMarket {
   uniqueKey: string;
   description: string;
   riskLevel: number;
+  collateralLogoURI: string;
+  loanLogoURI: string;
 }
 
 interface ChainMeta {
@@ -57,6 +60,8 @@ const CHAIN_ORDER = ["MAINNET", "BASE", "POLYGON", "KATANA"];
 const MARKETS_URL =
   "https://raw.githubusercontent.com/yearn/monitoring-scripts-py/main/morpho/markets.py";
 
+const MORPHO_GRAPHQL_URL = "https://blue-api.morpho.org/graphql";
+
 let cachedRaw: string | null = null;
 
 async function fetchRaw(): Promise<string> {
@@ -66,6 +71,78 @@ async function fetchRaw(): Promise<string> {
     throw new Error(`Failed to fetch morpho markets: ${response.status}`);
   cachedRaw = await response.text();
   return cachedRaw;
+}
+
+interface MorphoVaultGql {
+  address: string;
+  metadata: { image: string } | null;
+}
+
+interface MorphoMarketGql {
+  uniqueKey: string;
+  loanAsset: { logoURI: string } | null;
+  collateralAsset: { logoURI: string } | null;
+}
+
+async function fetchVaultIcons(
+  addresses: string[],
+  chainIds: number[],
+): Promise<Map<string, string>> {
+  const query = `{
+    vaults(where: { address_in: ${JSON.stringify(addresses)}, chainId_in: ${JSON.stringify(chainIds)} }, first: 200) {
+      items { address metadata { image } }
+    }
+  }`;
+  try {
+    const res = await fetch(MORPHO_GRAPHQL_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ query }),
+    });
+    if (!res.ok) return new Map();
+    const json = await res.json();
+    const items: MorphoVaultGql[] = json.data?.vaults?.items ?? [];
+    const map = new Map<string, string>();
+    for (const item of items) {
+      if (item.metadata?.image) {
+        map.set(item.address.toLowerCase(), item.metadata.image);
+      }
+    }
+    return map;
+  } catch {
+    return new Map();
+  }
+}
+
+async function fetchMarketIcons(
+  uniqueKeys: string[],
+  chainIds: number[],
+): Promise<Map<string, { loan: string; collateral: string }>> {
+  const query = `{
+    markets(where: { uniqueKey_in: ${JSON.stringify(uniqueKeys)}, chainId_in: ${JSON.stringify(chainIds)} }, first: 200) {
+      items { uniqueKey loanAsset { logoURI } collateralAsset { logoURI } }
+    }
+  }`;
+  try {
+    const res = await fetch(MORPHO_GRAPHQL_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ query }),
+    });
+    if (!res.ok) return new Map();
+    const json = await res.json();
+    const items: MorphoMarketGql[] = json.data?.markets?.items ?? [];
+    const map = new Map<string, { loan: string; collateral: string }>();
+    for (const item of items) {
+      map.set(item.uniqueKey.toLowerCase(), {
+        loan: item.loanAsset?.logoURI ?? "",
+        collateral: item.collateralAsset?.logoURI ?? "",
+      });
+    }
+    return map;
+  } catch {
+    return new Map();
+  }
 }
 
 function parseMorphoVaults(raw: string): ChainVaults[] {
@@ -93,6 +170,7 @@ function parseMorphoVaults(raw: string): ChainVaults[] {
         name: vaultMatch[1],
         address: vaultMatch[2],
         riskLevel,
+        iconUrl: "",
       });
     }
 
@@ -139,6 +217,8 @@ function parseMorphoMarkets(raw: string): ChainMarkets[] {
           uniqueKey: marketMatch[1],
           description,
           riskLevel: risk,
+          collateralLogoURI: "",
+          loanLogoURI: "",
         });
       }
       chainMap.set(chainKey, existing);
@@ -155,10 +235,34 @@ function parseMorphoMarkets(raw: string): ChainMarkets[] {
 
 export async function fetchMorphoVaults(): Promise<ChainVaults[]> {
   const raw = await fetchRaw();
-  return parseMorphoVaults(raw);
+  const chains = parseMorphoVaults(raw);
+
+  const allAddresses = chains.flatMap((c) => c.vaults.map((v) => v.address));
+  const allChainIds = chains.map((c) => c.chainId);
+  const iconMap = await fetchVaultIcons(allAddresses, allChainIds);
+
+  for (const chain of chains) {
+    for (const vault of chain.vaults) {
+      vault.iconUrl = iconMap.get(vault.address.toLowerCase()) ?? "";
+    }
+  }
+  return chains;
 }
 
 export async function fetchMorphoMarkets(): Promise<ChainMarkets[]> {
   const raw = await fetchRaw();
-  return parseMorphoMarkets(raw);
+  const chains = parseMorphoMarkets(raw);
+
+  const allKeys = chains.flatMap((c) => c.markets.map((m) => m.uniqueKey));
+  const allChainIds = chains.map((c) => c.chainId);
+  const iconMap = await fetchMarketIcons(allKeys, allChainIds);
+
+  for (const chain of chains) {
+    for (const market of chain.markets) {
+      const icons = iconMap.get(market.uniqueKey.toLowerCase());
+      market.collateralLogoURI = icons?.collateral ?? "";
+      market.loanLogoURI = icons?.loan ?? "";
+    }
+  }
+  return chains;
 }

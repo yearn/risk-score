@@ -34,7 +34,6 @@ const marketChains = await fetchMorphoMarkets();
               <thead>
                 <tr>
                   <th>Vault</th>
-                  <th>Address</th>
                   <th>Risk Level</th>
                   <th>Risk Tier</th>
                 </tr>
@@ -49,18 +48,14 @@ const marketChains = await fetchMorphoMarkets();
                           href={`https://app.morpho.org/${chain.morphoSlug}/vault/${vault.address}`}
                           target="_blank"
                           rel="noopener noreferrer"
+                          class="vault-link"
                         >
+                          {vault.iconUrl ? (
+                            <img src={vault.iconUrl} alt="" width="20" height="20" class="vault-icon" loading="lazy" />
+                          ) : (
+                            <div class="icon-placeholder-sm" />
+                          )}
                           {vault.name}
-                        </a>
-                      </td>
-                      <td class="mono">
-                        <a
-                          href={`${chain.explorerUrl}/address/${vault.address}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                        >
-                          {vault.address.slice(0, 6)}...
-                          {vault.address.slice(-4)}
                         </a>
                       </td>
                       <td>
@@ -90,7 +85,6 @@ const marketChains = await fetchMorphoMarkets();
               <thead>
                 <tr>
                   <th>Market</th>
-                  <th>Morpho ID</th>
                   <th>Risk Level</th>
                   <th>Risk Tier</th>
                 </tr>
@@ -105,12 +99,20 @@ const marketChains = await fetchMorphoMarkets();
                           href={`https://app.morpho.org/${chain.morphoSlug}/market/${market.uniqueKey}`}
                           target="_blank"
                           rel="noopener noreferrer"
+                          class="market-link"
                         >
+                          {(market.collateralLogoURI || market.loanLogoURI) && (
+                            <span class="token-pair">
+                              {market.collateralLogoURI && (
+                                <img src={market.collateralLogoURI} alt="" width="20" height="20" class="token-icon token-back" loading="lazy" />
+                              )}
+                              {market.loanLogoURI && (
+                                <img src={market.loanLogoURI} alt="" width="20" height="20" class="token-icon token-front" loading="lazy" />
+                              )}
+                            </span>
+                          )}
                           {market.description}
                         </a>
-                      </td>
-                      <td class="mono">
-                        {market.uniqueKey.slice(0, 6)}...{market.uniqueKey.slice(-4)}
                       </td>
                       <td>
                         <ScoreBadge score={market.riskLevel} />
@@ -214,9 +216,45 @@ const marketChains = await fetchMorphoMarkets();
     padding: 0.1rem 0.5rem;
     border-radius: 10px;
   }
-  .mono {
-    font-family: "SF Mono", "Fira Code", monospace;
-    font-size: 0.85em;
+  .vault-link,
+  .market-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .vault-icon {
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .icon-placeholder-sm {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: var(--bg-secondary);
+    flex-shrink: 0;
+  }
+  .token-pair {
+    position: relative;
+    width: 30px;
+    height: 20px;
+    flex-shrink: 0;
+  }
+  .token-icon {
+    border-radius: 50%;
+    position: absolute;
+    top: 0;
+  }
+  .token-back {
+    left: 0;
+    z-index: 1;
+  }
+  .token-front {
+    left: 10px;
+    z-index: 2;
+    border: 1.5px solid var(--bg-primary);
+    box-sizing: content-box;
+    width: 17px;
+    height: 17px;
   }
   @media (max-width: 640px) {
     table {
