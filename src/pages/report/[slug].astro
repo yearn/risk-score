@@ -3,7 +3,7 @@ import BaseLayout from "../../layouts/BaseLayout.astro";
 import ScoreBadge from "../../components/ScoreBadge.astro";
 import ScoreTable from "../../components/ScoreTable.astro";
 import { getAllSlugs, getReportBySlug } from "../../lib/reports";
-import { scoreTier } from "../../lib/colors";
+
 
 export function getStaticPaths() {
   return getAllSlugs().map((slug) => ({ params: { slug } }));
@@ -14,22 +14,30 @@ const report = getReportBySlug(slug!);
 if (!report) return Astro.redirect("/");
 ---
 
-<BaseLayout title={`${report.name} — Risk Report`}>
+<BaseLayout title={`${report.name} — Yearn Risk`}>
   <a href="/" class="back-link">&larr; All Reports</a>
 
   <div class="report-header">
     <div class="header-top">
-      <h1>{report.name}</h1>
+      <div class="header-title">
+        {report.iconUrl && (
+          <img src={report.iconUrl} alt="" width="32" height="32" class="report-protocol-icon" loading="lazy" />
+        )}
+        <h1>{report.name}</h1>
+      </div>
       <ScoreBadge score={report.finalScore} size="large" />
     </div>
     <div class="meta">
       <span>{report.token}</span>
       <span class="sep">/</span>
-      <span>{report.chain}</span>
+      <span class="chain-label">
+        {report.chainIconUrl && (
+          <img src={report.chainIconUrl} alt="" width="16" height="16" class="chain-icon-inline" loading="lazy" />
+        )}
+        {report.chain}
+      </span>
       <span class="sep">/</span>
       <span>{report.date}</span>
-      <span class="sep">/</span>
-      <span class={`tag tag-${report.type.toLowerCase()}`}>{report.type}</span>
     </div>
     <a
       href={`https://github.com/yearn/risk-score/blob/master/reports/report/${report.slug}.md`}
@@ -76,8 +84,26 @@ if (!report) return Astro.redirect("/");
     gap: 1rem;
     flex-wrap: wrap;
   }
+  .header-title {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+  .report-protocol-icon {
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
   h1 {
     font-size: 1.5rem;
+  }
+  .chain-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+  }
+  .chain-icon-inline {
+    border-radius: 50%;
+    vertical-align: middle;
   }
   .meta {
     margin-top: 0.5rem;
@@ -93,26 +119,10 @@ if (!report) return Astro.redirect("/");
     margin-top: 0.75rem;
     font-size: 1.1rem;
     font-weight: 600;
-    color: var(--text-primary);
-  }
-  .github-link:hover {
     color: var(--brand-blue);
   }
-  .tag {
-    display: inline-block;
-    padding: 0.1rem 0.4rem;
-    border-radius: 3px;
-    font-size: 0.75rem;
-    font-weight: 600;
-    text-transform: uppercase;
-  }
-  .tag-protocol {
-    background: rgba(6, 117, 249, 0.15);
-    color: #0675f9;
-  }
-  .tag-asset {
-    background: rgba(250, 204, 21, 0.15);
-    color: #facc15;
+  .github-link:hover {
+    text-decoration: underline;
   }
   .section {
     margin-bottom: 2.5rem;
