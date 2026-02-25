@@ -59,9 +59,11 @@ function parseMorphoVaults(raw: string): ChainVaults[] {
   if (!blockMatch) throw new Error("Could not find VAULTS_BY_CHAIN in source");
   const block = blockMatch[1];
 
-  // Match each Chain.<NAME>: [...] section within the block
-  const chainPattern = /Chain\.(\w+)\s*:\s*\[([\s\S]*?)\],/g;
-  const vaultPattern = /\["([^"]+)",\s*"(0x[0-9a-fA-F]{40})",\s*(\d+)\]/g;
+  // Match each Chain.<NAME>: [...] section within the block.
+  // The chain-level closing ], is at 4-space indent; vault entries are at 8-space indent.
+  const chainPattern = /Chain\.(\w+)\s*:\s*\[([\s\S]*?)\n    \],/g;
+  // Handle both single-line ["name", "0x...", 1], and multi-line entries with trailing comma
+  const vaultPattern = /\["([^"]+)",\s*"(0x[0-9a-fA-F]{40})",\s*(\d+),?\s*\]/g;
 
   const chainMap = new Map<string, MorphoVault[]>();
   let chainMatch;
