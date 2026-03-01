@@ -66,21 +66,13 @@ sUSN's value appreciates as the protocol mints new USN into the staking pool pro
 |----------|---------|---------------|
 | Multisig | [`0x1ea169EcCcf7714E7ba04900e1a3357cCA77327f`](https://etherscan.io/address/0x1ea169EcCcf7714E7ba04900e1a3357cCA77327f) | 3-of-6 Gnosis Safe v1.4.1, all anonymous signers (on-chain verified via `getThreshold()` and `getOwners()`) |
 
-**Multisig Signers (6):**
-1. [`0x0649F6Fc279B0EB94d5B15de013B87b0E50D2d88`](https://etherscan.io/address/0x0649F6Fc279B0EB94d5B15de013B87b0E50D2d88)
-2. [`0xe45Bb0D3cC77702E1310BB621c59c778304A42D0`](https://etherscan.io/address/0xe45Bb0D3cC77702E1310BB621c59c778304A42D0)
-3. [`0x09CE2d1C37772F7fF666B6447a66a5EBd2833799`](https://etherscan.io/address/0x09CE2d1C37772F7fF666B6447a66a5EBd2833799)
-4. [`0x7b1187106a3ac9D2602f41224A06e247fC12be37`](https://etherscan.io/address/0x7b1187106a3ac9D2602f41224A06e247fC12be37)
-5. [`0xe8241FACB568E4c880490e8Ab4E015F2572e6976`](https://etherscan.io/address/0xe8241FACB568E4c880490e8Ab4E015F2572e6976)
-6. [`0x8B3641db7737fFab752718fcc772161eC09FaD01`](https://etherscan.io/address/0x8B3641db7737fFab752718fcc772161eC09FaD01)
-
 ### Collateral Wallets (Ethereum)
 
-| Wallet | Address |
-|--------|---------|
-| Noon Collateral 1 | [`0x365bd6fb4200e422a2b1f7b9Dfb1C00471E6D089`](https://etherscan.io/address/0x365bd6fb4200e422a2b1f7b9Dfb1C00471E6D089) |
-| Noon Collateral 2 | [`0x1b2262903Fdb0a8eb84291cC227426be590c4503`](https://etherscan.io/address/0x1b2262903Fdb0a8eb84291cC227426be590c4503) |
-| Noon Collateral 3 | [`0x4fD04553468610e5a88a2cffA38E057C954312Da`](https://etherscan.io/address/0x4fD04553468610e5a88a2cffA38E057C954312Da) |
+| Wallet | Address | Type |
+|--------|---------|------|
+| Noon Collateral 1 | [`0x365bd6fb4200e422a2b1f7b9Dfb1C00471E6D089`](https://etherscan.io/address/0x365bd6fb4200e422a2b1f7b9Dfb1C00471E6D089) | 4-of-5 Gnosis Safe (on-chain verified) |
+| Noon Collateral 2 | [`0x1b2262903Fdb0a8eb84291cC227426be590c4503`](https://etherscan.io/address/0x1b2262903Fdb0a8eb84291cC227426be590c4503) | 3-of-4 Gnosis Safe (on-chain verified) |
+| Noon Collateral 3 | [`0x4fD04553468610e5a88a2cffA38E057C954312Da`](https://etherscan.io/address/0x4fD04553468610e5a88a2cffA38E057C954312Da) | **EOA** (on-chain verified — no contract code) |
 
 ### On-Chain Verification (Etherscan + cast, March 1, 2026)
 
@@ -140,8 +132,8 @@ The architecture is moderately complex:
 
 ## Historical Track Record
 
-- **USN deployment**: October 3, 2024 (block [20884046](https://etherscan.io/tx/0x...)) — ~17 months on-chain
-- **sUSN deployment**: November 6, 2024 (block [21130318](https://etherscan.io/tx/0x...)) — ~16 months on-chain
+- **USN deployment**: October 3, 2024 (block 20884046) — ~17 months on-chain
+- **sUSN deployment**: November 6, 2024 (block 21130318) — ~16 months on-chain
 - **Public beta launch**: January 25, 2025 — ~13 months of active usage
 - **GitHub**: Private repository (`dclf-labs/Noon-Core-Audit`), not public
 - **Incidents**: No reported security incidents, exploits, or hacks found
@@ -210,7 +202,7 @@ Alternatively, users can sell sUSN on DEXes for immediate (but potentially slipp
 - **On-chain verifiability**: sUSN exchange rate is programmatic on-chain (ERC-4626). DeFi strategy positions visible via ForDefi wallets on-chain
 - **Off-chain reserves**: TradFi positions (T-Bills, CLOs, private credit, CEX funding rate arb) are **not on-chain verifiable**. Users must trust Accountable's verification and custodian attestations
 - **Yield distribution**: Rebase mechanism — protocol mints new USN into the staking pool via `REBASE_MANAGER_ROLE`. The rebase amount is controlled by the team (up to `rebaseLimit` of ~50K USN per transaction)
-- **Collateral self-dealing prohibition**: Documentation states Noon never redeplooys assets back into Noon or lends to vaults accepting USN as collateral
+- **Collateral self-dealing prohibition**: Documentation states Noon never redeploys assets back into Noon or lends to vaults accepting USN as collateral
 
 ## Liquidity Risk
 
@@ -355,16 +347,26 @@ The entire protocol is controlled by a single 3-of-6 Gnosis Safe multisig with *
 - **Multisig**: [`0x1ea169EcCcf7714E7ba04900e1a3357cCA77327f`](https://etherscan.io/address/0x1ea169EcCcf7714E7ba04900e1a3357cCA77327f)
   - Monitor for owner/signer changes and threshold modifications
   - **Alert**: Immediately on any signer replacement or threshold change
-  - Monitor for proxy upgrade transactions (upgradeAndCall on ProxyAdmin contracts)
+  - Monitor for proxy upgrade transactions (`upgradeAndCall` on ProxyAdmin contracts)
   - **Alert**: Immediately on any proxy upgrade — **no timelock means upgrade is instant**
+- **RBAC changes** (on sUSN and MinterHandler):
+  - Monitor `RoleGranted`, `RoleRevoked` events
+  - **Alert**: Immediately on any role change
+- **Blacklist events** (on USN and sUSN):
+  - Monitor `blacklistAccount`, `unblacklistAccount` calls
+  - **Alert**: Immediately if any address is blacklisted
+- **Withdrawal period changes** (on sUSN):
+  - Monitor `WithdrawPeriodUpdated` events
+  - **Alert**: Immediately on any cooldown period change
 
 ### Collateral Wallet Monitoring
 
-- **Noon Collateral 1**: [`0x365bd6fb4200e422a2b1f7b9Dfb1C00471E6D089`](https://etherscan.io/address/0x365bd6fb4200e422a2b1f7b9Dfb1C00471E6D089)
-- **Noon Collateral 2**: [`0x1b2262903Fdb0a8eb84291cC227426be590c4503`](https://etherscan.io/address/0x1b2262903Fdb0a8eb84291cC227426be590c4503)
-- **Noon Collateral 3**: [`0x4fD04553468610e5a88a2cffA38E057C954312Da`](https://etherscan.io/address/0x4fD04553468610e5a88a2cffA38E057C954312Da)
-  - Monitor for large outflows
+- **Noon Collateral 1**: [`0x365bd6fb4200e422a2b1f7b9Dfb1C00471E6D089`](https://etherscan.io/address/0x365bd6fb4200e422a2b1f7b9Dfb1C00471E6D089) (4-of-5 Safe)
+- **Noon Collateral 2**: [`0x1b2262903Fdb0a8eb84291cC227426be590c4503`](https://etherscan.io/address/0x1b2262903Fdb0a8eb84291cC227426be590c4503) (3-of-4 Safe)
+- **Noon Collateral 3**: [`0x4fD04553468610e5a88a2cffA38E057C954312Da`](https://etherscan.io/address/0x4fD04553468610e5a88a2cffA38E057C954312Da) (**EOA** — higher risk, no multisig protection)
+  - Monitor for large outflows from all wallets
   - **Alert**: If total collateral wallet balances drop significantly relative to USN total supply
+  - **Alert**: Any outflows from Collateral 3 (EOA) should be reviewed
 
 ### Morpho Market Monitoring
 
@@ -381,9 +383,13 @@ The entire protocol is controlled by a single 3-of-6 Gnosis Safe multisig with *
 | Proxy upgrade events | Real-time | Critical |
 | Multisig signer/threshold changes | Real-time | Critical |
 | sUSN exchange rate decrease | Every 6 hours | Critical |
+| Blacklist events (USN/sUSN) | Real-time | Critical |
+| RBAC role changes | Real-time | Critical |
+| Withdrawal period changes | Real-time | Critical |
 | Rebase events | Daily | High |
 | USN total supply changes | Daily | High |
 | Collateral wallet balances | Daily | High |
+| Collateral 3 (EOA) outflows | Real-time | High |
 | Morpho oracle price vs sUSN rate | Every 6 hours | High |
 | Protocol TVL changes | Daily | Medium |
 
@@ -552,7 +558,11 @@ Final Score = (Centralization × 0.30) + (Funds Mgmt × 0.30) + (Audits × 0.20)
 
 | Final Score | Risk Tier | Recommendation |
 |------------|-----------|----------------|
-| **3.5-4.5** | **Elevated Risk** | Limited approval, strict limits |
+| 1.0-1.5 | Minimal Risk | Approved, high confidence |
+| 1.5-2.5 | Low Risk | Approved with standard monitoring |
+| 2.5-3.5 | Medium Risk | Approved with enhanced monitoring |
+| **3.5-4.5** | **Elevated Risk** | **Limited approval, strict limits** |
+| 4.5-5.0 | High Risk | Not recommended |
 
 **Final Risk Tier: Elevated Risk**
 
