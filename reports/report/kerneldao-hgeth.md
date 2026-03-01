@@ -189,10 +189,27 @@ The architecture is **highly complex** with multiple layers:
 
 ### Insurance
 
-**Nexus Mutual embedded cover** — confirmed partnership between Nexus Mutual, Edge Capital (UltraYield), and Kelp for the High Growth Vault. This is described as a "world-first DeFi vault with embedded cover":
-- Covers smart contract exploits, protocol failure, and other common DeFi risks
-- Cover is integrated directly into the vault — users receive protection as part of the product
-- Nexus Mutual track record: $4.4B in protected assets, $17M+ in claims paid since 2019
+**Nexus Mutual embedded cover** — confirmed partnership between Nexus Mutual, Edge Capital (UltraYield), and Kelp for the High Growth Vault ([announcement](https://www.einpresswire.com/article/887618132/nexus-mutual-edge-capital-and-kelp-partner-on-world-first-defi-vault-with-embedded-cover)). Described as a "world-first DeFi vault with embedded cover":
+- Cover protects across **$30M+ of the vault's core positions**
+- Cover is integrated directly into the vault — users receive protection as part of the product, not purchased separately
+- Nexus Mutual track record: $5.5B in crypto safeguarded since 2019, $17M+ in claims paid
+
+**What IS covered** ([Nexus Mutual cover terms](https://opencover.com/nexus-mutual-cover-covered-risks-and-exclusions/)):
+- Smart contract exploits/hacks (e.g., a bug in Aave, Euler, or the vault contract itself)
+- Oracle manipulation or oracle failure
+- Liquidation **failure** (when a protocol's liquidation mechanism malfunctions and bad debt accrues)
+- Governance takeovers (malicious upgrade forced through)
+
+**What is NOT covered:**
+- **Strategy losses from looping/leverage are NOT covered** — if hgETH's leveraged looping strategy on Aave gets liquidated because ETH price drops and the health factor falls below 1, that is the protocol working as intended → not a covered event
+- Market price movements of assets (except oracle manipulation)
+- Depegs of assets that the covered protocol generates
+- Rug pulls / owner confiscation within existing permissions
+- Bridge failures
+- User errors (phishing, private key compromise, malware)
+- Pre-existing issues or previously disclosed bugs
+
+**Key distinction for Yearn**: The Nexus Mutual cover protects against *protocol failures* (smart contract bugs, oracle malfunctions, broken liquidation mechanisms), but does **not** protect against *strategy underperformance* or losses from legitimate DeFi protocol behavior. Since hgETH's primary yield strategy involves leverage farming on Aave and looping, a normal liquidation from adverse market conditions would result in a loss to hgETH holders that insurance would not cover.
 
 ## Historical Track Record
 
@@ -489,7 +506,7 @@ The rsETH layer has notably better governance than the hgETH vault layer (higher
 - **Multiple audit layers**: Extensive auditing across the stack — Sigma Prime, ChainSecurity, Code4rena, MixBytes, Zellic, Hacken across rsETH, Gain, and Upshift
 - **Bug bounty**: Active Immunefi program for Kelp with up to $250K for critical bugs (rsETH core contracts only; hgETH/Gain vaults are not in scope)
 - **Non-custodial vault architecture**: Upshift's design prevents curators from withdrawing funds to external EOAs; policy-constrained execution via August subaccounts
-- **Nexus Mutual embedded cover**: Integrated insurance against smart contract exploits and protocol failures
+- **Nexus Mutual embedded cover**: Integrated insurance covering $30M+ of vault positions against smart contract exploits, oracle failures, and liquidation mechanism failures. **Does not cover** strategy losses from looping/leverage liquidations or market movements
 - **Chainlink PoR**: rsETH integrated Chainlink Proof of Reserve Secure Mint (added post-incident)
 - **rsETH governance**: 6-of-8 multisig with 10-day timelock for the underlying rsETH layer
 - **Large ecosystem TVL**: $2B+ across KernelDAO protocols provides scale and operational track record
