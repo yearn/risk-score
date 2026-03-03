@@ -53,16 +53,31 @@ BUCK is **not a stablecoin** — its price appreciates over time as yield accrue
 
 ## Audits and Due Diligence Disclosures
 
-BUCK has been audited by three firms. Two audits (Spearbit) are publicly available via Cantina; the Cyfrin and Halborn reports are claimed in the GitHub README but not publicly accessible.
+BUCK has been audited by three firms (4 audits total). All reports are publicly available — Spearbit audits via Cantina, and Cyfrin + Halborn reports in the [`buck-v2` GitHub repo](https://github.com/buck-labs/buck-v2/tree/master/docs/audits).
 
-### Spearbit Audit 1 — Initial Smart Contracts (Dec 18 – Jan 1, 2026)
+### Halborn — Strong DAO Smart Contracts (Nov 17 – Dec 8, 2025)
+
+- **Findings:** 12 total — 1 Critical, 0 High, 0 Medium, 3 Low, 8 Informational
+- **All findings addressed** (100% per report)
+- **Key Critical Finding:** Phantom unit accounting causes over-minting and reward misallocation
+- **Link:** [PDF in buck-v2 repo](https://github.com/buck-labs/buck-v2/blob/master/docs/audits/Strong%20DAO%20Smart%20Contracts%20_%20SSC.pdf)
+
+### Cyfrin — Strong Audit Report (Dec 19, 2025)
 
 - **Repo:** `buck-labs/strong-smart-contracts-internal`
-- **Researchers:** Chinmay Farkya, r0bert, Sujith S
+- **Lead Auditors:** Giovanni Di Siena, Blckhv, Slavcheww, BengalCatBalu
+- **Findings:** 1 Critical, 6 High, 9 Medium, 22 Low, 7 Informational, 5 Gas
+- **Key Critical Finding:** STRC rewards inflation results in risk of undercollateralization as more can be claimed than is distributed
+- **Link:** [PDF in buck-v2 repo](https://github.com/buck-labs/buck-v2/blob/master/docs/audits/2025-12-19-cyfrin-strong-v2.0.pdf)
+
+### Spearbit Audit 1 — Initial Smart Contracts (Dec 18 – Jan 5, 2026)
+
+- **Repo:** `buck-labs/strong-smart-contracts-internal`
+- **Researchers:** R0bert, Sujith Somraaj, Chinmay Farkya
 - **Findings:** 3 High, 6 Medium, 8 Low, 16 Informational, 6 Gas
 - **All critical/high findings resolved**
 - **Key High Finding:** ABI Struct Mismatch in Band Config — `LiquidityWindow` used a mismatched struct definition for `BandConfig` compared to `PolicyManager`, causing incorrect field decoding that could let refunds drain reserves below intended floor.
-- **Link:** [Cantina Portfolio](https://cantina.xyz/portfolio/baf9433d-7402-488f-919b-2efcf0c8fbb0)
+- **Link:** [Cantina Portfolio](https://cantina.xyz/portfolio/baf9433d-7402-488f-919b-2efcf0c8fbb0) | [PDF in buck-v2 repo](https://github.com/buck-labs/buck-v2/blob/master/docs/audits/spearbit-buck-1219.pdf)
 
 ### Spearbit Audit 2 — Follow-up (Jan 26 – Feb 2, 2026)
 
@@ -75,10 +90,15 @@ BUCK has been audited by three firms. Two audits (Spearbit) are publicly availab
   2. RewardsEngine V1.1 Implementation Incomplete — upgrade proxy lacked core V1 functions. Fixed with corrected contract inheritance.
 - **Link:** [Cantina Portfolio](https://cantina.xyz/portfolio/0e02dc97-1161-4afc-928e-6eb05e1e6f57)
 
-### Claimed Audits (Not Publicly Accessible)
+### Audit Findings Summary
 
-- **Cyfrin** — Claimed in GitHub README. No public report found on Cyfrin's audit reports repository.
-- **Halborn** — Claimed in GitHub README. No public report found on Halborn's audits page.
+| Firm | Date | Critical | High | Medium | Low | Info | Total |
+|------|------|----------|------|--------|-----|------|-------|
+| Halborn | Nov–Dec 2025 | 1 | 0 | 0 | 3 | 8 | 12 |
+| Cyfrin | Dec 2025 | 1 | 6 | 9 | 22 | 12 | 50 |
+| Spearbit #1 | Dec 2025–Jan 2026 | 0 | 3 | 6 | 8 | 22 | 39 |
+| Spearbit #2 | Jan–Feb 2026 | 0 | 2 | 14 | 13 | 25 | 54 |
+| **Total** | | **2** | **11** | **29** | **46** | **67** | **155** |
 
 **Smart Contract Complexity:** Moderate — UUPS upgradeable proxies, band state machine (Policy Manager), oracle integration (Pyth), access registry (Merkle tree), reward distribution system. 8 core contracts total.
 
@@ -308,7 +328,7 @@ BUCK yield comes from **STRC dividends** — Strategy Inc.'s Variable-Rate Serie
 
 ### Key Strengths
 
-1. **Multiple audit coverage** — 2 publicly available Spearbit audits via Cantina, plus claimed Cyfrin and Halborn audits. All critical/high findings reported as resolved.
+1. **Multiple audit coverage** — 4 audits from 3 firms (Halborn, Cyfrin, 2× Spearbit), all publicly available. 155 total findings (2 Critical, 11 High). All critical/high findings reported as resolved.
 2. **Overcollateralized** — 1.69x reserve ratio with USDC + STRC backing
 3. **Thoughtful band system** — GREEN/YELLOW/RED bands with escalating fees and tightening refund caps provide structured reserve protection
 4. **Real yield source** — Yield derived from STRC contractual preferred dividends, not token emissions
@@ -341,7 +361,7 @@ BUCK yield comes from **STRC dividends** — Strategy Inc.'s Variable-Rate Serie
 
 ### Critical Risk Gates
 
-- [ ] **No audit** → **PASS** (2 public Spearbit audits + 2 claimed audits)
+- [ ] **No audit** → **PASS** (4 public audits from 3 firms: Halborn, Cyfrin, 2× Spearbit)
 - [ ] **Unverifiable reserves** → **PARTIAL CONCERN** — USDC reserves verifiable on-chain (~$124K), but STRC holdings (~$1.52M) are off-chain with only monthly attestation. On-chain component is verifiable, so not an auto-fail, but a significant weakness. STRC now represents ~92% of total reserves, increasing off-chain dependency.
 - [x] **Total centralization** → **TRIGGERED** — All contracts controlled by single EOA ([`0x376269214bB78b3D4f31d17600499b439c1aCB4b`](https://etherscan.io/address/0x376269214bB78b3D4f31d17600499b439c1aCB4b)) with no multisig or governance. This meets the critical gate definition: "Controlled by a single EOA with no multisig or governance."
 
@@ -353,7 +373,7 @@ BUCK yield comes from **STRC dividends** — Strategy Inc.'s Variable-Rate Serie
 
 | Aspect | Assessment |
 |--------|-----------|
-| Audits | 2 publicly verified Spearbit audits. Cyfrin and Halborn claimed but not publicly accessible. 5 high-severity findings across 2 audits (all resolved). |
+| Audits | 4 audits from 3 firms (Halborn, Cyfrin, 2× Spearbit), all publicly available. 2 Critical + 11 High findings across all audits (all resolved). |
 | Bug Bounty | **None** — no program on any platform |
 | Time in Production | ~8 weeks (launched Jan 5, 2026). Extremely early. |
 | TVL | ~$1.6M total reserves. Small by DeFi standards. |
