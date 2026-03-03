@@ -53,14 +53,14 @@ BUCK is **not a stablecoin** — its price appreciates over time as yield accrue
 
 ## Audits and Due Diligence Disclosures
 
-BUCK has been audited by three firms (4 audits total). All reports are publicly available — Spearbit audits via Cantina, and Cyfrin + Halborn reports in the [`buck-v2` GitHub repo](https://github.com/buck-labs/buck-v2/tree/master/docs/audits).
+BUCK has been audited by three firms (4 audits total). All reports are publicly available — Spearbit audits via Cantina, and Cyfrin + Halborn reports in the [`buck-v1` GitHub repo](https://github.com/buck-labs/buck-v1/tree/master/docs/audits).
 
 ### Halborn — Strong DAO Smart Contracts (Nov 17 – Dec 8, 2025)
 
 - **Findings:** 12 total — 1 Critical, 0 High, 0 Medium, 3 Low, 8 Informational
 - **All findings addressed** (100% per report)
 - **Key Critical Finding:** Phantom unit accounting causes over-minting and reward misallocation
-- **Link:** [PDF in buck-v2 repo](https://github.com/buck-labs/buck-v2/blob/master/docs/audits/Strong%20DAO%20Smart%20Contracts%20_%20SSC.pdf)
+- **Link:** [PDF in buck-v1 repo](https://github.com/buck-labs/buck-v1/blob/master/docs/audits/Strong%20DAO%20Smart%20Contracts%20_%20SSC.pdf)
 
 ### Cyfrin — Strong Audit Report (Dec 19, 2025)
 
@@ -68,7 +68,7 @@ BUCK has been audited by three firms (4 audits total). All reports are publicly 
 - **Lead Auditors:** Giovanni Di Siena, Blckhv, Slavcheww, BengalCatBalu
 - **Findings:** 1 Critical, 6 High, 9 Medium, 22 Low, 7 Informational, 5 Gas
 - **Key Critical Finding:** STRC rewards inflation results in risk of undercollateralization as more can be claimed than is distributed
-- **Link:** [PDF in buck-v2 repo](https://github.com/buck-labs/buck-v2/blob/master/docs/audits/2025-12-19-cyfrin-strong-v2.0.pdf)
+- **Link:** [PDF in buck-v1 repo](https://github.com/buck-labs/buck-v1/blob/master/docs/audits/2025-12-19-cyfrin-strong-v2.0.pdf)
 
 ### Spearbit Audit 1 — Initial Smart Contracts (Dec 18 – Jan 5, 2026)
 
@@ -77,7 +77,7 @@ BUCK has been audited by three firms (4 audits total). All reports are publicly 
 - **Findings:** 3 High, 6 Medium, 8 Low, 16 Informational, 6 Gas
 - **All critical/high findings resolved**
 - **Key High Finding:** ABI Struct Mismatch in Band Config — `LiquidityWindow` used a mismatched struct definition for `BandConfig` compared to `PolicyManager`, causing incorrect field decoding that could let refunds drain reserves below intended floor.
-- **Link:** [Cantina Portfolio](https://cantina.xyz/portfolio/baf9433d-7402-488f-919b-2efcf0c8fbb0) | [PDF in buck-v2 repo](https://github.com/buck-labs/buck-v2/blob/master/docs/audits/spearbit-buck-1219.pdf)
+- **Link:** [Cantina Portfolio](https://cantina.xyz/portfolio/baf9433d-7402-488f-919b-2efcf0c8fbb0) | [PDF in buck-v1 repo](https://github.com/buck-labs/buck-v1/blob/master/docs/audits/spearbit-buck-1219.pdf)
 
 ### Spearbit Audit 2 — Follow-up (Jan 26 – Feb 2, 2026)
 
