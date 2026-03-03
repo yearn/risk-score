@@ -158,7 +158,7 @@ BUCK yield comes from **STRC dividends** — Strategy Inc.'s Variable-Rate Serie
 - **Collateral Composition:** STRC preferred equity (~92%) + USDC (~8%)
 - **Single-asset concentration:** Entire yield strategy depends on STRC dividends and Strategy Inc. solvency
 - **STRC is a publicly traded equity** — subject to market price volatility, trading hours (NASDAQ only ~32.5h/week vs crypto 24/7), and regulatory risk
-- **Assets are held in Fireblocks** institutional MPC custody (SOC 2 Type II certified)
+- **Assets are held in Fireblocks** institutional MPC custody (SOC 2 Type II certified) — per documentation; not verifiable on-chain (Fireblocks MPC wallets appear as regular EOAs)
 
 ### Provability
 
@@ -280,7 +280,7 @@ BUCK yield comes from **STRC dividends** — Strategy Inc.'s Variable-Rate Serie
 
 1. **Strategy Inc. / STRC (CRITICAL)** — Entire yield model depends on STRC dividends. Strategy's 700K+ BTC provides backing, but BTC price crash could impact STRC value and dividends.
 2. **Pyth Oracle (HIGH)** — Configured for STRC/USD pricing via [`0x4305fb66699c3b2702d4d05cf36551390a4c69c6`](https://etherscan.io/address/0x4305fb66699c3b2702d4d05cf36551390a4c69c6). Pyth off-chain feed is active, but on-chain price on Ethereum not updated since Jan 15, 2026 (no keeper configured, `priceUpdater = 0x0`). System falls back to admin-set $1.00. When active, depends on NASDAQ feed availability (32.5h/week).
-3. **Fireblocks Custody (MEDIUM)** — Off-chain STRC assets held in Fireblocks MPC custody.
+3. **Fireblocks Custody (MEDIUM)** — Off-chain STRC assets claimed to be held in Fireblocks MPC custody (per documentation, not independently verifiable).
 4. **The Network Firm (LOW)** — Monthly attestation provider for reserve verification.
 5. **NASDAQ Market Hours (MEDIUM)** — STRC trades only during NASDAQ hours. Pricing gaps over weekends/holidays create risk for BUCK operations.
 
@@ -332,7 +332,7 @@ BUCK yield comes from **STRC dividends** — Strategy Inc.'s Variable-Rate Serie
 2. **Overcollateralized** — 1.69x reserve ratio with USDC + STRC backing
 3. **Thoughtful band system** — GREEN/YELLOW/RED bands with escalating fees and tightening refund caps provide structured reserve protection
 4. **Real yield source** — Yield derived from STRC contractual preferred dividends, not token emissions
-5. **Fireblocks institutional custody** with SOC 2 Type II certification for off-chain assets
+5. **Fireblocks institutional custody** claimed for off-chain assets (per documentation, not independently verifiable)
 
 ### Key Risks
 
@@ -421,7 +421,7 @@ BUCK yield comes from **STRC dividends** — Strategy Inc.'s Variable-Rate Serie
 - STRC component (~$1.52M) is off-chain — publicly traded equity held in traditional custody
 - Single-asset concentration (STRC) — no diversification
 - STRC is liquid (NASDAQ-traded) but subject to market volatility
-- Fireblocks MPC custody provides institutional-grade security for off-chain assets
+- Fireblocks MPC custody claimed per documentation (not independently verifiable on-chain)
 - No on-chain liquidation mechanism for STRC holdings
 
 **Subcategory B: Provability — 4.0**
