@@ -332,7 +332,7 @@ BUCK yield comes from **STRC dividends** — Strategy Inc.'s Variable-Rate Serie
 2. **Overcollateralized** — 1.69x reserve ratio with USDC + STRC backing
 3. **Thoughtful band system** — GREEN/YELLOW/RED bands with escalating fees and tightening refund caps provide structured reserve protection
 4. **Real yield source** — Yield derived from STRC contractual preferred dividends, not token emissions
-5. **Fireblocks institutional custody** claimed for off-chain assets (per documentation, not independently verifiable)
+5. **Monthly third-party attestation** by The Network Firm under AICPA standards provides some reserve transparency
 
 ### Key Risks
 
