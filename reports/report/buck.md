@@ -167,7 +167,7 @@ BUCK yield comes from **STRC dividends** — Strategy Inc.'s Variable-Rate Serie
 - **Collateral Attestation contract:** [`0x1aEEEf99704258947A9ea77eF021d5e0551c0428`](https://etherscan.io/address/0x1aEEEf99704258947A9ea77eF021d5e0551c0428) — stores STRC valuation and collateral ratios, but values are posted by a single EOA attestor ([`0x6f31810c8e6bfaf3ba486b4b7ce651b023423fa3`](https://etherscan.io/address/0x6f31810c8e6bfaf3ba486b4b7ce651b023423fa3))
 - **Third-party attestation:** The Network Firm provides monthly independent attestation of treasury reserves under AICPA standards
 - **Exchange rate:** Not computed on-chain algorithmically. BUCK is a standard ERC-20 (not ERC-4626). Yield is distributed as additional BUCK tokens via the Rewards Engine, not through an exchange rate mechanism.
-- **Oracle:** Uses Pyth oracle for STRC pricing (STRC/USD feed). The on-chain Oracle Adapter currently operates in **non-strict mode** with `strictMode = false`. Pyth IS configured (contract [`0x4305fb66699c3b2702d4d05cf36551390a4c69c6`](https://etherscan.io/address/0x4305fb66699c3b2702d4d05cf36551390a4c69c6)) with the STRC/USD price feed, but the feed data is **stale (46+ days old)**, causing the staleness check to fail and the system to fall back to an admin-set internal price of **$1.00** (set on deployment via [`0xccbbd3f3...`](https://etherscan.io/tx/0xccbbd3f338078639f48a8f9bdd2a632cae9b9d4142a9870469082116e5669227), never updated). The `priceUpdater` role is set to `0x0` (not configured), meaning only the owner EOA can update the internal price. Note: an earlier version (OracleAdapterV4) used RedStone + Pyth dual oracles, but RedStone was removed post-audit in OracleAdapterV5.
+- **Oracle:** Uses Pyth oracle for STRC pricing ([STRC/USD feed](https://insights.pyth.network/price-feeds/Equity.US.STRC%2FUSD)). The on-chain Oracle Adapter currently operates in **non-strict mode** with `strictMode = false`. Pyth IS configured (contract [`0x4305fb66699c3b2702d4d05cf36551390a4c69c6`](https://etherscan.io/address/0x4305fb66699c3b2702d4d05cf36551390a4c69c6)) with the STRC/USD price feed. The Pyth off-chain feed is actively publishing prices, but Pyth is a **pull oracle** — prices must be pushed on-chain by calling `updatePriceFeeds()`. The **on-chain Pyth price on Ethereum has not been updated since January 15, 2026** (46+ days stale), causing the staleness check (`pythStaleAfter = 86400s`) to fail and the system to fall back to an admin-set internal price of **$1.00** (set on deployment via [`0xccbbd3f3...`](https://etherscan.io/tx/0xccbbd3f338078639f48a8f9bdd2a632cae9b9d4142a9870469082116e5669227), never updated). The `priceUpdater` role is set to `0x0` (not configured), meaning no keeper bot is pushing Pyth updates and only the owner EOA can update the internal price. Note: an earlier version (OracleAdapterV4) used RedStone + Pyth dual oracles, but RedStone was removed post-audit in OracleAdapterV5.
 
 ## Liquidity Risk
 
@@ -272,14 +272,14 @@ BUCK yield comes from **STRC dividends** — Strategy Inc.'s Variable-Rate Serie
 - BUCK is a standard ERC-20 (not ERC-4626). Yield is distributed as additional tokens via the Rewards Engine on the 4th business day of each month.
 - Minting/refunding operates through the Liquidity Window with on-chain band logic (Policy Manager)
 - Collateral values are posted by a single attestor EOA ([`0x6f31810c8e6bfaf3ba486b4b7ce651b023423fa3`](https://etherscan.io/address/0x6f31810c8e6bfaf3ba486b4b7ce651b023423fa3)) — not computed on-chain
-- Oracle Adapter currently in non-strict mode, falling back to admin-set $1.00 internal price (Pyth feed stale)
+- Oracle Adapter in non-strict mode, falling back to admin-set $1.00 internal price (on-chain Pyth data stale — no keeper pushing updates)
 - Reward distribution decisions are off-chain (Foundation approval), execution is on-chain
 - STRC purchase and custody are entirely off-chain
 
 ### External Dependencies
 
 1. **Strategy Inc. / STRC (CRITICAL)** — Entire yield model depends on STRC dividends. Strategy's 700K+ BTC provides backing, but BTC price crash could impact STRC value and dividends.
-2. **Pyth Oracle (HIGH)** — Configured for STRC/USD pricing via [`0x4305fb66699c3b2702d4d05cf36551390a4c69c6`](https://etherscan.io/address/0x4305fb66699c3b2702d4d05cf36551390a4c69c6). Currently stale (46+ days), system falls back to admin-set $1.00. When active, depends on NASDAQ feed availability (32.5h/week).
+2. **Pyth Oracle (HIGH)** — Configured for STRC/USD pricing via [`0x4305fb66699c3b2702d4d05cf36551390a4c69c6`](https://etherscan.io/address/0x4305fb66699c3b2702d4d05cf36551390a4c69c6). Pyth off-chain feed is active, but on-chain price on Ethereum not updated since Jan 15, 2026 (no keeper configured, `priceUpdater = 0x0`). System falls back to admin-set $1.00. When active, depends on NASDAQ feed availability (32.5h/week).
 3. **Fireblocks Custody (MEDIUM)** — Off-chain STRC assets held in Fireblocks MPC custody.
 4. **The Network Firm (LOW)** — Monthly attestation provider for reserve verification.
 5. **NASDAQ Market Hours (MEDIUM)** — STRC trades only during NASDAQ hours. Pricing gaps over weekends/holidays create risk for BUCK operations.
@@ -398,7 +398,7 @@ BUCK yield comes from **STRC dividends** — Strategy Inc.'s Variable-Rate Serie
 - BUCK is standard ERC-20, not ERC-4626 — no on-chain exchange rate
 - Yield distributed as additional tokens via Rewards Engine (off-chain decision, on-chain execution)
 - Collateral values posted by single attestor EOA — not computed on-chain
-- Oracle Adapter in non-strict mode, Pyth configured but stale, falling back to admin-set $1.00 internal price
+- Oracle Adapter in non-strict mode, Pyth configured but on-chain data stale (no keeper pushing updates), falling back to admin-set $1.00 internal price
 - Band system logic is on-chain (Policy Manager), but band parameters set by admin
 - STRC purchase and custody entirely off-chain
 
@@ -406,7 +406,7 @@ BUCK yield comes from **STRC dividends** — Strategy Inc.'s Variable-Rate Serie
 
 - **Single point of failure:** Entire yield model depends on STRC dividends from Strategy Inc.
 - If Strategy suspends dividends, BUCK's value proposition collapses entirely
-- Pyth oracle dependency for STRC pricing (configured but currently stale)
+- Pyth oracle dependency for STRC pricing (off-chain feed active, but no keeper pushing on-chain updates)
 - NASDAQ market hours limitation (32.5h/week vs 24/7 crypto)
 - No fallback mechanism if Strategy fails
 
@@ -432,7 +432,7 @@ BUCK yield comes from **STRC dividends** — Strategy Inc.'s Variable-Rate Serie
   - Single attestor EOA posting values to Collateral Attestation contract
 - No real-time on-chain verification of STRC holdings
 - Exchange rate not computed on-chain (standard ERC-20, not ERC-4626)
-- Oracle falls back to admin-set $1.00 internal price (Pyth feed stale 46+ days)
+- Oracle falls back to admin-set $1.00 internal price (on-chain Pyth data stale 46+ days — no keeper configured)
 - Transparency dashboard provides 24h reserve updates (per documentation)
 
 **Score: (3.5 + 4.0) / 2 = 3.75/5**
