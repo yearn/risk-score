@@ -144,7 +144,7 @@ BUCK yield comes from **STRC dividends** — Strategy Inc.'s Variable-Rate Serie
 | YELLOW | R/L < 5% | 0.15% | 0.10% | 0.15% | 2.5% of supply |
 | RED | R/L < 2.5% | 0.20% | 0.15% | 0.20% | 1.0% of supply |
 
-- **Daily Refund Cap (GREEN):** ~48,812 BUCK/day (5% of ~976K supply). Per-transaction limit: 50% of remaining daily capacity.
+- **Daily Refund Cap (GREEN):** 48,812 BUCK/day (5% of 976K supply). Per-transaction limit: 50% of remaining daily capacity.
 - **Emergency:** Triggered when R/L <= 1%.
 - **Current R/L Ratio:** ~36.4% (solidly in GREEN band)
 
@@ -153,9 +153,9 @@ BUCK yield comes from **STRC dividends** — Strategy Inc.'s Variable-Rate Serie
 ### Collateralization
 
 - **Total Reserves:** ~$1.65M ($124K USDC + $1.52M STRC)
-- **BUCK in Circulation:** ~647K tokens (total supply ~976K minus ~329K in Treasury)
+- **BUCK in Circulation:** 647K tokens (total supply 976K minus 329K in Treasury)
 - **Reserve Ratio:** 1.69x (overcollateralized)
-- **Collateral Composition:** STRC preferred equity (~92%) + USDC (~8%)
+- **Collateral Composition:** STRC preferred equity (92%) + USDC (8%)
 - **Single-asset concentration:** Entire yield strategy depends on STRC dividends and Strategy Inc. solvency
 - **STRC is a publicly traded equity** — subject to market price volatility, trading hours (NASDAQ only ~32.5h/week vs crypto 24/7), and regulatory risk
 - **Assets are held in Fireblocks** institutional MPC custody (SOC 2 Type II certified) — per documentation; not verifiable on-chain (Fireblocks MPC wallets appear as regular EOAs)
@@ -183,7 +183,7 @@ BUCK yield comes from **STRC dividends** — Strategy Inc.'s Variable-Rate Serie
 
 #### Path 2: Uniswap V2 Direct Swap (BUCK → USDC)
 - **Pool:** [`0xaab3e2a7908f557c2c28cadf7556353c9a08f82e`](https://etherscan.io/address/0xaab3e2a7908f557c2c28cadf7556353c9a08f82e)
-- **Reserves:** ~61,327 BUCK / ~61,283 USDC (~$122.6K TVL)
+- **Reserves:** 61,327 BUCK / 61,283 USDC ($122.6K TVL)
 - **Access:** Permissionless
 - **Speed:** Instant (single transaction)
 - **Volume:** ~$534/day (extremely low; variable day-to-day, ranging from $8 to $6K)
@@ -191,16 +191,16 @@ BUCK yield comes from **STRC dividends** — Strategy Inc.'s Variable-Rate Serie
 
 | Trade Size | Estimated Slippage | USDC Received |
 |-----------|-------------------|---------------|
-| $1,000 | ~1.6% | ~$983 |
-| $5,000 | ~7.5% | ~$4,625 |
-| $10,000 | ~14.0% | ~$8,600 |
+| $1,000 | 1.6% | $983 |
+| $5,000 | 7.5% | $4,625 |
+| $10,000 | 14.0% | $8,600 |
 
 #### Path 3: Curve StableSwap (BUCK → USDC)
 - **Pool:** [`0x42cb0274c6492e3991bde2ce75abf8cdf7f11d66`](https://etherscan.io/address/0x42cb0274c6492e3991bde2ce75abf8cdf7f11d66)
-- **Reserves:** ~53,855 BUCK / ~46,573 USDC (~$100.4K TVL)
+- **Reserves:** 53,855 BUCK / 46,573 USDC ($100.4K TVL)
 - **Access:** Permissionless
 - **Speed:** Instant (single transaction)
-- **Volume:** ~$5,215/day (variable; ranged from ~$0 to ~$6K)
+- **Volume:** $5,215/day (variable; ranged from $0 to $6K)
 - **Created:** January 27, 2026 by Buck Treasury EOA
 
 | Trade Size | Estimated Slippage |
@@ -225,7 +225,7 @@ BUCK yield comes from **STRC dividends** — Strategy Inc.'s Variable-Rate Serie
 **Key concerns:**
 - Total permissionless DEX liquidity is only ~$108K
 - Both DEX pools were deployed by Buck's own team (deployer + treasury) — protocol-managed liquidity, not organic
-- 24h volume across all pools is highly variable (~$500 to ~$6K) — extremely thin
+- 24h volume across all pools is highly variable ($500 to $6K) — extremely thin
 - No CEX listings
 - The Liquidity Window is the primary exit but is access-gated and operates at company discretion per terms
 
@@ -291,9 +291,9 @@ BUCK yield comes from **STRC dividends** — Strategy Inc.'s Variable-Rate Serie
 - **Head of Treasury:** Dan Hillery — founding member of MSTR True North community.
 - **GitHub:** Single pseudonymous contributor (CornBrother0x, 6 commits). "Full git history will be merged in after Buck Labs can properly sanitize the development repo." No updates since January 7, 2026. 2 stars, 0 forks.
 - **Documentation:** Adequate. GitBook-based docs, transparency dashboard, MiCA whitepaper. Some gaps (minting/redeeming details hard to find).
-- **Legal Structure:**
-  - **Buck Assets Ltd.** (BVI, Company No. 2183723) — Token issuer. Explicitly **"NOT licensed, registered or otherwise regulated"** in BVI.
-  - **Buck Foundation** (Cayman Islands, exempted limited guarantee foundation) — DAO/governance wrapper.
+- **Legal Structure** (source: [MiCA Whitepaper, Part A](https://cdn.buck.io/Buck+Token+MiCA+Whitepaper+-+Update+2.9.2026.pdf)):
+  - **Buck Assets Ltd.** (BVI, Company No. 2183723, registered 2025-08-07) — Token issuer. Explicitly **"NOT licensed, registered or otherwise regulated"** in BVI. Directors: Clint Johnson and Gareth Thomas.
+  - **Buck Foundation** (Cayman Islands, exempted limited guarantee foundation) — DAO/governance wrapper. Parent company of Buck Assets Ltd.
   - **Buck Labs Inc.** (USA, Miami FL) — Technology company / service provider.
 - **Restricted jurisdictions:** 38+ including US, Russia, China, Iran, Cuba, North Korea, Canada
 - **Structure:** Regulation S exemption from U.S. securities registration
@@ -362,7 +362,7 @@ BUCK yield comes from **STRC dividends** — Strategy Inc.'s Variable-Rate Serie
 ### Critical Risk Gates
 
 - [ ] **No audit** → **PASS** (4 public audits from 3 firms: Halborn, Cyfrin, 2× Spearbit)
-- [ ] **Unverifiable reserves** → **PARTIAL CONCERN** — USDC reserves verifiable on-chain (~$124K), but STRC holdings (~$1.52M) are off-chain with only monthly attestation. On-chain component is verifiable, so not an auto-fail, but a significant weakness. STRC now represents ~92% of total reserves, increasing off-chain dependency.
+- [ ] **Unverifiable reserves** → **PARTIAL CONCERN** — USDC reserves verifiable on-chain ($124K), but STRC holdings ($1.52M) are off-chain with only monthly attestation. On-chain component is verifiable, so not an auto-fail, but a significant weakness. STRC now represents 92% of total reserves, increasing off-chain dependency.
 - [x] **Total centralization** → **TRIGGERED** — All contracts controlled by single EOA ([`0x376269214bB78b3D4f31d17600499b439c1aCB4b`](https://etherscan.io/address/0x376269214bB78b3D4f31d17600499b439c1aCB4b)) with no multisig or governance. This meets the critical gate definition: "Controlled by a single EOA with no multisig or governance."
 
 **Critical gate is triggered.** Per the template, this should result in an automatic score of 5. However, as mitigating factors exist (Ownable2Step, production mode enabled, 24h delay on reserve withdrawals), we proceed with category scoring but note the gate trigger.
@@ -440,11 +440,11 @@ BUCK yield comes from **STRC dividends** — Strategy Inc.'s Variable-Rate Serie
 #### Category 4: Liquidity Risk (Weight: 15%) — **4.5**
 
 - Total permissionless DEX liquidity: ~$108K across Uniswap V2 and Curve pools
-- 24h trading volume: highly variable (~$500 to ~$6K) — extremely thin
+- 24h trading volume: highly variable ($500 to $6K) — extremely thin
 - $5K trade = 7.5% slippage on Uniswap V2, ~1-3% on Curve
 - $10K trade = 14% slippage on Uniswap V2
-- Liquidity Window provides best exit (~$124K at ~0.20% cost) but is access-gated and not a contractual right
-- Daily refund cap: ~49K BUCK/day (~$49K). Exiting $500K position: ~10 days minimum.
+- Liquidity Window provides best exit ($124K at 0.20% cost) but is access-gated and not a contractual right
+- Daily refund cap: 49K BUCK/day ($49K). Exiting $500K position: 10+ days minimum.
 - No CEX listings
 - Both DEX pools deployed by Buck's own team (deployer + treasury) — not organic liquidity
 - 199 holders total
@@ -501,7 +501,7 @@ The category-weighted score (shown below for reference) would have been 4.22, co
 
 **Final Risk Tier: HIGH RISK — Not recommended**
 
-The protocol's single EOA governance triggered the "Total centralization" critical gate, resulting in an automatic 5.0 score. Additionally, the extremely thin liquidity (~$108K permissionless), very early stage (8 weeks), and off-chain collateral dependency (~92% STRC) independently confirm the high-risk assessment. **Use as Morpho collateral is NOT recommended** at this stage due to insufficient DEX liquidity for liquidations and critical governance centralization risks.
+The protocol's single EOA governance triggered the "Total centralization" critical gate, resulting in an automatic 5.0 score. Additionally, the extremely thin liquidity ($108K permissionless), very early stage (8 weeks), and off-chain collateral dependency (92% STRC) independently confirm the high-risk assessment. **Use as Morpho collateral is NOT recommended** at this stage due to insufficient DEX liquidity for liquidations and critical governance centralization risks.
 
 ---
 
