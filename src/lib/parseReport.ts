@@ -1,5 +1,25 @@
 import { marked } from "marked";
 
+// Override the default GFM del (strikethrough) tokenizer to only match
+// ~~double tildes~~, not ~single tildes~. Reports use ~$value frequently
+// for approximations, which otherwise gets rendered as <del>strikethrough</del>.
+marked.use({
+  tokenizer: {
+    del(src) {
+      const match = src.match(/^~~(?=[^\s~])([\s\S]*?[^\s~])~~(?=[^~]|$)/);
+      if (match) {
+        return {
+          type: "del",
+          raw: match[0],
+          text: match[1],
+          tokens: this.lexer.inlineTokens(match[1]),
+        };
+      }
+      return undefined;
+    },
+  },
+});
+
 export interface ReportMeta {
   slug: string;
   name: string;
