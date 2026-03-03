@@ -1,6 +1,6 @@
 # Protocol Risk Assessment: BUCK (Bitcoin Dollar SavingsCoin)
 
-- **Assessment Date:** February 22, 2026
+- **Assessment Date:** March 3, 2026
 - **Token:** BUCK
 - **Chain:** Ethereum
 - **Token Address:** [`0xdb13997f4D83EF343845d0bAEb27d1173dF8c224`](https://etherscan.io/address/0xdb13997f4D83EF343845d0bAEb27d1173dF8c224)
@@ -15,10 +15,10 @@ BUCK is **not a stablecoin** — its price appreciates over time as yield accrue
 **Important:** Strategy Inc. and Michael Saylor are **NOT affiliated** with BUCK and do not sponsor or endorse the token. Buck Assets Ltd. purchases STRC on the open market as an independent third party.
 
 - **Current Price:** ~$1.00
-- **Total Supply:** ~1,341,186 BUCK
-- **Total Holders:** 188
-- **Total Reserves:** ~$650K ($150K USDC + $500K STRC)
-- **Reserve Ratio:** 1.79x
+- **Total Supply:** ~976,245 BUCK
+- **Total Holders:** 199
+- **Total Reserves:** ~$1,648K ($124K USDC + $1,524K STRC)
+- **Reserve Ratio:** 1.69x
 - **Current APY:** ~10% (raised from 7% in February 2026)
 - **Not listed on DeFiLlama**
 
@@ -92,12 +92,12 @@ BUCK is **not** listed on the SEAL Safe Harbor registry.
 
 ## Historical Track Record
 
-- **Launch Date:** January 5, 2026 (~7 weeks in production)
+- **Launch Date:** January 5, 2026 (~8 weeks in production)
 - **Smart Contract Exploits:** None to date
-- **TVL:** ~$650K total reserves ($150K USDC + $500K STRC). Not listed on DeFiLlama.
-- **Holder Distribution:** 188 holders. Very small holder base for a protocol managing $650K in reserves.
+- **TVL:** ~$1,648K total reserves ($124K USDC + $1,524K STRC). Not listed on DeFiLlama.
+- **Holder Distribution:** 199 holders. Very small holder base for a protocol managing ~$1.6M in reserves.
 - **Peg Behavior:** BUCK is not pegged — it is designed to appreciate as yield accrues. Price started at $1.00, currently ~$1.00 (early in yield cycle, first distribution was February 2026).
-- **Incidents:** None reported in the 7 weeks since launch.
+- **Incidents:** None reported in the 8 weeks since launch.
 - **Rewards Engine Upgrades:** The Rewards Engine has been upgraded 3 times (blocks 24169542, 24386223, 24427333), indicating active iteration on a critical component.
 
 ## Funds Management
@@ -125,7 +125,7 @@ BUCK yield comes from **STRC dividends** — Strategy Inc.'s Variable-Rate Serie
 | YELLOW | R/L < 5% | 0.15% | 0.10% | 0.15% | 2.5% of supply |
 | RED | R/L < 2.5% | 0.20% | 0.15% | 0.20% | 1.0% of supply |
 
-- **Daily Refund Cap (GREEN):** ~67,059 BUCK/day (5% of ~1.34M supply). Per-transaction limit: 50% of remaining daily capacity.
+- **Daily Refund Cap (GREEN):** ~48,812 BUCK/day (5% of ~976K supply). Per-transaction limit: 50% of remaining daily capacity.
 - **Emergency:** Triggered when R/L <= 1%.
 - **Current R/L Ratio:** ~36.4% (solidly in GREEN band)
 
@@ -133,17 +133,17 @@ BUCK yield comes from **STRC dividends** — Strategy Inc.'s Variable-Rate Serie
 
 ### Collateralization
 
-- **Total Reserves:** ~$650K ($150K USDC + $500K STRC)
-- **BUCK in Circulation:** ~835K tokens
-- **Reserve Ratio:** 1.79x (overcollateralized)
-- **Collateral Composition:** STRC preferred equity (~77%) + USDC (~23%)
+- **Total Reserves:** ~$1,648K ($124K USDC + $1,524K STRC)
+- **BUCK in Circulation:** ~647K tokens (total supply ~976K minus ~329K in Treasury)
+- **Reserve Ratio:** 1.69x (overcollateralized)
+- **Collateral Composition:** STRC preferred equity (~92%) + USDC (~8%)
 - **Single-asset concentration:** Entire yield strategy depends on STRC dividends and Strategy Inc. solvency
 - **STRC is a publicly traded equity** — subject to market price volatility, trading hours (NASDAQ only ~32.5h/week vs crypto 24/7), and regulatory risk
 - **Assets are held in Fireblocks** institutional MPC custody (SOC 2 Type II certified)
 
 ### Provability
 
-- **On-chain USDC reserves:** The Liquidity Reserve contract holds USDC verifiable on-chain (~$488K USDC at [`0x1A426E3a87368a4851f7443Ff656A054Af872f66`](https://etherscan.io/address/0x1A426E3a87368a4851f7443Ff656A054Af872f66))
+- **On-chain USDC reserves:** The Liquidity Reserve contract holds USDC verifiable on-chain (~$124K USDC at [`0x1A426E3a87368a4851f7443Ff656A054Af872f66`](https://etherscan.io/address/0x1A426E3a87368a4851f7443Ff656A054Af872f66))
 - **STRC holdings:** Off-chain. STRC is held in traditional brokerage/custodial accounts. Not verifiable on-chain.
 - **Collateral Attestation contract:** [`0x1aEEEf99704258947A9ea77eF021d5e0551c0428`](https://etherscan.io/address/0x1aEEEf99704258947A9ea77eF021d5e0551c0428) — stores STRC valuation and collateral ratios, but values are posted by a single EOA attestor ([`0x6f31810c8e6bfaf3ba486b4b7ce651b023423fa3`](https://etherscan.io/address/0x6f31810c8e6bfaf3ba486b4b7ce651b023423fa3))
 - **Third-party attestation:** The Network Firm provides monthly independent attestation of treasury reserves under AICPA standards
@@ -156,19 +156,19 @@ BUCK yield comes from **STRC dividends** — Strategy Inc.'s Variable-Rate Serie
 
 #### Path 1: Liquidity Window Redemption (Protocol-Level)
 - **Contract:** [`0x6E87adb23ac0e150Ca9F76C33Df2AdCae508548E`](https://etherscan.io/address/0x6E87adb23ac0e150Ca9F76C33Df2AdCae508548E)
-- **Available USDC:** ~$488,538 in Liquidity Reserve
+- **Available USDC:** ~$123,597 in Liquidity Reserve
 - **Access:** RESTRICTED (Access Registry allowlist required)
-- **Speed:** Subject to daily caps (~67K BUCK/day in GREEN band) + Liquidity Reserve uses `queueWithdrawal` pattern (24h admin delay)
+- **Speed:** Subject to daily caps (~49K BUCK/day in GREEN band) + Liquidity Reserve uses `queueWithdrawal` pattern (24h admin delay)
 - **Cost:** ~0.20% total (0.10% half-spread + 0.10% refund fee in GREEN band)
 - **Limitation:** Access-gated, daily caps, per-transaction 50% cap, not a contractual right per terms
 
 #### Path 2: Uniswap V2 Direct Swap (BUCK → USDC)
 - **Pool:** [`0xaab3e2a7908f557c2c28cadf7556353c9a08f82e`](https://etherscan.io/address/0xaab3e2a7908f557c2c28cadf7556353c9a08f82e)
-- **Reserves:** ~61,333 BUCK / ~61,270 USDC (~$122.6K TVL)
+- **Reserves:** ~61,327 BUCK / ~61,283 USDC (~$122.6K TVL)
 - **Access:** Permissionless
 - **Speed:** Instant (single transaction)
-- **Volume:** ~$253/day (extremely low)
-- **Created:** ~47 days ago by Buck deployer. Only ~3 transactions total.
+- **Volume:** ~$534/day (extremely low; variable day-to-day, ranging from $8 to $6K)
+- **Created:** January 5, 2026 by Buck deployer. Swaps occur primarily via DEX aggregator routers.
 
 | Trade Size | Estimated Slippage | USDC Received |
 |-----------|-------------------|---------------|
@@ -178,11 +178,11 @@ BUCK yield comes from **STRC dividends** — Strategy Inc.'s Variable-Rate Serie
 
 #### Path 3: Curve StableSwap (BUCK → USDC)
 - **Pool:** [`0x42cb0274c6492e3991bde2ce75abf8cdf7f11d66`](https://etherscan.io/address/0x42cb0274c6492e3991bde2ce75abf8cdf7f11d66)
-- **Reserves:** ~46,467 BUCK / ~53,957 USDC (~$100.4K TVL)
+- **Reserves:** ~53,855 BUCK / ~46,573 USDC (~$100.4K TVL)
 - **Access:** Permissionless
 - **Speed:** Instant (single transaction)
-- **Volume:** ~$889/day
-- **Created:** ~25 days ago
+- **Volume:** ~$5,215/day (variable; ranged from ~$0 to ~$6K)
+- **Created:** January 27, 2026 by Buck Treasury EOA
 
 | Trade Size | Estimated Slippage |
 |-----------|-------------------|
@@ -197,16 +197,16 @@ BUCK yield comes from **STRC dividends** — Strategy Inc.'s Variable-Rate Serie
 
 | Source | Available USDC | Access | Speed |
 |--------|---------------|--------|-------|
-| Uniswap V2 Pool | ~$61,270 | Permissionless | Instant |
-| Curve StableSwap Pool | ~$53,957 | Permissionless | Instant |
-| Liquidity Reserve (via Window) | ~$488,538 | Restricted (allowlist) | Daily-capped |
-| **Total (permissionless)** | **~$115,227** | — | — |
-| **Total (including restricted)** | **~$603,765** | — | — |
+| Uniswap V2 Pool | ~$61,283 | Permissionless | Instant |
+| Curve StableSwap Pool | ~$46,573 | Permissionless | Instant |
+| Liquidity Reserve (via Window) | ~$123,597 | Restricted (allowlist) | Daily-capped |
+| **Total (permissionless)** | **~$107,856** | — | — |
+| **Total (including restricted)** | **~$231,453** | — | — |
 
 **Key concerns:**
-- Total permissionless DEX liquidity is only ~$115K
-- Both DEX pools were deployed by Buck's own deployer — protocol-managed liquidity, not organic
-- 24h volume across all pools is ~$1,142 — extremely thin
+- Total permissionless DEX liquidity is only ~$108K
+- Both DEX pools were deployed by Buck's own team (deployer + treasury) — protocol-managed liquidity, not organic
+- 24h volume across all pools is highly variable (~$500 to ~$6K) — extremely thin
 - No CEX listings
 - The Liquidity Window is the primary exit but is access-gated and operates at company discretion per terms
 
@@ -270,7 +270,7 @@ BUCK yield comes from **STRC dividends** — Strategy Inc.'s Variable-Rate Serie
 - **Founder:** Travis VanderZanden — fully doxxed, previously CEO of Bird (electric scooter company, now bankrupt), COO at Lyft, VP at Uber. **Bird overstated revenue by ~$31.6M per SEC filings**, was delisted from NYSE, and filed for Chapter 11 bankruptcy in Dec 2023.
 - **VP Engineering:** Brett Potter — previously Senior Blockchain Engineer at Binance.US, Head Developer at friesDAO.
 - **Head of Treasury:** Dan Hillery — founding member of MSTR True North community.
-- **GitHub:** Single pseudonymous contributor (CornBrother0x, 6 commits). "Full git history will be merged in after Buck Labs can properly sanitize the development repo." No updates since January 14, 2026. 1 star, 0 forks.
+- **GitHub:** Single pseudonymous contributor (CornBrother0x, 6 commits). "Full git history will be merged in after Buck Labs can properly sanitize the development repo." No updates since January 7, 2026. 2 stars, 0 forks.
 - **Documentation:** Adequate. GitBook-based docs, transparency dashboard, MiCA whitepaper. Some gaps (minting/redeeming details hard to find).
 - **Legal Structure:**
   - **Buck Assets Ltd.** (BVI, Company No. 2183723) — Token issuer. Explicitly **"NOT licensed, registered or otherwise regulated"** in BVI.
@@ -310,7 +310,7 @@ BUCK yield comes from **STRC dividends** — Strategy Inc.'s Variable-Rate Serie
 ### Key Strengths
 
 1. **Multiple audit coverage** — 2 publicly available Spearbit audits via Cantina, plus claimed Cyfrin and Halborn audits. All critical/high findings reported as resolved.
-2. **Overcollateralized** — 1.79x reserve ratio with USDC + STRC backing
+2. **Overcollateralized** — 1.69x reserve ratio with USDC + STRC backing
 3. **Thoughtful band system** — GREEN/YELLOW/RED bands with escalating fees and tightening refund caps provide structured reserve protection
 4. **Real yield source** — Yield derived from STRC contractual preferred dividends, not token emissions
 5. **Fireblocks institutional custody** with SOC 2 Type II certification for off-chain assets
@@ -318,8 +318,8 @@ BUCK yield comes from **STRC dividends** — Strategy Inc.'s Variable-Rate Serie
 ### Key Risks
 
 1. **Single EOA controls everything** — One address owns all 8 contracts with no multisig, no timelock, and unlimited admin powers including instant upgrades, pausing, and module reconfiguration
-2. **Extremely thin liquidity** — Only ~$115K permissionless DEX liquidity, ~$1,142 daily volume, no CEX listings
-3. **Very early stage** — 7 weeks in production, 188 holders, $650K reserves, not on DeFiLlama
+2. **Extremely thin liquidity** — Only ~$108K permissionless DEX liquidity, highly variable daily volume, no CEX listings
+3. **Very early stage** — 8 weeks in production, 199 holders, ~$1.6M reserves, not on DeFiLlama
 4. **Off-chain collateral** — STRC holdings are off-chain, verified only by monthly Network Firm attestations and single attestor EOA postings
 5. **Founder's track record** — Previous company (Bird) overstated revenue by $31.6M and went bankrupt
 
@@ -328,7 +328,7 @@ BUCK yield comes from **STRC dividends** — Strategy Inc.'s Variable-Rate Serie
 - **Single EOA with no timelock can upgrade all proxy contracts instantly** — if this private key is compromised, the entire protocol can be drained. This is the most severe governance risk possible. The documentation claims "48-hour timelock" for upgrades, but on-chain verification shows **no timelock exists**.
 - **Liquidity Window redemption is not a contractual right** — per Terms & Conditions, tokens "cannot be redeemed at the instruction of Token holders." The company operates the refund facility "in its sole discretion."
 - **Complete dependency on STRC/Strategy Inc.** — if Strategy suspends dividends (e.g., severe BTC crash), the yield mechanism breaks entirely. Concentration in a single counterparty with no diversification.
-- **No bug bounty program** — for a protocol holding ~$600K in reserves with upgradeable contracts, the absence of a bug bounty is a significant security gap.
+- **No bug bounty program** — for a protocol holding ~$1.6M in reserves with upgradeable contracts, the absence of a bug bounty is a significant security gap.
 - **Discrepancy between documentation and on-chain reality** — docs claim "48-hour timelock and multi-sig for upgrades" but on-chain verification shows single EOA owner with no timelock.
 
 ---
@@ -343,7 +343,7 @@ BUCK yield comes from **STRC dividends** — Strategy Inc.'s Variable-Rate Serie
 ### Critical Risk Gates
 
 - [ ] **No audit** → **PASS** (2 public Spearbit audits + 2 claimed audits)
-- [ ] **Unverifiable reserves** → **PARTIAL CONCERN** — USDC reserves verifiable on-chain (~$488K), but STRC holdings (~$500K) are off-chain with only monthly attestation. On-chain component is verifiable, so not an auto-fail, but a significant weakness.
+- [ ] **Unverifiable reserves** → **PARTIAL CONCERN** — USDC reserves verifiable on-chain (~$124K), but STRC holdings (~$1,524K) are off-chain with only monthly attestation. On-chain component is verifiable, so not an auto-fail, but a significant weakness. STRC now represents ~92% of total reserves, increasing off-chain dependency.
 - [x] **Total centralization** → **TRIGGERED** — All contracts controlled by single EOA ([`0x376269214bB78b3D4f31d17600499b439c1aCB4b`](https://etherscan.io/address/0x376269214bB78b3D4f31d17600499b439c1aCB4b)) with no multisig or governance. This meets the critical gate definition: "Controlled by a single EOA with no multisig or governance."
 
 **Critical gate is triggered.** Per the template, this should result in an automatic score of 5. However, as mitigating factors exist (Ownable2Step, production mode enabled, 24h delay on reserve withdrawals), we proceed with category scoring but note the gate trigger.
@@ -356,11 +356,11 @@ BUCK yield comes from **STRC dividends** — Strategy Inc.'s Variable-Rate Serie
 |--------|-----------|
 | Audits | 2 publicly verified Spearbit audits. Cyfrin and Halborn claimed but not publicly accessible. 5 high-severity findings across 2 audits (all resolved). |
 | Bug Bounty | **None** — no program on any platform |
-| Time in Production | ~7 weeks (launched Jan 5, 2026). Extremely early. |
-| TVL | ~$650K total reserves. Negligible by DeFi standards. |
-| Historical Track Record | No incidents, but extremely limited track record. Rewards Engine upgraded 3x in 7 weeks. |
+| Time in Production | ~8 weeks (launched Jan 5, 2026). Extremely early. |
+| TVL | ~$1.6M total reserves. Small by DeFi standards. |
+| Historical Track Record | No incidents, but extremely limited track record. Rewards Engine upgraded 3x in 8 weeks. |
 
-7 weeks in production with ~$650K TVL places this firmly at score 4-5. Two Spearbit audits from a reputable firm prevent it from being a 5. No bug bounty is a significant negative.
+8 weeks in production with ~$1.6M TVL places this firmly at score 4-5. Two Spearbit audits from a reputable firm prevent it from being a 5. No bug bounty is a significant negative.
 
 **Score: 4.0/5**
 
@@ -397,9 +397,9 @@ BUCK yield comes from **STRC dividends** — Strategy Inc.'s Variable-Rate Serie
 
 **Subcategory A: Collateralization — 3.5**
 
-- 1.79x overcollateralization ratio
-- USDC component (~$150K) is on-chain and verifiable
-- STRC component (~$500K) is off-chain — publicly traded equity held in traditional custody
+- 1.69x overcollateralization ratio
+- USDC component (~$124K) is on-chain and verifiable
+- STRC component (~$1,524K) is off-chain — publicly traded equity held in traditional custody
 - Single-asset concentration (STRC) — no diversification
 - STRC is liquid (NASDAQ-traded) but subject to market volatility
 - Fireblocks MPC custody provides institutional-grade security for off-chain assets
@@ -407,7 +407,7 @@ BUCK yield comes from **STRC dividends** — Strategy Inc.'s Variable-Rate Serie
 
 **Subcategory B: Provability — 4.0**
 
-- USDC reserves verifiable on-chain (~$488K in Liquidity Reserve)
+- USDC reserves verifiable on-chain (~$124K in Liquidity Reserve)
 - STRC holdings off-chain, verified only by:
   - Monthly Network Firm attestation (AICPA standards)
   - Single attestor EOA posting values to Collateral Attestation contract
@@ -420,15 +420,15 @@ BUCK yield comes from **STRC dividends** — Strategy Inc.'s Variable-Rate Serie
 
 #### Category 4: Liquidity Risk (Weight: 15%) — **4.5**
 
-- Total permissionless DEX liquidity: ~$115K across Uniswap V2 and Curve pools
-- 24h trading volume: ~$1,142 (extremely thin)
+- Total permissionless DEX liquidity: ~$108K across Uniswap V2 and Curve pools
+- 24h trading volume: highly variable (~$500 to ~$6K) — extremely thin
 - $5K trade = 7.5% slippage on Uniswap V2, ~1-3% on Curve
 - $10K trade = 14% slippage on Uniswap V2
-- Liquidity Window provides best exit (~$488K at ~0.20% cost) but is access-gated and not a contractual right
-- Daily refund cap: ~67K BUCK/day (~$67K). Exiting $500K position: ~8 days minimum.
+- Liquidity Window provides best exit (~$124K at ~0.20% cost) but is access-gated and not a contractual right
+- Daily refund cap: ~49K BUCK/day (~$49K). Exiting $500K position: ~10 days minimum.
 - No CEX listings
-- Both DEX pools deployed by Buck's own deployer — not organic liquidity
-- 188 holders total
+- Both DEX pools deployed by Buck's own team (deployer + treasury) — not organic liquidity
+- 199 holders total
 - Throttle mechanism (+0.5): daily refund caps limit large exits
 
 **Score: 4.5/5**
@@ -437,7 +437,7 @@ BUCK yield comes from **STRC dividends** — Strategy Inc.'s Variable-Rate Serie
 
 - Founder (Travis VanderZanden) is fully doxxed with significant tech industry background, but **previous company Bird had revenue misstatement issues and went bankrupt**
 - VP Engineering (Brett Potter) and Head of Treasury (Dan Hillery) are public
-- GitHub repo has single pseudonymous contributor, no updates in 5+ weeks, sanitized history
+- GitHub repo has single pseudonymous contributor, no updates in 8+ weeks, sanitized history
 - Documentation is adequate but not comprehensive (some pages return 404)
 - Legal structure: BVI issuer explicitly "NOT regulated," Cayman Foundation, US technology entity
 - Structured via Regulation S (excludes US persons)
@@ -482,7 +482,7 @@ The category-weighted score (shown below for reference) would have been 4.22, co
 
 **Final Risk Tier: HIGH RISK — Not recommended**
 
-The protocol's single EOA governance triggered the "Total centralization" critical gate, resulting in an automatic 5.0 score. Additionally, the extremely thin liquidity (~$115K permissionless), very early stage (7 weeks), tiny TVL (~$650K), and off-chain collateral dependency independently confirm the high-risk assessment. **Use as Morpho collateral is NOT recommended** at this stage due to insufficient DEX liquidity for liquidations and critical governance centralization risks.
+The protocol's single EOA governance triggered the "Total centralization" critical gate, resulting in an automatic 5.0 score. Additionally, the extremely thin liquidity (~$108K permissionless), very early stage (8 weeks), and off-chain collateral dependency (~92% STRC) independently confirm the high-risk assessment. **Use as Morpho collateral is NOT recommended** at this stage due to insufficient DEX liquidity for liquidations and critical governance centralization risks.
 
 ---
 
