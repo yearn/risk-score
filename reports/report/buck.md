@@ -286,7 +286,7 @@ BUCK yield comes from **STRC dividends** — Strategy Inc.'s Variable-Rate Serie
 
 ## Operational Risk
 
-- **Founder:** Travis VanderZanden — fully doxxed. Listed as CEO on [buck.io](https://buck.io).
+- **Founder:** Travis VanderZanden — fully doxxed ([LinkedIn](https://www.linkedin.com/in/travis1)). Previously founder/CEO of Bird (electric scooter company). Bird [overstated revenue by ~$31.6M](https://techcrunch.com/2022/11/14/bird-tells-sec-it-overstated-revenue-for-two-years/) (2020–2022 restatement per SEC filing), was delisted from NYSE, and [filed for Chapter 11 bankruptcy](https://techcrunch.com/2023/12/20/bird-bankruptcy/) in December 2023.
 - **VP Engineering:** Brett Potter — previously Senior Blockchain Engineer at Binance.US, Head Developer at friesDAO.
 - **Head of Treasury:** Dan Hillery — founding member of MSTR True North community.
 - **GitHub:** Single pseudonymous contributor (CornBrother0x, 6 commits). "Full git history will be merged in after Buck Labs can properly sanitize the development repo." No updates since January 7, 2026. 2 stars, 0 forks.
@@ -340,7 +340,7 @@ BUCK yield comes from **STRC dividends** — Strategy Inc.'s Variable-Rate Serie
 2. **Extremely thin liquidity** — Only ~$108K permissionless DEX liquidity, highly variable daily volume, no CEX listings
 3. **Very early stage** — 8 weeks in production, 199 holders, ~$1.6M reserves, not on DeFiLlama
 4. **Off-chain collateral** — STRC holdings are off-chain, verified only by monthly Network Firm attestations and single attestor EOA postings
-5. **Founder's track record** — TODO: verify founder's prior company history with sources
+5. **Founder's track record** — Previous company (Bird) [overstated revenue by $31.6M](https://techcrunch.com/2022/11/14/bird-tells-sec-it-overstated-revenue-for-two-years/) and [filed for Chapter 11 bankruptcy](https://techcrunch.com/2023/12/20/bird-bankruptcy/)
 
 ### Critical Risks
 
@@ -454,7 +454,7 @@ BUCK yield comes from **STRC dividends** — Strategy Inc.'s Variable-Rate Serie
 
 #### Category 5: Operational Risk (Weight: 5%) — **3.5**
 
-- Founder (Travis VanderZanden) is fully doxxed, listed as CEO on buck.io
+- Founder (Travis VanderZanden) is fully doxxed. Previous company Bird had [$31.6M revenue overstatement](https://techcrunch.com/2022/11/14/bird-tells-sec-it-overstated-revenue-for-two-years/) and [went bankrupt](https://techcrunch.com/2023/12/20/bird-bankruptcy/)
 - VP Engineering (Brett Potter) and Head of Treasury (Dan Hillery) are public
 - GitHub repo has single pseudonymous contributor, no updates in 8+ weeks, sanitized history
 - Documentation is adequate but not comprehensive (some pages return 404)
