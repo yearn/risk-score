@@ -18,8 +18,6 @@ Spectra Finance (formerly APWine Finance, rebranded July 2023) is a permissionle
 4. At maturity, 1 PT redeems for 1 unit of underlying (unless negative yield occurred)
 5. MetaVaults automate liquidity management across expiring pools
 
-**Use Case Context:** The report is needed for deposits from [Ethstrat ESPN](https://docs.ethstrat.xyz/espn/espn) to a newly deployed, self-curated MetaVault. PT tokens from this MetaVault may be used as collateral on Morpho markets (see [existing PT-cUSD Morpho market](https://app.morpho.org/ethereum/market/0x802ec6e878dc9fe6905b8a0a18962dcca10440a87fa2242fbf4a0461c7b0c789/pt-cusd-29jan2026-usdc) as precedent). Liquidity data will not be available initially for the new deployment.
-
 **Links:**
 
 - [Spectra Documentation](https://docs.spectra.finance/)
@@ -78,7 +76,7 @@ The smart contract architecture involves: PrincipalToken, YieldToken, AMBeacon, 
 
 **Security Incidents:**
 
-1. **Router Exploit (July 23, 2024):** ~168 ETH (~$73K) lost. Arbitrary call vulnerability in the `execute` function's `_dispatch` handler allowed an attacker to drain tokens approved to the router via the `KYBER_SWAP` command type. 4 wallets affected. **Core protocol was unaffected** — only the router contract had the vulnerability. [Post-mortem published](https://mirror.xyz/spectraprotocol.eth/7Y1L_0y8CxA5rkneK5DAUelhb8v3GLEeGbEX39y9790).
+1. **Router Exploit (July 23, 2024):** 168 ETH (~$73K) lost. Arbitrary call vulnerability in the `execute` function's `_dispatch` handler allowed an attacker to drain tokens approved to the router via the `KYBER_SWAP` command type. 4 wallets affected. **Core protocol was unaffected** — only the router contract had the vulnerability. [Post-mortem published](https://mirror.xyz/spectraprotocol.eth/7Y1L_0y8CxA5rkneK5DAUelhb8v3GLEeGbEX39y9790).
 
 2. **APWine Critical Delegation Bug (pre-rebrand):** Discovered by whitehat `setuid0` via Immunefi before exploitation. Incorrect check in PT `beforeTokenTransfer` allowed bypassing delegation amount checks when burning tokens (since `to == address(0)`). Could have enabled yield theft after ~6 months. **$100,000 bounty paid**. Patched before any exploitation.
 
@@ -128,9 +126,9 @@ Spectra itself does not custody or delegate funds — it provides a permissionle
 - Anyone can verify reserves by reading the PrincipalToken contract
 - Revenue: 3% yield fee + 3% points fee to Spectra DAO treasury
 
-## Liquidity Risk
+## Liquidity Riskx
 
-**Note:** The MetaVault is newly deployed and liquidity data will not be available initially. This section assesses structural liquidity characteristics rather than current depth.
+**Note:** When the MetaVault is newly deployed and liquidity data will not be available initially. This section assesses structural liquidity characteristics rather than current depth.
 
 **Spectra PT Exit Mechanisms:**
 
@@ -154,17 +152,16 @@ Spectra itself does not custody or delegate funds — it provides a permissionle
 | Gami Spectra USDC | Base | $637K | Gami Labs |
 | vbUSDC Katana | Katana | $905K | Clearstar |
 
-Both existing MetaVaults are small-scale. No stress-period liquidity data available.
-
 ## Centralization & Control Risks
 
 ### Governance
 
 **Spectra Protocol:**
+
 - **Token:** $SPECTRA with veSPECTRA for governance voting, gauge allocation, and fee sharing
 - **Core contracts** use AMProxyAdmin and AMTransparentUpgradeableProxy — **upgradeable**
 - **AccessManager**: [`0x7EA3097E2AF59eA705398544e0f58EdDb7bd1852`](https://etherscan.io/address/0x7EA3097E2AF59eA705398544e0f58EdDb7bd1852) — central authority controlling upgrade permissions via OpenZeppelin 5.0 AccessManager with 11 defined roles
-- **DAO Multisig**: [`0xDbbfc051D200438dd5847b093B22484B842de9E7`](https://etherscan.io/address/0xDbbfc051D200438dd5847b093B22484B842de9E7) — Gnosis Safe v1.3.0, **3-of-5 threshold**, holds UPGRADE_ROLE (role 1) with **zero execution delay (no timelock)**
+- **DAO Multisig**: [`0xDbbfc051D200438dd5847b093B22484B842de9E7`](https://etherscan.io/address/0xDbbfc051D200438dd5847b093B22484B842de9E7) — Gnosis Safe v1.3.0, **3-of-5 threshold**, holds UPGRADE_ROLE (role 1) without timelock
 - **Signers**: 5 EOAs — [`0x3152D7e6B0eE11F4F945376b269A65A6c883711F`](https://etherscan.io/address/0x3152D7e6B0eE11F4F945376b269A65A6c883711F), [`0x4B05aC062981D229e8a47DDeAf286eAf65FB4ee0`](https://etherscan.io/address/0x4B05aC062981D229e8a47DDeAf286eAf65FB4ee0), [`0x54E939c5134F237510e1a21b0d42a00D70Ab8213`](https://etherscan.io/address/0x54E939c5134F237510e1a21b0d42a00D70Ab8213), [`0x01Aa68b18960109C34644362F9d619517f864489`](https://etherscan.io/address/0x01Aa68b18960109C34644362F9d619517f864489), [`0xA7499Aa6464c078EeB940da2fc95C6aCd010c3Cc`](https://etherscan.io/address/0xA7499Aa6464c078EeB940da2fc95C6aCd010c3Cc). Identities not publicly labeled on Etherscan. No modules or guard set on Safe
 - **Deployer removed**: Original deployer (`0x020d5ca8bd6451d4c44f784e594f02f352903e61`) has been fully removed from all AccessManager roles — positive security practice
 - Revenue sharing: 60% swap fees to veSPECTRA voters, 20% to LPs, 20% to Curve DAO
@@ -206,7 +203,6 @@ Both existing MetaVaults are small-scale. No stress-period liquidity data availa
 | **Curve Finance** | Critical | All PT/IBT trading via Curve AMM pools. Spectra uses `CurveOracleLib` for price data. Curve is battle-tested (since 2020) |
 | **ERC-4626 IBT protocols** | Critical | Spectra markets depend on the security of the underlying vault protocol providing the IBT. If the IBT vault is exploited, PT holders face proportional losses (negative yield) |
 | **Oracles** | Important | Spectra provides three oracle types (Deterministic, TWAP, Hybrid) following Chainlink AggregatorV3Interface. TWAP oracles derive from Curve's `price_oracle()` method |
-| **Amphor** | Important | MetaVault AsyncVault infrastructure. Amphor provides the ERC-7540 implementation |
 
 ## PT Tokens as Morpho Collateral
 
@@ -232,7 +228,6 @@ Spectra provides three oracle types, all implementing Chainlink's `AggregatorV3I
 - **Negative yield risk:** If underlying IBT loses value, PT backing decreases, potentially triggering liquidation
 - **Oracle manipulation:** While hybrid oracles mitigate this, TWAP-based prices can lag during rapid market moves
 - **Liquidity risk for liquidators:** PT liquidity on Curve may be insufficient for large liquidations, especially in new markets
-- **Post-expiry rate freezing:** First caller after expiry triggers `StoreRatesAtExpiry()` — if nobody calls this, rates aren't frozen, which could cause pricing issues
 
 ## Operational Risk
 
@@ -255,7 +250,6 @@ Spectra provides three oracle types, all implementing Chainlink's `AggregatorV3I
 | DAO Multisig (3/5 Safe) | [`0xDbbfc051D200438dd5847b093B22484B842de9E7`](https://etherscan.io/address/0xDbbfc051D200438dd5847b093B22484B842de9E7) | Signer/threshold changes, upgrade transactions |
 | AccessManager | [`0x7EA3097E2AF59eA705398544e0f58EdDb7bd1852`](https://etherscan.io/address/0x7EA3097E2AF59eA705398544e0f58EdDb7bd1852) | Role grants/revocations, target function changes |
 | Registry | [`0x4973b53b300d64ab72147EFF8C9d962f6b1dA02e`](https://etherscan.io/address/0x4973b53b300d64ab72147EFF8C9d962f6b1dA02e) | Implementation upgrades, fee changes |
-| DAO Treasury | [`0xe59d75C87ED608E4f5F22c9f9AFFb7b6fd02cc7C`](https://etherscan.io/address/0xe59d75C87ED608E4f5F22c9f9AFFb7b6fd02cc7C) | Balance changes |
 
 **MetaVault (not yet deployed on Ethereum mainnet):**
 
@@ -277,8 +271,6 @@ Existing MetaVaults are on Base (Gami Spectra USDC) and Katana (vbUSDC). Once de
 - Underlying IBT protocol incidents
 - Spectra core contract upgrades (AMProxyAdmin changes)
 
-**Recommended Frequency:** Daily monitoring, hourly during market stress.
-
 ## Risk Summary
 
 ### Key Strengths
@@ -296,7 +288,7 @@ Existing MetaVaults are on Base (Gami Spectra USDC) and Katana (vbUSDC). Once de
 - **Negative yield risk** — if the underlying IBT vault is exploited, PT holders face proportional losses with no protocol-level backstop
 - **MetaVault curator dependency** — settlement, rollover, and strategy decisions require active manual management. Curator failure can strand assets or delay withdrawals
 - **MetaVault adds async withdrawal layer** — ERC-7540 epoch-based exits add delay on top of any underlying IBT withdrawal mechanism
-- **No timelock on upgrades** — the 3-of-5 DAO multisig can execute contract upgrades immediately via the AccessManager with zero execution delay
+- **No timelock on upgrades** — the 3-of-5 DAO multisig can execute contract upgrades immediately via the AccessManager
 
 ### Critical Risks
 
@@ -306,12 +298,6 @@ Existing MetaVaults are on Base (Gami Spectra USDC) and Katana (vbUSDC). Once de
 ---
 
 ## Risk Score Assessment
-
-**Scoring Guidelines:**
-- Be conservative: when uncertain between two scores, choose the higher (riskier) one
-- Use decimals when a subcategory falls between scores
-- Prioritize on-chain evidence over documentation claims
-- This assessment covers Spectra Finance protocol only — underlying IBT risks should be assessed separately
 
 ### Critical Risk Gates
 
@@ -333,7 +319,7 @@ Existing MetaVaults are on Base (Gami Spectra USDC) and Katana (vbUSDC). Once de
 | Bug bounty | No active ongoing bounty — only completed $40K competition |
 | MetaVaults | Sherlock audit for MetaVaults V1 with 0 highs, but MetaVaults are newer (~2025) with limited production history |
 
-**Score: 2.5/5** — Strong audit coverage with zero high-severity findings across three reputable firms, and ~2 years production track record. The router exploit was contained to a peripheral contract. Penalized for no active bug bounty and MetaVaults being relatively new. TVL (~$40M) is moderate.
+**Score: 3/5** — Strong audit coverage with zero high-severity findings across three reputable firms, and with 2 years production track record. The router exploit was contained to a peripheral contract. Penalized for no active bug bounty and MetaVaults being relatively new. TVL (~$40M) is moderate.
 
 #### Category 2: Centralization & Control Risks (Weight: 30%)
 
@@ -364,11 +350,10 @@ Existing MetaVaults are on Base (Gami Spectra USDC) and Katana (vbUSDC). Once de
 |--------|-----------|
 | Curve Finance | Critical — trading + oracle pricing. Battle-tested (since 2020), blue-chip dependency |
 | ERC-4626 IBTs | Critical — Spectra inherits all risk from underlying IBT protocol |
-| Amphor | Important — MetaVault async infrastructure |
 
-**Subcategory C Score: 2.5/5** — Primary dependency (Curve) is a blue-chip protocol. IBT dependency is by design and curated at the MetaVault level. Amphor adds one more dependency layer.
+**Subcategory C Score: 2/5** — Primary dependency (Curve) is a blue-chip protocol. IBT dependency is by design and curated at the MetaVault level.
 
-**Centralization Score = (2.5 + 2.0 + 2.5) / 3 = 2.33/5**
+**Centralization Score = (2.5 + 2.0 + 2) / 3 = 2.17/5**
 
 **Score: 2.5/5** — Well-structured governance with Zodiac constraints, fully programmatic core, and deployer properly removed. Main concerns are **no timelock on upgrades** (3-of-5 multisig can upgrade immediately), pause authority over user funds, and anonymous signer identities.
 
@@ -392,7 +377,7 @@ Existing MetaVaults are on Base (Gami Spectra USDC) and Katana (vbUSDC). Once de
 | Reporting mechanism | Programmatic, real-time, anyone can verify |
 | Third-party verification | On-chain by design — no off-chain components in core protocol |
 
-**Subcategory B Score: 1.5/5** — Excellent provability. All rates are computed algorithmically on-chain. Anyone can verify PT backing at any time by reading the PrincipalToken contract.
+**Subcategory B Score: 1.5/5** — Good provability. All rates are computed algorithmically on-chain. Anyone can verify PT backing at any time by reading the PrincipalToken contract.
 
 **Funds Management Score = (2.0 + 1.5) / 2 = 1.75/5**
 
@@ -420,7 +405,7 @@ Existing MetaVaults are on Base (Gami Spectra USDC) and Katana (vbUSDC). Once de
 | Incident response | Published post-mortem, paid $100K bounty — proven track record |
 | Legal | Perspective SAS — registered French entity |
 
-**Score: 2.0/5** — Transparent, doxxed team with established reputation and proven incident response. Comprehensive documentation. Clear legal structure. Only gap is relatively modest funding ($3.6M) for a protocol handling $40M+ TVL.
+**Score: 1.5/5** — Transparent, doxxed team with established reputation and proven incident response. Comprehensive documentation. Clear legal structure.
 
 ### Final Score Calculation
 
@@ -430,12 +415,12 @@ Final Score = (Centralization × 0.30) + (Funds Mgmt × 0.30) + (Audits × 0.20)
 
 | Category | Score | Weight | Weighted |
 |----------|-------|--------|----------|
-| Audits & Historical Track Record | 2.5 | 20% | 0.50 |
+| Audits & Historical Track Record | 3.0 | 20% | 0.60 |
 | Centralization & Control | 2.5 | 30% | 0.75 |
 | Funds Management | 1.75 | 30% | 0.525 |
 | Liquidity Risk | 2.5 | 15% | 0.375 |
-| Operational Risk | 2.0 | 5% | 0.10 |
-| **Final Score** | | | **2.25/5.0** |
+| Operational Risk | 1.5 | 5% | 0.075 |
+| **Final Score** | | | **2.33/5.0** |
 
 ### Risk Tier
 
@@ -447,7 +432,7 @@ Final Score = (Centralization × 0.30) + (Funds Mgmt × 0.30) + (Audits × 0.20)
 | 3.5-4.5 | Elevated Risk | Limited approval, strict limits |
 | 4.5-5.0 | High Risk | Not recommended |
 
-**Final Risk Tier: Low Risk (2.25/5.0) — Approved with standard monitoring**
+**Final Risk Tier: Low Risk (2.33/5.0) — Approved with standard monitoring**
 
 **Important caveat:** This score assesses Spectra Finance protocol risk only. The total risk of any MetaVault position includes the underlying IBT risk (assessed separately) which propagates through PT tokens. The overall position risk will be the higher of Spectra's score and the underlying asset's score.
 
@@ -570,10 +555,3 @@ Curators execute via `execTransactionWithRole` through the Zodiac Roles module (
 3. **Liquidation parameters:** Ensure sufficient Curve pool liquidity for liquidator exits
 4. **Maturity alignment:** Match Morpho market duration with PT maturity to avoid forced pre-maturity liquidations
 5. **Post-expiry handling:** Monitor for `StoreRatesAtExpiry()` call — rates must be frozen for accurate post-expiry pricing
-
-## Appendix C: Resolved TODOs
-
-Items that have been verified on-chain:
-
-- [x] **Verify Spectra core ProxyAdmin owner** — Confirmed: 3-of-5 DAO multisig ([`0xDbbfc051D200438dd5847b093B22484B842de9E7`](https://etherscan.io/address/0xDbbfc051D200438dd5847b093B22484B842de9E7)) via AccessManager ([`0x7EA3097E2AF59eA705398544e0f58EdDb7bd1852`](https://etherscan.io/address/0x7EA3097E2AF59eA705398544e0f58EdDb7bd1852)). No timelock. Deployer removed from all roles. 5 EOA signers (not publicly labeled)
-- [x] **Verify ERC-4626 compliance of chosen IBT** — ESPN vault ([`0xb250c9e0f7be4cff13f94374c993ac445a1385fe`](https://etherscan.io/address/0xb250c9e0f7be4cff13f94374c993ac445a1385fe)) is ERC-4626 compliant with USDS as underlying. Already used in a live Spectra PT pool, confirming factory-level ERC-4626 validation passed. Spectra4626Wrapper not needed for this IBT
