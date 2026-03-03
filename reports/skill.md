@@ -14,6 +14,7 @@ Always mark sections as "TODO" if information is unavailable or not found, never
 - LlamaRisk has good reports on the risk of protocols and assets: https://www.llamarisk.com/research
 - When validating protocols, see for info on which focused on protocol decentralization: https://www.defiscan.info/
 - Don't check Safe multisig signers, only specify multisig threshold and number of signers.
+- Always include whole `Risk Tier` table and bold the final risk tier.
 
 ## Monitoring
 

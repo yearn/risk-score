@@ -1,4 +1,4 @@
-# Protocol Risk Assessment: StakedHYPE stHYPE
+# Protocol Risk Assessment: StakedHYPE
 
 - **Assessment Date:** February 18, 2026
 - **Token:** stHYPE

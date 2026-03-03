@@ -1,4 +1,4 @@
-# Protocol Risk Assessment: Reserve Protocol (ETH+)
+# Protocol Risk Assessment: Reserve Protocol
 
 - **Assessment Date:** December 22, 2025
 - **Token:** ETH+

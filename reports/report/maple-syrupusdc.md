@@ -1,4 +1,4 @@
-# Protocol Risk Assessment: Maple Finance (syrupUSDC)
+# Protocol Risk Assessment: Maple Finance
 
 - **Assessment Date:** February 17, 2026
 - **Token:** syrupUSDC

@@ -1,4 +1,4 @@
-# Protocol Risk Assessment: Resolv wstUSR (Wrapped Staked USR)
+# Protocol Risk Assessment: Resolv wstUSR
 
 - **Assessment Date:** February 9, 2026
 - **Token:** wstUSR (Wrapped Staked USR)
