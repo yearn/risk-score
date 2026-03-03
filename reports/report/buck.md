@@ -17,7 +17,7 @@ BUCK is **not a stablecoin** — its price appreciates over time as yield accrue
 - **Current Price:** ~$1.00
 - **Total Supply:** ~976,245 BUCK
 - **Total Holders:** 199
-- **Total Reserves:** ~$1,648K ($124K USDC + $1,524K STRC)
+- **Total Reserves:** ~$1.65M ($124K USDC + $1.52M STRC)
 - **Reserve Ratio:** 1.69x
 - **Current APY:** ~10% (raised from 7% in February 2026)
 - **Not listed on DeFiLlama**
@@ -94,7 +94,7 @@ BUCK is **not** listed on the SEAL Safe Harbor registry.
 
 - **Launch Date:** January 5, 2026 (~8 weeks in production)
 - **Smart Contract Exploits:** None to date
-- **TVL:** ~$1,648K total reserves ($124K USDC + $1,524K STRC). Not listed on DeFiLlama.
+- **TVL:** ~$1.65M total reserves ($124K USDC + $1.52M STRC). Not listed on DeFiLlama.
 - **Holder Distribution:** 199 holders. Very small holder base for a protocol managing ~$1.6M in reserves.
 - **Peg Behavior:** BUCK is not pegged — it is designed to appreciate as yield accrues. Price started at $1.00, currently ~$1.00 (early in yield cycle, first distribution was February 2026).
 - **Incidents:** None reported in the 8 weeks since launch.
@@ -133,7 +133,7 @@ BUCK yield comes from **STRC dividends** — Strategy Inc.'s Variable-Rate Serie
 
 ### Collateralization
 
-- **Total Reserves:** ~$1,648K ($124K USDC + $1,524K STRC)
+- **Total Reserves:** ~$1.65M ($124K USDC + $1.52M STRC)
 - **BUCK in Circulation:** ~647K tokens (total supply ~976K minus ~329K in Treasury)
 - **Reserve Ratio:** 1.69x (overcollateralized)
 - **Collateral Composition:** STRC preferred equity (~92%) + USDC (~8%)
@@ -343,7 +343,7 @@ BUCK yield comes from **STRC dividends** — Strategy Inc.'s Variable-Rate Serie
 ### Critical Risk Gates
 
 - [ ] **No audit** → **PASS** (2 public Spearbit audits + 2 claimed audits)
-- [ ] **Unverifiable reserves** → **PARTIAL CONCERN** — USDC reserves verifiable on-chain (~$124K), but STRC holdings (~$1,524K) are off-chain with only monthly attestation. On-chain component is verifiable, so not an auto-fail, but a significant weakness. STRC now represents ~92% of total reserves, increasing off-chain dependency.
+- [ ] **Unverifiable reserves** → **PARTIAL CONCERN** — USDC reserves verifiable on-chain (~$124K), but STRC holdings (~$1.52M) are off-chain with only monthly attestation. On-chain component is verifiable, so not an auto-fail, but a significant weakness. STRC now represents ~92% of total reserves, increasing off-chain dependency.
 - [x] **Total centralization** → **TRIGGERED** — All contracts controlled by single EOA ([`0x376269214bB78b3D4f31d17600499b439c1aCB4b`](https://etherscan.io/address/0x376269214bB78b3D4f31d17600499b439c1aCB4b)) with no multisig or governance. This meets the critical gate definition: "Controlled by a single EOA with no multisig or governance."
 
 **Critical gate is triggered.** Per the template, this should result in an automatic score of 5. However, as mitigating factors exist (Ownable2Step, production mode enabled, 24h delay on reserve withdrawals), we proceed with category scoring but note the gate trigger.
@@ -399,7 +399,7 @@ BUCK yield comes from **STRC dividends** — Strategy Inc.'s Variable-Rate Serie
 
 - 1.69x overcollateralization ratio
 - USDC component (~$124K) is on-chain and verifiable
-- STRC component (~$1,524K) is off-chain — publicly traded equity held in traditional custody
+- STRC component (~$1.52M) is off-chain — publicly traded equity held in traditional custody
 - Single-asset concentration (STRC) — no diversification
 - STRC is liquid (NASDAQ-traded) but subject to market volatility
 - Fireblocks MPC custody provides institutional-grade security for off-chain assets
