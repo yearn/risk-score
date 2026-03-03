@@ -58,6 +58,16 @@ if (!report) return Astro.redirect("/");
     <h2>Risk Summary</h2>
     <div class="prose" set:html={report.riskSummaryHtml} />
   </section>
+
+  <details class="full-report">
+    <summary class="full-report-toggle">
+      <span>Full Report</span>
+      <svg class="chevron" width="20" height="20" viewBox="0 0 20 20" fill="none">
+        <path d="M6 8l4 4 4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </summary>
+    <div class="prose" set:html={report.fullReportHtml} />
+  </details>
 </BaseLayout>
 
 <style>
@@ -118,6 +128,42 @@ if (!report) return Astro.redirect("/");
     margin-bottom: 1rem;
     padding-bottom: 0.5rem;
     border-bottom: 1px solid var(--border);
+  }
+  .full-report {
+    margin-bottom: 2.5rem;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+  }
+  .full-report-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.75rem 1rem;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    list-style: none;
+    user-select: none;
+    color: var(--text-primary);
+    background: var(--bg-secondary);
+    border-radius: 8px;
+  }
+  .full-report[open] .full-report-toggle {
+    border-radius: 8px 8px 0 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .full-report-toggle::-webkit-details-marker {
+    display: none;
+  }
+  .full-report-toggle .chevron {
+    transition: transform 0.2s ease;
+    flex-shrink: 0;
+  }
+  .full-report[open] .full-report-toggle .chevron {
+    transform: rotate(180deg);
+  }
+  .full-report > .prose {
+    padding: 1.25rem;
   }
   .prose :global(p) {
     margin-bottom: 0.75rem;
