@@ -23,6 +23,7 @@ export interface ReportData extends ReportMeta {
   overviewHtml: string;
   scoreTable: CategoryScore[];
   riskSummaryHtml: string;
+  fullReportHtml: string;
 }
 
 const TYPE_OVERRIDES: Record<string, "Protocol" | "Asset"> = {
@@ -168,17 +169,32 @@ function parseScoreTable(content: string): CategoryScore[] {
   return categories;
 }
 
+function extractFullBody(content: string): string {
+  const sections = content.split(/(?=^## )/m);
+  const skipHeadings = [
+    "Overview + Links",
+    "Risk Summary",
+    "Risk Score Assessment",
+  ];
+  const bodySections = sections
+    .slice(1) // skip title/metadata block
+    .filter((s) => !skipHeadings.some((h) => s.startsWith(`## ${h}`)));
+  return bodySections.join("\n").trim();
+}
+
 export function parseReport(slug: string, content: string): ReportData {
   const meta = parseMeta(slug, content);
 
   const overviewMd = extractSection(content, "Overview + Links");
   const riskSummaryMd = extractSection(content, "Risk Summary");
   const scoreTable = parseScoreTable(content);
+  const fullBodyMd = extractFullBody(content);
 
   return {
     ...meta,
     overviewHtml: marked.parse(overviewMd, { async: false }) as string,
     scoreTable,
     riskSummaryHtml: marked.parse(riskSummaryMd, { async: false }) as string,
+    fullReportHtml: marked.parse(fullBodyMd, { async: false }) as string,
   };
 }
