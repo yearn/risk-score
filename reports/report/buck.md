@@ -108,7 +108,6 @@ BUCK yield comes from **STRC dividends** — Strategy Inc.'s Variable-Rate Serie
 - STRC pays monthly cash dividends at initially 9.0% per year on $100 par value
 - Strategy Inc. holds 700,000+ BTC (~$60B+) on its balance sheet
 - STRC has preferred creditor status — dividends must be paid before common dividends
-- Per documentation, Strategy's cash reserves cover "77.4 years of dividend payments"
 - Yield is distributed to BUCK holders on the 4th business day of each month via the Rewards Engine contract
 
 **Current APY:** ~10% (raised from 7% in February 2026)
