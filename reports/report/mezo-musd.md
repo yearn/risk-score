@@ -1,5 +1,7 @@
 # Protocol Risk Assessment: Mezo MUSD
 
+**Report Date:** March 4, 2026
+
 ## Overview + Links
 
 Mezo is a Bitcoin-focused Layer-1 appchain (EVM-compatible, Cosmos SDK-based) described as "the onchain Bitcoin banking platform." MUSD is Mezo's native stablecoin, a **Liquity V1 fork** that allows users to borrow MUSD against BTC collateral (via tBTC) through a CDP (Collateralized Debt Position) model. Each MUSD is fully backed by Bitcoin and can be redeemed for BTC at face value.
@@ -54,7 +56,8 @@ The protocol is built by **Thesis**, the crypto venture studio that previously b
 - Name: Mezo USD
 - Symbol: MUSD
 - Decimals: 18
-- Total Supply on Ethereum: ~2,571,721 MUSD (as of 2026-02-13)
+- Total Supply on Ethereum: ~1,944,832 MUSD (as of 2026-03-04)
+- Circulating Supply: ~18,631,567 MUSD (across all chains)
 - Owner: Mezo Multisig (5/9)
 
 **Mezo Multisig Signers (5/9):**
@@ -127,18 +130,20 @@ Moderate complexity. The core CDP logic follows Liquity V1's proven architecture
 
 ## Historical Track Record
 
-- **Production History**: Mezo Borrow (MUSD) first appears on DeFiLlama on 2026-01-20. The Mezo chain launched earlier with bridge functionality. MUSD has been live for approximately **3-4 weeks** at time of assessment.
-- **TVL**: Mezo Borrow TVL is ~$19.6M (2026-02-13). Mezo Bridge TVL is ~$43.6M.
-- **MUSD Supply on Ethereum**: ~2,571,721 MUSD bridged to Ethereum.
+- **Production History**: Mezo Borrow (MUSD) first appears on DeFiLlama on 2026-01-20. The Mezo chain launched earlier with bridge functionality. MUSD has been live for approximately **6 weeks** at time of assessment.
+- **TVL**: Mezo Borrow TVL is ~$20.03M (2026-03-04). Mezo Bridge TVL is ~$43.6M.
+- **MUSD Supply on Ethereum**: ~1,944,832 MUSD bridged to Ethereum (decreased from ~2.57M in February, indicating net outflows).
+- **Market Cap**: ~$18.5M circulating market cap (CoinGecko).
 - **Incidents**: No reported security incidents or exploits found for Mezo or MUSD.
-- **Peg Stability** (CoinGecko data, 2025-08-14 to 2026-02-12):
-  - Mean price: $0.9945
-  - Min: $0.9794 (-2.06% from peg)
-  - Max: $1.0472 (+4.72% from peg)
-  - Standard deviation: $0.0089
-  - Notable depeg events: Brief upward deviations to $1.032 (Aug 2025) and $1.047 (Oct 2025).
-  - Recent trend: Consistently trading at $0.988-0.993 (slight discount).
-- **Concentration Risk**: With only ~$2.6M MUSD on Ethereum and $19.6M TVL on Mezo chain, the user base is likely concentrated among early adopters.
+- **Peg Stability** (CoinGecko data, 2025-08-14 to 2026-03-04):
+  - Current price: ~$0.995 (slight discount to peg)
+  - Mean price: ~$0.995
+  - Min: $0.964 (-3.6% from peg)
+  - Max: $1.055 (+5.5% from peg)
+  - ATH: $1.055 (Oct 2025)
+  - ATL: $0.964 (Nov 2025)
+  - Recent trend: Trading at slight discount ($0.993-$0.998).
+- **Concentration Risk**: With ~$1.94M MUSD on Ethereum and ~$20M TVL on Mezo chain, the user base is likely concentrated among early adopters.
 
 ## Funds Management
 
@@ -181,25 +186,26 @@ MUSD operates as a CDP stablecoin — it does **not** delegate funds to other pr
 
 ### On-Chain Liquidity (Ethereum)
 
-| Pool | Platform | TVL | MUSD Share | Notes |
-|------|----------|-----|------------|-------|
-| MUSD/2pool | Curve | ~$1,258,148 | 77.0% | Metapool with USDC/USDT |
-| OUSD/MUSD | Curve | ~$116,224 | 79.4% | Imbalanced toward MUSD |
-| USDC/MUSD | Uniswap V3 | ~$646,755 | 62.0% | |
-| USDC/MUSD | Uniswap V4 | ~$592,000 | — | Per DeFiLlama |
-| tBTC/MUSD | Uniswap V4 | ~$336,000 | — | Per DeFiLlama |
-| **Total** | | **~$2,949,000** | | |
+| Pool | Platform | Address | TVL | MUSD Share | Notes |
+|------|----------|---------|-----|------------|-------|
+| MUSD/crv2pool | Curve | [`0xB5571E76693ba60110B5811DD650FFefce1C955f`](https://etherscan.io/address/0xB5571E76693ba60110B5811DD650FFefce1C955f) | ~$1,183,706 | 71.4% | MUSD is quote token; imbalanced toward MUSD |
+| MUSD/USDC | Uniswap V4 | [`0xa9bf5691768ef950a99efd74d722961ff2df3fec`](https://etherscan.io/address/0xa9bf5691768ef950a99efd74d722961ff2df3fec) | ~$925,511 | 52.0% | Primary MUSD/USDC pair |
+| MUSD/USDC | Uniswap V3 | [`0x748C05B80d07de9692d976bd3173F301356aB945`](https://etherscan.io/address/0x748C05B80d07de9692d976bd3173F301356aB945) | ~$644,148 | 61.6% | Secondary MUSD/USDC pair |
+| MUSD/tBTC | Uniswap V4 | [`0x0dd11e1def156d20c60de1e7b4f7f4268c411ee9`](https://etherscan.io/address/0x0dd11e1def156d20c60de1e7b4f7f4268c411ee9) | ~$304,139 | ~53.0% | MUSD/tBTC pair |
+| OUSD/MUSD | Curve | [`0x23b78Dc3b1b0A27f3838219e97d806Aae377a1b2`](https://etherscan.io/address/0x23b78Dc3b1b0A27f3838219e97d806Aae377a1b2) | ~$202,511 | 81.5% | Imbalanced toward MUSD |
+| **Total** | | | **~$3,260,000** | | |
 
-**24h Trading Volume**: ~$514,000 (CoinGecko)
+**24h Trading Volume**: ~$739,543 (CoinGecko, 2026-03-04)
 
 ### Liquidity Assessment
 
-- **Total DEX liquidity**: ~$2.95M across Ethereum DEXes.
-- **Pool imbalance**: MUSD is the majority asset in both Curve pools (77% and 79.4%), indicating selling pressure or insufficient demand-side liquidity.
+- **Total DEX liquidity**: ~$3.26M across Ethereum DEXes.
+- **Pool imbalance**: MUSD is the majority asset in both Curve pools (71-82%), indicating selling pressure or insufficient demand-side liquidity.
 - **Slippage**: For a $100K MUSD→USDC swap, expect >2-3% slippage given pool depths and imbalances.
 - **Redemption mechanism**: On the Mezo chain, MUSD can be redeemed 1:1 for BTC collateral (minus 0.75% fee). This is the primary exit path. On Ethereum, exit requires either DEX swap or bridging back to Mezo for redemption.
 - **No withdrawal queues**: Liquity-style redemptions are instant against troves.
 - **Bridge dependency**: Exiting via redemption requires bridging MUSD back to Mezo chain (Wormhole NTT), adding latency and bridge risk.
+- **Supply trend**: MUSD on Ethereum decreased from ~2.57M to ~1.94M over 3 weeks (~24% decrease), suggesting net bridge outflows.
 
 ## Centralization & Control Risks
 
@@ -290,10 +296,11 @@ MUSD operates as a CDP stablecoin — it does **not** delegate funds to other pr
 
 ### Key Risks
 
-- **Very new protocol**: MUSD has been live for only ~3-4 weeks. Extremely limited production track record
+- **Very new protocol**: MUSD has been live for only ~6 weeks. Limited production track record.
 - **Chain risk**: Mezo is a new L1 — chain stability, validator decentralization, and liveness are unproven
 - **Double bridge risk**: MUSD on Ethereum depends on both tBTC (BTC→Mezo bridge) and Wormhole NTT (Mezo→Ethereum bridge)
-- **Limited liquidity**: Only ~$2.95M DEX liquidity on Ethereum with significant pool imbalances (MUSD is 77-79% of Curve pools)
+- **Limited liquidity**: ~$3.26M DEX liquidity on Ethereum with significant pool imbalances (MUSD is 71-82% of Curve pools)
+- **Net outflows**: MUSD supply on Ethereum decreased 24% over 3 weeks, indicating bridge outflows
 - **No bug bounty**: No formal bug bounty program with defined payouts
 - **Single audit for MUSD**: Only one independent audit (Cantina, April 2025). "Thesis Defense" audits are from an affiliated entity
 
@@ -326,8 +333,8 @@ MUSD operates as a CDP stablecoin — it does **not** delegate funds to other pr
 
 - **Audits**: 1 independent MUSD audit (Cantina). Multiple bridge/chain audits (Halborn, OtterSec). Base code (Liquity V1) has 3+ audits from top firms. However, MUSD modifications only have 1 independent audit.
 - **Bug Bounty**: No formal bug bounty — just a security email contact.
-- **Time in Production**: ~3-4 weeks for MUSD. The base Liquity V1 code has been live 4+ years.
-- **TVL**: ~$19.6M on Mezo chain. ~$2.6M MUSD on Ethereum.
+- **Time in Production**: ~6 weeks for MUSD. The base Liquity V1 code has been live 4+ years.
+- **TVL**: ~$20.03M on Mezo chain. ~$1.94M MUSD on Ethereum.
 
 Liquity V1's extensive audit history and 4+ year track record is a strong positive, but MUSD's own modifications have only 1 independent audit, no bug bounty, and extremely limited production time. The very short track record and lack of bug bounty push this toward a higher score.
 
@@ -392,11 +399,12 @@ Liquity V1's extensive audit history and 4+ year track record is a strong positi
 
 #### Category 4: Liquidity Risk (Weight: 15%)
 
-- **DEX Liquidity**: ~$2.95M total across Ethereum DEXes
-- **Pool Imbalance**: MUSD is 77-79% of Curve pools (significant imbalance indicating selling pressure)
+- **DEX Liquidity**: ~$3.26M total across Ethereum DEXes
+- **Pool Imbalance**: MUSD is 71-82% of Curve pools (significant imbalance indicating selling pressure)
 - **Redemption**: Can redeem 1:1 for BTC on Mezo chain (minus 0.75% fee), but requires bridging back
 - **Slippage**: >2-3% for $100K+ swaps on Ethereum
-- **24h Volume**: ~$514K
+- **24h Volume**: ~$740K
+- **Supply Trend**: MUSD on Ethereum decreased 24% over 3 weeks (net outflows)
 
 The primary exit mechanism (Liquity redemption) works well but requires bridging back to Mezo. DEX liquidity on Ethereum is limited with significant pool imbalances.
 
@@ -444,9 +452,13 @@ The protocol benefits from a battle-tested Liquity V1 codebase and an experience
 
 ## Reassessment Triggers
 
-- **Time-based**: Reassess in 3 months (May 2026) — the protocol needs more production time
+- **Time-based**: Reassess in 3 months (June 2026) — the protocol needs more production time
 - **TVL-based**: Reassess if MUSD supply on Ethereum grows above $10M or drops below $1M
 - **Liquidity-based**: Reassess if Ethereum DEX liquidity drops below $1M or Curve pool imbalances exceed 85%
 - **Incident-based**: Reassess after any exploit, bridge pause, Mezo chain downtime, or significant peg deviation (>5%)
 - **Governance-based**: Reassess if multisig threshold or signers change, or if a timelock is added
 - **Audit-based**: Reassess when additional independent audits are completed or a formal bug bounty is launched
+
+---
+
+*Last verified: March 4, 2026*
