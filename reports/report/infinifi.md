@@ -1,5 +1,11 @@
 # Protocol Risk Assessment: InfiniFi
 
+- **Assessment Date:** February 12, 2026
+- **Token:** siUSD (Staked iUSD)
+- **Chain:** Ethereum Mainnet
+- **Token Address:** [`0xDBDC1Ef57537E34680B898E1FEBD3D68c7389bCB`](https://etherscan.io/address/0xDBDC1Ef57537E34680B898E1FEBD3D68c7389bCB)
+- **Final Score: 2.8/5.0**
+
 ## Overview + Links
 
 InfiniFi is a stablecoin protocol that allows users to deposit assets (USDC, USDT, USDe, sUSDe) to mint iUSD, a stablecoin pegged to the US Dollar. The protocol automatically deploys deposited collateral into various DeFi yield strategies including liquid farms (Aave, Fluid, Euler, Spark) and illiquid farms (Pendle, Ethena, Gauntlet Frontier, Reservoir wsrUSD, Fasanara Genesis Fund, Tokemak autoUSD). See Appendix A for detailed analysis of high-risk farm deployments.

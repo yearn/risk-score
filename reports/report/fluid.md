@@ -1,4 +1,10 @@
-# Protocol Risk Assessment: Fluid Lending Protocol (fTokens)
+# Protocol Risk Assessment: Fluid Lending Protocol
+
+- **Assessment Date:** February 12, 2026
+- **Token:** fTokens (fUSDC, fUSDT, fWETH)
+- **Chain:** Ethereum Mainnet
+- **Token Address:** [`0x9Fb7b4477576Fe5B32be4C1843aFB1e55F251B33`](https://etherscan.io/address/0x9Fb7b4477576Fe5B32be4C1843aFB1e55F251B33) (fUSDC)
+- **Final Score: 1.1/5.0**
 
 ## Overview + Links
 
