@@ -1,6 +1,10 @@
 # Protocol Risk Assessment: Mezo MUSD
 
-**Report Date:** March 4, 2026
+- **Assessment Date:** March 4, 2026
+- **Token:** MUSD
+- **Chain:** Ethereum (bridged from Mezo chain via Wormhole NTT)
+- **Token Address:** [`0xdD468A1DDc392dcdbEf6db6e34E89AA338F9F186`](https://etherscan.io/address/0xdD468A1DDc392dcdbEf6db6e34E89AA338F9F186)
+- **Final Score: 3.0/5.0**
 
 ## Overview + Links
 
