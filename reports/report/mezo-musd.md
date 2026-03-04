@@ -37,6 +37,8 @@ The protocol is built by **Thesis**, the crypto venture studio that previously b
 | DefaultPool | [`0xE4B5913C0c82dB2eFC553b95c0173efb90a07c8B`](https://explorer.mezo.org/address/0xE4B5913C0c82dB2eFC553b95c0173efb90a07c8B) |
 | CollSurplusPool | [`0xBF51807ACb3394B8550f0554FB9098856Ef5F491`](https://explorer.mezo.org/address/0xBF51807ACb3394B8550f0554FB9098856Ef5F491) |
 | GasPool | [`0x3EB418BdBE95b4b9cf465ecfBD8424685ACD1Bc1`](https://explorer.mezo.org/address/0x3EB418BdBE95b4b9cf465ecfBD8424685ACD1Bc1) |
+| PriceFeed (proxy) | [`0xc5aC5A8892230E0A3e1c473881A2de7353fFcA88`](https://explorer.mezo.org/address/0xc5aC5A8892230E0A3e1c473881A2de7353fFcA88) |
+| Price Oracle Precompile | [`0x7b7c000000000000000000000000000000000015`](https://explorer.mezo.org/address/0x7b7c000000000000000000000000000000000015) |
 
 ### Ethereum Mainnet
 
@@ -171,7 +173,7 @@ MUSD operates as a CDP stablecoin — it does **not** delegate funds to other pr
 
 - **On-chain Verification**: Collateral is held in on-chain pool contracts on the Mezo chain (ActivePool, DefaultPool). Anyone can verify total collateral and total debt.
 - **No Exchange Rate**: MUSD targets 1:1 USD peg through arbitrage mechanics (not an exchange-rate model). No PPS/rate calculations needed.
-- **Oracle**: BTC/USD price feed (likely Chainlink-based per the PriceFeed.sol interface) is used for collateral ratio calculations.
+- **Oracle**: BTC/USD price feed powered by [**Skip Connect**](https://docs.skip.build/connect/introduction) (formerly Slinky), a consensus-level oracle built on Cosmos SDK's ABCI++ vote extensions. Each Mezo validator runs a Skip Connect sidecar that pulls prices from 9 CEXs (Binance, Bybit, Coinbase, Huobi, Kraken, KuCoin, MEXC, OKX, Crypto.com), aggregated via stake-weighted median. The oracle is exposed to EVM contracts via a precompile at [`0x7b7c000000000000000000000000000000000015`](https://explorer.mezo.org/address/0x7b7c000000000000000000000000000000000015) implementing the Chainlink AggregatorV3 interface for compatibility. The MUSD PriceFeed contract ([`0xc5aC5A8892230E0A3e1c473881A2de7353fFcA88`](https://explorer.mezo.org/address/0xc5aC5A8892230E0A3e1c473881A2de7353fFcA88)) consumes this precompile with a 60-second staleness check. Prices are updated every block as part of consensus, requiring a minimum of 3 providers to report.
 - **tBTC Proof of Reserves**: Available at [tbtcscan.com/wallets](https://tbtcscan.com/wallets) for verifying BTC backing of tBTC itself.
 - **Cross-chain Complexity**: Verifying MUSD backing requires checking the Mezo chain, not Ethereum. On Ethereum, MUSD is purely a bridged token — its backing exists on the Mezo chain.
 
@@ -240,7 +242,7 @@ MUSD operates as a CDP stablecoin — it does **not** delegate funds to other pr
 | **tBTC (Threshold Network)** | Critical — sole collateral type | Medium. Decentralized Bitcoin bridge with 6+ years of operation, but adds bridge risk layer |
 | **Wormhole NTT** | Critical — only bridge for MUSD to Ethereum | Medium. Wormhole is a major bridge protocol with 19 guardians, but has had a $320M exploit in Feb 2022 (on a different product) |
 | **Mezo Chain** | Critical — MUSD is minted here | High. New L1 chain with limited track record |
-| **BTC/USD Oracle** | Critical — used for collateral ratio calculations | Medium. Likely Chainlink-based |
+| **BTC/USD Oracle** | Critical — used for collateral ratio calculations | Medium. [Skip Connect](https://docs.skip.build/connect/introduction) consensus-level oracle via validator vote extensions, aggregating prices from 9 CEXs. Uses a Chainlink AggregatorV3-compatible precompile ([`0x7b7c000000000000000000000000000000000015`](https://explorer.mezo.org/address/0x7b7c000000000000000000000000000000000015)) |
 
 ## Operational Risk
 
@@ -356,7 +358,7 @@ Liquity V1's extensive audit history and 4+ year track record is a strong positi
 - tBTC (critical — sole collateral)
 - Wormhole NTT (critical — only Ethereum bridge)
 - Mezo chain (critical — where collateral lives)
-- BTC/USD oracle (critical — collateral ratio calculation)
+- BTC/USD oracle via [Skip Connect](https://docs.skip.build/connect/introduction) (critical — collateral ratio calculation)
 
 **Dependencies Score: 4/5** - Multiple critical dependencies, each of which is a potential single point of failure for Ethereum MUSD holders.
 
