@@ -105,7 +105,6 @@ Superstate is **not** listed on the SEAL Safe Harbor registry. This is typical f
   - Mar 2026: ~$650M+ total AUM, ~$572M on-chain TVL (DeFiLlama)
 - **Holder Distribution:** ~70 on-chain holders on Ethereum. Top 10 holders hold ~83.5% of supply. This concentration is expected for an institutional-grade permissioned fund. Top holders include EOAs (institutional investors) and smart contracts (DeFi integrations).
 - **Incidents:** None. No hacks, exploits, or adverse events involving Superstate or USTB.
-- **Compound Lawsuit (indirect):** Co-founder Robert Leshner faces a pending securities class action ([Houghton et al v. Leshner et al](https://www.courtlistener.com/docket/66623711/houghton-v-leshner/), Case No. 3:22-cv-07781, N.D. Cal.) related to Compound Labs (COMP token classification as [unregistered securities](https://blockworks.co/news/securities-lawsuit-against-compound)). Jury trial set for May 2026. This is Compound-specific and does not directly involve Superstate.
 
 ## Funds Management
 
@@ -471,7 +470,6 @@ USTB benefits from the safest possible underlying asset class (U.S. Treasury Bil
 - **Incident-based:** Reassess after any exploit, admin key compromise, contract upgrade, governance change, or regulatory action
 - **Governance-based:** Reassess if Superstate adopts multisig, timelock, or other governance improvements (potential score improvement)
 - **Regulatory-based:** Reassess if SEC takes enforcement action or Superstate's regulatory status changes (transfer agent, ERA)
-- **Compound lawsuit:** Reassess if the Compound securities class action ruling creates material impact on Superstate's leadership
 
 ---
 
