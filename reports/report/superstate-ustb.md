@@ -4,7 +4,7 @@
 - **Token:** USTB
 - **Chain:** Ethereum
 - **Token Address:** [`0x43415eB6ff9DB7E26A15b704e7A3eDCe97d31C4e`](https://etherscan.io/address/0x43415eB6ff9DB7E26A15b704e7A3eDCe97d31C4e)
-- **Final Score: 2.23/5.0**
+- **Final Score: 2.38/5.0**
 
 ## Overview + Links
 
@@ -148,7 +148,7 @@ The fund uses a **laddered approach** with holdings spread across various near-t
   - Annual audit by Ernst & Young
   - Chainlink Proof of Reserves was in development (per LlamaRisk, Oct 2024)
   - Redundant record-keeping across fund calculation agent, internal records, and on-chain records
-- **Reserve Transparency:** USTB publishes daily NAV and transparent holdings via the Superstate website and investor portal. The fund is structured under SEC exemptions with regulatory reporting requirements.
+- **Reserve Transparency:** USTB publishes headline NAV, AUM, and yield data publicly on [superstate.com/assets/ustb](https://superstate.com/assets/ustb). However, granular portfolio holdings (specific T-Bill CUSIPs, maturities, allocations) are only accessible through the authenticated investor portal (requires Qualified Purchaser onboarding and 2FA). The fund is structured under SEC exemptions with regulatory reporting requirements.
 
 ## Liquidity Risk
 
@@ -360,7 +360,7 @@ Great audit coverage (11 audits + formal verification) is among the strongest in
 
 **Score: (4.0 + 2.0 + 2.0) / 3 = 2.67 → 3.0/5** — Rounded up to 3.0 due to the severity of the EOA-with-no-timelock governance issue, which is the dominant risk factor. While external dependencies and programmability are strong, the governance centralization drags the overall category.
 
-#### Category 3: Funds Management (Weight: 30%) — **1.75**
+#### Category 3: Funds Management (Weight: 30%) — **2.25**
 
 **Subcategory A: Collateralization — 1.5**
 
@@ -371,19 +371,20 @@ Great audit coverage (11 audits + formal verification) is among the strongest in
 - At least 95% in Treasuries, up to 5% cash for liquidity
 - Virtually zero credit risk on the underlying assets
 
-**Subcategory B: Provability — 2.0**
+**Subcategory B: Provability — 3.0**
 
 - NAV calculated independently by NAV Consulting/NAV Fund Services (third party)
 - Annual audit by Ernst & Young
 - Chainlink NAV/Share feed provides independent on-chain pricing
 - Superstate Continuous Price Oracle provides real-time extrapolation
-- Daily NAV and holdings published via website/investor portal
+- Headline NAV, AUM, and yield publicly visible on [superstate.com/assets/ustb](https://superstate.com/assets/ustb)
+- Granular portfolio holdings (T-Bill CUSIPs, maturities) gated behind authenticated investor portal — not publicly accessible
 - SEC regulatory reporting requirements
 - Redundant record-keeping: fund agent records + internal records + on-chain records
 - However: underlying Treasury holdings are off-chain and cannot be independently verified on-chain by token holders
 - Chainlink Proof of Reserves was in development (per LlamaRisk, Oct 2024) but not yet confirmed live
 
-**Score: (1.5 + 2.0) / 2 = 1.75/5** — The safest possible underlying asset (U.S. Treasuries) with institutional-grade custody and independent verification layers. Off-chain holdings prevent on-chain verifiability but multiple independent parties provide oversight.
+**Score: (1.5 + 3.0) / 2 = 2.25/5** — The safest possible underlying asset (U.S. Treasuries) with institutional-grade custody. However, significant off-chain dependencies: portfolio holdings are not publicly verifiable (gated investor portal), NAV relies on off-chain calculation agents, and Chainlink Proof of Reserves is not yet live. Multiple independent parties provide oversight but the lack of public transparency on actual holdings is a material weakness.
 
 #### Category 4: Liquidity Risk (Weight: 15%) — **3.0**
 
@@ -417,20 +418,20 @@ Great audit coverage (11 audits + formal verification) is among the strongest in
 
 ```
 Final Score = (Audits × 0.20) + (Centralization × 0.30) + (Funds Mgmt × 0.30) + (Liquidity × 0.15) + (Operational × 0.05)
-            = (1.5 × 0.20) + (3.0 × 0.30) + (1.75 × 0.30) + (3.0 × 0.15) + (1.0 × 0.05)
-            = 0.30 + 0.90 + 0.525 + 0.45 + 0.05
-            = 2.225
-            ≈ 2.23
+            = (1.5 × 0.20) + (3.0 × 0.30) + (2.25 × 0.30) + (3.0 × 0.15) + (1.0 × 0.05)
+            = 0.30 + 0.90 + 0.675 + 0.45 + 0.05
+            = 2.375
+            ≈ 2.38
 ```
 
 | Category | Score | Weight | Weighted |
 |----------|-------|--------|----------|
 | Audits & Historical | 1.5 | 20% | 0.30 |
 | Centralization & Control | 3.0 | 30% | 0.90 |
-| Funds Management | 1.75 | 30% | 0.525 |
+| Funds Management | 2.25 | 30% | 0.675 |
 | Liquidity Risk | 3.0 | 15% | 0.45 |
 | Operational Risk | 1.0 | 5% | 0.05 |
-| **Final Score** | | | **2.23 / 5.0** |
+| **Final Score** | | | **2.38 / 5.0** |
 
 ### Risk Tier
 
@@ -444,7 +445,7 @@ Final Score = (Audits × 0.20) + (Centralization × 0.30) + (Funds Mgmt × 0.30)
 
 **Final Risk Tier: LOW RISK**
 
-USTB benefits from the safest possible underlying asset class (U.S. Treasury Bills), exceptional audit coverage, institutional-grade service providers, and a strong legal structure. The primary risk factor is the centralized admin (single EOA with no multisig or timelock), which is partially mitigated by regulatory accountability, secure key management, and the institutional framework around the fund.
+USTB benefits from the safest possible underlying asset class (U.S. Treasury Bills), great audit coverage, institutional-grade service providers, and a strong legal structure. The primary risk factors are the centralized admin (single EOA with no multisig or timelock) and heavy off-chain dependencies for reserve provability (holdings gated behind investor portal, no Chainlink Proof of Reserves yet). These are partially mitigated by regulatory accountability, secure key management, and the institutional framework around the fund.
 
 **Key conditions for exposure:**
 
