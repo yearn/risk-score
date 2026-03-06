@@ -1,7 +1,7 @@
 # Protocol Risk Assessment: Superstate USTB
 
 - **Assessment Date:** March 5, 2026
-- **Token:** USTB (Superstate Short Duration U.S. Government Securities Fund)
+- **Token:** USTB
 - **Chain:** Ethereum
 - **Token Address:** [`0x43415eB6ff9DB7E26A15b704e7A3eDCe97d31C4e`](https://etherscan.io/address/0x43415eB6ff9DB7E26A15b704e7A3eDCe97d31C4e)
 - **Final Score: 2.23/5.0**
@@ -34,7 +34,7 @@ The fund is structured as a series of **Superstate Asset Trust**, a **Delaware S
 - [Aave Forum — USTB/BUIDL GSM](https://governance.aave.com/t/arfc-ustb-buidl-gsm/19299/3)
 - [DeFiLlama](https://defillama.com/protocol/superstate-ustb)
 - [CoinGecko](https://www.coingecko.com/en/coins/superstate-short-duration-us-government-securities-fund-ustb)
-- [Chainlink USTB NAV/Share Feed](https://data.chain.link/feeds/ethereum/mainnet/ustb-nav)
+- [Chainlink USTB NAV/Share Feed](https://data.chain.link/feeds/ethereum/mainnet/ustb-nav-per-share)
 - [RWA.xyz](https://app.rwa.xyz/assets/USTB)
 - [Etherscan Token Page](https://etherscan.io/token/0x43415eB6ff9DB7E26A15b704e7A3eDCe97d31C4e)
 
@@ -105,7 +105,7 @@ Superstate is **not** listed on the SEAL Safe Harbor registry. This is typical f
   - Mar 2026: ~$650M+ total AUM, ~$572M on-chain TVL (DeFiLlama)
 - **Holder Distribution:** ~70 on-chain holders on Ethereum. Top 10 holders hold ~83.5% of supply. This concentration is expected for an institutional-grade permissioned fund. Top holders include EOAs (institutional investors) and smart contracts (DeFi integrations).
 - **Incidents:** None. No hacks, exploits, or adverse events involving Superstate or USTB.
-- **Compound Lawsuit (indirect):** Co-founder Robert Leshner faces a pending securities class action related to Compound Labs (COMP token classification). This is Compound-specific and does not directly involve Superstate.
+- **Compound Lawsuit (indirect):** Co-founder Robert Leshner faces a pending securities class action ([Houghton et al v. Leshner et al](https://www.courtlistener.com/docket/66623711/houghton-v-leshner/), Case No. 3:22-cv-07781, N.D. Cal.) related to Compound Labs (COMP token classification as [unregistered securities](https://blockworks.co/news/securities-lawsuit-against-compound)). Jury trial set for May 2026. This is Compound-specific and does not directly involve Superstate.
 
 ## Funds Management
 
@@ -140,7 +140,7 @@ The fund uses a **laddered approach** with holdings spread across various near-t
 
 ### Provability
 
-- **NAV/Price Updates:** The Superstate Continuous Price Oracle ([`0xe4fa682f94610ccd170680cc3b045d77d9e528a8`](https://etherscan.io/address/0xe4fa682f94610ccd170680cc3b045d77d9e528a8)) extrapolates real-time prices using linear interpolation between NAV/S checkpoints. Updates every second, 24/7/365. Compatible with Chainlink AggregatorV3Interface.
+- **NAV/Price Updates:** The Superstate Continuous Price Oracle ([`0xe4fa682f94610ccd170680cc3b045d77d9e528a8`](https://etherscan.io/address/0xe4fa682f94610ccd170680cc3b045d77d9e528a8)) extrapolates real-time prices using linear interpolation between NAV/S checkpoints. Updates every second, 24/7/365. Compatible with Chainlink AggregatorV3Interface. **Note:** Since prices are linearly interpolated between checkpoints, the on-chain price is an estimate that may diverge from the actual NAV between checkpoint updates — the price catches up only when the next checkpoint is posted by Superstate.
 - **Chainlink NAV Feed:** Chainlink provides an independent NAV/Share data feed ([`0x289B5036cd942e619E1Ee48670F98d214E745AAC`](https://etherscan.io/address/0x289B5036cd942e619E1Ee48670F98d214E745AAC)).
 - **On-chain Supply:** Total USTB supply is verifiable on-chain via `totalSupply()`.
 - **Off-chain Assets:** The underlying Treasury portfolio is held off-chain at UMB Bank. Token holders cannot independently verify the specific Treasury holdings on-chain. However:
@@ -237,7 +237,7 @@ The fund uses a **laddered approach** with holdings spread across various near-t
   - Seed: $4M (June 2023) — ParaFi, Cumberland, 1kx
   - Series A: $14M (November 2023) — Distributed Global, CoinFund, Breyer Capital, Galaxy, Hack VC
   - Series B: $82.5M (January 2026) — Bain Capital Crypto, Distributed Global, Brevan Howard Digital, Galaxy Digital, Haun Ventures
-- **Documentation:** Comprehensive docs at docs.superstate.com covering fund mechanics, legal structure, smart contracts, security. Actively maintained.
+- **Documentation:** Comprehensive docs at [docs.superstate.com](https://docs.superstate.com/) covering fund mechanics, legal structure, smart contracts, security. Actively maintained.
 - **Legal Structure:**
   - **Superstate Inc.** (Delaware corporation) — parent company and investment adviser
   - **Superstate Asset Trust** (Delaware Statutory Trust, organized June 15, 2023) — bankruptcy-remote fund entity
@@ -279,7 +279,7 @@ The fund uses a **laddered approach** with holdings spread across various near-t
 ### Key Strengths
 
 1. **Safest underlying asset class** — 95%+ invested in U.S. Treasury Bills, the lowest-risk financial instrument globally, backed by the full faith and credit of the U.S. government
-2. **Exceptional audit coverage** — 11 audits from 3 firms (0xMacro, ChainSecurity, Offside Labs) plus Certora formal verification, with ongoing audit relationship as code evolves
+2. **Great audit coverage** — 11 audits from 3 firms (0xMacro, ChainSecurity, Offside Labs) plus Certora formal verification, with ongoing audit relationship as code evolves
 3. **Institutional-grade service providers** — UMB Bank (OCC-regulated custodian), Federated Hermes (sub-advisor, $800B+ AUM), Ernst & Young (auditor), NAV Consulting (independent NAV)
 4. **Strong team and backing** — Compound Finance founders, $100.5M raised from Bain Capital Crypto, Distributed Global, Brevan Howard, Galaxy Digital, Haun Ventures
 5. **Bankruptcy-remote legal structure** — Delaware Statutory Trust with inter-series liability protection, SEC-regulated framework
@@ -295,7 +295,7 @@ The fund uses a **laddered approach** with holdings spread across various near-t
 
 ### Critical Risks
 
-- **AllowList freeze risk** — If Superstate removes an address from the AllowList, the holder's tokens are **completely frozen with zero exit paths**. No transfers, no redemption, no DEX fallback. For DeFi protocols integrating USTB, this means Superstate has unilateral power to freeze an entire protocol's USTB position. This is the most critical risk for Yearn's use case.
+- **AllowList freeze risk** — If Superstate removes an address from the AllowList, the holder's tokens are **completely frozen with zero exit paths**. No transfers, no redemption, no DEX fallback. For DeFi protocols integrating USTB, this means Superstate has unilateral power to freeze an entire protocol's USTB position.
 - **Private key compromise of admin EOA** — A single compromised key (`0xad30...ca83`) could upgrade the contract to malicious code, mint unlimited tokens, or burn tokens from any address, all with no delay. Mitigated by Turnkey secure enclaves but fundamentally a single point of failure.
 - **Admin burn capability** — The `adminBurn()` function can confiscate tokens from any holder. While documented as a regulatory compliance tool, this gives Superstate unilateral power over user funds.
 - **No upgrade delay** — Contract upgrades execute immediately with no timelock for users or protocols (like Aave, Morpho, Spark) to react.
@@ -306,7 +306,7 @@ The fund uses a **laddered approach** with holdings spread across various near-t
 
 ### Critical Risk Gates
 
-- [x] **No audit** → **PASS** — 11 audits by 3 firms + Certora formal verification. Exceptional coverage.
+- [x] **No audit** → **PASS** — 11 audits by 3 firms + Certora formal verification. Great coverage.
 - [x] **Unverifiable reserves** → **PASS** — Off-chain reserves, but verified by independent NAV agent (NAV Consulting), annual EY audit, SEC regulatory framework, bankruptcy-remote trust structure. Chainlink NAV feed provides on-chain pricing. Not fully on-chain verifiable, but multiple independent verification layers.
 - [x] **Total centralization** → **BORDERLINE PASS** — Single EOA controls all admin functions with no multisig or timelock. However, Superstate is a U.S. corporation under SEC regulation, with registered transfer agent status, institutional custodian, and institutional-grade key management via Turnkey secure enclaves. The regulatory accountability and legal framework provide off-chain governance guarantees that partially compensate for the lack of on-chain governance.
 
@@ -324,7 +324,7 @@ The fund uses a **laddered approach** with holdings spread across various near-t
 | TVL | ~$650M+ total AUM, ~$572M on-chain TVL |
 | Historical Incidents | None. No security incidents, exploits, or adverse events. |
 
-Exceptional audit coverage (11 audits + formal verification) is among the strongest in the RWA space. Clean operational history with significant AUM. The lack of a formal bug bounty with monetary rewards prevents a perfect score.
+Great audit coverage (11 audits + formal verification) is among the strongest in the RWA space. Clean operational history with significant AUM. The lack of a formal bug bounty with monetary rewards prevents a perfect score.
 
 **Score: 1.5/5**
 
