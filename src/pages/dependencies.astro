@@ -49,7 +49,7 @@ for (const dep of dependencies) {
     <h2>Protocols</h2>
     <div class="protocol-cards">
       {protocols.map((p: any) => (
-        <div class="protocol-card">
+        <div class="protocol-card" data-name={p.name}>
           <div class="card-name">{p.name}</div>
           <div class="card-meta">
             <span class="mono">{p.chain}</span>
@@ -99,10 +99,18 @@ for (const dep of dependencies) {
   </section>
 
   <script is:inline>
-    document.getElementById("protocol-filter").addEventListener("change", (e) => {
-      const val = e.target.value;
+    const filter = document.getElementById("protocol-filter");
+    function applyFilter(val) {
+      filter.value = val;
       document.querySelectorAll("#dep-table tbody tr").forEach((row) => {
         row.style.display = val === "all" || row.dataset.protocol === val ? "" : "none";
+      });
+    }
+    filter.addEventListener("change", (e) => applyFilter(e.target.value));
+    document.querySelectorAll(".protocol-card").forEach((card) => {
+      card.addEventListener("click", () => {
+        applyFilter(card.dataset.name);
+        filter.scrollIntoView({ behavior: "smooth", block: "start" });
       });
     });
   </script>
@@ -157,6 +165,11 @@ for (const dep of dependencies) {
     border-radius: 8px;
     padding: 0.75rem 1rem;
     background: var(--bg-card);
+    cursor: pointer;
+    transition: border-color 0.2s;
+  }
+  .protocol-card:hover {
+    border-color: var(--brand-blue);
   }
   .card-name { font-weight: 600; margin-bottom: 0.25rem; }
   .card-meta {
