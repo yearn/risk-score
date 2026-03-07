@@ -950,7 +950,7 @@
     },
     {
       "protocol": "Maple Finance (syrupUSDC)",
-      "asset": "sky",
+      "asset": "Sky",
       "type": "yield_source",
       "parent": "",
       "allocation": ""
@@ -985,74 +985,81 @@
     },
     {
       "protocol": "InfiniFi (siUSD)",
-      "asset": "Aave V3 Core",
+      "asset": "Fluid (USDC)",
       "type": "yield_source",
-      "parent": "",
+      "parent": "USDC",
       "allocation": ""
     },
     {
       "protocol": "InfiniFi (siUSD)",
-      "asset": "fluid",
+      "asset": "Euler (USDC)",
       "type": "yield_source",
-      "parent": "",
+      "parent": "USDC",
       "allocation": ""
     },
     {
       "protocol": "InfiniFi (siUSD)",
-      "asset": "euler",
+      "asset": "Aave v3 Horizon (aHorRwaUSDC)",
       "type": "yield_source",
-      "parent": "",
+      "parent": "USDC",
       "allocation": ""
     },
     {
       "protocol": "InfiniFi (siUSD)",
-      "asset": "spark",
+      "asset": "Spark (USDC)",
       "type": "yield_source",
-      "parent": "",
+      "parent": "USDC",
       "allocation": ""
     },
     {
       "protocol": "InfiniFi (siUSD)",
-      "asset": "pendle",
+      "asset": "Aave v3 (aEthUSDC)",
       "type": "yield_source",
-      "parent": "",
+      "parent": "USDC",
       "allocation": ""
     },
     {
       "protocol": "InfiniFi (siUSD)",
-      "asset": "ethena",
+      "asset": "Pendle (USDe, sUSDe)",
       "type": "yield_source",
-      "parent": "",
+      "parent": "USDe, sUSDe",
       "allocation": ""
     },
     {
       "protocol": "InfiniFi (siUSD)",
-      "asset": "gauntlet",
+      "asset": "Ethena (USDe, sUSDe)",
       "type": "yield_source",
-      "parent": "",
+      "parent": "USDe, sUSDe",
       "allocation": ""
     },
     {
       "protocol": "InfiniFi (siUSD)",
-      "asset": "reservoir",
+      "asset": "Gauntlet Frontier (gtUSDa)",
       "type": "yield_source",
-      "parent": "",
+      "parent": "USDC",
       "allocation": ""
     },
     {
       "protocol": "InfiniFi (siUSD)",
-      "asset": "fasanara",
+      "asset": "Reservoir wsrUSD",
       "type": "yield_source",
-      "parent": "",
+      "parent": "USDC",
       "allocation": ""
     },
     {
       "protocol": "InfiniFi (siUSD)",
-      "asset": "tokemak",
+      "asset": "Fasanara Genesis Fund",
       "type": "yield_source",
-      "parent": "",
+      "parent": "USDC",
+      "allocation": ""
+    },
+    {
+      "protocol": "InfiniFi (siUSD)",
+      "asset": "Tokemak autoUSD",
+      "type": "yield_source",
+      "parent": "USDC",
       "allocation": ""
     }
   ],
-  "mermaid": "graph LR\n    aave_v3_core[\"Aave V3 Core\\n<small>+43 unique assets</small>\"]\n    compound_v3_usdc[\"Compound V3 USDC\\n<small>+3 unique assets</small>\"]\n    compound_v3_weth[\"Compound V3 WETH\\n<small>+3 unique assets</small>\"]\n    maple[\"Maple Finance (syrupUSDC)\\n<small>+4 unique assets</small>\"]\n    infinifi[\"InfiniFi (siUSD)\"]\n    ETHx[\"ETHx\\n<small>(Stader)</small>\"]\n    LBTC[\"LBTC\\n<small>(Lombard)</small>\"]\n    LINK[\"LINK\\n<small>(Chainlink)</small>\"]\n    UNI[\"UNI\\n<small>(Uniswap)</small>\"]\n    USDC[\"USDC\\n<small>(Circle)</small>\"]\n    USDT[\"USDT\\n<small>(Tether)</small>\"]\n    USDe[\"USDe\\n<small>(Ethena)</small>\"]\n    WBTC[\"WBTC\\n<small>(BitGo)</small>\"]\n    WETH([\"WETH\"])\n    cbBTC[\"cbBTC\\n<small>(Coinbase)</small>\"]\n    cbETH[\"cbETH\\n<small>(Coinbase)</small>\"]\n    ezETH[\"ezETH\\n<small>(Renzo)</small>\"]\n    osETH[\"osETH\\n<small>(StakeWise)</small>\"]\n    rETH[\"rETH\\n<small>(Rocket Pool)</small>\"]\n    rsETH[\"rsETH\\n<small>(KelpDAO)</small>\"]\n    sUSDe[\"sUSDe\\n<small>(Ethena)</small>\"]\n    tBTC[\"tBTC\\n<small>(Threshold)</small>\"]\n    tETH[\"tETH\\n<small>(Treehouse)</small>\"]\n    weETH[\"weETH\\n<small>(EtherFi)</small>\"]\n    wstETH[\"wstETH\\n<small>(Lido)</small>\"]\n    aave_v3_core --> WETH\n    aave_v3_core --> wstETH\n    aave_v3_core --> WBTC\n    aave_v3_core --> USDC\n    aave_v3_core --> LINK\n    aave_v3_core --> cbETH\n    aave_v3_core --> USDT\n    aave_v3_core --> rETH\n    aave_v3_core --> UNI\n    aave_v3_core --> weETH\n    aave_v3_core --> osETH\n    aave_v3_core --> USDe\n    aave_v3_core --> ETHx\n    aave_v3_core --> sUSDe\n    aave_v3_core --> tBTC\n    aave_v3_core --> cbBTC\n    aave_v3_core --> rsETH\n    aave_v3_core --> LBTC\n    aave_v3_core --> tETH\n    aave_v3_core --> ezETH\n    compound_v3_usdc --> WBTC\n    compound_v3_usdc --> WETH\n    compound_v3_usdc --> UNI\n    compound_v3_usdc --> LINK\n    compound_v3_usdc --> wstETH\n    compound_v3_usdc --> cbBTC\n    compound_v3_usdc --> tBTC\n    compound_v3_usdc --> weETH\n    compound_v3_usdc --> rsETH\n    compound_v3_usdc --> USDe\n    compound_v3_weth --> cbETH\n    compound_v3_weth --> wstETH\n    compound_v3_weth --> rETH\n    compound_v3_weth --> rsETH\n    compound_v3_weth --> weETH\n    compound_v3_weth --> osETH\n    compound_v3_weth --> WBTC\n    compound_v3_weth --> ezETH\n    compound_v3_weth --> cbBTC\n    compound_v3_weth --> tBTC\n    compound_v3_weth --> ETHx\n    compound_v3_weth --> tETH\n    compound_v3_weth --> USDC\n    compound_v3_weth --> USDT\n    maple --> LBTC\n    maple --> weETH\n    infinifi --> USDC\n    infinifi --> USDT\n    infinifi --> USDe\n    infinifi --> sUSDe\n    maple -.->|yield| aave_v3_core\n    sky((\"sky\"))\n    maple -.->|yield| sky\n    infinifi -.->|yield| aave_v3_core\n    fluid((\"fluid\"))\n    infinifi -.->|yield| fluid\n    euler((\"euler\"))\n    infinifi -.->|yield| euler\n    spark((\"spark\"))\n    infinifi -.->|yield| spark\n    pendle((\"pendle\"))\n    infinifi -.->|yield| pendle\n    ethena((\"ethena\"))\n    infinifi -.->|yield| ethena\n    gauntlet((\"gauntlet\"))\n    infinifi -.->|yield| gauntlet\n    reservoir((\"reservoir\"))\n    infinifi -.->|yield| reservoir\n    fasanara((\"fasanara\"))\n    infinifi -.->|yield| fasanara\n    tokemak((\"tokemak\"))\n    infinifi -.->|yield| tokemak\n    classDef protocol fill:#0675F9,color:#fff,stroke:#0675F9\n    class aave_v3_core compound_v3_usdc compound_v3_weth maple infinifi protocol"
+  "mermaid": "graph LR\n    aave_v3_core[\"Aave V3 Core\\n<small>+43 unique assets</small>\"]\n    compound_v3_usdc[\"Compound V3 USDC\\n<small>+3 unique assets</small>\"]\n    compound_v3_weth[\"Compound V3 WETH\\n<small>+3 unique assets</small>\"]\n    maple[\"Maple Finance (syrupUSDC)\\n<small>+4 unique assets</small>\"]\n    infinifi[\"InfiniFi (siUSD)\"]\n    ETHx[\"ETHx\\n<small>(Stader)</small>\"]\n    LBTC[\"LBTC\\n<small>(Lombard)</small>\"]\n    LINK[\"LINK\\n<small>(Chainlink)</small>\"]\n    UNI[\"UNI\\n<small>(Uniswap)</small>\"]\n    USDC[\"USDC\\n<small>(Circle)</small>\"]\n    USDT[\"USDT\\n<small>(Tether)</small>\"]\n    USDe[\"USDe\\n<small>(Ethena)</small>\"]\n    WBTC[\"WBTC\\n<small>(BitGo)</small>\"]\n    WETH([\"WETH\"])\n    cbBTC[\"cbBTC\\n<small>(Coinbase)</small>\"]\n    cbETH[\"cbETH\\n<small>(Coinbase)</small>\"]\n    ezETH[\"ezETH\\n<small>(Renzo)</small>\"]\n    osETH[\"osETH\\n<small>(StakeWise)</small>\"]\n    rETH[\"rETH\\n<small>(Rocket Pool)</small>\"]\n    rsETH[\"rsETH\\n<small>(KelpDAO)</small>\"]\n    sUSDe[\"sUSDe\\n<small>(Ethena)</small>\"]\n    tBTC[\"tBTC\\n<small>(Threshold)</small>\"]\n    tETH[\"tETH\\n<small>(Treehouse)</small>\"]\n    weETH[\"weETH\\n<small>(EtherFi)</small>\"]\n    wstETH[\"wstETH\\n<small>(Lido)</small>\"]\n    aave_v3_core --> WETH\n    aave_v3_core --> wstETH\n    aave_v3_core --> WBTC\n    aave_v3_core --> USDC\n    aave_v3_core --> LINK\n    aave_v3_core --> cbETH\n    aave_v3_core --> USDT\n    aave_v3_core --> rETH\n    aave_v3_core --> UNI\n    aave_v3_core --> weETH\n    aave_v3_core --> osETH\n    aave_v3_core --> USDe\n    aave_v3_core --> ETHx\n    aave_v3_core --> sUSDe\n    aave_v3_core --> tBTC\n    aave_v3_core --> cbBTC\n    aave_v3_core --> rsETH\n    aave_v3_core --> LBTC\n    aave_v3_core --> tETH\n    aave_v3_core --> ezETH\n    compound_v3_usdc --> WBTC\n    compound_v3_usdc --> WETH\n    compound_v3_usdc --> UNI\n    compound_v3_usdc --> LINK\n    compound_v3_usdc --> wstETH\n    compound_v3_usdc --> cbBTC\n    compound_v3_usdc --> tBTC\n    compound_v3_usdc --> weETH\n    compound_v3_usdc --> rsETH\n    compound_v3_usdc --> USDe\n    compound_v3_weth --> cbETH\n    compound_v3_weth --> wstETH\n    compound_v3_weth --> rETH\n    compound_v3_weth --> rsETH\n    compound_v3_weth --> weETH\n    compound_v3_weth --> osETH\n    compound_v3_weth --> WBTC\n    compound_v3_weth --> ezETH\n    compound_v3_weth --> cbBTC\n    compound_v3_weth --> tBTC\n    compound_v3_weth --> ETHx\n    compound_v3_weth --> tETH\n    compound_v3_weth --> USDC\n    compound_v3_weth --> USDT\n    maple --> LBTC\n    maple --> weETH\n    infinifi --> USDC\n    infinifi --> USDT\n    infinifi --> USDe\n    infinifi --> sUSDe\n    maple -.->|yield| aave_v3_core\n    sky((\"sky\"))\n    maple -.->|yield| sky\n    fluid((\"fluid\"))\n    infinifi -.->|USDC| fluid\n    euler((\"euler\"))\n    infinifi -.->|USDC| euler\n    infinifi -.->|USDC| aave_v3_core\n    spark((\"spark\"))\n    infinifi -.->|USDC| spark\n    infinifi -.->|USDC| aave_v3_core\n    pendle((\"pendle\"))\n    infinifi -.->|USDe, sUSDe| pendle\n    ethena((\"ethena\"))\n    infinifi -.->|USDe, sUSDe| ethena\n    gauntlet((\"gauntlet\"))\n    infinifi -.->|USDC| gauntlet\n    reservoir((\"reservoir\"))\n    infinifi -.->|USDC| reservoir\n    fasanara((\"fasanara\"))\n    infinifi -.->|USDC| fasanara\n    tokemak((\"tokemak\"))\n    infinifi -.->|USDC| tokemak\n    classDef protocol fill:#0675F9,color:#fff,stroke:#0675F9\n    class aave_v3_core compound_v3_usdc compound_v3_weth maple infinifi protocol"
 }

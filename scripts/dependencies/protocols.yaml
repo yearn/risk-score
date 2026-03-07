@@ -307,15 +307,33 @@ protocols:
     - asset: USDe
     - asset: sUSDe
     yield_sources:
-    - aave_v3_core
-    - fluid
-    - euler
-    - spark
-    - pendle
-    - ethena
-    - gauntlet
-    - reservoir
-    - fasanara
-    - tokemak
+    - protocol: fluid
+      assets: [USDC]
+    - protocol: euler
+      assets: [USDC]
+    - protocol: aave_v3_core
+      assets: [USDC]
+      label: Aave v3 Horizon (aHorRwaUSDC)
+    - protocol: spark
+      assets: [USDC]
+    - protocol: aave_v3_core
+      assets: [USDC]
+      label: Aave v3 (aEthUSDC)
+    - protocol: pendle
+      assets: [USDe, sUSDe]
+    - protocol: ethena
+      assets: [USDe, sUSDe]
+    - protocol: gauntlet
+      assets: [USDC]
+      label: Gauntlet Frontier (gtUSDa)
+    - protocol: reservoir
+      assets: [USDC]
+      label: Reservoir wsrUSD
+    - protocol: fasanara
+      assets: [USDC]
+      label: Fasanara Genesis Fund
+    - protocol: tokemak
+      assets: [USDC]
+      label: Tokemak autoUSD
     infrastructure:
     - Chainlink

@@ -39,6 +39,31 @@ def get_assets(protocol: dict) -> list[str]:
     ]
 
 
+def _ys_protocol(ys) -> str:
+    """Get the protocol id from a yield source entry (string or dict)."""
+    return ys["protocol"] if isinstance(ys, dict) else ys
+
+
+def _ys_label(ys, protocols: dict) -> str:
+    """Get display label for a yield source entry."""
+    if isinstance(ys, dict):
+        label = ys.get("label", "")
+        if label:
+            return label
+        pid = ys["protocol"]
+        name = protocols[pid]["name"] if pid in protocols else pid.replace("_", " ").title()
+        assets = ys.get("assets", [])
+        return f"{name} ({', '.join(assets)})" if assets else name
+    return protocols[ys]["name"] if ys in protocols else ys.replace("_", " ").title()
+
+
+def _ys_assets(ys) -> list[str]:
+    """Get the assets from a yield source entry."""
+    if isinstance(ys, dict):
+        return ys.get("assets", [])
+    return []
+
+
 def render_mermaid(data: dict) -> str:
     """Mermaid graph showing only shared assets and cross-protocol relationships."""
     protocols = data["protocols"]
@@ -78,14 +103,22 @@ def render_mermaid(data: dict) -> str:
                 lines.append(f"    {pid} --> {_node_id(asset)}")
 
     # Edges: yield source (protocol → protocol)
+    seen_ys_nodes = set()
     for pid, pdata in protocols.items():
         for ys in pdata.get("yield_sources", []):
-            if ys in protocols:
-                lines.append(f"    {pid} -.->|yield| {ys}")
+            ys_pid = _ys_protocol(ys)
+            if ys_pid in protocols:
+                assets = _ys_assets(ys)
+                edge_label = f"|{', '.join(assets)}|" if assets else "|yield|"
+                lines.append(f"    {pid} -.->{ edge_label} {ys_pid}")
             else:
-                ys_id = _node_id(ys)
-                lines.append(f'    {ys_id}(("{ys}"))')
-                lines.append(f"    {pid} -.->|yield| {ys_id}")
+                ys_id = _node_id(ys_pid)
+                if ys_id not in seen_ys_nodes:
+                    lines.append(f'    {ys_id}(("{ys_pid}"))')
+                    seen_ys_nodes.add(ys_id)
+                assets = _ys_assets(ys)
+                edge_label = f"|{', '.join(assets)}|" if assets else "|yield|"
+                lines.append(f"    {pid} -.->{ edge_label} {ys_id}")
 
     # Style: protocols get a distinct look
     protocol_ids = " ".join(protocols.keys())
@@ -127,8 +160,10 @@ def render_table(data: dict) -> str:
 
         # Yield sources
         for ys in pdata.get("yield_sources", []):
-            ys_name = protocols[ys]["name"] if ys in protocols else ys
-            lines.append(f"| {name} | {ys_name} | yield_source | - | - |")
+            label = _ys_label(ys, protocols)
+            assets = _ys_assets(ys)
+            asset_str = ", ".join(assets) if assets else "-"
+            lines.append(f"| {name} | {label} | yield_source | {asset_str} | - |")
 
         # Infrastructure
         for infra in pdata.get("infrastructure", []):
@@ -206,8 +241,10 @@ def build_json(data: dict) -> dict:
                 alloc = ""
             full.append({"protocol": name, "asset": asset, "type": "collateral", "parent": protocol_tokens.get(asset, ""), "allocation": alloc})
         for ys in pdata.get("yield_sources", []):
-            ys_name = protocols[ys]["name"] if ys in protocols else ys
-            full.append({"protocol": name, "asset": ys_name, "type": "yield_source", "parent": "", "allocation": ""})
+            label = _ys_label(ys, protocols)
+            assets = _ys_assets(ys)
+            asset_str = ", ".join(assets) if assets else ""
+            full.append({"protocol": name, "asset": label, "type": "yield_source", "parent": asset_str, "allocation": ""})
 
     # Protocol summaries
     summaries = []
