@@ -295,3 +295,27 @@ protocols:
     - sky
     infrastructure:
     - Chainlink
+  infinifi:
+    name: InfiniFi (siUSD)
+    chain: ethereum
+    type: stablecoin
+    address: '0xDBDC1Ef57537E34680B898E1FEBD3D68c7389bCB'
+    report: reports/report/infinifi.md
+    collateral:
+    - asset: USDC
+    - asset: USDT
+    - asset: USDe
+    - asset: sUSDe
+    yield_sources:
+    - aave_v3_core
+    - fluid
+    - euler
+    - spark
+    - pendle
+    - ethena
+    - gauntlet
+    - reservoir
+    - fasanara
+    - tokemak
+    infrastructure:
+    - Chainlink

@@ -265,6 +265,36 @@ def maple_data() -> dict:
     }
 
 
+def infinifi_data() -> dict:
+    """InfiniFi dependency data from risk assessment report (Feb 2026)."""
+    return {
+        "name": "InfiniFi (siUSD)",
+        "chain": "ethereum",
+        "type": "stablecoin",
+        "address": "0xDBDC1Ef57537E34680B898E1FEBD3D68c7389bCB",
+        "report": "reports/report/infinifi.md",
+        "collateral": [
+            {"asset": "USDC"},
+            {"asset": "USDT"},
+            {"asset": "USDe"},
+            {"asset": "sUSDe"},
+        ],
+        "yield_sources": [
+            "aave_v3_core",
+            "fluid",
+            "euler",
+            "spark",
+            "pendle",
+            "ethena",
+            "gauntlet",
+            "reservoir",
+            "fasanara",
+            "tokemak",
+        ],
+        "infrastructure": ["Chainlink"],
+    }
+
+
 def main():
     data: dict = {
         "protocol_tokens": PROTOCOL_TOKENS,
@@ -289,6 +319,9 @@ def main():
 
     # Maple Finance
     data["protocols"]["maple"] = maple_data()
+
+    # InfiniFi
+    data["protocols"]["infinifi"] = infinifi_data()
 
     # Write YAML
     with open(OUTPUT_PATH, "w") as f:
