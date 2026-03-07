@@ -7,6 +7,7 @@ Usage:
     uv run scripts/dependencies/render.py shared       # shared exposure only
 """
 
+import json
 import sys
 from collections import defaultdict
 from pathlib import Path
@@ -14,6 +15,7 @@ from pathlib import Path
 import yaml
 
 YAML_PATH = Path(__file__).parent / "protocols.yaml"
+JSON_PATH = Path(__file__).parents[2] / "src" / "data" / "dependencies.json"
 
 
 def load_data() -> dict:
@@ -166,6 +168,67 @@ def _node_id(name: str) -> str:
     return name.replace(" ", "_").replace("-", "_").replace("/", "_").replace("(", "").replace(")", "")
 
 
+def build_json(data: dict) -> dict:
+    """Build structured JSON for the Astro frontend."""
+    protocols = data["protocols"]
+    protocol_tokens = data.get("protocol_tokens", {})
+
+    # Shared exposure
+    asset_protocols: dict[str, list[str]] = defaultdict(list)
+    for _pid, pdata in protocols.items():
+        for asset in get_assets(pdata):
+            asset_protocols[asset].append(pdata["name"])
+
+    shared = []
+    for asset in sorted(asset_protocols, key=lambda a: len(asset_protocols[a]), reverse=True):
+        ps = asset_protocols[asset]
+        if len(ps) > 1:
+            shared.append({
+                "asset": asset,
+                "parent": protocol_tokens.get(asset, ""),
+                "protocols": ps,
+                "count": len(ps),
+            })
+
+    # Full deps per protocol
+    full = []
+    for _pid, pdata in protocols.items():
+        name = pdata["name"]
+        base = pdata.get("base_asset")
+        if base:
+            full.append({"protocol": name, "asset": base, "type": "base", "parent": protocol_tokens.get(base, ""), "allocation": ""})
+        for c in pdata.get("collateral", []):
+            if isinstance(c, dict):
+                asset = c["asset"]
+                alloc = f'{c["allocation"]}%' if c.get("allocation") else ""
+            else:
+                asset = c
+                alloc = ""
+            full.append({"protocol": name, "asset": asset, "type": "collateral", "parent": protocol_tokens.get(asset, ""), "allocation": alloc})
+        for ys in pdata.get("yield_sources", []):
+            ys_name = protocols[ys]["name"] if ys in protocols else ys
+            full.append({"protocol": name, "asset": ys_name, "type": "yield_source", "parent": "", "allocation": ""})
+
+    # Protocol summaries
+    summaries = []
+    for pid, pdata in protocols.items():
+        summaries.append({
+            "id": pid,
+            "name": pdata["name"],
+            "chain": pdata.get("chain", ""),
+            "type": pdata.get("type", ""),
+            "address": pdata.get("address", ""),
+            "assetCount": len(pdata.get("collateral", [])),
+        })
+
+    return {
+        "protocols": summaries,
+        "shared": shared,
+        "dependencies": full,
+        "mermaid": render_mermaid(data),
+    }
+
+
 def main():
     fmt = sys.argv[1] if len(sys.argv) > 1 else "all"
     data = load_data()
@@ -185,6 +248,12 @@ def main():
         print("## Shared Asset Exposure (Contagion Risk)\n")
         print(render_shared_exposure(data))
         print()
+
+    if fmt in ("json", "all"):
+        JSON_PATH.parent.mkdir(parents=True, exist_ok=True)
+        with open(JSON_PATH, "w") as f:
+            json.dump(build_json(data), f, indent=2)
+        print(f"Written JSON to {JSON_PATH}")
 
 
 if __name__ == "__main__":

@@ -1,0 +1,940 @@
+{
+  "protocols": [
+    {
+      "id": "aave_v3_core",
+      "name": "Aave V3 Core",
+      "chain": "ethereum",
+      "type": "lending_market",
+      "address": "0x87870Bca3F3fD6335C3F4ce8392D69350B4fA4E2",
+      "assetCount": 63
+    },
+    {
+      "id": "compound_v3_usdc",
+      "name": "Compound V3 USDC",
+      "chain": "ethereum",
+      "type": "lending_market",
+      "address": "0xc3d688B66703497DAA19211EEdff47f25384cdc3",
+      "assetCount": 13
+    },
+    {
+      "id": "compound_v3_weth",
+      "name": "Compound V3 WETH",
+      "chain": "ethereum",
+      "type": "lending_market",
+      "address": "0xA17581A9E3356d9A858b789D68B4d866e593aE94",
+      "assetCount": 17
+    },
+    {
+      "id": "maple",
+      "name": "Maple Finance (syrupUSDC)",
+      "chain": "ethereum",
+      "type": "lending",
+      "address": "0x80ac24aA929eaF5013f6436cdA2a7ba190f5Cc0b",
+      "assetCount": 6
+    }
+  ],
+  "shared": [
+    {
+      "asset": "weETH",
+      "parent": "EtherFi",
+      "protocols": [
+        "Aave V3 Core",
+        "Compound V3 USDC",
+        "Compound V3 WETH",
+        "Maple Finance (syrupUSDC)"
+      ],
+      "count": 4
+    },
+    {
+      "asset": "wstETH",
+      "parent": "Lido",
+      "protocols": [
+        "Aave V3 Core",
+        "Compound V3 USDC",
+        "Compound V3 WETH"
+      ],
+      "count": 3
+    },
+    {
+      "asset": "WBTC",
+      "parent": "BitGo",
+      "protocols": [
+        "Aave V3 Core",
+        "Compound V3 USDC",
+        "Compound V3 WETH"
+      ],
+      "count": 3
+    },
+    {
+      "asset": "tBTC",
+      "parent": "Threshold",
+      "protocols": [
+        "Aave V3 Core",
+        "Compound V3 USDC",
+        "Compound V3 WETH"
+      ],
+      "count": 3
+    },
+    {
+      "asset": "cbBTC",
+      "parent": "Coinbase",
+      "protocols": [
+        "Aave V3 Core",
+        "Compound V3 USDC",
+        "Compound V3 WETH"
+      ],
+      "count": 3
+    },
+    {
+      "asset": "rsETH",
+      "parent": "KelpDAO",
+      "protocols": [
+        "Aave V3 Core",
+        "Compound V3 USDC",
+        "Compound V3 WETH"
+      ],
+      "count": 3
+    },
+    {
+      "asset": "WETH",
+      "parent": "",
+      "protocols": [
+        "Aave V3 Core",
+        "Compound V3 USDC"
+      ],
+      "count": 2
+    },
+    {
+      "asset": "USDC",
+      "parent": "Circle",
+      "protocols": [
+        "Aave V3 Core",
+        "Compound V3 WETH"
+      ],
+      "count": 2
+    },
+    {
+      "asset": "LINK",
+      "parent": "Chainlink",
+      "protocols": [
+        "Aave V3 Core",
+        "Compound V3 USDC"
+      ],
+      "count": 2
+    },
+    {
+      "asset": "cbETH",
+      "parent": "Coinbase",
+      "protocols": [
+        "Aave V3 Core",
+        "Compound V3 WETH"
+      ],
+      "count": 2
+    },
+    {
+      "asset": "USDT",
+      "parent": "Tether",
+      "protocols": [
+        "Aave V3 Core",
+        "Compound V3 WETH"
+      ],
+      "count": 2
+    },
+    {
+      "asset": "rETH",
+      "parent": "Rocket Pool",
+      "protocols": [
+        "Aave V3 Core",
+        "Compound V3 WETH"
+      ],
+      "count": 2
+    },
+    {
+      "asset": "UNI",
+      "parent": "Uniswap",
+      "protocols": [
+        "Aave V3 Core",
+        "Compound V3 USDC"
+      ],
+      "count": 2
+    },
+    {
+      "asset": "osETH",
+      "parent": "StakeWise",
+      "protocols": [
+        "Aave V3 Core",
+        "Compound V3 WETH"
+      ],
+      "count": 2
+    },
+    {
+      "asset": "USDe",
+      "parent": "Ethena",
+      "protocols": [
+        "Aave V3 Core",
+        "Compound V3 USDC"
+      ],
+      "count": 2
+    },
+    {
+      "asset": "ETHx",
+      "parent": "Stader",
+      "protocols": [
+        "Aave V3 Core",
+        "Compound V3 WETH"
+      ],
+      "count": 2
+    },
+    {
+      "asset": "LBTC",
+      "parent": "Lombard",
+      "protocols": [
+        "Aave V3 Core",
+        "Maple Finance (syrupUSDC)"
+      ],
+      "count": 2
+    },
+    {
+      "asset": "tETH",
+      "parent": "Treehouse",
+      "protocols": [
+        "Aave V3 Core",
+        "Compound V3 WETH"
+      ],
+      "count": 2
+    },
+    {
+      "asset": "ezETH",
+      "parent": "Renzo",
+      "protocols": [
+        "Aave V3 Core",
+        "Compound V3 WETH"
+      ],
+      "count": 2
+    }
+  ],
+  "dependencies": [
+    {
+      "protocol": "Aave V3 Core",
+      "asset": "WETH",
+      "type": "collateral",
+      "parent": "",
+      "allocation": ""
+    },
+    {
+      "protocol": "Aave V3 Core",
+      "asset": "wstETH",
+      "type": "collateral",
+      "parent": "Lido",
+      "allocation": ""
+    },
+    {
+      "protocol": "Aave V3 Core",
+      "asset": "WBTC",
+      "type": "collateral",
+      "parent": "BitGo",
+      "allocation": ""
+    },
+    {
+      "protocol": "Aave V3 Core",
+      "asset": "USDC",
+      "type": "collateral",
+      "parent": "Circle",
+      "allocation": ""
+    },
+    {
+      "protocol": "Aave V3 Core",
+      "asset": "DAI",
+      "type": "collateral",
+      "parent": "MakerDAO",
+      "allocation": ""
+    },
+    {
+      "protocol": "Aave V3 Core",
+      "asset": "LINK",
+      "type": "collateral",
+      "parent": "Chainlink",
+      "allocation": ""
+    },
+    {
+      "protocol": "Aave V3 Core",
+      "asset": "AAVE",
+      "type": "collateral",
+      "parent": "Aave",
+      "allocation": ""
+    },
+    {
+      "protocol": "Aave V3 Core",
+      "asset": "cbETH",
+      "type": "collateral",
+      "parent": "Coinbase",
+      "allocation": ""
+    },
+    {
+      "protocol": "Aave V3 Core",
+      "asset": "USDT",
+      "type": "collateral",
+      "parent": "Tether",
+      "allocation": ""
+    },
+    {
+      "protocol": "Aave V3 Core",
+      "asset": "rETH",
+      "type": "collateral",
+      "parent": "Rocket Pool",
+      "allocation": ""
+    },
+    {
+      "protocol": "Aave V3 Core",
+      "asset": "LUSD",
+      "type": "collateral",
+      "parent": "Liquity",
+      "allocation": ""
+    },
+    {
+      "protocol": "Aave V3 Core",
+      "asset": "CRV",
+      "type": "collateral",
+      "parent": "Curve",
+      "allocation": ""
+    },
+    {
+      "protocol": "Aave V3 Core",
+      "asset": "MKR",
+      "type": "collateral",
+      "parent": "MakerDAO",
+      "allocation": ""
+    },
+    {
+      "protocol": "Aave V3 Core",
+      "asset": "SNX",
+      "type": "collateral",
+      "parent": "Synthetix",
+      "allocation": ""
+    },
+    {
+      "protocol": "Aave V3 Core",
+      "asset": "BAL",
+      "type": "collateral",
+      "parent": "Balancer",
+      "allocation": ""
+    },
+    {
+      "protocol": "Aave V3 Core",
+      "asset": "UNI",
+      "type": "collateral",
+      "parent": "Uniswap",
+      "allocation": ""
+    },
+    {
+      "protocol": "Aave V3 Core",
+      "asset": "LDO",
+      "type": "collateral",
+      "parent": "Lido",
+      "allocation": ""
+    },
+    {
+      "protocol": "Aave V3 Core",
+      "asset": "ENS",
+      "type": "collateral",
+      "parent": "ENS",
+      "allocation": ""
+    },
+    {
+      "protocol": "Aave V3 Core",
+      "asset": "1INCH",
+      "type": "collateral",
+      "parent": "1inch",
+      "allocation": ""
+    },
+    {
+      "protocol": "Aave V3 Core",
+      "asset": "FRAX",
+      "type": "collateral",
+      "parent": "Frax",
+      "allocation": ""
+    },
+    {
+      "protocol": "Aave V3 Core",
+      "asset": "GHO",
+      "type": "collateral",
+      "parent": "Aave",
+      "allocation": ""
+    },
+    {
+      "protocol": "Aave V3 Core",
+      "asset": "RPL",
+      "type": "collateral",
+      "parent": "Rocket Pool",
+      "allocation": ""
+    },
+    {
+      "protocol": "Aave V3 Core",
+      "asset": "sDAI",
+      "type": "collateral",
+      "parent": "MakerDAO",
+      "allocation": ""
+    },
+    {
+      "protocol": "Aave V3 Core",
+      "asset": "STG",
+      "type": "collateral",
+      "parent": "Stargate",
+      "allocation": ""
+    },
+    {
+      "protocol": "Aave V3 Core",
+      "asset": "KNC",
+      "type": "collateral",
+      "parent": "Kyber",
+      "allocation": ""
+    },
+    {
+      "protocol": "Aave V3 Core",
+      "asset": "FXS",
+      "type": "collateral",
+      "parent": "Frax",
+      "allocation": ""
+    },
+    {
+      "protocol": "Aave V3 Core",
+      "asset": "crvUSD",
+      "type": "collateral",
+      "parent": "Curve",
+      "allocation": ""
+    },
+    {
+      "protocol": "Aave V3 Core",
+      "asset": "PYUSD",
+      "type": "collateral",
+      "parent": "PayPal",
+      "allocation": ""
+    },
+    {
+      "protocol": "Aave V3 Core",
+      "asset": "weETH",
+      "type": "collateral",
+      "parent": "EtherFi",
+      "allocation": ""
+    },
+    {
+      "protocol": "Aave V3 Core",
+      "asset": "osETH",
+      "type": "collateral",
+      "parent": "StakeWise",
+      "allocation": ""
+    },
+    {
+      "protocol": "Aave V3 Core",
+      "asset": "USDe",
+      "type": "collateral",
+      "parent": "Ethena",
+      "allocation": ""
+    },
+    {
+      "protocol": "Aave V3 Core",
+      "asset": "ETHx",
+      "type": "collateral",
+      "parent": "Stader",
+      "allocation": ""
+    },
+    {
+      "protocol": "Aave V3 Core",
+      "asset": "sUSDe",
+      "type": "collateral",
+      "parent": "Ethena",
+      "allocation": ""
+    },
+    {
+      "protocol": "Aave V3 Core",
+      "asset": "tBTC",
+      "type": "collateral",
+      "parent": "Threshold",
+      "allocation": ""
+    },
+    {
+      "protocol": "Aave V3 Core",
+      "asset": "cbBTC",
+      "type": "collateral",
+      "parent": "Coinbase",
+      "allocation": ""
+    },
+    {
+      "protocol": "Aave V3 Core",
+      "asset": "USDS",
+      "type": "collateral",
+      "parent": "Sky",
+      "allocation": ""
+    },
+    {
+      "protocol": "Aave V3 Core",
+      "asset": "rsETH",
+      "type": "collateral",
+      "parent": "KelpDAO",
+      "allocation": ""
+    },
+    {
+      "protocol": "Aave V3 Core",
+      "asset": "LBTC",
+      "type": "collateral",
+      "parent": "Lombard",
+      "allocation": ""
+    },
+    {
+      "protocol": "Aave V3 Core",
+      "asset": "eBTC",
+      "type": "collateral",
+      "parent": "Badger",
+      "allocation": ""
+    },
+    {
+      "protocol": "Aave V3 Core",
+      "asset": "RLUSD",
+      "type": "collateral",
+      "parent": "Ripple",
+      "allocation": ""
+    },
+    {
+      "protocol": "Aave V3 Core",
+      "asset": "PT-eUSDE-29MAY2025",
+      "type": "collateral",
+      "parent": "Pendle",
+      "allocation": ""
+    },
+    {
+      "protocol": "Aave V3 Core",
+      "asset": "PT-sUSDE-31JUL2025",
+      "type": "collateral",
+      "parent": "Pendle",
+      "allocation": ""
+    },
+    {
+      "protocol": "Aave V3 Core",
+      "asset": "USDtb",
+      "type": "collateral",
+      "parent": "Ethena",
+      "allocation": ""
+    },
+    {
+      "protocol": "Aave V3 Core",
+      "asset": "PT-USDe-31JUL2025",
+      "type": "collateral",
+      "parent": "Pendle",
+      "allocation": ""
+    },
+    {
+      "protocol": "Aave V3 Core",
+      "asset": "PT-eUSDE-14AUG2025",
+      "type": "collateral",
+      "parent": "Pendle",
+      "allocation": ""
+    },
+    {
+      "protocol": "Aave V3 Core",
+      "asset": "eUSDe",
+      "type": "collateral",
+      "parent": "Ethena",
+      "allocation": ""
+    },
+    {
+      "protocol": "Aave V3 Core",
+      "asset": "FBTC",
+      "type": "collateral",
+      "parent": "Ignition",
+      "allocation": ""
+    },
+    {
+      "protocol": "Aave V3 Core",
+      "asset": "EURC",
+      "type": "collateral",
+      "parent": "Circle",
+      "allocation": ""
+    },
+    {
+      "protocol": "Aave V3 Core",
+      "asset": "PT-sUSDE-25SEP2025",
+      "type": "collateral",
+      "parent": "Pendle",
+      "allocation": ""
+    },
+    {
+      "protocol": "Aave V3 Core",
+      "asset": "PT-USDe-25SEP2025",
+      "type": "collateral",
+      "parent": "Pendle",
+      "allocation": ""
+    },
+    {
+      "protocol": "Aave V3 Core",
+      "asset": "tETH",
+      "type": "collateral",
+      "parent": "Treehouse",
+      "allocation": ""
+    },
+    {
+      "protocol": "Aave V3 Core",
+      "asset": "ezETH",
+      "type": "collateral",
+      "parent": "Renzo",
+      "allocation": ""
+    },
+    {
+      "protocol": "Aave V3 Core",
+      "asset": "XAUt",
+      "type": "collateral",
+      "parent": "Tether",
+      "allocation": ""
+    },
+    {
+      "protocol": "Aave V3 Core",
+      "asset": "PT-sUSDE-27NOV2025",
+      "type": "collateral",
+      "parent": "Pendle",
+      "allocation": ""
+    },
+    {
+      "protocol": "Aave V3 Core",
+      "asset": "PT-USDe-27NOV2025",
+      "type": "collateral",
+      "parent": "Pendle",
+      "allocation": ""
+    },
+    {
+      "protocol": "Aave V3 Core",
+      "asset": "PT-USDe-5FEB2026",
+      "type": "collateral",
+      "parent": "Pendle",
+      "allocation": ""
+    },
+    {
+      "protocol": "Aave V3 Core",
+      "asset": "PT-sUSDE-5FEB2026",
+      "type": "collateral",
+      "parent": "Pendle",
+      "allocation": ""
+    },
+    {
+      "protocol": "Aave V3 Core",
+      "asset": "mUSD",
+      "type": "collateral",
+      "parent": "Mountain",
+      "allocation": ""
+    },
+    {
+      "protocol": "Aave V3 Core",
+      "asset": "syrupUSDT",
+      "type": "collateral",
+      "parent": "Maple",
+      "allocation": ""
+    },
+    {
+      "protocol": "Aave V3 Core",
+      "asset": "USDG",
+      "type": "collateral",
+      "parent": "Paxos",
+      "allocation": ""
+    },
+    {
+      "protocol": "Aave V3 Core",
+      "asset": "PT-USDe-7MAY2026",
+      "type": "collateral",
+      "parent": "Pendle",
+      "allocation": ""
+    },
+    {
+      "protocol": "Aave V3 Core",
+      "asset": "PT-sUSDE-7MAY2026",
+      "type": "collateral",
+      "parent": "Pendle",
+      "allocation": ""
+    },
+    {
+      "protocol": "Aave V3 Core",
+      "asset": "PT-srUSDe-2APR2026",
+      "type": "collateral",
+      "parent": "Pendle",
+      "allocation": ""
+    },
+    {
+      "protocol": "Compound V3 USDC",
+      "asset": "USDC",
+      "type": "base",
+      "parent": "Circle",
+      "allocation": ""
+    },
+    {
+      "protocol": "Compound V3 USDC",
+      "asset": "COMP",
+      "type": "collateral",
+      "parent": "Compound",
+      "allocation": ""
+    },
+    {
+      "protocol": "Compound V3 USDC",
+      "asset": "WBTC",
+      "type": "collateral",
+      "parent": "BitGo",
+      "allocation": ""
+    },
+    {
+      "protocol": "Compound V3 USDC",
+      "asset": "WETH",
+      "type": "collateral",
+      "parent": "",
+      "allocation": ""
+    },
+    {
+      "protocol": "Compound V3 USDC",
+      "asset": "UNI",
+      "type": "collateral",
+      "parent": "Uniswap",
+      "allocation": ""
+    },
+    {
+      "protocol": "Compound V3 USDC",
+      "asset": "LINK",
+      "type": "collateral",
+      "parent": "Chainlink",
+      "allocation": ""
+    },
+    {
+      "protocol": "Compound V3 USDC",
+      "asset": "wstETH",
+      "type": "collateral",
+      "parent": "Lido",
+      "allocation": ""
+    },
+    {
+      "protocol": "Compound V3 USDC",
+      "asset": "cbBTC",
+      "type": "collateral",
+      "parent": "Coinbase",
+      "allocation": ""
+    },
+    {
+      "protocol": "Compound V3 USDC",
+      "asset": "tBTC",
+      "type": "collateral",
+      "parent": "Threshold",
+      "allocation": ""
+    },
+    {
+      "protocol": "Compound V3 USDC",
+      "asset": "weETH",
+      "type": "collateral",
+      "parent": "EtherFi",
+      "allocation": ""
+    },
+    {
+      "protocol": "Compound V3 USDC",
+      "asset": "deUSD",
+      "type": "collateral",
+      "parent": "Elixir",
+      "allocation": ""
+    },
+    {
+      "protocol": "Compound V3 USDC",
+      "asset": "sdeUSD",
+      "type": "collateral",
+      "parent": "Elixir",
+      "allocation": ""
+    },
+    {
+      "protocol": "Compound V3 USDC",
+      "asset": "rsETH",
+      "type": "collateral",
+      "parent": "KelpDAO",
+      "allocation": ""
+    },
+    {
+      "protocol": "Compound V3 USDC",
+      "asset": "USDe",
+      "type": "collateral",
+      "parent": "Ethena",
+      "allocation": ""
+    },
+    {
+      "protocol": "Compound V3 WETH",
+      "asset": "WETH",
+      "type": "base",
+      "parent": "",
+      "allocation": ""
+    },
+    {
+      "protocol": "Compound V3 WETH",
+      "asset": "cbETH",
+      "type": "collateral",
+      "parent": "Coinbase",
+      "allocation": ""
+    },
+    {
+      "protocol": "Compound V3 WETH",
+      "asset": "wstETH",
+      "type": "collateral",
+      "parent": "Lido",
+      "allocation": ""
+    },
+    {
+      "protocol": "Compound V3 WETH",
+      "asset": "rETH",
+      "type": "collateral",
+      "parent": "Rocket Pool",
+      "allocation": ""
+    },
+    {
+      "protocol": "Compound V3 WETH",
+      "asset": "rsETH",
+      "type": "collateral",
+      "parent": "KelpDAO",
+      "allocation": ""
+    },
+    {
+      "protocol": "Compound V3 WETH",
+      "asset": "weETH",
+      "type": "collateral",
+      "parent": "EtherFi",
+      "allocation": ""
+    },
+    {
+      "protocol": "Compound V3 WETH",
+      "asset": "osETH",
+      "type": "collateral",
+      "parent": "StakeWise",
+      "allocation": ""
+    },
+    {
+      "protocol": "Compound V3 WETH",
+      "asset": "WBTC",
+      "type": "collateral",
+      "parent": "BitGo",
+      "allocation": ""
+    },
+    {
+      "protocol": "Compound V3 WETH",
+      "asset": "ezETH",
+      "type": "collateral",
+      "parent": "Renzo",
+      "allocation": ""
+    },
+    {
+      "protocol": "Compound V3 WETH",
+      "asset": "cbBTC",
+      "type": "collateral",
+      "parent": "Coinbase",
+      "allocation": ""
+    },
+    {
+      "protocol": "Compound V3 WETH",
+      "asset": "rswETH",
+      "type": "collateral",
+      "parent": "Swell",
+      "allocation": ""
+    },
+    {
+      "protocol": "Compound V3 WETH",
+      "asset": "tBTC",
+      "type": "collateral",
+      "parent": "Threshold",
+      "allocation": ""
+    },
+    {
+      "protocol": "Compound V3 WETH",
+      "asset": "ETHx",
+      "type": "collateral",
+      "parent": "Stader",
+      "allocation": ""
+    },
+    {
+      "protocol": "Compound V3 WETH",
+      "asset": "tETH",
+      "type": "collateral",
+      "parent": "Treehouse",
+      "allocation": ""
+    },
+    {
+      "protocol": "Compound V3 WETH",
+      "asset": "pufETH",
+      "type": "collateral",
+      "parent": "Puffer",
+      "allocation": ""
+    },
+    {
+      "protocol": "Compound V3 WETH",
+      "asset": "wOETH",
+      "type": "collateral",
+      "parent": "Origin",
+      "allocation": ""
+    },
+    {
+      "protocol": "Compound V3 WETH",
+      "asset": "USDC",
+      "type": "collateral",
+      "parent": "Circle",
+      "allocation": ""
+    },
+    {
+      "protocol": "Compound V3 WETH",
+      "asset": "USDT",
+      "type": "collateral",
+      "parent": "Tether",
+      "allocation": ""
+    },
+    {
+      "protocol": "Maple Finance (syrupUSDC)",
+      "asset": "BTC",
+      "type": "collateral",
+      "parent": "",
+      "allocation": "53.92%"
+    },
+    {
+      "protocol": "Maple Finance (syrupUSDC)",
+      "asset": "XRP",
+      "type": "collateral",
+      "parent": "",
+      "allocation": "25.38%"
+    },
+    {
+      "protocol": "Maple Finance (syrupUSDC)",
+      "asset": "USTB",
+      "type": "collateral",
+      "parent": "Superstate",
+      "allocation": "16.16%"
+    },
+    {
+      "protocol": "Maple Finance (syrupUSDC)",
+      "asset": "LBTC",
+      "type": "collateral",
+      "parent": "Lombard",
+      "allocation": "2.43%"
+    },
+    {
+      "protocol": "Maple Finance (syrupUSDC)",
+      "asset": "weETH",
+      "type": "collateral",
+      "parent": "EtherFi",
+      "allocation": "1.06%"
+    },
+    {
+      "protocol": "Maple Finance (syrupUSDC)",
+      "asset": "HYPE",
+      "type": "collateral",
+      "parent": "",
+      "allocation": "1.05%"
+    },
+    {
+      "protocol": "Maple Finance (syrupUSDC)",
+      "asset": "Aave V3 Core",
+      "type": "yield_source",
+      "parent": "",
+      "allocation": ""
+    },
+    {
+      "protocol": "Maple Finance (syrupUSDC)",
+      "asset": "sky",
+      "type": "yield_source",
+      "parent": "",
+      "allocation": ""
+    }
+  ],
+  "mermaid": "graph LR\n    aave_v3_core[\"Aave V3 Core\\n<small>+44 unique assets</small>\"]\n    compound_v3_usdc[\"Compound V3 USDC\\n<small>+3 unique assets</small>\"]\n    compound_v3_weth[\"Compound V3 WETH\\n<small>+3 unique assets</small>\"]\n    maple[\"Maple Finance (syrupUSDC)\\n<small>+4 unique assets</small>\"]\n    ETHx[\"ETHx\\n<small>(Stader)</small>\"]\n    LBTC[\"LBTC\\n<small>(Lombard)</small>\"]\n    LINK[\"LINK\\n<small>(Chainlink)</small>\"]\n    UNI[\"UNI\\n<small>(Uniswap)</small>\"]\n    USDC[\"USDC\\n<small>(Circle)</small>\"]\n    USDT[\"USDT\\n<small>(Tether)</small>\"]\n    USDe[\"USDe\\n<small>(Ethena)</small>\"]\n    WBTC[\"WBTC\\n<small>(BitGo)</small>\"]\n    WETH([\"WETH\"])\n    cbBTC[\"cbBTC\\n<small>(Coinbase)</small>\"]\n    cbETH[\"cbETH\\n<small>(Coinbase)</small>\"]\n    ezETH[\"ezETH\\n<small>(Renzo)</small>\"]\n    osETH[\"osETH\\n<small>(StakeWise)</small>\"]\n    rETH[\"rETH\\n<small>(Rocket Pool)</small>\"]\n    rsETH[\"rsETH\\n<small>(KelpDAO)</small>\"]\n    tBTC[\"tBTC\\n<small>(Threshold)</small>\"]\n    tETH[\"tETH\\n<small>(Treehouse)</small>\"]\n    weETH[\"weETH\\n<small>(EtherFi)</small>\"]\n    wstETH[\"wstETH\\n<small>(Lido)</small>\"]\n    aave_v3_core --> WETH\n    aave_v3_core --> wstETH\n    aave_v3_core --> WBTC\n    aave_v3_core --> USDC\n    aave_v3_core --> LINK\n    aave_v3_core --> cbETH\n    aave_v3_core --> USDT\n    aave_v3_core --> rETH\n    aave_v3_core --> UNI\n    aave_v3_core --> weETH\n    aave_v3_core --> osETH\n    aave_v3_core --> USDe\n    aave_v3_core --> ETHx\n    aave_v3_core --> tBTC\n    aave_v3_core --> cbBTC\n    aave_v3_core --> rsETH\n    aave_v3_core --> LBTC\n    aave_v3_core --> tETH\n    aave_v3_core --> ezETH\n    compound_v3_usdc --> WBTC\n    compound_v3_usdc --> WETH\n    compound_v3_usdc --> UNI\n    compound_v3_usdc --> LINK\n    compound_v3_usdc --> wstETH\n    compound_v3_usdc --> cbBTC\n    compound_v3_usdc --> tBTC\n    compound_v3_usdc --> weETH\n    compound_v3_usdc --> rsETH\n    compound_v3_usdc --> USDe\n    compound_v3_weth --> cbETH\n    compound_v3_weth --> wstETH\n    compound_v3_weth --> rETH\n    compound_v3_weth --> rsETH\n    compound_v3_weth --> weETH\n    compound_v3_weth --> osETH\n    compound_v3_weth --> WBTC\n    compound_v3_weth --> ezETH\n    compound_v3_weth --> cbBTC\n    compound_v3_weth --> tBTC\n    compound_v3_weth --> ETHx\n    compound_v3_weth --> tETH\n    compound_v3_weth --> USDC\n    compound_v3_weth --> USDT\n    maple --> LBTC\n    maple --> weETH\n    maple -.->|yield| aave_v3_core\n    sky((\"sky\"))\n    maple -.->|yield| sky\n    classDef protocol fill:#0675F9,color:#fff,stroke:#0675F9\n    class aave_v3_core compound_v3_usdc compound_v3_weth maple protocol"
+}
