@@ -298,6 +298,46 @@ def infinifi_data() -> dict:
     }
 
 
+def strata_data() -> dict:
+    """Strata (srUSDe) dependency data from risk assessment report (Feb 2026)."""
+    return {
+        "name": "Strata (srUSDe)",
+        "chain": "ethereum",
+        "type": "tranched_vault",
+        "address": "0x3d7d6fdf07EE548B939A80edbc9B2256d0cdc003",
+        "report": "reports/report/strata-srusde.md",
+        "collateral": [
+            {"asset": "USDe"},
+            {"asset": "sUSDe"},
+            {"asset": "USDT"},
+            {"asset": "USDC"},
+            {"asset": "DAI"},
+        ],
+        "yield_sources": [
+            {"protocol": "ethena", "assets": ["sUSDe"]},
+        ],
+        "infrastructure": ["Chainlink", "Aave"],
+    }
+
+
+def reserve_ethplus_data() -> dict:
+    """Reserve Protocol ETH+ dependency data from risk assessment report (Dec 2025)."""
+    return {
+        "name": "Reserve Protocol (ETH+)",
+        "chain": "ethereum",
+        "type": "lst_basket",
+        "address": "0xE72B141DF173b999AE7c1aDcbF60Cc9833Ce56a8",
+        "report": "reports/report/reserve-ethplus.md",
+        "collateral": [
+            {"asset": "wstETH", "allocation": 50.04},
+            {"asset": "rETH", "allocation": 21.04},
+            {"asset": "sfrxETH", "allocation": 20.91},
+            {"asset": "ETHx", "allocation": 8.02},
+        ],
+        "infrastructure": ["Chainlink"],
+    }
+
+
 def main():
     data: dict = {
         "protocol_tokens": PROTOCOL_TOKENS,
@@ -325,6 +365,12 @@ def main():
 
     # InfiniFi
     data["protocols"]["infinifi"] = infinifi_data()
+
+    # Strata
+    data["protocols"]["strata"] = strata_data()
+
+    # Reserve Protocol ETH+
+    data["protocols"]["reserve_ethplus"] = reserve_ethplus_data()
 
     # Write YAML
     with open(OUTPUT_PATH, "w") as f:
