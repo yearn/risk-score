@@ -1,0 +1,297 @@
+protocol_tokens:
+  wstETH: Lido
+  stETH: Lido
+  rETH: Rocket Pool
+  sfrxETH: Frax
+  cbETH: Coinbase
+  weETH: EtherFi
+  rsETH: KelpDAO
+  osETH: StakeWise
+  ETHx: Stader
+  ezETH: Renzo
+  pufETH: Puffer
+  rswETH: Swell
+  wOETH: Origin
+  tETH: Treehouse
+  sUSDe: Ethena
+  USDe: Ethena
+  USDS: Sky
+  sUSDS: Sky
+  sDAI: MakerDAO
+  DAI: MakerDAO
+  GHO: Aave
+  LUSD: Liquity
+  crvUSD: Curve
+  FRAX: Frax
+  PYUSD: PayPal
+  eUSDe: Ethena
+  deUSD: Elixir
+  sdeUSD: Elixir
+  RLUSD: Ripple
+  USDtb: Ethena
+  mUSD: Mountain
+  USDG: Paxos
+  EURC: Circle
+  XAUt: Tether
+  syrupUSDT: Maple
+  LBTC: Lombard
+  tBTC: Threshold
+  cbBTC: Coinbase
+  WBTC: BitGo
+  FBTC: Ignition
+  eBTC: Badger
+  AAVE: Aave
+  COMP: Compound
+  UNI: Uniswap
+  LINK: Chainlink
+  CRV: Curve
+  LDO: Lido
+  MKR: MakerDAO
+  RPL: Rocket Pool
+  ENS: ENS
+  SNX: Synthetix
+  BAL: Balancer
+  FXS: Frax
+  STG: Stargate
+  KNC: Kyber
+  1INCH: 1inch
+  USTB: Superstate
+  USDT: Tether
+  USDC: Circle
+protocols:
+  aave_v3_core:
+    name: Aave V3 Core
+    chain: ethereum
+    type: lending_market
+    address: '0x87870Bca3F3fD6335C3F4ce8392D69350B4fA4E2'
+    collateral:
+    - asset: WETH
+      address: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2'
+    - asset: wstETH
+      address: '0x7f39c581f595b53c5cb19bd0b3f8da6c935e2ca0'
+    - asset: WBTC
+      address: '0x2260fac5e5542a773aa44fbcfedf7c193bc2c599'
+    - asset: USDC
+      address: '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48'
+    - asset: DAI
+      address: '0x6b175474e89094c44da98b954eedeac495271d0f'
+    - asset: LINK
+      address: '0x514910771af9ca656af840dff83e8264ecf986ca'
+    - asset: AAVE
+      address: '0x7fc66500c84a76ad7e9c93437bfc5ac33e2ddae9'
+    - asset: cbETH
+      address: '0xbe9895146f7af43049ca1c1ae358b0541ea49704'
+    - asset: USDT
+      address: '0xdac17f958d2ee523a2206206994597c13d831ec7'
+    - asset: rETH
+      address: '0xae78736cd615f374d3085123a210448e74fc6393'
+    - asset: LUSD
+      address: '0x5f98805a4e8be255a32880fdec7f6728c6568ba0'
+    - asset: CRV
+      address: '0xd533a949740bb3306d119cc777fa900ba034cd52'
+    - asset: MKR
+      address: '0x9f8f72aa9304c8b593d555f12ef6589cc3a579a2'
+    - asset: SNX
+      address: '0xc011a73ee8576fb46f5e1c5751ca3b9fe0af2a6f'
+    - asset: BAL
+      address: '0xba100000625a3754423978a60c9317c58a424e3d'
+    - asset: UNI
+      address: '0x1f9840a85d5af5bf1d1762f925bdaddc4201f984'
+    - asset: LDO
+      address: '0x5a98fcbea516cf06857215779fd812ca3bef1b32'
+    - asset: ENS
+      address: '0xc18360217d8f7ab5e7c516566761ea12ce7f9d72'
+    - asset: 1INCH
+      address: '0x111111111117dc0aa78b770fa6a738034120c302'
+    - asset: FRAX
+      address: '0x853d955acef822db058eb8505911ed77f175b99e'
+    - asset: GHO
+      address: '0x40d16fc0246ad3160ccc09b8d0d3a2cd28ae6c2f'
+    - asset: RPL
+      address: '0xd33526068d116ce69f19a9ee46f0bd304f21a51f'
+    - asset: sDAI
+      address: '0x83f20f44975d03b1b09e64809b757c47f942beea'
+    - asset: STG
+      address: '0xaf5191b0de278c7286d6c7cc6ab6bb8a73ba2cd6'
+    - asset: KNC
+      address: '0xdefa4e8a7bcba345f687a2f1456f5edd9ce97202'
+    - asset: FXS
+      address: '0x3432b6a60d23ca0dfca7761b7ab56459d9c964d0'
+    - asset: crvUSD
+      address: '0xf939e0a03fb07f59a73314e73794be0e57ac1b4e'
+    - asset: PYUSD
+      address: '0x6c3ea9036406852006290770bedfcaba0e23a0e8'
+    - asset: weETH
+      address: '0xcd5fe23c85820f7b72d0926fc9b05b43e359b7ee'
+    - asset: osETH
+      address: '0xf1c9acdc66974dfb6decb12aa385b9cd01190e38'
+    - asset: USDe
+      address: '0x4c9edd5852cd905f086c759e8383e09bff1e68b3'
+    - asset: ETHx
+      address: '0xa35b1b31ce002fbf2058d22f30f95d405200a15b'
+    - asset: sUSDe
+      address: '0x9d39a5de30e57443bff2a8307a4256c8797a3497'
+    - asset: tBTC
+      address: '0x18084fba666a33d37592fa2633fd49a74dd93a88'
+    - asset: cbBTC
+      address: '0xcbb7c0000ab88b473b1f5afd9ef808440eed33bf'
+    - asset: USDS
+      address: '0xdc035d45d973e3ec169d2276ddab16f1e407384f'
+    - asset: rsETH
+      address: '0xa1290d69c65a6fe4df752f95823fae25cb99e5a7'
+    - asset: LBTC
+      address: '0x8236a87084f8b84306f72007f36f2618a5634494'
+    - asset: eBTC
+      address: '0x657e8c867d8b37dcc18fa4caead9c45eb088c642'
+    - asset: RLUSD
+      address: '0x8292bb45bf1ee4d140127049757c2e0ff06317ed'
+    - asset: PT-eUSDE-29MAY2025
+      address: '0x50d2c7992b802eef16c04feadab310f31866a545'
+    - asset: PT-sUSDE-31JUL2025
+      address: '0x3b3fb9c57858ef816833dc91565efcd85d96f634'
+    - asset: USDtb
+      address: '0xc139190f447e929f090edeb554d95abb8b18ac1c'
+    - asset: PT-USDe-31JUL2025
+      address: '0x917459337caac939d41d7493b3999f571d20d667'
+    - asset: PT-eUSDE-14AUG2025
+      address: '0x14bdc3a3ae09f5518b923b69489cbcafb238e617'
+    - asset: eUSDe
+      address: '0x90d2af7d622ca3141efa4d8f1f24d86e5974cc8f'
+    - asset: FBTC
+      address: '0xc96de26018a54d51c097160568752c4e3bd6c364'
+    - asset: EURC
+      address: '0x1abaea1f7c830bd89acc67ec4af516284b1bc33c'
+    - asset: PT-sUSDE-25SEP2025
+      address: '0x9f56094c450763769ba0ea9fe2876070c0fd5f77'
+    - asset: PT-USDe-25SEP2025
+      address: '0xbc6736d346a5ebc0debc997397912cd9b8fae10a'
+    - asset: tETH
+      address: '0xd11c452fc99cf405034ee446803b6f6c1f6d5ed8'
+    - asset: ezETH
+      address: '0xbf5495efe5db9ce00f80364c8b423567e58d2110'
+    - asset: XAUt
+      address: '0x68749665ff8d2d112fa859aa293f07a622782f38'
+    - asset: PT-sUSDE-27NOV2025
+      address: '0xe6a934089bbee34f832060ce98848359883749b3'
+    - asset: PT-USDe-27NOV2025
+      address: '0x62c6e813b9589c3631ba0cdb013acdb8544038b7'
+    - asset: PT-USDe-5FEB2026
+      address: '0x1f84a51296691320478c98b8d77f2bbd17d34350'
+    - asset: PT-sUSDE-5FEB2026
+      address: '0xe8483517077afa11a9b07f849cee2552f040d7b2'
+    - asset: mUSD
+      address: '0xaca92e438df0b2401ff60da7e4337b687a2435da'
+    - asset: syrupUSDT
+      address: '0x356b8d89c1e1239cbbb9de4815c39a1474d5ba7d'
+    - asset: USDG
+      address: '0xe343167631d89b6ffc58b88d6b7fb0228795491d'
+    - asset: PT-USDe-7MAY2026
+      address: '0xaebf0bb9f57e89260d57f31af34eb58657d96ce0'
+    - asset: PT-sUSDE-7MAY2026
+      address: '0x3de0ff76e8b528c092d47b9dac775931cef80f49'
+    - asset: PT-srUSDe-2APR2026
+      address: '0x9bf45ab47747f4b4dd09b3c2c73953484b4eb375'
+    infrastructure:
+    - Chainlink
+  compound_v3_usdc:
+    name: Compound V3 USDC
+    chain: ethereum
+    type: lending_market
+    address: '0xc3d688B66703497DAA19211EEdff47f25384cdc3'
+    base_asset: USDC
+    collateral:
+    - asset: COMP
+      address: '0xc00e94cb662c3520282e6f5717214004a7f26888'
+    - asset: WBTC
+      address: '0x2260fac5e5542a773aa44fbcfedf7c193bc2c599'
+    - asset: WETH
+      address: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2'
+    - asset: UNI
+      address: '0x1f9840a85d5af5bf1d1762f925bdaddc4201f984'
+    - asset: LINK
+      address: '0x514910771af9ca656af840dff83e8264ecf986ca'
+    - asset: wstETH
+      address: '0x7f39c581f595b53c5cb19bd0b3f8da6c935e2ca0'
+    - asset: cbBTC
+      address: '0xcbb7c0000ab88b473b1f5afd9ef808440eed33bf'
+    - asset: tBTC
+      address: '0x18084fba666a33d37592fa2633fd49a74dd93a88'
+    - asset: weETH
+      address: '0xcd5fe23c85820f7b72d0926fc9b05b43e359b7ee'
+    - asset: deUSD
+      address: '0x15700b564ca08d9439c58ca5053166e8317aa138'
+    - asset: sdeUSD
+      address: '0x5c5b196abe0d54485975d1ec29617d42d9198326'
+    - asset: rsETH
+      address: '0xa1290d69c65a6fe4df752f95823fae25cb99e5a7'
+    - asset: USDe
+      address: '0x4c9edd5852cd905f086c759e8383e09bff1e68b3'
+    infrastructure:
+    - Chainlink
+  compound_v3_weth:
+    name: Compound V3 WETH
+    chain: ethereum
+    type: lending_market
+    address: '0xA17581A9E3356d9A858b789D68B4d866e593aE94'
+    base_asset: WETH
+    collateral:
+    - asset: cbETH
+      address: '0xbe9895146f7af43049ca1c1ae358b0541ea49704'
+    - asset: wstETH
+      address: '0x7f39c581f595b53c5cb19bd0b3f8da6c935e2ca0'
+    - asset: rETH
+      address: '0xae78736cd615f374d3085123a210448e74fc6393'
+    - asset: rsETH
+      address: '0xa1290d69c65a6fe4df752f95823fae25cb99e5a7'
+    - asset: weETH
+      address: '0xcd5fe23c85820f7b72d0926fc9b05b43e359b7ee'
+    - asset: osETH
+      address: '0xf1c9acdc66974dfb6decb12aa385b9cd01190e38'
+    - asset: WBTC
+      address: '0x2260fac5e5542a773aa44fbcfedf7c193bc2c599'
+    - asset: ezETH
+      address: '0xbf5495efe5db9ce00f80364c8b423567e58d2110'
+    - asset: cbBTC
+      address: '0xcbb7c0000ab88b473b1f5afd9ef808440eed33bf'
+    - asset: rswETH
+      address: '0xfae103dc9cf190ed75350761e95403b7b8afa6c0'
+    - asset: tBTC
+      address: '0x18084fba666a33d37592fa2633fd49a74dd93a88'
+    - asset: ETHx
+      address: '0xa35b1b31ce002fbf2058d22f30f95d405200a15b'
+    - asset: tETH
+      address: '0xd11c452fc99cf405034ee446803b6f6c1f6d5ed8'
+    - asset: pufETH
+      address: '0xd9a442856c234a39a81a089c06451ebaa4306a72'
+    - asset: wOETH
+      address: '0xdcee70654261af21c44c093c300ed3bb97b78192'
+    - asset: USDC
+      address: '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48'
+    - asset: USDT
+      address: '0xdac17f958d2ee523a2206206994597c13d831ec7'
+    infrastructure:
+    - Chainlink
+  maple:
+    name: Maple Finance (syrupUSDC)
+    chain: ethereum
+    type: lending
+    address: '0x80ac24aA929eaF5013f6436cdA2a7ba190f5Cc0b'
+    report: reports/report/maple-syrupusdc.md
+    collateral:
+    - asset: BTC
+      allocation: 53.92
+    - asset: XRP
+      allocation: 25.38
+    - asset: USTB
+      allocation: 16.16
+    - asset: LBTC
+      allocation: 2.43
+    - asset: weETH
+      allocation: 1.06
+    - asset: HYPE
+      allocation: 1.05
+    yield_sources:
+    - aave_v3_core
+    - sky
+    infrastructure:
+    - Chainlink
