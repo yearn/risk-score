@@ -312,32 +312,45 @@ protocols:
     - asset: sUSDe
     yield_sources:
     - protocol: fluid
-      assets: [USDC]
+      assets:
+      - USDC
     - protocol: euler
-      assets: [USDC]
+      assets:
+      - USDC
     - protocol: aave_v3_core
-      assets: [USDC]
+      assets:
+      - USDC
       label: Aave v3 Horizon (aHorRwaUSDC)
     - protocol: spark
-      assets: [USDC]
+      assets:
+      - USDC
     - protocol: aave_v3_core
-      assets: [USDC]
+      assets:
+      - USDC
       label: Aave v3 (aEthUSDC)
     - protocol: pendle
-      assets: [USDe, sUSDe]
+      assets:
+      - USDe
+      - sUSDe
     - protocol: ethena
-      assets: [USDe, sUSDe]
+      assets:
+      - USDe
+      - sUSDe
     - protocol: gauntlet
-      assets: [USDC]
+      assets:
+      - USDC
       label: Gauntlet Frontier (gtUSDa)
     - protocol: reservoir
-      assets: [USDC]
+      assets:
+      - USDC
       label: Reservoir wsrUSD
     - protocol: fasanara
-      assets: [USDC]
+      assets:
+      - USDC
       label: Fasanara Genesis Fund
     - protocol: tokemak
-      assets: [USDC]
+      assets:
+      - USDC
       label: Tokemak autoUSD
     infrastructure:
     - Chainlink
@@ -355,7 +368,8 @@ protocols:
     - asset: DAI
     yield_sources:
     - protocol: ethena
-      assets: [sUSDe]
+      assets:
+      - sUSDe
     infrastructure:
     - Chainlink
     - Aave
@@ -420,11 +434,14 @@ protocols:
     - asset: USDC
     yield_sources:
     - protocol: aave_v3_core
-      assets: [USDe]
+      assets:
+      - USDe
     - protocol: pendle
-      assets: [USDC]
+      assets:
+      - USDC
     - protocol: morpho
-      assets: [USDC]
+      assets:
+      - USDC
     infrastructure: []
   origin_arm:
     name: Origin ARM (stETH/WETH)
@@ -437,7 +454,8 @@ protocols:
     - asset: stETH
     yield_sources:
     - protocol: morpho
-      assets: [WETH]
+      assets:
+      - WETH
       label: Morpho (Yearn WETH ARM vault)
     infrastructure:
     - Lido
@@ -465,11 +483,58 @@ protocols:
     - asset: USCC
     yield_sources:
     - protocol: aave_v3_core
-      assets: [USDC]
+      assets:
+      - USDC
     - protocol: fluid_lending
-      assets: [USDC]
+      assets:
+      - USDC
     infrastructure:
     - Chainlink
+  spark:
+    name: Spark Lending
+    chain: ethereum
+    type: lending_market
+    address: '0xC13e21B648A5Ee794902342038FF3aDAB66BE987'
+    collateral:
+    - asset: DAI
+      address: '0x6b175474e89094c44da98b954eedeac495271d0f'
+    - asset: sDAI
+      address: '0x83f20f44975d03b1b09e64809b757c47f942beea'
+    - asset: USDC
+      address: '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48'
+    - asset: WETH
+      address: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2'
+    - asset: wstETH
+      address: '0x7f39c581f595b53c5cb19bd0b3f8da6c935e2ca0'
+    - asset: WBTC
+      address: '0x2260fac5e5542a773aa44fbcfedf7c193bc2c599'
+    - asset: GNO
+      address: '0x6810e776880c02933d47db1b9fc05908e5386b96'
+    - asset: rETH
+      address: '0xae78736cd615f374d3085123a210448e74fc6393'
+    - asset: USDT
+      address: '0xdac17f958d2ee523a2206206994597c13d831ec7'
+    - asset: weETH
+      address: '0xcd5fe23c85820f7b72d0926fc9b05b43e359b7ee'
+    - asset: cbBTC
+      address: '0xcbb7c0000ab88b473b1f5afd9ef808440eed33bf'
+    - asset: sUSDS
+      address: '0xa3931d71877c0e7a3148cb7eb4463524fec27fbd'
+    - asset: USDS
+      address: '0xdc035d45d973e3ec169d2276ddab16f1e407384f'
+    - asset: LBTC
+      address: '0x8236a87084f8b84306f72007f36f2618a5634494'
+    - asset: tBTC
+      address: '0x18084fba666a33d37592fa2633fd49a74dd93a88'
+    - asset: ezETH
+      address: '0xbf5495efe5db9ce00f80364c8b423567e58d2110'
+    - asset: rsETH
+      address: '0xa1290d69c65a6fe4df752f95823fae25cb99e5a7'
+    - asset: PYUSD
+      address: '0x6c3ea9036406852006290770bedfcaba0e23a0e8'
+    infrastructure:
+    - Chainlink
+    - Chronicle
   spectra:
     name: Spectra Finance
     chain: ethereum

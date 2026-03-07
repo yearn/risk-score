@@ -434,6 +434,30 @@ def resolv_rlp_data() -> dict:
     }
 
 
+def fetch_spark() -> dict:
+    """Fetch all Spark Lending reserves from the Pool contract (Aave V3 fork)."""
+    print("Fetching Spark Lending reserves...")
+    pool_address = "0xC13e21B648A5Ee794902342038FF3aDAB66BE987"
+
+    raw = eth_call(pool_address, SEL_GET_RESERVES_LIST)
+    (reserves,) = decode(["address[]"], raw)
+
+    collateral = []
+    for addr in reserves:
+        symbol = get_symbol(addr)
+        collateral.append({"asset": symbol, "address": addr})
+        print(f"  {symbol}: {addr}")
+
+    return {
+        "name": "Spark Lending",
+        "chain": "ethereum",
+        "type": "lending_market",
+        "address": pool_address,
+        "collateral": collateral,
+        "infrastructure": ["Chainlink", "Chronicle"],
+    }
+
+
 def spectra_data() -> dict:
     """Spectra Finance dependency data from risk assessment report (Feb 2026)."""
     return {
@@ -571,6 +595,9 @@ def main():
 
     # Resolv RLP
     data["protocols"]["resolv_rlp"] = resolv_rlp_data()
+
+    # Spark Lending
+    data["protocols"]["spark"] = fetch_spark()
 
     # Spectra Finance
     data["protocols"]["spectra"] = spectra_data()
