@@ -34,6 +34,10 @@ protocol_tokens:
   EURC: Circle
   XAUt: Tether
   syrupUSDT: Maple
+  USR: Resolv
+  wstUSR: Resolv
+  USCC: Superstate
+  STRC: Strategy Inc.
   LBTC: Lombard
   tBTC: Threshold
   cbBTC: Coinbase
@@ -372,3 +376,124 @@ protocols:
       allocation: 8.02
     infrastructure:
     - Chainlink
+  fluid_lending:
+    name: Fluid Lending
+    chain: ethereum
+    type: lending
+    address: '0x9Fb7b4477576Fe5B32be4C1843aFB1e55F251B33'
+    report: reports/report/fluid.md
+    collateral:
+    - asset: USDC
+    - asset: USDT
+    - asset: WETH
+    - asset: wstETH
+    - asset: GHO
+    - asset: sUSDS
+    - asset: USDtb
+    infrastructure: []
+  buck:
+    name: BUCK
+    chain: ethereum
+    type: rwa_yield
+    address: '0xdb13997f4D83EF343845d0bAEb27d1173dF8c224'
+    report: reports/report/buck.md
+    collateral:
+    - asset: USDC
+    - asset: STRC
+    infrastructure: []
+  kinetiq:
+    name: Kinetiq (kHYPE)
+    chain: hyperevm
+    type: liquid_staking
+    address: '0xfd739d4e423301ce9385c1fb8850539d657c296d'
+    report: reports/report/kinetiq-khype.md
+    collateral:
+    - asset: HYPE
+    infrastructure: []
+  midas_mhyper:
+    name: Midas (mHYPER)
+    chain: ethereum
+    type: tokenized_fund
+    address: '0x9b5528528656DBC094765E2abB79F293c21191B9'
+    report: reports/report/midas-mhyper.md
+    collateral:
+    - asset: USDC
+    yield_sources:
+    - protocol: aave_v3_core
+      assets: [USDe]
+    - protocol: pendle
+      assets: [USDC]
+    - protocol: morpho
+      assets: [USDC]
+    infrastructure: []
+  origin_arm:
+    name: Origin ARM (stETH/WETH)
+    chain: ethereum
+    type: yield_vault
+    address: '0x85B78AcA6Deae198fBF201c82DAF6Ca21942acc6'
+    report: reports/report/origin-arm.md
+    collateral:
+    - asset: WETH
+    - asset: stETH
+    yield_sources:
+    - protocol: morpho
+      assets: [WETH]
+      label: Morpho (Yearn WETH ARM vault)
+    infrastructure:
+    - Lido
+  resolv_wstusr:
+    name: Resolv (wstUSR)
+    chain: ethereum
+    type: stablecoin
+    address: '0x1202F5C7b4B9E47a1A484E8B270be34dbbC75055'
+    report: reports/report/resolv-wstusr.md
+    collateral:
+    - asset: USR
+    infrastructure: []
+  resolv_rlp:
+    name: Resolv (RLP)
+    chain: ethereum
+    type: insurance_tranche
+    address: '0x4956b52aE2fF65D74CA2d61207523288e4528f96'
+    report: reports/report/resolv-rlp.md
+    collateral:
+    - asset: USDC
+    - asset: USDT
+    - asset: ETH
+    - asset: stETH
+    - asset: wstETH
+    - asset: USCC
+    yield_sources:
+    - protocol: aave_v3_core
+      assets: [USDC]
+    - protocol: fluid_lending
+      assets: [USDC]
+    infrastructure:
+    - Chainlink
+  spectra:
+    name: Spectra Finance
+    chain: ethereum
+    type: yield_tokenization
+    address: ''
+    report: reports/report/spectra-finance.md
+    collateral: []
+    infrastructure:
+    - Curve
+  stakedhype:
+    name: StakedHYPE (stHYPE)
+    chain: hyperevm
+    type: liquid_staking
+    address: '0xfFaa4a3D97fE9107Cef8a3F48c069F577Ff76cC1'
+    report: reports/report/stakedhype-sthype.md
+    collateral:
+    - asset: HYPE
+    infrastructure: []
+  unit_ubtc:
+    name: Unit (UBTC)
+    chain: hyperevm
+    type: bridge
+    address: '0x9FDBdA0A5e284c32744D2f17Ee5c74B284993463'
+    report: reports/report/unit-ubtc.md
+    collateral:
+    - asset: BTC
+    infrastructure: []

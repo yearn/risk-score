@@ -84,6 +84,12 @@ PROTOCOL_TOKENS: dict[str, str] = {
     "EURC": "Circle",
     "XAUt": "Tether",
     "syrupUSDT": "Maple",
+    # Resolv
+    "USR": "Resolv",
+    "wstUSR": "Resolv",
+    # RWA
+    "USCC": "Superstate",
+    "STRC": "Strategy Inc.",
     # Wrapped BTC
     "LBTC": "Lombard",
     "tBTC": "Threshold",
@@ -298,6 +304,179 @@ def infinifi_data() -> dict:
     }
 
 
+def fluid_data() -> dict:
+    """Fluid Lending Protocol dependency data from risk assessment report (Feb 2026)."""
+    return {
+        "name": "Fluid Lending",
+        "chain": "ethereum",
+        "type": "lending",
+        "address": "0x9Fb7b4477576Fe5B32be4C1843aFB1e55F251B33",
+        "report": "reports/report/fluid.md",
+        "collateral": [
+            {"asset": "USDC"},
+            {"asset": "USDT"},
+            {"asset": "WETH"},
+            {"asset": "wstETH"},
+            {"asset": "GHO"},
+            {"asset": "sUSDS"},
+            {"asset": "USDtb"},
+        ],
+        "infrastructure": [],
+    }
+
+
+def buck_data() -> dict:
+    """BUCK (Bitcoin Dollar SavingsCoin) dependency data from risk assessment report (Mar 2026)."""
+    return {
+        "name": "BUCK",
+        "chain": "ethereum",
+        "type": "rwa_yield",
+        "address": "0xdb13997f4D83EF343845d0bAEb27d1173dF8c224",
+        "report": "reports/report/buck.md",
+        "collateral": [
+            {"asset": "USDC"},
+            {"asset": "STRC"},
+        ],
+        "infrastructure": [],
+    }
+
+
+def kinetiq_data() -> dict:
+    """Kinetiq kHYPE dependency data from risk assessment report (Feb 2026)."""
+    return {
+        "name": "Kinetiq (kHYPE)",
+        "chain": "hyperevm",
+        "type": "liquid_staking",
+        "address": "0xfd739d4e423301ce9385c1fb8850539d657c296d",
+        "report": "reports/report/kinetiq-khype.md",
+        "collateral": [
+            {"asset": "HYPE"},
+        ],
+        "infrastructure": [],
+    }
+
+
+def midas_mhyper_data() -> dict:
+    """Midas mHYPER dependency data from risk assessment report (Feb 2026)."""
+    return {
+        "name": "Midas (mHYPER)",
+        "chain": "ethereum",
+        "type": "tokenized_fund",
+        "address": "0x9b5528528656DBC094765E2abB79F293c21191B9",
+        "report": "reports/report/midas-mhyper.md",
+        "collateral": [
+            {"asset": "USDC"},
+        ],
+        "yield_sources": [
+            {"protocol": "aave_v3_core", "assets": ["USDe"]},
+            {"protocol": "pendle", "assets": ["USDC"]},
+            {"protocol": "morpho", "assets": ["USDC"]},
+        ],
+        "infrastructure": [],
+    }
+
+
+def origin_arm_data() -> dict:
+    """Origin ARM dependency data from risk assessment report (Feb 2026)."""
+    return {
+        "name": "Origin ARM (stETH/WETH)",
+        "chain": "ethereum",
+        "type": "yield_vault",
+        "address": "0x85B78AcA6Deae198fBF201c82DAF6Ca21942acc6",
+        "report": "reports/report/origin-arm.md",
+        "collateral": [
+            {"asset": "WETH"},
+            {"asset": "stETH"},
+        ],
+        "yield_sources": [
+            {"protocol": "morpho", "assets": ["WETH"], "label": "Morpho (Yearn WETH ARM vault)"},
+        ],
+        "infrastructure": ["Lido"],
+    }
+
+
+def resolv_wstusr_data() -> dict:
+    """Resolv wstUSR dependency data from risk assessment report (Feb 2026)."""
+    return {
+        "name": "Resolv (wstUSR)",
+        "chain": "ethereum",
+        "type": "stablecoin",
+        "address": "0x1202F5C7b4B9E47a1A484E8B270be34dbbC75055",
+        "report": "reports/report/resolv-wstusr.md",
+        "collateral": [
+            {"asset": "USR"},
+        ],
+        "infrastructure": [],
+    }
+
+
+def resolv_rlp_data() -> dict:
+    """Resolv RLP dependency data from risk assessment report (Feb 2026)."""
+    return {
+        "name": "Resolv (RLP)",
+        "chain": "ethereum",
+        "type": "insurance_tranche",
+        "address": "0x4956b52aE2fF65D74CA2d61207523288e4528f96",
+        "report": "reports/report/resolv-rlp.md",
+        "collateral": [
+            {"asset": "USDC"},
+            {"asset": "USDT"},
+            {"asset": "ETH"},
+            {"asset": "stETH"},
+            {"asset": "wstETH"},
+            {"asset": "USCC"},
+        ],
+        "yield_sources": [
+            {"protocol": "aave_v3_core", "assets": ["USDC"]},
+            {"protocol": "fluid_lending", "assets": ["USDC"]},
+        ],
+        "infrastructure": ["Chainlink"],
+    }
+
+
+def spectra_data() -> dict:
+    """Spectra Finance dependency data from risk assessment report (Feb 2026)."""
+    return {
+        "name": "Spectra Finance",
+        "chain": "ethereum",
+        "type": "yield_tokenization",
+        "address": "",
+        "report": "reports/report/spectra-finance.md",
+        "collateral": [],
+        "infrastructure": ["Curve"],
+    }
+
+
+def stakedhype_data() -> dict:
+    """StakedHYPE stHYPE dependency data from risk assessment report (Feb 2026)."""
+    return {
+        "name": "StakedHYPE (stHYPE)",
+        "chain": "hyperevm",
+        "type": "liquid_staking",
+        "address": "0xfFaa4a3D97fE9107Cef8a3F48c069F577Ff76cC1",
+        "report": "reports/report/stakedhype-sthype.md",
+        "collateral": [
+            {"asset": "HYPE"},
+        ],
+        "infrastructure": [],
+    }
+
+
+def unit_ubtc_data() -> dict:
+    """Unit Bitcoin UBTC dependency data from risk assessment report (Feb 2026)."""
+    return {
+        "name": "Unit (UBTC)",
+        "chain": "hyperevm",
+        "type": "bridge",
+        "address": "0x9FDBdA0A5e284c32744D2f17Ee5c74B284993463",
+        "report": "reports/report/unit-ubtc.md",
+        "collateral": [
+            {"asset": "BTC"},
+        ],
+        "infrastructure": [],
+    }
+
+
 def strata_data() -> dict:
     """Strata (srUSDe) dependency data from risk assessment report (Feb 2026)."""
     return {
@@ -371,6 +550,36 @@ def main():
 
     # Reserve Protocol ETH+
     data["protocols"]["reserve_ethplus"] = reserve_ethplus_data()
+
+    # Fluid Lending
+    data["protocols"]["fluid_lending"] = fluid_data()
+
+    # BUCK
+    data["protocols"]["buck"] = buck_data()
+
+    # Kinetiq kHYPE
+    data["protocols"]["kinetiq"] = kinetiq_data()
+
+    # Midas mHYPER
+    data["protocols"]["midas_mhyper"] = midas_mhyper_data()
+
+    # Origin ARM
+    data["protocols"]["origin_arm"] = origin_arm_data()
+
+    # Resolv wstUSR
+    data["protocols"]["resolv_wstusr"] = resolv_wstusr_data()
+
+    # Resolv RLP
+    data["protocols"]["resolv_rlp"] = resolv_rlp_data()
+
+    # Spectra Finance
+    data["protocols"]["spectra"] = spectra_data()
+
+    # StakedHYPE stHYPE
+    data["protocols"]["stakedhype"] = stakedhype_data()
+
+    # Unit Bitcoin UBTC
+    data["protocols"]["unit_ubtc"] = unit_ubtc_data()
 
     # Write YAML
     with open(OUTPUT_PATH, "w") as f:
