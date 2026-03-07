@@ -48,7 +48,6 @@ Each layer introduces additional smart contract risk, oracle risk, and counterpa
 - [DeFiLlama - Kelp](https://defillama.com/protocol/kelp)
 - [DeFiLlama - Gain](https://defillama.com/protocol/gain)
 - [LlamaRisk - rsETH Collateral Risk Assessment](https://llamarisk.com/research/collateral-risk-rseth)
-- [CoinGecko - hgETH](https://www.coingecko.com/en/coins/high-growth-eth)
 - [Immunefi Bug Bounty](https://immunefi.com/bug-bounty/kelp-dao/information/)
 - [KernelDAO Blog](https://blogs.kerneldao.com)
 - [Twitter/X - @KelpDAO](https://x.com/KelpDAO)
@@ -76,23 +75,6 @@ Each layer introduces additional smart contract risk, oracle risk, and counterpa
 | Vault Owner Multisig | [`0x66Bee721697BF17D9Eea28c51C828a43ba597B0b`](https://etherscan.io/address/0x66Bee721697BF17D9Eea28c51C828a43ba597B0b) | 3-of-5 Gnosis Safe (on-chain verified via `getThreshold()` and `getOwners()`) |
 | ProxyAdmin Owner Multisig | [`0xFD96F6854bc73aeBc6dc6E61A372926186010a91`](https://etherscan.io/address/0xFD96F6854bc73aeBc6dc6E61A372926186010a91) | 3-of-5 Gnosis Safe — same 5 signers as vault owner (on-chain verified) |
 
-**Vault Owner Multisig signers (on-chain verified):**
-1. [`0xf5A37fEEe552895B4B7843c66e8A3F1036767873`](https://etherscan.io/address/0xf5A37fEEe552895B4B7843c66e8A3F1036767873)
-2. [`0xCfd77d87e633749d09F1A09ba333cc739E6fcB2B`](https://etherscan.io/address/0xCfd77d87e633749d09F1A09ba333cc739E6fcB2B)
-3. [`0x3485fa418874f04485047C384eef53377a81bd0e`](https://etherscan.io/address/0x3485fa418874f04485047C384eef53377a81bd0e)
-4. [`0x1e15e35d436960Cb95094142e73AABA9656393C3`](https://etherscan.io/address/0x1e15e35d436960Cb95094142e73AABA9656393C3)
-5. [`0x7AAd74b7f0d60D5867B59dbD377a71783425af47`](https://etherscan.io/address/0x7AAd74b7f0d60D5867B59dbD377a71783425af47) — labeled "Kelp DAO Deployer" on Etherscan
-
-### Morpho Market Contracts
-
-| Contract | Address | Description |
-|----------|---------|-------------|
-| Morpho Blue | [`0xBBBBBbbBBb9cc5e90e3b3Af64bdAF62C37EEFFCb`](https://etherscan.io/address/0xBBBBBbbBBb9cc5e90e3b3Af64bdAF62C37EEFFCb) | Morpho singleton |
-| Oracle (MorphoChainlinkOracleV2) | [`0x56dbc0f2784cd959e57fcc9cd83c3b7a24ee678c`](https://etherscan.io/address/0x56dbc0f2784cd959e57fcc9cd83c3b7a24ee678c) | hgETH/WETH pricing |
-| BASE_FEED_1 (hgETH/USD) | [`0x70cf192d6b76d57a46aafc9285ced110034eb013`](https://etherscan.io/address/0x70cf192d6b76d57a46aafc9285ced110034eb013) | TransparentUpgradeableProxy → EOMultiFeedAdapter |
-| QUOTE_FEED_1 (ETH/USD) | [`0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419`](https://etherscan.io/address/0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419) | Chainlink ETH/USD feed |
-| IRM | [`0x870aC11D48B15DB9a138Cf899d20F13F79Ba00BC`](https://etherscan.io/address/0x870aC11D48B15DB9a138Cf899d20F13F79Ba00BC) | AdaptiveCurveIrm |
-
 ### On-Chain Verification (Etherscan + cast, March 1, 2026)
 
 | Contract | Name | Verified | Proxy | Implementation |
@@ -103,11 +85,7 @@ Each layer introduces additional smart contract risk, oracle risk, and counterpa
 | ProxyAdmin | ProxyAdmin | Yes | No | — |
 
 **On-chain ownership verification (via `cast`):**
-- hgETH `owner()` → `0x66Bee721697BF17D9Eea28c51C828a43ba597B0b` (3-of-5 multisig) ✓
-- hgETH ProxyAdmin `owner()` → `0xFD96F6854bc73aeBc6dc6E61A372926186010a91` (3-of-5 multisig, same signers) ✓
-- Vault multisig `getThreshold()` → 3, `getOwners()` → 5 signers ✓
-- ProxyAdmin multisig `getThreshold()` → 3, `getOwners()` → 5 signers (same set) ✓
-
+- hgETH `owner()` → `0x66Bee721697BF17D9Eea28c51C828a43ba597B0b` (3-of-5 multisig)- hgETH ProxyAdmin `owner()` → `0xFD96F6854bc73aeBc6dc6E61A372926186010a91` (3-of-5 multisig, same signers)- Vault multisig `getThreshold()` → 3, `getOwners()` → 5 signers- ProxyAdmin multisig `getThreshold()` → 3, `getOwners()` → 5 signers (same set)
 ## Audits and Due Diligence Disclosures
 
 ### Audit History
@@ -127,43 +105,6 @@ hgETH involves multiple protocol layers, each with its own audit history.
 - A portion of rsETH tokens will not be accounted for by any vault and become stuck in the contract
 - Team acknowledged these as "design choices for protocol stability"
 
-#### Upshift Finance (vault infrastructure) Audits
-
-| # | Firm | Date | Scope | Report |
-|---|------|------|-------|--------|
-| 1 | **ChainSecurity** | Jan 2025 | Core Vault | Available |
-| 2 | **Hacken** | Sep 2025 | Unknown scope | Available |
-| 3 | **Hacken** | Dec 2025 | Unknown scope | Available |
-| 4 | **Hacken** | Jan 2026 | AllocationWhitelist | Available |
-| 5 | **Sigma Prime** | Aug 2024 | Unknown scope | Available |
-| 6 | **Zellic** | Apr 2023 | Fractal Protocol (predecessor) | Available |
-
-#### rsETH (Kelp) Audits
-
-| # | Firm | Date | Scope | Findings | Report |
-|---|------|------|-------|----------|--------|
-| 1 | **Sigma Prime** | Dec 2023 | rsETH smart contracts | 2M, 3L, 5I | [PDF](https://kelpdao.xyz/audits/smartcontracts/SigmaPrime.pdf) |
-| 2 | **Code4rena** | Nov 2023 | rsETH system (competitive, $28K pool) | 3H, 2M | [Report](https://code4rena.com/reports/2023-11-kelp) |
-| 3 | **MixBytes** | Mar 2024 | rsETH + withdrawal mechanism | 4H | [PDF](https://kerneldao.com/kelp/audits/smartcontracts/mixbytes.pdf) |
-| 4 | **Sigma Prime** | 2024 | rsETH with withdrawals | Unknown | [PDF](https://kelpdao.xyz/audits/smartcontracts/SigmaPrime_2.pdf) |
-| 5 | **Sigma Prime** | 2024 | rsETH with withdrawals | Unknown | [PDF](https://kelpdao.xyz/audits/smartcontracts/SigmaPrime_3.pdf) |
-
-**Notable Code4rena findings (Nov 2023):**
-- **H-01:** Possible arbitrage from Chainlink price discrepancy (disputed by Kelp)
-- **H-02:** Protocol mints less rsETH on deposit than intended (fixed)
-- **H-03:** rsETH price manipulable by first staker via donation attack (disputed but upheld as HIGH)
-
-**Notable MixBytes findings (Mar 2024):**
-- 4 HIGH severity including EigenPod initialization problem and race condition in node delegator management
-
-#### Kernel (BNB Chain) Audits
-
-| # | Firm | Date | Scope | Report |
-|---|------|------|-------|--------|
-| 1 | **ChainSecurity** | Dec 2024 | Kernel smart contracts | [PDF](https://cdn.prod.website-files.com/65d35b01a4034b72499019e8/677289c9b2a5ff641ff2d3d0_ChainSecurity_Kernel_DAO_Kernel_audit.pdf) |
-| 2 | **Bailsec** | Unknown | Kernel platform | Not publicly available |
-| 3 | **Sherlock** | Jul 2025 | Slashing/restaking logic | Private engagement |
-
 ### On-Chain Complexity
 
 The architecture is **highly complex** with multiple layers:
@@ -178,11 +119,6 @@ The architecture is **highly complex** with multiple layers:
 
 **Active Immunefi bug bounty program for Kelp DAO:**
 - **Critical smart contract bugs**: $100,000 - $250,000 (10% of funds at risk)
-- **High**: $50,000 - $100,000
-- **Medium**: $11,000 - $50,000
-- **Low**: $10,000
-- In-scope: 10 smart contracts (rsETH core)
-- KYC required, paid in USDC
 - [Immunefi - Kelp DAO](https://immunefi.com/bug-bounty/kelp-dao/information/)
 
 **Note:** The bug bounty covers rsETH core contracts only. **hgETH/Gain vault contracts are NOT in scope** — verified on [Immunefi Kelp DAO scope](https://immunefi.com/bug-bounty/kelp-dao/scope/). The 10 in-scope contracts are: LRT Config, rsETH, LRT Deposit Pool, LRT Oracle, EthXPriceOracle, FeeReceiver, LRTConverter, LRTWithdrawalManager, LRTUnstakingVault, and NodeDelegator. The hgETH contract ([`0xc824A08dB624942c5E5F330d56530cD1598859fD`](https://etherscan.io/address/0xc824A08dB624942c5E5F330d56530cD1598859fD)) and Upshift infrastructure are not covered. There is also no separate KernelDAO bug bounty program on Immunefi.
@@ -316,7 +252,7 @@ Only **1.45% of assets** are available as buffer for immediate redemptions. The 
 ### Primary Exit Mechanisms
 
 1. **Withdrawal from vault**: Request hgETH → rsETH redemption via Kelp Gain dApp. 3-4 day processing period as assets are recalled from strategies
-2. **DEX swap**: hgETH composability on Balancer, Pendle; rsETH has ~$79M DEX liquidity (Curve rsETH/weETH $26M, Balancer rsETH/WETH $25.8M per LlamaRisk)
+2. **DEX swap**: hgETH composability on [Balancer](https://balancer.fi/pools?token=0xc824A08dB624942c5E5F330d56530cD1598859fD), Pendle; rsETH has ~$79M DEX liquidity (Curve rsETH/weETH $26M, Balancer rsETH/WETH $25.8M per LlamaRisk)
 3. **Morpho/Euler**: hgETH can be used as collateral on Morpho and Euler Frontier vaults
 
 ### Liquidity Assessment
@@ -713,3 +649,44 @@ For a **strategy use case** (depositing into the vault), the risk profile is mor
 - [ ] Verify hgETH performance fee percentage (management fee confirmed at 1.5%, withdrawal fee at 0%)
 - [x] Verify whether hgETH/Gain vault contracts are in scope of the Kelp Immunefi bug bounty — **Resolved**: NOT in scope. Only rsETH core contracts (10 contracts) are covered
 - [x] Check if the EOMultiFeedAdapter oracle has any additional governance controls or circuit breakers — **Resolved**: No circuit breakers, pause, or governance functions exist. Implementation is entirely read-only after initialization. Only modification path is full proxy upgrade
+
+---
+
+## Appendix A — Related Protocol Audits
+
+### Upshift Finance (vault infrastructure) Audits
+
+| # | Firm | Date | Scope | Report |
+|---|------|------|-------|--------|
+| 1 | **ChainSecurity** | Jan 2025 | Core Vault | Available |
+| 2 | **Hacken** | Sep 2025 | Unknown scope | Available |
+| 3 | **Hacken** | Dec 2025 | Unknown scope | Available |
+| 4 | **Hacken** | Jan 2026 | AllocationWhitelist | Available |
+| 5 | **Sigma Prime** | Aug 2024 | Unknown scope | Available |
+| 6 | **Zellic** | Apr 2023 | Fractal Protocol (predecessor) | Available |
+
+### rsETH (Kelp) Audits
+
+| # | Firm | Date | Scope | Findings | Report |
+|---|------|------|-------|----------|--------|
+| 1 | **Sigma Prime** | Dec 2023 | rsETH smart contracts | 2M, 3L, 5I | [PDF](https://kelpdao.xyz/audits/smartcontracts/SigmaPrime.pdf) |
+| 2 | **Code4rena** | Nov 2023 | rsETH system (competitive, $28K pool) | 3H, 2M | [Report](https://code4rena.com/reports/2023-11-kelp) |
+| 3 | **MixBytes** | Mar 2024 | rsETH + withdrawal mechanism | 4H | [PDF](https://kerneldao.com/kelp/audits/smartcontracts/mixbytes.pdf) |
+| 4 | **Sigma Prime** | 2024 | rsETH with withdrawals | Unknown | [PDF](https://kelpdao.xyz/audits/smartcontracts/SigmaPrime_2.pdf) |
+| 5 | **Sigma Prime** | 2024 | rsETH with withdrawals | Unknown | [PDF](https://kelpdao.xyz/audits/smartcontracts/SigmaPrime_3.pdf) |
+
+**Notable Code4rena findings (Nov 2023):**
+- **H-01:** Possible arbitrage from Chainlink price discrepancy (disputed by Kelp)
+- **H-02:** Protocol mints less rsETH on deposit than intended (fixed)
+- **H-03:** rsETH price manipulable by first staker via donation attack (disputed but upheld as HIGH)
+
+**Notable MixBytes findings (Mar 2024):**
+- 4 HIGH severity including EigenPod initialization problem and race condition in node delegator management
+
+### Kernel (BNB Chain) Audits
+
+| # | Firm | Date | Scope | Report |
+|---|------|------|-------|--------|
+| 1 | **ChainSecurity** | Dec 2024 | Kernel smart contracts | [PDF](https://cdn.prod.website-files.com/65d35b01a4034b72499019e8/677289c9b2a5ff641ff2d3d0_ChainSecurity_Kernel_DAO_Kernel_audit.pdf) |
+| 2 | **Bailsec** | Unknown | Kernel platform | Not publicly available |
+| 3 | **Sherlock** | Jul 2025 | Slashing/restaking logic | Private engagement |
