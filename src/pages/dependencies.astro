@@ -43,6 +43,18 @@ function tokenRisk(asset: string): string {
   return TOKEN_RISK[asset] ?? "?";
 }
 
+function riskOrder(score: string): number {
+  if (score === "?") return 99;
+  return parseInt(score);
+}
+
+const sortedShared = [...shared].sort((a: any, b: any) => {
+  const ra = riskOrder(tokenRisk(a.asset));
+  const rb = riskOrder(tokenRisk(b.asset));
+  if (ra !== rb) return ra - rb;
+  return b.count - a.count;
+});
+
 ---
 
 <BaseLayout title="Token Exposures - Yearn Risk">
@@ -64,7 +76,7 @@ function tokenRisk(asset: string): string {
           </tr>
         </thead>
         <tbody>
-          {shared.map((row: any) => (
+          {sortedShared.map((row: any) => (
             <tr>
               <td class="col-icon">
                 {row.address ? (
