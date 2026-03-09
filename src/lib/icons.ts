@@ -15,7 +15,7 @@ export function protocolIconUrl(defillamaSlug: string): string {
 
 export function tokenIconUrl(address: string, chainId: number = 1): string {
   if (!address) return "";
-  return `https://token-assets-one.vercel.app/api/tokens/${chainId}/${address}/logo-32.png?fallback=true`;
+  return `https://token-assets-one.vercel.app/api/tokens/${chainId}/${address}/logo-32.png`;
 }
 
 export function chainIconUrl(chain: string): string {

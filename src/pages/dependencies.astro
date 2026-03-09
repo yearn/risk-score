@@ -54,7 +54,10 @@ const protocolsWithIcons = protocols.map((p: any) => ({
             <tr>
               <td class="col-icon">
                 {row.address ? (
-                  <img src={tokenIconUrl(row.address)} alt="" width="20" height="20" class="token-icon" loading="lazy" />
+                  <Fragment>
+                    <img src={tokenIconUrl(row.address)} alt="" width="20" height="20" class="token-icon" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='block'" />
+                    <div class="icon-placeholder small" style="display:none" />
+                  </Fragment>
                 ) : (
                   <div class="icon-placeholder small" />
                 )}
@@ -129,7 +132,10 @@ const protocolsWithIcons = protocols.map((p: any) => ({
             <tr data-protocol={row.protocol}>
               <td class="col-icon">
                 {row.address ? (
-                  <img src={tokenIconUrl(row.address)} alt="" width="20" height="20" class="token-icon" loading="lazy" />
+                  <Fragment>
+                    <img src={tokenIconUrl(row.address)} alt="" width="20" height="20" class="token-icon" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='block'" />
+                    <div class="icon-placeholder small" style="display:none" />
+                  </Fragment>
                 ) : (
                   <div class="icon-placeholder small" />
                 )}
