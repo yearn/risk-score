@@ -1,19 +1,64 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
+import { protocolIconUrl, chainIconUrl, tokenIconUrl } from "../lib/icons";
 import data from "../data/dependencies.json";
 
 const { shared, dependencies, protocols } = data;
 
-// Group dependencies by protocol for the full table
-const byProtocol = new Map<string, typeof dependencies>();
-for (const dep of dependencies) {
-  if (!byProtocol.has(dep.protocol)) byProtocol.set(dep.protocol, []);
-  byProtocol.get(dep.protocol)!.push(dep);
+const DEFILLAMA_SLUGS: Record<string, string> = {
+  aave_v3_core: "aave-v3",
+  compound_v3_usdc: "compound-v3",
+  compound_v3_weth: "compound-v3",
+  maple: "maple",
+  infinifi: "infinifi",
+  strata: "strata",
+  reserve_ethplus: "reserve-protocol",
+  fluid_lending: "fluid",
+  spark: "spark",
+  spectra: "spectra",
+  origin_arm: "origin-protocol",
+  resolv_wstusr: "resolv",
+  resolv_rlp: "resolv",
+  midas_mhyper: "midas-rwa",
+  unit_ubtc: "unit-protocol",
+};
+
+const protocolsWithIcons = protocols.map((p: any) => ({
+  ...p,
+  iconUrl: protocolIconUrl(DEFILLAMA_SLUGS[p.id] ?? ""),
+  chainIconUrl: chainIconUrl(p.chain),
+}));
+
+const TOKEN_RISK: Record<string, string> = {
+  USDC: "1", wstETH: "1", USDT: "1", WETH: "1", weETH: "1", WBTC: "1",
+  BTC: "1", USDS: "1", sUSDS: "1", stETH: "1", sDAI: "1", DAI: "1",
+  cbETH: "1", cbBTC: "1", rETH: "1",
+  USDe: "2", sUSDe: "2", tBTC: "2", rsETH: "2", ETHx: "2", LBTC: "2",
+  LINK: "2", UNI: "2", GHO: "2", PYUSD: "2", osETH: "2", USDtb: "2",
+  ezETH: "2",
+  tETH: "3", HYPE: "3",
+};
+
+function tokenRisk(asset: string): string {
+  return TOKEN_RISK[asset] ?? "?";
 }
+
+function riskOrder(score: string): number {
+  if (score === "?") return 99;
+  return parseInt(score);
+}
+
+const sortedShared = [...shared].sort((a: any, b: any) => {
+  const ra = riskOrder(tokenRisk(a.asset));
+  const rb = riskOrder(tokenRisk(b.asset));
+  if (ra !== rb) return ra - rb;
+  return b.count - a.count;
+});
+
 ---
 
-<BaseLayout title="Asset Dependencies - Yearn Risk">
-  <h1>Asset Dependencies</h1>
+<BaseLayout title="Token Exposures - Yearn Risk">
+  <h1>Token Exposures</h1>
   <p class="subtitle">Cross-protocol asset exposure across DeFi lending markets. Data fetched on-chain via Etherscan. Allocations as of Dec 2025 – Feb 2026 (per individual report dates).</p>
 
   <section>
@@ -23,20 +68,31 @@ for (const dep of dependencies) {
       <table>
         <thead>
           <tr>
+            <th class="col-icon"></th>
             <th>Asset</th>
             <th>Parent Protocol</th>
             <th>Exposed Protocols</th>
-            <th class="col-num">Count</th>
+            <th class="col-num">Risk Score</th>
           </tr>
         </thead>
         <tbody>
-          {shared.map((row: any) => (
+          {sortedShared.map((row: any) => (
             <tr>
+              <td class="col-icon">
+                {row.address ? (
+                  <Fragment>
+                    <img src={tokenIconUrl(row.address)} alt="" width="20" height="20" class="token-icon" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='block'" />
+                    <div class="icon-placeholder small" style="display:none" />
+                  </Fragment>
+                ) : (
+                  <div class="icon-placeholder small" />
+                )}
+              </td>
               <td class="mono">{row.asset}</td>
               <td>{row.parent || <span class="muted">-</span>}</td>
               <td>{row.protocols.join(", ")}</td>
               <td class="col-num">
-                <span class={`count-badge count-${Math.min(row.count, 4)}`}>{row.count}</span>
+                <span class={`risk-badge risk-${tokenRisk(row.asset)}`}>{tokenRisk(row.asset)}</span>
               </td>
             </tr>
           ))}
@@ -48,9 +104,21 @@ for (const dep of dependencies) {
   <section>
     <h2>Protocols</h2>
     <div class="protocol-cards">
-      {protocols.map((p: any) => (
+      {protocolsWithIcons.map((p: any) => (
         <div class="protocol-card" data-name={p.name}>
-          <div class="card-name">{p.name}</div>
+          <div class="card-header">
+            <div class="icon-stack">
+              {p.iconUrl ? (
+                <img src={p.iconUrl} alt="" width="24" height="24" class="protocol-icon" loading="lazy" />
+              ) : (
+                <div class="icon-placeholder" />
+              )}
+              {p.chainIconUrl && (
+                <img src={p.chainIconUrl} alt="" width="14" height="14" class="chain-icon" loading="lazy" />
+              )}
+            </div>
+            <div class="card-name">{p.name}</div>
+          </div>
           <div class="card-meta">
             <span class="mono">{p.chain}</span>
             <span class="muted">{p.type.replace("_", " ")}</span>
@@ -76,6 +144,7 @@ for (const dep of dependencies) {
       <table id="dep-table">
         <thead>
           <tr>
+            <th class="col-icon"></th>
             <th>Protocol</th>
             <th>Asset</th>
             <th>Type</th>
@@ -84,15 +153,27 @@ for (const dep of dependencies) {
           </tr>
         </thead>
         <tbody>
-          {dependencies.map((row: any) => (
+          {dependencies.map((row: any) => {
+            return (
             <tr data-protocol={row.protocol}>
+              <td class="col-icon">
+                {row.address ? (
+                  <Fragment>
+                    <img src={tokenIconUrl(row.address)} alt="" width="20" height="20" class="token-icon" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='block'" />
+                    <div class="icon-placeholder small" style="display:none" />
+                  </Fragment>
+                ) : (
+                  <div class="icon-placeholder small" />
+                )}
+              </td>
               <td>{row.protocol}</td>
               <td class="mono">{row.asset}</td>
               <td><span class={`type-badge type-${row.type}`}>{row.type}</span></td>
               <td>{row.parent || <span class="muted">-</span>}</td>
               <td class="mono">{row.allocation || <span class="muted">-</span>}</td>
             </tr>
-          ))}
+            );
+          })}
         </tbody>
       </table>
     </div>
@@ -133,16 +214,19 @@ for (const dep of dependencies) {
   .mono { font-family: "SF Mono", "Fira Code", monospace; font-size: 0.85em; }
   .muted { color: var(--text-secondary); }
   .col-num { text-align: center; width: 60px; }
-  .count-badge {
+  .risk-badge {
     display: inline-block;
     padding: 0.15rem 0.5rem;
     border-radius: 999px;
     font-size: 0.8rem;
     font-weight: 600;
   }
-  .count-4 { background: var(--brand-blue); color: #fff; }
-  .count-3 { background: #64748B; color: #fff; }
-  .count-2 { background: #94A3B8; color: #0c0c0c; }
+  .risk-1 { background: #22C55E; color: #0c0c0c; }
+  .risk-2 { background: #86EFAC; color: #0c0c0c; }
+  .risk-3 { background: #FACC15; color: #0c0c0c; }
+  .risk-4 { background: #FB923C; color: #0c0c0c; }
+  .risk-5 { background: #EF4444; color: #fff; }
+  .risk-\? { background: #64748B; color: #fff; }
 
   .type-badge {
     font-size: 0.75rem;
@@ -172,7 +256,39 @@ for (const dep of dependencies) {
     border-color: var(--brand-blue);
     background: rgba(6, 117, 249, 0.08);
   }
-  .card-name { font-weight: 600; margin-bottom: 0.25rem; }
+  .card-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.25rem;
+  }
+  .card-name { font-weight: 600; }
+
+  .col-icon { width: 36px; padding-right: 0; }
+  .icon-stack { position: relative; width: 24px; height: 24px; flex-shrink: 0; }
+  .protocol-icon { display: block; border-radius: 50%; }
+  .chain-icon {
+    position: absolute;
+    bottom: -4px;
+    right: -6px;
+    border-radius: 50%;
+    border: 1.5px solid var(--bg-primary);
+    background: var(--bg-primary);
+  }
+  .icon-placeholder {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: var(--bg-secondary);
+  }
+  .icon-placeholder.small {
+    width: 20px;
+    height: 20px;
+  }
+  .token-icon {
+    display: block;
+    border-radius: 50%;
+  }
   .card-meta {
     display: flex;
     gap: 0.5rem;
