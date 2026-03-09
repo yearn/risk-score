@@ -17,6 +17,31 @@ import yaml
 YAML_PATH = Path(__file__).parent / "protocols.yaml"
 JSON_PATH = Path(__file__).parents[2] / "src" / "data" / "dependencies.json"
 
+# Well-known Ethereum mainnet token addresses for tokens commonly referenced
+# as plain strings (no address) in protocols.yaml
+KNOWN_ADDRESSES: dict[str, str] = {
+    "WETH": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+    "USDC": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+    "USDT": "0xdAC17F958D2ee523a2206206994597C13D831ec7",
+    "DAI": "0x6B175474E89094C44Da98b954EedeAC495271d0F",
+    "wstETH": "0x7f39C581F595B53c5cb19bD0b3f8dA6c935E2Ca0",
+    "stETH": "0xae7ab96520DE3A18E5e111B5EaAb095312D7fE84",
+    "weETH": "0xCd5fE23C85820F7B72D0926FC9b05b43E359b7ee",
+    "rETH": "0xae78736Cd615f374D3085123A210448E74Fc6393",
+    "sfrxETH": "0xac3E018457B222d93114458476f3E3416Abbe38F",
+    "sUSDe": "0x9D39A5DE30e57443BfF2A8307A4256c8797A3497",
+    "USDe": "0x4c9EDD5852cd905f086C759E8383e09bff1E68B3",
+    "sUSDS": "0xa3931d71877C0E7a3148CB7Eb4463524FEc27fbD",
+    "GHO": "0x40D16FC0246aD3160Ccc09B8D0D3A2cD28aE6C2f",
+    "ETHx": "0xA35b1B31Ce002FBF2058D22F30f95D405200A15b",
+    "LBTC": "0x8236a87084f8B84306f72007F36F2618A5634494",
+    "USDtb": "0xC139190F447e929f090edF4C5EEa2c5fDa1dcD32",
+    "USR": "0x66a1E37c9b0eAddca17d3662D6c05F4DECf3e110",
+    "USCC": "0x14d60E7FDC0D71d8611742720E4C50E7a974020c",
+    "USTB": "0x43415eB6ff9DB7E26A15b704e7A3eDCe97d31C4e",
+    "STRC": "0x2Aa8c7856d4B4dDB1Ea7d30C0F3F5A7fadf6d308",
+}
+
 
 def load_data() -> dict:
     with open(YAML_PATH) as f:
@@ -29,6 +54,16 @@ def load_data() -> dict:
             if asset.startswith("PT-") and asset not in pt:
                 pt[asset] = "Pendle"
     return data
+
+
+def _build_address_map(data: dict) -> dict[str, str]:
+    """Build symbol→address map from all collateral entries + known addresses."""
+    addr_map: dict[str, str] = dict(KNOWN_ADDRESSES)
+    for pdata in data.get("protocols", {}).values():
+        for c in pdata.get("collateral", []):
+            if isinstance(c, dict) and c.get("address"):
+                addr_map.setdefault(c["asset"], c["address"])
+    return addr_map
 
 
 def get_assets(protocol: dict) -> list[str]:
@@ -207,6 +242,7 @@ def build_json(data: dict) -> dict:
     """Build structured JSON for the Astro frontend."""
     protocols = data["protocols"]
     protocol_tokens = data.get("protocol_tokens", {})
+    addr_map = _build_address_map(data)
 
     # Shared exposure
     asset_protocols: dict[str, list[str]] = defaultdict(list)
@@ -218,28 +254,40 @@ def build_json(data: dict) -> dict:
     for asset in sorted(asset_protocols, key=lambda a: len(asset_protocols[a]), reverse=True):
         ps = asset_protocols[asset]
         if len(ps) > 1:
-            shared.append({
+            entry: dict = {
                 "asset": asset,
                 "parent": protocol_tokens.get(asset, ""),
                 "protocols": ps,
                 "count": len(ps),
-            })
+            }
+            if asset in addr_map:
+                entry["address"] = addr_map[asset]
+            shared.append(entry)
 
     # Full deps per protocol
     full = []
     for _pid, pdata in protocols.items():
         name = pdata["name"]
+        chain = pdata.get("chain", "ethereum")
         base = pdata.get("base_asset")
         if base:
-            full.append({"protocol": name, "asset": base, "type": "base", "parent": protocol_tokens.get(base, ""), "allocation": ""})
+            dep: dict = {"protocol": name, "asset": base, "type": "base", "parent": protocol_tokens.get(base, ""), "allocation": ""}
+            if base in addr_map:
+                dep["address"] = addr_map[base]
+            full.append(dep)
         for c in pdata.get("collateral", []):
             if isinstance(c, dict):
                 asset = c["asset"]
                 alloc = f'{c["allocation"]}%' if c.get("allocation") else ""
+                addr = c.get("address", addr_map.get(asset, ""))
             else:
                 asset = c
                 alloc = ""
-            full.append({"protocol": name, "asset": asset, "type": "collateral", "parent": protocol_tokens.get(asset, ""), "allocation": alloc})
+                addr = addr_map.get(asset, "")
+            dep = {"protocol": name, "asset": asset, "type": "collateral", "parent": protocol_tokens.get(asset, ""), "allocation": alloc}
+            if addr:
+                dep["address"] = addr
+            full.append(dep)
         for ys in pdata.get("yield_sources", []):
             label = _ys_label(ys, protocols)
             assets = _ys_assets(ys)

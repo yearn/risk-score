@@ -13,6 +13,11 @@ export function protocolIconUrl(defillamaSlug: string): string {
   return `https://icons.llamao.fi/icons/protocols/${defillamaSlug}?w=48&h=48`;
 }
 
+export function tokenIconUrl(address: string, chainId: number = 1): string {
+  if (!address) return "";
+  return `https://assets.smold.app/api/token/${chainId}/${address}/logo-32.png`;
+}
+
 export function chainIconUrl(chain: string): string {
   const lower = chain.toLowerCase();
   if (lower.includes("hyperliquid") || lower.includes("hyperev")) {
