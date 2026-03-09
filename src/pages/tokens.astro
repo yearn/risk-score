@@ -59,8 +59,6 @@ const sortedShared = [...shared].sort((a: any, b: any) => {
 
 <BaseLayout title="Token Exposures - Yearn Risk">
   <h1>Token Exposures</h1>
-  <p class="subtitle">Cross-protocol token exposure across DeFi lending markets. Data fetched on-chain via Etherscan. Allocations as of Dec 2025 – Feb 2026 (per individual report dates).</p>
-
   <section>
     <h2>Shared Token Exposure</h2>
     <p class="section-desc">Tokens accepted by multiple protocols. If one depegs or its parent protocol fails, all listed protocols are affected.</p>
@@ -72,7 +70,7 @@ const sortedShared = [...shared].sort((a: any, b: any) => {
             <th>Token</th>
             <th>Parent Protocol</th>
             <th>Exposed Protocols</th>
-            <th class="col-num">Risk Score</th>
+            <th class="col-num">Score</th>
           </tr>
         </thead>
         <tbody>
@@ -199,11 +197,6 @@ const sortedShared = [...shared].sort((a: any, b: any) => {
 
 <style>
   h1 { margin-bottom: 0.25rem; }
-  .subtitle {
-    color: var(--text-secondary);
-    margin-bottom: 2rem;
-    font-size: 0.9rem;
-  }
   section { margin-bottom: 2.5rem; }
   h2 { margin-bottom: 0.5rem; }
   .section-desc {
