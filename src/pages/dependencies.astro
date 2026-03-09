@@ -29,6 +29,19 @@ const protocolsWithIcons = protocols.map((p: any) => ({
   chainIconUrl: chainIconUrl(p.chain),
 }));
 
+const TOKEN_RISK: Record<string, string> = {
+  USDC: "1", wstETH: "1", USDT: "1", WETH: "1", weETH: "1", WBTC: "1",
+  BTC: "1", USDS: "1", sUSDS: "1", stETH: "1", sDAI: "1", DAI: "1",
+  cbETH: "1", cbBTC: "1", rETH: "1",
+  USDe: "2", sUSDe: "2", tBTC: "2", rsETH: "2", ETHx: "2", LBTC: "2",
+  LINK: "2", UNI: "2", GHO: "2", PYUSD: "2", osETH: "2", USDtb: "2",
+  tETH: "3", HYPE: "3",
+};
+
+function tokenRisk(asset: string): string {
+  return TOKEN_RISK[asset] ?? "?";
+}
+
 ---
 
 <BaseLayout title="Token Exposures - Yearn Risk">
@@ -46,7 +59,7 @@ const protocolsWithIcons = protocols.map((p: any) => ({
             <th>Asset</th>
             <th>Parent Protocol</th>
             <th>Exposed Protocols</th>
-            <th class="col-num">Count</th>
+            <th class="col-num">Risk Score</th>
           </tr>
         </thead>
         <tbody>
@@ -66,7 +79,7 @@ const protocolsWithIcons = protocols.map((p: any) => ({
               <td>{row.parent || <span class="muted">-</span>}</td>
               <td>{row.protocols.join(", ")}</td>
               <td class="col-num">
-                <span class={`count-badge count-${Math.min(row.count, 4)}`}>{row.count}</span>
+                <span class={`risk-badge risk-${tokenRisk(row.asset)}`}>{tokenRisk(row.asset)}</span>
               </td>
             </tr>
           ))}
@@ -188,16 +201,17 @@ const protocolsWithIcons = protocols.map((p: any) => ({
   .mono { font-family: "SF Mono", "Fira Code", monospace; font-size: 0.85em; }
   .muted { color: var(--text-secondary); }
   .col-num { text-align: center; width: 60px; }
-  .count-badge {
+  .risk-badge {
     display: inline-block;
     padding: 0.15rem 0.5rem;
     border-radius: 999px;
     font-size: 0.8rem;
     font-weight: 600;
   }
-  .count-4 { background: var(--brand-blue); color: #fff; }
-  .count-3 { background: #64748B; color: #fff; }
-  .count-2 { background: #94A3B8; color: #0c0c0c; }
+  .risk-1 { background: #22C55E; color: #0c0c0c; }
+  .risk-2 { background: #EAB308; color: #0c0c0c; }
+  .risk-3 { background: #F97316; color: #0c0c0c; }
+  .risk-\? { background: #64748B; color: #fff; }
 
   .type-badge {
     font-size: 0.75rem;
