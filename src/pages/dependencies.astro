@@ -1,14 +1,45 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
+import { protocolIconUrl, chainIconUrl } from "../lib/icons";
 import data from "../data/dependencies.json";
 
 const { shared, dependencies, protocols } = data;
+
+const DEFILLAMA_SLUGS: Record<string, string> = {
+  aave_v3_core: "aave-v3",
+  compound_v3_usdc: "compound-v3",
+  compound_v3_weth: "compound-v3",
+  maple: "maple",
+  infinifi: "infinifi",
+  strata: "strata",
+  reserve_ethplus: "reserve-protocol",
+  fluid_lending: "fluid",
+  spark: "spark",
+  spectra: "spectra",
+  origin_arm: "origin-protocol",
+  resolv_wstusr: "resolv",
+  resolv_rlp: "resolv",
+  midas_mhyper: "midas-rwa",
+  unit_ubtc: "unit-protocol",
+};
+
+const protocolsWithIcons = protocols.map((p: any) => ({
+  ...p,
+  iconUrl: protocolIconUrl(DEFILLAMA_SLUGS[p.id] ?? ""),
+  chainIconUrl: chainIconUrl(p.chain),
+}));
 
 // Group dependencies by protocol for the full table
 const byProtocol = new Map<string, typeof dependencies>();
 for (const dep of dependencies) {
   if (!byProtocol.has(dep.protocol)) byProtocol.set(dep.protocol, []);
   byProtocol.get(dep.protocol)!.push(dep);
+}
+
+// Build a lookup from protocol name → icon URLs
+const iconByName = new Map<string, { iconUrl: string; chainIconUrl: string }>();
+for (const p of protocolsWithIcons) {
+  iconByName.set(p.name, { iconUrl: p.iconUrl, chainIconUrl: p.chainIconUrl });
 }
 ---
 
@@ -48,9 +79,21 @@ for (const dep of dependencies) {
   <section>
     <h2>Protocols</h2>
     <div class="protocol-cards">
-      {protocols.map((p: any) => (
+      {protocolsWithIcons.map((p: any) => (
         <div class="protocol-card" data-name={p.name}>
-          <div class="card-name">{p.name}</div>
+          <div class="card-header">
+            <div class="icon-stack">
+              {p.iconUrl ? (
+                <img src={p.iconUrl} alt="" width="24" height="24" class="protocol-icon" loading="lazy" />
+              ) : (
+                <div class="icon-placeholder" />
+              )}
+              {p.chainIconUrl && (
+                <img src={p.chainIconUrl} alt="" width="14" height="14" class="chain-icon" loading="lazy" />
+              )}
+            </div>
+            <div class="card-name">{p.name}</div>
+          </div>
           <div class="card-meta">
             <span class="mono">{p.chain}</span>
             <span class="muted">{p.type.replace("_", " ")}</span>
@@ -76,6 +119,7 @@ for (const dep of dependencies) {
       <table id="dep-table">
         <thead>
           <tr>
+            <th class="col-icon"></th>
             <th>Protocol</th>
             <th>Asset</th>
             <th>Type</th>
@@ -84,15 +128,30 @@ for (const dep of dependencies) {
           </tr>
         </thead>
         <tbody>
-          {dependencies.map((row: any) => (
+          {dependencies.map((row: any) => {
+            const icons = iconByName.get(row.protocol);
+            return (
             <tr data-protocol={row.protocol}>
+              <td class="col-icon">
+                <div class="icon-stack">
+                  {icons?.iconUrl ? (
+                    <img src={icons.iconUrl} alt="" width="24" height="24" class="protocol-icon" loading="lazy" />
+                  ) : (
+                    <div class="icon-placeholder" />
+                  )}
+                  {icons?.chainIconUrl && (
+                    <img src={icons.chainIconUrl} alt="" width="14" height="14" class="chain-icon" loading="lazy" />
+                  )}
+                </div>
+              </td>
               <td>{row.protocol}</td>
               <td class="mono">{row.asset}</td>
               <td><span class={`type-badge type-${row.type}`}>{row.type}</span></td>
               <td>{row.parent || <span class="muted">-</span>}</td>
               <td class="mono">{row.allocation || <span class="muted">-</span>}</td>
             </tr>
-          ))}
+            );
+          })}
         </tbody>
       </table>
     </div>
@@ -172,7 +231,31 @@ for (const dep of dependencies) {
     border-color: var(--brand-blue);
     background: rgba(6, 117, 249, 0.08);
   }
-  .card-name { font-weight: 600; margin-bottom: 0.25rem; }
+  .card-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.25rem;
+  }
+  .card-name { font-weight: 600; }
+
+  .col-icon { width: 36px; padding-right: 0; }
+  .icon-stack { position: relative; width: 24px; height: 24px; flex-shrink: 0; }
+  .protocol-icon { display: block; border-radius: 50%; }
+  .chain-icon {
+    position: absolute;
+    bottom: -4px;
+    right: -6px;
+    border-radius: 50%;
+    border: 1.5px solid var(--bg-primary);
+    background: var(--bg-primary);
+  }
+  .icon-placeholder {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: var(--bg-secondary);
+  }
   .card-meta {
     display: flex;
     gap: 0.5rem;
