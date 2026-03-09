@@ -1,0 +1,205 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import data from "../data/dependencies.json";
+
+const { shared, dependencies, protocols } = data;
+
+// Group dependencies by protocol for the full table
+const byProtocol = new Map<string, typeof dependencies>();
+for (const dep of dependencies) {
+  if (!byProtocol.has(dep.protocol)) byProtocol.set(dep.protocol, []);
+  byProtocol.get(dep.protocol)!.push(dep);
+}
+---
+
+<BaseLayout title="Asset Dependencies - Yearn Risk">
+  <h1>Asset Dependencies</h1>
+  <p class="subtitle">Cross-protocol asset exposure across DeFi lending markets. Data fetched on-chain via Etherscan. Allocations as of Dec 2025 – Feb 2026 (per individual report dates).</p>
+
+  <section>
+    <h2>Shared Asset Exposure</h2>
+    <p class="section-desc">Assets accepted by multiple protocols. If one depegs or its parent protocol fails, all listed protocols are affected.</p>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Asset</th>
+            <th>Parent Protocol</th>
+            <th>Exposed Protocols</th>
+            <th class="col-num">Count</th>
+          </tr>
+        </thead>
+        <tbody>
+          {shared.map((row: any) => (
+            <tr>
+              <td class="mono">{row.asset}</td>
+              <td>{row.parent || <span class="muted">-</span>}</td>
+              <td>{row.protocols.join(", ")}</td>
+              <td class="col-num">
+                <span class={`count-badge count-${Math.min(row.count, 4)}`}>{row.count}</span>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <h2>Protocols</h2>
+    <div class="protocol-cards">
+      {protocols.map((p: any) => (
+        <div class="protocol-card" data-name={p.name}>
+          <div class="card-name">{p.name}</div>
+          <div class="card-meta">
+            <span class="mono">{p.chain}</span>
+            <span class="muted">{p.type.replace("_", " ")}</span>
+            <span>{p.assetCount} assets</span>
+          </div>
+        </div>
+      ))}
+    </div>
+  </section>
+
+  <section>
+    <h2>Full Dependency Table</h2>
+    <div class="filter-row">
+      <label for="protocol-filter">Protocol:</label>
+      <select id="protocol-filter">
+        <option value="all">All</option>
+        {protocols.map((p: any) => (
+          <option value={p.name}>{p.name}</option>
+        ))}
+      </select>
+    </div>
+    <div class="table-wrap">
+      <table id="dep-table">
+        <thead>
+          <tr>
+            <th>Protocol</th>
+            <th>Asset</th>
+            <th>Type</th>
+            <th>Parent / Tokens</th>
+            <th>Allocation</th>
+          </tr>
+        </thead>
+        <tbody>
+          {dependencies.map((row: any) => (
+            <tr data-protocol={row.protocol}>
+              <td>{row.protocol}</td>
+              <td class="mono">{row.asset}</td>
+              <td><span class={`type-badge type-${row.type}`}>{row.type}</span></td>
+              <td>{row.parent || <span class="muted">-</span>}</td>
+              <td class="mono">{row.allocation || <span class="muted">-</span>}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <script is:inline>
+    const filter = document.getElementById("protocol-filter");
+    function applyFilter(val) {
+      filter.value = val;
+      document.querySelectorAll("#dep-table tbody tr").forEach((row) => {
+        row.style.display = val === "all" || row.dataset.protocol === val ? "" : "none";
+      });
+    }
+    filter.addEventListener("change", (e) => applyFilter(e.target.value));
+    document.querySelectorAll(".protocol-card").forEach((card) => {
+      card.addEventListener("click", () => {
+        applyFilter(card.dataset.name);
+        filter.scrollIntoView({ behavior: "smooth", block: "start" });
+      });
+    });
+  </script>
+</BaseLayout>
+
+<style>
+  h1 { margin-bottom: 0.25rem; }
+  .subtitle {
+    color: var(--text-secondary);
+    margin-bottom: 2rem;
+    font-size: 0.9rem;
+  }
+  section { margin-bottom: 2.5rem; }
+  h2 { margin-bottom: 0.5rem; }
+  .section-desc {
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    margin-bottom: 1rem;
+  }
+  .mono { font-family: "SF Mono", "Fira Code", monospace; font-size: 0.85em; }
+  .muted { color: var(--text-secondary); }
+  .col-num { text-align: center; width: 60px; }
+  .count-badge {
+    display: inline-block;
+    padding: 0.15rem 0.5rem;
+    border-radius: 999px;
+    font-size: 0.8rem;
+    font-weight: 600;
+  }
+  .count-4 { background: var(--brand-blue); color: #fff; }
+  .count-3 { background: #64748B; color: #fff; }
+  .count-2 { background: #94A3B8; color: #0c0c0c; }
+
+  .type-badge {
+    font-size: 0.75rem;
+    padding: 0.15rem 0.4rem;
+    border-radius: 4px;
+    font-weight: 500;
+  }
+  .type-collateral { background: var(--brand-blue); color: #fff; }
+  .type-base { background: #22C55E; color: #0c0c0c; }
+  .type-yield_source { background: #A78BFA; color: #0c0c0c; }
+
+  .protocol-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+  }
+  .protocol-card {
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+    background: var(--bg-card);
+    cursor: pointer;
+    transition: border-color 0.2s;
+  }
+  .protocol-card:hover {
+    border-color: var(--brand-blue);
+    background: rgba(6, 117, 249, 0.08);
+  }
+  .card-name { font-weight: 600; margin-bottom: 0.25rem; }
+  .card-meta {
+    display: flex;
+    gap: 0.5rem;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+  }
+
+  .filter-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
+    font-size: 0.85rem;
+  }
+  .filter-row label { color: var(--text-secondary); }
+  .filter-row select {
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 0.3rem 0.5rem;
+    font-size: 0.85rem;
+  }
+
+  @media (max-width: 640px) {
+    table { font-size: 0.8rem; }
+    th, td { padding: 0.4rem 0.5rem; }
+    .protocol-cards { grid-template-columns: 1fr; }
+  }
+</style>
