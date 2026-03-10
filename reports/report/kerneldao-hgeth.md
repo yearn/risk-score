@@ -97,8 +97,6 @@ hgETH involves multiple protocol layers, each with its own audit history.
 | # | Firm | Date | Scope | Report |
 |---|------|------|-------|--------|
 | 1 | **Sigma Prime** | Nov 2024 | GainAdapter contract (rsETH adapter for hgETH) | [PDF](https://kerneldao.com/kelp/audits/smartcontracts/Sigma_Prime_hgETH.pdf) |
-| 2 | **Zellic** | Unknown | Gain vault contracts | Not publicly available |
-| 3 | **ChainSecurity** | Unknown | Gain vault contracts | Not publicly available |
 
 **Key findings from Sigma Prime hgETH audit:**
 - Assets held by the adapter are not included in share calculations, causing users to receive more shares per asset than they should upon deposits
@@ -225,7 +223,7 @@ Only **1.45% of assets** are available as buffer for immediate redemptions. The 
 |-----|-------|-----------|
 | Management fee | **1.5% annual** (`managementFeePercent()` = 150) | Time-based, continuously accruing against `totalAssets()`. `chargeManagementFee()` materializes accrued fees as new hgETH shares → **dilutes existing holders**. `collectFees()` transfers shares to fee collector. Last charged: Feb 28, 2026 |
 | Withdrawal fee | **0%** (`withdrawalFee()` = 0) | — |
-| Performance fee | Unknown — prospectus not publicly accessible | — |
+| Performance fee | **20%** (per Edge Capital proposal: "Fee Structure (management/performance): 1.5/20%") | Applied to profits above baseline; not independently verified on-chain |
 | Fee collector | [`0x2151A97C7819782fD99efF020CdfE0aE838Ad378`](https://etherscan.io/address/0x2151A97C7819782fD99efF020CdfE0aE838Ad378) | Receives minted hgETH shares |
 | Daily fee accrual | ~0.676 rsETH/day (~$1,760) | On current 16,454 rsETH total assets |
 | Annual fee | ~246.8 rsETH (~$642K) | 1.5% of total assets |
@@ -439,7 +437,7 @@ The rsETH layer has notably better governance than the hgETH vault layer (higher
 
 - **Experienced team**: Founders built Stader Labs ($680M+ TVL, operating since 2021). Strong institutional credibility
 - **Significant funding**: $19M+ raised from reputable investors (Binance Labs, SCB Limited, Laser Digital, Hypersphere Ventures)
-- **Multiple audit layers**: Extensive auditing across the stack — Sigma Prime, ChainSecurity, Code4rena, MixBytes, Zellic, Hacken across rsETH, Gain, and Upshift
+- **Multiple audit layers**: Extensive auditing across the stack — Sigma Prime, Code4rena, MixBytes across rsETH; ChainSecurity, Hacken, Sigma Prime, Zellic across Upshift and Kernel. Only 1 public audit for hgETH/Gain vault (Sigma Prime)
 - **Bug bounty**: Active Immunefi program for Kelp with up to $250K for critical bugs (rsETH core contracts only; hgETH/Gain vaults are not in scope)
 - **Non-custodial vault architecture**: Upshift's design prevents curators from withdrawing funds to external EOAs; policy-constrained execution via August subaccounts
 - **Nexus Mutual embedded cover**: Integrated insurance covering $30M+ of vault positions against smart contract exploits, oracle failures, and liquidation mechanism failures. **Does not cover** strategy losses from looping/leverage liquidations or market movements
@@ -474,7 +472,7 @@ The rsETH layer has notably better governance than the hgETH vault layer (higher
 
 ### Critical Risk Gates
 
-- [x] **No audit** — Extensively audited across multiple layers: Sigma Prime (rsETH + hgETH), Code4rena, MixBytes, ChainSecurity (Upshift + Kernel), Hacken, Zellic. **PASS**
+- [x] **No audit** — Extensively audited across multiple layers: Sigma Prime (rsETH + hgETH), Code4rena, MixBytes (rsETH), ChainSecurity, Hacken, Zellic (Upshift + Kernel). Only 1 public audit specifically for hgETH/Gain (Sigma Prime). **PASS**
 - [x] **Unverifiable reserves** — hgETH is an ERC-4626 vault wrapping rsETH. Both exchange rates are verifiable on-chain. Strategy positions are on-chain in DeFi protocols. rsETH has Chainlink PoR. **PASS**
 - [x] **Total centralization** — 3-of-5 multisig for hgETH, 6-of-8 multisig with 10-day timelock for rsETH. Not a single EOA. **PASS**
 
@@ -484,7 +482,7 @@ The rsETH layer has notably better governance than the hgETH vault layer (higher
 
 #### Category 1: Audits & Historical Track Record (Weight: 20%)
 
-- **Audits**: 5+ audits for rsETH from 3 reputable firms (Sigma Prime, Code4rena, MixBytes). 3+ audits for Gain vaults (Sigma Prime, Zellic, ChainSecurity). 6+ audits for Upshift (ChainSecurity, Hacken, Sigma Prime, Zellic). Extensive coverage
+- **Audits**: 5+ audits for rsETH from 3 reputable firms (Sigma Prime, Code4rena, MixBytes). 1 public audit for hgETH/Gain vault (Sigma Prime). 6+ audits for Upshift (ChainSecurity, Hacken, Sigma Prime, Zellic). Limited direct audit coverage for the Gain vault layer
 - **Bug Bounty**: Active Immunefi program with $250K max for rsETH core contracts only. hgETH/Gain vault contracts are **not in scope** (verified on Immunefi). No separate KernelDAO bounty exists
 - **Time in Production**: KelpDAO ~27 months (since Dec 2023). Founders' prior project (Stader) since Apr 2021. hgETH deployed November 19, 2024 (~15 months on-chain)
 - **TVL**: ~$48M hgETH market cap, $2B+ Kelp protocol TVL. Significant scale
@@ -625,7 +623,7 @@ For a **strategy use case** (depositing into the vault), the risk profile is mor
 - Monitor the hgETH/USD oracle feed proxy for upgrades
 - Monitor vault multisig for signer/threshold changes
 - Note: **No on-chain timelock exists** on hgETH ProxyAdmin despite Upshift documentation claims — proxy upgrades are instant
-- Request access to the Edge Capital prospectus for performance fee details (management fee confirmed at 1.5%)
+- Performance fee confirmed at 20% per Edge Capital proposal (management fee 1.5%, performance fee 20%)
 - Request access to the rev share proposal
 - Consider position sizing relative to hgETH total supply (~15,900 hgETH / ~$48M)
 
@@ -646,7 +644,7 @@ For a **strategy use case** (depositing into the vault), the risk profile is mor
 - [x] Verify hgETH deployment date on Etherscan (exact block/date) — **Resolved**: November 19, 2024, block 21223734
 - [ ] Access and review the Edge Capital hgETH prospectus (Google Drive link requires authentication)
 - [ ] Access and review the rev share proposal (Google Drive link requires authentication)
-- [ ] Verify hgETH performance fee percentage (management fee confirmed at 1.5%, withdrawal fee at 0%)
+- [x] Verify hgETH performance fee percentage (management fee confirmed at 1.5%, withdrawal fee at 0%) — **Resolved**: Performance fee is **20%** per Edge Capital proposal ("Fee Structure (management/performance): 1.5/20%")
 - [x] Verify whether hgETH/Gain vault contracts are in scope of the Kelp Immunefi bug bounty — **Resolved**: NOT in scope. Only rsETH core contracts (10 contracts) are covered
 - [x] Check if the EOMultiFeedAdapter oracle has any additional governance controls or circuit breakers — **Resolved**: No circuit breakers, pause, or governance functions exist. Implementation is entirely read-only after initialization. Only modification path is full proxy upgrade
 
