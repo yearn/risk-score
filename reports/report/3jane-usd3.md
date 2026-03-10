@@ -4,7 +4,7 @@
 - **Token:** USD3
 - **Chain:** Ethereum
 - **Token Address:** [`0x056B269Eb1f75477a8666ae8C7fE01b64dD55eCc`](https://etherscan.io/address/0x056B269Eb1f75477a8666ae8C7fE01b64dD55eCc)
-- **Final Score: 3.4/5.0**
+- **Final Score: 3.5/5.0**
 
 ## Overview + Links
 
@@ -154,7 +154,7 @@ All core contracts (MorphoCredit, ProtocolConfig, CreditLine, USD3) are owned by
   - [`0x1226858E04b9d077258F153275613734421cD06B`](https://etherscan.io/address/0x1226858E04b9d077258F153275613734421cD06B)
 - Signer identities are **not publicly labeled** on Etherscan
 
-**Contracts are upgradeable** — MorphoCredit, CreditLine, and USD3 use proxy patterns. The 3-of-5 multisig can upgrade contract logic after the 24h timelock delay.
+**Contracts are upgradeable** — MorphoCredit, USD3, ProtocolConfig, and AdaptiveCurveIRM use proxy patterns (TransparentUpgradeableProxy). The 3-of-5 multisig can upgrade contract logic after the 24h timelock delay. CreditLine and Helper are standalone (non-proxy) contracts.
 
 **EmergencyController** (source verified, deployed address not publicly documented):
 
@@ -165,7 +165,7 @@ All core contracts (MorphoCredit, ProtocolConfig, CreditLine, USD3) are owned by
 **Privileged roles (from Veridise audit trust model):**
 
 - `ProtocolConfig.owner`: Pauses protocol, sets bounds on grace/delinquency periods, loan sizes, tranche ratios, interest rate configurations
-- `CreditLine.owner`: Approves credit lines, posts minimum repayments, settles debt from insurance fund. Can upgrade contracts. All core contracts are upgradeable.
+- `CreditLine.owner`: Approves credit lines, posts minimum repayments, settles debt from insurance fund.
 
 **Auditor noted:** These powerful roles are not sufficiently separated — the same owner role controls both emergency and configuration actions.
 
@@ -207,10 +207,10 @@ All core contracts (MorphoCredit, ProtocolConfig, CreditLine, USD3) are owned by
 | USD3 Token (Proxy) | [`0x056B269Eb1f75477a8666ae8C7fE01b64dD55eCc`](https://etherscan.io/address/0x056B269Eb1f75477a8666ae8C7fE01b64dD55eCc) | Supply changes, large deposits/withdrawals, share price |
 | sUSD3 Token (Proxy) | [`0xf689555121e529Ff0463e191F9Bd9d1E496164a7`](https://etherscan.io/address/0xf689555121e529Ff0463e191F9Bd9d1E496164a7) | Supply changes, lock period changes, cooldown events |
 | MorphoCredit (Proxy) | [`0xDe6e08ac208088cc62812Ba30608D852c6B0EcBc`](https://etherscan.io/address/0xDe6e08ac208088cc62812Ba30608D852c6B0EcBc) | Borrow/repay events, utilization ratio, new market creation, delinquency/default state changes |
-| ProtocolConfig | [`0x6b276A2A7dd8b629adBA8A06AD6573d01C84f34E`](https://etherscan.io/address/0x6b276A2A7dd8b629adBA8A06AD6573d01C84f34E) | Config changes (pause, debt cap, supply cap, tranche ratios) |
+| ProtocolConfig (Proxy) | [`0x6b276A2A7dd8b629adBA8A06AD6573d01C84f34E`](https://etherscan.io/address/0x6b276A2A7dd8b629adBA8A06AD6573d01C84f34E) | Config changes (pause, debt cap, supply cap, tranche ratios) |
 | CreditLine | [`0x26389b03298BA5DA0664FfD6bF78cF3A7820c6A9`](https://etherscan.io/address/0x26389b03298BA5DA0664FfD6bF78cF3A7820c6A9) | New credit line approvals, credit line revocations, repayment postings |
 | Helper | [`0x82736F81A56935c8429ADdbDa4aEBec737444505`](https://etherscan.io/address/0x82736F81A56935c8429ADdbDa4aEBec737444505) | Borrower interactions |
-| AdaptiveCurveIRM | [`0x1d434D2899f81F3C3fdf52C814A6E23318f9C7Df`](https://etherscan.io/address/0x1d434D2899f81F3C3fdf52C814A6E23318f9C7Df) | Rate model parameter changes |
+| AdaptiveCurveIRM (Proxy) | [`0x1d434D2899f81F3C3fdf52C814A6E23318f9C7Df`](https://etherscan.io/address/0x1d434D2899f81F3C3fdf52C814A6E23318f9C7Df) | Rate model parameter changes |
 | TimelockController (24h) | [`0x1dCcD4628d48a50C1A7adEA3848bcC869f08f8C2`](https://etherscan.io/address/0x1dCcD4628d48a50C1A7adEA3848bcC869f08f8C2) | Scheduled/executed/cancelled operations, role changes |
 | Multisig (3/5 Safe) | [`0x33333333bd7045f1a601a1e289d7ab21036fb5ef`](https://etherscan.io/address/0x33333333bd7045f1a601a1e289d7ab21036fb5ef) | Signer/threshold changes, submitted transactions |
 
@@ -284,12 +284,12 @@ All core contracts (MorphoCredit, ProtocolConfig, CreditLine, USD3) are owned by
 
 | Factor | Assessment |
 |--------|-----------|
-| Upgradeability | All core contracts upgradeable via proxy. 3/5 multisig + 24h timelock |
+| Upgradeability | MorphoCredit, USD3, ProtocolConfig, AdaptiveCurveIRM upgradeable via proxy. 3/5 multisig + 24h timelock |
 | Timelock | 24 hours — adequate for monitoring but limited for complex response |
 | Privileged roles | Significant: pause, config changes, credit line approval, contract upgrades, debt settlement. Auditor noted roles should be split |
 | Emergency | EmergencyController can pause/stop protocol immediately (bypasses timelock by design) |
 
-**Subcategory A Score: 3/5** — 3/5 multisig with 24h timelock is reasonable governance. However, contracts are upgradeable, signer identities are anonymous, and the auditor's recommendation to split roles has not been fully implemented. Emergency controller bypass is acceptable for safety but adds centralization.
+**Subcategory A Score: 3.5/5** — 3/5 multisig with 24h timelock. Per rubric, 3/5 multisig maps to score 4, but the 24h timelock (score 2-3) and constrained roles mitigate. Contracts are upgradeable, signer identities are anonymous, and the auditor's recommendation to split roles has not been fully implemented. Emergency controller bypass is acceptable for safety but adds centralization.
 
 **Subcategory B: Programmability**
 
@@ -312,9 +312,9 @@ All core contracts (MorphoCredit, ProtocolConfig, CreditLine, USD3) are owned by
 
 **Subcategory C Score: 4/5** — Multiple dependencies including novel, early-stage technologies (zkTLS, EigenLayer AVS) that are critical to the credit assessment pipeline. Failure of these dependencies would compromise the protocol's ability to underwrite new loans.
 
-**Centralization Score = (3 + 4 + 4) / 3 = 3.67/5**
+**Centralization Score = (3.5 + 4 + 4) / 3 = 3.83/5**
 
-**Score: 3.5/5** — Reasonable multisig + timelock governance structure, but significant centralization in off-chain credit operations, upgradeable contracts with anonymous signers, and heavy reliance on novel off-chain dependencies.
+**Score: 3.75/5** — Reasonable multisig + timelock governance structure, but significant centralization in off-chain credit operations, upgradeable contracts with anonymous signers, and heavy reliance on novel off-chain dependencies.
 
 #### Category 3: Funds Management (Weight: 30%)
 
@@ -376,11 +376,11 @@ Final Score = (Centralization × 0.30) + (Funds Mgmt × 0.30) + (Audits × 0.20)
 | Category | Score | Weight | Weighted |
 |----------|-------|--------|----------|
 | Audits & Historical Track Record | 3.0 | 20% | 0.60 |
-| Centralization & Control | 3.5 | 30% | 1.05 |
+| Centralization & Control | 3.75 | 30% | 1.125 |
 | Funds Management | 3.75 | 30% | 1.125 |
 | Liquidity Risk | 3.0 | 15% | 0.45 |
 | Operational Risk | 3.0 | 5% | 0.15 |
-| **Final Score** | | | **3.4/5.0** |
+| **Final Score** | | | **3.5/5.0** |
 
 ### Risk Tier
 
@@ -392,7 +392,7 @@ Final Score = (Centralization × 0.30) + (Funds Mgmt × 0.30) + (Audits × 0.20)
 | 3.5-4.5 | Elevated Risk | Limited approval, strict limits |
 | 4.5-5.0 | High Risk | Not recommended |
 
-**Final Risk Tier: Medium Risk (3.4/5.0) — Approved with enhanced monitoring**
+**Final Risk Tier: Medium Risk (3.5/5.0) — Approved with enhanced monitoring**
 
 ---
 
