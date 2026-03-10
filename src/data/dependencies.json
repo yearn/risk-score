@@ -1,0 +1,1866 @@
+{
+  "protocols": [
+    {
+      "id": "aave_v3_core",
+      "name": "Aave V3 Core",
+      "chain": "ethereum",
+      "type": "lending_market",
+      "address": "0x87870Bca3F3fD6335C3F4ce8392D69350B4fA4E2",
+      "assetCount": 63
+    },
+    {
+      "id": "compound_v3_usdc",
+      "name": "Compound V3 USDC",
+      "chain": "ethereum",
+      "type": "lending_market",
+      "address": "0xc3d688B66703497DAA19211EEdff47f25384cdc3",
+      "assetCount": 13
+    },
+    {
+      "id": "compound_v3_weth",
+      "name": "Compound V3 WETH",
+      "chain": "ethereum",
+      "type": "lending_market",
+      "address": "0xA17581A9E3356d9A858b789D68B4d866e593aE94",
+      "assetCount": 17
+    },
+    {
+      "id": "maple",
+      "name": "Maple Finance (syrupUSDC)",
+      "chain": "ethereum",
+      "type": "lending",
+      "address": "0x80ac24aA929eaF5013f6436cdA2a7ba190f5Cc0b",
+      "assetCount": 6
+    },
+    {
+      "id": "infinifi",
+      "name": "InfiniFi (siUSD)",
+      "chain": "ethereum",
+      "type": "stablecoin",
+      "address": "0xDBDC1Ef57537E34680B898E1FEBD3D68c7389bCB",
+      "assetCount": 4
+    },
+    {
+      "id": "strata",
+      "name": "Strata (srUSDe)",
+      "chain": "ethereum",
+      "type": "tranched_vault",
+      "address": "0x3d7d6fdf07EE548B939A80edbc9B2256d0cdc003",
+      "assetCount": 5
+    },
+    {
+      "id": "reserve_ethplus",
+      "name": "Reserve Protocol (ETH+)",
+      "chain": "ethereum",
+      "type": "lst_basket",
+      "address": "0xE72B141DF173b999AE7c1aDcbF60Cc9833Ce56a8",
+      "assetCount": 4
+    },
+    {
+      "id": "fluid_lending",
+      "name": "Fluid Lending",
+      "chain": "ethereum",
+      "type": "lending",
+      "address": "0x9Fb7b4477576Fe5B32be4C1843aFB1e55F251B33",
+      "assetCount": 7
+    },
+    {
+      "id": "buck",
+      "name": "BUCK",
+      "chain": "ethereum",
+      "type": "rwa_yield",
+      "address": "0xdb13997f4D83EF343845d0bAEb27d1173dF8c224",
+      "assetCount": 2
+    },
+    {
+      "id": "kinetiq",
+      "name": "Kinetiq (kHYPE)",
+      "chain": "hyperevm",
+      "type": "liquid_staking",
+      "address": "0xfd739d4e423301ce9385c1fb8850539d657c296d",
+      "assetCount": 1
+    },
+    {
+      "id": "midas_mhyper",
+      "name": "Midas (mHYPER)",
+      "chain": "ethereum",
+      "type": "tokenized_fund",
+      "address": "0x9b5528528656DBC094765E2abB79F293c21191B9",
+      "assetCount": 1
+    },
+    {
+      "id": "origin_arm",
+      "name": "Origin ARM (stETH/WETH)",
+      "chain": "ethereum",
+      "type": "yield_vault",
+      "address": "0x85B78AcA6Deae198fBF201c82DAF6Ca21942acc6",
+      "assetCount": 2
+    },
+    {
+      "id": "resolv_wstusr",
+      "name": "Resolv (wstUSR)",
+      "chain": "ethereum",
+      "type": "stablecoin",
+      "address": "0x1202F5C7b4B9E47a1A484E8B270be34dbbC75055",
+      "assetCount": 1
+    },
+    {
+      "id": "resolv_rlp",
+      "name": "Resolv (RLP)",
+      "chain": "ethereum",
+      "type": "insurance_tranche",
+      "address": "0x4956b52aE2fF65D74CA2d61207523288e4528f96",
+      "assetCount": 6
+    },
+    {
+      "id": "spark",
+      "name": "Spark Lending",
+      "chain": "ethereum",
+      "type": "lending_market",
+      "address": "0xC13e21B648A5Ee794902342038FF3aDAB66BE987",
+      "assetCount": 18
+    },
+    {
+      "id": "spectra",
+      "name": "Spectra Finance",
+      "chain": "ethereum",
+      "type": "yield_tokenization",
+      "address": "",
+      "assetCount": 0
+    },
+    {
+      "id": "stakedhype",
+      "name": "StakedHYPE (stHYPE)",
+      "chain": "hyperevm",
+      "type": "liquid_staking",
+      "address": "0xfFaa4a3D97fE9107Cef8a3F48c069F577Ff76cC1",
+      "assetCount": 1
+    },
+    {
+      "id": "unit_ubtc",
+      "name": "Unit (UBTC)",
+      "chain": "hyperevm",
+      "type": "bridge",
+      "address": "0x9FDBdA0A5e284c32744D2f17Ee5c74B284993463",
+      "assetCount": 1
+    }
+  ],
+  "shared": [
+    {
+      "asset": "USDC",
+      "parent": "Circle",
+      "protocols": [
+        "Aave V3 Core",
+        "Compound V3 WETH",
+        "InfiniFi (siUSD)",
+        "Strata (srUSDe)",
+        "Fluid Lending",
+        "BUCK",
+        "Midas (mHYPER)",
+        "Resolv (RLP)",
+        "Spark Lending"
+      ],
+      "count": 9,
+      "address": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"
+    },
+    {
+      "asset": "wstETH",
+      "parent": "Lido",
+      "protocols": [
+        "Aave V3 Core",
+        "Compound V3 USDC",
+        "Compound V3 WETH",
+        "Reserve Protocol (ETH+)",
+        "Fluid Lending",
+        "Resolv (RLP)",
+        "Spark Lending"
+      ],
+      "count": 7,
+      "address": "0x7f39C581F595B53c5cb19bD0b3f8dA6c935E2Ca0"
+    },
+    {
+      "asset": "USDT",
+      "parent": "Tether",
+      "protocols": [
+        "Aave V3 Core",
+        "Compound V3 WETH",
+        "InfiniFi (siUSD)",
+        "Strata (srUSDe)",
+        "Fluid Lending",
+        "Resolv (RLP)",
+        "Spark Lending"
+      ],
+      "count": 7,
+      "address": "0xdAC17F958D2ee523a2206206994597C13D831ec7"
+    },
+    {
+      "asset": "WETH",
+      "parent": "",
+      "protocols": [
+        "Aave V3 Core",
+        "Compound V3 USDC",
+        "Fluid Lending",
+        "Origin ARM (stETH/WETH)",
+        "Spark Lending"
+      ],
+      "count": 5,
+      "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2"
+    },
+    {
+      "asset": "weETH",
+      "parent": "EtherFi",
+      "protocols": [
+        "Aave V3 Core",
+        "Compound V3 USDC",
+        "Compound V3 WETH",
+        "Maple Finance (syrupUSDC)",
+        "Spark Lending"
+      ],
+      "count": 5,
+      "address": "0xCd5fE23C85820F7B72D0926FC9b05b43E359b7ee"
+    },
+    {
+      "asset": "WBTC",
+      "parent": "BitGo",
+      "protocols": [
+        "Aave V3 Core",
+        "Compound V3 USDC",
+        "Compound V3 WETH",
+        "Spark Lending"
+      ],
+      "count": 4,
+      "address": "0x2260fac5e5542a773aa44fbcfedf7c193bc2c599"
+    },
+    {
+      "asset": "rETH",
+      "parent": "Rocket Pool",
+      "protocols": [
+        "Aave V3 Core",
+        "Compound V3 WETH",
+        "Reserve Protocol (ETH+)",
+        "Spark Lending"
+      ],
+      "count": 4,
+      "address": "0xae78736Cd615f374D3085123A210448E74Fc6393"
+    },
+    {
+      "asset": "USDe",
+      "parent": "Ethena",
+      "protocols": [
+        "Aave V3 Core",
+        "Compound V3 USDC",
+        "InfiniFi (siUSD)",
+        "Strata (srUSDe)"
+      ],
+      "count": 4,
+      "address": "0x4c9EDD5852cd905f086C759E8383e09bff1E68B3"
+    },
+    {
+      "asset": "tBTC",
+      "parent": "Threshold",
+      "protocols": [
+        "Aave V3 Core",
+        "Compound V3 USDC",
+        "Compound V3 WETH",
+        "Spark Lending"
+      ],
+      "count": 4,
+      "address": "0x18084fba666a33d37592fa2633fd49a74dd93a88"
+    },
+    {
+      "asset": "cbBTC",
+      "parent": "Coinbase",
+      "protocols": [
+        "Aave V3 Core",
+        "Compound V3 USDC",
+        "Compound V3 WETH",
+        "Spark Lending"
+      ],
+      "count": 4,
+      "address": "0xcbb7c0000ab88b473b1f5afd9ef808440eed33bf"
+    },
+    {
+      "asset": "rsETH",
+      "parent": "KelpDAO",
+      "protocols": [
+        "Aave V3 Core",
+        "Compound V3 USDC",
+        "Compound V3 WETH",
+        "Spark Lending"
+      ],
+      "count": 4,
+      "address": "0xa1290d69c65a6fe4df752f95823fae25cb99e5a7"
+    },
+    {
+      "asset": "DAI",
+      "parent": "MakerDAO",
+      "protocols": [
+        "Aave V3 Core",
+        "Strata (srUSDe)",
+        "Spark Lending"
+      ],
+      "count": 3,
+      "address": "0x6B175474E89094C44Da98b954EedeAC495271d0F"
+    },
+    {
+      "asset": "ETHx",
+      "parent": "Stader",
+      "protocols": [
+        "Aave V3 Core",
+        "Compound V3 WETH",
+        "Reserve Protocol (ETH+)"
+      ],
+      "count": 3,
+      "address": "0xA35b1B31Ce002FBF2058D22F30f95D405200A15b"
+    },
+    {
+      "asset": "sUSDe",
+      "parent": "Ethena",
+      "protocols": [
+        "Aave V3 Core",
+        "InfiniFi (siUSD)",
+        "Strata (srUSDe)"
+      ],
+      "count": 3,
+      "address": "0x9D39A5DE30e57443BfF2A8307A4256c8797A3497"
+    },
+    {
+      "asset": "LBTC",
+      "parent": "Lombard",
+      "protocols": [
+        "Aave V3 Core",
+        "Maple Finance (syrupUSDC)",
+        "Spark Lending"
+      ],
+      "count": 3,
+      "address": "0x8236a87084f8B84306f72007F36F2618A5634494"
+    },
+    {
+      "asset": "ezETH",
+      "parent": "Renzo",
+      "protocols": [
+        "Aave V3 Core",
+        "Compound V3 WETH",
+        "Spark Lending"
+      ],
+      "count": 3,
+      "address": "0xbf5495efe5db9ce00f80364c8b423567e58d2110"
+    },
+    {
+      "asset": "HYPE",
+      "parent": "",
+      "protocols": [
+        "Maple Finance (syrupUSDC)",
+        "Kinetiq (kHYPE)",
+        "StakedHYPE (stHYPE)"
+      ],
+      "count": 3,
+      "address": "0x74EaDB3027Da5e62397dEe1376a9CC2081B89c8B"
+    },
+    {
+      "asset": "LINK",
+      "parent": "Chainlink",
+      "protocols": [
+        "Aave V3 Core",
+        "Compound V3 USDC"
+      ],
+      "count": 2,
+      "address": "0x514910771af9ca656af840dff83e8264ecf986ca"
+    },
+    {
+      "asset": "cbETH",
+      "parent": "Coinbase",
+      "protocols": [
+        "Aave V3 Core",
+        "Compound V3 WETH"
+      ],
+      "count": 2,
+      "address": "0xbe9895146f7af43049ca1c1ae358b0541ea49704"
+    },
+    {
+      "asset": "UNI",
+      "parent": "Uniswap",
+      "protocols": [
+        "Aave V3 Core",
+        "Compound V3 USDC"
+      ],
+      "count": 2,
+      "address": "0x1f9840a85d5af5bf1d1762f925bdaddc4201f984"
+    },
+    {
+      "asset": "GHO",
+      "parent": "Aave",
+      "protocols": [
+        "Aave V3 Core",
+        "Fluid Lending"
+      ],
+      "count": 2,
+      "address": "0x40D16FC0246aD3160Ccc09B8D0D3A2cD28aE6C2f"
+    },
+    {
+      "asset": "sDAI",
+      "parent": "MakerDAO",
+      "protocols": [
+        "Aave V3 Core",
+        "Spark Lending"
+      ],
+      "count": 2,
+      "address": "0x83f20f44975d03b1b09e64809b757c47f942beea"
+    },
+    {
+      "asset": "PYUSD",
+      "parent": "PayPal",
+      "protocols": [
+        "Aave V3 Core",
+        "Spark Lending"
+      ],
+      "count": 2,
+      "address": "0x6c3ea9036406852006290770bedfcaba0e23a0e8"
+    },
+    {
+      "asset": "osETH",
+      "parent": "StakeWise",
+      "protocols": [
+        "Aave V3 Core",
+        "Compound V3 WETH"
+      ],
+      "count": 2,
+      "address": "0xf1c9acdc66974dfb6decb12aa385b9cd01190e38"
+    },
+    {
+      "asset": "USDS",
+      "parent": "Sky",
+      "protocols": [
+        "Aave V3 Core",
+        "Spark Lending"
+      ],
+      "count": 2,
+      "address": "0xdc035d45d973e3ec169d2276ddab16f1e407384f"
+    },
+    {
+      "asset": "USDtb",
+      "parent": "Ethena",
+      "protocols": [
+        "Aave V3 Core",
+        "Fluid Lending"
+      ],
+      "count": 2,
+      "address": "0xC139190F447e929f090edF4C5EEa2c5fDa1dcD32"
+    },
+    {
+      "asset": "tETH",
+      "parent": "Treehouse",
+      "protocols": [
+        "Aave V3 Core",
+        "Compound V3 WETH"
+      ],
+      "count": 2,
+      "address": "0xd11c452fc99cf405034ee446803b6f6c1f6d5ed8"
+    },
+    {
+      "asset": "BTC",
+      "parent": "",
+      "protocols": [
+        "Maple Finance (syrupUSDC)",
+        "Unit (UBTC)"
+      ],
+      "count": 2,
+      "address": "0x2260fac5e5542a773aa44fbcfedf7c193bc2c599"
+    },
+    {
+      "asset": "sUSDS",
+      "parent": "Sky",
+      "protocols": [
+        "Fluid Lending",
+        "Spark Lending"
+      ],
+      "count": 2,
+      "address": "0xa3931d71877C0E7a3148CB7Eb4463524FEc27fbD"
+    },
+    {
+      "asset": "stETH",
+      "parent": "Lido",
+      "protocols": [
+        "Origin ARM (stETH/WETH)",
+        "Resolv (RLP)"
+      ],
+      "count": 2,
+      "address": "0xae7ab96520DE3A18E5e111B5EaAb095312D7fE84"
+    }
+  ],
+  "dependencies": [
+    {
+      "protocol": "Aave V3 Core",
+      "asset": "WETH",
+      "type": "collateral",
+      "parent": "",
+      "allocation": "",
+      "address": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2"
+    },
+    {
+      "protocol": "Aave V3 Core",
+      "asset": "wstETH",
+      "type": "collateral",
+      "parent": "Lido",
+      "allocation": "",
+      "address": "0x7f39c581f595b53c5cb19bd0b3f8da6c935e2ca0"
+    },
+    {
+      "protocol": "Aave V3 Core",
+      "asset": "WBTC",
+      "type": "collateral",
+      "parent": "BitGo",
+      "allocation": "",
+      "address": "0x2260fac5e5542a773aa44fbcfedf7c193bc2c599"
+    },
+    {
+      "protocol": "Aave V3 Core",
+      "asset": "USDC",
+      "type": "collateral",
+      "parent": "Circle",
+      "allocation": "",
+      "address": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48"
+    },
+    {
+      "protocol": "Aave V3 Core",
+      "asset": "DAI",
+      "type": "collateral",
+      "parent": "MakerDAO",
+      "allocation": "",
+      "address": "0x6b175474e89094c44da98b954eedeac495271d0f"
+    },
+    {
+      "protocol": "Aave V3 Core",
+      "asset": "LINK",
+      "type": "collateral",
+      "parent": "Chainlink",
+      "allocation": "",
+      "address": "0x514910771af9ca656af840dff83e8264ecf986ca"
+    },
+    {
+      "protocol": "Aave V3 Core",
+      "asset": "AAVE",
+      "type": "collateral",
+      "parent": "Aave",
+      "allocation": "",
+      "address": "0x7fc66500c84a76ad7e9c93437bfc5ac33e2ddae9"
+    },
+    {
+      "protocol": "Aave V3 Core",
+      "asset": "cbETH",
+      "type": "collateral",
+      "parent": "Coinbase",
+      "allocation": "",
+      "address": "0xbe9895146f7af43049ca1c1ae358b0541ea49704"
+    },
+    {
+      "protocol": "Aave V3 Core",
+      "asset": "USDT",
+      "type": "collateral",
+      "parent": "Tether",
+      "allocation": "",
+      "address": "0xdac17f958d2ee523a2206206994597c13d831ec7"
+    },
+    {
+      "protocol": "Aave V3 Core",
+      "asset": "rETH",
+      "type": "collateral",
+      "parent": "Rocket Pool",
+      "allocation": "",
+      "address": "0xae78736cd615f374d3085123a210448e74fc6393"
+    },
+    {
+      "protocol": "Aave V3 Core",
+      "asset": "LUSD",
+      "type": "collateral",
+      "parent": "Liquity",
+      "allocation": "",
+      "address": "0x5f98805a4e8be255a32880fdec7f6728c6568ba0"
+    },
+    {
+      "protocol": "Aave V3 Core",
+      "asset": "CRV",
+      "type": "collateral",
+      "parent": "Curve",
+      "allocation": "",
+      "address": "0xd533a949740bb3306d119cc777fa900ba034cd52"
+    },
+    {
+      "protocol": "Aave V3 Core",
+      "asset": "MKR",
+      "type": "collateral",
+      "parent": "MakerDAO",
+      "allocation": "",
+      "address": "0x9f8f72aa9304c8b593d555f12ef6589cc3a579a2"
+    },
+    {
+      "protocol": "Aave V3 Core",
+      "asset": "SNX",
+      "type": "collateral",
+      "parent": "Synthetix",
+      "allocation": "",
+      "address": "0xc011a73ee8576fb46f5e1c5751ca3b9fe0af2a6f"
+    },
+    {
+      "protocol": "Aave V3 Core",
+      "asset": "BAL",
+      "type": "collateral",
+      "parent": "Balancer",
+      "allocation": "",
+      "address": "0xba100000625a3754423978a60c9317c58a424e3d"
+    },
+    {
+      "protocol": "Aave V3 Core",
+      "asset": "UNI",
+      "type": "collateral",
+      "parent": "Uniswap",
+      "allocation": "",
+      "address": "0x1f9840a85d5af5bf1d1762f925bdaddc4201f984"
+    },
+    {
+      "protocol": "Aave V3 Core",
+      "asset": "LDO",
+      "type": "collateral",
+      "parent": "Lido",
+      "allocation": "",
+      "address": "0x5a98fcbea516cf06857215779fd812ca3bef1b32"
+    },
+    {
+      "protocol": "Aave V3 Core",
+      "asset": "ENS",
+      "type": "collateral",
+      "parent": "ENS",
+      "allocation": "",
+      "address": "0xc18360217d8f7ab5e7c516566761ea12ce7f9d72"
+    },
+    {
+      "protocol": "Aave V3 Core",
+      "asset": "1INCH",
+      "type": "collateral",
+      "parent": "1inch",
+      "allocation": "",
+      "address": "0x111111111117dc0aa78b770fa6a738034120c302"
+    },
+    {
+      "protocol": "Aave V3 Core",
+      "asset": "FRAX",
+      "type": "collateral",
+      "parent": "Frax",
+      "allocation": "",
+      "address": "0x853d955acef822db058eb8505911ed77f175b99e"
+    },
+    {
+      "protocol": "Aave V3 Core",
+      "asset": "GHO",
+      "type": "collateral",
+      "parent": "Aave",
+      "allocation": "",
+      "address": "0x40d16fc0246ad3160ccc09b8d0d3a2cd28ae6c2f"
+    },
+    {
+      "protocol": "Aave V3 Core",
+      "asset": "RPL",
+      "type": "collateral",
+      "parent": "Rocket Pool",
+      "allocation": "",
+      "address": "0xd33526068d116ce69f19a9ee46f0bd304f21a51f"
+    },
+    {
+      "protocol": "Aave V3 Core",
+      "asset": "sDAI",
+      "type": "collateral",
+      "parent": "MakerDAO",
+      "allocation": "",
+      "address": "0x83f20f44975d03b1b09e64809b757c47f942beea"
+    },
+    {
+      "protocol": "Aave V3 Core",
+      "asset": "STG",
+      "type": "collateral",
+      "parent": "Stargate",
+      "allocation": "",
+      "address": "0xaf5191b0de278c7286d6c7cc6ab6bb8a73ba2cd6"
+    },
+    {
+      "protocol": "Aave V3 Core",
+      "asset": "KNC",
+      "type": "collateral",
+      "parent": "Kyber",
+      "allocation": "",
+      "address": "0xdefa4e8a7bcba345f687a2f1456f5edd9ce97202"
+    },
+    {
+      "protocol": "Aave V3 Core",
+      "asset": "FXS",
+      "type": "collateral",
+      "parent": "Frax",
+      "allocation": "",
+      "address": "0x3432b6a60d23ca0dfca7761b7ab56459d9c964d0"
+    },
+    {
+      "protocol": "Aave V3 Core",
+      "asset": "crvUSD",
+      "type": "collateral",
+      "parent": "Curve",
+      "allocation": "",
+      "address": "0xf939e0a03fb07f59a73314e73794be0e57ac1b4e"
+    },
+    {
+      "protocol": "Aave V3 Core",
+      "asset": "PYUSD",
+      "type": "collateral",
+      "parent": "PayPal",
+      "allocation": "",
+      "address": "0x6c3ea9036406852006290770bedfcaba0e23a0e8"
+    },
+    {
+      "protocol": "Aave V3 Core",
+      "asset": "weETH",
+      "type": "collateral",
+      "parent": "EtherFi",
+      "allocation": "",
+      "address": "0xcd5fe23c85820f7b72d0926fc9b05b43e359b7ee"
+    },
+    {
+      "protocol": "Aave V3 Core",
+      "asset": "osETH",
+      "type": "collateral",
+      "parent": "StakeWise",
+      "allocation": "",
+      "address": "0xf1c9acdc66974dfb6decb12aa385b9cd01190e38"
+    },
+    {
+      "protocol": "Aave V3 Core",
+      "asset": "USDe",
+      "type": "collateral",
+      "parent": "Ethena",
+      "allocation": "",
+      "address": "0x4c9edd5852cd905f086c759e8383e09bff1e68b3"
+    },
+    {
+      "protocol": "Aave V3 Core",
+      "asset": "ETHx",
+      "type": "collateral",
+      "parent": "Stader",
+      "allocation": "",
+      "address": "0xa35b1b31ce002fbf2058d22f30f95d405200a15b"
+    },
+    {
+      "protocol": "Aave V3 Core",
+      "asset": "sUSDe",
+      "type": "collateral",
+      "parent": "Ethena",
+      "allocation": "",
+      "address": "0x9d39a5de30e57443bff2a8307a4256c8797a3497"
+    },
+    {
+      "protocol": "Aave V3 Core",
+      "asset": "tBTC",
+      "type": "collateral",
+      "parent": "Threshold",
+      "allocation": "",
+      "address": "0x18084fba666a33d37592fa2633fd49a74dd93a88"
+    },
+    {
+      "protocol": "Aave V3 Core",
+      "asset": "cbBTC",
+      "type": "collateral",
+      "parent": "Coinbase",
+      "allocation": "",
+      "address": "0xcbb7c0000ab88b473b1f5afd9ef808440eed33bf"
+    },
+    {
+      "protocol": "Aave V3 Core",
+      "asset": "USDS",
+      "type": "collateral",
+      "parent": "Sky",
+      "allocation": "",
+      "address": "0xdc035d45d973e3ec169d2276ddab16f1e407384f"
+    },
+    {
+      "protocol": "Aave V3 Core",
+      "asset": "rsETH",
+      "type": "collateral",
+      "parent": "KelpDAO",
+      "allocation": "",
+      "address": "0xa1290d69c65a6fe4df752f95823fae25cb99e5a7"
+    },
+    {
+      "protocol": "Aave V3 Core",
+      "asset": "LBTC",
+      "type": "collateral",
+      "parent": "Lombard",
+      "allocation": "",
+      "address": "0x8236a87084f8b84306f72007f36f2618a5634494"
+    },
+    {
+      "protocol": "Aave V3 Core",
+      "asset": "eBTC",
+      "type": "collateral",
+      "parent": "Badger",
+      "allocation": "",
+      "address": "0x657e8c867d8b37dcc18fa4caead9c45eb088c642"
+    },
+    {
+      "protocol": "Aave V3 Core",
+      "asset": "RLUSD",
+      "type": "collateral",
+      "parent": "Ripple",
+      "allocation": "",
+      "address": "0x8292bb45bf1ee4d140127049757c2e0ff06317ed"
+    },
+    {
+      "protocol": "Aave V3 Core",
+      "asset": "PT-eUSDE-29MAY2025",
+      "type": "collateral",
+      "parent": "Pendle",
+      "allocation": "",
+      "address": "0x50d2c7992b802eef16c04feadab310f31866a545"
+    },
+    {
+      "protocol": "Aave V3 Core",
+      "asset": "PT-sUSDE-31JUL2025",
+      "type": "collateral",
+      "parent": "Pendle",
+      "allocation": "",
+      "address": "0x3b3fb9c57858ef816833dc91565efcd85d96f634"
+    },
+    {
+      "protocol": "Aave V3 Core",
+      "asset": "USDtb",
+      "type": "collateral",
+      "parent": "Ethena",
+      "allocation": "",
+      "address": "0xc139190f447e929f090edeb554d95abb8b18ac1c"
+    },
+    {
+      "protocol": "Aave V3 Core",
+      "asset": "PT-USDe-31JUL2025",
+      "type": "collateral",
+      "parent": "Pendle",
+      "allocation": "",
+      "address": "0x917459337caac939d41d7493b3999f571d20d667"
+    },
+    {
+      "protocol": "Aave V3 Core",
+      "asset": "PT-eUSDE-14AUG2025",
+      "type": "collateral",
+      "parent": "Pendle",
+      "allocation": "",
+      "address": "0x14bdc3a3ae09f5518b923b69489cbcafb238e617"
+    },
+    {
+      "protocol": "Aave V3 Core",
+      "asset": "eUSDe",
+      "type": "collateral",
+      "parent": "Ethena",
+      "allocation": "",
+      "address": "0x90d2af7d622ca3141efa4d8f1f24d86e5974cc8f"
+    },
+    {
+      "protocol": "Aave V3 Core",
+      "asset": "FBTC",
+      "type": "collateral",
+      "parent": "Ignition",
+      "allocation": "",
+      "address": "0xc96de26018a54d51c097160568752c4e3bd6c364"
+    },
+    {
+      "protocol": "Aave V3 Core",
+      "asset": "EURC",
+      "type": "collateral",
+      "parent": "Circle",
+      "allocation": "",
+      "address": "0x1abaea1f7c830bd89acc67ec4af516284b1bc33c"
+    },
+    {
+      "protocol": "Aave V3 Core",
+      "asset": "PT-sUSDE-25SEP2025",
+      "type": "collateral",
+      "parent": "Pendle",
+      "allocation": "",
+      "address": "0x9f56094c450763769ba0ea9fe2876070c0fd5f77"
+    },
+    {
+      "protocol": "Aave V3 Core",
+      "asset": "PT-USDe-25SEP2025",
+      "type": "collateral",
+      "parent": "Pendle",
+      "allocation": "",
+      "address": "0xbc6736d346a5ebc0debc997397912cd9b8fae10a"
+    },
+    {
+      "protocol": "Aave V3 Core",
+      "asset": "tETH",
+      "type": "collateral",
+      "parent": "Treehouse",
+      "allocation": "",
+      "address": "0xd11c452fc99cf405034ee446803b6f6c1f6d5ed8"
+    },
+    {
+      "protocol": "Aave V3 Core",
+      "asset": "ezETH",
+      "type": "collateral",
+      "parent": "Renzo",
+      "allocation": "",
+      "address": "0xbf5495efe5db9ce00f80364c8b423567e58d2110"
+    },
+    {
+      "protocol": "Aave V3 Core",
+      "asset": "XAUt",
+      "type": "collateral",
+      "parent": "Tether",
+      "allocation": "",
+      "address": "0x68749665ff8d2d112fa859aa293f07a622782f38"
+    },
+    {
+      "protocol": "Aave V3 Core",
+      "asset": "PT-sUSDE-27NOV2025",
+      "type": "collateral",
+      "parent": "Pendle",
+      "allocation": "",
+      "address": "0xe6a934089bbee34f832060ce98848359883749b3"
+    },
+    {
+      "protocol": "Aave V3 Core",
+      "asset": "PT-USDe-27NOV2025",
+      "type": "collateral",
+      "parent": "Pendle",
+      "allocation": "",
+      "address": "0x62c6e813b9589c3631ba0cdb013acdb8544038b7"
+    },
+    {
+      "protocol": "Aave V3 Core",
+      "asset": "PT-USDe-5FEB2026",
+      "type": "collateral",
+      "parent": "Pendle",
+      "allocation": "",
+      "address": "0x1f84a51296691320478c98b8d77f2bbd17d34350"
+    },
+    {
+      "protocol": "Aave V3 Core",
+      "asset": "PT-sUSDE-5FEB2026",
+      "type": "collateral",
+      "parent": "Pendle",
+      "allocation": "",
+      "address": "0xe8483517077afa11a9b07f849cee2552f040d7b2"
+    },
+    {
+      "protocol": "Aave V3 Core",
+      "asset": "mUSD",
+      "type": "collateral",
+      "parent": "Mountain",
+      "allocation": "",
+      "address": "0xaca92e438df0b2401ff60da7e4337b687a2435da"
+    },
+    {
+      "protocol": "Aave V3 Core",
+      "asset": "syrupUSDT",
+      "type": "collateral",
+      "parent": "Maple",
+      "allocation": "",
+      "address": "0x356b8d89c1e1239cbbb9de4815c39a1474d5ba7d"
+    },
+    {
+      "protocol": "Aave V3 Core",
+      "asset": "USDG",
+      "type": "collateral",
+      "parent": "Paxos",
+      "allocation": "",
+      "address": "0xe343167631d89b6ffc58b88d6b7fb0228795491d"
+    },
+    {
+      "protocol": "Aave V3 Core",
+      "asset": "PT-USDe-7MAY2026",
+      "type": "collateral",
+      "parent": "Pendle",
+      "allocation": "",
+      "address": "0xaebf0bb9f57e89260d57f31af34eb58657d96ce0"
+    },
+    {
+      "protocol": "Aave V3 Core",
+      "asset": "PT-sUSDE-7MAY2026",
+      "type": "collateral",
+      "parent": "Pendle",
+      "allocation": "",
+      "address": "0x3de0ff76e8b528c092d47b9dac775931cef80f49"
+    },
+    {
+      "protocol": "Aave V3 Core",
+      "asset": "PT-srUSDe-2APR2026",
+      "type": "collateral",
+      "parent": "Pendle",
+      "allocation": "",
+      "address": "0x9bf45ab47747f4b4dd09b3c2c73953484b4eb375"
+    },
+    {
+      "protocol": "Compound V3 USDC",
+      "asset": "USDC",
+      "type": "base",
+      "parent": "Circle",
+      "allocation": "",
+      "address": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"
+    },
+    {
+      "protocol": "Compound V3 USDC",
+      "asset": "COMP",
+      "type": "collateral",
+      "parent": "Compound",
+      "allocation": "",
+      "address": "0xc00e94cb662c3520282e6f5717214004a7f26888"
+    },
+    {
+      "protocol": "Compound V3 USDC",
+      "asset": "WBTC",
+      "type": "collateral",
+      "parent": "BitGo",
+      "allocation": "",
+      "address": "0x2260fac5e5542a773aa44fbcfedf7c193bc2c599"
+    },
+    {
+      "protocol": "Compound V3 USDC",
+      "asset": "WETH",
+      "type": "collateral",
+      "parent": "",
+      "allocation": "",
+      "address": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2"
+    },
+    {
+      "protocol": "Compound V3 USDC",
+      "asset": "UNI",
+      "type": "collateral",
+      "parent": "Uniswap",
+      "allocation": "",
+      "address": "0x1f9840a85d5af5bf1d1762f925bdaddc4201f984"
+    },
+    {
+      "protocol": "Compound V3 USDC",
+      "asset": "LINK",
+      "type": "collateral",
+      "parent": "Chainlink",
+      "allocation": "",
+      "address": "0x514910771af9ca656af840dff83e8264ecf986ca"
+    },
+    {
+      "protocol": "Compound V3 USDC",
+      "asset": "wstETH",
+      "type": "collateral",
+      "parent": "Lido",
+      "allocation": "",
+      "address": "0x7f39c581f595b53c5cb19bd0b3f8da6c935e2ca0"
+    },
+    {
+      "protocol": "Compound V3 USDC",
+      "asset": "cbBTC",
+      "type": "collateral",
+      "parent": "Coinbase",
+      "allocation": "",
+      "address": "0xcbb7c0000ab88b473b1f5afd9ef808440eed33bf"
+    },
+    {
+      "protocol": "Compound V3 USDC",
+      "asset": "tBTC",
+      "type": "collateral",
+      "parent": "Threshold",
+      "allocation": "",
+      "address": "0x18084fba666a33d37592fa2633fd49a74dd93a88"
+    },
+    {
+      "protocol": "Compound V3 USDC",
+      "asset": "weETH",
+      "type": "collateral",
+      "parent": "EtherFi",
+      "allocation": "",
+      "address": "0xcd5fe23c85820f7b72d0926fc9b05b43e359b7ee"
+    },
+    {
+      "protocol": "Compound V3 USDC",
+      "asset": "deUSD",
+      "type": "collateral",
+      "parent": "Elixir",
+      "allocation": "",
+      "address": "0x15700b564ca08d9439c58ca5053166e8317aa138"
+    },
+    {
+      "protocol": "Compound V3 USDC",
+      "asset": "sdeUSD",
+      "type": "collateral",
+      "parent": "Elixir",
+      "allocation": "",
+      "address": "0x5c5b196abe0d54485975d1ec29617d42d9198326"
+    },
+    {
+      "protocol": "Compound V3 USDC",
+      "asset": "rsETH",
+      "type": "collateral",
+      "parent": "KelpDAO",
+      "allocation": "",
+      "address": "0xa1290d69c65a6fe4df752f95823fae25cb99e5a7"
+    },
+    {
+      "protocol": "Compound V3 USDC",
+      "asset": "USDe",
+      "type": "collateral",
+      "parent": "Ethena",
+      "allocation": "",
+      "address": "0x4c9edd5852cd905f086c759e8383e09bff1e68b3"
+    },
+    {
+      "protocol": "Compound V3 WETH",
+      "asset": "WETH",
+      "type": "base",
+      "parent": "",
+      "allocation": "",
+      "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2"
+    },
+    {
+      "protocol": "Compound V3 WETH",
+      "asset": "cbETH",
+      "type": "collateral",
+      "parent": "Coinbase",
+      "allocation": "",
+      "address": "0xbe9895146f7af43049ca1c1ae358b0541ea49704"
+    },
+    {
+      "protocol": "Compound V3 WETH",
+      "asset": "wstETH",
+      "type": "collateral",
+      "parent": "Lido",
+      "allocation": "",
+      "address": "0x7f39c581f595b53c5cb19bd0b3f8da6c935e2ca0"
+    },
+    {
+      "protocol": "Compound V3 WETH",
+      "asset": "rETH",
+      "type": "collateral",
+      "parent": "Rocket Pool",
+      "allocation": "",
+      "address": "0xae78736cd615f374d3085123a210448e74fc6393"
+    },
+    {
+      "protocol": "Compound V3 WETH",
+      "asset": "rsETH",
+      "type": "collateral",
+      "parent": "KelpDAO",
+      "allocation": "",
+      "address": "0xa1290d69c65a6fe4df752f95823fae25cb99e5a7"
+    },
+    {
+      "protocol": "Compound V3 WETH",
+      "asset": "weETH",
+      "type": "collateral",
+      "parent": "EtherFi",
+      "allocation": "",
+      "address": "0xcd5fe23c85820f7b72d0926fc9b05b43e359b7ee"
+    },
+    {
+      "protocol": "Compound V3 WETH",
+      "asset": "osETH",
+      "type": "collateral",
+      "parent": "StakeWise",
+      "allocation": "",
+      "address": "0xf1c9acdc66974dfb6decb12aa385b9cd01190e38"
+    },
+    {
+      "protocol": "Compound V3 WETH",
+      "asset": "WBTC",
+      "type": "collateral",
+      "parent": "BitGo",
+      "allocation": "",
+      "address": "0x2260fac5e5542a773aa44fbcfedf7c193bc2c599"
+    },
+    {
+      "protocol": "Compound V3 WETH",
+      "asset": "ezETH",
+      "type": "collateral",
+      "parent": "Renzo",
+      "allocation": "",
+      "address": "0xbf5495efe5db9ce00f80364c8b423567e58d2110"
+    },
+    {
+      "protocol": "Compound V3 WETH",
+      "asset": "cbBTC",
+      "type": "collateral",
+      "parent": "Coinbase",
+      "allocation": "",
+      "address": "0xcbb7c0000ab88b473b1f5afd9ef808440eed33bf"
+    },
+    {
+      "protocol": "Compound V3 WETH",
+      "asset": "rswETH",
+      "type": "collateral",
+      "parent": "Swell",
+      "allocation": "",
+      "address": "0xfae103dc9cf190ed75350761e95403b7b8afa6c0"
+    },
+    {
+      "protocol": "Compound V3 WETH",
+      "asset": "tBTC",
+      "type": "collateral",
+      "parent": "Threshold",
+      "allocation": "",
+      "address": "0x18084fba666a33d37592fa2633fd49a74dd93a88"
+    },
+    {
+      "protocol": "Compound V3 WETH",
+      "asset": "ETHx",
+      "type": "collateral",
+      "parent": "Stader",
+      "allocation": "",
+      "address": "0xa35b1b31ce002fbf2058d22f30f95d405200a15b"
+    },
+    {
+      "protocol": "Compound V3 WETH",
+      "asset": "tETH",
+      "type": "collateral",
+      "parent": "Treehouse",
+      "allocation": "",
+      "address": "0xd11c452fc99cf405034ee446803b6f6c1f6d5ed8"
+    },
+    {
+      "protocol": "Compound V3 WETH",
+      "asset": "pufETH",
+      "type": "collateral",
+      "parent": "Puffer",
+      "allocation": "",
+      "address": "0xd9a442856c234a39a81a089c06451ebaa4306a72"
+    },
+    {
+      "protocol": "Compound V3 WETH",
+      "asset": "wOETH",
+      "type": "collateral",
+      "parent": "Origin",
+      "allocation": "",
+      "address": "0xdcee70654261af21c44c093c300ed3bb97b78192"
+    },
+    {
+      "protocol": "Compound V3 WETH",
+      "asset": "USDC",
+      "type": "collateral",
+      "parent": "Circle",
+      "allocation": "",
+      "address": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48"
+    },
+    {
+      "protocol": "Compound V3 WETH",
+      "asset": "USDT",
+      "type": "collateral",
+      "parent": "Tether",
+      "allocation": "",
+      "address": "0xdac17f958d2ee523a2206206994597c13d831ec7"
+    },
+    {
+      "protocol": "Maple Finance (syrupUSDC)",
+      "asset": "BTC",
+      "type": "collateral",
+      "parent": "",
+      "allocation": "53.92%",
+      "address": "0x2260fac5e5542a773aa44fbcfedf7c193bc2c599"
+    },
+    {
+      "protocol": "Maple Finance (syrupUSDC)",
+      "asset": "XRP",
+      "type": "collateral",
+      "parent": "",
+      "allocation": "25.38%",
+      "address": "0x628f76eab0c1298f7a24d337bbbf73aab463c4ea"
+    },
+    {
+      "protocol": "Maple Finance (syrupUSDC)",
+      "asset": "USTB",
+      "type": "collateral",
+      "parent": "Superstate",
+      "allocation": "16.16%",
+      "address": "0x43415eB6ff9DB7E26A15b704e7A3eDCe97d31C4e"
+    },
+    {
+      "protocol": "Maple Finance (syrupUSDC)",
+      "asset": "LBTC",
+      "type": "collateral",
+      "parent": "Lombard",
+      "allocation": "2.43%",
+      "address": "0x8236a87084f8B84306f72007F36F2618A5634494"
+    },
+    {
+      "protocol": "Maple Finance (syrupUSDC)",
+      "asset": "weETH",
+      "type": "collateral",
+      "parent": "EtherFi",
+      "allocation": "1.06%",
+      "address": "0xCd5fE23C85820F7B72D0926FC9b05b43E359b7ee"
+    },
+    {
+      "protocol": "Maple Finance (syrupUSDC)",
+      "asset": "HYPE",
+      "type": "collateral",
+      "parent": "",
+      "allocation": "1.05%",
+      "address": "0x74EaDB3027Da5e62397dEe1376a9CC2081B89c8B"
+    },
+    {
+      "protocol": "Maple Finance (syrupUSDC)",
+      "asset": "Aave V3 Core",
+      "type": "yield_source",
+      "parent": "",
+      "allocation": ""
+    },
+    {
+      "protocol": "Maple Finance (syrupUSDC)",
+      "asset": "Sky",
+      "type": "yield_source",
+      "parent": "",
+      "allocation": ""
+    },
+    {
+      "protocol": "InfiniFi (siUSD)",
+      "asset": "USDC",
+      "type": "collateral",
+      "parent": "Circle",
+      "allocation": "",
+      "address": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"
+    },
+    {
+      "protocol": "InfiniFi (siUSD)",
+      "asset": "USDT",
+      "type": "collateral",
+      "parent": "Tether",
+      "allocation": "",
+      "address": "0xdAC17F958D2ee523a2206206994597C13D831ec7"
+    },
+    {
+      "protocol": "InfiniFi (siUSD)",
+      "asset": "USDe",
+      "type": "collateral",
+      "parent": "Ethena",
+      "allocation": "",
+      "address": "0x4c9EDD5852cd905f086C759E8383e09bff1E68B3"
+    },
+    {
+      "protocol": "InfiniFi (siUSD)",
+      "asset": "sUSDe",
+      "type": "collateral",
+      "parent": "Ethena",
+      "allocation": "",
+      "address": "0x9D39A5DE30e57443BfF2A8307A4256c8797A3497"
+    },
+    {
+      "protocol": "InfiniFi (siUSD)",
+      "asset": "Fluid (USDC)",
+      "type": "yield_source",
+      "parent": "USDC",
+      "allocation": ""
+    },
+    {
+      "protocol": "InfiniFi (siUSD)",
+      "asset": "Euler (USDC)",
+      "type": "yield_source",
+      "parent": "USDC",
+      "allocation": ""
+    },
+    {
+      "protocol": "InfiniFi (siUSD)",
+      "asset": "Aave v3 Horizon (aHorRwaUSDC)",
+      "type": "yield_source",
+      "parent": "USDC",
+      "allocation": ""
+    },
+    {
+      "protocol": "InfiniFi (siUSD)",
+      "asset": "Spark Lending (USDC)",
+      "type": "yield_source",
+      "parent": "USDC",
+      "allocation": ""
+    },
+    {
+      "protocol": "InfiniFi (siUSD)",
+      "asset": "Aave v3 (aEthUSDC)",
+      "type": "yield_source",
+      "parent": "USDC",
+      "allocation": ""
+    },
+    {
+      "protocol": "InfiniFi (siUSD)",
+      "asset": "Pendle (USDe, sUSDe)",
+      "type": "yield_source",
+      "parent": "USDe, sUSDe",
+      "allocation": ""
+    },
+    {
+      "protocol": "InfiniFi (siUSD)",
+      "asset": "Ethena (USDe, sUSDe)",
+      "type": "yield_source",
+      "parent": "USDe, sUSDe",
+      "allocation": ""
+    },
+    {
+      "protocol": "InfiniFi (siUSD)",
+      "asset": "Gauntlet Frontier (gtUSDa)",
+      "type": "yield_source",
+      "parent": "USDC",
+      "allocation": ""
+    },
+    {
+      "protocol": "InfiniFi (siUSD)",
+      "asset": "Reservoir wsrUSD",
+      "type": "yield_source",
+      "parent": "USDC",
+      "allocation": ""
+    },
+    {
+      "protocol": "InfiniFi (siUSD)",
+      "asset": "Fasanara Genesis Fund",
+      "type": "yield_source",
+      "parent": "USDC",
+      "allocation": ""
+    },
+    {
+      "protocol": "InfiniFi (siUSD)",
+      "asset": "Tokemak autoUSD",
+      "type": "yield_source",
+      "parent": "USDC",
+      "allocation": ""
+    },
+    {
+      "protocol": "Strata (srUSDe)",
+      "asset": "USDe",
+      "type": "collateral",
+      "parent": "Ethena",
+      "allocation": "",
+      "address": "0x4c9EDD5852cd905f086C759E8383e09bff1E68B3"
+    },
+    {
+      "protocol": "Strata (srUSDe)",
+      "asset": "sUSDe",
+      "type": "collateral",
+      "parent": "Ethena",
+      "allocation": "",
+      "address": "0x9D39A5DE30e57443BfF2A8307A4256c8797A3497"
+    },
+    {
+      "protocol": "Strata (srUSDe)",
+      "asset": "USDT",
+      "type": "collateral",
+      "parent": "Tether",
+      "allocation": "",
+      "address": "0xdAC17F958D2ee523a2206206994597C13D831ec7"
+    },
+    {
+      "protocol": "Strata (srUSDe)",
+      "asset": "USDC",
+      "type": "collateral",
+      "parent": "Circle",
+      "allocation": "",
+      "address": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"
+    },
+    {
+      "protocol": "Strata (srUSDe)",
+      "asset": "DAI",
+      "type": "collateral",
+      "parent": "MakerDAO",
+      "allocation": "",
+      "address": "0x6B175474E89094C44Da98b954EedeAC495271d0F"
+    },
+    {
+      "protocol": "Strata (srUSDe)",
+      "asset": "Ethena (sUSDe)",
+      "type": "yield_source",
+      "parent": "sUSDe",
+      "allocation": ""
+    },
+    {
+      "protocol": "Reserve Protocol (ETH+)",
+      "asset": "wstETH",
+      "type": "collateral",
+      "parent": "Lido",
+      "allocation": "50.04%",
+      "address": "0x7f39C581F595B53c5cb19bD0b3f8dA6c935E2Ca0"
+    },
+    {
+      "protocol": "Reserve Protocol (ETH+)",
+      "asset": "rETH",
+      "type": "collateral",
+      "parent": "Rocket Pool",
+      "allocation": "21.04%",
+      "address": "0xae78736Cd615f374D3085123A210448E74Fc6393"
+    },
+    {
+      "protocol": "Reserve Protocol (ETH+)",
+      "asset": "sfrxETH",
+      "type": "collateral",
+      "parent": "Frax",
+      "allocation": "20.91%",
+      "address": "0xac3E018457B222d93114458476f3E3416Abbe38F"
+    },
+    {
+      "protocol": "Reserve Protocol (ETH+)",
+      "asset": "ETHx",
+      "type": "collateral",
+      "parent": "Stader",
+      "allocation": "8.02%",
+      "address": "0xA35b1B31Ce002FBF2058D22F30f95D405200A15b"
+    },
+    {
+      "protocol": "Fluid Lending",
+      "asset": "USDC",
+      "type": "collateral",
+      "parent": "Circle",
+      "allocation": "",
+      "address": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"
+    },
+    {
+      "protocol": "Fluid Lending",
+      "asset": "USDT",
+      "type": "collateral",
+      "parent": "Tether",
+      "allocation": "",
+      "address": "0xdAC17F958D2ee523a2206206994597C13D831ec7"
+    },
+    {
+      "protocol": "Fluid Lending",
+      "asset": "WETH",
+      "type": "collateral",
+      "parent": "",
+      "allocation": "",
+      "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2"
+    },
+    {
+      "protocol": "Fluid Lending",
+      "asset": "wstETH",
+      "type": "collateral",
+      "parent": "Lido",
+      "allocation": "",
+      "address": "0x7f39C581F595B53c5cb19bD0b3f8dA6c935E2Ca0"
+    },
+    {
+      "protocol": "Fluid Lending",
+      "asset": "GHO",
+      "type": "collateral",
+      "parent": "Aave",
+      "allocation": "",
+      "address": "0x40D16FC0246aD3160Ccc09B8D0D3A2cD28aE6C2f"
+    },
+    {
+      "protocol": "Fluid Lending",
+      "asset": "sUSDS",
+      "type": "collateral",
+      "parent": "Sky",
+      "allocation": "",
+      "address": "0xa3931d71877C0E7a3148CB7Eb4463524FEc27fbD"
+    },
+    {
+      "protocol": "Fluid Lending",
+      "asset": "USDtb",
+      "type": "collateral",
+      "parent": "Ethena",
+      "allocation": "",
+      "address": "0xC139190F447e929f090edF4C5EEa2c5fDa1dcD32"
+    },
+    {
+      "protocol": "BUCK",
+      "asset": "USDC",
+      "type": "collateral",
+      "parent": "Circle",
+      "allocation": "",
+      "address": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"
+    },
+    {
+      "protocol": "BUCK",
+      "asset": "STRC",
+      "type": "collateral",
+      "parent": "Strategy Inc.",
+      "allocation": "",
+      "address": "0x2Aa8c7856d4B4dDB1Ea7d30C0F3F5A7fadf6d308"
+    },
+    {
+      "protocol": "Kinetiq (kHYPE)",
+      "asset": "HYPE",
+      "type": "collateral",
+      "parent": "",
+      "allocation": "",
+      "address": "0x74EaDB3027Da5e62397dEe1376a9CC2081B89c8B"
+    },
+    {
+      "protocol": "Midas (mHYPER)",
+      "asset": "USDC",
+      "type": "collateral",
+      "parent": "Circle",
+      "allocation": "",
+      "address": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"
+    },
+    {
+      "protocol": "Midas (mHYPER)",
+      "asset": "Aave V3 Core (USDe)",
+      "type": "yield_source",
+      "parent": "USDe",
+      "allocation": ""
+    },
+    {
+      "protocol": "Midas (mHYPER)",
+      "asset": "Pendle (USDC)",
+      "type": "yield_source",
+      "parent": "USDC",
+      "allocation": ""
+    },
+    {
+      "protocol": "Midas (mHYPER)",
+      "asset": "Morpho (USDC)",
+      "type": "yield_source",
+      "parent": "USDC",
+      "allocation": ""
+    },
+    {
+      "protocol": "Origin ARM (stETH/WETH)",
+      "asset": "WETH",
+      "type": "collateral",
+      "parent": "",
+      "allocation": "",
+      "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2"
+    },
+    {
+      "protocol": "Origin ARM (stETH/WETH)",
+      "asset": "stETH",
+      "type": "collateral",
+      "parent": "Lido",
+      "allocation": "",
+      "address": "0xae7ab96520DE3A18E5e111B5EaAb095312D7fE84"
+    },
+    {
+      "protocol": "Origin ARM (stETH/WETH)",
+      "asset": "Morpho (Yearn WETH ARM vault)",
+      "type": "yield_source",
+      "parent": "WETH",
+      "allocation": ""
+    },
+    {
+      "protocol": "Resolv (wstUSR)",
+      "asset": "USR",
+      "type": "collateral",
+      "parent": "Resolv",
+      "allocation": "",
+      "address": "0x66a1E37c9b0eAddca17d3662D6c05F4DECf3e110"
+    },
+    {
+      "protocol": "Resolv (RLP)",
+      "asset": "USDC",
+      "type": "collateral",
+      "parent": "Circle",
+      "allocation": "",
+      "address": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"
+    },
+    {
+      "protocol": "Resolv (RLP)",
+      "asset": "USDT",
+      "type": "collateral",
+      "parent": "Tether",
+      "allocation": "",
+      "address": "0xdAC17F958D2ee523a2206206994597C13D831ec7"
+    },
+    {
+      "protocol": "Resolv (RLP)",
+      "asset": "ETH",
+      "type": "collateral",
+      "parent": "",
+      "allocation": "",
+      "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2"
+    },
+    {
+      "protocol": "Resolv (RLP)",
+      "asset": "stETH",
+      "type": "collateral",
+      "parent": "Lido",
+      "allocation": "",
+      "address": "0xae7ab96520DE3A18E5e111B5EaAb095312D7fE84"
+    },
+    {
+      "protocol": "Resolv (RLP)",
+      "asset": "wstETH",
+      "type": "collateral",
+      "parent": "Lido",
+      "allocation": "",
+      "address": "0x7f39C581F595B53c5cb19bD0b3f8dA6c935E2Ca0"
+    },
+    {
+      "protocol": "Resolv (RLP)",
+      "asset": "USCC",
+      "type": "collateral",
+      "parent": "Superstate",
+      "allocation": "",
+      "address": "0x14d60E7FDC0D71d8611742720E4C50E7a974020c"
+    },
+    {
+      "protocol": "Resolv (RLP)",
+      "asset": "Aave V3 Core (USDC)",
+      "type": "yield_source",
+      "parent": "USDC",
+      "allocation": ""
+    },
+    {
+      "protocol": "Resolv (RLP)",
+      "asset": "Fluid Lending (USDC)",
+      "type": "yield_source",
+      "parent": "USDC",
+      "allocation": ""
+    },
+    {
+      "protocol": "Spark Lending",
+      "asset": "DAI",
+      "type": "collateral",
+      "parent": "MakerDAO",
+      "allocation": "",
+      "address": "0x6b175474e89094c44da98b954eedeac495271d0f"
+    },
+    {
+      "protocol": "Spark Lending",
+      "asset": "sDAI",
+      "type": "collateral",
+      "parent": "MakerDAO",
+      "allocation": "",
+      "address": "0x83f20f44975d03b1b09e64809b757c47f942beea"
+    },
+    {
+      "protocol": "Spark Lending",
+      "asset": "USDC",
+      "type": "collateral",
+      "parent": "Circle",
+      "allocation": "",
+      "address": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48"
+    },
+    {
+      "protocol": "Spark Lending",
+      "asset": "WETH",
+      "type": "collateral",
+      "parent": "",
+      "allocation": "",
+      "address": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2"
+    },
+    {
+      "protocol": "Spark Lending",
+      "asset": "wstETH",
+      "type": "collateral",
+      "parent": "Lido",
+      "allocation": "",
+      "address": "0x7f39c581f595b53c5cb19bd0b3f8da6c935e2ca0"
+    },
+    {
+      "protocol": "Spark Lending",
+      "asset": "WBTC",
+      "type": "collateral",
+      "parent": "BitGo",
+      "allocation": "",
+      "address": "0x2260fac5e5542a773aa44fbcfedf7c193bc2c599"
+    },
+    {
+      "protocol": "Spark Lending",
+      "asset": "GNO",
+      "type": "collateral",
+      "parent": "",
+      "allocation": "",
+      "address": "0x6810e776880c02933d47db1b9fc05908e5386b96"
+    },
+    {
+      "protocol": "Spark Lending",
+      "asset": "rETH",
+      "type": "collateral",
+      "parent": "Rocket Pool",
+      "allocation": "",
+      "address": "0xae78736cd615f374d3085123a210448e74fc6393"
+    },
+    {
+      "protocol": "Spark Lending",
+      "asset": "USDT",
+      "type": "collateral",
+      "parent": "Tether",
+      "allocation": "",
+      "address": "0xdac17f958d2ee523a2206206994597c13d831ec7"
+    },
+    {
+      "protocol": "Spark Lending",
+      "asset": "weETH",
+      "type": "collateral",
+      "parent": "EtherFi",
+      "allocation": "",
+      "address": "0xcd5fe23c85820f7b72d0926fc9b05b43e359b7ee"
+    },
+    {
+      "protocol": "Spark Lending",
+      "asset": "cbBTC",
+      "type": "collateral",
+      "parent": "Coinbase",
+      "allocation": "",
+      "address": "0xcbb7c0000ab88b473b1f5afd9ef808440eed33bf"
+    },
+    {
+      "protocol": "Spark Lending",
+      "asset": "sUSDS",
+      "type": "collateral",
+      "parent": "Sky",
+      "allocation": "",
+      "address": "0xa3931d71877c0e7a3148cb7eb4463524fec27fbd"
+    },
+    {
+      "protocol": "Spark Lending",
+      "asset": "USDS",
+      "type": "collateral",
+      "parent": "Sky",
+      "allocation": "",
+      "address": "0xdc035d45d973e3ec169d2276ddab16f1e407384f"
+    },
+    {
+      "protocol": "Spark Lending",
+      "asset": "LBTC",
+      "type": "collateral",
+      "parent": "Lombard",
+      "allocation": "",
+      "address": "0x8236a87084f8b84306f72007f36f2618a5634494"
+    },
+    {
+      "protocol": "Spark Lending",
+      "asset": "tBTC",
+      "type": "collateral",
+      "parent": "Threshold",
+      "allocation": "",
+      "address": "0x18084fba666a33d37592fa2633fd49a74dd93a88"
+    },
+    {
+      "protocol": "Spark Lending",
+      "asset": "ezETH",
+      "type": "collateral",
+      "parent": "Renzo",
+      "allocation": "",
+      "address": "0xbf5495efe5db9ce00f80364c8b423567e58d2110"
+    },
+    {
+      "protocol": "Spark Lending",
+      "asset": "rsETH",
+      "type": "collateral",
+      "parent": "KelpDAO",
+      "allocation": "",
+      "address": "0xa1290d69c65a6fe4df752f95823fae25cb99e5a7"
+    },
+    {
+      "protocol": "Spark Lending",
+      "asset": "PYUSD",
+      "type": "collateral",
+      "parent": "PayPal",
+      "allocation": "",
+      "address": "0x6c3ea9036406852006290770bedfcaba0e23a0e8"
+    },
+    {
+      "protocol": "StakedHYPE (stHYPE)",
+      "asset": "HYPE",
+      "type": "collateral",
+      "parent": "",
+      "allocation": "",
+      "address": "0x74EaDB3027Da5e62397dEe1376a9CC2081B89c8B"
+    },
+    {
+      "protocol": "Unit (UBTC)",
+      "asset": "BTC",
+      "type": "collateral",
+      "parent": "",
+      "allocation": "",
+      "address": "0x2260fac5e5542a773aa44fbcfedf7c193bc2c599"
+    }
+  ],
+  "mermaid": "graph LR\n    aave_v3_core[\"Aave V3 Core\\n<small>+37 unique assets</small>\"]\n    compound_v3_usdc[\"Compound V3 USDC\\n<small>+3 unique assets</small>\"]\n    compound_v3_weth[\"Compound V3 WETH\\n<small>+3 unique assets</small>\"]\n    maple[\"Maple Finance (syrupUSDC)\\n<small>+2 unique assets</small>\"]\n    infinifi[\"InfiniFi (siUSD)\"]\n    strata[\"Strata (srUSDe)\"]\n    reserve_ethplus[\"Reserve Protocol (ETH+)\\n<small>+1 unique assets</small>\"]\n    fluid_lending[\"Fluid Lending\"]\n    buck[\"BUCK\\n<small>+1 unique assets</small>\"]\n    kinetiq[\"Kinetiq (kHYPE)\"]\n    midas_mhyper[\"Midas (mHYPER)\"]\n    origin_arm[\"Origin ARM (stETH/WETH)\"]\n    resolv_wstusr[\"Resolv (wstUSR)\\n<small>+1 unique assets</small>\"]\n    resolv_rlp[\"Resolv (RLP)\\n<small>+2 unique assets</small>\"]\n    spark[\"Spark Lending\\n<small>+1 unique assets</small>\"]\n    spectra[\"Spectra Finance\"]\n    stakedhype[\"StakedHYPE (stHYPE)\"]\n    unit_ubtc[\"Unit (UBTC)\"]\n    BTC([\"BTC\"])\n    DAI[\"DAI\\n<small>(MakerDAO)</small>\"]\n    ETHx[\"ETHx\\n<small>(Stader)</small>\"]\n    GHO[\"GHO\\n<small>(Aave)</small>\"]\n    HYPE([\"HYPE\"])\n    LBTC[\"LBTC\\n<small>(Lombard)</small>\"]\n    LINK[\"LINK\\n<small>(Chainlink)</small>\"]\n    PYUSD[\"PYUSD\\n<small>(PayPal)</small>\"]\n    UNI[\"UNI\\n<small>(Uniswap)</small>\"]\n    USDC[\"USDC\\n<small>(Circle)</small>\"]\n    USDS[\"USDS\\n<small>(Sky)</small>\"]\n    USDT[\"USDT\\n<small>(Tether)</small>\"]\n    USDe[\"USDe\\n<small>(Ethena)</small>\"]\n    USDtb[\"USDtb\\n<small>(Ethena)</small>\"]\n    WBTC[\"WBTC\\n<small>(BitGo)</small>\"]\n    WETH([\"WETH\"])\n    cbBTC[\"cbBTC\\n<small>(Coinbase)</small>\"]\n    cbETH[\"cbETH\\n<small>(Coinbase)</small>\"]\n    ezETH[\"ezETH\\n<small>(Renzo)</small>\"]\n    osETH[\"osETH\\n<small>(StakeWise)</small>\"]\n    rETH[\"rETH\\n<small>(Rocket Pool)</small>\"]\n    rsETH[\"rsETH\\n<small>(KelpDAO)</small>\"]\n    sDAI[\"sDAI\\n<small>(MakerDAO)</small>\"]\n    sUSDS[\"sUSDS\\n<small>(Sky)</small>\"]\n    sUSDe[\"sUSDe\\n<small>(Ethena)</small>\"]\n    stETH[\"stETH\\n<small>(Lido)</small>\"]\n    tBTC[\"tBTC\\n<small>(Threshold)</small>\"]\n    tETH[\"tETH\\n<small>(Treehouse)</small>\"]\n    weETH[\"weETH\\n<small>(EtherFi)</small>\"]\n    wstETH[\"wstETH\\n<small>(Lido)</small>\"]\n    aave_v3_core --> WETH\n    aave_v3_core --> wstETH\n    aave_v3_core --> WBTC\n    aave_v3_core --> USDC\n    aave_v3_core --> DAI\n    aave_v3_core --> LINK\n    aave_v3_core --> cbETH\n    aave_v3_core --> USDT\n    aave_v3_core --> rETH\n    aave_v3_core --> UNI\n    aave_v3_core --> GHO\n    aave_v3_core --> sDAI\n    aave_v3_core --> PYUSD\n    aave_v3_core --> weETH\n    aave_v3_core --> osETH\n    aave_v3_core --> USDe\n    aave_v3_core --> ETHx\n    aave_v3_core --> sUSDe\n    aave_v3_core --> tBTC\n    aave_v3_core --> cbBTC\n    aave_v3_core --> USDS\n    aave_v3_core --> rsETH\n    aave_v3_core --> LBTC\n    aave_v3_core --> USDtb\n    aave_v3_core --> tETH\n    aave_v3_core --> ezETH\n    compound_v3_usdc --> WBTC\n    compound_v3_usdc --> WETH\n    compound_v3_usdc --> UNI\n    compound_v3_usdc --> LINK\n    compound_v3_usdc --> wstETH\n    compound_v3_usdc --> cbBTC\n    compound_v3_usdc --> tBTC\n    compound_v3_usdc --> weETH\n    compound_v3_usdc --> rsETH\n    compound_v3_usdc --> USDe\n    compound_v3_weth --> cbETH\n    compound_v3_weth --> wstETH\n    compound_v3_weth --> rETH\n    compound_v3_weth --> rsETH\n    compound_v3_weth --> weETH\n    compound_v3_weth --> osETH\n    compound_v3_weth --> WBTC\n    compound_v3_weth --> ezETH\n    compound_v3_weth --> cbBTC\n    compound_v3_weth --> tBTC\n    compound_v3_weth --> ETHx\n    compound_v3_weth --> tETH\n    compound_v3_weth --> USDC\n    compound_v3_weth --> USDT\n    maple --> BTC\n    maple --> LBTC\n    maple --> weETH\n    maple --> HYPE\n    infinifi --> USDC\n    infinifi --> USDT\n    infinifi --> USDe\n    infinifi --> sUSDe\n    strata --> USDe\n    strata --> sUSDe\n    strata --> USDT\n    strata --> USDC\n    strata --> DAI\n    reserve_ethplus --> wstETH\n    reserve_ethplus --> rETH\n    reserve_ethplus --> ETHx\n    fluid_lending --> USDC\n    fluid_lending --> USDT\n    fluid_lending --> WETH\n    fluid_lending --> wstETH\n    fluid_lending --> GHO\n    fluid_lending --> sUSDS\n    fluid_lending --> USDtb\n    buck --> USDC\n    kinetiq --> HYPE\n    midas_mhyper --> USDC\n    origin_arm --> WETH\n    origin_arm --> stETH\n    resolv_rlp --> USDC\n    resolv_rlp --> USDT\n    resolv_rlp --> stETH\n    resolv_rlp --> wstETH\n    spark --> DAI\n    spark --> sDAI\n    spark --> USDC\n    spark --> WETH\n    spark --> wstETH\n    spark --> WBTC\n    spark --> rETH\n    spark --> USDT\n    spark --> weETH\n    spark --> cbBTC\n    spark --> sUSDS\n    spark --> USDS\n    spark --> LBTC\n    spark --> tBTC\n    spark --> ezETH\n    spark --> rsETH\n    spark --> PYUSD\n    stakedhype --> HYPE\n    unit_ubtc --> BTC\n    maple -.->|yield| aave_v3_core\n    sky((\"sky\"))\n    maple -.->|yield| sky\n    fluid((\"fluid\"))\n    infinifi -.->|USDC| fluid\n    euler((\"euler\"))\n    infinifi -.->|USDC| euler\n    infinifi -.->|USDC| aave_v3_core\n    infinifi -.->|USDC| spark\n    infinifi -.->|USDC| aave_v3_core\n    pendle((\"pendle\"))\n    infinifi -.->|USDe, sUSDe| pendle\n    ethena((\"ethena\"))\n    infinifi -.->|USDe, sUSDe| ethena\n    gauntlet((\"gauntlet\"))\n    infinifi -.->|USDC| gauntlet\n    reservoir((\"reservoir\"))\n    infinifi -.->|USDC| reservoir\n    fasanara((\"fasanara\"))\n    infinifi -.->|USDC| fasanara\n    tokemak((\"tokemak\"))\n    infinifi -.->|USDC| tokemak\n    strata -.->|sUSDe| ethena\n    midas_mhyper -.->|USDe| aave_v3_core\n    midas_mhyper -.->|USDC| pendle\n    morpho((\"morpho\"))\n    midas_mhyper -.->|USDC| morpho\n    origin_arm -.->|WETH| morpho\n    resolv_rlp -.->|USDC| aave_v3_core\n    resolv_rlp -.->|USDC| fluid_lending\n    classDef protocol fill:#0675F9,color:#fff,stroke:#0675F9\n    class aave_v3_core compound_v3_usdc compound_v3_weth maple infinifi strata reserve_ethplus fluid_lending buck kinetiq midas_mhyper origin_arm resolv_wstusr resolv_rlp spark spectra stakedhype unit_ubtc protocol"
+}
