@@ -1,6 +1,6 @@
 # Protocol Risk Assessment: Noon
 
-- **Assessment Date:** March 1, 2026
+- **Assessment Date:** March 10, 2026
 - **Token:** sUSN (Staked USN)
 - **Chain:** Ethereum
 - **Token Address:** [`0xE24a3DC889621612422A64E6388927901608B91D`](https://etherscan.io/address/0xE24a3DC889621612422A64E6388927901608B91D)
@@ -22,13 +22,13 @@ Yield is distributed: **80%** to sUSN holders (via rebase), **10%** to the Noon 
 
 sUSN's value appreciates as the protocol mints new USN into the staking pool proportional to daily returns.
 
-**Key metrics (on-chain verified, March 1, 2026):**
-- Protocol TVL: ~$28M (DeFiLlama)
-- USN total supply: 27,956,113 USN (`totalSupply()` on-chain)
-- sUSN total supply: 20,814,894 sUSN (`totalSupply()` on-chain)
-- sUSN total assets: 24,269,986 USN staked (`totalAssets()` on-chain)
-- sUSN exchange rate: 1 sUSN = 1.1659 USN (`convertToAssets(1e18)` = 1,165,991,319,047,900,032)
-- Chains: Ethereum (~$21.3M), zkSync Era (~$3.3M), Sophon (~$2.3M), TAC (~$1.1M)
+**Key metrics (on-chain verified, March 10, 2026):**
+- Protocol TVL: ~$31M (DeFiLlama)
+- USN total supply: 27,923,316 USN (`totalSupply()` on-chain)
+- sUSN total supply: 20,647,638 sUSN (`totalSupply()` on-chain)
+- sUSN total assets: 24,116,984 USN staked (`totalAssets()` on-chain)
+- sUSN exchange rate: 1 sUSN = 1.1680 USN (`convertToAssets(1e18)` = 1,168,026,297,247,539,186)
+- Chains: Ethereum (~$27.9M), Sophon (~$1.3M), TAC (~$1.0M), zkSync Era (~$0.8M)
 
 **Yearn use case per issue #66:**
 - Use sUSN as collateral on Morpho for sUSN/USDC market
@@ -74,7 +74,7 @@ sUSN's value appreciates as the protocol mints new USN into the staking pool pro
 | Noon Collateral 2 | [`0x1b2262903Fdb0a8eb84291cC227426be590c4503`](https://etherscan.io/address/0x1b2262903Fdb0a8eb84291cC227426be590c4503) | 3-of-4 Gnosis Safe (on-chain verified) |
 | Noon Collateral 3 | [`0x4fD04553468610e5a88a2cffA38E057C954312Da`](https://etherscan.io/address/0x4fD04553468610e5a88a2cffA38E057C954312Da) | **EOA** (on-chain verified — no contract code) |
 
-### On-Chain Verification (Etherscan + cast, March 1, 2026)
+### On-Chain Verification (Etherscan + cast, March 10, 2026)
 
 | Contract | Name | Verified | Proxy | Implementation |
 |----------|------|----------|-------|----------------|
@@ -134,7 +134,7 @@ The architecture is moderately complex:
 
 - **USN deployment**: October 3, 2024 (block 20884046) — ~17 months on-chain
 - **sUSN deployment**: November 6, 2024 (block 21130318) — ~16 months on-chain
-- **Public beta launch**: January 25, 2025 — ~13 months of active usage
+- **Public beta launch**: January 25, 2025 — ~14 months of active usage
 - **GitHub**: Private repository (`dclf-labs/Noon-Core-Audit`), not public
 - **Incidents**: No reported security incidents, exploits, or hacks found
 - **TVL History**:
@@ -144,15 +144,15 @@ The architecture is moderately complex:
 | Jan 2025 | ~$28.5M | Public beta launch, peak TVL |
 | Mar 2025 (early) | ~$16.6M | Significant dip |
 | Mar 2025 (late) | ~$28M | Recovery |
-| Mar 2026 | ~$28M | Current |
+| Mar 2026 | ~$31M | Current (Ethereum ~$27.9M, Sophon ~$1.3M, TAC ~$1.0M, zkSync Era ~$0.8M) |
 
-- **TVL Volatility**: The protocol experienced a ~42% drawdown (from $28.5M to $16.6M) in early March 2025 but recovered. TVL has remained relatively stable around $28M but is small.
-- **Exchange rate (on-chain verified March 1, 2026)**:
-  - `convertToAssets(1e18)` = 1,165,991,319,047,900,032 = 1.1659 USN per sUSN
-  - `totalAssets()` = 24,269,986,627,948,288,166,826,634 = 24,269,986 USN
-  - `totalSupply()` = 20,814,894,786,494,764,652,082,891 = 20,814,894 sUSN
+- **TVL Volatility**: The protocol experienced a ~42% drawdown (from $28.5M to $16.6M) in early March 2025 but recovered. TVL has grown to ~$31M, with a notable shift toward Ethereum (from ~$21.3M to ~$27.9M) while zkSync Era dropped from ~$3.3M to ~$0.8M.
+- **Exchange rate (on-chain verified March 10, 2026)**:
+  - `convertToAssets(1e18)` = 1,168,026,297,247,539,186 = 1.1680 USN per sUSN
+  - `totalAssets()` = 24,116,984,220,685,763,950,027,012 = 24,116,984 USN
+  - `totalSupply()` = 20,647,638,051,915,079,811,578,141 = 20,647,638 sUSN
   - `maxRedeem(address)` = 0 (direct ERC-4626 redemption disabled)
-  - As an ERC-4626 vault, the exchange rate should only increase. The 16.6% appreciation over ~16 months implies ~12.5% annualized yield.
+  - As an ERC-4626 vault, the exchange rate should only increase. The 16.8% appreciation over ~16 months implies ~12.6% annualized yield.
 - **USN Peg**: No reported depegging events found. USN is backed 1:1 by USDT/USDC/T-Bills.
 
 ## Funds Management
@@ -209,17 +209,17 @@ Alternatively, users can sell sUSN on DEXes for immediate (but potentially slipp
 ### Primary Exit Mechanisms
 
 1. **Withdrawal request from sUSN vault**: `createWithdrawalRequest()` → cooldown → claim. T+5 maximum (20% at T+0, 60% at T+3, 100% at T+5). Not instant
-2. **DEX swap**: USN/sUSN pool on Uniswap V3 (Ethereum) with ~$60K 24h volume. Very thin liquidity for a $28M protocol
+2. **DEX swap**: USN/sUSN pool on Uniswap V3 (Ethereum) with ~$33K USN 24h volume and ~$156 sUSN 24h volume (CoinGecko). Extremely thin liquidity for a $31M protocol
 3. **USN redemption to stablecoins**: Permissioned institutional redemption via the dApp (subject to daily limits during public beta)
 
 ### Liquidity Assessment
 
 - **Primary liquidity**: The main exit path is through the cooldown-based withdrawal mechanism (up to 5 days)
-- **Secondary market**: DEX liquidity is negligible (~$60K daily volume on Uniswap V3). CoinGecko lists sUSN but with minimal trading data
+- **Secondary market**: DEX liquidity is negligible (~$33K USN daily volume, ~$156 sUSN daily volume per CoinGecko). sUSN has virtually no secondary market liquidity
 - **On-chain maxRedeem = 0**: Direct ERC-4626 redemption is disabled. Must use withdrawal handler
 - **Same-value redemption**: sUSN redeems for USN (stablecoin-denominated), so price change risk is minimal for the Morpho collateral use case
 - **Liquidity mismatch**: The protocol promises T+5 full redemption, but private credit positions (Fasanara F-TAC) have T+3 month redemption. If a significant portion of TVL is in private credit, a bank-run scenario could stress the redemption guarantee
-- **Small TVL**: At ~$28M, the protocol is small. Large positions relative to TVL could create concentration risk
+- **Small TVL**: At ~$31M, the protocol is small. Large positions relative to TVL could create concentration risk
 
 ### Morpho Market (sUSN/USDC)
 
@@ -231,9 +231,9 @@ Alternatively, users can sell sUSN on DEXes for immediate (but potentially slipp
 | Oracle | MorphoChainlinkOracleV2 ([`0xC415Cc3F04F9074A9562aEEe02591e65D39A94aa`](https://etherscan.io/address/0xC415Cc3F04F9074A9562aEEe02591e65D39A94aa)) |
 | IRM | AdaptiveCurveIrm ([`0x870aC11D48B15DB9a138Cf899d20F13F79Ba00BC`](https://etherscan.io/address/0x870aC11D48B15DB9a138Cf899d20F13F79Ba00BC)) |
 | LLTV | 86% |
-| Total Supply | ~$8.2M USDC |
-| Total Borrow | ~$7.3M USDC |
-| Utilization | ~89% |
+| Total Supply | ~$8.3M USDC |
+| Total Borrow | ~$7.4M USDC |
+| Utilization | ~89.6% |
 
 ### Morpho Oracle Analysis (on-chain verified)
 
@@ -247,25 +247,25 @@ The oracle formula: `price = vault_conversion * baseFeed1 * SCALE_FACTOR / quote
 
 | Parameter | Address | Description | Current Value |
 |-----------|---------|-------------|---------------|
-| BASE_VAULT | [`0xE24a3DC889621612422A64E6388927901608B91D`](https://etherscan.io/address/0xE24a3DC889621612422A64E6388927901608B91D) | sUSN vault (ERC-4626 exchange rate) | 1.1659 USN/sUSN |
+| BASE_VAULT | [`0xE24a3DC889621612422A64E6388927901608B91D`](https://etherscan.io/address/0xE24a3DC889621612422A64E6388927901608B91D) | sUSN vault (ERC-4626 exchange rate) | 1.1680 USN/sUSN |
 | BASE_VAULT_CONVERSION_SAMPLE | — | Conversion sample amount | 1e8 |
 | BASE_FEED_1 | [`0x6e498b02C0036235c8164A502b0eECC7660BD889`](https://etherscan.io/address/0x6e498b02C0036235c8164A502b0eECC7660BD889) | StorkChainlinkAdapter (USN/USD) | 1e18 (=$1.00) |
 | BASE_FEED_2 | `0x0` | Not set | — |
-| QUOTE_FEED_1 | [`0x8fFfFfd4AfB6115b954Bd326cbe7B4BA576818f6`](https://etherscan.io/address/0x8fFfFfd4AfB6115b954Bd326cbe7B4BA576818f6) | Chainlink USDC/USD (8 dec) | 99,997,640 (=$0.9999) |
+| QUOTE_FEED_1 | [`0x8fFfFfd4AfB6115b954Bd326cbe7B4BA576818f6`](https://etherscan.io/address/0x8fFfFfd4AfB6115b954Bd326cbe7B4BA576818f6) | Chainlink USDC/USD (8 dec) | 99,992,975 (=$0.9999) |
 | QUOTE_FEED_2 | `0x0` | Not set | — |
 | SCALE_FACTOR | — | Decimal adjustment | 1,000,000 |
-| **price()** | — | **Final oracle price** | **1,166,018,828,044,341,846,467,576 (~1.166 USDC/sUSN)** |
+| **price()** | — | **Final oracle price** | **1,168,108,349,611,560,212,104,900 (~1.168 USDC/sUSN)** |
 
 **Stork adapter details:**
 - Description: `"A port of a chainlink aggregator powered by Stork"`
-- Returns via `latestRoundData()`: roundId, answer, startedAt, updatedAt, answeredInRound — all fields return the same value (1,772,348,672,626,453,024), which does **not** appear to be a valid Unix timestamp. This means **staleness checks based on `updatedAt` will not work correctly**.
+- Returns via `latestRoundData()`: roundId, answer, startedAt, updatedAt, answeredInRound — all fields except `answer` return the same value (1,773,040,009,161,351,644), which does **not** appear to be a valid Unix timestamp. This means **staleness checks based on `updatedAt` will not work correctly**.
 
 **Oracle concerns:**
 - **Positive**: The sUSN→USN exchange rate is read directly from the vault contract on-chain (trustless, manipulation-resistant)
 - **Stork USN/USD feed risk**: If USN depegs (e.g., drops to $0.90) but the Stork feed continues reporting $1.00, the oracle would **overvalue sUSN collateral**, allowing borrowers to extract more than their collateral is worth. This is the primary oracle risk
 - **Stork is newer**: Less battle-tested than Chainlink. The adapter's non-standard `latestRoundData()` timestamps suggest incomplete Chainlink interface compliance
 - **Single oracle source for USN/USD**: No redundant oracle or fallback. If Stork fails or returns stale data during a USN depeg, liquidations would malfunction
-- **86% LLTV is aggressive** for an asset with a 5-day withdrawal window — liquidators may struggle to unwind sUSN collateral quickly through DEXes with only ~$60K daily volume
+- **86% LLTV is aggressive** for an asset with a 5-day withdrawal window — liquidators may struggle to unwind sUSN collateral quickly through DEXes with only ~$33K USN daily volume and ~$156 sUSN daily volume
 
 ## Centralization & Control Risks
 
@@ -332,7 +332,7 @@ The entire protocol is controlled by a single 3-of-6 Gnosis Safe multisig with *
   - Monitor `convertToAssets(1e18)` for exchange rate changes (should only increase)
   - **Alert**: If exchange rate **decreases** — indicates potential issue with rebase or loss event
   - Monitor `Rebase(amount)` events for yield distribution frequency and amounts
-  - Monitor `Deposit`, `Withdraw` events for large movements (>$500K given ~$28M TVL)
+  - Monitor `Deposit`, `Withdraw` events for large movements (>$500K given ~$31M TVL)
   - **Alert**: Single deposits/withdrawals >$2M
 
 ### USN Token Monitoring
@@ -368,6 +368,13 @@ The entire protocol is controlled by a single 3-of-6 Gnosis Safe multisig with *
   - **Alert**: If total collateral wallet balances drop significantly relative to USN total supply
   - **Alert**: Any outflows from Collateral 3 (EOA) should be reviewed
 
+### USN Peg Monitoring
+
+- **USN price**: Monitor USN/USD price on CoinGecko and DEXes
+  - **Alert**: If USN deviates >0.5% from $1.00 peg (significant depegging)
+  - **Alert**: If USN deviates >2% from $1.00 peg (critical — directly impacts sUSN collateral value via Stork oracle risk)
+  - Current price: $0.9997 (well-pegged, March 10, 2026)
+
 ### Morpho Market Monitoring
 
 - **Oracle**: [`0xC415Cc3F04F9074A9562aEEe02591e65D39A94aa`](https://etherscan.io/address/0xC415Cc3F04F9074A9562aEEe02591e65D39A94aa)
@@ -391,6 +398,7 @@ The entire protocol is controlled by a single 3-of-6 Gnosis Safe multisig with *
 | Collateral wallet balances | Daily | High |
 | Collateral 3 (EOA) outflows | Real-time | High |
 | Morpho oracle price vs sUSN rate | Every 6 hours | High |
+| USN peg stability | Hourly | High |
 | Protocol TVL changes | Daily | Medium |
 
 ## Risk Summary
@@ -407,9 +415,9 @@ The entire protocol is controlled by a single 3-of-6 Gnosis Safe multisig with *
 
 - **No timelock on governance**: The 3-of-6 multisig can upgrade contracts, change parameters, and extract tokens **immediately** with no delay. This is the most critical governance weakness
 - **Mostly off-chain/custodial reserves**: The majority of USN backing is held off-chain with custodians. On-chain verifiability is limited to DeFi strategy positions only
-- **No bug bounty program**: No formal bug bounty on any platform despite ~$28M TVL
+- **No bug bounty program**: No formal bug bounty on any platform despite ~$31M TVL
 - **Anonymous multisig signers**: All 6 signers are anonymous EOAs. No independent or known-entity signers
-- **Small and young protocol**: ~$28M TVL with ~13 months of public beta operation. Limited track record
+- **Small and young protocol**: ~$31M TVL with ~14 months of public beta operation. Limited track record
 - **5-day withdrawal lockup**: Not compatible with instant liquidation needs on Morpho
 - **Private code**: Source code is not publicly available (private GitHub repository)
 - **BVI jurisdiction**: Limited regulatory oversight and investor protection
@@ -445,11 +453,11 @@ The entire protocol is controlled by a single 3-of-6 Gnosis Safe multisig with *
 
 - **Audits**: 2 audits by Halborn (reputable), 2 audits by Hashlock (lesser-known). Quantstamp audit unverifiable. Total: 4 verifiable audits across 2 firms
 - **Bug Bounty**: None
-- **Time in Production**: ~13 months public beta, ~16 months sUSN on-chain. Young protocol
-- **TVL**: ~$28M. Small
+- **Time in Production**: ~14 months public beta, ~16 months sUSN on-chain. Young protocol
+- **TVL**: ~$31M. Small
 - **Incidents**: None reported
 
-**Score: 3.5/5** — Multiple audits but from a mix of reputable (Halborn) and lesser-known (Hashlock) firms. Quantstamp audit is unverifiable. No bug bounty. Short production history (~13 months beta). Small TVL (~$28M). Between score 3 (1 audit by reputable firm, 6-12 months, TVL >$10M) and score 4 (1 audit by lesser-known firm, 3-6 months, TVL <$10M). The multiple Halborn audits and 13-month track record prevent a score of 4, but the absence of a bug bounty, small TVL, and unverifiable Quantstamp audit prevent a score of 3.
+**Score: 3.5/5** — Multiple audits but from a mix of reputable (Halborn) and lesser-known (Hashlock) firms. Quantstamp audit is unverifiable. No bug bounty. Production history of ~14 months beta. Small TVL (~$31M). Between score 3 (1 audit by reputable firm, 6-12 months, TVL >$10M) and score 4 (1 audit by lesser-known firm, 3-6 months, TVL <$10M). The multiple Halborn audits and 14-month track record prevent a score of 4, but the absence of a bug bounty, small TVL, and unverifiable Quantstamp audit prevent a score of 3.
 
 #### Category 2: Centralization & Control Risks (Weight: 30%)
 
@@ -518,14 +526,14 @@ The entire protocol is controlled by a single 3-of-6 Gnosis Safe multisig with *
 #### Category 4: Liquidity Risk (Weight: 15%)
 
 - **Exit mechanism**: Withdrawal request + up to 5-day cooldown. Not instant
-- **DEX liquidity**: ~$60K daily volume on Uniswap V3. Negligible for a $28M protocol
+- **DEX liquidity**: ~$33K USN daily volume, ~$156 sUSN daily volume (CoinGecko). Negligible for a $31M protocol
 - **maxRedeem = 0**: Direct ERC-4626 redemption disabled. Must use withdrawal handler
 - **Liquidity mismatch**: Private credit positions have T+3 month redemption vs T+5 day user guarantee
 - **Same-value redemption**: sUSN redeems for USN (stablecoin-denominated)
 - **Small TVL**: Large positions could dominate TVL and create concentration risk
 - **Morpho context**: 5-day withdrawal delay makes liquidation of sUSN collateral slow — could be problematic at 86% LLTV
 
-**Score: 3.5/5** — Withdrawals require up to 5 days and go through a handler process. DEX liquidity is negligible. The same-value stablecoin redemption is a positive factor. Between score 3 (market-based or short queues, >$1M, 3-7 days exit) and score 4 (withdrawal queues or restrictions, <$1M, >1 week or >10% impact). The 5-day maximum and thin DEX liquidity push toward 3.5. The Morpho collateral use case introduces additional concern: if sUSN needs to be liquidated, the 5-day withdrawal delay could prevent timely liquidation.
+**Score: 3.5/5** — Withdrawals require up to 5 days and go through a handler process. DEX liquidity is negligible (~$33K USN daily, ~$156 sUSN daily). The same-value stablecoin redemption is a positive factor. Between score 3 (market-based or short queues, >$1M, 3-7 days exit) and score 4 (withdrawal queues or restrictions, <$1M, >1 week or >10% impact). The 5-day maximum and extremely thin DEX liquidity push toward 3.5. The Morpho collateral use case introduces additional concern: if sUSN needs to be liquidated, the 5-day withdrawal delay could prevent timely liquidation.
 
 #### Category 5: Operational Risk (Weight: 5%)
 
@@ -574,7 +582,7 @@ However, the protocol has significant centralization concerns: **no timelock** o
 
 **For the intended Yearn use case (sUSN as Morpho collateral):**
 
-The 5-day withdrawal lockup is the primary compatibility concern flagged in the issue. If sUSN collateral needs to be liquidated on Morpho, the liquidator cannot redeem sUSN for USN quickly — they must either sell on DEXes (very thin liquidity, ~$60K/day) or wait up to 5 days via the withdrawal handler. At an 86% LLTV, this creates a risk of bad debt accumulation if the sUSN/USDC price drops faster than liquidators can exit. The Stork oracle (non-Chainlink, single source, no fallback) adds additional risk to the Morpho market.
+The 5-day withdrawal lockup is the primary compatibility concern flagged in the issue. If sUSN collateral needs to be liquidated on Morpho, the liquidator cannot redeem sUSN for USN quickly — they must either sell on DEXes (extremely thin liquidity, ~$33K USN daily, ~$156 sUSN daily) or wait up to 5 days via the withdrawal handler. At an 86% LLTV, this creates a risk of bad debt accumulation if the sUSN/USDC price drops faster than liquidators can exit. The Stork oracle (non-Chainlink, single source, no fallback) adds additional risk to the Morpho market.
 
 **Key conditions for any exposure:**
 
@@ -592,7 +600,7 @@ The 5-day withdrawal lockup is the primary compatibility concern flagged in the 
 ## Reassessment Triggers
 
 - **Time-based**: Reassess in 3 months (June 2026) given the protocol's youth and elevated risk tier
-- **TVL-based**: Reassess if TVL changes by more than 50% (below ~$14M or above ~$42M)
+- **TVL-based**: Reassess if TVL changes by more than 50% (below ~$15.5M or above ~$46.5M)
 - **Incident-based**: Reassess after any exploit, governance change, collateral modification, or custodian incident
 - **Governance-based**: Reassess if a timelock is implemented (should improve Centralization score significantly)
 - **Bug bounty**: Reassess if/when a bug bounty program is launched
