@@ -33,6 +33,11 @@ sUSN's value appreciates as the protocol mints new USN into the staking pool pro
 **Yearn use case per issue #66:**
 - Use sUSN as collateral on Morpho for sUSN/USDC market
 
+**Recent developments (since original March 1 assessment):**
+- **NOON governance token launched on KuCoin** (March 5, 2026) — veToken system with sNOON staking (up to 4x voting multiplier, 12-month lock). This adds governance participation but does **not** change the underlying 3-of-6 multisig admin structure
+- **tBTC Bitcoin Yield Vault** launched on Starknet (January 2026) — uses tBTC as collateral, borrows USDC, deploys into sUSN, and loops. Reached $454K TVL within 2 days at 6.79% APY. Adds product complexity
+- **US GENIUS Act** (passed July 2025) + OCC rulemaking (early 2026) — creates strict framework for stablecoin issuers, including foreign issuers serving US users. Relevant for Noon as a BVI entity
+
 **Links:**
 
 - [Protocol Documentation](https://docs.noon.capital)
@@ -42,6 +47,7 @@ sUSN's value appreciates as the protocol mints new USN into the staking pool pro
 - [Mirror Blog](https://mirror.xyz/nooncapital.eth)
 - [Twitter/X](https://x.com/ag_noon)
 - [CoinGecko](https://www.coingecko.com/en/coins/staked-usn)
+- [Serenity Research — Noon USN Review (Jun 2025, paywalled)](https://serenityresearch.substack.com/p/serenity-premium-rwa-stablecoin-series-adf)
 
 ## Contract Addresses
 
@@ -135,6 +141,7 @@ The architecture is moderately complex:
 - **USN deployment**: October 3, 2024 (block 20884046) — ~17 months on-chain
 - **sUSN deployment**: November 6, 2024 (block 21130318) — ~16 months on-chain
 - **Public beta launch**: January 25, 2025 — ~14 months of active usage
+- **NOON token launch**: March 5, 2026 — governance token listed on KuCoin (NOON/USDT). veToken system with sNOON staking for voting power. Current price: ~$0.027
 - **GitHub**: Private repository (`dclf-labs/Noon-Core-Audit`), not public
 - **Incidents**: No reported security incidents, exploits, or hacks found
 - **TVL History**:
@@ -292,6 +299,7 @@ The entire protocol is controlled by a single 3-of-6 Gnosis Safe multisig with *
 - **Rebase control**: The `REBASE_MANAGER_ROLE` controls yield distribution. A compromised rebase manager could manipulate the sUSN exchange rate
 - **No Guardian or independent oversight**: Unlike protocols with independent Guardians or timelocked governance, Noon has a single multisig controlling everything
 - **Ownable2Step**: USN uses two-step ownership transfer, which is a positive security measure
+- **NOON governance token** (launched March 5, 2026): veToken system with sNOON staking for voting power. While this introduces governance participation, it does **not** replace the 3-of-6 multisig as the contract admin — the multisig retains all privileged roles and proxy upgrade authority
 
 ### Programmability
 
@@ -319,7 +327,7 @@ The entire protocol is controlled by a single 3-of-6 Gnosis Safe multisig with *
 
 - **Team transparency**: Founder **Arpan Gautam** is publicly identified — Wharton MBA, ex-McKinsey, ex-Dexterity Capital CFO, founded DCLF Labs / Noon Capital in June 2024. Other team members are not publicly identified. Fauve Altman (marketing) is partially known. All multisig signers are anonymous
 - **Documentation**: Good quality. Comprehensive docs at docs.noon.capital covering safety framework, strategies, custody, and governance principles. Actively maintained
-- **Legal structure**: **British Virgin Islands (BVI)** jurisdiction via DCLF Labs. Limited regulatory oversight and investor protection. Self-funded (no VC)
+- **Legal structure**: **British Virgin Islands (BVI)** jurisdiction via DCLF Labs. Limited regulatory oversight and investor protection. Self-funded (no VC). The US GENIUS Act (passed July 2025) and subsequent OCC rulemaking require foreign stablecoin issuers serving US users to apply for OCC registration — potential regulatory risk for Noon's BVI structure
 - **Incident response**: Documented 24-hour incident plan with "predefined response procedures, rollback capabilities, and emergency communication channels." Admin Multisig can pause the protocol immediately
 - **Source code**: Private GitHub repository (`dclf-labs/Noon-Core-Audit`). **Not open source**. Contracts are verified on Etherscan but source is not publicly browsable
 - **Token allocation**: 20% to team with 7-year lockup (1-year cliff + 6-year linear vesting)
