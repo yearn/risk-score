@@ -4,7 +4,7 @@
 - **Token:** hgETH (High Growth ETH)
 - **Chain:** Ethereum
 - **Token Address:** [`0xc824A08dB624942c5E5F330d56530cD1598859fD`](https://etherscan.io/address/0xc824A08dB624942c5E5F330d56530cD1598859fD)
-- **Final Score: 3.1/5.0**
+- **Final Score: 2.8/5.0**
 
 ## Overview + Links
 
@@ -301,16 +301,9 @@ The oracle is a `MorphoChainlinkOracleV2` that uses two price feeds (no vault co
 - Proxy admin: [`0x9b61cf07caa513430a21d4f1cb6b93d90a6bbfb8`](https://etherscan.io/address/0x9b61cf07caa513430a21d4f1cb6b93d90a6bbfb8) (ProxyAdmin)
 - ProxyAdmin owner: [`0x266f15c63d5D3dE038F2E05D1fA397d92BCB013E`](https://etherscan.io/address/0x266f15c63d5D3dE038F2E05D1fA397d92BCB013E) (3-of-5 Gnosis Safe — different signers from vault multisig, on-chain verified)
 
-**Oracle feed details (on-chain verified):**
-- BASE_FEED_1 `latestRoundData()`: roundId=0, answer=2,190,621,602,669,676,260,878 (~$2,190.62), updatedAt=1772368931 (valid timestamp)
-- QUOTE_FEED_1 `latestRoundData()`: roundId=129127208515966887504, answer=198,544,000,000 (~$1,985.44), standard Chainlink response
-
 **Oracle concerns:**
 - **Upgradeable oracle feed**: The hgETH/USD feed is a TransparentUpgradeableProxy (EOMultiFeedAdapter). The proxy admin multisig (3-of-5) could upgrade the oracle implementation — this is a significant centralization vector. Unlike the standard Chainlink ETH/USD feed, this oracle can be modified
 - **No vault conversion**: The oracle does NOT use the on-chain ERC-4626 exchange rate. Instead, it relies entirely on the EOMultiFeedAdapter for hgETH pricing. If the adapter price diverges from the actual vault value, mispricing could occur
-- **roundId=0**: The hgETH/USD feed returns roundId=0 and startedAt=0, which are non-standard for a Chainlink-compatible feed. Staleness checks based on roundId may not work correctly
-- **Single oracle source**: No redundant fallback oracle for hgETH/USD
-- **No circuit breakers or pause functionality**: The EOMultiFeedAdapter implementation ([`0x8a1bae36ee0e7b7d6ced3ffea250914bfca09292`](https://etherscan.io/address/0x8a1bae36ee0e7b7d6ced3ffea250914bfca09292)) has **no pause, freeze, emergency shutdown, or circuit breaker functions** (on-chain ABI verified). The only state-changing function is `initialize()`, which can only be called once. The implementation is entirely read-only after initialization — the only way to modify oracle behavior is via a full proxy upgrade by the ProxyAdmin owner ([`0x266f15c63d5D3dE038F2E05D1fA397d92BCB013E`](https://etherscan.io/address/0x266f15c63d5D3dE038F2E05D1fA397d92BCB013E), a Gnosis Safe). This means there is no ability to quickly halt a malfunctioning oracle without a full implementation upgrade
 - **Positive**: The ETH/USD quote feed is standard Chainlink with normal roundId, timestamps, and heartbeat
 
 ## Centralization & Control Risks
@@ -465,11 +458,6 @@ The rsETH layer has notably better governance than the hgETH vault layer (higher
 
 ## Risk Score Assessment
 
-**Scoring Guidelines:**
-- Be conservative: when uncertain between two scores, choose the higher (riskier) one
-- Use decimals (e.g., 2.5) when a subcategory falls between scores
-- Prioritize on-chain evidence over documentation claims
-
 ### Critical Risk Gates
 
 - [x] **No audit** — Extensively audited across multiple layers: Sigma Prime (rsETH + hgETH), Code4rena, MixBytes (rsETH), ChainSecurity, Hacken, Zellic (Upshift + Kernel). Only 1 public audit specifically for hgETH/Gain (Sigma Prime). **PASS**
@@ -500,7 +488,7 @@ The rsETH layer has notably better governance than the hgETH vault layer (higher
 - rsETH layer: 6-of-8 multisig with 10-day timelock (better governance)
 - $KERNEL governance token launched April 2025 (DAO still maturing)
 
-**Governance Score: 3.5** — The rsETH underlying layer has good governance (6-of-8 multisig + 10-day timelock + known signers), but the hgETH vault layer has weaker governance (3-of-5, mostly anonymous, **no timelock confirmed on-chain** despite Upshift documentation claims). The hgETH layer is the direct exposure. Upshift's non-custodial architecture partially mitigates upgrade risk (curators cannot extract funds even without a timelock), but the proxy is still instantly upgradeable by the 3-of-5 multisig.
+**Governance Score: 3.0** — The rsETH underlying layer has good governance (6-of-8 multisig + 10-day timelock + known signers), but the hgETH vault layer has weaker governance (3-of-5, mostly anonymous, **no timelock confirmed on-chain** despite Upshift documentation claims). The hgETH layer is the direct exposure. Upshift's non-custodial architecture partially mitigates upgrade risk (curators cannot extract funds even without a timelock), but the proxy is still instantly upgradeable by the 3-of-5 multisig.
 
 **Subcategory B: Programmability**
 
@@ -521,9 +509,9 @@ The rsETH layer has notably better governance than the hgETH vault layer (higher
 
 **Dependencies Score: 3.5** — Heavy dependency chain (rsETH → EigenLayer → Upshift → August → 12+ protocols), but these are generally well-established DeFi protocols. The curator dependency (UltraYield) adds trust assumptions but is mitigated by Upshift's non-custodial design.
 
-**Centralization Score = (3.5 + 3.0 + 3.5) / 3 = 3.33**
+**Centralization Score = (3.0 + 3.0 + 3.5) / 3 = 3.17**
 
-**Score: 3.5/5** — Rounded up due to the lack of verified timelock on the hgETH proxy. The underlying rsETH governance is good, but hgETH-specific governance is weaker. The Upshift non-custodial architecture is a significant mitigant.
+**Score: 3.0/5** — The underlying rsETH governance is good, but hgETH-specific governance is weaker. The Upshift non-custodial architecture is a significant mitigant.
 
 #### Category 3: Funds Management (Weight: 30%)
 
@@ -572,7 +560,7 @@ The rsETH layer has notably better governance than the hgETH vault layer (higher
 - **Source code**: Contracts verified on Etherscan but not open source on GitHub
 - **Incident response**: Two incidents handled competently with no fund loss
 
-**Score: 2.5/5** — Strong team with proven track record (Stader, $680M+ TVL). Professional curator. Well-funded. Good documentation. Past incidents resolved without fund loss. Andorra jurisdiction and closed source code are minor concerns.
+**Score: 2.0/5** — Strong team with proven track record (Stader, $680M+ TVL). Professional curator. Well-funded. Good documentation. Past incidents resolved without fund loss. Andorra jurisdiction and closed source code are minor concerns.
 
 ### Final Score Calculation
 
@@ -583,13 +571,13 @@ Final Score = (Centralization × 0.30) + (Funds Mgmt × 0.30) + (Audits × 0.20)
 | Category | Score | Weight | Weighted |
 |----------|-------|--------|----------|
 | Audits & Historical | 2.5 | 20% | 0.50 |
-| Centralization & Control | 3.5 | 30% | 1.05 |
+| Centralization & Control | 3.0 | 30% | 0.90 |
 | Funds Management | 2.5 | 30% | 0.75 |
 | Liquidity Risk | 3.5 | 15% | 0.525 |
-| Operational Risk | 2.5 | 5% | 0.125 |
-| **Final Score** | | | **2.95** |
+| Operational Risk | 2.0 | 5% | 0.10 |
+| **Final Score** | | | **2.775** |
 
-**Final Score: 3.1** (rounded up from 2.95 due to conservative adjustments for: multi-layered complexity, upgradeable oracle proxy, confirmed absence of on-chain timelock on hgETH proxy, and the combination of 91.5% LLTV with 3-4 day withdrawal delay + near-zero DEX liquidity)
+**Final Score: 2.8/5.0**
 
 ### Risk Tier
 
@@ -638,17 +626,6 @@ For a **strategy use case** (depositing into the vault), the risk profile is mor
 - **Oracle-based**: Reassess if the hgETH/USD oracle feed is upgraded or if an alternative oracle is deployed
 - **Audit-based**: Reassess if additional hgETH-specific audits by tier-1 firms are completed
 - **Bug bounty scope**: Reassess if hgETH/Gain vault contracts are explicitly added to the Immunefi program scope
-
-## TODO
-
-- [x] Verify hgETH deployment date on Etherscan (exact block/date) — **Resolved**: November 19, 2024, block 21223734
-- [ ] Access and review the Edge Capital hgETH prospectus (Google Drive link requires authentication)
-- [ ] Access and review the rev share proposal (Google Drive link requires authentication)
-- [x] Verify hgETH performance fee percentage (management fee confirmed at 1.5%, withdrawal fee at 0%) — **Resolved**: Performance fee is **20%** per Edge Capital proposal ("Fee Structure (management/performance): 1.5/20%")
-- [x] Verify whether hgETH/Gain vault contracts are in scope of the Kelp Immunefi bug bounty — **Resolved**: NOT in scope. Only rsETH core contracts (10 contracts) are covered
-- [x] Check if the EOMultiFeedAdapter oracle has any additional governance controls or circuit breakers — **Resolved**: No circuit breakers, pause, or governance functions exist. Implementation is entirely read-only after initialization. Only modification path is full proxy upgrade
-
----
 
 ## Appendix A — Related Protocol Audits
 
