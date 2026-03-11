@@ -13,7 +13,7 @@ yvUSD is a **USDC-denominated cross-chain Yearn V3 vault** (ERC-4626) that deplo
 **Key architecture:**
 
 - **Vault:** Standard Yearn V3 vault (v3.0.4) accepting USDC deposits, issuing yvUSD shares
-- **Cross-chain strategies:** Use a two-contract pattern — an origin CCTPStrategy on Ethereum and a remote strategy on the destination chain. The origin tracks remote capital via a `remoteAssets` variable updated by keeper-relayed CCTP messages
+- **Cross-chain strategies:** Use a two-contract pattern — an origin CCTPStrategy on Ethereum and a remote strategy on the destination chain. When `report()` is called on the destination chain, `_harvestAndReport()` reports new assets back to the origin by queuing a CCTP message — no separate keeper relay required. The origin tracks remote capital via a `remoteAssets` variable updated by these CCTP messages
 - **LockedyvUSD:** Companion cooldown wrapper where users lock yvUSD shares for additional yield. Users locking shares gives the vault better guarantees on duration risk, enabling higher-yield strategies without sacrificing atomic liquidity for non-lockers. Cooldown: 14 days (configurable), withdraw window: 7 days (configurable). Lockers receive a percentage of extra yield as an illiquidity premium. Also serves as the vault's accountant
 - **Strategies:** 12 active strategies deploying into Morpho, 3Jane USD3, InfiniFi, Maple syrupUSDC, Sky/MakerDAO, Spark, Fluid, Pendle/Spectra PT tokens, and Cap stcUSD
 - **Yield sources:** Lending yield (Morpho, Fluid, Spark, Sky), looper strategies (borrow-against-collateral loops on Morpho), and fixed-rate PT tokens (Pendle/Spectra)
@@ -156,7 +156,7 @@ All 12 scores are summed and mapped to risk levels (Level 1-4). ySec can make ex
 The yvUSD system is moderately complex:
 
 - **12 active strategies** across 2 chains (Ethereum + Arbitrum)
-- **Cross-chain accounting** via Circle CCTP with keeper-relayed messages
+- **Cross-chain accounting** via Circle CCTP (destination chain reports back to origin via CCTP on `_harvestAndReport()`)
 - **Looper strategies** using Morpho for leveraged yield (borrow-against-collateral loops)
 - **PT token strategies** with maturity dates requiring rollover
 - **Custom accountant** (LockedyvUSD) combining cooldown/locking mechanics with fee management
@@ -196,7 +196,7 @@ Strategies that borrow against collateral on Morpho to achieve leveraged yield p
 
 - USD3 Pendle PT Maxi (33.0%) — holds Pendle Principal Tokens backed by 3Jane USD3
 
-**PT risk:** PT tokens have fixed maturity dates. Before maturity, exit requires selling on AMM (Pendle/Spectra) at potentially unfavorable rates. At maturity, 1 PT redeems for 1 underlying (unless negative yield occurred).
+**PT risk:** PT tokens have fixed maturity dates. Before maturity, exit requires selling on AMM (Pendle/Spectra) at potentially unfavorable rates. At maturity, PT is manually rolled over by converting to SY (yield token) via a `rollover()` call on the strategy — this process cannot steal user funds. If not rolled over, the position simply holds the redeemed underlying.
 
 **3. Lending Strategies (6.7% of TVL)**
 
@@ -211,7 +211,7 @@ Two strategies bridge USDC to Arbitrum via Circle CCTP:
 - Arbitrum syrupUSDC/USDC Morpho Looper (2.8%)
 - Arb Yearn Degen Morpho Compounder (0%, inactive)
 
-**Cross-chain risk:** Bridge delays (CCTP attestation), accounting lag (remoteAssets updated by keeper), and remote chain execution risk.
+**Cross-chain risk:** Bridge delays (CCTP attestation time), and remote chain execution risk.
 
 ### Accessibility
 
@@ -232,13 +232,13 @@ Two strategies bridge USDC to Arbitrum via Circle CCTP:
   - Established with review (Morpho, Maple, Pendle): used across 70%+ of strategies
   - Medium-risk (3Jane 3.5/5, InfiniFi 2.8/5): **65.6% of TVL** — the majority of funds are in protocols with Medium Risk scores
   - Low-risk (Cap stcUSD, internal risk-2): 5.1% of TVL
-- **Leverage via looper strategies:** Borrowing against collateral on Morpho. Exact leverage ratios are TODO — need to verify max LTV parameters per Morpho market
+- **Leverage via looper strategies:** Borrowing against collateral on Morpho. TODO: verify exact max LTV parameters and liquidation buffers per Morpho market
 
 ### Provability
 
 - **yvUSD exchange rate:** Calculated on-chain via ERC-4626 standard (`convertToAssets()`/`convertToShares()`). Fully programmatic, no admin input
 - **Strategy positions:** Each strategy's `totalAssets()` is on-chain. The vault's `totalAssets()` is the sum of all strategy debts
-- **Cross-chain lag:** For cross-chain strategies, `remoteAssets` on the origin is updated when CCTP messages arrive. Between keeper cycles, the value can be stale — the vault's reported `totalAssets()` may not reflect real-time changes on Arbitrum
+- **Cross-chain lag:** For cross-chain strategies, `remoteAssets` on the origin is updated when CCTP messages arrive (sent automatically by `_harvestAndReport()` on the destination chain). Between report cycles, the value can be stale — the vault's reported `totalAssets()` may not reflect real-time changes on Arbitrum
 - **Profit/loss reporting:** Profits are reported by keepers via `process_report()` and locked for gradual distribution over 7 days (`profitMaxUnlockTime`). Losses are immediately reflected in PPS
 
 ## Liquidity Risk
@@ -247,8 +247,8 @@ Two strategies bridge USDC to Arbitrum via Circle CCTP:
 - **Zero idle funds:** Currently 100% of vault assets are deployed to strategies. Withdrawals require unwinding positions
 - **Strategy withdrawal constraints:**
   - Looper strategies: Must deleverage on Morpho (may require multiple keeper transactions)
-  - PT strategies: Before maturity, must sell PTs on AMM (potential slippage). At maturity, redeems 1:1
-  - Cross-chain strategies: Require keeper to process withdrawal on remote chain, bridge USDC back via CCTP (hours to days)
+  - PT strategies: Before maturity, must sell PTs on AMM (potential slippage). At maturity, manual rollover via `rollover()` call converting PT to SY
+  - Cross-chain strategies: Withdrawal triggers CCTP bridging back from remote chain (hours for CCTP attestation)
   - Lending strategies (Sky, Spark): Generally liquid for immediate withdrawal
 - **DEX liquidity:** No known DEX liquidity pools for yvUSD. The vault is an ERC-4626 token, not traded on DEXes
 - **LockedyvUSD:** 14-day cooldown + 7-day withdrawal window. Shares in cooldown cannot be transferred
@@ -297,7 +297,7 @@ The same queued transaction also:
 **This EOA is also the sole `governance` address on the Fee Splitter contract.**
 
 **Governance assessment:**
-1. **No timelock** on any governance action — changes take effect immediately. TODO: confirm if there are plans to add a timelock
+1. **No timelock** on any governance action — changes take effect immediately. The team has confirmed there are no plans to add a timelock at this time
 2. **EOA role concentration is temporary** — pending Safe transaction will remove all direct EOA roles, requiring multisig for all actions
 3. **Known Yearn team signers** — all 8 Safe owners are confirmed Yearn contributors (core team + security team)
 4. **Independent from Yearn global multisig** — the 6/9 Yearn multisig has no roles on this vault, but the separation is by design (strategy-focused governance vs vault-level governance)
@@ -308,7 +308,7 @@ The same queued transaction also:
 - **Vault operations:** Deposit/withdraw are permissionless on-chain transactions
 - **Strategy profit/loss:** Reported programmatically by keepers via `process_report()`. Profits unlock linearly over 7 days. Losses are immediate
 - **Debt allocation:** Requires manual intervention by DEBT_MANAGER role (the deployer EOA or the Safe)
-- **Cross-chain accounting:** Semi-programmatic — keeper triggers `report()` on remote chain, which sends CCTP message back. Can be stale between keeper cycles
+- **Cross-chain accounting:** When `report()` is called on the destination chain, `_harvestAndReport()` automatically queues a CCTP message back to the origin. No separate keeper relay required. Can be stale between report cycles
 - **V3 vaults are immutable** — no proxy upgrades, no admin-changeable implementation
 
 ### External Dependencies
@@ -405,9 +405,9 @@ Yearn maintains an active monitoring system via the [`monitoring-scripts-py`](ht
 ### Critical Risks
 
 - **EOA key compromise (temporary):** Until the queued Safe transaction (nonce 3130) executes, the deployer EOA can unilaterally reallocate all vault funds between existing strategies. Once the transaction executes (needs 1 more signature), this risk is eliminated
-- **No timelock:** All governance actions via the 3-of-8 Safe take effect immediately. No monitoring window for users to react to potentially harmful changes. TODO: confirm if there are plans to add a timelock
+- **No timelock:** All governance actions via the 3-of-8 Safe take effect immediately. No monitoring window for users to react to potentially harmful changes. The team has confirmed no plans to add a timelock at this time
 - **Looper liquidation cascade:** Looper strategies (~58% of TVL) use leveraged positions on Morpho. A collateral depeg (e.g., USD3 or siUSD) could trigger cascading liquidations across multiple strategies simultaneously
-- **Cross-chain accounting lag:** Remote strategy positions are only updated when keepers relay CCTP messages. The vault's reported `totalAssets()` may not reflect real losses on Arbitrum in real-time
+- **Cross-chain accounting lag:** Remote strategy positions are updated when `_harvestAndReport()` queues CCTP messages back to the origin. Between report cycles, the vault's reported `totalAssets()` may not reflect real-time changes on Arbitrum
 
 ---
 
@@ -463,7 +463,7 @@ Yearn maintains an active monitoring system via the [`monitoring-scripts-py`](ht
 | Vault operations | Permissionless deposits/withdrawals on-chain |
 | Strategy reporting | Programmatic via keepers |
 | Debt allocation | Manual intervention by DEBT_MANAGER |
-| Cross-chain | Semi-programmatic, keeper-relayed, can be stale |
+| Cross-chain | Programmatic — `_harvestAndReport()` queues CCTP messages automatically. Stale between report cycles |
 
 **Programmability Score: 1.5/5** — All funds are on-chain across Ethereum and Arbitrum and cannot be altered by off-chain factors. PPS is calculated on-chain algorithmically via ERC-4626. Deposits/withdrawals are permissionless. Strategy reporting is automated via keepers. Debt allocation has both automated (Debt Allocator) and manual (DEBT_MANAGER) paths. Cross-chain accounting has minor lag between keeper cycles but all positions are verifiable on-chain at all times.
 
@@ -572,17 +572,7 @@ Final Score = (Centralization × 0.30) + (Funds Mgmt × 0.30) + (Audits × 0.20)
 
 The following items could not be verified during this assessment and require team input:
 
-1. **Timelock plans:** Is there a plan to add a timelock for governance actions (e.g., debt reallocation, strategy removal)? Currently all actions via the 3-of-8 Safe take effect immediately.
-
-2. **Looper leverage ratios:** What are the specific max LTV parameters used in the Morpho looper strategies? What are the liquidation buffers? What happens in a collateral depeg scenario (e.g., USD3 or siUSD depeg)?
-
-3. **PT maturity handling:** What happens when Pendle/Spectra PT tokens reach maturity? Is rollover automated or manual? What happens to the strategy allocation?
-
-4. **Deposit limit roadmap:** What is the plan for increasing the $1.5M deposit limit? What conditions need to be met?
-
-5. **Cross-chain keeper reliability:** What keeper infrastructure manages the cross-chain strategies? What happens if a keeper goes offline — is there a fallback?
-
-6. **Fee structure:** What are the actual performance and management fee rates charged by the LockedyvUSD accountant? How are fees split via the Fee Splitter?
+1. **Looper leverage ratios:** What are the specific max LTV parameters used in the Morpho looper strategies? What are the liquidation buffers? What happens in a collateral depeg scenario (e.g., USD3 or siUSD depeg)?
 
 ---
 
