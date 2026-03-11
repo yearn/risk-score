@@ -277,16 +277,6 @@ The yvUSD vault uses a **different governance pattern** from the standard Yearn 
 - **Signers are Yearn team members**, spanning core contributors and the security team. Not publicly labeled on Etherscan but confirmed as known Yearn insiders
 - No timelock on any actions
 - 3,130 transactions processed as of March 2026 — very active multisig
-- Safe owners (8 EOAs):
-  - [`0x80a3887BA60F76acAb48EE4aEAd0a71A0774A8B2`](https://etherscan.io/address/0x80a3887BA60F76acAb48EE4aEAd0a71A0774A8B2)
-  - [`0xB13C8f58a233607569D2F8411B912148aeC4aEe2`](https://etherscan.io/address/0xB13C8f58a233607569D2F8411B912148aeC4aEe2)
-  - [`0xBD5f1429Ab467E69BEeba51E547C00A21F2a2092`](https://etherscan.io/address/0xBD5f1429Ab467E69BEeba51E547C00A21F2a2092)
-  - [`0x787aba336583f4A1D4f8cBBFDFFD49f3a38De665`](https://etherscan.io/address/0x787aba336583f4A1D4f8cBBFDFFD49f3a38De665)
-  - [`0x2C2dc95F8C8060a7e3B354c1B9540881AEa1613C`](https://etherscan.io/address/0x2C2dc95F8C8060a7e3B354c1B9540881AEa1613C)
-  - [`0xd0002c648CCa8DeE2f2b8D70D542Ccde8ad6EC03`](https://etherscan.io/address/0xd0002c648CCa8DeE2f2b8D70D542Ccde8ad6EC03)
-  - [`0x1b5f15DCb82d25f91c65b53CEe151E8b9fBdD271`](https://etherscan.io/address/0x1b5f15DCb82d25f91c65b53CEe151E8b9fBdD271)
-  - [`0x0Dca0FDC170baA4CA9c1dCd37Ffe01f97bCfF504`](https://etherscan.io/address/0x0Dca0FDC170baA4CA9c1dCd37Ffe01f97bCfF504)
-
 **Deployer EOA roles — pending removal:** [`0x1b5f15DCb82d25f91c65b53CEe151E8b9fBdD271`](https://etherscan.io/address/0x1b5f15DCb82d25f91c65b53CEe151E8b9fBdD271)
 
 This EOA (also a Safe owner and the vault deployer) currently holds **11 of 14 vault roles** directly:
@@ -352,7 +342,7 @@ The same queued transaction also:
 - **Team:** Yearn Finance — established since 2020, publicly known contributors. The Yearn global multisig has 9 named signers including Mariano Conti (ex-MakerDAO), Leo Cheng (C.R.E.A.M.), 0xngmi (DeFiLlama), Michael Egorov (Curve), and others
 - **yvUSD governance:** The vault is managed by a separate 3-of-8 Safe (not the Yearn global multisig). However, all 8 signers are confirmed Yearn team members (core contributors and security team), providing high trust in the governance quality
 - **Documentation:** Comprehensive Yearn V3 documentation. yvUSD-specific docs exist in a draft PR (not yet merged to main docs). Cross-chain strategy documentation available
-- **Legal:** Yearn Finance operates as a DAO with no formal legal entity. The YFI token governs the protocol via YIP proposals
+- **Legal:** Yearn Finance has converted its ychad.eth multisig into a BORG (cybernetic organization) via [YIP-87](https://gov.yearn.fi/t/yip-87-convert-ychad-eth-into-a-borg/14540), wrapping it in a Cayman Islands foundation company with smart contract governance restrictions. The YFI token governs the protocol via YIP proposals
 - **Incident response:** Yearn has demonstrated incident response capability across 4 historical events (all V1/legacy). V3 framework has not been tested under stress. The $200K Immunefi bug bounty provides a responsible disclosure channel
 - **V3 immutability:** Vault contracts cannot be upgraded — this eliminates proxy upgrade risk but means bugs cannot be patched without deploying a new vault
 
@@ -549,7 +539,7 @@ Yearn maintains an active monitoring system via the [`monitoring-scripts-py`](ht
 | Team | Yearn: well-known team, public contributors, established since 2020 |
 | Vault management | Separate from Yearn global governance. 3-of-8 Safe with known Yearn team signers |
 | Documentation | V3 docs comprehensive. yvUSD docs exist as draft PR |
-| Legal | Yearn DAO, no formal legal entity |
+| Legal | Yearn BORG (Cayman foundation via YIP-87) |
 | Incident response | Yearn has demonstrated capability across 4 historical events. V3 untested |
 | Monitoring | Active hourly large-flow alerts, weekly endorsed-vault checks, timelock monitoring across 6 chains |
 
