@@ -4,7 +4,7 @@
 - **Token:** yvUSDC-1 (USDC-1 yVault)
 - **Chain:** Ethereum
 - **Token Address:** [`0xBe53A109B494E5c9f97b9Cd39Fe969BE68BF6204`](https://etherscan.io/address/0xBe53A109B494E5c9f97b9Cd39Fe969BE68BF6204)
-- **Final Score: 1.6/5.0**
+- **Final Score: 1.4/5.0**
 
 ## Overview + Links
 
@@ -83,6 +83,8 @@ yvUSDC-1 is a **USDC-denominated Yearn V3 vault** (ERC-4626) that deploys deposi
 
 **Note:** 15 strategies have been added over the vault's 12-month lifetime with 6 revoked, demonstrating active portfolio management. The vault has rotated through strategies including Aave V3, Compound V3, Morpho, Spark, Fluid, and Sky/sUSDS. Currently all debt is consolidated into the sUSDS strategy.
 
+**Score impact of strategy diversification:** If the vault were to diversify lending across its available strategies (Aave V3, Morpho, Spark, Fluid), the final risk score would **not change** — all available strategies lend into minimal-risk, blue-chip protocols. The dependency score would remain at 2/5 (blue-chip dependencies), and collateral quality would remain at 1/5 (top-tier DeFi protocols).
+
 ### Strategy Protocol Dependencies
 
 | Protocol | Strategy | TVL |
@@ -157,16 +159,7 @@ The yvUSDC-1 system is **low complexity**:
 - **Security incidents:** None known for this vault or Yearn V3 generally
 - **Strategy changes:** 15 strategies added over lifetime, 6 revoked — active portfolio management. Has used Aave V3, Compound V3, Morpho, Spark, Fluid, and Sky strategies
 - **Current strategy (sUSDS) activated:** March 3, 2026 — all debt moved to sUSDS as the highest-yielding option
-- **Yearn V3 track record:** V3 framework has been live since May 2024 (~22 months). No V3 vault exploits. All 4 historical Yearn incidents affected legacy V1/iearn contracts (2021-2025), never V2 or V3
-
-**Yearn Historical Incidents (none affected V3):**
-
-| Date | Amount | Affected | Root Cause |
-|------|--------|----------|------------|
-| Feb 2021 | $11M | DAI v1 vault | Withdrawal fee disabled during migration |
-| Apr 2023 | $11.4M | Legacy yUSDT (iearn V1) | Copy-paste error in config |
-| Nov 2025 | $9M | Legacy yETH stableswap pool | Arithmetic underflow in solver |
-| Dec 2025 | $293K | Legacy iearn TUSD (V1) | Configuration mismatch |
+- **Yearn V3 track record:** V3 framework has been live since May 2024 (~22 months). No V3 vault exploits
 
 **Yearn protocol TVL:** ~$240M total across all chains (DeFi Llama, March 2026).
 
@@ -370,13 +363,13 @@ Yearn maintains an active monitoring system via the [`monitoring-scripts-py`](ht
 | Factor | Assessment |
 |--------|-----------|
 | Audits | V3 framework: 3 audits by top firms (Statemind, ChainSecurity, yAcademy). Sky/sUSDS: 7+ auditors (ChainSecurity, Cantina, Sherlock, Trail of Bits, etc.) |
-| Bug bounty | $200K on Immunefi (Yearn) + $10M on Immunefi (Sky). Combined: $10.2M |
+| Bug bounty | $200K on Immunefi (Yearn) |
 | Production history | **~12 months** (March 12, 2024). V3 framework: ~22 months |
 | TVL | **~$31.67M** USDC. Deposit limit: $50M |
-| Security incidents | None on V3. None on sUSDS. All historical Yearn incidents on V1/legacy |
+| Security incidents | None on V3. None on sUSDS |
 | Strategy review | Rigorous 12-metric framework with ySec security review |
 
-**Score: 1.5/5** — 3+ audits by top firms on the vault infrastructure, plus 7+ auditors on the underlying protocol. $10M+ combined bug bounty. 12 months of production history with $31.67M TVL and zero incidents. V3 framework has 22 months of clean track record. The high-quality audit coverage on both layers (vault + underlying) and the $10M Sky bug bounty warrant a score between 1 and 2.
+**Score: 1.5/5** — 3+ audits by top firms on the vault infrastructure, plus 7+ auditors on the underlying protocol. 12 months of production history with $31.67M TVL and zero incidents. V3 framework has 22 months of clean track record. The high-quality audit coverage on both layers (vault + underlying) warrant a score between 1 and 2.
 
 #### Category 2: Centralization & Control Risks (Weight: 30%)
 
@@ -401,7 +394,7 @@ Yearn maintains an active monitoring system via the [`monitoring-scripts-py`](ht
 | Strategy reporting | Programmatic via keeper (yHaaSRelayer) |
 | Debt allocation | Both automated (Debt Allocator) and manual (Brain multisig) |
 
-**Programmability Score: 1.5/5** — Highly programmatic system. PPS is fully on-chain, operations are permissionless, reporting is automated. Debt allocation has both manual and automated paths. Between score 1 (fully programmatic) and score 2 (mostly programmatic with minor admin input).
+**Programmability Score: 1/5** — Fully programmatic system. PPS is calculated on-chain algorithmically via ERC-4626. All vault operations (deposits, withdrawals) are permissionless on-chain transactions. Strategy reporting is automated via keeper. All funds are on-chain and cannot be altered by off-chain factors.
 
 **Subcategory C: External Dependencies**
 
@@ -413,9 +406,9 @@ Yearn maintains an active monitoring system via the [`monitoring-scripts-py`](ht
 
 **Dependencies Score: 2/5** — Single active dependency on a blue-chip protocol. Sky/MakerDAO is among the highest-quality DeFi dependencies possible. Per rubric, "1-2 blue-chip dependencies" = score 2. The 100% concentration in one protocol is a concern, but the protocol quality is exceptional.
 
-**Centralization Score = (2 + 1.5 + 2) / 3 = 1.83**
+**Centralization Score = (2 + 1 + 2) / 3 = 1.67**
 
-**Score: 1.8/5** — Strong governance with 6/9 named-signer multisig and immutable vault. Highly programmatic operations. Single blue-chip dependency. Strategy additions go through 24h timelock. Minor gap: no timelock on direct vault parameter changes.
+**Score: 1.7/5** — Strong governance with 6/9 named-signer multisig and immutable vault. Fully programmatic operations with all funds on-chain. Single blue-chip dependency. Strategy additions go through 24h timelock. Minor gap: no timelock on direct vault parameter changes.
 
 #### Category 3: Funds Management (Weight: 30%)
 
@@ -428,7 +421,7 @@ Yearn maintains an active monitoring system via the [`monitoring-scripts-py`](ht
 | Leverage | None |
 | Verifiability | ERC-4626, all positions on-chain |
 
-**Collateralization Score: 1.5/5** — 100% on-chain USDC backing deployed to the highest-quality DeFi savings protocol. No leverage. Fully verifiable. The only reason not to give score 1 is that funds are deployed (not sitting as idle USDC) — there is smart contract risk on the conversion pipeline (PSM + Exchanger + sUSDS).
+**Collateralization Score: 1/5** — 100% on-chain USDC backing deployed to the highest-quality DeFi savings protocol (Sky/MakerDAO). No leverage. Fully verifiable. Blue-chip collateral (sUSDS backed by over-collateralized loans and Treasury bills). Real-time on-chain verification.
 
 **Subcategory B: Provability**
 
@@ -441,9 +434,9 @@ Yearn maintains an active monitoring system via the [`monitoring-scripts-py`](ht
 
 **Provability Score: 1/5** — Excellent transparency. ERC-4626 standard provides fully on-chain, real-time verification. No off-chain components. Multiple verification sources (vault totalAssets, strategy totalAssets, sUSDS balance).
 
-**Funds Management Score = (1.5 + 1) / 2 = 1.25**
+**Funds Management Score = (1 + 1) / 2 = 1.0**
 
-**Score: 1.25/5** — Outstanding on-chain provability. Blue-chip collateral quality. No leverage. Simple, transparent pipeline.
+**Score: 1.0/5** — Outstanding on-chain provability. Top-tier blue-chip collateral quality. No leverage. Simple, transparent pipeline.
 
 #### Category 4: Liquidity Risk (Weight: 15%)
 
@@ -474,19 +467,19 @@ Yearn maintains an active monitoring system via the [`monitoring-scripts-py`](ht
 
 ```
 Final Score = (Centralization × 0.30) + (Funds Mgmt × 0.30) + (Audits × 0.20) + (Liquidity × 0.15) + (Operational × 0.05)
-            = (1.8 × 0.30) + (1.25 × 0.30) + (1.5 × 0.20) + (1.5 × 0.15) + (1.0 × 0.05)
-            = 0.54 + 0.375 + 0.30 + 0.225 + 0.05
-            = 1.49
+            = (1.7 × 0.30) + (1.0 × 0.30) + (1.5 × 0.20) + (1.5 × 0.15) + (1.0 × 0.05)
+            = 0.51 + 0.30 + 0.30 + 0.225 + 0.05
+            = 1.39
 ```
 
 | Category | Score | Weight | Weighted |
 |----------|-------|--------|----------|
 | Audits & Historical | 1.5 | 20% | 0.30 |
-| Centralization & Control | 1.8 | 30% | 0.54 |
-| Funds Management | 1.25 | 30% | 0.375 |
+| Centralization & Control | 1.7 | 30% | 0.51 |
+| Funds Management | 1.0 | 30% | 0.30 |
 | Liquidity Risk | 1.5 | 15% | 0.225 |
 | Operational Risk | 1.0 | 5% | 0.05 |
-| **Final Score** | | | **1.5/5.0** |
+| **Final Score** | | | **1.4/5.0** |
 
 ### Risk Tier
 
@@ -498,7 +491,7 @@ Final Score = (Centralization × 0.30) + (Funds Mgmt × 0.30) + (Audits × 0.20)
 | 3.5-4.5 | Elevated Risk | Limited approval, strict limits |
 | 4.5-5.0 | High Risk | Not recommended |
 
-**Final Risk Tier: Minimal Risk (1.5/5.0) — Approved, high confidence**
+**Final Risk Tier: Minimal Risk (1.4/5.0) — Approved, high confidence**
 
 ---
 
