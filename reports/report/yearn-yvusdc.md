@@ -4,7 +4,7 @@
 - **Token:** yvUSDC-1 (USDC-1 yVault)
 - **Chain:** Ethereum
 - **Token Address:** [`0xBe53A109B494E5c9f97b9Cd39Fe969BE68BF6204`](https://etherscan.io/address/0xBe53A109B494E5c9f97b9Cd39Fe969BE68BF6204)
-- **Final Score: 1.4/5.0**
+- **Final Score: 1.3/5.0**
 
 ## Overview + Links
 
@@ -383,7 +383,7 @@ Yearn maintains an active monitoring system via the [`monitoring-scripts-py`](ht
 | Privileged roles | Well-distributed: Daddy (6/9, all roles), Brain (3/8, operational), Security (4/7), Keeper + Debt Allocator (bots) |
 | EOA risk | None — no EOA holds direct vault roles |
 
-**Governance Score: 2/5** — Immutable vault (score 1 territory). 6-of-9 multisig with named, reputable signers (score 1-2). Strategy additions have 24-hour timelock. However, Daddy's direct vault parameter changes (e.g., deposit limits, emergency shutdown) have no timelock delay, which prevents a score of 1. Per rubric, "Multisig 7/11+ with timelock" = score 2.
+**Governance Score: 1.5/5** — Immutable vault contracts (no proxy upgrade risk). 6-of-9 multisig with named, prominent DeFi signers. The most critical governance action — adding new strategies, which could break the system — goes through a **24-hour TimelockController**. No EOA role concentration. Direct vault parameter changes (deposit limits, emergency shutdown) by the 6/9 multisig have no timelock, preventing a score of 1.
 
 **Subcategory B: Programmability**
 
@@ -406,9 +406,9 @@ Yearn maintains an active monitoring system via the [`monitoring-scripts-py`](ht
 
 **Dependencies Score: 2/5** — Single active dependency on a blue-chip protocol. Sky/MakerDAO is among the highest-quality DeFi dependencies possible. Per rubric, "1-2 blue-chip dependencies" = score 2. The 100% concentration in one protocol is a concern, but the protocol quality is exceptional.
 
-**Centralization Score = (2 + 1 + 2) / 3 = 1.67**
+**Centralization Score = (1.5 + 1 + 2) / 3 = 1.5**
 
-**Score: 1.7/5** — Strong governance with 6/9 named-signer multisig and immutable vault. Fully programmatic operations with all funds on-chain. Single blue-chip dependency. Strategy additions go through 24h timelock. Minor gap: no timelock on direct vault parameter changes.
+**Score: 1.5/5** — Immutable vault with 6/9 named-signer multisig. 24h timelock on the most critical action (strategy additions). Fully programmatic operations with all funds on-chain. Single blue-chip dependency. Minor gap: no timelock on direct vault parameter changes.
 
 #### Category 3: Funds Management (Weight: 30%)
 
@@ -448,7 +448,7 @@ Yearn maintains an active monitoring system via the [`monitoring-scripts-py`](ht
 | Same-value asset | USDC-denominated — no price divergence risk |
 | Withdrawal restrictions | None — atomic redemption, no cooldown |
 
-**Score: 1.5/5** — Highly liquid exit through the PSM (0% fee, deep liquidity) and sUSDS redemption. Same-value asset (USDC-denominated). No withdrawal delays or cooldowns. The vault's ~$31.67M is tiny relative to the ~$6.18B sUSDS pool. Score 1 requires ">$10M, <0.5% slippage" which is met, but the 100% deployment (0 idle) and dependence on the pipeline functioning correctly warrant a slight uplift. Between score 1 and 2.
+**Score: 1.5/5** — The vault lends into lending protocols (Sky/sUSDS, and available strategies for Aave V3, Morpho, Spark, Fluid) which are liquid the vast majority of the time. Withdrawals are atomic via the ERC-4626 pipeline with no cooldown. In rare edge cases (e.g., PSM liquidity constraints, temporary protocol congestion), withdrawals could face short delays — hence 1.5 rather than 1.
 
 #### Category 5: Operational Risk (Weight: 5%)
 
@@ -467,19 +467,19 @@ Yearn maintains an active monitoring system via the [`monitoring-scripts-py`](ht
 
 ```
 Final Score = (Centralization × 0.30) + (Funds Mgmt × 0.30) + (Audits × 0.20) + (Liquidity × 0.15) + (Operational × 0.05)
-            = (1.7 × 0.30) + (1.0 × 0.30) + (1.5 × 0.20) + (1.5 × 0.15) + (1.0 × 0.05)
-            = 0.51 + 0.30 + 0.30 + 0.225 + 0.05
-            = 1.39
+            = (1.5 × 0.30) + (1.0 × 0.30) + (1.5 × 0.20) + (1.5 × 0.15) + (1.0 × 0.05)
+            = 0.45 + 0.30 + 0.30 + 0.225 + 0.05
+            = 1.33
 ```
 
 | Category | Score | Weight | Weighted |
 |----------|-------|--------|----------|
 | Audits & Historical | 1.5 | 20% | 0.30 |
-| Centralization & Control | 1.7 | 30% | 0.51 |
+| Centralization & Control | 1.5 | 30% | 0.45 |
 | Funds Management | 1.0 | 30% | 0.30 |
 | Liquidity Risk | 1.5 | 15% | 0.225 |
 | Operational Risk | 1.0 | 5% | 0.05 |
-| **Final Score** | | | **1.4/5.0** |
+| **Final Score** | | | **1.3/5.0** |
 
 ### Risk Tier
 
@@ -491,7 +491,7 @@ Final Score = (Centralization × 0.30) + (Funds Mgmt × 0.30) + (Audits × 0.20)
 | 3.5-4.5 | Elevated Risk | Limited approval, strict limits |
 | 4.5-5.0 | High Risk | Not recommended |
 
-**Final Risk Tier: Minimal Risk (1.4/5.0) — Approved, high confidence**
+**Final Risk Tier: Minimal Risk (1.3/5.0) — Approved, high confidence**
 
 ---
 
