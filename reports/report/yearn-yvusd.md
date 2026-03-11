@@ -4,7 +4,7 @@
 - **Token:** yvUSD (USD yVault)
 - **Chain:** Ethereum (with cross-chain strategies on Arbitrum)
 - **Token Address:** [`0x696d02Db93291651ED510704c9b286841d506987`](https://etherscan.io/address/0x696d02Db93291651ED510704c9b286841d506987)
-- **Final Score: 2.9/5.0**
+- **Final Score: 2.8/5.0**
 
 ## Overview + Links
 
@@ -14,7 +14,7 @@ yvUSD is a **USDC-denominated cross-chain Yearn V3 vault** (ERC-4626) that deplo
 
 - **Vault:** Standard Yearn V3 vault (v3.0.4) accepting USDC deposits, issuing yvUSD shares
 - **Cross-chain strategies:** Use a two-contract pattern — an origin CCTPStrategy on Ethereum and a remote strategy on the destination chain. The origin tracks remote capital via a `remoteAssets` variable updated by keeper-relayed CCTP messages
-- **LockedyvUSD:** Companion cooldown wrapper that enforces a 14-day cooldown + 7-day withdrawal window. Users accepting the lock receive a "locker bonus" yield component. Also serves as the vault's accountant
+- **LockedyvUSD:** Companion cooldown wrapper where users lock yvUSD shares for additional yield. Users locking shares gives the vault better guarantees on duration risk, enabling higher-yield strategies without sacrificing atomic liquidity for non-lockers. Cooldown: 14 days (configurable), withdraw window: 7 days (configurable). Lockers receive a percentage of extra yield as an illiquidity premium. Also serves as the vault's accountant
 - **Strategies:** 12 active strategies deploying into Morpho, 3Jane USD3, InfiniFi, Maple syrupUSDC, Sky/MakerDAO, Spark, Fluid, Pendle/Spectra PT tokens, and Cap stcUSD
 - **Yield sources:** Lending yield (Morpho, Fluid, Spark, Sky), looper strategies (borrow-against-collateral loops on Morpho), and fixed-rate PT tokens (Pendle/Spectra)
 
@@ -110,7 +110,28 @@ The underlying vault infrastructure has been audited by 3 reputable firms:
 
 ### yvUSD-Specific Audits
 
-**No audit specifically covering the CCTPStrategy cross-chain code, the LockedyvUSD cooldown wrapper, or the individual strategies used by yvUSD was found.** This is a notable gap. The V3 vault framework and tokenized strategy base are audited, but the novel components (cross-chain bridging, looper strategies, custom accountant) have no dedicated external review on record.
+No external third-party audit specifically covering the CCTPStrategy cross-chain code, the LockedyvUSD cooldown wrapper, or individual yvUSD strategies was found. However, the **CCTPStrategy has undergone strict internal review by ySec** (Yearn's security team). All strategies go through Yearn's rigorous internal review process (see Strategy Review Process below).
+
+### Strategy Review Process
+
+Yearn uses a formal **12-metric risk scoring framework** ([RISK_FRAMEWORK.md](https://github.com/yearn/risk-score/blob/master/vaults/RISK_FRAMEWORK.md)) for evaluating and approving strategies. The framework scores strategies across two dimensions:
+
+**Strategy-Related Scores (6 metrics):**
+- **Review** — number of Sources of Trust (internal strategist, peer review, expert review, ySec security review, recurring security review)
+- **Testing** — code coverage requirements (score 1 = 95%+, score 5 = <70%)
+- **Complexity** — source lines of code (score 1 = 0-150 sLOC, score 5 = 600+)
+- **Risk Exposure** — potential loss percentage
+- **Centralization Risk** — off-chain management dependency
+- **Protocol Integration** — number of external protocols integrated
+
+**External Protocol-Related Scores (6 metrics):**
+- **Auditing** — number of trusted audits on external protocols
+- **Centralization** — owner control/governance of external protocols
+- **TVL** — active total value locked
+- **Longevity** — contract deployment age
+- **Protocol Type** — category (blue-chip vs novel vs cross-chain vs off-chain)
+
+All 12 scores are summed and mapped to risk levels (Level 1-4). ySec can make exceptions with textual justification. This is a rigorous, documented process that provides strong assurance for strategy quality even without external audits on individual strategies.
 
 ### Underlying Protocol Audits
 
@@ -128,7 +149,7 @@ The underlying vault infrastructure has been audited by 3 reputable firms:
 - **Immunefi:** Active bug bounty for Yearn Finance. Max payout: **$200,000** (Critical). Scope includes V3 vaults (`VaultV3.vy`, `VaultFactory.vy`).
   - Link: https://immunefi.com/bounty/yearnfinance/
 - **Sherlock:** Also listed: https://audits.sherlock.xyz/bug-bounties/30
-- **Safe Harbor:** TODO — unable to confirm whether Yearn is listed on the SEAL Safe Harbor registry (website uses client-rendered SvelteKit that could not be scraped)
+- **Safe Harbor:** Not listed on the SEAL Safe Harbor registry
 
 ### On-Chain Complexity
 
@@ -337,6 +358,16 @@ The same queued transaction also:
 
 ## Monitoring
 
+### Existing Monitoring Infrastructure
+
+Yearn maintains an active monitoring system via the [`monitoring-scripts-py`](https://github.com/yearn/monitoring-scripts-py) repository:
+
+- **Large flow alerts** (`yearn/alert_large_flows.py`): Runs **hourly via GitHub Actions**. Monitors deposit/withdrawal events via Envio indexer, alerts on flows exceeding $5M threshold via Telegram. Currently monitors 21 vaults across Ethereum, Base, Arbitrum, and Katana
+- **Endorsed vault check** (`yearn/check_endorsed.py`): Runs weekly, verifies all Yearn V3 vaults are endorsed on-chain via the registry contract
+- **Timelock monitoring** (`timelock/timelock_alerts.py`): Monitors Yearn TimelockController across 6 chains
+
+**Note:** yvUSD is not yet added to the monitored vault list in `alert_large_flows.py`, but the infrastructure is in place and can be extended.
+
 ### Key Contracts (Ethereum)
 
 | Contract | Address | Monitor |
@@ -379,13 +410,15 @@ The same queued transaction also:
 - **Diversified strategy portfolio:** 12 strategies across 8+ protocols, distributed across lending, looper, PT, and cross-chain categories. No single strategy exceeds 33% allocation
 - **Granular V3 role system:** 14 distinct roles with clear separation of responsibilities. The most sensitive actions (adding strategies, changing accountant) require multisig approval
 - **Circle CCTP:** Trust-minimized cross-chain bridge with same trust assumption as holding USDC. Audited by ChainSecurity
+- **Rigorous strategy review process:** 12-metric risk scoring framework with ySec security review. CCTPStrategy underwent strict internal review. All strategies evaluated across testing coverage, complexity, risk exposure, centralization, and protocol integration dimensions
+- **Active monitoring infrastructure:** Hourly large-flow alerts, weekly endorsed-vault checks, and timelock monitoring across 6 chains via GitHub Actions + Telegram alerts
 
 ### Key Risks
 
 - **Extremely new:** Only ~50 days in production with ~$1M TVL. No stress testing. Deposit limit of $1.5M indicates early experimental stage
 - **Separate governance from Yearn global multisig:** Vault is managed by a dedicated 3-of-8 Safe with known Yearn team signers, independent from the standard 6-of-9 Yearn multisig. By design for strategy-focused operations, but no cross-oversight
 - **Temporary EOA role concentration (pending fix):** One address currently holds 11/14 vault roles directly. A queued Safe transaction (nonce 3130, 2/3 signatures) will remove all EOA roles, requiring 3/8 multisig for all actions
-- **No product-specific audit:** The CCTPStrategy cross-chain code, LockedyvUSD wrapper, and individual strategies have no dedicated external audit. Only the underlying V3 framework is audited
+- **No external product-specific audit:** The CCTPStrategy cross-chain code and LockedyvUSD wrapper have no dedicated external audit. CCTPStrategy underwent strict internal ySec review. All strategies follow the rigorous 12-metric risk framework, but external third-party review of these specific components is absent
 - **65.6% in medium-risk protocols:** The majority of vault funds are deployed into 3Jane USD3 (score 3.5/5) and InfiniFi (score 2.8/5) — both relatively new protocols with elevated risk profiles
 
 ### Critical Risks
@@ -418,13 +451,14 @@ The same queued transaction also:
 
 | Factor | Assessment |
 |--------|-----------|
-| Audits | V3 framework: 3 audits by top firms (Statemind, ChainSecurity, yAcademy). **No yvUSD-specific or strategy-specific audits** |
-| Bug bounty | $200K on Immunefi (active). Modest but functional |
+| Audits | V3 framework: 3 audits by top firms (Statemind, ChainSecurity, yAcademy). CCTPStrategy: strict internal ySec review. All strategies: rigorous 12-metric risk framework |
+| Bug bounty | $200K on Immunefi (active) + Sherlock bounty |
 | Production history | **~50 days** (Jan 19, 2026). V3 framework: ~22 months |
 | TVL | **~$1M** (extremely small). Deposit limit: $1.5M |
 | Security incidents | None on V3. All historical Yearn incidents on V1/legacy |
+| Strategy review | Rigorous 12-metric framework with ySec security review, testing coverage requirements, complexity scoring, and risk exposure assessment |
 
-**Score: 3.5/5** — The underlying V3 framework has solid audit coverage from 3 reputable firms and a clean 22-month track record. However, yvUSD itself is extremely new (~50 days) with negligible TVL (~$1M), and the novel components (CCTPStrategy, looper strategies, LockedyvUSD) have no dedicated external audit. The $200K bug bounty is modest for the scope of the system. Between score 3 (1 audit, 6-12 months, TVL >$10M) and score 4 (1 audit by lesser-known firm, 3-6 months, TVL <$10M) — the strong framework audits pull it toward 3, but the very early stage and lack of product-specific audit push toward 4. Conservative assessment: 3.5.
+**Score: 3.0/5** — The underlying V3 framework has solid audit coverage from 3 reputable firms and a clean 22-month track record. The CCTPStrategy underwent strict internal ySec review, and all strategies follow a rigorous 12-metric risk scoring framework — providing strong assurance even without external audits on individual components. However, yvUSD itself is extremely new (~50 days) with negligible TVL (~$1M), and no external third-party audit covers the novel yvUSD-specific components. Between score 2 (2+ audits, 1-2 years) and score 4 (3-6 months, TVL <$10M) — the strong framework audits and rigorous internal review process pull toward 3, while the very early stage pushes toward 4.
 
 #### Category 2: Centralization & Control Risks (Weight: 30%)
 
@@ -517,26 +551,27 @@ The same queued transaction also:
 | Documentation | V3 docs comprehensive. yvUSD docs exist as draft PR |
 | Legal | Yearn DAO, no formal legal entity |
 | Incident response | Yearn has demonstrated capability across 4 historical events. V3 untested |
+| Monitoring | Active hourly large-flow alerts, weekly endorsed-vault checks, timelock monitoring across 6 chains |
 
-**Score: 2/5** — Yearn's brand, track record, and known team provide high confidence. All 8 signers of the yvUSD Safe are confirmed Yearn insiders (core team + security team). Comprehensive V3 documentation, active Immunefi bounty, and demonstrated incident response capability across 4 historical events. yvUSD-specific docs are still in draft but the V3 framework docs are extensive. Yearn DAO has no formal legal entity but has well-established reputation.
+**Score: 1.5/5** — Yearn's brand, track record, and known team provide high confidence. All 8 signers of the yvUSD Safe are confirmed Yearn insiders (core team + security team). Comprehensive V3 documentation, active Immunefi + Sherlock bounties, demonstrated incident response across 4 historical events, and active monitoring infrastructure (hourly alerts, endorsed-vault checks, timelock monitoring via GitHub Actions + Telegram). yvUSD-specific docs are in draft but V3 framework docs are extensive. Yearn DAO has no formal legal entity but has well-established reputation since 2020.
 
 ### Final Score Calculation
 
 ```
 Final Score = (Centralization × 0.30) + (Funds Mgmt × 0.30) + (Audits × 0.20) + (Liquidity × 0.15) + (Operational × 0.05)
-            = (3.0 × 0.30) + (2.5 × 0.30) + (3.5 × 0.20) + (3.0 × 0.15) + (2.0 × 0.05)
-            = 0.90 + 0.75 + 0.70 + 0.45 + 0.10
-            = 2.90
+            = (3.0 × 0.30) + (2.5 × 0.30) + (3.0 × 0.20) + (3.0 × 0.15) + (1.5 × 0.05)
+            = 0.90 + 0.75 + 0.60 + 0.45 + 0.075
+            = 2.78
 ```
 
 | Category | Score | Weight | Weighted |
 |----------|-------|--------|----------|
-| Audits & Historical | 3.5 | 20% | 0.70 |
+| Audits & Historical | 3.0 | 20% | 0.60 |
 | Centralization & Control | 3.0 | 30% | 0.90 |
 | Funds Management | 2.5 | 30% | 0.75 |
 | Liquidity Risk | 3.0 | 15% | 0.45 |
-| Operational Risk | 2.0 | 5% | 0.10 |
-| **Final Score** | | | **2.9/5.0** |
+| Operational Risk | 1.5 | 5% | 0.075 |
+| **Final Score** | | | **2.8/5.0** |
 
 ### Risk Tier
 
@@ -548,7 +583,7 @@ Final Score = (Centralization × 0.30) + (Funds Mgmt × 0.30) + (Audits × 0.20)
 | 3.5-4.5 | Elevated Risk | Limited approval, strict limits |
 | 4.5-5.0 | High Risk | Not recommended |
 
-**Final Risk Tier: Medium Risk (2.9/5.0) — Approved with enhanced monitoring**
+**Final Risk Tier: Medium Risk (2.8/5.0) — Approved with enhanced monitoring**
 
 ---
 
@@ -558,25 +593,17 @@ The following items could not be verified during this assessment and require tea
 
 1. **Timelock plans:** Is there a plan to add a timelock for governance actions (e.g., debt reallocation, strategy removal)? Currently all actions via the 3-of-8 Safe take effect immediately.
 
-2. **CCTPStrategy audit:** Has the cross-chain strategy code been audited or reviewed externally? Are there plans for a dedicated audit? No CCTPStrategy-specific audit was found in the yearn-security or yearn-vaults-v3 repositories.
+2. **Looper leverage ratios:** What are the specific max LTV parameters used in the Morpho looper strategies? What are the liquidation buffers? What happens in a collateral depeg scenario (e.g., USD3 or siUSD depeg)?
 
-3. **Looper leverage ratios:** What are the specific max LTV parameters used in the Morpho looper strategies? What are the liquidation buffers? What happens in a collateral depeg scenario (e.g., USD3 or siUSD depeg)?
+3. **PT maturity handling:** What happens when Pendle/Spectra PT tokens reach maturity? Is rollover automated or manual? What happens to the strategy allocation?
 
-4. **PT maturity handling:** What happens when Pendle/Spectra PT tokens reach maturity? Is rollover automated or manual? What happens to the strategy allocation?
+4. **HackMD access:** The initial vault design document (https://hackmd.io/@D4Z1faeARKedWmEygMxDBA/HJx1YYQ-bg) returned 403. Can we access this for deeper architectural review?
 
-5. **Monitoring infrastructure:** Are there formal monitoring/alerting systems in place for the vault and strategies (e.g., Tenderly, OZ Defender, custom keepers)?
+5. **Deposit limit roadmap:** What is the plan for increasing the $1.5M deposit limit? What conditions need to be met?
 
-6. **HackMD access:** The initial vault design document (https://hackmd.io/@D4Z1faeARKedWmEygMxDBA/HJx1YYQ-bg) returned 403. Can we access this for deeper architectural review?
+6. **Cross-chain keeper reliability:** What keeper infrastructure manages the cross-chain strategies? What happens if a keeper goes offline — is there a fallback?
 
-7. **Deposit limit roadmap:** What is the plan for increasing the $1.5M deposit limit? What conditions need to be met?
-
-8. **Strategy review process:** What is the internal review/approval process before a new strategy is added to the vault?
-
-9. **Cross-chain keeper reliability:** What keeper infrastructure manages the cross-chain strategies? What happens if a keeper goes offline — is there a fallback?
-
-10. **Fee structure:** What are the actual performance and management fee rates charged by the LockedyvUSD accountant? How are fees split via the Fee Splitter?
-
-11. **Safe Harbor:** Is Yearn listed on the SEAL Safe Harbor registry? (Website could not be scraped for verification.)
+7. **Fee structure:** What are the actual performance and management fee rates charged by the LockedyvUSD accountant? How are fees split via the Fee Splitter?
 
 ---
 
