@@ -597,13 +597,11 @@ The following items could not be verified during this assessment and require tea
 
 3. **PT maturity handling:** What happens when Pendle/Spectra PT tokens reach maturity? Is rollover automated or manual? What happens to the strategy allocation?
 
-4. **HackMD access:** The initial vault design document (https://hackmd.io/@D4Z1faeARKedWmEygMxDBA/HJx1YYQ-bg) returned 403. Can we access this for deeper architectural review?
+4. **Deposit limit roadmap:** What is the plan for increasing the $1.5M deposit limit? What conditions need to be met?
 
-5. **Deposit limit roadmap:** What is the plan for increasing the $1.5M deposit limit? What conditions need to be met?
+5. **Cross-chain keeper reliability:** What keeper infrastructure manages the cross-chain strategies? What happens if a keeper goes offline — is there a fallback?
 
-6. **Cross-chain keeper reliability:** What keeper infrastructure manages the cross-chain strategies? What happens if a keeper goes offline — is there a fallback?
-
-7. **Fee structure:** What are the actual performance and management fee rates charged by the LockedyvUSD accountant? How are fees split via the Fee Splitter?
+6. **Fee structure:** What are the actual performance and management fee rates charged by the LockedyvUSD accountant? How are fees split via the Fee Splitter?
 
 ---
 
