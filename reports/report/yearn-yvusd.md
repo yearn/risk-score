@@ -4,7 +4,7 @@
 - **Token:** yvUSD (USD yVault)
 - **Chain:** Ethereum (with cross-chain strategies on Arbitrum)
 - **Token Address:** [`0x696d02Db93291651ED510704c9b286841d506987`](https://etherscan.io/address/0x696d02Db93291651ED510704c9b286841d506987)
-- **Final Score: 2.8/5.0**
+- **Final Score: 2.6/5.0**
 
 ## Overview + Links
 
@@ -170,18 +170,9 @@ The yvUSD system is moderately complex:
 - **PPS trend:** 1.000000 → 1.004324 (~0.43% appreciation over 50 days, ~3.1% annualized)
 - **Security incidents:** None known for this vault or Yearn V3 generally
 - **Strategy changes:** 17 strategies have been added over the vault's lifetime, 5 have been revoked, indicating active and frequent portfolio management
-- **Yearn V3 track record:** V3 framework has been live since May 2024 (~22 months). No V3 vault exploits. All 4 historical Yearn incidents affected legacy V1/iearn contracts (2021-2025), never V2 or V3
+- **Yearn V3 track record:** V3 framework has been live since May 2024 (~22 months). No V3 vault exploits
 
-**Yearn Historical Incidents (none affected V3):**
-
-| Date | Amount | Affected | Root Cause |
-|------|--------|----------|------------|
-| Feb 2021 | $11M | DAI v1 vault | Withdrawal fee disabled during migration |
-| Apr 2023 | $11.4M | Legacy yUSDT (iearn V1) | Copy-paste error in config |
-| Nov 2025 | $9M | Legacy yETH stableswap pool | Arithmetic underflow in solver |
-| Dec 2025 | $293K | Legacy iearn TUSD (V1) | Configuration mismatch |
-
-**Yearn protocol TVL:** ~$240M total across all chains (DeFi Llama, March 2026). Down from ATH of $6.9B (December 2021) but recovering YoY (~33% growth from March 2025).
+**Yearn protocol TVL:** ~$240M total across all chains (DeFi Llama, March 2026).
 
 ## Funds Management
 
@@ -343,7 +334,7 @@ The same queued transaction also:
 - **yvUSD governance:** The vault is managed by a separate 3-of-8 Safe (not the Yearn global multisig). However, all 8 signers are confirmed Yearn team members (core contributors and security team), providing high trust in the governance quality
 - **Documentation:** Comprehensive Yearn V3 documentation. yvUSD-specific docs exist in a draft PR (not yet merged to main docs). Cross-chain strategy documentation available
 - **Legal:** Yearn Finance has converted its ychad.eth multisig into a BORG (cybernetic organization) via [YIP-87](https://gov.yearn.fi/t/yip-87-convert-ychad-eth-into-a-borg/14540), wrapping it in a Cayman Islands foundation company with smart contract governance restrictions. The YFI token governs the protocol via YIP proposals
-- **Incident response:** Yearn has demonstrated incident response capability across 4 historical events (all V1/legacy). V3 framework has not been tested under stress. The $200K Immunefi bug bounty provides a responsible disclosure channel
+- **Incident response:** Yearn has demonstrated incident response capability across historical events. V3 framework has not been tested under stress. The $200K Immunefi bug bounty provides a responsible disclosure channel
 - **V3 immutability:** Vault contracts cannot be upgraded — this eliminates proxy upgrade risk but means bugs cannot be patched without deploying a new vault
 
 ## Monitoring
@@ -445,7 +436,7 @@ Yearn maintains an active monitoring system via the [`monitoring-scripts-py`](ht
 | Bug bounty | $200K on Immunefi (active) + Sherlock bounty |
 | Production history | **~50 days** (Jan 19, 2026). V3 framework: ~22 months |
 | TVL | **~$1M** (extremely small). Deposit limit: $1.5M |
-| Security incidents | None on V3. All historical Yearn incidents on V1/legacy |
+| Security incidents | None on V3 |
 | Strategy review | Rigorous 12-metric framework with ySec security review, testing coverage requirements, complexity scoring, and risk exposure assessment |
 
 **Score: 3.0/5** — The underlying V3 framework has solid audit coverage from 3 reputable firms and a clean 22-month track record. The CCTPStrategy underwent strict internal ySec review, and all strategies follow a rigorous 12-metric risk scoring framework — providing strong assurance even without external audits on individual components. However, yvUSD itself is extremely new (~50 days) with negligible TVL (~$1M), and no external third-party audit covers the novel yvUSD-specific components. Between score 2 (2+ audits, 1-2 years) and score 4 (3-6 months, TVL <$10M) — the strong framework audits and rigorous internal review process pull toward 3, while the very early stage pushes toward 4.
@@ -474,7 +465,7 @@ Yearn maintains an active monitoring system via the [`monitoring-scripts-py`](ht
 | Debt allocation | Manual intervention by DEBT_MANAGER |
 | Cross-chain | Semi-programmatic, keeper-relayed, can be stale |
 
-**Programmability Score: 2/5** — Core operations are highly programmatic. PPS is on-chain, deposits/withdrawals are permissionless, strategy reporting is automated. Debt allocation is the main manual component. Cross-chain accounting has some lag but is keeper-automated.
+**Programmability Score: 1.5/5** — All funds are on-chain across Ethereum and Arbitrum and cannot be altered by off-chain factors. PPS is calculated on-chain algorithmically via ERC-4626. Deposits/withdrawals are permissionless. Strategy reporting is automated via keepers. Debt allocation has both automated (Debt Allocator) and manual (DEBT_MANAGER) paths. Cross-chain accounting has minor lag between keeper cycles but all positions are verifiable on-chain at all times.
 
 **Subcategory C: External Dependencies**
 
@@ -487,9 +478,9 @@ Yearn maintains an active monitoring system via the [`monitoring-scripts-py`](ht
 
 **Dependencies Score: 4/5** — Many dependencies (8+), several critical. 65.6% of funds in medium-risk protocols. Cross-chain bridge dependency. Failure of 3Jane or InfiniFi could impact >30% of vault funds each. Per rubric: "Many or newer protocol dependencies, critical functionality depends on them" maps to 4.
 
-**Centralization Score = (3 + 2 + 4) / 3 = 3.0**
+**Centralization Score = (3 + 1.5 + 4) / 3 = 2.83**
 
-**Score: 3.0/5** — Immutable vault contracts and known Yearn team signers on the 3/8 Safe are significant strengths. The EOA role concentration is being remediated. However, the lack of timelock on governance actions and the heavy dependency on multiple protocols (including medium-risk ones) remain concerns.
+**Score: 2.8/5** — Immutable vault contracts and known Yearn team signers on the 3/8 Safe are significant strengths. All funds are on-chain and fully programmatic. The EOA role concentration is being remediated. However, the lack of timelock on governance actions and the heavy dependency on multiple protocols (including medium-risk ones) remain concerns.
 
 #### Category 3: Funds Management (Weight: 30%)
 
@@ -513,11 +504,11 @@ Yearn maintains an active monitoring system via the [`monitoring-scripts-py`](ht
 | Cross-chain lag | remoteAssets updated by keeper, can be stale |
 | Reporting | Automated via keepers with 7-day profit unlock |
 
-**Provability Score: 2/5** — Excellent on-chain transparency. ERC-4626 share price is fully programmatic. All strategy positions are verifiable. Minor lag on cross-chain positions between keeper cycles.
+**Provability Score: 1.5/5** — All strategy positions are verifiable on-chain on both Ethereum and Arbitrum. ERC-4626 share price is fully programmatic. Cross-chain positions have minor reporting lag between keeper cycles but the actual positions exist on-chain at all times. Multiple verification sources available.
 
-**Funds Management Score = (3 + 2) / 2 = 2.5**
+**Funds Management Score = (3 + 1.5) / 2 = 2.25**
 
-**Score: 2.5/5** — Good on-chain provability and transparent operations, but the mixed collateral quality and leverage usage elevate the risk.
+**Score: 2.25/5** — Strong on-chain provability with all positions verifiable across both chains. Mixed collateral quality and leverage usage elevate the risk on the collateralization side.
 
 #### Category 4: Liquidity Risk (Weight: 15%)
 
@@ -540,28 +531,28 @@ Yearn maintains an active monitoring system via the [`monitoring-scripts-py`](ht
 | Vault management | Separate from Yearn global governance. 3-of-8 Safe with known Yearn team signers |
 | Documentation | V3 docs comprehensive. yvUSD docs exist as draft PR |
 | Legal | Yearn BORG (Cayman foundation via YIP-87) |
-| Incident response | Yearn has demonstrated capability across 4 historical events. V3 untested |
+| Incident response | Yearn has demonstrated capability across historical events. V3 untested |
 | Monitoring | Active hourly large-flow alerts, weekly endorsed-vault checks, timelock monitoring across 6 chains |
 
-**Score: 1.5/5** — Yearn's brand, track record, and known team provide high confidence. All 8 signers of the yvUSD Safe are confirmed Yearn insiders (core team + security team). Comprehensive V3 documentation, active Immunefi + Sherlock bounties, demonstrated incident response across 4 historical events, and active monitoring infrastructure (hourly alerts, endorsed-vault checks, timelock monitoring via GitHub Actions + Telegram). yvUSD-specific docs are in draft but V3 framework docs are extensive. Yearn DAO has no formal legal entity but has well-established reputation since 2020.
+**Score: 1.5/5** — Yearn's brand, track record, and known team provide high confidence. All 8 signers of the yvUSD Safe are confirmed Yearn insiders (core team + security team). Comprehensive V3 documentation, active Immunefi + Sherlock bounties, demonstrated incident response capability, and active monitoring infrastructure (hourly alerts, endorsed-vault checks, timelock monitoring via GitHub Actions + Telegram). yvUSD-specific docs are in draft but V3 framework docs are extensive. Yearn BORG legal entity (Cayman foundation via YIP-87).
 
 ### Final Score Calculation
 
 ```
 Final Score = (Centralization × 0.30) + (Funds Mgmt × 0.30) + (Audits × 0.20) + (Liquidity × 0.15) + (Operational × 0.05)
-            = (3.0 × 0.30) + (2.5 × 0.30) + (3.0 × 0.20) + (3.0 × 0.15) + (1.5 × 0.05)
-            = 0.90 + 0.75 + 0.60 + 0.45 + 0.075
-            = 2.78
+            = (2.8 × 0.30) + (2.25 × 0.30) + (3.0 × 0.20) + (3.0 × 0.15) + (1.5 × 0.05)
+            = 0.84 + 0.675 + 0.60 + 0.45 + 0.075
+            = 2.64
 ```
 
 | Category | Score | Weight | Weighted |
 |----------|-------|--------|----------|
 | Audits & Historical | 3.0 | 20% | 0.60 |
-| Centralization & Control | 3.0 | 30% | 0.90 |
-| Funds Management | 2.5 | 30% | 0.75 |
+| Centralization & Control | 2.8 | 30% | 0.84 |
+| Funds Management | 2.25 | 30% | 0.675 |
 | Liquidity Risk | 3.0 | 15% | 0.45 |
 | Operational Risk | 1.5 | 5% | 0.075 |
-| **Final Score** | | | **2.8/5.0** |
+| **Final Score** | | | **2.6/5.0** |
 
 ### Risk Tier
 
@@ -573,7 +564,7 @@ Final Score = (Centralization × 0.30) + (Funds Mgmt × 0.30) + (Audits × 0.20)
 | 3.5-4.5 | Elevated Risk | Limited approval, strict limits |
 | 4.5-5.0 | High Risk | Not recommended |
 
-**Final Risk Tier: Medium Risk (2.8/5.0) — Approved with enhanced monitoring**
+**Final Risk Tier: Medium Risk (2.6/5.0) — Approved with enhanced monitoring**
 
 ---
 
