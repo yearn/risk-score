@@ -1,6 +1,6 @@
 # Protocol Risk Assessment: Yearn — yvUSDC-1
 
-- **Assessment Date:** March 11, 2026
+- **Assessment Date:** March 13, 2026
 - **Token:** yvUSDC-1 (USDC-1 yVault)
 - **Chain:** Ethereum
 - **Token Address:** [`0xBe53A109B494E5c9f97b9Cd39Fe969BE68BF6204`](https://etherscan.io/address/0xBe53A109B494E5c9f97b9Cd39Fe969BE68BF6204)
@@ -8,21 +8,21 @@
 
 ## Overview + Links
 
-yvUSDC-1 is a **USDC-denominated Yearn V3 vault** (ERC-4626) that deploys deposited USDC into yield strategies on Ethereum mainnet. The vault currently uses a **single active strategy** — "USDC to sUSDS Lender" — which earns yield from the **Sky Savings Rate (SSR)** by converting USDC to sUSDS through the MakerDAO/Sky stablecoin conversion pipeline.
+yvUSDC-1 is a **USDC-denominated Yearn V3 vault** (ERC-4626) that deploys deposited USDC into yield strategies on Ethereum mainnet. The vault currently uses **two active strategies** — "USDC to USDS Depositor" (~79%) and "USDC to sUSDS Lender" (~21%) — both earning yield through the **Sky/MakerDAO ecosystem** by converting USDC into USDS-denominated yield-bearing positions.
 
 **Key architecture:**
 
 - **Vault:** Standard Yearn V3 vault (v3.0.2) accepting USDC deposits, issuing yvUSDC-1 shares. Deployed as an immutable Vyper minimal proxy (EIP-1167) via the Yearn V3 Vault Factory
-- **Strategy pipeline:** USDC → DAI (via MakerDAO PSM Lite at 1:1, 0 fee) → USDS (via DAI-USDS Exchanger at 1:1) → sUSDS (Sky Savings vault)
+- **Strategy pipelines:** Both active strategies share the same entry path: USDC → DAI (via MakerDAO PSM Lite at 1:1, 0 fee) → USDS (via DAI-USDS Exchanger at 1:1). The USDS Depositor then deposits into a **yvUSDS vault** (Yearn V3 ERC-4626), while the sUSDS Lender deposits into **sUSDS** (Sky Savings vault) directly
 - **Governance:** Managed via the standard **Yearn V3 Role Manager** contract, governed by the **Yearn 6-of-9 global multisig (ySafe)**
-- **Multi-strategy capable:** 9 strategies in the default queue (including Morpho, Aave V3, Fluid, Spark), but currently 100% of vault debt allocated to the sUSDS strategy
+- **Multi-strategy capable:** 9 strategies in the default queue (including Morpho, Aave V3, Fluid, Spark), with debt currently split between the USDS Depositor (~79%) and sUSDS Lender (~21%)
 
-**Key metrics (March 11, 2026):**
+**Key metrics (March 13, 2026):**
 
-- **TVL:** ~$31,670,080 USDC
+- **TVL:** ~$31,869,296 USDC
 - **Total Supply:** ~28,811,012 yvUSDC-1
 - **Price Per Share:** 1.099235 USDC/yvUSDC-1 (~9.9% cumulative appreciation over ~12 months)
-- **Total Debt:** 100% deployed (1.03 USDC idle)
+- **Total Debt:** ~99.4% deployed (~$177K USDC idle)
 - **Deposit Limit:** $50,000,000
 - **Profit Max Unlock Time:** 10 days
 - **Net APR:** ~2.37% (after 10% performance fee)
@@ -67,34 +67,34 @@ yvUSDC-1 is a **USDC-denominated Yearn V3 vault** (ERC-4626) that deploys deposi
 | Vault Factory (v3.0.2) | [`0x444045c5c13c246e117ed36437303cac8e250ab0`](https://etherscan.io/address/0x444045c5c13c246e117ed36437303cac8e250ab0) |
 | Tokenized Strategy | [`0xD377919FA87120584B21279a491F82D5265A139c`](https://etherscan.io/address/0xD377919FA87120584B21279a491F82D5265A139c) |
 
-### Active Strategies (9 in default queue, 1 with debt)
+### Active Strategies (9 in default queue, 2 with debt)
 
 | # | Strategy | Name | Current Debt (USDC) | Allocation |
 |---|----------|------|--------------------:|-----------:|
-| 1 | [`0x7130570BCEfCedBe9d15B5b11A33006156460f8f`](https://etherscan.io/address/0x7130570BCEfCedBe9d15B5b11A33006156460f8f) | **USDC to sUSDS Lender** | **31,670,079** | **100%** |
-| 2 | [`0x074134A290890Ff3215`](https://etherscan.io/address/0x074134A2b35b4A11E85ACD340917Be318290Ff3215) | Morpho Steakhouse USDC Compounder | 0 | 0% |
-| 3 | [`0x694E47AF92d7CDEF3737`](https://etherscan.io/address/0x694E47AF92d73DC67Da8b0C0A36D18b33CDEF3737) | Morpho Gauntlet USDC Prime Compounder | 0 | 0% |
-| 4 | [`0x00C8a649Ab5C74cF`](https://etherscan.io/address/0x00C8a649Ab5C74cF) | USDC Fluid Lender | 0 | 0% |
-| 5 | [`0x888239Ff8a14f75`](https://etherscan.io/address/0x888239Ff8a14f75) | Morpho OEV-boosted USDC Compounder | 0 | 0% |
-| 6 | [`0x39c0aEc5C8480a52`](https://etherscan.io/address/0x39c0aEc5C8480a52) | USDC to USDS Depositor | 0 | 0% |
-| 7 | [`0x694cdD1956F2858`](https://etherscan.io/address/0x694cdD1956F2858) | Aave V3 USDC Lender | 0 | 0% |
-| 8 | [`0x5224785Bd45B9B02`](https://etherscan.io/address/0x5224785Bd45B9B02) | Aave V3 Lido USDC Lender | 0 | 0% |
-| 9 | [`0x25f8932745cb6673`](https://etherscan.io/address/0x25f8932745cb6673) | Spark USDC Lender | 0 | 0% |
+| 1 | [`0x00C8a649C9837523ebb406Ceb17a6378Ab5C74cF`](https://etherscan.io/address/0x00C8a649C9837523ebb406Ceb17a6378Ab5C74cF) | USDC Fluid Lender | 0 | 0% |
+| 2 | [`0x39c0aEc5738ED939876245224aFc7E09C8480a52`](https://etherscan.io/address/0x39c0aEc5738ED939876245224aFc7E09C8480a52) | **USDC to USDS Depositor** | **25,152,715** | **~79%** |
+| 3 | [`0x694E47AFD14A64661a04eee674FB331bCDEF3737`](https://etherscan.io/address/0x694E47AFD14A64661a04eee674FB331bCDEF3737) | Morpho Gauntlet USDC Prime Compounder | 0 | 0% |
+| 4 | [`0x074134A2784F4F66b6ceD6f68849382990Ff3215`](https://etherscan.io/address/0x074134A2784F4F66b6ceD6f68849382990Ff3215) | Morpho Steakhouse USDC Compounder | 0 | 0% |
+| 5 | [`0x25f893276544d86a82b1ce407182836F45cb6673`](https://etherscan.io/address/0x25f893276544d86a82b1ce407182836F45cb6673) | Spark USDC Lender | 0 | 0% |
+| 6 | [`0x522478B54046aB7197880F2626b74a96d45B9B02`](https://etherscan.io/address/0x522478B54046aB7197880F2626b74a96d45B9B02) | Aave V3 Lido USDC Lender | 0 | 0% |
+| 7 | [`0x888239Ffa9a0613F9142C808aA9F7d1948a14f75`](https://etherscan.io/address/0x888239Ffa9a0613F9142C808aA9F7d1948a14f75) | Morpho OEV-boosted USDC Compounder | 0 | 0% |
+| 8 | [`0x694cdD19EBee7A974BA8fE3AF8B383bb256F2858`](https://etherscan.io/address/0x694cdD19EBee7A974BA8fE3AF8B383bb256F2858) | Aave V3 USDC Lender | 0 | 0% |
+| 9 | [`0x7130570BCEfCedBe9d15B5b11A33006156460f8f`](https://etherscan.io/address/0x7130570BCEfCedBe9d15B5b11A33006156460f8f) | **USDC to sUSDS Lender** | **6,539,182** | **~21%** |
 
-**Note:** 15 strategies have been added over the vault's 12-month lifetime with 6 revoked, demonstrating active portfolio management. The vault has rotated through strategies including Aave V3, Compound V3, Morpho, Spark, Fluid, and Sky/sUSDS. Currently all debt is consolidated into the sUSDS strategy.
+**Note:** 15 strategies have been added over the vault's 12-month lifetime with 6 revoked, demonstrating active portfolio management. The vault has rotated through strategies including Aave V3, Compound V3, Morpho, Spark, Fluid, and Sky/sUSDS. Debt is currently split between the USDS Depositor (~79%) and sUSDS Lender (~21%) strategies — both route through the Sky/MakerDAO ecosystem.
 
-**Score impact of strategy diversification:** If the vault were to diversify lending across its available strategies (Aave V3, Morpho, Spark, Fluid), the final risk score would **not change** — all available strategies lend into minimal-risk, blue-chip protocols. The dependency score would remain at 2/5 (blue-chip dependencies), and collateral quality would remain at 1/5 (top-tier DeFi protocols).
+**Score impact of strategy diversification:** Both active strategies and all available idle strategies (Aave V3, Morpho, Spark, Fluid) lend into minimal-risk, blue-chip protocols. The dependency score remains at 2/5 (blue-chip dependencies), and collateral quality remains at 1/5 (top-tier DeFi protocols). Diversification across these strategies would **not change** the final risk score.
 
 ### Strategy Protocol Dependencies
 
 | Protocol | Strategy | TVL |
 |----------|----------|-----|
-| **Sky/MakerDAO (sUSDS)** | USDC to sUSDS Lender | 100% of current allocation |
+| **Sky/MakerDAO (yvUSDS)** | USDC to USDS Depositor | ~79% of current allocation |
+| **Sky/MakerDAO (sUSDS)** | USDC to sUSDS Lender | ~21% of current allocation |
 | Morpho | 3 strategies (0% current allocation) | Blue-chip, $6.6B+ TVL, 25+ audits |
 | Aave V3 | 2 strategies (0% current allocation) | Blue-chip, $30B+ TVL |
 | Fluid | 1 strategy (0% current allocation) | [Report score 1.1/5](../report/fluid.md) |
 | Spark | 1 strategy (0% current allocation) | Part of Sky ecosystem |
-| Sky (USDS depositor) | 1 strategy (0% current allocation) | Blue-chip |
 
 ## Audits and Due Diligence Disclosures
 
@@ -144,21 +144,21 @@ All strategies go through Yearn's formal **12-metric risk scoring framework** ([
 
 The yvUSDC-1 system is **low complexity**:
 
-- **1 active strategy** on a single chain (Ethereum)
-- **Simple conversion pipeline:** USDC → DAI → USDS → sUSDS (three 1:1 conversions + deposit)
+- **2 active strategies** on a single chain (Ethereum), both routing through the same Sky/MakerDAO ecosystem
+- **Simple conversion pipelines:** USDC → DAI → USDS → yvUSDS or sUSDS (three 1:1 conversions + deposit)
 - **No leverage, no looping, no cross-chain bridging**
 - **Standard ERC-4626** deposit/withdrawal
-- **Single protocol dependency** (Sky/MakerDAO) — blue-chip
+- **Single protocol ecosystem dependency** (Sky/MakerDAO) — blue-chip
 - **Vault is immutable** (non-upgradeable Vyper minimal proxy)
 
 ## Historical Track Record
 
 - **Vault deployed:** March 12, 2024 (block 19,419,991) — **~12 months** in production
-- **TVL:** ~$31.67M USDC — established with a $50M deposit limit
+- **TVL:** ~$31.87M USDC — established with a $50M deposit limit
 - **PPS trend:** 1.000000 → 1.099235 (~9.9% cumulative return over 12 months, ~9.9% annualized)
 - **Security incidents:** None known for this vault or Yearn V3 generally
 - **Strategy changes:** 15 strategies added over lifetime, 6 revoked — active portfolio management. Has used Aave V3, Compound V3, Morpho, Spark, Fluid, and Sky strategies
-- **Current strategy (sUSDS) activated:** March 3, 2026 — all debt moved to sUSDS as the highest-yielding option
+- **Current allocation:** Debt split between USDC to USDS Depositor (~79%, depositing into yvUSDS) and USDC to sUSDS Lender (~21%) — both activated March 3, 2026
 - **Yearn V3 track record:** V3 framework has been live since May 2024 (~22 months). No V3 vault exploits
 
 **Yearn protocol TVL:** ~$240M total across all chains (DeFi Llama, March 2026).
@@ -172,19 +172,19 @@ The yvUSDC-1 system is **low complexity**:
 
 ## Funds Management
 
-yvUSDC-1 deploys deposited USDC into yield strategies with 100% capital utilization. Currently all debt is in a single strategy.
+yvUSDC-1 deploys deposited USDC into yield strategies with ~99.4% capital utilization. Debt is currently split between two strategies, both routing through the Sky/MakerDAO ecosystem.
 
-### Current Strategy: USDC to sUSDS Lender
+### Strategy 1: USDC to USDS Depositor (~79% allocation)
 
-**Contract:** [`0x7130570BCEfCedBe9d15B5b11A33006156460f8f`](https://etherscan.io/address/0x7130570BCEfCedBe9d15B5b11A33006156460f8f)
+**Contract:** [`0x39c0aEc5738ED939876245224aFc7E09C8480a52`](https://etherscan.io/address/0x39c0aEc5738ED939876245224aFc7E09C8480a52)
 
 **Conversion pipeline:**
 
 1. **USDC → DAI** via MakerDAO PSM Lite ([`0xf6e72Db5454dd049d0788e411b06CfAF16853042`](https://etherscan.io/address/0xf6e72Db5454dd049d0788e411b06CfAF16853042)) — 1:1 at **0% fee** (both `tin` and `tout` set to 0)
 2. **DAI → USDS** via Sky DAI-USDS Exchanger ([`0x3225737a9Bbb6473CB4a45b7244ACa2BeFdB276A`](https://etherscan.io/address/0x3225737a9Bbb6473CB4a45b7244ACa2BeFdB276A)) — 1:1, no fee
-3. **USDS → sUSDS** via Sky Savings vault ([`0xa3931d71877C0E7a3148CB7Eb4463524FEc27fbD`](https://etherscan.io/address/0xa3931d71877C0E7a3148CB7Eb4463524FEc27fbD)) — earns the SSR (~4.0% APY)
+3. **USDS → yvUSDS** via a Yearn V3 ERC-4626 vault — earns yield from the underlying yvUSDS vault strategies
 
-**Withdrawal pipeline:** Reverse path (sUSDS → USDS → DAI → USDC). If PSM `tout` fee exceeds 0.05%, the strategy falls back to **Uniswap V3** swap with 0.5% slippage tolerance.
+**Withdrawal pipeline:** Reverse path (yvUSDS → USDS → DAI → USDC). If PSM `tout` fee exceeds 0.05%, the strategy falls back to **Uniswap V3** swap with 0.5% slippage tolerance.
 
 **Strategy parameters:**
 - Deposit limit: 100,000,000 USDC
@@ -192,36 +192,50 @@ yvUSDC-1 deploys deposited USDC into yield strategies with 100% capital utilizat
 - Management: Brain multisig (3-of-8)
 - Keeper: yHaaSRelayer ([`0x604e586F17cE106B64185A7a0d2c1Da5bAce711E`](https://etherscan.io/address/0x604e586F17cE106B64185A7a0d2c1Da5bAce711E))
 
+### Strategy 2: USDC to sUSDS Lender (~21% allocation)
+
+**Contract:** [`0x7130570BCEfCedBe9d15B5b11A33006156460f8f`](https://etherscan.io/address/0x7130570BCEfCedBe9d15B5b11A33006156460f8f)
+
+**Conversion pipeline:**
+
+1. **USDC → DAI** via MakerDAO PSM Lite — 1:1 at 0% fee
+2. **DAI → USDS** via Sky DAI-USDS Exchanger — 1:1, no fee
+3. **USDS → sUSDS** via Sky Savings vault ([`0xa3931d71877C0E7a3148CB7Eb4463524FEc27fbD`](https://etherscan.io/address/0xa3931d71877C0E7a3148CB7Eb4463524FEc27fbD)) — earns the SSR (~4.0% APY)
+
+**Withdrawal pipeline:** Reverse path (sUSDS → USDS → DAI → USDC). Same PSM fee fallback to Uniswap V3.
+
+**Strategy parameters:** Same as USDS Depositor (100M deposit limit, 0.05% max PSM fee, Brain multisig management)
+
 ### Accessibility
 
 - **Deposits:** Permissionless — anyone can deposit USDC and receive yvUSDC-1 (ERC-4626 standard). Subject to $50M deposit limit
-- **Withdrawals:** ERC-4626 standard. Users redeem yvUSDC-1 for USDC. Withdrawal unwinds the sUSDS → USDS → DAI → USDC pipeline, which is highly liquid
+- **Withdrawals:** ERC-4626 standard. Users redeem yvUSDC-1 for USDC. Withdrawal unwinds the yvUSDS/sUSDS → USDS → DAI → USDC pipeline, which is highly liquid
 - **No cooldown or lock period** — unlike yvUSD's LockedyvUSD wrapper
 - **Fees:** 0% management fee, 10% performance fee (taken via accountant during `process_report`)
 
 ### Collateralization
 
-- **100% on-chain USDC backing** — all deposits are USDC, converted through blue-chip protocols to sUSDS
-- **Collateral quality:** sUSDS is backed by over-collateralized loans and RWA (Treasury bills) via Sky/MakerDAO — one of the most battle-tested DeFi protocols
-- **No leverage** — unlike yvUSD's looper strategies, this is a simple deposit into a savings rate
-- **sUSDS is fully redeemable** for USDS at any time (ERC-4626 vault), and USDS converts 1:1 to DAI via the Exchanger
+- **100% on-chain USDC backing** — all deposits are USDC, converted through blue-chip protocols to yvUSDS and sUSDS
+- **Collateral quality:** Both strategies route into the Sky/MakerDAO ecosystem — sUSDS is backed by over-collateralized loans and RWA (Treasury bills); yvUSDS is a Yearn V3 vault that itself deploys into Sky/MakerDAO yield sources
+- **No leverage** — unlike yvUSD's looper strategies, these are simple deposits into savings rate products
+- **Both positions are fully redeemable** — sUSDS and yvUSDS are ERC-4626 vaults, and USDS converts 1:1 to DAI via the Exchanger
 
 ### Provability
 
 - **yvUSDC-1 exchange rate:** Calculated on-chain via ERC-4626 standard (`convertToAssets()`/`convertToShares()`). Fully programmatic, no admin input
-- **Strategy positions:** The strategy's `totalAssets()` reads the sUSDS balance and converts to USDC equivalent on-chain
+- **Strategy positions:** Each strategy's `totalAssets()` reads the underlying vault share balance (yvUSDS or sUSDS) and converts to USDC equivalent on-chain
 - **sUSDS rate:** The Sky Savings Rate is set by Sky Governance and applied on-chain via the `pot`/`ssr` mechanism. The sUSDS exchange rate increases continuously based on the SSR
 - **Profit/loss reporting:** Profits are reported by keepers via `process_report()` and locked for gradual distribution over 10 days (`profitMaxUnlockTime`). Losses are immediately reflected in PPS
 
 ## Liquidity Risk
 
-- **Primary exit:** Redeem yvUSDC-1 for USDC via ERC-4626 `withdraw()`/`redeem()`. Triggers reverse pipeline through sUSDS → USDS → DAI → USDC
-- **Highly liquid underlying:** sUSDS holds ~$6.18B USDS — the vault's ~$31.67M is less than 0.5% of the sUSDS pool. Redemption will not impact the pool
+- **Primary exit:** Redeem yvUSDC-1 for USDC via ERC-4626 `withdraw()`/`redeem()`. Triggers reverse pipeline through yvUSDS/sUSDS → USDS → DAI → USDC
+- **Highly liquid underlying:** sUSDS holds ~$6.18B USDS — the vault's ~$31.87M is less than 0.5% of the sUSDS pool. Redemption will not impact the pool
 - **PSM liquidity:** The MakerDAO PSM Lite provides deep DAI ↔ USDC liquidity at 0% fee. PSM capacity is managed by Sky Governance and typically holds billions of USDC
 - **No DEX liquidity needed** — exit is via the protocol's own pipeline (PSM + Exchanger), not DEX AMMs
 - **Same-value asset:** USDC-denominated vault token — no price divergence risk from the underlying
 - **No withdrawal queue or cooldown** — atomic redemption through the pipeline
-- **Deposit limit:** $50M cap — generous relative to current TVL of $31.67M
+- **Deposit limit:** $50M cap — generous relative to current TVL of $31.87M
 
 ## Centralization & Control Risks
 
@@ -253,19 +267,19 @@ The yvUSDC-1 vault uses the **standard Yearn V3 governance pattern** via the Yea
 - **Exchange rate (PPS):** Calculated on-chain algorithmically via ERC-4626. Fully programmatic, no admin input
 - **Vault operations:** Deposit/withdraw are permissionless on-chain transactions
 - **Strategy profit/loss:** Reported programmatically by keepers via `process_report()`. Profits unlock linearly over 10 days
-- **Debt allocation:** Managed by both the Debt Allocator (automated) and Brain multisig (manual). Currently all debt in one strategy
+- **Debt allocation:** Managed by both the Debt Allocator (automated) and Brain multisig (manual). Currently split across two strategies
 - **V3 vaults are immutable** — no proxy upgrades, no admin-changeable implementation
 
 ### External Dependencies
 
 | Dependency | Criticality | Notes |
 |-----------|-------------|-------|
-| **Sky/MakerDAO (sUSDS)** | Critical | 100% of current allocation. ~$6.18B TVL in sUSDS. Blue-chip, extensively audited, $10M bug bounty. One of the oldest DeFi protocols |
+| **Sky/MakerDAO (yvUSDS + sUSDS)** | Critical | 100% of current allocation (~79% via yvUSDS, ~21% via sUSDS). ~$6.18B TVL in sUSDS. Blue-chip, extensively audited, $10M bug bounty. One of the oldest DeFi protocols |
 | **MakerDAO PSM Lite** | Critical | USDC ↔ DAI conversion at 1:1. 0% fee. Deep liquidity (billions of USDC capacity). Audited by ChainSecurity and Cantina |
 | **Sky DAI-USDS Exchanger** | Critical | DAI ↔ USDS 1:1 conversion. Core Sky infrastructure |
 | **Uniswap V3 (fallback)** | Low | Only used if PSM fee exceeds 0.05%. Currently not active (PSM fee is 0%) |
 
-**Dependency quality:** All current dependencies are on Sky/MakerDAO — a single blue-chip protocol ecosystem with 8+ years of history, extensive audit coverage, and $10M bug bounty. While this is a concentration risk (100% in one protocol family), the protocol quality is among the highest in DeFi.
+**Dependency quality:** All current dependencies are on Sky/MakerDAO — a single blue-chip protocol ecosystem with 8+ years of history, extensive audit coverage, and $10M bug bounty. The USDS Depositor adds a layer of Yearn V3 vault risk (yvUSDS), but this uses the same audited V3 infrastructure. While this is a concentration risk (100% in one protocol family), the protocol quality is among the highest in DeFi.
 
 ## Operational Risk
 
@@ -291,7 +305,8 @@ Yearn maintains an active monitoring system via the [`monitoring-scripts-py`](ht
 | Contract | Address | Monitor |
 |----------|---------|---------|
 | yvUSDC-1 Vault | [`0xBe53A109B494E5c9f97b9Cd39Fe969BE68BF6204`](https://etherscan.io/address/0xBe53A109B494E5c9f97b9Cd39Fe969BE68BF6204) | PPS (`convertToAssets(1e6)`), `totalAssets()`, `totalDebt()`, `totalIdle()`, Deposit/Withdraw events |
-| USDC to sUSDS Strategy | [`0x7130570BCEfCedBe9d15B5b11A33006156460f8f`](https://etherscan.io/address/0x7130570BCEfCedBe9d15B5b11A33006156460f8f) | `totalAssets()`, `isShutdown()`, keeper report frequency |
+| USDC to USDS Depositor | [`0x39c0aEc5738ED939876245224aFc7E09C8480a52`](https://etherscan.io/address/0x39c0aEc5738ED939876245224aFc7E09C8480a52) | `totalAssets()`, `isShutdown()`, keeper report frequency |
+| USDC to sUSDS Lender | [`0x7130570BCEfCedBe9d15B5b11A33006156460f8f`](https://etherscan.io/address/0x7130570BCEfCedBe9d15B5b11A33006156460f8f) | `totalAssets()`, `isShutdown()`, keeper report frequency |
 | ySafe (Daddy) | [`0xFEB4acf3df3cDEA7399794D0869ef76A6EfAff52`](https://etherscan.io/address/0xFEB4acf3df3cDEA7399794D0869ef76A6EfAff52) | Signer/threshold changes, submitted transactions |
 | Accountant | [`0x5A74Cb32D36f2f517DB6f7b0A0591e09b22cDE69`](https://etherscan.io/address/0x5A74Cb32D36f2f517DB6f7b0A0591e09b22cDE69) | Fee changes, config updates |
 | Sky Savings Rate | [`0xa3931d71877C0E7a3148CB7Eb4463524FEc27fbD`](https://etherscan.io/address/0xa3931d71877C0E7a3148CB7Eb4463524FEc27fbD) | SSR rate changes, sUSDS TVL |
@@ -323,15 +338,15 @@ Yearn maintains an active monitoring system via the [`monitoring-scripts-py`](ht
 ### Key Strengths
 
 - **Battle-tested Yearn V3 infrastructure:** V3 framework audited by Statemind, ChainSecurity, and yAcademy. No V3 exploits in ~22 months of production. Immutable vault contracts eliminate proxy upgrade risk
-- **Blue-chip single dependency:** 100% allocated to Sky/MakerDAO (sUSDS) — one of DeFi's oldest and most audited protocols with $10M bug bounty and ~$6.18B in sUSDS deposits
+- **Blue-chip single ecosystem dependency:** 100% allocated to Sky/MakerDAO (~79% via yvUSDS, ~21% via sUSDS) — one of DeFi's oldest and most audited protocols with $10M bug bounty and ~$6.18B in sUSDS deposits
 - **Standard Yearn governance:** Uses the Yearn V3 Role Manager with the 6-of-9 ySafe multisig (named, prominent DeFi signers). No EOA role concentration. Strategy additions go through 24-hour timelock
-- **Simple, low-complexity strategy:** USDC → DAI → USDS → sUSDS pipeline with three 1:1 conversions. No leverage, no cross-chain bridging, no looper mechanics
-- **Established track record:** 12 months in production with $31.67M TVL, ~9.9% cumulative return, zero incidents
+- **Simple, low-complexity strategies:** USDC → DAI → USDS → yvUSDS/sUSDS pipelines with three 1:1 conversions. No leverage, no cross-chain bridging, no looper mechanics
+- **Established track record:** 12 months in production with $31.87M TVL, ~9.9% cumulative return, zero incidents
 - **Active monitoring:** yvUSDC-1 is in Yearn's hourly monitoring system with Telegram alerts for large flows
 
 ### Key Risks
 
-- **Single-strategy concentration:** 100% of vault funds in one strategy (sUSDS). If the strategy or Sky/MakerDAO experiences an issue, the entire vault is affected
+- **Single-ecosystem concentration:** 100% of vault funds in two strategies (yvUSDS ~79%, sUSDS ~21%), both routing through Sky/MakerDAO. If Sky/MakerDAO experiences an issue, the entire vault is affected
 - **Sky Savings Rate variability:** SSR has been reduced from 15% → 6.5% → 4.5% → 4.0% over the past year. Further reductions would decrease vault yield but do not affect principal
 - **PSM fee risk:** Currently 0%, but Sky Governance can set fees. If fees exceed 0.05%, the strategy falls back to Uniswap V3 with 0.5% slippage tolerance, which could cause minor losses on large withdrawals
 
@@ -365,11 +380,11 @@ Yearn maintains an active monitoring system via the [`monitoring-scripts-py`](ht
 | Audits | V3 framework: 3 audits by top firms (Statemind, ChainSecurity, yAcademy). Sky/sUSDS: 7+ auditors (ChainSecurity, Cantina, Sherlock, Trail of Bits, etc.) |
 | Bug bounty | $200K on Immunefi (Yearn) |
 | Production history | **~12 months** (March 12, 2024). V3 framework: ~22 months |
-| TVL | **~$31.67M** USDC. Deposit limit: $50M |
+| TVL | **~$31.87M** USDC. Deposit limit: $50M |
 | Security incidents | None on V3. None on sUSDS |
 | Strategy review | Rigorous 12-metric framework with ySec security review |
 
-**Score: 1.5/5** — 3+ audits by top firms on the vault infrastructure, plus 7+ auditors on the underlying protocol. 12 months of production history with $31.67M TVL and zero incidents. V3 framework has 22 months of clean track record. The high-quality audit coverage on both layers (vault + underlying) warrant a score between 1 and 2.
+**Score: 1.5/5** — 3+ audits by top firms on the vault infrastructure, plus 7+ auditors on the underlying protocol. 12 months of production history with $31.87M TVL and zero incidents. V3 framework has 22 months of clean track record. The high-quality audit coverage on both layers (vault + underlying) warrant a score between 1 and 2.
 
 #### Category 2: Centralization & Control Risks (Weight: 30%)
 
@@ -400,8 +415,8 @@ Yearn maintains an active monitoring system via the [`monitoring-scripts-py`](ht
 
 | Factor | Assessment |
 |--------|-----------|
-| Protocol count | 1 active dependency (Sky/MakerDAO), 4+ available (Morpho, Aave V3, Fluid, Spark) |
-| Criticality | Sky/MakerDAO: 100% of current allocation |
+| Protocol count | 1 active ecosystem dependency (Sky/MakerDAO via 2 strategies), 4+ available (Morpho, Aave V3, Fluid, Spark) |
+| Criticality | Sky/MakerDAO: 100% of current allocation (~79% yvUSDS, ~21% sUSDS) |
 | Quality | Blue-chip: 8+ years history, $6.18B sUSDS TVL, $10M bug bounty, 7+ auditors |
 
 **Dependencies Score: 2/5** — Single active dependency on a blue-chip protocol. Sky/MakerDAO is among the highest-quality DeFi dependencies possible. Per rubric, "1-2 blue-chip dependencies" = score 2. The 100% concentration in one protocol is a concern, but the protocol quality is exceptional.
@@ -416,23 +431,23 @@ Yearn maintains an active monitoring system via the [`monitoring-scripts-py`](ht
 
 | Factor | Assessment |
 |--------|-----------|
-| Backing | 100% USDC-backed, deployed to blue-chip Sky Savings Rate |
-| Collateral quality | sUSDS: backed by over-collateralized loans and Treasury bills (RWA) via MakerDAO |
+| Backing | 100% USDC-backed, deployed to blue-chip Sky/MakerDAO yield products (yvUSDS + sUSDS) |
+| Collateral quality | yvUSDS and sUSDS: backed by over-collateralized loans and Treasury bills (RWA) via MakerDAO |
 | Leverage | None |
 | Verifiability | ERC-4626, all positions on-chain |
 
-**Collateralization Score: 1/5** — 100% on-chain USDC backing deployed to the highest-quality DeFi savings protocol (Sky/MakerDAO). No leverage. Fully verifiable. Blue-chip collateral (sUSDS backed by over-collateralized loans and Treasury bills). Real-time on-chain verification.
+**Collateralization Score: 1/5** — 100% on-chain USDC backing deployed to the highest-quality DeFi savings protocols (Sky/MakerDAO via yvUSDS and sUSDS). No leverage. Fully verifiable. Blue-chip collateral backed by over-collateralized loans and Treasury bills. Real-time on-chain verification.
 
 **Subcategory B: Provability**
 
 | Factor | Assessment |
 |--------|-----------|
-| Reserve transparency | Fully on-chain — anyone can verify yvUSDC-1 → sUSDS position |
+| Reserve transparency | Fully on-chain — anyone can verify yvUSDC-1 → yvUSDS/sUSDS positions |
 | Exchange rate | ERC-4626, programmatic, real-time |
 | Reporting | Automated via keepers with 10-day profit unlock |
 | Third-party verification | sUSDS rate is on-chain, verifiable independently |
 
-**Provability Score: 1/5** — Excellent transparency. ERC-4626 standard provides fully on-chain, real-time verification. No off-chain components. Multiple verification sources (vault totalAssets, strategy totalAssets, sUSDS balance).
+**Provability Score: 1/5** — Excellent transparency. ERC-4626 standard provides fully on-chain, real-time verification. No off-chain components. Multiple verification sources (vault totalAssets, strategy totalAssets, yvUSDS/sUSDS balances).
 
 **Funds Management Score = (1 + 1) / 2 = 1.0**
 
@@ -442,9 +457,9 @@ Yearn maintains an active monitoring system via the [`monitoring-scripts-py`](ht
 
 | Factor | Assessment |
 |--------|-----------|
-| Exit mechanism | ERC-4626 redemption → sUSDS → USDS → DAI → USDC pipeline |
+| Exit mechanism | ERC-4626 redemption → yvUSDS/sUSDS → USDS → DAI → USDC pipeline |
 | Liquidity depth | sUSDS: $6.18B TVL. PSM: billions of USDC capacity. Vault is 0.5% of pool |
-| Large holder impact | $31.67M vault vs $6.18B pool — negligible impact |
+| Large holder impact | $31.87M vault vs $6.18B pool — negligible impact |
 | Same-value asset | USDC-denominated — no price divergence risk |
 | Withdrawal restrictions | None — atomic redemption, no cooldown |
 
@@ -500,6 +515,6 @@ Final Score = (Centralization × 0.30) + (Funds Mgmt × 0.30) + (Audits × 0.20)
 - **Time-based:** Reassess in 6 months (September 2026) or annually
 - **TVL-based:** Reassess if TVL exceeds $100M or changes by more than ±50%
 - **Incident-based:** Reassess after any exploit, strategy loss, governance change, or Sky/MakerDAO incident
-- **Strategy-based:** Reassess if the vault reallocates away from sUSDS into riskier strategies (e.g., Morpho, leveraged positions). The current score assumes 100% allocation to blue-chip sUSDS — a shift to riskier strategies would significantly change the risk profile
+- **Strategy-based:** Reassess if the vault reallocates away from Sky/MakerDAO strategies into riskier strategies (e.g., leveraged positions). The current score assumes 100% allocation to blue-chip Sky/MakerDAO ecosystem (yvUSDS + sUSDS) — a shift to riskier strategies would significantly change the risk profile
 - **SSR-based:** Reassess if Sky Savings Rate drops below 2% (may indicate Sky governance issues) or if PSM fees are introduced
 - **Governance-based:** Reassess if ySafe composition changes (signer additions/removals, threshold changes)
