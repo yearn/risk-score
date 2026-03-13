@@ -1,6 +1,6 @@
 # Protocol Risk Assessment: Yearn — yvUSD
 
-- **Assessment Date:** March 11, 2026
+- **Assessment Date:** March 13, 2026
 - **Token:** yvUSD (USD yVault)
 - **Chain:** Ethereum (with cross-chain strategies on Arbitrum)
 - **Token Address:** [`0x696d02Db93291651ED510704c9b286841d506987`](https://etherscan.io/address/0x696d02Db93291651ED510704c9b286841d506987)
@@ -14,17 +14,17 @@ yvUSD is a **USDC-denominated cross-chain Yearn V3 vault** (ERC-4626) that deplo
 
 - **Vault:** Standard Yearn V3 vault (v3.0.4) accepting USDC deposits, issuing yvUSD shares
 - **Cross-chain strategies:** Use a two-contract pattern — an origin CCTPStrategy on Ethereum and a remote strategy on the destination chain. When `report()` is called on the destination chain, `_harvestAndReport()` reports new assets back to the origin by queuing a CCTP message — no separate keeper relay required. The origin tracks remote capital via a `remoteAssets` variable updated by these CCTP messages
-- **LockedyvUSD:** Companion cooldown wrapper where users lock yvUSD shares for additional yield. Users locking shares gives the vault better guarantees on duration risk, enabling higher-yield strategies without sacrificing atomic liquidity for non-lockers. Cooldown: 14 days (configurable), withdraw window: 7 days (configurable). Lockers receive a percentage of extra yield as an illiquidity premium. Also serves as the vault's accountant
+- **LockedyvUSD:** Companion cooldown wrapper where users lock yvUSD shares for additional yield. Users locking shares gives the vault better guarantees on duration risk, enabling higher-yield strategies without sacrificing atomic liquidity for non-lockers. Cooldown: 14 days (configurable), withdraw window: 5 days (configurable). Lockers receive a percentage of extra yield as an illiquidity premium. Also serves as the vault's accountant
 - **Strategies:** 12 active strategies deploying into Morpho, 3Jane USD3, InfiniFi, Maple syrupUSDC, Sky/MakerDAO, Spark, Fluid, Pendle/Spectra PT tokens, and Cap stcUSD
 - **Yield sources:** Lending yield (Morpho, Fluid, Spark, Sky), looper strategies (borrow-against-collateral loops on Morpho), and fixed-rate PT tokens (Pendle/Spectra)
 
-**Key metrics (March 11, 2026):**
+**Key metrics (March 13, 2026):**
 
-- **TVL:** ~$1,061,536 USDC
-- **Total Supply:** ~1,056,965 yvUSD
-- **Price Per Share:** 1.004324 USDC/yvUSD (~0.43% appreciation in ~50 days)
+- **TVL:** ~$3,015,281 USDC
+- **Total Supply:** ~3,001,435 yvUSD
+- **Price Per Share:** 1.004613 USDC/yvUSD (~0.46% appreciation in ~53 days)
 - **Total Debt:** 100% deployed (0 idle)
-- **Deposit Limit:** $1,500,000
+- **Deposit Limit:** $5,000,000
 - **Profit Max Unlock Time:** 7 days
 
 **Links:**
@@ -53,7 +53,7 @@ yvUSD is a **USDC-denominated cross-chain Yearn V3 vault** (ERC-4626) that deplo
 | Contract | Address | Configuration |
 |----------|---------|---------------|
 | Role Manager (Vault Safe) | [`0x16388463d60FFE0661Cf7F1f31a7D658aC790ff7`](https://etherscan.io/address/0x16388463d60FFE0661Cf7F1f31a7D658aC790ff7) | 3-of-8 Gnosis Safe v1.3.0 |
-| Deployer/Operator EOA | [`0x1b5f15DCb82d25f91c65b53CEe151E8b9fBdD271`](https://etherscan.io/address/0x1b5f15DCb82d25f91c65b53CEe151E8b9fBdD271) | Holds 11/14 vault roles directly, Fee Splitter governance |
+| Deployer/Operator EOA | [`0x1b5f15DCb82d25f91c65b53CEe151E8b9fBdD271`](https://etherscan.io/address/0x1b5f15DCb82d25f91c65b53CEe151E8b9fBdD271) | Fee Splitter governance only (vault roles removed via Safe tx nonce 3130) |
 | Yearn Global Multisig | [`0xFEB4acf3df3cDEA7399794D0869ef76A6EfAff52`](https://etherscan.io/address/0xFEB4acf3df3cDEA7399794D0869ef76A6EfAff52) | 6-of-9 Gnosis Safe — **has NO roles on yvUSD** |
 
 ### Yearn V3 Infrastructure
@@ -165,9 +165,9 @@ The yvUSD system is moderately complex:
 
 ## Historical Track Record
 
-- **Vault deployed:** January 19, 2026 (block 24271831) — **~50 days** in production
-- **TVL:** ~$1.06M USDC — very early stage with a $1.5M deposit limit
-- **PPS trend:** 1.000000 → 1.004324 (~0.43% appreciation over 50 days, ~3.1% annualized)
+- **Vault deployed:** January 19, 2026 (block 24271831) — **~53 days** in production
+- **TVL:** ~$3.02M USDC — early stage with a $5M deposit limit
+- **PPS trend:** 1.000000 → 1.004613 (~0.46% appreciation over 53 days, ~3.2% annualized)
 - **Security incidents:** None known for this vault or Yearn V3 generally
 - **Strategy changes:** 17 strategies have been added over the vault's lifetime, 5 have been revoked, indicating active and frequent portfolio management
 - **Yearn V3 track record:** V3 framework has been live since May 2024 (~22 months). No V3 vault exploits
@@ -215,13 +215,13 @@ Two strategies bridge USDC to Arbitrum via Circle CCTP:
 
 ### Accessibility
 
-- **Deposits:** Permissionless — anyone can deposit USDC and receive yvUSD (ERC-4626 standard). Subject to $1.5M deposit limit
+- **Deposits:** Permissionless — anyone can deposit USDC and receive yvUSD (ERC-4626 standard). Subject to $5M deposit limit
 - **Withdrawals:** ERC-4626 standard. Users can redeem yvUSD for USDC. However:
   - **100% of funds are deployed** (0 idle) — withdrawals require unwinding strategy positions
   - **Cross-chain strategies** require CCTP bridging back, which takes time
   - **PT strategies** may have liquidity constraints before maturity
   - **Looper strategies** require deleveraging, which may take multiple transactions
-- **LockedyvUSD:** Optional lock wrapper with 14-day cooldown + 7-day withdrawal window. Yields a "locker bonus" but restricts exit timing
+- **LockedyvUSD:** Optional lock wrapper with 14-day cooldown + 5-day withdrawal window. Yields a "locker bonus" but restricts exit timing
 - **No fees on deposits/withdrawals** — fees are taken via the accountant during `process_report` (performance/management fees)
 
 ### Collateralization
@@ -251,9 +251,9 @@ Two strategies bridge USDC to Arbitrum via Circle CCTP:
   - Cross-chain strategies: Withdrawal triggers CCTP bridging back from remote chain (hours for CCTP attestation)
   - Lending strategies (Sky, Spark): Generally liquid for immediate withdrawal
 - **DEX liquidity:** No known DEX liquidity pools for yvUSD. The vault is an ERC-4626 token, not traded on DEXes
-- **LockedyvUSD:** 14-day cooldown + 7-day withdrawal window. Shares in cooldown cannot be transferred
+- **LockedyvUSD:** 14-day cooldown + 5-day withdrawal window. Shares in cooldown cannot be transferred
 - **Same-value asset:** USDC-denominated vault token — no price divergence risk from the underlying
-- **Deposit limit:** $1.5M cap limits both concentration risk and indicates early stage
+- **Deposit limit:** $5M cap limits both concentration risk and indicates early stage
 
 ## Centralization & Control Risks
 
@@ -268,37 +268,21 @@ The yvUSD vault uses a **different governance pattern** from the standard Yearn 
 - **Signers are Yearn team members**, spanning core contributors and the security team. Not publicly labeled on Etherscan but confirmed as known Yearn insiders
 - No timelock on any actions
 - 3,130 transactions processed as of March 2026 — very active multisig
-**Deployer EOA roles — pending removal:** [`0x1b5f15DCb82d25f91c65b53CEe151E8b9fBdD271`](https://etherscan.io/address/0x1b5f15DCb82d25f91c65b53CEe151E8b9fBdD271)
+**Deployer EOA roles — removed:** [`0x1b5f15DCb82d25f91c65b53CEe151E8b9fBdD271`](https://etherscan.io/address/0x1b5f15DCb82d25f91c65b53CEe151E8b9fBdD271)
 
-This EOA (also a Safe owner and the vault deployer) currently holds **11 of 14 vault roles** directly:
+This EOA (also a Safe owner and the vault deployer) previously held 11 of 14 vault roles directly. **Safe transaction nonce 3130 has been executed**, calling `set_role(0x1b5f...d271, 0)` to remove ALL vault roles from this EOA. All vault operations now require 3-of-8 multisig approval.
 
-| Has Role | Missing Role |
-|----------|-------------|
-| REVOKE_STRATEGY_MANAGER | ADD_STRATEGY_MANAGER |
-| QUEUE_MANAGER | FORCE_REVOKE_MANAGER |
-| REPORTING_MANAGER | ACCOUNTANT_MANAGER |
-| DEBT_MANAGER | |
-| MAX_DEBT_MANAGER | |
-| DEPOSIT_LIMIT_MANAGER | |
-| WITHDRAW_LIMIT_MANAGER | |
-| MINIMUM_IDLE_MANAGER | |
-| PROFIT_UNLOCK_MANAGER | |
-| DEBT_PURCHASER | |
-| EMERGENCY_MANAGER | |
+The same transaction also:
+- Accepted management of 8 strategies
+- Set LockedyvUSD withdrawal window to 5 days (from previous 7)
+- Set keeper on a new strategy
+- Adjusted profit unlock timing on another vault
 
-**However, a queued Safe transaction (nonce 3130, 2-of-3 signatures collected) will remove ALL roles from this EOA** via `set_role(0x1b5f...d271, 0)`. This transaction is the next to execute and needs only 1 more signature. Once executed, all vault operations will require 3-of-8 multisig approval.
-
-The same queued transaction also:
-- Accepts management of 8 new strategies
-- Sets LockedyvUSD withdrawal window to 5 days (from current 7)
-- Sets keeper on a new strategy
-- Adjusts profit unlock timing on another vault
-
-**This EOA is also the sole `governance` address on the Fee Splitter contract.**
+**Note:** This EOA remains the sole `governance` address on the Fee Splitter contract ([`0xd744B7D6bE69b334766802245Db2895e861cb470`](https://etherscan.io/address/0xd744B7D6bE69b334766802245Db2895e861cb470)).
 
 **Governance assessment:**
 1. **No timelock** on any governance action — changes take effect immediately. The team has confirmed there are no plans to add a timelock at this time
-2. **EOA role concentration is temporary** — pending Safe transaction will remove all direct EOA roles, requiring multisig for all actions
+2. **No EOA role concentration** — Safe tx nonce 3130 has been executed, removing all direct vault roles from the deployer EOA. All vault operations now require 3-of-8 multisig approval. The EOA retains governance of the Fee Splitter contract only
 3. **Known Yearn team signers** — all 8 Safe owners are confirmed Yearn contributors (core team + security team)
 4. **Independent from Yearn global multisig** — the 6/9 Yearn multisig has no roles on this vault, but the separation is by design (strategy-focused governance vs vault-level governance)
 
@@ -307,7 +291,7 @@ The same queued transaction also:
 - **Exchange rate (PPS):** Calculated on-chain algorithmically via ERC-4626. Fully programmatic, no admin input
 - **Vault operations:** Deposit/withdraw are permissionless on-chain transactions
 - **Strategy profit/loss:** Reported programmatically by keepers via `process_report()`. Profits unlock linearly over 7 days. Losses are immediate
-- **Debt allocation:** Requires manual intervention by DEBT_MANAGER role (the deployer EOA or the Safe)
+- **Debt allocation:** Requires manual intervention by DEBT_MANAGER role (3-of-8 multisig)
 - **Cross-chain accounting:** When `report()` is called on the destination chain, `_harvestAndReport()` automatically queues a CCTP message back to the origin. No separate keeper relay required. Can be stale between report cycles
 - **V3 vaults are immutable** — no proxy upgrades, no admin-changeable implementation
 
@@ -356,7 +340,7 @@ Yearn maintains an active monitoring system via the [`monitoring-scripts-py`](ht
 | yvUSD Vault | [`0x696d02Db93291651ED510704c9b286841d506987`](https://etherscan.io/address/0x696d02Db93291651ED510704c9b286841d506987) | PPS (`convertToAssets(1e6)`), `totalAssets()`, `totalDebt()`, `totalIdle()`, Deposit/Withdraw events |
 | LockedyvUSD | [`0xAaaFEa48472f77563961Cdb53291DEDfB46F9040`](https://etherscan.io/address/0xAaaFEa48472f77563961Cdb53291DEDfB46F9040) | Cooldown events, configuration changes (cooldown duration, withdrawal window) |
 | Role Manager Safe | [`0x16388463d60FFE0661Cf7F1f31a7D658aC790ff7`](https://etherscan.io/address/0x16388463d60FFE0661Cf7F1f31a7D658aC790ff7) | Signer/threshold changes, submitted transactions |
-| Deployer EOA | [`0x1b5f15DCb82d25f91c65b53CEe151E8b9fBdD271`](https://etherscan.io/address/0x1b5f15DCb82d25f91c65b53CEe151E8b9fBdD271) | Strategy debt changes, report processing, emergency actions |
+| Deployer EOA | [`0x1b5f15DCb82d25f91c65b53CEe151E8b9fBdD271`](https://etherscan.io/address/0x1b5f15DCb82d25f91c65b53CEe151E8b9fBdD271) | Fee Splitter governance changes (vault roles removed) |
 | Fee Splitter | [`0xd744B7D6bE69b334766802245Db2895e861cb470`](https://etherscan.io/address/0xd744B7D6bE69b334766802245Db2895e861cb470) | Governance changes, fee distribution changes |
 
 ### Critical Events to Monitor
@@ -389,22 +373,20 @@ Yearn maintains an active monitoring system via the [`monitoring-scripts-py`](ht
 - **Battle-tested Yearn V3 infrastructure:** V3 framework audited by Statemind, ChainSecurity, and yAcademy. No V3 exploits in ~22 months of production. Immutable vault contracts eliminate proxy upgrade risk
 - **USDC-denominated:** Stablecoin backing eliminates price volatility risk on the underlying asset
 - **Diversified strategy portfolio:** 12 strategies across 8+ protocols, distributed across lending, looper, PT, and cross-chain categories. No single strategy exceeds 33% allocation
-- **Granular V3 role system:** 14 distinct roles with clear separation of responsibilities. The most sensitive actions (adding strategies, changing accountant) require multisig approval
+- **Granular V3 role system:** 14 distinct roles with clear separation of responsibilities, all held exclusively by the 3-of-8 multisig. No EOA role concentration
 - **Circle CCTP:** Trust-minimized cross-chain bridge with same trust assumption as holding USDC. Audited by ChainSecurity
 - **Rigorous strategy review process:** 12-metric risk scoring framework with ySec security review. CCTPStrategy underwent strict internal review. All strategies evaluated across testing coverage, complexity, risk exposure, centralization, and protocol integration dimensions
 - **Active monitoring infrastructure:** Hourly large-flow alerts, weekly endorsed-vault checks, and timelock monitoring across 6 chains via GitHub Actions + Telegram alerts
 
 ### Key Risks
 
-- **Extremely new:** Only ~50 days in production with ~$1M TVL. No stress testing. Deposit limit of $1.5M indicates early experimental stage
+- **Extremely new:** Only ~53 days in production with ~$3M TVL. No stress testing. Deposit limit of $5M indicates early stage
 - **Separate governance from Yearn global multisig:** Vault is managed by a dedicated 3-of-8 Safe with known Yearn team signers, independent from the standard 6-of-9 Yearn multisig. By design for strategy-focused operations, but no cross-oversight
-- **Temporary EOA role concentration (pending fix):** One address currently holds 11/14 vault roles directly. A queued Safe transaction (nonce 3130, 2/3 signatures) will remove all EOA roles, requiring 3/8 multisig for all actions
 - **No external product-specific audit:** The CCTPStrategy cross-chain code and LockedyvUSD wrapper have no dedicated external audit. CCTPStrategy underwent strict internal ySec review. All strategies follow the rigorous 12-metric risk framework, but external third-party review of these specific components is absent
 - **65.6% in medium-risk protocols:** The majority of vault funds are deployed into 3Jane USD3 (score 3.5/5) and InfiniFi (score 2.8/5) — both relatively new protocols with elevated risk profiles
 
 ### Critical Risks
 
-- **EOA key compromise (temporary):** Until the queued Safe transaction (nonce 3130) executes, the deployer EOA can unilaterally reallocate all vault funds between existing strategies. Once the transaction executes (needs 1 more signature), this risk is eliminated
 - **No timelock:** All governance actions via the 3-of-8 Safe take effect immediately. No monitoring window for users to react to potentially harmful changes. The team has confirmed no plans to add a timelock at this time
 - **Looper liquidation cascade:** Looper strategies (~58% of TVL) use leveraged positions on Morpho. A collateral depeg (e.g., USD3 or siUSD) could trigger cascading liquidations across multiple strategies simultaneously
 - **Cross-chain accounting lag:** Remote strategy positions are updated when `_harvestAndReport()` queues CCTP messages back to the origin. Between report cycles, the vault's reported `totalAssets()` may not reflect real-time changes on Arbitrum
@@ -422,7 +404,7 @@ Yearn maintains an active monitoring system via the [`monitoring-scripts-py`](ht
 
 - [x] **No audit** — Yearn V3 core audited by Statemind, ChainSecurity, and yAcademy. ✅ PASS (framework audited; individual strategies lack dedicated audit)
 - [x] **Unverifiable reserves** — ERC-4626 standard. All positions on-chain verifiable. ✅ PASS
-- [x] **Total centralization** — 3-of-8 multisig with known Yearn team signers (not a single EOA). ✅ PASS. EOA roles are being removed via pending Safe transaction
+- [x] **Total centralization** — 3-of-8 multisig with known Yearn team signers. All vault roles held by multisig only (EOA roles removed via Safe tx nonce 3130). ✅ PASS
 
 **All gates pass.** Proceed to category scoring.
 
@@ -434,12 +416,12 @@ Yearn maintains an active monitoring system via the [`monitoring-scripts-py`](ht
 |--------|-----------|
 | Audits | V3 framework: 3 audits by top firms (Statemind, ChainSecurity, yAcademy). CCTPStrategy: strict internal ySec review. All strategies: rigorous 12-metric risk framework |
 | Bug bounty | $200K on Immunefi (active) + Sherlock bounty |
-| Production history | **~50 days** (Jan 19, 2026). V3 framework: ~22 months |
-| TVL | **~$1M** (extremely small). Deposit limit: $1.5M |
+| Production history | **~53 days** (Jan 19, 2026). V3 framework: ~22 months |
+| TVL | **~$3M** (small). Deposit limit: $5M |
 | Security incidents | None on V3 |
 | Strategy review | Rigorous 12-metric framework with ySec security review, testing coverage requirements, complexity scoring, and risk exposure assessment |
 
-**Score: 3.0/5** — The underlying V3 framework has solid audit coverage from 3 reputable firms and a clean 22-month track record. The CCTPStrategy underwent strict internal ySec review, and all strategies follow a rigorous 12-metric risk scoring framework — providing strong assurance even without external audits on individual components. However, yvUSD itself is extremely new (~50 days) with negligible TVL (~$1M), and no external third-party audit covers the novel yvUSD-specific components. Between score 2 (2+ audits, 1-2 years) and score 4 (3-6 months, TVL <$10M) — the strong framework audits and rigorous internal review process pull toward 3, while the very early stage pushes toward 4.
+**Score: 3.0/5** — The underlying V3 framework has solid audit coverage from 3 reputable firms and a clean 22-month track record. The CCTPStrategy underwent strict internal ySec review, and all strategies follow a rigorous 12-metric risk scoring framework — providing strong assurance even without external audits on individual components. However, yvUSD itself is extremely new (~53 days) with small TVL (~$3M), and no external third-party audit covers the novel yvUSD-specific components. Between score 2 (2+ audits, 1-2 years) and score 4 (3-6 months, TVL <$10M) — the strong framework audits and rigorous internal review process pull toward 3, while the very early stage pushes toward 4.
 
 #### Category 2: Centralization & Control Risks (Weight: 30%)
 
@@ -450,10 +432,10 @@ Yearn maintains an active monitoring system via the [`monitoring-scripts-py`](ht
 | Upgradeability | V3 vaults are **immutable** (no proxy upgrades). Strategies can be added/removed |
 | Multisig | 3-of-8 Gnosis Safe with **known Yearn team signers** (core contributors + security team) |
 | Timelock | **None** — all actions immediate |
-| Privileged roles | Deployer EOA has 11/14 roles, but **pending removal** (Safe tx nonce 3130, 2/3 sigs). Once executed, all operations require 3/8 multisig |
+| Privileged roles | All 14 vault roles held by 3-of-8 multisig only. Deployer EOA roles removed (Safe tx nonce 3130 executed). EOA retains Fee Splitter governance |
 | Yearn oversight | No direct 6/9 ySafe involvement, but this is by design — strategy-focused vault uses dedicated multisig with Yearn insiders |
 
-**Governance Score: 3/5** — Vault contracts are immutable (no upgrade risk). The 3-of-8 Safe has high-quality signers (confirmed Yearn team members and security team). The EOA role concentration is temporary and actively being remediated via a queued transaction. However, the lack of timelock on any governance action is a significant gap — all changes take effect immediately with no monitoring window. Per rubric, the known-insider multisig with high trust but no timelock falls between score 2 (7/11+ with timelock) and score 4 (3/5, no timelock). Conservative: 3.
+**Governance Score: 2.5/5** — Vault contracts are immutable (no upgrade risk). The 3-of-8 Safe has high-quality signers (confirmed Yearn team members and security team). All vault roles are now held exclusively by the multisig — the previously identified EOA role concentration has been fully remediated (Safe tx nonce 3130 executed). However, the lack of timelock on any governance action remains a significant gap — all changes take effect immediately with no monitoring window. The 3/8 threshold is relatively low (37.5%). The deployer EOA retains sole governance of the Fee Splitter contract. Per rubric: known-insider multisig with high trust and no EOA risk, but no timelock and low threshold — between score 2 (7/11+ with timelock) and score 3 (3/5, no timelock). The high-quality signers and immutable vault pull toward 2, while the low threshold and no timelock push toward 3: 2.5.
 
 **Subcategory B: Programmability**
 
@@ -462,10 +444,10 @@ Yearn maintains an active monitoring system via the [`monitoring-scripts-py`](ht
 | PPS | On-chain ERC-4626, fully algorithmic |
 | Vault operations | Permissionless deposits/withdrawals on-chain |
 | Strategy reporting | Programmatic via keepers |
-| Debt allocation | Manual intervention by DEBT_MANAGER |
+| Debt allocation | Manual intervention by DEBT_MANAGER (3-of-8 multisig) |
 | Cross-chain | Programmatic — `_harvestAndReport()` queues CCTP messages automatically. Stale between report cycles |
 
-**Programmability Score: 1.5/5** — All funds are on-chain across Ethereum and Arbitrum and cannot be altered by off-chain factors. PPS is calculated on-chain algorithmically via ERC-4626. Deposits/withdrawals are permissionless. Strategy reporting is automated via keepers. Debt allocation has both automated (Debt Allocator) and manual (DEBT_MANAGER) paths. Cross-chain accounting has minor lag between keeper cycles but all positions are verifiable on-chain at all times.
+**Programmability Score: 1.5/5** — All funds are on-chain across Ethereum and Arbitrum and cannot be altered by off-chain factors. PPS is calculated on-chain algorithmically via ERC-4626. Deposits/withdrawals are permissionless. Strategy reporting is automated via keepers. Debt allocation has both automated (Debt Allocator) and manual (DEBT_MANAGER via 3/8 multisig) paths. Cross-chain accounting has minor lag between keeper cycles but all positions are verifiable on-chain at all times.
 
 **Subcategory C: External Dependencies**
 
@@ -478,9 +460,9 @@ Yearn maintains an active monitoring system via the [`monitoring-scripts-py`](ht
 
 **Dependencies Score: 4/5** — Many dependencies (8+), several critical. 65.6% of funds in medium-risk protocols. Cross-chain bridge dependency. Failure of 3Jane or InfiniFi could impact >30% of vault funds each. Per rubric: "Many or newer protocol dependencies, critical functionality depends on them" maps to 4.
 
-**Centralization Score = (3 + 1.5 + 4) / 3 = 2.83**
+**Centralization Score = (2.5 + 1.5 + 4) / 3 = 2.67**
 
-**Score: 2.8/5** — Immutable vault contracts and known Yearn team signers on the 3/8 Safe are significant strengths. All funds are on-chain and fully programmatic. The EOA role concentration is being remediated. However, the lack of timelock on governance actions and the heavy dependency on multiple protocols (including medium-risk ones) remain concerns.
+**Score: 2.7/5** — Immutable vault contracts and known Yearn team signers on the 3/8 Safe are significant strengths. All vault roles are now held exclusively by the multisig (EOA roles removed). All funds are on-chain and fully programmatic. However, the lack of timelock on governance actions and the heavy dependency on multiple protocols (including medium-risk ones) remain concerns.
 
 #### Category 3: Funds Management (Weight: 30%)
 
@@ -519,9 +501,9 @@ Yearn maintains an active monitoring system via the [`monitoring-scripts-py`](ht
 | Cross-chain | CCTP bridge delays for Arbitrum strategies |
 | PT maturity | Some strategies hold PT tokens with maturity constraints |
 | Same-value asset | USDC-denominated — no price impact risk |
-| Deposit limit | $1.5M cap limits current scale |
+| Deposit limit | $5M cap limits current scale |
 
-**Score: 3/5** — USDC-denominated vault eliminates price divergence risk. ERC-4626 redemption mechanism exists. However, 100% capital deployment means withdrawals require strategy unwinding which may take time (looper deleveraging, cross-chain bridging, PT selling before maturity). No DEX liquidity as alternative exit. The small current TVL (~$1M) means withdrawal amounts are small in absolute terms, partially mitigating liquidity risk. Same-value asset adjustment: -0.5 applied from a base of 3.5.
+**Score: 3/5** — USDC-denominated vault eliminates price divergence risk. ERC-4626 redemption mechanism exists. However, 100% capital deployment means withdrawals require strategy unwinding which may take time (looper deleveraging, cross-chain bridging, PT selling before maturity). No DEX liquidity as alternative exit. The current TVL (~$3M) means withdrawal amounts are relatively small in absolute terms, partially mitigating liquidity risk. Same-value asset adjustment: -0.5 applied from a base of 3.5.
 
 #### Category 5: Operational Risk (Weight: 5%)
 
@@ -540,15 +522,15 @@ Yearn maintains an active monitoring system via the [`monitoring-scripts-py`](ht
 
 ```
 Final Score = (Centralization × 0.30) + (Funds Mgmt × 0.30) + (Audits × 0.20) + (Liquidity × 0.15) + (Operational × 0.05)
-            = (2.8 × 0.30) + (2.25 × 0.30) + (3.0 × 0.20) + (3.0 × 0.15) + (1.5 × 0.05)
-            = 0.84 + 0.675 + 0.60 + 0.45 + 0.075
-            = 2.64
+            = (2.7 × 0.30) + (2.25 × 0.30) + (3.0 × 0.20) + (3.0 × 0.15) + (1.5 × 0.05)
+            = 0.81 + 0.675 + 0.60 + 0.45 + 0.075
+            = 2.61
 ```
 
 | Category | Score | Weight | Weighted |
 |----------|-------|--------|----------|
 | Audits & Historical | 3.0 | 20% | 0.60 |
-| Centralization & Control | 2.8 | 30% | 0.84 |
+| Centralization & Control | 2.7 | 30% | 0.81 |
 | Funds Management | 2.25 | 30% | 0.675 |
 | Liquidity Risk | 3.0 | 15% | 0.45 |
 | Operational Risk | 1.5 | 5% | 0.075 |
@@ -581,7 +563,7 @@ The following items could not be verified during this assessment and require tea
 - **Time-based:** Reassess in 2 months (May 2026) given the vault's extreme youth
 - **TVL-based:** Reassess if TVL exceeds $10M or changes by more than ±50%
 - **Incident-based:** Reassess after any exploit, strategy loss, governance change, or underlying protocol incident (especially 3Jane, InfiniFi, or Cap)
-- **Governance-based:** Reassess once Safe tx nonce 3130 executes (removes EOA roles — should improve Governance score). Reassess if the Safe composition changes, if a timelock is added, or if the vault migrates to the Yearn global multisig
+- **Governance-based:** Reassess if the Safe composition changes (signer additions/removals, threshold changes), if a timelock is added, or if the vault migrates to the Yearn global multisig. Reassess if the Fee Splitter governance is transferred from the deployer EOA to the multisig
 - **Audit-based:** Reassess if CCTPStrategy or yvUSD-specific components receive dedicated external audits (should improve Audits score)
 - **Dependency-based:** Reassess if 3Jane, InfiniFi, or Cap experience significant events. Reassess if Morpho looper markets face liquidation stress
 - **Strategy-based:** Reassess if allocation to medium-risk protocols exceeds 70% or if leverage ratios increase significantly
