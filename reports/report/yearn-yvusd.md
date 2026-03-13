@@ -550,14 +550,6 @@ Final Score = (Centralization × 0.30) + (Funds Mgmt × 0.30) + (Audits × 0.20)
 
 ---
 
-## TODO — Questions for the Team
-
-The following items could not be verified during this assessment and require team input:
-
-1. **Looper leverage ratios:** What are the specific max LTV parameters used in the Morpho looper strategies? What are the liquidation buffers? What happens in a collateral depeg scenario (e.g., USD3 or siUSD depeg)?
-
----
-
 ## Reassessment Triggers
 
 - **Time-based:** Reassess in 2 months (May 2026) given the vault's extreme youth
