@@ -13,7 +13,7 @@ yvUSD is a **USDC-denominated cross-chain Yearn V3 vault** (ERC-4626) that deplo
 **Key architecture:**
 
 - **Vault:** Standard Yearn V3 vault (v3.0.4) accepting USDC deposits, issuing yvUSD shares
-- **Cross-chain strategies:** Use a two-contract pattern — an origin CCTPStrategy on Ethereum and a remote strategy on the destination chain. When `report()` is called on the destination chain, `_harvestAndReport()` reports new assets back to the origin by queuing a CCTP message — no separate keeper relay required. The origin tracks remote capital via a `remoteAssets` variable updated by these CCTP messages
+- **Cross-chain strategies:** Use a two-contract pattern — an origin `CCTPStrategy` on Ethereum and a remote `CCTPRemoteStrategy` (ERC-4626 variant) on the destination chain. The origin strategy restricts deposits to a single `DEPOSITER` address (the yvUSD vault itself). When `report()` is called on the destination chain, `_harvestAndReport()` reports new assets back to the origin by queuing a CCTP message — no separate keeper relay required. The origin receives updates via `handleReceiveFinalizedMessage` and tracks remote capital via a `remoteAssets` variable. Additional remote vault implementations using different native bridges are currently in development
 - **LockedyvUSD:** Companion cooldown wrapper where users lock yvUSD shares for additional yield. Users locking shares gives the vault better guarantees on duration risk, enabling higher-yield strategies without sacrificing atomic liquidity for non-lockers. Cooldown: 14 days (configurable), withdraw window: 5 days (configurable). Lockers receive a percentage of extra yield as an illiquidity premium. Also serves as the vault's accountant
 - **Strategies:** 12 active strategies deploying into Morpho, 3Jane USD3, InfiniFi, Maple syrupUSDC, Sky/MakerDAO, Spark, Fluid, Pendle/Spectra PT tokens, and Cap stcUSD
 - **Yield sources:** Lending yield (Morpho, Fluid, Spark, Sky), looper strategies (borrow-against-collateral loops on Morpho), and fixed-rate PT tokens (Pendle/Spectra)
@@ -29,7 +29,10 @@ yvUSD is a **USDC-denominated cross-chain Yearn V3 vault** (ERC-4626) that deplo
 
 **Links:**
 
-- [yvUSD Documentation (draft)](https://yearn-docs-git-fork-engn33r-yvusd-yearn.vercel.app/getting-started/products/yvusd/overview)
+- [yvUSD Documentation](https://docs.yearn.fi/getting-started/products/yvaults/yvusd)
+- [yvUSD Developer Docs](https://docs.yearn.fi/developers/yvusd)
+- [yvUSD APR API](https://yvusd-api.yearn.fi)
+- [yvUSD Vault Portfolio (DeBank)](https://debank.com/bundles/221066/portfolio)
 - [Yearn V3 Documentation](https://docs.yearn.fi/getting-started/products/yvaults/v3)
 - [Yearn V3 Vault Management](https://docs.yearn.fi/developers/v3/vault_management)
 - [Yearn Security](https://github.com/yearn/yearn-security/blob/master/SECURITY.md)
@@ -315,7 +318,7 @@ The same transaction also:
 
 - **Team:** Yearn Finance — established since 2020, publicly known contributors. The Yearn global multisig has 9 named signers including Mariano Conti (ex-MakerDAO), Leo Cheng (C.R.E.A.M.), 0xngmi (DeFiLlama), Michael Egorov (Curve), and others
 - **yvUSD governance:** The vault is managed by a separate 3-of-8 Safe (not the Yearn global multisig). However, all 8 signers are confirmed Yearn team members (core contributors and security team), providing high trust in the governance quality
-- **Documentation:** Comprehensive Yearn V3 documentation. yvUSD-specific docs exist in a draft PR (not yet merged to main docs). Cross-chain strategy documentation available
+- **Documentation:** Comprehensive Yearn V3 documentation. yvUSD-specific docs are now published on the official Yearn docs site, including cross-chain strategy architecture, LockedyvUSD mechanics, and a dedicated APR API service ([yvusd-api.yearn.fi](https://yvusd-api.yearn.fi))
 - **Legal:** Yearn Finance has converted its ychad.eth multisig into a BORG (cybernetic organization) via [YIP-87](https://gov.yearn.fi/t/yip-87-convert-ychad-eth-into-a-borg/14540), wrapping it in a Cayman Islands foundation company with smart contract governance restrictions. The YFI token governs the protocol via YIP proposals
 - **Incident response:** Yearn has demonstrated incident response capability across historical events. V3 framework has not been tested under stress. The $200K Immunefi bug bounty provides a responsible disclosure channel
 - **V3 immutability:** Vault contracts cannot be upgraded — this eliminates proxy upgrade risk but means bugs cannot be patched without deploying a new vault
@@ -331,6 +334,8 @@ Yearn maintains an active monitoring system via the [`monitoring-scripts-py`](ht
 - **Timelock monitoring** (`timelock/timelock_alerts.py`): Monitors Yearn TimelockController across 6 chains
 
 **Note:** yvUSD is not yet added to the monitored vault list in `alert_large_flows.py`, but the infrastructure is in place and can be extended.
+
+Additionally, Yearn provides a dedicated **yvUSD APR API** ([yvusd-api.yearn.fi](https://yvusd-api.yearn.fi), [source](https://github.com/yearn/yearn-yvusd-apr-service)) that aggregates on-chain vault/strategy accounting with off-chain APR oracle computations. Endpoints include `/api/health` (data recency), `/api/aprs` (precomputed APRs), and `/api/snapshot` (raw strategy cache). A **DeBank bundle** ([portfolio view](https://debank.com/bundles/221066/portfolio)) provides a consolidated view of all vault fund positions.
 
 ### Key Contracts (Ethereum)
 
@@ -515,7 +520,7 @@ Yearn maintains an active monitoring system via the [`monitoring-scripts-py`](ht
 | Incident response | Yearn has demonstrated capability across historical events. V3 untested |
 | Monitoring | Active hourly large-flow alerts, weekly endorsed-vault checks, timelock monitoring across 6 chains |
 
-**Score: 1.5/5** — Yearn's brand, track record, and known team provide high confidence. All 8 signers of the yvUSD Safe are confirmed Yearn insiders (core team + security team). Comprehensive V3 documentation, active Immunefi + Sherlock bounties, demonstrated incident response capability, and active monitoring infrastructure (hourly alerts, endorsed-vault checks, timelock monitoring via GitHub Actions + Telegram). yvUSD-specific docs are in draft but V3 framework docs are extensive. Yearn BORG legal entity (Cayman foundation via YIP-87).
+**Score: 1.5/5** — Yearn's brand, track record, and known team provide high confidence. All 8 signers of the yvUSD Safe are confirmed Yearn insiders (core team + security team). Comprehensive V3 documentation, active Immunefi + Sherlock bounties, demonstrated incident response capability, and active monitoring infrastructure (hourly alerts, endorsed-vault checks, timelock monitoring via GitHub Actions + Telegram). yvUSD-specific documentation is on the official Yearn docs site, covering cross-chain strategy architecture, LockedyvUSD mechanics, and a dedicated APR API service. Yearn BORG legal entity (Cayman foundation via YIP-87).
 
 ### Final Score Calculation
 
