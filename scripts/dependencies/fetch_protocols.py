@@ -63,6 +63,8 @@ PROTOCOL_TOKENS: dict[str, str] = {
     "wOETH": "Origin",
     "tETH": "Treehouse",
     # Stablecoins / yield tokens
+    "USD3": "3Jane",
+    "sUSD3": "3Jane",
     "sUSDe": "Ethena",
     "USDe": "Ethena",
     "USDS": "Sky",
@@ -501,6 +503,23 @@ def unit_ubtc_data() -> dict:
     }
 
 
+def three_jane_usd3_data() -> dict:
+    """3Jane USD3 dependency data (Mar 2026)."""
+    return {
+        "name": "3Jane (USD3)",
+        "chain": "ethereum",
+        "type": "credit_market",
+        "address": "0x056B269Eb1f75477a8666ae8C7fE01b64dD55eCc",
+        "collateral": [
+            {"asset": "USDC"},
+        ],
+        "yield_sources": [
+            {"protocol": "aave_v3_core", "assets": ["USDC"], "label": "Aave V3 (idle USDC)"},
+        ],
+        "infrastructure": [],
+    }
+
+
 def strata_data() -> dict:
     """Strata (srUSDe) dependency data from risk assessment report (Feb 2026)."""
     return {
@@ -568,6 +587,9 @@ def main():
 
     # InfiniFi
     data["protocols"]["infinifi"] = infinifi_data()
+
+    # 3Jane USD3
+    data["protocols"]["three_jane_usd3"] = three_jane_usd3_data()
 
     # Strata
     data["protocols"]["strata"] = strata_data()

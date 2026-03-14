@@ -13,6 +13,8 @@ protocol_tokens:
   rswETH: Swell
   wOETH: Origin
   tETH: Treehouse
+  USD3: 3Jane
+  sUSD3: 3Jane
   sUSDe: Ethena
   USDe: Ethena
   USDS: Sky
@@ -354,6 +356,19 @@ protocols:
       label: Tokemak autoUSD
     infrastructure:
     - Chainlink
+  three_jane_usd3:
+    name: 3Jane (USD3)
+    chain: ethereum
+    type: credit_market
+    address: '0x056B269Eb1f75477a8666ae8C7fE01b64dD55eCc'
+    collateral:
+    - asset: USDC
+    yield_sources:
+    - protocol: aave_v3_core
+      assets:
+      - USDC
+      label: Aave V3 (idle USDC)
+    infrastructure: []
   strata:
     name: Strata (srUSDe)
     chain: ethereum
