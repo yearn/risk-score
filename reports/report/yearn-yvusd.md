@@ -30,7 +30,6 @@ yvUSD is a **USDC-denominated cross-chain Yearn V3 vault** (ERC-4626) that deplo
 **Links:**
 
 - [yvUSD Documentation (draft)](https://yearn-docs-git-fork-engn33r-yvusd-yearn.vercel.app/getting-started/products/yvusd/overview)
-- [Initial Vault Design (HackMD)](https://hackmd.io/@D4Z1faeARKedWmEygMxDBA/HJx1YYQ-bg)
 - [Yearn V3 Documentation](https://docs.yearn.fi/getting-started/products/yvaults/v3)
 - [Yearn V3 Vault Management](https://docs.yearn.fi/developers/v3/vault_management)
 - [Yearn Security](https://github.com/yearn/yearn-security/blob/master/SECURITY.md)
