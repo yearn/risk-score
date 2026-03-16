@@ -4,7 +4,7 @@
 - **Token:** apxUSD
 - **Chain:** Ethereum
 - **Token Address:** [`0x98a878B1CD98131b271883b390F68d2c90674665`](https://etherscan.io/address/0x98a878B1CD98131b271883b390F68d2c90674665)
-- **Final Score: 3.6/5.0**
+- **Final Score: 5.0/5.0**
 
 ## Overview + Links
 
@@ -473,10 +473,10 @@ Apyx uses an OpenZeppelin AccessManager for centralized role-based access contro
 ### Critical Risk Gates
 
 - [x] **No audit** -- Quantstamp audit confirmed (Feb 2026). Certora audit published (Feb 2026) with detailed findings. Zellic claimed but unverifiable and no longer listed on docs. **PASS** (two confirmed reputable audits)
-- [ ] **Unverifiable reserves** -- Reserves are entirely off-chain preferred shares. No on-chain proof of reserves. Monthly PCAOB attestations promised but none published yet (26 days live). Certora M-01 explicitly flagged this. However, collateral is publicly-traded Nasdaq equity with transparent pricing. **BORDERLINE PASS** -- similar to USDC/USDT model but with no published attestations yet
+- [ ] **Unverifiable reserves** -- **FAIL.** There is zero confirmation of where the funds are. Reserves are claimed to be off-chain preferred shares (STRC, SATA) held via unnamed MPC custody providers, but: (1) no on-chain proof of reserves exists, (2) no PCAOB attestation has been published despite being promised monthly (protocol is 26 days live), (3) no custodian is publicly named, (4) the overcollateralization ratio is undisclosed, (5) Certora audit M-01 explicitly flagged the backing model as entirely trust-based with no on-chain verification. Unlike USDC/USDT which have published attestations from named custodians (BNY Mellon, etc.), Apyx has published nothing. The entire $51.5M supply is backed solely by an unverifiable trust claim.
 - [x] **Total centralization** -- 3-of-6 Gnosis Safe multisig. Not a single EOA. **PASS**
 
-**All gates pass (borderline).** Proceed to category scoring.
+**GATE FAILURE: Unverifiable reserves.** The reserves gate fails -- there is no verifiable confirmation of where the backing funds are held, by whom, or in what amount. This overrides category scoring. **Final score: 5.0/5.0.**
 
 ### Category Scores
 
@@ -585,9 +585,13 @@ Final Score = (Centralization × 0.30) + (Funds Mgmt × 0.30) + (Audits × 0.20)
 | Funds Management | 4.5 | 30% | 1.35 |
 | Liquidity Risk | 3.0 | 15% | 0.45 |
 | Operational Risk | 4.0 | 5% | 0.20 |
-| **Final Score** | | | **4.0/5.0** |
+| **Weighted Total** | | | **4.0** |
+| **Gate Override** | | | **Unverifiable reserves → 5.0** |
+| **Final Score** | | | **5.0/5.0** |
 
-**Final Score: 4.0/5.0**
+**Final Score: 5.0/5.0** (gate failure override -- unverifiable reserves)
+
+The weighted category score is 4.0, but the **Unverifiable Reserves gate failure** overrides to the maximum score of 5.0. There is zero confirmation of where the backing funds are.
 
 ### Risk Tier
 
@@ -599,32 +603,34 @@ Final Score = (Centralization × 0.30) + (Funds Mgmt × 0.30) + (Audits × 0.20)
 | **3.5-4.5** | **Elevated Risk** | Limited approval, strict limits |
 | **4.5-5.0** | **High Risk** | Not recommended |
 
-**Final Risk Tier: Elevated Risk**
+**Final Risk Tier: High Risk -- Not recommended**
 
 ---
 
-Apyx's apxUSD is a novel "Dividend-Backed Stablecoin" with an innovative approach to bridging off-chain corporate dividends into on-chain yield. The underlying collateral (publicly-traded preferred shares on Nasdaq) provides pricing transparency. The protocol has shown strong growth (4x supply in 15 days) and now has two confirmed audits (Quantstamp, Certora).
+**apxUSD fails the Unverifiable Reserves critical risk gate. Yearn should not take exposure to this asset.**
 
-However, the protocol is **very young** (~26 days), has **no published reserve attestations** (despite Certora explicitly flagging this as M-01), relies on **off-chain collateral that cannot be verified on-chain**, has **no timelock on admin actions** (allowing instant proxy upgrades), an **anonymous team**, and a **manually-controlled rate oracle**. Curve pool liquidity has not kept pace with supply growth.
+There is no confirmation of where the $51.5M in backing funds are held. The protocol claims overcollateralization via off-chain preferred shares (STRC, SATA) held by unnamed MPC custody providers, but:
 
-**Morpho market update**: The actual Morpho market (created March 12, 2026) uses **apyUSD as collateral / apxUSD as loan** -- the inverse of what issue #63 anticipated. The Morpho oracle is immutable and reads directly from the ERC-4626 vault (much better than the Curve oracle). However, 97% utilization and 86% LLTV on a 4-day-old market create leveraged looping risk.
+1. **No proof of reserves exists** -- neither on-chain nor off-chain attestation
+2. **No custodian is named** -- "MPC custody providers" with no identity disclosed
+3. **No PCAOB attestation published** -- promised monthly, zero delivered in 26 days
+4. **Overcollateralization ratio undisclosed** -- no way to assess backing adequacy
+5. **Certora M-01 confirmed this** -- their audit explicitly flagged the backing model as entirely trust-based, comparing unfavorably to Ethena (on-chain reserve fund) and Ondo USDY (on-chain NAV oracle)
 
-**For Yearn exposure via Morpho:**
-- The primary exit path for liquidators is through apyUSD → apxUSD vault redemption (subject to cooldown) or secondary market sales
-- The Morpho oracle is sound (immutable, on-chain ERC-4626 rate), but indirectly affected by apyUSD vault upgrades
-- 97% utilization means lenders face withdrawal risk
-- The leveraged looping strategy amplifies protocol exposure -- cascading liquidations are possible if apxUSD depegs or apyUSD exchange rate drops
-- Morpho exposure should be strictly limited given the protocol's youth, elevated risk profile, and extreme utilization
+This is not comparable to USDC or USDT, which publish regular attestations from named, regulated custodians. Apyx has published nothing from nobody.
 
-**Key conditions for any exposure:**
-- Verify that published PCAOB attestations exist before committing significant capital
-- Monitor the rate oracle for any changes (currently 1.0000)
-- Monitor Curve pool balance ratio for peg stability signals
-- Strict position size limits given the $5.5M Curve pool depth (reduced from $9M)
-- Request the team implement a timelock on admin actions before expanding exposure
-- Monitor for resolution of Certora M-04 (yield gaming vulnerability)
-- Track Zellic audit status -- previously claimed but no longer listed on docs page
-- Monitor Morpho market utilization (currently 97%) and any liquidation events
+**Additional risk factors** (would independently justify a high score even without gate failure):
+- Anonymous team, BVI entity with $100 liability cap
+- No timelock on admin actions -- 3-of-6 multisig can upgrade all proxy contracts immediately
+- Manual rate oracle with no automation, bounds, or staleness checks
+- 26 days in production with no stress testing
+- Morpho market (apyUSD/apxUSD) at 97% utilization with 86% LLTV enables leveraged looping that amplifies all of the above risks
+
+**Recommendation: No exposure until:**
+- First PCAOB attestation is published with named custodian and verified reserve amounts
+- Timelock implemented on admin actions (minimum 48 hours for proxy upgrades)
+- Bug bounty program launched
+- At least 3 months of production track record without incident
 
 ---
 
