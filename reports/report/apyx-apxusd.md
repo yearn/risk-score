@@ -104,7 +104,7 @@ All contracts compiled with Solidity 0.8.30 using OpenZeppelin v5.5.0.
 
 | # | Firm | Date | Scope | Report |
 |---|------|------|-------|--------|
-| 1 | **Quantstamp** | Feb 2026 | APX USD Stablecoin | [Certificate](https://certificate.quantstamp.com/full/apx-usd-stablecoin/2a5be074-3d9f-49e7-aa08-46fb5f1e5bd6/index.html) |
+| 1 | **Quantstamp** | Feb 2-9, 2026 | ApxUSD Stablecoin Ecosystem (14 findings) | [Certificate](https://certificate.quantstamp.com/full/apx-usd-stablecoin/2a5be074-3d9f-49e7-aa08-46fb5f1e5bd6/index.html) |
 | 2 | **Certora** | Feb 2026 (work Jan 19-28, 2026) | apxUSD (18 contracts) | [Full Report](https://www.certora.com/reports/apyx-apxusd) ([PDF](https://certora.cdn.prismic.io/certora/aaX0-1xvIZEnjP6j_Apyx-apxUSD-Finalreport-February2026.pdf)) |
 | 3 | **Zellic** | Claimed | Unknown | Not publicly available |
 
@@ -125,8 +125,27 @@ All contracts compiled with Solidity 0.8.30 using OpenZeppelin v5.5.0.
 - **M-03** (Fixed): Partial claims corrupted vesting schedule, enabling early token extraction
 - **M-04** (Acknowledged, NOT fixed): Yield distribution can be gamed -- new depositors can capture yield from dividends they didn't generate, diluting existing depositors. Apyx relies on vesting period and cooldown to mitigate, but doesn't prevent the issue
 
+#### Quantstamp Audit Findings (14 total)
+
+Repo: `apyx-labs/evm-contracts` @ commit `c263465b`. Audit period: Feb 2-9, 2026.
+
+| Severity | Count | Fixed | Mitigated | Acknowledged |
+|---|---|---|---|---|
+| High | 1 | 1 | 0 | 0 |
+| Medium | 2 | 2 | 0 | 0 |
+| Low | 7 | 6 | 1 | 0 |
+| Informational | 4 | 3 | 0 | 1 |
+
+**Notable findings:**
+- **QS-1** (High, Fixed): `LinearVestV0.pullVestedYield()` does not reset `vestingAmount` after pulling, allowing the admin to extend vesting with stale accounting and double-distribute yield
+- **QS-2** (Medium, Fixed): `ERC20DenyListUpgradable` uses `initializer` instead of `onlyInitializing`, breaking initialization for derived contracts
+- **QS-3** (Medium, Fixed): `RedemptionPoolV0` requires matching decimals for asset/reserveAsset, preventing use with USDC (6 decimals)
+- **QS-4** (Low, Mitigated): `ApyUSD._decimalsOffset()` returns 0 (instead of OZ default), making first-depositor inflation attack slightly more feasible. Mitigated by team deploying with initial deposit
+- **QS-10** (Low, Fixed): `RedemptionPoolV0.redeem()` has no slippage protection -- admin can change exchange rate while user tx is pending (front-running risk)
+- **QS-13** (Informational, Acknowledged): `MinterV0` rate-limit checked at request time but not at execution -- requests can be queued and batch-executed, bypassing intended issuance cap
+
 **Notes:**
-- The Quantstamp audit is confirmed with a public certificate link, but the certificate is JavaScript-rendered and specific finding counts could not be extracted programmatically.
+- The Quantstamp audit certificate is JavaScript-rendered but finding data was extracted. All 14 findings are documented above. The audit reviewed the same `apyx-labs/evm-contracts` repo as Certora but at a different commit.
 - The Certora audit was published in March 2026 with full findings. Scope covered 18 contracts including ApxUSD, ApyUSD, MinterV0, UnlockToken, LinearVestV0, YieldDistributor, etc. Two medium-severity findings (M-01 trust-based backing, M-04 yield gaming) were acknowledged but **not fixed**.
 - Zellic was previously claimed in the [Apyx FAQ](https://docs.apyx.fi/resources/faq) but is **no longer listed on the official audits page**. No public report found in Zellic's GitHub publications repository (365+ published PDFs). This audit cannot be independently verified.
 - Several documentation pages in the Technical Overview section return 404 errors, suggesting incomplete documentation.
