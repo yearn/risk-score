@@ -19,8 +19,6 @@ Apyx is a "Dividend-Backed Stablecoin" (DBS) protocol that converts off-chain co
 
 The collateral is dynamically rebalanced based on issuer concentration limits, liquidity needs, and overcollateralization requirements.
 
-**Yearn use case per issue [#63](https://github.com/yearn/risk-score/issues/63)**: Use apxUSD as collateral in Morpho lending markets.
-
 **Note**: The actual Morpho market (created March 12, 2026) uses **apyUSD as collateral** and **apxUSD as the loan asset** -- the inverse of what the original issue assumed. This enables a leveraged yield strategy (deposit apyUSD → borrow apxUSD → deposit into apyUSD vault → repeat). See [Morpho Market](#morpho-market) section below.
 
 **Key metrics (March 16, 2026):**
@@ -383,14 +381,6 @@ Apyx uses an OpenZeppelin AccessManager for centralized role-based access contro
 
 ## Monitoring
 
-### apxUSD Token Monitoring
-
-- **apxUSD contract**: [`0x98a878B1CD98131b271883b390F68d2c90674665`](https://etherscan.io/address/0x98a878B1CD98131b271883b390F68d2c90674665)
-  - Monitor `totalSupply()` for unexpected minting events
-  - **Alert**: If supply increases by >1M in 24 hours
-  - Monitor `Transfer` events for large movements (>$500K)
-  - Monitor `Paused`/`Unpaused` events
-
 ### Rate Oracle Monitoring
 
 - **ApxUSDRateOracle**: [`0xa2ef2e7bf32248083e514a737259f3785ea8d37d`](https://etherscan.io/address/0xa2ef2e7bf32248083e514a737259f3785ea8d37d)
@@ -418,15 +408,6 @@ Apyx uses an OpenZeppelin AccessManager for centralized role-based access contro
   - Monitor `TargetFunctionRoleUpdated` events
   - **Alert**: On any role change
 
-### Morpho Market Monitoring
-
-- **Morpho Market** (apyUSD/apxUSD): Market ID `0xe233...1264`
-  - Monitor utilization rate (currently 97.1% -- extremely high)
-  - **Alert**: If utilization exceeds 99% (lender withdrawal risk)
-  - **Alert**: If total supply or borrow changes by >50% in 24 hours
-  - Monitor for liquidation events -- early liquidations signal stress
-  - Monitor apyUSD `convertToAssets()` rate for anomalies (Morpho oracle input)
-  - **Alert**: If exchange rate drops (would indicate vault losses)
 
 ### Supply & Holder Monitoring
 
@@ -445,11 +426,8 @@ Apyx uses an OpenZeppelin AccessManager for centralized role-based access contro
 | Proxy upgrade events | Real-time | Critical |
 | AccessManager role changes | Real-time | Critical |
 | Admin Safe transactions | Real-time | Critical |
-| Morpho market utilization & liquidations | Every 6 hours | Critical |
-| Curve pool balance ratio | Every 6 hours | High |
-| apxUSD supply changes | Every 6 hours | High |
-| apyUSD exchange rate (Morpho oracle input) | Every 6 hours | High |
-| Large holder movements | Daily | Medium |
+| Curve pool balance ratio | Hourly | High |
+| apyUSD exchange rate | Hourly | Medium |
 
 ## Risk Summary
 
@@ -462,7 +440,6 @@ Apyx uses an OpenZeppelin AccessManager for centralized role-based access contro
 - **Proper deployer decommissioning**: Deployer EOA's ADMIN_ROLE was revoked, admin control transferred to multisig
 - **Multi-party MPC custody**: Shared key management between Apyx and partners prevents single-entity mismanagement
 - **Strong growth**: Supply grew 4x in 15 days with CoinGecko listing and $1.93M daily volume
-- **Morpho oracle quality**: The Morpho market uses a standard immutable MorphoChainlinkOracleV2 that reads directly from the ERC-4626 vault -- significantly better than the manually-set Curve oracle
 
 ### Key Risks
 
@@ -534,7 +511,7 @@ Apyx uses an OpenZeppelin AccessManager for centralized role-based access contro
 - Rate oracle: Manually set, no automation
 - Minting: Programmatic rate limiting and signatures, but permissioned
 
-**Programmability Score: 3.0** -- Hybrid system. apyUSD exchange rate and yield vesting are on-chain. But the rate oracle, yield distribution initiation, and minting are all dependent on admin input. Between score 3 (hybrid) and score 4 (significant manual intervention).
+**Programmability Score: 4.0** -- Hybrid system. apyUSD exchange rate and yield vesting are on-chain. But the rate oracle, yield distribution initiation, and minting are all dependent on admin input.
 
 **Subcategory C: External Dependencies**
 
@@ -544,9 +521,9 @@ Apyx uses an OpenZeppelin AccessManager for centralized role-based access contro
 
 **Dependencies Score: 4.0** -- Critical dependency on off-chain assets and custody that cannot be verified on-chain. No fallback mechanism if custody providers fail. The oracle has no automated price feed.
 
-**Centralization Score = (4.0 + 3.0 + 4.0) / 3 = 3.67**
+**Centralization Score = (4.0 + 4.0 + 4.0) / 3 = 4.0**
 
-**Score: 3.7/5** -- Significant centralization risk driven by no timelock on admin actions, UUPS upgradeable contracts with instant upgrade capability, off-chain dependencies, and a manually-controlled rate oracle. Slightly improved from 3.8 due to the Admin Safe upgrade to 3-of-6.
+**Score: 4.0/5** -- Significant centralization risk driven by no timelock on admin actions, UUPS upgradeable contracts with instant upgrade capability, off-chain dependencies, and a manually-controlled rate oracle. Slightly improved from 3.8 due to the Admin Safe upgrade to 3-of-6.
 
 #### Category 3: Funds Management (Weight: 30%)
 
@@ -558,7 +535,7 @@ Apyx uses an OpenZeppelin AccessManager for centralized role-based access contro
 - Cannot verify collateral on-chain
 - Reserve is equity (not stablecoins) -- more volatile than typical stablecoin collateral
 
-**Collateralization Score: 3.5** -- Between score 3 (100% collateral, some off-chain, periodic attestation) and score 4 (partially collateralized or custodial, opaque reporting). Collateral quality is moderate -- publicly-traded equity is transparent in pricing but subordinated to debt in capital structure and subject to market volatility. No on-chain verification.
+**Collateralization Score: 4.0** -- Between score 3 (100% collateral, some off-chain, periodic attestation) and score 4 (partially collateralized or custodial, opaque reporting). Collateral quality is moderate -- publicly-traded equity is transparent in pricing but subordinated to debt in capital structure and subject to market volatility. No on-chain verification.
 
 **Subcategory B: Provability**
 
@@ -568,11 +545,11 @@ Apyx uses an OpenZeppelin AccessManager for centralized role-based access contro
 - Daily NAV reporting promised but not verified
 - Rate oracle: manually set, no third-party verification
 
-**Provability Score: 4.0** -- Between score 3 (manual reporting by admins, known custodian attestation) and score 4 (infrequent reporting, self-reported only). No attestation has been published yet, and all reserve claims are currently unverified. The protocol is simply too new.
+**Provability Score: 5.0** -- No attestation has been published yet, and all reserve claims are currently unverified.
 
-**Funds Management Score = (3.5 + 4.0) / 2 = 3.75**
+**Funds Management Score = (4.0 + 5.0) / 2 = 4.5**
 
-**Score: 3.75/5** -- Off-chain collateral with no published attestations yet. Publicly-traded equity provides pricing transparency but not reserve verification.
+**Score: 4.5/5** -- Off-chain collateral with no published attestations yet. Publicly-traded equity provides pricing transparency but not reserve verification.
 
 #### Category 4: Liquidity Risk (Weight: 15%)
 
@@ -604,13 +581,13 @@ Final Score = (Centralization × 0.30) + (Funds Mgmt × 0.30) + (Audits × 0.20)
 | Category | Score | Weight | Weighted |
 |----------|-------|--------|----------|
 | Audits & Historical | 4.0 | 20% | 0.80 |
-| Centralization & Control | 3.7 | 30% | 1.11 |
-| Funds Management | 3.75 | 30% | 1.125 |
+| Centralization & Control | 4.0 | 30% | 1.20 |
+| Funds Management | 4.5 | 30% | 1.35 |
 | Liquidity Risk | 3.0 | 15% | 0.45 |
 | Operational Risk | 4.0 | 5% | 0.20 |
-| **Final Score** | | | **3.69** |
+| **Final Score** | | | **4.0/5.0** |
 
-**Final Score: 3.7** (rounded)
+**Final Score: 4.0/5.0**
 
 ### Risk Tier
 
