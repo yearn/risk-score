@@ -1,0 +1,171 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import ScoreBadge from "../components/ScoreBadge.astro";
+import { fetchMorphoMarkets } from "../lib/morpho";
+
+const marketChains = await fetchMorphoMarkets();
+---
+
+<BaseLayout title="Morpho — Yearn">
+  <a href="/" class="back-link">&larr; Risk Reports</a>
+  <h1>Morpho Markets <span class="total-count">{marketChains.reduce((s, c) => s + c.markets.length, 0)}</span></h1>
+
+  <div>
+    {
+      marketChains.map((chain) => (
+        <section class="chain-section">
+          <h2>
+            {chain.chainName}
+            <span class="chain-count">{chain.markets.length}</span>
+          </h2>
+          <div class="table-wrap">
+            <table>
+              <colgroup>
+                <col />
+                <col style="width:12rem" />
+                <col style="width:5rem" />
+                <col style="width:5rem" />
+              </colgroup>
+              <thead>
+                <tr>
+                  <th>Market</th>
+                  <th class="col-center">Oracle</th>
+                  <th class="col-right">LLTV</th>
+                  <th class="col-right">Score</th>
+                </tr>
+              </thead>
+              <tbody>
+                {chain.markets
+                  .sort((a, b) => a.riskLevel - b.riskLevel)
+                  .map((market) => (
+                    <tr>
+                      <td>
+                        <a
+                          href={`https://app.morpho.org/${chain.morphoSlug}/market/${market.uniqueKey}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          class="market-link"
+                        >
+                          {(market.collateralLogoURI || market.loanLogoURI) && (
+                            <span class="token-pair">
+                              {market.collateralLogoURI && (
+                                <img src={market.collateralLogoURI} alt="" width="20" height="20" class="token-icon token-back" loading="lazy" />
+                              )}
+                              {market.loanLogoURI && (
+                                <img src={market.loanLogoURI} alt="" width="20" height="20" class="token-icon token-front" loading="lazy" />
+                              )}
+                            </span>
+                          )}
+                          {market.description}
+                        </a>
+                      </td>
+                      <td class="col-center col-oracle">{market.oracle}</td>
+                      <td class="col-right">{market.lltv}</td>
+                      <td class="col-right">
+                        <ScoreBadge score={market.riskLevel} />
+                      </td>
+                    </tr>
+                  ))}
+              </tbody>
+            </table>
+          </div>
+        </section>
+      ))
+    }
+  </div>
+</BaseLayout>
+
+
+<style>
+  .back-link {
+    display: inline-block;
+    margin-bottom: 1rem;
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+  }
+  .back-link:hover {
+    color: var(--text-primary);
+  }
+  h1 {
+    margin-bottom: 1rem;
+  }
+  .total-count {
+    font-size: 0.75rem;
+    font-weight: 600;
+    background: var(--bg-secondary);
+    color: var(--text-secondary);
+    padding: 0.1rem 0.5rem;
+    border-radius: 10px;
+    vertical-align: middle;
+  }
+  .chain-section {
+    margin-bottom: 2.5rem;
+  }
+  .chain-section h2 {
+    font-size: 1.15rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .chain-count {
+    font-size: 0.75rem;
+    font-weight: 600;
+    background: var(--bg-secondary);
+    color: var(--text-secondary);
+    padding: 0.1rem 0.5rem;
+    border-radius: 10px;
+  }
+  .market-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .token-pair {
+    position: relative;
+    width: 30px;
+    height: 20px;
+    flex-shrink: 0;
+  }
+  .token-icon {
+    border-radius: 50%;
+    position: absolute;
+    top: 0;
+  }
+  .token-back {
+    left: 0;
+    z-index: 1;
+  }
+  .token-front {
+    left: 10px;
+    z-index: 2;
+    border: 1.5px solid var(--bg-primary);
+    box-sizing: content-box;
+    width: 17px;
+    height: 17px;
+  }
+  table {
+    table-layout: fixed;
+  }
+  .col-center {
+    text-align: center;
+  }
+  .col-right {
+    text-align: right;
+  }
+  .col-oracle {
+    color: var(--text-secondary);
+    font-size: 0.85em;
+  }
+  @media (max-width: 640px) {
+    table {
+      font-size: 0.8rem;
+    }
+    th,
+    td {
+      padding: 0.4rem 0.5rem;
+    }
+  }
+</style>

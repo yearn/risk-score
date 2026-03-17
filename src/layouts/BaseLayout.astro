@@ -37,6 +37,8 @@ const { title } = Astro.props;
         <nav class="header-nav">
           <a href="/">Reports</a>
           <a href="/tokens/">Tokens</a>
+          <a href="/morpho/">Markets</a>
+          <a href="https://app.morpho.org/ethereum/curator/yearn" target="_blank" rel="noopener noreferrer" class="nav-external">Morpho <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>
         </nav>
         </div>
         <button id="theme-toggle" class="theme-toggle" aria-label="Toggle light mode">
@@ -95,7 +97,7 @@ const { title } = Astro.props;
   .header-row {
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    gap: 1.5rem;
   }
   .header-left {
     display: flex;
@@ -116,6 +118,14 @@ const { title } = Astro.props;
     color: var(--text-primary);
     text-decoration: none;
   }
+  .nav-external {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+  }
+  .nav-external svg {
+    opacity: 0.6;
+  }
   .logo-link {
     display: flex;
     align-items: center;
@@ -133,6 +143,7 @@ const { title } = Astro.props;
     display: block;
   }
   .theme-toggle {
+    margin-left: auto;
     background: none;
     border: 1px solid var(--border);
     border-radius: 6px;
