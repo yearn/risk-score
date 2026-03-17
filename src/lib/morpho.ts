@@ -9,6 +9,8 @@ export interface MorphoMarket {
   uniqueKey: string;
   description: string;
   riskLevel: number;
+  lltv: string;
+  oracle: string;
   collateralLogoURI: string;
   loanLogoURI: string;
 }
@@ -211,12 +213,21 @@ function parseMorphoMarkets(raw: string): ChainMarkets[] {
       let marketMatch;
       while ((marketMatch = marketPattern.exec(entries)) !== null) {
         const comment = marketMatch[2]?.trim() ?? "";
-        // Extract pair name from comment like "WBTC/USDC -> lltv 86%, oracle: ..."
-        const description = comment.split("->")[0].trim();
+        // Extract pair name, lltv, oracle from comment like "WBTC/USDC -> lltv 86%, chainlink oracles"
+        const [pairPart, detailPart] = comment.split("->");
+        const description = pairPart.trim();
+        const details = detailPart?.trim() ?? "";
+        const lltvMatch = details.match(/lltv\s+([\d.]+%)/i);
+        const lltv = lltvMatch?.[1] ?? "";
+        // Oracle is everything after the lltv percentage and comma
+        const oracleMatch = details.match(/lltv\s+[\d.]+%\s*,\s*(.*)/i);
+        const oracle = oracleMatch?.[1]?.trim() ?? "";
         existing.push({
           uniqueKey: marketMatch[1],
           description,
           riskLevel: risk,
+          lltv,
+          oracle,
           collateralLogoURI: "",
           loanLogoURI: "",
         });

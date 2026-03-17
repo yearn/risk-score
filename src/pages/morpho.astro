@@ -2,7 +2,6 @@
 import BaseLayout from "../layouts/BaseLayout.astro";
 import ScoreBadge from "../components/ScoreBadge.astro";
 import { fetchMorphoMarkets } from "../lib/morpho";
-import { scoreTier } from "../lib/colors";
 
 const marketChains = await fetchMorphoMarkets();
 ---
@@ -23,14 +22,16 @@ const marketChains = await fetchMorphoMarkets();
             <table>
               <colgroup>
                 <col />
-                <col style="width:7rem" />
-                <col style="width:9rem" />
+                <col style="width:5rem" />
+                <col style="width:5rem" />
+                <col style="width:12rem" />
               </colgroup>
               <thead>
                 <tr>
                   <th>Market</th>
-                  <th class="col-right">Risk Level</th>
-                  <th class="col-right">Risk Tier</th>
+                  <th class="col-right">LLTV</th>
+                  <th class="col-right">Score</th>
+                  <th>Oracle</th>
                 </tr>
               </thead>
               <tbody>
@@ -58,10 +59,11 @@ const marketChains = await fetchMorphoMarkets();
                           {market.description}
                         </a>
                       </td>
+                      <td class="col-right">{market.lltv}</td>
                       <td class="col-right">
                         <ScoreBadge score={market.riskLevel} />
                       </td>
-                      <td class="col-right">{scoreTier(market.riskLevel)}</td>
+                      <td class="col-oracle">{market.oracle}</td>
                     </tr>
                   ))}
               </tbody>
@@ -149,6 +151,10 @@ const marketChains = await fetchMorphoMarkets();
   }
   .col-right {
     text-align: right;
+  }
+  .col-oracle {
+    color: var(--text-secondary);
+    font-size: 0.85em;
   }
   @media (max-width: 640px) {
     table {
