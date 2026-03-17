@@ -1,4 +1,25 @@
 import { marked } from "marked";
+import { protocolIconUrl, chainIconUrl } from "./icons";
+
+// Override the default GFM del (strikethrough) tokenizer to only match
+// ~~double tildes~~, not ~single tildes~. Reports use ~$value frequently
+// for approximations, which otherwise gets rendered as <del>strikethrough</del>.
+marked.use({
+  tokenizer: {
+    del(src) {
+      const match = src.match(/^~~(?=[^\s~])([\s\S]*?[^\s~])~~(?=[^~]|$)/);
+      if (match) {
+        return {
+          type: "del",
+          raw: match[0],
+          text: match[1],
+          tokens: this.lexer.inlineTokens(match[1]),
+        };
+      }
+      return undefined;
+    },
+  },
+});
 
 export interface ReportMeta {
   slug: string;
@@ -9,6 +30,7 @@ export interface ReportMeta {
   finalScore: number;
   type: "Protocol" | "Asset";
   iconUrl: string;
+  chainIconUrl: string;
 }
 
 export interface CategoryScore {
@@ -22,6 +44,7 @@ export interface ReportData extends ReportMeta {
   overviewHtml: string;
   scoreTable: CategoryScore[];
   riskSummaryHtml: string;
+  fullReportHtml: string;
 }
 
 const TYPE_OVERRIDES: Record<string, "Protocol" | "Asset"> = {
@@ -40,10 +63,6 @@ function parseDefillamaSlug(slug: string, content: string): string {
   return match?.[1] ?? "";
 }
 
-function iconUrl(defillamaSlug: string): string {
-  if (!defillamaSlug) return "";
-  return `https://icons.llamao.fi/icons/protocols/${defillamaSlug}?w=48&h=48`;
-}
 
 function parseMeta(slug: string, content: string): ReportMeta {
   const titleMatch = content.match(
@@ -61,16 +80,18 @@ function parseMeta(slug: string, content: string): ReportMeta {
   const scoreMatch = content.match(/\*\*Final Score:\s*([\d.]+)\/5\.0\*\*/);
 
   const defillamaSlug = parseDefillamaSlug(slug, content);
+  const chainStr = chainMatch?.[1]?.trim() ?? "";
 
   return {
     slug,
     name,
     date: dateMatch?.[1]?.trim() ?? "",
     token: tokenMatch?.[1]?.trim() ?? "",
-    chain: chainMatch?.[1]?.trim() ?? "",
+    chain: chainStr,
     finalScore: parseFloat(scoreMatch?.[1] ?? "0"),
     type,
-    iconUrl: iconUrl(defillamaSlug),
+    iconUrl: protocolIconUrl(defillamaSlug),
+    chainIconUrl: chainIconUrl(chainStr),
   };
 }
 
@@ -142,17 +163,32 @@ function parseScoreTable(content: string): CategoryScore[] {
   return categories;
 }
 
+function extractFullBody(content: string): string {
+  const sections = content.split(/(?=^## )/m);
+  const skipHeadings = [
+    "Overview + Links",
+    "Risk Summary",
+    "Risk Score Assessment",
+  ];
+  const bodySections = sections
+    .slice(1) // skip title/metadata block
+    .filter((s) => !skipHeadings.some((h) => s.startsWith(`## ${h}`)));
+  return bodySections.join("\n").trim();
+}
+
 export function parseReport(slug: string, content: string): ReportData {
   const meta = parseMeta(slug, content);
 
   const overviewMd = extractSection(content, "Overview + Links");
   const riskSummaryMd = extractSection(content, "Risk Summary");
   const scoreTable = parseScoreTable(content);
+  const fullBodyMd = extractFullBody(content);
 
   return {
     ...meta,
     overviewHtml: marked.parse(overviewMd, { async: false }) as string,
     scoreTable,
     riskSummaryHtml: marked.parse(riskSummaryMd, { async: false }) as string,
+    fullReportHtml: marked.parse(fullBodyMd, { async: false }) as string,
   };
 }

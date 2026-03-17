@@ -43,14 +43,6 @@ Etherscan and other scan sites enables agents to query and analyze blockchain da
 * **Verify Proxy Contract**: Submit proxy contracts with `action=verifyproxycontract`
 * **Check Verification Status**: Monitor verification progress using `action=checkverifystatus`
 
-### Gas & Network Data
-
-* **Get Gas Oracle**: Retrieve current gas price recommendations using `module=gastracker&action=gasoracle`
-* **Get Gas Estimate**: Estimate gas for transactions using `action=gasestimate`
-* **Get Daily Gas Stats**: Query daily gas usage, limits, and prices (PRO endpoints)
-* **Get Network Stats**: Retrieve ETH supply, price, node count, chain size using `module=stats`
-* **Get Daily Network Metrics**: Query daily transaction counts, new addresses, network difficulty (PRO endpoints)
-
 ### Event Logs & Monitoring
 
 * **Get Event Logs**: Retrieve logs from addresses using `module=logs&action=getLogs&address=0x...&fromBlock=X&toBlock=Y`
@@ -95,7 +87,7 @@ Etherscan and other scan sites enables agents to query and analyze blockchain da
 1. Retrieve transaction list: `GET /v2/api?module=account&action=txlist&address=0x...&startblock=0&endblock=latest`
 2. Filter for specific token transfers: `GET /v2/api?module=account&action=tokentx&contractaddress=0xUSDC&address=0x...`
 3. Get transaction receipts: `GET /v2/api?module=transaction&action=gettxreceiptstatus&txhash=0x...`
-4. Analyze gas costs and transaction status
+4. Analyze transaction status
 
 ### Contract Verification Workflow
 
@@ -110,13 +102,6 @@ Etherscan and other scan sites enables agents to query and analyze blockchain da
 2. Filter by event topic: Add `topic0=0x...` parameter for specific event signatures
 3. Paginate through results using `page` and `offset` parameters
 4. Parse log data to extract event parameters
-
-### Gas Price Monitoring Workflow
-
-1. Get current gas prices: `GET /v2/api?module=gastracker&action=gasoracle&chainid=1`
-2. Estimate gas for transaction: `GET /v2/api?module=proxy&action=ethestimategas&to=0x...&data=0x...`
-3. Calculate transaction cost: gasUsed × gasPrice
-4. Monitor daily gas trends: `GET /v2/api?module=stats&action=dailyavggasprice` (PRO)
 
 ### Cross-Chain Data Aggregation
 
@@ -158,4 +143,3 @@ Etherscan integrates with:
 ***
 
 > For additional documentation and navigation, see: [https://docs.etherscan.io/llms.txt](https://docs.etherscan.io/llms.txt)
-

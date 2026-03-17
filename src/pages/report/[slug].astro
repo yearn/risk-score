@@ -3,7 +3,7 @@ import BaseLayout from "../../layouts/BaseLayout.astro";
 import ScoreBadge from "../../components/ScoreBadge.astro";
 import ScoreTable from "../../components/ScoreTable.astro";
 import { getAllSlugs, getReportBySlug } from "../../lib/reports";
-import { scoreTier } from "../../lib/colors";
+
 
 export function getStaticPaths() {
   return getAllSlugs().map((slug) => ({ params: { slug } }));
@@ -14,12 +14,17 @@ const report = getReportBySlug(slug!);
 if (!report) return Astro.redirect("/");
 ---
 
-<BaseLayout title={`${report.name} — Risk Report`}>
+<BaseLayout title={`${report.name} — Yearn Risk`}>
   <a href="/" class="back-link">&larr; All Reports</a>
 
   <div class="report-header">
     <div class="header-top">
-      <h1>{report.name}</h1>
+      <div class="header-title">
+        {report.iconUrl && (
+          <img src={report.iconUrl} alt="" width="32" height="32" class="report-protocol-icon" loading="lazy" />
+        )}
+        <h1>{report.name}</h1>
+      </div>
       <ScoreBadge score={report.finalScore} size="large" />
     </div>
     <div class="meta">
@@ -28,8 +33,6 @@ if (!report) return Astro.redirect("/");
       <span>{report.chain}</span>
       <span class="sep">/</span>
       <span>{report.date}</span>
-      <span class="sep">/</span>
-      <span class={`tag tag-${report.type.toLowerCase()}`}>{report.type}</span>
     </div>
     <a
       href={`https://github.com/yearn/risk-score/blob/master/reports/report/${report.slug}.md`}
@@ -55,6 +58,16 @@ if (!report) return Astro.redirect("/");
     <h2>Risk Summary</h2>
     <div class="prose" set:html={report.riskSummaryHtml} />
   </section>
+
+  <details class="full-report">
+    <summary class="full-report-toggle">
+      <span>Full Report</span>
+      <svg class="chevron" width="20" height="20" viewBox="0 0 20 20" fill="none">
+        <path d="M6 8l4 4 4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </summary>
+    <div class="prose" set:html={report.fullReportHtml} />
+  </details>
 </BaseLayout>
 
 <style>
@@ -76,6 +89,15 @@ if (!report) return Astro.redirect("/");
     gap: 1rem;
     flex-wrap: wrap;
   }
+  .header-title {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+  .report-protocol-icon {
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
   h1 {
     font-size: 1.5rem;
   }
@@ -93,26 +115,10 @@ if (!report) return Astro.redirect("/");
     margin-top: 0.75rem;
     font-size: 1.1rem;
     font-weight: 600;
-    color: var(--text-primary);
-  }
-  .github-link:hover {
     color: var(--brand-blue);
   }
-  .tag {
-    display: inline-block;
-    padding: 0.1rem 0.4rem;
-    border-radius: 3px;
-    font-size: 0.75rem;
-    font-weight: 600;
-    text-transform: uppercase;
-  }
-  .tag-protocol {
-    background: rgba(6, 117, 249, 0.15);
-    color: #0675f9;
-  }
-  .tag-asset {
-    background: rgba(250, 204, 21, 0.15);
-    color: #facc15;
+  .github-link:hover {
+    text-decoration: underline;
   }
   .section {
     margin-bottom: 2.5rem;
@@ -122,6 +128,42 @@ if (!report) return Astro.redirect("/");
     margin-bottom: 1rem;
     padding-bottom: 0.5rem;
     border-bottom: 1px solid var(--border);
+  }
+  .full-report {
+    margin-bottom: 2.5rem;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+  }
+  .full-report-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.75rem 1rem;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    list-style: none;
+    user-select: none;
+    color: var(--text-primary);
+    background: var(--bg-secondary);
+    border-radius: 8px;
+  }
+  .full-report[open] .full-report-toggle {
+    border-radius: 8px 8px 0 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .full-report-toggle::-webkit-details-marker {
+    display: none;
+  }
+  .full-report-toggle .chevron {
+    transition: transform 0.2s ease;
+    flex-shrink: 0;
+  }
+  .full-report[open] .full-report-toggle .chevron {
+    transform: rotate(180deg);
+  }
+  .full-report > .prose {
+    padding: 1.25rem;
   }
   .prose :global(p) {
     margin-bottom: 0.75rem;
@@ -167,6 +209,8 @@ if (!report) return Astro.redirect("/");
     border-collapse: collapse;
     margin-bottom: 0.75rem;
     font-size: 0.85rem;
+    display: block;
+    overflow-x: auto;
   }
   .prose :global(th),
   .prose :global(td) {

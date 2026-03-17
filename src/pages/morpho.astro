@@ -1,83 +1,17 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
 import ScoreBadge from "../components/ScoreBadge.astro";
-import { fetchMorphoVaults, fetchMorphoMarkets } from "../lib/morpho";
+import { fetchMorphoMarkets } from "../lib/morpho";
 import { scoreTier } from "../lib/colors";
 
-const vaultChains = await fetchMorphoVaults();
 const marketChains = await fetchMorphoMarkets();
 ---
 
 <BaseLayout title="Morpho — Yearn">
   <a href="/" class="back-link">&larr; Risk Reports</a>
-  <h1>Morpho Risk Levels</h1>
+  <h1>Morpho Markets <span class="total-count">{marketChains.reduce((s, c) => s + c.markets.length, 0)}</span></h1>
 
-  <div class="tabs">
-    <button class="tab active" data-tab="vaults">
-      Vaults <span class="tab-count">{vaultChains.reduce((s, c) => s + c.vaults.length, 0)}</span>
-    </button>
-    <button class="tab" data-tab="markets">
-      Markets <span class="tab-count">{marketChains.reduce((s, c) => s + c.markets.length, 0)}</span>
-    </button>
-  </div>
-
-  <div id="panel-vaults" class="tab-panel">
-    {
-      vaultChains.map((chain) => (
-        <section class="chain-section">
-          <h2>
-            {chain.chainName}
-            <span class="chain-count">{chain.vaults.length}</span>
-          </h2>
-          <div class="table-wrap">
-            <table>
-              <colgroup>
-                <col />
-                <col style="width:7rem" />
-                <col style="width:9rem" />
-              </colgroup>
-              <thead>
-                <tr>
-                  <th>Vault</th>
-                  <th class="col-right">Risk Level</th>
-                  <th class="col-right">Risk Tier</th>
-                </tr>
-              </thead>
-              <tbody>
-                {chain.vaults
-                  .sort((a, b) => a.riskLevel - b.riskLevel)
-                  .map((vault) => (
-                    <tr>
-                      <td>
-                        <a
-                          href={`https://app.morpho.org/${chain.morphoSlug}/vault/${vault.address}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          class="vault-link"
-                        >
-                          {vault.iconUrl ? (
-                            <img src={vault.iconUrl} alt="" width="20" height="20" class="vault-icon" loading="lazy" />
-                          ) : (
-                            <div class="icon-placeholder-sm" />
-                          )}
-                          {vault.name}
-                        </a>
-                      </td>
-                      <td class="col-right">
-                        <ScoreBadge score={vault.riskLevel} />
-                      </td>
-                      <td class="col-right">{scoreTier(vault.riskLevel)}</td>
-                    </tr>
-                  ))}
-              </tbody>
-            </table>
-          </div>
-        </section>
-      ))
-    }
-  </div>
-
-  <div id="panel-markets" class="tab-panel hidden">
+  <div>
     {
       marketChains.map((chain) => (
         <section class="chain-section">
@@ -139,22 +73,6 @@ const marketChains = await fetchMorphoMarkets();
   </div>
 </BaseLayout>
 
-<script is:inline>
-  document.querySelectorAll(".tab").forEach((btn) => {
-    btn.addEventListener("click", () => {
-      document
-        .querySelectorAll(".tab")
-        .forEach((b) => b.classList.remove("active"));
-      btn.classList.add("active");
-      document
-        .querySelectorAll(".tab-panel")
-        .forEach((p) => p.classList.add("hidden"));
-      document
-        .getElementById("panel-" + btn.dataset.tab)
-        .classList.remove("hidden");
-    });
-  });
-</script>
 
 <style>
   .back-link {
@@ -169,42 +87,14 @@ const marketChains = await fetchMorphoMarkets();
   h1 {
     margin-bottom: 1rem;
   }
-  .tabs {
-    display: flex;
-    gap: 0;
-    border-bottom: 1px solid var(--border);
-    margin-bottom: 1rem;
-  }
-  .tab {
-    background: none;
-    border: none;
-    border-bottom: 2px solid transparent;
-    padding: 0.5rem 1rem;
-    font-size: 0.95rem;
-    color: var(--text-secondary);
-    cursor: pointer;
-    transition: color 0.2s, border-color 0.2s;
-    display: flex;
-    align-items: center;
-    gap: 0.4rem;
-  }
-  .tab:hover {
-    color: var(--text-primary);
-  }
-  .tab.active {
-    color: var(--text-primary);
-    border-bottom-color: var(--brand-blue);
-  }
-  .tab-count {
+  .total-count {
     font-size: 0.75rem;
     font-weight: 600;
     background: var(--bg-secondary);
     color: var(--text-secondary);
-    padding: 0.1rem 0.45rem;
+    padding: 0.1rem 0.5rem;
     border-radius: 10px;
-  }
-  .tab-panel.hidden {
-    display: none;
+    vertical-align: middle;
   }
   .chain-section {
     margin-bottom: 2.5rem;
@@ -226,22 +116,10 @@ const marketChains = await fetchMorphoMarkets();
     padding: 0.1rem 0.5rem;
     border-radius: 10px;
   }
-  .vault-link,
   .market-link {
     display: inline-flex;
     align-items: center;
     gap: 0.5rem;
-  }
-  .vault-icon {
-    border-radius: 50%;
-    flex-shrink: 0;
-  }
-  .icon-placeholder-sm {
-    width: 20px;
-    height: 20px;
-    border-radius: 50%;
-    background: var(--bg-secondary);
-    flex-shrink: 0;
   }
   .token-pair {
     position: relative;
