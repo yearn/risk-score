@@ -221,7 +221,7 @@ function parseMorphoMarkets(raw: string): ChainMarkets[] {
         const lltv = lltvMatch?.[1] ?? "";
         // Oracle is everything after the lltv percentage and comma
         const oracleMatch = details.match(/lltv\s+[\d.]+%\s*,\s*(.*)/i);
-        const oracle = oracleMatch?.[1]?.trim() ?? "";
+        const oracle = (oracleMatch?.[1]?.trim() ?? "").replace(/^oracle:\s*/i, "");
         existing.push({
           uniqueKey: marketMatch[1],
           description,
