@@ -22,16 +22,16 @@ const marketChains = await fetchMorphoMarkets();
             <table>
               <colgroup>
                 <col />
-                <col style="width:5rem" />
-                <col style="width:5rem" />
                 <col style="width:12rem" />
+                <col style="width:5rem" />
+                <col style="width:5rem" />
               </colgroup>
               <thead>
                 <tr>
                   <th>Market</th>
+                  <th class="col-center">Oracle</th>
                   <th class="col-right">LLTV</th>
                   <th class="col-right">Score</th>
-                  <th>Oracle</th>
                 </tr>
               </thead>
               <tbody>
@@ -59,11 +59,11 @@ const marketChains = await fetchMorphoMarkets();
                           {market.description}
                         </a>
                       </td>
+                      <td class="col-center col-oracle">{market.oracle}</td>
                       <td class="col-right">{market.lltv}</td>
                       <td class="col-right">
                         <ScoreBadge score={market.riskLevel} />
                       </td>
-                      <td class="col-oracle">{market.oracle}</td>
                     </tr>
                   ))}
               </tbody>
@@ -148,6 +148,9 @@ const marketChains = await fetchMorphoMarkets();
   }
   table {
     table-layout: fixed;
+  }
+  .col-center {
+    text-align: center;
   }
   .col-right {
     text-align: right;
