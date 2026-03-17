@@ -1,10 +1,10 @@
 # Protocol Risk Assessment: Re Protocol reUSD
 
-- **Assessment Date:** March 6, 2026
+- **Assessment Date:** March 17, 2026
 - **Token:** reUSD (Re Protocol Deposit Token)
 - **Chain:** Ethereum (primary), multi-chain (Avalanche, Arbitrum, Base, Katana, BNB Chain, Ink)
 - **Token Address:** [`0x5086bf358635B81D8C47C66d1C8b9E567Db70c72`](https://etherscan.io/address/0x5086bf358635B81D8C47C66d1C8b9E567Db70c72)
-- **Final Score: 3.5/5.0**
+- **Final Score: 3.4/5.0**
 
 ## Overview + Links
 
@@ -25,12 +25,13 @@ The chosen "Applicable APY" is converted to a daily rate, and reUSD's **token pr
 - The off-chain entity issues **Surplus Notes** to the ICL, contractually locking in principal protection and an interest rate matching the Applicable APY
 - Off-chain balances are attested daily by **The Network Firm** (with read-only account access) and published through a **Chainlink oracle**
 
-**Key metrics (Mar 6, 2026):**
-- reUSD Price: ~$1.052 ([CoinGecko](https://www.coingecko.com/en/coins/re-protocol-reusd))
-- reUSD Market Cap: ~$111.5M (all chains)
-- reUSD Ethereum Total Supply: ~87.2M tokens ([Etherscan](https://etherscan.io/token/0x5086bf358635b81d8c47c66d1c8b9e567db70c72))
-- Holders (Ethereum): ~465
-- 24h Trading Volume: ~$76.8K
+**Key metrics (Mar 17, 2026):**
+- reUSD Price: ~$1.067 ([CoinGecko](https://www.coingecko.com/en/coins/re-protocol-reusd))
+- reUSD Market Cap: ~$184.6M (all chains)
+- reUSD Ethereum Total Supply: ~173.0M tokens ([Etherscan](https://etherscan.io/token/0x5086bf358635b81d8c47c66d1c8b9e567db70c72))
+- Holders (Ethereum): ~576
+- 24h Trading Volume: ~$10.8M
+- TVL (DeFi Llama): ~$168.6M
 - Re Protocol Written Premiums (2025): $168.8M
 - Reinsurance Capacity Unlocked: >$134M
 
@@ -92,7 +93,7 @@ Re Protocol has undergone auditing by 2 firms across 3+ audit engagements.
 
 | # | Date | Scope | Firm | Key Findings | Report |
 |---|------|-------|------|-------------|--------|
-| 1 | Aug 2024 | Smart Contract Audit (DeFi) | Hacken | Multiple issues: centralized minting, unaudited libraries, large array iteration gas risk, centralized oracles, 42.11% branch coverage | [Hacken](https://hacken.io/audits/re-protocol/sca-re-re-defi-aug2024/) |
+| 1 | Aug 2024 | Smart Contract Audit (DeFi) | Hacken | 29 findings (0 Critical, 0 High, 4 Medium, 7 Low, 18 Observations), all resolved. Centralized minting, unaudited libraries, gas risk, 42.11% branch coverage | [Hacken](https://hacken.io/audits/re-protocol/sca-re-re-defi-aug2024/) |
 | 2 | Previous | Additional audits | Hacken | 3 total audits on record | [Hacken Audits](https://hacken.io/audits/re-protocol/) |
 | 3 | Sep 2025 | Re Core (comprehensive) | Certora | 13 issues identified, all addressed and fixed. Formal verification and manual review. | [Certora](https://www.certora.com/reports/re-core) |
 
@@ -116,10 +117,10 @@ Re Protocol has undergone auditing by 2 firms across 3+ audit engagements.
 
 ## Historical Track Record
 
-- **Production History**: Re Protocol launched in late 2022. reUSD token has been in production for approximately 1+ year (Curve pool created ~8 months ago per GeckoTerminal).
-- **TVL**: ~$111.5M market cap across all chains. ~87.2M reUSD on Ethereum.
+- **Production History**: Re Protocol launched in late 2022. reUSD token inception June 12, 2025 (per RWA.xyz). Curve pool created ~9 months ago per GeckoTerminal.
+- **TVL**: ~$168.6M (DeFi Llama). ~$184.6M market cap across all chains. ~173.0M reUSD on Ethereum.
 - **Written Premiums**: $168.8M in 2025. >$134M in reinsurance capacity unlocked.
-- **Exchange Rate History**: reUSD has appreciated from ~$1.00 to ~$1.052, representing ~5.2% cumulative yield since inception.
+- **Exchange Rate History**: reUSD has appreciated from ~$1.00 to ~$1.067, representing ~6.7% cumulative yield since inception (June 2025).
 - **Incidents**: No reported security incidents, exploits, or hacks found for Re Protocol's reUSD on Rekt News or DeFi Llama hacks database. **Note**: Resupply Protocol (a different project with a different reUSD token at a different address) suffered a $9.6M exploit in June 2025 -- this is unrelated to Re Protocol/re.xyz.
 - **Peg/Price Stability**: reUSD is not a stablecoin in the traditional sense. Its price is designed to monotonically increase (accruing yield), so "depegging" is not applicable in the same way. The token price should only ever go up.
 
@@ -146,9 +147,9 @@ reUSD is an **ERC-20 deposit token** that uses a **price-appreciation model** (n
 - **Deposits**: KYC/AML required (via SumSub and Chainalysis). Users must pass KYC checks because a portion of protocol capital is deployed with a Cayman-regulated reinsurance company (CIMA-regulated)
 - **Instant Redemption**: Available from the on-chain instant liquidity buffer (up to ~10% of NAV). First-come, first-served. Atomic, same-block settlement
 - **Quarterly Redemption**: Once instant buffer is exhausted (< 1% of supply), the contract reverts to "window-only" mode. Quarterly queue, pro-rata fulfillment
-- **DEX Trading**: Can be traded on Curve reUSD/USDC pool
+- **DEX Trading**: Can be traded on multiple Curve pools (reUSD/scrvUSD, sfrxUSD/reUSD, reUSD/sUSDe, reUSD/USDC) totaling ~$17.4M liquidity
 - **Not available to U.S. persons**
-- **Fees**: TODO - need to verify fee structure
+- **Fees**: Redemption fee of 6 bps (0.06%) applied at the interaction layer ([docs](https://docs.re.xyz/insurance-capital-layers/what-is-reusd)). No documented deposit fees, management fees, or performance fees. RWA.xyz reports 0.18% subscription and 0.18% redemption fees — discrepancy with docs may reflect different fee tiers or methodology. On-chain data shows ~$1,535 total deposit fees collected historically, suggesting a small deposit fee mechanism exists in the contracts (also flagged in Hacken audit finding F-2024-5214 "Unclaimed Deposit Fees Unaccounted For").
 
 ### Collateralization
 
@@ -172,28 +173,36 @@ reUSD is an **ERC-20 deposit token** that uses a **price-appreciation model** (n
 2. **Quarterly Redemption**: Processed pro-rata with available capital not reserved for reinsurance plus actuarially released funds
 3. **DEX Swap**: Sell reUSD on Curve reUSD/USDC pool
 
-### DEX Liquidity (Mar 6, 2026)
+### DEX Liquidity (Mar 17, 2026)
 
-| Protocol | Chain | Pool | TVL | Notes |
-|----------|-------|------|-----|-------|
-| Curve | Ethereum | reUSD/USDC | ~$450K | ~217K reUSD + ~217K USDC |
+| Protocol | Chain | Pool | TVL | 24h Volume |
+|----------|-------|------|-----|------------|
+| Curve | Ethereum | reUSD/scrvUSD | ~$10.0M | ~$130K |
+| Curve | Ethereum | sfrxUSD/reUSD | ~$3.5M | ~$29K |
+| Curve | Ethereum | reUSD/sUSDe | ~$1.4M | ~$842K |
+| Curve | Ethereum | reUSD/fxUSD | ~$503K | ~$13K |
+| Curve | Ethereum | reUSD/USDC | ~$450K | ~$561K |
+| Curve | Ethereum | reUSDe/sUSDe | ~$543K | ~$308K |
+| Blackhole | Avalanche | reUSD/USDC | ~$956K | ~$12K |
+| DEX | Avalanche | reUSD/USDC | ~$509K | ~$3K |
 
 ### DeFi Integrations
 
 | Protocol | Type | Notes |
 |----------|------|-------|
-| Curve | DEX | reUSD/USDC pool |
+| Curve | DEX | Multiple pools: reUSD/scrvUSD (~$10M), sfrxUSD/reUSD (~$3.5M), reUSD/sUSDe (~$1.4M), reUSD/fxUSD (~$503K), reUSD/USDC (~$450K) |
 | Morpho | Lending | reUSD as collateral (mentioned in docs, 5x points for Re Airdrop) |
 | Pendle | Yield | Compatible for yield tokenization |
 
 ### Liquidity Summary
 
-- **Total DEX Liquidity**: ~$450K (very thin compared to market cap of ~$111.5M)
-- **24h Trading Volume**: ~$76.8K
-- **Instant redemption buffer**: Up to ~10% of NAV (actuarially determined), but exact current size unknown
+- **Total DEX Liquidity**: ~$17.4M across multiple Curve pools and chains (~9.4% of market cap). Significant improvement from ~$450K at initial assessment.
+- **24h Trading Volume**: ~$10.8M
+- **Instant redemption buffer**: **EMPTY ($0 USDC)** as of Mar 17, 2026 — the Daily Instant Redemption Vault at [`0x5C454f5526e41fBE917b63475CD8CA7E4631B147`](https://etherscan.io/address/0x5C454f5526e41fBE917b63475CD8CA7E4631B147) holds zero USDC. This means protocol-native instant redemptions are currently unavailable. The Redemption Reserves Custodian ([`0x9eA38e09F41A9DE53972a68268BA0Dcc6d2fAdf8`](https://etherscan.io/address/0x9eA38e09F41A9DE53972a68268BA0Dcc6d2fAdf8), an EOA) is also empty.
+- **On-chain capital**: ICL Custodial Wallet holds ~$66.4M USDC. ICL contract itself holds $0. Total of ~$160.4M USDC has been swept from ICL to custodian, of which ~$94M has been deployed off-chain.
 - **Quarterly queue**: Pro-rata fulfillment, may not be fully met if capital is locked in reinsurance
 - **KYC required**: Both for deposit and redemption through the protocol
-- **Multi-chain**: Available on 6+ chains but DEX liquidity concentrated on Ethereum Curve pool
+- **Multi-chain**: Available on 6+ chains. Liquidity concentrated on Ethereum Curve pools (~$16M) with ~$1.5M on Avalanche.
 
 ## Centralization & Control Risks
 
@@ -231,8 +240,8 @@ reUSD is an **ERC-20 deposit token** that uses a **price-appreciation model** (n
 ## Operational Risk
 
 - **Team**: CEO **Karn Saroya** (publicly known, LinkedIn/Twitter). Previously co-founded Cover (insurtech acquired/wound down) and Stylekick (acquired by Shopify). Veteran of the insurance-tech space for 10+ years. Other team members not prominently identified.
-- **Company**: Re (re.xyz). Founded 2022.
-- **Legal Structure**: Partner reinsurance company domiciled in Cayman Islands, regulated by CIMA. Off-chain trust accounts in U.S. jurisdiction (§114 Trust).
+- **Company**: Re (re.xyz). Founded 2022. Issuer entity: Resilience BVI Ltd. (British Virgin Islands, per [RWA.xyz](https://app.rwa.xyz/assets/reUSD)).
+- **Legal Structure**: Partner reinsurance company domiciled in Cayman Islands, regulated by CIMA. Off-chain trust accounts in U.S. jurisdiction (§114 Trust). Token issuer domiciled in BVI.
 - **Investors**: $14M seed round at $100M post-money valuation. Investors include **Tribe Capital, Framework Ventures, Morgan Creek Digital, SiriusPoint**.
 - **Documentation**: Comprehensive documentation at docs.re.xyz. Clear description of mechanism, risks, and investor protections.
 - **Incident Response**: Emergency pause mechanism exists. Recovery wallets designated for each ICL (e.g., [`0xDf6bF2713b5c7CA724E684657280bC407938F447`](https://etherscan.io/address/0xDf6bF2713b5c7CA724E684657280bC407938F447) for initial ICL).
@@ -276,9 +285,9 @@ reUSD is an **ERC-20 deposit token** that uses a **price-appreciation model** (n
 
 ### Liquidity Monitoring
 
-- **Curve reUSD/USDC pool**: Monitor TVL and balance ratio.
-  - **Alert**: If pool TVL drops below $200K.
-  - **Alert**: If pool imbalance exceeds 80/20 in either direction.
+- **Curve reUSD pools** (reUSD/scrvUSD, sfrxUSD/reUSD, reUSD/sUSDe, reUSD/USDC): Monitor TVL and balance ratio.
+  - **Alert**: If total Curve reUSD DEX liquidity drops below $5M (currently ~$16M).
+  - **Alert**: If any pool imbalance exceeds 80/20 in either direction.
 
 - **CoinGecko reUSD price**: Monitor for deviations from expected share price.
   - **Alert**: If CoinGecko price deviates >2% from on-chain share price.
@@ -319,7 +328,8 @@ reUSD is an **ERC-20 deposit token** that uses a **price-appreciation model** (n
 
 - **Off-chain price oracle**: reUSD price is NOT computed programmatically on-chain. It is set via admin-controlled Chainlink oracle based on off-chain yield calculations. This is a fundamental centralization risk -- the price can theoretically be manipulated by compromising the oracle feed or The Network Firm attestation.
 - **Significant off-chain capital deployment**: Majority of assets are deployed off-chain into §114 Trust and reinsurance programs. This introduces counterparty risk with the trust bank, partner reinsurer, and custodians that cannot be verified fully on-chain.
-- **Very thin DEX liquidity**: Only ~$450K in Curve pool vs ~$111.5M market cap. If instant redemption buffer is exhausted, secondary market exit is severely constrained.
+- **Instant redemption vault empty**: The Daily Instant Redemption Vault holds $0 USDC as of Mar 17, 2026. The protocol's primary exit mechanism is currently non-functional. Users must rely on DEX liquidity or quarterly redemption queue.
+- **DEX liquidity improved but still limited**: ~$17.4M across multiple Curve pools (~9.4% of ~$184.6M market cap). Significant improvement from ~$450K, but still relatively thin for a large-cap protocol.
 - **KYC gating**: All deposits and redemptions require KYC. This limits the universe of users who can exit and creates regulatory/jurisdictional risk.
 - **Quarterly redemption queue**: Once instant buffer is exhausted, redemptions are quarterly and pro-rata. Capital locked in reinsurance programs may not be available for 18+ months.
 - **Reinsurance tail risk**: Underlying assets are exposed to insurance claim risk. While reUSDe absorbs first-loss, a catastrophic insurance event could potentially impact reUSD if reUSDe reserves are depleted.
@@ -329,7 +339,7 @@ reUSD is an **ERC-20 deposit token** that uses a **price-appreciation model** (n
 
 - **Off-chain dependency concentration**: The protocol's value proposition depends on off-chain entities (Cayman reinsurer, §114 Trust, The Network Firm, Fireblocks) operating honestly and solvent. On-chain verification cannot fully cover off-chain risks.
 - **Oracle manipulation**: A compromised oracle could misrepresent the reUSD price or reserve attestation. The daily oracle guardrail mitigates but does not eliminate this risk.
-- **Liquidity mismatch**: reUSD represents liquid on-chain tokens backed by illiquid reinsurance capital locked for 18+ months. A bank-run scenario (all holders redeeming simultaneously) would quickly exhaust the instant buffer, leaving holders in a quarterly queue.
+- **Liquidity mismatch**: reUSD represents liquid on-chain tokens backed by illiquid reinsurance capital locked for 18+ months. The instant redemption vault is currently empty ($0 USDC), meaning the buffer is already exhausted. In a bank-run scenario, holders would be limited to ~$17.4M in DEX liquidity or a quarterly redemption queue for ~$184.6M in outstanding tokens.
 
 ---
 
@@ -426,15 +436,15 @@ reUSD is an **ERC-20 deposit token** that uses a **price-appreciation model** (n
 
 #### Category 4: Liquidity Risk (Weight: 15%)
 
-- **Instant Exit**: Available from buffer (up to ~10% NAV), but exact current buffer size unknown
+- **Instant Exit**: **Currently unavailable** — the Daily Instant Redemption Vault holds $0 USDC (verified on-chain Mar 17, 2026). Redemption Reserves Custodian also empty.
 - **Quarterly Queue**: Pro-rata, may not be fully filled if capital locked in reinsurance
-- **DEX Liquidity**: ~$450K in Curve pool -- extremely thin for ~$111.5M market cap
-- **KYC Required**: Limits universe of participants who can exit
-- **24h Volume**: ~$76.8K -- very low
-- **No lending market integration** for collateral liquidation price discovery
-- **Multi-chain**: Available on 6+ chains but concentrated liquidity
+- **DEX Liquidity**: ~$17.4M across multiple Curve pools (~9.4% of ~$184.6M market cap). Largest pool: reUSD/scrvUSD ~$10M. Significant improvement from ~$450K at initial assessment.
+- **24h Volume**: ~$10.8M — substantial increase from ~$76.8K
+- **KYC Required**: Limits universe of participants who can exit via protocol redemption
+- **On-chain capital**: ICL Custodial Wallet holds ~$66.4M USDC, but this is not directly accessible for redemptions without admin action
+- **Multi-chain**: Available on 6+ chains, liquidity concentrated on Ethereum
 
-**Score: 4.0/5** -- Very thin DEX liquidity (~0.4% of market cap), KYC-gated redemptions, quarterly queue when buffer exhausted, and 18+ month capital lock in reinsurance create significant liquidity risk. Instant buffer provides some mitigation but is limited.
+**Score: 3.5/5** -- DEX liquidity improved significantly from ~$450K to ~$17.4M (38x increase), providing a more viable secondary market exit. However, the instant redemption vault being empty ($0 USDC) means the protocol's primary exit mechanism is non-functional. KYC-gated protocol redemptions, quarterly queue, and 18+ month reinsurance capital lock remain material concerns. Net: DEX improvement offsets but does not fully compensate for the empty instant buffer.
 
 #### Category 5: Operational Risk (Weight: 5%)
 
@@ -460,38 +470,43 @@ Final Score = (Centralization × 0.30) + (Funds Mgmt × 0.30) + (Audits × 0.20)
 | Audits & Historical | 3.0 | 20% | 0.60 |
 | Centralization & Control | 3.8 | 30% | 1.14 |
 | Funds Management | 3.5 | 30% | 1.05 |
-| Liquidity Risk | 4.0 | 15% | 0.60 |
+| Liquidity Risk | 3.5 | 15% | 0.525 |
 | Operational Risk | 2.5 | 5% | 0.125 |
-| **Final Score** | | | **3.515** |
+| **Final Score** | | | **3.44** |
 
-**Final Score: 3.5**
+**Final Score: 3.4**
 
 ### Risk Tier
 
 | Final Score | Risk Tier | Recommendation |
 |------------|-----------|----------------|
-| **3.5-4.5** | **Medium-High Risk** | Approved with enhanced monitoring and strict exposure limits |
+| **1.0-1.5** | **Minimal Risk** | Approved, high confidence |
+| **1.5-2.5** | **Low Risk** | Approved with standard monitoring |
+| **2.5-3.5** | **Medium Risk** | Approved with enhanced monitoring |
+| **3.5-4.5** | **Elevated Risk** | Limited approval, strict limits |
+| **4.5-5.0** | **High Risk** | Not recommended |
 
-**Final Risk Tier: Medium-High Risk**
+**Final Risk Tier: Medium Risk**
 
 ---
 
-reUSD is a novel product that bridges DeFi capital with traditional reinsurance markets. While the concept is innovative and the protocol demonstrates real business traction ($168.8M written premiums), the risk profile is elevated compared to purely on-chain yield products. The primary concerns are: (1) the off-chain price oracle -- reUSD's price is not computed programmatically on-chain but set via admin-controlled Chainlink feed, (2) heavy off-chain capital deployment with 18+ month lock-ups in reinsurance programs, (3) extremely thin DEX liquidity (~$450K vs ~$111.5M market cap), and (4) KYC-gated redemptions creating friction for exits. These are partially mitigated by third-party reserve attestation (The Network Firm + Chainlink PoR), the reUSDe first-loss protection layer, MPC wallet role separation, 48-hour upgrade timelock, and the regulatory framework (CIMA-regulated reinsurer, §114 Trust).
+reUSD is a novel product that bridges DeFi capital with traditional reinsurance markets. While the concept is innovative and the protocol demonstrates real business traction ($168.8M written premiums, ~$184.6M market cap), the risk profile is moderate. The primary concerns are: (1) the off-chain price oracle — reUSD's price is not computed programmatically on-chain but set via admin-controlled Chainlink feed, (2) heavy off-chain capital deployment with 18+ month lock-ups in reinsurance programs (~$94M deployed off-chain out of ~$160.4M total), (3) the instant redemption vault is currently empty ($0 USDC), disabling the protocol's primary exit mechanism, and (4) KYC-gated redemptions creating friction for exits. DEX liquidity has improved significantly to ~$17.4M across multiple Curve pools (up from ~$450K), providing a more viable secondary exit. These risks are partially mitigated by third-party reserve attestation (The Network Firm + Chainlink PoR), the reUSDe first-loss protection layer, MPC wallet role separation, 48-hour upgrade timelock, and the regulatory framework (CIMA-regulated reinsurer, §114 Trust).
 
 **Key conditions for exposure:**
 - Monitor reUSD share price for any decreases (should only increase)
 - Monitor Chainlink PoR attestation for daily updates
-- Monitor instant redemption buffer balance (alert if < 1% of supply)
+- **Monitor instant redemption buffer balance — currently $0, alert if not replenished**
 - Monitor UUPS proxy upgrades (48-hour review window)
-- Track Curve reUSD/USDC pool liquidity depth
+- Track Curve pool liquidity depth across all reUSD pairs (reUSD/scrvUSD, sfrxUSD/reUSD, reUSD/sUSDe, reUSD/USDC)
 - Monitor for KYC policy or regulatory changes affecting redemption access
+- Monitor ICL Custodial Wallet balance (~$66.4M USDC on-chain) for large outflows
 
 ---
 
 ## Reassessment Triggers
 
-- **Time-based**: Reassess in 6 months (September 2026)
+- **Time-based**: Reassess in 6 months (September 2026) or sooner if instant redemption vault remains empty for >30 days
 - **Governance-based**: Reassess when DAO governance is activated
 - **Incident-based**: Reassess after any exploit, governance change, reinsurer insolvency, or material claim event
-- **Liquidity-based**: Reassess if instant redemption buffer is exhausted or DEX liquidity drops below $200K
+- **Liquidity-based**: Reassess if DEX liquidity drops below $5M or if instant redemption vault remains empty for >30 days
 - **Regulatory-based**: Reassess if CIMA regulatory status changes or new jurisdictional restrictions apply
