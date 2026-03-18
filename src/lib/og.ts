@@ -1,5 +1,6 @@
 import satori from "satori";
 import { Resvg } from "@resvg/resvg-js";
+import sharp from "sharp";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { scoreColor, scoreTier, scoreTextColor } from "./colors";
@@ -19,10 +20,106 @@ export async function generateReportOgImage(report: {
   finalScore: number;
   token: string;
   chain: string;
+  iconUrl?: string;
 }): Promise<Buffer> {
   const color = scoreColor(report.finalScore);
   const tier = scoreTier(report.finalScore);
   const textColor = scoreTextColor(report.finalScore);
+
+  let iconDataUri: string | undefined;
+  if (report.iconUrl) {
+    try {
+      const res = await fetch(report.iconUrl);
+      if (res.ok) {
+        const raw = Buffer.from(await res.arrayBuffer());
+        const png = await sharp(raw).png().toBuffer();
+        iconDataUri = `data:image/png;base64,${png.toString("base64")}`;
+      }
+    } catch {}
+  }
+
+  const nameRowChildren: Record<string, unknown>[] = [
+    // Left: name + score
+    {
+      type: "div",
+      props: {
+        style: {
+          display: "flex",
+          flexDirection: "column",
+          gap: "20px",
+          flex: "1",
+        },
+        children: [
+          {
+            type: "div",
+            props: {
+              style: {
+                fontSize: report.name.length > 25 ? "52px" : "64px",
+                fontWeight: 700,
+                color: "#f4f4f4",
+                lineHeight: 1.1,
+              },
+              children: report.name,
+            },
+          },
+          {
+            type: "div",
+            props: {
+              style: {
+                display: "flex",
+                alignItems: "center",
+                gap: "20px",
+              },
+              children: [
+                {
+                  type: "div",
+                  props: {
+                    style: {
+                      display: "flex",
+                      alignItems: "center",
+                      backgroundColor: color,
+                      color: textColor,
+                      borderRadius: "12px",
+                      padding: "10px 24px",
+                      fontSize: "32px",
+                      fontWeight: 700,
+                    },
+                    children: `${report.finalScore.toFixed(1)} / 5.0`,
+                  },
+                },
+                {
+                  type: "div",
+                  props: {
+                    style: {
+                      fontSize: "32px",
+                      fontWeight: 700,
+                      color: color,
+                    },
+                    children: tier,
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ];
+
+  if (iconDataUri) {
+    nameRowChildren.push({
+      type: "img",
+      props: {
+        src: iconDataUri,
+        width: 120,
+        height: 120,
+        style: {
+          borderRadius: "60px",
+          flexShrink: 0,
+        },
+      },
+    });
+  }
 
   const svg = await satori(
     {
@@ -85,71 +182,17 @@ export async function generateReportOgImage(report: {
                     ],
                   },
                 },
-                // Protocol name
+                // Protocol name + icon row
                 {
                   type: "div",
                   props: {
                     style: {
                       display: "flex",
-                      flexDirection: "column",
-                      gap: "20px",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                      gap: "40px",
                     },
-                    children: [
-                      {
-                        type: "div",
-                        props: {
-                          style: {
-                            fontSize: report.name.length > 25 ? "52px" : "64px",
-                            fontWeight: 700,
-                            color: "#f4f4f4",
-                            lineHeight: 1.1,
-                          },
-                          children: report.name,
-                        },
-                      },
-                      // Score row
-                      {
-                        type: "div",
-                        props: {
-                          style: {
-                            display: "flex",
-                            alignItems: "center",
-                            gap: "20px",
-                          },
-                          children: [
-                            // Score badge
-                            {
-                              type: "div",
-                              props: {
-                                style: {
-                                  display: "flex",
-                                  alignItems: "center",
-                                  backgroundColor: color,
-                                  color: textColor,
-                                  borderRadius: "12px",
-                                  padding: "10px 24px",
-                                  fontSize: "32px",
-                                  fontWeight: 700,
-                                },
-                                children: `${report.finalScore.toFixed(1)} / 5.0`,
-                              },
-                            },
-                            // Tier
-                            {
-                              type: "div",
-                              props: {
-                                style: {
-                                  fontSize: "32px",
-                                  fontWeight: 700,
-                                  color: color,
-                                },
-                                children: tier,
-                              },
-                            },
-                          ],
-                        },
-                      },
-                    ],
+                    children: nameRowChildren,
                   },
                 },
                 // Bottom meta
