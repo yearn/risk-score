@@ -108,14 +108,25 @@ export async function generateReportOgImage(report: {
 
   if (iconDataUri) {
     nameRowChildren.push({
-      type: "img",
+      type: "div",
       props: {
-        src: iconDataUri,
-        width: 120,
-        height: 120,
         style: {
-          borderRadius: "60px",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          width: "33.3%",
           flexShrink: 0,
+        },
+        children: {
+          type: "img",
+          props: {
+            src: iconDataUri,
+            width: 156,
+            height: 156,
+            style: {
+              borderRadius: "78px",
+            },
+          },
         },
       },
     });
