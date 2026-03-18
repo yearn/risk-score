@@ -43,3 +43,6 @@ htmlcov/
 # Astro
 node_modules/
 .astro/
+
+# Git worktrees
+.worktrees/
