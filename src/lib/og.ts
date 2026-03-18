@@ -187,7 +187,7 @@ export async function generateReportOgImage(report: {
                             color: "#0675F9",
                             letterSpacing: "2px",
                           },
-                          children: "YEARN RISK",
+                          children: "YEARN CURATION",
                         },
                       },
                     ],
@@ -292,7 +292,7 @@ export async function generateDefaultOgImage(): Promise<Buffer> {
                       color: "#0675F9",
                       letterSpacing: "3px",
                     },
-                    children: "YEARN",
+                    children: "YEARN CURATION",
                   },
                 },
                 {
