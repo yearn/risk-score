@@ -12,9 +12,9 @@ stcUSD is a **yield-bearing ERC-4626 vault token** issued by Cap (Covered Agent 
 
 **Key architecture:**
 
-- **cUSD:** Dollar-pegged stablecoin backed 1:1 by whitelisted reserve assets (USDC, USDT, pyUSD, BENJI/Franklin Templeton, BUIDL/BlackRock). Max 40% single-asset concentration. Users mint by depositing reserves and burn/redeem to withdraw
+- **cUSD:** Dollar-pegged stablecoin backed 1:1 by whitelisted reserve assets. Currently **2 assets accepted on-chain**: USDC (~96% of reserves) and wWTGXX/WisdomTree Government Money Market Digital Fund (~4%). Max 40% single-asset concentration rule exists but is not binding given current composition. Users mint by depositing reserves and burn/redeem to withdraw
 - **stcUSD:** ERC-4626 vault wrapping cUSD. Yield accrues via exchange rate appreciation. ~76% of cUSD supply is staked as stcUSD
-- **Fractional Reserve:** >80% of cUSD reserves (~$75M USDC) deployed to Aave V3 Core Ethereum via the Fractional Reserve Vault. Aave accounts for >90% of yield
+- **Fractional Reserve:** ~$75M USDC deployed via the USDC Fractional Reserve Vault (a Yearn V3 vault) — split between **Morpho Gauntlet USDC Prime** (~$50.2M, 67%) and **Aave V3 USDC Lender** (~$25.0M, 33%). An additional ~$5M wWTGXX is held in a separate Fractional Reserve Vault via a simple holder strategy
 - **Operator Model:** Institutional operators borrow reserves at a dynamic hurdle rate (~5.2% avg over 90 days), execute off-chain/proprietary strategies (HFT, private credit, arbitrage, MEV), and return principal + hurdle rate. Excess yield is split between operators and restakers
 - **Security Network:** Per-operator Symbiotic vaults with instant slashing. Restakers delegate collateral (ETH, wBTC, LSTs, stablecoins) to specific operators. If an operator defaults, their delegated collateral is slashed and redistributed to cover losses
 - **Governance:** 3-of-5 Gnosis Safe multisig → 24-hour TimelockController → Access Control system. All contracts are upgradeable proxies
@@ -25,7 +25,8 @@ stcUSD is a **yield-bearing ERC-4626 vault token** issued by Cap (Covered Agent 
 - **stcUSD Total Supply:** ~93,554,000 stcUSD
 - **stcUSD Total Assets:** ~98,522,086 cUSD
 - **Price Per Share:** ~1.0531 cUSD/stcUSD (~5.3% cumulative appreciation since launch)
-- **Fractional Reserve USDC:** ~$75.17M USDC
+- **Fractional Reserve USDC:** ~$75.17M USDC (67% Morpho, 33% Aave V3)
+- **Fractional Reserve wWTGXX:** ~$5.0M wWTGXX (WisdomTree Gov MMF)
 - **Outstanding Debt USDC:** ~$48.86M
 - **Protocol TVL (DeFi Llama):** ~$288M (includes restaker collateral)
 - **Net APY:** ~5.2% (hurdle rate benchmark)
@@ -61,7 +62,8 @@ stcUSD is a **yield-bearing ERC-4626 vault token** issued by Cap (Covered Agent 
 | Delegation | [`0xF3E3Eae671000612CE3Fd15e1019154C1a4d693F`](https://etherscan.io/address/0xF3E3Eae671000612CE3Fd15e1019154C1a4d693F) | Symbiotic delegation management |
 | Fee Auction | [`0xa1a20aBdc873CF291c22Ce3C8968EC06277324D0`](https://etherscan.io/address/0xa1a20aBdc873CF291c22Ce3C8968EC06277324D0) | Dutch auction for fee conversion |
 | Fee Receiver | [`0x0036c7b9b62c53F47c804a5643F0c09f864beF0b`](https://etherscan.io/address/0x0036c7b9b62c53F47c804a5643F0c09f864beF0b) | Collects protocol fees |
-| USDC Fractional Reserve Vault | [`0x3Ed6aa32c930253fc990dE58fF882B9186cd0072`](https://etherscan.io/address/0x3Ed6aa32c930253fc990dE58fF882B9186cd0072) | Deploys idle USDC to Aave V3 |
+| USDC Fractional Reserve Vault | [`0x3Ed6aa32c930253fc990dE58fF882B9186cd0072`](https://etherscan.io/address/0x3Ed6aa32c930253fc990dE58fF882B9186cd0072) | Yearn V3 vault — deploys USDC to Morpho (67%) + Aave V3 (33%) |
+| wWTGXX Fractional Reserve Vault | [`0xb1c1C80FDbBde5B40264e1410550F3C864113bF8`](https://etherscan.io/address/0xb1c1C80FDbBde5B40264e1410550F3C864113bF8) | Yearn V3 vault — holds wWTGXX (~$5M) via holder strategy |
 | cUSD Adapter | [`0xAcc9ce4C15A0F6A2bec49C3F81261d60553D2Faf`](https://etherscan.io/address/0xAcc9ce4C15A0F6A2bec49C3F81261d60553D2Faf) | cUSD integration adapter |
 | stcUSD Adapter | [`0xdf48Eb321B38bc19E7F5b2CCA8242Cc6B9a6EcD0`](https://etherscan.io/address/0xdf48Eb321B38bc19E7F5b2CCA8242Cc6B9a6EcD0) | stcUSD integration adapter |
 
@@ -159,9 +161,12 @@ The Cap system is **high complexity**:
 
 stcUSD earns yield from two primary sources:
 
-**1. Fractional Reserve Deployment (~90% of yield)**
+**1. Fractional Reserve Deployment**
 
-Idle cUSD reserves (in USDC form) are deployed to **Aave V3 Core Ethereum** via the USDC Fractional Reserve Vault ([`0x3Ed6aa32c930253fc990dE58fF882B9186cd0072`](https://etherscan.io/address/0x3Ed6aa32c930253fc990dE58fF882B9186cd0072)). Over 80% of reserves (~$75.2M USDC) are deployed on Aave, making Cap one of the largest USDC suppliers to Aave. Aave accounts for >90% of total stcUSD yield.
+Idle cUSD reserves are deployed via two Yearn V3 Fractional Reserve Vaults:
+
+- **USDC FRV** ([`0x3Ed6aa32c930253fc990dE58fF882B9186cd0072`](https://etherscan.io/address/0x3Ed6aa32c930253fc990dE58fF882B9186cd0072)): ~$75.2M USDC split between **Morpho Gauntlet USDC Prime** (~$50.2M, 67%) and **Aave V3 USDC Lender** (~$25.0M, 33%)
+- **wWTGXX FRV** ([`0xb1c1C80FDbBde5B40264e1410550F3C864113bF8`](https://etherscan.io/address/0xb1c1C80FDbBde5B40264e1410550F3C864113bF8)): ~$5.0M wWTGXX held via simple holder strategy (wWTGXX is itself a yield-bearing WisdomTree Government Money Market fund token)
 
 **2. Operator Borrowing Fees (~10% of yield)**
 
@@ -178,8 +183,8 @@ Operators generate yield through proprietary strategies: HFT, private credit, cr
 
 ### Collateralization
 
-- **cUSD reserves:** Backed by whitelisted stablecoins (USDC, USDT, pyUSD, BENJI, BUIDL). Max 40% single-asset concentration
-- **Fractional Reserve Vault:** ~$75.17M USDC in total assets, ~$48.86M in outstanding debt USDC
+- **cUSD reserves:** Backed by 2 whitelisted assets on-chain: **USDC** (~$124M, 96%) and **wWTGXX** (~$5M, 4%). USDC dominates — the 40% single-asset concentration cap is not binding
+- **Reserve deployment:** USDC Fractional Reserve Vault holds ~$75.2M (Morpho ~$50.2M + Aave ~$25.0M). ~$48.9M lent to operators. wWTGXX FRV holds ~$5M via holder strategy
 - **Operator collateralization:** Each operator must secure over-collateralized Symbiotic delegations (default 50% LTV, 80% liquidation threshold) from restakers before borrowing
 - **Liquidation:** Health Factor < 1.0 triggers a 12-hour grace period, then a 3-day liquidation window via permissionless Dutch auction. Liquidation bonus capped at 10%. Target: 125% health ratio post-liquidation
 - **Slashing:** Instant slashing on two objective fault conditions: (1) failure to return expected amount, (2) insufficient active delegation. No governance intervention needed
@@ -205,7 +210,7 @@ Operators generate yield through proprietary strategies: HFT, private credit, cr
 
 - **Primary exit for stcUSD:** Redeem stcUSD for cUSD via ERC-4626 `withdraw()`/`redeem()`. Then burn/redeem cUSD for underlying reserves
 - **cUSD exit mechanisms:** Burn (receive single asset at oracle price, dynamic fee) or Redeem (receive proportional basket, fixed fee). The redemption mechanism is designed to prevent "last man standing" scenarios
-- **Aave liquidity dependency:** >80% of reserves deployed on Aave V3. Withdrawal depends on Aave USDC liquidity. Given Aave's deep USDC markets, this is generally highly liquid, but in extreme scenarios (Aave utilization spike), withdrawal may be delayed
+- **Morpho/Aave liquidity dependency:** ~$75M USDC deployed across Morpho (~$50M) and Aave V3 (~$25M). Withdrawal depends on available liquidity in both protocols. Generally liquid, but in extreme scenarios (high utilization spikes), withdrawal may be delayed
 - **Morpho markets:** stcUSD is collateral in Morpho markets with ~$42M supply TVL at ~91% utilization. High utilization means limited immediate liquidity for Morpho lenders
 - **No DEX liquidity pool required** — exit is via protocol's own mint/burn/redeem mechanism
 - **Restaker withdrawal:** Up to 14-day delay creates a potential friction point for operators needing to return capital
@@ -224,16 +229,6 @@ Cap's governance flows through a **3-of-5 Gnosis Safe multisig** → **24-hour T
 | **Multisig** | [`0xb8FC49402dF3ee4f8587268FB89fda4d621a8793`](https://etherscan.io/address/0xb8FC49402dF3ee4f8587268FB89fda4d621a8793) | 3-of-5 Gnosis Safe v1.4.1. PROPOSER + EXECUTOR + CANCELLER on Timelock |
 | **Timelock** | [`0xD8236031d8279d82E615aF2BFab5FC0127A329ab`](https://etherscan.io/address/0xD8236031d8279d82E615aF2BFab5FC0127A329ab) | 24-hour minimum delay. Holds DEFAULT_ADMIN_ROLE on Access Control |
 | **Deployer EOA** | [`0xc1ab5a9593e6e1662a9a44f84df4f31fc8a76b52`](https://etherscan.io/address/0xc1ab5a9593e6e1662a9a44f84df4f31fc8a76b52) | Retains EXECUTOR_ROLE on Timelock (residual, never revoked) |
-
-**Multisig owners (5 addresses, 3-of-5 threshold):**
-
-| # | Address | Type | Notes |
-|---|---------|------|-------|
-| 1 | [`0xC1F56b5Af6aFfe36BC9A4cd9bd6cAaCFdc18FD7a`](https://etherscan.io/address/0xC1F56b5Af6aFfe36BC9A4cd9bd6cAaCFdc18FD7a) | EOA | Active, funded via Kraken |
-| 2 | [`0xdf466Fa3ddd0042d990FA9A023e040884CBaD439`](https://etherscan.io/address/0xdf466Fa3ddd0042d990FA9A023e040884CBaD439) | EOA | Dormant — zero on-chain activity |
-| 3 | [`0x7c29F6A93df60Bcd3B20f03B57a2F9e698FD4128`](https://etherscan.io/address/0x7c29F6A93df60Bcd3B20f03B57a2F9e698FD4128) | EOA | Dormant — zero on-chain activity |
-| 4 | [`0xcB8460E60fc8000fb11FE5231F50D31Bfc767688`](https://etherscan.io/address/0xcB8460E60fc8000fb11FE5231F50D31Bfc767688) | Nested Safe (1-of-2) | Owners: kexley.eth + 1 EOA. Either signer can independently act as one of 5 multisig owners |
-| 5 | [`0xD39C1775E98A73fd0A9c8ECac8C9fEDb9BB81E45`](https://etherscan.io/address/0xD39C1775E98A73fd0A9c8ECac8C9fEDb9BB81E45) | EOA | ENS-active wallet |
 
 **Governance concerns:**
 1. **Low multisig threshold:** 3-of-5 is a relatively low threshold. Two dormant owners and one nested 1-of-2 Safe weaken the effective security
@@ -258,12 +253,13 @@ Cap's governance flows through a **3-of-5 Gnosis Safe multisig** → **24-hour T
 
 | Dependency | Criticality | Notes |
 |-----------|-------------|-------|
-| **Aave V3 Core Ethereum** | Critical | >80% of reserves deployed (~$75M USDC). >90% of stcUSD yield. Blue-chip protocol ($30B+ TVL) |
+| **Morpho** | Critical | ~$50.2M USDC deployed (67% of USDC FRV). Also stcUSD collateral market (~$42M). Core yield source |
+| **Aave V3 Core Ethereum** | Critical | ~$25.0M USDC deployed (33% of USDC FRV). Blue-chip protocol ($30B+ TVL) |
 | **Symbiotic** | Critical | Restaking infrastructure securing operator positions. Per-operator vault delegation model |
 | **RedStone** | High | cUSD price oracle (0.05% deviation threshold). Stale prices disable minting/burning |
-| **Morpho** | Medium | stcUSD used as collateral in Morpho markets (~$42M supply). Not critical for protocol function |
+| **wWTGXX (WisdomTree)** | Low | ~$5M tokenized gov money market fund. Only 7 holders. Minimal DeFi track record |
 | **USDC (Circle)** | High | Primary reserve asset |
-| **USDT, pyUSD, BENJI, BUIDL** | Medium | Additional whitelisted reserve assets |
+| **USDT, pyUSD, BENJI, BUIDL** | Low | Listed in docs as potential reserve assets but **not currently whitelisted on-chain** |
 | **Institutional Operators** | High | IMC Trading, Edge Capital, Susquehanna Crypto generate yield via off-chain strategies. Counterparty risk mitigated by Symbiotic restaking |
 
 ## Operational Risk
@@ -297,7 +293,7 @@ Cap's governance flows through a **3-of-5 Gnosis Safe multisig** → **24-hour T
 - **Operator liquidations** — Lender contract liquidation events indicate operator defaults
 - **Contract upgrades** — implementation changes on proxy contracts (24h timelock provides advance notice)
 - **Multisig changes** — signer additions/removals, threshold changes
-- **Aave USDC utilization** — high Aave utilization could delay reserve withdrawal
+- **Morpho/Aave USDC utilization** — high utilization in either protocol could delay reserve withdrawal
 - **Oracle staleness** — stale RedStone prices disable minting/burning
 - **Reserve composition** — significant changes in backing asset ratios
 
@@ -307,7 +303,7 @@ Cap's governance flows through a **3-of-5 Gnosis Safe multisig** → **24-hour T
 
 - **Strong audit coverage:** 7 auditors including Trail of Bits, Spearbit, Zellic, Certora, and Sherlock contest. Comprehensive coverage of core protocol, security network, and invariant testing
 - **Novel security model:** Per-operator Symbiotic restaking with instant slashing provides cryptoeconomic guarantees against operator defaults. Not pooled risk — each operator is independently collateralized
-- **Blue-chip reserve deployment:** >80% of reserves on Aave V3 Core Ethereum, one of the most battle-tested DeFi protocols
+- **Blue-chip reserve deployment:** ~$75M USDC deployed across Morpho (67%) and Aave V3 (33%), both battle-tested DeFi protocols
 - **Institutional backing:** $11M from tier-1 investors (Franklin Templeton, Kraken, a16z, Dragonfly). Named operators include major trading firms (IMC Trading, Susquehanna)
 - **24-hour Timelock:** All governance changes go through 24-hour delay, providing users a window to react
 
@@ -316,7 +312,7 @@ Cap's governance flows through a **3-of-5 Gnosis Safe multisig** → **24-hour T
 - **Upgradeable contracts:** Core token contracts (cUSD, stcUSD) are upgradeable proxies. While upgrades go through the 24h Timelock, the 3-of-5 multisig can modify fundamental contract logic
 - **Weak multisig configuration:** 3-of-5 threshold with 2 dormant owners, 1 nested 1-of-2 Safe, and no public signer disclosure. Effective security is weaker than the threshold suggests
 - **Off-chain operator strategies:** Operators execute proprietary yield strategies that are opaque to on-chain verification. While slashing provides recourse, users cannot independently verify operator positions or risk exposure
-- **Aave concentration risk:** >90% of yield and >80% of reserves depend on Aave V3. An Aave incident would significantly impact the protocol
+- **Morpho/Aave concentration risk:** ~$75M USDC reserves deployed across Morpho (~$50M) and Aave V3 (~$25M). An incident in either protocol would significantly impact reserves
 - **Relatively new protocol:** 7 months in production. While growing rapidly ($288M TVL), the operator model and Symbiotic slashing mechanism have not been stress-tested in adverse conditions
 - **Deployer EOA retains EXECUTOR_ROLE:** Residual permission on the Timelock that was never revoked
 
@@ -369,7 +365,7 @@ Cap's governance flows through a **3-of-5 Gnosis Safe multisig** → **24-hour T
 | Privileged roles | Granular role system (oracle_admin, lender_admin, vault_config_admin, emergency_admin). All go through Timelock |
 | EOA risk | Deployer EOA retains EXECUTOR_ROLE (cannot propose, but can execute queued proposals) |
 
-**Governance Score: 3.0/5** — The 24-hour timelock is positive, but the weak 3-of-5 multisig configuration (anonymous signers, 2 dormant owners, 1 nested 1-of-2 Safe) is a significant concern. Upgradeable proxy contracts mean the multisig can fundamentally alter protocol behavior. The deployer EOA's residual EXECUTOR_ROLE is a minor but unnecessary risk. Compared to protocols with higher thresholds (e.g., 6-of-9), named signers, and immutable contracts, this warrants a score of 3.
+**Governance Score: 2.5/5** — The 24-hour timelock and granular role separation are positives. The 3-of-5 multisig with anonymous signers and 2 dormant owners is a concern but still provides meaningful multi-party control. Upgradeable proxy contracts mean the multisig can alter protocol behavior, but only through the timelock. The deployer EOA's residual EXECUTOR_ROLE is a minor but unnecessary risk.
 
 **Subcategory B: Programmability**
 
@@ -388,16 +384,16 @@ Cap's governance flows through a **3-of-5 Gnosis Safe multisig** → **24-hour T
 
 | Factor | Assessment |
 |--------|-----------|
-| Protocol count | Aave V3 (critical), Symbiotic (critical), RedStone (high), Morpho (medium), USDC/Circle (high) |
-| Aave concentration | >80% reserves, >90% yield. Single point of failure for yield and liquidity |
+| Protocol count | Morpho (critical), Aave V3 (critical), Symbiotic (critical), RedStone (high), USDC/Circle (high), wWTGXX/WisdomTree (low) |
+| Morpho + Aave concentration | ~$75M USDC deployed across Morpho (67%) and Aave (33%). Both are yield dependencies |
 | Symbiotic | Novel restaking infrastructure, less battle-tested than established alternatives |
 | Operator counterparties | Institutional firms (IMC, Susquehanna, Edge) — blue-chip but opaque |
 
-**Dependencies Score: 3.0/5** — Heavy dependency on Aave V3 (blue-chip but concentrated). Symbiotic integration adds complexity and a dependency on relatively new restaking infrastructure. Multiple oracle dependencies (RedStone). The operator model introduces counterparty risk with institutional firms. More dependencies and more complexity than simple vault protocols.
+**Dependencies Score: 3.0/5** — Heavy dependency on Morpho and Aave V3 for reserve deployment (~$75M USDC split 67/33). Symbiotic integration adds complexity and a dependency on relatively new restaking infrastructure. Multiple oracle dependencies (RedStone). The operator model introduces counterparty risk with institutional firms. More dependencies and more complexity than simple vault protocols.
 
-**Centralization Score = (3.0 + 2.5 + 3.0) / 3 = 2.8**
+**Centralization Score = (2.5 + 2.5 + 3.0) / 3 = 2.7**
 
-**Score: 2.8/5** — Upgradeable contracts with a weak multisig configuration, partially off-chain yield model, and complex multi-protocol dependency chain.
+**Score: 2.7/5** — Upgradeable contracts with a moderate multisig configuration, partially off-chain yield model, and complex multi-protocol dependency chain.
 
 #### Category 3: Funds Management (Weight: 30%)
 
@@ -405,13 +401,14 @@ Cap's governance flows through a **3-of-5 Gnosis Safe multisig** → **24-hour T
 
 | Factor | Assessment |
 |--------|-----------|
-| Backing | cUSD backed by whitelisted stablecoins (USDC, USDT, pyUSD, BENJI, BUIDL) with 40% max single-asset concentration |
-| Reserve quality | Mix of Circle USDC, Tether USDT, and institutional products (BENJI, BUIDL). Good diversification |
+| Backing | cUSD backed by 2 on-chain whitelisted assets: USDC (~96%) and wWTGXX/WisdomTree (~4%). Heavy USDC concentration |
+| Reserve quality | USDC (Circle) is blue-chip. wWTGXX (WisdomTree Gov Money Market) is an institutional tokenized fund with only 7 holders — limited track record in DeFi |
+| Reserve deployment | USDC FRV: ~$50.2M in Morpho + ~$25.0M in Aave V3. ~$48.9M lent to operators. wWTGXX FRV: ~$5M in holder strategy |
 | Leverage | No direct leverage in reserve. Operators borrow from reserves (over-collateralized via Symbiotic) |
 | Operator collateral | Per-operator Symbiotic delegations (50% default LTV, 80% liquidation threshold) |
 | Verifiability | Reserves on-chain. Operator positions partially verifiable (borrow/repay on-chain, strategies off-chain) |
 
-**Collateralization Score: 2.0/5** — Good reserve diversification across blue-chip stablecoins and institutional products. The per-operator over-collateralization via Symbiotic is a strong mechanism. However, the fractional reserve model means not all reserves are idle (>80% deployed to Aave, ~$49M lent to operators), and operator strategies are off-chain.
+**Collateralization Score: 2.0/5** — USDC is blue-chip but makes up 96% of reserves (low diversification despite the 40% cap rule). wWTGXX is a tokenized money market fund with minimal DeFi adoption (7 holders). The per-operator over-collateralization via Symbiotic is a strong mechanism. However, the fractional reserve model means reserves are actively deployed (~$75M in Morpho/Aave, ~$49M lent to operators), and operator strategies are off-chain.
 
 **Subcategory B: Provability**
 
@@ -433,12 +430,12 @@ Cap's governance flows through a **3-of-5 Gnosis Safe multisig** → **24-hour T
 | Factor | Assessment |
 |--------|-----------|
 | Exit mechanism | stcUSD → cUSD (ERC-4626 redeem) → burn/redeem cUSD for reserves |
-| Aave liquidity | >80% of reserves deployed on Aave. Withdrawal depends on Aave USDC liquidity (generally deep but not guaranteed) |
+| Morpho/Aave liquidity | ~$75M USDC in Morpho (67%) + Aave (33%). Withdrawal depends on available liquidity in both protocols |
 | cUSD redemption | Proportional basket redemption prevents "last man standing" scenarios |
 | Withdrawal restrictions | No lock for stcUSD. Restaker withdrawals up to 14 days |
 | Large withdrawal impact | With ~$75M in Fractional Reserve and ~$49M lent to operators, a large withdrawal would need to be sourced from Aave or wait for operator repayment |
 
-**Score: 3.0/5** — Multiple layers between stcUSD holder and underlying assets (stcUSD → cUSD → reserve assets). >80% of reserves deployed on Aave (liquid but adds a dependency), ~$49M lent to operators (not immediately available — operator epoch-based repayment). The proportional redemption mechanism is well-designed for stress scenarios, but the fractional reserve model means not all capital is immediately liquid. In adverse scenarios (Aave utilization spike + operator delays), significant redemptions could face delays.
+**Score: 3.0/5** — Multiple layers between stcUSD holder and underlying assets (stcUSD → cUSD → reserve assets). ~$75M deployed across Morpho/Aave (liquid but adds dependencies), ~$49M lent to operators (not immediately available — operator epoch-based repayment). The proportional redemption mechanism is well-designed for stress scenarios, but the fractional reserve model means not all capital is immediately liquid. In adverse scenarios (high utilization spikes + operator delays), significant redemptions could face delays.
 
 #### Category 5: Operational Risk (Weight: 5%)
 
@@ -457,15 +454,15 @@ Cap's governance flows through a **3-of-5 Gnosis Safe multisig** → **24-hour T
 
 ```
 Final Score = (Centralization × 0.30) + (Funds Mgmt × 0.30) + (Audits × 0.20) + (Liquidity × 0.15) + (Operational × 0.05)
-            = (2.8 × 0.30) + (2.3 × 0.30) + (2.0 × 0.20) + (3.0 × 0.15) + (2.0 × 0.05)
-            = 0.84 + 0.69 + 0.40 + 0.45 + 0.10
-            = 2.48
+            = (2.7 × 0.30) + (2.3 × 0.30) + (2.0 × 0.20) + (3.0 × 0.15) + (2.0 × 0.05)
+            = 0.81 + 0.69 + 0.40 + 0.45 + 0.10
+            = 2.45
 ```
 
 | Category | Score | Weight | Weighted |
 |----------|-------|--------|----------|
 | Audits & Historical | 2.0 | 20% | 0.40 |
-| Centralization & Control | 2.8 | 30% | 0.84 |
+| Centralization & Control | 2.7 | 30% | 0.81 |
 | Funds Management | 2.3 | 30% | 0.69 |
 | Liquidity Risk | 3.0 | 15% | 0.45 |
 | Operational Risk | 2.0 | 5% | 0.10 |
@@ -494,5 +491,5 @@ The score sits at the boundary of Low/Medium risk. The strong audit coverage, in
 - **Incident-based:** Reassess after any exploit, operator default, slashing event, or governance incident
 - **Governance-based:** Reassess if multisig threshold or signers change, or if deployer EOA's EXECUTOR_ROLE is revoked (positive signal)
 - **Operator-based:** Reassess if new operators are onboarded or existing operators experience issues
-- **Aave-based:** Reassess if Aave USDC utilization consistently exceeds 90% or if Aave experiences a security incident
+- **Protocol-based:** Reassess if Morpho or Aave V3 USDC utilization consistently exceeds 90% or if either experiences a security incident
 - **Upgrade-based:** Reassess after any contract upgrade via Timelock
