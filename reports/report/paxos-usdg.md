@@ -566,5 +566,5 @@ USDG benefits from Paxos's established stablecoin track record, highest-quality 
 **Recommended parameters for lending against USDG:**
 - Max LTV: 90% (same-value stablecoin, but freeze risk warrants buffer below 95%)
 - Liquidation threshold: 95%
-- Max exposure: min($5M, 50% of Ethereum USDG DEX liquidity)
+- Max exposure: min($5M, 50% of Ethereum USDG DEX liquidity, 10% of total vault TVL)
 - Monitor: Paxos freeze events, DEX liquidity depth, USDG peg
