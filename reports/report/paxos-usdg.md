@@ -4,7 +4,7 @@
 - **Token:** USDG (Global Dollar)
 - **Chain:** Ethereum
 - **Token Address:** [`0xe343167631d89B6Ffc58B88d6b7fB0228795491D`](https://etherscan.io/address/0xe343167631d89B6Ffc58B88d6b7fB0228795491D)
-- **Final Score: 2.3/5.0**
+- **Final Score: 2.4/5.0**
 
 ## Overview + Links
 
@@ -366,7 +366,7 @@ The absence of a formal public bug bounty with monetary rewards is a weakness fo
 | Reserves | Entirely off-chain — managed by Paxos and custodians |
 | Reporting | Monthly attestation (off-chain), no real-time on-chain reporting |
 
-**Programmability Score: 3.0/5** — Token operations are fully on-chain and programmatic. However, reserves are entirely off-chain with no on-chain visibility into specific holdings. Minting/burning is controlled by Paxos (not permissionless). Per rubric: "Hybrid on-chain/off-chain operations, on-chain but reliant on admin updates" maps to 3.
+**Programmability Score: 3.5/5** — Token operations are fully on-chain and programmatic. However, reserves are entirely off-chain with no on-chain visibility into specific holdings. Minting/burning is controlled by Paxos (not permissionless). The lack of permissionless minting/redemption and entirely off-chain reserve management push beyond a pure hybrid model. Per rubric: between "Hybrid on-chain/off-chain operations" (3) and "Significant manual intervention required" (4).
 
 **Subcategory C: External Dependencies**
 
@@ -378,9 +378,9 @@ The absence of a formal public bug bounty with monetary rewards is a weakness fo
 
 **Dependencies Score: 1.5/5** — Minimal external protocol dependencies. Banking infrastructure dependency is inherent to all fiat-backed stablecoins (USDC, USDT). LayerZero bridge is non-critical for Ethereum-only usage. Between score 1 (no external dependencies) and score 2 (1-2 blue-chip dependencies).
 
-**Centralization Score = (3.5 + 3.0 + 1.5) / 3 = 2.67**
+**Centralization Score = (3.5 + 3.5 + 1.5) / 3 = 2.83**
 
-**Score: 2.7/5** — The tiered governance structure with timelock is a positive, but the short 3h delay, EOA supply control admin, powerful freeze/wipe capability, and entirely off-chain reserve management elevate centralization risk. Standard for a regulated fiat-backed stablecoin — comparable to USDC's centralization profile.
+**Score: 2.8/5** — The tiered governance structure with timelock is a positive, but the short 3h delay, EOA supply control admin, powerful freeze/wipe capability, and entirely off-chain reserve management elevate centralization risk. Standard for a regulated fiat-backed stablecoin — comparable to USDC's centralization profile.
 
 #### Category 3: Funds Management (Weight: 30%)
 
@@ -406,11 +406,11 @@ The absence of a formal public bug bounty with monetary rewards is a weakness fo
 | Reporting | Monthly reports published on transparency portal |
 | Regulatory oversight | MAS supervision with regulatory reporting requirements |
 
-**Provability Score: 3.0/5** — Monthly attestation provides reasonable verification on a periodic basis. MAS regulatory oversight adds an independent verification layer. However, reserves are off-chain with no real-time on-chain verification mechanism and no Chainlink Proof of Reserves. Per rubric: "Hybrid on-chain/off-chain, manual reporting by admins, known custodian attestation" maps to 3.
+**Provability Score: 3.5/5** — Monthly attestation provides periodic verification, but reserves are entirely off-chain with no real-time on-chain verification mechanism and no Chainlink Proof of Reserves. MAS regulatory oversight adds an independent layer, but token holders cannot independently verify reserves between attestation periods. Per rubric: between "Manual reporting by admins, known custodian attestation" (3) and "Infrequent reporting, self-reported only" (4).
 
-**Funds Management Score = (2.0 + 3.0) / 2 = 2.5**
+**Funds Management Score = (2.0 + 3.5) / 2 = 2.75**
 
-**Score: 2.5/5** — Highest-quality collateral (U.S. Treasuries) with regulatory requirements for 1:1 backing and segregated custody. The off-chain nature of reserves and reliance on monthly attestation (rather than real-time on-chain proof) is the primary weakness — standard for fiat-backed stablecoins.
+**Score: 2.75/5** — Highest-quality collateral (U.S. Treasuries) with regulatory requirements for 1:1 backing and segregated custody. The off-chain nature of reserves and reliance on monthly attestation (rather than real-time on-chain proof) is the primary weakness — standard for fiat-backed stablecoins.
 
 #### Category 4: Liquidity Risk (Weight: 15%)
 
@@ -442,20 +442,20 @@ The absence of a formal public bug bounty with monetary rewards is a weakness fo
 
 ```
 Final Score = (Centralization × 0.30) + (Funds Mgmt × 0.30) + (Audits × 0.20) + (Liquidity × 0.15) + (Operational × 0.05)
-            = (2.7 × 0.30) + (2.5 × 0.30) + (2.0 × 0.20) + (2.0 × 0.15) + (1.5 × 0.05)
-            = 0.81 + 0.75 + 0.40 + 0.30 + 0.075
-            = 2.335
-            ≈ 2.3
+            = (2.8 × 0.30) + (2.75 × 0.30) + (2.0 × 0.20) + (2.0 × 0.15) + (1.5 × 0.05)
+            = 0.84 + 0.825 + 0.40 + 0.30 + 0.075
+            = 2.44
+            ≈ 2.4
 ```
 
 | Category | Score | Weight | Weighted |
 |----------|-------|--------|----------|
 | Audits & Historical | 2.0 | 20% | 0.40 |
-| Centralization & Control | 2.7 | 30% | 0.81 |
-| Funds Management | 2.5 | 30% | 0.75 |
+| Centralization & Control | 2.8 | 30% | 0.84 |
+| Funds Management | 2.75 | 30% | 0.825 |
 | Liquidity Risk | 2.0 | 15% | 0.30 |
 | Operational Risk | 1.5 | 5% | 0.075 |
-| **Final Score** | | | **2.3/5.0** |
+| **Final Score** | | | **2.4/5.0** |
 
 ### Risk Tier
 
@@ -467,7 +467,7 @@ Final Score = (Centralization × 0.30) + (Funds Mgmt × 0.30) + (Audits × 0.20)
 | 3.5-4.5 | Elevated Risk | Limited approval, strict limits |
 | 4.5-5.0 | High Risk | Not recommended |
 
-**Final Risk Tier: Low Risk (2.3/5.0) — Approved with standard monitoring**
+**Final Risk Tier: Low Risk (2.4/5.0) — Approved with standard monitoring**
 
 USDG benefits from Paxos's established stablecoin track record, highest-quality collateral (U.S. Treasuries), strong regulatory framework (MAS + MiCA), and solid audit coverage. The primary risk factors are centralization concerns standard for regulated stablecoins (freeze/wipe capability, upgradeable contracts, off-chain reserves) plus a few USDG-specific concerns (SupplyControl admin EOA, no public bug bounty, shorter production history vs USDC). Overall risk profile is comparable to other regulated fiat-backed stablecoins.
 
