@@ -4,7 +4,7 @@
 - **Token:** stcUSD (Staked cap USD)
 - **Chain:** Ethereum
 - **Token Address:** [`0x88887bE419578051FF9F4eb6C858A951921D8888`](https://etherscan.io/address/0x88887bE419578051FF9F4eb6C858A951921D8888)
-- **Final Score: 2.5/5.0**
+- **Final Score: 2.4/5.0**
 
 ## Overview + Links
 
@@ -365,7 +365,7 @@ Cap's governance flows through a **3-of-5 Gnosis Safe multisig** → **24-hour T
 | Privileged roles | Granular role system (oracle_admin, lender_admin, vault_config_admin, emergency_admin). All go through Timelock |
 | EOA risk | Deployer EOA retains EXECUTOR_ROLE (cannot propose, but can execute queued proposals) |
 
-**Governance Score: 2.5/5** — The 24-hour timelock and granular role separation are positives. The 3-of-5 multisig with anonymous signers and 2 dormant owners is a concern but still provides meaningful multi-party control. Upgradeable proxy contracts mean the multisig can alter protocol behavior, but only through the timelock. The deployer EOA's residual EXECUTOR_ROLE is a minor but unnecessary risk.
+**Governance Score: 2.0/5** — The 24-hour timelock on all governance actions (including contract upgrades) provides meaningful user protection. Granular role separation with function-level permissions. The 3-of-5 multisig with anonymous signers is a concern, but upgrades cannot bypass the timelock. The deployer EOA's residual EXECUTOR_ROLE is a minor but unnecessary risk.
 
 **Subcategory B: Programmability**
 
@@ -391,9 +391,9 @@ Cap's governance flows through a **3-of-5 Gnosis Safe multisig** → **24-hour T
 
 **Dependencies Score: 3.0/5** — Heavy dependency on Morpho and Aave V3 for reserve deployment (~$75M USDC split 67/33). Symbiotic integration adds complexity and a dependency on relatively new restaking infrastructure. Multiple oracle dependencies (RedStone). The operator model introduces counterparty risk with institutional firms. More dependencies and more complexity than simple vault protocols.
 
-**Centralization Score = (2.5 + 2.5 + 3.0) / 3 = 2.7**
+**Centralization Score = (2.0 + 2.5 + 3.0) / 3 = 2.5**
 
-**Score: 2.7/5** — Upgradeable contracts with a moderate multisig configuration, partially off-chain yield model, and complex multi-protocol dependency chain.
+**Score: 2.5/5** — Upgradeable contracts behind a 24h timelock, partially off-chain yield model, and complex multi-protocol dependency chain.
 
 #### Category 3: Funds Management (Weight: 30%)
 
@@ -454,33 +454,33 @@ Cap's governance flows through a **3-of-5 Gnosis Safe multisig** → **24-hour T
 
 ```
 Final Score = (Centralization × 0.30) + (Funds Mgmt × 0.30) + (Audits × 0.20) + (Liquidity × 0.15) + (Operational × 0.05)
-            = (2.7 × 0.30) + (2.3 × 0.30) + (2.0 × 0.20) + (3.0 × 0.15) + (2.0 × 0.05)
-            = 0.81 + 0.69 + 0.40 + 0.45 + 0.10
-            = 2.45
+            = (2.5 × 0.30) + (2.3 × 0.30) + (2.0 × 0.20) + (3.0 × 0.15) + (2.0 × 0.05)
+            = 0.75 + 0.69 + 0.40 + 0.45 + 0.10
+            = 2.39
 ```
 
 | Category | Score | Weight | Weighted |
 |----------|-------|--------|----------|
 | Audits & Historical | 2.0 | 20% | 0.40 |
-| Centralization & Control | 2.7 | 30% | 0.81 |
+| Centralization & Control | 2.5 | 30% | 0.75 |
 | Funds Management | 2.3 | 30% | 0.69 |
 | Liquidity Risk | 3.0 | 15% | 0.45 |
 | Operational Risk | 2.0 | 5% | 0.10 |
-| **Final Score** | | | **2.5/5.0** |
+| **Final Score** | | | **2.4/5.0** |
 
 ### Risk Tier
 
 | Final Score | Risk Tier | Recommendation |
 |------------|-----------|----------------|
 | 1.0-1.5 | Minimal Risk | Approved, high confidence |
-| 1.5-2.5 | Low Risk | Approved with standard monitoring |
-| **2.5-3.5** | **Medium Risk** | **Approved with enhanced monitoring** |
+| **1.5-2.5** | **Low Risk** | **Approved with standard monitoring** |
+| 2.5-3.5 | Medium Risk | Approved with enhanced monitoring |
 | 3.5-4.5 | Elevated Risk | Limited approval, strict limits |
 | 4.5-5.0 | High Risk | Not recommended |
 
-**Final Risk Tier: Medium Risk (2.5/5.0) — Approved with enhanced monitoring**
+**Final Risk Tier: Low Risk (2.4/5.0) — Approved with standard monitoring**
 
-The score sits at the boundary of Low/Medium risk. The strong audit coverage, institutional backing, and novel security model (Symbiotic restaking) are positives. The key risk drivers are the upgradeable contracts with a weak multisig, off-chain operator strategy opacity, Aave concentration, and the relatively short production history (~7 months). Enhanced monitoring is recommended, particularly around operator positions, multisig transactions, and contract upgrade proposals.
+The score sits at the upper end of Low risk. The strong audit coverage, institutional backing, and novel security model (Symbiotic restaking) are positives. The key risk drivers are the upgradeable contracts with a weak multisig, off-chain operator strategy opacity, Aave concentration, and the relatively short production history (~7 months). Enhanced monitoring is recommended, particularly around operator positions, multisig transactions, and contract upgrade proposals.
 
 ---
 
