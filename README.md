@@ -21,28 +21,28 @@ Yearn Vaults and Strategies risk scores are defined in folder [vaults](./vaults)
 
 ## API
 
-Risk data is served via `https://risk.yearn.fi`.
+Risk data is served via `https://curation.yearn.fi`.
 
 ### Vault Endpoints
 
 **Get all vaults for a chain:**
 ```
-GET https://risk.yearn.fi/cdn/vaults/{chainId}.json
+GET https://curation.yearn.fi/cdn/vaults/{chainId}.json
 ```
 
 Example:
 ```
-https://risk.yearn.fi/cdn/vaults/1.json
+https://curation.yearn.fi/cdn/vaults/1.json
 ```
 
 **Get a single vault:**
 ```
-GET https://risk.yearn.fi/cdn/vaults/{chainId}/{address}.json
+GET https://curation.yearn.fi/cdn/vaults/{chainId}/{address}.json
 ```
 
 Example:
 ```
-https://risk.yearn.fi/cdn/vaults/1/0x4cE9c93513DfF543Bc392870d57dF8C04e89Ba0a.json
+https://curation.yearn.fi/cdn/vaults/1/0x4cE9c93513DfF543Bc392870d57dF8C04e89Ba0a.json
 ```
 
 Vault addresses are case-insensitive and normalized to lowercase.
