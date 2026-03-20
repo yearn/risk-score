@@ -6,5 +6,5 @@ export default defineConfig({
   adapter: vercel(),
   site: process.env.VERCEL_URL
     ? `https://${process.env.VERCEL_URL}`
-    : "https://risk.yearn.fi",
+    : "https://curation.yearn.fi",
 });
