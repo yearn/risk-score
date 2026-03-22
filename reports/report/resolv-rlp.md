@@ -1,10 +1,10 @@
 # Protocol Risk Assessment: Resolv RLP
 
-- **Assessment Date:** February 8, 2026
+- **Assessment Date:** February 8, 2026 (Updated: March 22, 2026)
 - **Token:** RLP (Resolv Liquidity Pool)
 - **Chain:** Ethereum (primary), multi-chain (Base, BNB, Berachain, Arbitrum, HyperEVM, Soneium, TAC, Plasma)
 - **Token Address:** [`0x4956b52aE2fF65D74CA2d61207523288e4528f96`](https://etherscan.io/address/0x4956b52aE2fF65D74CA2d61207523288e4528f96)
-- **Final Score: 2.9/5.0**
+- **Final Score: 5.0/5.0 — DO NOT USE**
 
 ## Overview + Links
 
@@ -109,8 +109,8 @@ Resolv has undergone extensive auditing with 4 audit firms across 14+ audit enga
 - **TVL Growth**: From ~$9.3M at launch (Sep 2024) to ~$494.8M (Feb 2026). Significant growth.
 - **USR Supply**: ~354M ($354M circulating), peaked at ~$403M the previous week.
 - **RLP Supply**: ~109.7M tokens (~$140.8M market cap)
-- **Incidents**: No reported security incidents, exploits, or hacks found on Rekt News or DeFi Llama hacks database.
-- **Peg Stability**: USR trading at ~$0.9998, maintaining close to $1 peg.
+- **CRITICAL INCIDENT (March 22, 2026)**: A single EOA with `SERVICE_ROLE` on the USR Counter contract exploited the `requestSwap()` → `completeSwap()` flow. The attacker deposited ~100K USDC via `requestSwap()`, then the SERVICE_ROLE EOA called `completeSwap()` minting **50M USR** (not ~100K). A second mint followed for **30M USR**. Total: **~80M unbacked USR minted**. The attacker wrapped USR → wstUSR, dumped across KyberSwap + Velora at $0.50–$0.88, converted to ETH via Uniswap V4. **~$25M+ extracted from ~$200K input.** ~36M USR still held by attacker. Root cause: no on-chain issuance caps, no collateral ratio enforcement in `completeSwap()`, no oracle sanity checks, no multisig requirement on SERVICE_ROLE, no proof of reserves oracle. As the first-loss tranche, RLP absorbs these losses before USR — RLP holders are directly and immediately impacted.
+- **Peg Stability**: USR peg collapsed to $0.50–$0.88 during the dump.
 - **Historical Yield**: Median annual performance of delta-neutral strategy: 8.4%, with 99% of results in the 7-10% p.a. range.
 
 ## Funds Management
@@ -280,11 +280,11 @@ Losses are allocated entirely to RLP holders. No losses flow to USR holders unle
 
 ### Critical Risk Gates
 
-- [x] **No audit** -- Protocol has been audited by 4 reputable firms across 14+ engagements. **PASS**
-- [x] **Unverifiable reserves** -- Reserves verifiable via on-chain wallets and Apostro third-party dashboard. **PASS**
-- [x] **Total centralization** -- 3-of-5 Gnosis Safe multisig controls all contracts. 3-day timelock for proxy upgrades. Not a single EOA. **PASS**
+- [x] **No audit** -- Protocol has been audited by 4 reputable firms across 14+ engagements. **PASS** (but audits failed to catch the `completeSwap()` minting vulnerability in USR Counter)
+- [ ] **Unverifiable reserves** -- **FAIL**. ~80M USR minted without collateral backing on March 22, 2026 via USR Counter `completeSwap()` exploit. The collateral pool is no longer sufficient to back all outstanding USR. As the first-loss tranche, RLP absorbs these losses directly.
+- [ ] **Total centralization** -- **FAIL**. A single EOA with `SERVICE_ROLE` was able to mint arbitrary amounts of USR via `completeSwap()` with no multisig requirement, no on-chain issuance caps, and no collateral ratio enforcement.
 
-**All gates pass.** Proceed to category scoring.
+**Gates FAILED. Score automatically set to 5.0 — DO NOT USE.**
 
 ### Category Scores
 
@@ -381,43 +381,52 @@ Losses are allocated entirely to RLP holders. No losses flow to USR holders unle
 
 ### Final Score Calculation
 
-```
-Final Score = (Centralization × 0.30) + (Funds Mgmt × 0.30) + (Audits × 0.20) + (Liquidity × 0.15) + (Operational × 0.05)
-```
+**Critical risk gate FAILED — score override to 5.0.**
 
-| Category | Score | Weight | Weighted |
-|----------|-------|--------|----------|
-| Audits & Historical | 1.5 | 20% | 0.30 |
-| Centralization & Control | 3.7 | 30% | 1.11 |
-| Funds Management | 3.0 | 30% | 0.90 |
-| Liquidity Risk | 3.0 | 15% | 0.45 |
-| Operational Risk | 2.5 | 5% | 0.125 |
-| **Final Score** | | | **2.885** |
+Category scoring is superseded by gate failure. For reference, pre-incident category scores are preserved above.
 
-**Final Score: 2.9**
+| Category | Pre-Incident Score | Post-Incident | Weight | Weighted |
+|----------|-------------------|---------------|--------|----------|
+| Audits & Historical | 1.5 | N/A | 20% | — |
+| Centralization & Control | 3.7 | N/A | 30% | — |
+| Funds Management | 3.0 | N/A | 30% | — |
+| Liquidity Risk | 3.0 | N/A | 15% | — |
+| Operational Risk | 2.5 | N/A | 5% | — |
+| **Final Score (gate override)** | | | | **5.0** |
+
+**Final Score: 5.0**
 
 ### Risk Tier
 
 | Final Score | Risk Tier | Recommendation |
 |------------|-----------|----------------|
-| **2.5-3.5** | **Medium Risk** | Approved with enhanced monitoring |
+| **5.0** | **Critical Risk** | DO NOT USE — exit all positions immediately |
 
-**Final Risk Tier: Medium Risk**
+**Final Risk Tier: Critical Risk — DO NOT USE**
 
 ---
 
-RLP is a well-audited protocol with strong security practices but carries inherent structural risk as a **first-loss tranche** -- by design, RLP absorbs all losses from the delta-neutral strategy before USR is affected, meaning RLP price can decrease. A 3-of-5 Gnosis Safe multisig controls all contracts and a 3-day timelock gates proxy upgrades, but operational parameters remain untimelocked and no on-chain governance is live. In stress scenarios, RLP holders face both value impairment and potential liquidity lockout (110% CR gate). The RLP burn mechanism is epoch-based with no on-chain slippage protection, and pricing is entirely off-chain. These structural and centralization risks place RLP in the Medium Risk classification despite its strong audit and track record profile.
+**⚠️ DO NOT USE — CRITICAL INCIDENT ⚠️**
 
-**Key conditions for exposure:**
-- Enhanced monitoring of collateral pool composition and delta exposure via Apostro dashboard
-- Monitor for governance activation (stRESOLV voting)
-- Track RLP/USR coverage ratio; alert at <120%
-- Monitor multisig signer changes and timelock proposals
+On March 22, 2026, a single EOA with `SERVICE_ROLE` exploited the USR Counter contract's `completeSwap()` function to mint **~80M unbacked USR** (~$25M+ extracted).
+
+**Kill chain:**
+1. Attacker called `requestSwap()` depositing ~100K USDC
+2. SERVICE_ROLE EOA called `completeSwap()` minting **50M USR** (not ~100K)
+3. Repeat: second mint of **30M USR**
+4. Wrapped USR → wstUSR (better DEX liquidity)
+5. Dumped across KyberSwap + Velora at $0.50–$0.88
+6. Converted proceeds to USDT/USDC → ETH via Uniswap V4 and MetaMask Swaps
+7. **~$200K in → ~$25M+ out**
+8. ~36M USR still held by attacker (worth ~$2M), still being dumped
+
+**Impact on RLP**: As the first-loss tranche, RLP absorbs all protocol losses before USR. The ~$25M+ extraction directly impairs RLP value. RLP holders face both immediate value destruction and potential inability to redeem (110% CR gate likely breached).
+
+**All exposure to RLP, wstUSR, stUSR, and USR should be exited immediately.**
 
 ---
 
 ## Reassessment Triggers
 
-- **Time-based**: Reassess in 6 months (August 2026)
-- **Governance-based**: Reassess when on-chain governance is activated
-- **Incident-based**: Reassess after any exploit, governance change, CEX failure, or significant collateral modification
+- **TRIGGERED (March 22, 2026)**: ~80M unbacked USR minted via `completeSwap()` exploit. ~$25M+ extracted. RLP directly impaired as first-loss tranche. Score overridden to 5.0.
+- **Reassessment conditions**: Only reassess if Resolv (1) fully accounts for the unbacked mint, (2) revokes all EOA `SERVICE_ROLE` grants, (3) implements on-chain issuance caps and collateral ratio checks in `completeSwap()`, (4) submits to an independent audit of the incident and remediation, and (5) demonstrates RLP holders have been made whole or compensated.
