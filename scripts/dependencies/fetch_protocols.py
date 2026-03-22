@@ -87,6 +87,13 @@ PROTOCOL_TOKENS: dict[str, str] = {
     # Resolv
     "USR": "Resolv",
     "wstUSR": "Resolv",
+    # 3Jane
+    "USD3": "3Jane",
+    "sUSD3": "3Jane",
+    # Cap
+    "cUSD": "Cap",
+    "stcUSD": "Cap",
+    "wWTGXX": "WisdomTree",
     # RWA
     "USCC": "Superstate",
     "STRC": "Strategy Inc.",
@@ -502,6 +509,44 @@ def unit_ubtc_data() -> dict:
     }
 
 
+def threejane_data() -> dict:
+    """3Jane USD3 dependency data from risk assessment report (Feb 2026)."""
+    return {
+        "name": "3Jane (USD3)",
+        "chain": "ethereum",
+        "type": "credit_market",
+        "address": "0x056B269Eb1f75477a8666ae8C7fE01b64dD55eCc",
+        "report": "reports/report/3jane-usd3.md",
+        "collateral": [
+            {"asset": "USDC"},
+        ],
+        "yield_sources": [
+            {"protocol": "aave_v3_core", "assets": ["USDC"]},
+        ],
+        "infrastructure": [],
+    }
+
+
+def cap_data() -> dict:
+    """Cap stcUSD dependency data from risk assessment report (Feb 2026)."""
+    return {
+        "name": "Cap (stcUSD)",
+        "chain": "ethereum",
+        "type": "yield_vault",
+        "address": "0x88887bE419578051FF9F4eb6C858A951921D8888",
+        "report": "reports/report/cap-stcusd.md",
+        "collateral": [
+            {"asset": "USDC"},
+            {"asset": "wWTGXX"},
+        ],
+        "yield_sources": [
+            {"protocol": "morpho", "assets": ["USDC"], "label": "Morpho Gauntlet USDC Prime"},
+            {"protocol": "aave_v3_core", "assets": ["USDC"]},
+        ],
+        "infrastructure": ["RedStone"],
+    }
+
+
 def strata_data() -> dict:
     """Strata (srUSDe) dependency data from risk assessment report (Feb 2026)."""
     return {
@@ -566,6 +611,12 @@ def main():
 
     # Maple Finance
     data["protocols"]["maple"] = maple_data()
+
+    # 3Jane USD3
+    data["protocols"]["threejane"] = threejane_data()
+
+    # Cap stcUSD
+    data["protocols"]["cap"] = cap_data()
 
     # InfiniFi
     data["protocols"]["infinifi"] = infinifi_data()

@@ -36,6 +36,11 @@ protocol_tokens:
   syrupUSDT: Maple
   USR: Resolv
   wstUSR: Resolv
+  USD3: 3Jane
+  sUSD3: 3Jane
+  cUSD: Cap
+  stcUSD: Cap
+  wWTGXX: WisdomTree
   USCC: Superstate
   STRC: Strategy Inc.
   LBTC: Lombard
@@ -299,6 +304,38 @@ protocols:
     - sky
     infrastructure:
     - Chainlink
+  threejane:
+    name: 3Jane (USD3)
+    chain: ethereum
+    type: credit_market
+    address: '0x056B269Eb1f75477a8666ae8C7fE01b64dD55eCc'
+    report: reports/report/3jane-usd3.md
+    collateral:
+    - asset: USDC
+    yield_sources:
+    - protocol: aave_v3_core
+      assets:
+      - USDC
+    infrastructure: []
+  cap:
+    name: Cap (stcUSD)
+    chain: ethereum
+    type: yield_vault
+    address: '0x88887bE419578051FF9F4eb6C858A951921D8888'
+    report: reports/report/cap-stcusd.md
+    collateral:
+    - asset: USDC
+    - asset: wWTGXX
+    yield_sources:
+    - protocol: morpho
+      assets:
+      - USDC
+      label: Morpho Gauntlet USDC Prime
+    - protocol: aave_v3_core
+      assets:
+      - USDC
+    infrastructure:
+    - RedStone
   infinifi:
     name: InfiniFi (siUSD)
     chain: ethereum
