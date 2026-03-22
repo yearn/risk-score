@@ -313,6 +313,7 @@ def fluid_data() -> dict:
         "address": "0x9Fb7b4477576Fe5B32be4C1843aFB1e55F251B33",
         "report": "reports/report/fluid.md",
         "collateral": [
+            {"asset": "wstUSR"},
             {"asset": "USDC"},
             {"asset": "USDT"},
             {"asset": "WETH"},
