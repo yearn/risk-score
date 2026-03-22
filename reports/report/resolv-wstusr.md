@@ -5,7 +5,7 @@
 - **Chain:** Ethereum (primary), multi-chain (Arbitrum, Base)
 - **Token Address:** [`0x1202F5C7b4B9E47a1A484E8B270be34dbbC75055`](https://etherscan.io/address/0x1202F5C7b4B9E47a1A484E8B270be34dbbC75055)
 - **Final Score: 5.0/5.0**
-- **⚠️ DO NOT USE — CRITICAL INCIDENT**
+- **Warning:** HACKED — DO NOT USE
 
 ## Overview + Links
 

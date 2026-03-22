@@ -37,7 +37,10 @@ const reports = getAllReports();
                   )}
                 </div>
               </td>
-              <td>{r.name}</td>
+              <td>
+                {r.name}
+                {r.warning && <span class="warning-tag">&#9888; {r.warning}</span>}
+              </td>
               <td class="mono">{r.token}</td>
               <td>
                 <ScoreBadge score={r.finalScore} />
@@ -81,6 +84,17 @@ const reports = getAllReports();
     height: 24px;
     border-radius: 50%;
     background: var(--bg-secondary);
+  }
+  .warning-tag {
+    display: inline-block;
+    background: #dc2626;
+    color: #fff;
+    font-size: 0.7rem;
+    font-weight: 600;
+    padding: 0.15rem 0.4rem;
+    border-radius: 4px;
+    margin-left: 0.5rem;
+    vertical-align: middle;
   }
   .mono {
     font-family: "SF Mono", "Fira Code", monospace;

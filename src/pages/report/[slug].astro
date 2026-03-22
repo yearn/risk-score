@@ -23,6 +23,12 @@ const ogDescription = `${report.name} — Score: ${report.finalScore.toFixed(1)}
 >
   <a href="/" class="back-link">&larr; All Reports</a>
 
+  {report.warning && (
+    <div class="warning-banner">
+      <strong>&#9888; {report.warning}</strong>
+    </div>
+  )}
+
   <div class="report-header">
     <div class="header-top">
       <div class="header-title">
@@ -77,6 +83,15 @@ const ogDescription = `${report.name} — Score: ${report.finalScore.toFixed(1)}
 </BaseLayout>
 
 <style>
+  .warning-banner {
+    background: #dc2626;
+    color: #fff;
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+    font-size: 1rem;
+    text-align: center;
+  }
   .back-link {
     display: inline-block;
     margin-bottom: 1.5rem;
