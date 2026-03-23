@@ -1,10 +1,10 @@
 # Protocol Risk Assessment: Noon
 
-- **Assessment Date:** March 10, 2026
+- **Assessment Date:** March 23, 2026 (reassessment; original March 10, 2026)
 - **Token:** sUSN (Staked USN)
 - **Chain:** Ethereum
 - **Token Address:** [`0xE24a3DC889621612422A64E6388927901608B91D`](https://etherscan.io/address/0xE24a3DC889621612422A64E6388927901608B91D)
-- **Final Score: 3.6/5.0**
+- **Final Score: 3.4/5.0**
 
 ## Overview + Links
 
@@ -22,20 +22,26 @@ Yield is distributed: **80%** to sUSN holders (via rebase), **10%** to the Noon 
 
 sUSN's value appreciates as the protocol mints new USN into the staking pool proportional to daily returns.
 
-**Key metrics (on-chain verified, March 10, 2026):**
-- Protocol TVL: ~$31M (DeFiLlama)
-- USN total supply: 27,923,316 USN (`totalSupply()` on-chain)
-- sUSN total supply: 20,647,638 sUSN (`totalSupply()` on-chain)
-- sUSN total assets: 24,116,984 USN staked (`totalAssets()` on-chain)
-- sUSN exchange rate: 1 sUSN = 1.1680 USN (`convertToAssets(1e18)` = 1,168,026,297,247,539,186)
-- Chains: Ethereum (~$27.9M), Sophon (~$1.3M), TAC (~$1.0M), zkSync Era (~$0.8M)
+**Key metrics (on-chain verified, March 23, 2026):**
+- Protocol TVL: ~$30.75M (DeFiLlama)
+- USN total supply: 27,697,873 USN (`totalSupply()` on-chain)
+- sUSN total supply: 18,198,756 sUSN (`totalSupply()` on-chain)
+- sUSN total assets: 21,322,968 USN staked (`totalAssets()` on-chain)
+- sUSN exchange rate: 1 sUSN = 1.1717 USN (`convertToAssets(1e18)` = 1,171,671,739,039,426,902)
+- ~77% of USN is staked in sUSN (21.3M / 27.7M)
 
 **Yearn use case per issue #66:**
 - Use sUSN as collateral on Morpho for sUSN/USDC market
 
 **Recent developments (since original March 1 assessment):**
-- **NOON governance token launched on KuCoin** (March 5, 2026) — veToken system with sNOON staking (up to 4x voting multiplier, 12-month lock). This adds governance participation but does **not** change the underlying 3-of-6 multisig admin structure
-- **tBTC Bitcoin Yield Vault** launched on Starknet (January 2026) — uses tBTC as collateral, borrows USDC, deploys into sUSN, and loops. Reached $454K TVL within 2 days at 6.79% APY. Adds product complexity
+- **Timelock deployed** (verified on-chain March 23, 2026) — custom Timelock contract at [`0xE5e412C212B4FBbF550A94e7BD5e83dB0B315A7F`](https://etherscan.io/address/0xE5e412C212B4FBbF550A94e7BD5e83dB0B315A7F) with 48-hour delay. Both ProxyAdmins (USN + sUSN) now owned by timelock. Token contracts (USN, sUSN) still directly owned by multisig — operational functions (blacklist, rescueToken, rebase) are NOT timelocked
+- **Source code now public** (March 18-19, 2026) — Core contracts at [dclf-labs/Protocol-Core](https://github.com/dclf-labs/Protocol-Core), governance at [dclf-labs/Governance-Core](https://github.com/dclf-labs/Governance-Core). CI includes Slither + Mythril static analysis. Test coverage: 96-100%
+- **DCLM market maker liquidation agreement** — DCL Markets Ltd contractually obligated to buy sUSN at previous day's price (paying USDT/USDC) within 24 hours (+24h grace) if sUSN depegs >1%. Must execute even at a loss. BVI law, JAMS arbitration in London. 45-day termination notice
+- **Ceffu funding rate arbitrage paused** — Team confirms paused 12+ months with no restart anticipated. Reduces active custodial exposure to Ceffu
+- **Alpaca/Dinari clarification** — Team claims Alpaca assets tokenized on-chain via Dinari with T+1 redemption. **Not verified on-chain** — no Dinari dShares or tokenized T-bill tokens found in any collateral wallet. T-bills appear to remain off-chain at Alpaca Securities
+- **Anonymous signers** — No fix planned. Team commitment to adding independent/known entity signers after >$100M TVL growth; open to Yearn as signer
+- **NOON governance token launched on KuCoin** (March 5, 2026) — veToken system with sNOON staking (up to 4x voting multiplier, 12-month lock). Does **not** change the underlying 3-of-6 multisig admin structure
+- **tBTC Bitcoin Yield Vault** launched on Starknet (January 2026) — uses tBTC as collateral, borrows USDC, deploys into sUSN, and loops. Reached $454K TVL within 2 days at 6.79% APY
 - **US GENIUS Act** (passed July 2025) + OCC rulemaking (early 2026) — creates strict framework for stablecoin issuers, including foreign issuers serving US users. Relevant for Noon as a BVI entity
 
 **Links:**
@@ -63,14 +69,26 @@ sUSN's value appreciates as the protocol mints new USN into the staking pool pro
 
 | Contract | ProxyAdmin | ProxyAdmin Owner |
 |----------|-----------|-----------------|
-| USN | [`0x55f39512cb43111a13e8440ee3e3602e72628239`](https://etherscan.io/address/0x55f39512cb43111a13e8440ee3e3602e72628239) | 3-of-6 Multisig |
-| sUSN | [`0x1908284b50ee152c9f00c8e65a81fc1c4520bd81`](https://etherscan.io/address/0x1908284b50ee152c9f00c8e65a81fc1c4520bd81) | 3-of-6 Multisig |
+| USN | [`0x55f39512cb43111a13e8440ee3e3602e72628239`](https://etherscan.io/address/0x55f39512cb43111a13e8440ee3e3602e72628239) | Timelock (48h delay) |
+| sUSN | [`0x1908284b50ee152c9f00c8e65a81fc1c4520bd81`](https://etherscan.io/address/0x1908284b50ee152c9f00c8e65a81fc1c4520bd81) | Timelock (48h delay) |
 
 ### Governance
 
 | Contract | Address | Configuration |
 |----------|---------|---------------|
+| Timelock | [`0xE5e412C212B4FBbF550A94e7BD5e83dB0B315A7F`](https://etherscan.io/address/0xE5e412C212B4FBbF550A94e7BD5e83dB0B315A7F) | Custom Timelock, 48h delay (MIN_DELAY: 1 day, MAX_DELAY: 2 days), owned by Multisig, Solidity 0.8.28, verified on Etherscan |
 | Multisig | [`0x1ea169EcCcf7714E7ba04900e1a3357cCA77327f`](https://etherscan.io/address/0x1ea169EcCcf7714E7ba04900e1a3357cCA77327f) | 3-of-6 Gnosis Safe v1.4.1, all anonymous signers (on-chain verified via `getThreshold()` and `getOwners()`) |
+
+**Governance chain (on-chain verified March 23, 2026):**
+
+```
+Multisig (0x1ea1...327f) — 3-of-6 anonymous signers
+  ├── owns Timelock (0xE5e4...5A7F) — 48-hour delay on proxy upgrades
+  │     ├── owns USN ProxyAdmin (0x55f3...2239)
+  │     └── owns sUSN ProxyAdmin (0x1908...0b81)
+  ├── directly owns USN token (0xdA67...1eD) — NO timelock on operational functions
+  └── directly owns sUSN token (0xE24a...91D) — NO timelock on operational functions
+```
 
 ### Collateral Wallets (Ethereum)
 
@@ -80,7 +98,7 @@ sUSN's value appreciates as the protocol mints new USN into the staking pool pro
 | Noon Collateral 2 | [`0x1b2262903Fdb0a8eb84291cC227426be590c4503`](https://etherscan.io/address/0x1b2262903Fdb0a8eb84291cC227426be590c4503) | 3-of-4 Gnosis Safe (on-chain verified) |
 | Noon Collateral 3 | [`0x4fD04553468610e5a88a2cffA38E057C954312Da`](https://etherscan.io/address/0x4fD04553468610e5a88a2cffA38E057C954312Da) | **EOA** (on-chain verified — no contract code) |
 
-### On-Chain Verification (Etherscan + cast, March 10, 2026)
+### On-Chain Verification (Etherscan + cast, March 23, 2026)
 
 | Contract | Name | Verified | Proxy | Implementation |
 |----------|------|----------|-------|----------------|
@@ -89,11 +107,13 @@ sUSN's value appreciates as the protocol mints new USN into the staking pool pro
 | MinterHandlerV2 | MinterHandlerV2 | Yes | No | — |
 | Multisig | GnosisSafeProxy (Safe v1.4.1) | Yes | Yes | — |
 
-**On-chain ownership verification (via `cast`):**
-- USN `owner()` → `0x1ea169EcCcf7714E7ba04900e1a3357cCA77327f` (3-of-6 multisig) ✓
-- sUSN `owner()` → `0x1ea169EcCcf7714E7ba04900e1a3357cCA77327f` (3-of-6 multisig) ✓
-- USN ProxyAdmin `owner()` → `0x1ea169EcCcf7714E7ba04900e1a3357cCA77327f` (3-of-6 multisig) ✓
-- sUSN ProxyAdmin `owner()` → `0x1ea169EcCcf7714E7ba04900e1a3357cCA77327f` (3-of-6 multisig) ✓
+**On-chain ownership verification (via `cast`, March 23, 2026):**
+- USN `owner()` → `0x1ea169EcCcf7714E7ba04900e1a3357cCA77327f` (3-of-6 multisig, direct) ✓
+- sUSN `owner()` → `0x1ea169EcCcf7714E7ba04900e1a3357cCA77327f` (3-of-6 multisig, direct) ✓
+- USN ProxyAdmin `owner()` → `0xE5e412C212B4FBbF550A94e7BD5e83dB0B315A7F` (**Timelock**, 48h delay) ✓
+- sUSN ProxyAdmin `owner()` → `0xE5e412C212B4FBbF550A94e7BD5e83dB0B315A7F` (**Timelock**, 48h delay) ✓
+- Timelock `owner()` → `0x1ea169EcCcf7714E7ba04900e1a3357cCA77327f` (3-of-6 multisig) ✓
+- Timelock `delay()` → 172,800 seconds (48 hours) ✓
 - Multisig `getThreshold()` → 3, `getOwners()` → 6 signers ✓
 
 **Withdrawal period**: The sUSN vault delegates withdrawal logic to a separate handler via `setWithdrawalHandler()`. The withdrawal period is not exposed as a direct public view function on the sUSN contract. The `WithdrawPeriodUpdated` event and `WithdrawPeriodNotElapsed` error in the ABI confirm a configurable cooldown exists. Documentation states T+5 maximum (20% at T+0, 60% at T+3, 100% at T+5).
@@ -142,7 +162,7 @@ The architecture is moderately complex:
 - **sUSN deployment**: November 6, 2024 (block 21130318) — ~16 months on-chain
 - **Public beta launch**: January 25, 2025 — ~14 months of active usage
 - **NOON token launch**: March 5, 2026 — governance token listed on KuCoin (NOON/USDT). veToken system with sNOON staking for voting power. Current price: ~$0.027
-- **GitHub**: Private repository (`dclf-labs/Noon-Core-Audit`), not public
+- **GitHub**: **Public** as of March 18-19, 2026: [Protocol-Core](https://github.com/dclf-labs/Protocol-Core) (core contracts), [Governance-Core](https://github.com/dclf-labs/Governance-Core) (NOON staking). CI includes Slither + Mythril static analysis. Test coverage: 96-100%
 - **Incidents**: No reported security incidents, exploits, or hacks found
 - **TVL History**:
 
@@ -151,26 +171,61 @@ The architecture is moderately complex:
 | Jan 2025 | ~$28.5M | Public beta launch, peak TVL |
 | Mar 2025 (early) | ~$16.6M | Significant dip |
 | Mar 2025 (late) | ~$28M | Recovery |
-| Mar 2026 | ~$31M | Current (Ethereum ~$27.9M, Sophon ~$1.3M, TAC ~$1.0M, zkSync Era ~$0.8M) |
+| Mar 2026 | ~$30.75M | Current (DeFiLlama, March 23, 2026) |
 
-- **TVL Volatility**: The protocol experienced a ~42% drawdown (from $28.5M to $16.6M) in early March 2025 but recovered. TVL has grown to ~$31M, with a notable shift toward Ethereum (from ~$21.3M to ~$27.9M) while zkSync Era dropped from ~$3.3M to ~$0.8M.
-- **Exchange rate (on-chain verified March 10, 2026)**:
-  - `convertToAssets(1e18)` = 1,168,026,297,247,539,186 = 1.1680 USN per sUSN
-  - `totalAssets()` = 24,116,984,220,685,763,950,027,012 = 24,116,984 USN
-  - `totalSupply()` = 20,647,638,051,915,079,811,578,141 = 20,647,638 sUSN
+- **TVL Volatility**: The protocol experienced a ~42% drawdown (from $28.5M to $16.6M) in early March 2025 but recovered. TVL has been stable around ~$31M. sUSN total supply decreased from ~20.6M to ~18.2M since March 10, indicating some net unstaking.
+- **Exchange rate (on-chain verified March 23, 2026)**:
+  - `convertToAssets(1e18)` = 1,171,671,739,039,426,902 = 1.1717 USN per sUSN
+  - `totalAssets()` = 21,322,967,621,956,273,436,024,767 = 21,322,968 USN
+  - `totalSupply()` = 18,198,755,599,787,282,119,412,573 = 18,198,756 sUSN
   - `maxRedeem(address)` = 0 (direct ERC-4626 redemption disabled)
-  - As an ERC-4626 vault, the exchange rate should only increase. The 16.8% appreciation over ~16 months implies ~12.6% annualized yield.
+  - As an ERC-4626 vault, the exchange rate should only increase. The 17.17% appreciation over ~17 months implies ~12.1% annualized yield. Rate increased from 1.1680 → 1.1717 in 13 days (healthy).
 - **USN Peg**: No reported depegging events found. USN is backed 1:1 by USDT/USDC/T-Bills.
 
 ## Funds Management
 
 ### Deposit/Withdrawal Flow
 
-**Minting USN**: Institutional/permissioned users mint USN by depositing USDT or USDC through the MinterHandlerV2 contract. On-chain verified safeguards:
+**Minting USN**: The USN token has a single `admin` address that can call `mint()`. Currently the admin is the MinterHandlerV2 contract ([`0xB91b361ebE4022Bb62dF0651bDD09b21209ac058`](https://etherscan.io/address/0xB91b361ebE4022Bb62dF0651bDD09b21209ac058)). The multisig (USN owner) can change this admin at any time via `setAdmin()` — **NOT behind timelock**.
+
+MinterHandlerV2 exposes **three minting paths** (on-chain verified):
+
+| Path | Collateral Required? | Who Can Call | Limit | Atomic? |
+|------|---------------------|-------------|-------|---------|
+| `mint(order, sig)` | **Yes** — `safeTransferFrom(user, custodialWallet)` | MINTER_ROLE (multisig) + signed order from whitelisted user | 10M USN/block | Yes |
+| `directMint(collateral, amount, minUsn)` | **Yes** — `safeTransferFrom(user, custodialWallet)`, priced via Chainlink oracle | Any whitelisted user | 10M USN/block + 10M USN/day | Yes |
+| `mintAndRebase(amount)` | **NO — mints USN without any collateral** | MINTER_ROLE (multisig) only | 50,000 USN/call | Yes |
+
+**`mintAndRebase()` is the critical risk vector**: The multisig can mint up to 50,000 USN per call with zero collateral deposit. The newly minted USN is sent directly into the sUSN staking vault via `rebase()`, increasing the sUSN exchange rate as "yield." The trust assumption is that off-chain reserves back this minting, but **nothing on-chain enforces it**.
+
+**No on-chain supply enforcement (verified):**
+- USN has **no supply cap** (`maxSupply()`, `cap()` do not exist on the contract)
+- `mintAndRebase()` has **no cooldown** between calls (confirmed on-chain: 2 calls only 45 blocks / ~9 minutes apart)
+- **No daily aggregate limit** — no `totalRebased` counter or per-day tracking
+- `setRebaseLimit()` has **no upper bound** — multisig can set it to `type(uint256).max`
+- The sUSN vault's `rebase()` accepts **unlimited amounts** from any `REBASE_MANAGER_ROLE` holder
+- **NOT behind timelock** — both `mintAndRebase()` and `setRebaseLimit()` are immediate
+- Historical activity: 25 `MintAndRebase` events total, ~178,512 USN minted via this path. Limit already raised twice (30K → 40K → 50K)
+
+**Worst case (multisig compromise):** The multisig could call `setRebaseLimit(type(uint256).max)` then `mintAndRebase(any_amount)` in a single transaction — minting unlimited USN with zero collateral and zero on-chain resistance. This would inflate the sUSN exchange rate, allowing borrowers on Morpho to extract more USDC than their collateral is worth.
+
+**MINTER_ROLE holders** on MinterHandlerV2 (on-chain verified):
+- [`0x1ea169EcCcf7714E7ba04900e1a3357cCA77327f`](https://etherscan.io/address/0x1ea169EcCcf7714E7ba04900e1a3357cCA77327f) (3-of-6 multisig) — **active**
+
+**REBASE_MANAGER_ROLE holders** on sUSN vault (on-chain verified — all active, no revocations found):
+- [`0x1ea169EcCcf7714E7ba04900e1a3357cCA77327f`](https://etherscan.io/address/0x1ea169EcCcf7714E7ba04900e1a3357cCA77327f) (multisig)
+- [`0xB91b361ebE4022Bb62dF0651bDD09b21209ac058`](https://etherscan.io/address/0xB91b361ebE4022Bb62dF0651bDD09b21209ac058) (MinterHandlerV2)
+- [`0x173806021b18c4e60170e412dc88f991eb00d699`](https://etherscan.io/address/0x173806021b18c4e60170e412dc88f991eb00d699) (EOA — deployer)
+- [`0xcc2447b495cbc8c2263619ff3dc4c13604c9b11f`](https://etherscan.io/address/0xcc2447b495cbc8c2263619ff3dc4c13604c9b11f) (EOA — unknown)
+
+**Concern**: Two EOAs still hold `REBASE_MANAGER_ROLE`. While they cannot mint USN themselves (only MinterHandlerV2 is USN admin), if they obtained USN tokens they could call `rebase()` directly on the vault to inflate the exchange rate.
+
+On-chain verified MinterHandlerV2 parameters:
 - `mintLimitPerBlock`: 10,000,000 USN (1e25 wei)
 - `directMintLimitPerDay`: 10,000,000 USN (1e25 wei)
 - `rebaseLimit`: 50,000 USN (5e22 wei)
 - `priceThresholdBps`: 50 (0.5%)
+- `oracleStalenessThreshold`: 172,800 seconds (48 hours)
 - `custodialWallet`: [`0x365bd6fb4200e422a2b1f7b9Dfb1C00471E6D089`](https://etherscan.io/address/0x365bd6fb4200e422a2b1f7b9Dfb1C00471E6D089) (Noon Collateral 1)
 
 Retail users buy USN on DEXes.
@@ -186,7 +241,8 @@ Alternatively, users can sell sUSN on DEXes for immediate (but potentially slipp
 
 ### Accessibility
 
-- **USN minting**: Restricted to permissioned/whitelisted addresses via MinterHandler. Currently in "permissionless" transfer mode (anyone can transfer USN)
+- **USN minting**: Three paths — `mint()` requires MINTER_ROLE + whitelisted user with collateral; `directMint()` requires whitelisted user with collateral + Chainlink price; `mintAndRebase()` requires MINTER_ROLE only (no collateral). All minting is atomic (single transaction)
+- **USN transfers**: Permissionless (anyone can transfer USN)
 - **sUSN staking**: Anyone can deposit USN to receive sUSN
 - **sUSN redemption**: Subject to withdrawal request + cooldown period (up to 5 days). Not atomic
 - **Fees**: Not explicitly documented in public sources
@@ -194,11 +250,12 @@ Alternatively, users can sell sUSN on DEXes for immediate (but potentially slipp
 ### Collateralization
 
 - **Backing**: USN is backed 1:1 by USDT, USDC, or short-term U.S. Treasury Bills. Collateral is held by custodians:
-  - **Ceffu** — funding rate arbitrage (off-exchange, tri-partite settlement)
-  - **Alpaca Securities** (via Dinari) — T-Bills and CLOs (FINRA member, SIPC + Lloyd's of London insurance)
+  - **Ceffu** — funding rate arbitrage (off-exchange, tri-partite settlement). **Paused 12+ months per team; no restart anticipated**
+  - **Alpaca Securities** (via Dinari) — T-Bills and CLOs (FINRA member, SIPC + Lloyd's of London insurance). Team claims assets tokenized on-chain via Dinari with T+1 redemption. **Not verified on-chain** — no Dinari dShares or tokenized T-bill tokens found in collateral wallets; T-bills appear to remain off-chain at Alpaca Securities
   - **Fasanara Capital** — private credit (F-TAC fund, $6B AUM)
   - **ForDefi** — DeFi strategies (institutional MPC wallet, on-chain visibility)
-- **On-chain collateral**: Only DeFi strategies (Euler, Morpho, Pendle) are visible on-chain via ForDefi wallets. The majority of collateral is **off-chain/custodial**
+- **On-chain collateral**: Only DeFi strategies (Euler, Morpho, Pendle) are visible on-chain via ForDefi wallets. Collateral wallets primarily hold USDC and DeFi positions. The majority of collateral is **off-chain/custodial**
+- **Market maker backstop**: DCL Markets Ltd (DCLM) contractually obligated to buy sUSN at previous day's price within 24h (+24h grace) if sUSN depegs >1%. Must execute even at a loss. Provides a contractual (not on-chain) liquidation backstop
 - **Insurance layers**: Nexus Mutual (DeFi smart contract risk), SIPC + Lloyd's of London (TradFi custodial), and internal Insurance Fund (10% of revenue)
 - **No on-chain over-collateralization mechanism**: Unlike protocols with on-chain liquidation and collateral ratios, USN relies on custodial backing with periodic verification
 - **Private credit exposure**: Fasanara F-TAC positions have **T+3 month redemption windows**, creating potential liquidity mismatch with the T+5 day user redemption guarantee
@@ -208,7 +265,7 @@ Alternatively, users can sell sUSN on DEXes for immediate (but potentially slipp
 - **Proof of Solvency**: Partnership with Accountable provides real-time, independent verification using zero-knowledge proofs and secure enclaves. Dashboard at [noon.accountable.capital](https://noon.accountable.capital/)
 - **On-chain verifiability**: sUSN exchange rate is programmatic on-chain (ERC-4626). DeFi strategy positions visible via ForDefi wallets on-chain
 - **Off-chain reserves**: TradFi positions (T-Bills, CLOs, private credit, CEX funding rate arb) are **not on-chain verifiable**. Users must trust Accountable's verification and custodian attestations
-- **Yield distribution**: Rebase mechanism — protocol mints new USN into the staking pool via `REBASE_MANAGER_ROLE`. The rebase amount is controlled by the team (up to `rebaseLimit` of ~50K USN per transaction)
+- **Yield distribution**: Via `mintAndRebase()` — the multisig (MINTER_ROLE) mints new USN **without any collateral deposit** and sends it into the sUSN vault. This is the mechanism that increases the sUSN exchange rate. The rebase amount is controlled by the team (up to `rebaseLimit` of 50,000 USN per call, adjustable by multisig). **No on-chain enforcement that off-chain reserves back the minted USN**. Additionally, 4 addresses hold `REBASE_MANAGER_ROLE` on the sUSN vault (including 2 EOAs)
 - **Collateral self-dealing prohibition**: Documentation states Noon never redeploys assets back into Noon or lends to vaults accepting USN as collateral
 
 ## Liquidity Risk
@@ -222,11 +279,13 @@ Alternatively, users can sell sUSN on DEXes for immediate (but potentially slipp
 ### Liquidity Assessment
 
 - **Primary liquidity**: The main exit path is through the cooldown-based withdrawal mechanism (up to 5 days)
-- **Secondary market**: DEX liquidity is negligible (~$33K USN daily volume, ~$156 sUSN daily volume per CoinGecko). sUSN has virtually no secondary market liquidity
+- **Secondary market**: DEX liquidity is thin. sUSN has limited secondary market liquidity (~$2.5K 24h volume per CoinGecko). USN 24h volume ~$95.5K
 - **On-chain maxRedeem = 0**: Direct ERC-4626 redemption is disabled. Must use withdrawal handler
 - **Same-value redemption**: sUSN redeems for USN (stablecoin-denominated), so price change risk is minimal for the Morpho collateral use case
+- **DCLM market maker backstop**: DCL Markets Ltd contractually obligated to buy sUSN at previous day's price within 24h if sUSN depegs >1%. Provides a contractual (off-chain) backstop but depends on DCLM's willingness and solvency
 - **Liquidity mismatch**: The protocol promises T+5 full redemption, but private credit positions (Fasanara F-TAC) have T+3 month redemption. If a significant portion of TVL is in private credit, a bank-run scenario could stress the redemption guarantee
-- **Small TVL**: At ~$31M, the protocol is small. Large positions relative to TVL could create concentration risk
+- **Small TVL**: At ~$30.75M, the protocol is small. Large positions relative to TVL could create concentration risk
+- **Morpho market at 100% utilization**: All supplied USDC ($7.47M) is borrowed. Suppliers cannot withdraw until borrowers repay or new supply enters. Supply APY driven to ~38.35% to attract new supply
 
 ### Morpho Market (sUSN/USDC)
 
@@ -238,9 +297,9 @@ Alternatively, users can sell sUSN on DEXes for immediate (but potentially slipp
 | Oracle | MorphoChainlinkOracleV2 ([`0xC415Cc3F04F9074A9562aEEe02591e65D39A94aa`](https://etherscan.io/address/0xC415Cc3F04F9074A9562aEEe02591e65D39A94aa)) |
 | IRM | AdaptiveCurveIrm ([`0x870aC11D48B15DB9a138Cf899d20F13F79Ba00BC`](https://etherscan.io/address/0x870aC11D48B15DB9a138Cf899d20F13F79Ba00BC)) |
 | LLTV | 86% |
-| Total Supply | ~$8.3M USDC |
-| Total Borrow | ~$7.4M USDC |
-| Utilization | ~89.6% |
+| Total Supply | ~$7.47M USDC |
+| Total Borrow | ~$7.47M USDC |
+| Utilization | **~100%** (fully utilized — all supplied USDC is borrowed) |
 
 ### Morpho Oracle Analysis (on-chain verified)
 
@@ -254,14 +313,14 @@ The oracle formula: `price = vault_conversion * baseFeed1 * SCALE_FACTOR / quote
 
 | Parameter | Address | Description | Current Value |
 |-----------|---------|-------------|---------------|
-| BASE_VAULT | [`0xE24a3DC889621612422A64E6388927901608B91D`](https://etherscan.io/address/0xE24a3DC889621612422A64E6388927901608B91D) | sUSN vault (ERC-4626 exchange rate) | 1.1680 USN/sUSN |
+| BASE_VAULT | [`0xE24a3DC889621612422A64E6388927901608B91D`](https://etherscan.io/address/0xE24a3DC889621612422A64E6388927901608B91D) | sUSN vault (ERC-4626 exchange rate) | 1.1717 USN/sUSN |
 | BASE_VAULT_CONVERSION_SAMPLE | — | Conversion sample amount | 1e8 |
 | BASE_FEED_1 | [`0x6e498b02C0036235c8164A502b0eECC7660BD889`](https://etherscan.io/address/0x6e498b02C0036235c8164A502b0eECC7660BD889) | StorkChainlinkAdapter (USN/USD) | 1e18 (=$1.00) |
 | BASE_FEED_2 | `0x0` | Not set | — |
-| QUOTE_FEED_1 | [`0x8fFfFfd4AfB6115b954Bd326cbe7B4BA576818f6`](https://etherscan.io/address/0x8fFfFfd4AfB6115b954Bd326cbe7B4BA576818f6) | Chainlink USDC/USD (8 dec) | 99,992,975 (=$0.9999) |
+| QUOTE_FEED_1 | [`0x8fFfFfd4AfB6115b954Bd326cbe7B4BA576818f6`](https://etherscan.io/address/0x8fFfFfd4AfB6115b954Bd326cbe7B4BA576818f6) | Chainlink USDC/USD (8 dec) | 99,992,523 (=$0.9999) |
 | QUOTE_FEED_2 | `0x0` | Not set | — |
 | SCALE_FACTOR | — | Decimal adjustment | 1,000,000 |
-| **price()** | — | **Final oracle price** | **1,168,108,349,611,560,212,104,900 (~1.168 USDC/sUSN)** |
+| **price()** | — | **Final oracle price** | **1,171,759,342,446,034,690,013,772 (~1.1718 USDC/sUSN)** |
 
 **Stork adapter details:**
 - Description: `"A port of a chainlink aggregator powered by Stork"`
@@ -272,40 +331,42 @@ The oracle formula: `price = vault_conversion * baseFeed1 * SCALE_FACTOR / quote
 - **Stork USN/USD feed risk**: If USN depegs (e.g., drops to $0.90) but the Stork feed continues reporting $1.00, the oracle would **overvalue sUSN collateral**, allowing borrowers to extract more than their collateral is worth. This is the primary oracle risk
 - **Stork is newer**: Less battle-tested than Chainlink. The adapter's non-standard `latestRoundData()` timestamps suggest incomplete Chainlink interface compliance
 - **Single oracle source for USN/USD**: No redundant oracle or fallback. If Stork fails or returns stale data during a USN depeg, liquidations would malfunction
-- **86% LLTV is aggressive** for an asset with a 5-day withdrawal window — liquidators may struggle to unwind sUSN collateral quickly through DEXes with only ~$33K USN daily volume and ~$156 sUSN daily volume
+- **86% LLTV is aggressive** for an asset with a 5-day withdrawal window — liquidators may struggle to unwind sUSN collateral quickly through DEXes with thin liquidity. The Morpho market is at **100% utilization**, meaning suppliers cannot withdraw until borrowers repay
 
 ## Centralization & Control Risks
 
 ### Governance
 
-The entire protocol is controlled by a single 3-of-6 Gnosis Safe multisig with **no timelock**:
+The protocol is controlled by a 3-of-6 Gnosis Safe multisig. **Proxy upgrades are now behind a 48-hour timelock** (verified on-chain March 23, 2026). Operational functions remain directly controlled by the multisig:
 
-| Role | Controlled By | Description |
-|------|---------------|-------------|
-| ProxyAdmin Owner (USN) | 3-of-6 Multisig | Can upgrade USN implementation immediately |
-| ProxyAdmin Owner (sUSN) | 3-of-6 Multisig | Can upgrade sUSN implementation immediately |
-| USN Owner (Ownable2Step) | 3-of-6 Multisig | Blacklisting, whitelist, admin settings |
-| sUSN DEFAULT_ADMIN_ROLE | 3-of-6 Multisig | All role grants, rescue tokens, treasury settings |
-| MinterHandler DEFAULT_ADMIN_ROLE | 3-of-6 Multisig | Mint limits, custodial wallet, oracle settings |
-| REBASE_MANAGER_ROLE | Granted by Multisig | Controls yield distribution (rebase) |
-| BLACKLIST_MANAGER_ROLE | Granted by Multisig | Can freeze user funds |
-| MINTER_ROLE | Granted by Multisig | Can mint USN (via MinterHandler) |
+| Role | Controlled By | Timelocked? | Description |
+|------|---------------|-------------|-------------|
+| ProxyAdmin Owner (USN) | Timelock → Multisig | **Yes (48h)** | Proxy upgrades require 48-hour delay |
+| ProxyAdmin Owner (sUSN) | Timelock → Multisig | **Yes (48h)** | Proxy upgrades require 48-hour delay |
+| USN Owner (Ownable2Step) | 3-of-6 Multisig | **No** | Blacklisting, whitelist, admin settings — immediate |
+| sUSN DEFAULT_ADMIN_ROLE | 3-of-6 Multisig | **No** | All role grants, rescue tokens, treasury settings — immediate |
+| MinterHandler DEFAULT_ADMIN_ROLE | 3-of-6 Multisig | **No** | Mint limits, custodial wallet, oracle settings — immediate |
+| REBASE_MANAGER_ROLE | Granted by Multisig | **No** | Controls yield distribution (rebase) |
+| BLACKLIST_MANAGER_ROLE | Granted by Multisig | **No** | Can freeze user funds |
+| MINTER_ROLE | Granted by Multisig | **No** | Can mint USN (via MinterHandler) |
 
 **Key governance concerns:**
-- **No timelock**: The 3-of-6 multisig can upgrade both USN and sUSN contracts **immediately**. No delay for review or cancellation. This is a critical governance weakness
-- **All anonymous signers**: All 6 multisig signers are anonymous EOAs. No known entities or independent signers
-- **rescueToken()**: The sUSN vault has a function allowing the owner to extract any ERC-20 tokens from the vault — potential extraction vector if the multisig is compromised
-- **Blacklist**: Both USN and sUSN have blacklisting capabilities. The multisig can freeze user funds at any time
-- **Rebase control**: The `REBASE_MANAGER_ROLE` controls yield distribution. A compromised rebase manager could manipulate the sUSN exchange rate
-- **No Guardian or independent oversight**: Unlike protocols with independent Guardians or timelocked governance, Noon has a single multisig controlling everything
+- **Partial timelock coverage**: The 48-hour timelock protects against instant proxy upgrades (the most critical governance action). However, **operational functions are NOT timelocked**: blacklisting, rescueToken(), rebase, role grants, and minting parameters can still be changed immediately by the multisig
+- **All anonymous signers**: All 6 multisig signers are anonymous EOAs. No known entities or independent signers. Team has committed to adding known signers after >$100M TVL; open to Yearn as signer
+- **rescueToken()**: The sUSN vault has a function allowing the owner to extract any ERC-20 tokens from the vault — NOT behind timelock. Potential extraction vector if the multisig is compromised
+- **Blacklist**: Both USN and sUSN have blacklisting capabilities. The multisig can freeze user funds at any time — NOT behind timelock
+- **Unbacked minting via `mintAndRebase()`**: The multisig (MINTER_ROLE) can mint up to 50,000 USN per call with **zero collateral deposit** and distribute it as yield to sUSN stakers. The `rebaseLimit` is adjustable by the multisig — NOT behind timelock. No on-chain mechanism verifies off-chain reserves back this minting
+- **USN admin changeable without timelock**: The multisig can call `setAdmin()` on USN to change who can mint — NOT behind timelock. A compromised multisig could set a malicious admin to mint unlimited USN
+- **REBASE_MANAGER_ROLE held by 4 addresses**: Multisig, MinterHandlerV2, and 2 EOAs (`0x1738...d699` deployer, `0xcc24...b11f` unknown). The 2 EOAs could call `rebase()` directly on the vault if they obtained USN tokens, inflating the exchange rate
+- **No Guardian or independent oversight**: While proxy upgrades are now timelocked, there is no independent Guardian or veto mechanism. The same multisig controls both the timelock and all operational functions
 - **Ownable2Step**: USN uses two-step ownership transfer, which is a positive security measure
 - **NOON governance token** (launched March 5, 2026): veToken system with sNOON staking for voting power. While this introduces governance participation, it does **not** replace the 3-of-6 multisig as the contract admin — the multisig retains all privileged roles and proxy upgrade authority
 
 ### Programmability
 
 - **sUSN exchange rate**: Calculated on-chain via ERC-4626 standard. Programmatic
-- **Yield distribution**: Via rebase — the `REBASE_MANAGER_ROLE` mints USN into the staking pool. This is a **manual, privileged operation**, not a programmatic yield accrual
-- **Minting**: MinterHandler has safeguards (per-block limits, daily limits, price thresholds), but minting is ultimately controlled by privileged roles
+- **Yield distribution**: Via `mintAndRebase()` — mints new USN without collateral and deposits into staking vault. This is a **manual, privileged operation**, not a programmatic yield accrual. No on-chain enforcement of backing
+- **Minting**: Three paths — `mint()` and `directMint()` require collateral (atomic, with safeguards). `mintAndRebase()` requires NO collateral (up to 50K USN/call). USN admin can be changed by multisig without timelock
 - **Withdrawals**: Go through a handler contract. The withdrawal period is configurable by the admin (via `WithdrawPeriodUpdated` event)
 
 ### External Dependencies
@@ -329,7 +390,7 @@ The entire protocol is controlled by a single 3-of-6 Gnosis Safe multisig with *
 - **Documentation**: Good quality. Comprehensive docs at docs.noon.capital covering safety framework, strategies, custody, and governance principles. Actively maintained
 - **Legal structure**: **British Virgin Islands (BVI)** jurisdiction via DCLF Labs. Limited regulatory oversight and investor protection. Self-funded (no VC). The US GENIUS Act (passed July 2025) and subsequent OCC rulemaking require foreign stablecoin issuers serving US users to apply for OCC registration — potential regulatory risk for Noon's BVI structure
 - **Incident response**: Documented 24-hour incident plan with "predefined response procedures, rollback capabilities, and emergency communication channels." Admin Multisig can pause the protocol immediately
-- **Source code**: Private GitHub repository (`dclf-labs/Noon-Core-Audit`). **Not open source**. Contracts are verified on Etherscan but source is not publicly browsable
+- **Source code**: **Public** as of March 18-19, 2026. [Protocol-Core](https://github.com/dclf-labs/Protocol-Core) and [Governance-Core](https://github.com/dclf-labs/Governance-Core). CI includes Slither + Mythril static analysis. Contracts also verified on Etherscan
 - **Token allocation**: 20% to team with 7-year lockup (1-year cliff + 6-year linear vesting)
 
 ## Monitoring
@@ -349,14 +410,19 @@ The entire protocol is controlled by a single 3-of-6 Gnosis Safe multisig with *
   - Monitor `totalSupply()` for unexpected minting events
   - **Alert**: Minting >10M USN in a single day (matches `directMintLimitPerDay`)
   - Monitor `Transfer` events from/to collateral wallets
+- **MinterHandlerV2**: [`0xB91b361ebE4022Bb62dF0651bDD09b21209ac058`](https://etherscan.io/address/0xB91b361ebE4022Bb62dF0651bDD09b21209ac058)
+  - Monitor `MintAndRebase(amount)` events — each call mints USN without collateral
+  - **Alert**: If `mintAndRebase` called more than once per day or with amount close to `rebaseLimit`
+  - Monitor for `setRebaseLimit()`, `setAdmin()` calls — parameter changes with no timelock
+  - **Alert**: Immediately on any `rebaseLimit` or USN admin change
 
 ### Governance Monitoring
 
 - **Multisig**: [`0x1ea169EcCcf7714E7ba04900e1a3357cCA77327f`](https://etherscan.io/address/0x1ea169EcCcf7714E7ba04900e1a3357cCA77327f)
   - Monitor for owner/signer changes and threshold modifications
   - **Alert**: Immediately on any signer replacement or threshold change
-  - Monitor for proxy upgrade transactions (`upgradeAndCall` on ProxyAdmin contracts)
-  - **Alert**: Immediately on any proxy upgrade — **no timelock means upgrade is instant**
+  - Monitor Timelock [`0xE5e412C212B4FBbF550A94e7BD5e83dB0B315A7F`](https://etherscan.io/address/0xE5e412C212B4FBbF550A94e7BD5e83dB0B315A7F) for queued proxy upgrade transactions
+  - **Alert**: Immediately on any queued upgrade — 48-hour window to review and react before execution
 - **RBAC changes** (on sUSN and MinterHandler):
   - Monitor `RoleGranted`, `RoleRevoked` events
   - **Alert**: Immediately on any role change
@@ -381,7 +447,7 @@ The entire protocol is controlled by a single 3-of-6 Gnosis Safe multisig with *
 - **USN price**: Monitor USN/USD price on CoinGecko and DEXes
   - **Alert**: If USN deviates >0.5% from $1.00 peg (significant depegging)
   - **Alert**: If USN deviates >2% from $1.00 peg (critical — directly impacts sUSN collateral value via Stork oracle risk)
-  - Current price: $0.9997 (well-pegged, March 10, 2026)
+  - Current price: $0.9995 (well-pegged, March 23, 2026)
 
 ### Morpho Market Monitoring
 
@@ -395,17 +461,21 @@ The entire protocol is controlled by a single 3-of-6 Gnosis Safe multisig with *
 
 | Category | Frequency | Priority |
 |----------|-----------|----------|
-| Proxy upgrade events | Real-time | Critical |
+| Timelock queued upgrade events | Real-time | Critical |
 | Multisig signer/threshold changes | Real-time | Critical |
 | sUSN exchange rate decrease | Every 6 hours | Critical |
 | Blacklist events (USN/sUSN) | Real-time | Critical |
 | RBAC role changes | Real-time | Critical |
 | Withdrawal period changes | Real-time | Critical |
+| USN admin changes (`setAdmin()`) | Real-time | Critical |
+| `rebaseLimit` changes | Real-time | Critical |
+| `mintAndRebase` events (unbacked minting) | Real-time | High |
 | Rebase events | Daily | High |
 | USN total supply changes | Daily | High |
 | Collateral wallet balances | Daily | High |
 | Collateral 3 (EOA) outflows | Real-time | High |
 | Morpho oracle price vs sUSN rate | Every 6 hours | High |
+| Morpho market utilization rate | Daily | High |
 | USN peg stability | Hourly | High |
 | Protocol TVL changes | Daily | Medium |
 
@@ -413,30 +483,34 @@ The entire protocol is controlled by a single 3-of-6 Gnosis Safe multisig with *
 
 ### Key Strengths
 
-- **Diversified yield sources**: Multiple uncorrelated strategies (funding rate arb, T-Bills, CLOs, DeFi lending, Pendle PTs) reduce single-strategy risk
+- **Timelock on proxy upgrades**: 48-hour delay on the most critical governance action (contract upgrades). Verified on-chain
+- **Public source code**: Both core and governance repos now public with Slither + Mythril CI and 96-100% test coverage
+- **DCLM market maker backstop**: Contractual liquidation agreement provides guaranteed buyer for sUSN during depeg events
+- **Diversified yield sources**: Multiple uncorrelated strategies (T-Bills, CLOs, DeFi lending, Pendle PTs) reduce single-strategy risk. Ceffu funding rate arb paused
 - **Independent solvency verification**: Real-time proof of solvency via Accountable partnership with zero-knowledge proofs and secure enclaves
 - **Layered insurance**: Nexus Mutual (DeFi), SIPC + Lloyd's of London (TradFi), and internal Insurance Fund provide multiple layers of coverage
-- **Institutional custodians**: Ceffu, Alpaca Securities (FINRA/SIPC), and Fasanara Capital are established institutional custodians
 - **Self-dealing prohibition**: Protocol explicitly avoids circular collateral dependencies
 
 ### Key Risks
 
-- **No timelock on governance**: The 3-of-6 multisig can upgrade contracts, change parameters, and extract tokens **immediately** with no delay. This is the most critical governance weakness
-- **Mostly off-chain/custodial reserves**: The majority of USN backing is held off-chain with custodians. On-chain verifiability is limited to DeFi strategy positions only
+- **Unlimited unbacked minting via `mintAndRebase()`**: The multisig can mint USN without any collateral deposit — no supply cap, no cooldown, no daily aggregate limit. `setRebaseLimit()` has no upper bound. No on-chain enforcement of backing whatsoever. The `rebaseLimit` and USN admin are changeable by the multisig without timelock
+- **Partial timelock coverage**: Proxy upgrades are now behind a 48-hour timelock, but operational functions (blacklist, rescueToken, rebase, minting, role grants) remain immediately executable by the 3-of-6 multisig
+- **Mostly off-chain/custodial reserves**: The majority of USN backing is held off-chain with custodians. Alpaca/Dinari tokenization claim not verified on-chain. On-chain verifiability limited to DeFi strategy positions
+- **REBASE_MANAGER_ROLE on 2 EOAs**: Deployer EOA and unknown EOA still hold REBASE_MANAGER_ROLE on the sUSN vault — should be revoked
 - **No bug bounty program**: No formal bug bounty on any platform despite ~$31M TVL
-- **Anonymous multisig signers**: All 6 signers are anonymous EOAs. No independent or known-entity signers
-- **Small and young protocol**: ~$31M TVL with ~14 months of public beta operation. Limited track record
+- **Anonymous multisig signers**: All 6 signers are anonymous EOAs. No independent or known-entity signers. Commitment to add known signers only after >$100M TVL
 - **5-day withdrawal lockup**: Not compatible with instant liquidation needs on Morpho
-- **Private code**: Source code is not publicly available (private GitHub repository)
+- **Morpho market at 100% utilization**: All supplied USDC is borrowed; liquidity concerns for suppliers
 - **BVI jurisdiction**: Limited regulatory oversight and investor protection
 
 ### Critical Risks
 
-- **Immediate proxy upgrade**: The multisig can change the USN or sUSN contract logic at any time without warning. A compromised multisig could drain all funds instantly via a malicious upgrade
-- **rescueToken() function**: The sUSN vault owner can extract any ERC-20 tokens from the vault. Combined with no timelock, this is a significant extraction vector
+- **Unlimited unbacked minting**: `mintAndRebase()` allows the multisig to mint USN with zero collateral — no supply cap, no cooldown, no daily limit. The multisig can call `setRebaseLimit(type(uint256).max)` then `mintAndRebase(any_amount)` in a single transaction with zero on-chain resistance. USN `admin` (who can mint) is also changeable without timelock. A compromised multisig could mint unlimited USN, inflate the sUSN exchange rate, and drain Morpho USDC via overborrowing
+- **rescueToken() function without timelock**: The sUSN vault owner (multisig) can extract any ERC-20 tokens from the vault immediately — NOT behind the 48-hour timelock. This remains a significant extraction vector if the multisig is compromised
+- **Operational functions without timelock**: Blacklisting, rebase manipulation, role grants, minting admin changes, and minting parameter changes can be executed immediately by the 3-of-6 multisig
 - **Liquidity mismatch**: Private credit positions (Fasanara F-TAC) have T+3 month redemption windows while the protocol promises T+5 day user redemptions. A bank-run scenario could break the redemption guarantee
 - **Stork oracle risk**: The Morpho market relies on a single Stork oracle feed with no fallback. A Stork outage or manipulation could cause incorrect liquidations
-- **Blacklist capability**: Both USN and sUSN can blacklist addresses, freezing user funds without recourse
+- **Blacklist capability**: Both USN and sUSN can blacklist addresses, freezing user funds without recourse — NOT behind timelock
 
 ---
 
@@ -449,9 +523,9 @@ The entire protocol is controlled by a single 3-of-6 Gnosis Safe multisig with *
 
 ### Critical Risk Gates
 
-- [x] **No audit** — Protocol audited by Halborn (2x) and Hashlock (2x). Quantstamp audit unverifiable. **PASS** (marginal — Quantstamp audit cannot be verified)
-- [ ] **Unverifiable reserves** — The majority of reserves are held off-chain with custodians. While Accountable provides independent verification, reserves are **not fully on-chain verifiable**. Accountable is a third-party service, not a trustless on-chain mechanism. **BORDERLINE** — the Accountable partnership provides verification but the reserves themselves are custodial
-- [x] **Total centralization** — 3-of-6 Gnosis Safe multisig. Not a single EOA. **PASS** (though the lack of timelock is very concerning)
+- [x] **No audit** — Protocol audited by Halborn (2x) and Hashlock (2x). Quantstamp audit unverifiable. Source code now public. **PASS**
+- [ ] **Unverifiable reserves** — The majority of reserves are held off-chain with custodians. Team claims Alpaca/Dinari tokenization but not verified on-chain. Accountable provides independent verification, but reserves are **not fully on-chain verifiable**. **BORDERLINE** — the Accountable partnership provides verification but the reserves themselves are custodial
+- [x] **Total centralization** — 3-of-6 Gnosis Safe multisig with 48-hour timelock on proxy upgrades. Not a single EOA. **PASS**
 
 **All gates technically pass** (Accountable provides a verification mechanism, even if off-chain). Proceed to category scoring.
 
@@ -460,25 +534,26 @@ The entire protocol is controlled by a single 3-of-6 Gnosis Safe multisig with *
 #### Category 1: Audits & Historical Track Record (Weight: 20%)
 
 - **Audits**: 2 audits by Halborn (reputable), 2 audits by Hashlock (lesser-known). Quantstamp audit unverifiable. Total: 4 verifiable audits across 2 firms
+- **Source code**: Now public with Slither + Mythril CI and 96-100% test coverage
 - **Bug Bounty**: None
-- **Time in Production**: ~14 months public beta, ~16 months sUSN on-chain. Young protocol
-- **TVL**: ~$31M. Small
+- **Time in Production**: ~17 months public beta, ~17 months sUSN on-chain. Maturing protocol
+- **TVL**: ~$30.75M. Small but stable
 - **Incidents**: None reported
 
-**Score: 3.5/5** — Multiple audits but from a mix of reputable (Halborn) and lesser-known (Hashlock) firms. Quantstamp audit is unverifiable. No bug bounty. Production history of ~14 months beta. Small TVL (~$31M). Between score 3 (1 audit by reputable firm, 6-12 months, TVL >$10M) and score 4 (1 audit by lesser-known firm, 3-6 months, TVL <$10M). The multiple Halborn audits and 14-month track record prevent a score of 4, but the absence of a bug bounty, small TVL, and unverifiable Quantstamp audit prevent a score of 3.
+**Score: 3.0/5** — Multiple audits from reputable (Halborn) and lesser-known (Hashlock) firms. Source code now public with static analysis CI — a meaningful improvement enabling independent review. No bug bounty remains a gap. Production history of ~17 months (approaching score 2 rubric of 1-2 years). TVL ~$31M (>$10M threshold for score 3). Between score 2 (2+ audits by reputable firms, 1-2 years, TVL >$50M) and score 3 (1 audit by reputable firm, bug bounty, 6-12 months, TVL >$10M). The public source code, multiple Halborn audits, and 17-month track record meet score 3 criteria. The absence of a bug bounty prevents reaching score 2.
 
 #### Category 2: Centralization & Control Risks (Weight: 30%)
 
 **Subcategory A: Governance**
 
 - 3-of-6 multisig with all anonymous signers
-- **No timelock** — all changes are immediate
-- Proxy upgrades can be executed instantly
-- Blacklist capability on both tokens
-- rescueToken() function allows token extraction
+- **48-hour timelock on proxy upgrades** (verified on-chain) — most critical governance action is now delayed
+- Operational functions (blacklist, rescueToken, rebase, role grants) remain **immediately executable** by multisig
+- Blacklist capability on both tokens — NOT timelocked
+- rescueToken() function allows token extraction — NOT timelocked
 - Ownable2Step provides ownership transfer safety
 
-**Governance Score: 4.5** — The 3-of-6 threshold is between score 3 and score 4. However, the **complete absence of a timelock** is a critical deficiency that pushes this firmly toward score 4-5. The combination of no timelock + anonymous signers + proxy upgradeability + rescueToken() + blacklisting approaches score 5 (unlimited admin powers). The multisig structure and Ownable2Step prevent a full 5.
+**Governance Score: 3.5** — The 48-hour timelock on proxy upgrades is a significant improvement, meeting the score 3 rubric criterion of "24+ hours timelock." However, the 3-of-6 threshold (lower than score 3's 5/9) and the fact that operational functions (blacklist, rescueToken, rebase) are NOT behind the timelock keep this above score 3. Between score 3 (multisig 5/9 with timelock, powerful roles constrained by timelock) and score 4 (multisig 3/5, powerful admin roles with limited constraints). The timelock on upgrades prevents score 4, but the untimelocked operational powers and anonymous signers prevent score 3.
 
 **Subcategory B: Programmability**
 
@@ -498,11 +573,11 @@ The entire protocol is controlled by a single 3-of-6 Gnosis Safe multisig with *
 - **Medium**: Accountable (solvency verification)
 - Multiple critical dependencies with varying levels of trust
 
-**Dependencies Score: 4.0** — Many dependencies including multiple custodians, a newer oracle provider (Stork), and two bridge protocols. Critical functionality (reserve custody) depends on multiple external parties. Failure of any single custodian could partially break the system.
+**Dependencies Score: 3.5** — Many dependencies including multiple custodians, a newer oracle provider (Stork), and two bridge protocols. Critical functionality (reserve custody) depends on multiple external parties. Ceffu funding rate arb being paused reduces one active critical dependency. DCLM market maker adds a contractual (not on-chain) dependency. Failure of any single custodian could partially break the system.
 
-**Centralization Score = (4.5 + 3.5 + 4.0) / 3 = 4.0**
+**Centralization Score = (3.5 + 3.5 + 3.5) / 3 = 3.5**
 
-**Score: 4.0/5** — The absence of a timelock is the dominant factor. The 3-of-6 multisig with all anonymous signers, instant proxy upgradeability, rescueToken(), blacklisting, manual rebase, and multiple custodial dependencies create an elevated centralization risk profile.
+**Score: 3.5/5** — The 48-hour timelock on proxy upgrades significantly improves the governance posture compared to the previous assessment. However, operational functions remain untimelocked, signers are anonymous, and multiple custodial dependencies persist. The public source code enables independent review but doesn't reduce centralization directly.
 
 #### Category 3: Funds Management (Weight: 30%)
 
@@ -541,17 +616,17 @@ The entire protocol is controlled by a single 3-of-6 Gnosis Safe multisig with *
 - **Small TVL**: Large positions could dominate TVL and create concentration risk
 - **Morpho context**: 5-day withdrawal delay makes liquidation of sUSN collateral slow — could be problematic at 86% LLTV
 
-**Score: 3.5/5** — Withdrawals require up to 5 days and go through a handler process. DEX liquidity is negligible (~$33K USN daily, ~$156 sUSN daily). The same-value stablecoin redemption is a positive factor. Between score 3 (market-based or short queues, >$1M, 3-7 days exit) and score 4 (withdrawal queues or restrictions, <$1M, >1 week or >10% impact). The 5-day maximum and extremely thin DEX liquidity push toward 3.5. The Morpho collateral use case introduces additional concern: if sUSN needs to be liquidated, the 5-day withdrawal delay could prevent timely liquidation.
+**Score: 3.5/5** — Withdrawals require up to 5 days and go through a handler process. DEX liquidity remains thin. The DCLM market maker backstop provides a contractual (off-chain) exit mechanism for >1% depeg events, which is a positive factor. The same-value stablecoin redemption is also positive. However, the Morpho market at **100% utilization** is concerning — suppliers cannot withdraw. Between score 3 (market-based or short queues, >$1M, 3-7 days exit) and score 4 (withdrawal queues or restrictions, <$1M, >1 week or >10% impact). The DCLM backstop provides some comfort but is contractual, not on-chain. The 100% Morpho utilization and 5-day withdrawal delay offset the DCLM improvement, keeping score at 3.5.
 
 #### Category 5: Operational Risk (Weight: 5%)
 
 - **Team**: Founder Arpan Gautam publicly identified (Wharton, McKinsey, Dexterity Capital). Other team members mostly unknown. Multisig signers all anonymous
 - **Documentation**: Good quality, comprehensive safety framework documentation
 - **Legal Structure**: BVI (DCLF Labs). Limited regulatory protection. Self-funded
-- **Source code**: Private repository. Not open source
+- **Source code**: **Public** since March 18-19, 2026. [Protocol-Core](https://github.com/dclf-labs/Protocol-Core) and [Governance-Core](https://github.com/dclf-labs/Governance-Core). CI with Slither + Mythril. Contracts verified on Etherscan
 - **Incident Response**: Documented 24-hour plan with emergency pause capability
 
-**Score: 3.5/5** — Founder is doxxed with strong credentials, but the rest of the team and all multisig signers are unknown. Good documentation. BVI jurisdiction with limited oversight. Private source code. Between score 3 (mixed known/unknown, adequate docs, uncertain structure) and score 4 (mostly unknown, poor docs, no clear entity).
+**Score: 3.0/5** — Founder is doxxed with strong credentials, but the rest of the team and all multisig signers are unknown. Good documentation. BVI jurisdiction with limited oversight. **Source code now public** with CI including Slither + Mythril — a meaningful transparency improvement. Between score 2 (mostly public or known anons, good docs, established entity) and score 3 (mixed unknown and known anons, adequate docs, uncertain structure). The public source code and good documentation meet score 2-3 criteria, but the mostly unknown team and BVI jurisdiction keep this at score 3.
 
 ### Final Score Calculation
 
@@ -559,16 +634,23 @@ The entire protocol is controlled by a single 3-of-6 Gnosis Safe multisig with *
 Final Score = (Centralization × 0.30) + (Funds Mgmt × 0.30) + (Audits × 0.20) + (Liquidity × 0.15) + (Operational × 0.05)
 ```
 
-| Category | Score | Weight | Weighted |
-|----------|-------|--------|----------|
-| Audits & Historical | 3.5 | 20% | 0.70 |
-| Centralization & Control | 4.0 | 30% | 1.20 |
-| Funds Management | 3.5 | 30% | 1.05 |
-| Liquidity Risk | 3.5 | 15% | 0.525 |
-| Operational Risk | 3.5 | 5% | 0.175 |
-| **Final Score** | | | **3.65** |
+| Category | Score | Weight | Weighted | Previous |
+|----------|-------|--------|----------|----------|
+| Audits & Historical | 3.0 | 20% | 0.60 | 3.5 |
+| Centralization & Control | 3.5 | 30% | 1.05 | 4.0 |
+| Funds Management | 3.5 | 30% | 1.05 | 3.5 |
+| Liquidity Risk | 3.5 | 15% | 0.525 | 3.5 |
+| Operational Risk | 3.0 | 5% | 0.15 | 3.5 |
+| **Final Score** | | | **3.375** | **3.65** |
 
-**Final Score: 3.6** (rounded to 1 decimal)
+**Final Score: 3.4** (rounded to 1 decimal) — improved from 3.6
+
+**Key score changes:**
+- **Centralization**: 4.0 → 3.5 (48-hour timelock on proxy upgrades, verified on-chain)
+- **Audits & Historical**: 3.5 → 3.0 (public source code with CI, longer production history)
+- **Operational Risk**: 3.5 → 3.0 (public repos, Slither/Mythril CI)
+- **Funds Management**: 3.5 → 3.5 (unchanged — Alpaca/Dinari tokenization not verified on-chain)
+- **Liquidity Risk**: 3.5 → 3.5 (unchanged — DCLM backstop offsets 100% Morpho utilization)
 
 ### Risk Tier
 
@@ -576,41 +658,50 @@ Final Score = (Centralization × 0.30) + (Funds Mgmt × 0.30) + (Audits × 0.20)
 |------------|-----------|----------------|
 | 1.0-1.5 | Minimal Risk | Approved, high confidence |
 | 1.5-2.5 | Low Risk | Approved with standard monitoring |
-| 2.5-3.5 | Medium Risk | Approved with enhanced monitoring |
-| **3.5-4.5** | **Elevated Risk** | **Limited approval, strict limits** |
+| **2.5-3.5** | **Medium Risk** | **Approved with enhanced monitoring** |
+| 3.5-4.5 | Elevated Risk | Limited approval, strict limits |
 | 4.5-5.0 | High Risk | Not recommended |
 
-**Final Risk Tier: Elevated Risk**
+**Final Risk Tier: Medium Risk** (improved from Elevated Risk)
 
 ---
 
 Noon's sUSN is a yield-bearing staked stablecoin backed by diversified strategies with institutional custodians and independent solvency verification. The ERC-4626 vault mechanics are standard and transparent.
 
-However, the protocol has significant centralization concerns: **no timelock** on a 3-of-6 anonymous multisig that can instantly upgrade both contracts, extract tokens via `rescueToken()`, and blacklist addresses. The predominantly **off-chain custodial** reserve model limits on-chain verifiability, and the **5-day withdrawal delay** creates compatibility challenges with the intended Morpho collateral use case (86% LLTV with slow liquidation path).
+Since the initial assessment, the team has made meaningful improvements: **48-hour timelock on proxy upgrades** (verified on-chain), **public source code** with CI including Slither + Mythril, and a **DCLM market maker backstop** providing contractual liquidation support. Ceffu funding rate arbitrage has been paused 12+ months.
+
+However, concerns remain: the `mintAndRebase()` function allows **unbacked USN minting** (up to 50K/call, limit adjustable without timelock), operational functions (blacklist, rescueToken, rebase, USN admin) are **NOT behind the timelock**, all 6 multisig signers are anonymous, 2 EOAs still hold `REBASE_MANAGER_ROLE`, the predominantly **off-chain custodial** reserve model limits on-chain verifiability (Alpaca/Dinari tokenization not verified on-chain), and the **5-day withdrawal delay** plus **100% Morpho utilization** create liquidity challenges.
 
 **For the intended Yearn use case (sUSN as Morpho collateral):**
 
-The 5-day withdrawal lockup is the primary compatibility concern flagged in the issue. If sUSN collateral needs to be liquidated on Morpho, the liquidator cannot redeem sUSN for USN quickly — they must either sell on DEXes (extremely thin liquidity, ~$33K USN daily, ~$156 sUSN daily) or wait up to 5 days via the withdrawal handler. At an 86% LLTV, this creates a risk of bad debt accumulation if the sUSN/USDC price drops faster than liquidators can exit. The Stork oracle (non-Chainlink, single source, no fallback) adds additional risk to the Morpho market.
+The 5-day withdrawal lockup remains the primary compatibility concern. If sUSN collateral needs to be liquidated on Morpho, the liquidator cannot redeem sUSN for USN quickly — they must either sell on DEXes (thin liquidity) or wait up to 5 days via the withdrawal handler. The DCLM market maker backstop provides some comfort (contractual buyer at previous day's price within 24h during >1% depeg), but it is contractual/off-chain, not an on-chain guarantee. At 86% LLTV and 100% Morpho utilization, this creates concentration and bad debt risk. The Stork oracle (non-Chainlink, single source, no fallback) adds additional risk.
 
 **Key conditions for any exposure:**
 
-- Monitor multisig for instant proxy upgrades (no timelock — **critical**)
+- Monitor timelock for pending proxy upgrade transactions (48h delay gives time to react — **improvement**)
+- Monitor multisig for untimelocked operational changes (blacklist, rescueToken, role grants, USN admin — **still critical**)
+- Monitor `mintAndRebase()` calls — each one mints USN without collateral (up to 50K/call)
+- Monitor `setRebaseLimit()` and `setAdmin()` calls — parameter changes with no timelock
 - Monitor sUSN exchange rate for any decreases
 - Monitor rebase events for frequency and consistency
 - Monitor collateral wallet balances relative to USN supply
 - Monitor Stork oracle feed vs sUSN vault exchange rate
+- Monitor Morpho market utilization rate (currently 100% — suppliers cannot withdraw)
 - Verify Accountable proof of solvency dashboard is operational
-- Request the team implement a timelock before increasing exposure
-- Verify bug bounty program status with the team
+- Request the team revoke `REBASE_MANAGER_ROLE` from EOAs (`0x1738...d699`, `0xcc24...b11f`)
+- Request the team extend timelock to cover operational functions (blacklist, rescueToken, rebaseLimit, USN admin)
+- Request the team implement a bug bounty program
 
 ---
 
 ## Reassessment Triggers
 
-- **Time-based**: Reassess in 3 months (June 2026) given the protocol's youth and elevated risk tier
-- **TVL-based**: Reassess if TVL changes by more than 50% (below ~$15.5M or above ~$46.5M)
+- **Time-based**: Reassess in 3 months (June 2026)
+- **TVL-based**: Reassess if TVL changes by more than 50% (below ~$15M or above ~$46M)
 - **Incident-based**: Reassess after any exploit, governance change, collateral modification, or custodian incident
-- **Governance-based**: Reassess if a timelock is implemented (should improve Centralization score significantly)
+- **Governance-based**: Reassess if timelock is extended to cover operational functions (blacklist, rescueToken, role grants) — should further improve Centralization score
+- **Signer-based**: Reassess if known-entity or independent signers are added to the multisig
 - **Bug bounty**: Reassess if/when a bug bounty program is launched
 - **Audit-based**: Reassess if additional audits by tier-1 firms (Trail of Bits, OpenZeppelin, Cyfrin) are completed
-- **Morpho market-based**: Reassess if the Stork oracle is replaced with a native Chainlink feed or if LLTV is adjusted
+- **Morpho market-based**: Reassess if the Stork oracle is replaced with a native Chainlink feed, if LLTV is adjusted, or if utilization normalizes from 100%
+- **DCLM backstop**: Reassess if DCLM market maker agreement is terminated (45-day notice period)
