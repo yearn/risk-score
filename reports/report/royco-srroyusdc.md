@@ -140,19 +140,23 @@ The Senior Vault allocates deposited USDC across whitelisted markets where Junio
 - savUSD (Avant) on Avalanche introduces cross-chain risk
 - sNUSD (Neutrl) and autoUSD (Auto) are relatively unknown protocols — limited public track record
 - Junior buffer size is not publicly disclosed or easily verifiable on-chain for each market
-- Vault holds $0 USDC on-chain — 100% of ~$10.73M is deployed externally via MultisigStrategy, creating full reliance on underlying protocol solvency and accurate admin-reported accounting
+- Vault holds $0 USDC directly — 100% of ~$10.73M is deployed to underlying protocols (Aave, Avant, Neutrl, Auto) via MultisigStrategy. Funds are on-chain in those protocols, but the vault cannot read those balances directly — it relies on the treasury multisig manually reporting net changes via `adjustTotalAssets()`
 
 ### Provability
 
 - srRoyUSDC exchange rate is computed on-chain via ERC-4626 (`totalAssets()` / `totalSupply()`)
 - `totalAssets()` = `totalAllocatedValue()` from MultisigStrategy (~$10.73M). Vault holds $0 USDC directly — 100% of assets are reported by the strategy.
 - **Accounting is admin-reported:** The MultisigStrategy's `totalAllocatedValue()` is updated via `adjustTotalAssets(int256 diff, uint256 nonce)`, called by the 3/5 treasury multisig ([`0x170ff06326eBb64BF609a848Fc143143994AF6c8`](https://etherscan.io/address/0x170ff06326eBb64BF609a848Fc143143994AF6c8)). This is **not** computed from on-chain positions — it is manually reported by the multisig.
+- **How `adjustTotalAssets` works:** The `diff` parameter is a **signed raw USDC amount** (not a percentage), added to or subtracted from `vaultDepositedAmount`. Positive diffs increase reported assets (yield accrual), negative diffs decrease them (loss reporting). The funds themselves are on-chain in underlying protocols (Aave, Avant, etc.), but the vault cannot read those balances directly — instead the multisig manually reports the net change.
 - **Accounting constraints (verified on-chain March 25, 2026):**
-  - Max change per update: 50 (basis points, ~0.5% of deployed value)
-  - Cooldown between updates: 43,200 seconds (12 hours)
-  - Validity period: 2,592,000 seconds (30 days)
-  - Current nonce: 37 (37 updates since launch, ~1 update every 2 days)
+  - Max change per update: 50 bps (~0.5% of current `vaultDepositedAmount`). If exceeded, contract **auto-pauses** (does not revert).
+  - Cooldown between updates: 43,200 seconds (12 hours). If violated, contract **auto-pauses**.
+  - Validity period: 2,592,000 seconds (30 days) — if no update within 30 days, `_previewPosition()` reverts with `AccountingValidityPeriodExpired`, freezing deposits/withdrawals.
+  - Sequential nonce required (current: 37, ~1 update every 2 days). Prevents replay/out-of-order submissions.
+  - Underflow protection: negative diffs cannot exceed `vaultDepositedAmount` (reverts with `InsufficientUnderlyingBalance`).
   - Last updated: March 25, 2026
+- **Emergency bypass — `unpauseAndAdjustTotalAssets(int256 diff)`:** Callable only by `STRATEGY_ADMIN`. **Skips all validation** — no nonce check, no percentage cap, no cooldown. Designed as emergency recovery when contract is paused, but is effectively an unconstrained accounting override.
+- **Observed usage pattern:** 36 adjustments since Jan 30, 2026. Overwhelmingly small positive diffs (+$800–4,000 USDC for yield accrual). One negative diff observed (nonce 7: -$1,225 USDC). Calls every 12–72 hours.
 - Yield computation and distribution use the AdaptiveCurveYDM model on-chain
 - Junior/Senior coverage ratios are managed per-market, but not easily verifiable by external observers without protocol-specific tooling
 - Underlying market positions must be verified by checking each external protocol individually
@@ -267,8 +271,15 @@ The vault governance involves multiple multisigs and two factory contracts with 
 ### Critical Monitoring Points
 
 - **PPS (Price Per Share):** Track `convertToAssets(1e6)` — should be monotonically increasing. Alert on any decrease (indicates loss event or Protection Mode). Current: ~1.005571.
-- **Total Assets:** Monitor `totalAssets()` — currently 100% dependent on MultisigStrategy's admin-reported `totalAllocatedValue()` ($0 held in vault). Track correlation with DeFiLlama TVL data for sanity checking.
-- **Accounting Updates:** Track `adjustTotalAssets()` calls on MultisigStrategy — verify nonce increments sequentially (current: 37), changes stay within 0.5% threshold, and 12-hour cooldown is respected.
+- **Total Assets:** Monitor `totalAssets()` — currently 100% dependent on MultisigStrategy's admin-reported `totalAllocatedValue()`. Cross-reference with actual on-chain positions in underlying protocols (Aave, Avant, Neutrl, Auto) for sanity checking.
+- **Accounting Updates (`adjustTotalAssets`):**
+  - Track all `adjustTotalAssets(int256 diff, uint256 nonce)` calls on MultisigStrategy ([`0xd3F8Edff57570c4F9B11CC95eA65117e2D7A6C2D`](https://etherscan.io/address/0xd3F8Edff57570c4F9B11CC95eA65117e2D7A6C2D))
+  - `diff` is a signed raw USDC amount (positive = yield accrual, negative = loss). Normal range: +$800–4,000 per update.
+  - Alert on: negative diffs (loss events), unusually large positive diffs (>$10K), nonce gaps or out-of-sequence, updates faster than 12-hour cooldown
+  - Alert on contract pause: if diff exceeds 0.5% cap or cooldown is violated, the contract auto-pauses instead of reverting
+  - **Critical alert on `unpauseAndAdjustTotalAssets()`**: This emergency function skips all validation (no cap, no cooldown, no nonce). Any call to this is a high-severity event requiring immediate investigation.
+  - Monitor `accountingValidityPeriod`: if no update for 30 days, vault freezes (deposits/withdrawals revert)
+  - Verify nonce increments sequentially (current: 37)
 - **Governance:** Monitor Owner multisig for MultisigStrategy proxy upgrade transactions (**no timelock**). Monitor ConcreteFactory for vault implementation upgrade proposals. Monitor RoycoFactory for role grants and scheduled operations.
 - **Fee Changes:** Monitor VAULT_MANAGER multisig for `updateManagementFee()` and `updatePerformanceFee()` calls. Currently both 0% — any change would enable fee share minting via `accrueYield()`.
 - **Strategy:** Monitor MultisigStrategy for fund movements. Monitor RoycoVaultMakinaStrategy for activation (currently 0 allocation).
@@ -295,7 +306,7 @@ The vault governance involves multiple multisigs and two factory contracts with 
 2. **Extreme holder concentration** — One EOA holds ~69% of supply. ~$10.73M total assets with only ~8 holders.
 3. **MultisigStrategy upgradeable without timelock** — The Owner multisig (3/5) can upgrade the MultisigStrategy proxy immediately. This controls how all funds are deployed.
 4. **Reliance on newer underlying protocols** — 70% target allocation to Avant (savUSD) and Neutrl (sNUSD), which are relatively unknown protocols with limited public track records.
-5. **100% of assets admin-reported** — Vault holds $0 USDC directly; the entire ~$10.73M totalAssets is reported via MultisigStrategy's `adjustTotalAssets()`. No oracle or on-chain verification.
+5. **100% of assets admin-reported** — Funds are deployed on-chain to underlying protocols, but the vault cannot read those balances. The entire ~$10.73M totalAssets is reported via MultisigStrategy's `adjustTotalAssets()` (signed USDC delta per call). No oracle or on-chain verification of actual positions. Emergency function `unpauseAndAdjustTotalAssets()` can bypass all constraints.
 
 ### Critical Risks
 
@@ -332,10 +343,11 @@ While tokens cannot be directly minted without assets, the following mechanisms 
 
 1. **`adjustTotalAssets()` — PPS Inflation (Constrained)**
    - The treasury multisig (3/5) can call `adjustTotalAssets(int256 diff, uint256 nonce)` on the MultisigStrategy to inflate the reported `totalAllocatedValue()`
-   - This inflates `totalAssets()` and thus PPS, making existing tokens appear more valuable
-   - Constrained: max 50 bps (~0.5%) per update, 12-hour cooldown, 30-day validity period
+   - `diff` is a signed raw USDC amount added to `vaultDepositedAmount`. Positive values inflate `totalAssets()` and thus PPS.
+   - Constrained: max 50 bps (~0.5%) per update, 12-hour cooldown, sequential nonce, 30-day validity period
    - At ~$10.73M total assets, each update can inflate by at most ~$53.6K
    - This doesn't mint new tokens but can gradually misrepresent value
+   - **Emergency bypass:** `unpauseAndAdjustTotalAssets(int256 diff)` (STRATEGY_ADMIN only) skips all caps/cooldowns — enables unconstrained inflation in a single call
 
 2. **Fee Manipulation → Fee Share Minting**
    - The VAULT_MANAGER (3/4 Safe) could set non-zero fees via `updateManagementFee()` / `updatePerformanceFee()`
@@ -437,8 +449,9 @@ Hexens audit completed; Cantina competition still in judging after ~2 months (co
 **Subcategory B: Provability — 4.0**
 
 - ERC-4626 exchange rate is on-chain (PPS verifiable)
-- However, `totalAssets()` depends entirely on MultisigStrategy's `adjustTotalAssets()` — **manually reported** by the 3/5 treasury multisig (not computed from on-chain positions)
-- Vault holds $0 USDC — reported totalAssets is ~$10.73M. The entire PPS depends on trusting the multisig's accounting adjustments (constrained by max 0.5% per update, 12-hour cooldown, nonce 37 confirming regular updates)
+- However, `totalAssets()` depends entirely on MultisigStrategy's `adjustTotalAssets(int256 diff, uint256 nonce)` — the multisig submits a signed USDC delta (not an absolute value), which is added/subtracted from `vaultDepositedAmount`. This is **not** computed from on-chain positions in underlying protocols.
+- Funds are on-chain in Aave/Avant/Neutrl/Auto, but the vault cannot read those balances — the multisig bridges this gap manually. The entire PPS depends on trusting these accounting adjustments (constrained by max 0.5% per update, 12-hour cooldown, nonce 37 confirming regular updates).
+- **Emergency bypass exists:** `unpauseAndAdjustTotalAssets()` skips all validation — unconstrained single-call override by STRATEGY_ADMIN.
 - Individual underlying market positions are not easily auditable without protocol-specific tooling
 - Per-market Junior coverage ratios are not transparently displayed
 - No third-party verification mechanism (no Chainlink PoR, no custodian attestations)
