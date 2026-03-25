@@ -4,7 +4,7 @@
 - **Token:** srRoyUSDC (Senior Royco USDC)
 - **Chain:** Ethereum Mainnet
 - **Token Address:** [`0xcD9f5907F92818bC06c9Ad70217f089E190d2a32`](https://etherscan.io/address/0xcD9f5907F92818bC06c9Ad70217f089E190d2a32)
-- **Final Score: 3.3/5.0**
+- **Final Score: 3.5/5.0**
 
 ## Overview + Links
 
@@ -137,6 +137,7 @@ The Senior Vault allocates deposited USDC across whitelisted markets where Junio
 - Underlying protocols (Avant, Neutrl, Auto, Cap Finance) are newer, less battle-tested DeFi protocols
 - savUSD (Avant) on Avalanche introduces cross-chain risk
 - sNUSD (Neutrl) and autoUSD (Auto) are relatively unknown protocols — limited public track record
+- **No on-chain proof of Junior coverage:** The Senior vault has no on-chain reference to any Junior tranche contracts. Junior tranches are per-market (not a single aggregated vault), and there is no on-chain mechanism for the Senior vault to verify that Junior capital exists, that it provides first-loss coverage, or that Protection Mode is enforceable. The entire Junior buffer is a trust assumption — depositors trust that the Royco Foundation has deployed Senior capital into markets where adequate Junior capital exists.
 - Junior buffer size is not publicly disclosed or easily verifiable on-chain for each market
 - Vault holds $0 USDC directly — 100% of ~$10.73M is deployed to underlying protocols (Aave, Avant, Neutrl, Auto) via MultisigStrategy. Funds are on-chain in those protocols, but the vault cannot read those balances directly — it relies on the treasury multisig manually reporting net changes via `adjustTotalAssets()`
 
@@ -288,7 +289,7 @@ The vault governance involves multiple multisigs and two factory contracts with 
 
 ### Key Strengths
 
-1. **Tranching mechanism provides structural protection** — Junior capital absorbs losses first, creating a buffer for Senior depositors
+1. **Tranching mechanism provides structural protection (unverifiable on-chain)** — Junior capital is designed to absorb losses first, but the Senior vault has no on-chain link to Junior tranches and cannot verify coverage exists
 2. **Institutional-grade access controls** — KYC and whitelisting convert potential exploits into recoverable, legally actionable incidents
 3. **Experienced founder** — Jai Bhavnani has prior DeFi experience (Rari Capital, Ambo) and backing from reputable investors (Electric Capital, Coinbase Ventures, Hashed)
 4. **Active bug bounty** — $250K on Immunefi
@@ -307,9 +308,9 @@ The vault governance involves multiple multisigs and two factory contracts with 
 ### Critical Risks
 
 - **MultisigStrategy upgradeable with no timelock:** The Owner multisig (3/5) controls the MultisigStrategy's ProxyAdmin and can upgrade the strategy implementation immediately. A malicious upgrade could redirect funds or bypass the 0.5% accounting constraint. This is the most direct risk vector.
-- **Same signers across multisigs:** The Owner and Treasury multisig share identical 5 signers. The VAULT_MANAGER (3/4) shares 3 of those signers. Compromising 3 of 5 EOAs gives control over vault administration, treasury, and accounting.
-- **ConcreteFactory as third-party trust dependency:** The Concrete team's 3/5 multisig controls vault implementation upgrades. While this provides dual-control protection, it also means a compromise of the Concrete team could affect all Concrete-based vaults, not just srRoyUSDC.
 - **Underlying protocol risk is opaque:** The quality and health of Avant, Neutrl, Auto, and Cap Finance positions are not easily verifiable. These protocols themselves are newer with limited audit and track record history.
+- **No on-chain proof of Junior coverage:** The Senior vault has no on-chain link to Junior tranche contracts. Junior tranches are per-market, and the Senior vault cannot verify on-chain that Junior capital exists or that it will absorb losses first. The entire first-loss protection mechanism — the core value proposition of the tranching design — is a trust assumption with no on-chain enforceability from the Senior vault's perspective.
+- **Strategy totalAssets is manually reported, not derived from on-chain data:** `totalAllocatedValue()` returns a stored `vaultDepositedAmount` variable updated via `adjustTotalAssets()` by the treasury multisig. It does not read balances from Aave, Avant, Neutrl, or any underlying protocol. The reported value may not represent actual on-chain positions — there is no mechanism to verify accuracy.
 
 ---
 
@@ -390,7 +391,7 @@ Hexens audit completed; Cantina competition still in judging after ~2 months (co
 
 **Score: 3.0/5**
 
-#### Category 2: Centralization & Control Risks (Weight: 30%) — **3.5**
+#### Category 2: Centralization & Control Risks (Weight: 30%) — **3.67**
 
 **Subcategory A: Governance — 3.0**
 
@@ -415,7 +416,7 @@ Hexens audit completed; Cantina competition still in judging after ~2 months (co
 - Protection Mode activation is partially programmatic (triggered by drawdowns)
 - Hybrid system: core vault mechanics are on-chain, but allocation decisions and strategy execution are manual
 
-**Subcategory C: External Dependencies — 4.0**
+**Subcategory C: External Dependencies — 4.5**
 
 - Depends on 4-5 underlying yield protocols, most of which are newer/less established
 - Avant (savUSD, Avalanche) — newer protocol, cross-chain dependency, 35% allocation
@@ -424,22 +425,23 @@ Hexens audit completed; Cantina competition still in judging after ~2 months (co
 - Aave v3 — blue-chip, 20% allocation (positive)
 - Concrete vault framework — serves as proxy admin and controls vault upgrades. Adds third-party trust dependency.
 - Failure of any major underlying protocol (Avant or Neutrl) would impact 35% of allocated capital
+- **No on-chain proof of Junior coverage** — the Senior vault cannot verify that Junior capital exists in underlying markets or that first-loss protection is enforceable
 
-**Score: (3.0 + 3.5 + 4.0) / 3 = 3.5/5**
+**Score: (3.0 + 3.5 + 4.5) / 3 = 3.67/5**
 
-#### Category 3: Funds Management (Weight: 30%) — **3.5**
+#### Category 3: Funds Management (Weight: 30%) — **4.0**
 
-**Subcategory A: Collateralization — 3.0**
+**Subcategory A: Collateralization — 3.5**
 
 - 100% USDC-backed (deposits are USDC, deployed to yield markets)
-- Junior tranche provides first-loss protection (coverage = Junior TVL / Senior TVL)
+- Junior tranche is designed to provide first-loss protection (coverage = Junior TVL / Senior TVL), but there is **no on-chain proof** that Junior capital exists or will cover losses — the Senior vault has no link to Junior tranche contracts
 - Coverage ratio varies per market and is not publicly displayed in real-time
 - Underlying yield comes from newer protocols (Avant, Neutrl, Auto) — collateral quality is mixed
-- Protection Mode mechanism provides structural protection but pauses withdrawals
+- Protection Mode mechanism provides structural protection but pauses withdrawals — enforceability from Senior vault is unverifiable on-chain
 - Vault holds $0 USDC directly — 100% of ~$10.73M deployed externally via MultisigStrategy
 - If Junior coverage is insufficient, Senior absorbs losses
 
-**Subcategory B: Provability — 4.0**
+**Subcategory B: Provability — 4.5**
 
 - ERC-4626 exchange rate is on-chain (PPS verifiable)
 - However, `totalAssets()` depends entirely on MultisigStrategy's `adjustTotalAssets(int256 diff, uint256 nonce)` — the multisig submits a signed USDC delta (not an absolute value), which is added/subtracted from `vaultDepositedAmount`. This is **not** computed from on-chain positions in underlying protocols.
@@ -451,7 +453,7 @@ Hexens audit completed; Cantina competition still in judging after ~2 months (co
 - Yield computation is on-chain via AdaptiveCurveYDM
 - **Self-reported accounting** with constraints is better than no reporting, but fundamentally depends on multisig honesty
 
-**Score: (3.0 + 4.0) / 2 = 3.5/5**
+**Score: (3.5 + 4.5) / 2 = 4.0/5**
 
 #### Category 4: Liquidity Risk (Weight: 15%) — **3.5**
 
@@ -484,10 +486,10 @@ Hexens audit completed; Cantina competition still in judging after ~2 months (co
 
 ```
 Final Score = (Audits × 0.20) + (Centralization × 0.30) + (Funds Mgmt × 0.30) + (Liquidity × 0.15) + (Operational × 0.05)
-            = (3.0 × 0.20) + (3.5 × 0.30) + (3.5 × 0.30) + (3.5 × 0.15) + (2.0 × 0.05)
-            = 0.60 + 1.05 + 1.05 + 0.525 + 0.10
-            = 3.325
-            ≈ 3.3
+            = (3.0 × 0.20) + (3.67 × 0.30) + (4.0 × 0.30) + (3.5 × 0.15) + (2.0 × 0.05)
+            = 0.60 + 1.101 + 1.20 + 0.525 + 0.10
+            = 3.526
+            ≈ 3.5
 ```
 
 No optional modifiers apply (protocol is <2 years old, TVL <$500M).
@@ -495,11 +497,11 @@ No optional modifiers apply (protocol is <2 years old, TVL <$500M).
 | Category | Score | Weight | Weighted |
 |----------|-------|--------|----------|
 | Audits & Historical | 3.0 | 20% | 0.60 |
-| Centralization & Control | 3.5 | 30% | 1.05 |
-| Funds Management | 3.5 | 30% | 1.05 |
+| Centralization & Control | 3.67 | 30% | 1.101 |
+| Funds Management | 4.0 | 30% | 1.20 |
 | Liquidity Risk | 3.5 | 15% | 0.525 |
 | Operational Risk | 2.0 | 5% | 0.10 |
-| **Final Score** | | | **3.325 / 5.0** |
+| **Final Score** | | | **3.526 / 5.0** |
 
 ### Risk Tier
 
@@ -507,11 +509,11 @@ No optional modifiers apply (protocol is <2 years old, TVL <$500M).
 |------------|-----------|----------------|
 | 1.0-1.5 | Minimal Risk | Approved, high confidence |
 | 1.5-2.5 | Low Risk | Approved with standard monitoring |
-| **2.5-3.5** | **Medium Risk** | **Approved with enhanced monitoring** |
-| 3.5-4.5 | Elevated Risk | Limited approval, strict limits |
+| 2.5-3.5 | Medium Risk | Approved with enhanced monitoring |
+| **3.5-4.5** | **Elevated Risk** | **Limited approval, strict limits** |
 | 4.5-5.0 | High Risk | Not recommended |
 
-**Final Risk Tier: MEDIUM RISK**
+**Final Risk Tier: ELEVATED RISK**
 
 ---
 
