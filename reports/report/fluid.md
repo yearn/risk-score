@@ -1,4 +1,4 @@
-# Protocol Risk Assessment: Fluid Lending Protocol (fTokens)
+# Protocol Risk Assessment: Fluid Lending Protocol
 
 - **Assessment Date:** February 12, 2026
 - **Token:** fTokens (fUSDC, fUSDT, fWETH)
