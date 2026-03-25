@@ -122,9 +122,9 @@ The Senior Vault allocates deposited USDC across whitelisted markets where Junio
 ### Collateralization
 
 - USDC deposits are deployed to underlying yield markets (not held as idle collateral)
-- Junior tranche capital in each market absorbs losses first — coverage = Junior TVL / Senior TVL
+- Junior tranche capital in each market is designed to absorb losses first — coverage = Junior TVL / Senior TVL
 - If losses exceed Junior coverage, Senior absorbs remaining losses
-- **Protection Mode:** When underlying assets drawdown, system enters Protection Mode (1-7 days per market based on volatility):
+- **Protection Mode (per documentation):** When underlying assets drawdown, system enters Protection Mode (1-7 days per market based on volatility):
   - Senior withdrawals pause
   - Junior deposits pause
   - 100% of yield flows to Junior to rebuild buffer
@@ -132,6 +132,7 @@ The Senior Vault allocates deposited USDC across whitelisted markets where Junio
   - If losses persist, Junior absorbs up to its coverage %
   - If losses exceed coverage %, Senior activates Emergency Exit
 - Coverage adjustments require 3-day notice to whitelisted depositors with incremental 1% daily changes
+- **Loss propagation to Senior vault is opaque:** From the Senior vault's perspective, the only mechanism for reflecting losses is the treasury multisig calling `adjustTotalAssets()` with a negative diff. There is no on-chain automation that detects losses in underlying markets, triggers Junior absorption, calculates remaining Senior losses, and reports them to the vault. The entire loss flow — from underlying protocol drawdown → Junior absorption → residual Senior loss — is mediated off-chain by the multisig. Whether Junior actually absorbed losses before Senior is reported a loss is entirely trust-based and unverifiable from the vault contract.
 
 **Collateral Concerns:**
 - Underlying protocols (Avant, Neutrl, Auto, Cap Finance) are newer, less battle-tested DeFi protocols
