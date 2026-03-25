@@ -107,7 +107,6 @@ The Senior Vault allocates deposited USDC across whitelisted markets where Junio
 | sUSDai | USD.ai | Arbitrum | Pending | Pending integration |
 
 **Concentration Controls:**
-- Per-market: +15 percentage points above target allowed during bootstrapping
 - Per-protocol: 40% max
 - Per-asset: 40% max
 - Per-chain: 40% max (Ethereum exempt)
@@ -118,7 +117,7 @@ The Senior Vault allocates deposited USDC across whitelisted markets where Junio
 - **Deposits:** KYC-gated. Participants undergo KYC verification and deposits restricted to whitelisted addresses. Not fully permissionless.
 - **Withdrawals:** Request triggers up to 14-day unlock period. Vault sources liquidity from underlying Senior tranches. After unlock period, funds become claimable.
 - **Fees:** 0% management fee. 0% performance fee on-chain (both fees and fee recipients are set to zero/address(0) as verified on-chain March 25, 2026). Documentation states 10%/20% for Senior/Junior yield — either not yet enabled or changed since documentation was written. Fee updates require VAULT_MANAGER role (3/4 multisig).
-- **Secondary Market:** Improved since launch. Curve CurveStableSwapNG pool holds ~489K srRoyUSDC. Morpho Blue markets (~$2M, mostly srRoyUSDC/pmUSD, not direct USDC exit).
+- **Secondary Market:** Improved since launch. Curve CurveStableSwapNG pool holds ~489K srRoyUSDC. Morpho Blue markets: srRoyUSDC/USDC (~$272K supply, 84% utilized), srRoyUSDC/pmUSD (~$1.99M supply, 91% utilized — loan asset is pmUSD, not direct USDC exit).
 
 ### Collateralization
 
@@ -132,7 +131,6 @@ The Senior Vault allocates deposited USDC across whitelisted markets where Junio
   - If recovery occurs within Protection Mode, losses are erased
   - If losses persist, Junior absorbs up to its coverage %
   - If losses exceed coverage %, Senior activates Emergency Exit
-- **Minimum coverage per-market** is set at creation based on historical drawdown data
 - Coverage adjustments require 3-day notice to whitelisted depositors with incremental 1% daily changes
 
 **Collateral Concerns:**
@@ -149,15 +147,15 @@ The Senior Vault allocates deposited USDC across whitelisted markets where Junio
 - **Accounting is admin-reported:** The MultisigStrategy's `totalAllocatedValue()` is updated via `adjustTotalAssets(int256 diff, uint256 nonce)`, called by the 3/5 treasury multisig ([`0x170ff06326eBb64BF609a848Fc143143994AF6c8`](https://etherscan.io/address/0x170ff06326eBb64BF609a848Fc143143994AF6c8)). This is **not** computed from on-chain positions — it is manually reported by the multisig.
 - **How `adjustTotalAssets` works:** The `diff` parameter is a **signed raw USDC amount** (not a percentage), added to or subtracted from `vaultDepositedAmount`. Positive diffs increase reported assets (yield accrual), negative diffs decrease them (loss reporting). The funds themselves are on-chain in underlying protocols (Aave, Avant, etc.), but the vault cannot read those balances directly — instead the multisig manually reports the net change.
 - **Accounting constraints (verified on-chain March 25, 2026):**
-  - Max change per update: 50 bps (~0.5% of current `vaultDepositedAmount`). If exceeded, contract **auto-pauses** (does not revert).
-  - Cooldown between updates: 43,200 seconds (12 hours). If violated, contract **auto-pauses**.
+  - Max change per update: 50 bps (~0.5% of current `vaultDepositedAmount`), applies to both positive and negative diffs (`abs(diff)` is checked). At ~$10.73M, max ~$53.6K per call in either direction. If exceeded, contract **auto-pauses without applying the diff** — calls `_pause()` and returns immediately, discarding the change. This is a circuit breaker: the suspicious accounting update is rejected and the contract locks until `STRATEGY_ADMIN` calls `unpauseAndAdjustTotalAssets()`.
+  - Cooldown between updates: 43,200 seconds (12 hours). If violated, same circuit-breaker behavior — **diff is discarded**, contract pauses.
   - Validity period: 2,592,000 seconds (30 days) — if no update within 30 days, `_previewPosition()` reverts with `AccountingValidityPeriodExpired`, freezing deposits/withdrawals.
   - Sequential nonce required (current: 37, ~1 update every 2 days). Prevents replay/out-of-order submissions.
-  - Underflow protection: negative diffs cannot exceed `vaultDepositedAmount` (reverts with `InsufficientUnderlyingBalance`).
+  - Underflow protection: negative diffs cannot reduce `vaultDepositedAmount` below zero (reverts with `InsufficientUnderlyingBalance`). This is a floor guard only — the 0.5% cap is the actual per-call limit on losses.
   - Last updated: March 25, 2026
 - **Emergency bypass — `unpauseAndAdjustTotalAssets(int256 diff)`:** Callable only by `STRATEGY_ADMIN`. **Skips all validation** — no nonce check, no percentage cap, no cooldown. Designed as emergency recovery when contract is paused, but is effectively an unconstrained accounting override.
 - **Observed usage pattern:** 36 adjustments since Jan 30, 2026. Overwhelmingly small positive diffs (+$800–4,000 USDC for yield accrual). One negative diff observed (nonce 7: -$1,225 USDC). Calls every 12–72 hours.
-- Yield computation and distribution use the AdaptiveCurveYDM model on-chain
+- **Yield distribution — AdaptiveCurveYDM** ([`0x071B0FA065774b403B8dae0aE93A09Df5DE3DFAc`](https://etherscan.io/address/0x071B0FA065774b403B8dae0aE93A09Df5DE3DFAc)): Determines what percentage of Senior yield is redirected to Junior as a risk premium. Inspired by [Morpho's AdaptiveCurveIrm](https://github.com/morpho-org/morpho-blue-irm). Uses a piecewise linear curve with a kink at 90% utilization (Junior capital backing Senior exposure). When utilization > 90% (Junior scarce), Junior's yield share increases exponentially over time to attract more Junior capital; when < 90% (Junior abundant), it decreases. **Immutable contract** — no admin functions, no owner, no upgradeability. Parameters are set once at market initialization and the curve adapts autonomously. Floor: 0.01% JT yield share, ceiling: 100%.
 - Junior/Senior coverage ratios are managed per-market, but not easily verifiable by external observers without protocol-specific tooling
 - Underlying market positions must be verified by checking each external protocol individually
 - No third-party verification mechanism (no Chainlink PoR, no custodian attestations)
@@ -167,10 +165,10 @@ The Senior Vault allocates deposited USDC across whitelisted markets where Junio
 
 - **Primary Exit:** Async withdrawal from vault (ERC-7540 pattern — `maxWithdraw()` returns 0, confirming no instant redemption). Request triggers up to 14-day unlock period. Vault sources liquidity from underlying Senior tranches during this window. The 20% Aave v3 USDC allocation is described as a "liquidity reserve" but this refers to the vault's internal rebalancing speed (Aave is instant to unwind on the vault side), **not** instant withdrawals for depositors — all exits go through the request-and-wait mechanism.
 - **Secondary Exit (DEX):** Curve CurveStableSwapNG pool ([`0x8fc753f96752b35f64d1bae514e6cf8db0b9322e`](https://etherscan.io/address/0x8fc753f96752b35f64d1bae514e6cf8db0b9322e)) holds ~489K srRoyUSDC — significant improvement from ~$600 at initial assessment. Meaningful DEX liquidity now exists.
-- **Morpho Blue Markets:**
-  - srRoyUSDC/pmUSD (86% LLTV): ~$1.97M supply — this is the largest secondary market, but loan asset is pmUSD (Precious Metals USD from RAAC protocol), not USDC. Morpho Blue holds ~2.83M srRoyUSDC (~26% of total supply) as collateral.
-  - srRoyUSDC/USDC (91.5% LLTV): ~$22.4K supply, 100% utilized — tiny and fully utilized
-  - Two additional markets are empty or negligible
+- **Morpho Blue Markets** (verified via [Morpho API](https://api.morpho.org/graphql), March 25, 2026):
+  - srRoyUSDC/USDC (91.5% LLTV, [market](https://app.morpho.org/ethereum/market/0xacc49fbf58feb1ac971acce68f8adc177c43682d6a7087bbd4991a05cb7a2c67/srroyusdc-usdc)): ~$272K supply, ~$228K borrowed, 84% utilized — meaningful USDC exit path, significant growth from ~$22K at initial assessment
+  - srRoyUSDC/pmUSD (86% LLTV, [market](https://app.morpho.org/ethereum/market/0x72cc79433e9f91c2a185422725510f4bdd19c9006010f464f851468b2371b756/srroyusdc-pmusd)): ~$1.99M supply, ~$1.81M borrowed, 91% utilized — largest market by supply, but loan asset is pmUSD (Precious Metals USD from RAAC protocol), not direct USDC exit. Morpho Blue holds ~2.83M srRoyUSDC (~26% of total supply) as collateral.
+  - Two additional markets (srRoyUSDC/pmUSD at 91.5% LLTV and srRoyUSDC/USDC at 86% LLTV) are empty or negligible
 - **Slippage Analysis:** Curve pool now provides meaningful exit liquidity (~$490K). Large exits still face slippage given the vault's ~$10.7M total assets.
 - **Withdrawal Queues:** Up to 14-day max during normal conditions. During Protection Mode (market drawdown), Senior withdrawals are paused entirely until the Protection Mode period ends (1-7 days depending on market volatility parameters).
 - **Stress Scenario:** If multiple underlying markets enter Protection Mode simultaneously, all Senior withdrawals could be paused. Combined with 14-day unlock, holders could face extended periods unable to exit. The Curve pool now provides a partial escape valve for smaller positions.
@@ -250,8 +248,6 @@ The vault governance involves multiple multisigs and two factory contracts with 
 - **Incident Response:** Hypernative being configured for continuous monitoring. Emergency upgrade system in place. Private security council being assembled. No publicly documented incident response plan yet.
 - **License:** Not specified in contracts.
 
-**Note on Rari Capital history:** Jai Bhavnani co-founded Rari Capital, which suffered a ~$80M exploit in April 2022 via a reentrancy vulnerability in Fuse pools and a ~$15M price manipulation attack in May 2021. Additionally, the [SEC charged Rari Capital and its three co-founders](https://www.sec.gov/newsroom/press-releases/2024-138) (September 2024) with misleading investors about automated rebalancing (was actually manual) and unregistered broker activity. The settlement resulted in **five-year officer-and-director bars** for all three co-founders, civil penalties, and disgorgement. While the current project is architecturally different, the regulatory history and the pattern of misrepresenting automation levels is relevant context — particularly given that srRoyUSDC's `totalAssets()` relies on manual multisig-reported accounting via `adjustTotalAssets()`.
-
 ## Monitoring
 
 ### Key Contracts to Monitor
@@ -314,7 +310,6 @@ The vault governance involves multiple multisigs and two factory contracts with 
 - **Same signers across multisigs:** The Owner and Treasury multisig share identical 5 signers. The VAULT_MANAGER (3/4) shares 3 of those signers. Compromising 3 of 5 EOAs gives control over vault administration, treasury, and accounting.
 - **ConcreteFactory as third-party trust dependency:** The Concrete team's 3/5 multisig controls vault implementation upgrades. While this provides dual-control protection, it also means a compromise of the Concrete team could affect all Concrete-based vaults, not just srRoyUSDC.
 - **Underlying protocol risk is opaque:** The quality and health of Avant, Neutrl, Auto, and Cap Finance positions are not easily verifiable. These protocols themselves are newer with limited audit and track record history.
-- **Rari Capital exploit history:** The founder's previous project (Rari Capital) suffered an ~$80M exploit. While the current protocol is architecturally different, this is relevant context for risk assessment.
 
 ---
 
@@ -391,7 +386,7 @@ The most realistic risk vector is the MultisigStrategy proxy upgrade (no timeloc
 | Bug Bounty | $250K on Immunefi (live since Feb 17, 2026 — ~5 weeks active) |
 | Time in Production | ~78 days (since Jan 6, 2026). V1 (different product) launched 2024. |
 | TVL | ~$10.73M in srRoyUSDC vault (admin-reported). ~$5.16M across Royco V2 on DeFiLlama. |
-| Historical Incidents | None in ~78 days. Founder's prior project (Rari Capital) suffered ~$80M exploit in 2022. |
+| Historical Incidents | None in ~78 days. |
 
 Hexens audit completed; Cantina competition still in judging after ~2 months (concerning delay — 262 submissions, only high-severity eligible for rewards). Protocol approaching 3 months with growing TVL. Bug bounty established for 5+ weeks. Cantina competition excluded key risk vectors from scope.
 
@@ -456,7 +451,7 @@ Hexens audit completed; Cantina competition still in judging after ~2 months (co
 - Per-market Junior coverage ratios are not transparently displayed
 - No third-party verification mechanism (no Chainlink PoR, no custodian attestations)
 - Yield computation is on-chain via AdaptiveCurveYDM
-- **Self-reported accounting** with constraints is better than no reporting, but fundamentally depends on multisig honesty — particularly concerning given the SEC settlement for misrepresenting automation at Rari Capital
+- **Self-reported accounting** with constraints is better than no reporting, but fundamentally depends on multisig honesty
 
 **Score: (3.5 + 4.0) / 2 = 3.75/5**
 
@@ -465,8 +460,7 @@ Hexens audit completed; Cantina competition still in judging after ~2 months (co
 - Queue-based withdrawal with up to 14-day unlock period
 - During Protection Mode, Senior withdrawals are paused entirely (additional delay)
 - **Improved DEX liquidity:** Curve CurveStableSwapNG pool holds ~489K srRoyUSDC (~$490K) — significant improvement from ~$600 at launch
-- Morpho Blue markets exist (~$2M) — Morpho holds ~2.83M srRoyUSDC (26% of supply) as collateral, mostly for pmUSD (not direct USDC exit)
-- srRoyUSDC/USDC Morpho market has only $22.4K and is 100% utilized
+- Morpho Blue markets: srRoyUSDC/USDC (~$272K supply, 84% utilized — meaningful USDC exit), srRoyUSDC/pmUSD (~$1.99M supply, not direct USDC exit). Morpho holds ~2.83M srRoyUSDC (26% of supply) as collateral.
 - Extreme holder concentration — one EOA holds ~69% of supply. A single large withdrawal would require unwinding most underlying positions.
 - Same-value asset (USDC-denominated) mitigates some waiting risk
 - Throttle mechanism (14-day max + Protection Mode pauses): +0.5
@@ -476,7 +470,7 @@ Hexens audit completed; Cantina competition still in judging after ~2 months (co
 
 #### Category 5: Operational Risk (Weight: 5%) — **3.0**
 
-- Founder Jai Bhavnani is publicly known with DeFi track record (though includes Rari Capital exploit history)
+- Founder Jai Bhavnani is publicly known with DeFi track record
 - VC-backed by reputable investors (Electric Capital, Coinbase Ventures, Hashed, Amber Group)
 - Small dev team (2 GitHub contributors)
 - Documentation is adequate but has gaps (oracle mechanism, per-market coverage data)
