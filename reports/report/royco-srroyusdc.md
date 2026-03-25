@@ -469,28 +469,29 @@ Hexens audit completed; Cantina competition still in judging after ~2 months (co
 
 **Score: 3.5/5**
 
-#### Category 5: Operational Risk (Weight: 5%) — **2.0**
+#### Category 5: Operational Risk (Weight: 5%) — **2.5**
 
 - Founder Jai Bhavnani is publicly known with DeFi track record
 - VC-backed by reputable investors (Electric Capital, Coinbase Ventures, Hashed, Amber Group)
+- Public GitHub repo ([roycoprotocol/royco-dawn](https://github.com/roycoprotocol/royco-dawn)) — verified source code
 - Small dev team (2 GitHub contributors)
-- Documentation is adequate but has gaps (oracle mechanism, per-market coverage data)
+- Documentation has significant gaps: loss propagation flow undocumented, Junior coverage per-market not disclosed, oracle mechanism unclear, per-market risk data only on JS-rendered site
 - Hypernative monitoring being configured but not yet active
 - Security council being assembled but not yet formed
 - No publicly documented incident response plan
 - KYC requirements suggest regulatory compliance awareness
 - Legal structure: Waymont Co., Los Angeles — details limited
 
-**Score: 2.0/5**
+**Score: 2.5/5**
 
 ### Final Score Calculation
 
 ```
 Final Score = (Audits × 0.20) + (Centralization × 0.30) + (Funds Mgmt × 0.30) + (Liquidity × 0.15) + (Operational × 0.05)
-            = (3.0 × 0.20) + (3.67 × 0.30) + (4.0 × 0.30) + (3.5 × 0.15) + (2.0 × 0.05)
-            = 0.60 + 1.101 + 1.20 + 0.525 + 0.10
-            = 3.526
-            ≈ 3.5
+            = (3.0 × 0.20) + (3.67 × 0.30) + (4.0 × 0.30) + (3.5 × 0.15) + (2.5 × 0.05)
+            = 0.60 + 1.101 + 1.20 + 0.525 + 0.125
+            = 3.551
+            ≈ 3.6
 ```
 
 No optional modifiers apply (protocol is <2 years old, TVL <$500M).
@@ -501,8 +502,8 @@ No optional modifiers apply (protocol is <2 years old, TVL <$500M).
 | Centralization & Control | 3.67 | 30% | 1.101 |
 | Funds Management | 4.0 | 30% | 1.20 |
 | Liquidity Risk | 3.5 | 15% | 0.525 |
-| Operational Risk | 2.0 | 5% | 0.10 |
-| **Final Score** | | | **3.526 / 5.0** |
+| Operational Risk | 2.5 | 5% | 0.125 |
+| **Final Score** | | | **3.551 / 5.0** |
 
 ### Risk Tier
 
