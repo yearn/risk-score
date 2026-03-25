@@ -4,7 +4,7 @@
 - **Token:** srRoyUSDC (Senior Royco USDC)
 - **Chain:** Ethereum Mainnet
 - **Token Address:** [`0xcD9f5907F92818bC06c9Ad70217f089E190d2a32`](https://etherscan.io/address/0xcD9f5907F92818bC06c9Ad70217f089E190d2a32)
-- **Final Score: 3.7/5.0**
+- **Final Score: 3.3/5.0**
 
 ## Overview + Links
 
@@ -315,8 +315,6 @@ The vault governance involves multiple multisigs and two factory contracts with 
 
 ## Token Minting Analysis
 
-**Question: Can new srRoyUSDC tokens be minted out of thin air (without depositing underlying USDC)?**
-
 ### Current Implementation — No Direct Minting Without Assets
 
 The vault implementation (ConcreteAsyncVaultImpl) uses standard ERC-4626 minting:
@@ -378,7 +376,7 @@ The most realistic risk vector is the MultisigStrategy proxy upgrade (no timeloc
 
 ### Category Scores
 
-#### Category 1: Audits & Historical Track Record (Weight: 20%) — **3.75**
+#### Category 1: Audits & Historical Track Record (Weight: 20%) — **3.0**
 
 | Aspect | Assessment |
 |--------|-----------|
@@ -390,11 +388,11 @@ The most realistic risk vector is the MultisigStrategy proxy upgrade (no timeloc
 
 Hexens audit completed; Cantina competition still in judging after ~2 months (concerning delay — 262 submissions, only high-severity eligible for rewards). Protocol approaching 3 months with growing TVL. Bug bounty established for 5+ weeks. Cantina competition excluded key risk vectors from scope.
 
-**Score: 3.75/5**
+**Score: 3.0/5**
 
-#### Category 2: Centralization & Control Risks (Weight: 30%) — **3.83**
+#### Category 2: Centralization & Control Risks (Weight: 30%) — **3.5**
 
-**Subcategory A: Governance — 4.0**
+**Subcategory A: Governance — 3.0**
 
 - 3/5 Gnosis Safe multisig for vault ownership
 - Vault implementation upgrades require dual-control: ConcreteFactory (Concrete team 3/5 multisig) + Royco team. This is significantly better than single-party control.
@@ -427,11 +425,11 @@ Hexens audit completed; Cantina competition still in judging after ~2 months (co
 - Concrete vault framework — serves as proxy admin and controls vault upgrades. Adds third-party trust dependency.
 - Failure of any major underlying protocol (Avant or Neutrl) would impact 35% of allocated capital
 
-**Score: (4.0 + 3.5 + 4.0) / 3 = 3.83/5**
+**Score: (3.0 + 3.5 + 4.0) / 3 = 3.5/5**
 
-#### Category 3: Funds Management (Weight: 30%) — **3.75**
+#### Category 3: Funds Management (Weight: 30%) — **3.5**
 
-**Subcategory A: Collateralization — 3.5**
+**Subcategory A: Collateralization — 3.0**
 
 - 100% USDC-backed (deposits are USDC, deployed to yield markets)
 - Junior tranche provides first-loss protection (coverage = Junior TVL / Senior TVL)
@@ -453,7 +451,7 @@ Hexens audit completed; Cantina competition still in judging after ~2 months (co
 - Yield computation is on-chain via AdaptiveCurveYDM
 - **Self-reported accounting** with constraints is better than no reporting, but fundamentally depends on multisig honesty
 
-**Score: (3.5 + 4.0) / 2 = 3.75/5**
+**Score: (3.0 + 4.0) / 2 = 3.5/5**
 
 #### Category 4: Liquidity Risk (Weight: 15%) — **3.5**
 
@@ -468,7 +466,7 @@ Hexens audit completed; Cantina competition still in judging after ~2 months (co
 
 **Score: 3.5/5**
 
-#### Category 5: Operational Risk (Weight: 5%) — **3.0**
+#### Category 5: Operational Risk (Weight: 5%) — **2.0**
 
 - Founder Jai Bhavnani is publicly known with DeFi track record
 - VC-backed by reputable investors (Electric Capital, Coinbase Ventures, Hashed, Amber Group)
@@ -480,28 +478,28 @@ Hexens audit completed; Cantina competition still in judging after ~2 months (co
 - KYC requirements suggest regulatory compliance awareness
 - Legal structure: Waymont Co., Los Angeles — details limited
 
-**Score: 3.0/5**
+**Score: 2.0/5**
 
 ### Final Score Calculation
 
 ```
 Final Score = (Audits × 0.20) + (Centralization × 0.30) + (Funds Mgmt × 0.30) + (Liquidity × 0.15) + (Operational × 0.05)
-            = (3.75 × 0.20) + (3.83 × 0.30) + (3.75 × 0.30) + (3.5 × 0.15) + (3.0 × 0.05)
-            = 0.75 + 1.149 + 1.125 + 0.525 + 0.15
-            = 3.699
-            ≈ 3.7
+            = (3.0 × 0.20) + (3.5 × 0.30) + (3.5 × 0.30) + (3.5 × 0.15) + (2.0 × 0.05)
+            = 0.60 + 1.05 + 1.05 + 0.525 + 0.10
+            = 3.325
+            ≈ 3.3
 ```
 
 No optional modifiers apply (protocol is <2 years old, TVL <$500M).
 
 | Category | Score | Weight | Weighted |
 |----------|-------|--------|----------|
-| Audits & Historical | 3.75 | 20% | 0.75 |
-| Centralization & Control | 3.83 | 30% | 1.149 |
-| Funds Management | 3.75 | 30% | 1.125 |
+| Audits & Historical | 3.0 | 20% | 0.60 |
+| Centralization & Control | 3.5 | 30% | 1.05 |
+| Funds Management | 3.5 | 30% | 1.05 |
 | Liquidity Risk | 3.5 | 15% | 0.525 |
-| Operational Risk | 3.0 | 5% | 0.15 |
-| **Final Score** | | | **3.699 / 5.0** |
+| Operational Risk | 2.0 | 5% | 0.10 |
+| **Final Score** | | | **3.325 / 5.0** |
 
 ### Risk Tier
 
@@ -509,11 +507,11 @@ No optional modifiers apply (protocol is <2 years old, TVL <$500M).
 |------------|-----------|----------------|
 | 1.0-1.5 | Minimal Risk | Approved, high confidence |
 | 1.5-2.5 | Low Risk | Approved with standard monitoring |
-| 2.5-3.5 | Medium Risk | Approved with enhanced monitoring |
-| **3.5-4.5** | **Elevated Risk** | **Limited approval, strict limits** |
+| **2.5-3.5** | **Medium Risk** | **Approved with enhanced monitoring** |
+| 3.5-4.5 | Elevated Risk | Limited approval, strict limits |
 | 4.5-5.0 | High Risk | Not recommended |
 
-**Final Risk Tier: ELEVATED RISK**
+**Final Risk Tier: MEDIUM RISK**
 
 ---
 
