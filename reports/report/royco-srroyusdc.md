@@ -648,3 +648,118 @@ No optional modifiers apply (protocol is <2 years old, TVL <$500M).
 - **Strategy-based:** Reassess when RoycoVaultMakinaStrategy is activated (currently 0 allocation)
 - **Fee-based:** Reassess if performance or management fees are changed from 0%
 - **Underlying protocol:** Reassess if any whitelisted market (Avant, Neutrl, Auto) experiences an exploit or significant issue
+
+---
+
+## Appendix: Contract Architecture
+
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│                     CONCRETE VAULT LAYER                            │
+│                                                                     │
+│  ┌──────────────────────┐       ┌───────────────────────────────┐  │
+│  │  srRoyUSDC Vault     │       │  MultisigStrategy             │  │
+│  │  (ERC-4626 Proxy)    │──────▶│  (TransparentUpgradeableProxy)│  │
+│  │  0xcD9f...           │       │  0xd3F8...                    │  │
+│  │                      │       │                               │  │
+│  │  totalAssets() reads │       │  adjustTotalAssets(diff,nonce) │  │
+│  │  from strategy       │       │  unpauseAndAdjustTotalAssets() │  │
+│  └──────────┬───────────┘       └──────────────┬────────────────┘  │
+│             │                                  │                    │
+│             │ upgrade                          │ calls              │
+│             ▼                                  ▼                    │
+│  ┌──────────────────────┐       ┌───────────────────────────────┐  │
+│  │  ConcreteFactory     │       │  Treasury Multisig (3/5)      │  │
+│  │  (Proxy Admin)       │       │  0x170ff0...                  │  │
+│  │  0x0265...           │       │                               │  │
+│  │  Owner: Concrete 3/5 │       │  - Reports value via diff     │  │
+│  │  0xdc29...           │       │  - Holds Senior Tranche tokens│  │
+│  └──────────────────────┘       └──────────────┬────────────────┘  │
+│                                                │                    │
+└────────────────────────────────────────────────┼────────────────────┘
+                                                 │
+                                    holds ST tokens / redeems
+                                                 │
+┌────────────────────────────────────────────────┼────────────────────┐
+│                   ROYCO DAWN TRANCHING LAYER   │                    │
+│                                                ▼                    │
+│  ┌──────────────────────────────────────────────────────────────┐  │
+│  │  RoycoFactory Proxy (AccessManager)  0x7cC6...              │  │
+│  │  Manages roles for all Dawn contracts (DEPLOYER, LP, SYNC)  │  │
+│  └────────────────────────────┬─────────────────────────────────┘  │
+│                               │ deploys & governs                   │
+│               ┌───────────────┼───────────────┐                     │
+│               ▼               ▼               ▼                     │
+│  ┌─────────────────┐ ┌──────────────┐ ┌──────────────────┐        │
+│  │  PER-MARKET SET  │ │              │ │                  │        │
+│  │  (×2 active)     │ │  Neutrl      │ │  Tokemak         │        │
+│  │                  │ │  sNUSD       │ │  autoUSD         │        │
+│  │ ┌──────────────┐│ │  Market      │ │  Market          │        │
+│  │ │   Kernel     ││ │              │ │                  │        │
+│  │ │ stDeposit()  ││ │ fixedTerm=0  │ │ fixedTerm=2days  │        │
+│  │ │ stRedeem()   ││ │ liqUtil=100% │ │ liqUtil=122.5%   │        │
+│  │ │ jtDeposit()  ││ └──────────────┘ └──────────────────┘        │
+│  │ │ jtRedeem()   ││                                               │
+│  │ │ setConversion││                                               │
+│  │ │  Rate()      ││                                               │
+│  │ └──────┬───────┘│                                               │
+│  │        │        │                                               │
+│  │ ┌──────▼───────┐│  ┌──────────────┐  ┌──────────────────┐      │
+│  │ │  Accountant  ││  │Senior Tranche│  │ Junior Tranche   │      │
+│  │ │  getState()  ││  │ (ERC-4626)   │  │ (ERC-4626)       │      │
+│  │ │  coverage    ││  │ ROY-ST-*     │  │ ROY-JT-*         │      │
+│  │ │  NAV sync    │◀─▶│              │  │                  │      │
+│  │ │  loss waterf.││  │ Held by      │  │ Held by 2-3      │      │
+│  │ │  market state││  │ Treasury     │  │ independent      │      │
+│  │ └──────────────┘│  │ multisig     │  │ depositors       │      │
+│  │                  │  └──────────────┘  └──────────────────┘      │
+│  └─────────────────┘                                               │
+│                                                                     │
+│  ┌──────────────────────────────────────────────────────────────┐  │
+│  │  AdaptiveCurveYDM (Immutable)  0x071B...                    │  │
+│  │  Determines JT yield share (risk premium). No admin.        │  │
+│  └──────────────────────────────────────────────────────────────┘  │
+│                                                                     │
+└─────────────────────────────────────────────────────────────────────┘
+                                │
+                    deposits yield-bearing assets
+                                │
+┌───────────────────────────────┼─────────────────────────────────────┐
+│              UNDERLYING YIELD PROTOCOLS                              │
+│                               ▼                                     │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐              │
+│  │  Neutrl      │  │  Tokemak     │  │  Aave v3     │              │
+│  │  (sNUSD)     │  │  (autoUSD)   │  │  (USDC)      │              │
+│  │  35% target  │  │  10% target  │  │  20% target  │              │
+│  └──────────────┘  └──────────────┘  └──────────────┘              │
+│  ┌──────────────┐  ┌──────────────┐                                 │
+│  │  Avant       │  │  Cap Finance │                                 │
+│  │  (savUSD)    │  │  (stcUSD)    │                                 │
+│  │  35% target  │  │  Paused      │                                 │
+│  └──────────────┘  └──────────────┘                                 │
+│                                                                     │
+└─────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────┐
+│                        GOVERNANCE                                   │
+│                                                                     │
+│  Owner Multisig (3/5)          VAULT_MANAGER (3/4)                 │
+│  0x85de42...                   0x7c405b...                         │
+│  - Vault owner                 - Fee management                    │
+│  - MultisigStrategy upgrade    - Queue toggles                     │
+│    (NO TIMELOCK)                                                    │
+│                                                                     │
+│  Treasury Multisig (3/5)       ConcreteFactory Owner (3/5)         │
+│  0x170ff0...                   0xdc29BD... (Concrete team)         │
+│  - adjustTotalAssets()         - Vault implementation upgrades     │
+│  - Holds Senior Tranche tokens                                     │
+│                                                                     │
+│  ⚠ Owner & Treasury share same 5 signers (no separation of powers)│
+│  ⚠ VAULT_MANAGER shares 3 of 5 + 1 additional                    │
+│                                                                     │
+└─────────────────────────────────────────────────────────────────────┘
+
+Data flow: User deposits USDC → srRoyUSDC vault → MultisigStrategy
+→ Treasury multisig deploys to Dawn Senior Tranches → Kernel routes
+to underlying protocols. Value reported back via adjustTotalAssets().
+```
