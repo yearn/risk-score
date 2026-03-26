@@ -66,14 +66,6 @@ The Treasury multisig ([`0x170ff06326eBb64BF609a848Fc143143994AF6c8`](https://et
 | Tokemak autoUSD | Senior Tranche (ROY-ST-autoUSD) | [`0x73C641fe41EB0270C7f473f3c3E4A40eb97fd8dE`](https://etherscan.io/address/0x73C641fe41EB0270C7f473f3c3E4A40eb97fd8dE) |
 | Tokemak autoUSD | Junior Tranche (ROY-JT-autoUSD) | [`0x6f0D6567099621deE3850C673d73c532071A888d`](https://etherscan.io/address/0x6f0D6567099621deE3850C673d73c532071A888d) |
 | Tokemak autoUSD | Accountant | [`0xB0166629D78E3876F570f18B154A60b99024b6f4`](https://etherscan.io/address/0xB0166629D78E3876F570f18B154A60b99024b6f4) |
-| Smokehouse USDC | Kernel | [`0x6dBdf6EBdF02F50ec6a7d6F782850996928176F9`](https://etherscan.io/address/0x6dBdf6EBdF02F50ec6a7d6F782850996928176F9) |
-| Smokehouse USDC | Senior Tranche (ROY-ST-SmokehouseUSDC) | [`0xa225F24654b8995036606D5Cd0634133a4BE169c`](https://etherscan.io/address/0xa225F24654b8995036606D5Cd0634133a4BE169c) |
-| Smokehouse USDC | Junior Tranche (ROY-JT-SmokehouseUSDC) | [`0xC8fab124292cB792d15041292C2399910bD086d1`](https://etherscan.io/address/0xC8fab124292cB792d15041292C2399910bD086d1) |
-| Smokehouse USDC | Accountant | [`0x955f8f7691a8908fA5a2798935Bda557A03aFb75`](https://etherscan.io/address/0x955f8f7691a8908fA5a2798935Bda557A03aFb75) |
-| Maple syrupUSDC | Kernel | [`0xde1Ce2cF64808e50d000F93058784270E412B3A4`](https://etherscan.io/address/0xde1Ce2cF64808e50d000F93058784270E412B3A4) |
-| Maple syrupUSDC | Senior Tranche (ROY-ST-syrupUSDC) | [`0x66182442522D3049A941035190C315379c959250`](https://etherscan.io/address/0x66182442522D3049A941035190C315379c959250) |
-| Maple syrupUSDC | Junior Tranche (ROY-JT-syrupUSDC) | [`0x5f340B400F892bBFDed2e5c316369Dcbf05C282A`](https://etherscan.io/address/0x5f340B400F892bBFDed2e5c316369Dcbf05C282A) |
-| Maple syrupUSDC | Accountant | [`0x2995f615D0ec527eD43eBb22DE0DcB66084c98FE`](https://etherscan.io/address/0x2995f615D0ec527eD43eBb22DE0DcB66084c98FE) |
 
 #### On-Chain Coverage Data (Verified March 26, 2026)
 
@@ -90,6 +82,7 @@ Smokehouse USDC and Maple syrupUSDC markets have dust-level Senior NAV (<$10) an
 - **Junior depositors**: 2-3 independent addresses per market (e.g., [`0x2d745a6596d47a0fe28a7db7bd9dc7bdbca4e476`](https://etherscan.io/address/0x2d745a6596d47a0fe28a7db7bd9dc7bdbca4e476), [`0xfef0bb8df6210e441f03de23edafb0150129e176`](https://etherscan.io/address/0xfef0bb8df6210e441f03de23edafb0150129e176))
 - **No impermanent loss** recorded in any market (both `stImpermanentLoss` and `jtImpermanentLoss` are 0)
 - **Beta = 1.0** (1e18) in all markets — Junior uses the same underlying asset as Senior, meaning JT losses correlate with ST losses
+- **JT withdrawal is coverage-constrained:** The kernel enforces `postOpSyncTrancheAccountingAndEnforceCoverage` on every JT redemption — if the withdrawal would push utilization above 1.0 (coverage below required %), the tx reverts. JT can only withdraw the surplus above the coverage requirement. Current withdrawable surplus: ~28K sNUSD (Neutrl), ~28K autoUSD (Tokemak). However, coverage can still breach the threshold via underlying asset depreciation (no withdrawal needed) — this is when the loss escalation flow kicks in.
 
 ## Audits and Due Diligence Disclosures
 
