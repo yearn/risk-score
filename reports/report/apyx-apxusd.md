@@ -19,8 +19,6 @@ Apyx is a "Dividend-Backed Stablecoin" (DBS) protocol that converts off-chain co
 
 The collateral is dynamically rebalanced based on issuer concentration limits, liquidity needs, and overcollateralization requirements.
 
-**Yearn use case per issue [#63](https://github.com/yearn/risk-score/issues/63)**: Use apxUSD as collateral in Morpho lending markets.
-
 **Key metrics (March 26, 2026):**
 - apxUSD Total Supply: ~66,978,450 (supply cap: 100,000,000)
 - Curve apxUSD/USDC Pool: ~$5.5M TVL (2.72M apxUSD + 2.77M USDC)
@@ -153,11 +151,17 @@ The architecture is moderately complex:
 
 ### Minting & Redemption
 
-**Minting apxUSD**: **Permissioned** -- only whitelisted institutional participants can mint/redeem apxUSD directly. Minting uses EIP-712 structured data signing with the following on-chain safeguards:
-- Maximum single mint: 10,000,000 apxUSD
-- Rate limit: ~10,001,000 apxUSD per 24 hours
+**Minting apxUSD**: **Permissioned, no on-chain collateral required.** Minting creates tokens without any backing asset transfer in the transaction. The `ApxUSD.mint()` function only checks that the caller has `MINT_STRAT_ROLE` and that `totalSupply` does not exceed `supplyCap` — then calls `_mint(to, amount)`. **No `transferFrom`, no collateral deposit, no on-chain proof of backing.** The entire collateral relationship is trust-based and off-chain.
+
+Minting uses EIP-712 structured data signing via MinterV0 with the following on-chain safeguards:
+- Maximum single mint: 5,000,000 apxUSD
+- Rate limit: 5,000,000 apxUSD per 24 hours
 - 60-second execution delay via AccessManager (reduced from initial 4 hours)
 - Nonce-based replay protection per beneficiary
+
+**Minting roles:**
+- **MinterV0** ([`0x2c36e1adfaa80ee0324b04cc814f5207bb7ba76e`](https://etherscan.io/address/0x2c36e1adfaa80ee0324b04cc814f5207bb7ba76e)): Holds `MINT_STRAT_ROLE` (role 1). Enforces rate limits, EIP-712 signatures, and nonce checks.
+- **Admin Safe** ([`0xf9862efc1704ac05e687f66e5cd8c130e5663ce2`](https://etherscan.io/address/0xf9862efc1704ac05e687f66e5cd8c130e5663ce2)): Does NOT currently hold `MINT_STRAT_ROLE`, but can **self-grant it at any time** (0-second delay as ADMIN_ROLE holder), bypassing all MinterV0 rate limits and signature checks.
 
 General users acquire apxUSD through secondary markets (Curve, Uniswap).
 
@@ -258,7 +262,7 @@ Apyx uses an OpenZeppelin AccessManager for centralized role-based access contro
 - **apyUSD exchange rate**: Calculated on-chain via ERC-4626 (`totalAssets / totalSupply`). Programmatic, no admin input needed for the rate itself.
 - **Yield distribution**: Semi-manual. Admin deposits apxUSD into YieldDistributor → LinearVestV0 → apyUSD vault pulls vested yield. The yield vesting is programmatic (~17-day linear), but the initial deposit is admin-initiated.
 - **Rate oracle**: **Manually set** by authorized role. The `setRate()` function has no automation, no TWAP, and no staleness check. If the oracle is not updated, the Curve pool will continue using the stale rate.
-- **Minting**: Two-step process (request → execute) with 60-second delay. Rate-limited to ~10M/day.
+- **Minting**: Two-step process (request → execute) with 60-second delay. Rate-limited to 5M/day via MinterV0. Admin can bypass by self-granting mint role.
 
 ### External Dependencies
 
@@ -352,7 +356,7 @@ Apyx uses an OpenZeppelin AccessManager for centralized role-based access contro
 
 - **Publicly-traded collateral**: Underlying preferred shares (STRC, SATA) are Nasdaq-listed with transparent pricing, dividend policies, and regulatory oversight
 - **Three reputable audits**: Quantstamp, Zellic, and Certora audits all completed and publicly published with remediation evidence in the repo
-- **Well-designed minting safeguards**: EIP-712 structured signing, rate limiting (~10M/day), nonce-based replay protection, and two-step minting process
+- **Minting safeguards**: EIP-712 structured signing, rate limiting (5M/day), nonce-based replay protection, and two-step minting process with 60-second delay
 - **Open-source code**: Full Foundry project with 43 source files, 60+ test files including invariant tests, and Slither CI
 - **Public, credentialed team**: Six named founding contributors with verifiable backgrounds at Kraken, Goldman Sachs, Binance, and DeFi Development Corp.
 - **Proper deployer decommissioning**: Deployer EOA's ADMIN_ROLE was revoked, admin control transferred to multisig
@@ -370,6 +374,7 @@ Apyx uses an OpenZeppelin AccessManager for centralized role-based access contro
 
 ### Critical Risks
 
+- **Unbacked minting**: `ApxUSD.mint()` creates tokens without any on-chain collateral transfer. The function only checks role and supply cap — no `transferFrom`, no collateral deposit. The Admin Safe can self-grant `MINT_STRAT_ROLE` (0-second delay), bypassing MinterV0's rate limits and signature checks entirely. **Tokens can be printed without backing at the discretion of the 3-of-6 multisig.**
 - **Proxy upgrade without timelock**: The Admin Safe can upgrade apxUSD, apyUSD, and the rate oracle implementation contracts immediately. A compromised or malicious 3-of-6 multisig could deploy a malicious implementation that drains all funds or manipulates balances -- with zero delay for detection or intervention
 - **Off-chain collateral opacity**: If preferred shares are not actually held or are liquidated without disclosure, apxUSD could be undercollateralized with no on-chain mechanism to detect this. No PCAOB attestation has been published despite being promised monthly.
 - **Rate oracle manipulation**: A compromised admin could set the oracle rate to an extreme value, enabling extraction of value from the Curve pool. No staleness check or bounds validation exists in the oracle contract
