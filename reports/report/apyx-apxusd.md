@@ -1,6 +1,6 @@
 # Protocol Risk Assessment: Apyx
 
-- **Assessment Date:** March 16, 2026
+- **Assessment Date:** March 26, 2026
 - **Token:** apxUSD
 - **Chain:** Ethereum
 - **Token Address:** [`0x98a878B1CD98131b271883b390F68d2c90674665`](https://etherscan.io/address/0x98a878B1CD98131b271883b390F68d2c90674665)
@@ -19,30 +19,26 @@ Apyx is a "Dividend-Backed Stablecoin" (DBS) protocol that converts off-chain co
 
 The collateral is dynamically rebalanced based on issuer concentration limits, liquidity needs, and overcollateralization requirements.
 
-**Note**: The actual Morpho market (created March 12, 2026) uses **apyUSD as collateral** and **apxUSD as the loan asset** -- the inverse of what the original issue assumed. This enables a leveraged yield strategy (deposit apyUSD → borrow apxUSD → deposit into apyUSD vault → repeat). See [Morpho Market](#morpho-market) section below.
-
-**Key metrics (March 16, 2026):**
-- apxUSD Total Supply: ~51,478,450 (supply cap: 100,000,000)
+**Key metrics (March 26, 2026):**
+- apxUSD Total Supply: ~66,978,450 (supply cap: 100,000,000)
 - Curve apxUSD/USDC Pool: ~$5.5M TVL (2.72M apxUSD + 2.77M USDC)
-- Listed on CoinGecko (~$41.2M market cap, rank #512). Not yet listed on DeFi Llama
+- Listed on CoinGecko (~$41M market cap, rank #512). Not listed on DeFi Llama.
 - Chain: Ethereum only (Solana planned)
-- Protocol launched: February 18, 2026 (~26 days ago)
+- Protocol launched: February 18, 2026 (~36 days ago)
 
 **Links:**
 
 - [Protocol Website](https://apyx.fi/)
 - [Protocol Documentation](https://docs.apyx.fi)
-- [apxUSD Overview](https://docs.apyx.fi/solution-overview/apxusd-overview)
-- [apyUSD Overview](https://docs.apyx.fi/solution-overview/apyusd-overview)
-- [Peg Stability Model](https://docs.apyx.fi/solution-overview/peg-stability-model)
+- [apxUSD Overview](https://docs.apyx.fi/apxusd/overview)
+- [apyUSD Overview](https://docs.apyx.fi/apyusd/overview)
 - [Blog - Introducing Apyx](https://blog.apyx.fi/introducing-apyx/)
 - [Audits Page](https://docs.apyx.fi/resources/audits)
 - [FAQ](https://docs.apyx.fi/resources/faq)
 - [Curve Pool](https://www.curve.finance/dex/ethereum/pools/0xe1b96555bbeca40e583bbb41a11c68ca4706a414)
-- [DFDV Investment Announcement](https://www.globenewswire.com/news-release/2026/02/26/3245596/0/en/DeFi-Development-Corp-Announces-Investment-in-Apyx-The-First-Dividend-Backed-Stablecoin-DBS-Protocol.html)
 - [CoinGecko](https://www.coingecko.com/en/coins/apxusd)
-- [Certora Audit Report](https://www.certora.com/reports/apyx-apxusd)
-- [Morpho Market (apyUSD/apxUSD)](https://app.morpho.org/ethereum/market/0xe23380494e365453f72f736f2d941959ae945773eb67a06cf4f538c7c4201264/apyusd-apxusd)
+- [DFDV Investment Announcement](https://www.globenewswire.com/news-release/2026/02/26/3245596/0/en/DeFi-Development-Corp-Announces-Investment-in-Apyx-The-First-Dividend-Backed-Stablecoin-DBS-Protocol.html)
+- [GitHub - evm-contracts](https://github.com/apyx-labs/evm-contracts)
 
 ## Contract Addresses
 
@@ -70,18 +66,16 @@ The collateral is dynamically rebalanced based on issuer concentration limits, l
 | Contract | Address | Configuration |
 |----------|---------|---------------|
 | Admin Safe | [`0xf9862efc1704ac05e687f66e5cd8c130e5663ce2`](https://etherscan.io/address/0xf9862efc1704ac05e687f66e5cd8c130e5663ce2) | 3-of-6 Gnosis Safe, sole holder of ADMIN_ROLE |
-| Operations Safe | [`0x37b0779a66edc491df83e59a56d485835323a555`](https://etherscan.io/address/0x37b0779a66edc491df83e59a56d485835323a555) | 3-of-5 Gnosis Safe, 5 of 6 Admin Safe owners |
-| Third-Party Safe | [`0x81f5d98ea5acf65640ce8bb68aa8449b7c304c50`](https://etherscan.io/address/0x81f5d98ea5acf65640ce8bb68aa8449b7c304c50) | 2-of-3 Gnosis Safe, independent owners, holds 6.7% of supply |
+| Operations Safe | [`0x37b0779a66edc491df83e59a56d485835323a555`](https://etherscan.io/address/0x37b0779a66edc491df83e59a56d485835323a555) | 3-of-5 Gnosis Safe, 5 of the 6 Admin Safe owners |
+| Third-Party Safe | [`0x81f5d98ea5acf65640ce8bb68aa8449b7c304c50`](https://etherscan.io/address/0x81f5d98ea5acf65640ce8bb68aa8449b7c304c50) | 2-of-3 Gnosis Safe, different owners, holds 36.5% of supply |
 
-### Liquidity & Lending Contracts
+### Liquidity Contracts
 
 | Contract | Address | Type |
 |----------|---------|------|
 | Curve apxUSD/USDC Pool | [`0xe1b96555bbeca40e583bbb41a11c68ca4706a414`](https://etherscan.io/address/0xe1b96555bbeca40e583bbb41a11c68ca4706a414) | CurveStableSwapNG |
-| Morpho Blue | [`0xBBBBBbbBBb9cC5e90e3b3Af64bdAF62C37EEFFCb`](https://etherscan.io/address/0xBBBBBbbBBb9cC5e90e3b3Af64bdAF62C37EEFFCb) | Morpho Blue Core |
-| Morpho Oracle (apyUSD/apxUSD) | [`0x770661EE520Ff9F7D8FaCAdC4EFF885739Bd8872`](https://etherscan.io/address/0x770661EE520Ff9F7D8FaCAdC4EFF885739Bd8872) | MorphoChainlinkOracleV2 (immutable) |
 
-### On-Chain Verification (Etherscan, March 16, 2026)
+### On-Chain Verification (Etherscan, March 26, 2026)
 
 All core contracts are **verified on Etherscan**:
 
@@ -102,51 +96,15 @@ All contracts compiled with Solidity 0.8.30 using OpenZeppelin v5.5.0.
 
 | # | Firm | Date | Scope | Report |
 |---|------|------|-------|--------|
-| 1 | **Quantstamp** | Feb 2-9, 2026 | ApxUSD Stablecoin Ecosystem (14 findings) | [Certificate](https://certificate.quantstamp.com/full/apx-usd-stablecoin/2a5be074-3d9f-49e7-aa08-46fb5f1e5bd6/index.html) |
-| 2 | **Certora** | Feb 2026 (work Jan 19-28, 2026) | apxUSD (18 contracts) | [Full Report](https://www.certora.com/reports/apyx-apxusd) ([PDF](https://certora.cdn.prismic.io/certora/aaX0-1xvIZEnjP6j_Apyx-apxUSD-Finalreport-February2026.pdf)) |
-| 3 | **Zellic** | Claimed | Unknown | Not publicly available |
-
-#### Certora Audit Findings (14 total, 11 confirmed/fixed)
-
-| Severity | Discovered | Fixed |
-|---|---|---|
-| Critical | 0 | - |
-| High | 1 | 1 |
-| Medium | 4 | 2 |
-| Low | 5 | 5 |
-| Informational | 4 | 3 |
-
-**Notable findings:**
-- **H-01** (Fixed): Cooldown griefing allowed attacker to lock victim's funds in UnlockToken
-- **M-01** (Acknowledged, NOT fixed): Backing model is entirely trust-based with no on-chain verification. Certora compared unfavorably to Ethena (on-chain reserve fund) and Ondo USDY (on-chain NAV oracle). Apyx plans third-party custodial audits instead
-- **M-02** (Fixed): Deny list was not enforced on ApyUSD and ApxUSD transfers
-- **M-03** (Fixed): Partial claims corrupted vesting schedule, enabling early token extraction
-- **M-04** (Acknowledged, NOT fixed): Yield distribution can be gamed -- new depositors can capture yield from dividends they didn't generate, diluting existing depositors. Apyx relies on vesting period and cooldown to mitigate, but doesn't prevent the issue
-
-#### Quantstamp Audit Findings (14 total)
-
-Repo: `apyx-labs/evm-contracts` @ commit `c263465b`. Audit period: Feb 2-9, 2026.
-
-| Severity | Count | Fixed | Mitigated | Acknowledged |
-|---|---|---|---|---|
-| High | 1 | 1 | 0 | 0 |
-| Medium | 2 | 2 | 0 | 0 |
-| Low | 7 | 6 | 1 | 0 |
-| Informational | 4 | 3 | 0 | 1 |
-
-**Notable findings:**
-- **QS-1** (High, Fixed): `LinearVestV0.pullVestedYield()` does not reset `vestingAmount` after pulling, allowing the admin to extend vesting with stale accounting and double-distribute yield
-- **QS-2** (Medium, Fixed): `ERC20DenyListUpgradable` uses `initializer` instead of `onlyInitializing`, breaking initialization for derived contracts
-- **QS-3** (Medium, Fixed): `RedemptionPoolV0` requires matching decimals for asset/reserveAsset, preventing use with USDC (6 decimals)
-- **QS-4** (Low, Mitigated): `ApyUSD._decimalsOffset()` returns 0 (instead of OZ default), making first-depositor inflation attack slightly more feasible. Mitigated by team deploying with initial deposit
-- **QS-10** (Low, Fixed): `RedemptionPoolV0.redeem()` has no slippage protection -- admin can change exchange rate while user tx is pending (front-running risk)
-- **QS-13** (Informational, Acknowledged): `MinterV0` rate-limit checked at request time but not at execution -- requests can be queued and batch-executed, bypassing intended issuance cap
+| 1 | **Quantstamp** | Feb 2026 | APX USD Stablecoin | [Certificate](https://certificate.quantstamp.com/full/apx-usd-stablecoin/2a5be074-3d9f-49e7-aa08-46fb5f1e5bd6/index.html) |
+| 2 | **Zellic** | Mar 2026 | Apyx Stablecoin | [Report (PDF)](https://github.com/Zellic/publications/blob/master/Apyx%20Stablecoin%20-%20Zellic%20Audit%20Report.pdf) |
+| 3 | **Certora** | Mar 2026 | apxUSD (formal verification) | [Report](https://www.certora.com/reports/apyx-apxusd) / [PDF](https://github.com/Certora/SecurityReports/blob/main/Reports/2026/03_02_2026_Apyx_apxUSD.pdf) |
 
 **Notes:**
-- The Quantstamp audit certificate is JavaScript-rendered but finding data was extracted. All 14 findings are documented above. The audit reviewed the same `apyx-labs/evm-contracts` repo as Certora but at a different commit.
-- The Certora audit was published in March 2026 with full findings. Scope covered 18 contracts including ApxUSD, ApyUSD, MinterV0, UnlockToken, LinearVestV0, YieldDistributor, etc. Two medium-severity findings (M-01 trust-based backing, M-04 yield gaming) were acknowledged but **not fixed**.
-- Zellic was previously claimed in the [Apyx FAQ](https://docs.apyx.fi/resources/faq) but is **no longer listed on the official audits page**. No public report found in Zellic's GitHub publications repository (365+ published PDFs). This audit cannot be independently verified.
-- Several documentation pages in the Technical Overview section return 404 errors, suggesting incomplete documentation.
+- **Quantstamp**: Certificate is JavaScript-rendered; specific finding counts could not be extracted programmatically. Repo tag `audit/2026-02-02-quantstamp` confirms the audit.
+- **Zellic**: Published March 20, 2026 to their GitHub publications repo. Repo branch `audit/2026-01-12-zellic-remediation` and multiple PRs (e.g., #65, #110) reference Zellic findings with remediations.
+- **Certora**: Published March 3, 2026. **14 total findings: 1 High severity (fixed and confirmed), 4 Medium, 9 Low/Informational.** Notable: M-01 flagged the backing model as entirely trust-based with no on-chain verification. Repo tag `audit/2026-01-19-certora` confirms.
+- All three audits are now publicly verifiable. The [Apyx docs audits page](https://docs.apyx.fi/resources/audits) lists all three with direct links.
 
 ### On-Chain Complexity
 
@@ -163,40 +121,47 @@ The architecture is moderately complex:
 
 ## Historical Track Record
 
-- **Time in Production**: apxUSD proxy deployed February 18, 2026 (block [24481772](https://etherscan.io/tx/0xfb528661b410cce683a1ee40b49a5249dbd677e8304a102927bc6639486f450b)). In production for **~26 days** as of March 16, 2026. **Very young protocol.**
-- **GitHub Repository**: [`apyx-labs`](https://github.com/apyx-labs) organization exists on GitHub but contains only a `.github` profile repository. **No public smart contract source code repositories.** Contracts are verified on Etherscan but not open-sourced on GitHub.
-- **TVL History**: Listed on CoinGecko (~$41.2M market cap, rank #512, $1.93M 24h volume). Not tracked by DeFi Llama. On-chain data:
-  - Total apxUSD supply: ~51,478,450 (up ~4x from ~13M at launch)
-  - Curve pool: ~$5.5M (2.72M apxUSD + 2.77M USDC)
-  - Uniswap V4: ~7.86M apxUSD
-  - apyUSD vault: ~26.4M apxUSD backing (~19.6M apyUSD shares)
-  - 237 holders, 861 total transfers
-- **Incidents**: None reported (still very new)
-- **Peg Stability**: The Curve pool virtual price is 1.000090 with a near-balanced composition (apxUSD/USDC ratio ~0.983). apxUSD trades slightly below par in the pool but within acceptable range. CoinGecko price: $1.00
-- **Supply Growth**: Supply grew ~4x in 15 days (13M → 51.5M), driven primarily by apyUSD vault deposits (now holding 51.3% of supply). This rapid growth warrants monitoring
+- **Time in Production**: apxUSD proxy deployed February 18, 2026 (block [24481772](https://etherscan.io/tx/0xfb528661b410cce683a1ee40b49a5249dbd677e8304a102927bc6639486f450b)). In production for **~36 days** as of March 26, 2026. **Young protocol** (still under 3 months).
+- **GitHub Repository**: [`apyx-labs/evm-contracts`](https://github.com/apyx-labs/evm-contracts) — public Foundry repo with 263 commits, 2 contributors. Contains all core contract source code (43 Solidity files), comprehensive test suite (60+ test files including invariant tests and audit-remediation tests), Slither CI. Created January 5, 2026. No license specified.
+- **TVL History**: Not tracked by DeFi Llama. Listed on CoinGecko (~$41M market cap, rank #512). Based on on-chain data:
+  - Total apxUSD supply: ~66,978,450 (5.1x growth from ~13M at launch)
+  - apyUSD vault: ~36.9M apxUSD backing (55.1% of supply)
+  - Uniswap V4: ~7.84M apxUSD
+  - Curve pool: ~$5.5M (2.72M apxUSD + 2.77M USDC) — down from ~$9M at launch
+  - Admin Safe: ~2.2M apxUSD
+  - Third-Party Safe: ~3.58M apxUSD
+- **Supply Growth**: Rapid — 5.1x in 36 days. Supply grew from ~13M to ~67M while Curve pool TVL decreased from ~$9M to ~$5.5M. Liquidity has not kept pace with supply growth.
+- **Incidents**: None reported
+- **Peg Stability**: Curve pool virtual price is 1.000253 with near-balanced composition. Peg has held stable since launch, though untested under market stress.
 
 ### apxUSD Supply Distribution
 
 | Holder | Balance | % of Supply |
 |--------|---------|-------------|
-| apyUSD Vault (backing) | 26,397,377 | 51.3% |
-| Uniswap V4 PoolManager | 7,857,957 | 15.3% |
-| Third-Party Safe (2-of-3) | 3,451,356 | 6.7% |
-| Curve Pool (apxUSD/USDC) | 2,722,715 | 5.3% |
-| Admin Safe (3-of-6) | 2,020,000 | 3.9% |
-| Other (Pendle, users, etc.) | ~9,029,045 | ~17.5% |
+| apyUSD Vault (backing) | 36,893,661 | 55.1% |
+| Uniswap V4 PoolManager | 7,844,005 | 11.7% |
+| Third-Party Safe (2-of-3) | 3,581,374 | 5.3% |
+| Curve Pool (apxUSD/USDC) | 2,724,749 | 4.1% |
+| Admin Safe (3-of-6) | 2,200,000 | 3.3% |
+| Other (Pendle, users, etc.) | ~13,734,661 | ~20.5% |
 
-**Concentration risk**: The apyUSD vault now dominates supply distribution at 51.3%, reflecting strong yield-seeking demand. The Third-Party Safe's share dropped significantly from 36.5% to 6.7% (distributed into the ecosystem). The Admin Safe holds 2.02M apxUSD (3.9%). The "Other" category at 17.5% (~9M apxUSD) is spread across Pendle, individual wallets, and other DeFi protocols. Concentration risk has improved compared to initial assessment -- no single entity holds a destabilizing share outside the vault.
+**Distribution shift**: The apyUSD vault now dominates supply (55.1%), indicating strong adoption of the yield-bearing product. The Third-Party Safe concentration risk has decreased significantly (36.5% → 5.3%). Curve pool share of supply dropped from 34.7% to 4.1% as supply outgrew the pool.
 
 ## Funds Management
 
 ### Minting & Redemption
 
-**Minting apxUSD**: **Permissioned** -- only whitelisted institutional participants can mint/redeem apxUSD directly. Minting uses EIP-712 structured data signing with the following on-chain safeguards:
-- Maximum single mint: 10,000,000 apxUSD
-- Rate limit: ~10,001,000 apxUSD per 24 hours
+**Minting apxUSD**: **Permissioned, no on-chain collateral required.** Minting creates tokens without any backing asset transfer in the transaction. The `ApxUSD.mint()` function only checks that the caller has `MINT_STRAT_ROLE` and that `totalSupply` does not exceed `supplyCap` — then calls `_mint(to, amount)`. **No `transferFrom`, no collateral deposit, no on-chain proof of backing.** The entire collateral relationship is trust-based and off-chain.
+
+Minting uses EIP-712 structured data signing via MinterV0 with the following on-chain safeguards:
+- Maximum single mint: 5,000,000 apxUSD
+- Rate limit: 5,000,000 apxUSD per 24 hours
 - 60-second execution delay via AccessManager (reduced from initial 4 hours)
 - Nonce-based replay protection per beneficiary
+
+**Minting roles:**
+- **MinterV0** ([`0x2c36e1adfaa80ee0324b04cc814f5207bb7ba76e`](https://etherscan.io/address/0x2c36e1adfaa80ee0324b04cc814f5207bb7ba76e)): Holds `MINT_STRAT_ROLE` (role 1). Enforces rate limits, EIP-712 signatures, and nonce checks.
+- **Admin Safe** ([`0xf9862efc1704ac05e687f66e5cd8c130e5663ce2`](https://etherscan.io/address/0xf9862efc1704ac05e687f66e5cd8c130e5663ce2)): Does NOT currently hold `MINT_STRAT_ROLE`, but can **self-grant it at any time** (0-second delay as ADMIN_ROLE holder), bypassing all MinterV0 rate limits and signature checks.
 
 General users acquire apxUSD through secondary markets (Curve, Uniswap).
 
@@ -204,7 +169,7 @@ General users acquire apxUSD through secondary markets (Curve, Uniswap).
 
 **Redeeming apyUSD → apxUSD**: Uses UnlockToken contract with:
 1. User requests redemption (exchange rate locks at this point)
-2. **Cooldown period** (no yield accrual during cooldown)
+2. **~30-day cooldown period** (no yield accrual during cooldown)
 3. User claims assets after cooldown
 - 0.1% unlocking fee (max allowed: 1%)
 - Adding assets to existing request **resets the cooldown**
@@ -215,7 +180,7 @@ General users acquire apxUSD through secondary markets (Curve, Uniswap).
 - **apxUSD deposits (into Morpho, Curve, etc.)**: Permissionless
 - **apxUSD minting/redemption**: Permissioned (whitelisted entities only)
 - **apyUSD deposits**: Permissionless
-- **apyUSD redemptions**: Permissionless but subject to cooldown period
+- **apyUSD redemptions**: Permissionless but subject to 30-day cooldown
 - **Geographic restrictions**: US, EU, EEA, and sanctioned jurisdictions restricted
 
 ### Collateralization
@@ -231,77 +196,30 @@ General users acquire apxUSD through secondary markets (Curve, Uniswap).
 
 ### Provability
 
-- **apxUSD backing**: Off-chain. No on-chain proof of reserves. Monthly PCAOB attestations promised but **no attestations published yet** (protocol is 26 days old). Certora audit M-01 explicitly flagged this as a medium-severity issue -- the backing model is entirely trust-based with no on-chain verification. The team acknowledged but did not fix, planning third-party custodial audits instead.
-- **apyUSD exchange rate**: Calculated on-chain via ERC-4626 standard (`convertToAssets()`/`convertToShares()`). Anyone can verify. Current rate: 1.3443 apxUSD per apyUSD (totalAssets: 26.4M, totalSupply: 19.6M shares).
-- **Yield distribution**: Semi-programmatic. YieldDistributor deposits apxUSD into LinearVestV0, which vests linearly over ~17 days (1,489,445 seconds on-chain, not 30 days as previously documented). The apyUSD vault pulls vested yield, increasing totalAssets and therefore the exchange rate. The initial yield distribution is admin-initiated.
+- **apxUSD backing**: Off-chain. No on-chain proof of reserves. Monthly PCAOB attestations promised but **no attestations published in 36 days**.
+- **apyUSD exchange rate**: Calculated on-chain via ERC-4626 standard (`convertToAssets()`/`convertToShares()`). Anyone can verify. Current rate: 1.3476 apxUSD per apyUSD.
+- **Yield distribution**: Semi-programmatic. YieldDistributor deposits apxUSD into LinearVestV0, which vests linearly over ~17 days (1,489,445 seconds). The apyUSD vault pulls vested yield, increasing totalAssets and therefore the exchange rate. The initial yield distribution is admin-initiated.
 - **Rate oracle**: The ApxUSDRateOracle is **manually set** by an authorized role via `setRate()`. Currently set at exactly 1.000000 (1:1 with USDC). No on-chain price feed, no TWAP, no staleness check. Used by the Curve StableSwap-NG pool for pricing.
 
 ## Liquidity Risk
 
 ### Primary Exit Mechanisms
 
-For the Morpho market, the relevant question is: how can liquidators exit positions? In the active market (apyUSD collateral / apxUSD loan), liquidators would seize apyUSD collateral and need to convert it to apxUSD (via the vault's `redeem`) or sell on secondary markets.
+For the Morpho collateral use case, the relevant question is: how can liquidators exit an apxUSD position?
 
-1. **Curve StableSwap-NG Pool**: apxUSD/USDC pool with ~$5.5M total liquidity (2.72M apxUSD + 2.77M USDC). Pool ratio ~0.983 (apxUSD slightly below par). A=100, fee=0.01%.
+1. **Curve StableSwap-NG Pool (Primary)**: apxUSD/USDC pool with ~$5.5M total liquidity (2.72M apxUSD + 2.77M USDC), near-balanced. **Down from ~$9M at launch.**
 
-   *Note: The Curve pool has shrunk from ~$9M to ~$5.5M since initial assessment. Slippage estimates from March 1 are no longer accurate -- expect roughly 60% worse slippage for equivalent swap sizes given the reduced depth.*
-
-2. **Uniswap V4**: ~7.86M apxUSD in PoolManager (up from 1.52M). CoinGecko shows the apxUSD/USDC Uniswap V4 pair as the most active ($1.19M 24h volume). This has become a significant liquidity venue.
+2. **Uniswap V4**: ~7.84M apxUSD in pool manager (~$1.93M 24h volume per CoinGecko). Now the most active trading venue.
 3. **Direct Redemption**: Available only to whitelisted entities. Not a general exit path.
 
 ### Liquidity Assessment
 
-- **Pool quality**: The Curve pool has shrunk to ~$5.5M (down from ~$9M), representing only 5.3% of supply (down from 35%). Supply growth has outpaced liquidity depth.
-- **Uniswap V4 growth**: Uniswap V4 now holds ~7.86M apxUSD (15.3% of supply) and is the most active trading venue by volume ($1.19M/day). Combined DEX liquidity is reasonable.
-- **Trading volume**: CoinGecko reports ~$1.93M 24h trading volume across all venues.
-- **No stress testing**: Protocol is 26 days old, no market stress data available.
-- **Morpho context**: For Morpho liquidations, apxUSD would need to be sold quickly. The combined Curve + Uniswap V4 liquidity provides adequate exit paths for positions up to ~$1-2M, but larger liquidations could face challenges given the reduced Curve pool depth.
+- **Pool quality**: Curve pool is near-balanced but represents only **4.1% of total supply** (down from 35% at launch). Supply has outgrown liquidity significantly.
+- **Liquidity degradation**: Curve pool TVL dropped 39% ($9M → $5.5M) while supply grew 414% (13M → 67M). This is a material deterioration in the liquidity-to-supply ratio.
+- **Uniswap V4**: Has grown to become the primary trading venue with ~$1.93M daily volume.
+- **No stress testing**: Protocol is 36 days old, no market stress data available.
+- **Morpho context**: For Morpho liquidations, apxUSD would need to be sold quickly. The Curve pool has adequate absolute liquidity for positions up to ~$1M, but much less headroom than at launch.
 - **Pendle integration**: PT-apxUSD positions exist on Pendle, providing additional secondary market activity.
-- **GoPlus Warning**: CoinGecko flags a GoPlus security warning: "This is a proxy contract. The contract owner can make code changes to the token contract including but not limited to disabling sells, changing fees, minting, transferring tokens etc."
-
-## Morpho Market
-
-### Active Market: apyUSD (collateral) / apxUSD (loan)
-
-A Morpho Blue market was created on March 12, 2026 (4 days ago as of this assessment):
-
-| Parameter | Value |
-|-----------|-------|
-| Market ID | `0xe233...1264` |
-| Collateral | apyUSD ([`0x38eeb52f0771140d10c4e9a9a72349a329fe8a6a`](https://etherscan.io/address/0x38eeb52f0771140d10c4e9a9a72349a329fe8a6a)) |
-| Loan Asset | apxUSD ([`0x98a878B1CD98131b271883b390F68d2c90674665`](https://etherscan.io/address/0x98a878B1CD98131b271883b390F68d2c90674665)) |
-| LLTV | 86% |
-| Supply | ~$1.03M apxUSD |
-| Borrow | ~$1.0M apxUSD |
-| Utilization | **97.1%** (extremely high) |
-| Supply APY | ~10.7% |
-| Borrow APY | ~11.1% |
-| Fee | 0% |
-| Warnings | None (from Morpho) |
-
-**Note**: The original issue [#63](https://github.com/yearn/risk-score/issues/63) describes using **apxUSD as collateral**. However, the only active Morpho market uses **apyUSD as collateral** with apxUSD as the loan token. No Morpho market exists with apxUSD as collateral.
-
-### Morpho Oracle
-
-The oracle ([`0x770661EE520Ff9F7D8FaCAdC4EFF885739Bd8872`](https://etherscan.io/address/0x770661EE520Ff9F7D8FaCAdC4EFF885739Bd8872)) is a **standard MorphoChainlinkOracleV2** contract (from `morpho-org/morpho-blue-oracles`):
-
-- **Immutable** -- all parameters set at deployment, no admin functions, no owner
-- **Pure on-chain pricing** -- reads apyUSD's `convertToAssets(1e18)` to derive the exchange rate
-- **No external feeds** -- all four Chainlink feed slots are address(0) (unused)
-- **No staleness risk** -- price is computed fresh from vault state on each call
-- **Deployed by** "Apyx: Deployer 2" (`0x5db416BcFc1a8b5b921f55C1E078d1F39194e99F`)
-
-This is **significantly better** than the manually-set ApxUSDRateOracle used by the Curve pool. The Morpho oracle has no admin control and derives pricing purely from on-chain ERC-4626 state.
-
-**However**, since apyUSD is a UUPS upgradeable proxy, the Admin Safe could upgrade the vault implementation and alter the `convertToAssets()` calculation, which would directly affect the Morpho oracle output. This is an indirect centralization risk.
-
-### Morpho-Specific Risks
-
-- **Leveraged looping strategy**: The apyUSD/apxUSD market enables recursive leverage (deposit apyUSD → borrow apxUSD → deposit into apyUSD vault → repeat). This amplifies both yield and risk. A sharp decline in the apyUSD exchange rate or apxUSD depeg could trigger cascading liquidations.
-- **97% utilization**: Nearly all supplied apxUSD is borrowed. Lenders attempting to withdraw may face delays until utilization drops. This also means the market is very tight -- small supply/demand changes have outsized rate impacts.
-- **86% LLTV**: Aggressive for a 4-day-old market on a 26-day-old protocol. Leaves only 14% buffer before liquidation.
-- **apyUSD vault upgrade risk**: The Morpho oracle reads from `convertToAssets()`. If the Admin Safe upgrades the apyUSD implementation to alter this function, it could manipulate collateral valuation in the Morpho market.
-- **Small market size**: Only ~$1M supplied. Early stage -- risk parameters are still being tested.
 
 ## Centralization & Control Risks
 
@@ -322,31 +240,21 @@ Apyx uses an OpenZeppelin AccessManager for centralized role-based access contro
 | 8 | ROLE_REDEEMER | None assigned | - |
 
 **Multisig Details:**
-- **Admin Safe**: 3-of-6 Gnosis Safe (upgraded from 3-of-5 since initial assessment). **Sole holder of ADMIN_ROLE with 0-second execution delay.** Can:
+- **Admin Safe**: 3-of-6 Gnosis Safe. **Sole holder of ADMIN_ROLE with 0-second execution delay.** Can:
   - Upgrade all UUPS proxy contracts (apxUSD, apyUSD, rate oracle) **immediately**
   - Grant/revoke all roles
   - Pause the protocol
   - Manage the AddressList (whitelist/deny list)
   - Change fee parameters, unlock token, vesting contract
   - Set rate oracle value
-- **Admin Safe Signers** (6 total):
-  - `0xb51F89DEA7Df709cEbb4809B40c6431361e61d0d` (new, Admin Safe only)
-  - `0x5db416BcFc1a8b5b921f55C1E078d1F39194e99F`
-  - `0x0442cC5BBfBc4B7Dc3A14F9766c21C82b45f0024` (deployer EOA)
-  - `0xcFCF3C9Ed3d97DB54c99BDd197E59952a0973f6e`
-  - `0xB98cD8C868cf00cEA934977dBE4AC090E808fb87`
-  - `0xd66a0Fc924fAb7476D35aFe5941856ef76BA0839`
-- **Operations Safe**: 3-of-5 Gnosis Safe. All 5 Operations Safe owners are also Admin Safe owners. No AccessManager roles -- used as intermediary for token distribution.
-- **Admin Safe has 1 additional unique signer** (`0xb51F...1d0d`) not shared with Operations Safe. Still limited separation of concerns.
-- **Third-Party Safe**: 2-of-3 Gnosis Safe with 3 completely independent signers (zero overlap with Admin or Operations).
+- **Operations Safe**: 3-of-5 Gnosis Safe, with 5 of the 6 Admin Safe owners. No AccessManager roles -- used as intermediary for token distribution.
 - **Deployer EOA**: ADMIN_ROLE was properly revoked at the same block it was granted to the Safe (block 24481052).
 
 **Key concerns:**
 - **No timelock** on admin actions. The Admin Safe can upgrade all proxy contracts and change any parameter instantly with a 3-of-6 signature.
-- 5 of 6 Admin signers are also Operations Safe signers -- limited separation of concerns.
-- The Admin Safe directly holds 2,020,000 apxUSD (3.9% of supply).
+- 5 of 6 Admin Safe signers are also on the Operations Safe -- limited separation of concerns.
+- The Admin Safe directly holds ~2,200,000 apxUSD (3.3% of supply).
 - The 60-second mint delay (reduced from initial 4 hours in block 24494943) provides minimal protection.
-- **AddressList** (whitelist/deny list) is currently empty (0 entries) -- deny list not actively used despite Certora M-02 finding about unenforced deny list.
 
 ### Programmability
 
@@ -354,7 +262,7 @@ Apyx uses an OpenZeppelin AccessManager for centralized role-based access contro
 - **apyUSD exchange rate**: Calculated on-chain via ERC-4626 (`totalAssets / totalSupply`). Programmatic, no admin input needed for the rate itself.
 - **Yield distribution**: Semi-manual. Admin deposits apxUSD into YieldDistributor → LinearVestV0 → apyUSD vault pulls vested yield. The yield vesting is programmatic (~17-day linear), but the initial deposit is admin-initiated.
 - **Rate oracle**: **Manually set** by authorized role. The `setRate()` function has no automation, no TWAP, and no staleness check. If the oracle is not updated, the Curve pool will continue using the stale rate.
-- **Minting**: Two-step process (request → execute) with 60-second delay. Rate-limited to ~10M/day.
+- **Minting**: Two-step process (request → execute) with 60-second delay. Rate-limited to 5M/day via MinterV0. Admin can bypass by self-granting mint role.
 
 ### External Dependencies
 
@@ -363,7 +271,6 @@ Apyx uses an OpenZeppelin AccessManager for centralized role-based access contro
 | **Off-chain preferred shares (STRC, SATA)** | Collateral backing | **Critical** | All value derives from off-chain equity holdings. Dividend cuts, issuer default, or custody failure would impair backing |
 | **MPC Custody Providers** | Asset custody | **Critical** | Compromise or failure of custody could lead to loss of collateral. Multi-party MPC mitigates single-point risk |
 | **Curve StableSwap-NG** | Primary liquidity venue | **High** | Main exit path for non-whitelisted users. Pool failure would severely restrict liquidity |
-| **Morpho Blue** | Lending protocol | **High** | Active apyUSD/apxUSD market with 97% utilization. Leveraged looping creates recursive exposure. Immutable oracle depends on apyUSD vault state |
 | **Gnosis Safe** | Multisig infrastructure | **High** | All governance actions flow through Safe multisigs |
 | **Ethereum L1** | Settlement layer | **Medium** | All contracts on Ethereum mainnet only |
 
@@ -371,15 +278,31 @@ Apyx uses an OpenZeppelin AccessManager for centralized role-based access contro
 
 ## Operational Risk
 
-- **Team Transparency**: **Fully anonymous**. No individual team members from Apyx are publicly named in documentation or blog posts. The only publicly associated individual is **Joseph Onorati** (CEO of DeFi Development Corp., Nasdaq: DFDV), who announced DFDV's investment in Apyx. The team is described as "crypto and TradFi veterans with deep experience in capital markets, digital assets, and the DAT model."
+- **Team Transparency**: **Public**. Six founding contributors are [named on the Apyx website](https://apyx.fi/#team), most with extensive crypto and TradFi backgrounds. Five currently hold C-suite roles at **DeFi Development Corp.** (Nasdaq: DFDV):
+  - **Joseph Onorati** — CEO of DFDV. Former CSO at Kraken (8 years), founded a crypto market-making/HFT firm, former CEO of CaVirtEx (Canada's first Bitcoin exchange). Master's in Economics (monetary theory).
+  - **Parker White, CFA** — COO & CIO of DFDV. Former Director of Engineering at Kraken (6 years). Background in bond trading and portfolio management (~$2B AUM). Active in DeFi since 2021.
+  - **John Han, CFA** — CFO of DFDV. Former CFO of a unicorn L1 blockchain company, VP of Finance at Binance, Head of Strategic Finance at Kraken. Previously at Goldman Sachs equity research.
+  - **Dan Kang (DK)** — CSO of DFDV. Former Head of Strategy at Kraken (3 years). Background as a long-short equity analyst (7 years), formerly at Morgan Stanley and Snap. Mathematics degree from Columbia.
+  - **Pete Humiston** — CMO of DFDV. In crypto full-time since 2018. Former Sales & Trading at Jefferies. Focus on research, content, and marketing.
+  - **Dawson Reid** — Founding contributor. 9 years at Kraken across full engineering stack. 15+ years of software engineering experience, in crypto since 2013.
+
+  The team has strong overlap with DFDV, which is also Apyx's first institutional investor. This dual role (team members = investor executives) is a notable concentration of interest.
 - **Fundraising**: Raised $3M across two rounds at a $300M valuation. "No VCs, by design." First institutional capital from DFDV.
-- **Documentation**: Adequate but incomplete. The main docs cover core concepts, but multiple pages in the Technical Overview section return 404 errors (Minting, Unlocking, Commit Token pages). Documentation was recently updated for launch.
+- **Documentation**: Adequate. Main docs, FAQ, and audits page are functional. Documentation has been updated since launch.
 - **Legal Structure**: **Preference Capital (BVI) Ltd.** and affiliates, incorporated in the British Virgin Islands. Explicitly disclaims being a "marketplace facilitator, broker, financial institution or creditor." Liability capped at $100 per user. US, EU, EEA geo-blocked.
 - **Incident Response**: Not formally documented. The Admin Safe can pause the protocol immediately. No Guardian or independent cancellation mechanism.
-- **Code Availability**: Contracts verified on Etherscan but **not open-sourced on GitHub**. The `apyx-labs` GitHub organization contains only a profile README.
+- **Code Availability**: Contracts verified on Etherscan and **open-sourced on GitHub** ([`apyx-labs/evm-contracts`](https://github.com/apyx-labs/evm-contracts)). Full Foundry project with source and tests. No license specified.
 - **Points Program**: "Pips" points program active with various multipliers (5x for holding apxUSD, 10x for committing, up to 16x for Curve LP). This may attract mercenary capital.
 
 ## Monitoring
+
+### apxUSD Token Monitoring
+
+- **apxUSD contract**: [`0x98a878B1CD98131b271883b390F68d2c90674665`](https://etherscan.io/address/0x98a878B1CD98131b271883b390F68d2c90674665)
+  - Monitor `totalSupply()` for unexpected minting events
+  - **Alert**: If supply increases by >1M in 24 hours
+  - Monitor `Transfer` events for large movements (>$500K)
+  - Monitor `Paused`/`Unpaused` events
 
 ### Rate Oracle Monitoring
 
@@ -408,12 +331,9 @@ Apyx uses an OpenZeppelin AccessManager for centralized role-based access contro
   - Monitor `TargetFunctionRoleUpdated` events
   - **Alert**: On any role change
 
-
 ### Supply & Holder Monitoring
 
-- Monitor Third-Party Safe (`0x81f5d98ea5acf65640ce8bb68aa8449b7c304c50`) balance -- holds 6.7% of supply (~3.45M apxUSD)
-  - **Alert**: If this address moves >$500K of apxUSD
-- Monitor Admin Safe (`0xf9862efc1704ac05e687f66e5cd8c130e5663ce2`) balance -- holds 3.9% of supply (~2.02M apxUSD)
+- Monitor Third-Party Safe (`0x81f5d98ea5acf65640ce8bb68aa8449b7c304c50`) balance -- holds 36.5% of supply
   - **Alert**: If this address moves >$500K of apxUSD
 - Monitor Curve pool for large single-sided withdrawals
 - Monitor MinterV0 for mint execution events
@@ -426,40 +346,38 @@ Apyx uses an OpenZeppelin AccessManager for centralized role-based access contro
 | Proxy upgrade events | Real-time | Critical |
 | AccessManager role changes | Real-time | Critical |
 | Admin Safe transactions | Real-time | Critical |
-| Curve pool balance ratio | Hourly | High |
-| apyUSD exchange rate | Hourly | Medium |
+| Curve pool balance ratio | Every 6 hours | High |
+| apxUSD supply changes | Every 6 hours | High |
+| Large holder movements | Daily | Medium |
 
 ## Risk Summary
 
 ### Key Strengths
 
 - **Publicly-traded collateral**: Underlying preferred shares (STRC, SATA) are Nasdaq-listed with transparent pricing, dividend policies, and regulatory oversight
-- **Two confirmed audits**: Quantstamp (Feb 2026) and Certora (Feb 2026) with published reports. Certora report is thorough with detailed findings
-- **Well-designed minting safeguards**: EIP-712 structured signing, rate limiting (~10M/day), nonce-based replay protection, and two-step minting process
-- **Improved concentration risk**: Third-Party Safe share dropped from 36.5% to 6.7%, with supply more distributed across vault, Uniswap, and other protocols
+- **Three reputable audits**: Quantstamp, Zellic, and Certora audits all completed and publicly published with remediation evidence in the repo
+- **Minting safeguards**: EIP-712 structured signing, rate limiting (5M/day), nonce-based replay protection, and two-step minting process with 60-second delay
+- **Open-source code**: Full Foundry project with 43 source files, 60+ test files including invariant tests, and Slither CI
+- **Public, credentialed team**: Six named founding contributors with verifiable backgrounds at Kraken, Goldman Sachs, Binance, and DeFi Development Corp.
 - **Proper deployer decommissioning**: Deployer EOA's ADMIN_ROLE was revoked, admin control transferred to multisig
 - **Multi-party MPC custody**: Shared key management between Apyx and partners prevents single-entity mismanagement
-- **Strong growth**: Supply grew 4x in 15 days with CoinGecko listing and $1.93M daily volume
 
 ### Key Risks
 
-- **Very new protocol**: Only ~26 days in production. Limited track record, stress testing, or historical data
-- **Off-chain, unverifiable collateral**: Reserves backed by off-chain preferred shares with no on-chain proof of reserves. Monthly PCAOB attestations promised but none published yet. Certora audit M-01 explicitly flagged this as a medium-severity finding
+- **Young protocol**: ~36 days in production. Limited track record, no stress testing, still under 3 months
+- **Off-chain, unverifiable collateral**: Reserves backed by off-chain preferred shares with no on-chain proof of reserves. Monthly PCAOB attestations promised but **none published in 36 days**. No custodian publicly named. Certora M-01 flagged this as entirely trust-based.
 - **No timelock on admin actions**: Admin Safe (3/6) can upgrade all proxy contracts and change parameters immediately with zero delay
-- **Anonymous team**: No team members publicly identified. BVI legal entity with $100 liability cap
-- **Unverifiable Zellic audit**: Previously claimed but no longer listed on official audits page. No public report found
-- **No bug bounty program**: Notable absence for a protocol managing ~$51M in token supply
+- **Liquidity-supply mismatch**: Curve pool TVL dropped from ~$9M to ~$5.5M while supply grew 5.1x to ~67M. Pool now represents only 4.1% of supply.
+- **DFDV concentration**: All six founding contributors are executives at DeFi Development Corp. (Nasdaq: DFDV), which is also the protocol's first institutional investor. BVI legal entity with $100 liability cap
+- **No bug bounty program**: Notable absence for a protocol managing ~$67M in token supply
 - **Manual rate oracle**: Curve pool pricing depends on a manually-set oracle with no on-chain price feed, TWAP, or staleness detection
-- **Yield gaming vulnerability**: Certora M-04 (acknowledged, not fixed) -- new depositors can capture yield from dividends they didn't generate
-- **Reduced Curve liquidity**: Curve pool shrank from ~$9M to ~$5.5M while supply grew 4x, widening the liquidity gap
-- **Morpho leveraged looping**: The apyUSD/apxUSD Morpho market (86% LLTV, 97% utilization) enables recursive leverage that amplifies both yield and risk. Cascading liquidations possible if apyUSD exchange rate drops
 
 ### Critical Risks
 
+- **Unbacked minting**: `ApxUSD.mint()` creates tokens without any on-chain collateral transfer. The function only checks role and supply cap — no `transferFrom`, no collateral deposit. The Admin Safe can self-grant `MINT_STRAT_ROLE` (0-second delay), bypassing MinterV0's rate limits and signature checks entirely. **Tokens can be printed without backing at the discretion of the 3-of-6 multisig.**
 - **Proxy upgrade without timelock**: The Admin Safe can upgrade apxUSD, apyUSD, and the rate oracle implementation contracts immediately. A compromised or malicious 3-of-6 multisig could deploy a malicious implementation that drains all funds or manipulates balances -- with zero delay for detection or intervention
-- **Off-chain collateral opacity**: If preferred shares are not actually held or are liquidated without disclosure, apxUSD could be undercollateralized with no on-chain mechanism to detect this. No attestation has been published despite being 26 days live
+- **Off-chain collateral opacity**: If preferred shares are not actually held or are liquidated without disclosure, apxUSD could be undercollateralized with no on-chain mechanism to detect this. No PCAOB attestation has been published despite being promised monthly.
 - **Rate oracle manipulation**: A compromised admin could set the oracle rate to an extreme value, enabling extraction of value from the Curve pool. No staleness check or bounds validation exists in the oracle contract
-- **Liquidity/supply mismatch**: Supply grew 4x to ~$51M while Curve pool shrank to ~$5.5M. In a stress scenario, exit liquidity may be insufficient relative to outstanding supply
 
 ---
 
@@ -472,46 +390,46 @@ Apyx uses an OpenZeppelin AccessManager for centralized role-based access contro
 
 ### Critical Risk Gates
 
-- [x] **No audit** -- Quantstamp audit confirmed (Feb 2026). Certora audit published (Feb 2026) with detailed findings. Zellic claimed but unverifiable and no longer listed on docs. **PASS** (two confirmed reputable audits)
-- [ ] **Unverifiable reserves** -- **FAIL.** There is zero confirmation of where the funds are. Reserves are claimed to be off-chain preferred shares (STRC, SATA) held via unnamed MPC custody providers, but: (1) no on-chain proof of reserves exists, (2) no PCAOB attestation has been published despite being promised monthly (protocol is 26 days live), (3) no custodian is publicly named, (4) the overcollateralization ratio is undisclosed, (5) Certora audit M-01 explicitly flagged the backing model as entirely trust-based with no on-chain verification. Unlike USDC/USDT which have published attestations from named custodians (BNY Mellon, etc.), Apyx has published nothing. The entire $51.5M supply is backed solely by an unverifiable trust claim.
+- [x] **No audit** -- Three reputable audits confirmed: Quantstamp (Feb 2026), Zellic (Mar 2026), Certora (Mar 2026). All publicly published. **PASS**
+- [ ] **Unverifiable reserves** -- Reserves are entirely off-chain preferred shares. No on-chain proof of reserves. Monthly PCAOB attestations promised but **none published in 36 days**. No custodian publicly named. Certora M-01 flagged backing as entirely trust-based. Collateral is publicly-traded Nasdaq equity with transparent pricing, but this is **not comparable to USDC/USDT** which publish regular attestations from named, regulated custodians. **FAIL** -- no proof of reserves exists, neither on-chain nor off-chain.
 - [x] **Total centralization** -- 3-of-6 Gnosis Safe multisig. Not a single EOA. **PASS**
 
-**GATE FAILURE: Unverifiable reserves.** The reserves gate fails -- there is no verifiable confirmation of where the backing funds are held, by whom, or in what amount. This overrides category scoring. **Final score: 5.0/5.0.**
+**Unverifiable reserves gate FAILS.** Gate override applied: final score overridden to **5.0**.
 
 ### Category Scores
 
 #### Category 1: Audits & Historical Track Record (Weight: 20%)
 
-- **Audits**: 2 confirmed audits (Quantstamp, Certora -- both reputable). Certora published detailed findings including 1 High (fixed), 4 Medium (2 acknowledged/not fixed). Zellic previously claimed but no longer listed and unverifiable. Contract code verified on Etherscan but not open-sourced on GitHub.
+- **Audits**: 3 confirmed audits from reputable firms (Quantstamp, Zellic, Certora). All publicly published with remediation evidence. Certora identified 14 findings (1 High, fixed). Open-source code on GitHub with 60+ test files and invariant tests.
 - **Bug Bounty**: None found.
-- **Time in Production**: ~26 days. Very young -- well below the 3-month minimum for comfort.
-- **TVL**: ~$51.5M token supply. Listed on CoinGecko (rank #512, $1.93M 24h volume). Not tracked on DeFi Llama.
-- **Incidents**: None (still too new for meaningful track record).
+- **Time in Production**: ~36 days. Young -- still under 3 months.
+- **TVL**: ~$67M token supply. Listed on CoinGecko (~$41M market cap). Not on DeFi Llama.
+- **Incidents**: None.
 
-**Score: 4.0/5** -- Two confirmed reputable audits (Quantstamp + Certora) meaningfully improve the audit posture compared to one confirmed audit. However, the very short track record (~26 days, well below 3 months), absence of bug bounty, 2 unresolved medium findings in Certora (trust-based backing M-01, yield gaming M-04), and no open-source code still place this in high-risk territory. Improved from 4.5 to 4.0 due to the published Certora audit and slightly longer track record.
+**Score: 3.5/5** -- Three reputable audits with public reports and on-chain remediation evidence is a strong positive. Open-source code with comprehensive tests. Between score 3 (multiple audits, 3-6 months, established) and score 4 (single audit, <3 months). The 36-day track record (<3 months) and absent bug bounty keep this from reaching 3.
 
 #### Category 2: Centralization & Control Risks (Weight: 30%)
 
 **Subcategory A: Governance**
 
-- 3-of-6 Admin Multisig with 0-second execution delay (no timelock) -- improved from 3-of-5
-- 5 of 6 Admin Safe signers are also Operations Safe signers -- limited separation, but 1 additional unique signer added
-- Third-Party Safe (2-of-3) has fully independent signers (zero overlap)
+- 3-of-6 Admin Multisig with 0-second execution delay (no timelock)
+- Operations Safe is 3-of-5 with 5 of the 6 Admin Safe owners — limited separation
 - UUPS upgradeable contracts can be upgraded immediately
 - Deployer admin properly revoked
 - No Guardian or independent veto mechanism
 
-**Governance Score: 4.0** -- The 3-of-6 threshold is an improvement over 3-of-5 (now requires 50% vs 60% consensus). However, the complete absence of a timelock on admin actions (including proxy upgrades) remains a severe concern. One additional independent signer improves the picture slightly. Between score 4 (low threshold, <12 hours timelock) and score 5 (no timelock, unlimited admin powers). Improved from 4.5 to 4.0.
+**Governance Score: 4.0** -- The 3-of-6 threshold (50%) is reasonable. But the complete absence of a timelock on admin actions (including proxy upgrades) is a severe concern. The ability to instantly upgrade all core contracts with no delay for community review or intervention is between score 4 (low threshold, <12 hours timelock) and score 5 (no timelock, unlimited admin powers). The upgrade from 3-of-5 to 3-of-6 is a marginal improvement.
 
 **Subcategory B: Programmability**
 
 - apxUSD: Standard ERC-20, no on-chain exchange rate needed (1:1 stablecoin)
 - apyUSD: ERC-4626 with programmatic exchange rate
-- Yield distribution: Linear vesting (~17-day) is programmatic, but initial deposits are admin-initiated
+- Yield distribution: ~17-day linear vesting is programmatic, but initial deposits are admin-initiated
 - Rate oracle: Manually set, no automation
 - Minting: Programmatic rate limiting and signatures, but permissioned
+- 60-second mint delay reduced from initial 4 hours — governance action lowered safeguard
 
-**Programmability Score: 4.0** -- Hybrid system. apyUSD exchange rate and yield vesting are on-chain. But the rate oracle, yield distribution initiation, and minting are all dependent on admin input.
+**Programmability Score: 3.5** -- Hybrid system. apyUSD exchange rate and yield vesting are on-chain. But the rate oracle is entirely manually controlled, yield distribution requires admin initiation, and the 60-second minting delay was reduced from 4 hours. Between score 3 (hybrid) and score 4 (significant manual intervention).
 
 **Subcategory C: External Dependencies**
 
@@ -521,9 +439,9 @@ Apyx uses an OpenZeppelin AccessManager for centralized role-based access contro
 
 **Dependencies Score: 4.0** -- Critical dependency on off-chain assets and custody that cannot be verified on-chain. No fallback mechanism if custody providers fail. The oracle has no automated price feed.
 
-**Centralization Score = (4.0 + 4.0 + 4.0) / 3 = 4.0**
+**Centralization Score = (4.0 + 3.5 + 4.0) / 3 = 3.83**
 
-**Score: 4.0/5** -- Significant centralization risk driven by no timelock on admin actions, UUPS upgradeable contracts with instant upgrade capability, off-chain dependencies, and a manually-controlled rate oracle. Slightly improved from 3.8 due to the Admin Safe upgrade to 3-of-6.
+**Score: 3.8/5** -- Significant centralization risk driven by no timelock on admin actions, UUPS upgradeable contracts with instant upgrade capability, off-chain dependencies, and a manually-controlled rate oracle.
 
 #### Category 3: Funds Management (Weight: 30%)
 
@@ -535,42 +453,42 @@ Apyx uses an OpenZeppelin AccessManager for centralized role-based access contro
 - Cannot verify collateral on-chain
 - Reserve is equity (not stablecoins) -- more volatile than typical stablecoin collateral
 
-**Collateralization Score: 4.0** -- Between score 3 (100% collateral, some off-chain, periodic attestation) and score 4 (partially collateralized or custodial, opaque reporting). Collateral quality is moderate -- publicly-traded equity is transparent in pricing but subordinated to debt in capital structure and subject to market volatility. No on-chain verification.
+**Collateralization Score: 4.0** -- Between score 3 (100% collateral, some off-chain, periodic attestation) and score 4 (partially collateralized or custodial, opaque reporting). Raised from 3.5: 36 days in and still no published attestation despite monthly cadence being promised. No custodian publicly named. Overcollateralization ratio undisclosed. Certora M-01 flagged the entire backing model as trust-based. Collateral is publicly-traded equity with transparent pricing, but that alone doesn't prove reserves are held.
 
 **Subcategory B: Provability**
 
 - apyUSD exchange rate: on-chain (ERC-4626)
 - apxUSD collateral: entirely off-chain
-- Monthly PCAOB attestations promised but **none published yet**
+- Monthly PCAOB attestations promised but **none published in 36 days**
 - Daily NAV reporting promised but not verified
 - Rate oracle: manually set, no third-party verification
+- No custodian publicly named
 
-**Provability Score: 5.0** -- No attestation has been published yet, and all reserve claims are currently unverified.
+**Provability Score: 4.5** -- Between score 4 (infrequent reporting, self-reported only) and score 5 (no reporting at all). After 36 days, zero attestations have been published despite a monthly cadence being promised. No custodian is named. All reserve claims are unverified. The protocol has had enough time to publish at least one attestation and has not.
 
-**Funds Management Score = (4.0 + 5.0) / 2 = 4.5**
+**Funds Management Score = (4.0 + 4.5) / 2 = 4.25**
 
-**Score: 4.5/5** -- Off-chain collateral with no published attestations yet. Publicly-traded equity provides pricing transparency but not reserve verification.
+**Score: 4.25/5** -- Off-chain collateral with no published attestations after 36 days. No custodian named. Publicly-traded equity provides pricing transparency but not reserve verification.
 
 #### Category 4: Liquidity Risk (Weight: 15%)
 
-- **Curve pool**: ~$5.5M (down from ~$9M), slightly imbalanced (apxUSD/USDC ratio ~0.983)
-- **Uniswap V4**: ~7.86M apxUSD, most active venue ($1.19M/day volume)
-- **Combined DEX liquidity**: Reasonable but has not kept pace with 4x supply growth
+- **Curve pool**: ~$5.5M (down from $9M), near-balanced, represents only 4.1% of supply
+- **Uniswap V4**: ~7.84M apxUSD, ~$1.93M daily volume — now the primary trading venue
 - **Direct redemption**: Permissioned only (not available to general users/liquidators)
-- **No market stress data**: Protocol is 26 days old
-- **Peg stability**: Currently stable ($1.00 on CoinGecko, virtual price 1.000090) but untested under stress
+- **No market stress data**: Protocol is 36 days old
+- **Peg stability**: Currently stable (1.000253 virtual price) but untested under stress
 
-**Score: 3.0/5** -- The Curve pool shrank from ~$9M to ~$5.5M while supply grew 4x to ~$51M. The liquidity-to-supply ratio has deteriorated significantly (from ~69% to ~11% in Curve alone). Uniswap V4 has grown as a liquidity venue but concentrated liquidity depth is harder to assess. Combined DEX activity is healthy ($1.93M/day) for normal operations. However, for Morpho liquidations in stress scenarios, the reduced Curve pool and high supply create a wider gap. Worsened from 2.5 to 3.0 due to the liquidity/supply mismatch.
+**Score: 3.0/5** -- Curve pool liquidity has degraded significantly: TVL dropped 39% while supply grew 414%. The pool now represents only 4.1% of supply (was 35%). Direct redemption remains permissioned. Uniswap V4 has emerged as the primary venue. Between score 3 (market-based, >$1M, adequate for medium positions) and score 2 (deep liquidity). The deteriorating liquidity-to-supply ratio and lack of stress testing push this to 3.0.
 
 #### Category 5: Operational Risk (Weight: 5%)
 
-- **Team**: Fully anonymous. No individual Apyx team members named. DFDV (Nasdaq-listed) provides some institutional backing.
-- **Documentation**: Adequate but incomplete (multiple 404 pages). Actively being updated.
+- **Team**: Public. Six named founding contributors with verifiable backgrounds (Kraken, Goldman Sachs, Binance, DFDV). Strong institutional credibility via Nasdaq-listed DFDV.
+- **Documentation**: Adequate. Main docs and FAQ functional. Audits page lists all three reports with links.
 - **Legal Structure**: BVI entity with $100 liability cap. US/EU/EEA geo-blocked.
 - **Incident Response**: No formal plan. Admin can pause immediately.
-- **Code Availability**: Verified on Etherscan but not open-sourced on GitHub.
+- **Code Availability**: Verified on Etherscan and open-sourced on GitHub ([`apyx-labs/evm-contracts`](https://github.com/apyx-labs/evm-contracts)). Full Foundry project with 60+ test files, invariant tests, and Slither CI. No license specified.
 
-**Score: 4.0/5** -- Fully anonymous team is a significant concern. BVI entity with minimal liability provides limited legal recourse. Incomplete documentation. Between score 3 (mixed unknown/known anons, adequate docs) and score 4 (mostly unknown, poor docs). The DFDV backing (Nasdaq-listed) and verified-on-Etherscan contracts provide some offset but not enough.
+**Score: 2.0/5** -- Public, well-credentialed team with verifiable track records at major crypto and TradFi institutions. Open-source code with comprehensive tests. Between score 2 (fully public, strong track record, open source) and score 3 (adequate docs). Remaining concerns: BVI entity with minimal liability ($100 cap), no formal incident response plan, no license on the repo.
 
 ### Final Score Calculation
 
@@ -580,18 +498,16 @@ Final Score = (Centralization × 0.30) + (Funds Mgmt × 0.30) + (Audits × 0.20)
 
 | Category | Score | Weight | Weighted |
 |----------|-------|--------|----------|
-| Audits & Historical | 4.0 | 20% | 0.80 |
-| Centralization & Control | 4.0 | 30% | 1.20 |
-| Funds Management | 4.5 | 30% | 1.35 |
+| Audits & Historical | 3.5 | 20% | 0.70 |
+| Centralization & Control | 3.8 | 30% | 1.14 |
+| Funds Management | 4.25 | 30% | 1.275 |
 | Liquidity Risk | 3.0 | 15% | 0.45 |
-| Operational Risk | 4.0 | 5% | 0.20 |
-| **Weighted Total** | | | **4.0** |
+| Operational Risk | 2.0 | 5% | 0.10 |
+| **Weighted Total** | | | **3.67** |
 | **Gate Override** | | | **Unverifiable reserves → 5.0** |
 | **Final Score** | | | **5.0/5.0** |
 
-**Final Score: 5.0/5.0** (gate failure override -- unverifiable reserves)
-
-The weighted category score is 4.0, but the **Unverifiable Reserves gate failure** overrides to the maximum score of 5.0. There is zero confirmation of where the backing funds are.
+**Weighted Total: 3.7** — but the **Unverifiable Reserves critical risk gate fails**. No proof of reserves exists (neither on-chain nor off-chain), no custodian is named, and no PCAOB attestation has been published in 36 days despite a monthly cadence being promised. Certora M-01 confirmed the backing model is entirely trust-based. **Gate override applied: Final Score = 5.0.**
 
 ### Risk Tier
 
@@ -603,46 +519,36 @@ The weighted category score is 4.0, but the **Unverifiable Reserves gate failure
 | **3.5-4.5** | **Elevated Risk** | Limited approval, strict limits |
 | **4.5-5.0** | **High Risk** | Not recommended |
 
-**Final Risk Tier: High Risk -- Not recommended**
+**Final Risk Tier: High Risk — Not recommended**
 
 ---
 
-**apxUSD fails the Unverifiable Reserves critical risk gate. Yearn should not take exposure to this asset.**
+Apyx's apxUSD is a novel "Dividend-Backed Stablecoin" with an innovative approach to bridging off-chain corporate dividends into on-chain yield. The team is public and well-credentialed, all three audits are now published, and the code is open-source with comprehensive tests.
 
-There is no confirmation of where the $51.5M in backing funds are held. The protocol claims overcollateralization via off-chain preferred shares (STRC, SATA) held by unnamed MPC custody providers, but:
+However, **apxUSD fails the Unverifiable Reserves critical risk gate.** After 36 days in production, no proof of reserves exists — no PCAOB attestation, no named custodian, no on-chain verification. The backing model is entirely trust-based (confirmed by Certora M-01). Additionally, the protocol has **no timelock on admin actions** (allowing instant proxy upgrades), a **manually-controlled rate oracle**, and **Curve pool liquidity has degraded** from ~$9M to ~$5.5M while supply grew 5.1x.
 
-1. **No proof of reserves exists** -- neither on-chain nor off-chain attestation
-2. **No custodian is named** -- "MPC custody providers" with no identity disclosed
-3. **No PCAOB attestation published** -- promised monthly, zero delivered in 26 days
-4. **Overcollateralization ratio undisclosed** -- no way to assess backing adequacy
-5. **Certora M-01 confirmed this** -- their audit explicitly flagged the backing model as entirely trust-based, comparing unfavorably to Ethena (on-chain reserve fund) and Ondo USDY (on-chain NAV oracle)
+**Yearn should not take exposure to this asset until the Unverifiable Reserves gate is resolved.**
 
-This is not comparable to USDC or USDT, which publish regular attestations from named, regulated custodians. Apyx has published nothing from nobody.
+**Conditions to clear the gate and reconsider exposure:**
+1. Publish at least one PCAOB-registered audit firm attestation verifying reserves
+2. Publicly name the custodian(s) holding the preferred shares
+3. Disclose the overcollateralization ratio with supporting evidence
+4. Implement a timelock on admin actions (minimum 24 hours for proxy upgrades)
 
-**Additional risk factors** (would independently justify a high score even without gate failure):
-- Anonymous team, BVI entity with $100 liability cap
-- No timelock on admin actions -- 3-of-6 multisig can upgrade all proxy contracts immediately
-- Manual rate oracle with no automation, bounds, or staleness checks
-- 26 days in production with no stress testing
-- Morpho market (apyUSD/apxUSD) at 97% utilization with 86% LLTV enables leveraged looping that amplifies all of the above risks
-
-**Recommendation: No exposure until:**
-- First PCAOB attestation is published with named custodian and verified reserve amounts
-- Timelock implemented on admin actions (minimum 48 hours for proxy upgrades)
-- Bug bounty program launched
-- At least 3 months of production track record without incident
+**If the gate is cleared, additional conditions for exposure:**
+- Monitor the rate oracle for any changes (currently 1.0000)
+- Monitor Curve pool balance ratio for peg stability signals
+- Strict position size limits given the reduced ~$5.5M Curve pool depth
+- Monitor supply growth vs liquidity ratio
 
 ---
 
 ## Reassessment Triggers
 
-- **Time-based**: Reassess in 1 month (April 16, 2026) -- protocol's youth demands rapid re-evaluation
-- **TVL-based**: Reassess if TVL changes by more than 50% (supply already grew 4x since launch)
+- **Attestation-based**: Reassess when first PCAOB attestation is published (primary trigger for clearing the gate)
+- **Governance-based**: Reassess if timelock is implemented or multisig composition changes
+- **Time-based**: Reassess in 1 month (April 2026)
+- **TVL-based**: Reassess if TVL changes by more than 50%
+- **Liquidity-based**: Reassess if Curve pool TVL drops below $3M or supply-to-liquidity ratio exceeds 20x
 - **Incident-based**: Reassess after any exploit, governance change, oracle manipulation, or peg deviation >2%
-- **Attestation-based**: Reassess when first PCAOB attestation is published (promised monthly, none yet)
-- **Audit-based**: Reassess if Zellic audit report surfaces or is formally retracted
-- **Governance-based**: Reassess if timelock is implemented or multisig composition changes further
 - **Bug bounty**: Reassess if a bug bounty program is launched
-- **Liquidity-based**: Reassess if Curve pool TVL drops below $3M or ratio deviates >15%
-- **Morpho-based**: Reassess if Morpho market utilization exceeds 99%, any liquidations occur, or new apxUSD-collateral markets are created
-- **Certora findings**: Reassess if M-01 (trust-based backing) or M-04 (yield gaming) are addressed
