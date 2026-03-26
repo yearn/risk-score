@@ -83,8 +83,8 @@ Each market's Accountant contract exposes `getState()` which returns all NAV and
 |--------|-----------------|-----------------|-------------------|-------------------|--------------|
 | Neutrl sNUSD | ~1,172,599 sNUSD | ~145,187 sNUSD | 12.4% | 10% | PERPETUAL |
 | Tokemak autoUSD | ~1,168,619 autoUSD | ~145,849 autoUSD | 12.5% | 10% | PERPETUAL |
-| Smokehouse USDC | ~0.11 (dust) | ~20,000 | >>100% | 7% | PERPETUAL |
-| Maple syrupUSDC | ~2.6 (dust) | ~19,649 | >>100% | 3% | PERPETUAL |
+
+Smokehouse USDC and Maple syrupUSDC markets have dust-level Senior NAV (<$10) and are not currently allocated by the Treasury. They contain only Junior capital (~$20K and ~$19.6K respectively).
 
 - **Treasury multisig holds**: ~1,172,390 ROY-ST-sNUSD shares, ~1,168,613 ROY-ST-autoUSD shares
 - **Junior depositors**: 2-3 independent addresses per market (e.g., [`0x2d745a6596d47a0fe28a7db7bd9dc7bdbca4e476`](https://etherscan.io/address/0x2d745a6596d47a0fe28a7db7bd9dc7bdbca4e476), [`0xfef0bb8df6210e441f03de23edafb0150129e176`](https://etherscan.io/address/0xfef0bb8df6210e441f03de23edafb0150129e176))
