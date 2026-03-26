@@ -31,6 +31,7 @@ export interface ReportMeta {
   type: "Protocol" | "Asset";
   iconUrl: string;
   chainIconUrl: string;
+  warning?: string;
 }
 
 export interface CategoryScore {
@@ -78,6 +79,7 @@ function parseMeta(slug: string, content: string): ReportMeta {
   const tokenMatch = content.match(/\*\*Token:\*\*\s*(.+)/);
   const chainMatch = content.match(/\*\*Chain:\*\*\s*(.+)/);
   const scoreMatch = content.match(/\*\*Final Score:\s*([\d.]+)\/5\.0\*\*/);
+  const warningMatch = content.match(/\*\*Warning:\*\*\s*(.+)/);
 
   const defillamaSlug = parseDefillamaSlug(slug, content);
   const chainStr = chainMatch?.[1]?.trim() ?? "";
@@ -92,6 +94,7 @@ function parseMeta(slug: string, content: string): ReportMeta {
     type,
     iconUrl: protocolIconUrl(defillamaSlug),
     chainIconUrl: chainIconUrl(chainStr),
+    warning: warningMatch?.[1]?.trim(),
   };
 }
 
