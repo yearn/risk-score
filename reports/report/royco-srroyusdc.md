@@ -82,6 +82,15 @@ Smokehouse USDC and Maple syrupUSDC markets have dust-level Senior NAV (<$10) an
 - **Junior depositors**: 2-3 independent addresses per market (e.g., [`0x2d745a6596d47a0fe28a7db7bd9dc7bdbca4e476`](https://etherscan.io/address/0x2d745a6596d47a0fe28a7db7bd9dc7bdbca4e476), [`0xfef0bb8df6210e441f03de23edafb0150129e176`](https://etherscan.io/address/0xfef0bb8df6210e441f03de23edafb0150129e176))
 - **No impermanent loss** recorded in any market (both `stImpermanentLoss` and `jtImpermanentLoss` are 0)
 - **Beta = 1.0** (1e18) in all markets — Junior uses the same underlying asset as Senior, meaning JT losses correlate with ST losses
+- **Per-market Fixed-Term (Protection Mode) configuration differs significantly:**
+  - **Neutrl sNUSD: `fixedTermDuration = 0`** — this market is **permanently PERPETUAL** and can never enter Protection Mode. When JT covers ST losses, `jtImpermanentLoss` is immediately erased — JT permanently absorbs the loss with zero recovery period. ST withdrawals are never paused. Liquidation threshold: ~100.09%.
+  - **Tokemak autoUSD: `fixedTermDuration = 172,800s (2 days)`** — enters Protection Mode when JT covers losses. ST withdrawals blocked for up to 2 days. If no recovery, JT absorbs permanently. Liquidation threshold: 122.5%.
+- **Dawn-level protocol fees (per-market, separate from vault fees):**
+  - ST protocol fee: 10% of Senior yield
+  - JT protocol fee: 0%
+  - Yield share protocol fee: 45% of the risk premium (yield share) paid from ST to JT
+  - Fee recipient: [`0x05ea95aE815809D77153Ed3500Ad6d936712b639`](https://etherscan.io/address/0x05ea95aE815809D77153Ed3500Ad6d936712b639)
+  - No fees taken during Fixed-Term state
 - **JT withdrawal is coverage-constrained:** The kernel enforces `postOpSyncTrancheAccountingAndEnforceCoverage` on every JT redemption — if the withdrawal would push utilization above 1.0 (coverage below required %), the tx reverts. JT can only withdraw the surplus above the coverage requirement. Current withdrawable surplus: ~28K sNUSD (Neutrl), ~28K autoUSD (Tokemak). However, coverage can still breach the threshold via underlying asset depreciation (no withdrawal needed) — this is when the loss escalation flow kicks in.
 
 ## Audits and Due Diligence Disclosures
@@ -160,11 +169,12 @@ The Senior Vault allocates deposited USDC across whitelisted markets where Junio
 - If losses exceed Junior coverage, Senior absorbs remaining losses
 - **Loss Escalation Flow (enforced on-chain by kernel/accountant):**
   1. **Normal (PERPETUAL):** No losses. ST and JT deposit/withdraw freely, subject to coverage requirement.
-  2. **Small loss → Fixed-Term (Protection Mode):** When JT covers ST drawdowns and `jtImpermanentLoss` exceeds dust tolerance, the market transitions to Fixed-Term. **ST withdrawals are blocked** (protects JT from ST withdrawing the capital JT is covering). JT deposits are also blocked (protects existing JT from dilution). All yield flows to JT to rebuild the buffer.
+  2. **Small loss → Fixed-Term (Protection Mode):** When JT covers ST drawdowns and `jtImpermanentLoss` exceeds dust tolerance, the market transitions to Fixed-Term. **ST withdrawals are blocked** (protects JT from ST withdrawing the capital JT is covering). JT deposits are also blocked (protects existing JT from dilution). ST deposits and JT redemptions remain enabled (JT can still exit surplus above coverage). YDM curve adaptation is frozen. No protocol fees taken.
   3. **Recovery within fixed term:** If the underlying asset recovers before the term expires, `jtImpermanentLoss` is repaid from ST appreciation. Market returns to PERPETUAL. Losses are erased.
   4. **No recovery, term expires:** `jtImpermanentLoss` is **permanently zeroed** — JT absorbs the loss forever with no recourse. Market returns to PERPETUAL. ST is made whole at JT's expense.
-  5. **Severe loss → Liquidation threshold breached:** If utilization exceeds the liquidation threshold (Neutrl: 100%, Tokemak: 122.5%) — meaning JT is nearly depleted — the market is **forced back to PERPETUAL** regardless of Fixed-Term status. ST can now withdraw, and receives a **self-liquidation bonus** sourced from JT's remaining NAV, incentivizing ST to exit and delever the system. If JT is fully depleted, remaining losses hit ST as `stImpermanentLoss`.
-  - **Impact on srRoyUSDC:** During Fixed-Term, the Treasury multisig cannot redeem Senior Tranche tokens from the affected market. This blocks the vault from sourcing liquidity for that market's allocation. If multiple markets enter Fixed-Term simultaneously, withdrawal capacity could be severely reduced. The srRoyUSDC vault itself is not aware of this state.
+  5. **Severe loss → Liquidation threshold breached:** If utilization exceeds the liquidation threshold (Neutrl: ~100.09%, Tokemak: 122.5%) — meaning JT is nearly depleted — the market is **forced back to PERPETUAL** regardless of Fixed-Term status. ST can now withdraw, and receives a **self-liquidation bonus** sourced from JT's remaining NAV, incentivizing ST to exit and delever the system. If JT is fully depleted, remaining losses hit ST as `stImpermanentLoss`.
+  - **Neutrl sNUSD skips steps 2-4 entirely:** `fixedTermDuration = 0` means this market is permanently PERPETUAL — it never enters Protection Mode. When JT covers ST losses, `jtImpermanentLoss` is immediately erased and JT permanently absorbs the loss with zero recovery period. ST can always withdraw. This makes Neutrl's JT protection weaker (no recovery window) but the market more liquid.
+  - **Impact on srRoyUSDC:** During Fixed-Term (Tokemak only, up to 2 days), the Treasury multisig cannot redeem Senior Tranche tokens from the affected market. This blocks the vault from sourcing liquidity for that market's allocation. The srRoyUSDC vault itself is not aware of this state. Neutrl never blocks withdrawals.
 - Coverage adjustments require 3-day notice to whitelisted depositors with incremental 1% daily changes
 - **Loss propagation from Dawn markets to Senior vault is indirect:** While the Royco Dawn kernel/accountant contracts enforce Junior-first loss coverage on-chain, the srRoyUSDC Concrete vault itself cannot read these contracts. The Treasury multisig holds the Senior Tranche tokens and calls `adjustTotalAssets()` on the MultisigStrategy to report the net value. The loss waterfall (underlying drawdown → JT absorption → residual ST loss) is enforced at the market level, but the reporting of the net result to the vault is mediated by the multisig.
 
@@ -245,6 +255,7 @@ The vault governance involves multiple multisigs and two factory contracts with 
 - **Vault implementation upgrades:** Controlled by the ConcreteFactory (owned by Concrete team 3/5 multisig). The vault's `upgrade()` function requires `msg.sender == factory` (the ConcreteFactory). This means vault implementation upgrades require cooperation between the Concrete team and Royco team — a dual-control mechanism.
 - **MultisigStrategy upgrades:** Controlled by a ProxyAdmin owned by the Royco Owner multisig (3/5). **No timelock** — can be upgraded immediately. This is the most direct risk vector.
 - **Accounting adjustments:** No timelock, but constrained by max 0.5% change per update and 12-hour cooldown.
+- **Dawn market `setConversionRate`:** Each kernel's NAV conversion rate can be admin-set via `setConversionRate()` (AccessManager role, **no timelock**). For ERC4626 kernels, NAV = `ERC4626.convertToAssets(shares) × conversionRate`. Manipulating this rate directly affects raw NAVs, which drives the entire tranching/loss waterfall. Currently: Neutrl uses oracle (stored rate = 0), Tokemak uses hardcoded 1:1 (stored rate = 1e18).
 
 **Upgradeable Contracts:**
 - srRoyUSDC vault: ERC-1967 proxy → ConcreteAsyncVaultImpl (upgradeable via ConcreteFactory, requires Concrete team approval)
