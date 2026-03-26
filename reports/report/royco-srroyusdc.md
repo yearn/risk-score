@@ -201,7 +201,7 @@ The Senior Vault allocates deposited USDC across whitelisted markets where Junio
   - Sequential nonce required (current: 37, ~1 update every 2 days). Prevents replay/out-of-order submissions.
   - Underflow protection: negative diffs cannot reduce `vaultDepositedAmount` below zero (reverts with `InsufficientUnderlyingBalance`). This is a floor guard only — the 0.5% cap is the actual per-call limit on losses.
   - Last updated: March 25, 2026
-- **Emergency bypass — `unpauseAndAdjustTotalAssets(int256 diff)`:** Callable only by `STRATEGY_ADMIN`. **Skips all validation** — no nonce check, no percentage cap, no cooldown. Designed as emergency recovery when contract is paused, but is effectively an unconstrained accounting override.
+- **Emergency bypass — `unpauseAndAdjustTotalAssets(int256 diff)`:** Callable only by `STRATEGY_ADMIN`. Skips diff validation (no nonce check, no percentage cap, no cooldown). The diff is `int256` — can be positive or negative, unconstrained in magnitude. However, **the contract must be paused first** — OpenZeppelin's `_unpause()` reverts if not paused. This means the bypass can only be used after the circuit breaker has already triggered (a `Paused` event is emitted on-chain when `adjustTotalAssets` fails validation). The intended flow: (1) `adjustTotalAssets` exceeds 0.5% cap or cooldown → contract auto-pauses, diff discarded, `Paused` event emitted; (2) STRATEGY_ADMIN investigates the anomaly; (3) STRATEGY_ADMIN calls `unpauseAndAdjustTotalAssets(diff)` → emits `Unpaused` + `AdjustTotalAssets` in one tx. This design ensures the emergency bypass is always preceded by an observable on-chain pause event, providing a detection window before the unconstrained adjustment is applied.
 - **Observed usage pattern:** 36 adjustments since Jan 30, 2026. Overwhelmingly small positive diffs (+$800–4,000 USDC for yield accrual). One negative diff observed (nonce 7: -$1,225 USDC). Calls every 12–72 hours.
 - **Yield distribution — AdaptiveCurveYDM** ([`0x071B0FA065774b403B8dae0aE93A09Df5DE3DFAc`](https://etherscan.io/address/0x071B0FA065774b403B8dae0aE93A09Df5DE3DFAc)): Determines what percentage of Senior yield is redirected to Junior as a risk premium. Inspired by [Morpho's AdaptiveCurveIrm](https://github.com/morpho-org/morpho-blue-irm). Uses a piecewise linear curve with a kink at 90% utilization (Junior capital backing Senior exposure). When utilization > 90% (Junior scarce), Junior's yield share increases exponentially over time to attract more Junior capital; when < 90% (Junior abundant), it decreases. **Immutable contract** — no admin functions, no owner, no upgradeability. Parameters are set once at market initialization and the curve adapts autonomously. Floor: 0.01% JT yield share, ceiling: 100%.
 - **Per-market Junior/Senior coverage is verifiable on-chain:** Each market's Accountant contract exposes `getState()` returning `lastSTEffectiveNAV`, `lastJTEffectiveNAV`, `lastSTImpermanentLoss`, `lastJTImpermanentLoss`, `coverageWAD`, `betaWAD`, and `marketState`. The kernel exposes `getState()` returning `stOwnedYieldBearingAssets` and `jtOwnedYieldBearingAssets`. These can be queried without protocol-specific tooling (standard `eth_call` to verified contracts).
@@ -325,7 +325,7 @@ The vault governance involves multiple multisigs and two factory contracts with 
   - `diff` is a signed raw USDC amount (positive = yield accrual, negative = loss). Normal range: +$800–4,000 per update.
   - Alert on: negative diffs (loss events), unusually large positive diffs (>$10K), nonce gaps or out-of-sequence, updates faster than 12-hour cooldown
   - Alert on contract pause: if diff exceeds 0.5% cap or cooldown is violated, the contract auto-pauses instead of reverting
-  - **Critical alert on `unpauseAndAdjustTotalAssets()`**: This emergency function skips all validation (no cap, no cooldown, no nonce). Any call to this is a high-severity event requiring immediate investigation.
+  - **Critical alert on `unpauseAndAdjustTotalAssets()`**: This emergency function skips diff validation (no cap, no cooldown, no nonce). Can only be called when the contract is already paused (circuit breaker triggered). Monitor for the sequence: `Paused` event (circuit breaker) followed by `Unpaused` + `AdjustTotalAssets` in same tx. Any such sequence is a high-severity event requiring immediate investigation.
   - Monitor `accountingValidityPeriod`: if no update for 30 days, vault freezes (deposits/withdrawals revert)
   - Verify nonce increments sequentially (current: 37)
 - **Governance:** Monitor Owner multisig for MultisigStrategy proxy upgrade transactions (**no timelock**). Monitor ConcreteFactory for vault implementation upgrade proposals. Monitor RoycoFactory for role grants and scheduled operations.
@@ -425,7 +425,7 @@ The Junior tranche provides the first-loss buffer protecting Senior depositors. 
 2. **Extreme holder concentration** — One EOA holds ~69% of supply. ~$10.73M total assets with only ~8 holders.
 3. **MultisigStrategy upgradeable without timelock** — The Owner multisig (3/5) can upgrade the MultisigStrategy proxy immediately. This controls how all funds are deployed.
 4. **Reliance on newer underlying protocols** — 70% target allocation to Avant (savUSD) and Neutrl (sNUSD), which are relatively unknown protocols with limited public track records.
-5. **100% of assets admin-reported** — Funds are deployed on-chain to underlying protocols, but the vault cannot read those balances. The entire ~$10.73M totalAssets is reported via MultisigStrategy's `adjustTotalAssets()` (signed USDC delta per call). No oracle or on-chain verification of actual positions. Emergency function `unpauseAndAdjustTotalAssets()` can bypass all constraints.
+5. **100% of assets admin-reported** — Funds are deployed on-chain to underlying protocols, but the vault cannot read those balances. The entire ~$10.73M totalAssets is reported via MultisigStrategy's `adjustTotalAssets()` (signed USDC delta per call). No oracle or on-chain verification of actual positions. Emergency function `unpauseAndAdjustTotalAssets()` can bypass diff constraints, but requires the contract to be paused first (observable on-chain).
 
 ### Critical Risks
 
@@ -463,7 +463,7 @@ While tokens cannot be directly minted without assets, the following mechanisms 
    - Constrained: max 50 bps (~0.5%) per update, 12-hour cooldown, sequential nonce, 30-day validity period
    - At ~$10.73M total assets, each update can inflate by at most ~$53.6K
    - This doesn't mint new tokens but can gradually misrepresent value
-   - **Emergency bypass:** `unpauseAndAdjustTotalAssets(int256 diff)` (STRATEGY_ADMIN only) skips all caps/cooldowns — enables unconstrained inflation in a single call
+   - **Emergency bypass:** `unpauseAndAdjustTotalAssets(int256 diff)` (STRATEGY_ADMIN only) skips caps/cooldowns — requires contract to be paused first (circuit breaker must have triggered), then enables unconstrained adjustment in a single call
 
 2. **Fee Manipulation → Fee Share Minting**
    - The VAULT_MANAGER (3/4 Safe) could set non-zero fees via `updateManagementFee()` / `updatePerformanceFee()`
@@ -568,7 +568,7 @@ Hexens audit completed; Cantina competition still in judging after ~2 months (co
 - ERC-4626 exchange rate is on-chain (PPS verifiable)
 - However, `totalAssets()` depends entirely on MultisigStrategy's `adjustTotalAssets(int256 diff, uint256 nonce)` — the multisig submits a signed USDC delta (not an absolute value), which is added/subtracted from `vaultDepositedAmount`. This is **not** computed from on-chain positions in underlying protocols.
 - Funds are on-chain in Aave/Avant/Neutrl/Auto, but the vault cannot read those balances — the multisig bridges this gap manually. The entire PPS depends on trusting these accounting adjustments (constrained by max 0.5% per update, 12-hour cooldown, nonce 37 confirming regular updates).
-- **Emergency bypass exists:** `unpauseAndAdjustTotalAssets()` skips all validation — unconstrained single-call override by STRATEGY_ADMIN.
+- **Emergency bypass exists:** `unpauseAndAdjustTotalAssets()` skips diff validation — but requires contract to be paused first (circuit breaker triggered, `Paused` event emitted on-chain). Provides a detection window before the unconstrained adjustment.
 - Individual underlying market positions are not easily auditable without protocol-specific tooling
 - **Per-market Junior coverage IS verifiable on-chain:** Each market's Accountant `getState()` returns JT/ST effective NAV, impermanent loss, coverage parameters, and market state. Kernel `getState()` returns owned yield-bearing assets per tranche. All contracts are verified on Etherscan.
 - No third-party verification mechanism (no Chainlink PoR, no custodian attestations)
