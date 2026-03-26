@@ -1,10 +1,10 @@
 # Protocol Risk Assessment: Royco Dawn (srRoyUSDC)
 
-- **Assessment Date:** March 25, 2026
+- **Assessment Date:** March 26, 2026
 - **Token:** srRoyUSDC (Senior Royco USDC)
 - **Chain:** Ethereum Mainnet
 - **Token Address:** [`0xcD9f5907F92818bC06c9Ad70217f089E190d2a32`](https://etherscan.io/address/0xcD9f5907F92818bC06c9Ad70217f089E190d2a32)
-- **Final Score: 3.6/5.0**
+- **Final Score: 3.35/5.0**
 
 ## Overview + Links
 
@@ -49,7 +49,47 @@ The Senior Vault is curator-managed by the Royco Foundation, which allocates dep
 | ConcreteFactory Owner (Gnosis Safe 3/5) | [`0xdc29BD10CB9000dffBb5aAcD30606c66f07c866C`](https://etherscan.io/address/0xdc29BD10CB9000dffBb5aAcD30606c66f07c866C) |
 | RoycoFactory (AccessManager) | [`0xD567cCbb336Eb71eC2537057E2bCF6DB840bB71d`](https://etherscan.io/address/0xD567cCbb336Eb71eC2537057E2bCF6DB840bB71d) |
 | AdaptiveCurveYDM (Yield Distribution Model) | [`0x071B0FA065774b403B8dae0aE93A09Df5DE3DFAc`](https://etherscan.io/address/0x071B0FA065774b403B8dae0aE93A09Df5DE3DFAc) |
+| RoycoFactory Proxy (Dawn Market Factory) | [`0x7cC6fB28eC7b5e7afC3cB3986141797ffc27253C`](https://etherscan.io/address/0x7cC6fB28eC7b5e7afC3cB3986141797ffc27253C) |
 | Contract Creator | [`0xe86055afa2714dcd416594bc2db9b8fa69d70a47`](https://etherscan.io/address/0xe86055afa2714dcd416594bc2db9b8fa69d70a47) |
+
+### Royco Dawn Market Contracts (On-Chain Tranching)
+
+The Treasury multisig ([`0x170ff06326eBb64BF609a848Fc143143994AF6c8`](https://etherscan.io/address/0x170ff06326eBb64BF609a848Fc143143994AF6c8)) holds Senior Tranche tokens in each market, linking the srRoyUSDC vault to the Royco Dawn tranching system. All contracts are verified on Etherscan.
+
+| Market | Contract | Address |
+|--------|----------|---------|
+| Neutrl sNUSD | Kernel | [`0x0aE0978B868804929fd4C06B3B22D9197B8cd3c6`](https://etherscan.io/address/0x0aE0978B868804929fd4C06B3B22D9197B8cd3c6) |
+| Neutrl sNUSD | Senior Tranche (ROY-ST-sNUSD) | [`0x2070Af1C865f5d764F673Baf5654822947e71243`](https://etherscan.io/address/0x2070Af1C865f5d764F673Baf5654822947e71243) |
+| Neutrl sNUSD | Junior Tranche (ROY-JT-sNUSD) | [`0x3821eBea3BBbE23F3dea74f24082BD0f0b67f6c5`](https://etherscan.io/address/0x3821eBea3BBbE23F3dea74f24082BD0f0b67f6c5) |
+| Neutrl sNUSD | Accountant | [`0xCaa3F221fCf3c2EC7b6a49B73BB810cca35e1085`](https://etherscan.io/address/0xCaa3F221fCf3c2EC7b6a49B73BB810cca35e1085) |
+| Tokemak autoUSD | Kernel | [`0x8748D1c21CC550B435487F473d9Aaf6C84dA46A6`](https://etherscan.io/address/0x8748D1c21CC550B435487F473d9Aaf6C84dA46A6) |
+| Tokemak autoUSD | Senior Tranche (ROY-ST-autoUSD) | [`0x73C641fe41EB0270C7f473f3c3E4A40eb97fd8dE`](https://etherscan.io/address/0x73C641fe41EB0270C7f473f3c3E4A40eb97fd8dE) |
+| Tokemak autoUSD | Junior Tranche (ROY-JT-autoUSD) | [`0x6f0D6567099621deE3850C673d73c532071A888d`](https://etherscan.io/address/0x6f0D6567099621deE3850C673d73c532071A888d) |
+| Tokemak autoUSD | Accountant | [`0xB0166629D78E3876F570f18B154A60b99024b6f4`](https://etherscan.io/address/0xB0166629D78E3876F570f18B154A60b99024b6f4) |
+| Smokehouse USDC | Kernel | [`0x6dBdf6EBdF02F50ec6a7d6F782850996928176F9`](https://etherscan.io/address/0x6dBdf6EBdF02F50ec6a7d6F782850996928176F9) |
+| Smokehouse USDC | Senior Tranche (ROY-ST-SmokehouseUSDC) | [`0xa225F24654b8995036606D5Cd0634133a4BE169c`](https://etherscan.io/address/0xa225F24654b8995036606D5Cd0634133a4BE169c) |
+| Smokehouse USDC | Junior Tranche (ROY-JT-SmokehouseUSDC) | [`0xC8fab124292cB792d15041292C2399910bD086d1`](https://etherscan.io/address/0xC8fab124292cB792d15041292C2399910bD086d1) |
+| Smokehouse USDC | Accountant | [`0x955f8f7691a8908fA5a2798935Bda557A03aFb75`](https://etherscan.io/address/0x955f8f7691a8908fA5a2798935Bda557A03aFb75) |
+| Maple syrupUSDC | Kernel | [`0xde1Ce2cF64808e50d000F93058784270E412B3A4`](https://etherscan.io/address/0xde1Ce2cF64808e50d000F93058784270E412B3A4) |
+| Maple syrupUSDC | Senior Tranche (ROY-ST-syrupUSDC) | [`0x66182442522D3049A941035190C315379c959250`](https://etherscan.io/address/0x66182442522D3049A941035190C315379c959250) |
+| Maple syrupUSDC | Junior Tranche (ROY-JT-syrupUSDC) | [`0x5f340B400F892bBFDed2e5c316369Dcbf05C282A`](https://etherscan.io/address/0x5f340B400F892bBFDed2e5c316369Dcbf05C282A) |
+| Maple syrupUSDC | Accountant | [`0x2995f615D0ec527eD43eBb22DE0DcB66084c98FE`](https://etherscan.io/address/0x2995f615D0ec527eD43eBb22DE0DcB66084c98FE) |
+
+#### On-Chain Coverage Data (Verified March 26, 2026)
+
+Each market's Accountant contract exposes `getState()` which returns all NAV and coverage parameters. Junior capital absorbs losses first, enforced by the kernel/accountant contracts ([source code](https://github.com/roycoprotocol/royco-dawn/blob/main/src/accountant/RoycoAccountant.sol)).
+
+| Market | ST Effective NAV | JT Effective NAV | Coverage (JT/ST) | Required Coverage | Market State |
+|--------|-----------------|-----------------|-------------------|-------------------|--------------|
+| Neutrl sNUSD | ~1,172,599 sNUSD | ~145,187 sNUSD | 12.4% | 10% | PERPETUAL |
+| Tokemak autoUSD | ~1,168,619 autoUSD | ~145,849 autoUSD | 12.5% | 10% | PERPETUAL |
+| Smokehouse USDC | ~0.11 (dust) | ~20,000 | >>100% | 7% | PERPETUAL |
+| Maple syrupUSDC | ~2.6 (dust) | ~19,649 | >>100% | 3% | PERPETUAL |
+
+- **Treasury multisig holds**: ~1,172,390 ROY-ST-sNUSD shares, ~1,168,613 ROY-ST-autoUSD shares
+- **Junior depositors**: 2-3 independent addresses per market (e.g., [`0x2d745a6596d47a0fe28a7db7bd9dc7bdbca4e476`](https://etherscan.io/address/0x2d745a6596d47a0fe28a7db7bd9dc7bdbca4e476), [`0xfef0bb8df6210e441f03de23edafb0150129e176`](https://etherscan.io/address/0xfef0bb8df6210e441f03de23edafb0150129e176))
+- **No impermanent loss** recorded in any market (both `stImpermanentLoss` and `jtImpermanentLoss` are 0)
+- **Beta = 1.0** (1e18) in all markets — Junior uses the same underlying asset as Senior, meaning JT losses correlate with ST losses
 
 ## Audits and Due Diligence Disclosures
 
@@ -122,24 +162,27 @@ The Senior Vault allocates deposited USDC across whitelisted markets where Junio
 ### Collateralization
 
 - USDC deposits are deployed to underlying yield markets (not held as idle collateral)
-- Junior tranche capital in each market is designed to absorb losses first — coverage = Junior TVL / Senior TVL
+- Junior tranche capital in each market absorbs losses first — this is enforced on-chain by each market's RoycoAccountant contract (verified in [source code](https://github.com/roycoprotocol/royco-dawn/blob/main/src/accountant/RoycoAccountant.sol) and on deployed contracts). The loss waterfall: JT effective NAV is reduced first; if JT is depleted, residual losses hit ST as `stImpermanentLoss`.
+- **On-chain coverage verified (March 26, 2026):** Neutrl sNUSD: 12.4% (required 10%), Tokemak autoUSD: 12.5% (required 10%). See [On-Chain Coverage Data](#on-chain-coverage-data-verified-march-26-2026) for full breakdown.
 - If losses exceed Junior coverage, Senior absorbs remaining losses
-- **Protection Mode (per documentation):** When underlying assets drawdown, system enters Protection Mode (1-7 days per market based on volatility):
-  - Senior withdrawals pause
-  - Junior deposits pause
+- **Protection Mode (Fixed-Term State):** When JT covers ST drawdowns and `jtImpermanentLoss` exceeds dust tolerance, the market enters Fixed-Term (Protection Mode):
+  - Senior withdrawals pause (protects JT from ST withdrawing covered capital)
+  - Junior deposits pause (protects existing JT from dilution)
   - 100% of yield flows to Junior to rebuild buffer
-  - If recovery occurs within Protection Mode, losses are erased
-  - If losses persist, Junior absorbs up to its coverage %
-  - If losses exceed coverage %, Senior activates Emergency Exit
+  - If recovery occurs within the fixed term period, losses are erased
+  - If losses persist after the fixed term, `jtImpermanentLoss` is zeroed — JT permanently absorbs those losses
+  - Self-liquidation bonus activates when utilization exceeds liquidation threshold (incentivizes ST to exit to delever)
 - Coverage adjustments require 3-day notice to whitelisted depositors with incremental 1% daily changes
-- **Loss propagation to Senior vault is opaque:** From the Senior vault's perspective, the only mechanism for reflecting losses is the treasury multisig calling `adjustTotalAssets()` with a negative diff. There is no on-chain automation that detects losses in underlying markets, triggers Junior absorption, calculates remaining Senior losses, and reports them to the vault. The entire loss flow — from underlying protocol drawdown → Junior absorption → residual Senior loss — is mediated off-chain by the multisig. Whether Junior actually absorbed losses before Senior is reported a loss is entirely trust-based and unverifiable from the vault contract.
+- **Loss propagation from Dawn markets to Senior vault is indirect:** While the Royco Dawn kernel/accountant contracts enforce Junior-first loss coverage on-chain, the srRoyUSDC Concrete vault itself cannot read these contracts. The Treasury multisig holds the Senior Tranche tokens and calls `adjustTotalAssets()` on the MultisigStrategy to report the net value. The loss waterfall (underlying drawdown → JT absorption → residual ST loss) is enforced at the market level, but the reporting of the net result to the vault is mediated by the multisig.
 
 **Collateral Concerns:**
 - Underlying protocols (Avant, Neutrl, Auto, Cap Finance) are newer, less battle-tested DeFi protocols
 - savUSD (Avant) on Avalanche introduces cross-chain risk
 - sNUSD (Neutrl) and autoUSD (Auto) are relatively unknown protocols — limited public track record
-- **No on-chain proof of Junior coverage:** The Senior vault has no on-chain reference to any Junior tranche contracts. Junior tranches are per-market (not a single aggregated vault), and there is no on-chain mechanism for the Senior vault to verify that Junior capital exists, that it provides first-loss coverage, or that Protection Mode is enforceable. The entire Junior buffer is a trust assumption — depositors trust that the Royco Foundation has deployed Senior capital into markets where adequate Junior capital exists.
-- Junior buffer size is not publicly disclosed or easily verifiable on-chain for each market
+- **Junior coverage is verifiable at the market level but indirect from the vault:** Each market's Accountant exposes `getState()` returning JT effective NAV, coverage parameters, and impermanent loss. However, the srRoyUSDC Concrete vault has no on-chain link to these contracts — it relies on the Treasury multisig holding Senior Tranche tokens and reporting values via `adjustTotalAssets()`. The tranching enforcement is on-chain, but the vault's view of it is trust-based.
+- **Junior capital is concentrated:** Only 2-3 depositor addresses per market. Junior depositors could withdraw (subject to coverage enforcement — kernel blocks JT redemption if it would breach coverage).
+- **Coverage buffer is thin:** Active markets have 12.4-12.5% actual coverage vs 10% required — only ~2.5% buffer above minimum.
+- **Beta = 1.0:** In all markets, Junior uses the same underlying asset as Senior, meaning JT and ST losses are correlated. JT does not provide diversification — only a capital buffer.
 - Vault holds $0 USDC directly — 100% of ~$10.73M is deployed to underlying protocols (Aave, Avant, Neutrl, Auto) via MultisigStrategy. Funds are on-chain in those protocols, but the vault cannot read those balances directly — it relies on the treasury multisig manually reporting net changes via `adjustTotalAssets()`
 
 ### Provability
@@ -158,7 +201,7 @@ The Senior Vault allocates deposited USDC across whitelisted markets where Junio
 - **Emergency bypass — `unpauseAndAdjustTotalAssets(int256 diff)`:** Callable only by `STRATEGY_ADMIN`. **Skips all validation** — no nonce check, no percentage cap, no cooldown. Designed as emergency recovery when contract is paused, but is effectively an unconstrained accounting override.
 - **Observed usage pattern:** 36 adjustments since Jan 30, 2026. Overwhelmingly small positive diffs (+$800–4,000 USDC for yield accrual). One negative diff observed (nonce 7: -$1,225 USDC). Calls every 12–72 hours.
 - **Yield distribution — AdaptiveCurveYDM** ([`0x071B0FA065774b403B8dae0aE93A09Df5DE3DFAc`](https://etherscan.io/address/0x071B0FA065774b403B8dae0aE93A09Df5DE3DFAc)): Determines what percentage of Senior yield is redirected to Junior as a risk premium. Inspired by [Morpho's AdaptiveCurveIrm](https://github.com/morpho-org/morpho-blue-irm). Uses a piecewise linear curve with a kink at 90% utilization (Junior capital backing Senior exposure). When utilization > 90% (Junior scarce), Junior's yield share increases exponentially over time to attract more Junior capital; when < 90% (Junior abundant), it decreases. **Immutable contract** — no admin functions, no owner, no upgradeability. Parameters are set once at market initialization and the curve adapts autonomously. Floor: 0.01% JT yield share, ceiling: 100%.
-- Junior/Senior coverage ratios are managed per-market, but not easily verifiable by external observers without protocol-specific tooling
+- **Per-market Junior/Senior coverage is verifiable on-chain:** Each market's Accountant contract exposes `getState()` returning `lastSTEffectiveNAV`, `lastJTEffectiveNAV`, `lastSTImpermanentLoss`, `lastJTImpermanentLoss`, `coverageWAD`, `betaWAD`, and `marketState`. The kernel exposes `getState()` returning `stOwnedYieldBearingAssets` and `jtOwnedYieldBearingAssets`. These can be queried without protocol-specific tooling (standard `eth_call` to verified contracts).
 - Underlying market positions must be verified by checking each external protocol individually
 - No third-party verification mechanism (no Chainlink PoR, no custodian attestations)
 - **Overall provability is limited**: while the vault exchange rate is on-chain, the accuracy depends entirely on the MultisigStrategy correctly reporting deployed asset values ($0 held in vault vs ~$10.73M reported). The max change threshold and cooldown provide some protection against sudden malicious adjustments, but do not prevent gradual misreporting
@@ -265,6 +308,9 @@ The vault governance involves multiple multisigs and two factory contracts with 
 | ConcreteFactory | [`0x0265d73a8e61f698d8eb0dfeb91ddce55516844c`](https://etherscan.io/address/0x0265d73a8e61f698d8eb0dfeb91ddce55516844c) | Vault proxy admin | Implementation approvals, vault upgrades |
 | RoycoFactory | [`0xD567cCbb336Eb71eC2537057E2bCF6DB840bB71d`](https://etherscan.io/address/0xD567cCbb336Eb71eC2537057E2bCF6DB840bB71d) | AccessManager | Role grants, scheduled operations, market creation |
 | AdaptiveCurveYDM | [`0x071B0FA065774b403B8dae0aE93A09Df5DE3DFAc`](https://etherscan.io/address/0x071B0FA065774b403B8dae0aE93A09Df5DE3DFAc) | Yield distribution | Parameter changes |
+| Neutrl sNUSD Kernel | [`0x0aE0978B868804929fd4C06B3B22D9197B8cd3c6`](https://etherscan.io/address/0x0aE0978B868804929fd4C06B3B22D9197B8cd3c6) | Dawn market (sNUSD) | `syncTrancheAccounting()`, `pause()`, `getState()`, coverage changes |
+| Tokemak autoUSD Kernel | [`0x8748D1c21CC550B435487F473d9Aaf6C84dA46A6`](https://etherscan.io/address/0x8748D1c21CC550B435487F473d9Aaf6C84dA46A6) | Dawn market (autoUSD) | `syncTrancheAccounting()`, `pause()`, `getState()`, coverage changes |
+| RoycoFactory Proxy | [`0x7cC6fB28eC7b5e7afC3cB3986141797ffc27253C`](https://etherscan.io/address/0x7cC6fB28eC7b5e7afC3cB3986141797ffc27253C) | Dawn market factory | `deployMarket()`, role grants, scheduled operations |
 
 ### Critical Monitoring Points
 
@@ -281,7 +327,78 @@ The vault governance involves multiple multisigs and two factory contracts with 
 - **Governance:** Monitor Owner multisig for MultisigStrategy proxy upgrade transactions (**no timelock**). Monitor ConcreteFactory for vault implementation upgrade proposals. Monitor RoycoFactory for role grants and scheduled operations.
 - **Fee Changes:** Monitor VAULT_MANAGER multisig for `updateManagementFee()` and `updatePerformanceFee()` calls. Currently both 0% — any change would enable fee share minting via `accrueYield()`.
 - **Strategy:** Monitor MultisigStrategy for fund movements. Monitor RoycoVaultMakinaStrategy for activation (currently 0 allocation).
-- **Protection Mode:** Alert on any Protection Mode activation (Senior withdrawal pauses).
+- **Protection Mode / Fixed-Term State:** Alert on any market transitioning from PERPETUAL (0) to FIXED_TERM (1) state via `marketState` in accountant `getState()`. This means JT is covering ST losses and Senior withdrawals are paused.
+
+### Junior Vault / Tranching Monitoring
+
+The Junior tranche provides the first-loss buffer protecting Senior depositors. Loss of Junior capital directly reduces srRoyUSDC's structural protection. All data below is queryable on-chain via the kernel and accountant contracts.
+
+**Contracts to poll (via `getState()`):**
+
+| Market | Accountant | Kernel | Junior Tranche (ERC20) |
+|--------|-----------|--------|------------------------|
+| Neutrl sNUSD | [`0xCaa3F221fCf3c2EC7b6a49B73BB810cca35e1085`](https://etherscan.io/address/0xCaa3F221fCf3c2EC7b6a49B73BB810cca35e1085) | [`0x0aE0978B868804929fd4C06B3B22D9197B8cd3c6`](https://etherscan.io/address/0x0aE0978B868804929fd4C06B3B22D9197B8cd3c6) | [`0x3821eBea3BBbE23F3dea74f24082BD0f0b67f6c5`](https://etherscan.io/address/0x3821eBea3BBbE23F3dea74f24082BD0f0b67f6c5) |
+| Tokemak autoUSD | [`0xB0166629D78E3876F570f18B154A60b99024b6f4`](https://etherscan.io/address/0xB0166629D78E3876F570f18B154A60b99024b6f4) | [`0x8748D1c21CC550B435487F473d9Aaf6C84dA46A6`](https://etherscan.io/address/0x8748D1c21CC550B435487F473d9Aaf6C84dA46A6) | [`0x6f0D6567099621deE3850C673d73c532071A888d`](https://etherscan.io/address/0x6f0D6567099621deE3850C673d73c532071A888d) |
+
+**Key metrics (from Accountant `getState()` tuple):**
+
+| Field | Index | Type | Alert Condition |
+|-------|-------|------|-----------------|
+| `lastMarketState` | 0 | uint8 | Alert if != 0 (0 = PERPETUAL, 1 = FIXED_TERM). Fixed-Term means JT is actively covering ST losses and Senior withdrawals are paused. |
+| `coverageWAD` | 3 | uint64 | Alert on any change. Currently 1e17 (10%) for both active markets. Decrease = less protection. |
+| `betaWAD` | 4 | uint96 | Alert on any change. Currently 1e18 (100%) — JT has same underlying exposure as ST. |
+| `lastSTRawNAV` | 10 | uint256 | Track for trend. Decrease = underlying asset depreciation. |
+| `lastJTRawNAV` | 11 | uint256 | Track for trend. Decrease = JT asset depreciation (since beta=1.0, correlates with ST). |
+| `lastSTEffectiveNAV` | 12 | uint256 | Alert if < `lastSTRawNAV` (means JT has NOT fully covered ST losses). |
+| `lastJTEffectiveNAV` | 13 | uint256 | **Critical metric.** Alert if drops >10% in 24h. Alert if approaches 0 (JT depleted = no protection). |
+| `lastSTImpermanentLoss` | 14 | uint256 | Alert if != 0. Non-zero means ST has suffered losses beyond what JT could cover. |
+| `lastJTImpermanentLoss` | 15 | uint256 | Alert if != 0. Non-zero means JT is actively covering ST losses. |
+| `fixedTermEndTimestamp` | 2 | uint32 | If market is in FIXED_TERM, this is when the protection period ends. After expiry, `jtImpermanentLoss` is zeroed (JT permanently absorbs loss). |
+
+**Key metrics (from Kernel `getState()` tuple):**
+
+| Field | Index | Type | Alert Condition |
+|-------|-------|------|-----------------|
+| `stOwnedYieldBearingAssets` | 3 | uint256 | Track. Cross-reference with accountant NAV for consistency. |
+| `jtOwnedYieldBearingAssets` | 4 | uint256 | Track. Significant decrease = JT capital leaving. |
+
+**Derived metrics to compute and track:**
+
+| Metric | Formula | Baseline (March 26, 2026) | Alert Threshold |
+|--------|---------|--------------------------|-----------------|
+| Coverage ratio (Neutrl) | `lastJTEffectiveNAV / lastSTEffectiveNAV` | 12.4% | < 11% (approaching 10% minimum) |
+| Coverage ratio (Tokemak) | `lastJTEffectiveNAV / lastSTEffectiveNAV` | 12.5% | < 11% (approaching 10% minimum) |
+| Utilization (Neutrl) | `(stRawNAV + jtRawNAV × beta) × coverageWAD / jtEffectiveNAV` | ~90.8% | > 95% (approaching liquidation at 100%) |
+| Utilization (Tokemak) | `(stRawNAV + jtRawNAV × beta) × coverageWAD / jtEffectiveNAV` | ~90.0% | > 95% (approaching liquidation at 122.5%) |
+
+**Junior depositor monitoring:**
+- **ROY-JT-sNUSD holders** (2 addresses holding ~145K shares total):
+  - [`0x2d745a6596d47a0fe28a7db7bd9dc7bdbca4e476`](https://etherscan.io/address/0x2d745a6596d47a0fe28a7db7bd9dc7bdbca4e476): ~76,224 shares
+  - [`0xfef0bb8df6210e441f03de23edafb0150129e176`](https://etherscan.io/address/0xfef0bb8df6210e441f03de23edafb0150129e176): ~68,903 shares
+- **ROY-JT-autoUSD holders** (3 addresses holding ~145K shares total):
+  - [`0x72f9c5433113289985977e72f87d76969194f9ef`](https://etherscan.io/address/0x72f9c5433113289985977e72f87d76969194f9ef): ~100,414 shares
+  - [`0x2d745a6596d47a0fe28a7db7bd9dc7bdbca4e476`](https://etherscan.io/address/0x2d745a6596d47a0fe28a7db7bd9dc7bdbca4e476): ~30,256 shares
+  - [`0xfef0bb8df6210e441f03de23edafb0150129e176`](https://etherscan.io/address/0xfef0bb8df6210e441f03de23edafb0150129e176): ~15,177 shares
+- Alert on any `Transfer` event from these addresses (potential JT exit reducing coverage)
+- Alert on JT `totalSupply()` decrease > 5% in 24h
+- Note: Kernel enforces coverage on JT redemption — JT cannot withdraw below coverage requirement. However, if market enters Fixed-Term, JT deposits are also paused (cannot replenish).
+
+**Senior Tranche token monitoring (Treasury holdings):**
+- Treasury multisig ([`0x170ff06326eBb64BF609a848Fc143143994AF6c8`](https://etherscan.io/address/0x170ff06326eBb64BF609a848Fc143143994AF6c8)) holds:
+  - ~1,172,390 ROY-ST-sNUSD at [`0x2070Af1C865f5d764F673Baf5654822947e71243`](https://etherscan.io/address/0x2070Af1C865f5d764F673Baf5654822947e71243)
+  - ~1,168,613 ROY-ST-autoUSD at [`0x73C641fe41EB0270C7f473f3c3E4A40eb97fd8dE`](https://etherscan.io/address/0x73C641fe41EB0270C7f473f3c3E4A40eb97fd8dE)
+- Alert if Treasury transfers or redeems Senior Tranche tokens (could indicate rebalancing or exit)
+- Alert if Treasury deposits into new markets (new Senior Tranche tokens appearing)
+
+**New market deployment monitoring:**
+- Monitor RoycoFactory Proxy ([`0x7cC6fB28eC7b5e7afC3cB3986141797ffc27253C`](https://etherscan.io/address/0x7cC6fB28eC7b5e7afC3cB3986141797ffc27253C)) for `deployMarket()` calls (6 markets deployed so far)
+- When new markets appear, verify coverage parameters and underlying assets
+
+**Recommended polling frequency:**
+- Accountant/Kernel `getState()`: Every 1 hour (coverage and market state)
+- Junior Tranche `Transfer` events: Real-time (event subscription) or every 15 minutes
+- Treasury Senior Tranche `balanceOf()`: Every 6 hours
+- RoycoFactory `deployMarket()` events: Daily
 - **Holder Concentration:** Monitor the dominant EOA holder (~69% of supply) and Morpho Blue (~26%) for significant movements.
 - **Underlying Protocols:** Monitor health of Avant (savUSD), Neutrl (sNUSD), Auto (autoUSD), and Aave.
 - **Recommended Frequency:** Hourly for PPS, governance, and strategy. Daily for underlying protocol health. Immediate alerts for proxy upgrades and fee changes.
@@ -290,7 +407,7 @@ The vault governance involves multiple multisigs and two factory contracts with 
 
 ### Key Strengths
 
-1. **Tranching mechanism provides structural protection (unverifiable on-chain)** — Junior capital is designed to absorb losses first, but the Senior vault has no on-chain link to Junior tranches and cannot verify coverage exists
+1. **Tranching mechanism provides structural protection (verified on-chain at market level)** — Junior capital absorbs losses first, enforced by on-chain kernel/accountant contracts. Coverage verified: ~12.4% (Neutrl), ~12.5% (Tokemak) vs 10% required. Treasury multisig holds Senior Tranche tokens linking srRoyUSDC to these markets. The srRoyUSDC vault itself doesn't directly reference these contracts (indirect link via Treasury multisig).
 2. **Institutional-grade access controls** — KYC and whitelisting convert potential exploits into recoverable, legally actionable incidents
 3. **Experienced founder** — Jai Bhavnani has prior DeFi experience (Rari Capital, Ambo) and backing from reputable investors (Electric Capital, Coinbase Ventures, Hashed)
 4. **Active bug bounty** — $250K on Immunefi
@@ -310,7 +427,7 @@ The vault governance involves multiple multisigs and two factory contracts with 
 
 - **MultisigStrategy upgradeable with no timelock:** The Owner multisig (3/5) controls the MultisigStrategy's ProxyAdmin and can upgrade the strategy implementation immediately. A malicious upgrade could redirect funds or bypass the 0.5% accounting constraint. This is the most direct risk vector.
 - **Underlying protocol risk is opaque:** The quality and health of Avant, Neutrl, Auto, and Cap Finance positions are not easily verifiable. These protocols themselves are newer with limited audit and track record history.
-- **No on-chain proof of Junior coverage:** The Senior vault has no on-chain link to Junior tranche contracts. Junior tranches are per-market, and the Senior vault cannot verify on-chain that Junior capital exists or that it will absorb losses first. The entire first-loss protection mechanism — the core value proposition of the tranching design — is a trust assumption with no on-chain enforceability from the Senior vault's perspective.
+- **Junior coverage is on-chain but indirect from the vault:** The Royco Dawn kernel/accountant contracts enforce Junior-first loss coverage on-chain (verified: ~12.4-12.5% actual coverage, 10% required, 0 impermanent loss). However, the srRoyUSDC Concrete vault has no direct on-chain link to these contracts — the Treasury multisig bridges this gap by holding Senior Tranche tokens and reporting values via `adjustTotalAssets()`. The loss waterfall enforcement is real at the market level, but the vault cannot independently verify it. Coverage buffer is thin (~2.5% above minimum) and Junior capital comes from only 2-3 depositor addresses per market.
 - **Strategy totalAssets is manually reported, not derived from on-chain data:** `totalAllocatedValue()` returns a stored `vaultDepositedAmount` variable updated via `adjustTotalAssets()` by the treasury multisig. It does not read balances from Aave, Avant, Neutrl, or any underlying protocol. The reported value may not represent actual on-chain positions — there is no mechanism to verify accuracy.
 
 ---
@@ -373,7 +490,7 @@ The most realistic risk vector is the MultisigStrategy proxy upgrade (no timeloc
 ### Critical Risk Gates
 
 - [ ] **No audit** → **PASS** (Hexens completed full audit + whitelist audit; Cantina competition with 262 submissions still in judging)
-- [ ] **Unverifiable reserves** → **CONDITIONAL PASS** (ERC-4626 exchange rate is on-chain, but 100% of deployed assets rely on MultisigStrategy reporting. $0 held in vault vs ~$10.73M reported totalAssets — entirely dependent on admin honesty.)
+- [ ] **Unverifiable reserves** → **CONDITIONAL PASS** (ERC-4626 exchange rate is on-chain. Per-market coverage is verifiable via kernel/accountant contracts. However, the vault's totalAssets relies on MultisigStrategy reporting — $0 held in vault vs ~$10.73M reported. The link from vault to Dawn markets is indirect via Treasury multisig.)
 - [ ] **Total centralization** → **PASS** (multiple multisigs with dual-control for vault upgrades via ConcreteFactory — though MultisigStrategy upgrade has no timelock)
 
 ### Category Scores
@@ -392,7 +509,7 @@ Hexens audit completed; Cantina competition still in judging after ~2 months (co
 
 **Score: 3.0/5**
 
-#### Category 2: Centralization & Control Risks (Weight: 30%) — **3.67**
+#### Category 2: Centralization & Control Risks (Weight: 30%) — **3.5**
 
 **Subcategory A: Governance — 3.0**
 
@@ -417,7 +534,7 @@ Hexens audit completed; Cantina competition still in judging after ~2 months (co
 - Protection Mode activation is partially programmatic (triggered by drawdowns)
 - Hybrid system: core vault mechanics are on-chain, but allocation decisions and strategy execution are manual
 
-**Subcategory C: External Dependencies — 4.5**
+**Subcategory C: External Dependencies — 4.0**
 
 - Depends on 4-5 underlying yield protocols, most of which are newer/less established
 - Avant (savUSD, Avalanche) — newer protocol, cross-chain dependency, 35% allocation
@@ -426,35 +543,35 @@ Hexens audit completed; Cantina competition still in judging after ~2 months (co
 - Aave v3 — blue-chip, 20% allocation (positive)
 - Concrete vault framework — serves as proxy admin and controls vault upgrades. Adds third-party trust dependency.
 - Failure of any major underlying protocol (Avant or Neutrl) would impact 35% of allocated capital
-- **No on-chain proof of Junior coverage** — the Senior vault cannot verify that Junior capital exists in underlying markets or that first-loss protection is enforceable
+- **Junior coverage verified at market level, but indirect from vault** — Junior capital exists on-chain (~12.4-12.5% coverage, enforced by kernel/accountant), but the srRoyUSDC vault cannot directly query these contracts. The Treasury multisig holding Senior Tranche tokens is the bridge. Coverage buffer is thin (2.5% above minimum) with concentrated Junior depositors (2-3 addresses).
 
-**Score: (3.0 + 3.5 + 4.5) / 3 = 3.67/5**
+**Score: (3.0 + 3.5 + 4.0) / 3 = 3.5/5**
 
-#### Category 3: Funds Management (Weight: 30%) — **4.0**
+#### Category 3: Funds Management (Weight: 30%) — **3.5**
 
-**Subcategory A: Collateralization — 3.5**
+**Subcategory A: Collateralization — 3.0**
 
 - 100% USDC-backed (deposits are USDC, deployed to yield markets)
-- Junior tranche is designed to provide first-loss protection (coverage = Junior TVL / Senior TVL), but there is **no on-chain proof** that Junior capital exists or will cover losses — the Senior vault has no link to Junior tranche contracts
-- Coverage ratio varies per market and is not publicly displayed in real-time
+- Junior tranche provides first-loss protection, enforced on-chain by each market's kernel/accountant contracts. Verified coverage (March 26, 2026): Neutrl sNUSD 12.4%, Tokemak autoUSD 12.5%, both above 10% required minimum. No impermanent loss recorded. Treasury multisig holds Senior Tranche tokens, connecting srRoyUSDC to these markets.
+- **Coverage is thin and concentrated:** Only ~2.5% buffer above the 10% minimum. Junior capital comes from 2-3 depositor addresses per market. Beta = 1.0 (JT uses same asset as ST — correlated losses, not diversification).
 - Underlying yield comes from newer protocols (Avant, Neutrl, Auto) — collateral quality is mixed
-- Protection Mode mechanism provides structural protection but pauses withdrawals — enforceability from Senior vault is unverifiable on-chain
+- Protection Mode (Fixed-Term State) is enforced on-chain by the accountant — pauses ST withdrawals and JT deposits when JT is covering losses. However, the srRoyUSDC vault itself is not aware of this state — it would manifest as the Treasury multisig being unable to redeem Senior Tranche tokens.
 - Vault holds $0 USDC directly — 100% of ~$10.73M deployed externally via MultisigStrategy
 - If Junior coverage is insufficient, Senior absorbs losses
 
-**Subcategory B: Provability — 4.5**
+**Subcategory B: Provability — 4.0**
 
 - ERC-4626 exchange rate is on-chain (PPS verifiable)
 - However, `totalAssets()` depends entirely on MultisigStrategy's `adjustTotalAssets(int256 diff, uint256 nonce)` — the multisig submits a signed USDC delta (not an absolute value), which is added/subtracted from `vaultDepositedAmount`. This is **not** computed from on-chain positions in underlying protocols.
 - Funds are on-chain in Aave/Avant/Neutrl/Auto, but the vault cannot read those balances — the multisig bridges this gap manually. The entire PPS depends on trusting these accounting adjustments (constrained by max 0.5% per update, 12-hour cooldown, nonce 37 confirming regular updates).
 - **Emergency bypass exists:** `unpauseAndAdjustTotalAssets()` skips all validation — unconstrained single-call override by STRATEGY_ADMIN.
 - Individual underlying market positions are not easily auditable without protocol-specific tooling
-- Per-market Junior coverage ratios are not transparently displayed
+- **Per-market Junior coverage IS verifiable on-chain:** Each market's Accountant `getState()` returns JT/ST effective NAV, impermanent loss, coverage parameters, and market state. Kernel `getState()` returns owned yield-bearing assets per tranche. All contracts are verified on Etherscan.
 - No third-party verification mechanism (no Chainlink PoR, no custodian attestations)
 - Yield computation is on-chain via AdaptiveCurveYDM
 - **Self-reported accounting** with constraints is better than no reporting, but fundamentally depends on multisig honesty
 
-**Score: (3.5 + 4.5) / 2 = 4.0/5**
+**Score: (3.0 + 4.0) / 2 = 3.5/5**
 
 #### Category 4: Liquidity Risk (Weight: 15%) — **3.5**
 
@@ -475,7 +592,7 @@ Hexens audit completed; Cantina competition still in judging after ~2 months (co
 - VC-backed by reputable investors (Electric Capital, Coinbase Ventures, Hashed, Amber Group)
 - Public GitHub repo ([roycoprotocol/royco-dawn](https://github.com/roycoprotocol/royco-dawn)) — verified source code
 - Small dev team (2 GitHub contributors)
-- Documentation has significant gaps: loss propagation flow undocumented, Junior coverage per-market not disclosed, oracle mechanism unclear, per-market risk data only on JS-rendered site
+- Documentation has some gaps: oracle mechanism unclear, per-market risk data only on JS-rendered site. However, per-market Junior coverage is verifiable directly on-chain via accountant `getState()`, partially compensating for documentation gaps.
 - Hypernative monitoring being configured but not yet active
 - Security council being assembled but not yet formed
 - No publicly documented incident response plan
@@ -488,10 +605,9 @@ Hexens audit completed; Cantina competition still in judging after ~2 months (co
 
 ```
 Final Score = (Audits × 0.20) + (Centralization × 0.30) + (Funds Mgmt × 0.30) + (Liquidity × 0.15) + (Operational × 0.05)
-            = (3.0 × 0.20) + (3.67 × 0.30) + (4.0 × 0.30) + (3.5 × 0.15) + (2.5 × 0.05)
-            = 0.60 + 1.101 + 1.20 + 0.525 + 0.125
-            = 3.551
-            ≈ 3.6
+            = (3.0 × 0.20) + (3.5 × 0.30) + (3.5 × 0.30) + (3.5 × 0.15) + (2.5 × 0.05)
+            = 0.60 + 1.05 + 1.05 + 0.525 + 0.125
+            = 3.35
 ```
 
 No optional modifiers apply (protocol is <2 years old, TVL <$500M).
@@ -499,11 +615,11 @@ No optional modifiers apply (protocol is <2 years old, TVL <$500M).
 | Category | Score | Weight | Weighted |
 |----------|-------|--------|----------|
 | Audits & Historical | 3.0 | 20% | 0.60 |
-| Centralization & Control | 3.67 | 30% | 1.101 |
-| Funds Management | 4.0 | 30% | 1.20 |
+| Centralization & Control | 3.5 | 30% | 1.05 |
+| Funds Management | 3.5 | 30% | 1.05 |
 | Liquidity Risk | 3.5 | 15% | 0.525 |
 | Operational Risk | 2.5 | 5% | 0.125 |
-| **Final Score** | | | **3.551 / 5.0** |
+| **Final Score** | | | **3.35 / 5.0** |
 
 ### Risk Tier
 
@@ -511,11 +627,11 @@ No optional modifiers apply (protocol is <2 years old, TVL <$500M).
 |------------|-----------|----------------|
 | 1.0-1.5 | Minimal Risk | Approved, high confidence |
 | 1.5-2.5 | Low Risk | Approved with standard monitoring |
-| 2.5-3.5 | Medium Risk | Approved with enhanced monitoring |
-| **3.5-4.5** | **Elevated Risk** | **Limited approval, strict limits** |
+| **2.5-3.5** | **Medium Risk** | **Approved with enhanced monitoring** |
+| 3.5-4.5 | Elevated Risk | Limited approval, strict limits |
 | 4.5-5.0 | High Risk | Not recommended |
 
-**Final Risk Tier: ELEVATED RISK**
+**Final Risk Tier: MEDIUM RISK**
 
 ---
 
