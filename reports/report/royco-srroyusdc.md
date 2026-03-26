@@ -165,13 +165,13 @@ The Senior Vault allocates deposited USDC across whitelisted markets where Junio
 - Junior tranche capital in each market absorbs losses first — this is enforced on-chain by each market's RoycoAccountant contract (verified in [source code](https://github.com/roycoprotocol/royco-dawn/blob/main/src/accountant/RoycoAccountant.sol) and on deployed contracts). The loss waterfall: JT effective NAV is reduced first; if JT is depleted, residual losses hit ST as `stImpermanentLoss`.
 - **On-chain coverage verified (March 26, 2026):** Neutrl sNUSD: 12.4% (required 10%), Tokemak autoUSD: 12.5% (required 10%). See [On-Chain Coverage Data](#on-chain-coverage-data-verified-march-26-2026) for full breakdown.
 - If losses exceed Junior coverage, Senior absorbs remaining losses
-- **Protection Mode (Fixed-Term State):** When JT covers ST drawdowns and `jtImpermanentLoss` exceeds dust tolerance, the market enters Fixed-Term (Protection Mode):
-  - Senior withdrawals pause (protects JT from ST withdrawing covered capital)
-  - Junior deposits pause (protects existing JT from dilution)
-  - 100% of yield flows to Junior to rebuild buffer
-  - If recovery occurs within the fixed term period, losses are erased
-  - If losses persist after the fixed term, `jtImpermanentLoss` is zeroed — JT permanently absorbs those losses
-  - Self-liquidation bonus activates when utilization exceeds liquidation threshold (incentivizes ST to exit to delever)
+- **Loss Escalation Flow (enforced on-chain by kernel/accountant):**
+  1. **Normal (PERPETUAL):** No losses. ST and JT deposit/withdraw freely, subject to coverage requirement.
+  2. **Small loss → Fixed-Term (Protection Mode):** When JT covers ST drawdowns and `jtImpermanentLoss` exceeds dust tolerance, the market transitions to Fixed-Term. **ST withdrawals are blocked** (protects JT from ST withdrawing the capital JT is covering). JT deposits are also blocked (protects existing JT from dilution). All yield flows to JT to rebuild the buffer.
+  3. **Recovery within fixed term:** If the underlying asset recovers before the term expires, `jtImpermanentLoss` is repaid from ST appreciation. Market returns to PERPETUAL. Losses are erased.
+  4. **No recovery, term expires:** `jtImpermanentLoss` is **permanently zeroed** — JT absorbs the loss forever with no recourse. Market returns to PERPETUAL. ST is made whole at JT's expense.
+  5. **Severe loss → Liquidation threshold breached:** If utilization exceeds the liquidation threshold (Neutrl: 100%, Tokemak: 122.5%) — meaning JT is nearly depleted — the market is **forced back to PERPETUAL** regardless of Fixed-Term status. ST can now withdraw, and receives a **self-liquidation bonus** sourced from JT's remaining NAV, incentivizing ST to exit and delever the system. If JT is fully depleted, remaining losses hit ST as `stImpermanentLoss`.
+  - **Impact on srRoyUSDC:** During Fixed-Term, the Treasury multisig cannot redeem Senior Tranche tokens from the affected market. This blocks the vault from sourcing liquidity for that market's allocation. If multiple markets enter Fixed-Term simultaneously, withdrawal capacity could be severely reduced. The srRoyUSDC vault itself is not aware of this state.
 - Coverage adjustments require 3-day notice to whitelisted depositors with incremental 1% daily changes
 - **Loss propagation from Dawn markets to Senior vault is indirect:** While the Royco Dawn kernel/accountant contracts enforce Junior-first loss coverage on-chain, the srRoyUSDC Concrete vault itself cannot read these contracts. The Treasury multisig holds the Senior Tranche tokens and calls `adjustTotalAssets()` on the MultisigStrategy to report the net value. The loss waterfall (underlying drawdown → JT absorption → residual ST loss) is enforced at the market level, but the reporting of the net result to the vault is mediated by the multisig.
 
