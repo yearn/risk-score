@@ -1,8 +1,18 @@
 ---
 interface Props {
   title: string;
+  description?: string;
+  ogImage?: string;
+  ogUrl?: string;
 }
-const { title } = Astro.props;
+const {
+  title,
+  description = "Independent risk evaluations for DeFi protocols and assets",
+  ogImage = "/og/default.png",
+  ogUrl,
+} = Astro.props;
+const canonicalUrl = ogUrl ? new URL(ogUrl, Astro.site ?? Astro.url.origin).href : (Astro.site ?? Astro.url.origin).toString();
+const ogImageUrl = new URL(ogImage, Astro.site ?? Astro.url.origin).href;
 ---
 
 <!doctype html>
@@ -10,9 +20,26 @@ const { title } = Astro.props;
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="description" content="Yearn Risk Assessment Reports" />
+    <meta name="description" content={description} />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="canonical" href={canonicalUrl} />
     <title>{title}</title>
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:image" content={ogImageUrl} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:url" content={canonicalUrl} />
+    <meta property="og:site_name" content="Yearn Risk" />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImageUrl} />
     <script is:inline>
       if (localStorage.getItem("theme") === "light") {
         document.documentElement.classList.add("light");
@@ -22,6 +49,7 @@ const { title } = Astro.props;
   <body>
     <header class="site-header">
       <div class="container header-row">
+        <div class="header-left">
         <a href="https://yearn.fi" class="logo-link" aria-label="Yearn Home" target="_blank" rel="noopener noreferrer">
           <svg viewBox="85 100 390 115" fill="none" xmlns="http://www.w3.org/2000/svg" class="logo-img">
             <path d="M307.601 124.989C303.535 122.91 298.842 121.867 293.509 121.867C288.177 121.867 283.623 122.973 279.626 125.191C275.63 127.409 272.52 130.544 270.297 134.601C268.074 138.658 266.966 143.41 266.966 148.864C266.966 154.318 268.106 158.969 270.398 163.026C272.685 167.084 275.966 170.199 280.234 172.386C284.503 174.566 289.576 175.659 295.454 175.659C299.963 175.659 303.96 174.857 307.443 173.258C310.927 171.659 313.726 169.46 315.848 166.66C317.963 163.867 319.299 160.726 319.844 157.25H305.6C304.986 159.702 303.706 161.56 301.756 162.824C299.811 164.088 297.367 164.714 294.428 164.714C290.735 164.714 287.835 163.627 285.719 161.44C283.597 159.26 282.369 156.258 282.027 152.441V152.03H320.25C320.522 150.596 320.661 148.965 320.661 147.12C320.592 142.008 319.413 137.559 317.127 133.779C314.841 129.994 311.661 127.068 307.595 124.989H307.601ZM282.343 142.627C282.755 139.562 284.034 137.122 286.188 135.315C288.341 133.508 290.989 132.604 294.13 132.604C297.272 132.604 300.122 133.476 302.275 135.208C304.428 136.946 305.739 139.416 306.221 142.621H282.343V142.627Z" fill="currentColor"/>
@@ -33,6 +61,13 @@ const { title } = Astro.props;
             <path d="M124.069 175.008H141.606V147.171L171.45 117.38L159.049 105.006L132.847 131.163L106.62 105L94.2188 117.374L124.069 147.152V175.008Z" fill="currentColor"/>
           </svg>
         </a>
+        <nav class="header-nav">
+          <a href="/">Reports</a>
+          <a href="/tokens/">Tokens</a>
+
+          <a href="https://app.morpho.org/ethereum/curator/yearn" target="_blank" rel="noopener noreferrer" class="nav-external">Morpho <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>
+        </nav>
+        </div>
         <button id="theme-toggle" class="theme-toggle" aria-label="Toggle light mode">
           <svg class="icon-sun" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <circle cx="12" cy="12" r="5" />
@@ -89,7 +124,34 @@ const { title } = Astro.props;
   .header-row {
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    gap: 1.5rem;
+  }
+  .header-left {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+  }
+  .header-nav {
+    display: flex;
+    gap: 1rem;
+    font-size: 0.85rem;
+  }
+  .header-nav a {
+    color: var(--text-secondary);
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+  .header-nav a:hover {
+    color: var(--text-primary);
+    text-decoration: none;
+  }
+  .nav-external {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+  }
+  .nav-external svg {
+    opacity: 0.6;
   }
   .logo-link {
     display: flex;
@@ -108,6 +170,7 @@ const { title } = Astro.props;
     display: block;
   }
   .theme-toggle {
+    margin-left: auto;
     background: none;
     border: 1px solid var(--border);
     border-radius: 6px;

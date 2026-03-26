@@ -15,6 +15,7 @@ Always mark sections as "TODO" if information is unavailable or not found, never
 - When validating protocols, see for info on which focused on protocol decentralization: https://www.defiscan.info/
 - Don't check Safe multisig signers, only specify multisig threshold and number of signers.
 - Always include whole `Risk Tier` table and bold the final risk tier.
+- Explain how minting and redeeming works, if present. Verify if minting and redeeming are atomic in a single transaction. Verify if minting needs backing assets, high alert if not. List all accounts with minting role.
 
 ## Monitoring
 
@@ -34,4 +35,4 @@ Always mark sections as "TODO" if information is unavailable or not found, never
 - use etherscan to fetch blockchain data, usage defined in skill etherscan in `reports/etherscan/SKILL.md`
 - for fetching TVL, use defillama api. Docs: https://api-docs.defillama.com/ or use script: `uv run reports/scripts/fetch_defillama_tvl.py [protocol]`
 - if you use some script multiple times, add it to the `reports/scripts` folder but first ask for permission before committing it.
-- check .env file for environment variables and secrets.
+- check .env file for environment variables and secrets. if you can't access .env exit asap.
