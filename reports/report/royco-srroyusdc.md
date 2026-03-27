@@ -44,7 +44,7 @@ The Senior Vault is curator-managed by the Royco Foundation, which allocates dep
 | Multisig Safe (Treasury, 3/5) | [`0x170ff06326eBb64BF609a848Fc143143994AF6c8`](https://etherscan.io/address/0x170ff06326eBb64BF609a848Fc143143994AF6c8) |
 | Multisig Strategy (TransparentUpgradeableProxy) | [`0xd3F8Edff57570c4F9B11CC95eA65117e2D7A6C2D`](https://etherscan.io/address/0xd3F8Edff57570c4F9B11CC95eA65117e2D7A6C2D) |
 | MultisigStrategy Implementation | [`0xb417a7c43a7a8aa27bba2b2bb4639878532f9d0c`](https://etherscan.io/address/0xb417a7c43a7a8aa27bba2b2bb4639878532f9d0c) |
-| RoycoVaultMakinaStrategy (inactive) | [`0xc5FeF644d59415cec65049e0653CA10eD9Cba778`](https://etherscan.io/address/0xc5FeF644d59415cec65049e0653CA10eD9Cba778) |
+| RoycoVaultMakinaStrategy | [`0xc5FeF644d59415cec65049e0653CA10eD9Cba778`](https://etherscan.io/address/0xc5FeF644d59415cec65049e0653CA10eD9Cba778) |
 | ConcreteFactory (Vault Proxy Admin) | [`0x0265d73a8e61f698d8eb0dfeb91ddce55516844c`](https://etherscan.io/address/0x0265d73a8e61f698d8eb0dfeb91ddce55516844c) |
 | ConcreteFactory Owner (Gnosis Safe 3/5) | [`0xdc29BD10CB9000dffBb5aAcD30606c66f07c866C`](https://etherscan.io/address/0xdc29BD10CB9000dffBb5aAcD30606c66f07c866C) |
 | RoycoFactory (AccessManager) | [`0xD567cCbb336Eb71eC2537057E2bCF6DB840bB71d`](https://etherscan.io/address/0xD567cCbb336Eb71eC2537057E2bCF6DB840bB71d) |
@@ -62,10 +62,18 @@ The Treasury multisig ([`0x170ff06326eBb64BF609a848Fc143143994AF6c8`](https://et
 | Neutrl sNUSD | Senior Tranche (ROY-ST-sNUSD) | [`0x2070Af1C865f5d764F673Baf5654822947e71243`](https://etherscan.io/address/0x2070Af1C865f5d764F673Baf5654822947e71243) |
 | Neutrl sNUSD | Junior Tranche (ROY-JT-sNUSD) | [`0x3821eBea3BBbE23F3dea74f24082BD0f0b67f6c5`](https://etherscan.io/address/0x3821eBea3BBbE23F3dea74f24082BD0f0b67f6c5) |
 | Neutrl sNUSD | Accountant | [`0xCaa3F221fCf3c2EC7b6a49B73BB810cca35e1085`](https://etherscan.io/address/0xCaa3F221fCf3c2EC7b6a49B73BB810cca35e1085) |
+| Neutrl sNUSD (legacy active market) | Kernel | [`0xbdf2d357464727ee136a5f81479554f86759993a`](https://etherscan.io/address/0xbdf2d357464727ee136a5f81479554f86759993a) |
+| Neutrl sNUSD (legacy active market) | Senior Tranche (ROY-ST-sNUSD) | [`0x3b2df77f0eaa0ca98aaabffa96b03eaf08ec6c8e`](https://etherscan.io/address/0x3b2df77f0eaa0ca98aaabffa96b03eaf08ec6c8e) |
+| Neutrl sNUSD (legacy active market) | Junior Tranche (ROY-JT-sNUSD) | [`0x58c578d7e4f291ee1a11399d03e4418443e7a134`](https://etherscan.io/address/0x58c578d7e4f291ee1a11399d03e4418443e7a134) |
+| Neutrl sNUSD (legacy active market) | Accountant | [`0x3371871e8901899fec4539ae2d1737d84acb6d89`](https://etherscan.io/address/0x3371871e8901899fec4539ae2d1737d84acb6d89) |
 | Tokemak autoUSD | Kernel | [`0x8748D1c21CC550B435487F473d9Aaf6C84dA46A6`](https://etherscan.io/address/0x8748D1c21CC550B435487F473d9Aaf6C84dA46A6) |
 | Tokemak autoUSD | Senior Tranche (ROY-ST-autoUSD) | [`0x73C641fe41EB0270C7f473f3c3E4A40eb97fd8dE`](https://etherscan.io/address/0x73C641fe41EB0270C7f473f3c3E4A40eb97fd8dE) |
 | Tokemak autoUSD | Junior Tranche (ROY-JT-autoUSD) | [`0x6f0D6567099621deE3850C673d73c532071A888d`](https://etherscan.io/address/0x6f0D6567099621deE3850C673d73c532071A888d) |
 | Tokemak autoUSD | Accountant | [`0xB0166629D78E3876F570f18B154A60b99024b6f4`](https://etherscan.io/address/0xB0166629D78E3876F570f18B154A60b99024b6f4) |
+| Avant savUSD (Avalanche) | Kernel | [`0x7240FF91b471217FF93349184ABE9f102Ca1955C`](https://snowtrace.io/address/0x7240FF91b471217FF93349184ABE9f102Ca1955C) |
+| Avant savUSD (Avalanche) | Senior Tranche (ROY-ST-savUSD) | [`0xDA7bf1788aecb94fE6D5D3f739358De94f43E5C9`](https://snowtrace.io/address/0xDA7bf1788aecb94fE6D5D3f739358De94f43E5C9) |
+| Avant savUSD (Avalanche) | Junior Tranche (ROY-JT-savUSD) | [`0x2dfde7811567562aaB39D0A292e43aa7195f6Cf6`](https://snowtrace.io/address/0x2dfde7811567562aaB39D0A292e43aa7195f6Cf6) |
+| Avant savUSD (Avalanche) | Accountant | [`0x1067405d143a3973Dc48fD0Ea14ed6c1AF20dbb1`](https://snowtrace.io/address/0x1067405d143a3973Dc48fD0Ea14ed6c1AF20dbb1) |
 
 #### On-Chain Coverage Data (Verified March 26, 2026)
 
@@ -78,7 +86,7 @@ Each market's Accountant contract exposes `getState()` which returns all NAV and
 
 Smokehouse USDC and Maple syrupUSDC markets have dust-level Senior NAV (<$10) and are not currently allocated by the Treasury. They contain only Junior capital (~$20K and ~$19.6K respectively).
 
-- **Treasury multisig holds**: ~1,172,390 ROY-ST-sNUSD shares, ~1,168,613 ROY-ST-autoUSD shares
+- **Treasury multisig holds**: ~1,172,390 ROY-ST-sNUSD shares at [`0x2070Af1C865f5d764F673Baf5654822947e71243`](https://etherscan.io/address/0x2070Af1C865f5d764F673Baf5654822947e71243), ~1,981,280 ROY-ST-sNUSD shares at [`0x3b2df77f0eaa0ca98aaabffa96b03eaf08ec6c8e`](https://etherscan.io/address/0x3b2df77f0eaa0ca98aaabffa96b03eaf08ec6c8e), ~1,168,613 ROY-ST-autoUSD shares at [`0x73C641fe41EB0270C7f473f3c3E4A40eb97fd8dE`](https://etherscan.io/address/0x73C641fe41EB0270C7f473f3c3E4A40eb97fd8dE), and on Avalanche ~4,278,073 ROY-ST-savUSD shares at [`0xDA7bf1788aecb94fE6D5D3f739358De94f43E5C9`](https://snowtrace.io/address/0xDA7bf1788aecb94fE6D5D3f739358De94f43E5C9)
 - **Junior depositors**: 2-3 independent addresses per market (e.g., [`0x2d745a6596d47a0fe28a7db7bd9dc7bdbca4e476`](https://etherscan.io/address/0x2d745a6596d47a0fe28a7db7bd9dc7bdbca4e476), [`0xfef0bb8df6210e441f03de23edafb0150129e176`](https://etherscan.io/address/0xfef0bb8df6210e441f03de23edafb0150129e176))
 - **No impermanent loss** recorded in any market (both `stImpermanentLoss` and `jtImpermanentLoss` are 0)
 - **Beta = 1.0** (1e18) in all markets — Junior uses the same underlying asset as Senior, meaning JT losses correlate with ST losses
@@ -188,6 +196,25 @@ The Senior Vault allocates deposited USDC across whitelisted markets where Junio
 - **Beta = 1.0:** In all markets, Junior uses the same underlying asset as Senior, meaning JT and ST losses are correlated. JT does not provide diversification — only a capital buffer.
 - Vault holds $0 USDC directly — 100% of ~$10.73M is deployed to underlying protocols (Aave, Avant, Neutrl, Auto) via MultisigStrategy. Funds are on-chain in those protocols, but the vault cannot read those balances directly — it relies on the treasury multisig manually reporting net changes via `adjustTotalAssets()`
 
+#### Reserve Location Reconciliation (Verified March 27, 2026)
+
+I traced the current reserve path further by combining live `balanceOf()` reads on Ethereum and Avalanche, Royco deployment configs, and treasury USDC transfer history.
+
+| Chain | Position | Contract | Treasury Balance | Approx. Raw Value |
+|------|----------|----------|------------------|-------------------|
+| Ethereum | Aave aUSDC | [`0x98c23e9d8f34fefb1b7bd6a91b7ff122f4e16f5c`](https://etherscan.io/address/0x98c23e9d8f34fefb1b7bd6a91b7ff122f4e16f5c) | ~2,108,035.93 aUSDC | ~$2.108M |
+| Ethereum | ROY-ST-sNUSD | [`0x2070Af1C865f5d764F673Baf5654822947e71243`](https://etherscan.io/address/0x2070Af1C865f5d764F673Baf5654822947e71243) | ~1,172,390.32 shares | ~$1.172M raw shares |
+| Ethereum | ROY-ST-sNUSD (legacy active market) | [`0x3b2df77f0eaa0ca98aaabffa96b03eaf08ec6c8e`](https://etherscan.io/address/0x3b2df77f0eaa0ca98aaabffa96b03eaf08ec6c8e) | ~1,981,279.85 shares | ~$1.981M raw shares |
+| Ethereum | ROY-ST-autoUSD | [`0x73C641fe41EB0270C7f473f3c3E4A40eb97fd8dE`](https://etherscan.io/address/0x73C641fe41EB0270C7f473f3c3E4A40eb97fd8dE) | ~1,168,613.95 shares | ~$1.169M raw shares |
+| Avalanche | ROY-ST-savUSD | [`0xDA7bf1788aecb94fE6D5D3f739358De94f43E5C9`](https://snowtrace.io/address/0xDA7bf1788aecb94fE6D5D3f739358De94f43E5C9) | ~4,278,072.87 shares | ~$4.278M raw shares |
+
+- These raw treasury balances sum to **~$10.708M**, versus vault `totalAssets()` of **~$10.7378M**. Residual unexplained gap: **~$29.4K**.
+- The vault's second strategy is **not** at zero anymore: `getStrategyData(0xc5FeF644d59415cec65049e0653CA10eD9Cba778)` returns allocation **1,000 USDC** on March 27, 2026.
+- The Treasury multisig sent **~3.155M USDC** cumulatively to the Neutrl NUSD Router [`0xa052883ebee7354fc2aa0f9c727e657fdeca744a`](https://etherscan.io/address/0xa052883ebee7354fc2aa0f9c727e657fdeca744a), which aligns closely with the two live sNUSD senior tranche positions.
+- The Treasury multisig sent **~4.2628M USDC** cumulatively to Circle `TokenMinterV2` [`0xfd78ee919681417d192449715b2594ab58f5d002`](https://etherscan.io/address/0xfd78ee919681417d192449715b2594ab58f5d002), and the same Treasury safe address on Avalanche currently holds **~4.2781M ROY-ST-savUSD** shares in Royco's Avalanche kernel [`0x7240FF91b471217FF93349184ABE9f102Ca1955C`](https://snowtrace.io/address/0x7240FF91b471217FF93349184ABE9f102Ca1955C).
+- This is strong evidence for reserve *location* across Aave, Neutrl sNUSD, Tokemak autoUSD, and Avant savUSD.
+- **Important caveat:** if the tranche tokens are valued via current `convertToAssets()`/`previewRedeem()` outputs rather than raw share balances, the traced redeemable value is only **~$9.944M**, about **~$794K below** the vault's reported `totalAssets()`. So the reserve location is now mostly evidenced, but the vault's exact NAV methodology remains trust-based and cannot be treated as fully independently provable.
+
 ### Provability
 
 - srRoyUSDC exchange rate is computed on-chain via ERC-4626 (`totalAssets()` / `totalSupply()`)
@@ -207,7 +234,7 @@ The Senior Vault allocates deposited USDC across whitelisted markets where Junio
 - **Per-market Junior/Senior coverage is verifiable on-chain:** Each market's Accountant contract exposes `getState()` returning `lastSTEffectiveNAV`, `lastJTEffectiveNAV`, `lastSTImpermanentLoss`, `lastJTImpermanentLoss`, `coverageWAD`, `betaWAD`, and `marketState`. The kernel exposes `getState()` returning `stOwnedYieldBearingAssets` and `jtOwnedYieldBearingAssets`. These can be queried without protocol-specific tooling (standard `eth_call` to verified contracts).
 - Underlying market positions must be verified by checking each external protocol individually
 - No third-party verification mechanism (no Chainlink PoR, no custodian attestations)
-- **Overall provability is limited**: while the vault exchange rate is on-chain, the accuracy depends entirely on the MultisigStrategy correctly reporting deployed asset values ($0 held in vault vs ~$10.73M reported). The max change threshold and cooldown provide some protection against sudden malicious adjustments, but do not prevent gradual misreporting
+- **Overall provability is limited but better than initially documented**: Treasury holdings on Ethereum and Avalanche now evidence ~99.7% of reported assets by raw share balances, but the vault exchange rate still depends on the MultisigStrategy correctly reporting strategy NAV. The current tranche `convertToAssets()` outputs do not fully reconcile to the reported `totalAssets()`, so the exact accounting methodology remains trust-based.
 
 ## Liquidity Risk
 
@@ -218,8 +245,8 @@ The Senior Vault allocates deposited USDC across whitelisted markets where Junio
   - srRoyUSDC/pmUSD (86% LLTV, [market](https://app.morpho.org/ethereum/market/0x72cc79433e9f91c2a185422725510f4bdd19c9006010f464f851468b2371b756/srroyusdc-pmusd)): ~$1.99M supply, ~$1.81M borrowed, 91% utilized — largest market by supply, but loan asset is pmUSD (Precious Metals USD from RAAC protocol), not direct USDC exit. Morpho Blue holds ~2.83M srRoyUSDC (~26% of total supply) as collateral.
   - Two additional markets (srRoyUSDC/pmUSD at 91.5% LLTV and srRoyUSDC/USDC at 86% LLTV) are empty or negligible
 - **Slippage Analysis:** Curve pool now provides meaningful exit liquidity (~$490K). Large exits still face slippage given the vault's ~$10.7M total assets.
-- **Withdrawal Queues:** Up to 14-day max during normal conditions. During Protection Mode (market drawdown), Senior withdrawals are paused entirely until the Protection Mode period ends (1-7 days depending on market volatility parameters).
-- **Stress Scenario:** If multiple underlying markets enter Protection Mode simultaneously, all Senior withdrawals could be paused. Combined with 14-day unlock, holders could face extended periods unable to exit. The Curve pool now provides a partial escape valve for smaller positions.
+- **Withdrawal Queues:** Up to 14-day max during normal conditions. Protection Mode impact on vault liquidity is **per-market and proportional to exposure**, not a vault-wide pause: Neutrl sNUSD (`fixedTermDuration=0`) never enters Protection Mode — ST can always withdraw. Tokemak autoUSD has a 2-day Protection Mode that blocks ST redemptions during losses. Only the affected market's allocation becomes illiquid; the vault can still source from other markets.
+- **Stress Scenario:** If Tokemak enters Protection Mode, ~$1.17M of vault exposure (~11%) becomes temporarily illiquid (up to 2 days). Neutrl never pauses. In a worst case where all non-Aave, non-Neutrl markets are impaired simultaneously, the vault could still source from Aave (~$2.1M, instant unwind) and Neutrl (~$3.15M, always redeemable). The Curve pool provides an additional escape valve for smaller positions.
 - **Large Holder Impact:** One EOA holds ~69% of supply (~7.36M srRoyUSDC). A withdrawal of this magnitude would require unwinding the vast majority of underlying positions.
 
 ## Centralization & Control Risks
@@ -260,14 +287,14 @@ The vault governance involves multiple multisigs and two factory contracts with 
 **Upgradeable Contracts:**
 - srRoyUSDC vault: ERC-1967 proxy → ConcreteAsyncVaultImpl (upgradeable via ConcreteFactory, requires Concrete team approval)
 - MultisigStrategy: TransparentUpgradeableProxy → MultisigStrategy implementation (upgradeable by Owner multisig, **no timelock**)
-- RoycoVaultMakinaStrategy: New strategy added, currently inactive (0 allocation)
+- RoycoVaultMakinaStrategy: New strategy added, currently has a small live allocation (~1,000 USDC on March 27, 2026)
 
 ### Programmability
 
 - srRoyUSDC PPS is calculated on-chain via ERC-4626 standard (`totalAssets()` / `totalSupply()`)
 - Yield distribution uses the on-chain AdaptiveCurveYDM model
 - Fund deployment and rebalancing are executed by the MultisigStrategy, which is controlled by the 3/5 treasury multisig — **significant manual intervention**
-- A second strategy (RoycoVaultMakinaStrategy) has been added but is currently inactive (0 allocation). It uses an OZ AccessManager authority rather than direct multisig control, potentially for automated fund deployment via Makina.
+- A second strategy (RoycoVaultMakinaStrategy) has been added and currently has a small live allocation (~1,000 USDC on March 27, 2026). It uses an OZ AccessManager authority rather than direct multisig control, potentially for automated fund deployment via Makina.
 - Market selection, allocation targets, and coverage parameters are set by the Royco Foundation (off-chain decisions)
 - Fee management (management/performance fees) requires VAULT_MANAGER role (3/4 multisig). Both fees are currently 0%.
 - `accrueYield()` is callable by anyone (no access control) — triggers yield computation and fee share minting (currently mints 0 since fees are 0%)
@@ -307,7 +334,7 @@ The vault governance involves multiple multisigs and two factory contracts with 
 | Owner Multisig | [`0x85de42e5697d16b853ea24259c42290dace35190`](https://etherscan.io/address/0x85de42e5697d16b853ea24259c42290dace35190) | Governance | Submitted/confirmed/executed transactions, owner changes |
 | VAULT_MANAGER | [`0x7c405bbD131e42af506d14e752f2e59B19D49997`](https://etherscan.io/address/0x7c405bbD131e42af506d14e752f2e59B19D49997) | Fee/queue mgmt | Fee updates, queue toggles, signer changes |
 | MultisigStrategy | [`0xd3F8Edff57570c4F9B11CC95eA65117e2D7A6C2D`](https://etherscan.io/address/0xd3F8Edff57570c4F9B11CC95eA65117e2D7A6C2D) | Fund deployment | `adjustTotalAssets()`, strategy changes, proxy upgrades |
-| RoycoVaultMakinaStrategy | [`0xc5FeF644d59415cec65049e0653CA10eD9Cba778`](https://etherscan.io/address/0xc5FeF644d59415cec65049e0653CA10eD9Cba778) | Future strategy | `allocateFunds()`, `totalAllocatedValue()` (currently 0) |
+| RoycoVaultMakinaStrategy | [`0xc5FeF644d59415cec65049e0653CA10eD9Cba778`](https://etherscan.io/address/0xc5FeF644d59415cec65049e0653CA10eD9Cba778) | Secondary strategy | `allocateFunds()`, `totalAllocatedValue()` (~1,000 USDC allocated on March 27, 2026) |
 | Multisig Safe (Treasury) | [`0x170ff06326eBb64BF609a848Fc143143994AF6c8`](https://etherscan.io/address/0x170ff06326eBb64BF609a848Fc143143994AF6c8) | Treasury/accounting | `adjustTotalAssets()` calls, large transfers, signer changes |
 | ConcreteFactory | [`0x0265d73a8e61f698d8eb0dfeb91ddce55516844c`](https://etherscan.io/address/0x0265d73a8e61f698d8eb0dfeb91ddce55516844c) | Vault proxy admin | Implementation approvals, vault upgrades |
 | RoycoFactory | [`0xD567cCbb336Eb71eC2537057E2bCF6DB840bB71d`](https://etherscan.io/address/0xD567cCbb336Eb71eC2537057E2bCF6DB840bB71d) | AccessManager | Role grants, scheduled operations, market creation |
@@ -330,7 +357,7 @@ The vault governance involves multiple multisigs and two factory contracts with 
   - Verify nonce increments sequentially (current: 37)
 - **Governance:** Monitor Owner multisig for MultisigStrategy proxy upgrade transactions (**no timelock**). Monitor ConcreteFactory for vault implementation upgrade proposals. Monitor RoycoFactory for role grants and scheduled operations.
 - **Fee Changes:** Monitor VAULT_MANAGER multisig for `updateManagementFee()` and `updatePerformanceFee()` calls. Currently both 0% — any change would enable fee share minting via `accrueYield()`.
-- **Strategy:** Monitor MultisigStrategy for fund movements. Monitor RoycoVaultMakinaStrategy for activation (currently 0 allocation).
+- **Strategy:** Monitor MultisigStrategy for fund movements. Monitor RoycoVaultMakinaStrategy for growth beyond its current small allocation (~1,000 USDC on March 27, 2026).
 - **Protection Mode / Fixed-Term State:** Alert on any market transitioning from PERPETUAL (0) to FIXED_TERM (1) state via `marketState` in accountant `getState()`. This means JT is covering ST losses and Senior withdrawals are paused.
 
 ### Junior Vault / Tranching Monitoring
@@ -411,7 +438,7 @@ The Junior tranche provides the first-loss buffer protecting Senior depositors. 
 
 ### Key Strengths
 
-1. **Tranching mechanism provides structural protection (verified on-chain at market level)** — Junior capital absorbs losses first, enforced by on-chain kernel/accountant contracts. Coverage verified: ~12.4% (Neutrl), ~12.5% (Tokemak) vs 10% required. Treasury multisig holds Senior Tranche tokens linking srRoyUSDC to these markets. The srRoyUSDC vault itself doesn't directly reference these contracts (indirect link via Treasury multisig).
+1. **Tranching mechanism provides structural protection (verified on-chain at market level)** — Junior capital absorbs losses first, enforced by on-chain kernel/accountant contracts. Coverage verified: ~12.4% (Neutrl), ~12.5% (Tokemak) vs 10% required. Treasury holdings now evidence live exposure across Aave, two sNUSD senior tranche positions, autoUSD, and Avalanche savUSD. The srRoyUSDC vault itself still doesn't directly reference these contracts (indirect link via Treasury multisig).
 2. **Institutional-grade access controls** — KYC and whitelisting convert potential exploits into recoverable, legally actionable incidents
 3. **Experienced founder** — Jai Bhavnani has prior DeFi experience (Rari Capital, Ambo) and backing from reputable investors (Electric Capital, Coinbase Ventures, Hashed)
 4. **Active bug bounty** — $250K on Immunefi
@@ -494,7 +521,7 @@ The most realistic risk vector is the MultisigStrategy proxy upgrade (no timeloc
 ### Critical Risk Gates
 
 - [ ] **No audit** → **PASS** (Hexens completed full audit + whitelist audit; Cantina competition with 262 submissions still in judging)
-- [ ] **Unverifiable reserves** → **CONDITIONAL PASS** (ERC-4626 exchange rate is on-chain. Per-market coverage is verifiable via kernel/accountant contracts. However, the vault's totalAssets relies on MultisigStrategy reporting — $0 held in vault vs ~$10.73M reported. The link from vault to Dawn markets is indirect via Treasury multisig.)
+- [ ] **Unverifiable reserves** → **CONDITIONAL PASS** (ERC-4626 exchange rate is on-chain. Treasury holdings on Ethereum and Avalanche now evidence ~99.7% of reported assets by raw share balances, including Aave, two sNUSD tranche positions, autoUSD, and Avalanche savUSD. However, the vault's totalAssets still relies on MultisigStrategy reporting, and current tranche `convertToAssets()` outputs do not fully reconcile to reported NAV.)
 - [ ] **Total centralization** → **PASS** (multiple multisigs with dual-control for vault upgrades via ConcreteFactory — though MultisigStrategy upgrade has no timelock)
 
 ### Category Scores
@@ -531,7 +558,7 @@ Hexens audit completed; Cantina competition still in judging after ~2 months (co
 - PPS calculated on-chain via ERC-4626
 - Yield distribution uses on-chain AdaptiveCurveYDM model
 - Fund deployment is controlled by MultisigStrategy — requires multisig intervention for allocation changes
-- New RoycoVaultMakinaStrategy added (inactive, 0 allocation) — may indicate move toward automated allocation
+- New RoycoVaultMakinaStrategy added with a small live allocation (~1,000 USDC) — may indicate move toward automated allocation
 - `accrueYield()` is publicly callable (no access control) — currently no effect since fees are 0%
 - Market selection and coverage parameters set off-chain by Royco Foundation
 - KYC gating adds off-chain dependency for deposits
@@ -580,7 +607,7 @@ Hexens audit completed; Cantina competition still in judging after ~2 months (co
 #### Category 4: Liquidity Risk (Weight: 15%) — **3.5**
 
 - Queue-based withdrawal with up to 14-day unlock period
-- During Protection Mode, Senior withdrawals are paused entirely (additional delay)
+- Protection Mode impact is per-market: Neutrl never pauses (fixedTermDuration=0), Tokemak pauses ST for up to 2 days. Not a vault-wide freeze — proportional to affected market exposure.
 - **Improved DEX liquidity:** Curve CurveStableSwapNG pool holds ~489K srRoyUSDC (~$490K) — significant improvement from ~$600 at launch
 - Morpho Blue markets: srRoyUSDC/USDC (~$272K supply, 84% utilized — meaningful USDC exit), srRoyUSDC/pmUSD (~$1.99M supply, not direct USDC exit). Morpho holds ~2.83M srRoyUSDC (26% of supply) as collateral.
 - Extreme holder concentration — one EOA holds ~69% of supply. A single large withdrawal would require unwinding most underlying positions.
@@ -645,7 +672,7 @@ No optional modifiers apply (protocol is <2 years old, TVL <$500M).
 - **TVL-based:** Reassess if TVL exceeds $50M or drops below $2M
 - **Incident-based:** Reassess after any exploit, Protection Mode activation, or governance change
 - **Governance-based:** Reassess if timelock is added to MultisigStrategy, multisig threshold/signers change, or new governance mechanism is introduced
-- **Strategy-based:** Reassess when RoycoVaultMakinaStrategy is activated (currently 0 allocation)
+- **Strategy-based:** Reassess if RoycoVaultMakinaStrategy grows materially beyond its current small allocation (~1,000 USDC)
 - **Fee-based:** Reassess if performance or management fees are changed from 0%
 - **Underlying protocol:** Reassess if any whitelisted market (Avant, Neutrl, Auto) experiences an exploit or significant issue
 
