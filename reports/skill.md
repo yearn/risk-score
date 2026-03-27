@@ -8,7 +8,31 @@ allowed-tools: Read Write Edit Grep Glob Bash(git:*)  Bash(cast:*)
 
 - Always mark sections as "TODO" if information is unavailable or not found, never assume anything.
 - Follow instructions in `reports/README.md`.
-- Try to valide onchain code with github repository.
+- Try to validate onchain code with github repository.
+
+## Pre-Assessment: Architecture First
+
+Before writing any claims about a protocol, complete these steps in order:
+
+### Pass 1: Architecture Mapping
+1. **Read the protocol's GitHub README** — understand the contract architecture, what components exist, and how they relate. Browse the repo directory structure (`src/`, `contracts/`, etc.).
+2. **For every contract in the address table, fetch and review its ABI** — use Etherscan or `cast`. Look for references to other contracts (factory → deployed markets, kernel → tranches, vault → strategies). List all public functions.
+3. **Read protocol documentation** (gitbook, docs site) — understand the claimed architecture, fund flow, and governance before verifying on-chain.
+4. **Draw a contract architecture diagram** — map all layers (vault, strategy, factory, markets, governance, underlying protocols). This diagram goes in the report as an appendix. Do this FIRST, not last.
+5. **Trace the fund flow end-to-end on-chain** — follow the money from user deposit to final yield source. Check token balances, look at who holds what.
+
+### Pass 2: Verification and Scoring
+Only after architecture mapping is complete, proceed to verify each component on-chain and write risk assessments.
+
+### "Doesn't Exist" Checklist
+Before writing any claim that functionality is missing, unverifiable, or doesn't exist on-chain, confirm ALL of the following:
+- [ ] Searched the GitHub repo for the functionality
+- [ ] Checked all known contract ABIs for related functions
+- [ ] Read the protocol documentation about how this is supposed to work
+- [ ] Checked factory/deployer contracts for related deployments or events
+- [ ] Checked on-chain event logs for related contract creation
+
+If any answer is "no," use **"unverified"** not **"doesn't exist."**
 
 ## Risk
 
