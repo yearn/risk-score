@@ -10,8 +10,12 @@ const reports = getAllReports();
 <BaseLayout title="Yearn Risk" ogUrl="/" ogImage="/og/default.png">
   <h1>Risk Assessment Reports</h1>
 
+  <div class="search-row">
+    <input type="text" id="report-search" placeholder="Search by protocol, token, or risk tier…" autocomplete="off" />
+  </div>
+
   <div class="table-wrap">
-    <table>
+    <table id="reports-table">
       <thead>
         <tr>
           <th class="col-icon"></th>
@@ -52,11 +56,38 @@ const reports = getAllReports();
       </tbody>
     </table>
   </div>
+  <script is:inline>
+    const searchInput = document.getElementById("report-search");
+    const rows = document.querySelectorAll("#reports-table tbody tr");
+    searchInput.addEventListener("input", () => {
+      const q = searchInput.value.toLowerCase();
+      rows.forEach((row) => {
+        const text = row.textContent.toLowerCase();
+        row.style.display = text.includes(q) ? "" : "none";
+      });
+    });
+  </script>
 </BaseLayout>
 
 <style>
   h1 {
-    margin-bottom: 1.5rem;
+    margin-bottom: 1rem;
+  }
+  .search-row {
+    margin-bottom: 0.75rem;
+  }
+  .search-row input {
+    width: 100%;
+    max-width: 360px;
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 0.4rem 0.6rem;
+    font-size: 0.85rem;
+  }
+  .search-row input::placeholder {
+    color: var(--text-secondary);
   }
   .col-icon {
     width: 36px;
