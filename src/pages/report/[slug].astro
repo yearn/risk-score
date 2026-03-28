@@ -13,6 +13,22 @@ const { slug } = Astro.params;
 const report = getReportBySlug(slug!);
 if (!report) return Astro.redirect("/");
 const ogDescription = `${report.name} — Score: ${report.finalScore.toFixed(1)}/5.0 (${scoreTier(report.finalScore)}). ${report.token} on ${report.chain}.`;
+
+const reportIssueUrl = (() => {
+  const title = `Report Issue: ${report.name}`;
+  const body = [
+    `**Report:** ${report.name}`,
+    `**Link:** [${report.slug}](https://risk.yearn.farm/report/${report.slug})`,
+    `**GitHub:** [${report.slug}.md](https://github.com/yearn/risk-score/blob/master/reports/report/${report.slug}.md)`,
+    "",
+    "## Issue Description",
+    "",
+    "<!-- Describe what is wrong or outdated in this report -->",
+    "",
+  ].join("\n");
+  const params = new URLSearchParams({ title, body, labels: "report-issue" });
+  return `https://github.com/yearn/risk-score/issues/new?${params}`;
+})();
 ---
 
 <BaseLayout
@@ -80,6 +96,16 @@ const ogDescription = `${report.name} — Score: ${report.finalScore.toFixed(1)}
     </summary>
     <div class="prose" set:html={report.fullReportHtml} />
   </details>
+
+  <div class="report-footer">
+    <a href={reportIssueUrl} class="report-issue-btn" target="_blank" rel="noopener noreferrer">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+        <path d="M8 9.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3Z"/>
+        <path d="M8 0a8 8 0 1 1 0 16A8 8 0 0 1 8 0ZM1.5 8a6.5 6.5 0 1 0 13 0 6.5 6.5 0 0 0-13 0Z"/>
+      </svg>
+      Report Issue
+    </a>
+  </div>
 </BaseLayout>
 
 <style>
@@ -245,5 +271,29 @@ const ogDescription = `${report.name} — Score: ${report.finalScore.toFixed(1)}
     font-weight: 600;
     font-size: 0.75rem;
     text-transform: uppercase;
+  }
+  .report-footer {
+    margin-top: 1rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: center;
+  }
+  .report-issue-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1.25rem;
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    transition: color 0.2s, border-color 0.2s;
+  }
+  .report-issue-btn:hover {
+    color: var(--brand-blue);
+    border-color: var(--brand-blue);
+    text-decoration: none;
   }
 </style>
