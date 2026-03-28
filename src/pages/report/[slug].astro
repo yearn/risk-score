@@ -3,7 +3,7 @@ import BaseLayout from "../../layouts/BaseLayout.astro";
 import ScoreBadge from "../../components/ScoreBadge.astro";
 import ScoreTable from "../../components/ScoreTable.astro";
 import { getAllSlugs, getReportBySlug } from "../../lib/reports";
-
+import { scoreTier } from "../../lib/colors";
 
 export function getStaticPaths() {
   return getAllSlugs().map((slug) => ({ params: { slug } }));
@@ -12,6 +12,7 @@ export function getStaticPaths() {
 const { slug } = Astro.params;
 const report = getReportBySlug(slug!);
 if (!report) return Astro.redirect("/");
+const ogDescription = `${report.name} — Score: ${report.finalScore.toFixed(1)}/5.0 (${scoreTier(report.finalScore)}). ${report.token} on ${report.chain}.`;
 
 const reportIssueUrl = (() => {
   const title = `Report Issue: ${report.name}`;
@@ -30,8 +31,19 @@ const reportIssueUrl = (() => {
 })();
 ---
 
-<BaseLayout title={`${report.name} — Yearn Risk`}>
+<BaseLayout
+  title={`${report.name} — Yearn Risk`}
+  description={ogDescription}
+  ogImage={`/og/${report.slug}.png`}
+  ogUrl={`/report/${report.slug}/`}
+>
   <a href="/" class="back-link">&larr; All Reports</a>
+
+  {report.warning && (
+    <div class="warning-banner">
+      <strong>&#9888; {report.warning}</strong>
+    </div>
+  )}
 
   <div class="report-header">
     <div class="header-top">
@@ -97,6 +109,15 @@ const reportIssueUrl = (() => {
 </BaseLayout>
 
 <style>
+  .warning-banner {
+    background: #dc2626;
+    color: #fff;
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+    font-size: 1rem;
+    text-align: center;
+  }
   .back-link {
     display: inline-block;
     margin-bottom: 1.5rem;

@@ -35,7 +35,7 @@ const TOKEN_RISK: Record<string, string> = {
   cbETH: "1", cbBTC: "1", rETH: "1",
   USDe: "2", sUSDe: "2", tBTC: "2", rsETH: "2", ETHx: "2", LBTC: "2",
   LINK: "2", UNI: "2", GHO: "2", PYUSD: "2", osETH: "2", USDtb: "2",
-  ezETH: "2",
+  ezETH: "2", USR: "2", wstUSR: "2",
   tETH: "3", HYPE: "3",
 };
 
@@ -55,6 +55,8 @@ const sortedShared = [...shared].sort((a: any, b: any) => {
   return b.count - a.count;
 });
 
+const uniqueTokens = [...new Set(dependencies.map((d: any) => d.asset))].sort();
+
 ---
 
 <BaseLayout title="Token Exposures - Yearn Risk">
@@ -62,8 +64,11 @@ const sortedShared = [...shared].sort((a: any, b: any) => {
   <section>
     <h2>Shared Token Exposure</h2>
     <p class="section-desc">Tokens accepted by multiple protocols. If one depegs or its parent protocol fails, all listed protocols are affected.</p>
+    <div class="search-row">
+      <input type="text" id="token-search" placeholder="Search tokens…" autocomplete="off" />
+    </div>
     <div class="table-wrap">
-      <table>
+      <table id="shared-table">
         <thead>
           <tr>
             <th class="col-icon"></th>
@@ -137,6 +142,13 @@ const sortedShared = [...shared].sort((a: any, b: any) => {
           <option value={p.name}>{p.name}</option>
         ))}
       </select>
+      <label for="token-filter">Token:</label>
+      <select id="token-filter">
+        <option value="all">All</option>
+        {uniqueTokens.map((t: string) => (
+          <option value={t}>{t}</option>
+        ))}
+      </select>
     </div>
     <div class="table-wrap">
       <table id="dep-table">
@@ -153,7 +165,7 @@ const sortedShared = [...shared].sort((a: any, b: any) => {
         <tbody>
           {dependencies.map((row: any) => {
             return (
-            <tr data-protocol={row.protocol}>
+            <tr data-protocol={row.protocol} data-token={row.asset}>
               <td class="col-icon">
                 {row.address ? (
                   <Fragment>
@@ -178,18 +190,41 @@ const sortedShared = [...shared].sort((a: any, b: any) => {
   </section>
 
   <script is:inline>
-    const filter = document.getElementById("protocol-filter");
-    function applyFilter(val) {
-      filter.value = val;
-      document.querySelectorAll("#dep-table tbody tr").forEach((row) => {
-        row.style.display = val === "all" || row.dataset.protocol === val ? "" : "none";
+    // Shared Token Exposure search
+    const tokenSearch = document.getElementById("token-search");
+    const sharedRows = document.querySelectorAll("#shared-table tbody tr");
+    tokenSearch.addEventListener("input", () => {
+      const q = tokenSearch.value.toLowerCase();
+      sharedRows.forEach((row) => {
+        const text = row.textContent.toLowerCase();
+        row.style.display = text.includes(q) ? "" : "none";
+      });
+    });
+
+    // Dependency table filters
+    const protocolFilter = document.getElementById("protocol-filter");
+    const tokenFilter = document.getElementById("token-filter");
+    const depRows = document.querySelectorAll("#dep-table tbody tr");
+
+    function applyDepFilters() {
+      const pVal = protocolFilter.value;
+      const tVal = tokenFilter.value;
+      depRows.forEach((row) => {
+        const matchProtocol = pVal === "all" || row.dataset.protocol === pVal;
+        const matchToken = tVal === "all" || row.dataset.token === tVal;
+        row.style.display = matchProtocol && matchToken ? "" : "none";
       });
     }
-    filter.addEventListener("change", (e) => applyFilter(e.target.value));
+
+    protocolFilter.addEventListener("change", applyDepFilters);
+    tokenFilter.addEventListener("change", applyDepFilters);
+
     document.querySelectorAll(".protocol-card").forEach((card) => {
       card.addEventListener("click", () => {
-        applyFilter(card.dataset.name);
-        filter.scrollIntoView({ behavior: "smooth", block: "start" });
+        protocolFilter.value = card.dataset.name;
+        tokenFilter.value = "all";
+        applyDepFilters();
+        protocolFilter.scrollIntoView({ behavior: "smooth", block: "start" });
       });
     });
   </script>
@@ -199,6 +234,22 @@ const sortedShared = [...shared].sort((a: any, b: any) => {
   h1 { margin-bottom: 0.25rem; }
   section { margin-bottom: 2.5rem; }
   h2 { margin-bottom: 0.5rem; }
+  .search-row {
+    margin-bottom: 0.75rem;
+  }
+  .search-row input {
+    width: 100%;
+    max-width: 360px;
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 0.4rem 0.6rem;
+    font-size: 0.85rem;
+  }
+  .search-row input::placeholder {
+    color: var(--text-secondary);
+  }
   .section-desc {
     color: var(--text-secondary);
     font-size: 0.85rem;
@@ -310,5 +361,6 @@ const sortedShared = [...shared].sort((a: any, b: any) => {
     table { font-size: 0.8rem; }
     th, td { padding: 0.4rem 0.5rem; }
     .protocol-cards { grid-template-columns: 1fr; }
+    .filter-row { flex-wrap: wrap; }
   }
 </style>
