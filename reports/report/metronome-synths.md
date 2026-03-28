@@ -242,7 +242,7 @@ Collateral is held in the Treasury contract ([`0x3691EF68Ba22a854c36bC92f6b5F304
 
 ### Provability
 
-- **On-chain Verification**: Collateral balances are fully verifiable on-chain in Pool contracts on each chain.
+- **On-chain Verification**: Collateral balances are fully verifiable on-chain in Treasury contracts on each chain (Pool delegates collateral custody to Treasury, confirmed via `Pool.treasury()`).
 - **Oracle-based Pricing**: Chainlink oracle feeds determine collateral values and health factors. Synth assets are hard-coded to their reference asset's oracle price internally (msUSD = $1, msETH = ETH price), preventing peg deviations from triggering liquidations.
 - **No Exchange Rate**: Synthetics are not yield-bearing vault tokens — there is no PPS/exchange rate to verify. The system tracks debt positions, not share prices.
 - **Productive Collateral Transparency**: Vesper Finance tokens (vaUSDC, vaETH, etc.) have their own on-chain exchange rates, which can be independently verified.
@@ -323,6 +323,7 @@ An additional **$170M** is locked in yield aggregators and lending protocols bui
   - Voting period: 40,320 blocks (~134.4 hours / ~5.6 days)
 - **Timelock**: [`0x4c510878B907d6DDf69E6057ad2f865f60fB7775`](https://etherscan.io/address/0x4c510878B907d6DDf69E6057ad2f865f60fB7775) — **48-hour delay**
 - **ProxyAdmin Owner**: [`0xd1DE3F9CD4AE2F23DA941a67cA4C739f8dD9Af33`](https://etherscan.io/address/0xd1DE3F9CD4AE2F23DA941a67cA4C739f8dD9Af33) — controls upgrades for both ProxyAdmin contracts
+- **Pool & PoolRegistry governor**: On-chain `Pool.governor()` and `PoolRegistry.governor()` both return [`0xd1DE3F9CD4AE2F23DA941a67cA4C739f8dD9Af33`](https://etherscan.io/address/0xd1DE3F9CD4AE2F23DA941a67cA4C739f8dD9Af33) — the same 3/5 Safe. This means **parameter changes (collateral factors, deposit caps, fees) are also directly controlled by the multisig**, not routed through the Governor/Timelock. The on-chain Governor and Timelock appear to be entirely unused for both upgrades and parameter governance.
 
 **Base / Optimism:**
 - **Governor**: 3/5 Gnosis Safe ([`0xE01Df4ac1E1e57266900E62C37F12C986495A618`](https://basescan.org/address/0xE01Df4ac1E1e57266900E62C37F12C986495A618))
@@ -339,13 +340,12 @@ An additional **$170M** is locked in yield aggregators and lending protocols bui
 | Phase 4 (~9 months) | More binding votes; multisig loses veto except on token supply |
 | Phase 5 (~15 months) | Full decentralization, all decisions by community vote |
 
-**Snapshot Governance**: ~30 MIPs on [Snapshot](https://snapshot.org/#/metronome.eth). Low voter participation (5-12 votes per proposal). Last proposal (MIP-30) was in February 2025 — over 1 year with no governance activity.
+**Snapshot Governance**: ~30 MIPs on [Snapshot](https://snapshot.org/#/metronome.eth). Low voter participation (5-12 votes per proposal). Last proposal (MIP-30) was in March 2025 — over 1 year with no governance activity.
 
 **Privileged Roles:**
-- ProxyAdmin owner can upgrade all contracts on Ethereum
-- 3/5 multisig controls all contracts on Base and Optimism (same 5 signers as Ethereum)
-- Governor/Timelock system on Ethereum (48h delay)
-- Pool governor can modify collateral factors, deposit caps, fee parameters
+- 3/5 Safe (`0xd1DE`) is the ProxyAdmin owner (upgrades) AND the Pool/PoolRegistry governor (parameters) on Ethereum — all control flows through a single multisig
+- Same 3/5 Safe controls all contracts on Base and Optimism (5/5 signer overlap, no timelock)
+- Governor/Timelock system exists on Ethereum (48h delay) but is not wired to Pool or PoolRegistry — effectively unused
 
 ### Programmability
 
@@ -484,9 +484,10 @@ Fund Flow: User → deposit collateral → Pool → Treasury (holds collateral)
            Liquidator → repay debt → receives collateral + 10% bonus
 
 Trust Boundaries:
-  ⚠ ProxyAdmin Safe (3/5) can upgrade ALL contracts — bypasses Governor/Timelock
+  ⚠ 3/5 Safe controls BOTH upgrades (ProxyAdmin) AND parameters (Pool.governor)
+  ⚠ Governor/Timelock exists on Ethereum but is entirely unused
   ⚠ Same 5 anonymous signers control all chains (no independent signers)
-  ⚠ No timelock on Base/Optimism contract upgrades
+  ⚠ No timelock on Base/Optimism contract upgrades or parameter changes
 ```
 
 ---
@@ -499,13 +500,13 @@ Trust Boundaries:
 - **Multi-chain presence**: Deployed on Ethereum, Base, Optimism with significant liquidity on each.
 - **Experienced team**: Bloq Inc. (Jeff Garzik, Matthew Roszak) with 8+ years in crypto infrastructure. Same team behind Vesper Finance.
 - **Long production history**: Metronome 1.0 since 2018, Synth protocol since early 2023 (~3 years), with no direct smart contract exploits.
+- **Fully on-chain over-collateralized model**: Transparent reserves in Treasury contracts, Chainlink oracles, programmatic liquidations.
 - **Comprehensive DeFi integration**: Integrated with Main Street, Stake DAO, Morpho, Convex, Vesper, Beefy, Yearn, Pendle — indicating broad trust from major DeFi protocols.
 
 ### Key Risks
 
-- **Upgradeable contracts**: All contracts are upgradeable proxies. The ProxyAdmin owner on Ethereum is a **3/5 multisig** (not the Governor/Timelock), meaning contract upgrades bypass on-chain governance entirely.
-- **Single multisig across all chains**: All 5 signers are identical on Ethereum, Base, and Optimism (5/5 overlap). Base and Optimism have no timelock. All signers are anonymous EOAs.
-- **Governance completely inactive**: No Snapshot proposals since MIP-30 (February 2025) — over 1 year of zero governance activity. Only 5-12 votes per proposal when active.
+- **Single multisig controls everything**: The 3/5 Safe owns both ProxyAdmins (upgrades) and is the `governor()` on Pool and PoolRegistry (parameters). The on-chain Governor/Timelock is entirely unused. All 5 signers are identical on Ethereum, Base, and Optimism (5/5 overlap). L2s have no timelock. All signers are anonymous EOAs.
+- **Governance completely inactive**: No Snapshot proposals since MIP-30 (March 2025) — over 1 year of zero governance activity. Only 5-12 votes per proposal when active.
 - **Vesper Finance dependency**: Productive collateral tokens (vaUSDC, vaETH) introduce multi-layer smart contract risk — Vesper strategies route through Euler, Aave, Curve, Convex, and Frax beneath the va-tokens. Same parent company (Bloq) creates concentration risk. [LlamaRisk](https://www.llamarisk.com/research/archive-llamarisk-risk-assessment-metronome) noted >92% of collateral consists of Vesper tokens.
 - **No fallback oracle**: Chainlink is the sole oracle with no cross-check or fallback source. Quantstamp flagged this as medium-risk; still unresolved.
 - **Collateral factors untested**: LlamaRisk noted collateral factors were "chosen without testing whether they are optimal" — and they have since been increased (from 60-75% to 67-85%) without public simulation results.
@@ -516,8 +517,8 @@ Trust Boundaries:
 
 ### Critical Risks
 
-- **Single-entity rug risk**: [LlamaRisk assessed](https://www.llamarisk.com/research/archive-llamarisk-risk-assessment-metronome) that Bloq can effectively rug users. The ProxyAdmin owner (3/5 multisig) can upgrade any contract on Ethereum without governance approval or timelock — meaning it can mint arbitrary tokens, drain collateral, or brick the protocol. All 5 signers are anonymous EOAs; there is no on-chain evidence that "external signers" (promised in Phase 2 of decentralization) were actually added. All 5 signers are identical across Ethereum, Base, and Optimism Safes (5/5 overlap, verified on-chain 2026-03-28), and the L2 deployments have no timelock at all. At the time of LlamaRisk's review (2/4 multisig), they concluded: *"the entire protocol can essentially be shut down at any moment by two people who work for the same private U.S. company (Bloq)."* The threshold increased to 3/5, but if all signers remain Bloq-affiliated, the structural risk is unchanged.
-- **Governance abandoned**: No Snapshot proposals since February 2025 (over 1 year). Only 5-12 votes per proposal when active. On-chain Governor on Ethereum appears unused. This suggests governance is effectively dead and the protocol is operated unilaterally by the multisig.
+- **Single-entity rug risk**: [LlamaRisk assessed](https://www.llamarisk.com/research/archive-llamarisk-risk-assessment-metronome) that Bloq can effectively rug users. The 3/5 Safe is both the ProxyAdmin owner (upgrades) and the `governor()` on Pool and PoolRegistry (parameter changes) — meaning it controls every aspect of the protocol without governance approval or timelock. The on-chain Governor/Timelock is entirely unused. All 5 signers are anonymous EOAs; there is no on-chain evidence that "external signers" (promised in Phase 2 of decentralization) were actually added. All 5 signers are identical across Ethereum, Base, and Optimism Safes (5/5 overlap, verified on-chain 2026-03-28), and the L2 deployments have no timelock at all. At the time of LlamaRisk's review (2/4 multisig), they concluded: *"the entire protocol can essentially be shut down at any moment by two people who work for the same private U.S. company (Bloq)."* The threshold increased to 3/5, but if all signers remain Bloq-affiliated, the structural risk is unchanged.
+- **Governance abandoned**: No Snapshot proposals since March 2025 (over 1 year). Only 5-12 votes per proposal when active. On-chain Governor on Ethereum appears unused. This suggests governance is effectively dead and the protocol is operated unilaterally by the multisig.
 
 ---
 
@@ -531,7 +532,7 @@ Trust Boundaries:
 ### Critical Risk Gates
 
 - [ ] **No audit** - Protocol has been audited by Halborn (external) and internal teams. Multiple audit reports exist.
-- [ ] **Unverifiable reserves** - Collateral is fully on-chain in Pool contracts, verifiable by anyone.
+- [ ] **Unverifiable reserves** - Collateral is fully on-chain in Treasury contracts, verifiable by anyone.
 - [ ] **Total centralization** - Ethereum has Governor + 48h Timelock. L2s have 3/5 multisig.
 
 **All gates pass.** Proceed to category scoring.
@@ -553,12 +554,12 @@ Trust Boundaries:
 
 **Subcategory A: Governance**
 
-- Ethereum: Compound Governor with esMET voting token + 48-hour Timelock for parameter changes. However, **contract upgrades are controlled by a 3/5 multisig that bypasses the Governor/Timelock**.
+- Ethereum: On-chain Governor and 48-hour Timelock exist but are **entirely unused**. `Pool.governor()` and `PoolRegistry.governor()` both return the 3/5 Safe (`0xd1DE`), meaning **both parameter changes and contract upgrades are controlled directly by the multisig**, bypassing the Governor/Timelock entirely.
 - Base/Optimism: 3/5 multisig with no timelock and anonymous signers.
 - All chains governed by the exact same set of 5 multisig signers (5/5 overlap, verified on-chain).
-- Low governance participation (5-12 voters). No new Snapshot proposals since MIP-30 in February 2025 (over 1 year of inactivity).
+- Low governance participation (5-12 voters). No new Snapshot proposals since MIP-30 in March 2025 (over 1 year of inactivity).
 
-**Governance Score: 4.5/5** - The on-chain Governor with 48h timelock on Ethereum is effectively cosmetic — contract upgrades bypass it entirely via a 3/5 multisig with anonymous signers and no timelock. All chains are controlled by the exact same 5 signers (5/5 overlap, verified on-chain). LlamaRisk concluded Bloq can unilaterally rug users. No on-chain evidence that independent external signers were added as promised. Multisig can upgrade contracts to mint tokens, drain collateral, or brick the protocol. Governance has been completely inactive for over 1 year (last Snapshot proposal: February 2025), suggesting the protocol is operated unilaterally by the multisig with no community oversight.
+**Governance Score: 4.5/5** - The on-chain Governor and Timelock on Ethereum are entirely unused — `Pool.governor()` and `PoolRegistry.governor()` both return the 3/5 Safe, meaning both parameter changes and contract upgrades bypass governance entirely. All chains are controlled by the exact same 5 anonymous signers (5/5 overlap, verified on-chain). LlamaRisk concluded Bloq can unilaterally rug users. No on-chain evidence that independent external signers were added as promised. Multisig can upgrade contracts to mint tokens, drain collateral, or brick the protocol. Governance has been completely inactive for over 1 year (last Snapshot proposal: March 2025), confirming the protocol is operated unilaterally by the multisig with no community oversight.
 
 **Subcategory B: Programmability**
 
@@ -581,7 +582,7 @@ Trust Boundaries:
 
 **Centralization Score = (4.5 + 2 + 3.5) / 3 = 3.33**
 
-**Score: 3.3/5** - Governor + Timelock on Ethereum is cosmetic for upgrades — 3/5 multisig with anonymous, likely Bloq-affiliated signers controls all contract upgrades across all chains with no timelock. All 5 signers are identical on every chain, confirming single-entity control. LlamaRisk concluded single-entity rug risk exists. Governance has been inactive for 1+ year. Chainlink sole oracle without fallback and deep Vesper multi-layer dependency compound the centralization concern.
+**Score: 3.3/5** - Governor + Timelock on Ethereum are entirely unused — on-chain `Pool.governor()` and `PoolRegistry.governor()` both return the 3/5 Safe, so parameter changes and upgrades are all directly controlled by the multisig. All 5 signers are identical on every chain, confirming single-entity control. LlamaRisk concluded single-entity rug risk exists. Governance has been inactive for 1+ year. Chainlink sole oracle without fallback and deep Vesper multi-layer dependency compound the centralization concern.
 
 #### Category 3: Funds Management (Weight: 30%)
 
@@ -662,7 +663,7 @@ Final Score = (Centralization × 0.30) + (Funds Mgmt × 0.30) + (Audits × 0.20)
 
 **Final Risk Tier: Medium Risk (2.6/5.0)**
 
-Metronome Synth benefits from deep DEX liquidity ($93.4M, up from $75.9M), strong and growing DeFi integration ($170M in yield wrappers), an experienced and public team (Bloq/Garzik), and a fully on-chain over-collateralized model with transparent reserves. However, critical centralization concerns have worsened: all contract upgrades across all chains are controlled by a single 3/5 multisig with 5 identical anonymous signers across Ethereum, Base, and Optimism — with no timelock on L2s and bypassing the Governor on Ethereum. LlamaRisk concluded that Bloq can unilaterally rug users, and there is no on-chain evidence this has been mitigated. Governance has been completely inactive for over 1 year (last Snapshot proposal: February 2025). Additional concerns include: Chainlink as sole oracle with no fallback; Ethereum collateral predominantly in Vesper yield-bearing tokens with multi-layer strategy risk; collateral factors raised without simulation testing; no insurance fund for bad debt; and no new audits since February 2023. Protocol TVL decreased ~14% to ~$21M. With ~3 years in production and no direct exploits, the protocol falls into the medium risk tier with enhanced monitoring recommended.
+Metronome Synth benefits from deep DEX liquidity ($93.4M, up from $75.9M), strong and growing DeFi integration ($170M in yield wrappers), an experienced and public team (Bloq/Garzik), and a fully on-chain over-collateralized model with transparent reserves. However, critical centralization concerns have worsened: the 3/5 Safe is both the ProxyAdmin owner and the `governor()` on Pool and PoolRegistry — meaning a single multisig with 5 identical anonymous signers controls all upgrades AND all parameter changes across Ethereum, Base, and Optimism. The on-chain Governor/Timelock is entirely unused. LlamaRisk concluded that Bloq can unilaterally rug users, and there is no on-chain evidence this has been mitigated. Governance has been completely inactive for over 1 year (last Snapshot proposal: March 2025). Additional concerns include: Chainlink as sole oracle with no fallback; Ethereum collateral predominantly in Vesper yield-bearing tokens with multi-layer strategy risk; collateral factors raised without simulation testing; no insurance fund for bad debt; and no new audits since February 2023. Protocol TVL decreased ~14% to ~$21M. With ~3 years in production and no direct exploits, the protocol falls into the medium risk tier with enhanced monitoring recommended.
 
 ---
 
