@@ -120,6 +120,23 @@ List key contracts and events to monitor. At minimum, cover governance changes a
 - Try to define threshold values.
 - Recommended monitoring frequency, hourly, daily, weekly, etc.
 
+## Appendix: Contract Architecture
+
+Include an ASCII or text-based diagram showing the contract dependency graph. Group contracts by layer:
+
+1. **Vault / Token Layer** — the assessed token contract, strategies, proxy admins
+2. **Protocol Layer** — core protocol contracts (factories, kernels, markets, tranching)
+3. **Underlying Layer** — external protocols, yield sources, oracles
+4. **Governance** — multisigs, timelocks, access managers
+
+Show the data/fund flow between layers. Note key admin powers and trust boundaries. This diagram should be created during the pre-assessment architecture mapping phase (see `skill.md`).
+
+```
+[Replace with actual architecture diagram]
+```
+
+---
+
 ## Risk Summary
 
 ### Key Strengths
