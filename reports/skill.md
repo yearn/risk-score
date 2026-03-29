@@ -21,8 +21,20 @@ Before writing any claims about a protocol, complete these steps in order:
 4. **Draw a contract architecture diagram** — map all layers (vault, strategy, factory, markets, governance, underlying protocols). This diagram goes in the report as an appendix. Do this FIRST, not last.
 5. **Trace the fund flow end-to-end on-chain** — follow the money from user deposit to final yield source. Check token balances, look at who holds what.
 
+### Pass 1.5: Supply vs Reserves Reconciliation
+
+Before writing any collateralization claims, complete this arithmetic check:
+
+1. **Get the token's total supply** — `cast call <token> "totalSupply()(uint256)"`
+2. **Locate ALL contracts holding backing collateral** — do NOT rely on contract labels ("treasury", "vault"). Check token balances (wstETH, WBTC, USDC, etc.) across every known protocol contract: pools, managers, treasuries, routers, keepers. Protocols often migrate architectures (V1 → V2) and collateral custody may move to new contracts.
+3. **Sum the USD value of all located collateral** and compare to total supply. If `total collateral found < total supply`, you are missing collateral locations — keep searching before writing the report.
+4. **Compute the actual system-wide CR** = total collateral USD / total debt USD. Do not report per-market CRs as the system CR — they can be misleading (e.g. a legacy market with $8K at 12,000% CR and $0 in the main pool).
+5. **Cross-check with DeFi Llama TVL** — if your collateral total diverges significantly from reported TVL, investigate the gap.
+
+This step must pass before proceeding. A mismatch between supply and reserves is a red flag that the architecture mapping (Pass 1) is incomplete.
+
 ### Pass 2: Verification and Scoring
-Only after architecture mapping is complete, proceed to verify each component on-chain and write risk assessments.
+Only after architecture mapping and supply reconciliation are complete, proceed to verify each component on-chain and write risk assessments.
 
 ### "Doesn't Exist" Checklist
 Before writing any claim that functionality is missing, unverifiable, or doesn't exist on-chain, confirm ALL of the following:
