@@ -11,7 +11,7 @@
 fxUSD is a **decentralized stablecoin** issued by the f(x) Protocol (built by AladdinDAO) that maintains its USD peg through a dual-token system splitting yield-bearing collateral into a stable component (fxUSD) and leveraged components (xPOSITION/sPOSITION). The protocol accepts ETH LSTs (wstETH, sfrxETH, weETH, ezETH) and WBTC as collateral, enabling users to mint fxUSD at 0% ongoing interest through the fxMINT product, or to take leveraged long/short positions.
 
 **Key mechanism — the f(x) Invariant:**
-The core formula `Collateral Value = fxUSD Value + xPOSITION Value` ensures fxUSD remains fully backed. When collateral prices fluctuate, xPOSITION absorbs the volatility, keeping fxUSD stable. The system supports up to ~7x leverage on ETH/BTC positions.
+The current V2 invariant balances all position types: `Collateral - Borrowed Collateral = fxUSD (Long) + fxUSD (Short) + xPOSITION + sPOSITION`. Collateral (ETH LSTs, WBTC) is split into a stable component (fxUSD) and leveraged components — xPOSITIONs (leveraged longs) absorb upward volatility while sPOSITIONs (leveraged shorts) borrow collateral against fxUSD. When prices fluctuate, the leveraged positions absorb volatility, keeping fxUSD stable. The system supports up to ~7x leverage on ETH/BTC.
 
 **Yearn use cases (from issue #116):**
 1. **yvBTC vault strategies** — deposit BTC collateral and borrow fxUSD via fxMINT at 0% annual interest (one-time ~0.5% fee)
@@ -22,7 +22,7 @@ The core formula `Collateral Value = fxUSD Value + xPOSITION Value` ensures fxUS
 - **fxUSD Total Supply:** ~18,104,437 fxUSD
 - **fxUSD NAV:** ~$0.9984
 - **Protocol TVL (DeFi Llama):** ~$29.3M
-- **Pool2 (DEX liquidity):** ~$43.5M
+- **fxUSD DEX Liquidity:** ~$9.7M across Curve pools (~$7.1M in primary USDC/fxUSD pool)
 - **fxSAVE Total Assets:** ~30.0M fxSP (~$30M in Stability Pool)
 - **Stability Pool APY:** ~4.35%
 - **fxMINT Opening Fee:** 0.5% (ETH/BTC) | Closing Fee: 0.2%
@@ -53,25 +53,44 @@ The core formula `Collateral Value = fxUSD Value + xPOSITION Value` ensures fxUS
 | FXN (governance token) | [`0x365AccFCa291e7D3914637ABf1F7635dB165Bb09`](https://etherscan.io/address/0x365AccFCa291e7D3914637ABf1F7635dB165Bb09) | ERC-20 |
 | veFXN | [`0xEC6B8A3F3605B083F7044C0F31f2cac0caf1d469`](https://etherscan.io/address/0xEC6B8A3F3605B083F7044C0F31f2cac0caf1d469) | Vote-escrowed FXN |
 
-### Treasury Contracts
+### V2 Collateral (PoolManager — Primary Custodian)
 
-| Treasury | Address | Base Token | Collateral Value |
-|----------|---------|------------|-----------------|
-| stETH Treasury | [`0xED803540037B0ae069c93420F89Cd653B6e3Df1f`](https://etherscan.io/address/0xED803540037B0ae069c93420F89Cd653B6e3Df1f) | wstETH | ~$8,558 (legacy, mostly migrated) |
-| weETH Treasury | [`0x781BA968d5cc0b40EB592D5c8a9a3A4000063885`](https://etherscan.io/address/0x781BA968d5cc0b40EB592D5c8a9a3A4000063885) | weETH | ~$532K |
+In V2, **all position collateral is custodied by the PoolManager contract** — individual pool contracts (xstETH, xWBTC) are accounting/NFT contracts only and hold zero tokens.
+
+| Contract | Address | Role |
+|----------|---------|------|
+| PoolManager (Long) | [`0x250893CA4Ba5d05626C785e8da758026928FCD24`](https://etherscan.io/address/0x250893CA4Ba5d05626C785e8da758026928FCD24) | Custodies all V2 collateral, manages xPOSITION/fxMINT |
+| ShortPoolManager | [`0xaCDc0AB51178d0Ae8F70c1EAd7d3cF5421FDd66D`](https://etherscan.io/address/0xaCDc0AB51178d0Ae8F70c1EAd7d3cF5421FDd66D) | Manages sPOSITION positions (borrows from PoolManager) |
+
+**Collateral held in PoolManager:**
+
+| Asset | Amount | USD Value | fxUSD Debt | Positions |
+|-------|--------|-----------|------------|-----------|
+| wstETH (xstETH pool [`0x6ecfa38fee8a5277b91efda204c235814f0122e8`](https://etherscan.io/address/0x6ecfa38fee8a5277b91efda204c235814f0122e8)) | 4,519 wstETH | ~$11.1M | 7,207,005 fxUSD | 1,864 |
+| WBTC (xWBTC pool [`0xab709e26fa6b0a30c119d8c55b887ded24952473`](https://etherscan.io/address/0xab709e26fa6b0a30c119d8c55b887ded24952473)) | 228 WBTC | ~$15.2M | 10,123,422 fxUSD | 803 |
+| **Total** | | **~$26.2M** | **17,330,427 fxUSD** | 2,667 |
+
+**Overall V2 collateralization ratio: ~151.7%**
+
+**Note:** `fxUSD.isUnderCollateral()` returns `true` — this flag reflects legacy V1 market status (wstETH treasury at 81% CR with only ~$8.5K remaining). The V2 system via PoolManager maintains >150% collateralization.
+
+### Legacy V1 Treasury Contracts (Minimal Remaining Value)
+
+| Treasury | Address | Base Token | Remaining Value |
+|----------|---------|------------|----------------|
+| stETH Treasury | [`0xED803540037B0ae069c93420F89Cd653B6e3Df1f`](https://etherscan.io/address/0xED803540037B0ae069c93420F89Cd653B6e3Df1f) | wstETH | ~$8.6K (under-collateralized, ~264 legacy fxUSD) |
 | sfrxETH Treasury | [`0xcfEEfF214b256063110d3236ea12Db49d2dF2359`](https://etherscan.io/address/0xcfEEfF214b256063110d3236ea12Db49d2dF2359) | sfrxETH | ~$149K |
-| ezETH Treasury | [`0x38965311507D4E54973F81475a149c09376e241e`](https://etherscan.io/address/0x38965311507D4E54973F81475a149c09376e241e) | ezETH | ~$45K |
-| WBTC Treasury | [`0x63Fe55B3fe3f74B42840788cFbe6229869590f83`](https://etherscan.io/address/0x63Fe55B3fe3f74B42840788cFbe6229869590f83) | WBTC | ~$44K |
-| CVX Treasury | [`0xdFac83173A96b06C5D6176638124d028269cfCd2`](https://etherscan.io/address/0xdFac83173A96b06C5D6176638124d028269cfCd2) | aCVX | ~$760K |
+
+### Reserve Pool
+
+| Contract | Address | Holdings |
+|----------|---------|----------|
+| Reserve Pool | [`0xE93F5DD55eC9bdAbbba5eA88E4b4f3C253ee45Ed`](https://etherscan.io/address/0xE93F5DD55eC9bdAbbba5eA88E4b4f3C253ee45Ed) | 17.43 wstETH (~$43K) + 0.38 WBTC (~$25K) + 1,229 fxUSD |
 
 ### Market & Infrastructure Contracts
 
 | Contract | Address | Purpose |
 |----------|---------|---------|
-| fxUSD Market (MarketV2) | [`0xAD9A0E7C08bc9F747dF97a3E7E7f620632CB6155`](https://etherscan.io/address/0xAD9A0E7C08bc9F747dF97a3E7E7f620632CB6155) | Core market for wstETH |
-| btcUSD Market | [`0x56B85438F1E16a91eAc5Fe2DAAb2C3Dd57690175`](https://etherscan.io/address/0x56B85438F1E16a91eAc5Fe2DAAb2C3Dd57690175) | WBTC market |
-| PoolManager (Long) | [`0x250893CA4Ba5d05626C785e8da758026928FCD24`](https://etherscan.io/address/0x250893CA4Ba5d05626C785e8da758026928FCD24) | Manages xPOSITION/fxMINT positions |
-| ShortPoolManager | [`0xaCDc0AB51178d0Ae8F70c1EAd7d3cF5421FDd66D`](https://etherscan.io/address/0xaCDc0AB51178d0Ae8F70c1EAd7d3cF5421FDd66D) | Manages sPOSITION positions |
 | PegKeeper | [`0x50562fe7e870420F5AAe480B7F94EB4ace2fcd70`](https://etherscan.io/address/0x50562fe7e870420F5AAe480B7F94EB4ace2fcd70) | Maintains fxUSD peg via Stability Pool |
 | Configuration | [`0x16b334f2644cc00b85DB1A1efF0C2C395e00C28d`](https://etherscan.io/address/0x16b334f2644cc00b85DB1A1efF0C2C395e00C28d) | Protocol parameter configuration |
 | ProxyAdmin | [`0x9b54b7703551d9d0ced177a78367560a8b2edda4`](https://etherscan.io/address/0x9b54b7703551d9d0ced177a78367560a8b2edda4) | Controls all proxy upgrades |
@@ -138,7 +157,7 @@ No bug bounty program was found on Immunefi, Code4rena, Sherlock, or other major
 ## Historical Track Record
 
 - **In production since:** February 23, 2024 (~25 months)
-- **Current TVL:** ~$29.3M (DeFi Llama) with $43.5M in Pool2 DEX liquidity
+- **Current TVL:** ~$29.3M (DeFi Llama); ~$26.2M collateral backing ~17.3M fxUSD debt in PoolManager
 - **Peak fxUSD supply:** The token has grown from launch to ~18.1M supply
 - **Peg stability:** fxUSD has generally maintained its peg, with an ATL of $0.953 on December 5, 2024. Current price ~$1.00
 - **Security incidents:** One responsibly disclosed vulnerability (ChainSecurity, April 2025) — no exploits or fund losses
@@ -148,11 +167,11 @@ The protocol has operated for over 2 years with no exploits or fund losses. The 
 
 ## Funds Management
 
-fxUSD is backed by a diversified pool of crypto-native collateral deposited across multiple treasuries. The system does not delegate funds to external lending protocols for the core collateral — collateral stays in the treasury contracts. However, the Stability Pool deploys USDC to Aave (up to 80% cap) and wstETH to Aave Prime (up to 80% cap) for yield generation.
+In V2, all fxUSD position collateral is custodied by the PoolManager contract ([`0x250893CA4Ba5d05626C785e8da758026928FCD24`](https://etherscan.io/address/0x250893CA4Ba5d05626C785e8da758026928FCD24)), which currently holds ~4,519 wstETH (~$11.1M) and ~228 WBTC (~$15.2M) — totaling ~$26.2M backing ~17.3M fxUSD debt (**~151.7% CR**). The system does not delegate position collateral to external protocols. The Stability Pool separately deploys USDC to Aave (up to 80% cap) for yield generation on behalf of fxSP depositors.
 
 ### Accessibility
 
-- **Who can mint:** Anyone can mint fxUSD by depositing collateral (wstETH, WBTC, weETH, ezETH, sfrxETH) through fxMINT or by opening xPOSITION/sPOSITION positions. No whitelist required.
+- **Who can mint:** Anyone can mint fxUSD by depositing collateral (wstETH, WBTC in V2) through fxMINT or by opening xPOSITION/sPOSITION positions. No whitelist required.
 - **Minting mechanism:** Atomic in a single transaction via flash loans. Users deposit collateral, fxUSD is minted proportional to their leverage/debt position.
 - **Redemption:** Anyone can redeem fxUSD for $1 worth of underlying collateral (wstETH/WBTC) as a last-resort peg mechanism, with a 0.5% fee (creating a hard floor at ~$0.995).
 - **Fees:** Opening fee: 0.5% of minted debt (fxMINT), 0.3% (xPOSITION/sPOSITION). Closing fee: 0.2% (fxMINT), 0.1% (xPOSITION/sPOSITION). 0% ongoing annual interest for fxMINT.
@@ -160,9 +179,9 @@ fxUSD is backed by a diversified pool of crypto-native collateral deposited acro
 
 ### Collateralization
 
-- **Fully collateralized on-chain** by crypto-native assets: ETH LSTs (wstETH, weETH, sfrxETH, ezETH), WBTC, and aCVX
-- **Over-collateralization:** The system requires >100% collateralization. Most active markets maintain 180%+ CR. The Stability Ratio triggers protective measures at 130%.
-- **Collateral quality:** Primarily blue-chip LSTs (wstETH, weETH) and WBTC — high-quality DeFi assets with deep liquidity. aCVX (Convex) represents a lower-quality tail.
+- **Fully collateralized on-chain** by crypto-native assets held in the PoolManager: wstETH (~$11.1M) and WBTC (~$15.2M)
+- **Over-collateralization:** The V2 system maintains ~151.7% CR (~$26.2M collateral backing ~17.3M fxUSD debt). The system requires >100% CR; Stability Mode triggers protective measures at CR <130%. Note: `fxUSD.isUnderCollateral()` currently returns `true` due to the legacy V1 wstETH market (81% CR with only ~$8.5K remaining) — the V2 PoolManager system is healthy at >150%.
+- **Collateral quality:** wstETH (Lido) and WBTC — blue-chip DeFi assets with deep liquidity. V2 concentrates collateral in two high-quality assets rather than the V1 approach of 6+ collateral types.
 - **Liquidations are on-chain** via two mechanisms:
   - **Rebalancing (Liquidation Brake):** Triggered at 88% LTV — partial position reduction, 2.5% bounty
   - **Hard Liquidation:** Triggered at 95% LTV — full position closure, 4% bounty
@@ -182,7 +201,8 @@ fxUSD is backed by a diversified pool of crypto-native collateral deposited acro
 - **Oracle system:** Multi-source design:
   - **stETH/USD:** Chainlink ETH/USD + Uniswap V3 USDC/ETH (0.05% and 0.3% pools) + Curve stETH/ETH EMA + Uniswap V3 stETH/ETH. 1% deviation threshold.
   - **WBTC/USD:** Chainlink BTC/USD + Chainlink WBTC/BTC + Uniswap V3 pools (WBTC/USDC, WBTC/ETH, USDC/ETH). 2% deviation threshold.
-- **Admin minting:** The fxUSD contract is upgradeable (TransparentUpgradeableProxy). The 6/9 multisig controls the ProxyAdmin and could theoretically upgrade the implementation to allow unbacked minting. Under the current implementation, fxUSD can only be minted against collateral through the market contracts.
+- **Admin minting:** The fxUSD contract is upgradeable (TransparentUpgradeableProxy). The 6/9 multisig controls the ProxyAdmin and could theoretically upgrade the implementation to allow unbacked minting. Under the current implementation, fxUSD can only be minted against collateral through the PoolManager.
+- **`isUnderCollateral` flag:** The fxUSD contract currently reports `isUnderCollateral() = true` due to a legacy V1 wstETH market with 81% CR (~$8.5K remaining, negligible). The active V2 system holds ~$26.2M collateral against ~$17.3M fxUSD debt (151.7% CR).
 - **No third-party verification** (no Chainlink PoR or custodian attestation needed — all on-chain)
 
 ## Liquidity Risk
@@ -228,7 +248,7 @@ fxUSD is backed by a diversified pool of crypto-native collateral deposited acro
 - **Uniswap V3:** TWAP oracle data used as secondary/validation price source
 - **Curve:** stETH/ETH EMA oracle + fxUSD/USDC pool for peg monitoring
 - **Aave:** Stability Pool deploys USDC to Aave Core (up to 80% cap) and wstETH to Aave Prime (up to 80%)
-- **Lido/Rocket Pool/EtherFi/Renzo:** Underlying LST protocols for collateral tokens
+- **Lido:** wstETH is the primary ETH collateral in V2 (~$11.1M)
 - **LayerZero:** Used for omnichain fxUSD bridging (cross-chain OFT)
 
 The protocol depends on multiple well-established DeFi protocols. Chainlink is the most critical dependency — oracle failure would impair pricing and liquidations. Aave exposure is capped and non-critical to core fxUSD backing.
@@ -251,7 +271,7 @@ The protocol depends on multiple well-established DeFi protocols. Chainlink is t
 | ProxyAdmin | [`0x9b54b7703551d9d0ced177a78367560a8b2edda4`](https://etherscan.io/address/0x9b54b7703551d9d0ced177a78367560a8b2edda4) | Any `upgrade()` calls — immediate alert |
 | Operational Multisig | [`0x26B2ec4E02ebe2F54583af25b647b1D619e67BbF`](https://etherscan.io/address/0x26B2ec4E02ebe2F54583af25b647b1D619e67BbF) | Governance parameter changes, new transactions |
 | Emergency Multisig | [`0x28c921adAC4c1072658eB01a28DA06b5F651eF62`](https://etherscan.io/address/0x28c921adAC4c1072658eB01a28DA06b5F651eF62) | Pause events on PoolManager/ShortPoolManager |
-| PoolManager | [`0x250893CA4Ba5d05626C785e8da758026928FCD24`](https://etherscan.io/address/0x250893CA4Ba5d05626C785e8da758026928FCD24) | Rebalance/Liquidation events, position health |
+| PoolManager | [`0x250893CA4Ba5d05626C785e8da758026928FCD24`](https://etherscan.io/address/0x250893CA4Ba5d05626C785e8da758026928FCD24) | Rebalance/Liquidation events, wstETH/WBTC balances, collateral ratio |
 | Stability Pool (fxSP) | [`0x65C9A641afCEB9C0E6034e558A319488FA0FA3be`](https://etherscan.io/address/0x65C9A641afCEB9C0E6034e558A319488FA0FA3be) | USDC balance (alert if <5% of pool), deposit/withdrawal flows |
 | fxSAVE | [`0x7743e50F534a7f9F1791DdE7dCD89F7783Eefc39`](https://etherscan.io/address/0x7743e50F534a7f9F1791DdE7dCD89F7783Eefc39) | Total assets, exchange rate changes |
 | PegKeeper | [`0x50562fe7e870420F5AAe480B7F94EB4ace2fcd70`](https://etherscan.io/address/0x50562fe7e870420F5AAe480B7F94EB4ace2fcd70) | Peg maintenance events, funding level triggers |
@@ -274,8 +294,9 @@ The protocol depends on multiple well-established DeFi protocols. Chainlink is t
 
 - `fxUSD.nav()` — current NAV (target: 1e18 = $1.00)
 - `fxUSD.totalSupply()` — total fxUSD in circulation
-- `Market.collateralRatio()` — per-market collateral ratio
-- `Market.isUnderCollateral()` — boolean, true if CR <100%
+- `fxUSD.isUnderCollateral()` — boolean (currently true due to legacy market; monitor for V2 changes)
+- `PoolManager.getPoolInfo(pool)` — returns (collateralCapacity, collateralBalance, rawCollateral, debtCapacity, debtBalance) per pool
+- `wstETH.balanceOf(PoolManager)` / `WBTC.balanceOf(PoolManager)` — direct collateral balance checks
 - `StabilityPool.totalSupply()` — total fxSP tokens
 - `fxSAVE.totalAssets()` — total assets in fxSAVE vault
 
@@ -334,12 +355,12 @@ The protocol depends on multiple well-established DeFi protocols. Chainlink is t
 │  │ Manager       │  │ 0xA5e2...fE4│  │ 0xe60e...37  │           │
 │  │ 0xaCDc...66D  │  └──────────────┘  └──────────────┘           │
 │  └──────┬───────┘                                               │
-│         │ manages positions in                                  │
+│         │ custodies ALL V2 collateral                           │
 │  ┌──────▼───────────────────────────────────────────────┐       │
-│  │ TREASURIES (collateral vaults)                        │       │
-│  │ wstETH: 0xED80..1f  │ weETH:  0x781B..85            │       │
-│  │ sfrxETH: 0xcfEE..59 │ ezETH:  0x3896..1e            │       │
-│  │ WBTC:   0x63Fe..83  │ aCVX:   0xdFac..d2            │       │
+│  │ COLLATERAL (held in PoolManager)                      │       │
+│  │ wstETH: 4,519 (~$11.1M) via xstETH pool              │       │
+│  │ WBTC:     228 (~$15.2M) via xWBTC pool                │       │
+│  │ Total: ~$26.2M backing ~17.3M fxUSD (151.7% CR)      │       │
 │  └──────────────────────────────────────────────────────┘       │
 └─────────────────────────────────────────────────────────────────┘
           │
@@ -350,10 +371,10 @@ The protocol depends on multiple well-established DeFi protocols. Chainlink is t
 │  │ Chainlink  │  │ Uniswap   │  │ Curve     │  │ Aave      │    │
 │  │ (oracles)  │  │ V3 (TWAP) │  │ (EMA,DEX) │  │ (yield)   │    │
 │  └───────────┘  └───────────┘  └───────────┘  └───────────┘    │
-│  ┌───────────┐  ┌───────────┐  ┌───────────┐                   │
-│  │ Lido      │  │ EtherFi   │  │ Renzo     │                   │
-│  │ (wstETH)  │  │ (weETH)   │  │ (ezETH)   │                   │
-│  └───────────┘  └───────────┘  └───────────┘                   │
+│  ┌───────────┐                                                  │
+│  │ Lido      │                                                  │
+│  │ (wstETH)  │                                                  │
+│  └───────────┘                                                  │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
@@ -490,7 +511,7 @@ The protocol depends on multiple well-established DeFi protocols. Chainlink is t
 | **4** | Partially collateralized or custodial | Lower-quality or illiquid assets | Opaque or infrequent reporting |
 | **5** | Uncollateralized or unverifiable (CRITICAL GATE) | Unknown or very high-risk assets | No verification possible |
 
-**Score: 2.0/5** — Over-collateralized on-chain with verifiable reserves. Primarily high-quality LSTs (wstETH, weETH) and WBTC. aCVX is lower quality but a small portion. The complexity of verifying across 6+ treasury contracts and understanding the invariant formula adds some friction. The legacy wstETH market showing `isUnderCollateral: true` is concerning but has negligible remaining value (~$8.5K).
+**Score: 2.0/5** — Over-collateralized on-chain at ~151.7% CR with verifiable reserves in a single PoolManager contract. Collateral is concentrated in two high-quality assets: wstETH (~$11.1M) and WBTC (~$15.2M). The `isUnderCollateral` flag on the fxUSD contract is triggered by a legacy V1 market with negligible remaining value (~$8.5K, 81% CR), not the active V2 system. The V2 architecture simplifies verification by centralizing collateral custody.
 
 **Subcategory B: Provability**
 
