@@ -178,7 +178,7 @@ Actual allocations computed from Treasury multisig token balances (see [Reserve 
 - **On-chain coverage verified (March 26, 2026):** Neutrl sNUSD: 12.4% (required 10%), Tokemak autoUSD: 12.5% (required 10%). See [On-Chain Coverage Data](#on-chain-coverage-data-verified-march-26-2026) for full breakdown.
 - If losses exceed Junior coverage, Senior absorbs remaining losses
 - **Loss Escalation Flow (enforced on-chain by kernel/accountant):**
-  1. **Normal (PERPETUAL):** No losses. ST and JT deposit/withdraw freely, subject to coverage requirement.
+  1. **Normal (PERPETUAL):** No losses. At the Dawn market level, ST and JT can deposit/redeem instantly (single tx, subject to coverage requirement). Note: srRoyUSDC vault holders still face the 14-day async withdrawal queue at the Concrete vault layer — that queue is always active regardless of market state.
   2. **Small loss → Fixed-Term (Protection Mode):** When JT covers ST drawdowns and `jtImpermanentLoss` exceeds dust tolerance, the market transitions to Fixed-Term. **ST withdrawals are blocked** (protects JT from ST withdrawing the capital JT is covering). JT deposits are also blocked (protects existing JT from dilution). ST deposits and JT redemptions remain enabled (JT can still exit surplus above coverage). YDM curve adaptation is frozen. No protocol fees taken.
   3. **Recovery within fixed term:** If the underlying asset recovers before the term expires, `jtImpermanentLoss` is repaid from ST appreciation. Market returns to PERPETUAL. Losses are erased.
   4. **No recovery, term expires:** `jtImpermanentLoss` is **permanently zeroed** — JT absorbs the loss forever with no recourse. Market returns to PERPETUAL. ST is made whole at JT's expense.
