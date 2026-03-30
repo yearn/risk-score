@@ -58,6 +58,8 @@ The Treasury multisig ([`0x170ff06326eBb64BF609a848Fc143143994AF6c8`](https://et
 
 Blueprint's own architecture docs describe MultisigStrategy as a design that "simply forwards deposits to a multi-sig wallet and retrieves" them later: [`Architecture.md#3.1.3 Multisig Strategies`](https://github.com/Blueprint-Finance/concrete-earn-v2-bug-bounty/blob/a9ace6154cb2728bc9d3d4c5019e040fb2d4b562/doc/Architecture.md#313-multisig-strategies).
 
+The configured `multiSig` address was also verified live on-chain to be a standard Safe v1.4.1, not a custom treasury contract: `MultisigStrategy.getMultiSig()` returns [`0x170ff06326eBb64BF609a848Fc143143994AF6c8`](https://etherscan.io/address/0x170ff06326eBb64BF609a848Fc143143994AF6c8), and that address responds to `VERSION()` = `1.4.1`, `getThreshold()` = `3`, and `getOwners()` = 5 owners.
+
 | Market | Contract | Address |
 |--------|----------|---------|
 | Neutrl sNUSD | Kernel | [`0x0aE0978B868804929fd4C06B3B22D9197B8cd3c6`](https://etherscan.io/address/0x0aE0978B868804929fd4C06B3B22D9197B8cd3c6) |
