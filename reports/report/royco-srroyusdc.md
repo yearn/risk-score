@@ -12,6 +12,8 @@ srRoyUSDC is the Senior Vault token of Royco Dawn, an on-chain yield-splitting p
 
 The Senior Vault is curator-managed by the Royco Foundation, which allocates deposited USDC across whitelisted markets including autoUSD (Auto), savUSD (Avant), sNUSD (Neutrl), Aave v3 Core USDC, and stcUSD (Cap Finance, currently paused). Junior capital in each market absorbs losses first, providing a coverage buffer for Senior depositors.
 
+Royco's tranche mechanics are enforced on-chain, but the vault's capital path is trust-based: `MultisigStrategy` hands full custody of allocated funds to the treasury multisig.
+
 - **Current PPS:** ~1.005571 USDC per srRoyUSDC (verified on-chain March 25, 2026)
 - **Total Supply:** ~10,673,575 srRoyUSDC
 - **Total Assets:** ~$10,733,046 USDC (100% deployed via MultisigStrategy, $0 held directly in vault)
