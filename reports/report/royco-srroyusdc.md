@@ -18,7 +18,7 @@ The Senior Vault is curator-managed by the Royco Foundation, which allocates dep
 - **Total Holders:** ~8 (3 with meaningful holdings; 1 EOA holds ~69% of supply)
 - **DeFiLlama TVL (Royco V2, all chains):** ~$5.16M (Ethereum: $5.15M, Avalanche: $3.5K)
 - **Management Fee:** 0%
-- **Performance Fee:** 0% (currently; documentation states 10% of Senior yield, 20% of Junior yield)
+- **Performance Fee:** 0% at vault level (`performanceFee()` returns 0, recipient is `address(0)`). Fees are charged at the Dawn market layer instead: 10% on ST yield, 0% on JT yield, 45% on yield share — verified via accountant `getState()`. Documentation claims "10% Senior / 20% Junior" are partially outdated (JT fee is 0%, yield share fee is undocumented).
 - **Contract Created:** January 6, 2026 (~78 days ago)
 
 **Links:**
@@ -166,7 +166,7 @@ The Senior Vault allocates deposited USDC across whitelisted markets where Junio
 
 - **Deposits:** KYC-gated. Participants undergo KYC verification and deposits restricted to whitelisted addresses. Not fully permissionless.
 - **Withdrawals:** Request triggers up to 14-day unlock period. Vault sources liquidity from underlying Senior tranches. After unlock period, funds become claimable.
-- **Fees:** 0% management fee. 0% performance fee on-chain (both fees and fee recipients are set to zero/address(0) as verified on-chain March 25, 2026). Documentation states 10%/20% for Senior/Junior yield — either not yet enabled or changed since documentation was written. Fee updates require VAULT_MANAGER role (3/4 multisig).
+- **Fees:** 0% management fee, 0% performance fee at the vault level (`managementFee()` and `performanceFee()` both return 0 with `address(0)` recipients, verified on-chain). Fees are charged at the Dawn market layer: 10% on ST yield (`stProtocolFeeWAD`), 0% on JT yield (`jtProtocolFeeWAD`), 45% on yield share / risk premium (`yieldShareProtocolFeeWAD`) — verified via accountant `getState()`. Documentation claims "10% Senior / 20% Junior" are partially outdated. Vault-level fee updates require VAULT_MANAGER role (3/4 multisig).
 - **Secondary Market:** Improved since launch. Curve CurveStableSwapNG pool holds ~489K srRoyUSDC. Morpho Blue markets: srRoyUSDC/USDC (~$272K supply, 84% utilized), srRoyUSDC/pmUSD (~$1.99M supply, 91% utilized — loan asset is pmUSD, not direct USDC exit).
 
 ### Collateralization
