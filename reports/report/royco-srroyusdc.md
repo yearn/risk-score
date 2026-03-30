@@ -4,7 +4,7 @@
 - **Token:** srRoyUSDC (Senior Royco USDC)
 - **Chain:** Ethereum Mainnet
 - **Token Address:** [`0xcD9f5907F92818bC06c9Ad70217f089E190d2a32`](https://etherscan.io/address/0xcD9f5907F92818bC06c9Ad70217f089E190d2a32)
-- **Final Score: 3.65/5.0**
+- **Final Score: 3.80/5.0**
 
 ## Overview + Links
 
@@ -620,7 +620,7 @@ Hexens audit completed; Cantina competition still in judging after ~2 months (co
 
 **Score: (3.0 + 3.5 + 4.0) / 3 = 3.5/5**
 
-#### Category 3: Funds Management (Weight: 30%) — **4.5**
+#### Category 3: Funds Management (Weight: 30%) — **5.0**
 
 **Subcategory A: Collateralization — 5.0**
 
@@ -635,19 +635,20 @@ Hexens audit completed; Cantina competition still in judging after ~2 months (co
 - **Treasury multisig can divert 100% of allocated funds:** Because the capital path is a custody handoff rather than an escrowed strategy, the Treasury multisig can break the expected flow and use all forwarded funds freely.
 - If Junior coverage is insufficient, Senior absorbs losses
 
-**Subcategory B: Provability — 4.0**
+**Subcategory B: Provability — 5.0**
 
 - ERC-4626 exchange rate is on-chain (PPS verifiable)
 - However, `totalAssets()` depends entirely on MultisigStrategy's `adjustTotalAssets(int256 diff, uint256 nonce)` — the multisig submits a signed USDC delta (not an absolute value), which is added/subtracted from `vaultDepositedAmount`. This is **not** computed from on-chain positions in underlying protocols.
 - Funds are on-chain in Aave/Avant/Neutrl/Auto only if the Treasury multisig actually deploys them there. The strategy itself does not enforce deployment: `_allocateToPosition()` forwards full custody to the multisig, and `_retrieveAssetsFromMultisig()` depends on multisig approval to pull assets back. The entire PPS therefore depends on both multisig accounting honesty and multisig custody cooperation, because there is no on-chain guarantee that allocated funds remain in the intended flow after reaching the Treasury multisig (reporting is constrained by max 0.5% per update, 12-hour cooldown, nonce 37 confirming regular updates).
 - **Emergency bypass exists:** `unpauseAndAdjustTotalAssets()` skips diff validation — but requires contract to be paused first (circuit breaker triggered, `Paused` event emitted on-chain). Provides a detection window before the unconstrained adjustment.
+- **Underlying protocols remain partially opaque:** The vault is exposed to newer protocols where the actual safety, redeemability, and withdrawal behavior of deployed capital cannot be independently guaranteed from the vault layer. Even when reserve locations are partially evidenced, that does not prove capital will be recoverable on demand or safe from underlying protocol-specific failure modes.
 - Individual underlying market positions are not easily auditable without protocol-specific tooling
 - **Per-market Junior coverage IS verifiable on-chain:** Each market's Accountant `getState()` returns JT/ST effective NAV, impermanent loss, coverage parameters, and market state. Kernel `getState()` returns owned yield-bearing assets per tranche. All contracts are verified on Etherscan.
 - No third-party verification mechanism (no Chainlink PoR, no custodian attestations)
 - Yield computation is on-chain via AdaptiveCurveYDM
-- **Self-reported accounting** with constraints is better than no reporting, but fundamentally depends on multisig honesty
+- **Self-reported accounting** with constraints is better than no reporting, but fundamentally depends on multisig honesty and does not solve uncertainty around the underlying protocols themselves
 
-**Score: (5.0 + 4.0) / 2 = 4.5/5**
+**Score: (5.0 + 5.0) / 2 = 5.0/5**
 
 #### Category 4: Liquidity Risk (Weight: 15%) — **3.5**
 
@@ -685,10 +686,10 @@ No optional modifiers apply (protocol is <2 years old, TVL <$500M).
 |----------|-------|--------|----------|
 | Audits & Historical | 3.0 | 20% | 0.60 |
 | Centralization & Control | 3.5 | 30% | 1.05 |
-| Funds Management | 4.5 | 30% | 1.35 |
+| Funds Management | 5.0 | 30% | 1.50 |
 | Liquidity Risk | 3.5 | 15% | 0.525 |
 | Operational Risk | 2.5 | 5% | 0.125 |
-| **Final Score** | | | **3.65 / 5.0** |
+| **Final Score** | | | **3.80 / 5.0** |
 
 ### Risk Tier
 
@@ -712,7 +713,7 @@ No optional modifiers apply (protocol is <2 years old, TVL <$500M).
 - **Governance-based:** Reassess if timelock is added to MultisigStrategy, the multisig threshold/signers change, MultisigStrategy is replaced, or a new governance mechanism is introduced
 - **Strategy-based:** Reassess if RoycoVaultMakinaStrategy grows materially beyond its current small allocation (~1,000 USDC)
 - **Fee-based:** Reassess if performance or management fees are changed from 0%
-- **Underlying protocol:** Reassess if any whitelisted market (Avant, Neutrl, Auto) experiences an exploit or significant issue
+- **Underlying protocol:** Reassess if any whitelisted market (Avant, Neutrl, Auto) experiences an exploit or significant issue, or if the set of underlying protocols / markets changes materially
 
 ---
 
