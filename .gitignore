@@ -46,3 +46,6 @@ node_modules/
 
 # Git worktrees
 .worktrees/
+
+# Substack generated output
+reports/substack/output/

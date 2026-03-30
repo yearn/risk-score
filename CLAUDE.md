@@ -42,3 +42,10 @@
 - For link addresses, use the following format, don't shorten the address: [`0xDEaDbeefdEAdbeefdEadbEEFdeadbeEFdEaDbeeF`](https://etherscan.io/address/0xDEaDbeefdEAdbeefdEadbEEFdeadbeEFdEaDbeeF)
 - Always take time to read the report and understand the context before generating report or making any changes.
 - Use skill `generating-risk-reports` to generate risk assessment reports defined in `reports/SKILL.md`
+
+## Generating Substack Articles
+
+- Use skill `generate-substack-article` to convert a risk report into a Substack newsletter article
+- Skill definition: `reports/substack/SKILL.md`, template: `reports/substack/TEMPLATE.md`, style guide: `reports/substack/STYLE_GUIDE.md`
+- Generate images first: `uv run scripts/substack/generate_images.py <slug>`
+- Output goes to `reports/substack/output/<slug>/` (gitignored)
