@@ -147,19 +147,21 @@ The Senior Vault allocates deposited USDC across whitelisted markets where Junio
 
 ### Target Allocations
 
-| Market | Protocol | Chain | Target Allocation | Status |
-|--------|----------|-------|-------------------|--------|
-| savUSD | Avant | Avalanche | 35% | Active |
-| sNUSD | Neutrl | Ethereum | 35% | Active |
-| Aave v3 Core USDC | Aave | Ethereum | 20% | Active (liquidity reserve) |
-| autoUSD | Auto | Ethereum | 10% | Active |
-| stcUSD | Cap Finance | Ethereum | Paused | Paused (compressed yields) |
-| sUSDai | USD.ai | Arbitrum | Pending | Pending integration |
+| Market | Protocol | Chain | Target | Actual (March 27, 2026) | Status |
+|--------|----------|-------|--------|------------------------|--------|
+| savUSD | Avant | Avalanche | 35% | **~40%** (~$4.278M) | Active — at concentration cap |
+| sNUSD | Neutrl | Ethereum | 35% | **~29.4%** (~$3.153M, across 2 markets) | Active — under target |
+| Aave v3 Core USDC | Aave | Ethereum | 20% | **~19.7%** (~$2.108M) | Active (liquidity reserve) |
+| autoUSD | Auto | Ethereum | 10% | **~10.9%** (~$1.169M) | Active |
+| stcUSD | Cap Finance | Ethereum | Paused | 0% | Paused (compressed yields) |
+| sUSDai | USD.ai | Arbitrum | Pending | 0% | Pending integration |
+
+Actual allocations computed from Treasury multisig token balances (see [Reserve Location Reconciliation](#reserve-location-reconciliation-verified-march-27-2026)). Target allocations are set off-chain by the Royco Foundation curator — not stored in any contract.
 
 **Concentration Controls:**
-- Per-protocol: 40% max
+- Per-protocol: 40% max — Avant is currently at the cap (~40%)
 - Per-asset: 40% max
-- Per-chain: 40% max (Ethereum exempt)
+- Per-chain: 40% max (Ethereum exempt) — Avalanche at ~40% (Avant savUSD only)
 - Aave v3 USDC exempt from per-market caps
 
 ### Accessibility
@@ -421,6 +423,31 @@ The Junior tranche provides the first-loss buffer protecting Senior depositors. 
 - Alert if Treasury transfers or redeems Senior Tranche tokens (could indicate rebalancing or exit)
 - Alert if Treasury deposits into new markets (new Senior Tranche tokens appearing)
 
+**Market allocation monitoring:**
+
+Target allocations are set off-chain by the Royco Foundation curator — there is no on-chain registry of targets. Actual allocations must be reconstructed from the Treasury multisig's token balances across chains.
+
+*How to compute current allocation per market:*
+
+| Step | Chain | Call | Purpose |
+|------|-------|------|---------|
+| 1 | Ethereum | `balanceOf(0x170ff0...)` on aUSDC [`0x98c23e9d8f34fefb1b7bd6a91b7ff122f4e16f5c`](https://etherscan.io/address/0x98c23e9d8f34fefb1b7bd6a91b7ff122f4e16f5c) | Aave USDC position |
+| 2 | Ethereum | `balanceOf(0x170ff0...)` on ROY-ST-sNUSD [`0x2070Af1C865f5d764F673Baf5654822947e71243`](https://etherscan.io/address/0x2070Af1C865f5d764F673Baf5654822947e71243) | Neutrl sNUSD market 1 |
+| 3 | Ethereum | `balanceOf(0x170ff0...)` on ROY-ST-sNUSD [`0x3b2df77f0eaa0ca98aaabffa96b03eaf08ec6c8e`](https://etherscan.io/address/0x3b2df77f0eaa0ca98aaabffa96b03eaf08ec6c8e) | Neutrl sNUSD market 2 |
+| 4 | Ethereum | `balanceOf(0x170ff0...)` on ROY-ST-autoUSD [`0x73C641fe41EB0270C7f473f3c3E4A40eb97fd8dE`](https://etherscan.io/address/0x73C641fe41EB0270C7f473f3c3E4A40eb97fd8dE) | Tokemak autoUSD market |
+| 5 | Avalanche | `balanceOf(0x170ff0...)` on ROY-ST-savUSD [`0xDA7bf1788aecb94fE6D5D3f739358De94f43E5C9`](https://snowtrace.io/address/0xDA7bf1788aecb94fE6D5D3f739358De94f43E5C9) | Avant savUSD market |
+| 6 | — | Convert each balance to USD via `convertToAssets()` on each tranche (for Senior Tranche shares) or 1:1 for aUSDC | Get USD value per position |
+| 7 | — | Sum all positions and compute % per market | Current allocation |
+
+*Alert conditions:*
+- Any single protocol exceeding 40% concentration cap (Avant currently at ~40%)
+- Any single chain exceeding 40% (Avalanche currently at ~40%, Ethereum exempt)
+- Allocation drift >5% from last known target for any market
+- New positions appearing (Treasury holding new token types)
+- Positions disappearing (Treasury balance dropping to 0 on an existing market)
+
+*Important limitation:* The vault's `totalAssets()` (~$10.74M) is reported by the MultisigStrategy via `adjustTotalAssets()`. The sum of Treasury token balances converted via `convertToAssets()` (~$9.944M) does not exactly match the vault's reported value — there is a ~$794K gap. This means allocation percentages computed from Treasury balances are approximate. The vault's own accounting is the authoritative source, but it doesn't break down by market.
+
 **New market deployment monitoring:**
 - Monitor RoycoFactory Proxy ([`0x7cC6fB28eC7b5e7afC3cB3986141797ffc27253C`](https://etherscan.io/address/0x7cC6fB28eC7b5e7afC3cB3986141797ffc27253C)) for `deployMarket()` calls (6 markets deployed so far)
 - When new markets appear, verify coverage parameters and underlying assets
@@ -429,10 +456,11 @@ The Junior tranche provides the first-loss buffer protecting Senior depositors. 
 - Accountant/Kernel `getState()`: Every 1 hour (coverage and market state)
 - Junior Tranche `Transfer` events: Real-time (event subscription) or every 15 minutes
 - Treasury Senior Tranche `balanceOf()`: Every 6 hours
+- **Allocation monitoring:** Daily — compute per-market allocation from Treasury balances, alert on concentration cap breaches or significant drift
 - RoycoFactory `deployMarket()` events: Daily
 - **Holder Concentration:** Monitor the dominant EOA holder (~69% of supply) and Morpho Blue (~26%) for significant movements.
 - **Underlying Protocols:** Monitor health of Avant (savUSD), Neutrl (sNUSD), Auto (autoUSD), and Aave.
-- **Recommended Frequency:** Hourly for PPS, governance, and strategy. Daily for underlying protocol health. Immediate alerts for proxy upgrades and fee changes.
+- **Recommended Frequency:** Hourly for PPS, governance, and strategy. Daily for underlying protocol health and allocation. Immediate alerts for proxy upgrades and fee changes.
 
 ## Risk Summary
 
