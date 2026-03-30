@@ -59,7 +59,6 @@ The Treasury multisig ([`0x170ff06326eBb64BF609a848Fc143143994AF6c8`](https://et
 Blueprint's own architecture docs describe MultisigStrategy as a design that "simply forwards deposits to a multi-sig wallet and retrieves" them later: [`Architecture.md#3.1.3 Multisig Strategies`](https://github.com/Blueprint-Finance/concrete-earn-v2-bug-bounty/blob/a9ace6154cb2728bc9d3d4c5019e040fb2d4b562/doc/Architecture.md#313-multisig-strategies).
 
 The configured `multiSig` address was also verified live on-chain to be a standard Safe v1.4.1, not a custom treasury contract: `MultisigStrategy.getMultiSig()` returns [`0x170ff06326eBb64BF609a848Fc143143994AF6c8`](https://etherscan.io/address/0x170ff06326eBb64BF609a848Fc143143994AF6c8), and that address responds to `VERSION()` = `1.4.1`, `getThreshold()` = `3`, and `getOwners()` = 5 owners.
-
 | Market | Contract | Address |
 |--------|----------|---------|
 | Neutrl sNUSD | Kernel | [`0x0aE0978B868804929fd4C06B3B22D9197B8cd3c6`](https://etherscan.io/address/0x0aE0978B868804929fd4C06B3B22D9197B8cd3c6) |
@@ -188,16 +187,16 @@ Actual allocations computed from Treasury multisig token balances (see [Reserve 
   **Path A — Permanently PERPETUAL markets (`fixedTermDuration = 0`): Neutrl sNUSD (~29% of vault)**
   1. **Normal:** ST and JT deposit/redeem instantly at market level (subject to coverage).
   2. **Loss occurs:** JT covers ST losses. `jtImpermanentLoss` is **immediately erased** — JT permanently absorbs the loss with zero recovery period. Market stays PERPETUAL. ST can always withdraw. No Protection Mode, no withdrawal pause, no recovery window for JT.
-  3. **Severe loss → Liquidation threshold (~100.09%):** Self-liquidation bonus from JT's remaining NAV incentivizes ST to exit and delever. If JT fully depleted, remaining losses hit ST as `stImpermanentLoss`.
+  3. **Severe loss → Liquidation threshold (~100.09%):** If utilization breaches the liquidation threshold, ST can exit with a self-liquidation bonus sourced from JT's remaining NAV. If JT is fully depleted, remaining losses hit ST as `stImpermanentLoss`.
 
   **Path B — Fixed-Term markets (`fixedTermDuration > 0`): Tokemak autoUSD (~11% of vault, 2-day term)**
   1. **Normal (PERPETUAL):** ST and JT deposit/redeem instantly at market level (subject to coverage).
   2. **Small loss → Fixed-Term (Protection Mode):** When JT covers ST drawdowns and `jtImpermanentLoss` exceeds dust tolerance, market transitions to Fixed-Term. **ST withdrawals blocked** (protects JT from ST withdrawing covered capital). JT deposits blocked (protects existing JT from dilution). ST deposits and JT redemptions remain enabled (JT can still exit surplus above coverage). YDM curve frozen. No protocol fees taken.
-  3. **Recovery within fixed term:** Underlying asset recovers → `jtImpermanentLoss` repaid from ST appreciation → market returns to PERPETUAL. Losses erased.
-  4. **No recovery, term expires:** `jtImpermanentLoss` **permanently zeroed** — JT absorbs the loss forever with no recourse. Market returns to PERPETUAL. ST made whole at JT's expense.
-  5. **Severe loss → Liquidation threshold (122.5%):** Market **forced back to PERPETUAL** regardless of Fixed-Term status. ST can withdraw with **self-liquidation bonus** from JT's remaining NAV. If JT fully depleted, remaining losses hit ST as `stImpermanentLoss`.
+  3. **Recovery within fixed term:** Underlying asset recovers before the term expires, `jtImpermanentLoss` is repaid from ST appreciation, and the market returns to PERPETUAL.
+  4. **No recovery, term expires:** `jtImpermanentLoss` is **permanently zeroed** — JT absorbs the loss forever with no recourse. Market returns to PERPETUAL. ST is made whole at JT's expense.
+  5. **Severe loss → Liquidation threshold (122.5%):** The market is forced back to PERPETUAL regardless of Fixed-Term status. ST can withdraw with a self-liquidation bonus from JT's remaining NAV. If JT is fully depleted, remaining losses hit ST as `stImpermanentLoss`.
 
-  **Impact on srRoyUSDC:** During Fixed-Term (Tokemak only, up to 2 days), the Treasury multisig cannot redeem Senior Tranche tokens from that market — blocking vault liquidity sourcing for ~11% of exposure. Neutrl (~29%) and Aave (~20%) never block withdrawals. The srRoyUSDC vault itself is not aware of market states.
+  **Impact on srRoyUSDC:** During Fixed-Term (Tokemak only, up to 2 days), the Treasury multisig cannot redeem Senior Tranche tokens from the affected market, blocking vault liquidity sourcing for that sleeve. Neutrl never blocks withdrawals. The srRoyUSDC vault itself is not aware of market states.
 - Coverage adjustments require 3-day notice to whitelisted depositors with incremental 1% daily changes
 - **Loss propagation from Dawn markets to Senior vault is indirect:** While the Royco Dawn kernel/accountant contracts enforce Junior-first loss coverage on-chain, the srRoyUSDC Concrete vault itself cannot read these contracts. The Treasury multisig holds the Senior Tranche tokens and calls `adjustTotalAssets()` on the MultisigStrategy to report the net value. The loss waterfall (underlying drawdown → JT absorption → residual ST loss) is enforced at the market level, but the reporting of the net result to the vault is mediated by the multisig.
 
@@ -209,6 +208,7 @@ Actual allocations computed from Treasury multisig token balances (see [Reserve 
 - **Junior capital is concentrated:** Only 2-3 depositor addresses per market. Junior depositors could withdraw (subject to coverage enforcement — kernel blocks JT redemption if it would breach coverage).
 - **Coverage buffer is thin:** Active markets have 12.4-12.5% actual coverage vs 10% required — only ~2.5% buffer above minimum.
 - **Beta = 1.0:** In all markets, Junior uses the same underlying asset as Senior, meaning JT and ST losses are correlated. JT does not provide diversification — only a capital buffer.
+- Vault holds $0 USDC directly — 100% of ~$10.73M is deployed externally via MultisigStrategy. Importantly, this strategy is a **full-custody handoff** design: the vault calls `allocateFunds()`, the strategy's `_allocateToPosition()` forwards USDC directly to the Treasury multisig via `safeTransfer(multiSig, amount)`, and assets return only if the multisig cooperates with `_retrieveAssetsFromMultisig()` / `safeTransferFrom(multiSig, ...)`. There is no on-chain guarantee that forwarded funds will be deployed to approved markets or returned to the vault. Once funds reach the Treasury multisig, that multisig can break the expected flow and use the funds freely.
 - Vault holds $0 USDC directly — 100% of ~$10.73M is deployed externally via MultisigStrategy. Importantly, this strategy is a **full-custody handoff** design: the vault calls `allocateFunds()`, the strategy's `_allocateToPosition()` forwards USDC directly to the Treasury multisig via `safeTransfer(multiSig, amount)`, and assets return only if the multisig cooperates with `_retrieveAssetsFromMultisig()` / `safeTransferFrom(multiSig, ...)`. There is no on-chain guarantee that forwarded funds will be deployed to approved markets or returned to the vault. Once funds reach the Treasury multisig, that multisig can break the expected flow and use the funds freely.
 
 #### Reserve Location Reconciliation (Verified March 27, 2026)
@@ -435,7 +435,6 @@ The Junior tranche provides the first-loss buffer protecting Senior depositors. 
   - ~1,168,613 ROY-ST-autoUSD at [`0x73C641fe41EB0270C7f473f3c3E4A40eb97fd8dE`](https://etherscan.io/address/0x73C641fe41EB0270C7f473f3c3E4A40eb97fd8dE)
 - Alert if Treasury transfers or redeems Senior Tranche tokens (could indicate rebalancing or exit)
 - Alert if Treasury deposits into new markets (new Senior Tranche tokens appearing)
-
 **Market allocation monitoring:**
 
 Target allocations are set off-chain by the Royco Foundation curator — there is no on-chain registry of targets. Actual allocations must be reconstructed from the Treasury multisig's token balances across chains.
@@ -460,7 +459,6 @@ Target allocations are set off-chain by the Royco Foundation curator — there i
 - Positions disappearing (Treasury balance dropping to 0 on an existing market)
 
 *Important limitation:* The vault's `totalAssets()` (~$10.74M) is reported by the MultisigStrategy via `adjustTotalAssets()`. The sum of Treasury token balances converted via `convertToAssets()` (~$9.944M) does not exactly match the vault's reported value — there is a ~$794K gap. This means allocation percentages computed from Treasury balances are approximate. The vault's own accounting is the authoritative source, but it doesn't break down by market.
-
 **New market deployment monitoring:**
 - Monitor RoycoFactory Proxy ([`0x7cC6fB28eC7b5e7afC3cB3986141797ffc27253C`](https://etherscan.io/address/0x7cC6fB28eC7b5e7afC3cB3986141797ffc27253C)) for `deployMarket()` calls (6 markets deployed so far)
 - When new markets appear, verify coverage parameters and underlying assets
@@ -636,6 +634,7 @@ Hexens audit completed; Cantina competition still in judging after ~2 months (co
 
 - ERC-4626 exchange rate is on-chain (PPS verifiable)
 - However, `totalAssets()` depends entirely on MultisigStrategy's `adjustTotalAssets(int256 diff, uint256 nonce)` — the multisig submits a signed USDC delta (not an absolute value), which is added/subtracted from `vaultDepositedAmount`. This is **not** computed from on-chain positions in underlying protocols.
+- Funds are on-chain in Aave/Avant/Neutrl/Auto only if the Treasury multisig actually deploys them there. The strategy itself does not enforce deployment: `_allocateToPosition()` forwards full custody to the multisig, and `_retrieveAssetsFromMultisig()` depends on multisig approval to pull assets back. The entire PPS therefore depends on both multisig accounting honesty and multisig custody cooperation, because there is no on-chain guarantee that allocated funds remain in the intended flow after reaching the Treasury multisig (reporting is constrained by max 0.5% per update, 12-hour cooldown, nonce 37 confirming regular updates).
 - Funds are on-chain in Aave/Avant/Neutrl/Auto only if the Treasury multisig actually deploys them there. The strategy itself does not enforce deployment: `_allocateToPosition()` forwards full custody to the multisig, and `_retrieveAssetsFromMultisig()` depends on multisig approval to pull assets back. The entire PPS therefore depends on both multisig accounting honesty and multisig custody cooperation, because there is no on-chain guarantee that allocated funds remain in the intended flow after reaching the Treasury multisig (reporting is constrained by max 0.5% per update, 12-hour cooldown, nonce 37 confirming regular updates).
 - **Emergency bypass exists:** `unpauseAndAdjustTotalAssets()` skips diff validation — but requires contract to be paused first (circuit breaker triggered, `Paused` event emitted on-chain). Provides a detection window before the unconstrained adjustment.
 - Individual underlying market positions are not easily auditable without protocol-specific tooling
