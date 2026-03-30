@@ -178,13 +178,22 @@ Actual allocations computed from Treasury multisig token balances (see [Reserve 
 - **On-chain coverage verified (March 26, 2026):** Neutrl sNUSD: 12.4% (required 10%), Tokemak autoUSD: 12.5% (required 10%). See [On-Chain Coverage Data](#on-chain-coverage-data-verified-march-26-2026) for full breakdown.
 - If losses exceed Junior coverage, Senior absorbs remaining losses
 - **Loss Escalation Flow (enforced on-chain by kernel/accountant):**
-  1. **Normal (PERPETUAL):** No losses. At the Dawn market level, ST and JT can deposit/redeem instantly (single tx, subject to coverage requirement). Note: srRoyUSDC vault holders still face the 14-day async withdrawal queue at the Concrete vault layer — that queue is always active regardless of market state.
-  2. **Small loss → Fixed-Term (Protection Mode):** When JT covers ST drawdowns and `jtImpermanentLoss` exceeds dust tolerance, the market transitions to Fixed-Term. **ST withdrawals are blocked** (protects JT from ST withdrawing the capital JT is covering). JT deposits are also blocked (protects existing JT from dilution). ST deposits and JT redemptions remain enabled (JT can still exit surplus above coverage). YDM curve adaptation is frozen. No protocol fees taken.
-  3. **Recovery within fixed term:** If the underlying asset recovers before the term expires, `jtImpermanentLoss` is repaid from ST appreciation. Market returns to PERPETUAL. Losses are erased.
-  4. **No recovery, term expires:** `jtImpermanentLoss` is **permanently zeroed** — JT absorbs the loss forever with no recourse. Market returns to PERPETUAL. ST is made whole at JT's expense.
-  5. **Severe loss → Liquidation threshold breached:** If utilization exceeds the liquidation threshold (Neutrl: ~100.09%, Tokemak: 122.5%) — meaning JT is nearly depleted — the market is **forced back to PERPETUAL** regardless of Fixed-Term status. ST can now withdraw, and receives a **self-liquidation bonus** sourced from JT's remaining NAV, incentivizing ST to exit and delever the system. If JT is fully depleted, remaining losses hit ST as `stImpermanentLoss`.
-  - **Neutrl sNUSD skips steps 2-4 entirely:** `fixedTermDuration = 0` means this market is permanently PERPETUAL — it never enters Protection Mode. When JT covers ST losses, `jtImpermanentLoss` is immediately erased and JT permanently absorbs the loss with zero recovery period. ST can always withdraw. This makes Neutrl's JT protection weaker (no recovery window) but the market more liquid.
-  - **Impact on srRoyUSDC:** During Fixed-Term (Tokemak only, up to 2 days), the Treasury multisig cannot redeem Senior Tranche tokens from the affected market. This blocks the vault from sourcing liquidity for that market's allocation. The srRoyUSDC vault itself is not aware of this state. Neutrl never blocks withdrawals.
+
+  The flow differs per market depending on the `fixedTermDuration` parameter. Note: srRoyUSDC vault holders always face the 14-day async withdrawal queue at the Concrete vault layer regardless of market state below.
+
+  **Path A — Permanently PERPETUAL markets (`fixedTermDuration = 0`): Neutrl sNUSD (~29% of vault)**
+  1. **Normal:** ST and JT deposit/redeem instantly at market level (subject to coverage).
+  2. **Loss occurs:** JT covers ST losses. `jtImpermanentLoss` is **immediately erased** — JT permanently absorbs the loss with zero recovery period. Market stays PERPETUAL. ST can always withdraw. No Protection Mode, no withdrawal pause, no recovery window for JT.
+  3. **Severe loss → Liquidation threshold (~100.09%):** Self-liquidation bonus from JT's remaining NAV incentivizes ST to exit and delever. If JT fully depleted, remaining losses hit ST as `stImpermanentLoss`.
+
+  **Path B — Fixed-Term markets (`fixedTermDuration > 0`): Tokemak autoUSD (~11% of vault, 2-day term)**
+  1. **Normal (PERPETUAL):** ST and JT deposit/redeem instantly at market level (subject to coverage).
+  2. **Small loss → Fixed-Term (Protection Mode):** When JT covers ST drawdowns and `jtImpermanentLoss` exceeds dust tolerance, market transitions to Fixed-Term. **ST withdrawals blocked** (protects JT from ST withdrawing covered capital). JT deposits blocked (protects existing JT from dilution). ST deposits and JT redemptions remain enabled (JT can still exit surplus above coverage). YDM curve frozen. No protocol fees taken.
+  3. **Recovery within fixed term:** Underlying asset recovers → `jtImpermanentLoss` repaid from ST appreciation → market returns to PERPETUAL. Losses erased.
+  4. **No recovery, term expires:** `jtImpermanentLoss` **permanently zeroed** — JT absorbs the loss forever with no recourse. Market returns to PERPETUAL. ST made whole at JT's expense.
+  5. **Severe loss → Liquidation threshold (122.5%):** Market **forced back to PERPETUAL** regardless of Fixed-Term status. ST can withdraw with **self-liquidation bonus** from JT's remaining NAV. If JT fully depleted, remaining losses hit ST as `stImpermanentLoss`.
+
+  **Impact on srRoyUSDC:** During Fixed-Term (Tokemak only, up to 2 days), the Treasury multisig cannot redeem Senior Tranche tokens from that market — blocking vault liquidity sourcing for ~11% of exposure. Neutrl (~29%) and Aave (~20%) never block withdrawals. The srRoyUSDC vault itself is not aware of market states.
 - Coverage adjustments require 3-day notice to whitelisted depositors with incremental 1% daily changes
 - **Loss propagation from Dawn markets to Senior vault is indirect:** While the Royco Dawn kernel/accountant contracts enforce Junior-first loss coverage on-chain, the srRoyUSDC Concrete vault itself cannot read these contracts. The Treasury multisig holds the Senior Tranche tokens and calls `adjustTotalAssets()` on the MultisigStrategy to report the net value. The loss waterfall (underlying drawdown → JT absorption → residual ST loss) is enforced at the market level, but the reporting of the net result to the vault is mediated by the multisig.
 
