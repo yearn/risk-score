@@ -38,6 +38,10 @@ export const protocols: Protocol[] = [
         label: "Debt Cap",
         description: "Governance debt cap changes",
       },
+      {
+        label: "Timelock",
+        description: "TimelockController monitoring on Mainnet",
+      },
     ],
   },
   {
@@ -193,6 +197,10 @@ export const protocols: Protocol[] = [
         label: "Junior TVL Coverage",
         description: "Alerts if below 50% of risky farm exposure",
       },
+      {
+        label: "Timelock",
+        description: "Longtimelock and Shorttimelock monitoring on Mainnet",
+      },
     ],
   },
   {
@@ -223,6 +231,10 @@ export const protocols: Protocol[] = [
         label: "Curve Pool",
         description: "stETH/ETH Curve pool monitoring",
       },
+      {
+        label: "Timelock",
+        description: "Lido Timelock monitoring on Mainnet",
+      },
     ],
   },
   {
@@ -238,19 +250,27 @@ export const protocols: Protocol[] = [
       },
       {
         label: "Lombard (LBTC)",
-        description: "Oracle feed monitoring via Redstone",
+        description: "Oracle feed via Redstone and timelock monitoring",
+      },
+      {
+        label: "Renzo (ezETH)",
+        description: "TimelockController monitoring on Mainnet",
       },
       {
         label: "Origin (superOETH)",
-        description: "Wrapped share price and vault backing",
+        description: "Wrapped share price, vault backing, and timelock monitoring on Base",
       },
       {
         label: "Ether.fi (eETH)",
-        description: "Timelock monitoring",
+        description: "Timelock monitoring on Mainnet",
       },
       {
         label: "Kelp DAO (rsETH)",
         description: "Timelock monitoring (10-day delay)",
+      },
+      {
+        label: "Puffer (pufETH)",
+        description: "Timelock monitoring on Mainnet",
       },
     ],
   },
@@ -311,6 +331,10 @@ export const protocols: Protocol[] = [
       {
         label: "Stablecoin Peg",
         description: "DeFiLlama peg monitoring — depeg alert below $0.97",
+      },
+      {
+        label: "Timelock",
+        description: "Maple GovernorTimelock monitoring on Mainnet",
       },
     ],
   },
@@ -465,6 +489,11 @@ export const protocols: Protocol[] = [
         label: "Token Pricing",
         description:
           "Non-stable token pricing via CoinGecko with on-chain fallback",
+      },
+      {
+        label: "Timelock",
+        description:
+          "TimelockController monitoring across Mainnet, Base, Arbitrum, Polygon, Optimism, and Katana",
       },
     ],
   },
