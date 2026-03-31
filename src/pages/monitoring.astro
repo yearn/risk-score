@@ -1,0 +1,284 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { protocolIconUrl } from "../lib/icons";
+import { protocols } from "../data/monitoring";
+---
+
+<BaseLayout title="Monitoring — Yearn Risk" ogUrl="/monitoring/" ogImage="/og/default.png">
+  <div class="page-header">
+    <div>
+      <h1>Monitoring</h1>
+      <p class="section-desc">Protocols actively monitored by Yearn Curation. Alerts are sent to Telegram in real-time.<br/>Find additional info about our monitoring stack on <a href="https://github.com/yearn/monitoring-scripts-py" target="_blank" rel="noopener noreferrer">GitHub</a>.</p>
+    </div>
+    <a
+      href="https://t.me/yearn_curation_alerts"
+      target="_blank"
+      rel="noopener noreferrer"
+      class="tg-subscribe"
+    >
+      <svg class="tg-icon" viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
+        <path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.479.33-.913.492-1.302.48-.428-.012-1.252-.242-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/>
+      </svg>
+      Subscribe
+    </a>
+  </div>
+
+  <div class="search-row">
+    <input type="text" id="protocol-search" placeholder="Search protocols..." autocomplete="off" />
+  </div>
+
+  <div class="protocol-list" id="protocol-list">
+    {protocols.map((p) => {
+      const iconUrl = protocolIconUrl(p.defillamaSlug);
+      return (
+        <div class="protocol-accordion" data-name={p.name.toLowerCase()}>
+          <button class="accordion-trigger" aria-expanded="false">
+            <div class="accordion-left">
+              <div class="icon-wrap">
+                {iconUrl ? (
+                  <img src={iconUrl} alt="" width="28" height="28" class="protocol-icon" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" />
+                ) : null}
+                <div class="icon-placeholder" style={iconUrl ? "display:none" : ""}>
+                  <span>{p.name.charAt(0)}</span>
+                </div>
+              </div>
+              <div class="protocol-info">
+                <span class="protocol-name">{p.name}</span>
+                <span class="protocol-meta">{p.items.length} monitors &middot; {p.frequency}</span>
+              </div>
+            </div>
+            <svg class="chevron" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="6 9 12 15 18 9" />
+            </svg>
+          </button>
+          <div class="accordion-panel">
+            <ul class="monitor-list">
+              {p.items.map((item) => (
+                <li>
+                  <span class="monitor-label">{item.label}</span>
+                  <span class="monitor-desc">{item.description}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      );
+    })}
+  </div>
+
+  <script is:inline>
+    // Accordion toggle
+    document.querySelectorAll(".accordion-trigger").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const expanded = btn.getAttribute("aria-expanded") === "true";
+        btn.setAttribute("aria-expanded", String(!expanded));
+      });
+    });
+
+    // Search
+    const search = document.getElementById("protocol-search");
+    const items = document.querySelectorAll(".protocol-accordion");
+    search.addEventListener("input", () => {
+      const q = search.value.toLowerCase();
+      items.forEach((item) => {
+        item.style.display = item.dataset.name.includes(q) ? "" : "none";
+      });
+    });
+  </script>
+</BaseLayout>
+
+<style>
+  .page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1rem;
+    margin-bottom: 1.25rem;
+  }
+  h1 {
+    margin-bottom: 0.25rem;
+  }
+  .section-desc {
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    margin: 0;
+  }
+
+  /* Telegram subscribe button */
+  .tg-subscribe {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    background: #229ED9;
+    color: #fff;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-decoration: none;
+    white-space: nowrap;
+    transition: background 0.2s;
+    flex-shrink: 0;
+  }
+  .tg-subscribe:hover {
+    background: #1a8abf;
+    text-decoration: none;
+    color: #fff;
+  }
+  .tg-icon {
+    flex-shrink: 0;
+  }
+
+  /* Search */
+  .search-row {
+    margin-bottom: 1rem;
+  }
+  .search-row input {
+    width: 100%;
+    max-width: 360px;
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 0.4rem 0.6rem;
+    font-size: 0.85rem;
+  }
+  .search-row input::placeholder {
+    color: var(--text-secondary);
+  }
+
+  /* Protocol list */
+  .protocol-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  /* Accordion */
+  .protocol-accordion {
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--bg-card);
+    overflow: hidden;
+  }
+  .accordion-trigger {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding: 0.75rem 1rem;
+    background: none;
+    border: none;
+    color: var(--text-primary);
+    cursor: pointer;
+    font-size: 0.9rem;
+    text-align: left;
+    transition: background 0.15s;
+  }
+  .accordion-trigger:hover {
+    background: rgba(6, 117, 249, 0.06);
+  }
+  .accordion-left {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  /* Icon */
+  .icon-wrap {
+    width: 28px;
+    height: 28px;
+    flex-shrink: 0;
+  }
+  .protocol-icon {
+    display: block;
+    border-radius: 50%;
+    width: 28px;
+    height: 28px;
+  }
+  .icon-placeholder {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--bg-secondary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--text-secondary);
+  }
+
+  /* Protocol info */
+  .protocol-info {
+    display: flex;
+    flex-direction: column;
+  }
+  .protocol-name {
+    font-weight: 600;
+    line-height: 1.2;
+  }
+  .protocol-meta {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    line-height: 1.2;
+  }
+
+  /* Chevron */
+  .chevron {
+    color: var(--text-secondary);
+    transition: transform 0.2s;
+    flex-shrink: 0;
+  }
+  .accordion-trigger[aria-expanded="true"] .chevron {
+    transform: rotate(180deg);
+  }
+
+  /* Panel */
+  .accordion-panel {
+    display: none;
+    padding: 0 1rem 0.75rem;
+  }
+  .accordion-trigger[aria-expanded="true"] + .accordion-panel {
+    display: block;
+  }
+
+  /* Monitor list */
+  .monitor-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    border-top: 1px solid var(--border);
+    padding-top: 0.5rem;
+  }
+  .monitor-list li {
+    display: flex;
+    gap: 0.75rem;
+    padding: 0.35rem 0;
+    font-size: 0.85rem;
+    line-height: 1.4;
+  }
+  .monitor-label {
+    font-weight: 600;
+    white-space: nowrap;
+    color: var(--text-primary);
+    min-width: 160px;
+    flex-shrink: 0;
+  }
+  .monitor-desc {
+    color: var(--text-secondary);
+  }
+
+  @media (max-width: 640px) {
+    .page-header {
+      flex-direction: column;
+    }
+    .monitor-list li {
+      flex-direction: column;
+      gap: 0.1rem;
+    }
+    .monitor-label {
+      min-width: unset;
+    }
+  }
+</style>
