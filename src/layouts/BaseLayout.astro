@@ -201,6 +201,14 @@ const ogImageUrl = new URL(ogImage, Astro.site ?? Astro.url.origin).href;
     padding-top: 2rem;
     padding-bottom: 4rem;
   }
+  @media (max-width: 540px) {
+    .nav-external {
+      display: none;
+    }
+    .header-nav {
+      gap: 0.75rem;
+    }
+  }
   .site-footer {
     border-top: 1px solid var(--border);
     padding: 2rem 0;

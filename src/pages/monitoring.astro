@@ -81,9 +81,7 @@ import { protocols } from "../data/monitoring";
     search.addEventListener("input", () => {
       const q = search.value.toLowerCase();
       items.forEach((item) => {
-        const name = item.dataset.name;
-        const text = item.textContent.toLowerCase();
-        item.style.display = text.includes(q) ? "" : "none";
+        item.style.display = item.dataset.name.includes(q) ? "" : "none";
       });
     });
   </script>
