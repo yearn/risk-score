@@ -1,4 +1,4 @@
-# Yearn Risk Score Framework
+# Yearn Curation Score Framework
 
 Risk scores are separated into two categories: strategy-related and external protocol-related.
 

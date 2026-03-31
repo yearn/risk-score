@@ -1,4 +1,4 @@
-# Yearn Risk Score Guidelines
+# Yearn Curation Score Guidelines
 
 ## Development Commands
 - **Run Scripts**: `uv run scripts/scan_factories.py` or `uv run reports/old/scripts/veda_scan_auth_events.py`
