@@ -6,7 +6,7 @@
 - **Token Address:** TODO — pending AIP deployment
 - **Final Score: DRAFT — pending deployment and on-chain verification**
 
-> **DRAFT NOTICE:** The new sGHO ERC-4626 vault and GhoRouter have been audited and merged but are **not yet deployed** as of April 2, 2026. The ARFC (March 25, 2026) states: "Contracts have been audited and merged, and are scheduled for deployment soon. Deployment addresses will be confirmed in the AIP." This report is based on source code analysis and governance proposals. **Reassess after deployment** to verify on-chain roles, proxy admin, initial parameters, and actual governance configuration.
+> **DRAFT NOTICE:** The sGHO implementation (PR #29) has been audited and merged, but sGHO and any associated router deployment are **not yet live** as of April 2, 2026. The ARFC (March 25, 2026) states: "Contracts have been audited and merged, and are scheduled for deployment soon. Deployment addresses will be confirmed in the AIP." This report is based on governance proposals, audited source code, and the public materials linked below. **Reassess after deployment** to verify on-chain roles, proxy admin, initial parameters, deployment addresses, and final governance configuration.
 
 ## Overview + Links
 
@@ -22,7 +22,7 @@ sGHO is an **ERC-4626 compliant yield-bearing savings vault** for GHO, Aave's na
 **Key architecture:**
 
 - **sGHO Vault:** Upgradeable ERC-4626 vault (TransparentUpgradeableProxy) with internal index-based yield accounting. GHO deposited remains in the contract — no rehypothecation, no external strategy deployment
-- **GhoRouter:** Stateless routing contract that collapses multi-step USDC↔GHO↔sGHO conversions into atomic transactions with slippage protection. Never holds user funds
+- **GhoRouter:** Routing contract for multi-step USDC↔GHO↔sGHO conversions with slippage protection. It is intended to avoid persistent balances, but routed flows add extra token custody and approval surface versus direct calls
 - **GSM USDC (Gsm4626):** GHO Stability Module that converts waEthUSDC (wrapped Aave USDC) to/from GHO at a fixed 1:1 price. Uses a pre-minted GHO reserve (does not mint GHO directly)
 - **Yield source:** The Aave Savings Rate (ASR) is set by governance. Yield is **virtual** — the yield index grows over time, but the actual GHO to back it must be provided by the Aave DAO from protocol revenue (borrower interest + GSM fees). No strategy or lending is involved
 - **Governance:** Aave DAO on-chain governance via Executor Level 1, with GHO Stewards (Risk Council 3-of-4 multisig) for rate adjustments
@@ -45,8 +45,9 @@ sGHO is an **ERC-4626 compliant yield-bearing savings vault** for GHO, Aave's na
 - [ARFC: sGHO Launch Configuration](https://governance.aave.com/t/arfc-sgho-launch-configuration/24346)
 - [ARFC: GHO Savings Upgrade](https://governance.aave.com/t/arfc-gho-savings-upgrade/21680)
 - [Snapshot Vote](https://snapshot.org/#/s:aavedao.eth/proposal/0xb9e9b01efcf6151bade78546d0f51f11d7961939b649fb7717e82ea3d43d4f47)
+- [Implementation PR #29](https://github.com/aave-dao/gho-origin/pull/29)
 - [sGHO Source (gho-origin)](https://github.com/aave-dao/gho-origin/tree/main/src/contracts/sgho)
-- [GhoRouter PR #34](https://github.com/aave-dao/gho-origin/pull/34)
+- [TokenLogic Audit Repo Snapshot](https://github.com/TokenLogic-com-au/gho-origin/tree/b30f973f99fd6eb7a9f343b4681dae88f58007ef)
 - [GHO Core Contracts](https://github.com/aave/gho-core)
 - [Aave GHO Documentation](https://aave.com/docs/developers/gho)
 - [DeFiLlama: Aave](https://defillama.com/protocol/aave)
@@ -61,7 +62,7 @@ sGHO is an **ERC-4626 compliant yield-bearing savings vault** for GHO, Aave's na
 | sGHO Vault | TODO — pending AIP | ERC-4626, TransparentUpgradeableProxy |
 | sGHO Implementation | TODO — pending AIP | sGho.sol |
 | sGHO ProxyAdmin | TODO — pending AIP | Controls upgrades |
-| GhoRouter | TODO — pending AIP | Stateless swap router (PR #34, not yet merged) |
+| GhoRouter | TODO — pending AIP | Stateless swap router |
 | sGHO Steward | TODO — pending AIP | Rate governance (sGhoSteward.sol) |
 
 ### GHO Ecosystem Contracts (Deployed)
@@ -127,7 +128,7 @@ GHO is one of the most extensively audited DeFi stablecoin systems:
 | Certora | Sep 2024 | Modular GHO Stewards | [PDF](https://github.com/aave-dao/gho-origin/blob/main/audits/2024-09-15_ModularGhoStewards_Certora.pdf) |
 | Certora | Jul 2025 | Remote GSM | [PDF](https://github.com/aave-dao/gho-origin/blob/main/audits/2025-07-15_RemoteGSM_Certora.pdf) |
 | **Certora** | **Sep 2025** | **sGHO Vault** | [PDF](https://github.com/aave-dao/gho-origin/blob/main/audits/2025-09-09_sGHO_Certora.pdf) |
-| TokenLogic Collaborative | Mar 2026 | sGHO + GhoRouter | [PDF](https://github.com/TokenLogic-com-au/gho-origin/blob/b30f973f99fd6eb7a9f343b4681dae88f58007ef/audits/2026.03.04%20-%20Final%20-%20TokenLogic%20Collaborative%20Audit%20Report%201772584390.pdf) |
+| TokenLogic Collaborative | Mar 2026 | sGHO + sGhoSteward | [PDF](https://github.com/TokenLogic-com-au/gho-origin/blob/b30f973f99fd6eb7a9f343b4681dae88f58007ef/audits/2026.03.04%20-%20Final%20-%20TokenLogic%20Collaborative%20Audit%20Report%201772584390.pdf) |
 
 ### sGHO-Specific Audit: Certora (September 2025)
 
@@ -143,8 +144,11 @@ GHO is one of the most extensively audited DeFi stablecoin systems:
 ### TokenLogic Collaborative Audit (March 2026)
 
 - **Facilitated through:** Sherlock's Blackthorn collaborative audit program
-- **Scope:** sGHO vault and GhoRouter
-- **Full findings:** Could not extract from PDF — TODO: review findings after obtaining readable copy
+- **Scope:** Extracted PDF scope lists `sGho.sol`, `sGhoSteward.sol`, and related tests. **No GhoRouter files are listed in scope**
+- **Findings:** **0 High, 0 Medium, 2 Low/Info** — both marked **Resolved**
+  - **I-1:** Configured 50% target rate can realize ~64.87% annual yield under frequent updates
+  - **I-2:** Role documentation and code mismatch (pause affects transfers too; `YIELD_MANAGER_ROLE` can also set supply cap)
+- **Note:** This PDF should not be treated as router audit evidence without a router-specific scope listing
 
 ### Aave V3 Platform Audits
 
@@ -221,10 +225,10 @@ LlamaRisk published multiple analyses supporting sGHO but flagging key risks:
 |--------|-----------|---------|
 | **Add malicious GSM to allowlist** | **YES** | Owner can call `setGsmAllowed()` with a malicious contract that passes basic validation (`GHO_TOKEN()` matches, `UNDERLYING_ASSET()` exists). Users calling swap functions through this malicious GSM could lose their tokens |
 | **Drain user wallets** | **No** | Router cannot pull tokens users haven't approved for that specific call |
-| **Rescue stranded tokens** | **YES** | Owner can call `rescueToken()` to transfer any ERC-20 held by the router to any address. By design — router is stateless and shouldn't hold funds |
-| **Pause the router** | **No** | No pause mechanism exists. GSM paths can be disabled by removing GSMs from allowlist. Direct GHO↔sGHO paths (`depositForSGho`, `redeemSGho`) cannot be disabled |
+| **Rescue stranded tokens** | **YES** | Owner can call `rescueToken()` to transfer any ERC-20 held by the router to any address. The router is intended to avoid persistent balances, but stranded tokens remain an owner-controlled recovery path |
+| **Pause the router** | **No** | No pause mechanism exists on the router itself. GSM paths can be disabled by removing GSMs from allowlist, and direct GHO↔sGHO paths can still fail if sGHO is paused |
 
-**GhoRouter status:** PR #34 is still **open and not merged**. Reviewer comments from Aave team (CheyenneAtapour) flagged: dangling approvals after operations, missing token validation in preview functions. **This contract should not be considered production-ready** until the review is resolved.
+**GhoRouter status:** Not yet deployed. The public materials linked above do not include a canonical upstream router PR link, and the linked TokenLogic PDF does not list router files in scope. Router-specific risk should be reassessed against final AIP/deployment artifacts and published source code.
 
 ## Critical Design Characteristic: Virtual/Unfunded Yield
 
@@ -237,7 +241,7 @@ LlamaRisk published multiple analyses supporting sGHO but flagging key risks:
 5. The yield index grows independently of the actual GHO balance in the contract
 
 **Implications for Yearn:**
-- In normal operation, the Aave DAO funds sGHO adequately from protocol revenue (~$200M+ annual revenue)
+- In normal operation, the Aave DAO funds sGHO adequately from protocol revenue
 - In a stress scenario (DAO governance failure, revenue shortfall), late withdrawers may not receive their full yield entitlement
 - Principal is protected as long as the vault's GHO balance exceeds total deposits (yield is the unfunded part)
 
@@ -245,11 +249,11 @@ LlamaRisk published multiple analyses supporting sGHO but flagging key risks:
 
 - **sGHO vault:** NOT YET DEPLOYED — no production history. TODO: reassess after deployment
 - **GHO stablecoin:** Launched July 2023 — **~2.75 years** in production
-- **GHO supply:** ~$200M+ (DeFiLlama, as of early 2026)
-- **GSM USDC:** Deployed and operational — current exposure ~128M waEthUSDC against 175M cap
+- **GHO mainnet supply:** ~584.0M GHO (`totalSupply()`, April 2, 2026)
+- **GSM USDC:** Deployed and operational — current waEthUSDC held ~127.74M against 175M cap (`getAvailableLiquidity()`, April 2, 2026)
 - **GHO Reserve:** ~67.56M GHO available, 210M limit for GSM USDC
-- **Legacy stkGHO:** Holds ~302M GHO — demonstrates demand for GHO savings products
-- **Aave protocol:** One of the largest DeFi protocols, ~$30B+ TVL, live since January 2020 (~6 years)
+- **Legacy stkGHO:** Holds ~302.19M GHO — demonstrates demand for GHO savings products
+- **Aave protocol:** One of the largest DeFi protocols, ~$23.85B TVL (DeFiLlama API, April 2, 2026), live since January 2020 (~6 years)
 - **Security incidents (GHO):** No known exploits on GHO token, GSM, or stkGHO
 - **Security incidents (Aave):** Aave V3 has not been exploited. Historical V1/V2 incidents exist but are not relevant to the V3 architecture
 
@@ -281,7 +285,7 @@ GHO is deposited into the sGHO ERC-4626 vault. Shares are issued based on the cu
 ### Collateralization
 
 - **sGHO:** GHO deposited remains in the contract — **no rehypothecation**. Principal is fully backed. Yield backing depends on DAO funding
-- **GSM USDC:** Holds waEthUSDC (wrapped Aave USDC supply position). Each waEthUSDC is redeemable for USDC from Aave V3 (subject to Aave V3 liquidity). Current exposure: ~128M waEthUSDC
+- **GSM USDC:** Holds waEthUSDC (wrapped Aave USDC supply position). Each waEthUSDC is redeemable for USDC from Aave V3 (subject to Aave V3 liquidity). Current waEthUSDC held: ~127.74M
 - **No leverage** in the pipeline
 - **GHO itself:** Backed by over-collateralized Aave V3 loans and GSM stablecoin reserves
 
@@ -289,7 +293,7 @@ GHO is deposited into the sGHO ERC-4626 vault. Shares are issued based on the cu
 
 - **sGHO exchange rate:** On-chain via ERC-4626 `convertToAssets()`/`convertToShares()`. Computed from `yieldIndex`, fully deterministic
 - **sGHO actual backing:** `IERC20(GHO).balanceOf(sGHO)` shows actual GHO in vault. Compare to `totalAssets()` to detect any shortfall
-- **GSM exposure:** `getCurrentExposure()` and `getExposureCap()` readable on-chain
+- **GSM exposure:** `getAvailableLiquidity()`, `getAvailableUnderlyingExposure()`, `getUsed()`, and `getLimit()` readable on-chain
 - **GSM fees:** `getBuyFee()` / `getSellFee()` readable on-chain
 - **GHO Reserve balance:** On-chain verifiable at [`0x54C58157DeF387A880AE62332D1445f03adbE7E9`](https://etherscan.io/address/0x54C58157DeF387A880AE62332D1445f03adbE7E9)
 
@@ -381,7 +385,7 @@ sGHO and the GSM are governed through the **Aave DAO governance framework** — 
 | Contract | Address | Monitor |
 |----------|---------|---------|
 | sGHO Vault | TODO (pending deployment) | `totalAssets()`, `convertToAssets(1e18)` (PPS), `IERC20(GHO).balanceOf(sGHO)` vs `totalAssets()` (funding gap), Deposit/Withdraw events |
-| GSM USDC | [`0x3A3868898305f04beC7FEa77BecFf04C13444112`](https://etherscan.io/address/0x3A3868898305f04beC7FEa77BecFf04C13444112) | `getCurrentExposure()`, `getExposureCap()`, `getIsFrozen()`, `getIsSeized()`, FeeStrategyUpdated events |
+| GSM USDC | [`0x3A3868898305f04beC7FEa77BecFf04C13444112`](https://etherscan.io/address/0x3A3868898305f04beC7FEa77BecFf04C13444112) | `getAvailableLiquidity()`, `getAvailableUnderlyingExposure()`, `getUsed()`, `getLimit()`, `getIsFrozen()`, `getIsSeized()`, FeeStrategyUpdated events |
 | GHO Reserve | [`0x54C58157DeF387A880AE62332D1445f03adbE7E9`](https://etherscan.io/address/0x54C58157DeF387A880AE62332D1445f03adbE7E9) | GHO balance, limit vs used for GSM USDC |
 | GHO Risk Council | [`0x8513e6F37dBc52De87b166980Fa3F50639694B60`](https://etherscan.io/address/0x8513e6F37dBc52De87b166980Fa3F50639694B60) | Signer/threshold changes |
 | Oracle Swap Freezer | [`0x6e51936e0ED4256f9dA4794B536B619c88Ff0047`](https://etherscan.io/address/0x6e51936e0ED4256f9dA4794B536B619c88Ff0047) | Freeze/unfreeze events |
@@ -405,7 +409,10 @@ sGHO and the GSM are governed through the **Aave DAO governance framework** — 
 | `convertToAssets(1e18)` | sGHO | PPS tracking | Every 6 hours |
 | `totalAssets()` | sGHO | Total yield obligations | Daily |
 | `balanceOf(sGHO)` | GHO Token | Actual GHO in vault | Daily |
-| `getCurrentExposure()` | GSM USDC | Current waEthUSDC held | Daily |
+| `getAvailableLiquidity()` | GSM USDC | Current waEthUSDC held | Daily |
+| `getAvailableUnderlyingExposure()` | GSM USDC | Remaining waEthUSDC headroom | Daily |
+| `getUsed()` | GSM USDC | GHO reserve usage for this facilitator | Daily |
+| `getLimit()` | GSM USDC | GHO reserve limit for this facilitator | Daily |
 | `getIsFrozen()` | GSM USDC | Swap freeze status | Every 6 hours |
 | `getIsSeized()` | GSM USDC | Seize status | Daily |
 
@@ -416,15 +423,15 @@ sGHO and the GSM are governed through the **Aave DAO governance framework** — 
 - **Extensive audit coverage:** 12+ audits since 2022 by top firms (OpenZeppelin, Certora, Sigma Prime, ABDK). Certora formal verification. sGHO-specific audit found 0 critical/high/medium issues
 - **Aave DAO governance:** One of DeFi's most established on-chain governance systems. All critical operations require DAO vote with timelock. Rate-limited stewards for day-to-day parameter management
 - **Simple sGHO design:** No rehypothecation, no external strategies, no leverage. GHO stays in the vault. Yield is purely accounting-based
-- **GHO ecosystem maturity:** GHO live since July 2023 (~2.75 years), GSM operational, ~$200M+ supply, no security incidents
-- **Aave protocol backing:** $30B+ TVL platform, 6+ years of operation, $1M bug bounty
+- **GHO ecosystem maturity:** GHO live since July 2023 (~2.75 years), GSM operational, ~584M mainnet supply, no security incidents
+- **Aave protocol backing:** ~$23.85B TVL platform, 6+ years of operation, $1M bug bounty
 - **Token rescue protection:** sGHO `maxRescue()` returns 0 for GHO (underlying asset cannot be rescued by admin). GSM protects user funds tracked in `_currentExposure`
 - **GSM dangerous roles unassigned:** `LIQUIDATOR_ROLE` (seize) and `TOKEN_RESCUER_ROLE` on GSM are currently unassigned
 
 ### Key Risks
 
 - **sGHO NOT YET DEPLOYED:** No production history. All analysis is based on source code and audits. On-chain role assignments, proxy admin, and initial configuration must be verified after deployment
-- **GhoRouter NOT YET MERGED:** PR #34 has open reviewer comments (dangling approvals, missing validation). Not production-ready
+- **GhoRouter evidence gap:** The public materials linked in this report do not provide a canonical upstream router PR, and the linked TokenLogic PDF does not list router files in scope. Router-specific risk must be rechecked against final deployment artifacts
 - **Upgradeable contracts (rug via governance):** sGHO, GSM, GHO Token, and GHO Reserve are all upgradeable proxies controlled by Aave Governance. A malicious governance proposal could drain all funds. Mitigated by Aave's established governance framework and community oversight
 - **Virtual/unfunded yield:** sGHO yield index grows independently of actual GHO balance. The DAO must actively fund the vault. In a funding shortfall, late withdrawers lose yield (first-come-first-served). Principal remains protected
 - **GSM freeze can trap funds:** Oracle auto-freezes on USDC depeg, manual freeze by governance. During freeze, no USDC exit via GSM. DEX liquidity provides an alternative GHO exit path
@@ -463,7 +470,7 @@ sGHO and the GSM are governed through the **Aave DAO governance framework** — 
 | Audits | GHO: 12+ audits by top firms (OpenZeppelin, Certora, Sigma Prime, ABDK). sGHO: 2 audits (Certora + TokenLogic). Formal verification |
 | Bug bounty | $1,000,000 on Immunefi (Aave, covering GHO sub-systems) |
 | Production history | **sGHO: 0 months (NOT DEPLOYED)**. GHO: ~2.75 years. GSM USDC: operational. Aave V3: ~4 years |
-| TVL | sGHO: $0 (not deployed). GHO supply: ~$200M+. Aave V3: ~$30B+ |
+| TVL | sGHO: $0 (not deployed). GHO mainnet supply: ~584M. Aave: ~$23.85B TVL |
 | Security incidents | None on GHO, GSM, or Aave V3 |
 
 **Score: 2.5/5** — Exceptional audit coverage and formal verification, $1M bug bounty, and the broader Aave ecosystem has an outstanding track record. However, the sGHO vault itself has **zero production history** — no time in production means no battle-testing. The GHO ecosystem provides strong secondary confidence, but undeployed code is inherently riskier. Score heavily penalized by lack of deployment.
@@ -500,7 +507,7 @@ sGHO and the GSM are governed through the **Aave DAO governance framework** — 
 |--------|-----------|
 | Protocol count | Aave DAO (governance), Aave V3 (waEthUSDC), Chainlink (oracle for freeze), GHO Reserve |
 | Criticality | All within the Aave ecosystem — single governance trust root |
-| Quality | Blue-chip: Aave is the largest DeFi lending protocol, ~$30B+ TVL, 6+ years |
+| Quality | Blue-chip: Aave is one of the largest DeFi lending protocols, ~$23.85B TVL, 6+ years |
 
 **Dependencies Score: 2/5** — All dependencies are within the Aave ecosystem (single trust root), which is blue-chip quality. The Chainlink oracle dependency for auto-freeze adds a minor external dependency. Per rubric, 1-2 blue-chip dependencies with some concentration = score 2.
 
@@ -525,7 +532,7 @@ sGHO and the GSM are governed through the **Aave DAO governance framework** — 
 
 | Factor | Assessment |
 |--------|-----------|
-| Reserve transparency | sGHO: on-chain (ERC-4626). GSM: on-chain (`getCurrentExposure`). GHO Reserve: on-chain |
+| Reserve transparency | sGHO: on-chain (ERC-4626). GSM: on-chain (`getAvailableLiquidity()`, `getUsed()`, `getLimit()`). GHO Reserve: on-chain |
 | Exchange rate | sGHO: on-chain via yieldIndex. GSM: fixed 1:1 |
 | Funding gap | Detectable: compare `balanceOf(GHO, sGHO)` vs `totalAssets()` |
 | Third-party | Chainlink oracle for GSM freeze. All data independently verifiable |
