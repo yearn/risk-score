@@ -56,7 +56,7 @@ yvUSD is a **USDC-denominated cross-chain Yearn V3 vault** (ERC-4626) that deplo
 | Contract | Address | Configuration |
 |----------|---------|---------------|
 | Yearn RoleManager | [`0xb3bd6B2E61753C311EFbCF0111f75D29706D9a41`](https://etherscan.io/address/0xb3bd6B2E61753C311EFbCF0111f75D29706D9a41) | Vault `role_manager` — manages role assignments |
-| TimelockController | [`0x88ba032be87d5eF1FbE87336b7090767f367bF73`](https://etherscan.io/address/0x88ba032be87d5eF1FbE87336b7090767f367bF73) | **7-day delay**. Governs the RoleManager. DEFAULT_ADMIN renounced (immutable config) |
+| TimelockController | [`0x88ba032be87d5eF1FbE87336b7090767f367bF73`](https://etherscan.io/address/0x88ba032be87d5eF1FbE87336b7090767f367bF73) | **7-day delay**. Governs the RoleManager. DEFAULT_ADMIN never granted — `admin = address(0)` at construction ([tx](https://etherscan.io/tx/0x3063e5a82b383d0f5b38e8735dd13c0c9d492c3bfe5dc9d3d23fc829c60f96b0)), config permanently immutable |
 | Yearn Global Multisig | [`0xFEB4acf3df3cDEA7399794D0869ef76A6EfAff52`](https://etherscan.io/address/0xFEB4acf3df3cDEA7399794D0869ef76A6EfAff52) | 6-of-9 Gnosis Safe — **PROPOSER + EXECUTOR** on timelock. Holds nearly all vault roles (bitmask 0x3FF6) |
 | Vault Safe (Brain) | [`0x16388463d60FFE0661Cf7F1f31a7D658aC790ff7`](https://etherscan.io/address/0x16388463d60FFE0661Cf7F1f31a7D658aC790ff7) | 3-of-8 Gnosis Safe — operational roles + **CANCELLER** on timelock |
 | Security Safe | [`0xe5e2BAf96198c56380DDd5e992D7d1adA0E989C0`](https://etherscan.io/address/0xe5e2BAf96198c56380DDd5e992D7d1adA0E989C0) | 4-of-7 Gnosis Safe — DEBT_MANAGER, MAX_DEBT_MANAGER, EMERGENCY_MANAGER |
@@ -275,7 +275,7 @@ Since the initial March 2026 assessment, the yvUSD vault has **completed its gov
 Yearn Global Multisig (6-of-9 Safe, 0xFEB4...ff52)
   │
   ▼  [proposes/executes with 7-day delay]
-TimelockController (0x88ba...bf73) — 7 days, DEFAULT_ADMIN renounced
+TimelockController (0x88ba...bf73) — 7 days, DEFAULT_ADMIN never granted
   │
   ▼  [governance()]
 Yearn RoleManager (0xb3bd...9a41) — vault role_manager
@@ -288,7 +288,7 @@ yvUSD Vault (0x696d...6987)
 - **Minimum delay:** 7 days (604,800 seconds)
 - **Proposer + Executor:** Yearn Global Multisig (6-of-9)
 - **Canceller:** Yearn Global Multisig + Vault Safe (3-of-8)
-- **DEFAULT_ADMIN_ROLE:** Renounced — timelock configuration is immutable
+- **DEFAULT_ADMIN_ROLE:** Never granted (`admin = address(0)` at construction) — timelock configuration is permanently immutable
 
 **Vault Role Distribution:**
 
@@ -307,7 +307,7 @@ yvUSD Vault (0x696d...6987)
 2. **No EOA role concentration** — deployer EOA has 0 vault roles (confirmed). All vault operations require multisig or contract authorization
 3. **Yearn Global Multisig now involved** — the 6-of-9 Yearn multisig (with publicly known signers including Mariano Conti, Leo Cheng, 0xngmi, Michael Egorov) is the sole proposer/executor on the timelock and holds nearly all vault roles
 4. **Multi-layer security** — four distinct entities (global MS, vault safe, security safe, timelock) with overlapping but differentiated responsibilities. The Security Safe (4-of-7) provides dedicated emergency response capability
-5. **Immutable timelock config** — DEFAULT_ADMIN_ROLE on the timelock has been renounced, meaning the 7-day delay cannot be reduced or the role assignments changed
+5. **Immutable timelock config** — DEFAULT_ADMIN_ROLE was never granted on the timelock (`admin = address(0)` at construction), meaning the 7-day delay cannot be reduced or the role assignments changed
 6. **Standard Yearn framework** — the vault now uses the same RoleManager as other Yearn V3 vaults, providing consistency and established governance patterns
 
 **Remaining concern:** The deployer EOA ([`0x1b5f15DCb82d25f91c65b53CEe151E8b9fBdD271`](https://etherscan.io/address/0x1b5f15DCb82d25f91c65b53CEe151E8b9fBdD271)) remains the sole `governance` address on the Fee Splitter contract ([`0xd744B7D6bE69b334766802245Db2895e861cb470`](https://etherscan.io/address/0xd744B7D6bE69b334766802245Db2895e861cb470)). This is a low-impact concern (fee distribution only, not fund custody) but deviates from the otherwise robust multi-sig governance pattern.
@@ -399,7 +399,7 @@ Additionally, Yearn provides a dedicated **yvUSD APR API** ([yvusd-api.yearn.fi]
 ### Key Strengths
 
 - **Battle-tested Yearn V3 infrastructure:** V3 framework audited by Statemind, ChainSecurity, and yAcademy. No V3 exploits in ~23 months of production. Immutable vault contracts eliminate proxy upgrade risk
-- **Mature governance with 7-day timelock:** The vault has migrated to the standard Yearn RoleManager with a 7-day TimelockController for critical operations (adding strategies, changing accountant). The Yearn Global Multisig (6-of-9, with publicly known signers) is the sole proposer/executor. DEFAULT_ADMIN renounced, making the timelock configuration immutable
+- **Mature governance with 7-day timelock:** The vault has migrated to the standard Yearn RoleManager with a 7-day TimelockController for critical operations (adding strategies, changing accountant). The Yearn Global Multisig (6-of-9, with publicly known signers) is the sole proposer/executor. DEFAULT_ADMIN was never granted (`admin = address(0)` at construction), making the timelock configuration permanently immutable
 - **Multi-layer security:** Four distinct governance entities (Global MS, Vault Safe, Security Safe, Timelock) with differentiated responsibilities. No single point of failure
 - **USDC-denominated:** Stablecoin backing eliminates price volatility risk on the underlying asset
 - **Diversified strategy portfolio:** 11 strategies across 8+ protocols, distributed across lending, looper, PT, and cross-chain categories
@@ -460,7 +460,7 @@ Additionally, Yearn provides a dedicated **yvUSD APR API** ([yvusd-api.yearn.fi]
 |--------|-----------|
 | Upgradeability | V3 vaults are **immutable** (no proxy upgrades). Strategies can be added/removed |
 | Multisig | 6-of-9 Yearn Global Multisig (proposer/executor on timelock) + 3-of-8 Vault Safe (operations) + 4-of-7 Security Safe (emergency) |
-| Timelock | **7-day TimelockController** for critical operations (add strategy, change accountant, set max debt). DEFAULT_ADMIN renounced (immutable config) |
+| Timelock | **7-day TimelockController** for critical operations (add strategy, change accountant, set max debt). DEFAULT_ADMIN never granted — `admin = address(0)` at construction ([tx](https://etherscan.io/tx/0x3063e5a82b383d0f5b38e8735dd13c0c9d492c3bfe5dc9d3d23fc829c60f96b0)), config permanently immutable |
 | Privileged roles | Distributed across 6 entities (Global MS, Timelock, Vault Safe, Security Safe, DebtAllocator, Keeper). No EOA roles (deployer confirmed at bitmask 0x0) |
 | Yearn oversight | **Full integration** — Yearn Global MS (6-of-9) is sole proposer/executor on timelock, holds nearly all vault roles. Standard Yearn RoleManager |
 
