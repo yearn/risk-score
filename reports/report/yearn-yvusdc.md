@@ -56,7 +56,7 @@ yvUSDC-1 is a **USDC-denominated Yearn V3 vault** (ERC-4626) that deploys deposi
 | Daddy / ySafe (Governance) | [`0xFEB4acf3df3cDEA7399794D0869ef76A6EfAff52`](https://etherscan.io/address/0xFEB4acf3df3cDEA7399794D0869ef76A6EfAff52) | 6-of-9 Gnosis Safe — **ALL 14 vault roles** |
 | Brain (Operations) | [`0x16388463d60FFE0661Cf7F1f31a7D658aC790ff7`](https://etherscan.io/address/0x16388463d60FFE0661Cf7F1f31a7D658aC790ff7) | 3-of-8 Gnosis Safe — QUEUE, REPORTING, DEBT, DEPOSIT_LIMIT, EMERGENCY |
 | Security | [`0xe5e2Baf96198c56380dDD5E992D7d1ADa0e989c0`](https://etherscan.io/address/0xe5e2Baf96198c56380dDD5E992D7d1ADa0e989c0) | 4-of-7 Gnosis Safe — manages via Role Manager |
-| Strategy Manager (Timelock) | [`0x88Ba032be87d5EF1fbE87336b7090767F367BF73`](https://etherscan.io/address/0x88Ba032be87d5EF1fbE87336b7090767F367BF73) | TimelockController — **7-day delay** for strategy additions. DEFAULT_ADMIN never granted (`admin = address(0)` at [construction](https://etherscan.io/tx/0x3063e5a82b383d0f5b38e8735dd13c0c9d492c3bfe5dc9d3d23fc829c60f96b0)), config permanently immutable |
+| Strategy Manager (Timelock) | [`0x88Ba032be87d5EF1fbE87336b7090767F367BF73`](https://etherscan.io/address/0x88Ba032be87d5EF1fbE87336b7090767F367BF73) | TimelockController — **7-day delay** for strategy additions. Self-governed: timelock holds TIMELOCK_ADMIN_ROLE, so config changes must go through 7-day delay |
 | Keeper | [`0x604e586F17cE106B64185A7a0d2c1Da5bAce711E`](https://etherscan.io/address/0x604e586F17cE106B64185A7a0d2c1Da5bAce711E) | yHaaSRelayer — REPORTING only |
 | Debt Allocator | [`0x1e9eB053228B1156831759401dE0E115356b8671`](https://etherscan.io/address/0x1e9eB053228B1156831759401dE0E115356b8671) | Minimal proxy — REPORTING + DEBT_MANAGER |
 
@@ -351,7 +351,7 @@ Yearn maintains an active monitoring system via the [`monitoring-scripts-py`](ht
 
 - **Battle-tested Yearn V3 infrastructure:** V3 framework audited by Statemind, ChainSecurity, and yAcademy. No V3 exploits in ~23 months of production. Immutable vault contracts eliminate proxy upgrade risk
 - **Blue-chip dependencies with improved diversification:** ~41% Sky/MakerDAO (sUSDS) + ~59% Morpho (3 compounders) — both are top-tier DeFi protocols with extensive audit coverage. Improved from previous 100% Sky concentration
-- **Standard Yearn governance:** Uses the Yearn V3 Role Manager with the 6-of-9 ySafe multisig (named, prominent DeFi signers). No EOA role concentration. Strategy additions go through 7-day timelock (DEFAULT_ADMIN never granted, config permanently immutable)
+- **Standard Yearn governance:** Uses the Yearn V3 Role Manager with the 6-of-9 ySafe multisig (named, prominent DeFi signers). No EOA role concentration. Strategy additions go through 7-day timelock (self-governed — config changes must also go through 7-day delay)
 - **Simple, low-complexity strategies:** Sky: USDC → DAI → USDS → sUSDS pipeline with 1:1 conversions. Morpho: direct USDC deposit into lending vaults. No leverage, no cross-chain bridging, no looper mechanics
 - **Established track record:** ~13 months in production with ~$31.26M TVL, ~10.1% cumulative return, zero incidents
 - **Active monitoring:** yvUSDC-1 is in Yearn's hourly monitoring system with Telegram alerts for large flows
@@ -410,7 +410,7 @@ Yearn maintains an active monitoring system via the [`monitoring-scripts-py`](ht
 | Privileged roles | Well-distributed: Daddy (6/9, all roles), Brain (3/8, operational), Security (4/7), Keeper + Debt Allocator (bots) |
 | EOA risk | None — no EOA holds direct vault roles |
 
-**Governance Score: 1.5/5** — Immutable vault contracts (no proxy upgrade risk). 6-of-9 multisig with named, prominent DeFi signers. The most critical governance action — adding new strategies, which could break the system — goes through a **7-day TimelockController** (DEFAULT_ADMIN never granted, config permanently immutable). No EOA role concentration. Direct vault parameter changes (deposit limits, emergency shutdown) by the 6/9 multisig have no timelock, preventing a score of 1.
+**Governance Score: 1.5/5** — Immutable vault contracts (no proxy upgrade risk). 6-of-9 multisig with named, prominent DeFi signers. The most critical governance action — adding new strategies, which could break the system — goes through a **7-day TimelockController**. The timelock is self-governed (holds TIMELOCK_ADMIN_ROLE) — config changes like delay reduction must also go through the 7-day delay, though the delay is not permanently immutable. No EOA role concentration. Direct vault parameter changes (deposit limits, emergency shutdown) by the 6/9 multisig have no timelock, preventing a score of 1.
 
 **Subcategory B: Programmability**
 
