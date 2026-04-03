@@ -56,8 +56,8 @@ yvUSD is a **USDC-denominated cross-chain Yearn V3 vault** (ERC-4626) that deplo
 | Contract | Address | Configuration |
 |----------|---------|---------------|
 | Yearn V3 Role Manager | [`0xb3bd6B2E61753C311EFbCF0111f75D29706D9a41`](https://etherscan.io/address/0xb3bd6B2E61753C311EFbCF0111f75D29706D9a41) | Standard Yearn Role Manager — vault `role_manager` |
-| Strategy Manager (Timelock) | [`0x88ba032be87d5eF1FbE87336b7090767f367bF73`](https://etherscan.io/address/0x88ba032be87d5eF1FbE87336b7090767f367bF73) | TimelockController — **7-day delay**. Governs the RoleManager. DEFAULT_ADMIN never granted (`admin = address(0)` at [construction](https://etherscan.io/tx/0x3063e5a82b383d0f5b38e8735dd13c0c9d492c3bfe5dc9d3d23fc829c60f96b0)). Self-governed: timelock holds TIMELOCK_ADMIN_ROLE, so config changes (delay, roles) must themselves go through the 7-day delay |
-| Daddy / ySafe (Governance) | [`0xFEB4acf3df3cDEA7399794D0869ef76A6EfAff52`](https://etherscan.io/address/0xFEB4acf3df3cDEA7399794D0869ef76A6EfAff52) | 6-of-9 Gnosis Safe — **PROPOSER + EXECUTOR** on timelock. Holds nearly all vault roles (bitmask 0x3FF6) |
+| Strategy Manager (Timelock) | [`0x88ba032be87d5eF1FbE87336b7090767f367bF73`](https://etherscan.io/address/0x88ba032be87d5eF1FbE87336b7090767f367bF73) | TimelockController — **7-day delay**. Governs the RoleManager. TIMELOCK_ADMIN_ROLE held only by the timelock itself (not Daddy or any EOA). DEFAULT_ADMIN never granted (`admin = address(0)` at [construction](https://etherscan.io/tx/0x3063e5a82b383d0f5b38e8735dd13c0c9d492c3bfe5dc9d3d23fc829c60f96b0)) — no one can grant/revoke roles outside the propose→wait→execute flow |
+| Daddy / ySafe (Governance) | [`0xFEB4acf3df3cDEA7399794D0869ef76A6EfAff52`](https://etherscan.io/address/0xFEB4acf3df3cDEA7399794D0869ef76A6EfAff52) | 6-of-9 Gnosis Safe — **sole PROPOSER**, EXECUTOR, and CANCELLER on timelock. Holds nearly all vault roles (bitmask 0x3FF6) |
 | Brain (Operations) | [`0x16388463d60FFE0661Cf7F1f31a7D658aC790ff7`](https://etherscan.io/address/0x16388463d60FFE0661Cf7F1f31a7D658aC790ff7) | 3-of-8 Gnosis Safe — operational roles + **CANCELLER** on timelock |
 | Security | [`0xe5e2BAf96198c56380DDd5e992D7d1adA0E989C0`](https://etherscan.io/address/0xe5e2BAf96198c56380DDd5e992D7d1adA0E989C0) | 4-of-7 Gnosis Safe — DEBT_MANAGER, MAX_DEBT_MANAGER, EMERGENCY_MANAGER |
 | Debt Allocator | [`0x1E9eB053228B1156831759401DE0E115356b8671`](https://etherscan.io/address/0x1E9eB053228B1156831759401DE0E115356b8671) | Contract — REPORTING_MANAGER, DEBT_MANAGER |
@@ -273,7 +273,7 @@ Since the initial March 2026 assessment, the yvUSD vault has **completed its gov
 
 | Position | Address | Threshold | Roles on Vault |
 |----------|---------|-----------|----------------|
-| **Daddy (ySafe)** | [`0xFEB4acf3df3cDEA7399794D0869ef76A6EfAff52`](https://etherscan.io/address/0xFEB4acf3df3cDEA7399794D0869ef76A6EfAff52) | 6-of-9 | Nearly all roles (bitmask 0x3FF6). PROPOSER + EXECUTOR on timelock |
+| **Daddy (ySafe)** | [`0xFEB4acf3df3cDEA7399794D0869ef76A6EfAff52`](https://etherscan.io/address/0xFEB4acf3df3cDEA7399794D0869ef76A6EfAff52) | 6-of-9 | Nearly all roles (bitmask 0x3FF6). **Sole PROPOSER**, EXECUTOR, CANCELLER on timelock |
 | **Brain** | [`0x16388463d60FFE0661Cf7F1f31a7D658aC790ff7`](https://etherscan.io/address/0x16388463d60FFE0661Cf7F1f31a7D658aC790ff7) | 3-of-8 | Operational roles (bitmask 0x3972) — REVOKE_STRATEGY, QUEUE, REPORTING, DEBT, DEPOSIT_LIMIT, PROFIT_UNLOCK, DEBT_PURCHASER, EMERGENCY. CANCELLER on timelock |
 | **Security** | [`0xe5e2BAf96198c56380DDd5e992D7d1adA0E989C0`](https://etherscan.io/address/0xe5e2BAf96198c56380DDd5e992D7d1adA0E989C0) | 4-of-7 | DEBT_MANAGER, MAX_DEBT_MANAGER, EMERGENCY_MANAGER (bitmask 0x20C0) |
 | **Strategy Manager (Timelock)** | [`0x88ba032be87d5eF1FbE87336b7090767f367bF73`](https://etherscan.io/address/0x88ba032be87d5eF1FbE87336b7090767f367bF73) | 7-day delay | ADD_STRATEGY, REVOKE_STRATEGY, FORCE_REVOKE, ACCOUNTANT, MAX_DEBT (bitmask 0x8F). DEFAULT_ADMIN never granted. Timelock holds TIMELOCK_ADMIN_ROLE — config changes require 7-day delay |
@@ -285,7 +285,12 @@ Since the initial March 2026 assessment, the yvUSD vault has **completed its gov
 **Governance assessment:**
 1. **Standard Yearn governance** — same setup used across 37+ vaults (including yvUSDC-1), battle-tested pattern
 2. **No EOA role concentration** — deployer EOA has 0 vault roles (confirmed). All vault operations require multisig or contract authorization
-3. **Strategy additions go through a 7-day timelock** via the TimelockController (delay increased from the initial 24-hour setting). DEFAULT_ADMIN was never granted (`admin = address(0)` at construction). The timelock is self-governed: it holds TIMELOCK_ADMIN_ROLE, so any changes to the delay or role assignments must themselves pass through the 7-day delay — providing strong protection against rushed configuration changes
+3. **7-day timelock with locked-down role structure** — strategy additions and other critical operations go through the TimelockController (delay increased from initial 24h to 7 days). The timelock roles are tightly controlled:
+   - **PROPOSER:** Daddy (6/9) only — no one else can initiate timelocked operations
+   - **EXECUTOR:** Daddy (6/9) + TimelockExecutor contract (governed by Brain, internal executors: Brain + Deployer EOA)
+   - **CANCELLER:** Daddy (6/9) + Brain (3/8)
+   - **TIMELOCK_ADMIN_ROLE:** held only by the timelock contract itself — not by Daddy, Brain, or any EOA. Config changes (delay, role grants) must go through the 7-day delay
+   - **DEFAULT_ADMIN_ROLE:** never granted (`admin = address(0)` at construction). No one can grant or revoke timelock roles outside the normal propose→wait→execute flow
 4. **Immutable vault** — no proxy upgrades possible
 5. **Multi-layer security** — Daddy (governance), Brain (operations), Security (emergency), and automated bots (Keeper, Debt Allocator) with differentiated responsibilities
 
@@ -575,3 +580,49 @@ Final Score = (Centralization × 0.30) + (Funds Mgmt × 0.30) + (Audits × 0.20)
 - **Audit-based:** Reassess if CCTPStrategy or yvUSD-specific components receive dedicated external audits (should improve Audits score)
 - **Dependency-based:** Reassess if Maple syrupUSDC or InfiniFi experience significant events. Reassess if Morpho looper markets face liquidation stress
 - **Strategy-based:** Reassess if Maple concentration exceeds 60%, if allocation to medium-risk protocols exceeds 30%, or if looper leverage ratios increase significantly
+
+---
+
+## Appendix: TimelockController Role Structure
+
+TimelockController [`0x88ba032be87d5eF1FbE87336b7090767f367bF73`](https://etherscan.io/address/0x88ba032be87d5eF1FbE87336b7090767f367bF73) — deployed at [block 24,242,692](https://etherscan.io/tx/0x3063e5a82b383d0f5b38e8735dd13c0c9d492c3bfe5dc9d3d23fc829c60f96b0) with `admin = address(0)`.
+
+### Timelock Roles
+
+| Role | Holder | Type | Notes |
+|------|--------|------|-------|
+| **DEFAULT_ADMIN** | *No holder* | — | Never granted (`admin = address(0)` at construction). No one can grant/revoke roles outside the propose→wait→execute flow |
+| **TIMELOCK_ADMIN** | Timelock itself (`0x88ba...bf73`) | Contract | Only the timelock can admin its own roles. Config changes (delay, role grants) must go through the 7-day delay |
+| **PROPOSER** | Daddy/ySafe (`0xFEB4...ff52`) | 6-of-9 Safe | **Only proposer** — no one else can initiate timelocked operations |
+| **EXECUTOR** | Daddy/ySafe (`0xFEB4...ff52`) | 6-of-9 Safe | Can execute queued proposals directly |
+| **EXECUTOR** | TimelockExecutor (`0xf8f60bf9456a6e0141149db2dd6f02c60da5779b`) | Contract | Wrapper contract — delegates execution to its internal executor list (see below) |
+| **CANCELLER** | Daddy/ySafe (`0xFEB4...ff52`) | 6-of-9 Safe | Can cancel pending proposals |
+| **CANCELLER** | Brain (`0x1638...0ff7`) | 3-of-8 Safe | Can cancel pending proposals |
+
+### TimelockExecutor Contract
+
+[`0xf8f60bf9456a6e0141149db2dd6f02c60da5779b`](https://etherscan.io/address/0xf8f60bf9456a6e0141149db2dd6f02c60da5779b) — governance-gated wrapper around the TimelockController. Only addresses on its internal executor list can call `execute()` through it.
+
+| Parameter | Value |
+|-----------|-------|
+| Governance | Brain (`0x16388463d60FFE0661Cf7F1f31a7D658aC790ff7`) — only Brain can add/remove internal executors |
+| Internal executor 1 | Brain (`0x16388463d60FFE0661Cf7F1f31a7D658aC790ff7`) |
+| Internal executor 2 | Deployer EOA (`0x1b5f15DCb82d25f91c65b53CEe151E8b9fBdD271`) |
+
+### Execution Paths for Queued Proposals
+
+All paths require Daddy (6/9) to first propose the operation and a 7-day wait:
+
+1. **Daddy (6/9)** executes directly (holds EXECUTOR_ROLE on timelock)
+2. **Brain (3/8)** executes via TimelockExecutor contract
+3. **Deployer EOA** executes via TimelockExecutor contract
+
+### Why the Delay Cannot Be Bypassed
+
+To change the timelock delay (e.g., reduce from 7 days), an attacker would need to:
+
+1. Control Daddy (6/9) to **propose** `updateDelay()` — the only PROPOSER
+2. Wait 7 days — Brain or Daddy can **cancel** during this window
+3. Execute via Daddy, Brain, or the EOA — but the operation is already visible on-chain for 7 days
+
+DEFAULT_ADMIN was never granted, so no one can grant themselves PROPOSER or TIMELOCK_ADMIN to skip this flow. The timelock holds TIMELOCK_ADMIN but can only act on it through its own propose→wait→execute cycle.
