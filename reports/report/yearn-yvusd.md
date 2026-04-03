@@ -55,13 +55,13 @@ yvUSD is a **USDC-denominated cross-chain Yearn V3 vault** (ERC-4626) that deplo
 
 | Contract | Address | Configuration |
 |----------|---------|---------------|
-| Yearn RoleManager | [`0xb3bd6B2E61753C311EFbCF0111f75D29706D9a41`](https://etherscan.io/address/0xb3bd6B2E61753C311EFbCF0111f75D29706D9a41) | Vault `role_manager` — manages role assignments |
-| TimelockController | [`0x88ba032be87d5eF1FbE87336b7090767f367bF73`](https://etherscan.io/address/0x88ba032be87d5eF1FbE87336b7090767f367bF73) | **7-day delay**. Governs the RoleManager. DEFAULT_ADMIN never granted — `admin = address(0)` at construction ([tx](https://etherscan.io/tx/0x3063e5a82b383d0f5b38e8735dd13c0c9d492c3bfe5dc9d3d23fc829c60f96b0)), config permanently immutable |
-| Yearn Global Multisig | [`0xFEB4acf3df3cDEA7399794D0869ef76A6EfAff52`](https://etherscan.io/address/0xFEB4acf3df3cDEA7399794D0869ef76A6EfAff52) | 6-of-9 Gnosis Safe — **PROPOSER + EXECUTOR** on timelock. Holds nearly all vault roles (bitmask 0x3FF6) |
-| Vault Safe (Brain) | [`0x16388463d60FFE0661Cf7F1f31a7D658aC790ff7`](https://etherscan.io/address/0x16388463d60FFE0661Cf7F1f31a7D658aC790ff7) | 3-of-8 Gnosis Safe — operational roles + **CANCELLER** on timelock |
-| Security Safe | [`0xe5e2BAf96198c56380DDd5e992D7d1adA0E989C0`](https://etherscan.io/address/0xe5e2BAf96198c56380DDd5e992D7d1adA0E989C0) | 4-of-7 Gnosis Safe — DEBT_MANAGER, MAX_DEBT_MANAGER, EMERGENCY_MANAGER |
-| DebtAllocator | [`0x1E9eB053228B1156831759401DE0E115356b8671`](https://etherscan.io/address/0x1E9eB053228B1156831759401DE0E115356b8671) | Contract — REPORTING_MANAGER, DEBT_MANAGER |
-| yHaaS Keeper/Relayer | [`0x604e586F17cE106B64185a7A0d2c1DA5BaCe711e`](https://etherscan.io/address/0x604e586F17cE106B64185a7A0d2c1DA5BaCe711e) | Contract — REPORTING_MANAGER |
+| Yearn V3 Role Manager | [`0xb3bd6B2E61753C311EFbCF0111f75D29706D9a41`](https://etherscan.io/address/0xb3bd6B2E61753C311EFbCF0111f75D29706D9a41) | Standard Yearn Role Manager — vault `role_manager` |
+| Strategy Manager (Timelock) | [`0x88ba032be87d5eF1FbE87336b7090767f367bF73`](https://etherscan.io/address/0x88ba032be87d5eF1FbE87336b7090767f367bF73) | TimelockController — **7-day delay**. Governs the RoleManager. DEFAULT_ADMIN never granted — `admin = address(0)` at construction ([tx](https://etherscan.io/tx/0x3063e5a82b383d0f5b38e8735dd13c0c9d492c3bfe5dc9d3d23fc829c60f96b0)), config permanently immutable |
+| Daddy / ySafe (Governance) | [`0xFEB4acf3df3cDEA7399794D0869ef76A6EfAff52`](https://etherscan.io/address/0xFEB4acf3df3cDEA7399794D0869ef76A6EfAff52) | 6-of-9 Gnosis Safe — **PROPOSER + EXECUTOR** on timelock. Holds nearly all vault roles (bitmask 0x3FF6) |
+| Brain (Operations) | [`0x16388463d60FFE0661Cf7F1f31a7D658aC790ff7`](https://etherscan.io/address/0x16388463d60FFE0661Cf7F1f31a7D658aC790ff7) | 3-of-8 Gnosis Safe — operational roles + **CANCELLER** on timelock |
+| Security | [`0xe5e2BAf96198c56380DDd5e992D7d1adA0E989C0`](https://etherscan.io/address/0xe5e2BAf96198c56380DDd5e992D7d1adA0E989C0) | 4-of-7 Gnosis Safe — DEBT_MANAGER, MAX_DEBT_MANAGER, EMERGENCY_MANAGER |
+| Debt Allocator | [`0x1E9eB053228B1156831759401DE0E115356b8671`](https://etherscan.io/address/0x1E9eB053228B1156831759401DE0E115356b8671) | Contract — REPORTING_MANAGER, DEBT_MANAGER |
+| Keeper | [`0x604e586F17cE106B64185a7A0d2c1DA5BaCe711e`](https://etherscan.io/address/0x604e586F17cE106B64185a7A0d2c1DA5BaCe711e) | yHaaSRelayer — REPORTING_MANAGER |
 | Deployer EOA | [`0x1b5f15DCb82d25f91c65b53CEe151E8b9fBdD271`](https://etherscan.io/address/0x1b5f15DCb82d25f91c65b53CEe151E8b9fBdD271) | **0 vault roles** (confirmed). Fee Splitter governance only |
 
 ### Yearn V3 Infrastructure
@@ -267,48 +267,27 @@ Two strategies bridge USDC to Arbitrum via Circle CCTP:
 
 ### Governance
 
-Since the initial March 2026 assessment, the yvUSD vault has **completed its governance setup** by migrating to Yearn's standard governance framework. The vault now uses the Yearn V3 RoleManager contract ([`0xb3bd6B2E61753C311EFbCF0111f75D29706D9a41`](https://etherscan.io/address/0xb3bd6B2E61753C311EFbCF0111f75D29706D9a41)) — the same RoleManager used by the standard Yearn mainnet vaults (e.g., yvUSDC-1). This represents a significant maturation from the initial direct-Safe governance used during the vault's launch phase.
+Since the initial March 2026 assessment, the yvUSD vault has **completed its governance setup** by migrating to the **standard Yearn V3 governance pattern** via the Yearn V3 Role Manager contract ([`0xb3bd6B2E61753C311EFbCF0111f75D29706D9a41`](https://etherscan.io/address/0xb3bd6B2E61753C311EFbCF0111f75D29706D9a41)). This is the same governance framework used by yvUSDC-1 and 37+ other Yearn vaults — a significant maturation from the initial direct-Safe governance used during the vault's launch phase.
 
-**Governance Chain:**
+**Governance hierarchy:**
 
-```
-Yearn Global Multisig (6-of-9 Safe, 0xFEB4...ff52)
-  │
-  ▼  [proposes/executes with 7-day delay]
-TimelockController (0x88ba...bf73) — 7 days, DEFAULT_ADMIN never granted
-  │
-  ▼  [governance()]
-Yearn RoleManager (0xb3bd...9a41) — vault role_manager
-  │
-  ▼  [assigns roles]
-yvUSD Vault (0x696d...6987)
-```
+| Position | Address | Threshold | Roles on Vault |
+|----------|---------|-----------|----------------|
+| **Daddy (ySafe)** | [`0xFEB4acf3df3cDEA7399794D0869ef76A6EfAff52`](https://etherscan.io/address/0xFEB4acf3df3cDEA7399794D0869ef76A6EfAff52) | 6-of-9 | Nearly all roles (bitmask 0x3FF6). PROPOSER + EXECUTOR on timelock |
+| **Brain** | [`0x16388463d60FFE0661Cf7F1f31a7D658aC790ff7`](https://etherscan.io/address/0x16388463d60FFE0661Cf7F1f31a7D658aC790ff7) | 3-of-8 | Operational roles (bitmask 0x3972) — REVOKE_STRATEGY, QUEUE, REPORTING, DEBT, DEPOSIT_LIMIT, PROFIT_UNLOCK, DEBT_PURCHASER, EMERGENCY. CANCELLER on timelock |
+| **Security** | [`0xe5e2BAf96198c56380DDd5e992D7d1adA0E989C0`](https://etherscan.io/address/0xe5e2BAf96198c56380DDd5e992D7d1adA0E989C0) | 4-of-7 | DEBT_MANAGER, MAX_DEBT_MANAGER, EMERGENCY_MANAGER (bitmask 0x20C0) |
+| **Strategy Manager (Timelock)** | [`0x88ba032be87d5eF1FbE87336b7090767f367bF73`](https://etherscan.io/address/0x88ba032be87d5eF1FbE87336b7090767f367bF73) | 7-day delay | ADD_STRATEGY, REVOKE_STRATEGY, FORCE_REVOKE, ACCOUNTANT, MAX_DEBT (bitmask 0x8F). DEFAULT_ADMIN never granted — `admin = address(0)` at [construction](https://etherscan.io/tx/0x3063e5a82b383d0f5b38e8735dd13c0c9d492c3bfe5dc9d3d23fc829c60f96b0), config permanently immutable |
+| **Keeper** | [`0x604e586F17cE106B64185a7A0d2c1DA5BaCe711e`](https://etherscan.io/address/0x604e586F17cE106B64185a7A0d2c1DA5BaCe711e) | Bot | REPORTING_MANAGER |
+| **Debt Allocator** | [`0x1E9eB053228B1156831759401DE0E115356b8671`](https://etherscan.io/address/0x1E9eB053228B1156831759401DE0E115356b8671) | Bot | REPORTING_MANAGER + DEBT_MANAGER |
 
-**TimelockController** ([`0x88ba032be87d5eF1FbE87336b7090767f367bF73`](https://etherscan.io/address/0x88ba032be87d5eF1FbE87336b7090767f367bF73)):
-- **Minimum delay:** 7 days (604,800 seconds)
-- **Proposer + Executor:** Yearn Global Multisig (6-of-9)
-- **Canceller:** Yearn Global Multisig + Vault Safe (3-of-8)
-- **DEFAULT_ADMIN_ROLE:** Never granted (`admin = address(0)` at construction) — timelock configuration is permanently immutable
+**Daddy (ySafe) 6-of-9 multisig signers** include publicly known contributors: Mariano Conti (ex-MakerDAO), Leo Cheng (C.R.E.A.M.), 0xngmi (DeFiLlama), Michael Egorov (Curve), and others ([source](https://docs.yearn.fi/developers/security/multisig)).
 
-**Vault Role Distribution:**
-
-| Entity | Vault Roles | Notes |
-|--------|------------|-------|
-| Yearn Global MS (6-of-9) | Nearly all roles (bitmask 0x3FF6) — REVOKE_STRATEGY, FORCE_REVOKE, QUEUE, REPORTING, DEBT, MAX_DEBT, DEPOSIT_LIMIT, WITHDRAW_LIMIT, MINIMUM_IDLE, PROFIT_UNLOCK, DEBT_PURCHASER, EMERGENCY | Sole proposer/executor on timelock |
-| Timelock (7-day) | ADD_STRATEGY, REVOKE_STRATEGY, FORCE_REVOKE, ACCOUNTANT, MAX_DEBT (bitmask 0x8F) | Critical operations require 7-day delay |
-| Vault Safe (3-of-8) | Operational roles (bitmask 0x3972) — REVOKE_STRATEGY, QUEUE, REPORTING, DEBT, DEPOSIT_LIMIT, PROFIT_UNLOCK, DEBT_PURCHASER, EMERGENCY | Day-to-day operations + CANCELLER on timelock |
-| Security Safe (4-of-7) | DEBT_MANAGER, MAX_DEBT_MANAGER, EMERGENCY_MANAGER (bitmask 0x20C0) | Emergency response |
-| DebtAllocator (contract) | REPORTING_MANAGER, DEBT_MANAGER (bitmask 0x60) | Automated debt management |
-| yHaaS Keeper (contract) | REPORTING_MANAGER (bitmask 0x20) | Automated strategy reporting |
-| Deployer EOA | **0 vault roles** (bitmask 0x0) | Confirmed: all vault roles removed |
-
-**Key governance properties:**
-1. **7-day timelock** on critical operations — adding strategies, changing the accountant, and setting max debt require a 7-day delay via the TimelockController. This provides a monitoring window for users to react to potentially harmful governance changes
+**Governance assessment:**
+1. **Standard Yearn governance** — same setup used across 37+ vaults (including yvUSDC-1), battle-tested pattern
 2. **No EOA role concentration** — deployer EOA has 0 vault roles (confirmed). All vault operations require multisig or contract authorization
-3. **Yearn Global Multisig now involved** — the 6-of-9 Yearn multisig (with publicly known signers including Mariano Conti, Leo Cheng, 0xngmi, Michael Egorov) is the sole proposer/executor on the timelock and holds nearly all vault roles
-4. **Multi-layer security** — four distinct entities (global MS, vault safe, security safe, timelock) with overlapping but differentiated responsibilities. The Security Safe (4-of-7) provides dedicated emergency response capability
-5. **Immutable timelock config** — DEFAULT_ADMIN_ROLE was never granted on the timelock (`admin = address(0)` at construction), meaning the 7-day delay cannot be reduced or the role assignments changed
-6. **Standard Yearn framework** — the vault now uses the same RoleManager as other Yearn V3 vaults, providing consistency and established governance patterns
+3. **Strategy additions go through a 7-day timelock** via the TimelockController (delay increased from the initial 24-hour setting). DEFAULT_ADMIN was never granted (`admin = address(0)` at construction), making the timelock delay permanently immutable
+4. **Immutable vault** — no proxy upgrades possible
+5. **Multi-layer security** — Daddy (governance), Brain (operations), Security (emergency), and automated bots (Keeper, Debt Allocator) with differentiated responsibilities
 
 **Remaining concern:** The deployer EOA ([`0x1b5f15DCb82d25f91c65b53CEe151E8b9fBdD271`](https://etherscan.io/address/0x1b5f15DCb82d25f91c65b53CEe151E8b9fBdD271)) remains the sole `governance` address on the Fee Splitter contract ([`0xd744B7D6bE69b334766802245Db2895e861cb470`](https://etherscan.io/address/0xd744B7D6bE69b334766802245Db2895e861cb470)). This is a low-impact concern (fee distribution only, not fund custody) but deviates from the otherwise robust multi-sig governance pattern.
 
@@ -317,7 +296,7 @@ yvUSD Vault (0x696d...6987)
 - **Exchange rate (PPS):** Calculated on-chain algorithmically via ERC-4626. Fully programmatic, no admin input
 - **Vault operations:** Deposit/withdraw are permissionless on-chain transactions
 - **Strategy profit/loss:** Reported programmatically by keepers via `process_report()`. Profits unlock linearly over 7 days. Losses are immediate
-- **Debt allocation:** Automated via DebtAllocator contract, with manual override available to DEBT_MANAGER role holders (Yearn Global MS, Vault Safe, Security Safe)
+- **Debt allocation:** Automated via Debt Allocator contract, with manual override available to DEBT_MANAGER role holders (Daddy, Brain, Security)
 - **Cross-chain accounting:** When `report()` is called on the destination chain, `_harvestAndReport()` automatically queues a CCTP message back to the origin. No separate keeper relay required. Can be stale between report cycles
 - **V3 vaults are immutable** — no proxy upgrades, no admin-changeable implementation
 
@@ -341,7 +320,7 @@ yvUSD Vault (0x696d...6987)
 ## Operational Risk
 
 - **Team:** Yearn Finance — established since 2020, publicly known contributors. The Yearn global multisig has 9 named signers including Mariano Conti (ex-MakerDAO), Leo Cheng (C.R.E.A.M.), 0xngmi (DeFiLlama), Michael Egorov (Curve), and others
-- **yvUSD governance:** The vault has migrated to the standard Yearn RoleManager with a 7-day TimelockController. The Yearn Global Multisig (6-of-9) is the sole proposer/executor on the timelock. A dedicated 3-of-8 Vault Safe handles day-to-day operations, and a 4-of-7 Security Safe provides emergency response capability
+- **yvUSD governance:** Standard Yearn V3 Role Manager — the same governance used across 37+ vaults, with clear role separation (Daddy, Brain, Security, Keeper, Debt Allocator). 7-day timelock on critical operations
 - **Documentation:** Comprehensive Yearn V3 documentation. yvUSD-specific docs are now published on the official Yearn docs site, including cross-chain strategy architecture, LockedyvUSD mechanics, and a dedicated APR API service ([yvusd-api.yearn.fi](https://yvusd-api.yearn.fi))
 - **Legal:** Yearn Finance has converted its ychad.eth multisig into a BORG (cybernetic organization) via [YIP-87](https://gov.yearn.fi/t/yip-87-convert-ychad-eth-into-a-borg/14540), wrapping it in a Cayman Islands foundation company with smart contract governance restrictions. The YFI token governs the protocol via YIP proposals
 - **Incident response:** Yearn has demonstrated incident response capability across historical events. V3 framework has not been tested under stress. The $200K Immunefi bug bounty provides a responsible disclosure channel
@@ -399,8 +378,8 @@ Additionally, Yearn provides a dedicated **yvUSD APR API** ([yvusd-api.yearn.fi]
 ### Key Strengths
 
 - **Battle-tested Yearn V3 infrastructure:** V3 framework audited by Statemind, ChainSecurity, and yAcademy. No V3 exploits in ~23 months of production. Immutable vault contracts eliminate proxy upgrade risk
-- **Mature governance with 7-day timelock:** The vault has migrated to the standard Yearn RoleManager with a 7-day TimelockController for critical operations (adding strategies, changing accountant). The Yearn Global Multisig (6-of-9, with publicly known signers) is the sole proposer/executor. DEFAULT_ADMIN was never granted (`admin = address(0)` at construction), making the timelock configuration permanently immutable
-- **Multi-layer security:** Four distinct governance entities (Global MS, Vault Safe, Security Safe, Timelock) with differentiated responsibilities. No single point of failure
+- **Standard Yearn governance with 7-day timelock:** The vault now uses the standard Yearn V3 governance pattern (same as yvUSDC-1 and 37+ other vaults) with a 7-day TimelockController for critical operations (adding strategies, changing accountant). Daddy/ySafe (6-of-9, with publicly known signers) is the sole proposer/executor. DEFAULT_ADMIN was never granted (`admin = address(0)` at construction), making the timelock configuration permanently immutable
+- **Multi-layer security:** Daddy (governance), Brain (operations), Security (emergency), and automated bots (Keeper, Debt Allocator) with differentiated responsibilities. No single point of failure
 - **USDC-denominated:** Stablecoin backing eliminates price volatility risk on the underlying asset
 - **Diversified strategy portfolio:** 11 strategies across 8+ protocols, distributed across lending, looper, PT, and cross-chain categories
 - **Improved dependency quality:** Medium-risk protocol exposure reduced from 65.6% to 16.4%. Largest allocation (Maple, 45.8%) is rated Low Risk (2.33/5)
@@ -459,12 +438,12 @@ Additionally, Yearn provides a dedicated **yvUSD APR API** ([yvusd-api.yearn.fi]
 | Factor | Assessment |
 |--------|-----------|
 | Upgradeability | V3 vaults are **immutable** (no proxy upgrades). Strategies can be added/removed |
-| Multisig | 6-of-9 Yearn Global Multisig (proposer/executor on timelock) + 3-of-8 Vault Safe (operations) + 4-of-7 Security Safe (emergency) |
+| Multisig | 6-of-9 Daddy/ySafe (proposer/executor on timelock) + 3-of-8 Brain (operations) + 4-of-7 Security (emergency) |
 | Timelock | **7-day TimelockController** for critical operations (add strategy, change accountant, set max debt). DEFAULT_ADMIN never granted — `admin = address(0)` at construction ([tx](https://etherscan.io/tx/0x3063e5a82b383d0f5b38e8735dd13c0c9d492c3bfe5dc9d3d23fc829c60f96b0)), config permanently immutable |
-| Privileged roles | Distributed across 6 entities (Global MS, Timelock, Vault Safe, Security Safe, DebtAllocator, Keeper). No EOA roles (deployer confirmed at bitmask 0x0) |
-| Yearn oversight | **Full integration** — Yearn Global MS (6-of-9) is sole proposer/executor on timelock, holds nearly all vault roles. Standard Yearn RoleManager |
+| Privileged roles | Well-distributed: Daddy (6/9, nearly all roles), Brain (3/8, operational), Security (4/7, emergency), Keeper + Debt Allocator (bots). No EOA roles (deployer confirmed at bitmask 0x0) |
+| Yearn oversight | **Full integration** — same governance framework as yvUSDC-1 and 37+ other Yearn vaults. Standard Yearn RoleManager |
 
-**Governance Score: 2.0/5** — Major improvement from March assessment (was 2.5). Vault contracts remain immutable. A 7-day TimelockController now governs critical operations (adding strategies, changing accountant), with DEFAULT_ADMIN renounced making the delay immutable. The Yearn Global Multisig (6-of-9, with publicly known signers) serves as sole proposer/executor — a higher threshold and more established multisig than the previous 3-of-8 direct governance. Multi-layer security with four distinct entities provides robust access control with no single point of failure. Deployer EOA confirmed at 0 vault roles. The 3-of-8 Vault Safe retains operational roles (not behind timelock) for day-to-day management, and the deployer EOA retains Fee Splitter governance (low-impact). Per rubric: known-insider multisig (6/9) with 7-day timelock and immutable vault — solidly at score 2.
+**Governance Score: 1.5/5** — Major improvement from March assessment (was 2.5). Now uses the **standard Yearn V3 governance pattern** — the same framework as yvUSDC-1 (which also scores 1.5 for governance). Immutable vault contracts. 6-of-9 Daddy/ySafe multisig with named, prominent DeFi signers. The most critical governance actions — adding new strategies and changing the accountant — go through a **7-day TimelockController** (increased from initial 24h, with DEFAULT_ADMIN never granted making it permanently immutable). No EOA role concentration. Well-distributed roles across Daddy, Brain, Security, and automated bots. The deployer EOA retains Fee Splitter governance only (low-impact, fee distribution not fund custody). Direct vault parameter changes (deposit limits, emergency shutdown) by Daddy (6/9) have no timelock, preventing a score of 1.
 
 **Subcategory B: Programmability**
 
@@ -472,11 +451,11 @@ Additionally, Yearn provides a dedicated **yvUSD APR API** ([yvusd-api.yearn.fi]
 |--------|-----------|
 | PPS | On-chain ERC-4626, fully algorithmic |
 | Vault operations | Permissionless deposits/withdrawals on-chain |
-| Strategy reporting | Programmatic via yHaaS Keeper and DebtAllocator contracts |
-| Debt allocation | Automated via DebtAllocator contract, with manual override by DEBT_MANAGER holders (Global MS, Vault Safe, Security Safe) |
+| Strategy reporting | Programmatic via Keeper (yHaaSRelayer) and Debt Allocator |
+| Debt allocation | Automated via Debt Allocator, with manual override by DEBT_MANAGER holders (Daddy, Brain, Security) |
 | Cross-chain | Programmatic — `_harvestAndReport()` queues CCTP messages automatically. Stale between report cycles |
 
-**Programmability Score: 1.5/5** — All funds are on-chain across Ethereum and Arbitrum and cannot be altered by off-chain factors. PPS is calculated on-chain algorithmically via ERC-4626. Deposits/withdrawals are permissionless. Strategy reporting is automated via the yHaaS Keeper contract. Debt allocation is automated via the DebtAllocator contract with manual override available to multiple multisig holders. Cross-chain accounting has minor lag between keeper cycles but all positions are verifiable on-chain at all times.
+**Programmability Score: 1.5/5** — All funds are on-chain across Ethereum and Arbitrum and cannot be altered by off-chain factors. PPS is calculated on-chain algorithmically via ERC-4626. Deposits/withdrawals are permissionless. Strategy reporting is automated via the Keeper (yHaaSRelayer). Debt allocation is automated via the Debt Allocator with manual override available to Daddy, Brain, and Security multisigs. Cross-chain accounting has minor lag between keeper cycles but all positions are verifiable on-chain at all times.
 
 **Subcategory C: External Dependencies**
 
@@ -489,9 +468,9 @@ Additionally, Yearn provides a dedicated **yvUSD APR API** ([yvusd-api.yearn.fi]
 
 **Dependencies Score: 3.5/5** — Still many dependencies (8+), and Morpho is critical infrastructure across 86% of strategies. However, the dependency quality has significantly improved: medium-risk protocol exposure dropped from 65.6% to 16.4%, with the largest allocation (Maple, 45.8%) rated Low Risk (2.33/5). The main concern is Maple concentration — a single protocol failure could impact ~46% of the vault. Cross-chain bridge dependency via CCTP remains. Per rubric: many dependencies with critical reliance on Morpho and Maple, but improved quality pulls down from 4 to 3.5.
 
-**Centralization Score = (2.0 + 1.5 + 3.5) / 3 = 2.33**
+**Centralization Score = (1.5 + 1.5 + 3.5) / 3 = 2.17**
 
-**Score: 2.3/5** — Significant improvement from March (was 2.7). The addition of a 7-day timelock, Yearn Global Multisig integration, and standard RoleManager represent a major governance maturation. Immutable vault contracts, no EOA role concentration, and multi-layer security are key strengths. All funds remain on-chain and fully programmatic. The main remaining concerns are Maple protocol concentration and the Fee Splitter EOA governance.
+**Score: 2.2/5** — Significant improvement from March (was 2.7). The vault now uses the standard Yearn V3 governance pattern with 7-day timelock, Daddy/ySafe (6/9) integration, and standard RoleManager — the same framework as yvUSDC-1 and 37+ other Yearn vaults. Immutable vault contracts, no EOA role concentration, and multi-layer security are key strengths. All funds remain on-chain and fully programmatic. The main remaining concerns are Maple protocol concentration and the Fee Splitter EOA governance.
 
 #### Category 3: Funds Management (Weight: 30%)
 
@@ -546,21 +525,21 @@ Additionally, Yearn provides a dedicated **yvUSD APR API** ([yvusd-api.yearn.fi]
 | Incident response | Yearn has demonstrated capability across historical events. V3 untested |
 | Monitoring | Active hourly large-flow alerts, weekly endorsed-vault checks, timelock monitoring across 6 chains |
 
-**Score: 1.5/5** — Yearn's brand, track record, and known team provide high confidence. The vault now uses the standard Yearn governance framework with full Yearn Global Multisig involvement. Comprehensive V3 documentation, active Immunefi + Sherlock bounties, demonstrated incident response capability, and active monitoring infrastructure (hourly alerts, endorsed-vault checks, timelock monitoring via GitHub Actions + Telegram). yvUSD-specific documentation is on the official Yearn docs site, covering cross-chain strategy architecture, LockedyvUSD mechanics, and a dedicated APR API service. Yearn BORG legal entity (Cayman foundation via YIP-87). Score unchanged from March.
+**Score: 1.5/5** — Yearn's brand, track record, and known team provide high confidence. The vault now uses the standard Yearn governance framework (Daddy, Brain, Security, Keeper, Debt Allocator) — the same pattern across 37+ vaults. Comprehensive V3 documentation, active Immunefi + Sherlock bounties, demonstrated incident response capability, and active monitoring infrastructure (hourly alerts, endorsed-vault checks, timelock monitoring via GitHub Actions + Telegram). yvUSD-specific documentation is on the official Yearn docs site, covering cross-chain strategy architecture, LockedyvUSD mechanics, and a dedicated APR API service. Yearn BORG legal entity (Cayman foundation via YIP-87). Score unchanged from March.
 
 ### Final Score Calculation
 
 ```
 Final Score = (Centralization × 0.30) + (Funds Mgmt × 0.30) + (Audits × 0.20) + (Liquidity × 0.15) + (Operational × 0.05)
-            = (2.3 × 0.30) + (2.0 × 0.30) + (3.0 × 0.20) + (3.0 × 0.15) + (1.5 × 0.05)
-            = 0.69 + 0.60 + 0.60 + 0.45 + 0.075
-            = 2.415
+            = (2.2 × 0.30) + (2.0 × 0.30) + (3.0 × 0.20) + (3.0 × 0.15) + (1.5 × 0.05)
+            = 0.66 + 0.60 + 0.60 + 0.45 + 0.075
+            = 2.385
 ```
 
 | Category | Score | Weight | Weighted | Change from March |
 |----------|-------|--------|----------|-------------------|
 | Audits & Historical | 3.0 | 20% | 0.60 | — |
-| Centralization & Control | 2.3 | 30% | 0.69 | ↓ from 2.7 (timelock + global MS) |
+| Centralization & Control | 2.2 | 30% | 0.66 | ↓ from 2.7 (standard Yearn governance + 7-day timelock) |
 | Funds Management | 2.0 | 30% | 0.60 | ↓ from 2.25 (better dependency quality) |
 | Liquidity Risk | 3.0 | 15% | 0.45 | — |
 | Operational Risk | 1.5 | 5% | 0.075 | — |
@@ -579,7 +558,7 @@ Final Score = (Centralization × 0.30) + (Funds Mgmt × 0.30) + (Audits × 0.20)
 **Final Risk Tier: Low Risk (2.4/5.0) — Approved with standard monitoring**
 
 **Score change rationale:** The score improved from 2.6 (Medium Risk) to 2.4 (Low Risk) primarily due to:
-1. **Governance maturation** (2.7 → 2.3): Addition of 7-day timelock, Yearn Global Multisig integration, standard RoleManager, and multi-layer security
+1. **Governance maturation** (2.7 → 2.2): Migration to the standard Yearn V3 governance pattern (same as yvUSDC-1) with 7-day timelock, Daddy/ySafe (6/9) integration, and standard RoleManager
 2. **Improved dependency quality** (Funds Mgmt 2.25 → 2.0): Medium-risk protocol exposure reduced from 65.6% to 16.4%, with the dominant allocation shifting to Maple (Low Risk 2.33/5)
 
 ---
