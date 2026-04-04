@@ -37,8 +37,8 @@ sGHO is an **ERC-4626 compliant yield-bearing savings vault** for GHO, Aave's na
 - **Slashing:** None
 - **Rehypothecation:** None
 - **Fees:** None (0% deposit/withdrawal fees on sGHO itself)
-- **GSM USDC sell fee:** 0 bps (USDC → GHO)
-- **GSM USDC buy fee:** 7 bps (GHO → USDC)
+- **GSM USDC sell fee:** 0 bps (waEthUSDC → GHO). The GhoRouter wraps raw USDC into waEthUSDC before selling to the GSM
+- **GSM USDC buy fee:** 7 bps (GHO → waEthUSDC). The GhoRouter unwraps waEthUSDC back to USDC after buying from the GSM
 
 **Links:**
 
@@ -280,7 +280,7 @@ GHO is deposited into the sGHO ERC-4626 vault. Shares are issued based on the cu
 - **Deposits:** Permissionless — anyone can deposit GHO and receive sGHO shares (ERC-4626). Subject to supply cap (400M GHO)
 - **Withdrawals:** Permissionless, atomic, no cooldown. Capped by actual GHO balance in vault (see Virtual Yield section above)
 - **GSM:** Permissionless — `sellAsset` and `buyAsset` available to anyone. Subject to exposure cap (175M waEthUSDC). Can be frozen by oracle or governance
-- **Fees:** 0% on sGHO deposit/withdrawal. 0% GSM sell fee. 7 bps GSM buy fee
+- **Fees:** 0% on sGHO deposit/withdrawal. 0% GSM sell fee (waEthUSDC → GHO). 7 bps GSM buy fee (GHO → waEthUSDC)
 
 ### Collateralization
 
