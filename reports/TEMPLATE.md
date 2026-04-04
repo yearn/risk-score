@@ -206,7 +206,7 @@ If ANY gate is triggered, the protocol automatically receives a score of **5** (
 
 | Score | Contract Upgradeability | Timelock | Privileged Roles |
 |-------|------------------------|----------|-----------------|
-| **1** | Immutable or fully decentralized DAO | N/A or >3 days | No privileged roles or multi-party approval |
+| **1** | Immutable or fully decentralized DAO | 7+ days timelock on critical operations | Multisig above 3/5 threshold, no EOA roles. Multi-party approval required |
 | **2** | Multisig 7/11+ with timelock | 24+ hours | Limited roles, cannot seize funds |
 | **3** | Multisig 5/9 with timelock | 24+ hours | Some powerful roles, constrained by timelock |
 | **4** | Multisig 3/5 or low threshold | <12 hours | Powerful admin roles with limited constraints |

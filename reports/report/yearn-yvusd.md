@@ -4,7 +4,7 @@
 - **Token:** yvUSD (USD yVault)
 - **Chain:** Ethereum (with cross-chain strategies on Arbitrum)
 - **Token Address:** [`0x696d02Db93291651ED510704c9b286841d506987`](https://etherscan.io/address/0x696d02Db93291651ED510704c9b286841d506987)
-- **Final Score: 2.4/5.0**
+- **Final Score: 2.3/5.0**
 
 ## Overview + Links
 
@@ -77,17 +77,17 @@ yvUSD is a **USDC-denominated cross-chain Yearn V3 vault** (ERC-4626) that deplo
 
 | # | Strategy | Name | Current Debt (USDC) | Allocation | Protocols Used |
 |---|----------|------|--------------------:|-----------:|----------------|
-| 1 | [`0xf28d...442`](https://etherscan.io/address/0xf28d...442) | syrupUSDC/USDC Morpho Looper | 1,747,438 | 43.35% | Maple syrupUSDC, Morpho |
-| 2 | [`0x0e29...626`](https://etherscan.io/address/0x0e29...626) | Morpho Yearn OG USDC Compounder | 970,687 | 24.08% | Morpho |
-| 3 | [`0x5f9D...f89`](https://etherscan.io/address/0x5f9D...f89) | Infinifi sIUSD Morpho Looper | 612,648 | 15.20% | InfiniFi siUSD, Morpho |
-| 4 | [`0x7130...f8f`](https://etherscan.io/address/0x7130...f8f) | USDC to sUSDS Depositor | 421,438 | 10.45% | Sky/MakerDAO |
-| 5 | [`0x9e0A...75b`](https://etherscan.io/address/0x9e0A...75b) | USDC To Spark USDS Depositor | 100,257 | 2.49% | Spark, Sky/MakerDAO |
-| 6 | [`0x2f56...179`](https://etherscan.io/address/0x2f56...179) | Arbitrum syrupUSDC/USDC Morpho Looper | 100,114 | 2.48% | Maple syrupUSDC, Morpho, CCTP |
-| 7 | [`0x4c0e...34b`](https://etherscan.io/address/0x4c0e...34b) | USD3 Pendle PT Maxi | 50,015 | 1.24% | 3Jane USD3, Pendle |
-| 8 | [`0x7bf1...d1d`](https://etherscan.io/address/0x7bf1...d1d) | PT stcUSD Jul 23 Morpho Looper | 28,491 | 0.71% | Cap stcUSD, Morpho, Pendle/Spectra |
-| 9 | [`0x48E6...a93`](https://etherscan.io/address/0x48E6...a93) | USDC To SKY USDS Depositor | 0 | 0.0% | Sky/MakerDAO |
-| 10 | [`0x00C8...4cF`](https://etherscan.io/address/0x00C8...4cF) | USDC Fluid Lender | 0 | 0.0% | Fluid |
-| 11 | [`0x1983...9e`](https://etherscan.io/address/0x1983...9e) | Arb Yearn Degen Morpho Compounder | 0 | 0.0% | Morpho, CCTP |
+| 1 | [`0xF28DC8B6DeD7E45F8cf84B9972487C8e1857A442`](https://etherscan.io/address/0xF28DC8B6DeD7E45F8cf84B9972487C8e1857A442) | syrupUSDC/USDC Morpho Looper | 1,747,438 | 43.35% | Maple syrupUSDC, Morpho |
+| 2 | [`0x0e297dE4005883C757c9F09fdF7cF1363C20e626`](https://etherscan.io/address/0x0e297dE4005883C757c9F09fdF7cF1363C20e626) | Morpho Yearn OG USDC Compounder | 970,687 | 24.08% | Morpho |
+| 3 | [`0x5f9DBa2805411a8382FDb4E69d4f2Da8EFaF1F89`](https://etherscan.io/address/0x5f9DBa2805411a8382FDb4E69d4f2Da8EFaF1F89) | Infinifi sIUSD Morpho Looper | 612,648 | 15.20% | InfiniFi siUSD, Morpho |
+| 4 | [`0x7130570BCEfCedBe9d15B5b11A33006156460f8f`](https://etherscan.io/address/0x7130570BCEfCedBe9d15B5b11A33006156460f8f) | USDC to sUSDS Depositor | 421,438 | 10.45% | Sky/MakerDAO |
+| 5 | [`0x9e0A5943dFc1A85B48C191aa7c10487297aA675b`](https://etherscan.io/address/0x9e0A5943dFc1A85B48C191aa7c10487297aA675b) | USDC To Spark USDS Depositor | 100,257 | 2.49% | Spark, Sky/MakerDAO |
+| 6 | [`0x2F56D106C6Df739bdbb777C2feE79FFaED88D179`](https://etherscan.io/address/0x2F56D106C6Df739bdbb777C2feE79FFaED88D179) | Arbitrum syrupUSDC/USDC Morpho Looper | 100,114 | 2.48% | Maple syrupUSDC, Morpho, CCTP |
+| 7 | [`0x4C0e4d3cB62B91afBbf1Fe8e830f98A513c7234b`](https://etherscan.io/address/0x4C0e4d3cB62B91afBbf1Fe8e830f98A513c7234b) | USD3 Pendle PT Maxi | 50,015 | 1.24% | 3Jane USD3, Pendle |
+| 8 | [`0x7bf1D269bf2CB79E628F51B93763B342fd059D1D`](https://etherscan.io/address/0x7bf1D269bf2CB79E628F51B93763B342fd059D1D) | PT stcUSD Jul 23 Morpho Looper | 28,491 | 0.71% | Cap stcUSD, Morpho, Pendle/Spectra |
+| 9 | [`0x48E66D65006007ef62B50735D070fc30d0242a93`](https://etherscan.io/address/0x48E66D65006007ef62B50735D070fc30d0242a93) | USDC To SKY USDS Depositor | 0 | 0.0% | Sky/MakerDAO |
+| 10 | [`0x00C8a649C9837523ebb406Ceb17a6378Ab5C74cF`](https://etherscan.io/address/0x00C8a649C9837523ebb406Ceb17a6378Ab5C74cF) | USDC Fluid Lender | 0 | 0.0% | Fluid |
+| 11 | [`0x1983923e5a3591AFe036d38A8C8011e66Cd76e9E`](https://etherscan.io/address/0x1983923e5a3591AFe036d38A8C8011e66Cd76e9E) | Arb Yearn Degen Morpho Compounder | 0 | 0.0% | Morpho, CCTP |
 
 **Note:** Since the March 2026 assessment, one strategy has been removed (PT siUSD March 25 — matured) and significant rebalancing has occurred. The vault has shifted from 3Jane USD3 dominance (33% → 1.2%) to Maple syrupUSDC dominance (9.4% → 45.8% across two strategies). Active portfolio management continues with multiple strategy additions and revocations over the vault's ~74-day history.
 
@@ -451,7 +451,7 @@ Additionally, Yearn provides a dedicated **yvUSD APR API** ([yvusd-api.yearn.fi]
 | Privileged roles | Well-distributed: Daddy (6/9, nearly all roles), Brain (3/8, operational), Security (4/7, emergency), Keeper + Debt Allocator (bots). No EOA roles (deployer confirmed at bitmask 0x0) |
 | Yearn oversight | **Full integration** — same governance framework as yvUSDC-1 and 37+ other Yearn vaults. Standard Yearn RoleManager |
 
-**Governance Score: 1.5/5** — Major improvement from March assessment (was 2.5). Now uses the **standard Yearn V3 governance pattern** — the same framework as yvUSDC-1 (which also scores 1.5 for governance). Immutable vault contracts. 6-of-9 Daddy/ySafe multisig with named, prominent DeFi signers. The most critical governance actions — adding new strategies and changing the accountant — go through a **7-day TimelockController** (increased from initial 24h). The timelock is self-governed (holds TIMELOCK_ADMIN_ROLE) — any config changes must also pass through the 7-day delay, though the delay is not immutable and could theoretically be reduced via a timelocked proposal. No EOA role concentration. Well-distributed roles across Daddy, Brain, Security, and automated bots. The deployer EOA retains Fee Splitter governance only (low-impact, fee distribution not fund custody). Direct vault parameter changes (deposit limits, emergency shutdown) by Daddy (6/9) have no timelock, preventing a score of 1.
+**Governance Score: 1.0/5** — Major improvement from March assessment (was 2.5). Immutable vault contracts (no proxy upgrades). 7-day timelock on critical operations (strategy additions, accountant changes), with Daddy (6-of-9, named signers) as sole proposer. No EOA vault roles (deployer confirmed at bitmask 0x0). Well-distributed roles across Daddy, Brain (3/8), Security (4/7), and automated bots. Per rubric: immutable contracts + 7+ day timelock + multisig above 3/5 threshold + no EOA roles = score 1. The deployer EOA retains Fee Splitter governance only (low-impact, fee distribution not fund custody).
 
 **Subcategory B: Programmability**
 
@@ -476,9 +476,9 @@ Additionally, Yearn provides a dedicated **yvUSD APR API** ([yvusd-api.yearn.fi]
 
 **Dependencies Score: 3.5/5** — Still many dependencies (8+), and Morpho is critical infrastructure across 86% of strategies. However, the dependency quality has significantly improved: medium-risk protocol exposure dropped from 65.6% to 16.4%, with the largest allocation (Maple, 45.8%) rated Low Risk (2.33/5). The main concern is Maple concentration — a single protocol failure could impact ~46% of the vault. Cross-chain bridge dependency via CCTP remains. Per rubric: many dependencies with critical reliance on Morpho and Maple, but improved quality pulls down from 4 to 3.5.
 
-**Centralization Score = (1.5 + 1.5 + 3.5) / 3 = 2.17**
+**Centralization Score = (1.0 + 1.5 + 3.5) / 3 = 2.0**
 
-**Score: 2.2/5** — Significant improvement from March (was 2.7). The vault now uses the standard Yearn V3 governance pattern with 7-day timelock, Daddy/ySafe (6/9) integration, and standard RoleManager — the same framework as yvUSDC-1 and 37+ other Yearn vaults. Immutable vault contracts, no EOA role concentration, and multi-layer security are key strengths. All funds remain on-chain and fully programmatic. The main remaining concerns are Maple protocol concentration and the Fee Splitter EOA governance.
+**Score: 2.0/5** — Significant improvement from March (was 2.7). The vault now uses the standard Yearn V3 governance pattern with 7-day timelock, Daddy/ySafe (6/9) as sole proposer, and standard RoleManager — the same framework as yvUSDC-1 and 37+ other Yearn vaults. Immutable vault contracts, no EOA vault roles, and multi-layer security are key strengths. All funds remain on-chain and fully programmatic. The main remaining concerns are Maple protocol concentration and the Fee Splitter EOA governance.
 
 #### Category 3: Funds Management (Weight: 30%)
 
@@ -537,21 +537,15 @@ Additionally, Yearn provides a dedicated **yvUSD APR API** ([yvusd-api.yearn.fi]
 
 ### Final Score Calculation
 
-```
-Final Score = (Centralization × 0.30) + (Funds Mgmt × 0.30) + (Audits × 0.20) + (Liquidity × 0.15) + (Operational × 0.05)
-            = (2.2 × 0.30) + (2.0 × 0.30) + (3.0 × 0.20) + (3.0 × 0.15) + (1.5 × 0.05)
-            = 0.66 + 0.60 + 0.60 + 0.45 + 0.075
-            = 2.385
-```
 
 | Category | Score | Weight | Weighted | Change from March |
 |----------|-------|--------|----------|-------------------|
 | Audits & Historical | 3.0 | 20% | 0.60 | — |
-| Centralization & Control | 2.2 | 30% | 0.66 | ↓ from 2.7 (standard Yearn governance + 7-day timelock) |
+| Centralization & Control | 2.0 | 30% | 0.60 | ↓ from 2.7 (standard Yearn governance + 7-day timelock) |
 | Funds Management | 2.0 | 30% | 0.60 | ↓ from 2.25 (better dependency quality) |
 | Liquidity Risk | 3.0 | 15% | 0.45 | — |
 | Operational Risk | 1.5 | 5% | 0.075 | — |
-| **Final Score** | | | **2.4/5.0** | ↓ from 2.6 |
+| **Final Score** | | | **2.3/5.0** | ↓ from 2.6 |
 
 ### Risk Tier
 
@@ -563,10 +557,10 @@ Final Score = (Centralization × 0.30) + (Funds Mgmt × 0.30) + (Audits × 0.20)
 | 3.5-4.5 | Elevated Risk | Limited approval, strict limits |
 | 4.5-5.0 | High Risk | Not recommended |
 
-**Final Risk Tier: Low Risk (2.4/5.0) — Approved with standard monitoring**
+**Final Risk Tier: Low Risk (2.3/5.0) — Approved with standard monitoring**
 
-**Score change rationale:** The score improved from 2.6 (Medium Risk) to 2.4 (Low Risk) primarily due to:
-1. **Governance maturation** (2.7 → 2.2): Migration to the standard Yearn V3 governance pattern (same as yvUSDC-1) with 7-day timelock, Daddy/ySafe (6/9) integration, and standard RoleManager
+**Score change rationale:** The score improved from 2.6 (Medium Risk) to 2.3 (Low Risk) primarily due to:
+1. **Governance maturation** (2.7 → 2.0): Migration to the standard Yearn V3 governance pattern with 7-day timelock, Daddy/ySafe (6/9) as sole proposer, no EOA vault roles, and immutable vault contracts — scoring 1.0 on governance per updated rubric
 2. **Improved dependency quality** (Funds Mgmt 2.25 → 2.0): Medium-risk protocol exposure reduced from 65.6% to 16.4%, with the dominant allocation shifting to Maple (Low Risk 2.33/5)
 
 ---
@@ -592,12 +586,12 @@ TimelockController [`0x88ba032be87d5eF1FbE87336b7090767f367bF73`](https://ethers
 | Role | Holder | Type | Notes |
 |------|--------|------|-------|
 | **DEFAULT_ADMIN** | *No holder* | — | Never granted (`admin = address(0)` at construction). No one can grant/revoke roles outside the propose→wait→execute flow |
-| **TIMELOCK_ADMIN** | Timelock itself (`0x88ba...bf73`) | Contract | Only the timelock can admin its own roles. Config changes (delay, role grants) must go through the 7-day delay |
-| **PROPOSER** | Daddy/ySafe (`0xFEB4...ff52`) | 6-of-9 Safe | **Only proposer** — no one else can initiate timelocked operations |
-| **EXECUTOR** | Daddy/ySafe (`0xFEB4...ff52`) | 6-of-9 Safe | Can execute queued proposals directly |
+| **TIMELOCK_ADMIN** | Timelock itself ([`0x88ba032be87d5eF1FbE87336b7090767f367bF73`](https://etherscan.io/address/0x88ba032be87d5eF1FbE87336b7090767f367bF73)) | Contract | Only the timelock can admin its own roles. Config changes (delay, role grants) must go through the 7-day delay |
+| **PROPOSER** | Daddy/ySafe ([`0xFEB4acf3df3cDEA7399794D0869ef76A6EfAff52`](https://etherscan.io/address/0xFEB4acf3df3cDEA7399794D0869ef76A6EfAff52)) | 6-of-9 Safe | **Only proposer** — no one else can initiate timelocked operations |
+| **EXECUTOR** | Daddy/ySafe ([`0xFEB4acf3df3cDEA7399794D0869ef76A6EfAff52`](https://etherscan.io/address/0xFEB4acf3df3cDEA7399794D0869ef76A6EfAff52)) | 6-of-9 Safe | Can execute queued proposals directly |
 | **EXECUTOR** | TimelockExecutor (`0xf8f60bf9456a6e0141149db2dd6f02c60da5779b`) | Contract | Wrapper contract — delegates execution to its internal executor list (see below) |
-| **CANCELLER** | Daddy/ySafe (`0xFEB4...ff52`) | 6-of-9 Safe | Can cancel pending proposals |
-| **CANCELLER** | Brain (`0x1638...0ff7`) | 3-of-8 Safe | Can cancel pending proposals |
+| **CANCELLER** | Daddy/ySafe ([`0xFEB4acf3df3cDEA7399794D0869ef76A6EfAff52`](https://etherscan.io/address/0xFEB4acf3df3cDEA7399794D0869ef76A6EfAff52)) | 6-of-9 Safe | Can cancel pending proposals |
+| **CANCELLER** | Brain ([`0x16388463d60FFE0661Cf7F1f31a7D658aC790ff7`](https://etherscan.io/address/0x16388463d60FFE0661Cf7F1f31a7D658aC790ff7)) | 3-of-8 Safe | Can cancel pending proposals |
 
 ### TimelockExecutor Contract
 

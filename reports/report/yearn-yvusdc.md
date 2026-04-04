@@ -4,7 +4,7 @@
 - **Token:** yvUSDC-1 (USDC-1 yVault)
 - **Chain:** Ethereum
 - **Token Address:** [`0xBe53A109B494E5c9f97b9Cd39Fe969BE68BF6204`](https://etherscan.io/address/0xBe53A109B494E5c9f97b9Cd39Fe969BE68BF6204)
-- **Final Score: 1.3/5.0**
+- **Final Score: 1.2/5.0**
 
 ## Overview + Links
 
@@ -406,11 +406,11 @@ Yearn maintains an active monitoring system via the [`monitoring-scripts-py`](ht
 |--------|-----------|
 | Upgradeability | V3 vaults are **immutable** (no proxy upgrades) |
 | Multisig | 6-of-9 ySafe with **publicly named, prominent DeFi signers** |
-| Timelock | Strategy additions through **7-day TimelockController**. Direct vault parameter changes by Daddy (6/9) have no timelock |
+| Timelock | Strategy additions through **7-day TimelockController** |
 | Privileged roles | Well-distributed: Daddy (6/9, all roles), Brain (3/8, operational), Security (4/7), Keeper + Debt Allocator (bots) |
 | EOA risk | None — no EOA holds direct vault roles |
 
-**Governance Score: 1.5/5** — Immutable vault contracts (no proxy upgrade risk). 6-of-9 multisig with named, prominent DeFi signers. The most critical governance action — adding new strategies, which could break the system — goes through a **7-day TimelockController**. The timelock is self-governed (holds TIMELOCK_ADMIN_ROLE) — config changes like delay reduction must also go through the 7-day delay, though the delay is not permanently immutable. No EOA role concentration. Direct vault parameter changes (deposit limits, emergency shutdown) by the 6/9 multisig have no timelock, preventing a score of 1.
+**Governance Score: 1.0/5** — Immutable vault contracts (no proxy upgrades). 7-day timelock on critical operations (strategy additions), with Daddy (6-of-9, named signers) as sole proposer. No EOA vault roles. Well-distributed roles across Daddy, Brain (3/8), Security (4/7), and automated bots. Per rubric: immutable contracts + 7+ day timelock + multisig above 3/5 threshold + no EOA roles = score 1.
 
 **Subcategory B: Programmability**
 
@@ -433,9 +433,9 @@ Yearn maintains an active monitoring system via the [`monitoring-scripts-py`](ht
 
 **Dependencies Score: 2/5** — Two active blue-chip dependencies with improved diversification from the previous 100% Sky concentration. Per rubric, "1-2 blue-chip dependencies" = score 2. Both Sky/MakerDAO and Morpho are among the highest-quality DeFi protocols. The ~41/59 split reduces single-protocol concentration risk.
 
-**Centralization Score = (1.5 + 1 + 2) / 3 = 1.5**
+**Centralization Score = (1.0 + 1.0 + 2.0) / 3 = 1.0**
 
-**Score: 1.5/5** — Immutable vault with 6/9 named-signer multisig. 7-day timelock on the most critical action (strategy additions). Fully programmatic operations with all funds on-chain. Blue-chip dependencies (Sky + Morpho). Minor gap: no timelock on direct vault parameter changes.
+**Score: 1.0/5** — Immutable vault with 6/9 named-signer multisig. 7-day timelock on the most critical action (strategy additions), with Daddy as sole proposer and no EOA vault roles. Fully programmatic operations with all funds on-chain. Blue-chip dependencies (Sky + Morpho).
 
 #### Category 3: Funds Management (Weight: 30%)
 
@@ -492,21 +492,15 @@ Yearn maintains an active monitoring system via the [`monitoring-scripts-py`](ht
 
 ### Final Score Calculation
 
-```
-Final Score = (Centralization × 0.30) + (Funds Mgmt × 0.30) + (Audits × 0.20) + (Liquidity × 0.15) + (Operational × 0.05)
-            = (1.5 × 0.30) + (1.0 × 0.30) + (1.5 × 0.20) + (1.5 × 0.15) + (1.0 × 0.05)
-            = 0.45 + 0.30 + 0.30 + 0.225 + 0.05
-            = 1.33
-```
 
 | Category | Score | Weight | Weighted |
 |----------|-------|--------|----------|
 | Audits & Historical | 1.5 | 20% | 0.30 |
-| Centralization & Control | 1.5 | 30% | 0.45 |
+| Centralization & Control | 1.0 | 30% | 0.30 |
 | Funds Management | 1.0 | 30% | 0.30 |
 | Liquidity Risk | 1.5 | 15% | 0.225 |
 | Operational Risk | 1.0 | 5% | 0.05 |
-| **Final Score** | | | **1.3/5.0** |
+| **Final Score** | | | **1.2/5.0** |
 
 ### Risk Tier
 
@@ -518,7 +512,7 @@ Final Score = (Centralization × 0.30) + (Funds Mgmt × 0.30) + (Audits × 0.20)
 | 3.5-4.5 | Elevated Risk | Limited approval, strict limits |
 | 4.5-5.0 | High Risk | Not recommended |
 
-**Final Risk Tier: Minimal Risk (1.3/5.0) — Approved, high confidence**
+**Final Risk Tier: Minimal Risk (1.2/5.0) — Approved, high confidence**
 
 ---
 
