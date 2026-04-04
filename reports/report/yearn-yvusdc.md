@@ -524,3 +524,49 @@ Yearn maintains an active monitoring system via the [`monitoring-scripts-py`](ht
 - **Strategy-based:** Reassess if the vault reallocates into riskier strategies (e.g., leveraged positions). The current score assumes allocation to blue-chip ecosystems (Sky/MakerDAO + Morpho) — a shift to riskier strategies would significantly change the risk profile
 - **SSR-based:** Reassess if Sky Savings Rate drops below 2% (may indicate Sky governance issues) or if PSM fees are introduced
 - **Governance-based:** Reassess if ySafe composition changes (signer additions/removals, threshold changes)
+
+---
+
+## Appendix: TimelockController Role Structure
+
+TimelockController [`0x88Ba032be87d5EF1fbE87336b7090767F367BF73`](https://etherscan.io/address/0x88Ba032be87d5EF1fbE87336b7090767F367BF73) — deployed at [block 24,242,692](https://etherscan.io/tx/0x3063e5a82b383d0f5b38e8735dd13c0c9d492c3bfe5dc9d3d23fc829c60f96b0) with `admin = address(0)`. Same timelock used by yvUSD and 37+ other Yearn V3 vaults.
+
+### Timelock Roles
+
+| Role | Holder | Type | Notes |
+|------|--------|------|-------|
+| **DEFAULT_ADMIN** | *No holder* | — | Never granted (`admin = address(0)` at construction). No one can grant/revoke roles outside the propose→wait→execute flow |
+| **TIMELOCK_ADMIN** | Timelock itself ([`0x88Ba032be87d5EF1fbE87336b7090767F367BF73`](https://etherscan.io/address/0x88Ba032be87d5EF1fbE87336b7090767F367BF73)) | Contract | Only the timelock can admin its own roles. Config changes (delay, role grants) must go through the 7-day delay |
+| **PROPOSER** | Daddy/ySafe ([`0xFEB4acf3df3cDEA7399794D0869ef76A6EfAff52`](https://etherscan.io/address/0xFEB4acf3df3cDEA7399794D0869ef76A6EfAff52)) | 6-of-9 Safe | **Only proposer** — no one else can initiate timelocked operations |
+| **EXECUTOR** | Daddy/ySafe ([`0xFEB4acf3df3cDEA7399794D0869ef76A6EfAff52`](https://etherscan.io/address/0xFEB4acf3df3cDEA7399794D0869ef76A6EfAff52)) | 6-of-9 Safe | Can execute queued proposals directly |
+| **EXECUTOR** | TimelockExecutor ([`0xf8f60bf9456a6e0141149db2dd6f02c60da5779b`](https://etherscan.io/address/0xf8f60bf9456a6e0141149db2dd6f02c60da5779b)) | Contract | Wrapper contract — delegates execution to its internal executor list (see below) |
+| **CANCELLER** | Daddy/ySafe ([`0xFEB4acf3df3cDEA7399794D0869ef76A6EfAff52`](https://etherscan.io/address/0xFEB4acf3df3cDEA7399794D0869ef76A6EfAff52)) | 6-of-9 Safe | Can cancel pending proposals |
+| **CANCELLER** | Brain ([`0x16388463d60FFE0661Cf7F1f31a7D658aC790ff7`](https://etherscan.io/address/0x16388463d60FFE0661Cf7F1f31a7D658aC790ff7)) | 3-of-8 Safe | Can cancel pending proposals |
+
+### TimelockExecutor Contract
+
+[`0xf8f60bf9456a6e0141149db2dd6f02c60da5779b`](https://etherscan.io/address/0xf8f60bf9456a6e0141149db2dd6f02c60da5779b) — governance-gated wrapper around the TimelockController. Only addresses on its internal executor list can call `execute()` through it.
+
+| Parameter | Value |
+|-----------|-------|
+| Governance | Brain ([`0x16388463d60FFE0661Cf7F1f31a7D658aC790ff7`](https://etherscan.io/address/0x16388463d60FFE0661Cf7F1f31a7D658aC790ff7)) — only Brain can add/remove internal executors |
+| Internal executor 1 | Brain ([`0x16388463d60FFE0661Cf7F1f31a7D658aC790ff7`](https://etherscan.io/address/0x16388463d60FFE0661Cf7F1f31a7D658aC790ff7)) |
+| Internal executor 2 | Deployer EOA ([`0x1b5f15DCb82d25f91c65b53CEe151E8b9fBdD271`](https://etherscan.io/address/0x1b5f15DCb82d25f91c65b53CEe151E8b9fBdD271)) |
+
+### Execution Paths for Queued Proposals
+
+All paths require Daddy (6/9) to first propose the operation and a 7-day wait:
+
+1. **Daddy (6/9)** executes directly (holds EXECUTOR_ROLE on timelock)
+2. **Brain (3/8)** executes via TimelockExecutor contract
+3. **Deployer EOA** executes via TimelockExecutor contract
+
+### Why the Delay Cannot Be Bypassed
+
+To change the timelock delay (e.g., reduce from 7 days), an attacker would need to:
+
+1. Control Daddy (6/9) to **propose** `updateDelay()` — the only PROPOSER
+2. Wait 7 days — Brain or Daddy can **cancel** during this window
+3. Execute via Daddy, Brain, or the EOA — but the operation is already visible on-chain for 7 days
+
+DEFAULT_ADMIN was never granted, so no one can grant themselves PROPOSER or TIMELOCK_ADMIN to skip this flow. The timelock holds TIMELOCK_ADMIN but can only act on it through its own propose→wait→execute cycle.
