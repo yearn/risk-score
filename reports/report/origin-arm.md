@@ -48,7 +48,7 @@ ARM has been audited by OpenZeppelin (twice) and yAudit:
 |---|------|------|-------|--------|
 | 1 | Nov 2024 | OpenZeppelin | ARM contracts | [Report](https://github.com/OriginProtocol/security/blob/master/audits/OpenZeppelin%20-%20Origin%20Arm%20Audit%20-%20November%202024.pdf) |
 | 2 | Jun 2025 | OpenZeppelin | ARM contracts | [Report](https://github.com/OriginProtocol/security/blob/master/audits/OpenZeppelin%20-%20Origin%20ARM%20-%20June%202025.pdf) |
-| 3 | Dec 2025 | yAudit | ARM contracts (9 contracts, 916 LoC) | [Report](https://github.com/OriginProtocol/security/blob/master/audits/yAudit%20-%20Origin%20ARM%20-%20December%202025.pdf) |
+| 3 | Dec 2025 | yAudit | ARM contracts | [Report](https://github.com/OriginProtocol/security/blob/master/audits/yAudit%20-%20Origin%20ARM%20-%20December%202025.pdf) |
 
 **Note:** The Certora [formal verification report](https://github.com/OriginProtocol/security/blob/master/audits/Certora%20-%20Formal%20verification%20-%20December%202024.pdf) (December 2024) covers OUSD only, not ARM.
 
