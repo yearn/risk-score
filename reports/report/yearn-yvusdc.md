@@ -527,6 +527,68 @@ Yearn maintains an active monitoring system via the [`monitoring-scripts-py`](ht
 
 ---
 
+## Appendix: Contract Architecture
+
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│                         VAULT LAYER                                  │
+│                                                                      │
+│  ┌───────────────────────┐                                          │
+│  │  yvUSDC-1 (v3.0.2)   │                                          │
+│  │  ERC-4626, immutable  │                                          │
+│  │  0xBe53...6204        │                                          │
+│  │                       │                                          │
+│  │  deposit() / redeem() │                                          │
+│  │  totalAssets()        │                                          │
+│  └──────────┬────────────┘                                          │
+│             │ deploys USDC to 4 active strategies                    │
+│             │                                                        │
+│  ┌──────────▼──────────────────────────────────────────────────────┐│
+│  │  STRATEGIES (by allocation)                                      ││
+│  │                                                                  ││
+│  │  ┌─────────────────────────────────────────────────────────┐    ││
+│  │  │ SKY/MAKERDAO (~41%)                                     │    ││
+│  │  │  USDC to sUSDS Lender  40.9%                            │    ││
+│  │  │  Pipeline: USDC → DAI (PSM 1:1) → USDS → sUSDS         │    ││
+│  │  └─────────────────────────────────────────────────────────┘    ││
+│  │  ┌─────────────────────────────────────────────────────────┐    ││
+│  │  │ MORPHO (~59%)                                           │    ││
+│  │  │  Gauntlet USDC Prime Compounder     22.6%               │    ││
+│  │  │  Steakhouse USDC Compounder         21.4%               │    ││
+│  │  │  OEV-boosted USDC Compounder        15.1%               │    ││
+│  │  │  Pipeline: USDC → Morpho vault (direct)                 │    ││
+│  │  └─────────────────────────────────────────────────────────┘    ││
+│  │                                                                  ││
+│  │  5 additional strategies in queue with 0 debt:                   ││
+│  │  USDS Depositor, Fluid, Spark, Aave V3 (×2)                     ││
+│  └─────────────────────────────────────────────────────────────────┘│
+└──────────────────────────────────────────────────────────────────────┘
+                                │
+                  deposits into underlying protocols
+                                │
+┌───────────────────────────────▼──────────────────────────────────────┐
+│                    UNDERLYING PROTOCOLS                                │
+│                                                                       │
+│  ┌──────────────────────────┐    ┌──────────────────────────┐        │
+│  │  Sky/MakerDAO            │    │  Morpho                  │        │
+│  │  sUSDS: $6.18B TVL       │    │  $6.6B+ TVL              │        │
+│  │  SSR: ~4.0% APY          │    │  25+ audits              │        │
+│  │  8+ years, $10M bounty   │    │  Formal verification     │        │
+│  │  ~41% of vault           │    │  ~59% of vault           │        │
+│  └──────────────────────────┘    └──────────────────────────┘        │
+│  ┌──────────────────────────┐    ┌──────────────────────────┐        │
+│  │  MakerDAO PSM Lite       │    │  Sky DAI-USDS Exchanger  │        │
+│  │  USDC ↔ DAI at 1:1      │    │  DAI ↔ USDS at 1:1      │        │
+│  │  0% fee (tin=tout=0)     │    │  No fee                  │        │
+│  └──────────────────────────┘    └──────────────────────────┘        │
+└───────────────────────────────────────────────────────────────────────┘
+
+Data flow: User deposits USDC → yvUSDC-1 vault → sUSDS strategy converts
+USDC → DAI (PSM) → USDS (Exchanger) → sUSDS; Morpho strategies deposit
+USDC directly into lending vaults. Profits reported by Keeper, locked for
+10 days. Withdrawals reverse the pipeline (atomic, no cooldown).
+```
+
 ## Appendix: TimelockController Role Structure
 
 TimelockController [`0x88Ba032be87d5EF1fbE87336b7090767F367BF73`](https://etherscan.io/address/0x88Ba032be87d5EF1fbE87336b7090767F367BF73) — deployed at [block 24,242,692](https://etherscan.io/tx/0x3063e5a82b383d0f5b38e8735dd13c0c9d492c3bfe5dc9d3d23fc829c60f96b0) with `admin = address(0)`. Same timelock used by yvUSD and 37+ other Yearn V3 vaults.
