@@ -40,13 +40,15 @@ Origin's stETH ARM (Automated Redemption Manager) is a yield-generating ETH vaul
 
 ## Audits and Due Diligence Disclosures
 
-ARM has been audited by OpenZeppelin and formally verified by Certora:
+ARM has been audited by OpenZeppelin (twice) and yAudit:
 
 | # | Date | Firm | Scope | Report |
 |---|------|------|-------|--------|
 | 1 | Nov 2024 | OpenZeppelin | ARM contracts | [Report](https://github.com/OriginProtocol/security/blob/master/audits/OpenZeppelin%20-%20Origin%20Arm%20Audit%20-%20November%202024.pdf) |
-| 2 | Dec 2024 | Certora | Formal verification | [Report](https://github.com/OriginProtocol/security/blob/master/audits/Certora%20-%20Formal%20verification%20-%20December%202024.pdf) |
-| 3 | Jun 2025 | OpenZeppelin | ARM contracts | [Report](https://github.com/OriginProtocol/security/blob/master/audits/OpenZeppelin%20-%20Origin%20ARM%20-%20June%202025.pdf) |
+| 2 | Jun 2025 | OpenZeppelin | ARM contracts | [Report](https://github.com/OriginProtocol/security/blob/master/audits/OpenZeppelin%20-%20Origin%20ARM%20-%20June%202025.pdf) |
+| 3 | Dec 2025 | yAudit | ARM contracts | [Report](https://github.com/OriginProtocol/security/blob/master/audits/yAudit%20-%20Origin%20ARM%20-%20December%202025.pdf) |
+
+**Note:** The Certora [formal verification report](https://github.com/OriginProtocol/security/blob/master/audits/Certora%20-%20Formal%20verification%20-%20December%202024.pdf) (December 2024) covers OUSD only, not ARM.
 
 Origin Protocol has 30+ audit reports across all products (OpenZeppelin, Trail of Bits, Solidified, Nethermind, Sigma Prime, Narya, Perimeter) in their [security repository](https://github.com/OriginProtocol/security).
 
@@ -93,7 +95,7 @@ Origin Protocol has 30+ audit reports across all products (OpenZeppelin, Trail o
 
 ## Liquidity Risk
 
-- **Exit Mechanism:** Direct vault redemption with 10-minute delay. PPS locked at request time (no slippage on redemption value). No secondary DEX liquidity for the LP token.
+- **Exit Mechanism:** Direct vault redemption with 10-minute delay. PPS locked at request time (no slippage on redemption value). Limited secondary DEX liquidity via Curve pool ([OETH/ARM-WETH-stETH](https://curve.finance/dex/ethereum/pools/factory-stable-ng-641/deposit), [`0x95753095f15870acc0cb0ed224478ea61aeb0b8e`](https://etherscan.io/address/0x95753095f15870acc0cb0ed224478ea61aeb0b8e), ~$222K TVL).
 - **Immediate exits** limited to WETH buffer (variable, typically small % of TVL)
 - **Larger exits** require Lido withdrawal queue processing (1-3 days)
 - No priority mechanism - first-come-first-served
@@ -180,7 +182,7 @@ No cross-chain dependencies.
 
 1. On-chain xOGN governance with ~5-day total cycle, self-administered Timelock, no admin backdoor
 2. Cross-price protected by 48h timelock — limits operator manipulation
-3. 2x OpenZeppelin + Certora formal verification + $1M Immunefi bounty
+3. 3 independent audits (2x OpenZeppelin + yAudit) + $1M Immunefi bounty
 4. Simple strategy (stETH arbitrage), with lending to low risk ARM Morpho Vault curated by Yearn
 5. 16 months clean ARM track record, same-value assets (ETH/stETH)
 
@@ -201,7 +203,7 @@ No cross-chain dependencies.
 
 ### Critical Risk Gates
 
-- [ ] **No audit** → **PASS** (2x OpenZeppelin + Certora formal verification)
+- [ ] **No audit** → **PASS** (2x OpenZeppelin + yAudit)
 - [ ] **Unverifiable reserves** → **PASS** (100% on-chain, verifiable)
 - [ ] **Total centralization** → **PASS** (xOGN governance + Timelock; operator is EOA but admin is not)
 
@@ -211,10 +213,10 @@ No cross-chain dependencies.
 
 | Aspect | Assessment |
 |--------|-----------|
-| Audits | 2x OpenZeppelin + Certora formal verification |
+| Audits | 2x OpenZeppelin + yAudit |
 | Bug Bounty | $1M on Immunefi, ARM in scope |
 | Time in Production | ~16 months, no ARM incidents |
-| TVL | $5M |
+| TVL | ~$6.6M ([DeFiLlama](https://defillama.com/protocol/origin-arm)) |
 
 #### Category 2: Centralization & Control Risks (Weight: 30%) — **1.33**
 
