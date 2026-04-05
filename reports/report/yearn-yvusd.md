@@ -577,6 +577,67 @@ Additionally, Yearn provides a dedicated **yvUSD APR API** ([yvusd-api.yearn.fi]
 
 ---
 
+## Appendix: Contract Architecture
+
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│                         VAULT LAYER                                  │
+│                                                                      │
+│  ┌───────────────────────┐        ┌──────────────────────────────┐  │
+│  │  yvUSD Vault (v3.0.4) │        │  LockedyvUSD                 │  │
+│  │  ERC-4626, immutable  │◀───────│  Cooldown wrapper + accountant│  │
+│  │  0x696d...6987        │        │  14d cooldown, 5d window     │  │
+│  │                       │        │  0xAaaF...9040               │  │
+│  │  deposit() / redeem() │        └──────────────────────────────┘  │
+│  │  totalAssets()        │                                           │
+│  └──────────┬────────────┘                                           │
+│             │ deploys USDC to 11 strategies                          │
+│             │                                                        │
+│  ┌──────────▼──────────────────────────────────────────────────────┐│
+│  │  STRATEGIES (by allocation)                                      ││
+│  │                                                                  ││
+│  │  ┌─────────────────────────────────────────────────────────┐    ││
+│  │  │ LOOPER STRATEGIES (~86% of TVL)              via Morpho │    ││
+│  │  │  syrupUSDC/USDC Morpho Looper        43.35%  (Maple)   │    ││
+│  │  │  Morpho Yearn OG USDC Compounder     24.08%  (Morpho)  │    ││
+│  │  │  Infinifi sIUSD Morpho Looper        15.20%  (InfiniFi)│    ││
+│  │  │  Arb syrupUSDC/USDC Morpho Looper     2.48%  (CCTP)    │    ││
+│  │  │  PT stcUSD Jul 23 Morpho Looper       0.71%  (Cap)     │    ││
+│  │  └─────────────────────────────────────────────────────────┘    ││
+│  │  ┌──────────────────────┐  ┌────────────────────────────────┐  ││
+│  │  │ LENDING (~13%)       │  │ PT (~1%)                       │  ││
+│  │  │  sUSDS Depositor     │  │  USD3 Pendle PT Maxi  1.24%   │  ││
+│  │  │            10.45%    │  │  (3Jane USD3, Pendle)          │  ││
+│  │  │  Spark Depositor     │  └────────────────────────────────┘  ││
+│  │  │             2.49%    │                                       ││
+│  │  └──────────────────────┘                                       ││
+│  └─────────────────────────────────────────────────────────────────┘│
+└──────────────────────────────────────────────────────────────────────┘
+                                │
+                  deposits into underlying protocols
+                                │
+┌───────────────────────────────▼──────────────────────────────────────┐
+│                    UNDERLYING PROTOCOLS                                │
+│                                                                       │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐               │
+│  │  Morpho      │  │  Maple       │  │  Sky/MakerDAO│               │
+│  │  $6.6B TVL   │  │  syrupUSDC   │  │  sUSDS       │               │
+│  │  25+ audits  │  │  $1.7B TVL   │  │  Blue-chip   │               │
+│  │  86% of strat│  │  45.8% alloc │  │  12.9% alloc │               │
+│  └──────────────┘  └──────────────┘  └──────────────┘               │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐               │
+│  │  InfiniFi    │  │  Pendle/     │  │  Circle CCTP │               │
+│  │  siUSD       │  │  Spectra     │  │  Cross-chain │               │
+│  │  15.2% alloc │  │  PT tokens   │  │  bridge      │               │
+│  └──────────────┘  └──────────────┘  └──────────────┘               │
+└───────────────────────────────────────────────────────────────────────┘
+
+Data flow: User deposits USDC → yvUSD vault → strategies deploy to
+Morpho/Maple/Sky/InfiniFi/Pendle. Cross-chain strategies bridge via
+Circle CCTP to Arbitrum. Profits reported by Keeper, locked for 7 days.
+Optional: User locks yvUSD in LockedyvUSD for bonus yield (14d cooldown).
+```
+
 ## Appendix: TimelockController Role Structure
 
 TimelockController [`0x88ba032be87d5eF1FbE87336b7090767f367bF73`](https://etherscan.io/address/0x88ba032be87d5eF1FbE87336b7090767f367bF73) — deployed at [block 24,242,692](https://etherscan.io/tx/0x3063e5a82b383d0f5b38e8735dd13c0c9d492c3bfe5dc9d3d23fc829c60f96b0) with `admin = address(0)`.
