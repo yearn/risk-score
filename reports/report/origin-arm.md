@@ -107,22 +107,7 @@ Origin Protocol has 30+ audit reports across all products (OpenZeppelin, Trail o
 
 ### Governance
 
-**Governance Structure (all on-chain verified):**
-
-```
-xOGN Token Holders (Staked OGN)
-        │ (100K xOGN to propose, ~133.7M xOGN quorum)
-        ▼
-Origin DeFi Governance (0x1D3fBD...9EC)
-        │ (7,200 blocks voting delay + 14,416 blocks voting period)
-        ▼ PROPOSER + EXECUTOR roles
-Timelock Controller (0x35918c...69F)
-        │ 172,800 seconds (48-hour) delay        ◄── GOV Multisig (5/8) can CANCEL only
-        ▼ owner
-ARM Contract (0x85B78A...cc6)
-        ├── operator: EOA (0x39878...DE7) - codesize 0, confirmed EOA
-        └── feeCollector: contract (0xBB077...8c)
-```
+**Governance Structure:** See [Appendix: Contract Architecture](#appendix-contract-architecture) for full diagram.
 
 **Timelock Roles (verified via `hasRole()`):**
 
