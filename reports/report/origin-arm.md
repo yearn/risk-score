@@ -36,7 +36,9 @@ Origin's stETH ARM (Automated Redemption Manager) is a yield-generating ETH vaul
 | Fee Collector | [`0xBB077E716A5f1F1B63ed5244eBFf5214E50fec8c`](https://etherscan.io/address/0xBB077E716A5f1F1B63ed5244eBFf5214E50fec8c) |
 | xOGN Governance Token | [`0x63898b3b6Ef3d39332082178656E9862bee45C57`](https://etherscan.io/address/0x63898b3b6Ef3d39332082178656E9862bee45C57) |
 | Lido Withdrawal Queue | [`0x889edC2eDab5f40e902b864aD4d7AdE8E412F9B1`](https://etherscan.io/address/0x889edC2eDab5f40e902b864aD4d7AdE8E412F9B1) |
+| MorphoMarket Wrapper (Proxy) | [`0xB7CeFE4CB483Be80C2963D3D9Edb991e69ff39cf`](https://etherscan.io/address/0xB7CeFE4CB483Be80C2963D3D9Edb991e69ff39cf) |
 | Morpho Vault (WETH ARM, Yearn curated) | [`0x3Dfe70B05657949A5dB340754aD664810ac63b21`](https://etherscan.io/address/0x3Dfe70B05657949A5dB340754aD664810ac63b21) |
+| Harvester (Morpho rewards) | [`0x4FF1b9D9ba8558F5EAfCec096318eA0d8b541971`](https://etherscan.io/address/0x4FF1b9D9ba8558F5EAfCec096318eA0d8b541971) |
 
 ## Audits and Due Diligence Disclosures
 
@@ -295,3 +297,91 @@ Final Score = (Audits × 0.20) + (Centralization × 0.30) + (Funds Mgmt × 0.30)
 - **Time-based:** Quarterly (next: May 2026)
 - **Incident-based:** Any security incident, pricing anomaly, or withdrawal issues
 - **Change-based:** Morpho vault curator Yearn changes, especially adding new markets. Contract upgrade, Lido WQ issues or stETH depeg
+
+---
+
+## Appendix: Contract Architecture
+
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│                        GOVERNANCE                                   │
+│                                                                     │
+│  xOGN Token Holders (Staked OGN)                                   │
+│  (100K xOGN to propose, ~133.7M xOGN quorum)                      │
+│         │                                                           │
+│         ▼                                                           │
+│  Origin DeFi Governance (0x1D3f...)                                │
+│  [PROPOSER + EXECUTOR + CANCELLER]                                 │
+│  (7,200 blocks voting delay + 14,416 blocks voting period)         │
+│         │                                                           │
+│         ▼                                                           │
+│  Timelock Controller (0x3591...)          GOV Multisig 5/8         │
+│  [48h delay, self-administered]  ◄────── (0xbe2A...)               │
+│         │                                [CANCELLER only]           │
+│         │ owner                                                     │
+│         ├──────────────────────────────────────┐                    │
+│         ▼                                      ▼                    │
+│  ARM Proxy (0x85B7...)              MorphoMarket Wrapper (0xB7Ce..)│
+│  [EIP-1967, impl: 0xC029...]       [EIP-1967, also owned by TL]   │
+│                                                                     │
+│  ⚠ Proxy upgrade = single-step setOwner (no 2-step transfer)      │
+│                                                                     │
+└─────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────┐
+│                     ARM VAULT (LidoARM)                             │
+│                     0x85B7...cc6                                    │
+│                                                                     │
+│  Immutables:         Storage:                                      │
+│  ├── stETH (0xae7a)  ├── traderate0/1 (36-dec pricing)            │
+│  ├── WETH  (0xC02a)  ├── crossPrice (operator bound, timelocked)  │
+│  └── lidoWQ(0x889e)  ├── fee: 2000 (20%)                          │
+│                       ├── armBuffer: 0.1 ETH                       │
+│                       ├── claimDelay: 600s (10 min)                │
+│                       └── activeMarket: 0xB7Ce... (MorphoMarket)  │
+│                                                                     │
+│  Roles:                                                             │
+│  ├── owner:        Timelock (0x3591...)                             │
+│  │   setCrossPrice, setFee, setOperator, addMarkets, upgradeTo    │
+│  ├── operator:     EOA (0x3987...)                                 │
+│  │   setPrices, requestLidoWithdrawals, setActiveMarket            │
+│  ├── feeCollector: Safe 1/3 (0xBB07...)                            │
+│  └── capManager:   address(0) [disabled]                           │
+│                                                                     │
+│  Permissionless: deposit, requestRedeem, claimRedeem, allocate,    │
+│  claimLidoWithdrawals, collectFees, swap stETH↔WETH               │
+│                                                                     │
+└──────────┬──────────────┬──────────────┬────────────────────────────┘
+           │              │              │
+           ▼              ▼              ▼
+┌──────────────┐ ┌──────────────┐ ┌──────────────────────────────────┐
+│  stETH       │ │  Lido WQ     │ │  MorphoMarket Wrapper            │
+│  (0xae7a...) │ │  (0x889e...) │ │  (0xB7Ce...)                     │
+│              │ │              │ │  [Abstract4626MarketWrapper]      │
+│  transfer,   │ │  request,    │ │  owner: Timelock                 │
+│  approve     │ │  claim       │ │         │                        │
+│              │ │              │ │         ▼                        │
+└──────────────┘ └──────────────┘ │  Morpho Vault (0x3Dfe...)       │
+                                  │  [MetaMorpho v1.1, Yearn curated]│
+                                  │         │                        │
+                                  │         ▼                        │
+                                  │  Harvester Safe (0x4FF1...)      │
+                                  │  [receives MORPHO rewards]       │
+                                  └──────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────┐
+│                   SECONDARY LIQUIDITY                               │
+│                                                                     │
+│  Curve Pool: OETH / ARM-WETH-stETH (factory-stable-ng-641)        │
+│  (0x9575...)  ~$222K TVL                                           │
+│  Gauge: 0xfcad... (active, no CRV weight)                         │
+│                                                                     │
+└─────────────────────────────────────────────────────────────────────┘
+
+Data flows:
+  Deposit:  User WETH → ARM → mint LP shares
+  Redeem:   requestRedeem (burns shares, locks PPS) → claimRedeem (after 10m + liquidity)
+  Yield:    ARM buys discounted stETH → requestLidoWithdrawals → claimLidoWithdrawals → WETH
+  Lending:  allocate() → excess WETH → MorphoMarket wrapper → Morpho Vault (Yearn curated)
+  Swap:     User stETH↔WETH at operator-set traderates (bounded by crossPrice)
+```
