@@ -153,7 +153,7 @@ The fund uses a **laddered approach** with holdings spread across various near-t
 
 ### Provability
 
-- **NAV/Price Updates:** The Superstate Continuous Price Oracle ([`0xe4fa682f94610ccd170680cc3b045d77d9e528a8`](https://etherscan.io/address/0xe4fa682f94610ccd170680cc3b045d77d9e528a8)) extrapolates real-time prices using linear interpolation between NAV/S checkpoints. Updates every second, 24/7/365. Compatible with Chainlink AggregatorV3Interface. **Note:** Since prices are linearly interpolated between checkpoints, the on-chain price is an estimate that may diverge from the actual NAV between checkpoint updates — the price catches up only when the next checkpoint is posted by Superstate.
+- **NAV/Price Updates:** The Superstate Continuous Price Oracle ([`0xe4fa682f94610ccd170680cc3b045d77d9e528a8`](https://etherscan.io/address/0xe4fa682f94610ccd170680cc3b045d77d9e528a8)) extrapolates real-time prices using linear interpolation between NAV/S checkpoints. Updates every second, 24/7/365. Compatible with Chainlink AggregatorV3Interface. **Checkpoint expiration: 5 days** — if the Oracle Owner does not post a new checkpoint within 5 days, `latestRoundData()` reverts with `StaleCheckpoint()`, which causes both `subscribe()` and `redeem()` to revert, freezing all on-chain USTB operations. The 5-day window covers weekends and U.S. holidays. **Note:** Since prices are linearly interpolated between checkpoints, the on-chain price is an estimate that may diverge from the actual NAV between checkpoint updates — the price catches up only when the next checkpoint is posted by Superstate.
 - **Chainlink NAV Feed:** Chainlink provides an independent NAV/Share data feed ([`0x289B5036cd942e619E1Ee48670F98d214E745AAC`](https://etherscan.io/address/0x289B5036cd942e619E1Ee48670F98d214E745AAC)).
 - **On-chain Supply:** Total USTB supply is verifiable on-chain via `totalSupply()`.
 - **Off-chain Assets:** The underlying Treasury portfolio is held off-chain at UMB Bank. Token holders cannot independently verify the specific Treasury holdings on-chain. However:
@@ -289,7 +289,7 @@ The fund uses a **laddered approach** with holdings spread across various near-t
 
 ### Critical Monitoring Points
 
-- **NAV/Share:** Track Continuous Price Oracle (`latestRoundData()`) and Chainlink feed — should increase monotonically. Alert on any decrease (would indicate fund losses). Current: ~$11.045. Checkpoint expiration: 5 days.
+- **NAV/Share:** Track Continuous Price Oracle (`latestRoundData()`) and Chainlink feed — should increase monotonically. Alert on any decrease (would indicate fund losses). Current: ~$11.045. **Staleness alert:** if no `NewCheckpoint` event within ~3 days, `latestRoundData()` will revert after 5 days, freezing subscribe/redeem.
 - **Admin Burns:** Monitor `AdminBurn` events — forced burns from holder addresses are a critical event.
 - **Pause Events:** Monitor `Paused`/`Unpaused` and `AccountingPaused`/`AccountingUnpaused` on USTB Token AND RedemptionIdle.
 - **Contract Upgrades:** Monitor **all 3 ProxyAdmins** for `Upgraded` events — USTB ProxyAdmin (`0xb9d285dcad879513dc9c1a3b2e0cccb21c3c2146`), AllowList ProxyAdmin (`0xb819692a58db9dd4d3b403a875439b6ca155c610`), and RedemptionIdle ProxyAdmin (`0xcaba8c12873fffed13431d98bf6b836dff08e869`). Any proxy upgrade executes immediately with no timelock.
