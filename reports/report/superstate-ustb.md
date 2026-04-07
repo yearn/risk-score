@@ -137,7 +137,7 @@ The fund uses a **laddered approach** with holdings spread across various near-t
   - **Off-chain:** USD wire transfer, processed on Market Days (NYSE/Federal Reserve open days).
   - Max subscription fee: 0.1% (10 bps), configurable per stablecoin.
 - **Redemptions (Burning):**
-  - **On-chain atomic:** Via RedemptionIdle contract, burns USTB and sends USDC at Continuous NAV/S price. USDC instant redemption facility with variable capacity (currently ~$1.7M as of April 2026, verified on-chain via `balanceOf()`). [Docs](https://docs.superstate.com/welcome-to-superstate/smart-contracts) state: "USDC liquidity will be replenished in this contract regularly" — no specific target capacity is documented.
+  - **On-chain atomic:** Via RedemptionIdle contract, burns USTB and sends USDC at Continuous NAV/S price. USDC instant redemption facility with variable capacity (currently ~$1.7M as of April 2026, verified on-chain via `balanceOf()`). Superstate announced "$10M USDC instant redemption facility, refilled twice daily" on the [Aave governance forum (Jan 2025)](https://governance.aave.com/t/arfc-ustb-buidl-gsm/19299/3), but [docs](https://docs.superstate.com/welcome-to-superstate/smart-contracts) only state: "USDC liquidity will be replenished in this contract regularly" — the actual on-chain balance varies significantly.
   - **Off-chain:** Transfer tokens to contract address or call `offchainRedeem()`. Proceeds in USDC or USD wire. T+0 if before 9:00 AM EST on Market Days, otherwise T+1.
   - No redemption fees for standard redemptions.
 - **Geographic Restrictions:** Available to qualified purchasers in the U.S. and select offshore jurisdictions (Cayman Islands, BVI, Bermuda). Not available to sanctioned countries.
@@ -171,7 +171,7 @@ The fund uses a **laddered approach** with holdings spread across various near-t
 - **Transfer Restrictions:** All transfers require both sender and receiver to be on the AllowList. Removing an address from the AllowList effectively freezes their tokens.
 - **DeFi Integrations (Liquidity Venues):**
   - **Spark Protocol (MakerDAO):** $300M allocated to USTB as yield-generating reserve
-  - **Aave Horizon:** USTB accepted as collateral to borrow USDC, GHO, RLUSD
+  - **Aave Horizon:** USTB accepted as collateral to borrow USDC, GHO, RLUSD. ~$19.9M supplied (March 2026), 8.33x max leverage. Uses LlamaGuard NAV Oracle (risk-adjusted, built with Chainlink).
   - **Morpho / Pareto / Gauntlet:** USTB-adjacent via Pareto Credit Vault CV tokens as Morpho collateral; Gauntlet levered RWA strategy (~13% APY, ~$51M collateral)
   - **M^0 Protocol:** USTB designated as first eligible collateral for all M^0 network stablecoins (MetaMask mUSD, Noble USDN)
   - **FalconX:** USTB used as prime brokerage trading collateral
