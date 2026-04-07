@@ -289,7 +289,7 @@ The fund uses a **laddered approach** with holdings spread across various near-t
 
 ### Critical Monitoring Points
 
-- **NAV/Share:** Track Continuous Price Oracle (`latestRoundData()`) and Chainlink feed — should increase monotonically. Alert on any decrease (would indicate fund losses). Current: ~$11.045. **Staleness alert:** if no `NewCheckpoint` event within ~3 days, `latestRoundData()` will revert after 5 days, freezing subscribe/redeem.
+- **NAV/Share:** Track Continuous Price Oracle (`latestRoundData()`) and Chainlink feed — should increase monotonically. Alert on any decrease (would indicate fund losses). Current: ~$11.045. **Staleness alert:** if no `NewCheckpoint` event within 4 days, send alert — `latestRoundData()` will revert after 5 days, freezing subscribe/redeem.
 - **Admin Burns:** Monitor `AdminBurn` events — forced burns from holder addresses are a critical event.
 - **Pause Events:** Monitor `Paused`/`Unpaused` and `AccountingPaused`/`AccountingUnpaused` on USTB Token AND RedemptionIdle.
 - **Contract Upgrades:** Monitor **all 3 ProxyAdmins** for `Upgraded` events — USTB ProxyAdmin (`0xb9d285dcad879513dc9c1a3b2e0cccb21c3c2146`), AllowList ProxyAdmin (`0xb819692a58db9dd4d3b403a875439b6ca155c610`), and RedemptionIdle ProxyAdmin (`0xcaba8c12873fffed13431d98bf6b836dff08e869`). Any proxy upgrade executes immediately with no timelock.
