@@ -137,7 +137,7 @@ The fund uses a **laddered approach** with holdings spread across various near-t
   - **Off-chain:** USD wire transfer, processed on Market Days (NYSE/Federal Reserve open days).
   - Max subscription fee: 0.1% (10 bps), configurable per stablecoin.
 - **Redemptions (Burning):**
-  - **On-chain atomic:** Via RedemptionIdle contract, burns USTB and sends USDC at Continuous NAV/S price. USDC instant redemption facility (~$1.7M as of April 2026), regularly replenished.
+  - **On-chain atomic:** Via RedemptionIdle contract, burns USTB and sends USDC at Continuous NAV/S price. USDC instant redemption facility with variable capacity (currently ~$1.7M as of April 2026, verified on-chain via `balanceOf()`). [Docs](https://docs.superstate.com/welcome-to-superstate/smart-contracts) state: "USDC liquidity will be replenished in this contract regularly" — no specific target capacity is documented.
   - **Off-chain:** Transfer tokens to contract address or call `offchainRedeem()`. Proceeds in USDC or USD wire. T+0 if before 9:00 AM EST on Market Days, otherwise T+1.
   - No redemption fees for standard redemptions.
 - **Geographic Restrictions:** Available to qualified purchasers in the U.S. and select offshore jurisdictions (Cayman Islands, BVI, Bermuda). Not available to sanctioned countries.
@@ -211,11 +211,11 @@ The fund uses a **laddered approach** with holdings spread across various near-t
 
 **Critical centralization concerns:**
 
-1. **EOA-controlled administration** — The system is controlled by **4 distinct EOAs**, each with no multisig, no timelock, and no governance delay. The USTB Token Owner (`0xad30...ca83`) controls minting, burning from any address, pausing all operations, changing the oracle, and upgrading the USTB contract implementation. Separate EOAs control the AllowList, RedemptionIdle, and Oracle — splitting control across more keys reduces single-key blast radius but none have multisig protection.
+1. **EOA-controlled administration** — The system is controlled by **4 distinct EOAs**, each with no multisig, no timelock, and no governance delay. The USTB Token Owner (`0xad309bb6f13074128b4f23ef9ea2fe8552afca83`) controls minting, burning from any address, pausing all operations, changing the oracle, and upgrading the USTB contract implementation. Separate EOAs control the AllowList, RedemptionIdle, and Oracle — splitting control across more keys reduces single-key blast radius but none have multisig protection.
 2. **Admin burn capability** — The owner can call `adminBurn(address, uint256)` to forcibly burn tokens from any holder's address. This is documented as being for "exogenous legal circumstances" (regulatory compliance).
 3. **No timelock on any operation** — Contract upgrades, parameter changes, and critical admin functions execute immediately with no delay period for users to react.
 4. **AllowList control** — Removing an address from the AllowList effectively freezes their tokens (they cannot transfer or redeem). This is a compliance feature but also a centralization vector.
-5. **Oracle pricing control** — The Oracle Owner (`0x4B1d...1395`) controls NAV checkpoints via `addCheckpoint()`. While the oracle uses programmatic linear interpolation between checkpoints, the checkpoint values themselves are set by this EOA. A malicious or compromised oracle owner could post incorrect NAV values affecting subscription/redemption pricing.
+5. **Oracle pricing control** — The Oracle Owner (`0x4B1df64357a5D484563c9b7c16a80eD8B8fB1395`) controls NAV checkpoints via `addCheckpoint()`. While the oracle uses programmatic linear interpolation between checkpoints, the checkpoint values themselves are set by this EOA. A malicious or compromised oracle owner could post incorrect NAV values affecting subscription/redemption pricing.
 
 **Mitigations:**
 
@@ -292,7 +292,7 @@ The fund uses a **laddered approach** with holdings spread across various near-t
 - **NAV/Share:** Track Continuous Price Oracle (`latestRoundData()`) and Chainlink feed — should increase monotonically. Alert on any decrease (would indicate fund losses). Current: ~$11.045. Checkpoint expiration: 5 days.
 - **Admin Burns:** Monitor `AdminBurn` events — forced burns from holder addresses are a critical event.
 - **Pause Events:** Monitor `Paused`/`Unpaused` and `AccountingPaused`/`AccountingUnpaused` on USTB Token AND RedemptionIdle.
-- **Contract Upgrades:** Monitor **all 3 ProxyAdmins** for `Upgraded` events — USTB ProxyAdmin (`0xb9d2...2146`), AllowList ProxyAdmin (`0xb819...c610`), and RedemptionIdle ProxyAdmin (`0xcaba...e869`). Any proxy upgrade executes immediately with no timelock.
+- **Contract Upgrades:** Monitor **all 3 ProxyAdmins** for `Upgraded` events — USTB ProxyAdmin (`0xb9d285dcad879513dc9c1a3b2e0cccb21c3c2146`), AllowList ProxyAdmin (`0xb819692a58db9dd4d3b403a875439b6ca155c610`), and RedemptionIdle ProxyAdmin (`0xcaba8c12873fffed13431d98bf6b836dff08e869`). Any proxy upgrade executes immediately with no timelock.
 - **Oracle Changes:** Monitor `SetOracle` events on USTB Token and `NewCheckpoint` events on the Oracle. Monitor `SetMaximumAcceptablePriceDelta` on Oracle (current: $1.00).
 - **AllowList Changes:** Monitor `ProtocolAddressPermissionSet` and `EntityIdSet` events, especially protocol address permissions (DeFi integrations).
 - **Redemption Capacity:** Monitor USDC `balanceOf()` on RedemptionIdle — current ~$1.7M. Also monitor `Withdraw` events (owner can extract USDC) and `SetRedemptionFee` (currently 0).
@@ -322,7 +322,7 @@ The fund uses a **laddered approach** with holdings spread across various near-t
 ### Critical Risks
 
 - **AllowList freeze risk** — If Superstate removes an address from the AllowList, the holder's tokens are **completely frozen with zero exit paths**. No transfers, no redemption, no DEX fallback. For DeFi protocols integrating USTB, this means Superstate has unilateral power to freeze an entire protocol's USTB position.
-- **Private key compromise** — 4 separate EOAs control different parts of the system. Compromise of `0xad30...ca83` alone could upgrade the USTB token to malicious code, mint unlimited tokens, or burn tokens from any address, all with no delay. Other EOAs control AllowList (freeze addresses), RedemptionIdle (withdraw USDC, pause redemptions), and Oracle (manipulate pricing). Mitigated by Turnkey secure enclaves but each remains a single point of failure.
+- **Private key compromise** — 4 separate EOAs control different parts of the system. Compromise of `0xad309bb6f13074128b4f23ef9ea2fe8552afca83` alone could upgrade the USTB token to malicious code, mint unlimited tokens, or burn tokens from any address, all with no delay. Other EOAs control AllowList (freeze addresses), RedemptionIdle (withdraw USDC, pause redemptions), and Oracle (manipulate pricing). Mitigated by Turnkey secure enclaves but each remains a single point of failure.
 - **Admin burn capability** — The `adminBurn()` function can confiscate tokens from any holder. While documented as a regulatory compliance tool, this gives Superstate unilateral power over user funds.
 - **No upgrade delay** — All 3 proxy contracts (USTB Token, AllowList, RedemptionIdle) can be upgraded immediately with no timelock for users or protocols (like Aave, Morpho, Spark) to react.
 
@@ -346,7 +346,7 @@ The fund uses a **laddered approach** with holdings spread across various near-t
 |--------|-----------|
 | Audits | 11 audits by 3 firms (0xMacro ×9, ChainSecurity, Offside Labs) + Certora formal verification. Continuous audit relationship — each version audited before deployment. |
 | Bug Bounty | Self-hosted, no formal monetary rewards. Weaker than Immunefi-style programs. |
-| Time in Production | Fund: ~26 months (Feb 2024). Contracts: ~28 months (Dec 2023). Multiple version upgrades, all audited. |
+| Time in Production | ~25 months with TVL >$1M (since Feb 2024 — DeFiLlama first data point Mar 8, 2024 already at ~$38M). Contracts deployed Dec 2023. Multiple version upgrades, all audited. |
 | TVL | ~$650M+ total AUM, ~$625M on-chain (56.59M USTB × $11.045 NAV) |
 | Historical Incidents | None. No security incidents, exploits, or adverse events. |
 
@@ -361,10 +361,10 @@ The fund uses a **laddered approach** with holdings spread across various near-t
 **Subcategory A: Governance — 4.0**
 
 - **4 distinct EOAs** control the system with no multisig on any:
-  - `0xad30...ca83` — USTB Token owner + USTB ProxyAdmin owner (mint, adminBurn, pause, oracle, stablecoin config, proxy upgrades)
-  - `0x7747...2bfe` — AllowList owner + AllowList ProxyAdmin owner (permissions, proxy upgrades)
-  - `0x8cf4...0765` — RedemptionIdle owner + RedemptionIdle ProxyAdmin owner (pause redemptions, withdraw USDC, set fees, proxy upgrades)
-  - `0x4B1d...1395` — Oracle owner (NAV checkpoints, price delta)
+  - `0xad309bb6f13074128b4f23ef9ea2fe8552afca83` — USTB Token owner + USTB ProxyAdmin owner (mint, adminBurn, pause, oracle, stablecoin config, proxy upgrades)
+  - `0x7747940adbc7191f877a9b90596e0da4f8deb2fe` — AllowList owner + AllowList ProxyAdmin owner (permissions, proxy upgrades)
+  - `0x8cf40e96e7d7fd8A7A9bEf70d3882fbBC4D40765` — RedemptionIdle owner + RedemptionIdle ProxyAdmin owner (pause redemptions, withdraw USDC, set fees, proxy upgrades)
+  - `0x4B1df64357a5D484563c9b7c16a80eD8B8fB1395` — Oracle owner (NAV checkpoints, price delta)
 - **No timelock** on any operation — upgrades, parameter changes, and critical functions execute immediately
 - No on-chain governance, no DAO, no community voting
 - **Positive:** Separation across 4 keys reduces single-key blast radius compared to a single EOA controlling everything
@@ -448,14 +448,6 @@ The fund uses a **laddered approach** with holdings spread across various near-t
 
 ### Final Score Calculation
 
-```
-Final Score = (Audits × 0.20) + (Centralization × 0.30) + (Funds Mgmt × 0.30) + (Liquidity × 0.15) + (Operational × 0.05)
-            = (1.25 × 0.20) + (3.0 × 0.30) + (2.25 × 0.30) + (3.0 × 0.15) + (1.0 × 0.05)
-            = 0.25 + 0.90 + 0.675 + 0.45 + 0.05
-            = 2.325
-            ≈ 2.33
-```
-
 | Category | Score | Weight | Weighted |
 |----------|-------|--------|----------|
 | Audits & Historical | 1.25 | 20% | 0.25 |
@@ -538,87 +530,98 @@ USTB benefits from the safest possible underlying asset class (U.S. Treasury Bil
 *Verified on-chain April 7, 2026. All owners are EOAs (code size 0). No multisig, no timelock on any contract.*
 
 ```
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                          GOVERNANCE LAYER (4 EOAs)                          │
-│                                                                             │
-│  EOA 0xad30...ca83          EOA 0x7747...2bfe      EOA 0x8cf4...0765       │
-│  ├─ USTB Token owner        ├─ AllowList owner     ├─ RedemptionIdle owner │
-│  └─ USTB ProxyAdmin owner   └─ AL ProxyAdmin owner └─ RI ProxyAdmin owner │
-│                                                                             │
-│  EOA 0x4B1d...1395                                                         │
-│  └─ Oracle owner (addCheckpoint, setMaxAcceptablePriceDelta)               │
-├─────────────────────────────────────────────────────────────────────────────┤
-│                          PROXY ADMIN LAYER                                  │
-│                                                                             │
-│  ProxyAdmin 0xb9d2...2146   ProxyAdmin 0xb819...c610  ProxyAdmin 0xcaba..69│
-│  └─ upgrade(USTB Proxy)     └─ upgrade(AllowList)      └─ upgrade(Redemp.) │
-│     upgradeAndCall()           upgradeAndCall()            upgradeAndCall() │
-│     changeProxyAdmin()         changeProxyAdmin()          changeProxyAdmin │
-├─────────────────────────────────────────────────────────────────────────────┤
-│                          TOKEN LAYER                                        │
-│                                                                             │
-│  ┌──────────────────────────────────────────────────────┐                  │
-│  │  USTB Token (Proxy) 0x4341...1C4e                    │                  │
-│  │  impl: SuperstateTokenV5_1 (VERSION "5")             │                  │
-│  │                                                       │                  │
-│  │  Admin (owner only):                                  │                  │
-│  │  ├── mint() / bulkMint()                              │                  │
-│  │  ├── adminBurn(address, amount)                       │                  │
-│  │  ├── pause() / unpause()                              │                  │
-│  │  ├── accountingPause() / accountingUnpause()          │                  │
-│  │  ├── setOracle(newOracle)                             │                  │
-│  │  ├── setRedemptionContract(newContract)               │                  │
-│  │  ├── setStablecoinConfig(stablecoin, dest, fee)       │                  │
-│  │  ├── setChainIdSupport(chainId, supported)            │                  │
-│  │  └── setMaximumOracleDelay(delay)                     │                  │
-│  │                                                       │                  │
-│  │  User functions (AllowList-gated):                    │                  │
-│  │  ├── subscribe(to, amount, stablecoin)                │                  │
-│  │  ├── offchainRedeem(amount)                           │                  │
-│  │  ├── bridge(amount, dest, chainId)                    │                  │
-│  │  └── transfer / transferFrom                          │                  │
-│  └──────────┬──────────┬─────────────┬──────────────────┘                  │
-│             │          │             │                                       │
-│        reads│     reads│        reads│                                       │
-│             ▼          ▼             ▼                                       │
-├─────────────────────────────────────────────────────────────────────────────┤
-│                      PROTOCOL LAYER                                         │
-│                                                                             │
-│  ┌───────────────────┐  ┌──────────────────────┐  ┌─────────────────────┐  │
-│  │ AllowList V3.1     │  │ SuperstateOracle     │  │ RedemptionIdle      │  │
-│  │ (Proxy) 0x02f1..e5│  │ 0xe4fa..28a8         │  │ (Proxy) 0x4c21..cf  │  │
-│  │                    │  │ (NOT a proxy)        │  │                     │  │
-│  │ Admin:             │  │                      │  │ Admin (owner):      │  │
-│  │ ├ setEntityId..()  │  │ Admin (owner):       │  │ ├ pause/unpause()   │  │
-│  │ ├ setEntity..Pub() │  │ ├ addCheckpoint()    │  │ ├ setRedemptionFee()│  │
-│  │ ├ setEntity..Priv()│  │ ├ addCheckpoints()   │  │ ├ setSweepDest()    │  │
-│  │ ├ setProtocol..()  │  │ ├ setMaxAcceptable.. │  │ ├ setMaxOracleDelay │  │
-│  │ └ transferOwner()  │  │ └ transferOwner()    │  │ ├ withdraw()        │  │
-│  │                    │  │                      │  │ └ transferOwner()   │  │
-│  │ Gating:            │  │ Exposes:             │  │                     │  │
-│  │ isAddressAllowed   │  │ latestRoundData()    │  │ User:               │  │
-│  │ ForFund("USTB")    │  │ (Chainlink-compat)   │  │ └ redeem(amount)    │  │
-│  │ hasAnyProtocol     │  │                      │  │                     │  │
-│  │ Permissions()      │  │ NAV: $11.045/share   │  │ USDC bal: ~$1.7M    │  │
-│  └───────────────────┘  │ Expiry: 5 days       │  │ Oracle delay: 1h    │  │
-│                          └──────────────────────┘  │ Fee: 0              │  │
-│                                                     └─────────────────────┘  │
-├─────────────────────────────────────────────────────────────────────────────┤
-│                      EXTERNAL / UNDERLYING LAYER                            │
-│                                                                             │
-│  ┌────────────┐  ┌──────────────┐  ┌───────────────────────────────────┐   │
-│  │ USDC       │  │ Chainlink    │  │ Off-chain                        │   │
-│  │ 0xA0b8..48 │  │ NAV Feed     │  │ ├── UMB Bank (custodian)         │   │
-│  │            │  │ 0x289B..AAC  │  │ ├── Federated Hermes (sub-adv)   │   │
-│  │ Used for:  │  │              │  │ ├── Ernst & Young (auditor)       │   │
-│  │ subscribe  │  │ Independent  │  │ ├── NAV Consulting (NAV agent)   │   │
-│  │ redeem     │  │ NAV source   │  │ └── U.S. Treasury Bills (~95%)   │   │
-│  └────────────┘  └──────────────┘  └───────────────────────────────────┘   │
-│                                                                             │
-│  Sweep destination (subscription + redemption USDC):                        │
-│  EOA 0x774A...8807                                                          │
-└─────────────────────────────────────────────────────────────────────────────┘
+GOVERNANCE LAYER (4 EOAs — all code size 0, no multisig)
+═══════════════════════════════════════════════════════════
+
+  [EOA-1] USTB Token owner + USTB ProxyAdmin owner
+  [EOA-2] AllowList owner + AllowList ProxyAdmin owner
+  [EOA-3] RedemptionIdle owner + RedemptionIdle ProxyAdmin owner
+  [EOA-4] Oracle owner (addCheckpoint, setMaxAcceptablePriceDelta)
+          │               │                │               │
+          ▼               ▼                ▼               │
+PROXY ADMIN LAYER                                          │
+═════════════════                                          │
+                                                           │
+  [PA-1] upgrade(USTB)       ← owned by [EOA-1]           │
+  [PA-2] upgrade(AllowList)  ← owned by [EOA-2]           │
+  [PA-3] upgrade(Redemption) ← owned by [EOA-3]           │
+          │               │                │               │
+          ▼               ▼                ▼               │
+TOKEN LAYER                                                │
+═══════════                                                │
+                                                           │
+  [USTB] USTB Token (Proxy)                                │
+  impl: SuperstateTokenV5_1 (VERSION "5")                  │
+                                                           │
+  Admin (owner [EOA-1] only):                              │
+  ├── mint() / bulkMint()  ← no backing check on-chain    │
+  ├── adminBurn(address, amount)                           │
+  ├── pause() / unpause()                                  │
+  ├── accountingPause() / accountingUnpause()              │
+  ├── setOracle(newOracle)                                 │
+  ├── setRedemptionContract(newContract)                   │
+  ├── setStablecoinConfig(stablecoin, dest, fee)           │
+  ├── setChainIdSupport(chainId, supported)                │
+  └── setMaximumOracleDelay(delay)                         │
+                                                           │
+  User functions (AllowList-gated):                        │
+  ├── subscribe(to, amount, stablecoin)                    │
+  ├── offchainRedeem(amount)                               │
+  ├── bridge(amount, dest, chainId)                        │
+  └── transfer / transferFrom                              │
+          │               │                │               │
+     reads│          reads│           reads│               │
+          ▼               ▼                ▼               ▼
+PROTOCOL LAYER
+══════════════
+
+  [AL] AllowList V3.1 (Proxy)    [ORC] SuperstateOracle      [RI] RedemptionIdle (Proxy)
+  owner: [EOA-2]                  (NOT a proxy)                owner: [EOA-3]
+                                  owner: [EOA-4]
+  Admin:                                                       Admin:
+  ├ setEntityIdForAddress()       Admin:                       ├ pause/unpause()
+  ├ setEntityAllowedFor           ├ addCheckpoint()            ├ setRedemptionFee()
+  │ PublicInstrument()            ├ addCheckpoints()           ├ setSweepDestination()
+  ├ setEntityAllowedFor           ├ setMaxAcceptable           ├ setMaximumOracleDelay()
+  │ PrivateInstrument()           │ PriceDelta()               ├ withdraw()
+  ├ setProtocolAddress            └ transferOwnership()        └ transferOwnership()
+  │ Permission()
+  └ transferOwnership()           Exposes:                     User:
+                                  latestRoundData()            └ redeem(amount)
+  Gating:                         (Chainlink-compat)
+  isAddressAllowedForFund()                                    USDC bal: ~$1.7M
+  hasAnyProtocolPermissions()     NAV: $11.045/share           Oracle delay: 1h
+                                  Expiry: 5 days               Fee: 0
+
+EXTERNAL / UNDERLYING LAYER
+════════════════════════════
+
+  [USDC] USDC                 [CL] Chainlink NAV Feed       Off-chain
+  Used for subscribe/redeem   Independent NAV source         ├── UMB Bank (custodian)
+                                                             ├── Federated Hermes (sub-adv)
+  [SWEEP] Sweep destination                                  ├── Ernst & Young (auditor)
+  (subscription + redemption USDC)                           ├── NAV Consulting (NAV agent)
+                                                             └── U.S. Treasury Bills (~95%)
 ```
+
+**Address Legend:**
+
+| Label | Address |
+|-------|---------|
+| [EOA-1] | [`0xad309bb6f13074128b4f23ef9ea2fe8552afca83`](https://etherscan.io/address/0xad309bb6f13074128b4f23ef9ea2fe8552afca83) |
+| [EOA-2] | [`0x7747940adbc7191f877a9b90596e0da4f8deb2fe`](https://etherscan.io/address/0x7747940adbc7191f877a9b90596e0da4f8deb2fe) |
+| [EOA-3] | [`0x8cf40e96e7d7fd8A7A9bEf70d3882fbBC4D40765`](https://etherscan.io/address/0x8cf40e96e7d7fd8A7A9bEf70d3882fbBC4D40765) |
+| [EOA-4] | [`0x4B1df64357a5D484563c9b7c16a80eD8B8fB1395`](https://etherscan.io/address/0x4B1df64357a5D484563c9b7c16a80eD8B8fB1395) |
+| [PA-1] USTB ProxyAdmin | [`0xb9d285dcad879513dc9c1a3b2e0cccb21c3c2146`](https://etherscan.io/address/0xb9d285dcad879513dc9c1a3b2e0cccb21c3c2146) |
+| [PA-2] AllowList ProxyAdmin | [`0xb819692a58db9dd4d3b403a875439b6ca155c610`](https://etherscan.io/address/0xb819692a58db9dd4d3b403a875439b6ca155c610) |
+| [PA-3] RedemptionIdle ProxyAdmin | [`0xcaba8c12873fffed13431d98bf6b836dff08e869`](https://etherscan.io/address/0xcaba8c12873fffed13431d98bf6b836dff08e869) |
+| [USTB] USTB Token (Proxy) | [`0x43415eB6ff9DB7E26A15b704e7A3eDCe97d31C4e`](https://etherscan.io/address/0x43415eB6ff9DB7E26A15b704e7A3eDCe97d31C4e) |
+| [AL] AllowList V3.1 (Proxy) | [`0x02f1fa8b196d21c7b733eb2700b825611d8a38e5`](https://etherscan.io/address/0x02f1fa8b196d21c7b733eb2700b825611d8a38e5) |
+| [ORC] SuperstateOracle | [`0xe4fa682f94610ccd170680cc3b045d77d9e528a8`](https://etherscan.io/address/0xe4fa682f94610ccd170680cc3b045d77d9e528a8) |
+| [RI] RedemptionIdle (Proxy) | [`0x4c21b7577c8fe8b0b0669165ee7c8f67fa1454cf`](https://etherscan.io/address/0x4c21b7577c8fe8b0b0669165ee7c8f67fa1454cf) |
+| [CL] Chainlink NAV Feed | [`0x289B5036cd942e619E1Ee48670F98d214E745AAC`](https://etherscan.io/address/0x289B5036cd942e619E1Ee48670F98d214E745AAC) |
+| [USDC] USDC | [`0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48`](https://etherscan.io/address/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48) |
+| [SWEEP] Sweep Destination (EOA) | [`0x774AE279c21B6a17a6E2BD5ab5398FF98F398807`](https://etherscan.io/address/0x774AE279c21B6a17a6E2BD5ab5398FF98F398807) |
 
 ### Proxy Upgrade Paths
 
@@ -626,8 +629,8 @@ Each proxy can be upgraded immediately (no timelock) by its ProxyAdmin owner:
 
 | Proxy | ProxyAdmin | Owner (EOA) | Functions |
 |-------|-----------|-------------|-----------|
-| USTB Token `0x4341...1C4e` | `0xb9d2...2146` | `0xad30...ca83` | `upgrade()`, `upgradeAndCall()`, `changeProxyAdmin()` |
-| AllowList `0x02f1...38e5` | `0xb819...c610` | `0x7747...2bfe` | `upgrade()`, `upgradeAndCall()`, `changeProxyAdmin()` |
-| RedemptionIdle `0x4c21...54cf` | `0xcaba...e869` | `0x8cf4...0765` | `upgrade()`, `upgradeAndCall()`, `changeProxyAdmin()` |
+| USTB Token [`0x43415eB6ff9DB7E26A15b704e7A3eDCe97d31C4e`](https://etherscan.io/address/0x43415eB6ff9DB7E26A15b704e7A3eDCe97d31C4e) | [`0xb9d285dcad879513dc9c1a3b2e0cccb21c3c2146`](https://etherscan.io/address/0xb9d285dcad879513dc9c1a3b2e0cccb21c3c2146) | [`0xad309bb6f13074128b4f23ef9ea2fe8552afca83`](https://etherscan.io/address/0xad309bb6f13074128b4f23ef9ea2fe8552afca83) | `upgrade()`, `upgradeAndCall()`, `changeProxyAdmin()` |
+| AllowList [`0x02f1fa8b196d21c7b733eb2700b825611d8a38e5`](https://etherscan.io/address/0x02f1fa8b196d21c7b733eb2700b825611d8a38e5) | [`0xb819692a58db9dd4d3b403a875439b6ca155c610`](https://etherscan.io/address/0xb819692a58db9dd4d3b403a875439b6ca155c610) | [`0x7747940adbc7191f877a9b90596e0da4f8deb2fe`](https://etherscan.io/address/0x7747940adbc7191f877a9b90596e0da4f8deb2fe) | `upgrade()`, `upgradeAndCall()`, `changeProxyAdmin()` |
+| RedemptionIdle [`0x4c21b7577c8fe8b0b0669165ee7c8f67fa1454cf`](https://etherscan.io/address/0x4c21b7577c8fe8b0b0669165ee7c8f67fa1454cf) | [`0xcaba8c12873fffed13431d98bf6b836dff08e869`](https://etherscan.io/address/0xcaba8c12873fffed13431d98bf6b836dff08e869) | [`0x8cf40e96e7d7fd8A7A9bEf70d3882fbBC4D40765`](https://etherscan.io/address/0x8cf40e96e7d7fd8A7A9bEf70d3882fbBC4D40765) | `upgrade()`, `upgradeAndCall()`, `changeProxyAdmin()` |
 
-The Oracle (`0xe4fa...28a8`) is **not a proxy** and cannot be upgraded. However, the USTB Token owner can replace it entirely via `setOracle(newAddress)`.
+The Oracle ([`0xe4fa682f94610ccd170680cc3b045d77d9e528a8`](https://etherscan.io/address/0xe4fa682f94610ccd170680cc3b045d77d9e528a8)) is **not a proxy** and cannot be upgraded. However, the USTB Token owner can replace it entirely via `setOracle(newAddress)`.
