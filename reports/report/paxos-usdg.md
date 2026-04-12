@@ -141,8 +141,8 @@ The absence of a formal public bug bounty with monetary rewards is a weakness fo
 ### Accessibility
 
 - **Minting:** Available through Paxos distribution partners and direct API integration. Minting requires a Paxos account with KYC/AML verification. Not permissionless
-- **Redemption:** Direct 1:1 redemption through Paxos (requires account). On-chain, USDG can be exchanged via DEXes or CEXes
-- **No on-chain mint/redeem:** Unlike USDC's permissionless on-chain redemption, USDG minting and burning are controlled by Paxos supply controllers via the SupplyControl contract. End users cannot directly mint or burn
+- **Redemption:** Direct 1:1 redemption through Paxos (requires account). Onchain, USDG can be exchanged via DEXes or CEXes
+- **No onchain mint/redeem:** Unlike USDC's permissionless onchain redemption, USDG minting and burning are controlled by Paxos supply controllers via the SupplyControl contract. End users cannot directly mint or burn
 - **Fees:** No fees for minting or redeeming USDG through Paxos (standard network gas fees apply)
 - **Geographic restrictions:** Available globally except sanctioned jurisdictions. KYC required for direct minting/redemption
 
@@ -152,14 +152,14 @@ The absence of a formal public bug bounty with monetary rewards is a weakness fo
 - **Collateral quality:** U.S. Treasury Bills are the lowest-risk financial instruments globally — backed by the full faith and credit of the U.S. government
 - **Segregation:** Reserve assets are held in accounts segregated from Paxos's own operating funds, providing protection in a Paxos insolvency scenario
 - **Regulatory requirement:** As a Major Payments Institution supervised by MAS, Paxos is required to maintain 1:1 reserves and hold them in segregated accounts
-- **Off-chain:** All reserves are held off-chain at regulated banking institutions. Token holders cannot independently verify specific reserve compositions on-chain
+- **Offchain:** All reserves are held offchain at regulated banking institutions. Token holders cannot independently verify specific reserve compositions onchain
 
 ### Provability
 
 - **Monthly attestation:** Paxos publishes monthly reserve composition reports verified by independent accounting firms. Reports are available on the [USDG Transparency page](https://www.paxos.com/usdg-transparency)
-- **On-chain supply:** Total USDG supply is verifiable on-chain via `totalSupply()` on each chain
-- **No Chainlink Proof of Reserves:** No on-chain oracle feed independently verifying reserves
-- **Off-chain verification:** Reserves cannot be independently verified on-chain by token holders. Must rely on the attestation reports, MAS regulatory oversight, and Paxos's institutional framework
+- **Onchain supply:** Total USDG supply is verifiable onchain via `totalSupply()` on each chain
+- **No Chainlink Proof of Reserves:** No onchain oracle feed independently verifying reserves
+- **Offchain verification:** Reserves cannot be independently verified onchain by token holders. Must rely on the attestation reports, MAS regulatory oversight, and Paxos's institutional framework
 - **Regulatory reporting:** Paxos is subject to MAS supervisory requirements including regular regulatory reporting
 - **MiCA compliance:** USDG claims compliance with MiCA (Markets in Crypto-Assets) framework for Electronic Money Tokens under European Banking Authority oversight
 
@@ -197,7 +197,7 @@ The absence of a formal public bug bounty with monetary rewards is a weakness fo
 - **Primary exit (KYC):** Direct 1:1 redemption from Paxos — most capital-efficient but requires account setup
 - **Same-value asset:** USD stablecoin — no price divergence risk from the underlying
 - **No withdrawal queue:** DEX/CEX exits are instant. Direct Paxos redemption follows standard processing times
-- **Ethereum-only concern:** The Ethereum DEX liquidity (~$9.8M) is modest relative to the on-chain supply ($472M). Large exits exceeding $5M+ would require CEX routing or direct Paxos redemption
+- **Ethereum-only concern:** The Ethereum DEX liquidity (~$9.8M) is modest relative to the onchain supply ($472M). Large exits exceeding $5M+ would require CEX routing or direct Paxos redemption
 
 ## Centralization & Control Risks
 
@@ -230,12 +230,12 @@ The absence of a formal public bug bounty with monetary rewards is a weakness fo
 
 ### Programmability
 
-- **Token:** Standard ERC-20 with EIP-2612/EIP-3009 gasless support. Transfers are fully programmatic on-chain
-- **Minting/burning:** Through SupplyControl contract with rate-limited supply controllers. On-chain but Paxos-controlled (not permissionless)
+- **Token:** Standard ERC-20 with EIP-2612/EIP-3009 gasless support. Transfers are fully programmatic onchain
+- **Minting/burning:** Through SupplyControl contract with rate-limited supply controllers. Onchain but Paxos-controlled (not permissionless)
 - **Exchange rate:** Fixed 1:1 USD peg — no oracle needed for the token itself
-- **Reserves:** Entirely off-chain. Reserve management, yield generation, and reporting are handled by Paxos and its custodians with no on-chain visibility into specific holdings
+- **Reserves:** Entirely offchain. Reserve management, yield generation, and reporting are handled by Paxos and its custodians with no onchain visibility into specific holdings
 - **Pause mechanism:** `PAUSE_ROLE` can freeze all transfers/approvals; minting/burning remain operational during pause
-- **Operations split:** Token operations (transfers, approvals) are on-chain and programmatic. Reserve operations (investment, custody, yield distribution) are entirely off-chain and centralized
+- **Operations split:** Token operations (transfers, approvals) are onchain and programmatic. Reserve operations (investment, custody, yield distribution) are entirely offchain and centralized
 
 ### External Dependencies
 
@@ -299,10 +299,10 @@ The absence of a formal public bug bounty with monetary rewards is a weakness fo
 
 ### Key Risks
 
-- **SupplyControl admin is an EOA** — a single EOA ([`0x3Af3e85f4f97De7AD0f000B724Fb77fE5ffc024B`](https://etherscan.io/address/0x3Af3e85f4f97De7AD0f000B724Fb77fE5ffc024B)) controls the SupplyControl contract, including the ability to add supply controllers with large mint capacities. This is the most significant on-chain governance gap
+- **SupplyControl admin is an EOA** — a single EOA ([`0x3Af3e85f4f97De7AD0f000B724Fb77fE5ffc024B`](https://etherscan.io/address/0x3Af3e85f4f97De7AD0f000B724Fb77fE5ffc024B)) controls the SupplyControl contract, including the ability to add supply controllers with large mint capacities. This is the most significant onchain governance gap
 - **Short timelock (3 hours)** — contract upgrades and critical admin changes have only a 3-hour delay. While better than no timelock, this provides limited reaction time for large integrators
 - **No formal public bug bounty** — no confirmed Immunefi or equivalent program with monetary rewards. A private HackerOne program may exist but could not be verified
-- **Off-chain reserves** — reserves are entirely off-chain with monthly attestation. No on-chain Proof of Reserves mechanism for real-time verification
+- **Offchain reserves** — reserves are entirely offchain with monthly attestation. No onchain Proof of Reserves mechanism for real-time verification
 - **Relatively new (17 months)** — younger than USDC (2018) or USDT (2014), though longer than many DeFi stablecoins
 
 ### Critical Risks
@@ -317,12 +317,12 @@ The absence of a formal public bug bounty with monetary rewards is a weakness fo
 **Scoring Guidelines:**
 - Be conservative: when uncertain between two scores, choose the higher (riskier) one
 - Use decimals (e.g., 2.5) when a subcategory falls between scores
-- Prioritize on-chain evidence over documentation claims
+- Prioritize onchain evidence over documentation claims
 
 ### Critical Risk Gates
 
 - [x] **No audit** — 6 audits by 3 reputable firms (Zellic, Trail of Bits, Halborn). ✅ PASS
-- [x] **Unverifiable reserves** — Off-chain reserves, but monthly attestation by independent accounting firm, MAS regulatory oversight, segregated accounts. Multiple independent verification layers. ✅ PASS (same structure as USDC)
+- [x] **Unverifiable reserves** — Offchain reserves, but monthly attestation by independent accounting firm, MAS regulatory oversight, segregated accounts. Multiple independent verification layers. ✅ PASS (same structure as USDC)
 - [x] **Total centralization** — Token admin is a TimelockController (3h) controlled by a 7-owner multisig. Operational roles held by a 3-of-7 multisig. Not controlled by a single EOA (though SupplyControl admin is an EOA). ✅ PASS
 
 **All gates pass.** Proceed to category scoring.
@@ -352,21 +352,21 @@ The absence of a formal public bug bounty with monetary rewards is a weakness fo
 | Operational roles | 3-of-7 multisig for PAUSE, ASSET_PROTECTION, SUPPLY_CONTROLLER_MANAGER |
 | SupplyControl admin | **EOA** — can add/remove supply controllers, modify rate limits |
 | Privileged roles | Can pause all transfers, freeze/wipe individual addresses, upgrade contracts, change facets |
-| Regulatory | MAS-supervised — provides off-chain governance and accountability |
+| Regulatory | MAS-supervised — provides offchain governance and accountability |
 
-**Governance Score: 3.5/5** — The token itself has a decent governance structure: 7-owner multisig with 3h timelock for critical changes, 3-of-7 for operational/emergency. However, the 3h timelock is <12h (score 4 criterion), the SupplyControl admin is an EOA with power to add supply controllers (significant gap), and the freeze/wipe capability exists without timelock. The MAS regulatory framework provides off-chain accountability but doesn't change the on-chain risk profile. Between score 3 (multisig with timelock, 24+ hours) and score 4 (low threshold, <12 hours, powerful admin roles).
+**Governance Score: 3.5/5** — The token itself has a decent governance structure: 7-owner multisig with 3h timelock for critical changes, 3-of-7 for operational/emergency. However, the 3h timelock is <12h (score 4 criterion), the SupplyControl admin is an EOA with power to add supply controllers (significant gap), and the freeze/wipe capability exists without timelock. The MAS regulatory framework provides offchain accountability but doesn't change the onchain risk profile. Between score 3 (multisig with timelock, 24+ hours) and score 4 (low threshold, <12 hours, powerful admin roles).
 
 **Subcategory B: Programmability**
 
 | Factor | Assessment |
 |--------|-----------|
-| Token operations | Standard ERC-20, fully on-chain and programmatic |
+| Token operations | Standard ERC-20, fully onchain and programmatic |
 | Exchange rate | Fixed 1:1 USD peg — no oracle dependency |
-| Minting/burning | On-chain via SupplyControl, but Paxos-controlled (not permissionless) |
-| Reserves | Entirely off-chain — managed by Paxos and custodians |
-| Reporting | Monthly attestation (off-chain), no real-time on-chain reporting |
+| Minting/burning | Onchain via SupplyControl, but Paxos-controlled (not permissionless) |
+| Reserves | Entirely offchain — managed by Paxos and custodians |
+| Reporting | Monthly attestation (offchain), no real-time onchain reporting |
 
-**Programmability Score: 3.5/5** — Token operations are fully on-chain and programmatic. However, reserves are entirely off-chain with no on-chain visibility into specific holdings. Minting/burning is controlled by Paxos (not permissionless). The lack of permissionless minting/redemption and entirely off-chain reserve management push beyond a pure hybrid model. Per rubric: between "Hybrid on-chain/off-chain operations" (3) and "Significant manual intervention required" (4).
+**Programmability Score: 3.5/5** — Token operations are fully onchain and programmatic. However, reserves are entirely offchain with no onchain visibility into specific holdings. Minting/burning is controlled by Paxos (not permissionless). The lack of permissionless minting/redemption and entirely offchain reserve management push beyond a pure hybrid model. Per rubric: between "Hybrid onchain/offchain operations" (3) and "Significant manual intervention required" (4).
 
 **Subcategory C: External Dependencies**
 
@@ -380,7 +380,7 @@ The absence of a formal public bug bounty with monetary rewards is a weakness fo
 
 **Centralization Score = (3.5 + 3.5 + 1.5) / 3 = 2.83**
 
-**Score: 2.8/5** — The tiered governance structure with timelock is a positive, but the short 3h delay, EOA supply control admin, powerful freeze/wipe capability, and entirely off-chain reserve management elevate centralization risk. Standard for a regulated fiat-backed stablecoin — comparable to USDC's centralization profile.
+**Score: 2.8/5** — The tiered governance structure with timelock is a positive, but the short 3h delay, EOA supply control admin, powerful freeze/wipe capability, and entirely offchain reserve management elevate centralization risk. Standard for a regulated fiat-backed stablecoin — comparable to USDC's centralization profile.
 
 #### Category 3: Funds Management (Weight: 30%)
 
@@ -392,25 +392,25 @@ The absence of a formal public bug bounty with monetary rewards is a weakness fo
 | Collateral quality | U.S. Treasury Bills — lowest-risk financial instrument globally |
 | Segregation | Reserves held in segregated accounts, bankruptcy-remote |
 | Regulatory | MAS requires 1:1 reserve maintenance |
-| On-chain | All reserves are off-chain |
+| Onchain | All reserves are offchain |
 
-**Collateralization Score: 2.0/5** — Highest-quality collateral (U.S. T-Bills), 100% backing required by regulation, segregated accounts. However, reserves are entirely off-chain. Per rubric: between score 2 ("100% on-chain collateral, high quality DeFi assets") and score 3 ("100% collateral, some off-chain"). Quality is the highest possible (U.S. Treasuries) but fully off-chain — regulatory framework partially compensates. Same collateral profile as USDC and USTB.
+**Collateralization Score: 2.0/5** — Highest-quality collateral (U.S. T-Bills), 100% backing required by regulation, segregated accounts. However, reserves are entirely offchain. Per rubric: between score 2 ("100% onchain collateral, high quality DeFi assets") and score 3 ("100% collateral, some offchain"). Quality is the highest possible (U.S. Treasuries) but fully offchain — regulatory framework partially compensates. Same collateral profile as USDC and USTB.
 
 **Subcategory B: Provability**
 
 | Factor | Assessment |
 |--------|-----------|
 | Reserve transparency | Monthly attestation by independent accounting firm |
-| On-chain verification | Supply verifiable on-chain; reserves are not |
+| Onchain verification | Supply verifiable onchain; reserves are not |
 | Chainlink PoR | Not available |
 | Reporting | Monthly reports published on transparency portal |
 | Regulatory oversight | MAS supervision with regulatory reporting requirements |
 
-**Provability Score: 3.5/5** — Monthly attestation provides periodic verification, but reserves are entirely off-chain with no real-time on-chain verification mechanism and no Chainlink Proof of Reserves. MAS regulatory oversight adds an independent layer, but token holders cannot independently verify reserves between attestation periods. Per rubric: between "Manual reporting by admins, known custodian attestation" (3) and "Infrequent reporting, self-reported only" (4).
+**Provability Score: 3.5/5** — Monthly attestation provides periodic verification, but reserves are entirely offchain with no real-time onchain verification mechanism and no Chainlink Proof of Reserves. MAS regulatory oversight adds an independent layer, but token holders cannot independently verify reserves between attestation periods. Per rubric: between "Manual reporting by admins, known custodian attestation" (3) and "Infrequent reporting, self-reported only" (4).
 
 **Funds Management Score = (2.0 + 3.5) / 2 = 2.75**
 
-**Score: 2.75/5** — Highest-quality collateral (U.S. Treasuries) with regulatory requirements for 1:1 backing and segregated custody. The off-chain nature of reserves and reliance on monthly attestation (rather than real-time on-chain proof) is the primary weakness — standard for fiat-backed stablecoins.
+**Score: 2.75/5** — Highest-quality collateral (U.S. Treasuries) with regulatory requirements for 1:1 backing and segregated custody. The offchain nature of reserves and reliance on monthly attestation (rather than real-time onchain proof) is the primary weakness — standard for fiat-backed stablecoins.
 
 #### Category 4: Liquidity Risk (Weight: 15%)
 
@@ -423,7 +423,7 @@ The absence of a formal public bug bounty with monetary rewards is a weakness fo
 | Same-value asset | USD stablecoin — no price divergence risk |
 | Slippage | <0.5% for $1M swap on Curve USDG/USDC |
 
-**Score: 2.0/5** — Multiple exit paths: DEX (permissionless, ~$9.8M ETH liquidity), CEX (major exchanges), and direct Paxos redemption (1:1, KYC). Same-value asset eliminates price risk. The $9.8M Ethereum DEX liquidity is modest relative to $472M on-chain supply — exits >$5M require CEX routing or Paxos redemption. Direct redemption provides a strong backstop but requires KYC friction. Per rubric: "Direct redemption with minor delays" + ">$5M, <1% slippage" + same-value asset adjustment → score 2.
+**Score: 2.0/5** — Multiple exit paths: DEX (permissionless, ~$9.8M ETH liquidity), CEX (major exchanges), and direct Paxos redemption (1:1, KYC). Same-value asset eliminates price risk. The $9.8M Ethereum DEX liquidity is modest relative to $472M onchain supply — exits >$5M require CEX routing or Paxos redemption. Direct redemption provides a strong backstop but requires KYC friction. Per rubric: "Direct redemption with minor delays" + ">$5M, <1% slippage" + same-value asset adjustment → score 2.
 
 #### Category 5: Operational Risk (Weight: 5%)
 
@@ -469,7 +469,7 @@ Final Score = (Centralization × 0.30) + (Funds Mgmt × 0.30) + (Audits × 0.20)
 
 **Final Risk Tier: Low Risk (2.4/5.0) — Approved with standard monitoring**
 
-USDG benefits from Paxos's established stablecoin track record, highest-quality collateral (U.S. Treasuries), strong regulatory framework (MAS + MiCA), and solid audit coverage. The primary risk factors are centralization concerns standard for regulated stablecoins (freeze/wipe capability, upgradeable contracts, off-chain reserves) plus a few USDG-specific concerns (SupplyControl admin EOA, no public bug bounty, shorter production history vs USDC). Overall risk profile is comparable to other regulated fiat-backed stablecoins.
+USDG benefits from Paxos's established stablecoin track record, highest-quality collateral (U.S. Treasuries), strong regulatory framework (MAS + MiCA), and solid audit coverage. The primary risk factors are centralization concerns standard for regulated stablecoins (freeze/wipe capability, upgradeable contracts, offchain reserves) plus a few USDG-specific concerns (SupplyControl admin EOA, no public bug bounty, shorter production history vs USDC). Overall risk profile is comparable to other regulated fiat-backed stablecoins.
 
 ---
 
@@ -481,7 +481,7 @@ USDG benefits from Paxos's established stablecoin track record, highest-quality 
 - **Governance-based:** Reassess if SupplyControl admin transitions from EOA to multisig (potential score improvement), or if multisig composition/threshold changes
 - **Regulatory-based:** Reassess if MAS takes enforcement action, if Paxos loses its MPI license, or if regulatory status changes
 - **Bug bounty:** Reassess if Paxos launches a public bug bounty (score improvement)
-- **Proof of Reserves:** Reassess if on-chain reserve verification (e.g., Chainlink PoR) is deployed (score improvement)
+- **Proof of Reserves:** Reassess if onchain reserve verification (e.g., Chainlink PoR) is deployed (score improvement)
 
 ---
 

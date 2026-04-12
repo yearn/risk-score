@@ -97,8 +97,8 @@ The protocol acts as an asset manager, deploying user funds into other protocols
 
 - **Backing**: iUSD is backed by the assets deployed in the underlying strategies.
 - **Verification**: The protocol uses a "Self-Laddering Engine" to match asset duration with liability duration (locked periods).
-- **Off-chain Risks**: **CRITICAL**: Despite initial appearance of "100% on-chain DeFi", the protocol deploys into strategies with significant off-chain exposure:
-  - **Reservoir wsrUSD**: Backed by Real World Assets (RWAs) including T-Bills, introducing off-chain custodial risk, asset valuation complexity, and illiquidity during crisis.
+- **Offchain Risks**: **CRITICAL**: Despite initial appearance of "100% onchain DeFi", the protocol deploys into strategies with significant offchain exposure:
+  - **Reservoir wsrUSD**: Backed by Real World Assets (RWAs) including T-Bills, introducing offchain custodial risk, asset valuation complexity, and illiquidity during crisis.
   - **Fasanara Genesis Fund**: Tokenized traditional hedge fund/money market fund, likely includes institutional credit and RWA exposure similar to Maple.
   - **Gauntlet Frontier vaults**: Explicitly labeled as "higher-risk/higher-yield" strategies that "may lead to higher risks of insolvency" per Gauntlet's own documentation.
   - **Tokemak autoUSD**: Multi-protocol aggregator adding compounded smart contract risk and algorithmic allocation dependency.
@@ -106,13 +106,13 @@ The protocol acts as an asset manager, deploying user funds into other protocols
 
 ### Provability
 
-- **Transparency**: Reserves and allocations are verifiable on-chain.
+- **Transparency**: Reserves and allocations are verifiable onchain.
 - **Reserves**: $37.78M in liquid reserves.
 
 ## Liquidity Risk
 
 - **Exit Liquidity**:
-  - **iUSD**: $3.3M on-chain DEX liquidity. Instant redemptions against the $37.78M liquid reserve.
+  - **iUSD**: $3.3M onchain DEX liquidity. Instant redemptions against the $37.78M liquid reserve.
   - **Coverage**: The $37.78M liquid reserve fully covers the circulating unstaked iUSD supply (24.86M).
     - **siUSD**: The holders of siUSD can exit with this flow: siUSD --> iUSD --> USDC.
     - **liUSD**: Locked (1-13 weeks) but represented by a transferable ERC20 token, allowing for potential secondary market exit.
@@ -144,10 +144,10 @@ The governance system is split into three branches to check and balance power:
 
 - **Timelocks**: Both are custom `Timelock.sol` extending OZ TimelockController. They override `hasRole()` to delegate role checks to the central `InfiniFiCore` contract. Both have DEFAULT_ADMIN_ROLE renounced (immutable role configuration).
 
-  - **Long Timelock (7 days)**: [`0x3D18480CC32B6AB3B833dCabD80E76CfD41c48a9`](https://etherscan.io/address/0x3D18480CC32B6AB3B833dCabD80E76CfD41c48a9) — 604,800s confirmed on-chain.
-  - **Short Timelock (1 day)**: [`0x4B174afbeD7b98BA01F50E36109EEE5e6d327c32`](https://etherscan.io/address/0x4B174afbeD7b98BA01F50E36109EEE5e6d327c32) — 86,400s confirmed on-chain.
+  - **Long Timelock (7 days)**: [`0x3D18480CC32B6AB3B833dCabD80E76CfD41c48a9`](https://etherscan.io/address/0x3D18480CC32B6AB3B833dCabD80E76CfD41c48a9) — 604,800s confirmed onchain.
+  - **Short Timelock (1 day)**: [`0x4B174afbeD7b98BA01F50E36109EEE5e6d327c32`](https://etherscan.io/address/0x4B174afbeD7b98BA01F50E36109EEE5e6d327c32) — 86,400s confirmed onchain.
 
-  **Role assignments on both timelocks** (verified on-chain via InfiniFiCore):
+  **Role assignments on both timelocks** (verified onchain via InfiniFiCore):
 
   | Role | Holder(s) |
   |------|-----------|
@@ -276,13 +276,13 @@ Autonomous events triggered by protocol state, not governance actions.
 - Strong risk segmentation design with liability ladder (liUSD first-loss → siUSD → iUSD)
 - Comprehensive audit coverage: Spearbit/Cantina Code main review + 6 ongoing upgrade reviews + Certora formal verification + public competition
 - Robust governance: 4/7 multisig + dual timelock (7d/1d) + separation of powers. DEFAULT_ADMIN renounced. emergencyAction bypass prevented via no-op override in Timelock.
-- All contracts verified on-chain, all farms properly target expected DeFi protocols
+- All contracts verified onchain, all farms properly target expected DeFi protocols
 - Backed by reputable investors (Electric Capital, Sam Kazemian)
 
 ### Key Risks
 
-- **High-risk illiquid farm deployments**: Protocol deploys into Gauntlet Frontier vaults (explicit "insolvency risk" warning), Reservoir wsrUSD (RWA/off-chain exposure including T-Bills), Fasanara Genesis Fund (tokenized TradFi hedge fund), and Tokemak autoUSD (multi-layer compounding). All are locked until maturity. See Appendix A for detailed risk analysis.
-- **Off-chain/RWA exposure**: Contrary to initial impression of "100% on-chain DeFi," protocol has significant exposure to Real World Assets (T-Bills via Reservoir, institutional credit via Fasanara) introducing custodial risk, valuation complexity, and traditional finance dependencies.
+- **High-risk illiquid farm deployments**: Protocol deploys into Gauntlet Frontier vaults (explicit "insolvency risk" warning), Reservoir wsrUSD (RWA/offchain exposure including T-Bills), Fasanara Genesis Fund (tokenized TradFi hedge fund), and Tokemak autoUSD (multi-layer compounding). All are locked until maturity. See Appendix A for detailed risk analysis.
+- **Offchain/RWA exposure**: Contrary to initial impression of "100% onchain DeFi," protocol has significant exposure to Real World Assets (T-Bills via Reservoir, institutional credit via Fasanara) introducing custodial risk, valuation complexity, and traditional finance dependencies.
 - Short operational history (<1 year in production since June 2025)
 - Compounded smart contract risk from underlying strategies (Aave, Fluid, Pendle, Ethena, Maple, plus high-risk farms)
 - Pseudonymous team with notable history concerns: key contributor (RobAnon) authored Revest Finance contracts exploited for $2M; lead dev's prior projects (Fei, ECG) have wound down
@@ -293,7 +293,7 @@ Autonomous events triggered by protocol state, not governance actions.
 
 ### Critical Risks
 
-- None identified that would trigger automatic score of 5. All contracts verified, reserves on-chain, multisig governance with timelocks in place.
+- None identified that would trigger automatic score of 5. All contracts verified, reserves onchain, multisig governance with timelocks in place.
 
 ---
 
@@ -302,7 +302,7 @@ Autonomous events triggered by protocol state, not governance actions.
 ### Critical Risk Gates
 
 - [x] **No audit** — PASSED. Multiple audits by reputable firms (Spearbit, Certora, Cantina).
-- [x] **Unverifiable reserves** — PASSED. All reserves verifiable on-chain.
+- [x] **Unverifiable reserves** — PASSED. All reserves verifiable onchain.
 - [x] **Total centralization** — PASSED. 4/7 multisig with dual timelocks, DEFAULT_ADMIN renounced.
 
 ### Category Scores
@@ -338,23 +338,23 @@ Autonomous events triggered by protocol state, not governance actions.
 #### Category 3: Funds Management (Weight: 30%)
 
 **Subcategory A: Collateralization — 4.0**
-- **NOT 100% on-chain**: Significant exposure to Real World Assets (RWAs) via Reservoir wsrUSD (backed by T-Bills) and Fasanara Genesis Fund (tokenized TradFi).
+- **NOT 100% onchain**: Significant exposure to Real World Assets (RWAs) via Reservoir wsrUSD (backed by T-Bills) and Fasanara Genesis Fund (tokenized TradFi).
 - Deploying into **explicitly high-risk strategies**: Gauntlet Frontier vaults are labeled by Gauntlet as "may lead to higher risks of insolvency" and "potentially higher volatility markets that may face liquidity risks."
 - **Multi-layer compounding risk**: InfiniFi → Gauntlet → Frontier → Morpho Markets, and InfiniFi → Tokemak autoUSD → multiple underlying protocols.
 - **Illiquid locked positions**: High-risk farms are all "locked until maturity" — protocol cannot quickly de-risk or exit positions.
-- **Off-chain counterparty risk**: RWA issuers, T-Bill custodians, traditional hedge fund structures.
+- **Offchain counterparty risk**: RWA issuers, T-Bill custodians, traditional hedge fund structures.
 - First-loss tranches (liUSD → siUSD) provide some protection for iUSD holders, but are tested by high-risk deployments.
 - All farm contracts verified and target stated protocols (verification confirmed, but underlying strategies are high-risk).
 
 **Subcategory B: Provability — 2.5**
-- On-chain reserves verifiable via farm contracts.
-- **Underlying RWA valuations NOT verifiable on-chain** (Reservoir T-Bills, Fasanara fund assets).
+- Onchain reserves verifiable via farm contracts.
+- **Underlying RWA valuations NOT verifiable onchain** (Reservoir T-Bills, Fasanara fund assets).
 - Gauntlet Frontier allocations into Morpho markets add opacity layers.
 - Tokemak autoUSD algorithmic allocations not fully transparent.
 - Exchange rate (siUSD) computed programmatically via ERC4626 standard.
-- YieldSharing and Accounting contracts handle on-chain yield calculation.
+- YieldSharing and Accounting contracts handle onchain yield calculation.
 
-**Score: 3.3/5** — (4.0 + 2.5) / 2 = 3.25 rounded to 3.3. Significant off-chain exposure and high-risk strategy deployments increase funds management risk substantially.
+**Score: 3.3/5** — (4.0 + 2.5) / 2 = 3.25 rounded to 3.3. Significant offchain exposure and high-risk strategy deployments increase funds management risk substantially.
 
 #### Category 4: Liquidity Risk (Weight: 15%)
 
@@ -371,7 +371,7 @@ Autonomous events triggered by protocol state, not governance actions.
 - **Funding**: $3M Pre-Seed from reputable VCs.
 - **Docs**: Above average technical documentation.
 - **Legal**: No disclosed entity or jurisdiction.
-- **Incident Response**: No documented plan. Emergency capabilities exist on-chain.
+- **Incident Response**: No documented plan. Emergency capabilities exist onchain.
 
 **Score: 2.5/5** — Experienced team with VC backing, but pseudonymous with concerning prior project history, no legal entity, and no incident response plan.
 
@@ -401,11 +401,11 @@ Autonomous events triggered by protocol state, not governance actions.
 **Final Risk Tier: MEDIUM RISK**
 
 InfiniFi is a stablecoin model with a strong focus on risk segmentation (liUSD absorbing first losses). The main risks are:
-- **High-risk illiquid farm deployments**: Gauntlet Frontier vaults (explicit insolvency risk), Reservoir wsrUSD (RWA/off-chain exposure), Fasanara Genesis Fund (TradFi structure), Tokemak autoUSD (compounded complexity). See Appendix A for detailed farm risk analysis.
+- **High-risk illiquid farm deployments**: Gauntlet Frontier vaults (explicit insolvency risk), Reservoir wsrUSD (RWA/offchain exposure), Fasanara Genesis Fund (TradFi structure), Tokemak autoUSD (compounded complexity). See Appendix A for detailed farm risk analysis.
 - **Short operational history** (<1 year, launched June 2025) — not yet battle tested.
 - **79% in illiquid strategies** including the high-risk farms above, creating potential liquidity crisis if mass redemptions occur.
 - **Significant non-timelocked powers** held by anonymous multisig (emergency withdrawal, rebalancing).
-- **Off-chain dependencies** via RWA exposure contradict initial impression of "100% on-chain DeFi."
+- **Offchain dependencies** via RWA exposure contradict initial impression of "100% onchain DeFi."
 
 ---
 
@@ -426,8 +426,8 @@ InfiniFi deploys a significant portion of its assets into illiquid farms (locked
 
 | Farm Name | Type | Primary Risk | Off-Chain Exposure | Liquidity | Individual Risk Score |
 |-----------|------|--------------|-------------------|-----------|---------------------|
-| **Gauntlet Alpha (gtUSDa)** | Morpho vault aggregator | Explicit insolvency risk | Minimal (on-chain DeFi) | Locked until maturity | **4.0/5** |
-| **Reservoir wsrUSD** | RWA-backed stablecoin | Off-chain custodial, RWA valuation | **High** (T-Bills, institutional) | Locked until maturity | **4.5/5** |
+| **Gauntlet Alpha (gtUSDa)** | Morpho vault aggregator | Explicit insolvency risk | Minimal (onchain DeFi) | Locked until maturity | **4.0/5** |
+| **Reservoir wsrUSD** | RWA-backed stablecoin | Offchain custodial, RWA valuation | **High** (T-Bills, institutional) | Locked until maturity | **4.5/5** |
 | **Fasanara Genesis Fund** | Tokenized TradFi fund | Traditional finance risk, opacity | **Very High** (hedge fund assets) | Locked until maturity | **4.5/5** |
 | **Tokemak autoUSD** | Multi-protocol aggregator | Compounded smart contract risk | Minimal (DeFi protocols) | Locked until maturity | **3.5/5** |
 
@@ -458,7 +458,7 @@ Per [Gauntlet's Frontier Vault announcement](https://www.gauntlet.xyz/resources/
 | **Insolvency Risk** | **Very High** | Explicitly acknowledged by Gauntlet in product documentation |
 | **Liquidity Risk** | Very High | Frontier vaults target "potentially higher volatility markets that may face liquidity risks" |
 | **Transparency** | Medium | Allocation decisions made by Gauntlet algorithms, full position breakdown requires monitoring Morpho markets |
-| **Off-chain Risk** | Low | Primarily on-chain DeFi protocols |
+| **Offchain Risk** | Low | Primarily onchain DeFi protocols |
 
 **Why This Matters:**
 
@@ -483,23 +483,23 @@ Per [Gauntlet's Frontier Vault announcement](https://www.gauntlet.xyz/resources/
 **Risk Score: 4.5/5**
 
 **Description:**
-[Wrapped Savings rUSD](https://www.coingecko.com/en/coins/wrapped-savings-rusd) is the yield-bearing wrapper of Reservoir's rUSD stablecoin. Reservoir is a multicollateral stablecoin protocol backed by **Real World Assets (RWAs)** and on-chain strategies including T-Bills, overcollateralized on-chain lending, and funding rate strategies.
+[Wrapped Savings rUSD](https://www.coingecko.com/en/coins/wrapped-savings-rusd) is the yield-bearing wrapper of Reservoir's rUSD stablecoin. Reservoir is a multicollateral stablecoin protocol backed by **Real World Assets (RWAs)** and onchain strategies including T-Bills, overcollateralized onchain lending, and funding rate strategies.
 
 **Key Risk Factors:**
 
 | Risk Category | Assessment | Details |
 |--------------|------------|---------|
-| **Off-Chain Custodial Risk** | **Very High** | T-Bills and RWAs require trusted custodians to hold off-chain assets |
-| **Asset Valuation Risk** | **Very High** | RWA valuations depend on external oracles, appraisers, and market conditions; not verifiable on-chain |
-| **Liquidity Risk** | **Very High** | During crisis, selling RWAs (T-Bills) can be slow, expensive, or impossible; cannot instantly redeem like on-chain DeFi |
+| **Off-Chain Custodial Risk** | **Very High** | T-Bills and RWAs require trusted custodians to hold offchain assets |
+| **Asset Valuation Risk** | **Very High** | RWA valuations depend on external oracles, appraisers, and market conditions; not verifiable onchain |
+| **Liquidity Risk** | **Very High** | During crisis, selling RWAs (T-Bills) can be slow, expensive, or impossible; cannot instantly redeem like onchain DeFi |
 | **Counterparty Risk** | Very High | Institutional custodians, T-Bill issuers, banking infrastructure required |
 | **Transparency** | Low | Full composition of RWA backing not fully transparent; institutional relationships opaque |
 | **Regulatory Risk** | High | RWAs subject to securities laws, potential regulatory action could freeze assets |
-| **Smart Contract Risk** | Medium | Standard DeFi risks plus integration with off-chain infrastructure |
+| **Smart Contract Risk** | Medium | Standard DeFi risks plus integration with offchain infrastructure |
 
 **Why This Matters:**
 
-- **Contradicts "100% on-chain" claim**: Initial assessment stated "100% on-chain DeFi assets. No off-chain or custodial holdings" — this is false.
+- **Contradicts "100% onchain" claim**: Initial assessment stated "100% onchain DeFi assets. No offchain or custodial holdings" — this is false.
 - **Traditional finance failure modes**: If T-Bill custodian faces issues (bankruptcy, regulatory freeze, operational failure), assets could become inaccessible
 - **Valuation manipulation risk**: RWA values can be manipulated or become stale during market stress
 - **Redemption mismatch**: Reservoir may implement redemption queues if RWA liquidation cannot keep pace with outflows
@@ -513,7 +513,7 @@ Per [Reservoir documentation](https://fortunafi.beehiiv.com/p/hello-reservoir):
 - **Multi-asset collateral**: Mix of liquid DeFi assets and RWA collateral for diversification
 
 **Critical Questions:**
-- What percentage of wsrUSD backing is RWAs vs. on-chain DeFi? (Not disclosed)
+- What percentage of wsrUSD backing is RWAs vs. onchain DeFi? (Not disclosed)
 - Who are the custodians for T-Bills? (Not disclosed)
 - What happens if Reservoir's RWA custodian fails?
 
@@ -528,14 +528,14 @@ Per [Reservoir documentation](https://fortunafi.beehiiv.com/p/hello-reservoir):
 **Risk Score: 4.5/5**
 
 **Description:**
-Fasanara Capital is a London-based institutional investment manager with $4B+ AUM that has launched tokenized fund products. The [Genesis Alpha Fund](https://www.rcmalternatives.com/fund/genesis-alpha-fund-fasanara-digital/) is a hedge fund strategy tokenized on-chain. InfiniFi appears to be depositing into USDC-denominated Fasanara products.
+Fasanara Capital is a London-based institutional investment manager with $4B+ AUM that has launched tokenized fund products. The [Genesis Alpha Fund](https://www.rcmalternatives.com/fund/genesis-alpha-fund-fasanara-digital/) is a hedge fund strategy tokenized onchain. InfiniFi appears to be depositing into USDC-denominated Fasanara products.
 
 **Key Risk Factors:**
 
 | Risk Category | Assessment | Details |
 |--------------|------------|---------|
 | **Off-Chain Exposure** | **Extreme** | Entire fund structure operates in traditional finance with blockchain only for token representation |
-| **Custodial Risk** | **Extreme** | Fund assets held by traditional custodians, not on-chain; counterparty risk to Fasanara and sub-custodians |
+| **Custodial Risk** | **Extreme** | Fund assets held by traditional custodians, not onchain; counterparty risk to Fasanara and sub-custodians |
 | **Transparency** | **Very Low** | Hedge fund strategies typically opaque; holdings, positions, and risk exposures not disclosed publicly |
 | **Regulatory Risk** | **Very High** | Subject to UK/EU fund regulations; regulatory action could freeze redemptions or assets |
 | **Liquidity Risk** | **Very High** | Hedge funds typically have redemption gates, lock-up periods, notice requirements; may not be liquid during crisis |
@@ -585,10 +585,10 @@ Fasanara Capital is a London-based institutional investment manager with $4B+ AU
 | **Compounded Smart Contract Risk** | **Very High** | Multi-layer exposure: InfiniFi → autoUSD → (Aave, Compound, DEXs, other protocols). Each layer multiplies risk. |
 | **Algorithmic Allocation Risk** | High | Tokemak's proprietary algorithms decide where to deploy funds; if logic is flawed, funds could be allocated poorly or to risky venues |
 | **Dependency Risk** | High | Relies on Tokemak protocol security, governance, and ongoing operation |
-| **Transparency** | Medium | Allocation decisions made algorithmically; current positions visible on-chain but future allocations unpredictable |
+| **Transparency** | Medium | Allocation decisions made algorithmically; current positions visible onchain but future allocations unpredictable |
 | **Liquidity Risk** | Medium-High | Ability to redeem depends on underlying protocol liquidity and autoUSD's ability to rebalance |
 | **Governance Risk** | Medium | Tokemak governance could change allocation strategies or parameters |
-| **Off-chain Risk** | Low | Primarily deploys to on-chain DeFi protocols |
+| **Offchain Risk** | Low | Primarily deploys to onchain DeFi protocols |
 
 **Why This Matters:**
 
@@ -601,7 +601,7 @@ Fasanara Capital is a London-based institutional investment manager with $4B+ AU
 - Tokemak is an established DeFi protocol with significant TVL and track record
 - Algorithmic allocation can respond faster than manual management to changing yield opportunities
 - Diversification across multiple protocols provides some risk distribution
-- On-chain transparency allows monitoring of current allocations
+- Onchain transparency allows monitoring of current allocations
 
 **Critical Questions:**
 - What are autoUSD's allocation rules and constraints?
@@ -644,7 +644,7 @@ Fasanara Capital is a London-based institutional investment manager with $4B+ AU
 **Recommendation:**
 
 Users and protocols integrating with InfiniFi should:
-- Treat InfiniFi as having **significant off-chain/RWA exposure** (not pure DeFi)
+- Treat InfiniFi as having **significant offchain/RWA exposure** (not pure DeFi)
 - Understand that **79% of TVL is locked** in illiquid strategies including high-risk farms
 - Monitor the **$37.78M liquid reserve** closely — this is the only buffer against redemption requests
 - Watch for **governance proposals** that increase allocation to high-risk farms

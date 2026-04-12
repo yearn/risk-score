@@ -22,7 +22,7 @@ Vault Protocol (borrowers, liquidations, oracles)
 
 fToken holders are exposed to risks across this entire stack: the Lending Protocol itself, the Liquidity Layer that holds all funds, and the Vault Protocol whose borrowers generate the yield. The DEX Protocol and stETH Protocol also interact with the Liquidity Layer but are secondary dependencies.
 
-Fluid is governed by FLUID token holders via on-chain GovernorBravo governance with a 1-day Timelock. The protocol was developed by Instadapp Labs and launched in February 2024.
+Fluid is governed by FLUID token holders via onchain GovernorBravo governance with a 1-day Timelock. The protocol was developed by Instadapp Labs and launched in February 2024.
 
 **Links:**
 
@@ -71,7 +71,7 @@ All exchange rates are >1.0, confirming accumulated yield since launch. No rewar
 - **Liquidity Layer**: [`0x52Aa899454998Be5b000Ad077a46Bbe360F4e497`](https://etherscan.io/address/0x52Aa899454998Be5b000Ad077a46Bbe360F4e497) — Central contract holding all funds. Upgradeable proxy (Instadapp Infinite Proxy) with AdminModule and UserModule.
 - **LendingFactory**: [`0x54B91A0D94cb471F37f949c60F7Fa7935b551D03`](https://etherscan.io/address/0x54B91A0D94cb471F37f949c60F7Fa7935b551D03) — Creates fToken markets. Owner: Timelock.
 - **Timelock**: [`0x2386DC45AdDed673317eF068992F19421B481F4c`](https://etherscan.io/address/0x2386DC45AdDed673317eF068992F19421B481F4c) — Owner of Liquidity Layer, LendingFactory, VaultFactory, DexFactory. 1-day delay.
-- **GovernorBravo**: [`0x0204Cd037B2ec03605CFdFe482D8e257C765fA1B`](https://etherscan.io/address/0x0204Cd037B2ec03605CFdFe482D8e257C765fA1B) — On-chain governance. 117 proposals executed.
+- **GovernorBravo**: [`0x0204Cd037B2ec03605CFdFe482D8e257C765fA1B`](https://etherscan.io/address/0x0204Cd037B2ec03605CFdFe482D8e257C765fA1B) — Onchain governance. 117 proposals executed.
 - **Avocado Multisig**: [`0x4F6F977aCDD1177DCD81aB83074855EcB9C2D49e`](https://etherscan.io/address/0x4F6F977aCDD1177DCD81aB83074855EcB9C2D49e) — Timelock guardian (cancel-only). Also owns DeployerFactory.
 - **FLUID Token**: [`0x6f40d4A6237C257fff2dB00FA0510DeEECd303eb`](https://etherscan.io/address/0x6f40d4A6237C257fff2dB00FA0510DeEECd303eb) — Governance token. 100M max supply, ~77.5M circulating.
 
@@ -151,7 +151,7 @@ fTokens are **ERC4626-compliant vault tokens**. When a user deposits an underlyi
 
 On withdrawal, the reverse occurs: shares are **burned before** the underlying is withdrawn from the Liquidity Layer (burn-first pattern for safety).
 
-**Exchange rate**: Computed on-chain as `tokenExchangePrice / EXCHANGE_PRICES_PRECISION` (1e12 precision). The rate is monotonically increasing — it can never decrease. It incorporates:
+**Exchange rate**: Computed onchain as `tokenExchangePrice / EXCHANGE_PRICES_PRECISION` (1e12 precision). The rate is monotonically increasing — it can never decrease. It incorporates:
 - Yield from the Liquidity Layer (borrower interest)
 - Optional rewards from a `LendingRewardsRateModel` (currently **inactive** for all fTokens; yields are purely organic)
 
@@ -183,18 +183,18 @@ fToken yield comes from **borrower interest**. Borrowers use the Vault Protocol 
 
 ### Collateralization
 
-- **Backing**: All lending positions are over-collateralized on-chain. Borrowers must maintain collateral ratios (80-95% LTV depending on the pair).
-- **Liquidations**: Fully on-chain tick-based mechanism. Liquidation penalty as low as 0.1% for correlated pairs (wstETH/ETH), higher for uncorrelated pairs.
+- **Backing**: All lending positions are over-collateralized onchain. Borrowers must maintain collateral ratios (80-95% LTV depending on the pair).
+- **Liquidations**: Fully onchain tick-based mechanism. Liquidation penalty as low as 0.1% for correlated pairs (wstETH/ETH), higher for uncorrelated pairs.
 - **Withdrawal Gap**: Extra gap on Liquidity Layer limits reserved for liquidations to ensure they can always execute.
 
 ### Provability
 
-- **Transparency**: All reserves are fully on-chain and verifiable via resolver contracts (FluidLiquidityResolver at [`0xD7588F6c99605Ab274C211a0AFeC60947668A8Cb`](https://etherscan.io/address/0xD7588F6c99605Ab274C211a0AFeC60947668A8Cb)).
-- **Exchange Rate**: fToken exchange rates are computed programmatically on-chain (ERC4626 standard). No off-chain oracle or admin input needed. Rate is monotonically increasing.
+- **Transparency**: All reserves are fully onchain and verifiable via resolver contracts (FluidLiquidityResolver at [`0xD7588F6c99605Ab274C211a0AFeC60947668A8Cb`](https://etherscan.io/address/0xD7588F6c99605Ab274C211a0AFeC60947668A8Cb)).
+- **Exchange Rate**: fToken exchange rates are computed programmatically onchain (ERC4626 standard). No offchain oracle or admin input needed. Rate is monotonically increasing.
 - **Interest Rates**: Algorithmically determined based on utilization. USDC rate model: kink at 85% utilization (5.5% rate), second kink at 93% (8.5%), max rate 40%.
 - **Revenue**: Protocol revenue is calculated and verifiable via the RevenueResolver contract.
 
-### Interest Rate Model (USDC example, verified on-chain)
+### Interest Rate Model (USDC example, verified onchain)
 
 | Parameter | Value |
 |-----------|-------|
@@ -258,10 +258,10 @@ fToken holders face liquidity risk from the **shared Liquidity Layer** architect
 
 ### Governance
 
-- **Governance Model**: On-chain GovernorBravo governance. FLUID token holders vote on proposals that execute through a timelock. Discussion on [governance forum](https://gov.instadapp.io/), on-chain voting via [GovernorBravo](https://etherscan.io/address/0x0204Cd037B2ec03605CFdFe482D8e257C765fA1B), and off-chain signaling via [Snapshot](https://snapshot.org/#/instadapp-gov.eth).
+- **Governance Model**: Onchain GovernorBravo governance. FLUID token holders vote on proposals that execute through a timelock. Discussion on [governance forum](https://gov.instadapp.io/), onchain voting via [GovernorBravo](https://etherscan.io/address/0x0204Cd037B2ec03605CFdFe482D8e257C765fA1B), and offchain signaling via [Snapshot](https://snapshot.org/#/instadapp-gov.eth).
 - **Timelock**: [`0x2386DC45AdDed673317eF068992F19421B481F4c`](https://etherscan.io/address/0x2386DC45AdDed673317eF068992F19421B481F4c) — **1-day (86,400s) delay**. Admin of GovernorBravo is the Timelock itself (standard circular pattern). The Timelock guardian is the Avocado multisig (can cancel queued transactions). Min delay: 1 hour, max delay: 30 days.
-- **Owner/Admin**: All core contracts (Liquidity Layer proxy admin, LendingFactory, VaultFactory, DexFactory) are owned by the **Timelock** (`0x2386DC45...`), not directly by the multisig. Verified on-chain via `owner()` calls and EIP-1967 admin slot reads.
-- **GovernorBravo Parameters** (verified on-chain):
+- **Owner/Admin**: All core contracts (Liquidity Layer proxy admin, LendingFactory, VaultFactory, DexFactory) are owned by the **Timelock** (`0x2386DC45...`), not directly by the multisig. Verified onchain via `owner()` calls and EIP-1967 admin slot reads.
+- **GovernorBravo Parameters** (verified onchain):
   - Quorum: 4,000,000 FLUID (4% of total supply)
   - Proposal threshold: 1,000,000 FLUID (1% of total supply)
   - Voting delay: 7,200 blocks (~1 day)
@@ -283,7 +283,7 @@ fToken holders face liquidity risk from the **shared Liquidity Layer** architect
 
 ### Programmability
 
-- **System Operations**: Largely programmatic. Interest rates and exchange rates are all computed on-chain algorithmically.
+- **System Operations**: Largely programmatic. Interest rates and exchange rates are all computed onchain algorithmically.
 - **Oracle System** (dependency via Vault Protocol): Chainlink primary, with UniswapV3 TWAP, Redstone, and custom center-price oracles as fallbacks. Modular per vault.
 - **Rate Model**: Interest rates determined algorithmically via kink-based utilization model. Parameters set by governance.
 - **Keepers/Automation**: No keepers needed for lending. Liquidations (in Vaults) are incentivized and performed by external liquidators.
@@ -337,10 +337,10 @@ fToken holders face liquidity risk from the **shared Liquidity Layer** architect
 - **Lending-specific**: ERC4626-compliant fTokens with monotonically increasing exchange rates, no admin ability to access funds
 - Battle-tested team with ~6 years of DeFi operational history (Instadapp since 2019), zero security incidents
 - 8 security audits from 4 reputable firms (PeckShield, StateMind, MixBytes, Cantina) — **Lending Protocol directly covered** in 2 of them, Liquidity Layer (critical dependency) covered in 4
-- On-chain GovernorBravo governance with 1-day Timelock and 117 proposals executed — all core contracts owned by Timelock
+- Onchain GovernorBravo governance with 1-day Timelock and 117 proposals executed — all core contracts owned by Timelock
 - $1.28B lending TVL across 5 chains, ~2 years in production with zero incidents
 - Active Immunefi bug bounty ($500K max) with Lending Protocol explicitly in scope
-- Fully programmatic interest rates and exchange rates — no off-chain oracle needed for lending
+- Fully programmatic interest rates and exchange rates — no offchain oracle needed for lending
 
 ### Key Risks
 
@@ -352,7 +352,7 @@ fToken holders face liquidity risk from the **shared Liquidity Layer** architect
 
 ### Critical Risks
 
-- None identified that would trigger automatic score of 5. All contracts verified, reserves fully on-chain, governance is via on-chain GovernorBravo + Timelock. No EOA control. Guardian can only pause.
+- None identified that would trigger automatic score of 5. All contracts verified, reserves fully onchain, governance is via onchain GovernorBravo + Timelock. No EOA control. Guardian can only pause.
 
 ---
 
@@ -361,8 +361,8 @@ fToken holders face liquidity risk from the **shared Liquidity Layer** architect
 ### Critical Risk Gates
 
 - [x] **No audit** — PASSED. 8 audits by 4 reputable firms. Lending Protocol directly covered.
-- [x] **Unverifiable reserves** — PASSED. All reserves verifiable on-chain via resolver contracts. fToken exchange rates computed programmatically.
-- [x] **Total centralization** — PASSED. On-chain GovernorBravo governance with 1-day Timelock. No EOA control. Guardian can only pause.
+- [x] **Unverifiable reserves** — PASSED. All reserves verifiable onchain via resolver contracts. fToken exchange rates computed programmatically.
+- [x] **Total centralization** — PASSED. Onchain GovernorBravo governance with 1-day Timelock. No EOA control. Guardian can only pause.
 
 ### Category Scores
 
@@ -378,17 +378,17 @@ fToken holders face liquidity risk from the **shared Liquidity Layer** architect
 #### Category 2: Centralization & Control Risks (Weight: 30%)
 
 **Subcategory A: Governance — 2.0**
-- Full on-chain GovernorBravo governance with 117 proposals executed
+- Full onchain GovernorBravo governance with 117 proposals executed
 - 1-day timelock delay between GovernorBravo and contract execution
 - All core contracts owned by the Timelock, not directly by a multisig
 - Avocado multisig serves only as Timelock guardian (cancel-only role)
 - No admin role can directly access or withdraw fToken user funds
-- Timelock delay (1 day) is on the shorter side but adequate with on-chain governance
+- Timelock delay (1 day) is on the shorter side but adequate with onchain governance
 
 **Subcategory B: Programmability — 1.5**
-- Fully programmatic: interest rates and fToken exchange rates all on-chain
+- Fully programmatic: interest rates and fToken exchange rates all onchain
 - ERC4626 fTokens with algorithmically computed, monotonically increasing exchange rates
-- No off-chain keepers or oracles needed for lending operations
+- No offchain keepers or oracles needed for lending operations
 - Rebalancer role exists but can only deposit (not withdraw) — currently active only for fUSDC/fUSDT
 
 **Subcategory C: Dependencies — 2.0**
@@ -397,7 +397,7 @@ fToken holders face liquidity risk from the **shared Liquidity Layer** architect
 - Multiple fallback oracle paths (UniswapV3, Redstone) reduce oracle risk
 - Permit2 integration is standard and well-audited
 
-**Score: 1.83/5** — (2.0 + 1.5 + 2.0) / 3 = 1.83. Full on-chain governance with timelock. No admin can access lending funds. Highly programmatic exchange rate computation.
+**Score: 1.83/5** — (2.0 + 1.5 + 2.0) / 3 = 1.83. Full onchain governance with timelock. No admin can access lending funds. Highly programmatic exchange rate computation.
 
 #### Category 3: Funds Management (Weight: 30%)
 
@@ -405,15 +405,15 @@ fToken holders face liquidity risk from the **shared Liquidity Layer** architect
 - All lending is over-collateralized via Vault Protocol
 - Blue-chip collateral assets dominate (ETH, wstETH, WBTC, USDC, USDT)
 - Advanced tick-based liquidation mechanism
-- All reserves fully on-chain and verifiable
+- All reserves fully onchain and verifiable
 
 **Subcategory B: Provability — 1.0**
 - fToken exchange rates computed programmatically (ERC4626), monotonically increasing
 - Interest rates algorithmically determined via kink-based model
-- All reserves verifiable on-chain via FluidLiquidityResolver
-- No off-chain reporting dependencies
+- All reserves verifiable onchain via FluidLiquidityResolver
+- No offchain reporting dependencies
 
-**Score: 1.25/5** — (1.5 + 1.0) / 2 = 1.25. Excellent on-chain verifiability with programmatic, monotonically increasing exchange rates.
+**Score: 1.25/5** — (1.5 + 1.0) / 2 = 1.25. Excellent onchain verifiability with programmatic, monotonically increasing exchange rates.
 
 #### Category 4: Liquidity Risk (Weight: 15%)
 
@@ -470,7 +470,7 @@ Final Score = (Centralization × 0.30) + (Funds Mgmt × 0.30) + (Audits × 0.20)
 
 **Final Risk Tier: MINIMAL RISK**
 
-The Fluid Lending Protocol (fTokens) is a well-designed ERC4626-compliant lending product with strong security properties: 8 audits, on-chain GovernorBravo governance with timelock, monotonically increasing exchange rates, and no admin ability to access user funds. The primary risk is the **shared Liquidity Layer** architecture which means fToken holders are indirectly exposed to risks across the entire Fluid protocol stack (Vaults, DEX, oracles). This is substantially mitigated by the breadth of audit coverage, the programmatic nature of the protocol, and the ~2-year track record with zero incidents.
+The Fluid Lending Protocol (fTokens) is a well-designed ERC4626-compliant lending product with strong security properties: 8 audits, onchain GovernorBravo governance with timelock, monotonically increasing exchange rates, and no admin ability to access user funds. The primary risk is the **shared Liquidity Layer** architecture which means fToken holders are indirectly exposed to risks across the entire Fluid protocol stack (Vaults, DEX, oracles). This is substantially mitigated by the breadth of audit coverage, the programmatic nature of the protocol, and the ~2-year track record with zero incidents.
 
 ---
 

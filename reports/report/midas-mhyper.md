@@ -10,7 +10,7 @@
 
 mHYPER is a tokenized certificate (Liquid Yield Token / LYT) issued by Midas Software GmbH, a German-incorporated tokenization platform. It references the performance of **market-neutral, stablecoin-focused strategies** managed by [Hyperithm](https://www.hyperithm.com/), a digital asset management firm based in Tokyo and Seoul.
 
-mHYPER is **not** a stablecoin — its value floats based on strategy performance. Yield is auto-compounded into the token price (NAV), updated on-chain weekly via a custom oracle. The token has appreciated from $1.00 at inception to ~$1.077 as of February 2026.
+mHYPER is **not** a stablecoin — its value floats based on strategy performance. Yield is auto-compounded into the token price (NAV), updated onchain weekly via a custom oracle. The token has appreciated from $1.00 at inception to ~$1.077 as of February 2026.
 
 The yield strategy includes:
 - Leveraged USDe positions on **Aave**
@@ -27,7 +27,7 @@ Legally, mHYPER tokens are structured as **subordinated debt instruments** of Mi
 - **Holders:** ~387 addresses
 - **APY:** ~9.24%
 - **Midas Platform TVL:** ~$275M (per DeFiLlama, combined Midas RWA + Hyperithm entries)
-- **KYC Required:** Yes (greenlist enforced on-chain)
+- **KYC Required:** Yes (greenlist enforced onchain)
 
 **Links:**
 
@@ -129,25 +129,25 @@ mHYPER delegates 100% of funds to Hyperithm, who deploys them across multiple De
 
 - **Fund Manager:** Hyperithm (Tokyo/Seoul, founded 2018, AUM $300M+)
 - **Strategy:** Multi-chain stablecoin yield — leveraged USDe on Aave, farming on Pendle, basis trading on Hyperliquid, Morpho vault liquidity, carry trades, liquidation arbitrage
-- **Strategy Execution:** Off-chain by Hyperithm with discretionary investment decisions
+- **Strategy Execution:** Offchain by Hyperithm with discretionary investment decisions
 - **Custody:** Fordefi MPC custody with tri-party quorum (Midas + Hyperithm + independent signer). Fordefi is the primary custodian for LYT products; Midas also uses Fireblocks for other product lines
-- **Monitoring:** NAV updates provided by Hyperithm, reviewed by Midas, then published on-chain weekly
+- **Monitoring:** NAV updates provided by Hyperithm, reviewed by Midas, then published onchain weekly
 
 ### Accessibility
 
-- **KYC Required:** Yes — users must complete KYC/AML screening (1-4 business days). Once approved, added to on-chain greenlist via `Greenlistable` contract. Chainalysis Oracle integration for sanctions screening
+- **KYC Required:** Yes — users must complete KYC/AML screening (1-4 business days). Once approved, added to onchain greenlist via `Greenlistable` contract. Chainalysis Oracle integration for sanctions screening
 - **Minting:** Deposit USDC, receive mHYPER tokens. Default mode is instant issuance
 - **Redemption:** Two modes:
-  - **Instant:** Atomic on-chain at oracle price (when liquidity is available in the RedemptionVaultWithSwapper). **0.50% instant redemption fee.** Liquidity target: 1-2% of circulating supply, replenished within 2 business days. May be temporarily unavailable
+  - **Instant:** Atomic onchain at oracle price (when liquidity is available in the RedemptionVaultWithSwapper). **0.50% instant redemption fee.** Liquidity target: 1-2% of circulating supply, replenished within 2 business days. May be temporarily unavailable
   - **Standard:** 1-7 business day queue (fallback when instant capacity is insufficient). Subject to Risk Manager setting aside funds
 - **Fees:** 0% management fee, 10% performance fee (from yield), 0% standard mint/redeem fees, 0.50% instant redemption fee
 - **Geographic Restrictions:** Not available to US persons, UK, China, and sanctioned countries. IP screening with VPN detection
 
 ### Collateralization
 
-- **Backing Model:** Off-chain / hybrid — mHYPER is a **subordinated debt instrument** of Midas Software GmbH, not a direct claim on underlying assets
+- **Backing Model:** Offchain / hybrid — mHYPER is a **subordinated debt instrument** of Midas Software GmbH, not a direct claim on underlying assets
 - **Collateral Quality:** Strategies target stablecoin-focused, market-neutral positions across Aave (blue-chip), Pendle (established), Hyperliquid (newer, centralized perps DEX), Morpho (established). Includes leveraged positions and basis trading
-- **Verifiability:** Limited — the underlying strategy positions are managed off-chain. Hyperithm discloses some wallet addresses on a transparency page, but full portfolio composition requires off-chain reporting
+- **Verifiability:** Limited — the underlying strategy positions are managed offchain. Hyperithm discloses some wallet addresses on a transparency page, but full portfolio composition requires offchain reporting
 - **Risk Curation:** Hyperithm has discretion over allocation within the broad strategy framework. Midas enforces policy limits via Fordefi policy engine (address, asset, contract method, notional size)
 - **Tri-Party Governance (via Fordefi):** Midas Treasury + Hyperithm (Asset Manager) + Independent Oversight Signer. Operations within predefined rules clear automatically; anything outside routes to three-party quorum. No single group can act unilaterally for custody operations
 - **Legal Structure:** LYT holders are **subordinate creditors** of Midas Software GmbH (EUR 25,000 share capital). This is weaker than bankruptcy-remote SPV structures
@@ -155,10 +155,10 @@ mHYPER delegates 100% of funds to Hyperithm, who deploys them across multiple De
 
 ### Provability
 
-- **Reserve Transparency:** Hybrid. Strategy wallets are partially on-chain, but full portfolio composition requires off-chain reporting. The [Midas Attestation Engine](https://docs.midas.app/how-does-it-work/midas-attestation-engine) (introduced March 2026) adds a multi-party verification layer: financial data (NAV, proof of reserves, legal disclosures) is formalized as claims, grouped into attestations with validation logic, and published on-chain via **Chainlink Runtime Environment (CRE)** with storage on **IPFS**
-- **NAV/Price Updates:** Token price updated **weekly** by Midas via a privileged role on the `CustomAggregatorFeed` oracle. Current price: ~$1.077 (round 63, 8 decimals). The exchange rate is determined off-chain; users cannot know the exact amount of tokens they will receive beforehand (flagged by auditors). NAV data is now independently verified before publication through the Attestation Engine pipeline
-- **Verification Agent:** Midas's documentation references [Ankura Trust Company](https://docs.midas.app/defi-integration/price-oracle) as a verification agent for off-chain assets (confirmed for mTBILL/mBTC). The Attestation Engine introduces **LlamaRisk** and **Canary Protocol** as independent third-party verifiers that confirm data origins, processes, and handling meet defined criteria. **vlayer Labs** provides cryptographic notarization of source documents
-- **Third-Party Verification:** For Morpho integration, eOracle independently verifies and publishes pricing. Steakhouse applies market discounts for liquidation optimization. The Attestation Engine publishes verified data on-chain via **Chainlink Runtime Environment** (DON with BFT consensus), replacing the previous self-generated attestation reports. The oracle wraps the Chainlink AggregatorV3 interface but the underlying price feed is **not** a Chainlink data feed
+- **Reserve Transparency:** Hybrid. Strategy wallets are partially onchain, but full portfolio composition requires offchain reporting. The [Midas Attestation Engine](https://docs.midas.app/how-does-it-work/midas-attestation-engine) (introduced March 2026) adds a multi-party verification layer: financial data (NAV, proof of reserves, legal disclosures) is formalized as claims, grouped into attestations with validation logic, and published onchain via **Chainlink Runtime Environment (CRE)** with storage on **IPFS**
+- **NAV/Price Updates:** Token price updated **weekly** by Midas via a privileged role on the `CustomAggregatorFeed` oracle. Current price: ~$1.077 (round 63, 8 decimals). The exchange rate is determined offchain; users cannot know the exact amount of tokens they will receive beforehand (flagged by auditors). NAV data is now independently verified before publication through the Attestation Engine pipeline
+- **Verification Agent:** Midas's documentation references [Ankura Trust Company](https://docs.midas.app/defi-integration/price-oracle) as a verification agent for offchain assets (confirmed for mTBILL/mBTC). The Attestation Engine introduces **LlamaRisk** and **Canary Protocol** as independent third-party verifiers that confirm data origins, processes, and handling meet defined criteria. **vlayer Labs** provides cryptographic notarization of source documents
+- **Third-Party Verification:** For Morpho integration, eOracle independently verifies and publishes pricing. Steakhouse applies market discounts for liquidation optimization. The Attestation Engine publishes verified data onchain via **Chainlink Runtime Environment** (DON with BFT consensus), replacing the previous self-generated attestation reports. The oracle wraps the Chainlink AggregatorV3 interface but the underlying price feed is **not** a Chainlink data feed
 
 ## Liquidity Risk
 
@@ -182,7 +182,7 @@ mHYPER delegates 100% of funds to Hyperithm, who deploys them across multiple De
   - `0xC50BD843...` — Dormant EOA (0 ETH, no transactions)
 - **Access Control:** Role-based via `MidasAccessControl` ([0x0312A9D1...](https://etherscan.io/address/0x0312A9D1Ff2372DDEdCBB21e4B6389aFc919aC4B))
 - **DEFAULT_ADMIN_ROLE holder:** The same 1/3 Gnosis Safe ([0xB60842E9...](https://etherscan.io/address/0xB60842E9DaBCd1C52e354ac30E82a97661cB7E89)) holds `DEFAULT_ADMIN_ROLE` directly — **role changes (mint/burn/pause/blacklist grants) bypass the timelock** and can be executed immediately
-- **Governance Model:** No on-chain governance. Midas controls all admin functions
+- **Governance Model:** No onchain governance. Midas controls all admin functions
 - **Privileged Roles:**
   1. **`M_HYPER_MINT_OPERATOR_ROLE`** — Can mint unlimited mHYPER tokens
   2. **`M_HYPER_BURN_OPERATOR_ROLE`** — Can burn mHYPER tokens from any address
@@ -196,9 +196,9 @@ mHYPER delegates 100% of funds to Hyperithm, who deploys them across multiple De
 
 ### Programmability
 
-- **System Operations:** Primarily off-chain. Strategy execution, NAV calculation, and redemption processing are handled by Midas/Hyperithm off-chain
-- **Oracle/NAV Updates:** The `CustomAggregatorFeed` is updated weekly by a privileged role. The Attestation Engine adds a programmatic verification layer via Chainlink CRE before publication, but the on-chain price update itself is still admin-triggered
-- **PPS Definition:** The oracle price IS the PPS. It is updated by an admin role, not computed on-chain from reserves. NAV data is now independently verified through the Attestation Engine pipeline before oracle updates
+- **System Operations:** Primarily offchain. Strategy execution, NAV calculation, and redemption processing are handled by Midas/Hyperithm offchain
+- **Oracle/NAV Updates:** The `CustomAggregatorFeed` is updated weekly by a privileged role. The Attestation Engine adds a programmatic verification layer via Chainlink CRE before publication, but the onchain price update itself is still admin-triggered
+- **PPS Definition:** The oracle price IS the PPS. It is updated by an admin role, not computed onchain from reserves. NAV data is now independently verified through the Attestation Engine pipeline before oracle updates
 - **Off-Chain Dependencies:** Critical
   - Hyperithm's strategy execution and NAV reporting
   - Midas's redemption processing
@@ -207,7 +207,7 @@ mHYPER delegates 100% of funds to Hyperithm, who deploys them across multiple De
 
 ### External Dependencies
 
-- **Hyperithm (Critical):** Strategy management, NAV calculation, risk monitoring. Single external dependency for core value proposition. If Hyperithm fails or misreports, token holders have no on-chain recourse
+- **Hyperithm (Critical):** Strategy management, NAV calculation, risk monitoring. Single external dependency for core value proposition. If Hyperithm fails or misreports, token holders have no onchain recourse
 - **Fordefi (Critical):** MPC custody of underlying assets with tri-party governance. All fund movements depend on it
 - **Strategy Counterparties (Critical):**
   - **Aave** — Leveraged USDe positions (blue-chip, high trust)
@@ -216,7 +216,7 @@ mHYPER delegates 100% of funds to Hyperithm, who deploys them across multiple De
   - **Morpho** — Vault liquidity provision (established)
 - **Stablecoin Dependencies:** USDC, USDe (Ethena) — depegging events could impact strategy performance
 - **Oracle:** NAV reported via custom contract, now with independent verification through the Midas Attestation Engine (Chainlink CRE, LlamaRisk, Canary Protocol, vlayer)
-- **Criticality:** Failure of Fordefi would prevent fund movements. Failure of underlying DeFi protocols could cause direct losses. Strategy diversification across multiple protocols provides some mitigation. The tri-party governance via Fordefi provides some protection, but ultimately Midas Software GmbH controls the on-chain system
+- **Criticality:** Failure of Fordefi would prevent fund movements. Failure of underlying DeFi protocols could cause direct losses. Strategy diversification across multiple protocols provides some mitigation. The tri-party governance via Fordefi provides some protection, but ultimately Midas Software GmbH controls the onchain system
 
 ## Operational Risk
 
@@ -270,21 +270,21 @@ mHYPER delegates 100% of funds to Hyperithm, who deploys them across multiple De
 
 - **Doxxed team with institutional backing** — Goldman Sachs / Morgan Stanley alumni, backed by Coinbase Ventures, Framework Ventures, BlockTower
 - **Institutional-grade custody** — Fordefi MPC with tri-party governance prevents unilateral fund access
-- **Regulatory compliance** — FMA-approved prospectus, German GmbH legal structure, KYC enforcement on-chain
+- **Regulatory compliance** — FMA-approved prospectus, German GmbH legal structure, KYC enforcement onchain
 - **Proven redemption capacity** — Processed $150M+ in redemptions within 48 hours under stress (Stream Finance incident)
 - **Multiple audits** — Hacken + two Sherlock contests on shared vault infrastructure. Clean track record (~7 months mHYPER, ~20 months Midas platform)
 
 ### Key Risks
 
-- **Off-chain NAV / hybrid verification** — Underlying strategy positions are managed off-chain. The Attestation Engine (March 2026) adds multi-party verification (LlamaRisk, Canary, vlayer, Chainlink CRE) but the oracle price update is still admin-triggered weekly
+- **Offchain NAV / hybrid verification** — Underlying strategy positions are managed offchain. The Attestation Engine (March 2026) adds multi-party verification (LlamaRisk, Canary, vlayer, Chainlink CRE) but the oracle price update is still admin-triggered weekly
 - **Subordinated debt structure** — Investors have no claim on underlying assets. In insolvency, token holders are subordinated creditors of a GmbH with EUR 25,000 share capital
 - **Weak multisig and partial timelock** — Contract upgrades have a 48-hour timelock, but role changes (mint/burn/pause/blacklist grants) bypass it entirely. The controlling 1/3 Gnosis Safe means any single signer can grant themselves powerful roles immediately
-- **Thin on-chain liquidity** — ~$32K on Uniswap, ~$7.6K daily volume. Exit is entirely dependent on Midas's redemption infrastructure (1-7 days)
+- **Thin onchain liquidity** — ~$32K on Uniswap, ~$7.6K daily volume. Exit is entirely dependent on Midas's redemption infrastructure (1-7 days)
 - **Concentration risk** — ~387 holders with $43M market cap; single entity (Stream Finance) previously held a $75M leveraged position
 
 ### Critical Risks
 
-- **NAV reporting trust assumptions** — Hyperithm reports NAV, which is now verified through the Attestation Engine (LlamaRisk + Canary verify, vlayer notarizes, Chainlink CRE publishes on-chain). This is a significant improvement over the previous single-party reporting, but the underlying strategy positions remain off-chain and full portfolio composition still requires off-chain trust. A coordinated misreport across multiple verifiers remains a tail risk
+- **NAV reporting trust assumptions** — Hyperithm reports NAV, which is now verified through the Attestation Engine (LlamaRisk + Canary verify, vlayer notarizes, Chainlink CRE publishes onchain). This is a significant improvement over the previous single-party reporting, but the underlying strategy positions remain offchain and full portfolio composition still requires offchain trust. A coordinated misreport across multiple verifiers remains a tail risk
 - **Role changes bypass timelock** — While contract upgrades have a 48-hour timelock, the 1/3 Gnosis Safe can grant mint/burn/pause/blacklist roles immediately. A single compromised signer could grant themselves these roles and seize or freeze all user funds without any delay
 - **Hyperithm risk factors** — Alleged regulatory filing failure in South Korea; co-CEO's large speculative meme coin position contrasts with claimed market-neutral positioning
 
@@ -295,12 +295,12 @@ mHYPER delegates 100% of funds to Hyperithm, who deploys them across multiple De
 **Scoring Guidelines:**
 - Be conservative: when uncertain between two scores, choose the higher (riskier) one
 - Use decimals (e.g., 2.5) when a subcategory falls between scores
-- Prioritize on-chain evidence over documentation claims
+- Prioritize onchain evidence over documentation claims
 
 ### Critical Risk Gates
 
 - [ ] **No audit** → **PASS** — Three audits (Hacken + two Sherlock contests) cover the shared vault infrastructure
-- [ ] **Unverifiable reserves** → **PASS** — Reserves are managed off-chain by Hyperithm. NAV is admin-reported but now independently verified through the Midas Attestation Engine: LlamaRisk and Canary Protocol verify data origins and processes, vlayer provides cryptographic notarization, and attestations are published on-chain via Chainlink CRE with IPFS storage. Combined with the FMA-approved prospectus and tri-party custody model. Full portfolio composition still requires off-chain trust, but the multi-party verification pipeline provides meaningful independent oversight
+- [ ] **Unverifiable reserves** → **PASS** — Reserves are managed offchain by Hyperithm. NAV is admin-reported but now independently verified through the Midas Attestation Engine: LlamaRisk and Canary Protocol verify data origins and processes, vlayer provides cryptographic notarization, and attestations are published onchain via Chainlink CRE with IPFS storage. Combined with the FMA-approved prospectus and tri-party custody model. Full portfolio composition still requires offchain trust, but the multi-party verification pipeline provides meaningful independent oversight
 - [ ] **Total centralization** → **PASS** — Role-based access control, tri-party governance via Fordefi, 48-hour timelock on contract upgrades. Not a single EOA. However, 1/3 multisig threshold and role changes bypass the timelock
 
 **Result:** Protocol passes critical gates. Proceeding to category scoring.
@@ -334,14 +334,14 @@ mHYPER delegates 100% of funds to Hyperithm, who deploys them across multiple De
 - Controlling multisig is a **1/3 Gnosis Safe** — any single signer can act. One signer is a nested 3/7 Safe, one is a dormant EOA
 - Admin controls all critical roles (flagged by auditors as "highly centralized")
 - Tri-party custody model (Fordefi) is a positive but applies only to fund movements, not contract administration
-- No on-chain governance mechanism
+- No onchain governance mechanism
 
 **Subcategory B: Programmability — 3.5**
-- Strategy execution fully off-chain (Hyperithm)
-- NAV/oracle admin-updated weekly, but now with programmatic verification via the Attestation Engine (Chainlink CRE with BFT consensus). The on-chain price update is still admin-triggered
-- PPS is admin-reported (not computed on-chain from reserves), but NAV data is independently verified before publication
-- Redemption partially off-chain (standard redemptions processed by Midas team)
-- Users cannot independently compute the exchange rate on-chain, but can verify attestation records on-chain and IPFS
+- Strategy execution fully offchain (Hyperithm)
+- NAV/oracle admin-updated weekly, but now with programmatic verification via the Attestation Engine (Chainlink CRE with BFT consensus). The onchain price update is still admin-triggered
+- PPS is admin-reported (not computed onchain from reserves), but NAV data is independently verified before publication
+- Redemption partially offchain (standard redemptions processed by Midas team)
+- Users cannot independently compute the exchange rate onchain, but can verify attestation records onchain and IPFS
 
 **Subcategory C: External Dependencies — 3.5**
 - Hyperithm: single critical dependency for strategy management and NAV calculation
@@ -353,29 +353,29 @@ mHYPER delegates 100% of funds to Hyperithm, who deploys them across multiple De
 
 **Centralization Score = (3.5 + 3.5 + 3.5) / 3 = 3.5**
 
-**Score: 3.5/5** — High centralization driven by off-chain operations, weak 1/3 multisig, and dependency on Hyperithm. The Attestation Engine adds a programmatic verification layer (Chainlink CRE) that reduces reliance on pure admin reporting. The 48-hour timelock on upgrades is a meaningful positive, but role changes bypass it. Tri-party custody partially mitigates but is itself an off-chain trust assumption.
+**Score: 3.5/5** — High centralization driven by offchain operations, weak 1/3 multisig, and dependency on Hyperithm. The Attestation Engine adds a programmatic verification layer (Chainlink CRE) that reduces reliance on pure admin reporting. The 48-hour timelock on upgrades is a meaningful positive, but role changes bypass it. Tri-party custody partially mitigates but is itself an offchain trust assumption.
 
 #### 3. Funds Management (Weight: 30%)
 
 **Subcategory A: Collateralization — 3.5**
 - Tokens are subordinated debt instruments — not direct claims on collateral
-- Strategies are stablecoin-focused but managed off-chain with discretionary authority by Hyperithm
+- Strategies are stablecoin-focused but managed offchain with discretionary authority by Hyperithm
 - Includes leveraged positions across multiple protocols
-- No on-chain collateral verification; no over-collateralization requirement
+- No onchain collateral verification; no over-collateralization requirement
 - Tri-party custody via Fordefi prevents unilateral fund access
 - Previous recursive lending concerns (~30% of TVL) addressed but indicates structural vulnerability
 - EUR 25,000 share capital provides minimal corporate protection
 
 **Subcategory B: Provability — 3.0**
-- NAV reported by Hyperithm, now independently verified through the Midas Attestation Engine before on-chain publication
-- Multi-party verification pipeline: LlamaRisk + Canary Protocol verify data origins and processes, vlayer provides cryptographic notarization, Chainlink CRE publishes on-chain with BFT consensus, records stored on IPFS
-- Reserve transparency is hybrid: some strategy wallets on-chain, full portfolio off-chain. The attestation engine provides tamper-evident records but does not make underlying positions fully transparent
+- NAV reported by Hyperithm, now independently verified through the Midas Attestation Engine before onchain publication
+- Multi-party verification pipeline: LlamaRisk + Canary Protocol verify data origins and processes, vlayer provides cryptographic notarization, Chainlink CRE publishes onchain with BFT consensus, records stored on IPFS
+- Reserve transparency is hybrid: some strategy wallets onchain, full portfolio offchain. The attestation engine provides tamper-evident records but does not make underlying positions fully transparent
 - For Morpho integration, eOracle provides independent price verification
-- Token holders can now verify attestation records on-chain and IPFS, but cannot independently recompute the NAV from raw positions
+- Token holders can now verify attestation records onchain and IPFS, but cannot independently recompute the NAV from raw positions
 
 **Funds Management Score = (3.5 + 3.0) / 2 = 3.25**
 
-**Score: 3.25/5** — Off-chain funds management with subordinated debt structure. The Attestation Engine (March 2026) significantly improves provability by introducing multi-party verification (LlamaRisk, Canary, vlayer) and on-chain attestation publishing via Chainlink CRE, replacing the previous self-generated attestation reports. Full portfolio composition still requires off-chain trust. Leveraged strategy positions add risk.
+**Score: 3.25/5** — Offchain funds management with subordinated debt structure. The Attestation Engine (March 2026) significantly improves provability by introducing multi-party verification (LlamaRisk, Canary, vlayer) and onchain attestation publishing via Chainlink CRE, replacing the previous self-generated attestation reports. Full portfolio composition still requires offchain trust. Leveraged strategy positions add risk.
 
 #### 4. Liquidity Risk (Weight: 15%)
 
@@ -435,10 +435,10 @@ Final Score = (Centralization × 0.30) + (Funds Mgmt × 0.30) + (Audits × 0.20)
 2. **Enhanced Monitoring** — Real-time alerts on oracle updates, role changes, contract upgrades, and vault activity (see Monitoring section)
 3. **Verify Multisig Configuration** — Confirm the ProxyAdmin owner and role holder multisig setup before deployment
 4. **Monthly NAV Cross-Check** — Independently estimate NAV from known strategy positions where possible
-5. **Quarterly Reassessment** — Given the off-chain nature and evolving regulatory landscape
+5. **Quarterly Reassessment** — Given the offchain nature and evolving regulatory landscape
 
 **Key Concerns Driving the Score:**
-- Off-chain strategy execution with NAV determined off-chain (verification pipeline improves trust but does not eliminate off-chain dependency)
+- Offchain strategy execution with NAV determined offchain (verification pipeline improves trust but does not eliminate offchain dependency)
 - Role changes (mint/burn/pause/blacklist grants) bypass the 48-hour timelock; 1/3 multisig threshold
 - Subordinated debt structure (no direct claim on assets)
 - Thin secondary market liquidity
@@ -451,7 +451,7 @@ Final Score = (Centralization × 0.30) + (Funds Mgmt × 0.30) + (Audits × 0.20)
 - Institutional-grade custody (Fordefi tri-party MPC)
 - FMA-approved prospectus and German legal entity
 - Multiple audits on shared infrastructure
-- Attestation Engine (March 2026) with multi-party verification: LlamaRisk, Canary Protocol, vlayer cryptographic notarization, Chainlink CRE on-chain publishing
+- Attestation Engine (March 2026) with multi-party verification: LlamaRisk, Canary Protocol, vlayer cryptographic notarization, Chainlink CRE onchain publishing
 
 ---
 

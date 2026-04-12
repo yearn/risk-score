@@ -12,14 +12,14 @@ USTB is a tokenized investment fund issued by Superstate Inc. that provides expo
 
 USTB uses a **price appreciation model** (non-rebasing) — each USTB token represents one share in the fund, and the NAV per share increases daily as interest income from Treasury Bills accrues. The token price has grown from ~$10.00 at inception (February 2024) to ~$11.05 as of April 2026.
 
-Investors undergo KYC/AML onboarding, get their wallet addresses whitelisted on the AllowList smart contract, and can then subscribe (mint) or redeem (burn) USTB tokens via USDC or USD. On-chain atomic subscription and redemption is available through the Protocol Mint and Redeem system, with a USDC instant redemption facility (currently ~$1.7M, capacity varies as it is refilled regularly).
+Investors undergo KYC/AML onboarding, get their wallet addresses whitelisted on the AllowList smart contract, and can then subscribe (mint) or redeem (burn) USTB tokens via USDC or USD. Onchain atomic subscription and redemption is available through the Protocol Mint and Redeem system, with a USDC instant redemption facility (currently ~$1.7M, capacity varies as it is refilled regularly).
 
 The fund is structured as a series of **Superstate Asset Trust**, a **Delaware Statutory Trust**, providing bankruptcy remoteness from Superstate Inc. The sub-advisor is **Federated Hermes**, the custodian is **UMB Bank** (OCC-regulated), and the auditor is **Ernst & Young**.
 
-- **Current NAV/Share:** ~$11.045 (SuperstateOracle: $11.045231, Chainlink: $11.044354 — verified on-chain April 2026)
-- **On-chain Supply (Ethereum):** ~56.59M USTB (~$625M on-chain)
+- **Current NAV/Share:** ~$11.045 (SuperstateOracle: $11.045231, Chainlink: $11.044354 — verified onchain April 2026)
+- **Onchain Supply (Ethereum):** ~56.59M USTB (~$625M onchain)
 - **Total AUM:** ~$650M+ (including Solana and book-entry shares)
-- **On-chain Holders (Ethereum):** ~70
+- **Onchain Holders (Ethereum):** ~70
 - **Current APY:** ~2.58% (30-day), tracking the federal funds rate
 - **Management Fee:** 0.15% annually (waived until AUM exceeds $200M — now exceeded)
 
@@ -40,7 +40,7 @@ The fund is structured as a series of **Superstate Asset Trust**, a **Delaware S
 
 ## Contract Addresses
 
-*All addresses verified on-chain April 2026.*
+*All addresses verified onchain April 2026.*
 
 | Contract | Address |
 |----------|---------|
@@ -91,7 +91,7 @@ Superstate has undergone **11 security audits** from 3 firms (0xMacro, ChainSecu
 
 **Total findings across all audits: 2 Critical (Solana), 4 High, 7 Medium — all fixed or acknowledged with rationale.**
 
-**Smart Contract Complexity:** Moderate — Upgradeable EIP-1967 proxy, ERC-20 with ERC-7246 (deprecated in V4), AllowList-gated transfers, on-chain subscription via Chainlink oracle, multi-chain bridging. Clean OpenZeppelin patterns with proper storage gaps.
+**Smart Contract Complexity:** Moderate — Upgradeable EIP-1967 proxy, ERC-20 with ERC-7246 (deprecated in V4), AllowList-gated transfers, onchain subscription via Chainlink oracle, multi-chain bridging. Clean OpenZeppelin patterns with proper storage gaps.
 
 ### Bug Bounty
 
@@ -115,9 +115,9 @@ Superstate is **not** listed on the SEAL Safe Harbor registry. This is typical f
   - Feb 2024: Launch
   - Oct 2024: ~$114M (per LlamaRisk report)
   - Mar 2025: ~$300M allocated by Spark alone
-  - Mar 2026: ~$650M+ total AUM, ~$572M on-chain TVL (DeFiLlama)
-  - Apr 2026: ~$625M on-chain (56.59M USTB × $11.045 NAV, verified on-chain)
-- **Holder Distribution:** ~70 on-chain holders on Ethereum. Top 10 holders hold ~83.5% of supply. This concentration is expected for an institutional-grade permissioned fund. Top holders include EOAs (institutional investors) and smart contracts (DeFi integrations).
+  - Mar 2026: ~$650M+ total AUM, ~$572M onchain TVL (DeFiLlama)
+  - Apr 2026: ~$625M onchain (56.59M USTB × $11.045 NAV, verified onchain)
+- **Holder Distribution:** ~70 onchain holders on Ethereum. Top 10 holders hold ~83.5% of supply. This concentration is expected for an institutional-grade permissioned fund. Top holders include EOAs (institutional investors) and smart contracts (DeFi integrations).
 - **Incidents:** None. No hacks, exploits, or adverse events involving Superstate or USTB.
 
 ## Funds Management
@@ -133,19 +133,19 @@ The fund uses a **laddered approach** with holdings spread across various near-t
 
 - **KYC Required:** Yes — investors must be **Qualified Purchasers** ($5M+ in investments for individuals, $25M for institutions) AND **Accredited Investors**. Full KYC/AML screening required.
 - **Subscriptions (Minting):**
-  - **On-chain atomic:** `subscribe()` function atomically transfers USDC and mints USTB at the Continuous NAV/S price. Available 24/7.
-  - **Off-chain:** USD wire transfer, processed on Market Days (NYSE/Federal Reserve open days).
+  - **Onchain atomic:** `subscribe()` function atomically transfers USDC and mints USTB at the Continuous NAV/S price. Available 24/7.
+  - **Offchain:** USD wire transfer, processed on Market Days (NYSE/Federal Reserve open days).
   - Max subscription fee: 0.1% (10 bps), configurable per stablecoin.
 - **Redemptions (Burning):**
-  - **On-chain atomic:** Via RedemptionIdle contract, burns USTB and sends USDC at Continuous NAV/S price. USDC instant redemption facility with variable capacity (currently ~$1.7M as of April 2026, verified on-chain via `balanceOf()`). Superstate announced "$10M USDC instant redemption facility, refilled twice daily" on the [Aave governance forum (Jan 2025)](https://governance.aave.com/t/arfc-ustb-buidl-gsm/19299/3), but [docs](https://docs.superstate.com/welcome-to-superstate/smart-contracts) only state: "USDC liquidity will be replenished in this contract regularly" — the actual on-chain balance varies significantly.
-  - **Off-chain:** Transfer tokens to contract address or call `offchainRedeem()`. Proceeds in USDC or USD wire. T+0 if before 9:00 AM EST on Market Days, otherwise T+1.
+  - **Onchain atomic:** Via RedemptionIdle contract, burns USTB and sends USDC at Continuous NAV/S price. USDC instant redemption facility with variable capacity (currently ~$1.7M as of April 2026, verified onchain via `balanceOf()`). Superstate announced "$10M USDC instant redemption facility, refilled twice daily" on the [Aave governance forum (Jan 2025)](https://governance.aave.com/t/arfc-ustb-buidl-gsm/19299/3), but [docs](https://docs.superstate.com/welcome-to-superstate/smart-contracts) only state: "USDC liquidity will be replenished in this contract regularly" — the actual onchain balance varies significantly.
+  - **Offchain:** Transfer tokens to contract address or call `offchainRedeem()`. Proceeds in USDC or USD wire. T+0 if before 9:00 AM EST on Market Days, otherwise T+1.
   - No redemption fees for standard redemptions.
 - **Geographic Restrictions:** Available to qualified purchasers in the U.S. and select offshore jurisdictions (Cayman Islands, BVI, Bermuda). Not available to sanctioned countries.
 - **Management Fee:** 0.15% annually (waived until AUM exceeds $200M — now exceeded).
 
 ### Collateralization
 
-- **Backing Model:** Off-chain — USTB tokens represent shares in a fund that holds U.S. Treasury Bills and Agency securities at **UMB Bank** (OCC-regulated qualified custodian).
+- **Backing Model:** Offchain — USTB tokens represent shares in a fund that holds U.S. Treasury Bills and Agency securities at **UMB Bank** (OCC-regulated qualified custodian).
 - **Collateral Quality:** U.S. Treasury Bills are considered the **lowest-risk financial instrument** globally — backed by the full faith and credit of the U.S. government.
 - **Sub-Advisor:** **Federated Hermes** — a major institutional asset manager managing $800B+ AUM — handles daily portfolio management.
 - **Bankruptcy Remoteness:** The fund is a separate legal entity (series within a Delaware Statutory Trust) with inter-series liability protection, bankruptcy-remote from Superstate Inc.
@@ -153,20 +153,20 @@ The fund uses a **laddered approach** with holdings spread across various near-t
 
 ### Provability
 
-- **NAV/Price Updates:** The Superstate Continuous Price Oracle ([`0xe4fa682f94610ccd170680cc3b045d77d9e528a8`](https://etherscan.io/address/0xe4fa682f94610ccd170680cc3b045d77d9e528a8)) extrapolates real-time prices using linear interpolation between NAV/S checkpoints. Updates every second, 24/7/365. Compatible with Chainlink AggregatorV3Interface. **Checkpoint expiration: 5 days** — if the Oracle Owner does not post a new checkpoint within 5 days, `latestRoundData()` reverts with `StaleCheckpoint()`, which causes both `subscribe()` and `redeem()` to revert, freezing all on-chain USTB operations. The 5-day window covers weekends and U.S. holidays. **Note:** Since prices are linearly interpolated between checkpoints, the on-chain price is an estimate that may diverge from the actual NAV between checkpoint updates — the price catches up only when the next checkpoint is posted by Superstate.
+- **NAV/Price Updates:** The Superstate Continuous Price Oracle ([`0xe4fa682f94610ccd170680cc3b045d77d9e528a8`](https://etherscan.io/address/0xe4fa682f94610ccd170680cc3b045d77d9e528a8)) extrapolates real-time prices using linear interpolation between NAV/S checkpoints. Updates every second, 24/7/365. Compatible with Chainlink AggregatorV3Interface. **Checkpoint expiration: 5 days** — if the Oracle Owner does not post a new checkpoint within 5 days, `latestRoundData()` reverts with `StaleCheckpoint()`, which causes both `subscribe()` and `redeem()` to revert, freezing all onchain USTB operations. The 5-day window covers weekends and U.S. holidays. **Note:** Since prices are linearly interpolated between checkpoints, the onchain price is an estimate that may diverge from the actual NAV between checkpoint updates — the price catches up only when the next checkpoint is posted by Superstate.
 - **Chainlink NAV Feed:** Chainlink provides an independent NAV/Share data feed ([`0x289B5036cd942e619E1Ee48670F98d214E745AAC`](https://etherscan.io/address/0x289B5036cd942e619E1Ee48670F98d214E745AAC)).
-- **On-chain Supply:** Total USTB supply is verifiable on-chain via `totalSupply()`.
-- **Off-chain Assets:** The underlying Treasury portfolio is held off-chain at UMB Bank. Token holders cannot independently verify the specific Treasury holdings on-chain. However:
+- **Onchain Supply:** Total USTB supply is verifiable onchain via `totalSupply()`.
+- **Offchain Assets:** The underlying Treasury portfolio is held offchain at UMB Bank. Token holders cannot independently verify the specific Treasury holdings onchain. However:
   - Independent NAV calculation by NAV Consulting/NAV Fund Services
   - Annual audit by Ernst & Young
   - Chainlink Proof of Reserves was in development (per LlamaRisk, Oct 2024)
-  - Redundant record-keeping across fund calculation agent, internal records, and on-chain records
+  - Redundant record-keeping across fund calculation agent, internal records, and onchain records
 - **Reserve Transparency:** USTB publishes headline NAV, AUM, and yield data publicly on [superstate.com/assets/ustb](https://superstate.com/assets/ustb). However, granular portfolio holdings (specific T-Bill CUSIPs, maturities, allocations) are only accessible through the authenticated investor portal (requires Qualified Purchaser onboarding and 2FA). The fund is structured under SEC exemptions with regulatory reporting requirements.
 
 ## Liquidity Risk
 
-- **Primary Exit:** On-chain atomic redemption via RedemptionIdle contract at Continuous NAV/S price. USDC instant redemption capacity varies (~$1.7M as of April 2026, regularly refilled).
-- **Secondary Exit:** Off-chain redemption via wire transfer or USDC. T+0 if before 9:00 AM EST on Market Days, otherwise T+1. No withdrawals during weekends/U.S. holidays.
+- **Primary Exit:** Onchain atomic redemption via RedemptionIdle contract at Continuous NAV/S price. USDC instant redemption capacity varies (~$1.7M as of April 2026, regularly refilled).
+- **Secondary Exit:** Offchain redemption via wire transfer or USDC. T+0 if before 9:00 AM EST on Market Days, otherwise T+1. No withdrawals during weekends/U.S. holidays.
 - **DEX Liquidity:** None. USTB has $0 24h trading volume on DEXs. Not listed on any exchanges. This is by design — the token is a regulated fund product, not a freely tradeable token.
 - **Transfer Restrictions:** All transfers require both sender and receiver to be on the AllowList. Removing an address from the AllowList effectively freezes their tokens.
 - **DeFi Integrations (Liquidity Venues):**
@@ -184,23 +184,23 @@ The fund uses a **laddered approach** with holdings spread across various near-t
 
 1. `transfer()` reverts — AllowList checks sender AND receiver
 2. `transferFrom()` reverts — same AllowList check
-3. On-chain redemption via RedemptionIdle reverts — requires AllowList status
+3. Onchain redemption via RedemptionIdle reverts — requires AllowList status
 4. `offchainRedeem()` reverts — requires AllowList status
 5. DEX swap impossible — $0 liquidity AND DEX contracts would also need AllowList permission
 
-**There is no fallback exit mechanism.** The only recovery path is to contact Superstate to be re-whitelisted, or have Superstate perform an `adminBurn()` and process a manual off-chain redemption.
+**There is no fallback exit mechanism.** The only recovery path is to contact Superstate to be re-whitelisted, or have Superstate perform an `adminBurn()` and process a manual offchain redemption.
 
 **Implications for Yearn:** Yearn's vault/strategy contract must be whitelisted by Superstate via protocol address permissions. If Superstate removes this permission (regulatory action, policy change, sanctions, dispute, or operational error), Yearn's entire USTB position becomes frozen and unredeemable. This is a fundamentally different risk profile from permissionless DeFi tokens where DEX liquidity provides a fallback exit.
 
-**On-chain verification (April 2026):** Confirmed that DeFi protocols integrating USTB (e.g., Midas RedemptionVault at [`0x569d7dccbf6923350521ecbc28a555a500c4f0ec`](https://etherscan.io/address/0x569d7dccbf6923350521ecbc28a555a500c4f0ec), Frax FrxUSDCustodian at [`0x5fbaa3a3b489199338fbd85f7e3d444dc0504f33`](https://etherscan.io/address/0x5fbaa3a3b489199338fbd85f7e3d444dc0504f33)) are individually whitelisted on the AllowList with assigned entity IDs. Maple Finance's protocol contracts are NOT whitelisted — Maple's USTB collateral is held by borrowers in their own wallets as off-chain collateral arrangements, not locked in Maple smart contracts.
+**Onchain verification (April 2026):** Confirmed that DeFi protocols integrating USTB (e.g., Midas RedemptionVault at [`0x569d7dccbf6923350521ecbc28a555a500c4f0ec`](https://etherscan.io/address/0x569d7dccbf6923350521ecbc28a555a500c4f0ec), Frax FrxUSDCustodian at [`0x5fbaa3a3b489199338fbd85f7e3d444dc0504f33`](https://etherscan.io/address/0x5fbaa3a3b489199338fbd85f7e3d444dc0504f33)) are individually whitelisted on the AllowList with assigned entity IDs. Maple Finance's protocol contracts are NOT whitelisted — Maple's USTB collateral is held by borrowers in their own wallets as offchain collateral arrangements, not locked in Maple smart contracts.
 
 ## Centralization & Control Risks
 
 ### Governance
 
-**Governance Model:** Fully centralized — Superstate Inc. controls all administrative functions. No on-chain governance, no DAO, no community voting.
+**Governance Model:** Fully centralized — Superstate Inc. controls all administrative functions. No onchain governance, no DAO, no community voting.
 
-**Key Privileged Roles (verified on-chain, April 2026):**
+**Key Privileged Roles (verified onchain, April 2026):**
 
 | Role | Address | Type | Powers |
 |------|---------|------|--------|
@@ -227,11 +227,11 @@ The fund uses a **laddered approach** with holdings spread across various near-t
 
 ### Programmability
 
-- **NAV/Price:** The Continuous Price Oracle computes real-time NAV/S on-chain using linear extrapolation between NAV checkpoints set by Superstate. Chainlink provides an independent feed. NAV checkpoints are set by the admin, but the extrapolation is programmatic.
-- **Subscriptions:** Atomic on-chain subscription at oracle price is programmatic (anyone allowlisted can call `subscribe()`).
-- **Redemptions:** Atomic on-chain redemption is programmatic (via RedemptionIdle contract).
-- **Transfers:** Programmatic AllowList enforcement on every transfer (on-chain check).
-- **Minting/Burning:** Admin-only. Minting reflects off-chain subscriptions. Admin burning is for regulatory compliance.
+- **NAV/Price:** The Continuous Price Oracle computes real-time NAV/S onchain using linear extrapolation between NAV checkpoints set by Superstate. Chainlink provides an independent feed. NAV checkpoints are set by the admin, but the extrapolation is programmatic.
+- **Subscriptions:** Atomic onchain subscription at oracle price is programmatic (anyone allowlisted can call `subscribe()`).
+- **Redemptions:** Atomic onchain redemption is programmatic (via RedemptionIdle contract).
+- **Transfers:** Programmatic AllowList enforcement on every transfer (onchain check).
+- **Minting/Burning:** Admin-only. Minting reflects offchain subscriptions. Admin burning is for regulatory compliance.
 - **Accounting:** Dual pause mechanism (transfers vs. mint/burn) is admin-controlled.
 
 ### External Dependencies
@@ -314,7 +314,7 @@ The fund uses a **laddered approach** with holdings spread across various near-t
 ### Key Risks
 
 1. **EOA-controlled admin** — 4 distinct EOAs control token minting, forced burning, pausing, oracle changes, and proxy upgrades. No multisig, no timelock on any. The separation across 4 keys reduces single-key blast radius but none have multisig protection.
-2. **Off-chain assets** — Underlying Treasury portfolio held off-chain at UMB Bank. Token holders cannot independently verify holdings on-chain. Must rely on NAV agent, auditor, and regulatory framework.
+2. **Offchain assets** — Underlying Treasury portfolio held offchain at UMB Bank. Token holders cannot independently verify holdings onchain. Must rely on NAV agent, auditor, and regulatory framework.
 3. **No DEX liquidity** — Exit exclusively through Superstate's mint/redeem system. No secondary market. Transfer restricted to allowlisted addresses only.
 4. **No formal bug bounty rewards** — Researchers explicitly told not to expect compensation for vulnerability discoveries.
 5. **Permissioned access** — Only Qualified Purchasers ($5M+) who pass KYC can hold or transfer USTB. Limits DeFi composability.
@@ -333,8 +333,8 @@ The fund uses a **laddered approach** with holdings spread across various near-t
 ### Critical Risk Gates
 
 - [x] **No audit** → **PASS** — 11 audits by 3 firms + Certora formal verification. Great coverage.
-- [x] **Unverifiable reserves** → **PASS** — Off-chain reserves, but verified by independent NAV agent (NAV Consulting), annual EY audit, SEC regulatory framework, bankruptcy-remote trust structure. Chainlink NAV feed provides on-chain pricing. Not fully on-chain verifiable, but multiple independent verification layers.
-- [x] **Total centralization** → **BORDERLINE PASS** — 4 distinct EOAs control admin functions (token, allowlist, redemption, oracle) with no multisig or timelock on any. However, Superstate is a U.S. corporation under SEC regulation, with registered transfer agent status, institutional custodian, and institutional-grade key management via Turnkey secure enclaves. The separation across 4 keys and the regulatory accountability partially compensate for the lack of on-chain governance.
+- [x] **Unverifiable reserves** → **PASS** — Offchain reserves, but verified by independent NAV agent (NAV Consulting), annual EY audit, SEC regulatory framework, bankruptcy-remote trust structure. Chainlink NAV feed provides onchain pricing. Not fully onchain verifiable, but multiple independent verification layers.
+- [x] **Total centralization** → **BORDERLINE PASS** — 4 distinct EOAs control admin functions (token, allowlist, redemption, oracle) with no multisig or timelock on any. However, Superstate is a U.S. corporation under SEC regulation, with registered transfer agent status, institutional custodian, and institutional-grade key management via Turnkey secure enclaves. The separation across 4 keys and the regulatory accountability partially compensate for the lack of onchain governance.
 
 **Result:** Protocol passes critical gates. Proceeding to category scoring with conservative bias on centralization.
 
@@ -347,7 +347,7 @@ The fund uses a **laddered approach** with holdings spread across various near-t
 | Audits | 11 audits by 3 firms (0xMacro ×9, ChainSecurity, Offside Labs) + Certora formal verification. Continuous audit relationship — each version audited before deployment. |
 | Bug Bounty | Self-hosted, no formal monetary rewards. Weaker than Immunefi-style programs. |
 | Time in Production | ~25 months with TVL >$1M (since Feb 2024 — DeFiLlama first data point Mar 8, 2024 already at ~$38M). Contracts deployed Dec 2023. Multiple version upgrades, all audited. |
-| TVL | ~$650M+ total AUM, ~$625M on-chain (56.59M USTB × $11.045 NAV) |
+| TVL | ~$650M+ total AUM, ~$625M onchain (56.59M USTB × $11.045 NAV) |
 | Historical Incidents | None. No security incidents, exploits, or adverse events. |
 
 **Subcategory A: Audits — 1.5** Great audit coverage (11 audits + formal verification) is among the strongest in the RWA space. The lack of a formal bug bounty with monetary rewards prevents a perfect score.
@@ -366,20 +366,20 @@ The fund uses a **laddered approach** with holdings spread across various near-t
   - `0x8cf40e96e7d7fd8A7A9bEf70d3882fbBC4D40765` — RedemptionIdle owner + RedemptionIdle ProxyAdmin owner (pause redemptions, withdraw USDC, set fees, proxy upgrades)
   - `0x4B1df64357a5D484563c9b7c16a80eD8B8fB1395` — Oracle owner (NAV checkpoints, price delta)
 - **No timelock** on any operation — upgrades, parameter changes, and critical functions execute immediately
-- No on-chain governance, no DAO, no community voting
+- No onchain governance, no DAO, no community voting
 - **Positive:** Separation across 4 keys reduces single-key blast radius compared to a single EOA controlling everything
 - **Positive:** Turnkey secure enclaves for key management, two-step ownership transfer (`Ownable2StepUpgradeable`), `renounceOwnership` disabled
 - **Positive:** Regulatory accountability — Superstate is a U.S. corporation with SEC-registered transfer agent, subject to securities law enforcement
-- Despite regulatory mitigations and key separation, the on-chain governance remains EOA-controlled with no multisig or timelock on any contract
+- Despite regulatory mitigations and key separation, the onchain governance remains EOA-controlled with no multisig or timelock on any contract
 
 **Subcategory B: Programmability — 2.0**
 
 - NAV pricing: Continuous Price Oracle uses programmatic linear extrapolation between admin-set checkpoints. Chainlink provides independent feed
-- Subscriptions: Atomic on-chain subscription at oracle price is programmatic (allowlisted users call `subscribe()`)
-- Redemptions: Atomic on-chain redemption via RedemptionIdle is programmatic
-- Transfer enforcement: AllowList checks on every transfer are on-chain and programmatic
-- Minting/burning: Admin-controlled, reflects off-chain operations
-- Overall: Core token operations (subscribe, redeem, transfer) are well-automated on-chain. NAV pricing has a good programmatic model. Admin functions (mint, burn, pause) are necessarily manual for a regulated fund.
+- Subscriptions: Atomic onchain subscription at oracle price is programmatic (allowlisted users call `subscribe()`)
+- Redemptions: Atomic onchain redemption via RedemptionIdle is programmatic
+- Transfer enforcement: AllowList checks on every transfer are onchain and programmatic
+- Minting/burning: Admin-controlled, reflects offchain operations
+- Overall: Core token operations (subscribe, redeem, transfer) are well-automated onchain. NAV pricing has a good programmatic model. Admin functions (mint, burn, pause) are necessarily manual for a regulated fund.
 
 **Subcategory C: External Dependencies — 2.0**
 
@@ -407,31 +407,31 @@ The fund uses a **laddered approach** with holdings spread across various near-t
 
 - NAV calculated independently by NAV Consulting/NAV Fund Services (third party)
 - Annual audit by Ernst & Young
-- Chainlink NAV/Share feed provides independent on-chain pricing
+- Chainlink NAV/Share feed provides independent onchain pricing
 - Superstate Continuous Price Oracle provides real-time extrapolation
 - Headline NAV, AUM, and yield publicly visible on [superstate.com/assets/ustb](https://superstate.com/assets/ustb)
 - Granular portfolio holdings (T-Bill CUSIPs, maturities) gated behind authenticated investor portal — not publicly accessible
 - SEC regulatory reporting requirements
-- Redundant record-keeping: fund agent records + internal records + on-chain records
-- However: underlying Treasury holdings are off-chain and cannot be independently verified on-chain by token holders
+- Redundant record-keeping: fund agent records + internal records + onchain records
+- However: underlying Treasury holdings are offchain and cannot be independently verified onchain by token holders
 - Chainlink Proof of Reserves was in development (per LlamaRisk, Oct 2024) but not yet confirmed live
 
-**Score: (1.5 + 3.0) / 2 = 2.25/5** — The safest possible underlying asset (U.S. Treasuries) with institutional-grade custody. However, significant off-chain dependencies: portfolio holdings are not publicly verifiable (gated investor portal), NAV relies on off-chain calculation agents, and Chainlink Proof of Reserves is not yet live. Multiple independent parties provide oversight but the lack of public transparency on actual holdings is a material weakness.
+**Score: (1.5 + 3.0) / 2 = 2.25/5** — The safest possible underlying asset (U.S. Treasuries) with institutional-grade custody. However, significant offchain dependencies: portfolio holdings are not publicly verifiable (gated investor portal), NAV relies on offchain calculation agents, and Chainlink Proof of Reserves is not yet live. Multiple independent parties provide oversight but the lack of public transparency on actual holdings is a material weakness.
 
 #### Category 4: Liquidity Risk (Weight: 15%) — **3.0**
 
-- On-chain atomic redemption at NAV/S price via RedemptionIdle (~$1.7M USDC instant capacity as of April 2026, varies as refilled)
-- Off-chain redemption: T+0 if before 9 AM EST on Market Days, otherwise T+1
+- Onchain atomic redemption at NAV/S price via RedemptionIdle (~$1.7M USDC instant capacity as of April 2026, varies as refilled)
+- Offchain redemption: T+0 if before 9 AM EST on Market Days, otherwise T+1
 - No DEX liquidity whatsoever — $0 24h volume, not listed on any exchange
 - Transfers restricted to allowlisted addresses only — limits secondary market formation
 - **AllowList freeze risk:** If removed from AllowList, tokens are completely frozen with zero exit paths — no transfer, no redemption, no DEX fallback. Superstate has unilateral power to freeze any holder's position.
 - Same-value asset (USD-denominated Treasury fund) — no price slippage risk on redemption
 - Underlying Treasuries are among the most liquid financial instruments globally
 - Large DeFi integrations provide some institutional exit paths (Spark, Aave Horizon)
-- No withdrawal during weekends/U.S. holidays (off-chain path)
-- On-chain atomic redemption available 24/7 up to facility capacity
+- No withdrawal during weekends/U.S. holidays (offchain path)
+- Onchain atomic redemption available 24/7 up to facility capacity
 
-**Score: 3.0/5** — Redemption mechanism is functional with both on-chain atomic and off-chain paths, and same-value asset mitigates waiting risk. However, the complete absence of secondary market liquidity combined with the AllowList freeze risk creates a critical dependency: if Superstate removes a holder from the AllowList, tokens are irrecoverably frozen with no fallback exit. This is fundamentally different from permissionless DeFi tokens. The extremely high liquidity of the underlying Treasuries is irrelevant if the on-chain exit is blocked.
+**Score: 3.0/5** — Redemption mechanism is functional with both onchain atomic and offchain paths, and same-value asset mitigates waiting risk. However, the complete absence of secondary market liquidity combined with the AllowList freeze risk creates a critical dependency: if Superstate removes a holder from the AllowList, tokens are irrecoverably frozen with no fallback exit. This is fundamentally different from permissionless DeFi tokens. The extremely high liquidity of the underlying Treasuries is irrelevant if the onchain exit is blocked.
 
 #### Category 5: Operational Risk (Weight: 5%) — **1.0**
 
@@ -469,9 +469,9 @@ The fund uses a **laddered approach** with holdings spread across various near-t
 
 **Final Risk Tier: LOW RISK**
 
-USTB benefits from the safest possible underlying asset class (U.S. Treasury Bills), great audit coverage, institutional-grade service providers, a strong legal structure, and over 2 years of incident-free operation. The primary risk factors are the centralized admin (4 distinct EOAs with no multisig or timelock) and heavy off-chain dependencies for reserve provability (holdings gated behind investor portal, no Chainlink Proof of Reserves yet). These are partially mitigated by key separation across 4 EOAs, regulatory accountability, secure key management (Turnkey TEEs), and the institutional framework around the fund.
+USTB benefits from the safest possible underlying asset class (U.S. Treasury Bills), great audit coverage, institutional-grade service providers, a strong legal structure, and over 2 years of incident-free operation. The primary risk factors are the centralized admin (4 distinct EOAs with no multisig or timelock) and heavy offchain dependencies for reserve provability (holdings gated behind investor portal, no Chainlink Proof of Reserves yet). These are partially mitigated by key separation across 4 EOAs, regulatory accountability, secure key management (Turnkey TEEs), and the institutional framework around the fund.
 
-**Score change from prior assessment (March 2026: 2.38 → April 2026: 2.33):** Driven by improved Historical subscore (>2 years in production, score 1 vs prior ~2) and updated on-chain verification revealing 4 separate EOAs (modest positive vs prior assumption).
+**Score change from prior assessment (March 2026: 2.38 → April 2026: 2.33):** Driven by improved Historical subscore (>2 years in production, score 1 vs prior ~2) and updated onchain verification revealing 4 separate EOAs (modest positive vs prior assumption).
 
 **Key conditions for exposure:**
 
@@ -527,7 +527,7 @@ USTB benefits from the safest possible underlying asset class (U.S. Treasury Bil
 
 ## Appendix B — Contract Architecture
 
-*Verified on-chain April 7, 2026. All owners are EOAs (code size 0). No multisig, no timelock on any contract.*
+*Verified onchain April 7, 2026. All owners are EOAs (code size 0). No multisig, no timelock on any contract.*
 
 ```
 GOVERNANCE LAYER (4 EOAs — all code size 0, no multisig)
@@ -554,7 +554,7 @@ TOKEN LAYER                                                │
   impl: SuperstateTokenV5_1 (VERSION "5")                  │
                                                            │
   Admin (owner [EOA-1] only):                              │
-  ├── mint() / bulkMint()  ← no backing check on-chain    │
+  ├── mint() / bulkMint()  ← no backing check onchain    │
   ├── adminBurn(address, amount)                           │
   ├── pause() / unpause()                                  │
   ├── accountingPause() / accountingUnpause()              │
@@ -596,7 +596,7 @@ PROTOCOL LAYER
 EXTERNAL / UNDERLYING LAYER
 ════════════════════════════
 
-  [USDC] USDC                 [CL] Chainlink NAV Feed       Off-chain
+  [USDC] USDC                 [CL] Chainlink NAV Feed       Offchain
   Used for subscribe/redeem   Independent NAV source         ├── UMB Bank (custodian)
                                                              ├── Federated Hermes (sub-adv)
   [SWEEP] Sweep destination                                  ├── Ernst & Young (auditor)

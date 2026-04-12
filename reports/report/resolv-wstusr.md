@@ -25,7 +25,7 @@ Resolv is a protocol maintaining USR, a stablecoin pegged to the US Dollar, back
 - wstUSR Price: ~$1.13 ([CoinGecko](https://www.coingecko.com/en/coins/resolv-wstusr))
 - wstUSR Market Cap: ~$344.8M
 - wstUSR Supply: ~305.1M tokens
-- wstUSR Exchange Rate: 1 wstUSR = ~1.1304 USR (on-chain `convertToAssets(1e18)`)
+- wstUSR Exchange Rate: 1 wstUSR = ~1.1304 USR (onchain `convertToAssets(1e18)`)
 - stUSR Total Supply: ~347.2M (rebased, in USR terms)
 - stUSR Staked in wstUSR: ~344.9M stUSR (99.3% of all stUSR is wrapped)
 - USR Backing stUSR: ~347.2M USR held by stUSR contract
@@ -57,7 +57,7 @@ Resolv is a protocol maintaining USR, a stablecoin pegged to the US Dollar, back
 | wstUSR (Wrapped Staked USR) | [`0x1202F5C7b4B9E47a1A484E8B270be34dbbC75055`](https://etherscan.io/address/0x1202F5C7b4B9E47a1A484E8B270be34dbbC75055) | ERC-4626 Vault, Upgradeable Proxy |
 | RewardDistributor | [`0xbE23BB6D817C08E7EC4Cd0adB0E23156189c1bA9`](https://etherscan.io/address/0xbE23BB6D817C08E7EC4Cd0adB0E23156189c1bA9) | Non-proxy |
 
-### Proxy Implementation & Admin (Ethereum, verified on-chain)
+### Proxy Implementation & Admin (Ethereum, verified onchain)
 
 | Contract | Implementation | ProxyAdmin |
 |----------|---------------|------------|
@@ -121,7 +121,7 @@ The complete Resolv audit history covers 14+ engagements by MixBytes, Pashov Aud
 - **TVL Growth**: wstUSR market cap ~$344.8M. stUSR TVL ~$347M (DeFiLlama). The vast majority (99.3%) of stUSR is wrapped as wstUSR.
 - **Exchange Rate History**: wstUSR has appreciated from ~$1.00 (launch) to ~$1.13 (Feb 2026), representing ~13% cumulative yield. ATL was $0.59 (likely from low initial liquidity/launch pricing per CoinGecko). ATH is $1.13 (current).
 - **CRITICAL INCIDENT (March 22, 2026)**: A single EOA holding `SERVICE_ROLE` on the USR Counter contract exploited the `requestSwap()` → `completeSwap()` flow. The attacker deposited ~100K USDC via `requestSwap()`, then the SERVICE_ROLE EOA called `completeSwap()` minting **50M USR** (not the ~100K owed). A second mint followed for **30M USR**. Total: **~80M USR minted without corresponding collateral**. The attacker wrapped USR to wstUSR (for better DEX liquidity), dumped across KyberSwap and Velora at $0.50–$0.88, converted proceeds to ETH via Uniswap V4 and MetaMask Swaps. **~$25M+ extracted from ~$200K input.** ~36M USR still held by attacker (worth ~$2M at depressed prices), still being dumped.
-- **Root cause**: No on-chain issuance caps, no collateral ratio enforcement in `completeSwap()`, no oracle sanity checks, no multisig requirement on SERVICE_ROLE, no proof of reserves oracle.
+- **Root cause**: No onchain issuance caps, no collateral ratio enforcement in `completeSwap()`, no oracle sanity checks, no multisig requirement on SERVICE_ROLE, no proof of reserves oracle.
 - **Underlying Stability**: USR peg collapsed to $0.50–$0.88 during the dump.
 - **Protocol TVL**: ~$447.8M total Resolv protocol TVL on Ethereum (DeFiLlama) prior to incident.
 
@@ -134,7 +134,7 @@ The complete Resolv audit history covers 14+ engagements by MixBytes, Pashov Aud
 - Users deposit USR to receive stUSR shares
 - stUSR uses an internal shares model: `balanceOf(user) = shares[user] * totalPooled / totalShares`
 - When the RewardDistributor drips USR rewards into the stUSR contract, the `totalPooled` USR increases, causing all stUSR balances to grow proportionally
-- On-chain state (verified Feb 9, 2026):
+- Onchain state (verified Feb 9, 2026):
   - `totalSupply()` (rebased): ~347.2M stUSR
   - `totalShares()`: ~307.1B internal shares
   - `underlyingToken()`: USR (`0x66a1e...`)
@@ -144,7 +144,7 @@ The complete Resolv audit history covers 14+ engagements by MixBytes, Pashov Aud
 - Underlying asset: USR (per `asset()` = `0x66a1e...`)
 - wstUSR wraps stUSR internally -- holds ~344.9M stUSR (99.3% of all stUSR)
 - Non-rebasing: wstUSR balance stays constant, but `convertToAssets()` increases over time
-- Exchange rate on-chain (verified Feb 9, 2026):
+- Exchange rate onchain (verified Feb 9, 2026):
   - `convertToAssets(1e18)` = 1.1304 USR per wstUSR
   - `convertToShares(1e18)` = 0.8846 wstUSR per USR
   - `totalAssets()` = ~344.9M USR
@@ -172,7 +172,7 @@ The USR contract uses `SERVICE_ROLE` (`0xd8a7a7...`) to gate minting. The `mint(
 
 **CRITICAL — EXPLOIT (March 22, 2026)**: A single EOA with `SERVICE_ROLE` exploited the USR Counter's `completeSwap()` function. The kill chain: attacker called `requestSwap()` depositing ~100K USDC, then the SERVICE_ROLE EOA called `completeSwap()` minting 50M USR (instead of ~100K). A second mint followed for 30M USR. Total **~80M unbacked USR** minted. The attacker then wrapped USR → wstUSR (better DEX liquidity) and dumped across KyberSwap + Velora at $0.50–$0.88, converting to ETH via Uniswap V4. **~$25M+ extracted from ~$200K input.**
 
-Root cause: `completeSwap()` does not enforce that the minted amount matches the deposited collateral. There were no on-chain issuance caps, no collateral ratio checks, no oracle sanity checks, no multisig requirement on the SERVICE_ROLE EOA, and no proof of reserves oracle.
+Root cause: `completeSwap()` does not enforce that the minted amount matches the deposited collateral. There were no onchain issuance caps, no collateral ratio checks, no oracle sanity checks, no multisig requirement on the SERVICE_ROLE EOA, and no proof of reserves oracle.
 
 ### Accessibility
 
@@ -188,16 +188,16 @@ Root cause: `completeSwap()` does not enforce that the minted amount matches the
 
 ### Collateralization
 
-- **wstUSR backing**: wstUSR is 100% backed by stUSR, which is 100% backed by USR. Verified on-chain: stUSR contract holds ~347.2M USR for ~347.2M stUSR supply (pre-incident).
+- **wstUSR backing**: wstUSR is 100% backed by stUSR, which is 100% backed by USR. Verified onchain: stUSR contract holds ~347.2M USR for ~347.2M stUSR supply (pre-incident).
 - **USR backing**: **COMPROMISED**. ~80M USR was minted on March 22, 2026 without corresponding collateral via the USR Counter `completeSwap()` exploit. USR is no longer fully backed by the delta-neutral collateral pool.
 - **No leverage**: wstUSR does not add leverage -- it is a direct wrapper around the staked stablecoin.
 - **Risk hierarchy**: Unlike RLP, wstUSR is in the **senior tranche** -- RLP absorbs all losses before any impact to USR/stUSR/wstUSR holders. However, the unbacked mint may exceed RLP's absorption capacity.
 
 ### Provability
 
-- **wstUSR exchange rate**: Calculated **programmatically on-chain** via ERC-4626 `convertToAssets()`/`convertToShares()`. Based on `stUSR.totalSupply()` / `stUSR.totalShares()` ratio. Anyone can verify.
-- **stUSR backing**: USR held by stUSR contract is fully on-chain and verifiable. `USR.balanceOf(stUSR) == stUSR.totalSupply()` (verified).
-- **Reward distribution**: The RewardDistributor drip schedule is observable on-chain. The amount and frequency of reward allocations are controlled by a privileged role.
+- **wstUSR exchange rate**: Calculated **programmatically onchain** via ERC-4626 `convertToAssets()`/`convertToShares()`. Based on `stUSR.totalSupply()` / `stUSR.totalShares()` ratio. Anyone can verify.
+- **stUSR backing**: USR held by stUSR contract is fully onchain and verifiable. `USR.balanceOf(stUSR) == stUSR.totalSupply()` (verified).
+- **Reward distribution**: The RewardDistributor drip schedule is observable onchain. The amount and frequency of reward allocations are controlled by a privileged role.
 - **Underlying USR collateral**: Verified via [Apostro dashboard](https://info.apostro.xyz/resolv-reserves) and [protocol collateral pool dashboard](https://app.resolv.xyz/collateral-pool).
 
 ## Liquidity Risk
@@ -257,12 +257,12 @@ Root cause: `completeSwap()` does not enforce that the minted amount matches the
 - **Timelock**: A 3-day OpenZeppelin `TimelockController` at [`0x290d9544669c9c7a64f6899a0a3b28d563f6ebee`](https://etherscan.io/address/0x290d9544669c9c7a64f6899a0a3b28d563f6ebee) owns all ProxyAdmin contracts. **Contract upgrades require a 3-day delay**.
 - **ProxyAdmins**: stUSR ProxyAdmin at [`0xeb88058615eaf3e4833af053484012c4d6cbfa37`](https://etherscan.io/address/0xeb88058615eaf3e4833af053484012c4d6cbfa37), wstUSR ProxyAdmin at [`0xD89784610EefD4d11444788F7A85AaDfd57AF7E5`](https://etherscan.io/address/0xD89784610EefD4d11444788F7A85AaDfd57AF7E5). Both owned by the timelock.
 - **Split architecture**: Multisig controls **operational parameters directly** (no delay) -- pausing, role grants, parameter changes. Timelock only gates **proxy upgrades**.
-- **On-chain governance not yet live**: stRESOLV token exists but Snapshot voting has not been initiated.
+- **Onchain governance not yet live**: stRESOLV token exists but Snapshot voting has not been initiated.
 - **All 5 signers are EOAs** (not publicly identified).
 
 ### Programmability
 
-- **wstUSR exchange rate**: Fully programmatic. Calculated on-chain via ERC-4626 standard: `convertToAssets()` = stUSR totalSupply / totalShares. No admin input needed for exchange rate.
+- **wstUSR exchange rate**: Fully programmatic. Calculated onchain via ERC-4626 standard: `convertToAssets()` = stUSR totalSupply / totalShares. No admin input needed for exchange rate.
 - **stUSR rebasing**: Programmatic based on USR balance in the contract. When RewardDistributor drips USR, balances rebase automatically.
 - **Reward distribution**: Controlled by a **privileged role** on the RewardDistributor. The `allocateReward()` function is called by an admin to set reward amounts. The drip schedule is then programmatic.
 - **Wrapping/unwrapping**: Fully programmatic, no admin involvement.
@@ -282,7 +282,7 @@ Root cause: `completeSwap()` does not enforce that the minted amount matches the
 - **Jurisdiction**: British Virgin Islands (BVI).
 - **Investors**: $10M seed round led by Cyber Fund and Maven 11. Other investors: Coinbase Ventures, Arrington Capital, Robot Ventures, Animoca Brands, Ether.fi.
 - **Documentation**: Comprehensive litepaper at [docs.resolv.xyz](https://docs.resolv.xyz/). Quarterly reports and parameter updates published.
-- **Incident Response**: No documented incident response plan found. Bug bounty and on-chain monitoring exist.
+- **Incident Response**: No documented incident response plan found. Bug bounty and onchain monitoring exist.
 
 ## Monitoring
 
@@ -344,7 +344,7 @@ Root cause: `completeSwap()` does not enforce that the minted amount matches the
   - **Alert**: If wstUSR collateral liquidations occur (signals stress).
 
 - **CoinGecko wstUSR price**: Monitor for deviations from expected exchange rate.
-  - **Alert**: If CoinGecko price deviates >2% from on-chain `convertToAssets()` * USR_price (indicates market mispricing or DEX imbalance).
+  - **Alert**: If CoinGecko price deviates >2% from onchain `convertToAssets()` * USR_price (indicates market mispricing or DEX imbalance).
 
 ### USR Collateral Pool Monitoring
 
@@ -374,12 +374,12 @@ Root cause: `completeSwap()` does not enforce that the minted amount matches the
 
 ### Key Strengths
 
-- **Programmatic exchange rate**: Unlike RLP (where price is set off-chain), wstUSR exchange rate is computed on-chain via ERC-4626 standard. Anyone can verify.
+- **Programmatic exchange rate**: Unlike RLP (where price is set offchain), wstUSR exchange rate is computed onchain via ERC-4626 standard. Anyone can verify.
 - **Senior tranche**: wstUSR/stUSR holders are protected by RLP, which absorbs all losses before USR is affected. wstUSR is fundamentally a yield-bearing wrapper around a USD-pegged stablecoin.
 - **Extensive audit coverage**: wstUSR specifically audited by Pashov, Pessimistic, and Sherlock. 14+ total protocol audits.
 - **Permissionless wrapping**: No whitelist needed to wrap/unwrap wstUSR/stUSR. Only minting/redeeming USR requires whitelist.
 - **Strong DeFi adoption**: ~$593M TVL across 25 pools. Integrated with Fluid, Curve, Morpho, Pendle, Balancer V3, Convex, Yearn.
-- **1:1 stUSR backing verified on-chain**: USR.balanceOf(stUSR) == stUSR.totalSupply() (verified Feb 9, 2026).
+- **1:1 stUSR backing verified onchain**: USR.balanceOf(stUSR) == stUSR.totalSupply() (verified Feb 9, 2026).
 
 ### Key Risks
 
@@ -401,13 +401,13 @@ Root cause: `completeSwap()` does not enforce that the minted amount matches the
 **Scoring Guidelines:**
 - Be conservative: when uncertain between two scores, choose the higher (riskier) one
 - Use decimals (e.g., 2.5) when a subcategory falls between scores
-- Prioritize on-chain evidence over documentation claims
+- Prioritize onchain evidence over documentation claims
 
 ### Critical Risk Gates
 
 - [x] **No audit** -- wstUSR specifically audited by 3 firms (Pashov, Pessimistic, Sherlock). Protocol has 14+ total audits. **PASS** (but audits failed to catch the `completeSwap()` minting vulnerability in USR Counter)
-- [ ] **Unverifiable reserves** -- **FAIL**. ~80M USR minted without collateral backing on March 22, 2026 via USR Counter `completeSwap()` exploit. USR is no longer fully collateralized. The `completeSwap()` function enforces no relationship between deposited collateral and minted amount. No on-chain issuance caps, no collateral ratio checks, no oracle sanity checks.
-- [ ] **Total centralization** -- **FAIL**. A single EOA with `SERVICE_ROLE` was able to mint arbitrary amounts of USR with no multisig requirement, no timelock, and no on-chain constraint. The SERVICE_ROLE on the USR Counter had unchecked minting power — the `completeSwap()` function trusts the caller entirely.
+- [ ] **Unverifiable reserves** -- **FAIL**. ~80M USR minted without collateral backing on March 22, 2026 via USR Counter `completeSwap()` exploit. USR is no longer fully collateralized. The `completeSwap()` function enforces no relationship between deposited collateral and minted amount. No onchain issuance caps, no collateral ratio checks, no oracle sanity checks.
+- [ ] **Total centralization** -- **FAIL**. A single EOA with `SERVICE_ROLE` was able to mint arbitrary amounts of USR with no multisig requirement, no timelock, and no onchain constraint. The SERVICE_ROLE on the USR Counter had unchecked minting power — the `completeSwap()` function trusts the caller entirely.
 
 **Gates FAILED. Score automatically set to 5.0 — DO NOT USE.**
 
@@ -430,19 +430,19 @@ Root cause: `completeSwap()` does not enforce that the minted amount matches the
 - **3-of-5 Gnosis Safe** multisig controls all contracts.
 - **3-day timelock** for proxy upgrades (stUSR and wstUSR are both upgradeable proxies).
 - Operational parameters (pause, role grants) controlled by multisig **directly without timelock**.
-- No on-chain governance live yet.
+- No onchain governance live yet.
 - All 5 signers anonymous EOAs.
 
 **Governance Score: 3.5** -- Same governance structure as broader Resolv protocol. 3/5 multisig with 3-day upgrade timelock is adequate but operational parameters lack delay.
 
 **Subcategory B: Programmability**
 
-- **wstUSR exchange rate**: Fully on-chain, programmatic (ERC-4626). Significant improvement over RLP.
+- **wstUSR exchange rate**: Fully onchain, programmatic (ERC-4626). Significant improvement over RLP.
 - **stUSR rebase**: Programmatic based on USR in contract.
 - **Reward distribution**: Admin-controlled allocation, but drip schedule is programmatic.
 - **Wrapping/unwrapping**: Fully programmatic, no admin involvement.
 
-**Programmability Score: 2.5** -- wstUSR itself is highly programmatic (ERC-4626 on-chain exchange rate), but reward allocation is admin-controlled. Significantly better than RLP's fully off-chain pricing.
+**Programmability Score: 2.5** -- wstUSR itself is highly programmatic (ERC-4626 onchain exchange rate), but reward allocation is admin-controlled. Significantly better than RLP's fully offchain pricing.
 
 **Subcategory C: External Dependencies**
 
@@ -461,26 +461,26 @@ Root cause: `completeSwap()` does not enforce that the minted amount matches the
 
 **Subcategory A: Collateralization**
 
-- wstUSR → stUSR → USR: Each layer is 100% backed and verifiable on-chain.
-- stUSR holds exactly as much USR as its total supply (verified on-chain).
+- wstUSR → stUSR → USR: Each layer is 100% backed and verifiable onchain.
+- stUSR holds exactly as much USR as its total supply (verified onchain).
 - wstUSR is an ERC-4626 vault with no leverage.
 - **Senior tranche**: RLP absorbs losses before USR/stUSR/wstUSR are impacted.
-- Underlying USR collateral is a mix of on-chain (ETH, stETH, stablecoins) and off-chain (CEX margin ~15%).
+- Underlying USR collateral is a mix of onchain (ETH, stETH, stablecoins) and offchain (CEX margin ~15%).
 
-**Collateralization Score: 2.0** -- 100% on-chain verifiable backing for stUSR→USR. Senior tranche protection via RLP. Mixed quality underlying assets (including CEX margin), but wstUSR itself is purely on-chain.
+**Collateralization Score: 2.0** -- 100% onchain verifiable backing for stUSR→USR. Senior tranche protection via RLP. Mixed quality underlying assets (including CEX margin), but wstUSR itself is purely onchain.
 
 **Subcategory B: Provability**
 
-- wstUSR exchange rate: programmatic on-chain (ERC-4626).
+- wstUSR exchange rate: programmatic onchain (ERC-4626).
 - stUSR backing: fully verifiable (USR.balanceOf(stUSR)).
-- Reward allocation: admin-controlled but drip is on-chain.
+- Reward allocation: admin-controlled but drip is onchain.
 - Underlying USR collateral: Apostro third-party dashboard + self-reporting.
 
-**Provability Score: 2.0** -- wstUSR and stUSR layers are fully on-chain verifiable. Underlying USR collateral has hybrid on-chain/off-chain provability (same as broader Resolv).
+**Provability Score: 2.0** -- wstUSR and stUSR layers are fully onchain verifiable. Underlying USR collateral has hybrid onchain/offchain provability (same as broader Resolv).
 
 **Funds Management Score = (2.0 + 2.0) / 2 = 2.0**
 
-**Score: 2.0/5** -- Significantly better than RLP. wstUSR/stUSR layers are fully on-chain and verifiable. Underlying USR has hybrid on-chain/off-chain backing but is senior tranche (protected by RLP).
+**Score: 2.0/5** -- Significantly better than RLP. wstUSR/stUSR layers are fully onchain and verifiable. Underlying USR has hybrid onchain/offchain backing but is senior tranche (protected by RLP).
 
 #### Category 4: Liquidity Risk (Weight: 15%)
 
@@ -542,7 +542,7 @@ On March 22, 2026, a single EOA with `SERVICE_ROLE` exploited the USR Counter co
 7. **~$200K in → ~$25M+ out**
 8. ~36M USR still held by attacker (worth ~$2M), still being dumped
 
-**Root cause:** The `completeSwap()` function on the USR Counter trusts the SERVICE_ROLE caller entirely — no on-chain issuance caps, no collateral ratio enforcement, no oracle sanity checks, no multisig requirement, no proof of reserves oracle.
+**Root cause:** The `completeSwap()` function on the USR Counter trusts the SERVICE_ROLE caller entirely — no onchain issuance caps, no collateral ratio enforcement, no oracle sanity checks, no multisig requirement, no proof of reserves oracle.
 
 **All exposure to wstUSR, stUSR, and USR should be exited immediately.** The protocol's collateral backing is compromised and the minting vulnerability remains exploitable by any remaining SERVICE_ROLE holder.
 
@@ -551,4 +551,4 @@ On March 22, 2026, a single EOA with `SERVICE_ROLE` exploited the USR Counter co
 ## Reassessment Triggers
 
 - **TRIGGERED (March 22, 2026)**: ~80M unbacked USR minted via `completeSwap()` exploit. ~$25M+ extracted. Score overridden to 5.0.
-- **Reassessment conditions**: Only reassess if Resolv (1) fully accounts for the unbacked mint (burns or collateralizes the 80M USR), (2) revokes all EOA `SERVICE_ROLE` grants, (3) implements on-chain issuance caps and collateral ratio checks in `completeSwap()`, and (4) submits to an independent audit of the incident and remediation.
+- **Reassessment conditions**: Only reassess if Resolv (1) fully accounts for the unbacked mint (burns or collateralizes the 80M USR), (2) revokes all EOA `SERVICE_ROLE` grants, (3) implements onchain issuance caps and collateral ratio checks in `completeSwap()`, and (4) submits to an independent audit of the incident and remediation.

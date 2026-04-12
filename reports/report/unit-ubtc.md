@@ -121,7 +121,7 @@ Unit is a **bridge/asset tokenization protocol** — not a lending, staking, or 
 | ATL | $60,537 (Feb 6, 2026) |
 | 30-day Price Change | -25.67% |
 
-**On-chain supply (verified):**
+**Onchain supply (verified):**
 - `totalSupply()` = 21,000,000 UBTC (8 decimals, matching Bitcoin's hard cap)
 - Circulating supply per CoinGecko is only ~3,273 UBTC — the vast majority of the 21M max supply is not in circulation.
 
@@ -152,12 +152,12 @@ UBTC is a **1:1 BTC-backed bridged asset**. For every UBTC in circulation, the p
 
 - **Bitcoin treasury:** `bc1pdwu79dady576y3fupmm82m3g7p2p9f6hgyeqy0tdg7ztxg7xrayqlkl8j9`
 - Reserves can be verified on any Bitcoin block explorer (e.g., mempool.space).
-- No off-chain collateral or lending activity is disclosed.
+- No offchain collateral or lending activity is disclosed.
 - Collateral is entirely **native BTC** — the highest quality collateral for a BTC wrapper.
 
 ### Provability
 
-- **Bitcoin reserves** are verifiable on-chain via the Bitcoin treasury address.
+- **Bitcoin reserves** are verifiable onchain via the Bitcoin treasury address.
 - **UBTC supply** on HyperCore/HyperEVM is verifiable via `totalSupply()`.
 - **The backing ratio requires comparing two chains** (Bitcoin balance vs Hyperliquid UBTC supply), which complicates real-time verification but is deterministic.
 - No Chainlink Proof of Reserve (PoR) or equivalent third-party attestation mechanism is in place.
@@ -229,11 +229,11 @@ Per DeFiLlama, 27 UBTC pools on Hyperliquid L1 with ~$35M total TVL:
 
 **UBTC HyperEVM token contract:**
 - **Owner:** [`0xB4FC973924a91362D301E583E839Cdaf4f19cdF8`](https://hyperevmscan.io/address/0xB4FC973924a91362D301E583E839Cdaf4f19cdF8)
-- **On-chain code-size: 0** — this is an **EOA** (Externally Owned Account).
-- **Per Unit docs:** The HyperEVM deployer is "controlled via multi-party computation (MPC), requiring key-shares from multiple signers to construct and perform transactions." However, this is **not verifiable on-chain** — it appears as a regular EOA.
+- **Onchain code-size: 0** — this is an **EOA** (Externally Owned Account).
+- **Per Unit docs:** The HyperEVM deployer is "controlled via multi-party computation (MPC), requiring key-shares from multiple signers to construct and perform transactions." However, this is **not verifiable onchain** — it appears as a regular EOA.
 - **Contract type:** UUPS upgradeable proxy — the owner can upgrade the implementation without timelock.
-- **No timelock** detected on-chain.
-- **No multisig** on-chain — the MPC claim is off-chain only.
+- **No timelock** detected onchain.
+- **No multisig** onchain — the MPC claim is offchain only.
 
 **Guardian Network (bridge operations):**
 - 2-of-3 MPC threshold signature scheme.
@@ -244,14 +244,14 @@ Per DeFiLlama, 27 UBTC pools on Hyperliquid L1 with ~$35M total TVL:
 - The relay server only forwards ciphertext — no key material.
 - **Leader centralization:** Currently a single pre-determined leader coordinates proposals. The protocol plans to implement a leader election process in the future, but this creates interim centralization risk.
 
-**Key concern:** While the bridge operations use 2-of-3 MPC, the HyperEVM token contract ownership is an EOA. A compromise of the MPC key (or the off-chain signers controlling it) could allow an attacker to upgrade the UBTC implementation to a malicious contract.
+**Key concern:** While the bridge operations use 2-of-3 MPC, the HyperEVM token contract ownership is an EOA. A compromise of the MPC key (or the offchain signers controlling it) could allow an attacker to upgrade the UBTC implementation to a malicious contract.
 
 ### Programmability
 
 - The UBTC token contract is a **simple ERC-20 with Ownable + UUPS**. No complex vault logic, exchange rates, or admin parameters detected.
 - No `paused()`, `blacklister()`, `cap()`, `MINTER_ROLE()`, `DEFAULT_ADMIN_ROLE()`, or `DOMAIN_SEPARATOR()` functions exposed via the proxy interface.
 - However, bytecode analysis of the unverified implementation suggests **allowlist/blacklist mechanisms** exist for sender restrictions — these are not callable from the proxy but may be accessible to the owner.
-- The bridge operations (deposit/withdrawal) are handled entirely off-chain by the Guardian Network — the on-chain token contract is just a standard ERC-20.
+- The bridge operations (deposit/withdrawal) are handled entirely offchain by the Guardian Network — the onchain token contract is just a standard ERC-20.
 - The deterministic state machine underlying all protocol actions guarantees strict, verifiable workflows per the security docs.
 
 ### External Dependencies
@@ -319,9 +319,9 @@ Key addresses and data to monitor:
 
 ### Key Strengths
 
-1. **Simple architecture** — UBTC is a straightforward 1:1 BTC wrapper with minimal on-chain complexity.
+1. **Simple architecture** — UBTC is a straightforward 1:1 BTC wrapper with minimal onchain complexity.
 2. **Significant protocol TVL** (~$447M) and meaningful trading volume (~$34M/day) demonstrating product-market fit.
-3. **Bitcoin reserves are verifiable** on-chain via the Bitcoin treasury address.
+3. **Bitcoin reserves are verifiable** onchain via the Bitcoin treasury address.
 4. **No protocol fees** — reduces attack surface and misalignment incentives.
 5. **Regulatory compliance measures** — OFAC screening, geofencing, law enforcement cooperation.
 
@@ -330,7 +330,7 @@ Key addresses and data to monitor:
 1. **No public smart contract audits** — no audit reports found anywhere, confirmed by multiple independent sources. This is a critical concern for a bridge holding ~$447M.
 2. **No bug bounty program** — no Immunefi, Sherlock, or Cantina listing found.
 3. **Implementation source code unverified** — the proxy is verified (standard OpenZeppelin ERC1967Proxy), but the actual token implementation at [`0x1a7689c3b783eb37550efbb9c81e7f468f7034fc`](https://hyperevmscan.io/address/0x1a7689c3b783eb37550efbb9c81e7f468f7034fc) is **not verified**. Bytecode analysis suggests undisclosed allowlist/blacklist features.
-4. **EOA ownership on HyperEVM** — the MPC claim is not verifiable on-chain. The contract owner (`Unit: Deployer`) appears as a single EOA that can upgrade the implementation instantly.
+4. **EOA ownership on HyperEVM** — the MPC claim is not verifiable onchain. The contract owner (`Unit: Deployer`) appears as a single EOA that can upgrade the implementation instantly.
 5. **No timelock** on contract upgrades — implementation can be swapped instantly.
 7. **2-of-3 MPC** is a relatively low threshold — compromise of any 2 Guardians (one of which is Unit itself) could compromise the system.
 8. **Hyperliquid chain centralization** — Hyper Foundation controls 56.4% of validator stake.
@@ -347,14 +347,14 @@ Key addresses and data to monitor:
 ### Critical Risk Gates
 
 - [ ] **No audit** -> **TRIGGERED** — Protocol has no publicly disclosed audits by any firm.
-- [x] **Unverifiable reserves** -> **PASS** — Bitcoin reserves are verifiable on-chain.
-- [ ] **Total centralization** -> **BORDERLINE** — EOA owner on HyperEVM (claimed MPC), 2-of-3 Guardian Network. Not a single EOA in the traditional sense, but on-chain evidence shows EOA ownership.
+- [x] **Unverifiable reserves** -> **PASS** — Bitcoin reserves are verifiable onchain.
+- [ ] **Total centralization** -> **BORDERLINE** — EOA owner on HyperEVM (claimed MPC), 2-of-3 Guardian Network. Not a single EOA in the traditional sense, but onchain evidence shows EOA ownership.
 
 **Critical gate "No audit" is triggered.** Per the scoring guidelines, this automatically results in a score of **5** (High Risk).
 
 However, given that:
 1. The protocol has been operational for ~12 months with ~$447M TVL
-2. The on-chain token contract interface is relatively simple (standard ERC-20 + UUPS)
+2. The onchain token contract interface is relatively simple (standard ERC-20 + UUPS)
 3. The 2-of-3 MPC Guardian architecture provides some multi-party security
 4. Bitcoin reserves are transparently verifiable
 
@@ -377,7 +377,7 @@ Even though the critical gate is triggered, we provide category scores for refer
 #### Category 2: Centralization & Control Risks (Weight: 30%)
 
 Subscores:
-- **Governance: 4.5** — EOA owner (on-chain) claimed to be MPC-controlled (off-chain). No timelock. UUPS upgradeable. 2-of-3 Guardian Network for bridge operations, but not for contract governance.
+- **Governance: 4.5** — EOA owner (onchain) claimed to be MPC-controlled (offchain). No timelock. UUPS upgradeable. 2-of-3 Guardian Network for bridge operations, but not for contract governance.
 - **Programmability: 2.0** — Simple ERC-20 token; bridge operations handled by deterministic state machine. No complex vault logic or admin parameters.
 - **External dependencies: 3.5** — Depends on Bitcoin network, Hyperliquid L1 (centralized validator set), Guardian infrastructure (AWS Nitro, KMS). Hyperliquid Foundation controls 56.4% of validator stake.
 
@@ -388,8 +388,8 @@ Centralization score = (4.5 + 2.0 + 3.5) / 3 = **3.33**
 #### Category 3: Funds Management (Weight: 30%)
 
 Subscores:
-- **Collateralization: 2.0** — 1:1 BTC-backed on-chain. Collateral is native BTC (highest quality). No off-chain or mixed collateral.
-- **Provability: 2.5** — Bitcoin reserves verifiable on-chain. UBTC supply verifiable on Hyperliquid. Requires cross-chain comparison. No Proof of Reserve oracle or third-party attestation. No public reserve dashboard.
+- **Collateralization: 2.0** — 1:1 BTC-backed onchain. Collateral is native BTC (highest quality). No offchain or mixed collateral.
+- **Provability: 2.5** — Bitcoin reserves verifiable onchain. UBTC supply verifiable on Hyperliquid. Requires cross-chain comparison. No Proof of Reserve oracle or third-party attestation. No public reserve dashboard.
 
 Funds management score = (2.0 + 2.5) / 2 = **2.25**
 
@@ -439,7 +439,7 @@ Rationale:
 - **The critical gate "No audit" is triggered.** Unit Protocol has no publicly disclosed audits despite managing ~$447M in TVL.
 - Implementation source code is unverified.
 - No bug bounty program exists.
-- HyperEVM contract owner is an EOA (MPC claim not verifiable on-chain) with UUPS upgradeability and no timelock.
+- HyperEVM contract owner is an EOA (MPC claim not verifiable onchain) with UUPS upgradeability and no timelock.
 - Without the critical gate, the weighted score would be 3.19/5.0 (Medium Risk), primarily elevated by the audit gap and centralization concerns.
 - If audits are conducted and code is verified, the score could improve significantly to the Low-Medium range.
 
@@ -462,7 +462,7 @@ If the following were addressed, the score could improve from 5.0 to approximate
 1. **Audit by 1-2 reputable firms** → Would remove critical gate trigger
 2. **Implementation source code verification** on HyperEVMScan → Would improve transparency (proxy is already verified)
 3. **Bug bounty program** → Would reduce audit category score
-4. **On-chain multisig** for contract ownership (replacing EOA) → Would improve governance score
+4. **Onchain multisig** for contract ownership (replacing EOA) → Would improve governance score
 5. **Timelock** on contract upgrades → Would improve governance score
 
 ## Sources
@@ -482,7 +482,7 @@ If the following were addressed, the score could improve from 5.0 to approximate
 - Morpho UBTC markets: https://app.morpho.org/hyperevm/market/0x45af9c72aa97978e143a646498c8922058b7c6f18b6f7b05d7316c8cf7ab942f
 - HyperEVMScan UBTC proxy (verified): https://hyperevmscan.io/address/0x9FDBdA0A5e284c32744D2f17Ee5c74B284993463#code
 - HyperEVMScan UBTC implementation (unverified): https://hyperevmscan.io/address/0x1a7689c3b783eb37550efbb9c81e7f468f7034fc
-- On-chain verification via `cast` against HyperEVM RPC (`rpc.hyperliquid.xyz/evm`)
+- Onchain verification via `cast` against HyperEVM RPC (`rpc.hyperliquid.xyz/evm`)
 - Morpho Blue API: https://blue-api.morpho.org/graphql
 - DeFiLlama Yields API: https://yields.llama.fi/pools
 - DeFiLlama Hacks: https://api.llama.fi/hacks

@@ -167,7 +167,7 @@ MUSD operates as a CDP stablecoin — it does **not** delegate funds to other pr
 
 ### Provability
 
-- **On-chain Verification**: Collateral is held in on-chain pool contracts on the Mezo chain (ActivePool, DefaultPool). Anyone can verify total collateral and total debt.
+- **Onchain Verification**: Collateral is held in onchain pool contracts on the Mezo chain (ActivePool, DefaultPool). Anyone can verify total collateral and total debt.
 - **No Exchange Rate**: MUSD targets 1:1 USD peg through arbitrage mechanics (not an exchange-rate model). No PPS/rate calculations needed.
 - **Oracle**: BTC/USD price feed powered by [**Skip Connect**](https://docs.skip.build/connect/introduction) (formerly Slinky), a consensus-level oracle built on Cosmos SDK's ABCI++ vote extensions. Each Mezo validator runs a Skip Connect sidecar that pulls prices from 9 CEXs (Binance, Bybit, Coinbase, Huobi, Kraken, KuCoin, MEXC, OKX, Crypto.com), aggregated via stake-weighted median. The oracle is exposed to EVM contracts via a precompile at [`0x7b7c000000000000000000000000000000000015`](https://explorer.mezo.org/address/0x7b7c000000000000000000000000000000000015) implementing the Chainlink AggregatorV3 interface for compatibility. The MUSD PriceFeed contract ([`0xc5aC5A8892230E0A3e1c473881A2de7353fFcA88`](https://explorer.mezo.org/address/0xc5aC5A8892230E0A3e1c473881A2de7353fFcA88)) consumes this precompile with a 60-second staleness check. Prices are updated every block as part of consensus, requiring a minimum of 3 providers to report.
 - **tBTC Proof of Reserves**: Available at [tbtcscan.com/wallets](https://tbtcscan.com/wallets) for verifying BTC backing of tBTC itself.
@@ -211,8 +211,8 @@ MUSD operates as a CDP stablecoin — it does **not** delegate funds to other pr
 - **NTT Pauser**: Separate Safe [`0x40C7b9612B394212394EA860cACd0e176CA4Ae5B`](https://etherscan.io/address/0x40C7b9612B394212394EA860cACd0e176CA4Ae5B) — **2/4 threshold** (lower threshold allows fast pause in emergencies)
 - **No Timelock**: No timelock was found on the Ethereum MUSD contracts. The 5/9 multisig has direct control.
 - **Mint/Burn Control**: The multisig-owned MUSD contract has a mintList/burnList whitelist. The owner can add/remove addresses with minting/burning privileges.
-- **Signers**: 9 EOA signers, identities not publicly disclosed (verified on-chain 2026-03-20).
-- **Bridge pausability**: NTT Manager is currently unpaused (verified on-chain 2026-03-20). The 2/4 pauser multisig can pause bridging.
+- **Signers**: 9 EOA signers, identities not publicly disclosed (verified onchain 2026-03-20).
+- **Bridge pausability**: NTT Manager is currently unpaused (verified onchain 2026-03-20). The 2/4 pauser multisig can pause bridging.
 
 **On Mezo Chain (native MUSD):**
 
@@ -228,7 +228,7 @@ MUSD operates as a CDP stablecoin — it does **not** delegate funds to other pr
 
 ### Programmability
 
-- **Core CDP Logic**: Fully programmatic on-chain (Liquity V1 model). Liquidations, redemptions, and collateral management are all automated.
+- **Core CDP Logic**: Fully programmatic onchain (Liquity V1 model). Liquidations, redemptions, and collateral management are all automated.
 - **No PPS/Exchange Rate**: MUSD is a 1:1 stablecoin, not a vault token. No admin-controlled rate.
 - **Bridge Operations**: Wormhole NTT relies on Wormhole Guardian network (19 guardians, 13/19 threshold) for cross-chain message verification — semi-decentralized.
 - **Interest Rate Changes**: Require governance action, not fully programmatic.
@@ -269,7 +269,7 @@ MUSD operates as a CDP stablecoin — it does **not** delegate funds to other pr
 | Bridge pauses | NTT Manager | `isPaused()`, `NotPaused()` / `Paused()` events | Any state change |
 | Multisig config changes | Mezo Multisig | `AddedOwner(address)`, `RemovedOwner(address)`, `ChangedThreshold(uint256)` | Any change |
 | Large bridge transfers | MUSD Token | `Transfer(address,address,uint256)` to/from NTT Manager | >100K MUSD per tx |
-| MUSD peg deviation | DEX pools | Off-chain: CoinGecko / DEX price feeds | >2% deviation from $1.00 |
+| MUSD peg deviation | DEX pools | Offchain: CoinGecko / DEX price feeds | >2% deviation from $1.00 |
 | Curve pool imbalance | Curve MUSD/crv2pool | `balances(0)` vs `balances(1)` | MUSD share >80% |
 | Uniswap V3 pool depth | Uniswap V3 MUSD/USDC | `slot0()` for price, token `balanceOf()` for depth | USDC balance <$100K |
 | MUSD token ownership change | MUSD Token | `OwnershipTransferred(address,address)` | Any change |
@@ -287,7 +287,7 @@ MUSD operates as a CDP stablecoin — it does **not** delegate funds to other pr
 - **Battle-tested base code**: Liquity V1 fork — the core CDP architecture has been live since April 2021 with no smart contract exploits
 - **Experienced team**: Thesis has 6+ years building Bitcoin DeFi infrastructure (tBTC, Keep, Threshold)
 - **Over-collateralized**: Minimum 110% collateral ratio with robust liquidation mechanics
-- **Transparent**: Open-source code, on-chain verifiable collateral, documented security policy
+- **Transparent**: Open-source code, onchain verifiable collateral, documented security policy
 - **Conservative parameters**: MCR (110%) and CCR (150%) are identical to Liquity V1's proven settings
 
 ### Key Risks
@@ -313,12 +313,12 @@ MUSD operates as a CDP stablecoin — it does **not** delegate funds to other pr
 **Scoring Guidelines:**
 - Be conservative: when uncertain between two scores, choose the higher (riskier) one
 - Use decimals (e.g., 2.5) when a subcategory falls between scores
-- Prioritize on-chain evidence over documentation claims
+- Prioritize onchain evidence over documentation claims
 
 ### Critical Risk Gates
 
 - [ ] **No audit** - Protocol has been audited (Cantina for MUSD, Halborn for chain/bridge)
-- [ ] **Unverifiable reserves** - Reserves are on-chain on Mezo chain (verifiable, though requires cross-chain checking)
+- [ ] **Unverifiable reserves** - Reserves are onchain on Mezo chain (verifiable, though requires cross-chain checking)
 - [ ] **Total centralization** - 5/9 multisig (not a single EOA)
 
 **All gates pass.** Proceed to category scoring.
@@ -373,7 +373,7 @@ Liquity V1's extensive audit history and 4+ year track record is a strong positi
 
 **Subcategory A: Collateralization**
 
-- 100%+ on-chain collateral (over-collateralized CDPs)
+- 100%+ onchain collateral (over-collateralized CDPs)
 - BTC (via tBTC) is a high-quality asset, but tBTC adds bridge risk layer
 - Collateral is on Mezo chain, not Ethereum — requires cross-chain verification
 - Liquidation mechanics are proven (Liquity V1 model)
@@ -387,7 +387,7 @@ Liquity V1's extensive audit history and 4+ year track record is a strong positi
 - tBTC has proof of reserves at tbtcscan.com
 - Cross-chain complexity: Ethereum holders must trust Mezo chain state
 
-**Provability Score: 2.5/5** - On-chain verification exists but requires checking a different chain. tBTC PoR adds transparency.
+**Provability Score: 2.5/5** - Onchain verification exists but requires checking a different chain. tBTC PoR adds transparency.
 
 **Funds Management Score = (2.5 + 2.5) / 2 = 2.5**
 
