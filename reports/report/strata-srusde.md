@@ -101,7 +101,7 @@ All core contracts are **verified on Etherscan**:
 | 24h Timelock | StrataMasterChef (OZ TimelockController) | Yes | No |
 | Guardian | EOA (not a contract) | N/A | N/A |
 
-**Note**: Both timelocks are registered on Etherscan as `StrataMasterChef` but contain standard OpenZeppelin TimelockController functions (`schedule`, `execute`, `cancel`, `getMinDelay`). Delays verified on-chain: 48h = 172,800 seconds, 24h = 86,400 seconds.
+**Note**: Both timelocks are registered on Etherscan as `StrataMasterChef` but contain standard OpenZeppelin TimelockController functions (`schedule`, `execute`, `cancel`, `getMinDelay`). Delays verified onchain: 48h = 172,800 seconds, 24h = 86,400 seconds.
 
 ## Audits and Due Diligence Disclosures
 
@@ -139,7 +139,7 @@ The architecture is moderately complex:
 - **CDO Pattern**: Core orchestrator (StrataCDO) connects tranches, accounting, and strategy contracts
 - **Multiple Proxy Contracts**: Most core contracts use OpenZeppelin TransparentUpgradeableProxy
 - **Cooldown Mechanisms**: Two-stage withdrawal with ERC20Cooldown and UnstakeCooldown contracts
-- **APR Feed System**: On-chain APR calculation using Aave data feeds
+- **APR Feed System**: Onchain APR calculation using Aave data feeds
 - **Multi-token deposits**: The srUSDe Meta Vault accepts USDe, sUSDe, USDT, USDC, and DAI
 
 ### Bug Bounty
@@ -168,7 +168,7 @@ The architecture is moderately complex:
 
 - **TVL Volatility**: The protocol has experienced significant TVL swings. The sharp January drop (from ~$262M to ~$147M in one week) suggests **large depositor concentration risk**. The TVL remains volatile with multiple >20% swings.
 - **Incidents**: No reported security incidents, exploits, or hacks found.
-- **Exchange Rate (on-chain verified Feb 18, 2026)**:
+- **Exchange Rate (onchain verified Feb 18, 2026)**:
   - `convertToAssets(1e18)` = 1.013728 USDe per srUSDe
   - `totalAssets()` = 113,838,466 USDe
   - `totalSupply()` = 112,296,907 srUSDe
@@ -203,17 +203,17 @@ The architecture is moderately complex:
 
 ### Provability
 
-- **Exchange rate**: Calculated on-chain via ERC-4626 standard (`convertToAssets()`/`convertToShares()`). Anyone can verify
-- **Underlying sUSDe balance**: Verifiable on-chain by checking the strategy's sUSDe holdings
-- **Yield calculation**: DYS mechanism computes yields on-chain using the AprPairFeed contract. Benchmark rate sourced from Aave v3 Core. However, risk-premium parameters (x, y, k) are set by the team
-- **Accounting**: On-chain Accounting contract tracks raw TVL, balances, inflows/outflows, fees, and reward distribution for both tranches
+- **Exchange rate**: Calculated onchain via ERC-4626 standard (`convertToAssets()`/`convertToShares()`). Anyone can verify
+- **Underlying sUSDe balance**: Verifiable onchain by checking the strategy's sUSDe holdings
+- **Yield calculation**: DYS mechanism computes yields onchain using the AprPairFeed contract. Benchmark rate sourced from Aave v3 Core. However, risk-premium parameters (x, y, k) are set by the team
+- **Accounting**: Onchain Accounting contract tracks raw TVL, balances, inflows/outflows, fees, and reward distribution for both tranches
 
 ## Liquidity Risk
 
 ### Primary Exit Mechanisms
 
 1. **Redeem from srUSDe vault**: Initiate withdrawal → cooldown period (tied to Ethena's sUSDe cooldown, currently ~7 days) → finalize. Permissionless but not instant
-2. **DEX swap**: Extremely thin on-chain DEX liquidity. Total across all Uniswap V4 pools: ~$135K. Largest pool is srUSDe/USDe at ~$81K with only $425 in 24h volume. **No Curve or Balancer pools exist.** CoinGecko does not list srUSDe
+2. **DEX swap**: Extremely thin onchain DEX liquidity. Total across all Uniswap V4 pools: ~$135K. Largest pool is srUSDe/USDe at ~$81K with only $425 in 24h volume. **No Curve or Balancer pools exist.** CoinGecko does not list srUSDe
 3. **Pendle markets**: PT-srUSDe-02APR2026 pool holds ~$21.9M TVL with ~$128K weekly volume. Primary venue for srUSDe trading, but these are fixed-yield PT tokens, not raw srUSDe
 4. **Morpho markets**: PT-srUSDe-2APR2026/USDC market has ~$14.6M supply and 82.4% utilization. A raw srUSDe/USDe market exists on Morpho but is empty ($0 supply/$0 borrow)
 
@@ -257,14 +257,14 @@ Strata uses a layered Role-Based Access Control (RBAC) system with clear separat
 - All multisig keys held by internal team -- no external/independent signers
 - Admin Multisig can pause the protocol immediately (no timelock on pause)
 - RESERVE_MANAGER_ROLE (Admin Multisig) can transfer reserves to treasury -- potential extraction vector if compromised
-- No on-chain governance yet (planned for future)
+- No onchain governance yet (planned for future)
 
 ### Programmability
 
-- **srUSDe exchange rate**: Calculated on-chain via ERC-4626 standard. Programmatic, no admin input needed
-- **Yield distribution (DYS)**: Mostly programmatic. AprPairFeed fetches benchmark rate from Aave on-chain. However, risk-premium parameters (x, y, k) are set by the team initially
-- **APR updates**: Triggered by Operational Multisig via `updateRoundData`. This is a manual trigger for an on-chain computation
-- **Accounting**: Fully on-chain. TVL, balances, fees, and reward distribution tracked programmatically
+- **srUSDe exchange rate**: Calculated onchain via ERC-4626 standard. Programmatic, no admin input needed
+- **Yield distribution (DYS)**: Mostly programmatic. AprPairFeed fetches benchmark rate from Aave onchain. However, risk-premium parameters (x, y, k) are set by the team initially
+- **APR updates**: Triggered by Operational Multisig via `updateRoundData`. This is a manual trigger for an onchain computation
+- **Accounting**: Fully onchain. TVL, balances, fees, and reward distribution tracked programmatically
 - **Withdrawals**: Programmatic cooldown mechanism. No manual intervention needed after initiation
 
 ### External Dependencies
@@ -354,7 +354,7 @@ Strata uses a layered Role-Based Access Control (RBAC) system with clear separat
 
 - **Structured risk tranching**: srUSDe benefits from junior tranche (jrUSDe) first-loss protection, providing additional security beyond just the underlying yield source
 - **Multi-layered governance**: 48h timelock for owner changes, 24h timelock for strategy config, two-step exit-fee changes, independent Guardian (Patrick Collins/Cyfrin) with veto power
-- **On-chain transparency**: Exchange rate is programmatic (ERC-4626), accounting is fully on-chain, and the codebase is open-source
+- **Onchain transparency**: Exchange rate is programmatic (ERC-4626), accounting is fully onchain, and the codebase is open-source
 - **Multiple reputable audits**: 7+ audit engagements across Cyfrin, Quantstamp, and Guardian Audits
 - **Active monitoring**: 24/7 monitoring via Hypernative with Guardian oversight
 
@@ -381,12 +381,12 @@ Strata uses a layered Role-Based Access Control (RBAC) system with clear separat
 **Scoring Guidelines:**
 - Be conservative: when uncertain between two scores, choose the higher (riskier) one
 - Use decimals (e.g., 2.5) when a subcategory falls between scores
-- Prioritize on-chain evidence over documentation claims
+- Prioritize onchain evidence over documentation claims
 
 ### Critical Risk Gates
 
 - [x] **No audit** -- Protocol audited by 3 reputable firms (Cyfrin, Quantstamp, Guardian) across 7+ engagements. **PASS**
-- [x] **Unverifiable reserves** -- srUSDe exchange rate is programmatic on-chain (ERC-4626). Underlying sUSDe holdings verifiable on-chain. **PASS**
+- [x] **Unverifiable reserves** -- srUSDe exchange rate is programmatic onchain (ERC-4626). Underlying sUSDe holdings verifiable onchain. **PASS**
 - [x] **Total centralization** -- 3-of-4 Gnosis Safe multisig with 48h timelock and independent Guardian. Not a single EOA. **PASS**
 
 **All gates pass.** Proceed to category scoring.
@@ -419,13 +419,13 @@ Strata uses a layered Role-Based Access Control (RBAC) system with clear separat
 
 **Subcategory B: Programmability**
 
-- srUSDe exchange rate: fully on-chain ERC-4626
+- srUSDe exchange rate: fully onchain ERC-4626
 - Yield distribution (DYS): mostly programmatic using AprPairFeed from Aave
 - Risk-premium parameters (x, y, k): set by team initially, planned transition to independent risk managers
-- APR updates: triggered manually by Operational Multisig (but computation is on-chain)
-- Accounting: fully on-chain
+- APR updates: triggered manually by Operational Multisig (but computation is onchain)
+- Accounting: fully onchain
 
-**Programmability Score: 2.5** -- Most critical functions are on-chain and programmatic. The APR update trigger and risk-premium parameter setting introduce some manual dependency. The planned transition to independent risk managers is positive but not yet implemented.
+**Programmability Score: 2.5** -- Most critical functions are onchain and programmatic. The APR update trigger and risk-premium parameter setting introduce some manual dependency. The planned transition to independent risk managers is positive but not yet implemented.
 
 **Subcategory C: External Dependencies**
 
@@ -444,27 +444,27 @@ Strata uses a layered Role-Based Access Control (RBAC) system with clear separat
 
 **Subcategory A: Collateralization**
 
-- srUSDe backed by sUSDe staked in Ethena's vault (on-chain verifiable)
+- srUSDe backed by sUSDe staked in Ethena's vault (onchain verifiable)
 - Over-collateralized by junior tranche (first-loss capital)
 - 105% coverage circuit breaker provides protection
 - Underlying collateral is USDe (Ethena's synthetic dollar -- backed by delta-neutral ETH/BTC strategy with CEX counterparty exposure)
 - Reserve mechanism exists (configurable by admin, can be withdrawn to treasury)
 
-**Collateralization Score: 2.5** -- On-chain backing verifiable through ERC-4626 and strategy. Junior tranche first-loss protection is a strength. But the underlying asset is Ethena's USDe (itself a synthetic dollar with CEX counterparty risk), and the reserve extraction vector is a concern.
+**Collateralization Score: 2.5** -- Onchain backing verifiable through ERC-4626 and strategy. Junior tranche first-loss protection is a strength. But the underlying asset is Ethena's USDe (itself a synthetic dollar with CEX counterparty risk), and the reserve extraction vector is a concern.
 
 **Subcategory B: Provability**
 
-- Exchange rate: programmatic on-chain (ERC-4626)
-- Strategy holdings: verifiable on-chain (sUSDe balance in strategy contract)
-- Accounting: fully on-chain with transparent TVL tracking
+- Exchange rate: programmatic onchain (ERC-4626)
+- Strategy holdings: verifiable onchain (sUSDe balance in strategy contract)
+- Accounting: fully onchain with transparent TVL tracking
 - Underlying USDe collateral: relies on Ethena's proof of reserves (third-party verified)
-- Risk-premium parameters: set by team, visible on-chain once set
+- Risk-premium parameters: set by team, visible onchain once set
 
-**Provability Score: 2.0** -- srUSDe layer is fully on-chain verifiable. Underlying USDe/sUSDe provability depends on Ethena (which has third-party verification). Good transparency overall.
+**Provability Score: 2.0** -- srUSDe layer is fully onchain verifiable. Underlying USDe/sUSDe provability depends on Ethena (which has third-party verification). Good transparency overall.
 
 **Funds Management Score = (2.5 + 2.0) / 2 = 2.25**
 
-**Score: 2.25/5** -- Good on-chain provability and transparency. Senior tranche benefits from junior first-loss protection. Underlying Ethena dependency and reserve extraction risk prevent a lower score.
+**Score: 2.25/5** -- Good onchain provability and transparency. Senior tranche benefits from junior first-loss protection. Underlying Ethena dependency and reserve extraction risk prevent a lower score.
 
 #### Category 4: Liquidity Risk (Weight: 15%)
 
@@ -512,7 +512,7 @@ Final Score = (Centralization × 0.30) + (Funds Mgmt × 0.30) + (Audits × 0.20)
 
 ---
 
-Strata's srUSDe is a well-designed risk-tranching product with good audit coverage from reputable firms, multi-layered governance with independent Guardian oversight, and fully on-chain accounting and exchange rate computation. The junior tranche first-loss protection adds meaningful risk mitigation beyond the underlying yield source.
+Strata's srUSDe is a well-designed risk-tranching product with good audit coverage from reputable firms, multi-layered governance with independent Guardian oversight, and fully onchain accounting and exchange rate computation. The junior tranche first-loss protection adds meaningful risk mitigation beyond the underlying yield source.
 
 However, the protocol is very young (~4 months), has a critical single dependency on Ethena's sUSDe, exhibited significant TVL volatility (62.6% drawdown), has no bug bounty program, an anonymous team, and withdrawal delays tied to Ethena's cooldown period.
 
@@ -537,4 +537,4 @@ However, the protocol is very young (~4 months), has a critical single dependenc
 - **Incident-based**: Reassess after any exploit, governance change, collateral modification, or Ethena incident
 - **Dependency-based**: Reassess if Ethena modifies sUSDe mechanics, cooldown periods, or undergoes significant changes
 - **Bug bounty**: Reassess if/when a bug bounty program is launched (should improve Audits score)
-- **Governance-based**: Reassess when on-chain governance is activated or when risk-premium parameters transition to independent managers
+- **Governance-based**: Reassess when onchain governance is activated or when risk-premium parameters transition to independent managers

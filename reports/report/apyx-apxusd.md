@@ -8,7 +8,7 @@
 
 ## Overview + Links
 
-Apyx is a "Dividend-Backed Stablecoin" (DBS) protocol that converts off-chain corporate dividend income from publicly-traded Digital Asset Treasury (DAT) preferred shares into on-chain programmable yield. The protocol offers two tokens:
+Apyx is a "Dividend-Backed Stablecoin" (DBS) protocol that converts offchain corporate dividend income from publicly-traded Digital Asset Treasury (DAT) preferred shares into onchain programmable yield. The protocol offers two tokens:
 
 - **apxUSD**: A synthetic dollar backed by an overcollateralized basket of low-volatility, variable-rate DAT preferred shares. It does NOT pay yield directly to holders and serves as the protocol's primary liquidity and collateral layer.
 - **apyUSD**: A yield-bearing ERC-4626 vault token. Users deposit apxUSD and receive apyUSD, which accrues yield through a rising exchange rate (non-rebasing) funded by dividends from the underlying DAT preferred share portfolio.
@@ -103,7 +103,7 @@ All contracts compiled with Solidity 0.8.30 using OpenZeppelin v5.5.0.
 **Notes:**
 - **Quantstamp**: Certificate is JavaScript-rendered; specific finding counts could not be extracted programmatically. Repo tag `audit/2026-02-02-quantstamp` confirms the audit.
 - **Zellic**: Published March 20, 2026 to their GitHub publications repo. Repo branch `audit/2026-01-12-zellic-remediation` and multiple PRs (e.g., #65, #110) reference Zellic findings with remediations.
-- **Certora**: Published March 3, 2026. **14 total findings: 1 High severity (fixed and confirmed), 4 Medium, 9 Low/Informational.** Notable: M-01 flagged the backing model as entirely trust-based with no on-chain verification. Repo tag `audit/2026-01-19-certora` confirms.
+- **Certora**: Published March 3, 2026. **14 total findings: 1 High severity (fixed and confirmed), 4 Medium, 9 Low/Informational.** Notable: M-01 flagged the backing model as entirely trust-based with no onchain verification. Repo tag `audit/2026-01-19-certora` confirms.
 - All three audits are now publicly verifiable. The [Apyx docs audits page](https://docs.apyx.fi/resources/audits) lists all three with direct links.
 
 ### On-Chain Complexity
@@ -123,7 +123,7 @@ The architecture is moderately complex:
 
 - **Time in Production**: apxUSD proxy deployed February 18, 2026 (block [24481772](https://etherscan.io/tx/0xfb528661b410cce683a1ee40b49a5249dbd677e8304a102927bc6639486f450b)). In production for **~36 days** as of March 26, 2026. **Young protocol** (still under 3 months).
 - **GitHub Repository**: [`apyx-labs/evm-contracts`](https://github.com/apyx-labs/evm-contracts) — public Foundry repo with 263 commits, 2 contributors. Contains all core contract source code (43 Solidity files), comprehensive test suite (60+ test files including invariant tests and audit-remediation tests), Slither CI. Created January 5, 2026. No license specified.
-- **TVL History**: Not tracked by DeFi Llama. Listed on CoinGecko (~$41M market cap, rank #512). Based on on-chain data:
+- **TVL History**: Not tracked by DeFi Llama. Listed on CoinGecko (~$41M market cap, rank #512). Based on onchain data:
   - Total apxUSD supply: ~66,978,450 (5.1x growth from ~13M at launch)
   - apyUSD vault: ~36.9M apxUSD backing (55.1% of supply)
   - Uniswap V4: ~7.84M apxUSD
@@ -151,9 +151,9 @@ The architecture is moderately complex:
 
 ### Minting & Redemption
 
-**Minting apxUSD**: **Permissioned, no on-chain collateral required.** Minting creates tokens without any backing asset transfer in the transaction. The `ApxUSD.mint()` function only checks that the caller has `MINT_STRAT_ROLE` and that `totalSupply` does not exceed `supplyCap` — then calls `_mint(to, amount)`. **No `transferFrom`, no collateral deposit, no on-chain proof of backing.** The entire collateral relationship is trust-based and off-chain.
+**Minting apxUSD**: **Permissioned, no onchain collateral required.** Minting creates tokens without any backing asset transfer in the transaction. The `ApxUSD.mint()` function only checks that the caller has `MINT_STRAT_ROLE` and that `totalSupply` does not exceed `supplyCap` — then calls `_mint(to, amount)`. **No `transferFrom`, no collateral deposit, no onchain proof of backing.** The entire collateral relationship is trust-based and offchain.
 
-Minting uses EIP-712 structured data signing via MinterV0 with the following on-chain safeguards:
+Minting uses EIP-712 structured data signing via MinterV0 with the following onchain safeguards:
 - Maximum single mint: 5,000,000 apxUSD
 - Rate limit: 5,000,000 apxUSD per 24 hours
 - 60-second execution delay via AccessManager (reduced from initial 4 hours)
@@ -185,10 +185,10 @@ General users acquire apxUSD through secondary markets (Curve, Uniswap).
 
 ### Collateralization
 
-- **Backing**: Off-chain preferred shares from publicly-traded DAT companies (STRC, SATA on Nasdaq). Overcollateralized but specific ratio not disclosed publicly.
+- **Backing**: Offchain preferred shares from publicly-traded DAT companies (STRC, SATA on Nasdaq). Overcollateralized but specific ratio not disclosed publicly.
 - **Collateral quality**: Variable-rate perpetual preferred shares. These are equities (not stablecoins or crypto assets). They sit subordinated to debt obligations in the capital structure. The preferred shares have dividend adjustment mechanisms that theoretically stabilize their price near par value.
 - **Custody**: Multi-party MPC key management -- both Apyx and custody partners hold keys. "No singular entity has the ability to mismanage the funds."
-- **On-chain verification**: **Not possible**. Collateral is entirely off-chain. Users must rely on:
+- **Onchain verification**: **Not possible**. Collateral is entirely offchain. Users must rely on:
   - Promised monthly PCAOB-registered audit firm attestations (none published yet)
   - Promised real-time dashboard for reserve monitoring
   - Promised daily NAV reporting
@@ -196,10 +196,10 @@ General users acquire apxUSD through secondary markets (Curve, Uniswap).
 
 ### Provability
 
-- **apxUSD backing**: Off-chain. No on-chain proof of reserves. Monthly PCAOB attestations promised but **no attestations published in 36 days**.
-- **apyUSD exchange rate**: Calculated on-chain via ERC-4626 standard (`convertToAssets()`/`convertToShares()`). Anyone can verify. Current rate: 1.3476 apxUSD per apyUSD.
+- **apxUSD backing**: Offchain. No onchain proof of reserves. Monthly PCAOB attestations promised but **no attestations published in 36 days**.
+- **apyUSD exchange rate**: Calculated onchain via ERC-4626 standard (`convertToAssets()`/`convertToShares()`). Anyone can verify. Current rate: 1.3476 apxUSD per apyUSD.
 - **Yield distribution**: Semi-programmatic. YieldDistributor deposits apxUSD into LinearVestV0, which vests linearly over ~17 days (1,489,445 seconds). The apyUSD vault pulls vested yield, increasing totalAssets and therefore the exchange rate. The initial yield distribution is admin-initiated.
-- **Rate oracle**: The ApxUSDRateOracle is **manually set** by an authorized role via `setRate()`. Currently set at exactly 1.000000 (1:1 with USDC). No on-chain price feed, no TWAP, no staleness check. Used by the Curve StableSwap-NG pool for pricing.
+- **Rate oracle**: The ApxUSDRateOracle is **manually set** by an authorized role via `setRate()`. Currently set at exactly 1.000000 (1:1 with USDC). No onchain price feed, no TWAP, no staleness check. Used by the Curve StableSwap-NG pool for pricing.
 
 ## Liquidity Risk
 
@@ -258,8 +258,8 @@ Apyx uses an OpenZeppelin AccessManager for centralized role-based access contro
 
 ### Programmability
 
-- **apxUSD**: Standard ERC-20 with no on-chain exchange rate (it's a 1:1 stablecoin). Minting is permissioned and programmatically rate-limited.
-- **apyUSD exchange rate**: Calculated on-chain via ERC-4626 (`totalAssets / totalSupply`). Programmatic, no admin input needed for the rate itself.
+- **apxUSD**: Standard ERC-20 with no onchain exchange rate (it's a 1:1 stablecoin). Minting is permissioned and programmatically rate-limited.
+- **apyUSD exchange rate**: Calculated onchain via ERC-4626 (`totalAssets / totalSupply`). Programmatic, no admin input needed for the rate itself.
 - **Yield distribution**: Semi-manual. Admin deposits apxUSD into YieldDistributor → LinearVestV0 → apyUSD vault pulls vested yield. The yield vesting is programmatic (~17-day linear), but the initial deposit is admin-initiated.
 - **Rate oracle**: **Manually set** by authorized role. The `setRate()` function has no automation, no TWAP, and no staleness check. If the oracle is not updated, the Curve pool will continue using the stale rate.
 - **Minting**: Two-step process (request → execute) with 60-second delay. Rate-limited to 5M/day via MinterV0. Admin can bypass by self-granting mint role.
@@ -268,13 +268,13 @@ Apyx uses an OpenZeppelin AccessManager for centralized role-based access contro
 
 | Dependency | Type | Criticality | Impact of Failure |
 |------------|------|-------------|-------------------|
-| **Off-chain preferred shares (STRC, SATA)** | Collateral backing | **Critical** | All value derives from off-chain equity holdings. Dividend cuts, issuer default, or custody failure would impair backing |
+| **Offchain preferred shares (STRC, SATA)** | Collateral backing | **Critical** | All value derives from offchain equity holdings. Dividend cuts, issuer default, or custody failure would impair backing |
 | **MPC Custody Providers** | Asset custody | **Critical** | Compromise or failure of custody could lead to loss of collateral. Multi-party MPC mitigates single-point risk |
 | **Curve StableSwap-NG** | Primary liquidity venue | **High** | Main exit path for non-whitelisted users. Pool failure would severely restrict liquidity |
 | **Gnosis Safe** | Multisig infrastructure | **High** | All governance actions flow through Safe multisigs |
 | **Ethereum L1** | Settlement layer | **Medium** | All contracts on Ethereum mainnet only |
 
-**Key dependency risk**: The protocol has a **critical dependency on off-chain assets and custody** that cannot be verified on-chain. The rate oracle is manually set with no automated price feed or fallback mechanism.
+**Key dependency risk**: The protocol has a **critical dependency on offchain assets and custody** that cannot be verified onchain. The rate oracle is manually set with no automated price feed or fallback mechanism.
 
 ## Operational Risk
 
@@ -365,18 +365,18 @@ Apyx uses an OpenZeppelin AccessManager for centralized role-based access contro
 ### Key Risks
 
 - **Young protocol**: ~36 days in production. Limited track record, no stress testing, still under 3 months
-- **Off-chain, unverifiable collateral**: Reserves backed by off-chain preferred shares with no on-chain proof of reserves. Monthly PCAOB attestations promised but **none published in 36 days**. No custodian publicly named. Certora M-01 flagged this as entirely trust-based.
+- **Offchain, unverifiable collateral**: Reserves backed by offchain preferred shares with no onchain proof of reserves. Monthly PCAOB attestations promised but **none published in 36 days**. No custodian publicly named. Certora M-01 flagged this as entirely trust-based.
 - **No timelock on admin actions**: Admin Safe (3/6) can upgrade all proxy contracts and change parameters immediately with zero delay
 - **Liquidity-supply mismatch**: Curve pool TVL dropped from ~$9M to ~$5.5M while supply grew 5.1x to ~67M. Pool now represents only 4.1% of supply.
 - **DFDV concentration**: All six founding contributors are executives at DeFi Development Corp. (Nasdaq: DFDV), which is also the protocol's first institutional investor. BVI legal entity with $100 liability cap
 - **No bug bounty program**: Notable absence for a protocol managing ~$67M in token supply
-- **Manual rate oracle**: Curve pool pricing depends on a manually-set oracle with no on-chain price feed, TWAP, or staleness detection
+- **Manual rate oracle**: Curve pool pricing depends on a manually-set oracle with no onchain price feed, TWAP, or staleness detection
 
 ### Critical Risks
 
-- **Unbacked minting**: `ApxUSD.mint()` creates tokens without any on-chain collateral transfer. The function only checks role and supply cap — no `transferFrom`, no collateral deposit. The Admin Safe can self-grant `MINT_STRAT_ROLE` (0-second delay), bypassing MinterV0's rate limits and signature checks entirely. **Tokens can be printed without backing at the discretion of the 3-of-6 multisig.**
+- **Unbacked minting**: `ApxUSD.mint()` creates tokens without any onchain collateral transfer. The function only checks role and supply cap — no `transferFrom`, no collateral deposit. The Admin Safe can self-grant `MINT_STRAT_ROLE` (0-second delay), bypassing MinterV0's rate limits and signature checks entirely. **Tokens can be printed without backing at the discretion of the 3-of-6 multisig.**
 - **Proxy upgrade without timelock**: The Admin Safe can upgrade apxUSD, apyUSD, and the rate oracle implementation contracts immediately. A compromised or malicious 3-of-6 multisig could deploy a malicious implementation that drains all funds or manipulates balances -- with zero delay for detection or intervention
-- **Off-chain collateral opacity**: If preferred shares are not actually held or are liquidated without disclosure, apxUSD could be undercollateralized with no on-chain mechanism to detect this. No PCAOB attestation has been published despite being promised monthly.
+- **Offchain collateral opacity**: If preferred shares are not actually held or are liquidated without disclosure, apxUSD could be undercollateralized with no onchain mechanism to detect this. No PCAOB attestation has been published despite being promised monthly.
 - **Rate oracle manipulation**: A compromised admin could set the oracle rate to an extreme value, enabling extraction of value from the Curve pool. No staleness check or bounds validation exists in the oracle contract
 
 ---
@@ -386,12 +386,12 @@ Apyx uses an OpenZeppelin AccessManager for centralized role-based access contro
 **Scoring Guidelines:**
 - Be conservative: when uncertain between two scores, choose the higher (riskier) one
 - Use decimals (e.g., 2.5) when a subcategory falls between scores
-- Prioritize on-chain evidence over documentation claims
+- Prioritize onchain evidence over documentation claims
 
 ### Critical Risk Gates
 
 - [x] **No audit** -- Three reputable audits confirmed: Quantstamp (Feb 2026), Zellic (Mar 2026), Certora (Mar 2026). All publicly published. **PASS**
-- [ ] **Unverifiable reserves** -- Reserves are entirely off-chain preferred shares. No on-chain proof of reserves. Monthly PCAOB attestations promised but **none published in 36 days**. No custodian publicly named. Certora M-01 flagged backing as entirely trust-based. Collateral is publicly-traded Nasdaq equity with transparent pricing, but this is **not comparable to USDC/USDT** which publish regular attestations from named, regulated custodians. **FAIL** -- no proof of reserves exists, neither on-chain nor off-chain.
+- [ ] **Unverifiable reserves** -- Reserves are entirely offchain preferred shares. No onchain proof of reserves. Monthly PCAOB attestations promised but **none published in 36 days**. No custodian publicly named. Certora M-01 flagged backing as entirely trust-based. Collateral is publicly-traded Nasdaq equity with transparent pricing, but this is **not comparable to USDC/USDT** which publish regular attestations from named, regulated custodians. **FAIL** -- no proof of reserves exists, neither onchain nor offchain.
 - [x] **Total centralization** -- 3-of-6 Gnosis Safe multisig. Not a single EOA. **PASS**
 
 **Unverifiable reserves gate FAILS.** Gate override applied: final score overridden to **5.0**.
@@ -406,7 +406,7 @@ Apyx uses an OpenZeppelin AccessManager for centralized role-based access contro
 - **TVL**: ~$67M token supply. Listed on CoinGecko (~$41M market cap). Not on DeFi Llama.
 - **Incidents**: None.
 
-**Score: 3.5/5** -- Three reputable audits with public reports and on-chain remediation evidence is a strong positive. Open-source code with comprehensive tests. Between score 3 (multiple audits, 3-6 months, established) and score 4 (single audit, <3 months). The 36-day track record (<3 months) and absent bug bounty keep this from reaching 3.
+**Score: 3.5/5** -- Three reputable audits with public reports and onchain remediation evidence is a strong positive. Open-source code with comprehensive tests. Between score 3 (multiple audits, 3-6 months, established) and score 4 (single audit, <3 months). The 36-day track record (<3 months) and absent bug bounty keep this from reaching 3.
 
 #### Category 2: Centralization & Control Risks (Weight: 30%)
 
@@ -422,43 +422,43 @@ Apyx uses an OpenZeppelin AccessManager for centralized role-based access contro
 
 **Subcategory B: Programmability**
 
-- apxUSD: Standard ERC-20, no on-chain exchange rate needed (1:1 stablecoin)
+- apxUSD: Standard ERC-20, no onchain exchange rate needed (1:1 stablecoin)
 - apyUSD: ERC-4626 with programmatic exchange rate
 - Yield distribution: ~17-day linear vesting is programmatic, but initial deposits are admin-initiated
 - Rate oracle: Manually set, no automation
 - Minting: Programmatic rate limiting and signatures, but permissioned
 - 60-second mint delay reduced from initial 4 hours — governance action lowered safeguard
 
-**Programmability Score: 3.5** -- Hybrid system. apyUSD exchange rate and yield vesting are on-chain. But the rate oracle is entirely manually controlled, yield distribution requires admin initiation, and the 60-second minting delay was reduced from 4 hours. Between score 3 (hybrid) and score 4 (significant manual intervention).
+**Programmability Score: 3.5** -- Hybrid system. apyUSD exchange rate and yield vesting are onchain. But the rate oracle is entirely manually controlled, yield distribution requires admin initiation, and the 60-second minting delay was reduced from 4 hours. Between score 3 (hybrid) and score 4 (significant manual intervention).
 
 **Subcategory C: External Dependencies**
 
-- **Critical**: Off-chain preferred share collateral (STRC, SATA) and MPC custody providers
+- **Critical**: Offchain preferred share collateral (STRC, SATA) and MPC custody providers
 - **High**: Curve pool for liquidity
 - **Medium**: Gnosis Safe infrastructure
 
-**Dependencies Score: 4.0** -- Critical dependency on off-chain assets and custody that cannot be verified on-chain. No fallback mechanism if custody providers fail. The oracle has no automated price feed.
+**Dependencies Score: 4.0** -- Critical dependency on offchain assets and custody that cannot be verified onchain. No fallback mechanism if custody providers fail. The oracle has no automated price feed.
 
 **Centralization Score = (4.0 + 3.5 + 4.0) / 3 = 3.83**
 
-**Score: 3.8/5** -- Significant centralization risk driven by no timelock on admin actions, UUPS upgradeable contracts with instant upgrade capability, off-chain dependencies, and a manually-controlled rate oracle.
+**Score: 3.8/5** -- Significant centralization risk driven by no timelock on admin actions, UUPS upgradeable contracts with instant upgrade capability, offchain dependencies, and a manually-controlled rate oracle.
 
 #### Category 3: Funds Management (Weight: 30%)
 
 **Subcategory A: Collateralization**
 
-- Off-chain backing by publicly-traded preferred shares (Nasdaq-listed)
+- Offchain backing by publicly-traded preferred shares (Nasdaq-listed)
 - Overcollateralized (specific ratio undisclosed)
 - Multi-party MPC custody
-- Cannot verify collateral on-chain
+- Cannot verify collateral onchain
 - Reserve is equity (not stablecoins) -- more volatile than typical stablecoin collateral
 
-**Collateralization Score: 4.0** -- Between score 3 (100% collateral, some off-chain, periodic attestation) and score 4 (partially collateralized or custodial, opaque reporting). Raised from 3.5: 36 days in and still no published attestation despite monthly cadence being promised. No custodian publicly named. Overcollateralization ratio undisclosed. Certora M-01 flagged the entire backing model as trust-based. Collateral is publicly-traded equity with transparent pricing, but that alone doesn't prove reserves are held.
+**Collateralization Score: 4.0** -- Between score 3 (100% collateral, some offchain, periodic attestation) and score 4 (partially collateralized or custodial, opaque reporting). Raised from 3.5: 36 days in and still no published attestation despite monthly cadence being promised. No custodian publicly named. Overcollateralization ratio undisclosed. Certora M-01 flagged the entire backing model as trust-based. Collateral is publicly-traded equity with transparent pricing, but that alone doesn't prove reserves are held.
 
 **Subcategory B: Provability**
 
-- apyUSD exchange rate: on-chain (ERC-4626)
-- apxUSD collateral: entirely off-chain
+- apyUSD exchange rate: onchain (ERC-4626)
+- apxUSD collateral: entirely offchain
 - Monthly PCAOB attestations promised but **none published in 36 days**
 - Daily NAV reporting promised but not verified
 - Rate oracle: manually set, no third-party verification
@@ -468,7 +468,7 @@ Apyx uses an OpenZeppelin AccessManager for centralized role-based access contro
 
 **Funds Management Score = (4.0 + 4.5) / 2 = 4.25**
 
-**Score: 4.25/5** -- Off-chain collateral with no published attestations after 36 days. No custodian named. Publicly-traded equity provides pricing transparency but not reserve verification.
+**Score: 4.25/5** -- Offchain collateral with no published attestations after 36 days. No custodian named. Publicly-traded equity provides pricing transparency but not reserve verification.
 
 #### Category 4: Liquidity Risk (Weight: 15%)
 
@@ -507,7 +507,7 @@ Final Score = (Centralization × 0.30) + (Funds Mgmt × 0.30) + (Audits × 0.20)
 | **Gate Override** | | | **Unverifiable reserves → 5.0** |
 | **Final Score** | | | **5.0/5.0** |
 
-**Weighted Total: 3.7** — but the **Unverifiable Reserves critical risk gate fails**. No proof of reserves exists (neither on-chain nor off-chain), no custodian is named, and no PCAOB attestation has been published in 36 days despite a monthly cadence being promised. Certora M-01 confirmed the backing model is entirely trust-based. **Gate override applied: Final Score = 5.0.**
+**Weighted Total: 3.7** — but the **Unverifiable Reserves critical risk gate fails**. No proof of reserves exists (neither onchain nor offchain), no custodian is named, and no PCAOB attestation has been published in 36 days despite a monthly cadence being promised. Certora M-01 confirmed the backing model is entirely trust-based. **Gate override applied: Final Score = 5.0.**
 
 ### Risk Tier
 
@@ -523,9 +523,9 @@ Final Score = (Centralization × 0.30) + (Funds Mgmt × 0.30) + (Audits × 0.20)
 
 ---
 
-Apyx's apxUSD is a novel "Dividend-Backed Stablecoin" with an innovative approach to bridging off-chain corporate dividends into on-chain yield. The team is public and well-credentialed, all three audits are now published, and the code is open-source with comprehensive tests.
+Apyx's apxUSD is a novel "Dividend-Backed Stablecoin" with an innovative approach to bridging offchain corporate dividends into onchain yield. The team is public and well-credentialed, all three audits are now published, and the code is open-source with comprehensive tests.
 
-However, **apxUSD fails the Unverifiable Reserves critical risk gate.** After 36 days in production, no proof of reserves exists — no PCAOB attestation, no named custodian, no on-chain verification. The backing model is entirely trust-based (confirmed by Certora M-01). Additionally, the protocol has **no timelock on admin actions** (allowing instant proxy upgrades), a **manually-controlled rate oracle**, and **Curve pool liquidity has degraded** from ~$9M to ~$5.5M while supply grew 5.1x.
+However, **apxUSD fails the Unverifiable Reserves critical risk gate.** After 36 days in production, no proof of reserves exists — no PCAOB attestation, no named custodian, no onchain verification. The backing model is entirely trust-based (confirmed by Certora M-01). Additionally, the protocol has **no timelock on admin actions** (allowing instant proxy upgrades), a **manually-controlled rate oracle**, and **Curve pool liquidity has degraded** from ~$9M to ~$5.5M while supply grew 5.1x.
 
 **Yearn should not take exposure to this asset until the Unverifiable Reserves gate is resolved.**
 

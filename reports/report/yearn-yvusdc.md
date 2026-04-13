@@ -226,16 +226,16 @@ yvUSDC-1 deploys deposited USDC into yield strategies with 100% capital utilizat
 
 ### Collateralization
 
-- **100% on-chain USDC backing** — all deposits are USDC, deployed into blue-chip protocols (Sky/MakerDAO sUSDS and Morpho lending vaults)
+- **100% onchain USDC backing** — all deposits are USDC, deployed into blue-chip protocols (Sky/MakerDAO sUSDS and Morpho lending vaults)
 - **Collateral quality:** sUSDS (~41%) is backed by over-collateralized loans and RWA (Treasury bills) via MakerDAO. Morpho compounders (~59%) deposit into USDC lending markets with blue-chip collateral
 - **No leverage** — unlike yvUSD's looper strategies, these are simple deposits into savings rate and lending products
 - **All positions are fully redeemable** — sUSDS and Morpho vaults support standard ERC-4626 withdrawal. USDS converts 1:1 to DAI via the Exchanger
 
 ### Provability
 
-- **yvUSDC-1 exchange rate:** Calculated on-chain via ERC-4626 standard (`convertToAssets()`/`convertToShares()`). Fully programmatic, no admin input
-- **Strategy positions:** Each strategy's `totalAssets()` reads the underlying vault share balance (yvUSDS or sUSDS) and converts to USDC equivalent on-chain
-- **sUSDS rate:** The Sky Savings Rate is set by Sky Governance and applied on-chain via the `pot`/`ssr` mechanism. The sUSDS exchange rate increases continuously based on the SSR
+- **yvUSDC-1 exchange rate:** Calculated onchain via ERC-4626 standard (`convertToAssets()`/`convertToShares()`). Fully programmatic, no admin input
+- **Strategy positions:** Each strategy's `totalAssets()` reads the underlying vault share balance (yvUSDS or sUSDS) and converts to USDC equivalent onchain
+- **sUSDS rate:** The Sky Savings Rate is set by Sky Governance and applied onchain via the `pot`/`ssr` mechanism. The sUSDS exchange rate increases continuously based on the SSR
 - **Profit/loss reporting:** Profits are reported by keepers via `process_report()` and locked for gradual distribution over 10 days (`profitMaxUnlockTime`). Losses are immediately reflected in PPS
 
 ## Liquidity Risk
@@ -275,8 +275,8 @@ The yvUSDC-1 vault uses the **standard Yearn V3 governance pattern** via the Yea
 
 ### Programmability
 
-- **Exchange rate (PPS):** Calculated on-chain algorithmically via ERC-4626. Fully programmatic, no admin input
-- **Vault operations:** Deposit/withdraw are permissionless on-chain transactions
+- **Exchange rate (PPS):** Calculated onchain algorithmically via ERC-4626. Fully programmatic, no admin input
+- **Vault operations:** Deposit/withdraw are permissionless onchain transactions
 - **Strategy profit/loss:** Reported programmatically by keepers via `process_report()`. Profits unlock linearly over 10 days
 - **Debt allocation:** Managed by both the Debt Allocator (automated) and Brain multisig (manual). Currently split across four strategies
 - **V3 vaults are immutable** — no proxy upgrades, no admin-changeable implementation
@@ -309,7 +309,7 @@ The yvUSDC-1 vault uses the **standard Yearn V3 governance pattern** via the Yea
 Yearn maintains an active monitoring system via the [`monitoring-scripts-py`](https://github.com/yearn/monitoring-scripts-py) repository. **yvUSDC-1 is actively monitored:**
 
 - **Large flow alerts** (`yearn/alert_large_flows.py`): Runs **hourly via GitHub Actions**. yvUSDC-1 is in the monitored vault list. Alerts on deposits/withdrawals exceeding threshold via Telegram
-- **Endorsed vault check** (`yearn/check_endorsed.py`): Runs weekly, verifies all Yearn V3 vaults are endorsed on-chain via the registry contract
+- **Endorsed vault check** (`yearn/check_endorsed.py`): Runs weekly, verifies all Yearn V3 vaults are endorsed onchain via the registry contract
 - **Timelock monitoring** (`timelock/timelock_alerts.py`): Monitors the Yearn TimelockController (Strategy Manager) across 6 chains
 
 ### Key Contracts
@@ -373,12 +373,12 @@ Yearn maintains an active monitoring system via the [`monitoring-scripts-py`](ht
 **Scoring Guidelines:**
 - Be conservative: when uncertain between two scores, choose the higher (riskier) one
 - Use decimals (e.g., 2.5) when a subcategory falls between scores
-- Prioritize on-chain evidence over documentation claims
+- Prioritize onchain evidence over documentation claims
 
 ### Critical Risk Gates
 
 - [x] **No audit** — Yearn V3 core audited by 3 top firms. Sky/sUSDS audited by 7+ firms. ✅ PASS
-- [x] **Unverifiable reserves** — ERC-4626 standard. All positions on-chain verifiable. sUSDS is transparent. ✅ PASS
+- [x] **Unverifiable reserves** — ERC-4626 standard. All positions onchain verifiable. sUSDS is transparent. ✅ PASS
 - [x] **Total centralization** — 6-of-9 multisig with publicly named signers. ✅ PASS
 
 **All gates pass.** Proceed to category scoring.
@@ -416,12 +416,12 @@ Yearn maintains an active monitoring system via the [`monitoring-scripts-py`](ht
 
 | Factor | Assessment |
 |--------|-----------|
-| PPS | On-chain ERC-4626, fully algorithmic |
-| Vault operations | Permissionless deposits/withdrawals on-chain |
+| PPS | Onchain ERC-4626, fully algorithmic |
+| Vault operations | Permissionless deposits/withdrawals onchain |
 | Strategy reporting | Programmatic via keeper (yHaaSRelayer) |
 | Debt allocation | Both automated (Debt Allocator) and manual (Brain multisig) |
 
-**Programmability Score: 1/5** — Fully programmatic system. PPS is calculated on-chain algorithmically via ERC-4626. All vault operations (deposits, withdrawals) are permissionless on-chain transactions. Strategy reporting is automated via keeper. All funds are on-chain and cannot be altered by off-chain factors.
+**Programmability Score: 1/5** — Fully programmatic system. PPS is calculated onchain algorithmically via ERC-4626. All vault operations (deposits, withdrawals) are permissionless onchain transactions. Strategy reporting is automated via keeper. All funds are onchain and cannot be altered by offchain factors.
 
 **Subcategory C: External Dependencies**
 
@@ -435,7 +435,7 @@ Yearn maintains an active monitoring system via the [`monitoring-scripts-py`](ht
 
 **Centralization Score = (1.0 + 1.0 + 2.0) / 3 = 1.0**
 
-**Score: 1.0/5** — Immutable vault with 6/9 named-signer multisig. 7-day timelock on the most critical action (strategy additions), with Daddy as sole proposer and no EOA vault roles. Fully programmatic operations with all funds on-chain. Blue-chip dependencies (Sky + Morpho).
+**Score: 1.0/5** — Immutable vault with 6/9 named-signer multisig. 7-day timelock on the most critical action (strategy additions), with Daddy as sole proposer and no EOA vault roles. Fully programmatic operations with all funds onchain. Blue-chip dependencies (Sky + Morpho).
 
 #### Category 3: Funds Management (Weight: 30%)
 
@@ -446,24 +446,24 @@ Yearn maintains an active monitoring system via the [`monitoring-scripts-py`](ht
 | Backing | 100% USDC-backed, deployed to blue-chip yield products: Sky/MakerDAO (sUSDS, ~41%) and Morpho (3 compounders, ~59%) |
 | Collateral quality | sUSDS: backed by over-collateralized loans and Treasury bills (RWA) via MakerDAO. Morpho: USDC lending markets with blue-chip collateral |
 | Leverage | None |
-| Verifiability | ERC-4626, all positions on-chain |
+| Verifiability | ERC-4626, all positions onchain |
 
-**Collateralization Score: 1/5** — 100% on-chain USDC backing deployed to the highest-quality DeFi protocols (Sky/MakerDAO sUSDS and Morpho lending vaults). No leverage. Fully verifiable. Blue-chip collateral. Real-time on-chain verification.
+**Collateralization Score: 1/5** — 100% onchain USDC backing deployed to the highest-quality DeFi protocols (Sky/MakerDAO sUSDS and Morpho lending vaults). No leverage. Fully verifiable. Blue-chip collateral. Real-time onchain verification.
 
 **Subcategory B: Provability**
 
 | Factor | Assessment |
 |--------|-----------|
-| Reserve transparency | Fully on-chain — anyone can verify yvUSDC-1 → yvUSDS/sUSDS positions |
+| Reserve transparency | Fully onchain — anyone can verify yvUSDC-1 → yvUSDS/sUSDS positions |
 | Exchange rate | ERC-4626, programmatic, real-time |
 | Reporting | Automated via keepers with 10-day profit unlock |
-| Third-party verification | sUSDS rate is on-chain, verifiable independently |
+| Third-party verification | sUSDS rate is onchain, verifiable independently |
 
-**Provability Score: 1/5** — Excellent transparency. ERC-4626 standard provides fully on-chain, real-time verification. No off-chain components. Multiple verification sources (vault totalAssets, strategy totalAssets, yvUSDS/sUSDS balances).
+**Provability Score: 1/5** — Excellent transparency. ERC-4626 standard provides fully onchain, real-time verification. No offchain components. Multiple verification sources (vault totalAssets, strategy totalAssets, yvUSDS/sUSDS balances).
 
 **Funds Management Score = (1 + 1) / 2 = 1.0**
 
-**Score: 1.0/5** — Outstanding on-chain provability. Top-tier blue-chip collateral quality. No leverage. Simple, transparent pipeline.
+**Score: 1.0/5** — Outstanding onchain provability. Top-tier blue-chip collateral quality. No leverage. Simple, transparent pipeline.
 
 #### Category 4: Liquidity Risk (Weight: 15%)
 
@@ -629,6 +629,6 @@ To change the timelock delay (e.g., reduce from 7 days), an attacker would need 
 
 1. Control Daddy (6/9) to **propose** `updateDelay()` — the only PROPOSER
 2. Wait 7 days — Brain or Daddy can **cancel** during this window
-3. Execute via Daddy, Brain, or the EOA — but the operation is already visible on-chain for 7 days
+3. Execute via Daddy, Brain, or the EOA — but the operation is already visible onchain for 7 days
 
 DEFAULT_ADMIN was never granted, so no one can grant themselves PROPOSER or TIMELOCK_ADMIN to skip this flow. The timelock holds TIMELOCK_ADMIN but can only act on it through its own propose→wait→execute cycle.

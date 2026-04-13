@@ -8,13 +8,13 @@
 
 ## Overview + Links
 
-srRoyUSDC is the Senior Vault token of Royco Dawn, an on-chain yield-splitting protocol that divides yield into two tranches: Senior (conservative, protected) and Junior (enhanced returns, first-loss). Users deposit USDC into the Dawn Senior Vault (DSV) and receive srRoyUSDC tokens (ERC-4626) representing diversified Senior tranche exposure across multiple whitelisted yield markets.
+srRoyUSDC is the Senior Vault token of Royco Dawn, an onchain yield-splitting protocol that divides yield into two tranches: Senior (conservative, protected) and Junior (enhanced returns, first-loss). Users deposit USDC into the Dawn Senior Vault (DSV) and receive srRoyUSDC tokens (ERC-4626) representing diversified Senior tranche exposure across multiple whitelisted yield markets.
 
 The Senior Vault is curator-managed by the Royco Foundation, which allocates deposited USDC across whitelisted markets including autoUSD (Auto), savUSD (Avant), sNUSD (Neutrl), Aave v3 Core USDC, and stcUSD (Cap Finance, currently paused). Junior capital in each market absorbs losses first, providing a coverage buffer for Senior depositors.
 
-Royco's tranche mechanics are enforced on-chain, but the vault's capital path is trust-based: `MultisigStrategy` hands full custody of allocated funds to the treasury multisig.
+Royco's tranche mechanics are enforced onchain, but the vault's capital path is trust-based: `MultisigStrategy` hands full custody of allocated funds to the treasury multisig.
 
-- **Current PPS:** ~1.005571 USDC per srRoyUSDC (verified on-chain March 25, 2026)
+- **Current PPS:** ~1.005571 USDC per srRoyUSDC (verified onchain March 25, 2026)
 - **Total Supply:** ~10,673,575 srRoyUSDC
 - **Total Assets:** ~$10,733,046 USDC (100% deployed via MultisigStrategy, $0 held directly in vault)
 - **Total Holders:** ~8 (3 with meaningful holdings; 1 EOA holds ~69% of supply)
@@ -60,7 +60,7 @@ The Treasury multisig ([`0x170ff06326eBb64BF609a848Fc143143994AF6c8`](https://et
 
 Blueprint's own architecture docs describe MultisigStrategy as a design that "simply forwards deposits to a multi-sig wallet and retrieves" them later: [`Architecture.md#3.1.3 Multisig Strategies`](https://github.com/Blueprint-Finance/concrete-earn-v2-bug-bounty/blob/a9ace6154cb2728bc9d3d4c5019e040fb2d4b562/doc/Architecture.md#313-multisig-strategies).
 
-The configured `multiSig` address was also verified live on-chain to be a standard Safe v1.4.1, not a custom treasury contract: `MultisigStrategy.getMultiSig()` returns [`0x170ff06326eBb64BF609a848Fc143143994AF6c8`](https://etherscan.io/address/0x170ff06326eBb64BF609a848Fc143143994AF6c8), and that address responds to `VERSION()` = `1.4.1`, `getThreshold()` = `3`, and `getOwners()` = 5 owners.
+The configured `multiSig` address was also verified live onchain to be a standard Safe v1.4.1, not a custom treasury contract: `MultisigStrategy.getMultiSig()` returns [`0x170ff06326eBb64BF609a848Fc143143994AF6c8`](https://etherscan.io/address/0x170ff06326eBb64BF609a848Fc143143994AF6c8), and that address responds to `VERSION()` = `1.4.1`, `getThreshold()` = `3`, and `getOwners()` = 5 owners.
 | Market | Contract | Address |
 |--------|----------|---------|
 | Neutrl sNUSD | Kernel | [`0x0aE0978B868804929fd4C06B3B22D9197B8cd3c6`](https://etherscan.io/address/0x0aE0978B868804929fd4C06B3B22D9197B8cd3c6) |
@@ -141,7 +141,7 @@ Royco is **not** listed on the [SEAL Safe Harbor Registry](https://safeharbor.se
 - **Royco Dawn (V2) Launch:** January 6, 2026 (~78 days in production)
 - **Smart Contract Exploits:** None known. Protocol is still very new.
 - **Security Incidents:** None found in rekt.news, de.fi REKT Database, or other exploit trackers.
-- **TVL:** ~$5.16M across Royco V2 on DeFiLlama (Ethereum: $5.15M, Avalanche: $3.5K). srRoyUSDC vault `totalAssets()`: ~$10.73M (discrepancy likely due to DeFiLlama methodology vs on-chain reported value via MultisigStrategy).
+- **TVL:** ~$5.16M across Royco V2 on DeFiLlama (Ethereum: $5.15M, Avalanche: $3.5K). srRoyUSDC vault `totalAssets()`: ~$10.73M (discrepancy likely due to DeFiLlama methodology vs onchain reported value via MultisigStrategy).
 - **Holder Distribution:** ~8 holders with non-zero balances (3 with meaningful holdings). One EOA holds ~7.36M srRoyUSDC (~69% of supply). Morpho Blue holds ~2.83M (~26%, collateral from Morpho lending). Curve pool holds ~489K (~4.6%). Extreme concentration risk. The vault holds $0 USDC directly — 100% of ~$10.73M is deployed via MultisigStrategy.
 - **Peg Stability:** srRoyUSDC is a yield-bearing vault token priced at ~1.005571 USDC (reflecting accrued yield since January 6). The Curve CurveStableSwapNG pool ([`0x8fc753f96752b35f64d1bae514e6cf8db0b9322e`](https://etherscan.io/address/0x8fc753f96752b35f64d1bae514e6cf8db0b9322e)) holds ~489K srRoyUSDC, a significant improvement from initial launch (~$600).
 - **GitHub Activity:** 548 commits on main branch, 2 contributors (Shivaansh Kapoor and Ankur Dubey). v1.0.0 released February 5, 2026. Repository has 4 stars.
@@ -161,7 +161,7 @@ The Senior Vault allocates deposited USDC across whitelisted markets where Junio
 | stcUSD | Cap Finance | Ethereum | Paused | 0% | Paused (compressed yields) |
 | sUSDai | USD.ai | Arbitrum | Pending | 0% | Pending integration |
 
-Actual allocations computed from Treasury multisig token balances (see [Reserve Location Reconciliation](#reserve-location-reconciliation-verified-march-27-2026)). Target allocations are set off-chain by the Royco Foundation curator — not stored in any contract.
+Actual allocations computed from Treasury multisig token balances (see [Reserve Location Reconciliation](#reserve-location-reconciliation-verified-march-27-2026)). Target allocations are set offchain by the Royco Foundation curator — not stored in any contract.
 
 **Concentration Controls:**
 - Per-protocol: 40% max — Avant is currently at the cap (~40%)
@@ -173,16 +173,16 @@ Actual allocations computed from Treasury multisig token balances (see [Reserve 
 
 - **Deposits:** KYC-gated. Participants undergo KYC verification and deposits restricted to whitelisted addresses. Not fully permissionless.
 - **Withdrawals:** Request triggers up to 14-day unlock period. Vault sources liquidity from underlying Senior tranches. After unlock period, funds become claimable.
-- **Fees:** 0% management fee, 0% performance fee at the vault level (`managementFee()` and `performanceFee()` both return 0 with `address(0)` recipients, verified on-chain). Fees are charged at the Dawn market layer: 10% on ST yield (`stProtocolFeeWAD`), 0% on JT yield (`jtProtocolFeeWAD`), 45% on yield share / risk premium (`yieldShareProtocolFeeWAD`) — verified via accountant `getState()`. Documentation claims "10% Senior / 20% Junior" are partially outdated. Vault-level fee updates require VAULT_MANAGER role (3/4 multisig).
+- **Fees:** 0% management fee, 0% performance fee at the vault level (`managementFee()` and `performanceFee()` both return 0 with `address(0)` recipients, verified onchain). Fees are charged at the Dawn market layer: 10% on ST yield (`stProtocolFeeWAD`), 0% on JT yield (`jtProtocolFeeWAD`), 45% on yield share / risk premium (`yieldShareProtocolFeeWAD`) — verified via accountant `getState()`. Documentation claims "10% Senior / 20% Junior" are partially outdated. Vault-level fee updates require VAULT_MANAGER role (3/4 multisig).
 - **Secondary Market:** Improved since launch. Curve CurveStableSwapNG pool holds ~489K srRoyUSDC. Morpho Blue markets: srRoyUSDC/USDC (~$272K supply, 84% utilized), srRoyUSDC/pmUSD (~$1.99M supply, 91% utilized — loan asset is pmUSD, not direct USDC exit).
 
 ### Collateralization
 
 - USDC deposits are deployed to underlying yield markets (not held as idle collateral)
-- Junior tranche capital in each market absorbs losses first — this is enforced on-chain by each market's RoycoAccountant contract (verified in [source code](https://github.com/roycoprotocol/royco-dawn/blob/main/src/accountant/RoycoAccountant.sol) and on deployed contracts). The loss waterfall: JT effective NAV is reduced first; if JT is depleted, residual losses hit ST as `stImpermanentLoss`.
-- **On-chain coverage verified (March 26, 2026):** Neutrl sNUSD: 12.4% (required 10%), Tokemak autoUSD: 12.5% (required 10%). See [On-Chain Coverage Data](#on-chain-coverage-data-verified-march-26-2026) for full breakdown.
+- Junior tranche capital in each market absorbs losses first — this is enforced onchain by each market's RoycoAccountant contract (verified in [source code](https://github.com/roycoprotocol/royco-dawn/blob/main/src/accountant/RoycoAccountant.sol) and on deployed contracts). The loss waterfall: JT effective NAV is reduced first; if JT is depleted, residual losses hit ST as `stImpermanentLoss`.
+- **Onchain coverage verified (March 26, 2026):** Neutrl sNUSD: 12.4% (required 10%), Tokemak autoUSD: 12.5% (required 10%). See [On-Chain Coverage Data](#onchain-coverage-data-verified-march-26-2026) for full breakdown.
 - If losses exceed Junior coverage, Senior absorbs remaining losses
-- **Loss Escalation Flow (enforced on-chain by kernel/accountant):**
+- **Loss Escalation Flow (enforced onchain by kernel/accountant):**
 
   The flow differs per market depending on the `fixedTermDuration` parameter. Note: srRoyUSDC vault holders always face the 14-day async withdrawal queue at the Concrete vault layer regardless of market state below.
 
@@ -200,18 +200,18 @@ Actual allocations computed from Treasury multisig token balances (see [Reserve 
 
   **Impact on srRoyUSDC:** During Fixed-Term (Tokemak only, up to 2 days), the Treasury multisig cannot redeem Senior Tranche tokens from the affected market, blocking vault liquidity sourcing for that sleeve. Neutrl never blocks withdrawals. The srRoyUSDC vault itself is not aware of market states.
 - Coverage adjustments require 3-day notice to whitelisted depositors with incremental 1% daily changes
-- **Loss propagation from Dawn markets to Senior vault is indirect:** While the Royco Dawn kernel/accountant contracts enforce Junior-first loss coverage on-chain, the srRoyUSDC Concrete vault itself cannot read these contracts. The Treasury multisig holds the Senior Tranche tokens and calls `adjustTotalAssets()` on the MultisigStrategy to report the net value. The loss waterfall (underlying drawdown → JT absorption → residual ST loss) is enforced at the market level, but the reporting of the net result to the vault is mediated by the multisig.
+- **Loss propagation from Dawn markets to Senior vault is indirect:** While the Royco Dawn kernel/accountant contracts enforce Junior-first loss coverage onchain, the srRoyUSDC Concrete vault itself cannot read these contracts. The Treasury multisig holds the Senior Tranche tokens and calls `adjustTotalAssets()` on the MultisigStrategy to report the net value. The loss waterfall (underlying drawdown → JT absorption → residual ST loss) is enforced at the market level, but the reporting of the net result to the vault is mediated by the multisig.
 
 **Collateral Concerns:**
 - Underlying protocols (Avant, Neutrl, Auto, Cap Finance) are newer, less battle-tested DeFi protocols
 - savUSD (Avant) on Avalanche introduces cross-chain risk
 - sNUSD (Neutrl) and autoUSD (Auto) are relatively unknown protocols — limited public track record
-- **Junior coverage is verifiable at the market level but indirect from the vault:** Each market's Accountant exposes `getState()` returning JT effective NAV, coverage parameters, and impermanent loss. However, the srRoyUSDC Concrete vault has no on-chain link to these contracts — it relies on the Treasury multisig holding Senior Tranche tokens and reporting values via `adjustTotalAssets()`. The tranching enforcement is on-chain, but the vault's view of it is trust-based.
+- **Junior coverage is verifiable at the market level but indirect from the vault:** Each market's Accountant exposes `getState()` returning JT effective NAV, coverage parameters, and impermanent loss. However, the srRoyUSDC Concrete vault has no onchain link to these contracts — it relies on the Treasury multisig holding Senior Tranche tokens and reporting values via `adjustTotalAssets()`. The tranching enforcement is onchain, but the vault's view of it is trust-based.
 - **Junior capital is concentrated:** Only 2-3 depositor addresses per market. Junior depositors could withdraw (subject to coverage enforcement — kernel blocks JT redemption if it would breach coverage).
 - **Coverage buffer is thin:** Active markets have 12.4-12.5% actual coverage vs 10% required — only ~2.5% buffer above minimum.
 - **Beta = 1.0:** In all markets, Junior uses the same underlying asset as Senior, meaning JT and ST losses are correlated. JT does not provide diversification — only a capital buffer.
-- Vault holds $0 USDC directly — 100% of ~$10.73M is deployed externally via MultisigStrategy. Importantly, this strategy is a **full-custody handoff** design: the vault calls `allocateFunds()`, the strategy's `_allocateToPosition()` forwards USDC directly to the Treasury multisig via `safeTransfer(multiSig, amount)`, and assets return only if the multisig cooperates with `_retrieveAssetsFromMultisig()` / `safeTransferFrom(multiSig, ...)`. There is no on-chain guarantee that forwarded funds will be deployed to approved markets or returned to the vault. Once funds reach the Treasury multisig, that multisig can break the expected flow and use the funds freely.
-- Vault holds $0 USDC directly — 100% of ~$10.73M is deployed externally via MultisigStrategy. Importantly, this strategy is a **full-custody handoff** design: the vault calls `allocateFunds()`, the strategy's `_allocateToPosition()` forwards USDC directly to the Treasury multisig via `safeTransfer(multiSig, amount)`, and assets return only if the multisig cooperates with `_retrieveAssetsFromMultisig()` / `safeTransferFrom(multiSig, ...)`. There is no on-chain guarantee that forwarded funds will be deployed to approved markets or returned to the vault. Once funds reach the Treasury multisig, that multisig can break the expected flow and use the funds freely.
+- Vault holds $0 USDC directly — 100% of ~$10.73M is deployed externally via MultisigStrategy. Importantly, this strategy is a **full-custody handoff** design: the vault calls `allocateFunds()`, the strategy's `_allocateToPosition()` forwards USDC directly to the Treasury multisig via `safeTransfer(multiSig, amount)`, and assets return only if the multisig cooperates with `_retrieveAssetsFromMultisig()` / `safeTransferFrom(multiSig, ...)`. There is no onchain guarantee that forwarded funds will be deployed to approved markets or returned to the vault. Once funds reach the Treasury multisig, that multisig can break the expected flow and use the funds freely.
+- Vault holds $0 USDC directly — 100% of ~$10.73M is deployed externally via MultisigStrategy. Importantly, this strategy is a **full-custody handoff** design: the vault calls `allocateFunds()`, the strategy's `_allocateToPosition()` forwards USDC directly to the Treasury multisig via `safeTransfer(multiSig, amount)`, and assets return only if the multisig cooperates with `_retrieveAssetsFromMultisig()` / `safeTransferFrom(multiSig, ...)`. There is no onchain guarantee that forwarded funds will be deployed to approved markets or returned to the vault. Once funds reach the Treasury multisig, that multisig can break the expected flow and use the funds freely.
 
 #### Reserve Location Reconciliation (Verified March 27, 2026)
 
@@ -234,21 +234,21 @@ I traced the current reserve path further by combining live `balanceOf()` reads 
 
 ### Provability
 
-- srRoyUSDC exchange rate is computed on-chain via ERC-4626 (`totalAssets()` / `totalSupply()`)
+- srRoyUSDC exchange rate is computed onchain via ERC-4626 (`totalAssets()` / `totalSupply()`)
 - `totalAssets()` = `totalAllocatedValue()` from MultisigStrategy (~$10.73M). Vault holds $0 USDC directly — 100% of assets are reported by the strategy.
-- **Accounting is admin-reported:** The MultisigStrategy's `totalAllocatedValue()` is updated via `adjustTotalAssets(int256 diff, uint256 nonce)`, called by the 3/5 treasury multisig ([`0x170ff06326eBb64BF609a848Fc143143994AF6c8`](https://etherscan.io/address/0x170ff06326eBb64BF609a848Fc143143994AF6c8)). This is **not** computed from on-chain positions — it is manually reported by the multisig.
-- **How `adjustTotalAssets` works:** The `diff` parameter is a **signed raw USDC amount** (not a percentage), added to or subtracted from `vaultDepositedAmount`. Positive diffs increase reported assets (yield accrual), negative diffs decrease them (loss reporting). The funds themselves are on-chain in underlying protocols (Aave, Avant, etc.), but the vault cannot read those balances directly — instead the multisig manually reports the net change.
-- **Accounting constraints (verified on-chain March 25, 2026):**
+- **Accounting is admin-reported:** The MultisigStrategy's `totalAllocatedValue()` is updated via `adjustTotalAssets(int256 diff, uint256 nonce)`, called by the 3/5 treasury multisig ([`0x170ff06326eBb64BF609a848Fc143143994AF6c8`](https://etherscan.io/address/0x170ff06326eBb64BF609a848Fc143143994AF6c8)). This is **not** computed from onchain positions — it is manually reported by the multisig.
+- **How `adjustTotalAssets` works:** The `diff` parameter is a **signed raw USDC amount** (not a percentage), added to or subtracted from `vaultDepositedAmount`. Positive diffs increase reported assets (yield accrual), negative diffs decrease them (loss reporting). The funds themselves are onchain in underlying protocols (Aave, Avant, etc.), but the vault cannot read those balances directly — instead the multisig manually reports the net change.
+- **Accounting constraints (verified onchain March 25, 2026):**
   - Max change per update: 50 bps (~0.5% of current `vaultDepositedAmount`), applies to both positive and negative diffs (`abs(diff)` is checked). At ~$10.73M, max ~$53.6K per call in either direction. If exceeded, contract **auto-pauses without applying the diff** — calls `_pause()` and returns immediately, discarding the change. This is a circuit breaker: the suspicious accounting update is rejected and the contract locks until `STRATEGY_ADMIN` calls `unpauseAndAdjustTotalAssets()`.
   - Cooldown between updates: 43,200 seconds (12 hours). If violated, same circuit-breaker behavior — **diff is discarded**, contract pauses.
   - Validity period: 2,592,000 seconds (30 days) — if no update within 30 days, `_previewPosition()` reverts with `AccountingValidityPeriodExpired`, freezing deposits/withdrawals.
   - Sequential nonce required (current: 37, ~1 update every 2 days). Prevents replay/out-of-order submissions.
   - Underflow protection: negative diffs cannot reduce `vaultDepositedAmount` below zero (reverts with `InsufficientUnderlyingBalance`). This is a floor guard only — the 0.5% cap is the actual per-call limit on losses.
   - Last updated: March 25, 2026
-- **Emergency bypass — `unpauseAndAdjustTotalAssets(int256 diff)`:** Callable only by `STRATEGY_ADMIN`. Skips diff validation (no nonce check, no percentage cap, no cooldown). The diff is `int256` — can be positive or negative, unconstrained in magnitude. However, **the contract must be paused first** — OpenZeppelin's `_unpause()` reverts if not paused. This means the bypass can only be used after the circuit breaker has already triggered (a `Paused` event is emitted on-chain when `adjustTotalAssets` fails validation). The intended flow: (1) `adjustTotalAssets` exceeds 0.5% cap or cooldown → contract auto-pauses, diff discarded, `Paused` event emitted; (2) STRATEGY_ADMIN investigates the anomaly; (3) STRATEGY_ADMIN calls `unpauseAndAdjustTotalAssets(diff)` → emits `Unpaused` + `AdjustTotalAssets` in one tx. This design ensures the emergency bypass is always preceded by an observable on-chain pause event, providing a detection window before the unconstrained adjustment is applied.
+- **Emergency bypass — `unpauseAndAdjustTotalAssets(int256 diff)`:** Callable only by `STRATEGY_ADMIN`. Skips diff validation (no nonce check, no percentage cap, no cooldown). The diff is `int256` — can be positive or negative, unconstrained in magnitude. However, **the contract must be paused first** — OpenZeppelin's `_unpause()` reverts if not paused. This means the bypass can only be used after the circuit breaker has already triggered (a `Paused` event is emitted onchain when `adjustTotalAssets` fails validation). The intended flow: (1) `adjustTotalAssets` exceeds 0.5% cap or cooldown → contract auto-pauses, diff discarded, `Paused` event emitted; (2) STRATEGY_ADMIN investigates the anomaly; (3) STRATEGY_ADMIN calls `unpauseAndAdjustTotalAssets(diff)` → emits `Unpaused` + `AdjustTotalAssets` in one tx. This design ensures the emergency bypass is always preceded by an observable onchain pause event, providing a detection window before the unconstrained adjustment is applied.
 - **Observed usage pattern:** 36 adjustments since Jan 30, 2026. Overwhelmingly small positive diffs (+$800–4,000 USDC for yield accrual). One negative diff observed (nonce 7: -$1,225 USDC). Calls every 12–72 hours.
 - **Yield distribution — AdaptiveCurveYDM** ([`0x071B0FA065774b403B8dae0aE93A09Df5DE3DFAc`](https://etherscan.io/address/0x071B0FA065774b403B8dae0aE93A09Df5DE3DFAc)): Determines what percentage of Senior yield is redirected to Junior as a risk premium. Inspired by [Morpho's AdaptiveCurveIrm](https://github.com/morpho-org/morpho-blue-irm). Uses a piecewise linear curve with a kink at 90% utilization (Junior capital backing Senior exposure). When utilization > 90% (Junior scarce), Junior's yield share increases exponentially over time to attract more Junior capital; when < 90% (Junior abundant), it decreases. **Immutable contract** — no admin functions, no owner, no upgradeability. Parameters are set once at market initialization and the curve adapts autonomously. Floor: 0.01% JT yield share, ceiling: 100%.
-- **Per-market Junior/Senior coverage is verifiable on-chain:** Each market's Accountant contract exposes `getState()` returning `lastSTEffectiveNAV`, `lastJTEffectiveNAV`, `lastSTImpermanentLoss`, `lastJTImpermanentLoss`, `coverageWAD`, `betaWAD`, and `marketState`. The kernel exposes `getState()` returning `stOwnedYieldBearingAssets` and `jtOwnedYieldBearingAssets`. These can be queried without protocol-specific tooling (standard `eth_call` to verified contracts).
+- **Per-market Junior/Senior coverage is verifiable onchain:** Each market's Accountant contract exposes `getState()` returning `lastSTEffectiveNAV`, `lastJTEffectiveNAV`, `lastSTImpermanentLoss`, `lastJTImpermanentLoss`, `coverageWAD`, `betaWAD`, and `marketState`. The kernel exposes `getState()` returning `stOwnedYieldBearingAssets` and `jtOwnedYieldBearingAssets`. These can be queried without protocol-specific tooling (standard `eth_call` to verified contracts).
 - Underlying market positions must be verified by checking each external protocol individually
 - No third-party verification mechanism (no Chainlink PoR, no custodian attestations)
 - **Overall provability is limited but better than initially documented**: Treasury holdings on Ethereum and Avalanche now evidence ~99.7% of reported assets by raw share balances, but the vault exchange rate still depends on the MultisigStrategy correctly reporting strategy NAV. The current tranche `convertToAssets()` outputs do not fully reconcile to the reported `totalAssets()`, so the exact accounting methodology remains trust-based.
@@ -308,15 +308,15 @@ The vault governance involves multiple multisigs and two factory contracts with 
 
 ### Programmability
 
-- srRoyUSDC PPS is calculated on-chain via ERC-4626 standard (`totalAssets()` / `totalSupply()`)
-- Yield distribution uses the on-chain AdaptiveCurveYDM model
+- srRoyUSDC PPS is calculated onchain via ERC-4626 standard (`totalAssets()` / `totalSupply()`)
+- Yield distribution uses the onchain AdaptiveCurveYDM model
 - Fund deployment and rebalancing are executed by the MultisigStrategy, which is controlled by the 3/5 treasury multisig — **significant manual intervention**
 - A second strategy (RoycoVaultMakinaStrategy) has been added and currently has a small live allocation (~1,000 USDC on March 27, 2026). It uses an OZ AccessManager authority rather than direct multisig control, potentially for automated fund deployment via Makina.
-- Market selection, allocation targets, and coverage parameters are set by the Royco Foundation (off-chain decisions)
+- Market selection, allocation targets, and coverage parameters are set by the Royco Foundation (offchain decisions)
 - Fee management (management/performance fees) requires VAULT_MANAGER role (3/4 multisig). Both fees are currently 0%.
 - `accrueYield()` is callable by anyone (no access control) — triggers yield computation and fee share minting (currently mints 0 since fees are 0%)
 - Protection Mode activation and parameters are configurable
-- KYC gating for deposits adds an off-chain dependency
+- KYC gating for deposits adds an offchain dependency
 
 ### External Dependencies
 
@@ -363,7 +363,7 @@ The vault governance involves multiple multisigs and two factory contracts with 
 ### Critical Monitoring Points
 
 - **PPS (Price Per Share):** Track `convertToAssets(1e6)` — should be monotonically increasing. Alert on any decrease (indicates loss event or Protection Mode). Current: ~1.005571.
-- **Total Assets:** Monitor `totalAssets()` — currently 100% dependent on MultisigStrategy's admin-reported `totalAllocatedValue()`. Cross-reference with actual on-chain positions in underlying protocols (Aave, Avant, Neutrl, Auto) for sanity checking.
+- **Total Assets:** Monitor `totalAssets()` — currently 100% dependent on MultisigStrategy's admin-reported `totalAllocatedValue()`. Cross-reference with actual onchain positions in underlying protocols (Aave, Avant, Neutrl, Auto) for sanity checking.
 - **Accounting Updates (`adjustTotalAssets`):**
   - Track all `adjustTotalAssets(int256 diff, uint256 nonce)` calls on MultisigStrategy ([`0xd3F8Edff57570c4F9B11CC95eA65117e2D7A6C2D`](https://etherscan.io/address/0xd3F8Edff57570c4F9B11CC95eA65117e2D7A6C2D))
   - `diff` is a signed raw USDC amount (positive = yield accrual, negative = loss). Normal range: +$800–4,000 per update.
@@ -379,7 +379,7 @@ The vault governance involves multiple multisigs and two factory contracts with 
 
 ### Junior Vault / Tranching Monitoring
 
-The Junior tranche provides the first-loss buffer protecting Senior depositors. Loss of Junior capital directly reduces srRoyUSDC's structural protection. All data below is queryable on-chain via the kernel and accountant contracts.
+The Junior tranche provides the first-loss buffer protecting Senior depositors. Loss of Junior capital directly reduces srRoyUSDC's structural protection. All data below is queryable onchain via the kernel and accountant contracts.
 
 **Contracts to poll (via `getState()`):**
 
@@ -439,7 +439,7 @@ The Junior tranche provides the first-loss buffer protecting Senior depositors. 
 - Alert if Treasury deposits into new markets (new Senior Tranche tokens appearing)
 **Market allocation monitoring:**
 
-Target allocations are set off-chain by the Royco Foundation curator — there is no on-chain registry of targets. Actual allocations must be reconstructed from the Treasury multisig's token balances across chains.
+Target allocations are set offchain by the Royco Foundation curator — there is no onchain registry of targets. Actual allocations must be reconstructed from the Treasury multisig's token balances across chains.
 
 *How to compute current allocation per market:*
 
@@ -479,7 +479,7 @@ Target allocations are set off-chain by the Royco Foundation curator — there i
 
 ### Key Strengths
 
-1. **Tranching mechanism provides structural protection (verified on-chain at market level)** — Junior capital absorbs losses first, enforced by on-chain kernel/accountant contracts. Coverage verified: ~12.4% (Neutrl), ~12.5% (Tokemak) vs 10% required. Treasury holdings now evidence live exposure across Aave, two sNUSD senior tranche positions, autoUSD, and Avalanche savUSD. The srRoyUSDC vault itself still doesn't directly reference these contracts (indirect link via Treasury multisig).
+1. **Tranching mechanism provides structural protection (verified onchain at market level)** — Junior capital absorbs losses first, enforced by onchain kernel/accountant contracts. Coverage verified: ~12.4% (Neutrl), ~12.5% (Tokemak) vs 10% required. Treasury holdings now evidence live exposure across Aave, two sNUSD senior tranche positions, autoUSD, and Avalanche savUSD. The srRoyUSDC vault itself still doesn't directly reference these contracts (indirect link via Treasury multisig).
 2. **Institutional-grade access controls** — KYC and whitelisting convert potential exploits into recoverable, legally actionable incidents
 3. **Experienced founder** — Jai Bhavnani has prior DeFi experience (Rari Capital, Ambo) and backing from reputable investors (Electric Capital, Coinbase Ventures, Hashed)
 4. **Active bug bounty** — $250K on Immunefi
@@ -493,15 +493,15 @@ Target allocations are set off-chain by the Royco Foundation curator — there i
 2. **Extreme holder concentration** — One EOA holds ~69% of supply. ~$10.73M total assets with only ~8 holders.
 3. **MultisigStrategy upgradeable without timelock** — The Owner multisig (3/5) can upgrade the MultisigStrategy proxy immediately. This controls how all funds are deployed.
 4. **Reliance on newer underlying protocols** — 70% target allocation to Avant (savUSD) and Neutrl (sNUSD), which are relatively unknown protocols with limited public track records.
-5. **100% of assets admin-reported** — Funds are deployed on-chain to underlying protocols, but the vault cannot read those balances. The entire ~$10.73M totalAssets is reported via MultisigStrategy's `adjustTotalAssets()` (signed USDC delta per call). No oracle or on-chain verification of actual positions. Emergency function `unpauseAndAdjustTotalAssets()` can bypass diff constraints, but requires the contract to be paused first (observable on-chain).
+5. **100% of assets admin-reported** — Funds are deployed onchain to underlying protocols, but the vault cannot read those balances. The entire ~$10.73M totalAssets is reported via MultisigStrategy's `adjustTotalAssets()` (signed USDC delta per call). No oracle or onchain verification of actual positions. Emergency function `unpauseAndAdjustTotalAssets()` can bypass diff constraints, but requires the contract to be paused first (observable onchain).
 
 ### Critical Risks
 
 - **MultisigStrategy upgradeable with no timelock:** The Owner multisig (3/5) controls the MultisigStrategy's ProxyAdmin and can upgrade the strategy implementation immediately. A malicious upgrade could redirect funds or bypass the 0.5% accounting constraint. This is the most direct risk vector.
 - **Treasury multisig can divert 100% of allocated funds:** `onlyVault` restricts who can call strategy entrypoints, but does not constrain what happens after allocation. Once the vault allocates, `_allocateToPosition()` transfers the full amount to the Treasury multisig. The strategy cannot force deployment into Aave / Dawn markets, and `_retrieveAssetsFromMultisig()` requires the multisig to approve funds back. This means the Treasury multisig has full practical control over all forwarded capital and can break the expected flow, divert funds elsewhere, or refuse to return them to the vault.
 - **Underlying protocol risk is opaque:** The quality and health of Avant, Neutrl, Auto, and Cap Finance positions are not easily verifiable. These protocols themselves are newer with limited audit and track record history.
-- **Junior coverage is on-chain but indirect from the vault:** The Royco Dawn kernel/accountant contracts enforce Junior-first loss coverage on-chain (verified: ~12.4-12.5% actual coverage, 10% required, 0 impermanent loss). However, the srRoyUSDC Concrete vault has no direct on-chain link to these contracts — the Treasury multisig bridges this gap by holding Senior Tranche tokens and reporting values via `adjustTotalAssets()`. The loss waterfall enforcement is real at the market level, but the vault cannot independently verify it. Coverage buffer is thin (~2.5% above minimum) and Junior capital comes from only 2-3 depositor addresses per market.
-- **Strategy totalAssets is manually reported, not derived from on-chain data:** `totalAllocatedValue()` returns a stored `vaultDepositedAmount` variable updated via `adjustTotalAssets()` by the treasury multisig. It does not read balances from Aave, Avant, Neutrl, or any underlying protocol. The reported value may not represent actual on-chain positions — there is no mechanism to verify accuracy.
+- **Junior coverage is onchain but indirect from the vault:** The Royco Dawn kernel/accountant contracts enforce Junior-first loss coverage onchain (verified: ~12.4-12.5% actual coverage, 10% required, 0 impermanent loss). However, the srRoyUSDC Concrete vault has no direct onchain link to these contracts — the Treasury multisig bridges this gap by holding Senior Tranche tokens and reporting values via `adjustTotalAssets()`. The loss waterfall enforcement is real at the market level, but the vault cannot independently verify it. Coverage buffer is thin (~2.5% above minimum) and Junior capital comes from only 2-3 depositor addresses per market.
+- **Strategy totalAssets is manually reported, not derived from onchain data:** `totalAllocatedValue()` returns a stored `vaultDepositedAmount` variable updated via `adjustTotalAssets()` by the treasury multisig. It does not read balances from Aave, Avant, Neutrl, or any underlying protocol. The reported value may not represent actual onchain positions — there is no mechanism to verify accuracy.
 
 ---
 
@@ -516,7 +516,7 @@ The vault implementation (ConcreteAsyncVaultImpl) uses standard ERC-4626 minting
 2. **`deposit(uint256 assets, address receiver)`** — Standard ERC-4626 deposit. Same underlying flow — requires USDC transfer first.
 
 3. **Fee Share Minting (`accrueYield()`)** — The vault can mint shares to fee recipients via `accrueManagementFee()` and `accruePerformanceFee()`. These are the only code paths that mint shares without requiring a corresponding USDC deposit. However:
-   - Both management fee and performance fee are currently **0%** (verified on-chain March 25, 2026)
+   - Both management fee and performance fee are currently **0%** (verified onchain March 25, 2026)
    - Both fee recipient addresses are `address(0)` (no recipient set)
    - `accrueYield()` is publicly callable (no access control), but currently mints 0 shares since fees are 0%
    - Fee changes require the VAULT_MANAGER role (3/4 Gnosis Safe at [`0x7c405bbD131e42af506d14e752f2e59B19D49997`](https://etherscan.io/address/0x7c405bbD131e42af506d14e752f2e59B19D49997))
@@ -563,7 +563,7 @@ The most realistic risk vector is the MultisigStrategy proxy upgrade (no timeloc
 ### Critical Risk Gates
 
 - [ ] **No audit** → **PASS** (Hexens completed full audit + whitelist audit; Cantina competition with 262 submissions still in judging)
-- [ ] **Unverifiable reserves** → **CONDITIONAL PASS** (ERC-4626 exchange rate is on-chain. Treasury holdings on Ethereum and Avalanche now evidence ~99.7% of reported assets by raw share balances, including Aave, two sNUSD tranche positions, autoUSD, and Avalanche savUSD. However, the vault's totalAssets still relies on MultisigStrategy reporting, and current tranche `convertToAssets()` outputs do not fully reconcile to reported NAV.)
+- [ ] **Unverifiable reserves** → **CONDITIONAL PASS** (ERC-4626 exchange rate is onchain. Treasury holdings on Ethereum and Avalanche now evidence ~99.7% of reported assets by raw share balances, including Aave, two sNUSD tranche positions, autoUSD, and Avalanche savUSD. However, the vault's totalAssets still relies on MultisigStrategy reporting, and current tranche `convertToAssets()` outputs do not fully reconcile to reported NAV.)
 - [ ] **Total centralization** → **PASS** (multiple multisigs with dual-control for vault upgrades via ConcreteFactory — though MultisigStrategy upgrade has no timelock)
 
 ### Category Scores
@@ -592,20 +592,20 @@ Hexens audit completed; Cantina competition still in judging after ~2 months (co
 - **MultisigStrategy proxy upgrade has no timelock** — Owner multisig can upgrade immediately. This is the primary remaining governance risk.
 - Owner and Treasury multisig share the same 5 anonymous EOA signers — no separation of powers for those functions
 - VAULT_MANAGER is a separate 3/4 multisig (3 overlapping signers + 1 new)
-- No on-chain governance, no DAO, no community vote mechanism
+- No onchain governance, no DAO, no community vote mechanism
 - Pausing mechanism via Protection Mode (automatic, not admin-triggered — this is reasonable)
 
 **Subcategory B: Programmability — 3.5**
 
-- PPS calculated on-chain via ERC-4626
-- Yield distribution uses on-chain AdaptiveCurveYDM model
+- PPS calculated onchain via ERC-4626
+- Yield distribution uses onchain AdaptiveCurveYDM model
 - Fund deployment is controlled by MultisigStrategy — requires multisig intervention for allocation changes
 - New RoycoVaultMakinaStrategy added with a small live allocation (~1,000 USDC) — may indicate move toward automated allocation
 - `accrueYield()` is publicly callable (no access control) — currently no effect since fees are 0%
-- Market selection and coverage parameters set off-chain by Royco Foundation
-- KYC gating adds off-chain dependency for deposits
+- Market selection and coverage parameters set offchain by Royco Foundation
+- KYC gating adds offchain dependency for deposits
 - Protection Mode activation is partially programmatic (triggered by drawdowns)
-- Hybrid system: core vault mechanics are on-chain, but allocation decisions and strategy execution are manual
+- Hybrid system: core vault mechanics are onchain, but allocation decisions and strategy execution are manual
 
 **Subcategory C: External Dependencies — 4.0**
 
@@ -616,7 +616,7 @@ Hexens audit completed; Cantina competition still in judging after ~2 months (co
 - Aave v3 — blue-chip, 20% allocation (positive)
 - Concrete vault framework — serves as proxy admin and controls vault upgrades. Adds third-party trust dependency.
 - Failure of any major underlying protocol (Avant or Neutrl) would impact 35% of allocated capital
-- **Junior coverage verified at market level, but indirect from vault** — Junior capital exists on-chain (~12.4-12.5% coverage, enforced by kernel/accountant), but the srRoyUSDC vault cannot directly query these contracts. The Treasury multisig holding Senior Tranche tokens is the bridge. Coverage buffer is thin (2.5% above minimum) with concentrated Junior depositors (2-3 addresses).
+- **Junior coverage verified at market level, but indirect from vault** — Junior capital exists onchain (~12.4-12.5% coverage, enforced by kernel/accountant), but the srRoyUSDC vault cannot directly query these contracts. The Treasury multisig holding Senior Tranche tokens is the bridge. Coverage buffer is thin (2.5% above minimum) with concentrated Junior depositors (2-3 addresses).
 
 **Score: (3.0 + 3.5 + 4.0) / 3 = 3.5/5**
 
@@ -625,27 +625,27 @@ Hexens audit completed; Cantina competition still in judging after ~2 months (co
 **Subcategory A: Collateralization — 5.0**
 
 - 100% USDC-backed (deposits are USDC, deployed to yield markets)
-- Junior tranche provides first-loss protection, enforced on-chain by each market's kernel/accountant contracts. Verified coverage (March 26, 2026): Neutrl sNUSD 12.4%, Tokemak autoUSD 12.5%, both above 10% required minimum. No impermanent loss recorded. Treasury multisig holds Senior Tranche tokens, connecting srRoyUSDC to these markets.
+- Junior tranche provides first-loss protection, enforced onchain by each market's kernel/accountant contracts. Verified coverage (March 26, 2026): Neutrl sNUSD 12.4%, Tokemak autoUSD 12.5%, both above 10% required minimum. No impermanent loss recorded. Treasury multisig holds Senior Tranche tokens, connecting srRoyUSDC to these markets.
 - **Coverage is thin and concentrated:** Only ~2.5% buffer above the 10% minimum. Junior capital comes from 2-3 depositor addresses per market. Beta = 1.0 (JT uses same asset as ST — correlated losses, not diversification).
 - Underlying yield comes from newer protocols (Avant, Neutrl, Auto) — collateral quality is mixed
-- Protection Mode (Fixed-Term State) is enforced on-chain by the accountant — pauses ST withdrawals and JT deposits when JT is covering losses. However, the srRoyUSDC vault itself is not aware of this state — it would manifest as the Treasury multisig being unable to redeem Senior Tranche tokens.
+- Protection Mode (Fixed-Term State) is enforced onchain by the accountant — pauses ST withdrawals and JT deposits when JT is covering losses. However, the srRoyUSDC vault itself is not aware of this state — it would manifest as the Treasury multisig being unable to redeem Senior Tranche tokens.
 - Vault holds $0 USDC directly — 100% of ~$10.73M deployed externally via MultisigStrategy
 - **MultisigStrategy breaks collateral enforcement at the vault layer:** `allocateFunds()` forwards assets into `MultisigStrategy`, and `_allocateToPosition()` transfers the full amount to the Treasury multisig via `safeTransfer(multiSig, amount)`. Once this happens, the Treasury multisig has full practical control over the capital.
-- **No on-chain guarantee funds stay in the intended flow:** The strategy cannot force the Treasury multisig to deploy capital to Aave / Dawn markets, keep it there, or return it to the vault. `_retrieveAssetsFromMultisig()` depends on multisig approval and balance.
+- **No onchain guarantee funds stay in the intended flow:** The strategy cannot force the Treasury multisig to deploy capital to Aave / Dawn markets, keep it there, or return it to the vault. `_retrieveAssetsFromMultisig()` depends on multisig approval and balance.
 - **Treasury multisig can divert 100% of allocated funds:** Because the capital path is a custody handoff rather than an escrowed strategy, the Treasury multisig can break the expected flow and use all forwarded funds freely.
 - If Junior coverage is insufficient, Senior absorbs losses
 
 **Subcategory B: Provability — 5.0**
 
-- ERC-4626 exchange rate is on-chain (PPS verifiable)
-- However, `totalAssets()` depends entirely on MultisigStrategy's `adjustTotalAssets(int256 diff, uint256 nonce)` — the multisig submits a signed USDC delta (not an absolute value), which is added/subtracted from `vaultDepositedAmount`. This is **not** computed from on-chain positions in underlying protocols.
-- Funds are on-chain in Aave/Avant/Neutrl/Auto only if the Treasury multisig actually deploys them there. The strategy itself does not enforce deployment: `_allocateToPosition()` forwards full custody to the multisig, and `_retrieveAssetsFromMultisig()` depends on multisig approval to pull assets back. The entire PPS therefore depends on both multisig accounting honesty and multisig custody cooperation, because there is no on-chain guarantee that allocated funds remain in the intended flow after reaching the Treasury multisig (reporting is constrained by max 0.5% per update, 12-hour cooldown, nonce 37 confirming regular updates).
-- **Emergency bypass exists:** `unpauseAndAdjustTotalAssets()` skips diff validation — but requires contract to be paused first (circuit breaker triggered, `Paused` event emitted on-chain). Provides a detection window before the unconstrained adjustment.
+- ERC-4626 exchange rate is onchain (PPS verifiable)
+- However, `totalAssets()` depends entirely on MultisigStrategy's `adjustTotalAssets(int256 diff, uint256 nonce)` — the multisig submits a signed USDC delta (not an absolute value), which is added/subtracted from `vaultDepositedAmount`. This is **not** computed from onchain positions in underlying protocols.
+- Funds are onchain in Aave/Avant/Neutrl/Auto only if the Treasury multisig actually deploys them there. The strategy itself does not enforce deployment: `_allocateToPosition()` forwards full custody to the multisig, and `_retrieveAssetsFromMultisig()` depends on multisig approval to pull assets back. The entire PPS therefore depends on both multisig accounting honesty and multisig custody cooperation, because there is no onchain guarantee that allocated funds remain in the intended flow after reaching the Treasury multisig (reporting is constrained by max 0.5% per update, 12-hour cooldown, nonce 37 confirming regular updates).
+- **Emergency bypass exists:** `unpauseAndAdjustTotalAssets()` skips diff validation — but requires contract to be paused first (circuit breaker triggered, `Paused` event emitted onchain). Provides a detection window before the unconstrained adjustment.
 - **Underlying protocols remain partially opaque:** The vault is exposed to newer protocols where the actual safety, redeemability, and withdrawal behavior of deployed capital cannot be independently guaranteed from the vault layer. Even when reserve locations are partially evidenced, that does not prove capital will be recoverable on demand or safe from underlying protocol-specific failure modes.
 - Individual underlying market positions are not easily auditable without protocol-specific tooling
-- **Per-market Junior coverage IS verifiable on-chain:** Each market's Accountant `getState()` returns JT/ST effective NAV, impermanent loss, coverage parameters, and market state. Kernel `getState()` returns owned yield-bearing assets per tranche. All contracts are verified on Etherscan.
+- **Per-market Junior coverage IS verifiable onchain:** Each market's Accountant `getState()` returns JT/ST effective NAV, impermanent loss, coverage parameters, and market state. Kernel `getState()` returns owned yield-bearing assets per tranche. All contracts are verified on Etherscan.
 - No third-party verification mechanism (no Chainlink PoR, no custodian attestations)
-- Yield computation is on-chain via AdaptiveCurveYDM
+- Yield computation is onchain via AdaptiveCurveYDM
 - **Self-reported accounting** with constraints is better than no reporting, but fundamentally depends on multisig honesty and does not solve uncertainty around the underlying protocols themselves
 
 **Score: (5.0 + 5.0) / 2 = 5.0/5**
@@ -669,7 +669,7 @@ Hexens audit completed; Cantina competition still in judging after ~2 months (co
 - VC-backed by reputable investors (Electric Capital, Coinbase Ventures, Hashed, Amber Group)
 - Public GitHub repo ([roycoprotocol/royco-dawn](https://github.com/roycoprotocol/royco-dawn)) — verified source code
 - Small dev team (2 GitHub contributors)
-- Documentation has some gaps: oracle mechanism unclear, per-market risk data only on JS-rendered site. However, per-market Junior coverage is verifiable directly on-chain via accountant `getState()`, partially compensating for documentation gaps.
+- Documentation has some gaps: oracle mechanism unclear, per-market risk data only on JS-rendered site. However, per-market Junior coverage is verifiable directly onchain via accountant `getState()`, partially compensating for documentation gaps.
 - Hypernative monitoring being configured but not yet active
 - Security council being assembled but not yet formed
 - No publicly documented incident response plan

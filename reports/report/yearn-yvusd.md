@@ -48,7 +48,7 @@ yvUSD is a **USDC-denominated cross-chain Yearn V3 vault** (ERC-4626) that deplo
 |----------|---------|------|
 | yvUSD Vault | [`0x696d02Db93291651ED510704c9b286841d506987`](https://etherscan.io/address/0x696d02Db93291651ED510704c9b286841d506987) | Yearn V3 Vault (v3.0.4), Vyper minimal proxy |
 | LockedyvUSD (Accountant) | [`0xAaaFEa48472f77563961Cdb53291DEDfB46F9040`](https://etherscan.io/address/0xAaaFEa48472f77563961Cdb53291DEDfB46F9040) | Cooldown wrapper + vault accountant |
-| APR Oracle | [`0x1981AD9F44F2EA9aDd2dC4AD7D075c102C70aF92`](https://etherscan.io/address/0x1981AD9F44F2EA9aDd2dC4AD7D075c102C70aF92) | On-chain APR estimation |
+| APR Oracle | [`0x1981AD9F44F2EA9aDd2dC4AD7D075c102C70aF92`](https://etherscan.io/address/0x1981AD9F44F2EA9aDd2dC4AD7D075c102C70aF92) | Onchain APR estimation |
 | Fee Splitter | [`0xd744B7D6bE69b334766802245Db2895e861cb470`](https://etherscan.io/address/0xd744B7D6bE69b334766802245Db2895e861cb470) | Revenue distribution |
 
 ### Governance Contracts
@@ -128,7 +128,7 @@ Yearn uses a formal **12-metric risk scoring framework** ([RISK_FRAMEWORK.md](ht
 - **Testing** — code coverage requirements (score 1 = 95%+, score 5 = <70%)
 - **Complexity** — source lines of code (score 1 = 0-150 sLOC, score 5 = 600+)
 - **Risk Exposure** — potential loss percentage
-- **Centralization Risk** — off-chain management dependency
+- **Centralization Risk** — offchain management dependency
 - **Protocol Integration** — number of external protocols integrated
 
 **External Protocol-Related Scores (6 metrics):**
@@ -136,7 +136,7 @@ Yearn uses a formal **12-metric risk scoring framework** ([RISK_FRAMEWORK.md](ht
 - **Centralization** — owner control/governance of external protocols
 - **TVL** — active total value locked
 - **Longevity** — contract deployment age
-- **Protocol Type** — category (blue-chip vs novel vs cross-chain vs off-chain)
+- **Protocol Type** — category (blue-chip vs novel vs cross-chain vs offchain)
 
 All 12 scores are summed and mapped to risk levels (Level 1-4). ySec can make exceptions with textual justification. This is a rigorous, documented process that provides strong assurance for strategy quality even without external audits on individual strategies.
 
@@ -233,7 +233,7 @@ Two strategies bridge USDC to Arbitrum via Circle CCTP:
 
 ### Collateralization
 
-- **100% on-chain USDC backing** — all deposits are USDC, all strategy positions ultimately track back to USDC value
+- **100% onchain USDC backing** — all deposits are USDC, all strategy positions ultimately track back to USDC value
 - **Collateral quality varies by strategy:**
   - Blue-chip (Sky, Spark, Fluid): 12.9% of TVL
   - Low-risk (Maple syrupUSDC 2.33/5): 45.8% of TVL — now the dominant allocation
@@ -244,8 +244,8 @@ Two strategies bridge USDC to Arbitrum via Circle CCTP:
 
 ### Provability
 
-- **yvUSD exchange rate:** Calculated on-chain via ERC-4626 standard (`convertToAssets()`/`convertToShares()`). Fully programmatic, no admin input
-- **Strategy positions:** Each strategy's `totalAssets()` is on-chain. The vault's `totalAssets()` is the sum of all strategy debts
+- **yvUSD exchange rate:** Calculated onchain via ERC-4626 standard (`convertToAssets()`/`convertToShares()`). Fully programmatic, no admin input
+- **Strategy positions:** Each strategy's `totalAssets()` is onchain. The vault's `totalAssets()` is the sum of all strategy debts
 - **Cross-chain lag:** For cross-chain strategies, `remoteAssets` on the origin is updated when CCTP messages arrive (sent automatically by `_harvestAndReport()` on the destination chain). Between report cycles, the value can be stale — the vault's reported `totalAssets()` may not reflect real-time changes on Arbitrum
 - **Profit/loss reporting:** Profits are reported by keepers via `process_report()` and locked for gradual distribution over 7 days (`profitMaxUnlockTime`). Losses are immediately reflected in PPS
 
@@ -298,8 +298,8 @@ Since the initial March 2026 assessment, the yvUSD vault has **completed its gov
 
 ### Programmability
 
-- **Exchange rate (PPS):** Calculated on-chain algorithmically via ERC-4626. Fully programmatic, no admin input
-- **Vault operations:** Deposit/withdraw are permissionless on-chain transactions
+- **Exchange rate (PPS):** Calculated onchain algorithmically via ERC-4626. Fully programmatic, no admin input
+- **Vault operations:** Deposit/withdraw are permissionless onchain transactions
 - **Strategy profit/loss:** Reported programmatically by keepers via `process_report()`. Profits unlock linearly over 7 days. Losses are immediate
 - **Debt allocation:** Automated via Debt Allocator contract, with manual override available to DEBT_MANAGER role holders (Daddy, Brain, Security)
 - **Cross-chain accounting:** When `report()` is called on the destination chain, `_harvestAndReport()` automatically queues a CCTP message back to the origin. No separate keeper relay required. Can be stale between report cycles
@@ -338,12 +338,12 @@ Since the initial March 2026 assessment, the yvUSD vault has **completed its gov
 Yearn maintains an active monitoring system via the [`monitoring-scripts-py`](https://github.com/yearn/monitoring-scripts-py) repository:
 
 - **Large flow alerts** (`yearn/alert_large_flows.py`): Runs **hourly via GitHub Actions**. Monitors deposit/withdrawal events via Envio indexer, alerts on flows exceeding $5M threshold via Telegram. Currently monitors 21 vaults across Ethereum, Base, Arbitrum, and Katana
-- **Endorsed vault check** (`yearn/check_endorsed.py`): Runs weekly, verifies all Yearn V3 vaults are endorsed on-chain via the registry contract
+- **Endorsed vault check** (`yearn/check_endorsed.py`): Runs weekly, verifies all Yearn V3 vaults are endorsed onchain via the registry contract
 - **Timelock monitoring** (`timelock/timelock_alerts.py`): Monitors Yearn TimelockController across 6 chains
 
 **Note:** yvUSD is not yet added to the monitored vault list in `alert_large_flows.py`, but the infrastructure is in place and can be extended.
 
-Additionally, Yearn provides a dedicated **yvUSD APR API** ([yvusd-api.yearn.fi](https://yvusd-api.yearn.fi), [source](https://github.com/yearn/yearn-yvusd-apr-service)) that aggregates on-chain vault/strategy accounting with off-chain APR oracle computations. Endpoints include `/api/health` (data recency), `/api/aprs` (precomputed APRs), and `/api/snapshot` (raw strategy cache). A **DeBank bundle** ([portfolio view](https://debank.com/bundles/221066/portfolio)) provides a consolidated view of all vault fund positions.
+Additionally, Yearn provides a dedicated **yvUSD APR API** ([yvusd-api.yearn.fi](https://yvusd-api.yearn.fi), [source](https://github.com/yearn/yearn-yvusd-apr-service)) that aggregates onchain vault/strategy accounting with offchain APR oracle computations. Endpoints include `/api/health` (data recency), `/api/aprs` (precomputed APRs), and `/api/snapshot` (raw strategy cache). A **DeBank bundle** ([portfolio view](https://debank.com/bundles/221066/portfolio)) provides a consolidated view of all vault fund positions.
 
 ### Key Contracts (Ethereum)
 
@@ -365,7 +365,7 @@ Additionally, Yearn provides a dedicated **yvUSD APR API** ([yvusd-api.yearn.fi]
 - **Emergency actions** — `Shutdown` event on vault
 - **Timelock operations** — pending proposals on the TimelockController (strategy additions, accountant changes, delay changes)
 - **Signer/threshold changes** on the Daddy (6-of-9) and Brain (3-of-8) Safes
-- **Cross-chain strategy accounting** — monitor `remoteAssets` for staleness (compare to actual on-chain positions on Arbitrum)
+- **Cross-chain strategy accounting** — monitor `remoteAssets` for staleness (compare to actual onchain positions on Arbitrum)
 - **Looper strategy health** — monitor Morpho market positions for proximity to liquidation
 - **Underlying protocol health** — monitor Maple, InfiniFi, and Morpho for incidents
 
@@ -414,12 +414,12 @@ Additionally, Yearn provides a dedicated **yvUSD APR API** ([yvusd-api.yearn.fi]
 **Scoring Guidelines:**
 - Be conservative: when uncertain between two scores, choose the higher (riskier) one
 - Use decimals (e.g., 2.5) when a subcategory falls between scores
-- Prioritize on-chain evidence over documentation claims
+- Prioritize onchain evidence over documentation claims
 
 ### Critical Risk Gates
 
 - [x] **No audit** — Yearn V3 core audited by Statemind, ChainSecurity, and yAcademy. ✅ PASS (framework audited; individual strategies lack dedicated audit)
-- [x] **Unverifiable reserves** — ERC-4626 standard. All positions on-chain verifiable. ✅ PASS
+- [x] **Unverifiable reserves** — ERC-4626 standard. All positions onchain verifiable. ✅ PASS
 - [x] **Total centralization** — Standard Yearn governance: Daddy/ySafe 6-of-9 multisig with publicly named signers, 7-day timelock on critical operations, Brain 3-of-8 for operations, Security 4-of-7 for emergency. No EOA vault roles. ✅ PASS
 
 **All gates pass.** Proceed to category scoring.
@@ -457,13 +457,13 @@ Additionally, Yearn provides a dedicated **yvUSD APR API** ([yvusd-api.yearn.fi]
 
 | Factor | Assessment |
 |--------|-----------|
-| PPS | On-chain ERC-4626, fully algorithmic |
-| Vault operations | Permissionless deposits/withdrawals on-chain |
+| PPS | Onchain ERC-4626, fully algorithmic |
+| Vault operations | Permissionless deposits/withdrawals onchain |
 | Strategy reporting | Programmatic via Keeper (yHaaSRelayer) and Debt Allocator |
 | Debt allocation | Automated via Debt Allocator, with manual override by DEBT_MANAGER holders (Daddy, Brain, Security) |
 | Cross-chain | Programmatic — `_harvestAndReport()` queues CCTP messages automatically. Stale between report cycles |
 
-**Programmability Score: 1.5/5** — All funds are on-chain across Ethereum and Arbitrum and cannot be altered by off-chain factors. PPS is calculated on-chain algorithmically via ERC-4626. Deposits/withdrawals are permissionless. Strategy reporting is automated via the Keeper (yHaaSRelayer). Debt allocation is automated via the Debt Allocator with manual override available to Daddy, Brain, and Security multisigs. Cross-chain accounting has minor lag between keeper cycles but all positions are verifiable on-chain at all times.
+**Programmability Score: 1.5/5** — All funds are onchain across Ethereum and Arbitrum and cannot be altered by offchain factors. PPS is calculated onchain algorithmically via ERC-4626. Deposits/withdrawals are permissionless. Strategy reporting is automated via the Keeper (yHaaSRelayer). Debt allocation is automated via the Debt Allocator with manual override available to Daddy, Brain, and Security multisigs. Cross-chain accounting has minor lag between keeper cycles but all positions are verifiable onchain at all times.
 
 **Subcategory C: External Dependencies**
 
@@ -478,7 +478,7 @@ Additionally, Yearn provides a dedicated **yvUSD APR API** ([yvusd-api.yearn.fi]
 
 **Centralization Score = (1.0 + 1.5 + 3.5) / 3 = 2.0**
 
-**Score: 2.0/5** — Significant improvement from March (was 2.7). The vault now uses the standard Yearn V3 governance pattern with 7-day timelock, Daddy/ySafe (6/9) as sole proposer, and standard RoleManager — the same framework as yvUSDC-1 and 37+ other Yearn vaults. Immutable vault contracts, no EOA vault roles, and multi-layer security are key strengths. All funds remain on-chain and fully programmatic. The main remaining concerns are Maple protocol concentration and the Fee Splitter EOA governance.
+**Score: 2.0/5** — Significant improvement from March (was 2.7). The vault now uses the standard Yearn V3 governance pattern with 7-day timelock, Daddy/ySafe (6/9) as sole proposer, and standard RoleManager — the same framework as yvUSDC-1 and 37+ other Yearn vaults. Immutable vault contracts, no EOA vault roles, and multi-layer security are key strengths. All funds remain onchain and fully programmatic. The main remaining concerns are Maple protocol concentration and the Fee Splitter EOA governance.
 
 #### Category 3: Funds Management (Weight: 30%)
 
@@ -489,24 +489,24 @@ Additionally, Yearn provides a dedicated **yvUSD APR API** ([yvusd-api.yearn.fi]
 | Backing | 100% USDC-backed, deployed into DeFi yield strategies |
 | Collateral quality | Improved: 12.9% blue-chip (Sky, Spark), 45.8% low-risk (Maple 2.33/5), 16.4% medium-risk (InfiniFi 2.8/5, 3Jane 3.5/5) |
 | Leverage | Looper strategies (~86% of TVL) use Morpho leverage — increased from ~58% |
-| Verifiability | ERC-4626, all positions on-chain |
+| Verifiability | ERC-4626, all positions onchain |
 
-**Collateralization Score: 2.5/5** — On-chain USDC backing is fully verifiable. Collateral quality has improved significantly: medium-risk protocol exposure dropped from 65.6% to 16.4%, with the largest allocation now in Maple (low-risk, 2.33/5) and blue-chip protocols (Sky, Spark) at 12.9%. However, looper strategy allocation increased from ~58% to ~86% of TVL, adding more leverage risk. The improved dependency quality offsets the increased leverage concentration.
+**Collateralization Score: 2.5/5** — Onchain USDC backing is fully verifiable. Collateral quality has improved significantly: medium-risk protocol exposure dropped from 65.6% to 16.4%, with the largest allocation now in Maple (low-risk, 2.33/5) and blue-chip protocols (Sky, Spark) at 12.9%. However, looper strategy allocation increased from ~58% to ~86% of TVL, adding more leverage risk. The improved dependency quality offsets the increased leverage concentration.
 
 **Subcategory B: Provability**
 
 | Factor | Assessment |
 |--------|-----------|
-| Reserve transparency | All strategy positions verifiable on-chain |
+| Reserve transparency | All strategy positions verifiable onchain |
 | Exchange rate | ERC-4626, programmatic, anyone can verify |
 | Cross-chain lag | remoteAssets updated by keeper, can be stale |
 | Reporting | Automated via keepers with 7-day profit unlock |
 
-**Provability Score: 1.5/5** — All strategy positions are verifiable on-chain on both Ethereum and Arbitrum. ERC-4626 share price is fully programmatic. Cross-chain positions have minor reporting lag between keeper cycles but the actual positions exist on-chain at all times. Multiple verification sources available.
+**Provability Score: 1.5/5** — All strategy positions are verifiable onchain on both Ethereum and Arbitrum. ERC-4626 share price is fully programmatic. Cross-chain positions have minor reporting lag between keeper cycles but the actual positions exist onchain at all times. Multiple verification sources available.
 
 **Funds Management Score = (2.5 + 1.5) / 2 = 2.0**
 
-**Score: 2.0/5** — Improved from March (was 2.25). Strong on-chain provability with all positions verifiable across both chains. Collateral quality has improved with the shift from medium-risk to low-risk protocol dependencies. Increased looper concentration partially offsets the improvement.
+**Score: 2.0/5** — Improved from March (was 2.25). Strong onchain provability with all positions verifiable across both chains. Collateral quality has improved with the shift from medium-risk to low-risk protocol dependencies. Increased looper concentration partially offsets the improvement.
 
 #### Category 4: Liquidity Risk (Weight: 15%)
 
@@ -678,6 +678,6 @@ To change the timelock delay (e.g., reduce from 7 days), an attacker would need 
 
 1. Control Daddy (6/9) to **propose** `updateDelay()` — the only PROPOSER
 2. Wait 7 days — Brain or Daddy can **cancel** during this window
-3. Execute via Daddy, Brain, or the EOA — but the operation is already visible on-chain for 7 days
+3. Execute via Daddy, Brain, or the EOA — but the operation is already visible onchain for 7 days
 
 DEFAULT_ADMIN was never granted, so no one can grant themselves PROPOSER or TIMELOCK_ADMIN to skip this flow. The timelock holds TIMELOCK_ADMIN but can only act on it through its own propose→wait→execute cycle.
