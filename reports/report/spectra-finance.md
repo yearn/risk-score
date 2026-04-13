@@ -114,13 +114,13 @@ Spectra itself does not custody or delegate funds — it provides a permissionle
 - PTs are **fully backed** by the deposited IBT
 - 1 PT represents a claim on 1 unit of underlying at maturity
 - **Negative yield risk:** If the underlying IBT loses value (e.g., vault exploit), the PT backing decreases proportionally. The `ptRate` can only decrease, never increase. `_computeYield()` reconciles losses fairly across all holders
-- All collateral is verifiable on-chain through the PrincipalToken contract
+- All collateral is verifiable onchain through the PrincipalToken contract
 
 **The quality of PT collateral depends entirely on the underlying IBT** — Spectra is agnostic to what IBT is used. If the IBT comes from a risky vault, PTs inherit that risk. Risk assessment of the specific IBT should be done separately (see respective asset reports).
 
 ### Provability
 
-- All PT/YT balances and rates are on-chain and programmatically computed
+- All PT/YT balances and rates are onchain and programmatically computed
 - `ptRate` and `ibtRate` are transparent contract state variables
 - Exchange rates computed algorithmically — no privileged role updates
 - Anyone can verify reserves by reading the PrincipalToken contract
@@ -186,7 +186,7 @@ Spectra itself does not custody or delegate funds — it provides a permissionle
 ### Programmability
 
 **Spectra Core:**
-- Fully programmatic — PT/YT minting, yield calculation, and rate computation are all on-chain
+- Fully programmatic — PT/YT minting, yield calculation, and rate computation are all onchain
 - Exchange rates (`ptRate`, `ibtRate`) computed algorithmically
 - No keeper or relayer dependencies for core protocol
 
@@ -277,7 +277,7 @@ Existing MetaVaults are on Base (Gami Spectra USDC) and Katana (vbUSDC). Once de
 
 - **Zero high-severity audit findings** across three professional audits (Code4rena, Pashov, Sherlock)
 - **~5 years of continuous development** (APWine 2020 → Spectra 2023 → MetaVaults 2025) with ~2 years Spectra V2 in production
-- **Fully on-chain PT/YT mechanics** — rates computed algorithmically, no privileged role updates
+- **Fully onchain PT/YT mechanics** — rates computed algorithmically, no privileged role updates
 - **Robust oracle architecture** — three oracle types (Deterministic, TWAP, Hybrid) following Chainlink standard, with manipulation resistance via Curve
 - **Doxxed team** with established reputation, transparent incident response, and $3.6M in funding from reputable VCs
 - **MetaVault curator constraints** — whitelisted actions, receiver restrictions, DelegateCall disabled, time-locked sensitive operations
@@ -302,7 +302,7 @@ Existing MetaVaults are on Base (Gami Spectra USDC) and Katana (vbUSDC). Once de
 ### Critical Risk Gates
 
 - [x] **No audit** — Spectra has been audited by 3 reputable firms (Code4rena, Pashov, Sherlock) ✅ PASS
-- [x] **Unverifiable reserves** — PT reserves are fully on-chain and verifiable via PrincipalToken contract ✅ PASS
+- [x] **Unverifiable reserves** — PT reserves are fully onchain and verifiable via PrincipalToken contract ✅ PASS
 - [x] **Total centralization** — Uses multisig governance with Zodiac role constraints ✅ PASS
 
 **All gates pass.** Proceed to category scoring.
@@ -338,11 +338,11 @@ Existing MetaVaults are on Base (Gami Spectra USDC) and Katana (vbUSDC). Once de
 
 | Factor | Assessment |
 |--------|-----------|
-| Spectra PT/YT | Fully programmatic — rates computed on-chain algorithmically |
+| Spectra PT/YT | Fully programmatic — rates computed onchain algorithmically |
 | MetaVault | Hybrid — automated contracts + manual curator decisions for allocation/rollover/settlement |
-| PPS | On-chain, algorithmically computed via `ptRate` and `ibtRate` |
+| PPS | Onchain, algorithmically computed via `ptRate` and `ibtRate` |
 
-**Subcategory B Score: 2.0/5** — Core protocol is highly programmatic with on-chain rate computation. MetaVault curator introduces manual intervention for strategy, but share pricing remains algorithmic.
+**Subcategory B Score: 2.0/5** — Core protocol is highly programmatic with onchain rate computation. MetaVault curator introduces manual intervention for strategy, but share pricing remains algorithmic.
 
 **Subcategory C: External Dependencies**
 
@@ -363,25 +363,25 @@ Existing MetaVaults are on Base (Gami Spectra USDC) and Katana (vbUSDC). Once de
 
 | Factor | Assessment |
 |--------|-----------|
-| PT backing | Fully backed by deposited IBT, verifiable on-chain, 1:1 at maturity |
+| PT backing | Fully backed by deposited IBT, verifiable onchain, 1:1 at maturity |
 | Negative yield | PT backing decreases proportionally if IBT loses value — no protocol-level backstop |
 | Collateral quality | Depends entirely on IBT selected — Spectra is agnostic |
 
-**Subcategory A Score: 2.0/5** — Full on-chain collateralization with transparent backing. Negative yield mechanism is well-designed (fair loss distribution). Score assumes the IBT risk is assessed separately.
+**Subcategory A Score: 2.0/5** — Full onchain collateralization with transparent backing. Negative yield mechanism is well-designed (fair loss distribution). Score assumes the IBT risk is assessed separately.
 
 **Subcategory B: Provability**
 
 | Factor | Assessment |
 |--------|-----------|
-| Reserve transparency | Fully on-chain — `ptRate`, `ibtRate` are contract state variables |
+| Reserve transparency | Fully onchain — `ptRate`, `ibtRate` are contract state variables |
 | Reporting mechanism | Programmatic, real-time, anyone can verify |
-| Third-party verification | On-chain by design — no off-chain components in core protocol |
+| Third-party verification | Onchain by design — no offchain components in core protocol |
 
-**Subcategory B Score: 1.5/5** — Good provability. All rates are computed algorithmically on-chain. Anyone can verify PT backing at any time by reading the PrincipalToken contract.
+**Subcategory B Score: 1.5/5** — Good provability. All rates are computed algorithmically onchain. Anyone can verify PT backing at any time by reading the PrincipalToken contract.
 
 **Funds Management Score = (2.0 + 1.5) / 2 = 1.75/5**
 
-**Score: 1.75/5** — Strong on-chain collateralization and provability. PT backing is transparent and programmatically verifiable.
+**Score: 1.75/5** — Strong onchain collateralization and provability. PT backing is transparent and programmatically verifiable.
 
 #### Category 4: Liquidity Risk (Weight: 15%)
 

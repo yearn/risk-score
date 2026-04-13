@@ -55,7 +55,7 @@ All contracts are deployed on HyperEVM (Hyperliquid L1). Explorer: [HyperEVMScan
 
 All contracts are **upgradeable** via EIP-1967 transparent proxy pattern. Each proxy has a separate ProxyAdmin contract. All three ProxyAdmin contracts are owned by the governance multisig (`0x97dee0ea...`, verified via `owner()` on each ProxyAdmin). This means the **3-of-5 multisig can upgrade all contract implementations** without timelock.
 
-Source: [docs.stakedhype.fi/technical/contract-addresses](https://docs.stakedhype.fi/technical/contract-addresses) + on-chain verification via `eth_getStorageAt` (EIP-1967 slots).
+Source: [docs.stakedhype.fi/technical/contract-addresses](https://docs.stakedhype.fi/technical/contract-addresses) + onchain verification via `eth_getStorageAt` (EIP-1967 slots).
 
 ## How Hyperliquid Staking Works (Context)
 
@@ -145,7 +145,7 @@ stHYPE deposits are managed via HSM-integrated staking operations:
 
 ### Collateralization
 
-On-chain state (verified February 18, 2026):
+Onchain state (verified February 18, 2026):
 - **stHYPE totalSupply**: 4,252,373.17 stHYPE
 - **Total HYPE backing** (`totalSupply × exchangeRate`): 4,338,882.91 HYPE
 - **OverseerV1 liquid reserve**: 261,728.59 HYPE (6.0% of total backing held as liquid HYPE)
@@ -155,19 +155,19 @@ On-chain state (verified February 18, 2026):
 
 Economic backing is staked HYPE plus liquid reserves. The remaining ~94.0% of HYPE is staked across validators via HyperCore Staking Modules.
 - Backing quality is primarily dependent on Hyperliquid validator set quality and slashing/operational outcomes.
-- This is not off-chain custodial collateral; risk is on-chain protocol + validator behavior.
+- This is not offchain custodial collateral; risk is onchain protocol + validator behavior.
 
 ### Provability
 
-- Core staking and token accounting are on-chain by design.
-- Key on-chain readable functions verified: `totalSupply()`, `balancePerShare()`, `totalShares()`, `maxRedeemable()`, `burnCount()`, `getBurns(address)`, `redeemable(uint256)`.
-- Exchange rate (`balancePerShare`) is programmatically updated on-chain — not reliant on admin oracle updates.
+- Core staking and token accounting are onchain by design.
+- Key onchain readable functions verified: `totalSupply()`, `balancePerShare()`, `totalShares()`, `maxRedeemable()`, `burnCount()`, `getBurns(address)`, `redeemable(uint256)`.
+- Exchange rate (`balancePerShare`) is programmatically updated onchain — not reliant on admin oracle updates.
 - Contracts use OpenZeppelin AccessControl with MINTER_ROLE, BURNER_ROLE, PAUSER_ROLE, DEFAULT_ADMIN_ROLE. OverseerV1 holds MINTER_ROLE and BURNER_ROLE on stHYPE. The 3-of-5 multisig holds DEFAULT_ADMIN_ROLE.
 - **Transparency gaps remain in several areas:**
-  - **Validator delegation breakdown**: No public dashboard or on-chain mechanism shows per-validator stake distribution. The [operators page](https://docs.stakedhype.fi/governance/operators) lists operator names (ASXN, B-harvest, HypurrCO, etc.) but publishes no addresses, delegation amounts, or performance metrics.
+  - **Validator delegation breakdown**: No public dashboard or onchain mechanism shows per-validator stake distribution. The [operators page](https://docs.stakedhype.fi/governance/operators) lists operator names (ASXN, B-harvest, HypurrCO, etc.) but publishes no addresses, delegation amounts, or performance metrics.
   - **Queue monitoring**: The only user-facing tool is an estimated withdrawal time at `app.valantis.xyz/staking` ([stake accounts docs](https://docs.stakedhype.fi/technical/stake-accounts)). No real-time queue depth, position, or reserve utilization data is published.
   - **HSM not yet deployed**: The [HSM specification](https://docs.stakedhype.fi/technical/hyperliquid-stake-marketplace-hsm) uses future tense throughout (*"HSM will be natively integrated"*, *"stHYPE will use a governance process"*), indicating the Hyperliquid Stake Marketplace is still a design document, not a live system.
-  - **Off-chain operational components**: Reserve management relies on *"active liquidity management from the Protocol Delegator"* and *"coordination with custodians / HIP-3 operators"* ([stake accounts docs](https://docs.stakedhype.fi/technical/stake-accounts)) — off-chain processes with no on-chain enforcement or public monitoring.
+  - **Offchain operational components**: Reserve management relies on *"active liquidity management from the Protocol Delegator"* and *"coordination with custodians / HIP-3 operators"* ([stake accounts docs](https://docs.stakedhype.fi/technical/stake-accounts)) — offchain processes with no onchain enforcement or public monitoring.
   - **1:1 backing unverifiable end-to-end**: The [transparency page](https://docs.stakedhype.fi/info/transparency-and-risks) claims *"stHYPE is always backed 1:1 by native HYPE"*, but no independent verification tool is provided. Users can verify EVM-side state (`totalSupply`, `balancePerShare`) but cannot independently audit the full HyperCore validator delegation breakdown.
 
 ## Liquidity Risk
@@ -199,7 +199,7 @@ No stHYPE or wstHYPE pools found on Curve, Laminar, or KittenSwap despite these 
 
 ### wstHYPE as Lending Collateral
 
-Lending protocols accept **wstHYPE (wrapped stHYPE)**, not native stHYPE, as collateral for borrowing. This is the primary use case for staked HYPE derivatives and the key risk vector, since liquidation of undercollateralized positions depends on available on-chain liquidity.
+Lending protocols accept **wstHYPE (wrapped stHYPE)**, not native stHYPE, as collateral for borrowing. This is the primary use case for staked HYPE derivatives and the key risk vector, since liquidation of undercollateralized positions depends on available onchain liquidity.
 
 **Morpho V1** — isolated lending markets, **$44.0M wstHYPE collateral** across 10 active markets:
 
@@ -229,9 +229,9 @@ Lending protocols accept **wstHYPE (wrapped stHYPE)**, not native stHYPE, as col
 
 ### Liquidation Risk
 
-**On-chain liquidation of wstHYPE collateral positions is effectively broken.** $76M of wstHYPE is used as borrowing collateral, but total wstHYPE DEX liquidity is only ~$138K with zero stablecoin pairs. When a borrower's position becomes undercollateralized, liquidators must acquire and sell wstHYPE — but there is no viable on-chain path to do so efficiently:
+**Onchain liquidation of wstHYPE collateral positions is effectively broken.** $76M of wstHYPE is used as borrowing collateral, but total wstHYPE DEX liquidity is only ~$138K with zero stablecoin pairs. When a borrower's position becomes undercollateralized, liquidators must acquire and sell wstHYPE — but there is no viable onchain path to do so efficiently:
 
-1. **No stablecoin exit**: No wstHYPE/USDC or wstHYPE/USDT pools exist. Liquidators must route through HYPE derivatives (wstHYPE → WHYPE → USDC), adding hops and slippage. The largest Morpho market ($35.2M) is borrowing USDC against wstHYPE — liquidators need a wstHYPE-to-USDC path that doesn't exist on-chain.
+1. **No stablecoin exit**: No wstHYPE/USDC or wstHYPE/USDT pools exist. Liquidators must route through HYPE derivatives (wstHYPE → WHYPE → USDC), adding hops and slippage. The largest Morpho market ($35.2M) is borrowing USDC against wstHYPE — liquidators need a wstHYPE-to-USDC path that doesn't exist onchain.
 2. **Negligible DEX depth**: $138K total wstHYPE liquidity cannot absorb liquidations from $76M in collateral. Even a small liquidation event would exhaust available pool depth.
 3. **Unwrap delay**: Converting wstHYPE → stHYPE is instant at the contract level, but stHYPE → HYPE requires the 7-day unstaking queue (up to 90 days under stress). Liquidators cannot quickly realize value.
 4. **Correlated stress**: In a HYPE price drawdown, both the collateral value (wstHYPE) and exit liquidity (WHYPE pools) decline simultaneously, creating a liquidation spiral risk where falling prices trigger liquidations that cannot be efficiently executed.
@@ -258,11 +258,11 @@ StakedHYPE docs describe a planned dual-governance model based on a modified [Fr
 
 The current operational model is a **team-controlled multisig** without the documented veto mechanism.
 
-On-chain verified governance data:
+Onchain verified governance data:
 - **Multisig address**: [`0x97dee0ea4ca10560f260a0f6f45bdc128a1d51f9`](https://hyperevmscan.io/address/0x97dee0ea4ca10560f260a0f6f45bdc128a1d51f9) (Gnosis Safe on HyperEVM)
 - **Threshold**: **3-of-5** (verified via `getThreshold()`)
 - **Nonce**: 20 transactions executed
-- **Timelock**: No timelock mechanism documented or found on-chain.
+- **Timelock**: No timelock mechanism documented or found onchain.
 - **Signer identities**: Not individually disclosed. Described only as "Thunderhead team, Valantis Team, ecosystem partners."
 
 Risk implications:
@@ -274,7 +274,7 @@ Risk implications:
 
 - Hybrid system: smart-contract based staking + operational policy layer for delegation, reserves, and queue management.
 - More complex than simple wrappers (WHYPE/WETH).
-- Potential sensitivity to off-chain operator execution quality and policy correctness.
+- Potential sensitivity to offchain operator execution quality and policy correctness.
 
 ### External Dependencies
 
@@ -369,7 +369,7 @@ Track official Hyperliquid staking/validator announcements for:
 1. Clear product-market fit: native HYPE liquid staking primitive.
 2. Public audit trail with multiple firms and multiple rounds.
 3. Detailed technical docs for HSM and unstaking mechanics.
-4. On-chain staking economics rather than off-chain custodial backing.
+4. Onchain staking economics rather than offchain custodial backing.
 
 ### Key Risks
 
@@ -391,7 +391,7 @@ Track official Hyperliquid staking/validator announcements for:
 ### Critical Risk Gates
 
 - [x] **No audit** -- PASS (4 audits disclosed)
-- [x] **Unverifiable reserves** -- PASS (on-chain staking model, though monitoring visibility still maturing)
+- [x] **Unverifiable reserves** -- PASS (onchain staking model, though monitoring visibility still maturing)
 - [x] **Total centralization** -- PASS (not single-EOA only, but governance remains relatively concentrated)
 
 ### Category Scores
@@ -408,8 +408,8 @@ Track official Hyperliquid staking/validator announcements for:
 #### Category 2: Centralization & Control Risks (Weight: 30%)
 
 Subscores:
-- Governance: **4.0** — 3-of-5 multisig (verified on-chain), no timelock, signer identities undisclosed, planned governance system not yet implemented. Per rubric: "Multisig 3/5 or low threshold" + "No timelock" + "Powerful admin roles with limited constraints" = score 4.
-- Programmability: **3.0** — Hybrid on-chain/off-chain. Exchange rate is on-chain (`balancePerShare`), but validator delegation strategy requires off-chain operational decisions. OverseerV1 has MINTER_ROLE and BURNER_ROLE over stHYPE.
+- Governance: **4.0** — 3-of-5 multisig (verified onchain), no timelock, signer identities undisclosed, planned governance system not yet implemented. Per rubric: "Multisig 3/5 or low threshold" + "No timelock" + "Powerful admin roles with limited constraints" = score 4.
+- Programmability: **3.0** — Hybrid onchain/offchain. Exchange rate is onchain (`balancePerShare`), but validator delegation strategy requires offchain operational decisions. OverseerV1 has MINTER_ROLE and BURNER_ROLE over stHYPE.
 - External dependencies: **4.0** — Critical single-ecosystem dependency on Hyperliquid L1 (consensus, validator performance, staking rules). Failure of Hyperliquid would break the entire protocol.
 
 Centralization score = (4.0 + 3.0 + 4.0) / 3 = **3.67**
@@ -419,8 +419,8 @@ Centralization score = (4.0 + 3.0 + 4.0) / 3 = **3.67**
 #### Category 3: Funds Management (Weight: 30%)
 
 Subscores:
-- Collateralization: **2.5** — 100% on-chain collateral (staked HYPE), but not over-collateralized. Liquid reserve only 6.0% of total backing. Collateral quality = single-asset (HYPE), not blue-chip.
-- Provability: **2.0** — Key state readable on-chain (`totalSupply`, `balancePerShare`, `maxRedeemable`, `totalShares`). Exchange rate updated programmatically. AccessControl roles verified. Some off-chain complexity around validator delegation not fully transparent.
+- Collateralization: **2.5** — 100% onchain collateral (staked HYPE), but not over-collateralized. Liquid reserve only 6.0% of total backing. Collateral quality = single-asset (HYPE), not blue-chip.
+- Provability: **2.0** — Key state readable onchain (`totalSupply`, `balancePerShare`, `maxRedeemable`, `totalShares`). Exchange rate updated programmatically. AccessControl roles verified. Some offchain complexity around validator delegation not fully transparent.
 
 Funds management score = (2.5 + 2.0) / 2 = **2.25**
 
@@ -432,7 +432,7 @@ Funds management score = (2.5 + 2.0) / 2 = **2.25**
 - DEX liquidity is extremely thin: ~$380K total across all stHYPE/wstHYPE pools (0.3% of $124M TVL). Largest single pool ~$186K with near-zero daily volume.
 - `maxRedeemable()` returned 0 at time of check — no instant redemption buffer available.
 - Protocol unstaking queue is the primary exit mechanism, not secondary market trading.
-- ~$77M of wstHYPE used as lending collateral (HyperLend, Morpho, Felix) against only ~$138K wstHYPE DEX liquidity and zero stablecoin pairs. Liquidations are effectively unexecutable on-chain.
+- ~$77M of wstHYPE used as lending collateral (HyperLend, Morpho, Felix) against only ~$138K wstHYPE DEX liquidity and zero stablecoin pairs. Liquidations are effectively unexecutable onchain.
 - Per rubric: "Withdrawal queues or restrictions" + "<$1M DEX liquidity" + ">1 week potential exit time" = score 4. Current DEX liquidity ($380K) with near-zero daily trading volume ($13/day avg) means secondary market exits are effectively unavailable for any meaningful position size. The protocol unstaking queue (7+ days, up to 90 days under stress) is the only realistic exit path.
 
 **Score: 4.0/5**
@@ -465,7 +465,7 @@ Rationale:
 - Governance is centralized: 3-of-5 multisig with no timelock, planned dual-governance not yet implemented.
 - DEX liquidity is extremely thin ($380K vs $124M TVL); primary exit is via protocol unstaking queue (7+ days). ~$77M wstHYPE lending collateral with no stablecoin DEX pairs creates structural liquidation risk.
 - Strong single-ecosystem dependency on Hyperliquid L1.
-- Partially offset by: on-chain verifiable backing, programmatic exchange rate, Thunderhead's multi-LST track record, no incidents to date.
+- Partially offset by: onchain verifiable backing, programmatic exchange rate, Thunderhead's multi-LST track record, no incidents to date.
 
 ## Reassessment Triggers
 

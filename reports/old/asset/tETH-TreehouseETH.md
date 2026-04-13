@@ -1,6 +1,6 @@
 # tETH - TreehouseETH
 
-tETH is a liquid staking token (LST) that converges the fragmented on-chain ETH interest rates market. Holders of tETH earn real yield in excess of Ethereum’s Proof-of-Stake (PoS) rewards through interest rate arbitrage while still being able to use tETH for DeFi activities. tETH is also foundational to supporting the implementation of Decentralized Offered Rates (DOR).
+tETH is a liquid staking token (LST) that converges the fragmented onchain ETH interest rates market. Holders of tETH earn real yield in excess of Ethereum’s Proof-of-Stake (PoS) rewards through interest rate arbitrage while still being able to use tETH for DeFi activities. tETH is also foundational to supporting the implementation of Decentralized Offered Rates (DOR).
 
 tETH is denominated in wstETH.
 
@@ -9,7 +9,7 @@ TVL on Treehouse is $277M, $200M on mainnet, on 5th Feb 2025 on [DefiLlama](http
 ## Centralization Risk
 
 [Trail Of Bits](https://treehouse.finance/Trail_of_Bits_tETH_Sep_Audit_Report_vF.pdf) highlights centralization problems in Treehouse protocol:
-> The system’s operations depend on certain privileged actors manually executing essential tasks (via off-chain executions). These tasks include operations related to profit and loss distribution, user withdrawals, updating state variables affecting user solvency and funds, and managing investments and divestments. Due to the extensible nature of the portfolio management system, privileged actors can perform arbitrary actions.
+> The system’s operations depend on certain privileged actors manually executing essential tasks (via offchain executions). These tasks include operations related to profit and loss distribution, user withdrawals, updating state variables affecting user solvency and funds, and managing investments and divestments. Due to the extensible nature of the portfolio management system, privileged actors can perform arbitrary actions.
 
 This centralization risk remains present in the protocol:
 > TOB-TETH-2: a centralization risk and we acknowledge it as such - it's conceptually no different to another EOA with privileged access.

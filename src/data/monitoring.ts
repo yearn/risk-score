@@ -318,7 +318,7 @@ export const protocols: Protocol[] = [
       },
       {
         label: "Unrealized Losses",
-        description: "On-chain and subgraph — alerts if >=0.5% of pool",
+        description: "Onchain and subgraph — alerts if >=0.5% of pool",
       },
       {
         label: "Withdrawal Queue",
@@ -488,7 +488,7 @@ export const protocols: Protocol[] = [
       {
         label: "Token Pricing",
         description:
-          "Non-stable token pricing via CoinGecko with on-chain fallback",
+          "Non-stable token pricing via CoinGecko with onchain fallback",
       },
       {
         label: "Timelock",

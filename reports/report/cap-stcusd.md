@@ -12,10 +12,10 @@ stcUSD is a **yield-bearing ERC-4626 vault token** issued by Cap (Covered Agent 
 
 **Key architecture:**
 
-- **cUSD:** Dollar-pegged stablecoin backed 1:1 by whitelisted reserve assets. Currently **2 assets accepted on-chain**: USDC (~96% of reserves) and wWTGXX/WisdomTree Government Money Market Digital Fund (~4%). Max 40% single-asset concentration rule exists but is not binding given current composition. Users mint by depositing reserves and burn/redeem to withdraw
+- **cUSD:** Dollar-pegged stablecoin backed 1:1 by whitelisted reserve assets. Currently **2 assets accepted onchain**: USDC (~96% of reserves) and wWTGXX/WisdomTree Government Money Market Digital Fund (~4%). Max 40% single-asset concentration rule exists but is not binding given current composition. Users mint by depositing reserves and burn/redeem to withdraw
 - **stcUSD:** ERC-4626 vault wrapping cUSD. Yield accrues via exchange rate appreciation. ~76% of cUSD supply is staked as stcUSD
 - **Fractional Reserve:** ~$75M USDC deployed via the USDC Fractional Reserve Vault (a Yearn V3 vault) — split between **Morpho Gauntlet USDC Prime** (~$50.2M, 67%) and **Aave V3 USDC Lender** (~$25.0M, 33%). An additional ~$5M wWTGXX is held in a separate Fractional Reserve Vault via a simple holder strategy
-- **Operator Model:** Institutional operators borrow reserves at a dynamic hurdle rate (~5.2% avg over 90 days), execute off-chain/proprietary strategies (HFT, private credit, arbitrage, MEV), and return principal + hurdle rate. Excess yield is split between operators and restakers
+- **Operator Model:** Institutional operators borrow reserves at a dynamic hurdle rate (~5.2% avg over 90 days), execute offchain/proprietary strategies (HFT, private credit, arbitrage, MEV), and return principal + hurdle rate. Excess yield is split between operators and restakers
 - **Security Network:** Per-operator Symbiotic vaults with instant slashing. Restakers delegate collateral (ETH, wBTC, LSTs, stablecoins) to specific operators. If an operator defaults, their delegated collateral is slashed and redistributed to cover losses
 - **Governance:** 3-of-5 Gnosis Safe multisig → 24-hour TimelockController → Access Control system. All contracts are upgradeable proxies
 
@@ -132,7 +132,7 @@ The Cap system is **high complexity**:
 - **Multi-contract architecture:** 10+ core contracts (cUSD, stcUSD, Lender, Oracle, Access Control, Delegation, Fee Auction, Fee Receiver, Fractional Reserve, Adapters)
 - **Upgradeable proxies:** cUSD, stcUSD, and Access Control are ERC-1967 upgradeable proxies (proxy admin set to address(0), upgrades via Access Control roles through Timelock)
 - **Symbiotic integration:** Per-operator vault deployment, middleware for slashing/rewards, restaker delegation management
-- **Operator model:** Off-chain yield generation by institutional counterparties, on-chain borrowing/repayment/liquidation
+- **Operator model:** Offchain yield generation by institutional counterparties, onchain borrowing/repayment/liquidation
 - **Multi-oracle system:** RedStone price feeds with staleness checks, Morpho oracle adapters
 - **Cross-protocol dependencies:** Aave V3, Morpho, Symbiotic, RedStone, Pendle (for PT tokens)
 
@@ -183,7 +183,7 @@ Operators generate yield through proprietary strategies: HFT, private credit, cr
 
 ### Collateralization
 
-- **cUSD reserves:** Backed by 2 whitelisted assets on-chain: **USDC** (~$124M, 96%) and **wWTGXX** (~$5M, 4%). USDC dominates — the 40% single-asset concentration cap is not binding
+- **cUSD reserves:** Backed by 2 whitelisted assets onchain: **USDC** (~$124M, 96%) and **wWTGXX** (~$5M, 4%). USDC dominates — the 40% single-asset concentration cap is not binding
 - **Reserve deployment:** USDC Fractional Reserve Vault holds ~$75.2M (Morpho ~$50.2M + Aave ~$25.0M). ~$48.9M lent to operators. wWTGXX FRV holds ~$5M via holder strategy
 - **Operator collateralization:** Each operator must secure over-collateralized Symbiotic delegations (default 50% LTV, 80% liquidation threshold) from restakers before borrowing
 - **Liquidation:** Health Factor < 1.0 triggers a 12-hour grace period, then a 3-day liquidation window via permissionless Dutch auction. Liquidation bonus capped at 10%. Target: 125% health ratio post-liquidation
@@ -200,11 +200,11 @@ Operators generate yield through proprietary strategies: HFT, private credit, cr
 
 ### Provability
 
-- **stcUSD exchange rate:** On-chain ERC-4626 standard (`convertToAssets()`/`convertToShares()`). Fully programmatic
-- **Reserve composition:** On-chain — reserve assets held in the vault contracts are verifiable
-- **Fractional reserve positions:** On-chain — Aave V3 aToken balances verifiable
-- **Operator positions:** Partially on-chain — borrowing/repayment recorded on-chain, but operators' actual yield strategies are off-chain and opaque
-- **Slashing conditions:** On-chain verifiable — objective fault conditions, no governance discretion
+- **stcUSD exchange rate:** Onchain ERC-4626 standard (`convertToAssets()`/`convertToShares()`). Fully programmatic
+- **Reserve composition:** Onchain — reserve assets held in the vault contracts are verifiable
+- **Fractional reserve positions:** Onchain — Aave V3 aToken balances verifiable
+- **Operator positions:** Partially onchain — borrowing/repayment recorded onchain, but operators' actual yield strategies are offchain and opaque
+- **Slashing conditions:** Onchain verifiable — objective fault conditions, no governance discretion
 
 ## Liquidity Risk
 
@@ -240,14 +240,14 @@ Cap's governance flows through a **3-of-5 Gnosis Safe multisig** → **24-hour T
 
 | Factor | Assessment |
 |--------|-----------|
-| stcUSD PPS | On-chain ERC-4626, fully algorithmic |
-| Vault operations | Permissionless staking/unstaking on-chain |
+| stcUSD PPS | Onchain ERC-4626, fully algorithmic |
+| Vault operations | Permissionless staking/unstaking onchain |
 | Reserve deployment | Automated via Fractional Reserve Vault to Aave V3 |
-| Operator strategies | **Off-chain** — operators execute proprietary strategies. Borrowing/repayment recorded on-chain, but actual yield generation is opaque |
-| Hurdle rate | On-chain — dynamic function of market rate + utilization |
-| Slashing | On-chain — objective fault conditions, permissionless liquidation |
+| Operator strategies | **Offchain** — operators execute proprietary strategies. Borrowing/repayment recorded onchain, but actual yield generation is opaque |
+| Hurdle rate | Onchain — dynamic function of market rate + utilization |
+| Slashing | Onchain — objective fault conditions, permissionless liquidation |
 
-**Programmability is mixed:** Core vault mechanics (staking, PPS, reserve deployment, slashing) are fully on-chain. However, the operator yield generation — which represents a portion of stcUSD yield — is off-chain and opaque.
+**Programmability is mixed:** Core vault mechanics (staking, PPS, reserve deployment, slashing) are fully onchain. However, the operator yield generation — which represents a portion of stcUSD yield — is offchain and opaque.
 
 ### External Dependencies
 
@@ -259,8 +259,8 @@ Cap's governance flows through a **3-of-5 Gnosis Safe multisig** → **24-hour T
 | **RedStone** | High | cUSD price oracle (0.05% deviation threshold). Stale prices disable minting/burning |
 | **wWTGXX (WisdomTree)** | Low | ~$5M tokenized gov money market fund. Only 7 holders. Minimal DeFi track record |
 | **USDC (Circle)** | High | Primary reserve asset |
-| **USDT, pyUSD, BENJI, BUIDL** | Low | Listed in docs as potential reserve assets but **not currently whitelisted on-chain** |
-| **Institutional Operators** | High | IMC Trading, Edge Capital, Susquehanna Crypto generate yield via off-chain strategies. Counterparty risk mitigated by Symbiotic restaking |
+| **USDT, pyUSD, BENJI, BUIDL** | Low | Listed in docs as potential reserve assets but **not currently whitelisted onchain** |
+| **Institutional Operators** | High | IMC Trading, Edge Capital, Susquehanna Crypto generate yield via offchain strategies. Counterparty risk mitigated by Symbiotic restaking |
 
 ## Operational Risk
 
@@ -270,7 +270,7 @@ Cap's governance flows through a **3-of-5 Gnosis Safe multisig** → **24-hour T
 - **Documentation:** Comprehensive documentation covering protocol mechanics, operator model, and security network. Contract source code verified on Etherscan
 - **Legal:** No disclosed legal entity structure. Relies on operators being "regulated financial institutions" with legal agreements with restakers
 - **Incident response:** No incidents to date. $1M Sherlock bug bounty provides responsible disclosure channel. Emergency admin role can pause/unpause protocol
-- **Operator transparency:** Off-chain yield strategies are opaque. While slashing provides recourse, users cannot independently verify operator positions
+- **Operator transparency:** Offchain yield strategies are opaque. While slashing provides recourse, users cannot independently verify operator positions
 
 ## Monitoring
 
@@ -311,7 +311,7 @@ Cap's governance flows through a **3-of-5 Gnosis Safe multisig** → **24-hour T
 
 - **Upgradeable contracts:** Core token contracts (cUSD, stcUSD) are upgradeable proxies. While upgrades go through the 24h Timelock, the 3-of-5 multisig can modify fundamental contract logic
 - **Weak multisig configuration:** 3-of-5 threshold with 2 dormant owners, 1 nested 1-of-2 Safe, and no public signer disclosure. Effective security is weaker than the threshold suggests
-- **Off-chain operator strategies:** Operators execute proprietary yield strategies that are opaque to on-chain verification. While slashing provides recourse, users cannot independently verify operator positions or risk exposure
+- **Offchain operator strategies:** Operators execute proprietary yield strategies that are opaque to onchain verification. While slashing provides recourse, users cannot independently verify operator positions or risk exposure
 - **Morpho/Aave concentration risk:** ~$75M USDC reserves deployed across Morpho (~$50M) and Aave V3 (~$25M). An incident in either protocol would significantly impact reserves
 - **Relatively new protocol:** 7 months in production. While growing rapidly ($288M TVL), the operator model and Symbiotic slashing mechanism have not been stress-tested in adverse conditions
 - **Deployer EOA retains EXECUTOR_ROLE:** Residual permission on the Timelock that was never revoked
@@ -328,12 +328,12 @@ Cap's governance flows through a **3-of-5 Gnosis Safe multisig** → **24-hour T
 **Scoring Guidelines:**
 - Be conservative: when uncertain between two scores, choose the higher (riskier) one
 - Use decimals (e.g., 2.5) when a subcategory falls between scores
-- Prioritize on-chain evidence over documentation claims
+- Prioritize onchain evidence over documentation claims
 
 ### Critical Risk Gates
 
 - [x] **No audit** — 7 auditors with 8 reports including Trail of Bits, Spearbit, Zellic, Sherlock. ✅ PASS
-- [x] **Unverifiable reserves** — ERC-4626 standard. cUSD reserves on-chain. Fractional reserve Aave positions verifiable. However, operator yield strategies are off-chain. ⚠️ PARTIAL — core reserves verifiable, operator positions opaque
+- [x] **Unverifiable reserves** — ERC-4626 standard. cUSD reserves onchain. Fractional reserve Aave positions verifiable. However, operator yield strategies are offchain. ⚠️ PARTIAL — core reserves verifiable, operator positions opaque
 - [x] **Total centralization** — 3-of-5 multisig with 24h Timelock. Not a single EOA or 1-of-N setup. ✅ PASS
 
 **All gates pass (with caveat on operator opacity).** Proceed to category scoring.
@@ -371,14 +371,14 @@ Cap's governance flows through a **3-of-5 Gnosis Safe multisig** → **24-hour T
 
 | Factor | Assessment |
 |--------|-----------|
-| PPS | On-chain ERC-4626, fully algorithmic |
-| Core vault operations | Permissionless staking/unstaking on-chain |
+| PPS | Onchain ERC-4626, fully algorithmic |
+| Core vault operations | Permissionless staking/unstaking onchain |
 | Reserve deployment | Automated via Fractional Reserve to Aave |
-| Operator yield | **Off-chain** — proprietary strategies are opaque. Only borrowing/repayment recorded on-chain |
-| Hurdle rate | On-chain, dynamic |
-| Slashing | On-chain, objective conditions |
+| Operator yield | **Offchain** — proprietary strategies are opaque. Only borrowing/repayment recorded onchain |
+| Hurdle rate | Onchain, dynamic |
+| Slashing | Onchain, objective conditions |
 
-**Programmability Score: 2.5/5** — Core mechanics (PPS, staking, reserves, slashing) are fully on-chain and programmatic. However, operator yield strategies — a fundamental component of the protocol's value proposition — are executed off-chain and cannot be independently verified. This hybrid on-chain/off-chain model is less transparent than fully on-chain protocols.
+**Programmability Score: 2.5/5** — Core mechanics (PPS, staking, reserves, slashing) are fully onchain and programmatic. However, operator yield strategies — a fundamental component of the protocol's value proposition — are executed offchain and cannot be independently verified. This hybrid onchain/offchain model is less transparent than fully onchain protocols.
 
 **Subcategory C: External Dependencies**
 
@@ -393,7 +393,7 @@ Cap's governance flows through a **3-of-5 Gnosis Safe multisig** → **24-hour T
 
 **Centralization Score = (2.0 + 2.5 + 3.0) / 3 = 2.5**
 
-**Score: 2.5/5** — Upgradeable contracts behind a 24h timelock, partially off-chain yield model, and complex multi-protocol dependency chain.
+**Score: 2.5/5** — Upgradeable contracts behind a 24h timelock, partially offchain yield model, and complex multi-protocol dependency chain.
 
 #### Category 3: Funds Management (Weight: 30%)
 
@@ -401,29 +401,29 @@ Cap's governance flows through a **3-of-5 Gnosis Safe multisig** → **24-hour T
 
 | Factor | Assessment |
 |--------|-----------|
-| Backing | cUSD backed by 2 on-chain whitelisted assets: USDC (~96%) and wWTGXX/WisdomTree (~4%). Heavy USDC concentration |
+| Backing | cUSD backed by 2 onchain whitelisted assets: USDC (~96%) and wWTGXX/WisdomTree (~4%). Heavy USDC concentration |
 | Reserve quality | USDC (Circle) is blue-chip. wWTGXX (WisdomTree Gov Money Market) is an institutional tokenized fund with only 7 holders — limited track record in DeFi |
 | Reserve deployment | USDC FRV: ~$50.2M in Morpho + ~$25.0M in Aave V3. ~$48.9M lent to operators. wWTGXX FRV: ~$5M in holder strategy |
 | Leverage | No direct leverage in reserve. Operators borrow from reserves (over-collateralized via Symbiotic) |
 | Operator collateral | Per-operator Symbiotic delegations (50% default LTV, 80% liquidation threshold) |
-| Verifiability | Reserves on-chain. Operator positions partially verifiable (borrow/repay on-chain, strategies off-chain) |
+| Verifiability | Reserves onchain. Operator positions partially verifiable (borrow/repay onchain, strategies offchain) |
 
-**Collateralization Score: 2.0/5** — USDC is blue-chip but makes up 96% of reserves (low diversification despite the 40% cap rule). wWTGXX is a tokenized money market fund with minimal DeFi adoption (7 holders). The per-operator over-collateralization via Symbiotic is a strong mechanism. However, the fractional reserve model means reserves are actively deployed (~$75M in Morpho/Aave, ~$49M lent to operators), and operator strategies are off-chain.
+**Collateralization Score: 2.0/5** — USDC is blue-chip but makes up 96% of reserves (low diversification despite the 40% cap rule). wWTGXX is a tokenized money market fund with minimal DeFi adoption (7 holders). The per-operator over-collateralization via Symbiotic is a strong mechanism. However, the fractional reserve model means reserves are actively deployed (~$75M in Morpho/Aave, ~$49M lent to operators), and operator strategies are offchain.
 
 **Subcategory B: Provability**
 
 | Factor | Assessment |
 |--------|-----------|
-| Reserve transparency | On-chain — reserve balances, Aave positions, operator debt balances all verifiable |
-| Exchange rate | ERC-4626, fully on-chain |
-| Operator positions | **Partially opaque** — borrowing/repayment on-chain, but actual strategy execution and risk exposure are off-chain |
-| Slashing verifiability | On-chain — objective fault conditions |
+| Reserve transparency | Onchain — reserve balances, Aave positions, operator debt balances all verifiable |
+| Exchange rate | ERC-4626, fully onchain |
+| Operator positions | **Partially opaque** — borrowing/repayment onchain, but actual strategy execution and risk exposure are offchain |
+| Slashing verifiability | Onchain — objective fault conditions |
 
-**Provability Score: 2.5/5** — Core protocol state is fully on-chain and verifiable (reserves, PPS, operator debt, slashing conditions). However, the operator yield generation — where capital is deployed and what risks operators are taking — is off-chain and not independently verifiable. This hybrid model has a provability gap compared to fully on-chain protocols.
+**Provability Score: 2.5/5** — Core protocol state is fully onchain and verifiable (reserves, PPS, operator debt, slashing conditions). However, the operator yield generation — where capital is deployed and what risks operators are taking — is offchain and not independently verifiable. This hybrid model has a provability gap compared to fully onchain protocols.
 
 **Funds Management Score = (2.0 + 2.5) / 2 = 2.3**
 
-**Score: 2.3/5** — Good reserve quality and on-chain provability for core protocol state, but operator strategy opacity and fractional reserve model introduce trust assumptions.
+**Score: 2.3/5** — Good reserve quality and onchain provability for core protocol state, but operator strategy opacity and fractional reserve model introduce trust assumptions.
 
 #### Category 4: Liquidity Risk (Weight: 15%)
 
@@ -480,7 +480,7 @@ Final Score = (Centralization × 0.30) + (Funds Mgmt × 0.30) + (Audits × 0.20)
 
 **Final Risk Tier: Low Risk (2.4/5.0) — Approved with standard monitoring**
 
-The score sits at the upper end of Low risk. The strong audit coverage, institutional backing, and novel security model (Symbiotic restaking) are positives. The key risk drivers are the upgradeable contracts with a weak multisig, off-chain operator strategy opacity, Aave concentration, and the relatively short production history (~7 months). Enhanced monitoring is recommended, particularly around operator positions, multisig transactions, and contract upgrade proposals.
+The score sits at the upper end of Low risk. The strong audit coverage, institutional backing, and novel security model (Symbiotic restaking) are positives. The key risk drivers are the upgradeable contracts with a weak multisig, offchain operator strategy opacity, Aave concentration, and the relatively short production history (~7 months). Enhanced monitoring is recommended, particularly around operator positions, multisig transactions, and contract upgrade proposals.
 
 ---
 

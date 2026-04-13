@@ -84,16 +84,16 @@ Origin Protocol has 30+ audit reports across all products (OpenZeppelin, Trail o
 
 ### Collateralization
 
-- 100% on-chain collateral: WETH + stETH (same-value ETH-denominated assets)
+- 100% onchain collateral: WETH + stETH (same-value ETH-denominated assets)
 - No debt, leverage, or liquidation mechanics
 - Operator sets buy/sell prices manually, bounded by cross-price (which requires timelock to change)
 
 ### Provability
 
-- All reserves verifiable on-chain via view functions: `totalAssets()`, `totalSupply()`, `convertToAssets()`
-- PPS calculated programmatically on-chain: `totalAssets() / totalSupply()`
+- All reserves verifiable onchain via view functions: `totalAssets()`, `totalSupply()`, `convertToAssets()`
+- PPS calculated programmatically onchain: `totalAssets() / totalSupply()`
 - Lido withdrawal queue state verifiable: `withdrawsQueued()`, `withdrawsClaimed()`, `claimable()`
-- 100% on-chain reserves, no off-chain components
+- 100% onchain reserves, no offchain components
 
 ## Liquidity Risk
 
@@ -136,7 +136,7 @@ Origin Protocol has 30+ audit reports across all products (OpenZeppelin, Trail o
 
 ### Programmability
 
-- PPS calculated programmatically on-chain (`totalAssets() / totalSupply()`)
+- PPS calculated programmatically onchain (`totalAssets() / totalSupply()`)
 - `allocate()` function is permissionless
 - Operator sets buy/sell prices manually (no timelock), bounded by cross-price (admin-set, 48h timelock)
 - If operator inactive, pricing could become stale (no automated price discovery)
@@ -167,7 +167,7 @@ No cross-chain dependencies.
 
 ### Key Strengths
 
-1. On-chain xOGN governance with ~5-day total cycle, self-administered Timelock, no admin backdoor
+1. Onchain xOGN governance with ~5-day total cycle, self-administered Timelock, no admin backdoor
 2. Cross-price protected by 48h timelock — limits operator manipulation
 3. 3 independent audits (2x OpenZeppelin + yAudit) + $1M Immunefi bounty
 4. Simple strategy (stETH arbitrage), with lending to low risk ARM Morpho Vault curated by Yearn
@@ -191,7 +191,7 @@ No cross-chain dependencies.
 ### Critical Risk Gates
 
 - [ ] **No audit** → **PASS** (2x OpenZeppelin + yAudit)
-- [ ] **Unverifiable reserves** → **PASS** (100% on-chain, verifiable)
+- [ ] **Unverifiable reserves** → **PASS** (100% onchain, verifiable)
 - [ ] **Total centralization** → **PASS** (xOGN governance + Timelock; operator is EOA but admin is not)
 
 ### Category Scores
@@ -208,12 +208,12 @@ No cross-chain dependencies.
 #### Category 2: Centralization & Control Risks (Weight: 30%) — **1.33**
 
 **Subcategory A: Governance — 1.0**
-- On-chain xOGN token governance with ~5-day cycle
+- Onchain xOGN token governance with ~5-day cycle
 - 48h timelock, self-administered, GOV Multisig (5/8) cancel-only
 - No admin backdoor. Shorter than ideal 72h+ timelock.
 
 **Subcategory B: Programmability — 1.5**
-- PPS on-chain, cross-price timelocked, `allocate()` permissionless
+- PPS onchain, cross-price timelocked, `allocate()` permissionless
 - Operator is single EOA with no-timelock price setting
 
 **Subcategory C: External Dependencies — 1.5**
@@ -226,11 +226,11 @@ No cross-chain dependencies.
 #### Category 3: Funds Management (Weight: 30%) — **1.25**
 
 **Subcategory A: Collateralization — 1.5**
-- 100% on-chain, same-value assets (ETH/stETH), no leverage
+- 100% onchain, same-value assets (ETH/stETH), no leverage
 - Idle capital deposited into Yearn-curated WETH ARM Morpho vault, a safer option with stronger risk oversight than the previous MEV Capital vault
 
 **Subcategory B: Provability — 1.0**
-- Fully transparent on-chain. Minor dependency on operator pricing (bounded by cross-price)
+- Fully transparent onchain. Minor dependency on operator pricing (bounded by cross-price)
 
 **Score: (1.5 + 1.0) / 2 = 1.25**
 
