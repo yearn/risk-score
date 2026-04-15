@@ -1,10 +1,11 @@
 # Protocol Risk Assessment: Resolv RLP
 
-- **Assessment Date:** February 8, 2026
+- **Assessment Date:** February 8, 2026 (Updated: March 22, 2026)
 - **Token:** RLP (Resolv Liquidity Pool)
 - **Chain:** Ethereum (primary), multi-chain (Base, BNB, Berachain, Arbitrum, HyperEVM, Soneium, TAC, Plasma)
 - **Token Address:** [`0x4956b52aE2fF65D74CA2d61207523288e4528f96`](https://etherscan.io/address/0x4956b52aE2fF65D74CA2d61207523288e4528f96)
-- **Final Score: 2.9/5.0**
+- **Final Score: 5.0/5.0**
+- **Warning:** HACKED — DO NOT USE
 
 ## Overview + Links
 
@@ -14,7 +15,7 @@ Resolv is a protocol maintaining USR, a stablecoin pegged to the US Dollar, back
 
 **Yield sources:**
 1. **Perpetual Futures Funding Rates** -- Historically positive, providing steady income from short positions
-2. **Staking Rewards** -- On-chain assets (stETH, etc.) are staked for additional yield
+2. **Staking Rewards** -- Onchain assets (stETH, etc.) are staked for additional yield
 3. **Risk Premium** -- RLP receives an additional allocation (currently 13.5% of net yield) exclusively as compensation for risk absorption
 
 **Key metrics (Feb 8, 2026):**
@@ -109,8 +110,8 @@ Resolv has undergone extensive auditing with 4 audit firms across 14+ audit enga
 - **TVL Growth**: From ~$9.3M at launch (Sep 2024) to ~$494.8M (Feb 2026). Significant growth.
 - **USR Supply**: ~354M ($354M circulating), peaked at ~$403M the previous week.
 - **RLP Supply**: ~109.7M tokens (~$140.8M market cap)
-- **Incidents**: No reported security incidents, exploits, or hacks found on Rekt News or DeFi Llama hacks database.
-- **Peg Stability**: USR trading at ~$0.9998, maintaining close to $1 peg.
+- **CRITICAL INCIDENT (March 22, 2026)**: A single EOA with `SERVICE_ROLE` on the USR Counter contract exploited the `requestSwap()` → `completeSwap()` flow. The attacker deposited ~100K USDC via `requestSwap()`, then the SERVICE_ROLE EOA called `completeSwap()` minting **50M USR** (not ~100K). A second mint followed for **30M USR**. Total: **~80M unbacked USR minted**. The attacker wrapped USR → wstUSR, dumped across KyberSwap + Velora at $0.50–$0.88, converted to ETH via Uniswap V4. **~$25M+ extracted from ~$200K input.** ~36M USR still held by attacker. Root cause: no onchain issuance caps, no collateral ratio enforcement in `completeSwap()`, no oracle sanity checks, no multisig requirement on SERVICE_ROLE, no proof of reserves oracle. As the first-loss tranche, RLP absorbs these losses before USR — RLP holders are directly and immediately impacted.
+- **Peg Stability**: USR peg collapsed to $0.50–$0.88 during the dump.
 - **Historical Yield**: Median annual performance of delta-neutral strategy: 8.4%, with 99% of results in the 7-10% p.a. range.
 
 ## Funds Management
@@ -133,14 +134,14 @@ Losses are allocated entirely to RLP holders. No losses flow to USR holders unle
 
 ### Accessibility
 
-- **Minting RLP**: Deposit USDC, USDT, or ETH via `requestMint()` on the `LPExternalRequestsManager`. Minting takes ~1 minute (1-5 blocks). 0% minting fees (currently waived). Backend (`SERVICE_ROLE`) calls `completeMint()` with the mint amount determined off-chain based on current RLP price.
+- **Minting RLP**: Deposit USDC, USDT, or ETH via `requestMint()` on the `LPExternalRequestsManager`. Minting takes ~1 minute (1-5 blocks). 0% minting fees (currently waived). Backend (`SERVICE_ROLE`) calls `completeMint()` with the mint amount determined offchain based on current RLP price.
 - **Redeeming RLP**: Uses an **epoch-based batch burn system** (unique to RLP, not shared with USR or wstUSR):
   1. User calls `requestBurn()` -- RLP tokens are transferred to the contract
   2. Backend calls `processBurns()` -- groups burn requests into an epoch for batch processing
-  3. Backend calls `completeBurns()` -- determines withdrawal collateral amounts off-chain, supports partial completion across multiple epochs
+  3. Backend calls `completeBurns()` -- determines withdrawal collateral amounts offchain, supports partial completion across multiple epochs
   4. User calls `withdrawAvailableCollateral()` -- claims accumulated collateral (USDC/USDT/ETH)
   - Processed within 24 hours under normal conditions. 0% redemption fees (currently waived).
-  - **No on-chain slippage protection**: Unlike USR burn requests, RLP `requestBurn()` has no `minWithdrawalAmount` parameter.
+  - **No onchain slippage protection**: Unlike USR burn requests, RLP `requestBurn()` has no `minWithdrawalAmount` parameter.
   - **No instant redeem**: RLP has no equivalent to USR's `UsrRedemptionExtension` instant redeem function.
 - **Access Control**: Minting/redeeming requires **allowlisted wallets** (users must apply and be verified by Resolv Digital Assets Ltd).
 - **RLP Redemption Gate**: Redemption of RLP is **suspended** if USR Collateralization Ratio (CR) falls below 110%.
@@ -148,8 +149,8 @@ Losses are allocated entirely to RLP holders. No losses flow to USR holders unle
 ### Collateralization
 
 - **Backing**: USR is >100% collateralized. The excess collateral above 100% backs RLP.
-- **On-chain portion**: Majority of collateral held on-chain in protocol smart contract wallets
-- **Off-chain portion**: A portion held with institutional custodians (Fireblocks, Ceffu) as margin for futures positions
+- **Onchain portion**: Majority of collateral held onchain in protocol smart contract wallets
+- **Offchain portion**: A portion held with institutional custodians (Fireblocks, Ceffu) as margin for futures positions
 - **Exchange exposure**: As of H2 2025, exchange-related positions contribute less than 15% of collateral pool exposure combined
 - **Collateral quality**: ETH, BTC, stETH, wstETH, stablecoins (USDC, USDT), RWAs (USCC)
 
@@ -159,13 +160,13 @@ Losses are allocated entirely to RLP holders. No losses flow to USR holders unle
 - **Third-party verification**: [Apostro risk curators](https://info.apostro.xyz/resolv-reserves) provide independent proof-of-reserves dashboard showing market delta, RLP/USR ratio, overcollateralization ratio, exposure by asset, and backing assets by location
 - **RLP Price**: Updated every 24 hours based on collateral pool valuation. Calculated and published by Resolv (centralized update).
 - **Oracle feeds**: Pyth (fundamental & market), Chainlink, Chronicle, RedStone for USR. Pyth and Resolv's own oracle for RLP price.
-- **On-chain monitoring**: Continuous monitoring of smart contracts and integrated protocols
+- **Onchain monitoring**: Continuous monitoring of smart contracts and integrated protocols
 
 ## Liquidity Risk
 
 - **Exit Mechanism**: RLP can be redeemed at its current price (variable, ~$1.28) within 24 hours for USDC/USDT/ETH. No withdrawal queues under normal conditions.
 - **Redemption Gate**: RLP redemptions are **suspended** if USR Collateralization Ratio drops below 110%. This protects USR holders at the expense of RLP holders' liquidity.
-- **DEX Liquidity**: RLP available on Curve (Ethereum), Uniswap (Ethereum), Aerodrome (Base). TODO: Exact on-chain liquidity depth needs verification.
+- **DEX Liquidity**: RLP available on Curve (Ethereum), Uniswap (Ethereum), Aerodrome (Base). TODO: Exact onchain liquidity depth needs verification.
 - **RLP Trading Volume**: 7days on [Fluid Dex](https://fluid.io/stats/1/dex) is $8.5M.
 - **Bridge**: LayerZero OFT standard enables cross-chain transfers via Stargate.
 - **Multi-chain availability**: RLP deployed on 9 chains, with Ethereum as the primary (minting/redeeming only on Ethereum).
@@ -178,16 +179,16 @@ Losses are allocated entirely to RLP holders. No losses flow to USR holders unle
 - **Multisig**: All core contracts are controlled by a **3-of-5 Gnosis Safe** at [`0xd6889f307be1b83bb355d5da7d4478fb0d2af547`](https://etherscan.io/address/0xd6889f307be1b83bb355d5da7d4478fb0d2af547). The Safe is `owner()` and `DEFAULT_ADMIN_ROLE` holder for USR, RLP, Treasury, Request Managers, RewardDistributor, and Whitelist. Nonce 366+ indicates significant operational activity. All 5 signers are EOAs (not publicly identified).
 - **Timelock**: A 3-day OpenZeppelin `TimelockController` at [`0x290d9544669c9c7a64f6899a0a3b28d563f6ebee`](https://etherscan.io/address/0x290d9544669c9c7a64f6899a0a3b28d563f6ebee) owns all ProxyAdmin contracts. Contract upgrades require a 3-day delay. The Safe is the sole proposer/executor on the timelock.
 - **Split architecture**: The multisig controls **operational parameters directly** (no delay) -- pausing, role grants, parameter changes, price updates. The timelock only gates **proxy upgrades** (implementation changes).
-- **On-chain governance not yet live**: The stRESOLV token exists but Snapshot voting has not been initiated.
+- **Onchain governance not yet live**: The stRESOLV token exists but Snapshot voting has not been initiated.
 - **RDAL discretion**: From the Terms of Service, RDAL has **full discretion** over collateral pool composition and strategy parameters.
 - **Whitelist control**: RDAL controls who can mint/redeem by managing the address whitelist.
 
 ### Programmability
 
 - **Hybrid Model**: The system is semi-programmatic. Smart contracts handle token operations (mint/burn requests), but a **backend system** completes mint/redeem operations via `completeMint` / `completeBurn` calls.
-- **RLP Price**: Updated by a privileged role every 24 hours. Not calculated algorithmically on-chain.
+- **RLP Price**: Updated by a privileged role every 24 hours. Not calculated algorithmically onchain.
 - **Reward Distribution**: Rewards are distributed every 24 hours (epoch-based) by the protocol, not automatically by smart contracts.
-- **Collateral management**: Active management of hedging positions and collateral deployment by the team (off-chain).
+- **Collateral management**: Active management of hedging positions and collateral deployment by the team (offchain).
 - **Oracle updates**: Resolv's own fundamental price oracles for USR and RLP are updated centrally every 24 hours.
 
 ### External Dependencies
@@ -207,7 +208,7 @@ Losses are allocated entirely to RLP holders. No losses flow to USR holders unle
 - **Jurisdiction**: British Virgin Islands (BVI). Dispute resolution under BVI courts.
 - **U.S. access**: Restricted to Accredited Investors under Reg D Rule 501(a).
 - **Documentation**: Comprehensive litepaper available at [docs.resolv.xyz](https://docs.resolv.xyz/). Blog posts provide quarterly reports and parameter updates.
-- **Incident Response**: No documented incident response plan found in public documentation. Bug bounty and on-chain monitoring exist.
+- **Incident Response**: No documented incident response plan found in public documentation. Bug bounty and onchain monitoring exist.
 - **Investors**: $10M seed round led by Cyber Fund and Maven 11. Other investors include Coinbase Ventures, Arrington Capital, Robot Ventures, Animoca Brands, Ether.fi.
 
 ## Monitoring
@@ -259,7 +260,7 @@ Losses are allocated entirely to RLP holders. No losses flow to USR holders unle
 
 - **Centralized operations**: Backend processes minting/redeeming, RLP price updates are centralized (24h cycle), team has full discretion over collateral pool
 - **CEX counterparty risk**: Futures positions on Binance, Deribit, Bybit create counterparty exposure. A CEX failure directly impacts RLP value.
-- **Governance not yet live**: No on-chain governance. 3-of-5 multisig controls operations directly (no delay). 3-day timelock only for proxy upgrades. RDAL retains full discretion over collateral pool.
+- **Governance not yet live**: No onchain governance. 3-of-5 multisig controls operations directly (no delay). 3-day timelock only for proxy upgrades. RDAL retains full discretion over collateral pool.
 - **RLP as first-loss capital**: By design, RLP absorbs all losses. Severe market events or exchange failures could significantly impair RLP value.
 - **Liquidity gate**: RLP redemptions are suspended below 110% CR -- in a stress scenario, RLP holders cannot exit while losses mount.
 - **Whitelisting requirement**: Not permissionless; access controlled by RDAL.
@@ -267,7 +268,7 @@ Losses are allocated entirely to RLP holders. No losses flow to USR holders unle
 ### Critical Risks
 
 - **Operational parameters not timelocked**: While a 3-of-5 multisig exists and proxy upgrades have a 3-day timelock, operational parameters (pausing, role grants, price updates, whitelist changes) are controlled by the multisig **without any timelock delay**. This means 3 of 5 anonymous signers can immediately change critical operational parameters.
-- **RLP price is entirely off-chain**: The backend determines how much collateral to return for burned RLP with no on-chain price oracle or slippage protection in the contract. Users must trust the backend to apply fair pricing.
+- **RLP price is entirely offchain**: The backend determines how much collateral to return for burned RLP with no onchain price oracle or slippage protection in the contract. Users must trust the backend to apply fair pricing.
 
 ---
 
@@ -276,15 +277,15 @@ Losses are allocated entirely to RLP holders. No losses flow to USR holders unle
 **Scoring Guidelines:**
 - Be conservative: when uncertain between two scores, choose the higher (riskier) one
 - Use decimals (e.g., 2.5) when a subcategory falls between scores
-- Prioritize on-chain evidence over documentation claims
+- Prioritize onchain evidence over documentation claims
 
 ### Critical Risk Gates
 
-- [x] **No audit** -- Protocol has been audited by 4 reputable firms across 14+ engagements. **PASS**
-- [x] **Unverifiable reserves** -- Reserves verifiable via on-chain wallets and Apostro third-party dashboard. **PASS**
-- [x] **Total centralization** -- 3-of-5 Gnosis Safe multisig controls all contracts. 3-day timelock for proxy upgrades. Not a single EOA. **PASS**
+- [x] **No audit** -- Protocol has been audited by 4 reputable firms across 14+ engagements. **PASS** (but audits failed to catch the `completeSwap()` minting vulnerability in USR Counter)
+- [ ] **Unverifiable reserves** -- **FAIL**. ~80M USR minted without collateral backing on March 22, 2026 via USR Counter `completeSwap()` exploit. The collateral pool is no longer sufficient to back all outstanding USR. As the first-loss tranche, RLP absorbs these losses directly.
+- [ ] **Total centralization** -- **FAIL**. A single EOA with `SERVICE_ROLE` was able to mint arbitrary amounts of USR via `completeSwap()` with no multisig requirement, no onchain issuance caps, and no collateral ratio enforcement.
 
-**All gates pass.** Proceed to category scoring.
+**Gates FAILED. Score automatically set to 5.0 — DO NOT USE.**
 
 ### Category Scores
 
@@ -305,7 +306,7 @@ Losses are allocated entirely to RLP holders. No losses flow to USR holders unle
 - **3-of-5 Gnosis Safe** multisig ([`0xd6889...af547`](https://etherscan.io/address/0xd6889f307be1b83bb355d5da7d4478fb0d2af547)) is `owner()` and `DEFAULT_ADMIN_ROLE` for all core contracts.
 - **3-day OpenZeppelin TimelockController** ([`0x290d9...6ebee`](https://etherscan.io/address/0x290d9544669c9c7a64f6899a0a3b28d563f6ebee)) owns all ProxyAdmin contracts (upgrades only).
 - Operational parameters (pause, role grants, price updates, whitelist) controlled by multisig **directly with no timelock**.
-- No on-chain governance live yet. stRESOLV exists but voting not initiated.
+- No onchain governance live yet. stRESOLV exists but voting not initiated.
 - RDAL has full discretion per Terms of Service.
 - All 5 signers are anonymous EOAs.
 
@@ -313,12 +314,12 @@ Losses are allocated entirely to RLP holders. No losses flow to USR holders unle
 
 **Subcategory B: Programmability**
 
-- Hybrid on-chain/off-chain operations. Smart contracts handle token accounting but backend completes operations.
-- RLP price updated off-chain every 24 hours by privileged role.
-- Reward distribution managed off-chain.
-- Collateral management is fully manual/off-chain.
+- Hybrid onchain/offchain operations. Smart contracts handle token accounting but backend completes operations.
+- RLP price updated offchain every 24 hours by privileged role.
+- Reward distribution managed offchain.
+- Collateral management is fully manual/offchain.
 
-**Programmability Score: 4.0** -- Significant manual intervention required. Price and rewards are admin-controlled with 24h update cycles. Core financial decisions happen off-chain.
+**Programmability Score: 4.0** -- Significant manual intervention required. Price and rewards are admin-controlled with 24h update cycles. Core financial decisions happen offchain.
 
 **Subcategory C: External Dependencies**
 
@@ -332,32 +333,32 @@ Losses are allocated entirely to RLP holders. No losses flow to USR holders unle
 
 **Centralization Score = (3.5 + 4.0 + 3.5) / 3 = 3.67**
 
-**Score: 3.7/5** -- Centralized operational control with multisig but no timelocked parameter changes. No active on-chain governance. Partially mitigated by upgrade timelock, diversified custodians, and exchange venues.
+**Score: 3.7/5** -- Centralized operational control with multisig but no timelocked parameter changes. No active onchain governance. Partially mitigated by upgrade timelock, diversified custodians, and exchange venues.
 
 #### Category 3: Funds Management (Weight: 30%)
 
 **Subcategory A: Collateralization**
 
-- USR >100% collateralized on-chain; excess backs RLP.
+- USR >100% collateralized onchain; excess backs RLP.
 - Collateral: ETH, BTC, stETH, stablecoins, RWAs -- mix of high-quality and newer assets.
-- Majority on-chain, ~15% CEX margin exposure.
+- Majority onchain, ~15% CEX margin exposure.
 - **RLP is first-loss capital**: By design, RLP absorbs **all** losses from the delta-neutral strategy (funding rate losses, CEX counterparty failure, liquidation events) before any impact to USR. RLP price is variable and can decrease.
-- No on-chain slippage protection on RLP burns -- backend determines collateral return amounts off-chain.
+- No onchain slippage protection on RLP burns -- backend determines collateral return amounts offchain.
 
-**Collateralization Score: 3.5** -- Verifiable on-chain collateral with third-party dashboard, but RLP is explicitly designed as loss-absorbing capital. Price is variable and can decrease. Mixing on-chain assets with off-chain futures margin and CEX exposure. Partially custodial. The first-loss tranche design means depositors face embedded structural risk beyond typical collateralization concerns.
+**Collateralization Score: 3.5** -- Verifiable onchain collateral with third-party dashboard, but RLP is explicitly designed as loss-absorbing capital. Price is variable and can decrease. Mixing onchain assets with offchain futures margin and CEX exposure. Partially custodial. The first-loss tranche design means depositors face embedded structural risk beyond typical collateralization concerns.
 
 **Subcategory B: Provability**
 
 - Self-reporting dashboard + Apostro third-party verification.
-- RLP price calculated off-chain, updated by admin every 24 hours.
+- RLP price calculated offchain, updated by admin every 24 hours.
 - Multiple oracle sources for market pricing.
 - Exchange position data visible on Apostro dashboard.
 
-**Provability Score: 2.5** -- Good transparency with both self-reporting and third-party verification. However, fundamental price is admin-updated, not fully programmatic. Off-chain components (futures positions, custodial balances) require trust.
+**Provability Score: 2.5** -- Good transparency with both self-reporting and third-party verification. However, fundamental price is admin-updated, not fully programmatic. Offchain components (futures positions, custodial balances) require trust.
 
 **Funds Management Score = (3.5 + 2.5) / 2 = 3.0**
 
-**Score: 3.0/5** -- Verifiable collateral with third-party dashboard, but RLP is first-loss capital by design -- holders face embedded loss risk from the delta-neutral strategy. Hybrid on-chain/off-chain nature, admin-controlled pricing, and no on-chain slippage protection add further trust requirements.
+**Score: 3.0/5** -- Verifiable collateral with third-party dashboard, but RLP is first-loss capital by design -- holders face embedded loss risk from the delta-neutral strategy. Hybrid onchain/offchain nature, admin-controlled pricing, and no onchain slippage protection add further trust requirements.
 
 #### Category 4: Liquidity Risk (Weight: 15%)
 
@@ -381,43 +382,52 @@ Losses are allocated entirely to RLP holders. No losses flow to USR holders unle
 
 ### Final Score Calculation
 
-```
-Final Score = (Centralization × 0.30) + (Funds Mgmt × 0.30) + (Audits × 0.20) + (Liquidity × 0.15) + (Operational × 0.05)
-```
+**Critical risk gate FAILED — score override to 5.0.**
 
-| Category | Score | Weight | Weighted |
-|----------|-------|--------|----------|
-| Audits & Historical | 1.5 | 20% | 0.30 |
-| Centralization & Control | 3.7 | 30% | 1.11 |
-| Funds Management | 3.0 | 30% | 0.90 |
-| Liquidity Risk | 3.0 | 15% | 0.45 |
-| Operational Risk | 2.5 | 5% | 0.125 |
-| **Final Score** | | | **2.885** |
+Category scoring is superseded by gate failure. For reference, pre-incident category scores are preserved above.
 
-**Final Score: 2.9**
+| Category | Pre-Incident Score | Post-Incident | Weight | Weighted |
+|----------|-------------------|---------------|--------|----------|
+| Audits & Historical | 1.5 | N/A | 20% | — |
+| Centralization & Control | 3.7 | N/A | 30% | — |
+| Funds Management | 3.0 | N/A | 30% | — |
+| Liquidity Risk | 3.0 | N/A | 15% | — |
+| Operational Risk | 2.5 | N/A | 5% | — |
+| **Final Score (gate override)** | | | | **5.0** |
+
+**Final Score: 5.0**
 
 ### Risk Tier
 
 | Final Score | Risk Tier | Recommendation |
 |------------|-----------|----------------|
-| **2.5-3.5** | **Medium Risk** | Approved with enhanced monitoring |
+| **5.0** | **Critical Risk** | DO NOT USE — exit all positions immediately |
 
-**Final Risk Tier: Medium Risk**
+**Final Risk Tier: Critical Risk — DO NOT USE**
 
 ---
 
-RLP is a well-audited protocol with strong security practices but carries inherent structural risk as a **first-loss tranche** -- by design, RLP absorbs all losses from the delta-neutral strategy before USR is affected, meaning RLP price can decrease. A 3-of-5 Gnosis Safe multisig controls all contracts and a 3-day timelock gates proxy upgrades, but operational parameters remain untimelocked and no on-chain governance is live. In stress scenarios, RLP holders face both value impairment and potential liquidity lockout (110% CR gate). The RLP burn mechanism is epoch-based with no on-chain slippage protection, and pricing is entirely off-chain. These structural and centralization risks place RLP in the Medium Risk classification despite its strong audit and track record profile.
+**⚠️ DO NOT USE — CRITICAL INCIDENT ⚠️**
 
-**Key conditions for exposure:**
-- Enhanced monitoring of collateral pool composition and delta exposure via Apostro dashboard
-- Monitor for governance activation (stRESOLV voting)
-- Track RLP/USR coverage ratio; alert at <120%
-- Monitor multisig signer changes and timelock proposals
+On March 22, 2026, a single EOA with `SERVICE_ROLE` exploited the USR Counter contract's `completeSwap()` function to mint **~80M unbacked USR** (~$25M+ extracted).
+
+**Kill chain:**
+1. Attacker called `requestSwap()` depositing ~100K USDC
+2. SERVICE_ROLE EOA called `completeSwap()` minting **50M USR** (not ~100K)
+3. Repeat: second mint of **30M USR**
+4. Wrapped USR → wstUSR (better DEX liquidity)
+5. Dumped across KyberSwap + Velora at $0.50–$0.88
+6. Converted proceeds to USDT/USDC → ETH via Uniswap V4 and MetaMask Swaps
+7. **~$200K in → ~$25M+ out**
+8. ~36M USR still held by attacker (worth ~$2M), still being dumped
+
+**Impact on RLP**: As the first-loss tranche, RLP absorbs all protocol losses before USR. The ~$25M+ extraction directly impairs RLP value. RLP holders face both immediate value destruction and potential inability to redeem (110% CR gate likely breached).
+
+**All exposure to RLP, wstUSR, stUSR, and USR should be exited immediately.**
 
 ---
 
 ## Reassessment Triggers
 
-- **Time-based**: Reassess in 6 months (August 2026)
-- **Governance-based**: Reassess when on-chain governance is activated
-- **Incident-based**: Reassess after any exploit, governance change, CEX failure, or significant collateral modification
+- **TRIGGERED (March 22, 2026)**: ~80M unbacked USR minted via `completeSwap()` exploit. ~$25M+ extracted. RLP directly impaired as first-loss tranche. Score overridden to 5.0.
+- **Reassessment conditions**: Only reassess if Resolv (1) fully accounts for the unbacked mint, (2) revokes all EOA `SERVICE_ROLE` grants, (3) implements onchain issuance caps and collateral ratio checks in `completeSwap()`, (4) submits to an independent audit of the incident and remediation, and (5) demonstrates RLP holders have been made whole or compensated.

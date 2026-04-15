@@ -357,10 +357,10 @@
         }
     },
     "0x23ee3d14f09946a084350cc6a7153fc6eb918817": {
-        "riskLevel": 1,
+        "riskLevel": 2,
         "riskScore": {
             "centralizationRisk": 1,
-            "comment": "",
+            "comment": "Too much collateral in tETH and ezETH",
             "complexity": 1,
             "externalProtocolAudit": 1,
             "externalProtocolCentralisation": 1,
@@ -369,7 +369,7 @@
             "externalProtocolType": 1,
             "protocolIntegration": 1,
             "review": 3,
-            "riskExposure": 1,
+            "riskExposure": 3,
             "testing": 1
         }
     },

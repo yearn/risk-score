@@ -22,6 +22,8 @@ reports/
 └── old/                  # Legacy documentation (deprecated format)
 ```
 
+**Legacy documents are in `reports/old/` for reference only. Do not use them as templates.**
+
 ## How to Use This Framework
 
 ### Conducting a New Assessment
@@ -84,7 +86,7 @@ Each category receives a score from 1-5 (1 = safest, 5 = highest risk), which ar
 
 **Technical Safety**
 - Audited and battle-tested code
-- On-chain verifiability of reserves
+- Onchain verifiability of reserves
 - Programmatic operations (minimal admin intervention)
 - Robust liquidation and peg stability mechanisms
 
@@ -92,7 +94,6 @@ Each category receives a score from 1-5 (1 = safest, 5 = highest risk), which ar
 - Transparent team and operations
 - Strong documentation and communication
 - Proven incident response capabilities
-- Active development and maintenance
 
 **Systemic Resilience**
 - Limited dependencies on external protocols
@@ -104,20 +105,10 @@ Each category receives a score from 1-5 (1 = safest, 5 = highest risk), which ar
 
 - Unaudited or poorly audited code
 - Unlimited admin powers without timelocks
-- Opaque reserves or off-chain dependencies
+- Opaque reserves or offchain dependencies
 - History of incidents with poor response
 - Insufficient liquidity for expected TVL
 - Single points of failure in critical infrastructure
-
-## Migration from Legacy Format
-
-Previously, protocols and assets were documented separately with different formats. The new framework provides:
-- Unified assessment methodology
-- Quantitative risk scoring (1-5 scale)
-- Weighted category scoring
-- Standardized monitoring requirements
-
-**Legacy documents are in `reports/old/` for reference only. Do not use them as templates.**
 
 ## Related Resources
 

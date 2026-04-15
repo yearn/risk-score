@@ -1,0 +1,366 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { protocolIconUrl, chainIconUrl, tokenIconUrl } from "../lib/icons";
+import data from "../data/dependencies.json";
+
+const { shared, dependencies, protocols } = data;
+
+const DEFILLAMA_SLUGS: Record<string, string> = {
+  aave_v3_core: "aave-v3",
+  compound_v3_usdc: "compound-v3",
+  compound_v3_weth: "compound-v3",
+  maple: "maple",
+  infinifi: "infinifi",
+  strata: "strata",
+  reserve_ethplus: "reserve-protocol",
+  fluid_lending: "fluid",
+  spark: "spark",
+  spectra: "spectra",
+  origin_arm: "origin-protocol",
+  resolv_wstusr: "resolv",
+  resolv_rlp: "resolv",
+  midas_mhyper: "midas-rwa",
+  unit_ubtc: "unit-protocol",
+};
+
+const protocolsWithIcons = protocols.map((p: any) => ({
+  ...p,
+  iconUrl: protocolIconUrl(DEFILLAMA_SLUGS[p.id] ?? ""),
+  chainIconUrl: chainIconUrl(p.chain),
+}));
+
+const TOKEN_RISK: Record<string, string> = {
+  USDC: "1", wstETH: "1", USDT: "1", WETH: "1", weETH: "1", WBTC: "1",
+  BTC: "1", USDS: "1", sUSDS: "1", stETH: "1", sDAI: "1", DAI: "1",
+  cbETH: "1", cbBTC: "1", rETH: "1",
+  USDe: "2", sUSDe: "2", tBTC: "2", rsETH: "2", ETHx: "2", LBTC: "2",
+  LINK: "2", UNI: "2", GHO: "2", PYUSD: "2", osETH: "2", USDtb: "2",
+  ezETH: "2", USR: "2", wstUSR: "2",
+  tETH: "3", HYPE: "3",
+};
+
+function tokenRisk(asset: string): string {
+  return TOKEN_RISK[asset] ?? "?";
+}
+
+function riskOrder(score: string): number {
+  if (score === "?") return 99;
+  return parseInt(score);
+}
+
+const sortedShared = [...shared].sort((a: any, b: any) => {
+  const ra = riskOrder(tokenRisk(a.asset));
+  const rb = riskOrder(tokenRisk(b.asset));
+  if (ra !== rb) return ra - rb;
+  return b.count - a.count;
+});
+
+const uniqueTokens = [...new Set(dependencies.map((d: any) => d.asset))].sort();
+
+---
+
+<BaseLayout title="Token Exposures - Yearn Curation">
+  <h1>Token Exposures</h1>
+  <section>
+    <h2>Shared Token Exposure</h2>
+    <p class="section-desc">Tokens accepted by multiple protocols. If one depegs or its parent protocol fails, all listed protocols are affected.</p>
+    <div class="search-row">
+      <input type="text" id="token-search" placeholder="Search tokens…" autocomplete="off" />
+    </div>
+    <div class="table-wrap">
+      <table id="shared-table">
+        <thead>
+          <tr>
+            <th class="col-icon"></th>
+            <th>Token</th>
+            <th>Parent Protocol</th>
+            <th>Exposed Protocols</th>
+            <th class="col-num">Score</th>
+          </tr>
+        </thead>
+        <tbody>
+          {sortedShared.map((row: any) => (
+            <tr>
+              <td class="col-icon">
+                {row.address ? (
+                  <Fragment>
+                    <img src={tokenIconUrl(row.address)} alt="" width="20" height="20" class="token-icon" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='block'" />
+                    <div class="icon-placeholder small" style="display:none" />
+                  </Fragment>
+                ) : (
+                  <div class="icon-placeholder small" />
+                )}
+              </td>
+              <td class="mono">{row.asset}</td>
+              <td>{row.parent || <span class="muted">-</span>}</td>
+              <td>{row.protocols.join(", ")}</td>
+              <td class="col-num">
+                <span class={`risk-badge risk-${tokenRisk(row.asset)}`}>{tokenRisk(row.asset)}</span>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <h2>Protocols</h2>
+    <div class="protocol-cards">
+      {protocolsWithIcons.map((p: any) => (
+        <div class="protocol-card" data-name={p.name}>
+          <div class="card-header">
+            <div class="icon-stack">
+              {p.iconUrl ? (
+                <img src={p.iconUrl} alt="" width="24" height="24" class="protocol-icon" loading="lazy" />
+              ) : (
+                <div class="icon-placeholder" />
+              )}
+              {p.chainIconUrl && (
+                <img src={p.chainIconUrl} alt="" width="14" height="14" class="chain-icon" loading="lazy" />
+              )}
+            </div>
+            <div class="card-name">{p.name}</div>
+          </div>
+          <div class="card-meta">
+            <span class="mono">{p.chain}</span>
+            <span class="muted">{p.type.replace("_", " ")}</span>
+            <span>{p.assetCount} tokens</span>
+          </div>
+        </div>
+      ))}
+    </div>
+  </section>
+
+  <section>
+    <h2>Full Dependency Table</h2>
+    <div class="filter-row">
+      <label for="protocol-filter">Protocol:</label>
+      <select id="protocol-filter">
+        <option value="all">All</option>
+        {protocols.map((p: any) => (
+          <option value={p.name}>{p.name}</option>
+        ))}
+      </select>
+      <label for="token-filter">Token:</label>
+      <select id="token-filter">
+        <option value="all">All</option>
+        {uniqueTokens.map((t: string) => (
+          <option value={t}>{t}</option>
+        ))}
+      </select>
+    </div>
+    <div class="table-wrap">
+      <table id="dep-table">
+        <thead>
+          <tr>
+            <th class="col-icon"></th>
+            <th>Protocol</th>
+            <th>Token</th>
+            <th>Type</th>
+            <th>Parent / Tokens</th>
+            <th>Allocation</th>
+          </tr>
+        </thead>
+        <tbody>
+          {dependencies.map((row: any) => {
+            return (
+            <tr data-protocol={row.protocol} data-token={row.asset}>
+              <td class="col-icon">
+                {row.address ? (
+                  <Fragment>
+                    <img src={tokenIconUrl(row.address)} alt="" width="20" height="20" class="token-icon" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='block'" />
+                    <div class="icon-placeholder small" style="display:none" />
+                  </Fragment>
+                ) : (
+                  <div class="icon-placeholder small" />
+                )}
+              </td>
+              <td>{row.protocol}</td>
+              <td class="mono">{row.asset}</td>
+              <td><span class={`type-badge type-${row.type}`}>{row.type}</span></td>
+              <td>{row.parent || <span class="muted">-</span>}</td>
+              <td class="mono">{row.allocation || <span class="muted">-</span>}</td>
+            </tr>
+            );
+          })}
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <script is:inline>
+    // Shared Token Exposure search
+    const tokenSearch = document.getElementById("token-search");
+    const sharedRows = document.querySelectorAll("#shared-table tbody tr");
+    tokenSearch.addEventListener("input", () => {
+      const q = tokenSearch.value.toLowerCase();
+      sharedRows.forEach((row) => {
+        const text = row.textContent.toLowerCase();
+        row.style.display = text.includes(q) ? "" : "none";
+      });
+    });
+
+    // Dependency table filters
+    const protocolFilter = document.getElementById("protocol-filter");
+    const tokenFilter = document.getElementById("token-filter");
+    const depRows = document.querySelectorAll("#dep-table tbody tr");
+
+    function applyDepFilters() {
+      const pVal = protocolFilter.value;
+      const tVal = tokenFilter.value;
+      depRows.forEach((row) => {
+        const matchProtocol = pVal === "all" || row.dataset.protocol === pVal;
+        const matchToken = tVal === "all" || row.dataset.token === tVal;
+        row.style.display = matchProtocol && matchToken ? "" : "none";
+      });
+    }
+
+    protocolFilter.addEventListener("change", applyDepFilters);
+    tokenFilter.addEventListener("change", applyDepFilters);
+
+    document.querySelectorAll(".protocol-card").forEach((card) => {
+      card.addEventListener("click", () => {
+        protocolFilter.value = card.dataset.name;
+        tokenFilter.value = "all";
+        applyDepFilters();
+        protocolFilter.scrollIntoView({ behavior: "smooth", block: "start" });
+      });
+    });
+  </script>
+</BaseLayout>
+
+<style>
+  h1 { margin-bottom: 0.25rem; }
+  section { margin-bottom: 2.5rem; }
+  h2 { margin-bottom: 0.5rem; }
+  .search-row {
+    margin-bottom: 0.75rem;
+  }
+  .search-row input {
+    width: 100%;
+    max-width: 360px;
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 0.4rem 0.6rem;
+    font-size: 0.85rem;
+  }
+  .search-row input::placeholder {
+    color: var(--text-secondary);
+  }
+  .section-desc {
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    margin-bottom: 1rem;
+  }
+  .mono { font-family: "SF Mono", "Fira Code", monospace; font-size: 0.85em; }
+  .muted { color: var(--text-secondary); }
+  .col-num { text-align: center; width: 60px; }
+  .risk-badge {
+    display: inline-block;
+    padding: 0.15rem 0.5rem;
+    border-radius: 999px;
+    font-size: 0.8rem;
+    font-weight: 600;
+  }
+  .risk-1 { background: #22C55E; color: #0c0c0c; }
+  .risk-2 { background: #86EFAC; color: #0c0c0c; }
+  .risk-3 { background: #FACC15; color: #0c0c0c; }
+  .risk-4 { background: #FB923C; color: #0c0c0c; }
+  .risk-5 { background: #EF4444; color: #fff; }
+  .risk-\? { background: #64748B; color: #fff; }
+
+  .type-badge {
+    font-size: 0.75rem;
+    padding: 0.15rem 0.4rem;
+    border-radius: 4px;
+    font-weight: 500;
+  }
+  .type-collateral { background: var(--brand-blue); color: #fff; }
+  .type-base { background: #22C55E; color: #0c0c0c; }
+  .type-yield_source { background: #A78BFA; color: #0c0c0c; }
+
+  .protocol-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+  }
+  .protocol-card {
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+    background: var(--bg-card);
+    cursor: pointer;
+    transition: border-color 0.2s;
+  }
+  .protocol-card:hover {
+    border-color: var(--brand-blue);
+    background: rgba(6, 117, 249, 0.08);
+  }
+  .card-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.25rem;
+  }
+  .card-name { font-weight: 600; }
+
+  .col-icon { width: 36px; padding-right: 0; }
+  .icon-stack { position: relative; width: 24px; height: 24px; flex-shrink: 0; }
+  .protocol-icon { display: block; border-radius: 50%; }
+  .chain-icon {
+    position: absolute;
+    bottom: -4px;
+    right: -6px;
+    border-radius: 50%;
+    border: 1.5px solid var(--bg-primary);
+    background: var(--bg-primary);
+  }
+  .icon-placeholder {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: var(--bg-secondary);
+  }
+  .icon-placeholder.small {
+    width: 20px;
+    height: 20px;
+  }
+  .token-icon {
+    display: block;
+    border-radius: 50%;
+  }
+  .card-meta {
+    display: flex;
+    gap: 0.5rem;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+  }
+
+  .filter-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
+    font-size: 0.85rem;
+  }
+  .filter-row label { color: var(--text-secondary); }
+  .filter-row select {
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 0.3rem 0.5rem;
+    font-size: 0.85rem;
+  }
+
+  @media (max-width: 640px) {
+    table { font-size: 0.8rem; }
+    th, td { padding: 0.4rem 0.5rem; }
+    .protocol-cards { grid-template-columns: 1fr; }
+    .filter-row { flex-wrap: wrap; }
+  }
+</style>

@@ -7,11 +7,15 @@ import { scoreTier } from "../lib/colors";
 const reports = getAllReports();
 ---
 
-<BaseLayout title="Yearn Risk">
+<BaseLayout title="Yearn Curation" ogUrl="/" ogImage="/og/default.png">
   <h1>Risk Assessment Reports</h1>
 
+  <div class="search-row">
+    <input type="text" id="report-search" placeholder="Search by protocol, token, or risk tier…" autocomplete="off" />
+  </div>
+
   <div class="table-wrap">
-    <table>
+    <table id="reports-table">
       <thead>
         <tr>
           <th class="col-icon"></th>
@@ -37,7 +41,10 @@ const reports = getAllReports();
                   )}
                 </div>
               </td>
-              <td>{r.name}</td>
+              <td>
+                {r.name}
+                {r.warning && <span class="warning-tag">&#9888; {r.warning}</span>}
+              </td>
               <td class="mono">{r.token}</td>
               <td>
                 <ScoreBadge score={r.finalScore} />
@@ -49,11 +56,38 @@ const reports = getAllReports();
       </tbody>
     </table>
   </div>
+  <script is:inline>
+    const searchInput = document.getElementById("report-search");
+    const rows = document.querySelectorAll("#reports-table tbody tr");
+    searchInput.addEventListener("input", () => {
+      const q = searchInput.value.toLowerCase();
+      rows.forEach((row) => {
+        const text = row.textContent.toLowerCase();
+        row.style.display = text.includes(q) ? "" : "none";
+      });
+    });
+  </script>
 </BaseLayout>
 
 <style>
   h1 {
-    margin-bottom: 1.5rem;
+    margin-bottom: 1rem;
+  }
+  .search-row {
+    margin-bottom: 0.75rem;
+  }
+  .search-row input {
+    width: 100%;
+    max-width: 360px;
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 0.4rem 0.6rem;
+    font-size: 0.85rem;
+  }
+  .search-row input::placeholder {
+    color: var(--text-secondary);
   }
   .col-icon {
     width: 36px;
@@ -81,6 +115,17 @@ const reports = getAllReports();
     height: 24px;
     border-radius: 50%;
     background: var(--bg-secondary);
+  }
+  .warning-tag {
+    display: inline-block;
+    background: #dc2626;
+    color: #fff;
+    font-size: 0.7rem;
+    font-weight: 600;
+    padding: 0.15rem 0.4rem;
+    border-radius: 4px;
+    margin-left: 0.5rem;
+    vertical-align: middle;
   }
   .mono {
     font-family: "SF Mono", "Fira Code", monospace;
