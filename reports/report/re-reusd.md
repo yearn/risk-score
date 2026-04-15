@@ -192,6 +192,7 @@ Re reinsures a diversified $174M portfolio of U.S. insurance programs emphasizin
 - **Onchain reserves**: Visible onchain via the ICL contract and Redemption Reserves Custodian
 - **Offchain reserves**: Attested daily by The Network Firm (third-party accountant with read-only access) and published via Chainlink Proof of Reserve
 - **Insurance performance**: Reinsurance returns are inherently offchain and depend on claim experience over multi-year treaty periods
+- **Minting requires backing**: All ICL deposit paths (`deposit`, `depositFromCustodian`, `processPrestakedDeposit`) enforce `safeTransferFrom` — backing tokens must be transferred to the ICL before reUSD is minted (verified in source at [implementation `0x06d4acc104b974cd99bf22e4572f48a051e59670`](https://etherscan.io/address/0x06d4acc104b974cd99bf22e4572f48a051e59670)). However, the reUSD token contract has an unrestricted `mint(address, uint256)` gated only by `MINTER_ROLE`. Currently only the ICL holds this role. If `MINTER_ROLE` were granted to another address via Access Manager (MPC 5-of-8, 48h timelock), that address could mint without backing.
 
 ## Liquidity Risk
 
@@ -379,7 +380,7 @@ Total lending integrations support over $100M in borrow demand per the DD questi
 - **Instant redemption vault holds no USDC**: The Daily Instant Redemption Vault holds $0 USDC but ~6.19M sUSDe. The Redemption Reserves Custodian holds ~53.26M sUSDe. Instant redemptions can be fulfilled in sUSDe, but USDC-denominated instant exits are unavailable.
 - **DEX liquidity improved but still limited**: ~$29.4M across Fluid and Curve (~16.4% of ~$179.4M market cap). Significant improvement from ~$450K.
 - **KYC gating**: All deposits and redemptions require KYC. This limits the universe of users who can exit and creates regulatory/jurisdictional risk.
-- **Quarterly redemption queue**: Once instant buffer is exhausted, redemptions are quarterly and pro-rata. Capital locked in reinsurance programs may not be available for 18+ months.
+- **Quarterly redemption queue**: Once instant buffer is exhausted, redemptions are windowed and pro-rata. Capital release from reinsurance programs is reevaluated quarterly (per DD).
 - **Reinsurance tail risk**: Underlying assets are exposed to insurance claim risk. While reUSDe absorbs first-loss, a catastrophic insurance event could potentially impact reUSD if reUSDe reserves are depleted.
 - **No bug bounty program found**: No Immunefi or comparable bug bounty program identified.
 
@@ -387,7 +388,7 @@ Total lending integrations support over $100M in borrow demand per the DD questi
 
 - **Offchain dependency concentration**: The protocol's value proposition depends on offchain entities (Cayman reinsurer, §114 Trust, The Network Firm, Fireblocks) operating honestly and solvent. Onchain verification cannot fully cover offchain risks.
 - **Oracle manipulation**: A compromised oracle could misrepresent the reUSD price or reserve attestation. The daily oracle guardrail mitigates but does not eliminate this risk.
-- **Liquidity mismatch**: reUSD represents liquid onchain tokens backed by illiquid reinsurance capital locked for 18+ months. The instant redemption vault holds no USDC (sUSDe only — ~6.19M in vault, ~53.26M in Redemption Reserves Custodian). In a bank-run scenario, sUSDe redemption liquidity plus ~$29.4M in DEX liquidity would need to absorb exits for ~$179.4M in outstanding tokens; quarterly queue handles the remainder.
+- **Liquidity mismatch**: reUSD represents liquid onchain tokens partially backed by offchain reinsurance capital. Capital release is reevaluated quarterly, and programs are short-duration and cat-light (per performance memo). The instant redemption vault holds no USDC (sUSDe only — ~6.19M in vault, ~53.26M in Redemption Reserves Custodian). In a bank-run scenario, sUSDe redemption liquidity plus ~$29.4M in DEX liquidity would need to absorb exits for ~$179.4M in outstanding tokens; windowed queue handles the remainder.
 
 ---
 
@@ -465,9 +466,9 @@ Total lending integrations support over $100M in borrow demand per the DD questi
 - Offchain trust: §114 Trust with daily attestation via The Network Firm / Chainlink PoR
 - Surplus notes contractually protect principal
 - reUSDe provides first-loss protection for reUSD
-- Majority of capital deployed offchain in reinsurance programs (locked 18+ months)
+- Majority of capital deployed offchain in reinsurance programs (capital release reevaluated quarterly per DD)
 
-**Collateralization Score: 3.5** -- Hybrid onchain/offchain model. Onchain buffer is verifiable but represents only ~10% of NAV. Offchain reserves rely on third-party attestation rather than direct onchain verification. Reinsurance capital is illiquid (18+ month lock).
+**Collateralization Score: 3.5** -- Hybrid onchain/offchain model. Onchain buffer is verifiable but represents only ~10% of NAV. Offchain reserves rely on third-party attestation rather than direct onchain verification. Offchain reinsurance capital release is reevaluated quarterly.
 
 **Subcategory B: Provability**
 
@@ -492,7 +493,7 @@ Total lending integrations support over $100M in borrow demand per the DD questi
 - **Onchain capital**: ICL Custodial Wallet holds ~$5.97M USDC + ~7.77M sUSDe, but this is not directly accessible for redemptions without admin action
 - **Multi-chain**: Available on 6+ chains, liquidity concentrated on Ethereum
 
-**Score: 3.0/5** -- DEX liquidity improved significantly from ~$450K to ~$29.4M (65x increase) across Fluid and Curve, providing a viable secondary market exit. The instant redemption vault holds ~6.19M sUSDe and the Redemption Reserves Custodian holds ~53.26M sUSDe — sUSDe-denominated instant exits are available with daily/wallet caps (20% daily, 10% per wallet). Combined protocol-native sUSDe redemptions (~$59.4M) plus DEX liquidity (~$29.4M) cover a meaningful portion of the ~$179.4M market cap. KYC-gated protocol redemptions and 18+ month reinsurance capital lock remain material concerns, but the absence of USDC instant exits is partially mitigated by sUSDe availability.
+**Score: 3.0/5** -- DEX liquidity improved significantly from ~$450K to ~$29.4M (65x increase) across Fluid and Curve, providing a viable secondary market exit. The instant redemption vault holds ~6.19M sUSDe and the Redemption Reserves Custodian holds ~53.26M sUSDe — sUSDe-denominated instant exits are available with daily/wallet caps (20% daily, 10% per wallet). Combined protocol-native sUSDe redemptions (~$59.4M) plus DEX liquidity (~$29.4M) cover a meaningful portion of the ~$179.4M market cap. KYC-gated protocol redemptions and offchain capital deployment remain material concerns, but the absence of USDC instant exits is partially mitigated by sUSDe availability.
 
 #### Category 5: Operational Risk (Weight: 5%)
 
@@ -538,7 +539,7 @@ Final Score = (Centralization × 0.30) + (Funds Mgmt × 0.30) + (Audits × 0.20)
 
 ---
 
-reUSD is a novel product that bridges DeFi capital with traditional reinsurance markets. The protocol demonstrates real business traction ($178M gross written premium, ~$179.4M market cap, 92% combined ratio across 3 years) with a deep capital structure (Re Capital ~$73M + reUSDe first-loss). The risk profile is moderate. The primary concerns are: (1) the offchain price oracle with no timelock — reUSD's price is not computed programmatically onchain but set via admin-controlled Chainlink feed, (2) heavy offchain capital deployment with 18+ month lock-ups in reinsurance programs, (3) the instant redemption vault holds no USDC (sUSDe-denominated exits available via ~6.19M sUSDe in vault + ~53.26M sUSDe in Redemption Reserves Custodian), and (4) KYC-gated redemptions creating friction for exits. DEX liquidity has improved significantly to ~$29.4M across Fluid and Curve (up from ~$450K), providing a viable secondary exit. These risks are partially mitigated by third-party reserve attestation (The Network Firm + Chainlink PoR), 5+ audits including formal verification, MPC wallet role separation, 48-hour upgrade timelock, and the regulatory framework (CIMA-regulated reinsurer, §114 Trust at NAIC-compliant banks).
+reUSD is a novel product that bridges DeFi capital with traditional reinsurance markets. The protocol demonstrates real business traction ($178M gross written premium, ~$179.4M market cap, 92% combined ratio across 3 years) with a deep capital structure (Re Capital ~$73M + reUSDe first-loss). The risk profile is moderate. The primary concerns are: (1) the offchain price oracle with no timelock — reUSD's price is not computed programmatically onchain but set via admin-controlled Chainlink feed, (2) heavy offchain capital deployment in reinsurance programs (capital release reevaluated quarterly), (3) the instant redemption vault holds no USDC (sUSDe-denominated exits available via ~6.19M sUSDe in vault + ~53.26M sUSDe in Redemption Reserves Custodian), and (4) KYC-gated redemptions creating friction for exits. DEX liquidity has improved significantly to ~$29.4M across Fluid and Curve (up from ~$450K), providing a viable secondary exit. These risks are partially mitigated by third-party reserve attestation (The Network Firm + Chainlink PoR), 5+ audits including formal verification, MPC wallet role separation, 48-hour upgrade timelock, and the regulatory framework (CIMA-regulated reinsurer, §114 Trust at NAIC-compliant banks).
 
 **Key conditions for exposure:**
 - Monitor reUSD share price for any decreases (should only increase)
