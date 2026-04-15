@@ -168,6 +168,23 @@ Re reinsures a diversified $174M portfolio of U.S. insurance programs emphasizin
 - **Portfolio Focus**: Lower-layer, short-duration, cat-light programs. Avoids catastrophe-driven and long-tail casualty segments.
 - **Stress Testing** (capital structure): reUSD loss likelihood = **0.03%** at 135% combined ratio; reUSDe = 0.9%; Re Capital = 3.9%. Re Capital buffer ~$73M provides first-loss protection ahead of reUSDe and reUSD.
 
+### Capital Structure: reUSDe (Junior Tranche)
+
+reUSDe is the protocol's junior/first-loss tranche ([docs](https://docs.re.xyz/insurance-capital-layers/what-is-reusde)). It absorbs underwriting losses before they reach reUSD in exchange for a share of underwriting profits (historically 16-25% net annual returns per docs).
+
+**Loss waterfall** (losses absorbed in order):
+1. **Re Capital** (~$73M) — first-loss buffer, impaired at 105% combined ratio (3.9% likelihood)
+2. **reUSDe** (junior) — impaired at 115% combined ratio (0.9% likelihood). Absorbs losses up to the 115-135% combined ratio range.
+3. **reUSD** (senior) — only impaired if combined ratio exceeds **135%** (0.03% likelihood), meaning both Re Capital and all reUSDe reserves are depleted
+
+**reUSDe mechanics:**
+- Price based on quarterly-refreshed target NAV derived from actuarial reports; compounds daily but surplus realization occurs quarterly
+- Idle capital earns sUSDe basis-trade yield until called for underwriting
+- Redemptions are quarterly (72h window at fiscal quarter start), pro-rata if requests exceed capacity; unfilled rolls to next quarter
+- If losses deplete the buffer, later reinsurance profits first restore reUSD/reUSDe capital before recapitalizing the buffer layer (per DD)
+- Issued by Resilience (BVI) Ltd.; Resilience Foundation is the Agent of both reUSD and reUSDe token holders
+- reUSD is currently protected by ~$86M of subordinated assets (per DD: Re Capital + reUSDe combined)
+
 ### Accessibility
 
 - **Deposits**: KYC/AML required (via SumSub and Chainalysis). Users must pass KYC checks because a portion of protocol capital is deployed with a Cayman-regulated reinsurance company (CIMA-regulated)
@@ -381,7 +398,7 @@ Total lending integrations support over $100M in borrow demand per the DD questi
 - **DEX liquidity improved but still limited**: ~$29.4M across Fluid and Curve (~16.4% of ~$179.4M market cap). Significant improvement from ~$450K.
 - **KYC gating**: All deposits and redemptions require KYC. This limits the universe of users who can exit and creates regulatory/jurisdictional risk.
 - **Quarterly redemption queue**: Once instant buffer is exhausted, redemptions are windowed and pro-rata. Capital release from reinsurance programs is reevaluated quarterly (per DD).
-- **Reinsurance tail risk**: Underlying assets are exposed to insurance claim risk. While reUSDe absorbs first-loss, a catastrophic insurance event could potentially impact reUSD if reUSDe reserves are depleted.
+- **Reinsurance tail risk**: Underlying assets are exposed to insurance claim risk. reUSD is only impaired if the portfolio combined ratio exceeds 135%, after both Re Capital (~$73M) and all reUSDe reserves are depleted. reUSDe covers losses in the 115-135% combined ratio range. Re's historical combined ratio is ~92% and the portfolio avoids catastrophe lines, but tail risk from extreme loss events remains.
 - **No bug bounty program found**: No Immunefi or comparable bug bounty program identified.
 
 ### Critical Risks
