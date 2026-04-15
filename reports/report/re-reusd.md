@@ -67,15 +67,17 @@ The chosen "Applicable APY" is converted to a daily rate, and reUSD's **token pr
 | Redemption Reserves Custodian | [`0x9eA38e09F41A9DE53972a68268BA0Dcc6d2fAdf8`](https://etherscan.io/address/0x9eA38e09F41A9DE53972a68268BA0Dcc6d2fAdf8) |
 | Daily Instant Redemption Vault | [`0x5C454f5526e41fBE917b63475CD8CA7E4631B147`](https://etherscan.io/address/0x5C454f5526e41fBE917b63475CD8CA7E4631B147) |
 | Instant Redemption Interaction | [`0x8aEb9453EF22Cb38abC7a3Af9c208F65C1BfE31e`](https://etherscan.io/address/0x8aEb9453EF22Cb38abC7a3Af9c208F65C1BfE31e) |
+| Timelock Controller | [`0x69dDEa332723cF5407151aAF68B9b076557FCA93`](https://etherscan.io/address/0x69dDEa332723cF5407151aAF68B9b076557FCA93) |
 
 ### Protocol Controls (Ethereum)
 
-| Role | Controller Address | Control Mechanism | Permissions |
-|------|-------------------|-------------------|-------------|
-| Oracle Config | [`0x49BC5A880f77247A348764DdB95951cd9212A0ee`](https://etherscan.io/address/0x49BC5A880f77247A348764DdB95951cd9212A0ee) | MPC 3-of-5 | Set price feeds for deposit and collateral tokens |
-| Redemptions Config | [`0xEE16bE0374f2eFb34218affC1a8EbEe9310c47f8`](https://etherscan.io/address/0xEE16bE0374f2eFb34218affC1a8EbEe9310c47f8) | MPC 3-of-5 | Set redemption limits, top-up redemption vault |
-| Access Manager | [`0x80a62B72dF1136aCBc57141FB67Aa46812fECAFc`](https://etherscan.io/address/0x80a62B72dF1136aCBc57141FB67Aa46812fECAFc) | MPC 5-of-8 | Assign/revoke access roles |
-| Custodian Manager | [`0x9b6d7f2de2E4569297C7e88531E47679cEbE6eC9`](https://etherscan.io/address/0x9b6d7f2de2E4569297C7e88531E47679cEbE6eC9) | MPC 3-of-5 | Add/remove collateral custodians |
+| Role | Controller Address | Control Mechanism | Timelock | Permissions |
+|------|-------------------|-------------------|----------|-------------|
+| Oracle Config | [`0x49BC5A880f77247A348764DdB95951cd9212A0ee`](https://etherscan.io/address/0x49BC5A880f77247A348764DdB95951cd9212A0ee) | MPC 3-of-5 | **None** | Set price feeds for deposit and collateral tokens |
+| Redemptions Config | [`0xEE16bE0374f2eFb34218affC1a8EbEe9310c47f8`](https://etherscan.io/address/0xEE16bE0374f2eFb34218affC1a8EbEe9310c47f8) | MPC 3-of-5 | 48 hours | Set redemption limits, top-up redemption vault |
+| Access Manager | [`0x80a62B72dF1136aCBc57141FB67Aa46812fECAFc`](https://etherscan.io/address/0x80a62B72dF1136aCBc57141FB67Aa46812fECAFc) | MPC 5-of-8 | 48 hours | Assign/revoke access roles |
+| Custodian Manager | [`0x9b6d7f2de2E4569297C7e88531E47679cEbE6eC9`](https://etherscan.io/address/0x9b6d7f2de2E4569297C7e88531E47679cEbE6eC9) | MPC 3-of-5 | 48 hours | Add/remove collateral custodians |
+| Upgrade / Admin | Governance MPC via Timelock | MPC 3-of-5 | 48 hours | Contract upgrades |
 
 ### Cross-Chain Deployments
 
@@ -97,10 +99,10 @@ Re Protocol has undergone auditing by 3 firms across 5+ audit engagements.
 | # | Date | Scope | Firm | Key Findings | Report |
 |---|------|-------|------|-------------|--------|
 | 1 | Sep 2024 | Smart Contract Audit (DeFi) | Hacken | 29 findings (0 Critical, 0 High, 4 Medium, 7 Low, 18 Observations), all resolved. Centralized minting, unaudited libraries, gas risk, 42.11% branch coverage | [Hacken](https://hacken.io/audits/re-protocol/sca-re-re-defi-aug2024/) |
-| 2 | Dec 2024 | Smart Contract Audit | Hacken | Follow-up audit | [Hacken Audits](https://hacken.io/audits/re-protocol/) |
-| 3 | Apr 2025 | NAV Oracle Audit | Hacken | Focused on NAV oracle implementation | [Hacken Audits](https://hacken.io/audits/re-protocol/) |
+| 2 | Dec 2024 | Smart Contract Audit | Hacken | Follow-up audit, issues remediated | [Hacken](https://hacken.io/audits/re-protocol/sca-re-re-contracts-nov2024/) |
+| 3 | Apr 2025 | NAV Oracle Audit | Hacken | Focused on NAV oracle implementation, issues remediated | [Hacken](https://hacken.io/audits/re-protocol/sca-re-nav-oracle-mar2025/) |
 | 4 | Sep 2025 | Re Core (comprehensive) | Certora | 13 issues identified, all addressed and fixed. Formal verification and manual review. | [Certora](https://www.certora.com/reports/re-core) |
-| 5 | Oct 2025 | Agreed-Upon Procedures (AUP) | The Network Firm | Independent verification of offchain reserve attestation procedures | [Transparency](https://app.re.xyz/transparency) |
+| 5 | 2025 | Agreed-Upon Procedures (AUP) | The Network Firm | Independent verification of offchain operational controls and reserve attestation | [AUP Report](https://storage.googleapis.com/foundation-files/AUP-Report-2025.pdf) |
 
 ### Hacken Aug 2024 Findings (Detail)
 
@@ -139,30 +141,50 @@ reUSD is an **ERC-20 deposit token** that uses a **price-appreciation model** (n
 - Users receive reUSD tokens representing their deposit
 - The reUSD token price increases daily based on the Applicable APY
 - The price is updated onchain via a **Chainlink oracle** fed by daily attestations from **The Network Firm**
-- A **daily oracle guardrail** rejects outsized single-day price changes above the configured threshold
+- A **daily oracle guardrail** rejects single-day price changes above **25 bps**
+- **NAV formula**: `(Spread/365) + max[sUSDe(T)/sUSDe(T-7d) - 1 ; TBILL(T)/TBILL(T-7d) - 1] × (undeployed capital / total capital) + SOFR × (deployed capital / total capital)`. Spread = 250 bps.
 
 ### Capital Deployment
 
-1. **Onchain**: A portion of capital remains onchain as an instant redemption buffer in the Daily Instant Redemption Vault
-2. **Offchain (§114 Trust)**: The majority of capital is deployed offchain into a U.S.-domiciled §114 Reinsurance Trust Account, providing admitted collateral for the partner reinsurer's insurance programs
+1. **Onchain**: At least 50% of deposits are kept in onchain backing (target per DD). Held as USDC and sUSDe in the ICL Custodial Wallet and redemption reserves.
+2. **Offchain (§114 Trust)**: Remainder deployed offchain into U.S.-domiciled §114 Reinsurance Trust Accounts, providing admitted collateral for the partner reinsurer's insurance programs
 3. **Surplus Notes**: The offchain entity issues legally binding surplus notes back to the ICL, contractually guaranteeing principal protection and the Applicable APY interest rate
 4. **Yield Sources**: Delta-neutral ETH strategy (Ethena basis trade) or T-Bills, plus protocol spread from reinsurance premiums
+
+### Reinsurance Portfolio (Nov 2025 LP Memo)
+
+Re reinsures a diversified $174M portfolio of U.S. insurance programs emphasizing low-volatility risk across 26+ active reinsurance contracts:
+
+| Line of Business | Allocation | Written Premium | Risk Profile |
+|-----------------|-----------|----------------|-------------|
+| Homeowners Insurance | 35% | $49M | Low Volatility |
+| Auto Insurance | 30% | $42M | Low Volatility |
+| Small Business Commercial | 20% | $28M | Low Volatility |
+| Workers Compensation | 15% | $21M | Low Volatility |
+
+- **Combined Ratio**: ~92% across 3 consecutive underwriting years (2022-2024), no capital impairment or reserve deterioration. Industry average: 93-95%.
+- **Return on Capital**: 15-23% (intro deck). Estimated ROE: 12-19%.
+- **Pipeline Dealflow**: $4B.
+- **Portfolio Focus**: Lower-layer, short-duration, cat-light programs. Avoids catastrophe-driven and long-tail casualty segments.
+- **Stress Testing** (capital structure): reUSD loss likelihood = **0.03%** at 135% combined ratio; reUSDe = 0.9%; Re Capital = 3.9%. Re Capital buffer ~$73M provides first-loss protection ahead of reUSDe and reUSD.
 
 ### Accessibility
 
 - **Deposits**: KYC/AML required (via SumSub and Chainalysis). Users must pass KYC checks because a portion of protocol capital is deployed with a Cayman-regulated reinsurance company (CIMA-regulated)
-- **Instant Redemption**: Available from the onchain instant liquidity buffer (up to ~10% of NAV). First-come, first-served. Atomic, same-block settlement
-- **Quarterly Redemption**: Once instant buffer is exhausted (< 1% of supply), the contract reverts to "window-only" mode. Quarterly queue, pro-rata fulfillment
-- **DEX Trading**: Can be traded on multiple Curve pools (reUSD/scrvUSD, sfrxUSD/reUSD, reUSD/sUSDe, reUSD/USDC) totaling ~$17.4M liquidity
+- **Instant Redemption**: Available from the onchain instant liquidity buffer into USDC or sUSDe via `redeemInstant(uint256 shares, uint256 minPayout)` at [`0x8aEb9453EF22Cb38abC7a3Af9c208F65C1BfE31e`](https://etherscan.io/address/0x8aEb9453EF22Cb38abC7a3Af9c208F65C1BfE31e). Atomic, same-block settlement. Minimum redemption: 250 reUSD. Capped at 20% of daily redemption capacity and 10% per wallet. At the fastest drain rate, it would take ~5 days to exhaust all liquid onchain reserves (20% per day).
+- **Windowed Redemption**: Once instant buffer is exhausted, the protocol opens a redemption window (minimum 24 hours). Requests fulfilled pro-rata based on available capital. Proceeds must be claimed within two months.
+- **DEX Trading**: Can be traded on Fluid (reUSD/USDC ~$12M) and multiple Curve pools (reUSD/scrvUSD, sfrxUSD/reUSD, reUSD/sUSDe, reUSD/USDC) totaling ~$29.4M liquidity
 - **Not available to U.S. persons**
 - **Fees**: Redemption fee of 6 bps (0.06%) applied at the interaction layer ([docs](https://docs.re.xyz/insurance-capital-layers/what-is-reusd)). No documented deposit fees, management fees, or performance fees. RWA.xyz reports 0.18% subscription and 0.18% redemption fees — discrepancy with docs may reflect different fee tiers or methodology. Onchain data shows ~$1,535 total deposit fees collected historically, suggesting a small deposit fee mechanism exists in the contracts (also flagged in Hacken audit finding F-2024-5214 "Unclaimed Deposit Fees Unaccounted For").
 
 ### Collateralization
 
-- **Onchain buffer**: Instant redemption vault holds liquid assets (USDC) for immediate redemptions
-- **Offchain trust**: §114 Reinsurance Trust holds cash and T-Bills, attested daily by The Network Firm and published via Chainlink
+- **Onchain reserve target**: >=50% of deposits kept in onchain backing (USDC, sUSDe, and potentially T-bill wrappers such as BUIDL), per DD questionnaire
+- **Onchain buffer**: Instant redemption vault and Redemption Reserves Custodian hold liquid assets (USDC and sUSDe) for immediate redemptions
+- **Offchain trust**: §114 Reinsurance Trust holds cash and T-Bills in NAIC-compliant banks (including Coinbase, Wells Fargo), attested daily by The Network Firm and published via Chainlink
 - **Surplus Note protection**: Surplus notes rank junior to policyholders but contractually protect depositor principal
-- **reUSDe as backstop**: reUSDe (the risk-bearing token) absorbs first-loss risk across the reinsurance portfolio, providing a backstop to prevent losses reaching reUSD holders
+- **Re Capital buffer**: ~$73M subordinated first-loss layer ahead of reUSDe and reUSD
+- **reUSDe as backstop**: reUSDe (the risk-bearing token) absorbs first-loss risk across the reinsurance portfolio, providing a backstop to prevent losses reaching reUSD holders. Stress testing shows reUSD loss likelihood = 0.03% at 135% combined ratio
 
 ### Provability
 
@@ -179,15 +201,16 @@ reUSD is an **ERC-20 deposit token** that uses a **price-appreciation model** (n
 2. **Quarterly Redemption**: Processed pro-rata with available capital not reserved for reinsurance plus actuarially released funds
 3. **DEX Swap**: Sell reUSD on Curve reUSD/USDC pool
 
-### DEX Liquidity (Mar 17, 2026)
+### DEX Liquidity (Apr 15, 2026)
 
 | Protocol | Chain | Pool | TVL | 24h Volume |
 |----------|-------|------|-----|------------|
+| Fluid | Ethereum | reUSD/USDC | ~$12.0M | ~$3.14M |
 | Curve | Ethereum | reUSD/scrvUSD | ~$10.0M | ~$130K |
 | Curve | Ethereum | sfrxUSD/reUSD | ~$3.5M | ~$29K |
-| Curve | Ethereum | reUSD/sUSDe | ~$1.4M | ~$842K |
+| Curve | Ethereum | reUSD/sUSDe | ~$1.45M | ~$270K |
 | Curve | Ethereum | reUSD/fxUSD | ~$503K | ~$13K |
-| Curve | Ethereum | reUSD/USDC | ~$450K | ~$561K |
+| Curve | Ethereum | reUSD/USDC | ~$450K | ~$432K |
 | Curve | Ethereum | reUSDe/sUSDe | ~$543K | ~$308K |
 | Blackhole | Avalanche | reUSD/USDC | ~$956K | ~$12K |
 | DEX | Avalanche | reUSD/USDC | ~$509K | ~$3K |
@@ -196,13 +219,19 @@ reUSD is an **ERC-20 deposit token** that uses a **price-appreciation model** (n
 
 | Protocol | Type | Notes |
 |----------|------|-------|
-| Curve | DEX | Multiple pools: reUSD/scrvUSD (~$10M), sfrxUSD/reUSD (~$3.5M), reUSD/sUSDe (~$1.4M), reUSD/fxUSD (~$503K), reUSD/USDC (~$450K) |
-| Morpho | Lending | reUSD as collateral (mentioned in docs, 5x points for Re Airdrop) |
+| Fluid | DEX/Lending | reUSD/USDC pool (~$12M TVL, ~$3.14M daily volume). Major trading venue — most swap volume routes through Fluid |
+| Curve | DEX | Multiple pools: reUSD/scrvUSD (~$10M), sfrxUSD/reUSD (~$3.5M), reUSD/sUSDe (~$1.45M), reUSD/fxUSD (~$503K), reUSD/USDC (~$450K) |
+| Morpho | Lending | reUSD as collateral |
+| Euler | Lending | reUSD as collateral |
+| Silo | Lending | reUSD as collateral |
+| TermMax | Lending | reUSD as collateral |
 | Pendle | Yield | Compatible for yield tokenization |
+
+Total lending integrations support over $100M in borrow demand per the DD questionnaire.
 
 ### Liquidity Summary
 
-- **Total DEX Liquidity**: ~$17.4M across multiple Curve pools and chains (~9.4% of market cap). Significant improvement from ~$450K at initial assessment.
+- **Total DEX Liquidity**: ~$29.4M across Fluid, Curve, and other venues (~16.4% of market cap). Significant improvement from ~$450K at initial assessment. Fluid (~$12M) is the largest single venue by volume.
 - **24h Trading Volume**: ~$10.8M
 - **Instant redemption buffer**: The Daily Instant Redemption Vault at [`0x5C454f5526e41fBE917b63475CD8CA7E4631B147`](https://etherscan.io/address/0x5C454f5526e41fBE917b63475CD8CA7E4631B147) holds $0 USDC but ~6.19M sUSDe as of Apr 15, 2026. The Redemption Reserves Custodian ([`0x9eA38e09F41A9DE53972a68268BA0Dcc6d2fAdf8`](https://etherscan.io/address/0x9eA38e09F41A9DE53972a68268BA0Dcc6d2fAdf8), an EOA) holds ~53.26M sUSDe. Instant redemptions can be fulfilled in USDC or sUSDe, subject to daily and per-wallet caps. The vault holds no USDC, but instant redemption liquidity exists via sUSDe.
 - **Instant Redemption Interaction Contract**: [`0x8aEb9453EF22Cb38abC7a3Af9c208F65C1BfE31e`](https://etherscan.io/address/0x8aEb9453EF22Cb38abC7a3Af9c208F65C1BfE31e) — exposes `redeemInstant(uint256 shares, uint256 minPayout)` for instant redemptions.
@@ -215,16 +244,17 @@ reUSD is an **ERC-20 deposit token** that uses a **price-appreciation model** (n
 
 ### Governance
 
-- **MPC Wallets**: The protocol uses **MPC (Multi-Party Computation)** wallets rather than traditional multisigs. Multiple control wallets with role separation:
-  - Oracle Config: MPC 3-of-5
-  - Redemptions Config: MPC 3-of-5
-  - Access Manager: MPC 5-of-8
-  - Custodian Manager: MPC 3-of-5
+- **MPC Wallets**: The protocol uses **MPC (Multi-Party Computation)** wallets controlled by Resilience Foundation governance structure. Multiple control wallets with role separation:
+  - Oracle Config: MPC 3-of-5 — **no timelock**
+  - Redemptions Config: MPC 3-of-5 — 48-hour timelock
+  - Access Manager: MPC 5-of-8 — 48-hour timelock
+  - Custodian Manager: MPC 3-of-5 — 48-hour timelock
+  - Upgrade / Admin: Governance MPC 3-of-5 — 48-hour timelock
 - **Upgrade Pattern**: UUPS upgradeable contracts
-- **Upgrade Authority**: Governance MPC (3-of-5)
-- **Timelock**: 48-hour timelock on upgrades, no documented bypass path
-- **No onchain governance**: Protocol is currently governed by an expert-led council during initial phase. Planned transition to DAO in the future
-- **MPC signers are not publicly identified**
+- **Upgrade Authority**: Governance MPC (3-of-5) via Timelock Controller ([`0x69dDEa332723cF5407151aAF68B9b076557FCA93`](https://etherscan.io/address/0x69dDEa332723cF5407151aAF68B9b076557FCA93))
+- **Timelock**: 48-hour timelock on upgrades, redemptions, access, and custodian changes. **Oracle Config has no timelock** — price feed changes take effect immediately.
+- **No onchain governance**: Protocol is currently governed by an expert-led council (Resilience Foundation). Planned transition to DAO in the future
+- **MPC signers**: Re Team members — not publicly identified for security reasons (per DD)
 
 ### Programmability
 
@@ -246,15 +276,17 @@ reUSD is an **ERC-20 deposit token** that uses a **price-appreciation model** (n
 
 ## Operational Risk
 
-- **Team**: CEO **Karn Saroya** (publicly known, LinkedIn/Twitter). Previously co-founded Cover (insurtech acquired/wound down) and Stylekick (acquired by Shopify). Veteran of the insurance-tech space for 10+ years. Other team members not prominently identified.
-- **Company**: Re (re.xyz). Founded 2022. Issuer entity: Resilience BVI Ltd. (British Virgin Islands, per [RWA.xyz](https://app.rwa.xyz/assets/reUSD)).
-- **Legal Structure**: Partner reinsurance company domiciled in Cayman Islands, regulated by CIMA. Offchain trust accounts in U.S. jurisdiction (§114 Trust). Token issuer domiciled in BVI.
-- **Investors**: $14M seed round at $100M post-money valuation. Investors include **Tribe Capital, Framework Ventures, Morgan Creek Digital, SiriusPoint**.
+- **Team**: CEO **Karn Saroya** (publicly known, LinkedIn/Twitter). Previously co-founded Cover (YC-backed insurtech) and Stylekick (acquired by Shopify); part of early Shopify team. Reinsurance operations headed by **former CEO of Willis Programs**. Veteran team in insurance-tech for 10+ years.
+- **Company**: Re (re.xyz). Founded 2022. Issuer entity: Resilience BVI Ltd. (British Virgin Islands, per [RWA.xyz](https://app.rwa.xyz/assets/reUSD)). Governance controlled by Resilience Foundation.
+- **Legal Structure**: Partner reinsurance company domiciled in Cayman Islands, regulated by CIMA. Offchain trust accounts in U.S. jurisdiction (§114 Trust, NAIC-compliant banks). Token issuer domiciled in BVI.
+- **Investors**: $14M seed round at $100M post-money valuation. Investors include **Electric Capital, Tribe Capital, Stratos, SiriusPoint, Exor, Defy, Framework Ventures, Morgan Creek Digital**.
+- **Custody**: Fireblocks MPC custody for onchain assets; Coinbase and Wells Fargo as banking/custody counterparties for certain reinsurance company assets; §114 Trust accounts at NAIC-compliant banks for offchain reserves.
 - **Documentation**: Comprehensive documentation at docs.re.xyz. Clear description of mechanism, risks, and investor protections.
+- **Runtime Monitoring**: ChainAnalysis for onchain transaction monitoring.
 - **Incident Response**: Emergency pause mechanism exists. Recovery wallets designated for each ICL (e.g., [`0xDf6bF2713b5c7CA724E684657280bC407938F447`](https://etherscan.io/address/0xDf6bF2713b5c7CA724E684657280bC407938F447) for initial ICL).
 - **KYC/AML**: Required for all participants (SumSub + Chainalysis). Revoked KYC = request cancelled, tokens returned.
 - **Not available to U.S. persons** and may be restricted in other jurisdictions.
-- **Written Premiums**: $168.8M in 2025. Protocol has demonstrated real-world insurance business traction.
+- **Written Premiums**: $178M gross written premium to date (intro deck). $4B pipeline dealflow. Protocol has demonstrated real-world insurance business traction.
 
 ## Monitoring
 
@@ -297,6 +329,9 @@ reUSD is an **ERC-20 deposit token** that uses a **price-appreciation model** (n
 
 ### Liquidity Monitoring
 
+- **Fluid reUSD/USDC pool**: Monitor TVL and volume. Largest trading venue by volume (~$12M TVL).
+  - **Alert**: If Fluid pool TVL drops below $5M.
+
 - **Curve reUSD pools** (reUSD/scrvUSD, sfrxUSD/reUSD, reUSD/sUSDe, reUSD/USDC): Monitor TVL and balance ratio.
   - **Alert**: If total Curve reUSD DEX liquidity drops below $5M (currently ~$16M).
   - **Alert**: If any pool imbalance exceeds 80/20 in either direction.
@@ -329,21 +364,20 @@ reUSD is an **ERC-20 deposit token** that uses a **price-appreciation model** (n
 
 ### Key Strengths
 
-- **Principal protection**: reUSD is designed as the senior, principal-protected layer. reUSDe absorbs first-loss risk from reinsurance before any impact to reUSD holders.
-- **Third-party reserve verification**: The Network Firm provides daily independent attestation of offchain reserves, published via Chainlink Proof of Reserve.
-- **Regulatory framework**: Partner reinsurer is CIMA-regulated. Capital held in §114 Reinsurance Trust with independent bank/custodian.
-- **Role-separated MPC controls**: Multiple MPC wallets with distinct roles (oracle, redemptions, access, custodian) rather than a single admin key.
-- **Upgrade timelock**: 48-hour timelock on UUPS proxy upgrades with no documented bypass.
-- **Real business traction**: $168.8M in written premiums (2025), >$134M reinsurance capacity unlocked.
-- **Certora formal verification**: Comprehensive audit with formal verification (Sept 2025).
-- **Emergency mechanisms**: Pause functionality and designated recovery wallets.
+- **Principal protection with deep capital structure**: reUSD is the senior tranche with 0.03% modeled loss likelihood at 135% combined ratio. Re Capital (~$73M) and reUSDe provide subordinated first-loss protection.
+- **Strong underwriting track record**: 92% combined ratio across 3 consecutive years (2022-2024), outperforming industry average (93-95%). No capital impairment or reserve deterioration. $178M gross written premium.
+- **Third-party reserve verification**: The Network Firm provides daily independent attestation of offchain reserves, published via Chainlink Proof of Reserve. AUP report published.
+- **Regulatory framework**: Partner reinsurer is CIMA-regulated. Capital held in §114 Reinsurance Trust at NAIC-compliant banks (Coinbase, Wells Fargo).
+- **Comprehensive audit coverage**: 5+ audits across 3 firms (Hacken, Certora, The Network Firm), including formal verification and dedicated NAV oracle audit.
+- **Role-separated MPC controls**: Multiple MPC wallets with distinct roles (oracle, redemptions, access, custodian) rather than a single admin key. 48-hour timelock on upgrades.
+- **Emergency mechanisms**: Pause functionality, designated recovery wallets, ChainAnalysis runtime monitoring.
 
 ### Key Risks
 
-- **Offchain price oracle**: reUSD price is NOT computed programmatically onchain. It is set via admin-controlled Chainlink oracle based on offchain yield calculations. This is a fundamental centralization risk -- the price can theoretically be manipulated by compromising the oracle feed or The Network Firm attestation.
+- **Offchain price oracle with no timelock**: reUSD price is NOT computed programmatically onchain. It is set via admin-controlled Chainlink oracle based on offchain yield calculations. The Oracle Config MPC (3-of-5) has **no timelock** — price feed changes take effect immediately. This is a fundamental centralization risk.
 - **Significant offchain capital deployment**: Majority of assets are deployed offchain into §114 Trust and reinsurance programs. This introduces counterparty risk with the trust bank, partner reinsurer, and custodians that cannot be verified fully onchain.
 - **Instant redemption vault holds no USDC**: The Daily Instant Redemption Vault holds $0 USDC but ~6.19M sUSDe. The Redemption Reserves Custodian holds ~53.26M sUSDe. Instant redemptions can be fulfilled in sUSDe, but USDC-denominated instant exits are unavailable.
-- **DEX liquidity improved but still limited**: ~$17.4M across multiple Curve pools (~9.4% of ~$184.6M market cap). Significant improvement from ~$450K, but still relatively thin for a large-cap protocol.
+- **DEX liquidity improved but still limited**: ~$29.4M across Fluid and Curve (~16.4% of ~$179.4M market cap). Significant improvement from ~$450K.
 - **KYC gating**: All deposits and redemptions require KYC. This limits the universe of users who can exit and creates regulatory/jurisdictional risk.
 - **Quarterly redemption queue**: Once instant buffer is exhausted, redemptions are quarterly and pro-rata. Capital locked in reinsurance programs may not be available for 18+ months.
 - **Reinsurance tail risk**: Underlying assets are exposed to insurance claim risk. While reUSDe absorbs first-loss, a catastrophic insurance event could potentially impact reUSD if reUSDe reserves are depleted.
@@ -353,7 +387,7 @@ reUSD is an **ERC-20 deposit token** that uses a **price-appreciation model** (n
 
 - **Offchain dependency concentration**: The protocol's value proposition depends on offchain entities (Cayman reinsurer, §114 Trust, The Network Firm, Fireblocks) operating honestly and solvent. Onchain verification cannot fully cover offchain risks.
 - **Oracle manipulation**: A compromised oracle could misrepresent the reUSD price or reserve attestation. The daily oracle guardrail mitigates but does not eliminate this risk.
-- **Liquidity mismatch**: reUSD represents liquid onchain tokens backed by illiquid reinsurance capital locked for 18+ months. The instant redemption vault holds no USDC (sUSDe only — ~6.19M in vault, ~53.26M in Redemption Reserves Custodian). In a bank-run scenario, sUSDe redemption liquidity plus ~$17.4M in DEX liquidity would need to absorb exits for ~$179.4M in outstanding tokens; quarterly queue handles the remainder.
+- **Liquidity mismatch**: reUSD represents liquid onchain tokens backed by illiquid reinsurance capital locked for 18+ months. The instant redemption vault holds no USDC (sUSDe only — ~6.19M in vault, ~53.26M in Redemption Reserves Custodian). In a bank-run scenario, sUSDe redemption liquidity plus ~$29.4M in DEX liquidity would need to absorb exits for ~$179.4M in outstanding tokens; quarterly queue handles the remainder.
 
 ---
 
@@ -452,19 +486,19 @@ reUSD is an **ERC-20 deposit token** that uses a **price-appreciation model** (n
 
 - **Instant Exit**: The Daily Instant Redemption Vault holds $0 USDC but ~6.19M sUSDe. The Redemption Reserves Custodian holds ~53.26M sUSDe. Instant redemptions via [`0x8aEb9453EF22Cb38abC7a3Af9c208F65C1BfE31e`](https://etherscan.io/address/0x8aEb9453EF22Cb38abC7a3Af9c208F65C1BfE31e) can be fulfilled in USDC or sUSDe, subject to daily and per-wallet caps. USDC instant exits are currently unavailable; sUSDe instant exits are available.
 - **Quarterly Queue**: Pro-rata, may not be fully filled if capital locked in reinsurance
-- **DEX Liquidity**: ~$17.4M across multiple Curve pools (~9.4% of ~$179.4M market cap). Largest pool: reUSD/scrvUSD ~$10M. Significant improvement from ~$450K at initial assessment.
+- **DEX Liquidity**: ~$29.4M across Fluid and Curve (~16.4% of ~$179.4M market cap). Largest venue by volume: Fluid reUSD/USDC (~$12M). Significant improvement from ~$450K at initial assessment.
 - **24h Volume**: ~$3.3M
 - **KYC Required**: Limits universe of participants who can exit via protocol redemption
 - **Onchain capital**: ICL Custodial Wallet holds ~$5.97M USDC + ~7.77M sUSDe, but this is not directly accessible for redemptions without admin action
 - **Multi-chain**: Available on 6+ chains, liquidity concentrated on Ethereum
 
-**Score: 3.5/5** -- DEX liquidity improved significantly from ~$450K to ~$17.4M (38x increase), providing a more viable secondary market exit. The instant redemption vault holds no USDC but ~6.19M sUSDe, and the Redemption Reserves Custodian holds ~53.26M sUSDe — so sUSDe-denominated instant exits are available but USDC exits are not. KYC-gated protocol redemptions, quarterly queue, and 18+ month reinsurance capital lock remain material concerns.
+**Score: 3.0/5** -- DEX liquidity improved significantly from ~$450K to ~$29.4M (65x increase) across Fluid and Curve, providing a viable secondary market exit. The instant redemption vault holds ~6.19M sUSDe and the Redemption Reserves Custodian holds ~53.26M sUSDe — sUSDe-denominated instant exits are available with daily/wallet caps (20% daily, 10% per wallet). Combined protocol-native sUSDe redemptions (~$59.4M) plus DEX liquidity (~$29.4M) cover a meaningful portion of the ~$179.4M market cap. KYC-gated protocol redemptions and 18+ month reinsurance capital lock remain material concerns, but the absence of USDC instant exits is partially mitigated by sUSDe availability.
 
 #### Category 5: Operational Risk (Weight: 5%)
 
-- **Team**: CEO Karn Saroya publicly known, experienced in insurtech. Other team members not prominently identified.
+- **Team**: CEO Karn Saroya publicly known, experienced in insurtech. Reinsurance ops led by former CEO of Willis Programs. Core dev team from Cover (YC) and early Shopify.
 - **Company**: Founded 2022, $14M seed at $100M valuation.
-- **Investors**: Strong institutional investors (Tribe Capital, Framework Ventures, Morgan Creek Digital, SiriusPoint).
+- **Investors**: Strong institutional investors (Electric Capital, Tribe Capital, Stratos, SiriusPoint, Exor, Defy, Framework Ventures, Morgan Creek Digital).
 - **Documentation**: Comprehensive.
 - **Legal Structure**: Cayman-domiciled reinsurer (CIMA-regulated), U.S. §114 Trust.
 - **Incident Response**: Documented pause mechanism and recovery wallets.
@@ -484,9 +518,9 @@ Final Score = (Centralization × 0.30) + (Funds Mgmt × 0.30) + (Audits × 0.20)
 | Audits & Historical | 2.5 | 20% | 0.50 |
 | Centralization & Control | 3.8 | 30% | 1.14 |
 | Funds Management | 3.5 | 30% | 1.05 |
-| Liquidity Risk | 3.5 | 15% | 0.525 |
+| Liquidity Risk | 3.0 | 15% | 0.45 |
 | Operational Risk | 2.5 | 5% | 0.125 |
-| **Final Score** | | | **3.34** |
+| **Final Score** | | | **3.27** |
 
 **Final Score: 3.3**
 
@@ -504,7 +538,7 @@ Final Score = (Centralization × 0.30) + (Funds Mgmt × 0.30) + (Audits × 0.20)
 
 ---
 
-reUSD is a novel product that bridges DeFi capital with traditional reinsurance markets. While the concept is innovative and the protocol demonstrates real business traction ($168.8M written premiums, ~$179.4M market cap), the risk profile is moderate. The primary concerns are: (1) the offchain price oracle — reUSD's price is not computed programmatically onchain but set via admin-controlled Chainlink feed, (2) heavy offchain capital deployment with 18+ month lock-ups in reinsurance programs, (3) the instant redemption vault holds no USDC (sUSDe-denominated exits available via ~6.19M sUSDe in vault + ~53.26M sUSDe in Redemption Reserves Custodian), and (4) KYC-gated redemptions creating friction for exits. DEX liquidity has improved significantly to ~$17.4M across multiple Curve pools (up from ~$450K), providing a more viable secondary exit. These risks are partially mitigated by third-party reserve attestation (The Network Firm + Chainlink PoR), the reUSDe first-loss protection layer, MPC wallet role separation, 48-hour upgrade timelock, and the regulatory framework (CIMA-regulated reinsurer, §114 Trust).
+reUSD is a novel product that bridges DeFi capital with traditional reinsurance markets. The protocol demonstrates real business traction ($178M gross written premium, ~$179.4M market cap, 92% combined ratio across 3 years) with a deep capital structure (Re Capital ~$73M + reUSDe first-loss). The risk profile is moderate. The primary concerns are: (1) the offchain price oracle with no timelock — reUSD's price is not computed programmatically onchain but set via admin-controlled Chainlink feed, (2) heavy offchain capital deployment with 18+ month lock-ups in reinsurance programs, (3) the instant redemption vault holds no USDC (sUSDe-denominated exits available via ~6.19M sUSDe in vault + ~53.26M sUSDe in Redemption Reserves Custodian), and (4) KYC-gated redemptions creating friction for exits. DEX liquidity has improved significantly to ~$29.4M across Fluid and Curve (up from ~$450K), providing a viable secondary exit. These risks are partially mitigated by third-party reserve attestation (The Network Firm + Chainlink PoR), 5+ audits including formal verification, MPC wallet role separation, 48-hour upgrade timelock, and the regulatory framework (CIMA-regulated reinsurer, §114 Trust at NAIC-compliant banks).
 
 **Key conditions for exposure:**
 - Monitor reUSD share price for any decreases (should only increase)
@@ -512,7 +546,7 @@ reUSD is a novel product that bridges DeFi capital with traditional reinsurance 
 - **Monitor instant redemption buffer — track both USDC and sUSDe balances in vault and Redemption Reserves Custodian**
 - Monitor instant redemption interaction contract [`0x8aEb9453EF22Cb38abC7a3Af9c208F65C1BfE31e`](https://etherscan.io/address/0x8aEb9453EF22Cb38abC7a3Af9c208F65C1BfE31e) for redemption events and limit changes
 - Monitor UUPS proxy upgrades (48-hour review window)
-- Track Curve pool liquidity depth across all reUSD pairs (reUSD/scrvUSD, sfrxUSD/reUSD, reUSD/sUSDe, reUSD/USDC)
+- Track DEX liquidity depth across Fluid (reUSD/USDC) and Curve pools (reUSD/scrvUSD, sfrxUSD/reUSD, reUSD/sUSDe, reUSD/USDC)
 - Monitor for KYC policy or regulatory changes affecting redemption access
 - Monitor ICL Custodial Wallet balance (~$5.97M USDC + ~7.77M sUSDe onchain) for large outflows
 
