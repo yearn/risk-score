@@ -145,6 +145,30 @@ export const protocols: Protocol[] = [
     ],
   },
   {
+    id: "euler",
+    name: "Euler",
+    defillamaSlug: "euler",
+    frequency: "Hourly",
+    items: [
+      {
+        label: "Vault Risk Levels",
+        description: "Computed risk vs maximum threshold",
+      },
+      {
+        label: "Vault Allocation Ratios",
+        description: "Risk-adjusted allocation thresholds",
+      },
+      {
+        label: "Debt Supply Ratio",
+        description: "Alerts if ratio exceeds 60%",
+      },
+      {
+        label: "Safe Multisig",
+        description: "4/7 multisig transaction queue monitoring",
+      },
+    ],
+  },
+  {
     id: "fluid",
     name: "Fluid",
     defillamaSlug: "fluid",
@@ -361,6 +385,31 @@ export const protocols: Protocol[] = [
       {
         label: "Market Allocation",
         description: "Risk-adjusted allocation ratio monitoring",
+      },
+    ],
+  },
+  {
+    id: "pendle",
+    name: "Pendle",
+    defillamaSlug: "pendle",
+    frequency: "Hourly",
+    items: [
+      {
+        label: "Safe Multisig",
+        description: "2/4 governance on Mainnet and Arbitrum",
+      },
+      {
+        label: "Proxy Ownership",
+        description: "Governance proxy contract ownership monitoring",
+      },
+      {
+        label: "SY Token Governance",
+        description: "SY token governance and pause functionality",
+      },
+      {
+        label: "Core Contracts",
+        description:
+          "vePENDLE, PENDLE, RewardDistributor, and Voting contract monitoring",
       },
     ],
   },
