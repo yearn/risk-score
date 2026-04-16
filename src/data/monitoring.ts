@@ -145,30 +145,6 @@ export const protocols: Protocol[] = [
     ],
   },
   {
-    id: "euler",
-    name: "Euler",
-    defillamaSlug: "euler",
-    frequency: "Hourly",
-    items: [
-      {
-        label: "Vault Risk Levels",
-        description: "Computed risk vs maximum threshold",
-      },
-      {
-        label: "Vault Allocation Ratios",
-        description: "Risk-adjusted allocation thresholds",
-      },
-      {
-        label: "Debt Supply Ratio",
-        description: "Alerts if ratio exceeds 60%",
-      },
-      {
-        label: "Safe Multisig",
-        description: "4/7 multisig transaction queue monitoring",
-      },
-    ],
-  },
-  {
     id: "fluid",
     name: "Fluid",
     defillamaSlug: "fluid",
@@ -389,31 +365,6 @@ export const protocols: Protocol[] = [
     ],
   },
   {
-    id: "pendle",
-    name: "Pendle",
-    defillamaSlug: "pendle",
-    frequency: "Hourly",
-    items: [
-      {
-        label: "Safe Multisig",
-        description: "2/4 governance on Mainnet and Arbitrum",
-      },
-      {
-        label: "Proxy Ownership",
-        description: "Governance proxy contract ownership monitoring",
-      },
-      {
-        label: "SY Token Governance",
-        description: "SY token governance and pause functionality",
-      },
-      {
-        label: "Core Contracts",
-        description:
-          "vePENDLE, PENDLE, RewardDistributor, and Voting contract monitoring",
-      },
-    ],
-  },
-  {
     id: "rtoken",
     name: "RToken (ETH+)",
     defillamaSlug: "reserve-protocol",
@@ -459,6 +410,79 @@ export const protocols: Protocol[] = [
         label: "Safe Multisig",
         description:
           "3/6 multisig monitoring on Mainnet, Optimism, and Arbitrum",
+      },
+    ],
+  },
+  {
+    id: "strata",
+    name: "Strata",
+    defillamaSlug: "strata-finance",
+    frequency: "Daily",
+    items: [
+      {
+        label: "srUSDe Exchange Rate",
+        description: "Alerts if exchange rate decreases",
+      },
+      {
+        label: "Senior Coverage Ratio",
+        description: "Alerts if senior coverage falls below 105%",
+      },
+      {
+        label: "Junior Tranche Drain",
+        description: "Alerts on rapid jrUSDe totalAssets drop (>=15%)",
+      },
+      {
+        label: "Strategy Balance",
+        description:
+          "Alerts if sUSDe strategy balance drops significantly (>=20%)",
+      },
+      {
+        label: "TVL",
+        description: "Alerts on >=15% change in Total Value Locked",
+      },
+      {
+        label: "sUSDe Dependency",
+        description:
+          "sUSDe exchange rate monotonicity and cooldown period changes",
+      },
+      {
+        label: "Timelock",
+        description: "48h and 24h timelock monitoring on Mainnet",
+      },
+    ],
+  },
+  {
+    id: "superstate-ustb",
+    name: "Superstate USTB",
+    defillamaSlug: "superstate",
+    frequency: "Hourly",
+    items: [
+      {
+        label: "NAV/Share Monotonicity",
+        description:
+          "Alerts if NAV per share decreases — indicates fund losses",
+      },
+      {
+        label: "Oracle Divergence",
+        description:
+          "Alerts if Continuous Price Oracle and Chainlink feed differ by more than 0.5%",
+      },
+      {
+        label: "Redemption Capacity",
+        description: "Alerts if RedemptionIdle USDC balance falls below $500K",
+      },
+      {
+        label: "Supply Changes",
+        description: "Alerts if total supply changes by more than 10%",
+      },
+      {
+        label: "Oracle Staleness",
+        description:
+          "Alerts if oracle checkpoint is older than 4 days (reverts at 5 days)",
+      },
+      {
+        label: "Stablecoin Price",
+        description: "Depeg alert if USTB price falls below $10.50",
       },
     ],
   },
