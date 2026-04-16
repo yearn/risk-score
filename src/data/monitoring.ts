@@ -414,35 +414,6 @@ export const protocols: Protocol[] = [
     ],
   },
   {
-    id: "resolv",
-    name: "Resolv",
-    defillamaSlug: "resolv",
-    frequency: "Hourly",
-    items: [
-      {
-        label: "USR Price Stability",
-        description: "Alerts if USR price deviates from $1.00",
-      },
-      {
-        label: "Over-Collateralization",
-        description: "Alerts if reserves fall below 130% of USR supply",
-      },
-      {
-        label: "Redemption Usage",
-        description: "Alerts if usage exceeds 50% of redemption limit",
-      },
-      {
-        label: "Price Data Freshness",
-        description: "Alerts if last price update is older than 24 hours",
-      },
-      {
-        label: "Off-Chain Reserves",
-        description:
-          "TVL, backing assets, market delta, strategy net exposure, and RLP/USR ratio via Apostro dashboard",
-      },
-    ],
-  },
-  {
     id: "rtoken",
     name: "RToken (ETH+)",
     defillamaSlug: "reserve-protocol",
@@ -488,41 +459,6 @@ export const protocols: Protocol[] = [
         label: "Safe Multisig",
         description:
           "3/6 multisig monitoring on Mainnet, Optimism, and Arbitrum",
-      },
-    ],
-  },
-  {
-    id: "superstate-ustb",
-    name: "Superstate USTB",
-    defillamaSlug: "superstate",
-    frequency: "Hourly",
-    items: [
-      {
-        label: "NAV/Share Monotonicity",
-        description:
-          "Alerts if NAV per share decreases — indicates fund losses",
-      },
-      {
-        label: "Oracle Divergence",
-        description:
-          "Alerts if Continuous Price Oracle and Chainlink feed differ by more than 0.5%",
-      },
-      {
-        label: "Redemption Capacity",
-        description: "Alerts if RedemptionIdle USDC balance falls below $500K",
-      },
-      {
-        label: "Supply Changes",
-        description: "Alerts if total supply changes by more than 10%",
-      },
-      {
-        label: "Oracle Staleness",
-        description:
-          "Alerts if oracle checkpoint is older than 4 days (reverts at 5 days)",
-      },
-      {
-        label: "Stablecoin Price",
-        description: "Depeg alert if USTB price falls below $10.50",
       },
     ],
   },
