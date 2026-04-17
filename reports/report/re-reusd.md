@@ -40,7 +40,7 @@ The chosen "Applicable APY" is converted to a daily rate, and reUSD's **token pr
 - [Protocol Documentation](https://docs.re.xyz/)
 - [Protocol App (reUSD)](https://app.re.xyz/reusd)
 - [What is reUSD?](https://docs.re.xyz/insurance-capital-layers/what-is-reusd)
-- [How the Re Protocol Works](https://docs.re.xyz/protocol/how-the-re-protocol-work)
+- [How the Re Protocol Works](https://docs.re.xyz/protocol/how-the-re-protocol-works)
 - [Security and Audits](https://docs.re.xyz/security-and-audits)
 - [Smart Contract Addresses](https://docs.re.xyz/protocol/smart-contract-addresses)
 - [Investor Protections](https://docs.re.xyz/investor-protections-and-risk-management)
@@ -106,9 +106,9 @@ MPC team descriptions below come from Re's public protocol materials and cannot 
 
 ## Audits and Due Diligence Disclosures
 
-Re Protocol has undergone auditing by 3 firms across 5+ audit engagements.
+Re Protocol has 4 public smart-contract audit reports from Hacken and Certora, plus a 2025 Agreed-Upon Procedures (AUP) report from The Network Firm for offchain reserve/custody verification.
 
-### Audit History
+### Audit / Due Diligence History
 
 | # | Date | Scope | Firm | Key Findings | Report |
 |---|------|-------|------|-------------|--------|
@@ -116,7 +116,7 @@ Re Protocol has undergone auditing by 3 firms across 5+ audit engagements.
 | 2 | Dec 2024 | Smart Contract Audit | Hacken | Follow-up audit, issues remediated | [Hacken](https://hacken.io/audits/re-protocol/sca-re-re-contracts-nov2024/) |
 | 3 | Apr 2025 | NAV Oracle Audit | Hacken | Scope: the Chainlink-Functions-based `NAVConsumer` + related code at `github.com/resilience-foundation/nav-oracle` (commits `ee7e98…` / `e3dd86ef…`). 8 findings, all resolved. The audited contract IS deployed and active onchain at [`0x84d4eaeb10f9e57b67622f667c6c13e22fa4b2b6`](https://etherscan.io/address/0x84d4eaeb10f9e57b67622f667c6c13e22fa4b2b6), holds `PRICE_SETTER_ROLE` on the `SharePriceCalculator`, and runs daily at 23:45 UTC. | [Hacken](https://hacken.io/audits/re-protocol/sca-re-nav-oracle-mar2025/) |
 | 4 | Sep 2025 | Re Core (comprehensive) | Certora | 13 issues identified, all addressed and fixed. Formal verification and manual review. | [Certora](https://www.certora.com/reports/re-core) |
-| 5 | 2025 | Agreed-Upon Procedures (AUP) | The Network Firm | Independent verification of offchain operational controls and reserve attestation | [AUP Report](https://storage.googleapis.com/foundation-files/AUP-Report-2025.pdf) |
+| 5 | 2025 | Agreed-Upon Procedures (reserve/custody verification; not a smart-contract audit) | The Network Firm | Independent verification of offchain operational controls and reserve attestation | [AUP Report](https://storage.googleapis.com/foundation-files/AUP-Report-2025.pdf) |
 
 ### Hacken Aug 2024 Findings (Detail)
 
@@ -341,7 +341,7 @@ Combined ~$69.3M of Re reUSD is supplied into Fluid + Morpho lending markets onc
 
 ### External Dependencies
 
-- **Chainlink**: Oracle for reUSD price feed and Proof of Reserve attestations
+- **Chainlink**: Verified onchain use is (a) Chainlink Functions + Automation driving the daily reUSD NAV/share-price update and (b) the Chainlink `sUSDe/USD` price feed used for collateral pricing. Docs claim reserve attestations are published via Chainlink, but no Chainlink PoR aggregator for Re reserves was verified.
 - **The Network Firm**: Third-party accountant for daily offchain reserve verification
 - **Ethena**: USDe/sUSDe for basis-trade yield source
 - **Fireblocks**: Custody for idle onchain capital (daily sweeps from ICL to Fireblocks vault)
@@ -482,8 +482,8 @@ Combined ~$69.3M of Re reUSD is supplied into Fluid + Morpho lending markets onc
 ### Key Strengths
 
 - **Senior tranche position (structural)**: reUSD sits senior to reUSDe and Re Capital in the loss waterfall; losses must breach both subordinated layers before touching reUSD.
-- **Third-party offchain reserve attestation**: The Network Firm performs a daily AUP on §114 Trust balances; an AUP report is published annually.
-- **Comprehensive audit coverage**: 5+ audits across 3 firms (Hacken, Certora, The Network Firm), including Certora formal verification and a Hacken audit of the Chainlink-Functions-based `NAVConsumer` that is deployed onchain as the standard price writer.
+- **Third-party offchain reserve verification**: Re's docs state that The Network Firm verifies offchain bank balances daily and also verifies protocol custody wallet ownership/balances; the only public document verified in this report is the Oct 2025 AUP.
+- **Comprehensive smart-contract audit coverage**: 4 public smart-contract audit reports across Hacken and Certora, including Certora formal verification and a Hacken audit of the Chainlink-Functions-based `NAVConsumer` that is deployed onchain as the standard price writer. The Network Firm AUP is due diligence/reserve verification, not a smart-contract audit.
 - **Onchain NAV path with automation and deviation guard**: Daily share price is written by a Chainlink-Functions + Chainlink-Automation consumer with a `maxDeviationBps = 1000` (10%) onchain check. Caveat: a single EOA can bypass it — see Key Risks.
 - **Timelock on upgrades**: `TimelockController.getMinDelay() = 172800` (48 hours) on all privileged governance actions routed through it. `DEFAULT_ADMIN_ROLE` on reUSD and ICL sits with a 3-of-5 Safe multisig.
 - **Emergency mechanisms**: Pause functionality on the InstantRedemption, LayerZero adapter, and NAV Consumer; designated recovery wallets; Chainalysis runtime monitoring.
@@ -519,7 +519,7 @@ Combined ~$69.3M of Re reUSD is supplied into Fluid + Morpho lending markets onc
 
 ### Critical Risk Gates
 
-- [x] **No audit** -- Audited by Hacken (Aug 2024) and Certora with formal verification (Sep 2025). 3+ total audits. **PASS**
+- [x] **No audit** -- Audited by Hacken (3 public reports, including NAV Oracle) and Certora with formal verification (Sep 2025). 4 public smart-contract audit reports. **PASS**
 - [ ] **Unverifiable reserves** -- Offchain reserves attested daily by The Network Firm. Docs claim this is "published via Chainlink" but no corresponding Chainlink PoR feed exists publicly and none is consumed onchain (see appendix). Onchain buffer is fully verifiable. **CONDITIONAL PASS** -- hybrid onchain/offchain model with third-party attestation but no independent onchain PoR oracle.
 - [x] **Total centralization** -- MPC wallets with role separation (3-of-5 and 5-of-8). 48-hour upgrade timelock. Not a single EOA. **PASS**
 
@@ -529,13 +529,13 @@ Combined ~$69.3M of Re reUSD is supplied into Fluid + Morpho lending markets onc
 
 #### Category 1: Audits & Historical Track Record (Weight: 20%)
 
-- **Audits**: 3 audit firms (Hacken, Certora, The Network Firm), 5+ engagements. Certora audit (Sep 2025) included formal verification and found 13 issues (all fixed). Hacken conducted 3 audits (Sep 2024, Dec 2024, Apr 2025 NAV oracle). The Network Firm performed AUP on offchain reserve attestation (Oct 2025).
+- **Audits**: 2 smart-contract audit firms (Hacken, Certora), 4 public smart-contract audit reports. Certora audit (Sep 2025) included formal verification and found 13 issues (all fixed). Hacken conducted 3 audits (Sep 2024, Dec 2024, Apr 2025 NAV oracle). The Network Firm performed AUP on offchain reserve/custody verification (Oct 2025), which is due diligence rather than a smart-contract audit.
 - **Bug Bounty**: No Immunefi or comparable bug bounty program found.
 - **Time in Production**: reUSD token ~10 months in production (inception June 2025). Re Protocol company since 2022.
 - **TVL**: ~$186.7M market cap, ~$198.1M TVL (DeFi Llama, Apr 17, 2026).
 - **Incidents**: None reported for Re Protocol.
 
-**Score: 2.5/5** -- Three audit firms with formal verification and 5+ engagements is solid coverage. Certora formal verification and dedicated NAV oracle audit strengthen confidence. The Network Firm AUP adds offchain verification assurance. No bug bounty program remains a notable gap. Moderate production time (~10 months) with no incidents and TVL >$100M.
+**Score: 2.5/5** -- Four public smart-contract audits across Hacken and Certora is solid coverage. Certora formal verification and a dedicated NAV oracle audit strengthen confidence. The Network Firm AUP adds offchain verification assurance, but should not be counted as a smart-contract audit. No bug bounty program remains a notable gap. Moderate production time (~10 months) with no incidents and TVL >$100M.
 
 #### Category 2: Centralization & Control Risks (Weight: 30%)
 
@@ -658,7 +658,7 @@ Final Score = (Centralization × 0.30) + (Funds Mgmt × 0.30) + (Audits × 0.20)
 
 ---
 
-reUSD is a novel product that bridges DeFi capital with traditional reinsurance markets. Re reports ($178M gross written premium, ~92% combined ratio per LP memo) and market cap ~$186.7M are meaningful; the capital structure (Re Capital ~$73M + reUSDe first-loss) puts reUSD in the senior tranche. The risk profile is Elevated (final score 3.55). Primary concerns: (1) **custody / asset-movement surface — ~92% of onchain reserves ($92.3M) sit at three plain EOAs with no onchain outflow restriction; the 48h Timelock does not apply**. The AUP lists the address set but does not cryptographically verify the MPC quorum; (2) the standard share-price path is an audited Chainlink-Functions NAV Oracle with a 10% onchain deviation cap, but a single admin EOA can bypass it; (3) heavy offchain capital deployment in reinsurance programs (capital release reevaluated quarterly); (4) onchain reserves are ~54% of NAV with ~88% in sUSDe (Ethena counterparty risk, 7-day cooldown); only ~$9.34M is USDC; (5) KYC-gated redemptions (enforced onchain at every redemption entrypoint); (6) reUSDe redemption works differently — quarterly-only, no instant path; (7) three MINTER_ROLE holders on reUSD (ICL enforces backing; LayerZero OFT wrapper shares a single EOA owner with its adapter). Mitigants: Safe-3-of-5 + 48-hour Timelock on governance (onchain-verified `getMinDelay() = 172800`), 5+ audits (Hacken, Certora, The Network Firm AUP) including a Hacken audit of the deployed `NAVConsumer`, Chainlink Automation driving daily NAV updates, and The Network Firm's offchain AUP of the §114 Trust. **None of these mitigants cover the custody surface at the reserve EOAs, which remains the single largest unmitigated risk.**
+reUSD is a novel product that bridges DeFi capital with traditional reinsurance markets. Re reports ($178M gross written premium, ~92% combined ratio per LP memo) and market cap ~$186.7M are meaningful; the capital structure (Re Capital ~$73M + reUSDe first-loss) puts reUSD in the senior tranche. The risk profile is Elevated (final score 3.55). Primary concerns: (1) **custody / asset-movement surface — ~92% of onchain reserves ($92.3M) sit at three plain EOAs with no onchain outflow restriction; the 48h Timelock does not apply**. The AUP lists the address set but does not cryptographically verify the MPC quorum; (2) the standard share-price path is an audited Chainlink-Functions NAV Oracle with a 10% onchain deviation cap, but a single admin EOA can bypass it; (3) heavy offchain capital deployment in reinsurance programs (capital release reevaluated quarterly); (4) onchain reserves are ~54% of NAV with ~88% in sUSDe (Ethena counterparty risk, 7-day cooldown); only ~$9.34M is USDC; (5) KYC-gated redemptions (enforced onchain at every redemption entrypoint); (6) reUSDe redemption works differently — quarterly-only, no instant path; (7) three MINTER_ROLE holders on reUSD (ICL enforces backing; LayerZero OFT wrapper shares a single EOA owner with its adapter). Mitigants: Safe-3-of-5 + 48-hour Timelock on governance (onchain-verified `getMinDelay() = 172800`), 4 public smart-contract audits across Hacken/Certora including a Hacken audit of the deployed `NAVConsumer`, Chainlink Automation driving daily NAV updates, and The Network Firm's offchain AUP of the §114 Trust. **None of these mitigants cover the custody surface at the reserve EOAs, which remains the single largest unmitigated risk.**
 
 **Key conditions for exposure:**
 - Monitor reUSD share price for any decreases (should only increase)
@@ -830,4 +830,3 @@ So Re's claim *"A JSON price feed is pushed on-chain via Chainlink"* is correct 
 - "Proof-of-reserves, publicly auditable" → **overclaim**; reserve assurance is (a) direct onchain balance audit of the ICL/vault/custodian addresses and (b) The Network Firm's offchain AUP — there is no Chainlink-signed reserves oracle to cross-check either.
 
 **Action:** when evaluating "Chainlink" claims in Re's docs, distinguish between Chainlink Functions + Automation (used for the share price, real and audited) vs a Chainlink PoR aggregator for reserves (does not exist onchain). If Re asserts the latter in conversation, ask for the aggregator address — it should be in Chainlink's mainnet directory and verifiable on Etherscan.
-
