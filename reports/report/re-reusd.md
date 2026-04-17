@@ -1,6 +1,6 @@
 # Protocol Risk Assessment: Re Protocol reUSD
 
-- **Assessment Date:** April 15, 2026
+- **Assessment Date:** April 17, 2026
 - **Token:** reUSD (Re Protocol Deposit Token)
 - **Chain:** Ethereum (primary), multi-chain (Avalanche, Arbitrum, Base, Katana, BNB Chain, Ink)
 - **Token Address:** [`0x5086bf358635B81D8C47C66d1C8b9E567Db70c72`](https://etherscan.io/address/0x5086bf358635B81D8C47C66d1C8b9E567Db70c72)
@@ -17,20 +17,32 @@ reUSD accrues yield daily via a dual-source yield floor. At each daily valuation
 1. **Risk-Free Rate Path**: 7-day trailing average risk-free rate + 250 bps (aligned with short-term Treasuries)
 2. **Ethena Basis Trade Path**: Current annualized Ethena USDe hedged basis yield + 250 bps (captures excess basis when the futures curve is steep)
 
-The chosen "Applicable APY" is converted to a daily rate, and reUSD's **token price** (not quantity) increases daily. The price feed is pushed onchain via Chainlink, with a daily oracle guardrail rejecting outsized single-day price changes above a configured threshold. Current APY is approximately 6-9+%.
+The chosen "Applicable APY" is converted to a daily rate, and reUSD's **token price** (not quantity) increases daily. Current APY is approximately 6-9+%.
+
+**Onchain price mechanism (verified Apr 17, 2026):** The reUSD price is NOT sourced from a Chainlink feed. It is stored in the `SharePriceCalculator` contract at [`0xd1D104a7515989ac82F1AFDa15a23650411b05B8`](https://etherscan.io/address/0xd1D104a7515989ac82F1AFDa15a23650411b05B8) and updated by an EOA holding `PRICE_SETTER_ROLE` via `setSharePrice(uint256)`. The deployed implementation contains **no onchain guardrail** (only `newPrice != 0` is checked):
+
+```solidity
+function setSharePrice(uint256 newPrice) external onlyRole(PRICE_SETTER_ROLE) {
+    if (newPrice == 0) revert InvalidPrice();
+    sharePrice = newPrice;
+    emit SharePriceSet(oldPrice, newPrice);
+}
+```
+
+Any "daily oracle guardrail" (e.g. 25 bps max daily change) described in protocol docs is therefore enforced **offchain by the setter**, not by the deployed contract. Chainlink may still be used for Proof-of-Reserve attestations (TODO: verify PoR feed).
 
 **Capital Deployment:**
 - Users deposit admitted assets (e.g., USDC) into the Insurance Capital Layer (ICL) smart contracts and receive reUSD
 - A portion of the pool is converted into cash/T-Bills held in a **§114 Reinsurance Trust Account**, providing regulatory collateral to a Cayman-domiciled partner reinsurer (licensed by CIMA under Class B(iii))
 - The offchain entity issues **Surplus Notes** to the ICL, contractually locking in principal protection and an interest rate matching the Applicable APY
-- Offchain balances are attested daily by **The Network Firm** (with read-only account access) and published through a **Chainlink oracle**
+- Offchain balances are attested daily by **The Network Firm** (with read-only account access) and published through a **Chainlink Proof-of-Reserve feed** (TODO: identify feed address onchain). The reUSD *share price* itself is written directly via `setSharePrice` on the Share Price Calculator — it is not a Chainlink-aggregated feed.
 
-**Key metrics (Apr 15, 2026):**
-- reUSD Price: ~$1.072 ([CoinGecko](https://www.coingecko.com/en/coins/re-protocol-reusd))
-- reUSD Market Cap: ~$179.4M (all chains, CoinGecko)
-- reUSD Total Supply: ~167.36M tokens (CoinGecko); ~165.85M on Ethereum ([Etherscan](https://etherscan.io/token/0x5086bf358635b81d8c47c66d1c8b9e567db70c72))
-- 24h Trading Volume: ~$3.3M
-- TVL (DeFi Llama): ~$190.9M
+**Key metrics (Apr 17, 2026):**
+- reUSD Price: ~$1.072 ([CoinGecko](https://www.coingecko.com/en/coins/re-protocol-reusd)); verified onchain as `1.0724` via Share Price Calculator `getSharePrice()`
+- reUSD Market Cap: ~$186.7M (all chains, CoinGecko)
+- reUSD Total Supply: ~174.1M tokens (CoinGecko); ~172.6M on Ethereum ([Etherscan](https://etherscan.io/token/0x5086bf358635b81d8c47c66d1c8b9e567db70c72))
+- 24h Trading Volume: ~$7.3M (CoinGecko)
+- TVL (DeFi Llama): ~$198.1M ([DeFi Llama](https://defillama.com/protocol/re))
 - Total Deposits (Transparency Dashboard): ~$196.8M
 - Re Protocol Written Premiums (2025): $168.8M
 - Reinsurance Capacity Unlocked: >$134M
@@ -66,18 +78,26 @@ The chosen "Applicable APY" is converted to a daily rate, and reUSD's **token pr
 | Share Price Calculator | [`0xd1D104a7515989ac82F1AFDa15a23650411b05B8`](https://etherscan.io/address/0xd1D104a7515989ac82F1AFDa15a23650411b05B8) |
 | Redemption Reserves Custodian | [`0x9eA38e09F41A9DE53972a68268BA0Dcc6d2fAdf8`](https://etherscan.io/address/0x9eA38e09F41A9DE53972a68268BA0Dcc6d2fAdf8) |
 | Daily Instant Redemption Vault | [`0x5C454f5526e41fBE917b63475CD8CA7E4631B147`](https://etherscan.io/address/0x5C454f5526e41fBE917b63475CD8CA7E4631B147) |
+| Instant Redemption (impl., fee + limits) | [`0xa31DeeBB3680A3007120e74bcBdf4dF36F042a40`](https://etherscan.io/address/0xa31DeeBB3680A3007120e74bcBdf4dF36F042a40) |
 | Instant Redemption Interaction | [`0x8aEb9453EF22Cb38abC7a3Af9c208F65C1BfE31e`](https://etherscan.io/address/0x8aEb9453EF22Cb38abC7a3Af9c208F65C1BfE31e) |
+| Share Token Minter/Burner | [`0x0dFb42aa18CEeD719617cd554304F6cA412A6b18`](https://etherscan.io/address/0x0dFb42aa18CEeD719617cd554304F6cA412A6b18) |
+| Redemption Reserve Calculator | [`0x7E499842E7634cce793FFD5D44383BB4a2F086e0`](https://etherscan.io/address/0x7E499842E7634cce793FFD5D44383BB4a2F086e0) |
+| AccessManager (OZ v5) | [`0x3f0DA1C363e34802C6f12F9C27276dC0e6696FD8`](https://etherscan.io/address/0x3f0DA1C363e34802C6f12F9C27276dC0e6696FD8) |
+| Governance Safe (3-of-5) | [`0x8EEc10616802Ef639ca55C98Ac856553FadeFbAd`](https://etherscan.io/address/0x8EEc10616802Ef639ca55C98Ac856553FadeFbAd) |
 | Timelock Controller | [`0x69dDEa332723cF5407151aAF68B9b076557FCA93`](https://etherscan.io/address/0x69dDEa332723cF5407151aAF68B9b076557FCA93) |
 
 ### Protocol Controls (Ethereum)
 
-| Role | Controller Address | Control Mechanism | Timelock | Permissions |
-|------|-------------------|-------------------|----------|-------------|
-| Oracle Config | [`0x49BC5A880f77247A348764DdB95951cd9212A0ee`](https://etherscan.io/address/0x49BC5A880f77247A348764DdB95951cd9212A0ee) | MPC 3-of-5 | **None** | Set price feeds for deposit and collateral tokens |
-| Redemptions Config | [`0xEE16bE0374f2eFb34218affC1a8EbEe9310c47f8`](https://etherscan.io/address/0xEE16bE0374f2eFb34218affC1a8EbEe9310c47f8) | MPC 3-of-5 | 48 hours | Set redemption limits, top-up redemption vault |
-| Access Manager | [`0x80a62B72dF1136aCBc57141FB67Aa46812fECAFc`](https://etherscan.io/address/0x80a62B72dF1136aCBc57141FB67Aa46812fECAFc) | MPC 5-of-8 | 48 hours | Assign/revoke access roles |
-| Custodian Manager | [`0x9b6d7f2de2E4569297C7e88531E47679cEbE6eC9`](https://etherscan.io/address/0x9b6d7f2de2E4569297C7e88531E47679cEbE6eC9) | MPC 3-of-5 | 48 hours | Add/remove collateral custodians |
-| Upgrade / Admin | Governance MPC via Timelock | MPC 3-of-5 | 48 hours | Contract upgrades |
+All MPC team descriptions below come from the protocol's DD questionnaire and cannot be independently verified onchain (MPC signer sets are offchain). What IS onchain-verifiable: (a) the `Governance Safe` is a **3-of-5 Safe multisig** (not MPC) at [`0x8EEc10616802Ef639ca55C98Ac856553FadeFbAd`](https://etherscan.io/address/0x8EEc10616802Ef639ca55C98Ac856553FadeFbAd) holding DEFAULT_ADMIN on reUSD/ICL and PROPOSER/CANCELLER on the Timelock; (b) the Timelock min delay is `172800` seconds = 48 hours; (c) an OpenZeppelin v5 `AccessManager` contract at [`0x3f0DA1C363e34802C6f12F9C27276dC0e6696FD8`](https://etherscan.io/address/0x3f0DA1C363e34802C6f12F9C27276dC0e6696FD8) is the `authority()` for the Instant Redemption contract and is administered by the `Access Admin` EOA below.
+
+| Role | Controller Address | Control Mechanism (per docs) | Onchain Authority | Permissions |
+|------|-------------------|------------------------------|-------------------|-------------|
+| Oracle Admin | [`0x49BC5A880f77247A348764DdB95951cd9212A0ee`](https://etherscan.io/address/0x49BC5A880f77247A348764DdB95951cd9212A0ee) | MPC 3-of-5 (docs), **no timelock** | EOA; role on Share Price Calculator not verified — current `PRICE_SETTER_ROLE` holders onchain: `0x6c15b25e...bfe57649` and `0x84d4eaeb10f9e57b67622f667c6c13e22fa4b2b6` | Configure price feeds (per docs) |
+| Redemptions Admin | [`0xEE16bE0374f2eFb34218affC1a8EbEe9310c47f8`](https://etherscan.io/address/0xEE16bE0374f2eFb34218affC1a8EbEe9310c47f8) | MPC 3-of-5 (docs), 48 hours | EOA | Set redemption limits, top-up redemption vault (per docs) |
+| Access Admin | [`0x80a62B72dF1136aCBc57141FB67Aa46812fECAFc`](https://etherscan.io/address/0x80a62B72dF1136aCBc57141FB67Aa46812fECAFc) | MPC 5-of-8 (docs), 48 hours | EOA; observed calling `grantRole` / `labelRole` on `AccessManager` [`0x3f0DA1C363e34802C6f12F9C27276dC0e6696FD8`](https://etherscan.io/address/0x3f0DA1C363e34802C6f12F9C27276dC0e6696FD8) | Admin of OZ `AccessManager` (roles for Instant Redemption, etc.) |
+| Custodian Manager | [`0x9b6d7f2de2E4569297C7e88531E47679cEbE6eC9`](https://etherscan.io/address/0x9b6d7f2de2E4569297C7e88531E47679cEbE6eC9) | MPC 3-of-5 (docs), 48 hours | EOA; holds `CUSTODIAN_MANAGER_ROLE` (0x0792b378…) on ICL — **verified** | Add/remove collateral custodians |
+| Governance (Upgrades / DEFAULT_ADMIN) | [`0x8EEc10616802Ef639ca55C98Ac856553FadeFbAd`](https://etherscan.io/address/0x8EEc10616802Ef639ca55C98Ac856553FadeFbAd) | **Safe 3-of-5** (onchain-verified; not MPC) | Holds DEFAULT_ADMIN + UPGRADER on reUSD and ICL, PROPOSER + CANCELLER on Timelock | Contract upgrades, role administration (routed through Timelock for timelocked actions) |
+| Timelock executor | [`0x4BFea59b948a1a0FAC3C8C40BfD86E0e740738F3`](https://etherscan.io/address/0x4BFea59b948a1a0FAC3C8C40BfD86E0e740738F3) | EOA (onchain-verified) | Holds EXECUTOR_ROLE on the Timelock | Execute queued timelock transactions after 48h delay |
 
 ### Cross-Chain Deployments
 
@@ -86,9 +106,9 @@ The chosen "Applicable APY" is converted to a daily rate, and reUSD's **token pr
 | Avalanche | [`0x180aF87b47Bf272B2df59dccf2D76a6eaFa625Bf`](https://snowscan.xyz/address/0x180aF87b47Bf272B2df59dccf2D76a6eaFa625Bf) |
 | Arbitrum | [`0x76cE01F0Ef25AA66cC5F1E546a005e4A63B25609`](https://arbiscan.io/address/0x76cE01F0Ef25AA66cC5F1E546a005e4A63B25609) |
 | Base | [`0x7D214438D0F27AfCcC23B3d1e1a53906aCE5CFEa`](https://basescan.org/address/0x7D214438D0F27AfCcC23B3d1e1a53906aCE5CFEa) |
-| Katana | [`0xe08853433fDBC504240455e295B644E0F44c3B29`](https://etherscan.io/address/0xe08853433fDBC504240455e295B644E0F44c3B29) |
+| Katana | [`0xe08853433fDBC504240455e295B644E0F44c3B29`](https://katanascan.com/address/0xe08853433fDBC504240455e295B644E0F44c3B29) |
 | BNB Chain | [`0xbA9425EC55ee0E72216D18e0ad8BBbA2553bFb60`](https://bscscan.com/address/0xbA9425EC55ee0E72216D18e0ad8BBbA2553bFb60) |
-| Ink | [`0x5BCf6B008bf80b9296238546BaCE1797657B05d6`](https://etherscan.io/address/0x5BCf6B008bf80b9296238546BaCE1797657B05d6) |
+| Ink | [`0x5BCf6B008bf80b9296238546BaCE1797657B05d6`](https://explorer.inkonchain.com/address/0x5BCf6B008bf80b9296238546BaCE1797657B05d6) |
 
 ## Audits and Due Diligence Disclosures
 
@@ -126,7 +146,7 @@ Re Protocol has undergone auditing by 3 firms across 5+ audit engagements.
 ## Historical Track Record
 
 - **Production History**: Re Protocol launched in late 2022. reUSD token inception June 12, 2025 (per RWA.xyz). Curve pool created ~9 months ago per GeckoTerminal.
-- **TVL**: ~$190.9M (DeFi Llama). ~$179.4M market cap across all chains. ~167.36M reUSD total supply (CoinGecko).
+- **TVL**: ~$198.1M (DeFi Llama, Apr 17, 2026). ~$186.7M market cap across all chains (CoinGecko). ~174.1M reUSD total supply (CoinGecko); ~172.6M on Ethereum (onchain `totalSupply()`).
 - **Written Premiums**: $168.8M in 2025. >$134M in reinsurance capacity unlocked.
 - **Exchange Rate History**: reUSD has appreciated from ~$1.00 to ~$1.067, representing ~6.7% cumulative yield since inception (June 2025).
 - **Incidents**: No reported security incidents, exploits, or hacks found for Re Protocol's reUSD on Rekt News or DeFi Llama hacks database. **Note**: Resupply Protocol (a different project with a different reUSD token at a different address) suffered a $9.6M exploit in June 2025 -- this is unrelated to Re Protocol/re.xyz.
@@ -140,8 +160,8 @@ reUSD is an **ERC-20 deposit token** that uses a **price-appreciation model** (n
 - Users deposit admitted assets (USDC) into the ICL smart contract
 - Users receive reUSD tokens representing their deposit
 - The reUSD token price increases daily based on the Applicable APY
-- The price is updated onchain via a **Chainlink oracle** fed by daily attestations from **The Network Firm**
-- A **daily oracle guardrail** rejects single-day price changes above **25 bps**
+- The price is stored onchain in the Share Price Calculator and updated by the `PRICE_SETTER_ROLE` holder (EOA) via `setSharePrice(uint256)`. The contract performs no deviation check beyond `newPrice != 0` (verified onchain, see Overview). The "daily 25 bps guardrail" cited in protocol docs is **offchain** (enforced by the setter), not an onchain invariant — flagged as a centralization/trust concern in scoring.
+- The Network Firm performs daily offchain attestations; Chainlink Proof-of-Reserve is used for reserve attestations (TODO: identify PoR feed address onchain).
 - **NAV formula**: `(Spread/365) + max[sUSDe(T)/sUSDe(T-7d) - 1 ; TBILL(T)/TBILL(T-7d) - 1] × (undeployed capital / total capital) + SOFR × (deployed capital / total capital)`. Spread = 250 bps.
 
 ### Capital Deployment
@@ -188,11 +208,11 @@ reUSDe is the protocol's junior/first-loss tranche ([docs](https://docs.re.xyz/i
 ### Accessibility
 
 - **Deposits**: KYC/AML required (via SumSub and Chainalysis). Users must pass KYC checks because a portion of protocol capital is deployed with a Cayman-regulated reinsurance company (CIMA-regulated)
-- **Instant Redemption**: Available from the onchain instant liquidity buffer into USDC or sUSDe via `redeemInstant(uint256 shares, uint256 minPayout)` at [`0x8aEb9453EF22Cb38abC7a3Af9c208F65C1BfE31e`](https://etherscan.io/address/0x8aEb9453EF22Cb38abC7a3Af9c208F65C1BfE31e). Atomic, same-block settlement. Minimum redemption: 250 reUSD. Capped at 20% of daily redemption capacity and 10% per wallet. At the fastest drain rate, it would take ~5 days to exhaust all liquid onchain reserves (20% per day).
+- **Instant Redemption**: Available from the onchain instant liquidity buffer via `redeemInstant(uint256 shares, uint256 minPayout)` at [`0x8aEb9453EF22Cb38abC7a3Af9c208F65C1BfE31e`](https://etherscan.io/address/0x8aEb9453EF22Cb38abC7a3Af9c208F65C1BfE31e) (which delegates to the `InstantRedemption` implementation at [`0xa31DeeBB3680A3007120e74bcBdf4dF36F042a40`](https://etherscan.io/address/0xa31DeeBB3680A3007120e74bcBdf4dF36F042a40)). Atomic, same-block settlement. **Onchain-verified parameters** on Apr 17, 2026: `minRedemption = 0.01 reUSD` (`1e16`), `maxRedemption = 1,000,000 reUSD` (`1e24`), `dailyLimitBps = 2000` (20% of capacity), `userLimitBps = 1000` (10% per wallet), `feeBps = 6` (0.06%), `dayPayoutToken = sUSDe` (0x9D39A5DE30e57443BfF2A8307A4256c8797A3497). At the fastest drain rate, ~5 days to exhaust all liquid onchain reserves (20% per day). **Note:** the docs claim a `$250` minimum — onchain the contract minimum is far lower (0.01 reUSD). TODO: confirm whether the `$250` figure is an app-level UX gate.
 - **Windowed Redemption**: Once instant buffer is exhausted, the protocol opens a redemption window (minimum 24 hours). Requests fulfilled pro-rata based on available capital. Proceeds must be claimed within two months.
-- **DEX Trading**: Can be traded on Fluid (reUSD/USDC ~$12M) and multiple Curve pools (reUSD/scrvUSD, sfrxUSD/reUSD, reUSD/sUSDe, reUSD/USDC) totaling ~$29.4M liquidity
+- **DEX Trading**: Can be traded on Fluid (reUSD/USDT ~$11.6M — note: USDT not USDC) and multiple Curve pools (reUSD/scrvUSD, reUSD/sfrxUSD, reUSD/sUSDe, reUSD/USDC, reUSD/fxUSD) totaling **~$26.2M** Ethereum DEX liquidity on Apr 17, 2026 (sources: DeFi Llama yields API).
 - **Not available to U.S. persons**
-- **Fees**: Redemption fee of 6 bps (0.06%) applied at the interaction layer ([docs](https://docs.re.xyz/insurance-capital-layers/what-is-reusd)). No documented deposit fees, management fees, or performance fees. RWA.xyz reports 0.18% subscription and 0.18% redemption fees — discrepancy with docs may reflect different fee tiers or methodology. Onchain data shows ~$1,535 total deposit fees collected historically, suggesting a small deposit fee mechanism exists in the contracts (also flagged in Hacken audit finding F-2024-5214 "Unclaimed Deposit Fees Unaccounted For").
+- **Fees**: Redemption fee of `6 bps` (0.06%) — **onchain-verified** via `InstantRedemption.feeBps() = 6` at [`0xa31DeeBB3680A3007120e74bcBdf4dF36F042a40`](https://etherscan.io/address/0xa31DeeBB3680A3007120e74bcBdf4dF36F042a40) ([docs](https://docs.re.xyz/insurance-capital-layers/what-is-reusd)). No documented deposit fees, management fees, or performance fees. RWA.xyz reports 0.18% subscription and 0.18% redemption fees — discrepancy with docs may reflect different fee tiers or methodology. Onchain data shows ~$1,535 total deposit fees collected historically, suggesting a small deposit fee mechanism exists in the contracts (also flagged in Hacken audit finding F-2024-5214 "Unclaimed Deposit Fees Unaccounted For").
 
 ### Collateralization
 
@@ -205,11 +225,16 @@ reUSDe is the protocol's junior/first-loss tranche ([docs](https://docs.re.xyz/i
 
 ### Provability
 
-- **reUSD price**: Updated daily via Chainlink oracle. **Not computed programmatically onchain** -- the price is set by an admin-controlled oracle feed based on offchain yield calculations
+- **reUSD price**: Written directly onchain via `setSharePrice(uint256)` by an EOA holding `PRICE_SETTER_ROLE`. **Not computed programmatically onchain** — price is derived offchain (Network Firm attestation) and pushed in by the setter; the contract has no deviation cap.
 - **Onchain reserves**: Visible onchain via the ICL contract and Redemption Reserves Custodian
 - **Offchain reserves**: Attested daily by The Network Firm (third-party accountant with read-only access) and published via Chainlink Proof of Reserve
 - **Insurance performance**: Reinsurance returns are inherently offchain and depend on claim experience over multi-year treaty periods
-- **Minting requires backing**: All ICL deposit paths (`deposit`, `depositFromCustodian`, `processPrestakedDeposit`) enforce `safeTransferFrom` — backing tokens must be transferred to the ICL before reUSD is minted (verified in source at [implementation `0x06d4acc104b974cd99bf22e4572f48a051e59670`](https://etherscan.io/address/0x06d4acc104b974cd99bf22e4572f48a051e59670)). However, the reUSD token contract has an unrestricted `mint(address, uint256)` gated only by `MINTER_ROLE`. Currently only the ICL holds this role. If `MINTER_ROLE` were granted to another address via Access Manager (MPC 5-of-8, 48h timelock), that address could mint without backing.
+- **Minting requires backing (ICL path)**: All ICL deposit paths (`deposit`, `depositFromCustodian`, `processPrestakedDeposit`) enforce `safeTransferFrom` — backing tokens must be transferred to the ICL before reUSD is minted (verified in source at [implementation `0x06d4acc104b974cd99bf22e4572f48a051e59670`](https://etherscan.io/address/0x06d4acc104b974cd99bf22e4572f48a051e59670)). However, the reUSD token contract has an unrestricted `mint(address, uint256)` gated only by `MINTER_ROLE`.
+- **MINTER_ROLE holders (verified via RoleGranted logs on Apr 17, 2026)**: THREE contracts hold the role, not one:
+  1. `InsuranceCapitalLayer` [`0x4691C475bE804Fa85f91c2D6D0aDf03114de3093`](https://etherscan.io/address/0x4691C475bE804Fa85f91c2D6D0aDf03114de3093) — backed mint path.
+  2. `InstantRedemption` [`0xa31DeeBB3680A3007120e74bcBdf4dF36F042a40`](https://etherscan.io/address/0xa31DeeBB3680A3007120e74bcBdf4dF36F042a40) — burns reUSD on redemption; uses MINTER_ROLE because `mint` and `burn` typically share the role in this codebase.
+  3. `ShareTokenMinterBurner` [`0x0dFb42aa18CEeD719617cd554304F6cA412A6b18`](https://etherscan.io/address/0x0dFb42aa18CEeD719617cd554304F6cA412A6b18) — cross-chain / adapter minter; exposes bare `mint(address,uint256)` and `burn(address,uint256)` gated by an `adapter` it calls into ([`0x2BB4046022B9161f3F84Ad8E35cac1d5946e0e85`](https://etherscan.io/address/0x2BB4046022B9161f3F84Ad8E35cac1d5946e0e85)). TODO: verify adapter access controls and confirm whether this path can mint without backing on Ethereum.
+- If `MINTER_ROLE` were granted to another address via Governance Safe, that address could mint without a backing check at the token layer.
 
 ## Liquidity Risk
 
@@ -219,26 +244,28 @@ reUSDe is the protocol's junior/first-loss tranche ([docs](https://docs.re.xyz/i
 2. **Quarterly Redemption**: Processed pro-rata with available capital not reserved for reinsurance plus actuarially released funds
 3. **DEX Swap**: Sell reUSD on Curve reUSD/USDC pool
 
-### DEX Liquidity (Apr 15, 2026)
+### DEX Liquidity (Apr 17, 2026, source: DeFi Llama yields API)
 
-| Protocol | Chain | Pool | TVL | 24h Volume |
-|----------|-------|------|-----|------------|
-| Fluid | Ethereum | reUSD/USDC | ~$12.0M | ~$3.14M |
-| Curve | Ethereum | reUSD/scrvUSD | ~$10.0M | ~$130K |
-| Curve | Ethereum | sfrxUSD/reUSD | ~$3.5M | ~$29K |
-| Curve | Ethereum | reUSD/sUSDe | ~$1.45M | ~$270K |
-| Curve | Ethereum | reUSD/fxUSD | ~$503K | ~$13K |
-| Curve | Ethereum | reUSD/USDC | ~$450K | ~$432K |
-| Curve | Ethereum | reUSDe/sUSDe | ~$543K | ~$308K |
-| Blackhole | Avalanche | reUSD/USDC | ~$956K | ~$12K |
-| DEX | Avalanche | reUSD/USDC | ~$509K | ~$3K |
+| Protocol | Chain | Pool | TVL | Notes |
+|----------|-------|------|-----|-------|
+| Fluid (DEX) | Ethereum | reUSD/**USDT** | ~$11.6M | Underlying tokens confirmed onchain: `0x5086...0c72` / `0xdac17f...831ec7` |
+| Curve | Ethereum | reUSD/scrvUSD | ~$8.32M | |
+| Curve | Ethereum | reUSD/sfrxUSD | ~$2.36M | |
+| Curve | Ethereum | reUSD/sUSDe | ~$1.42M | |
+| Curve | Ethereum | reUSD/fxUSD | ~$520K | |
+| Curve | Ethereum | reUSD/USDC | ~$450K | |
+| Blackhole CLMM | Avalanche | reUSD/USDC | ~$962K | |
+| Blackhole AMM | Avalanche | reUSD/USDC | ~$510K | |
+| Curve | Ethereum | reUSDe/sUSDe | ~$546K | reUSDe pair, listed for reference |
+
+**Total reUSD DEX liquidity: ~$26.2M** (Ethereum ~$24.2M + Avalanche ~$1.5M). The reUSDe/sUSDe pool (~$546K) is excluded since it pairs the junior tranche, not reUSD.
 
 ### DeFi Integrations
 
 | Protocol | Type | Notes |
 |----------|------|-------|
-| Fluid | DEX/Lending | reUSD/USDC pool (~$12M TVL, ~$3.14M daily volume). Major trading venue — most swap volume routes through Fluid |
-| Curve | DEX | Multiple pools: reUSD/scrvUSD (~$10M), sfrxUSD/reUSD (~$3.5M), reUSD/sUSDe (~$1.45M), reUSD/fxUSD (~$503K), reUSD/USDC (~$450K) |
+| Fluid | DEX/Lending | reUSD/**USDT** DEX pool (~$11.6M TVL, ~$1.67M daily volume). Major trading venue. Separate Fluid lending markets also accept reUSD as collateral (~$23M + ~$15M + ~$4.7M supply). |
+| Curve | DEX | Multiple pools: reUSD/scrvUSD (~$8.3M), reUSD/sfrxUSD (~$2.36M), reUSD/sUSDe (~$1.42M), reUSD/fxUSD (~$520K), reUSD/USDC (~$450K) |
 | Morpho | Lending | reUSD as collateral |
 | Euler | Lending | reUSD as collateral |
 | Silo | Lending | reUSD as collateral |
@@ -249,11 +276,11 @@ Total lending integrations support over $100M in borrow demand per the DD questi
 
 ### Liquidity Summary
 
-- **Total DEX Liquidity**: ~$29.4M across Fluid, Curve, and other venues (~16.4% of market cap). Significant improvement from ~$450K at initial assessment. Fluid (~$12M) is the largest single venue by volume.
-- **24h Trading Volume**: ~$10.8M
-- **Instant redemption buffer**: The Daily Instant Redemption Vault at [`0x5C454f5526e41fBE917b63475CD8CA7E4631B147`](https://etherscan.io/address/0x5C454f5526e41fBE917b63475CD8CA7E4631B147) holds $0 USDC but ~6.19M sUSDe as of Apr 15, 2026. The Redemption Reserves Custodian ([`0x9eA38e09F41A9DE53972a68268BA0Dcc6d2fAdf8`](https://etherscan.io/address/0x9eA38e09F41A9DE53972a68268BA0Dcc6d2fAdf8), an EOA) holds ~53.26M sUSDe. Instant redemptions can be fulfilled in USDC or sUSDe, subject to daily and per-wallet caps. The vault holds no USDC, but instant redemption liquidity exists via sUSDe.
+- **Total DEX Liquidity**: ~$26.2M across Fluid, Curve, and Blackhole (~14.0% of ~$186.7M market cap). Significant improvement from ~$450K at initial assessment. Fluid reUSD/USDT (~$11.6M) is the largest single venue by volume.
+- **24h Trading Volume (token-level, CoinGecko)**: ~$7.3M.
+- **Instant redemption buffer (Apr 17, 2026, onchain)**: The Daily Instant Redemption Vault at [`0x5C454f5526e41fBE917b63475CD8CA7E4631B147`](https://etherscan.io/address/0x5C454f5526e41fBE917b63475CD8CA7E4631B147) holds `0` USDC and `6.188M` sUSDe. The `custodialWallet` (labeled "Redemption Reserves Custodian" in this report) [`0x9eA38e09F41A9DE53972a68268BA0Dcc6d2fAdf8`](https://etherscan.io/address/0x9eA38e09F41A9DE53972a68268BA0Dcc6d2fAdf8) is an EOA and holds `0` USDC and `53.263M` sUSDe. The configured `dayPayoutToken` is **sUSDe** (not USDC) on Apr 17, 2026, so instant redemptions settle into sUSDe under current config.
 - **Instant Redemption Interaction Contract**: [`0x8aEb9453EF22Cb38abC7a3Af9c208F65C1BfE31e`](https://etherscan.io/address/0x8aEb9453EF22Cb38abC7a3Af9c208F65C1BfE31e) — exposes `redeemInstant(uint256 shares, uint256 minPayout)` for instant redemptions.
-- **Onchain capital**: ICL Custodial Wallet holds ~$5.97M USDC + ~7.77M sUSDe (Apr 15, 2026). ICL contract itself holds $0.
+- **Onchain capital (Apr 17, 2026)**: ICL Custodial Wallet [`0x295F67Fdb21255A3Db82964445628a706FBe689E`](https://etherscan.io/address/0x295F67Fdb21255A3Db82964445628a706FBe689E) holds `9.344M` USDC + `10.496M` sUSDe. ICL contract itself holds $0.
 - **Quarterly queue**: Pro-rata fulfillment, may not be fully met if capital is locked in reinsurance
 - **KYC required**: Both for deposit and redemption through the protocol
 - **Multi-chain**: Available on 6+ chains. Liquidity concentrated on Ethereum Curve pools (~$16M) with ~$1.5M on Avalanche.
@@ -262,21 +289,21 @@ Total lending integrations support over $100M in borrow demand per the DD questi
 
 ### Governance
 
-- **MPC Wallets**: The protocol uses **MPC (Multi-Party Computation)** wallets controlled by Resilience Foundation governance structure. Multiple control wallets with role separation:
-  - Oracle Config: MPC 3-of-5 — **no timelock**
-  - Redemptions Config: MPC 3-of-5 — 48-hour timelock
-  - Access Manager: MPC 5-of-8 — 48-hour timelock
-  - Custodian Manager: MPC 3-of-5 — 48-hour timelock
-  - Upgrade / Admin: Governance MPC 3-of-5 — 48-hour timelock
-- **Upgrade Pattern**: UUPS upgradeable contracts
-- **Upgrade Authority**: Governance MPC (3-of-5) via Timelock Controller ([`0x69dDEa332723cF5407151aAF68B9b076557FCA93`](https://etherscan.io/address/0x69dDEa332723cF5407151aAF68B9b076557FCA93))
-- **Timelock**: 48-hour timelock on upgrades, redemptions, access, and custodian changes. **Oracle Config has no timelock** — price feed changes take effect immediately.
-- **No onchain governance**: Protocol is currently governed by an expert-led council (Resilience Foundation). Planned transition to DAO in the future
-- **MPC signers**: Re Team members — not publicly identified for security reasons (per DD)
+- **Governance (onchain-verified)**: A **Safe 3-of-5 multisig** at [`0x8EEc10616802Ef639ca55C98Ac856553FadeFbAd`](https://etherscan.io/address/0x8EEc10616802Ef639ca55C98Ac856553FadeFbAd) (SafeProxy; 5 owners, threshold 3) holds DEFAULT_ADMIN + UPGRADER on reUSD and ICL, and PROPOSER + CANCELLER on the Timelock. The protocol docs also describe additional MPC-controlled admin EOAs (Oracle, Redemptions, Access, Custodian); those EOAs exist onchain, but the `N-of-M` MPC quorum is offchain and cannot be verified.
+  - Oracle admin EOA: `0x49BC5A88…9212A0ee` — **no timelock** (direct `setSharePrice` capability implied).
+  - Redemptions admin EOA: `0xEE16bE03…310c47f8`.
+  - Access admin EOA: `0x80a62B72…812fECAFc` (administers `AccessManager` [`0x3f0DA1C363e34802C6f12F9C27276dC0e6696FD8`](https://etherscan.io/address/0x3f0DA1C363e34802C6f12F9C27276dC0e6696FD8); onchain-observed calling `grantRole`/`labelRole`).
+  - Custodian manager EOA: `0x9b6d7f2d…cEbE6eC9` — holds `CUSTODIAN_MANAGER_ROLE` on ICL (onchain-verified).
+  - Timelock executor EOA: `0x4BFea59b…740738F3` (onchain-verified).
+- **Upgrade Pattern**: UUPS / ERC1967 upgradeable contracts (reUSD and ICL implementations verified).
+- **Upgrade Authority**: Governance Safe → Timelock Controller ([`0x69dDEa332723cF5407151aAF68B9b076557FCA93`](https://etherscan.io/address/0x69dDEa332723cF5407151aAF68B9b076557FCA93)). Timelock `getMinDelay() = 172800` seconds (**48 hours**, onchain-verified).
+- **Timelock**: 48-hour timelock on upgrades and role changes routed through Timelock. **The `setSharePrice` path has no onchain timelock or guardrail** — price writes take effect immediately.
+- **No onchain governance**: Protocol is currently governed by an expert-led council (Resilience Foundation). Planned transition to DAO in the future.
+- **MPC signers**: Re Team members — not publicly identified for security reasons (per DD).
 
 ### Programmability
 
-- **reUSD price**: **NOT programmatic**. Updated daily via Chainlink oracle, fed by admin/The Network Firm attestations. Price is derived from offchain yield calculations (risk-free rate or Ethena basis yield + 250 bps). A daily change guardrail rejects large moves above a threshold.
+- **reUSD price**: **NOT programmatic**. Set by an EOA (`PRICE_SETTER_ROLE` holder) via `setSharePrice(uint256)` on the Share Price Calculator. Offchain yield calculation (risk-free rate or Ethena basis yield + 250 bps) is asserted by The Network Firm; published via Chainlink PoR (TODO: identify feed). **The deployed `setSharePrice` has no onchain guardrail** — only `newPrice != 0` is enforced; any 25 bps daily cap is an offchain convention.
 - **Deposits**: Require KYC verification through the KYC Registry contract
 - **Redemptions**: Instant redemptions are programmatic (from buffer). Quarterly redemptions involve admin-managed processes
 - **Capital deployment**: Offchain, managed by the protocol team through the Fireblocks custody infrastructure
@@ -311,10 +338,11 @@ Total lending integrations support over $100M in borrow demand per the DD questi
 ### reUSD Price Monitoring
 
 - **Share Price Calculator**: [`0xd1D104a7515989ac82F1AFDa15a23650411b05B8`](https://etherscan.io/address/0xd1D104a7515989ac82F1AFDa15a23650411b05B8)
-  - Monitor reUSD price changes daily. Current: ~$1.052.
+  - Monitor reUSD price changes daily. Current: ~$1.072 (onchain `getSharePrice()` = `1072426668551449984`, Apr 17, 2026).
   - **Alert**: If price **decreases** (should only ever increase under normal operation).
   - **Alert**: If price growth **stops** for >48 hours (indicates oracle feed interruption or yield issue).
-  - **Alert**: If single-day price change exceeds the configured guardrail threshold.
+  - **Alert**: If single-day price change exceeds any offchain guardrail threshold (reminder: `setSharePrice` has **no onchain guardrail**, so monitoring must enforce this).
+  - **Alert**: Any new member granted `PRICE_SETTER_ROLE` on the Share Price Calculator.
 
 ### ICL and Redemption Monitoring
 
@@ -336,22 +364,25 @@ Total lending integrations support over $100M in borrow demand per the DD questi
 
 ### Governance & Upgrade Monitoring
 
-- **Oracle Config (MPC 3-of-5)**: [`0x49BC5A880f77247A348764DdB95951cd9212A0ee`](https://etherscan.io/address/0x49BC5A880f77247A348764DdB95951cd9212A0ee)
-  - **Alert**: On any price feed configuration changes.
+- **Oracle admin EOA (MPC 3-of-5 per docs)**: [`0x49BC5A880f77247A348764DdB95951cd9212A0ee`](https://etherscan.io/address/0x49BC5A880f77247A348764DdB95951cd9212A0ee)
+  - **Alert**: On any price feed configuration changes; on any new `PRICE_SETTER_ROLE` grant on Share Price Calculator.
 
-- **Access Manager (MPC 5-of-8)**: [`0x80a62B72dF1136aCBc57141FB67Aa46812fECAFc`](https://etherscan.io/address/0x80a62B72dF1136aCBc57141FB67Aa46812fECAFc)
-  - **Alert**: On any role assignment or revocation.
+- **Access admin EOA (MPC 5-of-8 per docs)**: [`0x80a62B72dF1136aCBc57141FB67Aa46812fECAFc`](https://etherscan.io/address/0x80a62B72dF1136aCBc57141FB67Aa46812fECAFc) — admin of `AccessManager` [`0x3f0DA1C363e34802C6f12F9C27276dC0e6696FD8`](https://etherscan.io/address/0x3f0DA1C363e34802C6f12F9C27276dC0e6696FD8)
+  - **Alert**: On any role assignment or revocation in `AccessManager`; on `MINTER_ROLE` grant on reUSD token.
+
+- **Governance Safe (3-of-5, onchain-verified)**: [`0x8EEc10616802Ef639ca55C98Ac856553FadeFbAd`](https://etherscan.io/address/0x8EEc10616802Ef639ca55C98Ac856553FadeFbAd)
+  - **Alert**: On any transaction execution, owner change, or threshold change.
 
 - **UUPS Proxy Upgrades**: Monitor for `Upgraded` events on reUSD token and ICL contracts.
   - **Alert**: Immediately on any implementation change (48-hour timelock provides review window).
 
 ### Liquidity Monitoring
 
-- **Fluid reUSD/USDC pool**: Monitor TVL and volume. Largest trading venue by volume (~$12M TVL).
+- **Fluid reUSD/USDT pool**: Monitor TVL and volume. Largest trading venue by volume (~$11.6M TVL).
   - **Alert**: If Fluid pool TVL drops below $5M.
 
-- **Curve reUSD pools** (reUSD/scrvUSD, sfrxUSD/reUSD, reUSD/sUSDe, reUSD/USDC): Monitor TVL and balance ratio.
-  - **Alert**: If total Curve reUSD DEX liquidity drops below $5M (currently ~$16M).
+- **Curve reUSD pools** (reUSD/scrvUSD, reUSD/sfrxUSD, reUSD/sUSDe, reUSD/USDC, reUSD/fxUSD): Monitor TVL and balance ratio.
+  - **Alert**: If total Curve reUSD DEX liquidity drops below $5M (currently ~$13M across Curve pools).
   - **Alert**: If any pool imbalance exceeds 80/20 in either direction.
 
 - **CoinGecko reUSD price**: Monitor for deviations from expected share price.
@@ -383,7 +414,7 @@ Total lending integrations support over $100M in borrow demand per the DD questi
 ### Key Strengths
 
 - **Principal protection with deep capital structure**: reUSD is the senior tranche with 0.03% modeled loss likelihood at 135% combined ratio. Re Capital (~$73M) and reUSDe provide subordinated first-loss protection.
-- **Strong underwriting track record**: 92% combined ratio across 3 consecutive years (2022-2024), outperforming industry average (93-95%). No capital impairment or reserve deterioration. $178M gross written premium.
+- **Strong underwriting track record (per LP memo / intro deck, not independently verifiable)**: ~92% combined ratio across 3 consecutive years (2022-2024), outperforming industry average (93-95%). No capital impairment or reserve deterioration. $178M gross written premium. TODO: independent confirmation of combined-ratio figures.
 - **Third-party reserve verification**: The Network Firm provides daily independent attestation of offchain reserves, published via Chainlink Proof of Reserve. AUP report published.
 - **Regulatory framework**: Partner reinsurer is CIMA-regulated. Capital held in §114 Reinsurance Trust at NAIC-compliant banks (Coinbase, Wells Fargo).
 - **Comprehensive audit coverage**: 5+ audits across 3 firms (Hacken, Certora, The Network Firm), including formal verification and dedicated NAV oracle audit.
@@ -392,10 +423,11 @@ Total lending integrations support over $100M in borrow demand per the DD questi
 
 ### Key Risks
 
-- **Offchain price oracle with no timelock**: reUSD price is NOT computed programmatically onchain. It is set via admin-controlled Chainlink oracle based on offchain yield calculations. The Oracle Config MPC (3-of-5) has **no timelock** — price feed changes take effect immediately. This is a fundamental centralization risk.
+- **Offchain price setter with no onchain guardrail**: reUSD price is set via direct `setSharePrice(uint256)` by an EOA with `PRICE_SETTER_ROLE`. The deployed Share Price Calculator enforces only `newPrice != 0`; any "25 bps daily max" mentioned in docs is an offchain convention, not an onchain invariant. A compromised setter can instantly write an arbitrary positive price. This is a fundamental centralization risk.
 - **Significant offchain capital deployment**: Majority of assets are deployed offchain into §114 Trust and reinsurance programs. This introduces counterparty risk with the trust bank, partner reinsurer, and custodians that cannot be verified fully onchain.
-- **Instant redemption vault holds no USDC**: The Daily Instant Redemption Vault holds $0 USDC but ~6.19M sUSDe. The Redemption Reserves Custodian holds ~53.26M sUSDe. Instant redemptions can be fulfilled in sUSDe, but USDC-denominated instant exits are unavailable.
-- **DEX liquidity improved but still limited**: ~$29.4M across Fluid and Curve (~16.4% of ~$179.4M market cap). Significant improvement from ~$450K.
+- **Instant redemption vault holds no USDC**: The Daily Instant Redemption Vault holds `0` USDC + `6.188M` sUSDe. The Redemption Reserves Custodian (EOA) holds `0` USDC + `53.263M` sUSDe. `dayPayoutToken` is sUSDe — USDC-denominated instant exits are unavailable under the current config.
+- **Three MINTER_ROLE holders on reUSD, not one**: Beyond the ICL, `InstantRedemption` and `ShareTokenMinterBurner` also hold MINTER_ROLE. The ICL path enforces backing via `safeTransferFrom`; the other two need independent review to confirm no unbacked-mint path is reachable.
+- **DEX liquidity improved but still limited**: ~$26.2M across Fluid and Curve (~14.0% of ~$186.7M market cap). Significant improvement from ~$450K.
 - **KYC gating**: All deposits and redemptions require KYC. This limits the universe of users who can exit and creates regulatory/jurisdictional risk.
 - **Quarterly redemption queue**: Once instant buffer is exhausted, redemptions are windowed and pro-rata. Capital release from reinsurance programs is reevaluated quarterly (per DD).
 - **Reinsurance tail risk**: Underlying assets are exposed to insurance claim risk. reUSD is only impaired if the portfolio combined ratio exceeds 135%, after both Re Capital (~$73M) and all reUSDe reserves are depleted. reUSDe covers losses in the 115-135% combined ratio range. Re's historical combined ratio is ~92% and the portfolio avoids catastrophe lines, but tail risk from extreme loss events remains.
@@ -404,8 +436,8 @@ Total lending integrations support over $100M in borrow demand per the DD questi
 ### Critical Risks
 
 - **Offchain dependency concentration**: The protocol's value proposition depends on offchain entities (Cayman reinsurer, §114 Trust, The Network Firm, Fireblocks) operating honestly and solvent. Onchain verification cannot fully cover offchain risks.
-- **Oracle manipulation**: A compromised oracle could misrepresent the reUSD price or reserve attestation. The daily oracle guardrail mitigates but does not eliminate this risk.
-- **Liquidity mismatch**: reUSD represents liquid onchain tokens partially backed by offchain reinsurance capital. Capital release is reevaluated quarterly, and programs are short-duration and cat-light (per performance memo). The instant redemption vault holds no USDC (sUSDe only — ~6.19M in vault, ~53.26M in Redemption Reserves Custodian). In a bank-run scenario, sUSDe redemption liquidity plus ~$29.4M in DEX liquidity would need to absorb exits for ~$179.4M in outstanding tokens; windowed queue handles the remainder.
+- **Oracle/setter manipulation**: A compromised `PRICE_SETTER_ROLE` holder can write any positive `sharePrice`, since the deployed contract has no onchain deviation cap. The only mitigations are offchain — the setter's internal policy and offchain monitoring. A compromised Chainlink PoR feed could similarly misrepresent reserve attestations.
+- **Liquidity mismatch**: reUSD represents liquid onchain tokens partially backed by offchain reinsurance capital. Capital release is reevaluated quarterly, and programs are short-duration and cat-light (per performance memo). The instant redemption vault holds no USDC (sUSDe only — `6.188M` in vault, `53.263M` in Redemption Reserves Custodian). In a bank-run scenario, sUSDe redemption liquidity plus ~$26.2M in DEX liquidity would need to absorb exits for ~$186.7M in outstanding tokens; windowed queue handles the remainder.
 
 ---
 
@@ -431,7 +463,7 @@ Total lending integrations support over $100M in borrow demand per the DD questi
 - **Audits**: 3 audit firms (Hacken, Certora, The Network Firm), 5+ engagements. Certora audit (Sep 2025) included formal verification and found 13 issues (all fixed). Hacken conducted 3 audits (Sep 2024, Dec 2024, Apr 2025 NAV oracle). The Network Firm performed AUP on offchain reserve attestation (Oct 2025).
 - **Bug Bounty**: No Immunefi or comparable bug bounty program found.
 - **Time in Production**: reUSD token ~10 months in production (inception June 2025). Re Protocol company since 2022.
-- **TVL**: ~$179.4M market cap, ~$190.9M TVL (DeFi Llama).
+- **TVL**: ~$186.7M market cap, ~$198.1M TVL (DeFi Llama, Apr 17, 2026).
 - **Incidents**: None reported for Re Protocol.
 
 **Score: 2.5/5** -- Three audit firms with formal verification and 5+ engagements is solid coverage. Certora formal verification and dedicated NAV oracle audit strengthen confidence. The Network Firm AUP adds offchain verification assurance. No bug bounty program remains a notable gap. Moderate production time (~10 months) with no incidents and TVL >$100M.
@@ -450,7 +482,7 @@ Total lending integrations support over $100M in borrow demand per the DD questi
 
 **Subcategory B: Programmability**
 
-- reUSD price: **Offchain oracle** (Chainlink feed from The Network Firm attestation). Not programmatically computed onchain.
+- reUSD price: **Offchain setter** (`setSharePrice` by EOA). Not programmatically computed onchain and the contract enforces no deviation cap.
 - Deposits: Gated by KYC Registry
 - Instant redemptions: Programmatic from buffer
 - Quarterly redemptions: Admin-managed process
@@ -460,7 +492,7 @@ Total lending integrations support over $100M in borrow demand per the DD questi
 
 **Subcategory C: External Dependencies**
 
-- Chainlink oracle for price feed and PoR
+- Chainlink for Proof-of-Reserve (TODO: verify feed address). The reUSD *share price* itself is not sourced from Chainlink — it is an onchain storage value written by a role-holding EOA.
 - The Network Firm for daily attestations
 - Ethena for basis-trade yield source
 - Fireblocks for custody
@@ -489,7 +521,7 @@ Total lending integrations support over $100M in borrow demand per the DD questi
 
 **Subcategory B: Provability**
 
-- reUSD price: Set by oracle, not computed onchain
+- reUSD price: Set by admin EOA via direct `setSharePrice`; no deviation cap onchain
 - Onchain buffer: Fully verifiable
 - Offchain reserves: Attested daily by The Network Firm via Chainlink PoR
 - Underlying reinsurance performance: Inherently offchain, not verifiable onchain
@@ -502,15 +534,15 @@ Total lending integrations support over $100M in borrow demand per the DD questi
 
 #### Category 4: Liquidity Risk (Weight: 15%)
 
-- **Instant Exit**: The Daily Instant Redemption Vault holds $0 USDC but ~6.19M sUSDe. The Redemption Reserves Custodian holds ~53.26M sUSDe. Instant redemptions via [`0x8aEb9453EF22Cb38abC7a3Af9c208F65C1BfE31e`](https://etherscan.io/address/0x8aEb9453EF22Cb38abC7a3Af9c208F65C1BfE31e) can be fulfilled in USDC or sUSDe, subject to daily and per-wallet caps. USDC instant exits are currently unavailable; sUSDe instant exits are available.
+- **Instant Exit**: Daily Instant Redemption Vault holds `0` USDC + `6.188M` sUSDe; Redemption Reserves Custodian holds `0` USDC + `53.263M` sUSDe (onchain, Apr 17, 2026). Configured `dayPayoutToken` is sUSDe. Instant redemptions via [`0x8aEb9453EF22Cb38abC7a3Af9c208F65C1BfE31e`](https://etherscan.io/address/0x8aEb9453EF22Cb38abC7a3Af9c208F65C1BfE31e) settle in sUSDe under current config, subject to daily (20%) and per-wallet (10%) caps.
 - **Quarterly Queue**: Pro-rata, may not be fully filled if capital locked in reinsurance
-- **DEX Liquidity**: ~$29.4M across Fluid and Curve (~16.4% of ~$179.4M market cap). Largest venue by volume: Fluid reUSD/USDC (~$12M). Significant improvement from ~$450K at initial assessment.
-- **24h Volume**: ~$3.3M
+- **DEX Liquidity**: ~$26.2M across Fluid and Curve (~14.0% of ~$186.7M market cap). Largest venue by volume: Fluid reUSD/**USDT** (~$11.6M TVL, ~$1.67M daily volume).
+- **24h Volume (token-level, CoinGecko)**: ~$7.3M
 - **KYC Required**: Limits universe of participants who can exit via protocol redemption
-- **Onchain capital**: ICL Custodial Wallet holds ~$5.97M USDC + ~7.77M sUSDe, but this is not directly accessible for redemptions without admin action
+- **Onchain capital**: ICL Custodial Wallet holds `9.344M` USDC + `10.496M` sUSDe (Apr 17, 2026). This is not directly accessible for redemptions without admin action.
 - **Multi-chain**: Available on 6+ chains, liquidity concentrated on Ethereum
 
-**Score: 3.0/5** -- DEX liquidity improved significantly from ~$450K to ~$29.4M (65x increase) across Fluid and Curve, providing a viable secondary market exit. The instant redemption vault holds ~6.19M sUSDe and the Redemption Reserves Custodian holds ~53.26M sUSDe — sUSDe-denominated instant exits are available with daily/wallet caps (20% daily, 10% per wallet). Combined protocol-native sUSDe redemptions (~$59.4M) plus DEX liquidity (~$29.4M) cover a meaningful portion of the ~$179.4M market cap. KYC-gated protocol redemptions and offchain capital deployment remain material concerns, but the absence of USDC instant exits is partially mitigated by sUSDe availability.
+**Score: 3.0/5** -- DEX liquidity improved significantly from ~$450K to ~$26.2M (58x increase) across Fluid and Curve, providing a viable secondary market exit. The instant redemption vault holds ~6.188M sUSDe and the Redemption Reserves Custodian holds ~53.263M sUSDe — sUSDe-denominated instant exits are available with daily/wallet caps (20% daily, 10% per wallet). Combined protocol-native sUSDe redemptions (~$59.4M) plus DEX liquidity (~$26.2M) cover a meaningful portion of the ~$186.7M market cap. KYC-gated protocol redemptions and offchain capital deployment remain material concerns, but the absence of USDC instant exits is partially mitigated by sUSDe availability.
 
 #### Category 5: Operational Risk (Weight: 5%)
 
@@ -556,7 +588,7 @@ Final Score = (Centralization × 0.30) + (Funds Mgmt × 0.30) + (Audits × 0.20)
 
 ---
 
-reUSD is a novel product that bridges DeFi capital with traditional reinsurance markets. The protocol demonstrates real business traction ($178M gross written premium, ~$179.4M market cap, 92% combined ratio across 3 years) with a deep capital structure (Re Capital ~$73M + reUSDe first-loss). The risk profile is moderate. The primary concerns are: (1) the offchain price oracle with no timelock — reUSD's price is not computed programmatically onchain but set via admin-controlled Chainlink feed, (2) heavy offchain capital deployment in reinsurance programs (capital release reevaluated quarterly), (3) the instant redemption vault holds no USDC (sUSDe-denominated exits available via ~6.19M sUSDe in vault + ~53.26M sUSDe in Redemption Reserves Custodian), and (4) KYC-gated redemptions creating friction for exits. DEX liquidity has improved significantly to ~$29.4M across Fluid and Curve (up from ~$450K), providing a viable secondary exit. These risks are partially mitigated by third-party reserve attestation (The Network Firm + Chainlink PoR), 5+ audits including formal verification, MPC wallet role separation, 48-hour upgrade timelock, and the regulatory framework (CIMA-regulated reinsurer, §114 Trust at NAIC-compliant banks).
+reUSD is a novel product that bridges DeFi capital with traditional reinsurance markets. The protocol demonstrates real business traction ($178M gross written premium, ~$186.7M market cap, ~92% combined ratio across 3 years per LP memo) with a deep capital structure (Re Capital ~$73M + reUSDe first-loss). The risk profile is moderate. The primary concerns are: (1) the offchain price setter with **no onchain guardrail** — reUSD's price is updated by an EOA via direct `setSharePrice` on a contract that only checks `newPrice != 0`; (2) heavy offchain capital deployment in reinsurance programs (capital release reevaluated quarterly); (3) the instant redemption vault holds no USDC (sUSDe-denominated exits available via ~6.188M sUSDe in vault + ~53.263M sUSDe in Redemption Reserves Custodian); (4) KYC-gated redemptions creating friction for exits; and (5) **three MINTER_ROLE holders** on the reUSD token (ICL, InstantRedemption, ShareTokenMinterBurner) vs. the single-minter claim previously made — the ICL path enforces backing, the other two need independent review. DEX liquidity has improved significantly to ~$26.2M across Fluid and Curve (up from ~$450K), providing a viable secondary exit. These risks are partially mitigated by third-party reserve attestation (The Network Firm + Chainlink PoR), 5+ audits including formal verification, role separation via a 3-of-5 Safe governance, 48-hour upgrade timelock (onchain-verified `getMinDelay() = 172800`), and the regulatory framework (CIMA-regulated reinsurer, §114 Trust at NAIC-compliant banks).
 
 **Key conditions for exposure:**
 - Monitor reUSD share price for any decreases (should only increase)
@@ -566,7 +598,8 @@ reUSD is a novel product that bridges DeFi capital with traditional reinsurance 
 - Monitor UUPS proxy upgrades (48-hour review window)
 - Track DEX liquidity depth across Fluid (reUSD/USDC) and Curve pools (reUSD/scrvUSD, sfrxUSD/reUSD, reUSD/sUSDe, reUSD/USDC)
 - Monitor for KYC policy or regulatory changes affecting redemption access
-- Monitor ICL Custodial Wallet balance (~$5.97M USDC + ~7.77M sUSDe onchain) for large outflows
+- Monitor ICL Custodial Wallet balance (~`9.344M` USDC + ~`10.496M` sUSDe, Apr 17, 2026) for large outflows
+- Monitor `MINTER_ROLE` grants on reUSD token — currently held by ICL, `InstantRedemption`, and `ShareTokenMinterBurner`; any fourth grantee should trigger review
 
 ---
 
@@ -587,11 +620,11 @@ reUSD is a novel product that bridges DeFi capital with traditional reinsurance 
 │                     VAULT / TOKEN LAYER                            │
 │                                                                     │
 │  ┌──────────────┐    ┌──────────────────────┐                      │
-│  │  reUSD Token  │◄──│  Share Price          │◄── Chainlink Oracle  │
-│  │  (ERC-20,     │    │  Calculator           │    (daily price      │
-│  │   UUPS Proxy) │    │  0xd1D1..11b05B8      │     attestation)     │
+│  │  reUSD Token  │◄──│  Share Price          │◄── PRICE_SETTER_ROLE │
+│  │  (ERC-20,     │    │  Calculator           │    (EOA calls       │
+│  │   UUPS Proxy) │    │  0xd1D1..11b05B8      │     setSharePrice)  │
 │  │  0x5086..0c72 │    └──────────────────────┘                      │
-│  └──────┬───────┘                                                   │
+│  └──────┬───────┘    (no onchain guardrail — only newPrice != 0)   │
 │         │ mint/burn                                                  │
 │  ┌──────▼───────────────────┐    ┌─────────────────────────┐       │
 │  │  Insurance Capital Layer  │───►│  ICL Custodial Wallet    │       │
@@ -603,7 +636,7 @@ reUSD is a novel product that bridges DeFi capital with traditional reinsurance 
 │  │  Daily Instant Redemption │                ▼                     │
 │  │  Vault                    │    ┌──────────────────────┐         │
 │  │  0x5C45..B147             │    │  Offchain Deployment  │         │
-│  └──────────────────────────┘    │  (~$94M to §114 Trust)│         │
+│  └──────────────────────────┘    │  (offchain §114 Trust)│         │
 │                                   └──────────────────────┘         │
 └─────────────────────────────────────────────────────────────────────┘
 
@@ -644,31 +677,45 @@ reUSD is a novel product that bridges DeFi capital with traditional reinsurance 
 │                     GOVERNANCE                                      │
 │                                                                     │
 │  ┌─────────────────────┐  ┌─────────────────────┐                  │
-│  │  Oracle Config       │  │  Redemptions Config  │                  │
-│  │  MPC 3-of-5          │  │  MPC 3-of-5          │                  │
+│  │  Oracle Admin EOA    │  │  Redemptions Admin   │                  │
+│  │  MPC 3-of-5 (docs)   │  │  MPC 3-of-5 (docs)   │                  │
 │  │  0x49BC..0Aee        │  │  0xEE16..47f8        │                  │
-│  │  Set price feeds     │  │  Set redemption      │                  │
-│  │                      │  │  limits, top-up vault│                  │
+│  │  no onchain timelock │  │  48h timelock (docs) │                  │
 │  └─────────────────────┘  └─────────────────────┘                  │
 │                                                                     │
 │  ┌─────────────────────┐  ┌─────────────────────┐                  │
-│  │  Access Manager      │  │  Custodian Manager   │                  │
-│  │  MPC 5-of-8          │  │  MPC 3-of-5          │                  │
+│  │  Access Admin EOA    │  │  Custodian Manager   │                  │
+│  │  MPC 5-of-8 (docs)   │  │  (CUSTODIAN_MGR_ROLE)│                  │
 │  │  0x80a6..AFc         │  │  0x9b6d..eC9         │                  │
-│  │  Assign/revoke roles │  │  Add/remove          │                  │
-│  │                      │  │  custodians           │                  │
+│  │  admins AccessManager│  │  Add/remove          │                  │
+│  │  0x3f0D..6FD8        │  │  custodians (ICL)    │                  │
 │  └─────────────────────┘  └─────────────────────┘                  │
+│                                                                     │
+│  ┌─────────────────────────────────────────────┐                   │
+│  │  Governance Safe (3-of-5, onchain)          │                   │
+│  │  0x8EEc10..FadeFbAd                         │                   │
+│  │  DEFAULT_ADMIN + UPGRADER on reUSD and ICL; │                   │
+│  │  PROPOSER + CANCELLER on Timelock           │                   │
+│  └─────────────────────────────────────────────┘                   │
+│                                                                     │
+│  ┌─────────────────────────────────────────────┐                   │
+│  │  Timelock Controller  (getMinDelay = 48h)   │                   │
+│  │  0x69dDEa..57FCA93                          │                   │
+│  │  Executor: 0x4BFea59b..740738F3 (EOA)       │                   │
+│  └─────────────────────────────────────────────┘                   │
 └─────────────────────────────────────────────────────────────────────┘
 
 Fund Flow:
   User ──USDC──► ICL (KYC gate) ──mint──► reUSD Token
   ICL ──sweep──► Custodial Wallet ──deploy──► §114 Trust (offchain)
   §114 Trust ──surplus notes──► ICL (principal + yield guarantee)
-  Chainlink ◄── The Network Firm (daily attestation) ──► Share Price Calculator ──► reUSD price
+  Network Firm attestation ──► PRICE_SETTER EOA ──► setSharePrice on Share Price Calc ──► reUSD price
+  Chainlink PoR ◄── Network Firm  (reserve attestation; TODO identify feed)
 
 Trust Boundaries:
   ⚠ Onchain/offchain boundary at ICL Custodial Wallet sweep
-  ⚠ Price oracle is admin-controlled (not programmatic)
-  ⚠ Redemption Reserves Custodian is an EOA
+  ⚠ Share price is written by an admin EOA with no onchain deviation cap
+  ⚠ Redemption Reserves Custodian (0x9eA3..ADF8) is an EOA
+  ⚠ MINTER_ROLE held by THREE contracts on reUSD (ICL, InstantRedemption, ShareTokenMinterBurner)
   ⚠ KYC Registry gates all deposits and protocol redemptions
 ```
