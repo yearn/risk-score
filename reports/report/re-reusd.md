@@ -185,9 +185,11 @@ Re reinsures a ~$174M diversified portfolio of U.S. insurance programs across 26
 reUSDe is the protocol's junior/first-loss tranche ([docs](https://docs.re.xyz/insurance-capital-layers/what-is-reusde)). It absorbs underwriting losses before they reach reUSD in exchange for a share of underwriting profits (historically 16-25% net annual returns per docs).
 
 **Loss waterfall** (losses absorbed in order):
-1. **Re Capital** (~$73M) — first-loss buffer, impaired at 105% combined ratio (3.9% likelihood)
-2. **reUSDe** (junior) — impaired at 115% combined ratio (0.9% likelihood). Absorbs losses up to the 115-135% combined ratio range.
-3. **reUSD** (senior) — only impaired if combined ratio exceeds **135%** (0.03% likelihood), meaning both Re Capital and all reUSDe reserves are depleted
+1. **Re Capital** (~$73M) — first-loss buffer, starts taking losses once portfolio combined ratio reaches 105%.
+2. **reUSDe** (junior) — starts taking losses once combined ratio reaches 115% (i.e. after Re Capital is exhausted). Absorbs losses up to the 115-135% combined ratio range.
+3. **reUSD** (senior) — only impaired if combined ratio exceeds **135%**, meaning both Re Capital and all reUSDe reserves are depleted.
+
+Re's marketing attaches modeled impairment likelihoods to each threshold (Re Capital **~3.9%** at 105% CR; reUSDe **~0.9%** at 115%; reUSD **~0.03%** at 135%). These three numbers come from **a single chart on page 1 of the Nov 2025 LP Memo** — the *"Re Capital Structure and Risk-Remote Design"* panel — and represent the modeled probability of the portfolio combined ratio reaching each threshold. **The model is undisclosed**: no distributional assumptions, correlation structure, simulation count, calibration window, confidence intervals, or actuarial sign-off are published. The tail figures also assume the subordinated buffer is fully intact at time of stress. See [Appendix A.6](#a6-stress-testing-loss-likelihoods) for the verbatim source quote and caveats.
 
 **reUSDe mechanics:**
 - Price based on quarterly-refreshed target NAV derived from actuarial reports; compounds daily but surplus realization occurs quarterly
