@@ -236,7 +236,7 @@ reUSDe is the protocol's junior/first-loss tranche ([docs](https://docs.re.xyz/i
 
 - **reUSD price**: Written directly onchain via `setSharePrice(uint256)` by an EOA holding `PRICE_SETTER_ROLE`. **Not computed programmatically onchain** — price is derived offchain (Network Firm attestation) and pushed in by the setter; the contract has no deviation cap. Downstream `PriceRouter` [`0xFe76cF5eD606593fB7764f33627B8D7E0f9Fab66`](https://etherscan.io/address/0xFe76cF5eD606593fB7764f33627B8D7E0f9Fab66) exposes this value to dependent contracts.
 - **Onchain reserves**: Visible onchain via the ICL contract and Redemption Reserves Custodian
-- **Offchain reserves**: Attested daily by The Network Firm (third-party accountant with read-only access) and published via Chainlink Proof of Reserve
+- **Offchain reserves**: Attested daily by The Network Firm (third-party accountant with read-only access). Re's docs claim this attestation is *"published via Chainlink"* / *"Proof-of-reserves, publicly auditable"*. **This claim could not be substantiated** (Apr 17, 2026): no Chainlink PoR feed for reUSD exists in Chainlink's public reference directory (`reference-data-directory.vercel.app/feeds-mainnet.json`, 23 mainnet PoR feeds — none for Re / reUSD / Resilience; also absent on Avalanche and BSC directories). No Chainlink PoR aggregator is consumed by any verified Re contract. The actual onchain Chainlink dependency is the `sUSDe/USD` price aggregator ([`0xFF3BC18cCBd5999CE63E788A1c250a88626aD099`](https://etherscan.io/address/0xFF3BC18cCBd5999CE63E788A1c250a88626aD099)) used for collateral pricing, not reserves. See "Chainlink PoR claim — not substantiated" in the appendix.
 - **Insurance performance**: Reinsurance returns are inherently offchain and depend on claim experience over multi-year treaty periods
 - **Minting requires backing (ICL path)**: All ICL deposit paths (`deposit`, `depositFromCustodian`, `processPrestakedDeposit`) enforce `safeTransferFrom` — backing tokens must be transferred to the ICL before reUSD is minted (verified in source at [implementation `0x06d4acc104b974cd99bf22e4572f48a051e59670`](https://etherscan.io/address/0x06d4acc104b974cd99bf22e4572f48a051e59670)). However, the reUSD token contract has an unrestricted `mint(address, uint256)` gated only by `MINTER_ROLE`.
 - **MINTER_ROLE holders (verified via RoleGranted logs on Apr 17, 2026)**: THREE contracts hold the role, not one:
@@ -473,7 +473,7 @@ The DD questionnaire claim of ">$100M in borrow demand" across lending integrati
 
 - **Principal protection with deep capital structure**: reUSD is the senior tranche with 0.03% modeled loss likelihood at 135% combined ratio. Re Capital (~$73M) and reUSDe provide subordinated first-loss protection.
 - **Strong underwriting track record (per LP memo / intro deck, not independently verifiable)**: ~92% combined ratio across 3 consecutive years (2022-2024), outperforming industry average (93-95%). No capital impairment or reserve deterioration. $178M gross written premium. Third-party sources consulted: LlamaRisk (no published report on reUSD as of Apr 17, 2026) and Steakhouse (no archived review); no independent re-statement of these ratios was found. Treat as management-asserted until an external attestation (beyond The Network Firm AUP, which covers reserve accounting rather than combined ratios) is published.
-- **Third-party reserve verification**: The Network Firm provides daily independent attestation of offchain reserves, published via Chainlink Proof of Reserve. AUP report published.
+- **Third-party reserve verification**: The Network Firm provides daily independent attestation of offchain reserves; an AUP report is published. (Re's docs describe this as *"published via Chainlink"* but no Chainlink PoR feed for reUSD exists in Chainlink's public registry and no Re contract consumes such a feed onchain — see appendix.)
 - **Regulatory framework**: Partner reinsurer is CIMA-regulated. Capital held in §114 Reinsurance Trust at NAIC-compliant banks (Coinbase, Wells Fargo).
 - **Comprehensive audit coverage**: 5+ audits across 3 firms (Hacken, Certora, The Network Firm), including formal verification and dedicated NAV oracle audit.
 - **Role-separated MPC controls**: Multiple MPC wallets with distinct roles (oracle, redemptions, access, custodian) rather than a single admin key. 48-hour timelock on upgrades.
@@ -495,7 +495,7 @@ The DD questionnaire claim of ">$100M in borrow demand" across lending integrati
 ### Critical Risks
 
 - **Offchain dependency concentration**: The protocol's value proposition depends on offchain entities (Cayman reinsurer, §114 Trust, The Network Firm, Fireblocks) operating honestly and solvent. Onchain verification cannot fully cover offchain risks.
-- **Oracle/setter manipulation**: A compromised `PRICE_SETTER_ROLE` holder can write any positive `sharePrice`, since the deployed contract has no onchain deviation cap. The only mitigations are offchain — the setter's internal policy and offchain monitoring. A compromised Chainlink PoR feed could similarly misrepresent reserve attestations.
+- **Oracle/setter manipulation**: A compromised `PRICE_SETTER_ROLE` holder can write any positive `sharePrice`, since the deployed contract has no onchain deviation cap. The only mitigations are offchain — the setter's internal policy and offchain monitoring. The docs' implication that a Chainlink PoR feed independently attests reserves does not hold onchain (see appendix) — reserve attestation is effectively The Network Firm's word plus the raw onchain balances we audit directly.
 - **Liquidity mismatch**: reUSD represents liquid onchain tokens partially backed by offchain reinsurance capital. Capital release is reevaluated quarterly, and programs are short-duration and cat-light (per performance memo). The instant redemption vault holds no USDC (sUSDe only — `6.188M` in vault, `53.263M` in Redemption Reserves Custodian). In a bank-run scenario, sUSDe redemption liquidity plus only ~$14.96M in DEX liquidity would need to absorb exits for ~$186.7M in outstanding tokens; windowed queue handles the remainder.
 
 ---
@@ -510,7 +510,7 @@ The DD questionnaire claim of ">$100M in borrow demand" across lending integrati
 ### Critical Risk Gates
 
 - [x] **No audit** -- Audited by Hacken (Aug 2024) and Certora with formal verification (Sep 2025). 3+ total audits. **PASS**
-- [ ] **Unverifiable reserves** -- Offchain reserves attested daily by The Network Firm via Chainlink PoR, but ultimate verification relies on trust in offchain entities. Onchain buffer is verifiable. **CONDITIONAL PASS** -- hybrid onchain/offchain model with third-party attestation.
+- [ ] **Unverifiable reserves** -- Offchain reserves attested daily by The Network Firm. Docs claim this is "published via Chainlink" but no corresponding Chainlink PoR feed exists publicly and none is consumed onchain (see appendix). Onchain buffer is fully verifiable. **CONDITIONAL PASS** -- hybrid onchain/offchain model with third-party attestation but no independent onchain PoR oracle.
 - [x] **Total centralization** -- MPC wallets with role separation (3-of-5 and 5-of-8). 48-hour upgrade timelock. Not a single EOA. **PASS**
 
 **All gates conditionally pass.** Proceed to category scoring.
@@ -572,7 +572,7 @@ The DD questionnaire claim of ">$100M in borrow demand" across lending integrati
 **Subcategory A: Collateralization**
 
 - Onchain buffer: Verifiable, holds liquid assets for instant redemptions
-- Offchain trust: §114 Trust with daily attestation via The Network Firm / Chainlink PoR
+- Offchain trust: §114 Trust with daily attestation via The Network Firm (no onchain Chainlink PoR feed verified — see appendix)
 - Surplus notes contractually protect principal
 - reUSDe provides first-loss protection for reUSD
 - Majority of capital deployed offchain in reinsurance programs (capital release reevaluated quarterly per DD)
@@ -583,7 +583,7 @@ The DD questionnaire claim of ">$100M in borrow demand" across lending integrati
 
 - reUSD price: Set by admin EOA via direct `setSharePrice`; no deviation cap onchain
 - Onchain buffer: Fully verifiable
-- Offchain reserves: Attested daily by The Network Firm via Chainlink PoR
+- Offchain reserves: Attested daily by The Network Firm (no onchain Chainlink PoR feed verified)
 - Underlying reinsurance performance: Inherently offchain, not verifiable onchain
 
 **Provability Score: 3.5** -- Third-party attestation (The Network Firm + Chainlink) is better than pure self-reporting but still relies on trust in offchain entities. Core yield calculation is offchain.
@@ -652,7 +652,7 @@ reUSD is a novel product that bridges DeFi capital with traditional reinsurance 
 
 **Key conditions for exposure:**
 - Monitor reUSD share price for any decreases (should only increase)
-- Monitor Chainlink PoR attestation for daily updates
+- Monitor The Network Firm's daily reserve attestation (not a Chainlink PoR feed — see appendix)
 - **Monitor instant redemption buffer — track both USDC and sUSDe balances in vault and Redemption Reserves Custodian**
 - Monitor instant redemption interaction contract [`0x8aEb9453EF22Cb38abC7a3Af9c208F65C1BfE31e`](https://etherscan.io/address/0x8aEb9453EF22Cb38abC7a3Af9c208F65C1BfE31e) for redemption events and limit changes
 - Monitor UUPS proxy upgrades (48-hour review window)
@@ -882,3 +882,49 @@ The DD questionnaire [DD] adds operational claims that similarly depend on Re's 
 - Fireblocks MPC custody for idle onchain capital, with Coinbase and Wells Fargo as banking counterparties for offchain reserves.
 
 Each of these (other than the verified coverage ratio) should be read as **Re's representation**, not onchain- or independently-verified fact.
+
+### A.8 Chainlink Proof-of-Reserve claim — not substantiated (Apr 17, 2026)
+
+Re's documentation repeatedly describes Chainlink as the mechanism through which offchain reserves and the reUSD share price are published. Representative verbatim excerpts from `docs.re.xyz`:
+
+| Source page | Quote |
+|---|---|
+| Security and Audits | *"Off-chain bank balances are verified daily by The Network Firm and published via **Chainlink**. The Network Firm also verifies ownership and balances of protocol custody wallets."* |
+| How the Re Protocol Works | *"Idle funds are held in a Fireblocks vault under multisig. Balances are published daily to a **Chainlink oracle**. **Proof-of-reserves, publicly auditable**."* |
+| How the Re Protocol Works | *"On-Chain Mirror: Trust balances, premium inflows, and claim outflows are hashed and pushed to **Chainlink**, giving 24/7 proof of funds."* |
+| How the Re Protocol Works | *"**Chainlink Oracles**: Publish price feeds, trust balances, surplus-note schedules, and redemption queues."* |
+| What is reUSD? | *"A JSON price feed is pushed on-chain via **Chainlink**"* |
+
+These claims were tested against three independent sources:
+
+**1. Chainlink's public feed directory** — `https://reference-data-directory.vercel.app/feeds-mainnet.json` is Chainlink's canonical list of deployed feeds. On Ethereum mainnet:
+
+- 289 total price feeds indexed
+- 23 feeds categorised as `Proof of Reserve`: 21btc-por, bgbtc-por, c1usd-por, cbbtc-por, eeth-por, ezeth-por, fbtc-por, hbtc-por, kag-por, kau-por, lombard-por, m-reserves, nexus-weth-por, pumpbtc-por, solvbtc-por, stbtc-por, steth-por, swell-eth-por, swell-restaked-eth-por, tusd-por, unibtc-por, wbtc-por, xsolvbtc-por
+- **No feed matching `reusd`, `resilience`, `re-protocol`, or `re_usd` exists**
+
+Same result on Chainlink's Avalanche (93 feeds) and BSC (178 feeds) directories. No re-related PoR feed exists anywhere Chainlink publishes.
+
+**2. Re's deployed contracts** — audited on Etherscan:
+
+| Contract | Chainlink interface used? | Purpose |
+|---|---|---|
+| `InsuranceCapitalLayer` impl `0x06d4…9670` | no | core vault |
+| `ShareToken` impl `0xb527…21d4` | no | ERC-20 reUSD |
+| `SharePriceCalculator` `0xd1D1…05B8` | no | stores reUSD price |
+| `PriceRouter` `0xFe76…Fb66` | **no** | source file contains `@chainlink/` only in foundry path remappings, not in contract logic |
+| `SharePriceOracle` `0x0764…b6bb` | **no** | same — path remapping only |
+| `SimpleOracle` `0xb6aD…fB4D` | **yes** | wraps Chainlink `sUSDe/USD` [`0xFF3BC18c…aD099`](https://etherscan.io/address/0xFF3BC18cCBd5999CE63E788A1c250a88626aD099); used only for the **sUSDe collateral-pricing leg**, not for reUSD and not for reserves |
+
+The only onchain Chainlink aggregator consumed by any Re contract is the **sUSDe/USD price feed**. No PoR aggregator, no `latestRoundData` call against a reserves feed, no Chainlink Functions client, no CCIP receiver that emits proof-of-reserve data.
+
+**3. Chainlink's own media** — a search of `blog.chain.link` and `chain.link` for *"Re Protocol"*, *"re.xyz"*, *"reUSD"*, *"Resilience"* returned no announcement, case study, or press release about a Re Protocol integration. The ~440 blog hits for *"Re Protocol"* are coincidental uses of the words (restaking protocols, etc.), not Re-the-reinsurance-project.
+
+**Interpretation:**
+
+- The daily reserve attestation **does** happen — The Network Firm is a real accounting firm, and Re publishes balances on its transparency dashboard.
+- But the *"published via Chainlink / proof-of-reserves publicly auditable"* language in Re's docs **is not backed by a deployed Chainlink PoR feed we could locate**, public or private.
+- Possible benign explanations: an internal / unpublished Chainlink Functions job that writes to an off-chain dashboard only; a planned integration that was later descoped; marketing language carried over from earlier design decks.
+- Whatever the reason, the **downstream risk implications are the same**: reserve assurance for reUSD depends on (a) the onchain balances one can audit directly (as done in Funds Management → Collateralization) and (b) trust in The Network Firm's offchain attestation. **There is no independent Chainlink-signed onchain reserves oracle to fall back on.**
+
+**Action:** treat all "Chainlink PoR" / "publicly auditable proof-of-reserves" statements in Re's marketing as **not onchain-verified**. If Re is asked about this, useful follow-ups are: *"What is the Chainlink PoR feed address on mainnet?"*, *"Which Chainlink data job writes these values?"*, *"Is the PoR contract verified on Etherscan?"* — each would produce a specific, checkable artefact. Absent such an artefact, reserve provability is The Network Firm's AUP, not Chainlink.
