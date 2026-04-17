@@ -4,7 +4,7 @@
 - **Token:** reUSD (Re Protocol Deposit Token)
 - **Chain:** Ethereum (primary), multi-chain (Avalanche, Arbitrum, Base, Katana, BNB Chain, Ink)
 - **Token Address:** [`0x5086bf358635B81D8C47C66d1C8b9E567Db70c72`](https://etherscan.io/address/0x5086bf358635B81D8C47C66d1C8b9E567Db70c72)
-- **Final Score: 3.3/5.0**
+- **Final Score: 3.4/5.0**
 
 ## Overview + Links
 
@@ -19,17 +19,7 @@ reUSD accrues yield daily via a dual-source yield floor. At each daily valuation
 
 The chosen "Applicable APY" is converted to a daily rate, and reUSD's **token price** (not quantity) increases daily. Current APY is approximately 6-9+%.
 
-**Onchain price mechanism (verified Apr 17, 2026):** The reUSD price is NOT sourced from a Chainlink aggregator. It is stored in the `SharePriceCalculator` contract at [`0xd1D104a7515989ac82F1AFDa15a23650411b05B8`](https://etherscan.io/address/0xd1D104a7515989ac82F1AFDa15a23650411b05B8) and updated by an EOA holding `PRICE_SETTER_ROLE` via `setSharePrice(uint256)`. The deployed implementation contains **no onchain guardrail** (only `newPrice != 0` is checked):
-
-```solidity
-function setSharePrice(uint256 newPrice) external onlyRole(PRICE_SETTER_ROLE) {
-    if (newPrice == 0) revert InvalidPrice();
-    sharePrice = newPrice;
-    emit SharePriceSet(oldPrice, newPrice);
-}
-```
-
-Any "daily oracle guardrail" (e.g. 25 bps max daily change) described in protocol docs is therefore enforced **offchain by the setter**, not by the deployed contract. A downstream `PriceRouter` [`0xFe76cF5eD606593fB7764f33627B8D7E0f9Fab66`](https://etherscan.io/address/0xFe76cF5eD606593fB7764f33627B8D7E0f9Fab66) wraps the calculator via a `SharePriceOracle` at [`0x0764BFa862164D28799F31e7e1e7206F5177B6bB`](https://etherscan.io/address/0x0764BFa862164D28799F31e7e1e7206F5177B6bB). The same router feeds sUSDe pricing via a `SimpleOracle` wrapper [`0xb6aD3633cB3FAfed3D375d8c64240f122E19fB4D`](https://etherscan.io/address/0xb6aD3633cB3FAfed3D375d8c64240f122E19fB4D) around Chainlink's `sUSDe/USD` feed [`0xFF3BC18cCBd5999CE63E788A1c250a88626aD099`](https://etherscan.io/address/0xFF3BC18cCBd5999CE63E788A1c250a88626aD099) — so Chainlink is used for the sUSDe leg only, not for reUSD's own share price. No Chainlink Proof-of-Reserve feed is consumed onchain by Re's deployed contracts; any "Chainlink PoR" described in docs is offchain publishing only.
+**Onchain price mechanism (verified Apr 17, 2026):** reUSD's share price is stored in the `SharePriceCalculator` [`0xd1D104a7515989ac82F1AFDa15a23650411b05B8`](https://etherscan.io/address/0xd1D104a7515989ac82F1AFDa15a23650411b05B8) and written by `setSharePrice(uint256)`. The `SharePriceCalculator` contract itself only enforces `newPrice != 0`, but the **standard writer is `NAVConsumer`** [`0x84d4eaeb10f9e57b67622f667c6c13e22fa4b2b6`](https://etherscan.io/address/0x84d4eaeb10f9e57b67622f667c6c13e22fa4b2b6) — a **Chainlink Functions + Chainlink Automation consumer**, with DON ID `fun-ethereum-mainnet-1`, subscription `85`, target time `23:45 UTC` daily. `NAVConsumer` enforces a deviation guardrail onchain (`deviationCheckEnabled = true`, `maxDeviationBps = 1000` — i.e. **10% max change per update**; docs' "25 bps" figure is the operational target, not the onchain cap) and was audited by Hacken in April 2025 (repo `github.com/resilience-foundation/nav-oracle`, 8 findings, all resolved). The `PriceRouter` [`0xFe76cF5eD606593fB7764f33627B8D7E0f9Fab66`](https://etherscan.io/address/0xFe76cF5eD606593fB7764f33627B8D7E0f9Fab66) reads `SharePriceCalculator` via a `SharePriceOracle` [`0x0764BFa862164D28799F31e7e1e7206F5177B6bB`](https://etherscan.io/address/0x0764BFa862164D28799F31e7e1e7206F5177B6bB); the same router reads sUSDe via a `SimpleOracle` [`0xb6aD3633cB3FAfed3D375d8c64240f122E19fB4D`](https://etherscan.io/address/0xb6aD3633cB3FAfed3D375d8c64240f122E19fB4D) wrapping Chainlink's `sUSDe/USD` aggregator [`0xFF3BC18cCBd5999CE63E788A1c250a88626aD099`](https://etherscan.io/address/0xFF3BC18cCBd5999CE63E788A1c250a88626aD099). **Residual concern:** both `SharePriceCalculator.PRICE_SETTER_ROLE` and all admin/updater roles on `NAVConsumer` (including `EMERGENCY_UPDATER_ROLE` which can call `forceNAVUpdate` and `setDeviationCheckEnabled` which can disable the guardrail) are held by the same EOA `0x6C15B25E9750Dccb698C1a4023f34015bFe57649`. That EOA can bypass `NAVConsumer` entirely and write directly to `SharePriceCalculator`, or disable the deviation check. **No Chainlink Proof-of-Reserve aggregator is consumed onchain** — the NAV Oracle publishes share price, not reserves (see Appendix A.8).
 
 **Capital Deployment:**
 - Users deposit admitted assets (e.g., USDC) into the Insurance Capital Layer (ICL) smart contracts and receive reUSD
@@ -76,6 +66,7 @@ Any "daily oracle guardrail" (e.g. 25 bps max daily change) described in protoco
 | KYC Registry | [`0x82F1806AEab5Ecb9a485eb041d5Ed4940b123995`](https://etherscan.io/address/0x82F1806AEab5Ecb9a485eb041d5Ed4940b123995) |
 | Decentralized Fund | [`0xF04422E68f55E7C25724128692C3063A775472f2`](https://etherscan.io/address/0xF04422E68f55E7C25724128692C3063A775472f2) |
 | Share Price Calculator | [`0xd1D104a7515989ac82F1AFDa15a23650411b05B8`](https://etherscan.io/address/0xd1D104a7515989ac82F1AFDa15a23650411b05B8) |
+| NAV Consumer (Chainlink Functions + Automation) | [`0x84d4eaeb10f9e57b67622f667c6c13e22fa4b2b6`](https://etherscan.io/address/0x84d4eaeb10f9e57b67622f667c6c13e22fa4b2b6) |
 | Redemption Reserves Custodian | [`0x9eA38e09F41A9DE53972a68268BA0Dcc6d2fAdf8`](https://etherscan.io/address/0x9eA38e09F41A9DE53972a68268BA0Dcc6d2fAdf8) |
 | Daily Instant Redemption Vault | [`0x5C454f5526e41fBE917b63475CD8CA7E4631B147`](https://etherscan.io/address/0x5C454f5526e41fBE917b63475CD8CA7E4631B147) |
 | Instant Redemption (impl., fee + limits) | [`0xa31DeeBB3680A3007120e74bcBdf4dF36F042a40`](https://etherscan.io/address/0xa31DeeBB3680A3007120e74bcBdf4dF36F042a40) |
@@ -125,7 +116,7 @@ Re Protocol has undergone auditing by 3 firms across 5+ audit engagements.
 |---|------|-------|------|-------------|--------|
 | 1 | Sep 2024 | Smart Contract Audit (DeFi) | Hacken | 29 findings (0 Critical, 0 High, 4 Medium, 7 Low, 18 Observations), all resolved. Centralized minting, unaudited libraries, gas risk, 42.11% branch coverage | [Hacken](https://hacken.io/audits/re-protocol/sca-re-re-defi-aug2024/) |
 | 2 | Dec 2024 | Smart Contract Audit | Hacken | Follow-up audit, issues remediated | [Hacken](https://hacken.io/audits/re-protocol/sca-re-re-contracts-nov2024/) |
-| 3 | Apr 2025 | NAV Oracle Audit | Hacken | Focused on NAV oracle implementation, issues remediated | [Hacken](https://hacken.io/audits/re-protocol/sca-re-nav-oracle-mar2025/) |
+| 3 | Apr 2025 | NAV Oracle Audit | Hacken | Scope: the Chainlink-Functions-based `NAVConsumer` + related code at `github.com/resilience-foundation/nav-oracle` (commits `ee7e98…` / `e3dd86ef…`). 8 findings, all resolved. The audited contract IS deployed and active onchain at [`0x84d4eaeb10f9e57b67622f667c6c13e22fa4b2b6`](https://etherscan.io/address/0x84d4eaeb10f9e57b67622f667c6c13e22fa4b2b6), holds `PRICE_SETTER_ROLE` on the `SharePriceCalculator`, and runs daily at 23:45 UTC. | [Hacken](https://hacken.io/audits/re-protocol/sca-re-nav-oracle-mar2025/) |
 | 4 | Sep 2025 | Re Core (comprehensive) | Certora | 13 issues identified, all addressed and fixed. Formal verification and manual review. | [Certora](https://www.certora.com/reports/re-core) |
 | 5 | 2025 | Agreed-Upon Procedures (AUP) | The Network Firm | Independent verification of offchain operational controls and reserve attestation | [AUP Report](https://storage.googleapis.com/foundation-files/AUP-Report-2025.pdf) |
 
@@ -165,8 +156,9 @@ reUSD is an **ERC-20 deposit token** that uses a **price-appreciation model** (n
 - Users deposit admitted assets (USDC) into the ICL smart contract
 - Users receive reUSD tokens representing their deposit
 - The reUSD token price increases daily based on the Applicable APY
-- The price is stored onchain in the Share Price Calculator and updated by the `PRICE_SETTER_ROLE` holder (EOA) via `setSharePrice(uint256)`. The contract performs no deviation check beyond `newPrice != 0` (verified onchain, see Overview). The "daily 25 bps guardrail" cited in protocol docs is **offchain** (enforced by the setter), not an onchain invariant — flagged as a centralization/trust concern in scoring.
-- The Network Firm performs daily offchain attestations. **No Chainlink PoR feed is consumed onchain by Re's contracts** — the deployed `PriceRouter` uses a custom `SharePriceOracle` that reads the Share Price Calculator directly. Chainlink PoR publishing (if any) is external / informational (e.g. for RWA.xyz dashboards).
+- The price is written onchain by `NAVConsumer` [`0x84d4eaeb10f9e57b67622f667c6c13e22fa4b2b6`](https://etherscan.io/address/0x84d4eaeb10f9e57b67622f667c6c13e22fa4b2b6), a **Chainlink Functions + Automation consumer** that calls `SharePriceCalculator.setSharePrice` with a daily NAV computed offchain by the Chainlink DON. `NAVConsumer` enforces a deviation guardrail (`maxDeviationBps = 1000` = 10% onchain; docs' "25 bps" figure is the operational target, not the onchain cap) and was audited by Hacken in April 2025 (`github.com/resilience-foundation/nav-oracle`).
+- An EOA also holds `PRICE_SETTER_ROLE` directly on `SharePriceCalculator`, and all admin roles on `NAVConsumer` (including the ability to disable the deviation check). That EOA can bypass the Chainlink Functions path and write arbitrary prices. See "Residual concern" in the Overview.
+- The Network Firm performs daily offchain attestations of the §114 Trust balances. **No Chainlink Proof-of-Reserve aggregator is consumed onchain** — the onchain NAV Oracle publishes the share price, not reserves (see Appendix A.8).
 - **NAV formula**: `(Spread/365) + max[sUSDe(T)/sUSDe(T-7d) - 1 ; TBILL(T)/TBILL(T-7d) - 1] × (undeployed capital / total capital) + SOFR × (deployed capital / total capital)`. Spread = 250 bps.
 
 ### Capital Deployment
@@ -201,9 +193,11 @@ Re's marketing attaches modeled impairment likelihoods to each threshold (Re Cap
 
 ### Accessibility
 
-- **Deposits**: KYC/AML required (via SumSub and Chainalysis). Users must pass KYC checks because a portion of protocol capital is deployed with a Cayman-regulated reinsurance company (CIMA-regulated)
-- **Instant Redemption**: Available from the onchain instant liquidity buffer via `redeemInstant(uint256 shares, uint256 minPayout)` at [`0x8aEb9453EF22Cb38abC7a3Af9c208F65C1BfE31e`](https://etherscan.io/address/0x8aEb9453EF22Cb38abC7a3Af9c208F65C1BfE31e) (which delegates to the `InstantRedemption` implementation at [`0xa31DeeBB3680A3007120e74bcBdf4dF36F042a40`](https://etherscan.io/address/0xa31DeeBB3680A3007120e74bcBdf4dF36F042a40)). Atomic, same-block settlement. **Onchain-verified parameters** on Apr 17, 2026: `minRedemption = 0.01 reUSD` (`1e16`), `maxRedemption = 1,000,000 reUSD` (`1e24`), `dailyLimitBps = 2000` (20% of capacity), `userLimitBps = 1000` (10% per wallet), `feeBps = 6` (0.06%), `dayPayoutToken = sUSDe` (0x9D39A5DE30e57443BfF2A8307A4256c8797A3497). At the fastest drain rate, ~5 days to exhaust all liquid onchain reserves (20% per day). **Note:** the "250 reUSD minimum" previously cited in this report could not be found in the public docs (`docs.re.xyz/protocol/redemption-process-and-liquidity` mentions a "min" but gives no value) and contradicts the onchain parameter. Treat the onchain `minRedemption = 0.01 reUSD` as the authoritative floor; any `$250` figure, if it exists, is a front-end UX gate in `app.re.xyz`, not a contract-level invariant.
-- **Windowed Redemption**: Once instant buffer is exhausted, the protocol opens a redemption window (minimum 24 hours). Requests fulfilled pro-rata based on available capital. Proceeds must be claimed within two months.
+- **Deposits**: KYC/AML required (via SumSub and Chainalysis). Users must pass KYC checks because a portion of protocol capital is deployed with a Cayman-regulated reinsurance company (CIMA-regulated).
+- **KYC on redemption — enforced onchain** (verified Apr 17, 2026): every redemption entrypoint reverts with `KYCRequired` if `kyc.isKYCApproved(msg.sender) == false`. Checked functions in the `InstantRedemptionInteraction` contract [`0x8aEb9453EF22Cb38abC7a3Af9c208F65C1BfE31e`](https://etherscan.io/address/0x8aEb9453EF22Cb38abC7a3Af9c208F65C1BfE31e): `redeemInstant`, `submitWindowRequest`, `adjustWindowRequest`, `claimWindowPayout`. The same check is repeated inside `InstantRedemption._processRedemption` on the user argument. **A KYC revocation therefore blocks not only new deposits but also the holder's ability to redeem onchain through the protocol.** Selling on a DEX remains possible because DEX routers do not gate transfers on KYC.
+- **reUSD — Instant Redemption**: available from the onchain instant liquidity buffer via `redeemInstant(uint256 shares, uint256 minPayout)` on the Interaction contract (which delegates to the `InstantRedemption` implementation at [`0xa31DeeBB3680A3007120e74bcBdf4dF36F042a40`](https://etherscan.io/address/0xa31DeeBB3680A3007120e74bcBdf4dF36F042a40)). Atomic, same-block settlement. **Onchain-verified parameters** on Apr 17, 2026: `minRedemption = 0.01 reUSD` (`1e16`), `maxRedemption = 1,000,000 reUSD` (`1e24`), `dailyLimitBps = 2000` (20% of capacity), `userLimitBps = 1000` (10% per wallet), `feeBps = 6` (0.06%), `dayPayoutToken = sUSDe`. At the fastest drain rate, ~5 days to exhaust all liquid onchain reserves (20% per day). The "250 reUSD minimum" cited elsewhere is not in the public docs and contradicts the onchain parameter; treat `0.01 reUSD` as the contract-level floor.
+- **reUSD — Windowed Redemption**: once the instant buffer is exhausted, the protocol opens a redemption window (minimum 24 hours). Requests fulfilled pro-rata based on available capital. Proceeds must be claimed within two months.
+- **reUSDe — redemption works differently** (per [docs](https://docs.re.xyz/insurance-capital-layers/what-is-reusde)): **no instant redemption path exists**. reUSDe redemptions are quarterly-only. Request window = first 72 hours of each fiscal quarter; an "actuarial gate" at quarter-end (≤10 business days) determines *Available Surplus*; payouts are pro-rata against that surplus; unfilled balances auto-roll into the next quarter while retaining queue seniority. Re explicitly notes *"No secondary market maker pool is promised"* for reUSDe. The senior-tranche instant buffer/vault described above applies to reUSD only, not reUSDe.
 - **DEX Trading (Re reUSD only)**: Fluid reUSD/USDT DEX pool (~$11.62M — note: USDT, not USDC); Curve reUSD/sUSDe (~$1.42M) and reUSD/USDC (~$450K); Avalanche Blackhole reUSD/USDC pools (~$1.47M combined). **Total DEX liquidity ~$14.96M on Apr 17, 2026** (DeFi Llama yields API, filtered by underlying token `0x5086…0c72` / `0x180aF87b…625Bf`). Larger pools labelled "reUSD/scrvUSD", "reUSD/sfrxUSD", "reUSD/fxUSD", "reUSD/sDOLA" on Curve/Convex/Stake-DAO/Beefy are **Resupply Protocol's reUSD** (`0x57aB1E00…`) and are NOT Re reUSD exits.
 - **Not available to U.S. persons**
 - **Fees**: Redemption fee of `6 bps` (0.06%) — **onchain-verified** via `InstantRedemption.feeBps() = 6` at [`0xa31DeeBB3680A3007120e74bcBdf4dF36F042a40`](https://etherscan.io/address/0xa31DeeBB3680A3007120e74bcBdf4dF36F042a40) ([docs](https://docs.re.xyz/insurance-capital-layers/what-is-reusd)). No documented deposit fees, management fees, or performance fees. RWA.xyz reports 0.18% subscription and 0.18% redemption fees — discrepancy with docs may reflect different fee tiers or methodology. Onchain data shows ~$1,535 total deposit fees collected historically, suggesting a small deposit fee mechanism exists in the contracts (also flagged in Hacken audit finding F-2024-5214 "Unclaimed Deposit Fees Unaccounted For").
@@ -229,14 +223,14 @@ Re's marketing attaches modeled impairment likelihoods to each threshold (Re Cap
   - **No BUIDL or T-bill-wrapper balances** were found at any of the ICL / vault / custodian addresses (Apr 17, 2026), despite the DD questionnaire listing BUIDL as a potential reserve asset. Apart from USDC/USDe/sUSDe, the only non-dust holding is ~1.35M `reUSDsUSDe` Curve LP tokens at the ICL Custodial Wallet (protocol-owned liquidity for the reUSD/sUSDe pool; excluded from the reserve total above). All other token balances at these addresses are airdrop spam or dust (<$500).
   - The ICL contract [`0x4691…3093`](https://etherscan.io/address/0x4691C475bE804Fa85f91c2D6D0aDf03114de3093) itself holds $0 in reserves — assets sit at the Custodial Wallet (an EOA) and at the Redemption Reserves Custodian (also an EOA).
 - **Onchain buffer**: Instant redemption vault and Redemption Reserves Custodian hold ~$72.98M of sUSDe plus $0 USDC for immediate redemptions (USDC instant exits unavailable under current config; see Liquidity).
-- **Offchain trust**: §114 Reinsurance Trust holds cash and T-Bills in NAIC-compliant banks (including Coinbase, Wells Fargo), attested daily by The Network Firm and published via Chainlink
+- **Offchain trust**: §114 Reinsurance Trust holds cash and T-Bills in NAIC-compliant banks, attested daily by The Network Firm. Re's DD questionnaire specifically names Coinbase and Wells Fargo as banking / custody counterparties for certain reinsurance-company assets; this counterparty pair is not disclosed in Re's public docs. Re's docs describe the reserve publication as *"published via Chainlink"* — onchain, no Chainlink PoR aggregator is consumed; see Appendix A.8.
 - **Surplus Note protection**: Surplus notes rank junior to policyholders but contractually protect depositor principal
 - **Re Capital buffer**: ~$73M subordinated first-loss layer ahead of reUSDe and reUSD
 - **reUSDe as backstop**: reUSDe (the risk-bearing token) absorbs first-loss risk across the reinsurance portfolio, providing a backstop to prevent losses reaching reUSD holders. Stress testing shows reUSD loss likelihood = 0.03% at 135% combined ratio
 
 ### Provability
 
-- **reUSD price**: Written directly onchain via `setSharePrice(uint256)` by an EOA holding `PRICE_SETTER_ROLE`. **Not computed programmatically onchain** — price is derived offchain (Network Firm attestation) and pushed in by the setter; the contract has no deviation cap. Downstream `PriceRouter` [`0xFe76cF5eD606593fB7764f33627B8D7E0f9Fab66`](https://etherscan.io/address/0xFe76cF5eD606593fB7764f33627B8D7E0f9Fab66) exposes this value to dependent contracts.
+- **reUSD price**: Updated daily by a Chainlink-Functions-driven `NAVConsumer` [`0x84d4eaeb10f9e57b67622f667c6c13e22fa4b2b6`](https://etherscan.io/address/0x84d4eaeb10f9e57b67622f667c6c13e22fa4b2b6) calling `SharePriceCalculator.setSharePrice`. The NAV computation itself is **not** programmatically onchain — Chainlink Functions runs JS offchain (DON `fun-ethereum-mainnet-1`, subscription `85`) and returns a single NAV value. Onchain safeguards: Chainlink Automation triggers daily at 23:45 UTC; `NAVConsumer.maxDeviationBps = 1000` (10%) enforces a deviation guard; Hacken audited the NAV Oracle in Apr 2025. Residual concern: admin/updater roles on `NAVConsumer` and `PRICE_SETTER_ROLE` on `SharePriceCalculator` are both held by a single EOA that can bypass the guard.
 - **Onchain reserves**: Visible onchain via the ICL contract and Redemption Reserves Custodian
 - **Offchain reserves**: Attested daily by The Network Firm (third-party accountant with read-only access). Re's docs claim this attestation is *"published via Chainlink"* / *"Proof-of-reserves, publicly auditable"*. **This claim could not be substantiated** (Apr 17, 2026): no Chainlink PoR feed for reUSD exists in Chainlink's public reference directory (`reference-data-directory.vercel.app/feeds-mainnet.json`, 23 mainnet PoR feeds — none for Re / reUSD / Resilience; also absent on Avalanche and BSC directories). No Chainlink PoR aggregator is consumed by any verified Re contract. The actual onchain Chainlink dependency is the `sUSDe/USD` price aggregator ([`0xFF3BC18cCBd5999CE63E788A1c250a88626aD099`](https://etherscan.io/address/0xFF3BC18cCBd5999CE63E788A1c250a88626aD099)) used for collateral pricing, not reserves. See "Chainlink PoR claim — not substantiated" in the appendix.
 - **Insurance performance**: Reinsurance returns are inherently offchain and depend on claim experience over multi-year treaty periods
@@ -330,7 +324,7 @@ The DD questionnaire claim of ">$100M in borrow demand" across lending integrati
 
 ### Programmability
 
-- **reUSD price**: **NOT programmatic**. Set by an EOA (`PRICE_SETTER_ROLE` holder) via `setSharePrice(uint256)` on the Share Price Calculator. Offchain yield calculation (risk-free rate or Ethena basis yield + 250 bps) is asserted by The Network Firm. **No Chainlink PoR feed is consumed onchain by Re's contracts** — Chainlink is used only for the sUSDe leg of the PriceRouter. **The deployed `setSharePrice` has no onchain guardrail** — only `newPrice != 0` is enforced; any 25 bps daily cap is an offchain convention.
+- **reUSD price**: **NOT programmatically computed**. The NAV itself is produced offchain by a Chainlink Functions JS job, delivered onchain by `NAVConsumer`, and stored in `SharePriceCalculator`. Onchain, the NAV Consumer enforces a 10% deviation cap per update (`maxDeviationBps = 1000`). **No Chainlink PoR aggregator for reserves is consumed onchain** (see Appendix A.8). The calculator itself has no guardrail on `setSharePrice`; the admin EOA holds the role and can bypass the NAV Consumer path.
 - **Deposits**: Require KYC verification through the KYC Registry contract
 - **Redemptions**: Instant redemptions are programmatic (from buffer). Quarterly redemptions involve admin-managed processes
 - **Capital deployment**: Offchain, managed by the protocol team through the Fireblocks custody infrastructure
@@ -352,7 +346,7 @@ The DD questionnaire claim of ">$100M in borrow demand" across lending integrati
 - **Company**: Re (re.xyz). Founded 2022. Issuer entity: Resilience BVI Ltd. (British Virgin Islands, per [RWA.xyz](https://app.rwa.xyz/assets/reUSD)). Governance controlled by Resilience Foundation.
 - **Legal Structure**: Partner reinsurance company domiciled in Cayman Islands, regulated by CIMA. Offchain trust accounts in U.S. jurisdiction (§114 Trust, NAIC-compliant banks). Token issuer domiciled in BVI.
 - **Investors**: $14M seed round at $100M post-money valuation. Investors include **Electric Capital, Tribe Capital, Stratos, SiriusPoint, Exor, Defy, Framework Ventures, Morgan Creek Digital**.
-- **Custody**: Fireblocks MPC custody for onchain assets; Coinbase and Wells Fargo as banking/custody counterparties for certain reinsurance company assets; §114 Trust accounts at NAIC-compliant banks for offchain reserves.
+- **Custody (sources):** *Fireblocks MPC custody for idle onchain assets* — named in both Re's public docs (`docs.re.xyz/protocol/how-the-re-protocol-work`, `what-is-reusd`) and in the DD questionnaire. *Coinbase and Wells Fargo as banking / custody counterparties for certain reinsurance-company assets* — this specific counterparty pair is **only in the DD questionnaire** (private document provided to Yearn; table row *"Coinbase / Wells Fargo / partner trust accounts — Certain reinsurance company assets — United States — Counterpart…"*). It is **not** in any public Re source. Unverified onchain and offchain.
 - **Documentation**: Comprehensive documentation at docs.re.xyz. Clear description of mechanism, risks, and investor protections.
 - **Runtime Monitoring**: ChainAnalysis for onchain transaction monitoring.
 - **Incident Response**: Emergency pause mechanism exists. Recovery wallets designated for each ICL (e.g., [`0xDf6bF2713b5c7CA724E684657280bC407938F447`](https://etherscan.io/address/0xDf6bF2713b5c7CA724E684657280bC407938F447) for initial ICL).
@@ -368,8 +362,15 @@ The DD questionnaire claim of ">$100M in borrow demand" across lending integrati
   - Monitor reUSD price changes daily. Current: ~$1.072 (onchain `getSharePrice()` = `1072426668551449984`, Apr 17, 2026).
   - **Alert**: If price **decreases** (should only ever increase under normal operation).
   - **Alert**: If price growth **stops** for >48 hours (indicates oracle feed interruption or yield issue).
-  - **Alert**: If single-day price change exceeds any offchain guardrail threshold (reminder: `setSharePrice` has **no onchain guardrail**, so monitoring must enforce this).
-  - **Alert**: Any new member granted `PRICE_SETTER_ROLE` on the Share Price Calculator.
+  - **Alert**: Any new member granted `PRICE_SETTER_ROLE` on the Share Price Calculator (currently `0x6c15b25e…57649` and `NAVConsumer` `0x84d4eaeb…2b4b6`).
+  - **Alert (Critical)**: Any `setSharePrice` call whose `msg.sender` is NOT the `NAVConsumer` — this is a bypass of the audited NAV path.
+
+- **NAV Consumer (Chainlink Functions + Automation)**: [`0x84d4eaeb10f9e57b67622f667c6c13e22fa4b2b6`](https://etherscan.io/address/0x84d4eaeb10f9e57b67622f667c6c13e22fa4b2b6)
+  - **Alert (Critical)**: `maxDeviationBps` changes (currently `1000` = 10%); `deviationCheckEnabled` flipped to `false`; `automationEnabled` flipped to `false`; `paused` flipped to `true`.
+  - **Alert (Critical)**: Any call to `forceNAVUpdate` (admin override; minimum 4h interval).
+  - **Alert (Critical)**: Role changes on `DEFAULT_ADMIN_ROLE`, `ADMIN_ROLE`, `UPDATER_ROLE`, `EMERGENCY_UPDATER_ROLE`, `KEEPER_ROLE`.
+  - **Alert (High)**: `configure(uint64,bytes32,string,bytes)` — changes Chainlink Functions subscription / DON / source code.
+  - **Alert (High)**: Daily NAV update did not fire within the configured time window (default target 23:45 UTC).
 
 ### ICL and Redemption Monitoring
 
@@ -473,22 +474,21 @@ The DD questionnaire claim of ">$100M in borrow demand" across lending integrati
 
 ### Key Strengths
 
-- **Principal protection with deep capital structure**: reUSD is the senior tranche with 0.03% modeled loss likelihood at 135% combined ratio. Re Capital (~$73M) and reUSDe provide subordinated first-loss protection.
-- **Strong underwriting track record (per LP memo / intro deck, not independently verifiable)**: ~92% combined ratio across 3 consecutive years (2022-2024), outperforming industry average (93-95%). No capital impairment or reserve deterioration. $178M gross written premium. Third-party sources consulted: LlamaRisk (no published report on reUSD as of Apr 17, 2026) and Steakhouse (no archived review); no independent re-statement of these ratios was found. Treat as management-asserted until an external attestation (beyond The Network Firm AUP, which covers reserve accounting rather than combined ratios) is published.
-- **Third-party reserve verification**: The Network Firm provides daily independent attestation of offchain reserves; an AUP report is published. (Re's docs describe this as *"published via Chainlink"* but no Chainlink PoR feed for reUSD exists in Chainlink's public registry and no Re contract consumes such a feed onchain — see appendix.)
-- **Regulatory framework**: Partner reinsurer is CIMA-regulated. Capital held in §114 Reinsurance Trust at NAIC-compliant banks (Coinbase, Wells Fargo).
-- **Comprehensive audit coverage**: 5+ audits across 3 firms (Hacken, Certora, The Network Firm), including formal verification and dedicated NAV oracle audit.
-- **Role-separated MPC controls**: Multiple MPC wallets with distinct roles (oracle, redemptions, access, custodian) rather than a single admin key. 48-hour timelock on upgrades.
-- **Emergency mechanisms**: Pause functionality, designated recovery wallets, ChainAnalysis runtime monitoring.
+- **Senior tranche position (structural)**: reUSD sits senior to reUSDe and Re Capital in the loss waterfall; losses must breach both subordinated layers before touching reUSD.
+- **Third-party offchain reserve attestation**: The Network Firm performs a daily AUP on §114 Trust balances; an AUP report is published annually.
+- **Comprehensive audit coverage**: 5+ audits across 3 firms (Hacken, Certora, The Network Firm), including Certora formal verification and a Hacken audit of the Chainlink-Functions-based `NAVConsumer` that is deployed onchain as the standard price writer.
+- **Onchain NAV path with automation and deviation guard**: Daily share price is written by a Chainlink-Functions + Chainlink-Automation consumer with a `maxDeviationBps = 1000` (10%) onchain check. Caveat: a single EOA can bypass it — see Key Risks.
+- **Timelock on upgrades**: `TimelockController.getMinDelay() = 172800` (48 hours) on all privileged governance actions routed through it. `DEFAULT_ADMIN_ROLE` on reUSD and ICL sits with a 3-of-5 Safe multisig.
+- **Emergency mechanisms**: Pause functionality on the InstantRedemption, LayerZero adapter, and NAV Consumer; designated recovery wallets; Chainalysis runtime monitoring.
 
 ### Key Risks
 
-- **Offchain price setter with no onchain guardrail**: reUSD price is set via direct `setSharePrice(uint256)` by an EOA with `PRICE_SETTER_ROLE`. The deployed Share Price Calculator enforces only `newPrice != 0`; any "25 bps daily max" mentioned in docs is an offchain convention, not an onchain invariant. A compromised setter can instantly write an arbitrary positive price. This is a fundamental centralization risk.
+- **Single EOA can bypass the NAV Oracle**: the standard price path is the audited Chainlink-Functions `NAVConsumer` (10% deviation cap). However, **the same EOA holds both `PRICE_SETTER_ROLE` on `SharePriceCalculator` and all admin / emergency / keeper roles on `NAVConsumer`**. It can (a) write directly to `SharePriceCalculator`, skipping the Functions path, (b) call `setDeviationCheckEnabled(false)` to disable the guard, or (c) `forceNAVUpdate` once per 4 hours. Compromise of this key ≈ unchecked power over the reUSD share price.
 - **Significant offchain capital deployment**: Majority of assets are deployed offchain into §114 Trust and reinsurance programs. This introduces counterparty risk with the trust bank, partner reinsurer, and custodians that cannot be verified fully onchain.
 - **Instant redemption vault holds no USDC**: The Daily Instant Redemption Vault holds `0` USDC + `6.188M` sUSDe. The Redemption Reserves Custodian (EOA) holds `0` USDC + `53.263M` sUSDe. `dayPayoutToken` is sUSDe — USDC-denominated instant exits are unavailable under the current config.
 - **Onchain reserves heavily concentrated in sUSDe; coverage right at the 50% floor**: Onchain reserves total ~$95.31M (~51.5% of Ethereum NAV), of which ~90% is sUSDe and only ~9.8% (~$9.34M) is USDC. Ethena (sUSDe issuer) is a material counterparty: an Ethena incident, sUSDe unstaking bottleneck, or USDe depeg would directly impair the "50%+ onchain backing" narrative even before reaching offchain exposures. The DD-cited BUIDL / T-bill wrappers are **not** held onchain.
 - **Three MINTER_ROLE holders on reUSD**: Beyond the ICL, `InstantRedemption` and `ShareTokenMinterBurner` also hold MINTER_ROLE. The ICL path enforces backing via `safeTransferFrom`. `InstantRedemption` uses the role for burns during redemption. `ShareTokenMinterBurner` is a LayerZero OFT wrapper — its mint path has no backing check by design (supply is conserved cross-chain), but the OFT adapter [`0x2BB4046022B9161f3F84Ad8E35cac1d5946e0e85`](https://etherscan.io/address/0x2BB4046022B9161f3F84Ad8E35cac1d5946e0e85) and the wrapper are both owned by the **same EOA** [`0x6C15B25E9750Dccb698C1a4023f34015bFe57649`](https://etherscan.io/address/0x6C15B25E9750Dccb698C1a4023f34015bFe57649) (not a multisig). Compromise of that key would let an attacker repoint the adapter and mint up to `2,500,000 reUSD / 24h / peer` (onchain rate limit) on Ethereum without backing.
-- **DEX liquidity thin and concentrated**: ~$14.96M across Fluid, Curve, and Blackhole (~8.0% of ~$186.7M market cap), with Fluid reUSD/USDT alone providing ~78% of depth. A disruption at Fluid would leave very little remaining DEX liquidity. (Previously-cited "~$26.2M" figure included Resupply reUSD pools, a different token.)
+- **DEX liquidity thin**: only ~$14.96M of onchain-verified Re reUSD liquidity on DEXes (~8.0% of ~$186.7M market cap). (Previously-cited "~$26.2M" figure included Resupply reUSD pools, a different token.)
 - **KYC gating**: All deposits and redemptions require KYC. This limits the universe of users who can exit and creates regulatory/jurisdictional risk.
 - **Quarterly redemption queue**: Once instant buffer is exhausted, redemptions are windowed and pro-rata. Capital release from reinsurance programs is reevaluated quarterly (per DD).
 - **Reinsurance tail risk**: Underlying assets are exposed to insurance claim risk. reUSD is only impaired if the portfolio combined ratio exceeds 135%, after both Re Capital (~$73M) and all reUSDe reserves are depleted. reUSDe covers losses in the 115-135% combined ratio range. Re's historical combined ratio is ~92% and the portfolio avoids catastrophe lines, but tail risk from extreme loss events remains.
@@ -497,7 +497,7 @@ The DD questionnaire claim of ">$100M in borrow demand" across lending integrati
 ### Critical Risks
 
 - **Offchain dependency concentration**: The protocol's value proposition depends on offchain entities (Cayman reinsurer, §114 Trust, The Network Firm, Fireblocks) operating honestly and solvent. Onchain verification cannot fully cover offchain risks.
-- **Oracle/setter manipulation**: A compromised `PRICE_SETTER_ROLE` holder can write any positive `sharePrice`, since the deployed contract has no onchain deviation cap. The only mitigations are offchain — the setter's internal policy and offchain monitoring. The docs' implication that a Chainlink PoR feed independently attests reserves does not hold onchain (see appendix) — reserve attestation is effectively The Network Firm's word plus the raw onchain balances we audit directly.
+- **Oracle/setter manipulation**: the standard share-price path is the audited Chainlink-Functions `NAVConsumer` (10% deviation cap), but a compromised admin EOA can bypass it (write directly to `SharePriceCalculator`, disable the deviation check, or call `forceNAVUpdate` every 4h) and write arbitrary prices. There is no separate Chainlink PoR aggregator attesting reserves independently (see Appendix A.8) — reserve assurance reduces to The Network Firm's offchain AUP plus the onchain balances we audit directly.
 - **Liquidity mismatch**: reUSD represents liquid onchain tokens partially backed by offchain reinsurance capital. Capital release is reevaluated quarterly, and programs are short-duration and cat-light (per performance memo). The instant redemption vault holds no USDC (sUSDe only — `6.188M` in vault, `53.263M` in Redemption Reserves Custodian). In a bank-run scenario, sUSDe redemption liquidity plus only ~$14.96M in DEX liquidity would need to absorb exits for ~$186.7M in outstanding tokens; windowed queue handles the remainder.
 
 ---
@@ -533,17 +533,17 @@ The DD questionnaire claim of ">$100M in borrow demand" across lending integrati
 
 **Subcategory A: Governance**
 
-- MPC wallets with role separation (3-of-5, 5-of-8)
-- 48-hour timelock on UUPS proxy upgrades
-- No onchain governance (expert-led council, planned DAO transition)
-- MPC signers not publicly identified
-- KYC required for all participants
+- Onchain governance root: a 3-of-5 Safe multisig holds `DEFAULT_ADMIN` on reUSD/ICL and `PROPOSER/CANCELLER` on the Timelock; 48-hour timelock on UUPS proxy upgrades (`getMinDelay = 172800`) — onchain-verified.
+- Per-function admin EOAs (Oracle, Redemptions, Access, Custodian) described by docs as MPC 3-of-5 / 5-of-8. The MPC signer quorum is offchain and cannot be independently verified; signers not publicly identified.
+- NAV Oracle path (`NAVConsumer`) is audited and uses Chainlink Functions + Automation with a 10% onchain deviation cap — but all admin/updater roles on it sit with a single EOA.
+- `PRICE_SETTER_ROLE` on `SharePriceCalculator` directly granted to that same EOA, bypassing the NAV Oracle path if used.
+- KYC required for all deposits and protocol redemptions (enforced onchain).
 
-**Governance Score: 3.5** -- MPC wallets with role separation and timelock are positive. However, no onchain governance, unidentified signers, and KYC-gated access are centralizing factors.
+**Governance Score: 4.0** -- Safe-backed Timelock and 48h delay are positive. Undermined by: (a) a single EOA holding every role that governs the share price (direct PRICE_SETTER on the calculator + all admin/emergency/keeper roles on the NAV Consumer), (b) the MPC / N-of-M claims for other admin EOAs being offchain-only and unverifiable, (c) no onchain governance, and (d) KYC-gated access.
 
 **Subcategory B: Programmability**
 
-- reUSD price: **Offchain setter** (`setSharePrice` by EOA). Not programmatically computed onchain and the contract enforces no deviation cap.
+- reUSD price: Written onchain by a Chainlink-Functions-driven `NAVConsumer` with a 10% deviation cap (`maxDeviationBps = 1000`). NAV computation itself runs offchain in the Chainlink DON. An EOA can bypass the guard (holds `PRICE_SETTER_ROLE` on `SharePriceCalculator` and all admin roles on `NAVConsumer`).
 - Deposits: Gated by KYC Registry
 - Instant redemptions: Programmatic from buffer
 - Quarterly redemptions: Admin-managed process
@@ -553,7 +553,7 @@ The DD questionnaire claim of ">$100M in borrow demand" across lending integrati
 
 **Subcategory C: External Dependencies**
 
-- Chainlink: used onchain only for the sUSDe/USD leg of the `PriceRouter` (feed [`0xFF3BC18cCBd5999CE63E788A1c250a88626aD099`](https://etherscan.io/address/0xFF3BC18cCBd5999CE63E788A1c250a88626aD099), 24h staleness, min $1.18 / max $2.00 price bounds). Not used onchain for reUSD share price; no Chainlink PoR feed is consumed onchain.
+- Chainlink: used onchain as (a) the `sUSDe/USD` price feed inside `PriceRouter` (aggregator [`0xFF3BC18cCBd5999CE63E788A1c250a88626aD099`](https://etherscan.io/address/0xFF3BC18cCBd5999CE63E788A1c250a88626aD099), 24h staleness, $1.18 / $2.00 price bounds), and (b) **Chainlink Functions + Automation** driving the daily NAV update through `NAVConsumer` [`0x84d4eaeb10f9e57b67622f667c6c13e22fa4b2b6`](https://etherscan.io/address/0x84d4eaeb10f9e57b67622f667c6c13e22fa4b2b6) (DON `fun-ethereum-mainnet-1`, subscription `85`). **No Chainlink PoR aggregator for reserves** is consumed onchain — see Appendix A.8.
 - **LayerZero**: cross-chain reUSD transport via `ReMintBurnAdapter` OFT [`0x2BB4046022B9161f3F84Ad8E35cac1d5946e0e85`](https://etherscan.io/address/0x2BB4046022B9161f3F84Ad8E35cac1d5946e0e85). Active peers: Avalanche (eid 30106), Arbitrum (30110), Base (30184), BNB (30102). Rate limit: 2,500,000 reUSD per 24h inbound AND outbound per chain (onchain-verified).
 - The Network Firm for daily attestations
 - Ethena for basis-trade yield source
@@ -565,9 +565,9 @@ The DD questionnaire claim of ">$100M in borrow demand" across lending integrati
 
 **Dependencies Score: 4.0** -- Heavy reliance on offchain entities (trust bank, reinsurer, attestation firm, custody). Many single-point-of-failure dependencies that cannot be mitigated onchain.
 
-**Centralization Score = (3.5 + 4.0 + 4.0) / 3 = 3.83**
+**Centralization Score = (4.0 + 4.0 + 4.0) / 3 = 4.0**
 
-**Score: 3.8/5** -- Significant centralization due to offchain price oracle, offchain capital deployment, KYC gating, and heavy reliance on external entities.
+**Score: 4.0/5** -- Significant centralization due to a single EOA holding unchecked price-writing power (bypasses the audited Chainlink-Functions NAV path), offchain capital deployment, KYC gating, and heavy reliance on external entities.
 
 #### Category 3: Funds Management (Weight: 30%)
 
@@ -583,7 +583,7 @@ The DD questionnaire claim of ">$100M in borrow demand" across lending integrati
 
 **Subcategory B: Provability**
 
-- reUSD price: Set by admin EOA via direct `setSharePrice`; no deviation cap onchain
+- reUSD price: Written by Chainlink-Functions `NAVConsumer` (audited, 10% deviation cap). Bypassable by the admin EOA holding direct `PRICE_SETTER_ROLE` on `SharePriceCalculator`.
 - Onchain buffer: Fully verifiable
 - Offchain reserves: Attested daily by The Network Firm (no onchain Chainlink PoR feed verified)
 - Underlying reinsurance performance: Inherently offchain, not verifiable onchain
@@ -628,13 +628,13 @@ Final Score = (Centralization × 0.30) + (Funds Mgmt × 0.30) + (Audits × 0.20)
 | Category | Score | Weight | Weighted |
 |----------|-------|--------|----------|
 | Audits & Historical | 2.5 | 20% | 0.50 |
-| Centralization & Control | 3.8 | 30% | 1.14 |
+| Centralization & Control | 4.0 | 30% | 1.20 |
 | Funds Management | 3.5 | 30% | 1.05 |
 | Liquidity Risk | 3.5 | 15% | 0.525 |
 | Operational Risk | 2.5 | 5% | 0.125 |
-| **Final Score** | | | **3.34** |
+| **Final Score** | | | **3.40** |
 
-**Final Score: 3.3**
+**Final Score: 3.4**
 
 ### Risk Tier
 
@@ -650,7 +650,7 @@ Final Score = (Centralization × 0.30) + (Funds Mgmt × 0.30) + (Audits × 0.20)
 
 ---
 
-reUSD is a novel product that bridges DeFi capital with traditional reinsurance markets. The protocol demonstrates real business traction ($178M gross written premium, ~$186.7M market cap, ~92% combined ratio across 3 years per LP memo) with a deep capital structure (Re Capital ~$73M + reUSDe first-loss). The risk profile is moderate. The primary concerns are: (1) the offchain price setter with **no onchain guardrail** — reUSD's price is updated by an EOA via direct `setSharePrice` on a contract that only checks `newPrice != 0`; (2) heavy offchain capital deployment in reinsurance programs (capital release reevaluated quarterly); (3) the instant redemption vault holds no USDC (sUSDe-denominated exits available via ~6.188M sUSDe in vault + ~53.263M sUSDe in Redemption Reserves Custodian); (4) KYC-gated redemptions creating friction for exits; and (5) **three MINTER_ROLE holders** on the reUSD token (ICL, InstantRedemption, ShareTokenMinterBurner) vs. the single-minter claim previously made — the ICL path enforces backing, the other two need independent review. DEX liquidity has improved significantly to ~$26.2M across Fluid and Curve (up from ~$450K), providing a viable secondary exit. These risks are partially mitigated by third-party reserve attestation (The Network Firm + Chainlink PoR), 5+ audits including formal verification, role separation via a 3-of-5 Safe governance, 48-hour upgrade timelock (onchain-verified `getMinDelay() = 172800`), and the regulatory framework (CIMA-regulated reinsurer, §114 Trust at NAIC-compliant banks).
+reUSD is a novel product that bridges DeFi capital with traditional reinsurance markets. Re reports ($178M gross written premium, ~92% combined ratio across 3 years per LP memo) and market cap ~$186.7M are meaningful; the capital structure (Re Capital ~$73M + reUSDe first-loss) puts reUSD in the senior tranche. The risk profile is medium. Primary concerns: (1) the standard share-price path IS an audited Chainlink-Functions NAV Oracle with a 10% onchain deviation cap, but a single admin EOA can bypass it by writing directly to `SharePriceCalculator` or by disabling the deviation check; (2) heavy offchain capital deployment in reinsurance programs (capital release reevaluated quarterly); (3) the onchain reserve is ~51% of NAV with ~90% of it in sUSDe — Ethena-counterparty-concentrated and not easily convertible to USDC; (4) KYC-gated redemptions (enforced onchain at every redemption entrypoint) creating friction for exits; (5) reUSDe redemption works differently from reUSD (quarterly-only, no instant path); and (6) three MINTER_ROLE holders on reUSD — the ICL (enforces backing), the InstantRedemption burner, and a LayerZero OFT wrapper where the wrapper and the adapter share a single EOA owner. These risks are partially mitigated by Safe-3-of-5 + 48-hour Timelock on governance (onchain-verified `getMinDelay() = 172800`), 5+ audits (Hacken, Certora, The Network Firm AUP) including a Hacken audit of the deployed `NAVConsumer`, Chainlink Automation driving daily NAV updates, and The Network Firm's offchain attestation of the §114 Trust.
 
 **Key conditions for exposure:**
 - Monitor reUSD share price for any decreases (should only increase)
@@ -658,7 +658,7 @@ reUSD is a novel product that bridges DeFi capital with traditional reinsurance 
 - **Monitor instant redemption buffer — track both USDC and sUSDe balances in vault and Redemption Reserves Custodian**
 - Monitor instant redemption interaction contract [`0x8aEb9453EF22Cb38abC7a3Af9c208F65C1BfE31e`](https://etherscan.io/address/0x8aEb9453EF22Cb38abC7a3Af9c208F65C1BfE31e) for redemption events and limit changes
 - Monitor UUPS proxy upgrades (48-hour review window)
-- Track DEX liquidity depth across Fluid (reUSD/USDC) and Curve pools (reUSD/scrvUSD, sfrxUSD/reUSD, reUSD/sUSDe, reUSD/USDC)
+- Track DEX liquidity depth on Fluid reUSD/USDT (~$11.62M) and Curve reUSD/sUSDe (~$1.42M) / reUSD/USDC (~$450K). (Curve reUSD/scrvUSD, reUSD/sfrxUSD, reUSD/fxUSD are Resupply reUSD, not Re — do not count toward Re liquidity.)
 - Monitor for KYC policy or regulatory changes affecting redemption access
 - Monitor ICL Custodial Wallet balance (~`9.344M` USDC + ~`10.496M` sUSDe, Apr 17, 2026) for large outflows
 - Monitor `MINTER_ROLE` grants on reUSD token — currently held by ICL, `InstantRedemption`, and `ShareTokenMinterBurner`; any fourth grantee should trigger review
@@ -686,7 +686,8 @@ reUSD is a novel product that bridges DeFi capital with traditional reinsurance 
 │  │  (ERC-20,     │    │  Calculator           │    (EOA calls       │
 │  │   UUPS Proxy) │    │  0xd1D1..11b05B8      │     setSharePrice)  │
 │  │  0x5086..0c72 │    └──────────────────────┘                      │
-│  └──────┬───────┘    (no onchain guardrail — only newPrice != 0)   │
+│  └──────┬───────┘    (NAVConsumer: 10% onchain deviation cap;      │
+│                       admin EOA can bypass via direct setSharePrice) │
 │         │ mint/burn                                                  │
 │  ┌──────▼───────────────────┐    ┌─────────────────────────┐       │
 │  │  Insurance Capital Layer  │───►│  ICL Custodial Wallet    │       │
@@ -885,9 +886,9 @@ The DD questionnaire [DD] adds operational claims that similarly depend on Re's 
 
 Each of these (other than the verified coverage ratio) should be read as **Re's representation**, not onchain- or independently-verified fact.
 
-### A.8 Chainlink Proof-of-Reserve claim — not substantiated (Apr 17, 2026)
+### A.8 Chainlink usage by Re Protocol — what is real vs what is marketing (Apr 17, 2026)
 
-Re's documentation repeatedly describes Chainlink as the mechanism through which offchain reserves and the reUSD share price are published. Representative verbatim excerpts from `docs.re.xyz`:
+Re's documentation ties the protocol's reserve and price publication to Chainlink. The relevant quotes:
 
 | Source page | Quote |
 |---|---|
@@ -897,36 +898,25 @@ Re's documentation repeatedly describes Chainlink as the mechanism through which
 | How the Re Protocol Works | *"**Chainlink Oracles**: Publish price feeds, trust balances, surplus-note schedules, and redemption queues."* |
 | What is reUSD? | *"A JSON price feed is pushed on-chain via **Chainlink**"* |
 
-These claims were tested against three independent sources:
+**What's actually onchain (three Chainlink integrations, verified):**
 
-**1. Chainlink's public feed directory** — `https://reference-data-directory.vercel.app/feeds-mainnet.json` is Chainlink's canonical list of deployed feeds. On Ethereum mainnet:
+1. **Chainlink Price Feed — `sUSDe / USD`** ([`0xFF3BC18cCBd5999CE63E788A1c250a88626aD099`](https://etherscan.io/address/0xFF3BC18cCBd5999CE63E788A1c250a88626aD099)) wrapped by `SimpleOracle` [`0xb6aD3633…fB4D`](https://etherscan.io/address/0xb6aD3633cB3FAfed3D375d8c64240f122E19fB4D) and read by `PriceRouter`. Used for the sUSDe collateral-pricing leg.
+2. **Chainlink Functions** — `NAVConsumer` [`0x84d4eaeb…2b4b6`](https://etherscan.io/address/0x84d4eaeb10f9e57b67622f667c6c13e22fa4b2b6) subscribes to the mainnet DON `fun-ethereum-mainnet-1` (subscription `85`). A JS job in the DON computes the daily NAV offchain and the result is written onchain via `fulfillRequest` → `navReceiver.setSharePrice` → `SharePriceCalculator`.
+3. **Chainlink Automation** — a keeper calls `NAVConsumer.performUpkeep(bytes)` daily (observed every ~86400 s; target time 23:45 UTC). This is what triggers (2).
 
-- 289 total price feeds indexed
-- 23 feeds categorised as `Proof of Reserve`: 21btc-por, bgbtc-por, c1usd-por, cbbtc-por, eeth-por, ezeth-por, fbtc-por, hbtc-por, kag-por, kau-por, lombard-por, m-reserves, nexus-weth-por, pumpbtc-por, solvbtc-por, stbtc-por, steth-por, swell-eth-por, swell-restaked-eth-por, tusd-por, unibtc-por, wbtc-por, xsolvbtc-por
-- **No feed matching `reusd`, `resilience`, `re-protocol`, or `re_usd` exists**
+So Re's claim *"A JSON price feed is pushed on-chain via Chainlink"* is correct in a loose sense: the NAV is produced by Chainlink Functions and pushed by Chainlink Automation, even though it's not a classic Chainlink "price feed aggregator". The NAV Oracle code was audited by Hacken in Apr 2025 (repo `github.com/resilience-foundation/nav-oracle`).
 
-Same result on Chainlink's Avalanche (93 feeds) and BSC (178 feeds) directories. No re-related PoR feed exists anywhere Chainlink publishes.
+**What is NOT onchain — the "Proof-of-Reserves, publicly auditable" claim:**
 
-**2. Re's deployed contracts** — audited on Etherscan:
+1. **Chainlink's public PoR directory does not list Re.** The canonical list at `reference-data-directory.vercel.app/feeds-mainnet.json` has 23 Proof-of-Reserve feeds on Ethereum mainnet (FBTC, cbBTC, TUSD, eETH, Lombard, WBTC, M / MetaMask, C1USD, …). **No feed matching `reusd`, `resilience`, `re-protocol`, or `re_usd` exists** — nor on Avalanche (93 feeds) or BSC (178 feeds).
+2. **No Re contract consumes a PoR aggregator.** `InsuranceCapitalLayer`, `ShareToken`, `SharePriceCalculator`, `PriceRouter`, `SharePriceOracle`, and the Redemption contracts make no `latestRoundData` call against a reserves feed. The `@chainlink/` imports that appear in `PriceRouter` and `SharePriceOracle` are foundry path remappings, not live integrations.
+3. **Chainlink's own media** has no announcement, case study, or press release about a Re Protocol integration.
+4. **What the NAV Oracle publishes is the share price, not reserves.** It does not hash trust balances, premium inflows, or claim outflows onto Chainlink as Re's docs imply.
 
-| Contract | Chainlink interface used? | Purpose |
-|---|---|---|
-| `InsuranceCapitalLayer` impl `0x06d4…9670` | no | core vault |
-| `ShareToken` impl `0xb527…21d4` | no | ERC-20 reUSD |
-| `SharePriceCalculator` `0xd1D1…05B8` | no | stores reUSD price |
-| `PriceRouter` `0xFe76…Fb66` | **no** | source file contains `@chainlink/` only in foundry path remappings, not in contract logic |
-| `SharePriceOracle` `0x0764…b6bb` | **no** | same — path remapping only |
-| `SimpleOracle` `0xb6aD…fB4D` | **yes** | wraps Chainlink `sUSDe/USD` [`0xFF3BC18c…aD099`](https://etherscan.io/address/0xFF3BC18cCBd5999CE63E788A1c250a88626aD099); used only for the **sUSDe collateral-pricing leg**, not for reUSD and not for reserves |
+**Bottom line:**
 
-The only onchain Chainlink aggregator consumed by any Re contract is the **sUSDe/USD price feed**. No PoR aggregator, no `latestRoundData` call against a reserves feed, no Chainlink Functions client, no CCIP receiver that emits proof-of-reserve data.
+- "JSON price feed pushed via Chainlink" → **true** (Functions + Automation, verified onchain).
+- "Published via Chainlink oracle (for offchain bank balances)" → **not verified**; no such feed exists in Chainlink's registry and no Re contract reads one.
+- "Proof-of-reserves, publicly auditable" → **overclaim**; reserve assurance is (a) direct onchain balance audit of the ICL/vault/custodian addresses and (b) The Network Firm's offchain AUP — there is no Chainlink-signed reserves oracle to cross-check either.
 
-**3. Chainlink's own media** — a search of `blog.chain.link` and `chain.link` for *"Re Protocol"*, *"re.xyz"*, *"reUSD"*, *"Resilience"* returned no announcement, case study, or press release about a Re Protocol integration. The ~440 blog hits for *"Re Protocol"* are coincidental uses of the words (restaking protocols, etc.), not Re-the-reinsurance-project.
-
-**Interpretation:**
-
-- The daily reserve attestation **does** happen — The Network Firm is a real accounting firm, and Re publishes balances on its transparency dashboard.
-- But the *"published via Chainlink / proof-of-reserves publicly auditable"* language in Re's docs **is not backed by a deployed Chainlink PoR feed we could locate**, public or private.
-- Possible benign explanations: an internal / unpublished Chainlink Functions job that writes to an off-chain dashboard only; a planned integration that was later descoped; marketing language carried over from earlier design decks.
-- Whatever the reason, the **downstream risk implications are the same**: reserve assurance for reUSD depends on (a) the onchain balances one can audit directly (as done in Funds Management → Collateralization) and (b) trust in The Network Firm's offchain attestation. **There is no independent Chainlink-signed onchain reserves oracle to fall back on.**
-
-**Action:** treat all "Chainlink PoR" / "publicly auditable proof-of-reserves" statements in Re's marketing as **not onchain-verified**. If Re is asked about this, useful follow-ups are: *"What is the Chainlink PoR feed address on mainnet?"*, *"Which Chainlink data job writes these values?"*, *"Is the PoR contract verified on Etherscan?"* — each would produce a specific, checkable artefact. Absent such an artefact, reserve provability is The Network Firm's AUP, not Chainlink.
+**Action:** when evaluating "Chainlink" claims in Re's docs, distinguish between Chainlink Functions + Automation (used for the share price, real and audited) vs a Chainlink PoR aggregator for reserves (does not exist onchain). If Re asserts the latter in conversation, ask for the aggregator address — it should be in Chainlink's mainnet directory and verifiable on Etherscan.
