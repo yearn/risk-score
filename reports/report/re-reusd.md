@@ -19,7 +19,7 @@ reUSD accrues yield daily via a dual-source yield floor. At each daily valuation
 
 The chosen "Applicable APY" is converted to a daily rate, and reUSD's **token price** (not quantity) increases daily. Current APY is approximately 6-9+%.
 
-**Onchain price mechanism (verified Apr 17, 2026):** The reUSD price is NOT sourced from a Chainlink feed. It is stored in the `SharePriceCalculator` contract at [`0xd1D104a7515989ac82F1AFDa15a23650411b05B8`](https://etherscan.io/address/0xd1D104a7515989ac82F1AFDa15a23650411b05B8) and updated by an EOA holding `PRICE_SETTER_ROLE` via `setSharePrice(uint256)`. The deployed implementation contains **no onchain guardrail** (only `newPrice != 0` is checked):
+**Onchain price mechanism (verified Apr 17, 2026):** The reUSD price is NOT sourced from a Chainlink aggregator. It is stored in the `SharePriceCalculator` contract at [`0xd1D104a7515989ac82F1AFDa15a23650411b05B8`](https://etherscan.io/address/0xd1D104a7515989ac82F1AFDa15a23650411b05B8) and updated by an EOA holding `PRICE_SETTER_ROLE` via `setSharePrice(uint256)`. The deployed implementation contains **no onchain guardrail** (only `newPrice != 0` is checked):
 
 ```solidity
 function setSharePrice(uint256 newPrice) external onlyRole(PRICE_SETTER_ROLE) {
@@ -29,13 +29,13 @@ function setSharePrice(uint256 newPrice) external onlyRole(PRICE_SETTER_ROLE) {
 }
 ```
 
-Any "daily oracle guardrail" (e.g. 25 bps max daily change) described in protocol docs is therefore enforced **offchain by the setter**, not by the deployed contract. Chainlink may still be used for Proof-of-Reserve attestations (TODO: verify PoR feed).
+Any "daily oracle guardrail" (e.g. 25 bps max daily change) described in protocol docs is therefore enforced **offchain by the setter**, not by the deployed contract. A downstream `PriceRouter` [`0xFe76cF5eD606593fB7764f33627B8D7E0f9Fab66`](https://etherscan.io/address/0xFe76cF5eD606593fB7764f33627B8D7E0f9Fab66) wraps the calculator via a `SharePriceOracle` at [`0x0764BFa862164D28799F31e7e1e7206F5177B6bB`](https://etherscan.io/address/0x0764BFa862164D28799F31e7e1e7206F5177B6bB). The same router feeds sUSDe pricing via a `SimpleOracle` wrapper [`0xb6aD3633cB3FAfed3D375d8c64240f122E19fB4D`](https://etherscan.io/address/0xb6aD3633cB3FAfed3D375d8c64240f122E19fB4D) around Chainlink's `sUSDe/USD` feed [`0xFF3BC18cCBd5999CE63E788A1c250a88626aD099`](https://etherscan.io/address/0xFF3BC18cCBd5999CE63E788A1c250a88626aD099) — so Chainlink is used for the sUSDe leg only, not for reUSD's own share price. No Chainlink Proof-of-Reserve feed is consumed onchain by Re's deployed contracts; any "Chainlink PoR" described in docs is offchain publishing only.
 
 **Capital Deployment:**
 - Users deposit admitted assets (e.g., USDC) into the Insurance Capital Layer (ICL) smart contracts and receive reUSD
 - A portion of the pool is converted into cash/T-Bills held in a **§114 Reinsurance Trust Account**, providing regulatory collateral to a Cayman-domiciled partner reinsurer (licensed by CIMA under Class B(iii))
 - The offchain entity issues **Surplus Notes** to the ICL, contractually locking in principal protection and an interest rate matching the Applicable APY
-- Offchain balances are attested daily by **The Network Firm** (with read-only account access) and published through a **Chainlink Proof-of-Reserve feed** (TODO: identify feed address onchain). The reUSD *share price* itself is written directly via `setSharePrice` on the Share Price Calculator — it is not a Chainlink-aggregated feed.
+- Offchain balances are attested daily by **The Network Firm** (with read-only account access). The protocol's docs and marketing reference Chainlink Proof-of-Reserve — onchain investigation shows no Chainlink PoR feed is consumed by Re's deployed contracts. The reUSD *share price* is written directly via `setSharePrice` on the Share Price Calculator; Chainlink is used only for sUSDe pricing (Chainlink sUSDe/USD feed [`0xFF3BC18cCBd5999CE63E788A1c250a88626aD099`](https://etherscan.io/address/0xFF3BC18cCBd5999CE63E788A1c250a88626aD099)).
 
 **Key metrics (Apr 17, 2026):**
 - reUSD Price: ~$1.072 ([CoinGecko](https://www.coingecko.com/en/coins/re-protocol-reusd)); verified onchain as `1.0724` via Share Price Calculator `getSharePrice()`
@@ -80,8 +80,13 @@ Any "daily oracle guardrail" (e.g. 25 bps max daily change) described in protoco
 | Daily Instant Redemption Vault | [`0x5C454f5526e41fBE917b63475CD8CA7E4631B147`](https://etherscan.io/address/0x5C454f5526e41fBE917b63475CD8CA7E4631B147) |
 | Instant Redemption (impl., fee + limits) | [`0xa31DeeBB3680A3007120e74bcBdf4dF36F042a40`](https://etherscan.io/address/0xa31DeeBB3680A3007120e74bcBdf4dF36F042a40) |
 | Instant Redemption Interaction | [`0x8aEb9453EF22Cb38abC7a3Af9c208F65C1BfE31e`](https://etherscan.io/address/0x8aEb9453EF22Cb38abC7a3Af9c208F65C1BfE31e) |
-| Share Token Minter/Burner | [`0x0dFb42aa18CEeD719617cd554304F6cA412A6b18`](https://etherscan.io/address/0x0dFb42aa18CEeD719617cd554304F6cA412A6b18) |
+| Share Token Minter/Burner (LZ wrapper) | [`0x0dFb42aa18CEeD719617cd554304F6cA412A6b18`](https://etherscan.io/address/0x0dFb42aa18CEeD719617cd554304F6cA412A6b18) |
+| ReMintBurnAdapter (LayerZero OFT) | [`0x2BB4046022B9161f3F84Ad8E35cac1d5946e0e85`](https://etherscan.io/address/0x2BB4046022B9161f3F84Ad8E35cac1d5946e0e85) |
 | Redemption Reserve Calculator | [`0x7E499842E7634cce793FFD5D44383BB4a2F086e0`](https://etherscan.io/address/0x7E499842E7634cce793FFD5D44383BB4a2F086e0) |
+| PriceRouter | [`0xFe76cF5eD606593fB7764f33627B8D7E0f9Fab66`](https://etherscan.io/address/0xFe76cF5eD606593fB7764f33627B8D7E0f9Fab66) |
+| SharePriceOracle (reUSD PriceFeed) | [`0x0764BFa862164D28799F31e7e1e7206F5177B6bB`](https://etherscan.io/address/0x0764BFa862164D28799F31e7e1e7206F5177B6bB) |
+| SimpleOracle (sUSDe PriceFeed wrapper) | [`0xb6aD3633cB3FAfed3D375d8c64240f122E19fB4D`](https://etherscan.io/address/0xb6aD3633cB3FAfed3D375d8c64240f122E19fB4D) |
+| Chainlink sUSDe/USD aggregator | [`0xFF3BC18cCBd5999CE63E788A1c250a88626aD099`](https://etherscan.io/address/0xFF3BC18cCBd5999CE63E788A1c250a88626aD099) |
 | AccessManager (OZ v5) | [`0x3f0DA1C363e34802C6f12F9C27276dC0e6696FD8`](https://etherscan.io/address/0x3f0DA1C363e34802C6f12F9C27276dC0e6696FD8) |
 | Governance Safe (3-of-5) | [`0x8EEc10616802Ef639ca55C98Ac856553FadeFbAd`](https://etherscan.io/address/0x8EEc10616802Ef639ca55C98Ac856553FadeFbAd) |
 | Timelock Controller | [`0x69dDEa332723cF5407151aAF68B9b076557FCA93`](https://etherscan.io/address/0x69dDEa332723cF5407151aAF68B9b076557FCA93) |
@@ -161,7 +166,7 @@ reUSD is an **ERC-20 deposit token** that uses a **price-appreciation model** (n
 - Users receive reUSD tokens representing their deposit
 - The reUSD token price increases daily based on the Applicable APY
 - The price is stored onchain in the Share Price Calculator and updated by the `PRICE_SETTER_ROLE` holder (EOA) via `setSharePrice(uint256)`. The contract performs no deviation check beyond `newPrice != 0` (verified onchain, see Overview). The "daily 25 bps guardrail" cited in protocol docs is **offchain** (enforced by the setter), not an onchain invariant — flagged as a centralization/trust concern in scoring.
-- The Network Firm performs daily offchain attestations; Chainlink Proof-of-Reserve is used for reserve attestations (TODO: identify PoR feed address onchain).
+- The Network Firm performs daily offchain attestations. **No Chainlink PoR feed is consumed onchain by Re's contracts** — the deployed `PriceRouter` uses a custom `SharePriceOracle` that reads the Share Price Calculator directly. Chainlink PoR publishing (if any) is external / informational (e.g. for RWA.xyz dashboards).
 - **NAV formula**: `(Spread/365) + max[sUSDe(T)/sUSDe(T-7d) - 1 ; TBILL(T)/TBILL(T-7d) - 1] × (undeployed capital / total capital) + SOFR × (deployed capital / total capital)`. Spread = 250 bps.
 
 ### Capital Deployment
@@ -208,7 +213,7 @@ reUSDe is the protocol's junior/first-loss tranche ([docs](https://docs.re.xyz/i
 ### Accessibility
 
 - **Deposits**: KYC/AML required (via SumSub and Chainalysis). Users must pass KYC checks because a portion of protocol capital is deployed with a Cayman-regulated reinsurance company (CIMA-regulated)
-- **Instant Redemption**: Available from the onchain instant liquidity buffer via `redeemInstant(uint256 shares, uint256 minPayout)` at [`0x8aEb9453EF22Cb38abC7a3Af9c208F65C1BfE31e`](https://etherscan.io/address/0x8aEb9453EF22Cb38abC7a3Af9c208F65C1BfE31e) (which delegates to the `InstantRedemption` implementation at [`0xa31DeeBB3680A3007120e74bcBdf4dF36F042a40`](https://etherscan.io/address/0xa31DeeBB3680A3007120e74bcBdf4dF36F042a40)). Atomic, same-block settlement. **Onchain-verified parameters** on Apr 17, 2026: `minRedemption = 0.01 reUSD` (`1e16`), `maxRedemption = 1,000,000 reUSD` (`1e24`), `dailyLimitBps = 2000` (20% of capacity), `userLimitBps = 1000` (10% per wallet), `feeBps = 6` (0.06%), `dayPayoutToken = sUSDe` (0x9D39A5DE30e57443BfF2A8307A4256c8797A3497). At the fastest drain rate, ~5 days to exhaust all liquid onchain reserves (20% per day). **Note:** the docs claim a `$250` minimum — onchain the contract minimum is far lower (0.01 reUSD). TODO: confirm whether the `$250` figure is an app-level UX gate.
+- **Instant Redemption**: Available from the onchain instant liquidity buffer via `redeemInstant(uint256 shares, uint256 minPayout)` at [`0x8aEb9453EF22Cb38abC7a3Af9c208F65C1BfE31e`](https://etherscan.io/address/0x8aEb9453EF22Cb38abC7a3Af9c208F65C1BfE31e) (which delegates to the `InstantRedemption` implementation at [`0xa31DeeBB3680A3007120e74bcBdf4dF36F042a40`](https://etherscan.io/address/0xa31DeeBB3680A3007120e74bcBdf4dF36F042a40)). Atomic, same-block settlement. **Onchain-verified parameters** on Apr 17, 2026: `minRedemption = 0.01 reUSD` (`1e16`), `maxRedemption = 1,000,000 reUSD` (`1e24`), `dailyLimitBps = 2000` (20% of capacity), `userLimitBps = 1000` (10% per wallet), `feeBps = 6` (0.06%), `dayPayoutToken = sUSDe` (0x9D39A5DE30e57443BfF2A8307A4256c8797A3497). At the fastest drain rate, ~5 days to exhaust all liquid onchain reserves (20% per day). **Note:** the "250 reUSD minimum" previously cited in this report could not be found in the public docs (`docs.re.xyz/protocol/redemption-process-and-liquidity` mentions a "min" but gives no value) and contradicts the onchain parameter. Treat the onchain `minRedemption = 0.01 reUSD` as the authoritative floor; any `$250` figure, if it exists, is a front-end UX gate in `app.re.xyz`, not a contract-level invariant.
 - **Windowed Redemption**: Once instant buffer is exhausted, the protocol opens a redemption window (minimum 24 hours). Requests fulfilled pro-rata based on available capital. Proceeds must be claimed within two months.
 - **DEX Trading**: Can be traded on Fluid (reUSD/USDT ~$11.6M — note: USDT not USDC) and multiple Curve pools (reUSD/scrvUSD, reUSD/sfrxUSD, reUSD/sUSDe, reUSD/USDC, reUSD/fxUSD) totaling **~$26.2M** Ethereum DEX liquidity on Apr 17, 2026 (sources: DeFi Llama yields API).
 - **Not available to U.S. persons**
@@ -225,7 +230,7 @@ reUSDe is the protocol's junior/first-loss tranche ([docs](https://docs.re.xyz/i
 
 ### Provability
 
-- **reUSD price**: Written directly onchain via `setSharePrice(uint256)` by an EOA holding `PRICE_SETTER_ROLE`. **Not computed programmatically onchain** — price is derived offchain (Network Firm attestation) and pushed in by the setter; the contract has no deviation cap.
+- **reUSD price**: Written directly onchain via `setSharePrice(uint256)` by an EOA holding `PRICE_SETTER_ROLE`. **Not computed programmatically onchain** — price is derived offchain (Network Firm attestation) and pushed in by the setter; the contract has no deviation cap. Downstream `PriceRouter` [`0xFe76cF5eD606593fB7764f33627B8D7E0f9Fab66`](https://etherscan.io/address/0xFe76cF5eD606593fB7764f33627B8D7E0f9Fab66) exposes this value to dependent contracts.
 - **Onchain reserves**: Visible onchain via the ICL contract and Redemption Reserves Custodian
 - **Offchain reserves**: Attested daily by The Network Firm (third-party accountant with read-only access) and published via Chainlink Proof of Reserve
 - **Insurance performance**: Reinsurance returns are inherently offchain and depend on claim experience over multi-year treaty periods
@@ -233,7 +238,7 @@ reUSDe is the protocol's junior/first-loss tranche ([docs](https://docs.re.xyz/i
 - **MINTER_ROLE holders (verified via RoleGranted logs on Apr 17, 2026)**: THREE contracts hold the role, not one:
   1. `InsuranceCapitalLayer` [`0x4691C475bE804Fa85f91c2D6D0aDf03114de3093`](https://etherscan.io/address/0x4691C475bE804Fa85f91c2D6D0aDf03114de3093) — backed mint path.
   2. `InstantRedemption` [`0xa31DeeBB3680A3007120e74bcBdf4dF36F042a40`](https://etherscan.io/address/0xa31DeeBB3680A3007120e74bcBdf4dF36F042a40) — burns reUSD on redemption; uses MINTER_ROLE because `mint` and `burn` typically share the role in this codebase.
-  3. `ShareTokenMinterBurner` [`0x0dFb42aa18CEeD719617cd554304F6cA412A6b18`](https://etherscan.io/address/0x0dFb42aa18CEeD719617cd554304F6cA412A6b18) — cross-chain / adapter minter; exposes bare `mint(address,uint256)` and `burn(address,uint256)` gated by an `adapter` it calls into ([`0x2BB4046022B9161f3F84Ad8E35cac1d5946e0e85`](https://etherscan.io/address/0x2BB4046022B9161f3F84Ad8E35cac1d5946e0e85)). TODO: verify adapter access controls and confirm whether this path can mint without backing on Ethereum.
+  3. `ShareTokenMinterBurner` [`0x0dFb42aa18CEeD719617cd554304F6cA412A6b18`](https://etherscan.io/address/0x0dFb42aa18CEeD719617cd554304F6cA412A6b18) — **LayerZero OFT wrapper**. Only the registered `adapter` can call `mint`/`burn`. The `adapter` is `ReMintBurnAdapter` [`0x2BB4046022B9161f3F84Ad8E35cac1d5946e0e85`](https://etherscan.io/address/0x2BB4046022B9161f3F84Ad8E35cac1d5946e0e85), a LayerZero OFT with onchain rate limits of `2,500,000 reUSD / 24h` (inbound and outbound) per peer chain. There is no token-level backing check on this mint path by design — cross-chain OFTs conserve supply by burning on the source chain. **Risk:** both `ShareTokenMinterBurner.owner` and `ReMintBurnAdapter.owner` are the **same EOA** [`0x6C15B25E9750Dccb698C1a4023f34015bFe57649`](https://etherscan.io/address/0x6C15B25E9750Dccb698C1a4023f34015bFe57649) (~0.099 ETH balance). Compromise of this key would let an attacker redirect the adapter and mint up to the 2.5M/day rate limit on Ethereum per connected peer chain.
 - If `MINTER_ROLE` were granted to another address via Governance Safe, that address could mint without a backing check at the token layer.
 
 ## Liquidity Risk
@@ -303,7 +308,7 @@ Total lending integrations support over $100M in borrow demand per the DD questi
 
 ### Programmability
 
-- **reUSD price**: **NOT programmatic**. Set by an EOA (`PRICE_SETTER_ROLE` holder) via `setSharePrice(uint256)` on the Share Price Calculator. Offchain yield calculation (risk-free rate or Ethena basis yield + 250 bps) is asserted by The Network Firm; published via Chainlink PoR (TODO: identify feed). **The deployed `setSharePrice` has no onchain guardrail** — only `newPrice != 0` is enforced; any 25 bps daily cap is an offchain convention.
+- **reUSD price**: **NOT programmatic**. Set by an EOA (`PRICE_SETTER_ROLE` holder) via `setSharePrice(uint256)` on the Share Price Calculator. Offchain yield calculation (risk-free rate or Ethena basis yield + 250 bps) is asserted by The Network Firm. **No Chainlink PoR feed is consumed onchain by Re's contracts** — Chainlink is used only for the sUSDe leg of the PriceRouter. **The deployed `setSharePrice` has no onchain guardrail** — only `newPrice != 0` is enforced; any 25 bps daily cap is an offchain convention.
 - **Deposits**: Require KYC verification through the KYC Registry contract
 - **Redemptions**: Instant redemptions are programmatic (from buffer). Quarterly redemptions involve admin-managed processes
 - **Capital deployment**: Offchain, managed by the protocol team through the Fireblocks custody infrastructure
@@ -388,11 +393,21 @@ Total lending integrations support over $100M in borrow demand per the DD questi
 - **CoinGecko reUSD price**: Monitor for deviations from expected share price.
   - **Alert**: If CoinGecko price deviates >2% from onchain share price.
 
+### Cross-Chain / LayerZero Monitoring
+
+- **ReMintBurnAdapter** (LayerZero OFT): [`0x2BB4046022B9161f3F84Ad8E35cac1d5946e0e85`](https://etherscan.io/address/0x2BB4046022B9161f3F84Ad8E35cac1d5946e0e85)
+  - **Alert**: On `OwnershipTransferred`, `PeerSet`, or `Paused/Unpaused` events.
+  - **Alert**: On any change to inbound/outbound rate limits (current: 2.5M reUSD/24h per peer).
+- **ShareTokenMinterBurner**: [`0x0dFb42aa18CEeD719617cd554304F6cA412A6b18`](https://etherscan.io/address/0x0dFb42aa18CEeD719617cd554304F6cA412A6b18)
+  - **Alert**: On `AdapterSet` (change of authorized mint/burn caller) or `OwnershipTransferred`.
+- **PriceRouter**: [`0xFe76cF5eD606593fB7764f33627B8D7E0f9Fab66`](https://etherscan.io/address/0xFe76cF5eD606593fB7764f33627B8D7E0f9Fab66)
+  - **Alert**: On `PriceFeedSet` / `PriceFeedRemoved` events (any change to how reUSD or sUSDe are priced).
+
 ### Offchain Reserve Monitoring
 
-- **Chainlink Proof of Reserve**: Monitor for daily attestation updates.
+- **The Network Firm daily attestation**: Track daily publication of the offchain reserve attestation (via the Re team's transparency dashboard). No Chainlink PoR feed is consumed onchain, so alerting must target The Network Firm's publication channel, not an onchain aggregator.
   - **Alert**: If attestation is not updated for >48 hours.
-  - **Alert**: If reported reserves fall below total reUSD supply * share price.
+  - **Alert**: If reported reserves fall below total reUSD supply × share price.
 
 ### Monitoring Frequency
 
@@ -414,7 +429,7 @@ Total lending integrations support over $100M in borrow demand per the DD questi
 ### Key Strengths
 
 - **Principal protection with deep capital structure**: reUSD is the senior tranche with 0.03% modeled loss likelihood at 135% combined ratio. Re Capital (~$73M) and reUSDe provide subordinated first-loss protection.
-- **Strong underwriting track record (per LP memo / intro deck, not independently verifiable)**: ~92% combined ratio across 3 consecutive years (2022-2024), outperforming industry average (93-95%). No capital impairment or reserve deterioration. $178M gross written premium. TODO: independent confirmation of combined-ratio figures.
+- **Strong underwriting track record (per LP memo / intro deck, not independently verifiable)**: ~92% combined ratio across 3 consecutive years (2022-2024), outperforming industry average (93-95%). No capital impairment or reserve deterioration. $178M gross written premium. Third-party sources consulted: LlamaRisk (no published report on reUSD as of Apr 17, 2026) and Steakhouse (no archived review); no independent re-statement of these ratios was found. Treat as management-asserted until an external attestation (beyond The Network Firm AUP, which covers reserve accounting rather than combined ratios) is published.
 - **Third-party reserve verification**: The Network Firm provides daily independent attestation of offchain reserves, published via Chainlink Proof of Reserve. AUP report published.
 - **Regulatory framework**: Partner reinsurer is CIMA-regulated. Capital held in §114 Reinsurance Trust at NAIC-compliant banks (Coinbase, Wells Fargo).
 - **Comprehensive audit coverage**: 5+ audits across 3 firms (Hacken, Certora, The Network Firm), including formal verification and dedicated NAV oracle audit.
@@ -426,7 +441,7 @@ Total lending integrations support over $100M in borrow demand per the DD questi
 - **Offchain price setter with no onchain guardrail**: reUSD price is set via direct `setSharePrice(uint256)` by an EOA with `PRICE_SETTER_ROLE`. The deployed Share Price Calculator enforces only `newPrice != 0`; any "25 bps daily max" mentioned in docs is an offchain convention, not an onchain invariant. A compromised setter can instantly write an arbitrary positive price. This is a fundamental centralization risk.
 - **Significant offchain capital deployment**: Majority of assets are deployed offchain into §114 Trust and reinsurance programs. This introduces counterparty risk with the trust bank, partner reinsurer, and custodians that cannot be verified fully onchain.
 - **Instant redemption vault holds no USDC**: The Daily Instant Redemption Vault holds `0` USDC + `6.188M` sUSDe. The Redemption Reserves Custodian (EOA) holds `0` USDC + `53.263M` sUSDe. `dayPayoutToken` is sUSDe — USDC-denominated instant exits are unavailable under the current config.
-- **Three MINTER_ROLE holders on reUSD, not one**: Beyond the ICL, `InstantRedemption` and `ShareTokenMinterBurner` also hold MINTER_ROLE. The ICL path enforces backing via `safeTransferFrom`; the other two need independent review to confirm no unbacked-mint path is reachable.
+- **Three MINTER_ROLE holders on reUSD**: Beyond the ICL, `InstantRedemption` and `ShareTokenMinterBurner` also hold MINTER_ROLE. The ICL path enforces backing via `safeTransferFrom`. `InstantRedemption` uses the role for burns during redemption. `ShareTokenMinterBurner` is a LayerZero OFT wrapper — its mint path has no backing check by design (supply is conserved cross-chain), but the OFT adapter [`0x2BB4046022B9161f3F84Ad8E35cac1d5946e0e85`](https://etherscan.io/address/0x2BB4046022B9161f3F84Ad8E35cac1d5946e0e85) and the wrapper are both owned by the **same EOA** [`0x6C15B25E9750Dccb698C1a4023f34015bFe57649`](https://etherscan.io/address/0x6C15B25E9750Dccb698C1a4023f34015bFe57649) (not a multisig). Compromise of that key would let an attacker repoint the adapter and mint up to `2,500,000 reUSD / 24h / peer` (onchain rate limit) on Ethereum without backing.
 - **DEX liquidity improved but still limited**: ~$26.2M across Fluid and Curve (~14.0% of ~$186.7M market cap). Significant improvement from ~$450K.
 - **KYC gating**: All deposits and redemptions require KYC. This limits the universe of users who can exit and creates regulatory/jurisdictional risk.
 - **Quarterly redemption queue**: Once instant buffer is exhausted, redemptions are windowed and pro-rata. Capital release from reinsurance programs is reevaluated quarterly (per DD).
@@ -492,7 +507,8 @@ Total lending integrations support over $100M in borrow demand per the DD questi
 
 **Subcategory C: External Dependencies**
 
-- Chainlink for Proof-of-Reserve (TODO: verify feed address). The reUSD *share price* itself is not sourced from Chainlink — it is an onchain storage value written by a role-holding EOA.
+- Chainlink: used onchain only for the sUSDe/USD leg of the `PriceRouter` (feed [`0xFF3BC18cCBd5999CE63E788A1c250a88626aD099`](https://etherscan.io/address/0xFF3BC18cCBd5999CE63E788A1c250a88626aD099), 24h staleness, min $1.18 / max $2.00 price bounds). Not used onchain for reUSD share price; no Chainlink PoR feed is consumed onchain.
+- **LayerZero**: cross-chain reUSD transport via `ReMintBurnAdapter` OFT [`0x2BB4046022B9161f3F84Ad8E35cac1d5946e0e85`](https://etherscan.io/address/0x2BB4046022B9161f3F84Ad8E35cac1d5946e0e85). Active peers: Avalanche (eid 30106), Arbitrum (30110), Base (30184), BNB (30102). Rate limit: 2,500,000 reUSD per 24h inbound AND outbound per chain (onchain-verified).
 - The Network Firm for daily attestations
 - Ethena for basis-trade yield source
 - Fireblocks for custody
@@ -710,7 +726,8 @@ Fund Flow:
   ICL ──sweep──► Custodial Wallet ──deploy──► §114 Trust (offchain)
   §114 Trust ──surplus notes──► ICL (principal + yield guarantee)
   Network Firm attestation ──► PRICE_SETTER EOA ──► setSharePrice on Share Price Calc ──► reUSD price
-  Chainlink PoR ◄── Network Firm  (reserve attestation; TODO identify feed)
+  Network Firm ──► offchain reserve attestation (no Chainlink PoR consumed onchain)
+  Chainlink sUSDe/USD ──► SimpleOracle ──► PriceRouter (sUSDe leg only)
 
 Trust Boundaries:
   ⚠ Onchain/offchain boundary at ICL Custodial Wallet sweep
