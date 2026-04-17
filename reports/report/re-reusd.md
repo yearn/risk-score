@@ -32,19 +32,11 @@ The chosen "Applicable APY" is converted to a daily rate, and reUSD's **token pr
 - 24h Trading Volume: ~$7.3M (CoinGecko)
 - TVL (DeFi Llama): ~$198.1M ([DeFi Llama](https://defillama.com/protocol/re))
 - Total Deposits (Transparency Dashboard): ~$196.8M
-- Re Protocol Written Premiums (2025): $168.8M
-- Reinsurance Capacity Unlocked: >$134M
 
 **Links:**
 
 - [Protocol Documentation](https://docs.re.xyz/)
 - [Protocol App (reUSD)](https://app.re.xyz/reusd)
-- [What is reUSD?](https://docs.re.xyz/insurance-capital-layers/what-is-reusd)
-- [How the Re Protocol Works](https://docs.re.xyz/protocol/how-the-re-protocol-works)
-- [Security and Audits](https://docs.re.xyz/security-and-audits)
-- [Smart Contract Addresses](https://docs.re.xyz/protocol/smart-contract-addresses)
-- [Investor Protections](https://docs.re.xyz/investor-protections-and-risk-management)
-- [Redemption Process and Liquidity](https://docs.re.xyz/protocol/redemption-process-and-liquidity)
 - [DeFiLlama](https://defillama.com/protocol/re)
 - [CoinGecko](https://www.coingecko.com/en/coins/re-protocol-reusd)
 - [RWA.xyz](https://app.rwa.xyz/assets/reUSD)
@@ -116,7 +108,7 @@ Re Protocol has 4 public smart-contract audit reports from Hacken and Certora, p
 | 2 | Dec 2024 | Smart Contract Audit | Hacken | Follow-up audit, issues remediated | [Hacken](https://hacken.io/audits/re-protocol/sca-re-re-contracts-nov2024/) |
 | 3 | Apr 2025 | NAV Oracle Audit | Hacken | Scope: the Chainlink-Functions-based `NAVConsumer` + related code at `github.com/resilience-foundation/nav-oracle` (commits `ee7e98…` / `e3dd86ef…`). 8 findings, all resolved. The audited contract IS deployed and active onchain at [`0x84d4eaeb10f9e57b67622f667c6c13e22fa4b2b6`](https://etherscan.io/address/0x84d4eaeb10f9e57b67622f667c6c13e22fa4b2b6), holds `PRICE_SETTER_ROLE` on the `SharePriceCalculator`, and runs daily at 23:45 UTC. | [Hacken](https://hacken.io/audits/re-protocol/sca-re-nav-oracle-mar2025/) |
 | 4 | Sep 2025 | Re Core (comprehensive) | Certora | 13 issues identified, all addressed and fixed. Formal verification and manual review. | [Certora](https://www.certora.com/reports/re-core) |
-| 5 | 2025 | Agreed-Upon Procedures (reserve/custody verification; not a smart-contract audit) | The Network Firm | Independent verification of offchain operational controls and reserve attestation | [AUP Report](https://storage.googleapis.com/foundation-files/AUP-Report-2025.pdf) |
+| 5 | Oct 2025 | Agreed-Upon Procedures (reserve/custody verification; not a smart-contract audit) | The Network Firm | Independent verification of offchain operational controls and reserve attestation | [AUP Report](https://storage.googleapis.com/foundation-files/AUP-Report-2025.pdf) |
 
 ### Hacken Aug 2024 Findings (Detail)
 
@@ -166,7 +158,7 @@ reUSD is an **ERC-20 deposit token** that uses a **price-appreciation model** (n
 
 ### Reinsurance Portfolio (summary)
 
-Re reinsures a ~$174M diversified portfolio of U.S. insurance programs across 26+ active reinsurance contracts. Re classifies the book as "low-volatility" and claims a ~92% combined ratio over 2022-2024 with no capital impairment. Stress testing asserted by Re gives reUSD a 0.03% loss likelihood at a 135% combined ratio (reUSDe 0.9%, Re Capital 3.9%). **All portfolio composition, combined-ratio, ROE, pipeline, and stress-testing figures are sourced from Re's own LP memo and intro deck — none are independently verified.** Full figures with source tags are in [Appendix: Reinsurance Portfolio & Performance Claims (Re-provided)](#appendix-reinsurance-portfolio--performance-claims-re-provided).
+Re reinsures a ~$174M diversified portfolio of U.S. insurance programs across 26+ active reinsurance contracts. Re classifies the book as "low-volatility" and claims a ~92% combined ratio over 2022-2024 with no capital impairment. Stress testing asserted by Re gives reUSD a 0.03% loss likelihood at a 135% combined ratio (reUSDe 0.9%, Re Capital 3.9%). **All portfolio composition, combined-ratio, ROE, pipeline, and stress-testing figures are sourced from Re's own LP memo and intro deck — none are independently verified.**
 
 ### Capital Structure: reUSDe (Junior Tranche)
 
@@ -271,21 +263,6 @@ Re's marketing attaches modeled impairment likelihoods to each threshold (Re Cap
 2. **Quarterly Redemption**: Processed pro-rata with available capital not reserved for reinsurance plus actuarially released funds
 3. **DEX Swap**: Sell reUSD on Curve reUSD/USDC pool
 
-### DEX Liquidity (Apr 17, 2026, source: DeFi Llama yields API)
-
-**Pools labelled "reUSD" that actually belong to Resupply Protocol** (token `0x57aB1E0003F623289CD798B1824Be09a793e4Bec`), not Re Protocol — EXCLUDED from Re's liquidity totals:
-
-| Project | Pool | TVL | Correction |
-|---------|------|-----|------------|
-| Curve | reUSD/scrvUSD | ~$8.32M | Resupply reUSD |
-| Curve | reUSD/sfrxUSD | ~$2.36M | Resupply reUSD |
-| Curve | reUSD/fxUSD | ~$520K | Resupply reUSD |
-| Convex | reUSD/scrvUSD | ~$6.68M | Resupply reUSD |
-| Convex | reUSD/sfrxUSD | ~$1.47M | Resupply reUSD |
-| Yearn | reUSDscrv | ~$1.81M | Resupply reUSD |
-| Beefy | reUSD/scrvUSD | ~$1.45M | Resupply reUSD |
-| Stake-DAO | reUSD/scrvUSD, reUSD/sfrxUSD | ~$1.31M | Resupply reUSD |
-
 ### DeFi Integrations
 
 Onchain-verified integrations that consume **Re Protocol's reUSD** (`0x5086…0c72`):
@@ -300,8 +277,6 @@ Onchain-verified integrations that consume **Re Protocol's reUSD** (`0x5086…0c
 | Beefy | Vault | reUSD auto-compounding vault (~$786K). |
 | Stake-DAO | Vault | reUSD vault (~$428K). |
 | Blackhole (Avalanche) | DEX | reUSD/USDC pools on Blackhole CLMM + AMM (~$962K + ~$510K ≈ $1.47M). |
-
-**Integrations where we could not verify Re reUSD usage onchain (Apr 17, 2026):** Euler, Silo, TermMax. These are listed in Re marketing materials as "reUSD as collateral" but no Re reUSD (`0x5086…0c72`) holdings were found in their markets via the DeFi Llama yields API. Treat as unverified.
 
 Combined ~$69.3M of Re reUSD is supplied into Fluid + Morpho lending markets onchain.
 
@@ -396,18 +371,16 @@ Combined ~$69.3M of Re reUSD is supplied into Fluid + Morpho lending markets onc
   - **ICL Custodial Wallet (EOA)**: [`0x295F67Fdb21255A3Db82964445628a706FBe689E`](https://etherscan.io/address/0x295F67Fdb21255A3Db82964445628a706FBe689E) — current balance ~$24.4M.
     - **Alert (Critical)**: Any transfer (USDC / USDT / USDe / sUSDe) to a destination NOT on the historical allow-list (Ethena sUSDe/USDe contracts, Redemption Reserves Custodian, Daily Instant Redemption Vault, Fireblocks-pattern sweep addresses beginning `0x34b6…`). First-time destinations = incident.
     - **Alert (High)**: Any outbound transfer >$1M.
-    - **Alert (Medium)**: Sequential transfers draining ≥10% of balance within 24h.
   - **Redemption Reserves Custodian (EOA)**: [`0x9eA38e09F41A9DE53972a68268BA0Dcc6d2fAdf8`](https://etherscan.io/address/0x9eA38e09F41A9DE53972a68268BA0Dcc6d2fAdf8) — current balance ~$65.4M.
     - **Alert (Critical)**: Any sUSDe transfer to a destination NOT on the historical allow-list (only `0x5C45…B147` RedemptionVault and sUSDe/USDe staking contracts observed to date).
     - **Alert (High)**: Any single outbound >$5M.
-  - **Auxiliary custodian EOA `0xd4374008…B25831e9`**: [etherscan](https://etherscan.io/address/0xd4374008c88321Eb2e59ABD311156C44B25831e9) — currently holds ~$2.6M in USDe+sUSDe. Listed in AUP, role undocumented publicly.
+  - **Auxiliary custodian EOA [`0xd4374008…B25831e9`](https://etherscan.io/address/0xd4374008c88321Eb2e59ABD311156C44B25831e9)**: — currently holds ~$2.6M in USDe+sUSDe. Listed in AUP, role undocumented publicly.
     - **Alert (Critical)**: Any outbound transfer. Small size makes every movement worth a manual look.
   - **All 12 other AUP-listed addresses** (currently empty or dust): monitor for any incoming deposit >$1M and then for any subsequent outgoing transfer. Sudden use of a previously-empty AUP address is a governance signal (either new custody rotation or an unauthorized movement).
 
 - **Instant Redemption Interaction Contract**: [`0x8aEb9453EF22Cb38abC7a3Af9c208F65C1BfE31e`](https://etherscan.io/address/0x8aEb9453EF22Cb38abC7a3Af9c208F65C1BfE31e)
-  - Monitor `redeemInstant` events for redemption volume and frequency.
+  - Monitor threshold value.
   - **Alert**: On changes to daily or per-wallet redemption caps.
-  - **Alert**: If redemption reverts increase (may indicate liquidity exhaustion).
 
 ### Governance & Upgrade Monitoring
 
@@ -421,14 +394,9 @@ Combined ~$69.3M of Re reUSD is supplied into Fluid + Morpho lending markets onc
   - **Alert**: On any transaction execution, owner change, or threshold change.
 
 - **Timelock Controller**: [`0x69dDEa332723cF5407151aAF68B9b076557FCA93`](https://etherscan.io/address/0x69dDEa332723cF5407151aAF68B9b076557FCA93) — the 48h delay between `CallScheduled` and `CallExecuted` is the primary review window for any privileged action; the monitor must fire the moment something is queued, not when it executes.
-  - **Alert (Critical)**: On `CallScheduled(bytes32 id, uint256 index, address target, uint256 value, bytes data, bytes32 predecessor, uint256 delay)` — decode `target` / `data` and surface the decoded function call. Every scheduled call deserves a manual review before the 48h window expires.
-  - **Alert (Critical)**: On `CallExecuted(bytes32 id, uint256 index, address target, uint256 value, bytes data)` — confirm the execution matches what was scheduled and did not diverge (OZ TimelockController replays the same payload, so any mismatch would be an upstream monitoring bug).
-  - **Alert (Critical)**: On `Cancelled(bytes32 id)` — a Safe-initiated cancel is informational; a cancel originating from anything other than the Governance Safe (`0x8EEc10…`) or addresses with `CANCELLER_ROLE` is an incident.
-  - **Alert (Critical)**: On `MinDelayChange(uint256 oldDuration, uint256 newDuration)` — any change to the 48h floor is a governance event that materially alters the trust model.
-  - **Alert (High)**: On any `RoleGranted` / `RoleRevoked` touching `PROPOSER_ROLE` (0xb09aa5aeb3702cfd50b6b62bc4532604938f21248a27a1d5ca736082b6819cc1), `EXECUTOR_ROLE` (0xd8aa0f3194971a2a116679f7c2090f6939c8d4e01a2a8d7e41d55e5351469e63), `CANCELLER_ROLE` (0xfd643c72710c63c0180259aba6b2d05451e3591a24e58b62239378085726f783), or `DEFAULT_ADMIN_ROLE`. Current holders (Apr 17, 2026): proposer/canceller/admin = Governance Safe `0x8EEc10…`; executor = EOA `0x4BFea59b…`.
-  - **Action**: maintain an allowlist of expected `target` addresses (reUSD token, ICL, Share Price Calculator, AccessManager, PriceRouter, cross-chain adapter, deposit token registry). Any scheduled call to a target off the allowlist is an incident.
-  - **Action**: decode `data` against the known ABIs and flag any of these selectors as high-severity: `upgradeTo(address)`, `upgradeToAndCall(address,bytes)`, `grantRole(bytes32,address)`, `revokeRole(bytes32,address)`, `setPriceFeed(address,address)`, `removePriceFeed(address)`, `setAdapter(address)`, `transferOwnership(address)`, `updateFee(uint16)`, `updateLimitPercentages(uint256,uint256)`, `updateRedemptionRange(uint256,uint256)`.
-
+  - **Alert**: On `CallScheduled(bytes32 id, uint256 index, address target, uint256 value, bytes data, bytes32 predecessor, uint256 delay)` — decode `target` / `data` and surface the decoded function call. Every scheduled call deserves a manual review before the 48h window expires.
+  - **Alert**: On `CallExecuted(bytes32 id, uint256 index, address target, uint256 value, bytes data)` — confirm the execution matches what was scheduled and did not diverge (OZ TimelockController replays the same payload, so any mismatch would be an upstream monitoring bug).
+  - **Alert**: On `Cancelled(bytes32 id)` — a Safe-initiated cancel is informational; a cancel originating from anything other than the Governance Safe (`0x8EEc10…`) or addresses with `CANCELLER_ROLE` is an incident.
 - **UUPS Proxy Upgrades**: Monitor for `Upgraded` events on reUSD token and ICL contracts.
   - **Alert**: Immediately on any implementation change (48-hour timelock provides review window, so this should have been preceded by a `CallScheduled` event ≥48h earlier — absence of that precursor is an incident).
 
@@ -629,10 +597,6 @@ Combined ~$69.3M of Re reUSD is supplied into Fluid + Morpho lending markets onc
 
 ### Final Score Calculation
 
-```
-Final Score = (Centralization × 0.30) + (Funds Mgmt × 0.30) + (Audits × 0.20) + (Liquidity × 0.15) + (Operational × 0.05)
-```
-
 | Category | Score | Weight | Weighted |
 |----------|-------|--------|----------|
 | Audits & Historical | 2.5 | 20% | 0.50 |
@@ -676,7 +640,7 @@ reUSD is a novel product that bridges DeFi capital with traditional reinsurance 
 ## Reassessment Triggers
 
 - **Time-based**: Reassess in 6 months (September 2026) or sooner if instant redemption vault remains empty for >30 days
-- **Governance-based**: Reassess when DAO governance is activated
+- **Governance-based**: Reassess after roles are changed, or funds are 
 - **Incident-based**: Reassess after any exploit, governance change, reinsurer insolvency, or material claim event
 - **Liquidity-based**: Reassess if DEX liquidity drops below $5M or if instant redemption vault remains empty for >30 days
 - **Regulatory-based**: Reassess if CIMA regulatory status changes or new jurisdictional restrictions apply
@@ -687,42 +651,42 @@ reUSD is a novel product that bridges DeFi capital with traditional reinsurance 
 
 ```
 ┌─────────────────────────────────────────────────────────────────────┐
-│                     VAULT / TOKEN LAYER                            │
+│                     VAULT / TOKEN LAYER                             │
 │                                                                     │
-│  ┌──────────────┐    ┌──────────────────────┐                      │
+│  ┌──────────────┐    ┌──────────────────────┐                       │
 │  │  reUSD Token  │◄──│  Share Price          │◄── PRICE_SETTER_ROLE │
 │  │  (ERC-20,     │    │  Calculator           │    (EOA calls       │
 │  │   UUPS Proxy) │    │  0xd1D1..11b05B8      │     setSharePrice)  │
 │  │  0x5086..0c72 │    └──────────────────────┘                      │
-│  └──────┬───────┘    (NAVConsumer: 10% onchain deviation cap;      │
-│                       admin EOA can bypass via direct setSharePrice) │
-│         │ mint/burn                                                  │
-│  ┌──────▼───────────────────┐    ┌─────────────────────────┐       │
-│  │  Insurance Capital Layer  │───►│  ICL Custodial Wallet    │       │
-│  │  (ICL)                    │    │  (Fireblocks)            │       │
-│  │  0x4691..3093             │    │  0x295F..689E             │       │
-│  └──────┬───────────────────┘    └───────────┬─────────────┘       │
+│  └──────┬───────┘    (NAVConsumer: 10% onchain deviation cap;       │
+│                      admin EOA can bypass via direct setSharePrice) │
+│         │ mint/burn                                                 │
+│  ┌──────▼───────────────────┐    ┌─────────────────────────┐        │
+│  │  Insurance Capital Layer  │───►│  ICL Custodial Wallet    │      │
+│  │  (ICL)                    │    │  (Fireblocks)            │      │
+│  │  0x4691..3093             │    │  0x295F..689E             │     │
+│  └──────┬───────────────────┘    └───────────┬─────────────┘        │
 │         │                                     │                     │
-│  ┌──────▼───────────────────┐                │ sweep               │
+│  ┌──────▼───────────────────┐                │ sweep                │
 │  │  Daily Instant Redemption │                ▼                     │
-│  │  Vault                    │    ┌──────────────────────┐         │
+│  │  Vault                    │    ┌──────────────────────┐          │
 │  │  0x5C45..B147             │    │  Offchain Deployment  │         │
-│  └──────────────────────────┘    │  (offchain §114 Trust)│         │
-│                                   └──────────────────────┘         │
+│  └──────────────────────────┘    │  (offchain §114 Trust)│          │
+│                                   └──────────────────────┘          │
 └─────────────────────────────────────────────────────────────────────┘
 
 ┌─────────────────────────────────────────────────────────────────────┐
 │                     PROTOCOL LAYER                                  │
 │                                                                     │
-│  ┌────────────────────┐   ┌────────────────────┐                   │
-│  │  Deposit Token      │   │  KYC Registry       │                   │
-│  │  Registry           │   │  (SumSub/Chainalysis)│                  │
-│  │  0x73d3..03F6       │   │  0x82F1..9995       │                   │
-│  └────────────────────┘   └────────────────────┘                   │
+│  ┌────────────────────┐   ┌────────────────────┐                    │
+│  │  Deposit Token      │   │  KYC Registry       │                  │
+│  │  Registry           │   │  (SumSub/Chainalysis)│                 │
+│  │  0x73d3..03F6       │   │  0x82F1..9995       │                  │
+│  └────────────────────┘   └────────────────────┘                    │
 │                                                                     │
-│  ┌────────────────────┐   ┌────────────────────┐                   │
-│  │  Decentralized Fund │   │  Redemption Reserves│                   │
-│  │  0xF044..72f2       │   │  Custodian (EOA)    │                   │
+│  ┌────────────────────┐   ┌────────────────────┐                    │
+│  │  Decentralized Fund │   │  Redemption Reserves│                  │
+│  │  0xF044..72f2       │   │  Custodian (EOA)    │                  │
 │  └────────────────────┘   │  0x9eA3..ADF8       │                   │
 │                            └────────────────────┘                   │
 └─────────────────────────────────────────────────────────────────────┘
@@ -730,50 +694,50 @@ reUSD is a novel product that bridges DeFi capital with traditional reinsurance 
 ┌─────────────────────────────────────────────────────────────────────┐
 │                     UNDERLYING LAYER                                │
 │                                                                     │
-│  ┌─────────────────┐  ┌──────────────────┐  ┌──────────────────┐  │
+│  ┌─────────────────┐  ┌──────────────────┐  ┌──────────────────┐    │
 │  │  Chainlink       │  │  The Network Firm │  │  §114 Reinsurance│  │
 │  │  (Price Feed +   │  │  (Daily offchain  │  │  Trust (U.S.)    │  │
 │  │   Proof of       │  │   attestation)    │  │  Cash + T-Bills  │  │
 │  │   Reserve)       │  │                   │  │                  │  │
-│  └─────────────────┘  └──────────────────┘  └──────────────────┘  │
+│  └─────────────────┘  └──────────────────┘  └──────────────────┘    │
 │                                                                     │
-│  ┌─────────────────┐  ┌──────────────────┐                         │
+│  ┌─────────────────┐  ┌──────────────────┐                          │
 │  │  Ethena (USDe)   │  │  Cayman Reinsurer │                        │
 │  │  (Basis trade    │  │  (CIMA-licensed,  │                        │
 │  │   yield source)  │  │   Class B(iii))   │                        │
-│  └─────────────────┘  └──────────────────┘                         │
+│  └─────────────────┘  └──────────────────┘                          │
 └─────────────────────────────────────────────────────────────────────┘
 
 ┌─────────────────────────────────────────────────────────────────────┐
 │                     GOVERNANCE                                      │
 │                                                                     │
-│  ┌─────────────────────┐  ┌─────────────────────┐                  │
-│  │  Oracle Admin EOA    │  │  Redemptions Admin   │                  │
-│  │  MPC 3-of-5 (docs)   │  │  MPC 3-of-5 (docs)   │                  │
-│  │  0x49BC..0Aee        │  │  0xEE16..47f8        │                  │
-│  │  no onchain timelock │  │  48h timelock (docs) │                  │
-│  └─────────────────────┘  └─────────────────────┘                  │
+│  ┌─────────────────────┐  ┌─────────────────────┐                   │
+│  │  Oracle Admin EOA    │  │  Redemptions Admin   │                 │
+│  │  MPC 3-of-5 (docs)   │  │  MPC 3-of-5 (docs)   │                 │
+│  │  0x49BC..0Aee        │  │  0xEE16..47f8        │                 │
+│  │  no onchain timelock │  │  48h timelock (docs) │                 │
+│  └─────────────────────┘  └─────────────────────┘                   │
 │                                                                     │
-│  ┌─────────────────────┐  ┌─────────────────────┐                  │
-│  │  Access Admin EOA    │  │  Custodian Manager   │                  │
-│  │  MPC 5-of-8 (docs)   │  │  (CUSTODIAN_MGR_ROLE)│                  │
-│  │  0x80a6..AFc         │  │  0x9b6d..eC9         │                  │
-│  │  admins AccessManager│  │  Add/remove          │                  │
-│  │  0x3f0D..6FD8        │  │  custodians (ICL)    │                  │
-│  └─────────────────────┘  └─────────────────────┘                  │
+│  ┌─────────────────────┐  ┌─────────────────────┐                   │
+│  │  Access Admin EOA    │  │  Custodian Manager   │                 │
+│  │  MPC 5-of-8 (docs)   │  │  (CUSTODIAN_MGR_ROLE)│                 │
+│  │  0x80a6..AFc         │  │  0x9b6d..eC9         │                 │
+│  │  admins AccessManager│  │  Add/remove          │                 │
+│  │  0x3f0D..6FD8        │  │  custodians (ICL)    │                 │
+│  └─────────────────────┘  └─────────────────────┘                   │
 │                                                                     │
-│  ┌─────────────────────────────────────────────┐                   │
-│  │  Governance Safe (3-of-5, onchain)          │                   │
-│  │  0x8EEc10..FadeFbAd                         │                   │
-│  │  DEFAULT_ADMIN + UPGRADER on reUSD and ICL; │                   │
-│  │  PROPOSER + CANCELLER on Timelock           │                   │
-│  └─────────────────────────────────────────────┘                   │
+│  ┌─────────────────────────────────────────────┐                    │
+│  │  Governance Safe (3-of-5, onchain)          │                    │
+│  │  0x8EEc10..FadeFbAd                         │                    │
+│  │  DEFAULT_ADMIN + UPGRADER on reUSD and ICL; │                    │
+│  │  PROPOSER + CANCELLER on Timelock           │                    │
+│  └─────────────────────────────────────────────┘                    │
 │                                                                     │
-│  ┌─────────────────────────────────────────────┐                   │
-│  │  Timelock Controller  (getMinDelay = 48h)   │                   │
-│  │  0x69dDEa..57FCA93                          │                   │
-│  │  Executor: 0x4BFea59b..740738F3 (EOA)       │                   │
-│  └─────────────────────────────────────────────┘                   │
+│  ┌─────────────────────────────────────────────┐                    │
+│  │  Timelock Controller  (getMinDelay = 48h)   │                    │
+│  │  0x69dDEa..57FCA93                          │                    │
+│  │  Executor: 0x4BFea59b..740738F3 (EOA)       │                    │
+│  └─────────────────────────────────────────────┘                    │
 └─────────────────────────────────────────────────────────────────────┘
 
 Fund Flow:
