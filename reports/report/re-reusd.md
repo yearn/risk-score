@@ -205,44 +205,49 @@ Re's marketing attaches modeled impairment likelihoods to each threshold (Re Cap
 ### Collateralization
 
 - **Onchain reserve target**: ≥50% of deposits kept in onchain backing (USDC, sUSDe, and potentially T-bill wrappers such as BUIDL), per DD questionnaire.
-- **Onchain reserves — verified Apr 17, 2026**: onchain holdings sum to ~**$95.31M** against an Ethereum reUSD NAV of ~$185.10M (share price `1.0724` × supply `172,599,430`). **Coverage ratio ≈ 51.5% of Ethereum NAV (~51.0% of total cross-chain NAV of ~$186.72M)** — the ≥50% target is met, but only marginally; the protocol is running close to the floor. Breakdown:
+- **Onchain reserves — verified Apr 17, 2026 against AUP address list**: The Network Firm's Oct-2025 AUP report lists **15 Fireblocks-MPC-controlled addresses** as in-scope for Re's supporting assets ([`AUP-Report-2025.pdf`](https://storage.googleapis.com/foundation-files/AUP-Report-2025.pdf), Procedure 3 table). All 15 were checked for USDC / USDT / USDe / sUSDe / BUIDL balances today. 11 are empty; 4 hold all the reserves:
 
-| Asset | Location | Amount | USD value | Share |
-|-------|----------|--------|-----------|-------|
-| USDC  | ICL Custodial Wallet [`0x295F…689E`](https://etherscan.io/address/0x295F67Fdb21255A3Db82964445628a706FBe689E) | 9,343,698 | $9.34M | 9.8% |
-| USDe  | ICL Custodial Wallet `0x295F…689E` | 100,000 | $0.10M | 0.1% |
-| sUSDe | ICL Custodial Wallet `0x295F…689E` | 10,496,264 | ~$12.88M | 13.5% |
-| sUSDe | Daily Instant Redemption Vault [`0x5C45…B147`](https://etherscan.io/address/0x5C454f5526e41fBE917b63475CD8CA7E4631B147) | 6,188,822 | ~$7.60M | 8.0% |
-| sUSDe | Redemption Reserves Custodian [`0x9eA3…ADF8`](https://etherscan.io/address/0x9eA38e09F41A9DE53972a68268BA0Dcc6d2fAdf8) | 53,263,478 | ~$65.38M | 68.6% |
-| **Total** | | | **~$95.31M** | **100%** |
+| # | AUP-listed address | Chain type | Current USD value | Share |
+|---|---|---|---|---|
+| 1 | [`0x295F67Fdb21255A3Db82964445628a706FBe689E`](https://etherscan.io/address/0x295F67Fdb21255A3Db82964445628a706FBe689E) ICL Custodial Wallet | **EOA** | **$24.39M** (USDC $9.34M + USDT $1.99M + USDe $0.10M + sUSDe $12.96M) | 24.4% |
+| 2 | [`0x9eA38e09F41A9DE53972a68268BA0Dcc6d2fAdf8`](https://etherscan.io/address/0x9eA38e09F41A9DE53972a68268BA0Dcc6d2fAdf8) Redemption Reserves Custodian | **EOA** | **$65.38M** (sUSDe) | 65.4% |
+| 3 | [`0xd4374008c88321Eb2e59ABD311156C44B25831e9`](https://etherscan.io/address/0xd4374008c88321Eb2e59ABD311156C44B25831e9) | **EOA** | **$2.56M** (USDe $0.99M + sUSDe $1.57M) | 2.6% |
+| 4 | [`0x5C454f5526e41fBE917b63475CD8CA7E4631B147`](https://etherscan.io/address/0x5C454f5526e41fBE917b63475CD8CA7E4631B147) Daily Instant Redemption Vault | Contract (`RedemptionVault`) | $7.60M (sUSDe) | 7.6% |
+| 5 | [`0x4691C475bE804Fa85f91c2D6D0aDf03114de3093`](https://etherscan.io/address/0x4691C475bE804Fa85f91c2D6D0aDf03114de3093) ICL | Contract (proxy) | $0 | — |
+| 6 | [`0xE1886BE2bA8B2496c2044a77516F63a734193082`](https://etherscan.io/address/0xE1886BE2bA8B2496c2044a77516F63a734193082) | Contract | $258 (dust) | — |
+| 7-15 | 0x19af…5896, 0x4F1f…DaE4, 0x802e…0291, 0x9AB6…1FE3, 0xb22a…fbe1, 0xD75E…eDE9, 0xe132…9d23, 0xfB60…4BB0, 0xfd40…B852 | 9 × EOA | $0 | — |
+| **Total** | | | **~$99.93M** | **100%** |
 
   (sUSDe valued at the onchain sUSDe/USDe exchange rate of `1.22757` via `convertToAssets`, assuming USDe ≈ $1.)
+
+  **Coverage ratio: $99.93M / $185.10M Ethereum NAV = ~54.0%** (~53.5% vs $186.72M total cross-chain NAV). The DD-claimed ≥50% target is met with ~4 percentage points of headroom.
+
+  **Address 3 (`0xd4374008…B25831e9`) is listed in the AUP** but was **not previously enumerated** in this report. It currently holds $2.56M of USDe and sUSDe. Its purpose is undocumented publicly; from its onchain behaviour it appears to be an auxiliary custody / rebalancing EOA in the Fireblocks set.
 
 - **Concentration concerns (onchain-verified)**:
   - ~**90.1%** of onchain reserves are in sUSDe, not USDC. This inherits Ethena counterparty / smart-contract risk and a 7-day cooldown to unstake sUSDe → USDe. Only ~$9.34M of the reserves (≈9.8%) is immediately-redeemable USDC.
   - **No BUIDL or T-bill-wrapper balances** were found at any of the ICL / vault / custodian addresses (Apr 17, 2026), despite the DD questionnaire listing BUIDL as a potential reserve asset. Apart from USDC/USDe/sUSDe, the only non-dust holding is ~1.35M `reUSDsUSDe` Curve LP tokens at the ICL Custodial Wallet (protocol-owned liquidity for the reUSD/sUSDe pool; excluded from the reserve total above). All other token balances at these addresses are airdrop spam or dust (<$500).
   - The ICL contract [`0x4691…3093`](https://etherscan.io/address/0x4691C475bE804Fa85f91c2D6D0aDf03114de3093) itself holds $0 in reserves — assets sit at the Custodial Wallet (an EOA) and at the Redemption Reserves Custodian (also an EOA).
 
-- **Custody / rug-pull surface — 92% of reserves sit at plain EOAs (critical, onchain-verified Apr 17, 2026):**
+- **Custody / rug-pull surface — 92% of reserves sit at plain EOAs (critical):**
 
-| Address | Type (chain view) | Value | Onchain restriction on outflow |
-|---|---|---|---|
-| `0x295F67Fdb21255A3Db82964445628a706FBe689E` ICL Custodial Wallet | **Plain EOA** (`cast code` = `0x`, nonce 252) | $9.34M USDC + $12.88M sUSDe ≈ **$22.22M** | **None** |
-| `0x9eA38e09F41A9DE53972a68268BA0Dcc6d2fAdf8` Redemption Reserves Custodian | **Plain EOA** (`cast code` = `0x`, nonce 31) | $65.38M sUSDe ≈ **$65.38M** | **None** |
-| `0x5C454f5526e41fBE917b63475CD8CA7E4631B147` Daily Instant Redemption Vault | Contract (`RedemptionVault`) | ~$7.60M sUSDe | `withdraw(address,address,uint256)` role-gated by OZ AccessManager; role holder onchain = `InstantRedemption` only, no delay. `emergencyWithdraw` maps to AccessManager role 0 (effectively closed/admin) |
-| `0x4691C475bE804Fa85f91c2D6D0aDf03114de3093` ICL | Contract (ERC1967 proxy) | $0 | — |
+  Of the $99.93M onchain reserve, **$92.33M (~92.4%) sits at three plain EOAs**: the ICL Custodial Wallet (~$24.4M), the Redemption Reserves Custodian (~$65.4M), and the auxiliary address `0xd4374008…B25831e9` (~$2.6M). Only $7.60M (the Daily Instant Redemption Vault) sits behind contract-enforced role gating. From the chain's perspective, each EOA is indistinguishable from an ordinary single-key wallet. One ECDSA signature, one `transfer(...)` call, and those funds move anywhere — no onchain delay, no destination whitelist, no role check.
 
-  **$87.60M / $95.31M = ~92% of onchain reserves sit at plain EOAs**, from the chain's perspective indistinguishable from ordinary single-key wallets. One ECDSA signature, one `transfer(...)` call, and those funds move to any address — no onchain delay, no onchain destination whitelist, no role check.
+  Re's documentation and the October 2025 AUP describe these as **"Fireblocks MPC (Multi-Party Computation) wallets"** in which *"the associated private key is split into encrypted 'shares'"* (AUP Report 2025, footnote 2). Important caveats about what the AUP actually proves:
 
-  Re's docs describe these as "Fireblocks MPC custody" wallets. **MPC is an offchain key-management technique**: several parties jointly produce one ECDSA signature that the chain cannot distinguish from a normal signature. Fireblocks transaction policies (destination whitelists, spending limits, approval workflows) are likewise offchain and unverifiable by anyone outside Re. The **48-hour Timelock does NOT protect these reserves** — it only gates governance actions routed through `TimelockController` (upgrades, role changes).
+  - The AUP procedure for the Fireblocks assets was *"observe Re Management access the Fireblocks blockchain-based MPC wallet"* and then *"query the blockchain-based addresses observed for Supporting Assets"*. **This is watching someone log in; it is not cryptographic verification that N-of-M signers are required for any given transaction.** TNF relied on Re's assertion of the MPC structure.
+  - The AUP explicitly disclaims operating-effectiveness testing of internal controls: *"We did not perform procedures regarding the operating effectiveness of the Re's internal controls."*
+  - The AUP was also scoped to exclude 1:1 backing, TVL, and token valuations: *"We did not perform procedures over specific aspects of the Re Protocol, including but not limited to … 1:1 backing of reserves to the tokens or the total value locked (TVL) of the Re Protocol."*
 
-  What's needed to drain $87.6M onchain:
+  Onchain, the EOAs have no code — no Safe multisig, no timelock wrapper, no onchain-whitelisted destination set, no per-asset spending caps. Whatever Fireblocks policies exist (transaction whitelists, per-asset limits, approval workflows) and whatever the real MPC quorum is are **entirely offchain** and unverifiable by anyone outside Re. The **48-hour Timelock does NOT protect these reserves** — it only gates governance actions routed through `TimelockController` (upgrades, role changes).
 
-  - If Fireblocks policies are permissive → compromise / collusion of the claimed N-of-M MPC signer quorum → **1 signed tx**.
-  - If Fireblocks policies restrict destinations → compromise of Fireblocks policy + signer quorum → 1 signed tx.
-  - If an insider with quorum access goes rogue → **1 signed tx**.
+  What's needed to drain $92.3M onchain:
 
-  The only onchain artefacts that would reduce this surface are absent: no Safe multisig at these addresses (they have no code), no `TimelockController`-held reserves, no onchain-whitelisted destination set, no per-asset spending caps. This is the single largest unmitigated risk in the system.
+  - If the claimed N-of-M MPC is real and Fireblocks policies are tight → compromise the policy + compromise or collude signer quorum → **1 signed tx**.
+  - If Fireblocks policies are permissive → signer-quorum compromise / collusion alone → **1 signed tx**.
+  - If an insider with quorum access is malicious → **1 signed tx**.
+
+  This is the single largest unmitigated risk in the system. The AUP provides evidence that the specific address list is in Re's MPC setup, not that a rug would be prevented by multi-party signing.
 - **Onchain buffer**: Instant redemption vault and Redemption Reserves Custodian hold ~$72.98M of sUSDe plus $0 USDC for immediate redemptions (USDC instant exits unavailable under current config; see Liquidity).
 - **Offchain trust**: §114 Reinsurance Trust holds cash and T-Bills in NAIC-compliant banks, attested daily by The Network Firm. Re's DD questionnaire specifically names Coinbase and Wells Fargo as banking / custody counterparties for certain reinsurance-company assets; this counterparty pair is not disclosed in Re's public docs. Re's docs describe the reserve publication as *"published via Chainlink"* — onchain, no Chainlink PoR aggregator is consumed; see Appendix A.8.
 - **Surplus Note protection**: Surplus notes rank junior to policyholders but contractually protect depositor principal
@@ -403,15 +408,17 @@ The DD questionnaire claim of ">$100M in borrow demand" across lending integrati
   - Monitor buffer balance. Alert if buffer drops below 1% of reUSD supply (triggers window-only mode).
   - Monitor for rapid drawdowns indicating potential stress.
 
-- **Reserve EOAs — primary rug-pull surface**: these hold ~92% of onchain reserves and have no onchain outflow restriction.
-  - **ICL Custodial Wallet (EOA)**: [`0x295F67Fdb21255A3Db82964445628a706FBe689E`](https://etherscan.io/address/0x295F67Fdb21255A3Db82964445628a706FBe689E)
-    - **Alert (Critical)**: Any USDC or sUSDe transfer to a destination NOT on the historical sweep allow-list (previous destinations: Ethena sUSDe/USDe contracts, the Redemption Reserves Custodian, the Daily Instant Redemption Vault, Fireblocks-pattern sweep addresses beginning `0x34b6…`). Treat first-time destinations as an incident until confirmed.
-    - **Alert (High)**: Any outbound transfer >$1M (current balance is ~$22M).
-    - **Alert (Medium)**: Sequential transfers that would drain ≥10% of the EOA's balance within a single day.
-  - **Redemption Reserves Custodian (EOA)**: [`0x9eA38e09F41A9DE53972a68268BA0Dcc6d2fAdf8`](https://etherscan.io/address/0x9eA38e09F41A9DE53972a68268BA0Dcc6d2fAdf8)
-    - **Alert (Critical)**: Any sUSDe transfer to a destination NOT on the historical allow-list (historically, only `0x5C45…B147` RedemptionVault and sUSDe/USDe staking contracts). First-time destinations = incident.
-    - **Alert (High)**: Any single outbound >$5M (current balance ~$65M).
-    - Monitor balance levels (USDC + sUSDe) and replenishment cadence.
+- **Reserve EOAs — primary rug-pull surface**: ~92% of onchain reserves are at three plain EOAs (of the 15 Fireblocks-MPC-controlled addresses listed in the AUP-Report-2025). No onchain outflow restriction applies.
+  - **ICL Custodial Wallet (EOA)**: [`0x295F67Fdb21255A3Db82964445628a706FBe689E`](https://etherscan.io/address/0x295F67Fdb21255A3Db82964445628a706FBe689E) — current balance ~$24.4M.
+    - **Alert (Critical)**: Any transfer (USDC / USDT / USDe / sUSDe) to a destination NOT on the historical allow-list (Ethena sUSDe/USDe contracts, Redemption Reserves Custodian, Daily Instant Redemption Vault, Fireblocks-pattern sweep addresses beginning `0x34b6…`). First-time destinations = incident.
+    - **Alert (High)**: Any outbound transfer >$1M.
+    - **Alert (Medium)**: Sequential transfers draining ≥10% of balance within 24h.
+  - **Redemption Reserves Custodian (EOA)**: [`0x9eA38e09F41A9DE53972a68268BA0Dcc6d2fAdf8`](https://etherscan.io/address/0x9eA38e09F41A9DE53972a68268BA0Dcc6d2fAdf8) — current balance ~$65.4M.
+    - **Alert (Critical)**: Any sUSDe transfer to a destination NOT on the historical allow-list (only `0x5C45…B147` RedemptionVault and sUSDe/USDe staking contracts observed to date).
+    - **Alert (High)**: Any single outbound >$5M.
+  - **Auxiliary custodian EOA `0xd4374008…B25831e9`**: [etherscan](https://etherscan.io/address/0xd4374008c88321Eb2e59ABD311156C44B25831e9) — currently holds ~$2.6M in USDe+sUSDe. Listed in AUP, role undocumented publicly.
+    - **Alert (Critical)**: Any outbound transfer. Small size makes every movement worth a manual look.
+  - **All 12 other AUP-listed addresses** (currently empty or dust): monitor for any incoming deposit >$1M and then for any subsequent outgoing transfer. Sudden use of a previously-empty AUP address is a governance signal (either new custody rotation or an unauthorized movement).
 
 - **Instant Redemption Interaction Contract**: [`0x8aEb9453EF22Cb38abC7a3Af9c208F65C1BfE31e`](https://etherscan.io/address/0x8aEb9453EF22Cb38abC7a3Af9c208F65C1BfE31e)
   - Monitor `redeemInstant` events for redemption volume and frequency.
@@ -471,7 +478,7 @@ The DD questionnaire claim of ">$100M in borrow demand" across lending integrati
   - **Alert**: If attestation is not updated for >48 hours.
   - **Alert**: If reported reserves fall below total reUSD supply × share price.
 
-- **Onchain coverage ratio**: Compute `(USDC + USDe + sUSDe_in_USDe_terms) across ICL Custodian + Instant Redemption Vault + Redemption Reserves Custodian` divided by `(reUSD Ethereum totalSupply × getSharePrice())`. Currently ~51.5%.
+- **Onchain coverage ratio**: Compute `(USDC + USDT + USDe + sUSDe_in_USDe_terms)` across ALL 15 Fireblocks-MPC-controlled addresses listed in the AUP-Report-2025 (not just the 3 most-known ones), divided by `(reUSD Ethereum totalSupply × getSharePrice())`. Currently ~54.0%.
   - **Alert (Critical)**: If coverage drops below 50% (protocol floor per DD).
   - **Alert (High)**: If coverage drops below 55% (headroom erosion).
   - **Alert (High)**: If sUSDe share of reserves exceeds 92% or USDC share drops below 7% (current split: sUSDe ~90.1% / USDC ~9.8%).
@@ -514,7 +521,7 @@ The DD questionnaire claim of ">$100M in borrow demand" across lending integrati
 - **Single EOA can bypass the NAV Oracle**: the standard price path is the audited Chainlink-Functions `NAVConsumer` (10% deviation cap). However, **the same EOA holds both `PRICE_SETTER_ROLE` on `SharePriceCalculator` and all admin / emergency / keeper roles on `NAVConsumer`**. It can (a) write directly to `SharePriceCalculator`, skipping the Functions path, (b) call `setDeviationCheckEnabled(false)` to disable the guard, or (c) `forceNAVUpdate` once per 4 hours. Compromise of this key ≈ unchecked power over the reUSD share price.
 - **Significant offchain capital deployment**: Majority of assets are deployed offchain into §114 Trust and reinsurance programs. This introduces counterparty risk with the trust bank, partner reinsurer, and custodians that cannot be verified fully onchain.
 - **Instant redemption vault holds no USDC**: The Daily Instant Redemption Vault holds `0` USDC + `6.188M` sUSDe. The Redemption Reserves Custodian (EOA) holds `0` USDC + `53.263M` sUSDe. `dayPayoutToken` is sUSDe — USDC-denominated instant exits are unavailable under the current config.
-- **Onchain reserves heavily concentrated in sUSDe; coverage right at the 50% floor**: Onchain reserves total ~$95.31M (~51.5% of Ethereum NAV), of which ~90% is sUSDe and only ~9.8% (~$9.34M) is USDC. Ethena (sUSDe issuer) is a material counterparty: an Ethena incident, sUSDe unstaking bottleneck, or USDe depeg would directly impair the "50%+ onchain backing" narrative even before reaching offchain exposures. The DD-cited BUIDL / T-bill wrappers are **not** held onchain.
+- **Onchain reserves heavily concentrated in sUSDe**: Onchain reserves total ~$99.93M (~54.0% of Ethereum NAV — the ≥50% DD target is met with ~4 pp of headroom, not 1.5 pp as earlier indicated). But ~88% of the reserve is sUSDe and only ~9.3% (~$9.34M) is USDC. Ethena (sUSDe issuer) is a material counterparty: an Ethena incident, sUSDe unstaking bottleneck, or USDe depeg would directly impair the "50%+ onchain backing" narrative even before reaching offchain exposures. The DD-cited BUIDL / T-bill wrappers are **not** held onchain.
 - **Three MINTER_ROLE holders on reUSD**: Beyond the ICL, `InstantRedemption` and `ShareTokenMinterBurner` also hold MINTER_ROLE. The ICL path enforces backing via `safeTransferFrom`. `InstantRedemption` uses the role for burns during redemption. `ShareTokenMinterBurner` is a LayerZero OFT wrapper — its mint path has no backing check by design (supply is conserved cross-chain), but the OFT adapter [`0x2BB4046022B9161f3F84Ad8E35cac1d5946e0e85`](https://etherscan.io/address/0x2BB4046022B9161f3F84Ad8E35cac1d5946e0e85) and the wrapper are both owned by the **same EOA** [`0x6C15B25E9750Dccb698C1a4023f34015bFe57649`](https://etherscan.io/address/0x6C15B25E9750Dccb698C1a4023f34015bFe57649) (not a multisig). Compromise of that key would let an attacker repoint the adapter and mint up to `2,500,000 reUSD / 24h / peer` (onchain rate limit) on Ethereum without backing.
 - **DEX liquidity thin**: only ~$14.96M of onchain-verified Re reUSD liquidity on DEXes (~8.0% of ~$186.7M market cap). (Previously-cited "~$26.2M" figure included Resupply reUSD pools, a different token.)
 - **KYC gating**: All deposits and redemptions require KYC. This limits the universe of users who can exit and creates regulatory/jurisdictional risk.
@@ -524,7 +531,7 @@ The DD questionnaire claim of ">$100M in borrow demand" across lending integrati
 
 ### Critical Risks
 
-- **Custody / rug-pull surface — 92% of onchain reserves at plain EOAs**: `$87.60M` of `$95.31M` of onchain reserves sits at two plain EOAs ([`0x295F67…689E`](https://etherscan.io/address/0x295F67Fdb21255A3Db82964445628a706FBe689E) ICL Custodial Wallet, $22.22M; [`0x9eA38e…ADF8`](https://etherscan.io/address/0x9eA38e09F41A9DE53972a68268BA0Dcc6d2fAdf8) Redemption Reserves Custodian, $65.38M). Neither address has any code; both look identical to a single-key wallet from the chain's perspective. **No onchain delay, destination whitelist, or role check** applies to their outbound transfers — one ECDSA signature moves the funds. The claimed Fireblocks MPC custody (N-of-M offchain quorum, destination policies) is unverifiable by anyone outside Re and provides zero onchain guarantees. The 48h Timelock does NOT gate these flows. See Funds Management → Collateralization for the full custody table.
+- **Custody / rug-pull surface — 92% of onchain reserves at plain EOAs**: `$92.33M` of `$99.93M` of onchain reserves sits at **three** plain EOAs listed in the AUP-Report-2025: [`0x295F67…689E`](https://etherscan.io/address/0x295F67Fdb21255A3Db82964445628a706FBe689E) ICL Custodial Wallet ($24.39M); [`0x9eA38e…ADF8`](https://etherscan.io/address/0x9eA38e09F41A9DE53972a68268BA0Dcc6d2fAdf8) Redemption Reserves Custodian ($65.38M); [`0xd437…31e9`](https://etherscan.io/address/0xd4374008c88321Eb2e59ABD311156C44B25831e9) auxiliary ($2.56M). None has code; all look identical to single-key wallets from the chain's perspective. **No onchain delay, destination whitelist, or role check** applies to their outbound transfers — one ECDSA signature moves the funds. The claimed Fireblocks MPC custody (N-of-M offchain quorum, destination policies) is unverifiable by anyone outside Re; TNF's AUP procedure was "observe Re Management access the Fireblocks MPC wallet," which does not cryptographically attest the N-of-M quorum. The 48h Timelock does NOT gate these flows. See Funds Management → Collateralization for the full custody table.
 - **Offchain dependency concentration**: The protocol's value proposition depends on offchain entities (Cayman reinsurer, §114 Trust, The Network Firm, Fireblocks) operating honestly and solvent. Onchain verification cannot fully cover offchain risks.
 - **Oracle/setter manipulation**: the standard share-price path is the audited Chainlink-Functions `NAVConsumer` (10% deviation cap), but a compromised admin EOA can bypass it (write directly to `SharePriceCalculator`, disable the deviation check, or call `forceNAVUpdate` every 4h) and write arbitrary prices. There is no separate Chainlink PoR aggregator attesting reserves independently (see Appendix A.8) — reserve assurance reduces to The Network Firm's offchain AUP plus the onchain balances we audit directly.
 - **Liquidity mismatch**: reUSD represents liquid onchain tokens partially backed by offchain reinsurance capital. Capital release is reevaluated quarterly, and programs are short-duration and cat-light (per performance memo). The instant redemption vault holds no USDC (sUSDe only — `6.188M` in vault, `53.263M` in Redemption Reserves Custodian). In a bank-run scenario, sUSDe redemption liquidity plus only ~$14.96M in DEX liquidity would need to absorb exits for ~$186.7M in outstanding tokens; windowed queue handles the remainder.
@@ -608,7 +615,7 @@ The DD questionnaire claim of ">$100M in borrow demand" across lending integrati
 - reUSDe provides first-loss protection for reUSD
 - Majority of capital deployed offchain in reinsurance programs (capital release reevaluated quarterly per DD)
 
-**Collateralization Score: 4.0** -- Hybrid onchain/offchain model. Onchain reserves verified at ~$95.31M vs ~$185.10M Ethereum NAV (~51.5% coverage — DD-claimed ≥50% target is met but only marginally). **Critically, ~$87.60M of the onchain reserve (~92%) sits at two plain EOAs with no onchain restriction on outflow** — a single signed tx can drain them; the 48h Timelock does not apply. ~90% of the reserve is sUSDe (Ethena counterparty risk, 7-day cooldown); only ~9.8% is USDC. No BUIDL / T-bill wrappers present onchain despite DD listing. Offchain reinsurance capital release is reevaluated quarterly and relies on third-party attestation.
+**Collateralization Score: 4.0** -- Hybrid onchain/offchain model. Onchain reserves verified at ~$99.93M (across all 15 AUP-listed Fireblocks addresses) vs ~$185.10M Ethereum NAV (~54.0% coverage — DD-claimed ≥50% target met with ~4 pp headroom). **Critically, ~$92.33M of the onchain reserve (~92%) sits at three plain EOAs with no onchain restriction on outflow** — a single signed tx can drain them; the 48h Timelock does not apply. The AUP confirms the address list is in Re's Fireblocks MPC setup, not that multi-party signing would prevent a rug. ~88% of the reserve is sUSDe (Ethena counterparty risk, 7-day cooldown); only ~9.3% is USDC. No BUIDL / T-bill wrappers present onchain despite DD listing. Offchain reinsurance capital release is reevaluated quarterly and relies on third-party attestation.
 
 **Subcategory B: Provability**
 
@@ -679,7 +686,7 @@ Final Score = (Centralization × 0.30) + (Funds Mgmt × 0.30) + (Audits × 0.20)
 
 ---
 
-reUSD is a novel product that bridges DeFi capital with traditional reinsurance markets. Re reports ($178M gross written premium, ~92% combined ratio per LP memo) and market cap ~$186.7M are meaningful; the capital structure (Re Capital ~$73M + reUSDe first-loss) puts reUSD in the senior tranche. The risk profile is at the Medium / Elevated tier boundary. Primary concerns: (1) **custody / rug surface — ~92% of onchain reserves ($87.6M) sit at two plain EOAs with no onchain outflow restriction; the 48h Timelock does not apply**; (2) the standard share-price path is an audited Chainlink-Functions NAV Oracle with a 10% onchain deviation cap, but a single admin EOA can bypass it; (3) heavy offchain capital deployment in reinsurance programs (capital release reevaluated quarterly); (4) onchain reserves are ~51% of NAV with ~90% in sUSDe (Ethena counterparty risk, 7-day cooldown); only ~$9.34M is USDC; (5) KYC-gated redemptions (enforced onchain at every redemption entrypoint); (6) reUSDe redemption works differently — quarterly-only, no instant path; (7) three MINTER_ROLE holders on reUSD (ICL enforces backing; LayerZero OFT wrapper shares a single EOA owner with its adapter). Mitigants: Safe-3-of-5 + 48-hour Timelock on governance (onchain-verified `getMinDelay() = 172800`), 5+ audits (Hacken, Certora, The Network Firm AUP) including a Hacken audit of the deployed `NAVConsumer`, Chainlink Automation driving daily NAV updates, and The Network Firm's offchain AUP of the §114 Trust. **None of these mitigants cover the reserve-custody rug surface, which remains the single largest unmitigated risk.**
+reUSD is a novel product that bridges DeFi capital with traditional reinsurance markets. Re reports ($178M gross written premium, ~92% combined ratio per LP memo) and market cap ~$186.7M are meaningful; the capital structure (Re Capital ~$73M + reUSDe first-loss) puts reUSD in the senior tranche. The risk profile is at the Medium / Elevated tier boundary. Primary concerns: (1) **custody / rug surface — ~92% of onchain reserves ($92.3M) sit at three plain EOAs with no onchain outflow restriction; the 48h Timelock does not apply**. The AUP lists the address set but does not cryptographically verify the MPC quorum; (2) the standard share-price path is an audited Chainlink-Functions NAV Oracle with a 10% onchain deviation cap, but a single admin EOA can bypass it; (3) heavy offchain capital deployment in reinsurance programs (capital release reevaluated quarterly); (4) onchain reserves are ~54% of NAV with ~88% in sUSDe (Ethena counterparty risk, 7-day cooldown); only ~$9.34M is USDC; (5) KYC-gated redemptions (enforced onchain at every redemption entrypoint); (6) reUSDe redemption works differently — quarterly-only, no instant path; (7) three MINTER_ROLE holders on reUSD (ICL enforces backing; LayerZero OFT wrapper shares a single EOA owner with its adapter). Mitigants: Safe-3-of-5 + 48-hour Timelock on governance (onchain-verified `getMinDelay() = 172800`), 5+ audits (Hacken, Certora, The Network Firm AUP) including a Hacken audit of the deployed `NAVConsumer`, Chainlink Automation driving daily NAV updates, and The Network Firm's offchain AUP of the §114 Trust. **None of these mitigants cover the reserve-custody rug surface, which remains the single largest unmitigated risk.**
 
 **Key conditions for exposure:**
 - Monitor reUSD share price for any decreases (should only increase)
@@ -908,7 +915,7 @@ An accompanying chart on the same page also shows Re Capital ≈ 1.9% at 115% CR
 
 The DD questionnaire [DD] adds operational claims that similarly depend on Re's own disclosure:
 
-- **≥50% of deposits kept in onchain backing (target)** — **verified onchain as ~51.5% on Apr 17, 2026** ($95.31M reserves vs $185.10M Ethereum NAV); see Funds Management → Collateralization for the full breakdown. Target is met marginally. Composition note: ~90.1% of the onchain reserve is sUSDe, ~9.8% USDC, ~0.1% USDe; **no BUIDL or T-bill wrappers** were found at the ICL / vault / custodian addresses, so the DD's "potentially T-bill wrappers such as BUIDL" language is currently not implemented onchain.
+- **≥50% of deposits kept in onchain backing (target)** — **verified onchain as ~54.0% on Apr 17, 2026** ($99.93M reserves across all 15 AUP-listed Fireblocks addresses vs $185.10M Ethereum NAV); see Funds Management → Collateralization for the full breakdown. Composition: ~88% sUSDe, ~9.3% USDC, ~2% USDT, ~1.1% USDe. **No BUIDL or T-bill wrappers** were found at any of the 15 addresses, so the DD's "potentially T-bill wrappers such as BUIDL" language is currently not implemented onchain.
 - Capital release from reinsurance programs is reevaluated quarterly.
 - Combined ~$100M of borrow demand across lending integrations (Fluid, Morpho; and claims about Euler/Silo/TermMax that we could not verify onchain — see Liquidity section).
 - Fireblocks MPC custody for idle onchain capital, with Coinbase and Wells Fargo as banking counterparties for offchain reserves.
@@ -949,3 +956,50 @@ So Re's claim *"A JSON price feed is pushed on-chain via Chainlink"* is correct 
 - "Proof-of-reserves, publicly auditable" → **overclaim**; reserve assurance is (a) direct onchain balance audit of the ICL/vault/custodian addresses and (b) The Network Firm's offchain AUP — there is no Chainlink-signed reserves oracle to cross-check either.
 
 **Action:** when evaluating "Chainlink" claims in Re's docs, distinguish between Chainlink Functions + Automation (used for the share price, real and audited) vs a Chainlink PoR aggregator for reserves (does not exist onchain). If Re asserts the latter in conversation, ask for the aggregator address — it should be in Chainlink's mainnet directory and verifiable on Etherscan.
+
+### A.9 AUP-Report-2025 address list — cross-referenced onchain (Apr 17, 2026)
+
+The October 2025 AUP ([`AUP-Report-2025.pdf`](https://storage.googleapis.com/foundation-files/AUP-Report-2025.pdf), Procedure 3 table) lists 15 "Fireblocks MPC wallet" addresses as in-scope for Re's onchain Supporting Assets. All 15 were verified onchain:
+
+| # | Address | Chain type | AUP claim | Apr 17 2026 balance (USDC + USDT + USDe + sUSDe) | Where |
+|---|---|---|---|---|---|
+| 1 | `0x19aff1C007397Bdb7f82BdA18151C28AB4335896` | EOA | Fireblocks MPC | $0 | (unused) |
+| 2 | `0x295F67Fdb21255A3Db82964445628a706FBe689E` | EOA | Fireblocks MPC | **$24.39M** | ICL Custodial Wallet (active) |
+| 3 | `0x4691C475bE804Fa85f91c2D6D0aDf03114de3093` | Contract | Fireblocks MPC | $0 | ICL contract |
+| 4 | `0x4F1ff9b995472B27A6BAfEc967986F35Bf1aDaE4` | EOA | Fireblocks MPC | $0 | (unused) |
+| 5 | `0x5C454f5526e41fBE917b63475CD8CA7E4631B147` | Contract | Fireblocks MPC | **$7.60M** | Daily Instant Redemption Vault |
+| 6 | `0x802eDbB1Ec20548A4388ABC337E4011718eb0291` | EOA | Fireblocks MPC | $0 | (unused) |
+| 7 | `0x9AB62AebAbE738AB233C447eEdCE88D1D0a61FE3` | EOA | Fireblocks MPC | $0 | (unused) |
+| 8 | `0x9eA38e09F41A9DE53972a68268BA0Dcc6d2fAdf8` | EOA | Fireblocks MPC | **$65.38M** | Redemption Reserves Custodian |
+| 9 | `0xb22a8533e6cd81598f82514a42F0B3161745fbe1` | EOA | Fireblocks MPC | $0 | (unused) |
+| 10 | `0xd4374008c88321Eb2e59ABD311156C44B25831e9` | EOA | Fireblocks MPC | **$2.56M** | auxiliary (purpose undisclosed publicly) |
+| 11 | `0xD75Ea2fd3D00399df7b7241AB7A189085aB2eDE9` | EOA | Fireblocks MPC | $0 | (unused) |
+| 12 | `0xe13292F97E38da0C64398De5E0bFc95180DE9d23` | EOA | Fireblocks MPC | $0 | (unused) |
+| 13 | `0xE1886BE2bA8B2496c2044a77516F63a734193082` | Contract | Fireblocks MPC | $258 | (dust) |
+| 14 | `0xfB602cb83c9c15b4cc49340dc9aD7a8C23754BB0` | EOA | Fireblocks MPC | $0 | (unused) |
+| 15 | `0xfd4016Ea13ca8acc04A11a99702dF076A4d3B852` | EOA | Fireblocks MPC | $0 | (unused) |
+
+**Summary:** $99.93M active onchain, ~$92.33M at plain EOAs, ~$7.60M at one contract (RedemptionVault).
+
+**What the AUP establishes vs what it does not:**
+
+- Establishes: (a) the 15 addresses are the complete in-scope set Re disclosed to TNF as of Oct 31 2025; (b) a TNF auditor directly observed Re Management access the Fireblocks UI; (c) TNF independently queried each address's balance at the snapshot time and cross-referenced with CoinGecko prices.
+- Does not establish: (a) the actual N-of-M MPC configuration (the audit did not verify the signer threshold cryptographically — it relied on Re's representation that these are MPC wallets); (b) Fireblocks' transfer policies (whitelists, limits, approvals) — not in scope; (c) 1:1 backing or TVL coverage — explicitly excluded by the engagement letter; (d) operating effectiveness of Re's internal controls — explicitly excluded.
+- Also note: the AUP lists 15 addresses. The chain reflects 3 EOAs and 2 contracts carrying balances; the other 10 are dormant. An address rotating from dormant to active, or a new address not on this list appearing in the sweep flow, is a governance signal worth monitoring (see Monitoring → Reserve EOAs).
+
+**AUP snapshot totals (Oct 31, 2025) for context:**
+
+| Supporting Asset | USD Value | Where |
+|---|---|---|
+| Cash | $55,572,232 | Brokerage Account (offchain) |
+| Money Market Funds | $4,169,897 | Bank & Brokerage Accounts (offchain) |
+| USDC | $1,466,833 | Fireblocks MPC (onchain) |
+| USDT | $2,012,386 | Fireblocks MPC (onchain) |
+| USDe | $66,919 | Fireblocks MPC (onchain) |
+| sUSDe | $17,750,736 | Fireblocks MPC (onchain) |
+| UTY + YUTY | $2,472,438 | Fireblocks MPC (onchain; Unity Protocol) |
+| LIUSD (1w/2w/4w/8w) | $4,988,125 | Fireblocks MPC (onchain; InfiniFi) |
+| Estimated Gross Premium Receivable | $66,117,423 | Reinsurance Contracts (offchain) |
+| **Total** | **$154,616,990** | |
+
+Onchain portion then (~$28.76M) has grown to ~$99.93M now; total supporting assets including offchain cash/receivables would be higher today but not independently re-audited since Oct 2025.
