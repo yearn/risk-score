@@ -176,22 +176,9 @@ reUSD is an **ERC-20 deposit token** that uses a **price-appreciation model** (n
 3. **Surplus Notes**: The offchain entity issues legally binding surplus notes back to the ICL, contractually guaranteeing principal protection and the Applicable APY interest rate
 4. **Yield Sources**: Delta-neutral ETH strategy (Ethena basis trade) or T-Bills, plus protocol spread from reinsurance premiums
 
-### Reinsurance Portfolio (Nov 2025 LP Memo)
+### Reinsurance Portfolio (summary)
 
-Re reinsures a diversified $174M portfolio of U.S. insurance programs emphasizing low-volatility risk across 26+ active reinsurance contracts:
-
-| Line of Business | Allocation | Written Premium | Risk Profile |
-|-----------------|-----------|----------------|-------------|
-| Homeowners Insurance | 35% | $49M | Low Volatility |
-| Auto Insurance | 30% | $42M | Low Volatility |
-| Small Business Commercial | 20% | $28M | Low Volatility |
-| Workers Compensation | 15% | $21M | Low Volatility |
-
-- **Combined Ratio**: ~92% across 3 consecutive underwriting years (2022-2024), no capital impairment or reserve deterioration. Industry average: 93-95%.
-- **Return on Capital**: 15-23% (intro deck). Estimated ROE: 12-19%.
-- **Pipeline Dealflow**: $4B.
-- **Portfolio Focus**: Lower-layer, short-duration, cat-light programs. Avoids catastrophe-driven and long-tail casualty segments.
-- **Stress Testing** (capital structure): reUSD loss likelihood = **0.03%** at 135% combined ratio; reUSDe = 0.9%; Re Capital = 3.9%. Re Capital buffer ~$73M provides first-loss protection ahead of reUSDe and reUSD.
+Re reinsures a ~$174M diversified portfolio of U.S. insurance programs across 26+ active reinsurance contracts. Re classifies the book as "low-volatility" and claims a ~92% combined ratio over 2022-2024 with no capital impairment. Stress testing asserted by Re gives reUSD a 0.03% loss likelihood at a 135% combined ratio (reUSDe 0.9%, Re Capital 3.9%). **All portfolio composition, combined-ratio, ROE, pipeline, and stress-testing figures are sourced from Re's own LP memo and intro deck — none are independently verified.** Full figures with source tags are in [Appendix: Reinsurance Portfolio & Performance Claims (Re-provided)](#appendix-reinsurance-portfolio--performance-claims-re-provided).
 
 ### Capital Structure: reUSDe (Junior Tranche)
 
@@ -768,3 +755,105 @@ Trust Boundaries:
   ⚠ MINTER_ROLE held by THREE contracts on reUSD (ICL, InstantRedemption, ShareTokenMinterBurner)
   ⚠ KYC Registry gates all deposits and protocol redemptions
 ```
+
+---
+
+## Appendix: Reinsurance Portfolio & Performance Claims (Re-provided)
+
+All figures in this appendix are **asserted by Re Protocol** in private materials provided to Yearn for due diligence. No figure has been independently reproduced, attested, or actuarially reviewed by Yearn. Source files are checked in under `reports/data/re-reusd/issue-134/` (see `SOURCES.md` in that directory for the Google Drive links).
+
+Source legend:
+
+- **[LP Memo]** — `re-historical-comparative-performance-nov-2025.pdf` (4 pages, titled *"Re Historical and Comparative Performance — November 2025 | LP Memo"*)
+- **[Deck]** — `re-ethereum-house-2025.pdf` (8-page intro deck)
+- **[DD]** — `current-due-diligence-questionnaire-re.docx`
+- **[Cashflow]** — `re-illustrative-cashflow-model-v2-gid-1766877668.csv`
+
+### A.1 Portfolio composition ($174M written premium)
+
+| Line of Business | Allocation | Written Premium | Risk Profile (Re's label) |
+|------------------|-----------|-----------------|---------------------------|
+| Homeowners Insurance | 35% | $49M | Low Volatility |
+| Auto Insurance | 30% | $42M | Low Volatility |
+| Small Business Commercial | 20% | $28M | Low Volatility |
+| Workers Compensation | 15% | $21M | Low Volatility |
+
+**Source:** [LP Memo], page 3, *"Insurance Strategy Breakdown"* table.
+**What "Risk Profile" means here:** the "Low Volatility" label is Re's own self-classification, not a Yearn determination. Re's rationale (same page): Homeowners = "localized residential property with minimal cat exposure"; Auto = "frequency-based vehicle and liability programs with lower limits"; Small Business Commercial = "diversified property and liability across SMEs"; Workers Comp = "stable business segments and lower-layer attachment points". No quantitative volatility metric (e.g. historical std-dev of loss ratios) is disclosed.
+
+### A.2 Combined-ratio history (2022-2024, +1H 2025)
+
+Per [LP Memo] page 2 table *"Re Portfolio Performance"*:
+
+| Year | Global Reinsurance Combined Ratio | Re Portfolio Combined Ratio |
+|------|-----------------------------------|-----------------------------|
+| 2021 | 96.30% | 92.68% |
+| 2022 | 96.20% | 92.58% |
+| 2023 | 90.30% | 92.88% |
+| 2024 | 91.30% | 91.52% |
+| 1H 2025 | 94.80% | 92.67% |
+
+Re-stated underwriting-year view (same page):
+
+| UW Year | Written Premium | CR @ Inception | CR @ YE 2024 |
+|---------|----------------|----------------|--------------|
+| 2022 | $12.2M | 93.10% | 92.58% |
+| 2023 | $13.8M | 93.09% | 92.88% |
+| 2024 | $56.1M | 91.88% | 91.52% |
+| 2025 | $91.9M | 92.67% | n/a |
+| **Total** | **$174.0M** | **92.48%** | **91.91%** |
+
+**Source:** [LP Memo], page 2. Industry ratios cited as *"Source: Aon / Company Disclosure"* on the same chart.
+
+### A.3 Return-on-capital claim (15-23%)
+
+**Source:** [Deck], page 3 (headline slide *"Re is live and scaling to $400M+ EOY"*):
+
+> $178M IN GROSS WRITTEN PREMIUM TO DATE • $4B IN PIPELINE DEALFLOW • **15-23% RETURN ON CAPITAL**
+
+No methodology, time period, or base-of-capital disclosed in the slide.
+
+### A.4 Estimated ROE (12-19%)
+
+**Source:** [LP Memo], page 4, *"Comparative Performance and ROE Outlook"* table:
+
+|  | Global Reinsurance | Re Portfolio |
+|---|--------------------|--------------|
+| Combined Ratio (Avg.) | ~93-95% | ~92% |
+| **Estimated ROE** | ~13-20% | **~12-19%** |
+| Volatility Profile | Moderate | Low / Cat-Light |
+
+The same memo (page 2) cites industry-reported ROE for 2021-1H 2025 ranging from 10.2% to 19.6%. Re's own ROE is explicitly labelled "Estimated"; no capital base, leverage assumption, or fee treatment is disclosed.
+
+### A.5 Pipeline Dealflow ($4B)
+
+**Source:** [Deck], page 3 (same slide as ROC).
+
+**Meaning:** "Pipeline Dealflow" is insurance/reinsurance jargon for the dollar notional of reinsurance contract opportunities Re has identified or is in active discussion on but has **not bound**. It is a sales-pipeline forward-looking number, not current revenue, not capital, and not backing for reUSD. Re does not disclose a conversion probability or time horizon. For scale, the same slide shows **$178M gross written premium to date** — so the pipeline is ~23× the bound book. Treat as TAM-style marketing.
+
+### A.6 Stress testing (loss likelihoods)
+
+**Source:** [LP Memo], page 1, box *"Re Capital Structure and Risk-Remote Design"*:
+
+> Modeled stress testing demonstrates:
+> - reUSD loss likelihood ≈ **0.03%** at 135% combined ratio
+> - reUSDe ≈ **0.9%**
+> - Re Capital ≈ **3.9%**
+
+An accompanying chart on the same page also shows Re Capital ≈ 1.9% at 115% CR and charts loss likelihoods at 105% / 110% / 115% / 135%.
+
+**Caveats:**
+- The memo uses the phrase *"Modeled stress testing demonstrates"* but discloses no model, distributional assumptions, parameter calibration, confidence intervals, or actuarial attestation.
+- The claim is conditional on the Re Capital + reUSDe subordinated buffer remaining intact at the time of a loss event; the 0.03% tail probability assumes the current ~$73M Re Capital layer is fully present.
+- No independent actuarial firm has published reproduction of these figures.
+
+### A.7 Auxiliary claims in the DD questionnaire
+
+The DD questionnaire [DD] adds operational claims that similarly depend on Re's own disclosure:
+
+- ≥50% of deposits kept in onchain backing (target).
+- Capital release from reinsurance programs is reevaluated quarterly.
+- Combined ~$100M of borrow demand across lending integrations (Fluid, Morpho; and claims about Euler/Silo/TermMax that we could not verify onchain — see Liquidity section).
+- Fireblocks MPC custody for idle onchain capital, with Coinbase and Wells Fargo as banking counterparties for offchain reserves.
+
+Each of these should be read as **Re's representation**, not onchain- or independently-verified fact.
