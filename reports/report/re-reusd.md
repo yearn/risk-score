@@ -154,7 +154,7 @@ reUSD is an **ERC-20 deposit token** that uses a **price-appreciation model** (n
 - Users deposit admitted assets (USDC) into the ICL smart contract and receive reUSD; the token price increases daily based on the Applicable APY.
 - **Onchain price path (verified Apr 17, 2026):** the share price is stored in `SharePriceCalculator` [`0xd1D104a7515989ac82F1AFDa15a23650411b05B8`](https://etherscan.io/address/0xd1D104a7515989ac82F1AFDa15a23650411b05B8) and written via `setSharePrice(uint256)`. The standard writer is `NAVConsumer` [`0x84d4eaeb10f9e57b67622f667c6c13e22fa4b2b6`](https://etherscan.io/address/0x84d4eaeb10f9e57b67622f667c6c13e22fa4b2b6) — a Chainlink Functions + Chainlink Automation consumer (DON `fun-ethereum-mainnet-1`, subscription `85`, daily at 23:45 UTC). `NAVConsumer` enforces a 10% onchain deviation cap (`maxDeviationBps = 1000`) and was audited by Hacken in April 2025 (`github.com/resilience-foundation/nav-oracle`, 8 findings, all resolved). The `PriceRouter` [`0xFe76cF5eD606593fB7764f33627B8D7E0f9Fab66`](https://etherscan.io/address/0xFe76cF5eD606593fB7764f33627B8D7E0f9Fab66) reads the calculator via `SharePriceOracle` [`0x0764BFa862164D28799F31e7e1e7206F5177B6bB`](https://etherscan.io/address/0x0764BFa862164D28799F31e7e1e7206F5177B6bB); the same router reads sUSDe via `SimpleOracle` [`0xb6aD3633cB3FAfed3D375d8c64240f122E19fB4D`](https://etherscan.io/address/0xb6aD3633cB3FAfed3D375d8c64240f122E19fB4D) wrapping Chainlink's `sUSDe/USD` aggregator [`0xFF3BC18cCBd5999CE63E788A1c250a88626aD099`](https://etherscan.io/address/0xFF3BC18cCBd5999CE63E788A1c250a88626aD099). The `SharePriceCalculator` itself only enforces `newPrice != 0` — the deviation cap lives in the `NAVConsumer`, not the calculator.
 - **Residual concern:** both `PRICE_SETTER_ROLE` on `SharePriceCalculator` and all admin/updater roles on `NAVConsumer` (including `EMERGENCY_UPDATER_ROLE` which can call `forceNAVUpdate`, and the ability to flip `setDeviationCheckEnabled(false)` to disable the guardrail) sit with the same EOA [`0x6C15B25E9750Dccb698C1a4023f34015bFe57649`](https://etherscan.io/address/0x6C15B25E9750Dccb698C1a4023f34015bFe57649). That EOA can bypass `NAVConsumer` entirely and write any positive price directly to the calculator.
-- The Network Firm performs offchain attestations of the §114 Trust balances (cadence verified only via the single October 2025 AUP report). **No Chainlink Proof-of-Reserve aggregator for reserves is consumed onchain** — the onchain NAV Oracle publishes the share price, not reserves. See Appendix A.7.
+- The Network Firm performs offchain attestations of the §114 Trust balances (cadence verified only via the single October 2025 AUP report). **No Chainlink Proof-of-Reserve aggregator for reserves is consumed onchain** — the onchain NAV Oracle publishes the share price, not reserves. See the Chainlink usage appendix at the end of this report.
 - **NAV formula**: `(Spread/365) + max[sUSDe(T)/sUSDe(T-7d) - 1 ; TBILL(T)/TBILL(T-7d) - 1] × (undeployed capital / total capital) + SOFR × (deployed capital / total capital)`. Spread = 250 bps.
 
 ### Capital Deployment
@@ -177,7 +177,7 @@ reUSDe is the protocol's junior/first-loss tranche ([docs](https://docs.re.xyz/i
 2. **reUSDe** (junior) — starts taking losses once combined ratio reaches 115% (i.e. after Re Capital is exhausted). Absorbs losses up to the 115-135% combined ratio range.
 3. **reUSD** (senior) — only impaired if combined ratio exceeds **135%**, meaning both Re Capital and all reUSDe reserves are depleted.
 
-Re's marketing attaches modeled impairment likelihoods to each threshold (Re Capital **~3.9%** at 105% CR; reUSDe **~0.9%** at 115%; reUSD **~0.03%** at 135%). These three numbers come from **a single chart on page 1 of the Nov 2025 LP Memo** — the *"Re Capital Structure and Risk-Remote Design"* panel — and represent the modeled probability of the portfolio combined ratio reaching each threshold. **The model is undisclosed**: no distributional assumptions, correlation structure, simulation count, calibration window, confidence intervals, or actuarial sign-off are published. The tail figures also assume the subordinated buffer is fully intact at time of stress. See [Appendix A.6](#a6-stress-testing-loss-likelihoods) for the verbatim source quote and caveats.
+Re's marketing attaches modeled impairment likelihoods to each threshold (Re Capital **~3.9%** at 105% CR; reUSDe **~0.9%** at 115%; reUSD **~0.03%** at 135%). These numbers come from a single chart on page 1 of the Nov 2025 LP Memo (*"Re Capital Structure and Risk-Remote Design"*) and represent the modeled probability of the portfolio combined ratio reaching each threshold. **The model is undisclosed**: no distributional assumptions, correlation structure, simulation count, calibration window, confidence intervals, or actuarial sign-off are published. The tail figures also assume the subordinated buffer is fully intact at time of stress. Treat as Re-asserted, not independently attested.
 
 **reUSDe mechanics:**
 - Price based on quarterly-refreshed target NAV derived from actuarial reports; compounds daily but surplus realization occurs quarterly
@@ -245,7 +245,7 @@ Re's marketing attaches modeled impairment likelihoods to each threshold (Re Cap
 
   This is the single largest unmitigated custody risk in the system. The AUP provides evidence that the specific address list is in Re's MPC setup, not that unauthorized movement would be prevented by multi-party signing.
 - **Onchain buffer**: Instant redemption vault and Redemption Reserves Custodian hold ~$72.98M of sUSDe plus $0 USDC for immediate redemptions (USDC instant exits unavailable under current config; see Liquidity).
-- **Offchain trust**: §114 Reinsurance Trust holds cash and T-Bills in NAIC-compliant banks; Re's public materials name these as "an independent bank / custodian" without disclosing specific counterparty names. The only independently-verified attestation of these balances is the Oct 31, 2025 Agreed-Upon Procedures report by The Network Firm (see Appendix A.8); no ongoing cadence is publicly established. Re's docs describe the publication as *"published via Chainlink"* — onchain, no Chainlink PoR aggregator is consumed (see Appendix A.7).
+- **Offchain trust**: §114 Reinsurance Trust holds cash and T-Bills in NAIC-compliant banks; Re's public materials name these as "an independent bank / custodian" without disclosing specific counterparty names. The only independently-verified attestation of these balances is the Oct 31, 2025 Agreed-Upon Procedures report by The Network Firm ([`AUP-Report-2025.pdf`](https://storage.googleapis.com/foundation-files/AUP-Report-2025.pdf)); no ongoing cadence is publicly established. Re's docs describe the publication as *"published via Chainlink"* — onchain, no Chainlink PoR aggregator is consumed (see the Chainlink usage appendix).
 - **Surplus Note protection**: Surplus notes rank junior to policyholders but contractually protect depositor principal
 - **Re Capital buffer**: ~$73M subordinated first-loss layer ahead of reUSDe and reUSD
 - **reUSDe as backstop**: reUSDe (the risk-bearing token) absorbs first-loss risk across the reinsurance portfolio, providing a backstop to prevent losses reaching reUSD holders. Stress testing shows reUSD loss likelihood = 0.03% at 135% combined ratio
@@ -334,7 +334,7 @@ Combined ~$69.3M of Re reUSD is supplied into Fluid + Morpho lending markets onc
 
 ### Programmability
 
-- **reUSD price**: **NOT programmatically computed**. The NAV itself is produced offchain by a Chainlink Functions JS job, delivered onchain by `NAVConsumer`, and stored in `SharePriceCalculator`. Onchain, the NAV Consumer enforces a 10% deviation cap per update (`maxDeviationBps = 1000`). **No Chainlink PoR aggregator for reserves is consumed onchain** (see Appendix A.7). The calculator itself has no guardrail on `setSharePrice`; the admin EOA holds the role and can bypass the NAV Consumer path.
+- **reUSD price**: **NOT programmatically computed**. The NAV itself is produced offchain by a Chainlink Functions JS job, delivered onchain by `NAVConsumer`, and stored in `SharePriceCalculator`. Onchain, the NAV Consumer enforces a 10% deviation cap per update (`maxDeviationBps = 1000`). **No Chainlink PoR aggregator for reserves is consumed onchain** (see the Chainlink usage appendix). The calculator itself has no guardrail on `setSharePrice`; the admin EOA holds the role and can bypass the NAV Consumer path.
 - **Deposits**: Require KYC verification through the KYC Registry contract
 - **Redemptions**: Instant redemptions are programmatic (from buffer). Quarterly redemptions involve admin-managed processes
 - **Capital deployment**: Offchain, managed by the protocol team through the Fireblocks custody infrastructure
@@ -356,7 +356,7 @@ Combined ~$69.3M of Re reUSD is supplied into Fluid + Morpho lending markets onc
 - **Company**: Re (re.xyz). Founded 2022. Issuer entity: Resilience BVI Ltd. (British Virgin Islands, per [RWA.xyz](https://app.rwa.xyz/assets/reUSD)). Governance controlled by Resilience Foundation.
 - **Legal Structure**: Partner reinsurance company domiciled in Cayman Islands, regulated by CIMA. Offchain trust accounts in U.S. jurisdiction (§114 Trust, NAIC-compliant banks). Token issuer domiciled in BVI.
 - **Investors**: $14M seed round at $100M post-money valuation. Investors include **Electric Capital, Tribe Capital, Stratos, SiriusPoint, Exor, Defy, Framework Ventures, Morgan Creek Digital**.
-- **Custody:** Re's public materials (`docs.re.xyz`) name **Fireblocks MPC custody** for idle onchain assets. The AUP-Report-2025 (Appendix A.8) corroborates that Re operates a Fireblocks MPC wallet set covering the 15 listed addresses but does not cryptographically verify the N-of-M quorum. Public documentation does not name specific banking counterparties for the offchain §114 Trust assets.
+- **Custody:** Re's public materials (`docs.re.xyz`) name **Fireblocks MPC custody** for idle onchain assets. The [AUP-Report-2025](https://storage.googleapis.com/foundation-files/AUP-Report-2025.pdf) corroborates that Re operates a Fireblocks MPC wallet set covering the 15 listed addresses but does not cryptographically verify the N-of-M quorum. Public documentation does not name specific banking counterparties for the offchain §114 Trust assets.
 - **Documentation**: Comprehensive documentation at docs.re.xyz. Clear description of mechanism, risks, and investor protections.
 - **Runtime Monitoring**: ChainAnalysis for onchain transaction monitoring.
 - **Incident Response**: Emergency pause mechanism exists. Recovery wallets designated for each ICL (e.g., [`0xDf6bF2713b5c7CA724E684657280bC407938F447`](https://etherscan.io/address/0xDf6bF2713b5c7CA724E684657280bC407938F447) for initial ICL).
@@ -451,9 +451,9 @@ Combined ~$69.3M of Re reUSD is supplied into Fluid + Morpho lending markets onc
 - **The Network Firm attestation**: the only Network Firm engagement publicly verified is the single Agreed-Upon Procedures report dated Oct 31, 2025 (published Dec 17, 2025). No onchain or public evidence establishes a daily or weekly cadence; the "daily attestation" phrasing in Re's docs is a protocol claim, not an observed publication pattern. No Chainlink PoR feed is consumed onchain, so reserve-attestation monitoring has to target Re's transparency channel directly.
   - **Action**: before relying on an "X-hours stale" alert, confirm the actual publication cadence with Re or by observing the transparency dashboard for a calendar month.
   - **Alert**: if reported reserves fall below total reUSD supply × share price.
-  - **Alert**: if a new AUP report appears with an address list that differs from the 15 addresses in `AUP-Report-2025.pdf` (see Appendix A.8).
+  - **Alert**: if a new AUP report appears with an address list that differs from the 15 addresses in [`AUP-Report-2025`](https://storage.googleapis.com/foundation-files/AUP-Report-2025.pdf).
 
-- **Onchain coverage ratio**: Compute `(USDC + USDT + USDe + sUSDe_in_USDe_terms)` across all 15 Fireblocks-MPC-controlled addresses listed in `AUP-Report-2025`, divided by `reUSD Ethereum totalSupply × getSharePrice()`. Currently ~54.0%.
+- **Onchain coverage ratio**: Compute `(USDC + USDT + USDe + sUSDe_in_USDe_terms)` across all 15 Fireblocks-MPC-controlled addresses listed in the [AUP-Report-2025](https://storage.googleapis.com/foundation-files/AUP-Report-2025.pdf), divided by `reUSD Ethereum totalSupply × getSharePrice()`. Currently ~54.0%.
   - Alert if coverage drops below 50% (Re's stated floor).
   - Alert if coverage drops below 55% (headroom erosion).
   - Alert if the sUSDe share of reserves exceeds 92% or the USDC share drops below 7% (current split: sUSDe ~88% / USDC ~9.3%).
@@ -505,7 +505,7 @@ Combined ~$69.3M of Re reUSD is supplied into Fluid + Morpho lending markets onc
 
 - **Custody / asset-movement surface — 92% of onchain reserves at plain EOAs**: `$92.33M` of `$99.93M` of onchain reserves sits at **three** plain EOAs listed in the AUP-Report-2025: [`0x295F67…689E`](https://etherscan.io/address/0x295F67Fdb21255A3Db82964445628a706FBe689E) ICL Custodial Wallet ($24.39M); [`0x9eA38e…ADF8`](https://etherscan.io/address/0x9eA38e09F41A9DE53972a68268BA0Dcc6d2fAdf8) Redemption Reserves Custodian ($65.38M); [`0xd437…31e9`](https://etherscan.io/address/0xd4374008c88321Eb2e59ABD311156C44B25831e9) auxiliary ($2.56M). None has code; all look identical to single-key wallets from the chain's perspective. **No onchain delay, destination whitelist, or role check** applies to their outbound transfers — one ECDSA signature moves the funds. The claimed Fireblocks MPC custody (N-of-M offchain quorum, destination policies) is unverifiable by anyone outside Re; TNF's AUP procedure was "observe Re Management access the Fireblocks MPC wallet," which does not cryptographically attest the N-of-M quorum. The 48h Timelock does NOT gate these flows. See Funds Management → Collateralization for the full custody table.
 - **Offchain dependency concentration**: The protocol's value proposition depends on offchain entities (Cayman reinsurer, §114 Trust, The Network Firm, Fireblocks) operating honestly and solvent. Onchain verification cannot fully cover offchain risks.
-- **Oracle/setter manipulation**: the standard share-price path is the audited Chainlink-Functions `NAVConsumer` (10% deviation cap), but a compromised admin EOA can bypass it (write directly to `SharePriceCalculator`, disable the deviation check, or call `forceNAVUpdate` every 4h) and write arbitrary prices. There is no separate Chainlink PoR aggregator attesting reserves independently (see Appendix A.7) — reserve assurance reduces to The Network Firm's offchain AUP plus the onchain balances we audit directly.
+- **Oracle/setter manipulation**: the standard share-price path is the audited Chainlink-Functions `NAVConsumer` (10% deviation cap), but a compromised admin EOA can bypass it (write directly to `SharePriceCalculator`, disable the deviation check, or call `forceNAVUpdate` every 4h) and write arbitrary prices. There is no separate Chainlink PoR aggregator attesting reserves independently (see the Chainlink usage appendix) — reserve assurance reduces to The Network Firm's offchain AUP plus the onchain balances we audit directly.
 - **Liquidity mismatch**: reUSD represents liquid onchain tokens partially backed by offchain reinsurance capital. Capital release is reevaluated quarterly, and programs are short-duration and cat-light (per performance memo). The instant redemption vault holds no USDC (sUSDe only — `6.188M` in vault, `53.263M` in Redemption Reserves Custodian). In a bank-run scenario, sUSDe redemption liquidity plus only ~$14.96M in DEX liquidity would need to absorb exits for ~$186.7M in outstanding tokens; windowed queue handles the remainder.
 
 ---
@@ -561,7 +561,7 @@ Combined ~$69.3M of Re reUSD is supplied into Fluid + Morpho lending markets onc
 
 **Subcategory C: External Dependencies**
 
-- Chainlink: used onchain as (a) the `sUSDe/USD` price feed inside `PriceRouter` (aggregator [`0xFF3BC18cCBd5999CE63E788A1c250a88626aD099`](https://etherscan.io/address/0xFF3BC18cCBd5999CE63E788A1c250a88626aD099), 24h staleness, $1.18 / $2.00 price bounds), and (b) **Chainlink Functions + Automation** driving the daily NAV update through `NAVConsumer` [`0x84d4eaeb10f9e57b67622f667c6c13e22fa4b2b6`](https://etherscan.io/address/0x84d4eaeb10f9e57b67622f667c6c13e22fa4b2b6) (DON `fun-ethereum-mainnet-1`, subscription `85`). **No Chainlink PoR aggregator for reserves** is consumed onchain — see Appendix A.7.
+- Chainlink: used onchain as (a) the `sUSDe/USD` price feed inside `PriceRouter` (aggregator [`0xFF3BC18cCBd5999CE63E788A1c250a88626aD099`](https://etherscan.io/address/0xFF3BC18cCBd5999CE63E788A1c250a88626aD099), 24h staleness, $1.18 / $2.00 price bounds), and (b) **Chainlink Functions + Automation** driving the daily NAV update through `NAVConsumer` [`0x84d4eaeb10f9e57b67622f667c6c13e22fa4b2b6`](https://etherscan.io/address/0x84d4eaeb10f9e57b67622f667c6c13e22fa4b2b6) (DON `fun-ethereum-mainnet-1`, subscription `85`). **No Chainlink PoR aggregator for reserves** is consumed onchain — see the Chainlink usage appendix.
 - **LayerZero**: cross-chain reUSD transport via `ReMintBurnAdapter` OFT [`0x2BB4046022B9161f3F84Ad8E35cac1d5946e0e85`](https://etherscan.io/address/0x2BB4046022B9161f3F84Ad8E35cac1d5946e0e85). Active peers: Avalanche (eid 30106), Arbitrum (30110), Base (30184), BNB (30102). Rate limit: 2,500,000 reUSD per 24h inbound AND outbound per chain (onchain-verified).
 - The Network Firm for daily attestations
 - Ethena for basis-trade yield source
@@ -596,7 +596,7 @@ Combined ~$69.3M of Re reUSD is supplied into Fluid + Morpho lending markets onc
 - Offchain reserves: Attested daily by The Network Firm (no onchain Chainlink PoR feed verified)
 - Underlying reinsurance performance: Inherently offchain, not verifiable onchain
 
-**Provability Score: 4.0** -- Re's marketing describes Chainlink as the reserve-publication mechanism, but no Chainlink Proof-of-Reserve aggregator for reserves is consumed onchain (see Appendix A.7). Onchain Chainlink usage is limited to (a) the sUSDe/USD price feed for collateral pricing and (b) Chainlink Functions + Automation driving `NAVConsumer` for the share-price update only. Core yield calculation, reserve attestation, and performance reporting are all offchain with no independent onchain oracle to cross-check, and the only third-party attestation verified so far is a single Oct 2025 AUP snapshot.
+**Provability Score: 4.0** -- Re's marketing describes Chainlink as the reserve-publication mechanism, but no Chainlink Proof-of-Reserve aggregator for reserves is consumed onchain (see the Chainlink usage appendix). Onchain Chainlink usage is limited to (a) the sUSDe/USD price feed for collateral pricing and (b) Chainlink Functions + Automation driving `NAVConsumer` for the share-price update only. Core yield calculation, reserve attestation, and performance reporting are all offchain with no independent onchain oracle to cross-check, and the only third-party attestation verified so far is a single Oct 2025 AUP snapshot.
 
 **Funds Management Score = (4.0 + 4.0) / 2 = 4.0**
 
@@ -794,94 +794,9 @@ Trust Boundaries:
 
 ---
 
-## Appendix: Reinsurance Portfolio & Performance Claims (Re-provided)
+## Appendix: Chainlink usage by Re Protocol — what is real vs what is marketing
 
-All figures in this appendix are **asserted by Re Protocol** in private materials provided to Yearn for due diligence. No figure has been independently reproduced, attested, or actuarially reviewed by Yearn. Source files are checked in under `reports/data/re-reusd/issue-134/` (see `SOURCES.md` in that directory for the Google Drive links).
-
-Source legend:
-
-- **[LP Memo]** — `re-historical-comparative-performance-nov-2025.pdf` (4 pages, titled *"Re Historical and Comparative Performance — November 2025 | LP Memo"*)
-- **[Deck]** — `re-ethereum-house-2025.pdf` (8-page intro deck)
-
-### A.1 Portfolio composition ($174M written premium)
-
-| Line of Business | Allocation | Written Premium | Risk Profile (Re's label) |
-|------------------|-----------|-----------------|---------------------------|
-| Homeowners Insurance | 35% | $49M | Low Volatility |
-| Auto Insurance | 30% | $42M | Low Volatility |
-| Small Business Commercial | 20% | $28M | Low Volatility |
-| Workers Compensation | 15% | $21M | Low Volatility |
-
-**Source:** [LP Memo], page 3, *"Insurance Strategy Breakdown"* table.
-**What "Risk Profile" means here:** the "Low Volatility" label is Re's own self-classification, not a Yearn determination. Re's rationale (same page): Homeowners = "localized residential property with minimal cat exposure"; Auto = "frequency-based vehicle and liability programs with lower limits"; Small Business Commercial = "diversified property and liability across SMEs"; Workers Comp = "stable business segments and lower-layer attachment points". No quantitative volatility metric (e.g. historical std-dev of loss ratios) is disclosed.
-
-### A.2 Combined-ratio history (2022-2024, +1H 2025)
-
-Per [LP Memo] page 2 table *"Re Portfolio Performance"*:
-
-| Year | Global Reinsurance Combined Ratio | Re Portfolio Combined Ratio |
-|------|-----------------------------------|-----------------------------|
-| 2021 | 96.30% | 92.68% |
-| 2022 | 96.20% | 92.58% |
-| 2023 | 90.30% | 92.88% |
-| 2024 | 91.30% | 91.52% |
-| 1H 2025 | 94.80% | 92.67% |
-
-Re-stated underwriting-year view (same page):
-
-| UW Year | Written Premium | CR @ Inception | CR @ YE 2024 |
-|---------|----------------|----------------|--------------|
-| 2022 | $12.2M | 93.10% | 92.58% |
-| 2023 | $13.8M | 93.09% | 92.88% |
-| 2024 | $56.1M | 91.88% | 91.52% |
-| 2025 | $91.9M | 92.67% | n/a |
-| **Total** | **$174.0M** | **92.48%** | **91.91%** |
-
-**Source:** [LP Memo], page 2. Industry ratios cited as *"Source: Aon / Company Disclosure"* on the same chart.
-
-### A.3 Return-on-capital claim (15-23%)
-
-**Source:** [Deck], page 3 (headline slide *"Re is live and scaling to $400M+ EOY"*):
-
-> $178M IN GROSS WRITTEN PREMIUM TO DATE • $4B IN PIPELINE DEALFLOW • **15-23% RETURN ON CAPITAL**
-
-No methodology, time period, or base-of-capital disclosed in the slide.
-
-### A.4 Estimated ROE (12-19%)
-
-**Source:** [LP Memo], page 4, *"Comparative Performance and ROE Outlook"* table:
-
-|  | Global Reinsurance | Re Portfolio |
-|---|--------------------|--------------|
-| Combined Ratio (Avg.) | ~93-95% | ~92% |
-| **Estimated ROE** | ~13-20% | **~12-19%** |
-| Volatility Profile | Moderate | Low / Cat-Light |
-
-The same memo (page 2) cites industry-reported ROE for 2021-1H 2025 ranging from 10.2% to 19.6%. Re's own ROE is explicitly labelled "Estimated"; no capital base, leverage assumption, or fee treatment is disclosed.
-
-### A.5 Pipeline Dealflow ($4B)
-
-**Source:** [Deck], page 3 (same slide as ROC).
-
-**Meaning:** "Pipeline Dealflow" is insurance/reinsurance jargon for the dollar notional of reinsurance contract opportunities Re has identified or is in active discussion on but has **not bound**. It is a sales-pipeline forward-looking number, not current revenue, not capital, and not backing for reUSD. Re does not disclose a conversion probability or time horizon. For scale, the same slide shows **$178M gross written premium to date** — so the pipeline is ~23× the bound book. Treat as TAM-style marketing.
-
-### A.6 Stress testing (loss likelihoods)
-
-**Source:** [LP Memo], page 1, box *"Re Capital Structure and Risk-Remote Design"*:
-
-> Modeled stress testing demonstrates:
-> - reUSD loss likelihood ≈ **0.03%** at 135% combined ratio
-> - reUSDe ≈ **0.9%**
-> - Re Capital ≈ **3.9%**
-
-An accompanying chart on the same page also shows Re Capital ≈ 1.9% at 115% CR and charts loss likelihoods at 105% / 110% / 115% / 135%.
-
-**Caveats:**
-- The memo uses the phrase *"Modeled stress testing demonstrates"* but discloses no model, distributional assumptions, parameter calibration, confidence intervals, or actuarial attestation.
-- The claim is conditional on the Re Capital + reUSDe subordinated buffer remaining intact at the time of a loss event; the 0.03% tail probability assumes the current ~$73M Re Capital layer is fully present.
-- No independent actuarial firm has published reproduction of these figures.
-
-### A.7 Chainlink usage by Re Protocol — what is real vs what is marketing (Apr 17, 2026)
+_Verified Apr 17, 2026._
 
 Re's documentation ties the protocol's reserve and price publication to Chainlink. The relevant quotes:
 
@@ -916,49 +831,3 @@ So Re's claim *"A JSON price feed is pushed on-chain via Chainlink"* is correct 
 
 **Action:** when evaluating "Chainlink" claims in Re's docs, distinguish between Chainlink Functions + Automation (used for the share price, real and audited) vs a Chainlink PoR aggregator for reserves (does not exist onchain). If Re asserts the latter in conversation, ask for the aggregator address — it should be in Chainlink's mainnet directory and verifiable on Etherscan.
 
-### A.8 AUP-Report-2025 address list — cross-referenced onchain (Apr 17, 2026)
-
-The October 2025 AUP ([`AUP-Report-2025.pdf`](https://storage.googleapis.com/foundation-files/AUP-Report-2025.pdf), Procedure 3 table) lists 15 "Fireblocks MPC wallet" addresses as in-scope for Re's onchain Supporting Assets. All 15 were verified onchain:
-
-| # | Address | Chain type | AUP claim | Apr 17 2026 balance (USDC + USDT + USDe + sUSDe) | Where |
-|---|---|---|---|---|---|
-| 1 | `0x19aff1C007397Bdb7f82BdA18151C28AB4335896` | EOA | Fireblocks MPC | $0 | (unused) |
-| 2 | `0x295F67Fdb21255A3Db82964445628a706FBe689E` | EOA | Fireblocks MPC | **$24.39M** | ICL Custodial Wallet (active) |
-| 3 | `0x4691C475bE804Fa85f91c2D6D0aDf03114de3093` | Contract | Fireblocks MPC | $0 | ICL contract |
-| 4 | `0x4F1ff9b995472B27A6BAfEc967986F35Bf1aDaE4` | EOA | Fireblocks MPC | $0 | (unused) |
-| 5 | `0x5C454f5526e41fBE917b63475CD8CA7E4631B147` | Contract | Fireblocks MPC | **$7.60M** | Daily Instant Redemption Vault |
-| 6 | `0x802eDbB1Ec20548A4388ABC337E4011718eb0291` | EOA | Fireblocks MPC | $0 | (unused) |
-| 7 | `0x9AB62AebAbE738AB233C447eEdCE88D1D0a61FE3` | EOA | Fireblocks MPC | $0 | (unused) |
-| 8 | `0x9eA38e09F41A9DE53972a68268BA0Dcc6d2fAdf8` | EOA | Fireblocks MPC | **$65.38M** | Redemption Reserves Custodian |
-| 9 | `0xb22a8533e6cd81598f82514a42F0B3161745fbe1` | EOA | Fireblocks MPC | $0 | (unused) |
-| 10 | `0xd4374008c88321Eb2e59ABD311156C44B25831e9` | EOA | Fireblocks MPC | **$2.56M** | auxiliary (purpose undisclosed publicly) |
-| 11 | `0xD75Ea2fd3D00399df7b7241AB7A189085aB2eDE9` | EOA | Fireblocks MPC | $0 | (unused) |
-| 12 | `0xe13292F97E38da0C64398De5E0bFc95180DE9d23` | EOA | Fireblocks MPC | $0 | (unused) |
-| 13 | `0xE1886BE2bA8B2496c2044a77516F63a734193082` | Contract | Fireblocks MPC | $258 | (dust) |
-| 14 | `0xfB602cb83c9c15b4cc49340dc9aD7a8C23754BB0` | EOA | Fireblocks MPC | $0 | (unused) |
-| 15 | `0xfd4016Ea13ca8acc04A11a99702dF076A4d3B852` | EOA | Fireblocks MPC | $0 | (unused) |
-
-**Summary:** $99.93M active onchain, ~$92.33M at plain EOAs, ~$7.60M at one contract (RedemptionVault).
-
-**What the AUP establishes vs what it does not:**
-
-- Establishes: (a) the 15 addresses are the complete in-scope set Re disclosed to TNF as of Oct 31 2025; (b) a TNF auditor directly observed Re Management access the Fireblocks UI; (c) TNF independently queried each address's balance at the snapshot time and cross-referenced with CoinGecko prices.
-- Does not establish: (a) the actual N-of-M MPC configuration (the audit did not verify the signer threshold cryptographically — it relied on Re's representation that these are MPC wallets); (b) Fireblocks' transfer policies (whitelists, limits, approvals) — not in scope; (c) 1:1 backing or TVL coverage — explicitly excluded by the engagement letter; (d) operating effectiveness of Re's internal controls — explicitly excluded.
-- Also note: the AUP lists 15 addresses. The chain reflects 3 EOAs and 2 contracts carrying balances; the other 10 are dormant. An address rotating from dormant to active, or a new address not on this list appearing in the sweep flow, is a governance signal worth monitoring (see Monitoring → Reserve EOAs).
-
-**AUP snapshot totals (Oct 31, 2025) for context:**
-
-| Supporting Asset | USD Value | Where |
-|---|---|---|
-| Cash | $55,572,232 | Brokerage Account (offchain) |
-| Money Market Funds | $4,169,897 | Bank & Brokerage Accounts (offchain) |
-| USDC | $1,466,833 | Fireblocks MPC (onchain) |
-| USDT | $2,012,386 | Fireblocks MPC (onchain) |
-| USDe | $66,919 | Fireblocks MPC (onchain) |
-| sUSDe | $17,750,736 | Fireblocks MPC (onchain) |
-| UTY + YUTY | $2,472,438 | Fireblocks MPC (onchain; Unity Protocol) |
-| LIUSD (1w/2w/4w/8w) | $4,988,125 | Fireblocks MPC (onchain; InfiniFi) |
-| Estimated Gross Premium Receivable | $66,117,423 | Reinsurance Contracts (offchain) |
-| **Total** | **$154,616,990** | |
-
-Onchain portion then (~$28.76M) has grown to ~$99.93M now; total supporting assets including offchain cash/receivables would be higher today but not independently re-audited since Oct 2025.
