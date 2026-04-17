@@ -208,8 +208,25 @@ reUSDe is the protocol's junior/first-loss tranche ([docs](https://docs.re.xyz/i
 
 ### Collateralization
 
-- **Onchain reserve target**: >=50% of deposits kept in onchain backing (USDC, sUSDe, and potentially T-bill wrappers such as BUIDL), per DD questionnaire
-- **Onchain buffer**: Instant redemption vault and Redemption Reserves Custodian hold liquid assets (USDC and sUSDe) for immediate redemptions
+- **Onchain reserve target**: ≥50% of deposits kept in onchain backing (USDC, sUSDe, and potentially T-bill wrappers such as BUIDL), per DD questionnaire.
+- **Onchain reserves — verified Apr 17, 2026**: onchain holdings sum to ~**$95.31M** against an Ethereum reUSD NAV of ~$185.10M (share price `1.0724` × supply `172,599,430`). **Coverage ratio ≈ 51.5% of Ethereum NAV (~51.0% of total cross-chain NAV of ~$186.72M)** — the ≥50% target is met, but only marginally; the protocol is running close to the floor. Breakdown:
+
+| Asset | Location | Amount | USD value | Share |
+|-------|----------|--------|-----------|-------|
+| USDC  | ICL Custodial Wallet [`0x295F…689E`](https://etherscan.io/address/0x295F67Fdb21255A3Db82964445628a706FBe689E) | 9,343,698 | $9.34M | 9.8% |
+| USDe  | ICL Custodial Wallet `0x295F…689E` | 100,000 | $0.10M | 0.1% |
+| sUSDe | ICL Custodial Wallet `0x295F…689E` | 10,496,264 | ~$12.88M | 13.5% |
+| sUSDe | Daily Instant Redemption Vault [`0x5C45…B147`](https://etherscan.io/address/0x5C454f5526e41fBE917b63475CD8CA7E4631B147) | 6,188,822 | ~$7.60M | 8.0% |
+| sUSDe | Redemption Reserves Custodian [`0x9eA3…ADF8`](https://etherscan.io/address/0x9eA38e09F41A9DE53972a68268BA0Dcc6d2fAdf8) | 53,263,478 | ~$65.38M | 68.6% |
+| **Total** | | | **~$95.31M** | **100%** |
+
+  (sUSDe valued at the onchain sUSDe/USDe exchange rate of `1.22757` via `convertToAssets`, assuming USDe ≈ $1.)
+
+- **Concentration concerns (onchain-verified)**:
+  - ~**90.1%** of onchain reserves are in sUSDe, not USDC. This inherits Ethena counterparty / smart-contract risk and a 7-day cooldown to unstake sUSDe → USDe. Only ~$9.34M of the reserves (≈9.8%) is immediately-redeemable USDC.
+  - **No BUIDL or T-bill-wrapper balances** were found at any of the ICL / vault / custodian addresses (Apr 17, 2026), despite the DD questionnaire listing BUIDL as a potential reserve asset. Apart from USDC/USDe/sUSDe, the only non-dust holding is ~1.35M `reUSDsUSDe` Curve LP tokens at the ICL Custodial Wallet (protocol-owned liquidity for the reUSD/sUSDe pool; excluded from the reserve total above). All other token balances at these addresses are airdrop spam or dust (<$500).
+  - The ICL contract [`0x4691…3093`](https://etherscan.io/address/0x4691C475bE804Fa85f91c2D6D0aDf03114de3093) itself holds $0 in reserves — assets sit at the Custodial Wallet (an EOA) and at the Redemption Reserves Custodian (also an EOA).
+- **Onchain buffer**: Instant redemption vault and Redemption Reserves Custodian hold ~$72.98M of sUSDe plus $0 USDC for immediate redemptions (USDC instant exits unavailable under current config; see Liquidity).
 - **Offchain trust**: §114 Reinsurance Trust holds cash and T-Bills in NAIC-compliant banks (including Coinbase, Wells Fargo), attested daily by The Network Firm and published via Chainlink
 - **Surplus Note protection**: Surplus notes rank junior to policyholders but contractually protect depositor principal
 - **Re Capital buffer**: ~$73M subordinated first-loss layer ahead of reUSDe and reUSD
@@ -423,6 +440,12 @@ The DD questionnaire claim of ">$100M in borrow demand" across lending integrati
   - **Alert**: If attestation is not updated for >48 hours.
   - **Alert**: If reported reserves fall below total reUSD supply × share price.
 
+- **Onchain coverage ratio**: Compute `(USDC + USDe + sUSDe_in_USDe_terms) across ICL Custodian + Instant Redemption Vault + Redemption Reserves Custodian` divided by `(reUSD Ethereum totalSupply × getSharePrice())`. Currently ~51.5%.
+  - **Alert (Critical)**: If coverage drops below 50% (protocol floor per DD).
+  - **Alert (High)**: If coverage drops below 55% (headroom erosion).
+  - **Alert (High)**: If sUSDe share of reserves exceeds 92% or USDC share drops below 7% (current split: sUSDe ~90.1% / USDC ~9.8%).
+  - **Alert (Medium)**: First appearance of BUIDL or another T-bill-wrapper balance at any reserve address (would change the reserve mix narrative).
+
 ### Monitoring Frequency
 
 | Category | Frequency | Priority |
@@ -438,6 +461,7 @@ The DD questionnaire claim of ">$100M in borrow demand" across lending integrati
 | Instant redemption cap changes | Real-time | Critical |
 | reUSD share price | Daily | High |
 | Instant redemption buffer (USDC + sUSDe) | Every 6 hours | High |
+| Onchain coverage ratio (reserves / NAV) + composition | Every 6 hours | High |
 | Instant redemption interaction events | Every 6 hours | High |
 | The Network Firm offchain attestation publication | Daily | High |
 | DEX pool TVL/balance (Fluid reUSD/USDT + Curve) | Hourly | Medium |
@@ -460,6 +484,7 @@ The DD questionnaire claim of ">$100M in borrow demand" across lending integrati
 - **Offchain price setter with no onchain guardrail**: reUSD price is set via direct `setSharePrice(uint256)` by an EOA with `PRICE_SETTER_ROLE`. The deployed Share Price Calculator enforces only `newPrice != 0`; any "25 bps daily max" mentioned in docs is an offchain convention, not an onchain invariant. A compromised setter can instantly write an arbitrary positive price. This is a fundamental centralization risk.
 - **Significant offchain capital deployment**: Majority of assets are deployed offchain into §114 Trust and reinsurance programs. This introduces counterparty risk with the trust bank, partner reinsurer, and custodians that cannot be verified fully onchain.
 - **Instant redemption vault holds no USDC**: The Daily Instant Redemption Vault holds `0` USDC + `6.188M` sUSDe. The Redemption Reserves Custodian (EOA) holds `0` USDC + `53.263M` sUSDe. `dayPayoutToken` is sUSDe — USDC-denominated instant exits are unavailable under the current config.
+- **Onchain reserves heavily concentrated in sUSDe; coverage right at the 50% floor**: Onchain reserves total ~$95.31M (~51.5% of Ethereum NAV), of which ~90% is sUSDe and only ~9.8% (~$9.34M) is USDC. Ethena (sUSDe issuer) is a material counterparty: an Ethena incident, sUSDe unstaking bottleneck, or USDe depeg would directly impair the "50%+ onchain backing" narrative even before reaching offchain exposures. The DD-cited BUIDL / T-bill wrappers are **not** held onchain.
 - **Three MINTER_ROLE holders on reUSD**: Beyond the ICL, `InstantRedemption` and `ShareTokenMinterBurner` also hold MINTER_ROLE. The ICL path enforces backing via `safeTransferFrom`. `InstantRedemption` uses the role for burns during redemption. `ShareTokenMinterBurner` is a LayerZero OFT wrapper — its mint path has no backing check by design (supply is conserved cross-chain), but the OFT adapter [`0x2BB4046022B9161f3F84Ad8E35cac1d5946e0e85`](https://etherscan.io/address/0x2BB4046022B9161f3F84Ad8E35cac1d5946e0e85) and the wrapper are both owned by the **same EOA** [`0x6C15B25E9750Dccb698C1a4023f34015bFe57649`](https://etherscan.io/address/0x6C15B25E9750Dccb698C1a4023f34015bFe57649) (not a multisig). Compromise of that key would let an attacker repoint the adapter and mint up to `2,500,000 reUSD / 24h / peer` (onchain rate limit) on Ethereum without backing.
 - **DEX liquidity thin and concentrated**: ~$14.96M across Fluid, Curve, and Blackhole (~8.0% of ~$186.7M market cap), with Fluid reUSD/USDT alone providing ~78% of depth. A disruption at Fluid would leave very little remaining DEX liquidity. (Previously-cited "~$26.2M" figure included Resupply reUSD pools, a different token.)
 - **KYC gating**: All deposits and redemptions require KYC. This limits the universe of users who can exit and creates regulatory/jurisdictional risk.
@@ -552,7 +577,7 @@ The DD questionnaire claim of ">$100M in borrow demand" across lending integrati
 - reUSDe provides first-loss protection for reUSD
 - Majority of capital deployed offchain in reinsurance programs (capital release reevaluated quarterly per DD)
 
-**Collateralization Score: 3.5** -- Hybrid onchain/offchain model. Onchain buffer is verifiable but represents only ~10% of NAV. Offchain reserves rely on third-party attestation rather than direct onchain verification. Offchain reinsurance capital release is reevaluated quarterly.
+**Collateralization Score: 3.5** -- Hybrid onchain/offchain model. Onchain reserves verified at ~$95.31M vs ~$185.10M Ethereum NAV (**~51.5% coverage**) — the DD-claimed ≥50% target is met but only marginally. ~90% of onchain reserves are in sUSDe (Ethena counterparty risk, 7-day unstake cooldown); only ~9.8% is in immediately-redeemable USDC. No BUIDL / T-bill wrappers present onchain despite being named as "potential" reserve assets in the DD questionnaire. Offchain reserves rely on third-party attestation rather than direct onchain verification. Offchain reinsurance capital release is reevaluated quarterly.
 
 **Subcategory B: Provability**
 
@@ -851,9 +876,9 @@ An accompanying chart on the same page also shows Re Capital ≈ 1.9% at 115% CR
 
 The DD questionnaire [DD] adds operational claims that similarly depend on Re's own disclosure:
 
-- ≥50% of deposits kept in onchain backing (target).
+- **≥50% of deposits kept in onchain backing (target)** — **verified onchain as ~51.5% on Apr 17, 2026** ($95.31M reserves vs $185.10M Ethereum NAV); see Funds Management → Collateralization for the full breakdown. Target is met marginally. Composition note: ~90.1% of the onchain reserve is sUSDe, ~9.8% USDC, ~0.1% USDe; **no BUIDL or T-bill wrappers** were found at the ICL / vault / custodian addresses, so the DD's "potentially T-bill wrappers such as BUIDL" language is currently not implemented onchain.
 - Capital release from reinsurance programs is reevaluated quarterly.
 - Combined ~$100M of borrow demand across lending integrations (Fluid, Morpho; and claims about Euler/Silo/TermMax that we could not verify onchain — see Liquidity section).
 - Fireblocks MPC custody for idle onchain capital, with Coinbase and Wells Fargo as banking counterparties for offchain reserves.
 
-Each of these should be read as **Re's representation**, not onchain- or independently-verified fact.
+Each of these (other than the verified coverage ratio) should be read as **Re's representation**, not onchain- or independently-verified fact.
