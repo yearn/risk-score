@@ -215,7 +215,7 @@ reUSDe is the protocol's junior/first-loss tranche ([docs](https://docs.re.xyz/i
 - **Deposits**: KYC/AML required (via SumSub and Chainalysis). Users must pass KYC checks because a portion of protocol capital is deployed with a Cayman-regulated reinsurance company (CIMA-regulated)
 - **Instant Redemption**: Available from the onchain instant liquidity buffer via `redeemInstant(uint256 shares, uint256 minPayout)` at [`0x8aEb9453EF22Cb38abC7a3Af9c208F65C1BfE31e`](https://etherscan.io/address/0x8aEb9453EF22Cb38abC7a3Af9c208F65C1BfE31e) (which delegates to the `InstantRedemption` implementation at [`0xa31DeeBB3680A3007120e74bcBdf4dF36F042a40`](https://etherscan.io/address/0xa31DeeBB3680A3007120e74bcBdf4dF36F042a40)). Atomic, same-block settlement. **Onchain-verified parameters** on Apr 17, 2026: `minRedemption = 0.01 reUSD` (`1e16`), `maxRedemption = 1,000,000 reUSD` (`1e24`), `dailyLimitBps = 2000` (20% of capacity), `userLimitBps = 1000` (10% per wallet), `feeBps = 6` (0.06%), `dayPayoutToken = sUSDe` (0x9D39A5DE30e57443BfF2A8307A4256c8797A3497). At the fastest drain rate, ~5 days to exhaust all liquid onchain reserves (20% per day). **Note:** the "250 reUSD minimum" previously cited in this report could not be found in the public docs (`docs.re.xyz/protocol/redemption-process-and-liquidity` mentions a "min" but gives no value) and contradicts the onchain parameter. Treat the onchain `minRedemption = 0.01 reUSD` as the authoritative floor; any `$250` figure, if it exists, is a front-end UX gate in `app.re.xyz`, not a contract-level invariant.
 - **Windowed Redemption**: Once instant buffer is exhausted, the protocol opens a redemption window (minimum 24 hours). Requests fulfilled pro-rata based on available capital. Proceeds must be claimed within two months.
-- **DEX Trading**: Can be traded on Fluid (reUSD/USDT ~$11.6M — note: USDT not USDC) and multiple Curve pools (reUSD/scrvUSD, reUSD/sfrxUSD, reUSD/sUSDe, reUSD/USDC, reUSD/fxUSD) totaling **~$26.2M** Ethereum DEX liquidity on Apr 17, 2026 (sources: DeFi Llama yields API).
+- **DEX Trading (Re reUSD only)**: Fluid reUSD/USDT DEX pool (~$11.62M — note: USDT, not USDC); Curve reUSD/sUSDe (~$1.42M) and reUSD/USDC (~$450K); Avalanche Blackhole reUSD/USDC pools (~$1.47M combined). **Total DEX liquidity ~$14.96M on Apr 17, 2026** (DeFi Llama yields API, filtered by underlying token `0x5086…0c72` / `0x180aF87b…625Bf`). Larger pools labelled "reUSD/scrvUSD", "reUSD/sfrxUSD", "reUSD/fxUSD", "reUSD/sDOLA" on Curve/Convex/Stake-DAO/Beefy are **Resupply Protocol's reUSD** (`0x57aB1E00…`) and are NOT Re reUSD exits.
 - **Not available to U.S. persons**
 - **Fees**: Redemption fee of `6 bps` (0.06%) — **onchain-verified** via `InstantRedemption.feeBps() = 6` at [`0xa31DeeBB3680A3007120e74bcBdf4dF36F042a40`](https://etherscan.io/address/0xa31DeeBB3680A3007120e74bcBdf4dF36F042a40) ([docs](https://docs.re.xyz/insurance-capital-layers/what-is-reusd)). No documented deposit fees, management fees, or performance fees. RWA.xyz reports 0.18% subscription and 0.18% redemption fees — discrepancy with docs may reflect different fee tiers or methodology. Onchain data shows ~$1,535 total deposit fees collected historically, suggesting a small deposit fee mechanism exists in the contracts (also flagged in Hacken audit finding F-2024-5214 "Unclaimed Deposit Fees Unaccounted For").
 
@@ -251,37 +251,53 @@ reUSDe is the protocol's junior/first-loss tranche ([docs](https://docs.re.xyz/i
 
 ### DEX Liquidity (Apr 17, 2026, source: DeFi Llama yields API)
 
-| Protocol | Chain | Pool | TVL | Notes |
-|----------|-------|------|-----|-------|
-| Fluid (DEX) | Ethereum | reUSD/**USDT** | ~$11.6M | Underlying tokens confirmed onchain: `0x5086...0c72` / `0xdac17f...831ec7` |
-| Curve | Ethereum | reUSD/scrvUSD | ~$8.32M | |
-| Curve | Ethereum | reUSD/sfrxUSD | ~$2.36M | |
-| Curve | Ethereum | reUSD/sUSDe | ~$1.42M | |
-| Curve | Ethereum | reUSD/fxUSD | ~$520K | |
-| Curve | Ethereum | reUSD/USDC | ~$450K | |
-| Blackhole CLMM | Avalanche | reUSD/USDC | ~$962K | |
-| Blackhole AMM | Avalanche | reUSD/USDC | ~$510K | |
-| Curve | Ethereum | reUSDe/sUSDe | ~$546K | reUSDe pair, listed for reference |
+**Important:** a completely unrelated token, **Resupply Protocol's reUSD** at [`0x57aB1E0003F623289CD798B1824Be09a793e4Bec`](https://etherscan.io/address/0x57aB1E0003F623289CD798B1824Be09a793e4Bec), also uses the "reUSD" symbol. Pool labels like "reUSD/scrvUSD", "reUSD/sfrxUSD", "reUSD/fxUSD", "reUSD/sDOLA" on Curve / Convex / Stake-DAO / Yearn / Beefy refer to **Resupply** reUSD, not Re Protocol reUSD. Only pools whose onchain `underlyingTokens` array contains Re's reUSD (`0x5086bf35…0c72` on Ethereum, `0x180aF87b…625Bf` on Avalanche) are counted below.
 
-**Total reUSD DEX liquidity: ~$26.2M** (Ethereum ~$24.2M + Avalanche ~$1.5M). The reUSDe/sUSDe pool (~$546K) is excluded since it pairs the junior tranche, not reUSD.
+| Protocol | Chain | Pool | TVL | Underlying tokens (onchain-verified) |
+|----------|-------|------|-----|--------------------------------------|
+| Fluid (DEX) | Ethereum | reUSD/USDT | ~$11.62M | `0x5086…0c72` (Re reUSD) / `0xdac17f…831ec7` (USDT) |
+| Curve | Ethereum | reUSD/sUSDe | ~$1.42M | `0x5086…0c72` / `0x9D39A5…A3497` (sUSDe) |
+| Curve | Ethereum | reUSD/USDC | ~$450K | `0x5086…0c72` / `0xA0b869…6eB48` (USDC) |
+| Blackhole CLMM | Avalanche | reUSD/USDC | ~$962K | `0x180aF87b…625Bf` (Re reUSD on Avalanche) / USDC.e |
+| Blackhole AMM | Avalanche | reUSD/USDC | ~$510K | `0x180aF87b…625Bf` / USDC.e |
+
+**Total Re reUSD DEX liquidity: ~$14.96M** (Ethereum ~$13.49M + Avalanche ~$1.47M). The Fluid reUSD/USDT DEX pool is the dominant venue (~78% of total).
+
+**Pools previously mis-attributed to Re** (actually Resupply reUSD `0x57aB1E00…`, excluded from the total above):
+
+| Project | Pool | TVL | Correction |
+|---------|------|-----|------------|
+| Curve | reUSD/scrvUSD | ~$8.32M | Resupply reUSD |
+| Curve | reUSD/sfrxUSD | ~$2.36M | Resupply reUSD |
+| Curve | reUSD/fxUSD | ~$520K | Resupply reUSD |
+| Convex | reUSD/scrvUSD | ~$6.68M | Resupply reUSD |
+| Convex | reUSD/sfrxUSD | ~$1.47M | Resupply reUSD |
+| Yearn | reUSDscrv | ~$1.81M | Resupply reUSD |
+| Beefy | reUSD/scrvUSD | ~$1.45M | Resupply reUSD |
+| Stake-DAO | reUSD/scrvUSD, reUSD/sfrxUSD | ~$1.31M | Resupply reUSD |
 
 ### DeFi Integrations
 
+Onchain-verified integrations that consume **Re Protocol's reUSD** (`0x5086…0c72`):
+
 | Protocol | Type | Notes |
 |----------|------|-------|
-| Fluid | DEX/Lending | reUSD/**USDT** DEX pool (~$11.6M TVL, ~$1.67M daily volume). Major trading venue. Separate Fluid lending markets also accept reUSD as collateral (~$23M + ~$15M + ~$4.7M supply). |
-| Curve | DEX | Multiple pools: reUSD/scrvUSD (~$8.3M), reUSD/sfrxUSD (~$2.36M), reUSD/sUSDe (~$1.42M), reUSD/fxUSD (~$520K), reUSD/USDC (~$450K) |
-| Morpho | Lending | reUSD as collateral |
-| Euler | Lending | reUSD as collateral |
-| Silo | Lending | reUSD as collateral |
-| TermMax | Lending | reUSD as collateral |
-| Pendle | Yield | Compatible for yield tokenization |
+| Fluid DEX | DEX | reUSD/USDT pool (~$11.62M TVL, ~$1.67M daily volume). Largest trading venue. |
+| Fluid Lending | Lending | Three lending markets supply reUSD: ~$23.58M (vs USDT), ~$23.34M (vs USDC), ~$15.35M (vs fxUSD). Total reUSD supplied ~$62.3M. |
+| Curve | DEX | reUSD/sUSDe (~$1.42M), reUSD/USDC (~$450K). (reUSD/scrvUSD, reUSD/sfrxUSD, reUSD/fxUSD, reUSD/sDOLA pools are Resupply reUSD, not Re's.) |
+| Morpho | Lending | Re reUSD vaults (~$4.74M + ~$2.29M ≈ $7.0M). PT-REUSD-25JUN2026 Pendle-PT markets also reference Re reUSD indirectly. |
+| Pendle | Yield | reUSD yield-tokenization market (~$8.42M TVL). |
+| Beefy | Vault | reUSD auto-compounding vault (~$786K). |
+| Stake-DAO | Vault | reUSD vault (~$428K). |
+| Blackhole (Avalanche) | DEX | reUSD/USDC pools on Blackhole CLMM + AMM (~$962K + ~$510K ≈ $1.47M). |
 
-Total lending integrations support over $100M in borrow demand per the DD questionnaire.
+**Integrations where we could not verify Re reUSD usage onchain (Apr 17, 2026):** Euler, Silo, TermMax. These are listed in Re marketing materials as "reUSD as collateral" but no Re reUSD (`0x5086…0c72`) holdings were found in their markets via the DeFi Llama yields API. Treat as unverified.
+
+The DD questionnaire claim of ">$100M in borrow demand" across lending integrations aligns with the ~$69.3M visible in Fluid + Morpho lending alone.
 
 ### Liquidity Summary
 
-- **Total DEX Liquidity**: ~$26.2M across Fluid, Curve, and Blackhole (~14.0% of ~$186.7M market cap). Significant improvement from ~$450K at initial assessment. Fluid reUSD/USDT (~$11.6M) is the largest single venue by volume.
+- **Total DEX Liquidity (onchain-verified, Re reUSD only)**: **~$14.96M** across Fluid, Curve, and Blackhole (~**8.0%** of ~$186.7M market cap). Fluid reUSD/USDT (~$11.62M) is the dominant venue (~78% of DEX depth). Significantly smaller than the initial "~$26.2M" figure, which erroneously included Resupply-reUSD Curve pools.
 - **24h Trading Volume (token-level, CoinGecko)**: ~$7.3M.
 - **Instant redemption buffer (Apr 17, 2026, onchain)**: The Daily Instant Redemption Vault at [`0x5C454f5526e41fBE917b63475CD8CA7E4631B147`](https://etherscan.io/address/0x5C454f5526e41fBE917b63475CD8CA7E4631B147) holds `0` USDC and `6.188M` sUSDe. The `custodialWallet` (labeled "Redemption Reserves Custodian" in this report) [`0x9eA38e09F41A9DE53972a68268BA0Dcc6d2fAdf8`](https://etherscan.io/address/0x9eA38e09F41A9DE53972a68268BA0Dcc6d2fAdf8) is an EOA and holds `0` USDC and `53.263M` sUSDe. The configured `dayPayoutToken` is **sUSDe** (not USDC) on Apr 17, 2026, so instant redemptions settle into sUSDe under current config.
 - **Instant Redemption Interaction Contract**: [`0x8aEb9453EF22Cb38abC7a3Af9c208F65C1BfE31e`](https://etherscan.io/address/0x8aEb9453EF22Cb38abC7a3Af9c208F65C1BfE31e) — exposes `redeemInstant(uint256 shares, uint256 minPayout)` for instant redemptions.
@@ -378,17 +394,28 @@ Total lending integrations support over $100M in borrow demand per the DD questi
 - **Governance Safe (3-of-5, onchain-verified)**: [`0x8EEc10616802Ef639ca55C98Ac856553FadeFbAd`](https://etherscan.io/address/0x8EEc10616802Ef639ca55C98Ac856553FadeFbAd)
   - **Alert**: On any transaction execution, owner change, or threshold change.
 
+- **Timelock Controller**: [`0x69dDEa332723cF5407151aAF68B9b076557FCA93`](https://etherscan.io/address/0x69dDEa332723cF5407151aAF68B9b076557FCA93) — the 48h delay between `CallScheduled` and `CallExecuted` is the primary review window for any privileged action; the monitor must fire the moment something is queued, not when it executes.
+  - **Alert (Critical)**: On `CallScheduled(bytes32 id, uint256 index, address target, uint256 value, bytes data, bytes32 predecessor, uint256 delay)` — decode `target` / `data` and surface the decoded function call. Every scheduled call deserves a manual review before the 48h window expires.
+  - **Alert (Critical)**: On `CallExecuted(bytes32 id, uint256 index, address target, uint256 value, bytes data)` — confirm the execution matches what was scheduled and did not diverge (OZ TimelockController replays the same payload, so any mismatch would be an upstream monitoring bug).
+  - **Alert (Critical)**: On `Cancelled(bytes32 id)` — a Safe-initiated cancel is informational; a cancel originating from anything other than the Governance Safe (`0x8EEc10…`) or addresses with `CANCELLER_ROLE` is an incident.
+  - **Alert (Critical)**: On `MinDelayChange(uint256 oldDuration, uint256 newDuration)` — any change to the 48h floor is a governance event that materially alters the trust model.
+  - **Alert (High)**: On any `RoleGranted` / `RoleRevoked` touching `PROPOSER_ROLE` (0xb09aa5aeb3702cfd50b6b62bc4532604938f21248a27a1d5ca736082b6819cc1), `EXECUTOR_ROLE` (0xd8aa0f3194971a2a116679f7c2090f6939c8d4e01a2a8d7e41d55e5351469e63), `CANCELLER_ROLE` (0xfd643c72710c63c0180259aba6b2d05451e3591a24e58b62239378085726f783), or `DEFAULT_ADMIN_ROLE`. Current holders (Apr 17, 2026): proposer/canceller/admin = Governance Safe `0x8EEc10…`; executor = EOA `0x4BFea59b…`.
+  - **Action**: maintain an allowlist of expected `target` addresses (reUSD token, ICL, Share Price Calculator, AccessManager, PriceRouter, cross-chain adapter, deposit token registry). Any scheduled call to a target off the allowlist is an incident.
+  - **Action**: decode `data` against the known ABIs and flag any of these selectors as high-severity: `upgradeTo(address)`, `upgradeToAndCall(address,bytes)`, `grantRole(bytes32,address)`, `revokeRole(bytes32,address)`, `setPriceFeed(address,address)`, `removePriceFeed(address)`, `setAdapter(address)`, `transferOwnership(address)`, `updateFee(uint16)`, `updateLimitPercentages(uint256,uint256)`, `updateRedemptionRange(uint256,uint256)`.
+
 - **UUPS Proxy Upgrades**: Monitor for `Upgraded` events on reUSD token and ICL contracts.
-  - **Alert**: Immediately on any implementation change (48-hour timelock provides review window).
+  - **Alert**: Immediately on any implementation change (48-hour timelock provides review window, so this should have been preceded by a `CallScheduled` event ≥48h earlier — absence of that precursor is an incident).
 
 ### Liquidity Monitoring
 
 - **Fluid reUSD/USDT pool**: Monitor TVL and volume. Largest trading venue by volume (~$11.6M TVL).
   - **Alert**: If Fluid pool TVL drops below $5M.
 
-- **Curve reUSD pools** (reUSD/scrvUSD, reUSD/sfrxUSD, reUSD/sUSDe, reUSD/USDC, reUSD/fxUSD): Monitor TVL and balance ratio.
-  - **Alert**: If total Curve reUSD DEX liquidity drops below $5M (currently ~$13M across Curve pools).
+- **Curve Re reUSD pools** — only two pools actually pair **Re's reUSD** (`0x5086…0c72`): reUSD/sUSDe and reUSD/USDC. (Curve pools labelled reUSD/scrvUSD, reUSD/sfrxUSD, reUSD/fxUSD, reUSD/sDOLA use **Resupply's reUSD** `0x57aB1E00…` and must NOT be monitored as Re liquidity.) Monitor TVL and balance ratio.
+  - **Alert**: If total Curve Re reUSD DEX liquidity drops below $1M (currently ~$1.87M combined).
   - **Alert**: If any pool imbalance exceeds 80/20 in either direction.
+- **Avalanche Blackhole reUSD/USDC** (CLMM + AMM, Re's reUSD `0x180aF87b…625Bf`): Monitor TVL.
+  - **Alert**: If combined Avalanche TVL drops below $500K (currently ~$1.47M).
 
 - **CoinGecko reUSD price**: Monitor for deviations from expected share price.
   - **Alert**: If CoinGecko price deviates >2% from onchain share price.
@@ -413,16 +440,21 @@ Total lending integrations support over $100M in borrow demand per the DD questi
 
 | Category | Frequency | Priority |
 |----------|-----------|----------|
+| Timelock `CallScheduled` / `CallExecuted` / `Cancelled` / `MinDelayChange` | Real-time | Critical |
+| Governance Safe tx execution / owner / threshold changes | Real-time | Critical |
 | UUPS proxy upgrade events | Real-time | Critical |
-| Access role changes | Real-time | Critical |
-| Oracle config changes | Real-time | Critical |
+| Access role changes (reUSD MINTER_ROLE, ICL admin, Timelock PROPOSER/EXECUTOR/CANCELLER) | Real-time | Critical |
+| PriceRouter `PriceFeedSet` / `PriceFeedRemoved` | Real-time | Critical |
+| LayerZero adapter `OwnershipTransferred` / `PeerSet` / rate-limit changes | Real-time | Critical |
+| `ShareTokenMinterBurner.AdapterSet` | Real-time | Critical |
+| Share Price Calculator `PRICE_SETTER_ROLE` grant / revoke | Real-time | Critical |
 | Instant redemption cap changes | Real-time | Critical |
 | reUSD share price | Daily | High |
 | Instant redemption buffer (USDC + sUSDe) | Every 6 hours | High |
 | Instant redemption interaction events | Every 6 hours | High |
-| Chainlink PoR attestation | Daily | High |
-| DEX pool TVL/balance | Hourly | Medium |
-| Total supply changes | Daily | Medium |
+| The Network Firm offchain attestation publication | Daily | High |
+| DEX pool TVL/balance (Fluid reUSD/USDT + Curve) | Hourly | Medium |
+| Total supply changes (Ethereum + cross-chain) | Daily | Medium |
 
 ## Risk Summary
 
@@ -442,7 +474,7 @@ Total lending integrations support over $100M in borrow demand per the DD questi
 - **Significant offchain capital deployment**: Majority of assets are deployed offchain into §114 Trust and reinsurance programs. This introduces counterparty risk with the trust bank, partner reinsurer, and custodians that cannot be verified fully onchain.
 - **Instant redemption vault holds no USDC**: The Daily Instant Redemption Vault holds `0` USDC + `6.188M` sUSDe. The Redemption Reserves Custodian (EOA) holds `0` USDC + `53.263M` sUSDe. `dayPayoutToken` is sUSDe — USDC-denominated instant exits are unavailable under the current config.
 - **Three MINTER_ROLE holders on reUSD**: Beyond the ICL, `InstantRedemption` and `ShareTokenMinterBurner` also hold MINTER_ROLE. The ICL path enforces backing via `safeTransferFrom`. `InstantRedemption` uses the role for burns during redemption. `ShareTokenMinterBurner` is a LayerZero OFT wrapper — its mint path has no backing check by design (supply is conserved cross-chain), but the OFT adapter [`0x2BB4046022B9161f3F84Ad8E35cac1d5946e0e85`](https://etherscan.io/address/0x2BB4046022B9161f3F84Ad8E35cac1d5946e0e85) and the wrapper are both owned by the **same EOA** [`0x6C15B25E9750Dccb698C1a4023f34015bFe57649`](https://etherscan.io/address/0x6C15B25E9750Dccb698C1a4023f34015bFe57649) (not a multisig). Compromise of that key would let an attacker repoint the adapter and mint up to `2,500,000 reUSD / 24h / peer` (onchain rate limit) on Ethereum without backing.
-- **DEX liquidity improved but still limited**: ~$26.2M across Fluid and Curve (~14.0% of ~$186.7M market cap). Significant improvement from ~$450K.
+- **DEX liquidity thin and concentrated**: ~$14.96M across Fluid, Curve, and Blackhole (~8.0% of ~$186.7M market cap), with Fluid reUSD/USDT alone providing ~78% of depth. A disruption at Fluid would leave very little remaining DEX liquidity. (Previously-cited "~$26.2M" figure included Resupply reUSD pools, a different token.)
 - **KYC gating**: All deposits and redemptions require KYC. This limits the universe of users who can exit and creates regulatory/jurisdictional risk.
 - **Quarterly redemption queue**: Once instant buffer is exhausted, redemptions are windowed and pro-rata. Capital release from reinsurance programs is reevaluated quarterly (per DD).
 - **Reinsurance tail risk**: Underlying assets are exposed to insurance claim risk. reUSD is only impaired if the portfolio combined ratio exceeds 135%, after both Re Capital (~$73M) and all reUSDe reserves are depleted. reUSDe covers losses in the 115-135% combined ratio range. Re's historical combined ratio is ~92% and the portfolio avoids catastrophe lines, but tail risk from extreme loss events remains.
@@ -452,7 +484,7 @@ Total lending integrations support over $100M in borrow demand per the DD questi
 
 - **Offchain dependency concentration**: The protocol's value proposition depends on offchain entities (Cayman reinsurer, §114 Trust, The Network Firm, Fireblocks) operating honestly and solvent. Onchain verification cannot fully cover offchain risks.
 - **Oracle/setter manipulation**: A compromised `PRICE_SETTER_ROLE` holder can write any positive `sharePrice`, since the deployed contract has no onchain deviation cap. The only mitigations are offchain — the setter's internal policy and offchain monitoring. A compromised Chainlink PoR feed could similarly misrepresent reserve attestations.
-- **Liquidity mismatch**: reUSD represents liquid onchain tokens partially backed by offchain reinsurance capital. Capital release is reevaluated quarterly, and programs are short-duration and cat-light (per performance memo). The instant redemption vault holds no USDC (sUSDe only — `6.188M` in vault, `53.263M` in Redemption Reserves Custodian). In a bank-run scenario, sUSDe redemption liquidity plus ~$26.2M in DEX liquidity would need to absorb exits for ~$186.7M in outstanding tokens; windowed queue handles the remainder.
+- **Liquidity mismatch**: reUSD represents liquid onchain tokens partially backed by offchain reinsurance capital. Capital release is reevaluated quarterly, and programs are short-duration and cat-light (per performance memo). The instant redemption vault holds no USDC (sUSDe only — `6.188M` in vault, `53.263M` in Redemption Reserves Custodian). In a bank-run scenario, sUSDe redemption liquidity plus only ~$14.96M in DEX liquidity would need to absorb exits for ~$186.7M in outstanding tokens; windowed queue handles the remainder.
 
 ---
 
@@ -552,13 +584,13 @@ Total lending integrations support over $100M in borrow demand per the DD questi
 
 - **Instant Exit**: Daily Instant Redemption Vault holds `0` USDC + `6.188M` sUSDe; Redemption Reserves Custodian holds `0` USDC + `53.263M` sUSDe (onchain, Apr 17, 2026). Configured `dayPayoutToken` is sUSDe. Instant redemptions via [`0x8aEb9453EF22Cb38abC7a3Af9c208F65C1BfE31e`](https://etherscan.io/address/0x8aEb9453EF22Cb38abC7a3Af9c208F65C1BfE31e) settle in sUSDe under current config, subject to daily (20%) and per-wallet (10%) caps.
 - **Quarterly Queue**: Pro-rata, may not be fully filled if capital locked in reinsurance
-- **DEX Liquidity**: ~$26.2M across Fluid and Curve (~14.0% of ~$186.7M market cap). Largest venue by volume: Fluid reUSD/**USDT** (~$11.6M TVL, ~$1.67M daily volume).
+- **DEX Liquidity (Re reUSD only)**: ~$14.96M across Fluid, Curve, and Blackhole (~8.0% of ~$186.7M market cap). Largest venue: Fluid reUSD/**USDT** (~$11.62M TVL, ~$1.67M daily volume).
 - **24h Volume (token-level, CoinGecko)**: ~$7.3M
 - **KYC Required**: Limits universe of participants who can exit via protocol redemption
 - **Onchain capital**: ICL Custodial Wallet holds `9.344M` USDC + `10.496M` sUSDe (Apr 17, 2026). This is not directly accessible for redemptions without admin action.
 - **Multi-chain**: Available on 6+ chains, liquidity concentrated on Ethereum
 
-**Score: 3.0/5** -- DEX liquidity improved significantly from ~$450K to ~$26.2M (58x increase) across Fluid and Curve, providing a viable secondary market exit. The instant redemption vault holds ~6.188M sUSDe and the Redemption Reserves Custodian holds ~53.263M sUSDe — sUSDe-denominated instant exits are available with daily/wallet caps (20% daily, 10% per wallet). Combined protocol-native sUSDe redemptions (~$59.4M) plus DEX liquidity (~$26.2M) cover a meaningful portion of the ~$186.7M market cap. KYC-gated protocol redemptions and offchain capital deployment remain material concerns, but the absence of USDC instant exits is partially mitigated by sUSDe availability.
+**Score: 3.5/5** -- After correcting a token-identity mix-up (Resupply reUSD vs Re reUSD), onchain-verified DEX liquidity for Re reUSD is only ~**$14.96M** (~8% of market cap), of which ~78% sits in a single Fluid reUSD/USDT pool. Instant redemptions currently pay out in sUSDe only: ~6.188M in the daily vault and ~53.263M in the Redemption Reserves Custodian cover ~$59.4M of sUSDe-denominated exits under 20% daily / 10% per-wallet caps. Combined with DEX depth, protocol-native exits plus DEX can absorb ~$74M of the ~$186.7M outstanding before falling back to the quarterly queue. KYC-gated protocol redemptions, concentration of DEX liquidity in a single Fluid pool, and absence of USDC instant exits are material concerns — revising the earlier 3.0 to **3.5**.
 
 #### Category 5: Operational Risk (Weight: 5%)
 
@@ -584,9 +616,9 @@ Final Score = (Centralization × 0.30) + (Funds Mgmt × 0.30) + (Audits × 0.20)
 | Audits & Historical | 2.5 | 20% | 0.50 |
 | Centralization & Control | 3.8 | 30% | 1.14 |
 | Funds Management | 3.5 | 30% | 1.05 |
-| Liquidity Risk | 3.0 | 15% | 0.45 |
+| Liquidity Risk | 3.5 | 15% | 0.525 |
 | Operational Risk | 2.5 | 5% | 0.125 |
-| **Final Score** | | | **3.27** |
+| **Final Score** | | | **3.34** |
 
 **Final Score: 3.3**
 
