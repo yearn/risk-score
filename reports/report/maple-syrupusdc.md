@@ -19,7 +19,7 @@ Deposits are gated by a permission system for regulatory compliance (first-time 
 - **Total Syrup TVL (all pools):** ~$3.70B
 - **Collateral Ratio:** 168.96%
 - **Current APY:** ~4.42% (base pool: 3.37% + collateral boost: 1.05%)
-- **Management Fee:** 8.33% of gross borrower interest (Delegate: 3.33% + Platform: 5.00%, verified on-chain via PoolManager `delegateManagementFeeRate()` and MapleGlobals `platformManagementFeeRate()`)
+- **Management Fee:** 8.33% of gross borrower interest (Delegate: 3.33% + Platform: 5.00%, verified onchain via PoolManager `delegateManagementFeeRate()` and MapleGlobals `platformManagementFeeRate()`)
 
 **Links:**
 
@@ -100,10 +100,10 @@ Maple delegates deposited USDC to institutional borrowers via overcollateralized
 
 ### Accessibility
 
-- **Deposits:** Gated by `PoolPermissionManager` — first-time depositors require a one-time on-chain authorization, subsequent deposits are permissionless. Atomic, single-transaction. See [Appendix B — Deposit Flow](#appendix-b--deposit-flow) for details.
+- **Deposits:** Gated by `PoolPermissionManager` — first-time depositors require a one-time onchain authorization, subsequent deposits are permissionless. Atomic, single-transaction. See [Appendix B — Deposit Flow](#appendix-b--deposit-flow) for details.
 - **Withdrawals:** Queue-based (FIFO). Call `pool.requestRedeem(shares, receiver)` to enter queue. Assets sent directly to wallet when processed. No penalties. Yield stops accruing once withdrawal requested.
 - **Withdrawal Timing:** Typically minutes to 2 days. Maximum 30 days in low-liquidity scenarios.
-- **Fees:** Total management fee of 8.33% on gross borrower interest (Delegate fee: 3.33% + Platform fee: 5.00%, verified on-chain). DeFi strategy performance fees charged on yield generated.
+- **Fees:** Total management fee of 8.33% on gross borrower interest (Delegate fee: 3.33% + Platform fee: 5.00%, verified onchain). DeFi strategy performance fees charged on yield generated.
 - **Alternative Exit:** syrupUSDC can be swapped on Uniswap (~$20M liquidity in syrupUSDC/USDC pool).
 
 ### Collateralization
@@ -153,12 +153,12 @@ Inactive/zero-allocation assets: ETH, SOL, tETH, sUSDS, USR, LP_USR, OrcaLP_PYUS
 
 ### Provability
 
-- Loans are verifiable on-chain with transparent margin call and liquidation levels for each loan
-- syrupUSDC exchange rate is computed on-chain (ERC-4626 `convertToAssets()`/`convertToShares()`)
+- Loans are verifiable onchain with transparent margin call and liquidation levels for each loan
+- syrupUSDC exchange rate is computed onchain (ERC-4626 `convertToAssets()`/`convertToShares()`)
 - Collateral data can be fetched via Maple API and verified on Etherscan
-- Loan-level data (principal, collateral, rates) is on-chain
-- However, the actual lending operations (borrower creditworthiness assessment, loan origination) are managed off-chain by Maple Direct (the Pool Delegate)
-- DeFi strategy allocations are on-chain and verifiable
+- Loan-level data (principal, collateral, rates) is onchain
+- However, the actual lending operations (borrower creditworthiness assessment, loan origination) are managed offchain by Maple Direct (the Pool Delegate)
+- DeFi strategy allocations are onchain and verifiable
 
 ## Liquidity Risk
 
@@ -206,11 +206,11 @@ Protocol Contracts (MapleGlobals, PoolManager, etc.)
 | Permissions Admin | [`0x54b130c704919320E17F4F1Ffa4832A91AB29Dca`](https://etherscan.io/address/0x54b130c704919320E17F4F1Ffa4832A91AB29Dca) | Controls deposit authorization |
 | Pool Delegate (Maple Direct) | [`0xC1e18FFD8825FfB286D177DDEbeba345EC70B49f`](https://etherscan.io/address/0xC1e18FFD8825FfB286D177DDEbeba345EC70B49f) (EOA) | Manages pool, loan origination, impairments |
 
-**Timelock (verified on-chain):** GovernorTimelock contract with `MIN_DELAY = 86400s (24h)` and `MIN_EXECUTION_WINDOW = 86400s (24h)`. Timelocked actions include: `PoolManager.upgrade()`, `LoanManager.upgrade()`, `WithdrawalManager.upgrade()`. Governor can change timelock parameters, but these changes themselves require going through the timelock.
+**Timelock (verified onchain):** GovernorTimelock contract with `MIN_DELAY = 86400s (24h)` and `MIN_EXECUTION_WINDOW = 86400s (24h)`. Timelocked actions include: `PoolManager.upgrade()`, `LoanManager.upgrade()`, `WithdrawalManager.upgrade()`. Governor can change timelock parameters, but these changes themselves require going through the timelock.
 
-**MapleGlobals Timelock (verified on-chain, Feb 19 2026):** `defaultTimelockParameters()` on MapleGlobals (`0x804a6F5F667170F545Bf14e5DDB48C70B788390C`) returns **delay = 604800s (7 days)** and **duration = 172800s (2 days)**. This is a second timelock layer on top of the GovernorTimelock, providing robust dual-layer protection for protocol-level admin actions. A prior LlamaRisk assessment flagged `globalsV301` as having no delay at `defaultTimelockParameters` — this concern appears to have been addressed since that assessment.
+**MapleGlobals Timelock (verified onchain, Feb 19 2026):** `defaultTimelockParameters()` on MapleGlobals (`0x804a6F5F667170F545Bf14e5DDB48C70B788390C`) returns **delay = 604800s (7 days)** and **duration = 172800s (2 days)**. This is a second timelock layer on top of the GovernorTimelock, providing robust dual-layer protection for protocol-level admin actions. A prior LlamaRisk assessment flagged `globalsV301` as having no delay at `defaultTimelockParameters` — this concern appears to have been addressed since that assessment.
 
-**Multisig Details (verified on-chain):** DAO Multisig is a **Gnosis Safe v1.3.0** with **4-of-7 threshold**. All 7 signers are EOAs (no nested multisigs). No ENS names registered. Per LlamaRisk, a minority of signers are Maple employees; the majority are long-standing external advisors and investors who have held their seats for >2 years. 922 transactions processed as of Feb 2026.
+**Multisig Details (verified onchain):** DAO Multisig is a **Gnosis Safe v1.3.0** with **4-of-7 threshold**. All 7 signers are EOAs (no nested multisigs). No ENS names registered. Per LlamaRisk, a minority of signers are Maple employees; the majority are long-standing external advisors and investors who have held their seats for >2 years. 922 transactions processed as of Feb 2026.
 
 **Emergency Pause:** Three-tier granular pausing system:
 1. Global pause — single switch for entire system
@@ -223,12 +223,12 @@ Callable by Governor or Security Admin.
 
 ### Programmability
 
-- syrupUSDC exchange rate (PPS) is calculated on-chain via ERC-4626 standard
-- Loan interest accrual is on-chain
-- Loan origination, borrower assessment, and impairment decisions are **off-chain** (managed by Maple Direct as Pool Delegate)
+- syrupUSDC exchange rate (PPS) is calculated onchain via ERC-4626 standard
+- Loan interest accrual is onchain
+- Loan origination, borrower assessment, and impairment decisions are **offchain** (managed by Maple Direct as Pool Delegate)
 - Strategy fee rates can be changed at any time by protocol admins
-- DeFi strategy allocations (Aave, Sky) are executed on-chain but allocation decisions are made off-chain
-- Liquidations are executed by external Keepers on-chain, but margin call decisions can be made off-chain
+- DeFi strategy allocations (Aave, Sky) are executed onchain but allocation decisions are made offchain
+- Liquidations are executed by external Keepers onchain, but margin call decisions can be made offchain
 
 ### External Dependencies
 
@@ -288,12 +288,12 @@ Callable by Governor or Security Admin.
 1. **Extensive audit coverage** — 20+ audits from 8+ firms (Trail of Bits, Spearbit, Three Sigma, 0xMacro, Sherlock, Dedaub, Sigma Prime), continuously audited with each release
 2. **Large TVL** ($2B+ protocol, $3.25B syrupUSDC pool) with strong growth trajectory
 3. **No smart contract exploits** in protocol history
-4. **Overcollateralized lending** with on-chain liquidation mechanics and Chainlink oracle integration
+4. **Overcollateralized lending** with onchain liquidation mechanics and Chainlink oracle integration
 5. **Dual-layer timelock protection** — GovernorTimelock (MIN_DELAY=1 day) + MapleGlobals defaultTimelockParameters (7-day delay, 2-day execution window), three-tier pause system, real-time invariant monitoring via Tenderly
 
 ### Key Risks
 
-1. **Off-chain credit risk** — Loan origination and borrower assessment are off-chain (Maple Direct). The quality of lending decisions depends on the team's credit analysis capabilities.
+1. **Offchain credit risk** — Loan origination and borrower assessment are offchain (Maple Direct). The quality of lending decisions depends on the team's credit analysis capabilities.
 2. **Impairment mechanism** — Maple can unilaterally impair loans, temporarily reducing pool value. Lenders who withdraw during impairment take permanent losses.
 3. **Collateral concentration** — BTC dominates at 54% (56% with LBTC). XRP at 25% carries volatility and regulatory risk. USTB at 16% adds Superstate dependency.
 4. **Permissioned deposits** — First-time deposits require authorization from Maple, creating a gating mechanism.
@@ -302,8 +302,8 @@ Callable by Governor or Security Admin.
 ### Critical Risks
 
 - **V1 Credit Event Precedent:** The ~$36M default from the FTX collapse (2022) demonstrates that credit risk is real despite mitigation measures. V2's overcollateralized model significantly reduces but does not eliminate this risk.
-- **Pool Delegate Power:** The Pool Delegate (`0xC1e1...49f`, EOA) has significant power over loan management, impairments, and collateral decisions without on-chain governance approval.
-- **~~No default timelock on contract upgrades (per LlamaRisk):~~** Previously flagged by LlamaRisk, but verified on-chain (Feb 19, 2026) that `defaultTimelockParameters` is now set to 7-day delay + 2-day execution window. This concern has been addressed.
+- **Pool Delegate Power:** The Pool Delegate (`0xC1e1...49f`, EOA) has significant power over loan management, impairments, and collateral decisions without onchain governance approval.
+- **~~No default timelock on contract upgrades (per LlamaRisk):~~** Previously flagged by LlamaRisk, but verified onchain (Feb 19, 2026) that `defaultTimelockParameters` is now set to 7-day delay + 2-day execution window. This concern has been addressed.
 - **Fixed USDC price oracle (per LlamaRisk):** Maple uses a hardcoded 1 USD price for USDC in internal collateral liquidations rather than a live market feed, creating risk during depeg events.
 - **Loss socialization:** No tranching or insurance fund exists; all lenders bear equal exposure to defaults via exchange rate reduction.
 
@@ -314,7 +314,7 @@ Callable by Governor or Security Admin.
 ### Critical Risk Gates
 
 - [ ] **No audit** → **PASS** (20+ audits by 8+ firms including Trail of Bits, Spearbit, Sherlock)
-- [ ] **Unverifiable reserves** → **PASS** (Loans verifiable on-chain, collateral transparent, exchange rate on-chain)
+- [ ] **Unverifiable reserves** → **PASS** (Loans verifiable onchain, collateral transparent, exchange rate onchain)
 - [ ] **Total centralization** → **PASS** (GovernorTimelock + DAO Multisig, not single EOA)
 
 ### Category Scores
@@ -337,7 +337,7 @@ Exceptional audit coverage and large TVL. V1 credit event was counterparty risk,
 
 **Subcategory A: Governance — 2.0**
 
-- Dual-layer timelock protection: GovernorTimelock (MIN_DELAY=24h) + MapleGlobals defaultTimelockParameters (7-day delay, 2-day execution window), both verified on-chain
+- Dual-layer timelock protection: GovernorTimelock (MIN_DELAY=24h) + MapleGlobals defaultTimelockParameters (7-day delay, 2-day execution window), both verified onchain
 - DAO Multisig is 4/7 Safe v1.3.0, all EOA signers. Minority are employees; majority external advisors (per LlamaRisk)
 - Snapshot-based voting with 7-day window and quorum
 - Governor can change timelock parameters (through the timelock itself)
@@ -346,13 +346,13 @@ Exceptional audit coverage and large TVL. V1 credit event was counterparty risk,
 
 **Subcategory B: Programmability — 3.0**
 
-- Exchange rate (PPS) is on-chain via ERC-4626
-- Collateral is held on-chain with on-chain liquidation mechanics (Keepers + Chainlink oracles)
-- Withdrawal queue is fully on-chain
-- DeFi strategy execution (Aave, Sky) is on-chain
-- Loan origination and borrower assessment are off-chain (Pool Delegate discretion)
-- Impairment decisions and strategy allocation decisions are off-chain
-- Hybrid on-chain/off-chain operations — core protections are programmatic, lending decisions are manual
+- Exchange rate (PPS) is onchain via ERC-4626
+- Collateral is held onchain with onchain liquidation mechanics (Keepers + Chainlink oracles)
+- Withdrawal queue is fully onchain
+- DeFi strategy execution (Aave, Sky) is onchain
+- Loan origination and borrower assessment are offchain (Pool Delegate discretion)
+- Impairment decisions and strategy allocation decisions are offchain
+- Hybrid onchain/offchain operations — core protections are programmatic, lending decisions are manual
 
 **Subcategory C: External Dependencies — 2.5**
 
@@ -368,7 +368,7 @@ Exceptional audit coverage and large TVL. V1 credit event was counterparty risk,
 **Subcategory A: Collateralization — 3.0**
 
 - Overcollateralized lending (168.96% ratio) with liquid digital assets
-- On-chain liquidation mechanics with Chainlink oracles
+- Onchain liquidation mechanics with Chainlink oracles
 - BTC dominates at 54% of collateral — concentration risk in single asset class
 - XRP at 25% — more volatile, regulatory uncertainty
 - USTB at 16% — tokenized T-Bills (Superstate dependency)
@@ -377,13 +377,13 @@ Exceptional audit coverage and large TVL. V1 credit event was counterparty risk,
 
 **Subcategory B: Provability — 2.5**
 
-- All collateral is held and tracked on-chain — overcollateralization ratios, margin call levels, and liquidation thresholds are transparently verifiable
-- Exchange rate computed on-chain (ERC-4626 `convertToAssets()`/`convertToShares()`)
-- Loan-level data (principal, collateral, rates) is on-chain and verifiable
+- All collateral is held and tracked onchain — overcollateralization ratios, margin call levels, and liquidation thresholds are transparently verifiable
+- Exchange rate computed onchain (ERC-4626 `convertToAssets()`/`convertToShares()`)
+- Loan-level data (principal, collateral, rates) is onchain and verifiable
 - Collateral data can be cross-verified via Maple API and Etherscan
-- DeFi strategy allocations (Aave, Sky) are on-chain and verifiable
-- Borrower selection and creditworthiness assessment are off-chain (Pool Delegate discretion) — but the on-chain collateral protections ensure reserves are provable regardless of borrower quality
-- Impairment decisions are off-chain
+- DeFi strategy allocations (Aave, Sky) are onchain and verifiable
+- Borrower selection and creditworthiness assessment are offchain (Pool Delegate discretion) — but the onchain collateral protections ensure reserves are provable regardless of borrower quality
+- Impairment decisions are offchain
 
 **Score: (3.0 + 2.5) / 2 = 2.75/5**
 
@@ -542,7 +542,7 @@ Deposits into syrupUSDC are gated by the [`PoolPermissionManager`](https://ether
 
 **Subsequent deposits:**
 
-The lender bitmap is already set on-chain, so the user calls `SyrupRouter.deposit()` or `SyrupRouter.depositWithPermit()` (EIP-2612) directly — no authorization signature needed.
+The lender bitmap is already set onchain, so the user calls `SyrupRouter.deposit()` or `SyrupRouter.depositWithPermit()` (EIP-2612) directly — no authorization signature needed.
 
 **Alternative (no permission required):**
 

@@ -158,16 +158,16 @@ BUCK yield comes from **STRC dividends** — Strategy Inc.'s Variable-Rate Serie
 - **Collateral Composition:** STRC preferred equity (92%) + USDC (8%)
 - **Single-asset concentration:** Entire yield strategy depends on STRC dividends and Strategy Inc. solvency
 - **STRC is a publicly traded equity** — subject to market price volatility, trading hours (NASDAQ only ~32.5h/week vs crypto 24/7), and regulatory risk
-- **Assets are held in Fireblocks** institutional MPC custody (SOC 2 Type II certified) — per documentation; not verifiable on-chain (Fireblocks MPC wallets appear as regular EOAs)
+- **Assets are held in Fireblocks** institutional MPC custody (SOC 2 Type II certified) — per documentation; not verifiable onchain (Fireblocks MPC wallets appear as regular EOAs)
 
 ### Provability
 
-- **On-chain USDC reserves:** The Liquidity Reserve contract holds USDC verifiable on-chain (~$124K USDC at [`0x1A426E3a87368a4851f7443Ff656A054Af872f66`](https://etherscan.io/address/0x1A426E3a87368a4851f7443Ff656A054Af872f66))
-- **STRC holdings:** Off-chain. STRC is held in traditional brokerage/custodial accounts. Not verifiable on-chain.
+- **Onchain USDC reserves:** The Liquidity Reserve contract holds USDC verifiable onchain (~$124K USDC at [`0x1A426E3a87368a4851f7443Ff656A054Af872f66`](https://etherscan.io/address/0x1A426E3a87368a4851f7443Ff656A054Af872f66))
+- **STRC holdings:** Offchain. STRC is held in traditional brokerage/custodial accounts. Not verifiable onchain.
 - **Collateral Attestation contract:** [`0x1aEEEf99704258947A9ea77eF021d5e0551c0428`](https://etherscan.io/address/0x1aEEEf99704258947A9ea77eF021d5e0551c0428) — stores STRC valuation and collateral ratios, but values are posted by a single EOA attestor ([`0x6f31810c8e6bfaf3ba486b4b7ce651b023423fa3`](https://etherscan.io/address/0x6f31810c8e6bfaf3ba486b4b7ce651b023423fa3))
 - **Third-party attestation:** The Network Firm provides monthly independent attestation of treasury reserves under AICPA standards
-- **Exchange rate:** Not computed on-chain algorithmically. BUCK is a standard ERC-20 (not ERC-4626). Yield is distributed as additional BUCK tokens via the Rewards Engine, not through an exchange rate mechanism.
-- **Oracle:** Uses Pyth oracle for STRC pricing ([STRC/USD feed](https://insights.pyth.network/price-feeds/Equity.US.STRC%2FUSD)). The on-chain Oracle Adapter currently operates in **non-strict mode** with [`strictMode = false`](https://etherscan.io/address/0xa6c5f4D041192C2019E77f679eA02e9684235Fd9#readContract#F12). Pyth IS configured (contract [`0x4305fb66699c3b2702d4d05cf36551390a4c69c6`](https://etherscan.io/address/0x4305fb66699c3b2702d4d05cf36551390a4c69c6)) with the STRC/USD price feed. The Pyth off-chain feed is actively publishing prices, but Pyth is a **pull oracle** — prices must be pushed on-chain by calling `updatePriceFeeds()`. The **on-chain Pyth price on Ethereum has not been updated since January 15, 2026** ([single ever update tx](https://etherscan.io/tx/0xb56a1dd34a39e530d4e00f94894caf89c73d42457aa565869f170516105cae30), 46+ days stale), causing the staleness check (`pythStaleAfter = 86400s`) to fail and the system to fall back to an admin-set internal price of **$1.00** (set on deployment via [`0xccbbd3f3...`](https://etherscan.io/tx/0xccbbd3f338078639f48a8f9bdd2a632cae9b9d4142a9870469082116e5669227), never updated). The `priceUpdater` role is set to `0x0` (not configured), meaning no keeper bot is pushing Pyth updates and only the owner EOA can update the internal price. Note: an earlier version (OracleAdapterV4) used RedStone + Pyth dual oracles, but RedStone was removed post-audit in OracleAdapterV5.
+- **Exchange rate:** Not computed onchain algorithmically. BUCK is a standard ERC-20 (not ERC-4626). Yield is distributed as additional BUCK tokens via the Rewards Engine, not through an exchange rate mechanism.
+- **Oracle:** Uses Pyth oracle for STRC pricing ([STRC/USD feed](https://insights.pyth.network/price-feeds/Equity.US.STRC%2FUSD)). The onchain Oracle Adapter currently operates in **non-strict mode** with [`strictMode = false`](https://etherscan.io/address/0xa6c5f4D041192C2019E77f679eA02e9684235Fd9#readContract#F12). Pyth IS configured (contract [`0x4305fb66699c3b2702d4d05cf36551390a4c69c6`](https://etherscan.io/address/0x4305fb66699c3b2702d4d05cf36551390a4c69c6)) with the STRC/USD price feed. The Pyth offchain feed is actively publishing prices, but Pyth is a **pull oracle** — prices must be pushed onchain by calling `updatePriceFeeds()`. The **onchain Pyth price on Ethereum has not been updated since January 15, 2026** ([single ever update tx](https://etherscan.io/tx/0xb56a1dd34a39e530d4e00f94894caf89c73d42457aa565869f170516105cae30), 46+ days stale), causing the staleness check (`pythStaleAfter = 86400s`) to fail and the system to fall back to an admin-set internal price of **$1.00** (set on deployment via [`0xccbbd3f3...`](https://etherscan.io/tx/0xccbbd3f338078639f48a8f9bdd2a632cae9b9d4142a9870469082116e5669227), never updated). The `priceUpdater` role is set to `0x0` (not configured), meaning no keeper bot is pushing Pyth updates and only the owner EOA can update the internal price. Note: an earlier version (OracleAdapterV4) used RedStone + Pyth dual oracles, but RedStone was removed post-audit in OracleAdapterV5.
 
 ## Liquidity Risk
 
@@ -270,17 +270,17 @@ BUCK yield comes from **STRC dividends** — Strategy Inc.'s Variable-Rate Serie
 ### Programmability
 
 - BUCK is a standard ERC-20 (not ERC-4626). Yield is distributed as additional tokens via the Rewards Engine on the 4th business day of each month.
-- Minting/refunding operates through the Liquidity Window with on-chain band logic (Policy Manager)
-- Collateral values are posted by a single attestor EOA ([`0x6f31810c8e6bfaf3ba486b4b7ce651b023423fa3`](https://etherscan.io/address/0x6f31810c8e6bfaf3ba486b4b7ce651b023423fa3)) — not computed on-chain
-- Oracle Adapter in non-strict mode, falling back to admin-set $1.00 internal price (on-chain Pyth data stale — no keeper pushing updates)
-- Reward distribution decisions are off-chain (Foundation approval), execution is on-chain
-- STRC purchase and custody are entirely off-chain
+- Minting/refunding operates through the Liquidity Window with onchain band logic (Policy Manager)
+- Collateral values are posted by a single attestor EOA ([`0x6f31810c8e6bfaf3ba486b4b7ce651b023423fa3`](https://etherscan.io/address/0x6f31810c8e6bfaf3ba486b4b7ce651b023423fa3)) — not computed onchain
+- Oracle Adapter in non-strict mode, falling back to admin-set $1.00 internal price (onchain Pyth data stale — no keeper pushing updates)
+- Reward distribution decisions are offchain (Foundation approval), execution is onchain
+- STRC purchase and custody are entirely offchain
 
 ### External Dependencies
 
 1. **Strategy Inc. / STRC (CRITICAL)** — Entire yield model depends on STRC dividends. Strategy's 700K+ BTC provides backing, but BTC price crash could impact STRC value and dividends.
-2. **Pyth Oracle (HIGH)** — Configured for STRC/USD pricing via [`0x4305fb66699c3b2702d4d05cf36551390a4c69c6`](https://etherscan.io/address/0x4305fb66699c3b2702d4d05cf36551390a4c69c6). Pyth off-chain feed is active, but on-chain price on Ethereum not updated since Jan 15, 2026 (no keeper configured, `priceUpdater = 0x0`). System falls back to admin-set $1.00. When active, depends on NASDAQ feed availability (32.5h/week).
-3. **Fireblocks Custody (MEDIUM)** — Off-chain STRC assets claimed to be held in Fireblocks MPC custody (per documentation, not independently verifiable).
+2. **Pyth Oracle (HIGH)** — Configured for STRC/USD pricing via [`0x4305fb66699c3b2702d4d05cf36551390a4c69c6`](https://etherscan.io/address/0x4305fb66699c3b2702d4d05cf36551390a4c69c6). Pyth offchain feed is active, but onchain price on Ethereum not updated since Jan 15, 2026 (no keeper configured, `priceUpdater = 0x0`). System falls back to admin-set $1.00. When active, depends on NASDAQ feed availability (32.5h/week).
+3. **Fireblocks Custody (MEDIUM)** — Offchain STRC assets claimed to be held in Fireblocks MPC custody (per documentation, not independently verifiable).
 4. **The Network Firm (LOW)** — Monthly attestation provider for reserve verification.
 5. **NASDAQ Market Hours (MEDIUM)** — STRC trades only during NASDAQ hours. Pricing gaps over weekends/holidays create risk for BUCK operations.
 
@@ -339,16 +339,16 @@ BUCK yield comes from **STRC dividends** — Strategy Inc.'s Variable-Rate Serie
 1. **Single EOA controls everything** — One address owns all 8 contracts with no multisig, no timelock, and unlimited admin powers including instant upgrades, pausing, and module reconfiguration
 2. **Extremely thin liquidity** — Only ~$108K permissionless DEX liquidity, highly variable daily volume, no CEX listings
 3. **Very early stage** — 8 weeks in production, 199 holders, ~$1.6M reserves, not on DeFiLlama
-4. **Off-chain collateral** — STRC holdings are off-chain, verified only by monthly Network Firm attestations and single attestor EOA postings
+4. **Offchain collateral** — STRC holdings are offchain, verified only by monthly Network Firm attestations and single attestor EOA postings
 5. **Founder's track record** — Previous company (Bird) [overstated revenue by $31.6M](https://techcrunch.com/2022/11/14/bird-tells-sec-it-overstated-revenue-for-two-years/) and [filed for Chapter 11 bankruptcy](https://techcrunch.com/2023/12/20/bird-bankruptcy/)
 
 ### Critical Risks
 
-- **Single EOA with no timelock can upgrade all proxy contracts instantly** — if this private key is compromised, the entire protocol can be drained. This is the most severe governance risk possible. The documentation claims "48-hour timelock" for upgrades, but on-chain verification shows **no timelock exists**.
+- **Single EOA with no timelock can upgrade all proxy contracts instantly** — if this private key is compromised, the entire protocol can be drained. This is the most severe governance risk possible. The documentation claims "48-hour timelock" for upgrades, but onchain verification shows **no timelock exists**.
 - **Liquidity Window redemption is not a contractual right** — per Terms & Conditions, tokens "cannot be redeemed at the instruction of Token holders." The company operates the refund facility "in its sole discretion."
 - **Complete dependency on STRC/Strategy Inc.** — if Strategy suspends dividends (e.g., severe BTC crash), the yield mechanism breaks entirely. Concentration in a single counterparty with no diversification.
 - **No bug bounty program** — for a protocol holding ~$1.6M in reserves with upgradeable contracts, the absence of a bug bounty is a significant security gap.
-- **Discrepancy between documentation and on-chain reality** — docs claim "48-hour timelock and multi-sig for upgrades" but on-chain verification shows single EOA owner with no timelock.
+- **Discrepancy between documentation and onchain reality** — docs claim "48-hour timelock and multi-sig for upgrades" but onchain verification shows single EOA owner with no timelock.
 
 ---
 
@@ -357,12 +357,12 @@ BUCK yield comes from **STRC dividends** — Strategy Inc.'s Variable-Rate Serie
 **Scoring Guidelines:**
 - Be conservative: when uncertain between two scores, choose the higher (riskier) one
 - Use decimals (e.g., 2.5) when a subcategory falls between scores
-- Prioritize on-chain evidence over documentation claims
+- Prioritize onchain evidence over documentation claims
 
 ### Critical Risk Gates
 
 - [ ] **No audit** → **PASS** (4 public audits from 3 firms: Halborn, Cyfrin, 2× Spearbit)
-- [ ] **Unverifiable reserves** → **PARTIAL CONCERN** — USDC reserves verifiable on-chain ($124K), but STRC holdings ($1.52M) are off-chain with only monthly attestation. On-chain component is verifiable, so not an auto-fail, but a significant weakness. STRC now represents 92% of total reserves, increasing off-chain dependency.
+- [ ] **Unverifiable reserves** → **PARTIAL CONCERN** — USDC reserves verifiable onchain ($124K), but STRC holdings ($1.52M) are offchain with only monthly attestation. Onchain component is verifiable, so not an auto-fail, but a significant weakness. STRC now represents 92% of total reserves, increasing offchain dependency.
 - [x] **Total centralization** → **TRIGGERED** — All contracts controlled by single EOA ([`0x376269214bB78b3D4f31d17600499b439c1aCB4b`](https://etherscan.io/address/0x376269214bB78b3D4f31d17600499b439c1aCB4b)) with no multisig or governance. This meets the critical gate definition: "Controlled by a single EOA with no multisig or governance."
 
 **Critical gate is triggered.** Per the template, this should result in an automatic score of 5. However, as mitigating factors exist (Ownable2Step, production mode enabled, 24h delay on reserve withdrawals), we proceed with category scoring but note the gate trigger.
@@ -389,24 +389,24 @@ BUCK yield comes from **STRC dividends** — Strategy Inc.'s Variable-Rate Serie
 
 - All contracts owned by **single EOA** — no multisig, no timelock
 - EOA can: upgrade all proxies instantly, pause all transfers, rewire all modules, freeze any address
-- Documentation claims "48-hour timelock and multi-sig" but on-chain reality shows neither
-- No on-chain governance mechanism. Terms explicitly state company retains "sole discretionary authority"
+- Documentation claims "48-hour timelock and multi-sig" but onchain reality shows neither
+- No onchain governance mechanism. Terms explicitly state company retains "sole discretionary authority"
 - Ownable2Step provides marginal protection against accidental ownership transfer only
 
 **Subcategory B: Programmability — 4.5**
 
-- BUCK is standard ERC-20, not ERC-4626 — no on-chain exchange rate
-- Yield distributed as additional tokens via Rewards Engine (off-chain decision, on-chain execution)
-- Collateral values posted by single attestor EOA — not computed on-chain
-- Oracle Adapter in non-strict mode, Pyth configured but on-chain data stale (no keeper pushing updates), falling back to admin-set $1.00 internal price
-- Band system logic is on-chain (Policy Manager), but band parameters set by admin
-- STRC purchase and custody entirely off-chain
+- BUCK is standard ERC-20, not ERC-4626 — no onchain exchange rate
+- Yield distributed as additional tokens via Rewards Engine (offchain decision, onchain execution)
+- Collateral values posted by single attestor EOA — not computed onchain
+- Oracle Adapter in non-strict mode, Pyth configured but onchain data stale (no keeper pushing updates), falling back to admin-set $1.00 internal price
+- Band system logic is onchain (Policy Manager), but band parameters set by admin
+- STRC purchase and custody entirely offchain
 
 **Subcategory C: External Dependencies — 5.0**
 
 - **Single point of failure:** Entire yield model depends on STRC dividends from Strategy Inc.
 - If Strategy suspends dividends, BUCK's value proposition collapses entirely
-- Pyth oracle dependency for STRC pricing (off-chain feed active, but no keeper pushing on-chain updates)
+- Pyth oracle dependency for STRC pricing (offchain feed active, but no keeper pushing onchain updates)
 - NASDAQ market hours limitation (32.5h/week vs 24/7 crypto)
 - No fallback mechanism if Strategy fails
 
@@ -417,22 +417,22 @@ BUCK yield comes from **STRC dividends** — Strategy Inc.'s Variable-Rate Serie
 **Subcategory A: Collateralization — 3.5**
 
 - 1.69x overcollateralization ratio
-- USDC component (~$124K) is on-chain and verifiable
-- STRC component (~$1.52M) is off-chain — publicly traded equity held in traditional custody
+- USDC component (~$124K) is onchain and verifiable
+- STRC component (~$1.52M) is offchain — publicly traded equity held in traditional custody
 - Single-asset concentration (STRC) — no diversification
 - STRC is liquid (NASDAQ-traded) but subject to market volatility
-- Fireblocks MPC custody claimed per documentation (not independently verifiable on-chain)
-- No on-chain liquidation mechanism for STRC holdings
+- Fireblocks MPC custody claimed per documentation (not independently verifiable onchain)
+- No onchain liquidation mechanism for STRC holdings
 
 **Subcategory B: Provability — 4.0**
 
-- USDC reserves verifiable on-chain (~$124K in Liquidity Reserve)
-- STRC holdings off-chain, verified only by:
+- USDC reserves verifiable onchain (~$124K in Liquidity Reserve)
+- STRC holdings offchain, verified only by:
   - Monthly Network Firm attestation (AICPA standards)
   - Single attestor EOA posting values to Collateral Attestation contract
-- No real-time on-chain verification of STRC holdings
-- Exchange rate not computed on-chain (standard ERC-20, not ERC-4626)
-- Oracle falls back to admin-set $1.00 internal price (on-chain Pyth data stale 46+ days — no keeper configured)
+- No real-time onchain verification of STRC holdings
+- Exchange rate not computed onchain (standard ERC-20, not ERC-4626)
+- Oracle falls back to admin-set $1.00 internal price (onchain Pyth data stale 46+ days — no keeper configured)
 - Transparency dashboard provides 24h reserve updates (per documentation)
 
 **Score: (3.5 + 4.0) / 2 = 3.75/5**
@@ -501,7 +501,7 @@ The category-weighted score (shown below for reference) would have been 4.22, co
 
 **Final Risk Tier: HIGH RISK — Not recommended**
 
-The protocol's single EOA governance triggered the "Total centralization" critical gate, resulting in an automatic 5.0 score. Additionally, the extremely thin liquidity ($108K permissionless), very early stage (8 weeks), and off-chain collateral dependency (92% STRC) independently confirm the high-risk assessment. **Use as Morpho collateral is NOT recommended** at this stage due to insufficient DEX liquidity for liquidations and critical governance centralization risks.
+The protocol's single EOA governance triggered the "Total centralization" critical gate, resulting in an automatic 5.0 score. Additionally, the extremely thin liquidity ($108K permissionless), very early stage (8 weeks), and offchain collateral dependency (92% STRC) independently confirm the high-risk assessment. **Use as Morpho collateral is NOT recommended** at this stage due to insufficient DEX liquidity for liquidations and critical governance centralization risks.
 
 ---
 

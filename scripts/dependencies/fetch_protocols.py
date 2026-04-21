@@ -1,4 +1,4 @@
-"""Fetch protocol asset dependencies from on-chain data.
+"""Fetch protocol asset dependencies from onchain data.
 
 Usage: uv run scripts/dependencies/fetch_protocols.py
 
@@ -7,7 +7,7 @@ Fetches collateral/reserve assets for:
 - Compound V3: collateral assets from each Comet market
 - Maple Finance: hardcoded from risk assessment report
 
-Uses Etherscan API for on-chain reads (no RPC required).
+Uses Etherscan API for onchain reads (no RPC required).
 Outputs: scripts/dependencies/protocols.yaml
 """
 

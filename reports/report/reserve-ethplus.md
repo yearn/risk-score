@@ -93,7 +93,7 @@ This is one of the highest bug bounty programs in DeFi, indicating strong commit
 - Lido and Rocket Pool are considered blue-chip LST providers
 
 **Monitoring Fund Delegation:**
-- Basket composition is on-chain and transparent
+- Basket composition is onchain and transparent
 - Governance proposals for basket changes go through 3-day timelock
 - Alert on: basketConfig changes, collateral default events, basket refresh events
 
@@ -130,7 +130,7 @@ This is one of the highest bug bounty programs in DeFi, indicating strong commit
 ### Collateralization
 
 **On-Chain Collateralization:** Yes
-- Fully collateralized on-chain
+- Fully collateralized onchain
 - Users deposit LST tokens to mint ETH+
 - All collateral held in protocol-owned basket
 
@@ -156,7 +156,7 @@ This is one of the highest bug bounty programs in DeFi, indicating strong commit
 - Default triggered if collateral depegs significantly (>1% for extended period)
 - Automatic basket rebalancing in default scenarios
 
-**Liquidations:** On-chain
+**Liquidations:** Onchain
 - Automated collateral auctions in case of default
 - RSR seized from stakers to recapitalize if needed
 - Emergency collateral (WETH) used during recapitalization
@@ -172,15 +172,15 @@ This is one of the highest bug bounty programs in DeFi, indicating strong commit
 - Managed by: StRSR holders (token-weighted governance)
 
 **Off-Chain Components:** None
-- Fully on-chain collateral management
-- No custodians or off-chain reserve management
+- Fully onchain collateral management
+- No custodians or offchain reserve management
 
 **Attestations/Audits for Off-Chain:** N/A
 
 ### Provability
 
 **Reserve Verification:** Easy
-- All reserves on-chain and publicly verifiable
+- All reserves onchain and publicly verifiable
 - Contract: `RToken.basketsNeeded()` / `RToken.totalSupply()` = backing ratio
 - Should equal 1.0 for full collateralization
 - View functions allow real-time verification
@@ -188,7 +188,7 @@ This is one of the highest bug bounty programs in DeFi, indicating strong commit
 **Yield Calculation:** Transparent
 - Yield accrues automatically from underlying LSTs
 - ETH+ becomes worth more of the basket over time
-- Fully calculable on-chain via basket composition and LST exchange rates
+- Fully calculable onchain via basket composition and LST exchange rates
 
 **On-Chain Reporting:** Programmatic
 - No admin-controlled exchange rate
@@ -197,13 +197,13 @@ This is one of the highest bug bounty programs in DeFi, indicating strong commit
 - Anyone can call refresh functions to update basket status
 
 **Off-Chain Reserves:** None
-- 100% on-chain reserves
+- 100% onchain reserves
 - No exchange accounts or custody wallets
 
-**Merkle Proofs:** N/A (fully on-chain)
+**Merkle Proofs:** N/A (fully onchain)
 
 **Attestation Frequency:** Real-time
-- On-chain state updated with each transaction
+- Onchain state updated with each transaction
 - Oracle prices updated per Chainlink feed schedules
 - No periodic reporting needed
 
@@ -293,7 +293,7 @@ This is one of the highest bug bounty programs in DeFi, indicating strong commit
 **System Programmability:** Highly Programmatic
 
 Reserve Protocol operations are largely automated:
-- Basket valuation: Calculated on-chain via oracle prices
+- Basket valuation: Calculated onchain via oracle prices
 - Collateral monitoring: Automated default detection
 - Rebalancing: Automated trading during basket changes
 - Redemptions: Fully programmatic, no admin intervention
@@ -303,10 +303,10 @@ Reserve Protocol operations are largely automated:
 - Oracle address configuration: Governance-controlled
 - Parameter tuning: Governance sets throttles, delays, etc.
 
-**PPS Definition:** On-chain
+**PPS Definition:** Onchain
 - PPS = basket value / total supply
 - Calculated programmatically from oracle prices
-- No off-chain accounting
+- No offchain accounting
 
 **Oracle Upgradeability:** Yes
 - Each collateral plugin has oracle address
@@ -481,7 +481,7 @@ Reserve Protocol operations are largely automated:
 **Auto-Fail Criteria (if ANY true, score = 5):**
 
 - [ ] No audit → **PASS** (Multiple audits, clean)
-- [ ] Unverifiable reserves → **PASS** (Fully on-chain, verifiable)
+- [ ] Unverifiable reserves → **PASS** (Fully onchain, verifiable)
 - [ ] Total centralization (single EOA admin) → **PASS** (Decentralized governance with 3-day timelock)
 
 **Result:** Protocol passes all critical gates ✓
@@ -517,7 +517,7 @@ Reserve Protocol operations are largely automated:
 
 **Programmability (using 1-5 rubric):**
 - Mostly programmatic with minor admin governance input ✓
-- On-chain PPS calculation with parameters ✓
+- Onchain PPS calculation with parameters ✓
 - Decentralized oracle (Chainlink), governance can change ✓
 - Matches Score 2 criteria exactly
 - **Subcategory Score: 2.0**
@@ -535,7 +535,7 @@ Reserve Protocol operations are largely automated:
 #### 3. Funds Management (Collateralization + Provability)
 **Score: 1.5**
 
-- 100% on-chain collateral ✓
+- 100% onchain collateral ✓
 - High-quality collateral (blue-chip LSTs) ✓
 - Real-time verifiability ✓
 - Direct 1:1 redemption ✓
@@ -596,7 +596,7 @@ Final Score = (2.5 × 0.30) + (1.5 × 0.30) + (1.5 × 0.20) + (2.0 × 0.15) + (1
 ### Risk Tier: **LOW RISK**
 
 **Interpretation:**
-ETH+ (Reserve Protocol) represents a low-risk protocol suitable for integration with Yearn vaults. The protocol demonstrates strong technical security, transparent on-chain operations, and decentralized governance. The 3-day timelock provides adequate protection for users to exit before governance changes, though a longer delay would be preferable. Main risks are manageable and relate to external dependencies (Chainlink oracles, underlying LST protocols) and governance upgradeability.
+ETH+ (Reserve Protocol) represents a low-risk protocol suitable for integration with Yearn vaults. The protocol demonstrates strong technical security, transparent onchain operations, and decentralized governance. The 3-day timelock provides adequate protection for users to exit before governance changes, though a longer delay would be preferable. Main risks are manageable and relate to external dependencies (Chainlink oracles, underlying LST protocols) and governance upgradeability.
 
 **Risk Tier Definitions:**
 - **1.0-1.5**: Minimal Risk (Blue chip protocols)

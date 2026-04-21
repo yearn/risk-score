@@ -36,17 +36,21 @@ Origin's stETH ARM (Automated Redemption Manager) is a yield-generating ETH vaul
 | Fee Collector | [`0xBB077E716A5f1F1B63ed5244eBFf5214E50fec8c`](https://etherscan.io/address/0xBB077E716A5f1F1B63ed5244eBFf5214E50fec8c) |
 | xOGN Governance Token | [`0x63898b3b6Ef3d39332082178656E9862bee45C57`](https://etherscan.io/address/0x63898b3b6Ef3d39332082178656E9862bee45C57) |
 | Lido Withdrawal Queue | [`0x889edC2eDab5f40e902b864aD4d7AdE8E412F9B1`](https://etherscan.io/address/0x889edC2eDab5f40e902b864aD4d7AdE8E412F9B1) |
+| MorphoMarket Wrapper (Proxy) | [`0xB7CeFE4CB483Be80C2963D3D9Edb991e69ff39cf`](https://etherscan.io/address/0xB7CeFE4CB483Be80C2963D3D9Edb991e69ff39cf) |
 | Morpho Vault (WETH ARM, Yearn curated) | [`0x3Dfe70B05657949A5dB340754aD664810ac63b21`](https://etherscan.io/address/0x3Dfe70B05657949A5dB340754aD664810ac63b21) |
+| Harvester (Morpho rewards) | [`0x4FF1b9D9ba8558F5EAfCec096318eA0d8b541971`](https://etherscan.io/address/0x4FF1b9D9ba8558F5EAfCec096318eA0d8b541971) |
 
 ## Audits and Due Diligence Disclosures
 
-ARM has been audited by OpenZeppelin and formally verified by Certora:
+ARM has been audited by OpenZeppelin (twice) and yAudit:
 
 | # | Date | Firm | Scope | Report |
 |---|------|------|-------|--------|
 | 1 | Nov 2024 | OpenZeppelin | ARM contracts | [Report](https://github.com/OriginProtocol/security/blob/master/audits/OpenZeppelin%20-%20Origin%20Arm%20Audit%20-%20November%202024.pdf) |
-| 2 | Dec 2024 | Certora | Formal verification | [Report](https://github.com/OriginProtocol/security/blob/master/audits/Certora%20-%20Formal%20verification%20-%20December%202024.pdf) |
-| 3 | Jun 2025 | OpenZeppelin | ARM contracts | [Report](https://github.com/OriginProtocol/security/blob/master/audits/OpenZeppelin%20-%20Origin%20ARM%20-%20June%202025.pdf) |
+| 2 | Jun 2025 | OpenZeppelin | ARM contracts | [Report](https://github.com/OriginProtocol/security/blob/master/audits/OpenZeppelin%20-%20Origin%20ARM%20-%20June%202025.pdf) |
+| 3 | Dec 2025 | yAudit | ARM contracts | [Report](https://github.com/OriginProtocol/security/blob/master/audits/yAudit%20-%20Origin%20ARM%20-%20December%202025.pdf) |
+
+**Note:** The Certora [formal verification report](https://github.com/OriginProtocol/security/blob/master/audits/Certora%20-%20Formal%20verification%20-%20December%202024.pdf) (December 2024) covers OUSD only, not ARM.
 
 Origin Protocol has 30+ audit reports across all products (OpenZeppelin, Trail of Bits, Solidified, Nethermind, Sigma Prime, Narya, Perimeter) in their [security repository](https://github.com/OriginProtocol/security).
 
@@ -80,20 +84,20 @@ Origin Protocol has 30+ audit reports across all products (OpenZeppelin, Trail o
 
 ### Collateralization
 
-- 100% on-chain collateral: WETH + stETH (same-value ETH-denominated assets)
+- 100% onchain collateral: WETH + stETH (same-value ETH-denominated assets)
 - No debt, leverage, or liquidation mechanics
 - Operator sets buy/sell prices manually, bounded by cross-price (which requires timelock to change)
 
 ### Provability
 
-- All reserves verifiable on-chain via view functions: `totalAssets()`, `totalSupply()`, `convertToAssets()`
-- PPS calculated programmatically on-chain: `totalAssets() / totalSupply()`
+- All reserves verifiable onchain via view functions: `totalAssets()`, `totalSupply()`, `convertToAssets()`
+- PPS calculated programmatically onchain: `totalAssets() / totalSupply()`
 - Lido withdrawal queue state verifiable: `withdrawsQueued()`, `withdrawsClaimed()`, `claimable()`
-- 100% on-chain reserves, no off-chain components
+- 100% onchain reserves, no offchain components
 
 ## Liquidity Risk
 
-- **Exit Mechanism:** Direct vault redemption with 10-minute delay. PPS locked at request time (no slippage on redemption value). No secondary DEX liquidity for the LP token.
+- **Exit Mechanism:** Direct vault redemption with 10-minute delay. PPS locked at request time (no slippage on redemption value). Limited secondary DEX liquidity via Curve pool ([OETH/ARM-WETH-stETH](https://curve.finance/dex/ethereum/pools/factory-stable-ng-641/deposit), [`0x95753095f15870acc0cb0ed224478ea61aeb0b8e`](https://etherscan.io/address/0x95753095f15870acc0cb0ed224478ea61aeb0b8e), ~$222K TVL).
 - **Immediate exits** limited to WETH buffer (variable, typically small % of TVL)
 - **Larger exits** require Lido withdrawal queue processing (1-3 days)
 - No priority mechanism - first-come-first-served
@@ -103,22 +107,7 @@ Origin Protocol has 30+ audit reports across all products (OpenZeppelin, Trail o
 
 ### Governance
 
-**Governance Structure (all on-chain verified):**
-
-```
-xOGN Token Holders (Staked OGN)
-        │ (100K xOGN to propose, ~133.7M xOGN quorum)
-        ▼
-Origin DeFi Governance (0x1D3fBD...9EC)
-        │ (7,200 blocks voting delay + 14,416 blocks voting period)
-        ▼ PROPOSER + EXECUTOR roles
-Timelock Controller (0x35918c...69F)
-        │ 172,800 seconds (48-hour) delay        ◄── GOV Multisig (5/8) can CANCEL only
-        ▼ owner
-ARM Contract (0x85B78A...cc6)
-        ├── operator: EOA (0x39878...DE7) - codesize 0, confirmed EOA
-        └── feeCollector: contract (0xBB077...8c)
-```
+**Governance Structure:** See [Appendix: Contract Architecture](#appendix-contract-architecture) for full diagram.
 
 **Timelock Roles (verified via `hasRole()`):**
 
@@ -147,7 +136,7 @@ ARM Contract (0x85B78A...cc6)
 
 ### Programmability
 
-- PPS calculated programmatically on-chain (`totalAssets() / totalSupply()`)
+- PPS calculated programmatically onchain (`totalAssets() / totalSupply()`)
 - `allocate()` function is permissionless
 - Operator sets buy/sell prices manually (no timelock), bounded by cross-price (admin-set, 48h timelock)
 - If operator inactive, pricing could become stale (no automated price discovery)
@@ -178,9 +167,9 @@ No cross-chain dependencies.
 
 ### Key Strengths
 
-1. On-chain xOGN governance with ~5-day total cycle, self-administered Timelock, no admin backdoor
+1. Onchain xOGN governance with ~5-day total cycle, self-administered Timelock, no admin backdoor
 2. Cross-price protected by 48h timelock — limits operator manipulation
-3. 2x OpenZeppelin + Certora formal verification + $1M Immunefi bounty
+3. 3 independent audits (2x OpenZeppelin + yAudit) + $1M Immunefi bounty
 4. Simple strategy (stETH arbitrage), with lending to low risk ARM Morpho Vault curated by Yearn
 5. 16 months clean ARM track record, same-value assets (ETH/stETH)
 
@@ -201,8 +190,8 @@ No cross-chain dependencies.
 
 ### Critical Risk Gates
 
-- [ ] **No audit** → **PASS** (2x OpenZeppelin + Certora formal verification)
-- [ ] **Unverifiable reserves** → **PASS** (100% on-chain, verifiable)
+- [ ] **No audit** → **PASS** (2x OpenZeppelin + yAudit)
+- [ ] **Unverifiable reserves** → **PASS** (100% onchain, verifiable)
 - [ ] **Total centralization** → **PASS** (xOGN governance + Timelock; operator is EOA but admin is not)
 
 ### Category Scores
@@ -211,20 +200,20 @@ No cross-chain dependencies.
 
 | Aspect | Assessment |
 |--------|-----------|
-| Audits | 2x OpenZeppelin + Certora formal verification |
+| Audits | 2x OpenZeppelin + yAudit |
 | Bug Bounty | $1M on Immunefi, ARM in scope |
 | Time in Production | ~16 months, no ARM incidents |
-| TVL | $5M |
+| TVL | ~$6.6M ([DeFiLlama](https://defillama.com/protocol/origin-arm)) |
 
 #### Category 2: Centralization & Control Risks (Weight: 30%) — **1.33**
 
 **Subcategory A: Governance — 1.0**
-- On-chain xOGN token governance with ~5-day cycle
+- Onchain xOGN token governance with ~5-day cycle
 - 48h timelock, self-administered, GOV Multisig (5/8) cancel-only
 - No admin backdoor. Shorter than ideal 72h+ timelock.
 
 **Subcategory B: Programmability — 1.5**
-- PPS on-chain, cross-price timelocked, `allocate()` permissionless
+- PPS onchain, cross-price timelocked, `allocate()` permissionless
 - Operator is single EOA with no-timelock price setting
 
 **Subcategory C: External Dependencies — 1.5**
@@ -237,11 +226,11 @@ No cross-chain dependencies.
 #### Category 3: Funds Management (Weight: 30%) — **1.25**
 
 **Subcategory A: Collateralization — 1.5**
-- 100% on-chain, same-value assets (ETH/stETH), no leverage
+- 100% onchain, same-value assets (ETH/stETH), no leverage
 - Idle capital deposited into Yearn-curated WETH ARM Morpho vault, a safer option with stronger risk oversight than the previous MEV Capital vault
 
 **Subcategory B: Provability — 1.0**
-- Fully transparent on-chain. Minor dependency on operator pricing (bounded by cross-price)
+- Fully transparent onchain. Minor dependency on operator pricing (bounded by cross-price)
 
 **Score: (1.5 + 1.0) / 2 = 1.25**
 
@@ -293,3 +282,91 @@ Final Score = (Audits × 0.20) + (Centralization × 0.30) + (Funds Mgmt × 0.30)
 - **Time-based:** Quarterly (next: May 2026)
 - **Incident-based:** Any security incident, pricing anomaly, or withdrawal issues
 - **Change-based:** Morpho vault curator Yearn changes, especially adding new markets. Contract upgrade, Lido WQ issues or stETH depeg
+
+---
+
+## Appendix: Contract Architecture
+
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│                        GOVERNANCE                                   │
+│                                                                     │
+│  xOGN Token Holders (Staked OGN)                                   │
+│  (100K xOGN to propose, ~133.7M xOGN quorum)                      │
+│         │                                                           │
+│         ▼                                                           │
+│  Origin DeFi Governance (0x1D3f...)                                │
+│  [PROPOSER + EXECUTOR + CANCELLER]                                 │
+│  (7,200 blocks voting delay + 14,416 blocks voting period)         │
+│         │                                                           │
+│         ▼                                                           │
+│  Timelock Controller (0x3591...)          GOV Multisig 5/8         │
+│  [48h delay, self-administered]  ◄────── (0xbe2A...)               │
+│         │                                [CANCELLER only]           │
+│         │ owner                                                     │
+│         ├──────────────────────────────────────┐                    │
+│         ▼                                      ▼                    │
+│  ARM Proxy (0x85B7...)              MorphoMarket Wrapper (0xB7Ce..)│
+│  [EIP-1967, impl: 0xC029...]       [EIP-1967, also owned by TL]   │
+│                                                                     │
+│  ⚠ Proxy upgrade = single-step setOwner (no 2-step transfer)      │
+│                                                                     │
+└─────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────┐
+│                     ARM VAULT (LidoARM)                             │
+│                     0x85B7...cc6                                    │
+│                                                                     │
+│  Immutables:         Storage:                                      │
+│  ├── stETH (0xae7a)  ├── traderate0/1 (36-dec pricing)            │
+│  ├── WETH  (0xC02a)  ├── crossPrice (operator bound, timelocked)  │
+│  └── lidoWQ(0x889e)  ├── fee: 2000 (20%)                          │
+│                       ├── armBuffer: 0.1 ETH                       │
+│                       ├── claimDelay: 600s (10 min)                │
+│                       └── activeMarket: 0xB7Ce... (MorphoMarket)  │
+│                                                                     │
+│  Roles:                                                             │
+│  ├── owner:        Timelock (0x3591...)                             │
+│  │   setCrossPrice, setFee, setOperator, addMarkets, upgradeTo    │
+│  ├── operator:     EOA (0x3987...)                                 │
+│  │   setPrices, requestLidoWithdrawals, setActiveMarket            │
+│  ├── feeCollector: Safe 1/3 (0xBB07...)                            │
+│  └── capManager:   address(0) [disabled]                           │
+│                                                                     │
+│  Permissionless: deposit, requestRedeem, claimRedeem, allocate,    │
+│  claimLidoWithdrawals, collectFees, swap stETH↔WETH               │
+│                                                                     │
+└──────────┬──────────────┬──────────────┬────────────────────────────┘
+           │              │              │
+           ▼              ▼              ▼
+┌──────────────┐ ┌──────────────┐ ┌──────────────────────────────────┐
+│  stETH       │ │  Lido WQ     │ │  MorphoMarket Wrapper            │
+│  (0xae7a...) │ │  (0x889e...) │ │  (0xB7Ce...)                     │
+│              │ │              │ │  [Abstract4626MarketWrapper]      │
+│  transfer,   │ │  request,    │ │  owner: Timelock                 │
+│  approve     │ │  claim       │ │         │                        │
+│              │ │              │ │         ▼                        │
+└──────────────┘ └──────────────┘ │  Morpho Vault (0x3Dfe...)       │
+                                  │  [MetaMorpho v1.1, Yearn curated]│
+                                  │         │                        │
+                                  │         ▼                        │
+                                  │  Harvester Safe (0x4FF1...)      │
+                                  │  [receives MORPHO rewards]       │
+                                  └──────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────┐
+│                   SECONDARY LIQUIDITY                               │
+│                                                                     │
+│  Curve Pool: OETH / ARM-WETH-stETH (factory-stable-ng-641)        │
+│  (0x9575...)  ~$222K TVL                                           │
+│  Gauge: 0xfcad... (active, no CRV weight)                         │
+│                                                                     │
+└─────────────────────────────────────────────────────────────────────┘
+
+Data flows:
+  Deposit:  User WETH → ARM → mint LP shares
+  Redeem:   requestRedeem (burns shares, locks PPS) → claimRedeem (after 10m + liquidity)
+  Yield:    ARM buys discounted stETH → requestLidoWithdrawals → claimLidoWithdrawals → WETH
+  Lending:  allocate() → excess WETH → MorphoMarket wrapper → Morpho Vault (Yearn curated)
+  Swap:     User stETH↔WETH at operator-set traderates (bounded by crossPrice)
+```

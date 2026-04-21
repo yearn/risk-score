@@ -1,4 +1,4 @@
-# Yearn Risk Scores
+# Yearn Curation Scores
 
 This repository contains risk scores for Yearn V3 strategies, vaults. Additionally, it contains risk assessments for used protocols and assets.
 

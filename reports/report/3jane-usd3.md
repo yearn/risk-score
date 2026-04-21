@@ -103,10 +103,10 @@ USD3 funds are deployed into two channels:
 USD3 is fundamentally different from traditional overcollateralized stablecoins:
 
 - **Not overcollateralized** — USD3 is backed by USDC deposits that are then lent out via unsecured credit lines
-- **Credit-based model:** Borrowing limits are based on off-chain reputation and financial records, not on-chain collateral
+- **Credit-based model:** Borrowing limits are based on offchain reputation and financial records, not onchain collateral
 - **Default risk:** If borrowers default, losses are absorbed first by sUSD3 (junior tranche), then by the Insurance Fund ($1M USDC), and finally by USD3 holders (senior tranche)
 - **Markdown mechanism:** `MarkdownController` gradually reduces the value of defaulted loans from their initial value to zero over time, preventing sharp market shocks
-- **No liquidation mechanism** — there is no on-chain collateral to liquidate. Default recovery relies on off-chain legal enforcement via U.S.-based collection agencies
+- **No liquidation mechanism** — there is no onchain collateral to liquidate. Default recovery relies on offchain legal enforcement via U.S.-based collection agencies
 
 ### Default Recovery Process
 
@@ -115,16 +115,16 @@ USD3 is fundamentally different from traditional overcollateralized stablecoins:
 3. Markdown: protocol marks down delinquent/defaulted positions to reflect recovery rate
 4. Insurance Fund coverage ($1M USDC)
 5. NPL Auction: non-performing loans sold to registered U.S. collection agencies via Dutch-style auctions
-6. Off-chain legal recovery via credit bureau reporting and regulatory enforcement
+6. Offchain legal recovery via credit bureau reporting and regulatory enforcement
 
 ### Provability
 
-- **USD3/sUSD3 share prices** are computed on-chain via ERC-4626 standard
-- **Outstanding loans and interest accruals** are tracked on-chain in MorphoCredit
-- **Credit assessment is off-chain** — the 3CA (3Jane Credit Algorithm) is a proprietary black box. Credit line sizes, default risk rates, and repayment schedules are computed off-chain
-- **zkTLS + Reclaim Protocol** provides zero-knowledge proofs of off-chain data (bank statements, credit scores), verified by **EigenLayer AVS** nodes
-- **Off-chain data sources:** Plaid (bank data), Credit Karma (credit scores)
-- Total reserves cannot be fully verified on-chain because outstanding loan values depend on off-chain repayment status
+- **USD3/sUSD3 share prices** are computed onchain via ERC-4626 standard
+- **Outstanding loans and interest accruals** are tracked onchain in MorphoCredit
+- **Credit assessment is offchain** — the 3CA (3Jane Credit Algorithm) is a proprietary black box. Credit line sizes, default risk rates, and repayment schedules are computed offchain
+- **zkTLS + Reclaim Protocol** provides zero-knowledge proofs of offchain data (bank statements, credit scores), verified by **EigenLayer AVS** nodes
+- **Offchain data sources:** Plaid (bank data), Credit Karma (credit scores)
+- Total reserves cannot be fully verified onchain because outstanding loan values depend on offchain repayment status
 
 ## Liquidity Risk
 
@@ -171,10 +171,10 @@ All core contracts (MorphoCredit, ProtocolConfig, CreditLine, USD3) are owned by
 
 ### Programmability
 
-- **On-chain:** Interest accruals, share price computation (ERC-4626), loan state tracking, markdown decay — all programmatic
-- **Off-chain (critical):** Credit assessment (3CA algorithm), borrower approval, minimum repayment posting, credit line sizing — all require admin intervention
-- **PPS (price per share):** Computed on-chain algorithmically via ERC-4626 standard, but the total asset value depends on outstanding loan values which can be marked down by admin
-- **Hybrid system:** Automated on-chain mechanics + significant manual off-chain operations
+- **Onchain:** Interest accruals, share price computation (ERC-4626), loan state tracking, markdown decay — all programmatic
+- **Offchain (critical):** Credit assessment (3CA algorithm), borrower approval, minimum repayment posting, credit line sizing — all require admin intervention
+- **PPS (price per share):** Computed onchain algorithmically via ERC-4626 standard, but the total asset value depends on outstanding loan values which can be marked down by admin
+- **Hybrid system:** Automated onchain mechanics + significant manual offchain operations
 
 ### External Dependencies
 
@@ -182,10 +182,10 @@ All core contracts (MorphoCredit, ProtocolConfig, CreditLine, USD3) are owned by
 |-----------|-------------|-------|
 | **Aave V3** | Critical | Base yield on idle USDC. Well-audited, blue-chip dependency |
 | **Morpho Blue** (forked) | Critical | Core lending logic. Modifications (credit, tranches, markdown) are the novel risk surface |
-| **Reclaim Protocol / zkTLS** | High | Off-chain data verification for credit scores and bank data. Novel technology with limited battle-testing |
+| **Reclaim Protocol / zkTLS** | High | Offchain data verification for credit scores and bank data. Novel technology with limited battle-testing |
 | **EigenLayer AVS** | High | ZK proof distribution and verification. Early-stage infrastructure |
-| **Plaid** | Medium | Bank account data access. Centralized off-chain dependency |
-| **Credit Karma** | Medium | VantageScore/FICO data. Centralized off-chain dependency |
+| **Plaid** | Medium | Bank account data access. Centralized offchain dependency |
+| **Credit Karma** | Medium | VantageScore/FICO data. Centralized offchain dependency |
 | **Yearn V3 Vault** | Low | USD3/sUSD3 vault design pattern. Well-tested |
 
 ## Operational Risk
@@ -240,16 +240,16 @@ All core contracts (MorphoCredit, ProtocolConfig, CreditLine, USD3) are owned by
 
 ### Key Risks
 
-- **Unsecured lending model:** Fundamentally higher risk than overcollateralized DeFi lending. Default recovery depends entirely on off-chain legal mechanisms and U.S. collection agencies — novel and untested in DeFi
-- **Proprietary credit algorithm:** The 3CA is a black box. Credit decisions are off-chain and opaque. Incorrect credit assessments could lead to systemic defaults
+- **Unsecured lending model:** Fundamentally higher risk than overcollateralized DeFi lending. Default recovery depends entirely on offchain legal mechanisms and U.S. collection agencies — novel and untested in DeFi
+- **Proprietary credit algorithm:** The 3CA is a black box. Credit decisions are offchain and opaque. Incorrect credit assessments could lead to systemic defaults
 - **No bug bounty program:** Notable absence from Immunefi, Sherlock, and Cantina despite managing $20M+ in user funds
-- **Novel off-chain dependencies:** zkTLS/Reclaim Protocol and EigenLayer AVS are early-stage technologies with limited battle-testing
+- **Novel offchain dependencies:** zkTLS/Reclaim Protocol and EigenLayer AVS are early-stage technologies with limited battle-testing
 - **Limited team transparency:** Only the founder is publicly known. No disclosed legal entity
 
 ### Critical Risks
 
 - **Default contagion:** If multiple borrowers default simultaneously, the sUSD3 junior tranche + $1M Insurance Fund may be insufficient to cover losses, directly impacting USD3 holders
-- **Off-chain legal dependency:** Entire default recovery mechanism depends on U.S. legal system, licensed collection agencies, and credit bureau reporting — none of which have been tested at scale in a DeFi context
+- **Offchain legal dependency:** Entire default recovery mechanism depends on U.S. legal system, licensed collection agencies, and credit bureau reporting — none of which have been tested at scale in a DeFi context
 - **Upgrade risk:** All core contracts are upgradeable via 3/5 multisig + 24h timelock. Anonymous signers. The auditor explicitly recommended splitting roles, which has not been fully implemented
 - **Liquidity risk under stress:** If utilization spikes due to high borrowing demand or defaults, USD3 redemptions could face significant delays
 
@@ -260,7 +260,7 @@ All core contracts (MorphoCredit, ProtocolConfig, CreditLine, USD3) are owned by
 ### Critical Risk Gates
 
 - [x] **No audit** — 3Jane has been audited by Veridise (Aug 2025). Additionally inherits Morpho Blue audits. ✅ PASS
-- [ ] **Unverifiable reserves** — Outstanding loan values depend on off-chain repayment status. On-chain reserves (Aave idle) are verifiable, but total asset value including outstanding loans is partially opaque ⚠️ CONDITIONAL PASS
+- [ ] **Unverifiable reserves** — Outstanding loan values depend on offchain repayment status. Onchain reserves (Aave idle) are verifiable, but total asset value including outstanding loans is partially opaque ⚠️ CONDITIONAL PASS
 - [x] **Total centralization** — Uses 3/5 multisig with 24h timelock ✅ PASS
 
 **All gates pass (conditional).** Proceed to category scoring.
@@ -295,11 +295,11 @@ All core contracts (MorphoCredit, ProtocolConfig, CreditLine, USD3) are owned by
 
 | Factor | Assessment |
 |--------|-----------|
-| On-chain | ERC-4626 share price, interest accruals, loan state tracking — programmatic |
-| Off-chain | Credit assessment (3CA), borrower approval, repayment posting, credit line sizing — manual/admin |
-| PPS | On-chain via ERC-4626, but depends on loan valuations that can be marked down by admin |
+| Onchain | ERC-4626 share price, interest accruals, loan state tracking — programmatic |
+| Offchain | Credit assessment (3CA), borrower approval, repayment posting, credit line sizing — manual/admin |
+| PPS | Onchain via ERC-4626, but depends on loan valuations that can be marked down by admin |
 
-**Subcategory B Score: 4/5** — Significant off-chain components are critical to protocol operation. The credit algorithm is a proprietary black box. Admin can mark down loan values, directly affecting USD3 share price. This is a fundamentally hybrid system with substantial manual intervention.
+**Subcategory B Score: 4/5** — Significant offchain components are critical to protocol operation. The credit algorithm is a proprietary black box. Admin can mark down loan values, directly affecting USD3 share price. This is a fundamentally hybrid system with substantial manual intervention.
 
 **Subcategory C: External Dependencies**
 
@@ -308,13 +308,13 @@ All core contracts (MorphoCredit, ProtocolConfig, CreditLine, USD3) are owned by
 | Aave V3 | Critical, blue-chip |
 | Morpho Blue (forked) | Critical, well-audited base but modifications add risk |
 | zkTLS / Reclaim / EigenLayer AVS | High criticality, early-stage technologies |
-| Plaid / Credit Karma | Medium, centralized off-chain |
+| Plaid / Credit Karma | Medium, centralized offchain |
 
 **Subcategory C Score: 4/5** — Multiple dependencies including novel, early-stage technologies (zkTLS, EigenLayer AVS) that are critical to the credit assessment pipeline. Failure of these dependencies would compromise the protocol's ability to underwrite new loans.
 
 **Centralization Score = (3.5 + 4 + 4) / 3 = 3.83/5**
 
-**Score: 3.75/5** — Reasonable multisig + timelock governance structure, but significant centralization in off-chain credit operations, upgradeable contracts with anonymous signers, and heavy reliance on novel off-chain dependencies.
+**Score: 3.75/5** — Reasonable multisig + timelock governance structure, but significant centralization in offchain credit operations, upgradeable contracts with anonymous signers, and heavy reliance on novel offchain dependencies.
 
 #### Category 3: Funds Management (Weight: 30%)
 
@@ -323,25 +323,25 @@ All core contracts (MorphoCredit, ProtocolConfig, CreditLine, USD3) are owned by
 | Factor | Assessment |
 |--------|-----------|
 | Backing | **Not overcollateralized** — USD3 is backed by USDC that is lent out via unsecured credit lines |
-| Collateral quality | USDC (high quality) but lent out without on-chain collateral |
+| Collateral quality | USDC (high quality) but lent out without onchain collateral |
 | Default protection | sUSD3 junior tranche (~$6.4M) + Insurance Fund ($1M) absorb losses first |
-| Verifiability | On-chain idle reserves verifiable; outstanding loan values partially opaque |
+| Verifiability | Onchain idle reserves verifiable; outstanding loan values partially opaque |
 
-**Subcategory A Score: 4/5** — This is fundamentally an unsecured lending protocol. While the dual-tranche structure and insurance fund provide some loss absorption, there is no on-chain collateral to liquidate in case of default. Recovery depends on off-chain legal mechanisms. The sUSD3 buffer (~$6.4M) provides meaningful first-loss capital relative to current TVL.
+**Subcategory A Score: 4/5** — This is fundamentally an unsecured lending protocol. While the dual-tranche structure and insurance fund provide some loss absorption, there is no onchain collateral to liquidate in case of default. Recovery depends on offchain legal mechanisms. The sUSD3 buffer (~$6.4M) provides meaningful first-loss capital relative to current TVL.
 
 **Subcategory B: Provability**
 
 | Factor | Assessment |
 |--------|-----------|
-| Reserve transparency | Aave idle reserves on-chain; outstanding loans tracked on-chain but valuation depends on off-chain repayment status |
-| Reporting mechanism | On-chain ERC-4626 for share price; off-chain for credit health and repayment tracking |
+| Reserve transparency | Aave idle reserves onchain; outstanding loans tracked onchain but valuation depends on offchain repayment status |
+| Reporting mechanism | Onchain ERC-4626 for share price; offchain for credit health and repayment tracking |
 | Third-party verification | zkTLS proofs for credit data, but credit algorithm itself is opaque |
 
-**Subcategory B Score: 3.5/5** — On-chain reserve tracking is decent, but total asset value cannot be fully verified because outstanding loan recovery depends on off-chain borrower repayment. The credit algorithm is a proprietary black box.
+**Subcategory B Score: 3.5/5** — Onchain reserve tracking is decent, but total asset value cannot be fully verified because outstanding loan recovery depends on offchain borrower repayment. The credit algorithm is a proprietary black box.
 
 **Funds Management Score = (4 + 3.5) / 2 = 3.75/5**
 
-**Score: 3.75/5** — The unsecured lending model is the core risk. While the dual-tranche structure provides meaningful protection, the lack of on-chain collateral and dependence on off-chain recovery mechanisms significantly increase risk.
+**Score: 3.75/5** — The unsecured lending model is the core risk. While the dual-tranche structure provides meaningful protection, the lack of onchain collateral and dependence on offchain recovery mechanisms significantly increase risk.
 
 #### Category 4: Liquidity Risk (Weight: 15%)
 
