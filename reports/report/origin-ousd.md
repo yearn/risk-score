@@ -4,7 +4,7 @@
 - **Token:** OUSD (Origin Dollar)
 - **Chain:** Ethereum Mainnet
 - **Token Address:** [`0x2A8e1E676Ec238d8A992307B495b45B3fEAa5e86`](https://etherscan.io/address/0x2A8e1E676Ec238d8A992307B495b45B3fEAa5e86)
-- **Final Score: 1.85/5.0**
+- **Final Score: 1.90/5.0**
 
 ## Overview + Links
 
@@ -118,7 +118,10 @@ Reward tokens (CRV, MORPHO) are sold via CoW Protocol into USDC and returned to 
 
 - **Minting:** Permissionless. Anyone can call `mint()` by depositing USDC; the vault mints equivalent OUSD 1:1. Requires `safeTransferFrom` of USDC — cannot mint without depositing collateral.
 - **AMO Minting:** The Curve AMO strategy can call `mintForStrategy()` to mint OUSD without direct user-deposited backing (see [AMO Minting Analysis](#amo-minting-analysis) below). Only governor-whitelisted strategies can use this function.
-- **Redemption:** Permissionless via `redeem()`. 10-minute processing window when vault has sufficient liquidity; up to 24 hours if strategies need to be unwound.
+- **Redemption:** Async withdrawal queue — two-step process:
+  1. `requestWithdrawal(amount)` burns OUSD immediately and enqueues a withdrawal (NFT-like request ID).
+  2. `claimWithdrawal(id)` / `claimWithdrawals(ids[])` pays out USDC after `withdrawalClaimDelay` (600s = **10 minutes minimum**, verified on-chain) AND when the queue's claimable liquidity has caught up to the request.
+  There is no on-chain upper bound on claim time — if the queue is ahead of deposits/strategy withdrawals, a claim can wait indefinitely. The strategist (or anyone permissionlessly, via `allocate()` / strategy pulls) must supply USDC to advance the queue.
 - **DEX Swaps:** Instant exits via Curve OUSD/USDC pool (~$3.4M TVL).
 - **Fees:** 20% performance fee (2,000 bps), no deposit/withdrawal fees.
 
@@ -153,13 +156,13 @@ Reward tokens (CRV, MORPHO) are sold via CoW Protocol into USDC and returned to 
 
 ## Liquidity Risk
 
-- **Primary exit:** Direct redemption via vault — 10-minute delay when liquidity available, up to 24 hours if strategy unwinding needed
-- **DEX liquidity:** Curve OUSD/USDC pool ([`0x6d18E1a7faeB1F0467A77C0d293872ab685426dc`](https://etherscan.io/address/0x6d18E1a7faeB1F0467A77C0d293872ab685426dc)) with ~$3.4M TVL (~1.9M OUSD + ~1.5M USDC)
-- **Vault buffer:** 0 USDC idle — all funds deployed to strategies, so larger redemptions require strategy withdrawal
-- **Cross-chain assets:** ~$897K (12% of TVL) on Base and HyperEVM — cannot be immediately redeemed on Ethereum, requires CCTP bridging back (minutes to hours)
-- **No priority mechanism** — first-come-first-served redemption
-- **Same-value assets** (USD stablecoins) mitigate price impact risk during any waiting period
-- **Legacy OUSD/3CRV pool:** ~$30K TVL, effectively deprecated
+- **Primary exit:** Async withdrawal queue via `requestWithdrawal()` → `claimWithdrawal()`. OUSD is burned at request time; USDC is paid only after (a) `withdrawalClaimDelay` of 10 minutes AND (b) queue claimable liquidity has advanced past the request. No on-chain upper bound on wait time — effective wait depends on how quickly strategies return USDC.
+- **DEX liquidity:** Curve OUSD/USDC pool ([`0x6d18E1a7faeB1F0467A77C0d293872ab685426dc`](https://etherscan.io/address/0x6d18E1a7faeB1F0467A77C0d293872ab685426dc)) with ~$3.4M TVL (~1.9M OUSD + ~1.5M USDC) — provides instant exit path independent of the queue.
+- **Vault buffer:** 0 USDC idle — all funds deployed to strategies, so queue advancement depends on the strategist pulling from strategies (`withdrawFromStrategy` / `withdrawAllFromStrategies`) or on new deposits auto-allocating to cover requests.
+- **Cross-chain assets:** ~$897K (12% of TVL) on Base and HyperEVM — cannot be immediately redeemed on Ethereum, requires CCTP bridging back (minutes to hours).
+- **No priority mechanism** — first-come-first-served queue ordering.
+- **Same-value assets** (USD stablecoins) mitigate price impact risk during any waiting period.
+- **Legacy OUSD/3CRV pool:** ~$30K TVL, effectively deprecated.
 
 ## Centralization & Control Risks
 
@@ -186,11 +189,16 @@ Reward tokens (CRV, MORPHO) are sold via CoW Protocol into USDC and returned to 
 
 | Role | Who | Timelock? | Powers |
 |------|-----|-----------|--------|
-| Governor (owner) | Timelock → xOGN governance | ~5 days | Upgrade proxy, approve strategies, add to mint whitelist, set fees, set strategist, set oracle |
-| Strategist | 2-of-8 Safe `0x4FF1...971` | None | Allocate/withdraw from strategies, trigger AMO operations (mintAndAddOTokens, removeAndBurnOTokens), harvest rewards, pause capital/rebase |
+| Governor (owner) | Timelock → xOGN governance | ~5 days | Upgrade proxy, approve/remove strategies, add/remove from mint whitelist, `setAutoAllocateThreshold`, `setMaxSupplyDiff`, `setWithdrawalClaimDelay`, `setTrusteeFeeBps`, `setTrusteeAddress`, `setStrategistAddr`, set oracle, `governanceRebaseOptIn` |
+| Strategist | 2-of-8 Safe `0x4FF1...971` | None | Vault (all `onlyGovernorOrStrategist`): `depositToStrategy` / `withdrawFromStrategy` / `withdrawAllFromStrategy` / `withdrawAllFromStrategies`, `setVaultBuffer`, `setDefaultStrategy`, `setRebaseRateMax`, `setDripDuration`, `setRebaseThreshold`, `pauseCapital` / `pauseRebase`, `unpauseCapital` / `unpauseRebase`, `rebase`. Curve AMO: `mintAndAddOTokens` / `removeAndBurnOTokens` / `removeOnlyAssets` (AMO ops), reward harvesting. OUSD Token (`onlyGovernorOrStrategist`): `delegateYield(from, to)`, `undelegateYield(from)` — can redirect rebase yield of **any account** to any other account without that account's consent. |
 | Trustee | 1-of-3 Safe `0xBB07...c8c` | None | Receives 20% performance fee |
 
-**Key Risk:** The Strategist (2-of-8 multisig) can trigger AMO minting and strategy allocation without timelock. The deprecated vault-level AMO minting cap means the strategist's AMO operations are constrained only by the strategy-level 99.8% solvency check.
+**Key Risks:**
+
+1. **AMO minting without timelock:** The Strategist can trigger AMO mint/burn operations, constrained by the strategy-level 99.8% solvency check. The vault-level AMO minting cap (`netOusdMintForStrategyThreshold`) is deprecated (function reverts on-chain).
+2. **Yield delegation without timelock:** `delegateYield` / `undelegateYield` on the OUSD token are `onlyGovernorOrStrategist` — the strategist can redirect the rebase yield of any account (including smart contracts holding OUSD) to an arbitrary recipient. This is a non-trivial power over holder yield.
+3. **Strategy reallocation without timelock:** The strategist can move all vault funds to/from any approved strategy (`withdrawAllFromStrategies`, `setDefaultStrategy`, `depositToStrategy`). Bounded by what's already on the governor-approved strategy list.
+4. **Rebase rate cap without timelock:** `setRebaseRateMax` lets the strategist cap daily rebase APR — misconfiguration could strand yield.
 
 ### Programmability
 
@@ -222,13 +230,14 @@ No single-point-of-failure that would break the protocol entirely, but USDC depe
 ## Monitoring
 
 - **Governance:** Monitor Timelock events (`CallScheduled`, `CallExecuted`, `Cancelled`) on [`0x35918cDE7233F2dD33fA41ae3Cb6aE0e42E0e69F`](https://etherscan.io/address/0x35918cDE7233F2dD33fA41ae3Cb6aE0e42E0e69F). Monitor EIP-1967 implementation slot changes on Vault and OUSD Token proxies. Monitor Origin DeFi Governance proposals.
-- **Vault Parameters:** Track `totalValue()` and `totalSupply()` on the vault. Alert on >1% divergence between total value and total OUSD supply. Monitor `rebasePaused()` and `capitalPaused()` state changes. Track `maxSupplyDiff` changes.
+- **Vault Parameters:** Track `totalValue()` on the vault ([`0xE75D...F70`](https://etherscan.io/address/0xE75D77B1865Ae93c7eaa3040B038D7aA7BC02F70)) and `totalSupply()` on the OUSD token ([`0x2A8e...E86`](https://etherscan.io/address/0x2A8e1E676Ec238d8A992307B495b45B3fEAa5e86)). Alert on >1% divergence between vault `totalValue()` and token `totalSupply()`. Monitor `rebasePaused()` and `capitalPaused()` state changes on the vault. Track `maxSupplyDiff`, `vaultBuffer`, `defaultStrategy`, `dripDuration`, and `rebasePerSecondMax` changes (several settable by strategist without timelock).
 - **AMO:** Monitor `mintForStrategy()` calls and OUSD supply vs vault value ratio. Alert if solvency drops below 99.5%. Track `isMintWhitelistedStrategy` changes (requires governance).
 - **Strategy Allocation:** Monitor strategy balances via `checkBalance()` on each strategy contract. Alert on >20% TVL change in 24h. Track cross-chain strategy CCTP bridge transactions.
 - **Oracle:** Monitor Chainlink USDC/USD feed staleness on [`0x8fFfFfd4AfB6115b954Bd326cbe7B4BA576818f6`](https://etherscan.io/address/0x8fFfFfd4AfB6115b954Bd326cbe7B4BA576818f6). Alert if price deviates >1% from $1.00.
 - **Liquidity:** Monitor Curve OUSD/USDC pool balance ratio. Alert on significant imbalance (>60/40 split). Track vault USDC buffer level.
 - **Morpho:** Monitor MetaMorpho vault (mOUSD-V2) at [`0xFB154c729A16802c4ad1E8f7FF539a8b9f49c960`](https://etherscan.io/address/0xFB154c729A16802c4ad1E8f7FF539a8b9f49c960). Track curator changes and market allocations.
-- **Strategist:** Monitor role changes on vault `strategistAddr()`. Track AMO operations frequency and size.
+- **Strategist:** Monitor role changes on vault `strategistAddr()`. Track AMO operations frequency and size. Monitor `YieldDelegated` / `YieldUndelegated` events on the OUSD token for yield redirection activity. Monitor `withdrawAllFromStrategies`, `setVaultBuffer`, `setDefaultStrategy`, `setDripDuration`, `setRebaseRateMax` calls (untimelocked strategist powers).
+- **Withdrawal Queue:** Track `withdrawalQueueMetadata()` on the vault to monitor queue depth (requested vs claimable). Alert when queue backlog (requested − claimable) exceeds available vault + Morpho liquidity — indicates redemption delays.
 
 ## Risk Summary
 
@@ -243,11 +252,11 @@ No single-point-of-failure that would break the protocol entirely, but USDC depe
 ### Key Risks
 
 1. AMO `mintForStrategy()` can mint OUSD without direct backing (constrained to ~0.2% of supply), and historical vault-level cap has been deprecated
-2. Strategist (2-of-8 multisig) has significant power without timelock: AMO operations, strategy allocation, pause controls
+2. Strategist (2-of-8 multisig) has broad untimelocked power: AMO operations, strategy allocation (`withdrawAllFromStrategies`, `setDefaultStrategy`, `depositToStrategy`), vault parameters (`setVaultBuffer`, `setDripDuration`, `setRebaseRateMax`), pause controls, **and yield delegation** (`delegateYield` / `undelegateYield` can redirect any account's rebase yield)
 3. Single collateral dependency on USDC (Circle) — centralized stablecoin with freeze capabilities
 4. Cross-chain strategies (~12% of TVL) add bridge risk and reduce immediate redemption liquidity
 5. Modest TVL (~$7.6M, down from $275M peak) suggests concentration risk and reduced market confidence
-6. Vault buffer set to 0 — no idle USDC reserve for immediate redemptions
+6. Vault buffer set to 0 — no idle USDC reserve; redemptions flow through async withdrawal queue with no on-chain upper bound on claim time
 
 ### Critical Risks
 
@@ -288,19 +297,19 @@ No single-point-of-failure that would break the protocol entirely, but USDC depe
 
 **Score: (1.0 + 2.5) / 2 = 1.75**
 
-#### Category 2: Centralization & Control Risks (Weight: 30%) — **1.83**
+#### Category 2: Centralization & Control Risks (Weight: 30%) — **2.0**
 
 **Subcategory A: Governance — 1.0**
 - On-chain xOGN token governance with ~5-day cycle (24h delay + 48h voting + 48h timelock)
 - Self-administered Timelock, GOV Multisig (5/8) cancel-only
 - No admin backdoor. Same governance as Origin ARM.
 
-**Subcategory B: Programmability — 2.0**
-- Minting/redeeming permissionless and programmatic
-- Rebase automated via threshold triggers
-- AMO operations and strategy allocation require strategist (2-of-8 multisig)
+**Subcategory B: Programmability — 2.5**
+- Minting and `requestWithdrawal` permissionless and programmatic; rebase automated via threshold triggers
+- **Broad untimelocked strategist surface** (2-of-8 multisig, `onlyGovernorOrStrategist`): AMO mint/burn, strategy allocation (`depositToStrategy`, `withdrawFromStrategy`, `withdrawAllFromStrategies`, `setDefaultStrategy`), vault parameters (`setVaultBuffer`, `setDripDuration`, `setRebaseRateMax`, `setRebaseThreshold`), pause controls, and OUSD token `delegateYield` / `undelegateYield` which can redirect any account's rebase yield without consent
 - Cross-chain strategy management requires manual intervention
 - Reward harvesting semi-automated via CoW Protocol
+- Bounded by governor's approved-strategy list and the 99.8% solvency threshold, but the set of untimelocked levers is meaningfully larger than pause/allocate alone
 
 **Subcategory C: External Dependencies — 2.5**
 - Critical: USDC (single collateral, centralized stablecoin), Curve (AMO yield)
@@ -308,7 +317,7 @@ No single-point-of-failure that would break the protocol entirely, but USDC depe
 - Medium: Circle CCTP (cross-chain bridging, ~12% of TVL)
 - More dependencies than Origin ARM due to AMO, Morpho, and cross-chain strategies
 
-**Score: (1.0 + 2.0 + 2.5) / 3 = 1.83**
+**Score: (1.0 + 2.5 + 2.5) / 3 = 2.0**
 
 #### Category 3: Funds Management (Weight: 30%) — **1.75**
 
@@ -347,20 +356,19 @@ No single-point-of-failure that would break the protocol entirely, but USDC depe
 
 ```
 Final Score = (Audits × 0.20) + (Centralization × 0.30) + (Funds Mgmt × 0.30) + (Liquidity × 0.15) + (Operational × 0.05)
-            = (1.75 × 0.20) + (1.83 × 0.30) + (1.75 × 0.30) + (2.5 × 0.15) + (1.0 × 0.05)
-            = 0.35 + 0.549 + 0.525 + 0.375 + 0.05
-            = 1.849
-            ≈ 1.85
+            = (1.75 × 0.20) + (2.0 × 0.30) + (1.75 × 0.30) + (2.5 × 0.15) + (1.0 × 0.05)
+            = 0.350 + 0.600 + 0.525 + 0.375 + 0.050
+            = 1.900
 ```
 
 | Category | Score | Weight | Weighted |
 |----------|-------|--------|----------|
-| Audits & Historical | 1.75 | 20% | 0.35 |
-| Centralization & Control | 1.83 | 30% | 0.549 |
+| Audits & Historical | 1.75 | 20% | 0.350 |
+| Centralization & Control | 2.0 | 30% | 0.600 |
 | Funds Management | 1.75 | 30% | 0.525 |
 | Liquidity Risk | 2.5 | 15% | 0.375 |
-| Operational Risk | 1.0 | 5% | 0.05 |
-| **Final Score** | | | **1.85 / 5.0** |
+| Operational Risk | 1.0 | 5% | 0.050 |
+| **Final Score** | | | **1.90 / 5.0** |
 
 ### Risk Tier
 
@@ -418,10 +426,17 @@ Final Score = (Audits × 0.20) + (Centralization × 0.30) + (Funds Mgmt × 0.30)
 │  Oracle: Router (0x36CF...) → Chainlink USDC/USD [non-upgradeable]      │
 │                                                                          │
 │  Roles:                                                                  │
-│  ├── governor:      Timelock (0x3591...)                                │
-│  │   approveStrategy, addStrategyToMintWhitelist, setFee, upgradeTo     │
-│  ├── strategistAddr: 2-of-8 Safe (0x4FF1...) "Origin: Guardian"        │
-│  │   allocate, withdrawFromStrategy, AMO ops, harvest, pause            │
+│  ├── governor:      Timelock (0x3591...) [~5d timelock]                 │
+│  │   approveStrategy, addStrategyToMintWhitelist, setTrusteeFeeBps,     │
+│  │   setAutoAllocateThreshold, setMaxSupplyDiff,                        │
+│  │   setWithdrawalClaimDelay, setStrategistAddr, upgradeTo              │
+│  ├── strategistAddr: 2-of-8 Safe (0x4FF1...) "Origin: Guardian" [none]  │
+│  │   Vault: depositToStrategy, withdrawFromStrategy,                    │
+│  │   withdrawAllFromStrategy(ies), setDefaultStrategy, setVaultBuffer,  │
+│  │   setDripDuration, setRebaseRateMax, setRebaseThreshold,             │
+│  │   pauseCapital/Rebase, unpauseCapital/Rebase, rebase.                │
+│  │   AMO: mintAndAddOTokens, removeAndBurnOTokens, harvest.             │
+│  │   OUSD Token: delegateYield, undelegateYield (any account).          │
 │  ├── trusteeAddress: 1-of-3 Safe (0xBB07...) receives 20% fee          │
 │  └── vaultBuffer:   0 (all funds deployed to strategies)                │
 │                                                                          │
@@ -431,7 +446,8 @@ Final Score = (Audits × 0.20) + (Centralization × 0.30) + (Funds Mgmt × 0.30)
 │  ├── maxSupplyDiff:         5%                                          │
 │  └── trusteeFeeBps:         2,000 (20%)                                 │
 │                                                                          │
-│  Permissionless: mint, redeem, rebase (if threshold met)                │
+│  Permissionless: mint, requestWithdrawal, claimWithdrawal(s),          │
+│                     rebase (if threshold met), allocate                 │
 │                                                                          │
 └──────┬──────────────┬──────────────┬──────────────┬─────────────────────┘
        │              │              │              │
@@ -488,7 +504,9 @@ Final Score = (Audits × 0.20) + (Centralization × 0.30) + (Funds Mgmt × 0.30)
 
 Data flows:
   Mint:    User USDC → Vault → mint OUSD 1:1
-  Redeem:  User OUSD → Vault → burn OUSD → return USDC (10min-24h delay)
+  Redeem:  requestWithdrawal (burns OUSD, enqueues request) →
+           wait >=600s AND queue liquidity advances →
+           claimWithdrawal(s) pays USDC (no on-chain upper bound on wait)
   Rebase:  Yield accrues → rebase increases all opted-in balances
   AMO:     Strategist → AMO Strategy → mintForStrategy → Curve pool
   Yield:   Morpho interest + CRV/MORPHO rewards → CoW Harvester → USDC → Vault
