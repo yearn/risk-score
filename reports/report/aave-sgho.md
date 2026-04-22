@@ -1,12 +1,12 @@
 # Protocol Risk Assessment: Aave — sGHO
 
-- **Assessment Date:** April 2, 2026
+- **Assessment Date:** April 2, 2026 (rechecked April 22, 2026)
 - **Token:** sGHO (GHO Savings Vault)
 - **Chain:** Ethereum
 - **Token Address:** TODO — pending AIP deployment
 - **Final Score: DRAFT — pending deployment and on-chain verification**
 
-> **DRAFT NOTICE:** The sGHO implementation (PR #29) has been audited and merged, but sGHO and any associated router deployment are **not yet live** as of April 2, 2026. The ARFC (March 25, 2026) states: "Contracts have been audited and merged, and are scheduled for deployment soon. Deployment addresses will be confirmed in the AIP." This report is based on governance proposals, audited source code, and the public materials linked below. **Reassess after deployment** to verify on-chain roles, proxy admin, initial parameters, deployment addresses, and final governance configuration.
+> **DRAFT NOTICE:** The sGHO implementation (aave-dao/gho-origin PR #29) was merged March 3, 2026 and audited, but sGHO, sGhoSteward, and GhoRouter remain **not deployed on Ethereum mainnet as of April 22, 2026**. On-chain verification confirms: (a) no sGHO / sGhoSteward / GhoRouter entries in `aave-dao/aave-address-book` `GhoEthereum.sol`, (b) no sGHO-related proposal in `aave-dao/aave-proposals-v3/src` up to April 11, 2026, (c) the legacy stkGHO proxy ([`0x1a88...`](https://etherscan.io/address/0x1a88Df1cFe15Af22B3c4c783D4e6F7F9e0C1885d)) has not been upgraded (no `Upgraded` events, still returns `symbol() = "stkGHO"`, `asset()` reverts — not ERC-4626), and (d) the `GhoRouter` PR [#34](https://github.com/aave-dao/gho-origin/pull/34) is still open (not merged in source). The ARFC (March 25, 2026) states: "Deployment addresses will be confirmed in the AIP." This report is based on governance proposals, audited source code, and the public materials linked below. **Reassess after deployment** to verify on-chain roles, proxy admin, initial parameters, deployment addresses, and final governance configuration.
 
 ## Overview + Links
 
@@ -108,6 +108,21 @@ sGHO is an **ERC-4626 compliant yield-bearing savings vault** for GHO, Aave's na
 | Oracle Swap Freezer | Yes | No |
 | GHO Reserve | Yes | Yes (TransparentUpgradeableProxy) |
 
+### Deployment Status Verification (April 22, 2026)
+
+Mainnet checks performed to confirm sGHO and GhoRouter are not yet live:
+
+| Check | Result | Source |
+|-------|--------|--------|
+| sGHO / sGhoSteward / GhoRouter entries in Aave Address Book | **Absent** | [`GhoEthereum.sol`](https://github.com/aave-dao/aave-address-book/blob/main/src/GhoEthereum.sol) |
+| sGHO-related proposal in `aave-proposals-v3/src` | **None** (latest proposals through April 11, 2026 cover Scroll deprecation, MegaETH, Aave V4 activation, etc. — no sGHO AIP) | [`aave-dao/aave-proposals-v3`](https://github.com/aave-dao/aave-proposals-v3/tree/main/src) |
+| GhoRouter PR #34 merge status | **Open, not merged** | [PR #34](https://github.com/aave-dao/gho-origin/pull/34) |
+| sGHO PR #29 merge status | Merged 2026-03-03 (source code only) | [PR #29](https://github.com/aave-dao/gho-origin/pull/29) |
+| Legacy stkGHO proxy upgraded to sGHO? | **No** — `symbol() = "stkGHO"`, `asset()` reverts (not ERC-4626); no `Upgraded(address)` event since block 24,500,000 | [`0x1a88...`](https://etherscan.io/address/0x1a88Df1cFe15Af22B3c4c783D4e6F7F9e0C1885d) |
+| Aave bug bounty scope (Immunefi) includes sGHO? | **No** — Immunefi "Sub-systems of GHO" list covers GHO token, GHO Reserve, FlashMinter, GSM/GSM4626, CCIP bridge, stewards, remote facilitators — **sGHO not enumerated** | [Immunefi Aave](https://immunefi.com/bug-bounty/aave/) |
+
+**Conclusion:** Source is ready but not yet deployed. All scoring remains **draft** pending AIP execution.
+
 ## Audits and Due Diligence Disclosures
 
 ### GHO Ecosystem Audits (12+ since 2022)
@@ -141,14 +156,18 @@ GHO is one of the most extensively audited DeFi stablecoin systems:
   - **1 Informational (I-01):** Lack of pausability mechanism — Status: **Fixed** (pausability added)
 - **Formal verification:** Certora ran multiple formal verification proof suites covering sGHO, stewards, GHO token, GSM, and ERC-4626 compliance
 
-### TokenLogic Collaborative Audit (March 2026)
+### TokenLogic Collaborative Audit (February 2026, report dated March 4, 2026)
 
-- **Facilitated through:** Sherlock's Blackthorn collaborative audit program
-- **Scope:** Extracted PDF scope lists `sGho.sol`, `sGhoSteward.sol`, and related tests. **No GhoRouter files are listed in scope**
-- **Findings:** **0 High, 0 Medium, 2 Low/Info** — both marked **Resolved**
-  - **I-1:** Configured 50% target rate can realize ~64.87% annual yield under frequent updates
-  - **I-2:** Role documentation and code mismatch (pause affects transfers too; `YIELD_MANAGER_ROLE` can also set supply cap)
-- **Note:** This PDF should not be treated as router audit evidence without a router-specific scope listing
+- **Facilitated through:** Sherlock collaborative audit program (Blackthorn)
+- **Dates:** February 24 - 26, 2026
+- **Lead Security Experts:** `0x52`, `pkqs90`
+- **Audited Commit:** `f46868277c5e8b715cb33dcd6564e98cb73d064f`
+- **Final Commit (post-fixes):** `646ab32b290b0dd34934c867a69b26579a9b3ef4`
+- **Scope:** `src/contracts/sgho/sGho.sol`, `src/contracts/sgho/interfaces/IsGho.sol`, `src/contracts/misc/sGhoSteward.sol`, plus 12 test files under `tests/unit/` and `tests/misc/`. **No GhoRouter files are listed in scope**
+- **Findings:** **0 High, 0 Medium, 2 Low/Info** — both **RESOLVED** (not merely acknowledged)
+  - **I-1 [RESOLVED]:** Configured 50% target rate realizes ~64.87% annual yield under frequent updates. Root cause: `_getCurrentYieldIndex()` applies a linear step over elapsed time, but `_update()` runs on every share movement (deposit/withdraw/transfer), so the step compounds intra-year. With `newRate=5000` and 12-second updates, `yearly_factor = step_factor^(2,628,000) ≈ 1.6487`
+  - **I-2 [RESOLVED]:** Role documentation and code mismatch. Pause is enforced in `_update()`, so it also blocks `transfer()`/`transferFrom()` (not only deposits/withdrawals). `YIELD_MANAGER_ROLE` can also call `setSupplyCap()`, not only `setTargetRate()`
+- **Note:** Router-specific risk must be assessed separately — this audit does not cover `GhoRouter.sol`
 
 ### Aave V3 Platform Audits
 
@@ -163,7 +182,7 @@ The broader Aave V3 platform (which sGHO integrates with for GSM and governance)
   - Scope explicitly includes: GHO Token, GSM, stkGHO, GHO FlashMinter, CCIP bridge, stewards
   - Reward tiers: Critical $50K-$1M, High $10K-$75K, Medium $10K, Low $1K
   - Link: https://immunefi.com/bug-bounty/aave/
-- **Note:** sGHO vault is NOT yet explicitly listed in Immunefi scope (pending deployment). TODO: verify after deployment
+- **Note:** sGHO vault is NOT yet in Immunefi scope (rechecked April 22, 2026 — Aave Immunefi "Sub-systems of GHO" covers GHO token, GHO reserve, FlashMinter, GSM/GSM4626, CCIP bridge, stewards, remote facilitators; sGHO and GhoRouter are not enumerated). TODO: verify after deployment
 
 ### LlamaRisk Analysis
 
@@ -247,13 +266,13 @@ LlamaRisk published multiple analyses supporting sGHO but flagging key risks:
 
 ## Historical Track Record
 
-- **sGHO vault:** NOT YET DEPLOYED — no production history. TODO: reassess after deployment
+- **sGHO vault:** NOT YET DEPLOYED (verified April 22, 2026) — no production history. TODO: reassess after deployment
 - **GHO stablecoin:** Launched July 2023 — **~2.75 years** in production
-- **GHO mainnet supply:** ~584.0M GHO (`totalSupply()`, April 2, 2026)
-- **GSM USDC:** Deployed and operational — current waEthUSDC held ~127.74M against 175M cap (`getAvailableLiquidity()`, April 2, 2026)
-- **GHO Reserve:** ~67.56M GHO available, 210M limit for GSM USDC
-- **Legacy stkGHO:** Holds ~302.19M GHO — demonstrates demand for GHO savings products
-- **Aave protocol:** One of the largest DeFi protocols, ~$23.85B TVL (DeFiLlama API, April 2, 2026), live since January 2020 (~6 years)
+- **GHO mainnet supply:** ~584.0M GHO (`totalSupply()`, April 22, 2026; unchanged vs. April 2)
+- **GSM USDC:** Deployed and operational — current waEthUSDC held ~96.29M against 175M cap (`getAvailableLiquidity()`, April 22, 2026, block 24,937,338; down from 127.74M on April 2)
+- **GHO Reserve (GSM USDC facilitator):** 112.48M used of 210M limit; total GHO balance ~167.51M (reserve also serves GSM USDT)
+- **Legacy stkGHO:** Holds ~202.78M GHO (April 22, 2026; down from 302.19M on April 2 — ~99M net outflow over the month). Still on legacy staking implementation (no proxy upgrade observed)
+- **Aave protocol:** One of the largest DeFi protocols, ~$23.85B TVL (DeFiLlama, April 2, 2026), live since January 2020 (~6 years)
 - **Security incidents (GHO):** No known exploits on GHO token, GSM, or stkGHO
 - **Security incidents (Aave):** Aave V3 has not been exploited. Historical V1/V2 incidents exist but are not relevant to the V3 architecture
 
@@ -300,7 +319,7 @@ GHO is deposited into the sGHO ERC-4626 vault. Shares are issued based on the cu
 ## Liquidity Risk
 
 - **sGHO withdrawal:** Atomic via ERC-4626 `withdraw()`/`redeem()`. No cooldown, no queue. Capped by actual GHO balance
-- **GHO → USDC exit (via GSM):** Subject to GSM waEthUSDC availability. Current: ~128M waEthUSDC available. If GSM is frozen or at 0 exposure, this exit is blocked
+- **GHO → USDC exit (via GSM):** Subject to GSM waEthUSDC availability. Current: ~96.29M waEthUSDC in the GSM, ~78.71M of headroom remaining under the 175M cap (April 22, 2026). If GSM is frozen or at 0 exposure, this exit is blocked
 - **GHO → USDC exit (via DEX):** GHO has DEX liquidity (Balancer, Uniswap, Curve). Can be used as fallback if GSM is unavailable
 - **GSM freeze risk:** Oracle auto-freezes if USDC depegs outside [$0.99, $1.01]. Manual freeze possible by governance. During freeze, no `buyAsset` or `sellAsset` — funds are trapped until unfreeze
 - **GSM buy fee:** 7 bps (0.07%) — minor friction on exit
