@@ -1,6 +1,6 @@
 # Protocol Risk Assessment: Metronome Synths (msUSD / msETH)
 
-- **Assessment Date:** March 28, 2026
+- **Assessment Date:** April 22, 2026
 - **Token:** msUSD / msETH
 - **Chain:** Ethereum, Base, Optimism
 - **Token Address:** [`0xab5eB14c09D416F0aC63661E57EDB7AEcDb9BEfA`](https://etherscan.io/address/0xab5eB14c09D416F0aC63661E57EDB7AEcDb9BEfA) (msUSD) / [`0x64351fC9810aDAd17A690E4e1717Df5e7e085160`](https://etherscan.io/address/0x64351fC9810aDAd17A690E4e1717Df5e7e085160) (msETH)
@@ -61,7 +61,7 @@ The protocol was originally launched as Metronome 1.0 in June 2018. It relaunche
 | ProxyAdmin (Synths) | [`0x2fa85a496a9b79c6d50cef590304bdd36efa2dcc`](https://etherscan.io/address/0x2fa85a496a9b79c6d50cef590304bdd36efa2dcc) |
 | ProxyAdmin (Pool) | [`0xd4de85da9f2ca8c7c63dcdb417d0b5ce65a6f1be`](https://etherscan.io/address/0xd4de85da9f2ca8c7c63dcdb417d0b5ce65a6f1be) |
 
-Both ProxyAdmin contracts are owned by [`0xd1DE3F9CD4AE2F23DA941a67cA4C739f8dD9Af33`](https://etherscan.io/address/0xd1DE3F9CD4AE2F23DA941a67cA4C739f8dD9Af33) — a **3/5 Gnosis Safe** (verified on-chain 2026-03-28). This means contract upgrades on Ethereum **bypass the Governor/Timelock** and are controlled directly by the multisig. All 5 signers are identical to the L2 Safe signers (5/5 overlap, verified on-chain). All signers are anonymous EOAs.
+Both ProxyAdmin contracts are owned by [`0xd1DE3F9CD4AE2F23DA941a67cA4C739f8dD9Af33`](https://etherscan.io/address/0xd1DE3F9CD4AE2F23DA941a67cA4C739f8dD9Af33) — a **3/5 Gnosis Safe** (verified on-chain 2026-04-22). This means contract upgrades on Ethereum **bypass the Governor/Timelock** and are controlled directly by the multisig. All 5 signers are identical to the L2 Safe signers (5/5 overlap, verified on-chain). All signers are anonymous EOAs.
 
 ### Base
 
@@ -81,20 +81,20 @@ Both ProxyAdmin contracts are owned by [`0xd1DE3F9CD4AE2F23DA941a67cA4C739f8dD9A
 | msETH Synthetic | [`0x1610e3c85dd44af31ed7f33a63642012dca0c5a5`](https://optimistic.etherscan.io/address/0x1610e3c85dd44af31ed7f33a63642012dca0c5a5) |
 | Governor (Safe 3/5) | [`0xE01Df4ac1E1e57266900E62C37F12C986495A618`](https://optimistic.etherscan.io/address/0xE01Df4ac1E1e57266900E62C37F12C986495A618) |
 
-Base and Optimism are governed by a **3/5 Gnosis Safe** ([`0xE01Df4ac1E1e57266900E62C37F12C986495A618`](https://basescan.org/address/0xE01Df4ac1E1e57266900E62C37F12C986495A618)) with the same 5 anonymous EOA signers on both chains. All 5 signers are identical to the Ethereum ProxyAdmin Safe (5/5 overlap, verified on-chain 2026-03-28).
+Base and Optimism are governed by a **3/5 Gnosis Safe** ([`0xE01Df4ac1E1e57266900E62C37F12C986495A618`](https://basescan.org/address/0xE01Df4ac1E1e57266900E62C37F12C986495A618)) with the same 5 anonymous EOA signers on both chains. All 5 signers are identical to the Ethereum ProxyAdmin Safe (5/5 overlap, verified on-chain 2026-04-22).
 
-**Token Supply (as of 2026-03-28):**
+**Token Supply (as of 2026-04-22):**
 
 | Token | Chain | Supply |
 |-------|-------|--------|
-| msUSD | Ethereum | ~11,605,366 |
-| msUSD | Base | ~5,460,850 |
-| msUSD | Optimism | ~1,629,191 |
-| msUSD | **Total** | **~18,695,407** |
-| msETH | Ethereum | ~6,252 ETH |
-| msETH | Base | ~10,554 ETH |
-| msETH | Optimism | ~478 ETH |
-| msETH | **Total** | **~17,284 ETH** |
+| msUSD | Ethereum | ~12,102,717 |
+| msUSD | Base | ~9,427,311 |
+| msUSD | Optimism | ~1,579,418 |
+| msUSD | **Total** | **~23,109,446** |
+| msETH | Ethereum | ~6,488 ETH |
+| msETH | Base | ~10,800 ETH |
+| msETH | Optimism | ~526 ETH |
+| msETH | **Total** | **~17,813 ETH** |
 
 ## Audits and Due Diligence Disclosures
 
@@ -112,7 +112,7 @@ The GitHub repository (`autonomoussoftware/metronome-synth-public`) contains an 
 
 **Quantstamp Audit Findings**: 2 medium-risk, 3 low-risk, 11 informational issues. 9 resolved. Notable unresolved: **absence of fallback oracle** (Chainlink-only, no cross-check or fallback source — classified as medium risk). The team indicated a fallback would be added but it has not been implemented as of this assessment.
 
-**Note**: A [LlamaRisk assessment](https://www.llamarisk.com/research/archive-llamarisk-risk-assessment-metronome) was also conducted (early-stage, when TVL was ~$2M and governance was a 2/4 multisig). Key concerns raised: Vesper dependency (>92% of collateral), collateral factors chosen without simulation testing, frontrunning risk on synthetic marketplace, and no insurance fund for bad debt. Governance has since improved (2/4→3/5 multisig, Governor+Timelock added on Ethereum), but several structural concerns remain.
+**Note**: A [LlamaRisk assessment](https://www.llamarisk.com/research/archive-llamarisk-risk-assessment-metronome) was also conducted (early-stage, when TVL was ~$2M and governance was a 2/4 multisig). Key concerns raised: Vesper dependency (>92% of collateral), collateral factors chosen without simulation testing, frontrunning risk on synthetic marketplace, and no insurance fund for bad debt. The multisig threshold has since increased from 2/4 to 3/5, and on-chain Governor+Timelock contracts were deployed on Ethereum — but the Governor/Timelock is not wired into live governance (`Pool.governor()` and `PoolRegistry.governor()` both return the 3/5 Safe), so parameter control and upgrades remain directly on the Safe. Several structural concerns from the LlamaRisk review therefore remain unchanged.
 
 ### Smart Contract Complexity
 
@@ -142,11 +142,11 @@ The protocol is **not** listed in the [SEAL Safe Harbor](https://safeharbor.secu
 ## Historical Track Record
 
 - **Production History**: Metronome 1.0 launched June 2018. Metronome 2.0 (MET token migration) launched August 2022. Metronome Synth launched early 2023. The protocol has been live in production for approximately **3+ years** (Synth product for ~3 years).
-- **TVL** (DeFiLlama, as of 2026-03-28):
-  - Ethereum: $15,210,657
-  - Base: $3,771,743
-  - Optimism: $2,061,621
-  - **Total Protocol TVL: ~$21.04M** (down ~14% from $24.55M on 2026-03-20)
+- **TVL** (DeFiLlama, as of 2026-04-22):
+  - Ethereum: $18,187,478
+  - Base: $4,059,934
+  - Optimism: $2,172,517
+  - **Total Protocol TVL: ~$24.42M** (recovered from $21.04M on 2026-03-28, back near pre-decline levels)
 - **Market Data** (CoinGecko, as of 2026-03-28):
   - msUSD: $0.996, market cap $19.9M, 24h volume $7.1M
   - msETH: $2,009.97, market cap $34.7M, 24h volume $7.2M
@@ -156,11 +156,11 @@ The protocol is **not** listed in the [SEAL Safe Harbor](https://safeharbor.secu
 - **Peg Stability** (CoinGecko):
   - msUSD currently trading at $0.997 (slight discount to $1.00)
   - Historical ATL of $0.43 (Oct 2025) and ATH of $3.43 (Oct 2025) reflect past depeg events during early thin liquidity periods; current DEX depth significantly mitigates this risk
-- **Concentration Risk**: With ~$21M protocol TVL spread across 3 chains, user base is moderately concentrated.
+- **Concentration Risk**: With ~$24M protocol TVL spread across 3 chains, user base is moderately concentrated.
 
 ## Funds Management
 
-Metronome Synth is a **self-contained CDP protocol** — collateral is held within its own Pool contracts. It does not delegate funds to external lending protocols. However, users can deposit **yield-bearing Vesper Finance tokens** as productive collateral, which indirectly exposes funds to Vesper Finance strategies.
+Metronome Synth is a **self-contained CDP protocol** — collateral is held within protocol-owned Treasury contracts (one per chain; `Pool.treasury()` on Ethereum returns [`0x3691EF68Ba22a854c36bC92f6b5F30473eF5fb0A`](https://etherscan.io/address/0x3691EF68Ba22a854c36bC92f6b5F30473eF5fb0A)). It does not delegate funds to external lending protocols. However, users can deposit **yield-bearing Vesper Finance tokens** as productive collateral, which indirectly exposes funds to Vesper Finance strategies.
 
 ### Accessibility
 
@@ -213,24 +213,26 @@ Metronome Synth is a **self-contained CDP protocol** — collateral is held with
 
 - **Risk Curation**: Collateral factors are determined by a 5-variable risk scoring framework (Issuance/Market Cap, Open Market Liquidity, Lindy Score, Peg Volatility, Rehypothecation). Changes require governance action.
 
-**Ethereum Treasury Collateral Balances (on-chain, 2026-03-28):**
+**Ethereum Treasury Collateral Balances (on-chain, 2026-04-22):**
 
 Collateral is held in the Treasury contract ([`0x3691EF68Ba22a854c36bC92f6b5F30473eF5fb0A`](https://etherscan.io/address/0x3691EF68Ba22a854c36bC92f6b5F30473eF5fb0A)), not directly in the Pool.
 
 | Asset | Balance | Type |
 |-------|---------|------|
-| USDC | 205,418 | Direct |
+| USDC | 5,703 | Direct |
 | WETH | 97.10 | Direct |
-| WBTC | 17.15 | Direct |
-| sfrxETH | 1,682.93 | Direct |
+| WBTC | 42.38 | Direct |
+| sfrxETH | 1,695.96 | Direct |
 | FRAX | 101.46 | Direct |
 | DAI | 152.42 | Direct |
-| vaUSDC | ~1,445,020 tokens | Vesper yield-bearing |
-| vaFRAX | ~1,141,290 tokens | Vesper yield-bearing |
-| vaETH | ~1,839 tokens | Vesper yield-bearing |
+| vaUSDC | ~1,224,927 tokens | Vesper yield-bearing |
+| vaFRAX | ~714,817 tokens | Vesper yield-bearing |
+| vaETH | ~1,810 tokens | Vesper yield-bearing |
 | vaSTETH | ~873 tokens | Vesper yield-bearing |
 | vaCBETH | ~24 tokens | Vesper yield-bearing |
 | vaRETH | ~18 tokens | Vesper yield-bearing |
+
+Notable 25-day shifts since 2026-03-28: direct USDC fell from ~205K to ~5.7K (-97%), WBTC roughly doubled (17→42), and Vesper-token balances declined 15–37%. Net result: Ethereum Treasury is now even more weighted toward Vesper productive collateral relative to direct blue-chip holdings.
 
 **Ethereum Debt Outstanding (on-chain, 2026-03-28):**
 
@@ -414,11 +416,15 @@ An additional **$170M** is locked in yield aggregators and lending protocols bui
 │                      GOVERNANCE LAYER                               │
 │                                                                     │
 │  ┌──────────────────┐    ┌──────────────┐    ┌──────────────────┐  │
-│  │  Governor         │───▶│  Timelock     │    │  ProxyAdmin      │  │
-│  │  (esMET voting)   │    │  (48h delay)  │    │  Owner (3/5 Safe)│  │
-│  │  0xc869...        │    │  0x4c51...    │    │  0xd1DE...       │  │
-│  └──────────────────┘    └──────┬───────┘    └────────┬─────────┘  │
-│         Parameters only ────────┘   Upgrades ─────────┘             │
+│  │  Governor         │    │  Timelock     │    │  3/5 Safe         │  │
+│  │  (esMET voting)   │    │  (48h delay)  │    │  0xd1DE...        │  │
+│  │  0xc869...        │    │  0x4c51...    │    │  Live control     │  │
+│  │  [UNUSED]         │    │  [UNUSED]     │    │  (upgrades +      │  │
+│  │                   │    │               │    │   parameters)     │  │
+│  └──────────────────┘    └──────────────┘    └────────┬─────────┘  │
+│                                                       │             │
+│                           Upgrades + Pool.governor()──┘             │
+│                           + PoolRegistry.governor()                 │
 │                                                                     │
 │  L2 (Base/Optimism): 3/5 Safe 0xE01D... (same 5 signers, no TL)   │
 └─────────────────────────────────────────────────────────────────────┘
@@ -511,13 +517,13 @@ Trust Boundaries:
 - **No fallback oracle**: Chainlink is the sole oracle with no cross-check or fallback source. Quantstamp flagged this as medium-risk; still unresolved.
 - **Collateral factors untested**: LlamaRisk noted collateral factors were "chosen without testing whether they are optimal" — and they have since been increased (from 60-75% to 67-85%) without public simulation results.
 - **No insurance fund**: Protocol lacks an insurance fund to cover potential bad debt from suboptimal liquidation parameters.
-- **Modest bug bounty**: $50K max payout is low relative to protocol TVL ($21M).
+- **Modest bug bounty**: $50K max payout is low relative to protocol TVL (~$24M).
 - **No new audits**: Most recent audit is from February 2023 — over 3 years without a new security review despite ongoing code changes.
 - **Frontrunning risk**: Synthetic marketplace swaps execute at oracle price with only 0.45-0.55% fee protection, exploitable when inter-update volatility exceeds the fee.
 
 ### Critical Risks
 
-- **Single-entity rug risk**: [LlamaRisk assessed](https://www.llamarisk.com/research/archive-llamarisk-risk-assessment-metronome) that Bloq can effectively rug users. The 3/5 Safe is both the ProxyAdmin owner (upgrades) and the `governor()` on Pool and PoolRegistry (parameter changes) — meaning it controls every aspect of the protocol without governance approval or timelock. The on-chain Governor/Timelock is entirely unused. All 5 signers are anonymous EOAs; there is no on-chain evidence that "external signers" (promised in Phase 2 of decentralization) were actually added. All 5 signers are identical across Ethereum, Base, and Optimism Safes (5/5 overlap, verified on-chain 2026-03-28), and the L2 deployments have no timelock at all. At the time of LlamaRisk's review (2/4 multisig), they concluded: *"the entire protocol can essentially be shut down at any moment by two people who work for the same private U.S. company (Bloq)."* The threshold increased to 3/5, but if all signers remain Bloq-affiliated, the structural risk is unchanged.
+- **Single-entity rug risk**: [LlamaRisk assessed](https://www.llamarisk.com/research/archive-llamarisk-risk-assessment-metronome) that Bloq can effectively rug users. The 3/5 Safe is both the ProxyAdmin owner (upgrades) and the `governor()` on Pool and PoolRegistry (parameter changes) — meaning it controls every aspect of the protocol without governance approval or timelock. The on-chain Governor/Timelock is entirely unused. All 5 signers are anonymous EOAs; there is no on-chain evidence that "external signers" (promised in Phase 2 of decentralization) were actually added. All 5 signers are identical across Ethereum, Base, and Optimism Safes (5/5 overlap, verified on-chain 2026-04-22), and the L2 deployments have no timelock at all. At the time of LlamaRisk's review (2/4 multisig), they concluded: *"the entire protocol can essentially be shut down at any moment by two people who work for the same private U.S. company (Bloq)."* The threshold increased to 3/5, but if all signers remain Bloq-affiliated, the structural risk is unchanged.
 - **Governance abandoned**: No Snapshot proposals since March 2025 (over 1 year). Only 5-12 votes per proposal when active. On-chain Governor on Ethereum appears unused. This suggests governance is effectively dead and the protocol is operated unilaterally by the multisig.
 
 ---
@@ -533,7 +539,7 @@ Trust Boundaries:
 
 - [ ] **No audit** - Protocol has been audited by Halborn (external) and internal teams. Multiple audit reports exist.
 - [ ] **Unverifiable reserves** - Collateral is fully on-chain in Treasury contracts, verifiable by anyone.
-- [ ] **Total centralization** - Ethereum has Governor + 48h Timelock. L2s have 3/5 multisig.
+- [ ] **Total centralization** - Controlled by a 3/5 Gnosis Safe (not a single EOA), so the gate passes. However, note that the on-chain Governor/Timelock on Ethereum is unused — `Pool.governor()` and `PoolRegistry.governor()` both return the 3/5 Safe — and L2s have no timelock. This is reflected in the Centralization score below, not in the gate.
 
 **All gates pass.** Proceed to category scoring.
 
@@ -544,7 +550,7 @@ Trust Boundaries:
 - **Audits**: 2 Halborn audits + 1 Quantstamp audit (external) + multiple internal (Vesper/Bloq) audits. No audits from top-tier firms (Trail of Bits, OpenZeppelin, Spearbit). ~12 total audit reports in repository. Quantstamp found 2 medium-risk issues including absence of fallback oracle (still unresolved).
 - **Bug Bounty**: Immunefi program since Feb 2023, but max $50K payout is modest.
 - **Time in Production**: Synth protocol live since early 2023 (~3 years). Metronome 1.0 since 2018.
-- **TVL**: ~$21M protocol TVL (down ~14% from $24.5M in prior assessment).
+- **TVL**: ~$24.4M protocol TVL (recovered from a ~$21M dip on 2026-03-28, back near the prior-assessment level of $24.5M).
 - **Incidents**: Indirectly affected by Sonne Finance exploit (May 2024). No direct exploits.
 - **Third-party assessment**: [LlamaRisk](https://www.llamarisk.com/research/archive-llamarisk-risk-assessment-metronome) flagged considerable centralization risk, untested collateral parameters, and deep Vesper dependency.
 
@@ -593,7 +599,7 @@ Trust Boundaries:
 - On-chain liquidation mechanism with 18% penalty (incentivized).
 - Deposit caps limit exposure per asset.
 - Risk scoring framework for collateral factor determination.
-- Ethereum Treasury collateral is predominantly Vesper yield-bearing tokens (vaUSDC, vaFRAX, vaETH, vaSTETH), with direct USDC at only ~$205K (decreased from $364K). This increases smart contract dependency on Vesper Finance (same parent company — Bloq).
+- Ethereum Treasury collateral is predominantly Vesper yield-bearing tokens (vaUSDC, vaFRAX, vaETH, vaSTETH), with direct USDC now at only ~$5.7K (dropped from ~$205K on 2026-03-28 and ~$364K in prior assessment). This increases smart contract dependency on Vesper Finance (same parent company — Bloq).
 - Collateral factors were increased from 60-75% (at LlamaRisk assessment) to 67-85% without published simulation results. LlamaRisk flagged these as "chosen without testing whether they are optimal."
 - No insurance fund exists to cover potential bad debt from suboptimal liquidation parameters.
 
@@ -663,13 +669,13 @@ Final Score = (Centralization × 0.30) + (Funds Mgmt × 0.30) + (Audits × 0.20)
 
 **Final Risk Tier: Medium Risk (2.6/5.0)**
 
-Metronome Synth benefits from deep DEX liquidity ($93.4M, up from $75.9M), strong and growing DeFi integration ($170M in yield wrappers), an experienced and public team (Bloq/Garzik), and a fully on-chain over-collateralized model with transparent reserves. However, critical centralization concerns have worsened: the 3/5 Safe is both the ProxyAdmin owner and the `governor()` on Pool and PoolRegistry — meaning a single multisig with 5 identical anonymous signers controls all upgrades AND all parameter changes across Ethereum, Base, and Optimism. The on-chain Governor/Timelock is entirely unused. LlamaRisk concluded that Bloq can unilaterally rug users, and there is no on-chain evidence this has been mitigated. Governance has been completely inactive for over 1 year (last Snapshot proposal: March 2025). Additional concerns include: Chainlink as sole oracle with no fallback; Ethereum collateral predominantly in Vesper yield-bearing tokens with multi-layer strategy risk; collateral factors raised without simulation testing; no insurance fund for bad debt; and no new audits since February 2023. Protocol TVL decreased ~14% to ~$21M. With ~3 years in production and no direct exploits, the protocol falls into the medium risk tier with enhanced monitoring recommended.
+Metronome Synth benefits from deep DEX liquidity ($93.4M, up from $75.9M), strong and growing DeFi integration ($170M in yield wrappers), an experienced and public team (Bloq/Garzik), and a fully on-chain over-collateralized model with transparent reserves. However, critical centralization concerns have worsened: the 3/5 Safe is both the ProxyAdmin owner and the `governor()` on Pool and PoolRegistry — meaning a single multisig with 5 identical anonymous signers controls all upgrades AND all parameter changes across Ethereum, Base, and Optimism. The on-chain Governor/Timelock is entirely unused. LlamaRisk concluded that Bloq can unilaterally rug users, and there is no on-chain evidence this has been mitigated. Governance has been completely inactive for over 1 year (last Snapshot proposal: March 2025). Additional concerns include: Chainlink as sole oracle with no fallback; Ethereum collateral predominantly in Vesper yield-bearing tokens with multi-layer strategy risk; collateral factors raised without simulation testing; no insurance fund for bad debt; and no new audits since February 2023. Protocol TVL is ~$24.4M (recovered from a ~$21M dip on 2026-03-28). With ~3 years in production and no direct exploits, the protocol falls into the medium risk tier with enhanced monitoring recommended.
 
 ---
 
 ## Reassessment Triggers
 
-- **Time-based**: Reassess in 6 months (September 2026) or sooner if governance resumes activity
+- **Time-based**: Reassess in 6 months (October 2026) or sooner if governance resumes activity
 - **TVL-based**: Reassess if protocol TVL changes by more than 50%
 - **Incident-based**: Reassess after any exploit, governance change, or collateral modification
 - **Governance-based**: Reassess if ProxyAdmin ownership is transferred to the Timelock, if multisig threshold/signers change, or if upgrade timelock is added
@@ -678,4 +684,4 @@ Metronome Synth benefits from deep DEX liquidity ($93.4M, up from $75.9M), stron
 
 ---
 
-*Last verified: March 28, 2026*
+*Last verified: April 22, 2026*
