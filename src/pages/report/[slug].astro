@@ -15,7 +15,7 @@ if (!report) return Astro.redirect("/");
 const ogDescription = `${report.name} — Score: ${report.finalScore.toFixed(1)}/5.0 (${scoreTier(report.finalScore)}). ${report.token} on ${report.chain}.`;
 
 const reportIssueUrl = (() => {
-  const title = `Report Issue: ${report.name}`;
+  const title = `Report Inaccuracy: ${report.name}`;
   const body = [
     `**Report:** ${report.name}`,
     `**Link:** [${report.slug}](https://risk.yearn.farm/report/${report.slug})`,
@@ -103,7 +103,7 @@ const reportIssueUrl = (() => {
         <path d="M8 9.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3Z"/>
         <path d="M8 0a8 8 0 1 1 0 16A8 8 0 0 1 8 0ZM1.5 8a6.5 6.5 0 1 0 13 0 6.5 6.5 0 0 0-13 0Z"/>
       </svg>
-      Report Issue
+      Submit report inaccuracy
     </a>
   </div>
 </BaseLayout>
@@ -282,18 +282,21 @@ const reportIssueUrl = (() => {
   .report-issue-btn {
     display: inline-flex;
     align-items: center;
-    gap: 0.5rem;
-    padding: 0.5rem 1.25rem;
-    font-size: 0.85rem;
-    font-weight: 500;
-    color: var(--text-secondary);
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    transition: color 0.2s, border-color 0.2s;
+    gap: 0.625rem;
+    padding: 0.875rem 1.75rem;
+    font-size: 1rem;
+    font-weight: 600;
+    color: #fff;
+    background: var(--brand-blue);
+    border: 1px solid var(--brand-blue);
+    border-radius: 8px;
+    transition: background 0.2s, border-color 0.2s, transform 0.2s;
   }
   .report-issue-btn:hover {
-    color: var(--brand-blue);
-    border-color: var(--brand-blue);
+    background: #0560d4;
+    border-color: #0560d4;
+    color: #fff;
     text-decoration: none;
+    transform: translateY(-1px);
   }
 </style>
