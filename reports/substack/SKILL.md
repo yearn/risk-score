@@ -24,7 +24,22 @@ Read the full report from `reports/report/<slug>.md`. Understand:
 - Key strengths and risks
 - All data points that will feed into the article
 
-### Step 2: Generate Images
+### Step 2: Author the Appendix Mermaid Diagrams
+
+Before generating images, write two custom Mermaid diagrams to `reports/substack/output/<slug>/images/`:
+
+- `architecture.mmd` — Contract + fund-flow diagram. Nodes: user, vault proxy, implementation, and the external contracts that actually hold or route funds (e.g., withdrawal queues, lending vaults, strategies). 6-12 nodes max. Use `graph TB`.
+- `governance.mmd` — Control chain diagram. Nodes: token/voters, governor, timelock, admin surface of the contract, plus any off-chain-delay roles (multisigs, operator EOAs) with a label noting their protection (or lack of it). 6-12 nodes max. Use `graph TB`.
+
+Style tips:
+- Highlight the central contract node: `style NodeId fill:#0675F9,color:#fff`
+- Highlight un-timelocked / EOA-level roles in red: `fill:#EF4444,color:#fff`
+- Use `-.->` (dotted) for "can cancel / emergency" edges, solid `-->` for normal flow
+- Keep node labels terse (2-4 words). Put detail on edges with `-->|label|`
+
+Base every node and edge on the source report — do not invent contracts or roles.
+
+### Step 3: Generate Images
 
 Run the image generation script:
 ```bash
@@ -32,13 +47,15 @@ uv run scripts/substack/generate_images.py <slug>
 ```
 
 This creates images in `reports/substack/output/<slug>/images/`:
-- `hero.png` — OG-style hero image with score and tier
-- `score-table.png` — Visual score breakdown by category
-- `dependency.png` — Protocol dependency graph (if applicable)
+- `hero.png` — OG-style hero image with score and tier (auto)
+- `score-table.png` — Visual score breakdown by category (auto)
+- `dependency.png` — Protocol dependency graph from `protocols.yaml` (auto, skipped if no entry)
+- `architecture.png` — Rendered from `architecture.mmd` (your work in Step 2)
+- `governance.png` — Rendered from `governance.mmd` (your work in Step 2)
 
-Verify the images were generated successfully before proceeding.
+Verify all images were generated successfully before proceeding. If a Mermaid file has a syntax error, the script will report which one and fall back to mermaid.ink — but the output may be empty. Check the PNGs visually if possible.
 
-### Step 3: Write the Article
+### Step 4: Write the Article
 
 Generate a **complete draft** following the template structure. For each section:
 
@@ -60,7 +77,7 @@ Word count: <count>
 -->
 ```
 
-### Step 4: Review and Iterate
+### Step 5: Review and Iterate
 
 Present the draft to the user. Be prepared to:
 - Adjust tone (more/less technical)
@@ -69,7 +86,7 @@ Present the draft to the user. Be prepared to:
 - Add context the user wants to highlight
 - Remove content the user finds unnecessary
 
-### Step 5: Finalize
+### Step 6: Finalize
 
 Once the user approves:
 - Verify the final word count is in the 1200-1800 range

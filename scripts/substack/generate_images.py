@@ -5,9 +5,13 @@ Usage:
     uv run scripts/substack/generate_images.py <slug>
 
 Generates images in reports/substack/output/<slug>/images/:
-    hero.png        - OG-style hero image with score and tier
-    score-table.png - Visual score breakdown by category
-    dependency.png  - Protocol dependency graph (if in protocols.yaml)
+    hero.png         - OG-style hero image with score and tier
+    score-table.png  - Visual score breakdown by category
+    dependency.png   - Protocol dependency graph (auto, if in protocols.yaml)
+
+Plus any custom Mermaid diagrams the author drops into the same directory:
+    <name>.mmd       -> rendered to <name>.png
+    (typical: architecture.mmd, governance.mmd)
 """
 
 import base64
@@ -213,8 +217,23 @@ def _try_mermaid_ink(mermaid_text: str, output_path: Path) -> bool:
         return False
 
 
+def _render_mermaid(mermaid_text: str, output_path: Path, label: str) -> bool:
+    """Render Mermaid text to PNG. Tries local mmdc first, falls back to mermaid.ink."""
+    if _try_mmdc(mermaid_text, output_path):
+        print(f"{label}: {output_path}")
+        return True
+
+    print(f"{label}: mmdc failed, trying mermaid.ink API...")
+    if _try_mermaid_ink(mermaid_text, output_path):
+        print(f"{label}: {output_path} (via mermaid.ink)")
+        return True
+
+    print(f"{label}: failed (both mmdc and mermaid.ink)")
+    return False
+
+
 def generate_dependency_graph(slug: str, images_dir: Path) -> bool:
-    """Generate dependency graph PNG. Tries mmdc first, falls back to mermaid.ink."""
+    """Generate the auto external-dependencies graph from protocols.yaml."""
     protocol_id = find_protocol_id(slug)
     if not protocol_id:
         print("dependency: skipped (protocol not found in protocols.yaml)")
@@ -225,21 +244,19 @@ def generate_dependency_graph(slug: str, images_dir: Path) -> bool:
         print("dependency: skipped (no dependency data)")
         return False
 
-    output_path = images_dir / "dependency.png"
+    return _render_mermaid(mermaid_text, images_dir / "dependency.png", "dependency")
 
-    # Try local mmdc first
-    if _try_mmdc(mermaid_text, output_path):
-        print(f"dependency: {output_path}")
-        return True
 
-    # Fallback to mermaid.ink API
-    print("dependency: mmdc failed, trying mermaid.ink API...")
-    if _try_mermaid_ink(mermaid_text, output_path):
-        print(f"dependency: {output_path} (via mermaid.ink)")
-        return True
+def render_custom_mermaid(images_dir: Path) -> None:
+    """Render every <name>.mmd file in images_dir to <name>.png.
 
-    print("dependency: failed (both mmdc and mermaid.ink)")
-    return False
+    Used for per-article diagrams the author supplies (architecture.mmd,
+    governance.mmd, or anything else)."""
+    for mmd_path in sorted(images_dir.glob("*.mmd")):
+        name = mmd_path.stem
+        mermaid_text = mmd_path.read_text()
+        output_path = images_dir / f"{name}.png"
+        _render_mermaid(mermaid_text, output_path, name)
 
 
 def main():
@@ -259,8 +276,11 @@ def main():
     # 1. Hero + Score table (via Node/Satori)
     generate_satori_images(slug, images_dir)
 
-    # 2. Dependency graph (via mermaid-cli)
+    # 2. Dependency graph (auto from protocols.yaml)
     generate_dependency_graph(slug, images_dir)
+
+    # 3. Per-article custom Mermaid diagrams (architecture.mmd, governance.mmd, ...)
+    render_custom_mermaid(images_dir)
 
     print(f"\nDone. Images in: {images_dir}")
 

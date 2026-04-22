@@ -15,10 +15,20 @@ DeFi-literate readers who understand staking, liquidity, governance, and yield â
 
 ## Structure Rules
 
+### Paragraph Length
+- **Keep paragraphs to 2-4 sentences.** Substack readers scan. A single paragraph that runs five or six sentences becomes a wall of text on mobile.
+- If a paragraph is getting too long, split it on the first natural seam â€” a topic shift, a qualifier, or a transition from fact to implication.
+- One-sentence paragraphs are fine when they carry a key verdict or transition. Don't overuse them.
+
 ### Paragraphs over Bullets
 - Convert bullet-point lists into flowing paragraphs with complete sentences.
 - A bullet like "Launch Date: October 25, 2024" becomes part of a sentence: "The protocol launched in October 2024 and has been operating for over a year without incident."
 - Exception: If a list genuinely aids readability (e.g., 3 key risks at the end), keep it as a short list.
+
+### Push Technical Detail into Diagrams
+- The article explains **what matters and why**. The appendix diagrams carry the **contract-level detail**.
+- Resist the urge to enumerate every role, every contract, every external protocol in prose. Name the 2-3 most important, then point readers to the relevant appendix.
+- Cross-reference format: `> See **Appendix B** for the full control chain.` placed as a block quote at the end of the section it's relevant to.
 
 ### Contract Addresses
 - **Remove from prose.** Do not include hex addresses in the Substack article. They clutter the reading experience.
@@ -70,6 +80,12 @@ DeFi-literate readers who understand staking, liquidity, governance, and yield â
 ### Dependencies and Risks
 - Explain what could go wrong if an external dependency fails.
 - Quantify concentration: "50% of collateral sits in a single protocol" is more impactful than "relies on multiple protocols."
+- End with a pointer to **Appendix C** rather than listing every integration in prose.
+
+### Appendix Diagrams
+- **Order is fixed:** A = Contract Architecture, B = Governance & Control, C = External Dependencies. The logical progression is mechanism â†’ control â†’ outside risk, which mirrors the main article's flow.
+- Each appendix entry is 1-2 sentences of description plus the image. Don't re-explain the diagram in prose; the diagram is the explanation.
+- Omit an entry entirely if the underlying data doesn't support it (e.g., no `protocols.yaml` entry means no Appendix C).
 
 ### Liquidity: Can You Get Out?
 - Frame from the user's perspective: "If you need to exit, here's what to expect."
