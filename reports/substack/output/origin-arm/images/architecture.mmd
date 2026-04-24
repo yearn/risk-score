@@ -1,0 +1,22 @@
+graph TB
+    User([User])
+    Proxy["ARM Proxy<br/>(ERC4626 vault)"]
+    Impl["ARM Implementation<br/>(upgradeable)"]
+    LidoWQ["Lido Withdrawal Queue<br/>~99% of assets"]
+    Morpho["Morpho WETH Vault<br/>(Yearn-curated)<br/>idle capital"]
+    DEX["DEX Aggregators<br/>1inch / CoWSwap"]
+    stETH["stETH<br/>bought at discount"]
+
+    User -->|deposit WETH| Proxy
+    Proxy -->|LP tokens| User
+    Proxy -.->|delegatecall| Impl
+    Proxy -->|buy discounted| DEX
+    DEX --> stETH
+    stETH -->|redeem 1:1| LidoWQ
+    LidoWQ -->|WETH back| Proxy
+    Proxy -->|idle| Morpho
+
+    classDef central fill:#0675F9,color:#fff,stroke:#0675F9
+    classDef external fill:#1a1a1a,color:#e0e0e0,stroke:#444
+    class Proxy central
+    class LidoWQ,Morpho,DEX external

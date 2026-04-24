@@ -1,0 +1,23 @@
+graph TB
+    Daddy["Daddy / ySafe<br/>6-of-9 multisig<br/>sole PROPOSER"]
+    Brain["Brain<br/>3-of-8 multisig<br/>operations"]
+    Security["Security<br/>4-of-7 multisig<br/>emergency"]
+    Timelock["Timelock Controller<br/>7-day delay"]
+    Vault["yvUSD Vault<br/>(immutable, no upgrades)"]
+    Keeper["Keeper + Debt Allocator<br/>(bots, reporting only)"]
+    Deployer["Deployer EOA<br/>0 vault roles<br/>fee-splitter only"]
+
+    Daddy -->|propose critical changes| Timelock
+    Timelock -->|execute after 7d| Vault
+    Brain -.->|can cancel| Timelock
+    Daddy -.->|can cancel| Timelock
+    Brain -->|operational roles| Vault
+    Security -->|emergency shutdown| Vault
+    Keeper -->|programmatic reporting| Vault
+
+    classDef central fill:#0675F9,color:#fff,stroke:#0675F9
+    classDef protected fill:#0675F9,color:#fff,stroke:#0675F9
+    classDef isolated fill:#1a1a1a,color:#9d9d9d,stroke:#444,stroke-dasharray:4
+    class Vault central
+    class Timelock protected
+    class Deployer isolated

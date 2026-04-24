@@ -1,0 +1,28 @@
+graph TB
+    User([User])
+    Vault["yvUSD Vault<br/>ERC-4626 · immutable"]
+    Locked["LockedyvUSD<br/>14d cooldown + 5d window"]
+    Looper["Looper Strategies<br/>86% of TVL"]
+    Lending["Lending Strategies<br/>13% of TVL"]
+    PT["PT Strategies<br/>1% of TVL"]
+    Morpho["Morpho<br/>core leverage infra"]
+    Maple["Maple syrupUSDC<br/>45.8% allocation"]
+    SkySpark["Sky / Spark<br/>blue-chip lending"]
+    CCTP["Circle CCTP<br/>bridge to Arbitrum"]
+
+    User -->|deposit USDC| Vault
+    Vault -->|yvUSD shares| User
+    Vault -.->|optional lock| Locked
+    Vault --> Looper
+    Vault --> Lending
+    Vault --> PT
+    Looper --> Morpho
+    Looper --> Maple
+    Lending --> SkySpark
+    PT --> Morpho
+    Looper -.-> CCTP
+
+    classDef central fill:#0675F9,color:#fff,stroke:#0675F9
+    classDef external fill:#1a1a1a,color:#e0e0e0,stroke:#444
+    class Vault central
+    class Morpho,Maple,SkySpark,CCTP external

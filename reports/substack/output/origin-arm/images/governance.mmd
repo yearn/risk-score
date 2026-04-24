@@ -1,0 +1,23 @@
+graph TB
+    Holders["xOGN Holders<br/>(staked OGN)"]
+    Gov["Origin DeFi Governance<br/>24h delay + 48h voting"]
+    Timelock["Timelock Controller<br/>48h delay"]
+    ARM["ARM Contract<br/>(admin surface)"]
+    Multisig["GOV Multisig 5-of-8<br/>CANCELLER only"]
+    Operator["Operator EOA<br/>no timelock"]
+    CrossPrice["Cross-price bound<br/>48h timelocked"]
+
+    Holders -->|100K xOGN to propose| Gov
+    Gov -->|schedule| Timelock
+    Timelock -->|execute ~5d total| ARM
+    Multisig -.->|can cancel| Timelock
+    ARM -.->|upgrade, set cross-price,<br/>grant operator| ARM
+    Operator -->|set buy/sell prices| ARM
+    CrossPrice -.->|bounds| Operator
+
+    classDef central fill:#0675F9,color:#fff,stroke:#0675F9
+    classDef protected fill:#0675F9,color:#fff,stroke:#0675F9
+    classDef unprotected fill:#EF4444,color:#fff,stroke:#EF4444
+    class ARM central
+    class Timelock,CrossPrice protected
+    class Operator unprotected
