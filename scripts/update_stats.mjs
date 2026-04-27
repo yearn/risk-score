@@ -8,7 +8,7 @@ const ROOT = path.resolve(__dirname, "..");
 const REPORTS_DIR = path.join(ROOT, "reports", "report");
 const OUT = path.join(ROOT, "src", "data", "stats.json");
 
-const DEFILLAMA_URL = "https://api.llama.fi/protocol/yearn-curating";
+const DEFILLAMA_URL = "https://api.llama.fi/protocol/yearn";
 
 function countReports() {
   return fs.readdirSync(REPORTS_DIR).filter((f) => f.endsWith(".md")).length;
