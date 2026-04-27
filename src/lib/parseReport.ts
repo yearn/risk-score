@@ -25,6 +25,8 @@ export interface ReportMeta {
   slug: string;
   name: string;
   date: string;
+  /** Effective date for sorting (uses (Updated: ...) when present). 0 if unparseable. */
+  dateSortable: number;
   token: string;
   chain: string;
   finalScore: number;
@@ -64,6 +66,16 @@ function parseDefillamaSlug(slug: string, content: string): string {
   return match?.[1] ?? "";
 }
 
+function parseDateSortable(raw: string): number {
+  if (!raw) return 0;
+  // If there's a parenthetical "(Updated: <date>)" / "(updated <date>)",
+  // prefer that as the effective date.
+  const updated = raw.match(/\((?:updated:?)\s*([^)]+)\)/i);
+  const candidate = (updated?.[1] ?? raw.split("(")[0]).replace(/^-\s*/, "").trim();
+  const t = Date.parse(candidate);
+  return Number.isNaN(t) ? 0 : t;
+}
+
 
 function parseMeta(slug: string, content: string): ReportMeta {
   const titleMatch = content.match(
@@ -84,10 +96,12 @@ function parseMeta(slug: string, content: string): ReportMeta {
   const defillamaSlug = parseDefillamaSlug(slug, content);
   const chainStr = chainMatch?.[1]?.trim() ?? "";
 
+  const dateRaw = dateMatch?.[1]?.trim() ?? "";
   return {
     slug,
     name,
-    date: dateMatch?.[1]?.trim() ?? "",
+    date: dateRaw,
+    dateSortable: parseDateSortable(dateRaw),
     token: tokenMatch?.[1]?.trim() ?? "",
     chain: chainStr,
     finalScore: parseFloat(scoreMatch?.[1] ?? "0"),
