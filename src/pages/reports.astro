@@ -2,101 +2,497 @@
 import BaseLayout from "../layouts/BaseLayout.astro";
 import ScoreBadge from "../components/ScoreBadge.astro";
 import { getAllReports } from "../lib/reports";
-import { scoreTier } from "../lib/colors";
+import { scoreColor, scoreTier } from "../lib/colors";
+
+const formatRelative = (ts: number): string => {
+  if (!ts) return "—";
+  const days = Math.max(0, Math.round((Date.now() - ts) / 86_400_000));
+  if (days <= 1) return "today";
+  if (days < 7) return `${days}d ago`;
+  if (days < 30) return `${Math.round(days / 7)}w ago`;
+  if (days < 365) return `${Math.round(days / 30)}mo ago`;
+  return `${Math.round(days / 365)}y ago`;
+};
 
 const reports = getAllReports();
+const tierOrder = [
+  "Minimal Risk",
+  "Low Risk",
+  "Medium Risk",
+  "Elevated Risk",
+  "High Risk",
+];
+const tierCounts = tierOrder.map((t) => ({
+  tier: t,
+  count: reports.filter((r) => scoreTier(r.finalScore) === t).length,
+}));
 ---
 
 <BaseLayout title="Reports — Yearn Curation" ogUrl="/reports/" ogImage="/og/default.png">
-  <h1>Risk Assessment Reports</h1>
+  <section class="reports-hero">
+    <div class="section-eyebrow">
+      <span class="pulse-dot"></span>
+      All assessments
+    </div>
+    <h1>Risk Assessment Reports</h1>
+    <p class="reports-sub">
+      {reports.length} independent assessments across DeFi protocols, vaults
+      and assets. Sorted by score — safest first.
+    </p>
+  </section>
 
-  <div class="search-row">
-    <input type="text" id="report-search" placeholder="Search by protocol, token, or risk tier…" autocomplete="off" />
+  <div class="tools">
+    <div class="tools-row">
+      <div class="search-wrap">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="search-icon"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" id="report-search" placeholder="Search by protocol, token, or risk tier…" autocomplete="off" />
+      </div>
+      <div class="view-toggle" role="group" aria-label="View mode">
+        <button class="view-btn is-active" data-view="list" type="button" aria-label="List view" title="List view">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+        </button>
+        <button class="view-btn" data-view="grid" type="button" aria-label="Grid view" title="Grid view">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        </button>
+      </div>
+    </div>
+    <div class="filter-pills" id="filter-pills">
+      <button class="filter-pill is-active" data-tier="all" type="button">
+        All <span class="pill-count">{reports.length}</span>
+      </button>
+      {tierCounts.filter(t => t.count > 0).map(({ tier, count }) => {
+        const sample = reports.find(r => scoreTier(r.finalScore) === tier);
+        const accent = sample ? scoreColor(sample.finalScore) : "var(--brand-blue)";
+        return (
+          <button
+            class="filter-pill"
+            data-tier={tier}
+            type="button"
+            style={`--pill-accent:${accent};`}
+          >
+            <span class="pill-dot"></span>
+            {tier} <span class="pill-count">{count}</span>
+          </button>
+        );
+      })}
+    </div>
   </div>
 
-  <div class="table-wrap">
-    <table id="reports-table">
-      <thead>
-        <tr>
-          <th class="col-icon"></th>
-          <th>Protocol</th>
-          <th>Token</th>
-          <th>Score</th>
-          <th>Risk Tier</th>
-        </tr>
-      </thead>
-      <tbody>
-        {
-          reports.map((r) => (
-            <tr onclick={`window.location='/report/${r.slug}/'`}>
-              <td class="col-icon">
-                <div class="icon-stack">
-                  {r.iconUrl ? (
-                    <img src={r.iconUrl} alt="" width="24" height="24" class="protocol-icon" loading="lazy" />
-                  ) : (
-                    <div class="icon-placeholder" />
-                  )}
-                  {r.chainIconUrl && (
-                    <img src={r.chainIconUrl} alt="" width="14" height="14" class="chain-icon" loading="lazy" />
-                  )}
-                </div>
-              </td>
-              <td>
-                {r.name}
-                {r.warning && <span class="warning-tag">&#9888; {r.warning}</span>}
-              </td>
-              <td class="mono">{r.token}</td>
-              <td>
-                <ScoreBadge score={r.finalScore} />
-              </td>
-              <td>{scoreTier(r.finalScore)}</td>
-            </tr>
-          ))
-        }
-      </tbody>
-    </table>
+  <div class="reports-grid is-list" id="reports-grid">
+    {reports.map((r) => (
+      <a
+        href={`/report/${r.slug}/`}
+        class="report-card"
+        style={`--accent:${scoreColor(r.finalScore)};`}
+        data-name={r.name.toLowerCase()}
+        data-token={r.token.toLowerCase()}
+        data-tier={scoreTier(r.finalScore)}
+      >
+        <div class="card-glow" aria-hidden="true"></div>
+        <div class="card-head">
+          <div class="icon-stack">
+            {r.iconUrl ? (
+              <img src={r.iconUrl} alt="" width="36" height="36" class="protocol-icon" loading="lazy" />
+            ) : (
+              <div class="icon-placeholder" />
+            )}
+            {r.chainIconUrl && (
+              <img src={r.chainIconUrl} alt="" width="16" height="16" class="chain-icon" loading="lazy" />
+            )}
+          </div>
+          <div class="card-title">
+            <div class="card-name">{r.name}</div>
+            <div class="card-meta">
+              <span class="mono">{r.token}</span>
+              <span class="sep">·</span>
+              <span title={r.date}>{formatRelative(r.dateSortable)}</span>
+            </div>
+          </div>
+          {r.warning && (
+            <div class="warning-banner">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+              <span>{r.warning}</span>
+            </div>
+          )}
+          <ScoreBadge score={r.finalScore} />
+        </div>
+        <div class="card-foot">
+          <span class="tier-sm" style={`color:${scoreColor(r.finalScore)};`}>
+            {scoreTier(r.finalScore)}
+          </span>
+          <div class="score-bar" aria-hidden="true">
+            {[1, 2, 3, 4, 5].map((seg) => (
+              <span
+                class:list={["score-seg", { active: seg <= Math.round(r.finalScore) }]}
+                style={seg <= Math.round(r.finalScore) ? `background:${scoreColor(r.finalScore)};` : ""}
+              />
+            ))}
+          </div>
+        </div>
+      </a>
+    ))}
   </div>
+
+  <div class="empty-state" id="empty-state" hidden>
+    <div class="empty-icon">
+      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    </div>
+    <p>No reports match your search.</p>
+  </div>
+
   <script is:inline>
-    const searchInput = document.getElementById("report-search");
-    const rows = document.querySelectorAll("#reports-table tbody tr");
-    searchInput.addEventListener("input", () => {
-      const q = searchInput.value.toLowerCase();
-      rows.forEach((row) => {
-        const text = row.textContent.toLowerCase();
-        row.style.display = text.includes(q) ? "" : "none";
+    (() => {
+      const cards = Array.from(document.querySelectorAll(".report-card"));
+      const search = document.getElementById("report-search");
+      const pills = Array.from(document.querySelectorAll(".filter-pill"));
+      const grid = document.getElementById("reports-grid");
+      const viewBtns = Array.from(document.querySelectorAll(".view-btn"));
+      const empty = document.getElementById("empty-state");
+      let activeTier = "all";
+
+      function apply() {
+        const q = search.value.toLowerCase().trim();
+        let visible = 0;
+        cards.forEach((card) => {
+          const matchTier = activeTier === "all" || card.dataset.tier === activeTier;
+          const haystack = `${card.dataset.name} ${card.dataset.token} ${card.dataset.tier}`.toLowerCase();
+          const matchSearch = !q || haystack.includes(q);
+          const show = matchTier && matchSearch;
+          card.style.display = show ? "" : "none";
+          if (show) visible++;
+        });
+        empty.hidden = visible > 0;
+      }
+
+      function setView(mode) {
+        grid.classList.toggle("is-list", mode === "list");
+        grid.classList.toggle("is-grid", mode === "grid");
+        viewBtns.forEach((b) => b.classList.toggle("is-active", b.dataset.view === mode));
+        try { localStorage.setItem("reports-view", mode); } catch {}
+      }
+
+      // Restore preference (default "list")
+      let savedView = "list";
+      try { savedView = localStorage.getItem("reports-view") || "list"; } catch {}
+      setView(savedView);
+
+      search.addEventListener("input", apply);
+      pills.forEach((p) => {
+        p.addEventListener("click", () => {
+          pills.forEach((x) => x.classList.remove("is-active"));
+          p.classList.add("is-active");
+          activeTier = p.dataset.tier;
+          apply();
+        });
       });
-    });
+      viewBtns.forEach((b) => {
+        b.addEventListener("click", () => setView(b.dataset.view));
+      });
+
+      // Mouse-tracking glow
+      cards.forEach((card) => {
+        card.addEventListener("pointermove", (e) => {
+          const r = card.getBoundingClientRect();
+          card.style.setProperty("--mx", `${e.clientX - r.left}px`);
+          card.style.setProperty("--my", `${e.clientY - r.top}px`);
+        });
+        card.addEventListener("pointerleave", () => {
+          card.style.removeProperty("--mx");
+          card.style.removeProperty("--my");
+        });
+      });
+    })();
   </script>
 </BaseLayout>
 
 <style>
-  h1 {
-    margin-bottom: 1rem;
+  .reports-hero {
+    padding: 2rem 0 1.5rem;
+    text-align: center;
   }
-  .search-row {
-    margin-bottom: 0.75rem;
+  .section-eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    color: var(--brand-blue);
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
   }
-  .search-row input {
+  .pulse-dot {
+    width: 6px;
+    height: 6px;
+    background: var(--brand-blue);
+    border-radius: 50%;
+    box-shadow: 0 0 0 0 rgba(6, 117, 249, 0.6);
+    animation: pulse 2s ease-out infinite;
+  }
+  @keyframes pulse {
+    0% { box-shadow: 0 0 0 0 rgba(6, 117, 249, 0.6); }
+    70% { box-shadow: 0 0 0 8px rgba(6, 117, 249, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(6, 117, 249, 0); }
+  }
+  .reports-hero h1 {
+    font-size: clamp(1.75rem, 3.4vw, 2.4rem);
+    letter-spacing: -0.02em;
+    margin: 0 auto 0.75rem;
+    line-height: 1.15;
+    max-width: 22ch;
+  }
+  .reports-sub {
+    color: var(--text-secondary);
+    max-width: 60ch;
+    margin: 0 auto;
+    font-size: 0.95rem;
+    line-height: 1.5;
+  }
+
+  .tools {
+    margin: 2rem 0 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+  }
+  .tools-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+  .search-wrap {
+    position: relative;
+    max-width: 480px;
     width: 100%;
-    max-width: 360px;
-    background: var(--bg-secondary);
+    flex: 1;
+  }
+  .search-icon {
+    position: absolute;
+    left: 0.85rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-secondary);
+    pointer-events: none;
+  }
+  .search-wrap input {
+    width: 100%;
+    padding: 0.65rem 0.85rem 0.65rem 2.4rem;
+    background: color-mix(in srgb, var(--bg-card) 55%, transparent);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
     color: var(--text-primary);
     border: 1px solid var(--border);
-    border-radius: 4px;
-    padding: 0.4rem 0.6rem;
-    font-size: 0.85rem;
+    border-radius: 10px;
+    font-size: 0.9rem;
+    transition: border-color 0.15s, background 0.15s;
   }
-  .search-row input::placeholder {
+  .search-wrap input::placeholder {
     color: var(--text-secondary);
   }
-  .col-icon {
+  .search-wrap input:focus {
+    outline: none;
+    border-color: var(--brand-blue);
+    background: color-mix(in srgb, var(--bg-card) 75%, transparent);
+  }
+
+  .filter-pills {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+  .filter-pill {
+    --pill-accent: var(--brand-blue);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.4rem 0.85rem;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--bg-card) 50%, transparent);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    color: var(--text-secondary);
+    font-size: 0.82rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: color 0.15s, border-color 0.15s, background 0.15s;
+    font-family: inherit;
+  }
+  .filter-pill:hover {
+    color: var(--text-primary);
+    border-color: color-mix(in srgb, var(--pill-accent) 50%, var(--border));
+  }
+  .filter-pill.is-active {
+    color: var(--text-primary);
+    border-color: color-mix(in srgb, var(--pill-accent) 70%, var(--border));
+    background: color-mix(in srgb, var(--pill-accent) 14%, transparent);
+  }
+  .pill-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--pill-accent);
+  }
+  .pill-count {
+    font-variant-numeric: tabular-nums;
+    color: var(--text-secondary);
+    font-size: 0.75rem;
+    padding: 0.05rem 0.4rem;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--bg-secondary) 80%, transparent);
+  }
+  .filter-pill.is-active .pill-count {
+    color: var(--text-primary);
+  }
+
+  .view-toggle {
+    display: inline-flex;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: color-mix(in srgb, var(--bg-card) 50%, transparent);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+  .view-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     width: 36px;
-    padding-right: 0;
+    height: 36px;
+    padding: 0;
+    border: none;
+    background: transparent;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: color 0.15s, background 0.15s;
+    font-family: inherit;
+  }
+  .view-btn:hover { color: var(--text-primary); }
+  .view-btn.is-active {
+    color: var(--text-primary);
+    background: color-mix(in srgb, var(--brand-blue) 22%, transparent);
+  }
+  .view-btn + .view-btn { border-left: 1px solid var(--border); }
+
+  .reports-grid {
+    display: grid;
+    gap: 0.85rem;
+    margin-bottom: 3rem;
+  }
+  /* Grid view */
+  .reports-grid.is-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  @media (max-width: 880px) {
+    .reports-grid.is-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  }
+  @media (max-width: 540px) {
+    .reports-grid.is-grid { grid-template-columns: 1fr; }
+  }
+  /* List view — single column, horizontal card layout */
+  .reports-grid.is-list {
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
+  }
+  .reports-grid.is-list .report-card {
+    flex-direction: row;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.75rem 1rem;
+  }
+  .reports-grid.is-list .card-head {
+    flex: 1;
+    min-width: 0;
+    flex-wrap: nowrap;
+  }
+  .reports-grid.is-list .warning-banner {
+    order: 0;
+    flex-basis: auto;
+  }
+  .reports-grid.is-list .card-foot {
+    flex-shrink: 0;
+    margin-top: 0;
+    padding-top: 0;
+    align-items: center;
+    gap: 1rem;
+  }
+  .reports-grid.is-list .warning-banner {
+    align-self: center;
+    flex-shrink: 0;
+  }
+  .reports-grid.is-list .tier-sm {
+    min-width: 96px;
+    text-align: right;
+  }
+  @media (max-width: 640px) {
+    .reports-grid.is-list .tier-sm {
+      display: none;
+    }
+    .reports-grid.is-list .warning-banner {
+      display: none;
+    }
+    .reports-grid.is-list .report-card {
+      gap: 0.65rem;
+      padding: 0.65rem 0.85rem;
+    }
+  }
+
+  /* Card */
+  .report-card {
+    --accent: var(--brand-blue);
+    --mx: 50%;
+    --my: 50%;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+    padding: 1.1rem;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: color-mix(in srgb, var(--bg-card) 65%, transparent);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    color: var(--text-primary);
+    text-decoration: none;
+    overflow: hidden;
+    isolation: isolate;
+    transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+  }
+  .report-card:hover {
+    text-decoration: none;
+    transform: translateY(-2px);
+    border-color: color-mix(in srgb, var(--accent) 65%, var(--border));
+    box-shadow:
+      0 12px 30px -18px rgba(0, 0, 0, 0.6),
+      0 0 0 1px color-mix(in srgb, var(--accent) 25%, transparent);
+  }
+  .card-glow {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    opacity: 0;
+    background: radial-gradient(
+      260px circle at var(--mx, 50%) var(--my, 50%),
+      color-mix(in srgb, var(--accent) 18%, transparent),
+      transparent 60%
+    );
+    transition: opacity 0.25s;
+  }
+  .report-card:hover .card-glow { opacity: 1; }
+
+  .card-head {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.75rem;
   }
   .icon-stack {
     position: relative;
-    width: 24px;
-    height: 24px;
+    width: 36px;
+    height: 36px;
+    flex-shrink: 0;
   }
   .protocol-icon {
     display: block;
@@ -104,53 +500,108 @@ const reports = getAllReports();
   }
   .chain-icon {
     position: absolute;
-    bottom: -4px;
-    right: -6px;
+    bottom: -3px;
+    right: -4px;
     border-radius: 50%;
-    border: 1.5px solid var(--bg-primary);
-    background: var(--bg-primary);
+    border: 2px solid var(--bg-card);
+    background: var(--bg-card);
   }
   .icon-placeholder {
-    width: 24px;
-    height: 24px;
+    width: 100%;
+    height: 100%;
     border-radius: 50%;
     background: var(--bg-secondary);
   }
-  .warning-tag {
-    display: inline-block;
-    background: #dc2626;
-    color: #fff;
-    font-size: 0.7rem;
-    font-weight: 600;
-    padding: 0.15rem 0.4rem;
-    border-radius: 4px;
-    margin-left: 0.5rem;
-    vertical-align: middle;
+  .card-title {
+    flex: 1;
+    min-width: 0;
   }
+  .card-name {
+    font-size: 0.98rem;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    color: var(--text-primary);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .card-meta {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.78rem;
+    color: var(--text-secondary);
+    margin-top: 0.1rem;
+  }
+  .card-meta .sep { opacity: 0.4; }
   .mono {
     font-family: "SF Mono", "Fira Code", monospace;
-    font-size: 0.85em;
+    font-size: 0.92em;
   }
-  tbody tr {
-    cursor: pointer;
+
+  .warning-banner {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    color: #fca5a5;
+    background: color-mix(in srgb, #dc2626 18%, transparent);
+    border: 1px solid color-mix(in srgb, #dc2626 35%, transparent);
+    padding: 0.3rem 0.55rem;
+    border-radius: 6px;
+    font-size: 0.74rem;
+    font-weight: 500;
+    /* In grid view: wrap onto its own row inside card-head, after the
+       icon/title/badge row. In list view this is overridden below to
+       sit inline between the title and the score badge. */
+    order: 1;
+    flex-basis: 100%;
+    align-self: flex-start;
   }
-  tbody tr:hover {
-    background: var(--bg-secondary);
+
+  .card-foot {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.75rem;
+    margin-top: auto;
+    padding-top: 0.25rem;
   }
-  table {
-    background: color-mix(in srgb, var(--bg-primary) 65%, transparent);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-    border-radius: 8px;
-    overflow: hidden;
+  .tier-sm {
+    font-size: 0.74rem;
+    font-weight: 600;
   }
-  @media (max-width: 640px) {
-    table {
-      font-size: 0.8rem;
-    }
-    th,
-    td {
-      padding: 0.4rem 0.5rem;
-    }
+  .score-bar {
+    display: flex;
+    gap: 3px;
+  }
+  .score-seg {
+    width: 10px;
+    height: 4px;
+    border-radius: 2px;
+    background: var(--border);
+    transition: background 0.2s;
+  }
+
+  .empty-state {
+    margin: 3rem auto;
+    text-align: center;
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+  }
+  .empty-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: color-mix(in srgb, var(--bg-card) 60%, transparent);
+    border: 1px solid var(--border);
+    margin-bottom: 0.75rem;
+    color: var(--text-secondary);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .pulse-dot { animation: none; }
   }
 </style>
