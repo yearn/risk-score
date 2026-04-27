@@ -1,149 +1,432 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
-import ScoreBadge from "../components/ScoreBadge.astro";
-import { getAllReports } from "../lib/reports";
-import { scoreTier } from "../lib/colors";
+import stats from "../data/stats.json";
 
-const reports = getAllReports();
+const formatTvl = (n: number): string => {
+  if (n >= 1_000_000_000) return `$${(n / 1_000_000_000).toFixed(2)}B`;
+  if (n >= 1_000_000) return `$${(n / 1_000_000).toFixed(1)}M`;
+  if (n >= 1_000) return `$${(n / 1_000).toFixed(0)}K`;
+  return `$${n.toFixed(0)}`;
+};
+
+const tvlDisplay = formatTvl(stats.tvl.total);
+const reportCount = stats.reportCount;
+const chainCount = stats.chainCount;
+
+const chains = Object.entries(stats.tvl.byChain)
+  .filter(([, v]) => (v as number) > 0)
+  .sort(([, a], [, b]) => (b as number) - (a as number));
+
+const morphoUrl = "https://app.morpho.org/ethereum/curator/yearn";
 ---
 
-<BaseLayout title="Yearn Curation" ogUrl="/" ogImage="/og/default.png">
-  <h1>Risk Assessment Reports</h1>
+<BaseLayout title="Yearn Curation — DeFi Risk Curation" ogUrl="/" ogImage="/og/default.png">
+  <section class="hero">
+    <div class="eyebrow">
+      <span class="eyebrow-dot"></span>
+      Independent DeFi Risk Curation
+    </div>
+    <h1 class="hero-title">
+      Risk-curated yield. <br />
+      <span class="hero-accent">Vetted by Yearn.</span>
+    </h1>
+    <p class="hero-sub">
+      The Yearn Curation team reviews DeFi protocols, tokens and vaults, scoring
+      them against transparent criteria so allocators can deploy capital with
+      confidence.
+    </p>
 
-  <div class="search-row">
-    <input type="text" id="report-search" placeholder="Search by protocol, token, or risk tier…" autocomplete="off" />
-  </div>
+    <div class="stats">
+      <div class="stat-card">
+        <div class="stat-value">{tvlDisplay}</div>
+        <div class="stat-label">TVL Curated</div>
+        <div class="stat-source">
+          <a
+            href="https://defillama.com/protocol/yearn-curating"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            via DefiLlama
+          </a>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">{reportCount}</div>
+        <div class="stat-label">Risk Reports</div>
+        <div class="stat-source">independent assessments</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">{chainCount}</div>
+        <div class="stat-label">Chains</div>
+        <div class="stat-source">EVM + L1s</div>
+      </div>
+    </div>
 
-  <div class="table-wrap">
-    <table id="reports-table">
-      <thead>
-        <tr>
-          <th class="col-icon"></th>
-          <th>Protocol</th>
-          <th>Token</th>
-          <th>Score</th>
-          <th>Risk Tier</th>
-        </tr>
-      </thead>
-      <tbody>
-        {
-          reports.map((r) => (
-            <tr onclick={`window.location='/report/${r.slug}/'`}>
-              <td class="col-icon">
-                <div class="icon-stack">
-                  {r.iconUrl ? (
-                    <img src={r.iconUrl} alt="" width="24" height="24" class="protocol-icon" loading="lazy" />
-                  ) : (
-                    <div class="icon-placeholder" />
-                  )}
-                  {r.chainIconUrl && (
-                    <img src={r.chainIconUrl} alt="" width="14" height="14" class="chain-icon" loading="lazy" />
-                  )}
-                </div>
-              </td>
-              <td>
-                {r.name}
-                {r.warning && <span class="warning-tag">&#9888; {r.warning}</span>}
-              </td>
-              <td class="mono">{r.token}</td>
-              <td>
-                <ScoreBadge score={r.finalScore} />
-              </td>
-              <td>{scoreTier(r.finalScore)}</td>
-            </tr>
-          ))
-        }
-      </tbody>
-    </table>
-  </div>
-  <script is:inline>
-    const searchInput = document.getElementById("report-search");
-    const rows = document.querySelectorAll("#reports-table tbody tr");
-    searchInput.addEventListener("input", () => {
-      const q = searchInput.value.toLowerCase();
-      rows.forEach((row) => {
-        const text = row.textContent.toLowerCase();
-        row.style.display = text.includes(q) ? "" : "none";
-      });
-    });
-  </script>
+    <div class="hero-cta">
+      <a href="/reports/" class="btn btn-primary">Browse risk reports &rarr;</a>
+      <a
+        href="https://docs.yearn.fi/getting-started/products/curating/introduction"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="btn btn-secondary"
+      >
+        About Yearn Curation
+      </a>
+    </div>
+  </section>
+
+  <section class="features">
+    <div class="feature">
+      <div class="feature-num">01</div>
+      <h3>Transparent Scoring</h3>
+      <p>
+        Every assessment publishes its score breakdown — counterparty,
+        collateral, oracle, liquidity, contract risk — so the rationale is on the
+        page, not behind a paywall.
+      </p>
+    </div>
+    <div class="feature">
+      <div class="feature-num">02</div>
+      <h3>Continuous Monitoring</h3>
+      <p>
+        Curated assets and dependencies are tracked over time. When something
+        changes — governance, oracle, owner controls — the report and the
+        monitoring page reflect it.
+      </p>
+    </div>
+    <div class="feature">
+      <div class="feature-num">03</div>
+      <h3>Open & Reproducible</h3>
+      <p>
+        Reports live on GitHub. Anyone can read the data, file an issue on a
+        report they think is wrong, or follow the chain of references back to
+        the source.
+      </p>
+    </div>
+  </section>
+
+  <section class="chains-section">
+    <div class="chains-head">
+      <h2>Curated TVL by chain</h2>
+      <span class="chains-meta">Updated {new Date(stats.updatedAt).toISOString().slice(0, 10)}</span>
+    </div>
+    <div class="chains-grid">
+      {chains.map(([name, value]) => (
+        <div class="chain-card">
+          <div class="chain-name">{name}</div>
+          <div class="chain-value">{formatTvl(value as number)}</div>
+        </div>
+      ))}
+    </div>
+  </section>
+
+  <section class="morpho-card">
+    <div class="morpho-head">
+      <img
+        src="https://icons.llamao.fi/icons/protocols/morpho?w=64&h=64"
+        alt="Morpho"
+        class="morpho-logo"
+        width="56"
+        height="56"
+        loading="lazy"
+      />
+      <div>
+        <div class="morpho-eyebrow">Live curation</div>
+        <h2>Yearn-curated vaults on Morpho</h2>
+      </div>
+    </div>
+    <p>
+      Yearn operates curator vaults on Morpho across Ethereum, Base and other
+      networks. Allocators can deposit directly into vaults whose risk envelope
+      matches the assessments published here.
+    </p>
+    <a href={morphoUrl} target="_blank" rel="noopener noreferrer" class="btn btn-primary">
+      Open Yearn vaults on Morpho
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+    </a>
+  </section>
 </BaseLayout>
 
 <style>
-  h1 {
-    margin-bottom: 1rem;
+  .hero {
+    padding: 3.5rem 0 2.5rem;
+    text-align: center;
   }
-  .search-row {
-    margin-bottom: 0.75rem;
-  }
-  .search-row input {
-    width: 100%;
-    max-width: 360px;
-    background: var(--bg-secondary);
-    color: var(--text-primary);
+  .eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.3rem 0.85rem;
     border: 1px solid var(--border);
-    border-radius: 4px;
-    padding: 0.4rem 0.6rem;
-    font-size: 0.85rem;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--bg-secondary) 60%, transparent);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    color: var(--text-secondary);
+    font-size: 0.78rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    margin-bottom: 1.5rem;
   }
-  .search-row input::placeholder {
+  .eyebrow-dot {
+    width: 6px;
+    height: 6px;
+    background: var(--brand-blue);
+    border-radius: 50%;
+    box-shadow: 0 0 0 4px rgba(6, 117, 249, 0.18);
+  }
+  .hero-title {
+    font-size: clamp(2rem, 5vw, 3.4rem);
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    font-weight: 700;
+    margin: 0 auto 1.25rem;
+    max-width: 18ch;
+  }
+  .hero-accent {
+    background: linear-gradient(90deg, var(--brand-blue), #5aa8ff);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .hero-sub {
+    color: var(--text-secondary);
+    max-width: 56ch;
+    margin: 0 auto 2.5rem;
+    font-size: 1.05rem;
+    line-height: 1.5;
+  }
+
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    max-width: 720px;
+    margin: 0 auto 2.5rem;
+  }
+  .stat-card {
+    padding: 1.5rem 1.25rem;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: color-mix(in srgb, var(--bg-card) 60%, transparent);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    text-align: left;
+    position: relative;
+    overflow: hidden;
+  }
+  .stat-card::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      135deg,
+      rgba(6, 117, 249, 0.12) 0%,
+      transparent 50%
+    );
+    pointer-events: none;
+  }
+  .stat-value {
+    font-size: 2rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--text-primary);
+    line-height: 1;
+  }
+  .stat-label {
+    margin-top: 0.4rem;
+    font-size: 0.85rem;
+    color: var(--text-primary);
+    font-weight: 500;
+  }
+  .stat-source {
+    margin-top: 0.2rem;
+    font-size: 0.72rem;
     color: var(--text-secondary);
   }
-  .col-icon {
-    width: 36px;
-    padding-right: 0;
+  .stat-source a {
+    color: var(--text-secondary);
+    border-bottom: 1px dotted var(--border);
   }
-  .icon-stack {
-    position: relative;
-    width: 24px;
-    height: 24px;
+  .stat-source a:hover {
+    color: var(--brand-blue);
+    text-decoration: none;
   }
-  .protocol-icon {
-    display: block;
-    border-radius: 50%;
+
+  .hero-cta {
+    display: flex;
+    gap: 0.75rem;
+    justify-content: center;
+    flex-wrap: wrap;
   }
-  .chain-icon {
-    position: absolute;
-    bottom: -4px;
-    right: -6px;
-    border-radius: 50%;
-    border: 1.5px solid var(--bg-primary);
-    background: var(--bg-primary);
-  }
-  .icon-placeholder {
-    width: 24px;
-    height: 24px;
-    border-radius: 50%;
-    background: var(--bg-secondary);
-  }
-  .warning-tag {
-    display: inline-block;
-    background: #dc2626;
-    color: #fff;
-    font-size: 0.7rem;
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.4rem;
+    font-size: 0.95rem;
     font-weight: 600;
-    padding: 0.15rem 0.4rem;
-    border-radius: 4px;
-    margin-left: 0.5rem;
-    vertical-align: middle;
+    border-radius: 8px;
+    transition: transform 0.15s, background 0.15s, border-color 0.15s;
+    text-decoration: none;
   }
-  .mono {
+  .btn-primary {
+    background: var(--brand-blue);
+    color: #fff;
+    border: 1px solid var(--brand-blue);
+  }
+  .btn-primary:hover {
+    background: #0560d4;
+    border-color: #0560d4;
+    color: #fff;
+    text-decoration: none;
+    transform: translateY(-1px);
+  }
+  .btn-secondary {
+    background: color-mix(in srgb, var(--bg-secondary) 70%, transparent);
+    border: 1px solid var(--border);
+    color: var(--text-primary);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+  }
+  .btn-secondary:hover {
+    border-color: var(--text-secondary);
+    text-decoration: none;
+    transform: translateY(-1px);
+  }
+
+  .features {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    margin: 4rem 0 3rem;
+  }
+  .feature {
+    padding: 1.5rem;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: color-mix(in srgb, var(--bg-card) 55%, transparent);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+  .feature-num {
     font-family: "SF Mono", "Fira Code", monospace;
-    font-size: 0.85em;
+    font-size: 0.75rem;
+    color: var(--brand-blue);
+    margin-bottom: 0.5rem;
+    letter-spacing: 0.1em;
   }
-  tbody tr {
-    cursor: pointer;
+  .feature h3 {
+    font-size: 1.05rem;
+    margin-bottom: 0.5rem;
   }
-  tbody tr:hover {
-    background: var(--bg-secondary);
+  .feature p {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    line-height: 1.55;
   }
-  @media (max-width: 640px) {
-    table {
-      font-size: 0.8rem;
+
+  .chains-section {
+    margin: 3rem 0;
+  }
+  .chains-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  .chains-head h2 {
+    font-size: 1.1rem;
+  }
+  .chains-meta {
+    font-size: 0.78rem;
+    color: var(--text-secondary);
+  }
+  .chains-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 0.75rem;
+  }
+  .chain-card {
+    padding: 0.85rem 1rem;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: color-mix(in srgb, var(--bg-card) 50%, transparent);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+  }
+  .chain-name {
+    font-size: 0.78rem;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  .chain-value {
+    font-size: 1.05rem;
+    font-weight: 600;
+    margin-top: 0.2rem;
+  }
+
+  .morpho-card {
+    margin: 4rem 0 1rem;
+    padding: 2rem;
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    background:
+      linear-gradient(135deg, rgba(6, 117, 249, 0.1), transparent 60%),
+      color-mix(in srgb, var(--bg-card) 65%, transparent);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    position: relative;
+    overflow: hidden;
+  }
+  .morpho-head {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+  }
+  .morpho-logo {
+    border-radius: 12px;
+    background: #fff;
+    padding: 4px;
+    flex-shrink: 0;
+  }
+  .morpho-eyebrow {
+    font-size: 0.72rem;
+    color: var(--brand-blue);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-weight: 600;
+  }
+  .morpho-card h2 {
+    font-size: 1.25rem;
+    margin-top: 0.1rem;
+  }
+  .morpho-card p {
+    color: var(--text-secondary);
+    margin-bottom: 1.25rem;
+    max-width: 60ch;
+  }
+
+  @media (max-width: 720px) {
+    .stats {
+      grid-template-columns: 1fr;
     }
-    th,
-    td {
-      padding: 0.4rem 0.5rem;
+    .features {
+      grid-template-columns: 1fr;
+    }
+    .hero {
+      padding: 2rem 0 1.5rem;
+    }
+    .hero-cta {
+      flex-direction: column;
+      align-items: stretch;
+    }
+    .btn {
+      justify-content: center;
     }
   }
 </style>

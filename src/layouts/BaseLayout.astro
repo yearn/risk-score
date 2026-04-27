@@ -4,12 +4,14 @@ interface Props {
   description?: string;
   ogImage?: string;
   ogUrl?: string;
+  bare?: boolean;
 }
 const {
   title,
   description = "Independent risk evaluations for DeFi protocols and assets",
   ogImage = "/og/default.png",
   ogUrl,
+  bare = false,
 } = Astro.props;
 const canonicalUrl = ogUrl ? new URL(ogUrl, Astro.site ?? Astro.url.origin).href : (Astro.site ?? Astro.url.origin).toString();
 const ogImageUrl = new URL(ogImage, Astro.site ?? Astro.url.origin).href;
@@ -46,7 +48,18 @@ const ogImageUrl = new URL(ogImage, Astro.site ?? Astro.url.origin).href;
       }
     </script>
   </head>
-  <body>
+  <body class={bare ? "is-bare" : "has-bg"}>
+    {!bare && (
+      <div class="bg-deco" aria-hidden="true">
+        <div class="bg-glow"></div>
+        <img src="/pills/blue-pill.png" alt="" class="pill pill-1" />
+        <img src="/pills/blue-pill.png" alt="" class="pill pill-2" />
+        <img src="/pills/blue-pill.png" alt="" class="pill pill-3" />
+        <img src="/pills/blue-pill.png" alt="" class="pill pill-4" />
+        <img src="/pills/blue-pill.png" alt="" class="pill pill-5" />
+        <img src="/pills/blue-pill.png" alt="" class="pill pill-6" />
+      </div>
+    )}
     <header class="site-header">
       <div class="container header-row">
         <div class="header-left">
@@ -62,7 +75,8 @@ const ogImageUrl = new URL(ogImage, Astro.site ?? Astro.url.origin).href;
           </svg>
         </a>
         <nav class="header-nav">
-          <a href="/">Reports</a>
+          <a href="/">Home</a>
+          <a href="/reports/">Reports</a>
           <a href="/tokens/">Tokens</a>
           <a href="/monitoring/">Monitoring</a>
 
@@ -113,6 +127,137 @@ const ogImageUrl = new URL(ogImage, Astro.site ?? Astro.url.origin).href;
 </style>
 
 <style>
+  /* === Orbital pills background (Option C) === */
+  body.has-bg {
+    position: relative;
+    overflow-x: hidden;
+  }
+  .bg-deco {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    overflow: hidden;
+  }
+  .bg-glow {
+    position: absolute;
+    top: -20%;
+    right: -15%;
+    width: 70vw;
+    height: 70vw;
+    max-width: 1100px;
+    max-height: 1100px;
+    background: radial-gradient(
+      circle at center,
+      rgba(6, 117, 249, 0.28) 0%,
+      rgba(6, 117, 249, 0.08) 40%,
+      transparent 70%
+    );
+    filter: blur(20px);
+  }
+  :global(html.light) .bg-glow {
+    background: radial-gradient(
+      circle at center,
+      rgba(6, 117, 249, 0.18) 0%,
+      rgba(6, 117, 249, 0.06) 40%,
+      transparent 70%
+    );
+  }
+  .pill {
+    position: absolute;
+    pointer-events: none;
+    user-select: none;
+    will-change: transform;
+    opacity: 0.55;
+    filter: drop-shadow(0 0 30px rgba(6, 117, 249, 0.35));
+  }
+  :global(html.light) .pill {
+    opacity: 0.28;
+    filter: drop-shadow(0 0 20px rgba(6, 117, 249, 0.25));
+  }
+  .pill-1 {
+    width: 320px;
+    top: 6vh;
+    left: -90px;
+    transform: rotate(-22deg);
+    animation: float-a 11s ease-in-out infinite;
+  }
+  .pill-2 {
+    width: 220px;
+    top: 28vh;
+    right: -60px;
+    transform: rotate(35deg);
+    animation: float-b 14s ease-in-out infinite;
+  }
+  .pill-3 {
+    width: 160px;
+    top: 62vh;
+    left: 8vw;
+    transform: rotate(12deg);
+    opacity: 0.35;
+    animation: float-c 9s ease-in-out infinite;
+  }
+  .pill-4 {
+    width: 280px;
+    top: 78vh;
+    right: 10vw;
+    transform: rotate(-48deg);
+    opacity: 0.4;
+    animation: float-a 13s ease-in-out infinite reverse;
+  }
+  .pill-5 {
+    width: 130px;
+    top: 110vh;
+    left: 38vw;
+    transform: rotate(60deg);
+    opacity: 0.3;
+    animation: float-b 10s ease-in-out infinite;
+  }
+  .pill-6 {
+    width: 200px;
+    top: 145vh;
+    right: -30px;
+    transform: rotate(-15deg);
+    opacity: 0.32;
+    animation: float-c 12s ease-in-out infinite reverse;
+  }
+  @keyframes float-a {
+    0%, 100% { translate: 0 0; }
+    50% { translate: 0 -28px; }
+  }
+  @keyframes float-b {
+    0%, 100% { translate: 0 0; }
+    50% { translate: -18px 22px; }
+  }
+  @keyframes float-c {
+    0%, 100% { translate: 0 0; }
+    50% { translate: 14px -16px; }
+  }
+  @media (max-width: 720px) {
+    .pill-1 { width: 220px; }
+    .pill-2 { width: 160px; }
+    .pill-3 { width: 110px; }
+    .pill-4 { width: 180px; right: -50px; }
+    .pill-5 { display: none; }
+    .pill-6 { width: 140px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .pill { animation: none; }
+  }
+
+  /* Header / content sit above the deco */
+  .site-header,
+  main.container,
+  .site-footer {
+    position: relative;
+    z-index: 1;
+  }
+  body.has-bg .site-header {
+    background: color-mix(in srgb, var(--bg-primary) 70%, transparent);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+
   .site-header {
     border-bottom: 1px solid var(--border);
     padding: 0.75rem 0;
