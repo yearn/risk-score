@@ -33,7 +33,6 @@ const excerpt = (html: string, maxLen = 180): string => {
 
 const tvlDisplay = formatTvl(stats.tvl.total);
 const reportCount = stats.reportCount;
-const chainCount = stats.chainCount;
 
 const chains = Object.entries(stats.tvl.byChain)
   .filter(([, v]) => (v as number) > 0)
@@ -80,10 +79,6 @@ const followups = recent.slice(1);
       <div class="stat-card">
         <div class="stat-value">{reportCount}</div>
         <div class="stat-label">Risk Reports</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-value">{chainCount}</div>
-        <div class="stat-label">Chains</div>
       </div>
     </div>
 
@@ -361,9 +356,9 @@ const followups = recent.slice(1);
 
   .stats {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(2, 1fr);
     gap: 1rem;
-    max-width: 720px;
+    max-width: 560px;
     margin: 0 auto 2.5rem;
   }
   .stat-card {
