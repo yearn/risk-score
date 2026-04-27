@@ -11,29 +11,26 @@ Uses Etherscan API for onchain reads (no RPC required).
 Outputs: scripts/dependencies/protocols.yaml
 """
 
-import os
 import sys
 import time
 from pathlib import Path
 
 import requests
 import yaml
-from dotenv import load_dotenv
 from eth_abi import decode, encode
 from web3 import Web3
 
-# Walk up to find .env (may be in parent repo, not worktree)
-_dir = Path(__file__).resolve().parent
-while _dir != _dir.parent:
-    _env = _dir / ".env"
-    if _env.exists():
-        load_dotenv(_env)
-        break
-    _dir = _dir.parent
+SCRIPTS_DIR = Path(__file__).resolve().parents[1]
+if str(SCRIPTS_DIR) not in sys.path:
+    sys.path.insert(0, str(SCRIPTS_DIR))
 
-ETHERSCAN_API_KEY = os.getenv("ETHERSCAN_API_KEY")
-if not ETHERSCAN_API_KEY:
-    print("Error: ETHERSCAN_API_KEY not set in .env")
+from env import get_explorer_api_key, load_repo_env  # noqa: E402
+
+load_repo_env(__file__)
+try:
+    ETHERSCAN_API_KEY = get_explorer_api_key("ETHERSCAN")
+except ValueError as exc:
+    print(f"Error: {exc}")
     sys.exit(1)
 
 OUTPUT_PATH = Path(__file__).parent / "protocols.yaml"
@@ -239,7 +236,16 @@ def fetch_compound_v3(comet_address: str) -> dict:
         # Decode tuple: (uint8 offset, address asset, address priceFeed, uint64 scale,
         #   uint128 borrowCF, uint128 liquidateCF, uint128 liquidationFactor, uint128 supplyCap)
         decoded = decode(
-            ["uint8", "address", "address", "uint64", "uint128", "uint128", "uint128", "uint128"],
+            [
+                "uint8",
+                "address",
+                "address",
+                "uint64",
+                "uint128",
+                "uint128",
+                "uint128",
+                "uint128",
+            ],
             raw,
         )
         asset_addr = decoded[1]
@@ -289,15 +295,31 @@ def infinifi_data() -> dict:
             # Liquid farms (instant withdrawal)
             {"protocol": "fluid", "assets": ["USDC"]},
             {"protocol": "euler", "assets": ["USDC"]},
-            {"protocol": "aave_v3_core", "assets": ["USDC"], "label": "Aave v3 Horizon (aHorRwaUSDC)"},
+            {
+                "protocol": "aave_v3_core",
+                "assets": ["USDC"],
+                "label": "Aave v3 Horizon (aHorRwaUSDC)",
+            },
             {"protocol": "spark", "assets": ["USDC"]},
-            {"protocol": "aave_v3_core", "assets": ["USDC"], "label": "Aave v3 (aEthUSDC)"},
+            {
+                "protocol": "aave_v3_core",
+                "assets": ["USDC"],
+                "label": "Aave v3 (aEthUSDC)",
+            },
             # Illiquid farms (locked until maturity)
             {"protocol": "pendle", "assets": ["USDe", "sUSDe"]},
             {"protocol": "ethena", "assets": ["USDe", "sUSDe"]},
-            {"protocol": "gauntlet", "assets": ["USDC"], "label": "Gauntlet Frontier (gtUSDa)"},
+            {
+                "protocol": "gauntlet",
+                "assets": ["USDC"],
+                "label": "Gauntlet Frontier (gtUSDa)",
+            },
             {"protocol": "reservoir", "assets": ["USDC"], "label": "Reservoir wsrUSD"},
-            {"protocol": "fasanara", "assets": ["USDC"], "label": "Fasanara Genesis Fund"},
+            {
+                "protocol": "fasanara",
+                "assets": ["USDC"],
+                "label": "Fasanara Genesis Fund",
+            },
             {"protocol": "tokemak", "assets": ["USDC"], "label": "Tokemak autoUSD"},
         ],
         "infrastructure": ["Chainlink"],
@@ -390,7 +412,11 @@ def origin_arm_data() -> dict:
             {"asset": "stETH"},
         ],
         "yield_sources": [
-            {"protocol": "morpho", "assets": ["WETH"], "label": "Morpho (Yearn WETH ARM vault)"},
+            {
+                "protocol": "morpho",
+                "assets": ["WETH"],
+                "label": "Morpho (Yearn WETH ARM vault)",
+            },
         ],
         "infrastructure": ["Lido"],
     }
