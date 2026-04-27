@@ -11,7 +11,7 @@ export function getStaticPaths() {
 
 const { slug } = Astro.params;
 const report = getReportBySlug(slug!);
-if (!report) return Astro.redirect("/");
+if (!report) return Astro.redirect("/reports/");
 const ogDescription = `${report.name} — Score: ${report.finalScore.toFixed(1)}/5.0 (${scoreTier(report.finalScore)}). ${report.token} on ${report.chain}.`;
 
 const reportIssueUrl = (() => {
@@ -36,8 +36,9 @@ const reportIssueUrl = (() => {
   description={ogDescription}
   ogImage={`/og/${report.slug}.png`}
   ogUrl={`/report/${report.slug}/`}
+  bare
 >
-  <a href="/" class="back-link">&larr; All Reports</a>
+  <a href="/reports/" class="back-link">&larr; All Reports</a>
 
   {report.warning && (
     <div class="warning-banner">

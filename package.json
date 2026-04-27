@@ -2,9 +2,10 @@
   "name": "risk-score-frontend",
   "type": "module",
   "scripts": {
-    "dev": "astro dev",
-    "build": "astro build",
-    "preview": "astro preview"
+    "dev": "node scripts/update_stats.mjs && astro dev",
+    "build": "node scripts/update_stats.mjs && astro build",
+    "preview": "astro preview",
+    "update-stats": "node scripts/update_stats.mjs"
   },
   "dependencies": {
     "@astrojs/vercel": "^8.1.0",

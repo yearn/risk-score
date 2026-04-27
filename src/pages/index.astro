@@ -1,38 +1,187 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
 import ScoreBadge from "../components/ScoreBadge.astro";
-import { getAllReports } from "../lib/reports";
-import { scoreTier } from "../lib/colors";
+import stats from "../data/stats.json";
+import { getRecentReports } from "../lib/reports";
+import { scoreColor, scoreTier } from "../lib/colors";
 
-const reports = getAllReports();
+const formatTvl = (n: number): string => {
+  if (n >= 1_000_000_000) return `$${(n / 1_000_000_000).toFixed(2)}B`;
+  if (n >= 1_000_000) return `$${(n / 1_000_000).toFixed(1)}M`;
+  if (n >= 1_000) return `$${(n / 1_000).toFixed(0)}K`;
+  return `$${n.toFixed(0)}`;
+};
+
+const formatRelative = (ts: number): string => {
+  if (!ts) return "—";
+  const days = Math.max(0, Math.round((Date.now() - ts) / 86_400_000));
+  if (days <= 1) return "today";
+  if (days < 7) return `${days}d ago`;
+  if (days < 30) return `${Math.round(days / 7)}w ago`;
+  if (days < 365) return `${Math.round(days / 30)}mo ago`;
+  return `${Math.round(days / 365)}y ago`;
+};
+
+const stripHtml = (html: string): string =>
+  html.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
+
+const excerpt = (html: string, maxLen = 180): string => {
+  const text = stripHtml(html);
+  if (text.length <= maxLen) return text;
+  return text.slice(0, maxLen).replace(/\s+\S*$/, "") + "…";
+};
+
+const tvlDisplay = formatTvl(stats.tvl.total);
+const reportCount = stats.reportCount;
+const chainCount = stats.chainCount;
+
+const chains = Object.entries(stats.tvl.byChain)
+  .filter(([, v]) => (v as number) > 0)
+  .sort(([, a], [, b]) => (b as number) - (a as number));
+
+const morphoUrl = "https://app.morpho.org/ethereum/curator/yearn";
+
+const recent = getRecentReports(4);
+const featured = recent[0];
+const followups = recent.slice(1);
 ---
 
-<BaseLayout title="Yearn Curation" ogUrl="/" ogImage="/og/default.png">
-  <h1>Risk Assessment Reports</h1>
+<BaseLayout title="Yearn Curation — DeFi Risk Curation" ogUrl="/" ogImage="/og/default.png">
+  <section class="hero">
+    <div class="eyebrow">
+      <span class="eyebrow-dot"></span>
+      Independent DeFi Risk Curation
+    </div>
+    <h1 class="hero-title">
+      Risk-curated yield <br />
+      <span class="hero-accent">by Yearn.</span>
+    </h1>
+    <p class="hero-sub">
+      The Yearn Curation team reviews DeFi protocols, tokens and vaults, scoring
+      them against transparent criteria so allocators can deploy capital with
+      confidence.
+    </p>
 
-  <div class="search-row">
-    <input type="text" id="report-search" placeholder="Search by protocol, token, or risk tier…" autocomplete="off" />
-  </div>
+    <div class="stats">
+      <div class="stat-card">
+        <div class="stat-value">{tvlDisplay}</div>
+        <div class="stat-label">
+          Yearn TVL
+          <a
+            href="https://defillama.com/protocol/yearn"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="stat-source-inline"
+          >
+            via DefiLlama
+          </a>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">{reportCount}</div>
+        <div class="stat-label">Risk Reports</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">{chainCount}</div>
+        <div class="stat-label">Chains</div>
+      </div>
+    </div>
 
-  <div class="table-wrap">
-    <table id="reports-table">
-      <thead>
-        <tr>
-          <th class="col-icon"></th>
-          <th>Protocol</th>
-          <th>Token</th>
-          <th>Score</th>
-          <th>Risk Tier</th>
-        </tr>
-      </thead>
-      <tbody>
-        {
-          reports.map((r) => (
-            <tr onclick={`window.location='/report/${r.slug}/'`}>
-              <td class="col-icon">
-                <div class="icon-stack">
+    <div class="hero-cta">
+      <a href="/reports/" class="btn btn-primary">Browse risk reports &rarr;</a>
+      <a
+        href="https://docs.yearn.fi/getting-started/products/curating/introduction"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="btn btn-secondary"
+      >
+        About Yearn Curation
+      </a>
+    </div>
+  </section>
+
+  {recent.length > 0 && (
+    <section class="latest" data-mouse-glow>
+      <div class="latest-head">
+        <div>
+          <div class="section-eyebrow">
+            <span class="pulse-dot"></span>
+            Latest assessments
+          </div>
+          <h2>Most recent reports</h2>
+        </div>
+        <a href="/reports/" class="latest-all">
+          View all {reportCount} reports
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        </a>
+      </div>
+
+      <div class="latest-grid">
+        <a
+          href={`/report/${featured.slug}/`}
+          class="report-card report-card--featured"
+          style={`--accent:${scoreColor(featured.finalScore)};`}
+        >
+          <div class="card-glow" aria-hidden="true"></div>
+          <div class="card-scan" aria-hidden="true"></div>
+          <div class="card-top">
+            <span class="latest-badge">
+              <span class="latest-badge-dot"></span>
+              Latest
+            </span>
+            <span class="card-date" title={featured.date}>{formatRelative(featured.dateSortable)}</span>
+          </div>
+          <div class="card-head">
+            <div class="icon-stack">
+              {featured.iconUrl ? (
+                <img src={featured.iconUrl} alt="" width="44" height="44" class="protocol-icon" loading="lazy" />
+              ) : (
+                <div class="icon-placeholder" />
+              )}
+              {featured.chainIconUrl && (
+                <img src={featured.chainIconUrl} alt="" width="20" height="20" class="chain-icon" loading="lazy" />
+              )}
+            </div>
+            <div class="card-title">
+              <div class="card-name">{featured.name}</div>
+              <div class="card-meta">
+                <span class="mono">{featured.token}</span>
+                <span class="sep">·</span>
+                <span>{featured.chain}</span>
+              </div>
+            </div>
+            <ScoreBadge score={featured.finalScore} size="large" />
+          </div>
+          {featured.riskSummaryHtml && (
+            <p class="card-excerpt">{excerpt(featured.riskSummaryHtml, 220)}</p>
+          )}
+          <div class="card-foot">
+            <span class="tier" style={`color:${scoreColor(featured.finalScore)};`}>
+              {scoreTier(featured.finalScore)}
+            </span>
+            <div class="score-bar" aria-hidden="true">
+              {[1, 2, 3, 4, 5].map((seg) => (
+                <span
+                  class:list={["score-seg", { active: seg <= Math.round(featured.finalScore) }]}
+                  style={seg <= Math.round(featured.finalScore) ? `background:${scoreColor(featured.finalScore)};` : ""}
+                />
+              ))}
+            </div>
+          </div>
+        </a>
+
+        <div class="followups">
+          {followups.map((r) => (
+            <a
+              href={`/report/${r.slug}/`}
+              class="report-card report-card--compact"
+              style={`--accent:${scoreColor(r.finalScore)};`}
+            >
+              <div class="card-glow" aria-hidden="true"></div>
+              <div class="card-head">
+                <div class="icon-stack icon-stack--sm">
                   {r.iconUrl ? (
-                    <img src={r.iconUrl} alt="" width="24" height="24" class="protocol-icon" loading="lazy" />
+                    <img src={r.iconUrl} alt="" width="32" height="32" class="protocol-icon" loading="lazy" />
                   ) : (
                     <div class="icon-placeholder" />
                   )}
@@ -40,63 +189,472 @@ const reports = getAllReports();
                     <img src={r.chainIconUrl} alt="" width="14" height="14" class="chain-icon" loading="lazy" />
                   )}
                 </div>
-              </td>
-              <td>
-                {r.name}
-                {r.warning && <span class="warning-tag">&#9888; {r.warning}</span>}
-              </td>
-              <td class="mono">{r.token}</td>
-              <td>
+                <div class="card-title">
+                  <div class="card-name">{r.name}</div>
+                  <div class="card-meta">
+                    <span class="mono">{r.token}</span>
+                    <span class="sep">·</span>
+                    <span title={r.date}>{formatRelative(r.dateSortable)}</span>
+                  </div>
+                </div>
                 <ScoreBadge score={r.finalScore} />
-              </td>
-              <td>{scoreTier(r.finalScore)}</td>
-            </tr>
-          ))
-        }
-      </tbody>
-    </table>
-  </div>
-  <script is:inline>
-    const searchInput = document.getElementById("report-search");
-    const rows = document.querySelectorAll("#reports-table tbody tr");
-    searchInput.addEventListener("input", () => {
-      const q = searchInput.value.toLowerCase();
-      rows.forEach((row) => {
-        const text = row.textContent.toLowerCase();
-        row.style.display = text.includes(q) ? "" : "none";
-      });
-    });
-  </script>
+              </div>
+              <div class="card-foot">
+                <span class="tier-sm" style={`color:${scoreColor(r.finalScore)};`}>
+                  {scoreTier(r.finalScore)}
+                </span>
+                <div class="score-bar" aria-hidden="true">
+                  {[1, 2, 3, 4, 5].map((seg) => (
+                    <span
+                      class:list={["score-seg", { active: seg <= Math.round(r.finalScore) }]}
+                      style={seg <= Math.round(r.finalScore) ? `background:${scoreColor(r.finalScore)};` : ""}
+                    />
+                  ))}
+                </div>
+              </div>
+            </a>
+          ))}
+        </div>
+      </div>
+
+      <script is:inline>
+        // Mouse-tracking glow inside each report card
+        (() => {
+          const cards = document.querySelectorAll(".report-card");
+          cards.forEach((card) => {
+            card.addEventListener("pointermove", (e) => {
+              const r = card.getBoundingClientRect();
+              card.style.setProperty("--mx", `${e.clientX - r.left}px`);
+              card.style.setProperty("--my", `${e.clientY - r.top}px`);
+            });
+            card.addEventListener("pointerleave", () => {
+              card.style.removeProperty("--mx");
+              card.style.removeProperty("--my");
+            });
+          });
+        })();
+      </script>
+    </section>
+  )}
+
+  <section class="features">
+    <div class="feature">
+      <div class="feature-num">01</div>
+      <h3>Transparent Scoring</h3>
+      <p>
+        Every assessment publishes its score breakdown — counterparty,
+        collateral, oracle, liquidity, contract risk — so the rationale is on the
+        page, not behind a paywall.
+      </p>
+    </div>
+    <div class="feature">
+      <div class="feature-num">02</div>
+      <h3>Continuous Monitoring</h3>
+      <p>
+        Curated assets and dependencies are tracked over time. When something
+        changes — governance, oracle, owner controls — the report and the
+        monitoring page reflect it.
+      </p>
+    </div>
+    <div class="feature">
+      <div class="feature-num">03</div>
+      <h3>Open & Reproducible</h3>
+      <p>
+        Reports live on GitHub. Anyone can read the data, file an issue on a
+        report they think is wrong, or follow the chain of references back to
+        the source.
+      </p>
+    </div>
+  </section>
+
+  <section class="chains-section">
+    <div class="chains-head">
+      <h2>TVL by chain</h2>
+      <span class="chains-meta">Updated {new Date(stats.updatedAt).toISOString().slice(0, 10)}</span>
+    </div>
+    <div class="chains-grid">
+      {chains.slice(0, 5).map(([name, value]) => (
+        <div class="chain-card">
+          <div class="chain-name">{name}</div>
+          <div class="chain-value">{formatTvl(value as number)}</div>
+        </div>
+      ))}
+    </div>
+  </section>
+
+  <section class="morpho-card">
+    <div class="morpho-head">
+      <img
+        src="https://icons.llamao.fi/icons/protocols/morpho?w=64&h=64"
+        alt="Morpho"
+        class="morpho-logo"
+        width="56"
+        height="56"
+        loading="lazy"
+      />
+      <div>
+        <div class="morpho-eyebrow">Live curation</div>
+        <h2>Yearn-curated vaults on Morpho</h2>
+      </div>
+    </div>
+    <p>
+      Yearn operates curator vaults on Morpho across Ethereum, Base and other
+      networks. Allocators can deposit directly into vaults whose risk envelope
+      matches the assessments published here.
+    </p>
+    <a href={morphoUrl} target="_blank" rel="noopener noreferrer" class="btn btn-primary">
+      Open Yearn vaults on Morpho
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+    </a>
+  </section>
 </BaseLayout>
 
 <style>
-  h1 {
-    margin-bottom: 1rem;
+  .hero {
+    padding: 3.5rem 0 2.5rem;
+    text-align: center;
   }
-  .search-row {
-    margin-bottom: 0.75rem;
-  }
-  .search-row input {
-    width: 100%;
-    max-width: 360px;
-    background: var(--bg-secondary);
-    color: var(--text-primary);
+  .eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.3rem 0.85rem;
     border: 1px solid var(--border);
-    border-radius: 4px;
-    padding: 0.4rem 0.6rem;
-    font-size: 0.85rem;
-  }
-  .search-row input::placeholder {
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--bg-secondary) 60%, transparent);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
     color: var(--text-secondary);
+    font-size: 0.78rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    margin-bottom: 1.5rem;
   }
-  .col-icon {
-    width: 36px;
-    padding-right: 0;
+  .eyebrow-dot {
+    width: 6px;
+    height: 6px;
+    background: var(--brand-blue);
+    border-radius: 50%;
+    box-shadow: 0 0 0 4px rgba(6, 117, 249, 0.18);
+  }
+  .hero-title {
+    font-size: clamp(2rem, 5vw, 3.4rem);
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    font-weight: 700;
+    margin: 0 auto 1.25rem;
+    max-width: 18ch;
+  }
+  .hero-accent {
+    background: linear-gradient(90deg, var(--brand-blue), #5aa8ff);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .hero-sub {
+    color: var(--text-secondary);
+    max-width: 56ch;
+    margin: 0 auto 2.5rem;
+    font-size: 1.05rem;
+    line-height: 1.5;
+  }
+
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    max-width: 720px;
+    margin: 0 auto 2.5rem;
+  }
+  .stat-card {
+    padding: 1.5rem 1.25rem;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: color-mix(in srgb, var(--bg-card) 60%, transparent);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    text-align: left;
+    position: relative;
+    overflow: hidden;
+  }
+  .stat-card::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      135deg,
+      rgba(6, 117, 249, 0.12) 0%,
+      transparent 50%
+    );
+    pointer-events: none;
+  }
+  .stat-value {
+    font-size: 2rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--text-primary);
+    line-height: 1;
+  }
+  .stat-label {
+    margin-top: 0.4rem;
+    font-size: 0.85rem;
+    color: var(--text-primary);
+    font-weight: 500;
+    display: flex;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+  }
+  .stat-source-inline {
+    font-size: 0.72rem;
+    color: var(--text-secondary);
+    font-weight: 400;
+    border-bottom: 1px dotted var(--border);
+  }
+  .stat-source-inline:hover {
+    color: var(--brand-blue);
+    text-decoration: none;
+  }
+
+  .hero-cta {
+    display: flex;
+    gap: 0.75rem;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.4rem;
+    font-size: 0.95rem;
+    font-weight: 600;
+    border-radius: 8px;
+    transition: transform 0.15s, background 0.15s, border-color 0.15s;
+    text-decoration: none;
+  }
+  .btn-primary {
+    background: var(--brand-blue);
+    color: #fff;
+    border: 1px solid var(--brand-blue);
+  }
+  .btn-primary:hover {
+    background: #0560d4;
+    border-color: #0560d4;
+    color: #fff;
+    text-decoration: none;
+    transform: translateY(-1px);
+  }
+  .btn-secondary {
+    background: color-mix(in srgb, var(--bg-secondary) 70%, transparent);
+    border: 1px solid var(--border);
+    color: var(--text-primary);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+  }
+  .btn-secondary:hover {
+    border-color: var(--text-secondary);
+    text-decoration: none;
+    transform: translateY(-1px);
+  }
+
+  /* === Latest assessments === */
+  .latest {
+    margin: 4rem 0 3rem;
+  }
+  .latest-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 1rem;
+    margin-bottom: 1.25rem;
+    flex-wrap: wrap;
+  }
+  .section-eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    color: var(--brand-blue);
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-weight: 600;
+    margin-bottom: 0.35rem;
+  }
+  .pulse-dot {
+    width: 6px;
+    height: 6px;
+    background: var(--brand-blue);
+    border-radius: 50%;
+    box-shadow: 0 0 0 0 rgba(6, 117, 249, 0.6);
+    animation: pulse 2s ease-out infinite;
+  }
+  @keyframes pulse {
+    0% { box-shadow: 0 0 0 0 rgba(6, 117, 249, 0.6); }
+    70% { box-shadow: 0 0 0 8px rgba(6, 117, 249, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(6, 117, 249, 0); }
+  }
+  .latest-head h2 {
+    font-size: 1.4rem;
+    letter-spacing: -0.01em;
+  }
+  .latest-all {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    padding: 0.4rem 0.75rem;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--bg-secondary) 50%, transparent);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    transition: color 0.15s, border-color 0.15s;
+  }
+  .latest-all:hover {
+    color: var(--text-primary);
+    border-color: var(--brand-blue);
+    text-decoration: none;
+  }
+
+  .latest-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
+    gap: 1rem;
+  }
+  .followups {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+
+  /* Card base */
+  .report-card {
+    --accent: var(--brand-blue);
+    --mx: 50%;
+    --my: 50%;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    padding: 1.4rem;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    background: color-mix(in srgb, var(--bg-card) 65%, transparent);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    color: var(--text-primary);
+    text-decoration: none;
+    overflow: hidden;
+    isolation: isolate;
+    transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+  }
+  .report-card:hover {
+    text-decoration: none;
+    transform: translateY(-2px);
+    border-color: color-mix(in srgb, var(--accent) 65%, var(--border));
+    box-shadow:
+      0 12px 30px -18px rgba(0, 0, 0, 0.6),
+      0 0 0 1px color-mix(in srgb, var(--accent) 25%, transparent);
+  }
+  /* Mouse-tracking glow */
+  .card-glow {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    opacity: 0;
+    background: radial-gradient(
+      300px circle at var(--mx, 50%) var(--my, 50%),
+      color-mix(in srgb, var(--accent) 18%, transparent),
+      transparent 60%
+    );
+    transition: opacity 0.25s;
+  }
+  .report-card:hover .card-glow {
+    opacity: 1;
+  }
+  /* Diagonal scan-line on the featured card hover */
+  .card-scan {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    opacity: 0;
+    background: linear-gradient(
+      120deg,
+      transparent 30%,
+      color-mix(in srgb, var(--accent) 18%, transparent) 50%,
+      transparent 70%
+    );
+    background-size: 200% 100%;
+    background-position: 100% 0;
+    transition: opacity 0.2s;
+  }
+  .report-card--featured:hover .card-scan {
+    opacity: 1;
+    animation: scan 1.4s ease-out forwards;
+  }
+  @keyframes scan {
+    from { background-position: 100% 0; }
+    to { background-position: -100% 0; }
+  }
+
+  .report-card--featured {
+    grid-row: span 1;
+    min-height: 280px;
+    background:
+      linear-gradient(135deg, color-mix(in srgb, var(--accent) 8%, transparent), transparent 60%),
+      color-mix(in srgb, var(--bg-card) 70%, transparent);
+  }
+
+  .card-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.78rem;
+  }
+  .latest-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    color: var(--brand-blue);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-size: 0.7rem;
+    padding: 0.2rem 0.55rem;
+    border: 1px solid color-mix(in srgb, var(--brand-blue) 40%, transparent);
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--brand-blue) 10%, transparent);
+  }
+  .latest-badge-dot {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--brand-blue);
+    box-shadow: 0 0 0 0 rgba(6, 117, 249, 0.5);
+    animation: pulse 2s ease-out infinite;
+  }
+  .card-date {
+    color: var(--text-secondary);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .card-head {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
   }
   .icon-stack {
     position: relative;
-    width: 24px;
-    height: 24px;
+    width: 44px;
+    height: 44px;
+    flex-shrink: 0;
+  }
+  .icon-stack--sm {
+    width: 32px;
+    height: 32px;
   }
   .protocol-icon {
     display: block;
@@ -104,46 +662,248 @@ const reports = getAllReports();
   }
   .chain-icon {
     position: absolute;
-    bottom: -4px;
-    right: -6px;
+    bottom: -3px;
+    right: -5px;
     border-radius: 50%;
-    border: 1.5px solid var(--bg-primary);
-    background: var(--bg-primary);
+    border: 2px solid var(--bg-card);
+    background: var(--bg-card);
   }
   .icon-placeholder {
-    width: 24px;
-    height: 24px;
+    width: 100%;
+    height: 100%;
     border-radius: 50%;
     background: var(--bg-secondary);
   }
-  .warning-tag {
-    display: inline-block;
-    background: #dc2626;
-    color: #fff;
-    font-size: 0.7rem;
+  .card-title {
+    flex: 1;
+    min-width: 0;
+  }
+  .card-name {
+    font-size: 1.05rem;
     font-weight: 600;
-    padding: 0.15rem 0.4rem;
-    border-radius: 4px;
-    margin-left: 0.5rem;
-    vertical-align: middle;
+    letter-spacing: -0.01em;
+    color: var(--text-primary);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .report-card--featured .card-name {
+    font-size: 1.25rem;
+  }
+  .card-meta {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    margin-top: 0.15rem;
+  }
+  .card-meta .sep {
+    opacity: 0.4;
   }
   .mono {
     font-family: "SF Mono", "Fira Code", monospace;
-    font-size: 0.85em;
+    font-size: 0.92em;
   }
-  tbody tr {
-    cursor: pointer;
+
+  .card-excerpt {
+    color: var(--text-secondary);
+    font-size: 0.92rem;
+    line-height: 1.55;
+    margin: 0;
+    flex: 1;
   }
-  tbody tr:hover {
-    background: var(--bg-secondary);
+
+  .card-foot {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    margin-top: auto;
+    padding-top: 0.5rem;
   }
-  @media (max-width: 640px) {
-    table {
-      font-size: 0.8rem;
+  .tier {
+    font-size: 0.85rem;
+    font-weight: 600;
+  }
+  .tier-sm {
+    font-size: 0.75rem;
+    font-weight: 600;
+  }
+  .score-bar {
+    display: flex;
+    gap: 3px;
+  }
+  .score-seg {
+    width: 14px;
+    height: 5px;
+    border-radius: 2px;
+    background: var(--border);
+    transition: background 0.2s;
+  }
+  .report-card--compact .score-seg {
+    width: 10px;
+    height: 4px;
+  }
+
+  @media (max-width: 880px) {
+    .latest-grid {
+      grid-template-columns: 1fr;
     }
-    th,
-    td {
-      padding: 0.4rem 0.5rem;
+    .followups {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+  @media (max-width: 540px) {
+    .followups {
+      grid-template-columns: 1fr;
+    }
+    .report-card--featured {
+      min-height: 0;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .pulse-dot,
+    .latest-badge-dot {
+      animation: none;
+    }
+    .report-card--featured:hover .card-scan {
+      animation: none;
+    }
+  }
+
+  .features {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    margin: 4rem 0 3rem;
+  }
+  .feature {
+    padding: 1.5rem;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: color-mix(in srgb, var(--bg-card) 55%, transparent);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+  .feature-num {
+    font-family: "SF Mono", "Fira Code", monospace;
+    font-size: 0.75rem;
+    color: var(--brand-blue);
+    margin-bottom: 0.5rem;
+    letter-spacing: 0.1em;
+  }
+  .feature h3 {
+    font-size: 1.05rem;
+    margin-bottom: 0.5rem;
+  }
+  .feature p {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    line-height: 1.55;
+  }
+
+  .chains-section {
+    margin: 3rem 0;
+  }
+  .chains-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  .chains-head h2 {
+    font-size: 1.1rem;
+  }
+  .chains-meta {
+    font-size: 0.78rem;
+    color: var(--text-secondary);
+  }
+  .chains-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 0.75rem;
+  }
+  .chain-card {
+    padding: 0.85rem 1rem;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: color-mix(in srgb, var(--bg-card) 50%, transparent);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+  }
+  .chain-name {
+    font-size: 0.78rem;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  .chain-value {
+    font-size: 1.05rem;
+    font-weight: 600;
+    margin-top: 0.2rem;
+  }
+
+  .morpho-card {
+    margin: 4rem 0 1rem;
+    padding: 2rem;
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    background:
+      linear-gradient(135deg, rgba(6, 117, 249, 0.1), transparent 60%),
+      color-mix(in srgb, var(--bg-card) 65%, transparent);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    position: relative;
+    overflow: hidden;
+  }
+  .morpho-head {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+  }
+  .morpho-logo {
+    border-radius: 12px;
+    background: #fff;
+    padding: 4px;
+    flex-shrink: 0;
+  }
+  .morpho-eyebrow {
+    font-size: 0.72rem;
+    color: var(--brand-blue);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-weight: 600;
+  }
+  .morpho-card h2 {
+    font-size: 1.25rem;
+    margin-top: 0.1rem;
+  }
+  .morpho-card p {
+    color: var(--text-secondary);
+    margin-bottom: 1.25rem;
+    max-width: 60ch;
+  }
+
+  @media (max-width: 720px) {
+    .stats {
+      grid-template-columns: 1fr;
+    }
+    .features {
+      grid-template-columns: 1fr;
+    }
+    .hero {
+      padding: 2rem 0 1.5rem;
+    }
+    .hero-cta {
+      flex-direction: column;
+      align-items: stretch;
+    }
+    .btn {
+      justify-content: center;
     }
   }
 </style>

@@ -27,6 +27,11 @@ html.light {
   padding: 0;
 }
 
+html,
+body {
+  overflow-x: hidden;
+}
+
 html {
   color-scheme: dark;
 }
