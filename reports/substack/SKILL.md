@@ -31,11 +31,25 @@ Before generating images, write two custom Mermaid diagrams to `reports/substack
 - `architecture.mmd` — Contract + fund-flow diagram. Nodes: user, vault proxy, implementation, and the external contracts that actually hold or route funds (e.g., withdrawal queues, lending vaults, strategies). 6-12 nodes max. Use `graph TB`.
 - `governance.mmd` — Control chain diagram. Nodes: token/voters, governor, timelock, admin surface of the contract, plus any off-chain-delay roles (multisigs, operator EOAs) with a label noting their protection (or lack of it). 6-12 nodes max. Use `graph TB`.
 
-Style tips:
-- Highlight the central contract node: `style NodeId fill:#0675F9,color:#fff`
-- Highlight un-timelocked / EOA-level roles in red: `fill:#EF4444,color:#fff`
-- Use `-.->` (dotted) for "can cancel / emergency" edges, solid `-->` for normal flow
+**Required frontmatter** at the top of every `.mmd` file (Excalidraw-style hand-drawn look on a light "paper" background):
+
+```
+---
+config:
+  look: handDrawn
+  theme: neutral
+---
+graph TB
+    ...
+```
+
+Style tips (use Excalidraw pastel palette + black text — the rough.js hatch fill is heavy, so light fills read better):
+- Highlight the central contract node with pastel blue: `classDef central fill:#a5d8ff,color:#0c0c0c,stroke:#0c0c0c,stroke-width:2px`
+- Highlight un-timelocked / EOA-level roles with pastel red: `classDef unprotected fill:#ffc9c9,color:#0c0c0c,stroke:#0c0c0c,stroke-width:2px`
+- Mark isolated/no-power nodes (e.g., a deployer EOA with zero roles) with a dashed gray border: `classDef isolated fill:#f4f4f4,color:#666,stroke:#999,stroke-dasharray:4`
+- Use `-.->` (dotted) for "can cancel / emergency / off-band" edges, solid `-->` for normal flow
 - Keep node labels terse (2-4 words). Put detail on edges with `-->|label|`
+- Avoid commas inside edge labels — they can confuse the mermaid.ink renderer. Use `·` or split across two edges.
 
 Base every node and edge on the source report — do not invent contracts or roles.
 

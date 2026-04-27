@@ -120,8 +120,15 @@ def render_protocol_mermaid(protocol_id: str) -> str | None:
 
     infrastructure = pdata.get("infrastructure", [])
 
-    # Build mermaid graph
-    lines = ["graph LR"]
+    # Build mermaid graph (Excalidraw-style hand-drawn look)
+    lines = [
+        "---",
+        "config:",
+        "  look: handDrawn",
+        "  theme: neutral",
+        "---",
+        "graph LR",
+    ]
 
     # Central protocol node
     def node_id(name: str) -> str:
@@ -162,8 +169,10 @@ def render_protocol_mermaid(protocol_id: str) -> str | None:
         lines.append(f"    {iid}{{{{{infra}}}}}")
         lines.append(f"    {pid_node} -.-> {iid}")
 
-    # Style
-    lines.append(f"    classDef protocol fill:#0675F9,color:#fff,stroke:#0675F9")
+    # Style — central protocol node highlighted with pastel blue + black text
+    lines.append(
+        "    classDef protocol fill:#a5d8ff,color:#0c0c0c,stroke:#0c0c0c,stroke-width:2px"
+    )
     lines.append(f"    class {pid_node} protocol")
 
     return "\n".join(lines)
@@ -184,10 +193,8 @@ def _try_mmdc(mermaid_text: str, output_path: Path) -> bool:
                 mmd_path,
                 "-o",
                 str(output_path),
-                "-t",
-                "dark",
                 "-b",
-                "#0c0c0c",
+                "#ffffff",
                 "--scale",
                 "2",
             ],
@@ -201,9 +208,14 @@ def _try_mmdc(mermaid_text: str, output_path: Path) -> bool:
 
 
 def _try_mermaid_ink(mermaid_text: str, output_path: Path) -> bool:
-    """Fallback: render via mermaid.ink hosted API."""
+    """Fallback: render via mermaid.ink hosted API.
+
+    Theme/look is controlled by frontmatter inside each .mmd file
+    (e.g. `look: handDrawn`). We pass a white bgColor so Excalidraw-style
+    light diagrams render with a paper background; the diagram theme itself
+    is set per-file."""
     encoded = base64.urlsafe_b64encode(mermaid_text.encode()).decode()
-    url = f"https://mermaid.ink/img/{encoded}?type=png&theme=dark&bgColor=0c0c0c"
+    url = f"https://mermaid.ink/img/{encoded}?type=png&bgColor=ffffff"
 
     try:
         resp = requests.get(url, timeout=30)

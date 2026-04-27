@@ -1,3 +1,8 @@
+---
+config:
+  look: handDrawn
+  theme: neutral
+---
 graph TB
     User([User])
     Proxy["ARM Proxy<br/>(ERC4626 vault)"]
@@ -16,7 +21,5 @@ graph TB
     LidoWQ -->|WETH back| Proxy
     Proxy -->|idle| Morpho
 
-    classDef central fill:#0675F9,color:#fff,stroke:#0675F9
-    classDef external fill:#1a1a1a,color:#e0e0e0,stroke:#444
+    classDef central fill:#a5d8ff,color:#0c0c0c,stroke:#0c0c0c,stroke-width:2px
     class Proxy central
-    class LidoWQ,Morpho,DEX external

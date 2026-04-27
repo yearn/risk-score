@@ -1,0 +1,26 @@
+---
+config:
+  look: handDrawn
+  theme: neutral
+---
+graph TB
+    User([User])
+    Vault["yvUSDC-1 Vault<br/>ERC-4626 · immutable"]
+    SkyStrat["sUSDS Lender Strategy<br/>~41% of TVL"]
+    MorphoStrat["Morpho USDC Compounders<br/>3 strategies · ~59% of TVL"]
+    PSM["MakerDAO PSM Lite<br/>USDC → DAI · 1:1 · 0% fee"]
+    Exchanger["Sky DAI-USDS Exchanger<br/>DAI → USDS · 1:1"]
+    sUSDS["sUSDS<br/>Sky Savings Rate"]
+    Morpho["Morpho<br/>Gauntlet · Steakhouse · OEV"]
+
+    User -->|deposit USDC| Vault
+    Vault -->|yvUSDC-1 shares| User
+    Vault --> SkyStrat
+    Vault --> MorphoStrat
+    SkyStrat --> PSM
+    PSM --> Exchanger
+    Exchanger --> sUSDS
+    MorphoStrat --> Morpho
+
+    classDef central fill:#a5d8ff,color:#0c0c0c,stroke:#0c0c0c,stroke-width:2px
+    class Vault central

@@ -6,23 +6,20 @@ config:
 graph TB
     Daddy["Daddy / ySafe<br/>6-of-9 multisig<br/>sole PROPOSER"]
     Brain["Brain<br/>3-of-8 multisig<br/>operations"]
-    Security["Security<br/>4-of-7 multisig<br/>emergency"]
+    Security["Security<br/>4-of-7 multisig<br/>Role Manager admin"]
     Timelock["Timelock Controller<br/>7-day delay"]
-    Vault["yvUSD Vault<br/>(immutable, no upgrades)"]
-    Keeper["Keeper + Debt Allocator<br/>(bots, reporting only)"]
-    Deployer["Deployer EOA<br/>0 vault roles<br/>fee-splitter only"]
+    Vault["yvUSDC-1 Vault<br/>(immutable · no upgrades)"]
+    Keeper["Keeper + Debt Allocator<br/>(bots · reporting only)"]
 
-    Daddy -->|propose critical changes| Timelock
+    Daddy -->|propose strategy adds| Timelock
     Timelock -->|execute after 7d| Vault
     Brain -.->|can cancel| Timelock
     Daddy -.->|can cancel| Timelock
     Brain -->|operational roles| Vault
-    Security -->|emergency shutdown| Vault
+    Security -->|emergency · Role Manager| Vault
     Keeper -->|programmatic reporting| Vault
 
     classDef central fill:#a5d8ff,color:#0c0c0c,stroke:#0c0c0c,stroke-width:2px
     classDef protected fill:#a5d8ff,color:#0c0c0c,stroke:#0c0c0c,stroke-width:2px
-    classDef isolated fill:#f4f4f4,color:#666,stroke:#999,stroke-dasharray:4
     class Vault central
     class Timelock protected
-    class Deployer isolated

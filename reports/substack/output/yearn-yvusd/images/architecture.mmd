@@ -1,3 +1,8 @@
+---
+config:
+  look: handDrawn
+  theme: neutral
+---
 graph TB
     User([User])
     Vault["yvUSD Vault<br/>ERC-4626 · immutable"]
@@ -22,7 +27,5 @@ graph TB
     PT --> Morpho
     Looper -.-> CCTP
 
-    classDef central fill:#0675F9,color:#fff,stroke:#0675F9
-    classDef external fill:#1a1a1a,color:#e0e0e0,stroke:#444
+    classDef central fill:#a5d8ff,color:#0c0c0c,stroke:#0c0c0c,stroke-width:2px
     class Vault central
-    class Morpho,Maple,SkySpark,CCTP external

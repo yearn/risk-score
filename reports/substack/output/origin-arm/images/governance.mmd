@@ -1,3 +1,8 @@
+---
+config:
+  look: handDrawn
+  theme: neutral
+---
 graph TB
     Holders["xOGN Holders<br/>(staked OGN)"]
     Gov["Origin DeFi Governance<br/>24h delay + 48h voting"]
@@ -15,9 +20,9 @@ graph TB
     Operator -->|set buy/sell prices| ARM
     CrossPrice -.->|bounds| Operator
 
-    classDef central fill:#0675F9,color:#fff,stroke:#0675F9
-    classDef protected fill:#0675F9,color:#fff,stroke:#0675F9
-    classDef unprotected fill:#EF4444,color:#fff,stroke:#EF4444
+    classDef central fill:#a5d8ff,color:#0c0c0c,stroke:#0c0c0c,stroke-width:2px
+    classDef protected fill:#a5d8ff,color:#0c0c0c,stroke:#0c0c0c,stroke-width:2px
+    classDef unprotected fill:#ffc9c9,color:#0c0c0c,stroke:#0c0c0c,stroke-width:2px
     class ARM central
     class Timelock,CrossPrice protected
     class Operator unprotected
