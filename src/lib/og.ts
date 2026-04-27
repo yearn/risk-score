@@ -256,6 +256,9 @@ export async function generateDefaultOgImage(): Promise<Buffer> {
           display: "flex",
           flexDirection: "column",
           backgroundColor: "#0c0c0c",
+          // Subtle blue glow anchored top-right, matching the landing hero
+          backgroundImage:
+            "radial-gradient(circle at 85% 12%, rgba(6, 117, 249, 0.32), rgba(6, 117, 249, 0.08) 35%, transparent 60%)",
         },
         children: [
           // Top accent bar
@@ -265,7 +268,8 @@ export async function generateDefaultOgImage(): Promise<Buffer> {
               style: {
                 width: "100%",
                 height: "6px",
-                background: "linear-gradient(90deg, #0675F9 0%, #0675F9 60%, transparent 100%)",
+                background:
+                  "linear-gradient(90deg, #0675F9 0%, #0675F9 60%, transparent 100%)",
               },
             },
           },
@@ -276,48 +280,90 @@ export async function generateDefaultOgImage(): Promise<Buffer> {
               style: {
                 display: "flex",
                 flexDirection: "column",
-                padding: "60px 60px",
+                padding: "0 80px",
                 flex: "1",
                 justifyContent: "center",
                 alignItems: "center",
-                gap: "30px",
+                gap: "32px",
               },
               children: [
+                // Eyebrow pill
                 {
                   type: "div",
                   props: {
                     style: {
-                      fontSize: "28px",
-                      fontWeight: 700,
-                      color: "#0675F9",
-                      letterSpacing: "3px",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "12px",
+                      padding: "10px 22px",
+                      border: "1px solid #424242",
+                      borderRadius: "999px",
+                      backgroundColor: "rgba(40, 40, 40, 0.6)",
                     },
-                    children: "YEARN CURATION",
+                    children: [
+                      {
+                        type: "div",
+                        props: {
+                          style: {
+                            width: "12px",
+                            height: "12px",
+                            borderRadius: "999px",
+                            backgroundColor: "#0675F9",
+                            boxShadow: "0 0 0 6px rgba(6, 117, 249, 0.18)",
+                          },
+                        },
+                      },
+                      {
+                        type: "div",
+                        props: {
+                          style: {
+                            fontSize: "20px",
+                            fontWeight: 700,
+                            color: "#9d9d9d",
+                            letterSpacing: "2px",
+                            textTransform: "uppercase",
+                          },
+                          children: "Independent DeFi Risk Curation",
+                        },
+                      },
+                    ],
                   },
                 },
+                // Title — two lines, second line in brand blue
                 {
                   type: "div",
                   props: {
                     style: {
-                      fontSize: "64px",
-                      fontWeight: 700,
-                      color: "#f4f4f4",
-                      textAlign: "center",
-                      lineHeight: 1.2,
+                      display: "flex",
+                      flexDirection: "column",
+                      alignItems: "center",
+                      lineHeight: 1.05,
+                      letterSpacing: "-2px",
                     },
-                    children: "Risk Assessment Reports",
-                  },
-                },
-                {
-                  type: "div",
-                  props: {
-                    style: {
-                      fontSize: "24px",
-                      color: "#9d9d9d",
-                      textAlign: "center",
-                    },
-                    children:
-                      "Independent risk evaluations for DeFi protocols and assets",
+                    children: [
+                      {
+                        type: "div",
+                        props: {
+                          style: {
+                            fontSize: "108px",
+                            fontWeight: 700,
+                            color: "#f4f4f4",
+                          },
+                          children: "Risk-curated yield",
+                        },
+                      },
+                      {
+                        type: "div",
+                        props: {
+                          style: {
+                            fontSize: "108px",
+                            fontWeight: 700,
+                            color: "#0675F9",
+                          },
+                          children: "by Yearn.",
+                        },
+                      },
+                    ],
                   },
                 },
               ],
