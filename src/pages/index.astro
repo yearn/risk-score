@@ -65,7 +65,7 @@ const followups = recent.slice(1);
     <div class="stats">
       <div class="stat-card">
         <div class="stat-value">{tvlDisplay}</div>
-        <div class="stat-label">TVL Curated</div>
+        <div class="stat-label">Yearn TVL</div>
         <div class="stat-source">
           <a
             href="https://defillama.com/protocol/yearn"
@@ -269,11 +269,11 @@ const followups = recent.slice(1);
 
   <section class="chains-section">
     <div class="chains-head">
-      <h2>Curated TVL by chain</h2>
+      <h2>TVL by chain</h2>
       <span class="chains-meta">Updated {new Date(stats.updatedAt).toISOString().slice(0, 10)}</span>
     </div>
     <div class="chains-grid">
-      {chains.map(([name, value]) => (
+      {chains.slice(0, 5).map(([name, value]) => (
         <div class="chain-card">
           <div class="chain-name">{name}</div>
           <div class="chain-value">{formatTvl(value as number)}</div>
