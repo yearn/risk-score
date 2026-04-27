@@ -1,3 +1,9 @@
+/*
+ * Design tokens. Treat these as the source of truth for color and width;
+ * pages should never hardcode greys, blues, or backgrounds. New surfaces
+ * follow the existing frosted-glass recipe (color-mix(--bg-card, N%) +
+ * backdrop-filter: blur) — see reports.astro / tokens.astro for examples.
+ */
 :root {
   --brand-blue: #0675f9;
   --bg-primary: #0c0c0c;

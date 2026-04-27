@@ -1,19 +1,19 @@
 {
   "reportCount": 25,
   "tvl": {
-    "total": 252339378,
+    "total": 248111793,
     "byChain": {
       "Fantom": 160061,
-      "Base": 2902476,
+      "Base": 2903038,
       "Polygon": 386074,
-      "Katana": 72255839,
-      "Arbitrum": 427805,
+      "Katana": 68009661,
+      "Arbitrum": 427816,
       "OP Mainnet": 2060001,
-      "Ethereum": 173836805,
-      "Hyperliquid L1": 310317
+      "Ethereum": 173854802,
+      "Hyperliquid L1": 310340
     }
   },
   "chainCount": 8,
-  "updatedAt": "2026-04-27T19:08:24.411Z",
+  "updatedAt": "2026-04-27T19:58:48.664Z",
   "tvlSource": "live"
 }
