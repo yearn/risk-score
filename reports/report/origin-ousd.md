@@ -338,7 +338,7 @@ No single-point-of-failure that would break the protocol entirely, but USDC depe
 
 #### Category 4: Liquidity Risk (Weight: 15%) — **2.5**
 
-- Direct vault redemption with 10-minute to 24-hour delay
+- Async withdrawal queue: 10-minute minimum delay (`withdrawalClaimDelay` = 600s) plus queue liquidity catch-up; no on-chain upper bound
 - Curve OUSD/USDC pool ~$3.4M TVL provides instant swap liquidity
 - Vault buffer is 0 — larger redemptions require strategy unwinding
 - Cross-chain assets (~$897K) require CCTP bridging back to Ethereum
