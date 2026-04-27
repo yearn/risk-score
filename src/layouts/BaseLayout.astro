@@ -271,16 +271,32 @@ const ogImageUrl = new URL(ogImage, Astro.site ?? Astro.url.origin).href;
     display: flex;
     align-items: center;
     gap: 1.5rem;
+    min-width: 0;
   }
   .header-left {
     display: flex;
     align-items: center;
     gap: 1.5rem;
+    min-width: 0;
+    flex: 1;
   }
   .header-nav {
     display: flex;
     gap: 1rem;
     font-size: 0.85rem;
+    min-width: 0;
+    overflow-x: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    /* Soft fade on the right edge so cut-off items hint at scrollability */
+    mask-image: linear-gradient(90deg, #000 calc(100% - 24px), transparent);
+    -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 24px), transparent);
+  }
+  .header-nav::-webkit-scrollbar {
+    display: none;
+  }
+  .header-nav a {
+    white-space: nowrap;
   }
   .header-nav a {
     color: var(--text-secondary);
@@ -345,6 +361,17 @@ const ogImageUrl = new URL(ogImage, Astro.site ?? Astro.url.origin).href;
   main.container {
     padding-top: 2rem;
     padding-bottom: 4rem;
+  }
+  @media (max-width: 720px) {
+    .header-row {
+      gap: 0.75rem;
+    }
+    .header-left {
+      gap: 0.85rem;
+    }
+    .container {
+      padding: 0 0.85rem;
+    }
   }
   @media (max-width: 540px) {
     .nav-external {
