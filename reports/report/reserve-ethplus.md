@@ -73,10 +73,11 @@ The current onchain `Main` implementation (`version() = "4.2.0"`) was deployed a
 
 ### Bug Bounty
 
-**Platform:** Immunefi
-**Maximum Payout:** $10,000,000
-**Status:** Active per Immunefi (live since 2023-04-27; last updated 2025-06-26)
-**Link:** https://immunefi.com/bug-bounty/reserve/
+**Platform:** Cantina
+**Maximum Payout:** $10,000,000 (Critical tier)
+**Severity tiers:** Critical $10M / High $100k / Medium $5k / Low $1k
+**Status:** Live (launched 2026-03-26; 106 findings submitted as of this assessment)
+**Link:** https://cantina.xyz/bounties/3709ca85-4050-407e-9b36-51f5d5ea9b00
 
 Reserve Protocol is **not** enrolled in the SEAL Safe Harbor agreement (verified via [safeharbor.securityalliance.org](https://safeharbor.securityalliance.org/)).
 
