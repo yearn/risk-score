@@ -411,11 +411,14 @@ The protocol is controlled by a 3-of-6 Gnosis Safe multisig. **Proxy upgrades ar
   - Monitor `totalSupply()` for unexpected minting events
   - **Alert**: Minting >10M USN in a single day (matches `directMintLimitPerDay`)
   - Monitor `Transfer` events from/to collateral wallets
+  - Monitor for `setAdmin(address)` calls (selector `0x704b6c02`) — replaces the USN minter address without timelock; a malicious admin could mint unlimited USN
+  - **Alert**: Immediately on any `setAdmin()` call (i.e., any time the USN admin moves away from MinterHandlerV2 [`0xB91b361ebE4022Bb62dF0651bDD09b21209ac058`](https://etherscan.io/address/0xB91b361ebE4022Bb62dF0651bDD09b21209ac058))
 - **MinterHandlerV2**: [`0xB91b361ebE4022Bb62dF0651bDD09b21209ac058`](https://etherscan.io/address/0xB91b361ebE4022Bb62dF0651bDD09b21209ac058)
   - Monitor `MintAndRebase(amount)` events — each call mints USN without collateral
   - **Alert**: If `mintAndRebase` called more than once per day or with amount close to `rebaseLimit`
-  - Monitor for `setRebaseLimit()`, `setAdmin()` calls — parameter changes with no timelock
-  - **Alert**: Immediately on any `rebaseLimit` or USN admin change
+  - Monitor for `setRebaseLimit(uint256)` calls — parameter changes with no timelock
+  - **Alert**: Immediately on any `rebaseLimit` change
+  - Monitoring may also be done by tracking the multisig Safe's outgoing transactions filtered by target contract (USN vs MinterHandlerV2) rather than by event-name parsing
 
 ### Governance Monitoring
 
@@ -453,10 +456,16 @@ The protocol is controlled by a 3-of-6 Gnosis Safe multisig. **Proxy upgrades ar
 ### Morpho Market Monitoring
 
 - **Oracle**: [`0xC415Cc3F04F9074A9562aEEe02591e65D39A94aa`](https://etherscan.io/address/0xC415Cc3F04F9074A9562aEEe02591e65D39A94aa)
-  - Monitor oracle price for staleness or deviation from sUSN vault exchange rate
-  - **Alert**: If Stork feed deviates >1% from sUSN's on-chain `convertToAssets()` value
-- **Stork Base Feed**: [`0x6e498b02C0036235c8164A502b0eECC7660BD889`](https://etherscan.io/address/0x6e498b02C0036235c8164A502b0eECC7660BD889)
-  - Monitor for staleness or unexpected answer changes
+  - Monitor `price()` against the expected formula `convertToAssets(1e18) × USN/USD ÷ USDC/USD` (after normalizing decimals — BASE_VAULT 18 dec, BASE_FEED_1 18 dec, QUOTE_FEED_1 8 dec, SCALE_FACTOR 1e6, output 36 dec)
+  - **Alert**: If `price()` deviates >1% from the expected value (indicates Stork or Chainlink USDC/USD feed misbehavior)
+- **Stork USN/USD feed (BASE_FEED_1)**: [`0x6e498b02C0036235c8164A502b0eECC7660BD889`](https://etherscan.io/address/0x6e498b02C0036235c8164A502b0eECC7660BD889)
+  - This is a USN/USD price feed (currently a constant `1e18` = $1.00), **not** an sUSN/USN exchange rate — do not compare it to `convertToAssets()` directly
+  - **Alert**: If `latestAnswer()` deviates >0.5% from `1e18` ($1.00) — would indicate Stork is now reporting a USN depeg
+  - **Alert**: If the off-chain market USN/USD price (CoinGecko/DEX) deviates >1% from the Stork-reported value — oracle-vs-market divergence is the primary depeg risk because the Morpho oracle would then overvalue sUSN collateral
+  - Note on staleness: the Stork adapter's `latestRoundData()` returns a non-Unix value in `updatedAt`, so wall-clock staleness checks against `block.timestamp` will not work — fall back to monitoring whether the feed value has updated within the expected cadence
+- **Chainlink USDC/USD feed (QUOTE_FEED_1)**: [`0x8fFfFfd4AfB6115b954Bd326cbe7B4BA576818f6`](https://etherscan.io/address/0x8fFfFfd4AfB6115b954Bd326cbe7B4BA576818f6)
+  - Standard Chainlink staleness checks apply — `updatedAt` is a normal Unix timestamp
+  - **Alert**: If `latestAnswer()` deviates >0.5% from $1.00 or `updatedAt` is older than the feed's heartbeat
 
 ### Monitoring Frequency
 
