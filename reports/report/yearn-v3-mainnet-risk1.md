@@ -33,7 +33,7 @@ All six are registered as **Category 1** in the Role Manager (`getCategory(vault
 
 **USD TVL (Chainlink, snapshot):** ETH/USD = $2,288.82, BTC/USD = $76,879.12, WBTC/BTC = 0.99785 (feeds [`0x5f4eC3Df…b8419`](https://etherscan.io/address/0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419), [`0xF4030086…E88c`](https://etherscan.io/address/0xF4030086522a5bEEa4988F8cA5B36dbC97BeE88c), [`0xfdFD9C85…BB23`](https://etherscan.io/address/0xfdFD9C85aD200c506Cf9e21F1FD8dd01932FBB23)).
 
-| Vault | Native TVL | USD TVL |
+| Vault | Native TVL (gross `totalAssets`) | USD TVL (gross) |
 |-------|-----------:|--------:|
 | yvUSDC-1 | 28,311,547 USDC | ~$28.31M |
 | yvUSDS-1 | 35,236,511 USDS | ~$35.24M |
@@ -41,12 +41,30 @@ All six are registered as **Category 1** in the Role Manager (`getCategory(vault
 | yvDAI-1 | 8,565,115 DAI | ~$8.57M |
 | yvUSDT-1 | 7,124,701 USDT | ~$7.12M |
 | yvWBTC-1 | 47.5051 WBTC | ~$3.64M |
-| **Combined** | | **~$92.21M** |
+| **Combined (gross sum)** | | **~$92.21M** |
 
-**Notes on idle balances (rsETH-related deallocation):**
+**Important — gross vs net:** the **Combined** row is the gross sum of each vault's `totalAssets()` and **double-counts capital that flows through nested vault-of-vaults strategies**. At block 24974187, the internal positions are:
 
-- **yvUSDT-1 (100% idle), yvWBTC-1 (100% idle), and yvWETH-1 (~67% idle)** reflect a precautionary deallocation by Yearn following the recent **rsETH (KelpDAO) incident**. Funds that were previously deployed into strategies with potential indirect rsETH exposure (e.g. via Morpho/Aave markets that accept rsETH collateral) were withdrawn back to vault idle. None of the queued strategies in these vaults reference rsETH directly, so the deallocation is precautionary, not corrective.
-- yvUSDC-1, yvUSDS-1, and yvDAI-1 are all ~99%+ deployed (their funding routes through Sky / Spark, with no rsETH-adjacent surface).
+- yvUSDC-1's `USDC to USDS Depositor` holds yvUSDS shares worth ~$28.15M USDS (counted in both yvUSDC-1 and yvUSDS-1)
+- yvDAI-1's `DAI to USDC-1 Depositor` holds yvUSDC shares worth ~$6.21M USDC (counted in yvDAI-1 and yvUSDC-1, and through yvUSDC-1's onward routing also in yvUSDS-1)
+- yvDAI-1's `DAI to USDS Depositor` holds yvUSDS shares worth ~$2.36M USDS (counted in both yvDAI-1 and yvUSDS-1)
+
+Removing the ~$36.72M of internal cross-counting, the **net unique outside capital** is approximately:
+
+| Bucket | Net unique TVL |
+|--------|---------------:|
+| Stables (yvUSDC-1 + yvUSDS-1 + yvDAI-1 + yvUSDT-1, de-duplicated) | **~$42.52M** |
+| yvWETH-1 | ~$9.33M |
+| yvWBTC-1 | ~$3.64M |
+| **Net combined** | **~$55.49M** |
+
+Liquidity-depth and capacity comparisons throughout the report should be read against the **net** figure; growth/concentration thresholds in the Reassessment Triggers section refer to per-vault gross `totalAssets()` (as reported on-chain).
+
+**Notes on idle balances:**
+
+- **On-chain (verified):** yvUSDT-1 is 100% idle (`totalDebt = 0`), yvWBTC-1 is 100% idle (`totalDebt = 0`), and yvWETH-1 is ~67% idle (1,350 WETH of 4,078 WETH deployed to the stETH Accumulator only).
+- **Team-provided attribution (not on-chain verifiable):** per the Yearn team, this idle posture reflects a precautionary deallocation following the recent rsETH (KelpDAO) incident — funds were pulled from strategies whose underlying markets *could* indirectly hold rsETH as collateral (e.g. Morpho/Aave markets that accept rsETH). None of the queued strategies on these vaults reference rsETH directly, so the deallocation is precautionary, not corrective. **This causal claim has not been verified against an on-chain or off-chain source independent of the team.**
+- yvUSDC-1, yvUSDS-1, and yvDAI-1 remain ~99%+ deployed; their funding routes through Sky / Spark and have no rsETH-adjacent surface.
 - **TODO:** rerun this assessment once Yearn re-deploys funds back into yvUSDT-1, yvWBTC-1, and the idle portion of yvWETH-1, so the strategy mix and dependency profile reflect steady-state operation.
 
 **Fees:** 0% management fee, **10% performance fee** at the vault level (shared accountant [`0x5A74Cb32D36f2f517DB6f7b0A0591e09b22cDE69`](https://etherscan.io/address/0x5A74Cb32D36f2f517DB6f7b0A0591e09b22cDE69), `defaultConfig() = (0, 1000, 0, 10000, 20000, 1)`). Same fee schedule applies to all six vaults.
@@ -140,7 +158,7 @@ The **Spark USDS Compounder** stakes USDS into the Sky **USDS Staking Rewards** 
 | Morpho Gauntlet WETH Prime Compounder | [`0xeEB6Be70fF212238419cD638FAB17910CF61CBE7`](https://etherscan.io/address/0xeEB6Be70fF212238419cD638FAB17910CF61CBE7) | 0 | 0% | 2024-12-17 | 2026-04-19 |
 | Aave V3 WETH Lender | [`0x5ABcBBDbf617a21F7667e8cfD17Fa16475D20dB8`](https://etherscan.io/address/0x5ABcBBDbf617a21F7667e8cfD17Fa16475D20dB8) | 0 | 0% | 2025-11-07 | 2026-04-13 |
 
-**Accounting:** the strategy holds **355.37 stETH directly** (no wstETH/WETH locally); its `totalAssets()` reports 1,350.10 WETH. The remainder is accounted as `pendingRedemptions` (stETH queued in the Lido withdrawal queue, valued 1:1 to WETH), plus the loose stETH balance valued via `estimatedTotalAssets()` after a `reportBuffer` haircut to absorb peg slippage. Verified against `BaseLSTAccumulator.sol` on Etherscan. See the Funds Management section for the full stake/unwind paths.
+**Accounting (and where it can lag):** at block 24974187 the strategy holds **355.37 stETH directly** (no wstETH/WETH locally), `pendingRedemptions = 1,000 stETH`, `WETH balance = 0`, and `estimatedTotalAssets() = 355.37`. By contrast the TokenizedStrategy `totalAssets()` and the vault's `current_debt` for this strategy still report **1,350.10 WETH** — the gap is the pending Lido withdrawal request **#121758** (1,000 stETH, requested 2026-04-20 20:23 UTC, `getWithdrawalStatus([121758]).isFinalized = false` as of 2026-04-27 21:57 UTC). While `pendingRedemptions > 0`, `_harvestAndReport()` is blocked, so any peg slippage between the requested-stETH value and 1:1 WETH is not realized into PPS until the request is finalized and claimed. **Do not read the 1,350.10 WETH figure as real-time, on-chain liquid backing**; the in-flight portion settles only when Lido finalizes and `manualClaimWithdrawals()` is run. Verified against `BaseLSTAccumulator.sol` on Etherscan. See the Funds Management and Liquidity Risk sections for unwind paths.
 
 ### yvDAI-1 — Strategies
 
@@ -166,7 +184,7 @@ Note: the queue still contains `Savings Dai` (a direct sDAI ERC-4626 wrapper fro
 | Morpho Steakhouse USDT Compounder | [`0x0a4ea2bDe8496a878a7ca2772056a8e6fe3245c5`](https://etherscan.io/address/0x0a4ea2bDe8496a878a7ca2772056a8e6fe3245c5) | 0 | 0% | 2025-01-07 | 2025-05-13 |
 | Aave V3 USDT Lender | [`0x27998440eC85F0DF11DED26e6aB27c8D2a9d8Cb2`](https://etherscan.io/address/0x27998440eC85F0DF11DED26e6aB27c8D2a9d8Cb2) | 0 | 0% | 2025-11-07 | 2026-04-08 |
 
-**yvUSDT-1 holds 7.12M USDT but currently deploys none of it.** The PPS has still appreciated to 1.080484, so debt was deployed historically. The current 100%-idle posture reflects the rsETH-related precautionary deallocation; reassess once funds return.
+**yvUSDT-1 holds 7.12M USDT but currently deploys none of it** (`totalDebt = 0`, on-chain). The PPS has still appreciated to 1.080484, so debt was deployed historically. Per the Yearn team (unverified), the current 100%-idle posture is a precautionary deallocation tied to the rsETH incident; reassess once funds return.
 
 ### yvWBTC-1 — Strategies (currently 0% deployed)
 
@@ -174,7 +192,7 @@ Note: the queue still contains `Savings Dai` (a direct sDAI ERC-4626 wrapper fro
 |----------|---------|--------------------:|--:|-----------|-------------|
 | Aave V3 WBTC Lender | [`0x0B9Ae07457BAED5536B1f3e78C9649E980fB4EDc`](https://etherscan.io/address/0x0B9Ae07457BAED5536B1f3e78C9649E980fB4EDc) | 0 | 0% | 2025-05-18 | 2026-04-12 |
 
-yvWBTC-1 is the **newest and least mature vault** of the six. It has only **one strategy** in its default queue, and currently **zero debt is deployed** (a consequence of the rsETH-related deallocation). PPS has barely moved (1.000036). The `deposit_limit` is set to 100,000 WBTC — appears miscalibrated for the current TVL of ~47.5 WBTC, but is not a safety risk given the lack of an active strategy. **TODO:** confirm intent of the 100k WBTC deposit limit with the Yearn team.
+yvWBTC-1 is the **newest and least mature vault** of the six. It has only **one strategy** in its default queue, and currently **zero debt is deployed** (on-chain; per the Yearn team this is tied to the rsETH-related deallocation — unverified). PPS has barely moved (1.000036). The `deposit_limit` is set to **100,000 WBTC** (≈ $7.7B at current Chainlink BTC/USD), which is materially above any plausible near-term TVL — see the Reassessment Triggers section for the action item to either tighten the cap or document its intent before the vault re-deploys.
 
 ---
 
@@ -280,13 +298,13 @@ So today, **all stable-asset deposits ultimately concentrate into yvUSDS-1's str
 - **Unwind path (manual, management-only):** three options — (a) `manualSwapToAsset()` swaps stETH → ETH via Curve with a min-out, (b) `initiateLSTWithdrawal()` queues stETH in the Lido withdrawal queue ([`0x889edC2eDab5f40e902b864aD4d7AdE8E412F9B1`](https://etherscan.io/address/0x889edC2eDab5f40e902b864aD4d7AdE8E412F9B1)) for guaranteed 1:1 redemption (1–7 days under normal load), or (c) emergency `manualClaimWithdrawals()`. There is **no automatic unwind on user withdrawal**: `_freeFunds()` is a no-op, and `availableWithdrawLimit()` returns only `balanceOfAsset()` (the strategy's loose WETH balance). Users can only exit the share of WETH that management has pre-positioned as idle.
 - **Accounting buffer:** `reportBuffer` haircuts the LST value in `estimatedTotalAssets()` to absorb peg slippage, and `pendingRedemptions` blocks `_harvestAndReport()` from running while withdrawal requests are in flight (preventing double-counting).
 
-This is a deliberately conservative LST integration. Remaining ~67% of the vault is idle (per the rsETH-related deallocation noted above).
+This is a deliberately conservative LST integration. Remaining ~67% of the vault is idle (attributed by the Yearn team — unverified — to the rsETH-related deallocation noted above).
 
 **yvDAI-1 (DAI, ~8.57M):** 72.5% via `DAI to USDC-1 Depositor` → yvUSDC-1, then on to yvUSDS-1. 27.5% via `DAI to USDS Depositor` → yvUSDS-1 directly. Both paths terminate at yvUSDS-1's Sky/Spark mix. sDAI direct deposit and Spark DAI Lender are dormant.
 
-**yvUSDT-1 (USDT, ~7.12M):** Currently 100% idle. Five strategies queued (Fluid, Spark, two Morpho compounders, Aave V3) — none receiving debt at the snapshot. The vault was previously deployed (PPS = 1.080484 implies historical yield); the current posture is the rsETH-related precautionary deallocation. Reassess once funds return to strategies.
+**yvUSDT-1 (USDT, ~7.12M):** Currently 100% idle (on-chain). Five strategies queued (Fluid, Spark, two Morpho compounders, Aave V3) — none receiving debt at the snapshot. The vault was previously deployed (PPS = 1.080484 implies historical yield); the current posture is attributed by the Yearn team to a precautionary, rsETH-related deallocation (unverified). Reassess once funds return to strategies.
 
-**yvWBTC-1 (WBTC, ~47.5 WBTC):** Currently 100% idle. Only one strategy (Aave V3 WBTC Lender) queued, never funded since the rsETH-related deallocation. Newest vault in the set (~12 months old). The Aave V3 WBTC market would resume yield once the deallocation is reversed.
+**yvWBTC-1 (WBTC, ~47.5 WBTC):** Currently 100% idle (on-chain). Only one strategy (Aave V3 WBTC Lender) queued, with no debt deployed at the snapshot — per the Yearn team this is also tied to the rsETH-related precautionary deallocation (unverified). Newest vault in the set (~12 months old). The Aave V3 WBTC market would resume yield once the deallocation is reversed.
 
 ### Accessibility
 
@@ -310,6 +328,7 @@ This is a deliberately conservative LST integration. Remaining ~67% of the vault
 - Each strategy's `totalAssets()` reads underlying balances on-chain (yvUSDS shares, sUSDS shares, stETH balances, etc.)
 - Profits reported by the keeper (`yHaaSRelayer`) via `process_report()` and unlock linearly over each vault's `profitMaxUnlockTime` (3, 5, or 10 days depending on vault — see snapshot table)
 - Losses are immediately reflected in PPS
+- **yvWETH-1 stETH Accumulator caveat:** while a Lido withdrawal request is in flight (`pendingRedemptions > 0`), `_harvestAndReport()` is blocked, so the strategy's `current_debt` / `totalAssets()` continue to value the in-flight portion at the pre-request mark — accounting can lag actual settlement until the request is finalized and claimed. See the strategy section above for the current example.
 
 ---
 
@@ -326,7 +345,8 @@ This is a deliberately conservative LST integration. Remaining ~67% of the vault
 
 **Key points:**
 
-- **Stable vaults (yvUSDC-1, yvUSDS-1, yvDAI-1, yvUSDT-1):** depth is excellent. Even if all four were unwound at once, the volume (~$78M combined) is small relative to sUSDS ($5.38B), Maker PSM, and Spark/Aave/Morpho USDS markets. The cascading vault-of-vaults structure does mean a withdrawal from yvDAI-1 may trigger withdrawals from yvUSDC-1 and then yvUSDS-1 — atomic, but multiple strategy `withdraw()` calls need to settle in the same transaction.
+- **Sky-routed stables (yvUSDC-1, yvUSDS-1, yvDAI-1):** ~$42M of net unique capital ultimately sits in the Sky/Spark stack (sUSDS + USDS Staking SPK farm), small relative to sUSDS ($5.38B), Maker PSM, and the Spark/Aave/Morpho USDS markets. The cascading vault-of-vaults structure does mean a withdrawal from yvDAI-1 may trigger withdrawals from yvUSDC-1 and then yvUSDS-1 — atomic, but multiple strategy `withdraw()` calls need to settle in the same transaction.
+- **yvUSDT-1:** 100% idle today; its queued strategies are USDT-denominated (Fluid, Spark USDT, two Morpho USDT compounders, Aave V3 USDT) and do **not** route through the Sky/USDS stack. Liquidity is trivially atomic at the snapshot.
 - **yvWETH-1:** small/medium withdrawals are easily covered by the ~67% idle balance plus the strategy's loose WETH. Beyond that, the strategy does **not** auto-unwind stETH on user withdrawal — `availableWithdrawLimit()` returns only the strategy's loose WETH balance (verified in `BaseLSTAccumulator.sol`). Management must pre-position WETH via `manualSwapToAsset()` (Curve, immediate) or `initiateLSTWithdrawal()` (Lido queue, 1–7 days normal load). Larger redemptions are therefore management-paced, not user-paced.
 - **yvUSDT-1 / yvWBTC-1:** trivially liquid today (0% deployed). Risk score reflects current state, **but** if the Debt Allocator routes funds into the queued strategies (especially the Aave WBTC market, where WBTC has had concentrated liquidity issues historically), a re-assessment of the liquidity score may be warranted.
 
@@ -336,7 +356,7 @@ This is a deliberately conservative LST integration. Remaining ~67% of the vault
 - yvWETH-1: 15K WETH cap vs 4,078 WETH (room for +268%)
 - yvDAI-1: $50M cap vs $8.57M (room for +484%)
 - yvUSDT-1: $50M cap vs $7.12M (room for +602%)
-- yvWBTC-1: 100,000 WBTC cap vs 47.5 WBTC — **cap appears miscalibrated, TODO**
+- yvWBTC-1: 100,000 WBTC cap vs 47.5 WBTC — cap is materially oversized; tracked as an action item under Reassessment Triggers
 
 ---
 
@@ -439,11 +459,11 @@ For any of the 6 vaults:
 
 ### Key Risks
 
-- **Concentration into Sky / Spark.** All four stable vaults route — directly or via vault-of-vaults composition — to Sky USDS Staking Rewards (SPK farm) when fully deployed. A bug or governance failure at Sky propagates to most of the stable TVL.
+- **Concentration into Sky / Spark (yvUSDC-1, yvUSDS-1, yvDAI-1).** Three of the four stable vaults route — directly or via vault-of-vaults composition — into Sky USDS Staking Rewards (SPK farm) and sUSDS. A bug or governance failure at Sky would propagate to that ~$42M of net stable TVL. **yvUSDT-1 is excluded from this concentration today**: it is 100% idle and its queued strategies (Fluid USDT, Spark USDT, Morpho USDT compounders, Aave V3 USDT) do not route through the Sky/USDS stack. If yvUSDT-1 ever adds a USDS-denominated strategy, this exclusion no longer holds.
 - **Vault-of-vaults composition.** yvDAI-1 → yvUSDC-1 → yvUSDS-1 means three layers of strategies and three accounting boundaries. A bug in one vault's accounting cascades. Withdrawals are atomic but require multiple `withdraw()` calls to settle in the same transaction.
 - **stETH peg + manual unwind on yvWETH-1.** The stETH Accumulator does not auto-unwind on user withdrawal. Management must pre-position WETH; large redemptions are management-paced.
-- **Precautionary deallocation following the rsETH (KelpDAO) incident.** yvUSDT-1 and yvWBTC-1 are 100% idle; yvWETH-1 is ~67% idle. None of the active strategies have direct rsETH exposure, but Yearn pulled funds from strategies whose underlying markets *could* indirectly hold rsETH as collateral (Aave/Morpho). Reassess once funds are re-deployed.
-- **yvWBTC-1 deposit limit miscalibrated** at 100k WBTC. Not a safety risk while the vault has no active strategy, but should be tightened when funds re-deploy.
+- **Idle posture on yvUSDT-1, yvWBTC-1, and most of yvWETH-1.** All three are partially or fully un-deployed on-chain. Per the Yearn team (unverified attribution) this is a precautionary deallocation following the rsETH (KelpDAO) incident, since affected funds had been routed into Aave/Morpho markets that *could* indirectly hold rsETH as collateral. Reassess once funds are re-deployed and the steady-state strategy mix is observable on-chain.
+- **yvWBTC-1 deposit limit is oversized** at 100,000 WBTC (≈ $7.7B). Not a safety risk while the vault has no active strategy, but should be tightened or its rationale documented before funds re-deploy. Tracked under Reassessment Triggers.
 - **yvWBTC-1 not in `alert_large_flows.py`** monitoring list. Add before any meaningful TVL.
 - **Sky Savings Rate / SPK reward rate variability** — affects yields, not principal.
 - **PSM fee risk** — currently 0%, but Sky governance can change. Fallback routes via Uniswap V3 with 0.5% slippage.
@@ -513,8 +533,8 @@ For any of the 6 vaults:
 
 | Factor | Assessment |
 |--------|-----------|
-| Protocol count (funded) | Stables: effectively 1 ecosystem (Sky/Spark) due to vault-of-vaults concentration. yvWETH-1: Lido. yvUSDT-1/yvWBTC-1: none today |
-| Criticality | Sky concentration is critical for the stable side (~$78M routed there). Lido critical for yvWETH-1 deployed funds |
+| Protocol count (funded) | yvUSDC-1 / yvUSDS-1 / yvDAI-1: effectively 1 ecosystem (Sky/Spark) due to vault-of-vaults concentration. yvWETH-1: Lido. yvUSDT-1 / yvWBTC-1: none funded today (queues are USDT- and WBTC-native respectively, not Sky/USDS-routed) |
+| Criticality | Sky concentration is critical for yvUSDC-1 / yvUSDS-1 / yvDAI-1 (~$42M net unique stable capital ultimately at sUSDS + USDS Staking SPK farm). Lido critical for yvWETH-1 deployed funds. yvUSDT-1 is excluded — its queued strategies are USDT-native and do not touch the Sky/USDS stack |
 | Quality | Top-tier across the board (Sky $10M bounty, Lido $20B+ TVL) |
 
 **Score: 2.5 / 5** — the ecosystem quality is excellent (would be 1.5–2 on quality alone), but the **concentration** across stable vaults into a single ecosystem (Sky) bumps this to 2.5. If yvUSDT-1 deployed into Morpho/Aave, this would diversify; today it does not.
@@ -613,6 +633,7 @@ This score applies uniformly to all six vaults: yvUSDC-1, yvUSDS-1, yvWETH-1, yv
   - if the stable vaults diversify away from the Sky-dominant chain (e.g., funding Morpho or Aave strategies), revise the dependency subscore downward
 - **Vault-of-vaults composition:**
   - reassess if a new strategy is added that creates a third layer of nested vaults
+- **yvWBTC-1 deposit limit:** the current `deposit_limit = 100,000 WBTC` (≈ $7.7B) is materially above any plausible near-term TVL. **Action item:** before yvWBTC-1 re-deploys debt to a strategy, either tighten the cap (e.g. to a multiple of intended TVL) or document the rationale with the Yearn team and revisit this report.
 - **rsETH-related deallocation:**
   - **rerun this assessment once Yearn re-deploys funds back into yvUSDT-1, yvWBTC-1, and the idle portion of yvWETH-1.** The current strategy mix and dependency profile do not reflect steady-state operation while these vaults are sitting idle.
   - if any new strategy is added that takes direct or indirect rsETH exposure, re-evaluate the dependency subscore
@@ -686,7 +707,7 @@ This score applies uniformly to all six vaults: yvUSDC-1, yvUSDS-1, yvWETH-1, yv
                           └── <0.01% ─► Aave V3 Lido USDS Lender (dust)
 ```
 
-**Net effect today:** ~$72M of the ~$78M stable TVL across yvUSDC-1, yvUSDS-1, and yvDAI-1 lands at Sky (Spark Compounder + sUSDS Lender). yvWETH-1's deployed portion is in Lido. yvUSDT-1 and yvWBTC-1 are idle.
+**Net effect today:** of yvUSDS-1's ~$35.24M USDS, ~$33.5M (92.6% Spark Compounder + 7.4% sUSDS Lender) sits in the Sky stack — and yvUSDS-1 is the terminal layer for yvUSDC-1's deployed funds and the bulk of yvDAI-1's deployed funds. After de-duplicating the cross-counted depositor strategies, this corresponds to roughly **~$42M of net unique stable capital ultimately at Sky**. yvWETH-1's deployed portion is in Lido. **yvUSDT-1 and yvWBTC-1 are 100% idle on-chain, do not route to Sky, and are excluded from the concentration figure above.**
 
 ## Appendix B: TimelockController Role Structure
 
