@@ -74,9 +74,9 @@ The current onchain `Main` implementation (`version() = "4.2.0"`) was deployed a
 ### Bug Bounty
 
 **Platform:** Immunefi
-**Maximum Payout:** TODO — could not verify the current maximum from immunefi.com during this assessment (the previous version of this report cited $10M; LlamaRisk's 2024 review described it as one of DeFi's largest. Re-verify on next reassessment)
-**Status:** Active per Reserve documentation
-**Link:** https://immunefi.com/explore (search "Reserve")
+**Maximum Payout:** $10,000,000
+**Status:** Active per Immunefi (live since 2023-04-27; last updated 2025-06-26)
+**Link:** https://immunefi.com/bug-bounty/reserve/
 
 Reserve Protocol is **not** enrolled in the SEAL Safe Harbor agreement (verified via [safeharbor.securityalliance.org](https://safeharbor.securityalliance.org/)).
 
@@ -126,7 +126,7 @@ Reserve Protocol is **not** enrolled in the SEAL Safe Harbor agreement (verified
 **Monitoring Fund Delegation:**
 - Basket is fully onchain and queryable via `BasketHandler.quote()` and `nonce()`
 - Basket changes emit `BasketSet(uint256 nonce, address[] erc20s, uint192[] refAmts, bool disabled)`
-- Governance proposals to change the basket pass through Governor Anastasius (10% StRSR quorum, 3-day vote) plus a 3-day timelock — total floor ~6 days from proposal to execution
+- Governance proposals to change the basket pass through Governor Anastasius (2-day voting delay, 10% StRSR quorum, 3-day vote) plus a 3-day timelock — total floor ~8 days from proposal to execution
 
 ### Accessibility
 
