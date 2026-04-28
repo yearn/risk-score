@@ -4,7 +4,7 @@
 - **Token:** hgETH (High Growth ETH)
 - **Chain:** Ethereum
 - **Token Address:** [`0xc824A08dB624942c5E5F330d56530cD1598859fD`](https://etherscan.io/address/0xc824A08dB624942c5E5F330d56530cD1598859fD)
-- **Final Score: 3.7/5.0** (Elevated Risk; reassessment up from 2.8/5.0 in March 2026)
+- **Final Score: 3.75/5.0** (Elevated Risk; reassessment up from 2.8/5.0 in March 2026)
 
 > **Status (April 27, 2026):** hgETH vault is currently **PAUSED for both deposits and withdrawals** (verified onchain via `depositsPaused()` = true and `withdrawalsPaused()` = true). The pause was activated on April 18, 2026 by the 3-of-5 vault multisig in response to the **KelpDAO LayerZero bridge exploit** (~116,500 rsETH / ~$292M released from escrow via a forged cross-chain message). hgETH-specific contracts and the rsETH balances held by the vault on Ethereum were not directly affected, but the broader rsETH peg has come under stress and the vault remains frozen pending investigation.
 
@@ -162,8 +162,7 @@ The architecture is **highly complex** with multiple layers:
 - **rsETH deployment**: December 2023 — ~27 months onchain
 - **hgETH deployment**: November 19, 2024 — block [21223734](https://etherscan.io/block/21223734), tx [`0xfe6428fc9e5f89fd48ddb02953f1e2f3edf3a2e276524232e61788b5e2b853df`](https://etherscan.io/tx/0xfe6428fc9e5f89fd48ddb02953f1e2f3edf3a2e276524232e61788b5e2b853df) — ~15 months onchain
 - **GitHub**: Source code not publicly available for hgETH/Gain vaults; rsETH contracts verified on Etherscan
-- **KernelDAO total TVL**: $2B+ across 10+ chains
-- **Kelp TVL**: ~$2B (DeFiLlama) — second largest liquid restaking protocol
+- **Kelp TVL**: ~$1.54B on Ethereum ([DeFiLlama, April 28, 2026](https://defillama.com/protocol/kelp)) — down from ~$2B prior to the April 18, 2026 exploit. KernelDAO ecosystem TVL has fallen accordingly
 
 ### Incidents
 
@@ -239,7 +238,7 @@ Only **0.77% of assets** are available as buffer (down from 1.45% in March). The
 
 | Fee | Value | Mechanism |
 |-----|-------|-----------|
-| Management fee | **1.5% annual** (`managementFeePercent()` = 150, unchanged) | Time-based, continuously accruing against `totalAssets()`. `chargeManagementFee()` materializes accrued fees as new hgETH shares → **dilutes existing holders**. `collectFees()` transfers shares to fee collector. Last charged: March 21, 2026 (`managementFeeLastKnownTimestamp` = 1774371695). Fee continues to accrue while vault is paused |
+| Management fee | **1.5% annual** (`managementFeePercent()` = 150, unchanged) | Time-based, continuously accruing against `totalAssets()`. `chargeManagementFee()` materializes accrued fees as new hgETH shares → **dilutes existing holders**. `collectFees()` transfers shares to fee collector. Last charged: March 24, 2026 17:01:35 UTC (`managementFeeLastKnownTimestamp` = 1774371695). Fee continues to accrue while vault is paused |
 | Withdrawal fee | **0%** (`withdrawalFee()` = 0, unchanged) | — |
 | Performance fee | **20%** (per Edge Capital proposal: "Fee Structure (management/performance): 1.5/20%") | Applied to profits above baseline; not independently verified onchain |
 | Fee collector (`feesCollector`) | [`0x2151A97C7819782fD99efF020CdfE0aE838Ad378`](https://etherscan.io/address/0x2151A97C7819782fD99efF020CdfE0aE838Ad378) | Receives minted hgETH shares |
@@ -307,12 +306,14 @@ The oracle is a `MorphoChainlinkOracleV2` that uses two price feeds (no vault co
 |-----------|---------|-------------|---------------|
 | BASE_VAULT | `0x0` | Not used | — |
 | BASE_VAULT_CONVERSION_SAMPLE | — | — | 1 |
-| BASE_FEED_1 | [`0x70cf192d6b76d57a46aafc9285ced110034eb013`](https://etherscan.io/address/0x70cf192d6b76d57a46aafc9285ced110034eb013) | EOMultiFeedAdapter (hgETH/USD, 18 decimals) — **TransparentUpgradeableProxy** | ~$2,538.16 |
+| BASE_FEED_1 | [`0x70cf192d6b76d57a46aafc9285ced110034eb013`](https://etherscan.io/address/0x70cf192d6b76d57a46aafc9285ced110034eb013) | EOMultiFeedAdapter (hgETH/USD, 18 decimals) — **TransparentUpgradeableProxy** | ~$2,529.25 |
 | BASE_FEED_2 | `0x0` | Not set | — |
-| QUOTE_FEED_1 | [`0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419`](https://etherscan.io/address/0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419) | Chainlink ETH/USD (8 decimals) | ~$2,288.82 |
+| QUOTE_FEED_1 | [`0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419`](https://etherscan.io/address/0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419) | Chainlink ETH/USD (8 decimals) | ~$2,280.78 |
 | QUOTE_FEED_2 | `0x0` | Not set | — |
 | SCALE_FACTOR | — | Decimal adjustment | 1e26 |
-| **price()** | — | **Final oracle price** | **~1.109 (hgETH/ETH ratio, unchanged from pre-exploit)** |
+| **price()** | — | **Final oracle price** | **~1.1089 (hgETH/ETH ratio, unchanged from pre-exploit)** |
+
+Values above are read at Ethereum block 24973596 (timestamp 1777319567, the Morpho market `lastUpdate`). Spot prices an hour later were materially identical in ratio (~1.109) but a few dollars different in absolute USD terms.
 
 **Oracle architecture:**
 - `price = baseFeed1 * SCALE_FACTOR / quoteFeed1` → hgETH/USD ÷ ETH/USD = hgETH/ETH
@@ -538,7 +539,7 @@ The rsETH layer has notably better governance than the hgETH vault layer (higher
 
 **Centralization Score = (3.5 + 3.5 + 4.0) / 3 = 3.67**
 
-**Score: 3.5/5** (was 3.0) — Architecture unchanged, but observed failure modes increase scoring relative to March.
+**Score: 3.67/5** (was 3.0) — Architecture unchanged, but observed failure modes increase scoring relative to March. Score is the calculated subcategory mean rather than a half-point bucket.
 
 #### Category 3: Funds Management (Weight: 30%)
 
@@ -598,13 +599,13 @@ Final Score = (Centralization × 0.30) + (Funds Mgmt × 0.30) + (Audits × 0.20)
 | Category | Score (Apr 2026) | Score (Mar 2026) | Weight | Weighted (Apr 2026) |
 |----------|------------------|------------------|--------|---------------------|
 | Audits & Historical | 3.5 | 2.5 | 20% | 0.70 |
-| Centralization & Control | 3.5 | 3.0 | 30% | 1.05 |
+| Centralization & Control | 3.67 | 3.0 | 30% | 1.101 |
 | Funds Management | 3.75 | 2.5 | 30% | 1.125 |
 | Liquidity Risk | 4.5 | 3.5 | 15% | 0.675 |
 | Operational Risk | 3.0 | 2.0 | 5% | 0.15 |
-| **Final Score** | | | | **3.70** |
+| **Final Score** | | | | **3.75** |
 
-**Final Score: 3.7/5.0** (was 2.8/5.0 in March 2026)
+**Final Score: 3.75/5.0** (was 2.8/5.0 in March 2026). Subcategory means are used directly; no half-point bucketing.
 
 ### Risk Tier
 
