@@ -158,9 +158,9 @@ The architecture is **highly complex** with multiple layers:
 
 ## Historical Track Record
 
-- **KelpDAO launch**: December 2023 — ~27 months in operation
-- **rsETH deployment**: December 2023 — ~27 months onchain
-- **hgETH deployment**: November 19, 2024 — block [21223734](https://etherscan.io/block/21223734), tx [`0xfe6428fc9e5f89fd48ddb02953f1e2f3edf3a2e276524232e61788b5e2b853df`](https://etherscan.io/tx/0xfe6428fc9e5f89fd48ddb02953f1e2f3edf3a2e276524232e61788b5e2b853df) — ~15 months onchain
+- **KelpDAO launch**: December 2023 — ~28 months in operation
+- **rsETH deployment**: December 2023 — ~28 months onchain
+- **hgETH deployment**: November 19, 2024 — block [21223734](https://etherscan.io/block/21223734), tx [`0xfe6428fc9e5f89fd48ddb02953f1e2f3edf3a2e276524232e61788b5e2b853df`](https://etherscan.io/tx/0xfe6428fc9e5f89fd48ddb02953f1e2f3edf3a2e276524232e61788b5e2b853df) — ~17 months onchain
 - **GitHub**: Source code not publicly available for hgETH/Gain vaults; rsETH contracts verified on Etherscan
 - **Kelp TVL**: ~$1.54B on Ethereum ([DeFiLlama, April 28, 2026](https://defillama.com/protocol/kelp)) — down from ~$2B prior to the April 18, 2026 exploit. KernelDAO ecosystem TVL has fallen accordingly
 
