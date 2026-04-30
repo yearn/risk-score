@@ -1,0 +1,32 @@
+name: Reassessment Scan
+
+on:
+  schedule:
+    - cron: '0 12 * * 6'  # Saturday at 12:00 UTC
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Print what would be done without creating issues"
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  scan-stale-reports:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # full history needed for git-last-commit fallback
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+
+      - name: Scan for stale reports and open reassessment issues
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DRY_RUN: ${{ inputs.dry_run && 'true' || '' }}
+        run: uv run scripts/check_stale_reports.py
