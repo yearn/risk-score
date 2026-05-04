@@ -1,0 +1,61 @@
+name: Reassessment
+description: Reassess an existing risk assessment report
+title: "Reassessment: "
+labels: ["reassessment"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this template to track the reassessment of an existing risk assessment report.
+        Reports are flagged for reassessment automatically once they pass the staleness
+        threshold (60 days since the last assessment date), but this template can also be
+        filed manually when a protocol change warrants a fresh review.
+
+  - type: input
+    id: report-name
+    attributes:
+      label: Report Name
+      description: The name of the report due for reassessment.
+      placeholder: e.g., Lido wstETH
+    validations:
+      required: true
+
+  - type: input
+    id: report-link
+    attributes:
+      label: Report Link
+      description: Link to the report on the site or GitHub.
+      placeholder: https://risk.yearn.farm/report/lido-wsteth
+    validations:
+      required: false
+
+  - type: input
+    id: last-assessment-date
+    attributes:
+      label: Last Assessment Date
+      description: The Assessment Date currently recorded in the report.
+      placeholder: e.g., February 12, 2026
+    validations:
+      required: false
+
+  - type: textarea
+    id: changes-since
+    attributes:
+      label: Changes Since Last Assessment
+      description: |
+        Note any known changes since the last assessment that may affect the score
+        (audits, exploits, governance changes, integrations, TVL shifts, team changes, etc.).
+      placeholder: |
+        - New audit by ChainSecurity (March 2026)
+        - Migrated from EOA admin to 4/7 multisig
+        - Added Symbiotic restaking integration
+    validations:
+      required: false
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional Context
+      description: Any other context relevant to the reassessment.
+      validations:
+        required: false
