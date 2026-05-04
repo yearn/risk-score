@@ -1,6 +1,6 @@
 # Protocol Risk Assessment: Midas mHYPER
 
-- **Assessment Date:** February 7, 2026 (updated April 9, 2026)
+- **Assessment Date:** February 7, 2026 (Updated: April 9, 2026)
 - **Token:** mHYPER
 - **Chain:** Ethereum (also deployed on Monad, Plasma, Katana)
 - **Token Address:** [`0x9b5528528656DBC094765E2abB79F293c21191B9`](https://etherscan.io/token/0x9b5528528656dbc094765e2abb79f293c21191b9)
