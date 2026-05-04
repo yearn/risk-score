@@ -16,6 +16,7 @@ import os
 import re
 import subprocess
 import sys
+import time
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
@@ -31,7 +32,7 @@ DATE_RE = re.compile(
     r")\s+(\d{1,2}),\s+(\d{4})\b"
 )
 TITLE_RE = re.compile(r"^#\s+(.+)$", re.MULTILINE)
-SCORE_RE = re.compile(r"\*\*Final Score:?\*\*\s*([\d.]+)\s*/\s*5\.0")
+SCORE_RE = re.compile(r"\*\*Final Score:\s*([\d.]+)\s*/\s*5\.0\*\*")
 
 logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
 log = logging.getLogger("stale-reports")
@@ -142,7 +143,7 @@ def build_issue_body(report: dict, days: int) -> str:
     )
 
 
-def create_issue(title: str, body: str, dry_run: bool) -> None:
+def create_issue(title: str, body: str, dry_run: bool) -> bool:
     cmd = [
         "gh",
         "issue",
@@ -156,8 +157,24 @@ def create_issue(title: str, body: str, dry_run: bool) -> None:
     ]
     if dry_run:
         log.info("DRY-RUN would run: %s", " ".join(cmd[:3] + [repr(title)]))
-        return
-    subprocess.run(cmd, check=True)
+        return True
+    for attempt in range(3):
+        try:
+            subprocess.run(cmd, check=True)
+            return True
+        except subprocess.CalledProcessError as exc:
+            if attempt == 2:
+                log.error("failed to create issue %r after 3 attempts: %s", title, exc)
+                return False
+            backoff = 2**attempt
+            log.warning(
+                "issue create failed (attempt %d/3) — retrying in %ds: %s",
+                attempt + 1,
+                backoff,
+                exc,
+            )
+            time.sleep(backoff)
+    return False
 
 
 def main() -> int:
@@ -178,6 +195,7 @@ def main() -> int:
 
     stale_count = 0
     skipped_count = 0
+    failed_count = 0
     for path in sorted(REPORTS_DIR.glob("*.md")):
         report = parse_report(path)
         if report["date"] is None:
@@ -202,15 +220,18 @@ def main() -> int:
             report["date_source"],
         )
         body = build_issue_body(report, days)
-        create_issue(title, body, dry_run=dry_run)
-        stale_count += 1
+        if create_issue(title, body, dry_run=dry_run):
+            stale_count += 1
+        else:
+            failed_count += 1
 
     log.info(
-        "done: %d new issue(s), %d skipped (already open)",
+        "done: %d new issue(s), %d skipped (already open), %d failed",
         stale_count,
         skipped_count,
+        failed_count,
     )
-    return 0
+    return 1 if failed_count else 0
 
 
 if __name__ == "__main__":
