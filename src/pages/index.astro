@@ -35,9 +35,6 @@ const followups = recent.slice(1);
 
 <BaseLayout title="Yearn Curation — DeFi Risk Curation" ogUrl="/" ogImage="/og/default.png">
   <section class="hero">
-    <div class="eyebrow">
-      DeFi Risk Curation
-    </div>
     <h1 class="hero-title">
       Risk-curated yield <br />
       <span class="hero-accent">by Yearn.</span>
@@ -255,22 +252,6 @@ const followups = recent.slice(1);
   .hero {
     padding: 3.5rem 0 2.5rem;
     text-align: center;
-  }
-  .eyebrow {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.3rem 0.85rem;
-    border: 1px solid var(--border);
-    border-radius: 999px;
-    background: color-mix(in srgb, var(--bg-secondary) 60%, transparent);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-    color: var(--text-secondary);
-    font-size: 0.78rem;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-    margin-bottom: 1.5rem;
   }
   .hero-title {
     font-size: clamp(2rem, 5vw, 3.4rem);
