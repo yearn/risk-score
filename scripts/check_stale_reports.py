@@ -187,11 +187,9 @@ def main() -> int:
         return 1
 
     if dry_run:
-        log.info("DRY-RUN enabled — no issues will be created or fetched")
-        existing_titles: set[str] = set()
-    else:
-        existing_titles = open_reassessment_titles()
-        log.info("found %d existing open reassessment issues", len(existing_titles))
+        log.info("DRY-RUN enabled — no issues will be created")
+    existing_titles = open_reassessment_titles()
+    log.info("found %d existing open reassessment issues", len(existing_titles))
 
     stale_count = 0
     skipped_count = 0
