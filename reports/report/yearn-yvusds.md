@@ -19,16 +19,16 @@ This vault is **no longer the terminal layer** for the broader Yearn V3 mainnet 
 - **Vault:** Standard Yearn V3 vault (v3.0.3) accepting USDS deposits, issuing yvUSDS-1 shares. Deployed as an immutable Vyper minimal proxy (EIP-1167) via the v3.0.3 Yearn V3 Vault Factory ([`0x5577EdcB8A856582297CdBbB07055E6a6E38eb5f`](https://etherscan.io/address/0x5577EdcB8A856582297CdBbB07055E6a6E38eb5f))
 - **Default queue (3 strategies, 1 funded):**
   1. **USDS Sky Rewards Compounder** ([`0x0868076663Bbc6638ceDd27704cc8F0Fa53d5b81`](https://etherscan.io/address/0x0868076663Bbc6638ceDd27704cc8F0Fa53d5b81)) — 0 USDS debt at snapshot
-  2. **Spark USDS Compounder** ([`0xc9f01b5c6048B064E6d925d1c2d7206d4fEeF8a3`](https://etherscan.io/address/0xc9f01b5c6048B064E6d925d1c2d7206d4fEeF8a3)) — **6,009,717.39 USDS (100%)**, stakes USDS into the Sky **USDS Staking Rewards** contract ([`0x173e314C7635B45322cd8Cb14f44b312e079F3af`](https://etherscan.io/address/0x173e314C7635B45322cd8Cb14f44b312e079F3af)) and harvests SPK ([`0xc20059e0317DE91738d13af027DfC4a50781b066`](https://etherscan.io/address/0xc20059e0317DE91738d13af027DfC4a50781b066)) back to USDS
+  2. **Spark USDS Compounder** ([`0xc9f01b5c6048B064E6d925d1c2d7206d4fEeF8a3`](https://etherscan.io/address/0xc9f01b5c6048B064E6d925d1c2d7206d4fEeF8a3)) — **6,008,242.81 USDS (100%)**, stakes USDS into the Sky **USDS Staking Rewards** contract ([`0x173e314C7635B45322cd8Cb14f44b312e079F3af`](https://etherscan.io/address/0x173e314C7635B45322cd8Cb14f44b312e079F3af)) and harvests SPK ([`0xc20059e0317DE91738d13af027DfC4a50781b066`](https://etherscan.io/address/0xc20059e0317DE91738d13af027DfC4a50781b066)) back to USDS
   3. **sUSDS Lender** ([`0x3F2dE801629116A83B9734bB72012A554e01CfC1`](https://etherscan.io/address/0x3F2dE801629116A83B9734bB72012A554e01CfC1)) — 0 USDS debt at snapshot; deposits USDS into the Sky Savings vault ([`0xa3931d71877C0E7a3148CB7Eb4463524FEc27fbD`](https://etherscan.io/address/0xa3931d71877C0E7a3148CB7Eb4463524FEc27fbD))
 - **Governance:** Standard **Yearn V3 Role Manager** ([`0xb3bd6B2E61753C311EFbCF0111f75D29706D9a41`](https://etherscan.io/address/0xb3bd6B2E61753C311EFbCF0111f75D29706D9a41)) governed by the **Yearn 6-of-9 ySafe** with **7-day TimelockController** for strategy additions
 
-**Key metrics (May 5, 2026, snapshot at block 25029809, timestamp 1777996211 = 15:50:11 UTC):**
+**Key metrics (May 5, 2026, snapshot at block 25031569, timestamp 1778017355 = 21:42:35 UTC):**
 
-- **TVL:** 6,009,717.39 USDS
-- **Total Supply:** 5,476,264.09 yvUSDS-1
+- **TVL:** 6,008,242.81 USDS
+- **Total Supply:** 5,474,920.40 yvUSDS-1
 - **Price Per Share:** 1.097412 USDS/yvUSDS-1 (~9.74% cumulative appreciation over ~19.0 months, ~6.0% annualized)
-- **Total Debt:** 6,009,717.39 USDS (100% deployed)
+- **Total Debt:** 6,008,242.81 USDS (100% deployed)
 - **Total Idle:** 0 USDS
 - **Deposit Limit:** 100,000,000 USDS
 - **Profit Max Unlock Time:** 3 days
@@ -77,12 +77,12 @@ This vault is **no longer the terminal layer** for the broader Yearn V3 mainnet 
 
 ### Active Strategies (3 in default queue, 1 with debt)
 
-Default queue order at block 25029809:
+Default queue order at block 25031569:
 
 | # | Strategy | Name | Activation | Current Debt (USDS) | Allocation |
 |---|----------|------|------------|--------------------:|-----------:|
 | 1 | [`0x0868076663Bbc6638ceDd27704cc8F0Fa53d5b81`](https://etherscan.io/address/0x0868076663Bbc6638ceDd27704cc8F0Fa53d5b81) | USDS Sky Rewards Compounder | 2025-05-16 | 0 | 0% |
-| 2 | [`0xc9f01b5c6048B064E6d925d1c2d7206d4fEeF8a3`](https://etherscan.io/address/0xc9f01b5c6048B064E6d925d1c2d7206d4fEeF8a3) | **Spark USDS Compounder** | 2025-07-14 | **6,009,717.39** | **100%** |
+| 2 | [`0xc9f01b5c6048B064E6d925d1c2d7206d4fEeF8a3`](https://etherscan.io/address/0xc9f01b5c6048B064E6d925d1c2d7206d4fEeF8a3) | **Spark USDS Compounder** | 2025-07-14 | **6,008,242.81** | **100%** |
 | 3 | [`0x3F2dE801629116A83B9734bB72012A554e01CfC1`](https://etherscan.io/address/0x3F2dE801629116A83B9734bB72012A554e01CfC1) | sUSDS Lender | 2025-05-15 | 0 | 0% |
 
 **Removed from queue between April 27 and May 5 (no longer in `get_default_queue()`):**
@@ -159,7 +159,7 @@ The main accounting subtlety is the SPK reward harvest: the Spark Compounder per
 ## Historical Track Record
 
 - **Vault deployed:** October 8, 2024 (deployment [tx](https://etherscan.io/tx/0x6a1996554455945f9ba5f58b831c86f9afaeb1a5c36b9166099a7d3ac0106803)) — **~19.0 months** in production
-- **TVL:** 6,009,717.39 USDS at the May 5 snapshot — well within the 100M USDS deposit limit. **TVL has dropped ~83%** from the April 27 snapshot of ~35.24M
+- **TVL:** 6,008,242.81 USDS at the May 5 snapshot — well within the 100M USDS deposit limit. **TVL has dropped ~83%** from the April 27 snapshot of ~35.24M
 - **PPS trend:** 1.000000 → 1.097412 (~9.74% cumulative return over ~19.0 months, ~6.0% annualized)
 - **Security incidents:** None known for this vault or for the Yearn V3 framework generally
 - **Strategy changes:** active management — Aave V3 Lido USDS Lender and Aave V3 USDS Lender both removed from the default queue between April 27 and May 5; sUSDS Lender debt drained to zero in the same window. The vault is now 100% allocated to the Spark USDS Compounder
@@ -405,7 +405,7 @@ Yearn maintains an active monitoring system via the [`monitoring`](https://githu
 | Audits | V3 framework: 3 audits by top firms (Statemind, ChainSecurity, yAcademy). Sky / sUSDS / USDS Staking: 7+ auditors (ChainSecurity, Cantina, Sherlock, Trail of Bits, etc.) |
 | Bug bounty | $200K on Immunefi (Yearn); $10M on Immunefi (Sky) |
 | Production history | **~19.0 months** (October 8, 2024). V3 framework: ~24 months |
-| TVL | 6,009,717 USDS at snapshot (down ~83% from 35.24M April 27). Deposit limit: 100M |
+| TVL | 6,008,243 USDS at snapshot (down ~83% from 35.24M April 27). Deposit limit: 100M |
 | Security incidents | None on V3, none on USDS / USDS Staking |
 | Strategy review | Rigorous 12-metric framework with ySec security review |
 
@@ -554,7 +554,7 @@ Yearn maintains an active monitoring system via the [`monitoring`](https://githu
 
 ## Appendix: Contract Architecture
 
-Snapshot at block 25029809 (May 5, 2026, 15:50 UTC).
+Snapshot at block 25031569 (May 5, 2026, 21:42 UTC).
 
 ```
 ┌──────────────────────────────────────────────────────────────────────┐
@@ -565,9 +565,9 @@ Snapshot at block 25029809 (May 5, 2026, 15:50 UTC).
 │  │  ERC-4626, immutable Vyper proxy       │                          │
 │  │  0x1828…47E8                           │                          │
 │  │                                        │                          │
-│  │  TVL: 6,009,717.39 USDS                │                          │
+│  │  TVL: 6,008,242.81 USDS                │                          │
 │  │   ├── 0 idle                           │                          │
-│  │   └── 6,009,717.39 → Spark Compounder │                          │
+│  │   └── 6,008,242.81 → Spark Compounder │                          │
 │  └─────────────────┬──────────────────────┘                          │
 │                    │                                                  │
 │                    ▼                                                  │
@@ -597,7 +597,7 @@ Snapshot at block 25029809 (May 5, 2026, 15:50 UTC).
 │  └────────────────────────────────────────────────────────────────┘  │
 └──────────────────────────────────────────────────────────────────────┘
 
-Upstream composition (vault-of-vaults) at block 25029809:
+Upstream composition (vault-of-vaults) at block 25031569:
   yvUSDC-1 → USDC to USDS Depositor       — 0 USDC debt (no longer routes here)
   yvDAI-1  → DAI to USDS Depositor        — ~1.61M DAI (~20.6% of yvDAI TVL)
 

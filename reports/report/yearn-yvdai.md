@@ -26,23 +26,23 @@ The cascade is now at most **two Yearn V3 vault layers deep** (versus three at t
 
 - **Vault:** Standard Yearn V3 vault (v3.0.2) accepting DAI deposits, issuing yvDAI-1 shares. Deployed as an immutable Vyper minimal proxy (EIP-1167) via the v3.0.2 Yearn V3 Vault Factory ([`0x444045c5C13C246e117eD36437303cac8E250aB0`](https://etherscan.io/address/0x444045c5C13C246e117eD36437303cac8E250aB0))
 - **Default queue (2 strategies, both funded):**
-  - **DAI To USDC-1 Depositor** ([`0xfF03Dce6d95aa7a30B75EFbaFD11384221B9f9B5`](https://etherscan.io/address/0xfF03Dce6d95aa7a30B75EFbaFD11384221B9f9B5)) — 6,212,369.61 DAI (79.42%). DAI → USDC (Maker PSM Lite, 1:1 at 0% fee) → yvUSDC-1 deposit. yvUSDC-1 routes ~97.6% via its `USDC to sUSDS Lender` strategy directly into sUSDS, plus ~2.4% via `Spark USDC Lender` into Spark Lend
-  - **DAI to USDS Depositor** ([`0xAeDF7d5F3112552E110e5f9D08c9997Adce0b78d`](https://etherscan.io/address/0xAeDF7d5F3112552E110e5f9D08c9997Adce0b78d)) — 1,609,638.00 DAI (20.58%). DAI → USDS (Sky DAI-USDS Exchanger, 1:1, no fee) → yvUSDS-1 deposit. yvUSDS-1 currently routes 100% to its Spark USDS Compounder (Sky USDS Staking Rewards)
+  - **DAI To USDC-1 Depositor** ([`0xfF03Dce6d95aa7a30B75EFbaFD11384221B9f9B5`](https://etherscan.io/address/0xfF03Dce6d95aa7a30B75EFbaFD11384221B9f9B5)) — 6,212,369.61 DAI (79.44%). DAI → USDC (Maker PSM Lite, 1:1 at 0% fee) → yvUSDC-1 deposit. yvUSDC-1 routes ~97.6% via its `USDC to sUSDS Lender` strategy directly into sUSDS, plus ~2.4% via `Spark USDC Lender` into Spark Lend
+  - **DAI to USDS Depositor** ([`0xAeDF7d5F3112552E110e5f9D08c9997Adce0b78d`](https://etherscan.io/address/0xAeDF7d5F3112552E110e5f9D08c9997Adce0b78d)) — 1,608,163.42 DAI (20.56%). DAI → USDS (Sky DAI-USDS Exchanger, 1:1, no fee) → yvUSDS-1 deposit. yvUSDS-1 currently routes 100% to its Spark USDS Compounder (Sky USDS Staking Rewards)
 - **Removed from queue between April 27 and May 5:** Savings Dai (sDAI), Spark DAI Lender, Aave V3 DAI Lender — all previously zero-debt
 - **Governance:** Standard **Yearn V3 Role Manager** ([`0xb3bd6B2E61753C311EFbCF0111f75D29706D9a41`](https://etherscan.io/address/0xb3bd6B2E61753C311EFbCF0111f75D29706D9a41)) governed by the **Yearn 6-of-9 ySafe** with **7-day TimelockController** for strategy additions
 
-**Key metrics (May 5, 2026, snapshot at block 25029809, timestamp 1777996211 = 15:50:11 UTC):**
+**Key metrics (May 5, 2026, snapshot at block 25031569, timestamp 1778017355 = 21:42:35 UTC):**
 
-- **TVL:** 7,822,017.61 DAI
-- **Total Supply:** 6,996,581.11 yvDAI-1
-- **Price Per Share:** 1.117977 DAI/yvDAI-1 (~11.80% cumulative appreciation over ~25.8 months, ~5.4% annualized)
-- **Total Debt:** 7,822,007.61 DAI (~99.99987% deployed)
-- **Total Idle:** 10.00 DAI
+- **TVL:** 7,820,533.03 DAI
+- **Total Supply:** 6,995,114.40 yvDAI-1
+- **Price Per Share:** 1.117999 DAI/yvDAI-1 (~11.80% cumulative appreciation over ~25.8 months, ~5.4% annualized)
+- **Total Debt:** 7,820,533.03 DAI (100% deployed)
+- **Total Idle:** 0 DAI
 - **Deposit Limit:** 50,000,000 DAI
 - **Profit Max Unlock Time:** 10 days
 - **Fees:** 0% management fee, 10% performance fee
 
-**Verified vault-of-vaults wiring (block 25029809):**
+**Verified vault-of-vaults wiring (block 25031569):**
 
 - `DAI To USDC-1 Depositor` ([`0xfF03Dce6d95aa7a30B75EFbaFD11384221B9f9B5`](https://etherscan.io/address/0xfF03Dce6d95aa7a30B75EFbaFD11384221B9f9B5)) → yvUSDC-1 ([`0xBe53A109B494E5c9f97b9Cd39Fe969BE68BF6204`](https://etherscan.io/address/0xBe53A109B494E5c9f97b9Cd39Fe969BE68BF6204))
 - `DAI to USDS Depositor` ([`0xAeDF7d5F3112552E110e5f9D08c9997Adce0b78d`](https://etherscan.io/address/0xAeDF7d5F3112552E110e5f9D08c9997Adce0b78d)) → yvUSDS-1 ([`0x182863131F9a4630fF9E27830d945B1413e347E8`](https://etherscan.io/address/0x182863131F9a4630fF9E27830d945B1413e347E8))
@@ -93,12 +93,12 @@ The cascade is now at most **two Yearn V3 vault layers deep** (versus three at t
 
 ### Active Strategies (2 in default queue, 2 with debt)
 
-Default queue order at block 25029809:
+Default queue order at block 25031569:
 
 | # | Strategy | Name | Activation | Current Debt (DAI) | Allocation |
 |---|----------|------|------------|-------------------:|-----------:|
-| 1 | [`0xAeDF7d5F3112552E110e5f9D08c9997Adce0b78d`](https://etherscan.io/address/0xAeDF7d5F3112552E110e5f9D08c9997Adce0b78d) | **DAI to USDS Depositor** | 2025-05-15 | **1,609,638.00** | **20.58%** |
-| 2 | [`0xfF03Dce6d95aa7a30B75EFbaFD11384221B9f9B5`](https://etherscan.io/address/0xfF03Dce6d95aa7a30B75EFbaFD11384221B9f9B5) | **DAI To USDC-1 Depositor** | 2025-10-24 | **6,212,369.61** | **79.42%** |
+| 1 | [`0xAeDF7d5F3112552E110e5f9D08c9997Adce0b78d`](https://etherscan.io/address/0xAeDF7d5F3112552E110e5f9D08c9997Adce0b78d) | **DAI to USDS Depositor** | 2025-05-15 | **1,608,163.42** | **20.56%** |
+| 2 | [`0xfF03Dce6d95aa7a30B75EFbaFD11384221B9f9B5`](https://etherscan.io/address/0xfF03Dce6d95aa7a30B75EFbaFD11384221B9f9B5) | **DAI To USDC-1 Depositor** | 2025-10-24 | **6,212,369.61** | **79.44%** |
 
 Last reports: DAI to USDS Depositor 2026-05-04 (`last_report = 1777780343`); DAI To USDC-1 Depositor 2026-05-04 (`last_report = 1777777319`).
 
@@ -183,8 +183,8 @@ The vault-of-vaults composition is **not leverage** but is a real complexity sur
 ## Historical Track Record
 
 - **Vault deployed:** March 12, 2024 (deployment [tx](https://etherscan.io/tx/0xfc6be986a2e60849a91c397c5c4bd10d9b247f0e1fb30cdaf0ed1f7687ea648e)) — **~25.8 months** in production
-- **TVL:** 7,822,017.61 DAI — well within the 50M DAI deposit limit. **TVL is down ~8.7%** from the April 27 snapshot of 8.57M
-- **PPS trend:** 1.000000 → 1.117977 (~11.80% cumulative return over ~25.8 months, ~5.4% annualized)
+- **TVL:** 7,820,533.03 DAI — well within the 50M DAI deposit limit. **TVL is down ~8.7%** from the April 27 snapshot of 8.57M (and -1,484.58 DAI vs. the earlier in-day snapshot at block 25029809, from a small withdrawal that pulled from the USDS depositor strategy)
+- **PPS trend:** 1.000000 → 1.117999 (~11.80% cumulative return over ~25.8 months, ~5.4% annualized)
 - **Security incidents:** None known for this vault or for the Yearn V3 framework
 - **Strategy changes:** active management — between April 27 and May 5, three direct-deposit fallbacks (sDAI, Spark DAI Lender, Aave V3 DAI Lender) were removed from the default queue; allocation shifted from 72.5/27.5 to **79.4/20.6** between the two depositor strategies
 - **Vault-of-vaults rewiring (downstream):** at the April 27 snapshot yvUSDC-1 routed 100% to yvUSDS-1, so yvDAI-1's effective endpoint was 100% yvUSDS-1. At the May 5 snapshot yvUSDC-1 has switched its primary route to a direct `USDC to sUSDS Lender` strategy. Net effect: yvDAI-1's effective endpoint mix is now ~77.5% sUSDS / ~20.6% Sky USDS Staking / ~1.9% Spark Lend USDC. The total Sky-ecosystem concentration is largely unchanged (~98%), but the deepest Yearn-vault chain has been shortened from 3 layers to 2
@@ -198,7 +198,7 @@ The vault-of-vaults composition is **not leverage** but is a real complexity sur
 
 yvDAI-1 deploys ~99.9999% of its DAI via two depositor strategies. Both terminate inside the Sky ecosystem (sUSDS dominantly + Sky USDS Staking + a small Spark Lend USDC slice).
 
-### Strategy 1: DAI To USDC-1 Depositor (79.42% allocation)
+### Strategy 1: DAI To USDC-1 Depositor (79.44% allocation)
 
 **Contract:** [`0xfF03Dce6d95aa7a30B75EFbaFD11384221B9f9B5`](https://etherscan.io/address/0xfF03Dce6d95aa7a30B75EFbaFD11384221B9f9B5) — verified vault target [`0xBe53A109B494E5c9f97b9Cd39Fe969BE68BF6204`](https://etherscan.io/address/0xBe53A109B494E5c9f97b9Cd39Fe969BE68BF6204) (yvUSDC-1).
 
@@ -215,7 +215,7 @@ yvDAI-1 deploys ~99.9999% of its DAI via two depositor strategies. Both terminat
 - Last reported: 2026-05-04 (`last_report = 1777777319`)
 - PSM fee fallback: 0.05% threshold (above which the strategy can be configured to use Uniswap V3 with 0.5% slippage tolerance)
 
-### Strategy 2: DAI to USDS Depositor (20.58% allocation)
+### Strategy 2: DAI to USDS Depositor (20.56% allocation)
 
 **Contract:** [`0xAeDF7d5F3112552E110e5f9D08c9997Adce0b78d`](https://etherscan.io/address/0xAeDF7d5F3112552E110e5f9D08c9997Adce0b78d) — verified vault target [`0x182863131F9a4630fF9E27830d945B1413e347E8`](https://etherscan.io/address/0x182863131F9a4630fF9E27830d945B1413e347E8) (yvUSDS-1).
 
@@ -569,6 +569,7 @@ Yearn maintains the [`monitoring`](https://github.com/yearn/monitoring) reposito
 - **Downstream rewiring (the dominant change vector at this snapshot):**
   - if yvUSDC-1 reroutes materially away from its current `USDC to sUSDS Lender` strategy, yvDAI-1's effective endpoint mix changes accordingly — the dominant ~77.5% sUSDS share is inherited from yvUSDC-1
   - if yvUSDS-1 reintroduces sUSDS Lender or any non-Spark-Compounder strategy, yvDAI-1's secondary exposure diversifies
+  - **watch:** a new strategy `Morpho Yearn USDC Compounder` ([`0xf1784A1bF0cBDE0F868838Dd093E65215343c4C0`](https://etherscan.io/address/0xf1784A1bF0cBDE0F868838Dd093E65215343c4C0)) was added to yvUSDC-1's queue on 2026-04-30 with 0 debt at this snapshot. If funded, it would introduce a Morpho exposure (and a third effective endpoint) into yvDAI-1's flow via the yvUSDC-1 path
 - **Vault-of-vaults composition:**
   - **reassess if a new strategy is added that creates a third Yearn-vault layer** (the cascade is currently 2 layers deep)
   - reassess if any of the two intermediate vaults (yvUSDC-1, yvUSDS-1) shuts down a strategy that holds yvDAI-1's deployed funds

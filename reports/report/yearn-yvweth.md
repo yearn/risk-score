@@ -16,24 +16,26 @@ The April-27 snapshot captured the vault mid-deallocation following the **April 
 
 - **Vault:** Standard Yearn V3 vault (v3.0.2) accepting WETH deposits, issuing yvWETH-1 shares. Deployed as an immutable Vyper minimal proxy (EIP-1167) via the v3.0.2 Yearn V3 Vault Factory ([`0x444045c5C13C246e117eD36437303cac8E250aB0`](https://etherscan.io/address/0x444045c5C13C246e117eD36437303cac8E250aB0))
 - **Funded strategies (3 in default queue, all with debt):**
-  - Morpho Gauntlet WETH Prime Compounder ([`0xeEB6Be70fF212238419cD638FAB17910CF61CBE7`](https://etherscan.io/address/0xeEB6Be70fF212238419cD638FAB17910CF61CBE7)) — 4,033.64 WETH (72.92%)
-  - **stETH Accumulator** ([`0x470e0e048F85CFD72EEf325895e02c8D297E7435`](https://etherscan.io/address/0x470e0e048F85CFD72EEf325895e02c8D297E7435)) — 1,166.19 WETH (21.08%)
-  - Spark WETH Lender ([`0x365cC9c28Df1663fA37C565A3aC1Addc3A219e15`](https://etherscan.io/address/0x365cC9c28Df1663fA37C565A3aC1Addc3A219e15)) — 332.41 WETH (6.01%)
+  - Morpho Gauntlet WETH Prime Compounder ([`0xeEB6Be70fF212238419cD638FAB17910CF61CBE7`](https://etherscan.io/address/0xeEB6Be70fF212238419cD638FAB17910CF61CBE7)) — 4,033.64 WETH (73.85%)
+  - **stETH Accumulator** ([`0x470e0e048F85CFD72EEf325895e02c8D297E7435`](https://etherscan.io/address/0x470e0e048F85CFD72EEf325895e02c8D297E7435)) — 1,166.19 WETH (21.35%)
+  - Spark WETH Lender ([`0x365cC9c28Df1663fA37C565A3aC1Addc3A219e15`](https://etherscan.io/address/0x365cC9c28Df1663fA37C565A3aC1Addc3A219e15)) — 262.32 WETH (4.80%)
 - **Withdrawal mechanics:** Morpho and Spark unwind atomically against deep underlying lending markets. The stETH Accumulator **does not auto-unwind on user withdrawal** — `availableWithdrawLimit()` returns only the strategy's loose WETH balance. Larger redemptions touching the Accumulator portion are management-paced (manual unwind via Curve or the Lido withdrawal queue)
 - **Governance:** Standard **Yearn V3 Role Manager** ([`0xb3bd6B2E61753C311EFbCF0111f75D29706D9a41`](https://etherscan.io/address/0xb3bd6B2E61753C311EFbCF0111f75D29706D9a41)) governed by the **Yearn 6-of-9 ySafe** with **7-day TimelockController** for strategy additions
 
-**Key metrics (May 5, 2026, snapshot at block 25029809, timestamp 1777996211 = 15:50:11 UTC):**
+**Key metrics (May 5, 2026, snapshot at block 25031569, timestamp 1778017355 = 21:42:35 UTC):**
 
-- **TVL:** 5,532.24 WETH (~$13.19M at ETH/USD = $2,383.77, [Chainlink ETH/USD feed](https://etherscan.io/address/0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419))
-- **Total Supply:** 5,284.57 yvWETH-1
-- **Price Per Share:** 1.046866 WETH/yvWETH-1 (~4.69% cumulative appreciation over ~25.8 months, ~2.2% annualized)
-- **Total Debt:** 5,532.24 WETH (100% deployed)
+- **TVL:** 5,462.15 WETH (~$12.99M at ETH/USD = $2,378.63, [Chainlink ETH/USD feed](https://etherscan.io/address/0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419))
+- **Total Supply:** 5,217.47 yvWETH-1
+- **Price Per Share:** 1.046897 WETH/yvWETH-1 (~4.69% cumulative appreciation over ~25.8 months, ~2.2% annualized)
+- **Total Debt:** 5,462.15 WETH (100% deployed)
 - **Total Idle:** 0
 - **Deposit Limit:** 15,000 WETH
 - **Profit Max Unlock Time:** 10 days
 - **Fees:** 0% management fee, 10% performance fee
 
-**Lido withdrawal #121758 status:** Lido withdrawal request **#121758** (the 1,000-stETH in-flight request flagged in the April 27 snapshot) is now **finalized AND claimed** at block 25029809 (`getWithdrawalStatus([121758]) = (1000 stETH, 811.44 shares, owner = stETH strategy, ts = 1776716615, isFinalized = true, isClaimed = true)`). At the snapshot the strategy's `pendingRedemptions = 0`, so the accounting-lag mechanism described in the prior snapshot is **dormant** here. `estimatedTotalAssets() = 1,166.72 WETH` matches `current_debt = 1,166.19 WETH` to within profit-unlock noise.
+**Snapshot drift since the prior in-day snapshot (block 25029809, ~6 hours earlier):** vault TVL fell ~70.09 WETH (-1.27%). The entire reduction came out of the **Spark WETH Lender** strategy (332.41 → 262.32 WETH), with Morpho Gauntlet and stETH Accumulator absolute debts unchanged. As a result Spark's allocation share dropped from 6.01% → 4.80%, while Morpho moved 72.92% → 73.85% and stETH Accumulator moved 21.08% → 21.35% (composition-only changes; their absolute deployment is unchanged).
+
+**Lido withdrawal #121758 status:** Lido withdrawal request **#121758** (the 1,000-stETH in-flight request flagged in the April 27 snapshot) is now **finalized AND claimed** (`getWithdrawalStatus([121758]) = (1000 stETH, 811.44 shares, owner = stETH strategy, ts = 1776716615, isFinalized = true, isClaimed = true)`). At the snapshot the strategy's `pendingRedemptions = 0`, so the accounting-lag mechanism described in the prior snapshot is **dormant** here. `estimatedTotalAssets()` matches `current_debt = 1,166.19 WETH` to within profit-unlock noise.
 
 **Links:**
 
@@ -80,28 +82,28 @@ The April-27 snapshot captured the vault mid-deallocation following the **April 
 
 | # | Strategy | Name | Current Debt (WETH) | Allocation |
 |---|----------|------|--------------------:|-----------:|
-| 1 | [`0x365cC9c28Df1663fA37C565A3aC1Addc3A219e15`](https://etherscan.io/address/0x365cC9c28Df1663fA37C565A3aC1Addc3A219e15) | Spark WETH Lender | 332.41 | 6.01% |
-| 2 | [`0xeEB6Be70fF212238419cD638FAB17910CF61CBE7`](https://etherscan.io/address/0xeEB6Be70fF212238419cD638FAB17910CF61CBE7) | **Morpho Gauntlet WETH Prime Compounder** | **4,033.64** | **72.92%** |
-| 3 | [`0x470e0e048F85CFD72EEf325895e02c8D297E7435`](https://etherscan.io/address/0x470e0e048F85CFD72EEf325895e02c8D297E7435) | **stETH Accumulator** | **1,166.19** | **21.08%** |
+| 1 | [`0x365cC9c28Df1663fA37C565A3aC1Addc3A219e15`](https://etherscan.io/address/0x365cC9c28Df1663fA37C565A3aC1Addc3A219e15) | Spark WETH Lender | 262.32 | 4.80% |
+| 2 | [`0xeEB6Be70fF212238419cD638FAB17910CF61CBE7`](https://etherscan.io/address/0xeEB6Be70fF212238419cD638FAB17910CF61CBE7) | **Morpho Gauntlet WETH Prime Compounder** | **4,033.64** | **73.85%** |
+| 3 | [`0x470e0e048F85CFD72EEf325895e02c8D297E7435`](https://etherscan.io/address/0x470e0e048F85CFD72EEf325895e02c8D297E7435) | **stETH Accumulator** | **1,166.19** | **21.35%** |
 
-**Previously queued, now revoked (`activation = 0` at block 25029809):**
+**Previously queued, now revoked (`activation = 0` at block 25031569):**
 
 - Aave V3 Lido WETH Lender ([`0xC7baE383738274ea8C3292d53AfBB3b42B348DF0`](https://etherscan.io/address/0xC7baE383738274ea8C3292d53AfBB3b42B348DF0))
 - Aave V3 WETH Lender ([`0x5ABcBBDbf617a21F7667e8cfD17Fa16475D20dB8`](https://etherscan.io/address/0x5ABcBBDbf617a21F7667e8cfD17Fa16475D20dB8))
 
-**Current funding posture:** vault is 100% deployed across three venues. Morpho Gauntlet dominates at ~73% — a meaningful single-venue concentration. The stETH Accumulator share has dropped from 33% (April 27) to 21%. Both Aave V3 strategies were revoked entirely; per Yearn team this followed the April 18 rsETH bridge exploit (unverified attribution). None of the funded strategies reference rsETH directly.
+**Current funding posture:** vault is 100% deployed across three venues. Morpho Gauntlet dominates at ~74% — a meaningful single-venue concentration. The stETH Accumulator share is at ~21%. Both Aave V3 strategies were revoked entirely; per Yearn team this followed the April 18 rsETH bridge exploit (unverified attribution). None of the funded strategies reference rsETH directly. Between the prior in-day snapshot (block 25029809) and this snapshot (block 25031569, ~6 hours later) ~70 WETH was withdrawn from Spark WETH Lender, dropping its allocation share from 6.01% → 4.80%; Morpho Gauntlet and stETH Accumulator absolute debts were unchanged.
 
 ### Strategy Protocol Dependencies
 
 | Protocol | Strategy | Allocation |
 |----------|----------|-----------|
-| **Morpho (Gauntlet curator)** | Morpho Gauntlet WETH Prime Compounder | **72.92% of vault TVL** |
-| **Lido (stETH)** | stETH Accumulator | **21.08% of vault TVL** |
-| **Spark Lend** | Spark WETH Lender | **6.01% of vault TVL** |
+| **Morpho (Gauntlet curator)** | Morpho Gauntlet WETH Prime Compounder | **73.85% of vault TVL** |
+| **Lido (stETH)** | stETH Accumulator | **21.35% of vault TVL** |
+| **Spark Lend** | Spark WETH Lender | **4.80% of vault TVL** |
 | **Curve ETH/stETH pool** | stETH Accumulator (stake / unwind path) | Indirect dependency |
 | **Lido withdrawal queue** | stETH Accumulator (unwind path) | Indirect dependency |
 
-**Sky-governance exposure note:** Spark Lend is a Sky sub-DAO. Roughly 6% of yvWETH-1's debt sits in Spark WETH Lender, which is administered through Sky / Spark governance. This is a small Sky-governance dependency on a minority allocation; immaterial relative to the Morpho-dominated mix.
+**Sky-governance exposure note:** Spark Lend is a Sky sub-DAO. Roughly 5% of yvWETH-1's debt sits in Spark WETH Lender, which is administered through Sky / Spark governance. This is a small Sky-governance dependency on a minority allocation; immaterial relative to the Morpho-dominated mix.
 
 ## Audits and Due Diligence Disclosures
 
@@ -146,8 +148,8 @@ All strategies pass through Yearn's **12-metric risk-scoring framework** ([RISK_
 ## Historical Track Record
 
 - **Vault deployed:** March 12, 2024 (deployment [tx](https://etherscan.io/tx/0xfc6be986a2e60849a91c397c5c4bd10d9b247f0e1fb30cdaf0ed1f7687ea648e)) — **~25.8 months** in production
-- **TVL:** 5,532.24 WETH (~$13.19M)
-- **PPS trend:** 1.000000 → 1.046866 (~4.69% cumulative return over ~25.8 months, ~2.2% annualized — reflects historical periods at lower deployment ratios)
+- **TVL:** 5,462.15 WETH (~$12.99M)
+- **PPS trend:** 1.000000 → 1.046897 (~4.69% cumulative return over ~25.8 months, ~2.2% annualized — reflects historical periods at lower deployment ratios)
 - **Security incidents:** None known for this vault or for the Yearn V3 framework
 - **Strategy changes:** active management. Between April 27 and May 5, **Aave V3 Lido WETH and Aave V3 WETH were both revoked** (`activation = 0`); funds were re-deployed from the prior 67%-idle posture into a Morpho-dominant 3-venue mix
 - **Yearn V3 track record:** V3 framework live since May 2024 (~24 months). No V3 vault exploits
@@ -158,13 +160,13 @@ All strategies pass through Yearn's **12-metric risk-scoring framework** ([RISK_
 
 yvWETH-1 is **100% deployed** at the snapshot, split roughly: **Morpho Gauntlet 73%, stETH Accumulator 21%, Spark 6%**. The earlier April-27 67%-idle posture (per Yearn team a rsETH-precautionary deallocation, unverified attribution) has reversed.
 
-### Strategy 1: Morpho Gauntlet WETH Prime Compounder (~72.92% of vault TVL)
+### Strategy 1: Morpho Gauntlet WETH Prime Compounder (~73.85% of vault TVL)
 
 **Contract:** [`0xeEB6Be70fF212238419cD638FAB17910CF61CBE7`](https://etherscan.io/address/0xeEB6Be70fF212238419cD638FAB17910CF61CBE7)
 
 Direct WETH deposit into the Gauntlet-curated Morpho WETH Prime ERC-4626 vault. Atomic single-hop deposit / redeem against deep Morpho lending markets (Morpho protocol $6.6B+ TVL). Curated by Gauntlet, audited 25+ times across Trail of Bits, Spearbit, OpenZeppelin, ChainSecurity, Certora.
 
-### Strategy 2: stETH Accumulator (~21.08% of vault TVL)
+### Strategy 2: stETH Accumulator (~21.35% of vault TVL)
 
 **Contract:** [`0x470e0e048F85CFD72EEf325895e02c8D297E7435`](https://etherscan.io/address/0x470e0e048F85CFD72EEf325895e02c8D297E7435)
 
@@ -190,7 +192,7 @@ The contract code (`Strategy.sol` / `BaseLSTAccumulator.sol`, verified on Ethers
 - `reportBuffer` haircuts the LST value in `estimatedTotalAssets()` to absorb peg slippage
 - `pendingRedemptions` blocks `_harvestAndReport()` from running while withdrawal requests are in flight (preventing double-counting)
 
-**Current strategy state (snapshot block 25029809):**
+**Current strategy state (snapshot block 25031569):**
 
 | Field | Value |
 |-------|-------|
@@ -199,7 +201,7 @@ The contract code (`Strategy.sol` / `BaseLSTAccumulator.sol`, verified on Ethers
 | `estimatedTotalAssets()` | 1,166.72 WETH |
 | `totalAssets()` (TokenizedStrategy) | ~1,166.72 WETH (matches `estimatedTotalAssets()` to within profit-unlock noise) |
 | Vault `current_debt` for this strategy | 1,166.19 WETH |
-| Lido request #121758 | **isFinalized = true, isClaimed = true** at block 25029809 |
+| Lido request #121758 | **isFinalized = true, isClaimed = true** at block 25031569 |
 
 The accounting-lag mechanism (`pendingRedemptions > 0` blocks `_harvestAndReport()`) is **dormant** at this snapshot — there is no in-flight Lido withdrawal. If the strategy initiates a new `initiateLSTWithdrawal()` later, the lag mechanism will re-engage; captured under Reassessment Triggers.
 
@@ -209,7 +211,7 @@ The accounting-lag mechanism (`pendingRedemptions > 0` blocks `_harvestAndReport
 - Management: Brain multisig (3-of-8) and Debt Allocator
 - Keeper: yHaaSRelayer ([`0x604e586F17cE106B64185A7a0d2c1Da5bAce711E`](https://etherscan.io/address/0x604e586F17cE106B64185A7a0d2c1Da5bAce711E))
 
-### Strategy 3: Spark WETH Lender (~6.01% of vault TVL)
+### Strategy 3: Spark WETH Lender (~4.80% of vault TVL)
 
 **Contract:** [`0x365cC9c28Df1663fA37C565A3aC1Addc3A219e15`](https://etherscan.io/address/0x365cC9c28Df1663fA37C565A3aC1Addc3A219e15)
 
@@ -249,7 +251,7 @@ The rationale for revoking both Aave V3 strategies has not been independently ve
 | Aspect | Detail |
 |--------|--------|
 | Vault-level idle | 0 WETH (vault is fully deployed) |
-| Atomic-unwind portion | ~79% of TVL — Morpho Gauntlet (4,033.64 WETH) + Spark Lend (332.41 WETH), both deep blue-chip WETH lending markets |
+| Atomic-unwind portion | ~79% of TVL — Morpho Gauntlet (4,033.64 WETH) + Spark Lend (262.32 WETH), both deep blue-chip WETH lending markets |
 | Manual-unwind portion | ~21% of TVL — stETH Accumulator (1,166.19 WETH); `availableWithdrawLimit()` on this strategy returns only its loose WETH |
 | Manual unwind paths | (a) Curve ETH/stETH (immediate, peg-dependent), (b) Lido queue (1–7 days, 1:1) |
 | Curve ETH/stETH pool depth | Deep pool; stETH peg has been stable post-Shapella |
@@ -262,7 +264,7 @@ The rationale for revoking both Aave V3 strategies has not been independently ve
 - **Withdrawals exceeding the atomic portion** require either (a) additional Morpho headroom, which depends on Morpho Gauntlet WETH market utilization at the moment of withdraw, or (b) management to pre-position WETH out of the stETH Accumulator
 - **Lido queue can extend** under stress (post-merge withdrawal congestion, large coordinated unstake events)
 - **Same-asset:** vault token is WETH-denominated; no price-divergence risk on the share
-- **Deposit limit:** 15,000 WETH cap vs 5,532 WETH TVL (room for +171%)
+- **Deposit limit:** 15,000 WETH cap vs 5,462 WETH TVL (room for +175%)
 - **Single-venue concentration:** ~73% of TVL sits in the Morpho Gauntlet WETH Prime vault — concentrated single-venue exposure, though Morpho/Gauntlet is among the highest-quality WETH venues in DeFi
 
 The on-chain reality on the stETH Accumulator: `availableWithdrawLimit()` is **deliberately constrained** to the strategy's loose WETH balance — verified in `BaseLSTAccumulator.sol`. This is a design choice to prevent forced-sale of stETH at a discount during peg events, but it means **redemptions exceeding the atomic Morpho + Spark capacity are management-paced for the Accumulator portion**.
@@ -425,7 +427,7 @@ Yearn maintains the [`monitoring`](https://github.com/yearn/monitoring) reposito
 | Audits | V3 framework: 3 audits by top firms. Morpho: 25+ audits incl. Certora formal verification. Lido: multiple firms. Spark: ChainSecurity, Cantina |
 | Bug bounty | $200K (Yearn Immunefi); Morpho, Lido, Spark bounties active |
 | Production history | **~25.8 months** (March 12, 2024). V3 framework: ~24 months |
-| TVL | 5,532 WETH (~$13.19M). Deposit limit: 15,000 WETH |
+| TVL | 5,462 WETH (~$12.99M). Deposit limit: 15,000 WETH |
 | Security incidents | None on V3, none on Lido stETH, none on Morpho/Gauntlet, none on Spark Lend |
 | Strategy review | 12-metric ySec framework. Category-1 strictest tier |
 
@@ -586,7 +588,7 @@ The score sits at the Minimal / Low Risk boundary. The dominant factors keeping 
 
 ## Appendix: Contract Architecture
 
-Snapshot at block 25029809 (May 5, 2026, 15:50 UTC).
+Snapshot at block 25031569 (May 5, 2026, 21:42 UTC).
 
 ```
 ┌──────────────────────────────────────────────────────────────────────┐
@@ -597,9 +599,9 @@ Snapshot at block 25029809 (May 5, 2026, 15:50 UTC).
 │  │  ERC-4626, immutable Vyper proxy       │                          │
 │  │  0xc564…dDB0                           │                          │
 │  │                                        │                          │
-│  │  TVL: 5,532.24 WETH (~$13.19M)         │                          │
+│  │  TVL: 5,462.15 WETH (~$12.99M)         │                          │
 │  │   ├── 0 idle                           │                          │
-│  │   └── 5,532.24 deployed across 3      │                          │
+│  │   └── 5,462.15 deployed across 3      │                          │
 │  └─────────────────┬──────────────────────┘                          │
 │                    │                                                  │
 │   ┌────────────────┼────────────────────────────┐                    │
@@ -608,9 +610,9 @@ Snapshot at block 25029809 (May 5, 2026, 15:50 UTC).
 │ │ Spark WETH   │ │ Morpho Gauntlet      │ │ stETH Accumulator      │ │
 │ │ Lender       │ │ WETH Prime           │ │ 0x470e…7435            │ │
 │ │ 0x365c…9e15  │ │ Compounder           │ │                        │ │
-│ │ 332.41 WETH  │ │ 0xeEB6…CBE7          │ │ 1,166.19 WETH (21.08%) │ │
-│ │ 6.01%        │ │ 4,033.64 WETH        │ │                        │ │
-│ │ Atomic       │ │ 72.92%               │ │ Stake: WETH→ETH→stETH  │ │
+│ │ 262.32 WETH  │ │ 0xeEB6…CBE7          │ │ 1,166.19 WETH (21.35%) │ │
+│ │ 4.80%        │ │ 4,033.64 WETH        │ │                        │ │
+│ │ Atomic       │ │ 73.85%               │ │ Stake: WETH→ETH→stETH  │ │
 │ │ unwind       │ │ Atomic unwind        │ │ via Curve or Lido      │ │
 │ │              │ │ subject to market    │ │                        │ │
 │ │              │ │ utilization          │ │ Unwind (mgmt-only):    │ │

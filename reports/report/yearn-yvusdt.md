@@ -12,7 +12,7 @@ yvUSDT-1 is a **USDT-denominated Yearn V3 vault** (ERC-4626) on Ethereum mainnet
 
 Per the Yearn team, the late-April 100%-idle posture was a **precautionary deallocation following the April 18, 2026 rsETH (KelpDAO) bridge exploit** on the LayerZero OFT bridge layer (the rsETH event itself is documented in the [hgETH reassessment report](./kerneldao-hgeth.md)). The team's specific causal attribution has not been independently verified, but the rsETH event itself is well documented. **Funds have since been re-deployed** — the deallocation reversed, but the redeployment landed in a narrower set of venues (3 instead of 5) and did not return to Fluid or Aave V3 USDT.
 
-The PPS is 1.080606 (~8.06% cumulative since deployment, ~4.5% annualized). The current report captures the May 5 redeployed state.
+The PPS is 1.080611 (~8.06% cumulative since deployment, ~4.5% annualized). The current report captures the May 5 redeployed state.
 
 **Key architecture:**
 
@@ -23,15 +23,15 @@ The PPS is 1.080606 (~8.06% cumulative since deployment, ~4.5% annualized). The 
   - Morpho Steakhouse USDT Compounder ([`0x0a4ea2bDe8496a878a7ca2772056a8e6fe3245c5`](https://etherscan.io/address/0x0a4ea2bDe8496a878a7ca2772056a8e6fe3245c5)) — queued, 0 debt
 - **Governance:** Standard **Yearn V3 Role Manager** ([`0xb3bd6B2E61753C311EFbCF0111f75D29706D9a41`](https://etherscan.io/address/0xb3bd6B2E61753C311EFbCF0111f75D29706D9a41)) governed by the **Yearn 6-of-9 ySafe** with **7-day TimelockController** for strategy additions
 
-**Key metrics (May 5, 2026, snapshot at block 25029809, timestamp 1777996211 = 15:50:11 UTC):**
+**Key metrics (May 5, 2026, snapshot at block 25031569, timestamp 1778017355 = 21:42:35 UTC):**
 
-- **TVL:** 7,122,057.32 USDT (100% deployed)
-- **Total Supply:** 6,590,793.95 yvUSDT-1
-- **Price Per Share:** 1.080606 USDT/yvUSDT-1 (~8.06% cumulative appreciation over ~21.4 months, ~4.5% annualized)
-- **Total Debt:** 7,122,057.32 USDT (100% of TVL)
+- **TVL:** 7,121,083.02 USDT (100% deployed)
+- **Total Supply:** 6,589,866.21 yvUSDT-1
+- **Price Per Share:** 1.080611 USDT/yvUSDT-1 (~8.06% cumulative appreciation over ~21.4 months, ~4.5% annualized)
+- **Total Debt:** 7,121,083.02 USDT (100% of TVL)
 - **Total Idle:** 0
 - **Debt distribution:**
-  - Spark USDT Lender: 3,559,778.70 USDT (49.98%)
+  - Spark USDT Lender: 3,558,804.39 USDT (49.98%)
   - Morpho Gauntlet USDT Prime Compounder: 3,562,278.63 USDT (50.02%)
   - Morpho Steakhouse USDT Compounder: 0 (queued, unfunded)
 - **Deposit Limit:** 50,000,000 USDT
@@ -83,11 +83,11 @@ The PPS is 1.080606 (~8.06% cumulative since deployment, ~4.5% annualized). The 
 
 | # | Strategy | Name | Current Debt (USDT) | Allocation |
 |---|----------|------|--------------------:|-----------:|
-| 1 | [`0xED48069a2b9982B4eec646CBfA7b81d181f9400B`](https://etherscan.io/address/0xED48069a2b9982B4eec646CBfA7b81d181f9400B) | Spark USDT Lender | 3,559,778.70 | 49.98% |
+| 1 | [`0xED48069a2b9982B4eec646CBfA7b81d181f9400B`](https://etherscan.io/address/0xED48069a2b9982B4eec646CBfA7b81d181f9400B) | Spark USDT Lender | 3,558,804.39 | 49.98% |
 | 2 | [`0x6D2981FF9b8d7edbb7604de7A65BAC8694ac849F`](https://etherscan.io/address/0x6D2981FF9b8d7edbb7604de7A65BAC8694ac849F) | Morpho Gauntlet USDT Prime Compounder | 3,562,278.63 | 50.02% |
 | 3 | [`0x0a4ea2bDe8496a878a7ca2772056a8e6fe3245c5`](https://etherscan.io/address/0x0a4ea2bDe8496a878a7ca2772056a8e6fe3245c5) | Morpho Steakhouse USDT Compounder | 0 | 0% |
 
-**Previously queued, now revoked (`activation = 0` at block 25029809):**
+**Previously queued, now revoked (`activation = 0` at block 25031569):**
 
 - USDT Fluid Lender ([`0x4Bd05E6ff75b633F504F0fC501c1e257578C8A72`](https://etherscan.io/address/0x4Bd05E6ff75b633F504F0fC501c1e257578C8A72))
 - Aave V3 USDT Lender ([`0x27998440eC85F0DF11DED26e6aB27c8D2a9d8Cb2`](https://etherscan.io/address/0x27998440eC85F0DF11DED26e6aB27c8D2a9d8Cb2))
@@ -145,8 +145,8 @@ All strategies pass through Yearn's **12-metric risk-scoring framework** ([RISK_
 ## Historical Track Record
 
 - **Vault deployed:** July 23, 2024 (deployment [tx](https://etherscan.io/tx/0x05681fd5be0e925bb720450418d20eda99bb22adc72be3d702de70368d7cd3ea)) — **~21.4 months** in production
-- **TVL:** 7,122,057.32 USDT (~$7.12M) — well within the $50M deposit limit
-- **PPS trend:** 1.000000 → 1.080606 (~8.06% cumulative return, ~4.5% annualized)
+- **TVL:** 7,121,083.02 USDT (~$7.12M) — well within the $50M deposit limit
+- **PPS trend:** 1.000000 → 1.080611 (~8.06% cumulative return, ~4.5% annualized)
 - **Security incidents:** None known for this vault or for the Yearn V3 framework
 - **Strategy changes:** active management — five strategies have been queued historically. Between April 27 and May 5, **Fluid USDT and Aave V3 USDT were revoked** (`activation = 0`); funds were also re-deployed from the brief 100%-idle state into the remaining Spark + Morpho Gauntlet venues
 - **Yearn V3 track record:** V3 framework live since May 2024 (~24 months). No V3 vault exploits
@@ -161,8 +161,8 @@ yvUSDT-1 is **100% deployed** at the snapshot, split roughly 50/50 between Spark
 
 ### Current State (snapshot)
 
-- **Total Assets:** 7,122,057.32 USDT
-- **Total Debt:** 7,122,057.32 USDT (100% deployed)
+- **Total Assets:** 7,121,083.02 USDT
+- **Total Debt:** 7,121,083.02 USDT (100% deployed)
 - **Total Idle:** 0
 - **Capital utilization:** 100%
 

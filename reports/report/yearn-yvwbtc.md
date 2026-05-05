@@ -20,10 +20,10 @@ yvWBTC-1 is also the **newest and least mature vault** in the mainnet risk-1 set
 - **Strategy queue:** **empty** (`get_default_queue() == []`). No strategy currently attached to the vault. Adding any new strategy requires a 7-day timelock proposal
 - **Governance:** Standard **Yearn V3 Role Manager** ([`0xb3bd6B2E61753C311EFbCF0111f75D29706D9a41`](https://etherscan.io/address/0xb3bd6B2E61753C311EFbCF0111f75D29706D9a41)) governed by the **Yearn 6-of-9 ySafe** with **7-day TimelockController** for strategy additions
 
-**Key metrics (May 5, 2026, snapshot at block 25029809, timestamp 1777996211 = 15:50:11 UTC):**
+**Key metrics (May 5, 2026, snapshot at block 25031569, timestamp 1778017355 = 21:42:35 UTC):**
 
 - **TVL:** 47.50511676 WBTC (~$3.87M, Chainlink BTC/USD = $81,658.90, WBTC/BTC = 0.9972)
-- **Total Supply:** 47.50336728 yvWBTC-1
+- **Total Supply:** 47.50336605 yvWBTC-1
 - **Price Per Share:** 1.000037 WBTC/yvWBTC-1 (essentially unchanged over ~11.7 months — the vault has been mostly undeployed)
 - **Total Debt:** 0 (on-chain)
 - **Total Idle:** 47.50511676 WBTC (100% of TVL)
@@ -74,7 +74,7 @@ yvWBTC-1 is also the **newest and least mature vault** in the mainnet risk-1 set
 
 ### Strategies (0 in default queue, 0 with debt)
 
-`get_default_queue()` returns `[]` at block 25029809. The previously-attached **Aave V3 WBTC Lender** ([`0x0B9Ae07457BAED5536B1f3e78C9649E980fB4EDc`](https://etherscan.io/address/0x0B9Ae07457BAED5536B1f3e78C9649E980fB4EDc)) was revoked from the vault — `vault.strategies(0x0B9A…)` returns `(activation=0, last_report=0, current_debt=0, max_debt=0)`, indicating the strategy is no longer attached.
+`get_default_queue()` returns `[]` at block 25031569. The previously-attached **Aave V3 WBTC Lender** ([`0x0B9Ae07457BAED5536B1f3e78C9649E980fB4EDc`](https://etherscan.io/address/0x0B9Ae07457BAED5536B1f3e78C9649E980fB4EDc)) was revoked from the vault — `vault.strategies(0x0B9A…)` returns `(activation=0, last_report=0, current_debt=0, max_debt=0)`, indicating the strategy is no longer attached.
 
 Adding any new strategy now requires a fresh `addNewStrategy()` proposal through the Strategy Manager TimelockController (7-day delay). Until that happens, yvWBTC-1 has **no protocol dependency surface beyond WBTC itself**.
 
