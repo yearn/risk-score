@@ -341,7 +341,7 @@ All core contracts (MorphoCredit, ProtocolConfig, CreditLine, USD3) are owned by
 
 ### Critical Risks
 
-- **Default contagion:** If multiple borrowers default simultaneously, the sUSD3 junior tranche + ~$868K Insurance Fund may be insufficient to cover losses, directly impacting USD3 holders. With ~$6.91M outstanding loans, even a ~14% default rate would exhaust the insurance buffer before touching sUSD3.
+- **Default contagion:** If multiple borrowers default simultaneously, the sUSD3 junior tranche + ~$868K Insurance Fund may be insufficient to cover losses, directly impacting USD3 holders. With ~$6.91M outstanding loans and ~$6.28M sUSD3 assets + ~$868K fund, the combined first-loss buffer covers only ~103% of the borrow book — i.e. once cumulative defaults exceed ~$7.15M (≈103% of outstanding), USD3 senior holders begin to take losses.
 - **Offchain legal dependency:** Entire default recovery mechanism depends on U.S. legal system, licensed collection agencies, and credit bureau reporting — none of which have been tested at scale in a DeFi context
 - **Upgrade risk + Yearn V3 shutdown semantics:** The April 2026 incident showed that recovering from `shutdownStrategy()` required a brand-new `restartStrategy()` reinitializer (PR #112). Future shutdowns may again require timelocked upgrades to fully reopen — a hidden coupling between emergency response and governance.
 - **Liquidity risk under stress:** Utilization is now ~70% (up from ~44% in March). The April 2026 event demonstrated that when the strategy is shut down, idle reserves available for redemption can collapse to near-zero for a week+ window.
