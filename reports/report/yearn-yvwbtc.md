@@ -1,6 +1,6 @@
 # Protocol Risk Assessment: Yearn — yvWBTC-1
 
-- **Assessment Date:** April 27, 2026
+- **Assessment Date:** May 5, 2026
 - **Token:** yvWBTC-1 (WBTC-1 yVault)
 - **Chain:** Ethereum
 - **Token Address:** [`0x751F0cC6115410A3eE9eC92d08f46Ff6Da98b708`](https://etherscan.io/address/0x751F0cC6115410A3eE9eC92d08f46Ff6Da98b708)
@@ -8,31 +8,30 @@
 
 ## Overview + Links
 
-yvWBTC-1 is a **WBTC-denominated Yearn V3 vault** (ERC-4626) on Ethereum mainnet. The vault holds **47.5051 WBTC** (≈ $3.64M at the snapshot) but currently deploys **0% of it** — `totalDebt = 0`, `totalIdle = totalAssets`. **Only one strategy is queued** — Aave V3 WBTC Lender — and it currently holds zero debt.
+yvWBTC-1 is a **WBTC-denominated Yearn V3 vault** (ERC-4626) on Ethereum mainnet. The vault holds **47.5051 WBTC** (≈ $3.87M at the snapshot) and currently deploys **0% of it** — `totalDebt = 0`, `totalIdle = totalAssets`. The vault's **default queue is now empty** (`get_default_queue() == []`): the previously-queued Aave V3 WBTC Lender strategy has been **revoked from the vault** (`activation = 0` on-chain) since the prior April 27 snapshot.
 
-Per the Yearn team, the current 100%-idle posture is a **precautionary deallocation following the April 18, 2026 rsETH (KelpDAO) bridge exploit** on the LayerZero OFT bridge layer (the rsETH event itself is documented in the [hgETH reassessment report](./kerneldao-hgeth.md)). The team's specific causal attribution for yvWBTC-1's deallocation has not been independently verified; the rsETH event itself is well documented. Note that the queued Aave V3 WBTC market does not reference rsETH as collateral directly, so the deallocation here is precautionary.
+Per the Yearn team, the broader risk-1 vault posture during late April was a **precautionary deallocation following the April 18, 2026 rsETH (KelpDAO) bridge exploit** on the LayerZero OFT bridge layer (the rsETH event itself is documented in the [hgETH reassessment report](./kerneldao-hgeth.md)). For yvWBTC-1 specifically, the strategy revocation goes further than a temporary pull — there is now no strategy on the vault at all. Whether this is a permanent deprecation or a precursor to re-onboarding a different strategy under the 7-day timelock is not on-chain verifiable; the team's specific intent has not been independently verified.
 
-yvWBTC-1 is also the **newest and least mature vault** in the mainnet risk-1 set — deployed May 13, 2025, ~11.5 months at the snapshot. PPS has barely moved (1.000036), reflecting that the vault has spent most of its life undeployed or only briefly funded.
+yvWBTC-1 is also the **newest and least mature vault** in the mainnet risk-1 set — deployed May 13, 2025, ~11.7 months at the snapshot. PPS has barely moved (1.000037), reflecting that the vault has spent essentially all of its life undeployed.
 
 **Key architecture:**
 
 - **Vault:** Standard Yearn V3 vault (v3.0.4) accepting WBTC deposits, issuing yvWBTC-1 shares. Deployed as an immutable Vyper minimal proxy (EIP-1167) via the v3.0.4 Yearn V3 Vault Factory ([`0x770D0d1Fb036483Ed4AbB6d53c1C88fb277D812F`](https://etherscan.io/address/0x770D0d1Fb036483Ed4AbB6d53c1C88fb277D812F))
-- **Strategy queue (single, WBTC-native, no Sky / USDS routing):**
-  - Aave V3 WBTC Lender ([`0x0B9Ae07457BAED5536B1f3e78C9649E980fB4EDc`](https://etherscan.io/address/0x0B9Ae07457BAED5536B1f3e78C9649E980fB4EDc))
+- **Strategy queue:** **empty** (`get_default_queue() == []`). No strategy currently attached to the vault. Adding any new strategy requires a 7-day timelock proposal
 - **Governance:** Standard **Yearn V3 Role Manager** ([`0xb3bd6B2E61753C311EFbCF0111f75D29706D9a41`](https://etherscan.io/address/0xb3bd6B2E61753C311EFbCF0111f75D29706D9a41)) governed by the **Yearn 6-of-9 ySafe** with **7-day TimelockController** for strategy additions
 
-**Key metrics (April 27, 2026, snapshot at block 24974187):**
+**Key metrics (May 5, 2026, snapshot at block 25029809, timestamp 1777996211 = 15:50:11 UTC):**
 
-- **TVL:** 47.5051 WBTC (~$3.64M, Chainlink BTC/USD = $76,879.12, WBTC/BTC = 0.99785)
-- **Total Supply:** 47.5034 yvWBTC-1
-- **Price Per Share:** 1.000036 WBTC/yvWBTC-1 (essentially unchanged over ~11.5 months — the vault has been mostly undeployed)
+- **TVL:** 47.50511676 WBTC (~$3.87M, Chainlink BTC/USD = $81,658.90, WBTC/BTC = 0.9972)
+- **Total Supply:** 47.50336728 yvWBTC-1
+- **Price Per Share:** 1.000037 WBTC/yvWBTC-1 (essentially unchanged over ~11.7 months — the vault has been mostly undeployed)
 - **Total Debt:** 0 (on-chain)
-- **Total Idle:** 47.5051 WBTC (100% of TVL)
-- **Deposit Limit:** **100,000 WBTC** (≈ $7.7B at snapshot — materially oversized, see Reassessment Triggers)
+- **Total Idle:** 47.50511676 WBTC (100% of TVL)
+- **Deposit Limit:** **100,000 WBTC** (≈ $8.1B at snapshot — materially oversized, see Reassessment Triggers)
 - **Profit Max Unlock Time:** 5 days
 - **Fees:** 0% management fee, 10% performance fee
 
-**Important note:** because the vault is 100% idle and has only one strategy in queue, this assessment captures the **current snapshot state**, not steady-state operation. The dependency profile, liquidity score, and complexity assessment should be re-checked once Yearn re-deploys funds to a strategy. This trigger is recorded under Reassessment Triggers below.
+**Important note:** because the vault is 100% idle **and has no strategy attached at all**, depositors today earn 0% APR and there is no protocol-dependency surface beyond WBTC itself. The dependency, liquidity, and complexity assessments below reflect this state. If Yearn proposes a new strategy under the 7-day timelock, the dependency assessment should be re-run against the actual chosen strategy. Captured under Reassessment Triggers.
 
 **Links:**
 
@@ -73,21 +72,17 @@ yvWBTC-1 is also the **newest and least mature vault** in the mainnet risk-1 set
 | Vault Factory (v3.0.4) | [`0x770D0d1Fb036483Ed4AbB6d53c1C88fb277D812F`](https://etherscan.io/address/0x770D0d1Fb036483Ed4AbB6d53c1C88fb277D812F) |
 | Vault Original (v3.0.4) | [`0xd8063123BBA3B480569244AE66BFE72B6c84b00d`](https://etherscan.io/address/0xd8063123BBA3B480569244AE66BFE72B6c84b00d) |
 
-### Strategies (1 in default queue, 0 with debt)
+### Strategies (0 in default queue, 0 with debt)
 
-| # | Strategy | Name | Current Debt (WBTC) | Allocation |
-|---|----------|------|--------------------:|-----------:|
-| 1 | [`0x0B9Ae07457BAED5536B1f3e78C9649E980fB4EDc`](https://etherscan.io/address/0x0B9Ae07457BAED5536B1f3e78C9649E980fB4EDc) | Aave V3 WBTC Lender | 0 | 0% |
+`get_default_queue()` returns `[]` at block 25029809. The previously-attached **Aave V3 WBTC Lender** ([`0x0B9Ae07457BAED5536B1f3e78C9649E980fB4EDc`](https://etherscan.io/address/0x0B9Ae07457BAED5536B1f3e78C9649E980fB4EDc)) was revoked from the vault — `vault.strategies(0x0B9A…)` returns `(activation=0, last_report=0, current_debt=0, max_debt=0)`, indicating the strategy is no longer attached.
 
-**Important:** the queued strategy is WBTC-native and does **not** route through the Sky / USDS stack. yvWBTC-1 is therefore **not part of the Sky concentration risk** that affects yvUSDC-1 / yvUSDS-1 / yvDAI-1. If yvWBTC-1 ever adds a strategy with Sky/USDS routing or with rsETH-collateral exposure, this exclusion no longer holds and the dependency assessment should be re-checked.
+Adding any new strategy now requires a fresh `addNewStrategy()` proposal through the Strategy Manager TimelockController (7-day delay). Until that happens, yvWBTC-1 has **no protocol dependency surface beyond WBTC itself**.
 
-### Strategy Protocol Dependencies (steady-state, when re-deployed)
+**Important:** with no strategy attached, yvWBTC-1 is unambiguously **not part of the Sky concentration risk** that affects yvUSDC-1 / yvUSDS-1 / yvDAI-1. If a new strategy is proposed with Sky/USDS routing or rsETH-collateral exposure, the dependency assessment should be re-run.
 
-| Protocol | Strategy | Notes |
-|----------|----------|-------|
-| **Aave V3** | Aave V3 WBTC Lender | Blue-chip, $30B+ TVL. Multiple audits (SigmaPrime, Certora, OpenZeppelin, Trail of Bits, ABDK) |
+### Strategy Protocol Dependencies
 
-When the Debt Allocator re-deploys, the dependency profile is **single-protocol** (Aave V3 only) — less diversified than yvUSDT-1's queued mix, but Aave V3 is the most extensively audited and largest-TVL lending protocol in DeFi. WBTC is also a more concentrated-liquidity asset than USDT/USDC, so even an expanded queue would have a narrower set of viable WBTC venues.
+**None active or queued at the snapshot.** The vault holds WBTC directly and does not currently interact with any external protocol other than the WBTC token itself.
 
 ## Audits and Due Diligence Disclosures
 
@@ -120,88 +115,71 @@ All strategies pass through Yearn's **12-metric risk-scoring framework** ([RISK_
 
 ### On-Chain Complexity
 
-Today, **trivially low** — the vault holds WBTC directly with no strategy funded.
+**Trivially low** — the vault holds WBTC directly with no strategy attached. There are no conversion hops, no leverage, no looping, no cross-chain. Standard ERC-4626 throughout. The vault contract itself is immutable.
 
-When the Debt Allocator re-deploys to the queued Aave V3 WBTC Lender, complexity is still low:
-
-- Direct WBTC supply to Aave V3 — no conversion hops
-- No leverage, no looping, no cross-chain
-- Standard ERC-4626 throughout
-- Vault is immutable
+If a new strategy is later attached, complexity will depend on the chosen integration; the previously-queued Aave V3 WBTC Lender would have been a simple single-hop lend.
 
 ## Historical Track Record
 
-- **Vault deployed:** May 13, 2025 (deployment [tx](https://etherscan.io/tx/0x8cac67b54afe9af0cc072a2e63852c787343ae514638a54d9644894f6b2a3984)) — **~11.5 months** in production. **Newest of the six mainnet risk-1 vaults.**
-- **TVL:** 47.5051 WBTC (~$3.64M) — well within the 100,000 WBTC deposit limit (the cap itself is materially oversized — see Reassessment Triggers)
-- **PPS trend:** 1.000000 → 1.000036 (essentially flat, ~0% annualized — the vault has been mostly undeployed over its short life)
+- **Vault deployed:** May 13, 2025 (deployment [tx](https://etherscan.io/tx/0x8cac67b54afe9af0cc072a2e63852c787343ae514638a54d9644894f6b2a3984)) — **~11.7 months** in production. **Newest of the six mainnet risk-1 vaults.**
+- **TVL:** 47.5051 WBTC (~$3.87M) — well within the 100,000 WBTC deposit limit (the cap itself is materially oversized — see Reassessment Triggers)
+- **PPS trend:** 1.000000 → 1.000037 (essentially flat, ~0% annualized — the vault has been mostly undeployed over its short life)
 - **Security incidents:** None known for this vault or for the Yearn V3 framework
-- **Strategy changes:** only one strategy ever queued (Aave V3 WBTC Lender, activated 2025-05-18); current state is post-deallocation
-- **Yearn V3 track record:** V3 framework live since May 2024 (~23 months). No V3 vault exploits
+- **Strategy changes:** the Aave V3 WBTC Lender (only strategy ever attached) was added 2025-05-18 and **revoked at some point between the April 27 and May 5 snapshots** — at the May 5 snapshot the vault has no attached strategy
+- **Yearn V3 track record:** V3 framework live since May 2024 (~24 months). No V3 vault exploits
 
 **Yearn protocol TVL:** ~$197.5M total across all chains ([DeFiLlama](https://defillama.com/protocol/yearn), April 2026).
 
-**Underlying WBTC lending market track record:** the Aave V3 WBTC market has multi-year operational history with no significant principal-loss events. WBTC has historically had narrower concentrated-liquidity profiles than USD stablecoins, which is the main caveat to the dependency picture when re-deployed.
-
 ## Funds Management
 
-yvWBTC-1 currently holds 100% WBTC idle. There is no active strategy deployment to characterize.
+yvWBTC-1 currently holds 100% WBTC idle. There are **no attached strategies** to characterize.
 
 ### Current State (snapshot)
 
-- **Total Assets:** 47.5051 WBTC
+- **Total Assets:** 47.50511676 WBTC
 - **Total Debt:** 0
-- **Total Idle:** 47.5051 WBTC (100%)
+- **Total Idle:** 47.50511676 WBTC (100%)
 - **Capital utilization:** 0% deployed
+- **Default queue length:** 0
 
 WBTC is held directly at the vault contract. ERC-4626 redemptions settle atomically against this idle balance with no slippage.
 
-### Strategies When Re-Deployed
+### Strategies
 
-The single queued strategy is WBTC-native:
-
-| Strategy | Mechanic | Risk profile |
-|----------|----------|-------------|
-| **Aave V3 WBTC Lender** | Direct supply to Aave V3 WBTC market | Blue-chip, $30B+ TVL |
-
-Simple lend pattern with no leverage, no conversion hops, and no cross-chain.
+**None attached at the snapshot.** The vault has no protocol-dependency surface beyond WBTC itself. Adding any new strategy requires a 7-day TimelockController proposal.
 
 ### Accessibility
 
 - **Deposits:** Permissionless ERC-4626. Subject to 100,000 WBTC deposit limit (cap is oversized — see Reassessment Triggers)
-- **Withdrawals:** ERC-4626. Currently atomic against idle balance — no strategy unwind needed
+- **Withdrawals:** ERC-4626. Atomic against idle balance — no strategy unwind needed
 - **No cooldown or lock period**
 - **Fees:** 0% management, 10% performance
 - **Profit unlock:** 5 days
 
 ### Collateralization
 
-- **100% on-chain WBTC backing** — all of TVL is held directly at the vault contract today
-- **Collateral quality:** WBTC is a wrapped representation of BTC, custodied off-chain by BitGo. Quality is tied to BitGo's custody integrity and historical proof-of-reserves cadence
+- **100% on-chain WBTC backing** — all of TVL is held directly at the vault contract
+- **Collateral quality:** WBTC is a wrapped representation of BTC, custodied offchain by BitGo. Quality is tied to BitGo's custody integrity and historical proof-of-reserves cadence
 - **No leverage**
 - **Fully redeemable** — atomic redemption from the idle balance
-
-When re-deployed, the vault inherits the collateral quality of the chosen lending market (Aave V3 WBTC).
 
 ### Provability
 
 - **PPS:** ERC-4626, fully algorithmic
-- **Strategy `totalAssets()`:** trivial today (all idle); when re-deployed, reads the underlying Aave aWBTC balance on-chain
-- **Profit / loss reporting:** keepers via `process_report()`, profits unlock over 5 days
+- **Strategy `totalAssets()`:** n/a — no strategy attached
+- **Profit / loss reporting:** n/a today (no strategy reports flow); when a strategy is later attached, profits would unlock over 5 days
 
 ## Liquidity Risk
 
-**Today:** trivially atomic. Total assets = total idle, so any user redemption settles against the vault's WBTC balance with no slippage and no strategy unwind.
+Trivially atomic. `totalAssets()` = `totalIdle()` = 47.5051 WBTC, so any user redemption settles against the vault's WBTC balance with no slippage, no strategy unwind, and no dependency on any underlying lending market's utilization.
 
-**When re-deployed:**
-
-- **Exit pipeline:** ERC-4626 `withdraw` → strategy `withdraw` → Aave V3 WBTC withdrawal
-- **Underlying liquidity:** the Aave V3 WBTC market has historically had **narrower available-liquidity windows than USD stablecoin markets** — large redemptions could compete with utilization and require partial waits
+- **Exit pipeline:** ERC-4626 `withdraw` against the vault's idle WBTC balance — single transaction, no external protocol calls
 - **Same-asset:** WBTC-denominated share token — no price-divergence risk inside the vault (BTC custody risk is upstream of the vault)
-- **No DEX liquidity needed** — exits via the protocol's own redemption mechanics
-- **No withdrawal queue or cooldown** — atomic redemption
-- **Deposit limit:** 100,000 WBTC cap vs 47.5051 WBTC TVL — the cap is materially oversized at the current size, but does not by itself impair liquidity (it would only become relevant if TVL grew dramatically and a single redeemer wanted to exit a large fraction)
+- **No DEX liquidity needed**
+- **No withdrawal queue or cooldown**
+- **Deposit limit:** 100,000 WBTC cap vs 47.5051 WBTC TVL — materially oversized; not a liquidity issue today, but should be tightened before any future strategy attachment
 
-The single-venue queued strategy means re-deployed liquidity has no diversification cushion. If the Debt Allocator routes funds into the Aave V3 WBTC market, **liquidity becomes a function of Aave's WBTC utilization at the moment of withdrawal** — this is a meaningful change from the trivially-liquid current snapshot. Captured under Reassessment Triggers.
+If a new strategy is attached later, the liquidity profile will become a function of that strategy's underlying market — captured under Reassessment Triggers.
 
 ## Centralization & Control Risks
 
@@ -238,14 +216,14 @@ ySafe 6-of-9 signers include publicly known DeFi contributors — see [Yearn Mul
 
 **Today:** none directly funded. The only critical dependency is the underlying WBTC token itself (and its BitGo-custodied BTC backing).
 
-**When re-deployed (steady-state):**
+**Today:** none active or queued. The only material dependency is the WBTC token itself (which depends on BitGo custody upstream of the vault).
+
+**If a new strategy is later attached:** dependency profile becomes a function of the chosen strategy. The previously-attached Aave V3 WBTC Lender is the natural candidate; if re-attached, dependency would be:
 
 | Dependency | Criticality | Notes |
 |-----------|-------------|-------|
 | **WBTC (BitGo)** | Critical (underlying asset) | Wrapped BTC; relies on BitGo's custody integrity and proof-of-reserves practice |
-| **Aave V3** | High (when funded) | Blue-chip, $30B+ TVL |
-
-**Dependency quality (when re-deployed):** single-venue (Aave V3) but blue-chip. Less diversified than yvUSDT-1's queued mix; comparable to a single-venue lending vault.
+| **Aave V3** | High (if/when funded) | Blue-chip, $30B+ TVL |
 
 ## Operational Risk
 
@@ -256,8 +234,8 @@ ySafe 6-of-9 signers include publicly known DeFi contributors — see [Yearn Mul
 - **Incident response:** 4 historical V1 events handled. V3 framework not yet stress-tested by an exploit
 - **V3 immutability:** vault cannot be upgraded
 - **Operational anomalies:**
-  - Current 100%-idle posture is itself an operational signal — Brain / Debt Allocator have actively pulled all debt. Per the Yearn team this was a precautionary action following the rsETH bridge exploit (unverified attribution); reassess once funds re-deploy
-  - **Oversized deposit cap (100,000 WBTC ≈ $7.7B)** vs current 47.5 WBTC TVL — not a safety risk while the vault is undeployed, but should be tightened or its rationale documented before funds re-deploy. Action item under Reassessment Triggers
+  - Current 100%-idle posture **and zero attached strategies** is itself an operational signal — Brain / Daddy have actively pulled all debt and revoked the only attached strategy between the April 27 and May 5 snapshots. The broader risk-1 vault deallocation in late April was attributed by the Yearn team to a precautionary response following the rsETH bridge exploit (unverified attribution); the strategy revocation here is more permanent than a deallocation and the rationale has not been independently verified
+  - **Oversized deposit cap (100,000 WBTC ≈ $8.1B)** vs current 47.5 WBTC TVL — not a safety risk while the vault is undeployed, but should be tightened or its rationale documented before any future strategy attachment. Action item under Reassessment Triggers
   - **Not yet in `alert_large_flows.py` monitoring list** — likely an oversight given how recently the vault was deployed and that it currently holds no debt. Recommend Yearn adds it before any meaningful TVL
 
 ## Monitoring
@@ -275,16 +253,16 @@ Other monitoring that does cover yvWBTC-1 implicitly via the broader Yearn V3 se
 
 | Contract | Address | Monitor |
 |----------|---------|---------|
-| yvWBTC-1 Vault | [`0x751F0cC6115410A3eE9eC92d08f46Ff6Da98b708`](https://etherscan.io/address/0x751F0cC6115410A3eE9eC92d08f46Ff6Da98b708) | PPS (`convertToAssets(1e8)`), `totalAssets()`, `totalDebt()`, `totalIdle()`, Deposit / Withdraw events |
-| Aave V3 WBTC Lender | [`0x0B9Ae07457BAED5536B1f3e78C9649E980fB4EDc`](https://etherscan.io/address/0x0B9Ae07457BAED5536B1f3e78C9649E980fB4EDc) | `totalAssets()`, `current_debt`, `isShutdown()`, keeper report frequency |
+| yvWBTC-1 Vault | [`0x751F0cC6115410A3eE9eC92d08f46Ff6Da98b708`](https://etherscan.io/address/0x751F0cC6115410A3eE9eC92d08f46Ff6Da98b708) | PPS (`convertToAssets(1e8)`), `totalAssets()`, `totalDebt()`, `totalIdle()`, Deposit / Withdraw events, `StrategyChanged` |
+| Strategy Manager (Timelock) | [`0x88Ba032be87d5EF1fbE87336b7090767F367BF73`](https://etherscan.io/address/0x88Ba032be87d5EF1fbE87336b7090767F367BF73) | New `addStrategy()` proposals (7-day delay) |
 | ySafe (Daddy) | [`0xFEB4acf3df3cDEA7399794D0869ef76A6EfAff52`](https://etherscan.io/address/0xFEB4acf3df3cDEA7399794D0869ef76A6EfAff52) | Signer / threshold changes |
 | Accountant | [`0x5A74Cb32D36f2f517DB6f7b0A0591e09b22cDE69`](https://etherscan.io/address/0x5A74Cb32D36f2f517DB6f7b0A0591e09b22cDE69) | Fee changes |
 
 ### Critical Events to Monitor
 
-- **Idle ratio change** — currently 100%; a drop indicates re-deployment, which should trigger reassessment
-- **Strategy `current_debt` changes** — `DebtUpdated` events on the vault
-- **Strategy additions / removals** — `StrategyChanged` events (new strategies pass through 7-day timelock)
+- **New strategy attachment** — `StrategyChanged(strategy, ChangeType.ADDED)` would indicate the timelock has executed an `addNewStrategy()` proposal; trigger reassessment to evaluate the new dependency
+- **Idle ratio change** — currently 100%; a drop after a strategy is attached indicates re-deployment
+- **Strategy `current_debt` changes** — `DebtUpdated` events on the vault (n/a until a strategy is attached)
 - **Emergency actions** (`Shutdown`)
 - **ySafe / Brain / Security signer or threshold changes**
 - **PPS decrease** — should only increase outside of explicit loss events
@@ -297,9 +275,8 @@ Other monitoring that does cover yvWBTC-1 implicitly via the broader Yearn V3 se
 |----------|----------|---------|-----------|
 | `convertToAssets(1e8)` | Vault | PPS tracking | Every 6 hours |
 | `totalAssets()` | Vault | Total TVL | Daily |
-| `totalDebt()` / `totalIdle()` | Vault | Capital deployment ratio — **key early signal that re-deployment has begun** | Daily |
-| `strategies(address)` | Vault | Per-strategy debt, last report time | Daily |
-| `get_default_queue()` | Vault | Withdrawal queue composition | Weekly |
+| `totalDebt()` / `totalIdle()` | Vault | Capital deployment ratio — **key early signal that a strategy has been attached and funded** | Daily |
+| `get_default_queue()` | Vault | Queue composition — **currently empty; non-empty indicates a new strategy attachment** | Daily |
 | `deposit_limit()` | Vault | Cap monitoring (currently oversized) | Daily |
 | `getThreshold()` / `getOwners()` | ySafe | Governance integrity | Daily |
 
@@ -309,22 +286,22 @@ Other monitoring that does cover yvWBTC-1 implicitly via the broader Yearn V3 se
 
 - **Battle-tested Yearn V3 infrastructure:** 3 audits by top firms, ~23 months of clean V3 production. Immutable vault contract eliminates proxy upgrade risk
 - **Standard Yearn governance:** Yearn V3 Role Manager + 6-of-9 ySafe (named DeFi signers) + 7-day self-governed timelock
-- **No Sky / USDS exposure:** yvWBTC-1's queue is WBTC-native and does not route through the Sky / USDS stack — this vault is excluded from the Sky concentration risk affecting the other stable risk-1 vaults
+- **No Sky / USDS exposure:** yvWBTC-1 is WBTC-native with no strategy attached and never routed through the Sky / USDS stack — this vault is excluded from the Sky concentration risk affecting the other stable risk-1 vaults
 - **Trivially liquid today** — 100% idle, atomic redemption with no slippage
-- **No leverage. No cross-chain. No conversion hops** in the queued strategy
-- **Blue-chip queued dependency:** Aave V3 is the most-audited and largest-TVL lending protocol in DeFi
+- **No leverage. No cross-chain. No conversion hops** — the vault holds WBTC directly with no strategy attached
+- **7-day timelock guard on any future strategy:** any new strategy attachment must clear the Strategy Manager TimelockController before it can take debt — preserving a reassessment window
 
 ### Key Risks
 
-- **Idle posture (100% un-deployed):** per the Yearn team this is a precautionary deallocation following the April 18, 2026 rsETH bridge exploit (see [hgETH report](./kerneldao-hgeth.md) for verified facts about the event). The team's specific causal attribution has not been independently verified, but the rsETH event itself is well documented. The current dependency profile, liquidity, and complexity assessments do not reflect steady-state operation
-- **Newest and least mature vault** of the six mainnet risk-1 vaults (~11.5 months only). PPS appreciation is essentially zero (1.000036) reflecting the mostly-undeployed history
+- **Idle posture (100% un-deployed) and now-empty queue:** per the Yearn team the April deallocation was precautionary following the April 18, 2026 rsETH bridge exploit (see [hgETH report](./kerneldao-hgeth.md) for verified facts about the event). The team's specific causal attribution has not been independently verified. **Between the April 27 and May 5 snapshots the only attached strategy (Aave V3 WBTC Lender) was revoked entirely** — this is a step beyond a temporary pull, and the rationale has not been independently confirmed. Any future deployment will require a new 7-day timelock proposal
+- **Newest and least mature vault** of the six mainnet risk-1 vaults (~11.7 months only). PPS appreciation is essentially zero (1.000037) reflecting the mostly-undeployed history
 - **No yield while idle** — depositors today earn 0% APR on the idle balance (PPS is essentially flat)
-- **Single-venue queued strategy:** when re-deployed, the vault concentrates in the Aave V3 WBTC market with no diversification cushion. WBTC market liquidity is historically narrower than USD-stablecoin markets
-- **Oversized deposit cap (100,000 WBTC ≈ $7.7B)** vs current 47.5 WBTC TVL — not a safety risk while undeployed but should be tightened before re-deployment
+- **No diversification cushion if a new single-venue strategy is later attached:** WBTC market liquidity is historically narrower than USD-stablecoin markets, so a future single-strategy attachment would carry venue-concentration risk
+- **Oversized deposit cap (100,000 WBTC ≈ $8.1B)** vs current 47.5 WBTC TVL — not a safety risk while undeployed but should be tightened before any future strategy attachment
 - **Not in `alert_large_flows.py`** monitoring list — should be added before meaningful TVL
-- **Operational signal:** the deallocation indicates Brain / Debt Allocator can rapidly pull all debt — this is a strength in incident response but a sign that operational posture matters here
+- **Operational signal:** the deallocation followed by full strategy revocation indicates Brain / Daddy can rapidly tear down the strategy stack — this is a strength in incident response but a sign that operational posture matters here
 - **WBTC-specific:** BitGo custody risk is inherent to the underlying asset; this is not specific to yvWBTC-1
-- **Re-deployment risk:** when the Debt Allocator re-deploys, dependency, liquidity, and complexity scores need to be re-evaluated against the actual deployed mix
+- **Re-deployment risk:** when any new strategy is later proposed and funded, dependency, liquidity, and complexity scores need to be re-evaluated against the actual chosen mix
 
 ### Critical Risks
 
@@ -354,14 +331,14 @@ Other monitoring that does cover yvWBTC-1 implicitly via the broader Yearn V3 se
 
 | Factor | Assessment |
 |--------|-----------|
-| Audits | V3 framework: 3 audits by top firms. v3.0.4 patch reviewed internally. Queued underlying protocol (Aave V3): blue-chip, multi-firm coverage |
+| Audits | V3 framework: 3 audits by top firms. v3.0.4 patch reviewed internally. No active strategies to assess at the snapshot |
 | Bug bounty | $200K (Yearn Immunefi) |
-| Production history | **~11.5 months** (May 13, 2025) — youngest of the six mainnet risk-1 vaults. V3 framework: ~23 months |
-| TVL | **47.5051 WBTC** (~$3.64M). Deposit limit: 100,000 WBTC (oversized) |
-| Security incidents | None on V3, none on the queued underlying protocol |
-| Strategy review | Rigorous 12-metric framework with ySec security review |
+| Production history | **~11.7 months** (May 13, 2025) — youngest of the six mainnet risk-1 vaults. V3 framework: ~24 months |
+| TVL | **47.5051 WBTC** (~$3.87M). Deposit limit: 100,000 WBTC (oversized) |
+| Security incidents | None on V3 |
+| Strategy review | Rigorous 12-metric framework with ySec security review (n/a today — no strategy attached) |
 
-**Score: 1.7 / 5** — strong audit coverage, no incidents, but the **youngest vault in the set** (~11.5 months) and the **mostly-undeployed history** mean the operational track record specifically for this vault is materially shorter than for yvUSDC/USDS/DAI/USDT. Score ticked above 1.5 to reflect this.
+**Score: 1.7 / 5** — strong audit coverage, no incidents, but the **youngest vault in the set** (~11.7 months) and the **mostly-undeployed history** mean the operational track record specifically for this vault is materially shorter than for yvUSDC/USDS/DAI/USDT. Score ticked above 1.5 to reflect this.
 
 #### Category 2: Centralization & Control Risks (Weight: 30%)
 
@@ -392,12 +369,12 @@ Other monitoring that does cover yvWBTC-1 implicitly via the broader Yearn V3 se
 
 | Factor | Assessment |
 |--------|-----------|
-| Protocol count (today) | 0 funded strategies |
-| Protocol count (queued) | 1 (Aave V3) — single-venue |
-| Criticality | Today: only the WBTC token itself (BitGo custody). When re-deployed: Aave V3 WBTC market |
-| Quality | Top-tier (Aave V3 is blue-chip) |
+| Protocol count (today) | 0 funded strategies, 0 queued strategies (`get_default_queue() == []`) |
+| Criticality | Only the WBTC token itself (BitGo custody) |
+| Quality | WBTC is the most-liquid wrapped-BTC representation in DeFi |
+| Forward-looking | Any new strategy must clear a 7-day TimelockController proposal before it can hold debt — preserving a re-review window |
 
-**Dependencies Score: 2.0 / 5** — current 100%-idle state means today's only material dependency is WBTC itself; when re-deployed, single-venue Aave V3 (blue-chip but no diversification) keeps this from being lower. Per rubric, "1–2 blue-chip dependencies" = 2.
+**Dependencies Score: 2.0 / 5** — at the snapshot the only material dependency is WBTC itself, which would justify a lower score in isolation. Held conservatively at 2.0 because the empty queue is a transient state — Yearn's stated intent is to operate the vault in production, and any future strategy attachment will reintroduce a venue dependency. Re-evaluate downward only if the empty-queue posture persists meaningfully, or upward against the actual mix once a strategy is attached.
 
 **Centralization Score = (1.0 + 1.0 + 2.0) / 3 ≈ 1.3**
 
@@ -441,7 +418,7 @@ Other monitoring that does cover yvWBTC-1 implicitly via the broader Yearn V3 se
 | Same-value asset | WBTC-denominated |
 | Withdrawal restrictions | None |
 
-**Score: 1.0 / 5** — trivially liquid today. **When the Debt Allocator re-deploys** to the Aave V3 WBTC market, the liquidity score may need to step up — Aave's WBTC market historically has narrower available-liquidity windows than USD stablecoin markets, and the single-venue queued strategy means no diversification cushion. Captured under Reassessment Triggers.
+**Score: 1.0 / 5** — trivially liquid today. **When a future strategy is attached and funded**, the liquidity score may need to step up — WBTC lending-market liquidity is historically narrower than USD stablecoin markets, and a single-strategy attachment would carry venue-concentration risk. Captured under Reassessment Triggers.
 
 #### Category 5: Operational Risk (Weight: 5%)
 
@@ -451,9 +428,9 @@ Other monitoring that does cover yvWBTC-1 implicitly via the broader Yearn V3 se
 | Vault management | Standard pattern across 37+ vaults |
 | Documentation | Comprehensive, code verified on Etherscan |
 | Legal | BORG (Cayman foundation) |
-| Incident response | 4 historical V1 events, $200K Immunefi. **Demonstrated again here** — Brain / Debt Allocator pulled all debt as a precaution following the rsETH bridge exploit (per Yearn team, unverified attribution) |
+| Incident response | 4 historical V1 events, $200K Immunefi. **Demonstrated again here** — Brain / Debt Allocator pulled all debt and the only attached strategy was subsequently revoked, following the rsETH bridge exploit (per Yearn team, unverified attribution) |
 | Monitoring | Active alerts, but **yvWBTC-1 is NOT yet in `alert_large_flows.py`** — should be added before any meaningful TVL |
-| Deposit cap hygiene | **100,000 WBTC cap (≈ $7.7B) vs 47.5 WBTC TVL** is materially oversized. Not a safety risk while undeployed but should be tightened |
+| Deposit cap hygiene | **100,000 WBTC cap (≈ $8.1B) vs 47.5 WBTC TVL** is materially oversized. Not a safety risk while undeployed but should be tightened |
 
 **Score: 1.5 / 5** — top-tier operational maturity at the framework level, half-step bump for the missing monitoring entry and the oversized deposit cap on this specific vault.
 
@@ -488,15 +465,16 @@ Rounded conservatively to 1.5 to reflect the youngest-vault status, single-venue
 
 - **Time-based:** Reassess in 6 months (October 2026) or annually
 - **TVL-based:** Reassess if TVL exceeds 200 WBTC (~$15M) or changes by ±50%
-- **rsETH-related deallocation:**
-  - **rerun this assessment once Yearn re-deploys funds back into yvWBTC-1.** The current 100%-idle posture, dependency profile, and liquidity score all need re-evaluation against the actual re-deployed strategy mix
+- **rsETH-related deallocation and strategy revocation:**
+  - **rerun this assessment once Yearn attaches and funds any new strategy on yvWBTC-1.** The current 100%-idle / empty-queue posture, dependency profile, and liquidity score all need re-evaluation against the actual chosen strategy
   - if any new strategy is added that takes direct or indirect rsETH exposure, full re-review of the dependency subscore
 - **Strategy posture:**
-  - **if a new USDS-denominated or Sky-routed strategy is added** to yvWBTC-1, the "no Sky concentration" exclusion no longer holds — re-evaluate dependency and concentration scores against the broader risk-1 stable stack
-  - if more strategies are added to broaden the queue beyond Aave V3, re-evaluate the dependency subscore
-- **Underlying-protocol incidents:** any major incident at Aave V3 or to the WBTC market specifically — full re-review
+  - **any `addStrategy()` proposal at the Strategy Manager TimelockController** ([`0x88Ba032be87d5EF1fbE87336b7090767F367BF73`](https://etherscan.io/address/0x88Ba032be87d5EF1fbE87336b7090767F367BF73)) targeting yvWBTC-1 — review during the 7-day delay window before the strategy can be funded
+  - **if a USDS-denominated or Sky-routed strategy is later attached** to yvWBTC-1, the "no Sky concentration" exclusion no longer holds — re-evaluate dependency and concentration scores against the broader risk-1 stable stack
+  - if more than one strategy is attached, re-evaluate the dependency subscore for diversification
+- **Underlying-protocol incidents:** any major incident affecting WBTC (or the protocol of any future attached strategy) — full re-review
 - **Action items (operational hygiene):**
-  - **Tighten the deposit cap** — current `deposit_limit = 100,000 WBTC` (≈ $7.7B at snapshot) is materially above any plausible near-term TVL. Either tighten the cap (e.g. to a multiple of intended TVL) or document the rationale with the Yearn team and revisit this report before re-deployment
+  - **Tighten the deposit cap** — current `deposit_limit = 100,000 WBTC` (≈ $8.1B at snapshot) is materially above any plausible near-term TVL. Either tighten the cap (e.g. to a multiple of intended TVL) or document the rationale with the Yearn team and revisit this report before re-deployment
   - **Add yvWBTC-1 to `alert_large_flows.py`** monitored vault list before any meaningful TVL
 - **WBTC-specific:**
   - BitGo proof-of-reserves issues
@@ -518,21 +496,25 @@ Rounded conservatively to 1.5 to reflect the youngest-vault status, single-venue
 │  │  0x751F…b708          │                                          │
 │  │                       │                                          │
 │  │  47.5 WBTC TVL        │                                          │
-│  │  (~$3.64M)            │                                          │
+│  │  (~$3.87M)            │                                          │
 │  │  100% idle            │  ← all WBTC held at vault contract       │
 │  │  totalDebt = 0        │                                          │
+│  │  default queue = []   │  ← no strategy attached                  │
 │  │  deposit_limit=100k   │  ← oversized vs TVL                      │
 │  └───────────────────────┘                                          │
 │                                                                      │
-│  1 dormant strategy in queue (WBTC-native, no Sky/USDS routing):    │
-│   - Aave V3 WBTC Lender                                              │
+│  Strategies in queue: NONE (`get_default_queue() == []`)            │
+│   - Previously-attached Aave V3 WBTC Lender revoked between Apr 27  │
+│     and May 5 snapshots (`activation = 0` at 0x0B9A…4EDc)           │
 └──────────────────────────────────────────────────────────────────────┘
 
-When re-deployed (steady-state intent), the vault routes into a single
-blue-chip WBTC lending venue (Aave V3). Less diversified than yvUSDT-1's
-queued mix, but Aave V3 is the most extensively audited and largest-TVL
-lending protocol in DeFi. The vault remains fully outside the Sky / USDS
-concentration that affects yvUSDC-1 / yvUSDS-1 / yvDAI-1.
+At the snapshot the vault holds WBTC directly with no strategy attached
+and no protocol dependency surface beyond WBTC itself. Any new strategy
+must clear a 7-day TimelockController proposal before it can hold debt.
+Whether the empty-queue posture is permanent deprecation or a precursor
+to re-onboarding under the timelock is not on-chain verifiable today.
+The vault remains fully outside the Sky / USDS concentration that
+affects yvUSDC-1 / yvUSDS-1 / yvDAI-1.
 ```
 
 ## Appendix: TimelockController Role Structure

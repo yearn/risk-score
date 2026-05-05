@@ -1,6 +1,6 @@
 # Protocol Risk Assessment: Yearn — yvDAI-1
 
-- **Assessment Date:** April 27, 2026
+- **Assessment Date:** May 5, 2026
 - **Token:** yvDAI-1 (DAI-1 yVault)
 - **Chain:** Ethereum
 - **Token Address:** [`0x028eC7330ff87667b6dfb0D94b954c820195336c`](https://etherscan.io/address/0x028eC7330ff87667b6dfb0D94b954c820195336c)
@@ -8,36 +8,46 @@
 
 ## Overview + Links
 
-yvDAI-1 is a **DAI-denominated Yearn V3 vault** (ERC-4626) that deploys deposited DAI through a **vault-of-vaults composition**: 72.5% routes through `DAI to USDC-1 Depositor` into **yvUSDC-1** (which itself routes 100% into yvUSDS-1), and 27.5% routes through `DAI to USDS Depositor` directly into **yvUSDS-1**. After the vault-of-vaults unwind, **100% of yvDAI-1's deployed DAI ultimately ends up inside yvUSDS-1**, which terminates at Sky's USDS Staking Rewards (SPK farm) and the Sky Savings Rate (sUSDS).
+yvDAI-1 is a **DAI-denominated Yearn V3 vault** (ERC-4626) that deploys deposited DAI through a **vault-of-vaults composition**. At the May 5 snapshot, 79.4% routes through `DAI To USDC-1 Depositor` into **yvUSDC-1**, and 20.6% routes through `DAI to USDS Depositor` into **yvUSDS-1**. The default queue has been **trimmed from 5 strategies to 2** since the prior snapshot — the dormant `Savings Dai (sDAI)`, `Spark DAI Lender`, and `Aave V3 DAI Lender` strategies have all been removed from the queue.
+
+**Material composition change since the prior snapshot:** at April 27 the report described yvUSDC-1 as routing 100% into yvUSDS-1, so 100% of yvDAI-1's deployed DAI ultimately concentrated in yvUSDS-1. At the May 5 snapshot, **yvUSDC-1 has rewired its routing**: its `USDC to sUSDS Lender` strategy ([`0x7130570BCEfCedBe9d15B5b11A33006156460f8f`](https://etherscan.io/address/0x7130570BCEfCedBe9d15B5b11A33006156460f8f)) now holds **97.6% of yvUSDC-1's debt** and deposits direct into Sky's sUSDS, **bypassing yvUSDS-1 entirely**. The remaining 2.4% sits in `Spark USDC Lender` (direct supply into Spark Lend's USDC market). The downstream `USDC to USDS Depositor` strategy at yvUSDC-1 now holds 0 USDC.
+
+**Effective endpoint mix for yvDAI-1's deployed DAI (May 5):**
+
+| Endpoint | Path | Effective share |
+|----------|------|----------------:|
+| Sky **sUSDS** (Sky Savings Rate) | yvDAI-1 → yvUSDC-1 → sUSDS Lender | **~77.5%** |
+| Sky **USDS Staking Rewards** (SPK farm) | yvDAI-1 → yvUSDS-1 → Spark Compounder | **~20.6%** |
+| **Spark Lend USDC** market | yvDAI-1 → yvUSDC-1 → Spark USDC Lender | ~1.9% |
+
+The cascade is now at most **two Yearn V3 vault layers deep** (versus three at the prior snapshot, when both depositor paths chained through to yvUSDS-1). Effective Sky-ecosystem concentration is ~98% (sUSDS + USDS Staking + Spark Lend, the latter being a Sky sub-DAO).
 
 **Key architecture:**
 
 - **Vault:** Standard Yearn V3 vault (v3.0.2) accepting DAI deposits, issuing yvDAI-1 shares. Deployed as an immutable Vyper minimal proxy (EIP-1167) via the v3.0.2 Yearn V3 Vault Factory ([`0x444045c5C13C246e117eD36437303cac8E250aB0`](https://etherscan.io/address/0x444045c5C13C246e117eD36437303cac8E250aB0))
-- **Strategy pipelines:**
-  - **DAI to USDC-1 Depositor (72.5%):** DAI → USDC (Maker PSM Lite, 1:1 at 0% fee) → yvUSDC-1 deposit. yvUSDC-1 currently routes 100% to yvUSDS-1, so the effective end state is DAI → USDC → DAI → USDS → yvUSDS-1
-  - **DAI to USDS Depositor (27.5%):** DAI → USDS (Sky DAI-USDS Exchanger, 1:1, no fee) → yvUSDS-1 deposit. The shorter path
-  - **Savings Dai (sDAI):** queued, 0 debt — direct sDAI ERC-4626 wrapper from MakerDAO
-  - **Spark DAI Lender:** queued, 0 debt
-  - **Aave V3 DAI Lender:** queued, 0 debt
-- **Vault-of-vaults composition:** **100% of yvDAI-1's deployed funds end up inside yvUSDC-1 or yvUSDS-1 today**, which themselves terminate at Sky / Spark. Withdrawals settle atomically through up to three layers of strategy `withdraw()` calls in the same transaction
+- **Default queue (2 strategies, both funded):**
+  - **DAI To USDC-1 Depositor** ([`0xfF03Dce6d95aa7a30B75EFbaFD11384221B9f9B5`](https://etherscan.io/address/0xfF03Dce6d95aa7a30B75EFbaFD11384221B9f9B5)) — 6,212,369.61 DAI (79.42%). DAI → USDC (Maker PSM Lite, 1:1 at 0% fee) → yvUSDC-1 deposit. yvUSDC-1 routes ~97.6% via its `USDC to sUSDS Lender` strategy directly into sUSDS, plus ~2.4% via `Spark USDC Lender` into Spark Lend
+  - **DAI to USDS Depositor** ([`0xAeDF7d5F3112552E110e5f9D08c9997Adce0b78d`](https://etherscan.io/address/0xAeDF7d5F3112552E110e5f9D08c9997Adce0b78d)) — 1,609,638.00 DAI (20.58%). DAI → USDS (Sky DAI-USDS Exchanger, 1:1, no fee) → yvUSDS-1 deposit. yvUSDS-1 currently routes 100% to its Spark USDS Compounder (Sky USDS Staking Rewards)
+- **Removed from queue between April 27 and May 5:** Savings Dai (sDAI), Spark DAI Lender, Aave V3 DAI Lender — all previously zero-debt
 - **Governance:** Standard **Yearn V3 Role Manager** ([`0xb3bd6B2E61753C311EFbCF0111f75D29706D9a41`](https://etherscan.io/address/0xb3bd6B2E61753C311EFbCF0111f75D29706D9a41)) governed by the **Yearn 6-of-9 ySafe** with **7-day TimelockController** for strategy additions
 
-**Key metrics (April 27, 2026, snapshot at block 24974187):**
+**Key metrics (May 5, 2026, snapshot at block 25029809, timestamp 1777996211 = 15:50:11 UTC):**
 
-- **TVL:** ~$8,565,115 DAI
-- **Total Supply:** ~7,667,369 yvDAI-1
-- **Price Per Share:** 1.117087 DAI/yvDAI-1 (~11.71% cumulative appreciation over ~25.5 months, ~5.4% annualized)
-- **Total Debt:** 8,565,107.76 DAI (~99.9999% deployed)
-- **Total Idle:** 7.54 DAI
+- **TVL:** 7,822,017.61 DAI
+- **Total Supply:** 6,996,581.11 yvDAI-1
+- **Price Per Share:** 1.117977 DAI/yvDAI-1 (~11.80% cumulative appreciation over ~25.8 months, ~5.4% annualized)
+- **Total Debt:** 7,822,007.61 DAI (~99.99987% deployed)
+- **Total Idle:** 10.00 DAI
 - **Deposit Limit:** 50,000,000 DAI
 - **Profit Max Unlock Time:** 10 days
 - **Fees:** 0% management fee, 10% performance fee
 
-**Verified vault-of-vaults wiring:**
+**Verified vault-of-vaults wiring (block 25029809):**
 
-- `DAI to USDC-1 Depositor` ([`0xfF03Dce6d95aa7a30B75EFbaFD11384221B9f9B5`](https://etherscan.io/address/0xfF03Dce6d95aa7a30B75EFbaFD11384221B9f9B5)) → `VAULT() = 0xBe53A109B494E5c9f97b9Cd39Fe969BE68BF6204` (yvUSDC-1), with unlimited USDC approval on-chain
-- `DAI to USDS Depositor` ([`0xAeDF7d5F3112552E110e5f9D08c9997Adce0b78d`](https://etherscan.io/address/0xAeDF7d5F3112552E110e5f9D08c9997Adce0b78d)) → `VAULT() = 0x182863131F9a4630fF9E27830d945B1413e347E8` (yvUSDS-1)
-- yvUSDC-1's `USDC to USDS Depositor` strategy currently holds 100% of yvUSDC-1's deployed USDC and routes into yvUSDS-1
+- `DAI To USDC-1 Depositor` ([`0xfF03Dce6d95aa7a30B75EFbaFD11384221B9f9B5`](https://etherscan.io/address/0xfF03Dce6d95aa7a30B75EFbaFD11384221B9f9B5)) → yvUSDC-1 ([`0xBe53A109B494E5c9f97b9Cd39Fe969BE68BF6204`](https://etherscan.io/address/0xBe53A109B494E5c9f97b9Cd39Fe969BE68BF6204))
+- `DAI to USDS Depositor` ([`0xAeDF7d5F3112552E110e5f9D08c9997Adce0b78d`](https://etherscan.io/address/0xAeDF7d5F3112552E110e5f9D08c9997Adce0b78d)) → yvUSDS-1 ([`0x182863131F9a4630fF9E27830d945B1413e347E8`](https://etherscan.io/address/0x182863131F9a4630fF9E27830d945B1413e347E8))
+- yvUSDC-1's `USDC to sUSDS Lender` ([`0x7130570BCEfCedBe9d15B5b11A33006156460f8f`](https://etherscan.io/address/0x7130570BCEfCedBe9d15B5b11A33006156460f8f)) holds 97.63% of yvUSDC-1's debt; `USDC to USDS Depositor` ([`0x39c0aEc5738ED939876245224aFc7E09C8480a52`](https://etherscan.io/address/0x39c0aEc5738ED939876245224aFc7E09C8480a52)) holds 0 USDC
+- yvUSDS-1's Spark USDS Compounder holds 100% of yvUSDS-1's debt
 
 **Links:**
 
@@ -81,30 +91,40 @@ yvDAI-1 is a **DAI-denominated Yearn V3 vault** (ERC-4626) that deploys deposite
 | Vault Factory (v3.0.2) | [`0x444045c5C13C246e117eD36437303cac8E250aB0`](https://etherscan.io/address/0x444045c5C13C246e117eD36437303cac8E250aB0) |
 | Vault Original (v3.0.2) | [`0x1ab62413e0cf2eBEb73da7D40C70E7202ae14467`](https://etherscan.io/address/0x1ab62413e0cf2eBEb73da7D40C70E7202ae14467) |
 
-### Active Strategies (5 in default queue, 2 with debt)
+### Active Strategies (2 in default queue, 2 with debt)
 
-| # | Strategy | Name | Current Debt (DAI) | Allocation |
-|---|----------|------|-------------------:|-----------:|
-| 1 | [`0xfF03Dce6d95aa7a30B75EFbaFD11384221B9f9B5`](https://etherscan.io/address/0xfF03Dce6d95aa7a30B75EFbaFD11384221B9f9B5) | **DAI to USDC-1 Depositor** | **6,207,746.87** | **72.5%** |
-| 2 | [`0xAeDF7d5F3112552E110e5f9D08c9997Adce0b78d`](https://etherscan.io/address/0xAeDF7d5F3112552E110e5f9D08c9997Adce0b78d) | **DAI to USDS Depositor** | **2,357,360.90** | **27.5%** |
-| 3 | [`0x83F20F44975D03b1b09e64809B757c47f942BEeA`](https://etherscan.io/address/0x83F20F44975D03b1b09e64809B757c47f942BEeA) | Savings Dai (sDAI) | 0 | 0% |
-| 4 | [`0x1fd862499e9b9402DE6c599b6C391f83981180Ab`](https://etherscan.io/address/0x1fd862499e9b9402DE6c599b6C391f83981180Ab) | Spark DAI Lender | 0 | 0% |
-| 5 | [`0x9BF50e7589a562da2ecC0a87e2597EFBDBde241B`](https://etherscan.io/address/0x9BF50e7589a562da2ecC0a87e2597EFBDBde241B) | Aave V3 DAI Lender | 0 | 0% |
+Default queue order at block 25029809:
 
-**Note on `Savings Dai`:** strategy 3 in the queue is the canonical sDAI ERC-4626 token from MakerDAO at [`0x83F20F44975D03b1b09e64809B757c47f942BEeA`](https://etherscan.io/address/0x83F20F44975D03b1b09e64809B757c47f942BEeA). It is currently unfunded but is kept in the queue as a direct, single-hop alternative to the depositor strategies.
+| # | Strategy | Name | Activation | Current Debt (DAI) | Allocation |
+|---|----------|------|------------|-------------------:|-----------:|
+| 1 | [`0xAeDF7d5F3112552E110e5f9D08c9997Adce0b78d`](https://etherscan.io/address/0xAeDF7d5F3112552E110e5f9D08c9997Adce0b78d) | **DAI to USDS Depositor** | 2025-05-15 | **1,609,638.00** | **20.58%** |
+| 2 | [`0xfF03Dce6d95aa7a30B75EFbaFD11384221B9f9B5`](https://etherscan.io/address/0xfF03Dce6d95aa7a30B75EFbaFD11384221B9f9B5) | **DAI To USDC-1 Depositor** | 2025-10-24 | **6,212,369.61** | **79.42%** |
+
+Last reports: DAI to USDS Depositor 2026-05-04 (`last_report = 1777780343`); DAI To USDC-1 Depositor 2026-05-04 (`last_report = 1777777319`).
+
+**Removed from queue between April 27 and May 5 (no longer in `get_default_queue()`):**
+
+- Savings Dai (sDAI) ([`0x83F20F44975D03b1b09e64809B757c47f942BEeA`](https://etherscan.io/address/0x83F20F44975D03b1b09e64809B757c47f942BEeA)) — direct sDAI ERC-4626 wrapper from MakerDAO; previously zero debt
+- Spark DAI Lender ([`0x1fd862499e9b9402DE6c599b6C391f83981180Ab`](https://etherscan.io/address/0x1fd862499e9b9402DE6c599b6C391f83981180Ab)) — direct supply into Spark Lend; previously zero debt
+- Aave V3 DAI Lender ([`0x9BF50e7589a562da2ecC0a87e2597EFBDBde241B`](https://etherscan.io/address/0x9BF50e7589a562da2ecC0a87e2597EFBDBde241B)) — direct supply into Aave V3; previously zero debt
+
+The rationale for removing all three direct-deposit fallbacks has not been independently verified. Reintroducing any of them would require a fresh `addStrategy()` proposal at the Strategy Manager TimelockController (7-day delay).
 
 ### Strategy Protocol Dependencies (effective)
 
-After the vault-of-vaults unwind, yvDAI-1's effective dependency mix is identical to yvUSDS-1's funded mix:
+After the vault-of-vaults unwind:
 
-| Effective dependency | Path | Effective allocation |
-|----------------------|------|---------------------:|
-| **Sky USDS Staking Rewards (SPK farm)** | DAI → ... → yvUSDS-1 → Spark Compounder (~92.6% of yvUSDS-1) | **~92.6% of deployed DAI** |
-| **Sky / sUSDS** | DAI → ... → yvUSDS-1 → sUSDS Lender (~7.4% of yvUSDS-1) | **~7.4% of deployed DAI** |
-| **MakerDAO PSM Lite** (USDC ↔ DAI) | Used by `DAI to USDC-1 Depositor` for the inbound DAI → USDC conversion (and reverse on withdrawal) | High during routing |
-| **Sky DAI-USDS Exchanger** (DAI ↔ USDS) | Used by `DAI to USDS Depositor` and downstream by yvUSDC-1's `USDC to USDS Depositor` strategy | High during routing |
-| **yvUSDC-1** (intermediate vault) | 72.5% of yvDAI-1 routes through it | Vault-of-vaults dependency |
-| **yvUSDS-1** (terminal vault) | 100% of deployed DAI ultimately ends up here | Vault-of-vaults dependency |
+| Effective endpoint | Path | Effective share |
+|--------------------|------|----------------:|
+| **Sky / sUSDS (Sky Savings Rate)** | yvDAI-1 → yvUSDC-1 → `USDC to sUSDS Lender` → sUSDS | **~77.5%** |
+| **Sky USDS Staking Rewards (SPK farm)** | yvDAI-1 → yvUSDS-1 → Spark USDS Compounder → Sky USDS Staking | **~20.6%** |
+| **Spark Lend USDC market** | yvDAI-1 → yvUSDC-1 → `Spark USDC Lender` → Spark Lend | ~1.9% |
+| **MakerDAO PSM Lite** (USDC ↔ DAI) | Used by `DAI To USDC-1 Depositor` for inbound DAI → USDC conversion (and reverse on withdrawal) | High during routing |
+| **Sky DAI-USDS Exchanger** (DAI ↔ USDS) | Used by `DAI to USDS Depositor` for inbound DAI → USDS conversion (and reverse on withdrawal) | High during routing |
+| **yvUSDC-1** (intermediate vault) | 79.4% of yvDAI-1 routes through it | Vault-of-vaults dependency |
+| **yvUSDS-1** (intermediate vault) | 20.6% of yvDAI-1 routes through it | Vault-of-vaults dependency |
+
+Net Sky-ecosystem concentration: ~98% of deployed DAI (sUSDS + Sky USDS Staking + Spark Lend USDC market).
 
 ## Audits and Due Diligence Disclosures
 
@@ -149,26 +169,26 @@ All strategies pass through Yearn's **12-metric risk-scoring framework** ([RISK_
 
 The yvDAI-1 system is **moderately complex** because of the vault-of-vaults composition:
 
-- **2 funded strategies** today, both depositors into other Yearn V3 vaults
+- **2 funded strategies**, both depositors into other Yearn V3 vaults
 - **Conversion hops:**
-  - `DAI to USDC-1 Depositor`: DAI → USDC (PSM Lite) → yvUSDC-1 → ... (then USDC → DAI → USDS in yvUSDC-1's strategy)
-  - `DAI to USDS Depositor`: DAI → USDS (Exchanger) → yvUSDS-1
-- **Three layers of vault accounting** to verify (yvDAI-1 → yvUSDC-1 → yvUSDS-1) for the 72.5% path; two layers for the 27.5% path
+  - `DAI To USDC-1 Depositor`: DAI → USDC (PSM Lite) → yvUSDC-1 → (97.6%) USDC into sUSDS Lender / (2.4%) USDC into Spark Lend USDC market
+  - `DAI to USDS Depositor`: DAI → USDS (Exchanger) → yvUSDS-1 → Spark USDS Compounder → Sky USDS Staking Rewards
+- **Two layers of Yearn V3 vault accounting** to verify (yvDAI-1 → yvUSDC-1 or yvDAI-1 → yvUSDS-1). The third Yearn-vault layer that existed at the prior snapshot (yvUSDC-1 → yvUSDS-1 chain) has been eliminated by yvUSDC-1's switch to direct sUSDS routing
 - **No leverage, no looping, no cross-chain bridging**
 - **Standard ERC-4626** at every layer
 - **Vault is immutable** (non-upgradeable Vyper minimal proxy)
 
-The vault-of-vaults composition is **not leverage** but is a real complexity surface — a bug or accounting issue at any of the three layers cascades. Each layer is itself ERC-4626 and on-chain verifiable.
+The vault-of-vaults composition is **not leverage** but is a real complexity surface — a bug or accounting issue at any layer cascades. Each layer is itself ERC-4626 and on-chain verifiable.
 
 ## Historical Track Record
 
-- **Vault deployed:** March 12, 2024 (deployment [tx](https://etherscan.io/tx/0xfc6be986a2e60849a91c397c5c4bd10d9b247f0e1fb30cdaf0ed1f7687ea648e)) — **~25.5 months** in production
-- **TVL:** ~$8.57M DAI — well within the $50M deposit limit
-- **PPS trend:** 1.000000 → 1.117087 (~11.71% cumulative return over ~25.5 months, ~5.4% annualized)
+- **Vault deployed:** March 12, 2024 (deployment [tx](https://etherscan.io/tx/0xfc6be986a2e60849a91c397c5c4bd10d9b247f0e1fb30cdaf0ed1f7687ea648e)) — **~25.8 months** in production
+- **TVL:** 7,822,017.61 DAI — well within the 50M DAI deposit limit. **TVL is down ~8.7%** from the April 27 snapshot of 8.57M
+- **PPS trend:** 1.000000 → 1.117977 (~11.80% cumulative return over ~25.8 months, ~5.4% annualized)
 - **Security incidents:** None known for this vault or for the Yearn V3 framework
-- **Strategy changes:** active management — Spark DAI Lender, Aave V3 DAI Lender, sDAI all queued historically; the depositor strategies were added in 2025
-- **Current allocation:** 72.5% via `DAI to USDC-1 Depositor` + 27.5% via `DAI to USDS Depositor`. Direct strategies (sDAI, Spark, Aave) are dormant
-- **Yearn V3 track record:** V3 framework has been live since May 2024 (~23 months). No V3 vault exploits
+- **Strategy changes:** active management — between April 27 and May 5, three direct-deposit fallbacks (sDAI, Spark DAI Lender, Aave V3 DAI Lender) were removed from the default queue; allocation shifted from 72.5/27.5 to **79.4/20.6** between the two depositor strategies
+- **Vault-of-vaults rewiring (downstream):** at the April 27 snapshot yvUSDC-1 routed 100% to yvUSDS-1, so yvDAI-1's effective endpoint was 100% yvUSDS-1. At the May 5 snapshot yvUSDC-1 has switched its primary route to a direct `USDC to sUSDS Lender` strategy. Net effect: yvDAI-1's effective endpoint mix is now ~77.5% sUSDS / ~20.6% Sky USDS Staking / ~1.9% Spark Lend USDC. The total Sky-ecosystem concentration is largely unchanged (~98%), but the deepest Yearn-vault chain has been shortened from 3 layers to 2
+- **Yearn V3 track record:** V3 framework has been live since May 2024 (~24 months). No V3 vault exploits
 
 **Yearn protocol TVL:** ~$197.5M total across all chains ([DeFiLlama](https://defillama.com/protocol/yearn), April 2026).
 
@@ -176,9 +196,9 @@ The vault-of-vaults composition is **not leverage** but is a real complexity sur
 
 ## Funds Management
 
-yvDAI-1 deploys ~99.9999% of its DAI via two depositor strategies. Both terminate at yvUSDS-1.
+yvDAI-1 deploys ~99.9999% of its DAI via two depositor strategies. Both terminate inside the Sky ecosystem (sUSDS dominantly + Sky USDS Staking + a small Spark Lend USDC slice).
 
-### Strategy 1: DAI to USDC-1 Depositor (~72.5% allocation)
+### Strategy 1: DAI To USDC-1 Depositor (79.42% allocation)
 
 **Contract:** [`0xfF03Dce6d95aa7a30B75EFbaFD11384221B9f9B5`](https://etherscan.io/address/0xfF03Dce6d95aa7a30B75EFbaFD11384221B9f9B5) — verified vault target [`0xBe53A109B494E5c9f97b9Cd39Fe969BE68BF6204`](https://etherscan.io/address/0xBe53A109B494E5c9f97b9Cd39Fe969BE68BF6204) (yvUSDC-1).
 
@@ -186,16 +206,16 @@ yvDAI-1 deploys ~99.9999% of its DAI via two depositor strategies. Both terminat
 
 1. **DAI → USDC** via MakerDAO PSM Lite ([`0xf6e72Db5454dd049d0788e411b06CfAF16853042`](https://etherscan.io/address/0xf6e72Db5454dd049d0788e411b06CfAF16853042)) — 1:1 at **0% fee** (`tin = tout = 0`)
 2. **USDC → yvUSDC-1** deposit (ERC-4626)
-3. yvUSDC-1 internally routes 100% to its `USDC to USDS Depositor` strategy → USDC → DAI (PSM) → USDS (Exchanger) → yvUSDS-1 → Sky/Spark
+3. yvUSDC-1 internally routes ~97.6% to its `USDC to sUSDS Lender` strategy ([`0x7130570BCEfCedBe9d15B5b11A33006156460f8f`](https://etherscan.io/address/0x7130570BCEfCedBe9d15B5b11A33006156460f8f)) → USDC → USDS (or sUSDS-internal conversion) → sUSDS, plus ~2.4% to its `Spark USDC Lender` strategy ([`0x25f893276544d86a82b1ce407182836F45cb6673`](https://etherscan.io/address/0x25f893276544d86a82b1ce407182836F45cb6673)) → direct supply into Spark Lend USDC market
 
-**Withdrawal:** reverse path. The user's `redeem` on yvDAI-1 triggers `withdraw` from this strategy → `redeem` from yvUSDC-1 → `withdraw` from yvUSDC-1's `USDC to USDS Depositor` → `redeem` from yvUSDS-1 → unstake from Spark Compounder / sUSDS. All atomic in the same transaction.
+**Withdrawal:** reverse path. The user's `redeem` on yvDAI-1 triggers `withdraw` from this strategy → `redeem` from yvUSDC-1 → `withdraw` from yvUSDC-1's downstream (sUSDS Lender or Spark USDC Lender) → unwind into USDC → DAI via PSM. All atomic in the same transaction.
 
 **Strategy parameters:**
 - Activated: 2025-10-24
-- Last reported: 2026-04-22
+- Last reported: 2026-05-04 (`last_report = 1777777319`)
 - PSM fee fallback: 0.05% threshold (above which the strategy can be configured to use Uniswap V3 with 0.5% slippage tolerance)
 
-### Strategy 2: DAI to USDS Depositor (~27.5% allocation)
+### Strategy 2: DAI to USDS Depositor (20.58% allocation)
 
 **Contract:** [`0xAeDF7d5F3112552E110e5f9D08c9997Adce0b78d`](https://etherscan.io/address/0xAeDF7d5F3112552E110e5f9D08c9997Adce0b78d) — verified vault target [`0x182863131F9a4630fF9E27830d945B1413e347E8`](https://etherscan.io/address/0x182863131F9a4630fF9E27830d945B1413e347E8) (yvUSDS-1).
 
@@ -203,25 +223,21 @@ yvDAI-1 deploys ~99.9999% of its DAI via two depositor strategies. Both terminat
 
 1. **DAI → USDS** via Sky DAI-USDS Exchanger ([`0x3225737a9Bbb6473CB4a45b7244ACa2BeFdB276A`](https://etherscan.io/address/0x3225737a9Bbb6473CB4a45b7244ACa2BeFdB276A)) — 1:1, no fee
 2. **USDS → yvUSDS-1** deposit (ERC-4626)
-3. yvUSDS-1 routes ~92.6% to Spark USDS Compounder + ~7.4% to sUSDS Lender
+3. yvUSDS-1 currently routes 100% to its Spark USDS Compounder strategy → Sky USDS Staking Rewards (SPK farm)
 
-This is the shorter of the two paths — two layers of vaults instead of three.
-
-**Withdrawal:** reverse path. Atomic.
+**Withdrawal:** reverse path. The user's `redeem` on yvDAI-1 triggers `withdraw` from this strategy → `redeem` from yvUSDS-1 → unstake from Spark Compounder. All atomic in the same transaction.
 
 **Strategy parameters:**
 - Activated: 2025-05-15
-- Last reported: 2026-04-22
+- Last reported: 2026-05-04 (`last_report = 1777780343`)
 
-### Strategies 3–5: sDAI / Spark / Aave V3 (0% allocation)
+### Removed from default queue (between April 27 and May 5)
 
-Queued but unfunded today:
+- **Savings Dai (sDAI)** ([`0x83F20F44975D03b1b09e64809B757c47f942BEeA`](https://etherscan.io/address/0x83F20F44975D03b1b09e64809B757c47f942BEeA)) — direct ERC-4626 wrapper from MakerDAO; previously zero debt
+- **Spark DAI Lender** ([`0x1fd862499e9b9402DE6c599b6C391f83981180Ab`](https://etherscan.io/address/0x1fd862499e9b9402DE6c599b6C391f83981180Ab)) — direct supply into Spark Lend; previously zero debt
+- **Aave V3 DAI Lender** ([`0x9BF50e7589a562da2ecC0a87e2597EFBDBde241B`](https://etherscan.io/address/0x9BF50e7589a562da2ecC0a87e2597EFBDBde241B)) — direct supply into Aave V3; previously zero debt
 
-- **Savings Dai (sDAI)** ([`0x83F20F44975D03b1b09e64809B757c47f942BEeA`](https://etherscan.io/address/0x83F20F44975D03b1b09e64809B757c47f942BEeA)) — direct ERC-4626 wrapper from MakerDAO, single-hop alternative to the depositor strategies
-- **Spark DAI Lender** ([`0x1fd862499e9b9402DE6c599b6C391f83981180Ab`](https://etherscan.io/address/0x1fd862499e9b9402DE6c599b6C391f83981180Ab)) — direct supply into Spark Lend
-- **Aave V3 DAI Lender** ([`0x9BF50e7589a562da2ecC0a87e2597EFBDBde241B`](https://etherscan.io/address/0x9BF50e7589a562da2ecC0a87e2597EFBDBde241B)) — direct supply into Aave V3
-
-These would diversify the dependency profile if funded.
+The removal of all three direct-deposit fallbacks eliminates the on-chain single-hop alternatives that were available at the prior snapshot. Reintroducing any of them now requires a fresh `addStrategy()` proposal at the Strategy Manager TimelockController (7-day delay). Rationale for the removals has not been independently verified.
 
 ### Accessibility
 
@@ -242,7 +258,7 @@ These would diversify the dependency profile if funded.
 
 - **PPS:** ERC-4626, fully algorithmic
 - **Strategy `totalAssets()`:** reads the underlying yvUSDC-1 / yvUSDS-1 share balance and converts via ERC-4626 `convertToAssets()` — fully on-chain, real-time
-- **Multi-layer verification:** anyone can independently verify yvDAI-1 → yvUSDC-1 → yvUSDS-1 → Sky / Spark on-chain. Each layer's exchange rate is its own ERC-4626 calculation
+- **Multi-layer verification:** anyone can independently verify yvDAI-1 → yvUSDC-1 → (sUSDS or Spark Lend USDC) and yvDAI-1 → yvUSDS-1 → Spark USDS Compounder on-chain. Each layer's exchange rate is its own ERC-4626 calculation
 - **Profit / loss reporting:** keepers via `process_report()`, profits unlock over 10 days
 
 The vault-of-vaults adds a small surface area to verify (multiple `totalAssets()` reads) but does not add any off-chain dependency.
@@ -250,15 +266,15 @@ The vault-of-vaults adds a small surface area to verify (multiple `totalAssets()
 ## Liquidity Risk
 
 - **Primary exit:** Redeem yvDAI-1 for DAI via ERC-4626 `withdraw()` / `redeem()`. Triggers reverse pipeline through yvUSDC-1 / yvUSDS-1 (atomic, multi-step in the same transaction)
-- **Highly liquid underlying:** sUSDS holds ~$5.38B; USDS Staking Rewards has multi-billion USDS staked. yvDAI-1's ~$8.57M is a tiny fraction of underlying capacity
+- **Highly liquid underlying:** sUSDS holds multi-billion TVL; USDS Staking Rewards has multi-billion USDS staked. yvDAI-1's ~$7.82M is a tiny fraction of underlying capacity
 - **PSM liquidity:** MakerDAO PSM Lite provides deep DAI ↔ USDC liquidity at 1:1, 0% fee. PSM capacity is managed by Sky governance and typically holds billions of USDC
-- **Cascading withdrawal mechanics:** for the 72.5% path, a user redemption from yvDAI-1 triggers up to **three** layers of strategy `withdraw()` calls (yvDAI-1 → yvUSDC-1 → yvUSDS-1) plus the unstake from Spark Compounder / sUSDS — all in the same transaction. The 27.5% path is two layers
-- **No DEX liquidity needed** — exit is via Sky's own contracts (PSM, Exchanger, sUSDS, USDS Staking)
+- **Cascading withdrawal mechanics:** both depositor paths now traverse **two Yearn V3 vault layers** (yvDAI-1 → yvUSDC-1 or yvDAI-1 → yvUSDS-1) plus the terminal unstake (sUSDS withdrawal, Spark Lend supply withdrawal, or Spark Compounder unwind). The third Yearn-vault layer that existed at the prior snapshot (yvUSDC-1 → yvUSDS-1 chain) has been eliminated by yvUSDC-1's switch to a direct sUSDS-Lender strategy. All steps execute atomically in the same transaction
+- **No DEX liquidity needed** — exit is via Sky's own contracts (PSM, Exchanger, sUSDS, USDS Staking) and Spark Lend
 - **Same-value asset:** DAI-denominated vault token — no price-divergence risk
 - **No withdrawal queue or cooldown** — atomic redemption
-- **Deposit limit:** 50M DAI cap vs ~$8.57M TVL (room for +484%)
+- **Deposit limit:** 50M DAI cap vs ~$7.82M TVL (room for +539%)
 
-The cascading multi-layer withdrawal is atomic but has a higher gas cost than a single-strategy vault. For a large institutional withdrawal, the gas of unwinding through all layers plus the Spark / sUSDS unstakes should be considered when sizing the redemption.
+The cascading multi-layer withdrawal is atomic but has a higher gas cost than a single-strategy vault. For a large institutional withdrawal, the gas of unwinding through both layers plus the terminal Sky / Spark unstakes should be considered when sizing the redemption.
 
 ## Centralization & Control Risks
 
@@ -297,15 +313,16 @@ After resolving the vault-of-vaults composition, yvDAI-1's effective dependencie
 
 | Dependency | Criticality | Notes |
 |-----------|-------------|-------|
-| **yvUSDC-1** (intermediate vault) | Critical — 72.5% of deployed funds route through it | Same governance, audits, code as yvDAI-1. See [yvUSDC-1 report](./yearn-yvusdc.md) |
-| **yvUSDS-1** (terminal vault) | Critical — 100% of deployed funds end here | Same governance, audits, code. See [yvUSDS-1 report](./yearn-yvusds.md) |
-| **Sky USDS Staking Rewards (SPK farm)** | Critical — ~92.6% of yvUSDS-1's allocation | First-party Sky contract |
-| **Sky / sUSDS** | Critical — ~7.4% of yvUSDS-1's allocation | $5.38B sUSDS TVL, $10M Immunefi bounty |
+| **yvUSDC-1** (intermediate vault) | Critical — 79.4% of deployed funds route through it | Same governance, audits, code as yvDAI-1. See [yvUSDC-1 report](./yearn-yvusdc.md) |
+| **yvUSDS-1** (intermediate vault) | Critical — 20.6% of deployed funds route through it | Same governance, audits, code. See [yvUSDS-1 report](./yearn-yvusds.md) |
+| **Sky / sUSDS** (Sky Savings Rate) | Critical — ~77.5% of effective deployment (via yvUSDC-1) | Multi-billion sUSDS TVL, $10M Immunefi bounty |
+| **Sky USDS Staking Rewards (SPK farm)** | Critical — ~20.6% of effective deployment (via yvUSDS-1) | First-party Sky contract |
+| **Spark Lend USDC market** | Moderate — ~1.9% of effective deployment (via yvUSDC-1) | Sky sub-DAO; audited |
 | **MakerDAO PSM Lite** | High during routing (used by yvUSDC-1 path) | 1:1, 0% fee, audited |
-| **Sky DAI-USDS Exchanger** | High during routing | 1:1, no fee, audited |
+| **Sky DAI-USDS Exchanger** | High during routing (used by yvUSDS-1 path) | 1:1, no fee, audited |
 | **DAI / USDS / USDC tokens** | Critical | Inherited from each conversion hop |
 
-**Dependency quality:** all dependencies are top-tier — Sky / MakerDAO infrastructure plus Yearn V3 itself. The vault-of-vaults composition concentrates dependency on yvUSDS-1 specifically (since 100% of yvDAI-1's deployed funds end up there) and on Yearn V3's own vault accounting working correctly across three layers.
+**Dependency quality:** all dependencies are top-tier — Sky / MakerDAO infrastructure plus Yearn V3 itself. The vault-of-vaults composition concentrates dependency on the Sky ecosystem (~98% of effective deployment across sUSDS + USDS Staking + Spark Lend USDC) and on Yearn V3's own vault accounting working correctly across two layers.
 
 ## Operational Risk
 
@@ -342,12 +359,14 @@ Yearn maintains the [`monitoring`](https://github.com/yearn/monitoring) reposito
 
 ### Critical Events to Monitor
 
-- **PPS decrease** at any of the three layers (yvDAI-1, yvUSDC-1, yvUSDS-1) — should only increase outside of explicit loss events
+- **PPS decrease** at any of the three vaults in scope (yvDAI-1, yvUSDC-1, yvUSDS-1) — should only increase outside of explicit loss events
 - **Strategy additions / removals** at any layer
 - **Emergency actions** (`Shutdown`) at any layer — directly impacts yvDAI-1's redemption path
 - **PSM `tin` / `tout`** — if non-zero, USDC ↔ DAI conversion incurs fees
 - **DAI-USDS Exchanger pause state**
-- **Sky USDS Staking Rewards pause / migration** (affects ~92.6% of effective deployment)
+- **Sky USDS Staking Rewards pause / migration** (affects ~20.6% of effective deployment via yvUSDS-1)
+- **Sky sUSDS pause / migration** (affects ~77.5% of effective deployment via yvUSDC-1)
+- **Spark Lend USDC market freeze / pause** (affects ~1.9% of effective deployment via yvUSDC-1)
 - **ySafe / Brain / Security signer or threshold changes**
 
 ### Monitoring Functions
@@ -366,23 +385,25 @@ Yearn maintains the [`monitoring`](https://github.com/yearn/monitoring) reposito
 
 ### Key Strengths
 
-- **Battle-tested Yearn V3 infrastructure:** 3 audits by top firms, ~23 months of clean V3 production. Immutable vault contract eliminates proxy upgrade risk
-- **Top-tier underlying:** all deployed funds end up at Sky USDS Staking Rewards + sUSDS, both first-party Sky contracts with $10M Immunefi bounty
+- **Battle-tested Yearn V3 infrastructure:** 3 audits by top firms, ~24 months of clean V3 production. Immutable vault contract eliminates proxy upgrade risk
+- **Top-tier underlying:** ~98% of effective deployment ends at Sky-ecosystem contracts (sUSDS + USDS Staking + Spark Lend USDC) — Sky has a $10M Immunefi bounty and is one of the most extensively audited DeFi protocols
 - **Standard Yearn governance:** Yearn V3 Role Manager + 6-of-9 ySafe (named DeFi signers) + 7-day self-governed timelock
-- **Established track record:** ~25.5 months in production, ~11.71% cumulative return, zero incidents
+- **Established track record:** ~25.8 months in production, ~11.80% cumulative return, zero incidents
 - **Active monitoring:** vault is in Yearn's hourly monitoring system
+- **Cascade depth reduced:** the deepest Yearn-vault chain has shortened from three layers to two since the prior snapshot, removing one accounting boundary on the dominant path
 - **No leverage. No cross-chain.** Vault-of-vaults composition is not leverage
 - **Highly liquid underlying** — Sky / sUSDS / PSM all multi-billion-dollar deep
 - **All conversion hops at 1:1** — PSM Lite (USDC ↔ DAI) and DAI-USDS Exchanger are both 0-fee 1:1
 
 ### Key Risks
 
-- **Vault-of-vaults composition (3 layers):** the 72.5% path traverses yvDAI-1 → yvUSDC-1 → yvUSDS-1 → Spark / sUSDS. A bug or accounting issue at any layer cascades. Each layer's emergency state (shutdown, deposit pause) directly affects yvDAI-1
-- **Effective concentration into Sky / Spark:** because yvUSDC-1 currently routes 100% to yvUSDS-1, ~100% of yvDAI-1's deployed DAI ultimately concentrates in yvUSDS-1's two main strategies (Spark Compounder + sUSDS). A bug or governance failure at the Sky USDS Staking Rewards contract would directly impair the bulk of yvDAI-1's deployed value
-- **Cascading withdrawal mechanics:** atomic but multi-step — a redemption from yvDAI-1 triggers strategy `withdraw()` calls at up to three vault layers plus the Spark / sUSDS unstake, all in the same transaction. Higher gas, more accounting boundaries
+- **Vault-of-vaults composition (2 layers):** both depositor paths traverse two Yearn V3 vault layers. A bug or accounting issue at any layer cascades. Each layer's emergency state (shutdown, deposit pause) directly affects yvDAI-1
+- **Effective concentration into Sky ecosystem:** ~98% of deployed DAI ultimately ends up in Sky-ecosystem contracts (sUSDS ~77.5%, Sky USDS Staking ~20.6%, Spark Lend USDC ~1.9%). A bug or governance failure at any one of these would impair a large fraction of deployed value; a Sky-wide systemic failure would affect essentially the entire vault
+- **Cascading withdrawal mechanics:** atomic but multi-step — a redemption triggers strategy `withdraw()` calls at two vault layers plus the terminal Sky / Spark unstake, all in the same transaction. Higher gas, more accounting boundaries than a single-strategy vault
+- **Default queue trimmed:** the dormant sDAI / Spark DAI Lender / Aave V3 DAI Lender strategies were removed from the queue between April 27 and May 5 — the on-chain single-hop fallbacks are no longer present, and reintroducing any requires a fresh `addStrategy()` proposal at the 7-day timelock
 - **Sky Savings Rate / SPK reward rate variability:** affects yield, not principal
 - **PSM fee risk:** currently 0%, but Sky governance can change. Above 0.05% the strategy can fall back to Uniswap V3 with 0.5% slippage
-- **Single intermediate-vault dependency:** the 72.5% path has yvUSDC-1 as a single point of dependency between yvDAI-1 and the terminal yvUSDS-1
+- **Intermediate-vault dependency:** both paths have a single intermediate Yearn V3 vault (yvUSDC-1 or yvUSDS-1) between yvDAI-1 and the terminal Sky / Spark contracts
 
 ### Critical Risks
 
@@ -400,7 +421,7 @@ Yearn maintains the [`monitoring`](https://github.com/yearn/monitoring) reposito
 ### Critical Risk Gates
 
 - [x] **No audit** — Yearn V3 core audited by 3 top firms. Sky / sUSDS / USDS Staking audited by 7+ firms. ✅ PASS
-- [x] **Unverifiable reserves** — ERC-4626 at all three layers, all positions on-chain verifiable. ✅ PASS
+- [x] **Unverifiable reserves** — ERC-4626 at all vaults in scope, all positions on-chain verifiable. ✅ PASS
 - [x] **Total centralization** — 6-of-9 multisig with publicly named signers. ✅ PASS
 
 **All gates pass.** Proceed to category scoring.
@@ -413,12 +434,12 @@ Yearn maintains the [`monitoring`](https://github.com/yearn/monitoring) reposito
 |--------|-----------|
 | Audits | V3 framework: 3 audits by top firms. Sky / sUSDS / USDS Staking: 7+ auditors |
 | Bug bounty | $200K (Yearn Immunefi); $10M (Sky Immunefi) |
-| Production history | **~25.5 months** (March 12, 2024). V3 framework: ~23 months |
-| TVL | **~$8.57M** DAI. Deposit limit: 50M |
+| Production history | **~25.8 months** (March 12, 2024). V3 framework: ~24 months |
+| TVL | **~$7.82M** DAI. Deposit limit: 50M |
 | Security incidents | None on V3, none on Sky |
 | Strategy review | Rigorous 12-metric framework with ySec security review |
 
-**Score: 1.5 / 5** — strong audit coverage, ~25 months clean production, no incidents.
+**Score: 1.5 / 5** — strong audit coverage, ~25.8 months clean production, no incidents.
 
 #### Category 2: Centralization & Control Risks (Weight: 30%)
 
@@ -450,11 +471,11 @@ Yearn maintains the [`monitoring`](https://github.com/yearn/monitoring) reposito
 
 | Factor | Assessment |
 |--------|-----------|
-| Protocol count (effective) | 1 ecosystem (Sky / Spark) for ~100% of effective deployment, plus dependency on Yearn V3's own vault-of-vaults accounting |
-| Criticality | Sky USDS Staking + sUSDS critical (~100% of deployed funds, via yvUSDS-1); intermediate dependency on yvUSDC-1 (72.5%); same-team Yearn V3 dependency |
-| Quality | Top-tier (Sky $10M bounty, $5.38B sUSDS TVL) plus same Yearn V3 framework |
+| Protocol count (effective) | 1 ecosystem (Sky / Spark) for ~98% of effective deployment, plus dependency on Yearn V3's own vault-of-vaults accounting (now 2 layers, down from 3) |
+| Criticality | Sky sUSDS critical (~77.5% of deployed funds, via yvUSDC-1); Sky USDS Staking critical (~20.6% via yvUSDS-1); Spark Lend USDC market moderate (~1.9% via yvUSDC-1); same-team Yearn V3 dependency at both intermediate vaults |
+| Quality | Top-tier (Sky $10M bounty, multi-billion sUSDS TVL) plus same Yearn V3 framework |
 
-**Dependencies Score: 2.5 / 5** — single-ecosystem (Sky) effective concentration plus three layers of vault-of-vaults dependency on Yearn V3 itself. The ecosystem quality is excellent, but the concentration and the multi-layer composition warrant 2.5.
+**Dependencies Score: 2.5 / 5** — single-ecosystem (Sky) effective concentration plus a two-layer vault-of-vaults dependency on Yearn V3 itself. The ecosystem quality is excellent, and the cascade depth has improved (3 → 2 layers), but the ~98% Sky concentration and continued multi-layer composition warrant 2.5.
 
 **Centralization Score = (1.0 + 1.0 + 2.5) / 3 ≈ 1.5**
 
@@ -469,7 +490,7 @@ Yearn maintains the [`monitoring`](https://github.com/yearn/monitoring) reposito
 | Backing | 100% on-chain DAI; deployed to Sky-ecosystem contracts via vault-of-vaults |
 | Collateral quality | USDS / sUSDS / Sky Staking — all backed by Sky's over-collateralized loan book + RWA |
 | Leverage | None |
-| Verifiability | Fully on-chain across all three layers |
+| Verifiability | Fully on-chain across both vault layers |
 
 **Score: 1.0 / 5** — top-tier.
 
@@ -492,13 +513,13 @@ Yearn maintains the [`monitoring`](https://github.com/yearn/monitoring) reposito
 
 | Factor | Assessment |
 |--------|-----------|
-| Exit pipeline | Up to 3 vault layers + Spark Compounder unstake / sUSDS withdraw |
-| Liquidity depth | sUSDS $5.38B; PSM billions; Spark / Aave / Morpho deep |
-| Large holder impact | $8.57M vault vs multi-billion underlying — negligible |
+| Exit pipeline | 2 vault layers + terminal Sky / Spark unstake (sUSDS withdraw, Spark Lend USDC withdraw, or Spark Compounder unwind) |
+| Liquidity depth | sUSDS multi-billion; PSM billions; Spark / Aave / Morpho deep |
+| Large holder impact | $7.82M vault vs multi-billion underlying — negligible |
 | Same-asset | DAI-denominated share token |
 | Withdrawal restrictions | None — atomic redemption (multi-step within one transaction) |
 
-**Score: 1.5 / 5** — highly liquid; only mild downward pressure from the multi-layer cascade.
+**Score: 1.5 / 5** — highly liquid; only mild downward pressure from the multi-layer cascade (now 2 layers, was 3).
 
 #### Category 5: Operational Risk (Weight: 5%)
 
@@ -540,20 +561,24 @@ Yearn maintains the [`monitoring`](https://github.com/yearn/monitoring) reposito
 
 ## Reassessment Triggers
 
-- **Time-based:** Reassess in 6 months (October 2026) or annually
+- **Time-based:** Reassess in 6 months (November 2026) or annually
 - **TVL-based:** Reassess if TVL exceeds $25M or changes by ±50%, or if the deposit limit is changed
 - **Strategy posture:**
-  - if yvDAI-1 funds the dormant strategies (sDAI, Spark DAI Lender, Aave V3 DAI Lender), the dependency profile diversifies and the report should be updated
-  - if yvUSDC-1's downstream allocation diversifies away from yvUSDS-1, yvDAI-1's effective concentration changes accordingly
+  - any new `addStrategy()` proposal at the Strategy Manager TimelockController for yvDAI-1 (would surface in the 7-day queue) — particularly if it reintroduces direct sDAI / Spark DAI Lender / Aave V3 DAI Lender exposure
+  - the depositor allocation between yvUSDC-1 and yvUSDS-1 swings by more than ±20 percentage points from the current 79.4 / 20.6 split
+- **Downstream rewiring (the dominant change vector at this snapshot):**
+  - if yvUSDC-1 reroutes materially away from its current `USDC to sUSDS Lender` strategy, yvDAI-1's effective endpoint mix changes accordingly — the dominant ~77.5% sUSDS share is inherited from yvUSDC-1
+  - if yvUSDS-1 reintroduces sUSDS Lender or any non-Spark-Compounder strategy, yvDAI-1's secondary exposure diversifies
 - **Vault-of-vaults composition:**
-  - **reassess if a new strategy is added that creates a fourth layer of nested vaults**
-  - reassess if any of the three layers (yvDAI-1, yvUSDC-1, yvUSDS-1) shuts down a strategy that contains yvDAI-1's deployed funds
+  - **reassess if a new strategy is added that creates a third Yearn-vault layer** (the cascade is currently 2 layers deep)
+  - reassess if any of the two intermediate vaults (yvUSDC-1, yvUSDS-1) shuts down a strategy that holds yvDAI-1's deployed funds
 - **Sky-specific:**
   - SSR drops below 2% (may indicate Sky-side stress)
   - PSM `tin` / `tout` set above 0.05% (activates Uniswap V3 fallback in the USDC depositor path)
   - SPK reward rate changes materially or USDS Staking Rewards is paused / migrated
   - DAI-USDS Exchanger pause
-- **Incident-based:** any V3 exploit, strategy loss, governance compromise, or major incident at Sky / MakerDAO
+  - Spark Lend USDC market freeze / pause (affects ~1.9% of effective deployment via yvUSDC-1)
+- **Incident-based:** any V3 exploit, strategy loss, governance compromise, or major incident at Sky / MakerDAO / Spark
 - **Governance-based:** ySafe / Brain / Security signer or threshold changes; any change to the timelock delay (would itself require 7 days)
 
 ---
@@ -561,65 +586,52 @@ Yearn maintains the [`monitoring`](https://github.com/yearn/monitoring) reposito
 ## Appendix: Contract Architecture
 
 ```
-┌─────────────────────────────────────────────────────────────────────┐
-│                         VAULT LAYER 1                                │
-│                                                                      │
-│  ┌───────────────────────┐                                          │
-│  │  yvDAI-1 (v3.0.2)    │                                          │
-│  │  ERC-4626, immutable  │                                          │
-│  │  0x028e…336c          │                                          │
-│  │                       │                                          │
-│  │  ~$8.57M DAI TVL      │                                          │
-│  └───┬──────────────┬────┘                                          │
-│      │ 72.5%        │ 27.5%                                         │
-│      ▼              ▼                                                │
-│  ┌────────────┐  ┌─────────────────┐                                │
-│  │ DAI→USDC-1 │  │ DAI→USDS        │                                │
-│  │ Depositor  │  │ Depositor       │                                │
-│  │ 0xfF03…f9B5│  │ 0xAeDF…b78d     │                                │
-│  └────┬───────┘  └────────┬────────┘                                │
-│       │                   │                                          │
-│  ┌────▼─────────┐         │                                          │
-│  │ DAI→USDC     │         │ DAI→USDS                                 │
-│  │ via PSM Lite │         │ via DAI-USDS Exchanger                   │
-│  │ 1:1, 0 fee   │         │ 1:1, no fee                              │
-│  └────┬─────────┘         │                                          │
-│       │                   │                                          │
-└───────┼───────────────────┼──────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────────────┐
+│                          VAULT LAYER 1                                   │
+│                                                                          │
+│  ┌────────────────────────┐                                             │
+│  │  yvDAI-1 (v3.0.2)      │                                             │
+│  │  ERC-4626, immutable    │                                             │
+│  │  0x028e…336c            │                                             │
+│  │                         │                                             │
+│  │  ~$7.82M DAI TVL        │                                             │
+│  └───┬───────────────┬─────┘                                             │
+│      │ 79.4%         │ 20.6%                                             │
+│      ▼               ▼                                                    │
+│  ┌────────────┐  ┌─────────────────┐                                    │
+│  │ DAI→USDC-1 │  │ DAI→USDS        │                                    │
+│  │ Depositor  │  │ Depositor       │                                    │
+│  │ 0xfF03…f9B5│  │ 0xAeDF…b78d     │                                    │
+│  └────┬───────┘  └────────┬────────┘                                    │
+│       │                   │                                              │
+│  ┌────▼─────────┐    ┌────▼──────────────────┐                          │
+│  │ DAI→USDC     │    │ DAI→USDS              │                          │
+│  │ via PSM Lite │    │ via DAI-USDS Exchanger│                          │
+│  │ 1:1, 0 fee   │    │ 1:1, no fee           │                          │
+│  └────┬─────────┘    └────┬──────────────────┘                          │
+└───────┼───────────────────┼──────────────────────────────────────────────┘
         │                   │
         ▼                   ▼
-┌──────────────────────────────────────────────────────────────────────┐
-│                         VAULT LAYER 2                                 │
-│                                                                       │
-│  ┌────────────────────┐         ┌────────────────────┐                │
-│  │  yvUSDC-1          │         │  (skip layer 2 —   │                │
-│  │  0xBe53…6204       │         │   direct to L3)    │                │
-│  │  100% to USDS depr │         │                    │                │
-│  └─────────┬──────────┘         └─────────┬──────────┘                │
-│            │ 100%                         │                            │
-│            ▼                              │                            │
-│  ┌─────────────────────────┐              │                            │
-│  │ USDC→USDS Depositor     │              │                            │
-│  │ USDC→DAI(PSM)→USDS(Exch)│              │                            │
-│  └─────────┬───────────────┘              │                            │
-└────────────┼──────────────────────────────┼────────────────────────────┘
-             │                              │
-             ▼                              ▼
-┌──────────────────────────────────────────────────────────────────────┐
-│                         VAULT LAYER 3 (TERMINAL)                       │
-│                                                                       │
-│  ┌────────────────────────────────────────┐                          │
-│  │  yvUSDS-1                              │                          │
-│  │  0x1828…47E8                           │                          │
-│  │  ~92.6% Spark Compounder (SPK farm)    │                          │
-│  │   ~7.4% sUSDS Lender (SSR)             │                          │
-│  │  <0.01% Aave V3 Lido USDS (dust)       │                          │
-│  └────────────────────────────────────────┘                          │
-└──────────────────────────────────────────────────────────────────────┘
-                                │
-                                ▼
-                       Sky / Spark Stack
-            (USDS Staking Rewards + sUSDS Savings Rate)
+┌─────────────────────────────────────────────────────────────────────────┐
+│                          VAULT LAYER 2 (TERMINAL Yearn layer)            │
+│                                                                          │
+│  ┌─────────────────────────────┐    ┌────────────────────────────┐      │
+│  │  yvUSDC-1                   │    │  yvUSDS-1                  │      │
+│  │  0xBe53…6204                │    │  0x1828…47E8               │      │
+│  │  ~97.6% sUSDS Lender        │    │  100% Spark USDS Compounder│      │
+│  │   ~2.4% Spark USDC Lender   │    │   (Sky USDS Staking / SPK) │      │
+│  │  USDS Depositor: 0 USDC     │    │                            │      │
+│  └─────────┬───────────────────┘    └─────────┬──────────────────┘      │
+│            │                                   │                          │
+│            ▼                                   ▼                          │
+│   sUSDS (Sky Savings Rate)             Sky USDS Staking Rewards         │
+│   + Spark Lend USDC market             (SPK farm)                       │
+└─────────────────────────────────────────────────────────────────────────┘
+
+Effective endpoint mix for yvDAI-1's deployed DAI (May 5, 2026):
+  ~77.5%  Sky sUSDS         (via yvUSDC-1 → USDC to sUSDS Lender)
+  ~20.6%  Sky USDS Staking   (via yvUSDS-1 → Spark USDS Compounder)
+  ~1.9%   Spark Lend USDC    (via yvUSDC-1 → Spark USDC Lender)
 ```
 
 ## Appendix: TimelockController Role Structure
