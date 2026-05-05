@@ -1,6 +1,7 @@
 # Protocol Risk Assessment: 3Jane — USD3
 
-- **Assessment Date:** March 4, 2026 (Updated: May 5, 2026 after April 2026 emergency shutdown event)
+- **Assessment Date:** March 4, 2026 (Updated: May 5, 2026)
+- **Reassessment trigger:** April 2026 emergency shutdown event — see summary below.
 - **Token:** USD3
 - **Chain:** Ethereum
 - **Token Address:** [`0x056B269Eb1f75477a8666ae8C7fE01b64dD55eCc`](https://etherscan.io/address/0x056B269Eb1f75477a8666ae8C7fE01b64dD55eCc)
@@ -116,12 +117,19 @@ USD3 is fundamentally different from traditional overcollateralized stablecoins:
 
 ### Default Recovery Process
 
+Per-loan recovery sequence applied to a defaulted credit line:
+
 1. Immediate credit score reduction (slashing 3Jane score)
 2. Overdue interest reallocation
 3. Markdown: protocol marks down delinquent/defaulted positions to reflect recovery rate
-4. Insurance Fund coverage ($1M USDC)
-5. NPL Auction: non-performing loans sold to registered U.S. collection agencies via Dutch-style auctions
-6. Offchain legal recovery via credit bureau reporting and regulatory enforcement
+4. NPL Auction: non-performing loans sold to registered U.S. collection agencies via Dutch-style auctions
+5. Offchain legal recovery via credit bureau reporting and regulatory enforcement
+
+Any residual loss after the per-loan recovery above is then absorbed in the **tranche loss waterfall** (same order as in *Collateralization* above):
+
+1. **sUSD3** (junior tranche) — first-loss capital
+2. **Insurance Fund** — ~868,288 `waEthUSDC` (≈$868K, May 5 2026); see *Collateralization* for address details
+3. **USD3** (senior tranche) — last-resort loss absorption
 
 ### Provability
 
@@ -413,7 +421,7 @@ All core contracts (MorphoCredit, ProtocolConfig, CreditLine, USD3) are owned by
 |--------|-----------|
 | Backing | **Not overcollateralized** — USD3 is backed by USDC that is lent out via unsecured credit lines |
 | Collateral quality | USDC / `waEthUSDC` (high quality) but lent out without onchain collateral |
-| Default protection | sUSD3 junior tranche (~$5.81M supply, ~$6.28M assets) + Insurance Fund **~$868K in `waEthUSDC`** (verified onchain May 5 2026; previously approximated as "$1M USDC") absorb losses first. With ~$6.91M outstanding, a ~14% loss would exhaust the insurance fund alone before tapping sUSD3. |
+| Default protection | Loss waterfall (junior → fund → senior): **sUSD3** junior tranche (~$5.81M supply, ~$6.28M assets) absorbs first, then **Insurance Fund** ~$868K in `waEthUSDC` (verified onchain May 5 2026; previously approximated as "$1M USDC"), then **USD3** senior holders. With ~$6.91M outstanding, sUSD3 alone covers ~91% of the borrow book before the fund or USD3 are touched. |
 | Verifiability | Onchain idle reserves verifiable; outstanding loan values partially opaque |
 
 **Subcategory A Score: 4/5** — Held. Insurance fund correction (~$868K vs $1M assumed) does not change the rubric placement. sUSD3 buffer is still meaningful relative to the now-smaller total deposits, but the absolute loss-absorbing capacity has not grown while utilization has.
