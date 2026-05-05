@@ -93,7 +93,7 @@ The largest declines (fGHO, fUSDtb, fUSDC) reflect post-Resolv withdrawals as us
   - **EIP-1967 admin slot**: `0x2386DC45AdDed673317eF068992F19421B481F4c` (Timelock) ✓ unchanged since Feb 2026
   - **EIP-1967 implementation slot**: changed once between assessments. At block `24436972` (Feb 12, 2026) the slot held [`0xa57d7cEF617271F4cEa4F665D33eBcFCbA4929f6`](https://etherscan.io/address/0xa57d7cEF617271F4cEa4F665D33eBcFCbA4929f6); at block `24779519` (Mar 31, 2026) it was upgraded to the current [`0xcc331DaF69752Bece3Dc98DBc63EacD5092266a2`](https://etherscan.io/address/0xcc331DaF69752Bece3Dc98DBc63EacD5092266a2). Both impls are verified as `FluidLiquidityDummyImpl` (compiler `0.8.21` → `0.8.29` respectively).
     - **Upgrade tx**: [`0xf484b2a265add120c907049c43ca1cfd11b73fce6154c0abe3e15d5ac325d487`](https://etherscan.io/tx/0xf484b2a265add120c907049c43ca1cfd11b73fce6154c0abe3e15d5ac325d487). The transaction was executed by the Timelock and bundled (a) the dummy-impl swap (`Upgraded` EIP-1967 event), (b) module-dispatcher selector updates (`ad967e15`, `dacb5419`), and (c) USDC rate-config update (see Interest Rate Model section below).
-    - Scheduled by **governance proposal #126** — verified via the `ProposalExecuted(126)` event emitted by GovernorBravo within the upgrade tx (block 24779519, Mar 31 2026). **TODO**: link the published audit/changelog for the new module version. No public audit dated 2026 was found at [audits-and-security.html](https://docs.fluid.instadapp.io/audits-and-security.html).
+    - Scheduled by **governance proposal #126** — verified via the `ProposalExecuted(126)` event emitted by GovernorBravo within the upgrade tx (block 24779519, Mar 31 2026). **No 2026-dated audit covering the new module version is published** at [audits-and-security.html](https://docs.fluid.instadapp.io/audits-and-security.html); the most recent posted audits are MixBytes (Sep–Dec 2025) and StateMind (Sep–Oct 2025), both on the Liquidity Layer. Treat the `0xcc33…` impl as in-scope of those 2025 reviews unless a separate post-upgrade audit is later published.
 - **LendingFactory**: [`0x54B91A0D94cb471F37f949c60F7Fa7935b551D03`](https://etherscan.io/address/0x54B91A0D94cb471F37f949c60F7Fa7935b551D03) — `owner() = 0x2386DC45...` (Timelock) ✓
 - **Timelock**: [`0x2386DC45AdDed673317eF068992F19421B481F4c`](https://etherscan.io/address/0x2386DC45AdDed673317eF068992F19421B481F4c) — `delay() = 86400` (1 day) ✓; `admin() = 0x0204Cd03...` (GovernorBravo) ✓
 - **GovernorBravo**: [`0x0204Cd037B2ec03605CFdFe482D8e257C765fA1B`](https://etherscan.io/address/0x0204Cd037B2ec03605CFdFe482D8e257C765fA1B) — `proposalCount() = 128` (was 117 in Feb 2026). `proposalCount` counts **created** proposals, not executed; verified onchain by iterating `state(uint256)` for all 128 proposals: **119 are in state `Executed`** (state==7).
@@ -106,7 +106,8 @@ The largest declines (fGHO, fUSDtb, fUSDC) reflect post-Resolv withdrawals as us
 
 ### Resolvers (Read-Only Periphery)
 
-- **FluidLiquidityResolver**: [`0xD7588F6c99605Ab274C211a0AFeC60947668A8Cb`](https://etherscan.io/address/0xD7588F6c99605Ab274C211a0AFeC60947668A8Cb) — Active resolver for supply/borrow rates, exchange prices, rate model params
+- **LiquidityResolver (current, all 6 chains)**: [`0xca13A15de31235A37134B4717021C35A3CF25C60`](https://etherscan.io/address/0xca13A15de31235A37134B4717021C35A3CF25C60) — Per Fluid's official [deployments registry](https://github.com/Instadapp/fluid-contracts-public/blob/main/deployments/deployments.md), this is the current LiquidityResolver on mainnet, arbitrum, base, polygon, plasma, and bnb. Verified onchain Apr 27 2026: `LIQUIDITY()` returns `0x52Aa899454998Be5b000Ad077a46Bbe360F4e497` ✓.
+- **FluidLiquidityResolver (prior version, still deployed)**: [`0xD7588F6c99605Ab274C211a0AFeC60947668A8Cb`](https://etherscan.io/address/0xD7588F6c99605Ab274C211a0AFeC60947668A8Cb) — Earlier version; bytecode still live and `LIQUIDITY()` returns the same Liquidity Layer, but no longer the canonical address in the deployments registry.
 - **RevenueResolver**: [`0x0A84741D50B4190B424f57425b09FAe60C330F32`](https://etherscan.io/address/0x0A84741D50B4190B424f57425b09FAe60C330F32)
 
 ## Audits and Due Diligence Disclosures
@@ -374,7 +375,7 @@ Going forward, it is reasonable to assume:
   - Voting delay: 7,200 blocks (~1 day) ✓
   - Voting period: 14,400 blocks (~2 days) ✓
   - **Proposals executed: 128** (was 117 in Feb 2026 → 11 new since)
-- **Pending governance change (NEW)**: [Fluid Foundation Proposal](https://gov.fluid.io/t/proposal-establish-fluid-foundation/1768) (Feb 23, 2026, by DMH/Instadapp COO). Would transfer all Fluid IP, code, frontend, and trademarks to a Cayman Islands foundation with no owners (operating via custodians/directors), funded by a $250K/month ($3M/yr) DAO grant. Token holders retain ultimate authority (can change policy or dissolve foundation). **Status: in governance discussion, not executed.** This would be a positive maturation of the operational/legal structure if approved as written.
+- **Pending governance change (NEW)**: [Fluid Foundation Proposal](https://gov.fluid.io/t/proposal-establish-fluid-foundation/1768) (Feb 23, 2026, by DMH/Instadapp COO). Would transfer all Fluid IP, code, frontend, and trademarks to a Cayman Islands foundation with no owners (operating via custodians/directors), funded by a $250K/month ($3M/yr) DAO grant. Token holders retain ultimate authority (can change policy or dissolve foundation). **Status (verified Apr 27 2026):** Signaling-only [Snapshot vote](https://snapshot.box/#/s:fluid.eth/proposal/0xde0d55050ef945d3d756219a9ee2cf29ef97c3f5625b107a65e9fd39937d6c5e) passed unanimously Feb 27–28 2026 (2,697,983 FLUID For / 0 Against / 0 Abstain). **No onchain GovernorBravo proposal has been filed** for the Foundation transfer (verified via the 11 new proposals 118–128 — none are Foundation-related). IP transfer / legal completion targeted "mid-2026" per the proposal text. This would be a positive maturation of the operational/legal structure if approved as written.
 
 ### Lending-Specific Admin Controls (Unchanged)
 
@@ -407,7 +408,7 @@ Going forward, it is reasonable to assume:
 
 - **Team**: Instadapp Labs. Founded by **Sowmay Jain** and **Samyak Jain** — both are publicly known, India-based founders active since 2019. Key GitHub contributors include **thrilok209**, **KABBOUCHI**, and **SamarendraGouda**.
 - **Funding**: Well-funded by top-tier VCs: Pantera Capital, Coinbase Ventures, Standard Crypto, additional undisclosed investors.
-- **Legal Structure**: Currently Instadapp Labs. **Pending: Cayman Islands Fluid Foundation** (Feb 2026 proposal, awaiting approval and IP transfer expected mid-2026 if approved).
+- **Legal Structure**: Currently Instadapp Labs. **Pending: Cayman Islands Fluid Foundation** (Feb 23, 2026 proposal). Snapshot signaling vote passed unanimously Feb 27–28 2026 (2.70M FLUID For / 0 Against). No onchain GovernorBravo proposal filed yet for the actual transfer; IP transfer and legal work targeted mid-2026 per the proposal text.
 - **Documentation**: Comprehensive technical documentation at [docs.fluid.instadapp.io](https://docs.fluid.instadapp.io/). Full source code on GitHub.
 - **Communication**: Active [governance forum](https://gov.fluid.io/), [Discord](https://discord.com/invite/C76CeZc), Twitter [@0xfluid](https://x.com/0xfluid), [Blog](https://blog.instadapp.io/).
 - **Incident Response (NEW evidence)**: Mar 2026 response demonstrated the team can act within ~30 minutes (pause/freeze affected markets) and arrange off-balance-sheet capital coverage of ~$70M within ~3 days. Strong response, but reliance on personal commitments rather than a programmatic mechanism is a structural concern.
@@ -550,7 +551,7 @@ Given the Mar/Apr 2026 contagion events, monitoring of the off-protocol collater
 - **Team**: Publicly known founders (Sowmay Jain, Samyak Jain). Active since 2019. Strong DeFi reputation.
 - **Funding**: Well-funded by Pantera Capital, Coinbase Ventures, and others.
 - **Docs**: Comprehensive documentation and open-source code.
-- **Legal**: Cayman Islands Fluid Foundation **proposed** Feb 23, 2026; not yet executed. Currently still Instadapp Labs.
+- **Legal**: Cayman Islands Fluid Foundation **proposed** Feb 23, 2026; Snapshot signaling vote passed unanimously Feb 27–28 2026, but **no onchain GovernorBravo proposal filed** for the actual transfer. Currently still Instadapp Labs.
 - **Incident Response (NEW evidence)**: ~30 min pause/freeze response, $70M coverage arranged in ~3 days. Strong execution. No formal documented IR plan but operational track record now exists. Reliance on personal commitments rather than programmatic backstop is a documented structural concern.
 
 **Score: 1.5/5** (unchanged). Publicly known team, strong reputation, well-funded, comprehensive docs. Incident response was demonstrably effective. Legal wrapper still pending — would improve to 1.0 if Foundation executes as proposed.
@@ -607,11 +608,10 @@ The Fluid Lending Protocol (fTokens) remains a well-designed ERC4626-compliant l
 
 ## Open TODOs from this Reassessment
 
-- **Liquidity Layer impl upgrade — audit linkage**: proposal #126 verified onchain as the source of the Mar 31, 2026 dummy-impl swap (`0xa57d…→0xcc33…`); however, no public audit/changelog dated 2026 was found at the audits page covering the new module version. Should be filled before next reassessment.
-- **Per-chain lending utilization refresh**: Feb 2026 report had Ethereum at 95% utilization; current per-chain utilization not refreshed (DefiLlama lending TVL is total only).
-- **Proposal #128 vs proposal #126 rate-value reconciliation**: proposal #126 (executed Mar 31 2026) bundled a USDC rate-config update; the currently-live values (kinks 85%/93% at 5.40%/7.50%) presumably came from #126, but this has not been confirmed by decoding the rate event in the #126 tx. Proposal #128 (queued) would change kinks to 90%/95% with rates 4.5%/7.5%.
-- **Foundation proposal status**: track for execution date and any amendments.
+- **Per-chain lending utilization refresh**: Feb 2026 report had Ethereum at 95% utilization; current per-chain utilization not refreshed (DefiLlama lending TVL is total only). Computing it requires iterating `getOverallTokenData(token)` on the LiquidityResolver `0xca13A15de31235A37134B4717021C35A3CF25C60` per chain per token and decoding the packed bitfield; not attempted in this assessment.
+- **Proposal #128 vs proposal #126 rate-value reconciliation**: proposal #126 (executed Mar 31 2026) bundled a USDC rate-config update; the currently-live values (kinks 85%/93% at 5.40%/7.50%) presumably came from #126, but this has not been confirmed by decoding the rate event in the #126 tx (`0xf484b2a2…`) logs. Proposal #128 (queued) would change kinks to 90%/95% with rates 4.5%/7.5%.
 - **Proposal #128 execution outcome**: queued at time of this reassessment. If executed, USDC/USDT V2 kinks shift to 90%/95%; reassess utilization-based liquidity behavior.
+- **Foundation proposal — onchain execution date**: signaling Snapshot passed Feb 27–28 2026 (verified, unanimous); track for the actual onchain GovernorBravo proposal and IP-transfer completion (targeted "mid-2026" per the proposal text).
 
 ## Appendix: Contract Architecture
 
