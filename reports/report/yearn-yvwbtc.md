@@ -4,7 +4,7 @@
 - **Token:** yvWBTC-1 (WBTC-1 yVault)
 - **Chain:** Ethereum
 - **Token Address:** [`0x751F0cC6115410A3eE9eC92d08f46Ff6Da98b708`](https://etherscan.io/address/0x751F0cC6115410A3eE9eC92d08f46Ff6Da98b708)
-- **Final Score: 1.5/5.0**
+- **Final Score: 1.3/5.0**
 
 ## Overview + Links
 
@@ -338,7 +338,7 @@ Other monitoring that does cover yvWBTC-1 implicitly via the broader Yearn V3 se
 | Security incidents | None on V3 |
 | Strategy review | Rigorous 12-metric framework with ySec security review (n/a today — no strategy attached) |
 
-**Score: 1.7 / 5** — strong audit coverage, no incidents, but the **youngest vault in the set** (~11.7 months) and the **mostly-undeployed history** mean the operational track record specifically for this vault is materially shorter than for yvUSDC/USDS/DAI/USDT. Score ticked above 1.5 to reflect this.
+**Score: 1.5 / 5** — strong audit coverage, no incidents. The vault is the **youngest in the set** (~11.7 months) and has been **mostly undeployed** — the track record gap reflects shorter time-in-production, not shorter time-at-risk-for-depositors (with no strategy funded, deposited WBTC has never been exposed to a counterparty).
 
 #### Category 2: Centralization & Control Risks (Weight: 30%)
 
@@ -374,11 +374,11 @@ Other monitoring that does cover yvWBTC-1 implicitly via the broader Yearn V3 se
 | Quality | WBTC is the most-liquid wrapped-BTC representation in DeFi |
 | Forward-looking | Any new strategy must clear a 7-day TimelockController proposal before it can hold debt — preserving a re-review window |
 
-**Dependencies Score: 2.0 / 5** — at the snapshot the only material dependency is WBTC itself, which would justify a lower score in isolation. Held conservatively at 2.0 because the empty queue is a transient state — Yearn's stated intent is to operate the vault in production, and any future strategy attachment will reintroduce a venue dependency. Re-evaluate downward only if the empty-queue posture persists meaningfully, or upward against the actual mix once a strategy is attached.
+**Dependencies Score: 1.0 / 5** — at the snapshot the only material dependency is WBTC itself. With **no strategy attached and no funded protocol dependency**, depositors' WBTC sits at the immutable vault contract with zero counterparty surface. Any future strategy attachment must clear a 7-day TimelockController proposal — preserving a re-review window. Re-evaluate upward against the actual mix once a strategy is attached.
 
-**Centralization Score = (1.0 + 1.0 + 2.0) / 3 ≈ 1.3**
+**Centralization Score = (1.0 + 1.0 + 1.0) / 3 = 1.0**
 
-**Score: 1.3 / 5**
+**Score: 1.0 / 5**
 
 #### Category 3: Funds Management (Weight: 30%)
 
@@ -438,14 +438,14 @@ Other monitoring that does cover yvWBTC-1 implicitly via the broader Yearn V3 se
 
 | Category | Score | Weight | Weighted |
 |----------|------:|-------:|---------:|
-| Audits & Historical | 1.7 | 20% | 0.340 |
-| Centralization & Control | 1.3 | 30% | 0.390 |
+| Audits & Historical | 1.5 | 20% | 0.300 |
+| Centralization & Control | 1.0 | 30% | 0.300 |
 | Funds Management | 1.3 | 30% | 0.390 |
 | Liquidity Risk | 1.0 | 15% | 0.150 |
 | Operational Risk | 1.5 | 5% | 0.075 |
-| **Final Score** | | | **1.345 → 1.5 / 5.0** |
+| **Final Score** | | | **1.215 → 1.3 / 5.0** |
 
-Rounded conservatively to 1.5 to reflect the youngest-vault status, single-venue queued strategy, oversized deposit cap, and missing monitoring entry — collectively a step above the score-1.3 yvUSDT-1 / yvDAI-1 / yvUSDS-1 reports despite a structurally similar governance and idle-posture story.
+Rounded to 1.3 to reflect the **lowest risk surface of the six mainnet risk-1 vaults**: with no strategy attached, depositors' WBTC has zero counterparty exposure beyond the immutable vault contract and the WBTC token itself. The youngest-vault status, oversized deposit cap, and missing monitoring entry are operational-hygiene issues but do not put deposited funds at risk.
 
 ### Risk Tier
 
@@ -457,7 +457,7 @@ Rounded conservatively to 1.5 to reflect the youngest-vault status, single-venue
 | 3.5–4.5 | Elevated Risk | Limited approval, strict limits |
 | 4.5–5.0 | High Risk | Not recommended |
 
-**Final Risk Tier: Minimal / Low boundary (1.5 / 5.0) — Approved, high confidence**
+**Final Risk Tier: Minimal Risk (1.3 / 5.0) — Approved, high confidence**
 
 ---
 
