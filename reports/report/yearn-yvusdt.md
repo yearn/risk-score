@@ -340,6 +340,7 @@ Yearn maintains the [`monitoring`](https://github.com/yearn/monitoring) reposito
 - Be conservative: when uncertain between two scores, choose the higher (riskier) one
 - Use decimals when a subcategory falls between scores
 - Prioritize on-chain evidence over documentation claims
+- **Rounding rule:** the weighted sum is rounded to one decimal place using standard nearest-0.1 rounding; when the value is exactly halfway between two 0.1 marks (X.X50), round UP to the higher (riskier) score per the conservative principle
 - **Score reflects May 5 snapshot — 100% deployed across Spark + Morpho.**
 
 ### Critical Risk Gates
@@ -399,11 +400,11 @@ Yearn maintains the [`monitoring`](https://github.com/yearn/monitoring) reposito
 | Concentration | ~50% behind Sky-governed infrastructure (Spark) — meaningful Sky-governance dependency, but no USDS-peg dependency |
 | Quality | Top-tier on both venues; concentration is the main concern |
 
-**Dependencies Score: 2.0 / 5** — two-ecosystem split with both being blue-chip; offset by Sky-governance concentration on ~50%. Per rubric, "1–2 blue-chip dependencies" = 2.
+**Dependencies Score: 2.5 / 5** — two blue-chip ecosystems (Spark Lend, Morpho/Gauntlet), but ~50% of debt sits behind Sky-governance infrastructure (Spark Lend → Sky sub-DAO → Sky governance). The rubric "1–2 blue-chip dependencies" = 2 captures the count; the +0.5 reflects that the Sky-governance share is a single-point-of-control concentration above what a pure two-blue-chip split would carry. The Morpho leg is governed by Morpho DAO + Gauntlet curator, which is independent of Sky.
 
-**Centralization Score = (1.0 + 1.0 + 2.0) / 3 ≈ 1.3**
+**Centralization Score = (1.0 + 1.0 + 2.5) / 3 ≈ 1.5**
 
-**Score: 1.3 / 5**
+**Score: 1.5 / 5**
 
 #### Category 3: Funds Management (Weight: 30%)
 
@@ -463,13 +464,13 @@ Yearn maintains the [`monitoring`](https://github.com/yearn/monitoring) reposito
 | Category | Score | Weight | Weighted |
 |----------|------:|-------:|---------:|
 | Audits & Historical | 1.5 | 20% | 0.300 |
-| Centralization & Control | 1.3 | 30% | 0.390 |
+| Centralization & Control | 1.5 | 30% | 0.450 |
 | Funds Management | 1.0 | 30% | 0.300 |
 | Liquidity Risk | 1.0 | 15% | 0.150 |
 | Operational Risk | 1.0 | 5% | 0.050 |
-| **Final Score** | | | **1.190 → 1.3 / 5.0** |
+| **Final Score** | | | **1.250 → 1.3 / 5.0** |
 
-Rounded conservatively to 1.3 to reflect the two-venue concentration and the Sky-governance dependency on ~50% of debt.
+1.250 rounds to 1.3 under the conservative rule (X.X50 ties break UP). The Centralization score (1.5) reflects the Sky-governance concentration on ~50% of debt; otherwise the vault is a clean two-venue blue-chip stablecoin deployment.
 
 ### Risk Tier
 

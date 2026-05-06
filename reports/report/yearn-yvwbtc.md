@@ -4,7 +4,7 @@
 - **Token:** yvWBTC-1 (WBTC-1 yVault)
 - **Chain:** Ethereum
 - **Token Address:** [`0x751F0cC6115410A3eE9eC92d08f46Ff6Da98b708`](https://etherscan.io/address/0x751F0cC6115410A3eE9eC92d08f46Ff6Da98b708)
-- **Final Score: 1.3/5.0**
+- **Final Score: 1.2/5.0**
 
 ## Overview + Links
 
@@ -96,11 +96,9 @@ Adding any new strategy now requires a fresh `addNewStrategy()` proposal through
 
 The **v3.0.4 patch release** (used by yvWBTC-1) was reviewed **internally** by the Yearn team rather than re-engaging external auditors. The diff from v3.0.2 is a minor patch-level change; the external audits cover the core architecture. Source: [yearn-vaults-v3 GitHub releases](https://github.com/yearn/yearn-vaults-v3/releases).
 
-### Underlying Protocol Audits (queued strategy)
+### Underlying Protocol Audits
 
-| Underlying | Audits | Notes |
-|------------|--------|-------|
-| **Aave V3 (WBTC lender)** | Multiple audits (SigmaPrime, Certora, OpenZeppelin, Trail of Bits, ABDK) | Blue-chip, $30B+ TVL |
+No active underlying protocol dependency at the May 5, 2026 snapshot — the only previously-attached strategy (Aave V3 WBTC Lender) was revoked between the April 27 and May 5 snapshots and there are no strategies currently in the queue. Underlying-protocol audits will become applicable when a new strategy is added; this section will be reassessed at that point. The historical Aave V3 attachment is documented in the Historical Track Record below.
 
 ### Strategy Review Process
 
@@ -110,7 +108,7 @@ All strategies pass through Yearn's **12-metric risk-scoring framework** ([RISK_
 
 - **Yearn (Immunefi):** active, **$200,000** max payout (Critical). https://immunefi.com/bounty/yearnfinance/
 - **Yearn (Sherlock):** also listed at https://audits.sherlock.xyz/bug-bounties/30
-- **Aave** has an active bug bounty program
+- **Underlying-protocol bug bounties:** N/A at this snapshot — no underlying protocol is integrated. When a strategy is added, the underlying protocol's bounty coverage will be evaluated at that point
 - **Safe Harbor (SEAL):** Yearn is **not** listed on the SEAL Safe Harbor registry
 
 ### On-Chain Complexity
@@ -315,6 +313,7 @@ Other monitoring that does cover yvWBTC-1 implicitly via the broader Yearn V3 se
 - Be conservative: when uncertain between two scores, choose the higher (riskier) one
 - Use decimals when a subcategory falls between scores
 - Prioritize on-chain evidence over documentation claims
+- **Rounding rule:** the weighted sum is rounded to one decimal place using standard nearest-0.1 rounding; when the value is exactly halfway between two 0.1 marks (X.X50), round UP to the higher (riskier) score per the conservative principle
 - **Score reflects current snapshot state (100% idle).** Reassess when funds re-deploy.
 
 ### Critical Risk Gates
@@ -406,7 +405,7 @@ Other monitoring that does cover yvWBTC-1 implicitly via the broader Yearn V3 se
 
 **Funds Management Score = (1.5 + 1.0) / 2 = 1.25**
 
-**Score: 1.3 / 5**
+**Score: 1.25 / 5**
 
 #### Category 4: Liquidity Risk (Weight: 15%)
 
@@ -440,12 +439,12 @@ Other monitoring that does cover yvWBTC-1 implicitly via the broader Yearn V3 se
 |----------|------:|-------:|---------:|
 | Audits & Historical | 1.5 | 20% | 0.300 |
 | Centralization & Control | 1.0 | 30% | 0.300 |
-| Funds Management | 1.3 | 30% | 0.390 |
+| Funds Management | 1.25 | 30% | 0.375 |
 | Liquidity Risk | 1.0 | 15% | 0.150 |
 | Operational Risk | 1.5 | 5% | 0.075 |
-| **Final Score** | | | **1.215 → 1.3 / 5.0** |
+| **Final Score** | | | **1.200 → 1.2 / 5.0** |
 
-Rounded to 1.3 to reflect the **lowest risk surface of the six mainnet risk-1 vaults**: with no strategy attached, depositors' WBTC has zero counterparty exposure beyond the immutable vault contract and the WBTC token itself. The youngest-vault status, oversized deposit cap, and missing monitoring entry are operational-hygiene issues but do not put deposited funds at risk.
+1.200 rounds to 1.2 under the standard nearest-0.1 rule. This is the **lowest risk surface of the six mainnet risk-1 vaults**: with no strategy attached, depositors' WBTC has zero counterparty exposure beyond the immutable vault contract and the WBTC token itself. The youngest-vault status, oversized deposit cap, and missing monitoring entry are operational-hygiene issues but do not put deposited funds at risk.
 
 ### Risk Tier
 
@@ -457,7 +456,7 @@ Rounded to 1.3 to reflect the **lowest risk surface of the six mainnet risk-1 va
 | 3.5–4.5 | Elevated Risk | Limited approval, strict limits |
 | 4.5–5.0 | High Risk | Not recommended |
 
-**Final Risk Tier: Minimal Risk (1.3 / 5.0) — Approved, high confidence**
+**Final Risk Tier: Minimal Risk (1.2 / 5.0) — Approved, high confidence**
 
 ---
 
