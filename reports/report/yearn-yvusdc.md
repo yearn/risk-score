@@ -1,6 +1,6 @@
 # Protocol Risk Assessment: Yearn — yvUSDC-1
 
-- **Assessment Date:** May 5, 2026
+- **Assessment Date:** May 11, 2026
 - **Token:** yvUSDC-1 (USDC-1 yVault)
 - **Chain:** Ethereum
 - **Token Address:** [`0xBe53A109B494E5c9f97b9Cd39Fe969BE68BF6204`](https://etherscan.io/address/0xBe53A109B494E5c9f97b9Cd39Fe969BE68BF6204)
@@ -8,34 +8,33 @@
 
 ## Overview + Links
 
-yvUSDC-1 is a **USDC-denominated Yearn V3 vault** (ERC-4626) that deploys deposited USDC into yield strategies on Ethereum mainnet. The vault holds **~$28.07M USDC** and is **100% deployed** at the snapshot (`totalIdle = 0`, `totalDebt = totalAssets`). The default queue holds **four strategies** with **two funded**: USDC to sUSDS Lender (~97.6%) and Spark USDC Lender (~2.4%). The recently-activated Morpho Yearn USDC Compounder (added 2026-04-30) and the USDC to USDS Depositor are queued at 0 debt.
+yvUSDC-1 is a **USDC-denominated Yearn V3 vault** (ERC-4626) that deploys deposited USDC into yield strategies on Ethereum mainnet. The vault holds **~$29.84M USDC** and is **100% deployed** at the snapshot (`totalIdle ≈ 0`, `totalDebt = totalAssets`). The default queue holds **three strategies** with **two funded**: USDC to sUSDS Lender (~97.2%) and Spark USDC Lender (~2.9%). The USDC to USDS Depositor remains queued at 0 debt.
 
-The three Morpho USDC compounders that were active at the prior April 3 assessment (Gauntlet, Steakhouse, OEV-boosted) have all been **revoked** at the May 5 snapshot (`activation = 0`). Funded debt has consolidated into a single Sky-governed venue (sUSDS via the sUSDS Lender) plus a small Spark Lend slice — both Sky / Sky sub-DAO infrastructure. The vault is therefore **~100% Sky-governance-coupled** at this snapshot, a material concentration shift versus the prior 41% Sky / 59% Morpho split.
+The three Morpho USDC compounders that were active at the prior April 3 assessment (Gauntlet, Steakhouse, OEV-boosted) remain **revoked** at the May 11 snapshot (`activation = 0`). The Morpho Yearn USDC Compounder that was added on 2026-04-30 and queued at 0 debt at the May 5 snapshot has **also been revoked** between snapshots (`activation = 0` at block 25073237). Funded debt continues to sit in a single Sky-governed venue (sUSDS via the sUSDS Lender) plus a small Spark Lend slice — both Sky / Sky sub-DAO infrastructure. The vault remains **~100% Sky-governance-coupled** at this snapshot.
 
 **Key architecture:**
 
 - **Vault:** Standard Yearn V3 vault (v3.0.2) accepting USDC deposits, issuing yvUSDC-1 shares. Deployed as an immutable Vyper minimal proxy (EIP-1167) via the Yearn V3 Vault Factory
-- **Strategy pipelines:** sUSDS Lender path: USDC → DAI (via MakerDAO PSM Lite at 1:1, 0 fee) → USDS (via DAI-USDS Exchanger at 1:1) → sUSDS (Sky Savings vault). Spark USDC Lender: direct USDC supply to Spark Lend's USDC market (Spark is a Sky sub-DAO). Morpho Yearn USDC Compounder (queued, 0 debt today): would deposit USDC directly into a Morpho lending vault
+- **Strategy pipelines:** sUSDS Lender path: USDC → DAI (via MakerDAO PSM Lite at 1:1, 0 fee) → USDS (via DAI-USDS Exchanger at 1:1) → sUSDS (Sky Savings vault). Spark USDC Lender: direct USDC supply to Spark Lend's USDC market (Spark is a Sky sub-DAO). USDC to USDS Depositor (queued, 0 debt today): would deposit USDC-converted USDS into yvUSDS-1
 - **Governance:** Managed via the standard **Yearn V3 Role Manager** contract, governed by the **Yearn 6-of-9 global multisig (ySafe)** with **7-day TimelockController** for strategy additions
-- **Default queue:** 4 strategies (sUSDS Lender funded, Spark Lender funded, USDS Depositor and Morpho Yearn Compounder queued at 0 debt). Legacy Morpho Gauntlet / Steakhouse / OEV strategies and three other lenders (Fluid, Aave V3, Aave V3 Lido) revoked at prior cleanups
+- **Default queue:** 3 strategies (sUSDS Lender funded, Spark Lender funded, USDS Depositor queued at 0 debt). Legacy Morpho Gauntlet / Steakhouse / OEV strategies and three other lenders (Fluid, Aave V3, Aave V3 Lido) revoked at prior cleanups. The Morpho Yearn USDC Compounder added on 2026-04-30 has been revoked between May 5 and May 11
 
-**Key metrics (May 5, 2026, snapshot at block 25031569):**
+**Key metrics (May 11, 2026, snapshot at block 25073237):**
 
-- **TVL:** 28,067,648.67 USDC (100% deployed)
-- **Total Supply:** 25,400,443.80 yvUSDC-1
-- **Price Per Share:** 1.105006 USDC/yvUSDC-1 (~10.5% cumulative appreciation since deployment)
-- **Total Debt:** 28,067,648.67 USDC (100% of TVL)
-- **Total Idle:** 0
+- **TVL:** 29,839,559.89 USDC (100% deployed)
+- **Total Supply:** 26,990,466.72 yvUSDC-1
+- **Price Per Share:** 1.105559 USDC/yvUSDC-1 (~10.6% cumulative appreciation since deployment)
+- **Total Debt:** 29,839,559.89 USDC (100% of TVL)
+- **Total Idle:** ~0 USDC (0.000001 dust)
 - **Debt distribution:**
-  - USDC to sUSDS Lender: 27,402,546.99 USDC (**97.63%**)
-  - Spark USDC Lender: 665,101.68 USDC (**2.37%**)
+  - USDC to sUSDS Lender: 28,988,516.09 USDC (**97.15%**)
+  - Spark USDC Lender: 851,043.79 USDC (**2.85%**)
   - USDC to USDS Depositor: 0 (queued, unfunded)
-  - Morpho Yearn USDC Compounder: 0 (queued, activated 2026-04-30, unfunded)
 - **Deposit Limit:** 50,000,000 USDC
 - **Profit Max Unlock Time:** 10 days
 - **Fees:** 0% management fee, 10% performance fee
 
-**Sky-governance concentration note:** Both funded strategies (sUSDS Lender ~98% and Spark USDC Lender ~2%) sit under Sky / Sky sub-DAO governance. Effective Sky-governance exposure is **~100%** of debt at this snapshot. This is a meaningful concentration risk and is captured in the dependency subscore below.
+**Sky-governance concentration note:** Both funded strategies (sUSDS Lender ~97% and Spark USDC Lender ~3%) sit under Sky / Sky sub-DAO governance. Effective Sky-governance exposure is **~100%** of debt at this snapshot. This is a meaningful concentration risk and is captured in the dependency subscore below.
 
 **Links:**
 
@@ -76,36 +75,35 @@ The three Morpho USDC compounders that were active at the prior April 3 assessme
 | Vault Factory (v3.0.2) | [`0x444045c5c13c246e117ed36437303cac8e250ab0`](https://etherscan.io/address/0x444045c5c13c246e117ed36437303cac8e250ab0) |
 | Tokenized Strategy | [`0xD377919FA87120584B21279a491F82D5265A139c`](https://etherscan.io/address/0xD377919FA87120584B21279a491F82D5265A139c) |
 
-### Active Strategies (4 in default queue, 2 with debt)
+### Active Strategies (3 in default queue, 2 with debt)
 
 | # | Strategy | Name | Current Debt (USDC) | Allocation |
 |---|----------|------|--------------------:|-----------:|
 | 1 | [`0x39c0aEc5738ED939876245224aFc7E09C8480a52`](https://etherscan.io/address/0x39c0aEc5738ED939876245224aFc7E09C8480a52) | USDC to USDS Depositor | 0 | 0% |
-| 2 | [`0x25f893276544d86a82b1ce407182836F45cb6673`](https://etherscan.io/address/0x25f893276544d86a82b1ce407182836F45cb6673) | **Spark USDC Lender** | **665,101.68** | **2.37%** |
-| 3 | [`0x7130570BCEfCedBe9d15B5b11A33006156460f8f`](https://etherscan.io/address/0x7130570BCEfCedBe9d15B5b11A33006156460f8f) | **USDC to sUSDS Lender** | **27,402,546.99** | **97.63%** |
-| 4 | [`0xf1784A1bF0cBDE0F868838Dd093E65215343c4C0`](https://etherscan.io/address/0xf1784A1bF0cBDE0F868838Dd093E65215343c4C0) | Morpho Yearn USDC Compounder | 0 | 0% |
+| 2 | [`0x25f893276544d86a82b1ce407182836F45cb6673`](https://etherscan.io/address/0x25f893276544d86a82b1ce407182836F45cb6673) | **Spark USDC Lender** | **851,043.79** | **2.85%** |
+| 3 | [`0x7130570BCEfCedBe9d15B5b11A33006156460f8f`](https://etherscan.io/address/0x7130570BCEfCedBe9d15B5b11A33006156460f8f) | **USDC to sUSDS Lender** | **28,988,516.09** | **97.15%** |
 
-**Previously queued, now revoked (`activation = 0` at block 25031569):**
+**Previously queued, now revoked (`activation = 0` at block 25073237):**
 
 - Morpho Gauntlet USDC Prime Compounder ([`0x694E47AFD14A64661a04eee674FB331bCDEF3737`](https://etherscan.io/address/0x694E47AFD14A64661a04eee674FB331bCDEF3737))
 - Morpho Steakhouse USDC Compounder ([`0x074134A2784F4F66b6ceD6f68849382990Ff3215`](https://etherscan.io/address/0x074134A2784F4F66b6ceD6f68849382990Ff3215))
 - Morpho OEV-boosted USDC Compounder ([`0x888239Ffa9a0613F9142C808aA9F7d1948a14f75`](https://etherscan.io/address/0x888239Ffa9a0613F9142C808aA9F7d1948a14f75))
+- Morpho Yearn USDC Compounder ([`0xf1784A1bF0cBDE0F868838Dd093E65215343c4C0`](https://etherscan.io/address/0xf1784A1bF0cBDE0F868838Dd093E65215343c4C0)) — added 2026-04-30, queued at 0 debt at the May 5 snapshot, **revoked between May 5 and May 11** (`activation = 0`)
 - USDC Fluid Lender ([`0x00C8a649C9837523ebb406Ceb17a6378Ab5C74cF`](https://etherscan.io/address/0x00C8a649C9837523ebb406Ceb17a6378Ab5C74cF))
 - Aave V3 Lido USDC Lender ([`0x522478B54046aB7197880F2626b74a96d45B9B02`](https://etherscan.io/address/0x522478B54046aB7197880F2626b74a96d45B9B02))
 - Aave V3 USDC Lender ([`0x694cdD19EBee7A974BA8fE3AF8B383bb256F2858`](https://etherscan.io/address/0x694cdD19EBee7A974BA8fE3AF8B383bb256F2858))
 
-**Note:** Significant queue reshape since the prior April 3 assessment. The three Morpho compounders that previously held ~59% of debt (Gauntlet, Steakhouse, OEV) have all been **revoked**. Funded debt has been **consolidated into a single Sky-governed venue** (sUSDS Lender ~98%) plus a small residual Spark Lend slice (~2%). A single new Morpho strategy — Morpho Yearn USDC Compounder — was added 2026-04-30 but is queued at 0 debt at the snapshot. Active portfolio management continues; the vault has used Aave V3, Compound V3, Morpho, Spark, Fluid, and Sky strategies over its ~14-month lifetime.
+**Note:** The Morpho Yearn USDC Compounder added on 2026-04-30 — which had been queued at 0 debt at the May 5 snapshot as a potential non-Sky re-diversification leg — has been **revoked between May 5 and May 11**. The queue is now down to 3 strategies (from 4), all Sky / Sky sub-DAO. Funded debt remains **consolidated into a single Sky-governed venue** (sUSDS Lender ~97%) plus a small Spark Lend slice (~3%). Active portfolio management continues; the vault has used Aave V3, Compound V3, Morpho, Spark, Fluid, and Sky strategies over its ~14-month lifetime.
 
-**Score impact of recent rebalancing:** The vault is now **~100% Sky-governance-coupled** (98% sUSDS Lender + 2% Spark Lender, both Sky / Sky sub-DAO). This is materially more concentrated than the prior 41% Sky / 59% Morpho split and is reflected in the Centralization → Dependencies subscore below.
+**Score impact of recent rebalancing:** The vault remains **~100% Sky-governance-coupled** (97% sUSDS Lender + 3% Spark Lender, both Sky / Sky sub-DAO). With the Morpho Yearn USDC Compounder now revoked, the optional non-Sky re-diversification leg that existed at May 5 has been removed. This is reflected in the Centralization → Dependencies subscore below.
 
 ### Strategy Protocol Dependencies (current allocation)
 
 | Protocol | Strategy | Allocation | Notes |
 |----------|----------|-----------:|-------|
-| **Sky / sUSDS** | USDC to sUSDS Lender | **97.63%** | Sky Savings Rate via sUSDS — Sky-governed |
-| **Spark Lend (Sky sub-DAO)** | Spark USDC Lender | **2.37%** | Sky sub-DAO; Spark admin keys live under Sky governance |
+| **Sky / sUSDS** | USDC to sUSDS Lender | **97.15%** | Sky Savings Rate via sUSDS — Sky-governed |
+| **Spark Lend (Sky sub-DAO)** | Spark USDC Lender | **2.85%** | Sky sub-DAO; Spark admin keys live under Sky governance |
 | Sky (yvUSDS via Depositor) | USDC to USDS Depositor | 0% (queued) | Previously the dominant strategy; currently unfunded |
-| Morpho | Morpho Yearn USDC Compounder | 0% (queued, activated 2026-04-30) | Direct USDC into Morpho |
 
 ## Audits and Due Diligence Disclosures
 
@@ -155,7 +153,7 @@ All strategies go through Yearn's formal **12-metric risk scoring framework** ([
 
 The yvUSDC-1 system is **low complexity**:
 
-- **2 funded strategies** on a single chain (Ethereum), both Sky-governed: sUSDS Lender (~98%) and Spark USDC Lender (~2%)
+- **2 funded strategies** on a single chain (Ethereum), both Sky-governed: sUSDS Lender (~97%) and Spark USDC Lender (~3%)
 - **Simple pipelines:** sUSDS Lender: USDC → DAI → USDS → sUSDS (three 1:1 conversions + deposit). Spark USDC Lender: direct USDC supply to Spark Lend's USDC market
 - **No leverage, no looping, no cross-chain bridging**
 - **Standard ERC-4626** deposit/withdrawal
@@ -165,25 +163,25 @@ The yvUSDC-1 system is **low complexity**:
 ## Historical Track Record
 
 - **Vault deployed:** March 12, 2024 (block 19,419,991) — **~14 months** in production
-- **TVL:** 28,067,648.67 USDC (~$28.07M) — well within the $50M deposit limit
-- **PPS trend:** 1.000000 → 1.105006 (~10.5% cumulative return, ~8.8% annualized)
+- **TVL:** 29,839,559.89 USDC (~$29.84M) — well within the $50M deposit limit
+- **PPS trend:** 1.000000 → 1.105559 (~10.6% cumulative return, ~8.8% annualized)
 - **Security incidents:** None known for this vault or Yearn V3 generally
-- **Strategy changes:** active portfolio management. The vault has used Aave V3, Compound V3, Morpho, Spark, Fluid, and Sky strategies over its lifetime. Between the April 3 and May 5 snapshots: three Morpho compounders (Gauntlet, Steakhouse, OEV-boosted) **revoked**; Morpho Yearn USDC Compounder **added** 2026-04-30 (queued at 0 debt); funded debt consolidated into the sUSDS Lender + Spark
-- **Current allocation:** ~98% USDC to sUSDS Lender (Sky-governed) and ~2% Spark USDC Lender (Sky sub-DAO) — effectively single-ecosystem (Sky) at the snapshot
+- **Strategy changes:** active portfolio management. The vault has used Aave V3, Compound V3, Morpho, Spark, Fluid, and Sky strategies over its lifetime. Between the April 3 and May 5 snapshots: three Morpho compounders (Gauntlet, Steakhouse, OEV-boosted) **revoked**; Morpho Yearn USDC Compounder **added** 2026-04-30 (queued at 0 debt); funded debt consolidated into the sUSDS Lender + Spark. Between May 5 and May 11: the Morpho Yearn USDC Compounder was **revoked** (queue trimmed from 4 → 3)
+- **Current allocation:** ~97% USDC to sUSDS Lender (Sky-governed) and ~3% Spark USDC Lender (Sky sub-DAO) — effectively single-ecosystem (Sky) at the snapshot
 - **Yearn V3 track record:** V3 framework has been live since May 2024 (~24 months). No V3 vault exploits
 
 **Yearn protocol TVL:** ~$197.5M total across all chains ([DeFiLlama](https://defillama.com/protocol/yearn), April 2026).
 
 **Sky/sUSDS track record:**
 - sUSDS launched as part of Sky Endgame (2024)
-- TVL: ~$6.18B USDS deposited (~$10B+ including all sUSDS)
+- TVL: ~$5.38B+ in sUSDS (within ~$10B+ total USDS ecosystem)
 - No security incidents since launch
 - Sky Savings Rate (SSR): currently ~4.0% APY, set by Sky Governance
 - Revenue sourced from over-collateralized loans and tokenized Treasury bill (RWA) investments
 
 ## Funds Management
 
-yvUSDC-1 deploys deposited USDC into yield strategies with 100% capital utilization. At the May 5 snapshot debt is concentrated in **two Sky-governed strategies**: USDC to sUSDS Lender (~98%) and Spark USDC Lender (~2%). Two further strategies sit in the queue at 0 debt: USDC to USDS Depositor and the recently-added Morpho Yearn USDC Compounder.
+yvUSDC-1 deploys deposited USDC into yield strategies with 100% capital utilization. At the May 11 snapshot debt is concentrated in **two Sky-governed strategies**: USDC to sUSDS Lender (~97%) and Spark USDC Lender (~3%). One further strategy sits in the queue at 0 debt: USDC to USDS Depositor.
 
 ### Strategy 1: USDC to USDS Depositor (0% — queued, unfunded)
 
@@ -203,7 +201,7 @@ yvUSDC-1 deploys deposited USDC into yield strategies with 100% capital utilizat
 - Management: Brain multisig (3-of-8)
 - Keeper: yHaaSRelayer ([`0x604e586F17cE106B64185A7a0d2c1Da5bAce711E`](https://etherscan.io/address/0x604e586F17cE106B64185A7a0d2c1Da5bAce711E))
 
-### Strategy 2: USDC to sUSDS Lender (~97.6% allocation)
+### Strategy 2: USDC to sUSDS Lender (~97.2% allocation)
 
 **Contract:** [`0x7130570BCEfCedBe9d15B5b11A33006156460f8f`](https://etherscan.io/address/0x7130570BCEfCedBe9d15B5b11A33006156460f8f)
 
@@ -217,7 +215,7 @@ yvUSDC-1 deploys deposited USDC into yield strategies with 100% capital utilizat
 
 **Strategy parameters:** Same as USDS Depositor (100M deposit limit, 0.05% max PSM fee, Brain multisig management)
 
-### Strategy 3: Spark USDC Lender (~2.4% allocation)
+### Strategy 3: Spark USDC Lender (~2.9% allocation)
 
 **Contract:** [`0x25f893276544d86a82b1ce407182836F45cb6673`](https://etherscan.io/address/0x25f893276544d86a82b1ce407182836F45cb6673)
 
@@ -225,28 +223,20 @@ yvUSDC-1 deploys deposited USDC into yield strategies with 100% capital utilizat
 
 **Strategy parameters:** Brain multisig management, keeper-driven reporting, ERC-4626 throughout.
 
-### Strategy 4: Morpho Yearn USDC Compounder (queued, 0 debt)
-
-**Contract:** [`0xf1784A1bF0cBDE0F868838Dd093E65215343c4C0`](https://etherscan.io/address/0xf1784A1bF0cBDE0F868838Dd093E65215343c4C0)
-
-**Status:** Activated 2026-04-30, queued at 0 debt at the May 5 snapshot. When funded, this strategy would deposit USDC directly into a Morpho lending vault (no conversion hops). Adding this strategy provides a non-Sky route should the team choose to re-diversify away from the current ~100% Sky concentration.
-
-**Morpho risk profile:** Morpho is a blue-chip lending protocol with $6.6B+ TVL, 25+ audits (Trail of Bits, Spearbit, OpenZeppelin, ChainSecurity, Certora), and formal verification.
-
 ### Revoked strategies (historical context)
 
-Three Morpho compounders that were active at the prior April 3 assessment have been **revoked** between snapshots: Morpho Gauntlet USDC Prime Compounder, Morpho Steakhouse USDC Compounder, and Morpho OEV-boosted USDC Compounder. All three show `activation = 0` at block 25031569. The cleanup also removed USDC Fluid Lender, Aave V3 Lido USDC Lender, and Aave V3 USDC Lender from the queue (also `activation = 0`). Per the broader cleanup pattern observed across the Yearn V3 risk-1 vaults in late April, the team has been pruning the queue and consolidating debt. Independent attribution of the rationale has not been verified.
+Three Morpho compounders that were active at the prior April 3 assessment have been **revoked** between snapshots: Morpho Gauntlet USDC Prime Compounder, Morpho Steakhouse USDC Compounder, and Morpho OEV-boosted USDC Compounder. The Morpho Yearn USDC Compounder ([`0xf1784A1bF0cBDE0F868838Dd093E65215343c4C0`](https://etherscan.io/address/0xf1784A1bF0cBDE0F868838Dd093E65215343c4C0)) — added on 2026-04-30 and queued at 0 debt at the May 5 snapshot as a potential non-Sky re-diversification leg — has also been **revoked between May 5 and May 11** (`activation = 0` at block 25073237). All four show `activation = 0` at block 25073237. The cleanup also removed USDC Fluid Lender, Aave V3 Lido USDC Lender, and Aave V3 USDC Lender from the queue (also `activation = 0`). Per the broader cleanup pattern observed across the Yearn V3 risk-1 vaults in late April / early May, the team has been pruning the queue and consolidating debt. Independent attribution of the rationale has not been verified.
 
 ### Accessibility
 
 - **Deposits:** Permissionless — anyone can deposit USDC and receive yvUSDC-1 (ERC-4626 standard). Subject to $50M deposit limit
-- **Withdrawals:** ERC-4626 standard. Users redeem yvUSDC-1 for USDC. For Sky strategies: unwinds sUSDS → USDS → DAI → USDC pipeline. For Morpho strategies: direct withdrawal from lending vaults. Both paths are highly liquid
+- **Withdrawals:** ERC-4626 standard. Users redeem yvUSDC-1 for USDC. For the sUSDS Lender: unwinds sUSDS → USDS → DAI → USDC pipeline. For Spark Lender: direct withdrawal from Spark Lend's USDC market. Both paths are highly liquid
 - **No cooldown or lock period** — unlike yvUSD's LockedyvUSD wrapper
 - **Fees:** 0% management fee, 10% performance fee (taken via accountant during `process_report`)
 
 ### Collateralization
 
-- **100% onchain USDC backing** — all deposits are USDC, deployed into Sky-governed lending venues (sUSDS Lender ~98% and Spark USDC Lender ~2%)
+- **100% onchain USDC backing** — all deposits are USDC, deployed into Sky-governed lending venues (sUSDS Lender ~97% and Spark USDC Lender ~3%)
 - **Collateral quality:** sUSDS is backed by over-collateralized loans and RWA (Treasury bills) via MakerDAO. Spark USDC Lender supplies into Spark Lend's USDC market (Sky sub-DAO infrastructure)
 - **No leverage** — unlike yvUSD's looper strategies, these are simple deposits into savings rate and lending products
 - **All positions are fully redeemable** — sUSDS and Spark vaults support standard ERC-4626 / aToken withdrawal. USDS converts 1:1 to DAI via the Exchanger
@@ -260,13 +250,13 @@ Three Morpho compounders that were active at the prior April 3 assessment have b
 
 ## Liquidity Risk
 
-- **Primary exit:** Redeem yvUSDC-1 for USDC via ERC-4626 `withdraw()`/`redeem()`. Triggers reverse pipeline through sUSDS → USDS → DAI → USDC (~98% of debt) or direct Spark Lend withdrawal (~2%)
-- **Highly liquid underlying:** sUSDS holds multi-billion-dollar USDS reserves; Spark Lend's USDC market also has deep lending liquidity. The vault's ~$28M is a small fraction of underlying pool capacity
+- **Primary exit:** Redeem yvUSDC-1 for USDC via ERC-4626 `withdraw()`/`redeem()`. Triggers reverse pipeline through sUSDS → USDS → DAI → USDC (~97% of debt) or direct Spark Lend withdrawal (~3%)
+- **Highly liquid underlying:** sUSDS holds multi-billion-dollar USDS reserves; Spark Lend's USDC market also has deep lending liquidity. The vault's ~$29.84M is a small fraction of underlying pool capacity
 - **PSM liquidity:** The MakerDAO PSM Lite provides deep DAI ↔ USDC liquidity at 0% fee. PSM capacity is managed by Sky Governance and typically holds billions of USDC
 - **No DEX liquidity needed** in the base case — exit is via the protocol's own pipeline (PSM + Exchanger), not DEX AMMs. Uniswap V3 fallback applies only if PSM fees rise above 0.05%
 - **Same-value asset:** USDC-denominated vault token — no price divergence risk from the underlying
 - **No withdrawal queue or cooldown** — atomic redemption through the pipeline
-- **Deposit limit:** $50M cap — generous relative to current TVL of $28.07M
+- **Deposit limit:** $50M cap — generous relative to current TVL of $29.84M
 
 ## Centralization & Control Risks
 
@@ -305,14 +295,13 @@ The yvUSDC-1 vault uses the **standard Yearn V3 governance pattern** via the Yea
 
 | Dependency | Criticality | Notes |
 |-----------|-------------|-------|
-| **Sky / sUSDS** | Critical | ~98% of current allocation via the sUSDS Lender. Multi-billion-dollar sUSDS TVL. Blue-chip, extensively audited, $10M bug bounty |
-| **Spark Lend (Sky sub-DAO)** | High | ~2% of current allocation via Spark USDC Lender. Spark is a Sky sub-DAO; admin keys live under Sky governance |
+| **Sky / sUSDS** | Critical | ~97% of current allocation via the sUSDS Lender. Multi-billion-dollar sUSDS TVL. Blue-chip, extensively audited, $10M bug bounty |
+| **Spark Lend (Sky sub-DAO)** | High | ~3% of current allocation via Spark USDC Lender. Spark is a Sky sub-DAO; admin keys live under Sky governance |
 | **MakerDAO PSM Lite** | High | USDC ↔ DAI conversion at 1:1 for the sUSDS Lender path. 0% fee. Deep liquidity. Audited by ChainSecurity and Cantina |
 | **Sky DAI-USDS Exchanger** | High | DAI ↔ USDS 1:1 conversion for the sUSDS Lender path. Core Sky infrastructure |
 | **Uniswap V3 (fallback)** | Low | Only used if PSM fee exceeds 0.05%. Currently not active (PSM fee is 0%) |
-| **Morpho** (queued, 0 debt) | N/A at snapshot | Morpho Yearn USDC Compounder activated 2026-04-30, currently unfunded. Would re-introduce a non-Sky leg if funded |
 
-**Dependency quality:** All funded dependencies sit under Sky / Sky sub-DAO governance — effective Sky-governance exposure is **~100%** of debt at this snapshot. Sky itself is top-tier (8+ years of history, $10M bug bounty, multi-billion-dollar sUSDS TVL), but the **single-ecosystem concentration is materially worse** than the prior 41% Sky / 59% Morpho split. The newly-added Morpho Yearn USDC Compounder is queued but unfunded; if and when it is funded, this profile would become two-ecosystem again. This concentration is reflected in the dependency subscore.
+**Dependency quality:** All funded dependencies sit under Sky / Sky sub-DAO governance — effective Sky-governance exposure is **~100%** of debt at this snapshot. Sky itself is top-tier (8+ years of history, $10M bug bounty, multi-billion-dollar sUSDS TVL), but the **single-ecosystem concentration is materially worse** than the prior 41% Sky / 59% Morpho split. The Morpho Yearn USDC Compounder that was queued at the May 5 snapshot has been revoked, eliminating that on-chain re-diversification optionality until a new Morpho strategy is reproposed via the 7-day timelock. This concentration is reflected in the dependency subscore.
 
 ## Operational Risk
 
@@ -321,7 +310,7 @@ The yvUSDC-1 vault uses the **standard Yearn V3 governance pattern** via the Yea
 - **Documentation:** Comprehensive Yearn V3 documentation. Strategy code is verified on Etherscan
 - **Legal:** Yearn Finance has converted its ychad.eth multisig into a BORG (cybernetic organization) via [YIP-87](https://gov.yearn.fi/t/yip-87-convert-ychad-eth-into-a-borg/14540), wrapping it in a Cayman Islands foundation company with smart contract governance restrictions
 - **Incident response:** Yearn has demonstrated incident response capability across 4 historical events (all V1/legacy). V3 framework has not been tested under stress. The $200K Immunefi bug bounty provides a responsible disclosure channel
-- **V3 immutability:** Vault contracts cannot be upgraded — this eliminates proxy upgrade risk but means bugs cannot be patched without deploying a new vault
+- **V3 immutability:** Vault contracts cannot be upgraded — this eliminates proxy upgrade risk
 
 ## Monitoring
 
@@ -340,7 +329,6 @@ Yearn maintains an active monitoring system via the [`monitoring-scripts-py`](ht
 | yvUSDC-1 Vault | [`0xBe53A109B494E5c9f97b9Cd39Fe969BE68BF6204`](https://etherscan.io/address/0xBe53A109B494E5c9f97b9Cd39Fe969BE68BF6204) | PPS (`convertToAssets(1e6)`), `totalAssets()`, `totalDebt()`, `totalIdle()`, Deposit/Withdraw events |
 | USDC to sUSDS Lender | [`0x7130570BCEfCedBe9d15B5b11A33006156460f8f`](https://etherscan.io/address/0x7130570BCEfCedBe9d15B5b11A33006156460f8f) | `totalAssets()`, `current_debt`, `isShutdown()`, keeper report frequency |
 | Spark USDC Lender | [`0x25f893276544d86a82b1ce407182836F45cb6673`](https://etherscan.io/address/0x25f893276544d86a82b1ce407182836F45cb6673) | `totalAssets()`, `current_debt`, `isShutdown()`, keeper report frequency |
-| Morpho Yearn USDC Compounder | [`0xf1784A1bF0cBDE0F868838Dd093E65215343c4C0`](https://etherscan.io/address/0xf1784A1bF0cBDE0F868838Dd093E65215343c4C0) | Activation date / first debt allocation |
 | ySafe (Daddy) | [`0xFEB4acf3df3cDEA7399794D0869ef76A6EfAff52`](https://etherscan.io/address/0xFEB4acf3df3cDEA7399794D0869ef76A6EfAff52) | Signer/threshold changes, submitted transactions |
 | Accountant | [`0x5A74Cb32D36f2f517DB6f7b0A0591e09b22cDE69`](https://etherscan.io/address/0x5A74Cb32D36f2f517DB6f7b0A0591e09b22cDE69) | Fee changes, config updates |
 | Sky Savings Rate | [`0xa3931d71877C0E7a3148CB7Eb4463524FEc27fbD`](https://etherscan.io/address/0xa3931d71877C0E7a3148CB7Eb4463524FEc27fbD) | SSR rate changes, sUSDS TVL |
@@ -372,18 +360,17 @@ Yearn maintains an active monitoring system via the [`monitoring-scripts-py`](ht
 ### Key Strengths
 
 - **Battle-tested Yearn V3 infrastructure:** V3 framework audited by Statemind, ChainSecurity, and yAcademy. No V3 exploits in ~24 months of production. Immutable vault contracts eliminate proxy upgrade risk
-- **Blue-chip Sky exposure:** ~98% of debt is supplied to sUSDS (Sky Savings Rate, multi-billion-dollar TVL, 7+ auditors, $10M Immunefi bounty), with the residual ~2% in Spark Lend (Sky sub-DAO). Sky itself is one of the highest-quality DeFi protocols
+- **Blue-chip Sky exposure:** ~97% of debt is supplied to sUSDS (Sky Savings Rate, multi-billion-dollar TVL, 7+ auditors, $10M Immunefi bounty), with the residual ~3% in Spark Lend (Sky sub-DAO). Sky itself is one of the highest-quality DeFi protocols
 - **Standard Yearn governance:** Uses the Yearn V3 Role Manager with the 6-of-9 ySafe multisig (named, prominent DeFi signers). No EOA role concentration. Strategy additions go through 7-day timelock (self-governed — config changes must also go through 7-day delay)
 - **Simple, low-complexity pipelines:** sUSDS: USDC → DAI → USDS → sUSDS via 1:1 conversions. Spark: direct USDC supply. No leverage, no cross-chain bridging, no looper mechanics
-- **Established track record:** ~14 months in production with ~$28.07M TVL, ~10.5% cumulative return, zero incidents
+- **Established track record:** ~14 months in production with ~$29.84M TVL, ~10.6% cumulative return, zero incidents
 - **Active monitoring:** yvUSDC-1 is in Yearn's hourly monitoring system with Telegram alerts for large flows
 
 ### Key Risks
 
-- **Single-ecosystem concentration:** ~100% Sky-governance-coupled at the May 5 snapshot (98% sUSDS Lender + 2% Spark Lender, both Sky / Sky sub-DAO). This is a meaningful regression from the prior 41% Sky / 59% Morpho profile and is the dominant risk at this snapshot. A Sky governance / sUSDS / Spark Lend incident would affect ~all of yvUSDC-1's debt
+- **Single-ecosystem concentration:** ~100% Sky-governance-coupled at the May 11 snapshot (97% sUSDS Lender + 3% Spark Lender, both Sky / Sky sub-DAO). The Morpho Yearn USDC Compounder that was queued at the May 5 snapshot as a non-Sky re-diversification option has been revoked. A Sky governance / sUSDS / Spark Lend incident would affect ~all of yvUSDC-1's debt
 - **Sky Savings Rate variability:** SSR has been reduced from 15% → 6.5% → 4.5% → 4.0% over the past year. Further reductions would decrease vault yield from the sUSDS strategy but do not affect principal
 - **PSM fee risk:** Currently 0%, but Sky Governance can set fees. If fees exceed 0.05%, the strategy falls back to Uniswap V3 with 0.5% slippage tolerance, which could cause minor losses on large withdrawals
-- **Strategy revocation rationale unverified:** Three Morpho USDC compounders were revoked between snapshots. The rationale (operational vs strategy-specific vs APR-driven) is not independently verifiable on-chain
 
 ### Critical Risks
 
@@ -416,11 +403,11 @@ Yearn maintains an active monitoring system via the [`monitoring-scripts-py`](ht
 | Audits | V3 framework: 3 audits by top firms (Statemind, ChainSecurity, yAcademy). Sky/sUSDS: 7+ auditors (ChainSecurity, Cantina, Sherlock, Trail of Bits, etc.) |
 | Bug bounty | $200K on Immunefi (Yearn); $10M on Sky |
 | Production history | **~14 months** (March 12, 2024). V3 framework: ~24 months |
-| TVL | **~$28.07M** USDC. Deposit limit: $50M |
+| TVL | **~$29.84M** USDC. Deposit limit: $50M |
 | Security incidents | None on V3. None on sUSDS or Spark Lend |
 | Strategy review | Rigorous 12-metric framework with ySec security review |
 
-**Score: 1.5 / 5** — 3+ audits by top firms on the vault infrastructure, plus 7+ auditors on the dominant underlying (Sky / sUSDS / Spark). ~14 months of production history with ~$28.07M TVL and zero incidents. V3 framework has ~24 months of clean track record. High-quality audit coverage on both layers (vault + underlying) warrants a score between 1 and 2.
+**Score: 1.5 / 5** — 3+ audits by top firms on the vault infrastructure, plus 7+ auditors on the dominant underlying (Sky / sUSDS / Spark). ~14 months of production history with ~$29.84M TVL and zero incidents. V3 framework has ~24 months of clean track record. High-quality audit coverage on both layers (vault + underlying) warrants a score between 1 and 2.
 
 #### Category 2: Centralization & Control Risks (Weight: 30%)
 
@@ -451,12 +438,12 @@ Yearn maintains an active monitoring system via the [`monitoring-scripts-py`](ht
 
 | Factor | Assessment |
 |--------|-----------|
-| Protocol count (funded) | 2 funded strategies (sUSDS Lender 97.6%, Spark Lender 2.4%) — both Sky / Sky sub-DAO. 1 additional queued: Morpho Yearn USDC Compounder (0 debt, activated 2026-04-30) |
-| Criticality | Sky / sUSDS: ~98% via sUSDS Lender. Spark Lend (Sky sub-DAO): ~2% |
+| Protocol count (funded) | 2 funded strategies (sUSDS Lender 97.15%, Spark Lender 2.85%) — both Sky / Sky sub-DAO. No non-Sky strategies queued (Morpho Yearn USDC Compounder revoked between May 5 and May 11) |
+| Criticality | Sky / sUSDS: ~97% via sUSDS Lender. Spark Lend (Sky sub-DAO): ~3% |
 | Concentration | **~100% Sky-governance-coupled** at the snapshot — single-ecosystem exposure |
 | Quality | Top-tier on the funded leg (Sky has $10M Immunefi bounty, multi-billion sUSDS TVL, 7+ auditors) — quality is excellent, but concentration is the dominant concern |
 
-**Dependencies Score: 2.5 / 5** — funded debt sits behind a single ecosystem (Sky governance) at ~100%. The rubric treats "1–2 blue-chip dependencies" as 2.0; the +0.5 reflects that the entire venue surface is Sky-coupled rather than two ecosystems split. The recently-added Morpho Yearn USDC Compounder is queued at 0 debt and would re-introduce a non-Sky leg if funded — at that point this score would step back toward 2.0.
+**Dependencies Score: 2.5 / 5** — funded debt sits behind a single ecosystem (Sky governance) at ~100%. The rubric treats "1–2 blue-chip dependencies" as 2.0; the +0.5 reflects that the entire venue surface is Sky-coupled rather than two ecosystems split. Note: the May 5 snapshot's queued Morpho Yearn USDC Compounder (which could have re-introduced a non-Sky leg) has been revoked, so the optional on-chain re-diversification path no longer exists until a new Morpho strategy is reproposed via the 7-day timelock.
 
 **Centralization Score = (1.0 + 1.0 + 2.5) / 3 ≈ 1.5**
 
@@ -468,7 +455,7 @@ Yearn maintains an active monitoring system via the [`monitoring-scripts-py`](ht
 
 | Factor | Assessment |
 |--------|-----------|
-| Backing | 100% USDC-backed, deployed to Sky-governed venues: sUSDS Lender (~98%) and Spark USDC Lender (~2%) |
+| Backing | 100% USDC-backed, deployed to Sky-governed venues: sUSDS Lender (~97%) and Spark USDC Lender (~3%) |
 | Collateral quality | sUSDS: backed by over-collateralized loans and Treasury bills (RWA) via MakerDAO. Spark Lend: USDC lending market on Sky sub-DAO infrastructure |
 | Leverage | None |
 | Verifiability | ERC-4626, all positions onchain |
@@ -494,9 +481,9 @@ Yearn maintains an active monitoring system via the [`monitoring-scripts-py`](ht
 
 | Factor | Assessment |
 |--------|-----------|
-| Exit mechanism | ERC-4626 redemption → sUSDS → USDS → DAI → USDC pipeline (~98%) or direct Spark Lend withdrawal (~2%) |
+| Exit mechanism | ERC-4626 redemption → sUSDS → USDS → DAI → USDC pipeline (~97%) or direct Spark Lend withdrawal (~3%) |
 | Liquidity depth | sUSDS: multi-billion-dollar TVL. PSM: billions of USDC capacity. Spark Lend USDC market: deep. Vault is small fraction of pool capacity |
-| Large holder impact | $28.07M vault vs multi-billion pools — negligible impact |
+| Large holder impact | $29.84M vault vs multi-billion pools — negligible impact |
 | Same-value asset | USDC-denominated — no price divergence risk |
 | Withdrawal restrictions | None — atomic redemption, no cooldown |
 
@@ -526,7 +513,7 @@ Yearn maintains an active monitoring system via the [`monitoring-scripts-py`](ht
 | Operational Risk | 1.0 | 5% | 0.050 |
 | **Final Score** | | | **1.325 → 1.3 / 5.0** |
 
-1.325 rounds to 1.3 under the standard nearest-0.1 rule. The Centralization score (1.5) reflects that funded debt is ~100% Sky-governance-coupled at this snapshot (98% sUSDS Lender + 2% Spark Lender). Score is a step up from the previous 1.2 — driven entirely by the post-rebalance single-ecosystem concentration, not by any audit / governance / funds-management regression.
+1.325 rounds to 1.3 under the standard nearest-0.1 rule. The Centralization score (1.5) reflects that funded debt is ~100% Sky-governance-coupled at this snapshot (97% sUSDS Lender + 3% Spark Lender). Score is unchanged from the May 5 1.3; the underlying concentration profile is the same, but the optional non-Sky leg (queued Morpho Yearn USDC Compounder) has been revoked.
 
 ### Risk Tier
 
@@ -547,7 +534,7 @@ Yearn maintains an active monitoring system via the [`monitoring-scripts-py`](ht
 - **Time-based:** Reassess in 6 months (November 2026) or annually
 - **TVL-based:** Reassess if TVL exceeds $100M or changes by more than ±50%
 - **Incident-based:** Reassess after any exploit, strategy loss, governance change, or Sky / Spark Lend / Morpho incident
-- **Allocation-based:** Reassess if the vault re-funds the queued Morpho Yearn USDC Compounder (would re-introduce a non-Sky leg and potentially step the Cat 2C dependency score back down to 2.0 / final to 1.2). Conversely, reassess if any new Sky-coupled strategy increases concentration further
+- **Allocation-based:** Reassess if a new non-Sky strategy is added to the queue (would re-introduce a non-Sky leg and potentially step the Cat 2C dependency score back down to 2.0 / final to 1.2). Conversely, reassess if any new Sky-coupled strategy increases concentration further
 - **SSR-based:** Reassess if Sky Savings Rate drops below 2% (may indicate Sky governance issues) or if PSM fees are introduced
 - **Governance-based:** Reassess if ySafe composition changes (signer additions/removals, threshold changes)
 
@@ -567,24 +554,26 @@ Yearn maintains an active monitoring system via the [`monitoring-scripts-py`](ht
 │  │  deposit() / redeem() │                                          │
 │  │  totalAssets()        │                                          │
 │  └──────────┬────────────┘                                          │
-│             │ deploys USDC to 4 queued strategies (2 funded)         │
+│             │ deploys USDC to 3 queued strategies (2 funded)         │
 │             │                                                        │
 │  ┌──────────▼──────────────────────────────────────────────────────┐│
-│  │  STRATEGIES (by allocation, May 5 snapshot)                      ││
+│  │  STRATEGIES (by allocation, May 11 snapshot)                     ││
 │  │                                                                  ││
 │  │  ┌─────────────────────────────────────────────────────────┐    ││
-│  │  │ SKY (~98%)                                              │    ││
-│  │  │  USDC to sUSDS Lender                       97.63%      │    ││
+│  │  │ SKY (~97%)                                              │    ││
+│  │  │  USDC to sUSDS Lender                       97.15%      │    ││
 │  │  │  Pipeline: USDC → DAI (PSM 1:1) → USDS → sUSDS         │    ││
 │  │  └─────────────────────────────────────────────────────────┘    ││
 │  │  ┌─────────────────────────────────────────────────────────┐    ││
-│  │  │ SPARK (Sky sub-DAO) (~2%)                               │    ││
-│  │  │  Spark USDC Lender                          2.37%       │    ││
+│  │  │ SPARK (Sky sub-DAO) (~3%)                               │    ││
+│  │  │  Spark USDC Lender                          2.85%       │    ││
 │  │  │  Pipeline: USDC → Spark Lend (direct)                   │    ││
 │  │  └─────────────────────────────────────────────────────────┘    ││
 │  │                                                                  ││
 │  │  Queued (0 debt):                                                ││
 │  │  - USDC to USDS Depositor                                        ││
+│  │                                                                  ││
+│  │  Revoked between May 5 and May 11:                               ││
 │  │  - Morpho Yearn USDC Compounder (added 2026-04-30)               ││
 │  └─────────────────────────────────────────────────────────────────┘│
 └──────────────────────────────────────────────────────────────────────┘
@@ -599,7 +588,7 @@ Yearn maintains an active monitoring system via the [`monitoring-scripts-py`](ht
 │  │  Multi-billion TVL       │    │  USDC market             │        │
 │  │  SSR: ~4.0% APY          │    │  Sky-governed            │        │
 │  │  8+ years, $10M bounty   │    │  Audited (ChainSec, etc.)│        │
-│  │  ~98% of vault           │    │  ~2% of vault            │        │
+│  │  ~97% of vault           │    │  ~3% of vault            │        │
 │  └──────────────────────────┘    └──────────────────────────┘        │
 │  ┌──────────────────────────┐    ┌──────────────────────────┐        │
 │  │  MakerDAO PSM Lite       │    │  Sky DAI-USDS Exchanger  │        │
@@ -608,8 +597,8 @@ Yearn maintains an active monitoring system via the [`monitoring-scripts-py`](ht
 │  └──────────────────────────┘    └──────────────────────────┘        │
 └───────────────────────────────────────────────────────────────────────┘
 
-Data flow: User deposits USDC → yvUSDC-1 vault → sUSDS Lender (~98%)
-converts USDC → DAI (PSM) → USDS (Exchanger) → sUSDS; Spark Lender (~2%)
+Data flow: User deposits USDC → yvUSDC-1 vault → sUSDS Lender (~97%)
+converts USDC → DAI (PSM) → USDS (Exchanger) → sUSDS; Spark Lender (~3%)
 supplies USDC directly to Spark Lend. Profits reported by Keeper, locked
 for 10 days. Withdrawals reverse the pipeline (atomic, no cooldown).
 ```

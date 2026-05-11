@@ -1,6 +1,6 @@
 # Protocol Risk Assessment: Yearn — yvUSDT-1
 
-- **Assessment Date:** May 5, 2026
+- **Assessment Date:** May 11, 2026
 - **Token:** yvUSDT-1 (USDT-1 yVault)
 - **Chain:** Ethereum
 - **Token Address:** [`0x310B7Ea7475A0B449Cfd73bE81522F1B88eFAFaa`](https://etherscan.io/address/0x310B7Ea7475A0B449Cfd73bE81522F1B88eFAFaa)
@@ -8,37 +8,37 @@
 
 ## Overview + Links
 
-yvUSDT-1 is a **USDT-denominated Yearn V3 vault** (ERC-4626) on Ethereum mainnet. The vault holds **~$7.12M USDT** and is **100% deployed** at the snapshot — `totalIdle = 0`, `totalDebt = totalAssets`. The queue has been trimmed from five to **three strategies** (Spark USDT, Morpho Gauntlet USDT Prime, Morpho Steakhouse USDT). Two previously-queued strategies — **USDT Fluid Lender and Aave V3 USDT Lender** — were revoked between the April 27 and May 5 snapshots (`activation = 0` on both).
+yvUSDT-1 is a **USDT-denominated Yearn V3 vault** (ERC-4626) on Ethereum mainnet. The vault holds **~$7.30M USDT** and is **100% deployed** at the snapshot — `totalIdle = 0`, `totalDebt = totalAssets`. The queue holds **three strategies** (Spark USDT, Morpho Gauntlet USDT Prime, Morpho Steakhouse USDT). Two previously-queued strategies — **USDT Fluid Lender and Aave V3 USDT Lender** — were revoked between the April 27 and May 5 snapshots (`activation = 0` on both) and remain revoked at this snapshot.
 
 Per the Yearn team, the late-April 100%-idle posture was a **precautionary deallocation following the April 18, 2026 rsETH (KelpDAO) bridge exploit** on the LayerZero OFT bridge layer (the rsETH event itself is documented in the [hgETH reassessment report](./kerneldao-hgeth.md)). The team's specific causal attribution has not been independently verified, but the rsETH event itself is well documented. **Funds have since been re-deployed** — the deallocation reversed, but the redeployment landed in a narrower set of venues (3 instead of 5) and did not return to Fluid or Aave V3 USDT.
 
-The PPS is 1.080611 (~8.06% cumulative since deployment, ~4.5% annualized). The current report captures the May 5 redeployed state.
+The PPS is 1.080708 (~8.07% cumulative since deployment, ~4.5% annualized). The current report captures the May 11 state — debt has rebalanced from the May 5 ~50/50 split to ~45.58% Spark / ~54.42% Morpho Gauntlet, with Spark's share trimmed by ~$233K and Morpho Gauntlet's increased by ~$409K (net TVL +$176K).
 
 **Key architecture:**
 
 - **Vault:** Standard Yearn V3 vault (v3.0.2) accepting USDT deposits, issuing yvUSDT-1 shares. Deployed as an immutable Vyper minimal proxy (EIP-1167) via the v3.0.2 Yearn V3 Vault Factory ([`0x444045c5C13C246e117eD36437303cac8E250aB0`](https://etherscan.io/address/0x444045c5C13C246e117eD36437303cac8E250aB0))
 - **Strategy queue (3 strategies, all USDT-native):**
-  - Spark USDT Lender ([`0xED48069a2b9982B4eec646CBfA7b81d181f9400B`](https://etherscan.io/address/0xED48069a2b9982B4eec646CBfA7b81d181f9400B)) — 49.98% of debt
-  - Morpho Gauntlet USDT Prime Compounder ([`0x6D2981FF9b8d7edbb7604de7A65BAC8694ac849F`](https://etherscan.io/address/0x6D2981FF9b8d7edbb7604de7A65BAC8694ac849F)) — 50.02% of debt
+  - Spark USDT Lender ([`0xED48069a2b9982B4eec646CBfA7b81d181f9400B`](https://etherscan.io/address/0xED48069a2b9982B4eec646CBfA7b81d181f9400B)) — 45.58% of debt
+  - Morpho Gauntlet USDT Prime Compounder ([`0x6D2981FF9b8d7edbb7604de7A65BAC8694ac849F`](https://etherscan.io/address/0x6D2981FF9b8d7edbb7604de7A65BAC8694ac849F)) — 54.42% of debt
   - Morpho Steakhouse USDT Compounder ([`0x0a4ea2bDe8496a878a7ca2772056a8e6fe3245c5`](https://etherscan.io/address/0x0a4ea2bDe8496a878a7ca2772056a8e6fe3245c5)) — queued, 0 debt
 - **Governance:** Standard **Yearn V3 Role Manager** ([`0xb3bd6B2E61753C311EFbCF0111f75D29706D9a41`](https://etherscan.io/address/0xb3bd6B2E61753C311EFbCF0111f75D29706D9a41)) governed by the **Yearn 6-of-9 ySafe** with **7-day TimelockController** for strategy additions
 
-**Key metrics (May 5, 2026, snapshot at block 25031569, timestamp 1778017355 = 21:42:35 UTC):**
+**Key metrics (May 11, 2026, snapshot at block 25073237, timestamp 1778519075 = 17:04:35 UTC):**
 
-- **TVL:** 7,121,083.02 USDT (100% deployed)
-- **Total Supply:** 6,589,866.21 yvUSDT-1
-- **Price Per Share:** 1.080611 USDT/yvUSDT-1 (~8.06% cumulative appreciation over ~21.4 months, ~4.5% annualized)
-- **Total Debt:** 7,121,083.02 USDT (100% of TVL)
+- **TVL:** 7,297,009.96 USDT (100% deployed)
+- **Total Supply:** 6,752,058.44 yvUSDT-1
+- **Price Per Share:** 1.080708 USDT/yvUSDT-1 (~8.07% cumulative appreciation over ~21.6 months, ~4.5% annualized)
+- **Total Debt:** 7,297,009.96 USDT (100% of TVL)
 - **Total Idle:** 0
 - **Debt distribution:**
-  - Spark USDT Lender: 3,558,804.39 USDT (49.98%)
-  - Morpho Gauntlet USDT Prime Compounder: 3,562,278.63 USDT (50.02%)
+  - Spark USDT Lender: 3,325,977.14 USDT (45.58%)
+  - Morpho Gauntlet USDT Prime Compounder: 3,971,032.82 USDT (54.42%)
   - Morpho Steakhouse USDT Compounder: 0 (queued, unfunded)
 - **Deposit Limit:** 50,000,000 USDT
 - **Profit Max Unlock Time:** 10 days
 - **Fees:** 0% management fee, 10% performance fee
 
-**Sky exposure note:** Spark Lend is a **Sky sub-DAO** (governed by Sky), so the ~50% allocation to Spark USDT Lender carries a **Sky-governance dependency** on the Spark admin keys, even though USDT itself has no USDS / Sky peg dependency. This is materially less Sky-coupled than yvUSDC-1 / yvUSDS-1 / yvDAI-1 (which have direct USDS exposure), but yvUSDT-1 is **not fully Sky-independent** — the prior framing of the queue as having "no Sky routing" was incorrect and has been revised here.
+**Sky exposure note:** Spark Lend is a **Sky sub-DAO** (governed by Sky), so the ~45.58% allocation to Spark USDT Lender carries a **Sky-governance dependency** on the Spark admin keys, even though USDT itself has no USDS / Sky peg dependency. This is materially less Sky-coupled than yvUSDC-1 / yvUSDS-1 / yvDAI-1 (which have direct USDS exposure), but yvUSDT-1 is **not fully Sky-independent** — the prior framing of the queue as having "no Sky routing" was incorrect and has been revised here.
 
 **Links:**
 
@@ -83,26 +83,26 @@ The PPS is 1.080611 (~8.06% cumulative since deployment, ~4.5% annualized). The 
 
 | # | Strategy | Name | Current Debt (USDT) | Allocation |
 |---|----------|------|--------------------:|-----------:|
-| 1 | [`0xED48069a2b9982B4eec646CBfA7b81d181f9400B`](https://etherscan.io/address/0xED48069a2b9982B4eec646CBfA7b81d181f9400B) | Spark USDT Lender | 3,558,804.39 | 49.98% |
-| 2 | [`0x6D2981FF9b8d7edbb7604de7A65BAC8694ac849F`](https://etherscan.io/address/0x6D2981FF9b8d7edbb7604de7A65BAC8694ac849F) | Morpho Gauntlet USDT Prime Compounder | 3,562,278.63 | 50.02% |
+| 1 | [`0xED48069a2b9982B4eec646CBfA7b81d181f9400B`](https://etherscan.io/address/0xED48069a2b9982B4eec646CBfA7b81d181f9400B) | Spark USDT Lender | 3,325,977.14 | 45.58% |
+| 2 | [`0x6D2981FF9b8d7edbb7604de7A65BAC8694ac849F`](https://etherscan.io/address/0x6D2981FF9b8d7edbb7604de7A65BAC8694ac849F) | Morpho Gauntlet USDT Prime Compounder | 3,971,032.82 | 54.42% |
 | 3 | [`0x0a4ea2bDe8496a878a7ca2772056a8e6fe3245c5`](https://etherscan.io/address/0x0a4ea2bDe8496a878a7ca2772056a8e6fe3245c5) | Morpho Steakhouse USDT Compounder | 0 | 0% |
 
-**Previously queued, now revoked (`activation = 0` at block 25031569):**
+**Previously queued, now revoked (`activation = 0` at block 25073237):**
 
 - USDT Fluid Lender ([`0x4Bd05E6ff75b633F504F0fC501c1e257578C8A72`](https://etherscan.io/address/0x4Bd05E6ff75b633F504F0fC501c1e257578C8A72))
 - Aave V3 USDT Lender ([`0x27998440eC85F0DF11DED26e6aB27c8D2a9d8Cb2`](https://etherscan.io/address/0x27998440eC85F0DF11DED26e6aB27c8D2a9d8Cb2))
 
-**Sky-governance exposure note:** Spark Lend is a Sky sub-DAO. Roughly 50% of yvUSDT-1's debt sits in Spark USDT Lender, which is administered through Sky / Spark governance. This is a **Sky-governance dependency** but not a USDS-peg or USDS-collateral dependency — yvUSDT-1 is materially less Sky-coupled than yvUSDC-1 / yvUSDS-1 / yvDAI-1, but **not fully Sky-independent**. Captured in the dependency subscore.
+**Sky-governance exposure note:** Spark Lend is a Sky sub-DAO. Roughly 45.58% of yvUSDT-1's debt sits in Spark USDT Lender, which is administered through Sky / Spark governance. This is a **Sky-governance dependency** but not a USDS-peg or USDS-collateral dependency — yvUSDT-1 is materially less Sky-coupled than yvUSDC-1 / yvUSDS-1 / yvDAI-1, but **not fully Sky-independent**. Captured in the dependency subscore.
 
 ### Strategy Protocol Dependencies (current allocation)
 
 | Protocol | Strategy | Allocation | Notes |
 |----------|----------|-----------:|-------|
-| **Spark** | Spark USDT Lender | 49.98% | Sky sub-DAO; audited stack (ChainSecurity, Cantina) |
-| **Morpho (Gauntlet)** | Morpho Gauntlet USDT Prime Compounder | 50.02% | Curated by Gauntlet, $6.6B+ Morpho TVL, 25+ audits, Certora formal verification |
+| **Spark** | Spark USDT Lender | 45.58% | Sky sub-DAO; audited stack (ChainSecurity, Cantina) |
+| **Morpho (Gauntlet)** | Morpho Gauntlet USDT Prime Compounder | 54.42% | Curated by Gauntlet, $6.6B+ Morpho TVL, 25+ audits, Certora formal verification |
 | **Morpho (Steakhouse)** | Morpho Steakhouse USDT Compounder | 0% (queued) | Curated by Steakhouse |
 
-The current debt is **split roughly 50/50 across two ecosystems** (Spark, Morpho). Both have multi-year USDT track records with no significant principal-loss events. The mix is less diversified than the prior 5-strategy queue but more concentrated than ideal — particularly the ~50% allocation to a single Sky-governed venue.
+The current debt is **split ~46/54 across two ecosystems** (Spark, Morpho). Both have multi-year USDT track records with no significant principal-loss events. The mix is less diversified than the prior 5-strategy queue but more concentrated than ideal — particularly the ~46% allocation to a single Sky-governed venue. Allocation has drifted slightly toward Morpho between May 5 and May 11 (Spark −$233K, Morpho Gauntlet +$409K).
 
 ## Audits and Due Diligence Disclosures
 
@@ -144,9 +144,9 @@ All strategies pass through Yearn's **12-metric risk-scoring framework** ([RISK_
 
 ## Historical Track Record
 
-- **Vault deployed:** July 23, 2024 (deployment [tx](https://etherscan.io/tx/0x05681fd5be0e925bb720450418d20eda99bb22adc72be3d702de70368d7cd3ea)) — **~21.4 months** in production
-- **TVL:** 7,121,083.02 USDT (~$7.12M) — well within the $50M deposit limit
-- **PPS trend:** 1.000000 → 1.080611 (~8.06% cumulative return, ~4.5% annualized)
+- **Vault deployed:** July 23, 2024 (deployment [tx](https://etherscan.io/tx/0x05681fd5be0e925bb720450418d20eda99bb22adc72be3d702de70368d7cd3ea)) — **~21.6 months** in production
+- **TVL:** 7,297,009.96 USDT (~$7.30M) — well within the $50M deposit limit
+- **PPS trend:** 1.000000 → 1.080708 (~8.07% cumulative return, ~4.5% annualized)
 - **Security incidents:** None known for this vault or for the Yearn V3 framework
 - **Strategy changes:** active management — five strategies have been queued historically. Between April 27 and May 5, **Fluid USDT and Aave V3 USDT were revoked** (`activation = 0`); funds were also re-deployed from the brief 100%-idle state into the remaining Spark + Morpho Gauntlet venues
 - **Yearn V3 track record:** V3 framework live since May 2024 (~24 months). No V3 vault exploits
@@ -157,12 +157,12 @@ All strategies pass through Yearn's **12-metric risk-scoring framework** ([RISK_
 
 ## Funds Management
 
-yvUSDT-1 is **100% deployed** at the snapshot, split roughly 50/50 between Spark USDT Lender and Morpho Gauntlet USDT Prime Compounder. Morpho Steakhouse USDT remains queued but unfunded.
+yvUSDT-1 is **100% deployed** at the snapshot, split ~46/54 between Spark USDT Lender and Morpho Gauntlet USDT Prime Compounder. Morpho Steakhouse USDT remains queued but unfunded.
 
 ### Current State (snapshot)
 
-- **Total Assets:** 7,121,083.02 USDT
-- **Total Debt:** 7,121,083.02 USDT (100% deployed)
+- **Total Assets:** 7,297,009.96 USDT
+- **Total Debt:** 7,297,009.96 USDT (100% deployed)
 - **Total Idle:** 0
 - **Capital utilization:** 100%
 
@@ -172,8 +172,8 @@ ERC-4626 redemptions now settle by unwinding strategy positions in queue order �
 
 | Strategy | Allocation | Mechanic | Risk profile |
 |----------|-----------:|----------|-------------|
-| **Spark USDT Lender** | 49.98% | Direct supply to Spark Lend USDT market | Sky sub-DAO, ChainSecurity / Cantina audits |
-| **Morpho Gauntlet USDT Prime Compounder** | 50.02% | Direct USDT deposit to Morpho Gauntlet vault | Curated by Gauntlet, blue-chip lending markets |
+| **Spark USDT Lender** | 45.58% | Direct supply to Spark Lend USDT market | Sky sub-DAO, ChainSecurity / Cantina audits |
+| **Morpho Gauntlet USDT Prime Compounder** | 54.42% | Direct USDT deposit to Morpho Gauntlet vault | Curated by Gauntlet, blue-chip lending markets |
 | **Morpho Steakhouse USDT Compounder** | 0% (queued) | Direct USDT deposit to Morpho Steakhouse vault | Curated by Steakhouse, blue-chip lending markets |
 
 All are simple lend / compound patterns with no leverage, no conversion hops, and no cross-chain.
@@ -205,13 +205,13 @@ The collateral quality is the union of Spark Lend USDT and Morpho USDT market qu
 
 **Exit pipeline:** ERC-4626 `withdraw` → strategy `withdraw` → underlying lending market withdrawal (Spark Lend USDT or Morpho Gauntlet USDT vault).
 
-- **Underlying liquidity:** Spark Lend USDT and Morpho Gauntlet USDT are both multi-million-dollar venues with healthy utilization headroom; ~$3.5M / venue here is a small fraction of either market's free liquidity
+- **Underlying liquidity:** Spark Lend USDT and Morpho Gauntlet USDT are both multi-million-dollar venues with healthy utilization headroom; ~$3.3M (Spark) and ~$4.0M (Morpho) here are small fractions of either market's free liquidity
 - **Same-asset:** USDT-denominated share token — no price-divergence risk
 - **No DEX liquidity needed** — exits via the lending protocol's own redemption mechanics
 - **No withdrawal queue or cooldown** — atomic redemption for normal sizes
-- **Deposit limit:** 50M USDT cap vs $7.12M TVL (room for +602%)
+- **Deposit limit:** 50M USDT cap vs $7.30M TVL (room for +585%)
 
-The 50/50 split across two ecosystems means a liquidity squeeze in one venue can be partially absorbed by the other (subject to queue order and the user's withdraw size).
+The two-ecosystem split (~46% Spark / ~54% Morpho) means a liquidity squeeze in one venue can be partially absorbed by the other (subject to queue order and the user's withdraw size).
 
 ## Centralization & Control Risks
 
@@ -249,11 +249,11 @@ ySafe 6-of-9 signers include publicly known DeFi contributors — see [Yearn Mul
 | Dependency | Criticality | Notes |
 |-----------|-------------|-------|
 | **USDT (Tether)** | Critical (underlying asset) | Centrally issued; relies on Tether's operational and reserve integrity |
-| **Spark Lend** | High (~50% of debt) | Sky sub-DAO; Spark admin keys live under Sky governance |
-| **Morpho (Gauntlet curator)** | High (~50% of debt) | Morpho protocol $6.6B+ TVL; Gauntlet curator selects underlying markets |
+| **Spark Lend** | High (~46% of debt) | Sky sub-DAO; Spark admin keys live under Sky governance |
+| **Morpho (Gauntlet curator)** | High (~54% of debt) | Morpho protocol $6.6B+ TVL; Gauntlet curator selects underlying markets |
 | **Sky governance** | Indirect via Spark | Spark Lend admin sits under Sky; not an independent venue |
 
-**Dependency quality:** the deployed mix is **two blue-chip ecosystems split ~50/50** (Spark + Morpho/Gauntlet). Less diversified than the prior 5-strategy queue, and ~50% of debt sits behind Sky-governed infrastructure. Materially less Sky-coupled than yvUSDC-1 / yvUSDS-1 / yvDAI-1 (which carry direct USDS exposure) but **not fully Sky-independent** as the original report claimed.
+**Dependency quality:** the deployed mix is **two blue-chip ecosystems split ~46/54** (Spark + Morpho/Gauntlet). Less diversified than the prior 5-strategy queue, and ~46% of debt sits behind Sky-governed infrastructure. Materially less Sky-coupled than yvUSDC-1 / yvUSDS-1 / yvDAI-1 (which carry direct USDS exposure) but **not fully Sky-independent** as the original report claimed.
 
 ## Operational Risk
 
@@ -314,16 +314,16 @@ Yearn maintains the [`monitoring`](https://github.com/yearn/monitoring) reposito
 
 - **Battle-tested Yearn V3 infrastructure:** 3 audits by top firms, ~24 months of clean V3 production. Immutable vault contract eliminates proxy upgrade risk
 - **Standard Yearn governance:** Yearn V3 Role Manager + 6-of-9 ySafe (named DeFi signers) + 7-day self-governed timelock
-- **Two-ecosystem split:** ~50/50 across Spark Lend and Morpho Gauntlet — both blue-chip USDT venues with multi-year clean track records
+- **Two-ecosystem split:** ~46/54 across Spark Lend and Morpho Gauntlet — both blue-chip USDT venues with multi-year clean track records
 - **No USDS-peg exposure:** yvUSDT-1 holds USDT, not USDS, so it is not exposed to USDS peg risk that affects yvUSDC-1 / yvUSDS-1 / yvDAI-1
 - **Active monitoring** via Yearn's monitoring-scripts repo
 - **No leverage. No cross-chain. No conversion hops** in the active strategies
-- **Established track record:** ~21.4 months in production, ~8.06% cumulative return, zero incidents
+- **Established track record:** ~21.6 months in production, ~8.07% cumulative return, zero incidents
 
 ### Key Risks
 
-- **Concentration in two venues only:** ~50% Spark + ~50% Morpho/Gauntlet. The pre-deallocation 5-strategy queue offered better venue diversification; the post-redeployment 3-strategy queue (with one unfunded) is materially more concentrated
-- **Sky-governance dependency on ~50% of debt:** Spark Lend is a Sky sub-DAO, so Sky governance / Spark admin keys can affect ~half of yvUSDT-1's funds. Less coupled than the USDS-denominated vaults but **not Sky-independent** as the prior report claimed
+- **Concentration in two venues only:** ~46% Spark + ~54% Morpho/Gauntlet. The pre-deallocation 5-strategy queue offered better venue diversification; the post-redeployment 3-strategy queue (with one unfunded) is materially more concentrated
+- **Sky-governance dependency on ~46% of debt:** Spark Lend is a Sky sub-DAO, so Sky governance / Spark admin keys can affect close to half of yvUSDT-1's funds. Less coupled than the USDS-denominated vaults but **not Sky-independent** as the prior report claimed
 - **Operational signal:** the late-April deallocation followed by the May 5 redeployment with two strategies revoked is a meaningful operational footprint. Per Yearn team this was rsETH-precautionary (see [hgETH report](./kerneldao-hgeth.md)) but specific attribution has not been independently verified
 - **USDT-specific:** centrally-issued stablecoin with periodic concerns about Tether's reserve composition; this risk is inherent to the underlying asset and not specific to yvUSDT-1
 - **Strategy revocation rationale unverified:** USDT Fluid Lender and Aave V3 USDT Lender — both blue-chip — were revoked entirely. The rationale (rsETH-related vs strategy-specific issue vs APR optimization) is not independently verifiable on-chain
@@ -341,7 +341,7 @@ Yearn maintains the [`monitoring`](https://github.com/yearn/monitoring) reposito
 - Use decimals when a subcategory falls between scores
 - Prioritize on-chain evidence over documentation claims
 - **Rounding rule:** the weighted sum is rounded to one decimal place using standard nearest-0.1 rounding; when the value is exactly halfway between two 0.1 marks (X.X50), round UP to the higher (riskier) score per the conservative principle
-- **Score reflects May 5 snapshot — 100% deployed across Spark + Morpho.**
+- **Score reflects May 11 snapshot — 100% deployed across Spark + Morpho (~46/54).**
 
 ### Critical Risk Gates
 
@@ -359,12 +359,12 @@ Yearn maintains the [`monitoring`](https://github.com/yearn/monitoring) reposito
 |--------|-----------|
 | Audits | V3 framework: 3 audits by top firms. Active underlying protocols (Spark, Morpho): blue-chip with extensive audit coverage |
 | Bug bounty | $200K (Yearn Immunefi) |
-| Production history | **~21.4 months** (July 23, 2024). V3 framework: ~24 months |
-| TVL | **$7.12M** USDT (100% deployed). Deposit limit: 50M |
+| Production history | **~21.6 months** (July 23, 2024). V3 framework: ~24 months |
+| TVL | **$7.30M** USDT (100% deployed). Deposit limit: 50M |
 | Security incidents | None on V3, none on the active underlying protocols |
 | Strategy review | Rigorous 12-metric framework with ySec security review |
 
-**Score: 1.5 / 5** — strong audit coverage, ~21.4 months clean production, no incidents.
+**Score: 1.5 / 5** — strong audit coverage, ~21.6 months clean production, no incidents.
 
 #### Category 2: Centralization & Control Risks (Weight: 30%)
 
@@ -396,11 +396,11 @@ Yearn maintains the [`monitoring`](https://github.com/yearn/monitoring) reposito
 | Factor | Assessment |
 |--------|-----------|
 | Protocol count (active) | 2 funded ecosystems (Spark Lend, Morpho Gauntlet); 1 additional queued (Morpho Steakhouse) |
-| Criticality | USDT (Tether) + Spark Lend (~50%, Sky-governed) + Morpho/Gauntlet (~50%) |
-| Concentration | ~50% behind Sky-governed infrastructure (Spark) — meaningful Sky-governance dependency, but no USDS-peg dependency |
+| Criticality | USDT (Tether) + Spark Lend (~46%, Sky-governed) + Morpho/Gauntlet (~54%) |
+| Concentration | ~46% behind Sky-governed infrastructure (Spark) — meaningful Sky-governance dependency, but no USDS-peg dependency |
 | Quality | Top-tier on both venues; concentration is the main concern |
 
-**Dependencies Score: 2.5 / 5** — two blue-chip ecosystems (Spark Lend, Morpho/Gauntlet), but ~50% of debt sits behind Sky-governance infrastructure (Spark Lend → Sky sub-DAO → Sky governance). The rubric "1–2 blue-chip dependencies" = 2 captures the count; the +0.5 reflects that the Sky-governance share is a single-point-of-control concentration above what a pure two-blue-chip split would carry. The Morpho leg is governed by Morpho DAO + Gauntlet curator, which is independent of Sky.
+**Dependencies Score: 2.5 / 5** — two blue-chip ecosystems (Spark Lend, Morpho/Gauntlet), but ~46% of debt sits behind Sky-governance infrastructure (Spark Lend → Sky sub-DAO → Sky governance). The rubric "1–2 blue-chip dependencies" = 2 captures the count; the +0.5 reflects that the Sky-governance share is a single-point-of-control concentration above what a pure two-blue-chip split would carry. The Morpho leg is governed by Morpho DAO + Gauntlet curator, which is independent of Sky.
 
 **Centralization Score = (1.0 + 1.0 + 2.5) / 3 ≈ 1.5**
 
@@ -439,12 +439,12 @@ Yearn maintains the [`monitoring`](https://github.com/yearn/monitoring) reposito
 | Factor | Assessment |
 |--------|-----------|
 | Exit mechanism | ERC-4626 → strategy unwind through Spark and Morpho USDT markets |
-| Liquidity depth | Both venues have multi-million-USDT free liquidity; ~$3.5M each is small relative to either market |
+| Liquidity depth | Both venues have multi-million-USDT free liquidity; ~$3.3M (Spark) and ~$4.0M (Morpho) are small relative to either market |
 | Large holder impact | Very large redemptions depend on Spark / Morpho utilization at withdraw time |
 | Same-value asset | USDT-denominated |
 | Withdrawal restrictions | None |
 
-**Score: 1.0 / 5** — both active venues are deep blue-chip USDT lending markets with healthy utilization headroom. The 50/50 split provides cross-venue resilience. Re-evaluate if either venue's utilization spikes or if allocation drifts beyond ~75% to a single venue.
+**Score: 1.0 / 5** — both active venues are deep blue-chip USDT lending markets with healthy utilization headroom. The ~46/54 split provides cross-venue resilience. Re-evaluate if either venue's utilization spikes or if allocation drifts beyond ~75% to a single venue.
 
 #### Category 5: Operational Risk (Weight: 5%)
 
@@ -516,16 +516,16 @@ Yearn maintains the [`monitoring`](https://github.com/yearn/monitoring) reposito
 │  │  ERC-4626, immutable  │                                          │
 │  │  0x310B…FAaa          │                                          │
 │  │                       │                                          │
-│  │  $7.12M USDT TVL      │                                          │
+│  │  $7.30M USDT TVL      │                                          │
 │  │  100% deployed        │                                          │
-│  │  totalDebt = $7.12M   │                                          │
+│  │  totalDebt = $7.30M   │                                          │
 │  │  totalIdle = 0        │                                          │
 │  └───────────┬───────────┘                                          │
 │              │                                                       │
 │      ┌───────┴────────┐                                             │
 │      ▼                ▼                                             │
 │  Spark USDT       Morpho Gauntlet                                   │
-│  3.56M (49.98%)   3.56M (50.02%)                                    │
+│  3.33M (45.58%)   3.97M (54.42%)                                    │
 │  Sky sub-DAO      Morpho protocol                                   │
 │                                                                      │
 │  Also queued (unfunded): Morpho Steakhouse USDT (0 debt)            │
@@ -535,10 +535,11 @@ Yearn maintains the [`monitoring`](https://github.com/yearn/monitoring) reposito
 │   - Aave V3 USDT Lender (0x2799…8Cb2)                               │
 └──────────────────────────────────────────────────────────────────────┘
 
-The vault is now 50/50 across two ecosystems. ~50% sits behind Sky-governed
+The vault is now ~46/54 across two ecosystems. ~46% sits behind Sky-governed
 infrastructure (Spark Lend), so yvUSDT-1 is materially less Sky-coupled
 than the USDS-denominated risk-1 vaults but **not Sky-independent**. The
-prior 5-strategy queue offered better venue diversification.
+prior 5-strategy queue offered better venue diversification. Allocation
+has drifted slightly toward Morpho between May 5 and May 11.
 ```
 
 ## Appendix: TimelockController Role Structure
