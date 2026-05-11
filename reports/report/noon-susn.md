@@ -1,6 +1,6 @@
 # Protocol Risk Assessment: Noon
 
-- **Assessment Date:** April 27, 2026 (metrics refresh; reassessment March 23, 2026; original March 10, 2026)
+- **Assessment Date:** May 11, 2026 (metrics refresh; reassessment March 23, 2026; original March 10, 2026)
 - **Token:** sUSN (Staked USN)
 - **Chain:** Ethereum
 - **Token Address:** [`0xE24a3DC889621612422A64E6388927901608B91D`](https://etherscan.io/address/0xE24a3DC889621612422A64E6388927901608B91D)
@@ -22,13 +22,13 @@ Yield is distributed: **80%** to sUSN holders (via rebase), **10%** to the Noon 
 
 sUSN's value appreciates as the protocol mints new USN into the staking pool proportional to daily returns.
 
-**Key metrics (on-chain verified, April 27, 2026, block 24,973,944):**
-- Protocol TVL: ~$26.57M (DeFiLlama: $23.75M Ethereum + $1.07M TAC + $0.89M zkSync Era + $0.86M Sophon)
-- USN total supply: 23,761,212 USN (`totalSupply()` on-chain) — **down ~14.2%** from 27.70M on Mar 23
-- sUSN total supply: 17,554,251 sUSN (`totalSupply()` on-chain) — down ~3.5% from Mar 23
-- sUSN total assets: 20,755,626 USN staked (`totalAssets()` on-chain) — down ~2.7% from Mar 23
-- sUSN exchange rate: 1 sUSN = 1.1824 USN (`convertToAssets(1e18)` = 1,182,370,407,318,935,270) — up 0.9% from 1.1717 on Mar 23 (~9.4% annualized over 35 days)
-- ~87.4% of USN is staked in sUSN (20.76M / 23.76M) — staking ratio has risen as USN supply contracted
+**Key metrics (on-chain verified, May 11, 2026, block 25,074,135):**
+- Protocol TVL: ~$29.10M (DeFiLlama: $27.65M Ethereum + $1.07M TAC + $0.21M zkSync Era + $0.17M Sophon) — **up ~9.5%** from Apr 27. Ethereum grew but Sophon (-79.6%) and zkSync Era (-76.8%) L2 deployments contracted sharply
+- USN total supply: 27,656,797 USN (`totalSupply()` on-chain) — **rebounded +16.4%** from 23.76M on Apr 27 (back near the Mar 23 level of 27.70M)
+- sUSN total supply: 16,782,130 sUSN (`totalSupply()` on-chain) — down ~4.4% from Apr 27 and down ~7.8% from Mar 23
+- sUSN total assets: 19,920,820 USN staked (`totalAssets()` on-chain) — down ~4.0% from Apr 27 and down ~6.6% from Mar 23
+- sUSN exchange rate: 1 sUSN = 1.1870 USN (`convertToAssets(1e18)` = 1,187,025,738,413,861,720) — up 0.4% from 1.1824 on Apr 27
+- **~72% of USN is staked** in sUSN (19.92M / 27.66M) — staking ratio dropped sharply from 87.4% on Apr 27 as new USN mints did not enter sUSN
 
 **Yearn use case per issue #66:**
 - Use sUSN as collateral on Morpho for sUSN/USDC market
@@ -79,7 +79,7 @@ sUSN's value appreciates as the protocol mints new USN into the staking pool pro
 | Timelock | [`0xE5e412C212B4FBbF550A94e7BD5e83dB0B315A7F`](https://etherscan.io/address/0xE5e412C212B4FBbF550A94e7BD5e83dB0B315A7F) | Custom Timelock, 48h delay (MIN_DELAY: 1 day, MAX_DELAY: 2 days), owned by Multisig, Solidity 0.8.28, verified on Etherscan |
 | Multisig | [`0x1ea169EcCcf7714E7ba04900e1a3357cCA77327f`](https://etherscan.io/address/0x1ea169EcCcf7714E7ba04900e1a3357cCA77327f) | 3-of-6 Gnosis Safe v1.4.1, all anonymous signers (on-chain verified via `getThreshold()` and `getOwners()`) |
 
-**Governance chain (on-chain verified April 27, 2026; unchanged from March 23 verification):**
+**Governance chain (on-chain verified May 11, 2026; unchanged from March 23 verification):**
 
 ```
 Multisig (0x1ea1...327f) — 3-of-6 anonymous signers
@@ -98,7 +98,7 @@ Multisig (0x1ea1...327f) — 3-of-6 anonymous signers
 | Noon Collateral 2 | [`0x1b2262903Fdb0a8eb84291cC227426be590c4503`](https://etherscan.io/address/0x1b2262903Fdb0a8eb84291cC227426be590c4503) | 3-of-4 Gnosis Safe (on-chain verified) |
 | Noon Collateral 3 | [`0x4fD04553468610e5a88a2cffA38E057C954312Da`](https://etherscan.io/address/0x4fD04553468610e5a88a2cffA38E057C954312Da) | **EOA** (on-chain verified — no contract code) |
 
-### On-Chain Verification (Etherscan + cast, April 27, 2026)
+### On-Chain Verification (Etherscan + cast, May 11, 2026)
 
 | Contract | Name | Verified | Proxy | Implementation |
 |----------|------|----------|-------|----------------|
@@ -107,7 +107,7 @@ Multisig (0x1ea1...327f) — 3-of-6 anonymous signers
 | MinterHandlerV2 | MinterHandlerV2 | Yes | No | — |
 | Multisig | GnosisSafeProxy (Safe v1.4.1) | Yes | Yes | — |
 
-**On-chain ownership verification (via `cast`, April 27, 2026; unchanged):**
+**On-chain ownership verification (via `cast`, May 11, 2026; unchanged):**
 - USN `owner()` → `0x1ea169EcCcf7714E7ba04900e1a3357cCA77327f` (3-of-6 multisig, direct) ✓
 - sUSN `owner()` → `0x1ea169EcCcf7714E7ba04900e1a3357cCA77327f` (3-of-6 multisig, direct) ✓
 - USN ProxyAdmin `owner()` → `0xE5e412C212B4FBbF550A94e7BD5e83dB0B315A7F` (**Timelock**, 48h delay) ✓
@@ -172,16 +172,17 @@ The architecture is moderately complex:
 | Mar 2025 (early) | ~$16.6M | Significant dip |
 | Mar 2025 (late) | ~$28M | Recovery |
 | Mar 23, 2026 | ~$30.75M | Prior assessment point (DeFiLlama) |
-| Apr 27, 2026 | ~$26.57M | Current (DeFiLlama) — USN supply contracted ~14% over 35 days |
+| Apr 27, 2026 | ~$26.57M | Prior refresh (DeFiLlama) — USN supply contracted ~14% over 35 days |
+| May 11, 2026 | ~$29.10M | Current (DeFiLlama) — USN supply rebounded +16.4% but L2 deployments collapsed |
 
-- **TVL Volatility**: The protocol experienced a ~42% drawdown (from $28.5M to $16.6M) in early March 2025 but recovered. Between March 23 and April 27, 2026, **USN total supply declined from 27.70M to 23.76M (-14.2%)** while sUSN supply fell only ~3.5% — suggesting unstaked USN was redeemed out of the system. TVL overall fell ~$4.18M (-13.6%).
-- **Exchange rate (on-chain verified April 27, 2026, block 24,973,944)**:
-  - `convertToAssets(1e18)` = 1,182,370,407,318,935,270 = 1.1824 USN per sUSN
-  - `totalAssets()` = 20,755,626,497,920,483,229,282,898 = 20,755,626 USN
-  - `totalSupply()` = 17,554,250,655,667,681,594,850,093 = 17,554,251 sUSN
+- **TVL Volatility**: The protocol experienced a ~42% drawdown (from $28.5M to $16.6M) in early March 2025 but recovered. Between Apr 27 and May 11, 2026, **USN total supply rebounded from 23.76M to 27.66M (+16.4%)** while sUSN supply fell another ~4.4% — so the new USN mints did not enter the staking vault. Staking ratio dropped from 87.4% to ~72.0%. Total TVL grew ~$2.53M (+9.5%) but composition shifted heavily to Ethereum: **Sophon dropped −79.6% ($855K → $175K)** and **zkSync Era dropped −76.8% ($888K → $206K)**, while Ethereum rose +16.4% ($23.75M → $27.65M).
+- **Exchange rate (on-chain verified May 11, 2026, block 25,074,135)**:
+  - `convertToAssets(1e18)` = 1,187,025,738,413,861,720 = 1.1870 USN per sUSN
+  - `totalAssets()` = 19,920,820,574,981,704,269,770,568 = 19,920,820 USN
+  - `totalSupply()` = 16,782,130,269,222,707,423,197,836 = 16,782,130 sUSN
   - `maxRedeem(address)` = 0 (direct ERC-4626 redemption still disabled)
-  - As an ERC-4626 vault, the exchange rate should only increase. The 18.24% appreciation over ~17 months implies ~12.3% annualized yield. Rate progression: 1.1680 (Mar 10) → 1.1717 (Mar 23) → 1.1822 (Apr 22) → 1.1824 (Apr 27) — appreciation continues but slowed in the last 5 days alongside the supply contraction.
-- **USN Peg**: No reported depegging events found. USN is backed 1:1 by USDT/USDC/T-Bills. Current price: $0.9997 (CoinGecko, April 27, 2026).
+  - As an ERC-4626 vault, the exchange rate should only increase. The 18.70% appreciation over ~18 months implies a healthy mid-single-digit-to-low-double-digit yield. Rate progression: 1.1680 (Mar 10) → 1.1717 (Mar 23) → 1.1822 (Apr 22) → 1.1824 (Apr 27) → 1.1870 (May 11) — rate of appreciation re-accelerated between Apr 27 and May 11 (+0.39% in 14 days vs +0.02% in the prior 5 days).
+- **USN Peg**: No reported depegging events found. USN is backed 1:1 by USDT/USDC/T-Bills. Current price: $0.9997 (CoinGecko, May 11, 2026).
 
 ## Funds Management
 
@@ -274,19 +275,19 @@ Alternatively, users can sell sUSN on DEXes for immediate (but potentially slipp
 ### Primary Exit Mechanisms
 
 1. **Withdrawal request from sUSN vault**: `createWithdrawalRequest()` → cooldown → claim. T+5 maximum (20% at T+0, 60% at T+3, 100% at T+5). Not instant
-2. **DEX swap**: USN/sUSN pools on Uniswap V3 (Ethereum). Secondary-market volume remains negligible: USN 24h volume ~$5.7K, sUSN 24h volume ~$1.6 (CoinGecko, Apr 27, 2026; vs ~$33K / ~$156 on Mar 23 and ~$626 / ~$118 on Apr 22). USN volume rebounded slightly from Apr 22 but sUSN volume effectively collapsed to zero. No on-DEX exit for anything but retail-sized positions
+2. **DEX swap**: USN/sUSN pools on Uniswap V3 (Ethereum). Secondary-market volume remains negligible: USN 24h volume ~$1.0K, sUSN 24h volume ~$42 (CoinGecko, May 11, 2026; vs ~$5.7K / ~$1.6 on Apr 27 and ~$33K / ~$156 on Mar 23). Volumes remain in the noise for a ~$29M protocol — no on-DEX exit for anything but retail-sized positions
 3. **USN redemption to stablecoins**: Permissioned institutional redemption via the dApp (subject to daily limits during public beta)
 
 ### Liquidity Assessment
 
 - **Primary liquidity**: The main exit path is through the cooldown-based withdrawal mechanism (up to 5 days)
-- **Secondary market**: DEX liquidity is negligible. CoinGecko 24h volumes (Apr 27, 2026): USN ~$5.7K, sUSN ~$1.6 — sUSN secondary depth is effectively zero. Volumes have been highly variable (Mar 23: $33K USN / $156 sUSN; Apr 22: $626 USN / $118 sUSN) but consistently negligible relative to ~$26.6M TVL
+- **Secondary market**: DEX liquidity is negligible. CoinGecko 24h volumes (May 11, 2026): USN ~$1.0K, sUSN ~$42 — sUSN secondary depth is effectively zero. Volumes have been highly variable (Mar 23: $33K USN / $156 sUSN; Apr 22: $626 / $118; Apr 27: $5.7K / $1.6; May 11: $1.0K / $42) but consistently negligible relative to ~$29.1M TVL
 - **On-chain maxRedeem = 0**: Direct ERC-4626 redemption is disabled. Must use withdrawal handler
 - **Same-value redemption**: sUSN redeems for USN (stablecoin-denominated), so price change risk is minimal for the Morpho collateral use case
 - **DCLM market maker backstop**: DCL Markets Ltd contractually obligated to buy sUSN at previous day's price within 24h if sUSN depegs >1%. Provides a contractual (off-chain) backstop but depends on DCLM's willingness and solvency
 - **Liquidity mismatch**: The protocol promises T+5 full redemption, but private credit positions (Fasanara F-TAC) have T+3 month redemption. If a significant portion of TVL is in private credit, a bank-run scenario could stress the redemption guarantee
-- **Small TVL**: At ~$26.57M (Apr 27, 2026, down from ~$30.75M on Mar 23), the protocol is small and has contracted ~13.6% over the last 35 days. Large positions relative to TVL could create concentration risk
-- **Morpho market tightly utilized (89.6% on Apr 27, 2026; was 100% on Mar 23)**: Supply ~$8.45M, borrow ~$7.57M. The headroom for withdrawals is only ~$880K at current utilization; a single large borrow could push the market back to 100% and re-lock new supply
+- **Small TVL**: At ~$29.10M (May 11, 2026, up 9.5% from ~$26.57M on Apr 27 but down 5.4% from ~$30.75M on Mar 23). The protocol is small; large positions relative to TVL could create concentration risk. L2 deployments contracted heavily (Sophon −79.6%, zkSync Era −76.8% over 14 days), concentrating TVL on Ethereum (~95% of total)
+- **Morpho market tightly utilized (89.5% on May 11, 2026; ~89.6% on Apr 27; 100% on Mar 23)**: Supply ~$8.53M, borrow ~$7.63M. The headroom for withdrawals is only ~$890K at current utilization; a single large borrow could push the market back to 100% and re-lock new supply
 
 ### Morpho Market (sUSN/USDC)
 
@@ -298,9 +299,9 @@ Alternatively, users can sell sUSN on DEXes for immediate (but potentially slipp
 | Oracle | MorphoChainlinkOracleV2 ([`0xC415Cc3F04F9074A9562aEEe02591e65D39A94aa`](https://etherscan.io/address/0xC415Cc3F04F9074A9562aEEe02591e65D39A94aa)) |
 | IRM | AdaptiveCurveIrm ([`0x870aC11D48B15DB9a138Cf899d20F13F79Ba00BC`](https://etherscan.io/address/0x870aC11D48B15DB9a138Cf899d20F13F79Ba00BC)) |
 | LLTV | 86% |
-| Total Supply | ~$8.45M USDC |
-| Total Borrow | ~$7.57M USDC |
-| Utilization | **89.6%** (Apr 27, 2026; was ~100% on Mar 23 — new supply entered but market remains tightly utilized) |
+| Total Supply | ~$8.53M USDC |
+| Total Borrow | ~$7.63M USDC |
+| Utilization | **89.5%** (May 11, 2026; was 89.6% on Apr 27 and ~100% on Mar 23 — stable at ~90% over the last 2 weeks) |
 
 ### Morpho Oracle Analysis (on-chain verified)
 
@@ -314,14 +315,14 @@ The oracle formula: `price = vault_conversion * baseFeed1 * SCALE_FACTOR / quote
 
 | Parameter | Address | Description | Current Value |
 |-----------|---------|-------------|---------------|
-| BASE_VAULT | [`0xE24a3DC889621612422A64E6388927901608B91D`](https://etherscan.io/address/0xE24a3DC889621612422A64E6388927901608B91D) | sUSN vault (ERC-4626 exchange rate) | 1.1824 USN/sUSN |
+| BASE_VAULT | [`0xE24a3DC889621612422A64E6388927901608B91D`](https://etherscan.io/address/0xE24a3DC889621612422A64E6388927901608B91D) | sUSN vault (ERC-4626 exchange rate) | 1.1870 USN/sUSN |
 | BASE_VAULT_CONVERSION_SAMPLE | — | Conversion sample amount | 1e8 |
 | BASE_FEED_1 | [`0x6e498b02C0036235c8164A502b0eECC7660BD889`](https://etherscan.io/address/0x6e498b02C0036235c8164A502b0eECC7660BD889) | StorkChainlinkAdapter (USN/USD) | 1e18 (=$1.00) |
 | BASE_FEED_2 | `0x0` | Not set | — |
-| QUOTE_FEED_1 | [`0x8fFfFfd4AfB6115b954Bd326cbe7B4BA576818f6`](https://etherscan.io/address/0x8fFfFfd4AfB6115b954Bd326cbe7B4BA576818f6) | Chainlink USDC/USD (8 dec) | 99,979,871 (=$0.9998) |
+| QUOTE_FEED_1 | [`0x8fFfFfd4AfB6115b954Bd326cbe7B4BA576818f6`](https://etherscan.io/address/0x8fFfFfd4AfB6115b954Bd326cbe7B4BA576818f6) | Chainlink USDC/USD (8 dec) | 99,977,982 (=$0.9998) |
 | QUOTE_FEED_2 | `0x0` | Not set | — |
 | SCALE_FACTOR | — | Decimal adjustment | 1,000,000 |
-| **price()** | — | **Final oracle price** | **1,182,608,447,254,347,827,674,232 (~1.1826 USDC/sUSN)** |
+| **price()** | — | **Final oracle price** | **1,187,287,146,884,000,919,322,416 (~1.1873 USDC/sUSN)** |
 
 **Stork adapter details:**
 - Description: `"A port of a chainlink aggregator powered by Stork"`
@@ -332,7 +333,7 @@ The oracle formula: `price = vault_conversion * baseFeed1 * SCALE_FACTOR / quote
 - **Stork USN/USD feed risk**: If USN depegs (e.g., drops to $0.90) but the Stork feed continues reporting $1.00, the oracle would **overvalue sUSN collateral**, allowing borrowers to extract more than their collateral is worth. This is the primary oracle risk
 - **Stork is newer**: Less battle-tested than Chainlink. The adapter's non-standard `latestRoundData()` timestamps suggest incomplete Chainlink interface compliance
 - **Single oracle source for USN/USD**: No redundant oracle or fallback. If Stork fails or returns stale data during a USN depeg, liquidations would malfunction
-- **86% LLTV is aggressive** for an asset with a 5-day withdrawal window — liquidators may struggle to unwind sUSN collateral quickly through DEXes with thin liquidity. The Morpho market remains tightly utilized (**89.6%** as of Apr 27, 2026; was 100% on Mar 23), leaving only ~$880K of withdrawable supply headroom
+- **86% LLTV is aggressive** for an asset with a 5-day withdrawal window — liquidators may struggle to unwind sUSN collateral quickly through DEXes with thin liquidity. The Morpho market remains tightly utilized (**89.5%** as of May 11, 2026; 89.6% on Apr 27; 100% on Mar 23), leaving only ~$890K of withdrawable supply headroom
 
 ## Centralization & Control Risks
 
@@ -402,7 +403,7 @@ The protocol is controlled by a 3-of-6 Gnosis Safe multisig. **Proxy upgrades ar
   - Monitor `convertToAssets(1e18)` for exchange rate changes (should only increase)
   - **Alert**: If exchange rate **decreases** — indicates potential issue with rebase or loss event
   - Monitor `Rebase(amount)` events for yield distribution frequency and amounts
-  - Monitor `Deposit`, `Withdraw` events for large movements (>$500K given ~$26.6M TVL)
+  - Monitor `Deposit`, `Withdraw` events for large movements (>$500K given ~$29.1M TVL)
   - **Alert**: Single deposits/withdrawals >$2M
 
 ### USN Token Monitoring
@@ -451,7 +452,7 @@ The protocol is controlled by a 3-of-6 Gnosis Safe multisig. **Proxy upgrades ar
 - **USN price**: Monitor USN/USD price on CoinGecko and DEXes
   - **Alert**: If USN deviates >0.5% from $1.00 peg (significant depegging)
   - **Alert**: If USN deviates >2% from $1.00 peg (critical — directly impacts sUSN collateral value via Stork oracle risk)
-  - Current price: $0.9997 (well-pegged, April 27, 2026; CoinGecko)
+  - Current price: $0.9997 (well-pegged, May 11, 2026; CoinGecko)
 
 ### Morpho Market Monitoring
 
@@ -507,10 +508,10 @@ The protocol is controlled by a 3-of-6 Gnosis Safe multisig. **Proxy upgrades ar
 - **Partial timelock coverage**: Proxy upgrades are now behind a 48-hour timelock, but operational functions (blacklist, rescueToken, rebase, minting, role grants) remain immediately executable by the 3-of-6 multisig
 - **Mostly off-chain/custodial reserves**: The majority of USN backing is held off-chain with custodians. Alpaca/Dinari tokenization claim not verified on-chain. On-chain verifiability limited to DeFi strategy positions
 - **REBASE_MANAGER_ROLE on 2 EOAs**: Deployer EOA and unknown EOA still hold REBASE_MANAGER_ROLE on the sUSN vault — should be revoked
-- **No bug bounty program**: No formal bug bounty on any platform despite ~$26.6M TVL
+- **No bug bounty program**: No formal bug bounty on any platform despite ~$29.1M TVL
 - **Anonymous multisig signers**: All 6 signers are anonymous EOAs. No independent or known-entity signers. Commitment to add known signers only after >$100M TVL
 - **5-day withdrawal lockup**: Not compatible with instant liquidation needs on Morpho
-- **Morpho market tightly utilized (89.6%, was 100% on Mar 23)**: ~$880K withdrawable supply headroom; can snap back to 100% on any sizable new borrow
+- **Morpho market tightly utilized (89.5%, was 100% on Mar 23)**: ~$890K withdrawable supply headroom; can snap back to 100% on any sizable new borrow
 - **BVI jurisdiction**: Limited regulatory oversight and investor protection
 
 ### Critical Risks
@@ -547,10 +548,10 @@ The protocol is controlled by a 3-of-6 Gnosis Safe multisig. **Proxy upgrades ar
 - **Source code**: Now public with Slither + Mythril CI and 96-100% test coverage
 - **Bug Bounty**: None
 - **Time in Production**: ~17 months public beta, ~17 months sUSN on-chain. Maturing protocol
-- **TVL**: ~$26.57M (Apr 27, 2026, down from ~$30.75M on Mar 23 — -13.6% in 35 days). Small and now contracting
+- **TVL**: ~$29.10M (May 11, 2026, up 9.5% from ~$26.57M on Apr 27 but still down 5.4% from ~$30.75M on Mar 23). Small; recently rebounded
 - **Incidents**: None reported
 
-**Score: 3.0/5** — Multiple audits from reputable (Halborn) and lesser-known (Hashlock) firms. Source code now public with static analysis CI — a meaningful improvement enabling independent review. No bug bounty remains a gap. Production history of ~17 months (approaching score 2 rubric of 1-2 years). TVL ~$26.6M (still >$10M threshold for score 3; contracted 13.6% in the last 35 days — worth watching for the reassessment trigger at ~$15M). Between score 2 (2+ audits by reputable firms, 1-2 years, TVL >$50M) and score 3 (1 audit by reputable firm, bug bounty, 6-12 months, TVL >$10M). The public source code, multiple Halborn audits, and 17-month track record meet score 3 criteria. The absence of a bug bounty prevents reaching score 2.
+**Score: 3.0/5** — Multiple audits from reputable (Halborn) and lesser-known (Hashlock) firms. Source code now public with static analysis CI — a meaningful improvement enabling independent review. No bug bounty remains a gap. Production history of ~18 months (approaching score 2 rubric of 1-2 years). TVL ~$29.1M (well above the $10M threshold for score 3; rebounded 9.5% in the last 14 days, comfortably outside the ~$15M reassessment trigger). Between score 2 (2+ audits by reputable firms, 1-2 years, TVL >$50M) and score 3 (1 audit by reputable firm, bug bounty, 6-12 months, TVL >$10M). The public source code, multiple Halborn audits, and 18-month track record meet score 3 criteria. The absence of a bug bounty prevents reaching score 2.
 
 #### Category 2: Centralization & Control Risks (Weight: 30%)
 
@@ -619,14 +620,14 @@ The protocol is controlled by a 3-of-6 Gnosis Safe multisig. **Proxy upgrades ar
 #### Category 4: Liquidity Risk (Weight: 15%)
 
 - **Exit mechanism**: Withdrawal request + up to 5-day cooldown. Not instant
-- **DEX liquidity**: ~$5.7K USN daily volume, ~$1.6 sUSN daily volume (CoinGecko, Apr 27, 2026; was ~$626 / ~$118 on Apr 22 and ~$33K / ~$156 on Mar 23). Effectively no DEX exit for a ~$26.6M protocol
+- **DEX liquidity**: ~$1.0K USN daily volume, ~$42 sUSN daily volume (CoinGecko, May 11, 2026; was ~$5.7K / ~$1.6 on Apr 27 and ~$33K / ~$156 on Mar 23). Effectively no DEX exit for a ~$29.1M protocol
 - **maxRedeem = 0**: Direct ERC-4626 redemption disabled. Must use withdrawal handler
 - **Liquidity mismatch**: Private credit positions have T+3 month redemption vs T+5 day user guarantee
 - **Same-value redemption**: sUSN redeems for USN (stablecoin-denominated)
 - **Small TVL**: Large positions could dominate TVL and create concentration risk
 - **Morpho context**: 5-day withdrawal delay makes liquidation of sUSN collateral slow — could be problematic at 86% LLTV
 
-**Score: 3.5/5** — Withdrawals require up to 5 days and go through a handler process. DEX liquidity remains effectively zero on the sUSN side (~$1.6/day on Apr 27, vs ~$118 on Apr 22 and ~$156 on Mar 23). USN volume rebounded to ~$5.7K/day from ~$626 on Apr 22 — still negligible relative to TVL. The DCLM market maker backstop provides a contractual (off-chain) exit mechanism for >1% depeg events, which is a positive factor. The same-value stablecoin redemption is also positive. However, the Morpho market remains tightly utilized (**89.6% on Apr 27, was 100% on Mar 23**) — only ~$880K of withdrawable supply headroom. Between score 3 (market-based or short queues, >$1M, 3-7 days exit) and score 4 (withdrawal queues or restrictions, <$1M, >1 week or >10% impact). The DCLM backstop provides some comfort but is contractual, not on-chain. The tight Morpho utilization, 5-day withdrawal delay, and collapsed sUSN DEX volume offset the DCLM improvement, keeping score at 3.5.
+**Score: 3.5/5** — Withdrawals require up to 5 days and go through a handler process. DEX liquidity remains effectively zero on the sUSN side (~$42/day on May 11, vs ~$1.6 on Apr 27 and ~$156 on Mar 23). USN volume is ~$1.0K/day (vs ~$5.7K on Apr 27 and ~$33K on Mar 23) — still negligible relative to TVL. The DCLM market maker backstop provides a contractual (off-chain) exit mechanism for >1% depeg events, which is a positive factor. The same-value stablecoin redemption is also positive. However, the Morpho market remains tightly utilized (**89.5% on May 11; 89.6% on Apr 27; 100% on Mar 23**) — only ~$890K of withdrawable supply headroom. Between score 3 (market-based or short queues, >$1M, 3-7 days exit) and score 4 (withdrawal queues or restrictions, <$1M, >1 week or >10% impact). The DCLM backstop provides some comfort but is contractual, not on-chain. The tight Morpho utilization, 5-day withdrawal delay, and effectively-zero sUSN DEX volume offset the DCLM improvement, keeping score at 3.5.
 
 #### Category 5: Operational Risk (Weight: 5%)
 
@@ -660,7 +661,7 @@ Final Score = (Centralization × 0.30) + (Funds Mgmt × 0.30) + (Audits × 0.20)
 - **Audits & Historical**: 3.5 → 3.0 (public source code with CI, longer production history)
 - **Operational Risk**: 3.5 → 3.0 (public repos, Slither/Mythril CI)
 - **Funds Management**: 3.5 → 3.5 (unchanged — Alpaca/Dinari tokenization not verified on-chain)
-- **Liquidity Risk**: 3.5 → 3.5 (unchanged — DCLM backstop offsets Morpho utilization risk; 89.6% Apr 27 vs 100% Mar 23)
+- **Liquidity Risk**: 3.5 → 3.5 (unchanged — DCLM backstop offsets Morpho utilization risk; 89.5% May 11, 89.6% Apr 27, 100% Mar 23)
 
 ### Risk Tier
 
@@ -680,11 +681,11 @@ Noon's sUSN is a yield-bearing staked stablecoin backed by diversified strategie
 
 Since the initial assessment, the team has made meaningful improvements: **48-hour timelock on proxy upgrades** (verified on-chain), **public source code** with CI including Slither + Mythril, and a **DCLM market maker backstop** providing contractual liquidation support. Ceffu funding rate arbitrage has been paused 12+ months.
 
-However, concerns remain: the `mintAndRebase()` function allows **unbacked USN minting** (up to 50K/call, limit adjustable without timelock), operational functions (blacklist, rescueToken, rebase, USN admin) are **NOT behind the timelock**, all 6 multisig signers are anonymous, 2 EOAs still hold `REBASE_MANAGER_ROLE` (verified still true on Apr 27), the predominantly **off-chain custodial** reserve model limits on-chain verifiability (Alpaca/Dinari tokenization not verified on-chain), and the **5-day withdrawal delay** plus **89.6% Morpho utilization** (100% on Mar 23) create liquidity challenges. USN supply has also contracted ~14.2% in the last 35 days, worth watching against the ~$15M TVL reassessment trigger.
+However, concerns remain: the `mintAndRebase()` function allows **unbacked USN minting** (up to 50K/call, limit adjustable without timelock), operational functions (blacklist, rescueToken, rebase, USN admin) are **NOT behind the timelock**, all 6 multisig signers are anonymous, 2 EOAs still hold `REBASE_MANAGER_ROLE` (verified still true on May 11), the predominantly **off-chain custodial** reserve model limits on-chain verifiability (Alpaca/Dinari tokenization not verified on-chain), and the **5-day withdrawal delay** plus **89.5% Morpho utilization** (89.6% on Apr 27, 100% on Mar 23) create liquidity challenges. Note also that **USN supply rebounded +16.4% in the last 14 days (23.76M → 27.66M) while sUSN supply fell ~4.4%**, dropping the staking ratio from 87.4% to ~72% — new mints are not being staked, worth monitoring.
 
 **For the intended Yearn use case (sUSN as Morpho collateral):**
 
-The 5-day withdrawal lockup remains the primary compatibility concern. If sUSN collateral needs to be liquidated on Morpho, the liquidator cannot redeem sUSN for USN quickly — they must either sell on DEXes (which now show near-zero sUSN volume: ~$5.7K/day USN, ~$1.6/day sUSN) or wait up to 5 days via the withdrawal handler. The DCLM market maker backstop provides some comfort (contractual buyer at previous day's price within 24h during >1% depeg), but it is contractual/off-chain, not an on-chain guarantee. At 86% LLTV and 89.6% Morpho utilization (was 100% on Mar 23), this creates concentration and bad debt risk. The Stork oracle (non-Chainlink, single source, no fallback) adds additional risk.
+The 5-day withdrawal lockup remains the primary compatibility concern. If sUSN collateral needs to be liquidated on Morpho, the liquidator cannot redeem sUSN for USN quickly — they must either sell on DEXes (which show near-zero volume: ~$1.0K/day USN, ~$42/day sUSN on May 11) or wait up to 5 days via the withdrawal handler. The DCLM market maker backstop provides some comfort (contractual buyer at previous day's price within 24h during >1% depeg), but it is contractual/off-chain, not an on-chain guarantee. At 86% LLTV and 89.5% Morpho utilization (89.6% on Apr 27, 100% on Mar 23), this creates concentration and bad debt risk. The Stork oracle (non-Chainlink, single source, no fallback) adds additional risk.
 
 **Key conditions for any exposure:**
 
@@ -696,7 +697,7 @@ The 5-day withdrawal lockup remains the primary compatibility concern. If sUSN c
 - Monitor rebase events for frequency and consistency
 - Monitor collateral wallet balances relative to USN supply
 - Monitor Stork oracle feed vs sUSN vault exchange rate
-- Monitor Morpho market utilization rate (currently 89.6%, was 100% on Mar 23 — thin withdrawal headroom)
+- Monitor Morpho market utilization rate (currently 89.5%, was 89.6% on Apr 27 and 100% on Mar 23 — thin withdrawal headroom)
 - Verify Accountable proof of solvency dashboard is operational
 - Request the team revoke `REBASE_MANAGER_ROLE` from EOAs (`0x1738...d699`, `0xcc24...b11f`)
 - Request the team extend timelock to cover operational functions (blacklist, rescueToken, rebaseLimit, USN admin)
@@ -713,5 +714,5 @@ The 5-day withdrawal lockup remains the primary compatibility concern. If sUSN c
 - **Signer-based**: Reassess if known-entity or independent signers are added to the multisig
 - **Bug bounty**: Reassess if/when a bug bounty program is launched
 - **Audit-based**: Reassess if additional audits by tier-1 firms (Trail of Bits, OpenZeppelin, Cyfrin) are completed
-- **Morpho market-based**: Reassess if the Stork oracle is replaced with a native Chainlink feed, if LLTV is adjusted, or if utilization returns to 100% (currently 89.6%)
+- **Morpho market-based**: Reassess if the Stork oracle is replaced with a native Chainlink feed, if LLTV is adjusted, or if utilization returns to 100% (currently 89.5%)
 - **DCLM backstop**: Reassess if DCLM market maker agreement is terminated (45-day notice period)
