@@ -8,36 +8,25 @@ max_retries = 2
 retry_wait_time = 2
 timeout = 20
 
-# Treat rate-limit as OK so transient throttling doesn't fail the run
-accept = ['200..=299', '429']
+# Accept 200-range, 403 (bot-blocked but URL exists), and 429 (rate-limited).
+# 403 covers the long tail of Cloudflare/bot-protection responses (block explorers,
+# GitBook hosts, DefiLlama, app frontends, etc.) without per-host allowlisting.
+accept = ['200..=299', '403', '429']
 
 # TEMPLATE.md contains literal `URL` placeholders in markdown link syntax.
 # reports/old/ is archived/legacy material that we don't actively maintain.
 exclude_path = ["reports/TEMPLATE.md", "reports/old"]
 
-# Hosts that block bots / produce false positives:
-# - Block explorers (etherscan, basescan, etc.) sit behind Cloudflare and 403 CI requests
-# - GitBook-hosted docs (midas, others) 403 non-browser user agents
-# - DefiLlama 403s all bot traffic
+# Excludes for non-403 false-positive cases:
 # - rekt.news intermittently returns 500 to crawlers
 # - Morpho GraphQL endpoints are POST-only and 400 on GET
-# - Twitter/X and LinkedIn require auth or block bots
+# - Twitter/X often produces connection errors / soft-blocks
+# - LinkedIn requires auth (returns 999/other non-403 codes)
+# - trust-security.xyz returns 405 on HEAD requests
 exclude = [
-    '^https?://(www\.)?etherscan\.io',
-    '^https?://(www\.)?basescan\.org',
-    '^https?://(www\.)?arbiscan\.io',
-    '^https?://(www\.)?polygonscan\.com',
-    '^https?://(www\.)?optimistic\.etherscan\.io',
-    '^https?://(www\.)?ftmscan\.com',
-    '^https?://(www\.)?snowtrace\.io',
-    '^https?://(www\.)?bscscan\.com',
-    '^https?://(www\.)?defillama\.com',
-    '^https?://(docs\.)?midas\.app',
     '^https?://(www\.)?rekt\.news',
     '^https?://(blue-api|api)\.morpho\.org/graphql',
-    '^https?://app\.maple\.finance',
-    '^https?://accountable\.apyx\.fi',
-    '^https?://(www\.)?trust-security\.xyz',
     '^https?://(www\.)?(twitter|x)\.com',
     '^https?://(www\.)?linkedin\.com',
+    '^https?://(www\.)?trust-security\.xyz',
 ]
