@@ -33,8 +33,8 @@ The architecture has two layers:
 - [Audits](https://docs.stakedhype.fi/technical/audits)
 - [StakedHYPE security page](https://docs.stakedhype.fi/technical/security)
 - [StakedHYPE governance page](https://docs.stakedhype.fi/governance)
-- [Hyperliquid staking docs](https://hyperliquid.gitbook.io/hyperliquid-docs/hype-staking)
-- [Hyperliquid validator docs](https://hyperliquid.gitbook.io/hyperliquid-docs/hype-staking/validators)
+- [Hyperliquid staking docs](https://hyperliquid.gitbook.io/hyperliquid-docs/hypercore/staking)
+- [Hyperliquid validator docs](https://hyperliquid.gitbook.io/hyperliquid-docs/hypercore/staking)
 
 ## Contract Addresses
 
@@ -497,8 +497,8 @@ Rationale:
 - Guardian Nov 2025 audit: https://github.com/ValantisLabs/audits/blob/main/guardian_nov_2025.pdf
 - Trail of Bits FraxGov audit (governance basis): https://github.com/trailofbits/publications/blob/master/reviews/2023-05-fraxgov-securityreview.pdf
 - DeFiLlama StakedHYPE: https://defillama.com/protocol/stakedhype
-- Hyperliquid staking docs: https://hyperliquid.gitbook.io/hyperliquid-docs/hype-staking
-- Hyperliquid validators docs: https://hyperliquid.gitbook.io/hyperliquid-docs/hype-staking/validators
+- Hyperliquid staking docs: https://hyperliquid.gitbook.io/hyperliquid-docs/hypercore/staking
+- Hyperliquid validators docs: https://hyperliquid.gitbook.io/hyperliquid-docs/hypercore/staking
 - Hyperliquid risks docs: https://hyperliquid.gitbook.io/hyperliquid-docs/risks
 - ASXN HyperScreener (LST data): https://hyperscreener.asxn.xyz/liquid-staking
 

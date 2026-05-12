@@ -43,7 +43,7 @@ This vault is **no longer the terminal layer** for the broader Yearn V3 mainnet 
 - [Yearn Multisig Info](https://docs.yearn.fi/developers/security/multisig)
 - [Sky Protocol Documentation](https://developers.skyeco.com/)
 - [Sky Savings Rate (sUSDS)](https://docs.spark.fi/user-guides/earning-savings/susds)
-- [Sky USDS Staking Rewards](https://docs.spark.fi/user-guides/earning-savings/sky-token-rewards)
+- [Sky USDS Staking Rewards](https://docs.spark.fi/user-guides/farming-rewards)
 
 ## Contract Addresses
 

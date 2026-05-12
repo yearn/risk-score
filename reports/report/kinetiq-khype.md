@@ -16,10 +16,10 @@ Kinetiq routes stake through a `StakingPool` contract that manages validator del
 
 - [Kinetiq app](https://kinetiq.xyz/)
 - [Kinetiq docs](https://docs.kinetiq.xyz/)
-- [kHYPE docs](https://docs.kinetiq.xyz/kinetiq-lsd/khype)
-- [StakeHub docs](https://docs.kinetiq.xyz/kinetiq-lsd/stakehub)
-- [Contracts page](https://docs.kinetiq.xyz/resources/contracts)
-- [Audits page](https://docs.kinetiq.xyz/resources/audits)
+- [kHYPE docs](https://kinetiq.xyz/docs/khype)
+- [StakeHub docs](https://kinetiq.xyz/docs/stakehub)
+- [Contracts page](https://kinetiq.xyz/docs/contracts-and-audits)
+- [Audits page](https://kinetiq.xyz/docs/contracts-and-audits)
 - [Kinetiq bug bounty (Cantina)](https://cantina.xyz/bounties/a98129d7-dd15-4c16-b2cb-d8cc42f87de4)
 - [CoinGecko kHYPE](https://www.coingecko.com/en/coins/kinetiq-staked-hype)
 - [DeFiLlama Kinetiq](https://defillama.com/protocol/kinetiq)
@@ -466,18 +466,18 @@ Rationale:
 
 - Kinetiq app: https://kinetiq.xyz/
 - Kinetiq docs: https://docs.kinetiq.xyz/
-- kHYPE docs: https://docs.kinetiq.xyz/kinetiq-lsd/khype
-- StakeHub docs: https://docs.kinetiq.xyz/kinetiq-lsd/stakehub
-- Kinetiq FAQ: https://docs.kinetiq.xyz/resources/faq
-- Kinetiq contracts: https://docs.kinetiq.xyz/resources/contracts
-- Kinetiq audits: https://docs.kinetiq.xyz/resources/audits
+- kHYPE docs: https://kinetiq.xyz/docs/khype
+- StakeHub docs: https://kinetiq.xyz/docs/stakehub
+- Kinetiq FAQ: https://kinetiq.xyz/docs/faq
+- Kinetiq contracts: https://kinetiq.xyz/docs/contracts-and-audits
+- Kinetiq audits: https://kinetiq.xyz/docs/contracts-and-audits
 - Kinetiq audit PDFs (Google Drive): https://drive.google.com/drive/folders/1T3ZGl6HNmt5LaKwdCmrA9HS7MsXheOys
 - Code4rena Kinetiq audit: https://code4rena.com/audits/2025-04-kinetiq
 - Kinetiq bug bounty (Cantina): https://cantina.xyz/bounties/a98129d7-dd15-4c16-b2cb-d8cc42f87de4
 - CoinGecko kHYPE: https://www.coingecko.com/en/coins/kinetiq-staked-hype
 - DeFiLlama Kinetiq: https://defillama.com/protocol/kinetiq
-- Hyperliquid staking docs: https://hyperliquid.gitbook.io/hyperliquid-docs/hype-staking
-- Hyperliquid validator prison docs: https://hyperliquid.gitbook.io/hyperliquid-docs/hype-staking/validator-prison
+- Hyperliquid staking docs: https://hyperliquid.gitbook.io/hyperliquid-docs/hypercore/staking
+- Hyperliquid validator prison docs: https://hyperliquid.gitbook.io/hyperliquid-docs/hypercore/staking
 - Hyperliquid risks docs: https://hyperliquid.gitbook.io/hyperliquid-docs/risks
 - Onchain verification via `cast` against HyperEVM RPC (`rpc.hyperliquid.xyz/evm`)
 - Hyperliquid L1 API: `POST https://api.hyperliquid.xyz/info` (validator summaries, delegations)

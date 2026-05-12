@@ -25,7 +25,7 @@ Deposits are gated by a permission system for regulatory compliance (first-time 
 
 - [Protocol Documentation](https://docs.maple.finance/)
 - [Syrup Lender Documentation](https://docs.maple.finance/syrupusdc-usdt-for-lenders/introduction)
-- [Protocol App](https://syrup.fi/)
+- [Protocol App](https://maple.finance/syrup)
 - [App Details / Allocations](https://app.maple.finance/earn/details)
 - [Smart Contract Integration](https://docs.maple.finance/integrate/ethereum-mainnet/smart-contract-integrations)
 - [Security / Audits](https://docs.maple.finance/technical-resources/security/security)
@@ -532,7 +532,7 @@ Deposits into syrupUSDC are gated by the [`PoolPermissionManager`](https://ether
 
 **First-time deposit flow:**
 
-1. User connects wallet on [syrup.fi](https://syrup.fi) and enters a USDC deposit amount
+1. User connects wallet on [syrup.fi](https://maple.finance/syrup) and enters a USDC deposit amount
 2. The frontend requests an ECDSA authorization signature from Maple's backend (checks jurisdiction, sanctions, etc.)
 3. If approved, the backend returns a signature from a permission admin ([`0x54b130c704919320E17F4F1Ffa4832A91AB29Dca`](https://etherscan.io/address/0x54b130c704919320E17F4F1Ffa4832A91AB29Dca))
 4. The frontend calls `SyrupRouter.authorizeAndDeposit()` — a single atomic transaction that:
