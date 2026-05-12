@@ -45,7 +45,7 @@ The April-27 snapshot captured the vault mid-deallocation following the **April 
 - [DeFiLlama: Yearn Finance](https://defillama.com/protocol/yearn-finance)
 - [Yearn Multisig Info](https://docs.yearn.fi/developers/security/multisig)
 - [Lido Documentation](https://docs.lido.fi/)
-- [Lido Security](https://lido.fi/security)
+- [Lido Security](https://docs.lido.fi/security/audits/)
 - [hgETH reassessment (rsETH bridge exploit context)](./kerneldao-hgeth.md)
 
 ## Contract Addresses
@@ -117,7 +117,7 @@ The April-27 snapshot captured the vault mid-deallocation following the **April 
 
 ### Lido Audits (Underlying Protocol)
 
-Lido is one of the most extensively audited LSTs in DeFi. Audits include MixBytes, Quantstamp, Sigma Prime, Statemind, Oxorio, ChainSecurity, and others. See [Lido security](https://lido.fi/security) for the full list.
+Lido is one of the most extensively audited LSTs in DeFi. Audits include MixBytes, Quantstamp, Sigma Prime, Statemind, Oxorio, ChainSecurity, and others. See [Lido security](https://docs.lido.fi/security/audits/) for the full list.
 
 ### Curve ETH/stETH Pool
 

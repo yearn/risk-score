@@ -23,16 +23,16 @@ ETH+ is a yield-bearing Ethereum Liquid Staking Token basket built on Reserve Pr
 **Total TVL:** ~$108M (~36,246 ETH)
 
 **Links:**
-- [Reserve Protocol Documentation](https://reserve.org/protocol/introduction/)
+- [Reserve Protocol Documentation](https://docs.reserve.org/introduction)
 - [ETH+ Dashboard](https://app.reserve.org/ethereum/token/0xe72b141df173b999ae7c1adcbf60cc9833ce56a8/overview)
-- [Reserve Protocol Security](https://reserve.org/protocol/security/)
+- [Reserve Protocol Security](https://docs.reserve.org/security)
 - [LlamaRisk Analysis](https://www.llamarisk.com/research/rtoken-risk-ethplus)
 
 ## Audits and Due Diligence Disclosures
 
 **Audit Status:** Comprehensive
 
-The Reserve Protocol has undergone [multiple security audits and code contests](https://reserve.org/protocol/security/#smart-contract-security-audits):
+The Reserve Protocol has undergone [multiple security audits and code contests](https://docs.reserve.org/security):
 - Trail of Bits
 - Solidified
 - Ackee Blockchain
@@ -50,7 +50,7 @@ The Reserve Protocol has undergone [multiple security audits and code contests](
 
 **Platform:** Immunefi
 **Maximum Payout:** $10,000,000
-**Link:** https://immunefi.com/bug-bounty/reserve/
+**Link:** https://docs.reserve.org/security#bug-bounty
 
 This is one of the highest bug bounty programs in DeFi, indicating strong commitment to security.
 

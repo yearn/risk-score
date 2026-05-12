@@ -33,8 +33,8 @@ The architecture has two layers:
 - [Audits](https://docs.stakedhype.fi/technical/audits)
 - [StakedHYPE security page](https://docs.stakedhype.fi/technical/security)
 - [StakedHYPE governance page](https://docs.stakedhype.fi/governance)
-- [Hyperliquid staking docs](https://hyperliquid.gitbook.io/hyperliquid-docs/hype-staking)
-- [Hyperliquid validator docs](https://hyperliquid.gitbook.io/hyperliquid-docs/hype-staking/validators)
+- [Hyperliquid staking docs](https://hyperliquid.gitbook.io/hyperliquid-docs/hypercore/staking)
+- [Hyperliquid validator docs](https://hyperliquid.gitbook.io/hyperliquid-docs/hypercore/staking)
 
 ## Contract Addresses
 
@@ -119,7 +119,7 @@ Assessment note:
 ## Historical Track Record
 
 - StakedHYPE documentation indicates active production operation with stHYPE issuance and unstaking mechanisms live.
-- Listed on [DeFiLlama](https://defillama.com/protocol/stakedhype) since July 2025 (~8 months at assessment date).
+- Listed on [DeFiLlama](https://defillama.com/protocol/hyperstake-hype-staking) since July 2025 (~8 months at assessment date).
 - **Current TVL**: ~$124M (February 18, 2026, per DeFiLlama).
 - **Peak TVL**: ~$544M (July 2025).
 - **TVL trend**: Significant decline from peak, currently at ~23% of ATH. Likely driven by broader market conditions and HYPE price movements rather than protocol-specific issues.
@@ -496,9 +496,9 @@ Rationale:
 - Pashov Nov 2025 audit: https://github.com/ValantisLabs/audits/blob/main/pashov_nov_2025.pdf
 - Guardian Nov 2025 audit: https://github.com/ValantisLabs/audits/blob/main/guardian_nov_2025.pdf
 - Trail of Bits FraxGov audit (governance basis): https://github.com/trailofbits/publications/blob/master/reviews/2023-05-fraxgov-securityreview.pdf
-- DeFiLlama StakedHYPE: https://defillama.com/protocol/stakedhype
-- Hyperliquid staking docs: https://hyperliquid.gitbook.io/hyperliquid-docs/hype-staking
-- Hyperliquid validators docs: https://hyperliquid.gitbook.io/hyperliquid-docs/hype-staking/validators
+- DeFiLlama StakedHYPE: https://defillama.com/protocol/hyperstake-hype-staking
+- Hyperliquid staking docs: https://hyperliquid.gitbook.io/hyperliquid-docs/hypercore/staking
+- Hyperliquid validators docs: https://hyperliquid.gitbook.io/hyperliquid-docs/hypercore/staking
 - Hyperliquid risks docs: https://hyperliquid.gitbook.io/hyperliquid-docs/risks
 - ASXN HyperScreener (LST data): https://hyperscreener.asxn.xyz/liquid-staking
 

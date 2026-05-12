@@ -39,8 +39,8 @@ apyUSD inherits the same risk because it is redeemable into apxUSD. Its exchange
 
 - [Protocol Website](https://apyx.fi/)
 - [Protocol Documentation](https://docs.apyx.fi)
-- [apxUSD Overview](https://docs.apyx.fi/apxusd/overview)
-- [apyUSD Overview](https://docs.apyx.fi/apyusd/overview)
+- [apxUSD Overview](https://docs.apyx.fi/product-overview/apxusd-overview)
+- [apyUSD Overview](https://docs.apyx.fi/product-overview/apyusd-overview)
 - [Blog - Introducing Apyx](https://blog.apyx.fi/introducing-apyx/)
 - [Audits Page](https://docs.apyx.fi/resources/audits)
 - [Third-Party Attestation Page](https://docs.apyx.fi/collateral-and-custody/third-party-attestation)
