@@ -611,7 +611,6 @@ Fasanara Capital is a London-based institutional investment manager with $4B+ AU
 **References:**
 - [Auto Finance Blog - autoUSD Launch](https://blog.auto.finance/post/the-stablecoin-autopool-autousd-is-now-live)
 - [Auto Finance Rebrand Announcement](https://x.com/autopools/status/1968786026190504417)
-<!-- Trust Security disclosure post (trust-security.xyz/post/tokemak-liquidity-operator-can-steal-funds) is no longer accessible as of 2026-05-12. -->
 
 ---
 
