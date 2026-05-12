@@ -7,6 +7,7 @@ max_concurrency = 8
 max_retries = 2
 retry_wait_time = 2
 timeout = 20
+no_progress = true
 
 # Accept 200-range, 403 (bot-blocked but URL exists), and 429 (rate-limited).
 # 403 covers the long tail of Cloudflare/bot-protection responses (block explorers,

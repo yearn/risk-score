@@ -8,6 +8,7 @@ hammering per-protocol endpoints that can time out on large protocols
 (e.g. yearn).
 
 Usage:
+    uv run scripts/check_defillama_links.py reports
     uv run scripts/check_defillama_links.py reports/report/file1.md reports/report/file2.md
 
 Exit codes:
@@ -28,16 +29,35 @@ DEFILLAMA_RE = re.compile(r"https?://defillama\.com/protocol/([a-zA-Z0-9._-]+)")
 PROTOCOLS_URL = "https://api.llama.fi/protocols"
 REQUEST_TIMEOUT = 60  # /protocols payload is ~5MB, give it room
 
+# Mirror lychee.toml's exclude_path so dir-walks scan the same set lychee does.
+EXCLUDE_PATHS = ("reports/TEMPLATE.md", "reports/old")
+
 logging.basicConfig(level=logging.INFO, format="%(message)s")
 logger = logging.getLogger(__name__)
+
+
+def _is_excluded(path: Path) -> bool:
+    s = path.as_posix()
+    return any(s == e or s.startswith(e + "/") for e in EXCLUDE_PATHS)
+
+
+def collect_paths(args: list[str]) -> list[Path]:
+    """Expand a mix of files and directories into a flat list of .md files,
+    skipping the same paths lychee.toml excludes."""
+    collected: list[Path] = []
+    for arg in args:
+        p = Path(arg)
+        if p.is_dir():
+            collected.extend(sorted(p.rglob("*.md")))
+        elif p.is_file():
+            collected.append(p)
+    return [p for p in collected if not _is_excluded(p)]
 
 
 def find_defillama_slugs(paths: list[Path]) -> dict[str, list[Path]]:
     """Map each unique slug to the files that reference it."""
     slug_to_files: dict[str, list[Path]] = {}
     for path in paths:
-        if not path.is_file():
-            continue
         text = path.read_text(encoding="utf-8", errors="ignore")
         for slug in DEFILLAMA_RE.findall(text):
             slug_to_files.setdefault(slug, []).append(path)
@@ -69,10 +89,12 @@ def fetch_valid_slugs() -> set[str]:
 
 def main(argv: list[str]) -> int:
     if len(argv) < 2:
-        logger.error("usage: check_defillama_links.py <file.md> [<file.md>...]")
+        logger.error(
+            "usage: check_defillama_links.py <path> [<path>...]  (paths may be files or directories)"
+        )
         return 2
 
-    paths = [Path(arg) for arg in argv[1:]]
+    paths = collect_paths(argv[1:])
     slug_to_files = find_defillama_slugs(paths)
 
     if not slug_to_files:
@@ -85,8 +107,11 @@ def main(argv: list[str]) -> int:
     except requests.RequestException as exc:
         logger.error("Could not fetch protocol list: %s", exc)
         return 3
-    logger.info("Loaded %d known slugs; checking %d unique referenced slug(s)...",
-                len(valid_slugs), len(slug_to_files))
+    logger.info(
+        "Loaded %d known slugs; checking %d unique referenced slug(s)...",
+        len(valid_slugs),
+        len(slug_to_files),
+    )
 
     broken: list[tuple[str, list[Path]]] = []
     for slug, files in sorted(slug_to_files.items()):
@@ -99,7 +124,10 @@ def main(argv: list[str]) -> int:
     if broken:
         logger.error("\nFound %d broken defillama link(s):", len(broken))
         for slug, files in broken:
-            logger.error("  https://defillama.com/protocol/%s — slug not in current protocol list", slug)
+            logger.error(
+                "  https://defillama.com/protocol/%s — slug not in current protocol list",
+                slug,
+            )
             for f in files:
                 logger.error("    in %s", f)
         return 1
