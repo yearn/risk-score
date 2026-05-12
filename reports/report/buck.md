@@ -27,7 +27,6 @@ BUCK is **not a stablecoin** — its price appreciates over time as yield accrue
 - [Protocol App](https://www.buck.io)
 - [GitHub (buck-v1)](https://github.com/buck-labs/buck-v1)
 - [CoinGecko](https://www.coingecko.com/en/coins/buck-2)
-<!-- TODO: Buck moved/removed their docs (buck.io/docs, buck.io/transparency, cdn.buck.io whitepaper PDF all 404 as of 2026-05-12). Update links once new locations are confirmed. -->
 
 - [CoinDesk: Buck Launches Bitcoin-linked Savings Coin](https://www.coindesk.com/business/2026/01/05/buck-launches-bitcoin-linked-savings-coin-tied-to-michael-saylor-s-strategy)
 
