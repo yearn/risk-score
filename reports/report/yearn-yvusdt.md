@@ -306,7 +306,8 @@ Yearn maintains the [`monitoring`](https://github.com/yearn/monitoring) reposito
 | `totalDebt()` / `totalIdle()` | Vault | Capital deployment ratio — currently 100% deployed | Daily |
 | `strategies(address)` | Vault | Per-strategy debt, last report time, activation (revocations show `activation = 0`) | Daily |
 | `get_default_queue()` | Vault | Withdrawal queue composition (currently 3 strategies) | Weekly |
-| `getThreshold()` / `getOwners()` | ySafe | Governance integrity | Daily |
+| `getThreshold()` / `getOwners()` | ySafe | Governance integrity | Weekly |
+| `getMinDelay()` | ySafe | Delay change detection | Weekly |
 
 ## Risk Summary
 

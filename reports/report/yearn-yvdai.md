@@ -382,7 +382,8 @@ Yearn maintains the [`monitoring`](https://github.com/yearn/monitoring) reposito
 | `totalAssets()` | All three vaults | TVL | Daily |
 | `tin()` / `tout()` | PSM Lite | PSM fee | Daily |
 | `live()` | DAI-USDS Exchanger | Exchanger active | Daily |
-| `getThreshold()` / `getOwners()` | ySafe | Governance integrity | Daily |
+| `getThreshold()` / `getOwners()` | ySafe | Governance integrity | Weekly |
+| `getMinDelay()` | ySafe | Delay change detection | Weekly |
 
 ## Risk Summary
 
@@ -402,8 +403,6 @@ Yearn maintains the [`monitoring`](https://github.com/yearn/monitoring) reposito
 
 - **Vault-of-vaults composition (2 layers):** both depositor paths traverse two Yearn V3 vault layers. A bug or accounting issue at any layer cascades. Each layer's emergency state (shutdown, deposit pause) directly affects yvDAI-1
 - **Effective concentration into Sky ecosystem:** ~100% of deployed DAI ultimately ends up in Sky-ecosystem contracts (sUSDS ~92.5%, Sky USDS Staking ~5.4%, Spark Lend USDC ~2.1%). The sUSDS share grew substantially between May 5 and May 11 (~77.5% → ~92.5%) as yvUSDS-1 re-diversified its routing into the sUSDS Lender strategy. A bug or governance failure at the sUSDS contract would now affect ~92.5% of deployed value; a Sky-wide systemic failure would affect essentially the entire vault
-- **Cascading withdrawal mechanics:** atomic but multi-step — a redemption triggers strategy `withdraw()` calls at two vault layers plus the terminal Sky / Spark unstake, all in the same transaction. Higher gas, more accounting boundaries than a single-strategy vault
-- **Default queue trimmed:** the dormant sDAI / Spark DAI Lender / Aave V3 DAI Lender strategies were removed from the queue between April 27 and May 5 — the on-chain single-hop fallbacks are no longer present, and reintroducing any requires a fresh `addStrategy()` proposal at the 7-day timelock
 - **Sky Savings Rate / SPK reward rate variability:** affects yield, not principal
 - **PSM fee risk:** currently 0%, but Sky governance can change. Above 0.05% the strategy can fall back to Uniswap V3 with 0.5% slippage
 - **Intermediate-vault dependency:** both paths have a single intermediate Yearn V3 vault (yvUSDC-1 or yvUSDS-1) between yvDAI-1 and the terminal Sky / Spark contracts

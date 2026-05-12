@@ -88,7 +88,7 @@ The three Morpho USDC compounders that were active at the prior April 3 assessme
 - Morpho Gauntlet USDC Prime Compounder ([`0x694E47AFD14A64661a04eee674FB331bCDEF3737`](https://etherscan.io/address/0x694E47AFD14A64661a04eee674FB331bCDEF3737))
 - Morpho Steakhouse USDC Compounder ([`0x074134A2784F4F66b6ceD6f68849382990Ff3215`](https://etherscan.io/address/0x074134A2784F4F66b6ceD6f68849382990Ff3215))
 - Morpho OEV-boosted USDC Compounder ([`0x888239Ffa9a0613F9142C808aA9F7d1948a14f75`](https://etherscan.io/address/0x888239Ffa9a0613F9142C808aA9F7d1948a14f75))
-- Morpho Yearn USDC Compounder ([`0xf1784A1bF0cBDE0F868838Dd093E65215343c4C0`](https://etherscan.io/address/0xf1784A1bF0cBDE0F868838Dd093E65215343c4C0)) — added 2026-04-30, queued at 0 debt at the May 5 snapshot, **revoked between May 5 and May 11** (`activation = 0`)
+- Morpho Yearn USDC Compounder ([`0xf1784A1bF0cBDE0F868838Dd093E65215343c4C0`](https://etherscan.io/address/0xf1784A1bF0cBDE0F868838Dd093E65215343c4C0))
 - USDC Fluid Lender ([`0x00C8a649C9837523ebb406Ceb17a6378Ab5C74cF`](https://etherscan.io/address/0x00C8a649C9837523ebb406Ceb17a6378Ab5C74cF))
 - Aave V3 Lido USDC Lender ([`0x522478B54046aB7197880F2626b74a96d45B9B02`](https://etherscan.io/address/0x522478B54046aB7197880F2626b74a96d45B9B02))
 - Aave V3 USDC Lender ([`0x694cdD19EBee7A974BA8fE3AF8B383bb256F2858`](https://etherscan.io/address/0x694cdD19EBee7A974BA8fE3AF8B383bb256F2858))
@@ -352,7 +352,8 @@ Yearn maintains an active monitoring system via the [`monitoring-scripts-py`](ht
 | `totalDebt()` / `totalIdle()` | Vault | Capital deployment ratio | Daily |
 | `strategies(address)` | Vault | Per-strategy debt, last report time | Daily |
 | `get_default_queue()` | Vault | Withdrawal queue composition | Weekly |
-| `getThreshold()` / `getOwners()` | ySafe | Governance integrity | Daily |
+| `getThreshold()` / `getOwners()` | ySafe | Governance integrity | Weekly |
+| `getMinDelay()` | ySafe | Delay change detection | Weekly |
 | `ssr()` | Sky Pot | Savings rate | Weekly |
 
 ## Risk Summary

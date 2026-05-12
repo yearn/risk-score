@@ -274,7 +274,8 @@ Other monitoring that does cover yvWBTC-1 implicitly via the broader Yearn V3 se
 | `totalDebt()` / `totalIdle()` | Vault | Capital deployment ratio — **key early signal that a strategy has been attached and funded** | Daily |
 | `get_default_queue()` | Vault | Queue composition — **currently empty; non-empty indicates a new strategy attachment** | Daily |
 | `deposit_limit()` | Vault | Cap monitoring (currently oversized) | Daily |
-| `getThreshold()` / `getOwners()` | ySafe | Governance integrity | Daily |
+| `getThreshold()` / `getOwners()` | ySafe | Governance integrity | Weekly |
+| `getMinDelay()` | ySafe | Delay change detection | Weekly |
 
 ## Risk Summary
 

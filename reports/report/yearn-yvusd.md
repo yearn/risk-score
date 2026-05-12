@@ -378,8 +378,8 @@ Additionally, Yearn provides a dedicated **yvUSD APR API** ([yvusd-api.yearn.fi]
 | `totalDebt()` / `totalIdle()` | Vault | Capital deployment ratio | Daily |
 | `strategies(address)` | Vault | Per-strategy debt, last report time | Daily |
 | `get_default_queue()` | Vault | Withdrawal queue composition | Weekly |
-| `getThreshold()` / `getOwners()` | Daddy / Brain Safes | Governance integrity | Daily |
-| `getMinDelay()` | Timelock | Delay change detection | Weekly |
+| `getThreshold()` / `getOwners()` | ySafe | Governance integrity | Weekly |
+| `getMinDelay()` | ySafe | Delay change detection | Weekly |
 
 ## Risk Summary
 

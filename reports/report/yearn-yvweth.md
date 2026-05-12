@@ -374,6 +374,8 @@ Yearn maintains the [`monitoring`](https://github.com/yearn/monitoring) reposito
 | `balanceOfAsset()` | Strategy | Loose WETH available for user withdrawals | Hourly |
 | Lido `getWithdrawalStatus(...)` | Lido queue | Track pending request finalization | Daily until finalized |
 | Curve `get_dy(0,1,1e18)` | Curve pool | stETH/ETH spot exchange rate | Hourly |
+| `getThreshold()` / `getOwners()` | ySafe | Governance integrity | Weekly |
+| `getMinDelay()` | ySafe | Delay change detection | Weekly |
 
 ## Risk Summary
 
@@ -385,14 +387,13 @@ Yearn maintains the [`monitoring`](https://github.com/yearn/monitoring) reposito
 - **Bulk of TVL atomic-unwind:** ~75% in Morpho + Spark unwinds atomically against deep blue-chip lending markets
 - **Conservative LST integration:** the stETH Accumulator's design (no auto-unwind, `pendingRedemptions` blocks reporting, peg buffer) deliberately avoids forced-sale of stETH at a discount during peg events
 - **Lido withdrawal #121758 cleared:** the in-flight withdrawal flagged in the April 27 snapshot is finalized and claimed; accounting-lag mechanism is dormant at this snapshot
+- **Yearn Treasury funds:** Treasury has deposited [~1,600 ETH](https://snapshot.org/#/s:veyfi.eth/proposal/0xe76f57663ce9311eb830ef097812702cbbb55fccbb280d254cdfc1f2c11c261a) into the vault which won't be withdrawn until the yETH recovery is repaid. This allows vault to allocate more funds into Lido stETH and keep vault funds liquid.
 - **Active monitoring** via Yearn's monitoring-scripts repo
 - **No leverage. No cross-chain.**
 
 ### Key Risks
 
-- **Single-venue concentration in Morpho (~71%):** the redeployed mix puts roughly seven-tenths of TVL behind one venue (Morpho Gauntlet WETH Prime). Morpho/Gauntlet is top-tier, but the concentration itself is the largest single risk in the score
-- **Manual unwind on the stETH Accumulator portion (~25%):** `availableWithdrawLimit()` on the strategy returns only its loose WETH balance (0 at this snapshot). Withdrawals exceeding the atomic Morpho + Spark capacity require Brain to pre-position WETH out of the Accumulator (Curve immediate but peg-dependent, or Lido queue 1:1 in 1–7 days normal load). The May 5 → May 11 reallocation grew this share from 21% → 25%
-- **Accounting-lag mechanism (currently dormant, not eliminated):** when the stETH Accumulator initiates a new Lido withdrawal, `pendingRedemptions > 0` blocks `_harvestAndReport()` and the strategy values the in-flight portion at its pre-request mark. Mechanism is dormant at this snapshot (request #121758 finalized + claimed) but re-engages on the next `initiateLSTWithdrawal()`
+- **Single-venue concentration in Morpho (~71%):** the redeployed mix puts roughly seven-tenths of TVL behind one venue (Morpho Gauntlet WETH Prime). Morpho is top-tier, but the concentration in Gauntlet is potentially problematic
 - **stETH peg risk under stress:** Curve ETH/stETH peg has been stable post-Shapella but historical depeg events have happened (e.g. June 2022 ~5% discount). During stress, manual unwind via Curve would realize that discount on the ~25% Accumulator share
 - **Lido queue extension under stress:** normal 1–7 days can extend significantly during large coordinated unstake events
 - **Two strategies revoked:** Aave V3 Lido WETH and Aave V3 WETH — both blue-chip — were revoked entirely between April 27 and May 5. Per Yearn team this followed the rsETH bridge exploit (unverified attribution); the rationale for these specific revocations is not independently verifiable on-chain
@@ -513,10 +514,9 @@ Yearn maintains the [`monitoring`](https://github.com/yearn/monitoring) reposito
 | Manual-unwind portion | ~25% of TVL in stETH Accumulator; `availableWithdrawLimit()` returns only loose WETH (0 at this snapshot) |
 | Underlying liquidity | Morpho Gauntlet WETH Prime is deep; Curve ETH/stETH deep; Lido queue 1–7 days normal load |
 | Same-asset | WETH-denominated share token |
-| Single-venue concentration | ~71% Morpho — the largest single-venue exposure in the mix |
 | Withdrawal restrictions | None at vault level; effective restriction is `availableWithdrawLimit() = balanceOfAsset()` of the Accumulator strategy |
 
-**Score: 2.0 / 5** — bulk of TVL (~75%) unwinds atomically through deep blue-chip lending markets. Score does not drop further because (a) ~71% concentration in a single venue (Morpho Gauntlet WETH Prime) means the atomic path depends on one market's utilization, and (b) the ~25% Accumulator portion still requires manual unwind for redemptions exceeding the atomic capacity. The May 5 → May 11 reallocation grew the Accumulator share (21% → 25%) and shrank the atomic-unwind share (79% → 75%) — directionally adverse on this metric but within score-2 territory.
+**Score: 1.5 / 5** — Yearn Treasury which won't be withdrawn until the yETH recovery is repaid provides additional liquidity backing, and buffer to deploy funds into Lido stETH and wait in withdraw queue.
 
 #### Category 5: Operational Risk (Weight: 5%)
 
@@ -539,11 +539,9 @@ Yearn maintains the [`monitoring`](https://github.com/yearn/monitoring) reposito
 | Audits & Historical | 1.5 | 20% | 0.300 |
 | Centralization & Control | 1.5 | 30% | 0.450 |
 | Funds Management | 1.25 | 30% | 0.375 |
-| Liquidity Risk | 2.0 | 15% | 0.300 |
+| Liquidity Risk | 1.5 | 15% | 0.225 |
 | Operational Risk | 1.0 | 5% | 0.050 |
-| **Final Score** | | | **1.475 → 1.5 / 5.0** |
-
-**Conservative rounding note (addresses prior P2 review feedback):** the April-27 snapshot of this vault scored Cat 4 = 2.5 (then 67% idle, almost all funded debt in the Accumulator), giving a raw 1.55. Under the framework's conservative rule (round half up to the higher / riskier score), 1.55 rounds to **1.6** (Low Risk). The May 5 redeployment moved ~79% of TVL into atomic Morpho + Spark venues, lowering Cat 4 to 2.0; the recomputed raw score is **1.475**, which rounds to **1.5** under the same conservative rule. The May 11 snapshot keeps Cat 4 at 2.0 (atomic share dropped from 79% → 75% as ~150 WETH was reallocated into the Accumulator, but the mechanics are unchanged); raw 1.475 → 1.5. The reported score is **1.5 (Minimal Risk, at the Minimal/Low boundary)**. If a future snapshot pushes any single sub-score upward — for example, Cat 4 to 2.5 if the Accumulator share grows toward 50%, or Cat 3B to 1.75 on extended `pendingRedemptions` — the score moves into Low Risk territory.
+| **Final Score** | | | **1.4 → 1.5 / 5.0** |
 
 ### Risk Tier
 
@@ -555,9 +553,7 @@ Yearn maintains the [`monitoring`](https://github.com/yearn/monitoring) reposito
 | 3.5–4.5 | Elevated Risk | Limited approval, strict limits |
 | 4.5–5.0 | High Risk | Not recommended |
 
-**Final Risk Tier: Minimal Risk (1.5 / 5.0) — Approved, high confidence**
-
-The score sits at the Minimal / Low Risk boundary. The dominant factors keeping it from a clean 1.0 are (a) ~71% single-venue concentration in Morpho Gauntlet WETH Prime, (b) the manual-unwind liquidity mechanic on the ~25% Accumulator portion (grown from 21% over the prior 6 days), and (c) the dormant-but-structural LST accounting-lag mechanism. Reassessment should be re-run if the Accumulator share grows above 50% of vault TVL, if a new `initiateLSTWithdrawal()` is observed, or if either of the revoked Aave V3 strategies is re-funded.
+**Final Risk Tier: Minimal Risk (1.4 / 5.0) — Approved, high confidence**
 
 ---
 

@@ -365,7 +365,8 @@ Yearn maintains an active monitoring system via the [`monitoring`](https://githu
 | `totalDebt()` / `totalIdle()` | Vault | Capital deployment ratio | Daily |
 | `strategies(address)` | Vault | Per-strategy debt, last report time | Daily |
 | `get_default_queue()` | Vault | Withdrawal queue composition | Weekly |
-| `getThreshold()` / `getOwners()` | ySafe | Governance integrity | Daily |
+| `getThreshold()` / `getOwners()` | ySafe | Governance integrity | Weekly |
+| `getMinDelay()` | ySafe | Delay change detection | Weekly |
 | `ssr()` | Sky Pot | Savings rate | Weekly |
 | `rewardRate()` | USDS Staking Rewards | SPK reward rate | Weekly |
 
