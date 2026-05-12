@@ -54,7 +54,7 @@ jobs:
       - name: Find existing broken-links issue
         if: steps.check.outputs.lychee-exit-code != '0' || steps.defillama.outcome == 'failure'
         id: existing
-        uses: micalevisk/last-issue-action@044e1cb7e9a4dde20e22969cb67818bfca0797be # v2.0.0
+        uses: micalevisk/last-issue-action@0d40124cc99ac8601c2516007f0c98ef3d27537b # v2.3.0
         with:
           state: open
           labels: broken-links
