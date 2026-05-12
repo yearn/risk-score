@@ -6,8 +6,6 @@ updates:
       interval: "weekly"
     allow:
       - dependency-type: "direct"
-    registry-urls:
-      - "https://registry.npmjs.org"
 
   - package-ecosystem: "github-actions"
     directory: "/"
