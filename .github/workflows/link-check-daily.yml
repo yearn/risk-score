@@ -1,0 +1,50 @@
+name: Link Check (Daily)
+
+on:
+  schedule:
+    - cron: '0 9 * * *'  # 09:00 UTC daily
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  link-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Restore lychee cache
+        uses: actions/cache@v4
+        with:
+          path: .lycheecache
+          key: cache-lychee-${{ github.sha }}
+          restore-keys: cache-lychee-
+
+      - name: Check links across reports/
+        id: lychee
+        uses: lycheeverse/lychee-action@v2
+        with:
+          args: --no-progress './reports/**/*.md'
+          fail: false
+          output: ./lychee-report.md
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Find existing broken-links issue
+        if: env.lychee_exit_code != '0'
+        id: existing
+        uses: micalevisk/last-issue-action@v2
+        with:
+          state: open
+          labels: broken-links
+
+      - name: Open or update broken-links issue
+        if: env.lychee_exit_code != '0'
+        uses: peter-evans/create-issue-from-file@v5
+        with:
+          title: Broken links found in reports/
+          content-filepath: ./lychee-report.md
+          issue-number: ${{ steps.existing.outputs.issue-number }}
+          labels: broken-links

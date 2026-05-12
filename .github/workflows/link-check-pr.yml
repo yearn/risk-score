@@ -1,0 +1,43 @@
+name: Link Check (PR)
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+    paths:
+      - 'reports/**/*.md'
+
+permissions:
+  contents: read
+
+jobs:
+  link-check:
+    # Skip draft PRs — they iterate a lot. Runs once the PR is marked ready.
+    if: github.event.pull_request.draft == false
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # needed for changed-files diff against base
+
+      - name: Get changed report files
+        id: changed
+        uses: tj-actions/changed-files@v45
+        with:
+          files: reports/**/*.md
+
+      - name: Restore lychee cache
+        if: steps.changed.outputs.any_changed == 'true'
+        uses: actions/cache@v4
+        with:
+          path: .lycheecache
+          key: cache-lychee-${{ github.sha }}
+          restore-keys: cache-lychee-
+
+      - name: Check links in changed reports
+        if: steps.changed.outputs.any_changed == 'true'
+        uses: lycheeverse/lychee-action@v2
+        with:
+          args: --no-progress ${{ steps.changed.outputs.all_changed_files }}
+          fail: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

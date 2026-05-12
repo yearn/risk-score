@@ -1,0 +1,43 @@
+# Lychee link checker config (https://github.com/lycheeverse/lychee)
+# Used by .github/workflows/link-check-*.yml
+
+cache = true
+max_cache_age = "1d"
+max_concurrency = 8
+max_retries = 2
+retry_wait_time = 2
+timeout = 20
+
+# Treat rate-limit as OK so transient throttling doesn't fail the run
+accept = ['200..=299', '429']
+
+# TEMPLATE.md contains literal `URL` placeholders in markdown link syntax.
+# reports/old/ is archived/legacy material that we don't actively maintain.
+exclude_path = ["reports/TEMPLATE.md", "reports/old"]
+
+# Hosts that block bots / produce false positives:
+# - Block explorers (etherscan, basescan, etc.) sit behind Cloudflare and 403 CI requests
+# - GitBook-hosted docs (midas, others) 403 non-browser user agents
+# - DefiLlama 403s all bot traffic
+# - rekt.news intermittently returns 500 to crawlers
+# - Morpho GraphQL endpoints are POST-only and 400 on GET
+# - Twitter/X and LinkedIn require auth or block bots
+exclude = [
+    '^https?://(www\.)?etherscan\.io',
+    '^https?://(www\.)?basescan\.org',
+    '^https?://(www\.)?arbiscan\.io',
+    '^https?://(www\.)?polygonscan\.com',
+    '^https?://(www\.)?optimistic\.etherscan\.io',
+    '^https?://(www\.)?ftmscan\.com',
+    '^https?://(www\.)?snowtrace\.io',
+    '^https?://(www\.)?bscscan\.com',
+    '^https?://(www\.)?defillama\.com',
+    '^https?://(docs\.)?midas\.app',
+    '^https?://(www\.)?rekt\.news',
+    '^https?://(blue-api|api)\.morpho\.org/graphql',
+    '^https?://app\.maple\.finance',
+    '^https?://accountable\.apyx\.fi',
+    '^https?://(www\.)?trust-security\.xyz',
+    '^https?://(www\.)?(twitter|x)\.com',
+    '^https?://(www\.)?linkedin\.com',
+]
