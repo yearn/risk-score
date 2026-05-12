@@ -4,7 +4,7 @@
 - **Token:** JAAA (Janus Henderson Anemoy AAA CLO Fund Token)
 - **Chain:** Ethereum
 - **Token Address:** [`0x5a0F93D040De44e78F251b03c43be9CF317Dcf64`](https://etherscan.io/address/0x5a0F93D040De44e78F251b03c43be9CF317Dcf64)
-- **Final Score: 2.95/5.0**
+- **Final Score: 2.85/5.0**
 
 ## Overview + Links
 
@@ -63,31 +63,35 @@ A separate, **freely-transferable** wrapper of the same fund — **deJAAA** ([`0
 | Spoke | [`0xEC3582fcDc34078a4B7a8c75a5a3AE46f48525aB`](https://etherscan.io/address/0xEC3582fcDc34078a4B7a8c75a5a3AE46f48525aB) | Local share/vault registry on Ethereum |
 | Hub (current, V3.1+) | [`0xA4A7Bb3831958463b3FE3E27A6a160F764341953`](https://etherscan.io/address/0xA4A7Bb3831958463b3FE3E27A6a160F764341953) | Canonical Hub per [Centrifuge deployments docs](https://docs.centrifuge.io/developer/protocol/deployments/); the JAAA pool is registered here (confirmed via `HubRegistry.exists()` + `UpdateManager` event at block 24376421) |
 | Hub (V3.0, legacy) | [`0x9c8454A506263549f07c80698E276e3622077098`](https://etherscan.io/address/0x9c8454A506263549f07c80698E276e3622077098) | Original V3.0 Hub — still onchain and referenced by `ProtocolGuardian (V3.0).hub()` |
-| HubRegistry (current, V3.1+) | [`0x19f46D8130e610C6C0f0116EA40Fb781dEFaDE93`](https://etherscan.io/address/0x19f46D8130e610C6C0f0116EA40Fb781dEFaDE93) | Per [docs](https://docs.centrifuge.io/developer/protocol/deployments/); JAAA pool 281474976710663 exists here with Pool Manager `0x742d…be1e` as the sole `manager` |
-| HubRegistry (legacy) | [`0x12044ef361Cc3446Cb7d36541C8411EE4e6f52cb`](https://etherscan.io/address/0x12044ef361Cc3446Cb7d36541C8411EE4e6f52cb) | Original V3.0 HubRegistry — JAAA pool still exists here too (pool data not deny'd on legacy registry) |
+| HubRegistry (current, V3.1+) | [`0x19f46D8130e610C6C0f0116EA40Fb781dEFaDE93`](https://etherscan.io/address/0x19f46D8130e610C6C0f0116EA40Fb781dEFaDE93) | Per [docs](https://docs.centrifuge.io/developer/protocol/deployments/); JAAA pool 281474976710663 is registered here at block 24376421 with **two** managers: the 3-of-8 Safe `0x742d…be1e` and EOA `0x7bf090b9…02ec`. **This registry is the authoritative one for live operations under the current Hub.** |
+| HubRegistry (legacy) | [`0x12044ef361Cc3446Cb7d36541C8411EE4e6f52cb`](https://etherscan.io/address/0x12044ef361Cc3446Cb7d36541C8411EE4e6f52cb) | Original V3.0 HubRegistry — JAAA pool data still exists onchain, but the current Hub does **not** consult this registry. Manager-change monitoring should target the current registry above. |
 | AsyncRequestManager | [`0xF48256AbDDf96EcDDc4B3DbD23E8C1921f9761Ae`](https://etherscan.io/address/0xF48256AbDDf96EcDDc4B3DbD23E8C1921f9761Ae) | ERC-7540 deposit/redeem flow + price cache (`priceLastUpdated`, `convertToAssets`) |
 | BalanceSheet | [`0x12a110cE5f0FC871cC72Bc7ECaF35cf39DD0f43e`](https://etherscan.io/address/0x12a110cE5f0FC871cC72Bc7ECaF35cf39DD0f43e) | Double-entry onchain accounting layer (V3.1+) |
 | NAVManager (V3.2) | [`0x493b6C8ccC7BfD43c5a20C4F2C648701f74E9130`](https://etherscan.io/address/0x493b6C8ccC7BfD43c5a20C4F2C648701f74E9130) | V3.2 onchain-NAV manager — **NOT initialized for JAAA pool** (verified: `initialized(281474976710663, 1)` = `false`, `navHook(poolId)` = `0x0`); JAAA still uses manager-pushed pricing |
 | SimplePriceManager (V3.2) | [`0x280C94eB440A8a75c2F8f6cA8c6FaFf907000823`](https://etherscan.io/address/0x280C94eB440A8a75c2F8f6cA8c6FaFf907000823) | V3.2 simple-price manager; `navUpdater()` = NAVManager. `pricePoolPerShare(JAAA poolId)` returns 1e18 (default), suggesting JAAA is not yet routed through it either |
+| Gateway (current) | [`0x19a524D03aA94ECEe41a80341537BCFCb47D3172`](https://etherscan.io/address/0x19a524D03aA94ECEe41a80341537BCFCb47D3172) | Outbound message gateway used by current Hub (`processor()` → current MessageProcessor) |
 | MultiAdapter (current) | [`0x35C837F0A54B715a23D193E1476BFC9BC30073BE`](https://etherscan.io/address/0x35C837F0A54B715a23D193E1476BFC9BC30073BE) | Cross-chain message router per [docs](https://docs.centrifuge.io/developer/protocol/deployments/) (V3.1+) |
 | MultiAdapter (legacy) | [`0x457C91384C984b1659157160e8543adb12BC5317`](https://etherscan.io/address/0x457C91384C984b1659157160e8543adb12BC5317) | Original V3.0 adapter (referenced by V3.0 Guardian) |
-| MessageProcessor | [`0xe994149c6d00fe8708f843dc73973d1e7205530d`](https://etherscan.io/address/0xe994149c6d00fe8708f843dc73973d1e7205530d) | Incoming cross-chain message handler |
-| MessageDispatcher | [`0x21AF0C29611CFAaFf9271C8a3F84F2bC31d59132`](https://etherscan.io/address/0x21AF0C29611CFAaFf9271C8a3F84F2bC31d59132) | Outgoing cross-chain dispatcher |
-| TokenRecoverer | [`0x94269dbaba605b63321221679df1356be0c00e63`](https://etherscan.io/address/0x94269dbaba605b63321221679df1356be0c00e63) | Authorized token recovery flow (auth-protected) |
+| MessageProcessor (current) | [`0x97cc7e9Dafdd725Cc23B25eeBC93c4384B4Fe30A`](https://etherscan.io/address/0x97cc7e9Dafdd725Cc23B25eeBC93c4384B4Fe30A) | Incoming cross-chain message handler — `Root.wards()=1` (verified onchain) |
+| MessageProcessor (legacy) | [`0xe994149c6d00fe8708f843dc73973d1e7205530d`](https://etherscan.io/address/0xe994149c6d00fe8708f843dc73973d1e7205530d) | V3.0 legacy — `Root.wards()=0` (denied; do not monitor for live activity) |
+| MessageDispatcher (current) | [`0xf837a22883e004f705E0D7e1deE08e295Df30B27`](https://etherscan.io/address/0xf837a22883e004f705E0D7e1deE08e295Df30B27) | Outgoing cross-chain dispatcher (Hub `sender()`) — `Root.wards()=1` |
+| MessageDispatcher (legacy) | [`0x21AF0C29611CFAaFf9271C8a3F84F2bC31d59132`](https://etherscan.io/address/0x21AF0C29611CFAaFf9271C8a3F84F2bC31d59132) | V3.0 legacy — `Root.wards()=0` |
+| TokenRecoverer (current) | [`0x1E70530e9555711f8DF4838Ab940b97c039B4037`](https://etherscan.io/address/0x1E70530e9555711f8DF4838Ab940b97c039B4037) | Authorized token recovery flow — `Root.wards()=1` (verified onchain via `MessageProcessor.tokenRecoverer()`) |
+| TokenRecoverer (legacy) | [`0x94269dbaba605b63321221679df1356be0c00e63`](https://etherscan.io/address/0x94269dbaba605b63321221679df1356be0c00e63) | V3.0 legacy — `Root.wards()=0` |
 
 ### Governance Contracts
 
 | Contract | Address | Role |
 |----------|---------|------|
-| ProtocolGuardian (V3.0) | [`0xfee13c017693a4706391d516acabf6789d5c3157`](https://etherscan.io/address/0xfee13c017693a4706391d516acabf6789d5c3157) | Original Guardian; `safe()` = `0xD9D3…7e7FD` |
-| ProtocolAdminSafe (V3.0) | [`0xD9D30ab47c0f096b0AA67e9B8B1624504a63e7FD`](https://etherscan.io/address/0xD9D30ab47c0f096b0AA67e9B8B1624504a63e7FD) | Gnosis Safe v1.3.0 — **4-of-8 threshold** (verified onchain) |
-| ProtocolGuardian (current) | [`0xCEb7eD5d5B3bAD3088f6A1697738B60d829635c6`](https://etherscan.io/address/0xCEb7eD5d5B3bAD3088f6A1697738B60d829635c6) | `safe()` = `0x9711…7D225`; added as Root ward at block 24376326 |
-| ProtocolAdminSafe (current) | [`0x9711730060C73Ee7Fcfe1890e8A0993858a7D225`](https://etherscan.io/address/0x9711730060C73Ee7Fcfe1890e8A0993858a7D225) | Gnosis Safe — **4-of-9 threshold** (verified onchain) |
+| ProtocolGuardian (V3.0, **retired**) | [`0xfee13c017693a4706391d516acabf6789d5c3157`](https://etherscan.io/address/0xfee13c017693a4706391d516acabf6789d5c3157) | Original V3.0 Guardian — **`Root.wards()=0`**; `Deny` emitted on Root at block **24376326** (tx [`0x559e892f...`](https://etherscan.io/tx/0x559e892f88bedd4042929ddfaa6d92225c6074ba582b9a48168db8138dc4a908)). No longer has admin power. |
+| ProtocolAdminSafe (V3.0, **retired**) | [`0xD9D30ab47c0f096b0AA67e9B8B1624504a63e7FD`](https://etherscan.io/address/0xD9D30ab47c0f096b0AA67e9B8B1624504a63e7FD) | Gnosis Safe v1.3.0 — 4-of-8; only ever controlled Root indirectly via the V3.0 Guardian above, which is now denied. Effectively dormant. |
+| ProtocolGuardian (current) | [`0xCEb7eD5d5B3bAD3088f6A1697738B60d829635c6`](https://etherscan.io/address/0xCEb7eD5d5B3bAD3088f6A1697738B60d829635c6) | `safe()` = `0x9711…7D225`; `Root.wards()=1` (added at block 24376326 in the same tx that retired V3.0). **Sole live admin path to Root.** |
+| ProtocolAdminSafe (current) | [`0x9711730060C73Ee7Fcfe1890e8A0993858a7D225`](https://etherscan.io/address/0x9711730060C73Ee7Fcfe1890e8A0993858a7D225) | Gnosis Safe — **4-of-9 threshold** (verified onchain). Owns the current Guardian. |
 | OpsGuardian | [`0x055589229506Ee89645EF08ebE9B9a863486d0dE`](https://etherscan.io/address/0x055589229506Ee89645EF08ebE9B9a863486d0dE) | Operations Guardian (lower-privilege actions, e.g. `createPool`, `wire`) |
 | OpsSafe | [`0xd21413291444C5c104F1b5918cA0D2f6EC91Ad16`](https://etherscan.io/address/0xd21413291444C5c104F1b5918cA0D2f6EC91Ad16) | Gnosis Safe behind OpsGuardian |
 | FullActionBatcher (deployer) | [`0x5f3f8ea3b54bff7795de7754866e0eac52e0881d`](https://etherscan.io/address/0x5f3f8ea3b54bff7795de7754866e0eac52e0881d) | Atomic deployment script — held bootstrap rely on Root at block 22924235 |
 
-Per the Centrifuge `wards` permission model (`rely(addr)` → `wards[addr]=1`), Root is the master ward on Vault, Share Token, AsyncRequestManager, Spoke, Hub, BalanceSheet, the FullRestrictions hook, etc. (all verified onchain). Root in turn is ward'd by both `ProtocolGuardian` instances and protocol-internal contracts (Message Processor/Dispatcher, Token Recoverer). **No `Deny` events have been emitted on Root** — both the V3.0 and V3.1 governance Safes retain admin power simultaneously.
+Per the Centrifuge `wards` permission model (`rely(addr)` → `wards[addr]=1`), Root is the master ward on Vault, Share Token, AsyncRequestManager, Spoke, Hub, BalanceSheet, the FullRestrictions hook, etc. (all verified onchain). Root in turn is ward'd by the current `ProtocolGuardian` and the current protocol-internal contracts (current MessageProcessor / MessageDispatcher / TokenRecoverer). The **V3.0 Guardian was `Deny`'d on Root at block 24376326** ([Deny event](https://etherscan.io/tx/0x559e892f88bedd4042929ddfaa6d92225c6074ba582b9a48168db8138dc4a908)) during the V3.1 upgrade; the V3.0 ProtocolAdminSafe behind it is therefore dormant. The current 4-of-9 `ProtocolAdminSafe` (via its Guardian) is the **sole live admin path to Root** — verified onchain by checking `Root.wards()` on every governance address.
 
 ### deJAAA Pool (poolId 281474976710659) — Freely-transferable wrapper
 
@@ -131,7 +135,7 @@ Centrifuge V3 has received an unusually heavy audit cadence — **20+ engagement
 ## Historical Track Record
 
 - **Centrifuge V3 launch:** July 24, 2025 (multichain) ([Centrifuge blog](https://centrifuge.io/blog/centrifuge-v3-multichain-launch)). **~10 months in production** as of May 12, 2026.
-- **V3.1 launch:** February 11, 2026 — adds Optimism, HyperEVM, Monad; new ProtocolGuardian deployed. ([Centrifuge blog](https://centrifuge.io/blog/centrifuge-v3-1))
+- **V3.1 launch:** February 11, 2026 — adds Optimism, HyperEVM, Monad; new ProtocolGuardian deployed and the V3.0 Guardian was `Deny`'d on Root at block 24376326 ([Deny event tx](https://etherscan.io/tx/0x559e892f88bedd4042929ddfaa6d92225c6074ba582b9a48168db8138dc4a908)). The new HubRegistry [`0x19f46…ADE93`](https://etherscan.io/address/0x19f46D8130e610C6C0f0116EA40Fb781dEFaDE93) became the authoritative registry; JAAA pool was registered there at block 24376421 ([`UpdateManager` event tx](https://etherscan.io/tx/0x499ec04a42f6f4a961be5333f2d58db0538a8503cc058bb8b63fd9ca0fd5b9f8)). ([Centrifuge blog](https://centrifuge.io/blog/centrifuge-v3-1))
 - **V3.2 (Onchain Portfolio Manager):** Released 2026 — introduces an onchain `NAVManager` ([`0x493b…9130`](https://etherscan.io/address/0x493b6C8ccC7BfD43c5a20C4F2C648701f74E9130)) and `SimplePriceManager` ([`0x280C…0823`](https://etherscan.io/address/0x280C94eB440A8a75c2F8f6cA8c6FaFf907000823)). **JAAA does not currently use either** — verified onchain: `NAVManager.initialized(281474976710663, 1)` = `false`, `NAVManager.navHook(281474976710663)` = `0x0`, and `SimplePriceManager.pricePoolPerShare(281474976710663)` returns the default 1e18. JAAA's price remains pushed manually by the Pool Manager Safe.
 - **JAAA fund inception (offchain):** May 1, 2025. ([rwa.xyz](https://app.rwa.xyz/assets/JAAA))
 - **JAAA public onchain launch:** June 25, 2025 with a **$1B seed allocation from Grove** (Sky-incubated credit infrastructure protocol). ([Centrifuge blog](https://centrifuge.io/blog/centrifuge-janus-henderson-grove-tokenized-aaa-clo-fund) · [Businesswire](https://www.businesswire.com/news/home/20250624393365/en/))
@@ -180,10 +184,13 @@ Centrifuge V3 has received an unusually heavy audit cadence — **20+ engagement
 ### Provability
 
 - **Share price source:** The price returned by `AsyncRequestManager.convertToAssets()` (1.034352 USDC/JAAA at this assessment) is a **cached value pushed onchain by the pool manager**, not a real-time onchain computation. `priceLastUpdated(vault)` returned timestamp `1778500800` = 2026-05-11 12:00 UTC, i.e., the price had been refreshed ~24 hours before this assessment.
-- **Who publishes the price:** The JAAA Pool Manager Safe [`0x742d100011ffbc6e509e39dbcb0334159e86be1e`](https://etherscan.io/address/0x742d100011ffbc6e509e39dbcb0334159e86be1e) — a **3-of-8 Gnosis Safe** appointed via `HubRegistry.updateManager` (block 22932166, tx confirmed onchain). Signer identities: **TODO** (not publicly disclosed; presumed to be Anemoy / Centrifuge operational keys).
+- **Who publishes the price:** Two principals are registered as JAAA pool managers on the current HubRegistry (`manager(281474976710663, addr)==true` verified onchain):
+  - **3-of-8 Pool Manager Safe** [`0x742d100011ffbc6e509e39dbcb0334159e86be1e`](https://etherscan.io/address/0x742d100011ffbc6e509e39dbcb0334159e86be1e) — original manager appointed via `HubRegistry.updateManager` at block 22932166.
+  - **EOA** [`0x7bf090b97f896fb77e852cc98aa52a8cb7dc02ec`](https://etherscan.io/address/0x7bf090b97f896fb77e852cc98aa52a8cb7dc02ec) — added at block 24376421 during the V3.1 upgrade; no contract code (single-key authority).
+  Signer / EOA identities: **TODO** (not publicly disclosed; presumed to be Anemoy / Centrifuge operational keys).
 - **V3.2 onchain pricing — not in use for JAAA:** Centrifuge V3.2 introduces a `NAVManager` ([`0x493b…9130`](https://etherscan.io/address/0x493b6C8ccC7BfD43c5a20C4F2C648701f74E9130)) that "recomputes the fund's net asset value directly from onchain state" and a `SimplePriceManager` ([`0x280C…0823`](https://etherscan.io/address/0x280C94eB440A8a75c2F8f6cA8c6FaFf907000823)) ([V3.2 blog](https://centrifuge.io/blog/onchain-pm)). For JAAA — whose underlying assets (CLO tranches) live entirely offchain — a fully onchain NAV is structurally impossible. Verified onchain: `NAVManager.initialized(281474976710663, 1)` = `false` and `NAVManager.navHook(281474976710663)` = `address(0)`. The JAAA price is therefore still pushed manually by the Pool Manager Safe via the Hub, not derived from onchain state.
 - **Third-party verification:** No Chainlink Proof of Reserves or NAVLink feed for JAAA was found. Trust is therefore anchored on (a) Trident Trust as fund administrator publishing NAV, (b) MHA Cayman as auditor, (c) StoneX as regulated custodian, and (d) the BVI Financial Services Commission as the fund's regulator. The Centrifuge protocol enforces no onchain attestation; whatever Anemoy/the pool manager pushes is canonical.
-- **Can admin mint tokens without backing?** **Yes, technically.** The JAAA `Tranche` (share token) exposes `mint(address, uint256)` gated only by `wards[caller]==1`. Root has ward power, and Root is reachable by both the V3.0 ProtocolAdminSafe (4-of-8) and the V3.1 ProtocolAdminSafe (4-of-9). In normal operation the protocol only mints in response to deposit requests with backing escrowed; however, an attacker controlling either governance Safe (or the Pool Manager Safe operating via the Hub) could issue shares without corresponding USDC backing. This is a generic governance-key risk shared with most issuer-controlled stablecoins (USDG, USDC, etc.) but worth noting given JAAA's institutional positioning.
+- **Can admin mint tokens without backing?** **Yes, technically.** The JAAA `Tranche` (share token) exposes `mint(address, uint256)` gated only by `wards[caller]==1`. Root has ward power, and Root is reachable only through the current 4-of-9 V3.1+ ProtocolAdminSafe (verified onchain — the V3.0 Guardian was `Deny`'d on Root at block 24376326). In normal operation the protocol only mints in response to deposit requests with backing escrowed; however, an attacker controlling the current governance Safe — or either of the two pool-manager principals (3-of-8 Safe or the EOA) operating via the Hub — could issue shares without corresponding USDC backing. The Pool Manager EOA path is the most concerning: a single private key, no timelock for issuance, daily NAV-push authority. This is a generic governance-key risk shared with most issuer-controlled stablecoins (USDG, USDC, etc.) but worth noting given JAAA's institutional positioning.
 - **Token recovery:** A `TokenRecoverer` contract ([`0x94269dbaba605b63321221679df1356be0c00e63`](https://etherscan.io/address/0x94269dbaba605b63321221679df1356be0c00e63)) is ward'd on Root and can move tokens out of protocol contracts via auth-protected `recoverTokens` flows. This is necessary for cross-chain message-loss recovery but represents a privileged-action surface. The Guardian must `initiateRecovery` and a `disputeRecovery` window exists.
 
 ## Liquidity Risk
@@ -205,11 +212,14 @@ Centrifuge V3 has received an unusually heavy audit cadence — **20+ engagement
 
 ### Governance
 
-- **Two coexisting ProtocolAdminSafes** (both retain `wards=1` on Root, no Deny events):
-  1. **V3.0 Safe** [`0xD9D30ab47c0f096b0AA67e9B8B1624504a63e7FD`](https://etherscan.io/address/0xD9D30ab47c0f096b0AA67e9B8B1624504a63e7FD) — Gnosis Safe v1.3.0, **4-of-8 threshold**.
-  2. **V3.1+ Safe** [`0x9711730060C73Ee7Fcfe1890e8A0993858a7D225`](https://etherscan.io/address/0x9711730060C73Ee7Fcfe1890e8A0993858a7D225) — Gnosis Safe, **4-of-9 threshold**, behind the current `ProtocolGuardian` [`0xCEb7…35c6`](https://etherscan.io/address/0xCEb7eD5d5B3bAD3088f6A1697738B60d829635c6).
-  Signer identities for either Safe are **not publicly documented**: TODO — Centrifuge has not published a roster mapping signer addresses to entities/persons.
-- **Pool Manager Safe** [`0x742d100011ffbc6e509e39dbcb0334159e86be1e`](https://etherscan.io/address/0x742d100011ffbc6e509e39dbcb0334159e86be1e) — **3-of-8** — has the heaviest day-to-day power over the JAAA pool: set prices, approve/issue/revoke shares, force-cancel investor requests, update allowlist. A 3-signer compromise here directly impacts JAAA accounting; investor recourse is to (a) wait for the 48h Root timelock to ratify a Pool Manager change or (b) rely on Guardian pause.
+- **Single live ProtocolAdminSafe** (verified onchain — `Root.wards()` check on every governance address):
+  - **Current V3.1+ Safe** [`0x9711730060C73Ee7Fcfe1890e8A0993858a7D225`](https://etherscan.io/address/0x9711730060C73Ee7Fcfe1890e8A0993858a7D225) — Gnosis Safe, **4-of-9 threshold**, behind the current `ProtocolGuardian` [`0xCEb7…35c6`](https://etherscan.io/address/0xCEb7eD5d5B3bAD3088f6A1697738B60d829635c6) (`Root.wards()=1`).
+  - The V3.0 Guardian [`0xfee1…3157`](https://etherscan.io/address/0xfee13c017693a4706391d516acabf6789d5c3157) was `Deny`'d on Root at block **24376326** (tx [`0x559e892f…`](https://etherscan.io/tx/0x559e892f88bedd4042929ddfaa6d92225c6074ba582b9a48168db8138dc4a908)) — the V3.0 4-of-8 Safe behind it is dormant.
+  Signer identities for the live Safe are **not publicly documented**: TODO — Centrifuge has not published a roster mapping signer addresses to entities/persons.
+- **Pool Manager (Hub-level)** — the JAAA pool has **two registered managers** on the current `HubRegistry` ([`0x19f46…ADE93`](https://etherscan.io/address/0x19f46D8130e610C6C0f0116EA40Fb781dEFaDE93)), both verified by `manager(281474976710663, addr) == true`:
+  1. **Pool Manager Safe** [`0x742d100011ffbc6e509e39dbcb0334159e86be1e`](https://etherscan.io/address/0x742d100011ffbc6e509e39dbcb0334159e86be1e) — **3-of-8 Gnosis Safe**.
+  2. **Pool Manager EOA** [`0x7bf090b97f896fb77e852cc98aa52a8cb7dc02ec`](https://etherscan.io/address/0x7bf090b97f896fb77e852cc98aa52a8cb7dc02ec) — externally-owned account (no contract code), registered as a manager at block **24376421** during the V3.1 upgrade ([`UpdateManager` event](https://etherscan.io/tx/0x499ec04a42f6f4a961be5333f2d58db0538a8503cc058bb8b63fd9ca0fd5b9f8)). Likely an Anemoy pricing/automation key; identity not publicly documented (TODO).
+  Either manager can set prices, approve/issue/revoke shares, force-cancel investor requests, and update the allowlist for the JAAA pool. The **EOA path is a single-key risk** — compromise of one signer is sufficient to mis-price or seize. Investor recourse is to (a) wait for the 48h Root timelock to ratify a Pool Manager change or (b) rely on Guardian pause.
 - **Root timelock:** `delay()` = **172,800 s (48 hours)** for `scheduleRely`/`executeScheduledRely`. The Guardian wraps the Safe and adds a Zodiac Delay module of ~24h per Centrifuge docs (not directly verified onchain in this session). Aggregate "schedule new admin" delay is therefore documented as **72h**; the onchain Root delay alone is 48h.
 - **Guardian pause:** `Guardian.pause()` is callable without delay and freezes the protocol. `Guardian.unpause()` and other privileged paths require the Safe.
 - **CFG token governance:** Centrifuge maintains a [governance forum](https://gov.centrifuge.io/) and [governance portal](https://centrifuge.io/governance/) where CFG holders vote on protocol parameters. The on-chain enforcement linkage between CFG votes and the EVM ProtocolAdminSafe is **not publicly documented**: TODO. As a practical matter, Ethereum-side authority sits with the two Safes above, not directly with CFG holders.
@@ -261,15 +271,16 @@ The most consequential signals for JAAA risk are (a) governance Safe actions, (b
 3. **Root pause state** — `Root.paused()` on [`0x7Ed48C31f2fdC40d37407cBaBf0870B2b688368f`](https://etherscan.io/address/0x7Ed48C31f2fdC40d37407cBaBf0870B2b688368f). Any `Pause` event = stop new flows.
 
 4. **Governance Safe transactions** — monitor on-chain transaction submission to:
-   - V3.0 Safe [`0xD9D30ab47c0f096b0AA67e9B8B1624504a63e7FD`](https://etherscan.io/address/0xD9D30ab47c0f096b0AA67e9B8B1624504a63e7FD) (4-of-8)
-   - V3.1+ Safe [`0x9711730060C73Ee7Fcfe1890e8A0993858a7D225`](https://etherscan.io/address/0x9711730060C73Ee7Fcfe1890e8A0993858a7D225) (4-of-9)
+   - V3.1+ Safe [`0x9711730060C73Ee7Fcfe1890e8A0993858a7D225`](https://etherscan.io/address/0x9711730060C73Ee7Fcfe1890e8A0993858a7D225) (4-of-9) — sole live admin path to Root
    - Pool Manager Safe [`0x742d100011ffbc6e509e39dbcb0334159e86be1e`](https://etherscan.io/address/0x742d100011ffbc6e509e39dbcb0334159e86be1e) (3-of-8 — JAAA-specific)
+   - Pool Manager EOA [`0x7bf090b97f896fb77e852cc98aa52a8cb7dc02ec`](https://etherscan.io/address/0x7bf090b97f896fb77e852cc98aa52a8cb7dc02ec) — JAAA-specific; flag *any* outgoing tx, especially calls into `Hub` / `AsyncRequestManager` / `Spoke`
    - OpsSafe [`0xd21413291444C5c104F1b5918cA0D2f6EC91Ad16`](https://etherscan.io/address/0xd21413291444C5c104F1b5918cA0D2f6EC91Ad16)
+   The V3.0 Safe [`0xD9D30…7e7FD`](https://etherscan.io/address/0xD9D30ab47c0f096b0AA67e9B8B1624504a63e7FD) is dormant after its Guardian was denied (block 24376326) — no longer needs active monitoring.
    Use [`safe-monitor`](https://github.com/yearn/monitoring-scripts-py/blob/main/safe/main.py) pattern.
 
 5. **Root Rely / Deny events** — log `Rely(address)` and `Deny(address)` on Root. Any new ward added to Root is by definition a new governance principal; should match a known protocol upgrade announcement.
 
-6. **HubRegistry.UpdateManager events** — event topic `0x81f643865c0866521d6d17071e4ec2358fb0b285a9623d6706f42281ad28c45d` on [`0x12044ef361Cc3446Cb7d36541C8411EE4e6f52cb`](https://etherscan.io/address/0x12044ef361Cc3446Cb7d36541C8411EE4e6f52cb). New pool manager for poolId `281474976710663` = change to who can set JAAA price / issue shares.
+6. **HubRegistry.UpdateManager events on the *current* registry** — `UpdateManager(uint64 poolId, address manager, bool canManage)`, topic0 `0x34d7bc620a98c7bbfc3e91245b8fd8cb1812543d39dffb55d1aafc6a44e3cdab`, on the current registry [`0x19f46D8130e610C6C0f0116EA40Fb781dEFaDE93`](https://etherscan.io/address/0x19f46D8130e610C6C0f0116EA40Fb781dEFaDE93). Filter on poolId topic = `0x0000000000000000000000000000000000000000000000000001000000000007` (= 281474976710663). Any new manager registered = change to who can set JAAA price / issue shares. **Do not watch the legacy registry** [`0x12044…f52cb`](https://etherscan.io/address/0x12044ef361Cc3446Cb7d36541C8411EE4e6f52cb) — it is no longer authoritative under the current Hub.
 
 7. **Aggregate cross-chain JAAA supply** — pull from [rwa.xyz/JAAA](https://app.rwa.xyz/assets/JAAA) (offchain dashboard); cross-check with each chain's `IERC20(JAAA).totalSupply()`.
 
@@ -289,26 +300,33 @@ Recommended frequency: daily for NAV / Safe / pause monitoring; weekly for aggre
 │                                                                             │
 │   V3.0 Safe (4/8)          V3.1+ Safe (4/9)        OpsSafe                  │
 │   0xD9D3…7e7FD             0x9711…7D225            0xd214…dAd16             │
-│        │                        │                       │                   │
-│        ▼                        ▼                       ▼                   │
-│   ProtocolGuardian          ProtocolGuardian         OpsGuardian            │
-│   (V3.0) 0xfee1…3157        (current) 0xCEb7…35c6    0x0555…d0dE            │
-│              │                      │                      │                │
-│              └──────────┬───────────┘                      │                │
-│                         ▼                                  │                │
-│                    Root (48h delay)                        │                │
-│                    0x7Ed4…368f                             │                │
+│   [DORMANT]                     │                       │                   │
+│        │                        ▼                       ▼                   │
+│        ▼                   ProtocolGuardian         OpsGuardian            │
+│   ProtocolGuardian          (current) 0xCEb7…35c6    0x0555…d0dE            │
+│   (V3.0) 0xfee1…3157                │                      │                │
+│   [DENIED on Root,                  │                      │                │
+│    block 24376326]                  ▼                      │                │
+│                              Root (48h delay)              │                │
+│                              0x7Ed4…368f                   │                │
 └──────────────────────────┬─────────────────────────────────┴────────────────┘
                            │ wards = master admin
                            ▼
 ┌─────────────────────────────────────────────────────────────────────────────┐
 │                          PROTOCOL CORE (V3)                                 │
 │                                                                             │
-│   Hub (V3.0/3.1)        HubRegistry           Hub (V3.2)                    │
-│   0x9c84…7098 ◀────────▶0x1204…f52cb ◀──────▶ 0xA4A7…1953                   │
-│        ▲                                                                    │
-│        │ (cross-chain via Wormhole MultiAdapter 0x457C…5317)                │
-│        ▼                                                                    │
+│   Hub (V3.0, legacy)        HubRegistry (current)     Hub (V3.1+, current)  │
+│   0x9c84…7098               0x19f46…ADE93 ◀─────────▶ 0xA4A7…1953           │
+│   [governance retired]      JAAA managers:                                  │
+│                             0x742d…be1e (3/8 Safe)                          │
+│                             0x7bf090b9…02ec (EOA)                           │
+│                             (legacy HubRegistry 0x1204…f52cb retains stale  │
+│                              pool data but is not consulted by current Hub) │
+│                                          ▲                                  │
+│                                          │ cross-chain via Wormhole         │
+│                                          │ MultiAdapter (current)           │
+│                                          │ 0x35C8…73BE                      │
+│                                          ▼                                  │
 │   Spoke (Ethereum)               BalanceSheet (V3.1 acctg)                  │
 │   0xEC35…525aB                   0x12a1…f43e                                │
 │        │                                                                    │
@@ -369,8 +387,7 @@ Parallel deRWA wrapper pool (poolId 281474976710659):
 
 ### Key Risks
 
-- **Pool Manager is a 3-of-8 Safe** ([`0x742d…be1e`](https://etherscan.io/address/0x742d100011ffbc6e509e39dbcb0334159e86be1e)) with daily power to set the JAAA NAV, approve/issue shares, force-cancel investor requests, and modify the FullRestrictions allowlist. Three colluding or compromised signers can directly mis-price or seize.
-- **Two governance Safes simultaneously hold Root ward** (V3.0 and V3.1+). Either can independently take ProtocolAdmin actions. This is the result of a non-revoked legacy permission rather than a documented operational pattern — TODO to confirm whether retiring the V3.0 Safe is on the roadmap.
+- **Two Pool Manager principals on the JAAA pool — including one EOA.** The current HubRegistry shows `manager(JAAA pool, addr)=true` for both the 3-of-8 Pool Manager Safe [`0x742d…be1e`](https://etherscan.io/address/0x742d100011ffbc6e509e39dbcb0334159e86be1e) and an EOA [`0x7bf090b9…02ec`](https://etherscan.io/address/0x7bf090b97f896fb77e852cc98aa52a8cb7dc02ec) (registered at block 24376421). Either can set JAAA NAV, approve/issue shares, force-cancel investor requests, and modify the FullRestrictions allowlist. The EOA is a **single private key** — compromise of one signer is sufficient to mis-price or seize. Identity of the EOA holder: TODO (likely Anemoy automation; not publicly disclosed).
 - **NAV is admin-pushed, not onchain-derived.** Underlying CLOs are offchain, so a fully onchain proof-of-reserves is structurally impossible. Token holders trust Anemoy / Trident Trust to compute correct NAV and the Pool Manager Safe to push it faithfully. No Chainlink PoR or independent oracle.
 - **Mint-without-backing is technically possible** via the share token's `mint(address,uint256)` (gated only by wards). Standard governance-key risk, mitigated by the 48h Root timelock but not eliminated for paths involving the Pool Manager Safe acting via the Hub.
 - **Highly concentrated holder base.** rwa.xyz reports 23 holders globally; a single large redemption (e.g. Grove unwinding) could deplete the pool's USDC float and force unscheduled CLO sales. Grove appears to have already drawn down a significant portion of its original $1B allocation (current aggregate JAAA NAV ~$417M).
@@ -428,12 +445,11 @@ Parallel deRWA wrapper pool (poolId 281474976710659):
 
 **Subcategory A: Governance**
 
-- Two ProtocolAdminSafes (4-of-8 and 4-of-9) behind a 48h Root timelock + Guardian Zodiac delay (docs cite ~24h, not verified onchain).
-- Pool Manager Safe is **3-of-8** — below the "3/5 or higher" floor for score 3 but above the EOA gate for score 5.
+- One live ProtocolAdminSafe (4-of-9) behind a 48h Root timelock + Guardian Zodiac delay (docs cite ~24h, not verified onchain). V3.0 Guardian denied on Root at block 24376326 — no dual-Safe issue.
+- Pool Manager (Hub-level) has **two registered principals**: a 3-of-8 Safe **and** an EOA (`0x7bf090b9…`). The EOA path means a single-key compromise is sufficient to set NAV / issue shares for JAAA — strictly worse than the Safe-only assumption.
 - Privileged roles (mint, freeze, force-cancel, recover) exist but are gated through the timelocked Root or the pool manager. Critical actions (Root upgrade) are timelocked; routine actions (price push) are not.
-- Two coexisting governance Safes is a mild red flag (legacy V3.0 Safe was never deny'd).
 
-→ **Subcategory A: 3.0** (3/5-ish for the pool manager dominates daily risk; 4-of-N main governance with 48h timelock is healthy; coexisting Safes mildly negative).
+→ **Subcategory A: 3.0** — 4-of-9 governance with 48h timelock is healthy; pool-manager EOA path is the dominant daily centralization risk (single private key with NAV-push authority).
 
 **Subcategory B: Programmability**
 
@@ -517,9 +533,9 @@ Parallel deRWA wrapper pool (poolId 281474976710659):
 - Protocol live >2 years with no incidents: **not eligible** (V3 is ~10 months old).
 - TVL maintained >$500M for >1 year: **not eligible** at JAAA level (Grove redemption has brought aggregate NAV from $1B at launch to ~$417M); protocol-level TVL >$1B has been sustained <1 year. No modifier applied.
 
-**Optional add-ons applied:** +0.10 for the dual coexisting governance Safes (legacy V3.0 Safe still ward'd on Root without documented purpose) — minor but real residual centralization risk.
+**Optional add-ons applied:** None. (A prior draft applied +0.10 for "two coexisting governance Safes"; reviewer flagged this as stale — the V3.0 Guardian was in fact `Deny`'d on Root at block 24376326, so there is only one live admin path. Add-on removed.)
 
-**Final Score: 2.95/5.0**
+**Final Score: 2.85/5.0**
 
 ### Risk Tier
 
@@ -539,7 +555,7 @@ Parallel deRWA wrapper pool (poolId 281474976710659):
 
 - **Time-based:** Reassess in **6 months** (or earlier if V3.2 or any V3.x major release ships).
 - **TVL-based:** Reassess if aggregate JAAA NAV moves by **±30%** within a 30-day window, or if Centrifuge protocol TVL drops below $500M.
-- **Governance:** Reassess if the V3.0 ProtocolAdminSafe ([`0xD9D30ab47c0f096b0AA67e9B8B1624504a63e7FD`](https://etherscan.io/address/0xD9D30ab47c0f096b0AA67e9B8B1624504a63e7FD)) is finally `deny`'d on Root, or if the Pool Manager Safe threshold/signer set changes.
+- **Governance:** Reassess on any new `Rely` on Root (new admin principal), any change to the current ProtocolAdminSafe threshold/signer set, or any `UpdateManager` event on the current HubRegistry [`0x19f46…ADE93`](https://etherscan.io/address/0x19f46D8130e610C6C0f0116EA40Fb781dEFaDE93) for poolId `281474976710663` (add/remove of a JAAA Pool Manager — Safe or EOA).
 - **Pricing:** Reassess if the JAAA pool migrates to V3.2's onchain `NAVManager`/`PriceManager`, or conversely if the NAV stops being refreshed at least every 48 hours during business days.
 - **Counterparty:** Reassess on any material change to Anemoy, Janus Henderson sub-advisory, StoneX custody, Trident Trust administration, or MHA Cayman audit relationships.
 - **Incident-based:** Reassess after any Centrifuge protocol exploit, any pause event, any token recovery action via `TokenRecoverer`, or any depeg / NAV-discontinuity > 1%.
