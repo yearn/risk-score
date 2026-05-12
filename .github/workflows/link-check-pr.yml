@@ -41,3 +41,11 @@ jobs:
           fail: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Install uv
+        if: steps.changed.outputs.any_changed == 'true'
+        uses: astral-sh/setup-uv@v5
+
+      - name: Verify defillama slugs in changed reports
+        if: steps.changed.outputs.any_changed == 'true'
+        run: uv run scripts/check_defillama_links.py ${{ steps.changed.outputs.all_changed_files }}
