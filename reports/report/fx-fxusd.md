@@ -1,10 +1,19 @@
 # Protocol Risk Assessment: f(x) Protocol — fxUSD
 
-- **Assessment Date:** March 29, 2026
+- **Assessment Date:** March 29, 2026 (updated May 13, 2026 — see [Update](#update-may-13-2026))
 - **Token:** fxUSD (f(x) USD)
 - **Chain:** Ethereum
 - **Token Address:** [`0x085780639CC2cACd35E474e71f4d000e2405d8f6`](https://etherscan.io/address/0x085780639CC2cACd35E474e71f4d000e2405d8f6)
-- **Final Score: 2.5/5.0**
+- **Final Score: 2.2/5.0** (revised from 2.5 after timelock deployment and TVL growth)
+
+## Update (May 13, 2026)
+
+Two material changes have occurred since the initial assessment that lower the risk score:
+
+1. **3-day timelock now controls all proxy upgrades.** On April 20, 2026 (block 24,920,358, tx [`0xeb7c71fc855cd928bb4b300eaf7cc5e8b0ad86b625a109f3308b0552068b9fd8`](https://etherscan.io/tx/0xeb7c71fc855cd928bb4b300eaf7cc5e8b0ad86b625a109f3308b0552068b9fd8)), ProxyAdmin ownership was transferred from the 6/9 operational multisig directly to a TimelockController at [`0x68863fb8855b04509a835082478D6E3D0bE4E61a`](https://etherscan.io/address/0x68863fb8855b04509a835082478D6E3D0bE4E61a) with a 259,200-second (3-day) minimum delay. The 6/9 multisig now holds PROPOSER, EXECUTOR, and CANCELLER roles but is no longer admin of the timelock itself. This removes the previous "immediate upgrade" critical risk.
+2. **fxUSD supply and TVL have grown substantially.** fxUSD supply has grown from ~18.1M to ~53.9M (~3x). DeFi Llama TVL has grown from ~$29M to ~$89M (peaked at $91M on May 12, 2026 in the last 60 days; historically peaked at $271M on August 24, 2025 and spent 182 days above $100M between May–November 2025).
+
+The score has been revised from 2.5 to **2.2** to reflect these changes. The Centralization (Governance) subcategory drops from 4.0 to 2.5 (6/9 multisig with 3-day timelock), and the Historical Track Record subcategory drops from 2.5 to 2.0 (TVL ~$89M with >2 years in production). All other findings, including pre-timelock collateral verification numbers, remain valid as historical context but are superseded by the updated figures below.
 
 ## Overview + Links
 
@@ -17,18 +26,14 @@ The current V2 invariant balances all position types: `Collateral - Borrowed Col
 1. **yvBTC vault strategies** — deposit BTC collateral and borrow fxUSD via fxMINT at 0% annual interest (one-time ~0.5% fee)
 2. **fxUSD vault** — similar to existing crvUSD and BOLD vaults, enabling treasury diversification into DeFi-native stablecoins
 
-**Key metrics (March 29, 2026):**
+**Key metrics (May 13, 2026):**
 
-- **fxUSD Total Supply:** ~18,104,437 fxUSD
-- **fxUSD NAV:** ~$0.9984
-- **Protocol TVL (DeFi Llama):** ~$29.3M
-- **fxUSD DEX Liquidity:** ~$9.7M across Curve pools (~$7.1M in primary USDC/fxUSD pool)
-- **fxSAVE Total Assets:** ~30.0M fxSP (~$30M in Stability Pool)
-- **Stability Pool APY:** ~4.35%
+- **fxUSD Total Supply:** ~53,922,109 fxUSD
+- **fxUSD NAV:** ~$0.9993
+- **Protocol TVL (DeFi Llama):** ~$89.4M (peak last 60 days: $91.3M on May 12, 2026; all-time peak $271M on August 24, 2025)
+- **fxUSD DEX Liquidity:** ~$7.7M in primary Curve USDC/fxUSD pool
+- **fxSAVE Total Assets:** ~47.67M fxSP
 - **fxMINT Opening Fee:** 0.5% (ETH/BTC) | Closing Fee: 0.2%
-- **Market Cap (CoinGecko):** ~$18.1M (#848)
-- **24h Volume:** ~$326K
-- **ATH:** $1.042 (March 23, 2026) | **ATL:** $0.953 (December 5, 2024)
 - **Launch Date:** February 23, 2024 (~2 years in production)
 
 **Links:**
@@ -62,15 +67,15 @@ In V2, **all position collateral is custodied by the PoolManager contract** — 
 | PoolManager (Long) | [`0x250893CA4Ba5d05626C785e8da758026928FCD24`](https://etherscan.io/address/0x250893CA4Ba5d05626C785e8da758026928FCD24) | Custodies all V2 collateral, manages xPOSITION/fxMINT |
 | ShortPoolManager | [`0xaCDc0AB51178d0Ae8F70c1EAd7d3cF5421FDd66D`](https://etherscan.io/address/0xaCDc0AB51178d0Ae8F70c1EAd7d3cF5421FDd66D) | Manages sPOSITION positions (borrows from PoolManager) |
 
-**Collateral held in PoolManager:**
+**Collateral held in PoolManager (May 13, 2026):**
 
-| Asset | Amount | USD Value | fxUSD Debt | Positions |
-|-------|--------|-----------|------------|-----------|
-| wstETH (xstETH pool [`0x6ecfa38fee8a5277b91efda204c235814f0122e8`](https://etherscan.io/address/0x6ecfa38fee8a5277b91efda204c235814f0122e8)) | 4,519 wstETH | ~$11.1M | 7,207,005 fxUSD | 1,864 |
-| WBTC (xWBTC pool [`0xab709e26fa6b0a30c119d8c55b887ded24952473`](https://etherscan.io/address/0xab709e26fa6b0a30c119d8c55b887ded24952473)) | 228 WBTC | ~$15.2M | 10,123,422 fxUSD | 803 |
-| **Total** | | **~$26.2M** | **17,330,427 fxUSD** | 2,667 |
+| Asset | Amount | USD Value |
+|-------|--------|-----------|
+| wstETH (xstETH pool [`0x6ecfa38fee8a5277b91efda204c235814f0122e8`](https://etherscan.io/address/0x6ecfa38fee8a5277b91efda204c235814f0122e8)) | ~4,451.58 wstETH | ~$12.45M |
+| WBTC (xWBTC pool [`0xab709e26fa6b0a30c119d8c55b887ded24952473`](https://etherscan.io/address/0xab709e26fa6b0a30c119d8c55b887ded24952473)) | ~901.78 WBTC | ~$71.76M |
+| **Total** | | **~$84.21M** |
 
-**Overall V2 collateralization ratio: ~151.7%**
+**Overall V2 collateralization ratio: ~156%** (~$84.21M collateral / ~$53.88M fxUSD debt at NAV $0.9993).
 
 **Note:** `fxUSD.isUnderCollateral()` returns `true` — this flag reflects legacy V1 market status (wstETH treasury at 81% CR with only ~$8.5K remaining). The V2 system via PoolManager maintains >150% collateralization.
 
@@ -93,7 +98,8 @@ In V2, **all position collateral is custodied by the PoolManager contract** — 
 |----------|---------|---------|
 | PegKeeper | [`0x50562fe7e870420F5AAe480B7F94EB4ace2fcd70`](https://etherscan.io/address/0x50562fe7e870420F5AAe480B7F94EB4ace2fcd70) | Maintains fxUSD peg via Stability Pool |
 | Configuration | [`0x16b334f2644cc00b85DB1A1efF0C2C395e00C28d`](https://etherscan.io/address/0x16b334f2644cc00b85DB1A1efF0C2C395e00C28d) | Protocol parameter configuration |
-| ProxyAdmin | [`0x9b54b7703551d9d0ced177a78367560a8b2edda4`](https://etherscan.io/address/0x9b54b7703551d9d0ced177a78367560a8b2edda4) | Controls all proxy upgrades |
+| ProxyAdmin | [`0x9b54b7703551d9d0ced177a78367560a8b2edda4`](https://etherscan.io/address/0x9b54b7703551d9d0ced177a78367560a8b2edda4) | Controls all proxy upgrades; owned by TimelockController (since April 20, 2026) |
+| TimelockController | [`0x68863fb8855b04509a835082478D6E3D0bE4E61a`](https://etherscan.io/address/0x68863fb8855b04509a835082478D6E3D0bE4E61a) | 3-day (259,200s) minimum delay on ProxyAdmin actions; PROPOSER/EXECUTOR/CANCELLER = 6/9 multisig |
 | GatewayRouter | [`0xA5e2Ec4682a32605b9098Ddd7204fe84Ab932fE4`](https://etherscan.io/address/0xA5e2Ec4682a32605b9098Ddd7204fe84Ab932fE4) | User-facing router |
 | GaugeController | [`0xe60eB8098B34eD775ac44B1ddE864e098C6d7f37`](https://etherscan.io/address/0xe60eB8098B34eD775ac44B1ddE864e098C6d7f37) | FXN emissions gauge voting |
 
@@ -156,18 +162,19 @@ No bug bounty program was found on Immunefi, Code4rena, Sherlock, or other major
 
 ## Historical Track Record
 
-- **In production since:** February 23, 2024 (~25 months)
-- **Current TVL:** ~$29.3M (DeFi Llama); ~$26.2M collateral backing ~17.3M fxUSD debt in PoolManager
-- **Peak fxUSD supply:** The token has grown from launch to ~18.1M supply
-- **Peg stability:** fxUSD has generally maintained its peg, with an ATL of $0.953 on December 5, 2024. Current price ~$1.00
+- **In production since:** February 23, 2024 (~27 months as of May 2026)
+- **Current TVL:** ~$89.4M (DeFi Llama); ~$84.21M collateral backing ~$53.88M fxUSD debt in PoolManager
+- **TVL history:** Spent 182 days above $100M between May–November 2025; all-time peak $271M on August 24, 2025. Currently $89.4M with last-60-day peak of $91M.
+- **fxUSD supply growth:** ~18.1M (March 2026) → ~53.9M (May 2026), roughly 3x in 6 weeks
+- **Peg stability:** fxUSD has generally maintained its peg, with an ATL of $0.953 on December 5, 2024. Current NAV ~$0.9993
 - **Security incidents:** One responsibly disclosed vulnerability (ChainSecurity, April 2025) — no exploits or fund losses
 - **No concentration risk data available** — top holder information requires PRO Etherscan tier
 
-The protocol has operated for over 2 years with no exploits or fund losses. The December 2024 ATL of $0.953 (~4.7% deviation) is notable but represents a relatively mild depeg for a DeFi stablecoin. The TVL at ~$29M is modest but has been sustained.
+The protocol has operated for over 2 years with no exploits or fund losses. The December 2024 ATL of $0.953 (~4.7% deviation) is notable but represents a relatively mild depeg for a DeFi stablecoin. TVL has scaled from launch to a sustained $100M+ band in mid-2025 and is currently in the $80–$90M range.
 
 ## Funds Management
 
-In V2, all fxUSD position collateral is custodied by the PoolManager contract ([`0x250893CA4Ba5d05626C785e8da758026928FCD24`](https://etherscan.io/address/0x250893CA4Ba5d05626C785e8da758026928FCD24)), which currently holds ~4,519 wstETH (~$11.1M) and ~228 WBTC (~$15.2M) — totaling ~$26.2M backing ~17.3M fxUSD debt (**~151.7% CR**). The system does not delegate position collateral to external protocols. The Stability Pool separately deploys USDC to Aave (up to 80% cap) for yield generation on behalf of fxSP depositors.
+In V2, all fxUSD position collateral is custodied by the PoolManager contract ([`0x250893CA4Ba5d05626C785e8da758026928FCD24`](https://etherscan.io/address/0x250893CA4Ba5d05626C785e8da758026928FCD24)), which currently holds ~4,451.58 wstETH (~$12.45M) and ~901.78 WBTC (~$71.76M) — totaling ~$84.21M backing ~$53.88M fxUSD debt (**~156% CR**). The system does not delegate position collateral to external protocols. The Stability Pool separately deploys USDC to Aave (up to 80% cap) for yield generation on behalf of fxSP depositors.
 
 ### Accessibility
 
@@ -179,8 +186,8 @@ In V2, all fxUSD position collateral is custodied by the PoolManager contract ([
 
 ### Collateralization
 
-- **Fully collateralized on-chain** by crypto-native assets held in the PoolManager: wstETH (~$11.1M) and WBTC (~$15.2M)
-- **Over-collateralization:** The V2 system maintains ~151.7% CR (~$26.2M collateral backing ~17.3M fxUSD debt). The system requires >100% CR; Stability Mode triggers protective measures at CR <130%. Note: `fxUSD.isUnderCollateral()` currently returns `true` due to the legacy V1 wstETH market (81% CR with only ~$8.5K remaining) — the V2 PoolManager system is healthy at >150%.
+- **Fully collateralized onchain** by crypto-native assets held in the PoolManager: wstETH (~$12.45M) and WBTC (~$71.76M)
+- **Over-collateralization:** The V2 system maintains ~156% CR (~$84.21M collateral backing ~$53.88M fxUSD debt). The system requires >100% CR; Stability Mode triggers protective measures at CR <130%. Note: `fxUSD.isUnderCollateral()` currently returns `true` due to the legacy V1 wstETH market (81% CR with only ~$8.5K remaining) — the V2 PoolManager system is healthy at >150%.
 - **Collateral quality:** wstETH (Lido) and WBTC — blue-chip DeFi assets with deep liquidity. V2 concentrates collateral in two high-quality assets rather than the V1 approach of 6+ collateral types.
 - **Liquidations are on-chain** via two mechanisms:
   - **Rebalancing (Liquidation Brake):** Triggered at 88% LTV — partial position reduction, 2.5% bounty
@@ -222,17 +229,18 @@ In V2, all fxUSD position collateral is custodied by the PoolManager contract ([
 ### Governance
 
 - **All contracts are upgradeable** via TransparentUpgradeableProxy, controlled by ProxyAdmin [`0x9b54b7703551d9d0ced177a78367560a8b2edda4`](https://etherscan.io/address/0x9b54b7703551d9d0ced177a78367560a8b2edda4)
+- **3-day timelock on upgrades (since April 20, 2026):** ProxyAdmin is now owned by a TimelockController at [`0x68863fb8855b04509a835082478D6E3D0bE4E61a`](https://etherscan.io/address/0x68863fb8855b04509a835082478D6E3D0bE4E61a) with a 259,200-second (3-day) minimum delay. Any upgrade or admin call must be scheduled, then executed after 3 days, giving users time to react.
 - **Operational multisig:** 6-of-9 Gnosis Safe [`0x26B2ec4E02ebe2F54583af25b647b1D619e67BbF`](https://etherscan.io/address/0x26B2ec4E02ebe2F54583af25b647b1D619e67BbF)
   - Known signers: Diligent Deer, Paul, chiaki644, Gordon, Guo Yu, Jamie, Martin Krung, Sharlyn Wu, vfat
   - Mix of known and semi-anonymous contributors
+  - Holds PROPOSER, EXECUTOR, and CANCELLER roles on the TimelockController (but not TIMELOCK_ADMIN_ROLE)
 - **Emergency multisig:** 3-of-4 Gnosis Safe [`0x28c921adAC4c1072658eB01a28DA06b5F651eF62`](https://etherscan.io/address/0x28c921adAC4c1072658eB01a28DA06b5F651eF62)
   - Signers: Gordon, Guo Yu, Jamie, Sharlyn Wu (all team members)
-  - Can pause xPOSITION and sPOSITION operations
-- **No timelock detected.** The ProxyAdmin is directly owned by the multisig — upgrades can execute immediately without a delay period.
+  - Can pause xPOSITION and sPOSITION operations directly (pause path does not go through the timelock)
 - **Governance voting:** Snapshot space `fxn.eth` using veFXN voting power. 32 proposals to date with low voter participation (4-16 voters, ~118-172K veFXN per vote).
-- **Privileged roles:** The 6/9 multisig can upgrade all contracts, change fee parameters, modify oracle configurations, and alter system addresses. The 3/4 emergency multisig can pause position operations.
+- **Privileged roles:** The 6/9 multisig can propose to upgrade all contracts, change fee parameters, modify oracle configurations, and alter system addresses — all subject to the 3-day timelock delay. The 3/4 emergency multisig can pause position operations without delay.
 
-**Key concern:** The combination of upgradeable contracts + no timelock means the 6/9 multisig can make immediate, arbitrary changes to all protocol contracts. While the 6/9 threshold is reasonable, the lack of a timelock is a significant centralization risk.
+**Trust model:** The 6/9 multisig retains broad upgrade authority but can no longer act instantly; users have 3 days to detect and respond to any scheduled change. The CANCELLER role (also held by the multisig itself) means a compromised multisig could theoretically schedule and immediately cancel actions to spam, but cannot bypass the 3-day delay for an actual upgrade. The emergency 3/4 multisig retains immediate pause authority but cannot upgrade contracts.
 
 ### Programmability
 
@@ -269,6 +277,7 @@ The protocol depends on multiple well-established DeFi protocols. Chainlink is t
 |----------|---------|-----------------|
 | fxUSD | [`0x085780639CC2cACd35E474e71f4d000e2405d8f6`](https://etherscan.io/address/0x085780639CC2cACd35E474e71f4d000e2405d8f6) | totalSupply changes, NAV deviations from $1.00 |
 | ProxyAdmin | [`0x9b54b7703551d9d0ced177a78367560a8b2edda4`](https://etherscan.io/address/0x9b54b7703551d9d0ced177a78367560a8b2edda4) | Any `upgrade()` calls — immediate alert |
+| TimelockController | [`0x68863fb8855b04509a835082478D6E3D0bE4E61a`](https://etherscan.io/address/0x68863fb8855b04509a835082478D6E3D0bE4E61a) | `CallScheduled`, `CallExecuted`, `Cancelled`, `MinDelayChange`, role changes |
 | Operational Multisig | [`0x26B2ec4E02ebe2F54583af25b647b1D619e67BbF`](https://etherscan.io/address/0x26B2ec4E02ebe2F54583af25b647b1D619e67BbF) | Governance parameter changes, new transactions |
 | Emergency Multisig | [`0x28c921adAC4c1072658eB01a28DA06b5F651eF62`](https://etherscan.io/address/0x28c921adAC4c1072658eB01a28DA06b5F651eF62) | Pause events on PoolManager/ShortPoolManager |
 | PoolManager | [`0x250893CA4Ba5d05626C785e8da758026928FCD24`](https://etherscan.io/address/0x250893CA4Ba5d05626C785e8da758026928FCD24) | Rebalance/Liquidation events, wstETH/WBTC balances, collateral ratio |
@@ -286,7 +295,9 @@ The protocol depends on multiple well-established DeFi protocols. Chainlink is t
 | Stability Pool USDC ratio | <5% of pool | Funding Level I activates |
 | Collateral Ratio (any market) | <130% | Stability Mode — enhanced monitoring |
 | Collateral Ratio (any market) | <100% | Critical — recapitalization mode |
-| ProxyAdmin upgrade | Any call | Immediate investigation |
+| TimelockController `CallScheduled` | Any | Investigate target/calldata; 3 days to react before execution |
+| TimelockController `MinDelayChange` | Any | Immediate investigation — delay reduction is a major risk event |
+| ProxyAdmin upgrade | Any call | Immediate investigation (should only occur after a timelock-scheduled call) |
 | Emergency pause | Any | Immediate alert and assessment |
 | fxUSD totalSupply | >50% change in 24h | Investigate unusual minting/burning |
 
@@ -319,12 +330,18 @@ The protocol depends on multiple well-established DeFi protocols. Chainlink is t
 │  │ Multisig (6/9)   │    │ Multisig (3/4)    │                  │
 │  │ 0x26B2...BbF     │    │ 0x28c9...eF62     │                  │
 │  └────────┬─────────┘    └────────┬──────────┘                  │
-│           │ owns                  │ can pause                   │
+│           │ proposes/             │ can pause                   │
+│           │ executes              │                             │
+│  ┌────────▼─────────┐             │                             │
+│  │ TimelockController │           │                             │
+│  │ 0x6886...61a (3d)  │           │                             │
+│  └────────┬─────────┘             │                             │
+│           │ owns                  │                             │
 │  ┌────────▼─────────┐    ┌───────▼───────────┐                  │
 │  │ ProxyAdmin        │    │ PoolManager       │                  │
 │  │ 0x9b54...da4     │    │ ShortPoolManager   │                  │
 │  └────────┬─────────┘    └───────────────────┘                  │
-│           │ upgrades all proxies (NO TIMELOCK)                  │
+│           │ upgrades all proxies (subject to 3-day timelock)    │
 └───────────┼─────────────────────────────────────────────────────┘
             │
 ┌───────────▼─────────────────────────────────────────────────────┐
@@ -379,8 +396,8 @@ The protocol depends on multiple well-established DeFi protocols. Chainlink is t
 ```
 
 **Trust boundaries:**
-- The 6/9 multisig has full upgrade authority over all protocol contracts with no timelock — this is the primary trust boundary
-- The 3/4 emergency multisig can pause position operations but cannot upgrade contracts
+- The 6/9 multisig has full upgrade authority over all protocol contracts, but actions are subject to a 3-day timelock (as of April 20, 2026) — this is the primary trust boundary
+- The 3/4 emergency multisig can pause position operations immediately (no timelock) but cannot upgrade contracts
 - Keepers are permissionless (anyone can trigger rebalancing/liquidation for bounties)
 - Oracle data flows from Chainlink + Uniswap/Curve and is validated with deviation thresholds
 
@@ -391,22 +408,19 @@ The protocol depends on multiple well-established DeFi protocols. Chainlink is t
 ### Key Strengths
 
 - **Extensive audit history:** 21 audits from 3 firms (Secbit, Trail of Bits, OpenZeppelin) with continuous coverage since 2023
-- **Innovative peg mechanism:** 5-layer peg protection with on-chain redemption as a hard floor at $0.995
-- **Fully on-chain collateral:** All reserves verifiable in treasury contracts, NAV calculated algorithmically
+- **3-day timelock on all proxy upgrades** (since April 20, 2026) — users have 3 days to react to any scheduled multisig action
+- **Innovative peg mechanism:** 5-layer peg protection with onchain redemption as a hard floor at $0.995
+- **Fully onchain collateral:** All reserves verifiable in treasury contracts, NAV calculated algorithmically
 - **Strong team backing:** Well-known DeFi founders (Leshner, Warwick, Lambur) as founding contributors, institutional backing from Polychain, DCG, 1kx
-- **2+ years in production** with no exploits or fund losses
+- **2+ years in production** with no exploits or fund losses; TVL has scaled from launch to a sustained $100M+ band in mid-2025
 
 ### Key Risks
 
-- **No timelock on contract upgrades:** The 6/9 multisig can upgrade all protocol contracts immediately, with no delay for users to react
 - **No bug bounty program** despite complex contract architecture and a previously discovered vulnerability
-- **Modest TVL (~$29M)** and liquidity (~$7.1M primary Curve pool) — large exits could face friction
+- **Moderate TVL and DEX liquidity:** ~$89M TVL with ~$7.7M primary Curve pool — large exits ($1M+) rely on direct redemption (0.5% fee, 20% xPOSITION cap per event)
+- **Emergency multisig can still pause without delay:** The 3/4 emergency multisig retains immediate pause authority over xPOSITION/sPOSITION operations
 - **Keeper dependency:** Rebalancing and liquidation rely on external keepers; failure to act in time could lead to under-collateralization
 - **Complex multi-contract architecture** with many external dependencies (Chainlink, Aave, Curve, multiple LSTs)
-
-### Critical Risks
-
-- **Upgrade authority without timelock:** If the 6/9 multisig is compromised, all funds could be at risk through malicious contract upgrades with no delay for detection or exit. Adding a timelock would significantly mitigate this risk.
 
 ---
 
@@ -451,11 +465,11 @@ The protocol depends on multiple well-established DeFi protocols. Chainlink is t
 | **4** | 3–6 months | <$10M |
 | **5** | <3 months | No meaningful TVL |
 
-**Score: 2.5/5** — In production >2 years (since Feb 2024) which is excellent, but TVL at ~$29M is moderate, not >$50M. No exploits or fund losses. One responsibly disclosed vulnerability handled well. December 2024 depeg to $0.953 was mild.
+**Score: 2.0/5** — In production >2 years (since Feb 2024) which is excellent. Current TVL ~$89M (May 2026) is between the >$50M (score 2) and sustained >$100M (score 1) thresholds; the protocol did spend 182 days above $100M between May–November 2025 (all-time peak $271M on August 24, 2025) but is not currently sustained above $100M. No exploits or fund losses. One responsibly disclosed vulnerability handled well. December 2024 depeg to $0.953 was mild.
 
-**Audits & Historical Score = (1.5 + 2.5) / 2 = 2.0**
+**Audits & Historical Score = (1.5 + 2.0) / 2 = 1.75**
 
-**Score: 2.0/5** — Strong audit coverage and decent track record, held back by lack of bug bounty and moderate TVL.
+**Score: 1.75/5** — Strong audit coverage and solid track record with substantial TVL growth, held back by lack of bug bounty.
 
 #### Category 2: Centralization & Control Risks (Weight: 30%)
 
@@ -469,7 +483,7 @@ The protocol depends on multiple well-established DeFi protocols. Chainlink is t
 | **4** | Multisig 3/5 or low threshold | <12 hours | Powerful admin roles with limited constraints |
 | **5** | EOA or <3 signers (CRITICAL GATE) | No timelock | Unlimited admin powers |
 
-**Score: 4.0/5** — The 6/9 multisig threshold is reasonable, but the complete absence of a timelock is a serious concern. The multisig can upgrade all contracts and change parameters immediately with no delay for users to react or exit. Per scoring guidelines ("be conservative"), the no-timelock column clearly maps to score 4-5, and the powerful admin roles (full upgrade authority over all contracts) add further risk. The emergency 3/4 multisig can also pause operations. Known signers include some reputable DeFi figures but most are semi-anonymous.
+**Score: 2.5/5** — As of April 20, 2026, ProxyAdmin is owned by a TimelockController with a 3-day (259,200s) minimum delay; the 6/9 multisig now proposes and executes through the timelock but is no longer the immediate admin of upgrades. This is a substantial improvement over the previous "no timelock" configuration. The 6/9 threshold sits between the 5/9 (score 3) and 7/11+ (score 2) reference cases; combined with the 3-day delay (well above the 24-hour threshold) and constrained powerful roles, the subcategory maps to a 2.5. The emergency 3/4 multisig retains immediate (non-timelocked) pause authority on positions. Known signers include reputable DeFi figures alongside semi-anonymous contributors.
 
 **Subcategory B: Programmability**
 
@@ -495,9 +509,9 @@ The protocol depends on multiple well-established DeFi protocols. Chainlink is t
 
 **Score: 3.0/5** — Multiple dependencies: Chainlink (critical for pricing), Aave (yield on Stability Pool), Curve (peg monitoring EMA + DEX liquidity), Uniswap V3 (TWAP validation), and 4+ LST protocols. All are established blue-chip protocols, but the breadth and criticality (especially Chainlink for all liquidations) pushes toward score 3.
 
-**Centralization Score = (4.0 + 1.5 + 3.0) / 3 = 2.83**
+**Centralization Score = (2.5 + 1.5 + 3.0) / 3 = 2.33**
 
-**Score: 2.83/5** — Good programmability offset by lack of timelock on upgradeable contracts and multiple critical dependencies.
+**Score: 2.33/5** — Good programmability, 3-day timelock now mitigates the previous "immediate upgrade" risk, balanced against multiple critical dependencies.
 
 #### Category 3: Funds Management (Weight: 30%)
 
@@ -561,37 +575,37 @@ The protocol depends on multiple well-established DeFi protocols. Chainlink is t
 
 | Category | Score | Weight | Weighted |
 |----------|-------|--------|----------|
-| Audits & Historical | 2.0 | 20% | 0.40 |
-| Centralization & Control | 2.83 | 30% | 0.85 |
+| Audits & Historical | 1.75 | 20% | 0.35 |
+| Centralization & Control | 2.33 | 30% | 0.70 |
 | Funds Management | 1.75 | 30% | 0.53 |
 | Liquidity Risk | 3.0 | 15% | 0.45 |
 | Operational Risk | 2.5 | 5% | 0.13 |
-| **Final Score** | | | **2.35** |
+| **Final Score** | | | **2.15** |
 
 **Optional Modifiers:**
 - Protocol live >2 years with no incidents: **-0.5** → Does not fully apply due to ChainSecurity vulnerability disclosure (though no exploitation occurred). Not applied.
 - TVL maintained >$500M for >1 year: Not applicable
 
-**Final Score: 2.5/5.0** — Rounded up from 2.35 per conservative scoring guidelines, reflecting the tail risk from immediate-upgrade authority without timelock which is difficult to fully weight in category scoring.
+**Final Score: 2.2/5.0** — Rounded up from 2.15 per conservative scoring guidelines. Down from the initial 2.5 score due to the April 20, 2026 timelock deployment (3-day delay on all proxy upgrades) and substantial TVL growth (~$29M → ~$89M).
 
 ### Risk Tier
 
 | Final Score | Risk Tier | Recommendation |
 |------------|-----------|----------------|
 | **1.0-1.5** | **Minimal Risk** | Approved, high confidence |
-| **1.5-2.5** | **Low Risk** | Approved with standard monitoring |
-| **2.5-3.5** | ***Medium Risk*** | ***Approved with enhanced monitoring*** |
+| **1.5-2.5** | ***Low Risk*** | ***Approved with standard monitoring*** |
+| **2.5-3.5** | **Medium Risk** | Approved with enhanced monitoring |
 | **3.5-4.5** | **Elevated Risk** | Limited approval, strict limits |
 | **4.5-5.0** | **High Risk** | Not recommended |
 
-**Final Risk Tier: Medium Risk — Approved with enhanced monitoring**
+**Final Risk Tier: Low Risk — Approved with standard monitoring**
 
 ---
 
 ## Reassessment Triggers
 
-- **Time-based**: Reassess in 6 months (September 2026)
-- **TVL-based**: Reassess if TVL changes by more than 50%
+- **Time-based**: Reassess in 6 months (November 2026)
+- **TVL-based**: Reassess if TVL changes by more than 50%, or sustains above $150M for >1 month
 - **Incident-based**: Reassess after any exploit, governance change, or collateral modification
-- **Governance**: Reassess if timelock is added (positive) or if multisig threshold is lowered (negative)
+- **Governance**: Reassess if the timelock delay is reduced, ProxyAdmin ownership is changed away from the TimelockController, or if multisig threshold is lowered (all negative); reassess if a bug bounty program is launched (positive)
 - **Peg deviation**: Reassess if fxUSD trades below $0.95 for more than 24 hours
