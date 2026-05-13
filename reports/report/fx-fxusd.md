@@ -1,19 +1,19 @@
 # Protocol Risk Assessment: f(x) Protocol — fxUSD
 
-- **Assessment Date:** March 29, 2026 (updated May 13, 2026 — see [Update](#update-may-13-2026))
+- **Assessment Date:** May 13, 2026
 - **Token:** fxUSD (f(x) USD)
 - **Chain:** Ethereum
 - **Token Address:** [`0x085780639CC2cACd35E474e71f4d000e2405d8f6`](https://etherscan.io/address/0x085780639CC2cACd35E474e71f4d000e2405d8f6)
-- **Final Score: 2.2/5.0** (revised from 2.5 after timelock deployment and TVL growth)
+- **Final Score: 2.2/5.0**
 
-## Update (May 13, 2026)
+## Revision Notes
 
-Two material changes have occurred since the initial assessment that lower the risk score:
+This is the second pass on this report. The first pass (March 29, 2026) scored fxUSD at 2.5 with two material risk drivers: (1) no timelock on proxy upgrades and (2) modest TVL (~$29M). Both have changed since:
 
-1. **3-day timelock now controls all proxy upgrades.** On April 20, 2026 (block 24,920,358, tx [`0xeb7c71fc855cd928bb4b300eaf7cc5e8b0ad86b625a109f3308b0552068b9fd8`](https://etherscan.io/tx/0xeb7c71fc855cd928bb4b300eaf7cc5e8b0ad86b625a109f3308b0552068b9fd8)), ProxyAdmin ownership was transferred from the 6/9 operational multisig directly to a TimelockController at [`0x68863fb8855b04509a835082478D6E3D0bE4E61a`](https://etherscan.io/address/0x68863fb8855b04509a835082478D6E3D0bE4E61a) with a 259,200-second (3-day) minimum delay. The 6/9 multisig now holds PROPOSER, EXECUTOR, and CANCELLER roles but is no longer admin of the timelock itself. This removes the previous "immediate upgrade" critical risk.
-2. **fxUSD supply and TVL have grown substantially.** fxUSD supply has grown from ~18.1M to ~53.9M (~3x). DeFi Llama TVL has grown from ~$29M to ~$89M (peaked at $91M on May 12, 2026 in the last 60 days; historically peaked at $271M on August 24, 2025 and spent 182 days above $100M between May–November 2025).
+1. **3-day timelock now controls all proxy upgrades.** On April 20, 2026 (block 24,920,358, tx [`0xeb7c71fc855cd928bb4b300eaf7cc5e8b0ad86b625a109f3308b0552068b9fd8`](https://etherscan.io/tx/0xeb7c71fc855cd928bb4b300eaf7cc5e8b0ad86b625a109f3308b0552068b9fd8)), ProxyAdmin ownership was transferred from the 6/9 operational multisig directly to a TimelockController at [`0x68863fb8855b04509a835082478D6E3D0bE4E61a`](https://etherscan.io/address/0x68863fb8855b04509a835082478D6E3D0bE4E61a) with a 259,200-second (3-day) minimum delay. The 6/9 multisig now holds PROPOSER, EXECUTOR, and CANCELLER roles but is no longer admin of the timelock itself.
+2. **fxUSD supply and TVL grew substantially.** Supply ~18.1M → ~53.9M (~3x). DeFi Llama TVL ~$29M → ~$89M (60-day peak $91M on May 12, 2026; all-time peak $271M on August 24, 2025; 182 days above $100M between May–November 2025).
 
-The score has been revised from 2.5 to **2.2** to reflect these changes. The Centralization (Governance) subcategory drops from 4.0 to 2.5 (6/9 multisig with 3-day timelock), and the Historical Track Record subcategory drops from 2.5 to 2.0 (TVL ~$89M with >2 years in production). All other findings, including pre-timelock collateral verification numbers, remain valid as historical context but are superseded by the updated figures below.
+These changes lower the Centralization (Governance) subcategory from 4.0 → 2.5 and the Historical Track Record subcategory from 2.5 → 2.0, moving the overall score from 2.5 → 2.2 and the risk tier from Medium → Low.
 
 ## Overview + Links
 
@@ -72,11 +72,11 @@ In V2, **all position collateral is custodied by the PoolManager contract** — 
 
 | Asset | Amount | USD Value |
 |-------|--------|-----------|
-| wstETH (xstETH pool [`0x6ecfa38fee8a5277b91efda204c235814f0122e8`](https://etherscan.io/address/0x6ecfa38fee8a5277b91efda204c235814f0122e8)) | ~4,451.58 wstETH | ~$12.45M |
+| wstETH (xstETH pool [`0x6ecfa38fee8a5277b91efda204c235814f0122e8`](https://etherscan.io/address/0x6ecfa38fee8a5277b91efda204c235814f0122e8)) | ~4,451.58 wstETH | ~$12.38M |
 | WBTC (xWBTC pool [`0xab709e26fa6b0a30c119d8c55b887ded24952473`](https://etherscan.io/address/0xab709e26fa6b0a30c119d8c55b887ded24952473)) | ~901.78 WBTC | ~$71.76M |
-| **Total** | | **~$84.21M** |
+| **Total** | | **~$84.14M** |
 
-**Overall V2 collateralization ratio: ~156%** (~$84.21M collateral / ~$53.88M fxUSD debt at NAV $0.9993).
+**Overall V2 collateralization ratio: ~156%** (~$84.14M collateral / ~$53.89M fxUSD debt at NAV $0.9993). Prices from Chainlink: BTC $79,585.64; ETH $2,252.94; wstETH/stETH ratio 1.2344.
 
 **Note:** `fxUSD.isUnderCollateral()` returns `true` — this flag reflects legacy V1 market status (wstETH treasury at 81% CR with only ~$8.5K remaining). The V2 system via PoolManager maintains >150% collateralization.
 
@@ -122,8 +122,8 @@ In V2, **all position collateral is custodied by the PoolManager contract** — 
 
 | Pool | Address | TVL |
 |------|---------|-----|
-| Curve USDC/fxUSD | [`0x5018BE882DccE5E3F2f3B0913AE2096B9b3fB61f`](https://etherscan.io/address/0x5018BE882DccE5E3F2f3B0913AE2096B9b3fB61f) | ~$7.1M |
-| Curve DeFi Stable Avengers | [`0x8B878AFE454e31CF0A79c6D7cf2f077DD286C12f`](https://etherscan.io/address/0x8B878AFE454e31CF0A79c6D7cf2f077DD286C12f) | ~$203K |
+| Curve USDC/fxUSD | [`0x5018BE882DccE5E3F2f3B0913AE2096B9b3fB61f`](https://etherscan.io/address/0x5018BE882DccE5E3F2f3B0913AE2096B9b3fB61f) | ~$7.73M (3.67M USDC + 4.07M fxUSD) |
+| Curve DeFi Stable Avengers | [`0x8B878AFE454e31CF0A79c6D7cf2f077DD286C12f`](https://etherscan.io/address/0x8B878AFE454e31CF0A79c6D7cf2f077DD286C12f) | ~$25K of fxUSD (drained materially since March 2026) |
 
 ## Audits and Due Diligence Disclosures
 
@@ -164,7 +164,7 @@ No bug bounty program was found on Immunefi, Code4rena, Sherlock, or other major
 ## Historical Track Record
 
 - **In production since:** February 23, 2024 (~27 months as of May 2026)
-- **Current TVL:** ~$89.4M (DeFi Llama); ~$84.21M collateral backing ~$53.88M fxUSD debt in PoolManager
+- **Current TVL:** ~$89.4M (DeFi Llama); ~$84.14M collateral backing ~$53.89M fxUSD debt in PoolManager
 - **TVL history:** Spent 182 days above $100M between May–November 2025; all-time peak $271M on August 24, 2025. Currently $89.4M with last-60-day peak of $91M.
 - **fxUSD supply growth:** ~18.1M (March 2026) → ~53.9M (May 2026), roughly 3x in 6 weeks
 - **Peg stability:** fxUSD has generally maintained its peg, with an ATL of $0.953 on December 5, 2024. Current NAV ~$0.9993
@@ -175,7 +175,7 @@ The protocol has operated for over 2 years with no exploits or fund losses. The 
 
 ## Funds Management
 
-In V2, all fxUSD position collateral is custodied by the PoolManager contract ([`0x250893CA4Ba5d05626C785e8da758026928FCD24`](https://etherscan.io/address/0x250893CA4Ba5d05626C785e8da758026928FCD24)), which currently holds ~4,451.58 wstETH (~$12.45M) and ~901.78 WBTC (~$71.76M) — totaling ~$84.21M backing ~$53.88M fxUSD debt (**~156% CR**). The system does not delegate position collateral to external protocols. The Stability Pool separately deploys USDC to Aave (up to 80% cap) for yield generation on behalf of fxSP depositors.
+In V2, all fxUSD position collateral is custodied by the PoolManager contract ([`0x250893CA4Ba5d05626C785e8da758026928FCD24`](https://etherscan.io/address/0x250893CA4Ba5d05626C785e8da758026928FCD24)), which currently holds ~4,451.58 wstETH (~$12.38M) and ~901.78 WBTC (~$71.76M) — totaling ~$84.14M backing ~$53.89M fxUSD debt (**~156% CR**). The system does not delegate position collateral to external protocols. The Stability Pool separately deploys USDC to Aave (up to 80% cap) for yield generation on behalf of fxSP depositors.
 
 ### Accessibility
 
@@ -187,8 +187,8 @@ In V2, all fxUSD position collateral is custodied by the PoolManager contract ([
 
 ### Collateralization
 
-- **Fully collateralized onchain** by crypto-native assets held in the PoolManager: wstETH (~$12.45M) and WBTC (~$71.76M)
-- **Over-collateralization:** The V2 system maintains ~156% CR (~$84.21M collateral backing ~$53.88M fxUSD debt). The system requires >100% CR; Stability Mode triggers protective measures at CR <130%. Note: `fxUSD.isUnderCollateral()` currently returns `true` due to the legacy V1 wstETH market (81% CR with only ~$8.5K remaining) — the V2 PoolManager system is healthy at >150%.
+- **Fully collateralized onchain** by crypto-native assets held in the PoolManager: wstETH (~$12.38M) and WBTC (~$71.76M)
+- **Over-collateralization:** The V2 system maintains ~156% CR (~$84.14M collateral backing ~$53.89M fxUSD debt). The system requires >100% CR; Stability Mode triggers protective measures at CR <130%. Note: `fxUSD.isUnderCollateral()` currently returns `true` due to the legacy V1 wstETH market (81% CR with only ~$8.5K remaining) — the V2 PoolManager system is healthy at >150%.
 - **Collateral quality:** wstETH (Lido) and WBTC — blue-chip DeFi assets with deep liquidity. V2 concentrates collateral in two high-quality assets rather than the V1 approach of 6+ collateral types.
 - **Liquidations are on-chain** via two mechanisms:
   - **Rebalancing (Liquidation Brake):** Triggered at 88% LTV — partial position reduction, 2.5% bounty
@@ -210,20 +210,18 @@ In V2, all fxUSD position collateral is custodied by the PoolManager contract ([
   - **stETH/USD:** Chainlink ETH/USD + Uniswap V3 USDC/ETH (0.05% and 0.3% pools) + Curve stETH/ETH EMA + Uniswap V3 stETH/ETH. 1% deviation threshold.
   - **WBTC/USD:** Chainlink BTC/USD + Chainlink WBTC/BTC + Uniswap V3 pools (WBTC/USDC, WBTC/ETH, USDC/ETH). 2% deviation threshold.
 - **Admin minting:** The fxUSD contract is upgradeable (TransparentUpgradeableProxy). The 6/9 multisig controls the ProxyAdmin and could theoretically upgrade the implementation to allow unbacked minting. Under the current implementation, fxUSD can only be minted against collateral through the PoolManager.
-- **`isUnderCollateral` flag:** The fxUSD contract currently reports `isUnderCollateral() = true` due to a legacy V1 wstETH market with 81% CR (~$8.5K remaining, negligible). The active V2 system holds ~$26.2M collateral against ~$17.3M fxUSD debt (151.7% CR).
+- **`isUnderCollateral` flag:** The fxUSD contract currently reports `isUnderCollateral() = true` due to a legacy V1 wstETH market with 81% CR (~$8.5K remaining, negligible). The active V2 system holds ~$84.14M collateral against ~$53.89M fxUSD debt (~156% CR).
 - **No third-party verification** (no Chainlink PoR or custodian attestation needed — all on-chain)
 
 ## Liquidity Risk
 
-- **Primary liquidity:** Curve USDC/fxUSD pool at ~$7.1M TVL with balanced composition (~51.6% USDC, ~48.4% fxUSD)
-- **Secondary pools:** Curve DeFi Stable Avengers (~$203K), Curve MSUSD/fxUSD (~$1.2M), Curve USDNR/fxUSD (~$636K), Curve REUSD/fxUSD (~$578K)
-- **Total DEX liquidity:** ~$9.7M across Curve pools
+- **Primary liquidity:** Curve USDC/fxUSD pool at ~$7.73M TVL with balanced composition (~47% USDC, ~53% fxUSD)
+- **Secondary pools:** Multiple smaller Curve pools (DeFi Stable Avengers, MSUSD/fxUSD, USDNR/fxUSD, REUSD/fxUSD) — most have shrunk materially since the original March 2026 assessment as supply migrated toward the primary USDC pool; the DeFi Stable Avengers pool now holds only ~$25K of fxUSD (verified onchain May 13, 2026)
 - **Redemption mechanism:** Direct 1:1 redemption for underlying collateral (wstETH/WBTC) with 0.5% fee, capped at 20% of xPOSITION per redemption event
 - **Stability Pool exits:** 1% early exit fee, 60-minute redemption window
-- **24h trading volume:** ~$326K (CoinGecko)
-- **Slippage analysis:** With ~$7.1M in the primary Curve pool, a $500K swap would experience moderate slippage. For larger exits ($1M+), the direct redemption mechanism at 0.5% fee provides a reliable floor.
+- **Slippage analysis:** With ~$7.73M in the primary Curve pool, a $500K swap would experience moderate slippage. For larger exits ($1M+), the direct redemption mechanism at 0.5% fee provides a reliable floor.
 - **Historical liquidity during stress:** The December 2024 depeg to $0.953 suggests that liquidity was somewhat thin during that period, though the peg recovered.
-- **Large holder exit:** Given ~$18M market cap and ~$9.7M DEX liquidity, large holders could exit through a combination of DEX swaps and direct redemptions over 1-3 days with <2% impact.
+- **Large holder exit:** Given ~$53.9M market cap and ~$7.73M primary DEX pool (~14% of supply), DEX liquidity has not scaled with the 3x supply growth since March 2026. Large holders (>$1M) would likely rely primarily on direct redemption rather than DEX exits.
 
 ## Centralization & Control Risks
 
@@ -257,7 +255,7 @@ In V2, all fxUSD position collateral is custodied by the PoolManager contract ([
 - **Uniswap V3:** TWAP oracle data used as secondary/validation price source
 - **Curve:** stETH/ETH EMA oracle + fxUSD/USDC pool for peg monitoring
 - **Aave:** Stability Pool deploys USDC to Aave Core (up to 80% cap) and wstETH to Aave Prime (up to 80%)
-- **Lido:** wstETH is the primary ETH collateral in V2 (~$11.1M)
+- **Lido:** wstETH is the primary ETH collateral in V2 (~$12.38M)
 - **LayerZero:** Used for omnichain fxUSD bridging (cross-chain OFT)
 
 The protocol depends on multiple well-established DeFi protocols. Chainlink is the most critical dependency — oracle failure would impair pricing and liquidations. Aave exposure is capped and non-critical to core fxUSD backing.
@@ -376,9 +374,9 @@ The protocol depends on multiple well-established DeFi protocols. Chainlink is t
 │         │ custodies ALL V2 collateral                           │
 │  ┌──────▼───────────────────────────────────────────────┐       │
 │  │ COLLATERAL (held in PoolManager)                      │       │
-│  │ wstETH: 4,519 (~$11.1M) via xstETH pool              │       │
-│  │ WBTC:     228 (~$15.2M) via xWBTC pool                │       │
-│  │ Total: ~$26.2M backing ~17.3M fxUSD (151.7% CR)      │       │
+│  │ wstETH: 4,451.58 (~$12.38M) via xstETH pool          │       │
+│  │ WBTC:     901.78 (~$71.76M) via xWBTC pool            │       │
+│  │ Total: ~$84.14M backing ~$53.89M fxUSD (~156% CR)    │       │
 │  └──────────────────────────────────────────────────────┘       │
 └─────────────────────────────────────────────────────────────────┘
           │
@@ -526,7 +524,7 @@ The protocol depends on multiple well-established DeFi protocols. Chainlink is t
 | **4** | Partially collateralized or custodial | Lower-quality or illiquid assets | Opaque or infrequent reporting |
 | **5** | Uncollateralized or unverifiable (CRITICAL GATE) | Unknown or very high-risk assets | No verification possible |
 
-**Score: 2.0/5** — Over-collateralized on-chain at ~151.7% CR with verifiable reserves in a single PoolManager contract. Collateral is concentrated in two high-quality assets: wstETH (~$11.1M) and WBTC (~$15.2M). The `isUnderCollateral` flag on the fxUSD contract is triggered by a legacy V1 market with negligible remaining value (~$8.5K, 81% CR), not the active V2 system. The V2 architecture simplifies verification by centralizing collateral custody.
+**Score: 2.0/5** — Over-collateralized onchain at ~156% CR with verifiable reserves in a single PoolManager contract. Collateral is concentrated in two high-quality assets: wstETH (~$12.38M) and WBTC (~$71.76M). The `isUnderCollateral` flag on the fxUSD contract is triggered by a legacy V1 market with negligible remaining value (~$8.5K, 81% CR), not the active V2 system. The V2 architecture simplifies verification by centralizing collateral custody.
 
 **Subcategory B: Provability**
 
@@ -554,7 +552,7 @@ The protocol depends on multiple well-established DeFi protocols. Chainlink is t
 | **4** | Withdrawal queues or restrictions | <$1M, >3% slippage | >1 week or >10% impact |
 | **5** | No clear exit mechanism | No liquidity | Cannot exit without massive losses |
 
-**Score: 3.0/5** — Direct redemption mechanism exists (0.5% fee) but is capped at 20% of xPOSITION per event and depends on sufficient xPOSITION liquidity. Primary Curve pool has ~$7.1M which is >$5M but below $10M. The Stability Pool has a 1% early exit fee and 60-minute window. For moderate positions ($500K-$1M), exit is feasible within 1-3 days. The December 2024 depeg to $0.953 suggests liquidity can thin during stress. 24h volume of ~$326K is low relative to supply.
+**Score: 3.0/5** — Direct redemption mechanism exists (0.5% fee) but is capped at 20% of xPOSITION per event and depends on sufficient xPOSITION liquidity. Primary Curve pool has ~$7.73M which is >$5M but below $10M. The Stability Pool has a 1% early exit fee and 60-minute window. For moderate positions ($500K-$1M), exit is feasible within 1-3 days. The December 2024 depeg to $0.953 suggests liquidity can thin during stress. DEX liquidity has not scaled with the 3x supply growth since March 2026, increasing reliance on direct redemption.
 
 **Score: 3.0/5** — Adequate redemption mechanism but moderate DEX depth, capped redemptions, and demonstrated stress-period thinning.
 
