@@ -4,7 +4,7 @@
 - **Token:** sUSN (Staked USN)
 - **Chain:** Ethereum
 - **Token Address:** [`0xE24a3DC889621612422A64E6388927901608B91D`](https://etherscan.io/address/0xE24a3DC889621612422A64E6388927901608B91D)
-- **Final Score: 3.4/5.0**
+- **Final Score: 3.5/5.0**
 
 ## Overview + Links
 
@@ -625,9 +625,10 @@ The protocol is controlled by a 3-of-6 Gnosis Safe multisig. **Proxy upgrades ar
 - **Liquidity mismatch**: Private credit positions have T+3 month redemption vs T+5 day user guarantee
 - **Same-value redemption**: sUSN redeems for USN (stablecoin-denominated)
 - **Small TVL**: Large positions could dominate TVL and create concentration risk
-- **Morpho context**: 5-day withdrawal delay makes liquidation of sUSN collateral slow — could be problematic at 86% LLTV
+- **Morpho context**: 5-day withdrawal delay makes liquidation of sUSN collateral slow — problematic at 86% LLTV with only ~$890K headroom at 89.5% utilization
+- **DCLM backstop**: Contractual buyer at prior-day price within 24h on >1% depeg — useful but **off-chain**, not on-chain enforceable
 
-**Score: 3.5/5** — Withdrawals require up to 5 days and go through a handler process. DEX liquidity remains effectively zero on the sUSN side (~$42/day on May 11, vs ~$1.6 on Apr 27 and ~$156 on Mar 23). USN volume is ~$1.0K/day (vs ~$5.7K on Apr 27 and ~$33K on Mar 23) — still negligible relative to TVL. The DCLM market maker backstop provides a contractual (off-chain) exit mechanism for >1% depeg events, which is a positive factor. The same-value stablecoin redemption is also positive. However, the Morpho market remains tightly utilized (**89.5% on May 11; 89.6% on Apr 27; 100% on Mar 23**) — only ~$890K of withdrawable supply headroom. Between score 3 (market-based or short queues, >$1M, 3-7 days exit) and score 4 (withdrawal queues or restrictions, <$1M, >1 week or >10% impact). The DCLM backstop provides some comfort but is contractual, not on-chain. The tight Morpho utilization, 5-day withdrawal delay, and effectively-zero sUSN DEX volume offset the DCLM improvement, keeping score at 3.5.
+**Score: 4.0/5** — The protocol hits multiple score-4 criteria simultaneously: (1) withdrawals are gated by a **5-day handler queue** with `maxRedeem = 0` (no on-chain instant redemption), (2) DEX exit is **effectively absent** — ~$42/day sUSN and ~$1.0K/day USN against ~$29M TVL means there is no market-based exit for anything but retail-sized positions, and (3) the Morpho market with the intended Yearn use case has only **~$890K of withdrawable headroom at 89.5% utilization** — a single moderately-sized borrow would push it back to 100% (as it was for most of February–March). The DCLM market maker backstop is a positive factor (contractual buyer at prior-day price within 24h on >1% depeg) and the same-value USN redemption helps, but the backstop is **contractual/off-chain**, not on-chain enforceable. For the specific Morpho-collateral use case at 86% LLTV, liquidators have no fast on-chain exit. Score 4 better reflects "<$1M effective liquidity + queued exit >1 week potential" than score 3.5.
 
 #### Category 5: Operational Risk (Weight: 5%)
 
@@ -650,18 +651,18 @@ Final Score = (Centralization × 0.30) + (Funds Mgmt × 0.30) + (Audits × 0.20)
 | Audits & Historical | 3.0 | 20% | 0.60 | 3.5 |
 | Centralization & Control | 3.5 | 30% | 1.05 | 4.0 |
 | Funds Management | 3.5 | 30% | 1.05 | 3.5 |
-| Liquidity Risk | 3.5 | 15% | 0.525 | 3.5 |
+| Liquidity Risk | 4.0 | 15% | 0.60 | 3.5 |
 | Operational Risk | 3.0 | 5% | 0.15 | 3.5 |
-| **Final Score** | | | **3.375** | **3.65** |
+| **Final Score** | | | **3.45** | **3.65** |
 
-**Final Score: 3.4** (rounded to 1 decimal) — improved from 3.6
+**Final Score: 3.5** (rounded to 1 decimal) — was 3.4 prior to May 11 reassessment
 
 **Key score changes:**
 - **Centralization**: 4.0 → 3.5 (48-hour timelock on proxy upgrades, verified on-chain)
 - **Audits & Historical**: 3.5 → 3.0 (public source code with CI, longer production history)
 - **Operational Risk**: 3.5 → 3.0 (public repos, Slither/Mythril CI)
 - **Funds Management**: 3.5 → 3.5 (unchanged — Alpaca/Dinari tokenization not verified on-chain)
-- **Liquidity Risk**: 3.5 → 3.5 (unchanged — DCLM backstop offsets Morpho utilization risk; 89.5% May 11, 89.6% Apr 27, 100% Mar 23)
+- **Liquidity Risk**: 3.5 → 4.0 (tightened — 5-day handler queue, near-zero DEX exit (~$42/day sUSN), Morpho market at 89.5% utilization with only ~$890K headroom; DCLM backstop helpful but contractual/off-chain only)
 
 ### Risk Tier
 
@@ -669,11 +670,11 @@ Final Score = (Centralization × 0.30) + (Funds Mgmt × 0.30) + (Audits × 0.20)
 |------------|-----------|----------------|
 | 1.0-1.5 | Minimal Risk | Approved, high confidence |
 | 1.5-2.5 | Low Risk | Approved with standard monitoring |
-| **2.5-3.5** | **Medium Risk** | **Approved with enhanced monitoring** |
-| 3.5-4.5 | Elevated Risk | Limited approval, strict limits |
+| 2.5-3.5 | Medium Risk | Approved with enhanced monitoring |
+| **3.5-4.5** | **Elevated Risk** | **Limited approval, strict limits** |
 | 4.5-5.0 | High Risk | Not recommended |
 
-**Final Risk Tier: Medium Risk** (improved from Elevated Risk)
+**Final Risk Tier: Elevated Risk** — at the lower bound (3.5), driven primarily by the Liquidity Risk reassessment for the Morpho collateral use case. Limited approval with strict position-size limits recommended.
 
 ---
 
@@ -686,6 +687,8 @@ However, concerns remain: the `mintAndRebase()` function allows **unbacked USN m
 **For the intended Yearn use case (sUSN as Morpho collateral):**
 
 The 5-day withdrawal lockup remains the primary compatibility concern. If sUSN collateral needs to be liquidated on Morpho, the liquidator cannot redeem sUSN for USN quickly — they must either sell on DEXes (which show near-zero volume: ~$1.0K/day USN, ~$42/day sUSN on May 11) or wait up to 5 days via the withdrawal handler. The DCLM market maker backstop provides some comfort (contractual buyer at previous day's price within 24h during >1% depeg), but it is contractual/off-chain, not an on-chain guarantee. At 86% LLTV and 89.5% Morpho utilization (89.6% on Apr 27, 100% on Mar 23), this creates concentration and bad debt risk. The Stork oracle (non-Chainlink, single source, no fallback) adds additional risk.
+
+This combination is what drove the May 11 reassessment of **Liquidity Risk from 3.5 to 4.0** and the overall score from **3.4 (Medium Risk) to 3.5 (Elevated Risk)**. The tier change reflects the *use-case-specific* liquidity profile, not a deterioration of protocol fundamentals.
 
 **Key conditions for any exposure:**
 
