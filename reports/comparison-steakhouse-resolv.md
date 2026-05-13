@@ -20,7 +20,7 @@
 
 ### 1.2 Stress Testing & Scenario Analysis
 
-**Exchange insolvency scenario** -- Steakhouse models what happens if a major CEX goes down (FTX-style): margin and unrealized PnL lost, RLP absorbs it, USR remains redeemable from on-chain assets. We mention CEX counterparty risk but never walk through the concrete impact mechanics.
+**Exchange insolvency scenario** -- Steakhouse models what happens if a major CEX goes down (FTX-style): margin and unrealized PnL lost, RLP absorbs it, USR remains redeemable from onchain assets. We mention CEX counterparty risk but never walk through the concrete impact mechanics.
 
 **Prolonged negative funding scenario** -- Steakhouse quantifies: "extreme 8-hour funding rates (-0.35% Binance, -0.6% Deribit) would require 60-90 days of extreme negative rates to drain the protection layer." We don't provide any time-to-depletion analysis for RLP under stress.
 
@@ -46,7 +46,7 @@
 
 **stRESOLV mechanics** -- Steakhouse details: 14-day unstake cooldown, time-weighted multiplier reaching 2x for 1-year holders, Snapshot voting at resolvgovernance.eth. We note voting hasn't been initiated -- Steakhouse shows it was launched November 2025 and RGP-01 already passed.
 
-**Governance transition roadmap** -- Steakhouse describes a "hybrid, team-led with transition roadmap toward full DAO control" model. We say "on-chain governance not yet live" which appears to be outdated information.
+**Governance transition roadmap** -- Steakhouse describes a "hybrid, team-led with transition roadmap toward full DAO control" model. We say "onchain governance not yet live" which appears to be outdated information.
 
 ### 1.5 Legal & Regulatory
 
@@ -92,7 +92,7 @@ Our reports mention custodians (Fireblocks, Ceffu) by name but don't explain:
 
 ### 2.5 Keep Governance Information Current
 
-Our report says "on-chain governance not yet live" and "Snapshot voting has not been initiated," but Steakhouse shows governance launched in November 2025 with RGP-01 already passed. We need better processes to keep reports current with protocol developments.
+Our report says "onchain governance not yet live" and "Snapshot voting has not been initiated," but Steakhouse shows governance launched in November 2025 with RGP-01 already passed. We need better processes to keep reports current with protocol developments.
 
 ### 2.6 Correlation & Diversification Analysis
 
@@ -121,7 +121,7 @@ Worth noting -- our reports have strengths Steakhouse's doesn't:
 
 - **Quantitative risk scoring** -- We have a structured 1-5 scoring framework with weighted categories. Steakhouse provides no scores at all, just qualitative narrative. Our approach is more actionable for decision-making.
 - **Monitoring section** -- We define specific contracts, functions, thresholds, and alert frequencies. Steakhouse doesn't include a monitoring playbook.
-- **On-chain verification** -- We verify claims with actual on-chain data (e.g., `convertToAssets(1e18) = 1.1304`, `USR.balanceOf(stUSR) == totalSupply`). Steakhouse references on-chain data but less granularly.
+- **Onchain verification** -- We verify claims with actual onchain data (e.g., `convertToAssets(1e18) = 1.1304`, `USR.balanceOf(stUSR) == totalSupply`). Steakhouse references onchain data but less granularly.
 - **Contract address tables** -- We provide comprehensive contract address tables with proxy implementations, ProxyAdmin addresses, and cross-chain deployments. Steakhouse lists fewer addresses.
 - **Reassessment triggers** -- We define specific conditions for re-evaluation. Steakhouse doesn't.
 - **Audit detail** -- We list specific findings per audit (e.g., "4 Medium + 3 Low: rounding in unwrap, mintWithPermit wrong amount..."). Steakhouse just counts engagements.
@@ -151,14 +151,14 @@ Based on gaps identified, here are skills that would be valuable to define:
 - For each identified risk, walk through: Scenario -> Consequence -> Mitigants -> Quantified impact
 - Model specific scenarios: CEX insolvency (% of collateral lost), prolonged negative funding (time-to-depletion for insurance layer), mass redemption (cascade dynamics)
 - Reference historical stress events from the protocol or comparable protocols
-- Use on-chain data to parameterize scenarios (fetch current collateral ratios, exchange exposure, margin ratios)
+- Use onchain data to parameterize scenarios (fetch current collateral ratios, exchange exposure, margin ratios)
 - Output a structured "Failure Modes" table
 
 **Why:** Our reports identify risks qualitatively but never quantify "how bad could it get?" Steakhouse's Monte Carlo and scenario analysis is significantly more useful for decision-making.
 
 ### 4.3 `custody-analysis` -- Off-Chain Custody & Settlement Deep-Dive
 
-**Purpose:** For protocols with off-chain/custodial components, analyze the custody architecture.
+**Purpose:** For protocols with offchain/custodial components, analyze the custody architecture.
 **What it would do:**
 - Map the custody stack (which custodian, what signer model, what settlement frequency)
 - Identify what assets are truly at risk on exchanges vs held in custody
@@ -166,33 +166,33 @@ Based on gaps identified, here are skills that would be valuable to define:
 - Compare to industry standards
 - Flag custody concentration risks
 
-**Why:** Many DeFi protocols now have off-chain components (CEX hedging, RWAs, custodial bridges). "Uses Fireblocks" is not enough detail.
+**Why:** Many DeFi protocols now have offchain components (CEX hedging, RWAs, custodial bridges). "Uses Fireblocks" is not enough detail.
 
 ### 4.4 `report-freshness-check` -- Keep Reports Current
 
 **Purpose:** Check if existing reports contain outdated information.
 **What it would do:**
-- Compare report claims against current on-chain state (TVL, exchange rates, contract states)
+- Compare report claims against current onchain state (TVL, exchange rates, contract states)
 - Check if governance has evolved (new proposals, new voting systems)
 - Check for new audits since assessment date
 - Check for incidents since assessment date (Rekt News, DeFi Llama hacks)
 - Flag stale data points and suggest updates
 - Could be run periodically (e.g., monthly)
 
-**Why:** Our Resolv reports claimed "on-chain governance not yet live" when it had already launched. Regular freshness checks prevent this.
+**Why:** Our Resolv reports claimed "onchain governance not yet live" when it had already launched. Regular freshness checks prevent this.
 
 ### 4.5 `redemption-analysis` -- Empirical Liquidity & Redemption Analysis
 
 **Purpose:** Gather empirical data on how redemptions actually work in practice.
 **What it would do:**
-- Fetch on-chain redemption events and calculate actual processing times
+- Fetch onchain redemption events and calculate actual processing times
 - Analyze redemption size vs processing time correlation
 - Check for redemption delays or failures
 - Map all exit paths (primary market redemption, DEX swap, lending market unwind)
 - Calculate slippage for different exit sizes on DEX pools
 - Compare stated redemption times vs actual
 
-**Why:** "1-24h" is what docs say. Steakhouse cited actual data showing 1.8h average. On-chain data can tell us the truth.
+**Why:** "1-24h" is what docs say. Steakhouse cited actual data showing 1.8h average. Onchain data can tell us the truth.
 
 ### 4.6 `competitor-comparison` -- Cross-Protocol Benchmarking
 
@@ -213,7 +213,7 @@ Based on gaps identified, here are skills that would be valuable to define:
 |-----------|-----|-----------|--------|
 | Scoring framework | Structured 1-5 weighted scores | No scores, qualitative only | Us |
 | Monitoring | Detailed contract/function/threshold | None | Us |
-| On-chain verification | Granular with specific calls | High-level | Us |
+| Onchain verification | Granular with specific calls | High-level | Us |
 | Economic analysis | Minimal | Deep yield/incentive modeling | Steakhouse |
 | Stress testing | Qualitative risk list | Monte Carlo + scenario walkthroughs | Steakhouse |
 | Custody architecture | Names only | Full MPC/settlement detail | Steakhouse |

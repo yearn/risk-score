@@ -10,7 +10,7 @@ Despite these concerns, the system incorporates some positive features such as r
 
 ## Documentation & Resources
 
-- [All off-chain algorithms](https://docs.veda.tech/#flexible-off-chain-algorithms)
+- [All offchain algorithms](https://docs.veda.tech/#flexible-off-chain-algorithms)
 - [Contracts repository](https://github.com/Se7en-Seas/boring-vault/)
 - [Funds flow](https://docs.veda.tech/integrations/ui-integration)
 

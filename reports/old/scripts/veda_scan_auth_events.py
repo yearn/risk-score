@@ -27,21 +27,33 @@ Supports multiple chains:
 Output is saved to protocol/data/{vault_name}-auth-{contract_address}-{chain_id}.md for easy viewing and tracking of permission changes.
 """
 
+import argparse
 import csv
 import json
 import logging
-import os
+import sys
 from collections import defaultdict
 from functools import lru_cache
 from pathlib import Path
 from typing import Dict, List, Optional, Set, Tuple
 
 import requests
-from dotenv import load_dotenv
 from web3 import Web3
-import argparse
 
-load_dotenv()
+SCRIPT_UTILS_DIR = None
+for parent in Path(__file__).resolve().parents:
+    candidate = parent / "scripts" / "env.py"
+    if candidate.exists():
+        SCRIPT_UTILS_DIR = candidate.parent
+        break
+if SCRIPT_UTILS_DIR is None:
+    raise RuntimeError("Could not find scripts/env.py")
+if str(SCRIPT_UTILS_DIR) not in sys.path:
+    sys.path.insert(0, str(SCRIPT_UTILS_DIR))
+
+from env import get_explorer_api_key, get_rpc_url, load_repo_env  # noqa: E402
+
+load_repo_env(__file__)
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
@@ -55,11 +67,7 @@ def get_web3(chain_id: int) -> Web3:
     Get Web3 instance for given chain ID
     Returns: Web3 instance
     """
-    rpc_url = os.getenv(f"RPC_{chain_id}")
-    if not rpc_url:
-        raise ValueError(f"Missing env variable RPC_{chain_id}")
-
-    return Web3(Web3.HTTPProvider(rpc_url))
+    return Web3(Web3.HTTPProvider(get_rpc_url(chain_id)))
 
 
 def get_vault_info(vault_address: str, chain_id: int) -> tuple[str, str]:
@@ -267,18 +275,15 @@ def get_etherscan_config(chain_id: int) -> tuple[str, str]:
     """
     if chain_id == 1:
         api_url = "https://api.etherscan.io/api"
-        api_key = os.getenv("ETHERSCAN_API_KEY")
+        api_key = get_explorer_api_key("ETHERSCAN")
     elif chain_id == 137:
         api_url = "https://api.polygonscan.com/api"
-        api_key = os.getenv("POLYGONSCAN_API_KEY")
+        api_key = get_explorer_api_key("POLYGONSCAN")
     elif chain_id == 146:
         api_url = "https://api.sonicscan.org/api"
-        api_key = os.getenv("SONICSCAN_API_KEY")
+        api_key = get_explorer_api_key("SONICSCAN")
     else:
         raise ValueError(f"Unsupported chain_id: {chain_id}")
-
-    if api_key is None:
-        raise ValueError(f"Missing API key for chain_id: {chain_id}")
 
     return api_url, api_key
 
@@ -637,10 +642,23 @@ def get_contract_deployment_info(
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description='Scan blockchain events for BoringVault authority contract')
-    parser.add_argument('--chain-id', type=int, default=1, help='Chain ID (1=Ethereum, 137=Polygon, 146=Sonic). Default: 1')
-    parser.add_argument('--vault', type=str, required=True, help='BoringVault contract address')
-    parser.add_argument('--no-cache', action='store_true', help='Disable cache and force blockchain scan')
+    parser = argparse.ArgumentParser(
+        description="Scan blockchain events for BoringVault authority contract"
+    )
+    parser.add_argument(
+        "--chain-id",
+        type=int,
+        default=1,
+        help="Chain ID (1=Ethereum, 137=Polygon, 146=Sonic). Default: 1",
+    )
+    parser.add_argument(
+        "--vault", type=str, required=True, help="BoringVault contract address"
+    )
+    parser.add_argument(
+        "--no-cache",
+        action="store_true",
+        help="Disable cache and force blockchain scan",
+    )
 
     args = parser.parse_args()
 
@@ -648,7 +666,9 @@ if __name__ == "__main__":
     boring_vault_address = args.vault
     use_cache = not args.no_cache  # Convert no-cache to use_cache
 
-    vault_name, authority_contract_address = get_vault_info(boring_vault_address, chain_id)
+    vault_name, authority_contract_address = get_vault_info(
+        boring_vault_address, chain_id
+    )
     from_block_etherscan, to_block_etherscan = get_contract_deployment_info(
         authority_contract_address, chain_id
     )

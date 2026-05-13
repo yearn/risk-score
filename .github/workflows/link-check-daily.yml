@@ -1,0 +1,69 @@
+name: Link Check (Daily)
+
+on:
+  schedule:
+    - cron: '0 9 * * *'  # 09:00 UTC daily
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  link-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.0
+
+      - name: Check links across reports/
+        id: check
+        uses: ./.github/actions/check-links
+        with:
+          files: './reports/**/*.md'
+          fail: 'false'
+          output: ./lychee-report.md
+
+      - name: Verify defillama slugs (catches renames lychee misses due to Cloudflare 403)
+        id: defillama
+        continue-on-error: true
+        run: |
+          uv run scripts/check_defillama_links.py reports 2>&1 | tee defillama-output.txt
+          status=${PIPESTATUS[0]}
+          if [ "$status" -ne 0 ]; then
+            {
+              echo ""
+              echo "## Broken DeFiLlama slugs"
+              echo ""
+              echo '```'
+              cat defillama-output.txt
+              echo '```'
+            } >> ./lychee-report.md
+          fi
+          exit $status
+
+      - name: Truncate report to GitHub issue body limit
+        if: steps.check.outputs.lychee-exit-code != '0' || steps.defillama.outcome == 'failure'
+        # GitHub caps issue bodies at 65536 chars; leave headroom so create-issue-from-file doesn't 422.
+        run: |
+          if [ "$(wc -c < ./lychee-report.md)" -gt 60000 ]; then
+            head -c 60000 ./lychee-report.md > ./lychee-report.md.tmp
+            printf '\n\n_... output truncated to fit GitHub issue body limit ..._\n' >> ./lychee-report.md.tmp
+            mv ./lychee-report.md.tmp ./lychee-report.md
+          fi
+
+      - name: Find existing broken-links issue
+        if: steps.check.outputs.lychee-exit-code != '0' || steps.defillama.outcome == 'failure'
+        id: existing
+        uses: micalevisk/last-issue-action@044e1cb7e9a4dde20e22969cb67818bfca0797be # v2.0.0
+        with:
+          state: open
+          labels: broken-links
+
+      - name: Open or update broken-links issue
+        if: steps.check.outputs.lychee-exit-code != '0' || steps.defillama.outcome == 'failure'
+        uses: peter-evans/create-issue-from-file@fca9117c27cdc29c6c4db3b86c48e4115a786710 # v6.0.0
+        with:
+          title: Broken links found in reports/
+          content-filepath: ./lychee-report.md
+          issue-number: ${{ steps.existing.outputs.issue-number }}
+          labels: broken-links
