@@ -40,6 +40,7 @@ The current V2 invariant balances all position types: `Collateral - Borrowed Col
 
 - [f(x) Protocol Documentation](https://fxprotocol.gitbook.io/fx-docs)
 - [f(x) Protocol App](https://fx.aladdin.club)
+- [f(x) Protocol Live Statistics](https://fx.aladdin.club/v2/statistics)
 - [GitHub — fx-protocol-contracts](https://github.com/AladdinDAO/fx-protocol-contracts)
 - [GitHub — aladdin-v3-contracts](https://github.com/AladdinDAO/aladdin-v3-contracts)
 - [Audit Reports](https://fxprotocol.gitbook.io/fx-docs/risk-management/audit-reports)
