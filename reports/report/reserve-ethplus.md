@@ -4,7 +4,7 @@
 - **Token:** ETH+
 - **Chain:** Ethereum Mainnet
 - **Token Address:** [`0xE72B141DF173b999AE7c1aDcbF60Cc9833Ce56a8`](https://etherscan.io/address/0xE72B141DF173b999AE7c1aDcbF60Cc9833Ce56a8)
-- **Final Score: 2.0/5.0**
+- **Final Score: 1.8/5.0**
 
 ## Overview + Links
 
@@ -257,7 +257,7 @@ The primary spot pool (Curve ETH+/WETH) has ~$12.5M TVL. With Convex/Beefy/Stake
 | LONG_FREEZER | Guardian Safe `0xd5fe2780…` | Freeze for an extended period (governance-set) |
 | Timelock CANCELLER | Guardian Safe `0xd5fe2780…` | Cancel queued timelock proposals |
 
-**⚠️ Finding:** The deployer EOA [`0xe3e34fa93575af41bef3476236e1a3cdb3f60b85`](https://etherscan.io/address/0xe3e34fa93575af41bef3476236e1a3cdb3f60b85) **still holds the PAUSER role** on `Main`. It was granted at deployment (block 17,086,220) and was not revoked in the 4.2.0 upgrade transaction. PAUSER cannot freeze the system or seize funds, but a single private-key compromise here would let an attacker pause issuance and trading, disrupting the protocol. The Reserve team should be asked to revoke this role; until then, treat the protocol as having an active EOA pauser.
+**Finding:** The deployer EOA [`0xe3e34fa93575af41bef3476236e1a3cdb3f60b85`](https://etherscan.io/address/0xe3e34fa93575af41bef3476236e1a3cdb3f60b85) **still holds the PAUSER role** on `Main`. It was granted at deployment (block 17,086,220) and was not revoked in the 4.2.0 upgrade transaction. PAUSER cannot freeze the system or seize funds, but a single private-key compromise here would let an attacker pause issuance and trading, disrupting the protocol. The condition has existed since 2023 deployment with no incident; documented here for the role-holder watch list rather than scored as a discrete penalty.
 
 **Old governance (pre-upgrade, no longer authoritative):** the previous timelock [`0x5f4A10aE2fF68bE3cdA7d7FB432b10C6BFA6457B`](https://etherscan.io/address/0x5f4A10aE2fF68bE3cdA7d7FB432b10C6BFA6457B) was revoked from OWNER, PAUSER, SHORT_FREEZER, and LONG_FREEZER at block 24,944,370.
 
@@ -438,7 +438,7 @@ ERC-1967 implementation slot (`0x360894a13ba1a3210667c828492db98dca3e2076cc3735a
 
 - **Recently rotated governance (4 days old).** The v4.2.0 upgrade and new timelock/governor went live on 2026-04-23. Track record on the new governance is by definition <1 week
 - **Guardian Safe concentration.** A 3-of-6 multisig can pause, freeze, and cancel governance proposals — the binding constraint inside any 3-day timelock window
-- **Deployer EOA still holds PAUSER role.** Single-key risk that can disrupt issuance/trading; should be revoked
+- **Deployer EOA still holds PAUSER role.** In place since the 2023 deployment without incident; bounded (cannot freeze redemption, cannot seize funds) but a single private-key compromise could disrupt issuance/trading. Tracked on the role-holder watch list
 - **Thin RSR overcollateralization (~2.4%).** The first-loss buffer is small relative to TVL and scales with RSR price, not ETH+ TVL
 - **TVL contraction.** Supply has dropped 25% in ETH terms and 38% in USD since the prior assessment, with no obvious onchain cause — worth understanding before increasing exposure
 
@@ -547,9 +547,7 @@ Base score 2 (rubric: ">$5M, <1% slippage, 1-3 days"); +0.5 for throttle ≈ **2
 
 **Final score (rounded): 1.8**
 
-But: the EOA holding PAUSER role is a discrete finding that the rubric does not capture in the existing subcategory ranges. Adding **+0.2** as an explicit penalty until that role is revoked.
-
-**Adjusted Final Score: 2.0**
+The deployer EOA holding PAUSER is documented as a role-holder watch item, not as a discrete numeric penalty: the condition has existed since 2023 deployment without incident and PAUSER is bounded (no freeze, no fund seizure).
 
 ### Risk Tier
 
@@ -561,7 +559,7 @@ But: the EOA holding PAUSER role is a discrete finding that the rubric does not 
 | 3.5–4.5 | Elevated Risk | Limited approval, strict limits |
 | 4.5–5.0 | High Risk | Not recommended |
 
-## Overall Risk Score: **2.0 / 5.0**
+## Overall Risk Score: **1.8 / 5.0**
 
 ### Risk Tier: **LOW RISK**
 
