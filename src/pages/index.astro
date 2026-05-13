@@ -5,13 +5,6 @@ import stats from "../data/stats.json";
 import { getRecentReports } from "../lib/reports";
 import { scoreColor, scoreTier } from "../lib/colors";
 
-const formatTvl = (n: number): string => {
-  if (n >= 1_000_000_000) return `$${(n / 1_000_000_000).toFixed(2)}B`;
-  if (n >= 1_000_000) return `$${(n / 1_000_000).toFixed(1)}M`;
-  if (n >= 1_000) return `$${(n / 1_000).toFixed(0)}K`;
-  return `$${n.toFixed(0)}`;
-};
-
 const formatRelative = (ts: number): string => {
   if (!ts) return "—";
   const days = Math.max(0, Math.round((Date.now() - ts) / 86_400_000));
@@ -31,12 +24,7 @@ const excerpt = (html: string, maxLen = 180): string => {
   return text.slice(0, maxLen).replace(/\s+\S*$/, "") + "…";
 };
 
-const tvlDisplay = formatTvl(stats.tvl.total);
 const reportCount = stats.reportCount;
-
-const chains = Object.entries(stats.tvl.byChain)
-  .filter(([, v]) => (v as number) > 0)
-  .sort(([, a], [, b]) => (b as number) - (a as number));
 
 const morphoUrl = "https://app.morpho.org/ethereum/curator/yearn";
 
@@ -47,10 +35,6 @@ const followups = recent.slice(1);
 
 <BaseLayout title="Yearn Curation — DeFi Risk Curation" ogUrl="/" ogImage="/og/default.png">
   <section class="hero">
-    <div class="eyebrow">
-      <span class="eyebrow-dot"></span>
-      Independent DeFi Risk Curation
-    </div>
     <h1 class="hero-title">
       Risk-curated yield <br />
       <span class="hero-accent">by Yearn.</span>
@@ -60,27 +44,6 @@ const followups = recent.slice(1);
       them against transparent criteria so allocators can deploy capital with
       confidence.
     </p>
-
-    <div class="stats">
-      <div class="stat-card">
-        <div class="stat-value">{tvlDisplay}</div>
-        <div class="stat-label">
-          Yearn TVL
-          <a
-            href="https://defillama.com/protocol/yearn"
-            target="_blank"
-            rel="noopener noreferrer"
-            class="stat-source-inline"
-          >
-            via DefiLlama
-          </a>
-        </div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-value">{reportCount}</div>
-        <div class="stat-label">Risk Reports</div>
-      </div>
-    </div>
 
     <div class="hero-cta">
       <a href="/reports/" class="btn btn-primary">Browse risk reports &rarr;</a>
@@ -99,10 +62,6 @@ const followups = recent.slice(1);
     <section class="latest" data-mouse-glow>
       <div class="latest-head">
         <div>
-          <div class="section-eyebrow">
-            <span class="pulse-dot"></span>
-            Latest assessments
-          </div>
           <h2>Most recent reports</h2>
         </div>
         <a href="/reports/" class="latest-all">
@@ -262,21 +221,6 @@ const followups = recent.slice(1);
     </div>
   </section>
 
-  <section class="chains-section">
-    <div class="chains-head">
-      <h2>TVL by chain</h2>
-      <span class="chains-meta">Updated {new Date(stats.updatedAt).toISOString().slice(0, 10)}</span>
-    </div>
-    <div class="chains-grid">
-      {chains.slice(0, 5).map(([name, value]) => (
-        <div class="chain-card">
-          <div class="chain-name">{name}</div>
-          <div class="chain-value">{formatTvl(value as number)}</div>
-        </div>
-      ))}
-    </div>
-  </section>
-
   <section class="morpho-card">
     <div class="morpho-head">
       <img
@@ -293,7 +237,7 @@ const followups = recent.slice(1);
       </div>
     </div>
     <p>
-      Yearn operates curator vaults on Morpho across Ethereum, Base and other
+      Yearn operates curator vaults on Morpho across Ethereum, Katana and other
       networks. Allocators can deposit directly into vaults whose risk envelope
       matches the assessments published here.
     </p>
@@ -308,29 +252,6 @@ const followups = recent.slice(1);
   .hero {
     padding: 3.5rem 0 2.5rem;
     text-align: center;
-  }
-  .eyebrow {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.3rem 0.85rem;
-    border: 1px solid var(--border);
-    border-radius: 999px;
-    background: color-mix(in srgb, var(--bg-secondary) 60%, transparent);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-    color: var(--text-secondary);
-    font-size: 0.78rem;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-    margin-bottom: 1.5rem;
-  }
-  .eyebrow-dot {
-    width: 6px;
-    height: 6px;
-    background: var(--brand-blue);
-    border-radius: 50%;
-    box-shadow: 0 0 0 4px rgba(6, 117, 249, 0.18);
   }
   .hero-title {
     font-size: clamp(2rem, 5vw, 3.4rem);
@@ -352,63 +273,6 @@ const followups = recent.slice(1);
     margin: 0 auto 2.5rem;
     font-size: 1.05rem;
     line-height: 1.5;
-  }
-
-  .stats {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 1rem;
-    max-width: 560px;
-    margin: 0 auto 2.5rem;
-  }
-  .stat-card {
-    padding: 1.5rem 1.25rem;
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    background: color-mix(in srgb, var(--bg-card) 60%, transparent);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    text-align: left;
-    position: relative;
-    overflow: hidden;
-  }
-  .stat-card::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(
-      135deg,
-      rgba(6, 117, 249, 0.12) 0%,
-      transparent 50%
-    );
-    pointer-events: none;
-  }
-  .stat-value {
-    font-size: 2rem;
-    font-weight: 700;
-    letter-spacing: -0.02em;
-    color: var(--text-primary);
-    line-height: 1;
-  }
-  .stat-label {
-    margin-top: 0.4rem;
-    font-size: 0.85rem;
-    color: var(--text-primary);
-    font-weight: 500;
-    display: flex;
-    align-items: baseline;
-    flex-wrap: wrap;
-    gap: 0.4rem;
-  }
-  .stat-source-inline {
-    font-size: 0.72rem;
-    color: var(--text-secondary);
-    font-weight: 400;
-    border-bottom: 1px dotted var(--border);
-  }
-  .stat-source-inline:hover {
-    color: var(--brand-blue);
-    text-decoration: none;
   }
 
   .hero-cta {
@@ -464,25 +328,6 @@ const followups = recent.slice(1);
     gap: 1rem;
     margin-bottom: 1.25rem;
     flex-wrap: wrap;
-  }
-  .section-eyebrow {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.4rem;
-    color: var(--brand-blue);
-    font-size: 0.72rem;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    font-weight: 600;
-    margin-bottom: 0.35rem;
-  }
-  .pulse-dot {
-    width: 6px;
-    height: 6px;
-    background: var(--brand-blue);
-    border-radius: 50%;
-    box-shadow: 0 0 0 0 rgba(6, 117, 249, 0.6);
-    animation: pulse 2s ease-out infinite;
   }
   @keyframes pulse {
     0% { box-shadow: 0 0 0 0 rgba(6, 117, 249, 0.6); }
@@ -758,7 +603,6 @@ const followups = recent.slice(1);
     }
   }
   @media (prefers-reduced-motion: reduce) {
-    .pulse-dot,
     .latest-badge-dot {
       animation: none;
     }
@@ -796,49 +640,6 @@ const followups = recent.slice(1);
     color: var(--text-secondary);
     font-size: 0.9rem;
     line-height: 1.55;
-  }
-
-  .chains-section {
-    margin: 3rem 0;
-  }
-  .chains-head {
-    display: flex;
-    justify-content: space-between;
-    align-items: baseline;
-    margin-bottom: 1rem;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-  }
-  .chains-head h2 {
-    font-size: 1.1rem;
-  }
-  .chains-meta {
-    font-size: 0.78rem;
-    color: var(--text-secondary);
-  }
-  .chains-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-    gap: 0.75rem;
-  }
-  .chain-card {
-    padding: 0.85rem 1rem;
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    background: color-mix(in srgb, var(--bg-card) 50%, transparent);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-  }
-  .chain-name {
-    font-size: 0.78rem;
-    color: var(--text-secondary);
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-  }
-  .chain-value {
-    font-size: 1.05rem;
-    font-weight: 600;
-    margin-top: 0.2rem;
   }
 
   .morpho-card {
@@ -884,9 +685,6 @@ const followups = recent.slice(1);
   }
 
   @media (max-width: 720px) {
-    .stats {
-      grid-template-columns: 1fr;
-    }
     .features {
       grid-template-columns: 1fr;
     }

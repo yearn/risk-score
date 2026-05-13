@@ -287,48 +287,6 @@ export async function generateDefaultOgImage(): Promise<Buffer> {
                 gap: "32px",
               },
               children: [
-                // Eyebrow pill
-                {
-                  type: "div",
-                  props: {
-                    style: {
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "12px",
-                      padding: "10px 22px",
-                      border: "1px solid #424242",
-                      borderRadius: "999px",
-                      backgroundColor: "rgba(40, 40, 40, 0.6)",
-                    },
-                    children: [
-                      {
-                        type: "div",
-                        props: {
-                          style: {
-                            width: "12px",
-                            height: "12px",
-                            borderRadius: "999px",
-                            backgroundColor: "#0675F9",
-                            boxShadow: "0 0 0 6px rgba(6, 117, 249, 0.18)",
-                          },
-                        },
-                      },
-                      {
-                        type: "div",
-                        props: {
-                          style: {
-                            fontSize: "20px",
-                            fontWeight: 700,
-                            color: "#9d9d9d",
-                            letterSpacing: "2px",
-                            textTransform: "uppercase",
-                          },
-                          children: "Independent DeFi Risk Curation",
-                        },
-                      },
-                    ],
-                  },
-                },
                 // Title — two lines, second line in brand blue
                 {
                   type: "div",

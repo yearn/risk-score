@@ -1,10 +1,24 @@
 # Protocol Risk Assessment: [Protocol Name]
 
-- **Assessment Date:** [Date]
+- **Assessment Date:** [Month Day, Year]
 - **Token:** [Token Name]
 - **Chain:** [Chain Name]
 - **Token Address:** [`[Token Address]`]([Token Explorer Link])
 - **Final Score: X/5.0**
+
+<!--
+Assessment Date format:
+  - Use full English month name and four-digit year, e.g. "March 4, 2026".
+  - When a report is reassessed, append the new date in parentheses on the
+    same line, e.g.
+        **Assessment Date:** February 8, 2026 (Updated: March 22, 2026)
+    or, when reassessing in response to an event:
+        **Assessment Date:** April 27, 2026 (reassessment after April 18, 2026 exploit)
+  - The reassessment-scan workflow parses every "Month Day, Year" date on this
+    line and uses the latest one to decide whether the report is stale, so the
+    appended date keeps the staleness clock honest.
+-->
+
 
 ## Overview + Links
 

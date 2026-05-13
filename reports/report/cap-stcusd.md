@@ -37,7 +37,7 @@ stcUSD is a **yield-bearing ERC-4626 vault token** issued by Cap (Covered Agent 
 
 - [Cap Documentation](https://docs.cap.app/)
 - [Cap stcUSD Mechanics](https://docs.cap.app/protocol-overview/stcusd-mechanics)
-- [Cap cUSD Mechanics](https://docs.cap.app/protocol-overview/cusd-mechanics)
+- [Cap cUSD Mechanics](https://docs.cap.app/overview/protocol-overview)
 - [Cap Audits](https://docs.cap.app/resources/audits)
 - [DeFi Llama: Cap](https://defillama.com/protocol/cap)
 - [Aave Blog: Cap Integration](https://aave.com/blog/cap)

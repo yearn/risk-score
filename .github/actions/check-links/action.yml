@@ -1,0 +1,43 @@
+name: 'Check links'
+description: 'Restores lychee cache, runs lychee, and installs uv so defillama checks can run.'
+
+inputs:
+  files:
+    description: 'Files or globs for lychee to check'
+    required: true
+  fail:
+    description: 'Whether lychee should fail the job on broken links'
+    required: false
+    default: 'false'
+  output:
+    description: 'Optional path to write lychee output markdown'
+    required: false
+    default: ''
+
+outputs:
+  lychee-exit-code:
+    description: 'Lychee exit code (0 = all links OK)'
+    value: ${{ steps.lychee.outputs.exit_code }}
+
+runs:
+  using: composite
+  steps:
+    - name: Restore lychee cache
+      uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+      with:
+        path: .lycheecache
+        key: cache-lychee-${{ github.run_id }}
+        restore-keys: cache-lychee-
+
+    - name: Check links
+      id: lychee
+      uses: lycheeverse/lychee-action@8646ba30535128ac92d33dfc9133794bfdd9b411 # v2.8.0
+      with:
+        args: ${{ inputs.files }}
+        fail: ${{ inputs.fail }}
+        output: ${{ inputs.output }}
+      env:
+        GITHUB_TOKEN: ${{ github.token }}
+
+    - name: Install uv
+      uses: astral-sh/setup-uv@d0cc045d04ccac9d8b7881df0226f9e82c39688e # v6.8.0

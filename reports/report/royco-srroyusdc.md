@@ -112,7 +112,7 @@ Royco Dawn has been audited by Hexens, with a Cantina competitive audit still in
 
 | Auditor | Scope | Date | Status | Report |
 |---------|-------|------|--------|--------|
-| Hexens | Royco Dawn (full audit) | ~Jan 2026 | Completed | [Report (PDF)](https://github.com/roycoprotocol/royco-dawn/blob/main/audit/Hexens-Royco-Dawn.pdf) |
+| Hexens | Royco Dawn (full audit) | ~Jan 2026 | Completed | [Report (PDF)](https://github.com/roycoprotocol/royco-dawn/blob/main/audit/Hexens-Royco-Dawn-1.pdf) |
 | Hexens | Royco Dawn (whitelist) | ~Jan 2026 | Completed | [Report (PDF)](https://github.com/roycoprotocol/royco-dawn/blob/main/audit/Hexens-Royco-Dawn-Whitelist.pdf) |
 | Cantina | Royco Dawn (competition) | Jan 20-27, 2026 | Judging (262 submissions, judged by Royco team) | [Competition Page](https://cantina.xyz/competitions/9c6e38e2-535e-47b2-83ef-29df91fbb774) |
 | Cantina | Royco Dawn (whitelist) | Jan 2026 | Completed | [Report (PDF)](https://github.com/roycoprotocol/royco-dawn/blob/main/audit/Cantina-Royco-Dawn-Whitelist.pdf) |

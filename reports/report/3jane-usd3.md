@@ -24,7 +24,7 @@ Interest is distributed with an **85/15 split** between USD3 (senior) and sUSD3 
 - [3Jane Documentation](https://docs.3jane.xyz/)
 - [3Jane App](https://www.3jane.xyz/)
 - [3Jane Whitepaper](https://www.3jane.xyz/pdf/whitepaper.pdf)
-- [3Jane Introduction (Mirror)](https://mirror.xyz/0x763E83224239b339788c36652EFA9f40107EFf2C/AtiYFk_sL7-74q-wRqRhPMqW_OQbs4xqZHKgAbRa37Y)
+- [3Jane Introduction](https://paragraph.com/@3jane-protocol/introducing-3jane)
 - [Veridise Audit Report](https://github.com/3jane-protocol/audits/blob/main/veridise-audit.pdf)
 - [GitHub: moneymarket-contracts](https://github.com/3jane-protocol/moneymarket-contracts)
 - [DefiLlama: 3Jane](https://defillama.com/protocol/3jane)

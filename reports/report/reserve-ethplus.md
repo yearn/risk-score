@@ -41,8 +41,9 @@ Onchain values fetched from `BasketHandler.quote(1e18, ROUND)` and each LST's ex
 - Net change since prior assessment (2025-12-22): **−38%** in USD ($108M → $67M), **−25%** in ETH terms (36,246 → 27,248 ETH+)
 
 **Links:**
-- [Reserve Protocol Documentation](https://reserve.org/)
+- [Reserve Protocol Documentation](https://docs.reserve.org/introduction)
 - [ETH+ Dashboard](https://app.reserve.org/ethereum/token/0xe72b141df173b999ae7c1adcbf60cc9833ce56a8/overview)
+- [Reserve Protocol Security](https://docs.reserve.org/security)
 - [Reserve GitHub](https://github.com/reserve-protocol/protocol)
 - [Audit Reports Folder](https://github.com/reserve-protocol/protocol/tree/master/audits)
 - [LlamaRisk ETH+ Analysis (July 2024)](https://www.llamarisk.com/research/rtoken-risk-ethplus)
@@ -51,7 +52,7 @@ Onchain values fetched from `BasketHandler.quote(1e18, ROUND)` and each LST's ex
 
 **Audit Status:** Comprehensive, with audits covering each major version including the recently-deployed v4.2.0.
 
-Audit reports are published in [`reserve-protocol/protocol/audits`](https://github.com/reserve-protocol/protocol/tree/master/audits):
+Audit reports are published in [`reserve-protocol/protocol/audits`](https://github.com/reserve-protocol/protocol/tree/master/audits) and on the [Reserve Security docs](https://docs.reserve.org/security):
 
 | Firm | Scope | Date |
 |------|-------|------|
@@ -307,7 +308,7 @@ The primary spot pool (Curve ETH+/WETH) has ~$12.5M TVL. With Convex/Beefy/Stake
 **Development Activity:** Active. Recent commits (last 90 days) include weETH integration tests, Certora formal verification, RToken deprecation tooling, and the v4.2.0 audit cycle.
 
 **Incident Response:**
-- Active Immunefi bug bounty
+- Active Cantina bug bounty ($10M max payout)
 - Pause/freeze mechanisms at multiple severity levels
 - Guardian multisig with timelock-cancellation power for live-incident response
 - No prior incidents to assess response from
@@ -463,7 +464,7 @@ All gates pass. Proceed to category scoring.
 
 **Subcategory A — Audits:** 1
 - 8+ audits across multiple top firms; v4.2.0 specifically covered by Trust Security, Oak Security, Certora
-- Active Immunefi bounty
+- Active Cantina bounty
 - Moderate–high contract complexity, but offset by repeated audit cycles and formal verification
 
 **Subcategory B — Historical track record:** 1
