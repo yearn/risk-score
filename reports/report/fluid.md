@@ -1,10 +1,28 @@
 # Protocol Risk Assessment: Fluid Lending Protocol
 
-- **Assessment Date:** February 12, 2026
-- **Token:** fTokens (fUSDC, fUSDT, fWETH)
+- **Assessment Date:** April 27, 2026 (Reassessment — original assessment Feb 12, 2026)
+- **Token:** fTokens (fUSDC, fUSDT, fWETH, etc.)
 - **Chain:** Ethereum Mainnet
 - **Token Address:** [`0x9Fb7b4477576Fe5B32be4C1843aFB1e55F251B33`](https://etherscan.io/address/0x9Fb7b4477576Fe5B32be4C1843aFB1e55F251B33) (fUSDC)
-- **Final Score: 1.1/5.0**
+- **Final Score: 1.4/5.0** (was 1.1/5.0 in Feb 2026)
+
+## Reassessment Summary (Apr 2026)
+
+This reassessment is triggered by two material events that occurred since the original Feb 12, 2026 assessment:
+
+1. **Resolv USR depeg / contagion event (Mar 22, 2026)** — Resolv's stablecoin (USR) was exploited via a compromised AWS KMS key. Fluid was the most-impacted lending counterparty due to the previously-flagged wstUSR concentration risk (which materialized). Fluid absorbed ~$10–17.5M of bad debt and saw ~$300M of net outflows in a single day. Fluid covered 100% of bad debt via a short-term loan coverage agreement (cyberfund/Lomashuk, weremeow, Fluid core team). User funds (fToken holders) were made whole. By March 25, 2026, Fluid reported repaying $70M of USR-related debt across affected chains.
+
+2. **Kelp DAO rsETH bridge exploit (Apr 18, 2026)** — $292M drained via a LayerZero cross-chain messaging exploit. Fluid froze its rsETH markets within hours alongside Aave, SparkLend, and Upshift. No direct loss to Fluid contracts; this was a precautionary action against contagion.
+
+**Net effect on the assessment:**
+
+- Lending TVL fell from $1.28B (Feb 2026) to **~$751M** (Apr 27, 2026) — a 41% decline driven by the two stress events.
+- fToken exchange rates remain **monotonically increasing onchain** for every fToken (verified) — no value loss to lenders due to the protocol's coverage of bad debt.
+- A previously-identified "key risk" (concentration in wstUSR at 18.9% of TVL) materialized. The protocol response was rapid and effective, but the recovery relied on **discretionary off-balance-sheet capital commitments** rather than a pre-funded, programmatic insurance/coverage layer.
+- **Concentration has shifted but not improved**: as of Apr 27, 2026 the top supply asset is SUSDAI at 19.9% of all-chain lending TVL (above the 15% reassessment trigger), with reUSD at 12.7% in fourth. Both are yield-bearing stablecoin wrappers — the same structural pattern as the wstUSR exposure that produced the Mar 2026 incident.
+- A core proxy upgrade did occur post-assessment: the Liquidity Layer's EIP-1967 dummy implementation was changed at block 24779519 (Mar 31, 2026, governance-executed). This is a "dummy" slot used for explorer recognition; the actual logic dispatch lives in module slots that were also updated in the same tx. Follow-up verification found no USDC/USDT rate event in that upgrade tx.
+- The "Protocol live >2 years with no incidents" optional modifier (-0.5) does not apply due to the Resolv-related bad debt event.
+- Score moves from **1.1 → 1.4** (still **MINIMAL RISK**), reflecting the materialization of a previously-identified concentration risk, the demonstrated ad-hoc coverage pattern, and the **fact that current top concentration remains above the 15% trigger in a structurally similar asset (SUSDAI)** — partially offset by a successful response that protected lenders.
 
 ## Overview + Links
 
@@ -31,9 +49,10 @@ Fluid is governed by FLUID token holders via onchain GovernorBravo governance wi
 - [Security/Audits Page](https://docs.fluid.instadapp.io/audits-and-security.html)
 - [GitHub (Public Contracts)](https://github.com/Instadapp/fluid-contracts-public)
 - [Deployments](https://github.com/Instadapp/fluid-contracts-public/blob/main/deployments/deployments.md)
-- [Governance Forum](https://gov.instadapp.io/)
+- [Governance Forum](https://gov.fluid.io/) (formerly gov.instadapp.io — redirects)
 - [Snapshot Governance](https://snapshot.org/#/instadapp-gov.eth)
 - [DeFiLlama — Fluid Lending](https://defillama.com/protocol/fluid-lending)
+- [DeFiLlama — Fluid (overall)](https://defillama.com/protocol/fluid)
 
 ## Contract Addresses (Ethereum Mainnet)
 
@@ -51,38 +70,50 @@ All contracts verified on Etherscan. Compiled with Solidity 0.8.21.
 | **fsUSDS** | [`0x2BBE31d63E6813E3AC858C04dae43FB2a72B0D11`](https://etherscan.io/address/0x2BBE31d63E6813E3AC858C04dae43FB2a72B0D11) | sUSDS | [`0xa3931d71877C0E7a3148CB7Eb4463524FEc27fbD`](https://etherscan.io/address/0xa3931d71877C0E7a3148CB7Eb4463524FEc27fbD) |
 | **fUSDtb** | [`0x15e8c742614b5D8Db4083A41Df1A14F5D2bFB400`](https://etherscan.io/address/0x15e8c742614b5D8Db4083A41Df1A14F5D2bFB400) | USDtb | [`0xC139190F447e929f090Edeb554D95AbB8b18aC1C`](https://etherscan.io/address/0xC139190F447e929f090Edeb554D95AbB8b18aC1C) |
 
-### fToken On-Chain State (Ethereum Mainnet, as of Feb 2026)
+### fToken On-Chain State (Ethereum Mainnet, verified May 11, 2026)
 
-| fToken | Total Assets | Exchange Rate | Supply Rate | Approx TVL |
-|--------|-------------|---------------|-------------|------------|
-| fUSDC | 274.8M USDC | 1.1853 | 4.59% | ~$274.8M |
-| fUSDT | 167.5M USDT | 1.1788 | 3.99% | ~$167.5M |
-| fGHO | 42.3M GHO | 1.0975 | 7.32% | ~$42.3M |
-| fwstETH | 2,874 wstETH | 1.0381 | 0.26% | ~$8.9M |
-| fUSDtb | 5.8M USDtb | 1.0171 | 1.82% | ~$5.8M |
-| fWETH | 1,773 WETH | 1.0682 | 2.56% | ~$4.7M |
-| fsUSDS | 15,025 sUSDS | 1.0021 | 0.00% | ~$15.8K |
-| **Total Ethereum fTokens** | | | | **~$504M** |
+| fToken | Total Assets (May 11 2026) | Total Assets (Feb 2026) | Exchange Rate (May 11) | Exchange Rate (Feb) | Δ Rate (Feb→May) |
+|--------|---------------------------|------------------------|------------------------|---------------------|------------------|
+| fUSDC | 193.13M USDC | 274.8M USDC | 1.1944 | 1.1853 | +0.77% |
+| fUSDT | 130.00M USDT | 167.5M USDT | 1.1881 | 1.1788 | +0.79% |
+| fGHO | 12.08M GHO | 42.3M GHO | 1.1096 | 1.0975 | +1.10% |
+| fwstETH | 1,767.83 wstETH | 2,874 wstETH | 1.0383 | 1.0381 | +0.02% |
+| fWETH | 2,532.88 WETH | 1,773 WETH | 1.0749 | 1.0682 | +0.63% |
+| fUSDtb | 2.10M USDtb | 5.8M USDtb | 1.0214 | 1.0171 | +0.42% |
+| fsUSDS | 15,024.77 sUSDS | 15,025 sUSDS | 1.0021 | 1.0021 | 0.0% |
 
-All exchange rates are >1.0, confirming accumulated yield since launch. No rewards programs currently active on any fToken — yields are purely organic from supply/borrow spreads.
+All exchange rates **continue to increase monotonically** (verified onchain — none decreased through the March or April events, nor between Apr 27 and May 11 spot-checks). This is the key safety property of the ERC4626 fToken design and confirms that fToken holders have not lost any principal value on Ethereum at any point.
 
-### Core Infrastructure (Dependency for Lending)
+Recovery has continued between Apr 27 and May 11: fUSDC supply rose from 183.47M → 193.13M USDC (+5%) and fWETH supply nearly doubled (1,740 → 2,533 WETH); fGHO and fwstETH continued to decline (-26% and -37% respectively over the same window). The earlier broad fGHO/fUSDtb/fUSDC declines reflect post-Resolv withdrawals.
 
-- **Liquidity Layer**: [`0x52Aa899454998Be5b000Ad077a46Bbe360F4e497`](https://etherscan.io/address/0x52Aa899454998Be5b000Ad077a46Bbe360F4e497) — Central contract holding all funds. Upgradeable proxy (Instadapp Infinite Proxy) with AdminModule and UserModule.
-- **LendingFactory**: [`0x54B91A0D94cb471F37f949c60F7Fa7935b551D03`](https://etherscan.io/address/0x54B91A0D94cb471F37f949c60F7Fa7935b551D03) — Creates fToken markets. Owner: Timelock.
-- **Timelock**: [`0x2386DC45AdDed673317eF068992F19421B481F4c`](https://etherscan.io/address/0x2386DC45AdDed673317eF068992F19421B481F4c) — Owner of Liquidity Layer, LendingFactory, VaultFactory, DexFactory. 1-day delay.
-- **GovernorBravo**: [`0x0204Cd037B2ec03605CFdFe482D8e257C765fA1B`](https://etherscan.io/address/0x0204Cd037B2ec03605CFdFe482D8e257C765fA1B) — Onchain governance. 117 proposals executed.
-- **Avocado Multisig**: [`0x4F6F977aCDD1177DCD81aB83074855EcB9C2D49e`](https://etherscan.io/address/0x4F6F977aCDD1177DCD81aB83074855EcB9C2D49e) — Timelock guardian (cancel-only). Also owns DeployerFactory.
-- **FLUID Token**: [`0x6f40d4A6237C257fff2dB00FA0510DeEECd303eb`](https://etherscan.io/address/0x6f40d4A6237C257fff2dB00FA0510DeEECd303eb) — Governance token. 100M max supply, ~77.5M circulating.
+### Core Infrastructure (Dependency for Lending) — Verified Onchain May 11, 2026; selected items rechecked May 6, 2026
+
+- **Liquidity Layer (proxy)**: [`0x52Aa899454998Be5b000Ad077a46Bbe360F4e497`](https://etherscan.io/address/0x52Aa899454998Be5b000Ad077a46Bbe360F4e497) — Central contract holding all funds. Upgradeable proxy (Instadapp **Infinite Proxy** — uses a Fluid-custom slot layout, *not* standard EIP-1967). The dispatch logic lives in module slots; the impl-slot holds a "dummy" implementation purely so block explorers can detect the proxy.
+  - **Admin slot** (EIP-1967-style, `keccak("eip1967.proxy.admin")-1` = `0xb531...6103`): `0x2386DC45AdDed673317eF068992F19421B481F4c` (Timelock) ✓ unchanged since Feb 2026.
+  - **Dummy-implementation slot** (Fluid custom: `0x360894a13ba1a3210667c828492db98dca3e2076cc3735a920a3ca505d382bbc` — defined in [`infiniteProxy/proxy.sol`](https://github.com/Instadapp/fluid-contracts-public/blob/main/contracts/infiniteProxy/proxy.sol)): changed once between assessments. At block `24436972` (Feb 12, 2026) the slot held [`0xa57d7cEF617271F4cEa4F665D33eBcFCbA4929f6`](https://etherscan.io/address/0xa57d7cEF617271F4cEa4F665D33eBcFCbA4929f6); at block `24779519` (Mar 31, 2026) it was upgraded to the current [`0xcc331DaF69752Bece3Dc98DBc63EacD5092266a2`](https://etherscan.io/address/0xcc331DaF69752Bece3Dc98DBc63EacD5092266a2). Both impls are verified as `FluidLiquidityDummyImpl` (compiler `0.8.21` → `0.8.29` respectively). Verified unchanged at block 25074136 (May 11, 2026). The standard EIP-1967 impl slot is **empty** — Fluid does not use it.
+    - **Upgrade tx**: [`0xf484b2a265add120c907049c43ca1cfd11b73fce6154c0abe3e15d5ac325d487`](https://etherscan.io/tx/0xf484b2a265add120c907049c43ca1cfd11b73fce6154c0abe3e15d5ac325d487). The transaction was executed by the Timelock and bundled (a) the dummy-impl swap (`Upgraded` EIP-1967 event), (b) module-dispatcher selector updates (`ad967e15`, `dacb5419`), and (c) user borrow-config updates. Follow-up verification on May 6, 2026 found **no `LogUpdateRateDataV2s` event in this transaction**; the current USDC/USDT rate values did not come from proposal #126.
+    - Scheduled by **governance proposal #126** — verified via the `ProposalExecuted(126)` event emitted by GovernorBravo within the upgrade tx (block 24779519, Mar 31 2026). **No 2026-dated audit covering the new module version is published** at [audits-and-security.html](https://docs.fluid.instadapp.io/audits-and-security.html); the most recent posted audits are MixBytes (Sep–Dec 2025) and StateMind (Sep–Oct 2025), both on the Liquidity Layer. Treat the `0xcc33…` impl as in-scope of those 2025 reviews unless a separate post-upgrade audit is later published.
+- **LendingFactory**: [`0x54B91A0D94cb471F37f949c60F7Fa7935b551D03`](https://etherscan.io/address/0x54B91A0D94cb471F37f949c60F7Fa7935b551D03) — `owner() = 0x2386DC45...` (Timelock) ✓
+- **Timelock**: [`0x2386DC45AdDed673317eF068992F19421B481F4c`](https://etherscan.io/address/0x2386DC45AdDed673317eF068992F19421B481F4c) — `delay() = 86400` (1 day) ✓; `admin() = 0x0204Cd03...` (GovernorBravo) ✓
+- **GovernorBravo**: [`0x0204Cd037B2ec03605CFdFe482D8e257C765fA1B`](https://etherscan.io/address/0x0204Cd037B2ec03605CFdFe482D8e257C765fA1B) — `proposalCount() = 128` (was 117 in Feb 2026). `proposalCount` counts **created** proposals, not executed; re-verified onchain May 6, 2026 by iterating `state(uint256)` for all 128 proposals: **120 are in state `Executed`** (state==7).
+  - **11 new proposals (118–128) since the Feb assessment**: 9 executed (118, 119, 120, 122, 123, 125, 126, 127, 128), 1 defeated (121), 1 expired (124), and none currently queued.
+  - **Proposal 128 executed on May 5, 2026** at 05:43 UTC ([tx](https://etherscan.io/tx/0x6e0273ae285520126687f852efd623a0c84b351a6873850553da331d0c2430f5), block `25007782`; date re-verified onchain via `eth_getBlockByNumber`). Although the proposal text said it would move the V2 USDC/USDT kinks from 85%/93% to 90%/95%, the execution receipt emitted `LogUpdateRateDataV2s` only for ETH (`rateAtUtilizationMax` 100% -> 10%). Re-verified current onchain values: USDC and USDT remain at 85%/93% with 5.40%/7.50% kink rates.
+  - quorumVotes: 4,000,000 FLUID ✓; proposalThreshold: 1,000,000 FLUID ✓; votingDelay: 7,200 blocks ✓; votingPeriod: 14,400 blocks ✓
+- **Avocado Multisig (Timelock guardian)**: [`0x4F6F977aCDD1177DCD81aB83074855EcB9C2D49e`](https://etherscan.io/address/0x4F6F977aCDD1177DCD81aB83074855EcB9C2D49e) — Custom contract (not a Gnosis Safe; standard `getThreshold()` / `getOwners()` revert). Signers exposed via `signers()(address[])` and threshold via `requiredSigners()(uint256)`. Re-verified onchain May 11 2026 (block `25074136`): **7-of-14 multisig** (was 8-of-16 on Apr 27 2026), `owner() = 0xC7810aA3b0c6A2778EEcC114B93d59B2E9Da9E05` (also one of the 14 signers). The Apr 27 → May 11 change removed signers `0x9a30B8Ca…` and `0xa9061100…` and reduced the threshold 8 → 7; the ~50% ratio is preserved.
+  - Signers (14): `0x1d895E5C…`, `0x33581f26…`, `0x4604E3bF…`, `0x5612C18E…`, `0x7284a845…`, `0x88bB9B99…`, `0x97399C93…`, `0xA32e5237…`, `0xa385B298…`, `0xa7615CD3…`, `0xC0c72156…`, `0xc1490E04…`, `0xC7810aA3…`, `0xD33D3fcE…`.
+- **FLUID Token**: [`0x6f40d4A6237C257fff2dB00FA0510DeEECd303eb`](https://etherscan.io/address/0x6f40d4A6237C257fff2dB00FA0510DeEECd303eb) — Governance token. 100M max supply.
 
 ### Resolvers (Read-Only Periphery)
 
-- **FluidLiquidityResolver**: [`0xD7588F6c99605Ab274C211a0AFeC60947668A8Cb`](https://etherscan.io/address/0xD7588F6c99605Ab274C211a0AFeC60947668A8Cb) — Active resolver for supply/borrow rates, exchange prices, rate model params
+- **LiquidityResolver (current, all 6 chains)**: [`0xca13A15de31235A37134B4717021C35A3CF25C60`](https://etherscan.io/address/0xca13A15de31235A37134B4717021C35A3CF25C60) — Per Fluid's official [deployments registry](https://github.com/Instadapp/fluid-contracts-public/blob/main/deployments/deployments.md), this is the current LiquidityResolver on mainnet, arbitrum, base, polygon, plasma, and bnb. Verified onchain Apr 27 2026: `LIQUIDITY()` returns `0x52Aa899454998Be5b000Ad077a46Bbe360F4e497` ✓.
+- **FluidLiquidityResolver (prior version, still deployed)**: [`0xD7588F6c99605Ab274C211a0AFeC60947668A8Cb`](https://etherscan.io/address/0xD7588F6c99605Ab274C211a0AFeC60947668A8Cb) — Earlier version; bytecode still live and `LIQUIDITY()` returns the same Liquidity Layer, but no longer the canonical address in the deployments registry.
 - **RevenueResolver**: [`0x0A84741D50B4190B424f57425b09FAe60C330F32`](https://etherscan.io/address/0x0A84741D50B4190B424f57425b09FAe60C330F32)
 
 ## Audits and Due Diligence Disclosures
 
-Fluid has undergone **8 distinct security audits** across 4 audit firms, covering all major protocol components. The Lending Protocol was covered in the PeckShield and StateMind full-protocol audits. The Liquidity Layer (critical dependency for lending) was audited by both MixBytes and StateMind in 2025 using a dual-audit approach. All audit reports are available on the [audits and security page](https://docs.fluid.instadapp.io/audits-and-security.html).
+**No new audits have been published since the Feb 2026 assessment.** The audit landscape is unchanged: 8 distinct security audits across 4 audit firms covering all major protocol components, including the Lending Protocol (PeckShield + StateMind full-protocol audits) and the Liquidity Layer (MixBytes + StateMind dual audit in 2025). All audit reports are available on the [audits and security page](https://docs.fluid.instadapp.io/audits-and-security.html).
+
+The Resolv USR contagion event was **not the result of an unaudited Fluid contract bug**; it was the result of a leverage-loop borrower position becoming undercollateralized when an external collateral asset (wstUSR) collapsed in price following the upstream Resolv exploit.
 
 | # | Firm | Date | Scope | Critical | High | Medium | Low | Info | Total |
 |---|------|------|-------|----------|------|--------|-----|------|-------|
@@ -95,19 +126,11 @@ Fluid has undergone **8 distinct security audits** across 4 audit firms, coverin
 | 7 | StateMind | Sep–Oct 2025 | Liquidity Layer | 0 | 1 | 0 | 0 | 4 | 5 |
 | **Total** | | | | **3** | **13** | **23** | **21** | **48** | **108** |
 
-**Lending-relevant audit details:**
-
-- **PeckShield — Full Protocol** ([report](https://docs.fluid.instadapp.io/Peckshield_Fluid_Audit.pdf)): Covered lending/fToken contracts. All 13 issues resolved (12 resolved, 1 mitigated — "Trust Issue of Admin Keys").
-- **StateMind — Full Protocol** ([report](https://docs.fluid.instadapp.io/Statemind_Fluid_Audit.pdf)): Covered Lending/iTokens (now fTokens), Liquidity Layer, Vaults, Oracles. Critical finding: **LendingRewardRateModel returns rate with incorrect decimals** (pool-draining risk) — **fixed**. Also: incorrect supplyExchangePrice calculation, DOS of iToken markets — **all fixed**.
-- **MixBytes — Liquidity Layer** ([report](https://docs.fluid.instadapp.io/MixBytes_Fluid_Liquidity_Audit.pdf)): Directly impacts lending withdrawal/supply mechanics. 2 Low findings.
-- **StateMind — Liquidity Layer Updates** ([report](https://docs.fluid.instadapp.io/Statemind_Fluid_Liquidity_Updates_Audit.pdf)): 1 High: incorrect net transfer calculation causing user overpayment — **fixed**.
-- **MixBytes — Vault Protocol** ([report](https://docs.fluid.instadapp.io/Mixbytes_Fluid_Vault_Protocol_Audit.pdf)): Vault borrowers generate fToken yield. Relevant for lending counterparty risk. Insufficient reentrancy protection — **fixed**.
-
 No formal verification (Certora, Halmos, etc.) has been performed.
 
 ### Bug Bounty
 
-[Immunefi Bug Bounty Program](https://immunefi.com/bug-bounty/instadapp/) — Active program under the "Instadapp" name. Last updated 2024-12-15. **Fluid Lending Protocol is explicitly in scope.**
+[Immunefi Bug Bounty Program](https://immunefi.com/bug-bounty/instadapp/) — Active program under the "Instadapp" name. **Fluid Lending Protocol explicitly in scope.**
 
 | Category | Severity | Min Reward | Max Reward | Calculation |
 |----------|----------|------------|------------|-------------|
@@ -122,22 +145,83 @@ No formal verification (Certora, Halmos, etc.) has been performed.
 
 ## Historical Track Record
 
-- **Production History**: Fluid launched on Ethereum mainnet on **February 20, 2024** (first TVL recorded). The protocol has been in production for approximately **~2 years** (722 days as of February 2026).
-- **Lending TVL**: **$1.28B** across all chains (88.7% of Fluid's total $1.45B TVL). Lending is the dominant product. TVL peaked at $2.68B (Oct 2025). TVL maintained >$500M for over 1.5 years.
-- **Multi-chain Lending Deployment**:
+- **Production History**: Fluid launched on Ethereum mainnet on **February 20, 2024**. As of April 27, 2026, the protocol has been in production for **~2.18 years (798 days)**.
+- **Total Fluid TVL** (DeFiLlama "fluid" — all products, all chains, supply-side only): **~$969M** as of May 11 2026 (Apr 27 snapshot: $911.5M; down from $1.45B in Feb 2026; peak $2.68B on Oct 9, 2025).
+- **Lending-only TVL** (DeFiLlama "fluid-lending" — all chains): **~$803.6M** as of May 11 2026 (Apr 27 snapshot: $750.8M; down from $1.28B in Feb 2026; peak $2.37B on Oct 9, 2025). Per-chain (May 11): Ethereum $527.7M, Arbitrum $131.2M, Plasma $107.6M, Base $32.4M, Polygon $4.7M.
 
-| Chain | Lending Supply TVL | % of Lending | Borrowed | Utilization |
-|-------|-------------------|--------------|----------|-------------|
-| Ethereum | $718.9M | 56.1% | $682.7M | **95.0%** |
-| Plasma | $366.9M | 28.6% | $279.3M | 76.1% |
-| Arbitrum | $146.7M | 11.4% | $77.9M | 53.1% |
-| Base | $43.2M | 3.4% | $20.0M | 46.3% |
-| Polygon | $5.4M | 0.4% | $2.6M | 47.8% |
-| **Total** | **$1.28B** | **100%** | **$1.06B** | **82.9%** |
+### Major TVL Drawdowns (Historical)
 
-- **Incidents**: **No reported security incidents or exploits** found. Not listed in DeFi Llama hacks database. No rekt.news entries for Fluid or Instadapp.
-- **TVL Stability**: Only 1 daily drop >15% in entire history (August 6, 2024, -16.1%, aligned with broader crypto market selloff). Average daily volatility of 2.53% over past 90 days.
-- **Instadapp Legacy**: Instadapp has been operating since 2019, maintaining ~$2B TVL through 2023. Fluid represents the team's most ambitious protocol built on years of DeFi infrastructure experience.
+| Date | Drawdown | Driver |
+|------|----------|--------|
+| 2024-03-20 | -13.7% | Early-protocol churn |
+| 2024-08-06 | -16.1% | Broader crypto market selloff |
+| 2025-04-11 | -11.3% | Market stress |
+| **2026-03-23** | **-30.3%** | **Resolv USR exploit contagion (NEW)** |
+| **2026-04-19/20** | **-17.5%** | **Kelp DAO bridge exploit / rsETH market freeze (NEW)** |
+
+The two 2026 events are the largest single-day drawdowns in the protocol's history. Both were driven by external counterparty/collateral-asset events, not by a bug in Fluid's contracts.
+
+### Incidents (NEW since Feb 2026)
+
+#### 1. Resolv USR Depeg / Bad Debt Event — March 22, 2026
+
+**Upstream cause:** Resolv Labs' minting infrastructure was exploited via a compromised AWS KMS-hosted private key (the `SERVICE_ROLE` signer). The attacker minted ~80M unbacked USR for ~$200K of USDC collateral, extracted ~$25M, and the USR stablecoin depegged from $1.00 to as low as $0.0025 on Curve before partially recovering to ~$0.85.
+
+**Impact on Fluid:**
+
+- **Concentration risk materialized:** wstUSR was the largest single supply asset on Fluid (18.9% of all-chain lending TVL per the Feb 2026 assessment), and ~98% of wstUSR supply was reportedly deployed in Fluid leverage loops at up to 6x leverage.
+- **Bad debt:** Estimated $10–17.5M of bad debt accrued in Fluid lending markets when wstUSR-collateralized borrower positions became insolvent (the wrapping ratio of wstUSR meant that positions were deeply underwater even if USR repegged).
+- **Outflows:** ~$300M of net outflows in a single day (the largest in protocol history). Total Fluid TVL: $1.25B (Mar 22) → $873M (Mar 23) = **-30.3%** in 24 hours.
+- **Operational response (~30 minutes):** Admin team paused new borrowings and froze new deposits on affected vaults, then began analyzing existing positions. Per Fluid's official statement, *all other markets continued operating normally*.
+- **Bad debt coverage:** Per Fluid's official communication, **100% of bad debt was covered via a short-term loan coverage agreement** funded by personal commitments from Lom Lomashuk (Cyber Fund), a contributor known as "weremeow," and the Fluid core team itself. Resolv Labs additionally executed USR redemptions for whitelisted (pre-incident) wallets covering >90% of the affected user group, and committed to a permanent burn of 46M USR (9M immediate + 36M frozen via blacklist) to reduce ongoing depeg pressure.
+- **Repayment status:** Fluid reported that ~$70M of USR-related debt was fully repaid by **March 25, 2026**, three days after the incident. All lending markets remained operational.
+- **fToken impact:** **No direct loss to fToken holders** on Ethereum — onchain exchange rates continued to increase monotonically through and after the event (verified). fToken holders are reported as "not affected" per the official statement.
+
+**Sources:**
+- [Halborn — Explained: The Resolv Hack (March 2026)](https://www.halborn.com/blog/post/explained-the-resolv-hack-march-2026)
+- [Sentora Research — The Resolv Hack: $25M From a Single Compromised Key](https://sentora.com/research/articles/the-resolv-hack-25m-from-a-single-compromised-key)
+- [WEEX News — Fluid: 100% of bad debts are covered by the short-term loan coverage agreement](https://www.weex.com/news/detail/fluid-100-of-bad-debts-are-covered-by-the-short-term-loan-coverage-agreement-and-user-funds-are-not-affected-399991)
+- [Phemex News — Fluid Begins $70M Repayments After Resolv Incident](https://phemex.com/news/article/fluid-commences-70m-repayments-following-resolv-incident-68934)
+- [Resolv USR Exploit Analysis (independent)](https://resolv-usr-exploit.vercel.app/)
+- [Protos — Resolv hack shows DeFi learned nothing from last contagion](https://protos.com/resolv-hack-shows-defi-learned-nothing-from-last-contagion/)
+
+**Critical observation:** The bad-debt coverage was **discretionary and off-balance-sheet** (loans from named individuals/entities). It is not a pre-funded, programmatic insurance fund or first-loss tranche. While the response was rapid and successful, the same coverage mechanism cannot be assumed to scale to a much larger event, and there is no documented contractual obligation forcing those parties to backstop losses again. This is the most material change to the risk profile since the previous assessment.
+
+#### 2. Kelp DAO rsETH Bridge Exploit — April 18, 2026
+
+**Upstream cause:** Attacker drained 116,500 rsETH (~18% of circulating supply, ~$292M) from Kelp DAO's LayerZero-powered bridge by tricking the cross-chain messaging layer into accepting a forged instruction. This is the largest DeFi exploit of 2026 to date.
+
+**Impact on Fluid:**
+
+- Fluid froze its rsETH markets within hours, alongside Aave, SparkLend, and Upshift.
+- This was a **precautionary action** — Fluid contracts were not exploited.
+- Total Fluid TVL: $1.04B (Apr 18) → $861M (Apr 20) = **-17.5%** over 2 days.
+- No bad debt event reported.
+
+**Sources:**
+- [CoinDesk — 2026's biggest crypto exploit: Kelp DAO hit for $292M](https://www.coindesk.com/tech/2026/04/19/2026-s-biggest-crypto-exploit-kelp-dao-hit-for-usd292-million-with-wrapped-ether-stranded-across-20-chains)
+- [Aave Governance — rsETH Incident Report (April 20, 2026)](https://governance.aave.com/t/rseth-incident-report-april-20-2026/24580)
+
+### Multi-chain Lending Deployment
+
+Per-chain utilization refresh completed May 6, 2026 using the current `LiquidityResolver` (`0xca13...5C60`) on each deployed chain. Methodology: call `listedTokens()`, then `getOverallTokensData(tokens)` and compute token-level utilization as `totalBorrow / totalSupply`. The "USD-weighted aggregate" column uses DeFiLlama current token prices to aggregate across token units, so it is useful for directional chain comparison but is **not** identical to a pure fToken-only utilization metric. The token-level figures are the source of truth for stress monitoring.
+
+| Chain | Resolver Block | Listed Tokens | USD-Weighted Aggregate Utilization | Highest Borrowed-Token Utilization |
+|-------|----------------|---------------|------------------------------------|------------------------------------|
+| Ethereum | `25035643` | 38 | ~52.5% | GHO 86.7%, ETH 84.9%, USDT 77.6%, USDC 76.1% |
+| Arbitrum | `459964767` | 22 | ~45.2% | USDC 90.3%, USDT0 88.6%, GHO 86.3%, ETH 81.1% |
+| Base | `45638505` | 23 | ~40.4% | USDC 86.5%, GHO 84.0%, ETH 70.5% |
+| Polygon | `86473158` | 13 | ~31.7% | USDT0 92.1%, USDC 87.3%, WETH 80.6% |
+| Plasma | `21134495` | 16 | ~44.3% | USDT0 90.9%, USDe 58.5%, GHO 46.7% |
+| BNB | `96695358` | 10 | ~43.3% | USDT 96.7%, USDC 90.1%, WETH 84.9% |
+
+The prior Feb 2026 Ethereum utilization figure (95.0%) should no longer be used. As of the refresh, no Ethereum borrowed token is above 90% utilization; the highest Ethereum token is GHO at 86.7%. High-utilization stablecoin markets now sit mostly on BNB (USDT 96.7%, USDC 90.1%), Polygon (USDT0 92.1%, USDC 87.3%), Plasma (USDT0 90.9%), and Arbitrum (USDC 90.3%, USDT0 88.6%). These do not change the score, but they should be monitored more closely than Ethereum for near-term utilization stress.
+
+Combined lending TVL fell from $1.28B → $750.8M (-41%) across all chains. Most reduction was driven by stablecoin supply withdrawals.
+
+### Instadapp Legacy
+
+Instadapp has been operating since 2019, maintaining ~$2B TVL through 2023. Fluid represents the team's most ambitious protocol built on years of DeFi infrastructure experience. Track record now includes one **bad debt absorption event** (Mar 2026) with successful third-party-funded recovery.
 
 ## Funds Management
 
@@ -151,11 +235,13 @@ fTokens are **ERC4626-compliant vault tokens**. When a user deposits an underlyi
 
 On withdrawal, the reverse occurs: shares are **burned before** the underlying is withdrawn from the Liquidity Layer (burn-first pattern for safety).
 
-**Exchange rate**: Computed onchain as `tokenExchangePrice / EXCHANGE_PRICES_PRECISION` (1e12 precision). The rate is monotonically increasing — it can never decrease. It incorporates:
+**Exchange rate**: Computed onchain as `tokenExchangePrice / EXCHANGE_PRICES_PRECISION` (1e12 precision). The rate is monotonically increasing — it can never decrease. **Verified onchain on Apr 27, 2026:** all fToken exchange rates have increased since Feb 2026.
+
+It incorporates:
 - Yield from the Liquidity Layer (borrower interest)
 - Optional rewards from a `LendingRewardsRateModel` (currently **inactive** for all fTokens; yields are purely organic)
 
-**Safety mechanisms in fToken contracts:**
+**Safety mechanisms in fToken contracts (unchanged):**
 - Custom reentrancy guard (deposit/withdraw/rebalance all protected)
 - Callback validation: checks caller = Liquidity AND token = ASSET AND status = ENTERED
 - Burn-before-withdraw pattern
@@ -165,111 +251,150 @@ On withdrawal, the reverse occurs: shares are **burned before** the underlying i
 ### Accessibility
 
 - **Supplying**: Permissionless — anyone can deposit via fTokens. No whitelist required.
-- **Redemption**: fToken withdrawals via `withdraw()` or `redeem()` (standard ERC4626). Subject to Liquidity Layer withdrawal limits. If utilization is very high, withdrawals may be temporarily throttled until limits expand or borrows are repaid.
+- **Redemption**: fToken withdrawals via `withdraw()` or `redeem()` (standard ERC4626). Subject to Liquidity Layer withdrawal limits. During the Mar 2026 event, withdrawals from affected (wstUSR-related) vaults were paused while solvent markets continued operating; standard fToken markets (fUSDC etc.) on Ethereum remained operational throughout.
 - **Fees**: No explicit deposit/withdrawal fees. Interest rates are algorithmically determined by utilization via a kink-based model.
 
 ### Yield Source and Counterparty Risk
 
 fToken yield comes from **borrower interest**. Borrowers use the Vault Protocol to deposit collateral and borrow assets from the Liquidity Layer. This means fToken holders are exposed to:
 
-- **Vault Protocol solvency**: If borrowers default and liquidations fail to recover full value, bad debt could affect lending reserves
-- **Liquidation effectiveness**: The tick-based liquidation mechanism must function correctly to prevent bad debt accumulation
-- **Oracle correctness**: Vault liquidations depend on Chainlink, UniswapV3 TWAP, and Redstone price feeds. Oracle failures could delay liquidations
+- **Vault Protocol solvency**: If borrowers default and liquidations fail to recover full value, bad debt could affect lending reserves. **The Mar 2026 event is a concrete example of this risk materializing** — the wstUSR price collapse outpaced the liquidation engine's ability to safely close positions, producing $10–17.5M of bad debt.
+- **Liquidation effectiveness**: The tick-based liquidation mechanism must function correctly to prevent bad debt accumulation. In the Mar 2026 case, the speed and magnitude of the wstUSR price collapse exceeded what the liquidation mechanism could handle without losses.
+- **Oracle correctness**: Vault liquidations depend on Chainlink, UniswapV3 TWAP, and Redstone price feeds. Oracle failures could delay liquidations.
+- **Coverage mechanism**: Bad debt is **not covered by a programmatic, pre-funded insurance fund or first-loss tranche.** The Mar 2026 incident was covered via discretionary short-term loans from named individuals and entities.
 
 **Collateral quality backing fToken yield** (borrower collateral types):
 - Blue-chip: ETH, WETH, wstETH, weETH, WBTC, cbBTC
 - Stablecoins: USDC, USDT, sUSDe, GHO
-- Others: PAXG, XAUt, various LSTs
+- Yield/restaking: PAXG, XAUt, various LSTs, sUSDe, syrupUSDC (and previously wstUSR — substantially de-risked post-Mar 2026)
 
 ### Collateralization
 
-- **Backing**: All lending positions are over-collateralized onchain. Borrowers must maintain collateral ratios (80-95% LTV depending on the pair).
+- **Backing**: All lending positions are over-collateralized onchain. Borrowers must maintain collateral ratios (80–95% LTV depending on the pair).
 - **Liquidations**: Fully onchain tick-based mechanism. Liquidation penalty as low as 0.1% for correlated pairs (wstETH/ETH), higher for uncorrelated pairs.
 - **Withdrawal Gap**: Extra gap on Liquidity Layer limits reserved for liquidations to ensure they can always execute.
+- **Limitation observed Mar 2026:** the liquidation engine's effectiveness depends on the collateral asset behaving like a liquid market asset. When wstUSR's underlying USR depegged ~99.7% intraday, on-DEX liquidity for wstUSR was insufficient for safe liquidation, producing bad debt.
 
 ### Provability
 
 - **Transparency**: All reserves are fully onchain and verifiable via resolver contracts (FluidLiquidityResolver at [`0xD7588F6c99605Ab274C211a0AFeC60947668A8Cb`](https://etherscan.io/address/0xD7588F6c99605Ab274C211a0AFeC60947668A8Cb)).
-- **Exchange Rate**: fToken exchange rates are computed programmatically onchain (ERC4626 standard). No offchain oracle or admin input needed. Rate is monotonically increasing.
-- **Interest Rates**: Algorithmically determined based on utilization. USDC rate model: kink at 85% utilization (5.5% rate), second kink at 93% (8.5%), max rate 40%.
+- **Exchange Rate**: fToken exchange rates are computed programmatically onchain (ERC4626 standard). No offchain oracle or admin input needed. Rate is monotonically increasing — verified.
+- **Interest Rates**: Algorithmically determined based on utilization. USDC rate model (re-verified onchain May 6, 2026): kink at 85% utilization (5.40% rate), second kink at 93% (7.50%), max rate 40%. Proposal #128 has now executed, but it did **not** emit a USDC/USDT rate update and the live USDC/USDT curve remains unchanged.
 - **Revenue**: Protocol revenue is calculated and verifiable via the RevenueResolver contract.
 
-### Interest Rate Model (USDC example, verified onchain)
+### Interest Rate Model (USDC example, re-verified onchain May 6, 2026)
 
-| Parameter | Value |
-|-----------|-------|
-| Model Type | Kinked (V2) |
-| Kink 1 | 85% utilization |
-| Rate at Kink 1 | 5.50% |
-| Kink 2 | 93% utilization |
-| Rate at Kink 2 | 8.50% |
-| Max Rate | 40.00% |
-| Fee | 10% of spread |
+Decoded from `FluidLiquidityResolver.getTokensRateData([USDC])` and `getRateConfig(USDC)` at block `25035643`. Compared against the Feb 2026 snapshot in the previous report.
+
+| Parameter | May 6, 2026 (current) | Feb 2026 | Δ |
+|-----------|------------------------|----------|----|
+| Model Type | Kinked (V2) | Kinked (V2) | unchanged |
+| Kink 1 | 85% utilization | 85% utilization | unchanged |
+| Rate at Kink 1 | **5.40%** | 5.50% | -10 bps |
+| Kink 2 | 93% utilization | 93% utilization | unchanged |
+| Rate at Kink 2 | **7.50%** | 8.50% | -100 bps |
+| Max Rate | 40.00% | 40.00% | unchanged |
+| Fee | 10% of spread | 10% of spread | unchanged |
+
+The current rate curve is **softer above the kinks** than the prior assessment (kink2 rate dropped 100 bps), which lowers the marginal incentive for borrower repayment at very high utilization. This change matters in stress: the kink-based mechanism's effectiveness in the Mar 2026 outflow event was partly attributed to high rates above the kink prompting repayment.
+
+**Rate-value reconciliation (verified May 6, 2026):** proposal #126 did **not** emit `LogUpdateRateDataV2s` in tx `0xf484b2a2...`, so the current USDC/USDT values did not come from #126. The post-Feb USDC/USDT rate history from Liquidity Layer events is:
+
+| Date | Tx | USDC/USDT Kink 1 | Rate at Kink 1 | Kink 2 | Rate at Kink 2 | Notes |
+|------|----|------------------|----------------|--------|----------------|-------|
+| Feb 13, 2026 | [`0xe373...131bb`](https://etherscan.io/tx/0xe373ed1f4fa84ae1e4e0f9c33f3a88dc6143eb7bcee56c9a4152b6e9974131bb) | 85% | 5.00% | 93% | 8.00% | Liquidity Layer rate update event |
+| Mar 10, 2026 | [`0xa99e...96c06`](https://etherscan.io/tx/0xa99e59f371916802c5228c585d0edc7a35ee1988873c0768c9820284d3496c06) | 85% | 4.50% | 93% | 7.50% | Liquidity Layer rate update event |
+| Apr 23, 2026 | [`0x1927...49e`](https://etherscan.io/tx/0x1927e2147a52b2a4ba0bdfb3b764b79fa33339c12a7048fb51dda19225b0490e) | 85% | 5.40% | 93% | 7.50% | Liquidity Layer rate update event; this is the current live USDC/USDT curve |
+
+Proposal #128 was executed on May 5, 2026 at 05:43 UTC ([tx](https://etherscan.io/tx/0x6e0273ae285520126687f852efd623a0c84b351a6873850553da331d0c2430f5), block `25007782`), but the only `LogUpdateRateDataV2s` in that execution was for ETH, capping ETH `rateAtUtilizationMax` from 100% to 10%. I could not verify a reason why the proposal text's stated USDC/USDT kink move (90%/95%) did not materialize; the onchain state and emitted events show that it did not.
 
 ## Liquidity Risk
 
 ### Lending-Specific Liquidity Concerns
 
-fToken holders face liquidity risk from the **shared Liquidity Layer** architecture. The Liquidity Layer serves not only lending but also Vaults, DEX, and stETH protocols. This means:
+fToken holders face liquidity risk from the **shared Liquidity Layer** architecture. This architecture and its trade-offs are unchanged since Feb 2026, but the Mar 2026 event provides a concrete stress test.
 
-- **Shared pool**: fToken withdrawals compete with all other withdrawal demand on the Liquidity Layer
-- **High utilization**: Ethereum lending utilization is **95.0%** (borrowing $682.7M of $718.9M supplied). Overall cross-chain lending utilization is **82.9%**. This is very high.
-- **Withdrawal limits**: The Liquidity Layer enforces per-token expandable withdrawal limits. `maxWithdraw()` returns the minimum of: (1) the withdrawal limit at Liquidity, (2) actual liquid balance. If a large withdrawal exceeds the current expanded limit, users must wait for the limit to expand.
+- **Shared pool**: fToken withdrawals compete with all other withdrawal demand on the Liquidity Layer.
+- **Withdrawal limits**: The Liquidity Layer enforces per-token expandable withdrawal limits. `maxWithdraw()` returns the minimum of: (1) the withdrawal limit at Liquidity, (2) actual liquid balance.
+- **Stress test result (Mar 22–25, 2026)**: $300M+ net outflows in 24 hours. Standard fToken markets (fUSDC, fUSDT, etc.) on Ethereum continued processing withdrawals throughout. Affected vaults (wstUSR-collateralized) were paused. The kink-based rate model worked as designed — high utilization produced rate increases that incentivized borrowers to repay and stabilize utilization.
+- **Stress test result (Apr 18–20, 2026)**: Additional ~$180M outflows over 2 days following the Kelp/rsETH freeze. No further bad debt; precautionary freeze of rsETH markets only.
 
 ### Exit Mechanisms
 
 - **Normal exit**: Call `withdraw()` or `redeem()` on fToken. Subject to available liquidity and withdrawal limits.
 - **Secondary market**: fTokens are ERC20 tokens and can be traded on secondary markets, though no significant DEX liquidity for fTokens was observed.
-- **Throttled exit**: During high utilization, the expansion-rate mechanism throttles large withdrawals. This prevents bank runs but delays exit for large holders.
+- **Throttled exit**: During high utilization, the expansion-rate mechanism throttles large withdrawals.
 
-### Lending TVL by Asset Type (Ethereum)
+### Lending TVL by Asset Type — Refreshed Apr 27, 2026
 
-| Asset Type | TVL | % of Ethereum Lending |
-|------------|-----|----------------------|
-| Stablecoins | $368.8M | 51.3% |
-| ETH/LSTs | $265.1M | 36.9% |
-| BTC tokens | $54.4M | 7.6% |
-| Other (Gold, FLUID, etc.) | $30.7M | 4.3% |
-| **Total** | **$718.9M** | 100% |
+Source: DeFiLlama `fluid-lending` `chainTvls.Ethereum.tokensInUsd` snapshot dated 2026-04-27 (Ethereum-only, total $503.6M of supply collateral routed through the Liquidity Layer; this includes Vault-collateral deposits, not only fToken supply).
 
-### Top Supply Assets (All Chains)
+| Asset Type | Eth Supply TVL | % of Eth |
+|------------|----------------|----------|
+| ETH/LSTs (WSTETH, WEETH, WETH, OSETH, sUSDe-LST mix) | ~$226M | 44.9% |
+| Yield-bearing stablecoin wrappers (REUSD, sUSDe-stable, etc.) | ~$108M | 21.5% |
+| BTC tokens (WBTC, CBBTC) | ~$50.7M | 10.1% |
+| Stablecoins (USDC, USDT, USDE, GHO, …) | ~$87M | 17.3% |
+| Other | ~$31M | 6.2% |
+
+Stablecoin share has fallen materially vs Feb 2026 (51.3% → 17.3%) — consistent with the disproportionately stablecoin-driven outflows after the Resolv event. ETH/LSTs and yield-bearing wrappers now dominate.
+
+### Top Supply Assets — Refreshed Apr 27, 2026
+
+Source: DeFiLlama `fluid-lending` `tokensInUsd` snapshot dated 2026-04-27 (cross-chain, total $752.3M).
 
 | Rank | Token | Supply TVL | % of Total |
 |------|-------|-----------|------------|
-| 1 | wstUSR | $242.5M | 18.9% |
-| 2 | wstETH | $130.3M | 10.2% |
-| 3 | USDT0 | $125.3M | 9.8% |
-| 4 | USDC | $124.4M | 9.7% |
-| 5 | weETH | $113.1M | 8.8% |
-| 6 | sUSDe | $103.8M | 8.1% |
-| 7 | USDT | $77.7M | 6.1% |
-| 8 | WBTC | $55.1M | 4.3% |
-| 9 | syrupUSDC | $51.3M | 4.0% |
-| 10 | syrupUSDT | $51.0M | 4.0% |
+| 1 | **SUSDAI** | $149.4M | **19.9%** |
+| 2 | **WSTETH** | $126.1M | **16.8%** |
+| 3 | WEETH | $96.7M | 12.9% |
+| 4 | **REUSD** | $95.3M | **12.7%** |
+| 5 | WBTC | $51.2M | 6.8% |
+| 6 | USDC | $39.1M | 5.2% |
+| 7 | USDT | $28.0M | 3.7% |
+| 8 | WETH | $24.2M | 3.2% |
+| 9 | CBBTC | $19.4M | 2.6% |
+| 10 | USDT0 | $15.3M | 2.0% |
 
-**Concentration risk**: wstUSR is the single largest supply asset at 18.9% of total lending TVL. Top 5 assets account for 57.6%.
+**Top-5 concentration: 69.0%.**
+
+**Concentration risk has not materially improved post-Resolv.** wstUSR (the Feb 2026 top concentration at 18.9%) is no longer in the top 10, but it has been *replaced by SUSDAI at 19.9%* and reUSD at 12.7%. Both of these are **yield-bearing wrappers of stablecoin-class assets** — the same structural pattern as wstUSR/USR that produced the Mar 2026 bad-debt event:
+
+- **SUSDAI** = sUSDS-style yield-bearing wrapper (Sky/Maker ecosystem). Wrap ratio amplifies any loss in the underlying.
+- **REUSD** = Re Protocol yield-bearing stablecoin (assessed separately in this repo). Recently-launched with comparatively short live history.
+
+Two of the top 4 assets (SUSDAI #1, REUSD #4) carry the same wrap-ratio amplification structure that was the proximate cause of the Mar 2026 incident. wstETH and weETH (#2 and #3) are blue-chip ETH LSTs and present materially lower contagion risk.
+
+### Concentration Risk Reassessment
+
+The previous report's call-out — *"Concentration risk: wstUSR is the single largest supply asset at 18.9% of total lending TVL"* — was correct and the risk materialized within ~6 weeks of the assessment. The current top concentration is **structurally similar (yield-bearing stable wrapper) and only slightly larger than Feb's wstUSR position** (19.9% vs 18.9%). Net: the concentration risk has shifted assets but **has not been reduced in pattern or magnitude**, contrary to the implication in the original draft of this reassessment.
+
+Going forward, it is reasonable to assume:
+- Top-asset concentrations of >15% in any non-blue-chip asset warrant elevated monitoring (the Reassessment Triggers section already encodes this).
+- Yield-bearing wrappers of stablecoins (the wstUSR / SUSDAI / reUSD pattern) carry additional contagion risk because their wrap ratio amplifies losses when the underlying depegs.
+- The current top exposure (SUSDAI) shares the structural property that produced the Mar 2026 incident.
 
 ### Historical Liquidity Performance
 
-- During the August 2024 market stress (only >15% TVL drop), the protocol maintained operations normally. TVL recovered and continued growing.
-- No recorded instances of withdrawal limit throttling causing prolonged user lockouts.
+- August 2024: -16.1% TVL drop, recovered without operational issues
+- **March 2026: -30.3% drop, partial market freezes (wstUSR vaults), bad debt event covered, full recovery within days. Standard fToken markets remained functional.**
+- **April 2026: -17.5% drop, precautionary rsETH freeze, no operational impact to other markets.**
 
 ## Centralization & Control Risks
 
-### Governance
+### Governance — Verified Apr 27, 2026; selected items rechecked May 6, 2026
 
-- **Governance Model**: Onchain GovernorBravo governance. FLUID token holders vote on proposals that execute through a timelock. Discussion on [governance forum](https://gov.instadapp.io/), onchain voting via [GovernorBravo](https://etherscan.io/address/0x0204Cd037B2ec03605CFdFe482D8e257C765fA1B), and offchain signaling via [Snapshot](https://snapshot.org/#/instadapp-gov.eth).
-- **Timelock**: [`0x2386DC45AdDed673317eF068992F19421B481F4c`](https://etherscan.io/address/0x2386DC45AdDed673317eF068992F19421B481F4c) — **1-day (86,400s) delay**. Admin of GovernorBravo is the Timelock itself (standard circular pattern). The Timelock guardian is the Avocado multisig (can cancel queued transactions). Min delay: 1 hour, max delay: 30 days.
-- **Owner/Admin**: All core contracts (Liquidity Layer proxy admin, LendingFactory, VaultFactory, DexFactory) are owned by the **Timelock** (`0x2386DC45...`), not directly by the multisig. Verified onchain via `owner()` calls and EIP-1967 admin slot reads.
-- **GovernorBravo Parameters** (verified onchain):
-  - Quorum: 4,000,000 FLUID (4% of total supply)
-  - Proposal threshold: 1,000,000 FLUID (1% of total supply)
-  - Voting delay: 7,200 blocks (~1 day)
-  - Voting period: 14,400 blocks (~2 days)
-  - Proposals executed: 117
-  - Minimum time from proposal to execution: ~4 days (1d delay + 2d voting + 1d timelock)
+- **Governance Model**: Onchain GovernorBravo governance. FLUID token holders vote on proposals that execute through a timelock. Discussion on [governance forum](https://gov.fluid.io/), onchain voting via [GovernorBravo](https://etherscan.io/address/0x0204Cd037B2ec03605CFdFe482D8e257C765fA1B), and offchain signaling via [Snapshot](https://snapshot.org/#/instadapp-gov.eth).
+- **Timelock**: [`0x2386DC45AdDed673317eF068992F19421B481F4c`](https://etherscan.io/address/0x2386DC45AdDed673317eF068992F19421B481F4c) — **1-day (86,400s) delay** ✓ unchanged. Admin = GovernorBravo.
+- **Owner/Admin**: All core contracts (Liquidity Layer proxy admin, LendingFactory) confirmed owned by the **Timelock** (`0x2386DC45...`) — verified onchain via `owner()` and EIP-1967 admin slot reads.
+- **GovernorBravo Parameters** (re-verified onchain May 6, 2026):
+  - Quorum: 4,000,000 FLUID (4% of total supply) ✓
+  - Proposal threshold: 1,000,000 FLUID (1% of total supply) ✓
+  - Voting delay: 7,200 blocks (~1 day) ✓
+  - Voting period: 14,400 blocks (~2 days) ✓
+  - **Proposals created: 128; proposals executed: 120** (was 117 created in Feb 2026 -> 11 new created since)
 
-### Lending-Specific Admin Controls
+### Lending-Specific Admin Controls (Unchanged)
 
 | Role | Who | What They Can Do to Lending |
 |------|-----|---------------------------|
@@ -277,9 +402,9 @@ fToken holders face liquidity risk from the **shared Liquidity Layer** architect
 | **LendingFactory Auths** | Set by Timelock | Update fToken rewards config, change rebalancer address, rescue stuck tokens, set fToken creation code |
 | **LendingFactory Deployers** | Set by Timelock | Create new fToken contracts |
 | **Rebalancer** | [`0x724d...b9b6`](https://etherscan.io/address/0x724d0c9497Fa89B2C6A4585e08380c91a92ab9b6) (fUSDC/fUSDT only) | Deposit underlying without minting shares (adds as rewards). Cannot withdraw. |
-| **Guardian** (Avocado multisig) | [`0x4F6F977a...`](https://etherscan.io/address/0x4F6F977aCDD1177DCD81aB83074855EcB9C2D49e) | Pause Class 0 protocols only. **Cannot move or withdraw funds.** Cancel timelock transactions. |
+| **Guardian** (Avocado multisig) | [`0x4F6F977a...`](https://etherscan.io/address/0x4F6F977aCDD1177DCD81aB83074855EcB9C2D49e) | Pause Class 0 protocols only. **Cannot move or withdraw funds.** Cancel timelock transactions. Used to freeze rsETH markets in Apr 2026 (precautionary). |
 
-**Key finding**: No admin role can directly access or move user funds deposited via fTokens. The most powerful action is the Timelock upgrading the Liquidity Layer implementation (1-day delay).
+**Key finding (unchanged):** No admin role can directly access or move user funds deposited via fTokens. The most powerful action is the Timelock upgrading the Liquidity Layer implementation (1-day delay). The Guardian's pause capability was exercised appropriately in both Mar and Apr 2026 events without abuse.
 
 ### Programmability
 
@@ -294,15 +419,16 @@ fToken holders face liquidity risk from the **shared Liquidity Layer** architect
 - **Vault Protocol**: Generates fToken yield. Vault borrowers, liquidations, and oracles all affect lending counterparty risk.
 - **Chainlink**: Indirect dependency via Vault Protocol oracle system. Multiple fallback oracle paths reduce risk.
 - **Permit2**: Supported for deposits (Uniswap's `0x000000000022D473030F116dDEE9F6B43aC78BA3`).
+- **External collateral asset issuers (NEW emphasis)**: As demonstrated by the Resolv (USR/wstUSR) and Kelp (rsETH) events, the protocol's risk surface includes the operational security of every accepted collateral asset issuer. A compromise of an issuer's keys or bridge can produce contagion damage even without any bug in Fluid.
 
 ## Operational Risk
 
 - **Team**: Instadapp Labs. Founded by **Sowmay Jain** and **Samyak Jain** — both are publicly known, India-based founders active since 2019. Key GitHub contributors include **thrilok209**, **KABBOUCHI**, and **SamarendraGouda**.
 - **Funding**: Well-funded by top-tier VCs: Pantera Capital, Coinbase Ventures, Standard Crypto, additional undisclosed investors.
-- **Legal Structure**: Instadapp Labs. No formal DAO legal wrapper disclosed.
+- **Legal Structure**: Instadapp Labs.
 - **Documentation**: Comprehensive technical documentation at [docs.fluid.instadapp.io](https://docs.fluid.instadapp.io/). Full source code on GitHub.
-- **Communication**: Active [governance forum](https://gov.instadapp.io/), [Discord](https://discord.com/invite/C76CeZc), Twitter [@0xfluid](https://x.com/0xfluid), [Blog](https://blog.instadapp.io/).
-- **Incident Response**: No documented formal incident response plan found. However, Guardian role can pause protocols immediately. Team has ~6 years of operational history with zero security incidents.
+- **Communication**: Active [governance forum](https://gov.fluid.io/), [Discord](https://discord.com/invite/C76CeZc), Twitter [@0xfluid](https://x.com/0xfluid), [Blog](https://blog.instadapp.io/).
+- **Incident Response (NEW evidence)**: Mar 2026 response demonstrated the team can act within ~30 minutes (pause/freeze affected markets) and arrange off-balance-sheet capital coverage of ~$70M within ~3 days. Strong response, but reliance on personal commitments rather than a programmatic mechanism is a structural concern.
 
 ## Monitoring
 
@@ -310,13 +436,15 @@ fToken holders face liquidity risk from the **shared Liquidity Layer** architect
 
 | Contract | Address | Why Monitor |
 |----------|---------|-------------|
-| **fUSDC** | [`0x9Fb7b4477576Fe5B32be4C1843aFB1e55F251B33`](https://etherscan.io/address/0x9Fb7b4477576Fe5B32be4C1843aFB1e55F251B33) | Largest fToken (~$274.8M). Exchange rate, deposits/withdrawals |
-| **fUSDT** | [`0x5C20B550819128074FD538Edf79791733ccEdd18`](https://etherscan.io/address/0x5C20B550819128074FD538Edf79791733ccEdd18) | Second largest (~$167.5M). Exchange rate, deposits/withdrawals |
+| **fUSDC** | [`0x9Fb7b4477576Fe5B32be4C1843aFB1e55F251B33`](https://etherscan.io/address/0x9Fb7b4477576Fe5B32be4C1843aFB1e55F251B33) | Largest fToken (~$183M Apr 2026). Exchange rate, deposits/withdrawals |
+| **fUSDT** | [`0x5C20B550819128074FD538Edf79791733ccEdd18`](https://etherscan.io/address/0x5C20B550819128074FD538Edf79791733ccEdd18) | Second largest (~$126M Apr 2026). Exchange rate, deposits/withdrawals |
 | **Liquidity Layer** | [`0x52Aa899454998Be5b000Ad077a46Bbe360F4e497`](https://etherscan.io/address/0x52Aa899454998Be5b000Ad077a46Bbe360F4e497) | Holds all fToken deposits. Admin changes, implementation upgrades |
+| **Liquidity Layer impl (current)** | [`0xcc331daf69752bece3dc98dbc63eacd5092266a2`](https://etherscan.io/address/0xcc331daf69752bece3dc98dbc63eacd5092266a2) | Implementation contract behind the proxy. Monitor for changes via EIP-1967 implementation slot. |
 | **Timelock** | [`0x2386DC45AdDed673317eF068992F19421B481F4c`](https://etherscan.io/address/0x2386DC45AdDed673317eF068992F19421B481F4c) | Owner of all core contracts — queued/executed transactions |
 | **GovernorBravo** | [`0x0204Cd037B2ec03605CFdFe482D8e257C765fA1B`](https://etherscan.io/address/0x0204Cd037B2ec03605CFdFe482D8e257C765fA1B) | Governance proposals, voting, execution |
+| **Avocado Multisig** | [`0x4F6F977aCDD1177DCD81aB83074855EcB9C2D49e`](https://etherscan.io/address/0x4F6F977aCDD1177DCD81aB83074855EcB9C2D49e) | Guardian pause/cancel actions |
 
-### Key Events to Watch
+### Key Events to Watch (Unchanged + new emphasis)
 
 | Contract | Event | Significance |
 |----------|-------|-------------|
@@ -324,35 +452,43 @@ fToken holders face liquidity risk from the **shared Liquidity Layer** architect
 | **Timelock** | `CancelTransaction` | Guardian cancelled a queued action |
 | **Liquidity Layer** | `LogUpdateAuth` | Auth permissions changed — affects who can modify lending configs |
 | **Liquidity Layer** | `LogUpdateGuardian` | Guardian address changed |
-| **Liquidity Layer** | `LogPauseUser` / `LogUnpauseUser` | Protocol paused/unpaused — directly affects fToken operations |
+| **Liquidity Layer** | `LogPauseUser` / `LogUnpauseUser` | Protocol paused/unpaused — directly affects fToken operations. **Now an actively exercised path (Mar/Apr 2026).** |
 | **Liquidity Layer** | `LogUpdateUserSupplyConfigs` | Supply limits changed — affects max fToken deposits |
 | **Liquidity Layer** | `LogUpdateUserBorrowConfigs` | Borrow limits changed — affects utilization and withdrawal availability |
 | **Liquidity Layer** | `LogUpdateRateDataV1` / `LogUpdateRateDataV2` | Interest rate parameters changed — affects fToken yield |
+| **EIP-1967 Admin (proxy)** | Storage slot read | Implementation changes on Liquidity Layer / fToken contracts |
 | **LendingFactory** | New fToken creation | New lending market created |
+
+### New Monitoring Recommendation: Collateral Asset Issuers
+
+Given the Mar/Apr 2026 contagion events, monitoring of the off-protocol collateral asset issuers (Resolv, Kelp, Ethena, Maple, etc.) is now a first-order concern. A compromise at any major upstream issuer can produce sub-day bad-debt events at Fluid even without any Fluid contract change.
 
 ## Risk Summary
 
 ### Key Strengths
 
-- **Lending-specific**: ERC4626-compliant fTokens with monotonically increasing exchange rates, no admin ability to access funds
-- Battle-tested team with ~6 years of DeFi operational history (Instadapp since 2019), zero security incidents
-- 8 security audits from 4 reputable firms (PeckShield, StateMind, MixBytes, Cantina) — **Lending Protocol directly covered** in 2 of them, Liquidity Layer (critical dependency) covered in 4
-- Onchain GovernorBravo governance with 1-day Timelock and 117 proposals executed — all core contracts owned by Timelock
-- $1.28B lending TVL across 5 chains, ~2 years in production with zero incidents
-- Active Immunefi bug bounty ($500K max) with Lending Protocol explicitly in scope
-- Fully programmatic interest rates and exchange rates — no offchain oracle needed for lending
+- **fToken design held under stress**: Monotonically-increasing exchange rates verified before and after the Mar/Apr 2026 stress events; no direct loss to lenders on Ethereum.
+- **Rapid incident response**: ~30 minute pause-and-freeze response on Mar 22; ~3 days to fully repay $70M of bad debt.
+- Battle-tested team with ~6 years of DeFi operational history (Instadapp since 2019).
+- 8 security audits from 4 reputable firms covering Lending Protocol and Liquidity Layer.
+- Onchain GovernorBravo governance with 1-day Timelock and **128 proposals created / 120 executed** — all core contracts owned by Timelock.
+- Active Immunefi bug bounty ($500K max) with Lending Protocol explicitly in scope.
+- Fully programmatic interest rates and exchange rates — no offchain oracle for lending.
+- ~2.2 years in production, ~$800M lending TVL across 5 chains following partial recovery from the 41% drawdown bottom ($751M on Apr 27).
 
 ### Key Risks
 
-- **Shared Liquidity Layer**: fToken deposits are commingled in the Liquidity Layer with Vault, DEX, and stETH protocol funds. A vulnerability in any protocol on the stack affects fToken holders.
-- **Liquidity Layer upgradeability**: Upgradeable proxy controlled by Timelock with only 1-day delay. Malicious upgrade could affect all deposited funds.
-- **Complex counterparty chain**: fToken yield depends on Vault Protocol borrowers → liquidation mechanism → oracle system. Failure at any point could lead to bad debt.
-- **Concentration risk**: wstUSR is 18.9% of all lending TVL. Top 5 assets = 57.6% of lending TVL.
-- **No formal verification** (Certora, Halmos) has been performed
+- **Concentration risk has demonstrably materialized**: The Feb 2026 report flagged wstUSR (18.9% of TVL) as a concentration risk. That risk turned into a real bad-debt event within 6 weeks. Future top-asset concentrations should be treated as elevated risk.
+- **Ad-hoc bad-debt coverage**: The Mar 2026 recovery relied on **discretionary off-balance-sheet loans from named individuals/entities** (cyberfund/Lomashuk, weremeow, Fluid core team). There is no programmatic, pre-funded insurance fund, first-loss tranche, or contractual coverage obligation. The same coverage pattern is not guaranteed to scale to a larger event.
+- **Wrapped-stablecoin contagion amplification**: The wstUSR wrapping ratio meant that even a partial USR repeg would not have made wstUSR-collateralized borrowers solvent. Other yield-bearing wrappers (sUSDe, syrupUSDC, etc.) share this structural property.
+- **Shared Liquidity Layer**: fToken deposits are commingled with Vault, DEX, and stETH protocol funds. A vulnerability anywhere in the stack affects fToken holders.
+- **Liquidity Layer upgradeability**: Upgradeable proxy controlled by Timelock with only 1-day delay.
+- **No formal verification** has been performed.
+- **External collateral-issuer dependency surface (NEW)**: Mar/Apr 2026 demonstrated that the protocol is significantly exposed to the operational security of every accepted collateral issuer (Resolv, Kelp, etc.).
 
 ### Critical Risks
 
-- None identified that would trigger automatic score of 5. All contracts verified, reserves fully onchain, governance is via onchain GovernorBravo + Timelock. No EOA control. Guardian can only pause.
+- None that would trigger an automatic score of 5. All contracts verified, reserves fully onchain, governance is via onchain GovernorBravo + Timelock, no EOA control. Guardian can only pause. The Mar 2026 bad-debt event was material but did not result in lender losses on Ethereum.
 
 ---
 
@@ -361,81 +497,80 @@ fToken holders face liquidity risk from the **shared Liquidity Layer** architect
 ### Critical Risk Gates
 
 - [x] **No audit** — PASSED. 8 audits by 4 reputable firms. Lending Protocol directly covered.
-- [x] **Unverifiable reserves** — PASSED. All reserves verifiable onchain via resolver contracts. fToken exchange rates computed programmatically.
+- [x] **Unverifiable reserves** — PASSED. All reserves verifiable onchain via resolver contracts. fToken exchange rates computed programmatically and verified monotonically increasing through stress events.
 - [x] **Total centralization** — PASSED. Onchain GovernorBravo governance with 1-day Timelock. No EOA control. Guardian can only pause.
 
 ### Category Scores
 
 #### Category 1: Audits & Historical Track Record (Weight: 20%)
 
-- **Audits**: Exceptional coverage — 8 audits across 4 firms. Lending covered in PeckShield and StateMind full-protocol audits. Liquidity Layer (critical lending dependency) separately audited by MixBytes and StateMind in 2025. All 3 criticals and 13 highs fixed.
-- **History**: ~2 years in production. Lending TVL $1.28B across 5 chains. Zero security incidents.
+- **Audits**: Unchanged — 8 audits across 4 firms. All 3 criticals and 13 highs from prior audits resolved. No new audits since Feb 2026.
+- **History**: ~2.2 years in production, ~$800M lending TVL across 5 chains (May 11 2026 snapshot; Apr 27 drawdown bottom was $751M).
 - **Bounty**: Active Immunefi bug bounty ($500K max) with Lending Protocol explicitly in scope.
-- **Note**: No formal verification performed. StateMind found a critical lending-specific bug pre-launch (LendingRewardRateModel incorrect decimals, pool-draining risk) — **fixed before launch**.
+- **NEW — material incident**: The Mar 2026 Resolv contagion event produced $10–17.5M of bad debt and a 30% single-day TVL drop. While Fluid's own contracts were not exploited and lenders were made whole, this is a material adverse event that did not exist at the prior assessment. The Apr 2026 Kelp event triggered a precautionary freeze and a 17.5% TVL drop with no bad debt.
 
-**Score: 1.5/5** — 8 audits from 4 reputable firms with all critical/high findings resolved. Lending-specific critical bug caught and fixed pre-launch. ~2 years in production with zero incidents.
+**Score: 2.0/5** (was 1.5/5) — Strong audit coverage and bounty unchanged. History grew from ~2 to ~2.18 years but is no longer "incident-free": one bad-debt event covered via off-balance-sheet capital, plus one precautionary freeze. Still excellent overall but not the unblemished record of the Feb 2026 assessment.
 
 #### Category 2: Centralization & Control Risks (Weight: 30%)
 
-**Subcategory A: Governance — 2.0**
-- Full onchain GovernorBravo governance with 117 proposals executed
-- 1-day timelock delay between GovernorBravo and contract execution
-- All core contracts owned by the Timelock, not directly by a multisig
-- Avocado multisig serves only as Timelock guardian (cancel-only role)
+**Subcategory A: Governance — 2.0** (unchanged)
+- Full onchain GovernorBravo governance with 128 proposals created / 120 executed
+- 1-day timelock delay; all core contracts owned by Timelock
 - No admin role can directly access or withdraw fToken user funds
-- Timelock delay (1 day) is on the shorter side but adequate with onchain governance
+- Guardian pause used appropriately in Mar/Apr 2026 events; no abuse
 
-**Subcategory B: Programmability — 1.5**
+**Subcategory B: Programmability — 1.5** (unchanged)
 - Fully programmatic: interest rates and fToken exchange rates all onchain
-- ERC4626 fTokens with algorithmically computed, monotonically increasing exchange rates
-- No offchain keepers or oracles needed for lending operations
-- Rebalancer role exists but can only deposit (not withdraw) — currently active only for fUSDC/fUSDT
+- ERC4626 fTokens with algorithmically computed, monotonically increasing exchange rates (stress-tested)
+- No offchain keepers/oracles for lending
+- Bad-debt coverage process is **not programmatic** (relies on discretionary capital commitments) — a structural gap, but does not affect day-to-day operations
 
-**Subcategory C: Dependencies — 2.0**
-- Critical dependency on Liquidity Layer (upgradeable proxy, shared with Vaults/DEX)
-- Indirect dependency on Chainlink via Vault Protocol oracle system
-- Multiple fallback oracle paths (UniswapV3, Redstone) reduce oracle risk
-- Permit2 integration is standard and well-audited
+**Subcategory C: Dependencies — 2.5** (was 2.0)
+- Critical dependency on Liquidity Layer (unchanged)
+- Indirect dependency on Chainlink via Vault Protocol oracle system (unchanged)
+- **NEW emphasis**: external collateral-issuer dependency demonstrated to be a first-order risk by Mar/Apr 2026 events. Not a single point of failure (multiple issuers across many assets) but a real and recurring contagion vector.
 
-**Score: 1.83/5** — (2.0 + 1.5 + 2.0) / 3 = 1.83. Full onchain governance with timelock. No admin can access lending funds. Highly programmatic exchange rate computation.
+**Score: 2.0/5** — (2.0 + 1.5 + 2.5) / 3 = 2.0 (was 1.83). Governance/programmability unchanged; dependency risk reweighted upward to reflect the demonstrated contagion exposure.
 
 #### Category 3: Funds Management (Weight: 30%)
 
-**Subcategory A: Collateralization — 1.5**
-- All lending is over-collateralized via Vault Protocol
-- Blue-chip collateral assets dominate (ETH, wstETH, WBTC, USDC, USDT)
-- Advanced tick-based liquidation mechanism
-- All reserves fully onchain and verifiable
+**Subcategory A: Collateralization — 2.5** (was 1.5)
+- All lending is over-collateralized via Vault Protocol (unchanged)
+- Blue-chip collateral assets are no longer dominant — the top supply asset is SUSDAI (yield-bearing stablecoin wrapper) at 19.9% of all-chain TVL, with reUSD at 12.7%. **Two of the top four assets share the structural pattern that produced the Mar 2026 incident.**
+- Tick-based liquidation mechanism (unchanged)
+- All reserves fully onchain and verifiable (unchanged)
+- **NEW**: Demonstrated that the liquidation engine cannot prevent bad debt for accepted collateral assets that experience extreme intraday repricing (>90% in minutes) when DEX liquidity is shallow. The wstUSR wrapping ratio also amplifies losses from underlying depegs.
+- **NEW**: Bad-debt coverage is discretionary, not programmatic. Other major lending protocols (e.g., Aave Safety Module) have pre-funded backstops; Fluid does not.
+- **NEW**: Top-asset concentration remains above the 15% trigger we set in the Reassessment Triggers section (SUSDAI 19.9%, top-5 = 69%), so the trigger that motivated this category bump in the first place is **continuously firing** and not a transient post-incident artifact.
 
-**Subcategory B: Provability — 1.0**
-- fToken exchange rates computed programmatically (ERC4626), monotonically increasing
+**Subcategory B: Provability — 1.0** (unchanged)
+- fToken exchange rates computed programmatically (ERC4626), monotonically increasing — verified through stress events
 - Interest rates algorithmically determined via kink-based model
 - All reserves verifiable onchain via FluidLiquidityResolver
 - No offchain reporting dependencies
 
-**Score: 1.25/5** — (1.5 + 1.0) / 2 = 1.25. Excellent onchain verifiability with programmatic, monotonically increasing exchange rates.
+**Score: 1.75/5** — (2.5 + 1.0) / 2 = 1.75 (was 1.25). Collateralization is downgraded specifically because the top-asset concentration risk has shifted (wstUSR → SUSDAI/reUSD) but has not been resolved, and the protocol still lacks a programmatic backstop for events similar to Mar 2026. Provability is unchanged and excellent.
 
 #### Category 4: Liquidity Risk (Weight: 15%)
 
 - **Exit**: fToken withdrawals subject to Liquidity Layer withdrawal limits and available liquidity
-- **Utilization**: Standard lending utilization dynamics apply — high utilization temporarily limits withdrawals, consistent with all lending protocols (Morpho, Aave, Compound). Kink-based rate model incentivizes rebalancing.
-- **Withdrawal limits**: Expandable limits throttle large exits. Users must wait for limits to expand.
-- **Shared pool risk**: Liquidity Layer serves lending, vaults, DEX, and stETH — fToken withdrawals compete with all other demand
-- **Concentration**: Top 5 assets = 57.6% of lending TVL. wstUSR alone = 18.9%.
-- **Stress test**: Handled August 2024 market stress (only >15% drop) without operational issues
-- **Secondary market**: No significant DEX liquidity for fTokens themselves
+- **Stress test results (Mar 22–25, 2026)**: $300M+ net outflows in 24 hours absorbed; standard fToken markets remained operational; affected vaults paused. Kink-based rate model worked as designed.
+- **Stress test results (Apr 18–20, 2026)**: ~$180M outflows over 2 days; rsETH markets precautionarily frozen; no other operational impact.
+- **Withdrawal limits**: Expandable limits throttle large exits.
+- **Shared pool risk**: Liquidity Layer serves lending, vaults, DEX, and stETH (unchanged)
+- **Concentration**: Previously identified concentration risk materialized in Mar 2026 (wstUSR). As of Apr 27, 2026 the top supply asset is SUSDAI at 19.9% of all-chain TVL — **above the 15% reassessment trigger and structurally similar to the wstUSR pattern** (yield-bearing stablecoin wrapper). Concentration has shifted, not improved.
+- **Secondary market**: No significant DEX liquidity for fTokens themselves.
 
-**Score: 2.0/5** — Shared Liquidity Layer adds withdrawal competition beyond standard lending protocol dynamics. Concentration risk in top assets. Expandable limits provide gradual access but delay large exits. Offset by strong TVL depth ($1.28B) and kink-based rate model that incentivizes utilization rebalancing.
+**Score: 2.0/5** (unchanged). The shared Liquidity Layer / withdrawal-limit dynamics are unchanged. The Mar/Apr 2026 stress events are evidence of robust liquidity behavior **for unaffected markets** — standard fToken withdrawals continued processing through both events. Negative: concentration in a single risky collateral asset proved to be a real source of liquidity risk for vault depositors. Net: same score, but now backed by real-world stress-test data (mixed signal: protocol mechanics worked, but the system did require manual intervention).
 
 #### Category 5: Operational Risk (Weight: 5%)
 
 - **Team**: Publicly known founders (Sowmay Jain, Samyak Jain). Active since 2019. Strong DeFi reputation.
 - **Funding**: Well-funded by Pantera Capital, Coinbase Ventures, and others.
 - **Docs**: Comprehensive documentation and open-source code.
-- **Legal**: No formal DAO legal wrapper. Instadapp Labs as operational entity.
-- **Incident Response**: No formal plan documented, but Guardian pause capability exists. Zero incidents in ~6 years.
+- **Incident Response (NEW evidence)**: ~30 min pause/freeze response, $70M coverage arranged in ~3 days. Strong execution. No formal documented IR plan but operational track record now exists. Reliance on personal commitments rather than programmatic backstop is a documented structural concern.
 
-**Score: 1.5/5** — Publicly known team with strong reputation, well-funded, comprehensive documentation. Minor deduction for no formal legal wrapper.
+**Score: 1.5/5** (unchanged). Publicly known team, strong reputation, well-funded, comprehensive docs. Incident response was demonstrably effective.
 
 ### Final Score Calculation
 
@@ -445,40 +580,155 @@ Final Score = (Centralization × 0.30) + (Funds Mgmt × 0.30) + (Audits × 0.20)
 
 | Category | Score | Weight | Weighted |
 |----------|-------|--------|----------|
-| Audits & Historical | 1.5 | 20% | 0.30 |
-| Centralization & Control | 1.83 | 30% | 0.549 |
-| Funds Management | 1.25 | 30% | 0.375 |
-| Liquidity Risk | 2.0 | 15% | 0.300 |
+| Audits & Historical | 2.0 | 20% | 0.40 |
+| Centralization & Control | 2.0 | 30% | 0.60 |
+| Funds Management | 1.75 | 30% | 0.525 |
+| Liquidity Risk | 2.0 | 15% | 0.30 |
 | Operational Risk | 1.5 | 5% | 0.075 |
-| **Final Score** | | | **1.60** |
+| **Subtotal** | | | **1.90** |
 
 **Optional Modifiers:**
-- Protocol live >2 years with no incidents: **-0.5** → Not applied yet (1.98 years, borderline — will qualify at reassessment)
-- TVL maintained >$500M for >1 year: **-0.5** → Applied
 
-**Final Score: 1.10** (capped at minimum 1.0)
+- Protocol live >2 years with no incidents: **NOT APPLIED**. Protocol has been live >2 years (2.18y), but the Mar 2026 Resolv contagion / bad-debt event disqualifies the "no incidents" condition. (Previous report had not yet reached the 2-year mark and explicitly noted "borderline — will qualify at reassessment"; the reassessment determines it does not qualify due to incident.)
+- TVL maintained >$500M for >1 year: **APPLIED (-0.5)**. Lending TVL has been >$500M for >1.5 years and is currently ~$800M (May 11 2026; Apr 27 drawdown bottom was $751M).
+
+**Final Score: 1.40** → rounded to **1.4** (vs. 1.1 in Feb 2026)
 
 ### Risk Tier
 
 | Final Score | Risk Tier | Recommendation |
 |-------------|-----------|----------------|
-| 1.0-1.5 | Minimal Risk | Approved, high confidence |
-| 1.5-2.5 | Low Risk | Approved with standard monitoring |
-| 2.5-3.5 | Medium Risk | Approved with enhanced monitoring |
-| 3.5-4.5 | Elevated Risk | Limited approval, strict limits |
-| 4.5-5.0 | High Risk | Not recommended |
+| **1.0–1.5** | **Minimal Risk** | **Approved, high confidence** |
+| 1.5–2.5 | Low Risk | Approved with standard monitoring |
+| 2.5–3.5 | Medium Risk | Approved with enhanced monitoring |
+| 3.5–4.5 | Elevated Risk | Limited approval, strict limits |
+| 4.5–5.0 | High Risk | Not recommended |
 
-**Final Risk Tier: MINIMAL RISK**
+**Final Risk Tier: MINIMAL RISK** (unchanged tier; score moved from 1.1 to 1.4)
 
-The Fluid Lending Protocol (fTokens) is a well-designed ERC4626-compliant lending product with strong security properties: 8 audits, onchain GovernorBravo governance with timelock, monotonically increasing exchange rates, and no admin ability to access user funds. The primary risk is the **shared Liquidity Layer** architecture which means fToken holders are indirectly exposed to risks across the entire Fluid protocol stack (Vaults, DEX, oracles). This is substantially mitigated by the breadth of audit coverage, the programmatic nature of the protocol, and the ~2-year track record with zero incidents.
+The Fluid Lending Protocol (fTokens) remains a well-designed ERC4626-compliant lending product with strong security properties. The Mar 2026 Resolv USR contagion event is the most material change to the risk profile since the prior assessment: a previously-flagged concentration risk materialized into a real bad-debt event, and recovery relied on **discretionary off-balance-sheet capital commitments** rather than a programmatic insurance mechanism. Lender funds on Ethereum were not impaired — exchange rates remained monotonically increasing throughout — but the episode demonstrates a structural gap (no pre-funded backstop) that did not factor into the previous score. The Apr 2026 Kelp event triggered a precautionary freeze with no direct loss. The current top supply asset (SUSDAI at 19.9% of all-chain TVL) shares the same yield-bearing-stable-wrapper structural pattern as the wstUSR exposure that produced the Mar 2026 incident, so the previously-flagged concentration risk has shifted assets but **not been reduced**. Score moves up from 1.1 → 1.4 within the Minimal Risk tier.
 
 ---
 
 ## Reassessment Triggers
 
-- **Time-based**: Reassess in 6 months (August 2026) — protocol will have >2.5 years history. Apply >2 year modifier (-0.5) at that time.
-- **Utilization-based**: Reassess if Ethereum utilization exceeds 99% (negative — withdrawal availability critically constrained)
-- **TVL-based**: Reassess if lending TVL changes by more than 50%
-- **Incident-based**: Reassess after any exploit, governance change, or significant parameter modification
-- **Governance**: Reassess if GovernorBravo parameters change (quorum, timelock delay, voting period) or if Avocado multisig signers change
-- **Dependency**: Reassess if Liquidity Layer implementation is upgraded or if a new protocol is added to the shared liquidity pool
+- **Time-based**: Reassess in 6 months (October 2026), or earlier if any of the below trigger.
+- **Coverage-mechanism formalization**: Reassess if Fluid implements a programmatic insurance/coverage layer (would lower funds-management subcategory). Conversely, reassess if the protocol experiences a second bad-debt event without comparable third-party coverage.
+- **Foundation execution**: Reassess once the Cayman Islands Fluid Foundation IP transfer completes (would improve operational score).
+- **TVL-based**: Reassess if lending TVL changes by more than 50% from current ~$800M baseline (May 11 2026).
+- **Concentration-based**: Reassess if any single supply asset exceeds 15% of total lending TVL (the wstUSR threshold that materialized).
+- **Incident-based**: Reassess after any further exploit, governance change, significant parameter modification, or contagion event from a major collateral issuer.
+- **Governance**: Reassess if GovernorBravo parameters change (quorum, timelock delay, voting period) or if Avocado guardian configuration changes.
+- **Dependency**: Reassess if Liquidity Layer implementation is upgraded (current impl: `0xcc331daf69752bece3dc98dbc63eacd5092266a2`) or if a new protocol is added to the shared liquidity pool.
+- **Utilization-based**: Reassess if Ethereum lending utilization sustains >99% for >24 hours.
+
+## Verification Follow-up (May 6, 2026)
+
+- **Per-chain lending utilization refresh: RESOLVED.** Iterated `listedTokens()` and `getOverallTokensData(tokens)` on LiquidityResolver `0xca13A15de31235A37134B4717021C35A3CF25C60` for Ethereum, Arbitrum, Base, Polygon, Plasma, and BNB. Results are added in the Multi-chain Lending Deployment section.
+- **Proposal #128 vs proposal #126 rate-value reconciliation: RESOLVED.** Proposal #126 tx `0xf484b2a2...` did not emit `LogUpdateRateDataV2s`. Current USDC/USDT rates came from the Apr 23, 2026 Liquidity Layer rate update event in tx `0x1927e214...`, not from #126.
+- **Proposal #128 execution outcome: RESOLVED.** Proposal #128 executed on May 5, 2026 at block `25007782` via tx `0x6e0273ae...`. Its execution did not change USDC/USDT rate kinks; the only rate event was for ETH max-utilization borrow rate (100% -> 10%).
+
+## Appendix: Contract Architecture
+
+```
+┌─────────────────────────────────────────────────────────────────────────┐
+│                          GOVERNANCE LAYER                                │
+│                                                                          │
+│   FLUID Token Holders   (100M max supply, 4M quorum, 1M propose)         │
+│              │                                                           │
+│              │ propose / vote                                            │
+│              ▼                                                           │
+│   ┌────────────────────────────┐      ┌──────────────────────────────┐  │
+│   │  GovernorBravo             │      │  Avocado Multisig (Guardian) │  │
+│   │  0x0204Cd03...             │      │  0x4F6F977a...               │  │
+│   │  proposalCount: 128        │      │  Custom contract (not Safe)  │  │
+│   │  119 in state Executed     │      │  - Pause Class-0 protocols   │  │
+│   │  voting: 1d delay, 2d vote │      │  - Cancel timelock txns      │  │
+│   └────────────┬───────────────┘      └────────────┬─────────────────┘  │
+│                │ queue                             │ cancel              │
+│                ▼                                   ▼                     │
+│   ┌──────────────────────────────────────────────────────────────────┐  │
+│   │  Timelock — 1-day delay (admin = GovernorBravo)                  │  │
+│   │  0x2386DC45AdDed673317eF068992F19421B481F4c                      │  │
+│   │  Owns: Liquidity Layer admin slot, LendingFactory, VaultFactory, │  │
+│   │        DexFactory                                                │  │
+│   └──────────────────────────────────────────────────────────────────┘  │
+└──────────────────────────────────┬──────────────────────────────────────┘
+                                   │ owns / upgrades
+                                   ▼
+┌─────────────────────────────────────────────────────────────────────────┐
+│                        CORE INFRASTRUCTURE                               │
+│                                                                          │
+│   ┌──────────────────────────────────────────────────────────────────┐  │
+│   │  Liquidity Layer  (Instadapp Infinite Proxy)                     │  │
+│   │  Proxy: 0x52Aa899454998Be5b000Ad077a46Bbe360F4e497                │  │
+│   │  EIP-1967 dummy impl (current): 0xcc331daf… (since Mar 31 2026)  │  │
+│   │      previous: 0xa57d7cEF…  (upgrade tx 0xf484b2a2…)             │  │
+│   │  Module-dispatch logic in module slots, NOT EIP-1967 impl slot   │  │
+│   │                                                                  │  │
+│   │  Holds ALL deposits across lending / vaults / DEX / stETH        │  │
+│   └────┬─────────────────────────────────────────────────────────────┘  │
+│        │                                                                 │
+│   ┌────▼────────────────┐  ┌─────────────────┐  ┌───────────────────┐   │
+│   │  LendingFactory     │  │  Resolvers      │  │  Sibling Factories│   │
+│   │  0x54B91A0D...      │  │  FluidLiquidity │  │  VaultFactory     │   │
+│   │  Deploys fTokens    │  │  Revenue        │  │  DexFactory       │   │
+│   └────┬────────────────┘  └─────────────────┘  └────────┬──────────┘   │
+└────────┼───────────────────────────────────────────────────┼────────────┘
+         │ deploys                                           │ deploys
+         ▼                                                   ▼
+┌──────────────────────────────────┐    ┌────────────────────────────────┐
+│   LENDING PROTOCOL (fTokens)     │    │   SIBLING PROTOCOLS            │
+│   ERC4626, monotonic exch. rate  │    │   (share Liquidity Layer)      │
+│                                  │    │                                │
+│   fUSDC   0x9Fb7…  ~$193M        │    │  Vault Protocol                │
+│   fUSDT   0x5C20…  ~$130M        │    │   - borrowers + collateral     │
+│   fGHO    0x6A29…  ~$12M         │◀───│   - tick-based liquidations    │
+│   fwstETH 0x2411…  ~1,768 wstETH │ yield   - generates fToken yield    │
+│   fWETH   0x9055…  ~2,533 WETH   │    │                                │
+│   fUSDtb  0x15e8…  ~$2.1M        │    │  DEX Protocol                  │
+│   fsUSDS  0x2BBE…  ~$15K         │    │  stETH Protocol                │
+│                                  │    │                                │
+│   Eth subtotal: ~$351M (May 11)  │    │                                │
+│   All-chain lending TVL: ~$804M  │    │                                │
+└──────┬──────────────────▲────────┘    └─────────┬──────────────────────┘
+       │ deposit            ▲ withdraw            │ borrow / repay
+       ▼                    │                     ▼
+   Lenders               (no value loss        Borrowers
+                          Mar/Apr 2026)        (post collateral)
+                                                  │
+                                                  ▼
+┌─────────────────────────────────────────────────────────────────────────┐
+│                       EXTERNAL DEPENDENCIES                              │
+│                                                                          │
+│  ORACLES  (Vault Protocol consumes these for liquidations)               │
+│    Chainlink (primary)  •  UniswapV3 TWAP  •  Redstone  •  custom        │
+│                                                                          │
+│  COLLATERAL-ASSET ISSUERS  ← first-order contagion vector                │
+│    Top-10 cross-chain supply (Apr 27 2026, total $752.3M):               │
+│      SUSDAI   19.9%  (Sky yield-bearing wrapper)                ★        │
+│      WSTETH   16.8%  (Lido)                                              │
+│      WEETH    12.9%  (ether.fi)                                          │
+│      REUSD    12.7%  (Re Protocol yield-bearing stable)         ★        │
+│      WBTC      6.8%                                                      │
+│      USDC      5.2%   USDT 3.7%   WETH 3.2%   CBBTC 2.6%   USDT0 2.0%    │
+│    ★ = yield-bearing stablecoin wrapper (same structural pattern as      │
+│        wstUSR/USR that produced the Mar 22 2026 bad-debt event)          │
+│                                                                          │
+│    Materialized contagion (since Feb 2026 assessment):                   │
+│      Mar 22 2026 — Resolv USR depeg → wstUSR collateral collapse →       │
+│                    $10–17.5M bad debt (covered off-balance-sheet)        │
+│      Apr 18 2026 — Kelp DAO bridge exploit → rsETH precautionary freeze  │
+│                    (no Fluid contract loss)                              │
+│                                                                          │
+│  PERMIT2 (Uniswap):  0x000000000022D473030F116dDEE9F6B43aC78BA3          │
+└─────────────────────────────────────────────────────────────────────────┘
+```
+
+**Risk pathways (key):**
+
+- **Lender → fToken → Liquidity Layer**: fully programmatic ERC4626 with burn-before-withdraw; exchange rate monotonically increasing (verified through both 2026 events).
+- **Borrower default → bad debt → fToken yield**: realized in Mar 2026 ($10–17.5M). **No programmatic backstop**; covered via discretionary loans (cyberfund/Lomashuk, weremeow, Fluid core team).
+- **Collateral-issuer compromise → wrap-ratio amplified loss → bad debt**: the structural pattern that produced Mar 2026. SUSDAI (19.9%) and reUSD (12.7%) currently replicate this pattern.
+- **Governance → Timelock (1d) → Liquidity Layer impl**: upgrade path. The Mar 31 2026 upgrade bundled dummy-impl swap + module-dispatcher selectors in one tx (`0xf484b2a2…`); follow-up verification found no USDC/USDT rate event in that receipt.
+- **Avocado Guardian → Pause Class-0**: cannot move funds; used appropriately in both Mar and Apr 2026 events.
