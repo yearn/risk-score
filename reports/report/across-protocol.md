@@ -4,7 +4,7 @@
 - **Token:** Across V2 LP Tokens (Av2-WETH-LP, Av2-USDC-LP, Av2-USDT-LP, Av2-DAI-LP, Av2-WBTC-LP)
 - **Chain:** Ethereum Mainnet
 - **HubPool Address:** [`0xc186fA914353c44b2E33eBE05f21846F1048bEda`](https://etherscan.io/address/0xc186fA914353c44b2E33eBE05f21846F1048bEda)
-- **Final Score: 3.4/5.0**
+- **Final Score: 3.5/5.0**
 
 > The issue (yearn/risk-score#169) lists "Across Protocol" as both protocol and asset. For a Yearn integration, the only yield-bearing Across asset is the per-pool **LP token** minted by the HubPool when LPs deposit underlying. This assessment focuses on those LP tokens. The ACX governance token is **not** a yield-bearing asset and is out of scope; it is referenced only where it bears on operational risk.
 
@@ -169,9 +169,10 @@ So fund delegation risk is limited to (a) the HubPool's own custody and (b) ever
 
 ### Programmability
 
-- **System operations:** Mostly programmatic. Bundle proposal, dispute, execution, refund, and rebalance are all onchain functions callable by any actor with the required bond. Anyone with ≥1 ABT can act as a proposer.
+- **System operations:** Bundle execution, refund, and rebalance are fully onchain and callable by any actor. **Dispute is permissionless.** **Bundle proposal is *not* permissionless** — the BondToken (ABT) overrides `transferFrom` to require either `proposers[src] == true` or that `src` is not the current root-bundle proposer; tracing `HubPool.proposeRootBundle()`, the contract sets `rootBundleProposal.proposer = msg.sender` before the bond transfer, so the proposer-side require collapses to `require(proposers[src])`. `setProposer(address,bool)` is `onlyOwner` on the BondToken, and the BondToken owner is the same 3-of-5 Hub Pool Owner Safe ([`0xB524735356985D2f267FA010D681f061DfF03715`](https://etherscan.io/address/0xB524735356985D2f267FA010D681f061DfF03715), verified via `cast call BondToken.owner()`). In effect, the dataworker is admin-gated. Source: [BondToken.sol on Etherscan](https://etherscan.io/address/0xee1DC6BCF1Ee967a350e9aC6CaaAA236109002ea#code).
+- **Bond size:** `bondAmount() = 0.45 ABT` (verified onchain). ABT is issued 1:1 against deposited WETH.
 - **Off-chain components:**
-  - **Dataworker / bundler:** Off-chain bot that aggregates fills into a root bundle and posts it onchain. The protocol allows permissionless proposers in principle; in practice, Risk Labs runs the canonical dataworker. Liveness is **only 30 minutes** (`HubPool.liveness() = 1800`, verified onchain), so honest disputers must be online to catch invalid bundles.
+  - **Dataworker / bundler:** Off-chain bot that aggregates fills into a root bundle and posts it onchain. In practice, Risk Labs runs the canonical dataworker and is on the proposer allowlist; new proposers would need to be added by the multisig. Liveness is **only 30 minutes** (`HubPool.liveness() = 1800`, verified onchain), so honest disputers must be online to catch invalid bundles.
   - **Relayers:** Off-chain capital providers that fill destination intents. Permissionless — anyone can run a relayer.
   - **LP fee parameters:** `lpFeeRatePerSecond` lives in `AcrossConfigStore` and is governance-controlled.
 - **PPS / exchange rate:** Defined onchain by a deterministic formula; no admin update path (other than `haircutReserves`, which writes down the inputs but does not redefine the formula).
@@ -186,8 +187,8 @@ So fund delegation risk is limited to (a) the HubPool's own custody and (b) ever
 
 ## Operational Risk
 
-- **Team transparency:** Public. Risk Labs leadership is disclosed on [risklabs.foundation/team](https://risklabs.foundation/team) — Hart Lambur (CEO), Matt Rice (CTO), Melissa Quinn (COO), Kevin Chan (Treasurer), Ryan Carman (Product), James Richard Fry (Marketing). Hart Lambur is publicly known from UMA.
-- **Legal structure:** Risk Labs Foundation. The foundation's own site ([risklabs.foundation](https://risklabs.foundation/)) lists the team but does **not** disclose jurisdiction or registration number. Third-party coverage of the June 2025 controversy refers to a Cayman Islands foundation company — TODO: confirm exact registration / jurisdiction from a primary source.
+- **Team transparency:** Public. Risk Labs leadership is disclosed on [risklabs.foundation/#team](https://risklabs.foundation/#team) — Hart Lambur (CEO), Matt Rice (CTO), Melissa Quinn (COO), Kevin Chan (Treasurer), Ryan Carman (Head of Product), James Richard Fry (Head of Marketing). Hart Lambur is publicly known from UMA.
+- **Legal structure:** Risk Labs is a Cayman Islands **Exempted Foundation Company**, registered with the Cayman Islands General Registry (RA000086) under registry ID **339077** ([GLEIF LEI 984500B2DE6O0F0P5071](https://api.gleif.org/api/v1/lei-records/984500B2DE6O0F0P5071)). Registered address: 23 Lime Tree Bay Avenue, PO Box 10176, c/o ZEDRA Trust Company (Cayman) Limited, Grand Cayman, KY1-1002. Entity status: ACTIVE; LEI registration status: ISSUED; next renewal due 2026-11-21. Risk Labs' own website does not disclose jurisdiction; this citation is sourced from the GLEIF registry, not the foundation's website.
 - **Documentation:** Good. [docs.across.to](https://docs.across.to/) is comprehensive and current; concept docs explain the intents architecture clearly. Contract address and bug-bounty pages are reachable at the URLs cited above.
 - **Incident response:** No public, documented incident-response runbook surfaced during research. The multisig can call `setPaused(true)` to freeze entry/exit in an emergency. The protocol has not had a smart-contract incident to test response capability.
 - **Reputational concern:** The unresolved June 2025 ACX governance / treasury controversy weighs on operational risk because the parties involved are the same parties who hold the HubPool keys. While the alleged misconduct is not a contract-level loss event for LPs, it speaks directly to governance integrity — see Historical Track Record above.
@@ -325,6 +326,7 @@ If on-chain queries are insufficient, fall back to DefiLlama for TVL and the Acr
 - **TVL collapsed 89% from Dec 2024 peak** ($249M → $28M as of May 12, 2026), well below the "$50M sustained" track-record threshold.
 - **Sole-auditor concentration** (only OpenZeppelin).
 - **Per-pool liquidity asymmetry** — at snapshot, the USDT pool had ~22× more inventory in flight than liquid, so a large LP exit on certain pools can revert until the next settlement cycle.
+- **Root-bundle proposers are admin-gated** via the BondToken allowlist (same 3-of-5 Safe is the BondToken owner). Disputes are permissionless, but the canonical dataworker pipeline is centralized.
 
 ### Critical Risks
 
@@ -380,11 +382,11 @@ All gates pass; proceeding to category scoring.
 
 **Subcategory B: Programmability**
 
-- Bundle proposal / dispute / execution / refund are fully onchain functions.
+- Bundle dispute / execution / refund are fully onchain and permissionless.
 - Exchange rate is computed onchain by deterministic formula.
-- Off-chain dataworker proposes bundles, but proposal is permissionless in principle (anyone with ≥1 ABT). 30-minute liveness assumes honest off-chain disputers.
-- Rubric match: "Mostly programmatic with minor admin input" (Score 2) — and PPS is "calculated onchain algorithmically" (Score 1). Average ~2.
-- **Subcategory Score: 2.0**
+- **Bundle proposal is admin-gated:** the BondToken's `transferFrom` blocks bond posting into the HubPool unless the proposer is on an `onlyOwner` allowlist; the BondToken owner is the same 3-of-5 Hub Pool Owner Safe. Disputes remain permissionless. The 30-minute liveness window assumes honest disputers are online.
+- Rubric match: bundle execution/dispute/refund and PPS calculation match Score 1 ("Fully programmatic"/"calculated onchain algorithmically"); admin-gated proposer pushes "system operations" toward Score 3 ("hybrid onchain/offchain operations"). Averaged across operations: Score ~2.5.
+- **Subcategory Score: 2.5**
 
 **Subcategory C: External Dependencies**
 
@@ -393,7 +395,7 @@ All gates pass; proceeding to category scoring.
 - Rubric match: "Many or newer protocol dependencies" + "Critical functionality depends on them" → Score 4. UMA and the major canonical bridges are blue-chip, which softens it.
 - **Subcategory Score: 3.5**
 
-**Category 2 Score = (4.0 + 2.0 + 3.5) / 3 = 3.17 ≈ 3.0**
+**Category 2 Score = (4.0 + 2.5 + 3.5) / 3 = 3.33 ≈ 3.3**
 
 #### Category 3: Funds Management (Weight: 30%)
 
@@ -428,7 +430,7 @@ All gates pass; proceeding to category scoring.
 
 - Team partially doxxed via Risk Labs Foundation team page (Hart Lambur, Matt Rice, Melissa Quinn, etc.). UMA is the team's prior public protocol.
 - Documentation is good and current.
-- Legal: reported as a Cayman Islands foundation (third-party sources — TODO: confirm).
+- Legal: Cayman Islands Exempted Foundation Company (Cayman General Registry ID 339077, GLEIF LEI 984500B2DE6O0F0P5071, status ACTIVE/ISSUED).
 - Negative weight from unresolved June 2025 ACX governance controversy.
 - Rubric match: "Mostly public or known anons" + "Good, mostly complete" + "Established entity" matches Score 2; the unresolved governance controversy pushes toward Score 2.5.
 - **Subcategory Score: 2.5**
@@ -438,11 +440,11 @@ All gates pass; proceeding to category scoring.
 | Category | Score | Weight | Weighted |
 |----------|-------|--------|----------|
 | Audits & Historical | 2.5 | 20% | 0.50 |
-| Centralization & Control | 3.0 | 30% | 0.90 |
+| Centralization & Control | 3.3 | 30% | 0.99 |
 | Funds Management | 1.5 | 30% | 0.45 |
 | Liquidity Risk | 3.0 | 15% | 0.45 |
 | Operational Risk | 2.5 | 5% | 0.125 |
-| **Subtotal** | | | **2.43** |
+| **Subtotal** | | | **2.52** |
 
 **Optional Modifiers:**
 - Protocol live >2 years with no incidents: **−0.5** (qualifies — ~4 years live, no bridge-contract exploit).
@@ -450,7 +452,7 @@ All gates pass; proceeding to category scoring.
 - Unresolved June 2025 governance controversy involving the same parties that hold the HubPool multisig keys: **+0.5** (custom risk modifier; not in standard rubric but material to the centralization picture).
 - No timelock on a multisig with `haircutReserves` + cross-chain upgrade authority: **+1.0** (custom risk modifier; the LP has no exit window if signers act adversely).
 
-**Adjusted Final Score: 2.43 − 0.5 + 0.5 + 1.0 = 3.43 ≈ 3.4**
+**Adjusted Final Score: 2.52 − 0.5 + 0.5 + 1.0 = 3.52 ≈ 3.5**
 
 ### Risk Tier
 
@@ -462,9 +464,9 @@ All gates pass; proceeding to category scoring.
 | **3.5-4.5** | **Elevated Risk** | Limited approval, strict limits |
 | **4.5-5.0** | **High Risk** | Not recommended |
 
-**Final Risk Tier: Medium Risk**
+**Final Risk Tier: Medium Risk** (at the upper boundary of the 2.5–3.5 range).
 
-**Interpretation:** Across LP tokens represent a medium-risk integration target. The protocol's core technical design — immutable HubPool, fully onchain NAV, atomic permissionless redemption, four years without a bridge exploit — is genuinely strong. What pulls the score from Low Risk into Medium Risk is the governance configuration: a 3-of-5 multisig of related parties with no timelock, holding both the `haircutReserves` power on LP NAV and cross-chain SpokePool upgrade authority, against the backdrop of an unresolved June 2025 ACX-treasury controversy involving those same parties. The custom modifiers above reflect this concentration. Note: if a timelock were added between the multisig and the HubPool, and if the June 2025 governance issue were resolved through an external review or remediation, the score would naturally move back into Low Risk territory.
+**Interpretation:** Across LP tokens represent a medium-risk integration target sitting on the boundary with Elevated Risk. The protocol's core technical design — immutable HubPool, fully onchain NAV, atomic permissionless redemption, four years without a bridge exploit — is genuinely strong. What pulls the score from Low Risk into Medium Risk is the governance configuration: a 3-of-5 multisig of related parties with no timelock, holding both the `haircutReserves` power on LP NAV and cross-chain SpokePool upgrade authority **and** the BondToken's proposer allowlist (so the canonical dataworker is admin-gated, not permissionless), against the backdrop of an unresolved June 2025 ACX-treasury controversy involving those same parties. The custom modifiers above reflect this concentration. Note: if a timelock were added between the multisig and the HubPool, and if the June 2025 governance issue were resolved through an external review or remediation, the score would naturally move back into Low Risk territory.
 
 ---
 
