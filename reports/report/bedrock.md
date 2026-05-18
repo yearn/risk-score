@@ -7,7 +7,7 @@
   - uniBTC: [`0x004E9C3EF86bc1ca1f0bB5C7662861Ee93350568`](https://etherscan.io/address/0x004E9C3EF86bc1ca1f0bB5C7662861Ee93350568)
   - brBTC: [`0x2eC37d45FCAE65D9787ECf71dc85a444968f6646`](https://etherscan.io/address/0x2eC37d45FCAE65D9787ECf71dc85a444968f6646)
   - uniETH: [`0xF1376bceF0f78459C0Ed0ba5ddce976F1ddF51F4`](https://etherscan.io/address/0xF1376bceF0f78459C0Ed0ba5ddce976F1ddF51F4)
-- **Final Score: 3.7/5.0**
+- **Final Score: 4.2/5.0**
 
 ## Overview + Links
 
@@ -79,9 +79,10 @@ All thresholds/owners read live via `getThreshold()` / `getOwners()` on each Saf
 ### uniBTC (BTC LRT, 8 decimals)
 
 - **Deposit assets accepted:** WBTC, FBTC, cbBTC, M-BTC (and `uniBTC` itself for cross-chain routing).
-- **Mint flow:** User deposits a permitted wrapped BTC into the Vault `mint` function and atomically receives uniBTC 1:1 (in 8-decimal sat units). Mint reverts unless the Chainlink PoR feeder reports reserves >= circulating uniBTC × `adequacyRatio / EXCHANGE_RATE_BASE`. The Vault wiring is verified onchain: `chainlinkReserveFeeder = 0xc590D9fb…`, `uniBTCSupplyFeeder = 0xE542919E…`, `outOfService = false`.
-- **Redeem flow:** 8-day delayed redemption queue, 0.5% redemption fee (per docs). TODO: confirm exact queue mechanics in source (is the queue per-user or batched?).
-- **Custody:** TODO — Bedrock docs do **not** name a custodian (Cobo, Ceffu, BitGo, etc.). Public materials describe the design as "non-custodial in partnership with RockX" but the BTC wallets monitored by the Chainlink PoR feed are self-declared by the project. The PoR detects unbacked mint attempts but does not independently verify which signers control the BTC.
+- **Mint flow:** User deposits a permitted wrapped BTC into the Vault `mint` function and atomically receives uniBTC 1:1 (in 8-decimal sat units). Mint reverts unless the Chainlink PoR feeder reports reserves >= circulating uniBTC × `adequacyRatio / 1000`. **The Vault explicitly tolerates a 10% reserve shortfall:** verified onchain `adequacyRatio = 900` and source-code `checkReserve` modifier `require(supply * adequacyRatio / 1000 <= reserves, "SYS013")` — so mint is allowed as long as backing ≥ 90% of supply. `setAdequacyRatio` NatSpec confirms 3-decimal base (`880 → 0.88`). The Vault wiring is verified onchain: `chainlinkReserveFeeder = 0xc590D9fb…`, `uniBTCSupplyFeeder = 0xE542919E…`, `feederHeartbeat = 86,400s`, `outOfService = false`. `EXCHANGE_RATE_BASE = 1e10` is a separate constant used to scale 18-decimal wrapped BTC down to 8-decimal uniBTC inside `_amounts()`, not part of the PoR check.
+- **Redeem flow (per [Bedrock docs](https://docs.bedrock.technology/multi-asset-liquid-staking/unibtc/unstaking)):** claim-based queue with **8-day delay, 0.5% redemption fee, capped at 2 WBTC/day on Ethereum**.
+- **Onchain reserve held in Vault:** verified live — only **0.32249593 WBTC** sits in the Vault contract directly (3,224,9593 raw with 8 decimals). The remainder of the ~4,615 BTC reported by the PoR feed is held off-Ethereum (Babylon-restaked BTC, Bitcoin native treasury, custodied wrapped BTC on other chains). The Vault's `execute(...)` function — gated by `OPERATOR_ROLE` and an `allowedTargetList` whitelist — can move the WBTC out.
+- **Custody:** TODO — Bedrock docs do **not** name a custodian (Cobo, Ceffu, BitGo, etc.). Public materials describe the design as "non-custodial in partnership with RockX" but the wallets monitored by the Chainlink PoR feed are self-declared by the project. The PoR detects unbacked mints up to the 10% tolerance but does not independently verify which signers control the BTC.
 - **Cross-chain:** Chainlink CCIP is the documented canonical bridge. uniBTC is deployed on 17+ chains; the Ethereum slice is one of several supply sources.
 
 ### brBTC (BTC meta-LRT, 8 decimals)
@@ -90,7 +91,7 @@ All thresholds/owners read live via `getThreshold()` / `getOwners()` on each Saf
 - **Restaking allocations:** Babylon Labs, Kernel DAO, SatLayer, Pell Network, Symbiotic, Mellow Finance. Each is a separate smart-contract counterparty.
 - **PoR:** No Chainlink Proof-of-Reserve feed for brBTC. Reserve accounting is internal to the protocol.
 - **Vault status:** `outOfService = false`.
-- **Redemption:** TODO — neither doc fetch surfaced the exact redemption fee/delay for brBTC.
+- **Redemption:** TODO — Bedrock's public documentation does not specify brBTC redemption fee, delay, or queue mechanics. The brBTC docs pages document only minting and bridging; the dApp page is JS-rendered with no static text. Treat as a material disclosure gap.
 
 ### uniETH (ETH LST, 18 decimals)
 
@@ -117,7 +118,7 @@ Five audit reports total by two reputable firms (PeckShield, BlockSec). The Octo
 ### Bug Bounty
 
 - **No public Immunefi / Cantina / Sherlock / Code4rena bug bounty program found.** Direct URL [immunefi.com/bug-bounty/bedrock/](https://immunefi.com/bug-bounty/bedrock/) returns 404. The Bedrock docs site has no dedicated bug-bounty page.
-- TODO: SEAL Safe Harbor registration status — the [Safe Harbor adopters list](https://safeharbor.securityalliance.org/) did not surface Bedrock during research, but the page is JS-rendered and a definitive check was not possible.
+- **SEAL Safe Harbor: NOT registered.** Confirmed against the onchain SafeHarborRegistry [`0x8f72fcf695523a6fc7dd97eafdd7a083c386b7b6`](https://etherscan.io/address/0x8f72fcf695523a6fc7dd97eafdd7a083c386b7b6) — no Bedrock-related address (vault, token, or deployer) appears in the registry's adoption logs.
 
 ## Historical Track Record
 
@@ -131,7 +132,7 @@ Five audit reports total by two reputable firms (PeckShield, BlockSec). The Octo
 - **uniBTC totalSupply (Ethereum, verified onchain):** 2,981.38 uniBTC (`298,138,175,772` sats).
 - **brBTC totalSupply (Ethereum, verified onchain):** 121.37 brBTC (`12,137,141,779` sats).
 - **uniETH totalSupply (Ethereum, verified onchain):** 9,299.10 uniETH (`9,299,102,553,635,685,029,012` wei).
-- **Peg history:** uniBTC trades within ~0.6% of WBTC on Uniswap V3 (Ethereum) and Aerodrome (Base) per CoinGecko. brBTC is essentially illiquid (no 24h volume). uniETH peg — TODO: did not query a price oracle.
+- **Peg history:** uniBTC trades within ~0.6% of WBTC on Uniswap V3 (Ethereum) and Aerodrome (Base) per CoinGecko. brBTC is essentially illiquid (no 24h volume). uniETH onchain `exchangeRatio() = 1.131913` matches CoinGecko's ETH-equivalent (~1.1296) — oracle peg holds.
 
 ### Security Incident: September 27, 2024 — uniBTC Mint Exploit
 
@@ -141,9 +142,9 @@ Five audit reports total by two reputable firms (PeckShield, BlockSec). The Octo
 - **Exploiter:** EOA [`0x2bFB373017349820dda2Da8230E6b66739BE9F96`](https://etherscan.io/address/0x2bFB373017349820dda2Da8230E6b66739BE9F96).
 - **Response:**
   - Vault paused; vulnerability patched and re-audited (PeckShield Oct 1 2024, BlockSec Oct 30 2024).
-  - Chainlink Proof-of-Reserve and Chainlink Secure Mint integrated as hardening — Vault now reverts on mint if PoR-reported reserves are inadequate vs circulating supply.
-  - **Fuzzland publicly took responsibility:** the attacker was a Fuzzland ex-employee, and Fuzzland reimbursed Bedrock for the loss with company funds (per multiple press reports). Users were made whole through this third-party reimbursement, not by Bedrock's treasury.
-  - TODO: an independent onchain post-mortem from Bedrock listing the restitution transaction hashes was not located.
+  - Chainlink Proof-of-Reserve and Chainlink Secure Mint integrated as hardening — Vault now reverts on mint if PoR-reported reserves drop below 90% of circulating supply (adequacyRatio = 900/1000).
+  - **Fuzzland publicly took responsibility:** the attacker was a Fuzzland ex-employee, and Fuzzland reimbursed Bedrock for the loss with company funds ([Cointelegraph, Jun 2025](https://cointelegraph.com/news/fuzzland-ex-employee-bedrock-unibtc-exploit); [Cryptonews](https://cryptonews.com/news/ex-employee-hacks-bedrock-unibtc-for-2m-fuzzland-uncovers-insider-exploit/)). Users were made whole through this third-party reimbursement, not by Bedrock's treasury.
+  - **TODO:** specific onchain reimbursement transaction hashes are not publicly disclosed. The labeled `fuzzland.eth` address shows no $2M outflow — reimbursement appears to have come from an unannounced Fuzzland-controlled wallet.
 
 This is a significant incident on the same vault that is still in production, although the patched implementation has not had a recurrence in the 19 months since.
 
@@ -177,11 +178,27 @@ This is a significant incident on the same vault that is still in production, al
   - Aerodrome Slipstream (Base) uniBTC/cbBTC — ~40.1% of volume
   - Kodiak V3 (Berachain) uniBTC/WBTC — ~7.1% of volume
   - **Aggregate uniBTC 24h volume across all DEXes: ~$19,774** — very thin for a $229M market cap.
+- **uniETH Ethereum pools** (Curve API, verified onchain):
+  - uniETH/frxETH (Curve factory-stable-ng) [`0x78C579A2Dcfe10Ae8B3C888A583337Beb4D91733`](https://etherscan.io/address/0x78C579A2Dcfe10Ae8B3C888A583337Beb4D91733) — TVL ~$485K (87.93 uniETH / 125.70 frxETH).
+  - uniETH/ETH (Curve factory-stable-ng) [`0x0f2F4D68308dB60d36268a602EF273421A227021`](https://etherscan.io/address/0x0f2F4D68308dB60d36268a602EF273421A227021) — effectively dead (~$7 TVL).
 - **brBTC:** No reported 24h DEX volume on CoinGecko — effectively illiquid on secondary markets.
-- **uniETH:** Curve `factory-stable-ng-71` pool referenced in Bedrock docs. TODO: confirm Ethereum pool address and current TVL/depth.
-- **Slippage for $1M exit (Ethereum):** likely >5% for uniBTC and prohibitive for brBTC based on observed depth. TODO: actual 1inch quote.
+
+### Slippage (CoW Protocol quotes, May 18, 2026)
+
+| Token | Size | Route | Slippage |
+|-------|------|-------|----------|
+| uniBTC → WBTC | ~10 uniBTC (~$1M) | Ethereum mainnet | **~2.4%** |
+| uniBTC → WBTC | ~50 uniBTC (~$5M) | Ethereum mainnet | **~77%** (cliff; route saturates) |
+| uniETH → WETH | ~300 uniETH (~$1M) | Ethereum mainnet | **~63%** (frxETH pool too shallow) |
+| uniETH → WETH | ~1,500 uniETH (~$5M) | Ethereum mainnet | **~93%** |
+
+uniETH's onchain `exchangeRatio() = 1.131913` matches CoinGecko's ETH-equivalent ratio (~1.1296) — the **oracle peg holds, but realized DEX exit price collapses immediately above ~$200K size** because the only meaningful pool is the $485K uniETH/frxETH. Holders depend almost entirely on protocol redemption for non-trivial exits.
+
 - **CEX listings:** None disclosed in CoinGecko for any of the three tokens.
-- **Protocol redemption is the primary exit** for all three tokens, and all three are queued/delayed (8-day queue for uniBTC, multi-week for uniETH, undisclosed for brBTC).
+- **Protocol redemption is the primary exit** for all three tokens, and all three are queued/delayed:
+  - uniBTC: 8-day queue, 0.5% fee, 2 WBTC/day cap on Ethereum.
+  - uniETH: 32-ETH-multiple queue + EigenLayer 7-day delay (2–10 days protocol + 7d EL per docs).
+  - brBTC: queue and fee not publicly documented.
 
 ## Centralization & Control Risks
 
@@ -190,7 +207,7 @@ This is a significant incident on the same vault that is still in production, al
 - **All three tokens and their core vaults are upgradeable transparent proxies with no onchain timelock.** A 3-of-5 (or 3-of-4 for brBTC operations) Safe can swap any implementation atomically.
 - **Four distinct Safes** govern the system (see Contract Addresses → Governance Layer). Three of them are 3-of-5; one is 3-of-4 (brBTC Vault admin).
 - **Signer overlap** between Safes (signers `0x09610d…` and `0x1fc76b…` each appear in multiple Safes) reduces the practical independence of the governance partition.
-- TODO: explicit check for Safe Guard / Delay modules on each Safe. Storage layout did not show a configured Delay; not exhaustively verified.
+- **No Safe Guards or Modules configured on any of the four Safes** — verified onchain by reading the Safe Guard storage slot (`0x4a204f…34c8`) and `getModulesPaginated(SENTINEL, 10)` on each Safe. All return zero. **There is no Delay module, no spending-limit module, and no Guard contract intercepting transactions.** A 3/5 (or 3/4) signature is sufficient to execute any operation, including a contract upgrade or `execute(...)` outflow from the vault, without any onchain delay.
 - **Roles:** uniBTC Vault exposes `DEFAULT_ADMIN_ROLE`, `PAUSER_ROLE`, `OPERATOR_ROLE`, `MANAGER_ROLE`. brBTC Vault and uniETH Staking use similar role models. Verified onchain that the protocol deployer EOA [`0x899c284a89e113056a72dC9ADe5B60E80dd3c94f`](https://etherscan.io/address/0x899c284a89e113056a72dc9ade5b60e80dd3c94f) **does not currently hold** `DEFAULT_ADMIN_ROLE`, `MINTER_ROLE`, `PAUSER_ROLE`, `OPERATOR_ROLE`, or `MANAGER_ROLE` on any of the three vaults (each role probed individually). Initial-deployment grants appear to have been revoked.
 
 ### Programmability
@@ -221,8 +238,8 @@ This is a significant incident on the same vault that is still in production, al
 ## Operational Risk
 
 - **Team transparency:** Public, doxxed leadership with prior crypto-industry experience.
-- **Documentation:** Adequate GitBook coverage of architecture, fees, redemption, audits. Some pages are JS-rendered. The audit list is well-organized and links directly to PDFs.
-- **Legal structure:** TODO — no specific legal entity named in docs. Bedrock is positioned as a product of the broader RockX organization.
+- **Documentation:** Adequate GitBook coverage of architecture, fees, redemption (uniBTC and uniETH only — brBTC redemption is undocumented), audits. Some pages are JS-rendered. The audit list is well-organized and links directly to PDFs.
+- **Legal structure:** Per Bedrock [Terms of Use](https://docs.bedrock.technology/legal/terms-of-use.md), the website and protocol are operated by **Golden Bull Enterprises Limited**, an entity formed under the laws of the **British Virgin Islands**. Governing-law clause confirms BVI jurisdiction.
 - **Incident handling:** The Sept 2024 exploit response was credible — vault paused, re-audited, PoR integrated, users made whole (via third-party reimbursement). However, the reimbursement was extraordinary (not Bedrock's treasury) and there is no published formal incident-response plan.
 
 ## Monitoring
@@ -261,7 +278,7 @@ This is a significant incident on the same vault that is still in production, al
 ### Peg / liquidity
 
 - uniBTC/WBTC ratio on Uniswap V3 (Ethereum) and Aerodrome (Base). Alert if discount >2% sustained for >1h.
-- brBTC/BTC ratio: TODO — establish source (CoinGecko, on-chain pool).
+- brBTC/BTC ratio: no liquid onchain pool to establish a market ratio. Monitor `totalSupply()` against backing reports if Bedrock publishes a brBTC PoR feed in the future.
 
 ### Recommended frequency
 
@@ -333,13 +350,14 @@ Undisclosed BTC custodian(s)  ←── TODO
 ### Key Risks
 
 1. **September 2024 exploit on the same uniBTC vault still in use** (~$2M lost). Users were made whole only because Fuzzland (third party) reimbursed — Bedrock's own treasury did not absorb the loss, so a recurrence is not necessarily covered.
-2. **No timelock on any upgrade path.** A 3-of-5 (or 3-of-4) Safe can swap any implementation in a single tx; with no Safe Delay/Guard verified, contract upgrade is effectively instant.
-3. **Custody opacity for the BTC backing uniBTC and brBTC.** No custodian is named in docs, and Chainlink PoR only verifies balances at self-declared addresses — not control of those addresses.
-4. **Signer overlap across governance Safes** reduces independence of the four-Safe partition.
-5. **Sole validator operator (RockX) for uniETH**, owned by Bedrock's CEO — concentration of governance and the off-chain counterparty.
-6. **Compounded restaking exposure for brBTC** across six restaking venues — each is a separate slashing/contract counterparty.
-7. **Thin secondary liquidity** for uniBTC on Ethereum and effectively zero for brBTC. Exits depend on protocol queues (8-day uniBTC; multi-week uniETH; brBTC TODO).
-8. **No formal bug bounty program** (no Immunefi / Cantina / Sherlock / SEAL Safe Harbor verified).
+2. **No timelock and no Safe Guard/Delay module on any upgrade or admin path.** Confirmed onchain: all four governance Safes return zero for both the EIP-1967 Safe Guard storage slot and `getModulesPaginated`. A 3-of-5 (or 3-of-4) signature is sufficient to upgrade any implementation or call `execute()` on the vault, with zero onchain delay.
+3. **Mint allowed against up to 10% under-collateralization.** Verified onchain `adequacyRatio = 900` (base 1000): the Vault `checkReserve` modifier permits minting as long as PoR-reported reserves are ≥ 90% of circulating uniBTC. This is by design but means PoR is not a strict 1:1 gate.
+4. **Custody opacity for the BTC backing uniBTC and brBTC.** No custodian is named in docs, and Chainlink PoR only verifies balances at self-declared addresses — not control of those addresses. Only **0.32 WBTC** is held directly in the Ethereum Vault contract; the remaining ~4,615 BTC of backing is held off-Ethereum (Babylon-restaked, multi-chain wrapped, native Bitcoin).
+5. **Signer overlap across governance Safes** reduces independence of the four-Safe partition.
+6. **Sole validator operator (RockX) for uniETH**, owned by Bedrock's CEO — concentration of governance and the off-chain counterparty.
+7. **Compounded restaking exposure for brBTC** across six restaking venues — each is a separate slashing/contract counterparty.
+8. **Catastrophic uniETH DEX liquidity** — quoted slippage ~63% for a $1M exit and ~93% for $5M; sole pool of consequence is uniETH/frxETH at $485K TVL. uniBTC at $5M cliffs to ~77% slippage. brBTC has no DEX exit at any size. Holders depend on protocol redemption queues for non-trivial exits.
+9. **No formal bug bounty program** (no Immunefi / Cantina / Sherlock; SEAL Safe Harbor confirmed NOT adopted via onchain registry check).
 
 ### Critical Risks
 
@@ -380,10 +398,10 @@ Undisclosed BTC custodian(s)  ←── TODO
 #### Category 2: Centralization & Control Risks (Weight: 30%)
 
 **Subcategory A: Governance**
-- 3-of-5 (and 3-of-4 for brBTC ops) Safes, no onchain timelock detected, fully upgradeable transparent proxies.
+- 3-of-5 (and 3-of-4 for brBTC ops) Safes; no Safe Guard or Module on any of the four Safes (verified onchain); no onchain timelock; fully upgradeable transparent proxies.
 - Privileged roles can pause / unpause / upgrade / re-allocate restaking venues without delay.
 - Doxxed signers per docs but not individually identified onchain. Signer overlap reduces Safe independence.
-- **Score: 4.0** (Multisig 3-of-5, <12 hours effective delay, powerful admin roles)
+- **Score: 4.0** (Multisig 3-of-5, effectively instant execution, powerful admin roles)
 
 **Subcategory B: Programmability**
 - uniBTC mint is fully programmatic and PoR-gated.
@@ -404,40 +422,42 @@ Undisclosed BTC custodian(s)  ←── TODO
 #### Category 3: Funds Management (Weight: 30%)
 
 **Subcategory A: Collateralization**
-- 100% backed onchain (Chainlink PoR shows backing > supply for uniBTC).
+- 100% backed onchain at present (Chainlink PoR shows ~4,615 BTC backing vs ~3,103 BTC of uniBTC+brBTC supply across chains).
+- **However, the protocol explicitly tolerates up to 10% under-collateralization** via `adequacyRatio = 900` — mints are permitted when backing is ≥ 90% of supply.
 - Collateral mix: blue-chip (WBTC, cbBTC, native ETH staked) plus newer wrapped variants (FBTC, M-BTC) plus restaked positions at Babylon, EigenLayer, and (for brBTC) five additional venues.
 - Restaked collateral carries slashing risk; brBTC compounds this across six venues.
-- **Score: 3.0** (mixed quality / newer protocols; some custodian dependency)
+- **Score: 3.5** (mixed quality, slashing exposure, opaque off-chain custody, explicit 10% under-collateralization tolerance)
 
 **Subcategory B: Provability**
-- **uniBTC: 2.0** — Chainlink PoR wired into Vault and verifiable onchain, with periodic updates.
+- **uniBTC: 2.5** — Chainlink PoR wired into Vault and verifiable onchain, but PoR is a self-attested address list and the 10% adequacy band weakens the gate.
 - **brBTC: 4.0** — no PoR, no published per-venue allocation accounting.
 - **uniETH: 2.5** — beacon-chain and EigenPod balances verifiable onchain, but no aggregate dashboard.
-- Weighted by approximate USD size (uniBTC ≫ uniETH ≫ brBTC on Ethereum): blended **~2.5**.
-- **Score: 2.5**
+- Weighted by approximate USD size (uniBTC ≫ uniETH ≫ brBTC on Ethereum): blended **~2.75**.
+- **Score: 2.75**
 
-**Funds Management Score = (3.0 + 2.5) / 2 = 2.75**
+**Funds Management Score = (3.5 + 2.75) / 2 = 3.125**
 
-**Score: 2.75/5**
+**Score: 3.1/5**
 
 #### Category 4: Liquidity Risk (Weight: 15%)
 
-- uniBTC primary exit is protocol redemption (8-day queue, 0.5% fee). Secondary DEX volume ~$20K/day — insufficient for institutional size on Ethereum.
-- brBTC has effectively zero secondary liquidity; exit entirely depends on protocol redemption (delay TODO).
-- uniETH has Curve pool support (TODO confirm); protocol exit is multi-week.
+- uniBTC primary exit is protocol redemption (8-day queue, 0.5% fee, 2 WBTC/day Ethereum cap). Secondary DEX volume ~$20K/day, slippage ~2.4% at $1M but ~77% at $5M — insufficient for institutional size on Ethereum.
+- uniETH primary DEX is uniETH/frxETH on Curve at only **$485K TVL** — quoted slippage **~63% at $1M, ~93% at $5M**. Effectively no secondary exit; redemption queue (32-ETH multiples + EigenLayer 7-day delay) is the only realistic path.
+- brBTC has effectively zero secondary liquidity and undisclosed redemption mechanics.
 - All redemption queues persisted through prior volatility per docs; no published incident of redemption queue freeze.
-- **Score: 3.5** (Withdrawal queues with thin DEX liquidity; >1 week for full exit for sizable positions; +0.5 because queue mechanism is throttled)
+- **Score: 4.0** (Withdrawal queues with very thin DEX liquidity; uniETH market exit catastrophic above ~$200K; brBTC market exit nonexistent; +0.5 because queue mechanism is throttled)
 
-**Score: 3.5/5**
+**Score: 4.0/5**
 
 #### Category 5: Operational Risk (Weight: 5%)
 
 - Doxxed leadership (Zhuling Chen, Alex Lam) with prior crypto industry experience and institutional funding (OKX Ventures).
-- Documentation is adequate but lacks named custodian, formal incident response plan, and explicit legal entity.
+- Legal entity confirmed: Golden Bull Enterprises Limited (BVI) per Terms of Use.
+- Documentation is adequate but lacks named custodian, formal incident response plan, and brBTC redemption details.
 - The Sept 2024 incident was handled credibly (re-audit + PoR + Fuzzland reimbursement).
-- **Score: 2.5** (Mostly public team, good docs, established product, but legal/custody gaps)
+- **Score: 2.0** (Public team, known legal entity in established offshore jurisdiction, good docs, established product, with custody/IR gaps)
 
-**Score: 2.5/5**
+**Score: 2.0/5**
 
 ### Final Score Calculation
 
@@ -445,17 +465,17 @@ Undisclosed BTC custodian(s)  ←── TODO
 |----------|-------|--------|----------|
 | Audits & Historical | 2.75 | 20% | 0.550 |
 | Centralization & Control | 3.5 | 30% | 1.050 |
-| Funds Management | 2.75 | 30% | 0.825 |
-| Liquidity Risk | 3.5 | 15% | 0.525 |
-| Operational Risk | 2.5 | 5% | 0.125 |
-| **Subtotal** | | | **3.075** |
+| Funds Management | 3.1 | 30% | 0.930 |
+| Liquidity Risk | 4.0 | 15% | 0.600 |
+| Operational Risk | 2.0 | 5% | 0.100 |
+| **Subtotal** | | | **3.230** |
 
 **Modifiers:**
 - Prior $2M exploit on the same vault still in use: **+0.5** (incident penalty; framework specifies modifiers for sustained operation without incident, this applies the inverse for an unmitigated repeat-exposure risk)
 - Custodian opacity for BTC backing: **+0.25**
-- No timelock on upgrades despite three audited products and ~$120M Ethereum TVL: **+0.25**
+- No timelock, no Safe Guard/Module, and explicit 10% under-collateralization tolerance: **+0.25**
 
-**Adjusted Final Score: 3.075 + 1.0 = ~3.7 / 5.0** (capped within [1.0, 5.0])
+**Adjusted Final Score: 3.230 + 1.0 = ~4.2 / 5.0** (capped within [1.0, 5.0])
 
 ### Risk Tier
 
@@ -496,15 +516,9 @@ A vault implementer should treat these as three different assets with different 
 
 ## Open TODOs (Items Not Verifiable This Session)
 
-- **Custodian identity** for BTC backing uniBTC and brBTC (no name in docs).
-- **Safe Guard / Delay module** check on the four governance Safes (storage layout did not show one but not exhaustively probed).
-- **brBTC redemption flow** — exact fee and delay (docs not surfaced).
-- **September 2024 restitution transactions** — on-chain evidence of user reimbursement from Fuzzland.
-- **SEAL Safe Harbor registration status** for Bedrock.
-- **Curve `factory-stable-ng-71` pool** — exact Ethereum address and current TVL.
-- **uniETH peg** vs ETH on Curve and other venues.
-- **Slippage curves** for $1M / $5M exits on uniBTC on Ethereum (1inch / Cowswap quote not captured).
-- **Bedrock legal entity / jurisdiction** — not stated in docs.
+- **Custodian identity** for BTC backing uniBTC and brBTC — Bedrock docs and public materials do not name a custodian (Cobo / Ceffu / BitGo / Fireblocks). Treat as a material disclosure gap.
+- **brBTC redemption flow** — exact fee, delay, and queue mechanics are not documented publicly. The brBTC docs cover only mint and bridging; the dApp page is JS-rendered. Contact Bedrock for clarification.
+- **September 2024 restitution transactions** — onchain Fuzzland-to-Bedrock reimbursement tx hashes are not published. The labeled `fuzzland.eth` address shows no $2M outbound; reimbursement appears to have come from an unannounced Fuzzland-controlled wallet.
 
 ## Sources
 
