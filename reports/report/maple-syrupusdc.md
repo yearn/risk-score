@@ -235,8 +235,8 @@ MapleGlobals.governor()  →  Protocol Contracts (PoolManager, MapleGlobals, Loa
 | DAO Multisig | [`0xd6d4Bcde6c816F17889f1Dd3000aF0261B03a196`](https://etherscan.io/address/0xd6d4Bcde6c816F17889f1Dd3000aF0261B03a196) | **PROPOSER + ROLE_ADMIN** on Timelock (not EXECUTOR — corrected from prior assessment). Also `tokenWithdrawer` of Timelock. |
 | Security Admin (3/6 Safe) | [`0x6b1A78C1943b03086F7Ee53360f9b0672bD60818`](https://etherscan.io/address/0x6b1A78C1943b03086F7Ee53360f9b0672bD60818) | Emergency pause + **CANCELLER** on Timelock (can veto scheduled proposals) |
 | Operational Admin (3/5 Safe) | [`0xCe1cE7c7F436DCc4E28Bc8bf86115514d3DC34E8`](https://etherscan.io/address/0xCe1cE7c7F436DCc4E28Bc8bf86115514d3DC34E8) | Routine operations + **EXECUTOR** on Timelock (executes proposals after delay) |
-| Extra EXECUTOR (EOA) | [`0x6d9f3a385796a5407c06a5bf18e903916548993e`](https://etherscan.io/address/0x6d9f3a385796a5407c06a5bf18e903916548993e) | Holds `EXECUTOR_ROLE` on Timelock. EOA, no code. TODO: identify off-chain. |
-| Extra ROLE_ADMIN (EOA) | [`0xa04bddfb5bce1afc0a939749dc721ba762019b2a`](https://etherscan.io/address/0xa04bddfb5bce1afc0a939749dc721ba762019b2a) | Holds `ROLE_ADMIN` on Timelock. EOA, no code. TODO: identify off-chain. |
+| Extra EXECUTOR (EOA) | [`0x6d9f3a385796a5407c06a5bf18e903916548993e`](https://etherscan.io/address/0x6d9f3a385796a5407c06a5bf18e903916548993e) | Holds `EXECUTOR_ROLE` on Timelock. EOA, no code. Can execute already-scheduled proposals after the 24h delay window opens (cannot schedule, cannot bypass timelock). TODO: identify off-chain. |
+| Extra ROLE_ADMIN (EOA) | [`0xa04bddfb5bce1afc0a939749dc721ba762019b2a`](https://etherscan.io/address/0xa04bddfb5bce1afc0a939749dc721ba762019b2a) | Holds `ROLE_ADMIN` on Timelock. EOA, no code. Powers are *gated through the timelock* — see "ROLE_ADMIN powers" note below. TODO: identify off-chain. |
 | Permissions Admin | [`0x54b130c704919320E17F4F1Ffa4832A91AB29Dca`](https://etherscan.io/address/0x54b130c704919320E17F4F1Ffa4832A91AB29Dca) | Controls deposit authorization (signs ECDSA permission bitmaps) |
 | Pool Delegate (Maple Direct) | [`0xC1e18FFD8825FfB286D177DDEbeba345EC70B49f`](https://etherscan.io/address/0xC1e18FFD8825FfB286D177DDEbeba345EC70B49f) (EOA) | Manages pool, loan origination, impairments. `PoolManager.poolDelegate()` (verified) |
 
@@ -251,6 +251,14 @@ MapleGlobals.governor()  →  Protocol Contracts (PoolManager, MapleGlobals, Loa
 | EOA `0xa04b…9b2a` | ❌ | ❌ | ❌ | ✅ |
 
 **This is a positive correction over the prior assessment.** Separating EXECUTOR (Ops Admin) from PROPOSER (DAO) introduces an extra check — the DAO cannot unilaterally schedule and execute its own proposals through the same hot multisig. The CANCELLER role being held by the Security Admin Safe (3/6) provides an additional kill-switch for malicious or compromised proposals.
+
+**ROLE_ADMIN powers (verified from `GovernorTimelock.sol` source):** Despite the name, `ROLE_ADMIN` cannot unilaterally grant or revoke roles. Reading the contract:
+- `updateRole(bytes32,address,bool)` is `onlySelf` — only callable by the Timelock itself (i.e. as the target of an executed proposal).
+- `proposeRoleUpdates(...)` is gated by `onlyRole(ROLE_ADMIN)` but **schedules** a `updateRole` call through the normal timelock flow (24h delay → EXECUTOR must execute → CANCELLER can veto).
+- `scheduleProposals(...)` explicitly rejects generic proposals targeting `updateRole` (`require(!_isUpdatingRoles(...), "GT:SP:UPDATE_ROLE_NOT_ALLOWED")`), so PROPOSER cannot smuggle a role change in.
+- The only direct (non-timelock) power of ROLE_ADMIN is `setPendingTokenWithdrawer(address)`. The new pending withdrawer must then call `acceptTokenWithdrawer()` to actually take the role, after which it can call `withdrawERC20Token`. **Current Timelock balances (block 25124222): 0 USDC, 0 syrupUSDC, 0 MPL, 0 SYRUP, 0 ETH** — no assets at risk; current `tokenWithdrawer` is the DAO Multisig. The token-recovery role exists to retrieve ERC20s mistakenly sent to the Timelock contract.
+
+**Implication:** A compromise of the EOA `0xa04b…9b2a` ROLE_ADMIN holder would require *also* compromising the EXECUTOR (Ops Admin Safe 3/5 or EOA `0x6d9f…993e`) and surviving the 24h window without the CANCELLER (Security Admin Safe 3/6) vetoing, before any role change would take effect. It cannot drain pool funds or modify protocol contracts directly. Still, holding ROLE_ADMIN in an EOA is weaker than holding it in a multisig — the bar to defense-in-depth is the executor + canceller layers, not key custody.
 
 **Timelock (verified onchain):** GovernorTimelock contract with `MIN_DELAY = 86400s (24h)` and `MIN_EXECUTION_WINDOW = 86400s (24h)`. Timelocked actions include: `PoolManager.upgrade()`, `LoanManager.upgrade()`, `WithdrawalManager.upgrade()`. Governor can change timelock parameters, but these changes themselves require going through the timelock. `latestProposalId = 12` — only 12 governance proposals have ever been scheduled since Timelock deployment (block 23418541), indicating very low governance activity / churn.
 
@@ -394,7 +402,7 @@ Exceptional audit coverage and large TVL. V1 credit event was counterparty risk,
 **Subcategory A: Governance — 2.0**
 
 - Dual-layer timelock protection: GovernorTimelock (MIN_DELAY=24h) + MapleGlobals defaultTimelockParameters (7-day delay, 2-day execution window), both verified onchain (May 2026)
-- **Separation of roles re-verified onchain (May 2026): PROPOSER (DAO 4/7), EXECUTOR (Ops 3/5), CANCELLER (Security 3/6) are held by *different* multisigs.** Prior assessment incorrectly attributed EXECUTOR to the DAO; reality is stronger. Two EOA addresses also hold EXECUTOR and ROLE_ADMIN respectively — small operational hot-wallet concentration risk (TODO: identify).
+- **Separation of roles re-verified onchain (May 2026): PROPOSER (DAO 4/7), EXECUTOR (Ops 3/5), CANCELLER (Security 3/6) are held by *different* multisigs.** Prior assessment incorrectly attributed EXECUTOR to the DAO; reality is stronger. Two EOA addresses also hold EXECUTOR and ROLE_ADMIN respectively — both powers are timelock-gated per the GovernorTimelock source (ROLE_ADMIN cannot grant roles unilaterally; EXECUTOR cannot schedule proposals), so the impact of EOA compromise is bounded by the executor + canceller layers. Still a hot-wallet weakness vs. multisig custody (TODO: identify).
 - DAO Multisig is 4/7 Safe v1.3.0, all EOA signers. Minority are employees; majority external advisors (per LlamaRisk)
 - Snapshot-based voting with 7-day window and quorum
 - Governor can change timelock parameters (through the timelock itself)
