@@ -117,10 +117,14 @@ Loans are overcollateralized with liquid digital assets. Pool-level metrics from
 - `collateralRatio`: 148.35% (down from 168.96% in Feb 2026)
 - `numOpenTermLoans`: 149 total (23–55 active depending on the API state filter)
 
-The per-asset collateral USD breakdown returned by the Maple public GraphQL endpoint (`collateralByAsset`) is empty without authentication, and the prior Feb 2026 USD figures are no longer fetchable from a public source. As a verifiable proxy, the table below shows the **active loan principal weighted by collateral asset** (i.e. what borrowers are drawing against each asset class) — not collateral USD value:
+The per-asset collateral USD breakdown returned by the Maple public GraphQL endpoint (`collateralByAsset`) is empty without authentication, and the prior Feb 2026 USD figures are no longer fetchable from a public source. The active-loan table below was obtained from `openTermLoans(where: {state: Active})` **without a pool-scope filter**, so it represents Maple V2 protocol-wide active loans — not syrupUSDC alone. Sum ($1.76B) exceeds this pool's `totalAssets` ($1.38B) and `OpenTermLoanManager.assetsUnderManagement()` ($1.34B), with the delta (~$420M) consistent with the syrupUSDT pool ($374M) and legacy pools (~$59M).
 
-| Collateral Asset | Active Loan Principal | Share | # Active Loans |
-|------------------|----------------------|-------|----------------|
+The implied syrupUSDC-pool-specific active principal from the API is `collateralValueUsd / collateralRatio` = $1.556B / 1.4835 ≈ **$1.05B**, which is what backs the $1.34B OTLM AUM after accounting for unallocated cash, **not** the $1.76B in the table.
+
+> ⚠️ **Use the table directionally only.** The shares below describe Maple V2 protocol-wide collateral exposure; syrupUSDC's specific share by asset cannot be derived from the public API at this assessment and is flagged TODO. Funds-management scoring relies on protocol-wide LTV / liquidation parameters (which are pool-agnostic) and the verified onchain pool composition ($1.34B OTLM AUM, $37.9M idle USDC, FTLM = $0), not on this per-asset table.
+
+| Collateral Asset | Active Loan Principal (Maple V2-wide) | Share | # Active Loans |
+|------------------|---------------------------------------|-------|----------------|
 | BTC | $1,004M | **57.10%** | 26 |
 | PYUSD | $253M | **14.39%** | 6 |
 | XRP | $234M | **13.31%** | 5 |
@@ -132,17 +136,17 @@ The per-asset collateral USD breakdown returned by the Maple public GraphQL endp
 | USDT | $3.3M | **0.18%** | 4 |
 | SOL | $7 | 0.00% | 1 |
 | UNKNOWN | $7.4M | 0.42% | 2 |
-| **TOTAL** | **$1.76B** | **100%** | **55** |
+| **TOTAL (cross-pool)** | **$1.76B** | **100%** | **55** |
 
-Source: Maple GraphQL `openTermLoans(where: {state: Active})`. Note this represents what each loan is backed by; the actual deposited collateral USD value is higher (148.35% of active principal ≈ $1.56B).
+Source: Maple GraphQL `openTermLoans(where: {state: Active})`, **unscoped across all V2 pools**. Per-pool scoping not available from the public endpoint without auth.
 
-**Allocation shifts vs Feb 2026 assessment:**
-- **BTC dominance increased:** BTC + cbBTC now ~59% of borrowing (was 56% with BTC+LBTC); cbBTC (Coinbase Wrapped BTC) is a new addition, LBTC fully exited
-- **PYUSD position is new:** $253M (14%) — PayPal's stablecoin now a significant collateral asset (TODO: verify this is collateral and not a loan asset; could be a stable-against-stable loan structure)
-- **XRP allocation roughly halved:** 13.3% (was 25.4%)
-- **USTB roughly halved:** 8.8% (was 16.2%)
+**Maple V2 protocol-wide allocation shifts vs Feb 2026 assessment** (Feb 2026 figures were syrupUSDC-specific from authenticated `collateralByAsset`; direct comparison is therefore approximate):
+- **BTC + cbBTC dominate:** ~59% protocol-wide (was 56% with BTC + LBTC for syrupUSDC alone); cbBTC newly present, LBTC fully exited
+- **PYUSD is new:** $253M (14%) — PayPal's stablecoin now material as either collateral or one side of a stable-pair structure (TODO: confirm role)
+- **XRP roughly halved (cross-pool):** 13% (was 25% syrupUSDC-only)
+- **USTB roughly halved (cross-pool):** 9% (was 16% syrupUSDC-only)
 - **LBTC and weETH fully exited**
-- **HYPE reduced from 1.05% to 0.43%**
+- **HYPE reduced**
 
 **LTV Parameters (from prior assessment, unchanged in docs):**
 
@@ -152,12 +156,12 @@ Source: Maple GraphQL `openTermLoans(where: {state: Active})`. Note this represe
 | LBTC | 75% | 85% |
 | ETH | 70% | 85% |
 
-**Collateral Concerns:**
-- **BTC dominance:** BTC (+cbBTC) represents ~59% of borrowed-against collateral — high concentration in a single asset class
-- **PYUSD novel concentration (14%):** TODO — confirm whether PYUSD is the collateral or a stablecoin-pair lending structure; PYUSD-backed loans introduce PayPal/Paxos counterparty and stablecoin depeg risk
-- **XRP still material (13%):** XRP is more volatile than BTC/ETH and carries regulatory uncertainty
-- **USTB (Superstate US T-Bills):** Still ~9% — tokenized US Treasuries provide stable backing but introduce Superstate protocol dependency
-- **HYPE token (0.4%):** Hyperliquid's native token, lower liquidity, allocation reduced
+**Collateral Concerns** (Maple V2 protocol-wide directional view — syrupUSDC-specific shares are TODO; system-wide LTV/liquidation policies apply identically to all pools):
+- **BTC dominance:** BTC (+cbBTC) represents ~59% of Maple V2 protocol-wide borrowed-against collateral — high concentration in a single asset class
+- **PYUSD novel concentration (~14% protocol-wide):** TODO — confirm whether PYUSD is the collateral or a stablecoin-pair lending structure; PYUSD-backed loans would introduce PayPal/Paxos counterparty and stablecoin depeg risk
+- **XRP still material (~13% protocol-wide):** XRP is more volatile than BTC/ETH and carries regulatory uncertainty
+- **USTB (Superstate US T-Bills, ~9% protocol-wide):** tokenized US Treasuries provide stable backing but introduce Superstate protocol dependency
+- **HYPE token (~0.4% protocol-wide):** Hyperliquid's native token, lower liquidity, allocation reduced
 
 **Liquidation Mechanism:**
 - Maple's smart contracts monitor all loans in real-time for adherence to collateralization levels
@@ -346,7 +350,7 @@ Callable by Governor (Timelock) or Security Admin.
 
 1. **Offchain credit risk** — Loan origination and borrower assessment are offchain (Maple Direct). The quality of lending decisions depends on the team's credit analysis capabilities.
 2. **Impairment mechanism** — Maple can unilaterally impair loans, temporarily reducing pool value. Lenders who withdraw during impairment take permanent losses.
-3. **Collateral concentration** — BTC (+cbBTC) dominates at ~59% of borrowed-against value. PYUSD newly at ~14% introduces stablecoin/issuer dependency. XRP at ~13% still carries volatility and regulatory risk. USTB at ~9% adds Superstate dependency.
+3. **Collateral concentration (Maple V2 protocol-wide):** BTC (+cbBTC) dominates at ~59%, PYUSD newly at ~14% (stablecoin/issuer dependency), XRP at ~13% (volatility/regulatory risk), USTB at ~9% (Superstate dependency). Pool-scoped shares for syrupUSDC alone are TODO — see Collateralization section.
 4. **Permissioned deposits** — First-time deposits require authorization from Maple, creating a gating mechanism.
 5. **Withdrawal delays** — Up to 30 days in low-liquidity scenarios. In a credit stress event, many lenders could be queued simultaneously.
 6. **Material TVL decline** — Pool `totalAssets` has fallen from ~$1.68B to ~$1.38B (and total Maple V2 TVL from ~$3.7B to ~$1.8B) since Feb 2026. The decline appears to have been absorbed without queue backlog, but a continued contraction may compress yields or signal deteriorating depositor confidence.
@@ -421,12 +425,9 @@ Exceptional audit coverage and large TVL. V1 credit event was counterparty risk,
 
 **Subcategory A: Collateralization — 3.0**
 
-- Overcollateralized lending (`collateralRatio` = 148.35% Maple API, down from 168.96% Feb 2026) with liquid digital assets
+- Overcollateralized lending (`collateralRatio` = 148.35% Maple API, down from 168.96% Feb 2026) with liquid digital assets — system-wide LTV / liquidation parameters are pool-agnostic
 - Onchain liquidation mechanics with Chainlink oracles
-- BTC (+cbBTC) dominates at ~59% of borrowed-against value — concentration risk in single asset class
-- PYUSD new at ~14% — stablecoin/issuer (PayPal/Paxos) dependency, depeg risk
-- XRP at ~13% — more volatile, regulatory uncertainty
-- USTB at ~9% — tokenized T-Bills (Superstate dependency)
+- Per-asset concentration (**Maple V2 protocol-wide**, syrupUSDC-specific shares TODO): BTC (+cbBTC) ~59%, PYUSD ~14% (new, stablecoin/issuer depeg risk), XRP ~13% (volatility/regulatory), USTB ~9% (Superstate dependency)
 - Impairment mechanism can reduce pool value at Maple's discretion
 - Credit risk remains despite overcollateralization (V1 precedent)
 
@@ -447,8 +448,9 @@ Exceptional audit coverage and large TVL. V1 credit event was counterparty risk,
 - Queue-based redemption at smart contract exchange rate (no slippage on redemption value)
 - Typical processing: minutes to 2 days
 - Maximum 30 days in extreme scenarios
-- ~$20M Uniswap V4 liquidity as alternative exit — but only $14.9M USDC reserve, $1M swap = ~5.4% slippage
-- DEX liquidity is only 1.2% of market cap — not a viable exit for large holders
+- ~$15.2M Uniswap V4 + ~$1.0M Fluid DEX liquidity as alternative exits (DefiLlama yields, May 2026)
+- DEX liquidity is only ~1.2% of market cap — not a viable exit for large holders
+- Onchain pool state at block 25124052: withdrawal queue empty (`queue() = (14649, 14649)`); $37.9M idle USDC in pool available for immediate redemption without recalling loans
 - Top holders are protocol infrastructure contracts (Maple ALMProxy, Chainlink CCIP pool, Morpho, Fluid) — not external whale withdrawal risk
 - Same-value asset (USDC-denominated), which mitigates some waiting risk
 - Historical: No V2 stress-test of withdrawal queue during market turmoil
