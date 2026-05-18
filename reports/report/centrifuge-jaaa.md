@@ -4,7 +4,7 @@
 - **Token:** JAAA (Janus Henderson Anemoy AAA CLO Fund Token)
 - **Chain:** Ethereum
 - **Token Address:** [`0x5a0F93D040De44e78F251b03c43be9CF317Dcf64`](https://etherscan.io/address/0x5a0F93D040De44e78F251b03c43be9CF317Dcf64)
-- **Final Score: 2.85/5.0**
+- **Final Score: 3.05/5.0**
 
 ## Overview + Links
 
@@ -191,7 +191,7 @@ Centrifuge V3 has received an unusually heavy audit cadence — **20+ engagement
 - **V3.2 onchain pricing — not in use for JAAA:** Centrifuge V3.2 introduces a `NAVManager` ([`0x493b…9130`](https://etherscan.io/address/0x493b6C8ccC7BfD43c5a20C4F2C648701f74E9130)) that "recomputes the fund's net asset value directly from onchain state" and a `SimplePriceManager` ([`0x280C…0823`](https://etherscan.io/address/0x280C94eB440A8a75c2F8f6cA8c6FaFf907000823)) ([V3.2 blog](https://centrifuge.io/blog/onchain-pm)). For JAAA — whose underlying assets (CLO tranches) live entirely offchain — a fully onchain NAV is structurally impossible. Verified onchain: `NAVManager.initialized(281474976710663, 1)` = `false` and `NAVManager.navHook(281474976710663)` = `address(0)`. The JAAA price is therefore still pushed manually by the Pool Manager Safe via the Hub, not derived from onchain state.
 - **Third-party verification:** No Chainlink Proof of Reserves or NAVLink feed for JAAA was found. Trust is therefore anchored on (a) Trident Trust as fund administrator publishing NAV, (b) MHA Cayman as auditor, (c) StoneX as regulated custodian, and (d) the BVI Financial Services Commission as the fund's regulator. The Centrifuge protocol enforces no onchain attestation; whatever Anemoy/the pool manager pushes is canonical.
 - **Can admin mint tokens without backing?** **Yes, technically.** The JAAA `Tranche` (share token) exposes `mint(address, uint256)` gated only by `wards[caller]==1`. Root has ward power, and Root is reachable only through the current 4-of-9 V3.1+ ProtocolAdminSafe (verified onchain — the V3.0 Guardian was `Deny`'d on Root at block 24376326). In normal operation the protocol only mints in response to deposit requests with backing escrowed; however, an attacker controlling the current governance Safe — or either of the two pool-manager principals (3-of-8 Safe or the EOA) operating via the Hub — could issue shares without corresponding USDC backing. The Pool Manager EOA path is the most concerning: a single private key, no timelock for issuance, daily NAV-push authority. This is a generic governance-key risk shared with most issuer-controlled stablecoins (USDG, USDC, etc.) but worth noting given JAAA's institutional positioning.
-- **Token recovery:** A `TokenRecoverer` contract ([`0x94269dbaba605b63321221679df1356be0c00e63`](https://etherscan.io/address/0x94269dbaba605b63321221679df1356be0c00e63)) is ward'd on Root and can move tokens out of protocol contracts via auth-protected `recoverTokens` flows. This is necessary for cross-chain message-loss recovery but represents a privileged-action surface. The Guardian must `initiateRecovery` and a `disputeRecovery` window exists.
+- **Token recovery:** The current `TokenRecoverer` contract ([`0x1E70530e9555711f8DF4838Ab940b97c039B4037`](https://etherscan.io/address/0x1E70530e9555711f8DF4838Ab940b97c039B4037)) is ward'd on Root (verified onchain — `Root.wards()=1`; resolved via `MessageProcessor.tokenRecoverer()`) and can move tokens out of protocol contracts via auth-protected `recoverTokens` flows. The legacy V3.0 TokenRecoverer [`0x94269d…00e63`](https://etherscan.io/address/0x94269dbaba605b63321221679df1356be0c00e63) is denied (`Root.wards()=0`). Token recovery is necessary for cross-chain message-loss recovery but represents a privileged-action surface. The Guardian must `initiateRecovery` and a `disputeRecovery` window exists.
 
 ## Liquidity Risk
 
@@ -373,6 +373,127 @@ Parallel deRWA wrapper pool (poolId 281474976710659):
   lending markets (Aave Horizon, Falcon, 3F/Morpho).
 ```
 
+### Appendix: Investor Deposit Flow (ERC-7540 async)
+
+The deposit path is **two-phase**: (1) the investor locks USDC into the PoolEscrow and registers a pending request, (2) on the next batch, the pool manager (3-of-8 Safe **or** EOA) sets a price and approves/issues against that price. Steps 1–3 are user-initiated; steps 4–7 are pool-manager-initiated; step 8 is again user-initiated. On Ethereum (the Hub chain), all Hub→Spoke calls execute synchronously inside the same transaction (no cross-chain async window). On non-Hub chains, the Hub→Spoke leg is bridged via Wormhole and is async.
+
+```
+INVESTOR DEPOSIT — ERC-7540 ASYNC FLOW (JAAA on Ethereum)
+
+╭─── 1. ALLOWLIST (one-time) ──────────────────────────────────────────────╮
+│  Pool Manager (Safe or EOA) → FullRestrictions hook 0x3C5E…80A7         │
+│  .updateMember(investor) — KYC-gated, off-chain check happens upstream  │
+╰──────────────────────────────────────────────────────────────────────────╯
+                                  │
+                                  ▼
+╭─── 2. REQUEST DEPOSIT (investor) ────────────────────────────────────────╮
+│  Investor → AsyncVault 0x4880…780b .requestDeposit(assets, ctrl, owner) │
+│      → AsyncRequestManager 0xF482…761Ae .requestDeposit                 │
+│          • pulls `assets` USDC from investor into PoolEscrow 0x0401…a52a│
+│          • increments pendingDepositRequest[poolId][scId][user]         │
+│          • emits DepositRequest message (Hub-chain handler)             │
+╰──────────────────────────────────────────────────────────────────────────╯
+                                  │
+                                  ▼
+╭─── 3. PENDING (no shares minted yet — investor holds a claim) ───────────╮
+│  PoolEscrow now custodies the USDC.                                     │
+│  No JAAA exists for this request until the manager processes the batch. │
+╰──────────────────────────────────────────────────────────────────────────╯
+                                  │
+                       ── Daily off-chain step ──
+                       Anemoy + Trident Trust
+                       compute true fund NAV
+                                  │
+                                  ▼
+╭─── 4. PUSH PRICE (pool manager) ── ★ UNBOUNDED ──────────────────────────╮
+│  Manager → Hub 0xA4A7…1953 .updateSharePrice(                            │
+│      poolId, scId, pricePoolPerShare, computedAt)                        │
+│  → ShareClassManager 0xaFFC…9BEf .updateSharePrice                       │
+│      • Checks: share class exists; computedAt ≤ block.timestamp          │
+│      • NO upper bound, NO deviation cap, NO timelock                     │
+│  → (if feeHook set) feeHook.accrue() — JAAA: not currently set           │
+╰──────────────────────────────────────────────────────────────────────────╯
+                                  │
+                                  ▼
+╭─── 5. NOTIFY SPOKE (same tx on Ethereum) ────────────────────────────────╮
+│  Manager → Hub .notifySharePrice(poolId, scId, chainId)                 │
+│  → MessageDispatcher 0xf837…30B27 .sendNotifyPricePoolPerShare           │
+│      • chainId == localCentrifugeId  → SYNCHRONOUS:                     │
+│           Spoke 0xEC35…525aB .updatePricePoolPerShare(...)              │
+│           → AsyncRequestManager.priceLastUpdated set                    │
+│           → convertToAssets() now returns new NAV immediately           │
+│      • else → async cross-chain via Gateway + Wormhole adapter          │
+╰──────────────────────────────────────────────────────────────────────────╯
+                                  │
+                                  ▼
+╭─── 6. APPROVE BATCH (pool manager) ──────────────────────────────────────╮
+│  Manager → Hub .approveDeposits(poolId, scId, pricePoolPerAsset)        │
+│  Locks the price at which queued USDC will be converted into shares.    │
+╰──────────────────────────────────────────────────────────────────────────╯
+                                  │
+                                  ▼
+╭─── 7. ISSUE & FULFILL (pool manager) ────────────────────────────────────╮
+│  Manager → Hub .issueShares(poolId, scId, navPerShare)                  │
+│  → AsyncRequestManager .fulfillDepositRequest                            │
+│      • Locks state.depositPrice per user (so price at fulfilment is     │
+│        the price the user later mints against)                          │
+│      • Increments maxMint[user] = pendingDepositRequest * 1/price       │
+│      • Pending request cleared                                          │
+╰──────────────────────────────────────────────────────────────────────────╯
+                                  │
+                                  ▼
+╭─── 8. CLAIM SHARES (investor) ───────────────────────────────────────────╮
+│  Investor → AsyncVault .mint(shares, receiver)                          │
+│  → AsyncRequestManager .mint                                            │
+│      • Computes assets-out = shares * state.depositPrice (locked)       │
+│      • JAAA Tranche 0x5a0F…cf64 mints `shares` to receiver              │
+│      • Subject to FullRestrictions hook (receiver must be allowlisted)  │
+╰──────────────────────────────────────────────────────────────────────────╯
+
+Price-update propagation summary:
+  • On Ethereum (Hub chain): steps 4 + 5 land in ONE transaction.
+    convertToAssets() and any fulfilment that follows use the new price
+    in the same block. There is no inspection window.
+  • Pending-batch users: get whatever price the manager sets in step 6
+    (approveDeposits) and step 7 (issueShares) — also manager-chosen,
+    also unbounded.
+  • Already-minted JAAA: only affected via convertToAssets() readbacks
+    (e.g., lending markets pricing collateral). The shares themselves
+    are fungible ERC-20 — their *interpretation* changes, not balances.
+
+Redemptions mirror this flow in reverse (requestRedeem →
+approveRedeems → revokeShares → withdraw); the same manager-set
+prices apply to each redeem batch.
+```
+
+### Appendix: Pool-Manager (Safe + EOA) Capability Matrix
+
+Both the 3-of-8 Pool Manager Safe `0x742d…be1e` and the EOA `0x7bf090b9…02ec` are registered as managers for the JAAA pool on the current HubRegistry `0x19f46…ADE93` (`manager(poolId, addr) = true`, verified at block 24376421). They have **identical privileges** at the Hub level. The table below enumerates what either principal can do directly without further governance approval. "Bounds" refers to onchain validation only — offchain operational policy is not enforced by the contracts.
+
+| # | Capability | Method (caller → contract) | Onchain bounds / checks | Reversibility | Worst-case if EOA key is compromised |
+|---|---|---|---|---|---|
+| 1 | **Set JAAA NAV to any value** | `Hub.updateSharePrice(poolId, scId, pricePoolPerShare, computedAt)` → `ShareClassManager.updateSharePrice` | Pool exists; `computedAt ≤ block.timestamp`. **No upper bound, no deviation cap, no timelock, no per-epoch limit.** | Irreversible for any fulfilment that prices against it. | Mis-price the fund up or down arbitrarily — convertToAssets, integrators (Aave Horizon, Falcon, 3F/Morpho) all consume the new value the same block on Ethereum. |
+| 2 | **Notify Spoke of new price** | `Hub.notifySharePrice(poolId, scId, chainId)` → `MessageDispatcher.sendNotifyPricePoolPerShare` | Same-chain → synchronous `Spoke.updatePricePoolPerShare`. Cross-chain → async via Wormhole MultiAdapter. | Same as (1). | Propagates the mis-price to lending markets and to other chains. |
+| 3 | **Approve a deposit batch at chosen price** | `Hub.approveDeposits(poolId, scId, pricePoolPerAsset)` | Manager-set price; pool exists. **No price bound.** | Irreversible once shares are issued in step (4). | Approve a self-deposit at near-zero USDC/JAAA price, minting huge JAAA against a small USDC outlay (combined with (1)/(4)). |
+| 4 | **Issue (mint) shares against approved batch** | `Hub.issueShares(poolId, scId, navPerShare)` → `AsyncRequestManager.fulfillDepositRequest` | Approved batch exists; manager-set navPerShare. **No bound.** | Irreversible. | Mint JAAA tokens to depositors (themselves) far in excess of the USDC they queued. |
+| 5 | **Approve a redeem batch at chosen price** | `Hub.approveRedeems(...)` | Manager-set price; pool exists. **No price bound.** | Irreversible once USDC is paid out in (6). | Pay out near-zero USDC for redeemed shares (other users' redeems get robbed). |
+| 6 | **Revoke (burn) redeemed shares and pay USDC** | `Hub.revokeShares(...)` → `AsyncRequestManager.fulfillRedeemRequest` | Approved redeem batch exists. | Irreversible. | Pair with (5) for redemption value extraction. |
+| 7 | **Force-cancel any investor's pending deposit** | `Hub.forceCancelDepositRequest(...)` | Pool-manager auth only. | Reversible — investor can re-request. | Eject pending investors before a price manipulation. |
+| 8 | **Force-cancel any investor's pending redeem** | `Hub.forceCancelRedeemRequest(...)` | Pool-manager auth only. | Reversible. | Trap a redeem request indefinitely (combined with refusal to approve batches). |
+| 9 | **Add or remove KYC'd holders** | `Hub.updateMember(...)` → FullRestrictions hook `0x3C5E…80A7` `.updateMember` | Pool-manager auth only. | Reversible. | Freeze specific holders (refuse to allowlist them, or block transfers). |
+| 10 | **Update pool metadata / IPFS pointer** | `Hub.updateMetadata(...)` | Pool-manager auth only. | Reversible. | Misleading offchain pool documentation (low direct economic risk). |
+
+**What the pool manager *cannot* do directly** (verified by reading Hub / Spoke / Tranche / Root source on Etherscan):
+
+- **Drain PoolEscrow USDC arbitrarily.** USDC only leaves the escrow as part of an approved redeem batch (`revokeShares`) or as an authorized cross-chain transfer initiated by Spoke/Root, not by a raw withdraw. Mis-pricing a redeem batch is the indirect route.
+- **Mint share tokens outside the AsyncRequestManager flow.** `JAAA.Tranche.mint()` is `auth`-gated to Spoke wards, not Hub managers. Issuance can only happen via step 4 above.
+- **Bypass the 48h Root timelock or Guardian pause.** Root ward changes, protocol upgrades, adapter swaps and TokenRecoverer authorization all go through Root, which the pool manager is not on.
+- **Replace itself.** Manager-registration changes happen on `HubRegistry.updateManager`, which is called by the Hub on behalf of the pool's *deployer/owner*, not by the manager — escalation back to the protocol-admin path is required to add/remove a manager.
+- **Pause the protocol.** Pause/unpause are Guardian-only (`ProtocolGuardian` + `OpsGuardian`).
+- **Mutate other pools.** All Hub functions in the table are scoped by `poolId` via `_isManager(poolId)`, which reads `HubRegistry.manager(poolId, msg.sender)`. JAAA's manager has no privileges on deJAAA or any other Centrifuge pool.
+
+**Net summary.** The EOA cannot steal PoolEscrow USDC by direct withdrawal and cannot mint JAAA out of thin air bypassing AsyncRequestManager — but rows 1–6 are a *complete economic capture surface*. Setting the price (or batch price) to arbitrary values, combined with the manager's own ability to queue and fulfill a deposit/redeem, is functionally equivalent to "mint to self / drain to self" within one batch cycle. The only mitigations are (a) offchain operational discipline at Anemoy, (b) post-hoc TokenRecoverer / Guardian-pause response (slow, requires the protocol-admin path), and (c) Yearn-side monitoring of the EOA address.
+
 ---
 
 ## Risk Summary
@@ -387,7 +508,7 @@ Parallel deRWA wrapper pool (poolId 281474976710659):
 
 ### Key Risks
 
-- **Two Pool Manager principals on the JAAA pool — including one EOA.** The current HubRegistry shows `manager(JAAA pool, addr)=true` for both the 3-of-8 Pool Manager Safe [`0x742d…be1e`](https://etherscan.io/address/0x742d100011ffbc6e509e39dbcb0334159e86be1e) and an EOA [`0x7bf090b9…02ec`](https://etherscan.io/address/0x7bf090b97f896fb77e852cc98aa52a8cb7dc02ec) (registered at block 24376421). Either can set JAAA NAV, approve/issue shares, force-cancel investor requests, and modify the FullRestrictions allowlist. The EOA is a **single private key** — compromise of one signer is sufficient to mis-price or seize. Identity of the EOA holder: TODO (likely Anemoy automation; not publicly disclosed).
+- **Two Pool Manager principals on the JAAA pool — including one EOA with unbounded NAV-push authority.** The current HubRegistry shows `manager(JAAA pool, addr)=true` for both the 3-of-8 Pool Manager Safe [`0x742d…be1e`](https://etherscan.io/address/0x742d100011ffbc6e509e39dbcb0334159e86be1e) and an EOA [`0x7bf090b9…02ec`](https://etherscan.io/address/0x7bf090b97f896fb77e852cc98aa52a8cb7dc02ec) (registered at block 24376421). Either can call `Hub.updateSharePrice` to set JAAA NAV to **any value with no upper bound, no deviation cap and no timelock**, approve/issue shares, force-cancel investor requests, and modify the FullRestrictions allowlist. On Ethereum (Hub-chain), the new price propagates to the Spoke synchronously in the same tx via `notifySharePrice`, so the user-facing `convertToAssets()` and batch-fulfilment prices reflect the manipulated value immediately. The EOA is a **single private key** — compromise of one signer is sufficient to mis-price the fund and extract value via the next deposit/redeem batch. Identity of the EOA holder: TODO (likely Anemoy automation; not publicly disclosed). See "Critical Risks" below and Appendix tables for the full capability surface.
 - **NAV is admin-pushed, not onchain-derived.** Underlying CLOs are offchain, so a fully onchain proof-of-reserves is structurally impossible. Token holders trust Anemoy / Trident Trust to compute correct NAV and the Pool Manager Safe to push it faithfully. No Chainlink PoR or independent oracle.
 - **Mint-without-backing is technically possible** via the share token's `mint(address,uint256)` (gated only by wards). Standard governance-key risk, mitigated by the 48h Root timelock but not eliminated for paths involving the Pool Manager Safe acting via the Hub.
 - **Highly concentrated holder base.** rwa.xyz reports 23 holders globally; a single large redemption (e.g. Grove unwinding) could deplete the pool's USDC float and force unscheduled CLO sales. Grove appears to have already drawn down a significant portion of its original $1B allocation (current aggregate JAAA NAV ~$417M).
@@ -397,7 +518,11 @@ Parallel deRWA wrapper pool (poolId 281474976710659):
 
 ### Critical Risks `[If Any]`
 
-- None at this time — no auto-fail gate is triggered. The protocol is audited, the reserves are verifiable via a regulated offchain attestation chain, and there is no single-EOA admin path.
+- **EOA can set JAAA NAV to any value, with no bounds and no timelock.** The current HubRegistry has an EOA pool manager [`0x7bf090b9…02ec`](https://etherscan.io/address/0x7bf090b97f896fb77e852cc98aa52a8cb7dc02ec) registered alongside the 3-of-8 Pool Manager Safe. Both have identical privileges. Either principal can call `Hub.updateSharePrice(poolId, scId, pricePoolPerShare, computedAt)` on the current Hub [`0xA4A7…1953`](https://etherscan.io/address/0xA4A7Bb3831958463b3FE3E27A6a160F764341953); the only checks in `ShareClassManager.updateSharePrice` are that the share class exists and that `computedAt <= block.timestamp`. **There is no upper bound, no deviation cap, no per-epoch limit, no timelock and no Guardian-pause-on-large-change.** The Spoke-side price is updated synchronously in the same Ethereum transaction via `Hub.notifySharePrice` (which calls `Spoke.updatePricePoolPerShare` directly when `chainId == localCentrifugeId`), so `AsyncRequestManager.convertToAssets()`, batch fulfilment prices and any third-party integrator (Aave Horizon, Falcon, 3F/Morpho, Resolv via deJAAA) consume the manipulated value immediately. A compromised single private key is sufficient to:
+  1. set the price to near-zero before processing a pending redeem batch, paying out near-zero USDC for canceled shares;
+  2. set the price to an arbitrarily high value before fulfilling a pending deposit the attacker has queued, minting excess JAAA against a small USDC outlay;
+  3. or, more subtly, drift the published NAV away from the true offchain NAV indefinitely.
+  This is **not** treated as a Critical-Gate auto-fail (the 48h Root timelock, 4-of-9 ProtocolAdminSafe and Guardian pause still constrain protocol-level upgrades; PoolEscrow USDC is not directly drainable), but it is the single largest operational risk on JAAA and the dominant reason this report sits in the upper end of Medium Risk. Yearn integrations should monitor every outgoing transaction from the EOA in real time and treat *any* call into `Hub`, `AsyncRequestManager` or `Spoke` from it as an incident. See the Appendix capability table for the full set of EOA powers.
 
 ---
 
@@ -413,7 +538,7 @@ Parallel deRWA wrapper pool (poolId 281474976710659):
 
 - [x] **No audit** — FAIL → not triggered (20+ audits from multiple top firms).
 - [x] **Unverifiable reserves** — FAIL → not triggered. Reserves are offchain but verifiable through a chain of regulated attestation (BVI FSC → Anemoy → MHA Cayman audit → Trident Trust admin → StoneX custody). Comparable to Paxos USDG / Superstate USTB in transparency model.
-- [x] **Total centralization** — FAIL → not triggered. Governance is two independent 4-of-N Safes behind a 48h Root timelock, plus a Guardian pause. Pool Manager is 3-of-8 (not single-EOA).
+- [x] **Total centralization** — FAIL → not triggered for protocol-level governance. Root is controlled by a 4-of-9 ProtocolAdminSafe behind a 48h timelock + Guardian pause. **However**, the JAAA pool itself has an EOA as one of two registered pool managers, with unbounded NAV-push authority (see Critical Risks above). This does not trip the auto-fail gate (protocol-level admin is multi-sig + timelocked and PoolEscrow USDC is not directly drainable), but it materially elevates Centralization scoring.
 
 **All gates pass** → proceed to category scoring.
 
@@ -449,15 +574,16 @@ Parallel deRWA wrapper pool (poolId 281474976710659):
 - Pool Manager (Hub-level) has **two registered principals**: a 3-of-8 Safe **and** an EOA (`0x7bf090b9…`). The EOA path means a single-key compromise is sufficient to set NAV / issue shares for JAAA — strictly worse than the Safe-only assumption.
 - Privileged roles (mint, freeze, force-cancel, recover) exist but are gated through the timelocked Root or the pool manager. Critical actions (Root upgrade) are timelocked; routine actions (price push) are not.
 
-→ **Subcategory A: 3.0** — 4-of-9 governance with 48h timelock is healthy; pool-manager EOA path is the dominant daily centralization risk (single private key with NAV-push authority).
+→ **Subcategory A: 3.5** — 4-of-9 governance with 48h timelock is healthy for *protocol-level* admin, but the pool-manager EOA path is the dominant daily centralization risk: a single private key has NAV-push authority with no bound, no cap and no timelock. This pulls the subcategory firmly into the 4 ("Multisig (3-5)/admin keys; No real timelock for routine actions; Significant admin powers") side of the rubric, partly offset by the timelocked Root above it.
 
 **Subcategory B: Programmability**
 
-- NAV/price is **admin-pushed daily** by the 3-of-8 pool manager — offchain accounting reliant on admin updates.
-- Issuance/redemption is async (manager approves batches), not fully programmatic.
-- Onchain accounting layer (BalanceSheet) is programmatic; underlying valuation is not.
+- **NAV/price is fully admin-controlled with no bounds.** Either pool-manager principal (3-of-8 Safe or EOA `0x7bf090b9…`) can call `Hub.updateSharePrice(poolId, scId, pricePoolPerShare, computedAt)` to set the JAAA NAV to **any** value. `ShareClassManager.updateSharePrice` only checks that the share class exists and that `computedAt <= block.timestamp` — there is no upper bound, no deviation cap, no per-epoch limit and no timelock. The Spoke-side price is updated synchronously on Ethereum in the same transaction via `Hub.notifySharePrice` (which calls `Spoke.updatePricePoolPerShare` directly when chain-id matches), so `convertToAssets()` and batch-fulfilment prices reflect the new value immediately.
+- Issuance/redemption is async — the pool manager approves batches at prices the manager itself sets (`approveDeposits/approveRedeems → issueShares/revokeShares`), not fully programmatic.
+- Onchain accounting layer (BalanceSheet) is programmatic; underlying valuation is not. JAAA is not routed through the V3.2 SimplePriceManager / NAVManager (`navHook(poolId) = 0x0`), so the only price input is the manager push.
+- No transparency on parameter changes beyond raw onchain events; no public preview/queue of price updates before they land.
 
-→ **Subcategory B: 3.5** — hybrid onchain/offchain, with NAV being admin-controlled but with onchain accounting infrastructure.
+→ **Subcategory B: 5.0** — matches the row-5 rubric ("Fully custodial/centralized operations; Admin-controlled rate, no transparency"). NAV is the single most important parameter for any RWA token, and it is set by an admin call (one of which is an EOA private key) with **no programmatic guardrails of any kind**. The presence of an onchain accounting layer below the price push does not mitigate this — it just records the manipulated price faithfully.
 
 **Subcategory C: External Dependencies**
 
@@ -467,9 +593,9 @@ Parallel deRWA wrapper pool (poolId 281474976710659):
 
 → **Subcategory C: 3.5** (between "2-3 established dependencies" and "many or newer protocol dependencies"; the institutional offchain dependencies are mature, but the onchain dependency on Wormhole as sole adapter justifies pushing toward 4).
 
-**Centralization Score = (3.0 + 3.5 + 3.5) / 3 ≈ 3.33**
+**Centralization Score = (3.5 + 5.0 + 3.5) / 3 ≈ 4.0**
 
-**Score: 3.33/5**
+**Score: 4.0/5**
 
 #### Category 3: Funds Management (Weight: 30%)
 
@@ -522,11 +648,11 @@ Parallel deRWA wrapper pool (poolId 281474976710659):
 | Category | Score | Weight | Weighted |
 |----------|-------|--------|----------|
 | Audits & Historical | 2.0 | 20% | 0.40 |
-| Centralization & Control | 3.33 | 30% | 1.00 |
+| Centralization & Control | 4.0 | 30% | 1.20 |
 | Funds Management | 3.0 | 30% | 0.90 |
 | Liquidity Risk | 3.0 | 15% | 0.45 |
 | Operational Risk | 2.0 | 5% | 0.10 |
-| **Final Score** | | | **2.85/5.0** |
+| **Final Score** | | | **3.05/5.0** |
 
 **Optional Modifiers:**
 
@@ -535,7 +661,7 @@ Parallel deRWA wrapper pool (poolId 281474976710659):
 
 **Optional add-ons applied:** None. (A prior draft applied +0.10 for "two coexisting governance Safes"; reviewer flagged this as stale — the V3.0 Guardian was in fact `Deny`'d on Root at block 24376326, so there is only one live admin path. Add-on removed.)
 
-**Final Score: 2.85/5.0**
+**Final Score: 3.05/5.0** — sits in the upper end of the **Medium Risk** band (2.5–3.5), pulled there primarily by the EOA pool-manager + unbounded NAV-push capability documented in the Critical Risks subsection. If the EOA were removed from the HubRegistry and NAV updates were routed through a multisig (or the V3.2 NAVManager / SimplePriceManager were initialized for the JAAA pool), Programmability would compress from 5 to ~3 and the overall score would fall back toward 2.55–2.65.
 
 ### Risk Tier
 
