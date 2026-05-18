@@ -1,6 +1,6 @@
 # Protocol Risk Assessment: Origin ARM
 
-- **Assessment Date:** February 8, 2026
+- **Assessment Date:** May 18, 2026
 - **Token:** ARM-WETH-stETH
 - **Chain:** Ethereum Mainnet
 - **Token Address:** [`0x85B78AcA6Deae198fBF201c82DAF6Ca21942acc6`](https://etherscan.io/address/0x85B78AcA6Deae198fBF201c82DAF6Ca21942acc6)
@@ -65,7 +65,7 @@ Origin Protocol has 30+ audit reports across all products (OpenZeppelin, Trail o
 
 ## Historical Track Record
 
-- **Launched:** October 25, 2024 (~16 months in production)
+- **Launched:** October 25, 2024 (~19 months in production)
 - **ARM-specific incidents:** None ✓
 - **Origin Protocol incident:** November 17, 2020 - OUSD Flash Loan Reentrancy Attack ($8M loss). Different product (OUSD) with different contracts. ARM codebase built later with lessons learned. Source: [DeFiLlama Hacks DB](https://defillama.com/hacks), [rekt.news](https://rekt.news/origin-rekt/)
 - **TVL volatility:** Extreme range from $782K to $28M peak, suggesting whale concentration risk
@@ -121,8 +121,8 @@ Origin Protocol has 30+ audit reports across all products (OpenZeppelin, Trail o
 - Total time from proposal to execution: ~5 days minimum (24h voting delay + 48h voting + 48h timelock)
 - No backdoor - only Origin DeFi Governance can propose/execute
 
-**GOV Multisig Signers (5-of-8):**
-`0x530d3F8C`, `0xce96ae6D`, `0x336C02D3`, `0x6AC8d65D`, `0x617a3582`, `0x17aBc3F0`, `0x39772922`, `0xa96bD9c5`
+**GOV Multisig Signers (5-of-8) — verified onchain via `getOwners()`:**
+`0x530d3F8C`, `0xce96ae6D`, `0x336C02D3`, `0x6AC8d65D`, `0x617a3582`, `0x17aBc3F0`, `0x39772922`, `0x9990C10c`
 
 **Privileged Roles:**
 
@@ -171,7 +171,7 @@ No cross-chain dependencies.
 2. Cross-price protected by 48h timelock — limits operator manipulation
 3. 3 independent audits (2x OpenZeppelin + yAudit) + $1M Immunefi bounty
 4. Simple strategy (stETH arbitrage), with lending to low risk ARM Morpho Vault curated by Yearn
-5. 16 months clean ARM track record, same-value assets (ETH/stETH)
+5. 19 months clean ARM track record, same-value assets (ETH/stETH)
 
 ### Key Risks
 
@@ -202,8 +202,8 @@ No cross-chain dependencies.
 |--------|-----------|
 | Audits | 2x OpenZeppelin + yAudit |
 | Bug Bounty | $1M on Immunefi, ARM in scope |
-| Time in Production | ~16 months, no ARM incidents |
-| TVL | ~$6.6M ([DeFiLlama](https://defillama.com/protocol/origin-arm)) |
+| Time in Production | ~19 months, no ARM incidents |
+| TVL | ~$7.7M ([DeFiLlama](https://defillama.com/protocol/origin-arm)) |
 
 #### Category 2: Centralization & Control Risks (Weight: 30%) — **1.33**
 
@@ -279,7 +279,7 @@ Final Score = (Audits × 0.20) + (Centralization × 0.30) + (Funds Mgmt × 0.30)
 
 ## Reassessment Triggers
 
-- **Time-based:** Quarterly (next: May 2026)
+- **Time-based:** Quarterly (next: August 2026)
 - **Incident-based:** Any security incident, pricing anomaly, or withdrawal issues
 - **Change-based:** Morpho vault curator Yearn changes, especially adding new markets. Contract upgrade, Lido WQ issues or stETH depeg
 
@@ -292,7 +292,7 @@ Final Score = (Audits × 0.20) + (Centralization × 0.30) + (Funds Mgmt × 0.30)
 │                        GOVERNANCE                                   │
 │                                                                     │
 │  xOGN Token Holders (Staked OGN)                                   │
-│  (100K xOGN to propose, ~133.7M xOGN quorum)                      │
+│  (100K xOGN to propose, ~280.6M xOGN quorum = 20% of supply)      │
 │         │                                                           │
 │         ▼                                                           │
 │  Origin DeFi Governance (0x1D3f...)                                │
@@ -321,7 +321,7 @@ Final Score = (Audits × 0.20) + (Centralization × 0.30) + (Funds Mgmt × 0.30)
 │  ├── stETH (0xae7a)  ├── traderate0/1 (36-dec pricing)            │
 │  ├── WETH  (0xC02a)  ├── crossPrice (operator bound, timelocked)  │
 │  └── lidoWQ(0x889e)  ├── fee: 2000 (20%)                          │
-│                       ├── armBuffer: 0.1 ETH                       │
+│                       ├── armBuffer: 0.05 ETH                      │
 │                       ├── claimDelay: 600s (10 min)                │
 │                       └── activeMarket: 0xB7Ce... (MorphoMarket)  │
 │                                                                     │
