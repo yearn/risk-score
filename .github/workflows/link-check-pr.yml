@@ -1,0 +1,42 @@
+name: Link Check (PR)
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+    paths:
+      - 'reports/**/*.md'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: link-check-pr-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  link-check:
+    # Skip draft PRs — they iterate a lot. Runs once the PR is marked ready.
+    if: github.event.pull_request.draft == false
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          fetch-depth: 0  # needed for changed-files diff against base
+
+      - name: Get changed report files
+        id: changed
+        uses: tj-actions/changed-files@9426d40962ed5378910ee2e21d5f8c6fcbf2dd96 # v47.0.6
+        with:
+          files: reports/**/*.md
+
+      - name: Check links in changed reports
+        if: steps.changed.outputs.any_changed == 'true'
+        uses: ./.github/actions/check-links
+        with:
+          files: ${{ steps.changed.outputs.all_changed_files }}
+          fail: 'true'
+
+      - name: Verify defillama slugs in changed reports
+        if: steps.changed.outputs.any_changed == 'true'
+        continue-on-error: true
+        run: uv run scripts/check_defillama_links.py ${{ steps.changed.outputs.all_changed_files }}

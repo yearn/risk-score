@@ -105,7 +105,7 @@ Each category receives a score from 1-5 (1 = safest, 5 = highest risk), which ar
 
 - Unaudited or poorly audited code
 - Unlimited admin powers without timelocks
-- Opaque reserves or off-chain dependencies
+- Opaque reserves or offchain dependencies
 - History of incidents with poor response
 - Insufficient liquidity for expected TVL
 - Single points of failure in critical infrastructure

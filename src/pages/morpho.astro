@@ -7,7 +7,7 @@ const marketChains = await fetchMorphoMarkets();
 ---
 
 <BaseLayout title="Morpho — Yearn">
-  <a href="/" class="back-link">&larr; Risk Reports</a>
+  <a href="/reports/" class="back-link">&larr; Risk Reports</a>
   <h1>Morpho Markets <span class="total-count">{marketChains.reduce((s, c) => s + c.markets.length, 0)}</span></h1>
 
   <div>

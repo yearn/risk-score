@@ -1,12 +1,13 @@
-from web3 import Web3
 import json
-import os
+import logging
 from pathlib import Path
 from typing import Dict, List
-import logging
-from dotenv import load_dotenv
 
-load_dotenv()
+from web3 import Web3
+
+from env import get_rpc_url, load_repo_env
+
+load_repo_env(__file__)
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -28,10 +29,7 @@ class FactoryScanner:
     def get_provider(self, chain_id: str) -> Web3:
         """Get or create Web3 provider for a chain."""
         if chain_id not in self.providers:
-            rpc_url = os.getenv(f"RPC_{chain_id}")
-            if not rpc_url:
-                raise ValueError(f"Missing env variable RPC_{chain_id}")
-            self.providers[chain_id] = Web3(Web3.HTTPProvider(rpc_url))
+            self.providers[chain_id] = Web3(Web3.HTTPProvider(get_rpc_url(chain_id)))
         return self.providers[chain_id]
 
     def scan_factory(
