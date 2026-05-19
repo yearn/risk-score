@@ -34,6 +34,8 @@ exclude_path = ["reports/TEMPLATE.md", "reports/old"]
 # - maple.finance/syrup Cloudflare returns 404 to bots on this subpath despite
 #   the page existing (verified via Wayback); no other maple.finance subpath
 #   exhibits this so the exclude is kept narrow
+# - app.metronome.io frontend intermittently returns 502 to crawlers; the marketing
+#   site (metronome.io) and docs respond normally so the exclude is scoped to the app subdomain
 exclude = [
     '^https?://(www\.)?rekt\.news',
     '^https?://(blue-api|api)\.morpho\.org/graphql',
@@ -42,4 +44,5 @@ exclude = [
     '^https?://(www\.)?trust-security\.xyz',
     '^https?://(www\.)?defillama\.com/protocol/',
     '^https?://(www\.)?maple\.finance/syrup',
+    '^https?://app\.metronome\.io',
 ]
