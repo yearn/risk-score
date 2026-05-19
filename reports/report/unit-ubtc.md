@@ -113,7 +113,7 @@ Unit is a **bridge/asset tokenization protocol** — not a lending, staking, or 
 
 - **Proxy contract** ([`0x9FDBdA0A5e284c32744D2f17Ee5c74B284993463`](https://hyperevmscan.io/address/0x9FDBdA0A5e284c32744D2f17Ee5c74B284993463#code)) **is source-code verified** on HyperEVMScan — `ERC1967Proxy` (Solidity v0.8.24, MIT). Re-verified May 19, 2026 via Etherscan V2 multi-chain API (chainId=999): `ContractName=ERC1967Proxy`, `Proxy=1`, `Implementation=0x1a7689c3b783eb37550efbb9c81e7f468f7034fc`.
 - **Implementation contract** ([`0x1a7689c3b783eb37550efbb9c81e7f468f7034fc`](https://hyperevmscan.io/address/0x1a7689c3b783eb37550efbb9c81e7f468f7034fc)) **is STILL NOT source-code verified** — the actual token logic remains opaque. Etherscan V2 API returns empty `ContractName` and `SourceCode` (verified May 19, 2026).
-- Bytecode analysis of the implementation suggests it contains **allowlist/blacklist mechanisms** for sender restrictions (per HyperEVMScan), in addition to standard ERC-20 functionality.
+- Selector + string extraction from the bytecode confirms a **USDT-style sender blacklist** plus a **separate compliance-authority role** layered on top of OZ ERC20Upgradeable + OwnableUpgradeable + UUPSUpgradeable. See **Appendix: Implementation Surface (bytecode-derived)** for the full selector list and verification commands.
 - No public GitHub repository found for Unit Protocol smart contracts (DeFiLlama lists no GitHub).
 - Implementation bytecode is 11,660 bytes. Proxy bytecode is 163 bytes (minimal ERC-1967 proxy).
 
@@ -265,10 +265,12 @@ Per DeFiLlama yields API (May 19, 2026), 28 UBTC pools on HyperEVM with **~$43.7
 
 ### Programmability
 
-- The UBTC token contract is a **simple ERC-20 with Ownable + UUPS**. No complex vault logic, exchange rates, or admin parameters detected.
-- No `paused()`, `blacklister()`, `cap()`, `MINTER_ROLE()`, `DEFAULT_ADMIN_ROLE()`, or `DOMAIN_SEPARATOR()` functions exposed via the proxy interface.
-- However, bytecode analysis of the unverified implementation suggests **allowlist/blacklist mechanisms** exist for sender restrictions — these are not callable from the proxy but may be accessible to the owner.
-- The bridge operations (deposit/withdrawal) are handled entirely offchain by the Guardian Network — the onchain token contract is just a standard ERC-20.
+- The UBTC token contract is an **OZ ERC20Upgradeable + OwnableUpgradeable + UUPSUpgradeable**, with two non-OZ additions confirmed from selectors and bytecode strings:
+  1. **USDT-style sender blacklist** — functions `addToBlacklist(address)`, `removeFromBlacklist(address)`, `isBlacklisted(address)` are present, and the bytecode contains the revert string `"UBTC: sender blacklisted"`. The blacklist is enforced inside the transfer path → a blacklisted holder cannot move their UBTC. This implies **freeze risk for any HyperEVM holder, including Morpho borrowers** (a frozen position cannot be liquidated normally).
+  2. **Compliance-authority role** separate from `owner()` — `complianceAuthority()` returns the address authorized to manage the blacklist; revert strings include `"UBTC: caller is not compliance authority"` and `"UBTC: new compliance authority cannot be zero"`. Currently the compliance authority equals the owner EOA `0xB4FC973924a91362D301E583E839Cdaf4f19cdF8`. There is a setter (selector `0x6b9be885`, signature unrecovered, almost certainly `updateComplianceAuthority(address)`).
+- **No `mint(address,uint256)` (`0x40c10f19`) or `burn` selector** is present on the EVM implementation. Supply changes happen on the **HyperCore** side under HIP-1 native token semantics; `totalSupply()` is the fixed 21M Bitcoin cap and tokens move into HyperEVM via the HyperCore↔HyperEVM bridge. The constant `coreDeployer` (selector `0xb768259d`) is hardcoded to `0xF036a5261406a394bd63Eb4dF49C464634a66155`.
+- No `paused()`, `cap()`, `MINTER_ROLE()`, `DEFAULT_ADMIN_ROLE()`, or `DOMAIN_SEPARATOR()` functions exposed.
+- The bridge operations (deposit/withdrawal) are handled entirely offchain by the Guardian Network — the onchain HyperEVM contract is the ERC-20 reflection plus the freeze/compliance surface above.
 - The deterministic state machine underlying all protocol actions guarantees strict, verifiable workflows per the security docs.
 
 ### External Dependencies
@@ -483,6 +485,91 @@ If the following were addressed, the score could improve from 5.0 to approximate
 3. **Bug bounty program** → Would reduce audit category score
 4. **Onchain multisig** for contract ownership (replacing EOA) → Would improve governance score
 5. **Timelock** on contract upgrades → Would improve governance score
+
+## Appendix: Implementation Surface (bytecode-derived)
+
+Source not verified — the function set below was reconstructed from the deployed bytecode on May 19, 2026 and is the baseline to **diff against on the next reassessment**. Any new selector, removed selector, or changed bytecode size means a hidden upgrade or unrecorded behavior change.
+
+**Implementation:** [`0x1a7689c3b783eb37550efbb9c81e7f468f7034fc`](https://hyperevmscan.io/address/0x1a7689c3b783eb37550efbb9c81e7f468f7034fc) — bytecode size **11,660 bytes**.
+
+**Standard OZ surface (callable through the proxy):**
+
+| Selector | Signature | Source |
+|---|---|---|
+| `0x06fdde03` | `name()` | OZ ERC20 |
+| `0x95d89b41` | `symbol()` | OZ ERC20 |
+| `0x313ce567` | `decimals()` | OZ ERC20 |
+| `0x18160ddd` | `totalSupply()` | OZ ERC20 |
+| `0x70a08231` | `balanceOf(address)` | OZ ERC20 |
+| `0xa9059cbb` | `transfer(address,uint256)` | OZ ERC20 |
+| `0x23b872dd` | `transferFrom(address,address,uint256)` | OZ ERC20 |
+| `0x095ea7b3` | `approve(address,uint256)` | OZ ERC20 |
+| `0xdd62ed3e` | `allowance(address,address)` | OZ ERC20 |
+| `0x8da5cb5b` | `owner()` | OZ Ownable |
+| `0xf2fde38b` | `transferOwnership(address)` | OZ Ownable |
+| `0x715018a6` | `renounceOwnership()` | OZ Ownable |
+| `0x4f1ef286` | `upgradeToAndCall(address,bytes)` | OZ UUPS v5 |
+| `0x52d1902d` | `proxiableUUID()` | OZ UUPS |
+| `0xad3cb1cc` | `UPGRADE_INTERFACE_VERSION()` | OZ UUPS v5 |
+| `0x8129fc1c` | `initialize()` | OZ Initializable |
+
+**Custom (non-OZ) surface — the part that warrants audit:**
+
+| Selector | Signature | Notes |
+|---|---|---|
+| `0x44337ea1` | `addToBlacklist(address)` | resolved via 4byte directory |
+| `0x537df3b6` | `removeFromBlacklist(address)` | resolved via 4byte directory |
+| `0xfe575a87` | `isBlacklisted(address)` | resolved via 4byte directory; `isBlacklisted(0x0)=false`, `isBlacklisted(owner)=false` as of 2026-05-19 |
+| `0x309f477a` | `complianceAuthority()` | resolved via OpenChain DB; returns `0xB4FC973924a91362D301E583E839Cdaf4f19cdF8` (= current `owner()`) |
+| `0x6b9be885` | unknown setter `(address)`, nonpayable | not in 4byte/OpenChain; reverts when called from a non-authority; inferred as `updateComplianceAuthority(address)` |
+| `0xb768259d` | unknown pure getter | not in 4byte/OpenChain; returns the constant `0xF036a5261406a394bd63Eb4dF49C464634a66155` (the HyperCore deployer multi-sig); inferred as `coreDeployer()` |
+
+**Notably absent selectors:** no `mint(address,uint256)` (`0x40c10f19`), no `burn(uint256)`/`burnFrom(address,uint256)`, no `pause()`/`unpause()`. Supply changes occur on the HyperCore side; the HyperEVM contract has no mint/burn entrypoint of its own.
+
+**Bytecode strings observed** (printable ASCII runs ≥ 6 chars, after stripping push-data noise):
+
+- `"Unit Bitcoin"`
+- `"UBTC: sender blacklisted"` — proves the blacklist is enforced inside the transfer path (sender side, not just metadata).
+- `"UBTC: caller is not compliance authority"` — proves a distinct compliance-authority role exists at the modifier level.
+- `"UBTC: new compliance authority cannot be zero"` — proves the authority is transferable via a setter with a zero-address check.
+
+**Risk implications of the custom surface:**
+
+1. The owner / compliance authority can freeze any HyperEVM UBTC holder's balance. Downstream protocols (Morpho UBTC-USDC etc.) inherit this risk: a frozen borrower's position cannot be liquidated through normal `transfer`.
+2. The `complianceAuthority` role is currently the same EOA as `owner` (`0xB4FC97…cdF8`), which is claimed-MPC but onchain just an EOA. Compromise of that key gives both upgrade rights AND freeze rights.
+3. We cannot confirm from bytecode whether the blacklist's transfer-block exempts approved bridge addresses, whether there is a `destroyBlackFunds`-style siphon, or what happens to allowances when an address is blacklisted. **These require source verification or audit to answer.**
+
+**Reproduction commands** (rerun on next reassessment and diff):
+
+```bash
+# bytecode + size
+cast code 0x1a7689c3b783eb37550efbb9c81e7f468f7034fc \
+  --rpc-url https://rpc.hyperliquid.xyz/evm | wc -c   # expect 23323 (= 11,660 bytes + "0x" + newline)
+
+# selectors
+cast code 0x1a7689c3b783eb37550efbb9c81e7f468f7034fc \
+  --rpc-url https://rpc.hyperliquid.xyz/evm | xargs cast selectors
+
+# privileged role state
+cast call 0x9FDBdA0A5e284c32744D2f17Ee5c74B284993463 "owner()(address)" \
+  --rpc-url https://rpc.hyperliquid.xyz/evm
+cast call 0x9FDBdA0A5e284c32744D2f17Ee5c74B284993463 "complianceAuthority()(address)" \
+  --rpc-url https://rpc.hyperliquid.xyz/evm
+cast call 0x9FDBdA0A5e284c32744D2f17Ee5c74B284993463 0xb768259d \
+  --rpc-url https://rpc.hyperliquid.xyz/evm   # coreDeployer constant
+
+# verify source-verification status (chainId 999 = HyperEVM)
+curl -s "https://api.etherscan.io/v2/api?chainid=999&module=contract&action=getsourcecode&address=0x1a7689c3b783eb37550efbb9c81e7f468f7034fc&apikey=$ETHERSCAN_API_KEY"
+```
+
+**Checklist for the next reassessment:**
+
+- [ ] Bytecode size still 11,660 bytes? If not → hidden upgrade.
+- [ ] Same 22 selectors? Any addition (especially `mint`, `pause`, `seize`, `destroyBlackFunds`) → investigate.
+- [ ] Implementation source code verified on HyperEVMScan? If yes → drop the bytecode-derived appendix and replace with a real source review (blacklist semantics, role transfer, transfer hook).
+- [ ] `complianceAuthority` still equals `owner`? Any divergence is worth recording.
+- [ ] Any address showing `isBlacklisted(addr)=true`? Track and report.
+- [ ] Any new `Upgraded` event on the proxy? Already a monitoring trigger; re-check.
 
 ## Sources
 
