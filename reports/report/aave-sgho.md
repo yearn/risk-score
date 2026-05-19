@@ -1,10 +1,10 @@
 # Protocol Risk Assessment: Aave — sGHO
 
-- **Assessment Date:** April 2, 2026 (rechecked April 22, 2026; refreshed post-deployment May 19, 2026)
+- **Assessment Date:** April 2, 2026 (rechecked April 22, 2026; refreshed post-deployment May 19, 2026; external-review corrections May 19, 2026)
 - **Token:** sGho (GHO Savings Vault)
 - **Chain:** Ethereum
 - **Token Address:** [`0xE1753F2e00940cC31213dd92013cF019DFE4ca1d`](https://etherscan.io/address/0xE1753F2e00940cC31213dd92013cF019DFE4ca1d)
-- **Final Score: 2.1/5.0 — Low Risk**
+- **Final Score: 2.3/5.0 — Low Risk**
 
 > **DEPLOYMENT STATUS (May 19, 2026):** sGho and sGhoSteward are **deployed and live on Ethereum mainnet**. Implementation, proxy, and steward were deployed on **May 5, 2026** by `0x3765a685a401622c060e5d700d9ad89413363a91`. [AIP 484](https://app.aave.com/governance/v3/proposal/?proposalId=484) ("sGho Launch" by TokenLogic, payload contract [`0x4b2612332f8f73a445d79f7dab34e246bf029061`](https://etherscan.io/address/0x4b2612332f8f73a445d79f7dab34e246bf029061)) executed on **May 16, 2026** (block 25,109,406, tx [`0x48ef4e...d404e`](https://etherscan.io/tx/0x48ef4e0de1e5684ee05ae0e49c67af781bd497b675c0ea1a24193a5a499d404e)), wiring up roles, setting `targetRate = 425 bps` (4.25% APR), `supplyCap = 400M GHO`, and granting allowances. On-chain reads at block 25,129,472 confirm: `totalAssets = 37,298,827 GHO`, `paused = false`, `convertToAssets(1e18) = 1.000326e18` (≈3 days of accrual). **The new sGho contract is separate from the legacy stkGHO proxy** ([`0x1a88...`](https://etherscan.io/address/0x1a88Df1cFe15Af22B3c4c783D4e6F7F9e0C1885d)), which still holds 216.75M stkGHO and was **not** upgraded (no `Upgraded` event, `symbol() = "stkGHO"`, `asset()` reverts — not ERC-4626). The `GhoRouter` referenced in the AIP description was **not** deployed by AIP 484 — it remains a separate future workstream ([gho-origin PR #34](https://github.com/aave-dao/gho-origin/pull/34) was the open draft; it is not in scope of this launch and not in the Aave Address Book).
 
@@ -231,17 +231,19 @@ LlamaRisk published multiple analyses supporting sGHO but flagging key risks:
 | `PAUSE_GUARDIAN_ROLE` (`0x3bb1…21dd`) | `pause()`, `unpause()` — freezes all token operations | Aave Protocol Guardian ([`0x2CFe3ec4d5a6811f4B8067F0DE7e47DfA938Aa30`](https://etherscan.io/address/0x2CFe3ec4d5a6811f4B8067F0DE7e47DfA938Aa30)) |
 | `TOKEN_RESCUER_ROLE` (`0xbf63…9c06`) | `emergencyTokenTransfer()` — can rescue any token EXCEPT GHO | Aave Governance Executor L1 ([`0x5300A1a15135EA4dc7aD5a167152C01EFc9b192A`](https://etherscan.io/address/0x5300A1a15135EA4dc7aD5a167152C01EFc9b192A)) |
 
-**sGho Steward Roles (Verified On-Chain):**
+**sGho Steward Roles (Verified On-Chain, May 19, 2026, block 25,129,472, cross-checked on RPC_1 and RPC_2):**
 
-| Role | Power | Holder |
-|------|-------|--------|
-| `DEFAULT_ADMIN_ROLE` | Grant/revoke steward sub-roles | Aave Governance Executor L1 ([`0x5300…192A`](https://etherscan.io/address/0x5300A1a15135EA4dc7aD5a167152C01EFc9b192A)) |
-| `FIXED_RATE_MANAGER_ROLE` (`0x9720…1e0e`) | Update `fixedRate` component of `targetRate` | Aave Governance Executor L1 |
-| `SUPPLY_CAP_MANAGER_ROLE` (`0xd80d…6c04`) | Update `supplyCap` on sGho | Aave Governance Executor L1 |
-| `AMPLIFICATION_MANAGER_ROLE` | Update `amplification` component | Unassigned (no `floatRate` to manage at launch) |
-| `FLOAT_RATE_MANAGER_ROLE` | Update `floatRate` component | Unassigned |
+| Role | Power | Holder(s) |
+|------|-------|-----------|
+| `DEFAULT_ADMIN_ROLE` | Grant/revoke steward sub-roles | Aave Governance Executor L1 ([`0x5300…192A`](https://etherscan.io/address/0x5300A1a15135EA4dc7aD5a167152C01EFc9b192A)) — Risk Council does **not** hold this |
+| `FIXED_RATE_MANAGER_ROLE` (`0x9720…1e0e`) | Update `fixedRate` component of `targetRate` | Aave Governance Executor L1 **AND** GHO Risk Council Safe ([`0x8513e6F37dBc52De87b166980Fa3F50639694B60`](https://etherscan.io/address/0x8513e6F37dBc52De87b166980Fa3F50639694B60)) (3-of-4) |
+| `SUPPLY_CAP_MANAGER_ROLE` (`0xd80d…6c04`) | Update `supplyCap` on sGho | Aave Governance Executor L1 **AND** GHO Risk Council Safe |
+| `AMPLIFICATION_MANAGER_ROLE` (`0xf8fb…6f6a`) | Update `amplification` component | GHO Risk Council Safe (Executor L1 has DEFAULT_ADMIN and can self-grant if needed) |
+| `FLOAT_RATE_MANAGER_ROLE` (`0xdfb8…50d2`) | Update `floatRate` component | GHO Risk Council Safe |
 
-**Notable:** All four steward management roles route through the DAO Executor L1 at launch, not the Risk Council. The Steward design allows finer-grained delegation later (e.g., granting `FIXED_RATE_MANAGER_ROLE` to the Risk Council for rate-limited daily adjustments) without a full code change.
+**Correction (2026-05-19):** an earlier draft of this report said all four steward management roles route through Executor L1 only and called out the Risk Council as **not** holding them. That was wrong — `hasRole` checks at block 25,129,472 on two independent RPC providers confirm the Risk Council 3-of-4 Safe holds all four management roles. The practical consequence is that **the Risk Council can change `fixedRate` (the ASR), the supply cap, and the floatRate/amplification components without a full DAO vote**, subject only to the `MAX_RATE` cap of 50% APR enforced inside sGho's `setTargetRate`. There is no per-second/per-day rate-limit on the Steward itself — the rate-limited stewardship pattern only applies to GhoGsmSteward, not sGhoSteward. The Risk Council can in principle set `fixedRate` anywhere in `[0, 5000]` bps in a single Safe execution.
+
+**Mitigations:** (a) the `MAX_RATE = 5000` bps constant caps the worst case; (b) Safe execution emits `RateConfigUpdated`/`SupplyCapUpdated` events that are easy to monitor; (c) DEFAULT_ADMIN (Executor L1) can revoke Risk Council roles via a DAO vote if abuse is observed.
 
 ### GSM USDC — Can Admin Steal Funds?
 
@@ -277,18 +279,25 @@ LlamaRisk published multiple analyses supporting sGHO but flagging key risks:
 
 ## Critical Design Characteristic: Virtual/Unfunded Yield
 
-**sGHO's yield is accounting-based, not strategy-based.** This is fundamentally different from most ERC-4626 vaults:
+**sGho's yield is accounting-based, not strategy-based.** This is fundamentally different from most ERC-4626 vaults:
 
-1. The `yieldIndex` grows over time at `ratePerSecond`, making each sGHO share worth more GHO
+1. The `yieldIndex` grows over time at `ratePerSecond`, making each sGho share worth more GHO
 2. The actual GHO to back this growing obligation **must be provided by the Aave DAO** via direct transfers from protocol revenue
-3. If the DAO does not top up the vault, withdrawals become **first-come-first-served** — `maxWithdraw()` is capped by `min(theoretical_entitlement, actual_GHO_balance)`
+3. If the DAO does not top up the vault, withdrawals become **first-come-first-served** — `maxWithdraw(owner) = min(super.maxWithdraw(owner), IERC20(GHO).balanceOf(sGho))` (sGho.sol:197-205). The single-owner cap is the vault's *entire* GHO balance, not a pro-rata share
 4. There is **no mechanism to automatically mint GHO** to cover the yield — the DAO must manually fund it
 5. The yield index grows independently of the actual GHO balance in the contract
 
+**This is the worst-case failure mode (corrected 2026-05-19):**
+
+Because `maxWithdraw` lets a single owner extract up to the *full* GHO balance (capped only by the vault total, not by a fair-share-of-shortfall), **early redeemers can receive their full virtual entitlement (principal + accrued yield) out of the shared GHO pool, leaving later redeemers with less than principal** — not just less yield.
+
+Concrete example: 100 users each deposit 1 GHO at index 1.0. `yieldIndex` grows to 1.1 (10% virtual accrual) but DAO has not topped up — vault still holds 100 GHO against 110 GHO of theoretical claims. If users 1-90 each redeem first, they each receive their full 1.1 GHO entitlement (99 GHO drained). Users 91-100 then share the remaining 1 GHO across 10 ÷ 0.1 GHO each — a **90% principal loss**. Mathematically, if shortfall ratio is `s = actual_balance / totalAssets`, every withdrawer except the latest takes full theoretical entitlement and the residual users take whatever remains.
+
 **Implications for Yearn:**
-- In normal operation, the Aave DAO funds sGHO adequately from protocol revenue
-- In a stress scenario (DAO governance failure, revenue shortfall), late withdrawers may not receive their full yield entitlement
-- Principal is protected as long as the vault's GHO balance exceeds total deposits (yield is the unfunded part)
+- In normal operation, the Aave DAO funds sGho adequately from protocol revenue and this failure mode never materializes
+- In a stress scenario (DAO governance failure, revenue shortfall), being **late** to withdraw can impair *principal*, not just lose yield. This is more severe than the prior framing in this report
+- Monitor `IERC20(GHO).balanceOf(sGho) < totalAssets()` as an **early-warning trigger to exit ahead of others**, not just as a "DAO funding gap" telemetry
+- For a Yearn strategy holding a large share of sGho, the principal-impairment risk grows with shortfall depth and time to detection
 
 ## Historical Track Record
 
@@ -472,7 +481,7 @@ sGHO and the GSM are governed through the **Aave DAO governance framework** — 
 - **Aave DAO governance:** One of DeFi's most established on-chain governance systems. All critical operations require DAO vote with timelock. Rate-limited stewards for day-to-day parameter management
 - **Simple sGHO design:** No rehypothecation, no external strategies, no leverage. GHO stays in the vault. Yield is purely accounting-based
 - **GHO ecosystem maturity:** GHO live since July 2023 (~2.75 years), GSM operational, ~584M mainnet supply, no security incidents
-- **Aave protocol backing:** ~$23.85B TVL platform, 6+ years of operation, $1M bug bounty
+- **Aave protocol backing:** ~$14.0B Aave V3 TVL platform (DeFiLlama, May 19, 2026; down from ~$23.85B on April 2, 2026), 6+ years of operation, $1M bug bounty
 - **Token rescue protection:** sGHO `maxRescue()` returns 0 for GHO (underlying asset cannot be rescued by admin). GSM protects user funds tracked in `_currentExposure`
 - **GSM dangerous roles unassigned:** `LIQUIDATOR_ROLE` (seize) and `TOKEN_RESCUER_ROLE` on GSM are currently unassigned
 
@@ -491,7 +500,7 @@ sGHO and the GSM are governed through the **Aave DAO governance framework** — 
 - **Very short production history:** sGho went live on May 16, 2026 — only ~3 days of mainnet usage at time of this assessment. The configuration matches the AIP-484 spec on-chain, but no stress events have been observed
 - **GhoRouter not deployed:** The launch AIP markets the GhoRouter as enabling single-tx USDC→sGho onboarding, but the actual payload deploys no router. Yearn's USDC strategy must compose the existing GSM USDC + sGho deposit steps itself. Note: even if/when the router ships, it would not change the 7 bps exit fee above — that fee is set at the GSM layer
 - **Upgradeable contracts (rug via governance):** sGho, GSM, GHO Token, and GHO Reserve are all upgradeable proxies controlled by Aave Governance. A malicious governance proposal could drain all funds. Mitigated by Aave's established governance framework and community oversight
-- **Virtual/unfunded yield:** sGho yield index grows independently of actual GHO balance. The DAO must actively fund the vault. In a funding shortfall, late withdrawers lose yield (first-come-first-served). Principal remains protected
+- **Virtual/unfunded yield can impair late withdrawers' principal:** sGho yield index grows independently of actual GHO balance. The DAO must actively fund the vault. In a funding shortfall, `maxWithdraw` lets early redeemers take their *full* virtual entitlement (principal + accrued yield) from the shared GHO balance — last redeemers can receive **less than their original principal**, not just less yield. Monitor `IERC20(GHO).balanceOf(sGho) < totalAssets()` as an exit-ahead-of-others signal, not merely a telemetry gap
 - **GSM freeze can trap funds:** Oracle auto-freezes on USDC depeg, manual freeze by governance. During freeze, no USDC exit via GSM. DEX liquidity provides an alternative GHO exit path
 - **Pause can freeze sGho:** PAUSE_GUARDIAN can freeze all sGho token operations (deposits, withdrawals, transfers). Mitigated by governance ability to revoke the guardian role
 
@@ -544,7 +553,12 @@ sGHO and the GSM are governed through the **Aave DAO governance framework** — 
 | Privileged roles | Well-distributed: Governance (admin), Stewards (rate-limited ops), Guardian (pause), Oracle (auto-freeze) |
 | EOA risk | No EOAs hold critical roles — all controlled by multisigs, DAO, or automated contracts |
 
-**Governance Score: 2.5/5** — Aave DAO is one of the strongest governance systems in DeFi, with established on-chain voting, timelocks, and community oversight. However, all core contracts are upgradeable proxies — governance can replace any implementation. The rate-limited steward pattern is well-designed. Score elevated due to full upgradeability across the entire contract stack (sGho, GSM, GHO Token, Reserve). sGho ProxyAdmin (`0xc157…8adb`) is owned by the DAO Executor L1 — verified on-chain.
+**Governance Score: 3.0/5** — Aave DAO is one of the strongest governance systems in DeFi, with established on-chain voting, timelocks, and community oversight. However, two governance facts on sGho push this subscore up vs the prior draft:
+
+- All core contracts are upgradeable proxies — governance can replace any implementation. sGho ProxyAdmin (`0xc157…8adb`) is owned by the DAO Executor L1 (verified on-chain).
+- **The GHO Risk Council 3-of-4 Safe (`0x8513…B60`) holds all four sGhoSteward management roles** (`FIXED_RATE_MANAGER_ROLE`, `SUPPLY_CAP_MANAGER_ROLE`, `AMPLIFICATION_MANAGER_ROLE`, `FLOAT_RATE_MANAGER_ROLE`) at block 25,129,472, in addition to Executor L1 holding the first two. Unlike `GhoGsmSteward`, **`sGhoSteward` has no per-day rate limit** — the Risk Council can set `fixedRate` anywhere in `[0, 5000]` bps and change the supply cap in a single Safe execution. The `MAX_RATE = 5000` bps constant is the only cap. This is a meaningful concentration of power in a 3-of-4 multisig.
+
+An earlier draft of this report incorrectly stated that all four management roles routed through Executor L1 only. That has been corrected.
 
 **Subcategory B: Programmability**
 
@@ -564,13 +578,13 @@ sGHO and the GSM are governed through the **Aave DAO governance framework** — 
 |--------|-----------|
 | Protocol count | Aave DAO (governance), Aave V3 (waEthUSDC), Chainlink (oracle for freeze), GHO Reserve |
 | Criticality | All within the Aave ecosystem — single governance trust root |
-| Quality | Blue-chip: Aave is one of the largest DeFi lending protocols, ~$23.85B TVL, 6+ years |
+| Quality | Blue-chip: Aave is one of the largest DeFi lending protocols, ~$14.0B Aave V3 TVL (May 19, 2026), 6+ years |
 
 **Dependencies Score: 2/5** — All dependencies are within the Aave ecosystem (single trust root), which is blue-chip quality. The Chainlink oracle dependency for auto-freeze adds a minor external dependency. Per rubric, 1-2 blue-chip dependencies with some concentration = score 2.
 
-**Centralization Score = (2.5 + 2 + 2) / 3 ≈ 2.2**
+**Centralization Score = (3.0 + 2 + 2) / 3 ≈ 2.33**
 
-**Score: 2.0/5** — Strong governance through Aave DAO, but full upgradeability across all contracts and admin-controlled yield rate prevent a lower score. Blue-chip dependencies within the Aave ecosystem.
+**Score: 2.5/5** — Strong governance through Aave DAO, but corrected upward from prior draft (2.0 → 2.5) after verifying that the GHO Risk Council 3-of-4 Safe holds all four sGhoSteward management roles **without** a per-day rate limit. Full upgradeability across all contracts, admin-controlled yield rate, and an unrate-limited Steward Safe with direct supply-cap and rate authority prevent a lower score. Blue-chip dependencies within the Aave ecosystem.
 
 #### Category 3: Funds Management (Weight: 30%)
 
@@ -583,7 +597,7 @@ sGHO and the GSM are governed through the **Aave DAO governance framework** — 
 | Leverage | None |
 | Yield backing | **Virtual** — yield not backed by assets, backed by DAO funding commitment |
 
-**Collateralization Score: 2/5** — Principal is well-protected (no rehypothecation, GHO stays in vault, GSM protects user exposure). However, yield is virtually accrued and depends on DAO funding — this is a meaningful departure from fully-backed vaults. Blue-chip underlying assets (USDC, Aave V3). No leverage.
+**Collateralization Score: 2.5/5** — Principal is structurally protected in normal operation (no rehypothecation, GHO stays in vault, GSM protects user exposure), but the virtual-yield model has a non-trivial edge case: in a DAO funding shortfall, `maxWithdraw` lets early redeemers extract their full virtual entitlement from a shared GHO pool, leaving last withdrawers with **less than principal**. This is a meaningful departure from fully-backed vaults — corrected upward from the prior draft's "Principal is well-protected" framing. Blue-chip underlying assets (USDC, Aave V3). No leverage.
 
 **Subcategory B: Provability**
 
@@ -596,9 +610,9 @@ sGHO and the GSM are governed through the **Aave DAO governance framework** — 
 
 **Provability Score: 1.5/5** — Excellent on-chain transparency. ERC-4626 standard provides real-time verification. Funding gap between actual GHO balance and yield obligations is detectable on-chain. GSM exposure and fees fully readable. Score slightly elevated because yield obligations vs actual backing require manual comparison (not automatically flagged by the protocol).
 
-**Funds Management Score = (2 + 1.5) / 2 = 1.75**
+**Funds Management Score = (2.5 + 1.5) / 2 = 2.0**
 
-**Score: 2.0/5** — Good provability and blue-chip collateral. Score elevated by the virtual yield model where yield backing is not guaranteed by the protocol itself.
+**Score: 2.0/5** — Good provability and blue-chip collateral, but the virtual-yield model has a non-trivial principal-impairment edge case for late withdrawers in a DAO funding shortfall (corrected from prior "principal protected" framing). Collateralization moved from 2.0 → 2.5 to reflect this; the rolled-up Funds Mgmt score is unchanged at 2.0.
 
 #### Category 4: Liquidity Risk (Weight: 15%)
 
@@ -622,27 +636,32 @@ sGHO and the GSM are governed through the **Aave DAO governance framework** — 
 | Documentation | Comprehensive Aave and GHO docs. Source code open and verified |
 | Legal | LlamaRisk flagged MiCA (EU) prohibits interest on stablecoins — regulatory risk for sGHO |
 | Incident response | Protocol Guardian for emergencies. $1M bug bounty. Rate-limited stewards |
-| Monitoring | Chainlink oracle auto-freezer on GSM. No known sGHO-specific monitoring yet (not deployed) |
+| Monitoring | Chainlink oracle auto-freezer on GSM. sGho-specific monitoring is ad-hoc post-launch (May 16, 2026) — no published dashboards or alerting frameworks yet, but `RateConfigUpdated`/`SupplyCapUpdated`/`TargetRateUpdated`/`Paused` events are all on-chain |
 
-**Score: 1.5/5** — Top-tier operational maturity from one of DeFi's most established teams. Comprehensive documentation and governance infrastructure. Minor elevations for regulatory uncertainty (LlamaRisk MiCA concerns) and lack of sGHO-specific monitoring (pre-deployment).
+**Score: 1.5/5** — Top-tier operational maturity from one of DeFi's most established teams. Comprehensive documentation and governance infrastructure. Minor elevations for regulatory uncertainty (LlamaRisk MiCA concerns) and the absence of dedicated sGho monitoring/alerting tooling so soon after launch.
 
 ### Final Score Calculation
 
 ```
 Final Score = (Centralization × 0.30) + (Funds Mgmt × 0.30) + (Audits × 0.20) + (Liquidity × 0.15) + (Operational × 0.05)
-            = (2.0 × 0.30) + (2.0 × 0.30) + (2.5 × 0.20) + (2.5 × 0.15) + (1.5 × 0.05)
-            = 0.60 + 0.60 + 0.50 + 0.375 + 0.075
-            = 2.15
+            = (2.5 × 0.30) + (2.0 × 0.30) + (2.5 × 0.20) + (2.5 × 0.15) + (1.5 × 0.05)
+            = 0.75 + 0.60 + 0.50 + 0.375 + 0.075
+            = 2.30
 ```
 
 | Category | Score | Weight | Weighted |
 |----------|-------|--------|----------|
 | Audits & Historical | 2.5 | 20% | 0.50 |
-| Centralization & Control | 2.0 | 30% | 0.60 |
+| Centralization & Control | 2.5 | 30% | 0.75 |
 | Funds Management | 2.0 | 30% | 0.60 |
 | Liquidity Risk | 2.5 | 15% | 0.375 |
 | Operational Risk | 1.5 | 5% | 0.075 |
-| **Final Score** | | | **2.1/5.0** |
+| **Final Score** | | | **2.3/5.0** |
+
+**Change vs prior commit (`56d2817`):** Final score moved from **2.1 → 2.3** after the May 19 external reviewer findings:
+- Centralization 2.0 → 2.5 (Risk Council holds unrate-limited Steward authority over rate + supply cap)
+- Funds Mgmt internal Collateralization subscore 2.0 → 2.5 (principal-impairment edge case for late withdrawers) — rolls up to 2.0 unchanged
+- Audits, Liquidity, Operational unchanged
 
 ### Risk Tier
 
@@ -654,9 +673,9 @@ Final Score = (Centralization × 0.30) + (Funds Mgmt × 0.30) + (Audits × 0.20)
 | 3.5-4.5 | Elevated Risk | Limited approval, strict limits |
 | 4.5-5.0 | High Risk | Not recommended |
 
-**Risk Tier: Low Risk (2.1/5.0) — Approved with standard monitoring**
+**Risk Tier: Low Risk (2.3/5.0) — Approved with standard monitoring**
 
-> Score may improve toward ~1.8 once sGho has accumulated ~3 months of incident-free production history and is added to the Immunefi bug-bounty scope. Score may worsen if the legacy stkGHO → sGho migration introduces unexpected admin-controlled flows, if a GhoRouter is later deployed with broad token-rescue powers, or if sGho's `IERC20(GHO).balanceOf` consistently lags `totalAssets()` (unfunded yield).
+> Score may improve toward ~2.0 once sGho has accumulated ~3 months of incident-free production history, is added to the Immunefi bug-bounty scope, and the GhoGsmSteward-style per-day rate limits are extended to sGhoSteward. Score may worsen if the legacy stkGHO → sGho migration introduces unexpected admin-controlled flows, if a GhoRouter is later deployed with broad token-rescue powers, or if sGho's `IERC20(GHO).balanceOf` consistently lags `totalAssets()` (unfunded yield — triggers the principal-impairment risk).
 
 ---
 
@@ -678,7 +697,7 @@ Step-by-step view of the Yearn USDC strategy's two flows, with explicit fees at 
 
 | # | From → To | Contract | Call | Fee | Notes |
 |---|---|---|---|---|---|
-| 1 | sGho → GHO | sGho [`0xE175…ca1d`](https://etherscan.io/address/0xE1753F2e00940cC31213dd92013cF019DFE4ca1d) | `withdraw(gho_amount, receiver, owner)` or `redeem(shares, receiver, owner)` | **0%** | No withdrawal fee. Capped by `IERC20(GHO).balanceOf(sGho)` — see "Virtual/Unfunded Yield" |
+| 1 | sGho → GHO | sGho [`0xE175…ca1d`](https://etherscan.io/address/0xE1753F2e00940cC31213dd92013cF019DFE4ca1d) | `withdraw(gho_amount, receiver, owner)` or `redeem(shares, receiver, owner)` | **0%** | No withdrawal fee. Capped by `IERC20(GHO).balanceOf(sGho)` (single-owner cap, not pro-rata) — see "Virtual/Unfunded Yield" for the first-come-first-served principal-impairment edge case |
 | 2 | GHO → waEthUSDC | GSM USDC [`0x3A38…4112`](https://etherscan.io/address/0x3A3868898305f04beC7FEa77BecFf04C13444112) | `buyAsset(waEthUSDC_amount, receiver)` | **7 bps (0.07%)** ⚠️ | Fee strategy [`0x73bf…3080`](https://etherscan.io/address/0x73bf24CD7ba43803961c80Ee678a5445eC413080): `getBuyFee(1_000_000) = 700`. **This is the only economic fee in the full round-trip.** GhoRouter would NOT eliminate this — it's charged at the GSM layer regardless of caller |
 | 3 | waEthUSDC → USDC | static-aToken wrapper + Aave V3 USDC market | `redeem` / `withdraw(usdc, receiver, owner)` | **0%** | Subject to Aave V3 USDC pool liquidity (utilization-dependent) |
 
@@ -692,7 +711,7 @@ Step-by-step view of the Yearn USDC strategy's two flows, with explicit fees at 
 | `GSM.isFrozen() = true` (oracle auto-freeze on USDC depeg outside [$0.99, $1.01], or manual governance freeze) | Step 2 of both flows | Oracle unfreezes when USDC returns to [$0.995, $1.005]; or DAO unfreezes manually |
 | GSM exposure at 175M cap | Step 2 of deposit only (`sellAsset`) | Wait for withdrawals to free capacity, or DAO raises cap |
 | sGho `supplyCap` (400M GHO) reached | Step 3 of deposit | DAO raises cap via Steward `SUPPLY_CAP_MANAGER_ROLE` |
-| `IERC20(GHO).balanceOf(sGho) < requested_amount` | Step 1 of withdrawal (late withdrawers in funding shortfall) | DAO tops up GHO from protocol revenue |
+| `IERC20(GHO).balanceOf(sGho) < requested_amount` | Step 1 of withdrawal (late withdrawers in funding shortfall) — **late redeemers can receive less than principal**, not just less yield | DAO tops up GHO from protocol revenue. Yearn-side mitigation: exit when `balanceOf(GHO, sGho) < totalAssets()` is observed |
 | Aave V3 USDC pool at high utilization | Step 3 of withdrawal | Wait for borrowers to repay, or use DEX path |
 
 ### Alternate Exit Path (Bypassing the 7 bps Fee — With Tradeoffs)
