@@ -1,12 +1,12 @@
 # Protocol Risk Assessment: Aave — sGHO
 
-- **Assessment Date:** April 2, 2026 (rechecked April 22, 2026)
-- **Token:** sGHO (GHO Savings Vault)
+- **Assessment Date:** April 2, 2026 (rechecked April 22, 2026; refreshed post-deployment May 19, 2026)
+- **Token:** sGho (GHO Savings Vault)
 - **Chain:** Ethereum
-- **Token Address:** TODO — pending AIP deployment
-- **Final Score: DRAFT — pending deployment and on-chain verification**
+- **Token Address:** [`0xE1753F2e00940cC31213dd92013cF019DFE4ca1d`](https://etherscan.io/address/0xE1753F2e00940cC31213dd92013cF019DFE4ca1d)
+- **Final Score: 2.1/5.0 — Low Risk**
 
-> **DRAFT NOTICE:** The sGHO implementation (aave-dao/gho-origin PR #29) was merged March 3, 2026 and audited, but sGHO, sGhoSteward, and GhoRouter remain **not deployed on Ethereum mainnet as of April 22, 2026**. On-chain verification confirms: (a) no sGHO / sGhoSteward / GhoRouter entries in `aave-dao/aave-address-book` `GhoEthereum.sol`, (b) no sGHO-related proposal in `aave-dao/aave-proposals-v3/src` up to April 11, 2026, (c) the legacy stkGHO proxy ([`0x1a88...`](https://etherscan.io/address/0x1a88Df1cFe15Af22B3c4c783D4e6F7F9e0C1885d)) has not been upgraded (no `Upgraded` events, still returns `symbol() = "stkGHO"`, `asset()` reverts — not ERC-4626), and (d) the `GhoRouter` PR [#34](https://github.com/aave-dao/gho-origin/pull/34) is still open (not merged in source). The ARFC (March 25, 2026) states: "Deployment addresses will be confirmed in the AIP." This report is based on governance proposals, audited source code, and the public materials linked below. **Reassess after deployment** to verify on-chain roles, proxy admin, initial parameters, deployment addresses, and final governance configuration.
+> **DEPLOYMENT STATUS (May 19, 2026):** sGho and sGhoSteward are **deployed and live on Ethereum mainnet**. Implementation, proxy, and steward were deployed on **May 5, 2026** by `0x3765a685a401622c060e5d700d9ad89413363a91`. [AIP 484](https://app.aave.com/governance/v3/proposal/?proposalId=484) ("sGho Launch" by TokenLogic, payload contract [`0x4b2612332f8f73a445d79f7dab34e246bf029061`](https://etherscan.io/address/0x4b2612332f8f73a445d79f7dab34e246bf029061)) executed on **May 16, 2026** (block 25,109,406, tx [`0x48ef4e...d404e`](https://etherscan.io/tx/0x48ef4e0de1e5684ee05ae0e49c67af781bd497b675c0ea1a24193a5a499d404e)), wiring up roles, setting `targetRate = 425 bps` (4.25% APR), `supplyCap = 400M GHO`, and granting allowances. On-chain reads at block 25,129,472 confirm: `totalAssets = 37,298,827 GHO`, `paused = false`, `convertToAssets(1e18) = 1.000326e18` (≈3 days of accrual). **The new sGho contract is separate from the legacy stkGHO proxy** ([`0x1a88...`](https://etherscan.io/address/0x1a88Df1cFe15Af22B3c4c783D4e6F7F9e0C1885d)), which still holds 216.75M stkGHO and was **not** upgraded (no `Upgraded` event, `symbol() = "stkGHO"`, `asset()` reverts — not ERC-4626). The `GhoRouter` referenced in the AIP description was **not** deployed by AIP 484 — it remains a separate future workstream ([gho-origin PR #34](https://github.com/aave-dao/gho-origin/pull/34) was the open draft; it is not in scope of this launch and not in the Aave Address Book).
 
 ## Overview + Links
 
@@ -55,15 +55,17 @@ sGHO is an **ERC-4626 compliant yield-bearing savings vault** for GHO, Aave's na
 
 ## Contract Addresses
 
-### sGHO Contracts (Pending Deployment)
+### sGho Contracts (Deployed May 5, 2026; activated by AIP 484 on May 16, 2026)
 
 | Contract | Address | Type |
 |----------|---------|------|
-| sGHO Vault | TODO — pending AIP | ERC-4626, TransparentUpgradeableProxy |
-| sGHO Implementation | TODO — pending AIP | sGho.sol |
-| sGHO ProxyAdmin | TODO — pending AIP | Controls upgrades |
-| GhoRouter | TODO — pending AIP | Stateless swap router |
-| sGHO Steward | TODO — pending AIP | Rate governance (sGhoSteward.sol) |
+| sGho Vault (proxy) | [`0xE1753F2e00940cC31213dd92013cF019DFE4ca1d`](https://etherscan.io/address/0xE1753F2e00940cC31213dd92013cF019DFE4ca1d) | ERC-4626, TransparentUpgradeableProxy |
+| sGho Implementation | [`0xff229a0bbb614a284de8ae0e41e5974878fd7c04`](https://etherscan.io/address/0xff229a0bbb614a284de8ae0e41e5974878fd7c04) | `sGho.sol` |
+| sGho ProxyAdmin | [`0xc15700631020eba02317964550365b95a9a28adb`](https://etherscan.io/address/0xc15700631020eba02317964550365b95a9a28adb) | Owner = Aave Governance Executor L1 |
+| sGho Steward | [`0x60Bf2DF49F17529Cf956D57848ebEB8a0d0a2757`](https://etherscan.io/address/0x60Bf2DF49F17529Cf956D57848ebEB8a0d0a2757) | Rate/cap governance (`sGhoSteward.sol`) |
+| GhoRouter | Not deployed — not part of AIP 484 | (Future router; see [gho-origin PR #34](https://github.com/aave-dao/gho-origin/pull/34)) |
+
+Source-of-truth references: [`aave-address-book/GhoEthereum.sol`](https://github.com/bgd-labs/aave-address-book/blob/main/src/GhoEthereum.sol) (`SGHO`, `SGHO_STEWARD`); [AIP-484 payload source](https://github.com/aave-dao/aave-proposals-v3/tree/main/src/20260427_AaveV3Ethereum_SGhoLaunch); [contract creator](https://etherscan.io/address/0x3765a685a401622c060e5d700d9ad89413363a91).
 
 ### GHO Ecosystem Contracts (Deployed)
 
@@ -108,20 +110,32 @@ sGHO is an **ERC-4626 compliant yield-bearing savings vault** for GHO, Aave's na
 | Oracle Swap Freezer | Yes | No |
 | GHO Reserve | Yes | Yes (TransparentUpgradeableProxy) |
 
-### Deployment Status Verification (April 22, 2026)
+### Deployment Status Verification (May 19, 2026, block 25,129,472)
 
-Mainnet checks performed to confirm sGHO and GhoRouter are not yet live:
+Mainnet checks performed to confirm sGho is live and the AIP 484 configuration matches the spec:
 
 | Check | Result | Source |
 |-------|--------|--------|
-| sGHO / sGhoSteward / GhoRouter entries in Aave Address Book | **Absent** | [`GhoEthereum.sol`](https://github.com/aave-dao/aave-address-book/blob/main/src/GhoEthereum.sol) |
-| sGHO-related proposal in `aave-proposals-v3/src` | **None** (latest proposals through April 11, 2026 cover Scroll deprecation, MegaETH, Aave V4 activation, etc. — no sGHO AIP) | [`aave-dao/aave-proposals-v3`](https://github.com/aave-dao/aave-proposals-v3/tree/main/src) |
-| GhoRouter PR #34 merge status | **Open, not merged** | [PR #34](https://github.com/aave-dao/gho-origin/pull/34) |
-| sGHO PR #29 merge status | Merged 2026-03-03 (source code only) | [PR #29](https://github.com/aave-dao/gho-origin/pull/29) |
-| Legacy stkGHO proxy upgraded to sGHO? | **No** — `symbol() = "stkGHO"`, `asset()` reverts (not ERC-4626); no `Upgraded(address)` event since block 24,500,000 | [`0x1a88...`](https://etherscan.io/address/0x1a88Df1cFe15Af22B3c4c783D4e6F7F9e0C1885d) |
-| Aave bug bounty scope (Immunefi) includes sGHO? | **No** — Immunefi "Sub-systems of GHO" list covers GHO token, GHO Reserve, FlashMinter, GSM/GSM4626, CCIP bridge, stewards, remote facilitators — **sGHO not enumerated** | [Immunefi Aave](https://immunefi.com/bug-bounty/aave/) |
+| sGho / SGHO_STEWARD entries in Aave Address Book | **Present** | [`GhoEthereum.sol`](https://github.com/bgd-labs/aave-address-book/blob/main/src/GhoEthereum.sol#L20-L23) |
+| sGho launch proposal in `aave-proposals-v3/src` | **Merged** as `20260427_AaveV3Ethereum_SGhoLaunch` | [proposal source](https://github.com/aave-dao/aave-proposals-v3/tree/main/src/20260427_AaveV3Ethereum_SGhoLaunch) |
+| AIP 484 governance state | **Executed** (state=4) | `cast call AaveGov.getProposalState(484)` |
+| AIP 484 payload state | **Executed** at block 25,109,406 (2026-05-16 18:04 UTC) | [tx 0x48ef4e…d404e](https://etherscan.io/tx/0x48ef4e0de1e5684ee05ae0e49c67af781bd497b675c0ea1a24193a5a499d404e) |
+| sGho contract is ERC-4626 with GHO as asset | **Yes** — `asset() = 0x40D1…6C2f` (GHO Token) | `cast call SGHO asset()` |
+| sGho `targetRate` matches AIP spec (425 bps = 4.25% APR) | **Yes** — `targetRate() = 425` | `cast call SGHO targetRate()` |
+| sGho `supplyCap` matches AIP spec (400M) | **Yes** — `supplyCap() = 4e26` (400M·1e18) | `cast call SGHO supplyCap()` |
+| sGho `MAX_SAFE_RATE` is 50% APR | **Yes** — `MAX_SAFE_RATE() = 5000` (bps) | `cast call SGHO MAX_SAFE_RATE()` |
+| sGho `paused` | **false** | `cast call SGHO paused()` |
+| sGho `convertToAssets(1e18)` (post-launch accrual) | `1.000326e18` (≈3 days at 4.25% APR) | `cast call SGHO convertToAssets(uint256) 1e18` |
+| Steward `getRateConfig()` matches AIP (amp=0, float=0, fixed=425) | **Yes** — `(0, 0, 425)` | `cast call SGHO_STEWARD getRateConfig()` |
+| Steward `MAX_RATE` = 5000 bps | **Yes** | `cast call SGHO_STEWARD MAX_RATE()` |
+| Steward `sGHO()` points to sGho proxy | **Yes** — returns `0xE175…ca1d` | `cast call SGHO_STEWARD sGHO()` |
+| sGho ProxyAdmin owner | Aave Governance Executor L1 ([`0x5300…192A`](https://etherscan.io/address/0x5300A1a15135EA4dc7aD5a167152C01EFc9b192A)) | `cast call ProxyAdmin owner()` |
+| sGho roles correctly granted (DEFAULT_ADMIN, PAUSE_GUARDIAN, TOKEN_RESCUER, YIELD_MANAGER) | **Verified** — see "sGho Roles (Verified On-Chain)" below | `cast call SGHO hasRole(bytes32,address)` |
+| Legacy stkGHO proxy upgraded? | **No** — separate contract; `symbol() = "stkGHO"`, `asset()` reverts (not ERC-4626); no `Upgraded(address)` event | [`0x1a88…`](https://etherscan.io/address/0x1a88Df1cFe15Af22B3c4c783D4e6F7F9e0C1885d) |
+| GhoRouter merge / deployment status | **Not deployed** — not part of AIP 484; [gho-origin PR #34](https://github.com/aave-dao/gho-origin/pull/34) still references router as separate work | [PR #34](https://github.com/aave-dao/gho-origin/pull/34); not in Address Book |
+| Aave bug bounty (Immunefi) sGho coverage | **Still not enumerated** (re-checked May 19, 2026). Immunefi "Sub-systems of GHO" covers: GHO stablecoin, GHO reserve of Aave Pool, GHO FlashMinter, GSM/GSM4626, CCIP bridge, GHO stewards, GHO Remote Facilitators. sGho vault (`0xE175…ca1d`) and sGho Steward (`0x60Bf…2757`) are not listed | [Immunefi Aave](https://immunefi.com/bug-bounty/aave/) |
 
-**Conclusion:** Source is ready but not yet deployed. All scoring remains **draft** pending AIP execution.
+**Conclusion:** sGho launched and is operating to spec. All on-chain parameters match the AIP-484 payload. Production history is ~3 days — minimal track record, but the core configuration and admin assignments are verified.
 
 ## Audits and Due Diligence Disclosures
 
@@ -182,7 +196,7 @@ The broader Aave V3 platform (which sGHO integrates with for GSM and governance)
   - Scope explicitly includes: GHO Token, GSM, stkGHO, GHO FlashMinter, CCIP bridge, stewards
   - Reward tiers: Critical $50K-$1M, High $10K-$75K, Medium $10K, Low $1K
   - Link: https://immunefi.com/bug-bounty/aave/
-- **Note:** sGHO vault is NOT yet in Immunefi scope (rechecked April 22, 2026 — Aave Immunefi "Sub-systems of GHO" covers GHO token, GHO reserve, FlashMinter, GSM/GSM4626, CCIP bridge, stewards, remote facilitators; sGHO and GhoRouter are not enumerated). TODO: verify after deployment
+- **Note:** sGho vault is **still not** in Immunefi scope (re-checked May 19, 2026 — Aave Immunefi "Sub-systems of GHO" enumerates GHO stablecoin, GHO reserve of the Aave Pool, GHO FlashMinter, GSM/GSM4626, CCIP bridge, GHO stewards, and GHO Remote Facilitators; sGho vault, sGho Steward, and any future GhoRouter are not listed). Reassess scope after each Immunefi update
 
 ### LlamaRisk Analysis
 
@@ -208,14 +222,26 @@ LlamaRisk published multiple analyses supporting sGHO but flagging key risks:
 | **Set supply cap to 0 (block deposits)** | **YES** | `YIELD_MANAGER_ROLE` can set cap to 0. Blocks new deposits but does **not** affect existing depositors' ability to withdraw |
 | **Donation attack** | **Not possible** | `totalAssets()` is computed from `totalSupply() * yieldIndex`, NOT from actual GHO balance. Donating GHO does not affect share pricing |
 
-**sGHO Roles:**
+**sGho Roles (Verified On-Chain, May 19, 2026):**
 
-| Role | Power | Expected Holder |
+| Role | Power | Holder (verified via `hasRole`) |
 |------|-------|-----------------|
-| `DEFAULT_ADMIN_ROLE` | Grant/revoke all roles, full role management | Aave DAO Executor (TODO: verify on-chain) |
-| `YIELD_MANAGER_ROLE` | `setTargetRate()` (max 50% APR), `setSupplyCap()` | sGHO Steward (TODO: verify on-chain) |
-| `PAUSE_GUARDIAN_ROLE` | `pause()`, `unpause()` — freezes all token operations | Aave Protocol Guardian (TODO: verify on-chain) |
-| `TOKEN_RESCUER_ROLE` | `emergencyTokenTransfer()` — can rescue any token EXCEPT GHO | TODO: verify on-chain |
+| `DEFAULT_ADMIN_ROLE` (`0x00…00`) | Grant/revoke all roles, full role management | Aave Governance Executor L1 ([`0x5300A1a15135EA4dc7aD5a167152C01EFc9b192A`](https://etherscan.io/address/0x5300A1a15135EA4dc7aD5a167152C01EFc9b192A)) |
+| `YIELD_MANAGER_ROLE` (`0x470f…fe27`) | `setTargetRate()` (max 50% APR), `setSupplyCap()` | sGho Steward ([`0x60Bf2DF49F17529Cf956D57848ebEB8a0d0a2757`](https://etherscan.io/address/0x60Bf2DF49F17529Cf956D57848ebEB8a0d0a2757)) |
+| `PAUSE_GUARDIAN_ROLE` (`0x3bb1…21dd`) | `pause()`, `unpause()` — freezes all token operations | Aave Protocol Guardian ([`0x2CFe3ec4d5a6811f4B8067F0DE7e47DfA938Aa30`](https://etherscan.io/address/0x2CFe3ec4d5a6811f4B8067F0DE7e47DfA938Aa30)) |
+| `TOKEN_RESCUER_ROLE` (`0xbf63…9c06`) | `emergencyTokenTransfer()` — can rescue any token EXCEPT GHO | Aave Governance Executor L1 ([`0x5300A1a15135EA4dc7aD5a167152C01EFc9b192A`](https://etherscan.io/address/0x5300A1a15135EA4dc7aD5a167152C01EFc9b192A)) |
+
+**sGho Steward Roles (Verified On-Chain):**
+
+| Role | Power | Holder |
+|------|-------|--------|
+| `DEFAULT_ADMIN_ROLE` | Grant/revoke steward sub-roles | Aave Governance Executor L1 ([`0x5300…192A`](https://etherscan.io/address/0x5300A1a15135EA4dc7aD5a167152C01EFc9b192A)) |
+| `FIXED_RATE_MANAGER_ROLE` (`0x9720…1e0e`) | Update `fixedRate` component of `targetRate` | Aave Governance Executor L1 |
+| `SUPPLY_CAP_MANAGER_ROLE` (`0xd80d…6c04`) | Update `supplyCap` on sGho | Aave Governance Executor L1 |
+| `AMPLIFICATION_MANAGER_ROLE` | Update `amplification` component | Unassigned (no `floatRate` to manage at launch) |
+| `FLOAT_RATE_MANAGER_ROLE` | Update `floatRate` component | Unassigned |
+
+**Notable:** All four steward management roles route through the DAO Executor L1 at launch, not the Risk Council. The Steward design allows finer-grained delegation later (e.g., granting `FIXED_RATE_MANAGER_ROLE` to the Risk Council for rate-limited daily adjustments) without a full code change.
 
 ### GSM USDC — Can Admin Steal Funds?
 
@@ -247,7 +273,7 @@ LlamaRisk published multiple analyses supporting sGHO but flagging key risks:
 | **Rescue stranded tokens** | **YES** | Owner can call `rescueToken()` to transfer any ERC-20 held by the router to any address. The router is intended to avoid persistent balances, but stranded tokens remain an owner-controlled recovery path |
 | **Pause the router** | **No** | No pause mechanism exists on the router itself. GSM paths can be disabled by removing GSMs from allowlist, and direct GHO↔sGHO paths can still fail if sGHO is paused |
 
-**GhoRouter status:** Not yet deployed. The public materials linked above do not include a canonical upstream router PR link, and the linked TokenLogic PDF does not list router files in scope. Router-specific risk should be reassessed against final AIP/deployment artifacts and published source code.
+**GhoRouter status:** Not deployed. AIP 484 mentions GhoRouter in its marketing/motivation copy ("Frictionless onboarding…single transaction") but the actual payload does not deploy a router — it only configures sGho, sGhoSteward, and a 10M GHO Collector allowance. The router is not present in `aave-address-book` and the TokenLogic audit does not cover any router contract. **Yearn's USDC → sGho strategy must therefore wrap USDC → waEthUSDC → GHO → sGho manually** (or via the existing GSM USDC) and cannot route through a GhoRouter for the foreseeable future. Reassess if a separate AIP deploys GhoRouter.
 
 ## Critical Design Characteristic: Virtual/Unfunded Yield
 
@@ -266,13 +292,15 @@ LlamaRisk published multiple analyses supporting sGHO but flagging key risks:
 
 ## Historical Track Record
 
-- **sGHO vault:** NOT YET DEPLOYED (verified April 22, 2026) — no production history. TODO: reassess after deployment
-- **GHO stablecoin:** Launched July 2023 — **~2.75 years** in production
-- **GHO mainnet supply:** ~584.0M GHO (`totalSupply()`, April 22, 2026; unchanged vs. April 2)
-- **GSM USDC:** Deployed and operational — current waEthUSDC held ~96.29M against 175M cap (`getAvailableLiquidity()`, April 22, 2026, block 24,937,338; down from 127.74M on April 2)
-- **GHO Reserve (GSM USDC facilitator):** 112.48M used of 210M limit; total GHO balance ~167.51M (reserve also serves GSM USDT)
-- **Legacy stkGHO:** Holds ~202.78M GHO (April 22, 2026; down from 302.19M on April 2 — ~99M net outflow over the month). Still on legacy staking implementation (no proxy upgrade observed)
-- **Aave protocol:** One of the largest DeFi protocols, ~$23.85B TVL (DeFiLlama, April 2, 2026), live since January 2020 (~6 years)
+All on-chain numbers below from block 25,129,472 (2026-05-19 13:16 UTC) unless noted.
+
+- **sGho vault:** **Live since May 16, 2026 (AIP 484 execution) — ~3 days of production history.** `totalAssets() = 37,298,827 GHO`, `totalSupply() = 37,286,664` shares. `convertToAssets(1e18) = 1.000326e18` → ~0.033% accrued (`ratePerSecond` of `1.347666e18` RAY corresponds to 4.25% simple APR per spec; ~4.34% continuously compounded). The contract itself was deployed on May 5, 2026 but only became operational once AIP 484 wired up the roles and supply cap on May 16
+- **GHO stablecoin:** Launched July 2023 — **~2.83 years** in production
+- **GHO mainnet supply:** 584.0M GHO (on-chain `totalSupply()`, May 19, 2026; unchanged vs April readings)
+- **GSM USDC:** Deployed and operational — current waEthUSDC held: ~111.25M (`getAvailableLiquidity()`) against 175M cap; available underlying exposure ~63.75M (already-minted GHO side). Cap unchanged
+- **GHO Reserve (GSM USDC facilitator):** GHO balance = **133.49M** (May 19; down from 167.51M on April 22, partially reflecting AIP 484's 10M allowance creation and ongoing GSM activity; reserve also serves GSM USDT)
+- **Legacy stkGHO:** Holds **216.75M stkGHO** (May 19; up from 202.78M on April 22 — ~14M net inflow). Still on legacy staking implementation (no proxy upgrade — sGho was launched as a separate ERC-4626 contract rather than via an in-place upgrade). The ARFC envisions an "aggressive migration schedule from the legacy sGHO contract" but that migration is **not** part of AIP 484
+- **Aave protocol:** One of the largest DeFi protocols, ~$14.0B Aave V3 TVL (DeFiLlama, May 19, 2026; down from ~$23.85B on April 2, 2026), live since January 2020 (~6 years)
 - **Security incidents (GHO):** No known exploits on GHO token, GSM, or stkGHO
 - **Security incidents (Aave):** Aave V3 has not been exploited. Historical V1/V2 incidents exist but are not relevant to the V3 architecture
 
@@ -304,7 +332,7 @@ GHO is deposited into the sGHO ERC-4626 vault. Shares are issued based on the cu
 ### Collateralization
 
 - **sGHO:** GHO deposited remains in the contract — **no rehypothecation**. Principal is fully backed. Yield backing depends on DAO funding
-- **GSM USDC:** Holds waEthUSDC (wrapped Aave USDC supply position). Each waEthUSDC is redeemable for USDC from Aave V3 (subject to Aave V3 liquidity). Current waEthUSDC held: ~127.74M
+- **GSM USDC:** Holds waEthUSDC (wrapped Aave USDC supply position). Each waEthUSDC is redeemable for USDC from Aave V3 (subject to Aave V3 liquidity). Current waEthUSDC available: ~111.25M (May 19, 2026)
 - **No leverage** in the pipeline
 - **GHO itself:** Backed by over-collateralized Aave V3 loans and GSM stablecoin reserves
 
@@ -319,7 +347,7 @@ GHO is deposited into the sGHO ERC-4626 vault. Shares are issued based on the cu
 ## Liquidity Risk
 
 - **sGHO withdrawal:** Atomic via ERC-4626 `withdraw()`/`redeem()`. No cooldown, no queue. Capped by actual GHO balance
-- **GHO → USDC exit (via GSM):** Subject to GSM waEthUSDC availability. Current: ~96.29M waEthUSDC in the GSM, ~78.71M of headroom remaining under the 175M cap (April 22, 2026). If GSM is frozen or at 0 exposure, this exit is blocked
+- **GHO → USDC exit (via GSM):** Subject to GSM waEthUSDC availability. Current: ~111.25M waEthUSDC available in the GSM, ~63.75M already-minted-GHO exposure (out of 175M cap; May 19, 2026). If GSM is frozen or at 0 exposure, this exit is blocked
 - **GHO → USDC exit (via DEX):** GHO has DEX liquidity (Balancer, Uniswap, Curve). Can be used as fallback if GSM is unavailable
 - **GSM freeze risk:** Oracle auto-freezes if USDC depegs outside [$0.99, $1.01]. Manual freeze possible by governance. During freeze, no `buyAsset` or `sellAsset` — funds are trapped until unfreeze
 - **GSM buy fee:** 7 bps (0.07%) — minor friction on exit
@@ -357,7 +385,7 @@ sGHO and the GSM are governed through the **Aave DAO governance framework** — 
 
 | Contract | Upgradeable | Upgrade Authority |
 |----------|-------------|-------------------|
-| sGHO Vault | **YES** (TransparentUpgradeableProxy) | TODO: verify ProxyAdmin on-chain |
+| sGho Vault | **YES** (TransparentUpgradeableProxy) | Aave Governance Executor L1 (via ProxyAdmin [`0xc15700631020eba02317964550365b95a9a28adb`](https://etherscan.io/address/0xc15700631020eba02317964550365b95a9a28adb), `owner() = 0x5300…192A`) |
 | GSM USDC | **YES** (TransparentUpgradeableProxy) | Aave Governance Executor L1 (via ProxyAdmin [`0x51bbc06d0032f8fea31f4f7a39e369c5e282cc21`](https://etherscan.io/address/0x51bbc06d0032f8fea31f4f7a39e369c5e282cc21)) |
 | GHO Token | **YES** (upgradeable) | Aave Governance |
 | GhoRouter | **No** (not upgradeable, owner-managed allowlist) | N/A |
@@ -403,7 +431,8 @@ sGHO and the GSM are governed through the **Aave DAO governance framework** — 
 
 | Contract | Address | Monitor |
 |----------|---------|---------|
-| sGHO Vault | TODO (pending deployment) | `totalAssets()`, `convertToAssets(1e18)` (PPS), `IERC20(GHO).balanceOf(sGHO)` vs `totalAssets()` (funding gap), Deposit/Withdraw events |
+| sGho Vault | [`0xE1753F2e00940cC31213dd92013cF019DFE4ca1d`](https://etherscan.io/address/0xE1753F2e00940cC31213dd92013cF019DFE4ca1d) | `totalAssets()`, `convertToAssets(1e18)` (PPS), `IERC20(GHO).balanceOf(sGho)` vs `totalAssets()` (funding gap), `targetRate()`, `paused()`, Deposit/Withdraw/TargetRateUpdated/Paused events |
+| sGho Steward | [`0x60Bf2DF49F17529Cf956D57848ebEB8a0d0a2757`](https://etherscan.io/address/0x60Bf2DF49F17529Cf956D57848ebEB8a0d0a2757) | `getRateConfig()`, `RateConfigUpdated`/`SupplyCapUpdated`/`RoleGranted`/`RoleRevoked` events |
 | GSM USDC | [`0x3A3868898305f04beC7FEa77BecFf04C13444112`](https://etherscan.io/address/0x3A3868898305f04beC7FEa77BecFf04C13444112) | `getAvailableLiquidity()`, `getAvailableUnderlyingExposure()`, `getUsed()`, `getLimit()`, `getIsFrozen()`, `getIsSeized()`, FeeStrategyUpdated events |
 | GHO Reserve | [`0x54C58157DeF387A880AE62332D1445f03adbE7E9`](https://etherscan.io/address/0x54C58157DeF387A880AE62332D1445f03adbE7E9) | GHO balance, limit vs used for GSM USDC |
 | GHO Risk Council | [`0x8513e6F37dBc52De87b166980Fa3F50639694B60`](https://etherscan.io/address/0x8513e6F37dBc52De87b166980Fa3F50639694B60) | Signer/threshold changes |
@@ -449,8 +478,8 @@ sGHO and the GSM are governed through the **Aave DAO governance framework** — 
 
 ### Key Risks
 
-- **sGHO NOT YET DEPLOYED:** No production history. All analysis is based on source code and audits. On-chain role assignments, proxy admin, and initial configuration must be verified after deployment
-- **GhoRouter evidence gap:** The public materials linked in this report do not provide a canonical upstream router PR, and the linked TokenLogic PDF does not list router files in scope. Router-specific risk must be rechecked against final deployment artifacts
+- **Very short production history:** sGho went live on May 16, 2026 — only ~3 days of mainnet usage at time of this assessment. The configuration matches the AIP-484 spec on-chain, but no stress events have been observed
+- **GhoRouter not deployed:** The launch AIP markets the GhoRouter as enabling single-tx USDC→sGho onboarding, but the actual payload deploys no router. Yearn's USDC strategy must compose the existing GSM USDC + sGho deposit steps itself
 - **Upgradeable contracts (rug via governance):** sGHO, GSM, GHO Token, and GHO Reserve are all upgradeable proxies controlled by Aave Governance. A malicious governance proposal could drain all funds. Mitigated by Aave's established governance framework and community oversight
 - **Virtual/unfunded yield:** sGHO yield index grows independently of actual GHO balance. The DAO must actively fund the vault. In a funding shortfall, late withdrawers lose yield (first-come-first-served). Principal remains protected
 - **GSM freeze can trap funds:** Oracle auto-freezes on USDC depeg, manual freeze by governance. During freeze, no USDC exit via GSM. DEX liquidity provides an alternative GHO exit path
@@ -458,14 +487,13 @@ sGHO and the GSM are governed through the **Aave DAO governance framework** — 
 
 ### Critical Risks
 
-- **Pre-deployment uncertainty:** Final on-chain configuration (roles, proxy admin, initial parameters) is unknown. The deployed version could differ from the audited code. **This is the most significant risk factor for this assessment**
-- **Upgrade-based rug pull:** The theoretical worst case — a malicious Aave governance proposal that upgrades sGHO or GSM to steal funds. This would require corrupting Aave's on-chain governance process, which has never happened in 6+ years of operation
+- **Upgrade-based rug pull:** The theoretical worst case — a malicious Aave governance proposal that upgrades sGho or GSM to steal funds. The sGho ProxyAdmin owner is the DAO Executor L1, so this requires corrupting Aave's on-chain governance process, which has never happened in 6+ years of operation
 
 ---
 
 ## Risk Score Assessment
 
-> **Note:** Scores below are preliminary/draft. Several factors cannot be verified until deployment. Final scores should be recalculated after on-chain verification.
+> **Note:** Scores below are computed post-deployment (May 19, 2026), with on-chain roles, ProxyAdmin owner, supply cap, target rate, and audit posture all verified. The dominant penalty is now the very short production history (~3 days), not unverifiable configuration.
 
 **Scoring Guidelines:**
 - Be conservative: when uncertain between two scores, choose the higher (riskier) one
@@ -488,11 +516,11 @@ sGHO and the GSM are governed through the **Aave DAO governance framework** — 
 |--------|-----------|
 | Audits | GHO: 12+ audits by top firms (OpenZeppelin, Certora, Sigma Prime, ABDK). sGHO: 2 audits (Certora + TokenLogic). Formal verification |
 | Bug bounty | $1,000,000 on Immunefi (Aave, covering GHO sub-systems) |
-| Production history | **sGHO: 0 months (NOT DEPLOYED)**. GHO: ~2.75 years. GSM USDC: operational. Aave V3: ~4 years |
-| TVL | sGHO: $0 (not deployed). GHO mainnet supply: ~584M. Aave: ~$23.85B TVL |
-| Security incidents | None on GHO, GSM, or Aave V3 |
+| Production history | **sGho: ~3 days (deployed May 5, activated by AIP 484 on May 16, 2026)**. GHO: ~2.83 years. GSM USDC: operational. Aave V3: ~6 years |
+| TVL | sGho: ~37.3M GHO (3 days post-launch). GHO mainnet supply: 584.0M (May 19, 2026). Aave V3: ~$14.0B TVL (May 19) |
+| Security incidents | None on GHO, GSM, sGho, or Aave V3 |
 
-**Score: 2.5/5** — Exceptional audit coverage and formal verification, $1M bug bounty, and the broader Aave ecosystem has an outstanding track record. However, the sGHO vault itself has **zero production history** — no time in production means no battle-testing. The GHO ecosystem provides strong secondary confidence, but undeployed code is inherently riskier. Score heavily penalized by lack of deployment.
+**Score: 2.5/5** — Exceptional audit coverage and formal verification, $1M bug bounty (with sGho **not** enumerated in Immunefi scope as of May 19, 2026), and the broader Aave ecosystem has an outstanding track record. However, the sGho vault itself has **only ~3 days of production history** at the time of assessment — minimal battle-testing. The GHO ecosystem provides strong secondary confidence, but a freshly-deployed vault is inherently riskier than one with months of incident-free operation. Score will likely improve toward 2.0 after a clean first 3-month window.
 
 #### Category 2: Centralization & Control Risks (Weight: 30%)
 
@@ -506,7 +534,7 @@ sGHO and the GSM are governed through the **Aave DAO governance framework** — 
 | Privileged roles | Well-distributed: Governance (admin), Stewards (rate-limited ops), Guardian (pause), Oracle (auto-freeze) |
 | EOA risk | No EOAs hold critical roles — all controlled by multisigs, DAO, or automated contracts |
 
-**Governance Score: 2.5/5** — Aave DAO is one of the strongest governance systems in DeFi, with established on-chain voting, timelocks, and community oversight. However, all core contracts are upgradeable proxies — governance can replace any implementation. The rate-limited steward pattern is well-designed. Score elevated due to full upgradeability across the entire contract stack (sGHO, GSM, GHO Token, Reserve). TODO: verify sGHO proxy admin assignment on-chain.
+**Governance Score: 2.5/5** — Aave DAO is one of the strongest governance systems in DeFi, with established on-chain voting, timelocks, and community oversight. However, all core contracts are upgradeable proxies — governance can replace any implementation. The rate-limited steward pattern is well-designed. Score elevated due to full upgradeability across the entire contract stack (sGho, GSM, GHO Token, Reserve). sGho ProxyAdmin (`0xc157…8adb`) is owned by the DAO Executor L1 — verified on-chain.
 
 **Subcategory B: Programmability**
 
@@ -567,7 +595,7 @@ sGHO and the GSM are governed through the **Aave DAO governance framework** — 
 | Factor | Assessment |
 |--------|-----------|
 | sGHO exit | Atomic ERC-4626 redemption, no cooldown. Capped by actual GHO balance |
-| GHO → USDC exit | Via GSM (7 bps fee) or DEX. GSM has ~128M waEthUSDC capacity |
+| GHO → USDC exit | Via GSM (7 bps fee) or DEX. GSM has ~111M waEthUSDC available (May 19, 2026) |
 | Freeze risk | GSM auto-freezes on USDC depeg [$0.99, $1.01]. Manual freeze possible. **Blocks USDC exit** |
 | Pause risk | sGHO pause blocks all token operations including withdrawal |
 | DEX fallback | GHO has DEX liquidity (Balancer, Uniswap, Curve) as alternative exit |
@@ -604,7 +632,7 @@ Final Score = (Centralization × 0.30) + (Funds Mgmt × 0.30) + (Audits × 0.20)
 | Funds Management | 2.0 | 30% | 0.60 |
 | Liquidity Risk | 2.5 | 15% | 0.375 |
 | Operational Risk | 1.5 | 5% | 0.075 |
-| **Final Score** | | | **2.2/5.0 (DRAFT)** |
+| **Final Score** | | | **2.1/5.0** |
 
 ### Risk Tier
 
@@ -616,20 +644,20 @@ Final Score = (Centralization × 0.30) + (Funds Mgmt × 0.30) + (Audits × 0.20)
 | 3.5-4.5 | Elevated Risk | Limited approval, strict limits |
 | 4.5-5.0 | High Risk | Not recommended |
 
-**Draft Risk Tier: Low Risk (2.2/5.0) — Approved with standard monitoring**
+**Risk Tier: Low Risk (2.1/5.0) — Approved with standard monitoring**
 
-> **Score likely to improve after deployment** if: on-chain roles are correctly assigned to governance contracts (not EOAs), proxy admin is controlled by DAO timelock, sGHO is added to Immunefi scope, and production history is established without incidents. Estimated post-deployment score improvement: -0.3 to -0.5 points (bringing score toward 1.7-1.9/5.0 range).
+> Score may improve toward ~1.8 once sGho has accumulated ~3 months of incident-free production history and is added to the Immunefi bug-bounty scope. Score may worsen if the legacy stkGHO → sGho migration introduces unexpected admin-controlled flows, if a GhoRouter is later deployed with broad token-rescue powers, or if sGho's `IERC20(GHO).balanceOf` consistently lags `totalAssets()` (unfunded yield).
 
 ---
 
 ## Reassessment Triggers
 
-- **MANDATORY: After sGHO deployment** — verify on-chain roles, proxy admin, initial parameters, and GHO balance. Update all TODO addresses. Verify GhoRouter is merged and deployed
-- **Time-based:** Reassess 3 months after deployment (establish production track record), then every 6 months
+- **Time-based:** Reassess 3 months after the May 16, 2026 launch (mid-August 2026) to capture initial production track record, then every 6 months
 - **TVL-based:** Reassess if sGHO TVL exceeds $100M or changes by more than ±50%
 - **Incident-based:** Reassess after any exploit, governance attack, or Aave protocol incident
 - **Funding-based:** Reassess if `balanceOf(GHO, sGHO) < totalAssets()` (unfunded yield gap)
 - **Rate-based:** Reassess if ASR exceeds GHO borrow rate (arbitrage risk per LlamaRisk)
 - **GSM-based:** Reassess if GSM freeze lasts >24 hours or if LIQUIDATOR_ROLE is granted to any address
-- **Governance-based:** Reassess if sGHO proxy admin or role assignments change
+- **Governance-based:** Reassess if sGho proxy admin or role assignments change, or if a GhoRouter is later deployed and granted token rescue / approval-handling roles
+- **Migration-based:** Reassess if/when the legacy stkGHO is migrated or unwound (currently 216.75M still held in the legacy contract, separate from the new sGho)
 - **Regulatory:** Monitor MiCA enforcement actions related to interest-bearing stablecoins
