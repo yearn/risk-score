@@ -149,7 +149,7 @@ The architecture is moderately complex:
 
 ### Bug Bounty
 
-**No active bug bounty program found.** Exhaustive search across Immunefi, Code4rena, Sherlock, HackerOne, Safe Harbor, and the protocol's own documentation and GitHub yielded no bug bounty listing, responsible disclosure policy, or security contact for vulnerability reporting. The [security documentation](https://docs.strata.markets/technical-documentation/security) covers audits, multisigs, and monitoring but does not mention a bug bounty. This is a notable gap for a protocol with >$150M TVL.
+**No active bug bounty program found.** Exhaustive search across Immunefi, Code4rena, Sherlock, HackerOne, Safe Harbor, and the protocol's own documentation and GitHub yielded no bug bounty listing, responsible disclosure policy, or security contact for vulnerability reporting. The [security documentation](https://docs.strata.markets/technical-documentation/security) covers audits, multisigs, and monitoring but does not mention a bug bounty. This is a notable gap for a protocol with tens of millions in TVL (~$86.8M as of May 19, 2026).
 
 ## Historical Track Record
 
@@ -213,7 +213,7 @@ The architecture is moderately complex:
 - **Senior coverage ratio**: When it falls below **105%**, the protocol may temporarily halt senior minting and junior redemptions to protect the senior tranche
 - **Underlying collateral**: USDe is Ethena's synthetic dollar backed by a delta-neutral strategy (ETH/BTC spot + short perpetual futures). Ethena maintains proof of reserves via third-party verification
 - **Risk hierarchy**: Senior tranche (srUSDe) is principal-protected in the base asset and paid first. The junior tranche absorbs losses before any impact to senior holders. However, if the junior tranche is **fully depleted**, the senior tranche **may incur principal losses**
-- **Reserve mechanism**: Part of strategy gains can be allocated to a protocol reserve (configurable via `setReserveBps`), which can be redistributed to tranche TVL or withdrawn to treasury
+- **Reserve mechanism**: Part of strategy gains can be allocated to a protocol reserve (configurable via `setReserveBps`). The reserve *could* in principle be redistributed to tranche TVL or withdrawn to treasury via `distributeReserve`, `reduceReserve`, and `setReserveTreasury` — however, all three functions require `RESERVE_MANAGER_ROLE`, which onchain is held only by the 24h Timelock. The 24h Timelock currently has no executor configured (see Centralization section), so **none of these reserve-management paths can currently fire**. The reserve buffer is therefore effectively frozen at its current allocation and cannot be relied upon as adjustable senior-tranche support until the executor configuration is fixed.
 
 ### Provability
 
@@ -228,8 +228,8 @@ The architecture is moderately complex:
 
 1. **Redeem from srUSDe vault**: Initiate withdrawal → cooldown period (tied to Ethena's sUSDe cooldown, currently ~7 days) → finalize. Permissionless but not instant
 2. **DEX swap**: Extremely thin onchain DEX liquidity. Total across all Uniswap V4 pools: ~$135K. Largest pool is srUSDe/USDe at ~$81K with only $425 in 24h volume. **No Curve or Balancer pools exist.** CoinGecko does not list srUSDe
-3. **Pendle markets**: PT-srUSDe-02APR2026 pool holds ~$21.9M TVL with ~$128K weekly volume. Primary venue for srUSDe trading, but these are fixed-yield PT tokens, not raw srUSDe
-4. **Morpho markets**: PT-srUSDe-2APR2026/USDC market has ~$14.6M supply and 82.4% utilization. A raw srUSDe/USDe market exists on Morpho but is empty ($0 supply/$0 borrow)
+3. **Pendle markets**: The PT-srUSDe-02APR2026 pool referenced in the previous report **expired April 2, 2026** (onchain `isExpired() = true`, `expiry() = 1775088000`). The successor market PT-srUSDe-25JUN2026 ([market `0xfc82267a9e065aaf407f64dadd49bfbdc9511fb1`](https://etherscan.io/address/0xfc82267a9e065aaf407f64dadd49bfbdc9511fb1), [PT `0x619D75E3b790eBC21c289f2805Bb7177A7D732E2`](https://etherscan.io/address/0x619D75E3b790eBC21c289f2805Bb7177A7D732E2)) is live with **~$11.2M LP liquidity** as of May 19, 2026 (Pendle API). This trades the fixed-yield PT, not raw srUSDe
+4. **Morpho markets**: PT-srUSDe-25JUN2026/USDC market exists but is **near-empty** (~$4.7K supply, 88% utilization on minuscule borrow per Morpho Blue API on May 19, 2026). A raw srUSDe/USDe market exists on Morpho with $0 supply/$0 borrow. The previously-cited ~$14.6M PT-srUSDe-2APR2026/USDC market is no longer active (PT expired)
 
 ### Withdrawal Restrictions
 
@@ -240,8 +240,8 @@ The architecture is moderately complex:
 ### Liquidity Assessment
 
 - **Primary liquidity**: The main exit path is through the cooldown-based redemption mechanism (not instant)
-- **Secondary market**: DEX liquidity is negligible (~$135K total across Uniswap V4 pools). Pendle PT-srUSDe markets (~$21.9M) are the most liquid venue but trade fixed-yield PTs, not raw srUSDe. Morpho lending markets hold ~$14.6M in PT-srUSDe collateral
-- **Large holder impact**: Given the TVL volatility (62.6% drawdown from peak), large holders can exit but it takes time due to cooldowns
+- **Secondary market**: DEX liquidity remains negligible. Pendle is the most liquid venue with the **active** PT-srUSDe-25JUN2026 market holding ~$11.2M LP liquidity (down from the ~$21.9M cited at the previous assessment for the now-expired April PT). Morpho PT-srUSDe-25JUN2026/USDC market has effectively no supply (~$4.7K). Raw srUSDe markets remain empty
+- **Large holder impact**: Given the TVL volatility (~73% drawdown from peak), large holders can exit but it takes time due to cooldowns and the now-thinner secondary market
 - **Same-value redemption**: srUSDe redeems for USDe (stablecoin-denominated), so price impact risk is minimal for the Morpho use case
 
 ## Centralization & Control Risks
@@ -409,7 +409,7 @@ Strata uses a layered Role-Based Access Control (RBAC) system in the **AccessCon
 
 ### Critical Risk Gates
 
-- [x] **No audit** -- Protocol audited by 3 reputable firms (Cyfrin, Quantstamp, Guardian) across 7+ engagements. **PASS**
+- [x] **No audit** -- Protocol audited by 3 reputable firms (Cyfrin, Quantstamp, Guardian) across 8 engagements. **PASS**
 - [x] **Unverifiable reserves** -- srUSDe exchange rate is programmatic onchain (ERC-4626). Underlying sUSDe holdings verifiable onchain. **PASS**
 - [x] **Total centralization** -- 3-of-4 Gnosis Safe multisig with 48h timelock and independent Guardian. Not a single EOA. **PASS**
 
@@ -475,9 +475,9 @@ Strata uses a layered Role-Based Access Control (RBAC) system in the **AccessCon
 - Over-collateralized by junior tranche (first-loss capital). Senior:Junior asset ratio ~5.17:1; total-system collateralization ~119.3% of senior assets — above the 105% circuit breaker but tighter than the protocol's idealized targets
 - 105% coverage circuit breaker provides protection
 - Underlying collateral is USDe (Ethena's synthetic dollar -- backed by delta-neutral ETH/BTC strategy with CEX counterparty exposure)
-- Reserve mechanism exists (configurable via timelock; treasury withdrawal currently blocked by the 24h-timelock executor gap)
+- Reserve mechanism exists in code (`setReserveBps` allocates a portion of strategy gains to reserve), but **all reserve-management paths are currently unreachable**: `RESERVE_MANAGER_ROLE` is held only by the 24h Timelock, which has no executor configured (see Centralization section). `distributeReserve`, `reduceReserve`, and `setReserveTreasury` therefore cannot fire on the current setup, so the reserve cannot be relied upon as adjustable senior-tranche support (it also can't be extracted to treasury — net mixed for users).
 
-**Collateralization Score: 2.5** -- Unchanged. Onchain backing remains verifiable. Reserve-extraction concern is reduced vs. the prior assessment (timelocked, currently unreachable) but Ethena synthetic-dollar dependency is the dominant risk.
+**Collateralization Score: 2.5** -- Unchanged. Onchain backing remains verifiable. Reserve cannot be redistributed *or* extracted under current configuration, removing both the extraction risk and the reserve-as-support upside vs. the prior assessment. Ethena synthetic-dollar dependency remains the dominant risk.
 
 **Subcategory B: Provability**
 
