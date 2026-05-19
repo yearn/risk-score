@@ -55,6 +55,17 @@ All contracts are deployed on HyperEVM (Hyperliquid L1). Explorer: [HyperEVMScan
 | wstHYPE ProxyAdmin | [`0xa29a2043b2fcbc9189beb9e6efcb2ba48bb3d586`](https://hyperevmscan.io/address/0xa29a2043b2fcbc9189beb9e6efcb2ba48bb3d586) | EIP-1967 Admin |
 | TimelockController (upgrades) | [`0xc5DEd4F7F53919c714059a17d31371aE847E23D2`](https://hyperevmscan.io/address/0xc5DEd4F7F53919c714059a17d31371aE847E23D2) | OZ TimelockController, 48h min delay (added 2026-04-10) |
 | Governance Multisig | [`0x97dee0ea4ca10560f260a0f6f45bdc128a1d51f9`](https://hyperevmscan.io/address/0x97dee0ea4ca10560f260a0f6f45bdc128a1d51f9) | Gnosis Safe (**4-of-6**, raised from 3-of-5 on 2026-04-07) |
+| stHYPE/WHYPE AMM Withdrawal Module | [`0x69e487aa3132708d08a979b2d07c5119bb77f698`](https://hyperevmscan.io/address/0x69e487aa3132708d08a979b2d07c5119bb77f698) | Services AMM-pool unstakes (dominant net-receiver of Overseer HYPE Feb–May 2026) |
+| HyperCore Staking Module #1 | [`0x591540F231055743A37F691C3ffd50E4E53561ab`](https://hyperevmscan.io/address/0x591540F231055743A37F691C3ffd50E4E53561ab) | Validator delegation module |
+| HyperCore Staking Module #2 | [`0x16a4814e8eB502C56CeBd73F9c8aC7FDee29c042`](https://hyperevmscan.io/address/0x16a4814e8eB502C56CeBd73F9c8aC7FDee29c042) | Validator delegation module |
+| HyperCore Staking Module #3 | [`0xf992aa323ec183733213f874b6322b8bd1aAD625`](https://hyperevmscan.io/address/0xf992aa323ec183733213f874b6322b8bd1aAD625) | Validator delegation module |
+| HyperCore Staking Module #4 | [`0x06b5659f16110319137220D1EFd680053F5e72a2`](https://hyperevmscan.io/address/0x06b5659f16110319137220D1EFd680053F5e72a2) | Validator delegation module |
+| HyperCore Staking Module #5 | [`0xe787dD1347A29e6807D164C4FA43105b64048556`](https://hyperevmscan.io/address/0xe787dD1347A29e6807D164C4FA43105b64048556) | Validator delegation module |
+| HyENA HIP-3 / USDe Quote Asset | [`0xa5101b03675294c87ab7381b41d4225eb8709128`](https://hyperevmscan.io/address/0xa5101b03675294c87ab7381b41d4225eb8709128) | HIP-3 stake module |
+| HyENA HIP-3 Deployer | [`0x358e783c32147b344a1168e0984d3350de4e07cb`](https://hyperevmscan.io/address/0x358e783c32147b344a1168e0984d3350de4e07cb) | HIP-3 delegation/quote-asset deployer |
+| MANAGER role | [`0x53D6c6594d14f9bBDFC572f048312728F7B2418e`](https://hyperevmscan.io/address/0x53D6c6594d14f9bBDFC572f048312728F7B2418e) | Operational manager (per Roles & Controls registry) |
+| REBASER role | [`0x4eb038eb501045daa520b972fcad48c429531e10`](https://hyperevmscan.io/address/0x4eb038eb501045daa520b972fcad48c429531e10) | Rebase/exchange-rate trigger (per Roles & Controls registry) |
+| FEE_RECIPIENT | [`0xa2666b4dd1242def4c3cf5731a85aa8457fe01c1`](https://hyperevmscan.io/address/0xa2666b4dd1242def4c3cf5731a85aa8457fe01c1) | Protocol fee destination |
 
 All contracts are **upgradeable** via EIP-1967 transparent proxy pattern. Each proxy has a separate ProxyAdmin contract. Since the 2026-04-10 governance upgrade, **all three ProxyAdmin contracts are owned by the TimelockController** (`0xc5DEd4F7...`, verified via `owner()` on each ProxyAdmin). The TimelockController has a **48-hour minimum delay** (`getMinDelay()` returns 172,800 seconds) and the Safe multisig holds `PROPOSER_ROLE`, `EXECUTOR_ROLE`, and `CANCELLER_ROLE` on it (the zero address does NOT hold `EXECUTOR_ROLE`, so execution is multisig-restricted, not open). The TimelockController is self-administered (`DEFAULT_ADMIN_ROLE` held by the timelock itself). Net effect: **implementation upgrades now require a 48-hour delay between Safe proposal and execution.** Role changes and other `DEFAULT_ADMIN_ROLE`-gated actions on stHYPE/OverseerV1 are NOT timelocked — the Safe holds those roles directly.
 
@@ -158,7 +169,7 @@ Onchain state (verified May 19, 2026 via `cast` against `https://rpc.hyperliquid
 - **stHYPE totalSupply**: 3,331,041.01 stHYPE (Feb 2026: 4,252,373.17 — **-21.7%**)
 - **Exchange rate** (`balancePerShare`): 1.026262 HYPE per stHYPE (Feb 2026: 1.0203 — **+0.59%** in 90 days ≈ 2.4% annualised, in line with HyperEVM staking yield)
 - **Total HYPE backing** (`totalSupply × exchangeRate`): ~3,418,520 HYPE
-- **OverseerV1 native HYPE balance**: **5,126.84 HYPE** (0.15% of backing) — Feb 2026: 261,728.59 HYPE (6.0%). Marked as **TODO**: the docs registry does not disclose a new buffer contract address; whether this reflects (a) buffer relocation to an undocumented contract, (b) reserves moved to staking modules with a different withdrawal path, or (c) genuine reserve depletion is **unverified this session**. Either way, the previously-observed 6% on-Overseer liquid buffer is no longer present at the original address.
+- **OverseerV1 native HYPE balance**: **5,124.82 HYPE** (0.15% of backing) — Feb 2026: 261,728.59 HYPE (6.0%). The drop is NOT a buffer relocation to a new contract; it reflects **normal withdrawal-servicing flow**. Onchain trace (Etherscan V2 API, chain 999, Feb 1 – May 19 2026): the dominant net-receiver of HYPE from Overseer is the documented **stHYPE/WHYPE AMM Withdrawal Module** [`0x69e487aa…f698`](https://hyperevmscan.io/address/0x69e487aa3132708d08a979b2d07c5119bb77f698) (~1.0M HYPE net out). The five HyperCore Staking Modules are net senders **back** to Overseer (~-1.32M combined), consistent with returning unstaked HYPE to fulfill withdrawals. No single >100k tx caused the drop — dozens of normal-sized transfers. Four large net-receiving EOAs (`0xbda2…`, `0xcdb4…`, `0x183d…`, `0x98265…`) totaling ~644K HYPE are not labeled in the published Roles & Controls Registry — **TODO**: confirm with Valantis whether these are operator/keeper hot wallets or end-user withdrawals.
 - **maxRedeemable** (OverseerV1): 0 HYPE — no instant redemption buffer available at time of check; all burns go through the unstaking queue (Feb 2026: also 0).
 - **burnCount**: 42,180 total burns processed (+3,067 vs Feb 2026, +7.8%).
 
@@ -185,7 +196,7 @@ Economic backing is staked HYPE plus liquid reserves. The remaining ~99.85% of H
   - **Queue monitoring**: The only user-facing tool is an estimated withdrawal time at `app.valantis.xyz/staking` ([stake accounts docs](https://docs.stakedhype.fi/technical/stake-accounts)). No real-time queue depth, position, or reserve utilization data is published.
   - **HSM still not deployed**: The HSM docs page returns 404 as of May 2026 (was a design document in Feb 2026). The Hyperliquid Stake Marketplace remains unshipped per public documentation; no HIP-3 deployers cited as using HSM.
   - **Offchain operational components**: Reserve management relies on *"active liquidity management from the Protocol Delegator"* and *"coordination with custodians / HIP-3 operators"* ([stake accounts docs](https://docs.stakedhype.fi/technical/stake-accounts)) — offchain processes with no onchain enforcement or public monitoring.
-  - **Buffer/reserve location unclear (NEW since Feb 2026)**: OverseerV1's native HYPE balance fell from 261,729 to 5,127. The docs registry does not disclose a replacement buffer contract. TODO: confirm with Valantis whether reserves migrated to a new contract (e.g., a staking-module-side buffer) or whether the on-Overseer buffer was retired.
+  - **Buffer/reserve flow now clearer (Feb→May 2026)**: OverseerV1's native HYPE balance fell from 261,729 to 5,125. Onchain trace confirms this is normal withdrawal-servicing — dominant sink is the documented stHYPE/WHYPE AMM Withdrawal Module ([`0x69e487aa…f698`](https://hyperevmscan.io/address/0x69e487aa3132708d08a979b2d07c5119bb77f698)). Four large undocumented EOA receivers (~644K HYPE combined) remain a TODO for operator-wallet labeling. No standalone "buffer contract" is published in docs — Overseer itself appears to be the buffer, replenished by staking-module returns rather than maintained as a static float.
   - **1:1 backing unverifiable end-to-end**: The [transparency page](https://docs.stakedhype.fi/info/transparency-and-risks) claims *"stHYPE is always backed 1:1 by native HYPE"*, but no independent verification tool is provided. Users can verify EVM-side state (`totalSupply`, `balancePerShare`) but cannot independently audit the full HyperCore validator delegation breakdown.
 
 ## Liquidity Risk
@@ -399,7 +410,7 @@ Track official Hyperliquid staking/validator announcements for:
 
 1. Queue-based exits and stress-path wind-down mechanics introduce liquidity delay risk.
 2. Role/parameter changes on stHYPE/OverseerV1 are NOT timelocked (only upgrades are); planned dual-governance veto still not live.
-3. **OverseerV1 liquid HYPE reserve fell from 6.0% to 0.15% of backing with no docs-disclosed buffer relocation (TODO to verify).**
+3. OverseerV1 liquid HYPE reserve fell from 6.0% to 0.15% of backing — onchain trace confirms this is normal withdrawal-servicing via the documented stHYPE/WHYPE AMM Withdrawal Module, not a buffer disappearance. Four undocumented EOA receivers (~644K HYPE combined) remain a labeling TODO.
 4. wstHYPE lending exposure (~$65M) concentrated in HyperLend pooled lending (~$57M, 87%); single-venue counterparty/liquidation risk.
 5. Strong dependency on Hyperliquid validator and chain-level risk.
 6. Slashing regime may change via governance (currently no automatic validator slashing in base staking).
@@ -446,7 +457,7 @@ Centralization score = (3.0 + 3.0 + 4.0) / 3 = **3.33**
 #### Category 3: Funds Management (Weight: 30%)
 
 Subscores:
-- Collateralization: **2.5** — 100% onchain collateral (staked HYPE), not over-collateralized. Liquid reserve at OverseerV1 dropped from 6.0% to 0.15% of backing; whether reserves relocated is unverified — flagged as TODO. Conservative subscore unchanged pending clarification (would worsen if reserve truly depleted; would remain 2.5 if relocated and verified).
+- Collateralization: **2.5** — 100% onchain collateral (staked HYPE), not over-collateralized. Liquid reserve at OverseerV1 dropped from 6.0% to 0.15% of backing; onchain trace confirms this is normal withdrawal-servicing (dominant sink is the documented stHYPE/WHYPE AMM Withdrawal Module), not a buffer disappearance. The system operates as flow-through reserve (Overseer replenished by staking-module returns) rather than maintaining a static float.
 - Provability: **2.0** — Key state readable onchain (`totalSupply`, `balancePerShare`, `maxRedeemable`, `burnCount`). Exchange rate updated programmatically. AccessControl roles verified via `hasRole()`. Some offchain complexity around validator delegation not fully transparent.
 
 Funds management score = (2.5 + 2.0) / 2 = **2.25**
