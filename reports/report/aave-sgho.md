@@ -476,14 +476,24 @@ sGHO and the GSM are governed through the **Aave DAO governance framework** — 
 - **Token rescue protection:** sGHO `maxRescue()` returns 0 for GHO (underlying asset cannot be rescued by admin). GSM protects user funds tracked in `_currentExposure`
 - **GSM dangerous roles unassigned:** `LIQUIDATOR_ROLE` (seize) and `TOKEN_RESCUER_ROLE` on GSM are currently unassigned
 
-### Key Risks
+### High-Severity Issues
+
+- **7 bps GSM exit fee on every USDC withdrawal (HIGH):** Exiting from sGho back to USDC requires a `GSM.buyAsset()` call that charges **7 bps (0.07%)** on the GHO→waEthUSDC leg (verified on-chain at GSM fee strategy [`0x73bf24CD7ba43803961c80Ee678a5445eC413080`](https://etherscan.io/address/0x73bf24CD7ba43803961c80Ee678a5445eC413080): `getBuyFee(1_000_000) = 700`). This applies on **every** withdrawal — partial rebalances are repeatedly fee'd. At the current 4.25% APR, breakeven against holding raw USDC requires holding sGho for ≥**~6 days** (7 / 425 of a year). Implications for Yearn:
+  - The strategy must batch withdrawals to amortize the fee
+  - Frequent rebalancing or harvests that touch USDC will compound this drag
+  - Deposit direction is fee-free (`sellAsset` charges 0 bps), so the cost is purely on the exit path
+  - **GhoRouter would NOT have eliminated this fee** — the router is a UX wrapper; it still calls `GSM.buyAsset()` under the hood, which is what charges the fee
+  - The fee is governance-adjustable via the GhoGsmSteward (rate-limited to ±0.5%/day, max 50% per FixedFeeStrategy). Aave could lower it to 0, but historically has held it at 7 bps to slow GSM reserve drainage
+  - Alternative exit via DEX (Balancer/Uniswap/Curve GHO pools) is possible but introduces slippage that is typically worse than 7 bps for size
+
+### Other Key Risks
 
 - **Very short production history:** sGho went live on May 16, 2026 — only ~3 days of mainnet usage at time of this assessment. The configuration matches the AIP-484 spec on-chain, but no stress events have been observed
-- **GhoRouter not deployed:** The launch AIP markets the GhoRouter as enabling single-tx USDC→sGho onboarding, but the actual payload deploys no router. Yearn's USDC strategy must compose the existing GSM USDC + sGho deposit steps itself
-- **Upgradeable contracts (rug via governance):** sGHO, GSM, GHO Token, and GHO Reserve are all upgradeable proxies controlled by Aave Governance. A malicious governance proposal could drain all funds. Mitigated by Aave's established governance framework and community oversight
-- **Virtual/unfunded yield:** sGHO yield index grows independently of actual GHO balance. The DAO must actively fund the vault. In a funding shortfall, late withdrawers lose yield (first-come-first-served). Principal remains protected
+- **GhoRouter not deployed:** The launch AIP markets the GhoRouter as enabling single-tx USDC→sGho onboarding, but the actual payload deploys no router. Yearn's USDC strategy must compose the existing GSM USDC + sGho deposit steps itself. Note: even if/when the router ships, it would not change the 7 bps exit fee above — that fee is set at the GSM layer
+- **Upgradeable contracts (rug via governance):** sGho, GSM, GHO Token, and GHO Reserve are all upgradeable proxies controlled by Aave Governance. A malicious governance proposal could drain all funds. Mitigated by Aave's established governance framework and community oversight
+- **Virtual/unfunded yield:** sGho yield index grows independently of actual GHO balance. The DAO must actively fund the vault. In a funding shortfall, late withdrawers lose yield (first-come-first-served). Principal remains protected
 - **GSM freeze can trap funds:** Oracle auto-freezes on USDC depeg, manual freeze by governance. During freeze, no USDC exit via GSM. DEX liquidity provides an alternative GHO exit path
-- **Pause can freeze sGHO:** PAUSE_GUARDIAN can freeze all sGHO token operations (deposits, withdrawals, transfers). Mitigated by governance ability to revoke the guardian role
+- **Pause can freeze sGho:** PAUSE_GUARDIAN can freeze all sGho token operations (deposits, withdrawals, transfers). Mitigated by governance ability to revoke the guardian role
 
 ### Critical Risks
 
@@ -647,6 +657,54 @@ Final Score = (Centralization × 0.30) + (Funds Mgmt × 0.30) + (Audits × 0.20)
 **Risk Tier: Low Risk (2.1/5.0) — Approved with standard monitoring**
 
 > Score may improve toward ~1.8 once sGho has accumulated ~3 months of incident-free production history and is added to the Immunefi bug-bounty scope. Score may worsen if the legacy stkGHO → sGho migration introduces unexpected admin-controlled flows, if a GhoRouter is later deployed with broad token-rescue powers, or if sGho's `IERC20(GHO).balanceOf` consistently lags `totalAssets()` (unfunded yield).
+
+---
+
+## Appendix: USDC ↔ sGho Conversion Flows
+
+Step-by-step view of the Yearn USDC strategy's two flows, with explicit fees at each leg. All fees verified on-chain at block 25,129,472 (May 19, 2026).
+
+### Deposit Flow: USDC → sGho
+
+| # | From → To | Contract | Call | Fee | Notes |
+|---|---|---|---|---|---|
+| 1 | USDC → waEthUSDC | Aave V3 USDC market + static-aToken wrapper [`0xD4fa…D23E`](https://etherscan.io/address/0xD4fa2D31b7968E448877f69A96DE69f5de8cD23E) | `deposit(usdc, receiver)` | **0%** | USDC starts earning Aave V3 supply APY while held as waEthUSDC |
+| 2 | waEthUSDC → GHO | GSM USDC [`0x3A38…4112`](https://etherscan.io/address/0x3A3868898305f04beC7FEa77BecFf04C13444112) | `sellAsset(waEthUSDC_amount, receiver)` | **0 bps (0%)** | Fixed 1:1 price (FixedPriceStrategy [`0xEE73…D64f`](https://etherscan.io/address/0xEE73e0c5Cc8E4cAf400baB5239860696Ff44D64f)); fee strategy [`0x73bf…3080`](https://etherscan.io/address/0x73bf24CD7ba43803961c80Ee678a5445eC413080) returns 0 for sell side. Subject to 175M waEthUSDC exposure cap |
+| 3 | GHO → sGho | sGho [`0xE175…ca1d`](https://etherscan.io/address/0xE1753F2e00940cC31213dd92013cF019DFE4ca1d) | `deposit(gho_amount, receiver)` | **0%** | Standard ERC-4626 — no deposit fee. Subject to 400M GHO supply cap |
+
+**Total deposit-side fees: 0%.** Costs are gas + any GSM unavailability (oracle freeze, exposure cap full) + sGho pause / supply-cap full.
+
+### Withdrawal Flow: sGho → USDC
+
+| # | From → To | Contract | Call | Fee | Notes |
+|---|---|---|---|---|---|
+| 1 | sGho → GHO | sGho [`0xE175…ca1d`](https://etherscan.io/address/0xE1753F2e00940cC31213dd92013cF019DFE4ca1d) | `withdraw(gho_amount, receiver, owner)` or `redeem(shares, receiver, owner)` | **0%** | No withdrawal fee. Capped by `IERC20(GHO).balanceOf(sGho)` — see "Virtual/Unfunded Yield" |
+| 2 | GHO → waEthUSDC | GSM USDC [`0x3A38…4112`](https://etherscan.io/address/0x3A3868898305f04beC7FEa77BecFf04C13444112) | `buyAsset(waEthUSDC_amount, receiver)` | **7 bps (0.07%)** ⚠️ | Fee strategy [`0x73bf…3080`](https://etherscan.io/address/0x73bf24CD7ba43803961c80Ee678a5445eC413080): `getBuyFee(1_000_000) = 700`. **This is the only economic fee in the full round-trip.** GhoRouter would NOT eliminate this — it's charged at the GSM layer regardless of caller |
+| 3 | waEthUSDC → USDC | static-aToken wrapper + Aave V3 USDC market | `redeem` / `withdraw(usdc, receiver, owner)` | **0%** | Subject to Aave V3 USDC pool liquidity (utilization-dependent) |
+
+**Total withdrawal-side fees: 7 bps (0.07%).** This is the high-severity issue called out above — every USDC exit incurs this. At the current 4.25% sGho APR, breakeven against just holding raw USDC is ~6 days (7 / 425 of a year).
+
+### Failure Modes That Block These Flows (no fee, but liquidity risk)
+
+| Condition | Blocks | Recovery |
+|---|---|---|
+| `sGho.paused = true` | Steps 1+3 of deposit (the sGho `deposit` call) and step 1 of withdrawal | Protocol Guardian or DAO `unpause()` |
+| `GSM.isFrozen() = true` (oracle auto-freeze on USDC depeg outside [$0.99, $1.01], or manual governance freeze) | Step 2 of both flows | Oracle unfreezes when USDC returns to [$0.995, $1.005]; or DAO unfreezes manually |
+| GSM exposure at 175M cap | Step 2 of deposit only (`sellAsset`) | Wait for withdrawals to free capacity, or DAO raises cap |
+| sGho `supplyCap` (400M GHO) reached | Step 3 of deposit | DAO raises cap via Steward `SUPPLY_CAP_MANAGER_ROLE` |
+| `IERC20(GHO).balanceOf(sGho) < requested_amount` | Step 1 of withdrawal (late withdrawers in funding shortfall) | DAO tops up GHO from protocol revenue |
+| Aave V3 USDC pool at high utilization | Step 3 of withdrawal | Wait for borrowers to repay, or use DEX path |
+
+### Alternate Exit Path (Bypassing the 7 bps Fee — With Tradeoffs)
+
+Instead of `GSM.buyAsset()`, exit GHO to USDC via DEX:
+
+| Venue | Pros | Cons |
+|---|---|---|
+| Balancer / Curve / Uniswap GHO pools | No GSM dependency, no oracle freeze risk | Slippage is typically worse than 7 bps for size; LP pools shallow vs the 175M GSM |
+| Direct GHO → USDC OTC | Could be 0 fee | Trust + size constraints, not on-chain composable |
+
+For most Yearn strategy sizes, the GSM at 7 bps is cheaper and more reliable than DEX exit.
 
 ---
 
