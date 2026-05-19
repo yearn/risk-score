@@ -37,6 +37,7 @@ Deposits are gated by a permission system for regulatory compliance (first-time 
 - [Bug Bounty (Immunefi)](https://immunefi.com/bounty/maple/)
 - [LlamaRisk Assessment (Aave Governance)](https://governance.aave.com/t/arfc-onboard-syrupusdc-to-aave-v3-core-instance/22456/5)
 - [Maple Address Registry (GitHub)](https://github.com/maple-labs/address-registry/blob/main/MapleAddressRegistryETH.md)
+- [LedgerLens Transparency Dashboard (The Network Firm)](https://dashboard.ledgerlens.io/c/maple)
 - [Maple Legal Docs (GitHub)](https://github.com/maple-labs/maple-docs/tree/master/legal)
 
 ## Contract Addresses
@@ -186,6 +187,7 @@ Source: Maple GraphQL `openTermLoans(where: {state: Active})`, **unscoped across
 - Loan-level data (principal, collateral, rates) is onchain
 - However, the actual lending operations (borrower creditworthiness assessment, loan origination) are managed offchain by Maple Direct (the Pool Delegate)
 - DeFi strategy allocations are onchain and verifiable
+- **Third-party transparency dashboard ([LedgerLens by The Network Firm](https://dashboard.ledgerlens.io/c/maple)):** Public dashboard attesting **Total Verified Collateral Value across both syrupUSDC + syrupUSDT pools = ~$2B** (last verified May 18, 2026 17:00 UTC — same day as this reassessment). Cross-check: Maple API `collateralValueUsd` for syrupUSDC ($1.556B) + implied syrupUSDT collateral at 148% CR on $374M pool (~$555M) ≈ $2.11B, consistent with the dashboard figure. The Network Firm LLP is a licensed US CPA firm providing audit/attestation services. **Caveats:** (a) the dashboard exposes aggregate-only collateral USD — per-pool and per-asset breakdowns are not public; (b) the specific AICPA attestation standard for the Maple engagement (SOC, AT-C 215 agreed-upon procedures, etc.) is not disclosed on the public dashboard or on the firm's marketing pages — the engagement's legal weight cannot be fully assessed from public materials; (c) the attestation covers collateral *existence and USD valuation*, not borrower creditworthiness or recovery in liquidation.
 
 ## Liquidity Risk
 
@@ -353,6 +355,7 @@ Callable by Governor (Timelock) or Security Admin.
 4. **Overcollateralized lending** with onchain liquidation mechanics and Chainlink oracle integration
 5. **Dual-layer timelock protection** — GovernorTimelock (MIN_DELAY=1 day) + MapleGlobals defaultTimelockParameters (7-day delay, 2-day execution window), three-tier pause system, real-time invariant monitoring via Tenderly
 6. **Separation of governance powers (re-verified May 2026)** — PROPOSER (DAO 4/7), EXECUTOR (Ops 3/5), CANCELLER (Security 3/6) are held by *different* multisigs, preventing any single Safe from unilaterally pushing through a malicious proposal
+7. **Third-party CPA attestation of collateral** — [LedgerLens dashboard](https://dashboard.ledgerlens.io/c/maple) by The Network Firm LLP (licensed US CPA firm) publishes daily-updated verified collateral USD across both Syrup pools (~$2B as of May 18, 2026), consistent with the Maple API self-reported figure. Engagement standard not publicly disclosed (caveats in Provability section).
 
 ### Key Risks
 
@@ -446,6 +449,7 @@ Exceptional audit coverage and large TVL. V1 credit event was counterparty risk,
 - Loan-level data (principal, collateral, rates) is onchain and verifiable
 - Collateral data can be cross-verified via Maple API and Etherscan
 - DeFi strategy allocations (Aave, Sky) are onchain and verifiable
+- **Third-party CPA attestation:** [LedgerLens dashboard by The Network Firm LLP](https://dashboard.ledgerlens.io/c/maple) — daily-updated verified collateral USD (~$2B across syrupUSDC + syrupUSDT, May 18, 2026), figure cross-checks vs Maple's own API. Specific AICPA attestation standard not publicly disclosed; per-pool / per-asset granularity not exposed on the public dashboard
 - Borrower selection and creditworthiness assessment are offchain (Pool Delegate discretion) — but the onchain collateral protections ensure reserves are provable regardless of borrower quality
 - Impairment decisions are offchain
 
