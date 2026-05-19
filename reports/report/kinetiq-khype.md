@@ -33,7 +33,7 @@ All contracts are deployed on HyperEVM (Hyperliquid L1). Explorer: [HyperEVMScan
 | Contract | Address | Type |
 |----------|---------|------|
 | kHYPE | [`0xfd739d4e423301ce9385c1fb8850539d657c296d`](https://hyperevmscan.io/address/0xfd739d4e423301ce9385c1fb8850539d657c296d) | Proxy (ERC-20 LST) |
-| kHYPE Implementation | [`0xfe3216d46448efd7708435eeb851950742681975`](https://hyperevmscan.io/address/0xfe3216d46448efd7708435eeb851950742681975) | Implementation (unchanged since 2025-11-14) |
+| kHYPE Implementation | [`0xfe3216d46448efd7708435eeb851950742681975`](https://hyperevmscan.io/address/0xfe3216d46448efd7708435eeb851950742681975) | Implementation |
 | kHYPE ProxyAdmin | [`0x9c1e8db004d8158a52e83ffdc63e37eabea8304c`](https://hyperevmscan.io/address/0x9c1e8db004d8158a52e83ffdc63e37eabea8304c) | EIP-1967 Admin |
 | StakingPool (Minter/Burner) | [`0x393D0B87Ed38fc779FD9611144aE649BA6082109`](https://hyperevmscan.io/address/0x393D0B87Ed38fc779FD9611144aE649BA6082109) | Proxy |
 | StakingPool Implementation (`StakingManagerRouter`) | [`0x23fda3b9f944dbeaf2dcd5e7b9f8207b102c933f`](https://hyperevmscan.io/address/0x23fda3b9f944dbeaf2dcd5e7b9f8207b102c933f) | Implementation (upgraded 2026-04-07) |
@@ -52,7 +52,7 @@ All contracts are deployed on HyperEVM (Hyperliquid L1). Explorer: [HyperEVMScan
 
 All three ProxyAdmin contracts are owned by the [`Governance Multisig`](https://hyperevmscan.io/address/0x18A82c968b992D28D4D812920eB7b4305306f8F1) (verified onchain). The **4-of-8 multisig can upgrade all contract implementations** without timelock.
 
-**Architecture change (2026-04-07).** Two implementations were upgraded in a single transaction ([`0xe0d05afb…0478a0`](https://hyperevmscan.io/tx/0xe0d05afb1df4ee892f3f08bdea052fdfcdb604109574b7efeb21fc0fbf0478a0)): StakingPool moved to a Diamond/facet architecture (`StakingManagerRouter`, 7 facets in `FacetRegistry`), and PauserRegistry was replaced. The new StakingPool exposes a `quickWithdrawalDelay()` of **36 hours** and an `InstantUnstakePool` for faster exits, in addition to the existing 7-day standard withdrawal queue. The kHYPE token implementation is unchanged.
+**Architecture (2026-04-07 upgrade).** StakingPool and PauserRegistry were upgraded in a single transaction ([`0xe0d05afb…0478a0`](https://hyperevmscan.io/tx/0xe0d05afb1df4ee892f3f08bdea052fdfcdb604109574b7efeb21fc0fbf0478a0)). StakingPool runs on a Diamond/facet architecture (`StakingManagerRouter`, 7 facets in `FacetRegistry`) and exposes a `quickWithdrawalDelay()` of **36 hours** plus an `InstantUnstakePool` alongside the standard 7-day withdrawal queue.
 
 ## How Hyperliquid Staking Works (Context)
 
@@ -107,11 +107,10 @@ Architecture complexity: high-moderate. kHYPE relies on multiple upgradeable pro
 ## Historical Track Record
 
 - Listed on DeFiLlama since **July 17, 2025** (~10 months at assessment date).
-- **Current TVL**: ~$932M (May 19, 2026, per DeFiLlama).
+- **Current TVL**: ~$932M (May 19, 2026, per DeFiLlama) — up ~36% over the last quarter.
 - **Peak TVL**: ~$2.65B (October 4, 2025).
-- **TVL trend**: Recovering from prior decline — up ~36% from February 2026 ($683M → $932M); now ~35% of ATH. Largely tracks HYPE price.
 - **CoinGecko market data**: kHYPE price $49.57, market cap ~$863M, 24h volume ~$3.67M. ATH $59.44 on September 18, 2025.
-- **totalSupply (onchain)**: 17,406,215.90 kHYPE — supply has *declined* ~21% since February (22.1M → 17.4M kHYPE) despite USD TVL growth, indicating net unstaking absorbed by validator yield + price appreciation.
+- **totalSupply (onchain)**: 17,406,215.90 kHYPE.
 - No Kinetiq entry found in [DeFiLlama Hacks database](https://defillama.com/hacks) or [Rekt News](https://rekt.news/).
 - Evolving module set (kHYPE + xkHYPE/skHYPE/kmHYPE + April 2026 StakingPool facet refactor) maintains a moderate-to-high change-risk profile.
 
@@ -122,12 +121,12 @@ kHYPE manages deposited HYPE through a StakingPool contract and validator delega
 ### Accessibility
 
 - Minting via stake flow is permissionless through app/contract path (`whitelistEnabled()` = false onchain).
-- Unstaking now offers three exit paths after the April 2026 upgrade:
-  1. **Standard queue**: `withdrawalDelay()` = 604,800 sec = **7 days** exact.
-  2. **Quick withdrawal**: `quickWithdrawalDelay()` = 129,600 sec = **36 hours** (new, post-upgrade).
+- Three exit paths:
+  1. **Standard queue**: `withdrawalDelay()` = 604,800 sec = **7 days**.
+  2. **Quick withdrawal**: `quickWithdrawalDelay()` = 129,600 sec = **36 hours**.
   3. **Instant unstake** via [`InstantUnstakePool`](https://hyperevmscan.io/address/0x665b67793594fc5C251a3C95cbEb4B6245Cd2123) (currently 41,837 HYPE liquid).
 - Onchain verified parameters:
-  - **`unstakeFeeRate()`**: **0** (down from 10 / 0.10% — fee removed in April 2026 upgrade)
+  - **`unstakeFeeRate()`**: **0** — no exit fee.
   - **`minStakeAmount()`**: 5 HYPE
   - `withdrawalPaused()`: false
   - `stakingPaused()`: false
@@ -167,12 +166,12 @@ kHYPE exit routes:
 
 1. Protocol unstake queue (primary deterministic exit)
 - Onchain `withdrawalDelay()` = 7 days; `quickWithdrawalDelay()` = 36 hours
-- `unstakeFeeRate()` = 0 — fee-free exits post-April 2026 upgrade
+- `unstakeFeeRate()` = 0 — fee-free exits
 - Queue delay can expand under stress; instant path is capacity-limited by `InstantUnstakePool` liquidity (~42K HYPE currently)
 
 2. Secondary market liquidity (per GeckoTerminal + DeFiLlama, May 19, 2026)
 
-**Total kHYPE DEX liquidity: ~$8.6M** across 40 pools on HyperEVM DEXes — a sharp decline from ~$44M in February 2026 as liquidity migrated into the new instant-unstake path and lending markets.
+**Total kHYPE DEX liquidity: ~$8.6M** across 40 pools on HyperEVM DEXes.
 
 Top DEX pools:
 
@@ -185,11 +184,11 @@ Top DEX pools:
 | Project X | UBTC/kHYPE (0.3%) | $160,863 | $154,000 |
 | HyperSwap v3 | kHYPE/WHYPE (0.01%) | $245,062 | $16,719 |
 
-**Lending protocol deposits** dominate external kHYPE usage: ~$304M HyperLend (was ~$170M), ~$180M Morpho Blue across 5 markets (was ~$215M), ~$5.7M HypurrFi, ~$4.8M Felix CDP, ~$1.7M Harmonix, ~$0.8M Euler v2. These are not exit liquidity. No Pendle kHYPE market is currently listed on DeFiLlama.
+**Lending protocol deposits** dominate external kHYPE usage: ~$304M HyperLend, ~$180M Morpho Blue across 5 markets, ~$5.7M HypurrFi, ~$4.8M Felix CDP, ~$1.7M Harmonix, ~$0.8M Euler v2. These are not exit liquidity. No Pendle kHYPE market is currently listed on DeFiLlama.
 
 All trading is DEX-based on HyperEVM. No centralized exchange listings found.
 
-The combined effect — DEX liquidity collapse offset by new instant/quick exit paths and lower fees — is mixed: standard exits are cheaper and have more options, but stress-test secondary depth is materially reduced.
+Stress-exit scenarios rely primarily on the protocol's three-tier queue (instant pool → 36h quick path → 7d standard) rather than DEX depth.
 
 ## Centralization & Control Risks
 
@@ -198,12 +197,11 @@ The combined effect — DEX liquidity collapse offset by new instant/quick exit 
 Onchain verified governance data (May 19, 2026):
 
 - **Multisig address**: [`Governance Multisig`](https://hyperevmscan.io/address/0x18A82c968b992D28D4D812920eB7b4305306f8F1) (Gnosis Safe on HyperEVM)
-- **Threshold**: **4-of-8** (verified via `getThreshold()`) — one new owner added on 2026-04-07 (same day as the StakingPool upgrade), raising the owner count from 7 to 8 while keeping threshold at 4. `ChangedThreshold` event count over all history: 0.
+- **Threshold**: **4-of-8** (verified via `getThreshold()`). `ChangedThreshold` event count over all history: 0.
 - **Version**: 1.3.0
-- **Nonce**: 59 transactions executed (vs 32 at last assessment)
-- **Timelock**: **None.** Re-verified onchain — Safe still has no modules (`getModulesPaginated` returns empty array), no guard (storage slot `0x4a204f…c34c8` is zero), all three ProxyAdmins are standard OpenZeppelin (881 bytes, owned directly by multisig), and no `EnabledModule` events have ever been emitted.
+- **Nonce**: 59 transactions executed.
+- **Timelock**: **None.** Verified onchain — Safe has no modules (`getModulesPaginated` returns empty array), no guard (storage slot `0x4a204f…c34c8` is zero), all three ProxyAdmins are standard OpenZeppelin (881 bytes, owned directly by multisig), and no `EnabledModule` events have ever been emitted.
 - **Signer identities**: All 8 signers are pseudonymous.
-- **Owner change history** (Etherscan v2 `logs` API): 1× `RemovedOwner` and 2× `AddedOwner` events total. On 2025-11-14: owner `0x1a4f…71c0` was swapped for `0x6FF6…5B1d`. On 2026-04-07: owner `0x806e…7503` was added (no removal) — net +1 owner, threshold unchanged.
 
 **Role structure (verified via AccessControlEnumerable on May 19, 2026):**
 
@@ -221,16 +219,16 @@ Onchain verified governance data (May 19, 2026):
 | PauserRegistry | PAUSER | Governance Multisig (4/8) |
 | StakingAccountant | MANAGER | Governance Multisig (4/8) — sole authorized manager mapping (StakingPool → kHYPE) |
 
-The new `SENTINEL_ROLE` and `TREASURY_ROLE` are introduced by the April upgrade but currently have zero members onchain.
+`SENTINEL_ROLE` and `TREASURY_ROLE` exist on the StakingPool but currently have zero members onchain.
 
-**Key concern:** The OPERATOR role on the StakingPool is still held by a single **EOA** ([`OPERATOR EOA`](https://hyperevmscan.io/address/0x23A4604cDFe8e9e2e9Cf7C10D7492B0F3f4B4038)), not the multisig. This address is a Kinetiq automated bot — nonce has grown from 6,421 (Feb 2026) to **9,755** (May 2026), confirming continuous active operation calling `generatePerformance()` and `updateValidatorMetrics()`.
+**Key concern:** The OPERATOR role on the StakingPool is held by a single **EOA** ([`OPERATOR EOA`](https://hyperevmscan.io/address/0x23A4604cDFe8e9e2e9Cf7C10D7492B0F3f4B4038)), not the multisig. This address is a Kinetiq automated bot (nonce 9,755) calling `generatePerformance()` and `updateValidatorMetrics()` on a regular basis.
 
 ### Programmability
 
 - Hybrid onchain system with multiple upgradeable proxy contracts.
 - Exchange rate is derived from onchain state (`StakingAccountant.kHYPEToHYPE`), not admin-set.
-- StakingPool has significant admin functions: `pauseWithdrawal()`, `pauseStaking()`, `setWithdrawalDelay()`, `setUnstakeFeeRate()`, `executeEmergencyWithdrawal()`, `rescueToken()`. Emergency withdrawal and token rescue capabilities remain — powerful admin functions.
-- **New (April 2026) Diamond/facet architecture** for the StakingPool: a `FacetRegistry` ([`0x4841…4225`](https://hyperevmscan.io/address/0x4841eCC9Ffb18aEA197E4d1dd1633cEA5e834225)) routes calls across 7 facet contracts. This increases code surface area and integration complexity, though the new implementation (`StakingManagerRouter`) is source-verified on HyperEVMScan and was preceded by the Nov 2025 Pashov instant-unstake audit.
+- StakingPool has significant admin functions: `pauseWithdrawal()`, `pauseStaking()`, `setWithdrawalDelay()`, `setUnstakeFeeRate()`, `executeEmergencyWithdrawal()`, `rescueToken()`. Emergency withdrawal and token rescue are powerful admin functions.
+- **Diamond/facet architecture** for the StakingPool: a `FacetRegistry` ([`0x4841…4225`](https://hyperevmscan.io/address/0x4841eCC9Ffb18aEA197E4d1dd1633cEA5e834225)) routes calls across 7 facet contracts. The implementation (`StakingManagerRouter`) is source-verified on HyperEVMScan and was preceded by the Nov 2025 Pashov instant-unstake audit.
 
 ### External Dependencies
 
@@ -242,7 +240,7 @@ Critical dependencies:
 
 Dependency concentration on Hyperliquid ecosystem is structurally high. **HyperEVM is NOT a separate chain** — it shares the same HyperBFT consensus as HyperCore. There is no bridge risk between HyperCore and HyperEVM; the risk is pure L1 liveness.
 
-**Important:** Hyperliquid is a highly centralized chain — Hyper Foundation controls **54.83%** of validator stake via 5 validators (May 2026; down slightly from 56.4% in February), still well in excess of the 1/3 BFT blocking minority. HYPE staking cannot be considered as safe as ETH staking, where validator set decentralization is significantly stronger (~1M validators, no single entity near blocking minority). This network-level centralization risk is inherited by kHYPE and should be weighed accordingly, even though Kinetiq's own delegations no longer flow to HF validators.
+**Important:** Hyperliquid is a highly centralized chain — Hyper Foundation controls **54.83%** of validator stake via 5 validators, well in excess of the 1/3 BFT blocking minority. HYPE staking cannot be considered as safe as ETH staking, where validator set decentralization is significantly stronger (~1M validators, no single entity near blocking minority). This network-level centralization risk is inherited by kHYPE and should be weighed accordingly, even though Kinetiq's own delegations no longer flow to HF validators.
 
 ### Hyperliquid Validator Set Dependency (Quantified)
 
@@ -260,15 +258,15 @@ Verify validator data: [Hyperliquid Staking Portal](https://app.hyperliquid.xyz/
 | Jailed stake | 37,138 HYPE (0.01%) |
 
 **Concentration risk:**
-- **Hyper Foundation operates 5 validators** controlling **54.83%** of active stake (~234.4M HYPE). This still exceeds the **1/3 blocking minority** for BFT consensus, but has declined slightly from 56.4% in February.
-- Top 5 validators (4 HF + Nansen x HypurrCollective) = 57.2% of active stake (was 60.1%).
-- Top 10 validators = 79.5% of active stake (was 83.4%).
-- Kinetiq now represents **~3.96% of total network stake** (down from 11.5% in February), reflecting both kHYPE supply contraction and broader network growth.
+- **Hyper Foundation operates 5 validators** controlling **54.83%** of active stake (~234.4M HYPE), still exceeding the **1/3 blocking minority** for BFT consensus.
+- Top 5 validators (4 HF + Nansen x HypurrCollective) = 57.2% of active stake.
+- Top 10 validators = 79.5% of active stake.
+- Kinetiq represents **~3.96% of total network stake**.
 
-**Kinetiq's delegation strategy (significantly diversified):**
+**Kinetiq's delegation strategy:**
 - L1 `delegatorSummary` for StakingPool: 16,932,424 delegated; 638,801 pending withdrawal across 5 positions; ~0 undelegated.
-- Delegations are now spread across **15 validators** (up from 9). Most non-anchor validators receive a uniform ~586,904 HYPE allocation.
-- **Zero delegations to Hyper Foundation validators** — a major shift from February when 45.0% of Kinetiq stake went to HF validators.
+- Delegations are spread across **15 validators**. Most non-anchor validators receive a uniform ~586,904 HYPE allocation.
+- **Zero delegations to Hyper Foundation validators.**
 
 | Validator | Delegation (HYPE) | % of Kinetiq | Lock Status |
 |-----------|-------------------|-------------|-------------|
@@ -288,7 +286,7 @@ Verify validator data: [Hyperliquid Staking Portal](https://app.hyperliquid.xyz/
 | HypurrCorea: SKYGG x DeSpread | 586,904 | 3.47% | Unlocked |
 | Liquid Spirit x Hydromancer x Rekt Gan | 586,904 | 3.47% | Unlocked |
 
-- **0% of Kinetiq delegations go to Hyper Foundation validators** (was 45%).
+- **0% of Kinetiq delegations go to Hyper Foundation validators.**
 - All delegated validators are active with no current jailing exposure.
 
 **Slashing/jailing context:**
@@ -388,29 +386,29 @@ Track official Hyperliquid updates for:
 
 ### Key Strengths
 
-1. Significant TVL (~$932M, +36% since February) and deeper DeFi integration (~$497M of kHYPE deposited in lending markets).
-2. 8 audits from reputable firms (Pashov ×2, Zenith ×2, Code4rena, Spearbit ×3) — including a Pashov audit specifically covering the new instant-unstake design that shipped in April 2026.
-3. Active Cantina bug bounty with $5M max and **387 submissions** (up from 294).
+1. TVL ~$932M (up ~36% over the last quarter) with deep DeFi integration (~$497M of kHYPE deposited in lending markets).
+2. 8 audits from reputable firms (Pashov ×2, Zenith ×2, Code4rena, Spearbit ×3), including a Pashov audit specifically covering the instant-unstake design.
+3. Active Cantina bug bounty with $5M max and **387 submissions**.
 4. Onchain verifiable staking economics with AccessControl role enumeration; backing reconciles to within ~900 HYPE between accountant and actual L1+EVM holdings.
-5. **Delegation strategy materially diversified** — Kinetiq now spreads across 15 validators with **0% to Hyper Foundation** (was 45%), and Kinetiq's share of total network stake fell from 11.5% → 3.96%.
-6. **Three exit paths**: 7-day standard queue, 36-hour quick withdrawal, and `InstantUnstakePool`; standard fee removed (0.10% → 0%).
+5. **Diversified delegation**: spread across 15 validators with **0% to Hyper Foundation**; Kinetiq's share of total network stake is ~3.96%.
+6. **Three exit paths** with **no exit fee**: 7-day standard queue, 36-hour quick withdrawal, and `InstantUnstakePool`.
 
 ### Key Risks
 
-1. Queue-based unstake path (7 days) remains the deterministic exit; quick/instant paths are capacity-limited.
-2. **New Diamond/facet StakingPool architecture (April 2026)** — 7 facets routed via `FacetRegistry` increases code surface and integration complexity. Implementation verified onchain and preceded by audit, but the architecture is recent.
-3. OPERATOR role on StakingPool still held by a single EOA (now nonce 9,755 — confirmed continuously active).
-4. **No timelock on multisig** — re-verified exhaustively onchain (no modules, no guard, no timelock contract). Upgrades can be executed immediately.
-5. **Multisig expanded 4-of-7 → 4-of-8** (April 2026). Threshold remained at 4 — proportionally weaker (50% vs 57% prior). All 8 signers remain pseudonymous and team-associated based on prior signer-independence analysis.
-6. **Hyper Foundation still controls 54.83% of network stake** — exceeds 1/3 BFT blocking minority (network-level risk, not Kinetiq-specific).
-7. DEX liquidity declined sharply: ~$44M → ~$8.6M across HyperEVM DEXes. Top pools now hold $2–3M each. Stress-exit scenarios depend more on the protocol queue / InstantUnstakePool than DEX depth.
+1. Standard queue-based unstake (7 days) is the deterministic exit; quick/instant paths are capacity-limited.
+2. **Diamond/facet StakingPool architecture** — 7 facets routed via `FacetRegistry` carries higher code surface and integration complexity than a monolithic implementation.
+3. OPERATOR role on StakingPool held by a single EOA (nonce 9,755).
+4. **No timelock on multisig** — verified exhaustively onchain (no modules, no guard, no timelock contract). Upgrades can be executed immediately.
+5. **4-of-8 multisig** — threshold is proportionally 50%. All 8 signers are pseudonymous and appear team-associated.
+6. **Hyper Foundation controls 54.83% of network stake** — exceeds 1/3 BFT blocking minority (network-level risk, not Kinetiq-specific).
+7. DEX liquidity is ~$8.6M across HyperEVM DEXes; top pools hold $2–3M each. Stress-exit scenarios depend on the protocol queue / InstantUnstakePool more than DEX depth.
 8. Contracts not open-sourced on GitHub (but verified onchain on HyperEVMScan).
 9. Legal entity ambiguity: "Kinetiq Labs" (Terms) vs "Kinetiq Research" (Privacy/GitHub) with no specific governing law jurisdiction named.
 
 ### Critical Risks
 
 - `executeEmergencyWithdrawal()` and `rescueToken()` functions give admin significant power over funds.
-- New `SENTINEL_ROLE` and `TREASURY_ROLE` on StakingPool are currently unassigned — monitor for grants.
+- `SENTINEL_ROLE` and `TREASURY_ROLE` on StakingPool are currently unassigned — monitor for grants.
 
 ---
 
@@ -426,7 +424,7 @@ Track official Hyperliquid updates for:
 
 #### Category 1: Audits & Historical Track Record (Weight: 20%)
 
-- 8 audits by reputable firms (Pashov ×2, Zenith ×2, Code4rena, Spearbit ×3) from Mar 2025 – Jan 2026, including coverage of the instant-unstake path that shipped in April 2026.
+- 8 audits by reputable firms (Pashov ×2, Zenith ×2, Code4rena, Spearbit ×3) from Mar 2025 – Jan 2026, including coverage of the instant-unstake path.
 - Cantina bug bounty at $5M max with **387** submissions.
 - ~10 months in production, TVL ~$932M (peaked ~$2.65B). No public incidents.
 
@@ -435,9 +433,9 @@ Track official Hyperliquid updates for:
 #### Category 2: Centralization & Control Risks (Weight: 30%)
 
 Subscores:
-- Governance: **4.0** — 4-of-8 multisig (verified onchain). **No timelock** (re-confirmed exhaustively). Threshold remained at 4 while owner count grew from 7→8 in April 2026, so the *proportional* threshold weakened slightly (50% vs 57%). Signer independence remains questionable (all pseudonymous, prior signer-funding analysis suggests team-association). Powerful admin functions persist (emergency withdrawal, rescue, parameter changes).
-- Programmability: **2.5** — New Diamond/facet StakingPool architecture (7 facets) increases code surface and integration risk versus the previous monolithic implementation, partially offset by recent audit coverage. Exchange rate remains onchain-derived (via `StakingAccountant`). All core contracts source-verified on HyperEVMScan.
-- External dependencies: **3.5** — Critical single-ecosystem dependency on Hyperliquid L1 remains. Hyper Foundation still controls 54.83% of network stake. However, **Kinetiq has eliminated its direct HF-validator exposure** (0% vs prior 45%), partially decoupling Kinetiq-specific risk from HF-concentration risk. Kinetiq's network share also dropped to ~3.96%.
+- Governance: **4.0** — 4-of-8 multisig (verified onchain), proportionally 50% threshold. **No timelock** (confirmed exhaustively). Signer independence is questionable (all pseudonymous and team-associated). Powerful admin functions exist (emergency withdrawal, rescue, parameter changes).
+- Programmability: **2.5** — Diamond/facet StakingPool architecture (7 facets) carries elevated code surface and integration risk, partially offset by audit coverage. Exchange rate is onchain-derived (via `StakingAccountant`). All core contracts source-verified on HyperEVMScan.
+- External dependencies: **3.5** — Critical single-ecosystem dependency on Hyperliquid L1. Hyper Foundation controls 54.83% of network stake. Kinetiq has **zero direct HF-validator exposure**, decoupling Kinetiq-specific risk from HF-concentration risk. Kinetiq's network share is ~3.96%.
 
 Centralization score = (4.0 + 2.5 + 3.5) / 3 = **3.33**
 
@@ -455,18 +453,18 @@ Funds management score = (2.0 + 1.5) / 2 = **1.75**
 
 #### Category 4: Liquidity Risk (Weight: 15%)
 
-- Three deterministic exit paths now (7-day, 36-hour, instant-pool) versus a single 7-day path in February; fee removed (0% vs 0.10%).
-- DEX liquidity has *fallen sharply* — ~$8.6M across 40 pools (was ~$44M across 39 pools). Largest pool now ~$3.4M vs prior ~$8.2M.
-- Most kHYPE in DeFi is in lending markets (~$304M HyperLend, ~$180M Morpho), which is not exit liquidity.
-- All trading liquidity is on HyperEVM DEXes; no CEX listings. The protocol's queue/quick/instant paths now bear more of the exit burden.
+- Three deterministic exit paths: 7-day standard, 36-hour quick, and instant pool. No exit fee.
+- DEX liquidity is ~$8.6M across 40 pools; largest pool ~$3.4M.
+- Most kHYPE in DeFi sits in lending markets (~$304M HyperLend, ~$180M Morpho), which is not exit liquidity.
+- All trading liquidity is on HyperEVM DEXes; no CEX listings. The protocol's queue/quick/instant paths carry most of the exit burden.
 
-**Score: 2.0/5** (mixed: more protocol-level exit options, less secondary depth)
+**Score: 2.0/5**
 
 #### Category 5: Operational Risk (Weight: 5%)
 
 - Docs present but client-side rendered (verification difficult).
-- Audit cadence and bounty are strong; coverage now spans the new architecture.
-- Team transparency: unchanged from February (3 identifiable contributors via GitHub history; no team page).
+- Audit cadence and bounty are strong, with coverage of the current architecture.
+- Team transparency: 3 identifiable contributors via GitHub history; no public team page.
 - No public incident response plan documented.
 
 **Score: 2.0/5**
@@ -482,18 +480,17 @@ Funds management score = (2.0 + 1.5) / 2 = **1.75**
 | Operational Risk | 2.0 | 5% | 0.10 |
 | **Final Score** | | | **2.315 / 5.0** |
 
-## Overall Risk Score: **2.3 / 5.0** (unchanged)
+## Overall Risk Score: **2.3 / 5.0**
 
 ### Risk Tier: **MEDIUM RISK**
 
 Rationale:
-- kHYPE is a well-audited LST with significant TVL ($932M) and growing DeFi adoption.
-- Governance is now formally 4-of-8 multisig (owner added April 2026 alongside upgrade), still no timelock, signers still pseudonymous and team-associated.
-- **Delegation strategy meaningfully improved**: 0% to Hyper Foundation validators (was 45%), 15 validators (was 9), Kinetiq's share of total network stake down to ~3.96% (was 11.5%).
-- Architecture now Diamond/facet (7 facets) — more complex, but audited and source-verified onchain.
-- Liquidity profile shifted: more protocol-side exit options (7d/36h/instant), but ~80% drop in DEX depth.
-- Hyper Foundation still controls 54.8% of network validator stake — unchanged structural Hyperliquid risk.
-- The net of these factors leaves the score essentially unchanged versus February.
+- kHYPE is a well-audited LST with significant TVL ($932M, up ~36% over the last quarter) and deep DeFi integration.
+- Governance is a 4-of-8 multisig with no timelock; signers are pseudonymous and team-associated.
+- **Diversified delegation**: 0% to Hyper Foundation validators, spread across 15 validators; Kinetiq's share of total network stake is ~3.96%.
+- Architecture is Diamond/facet (7 facets) — audited and source-verified onchain.
+- Three protocol-side exit paths (7d / 36h / instant pool) with no fee; DEX depth is ~$8.6M.
+- Hyper Foundation controls 54.8% of network validator stake — structural Hyperliquid risk.
 
 ## Reassessment Triggers
 
