@@ -10,7 +10,7 @@
   "dependencies": {
     "@astrojs/vercel": "10.0.6",
     "@resvg/resvg-js": "2.6.2",
-    "astro": "6.2.2",
+    "astro": "6.3.5",
     "marked": "18.0.3",
     "satori": "0.26.0"
   }
