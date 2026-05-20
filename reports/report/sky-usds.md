@@ -4,18 +4,20 @@
 - **Token:** USDS (Sky Dollar) and sUSDS (Savings USDS)
 - **Chain:** Ethereum
 - **Token Address:** [`0xdC035D45d973E3EC169d2276DDab16f1e407384F`](https://etherscan.io/address/0xdC035D45d973E3EC169d2276DDab16f1e407384F) (USDS) · [`0xa3931d71877C0E7a3148CB7Eb4463524FEc27fbD`](https://etherscan.io/address/0xa3931d71877C0E7a3148CB7Eb4463524FEc27fbD) (sUSDS)
-- **Final Score: 1.3/5.0**
+- **Final Score: 1.5/5.0**
 
 ## Overview + Links
 
 **USDS** is Sky Protocol's USD-pegged stablecoin — the upgraded, rebranded successor to **DAI**, launched on September 2, 2024 as part of MakerDAO's "Endgame" transition to Sky. USDS is an upgradeable ERC-20 (UUPS/EIP-1967 proxy) and is governed through the same on-chain machinery that governs DAI: the Sky **Maker Vat** (MCD_VAT) ledger, **Chief** continuous-approval voting, and the **PauseProxy** with a 48-hour Governance Security Module (GSM) delay.
 
-USDS does **not** have its own dedicated collateral system — it is **issued only through two atomic, fee-free conversion paths**, each of which routes through the underlying Sky/MakerDAO infrastructure:
+USDS does **not** have its own dedicated collateral system. There are **two permissionless, user-facing 1:1 swap paths** for getting in and out of USDS:
 
 1. **DAI ↔ USDS Converter** ([`0x3225737a9Bbb6473CB4a45b7244ACa2BeFdB276A`](https://etherscan.io/address/0x3225737a9Bbb6473CB4a45b7244ACa2BeFdB276A)) — anyone with DAI can swap 1:1 to USDS (and back) at zero fees in a single transaction. This rails USDS's peg directly to DAI.
 2. **USDS-USDC LitePSM Wrapper** ([`0xA188EEC8F81263234dA3622A406892F3D630f98c`](https://etherscan.io/address/0xA188EEC8F81263234dA3622A406892F3D630f98c)) — a thin wrapper around the existing **DAI LitePSM** ([`0xf6e72Db5454dd049d0788e411b06CfAF16853042`](https://etherscan.io/address/0xf6e72Db5454dd049d0788e411b06CfAF16853042)) that lets anyone swap USDC ↔ USDS 1:1 with **zero fees** (`tin = tout = 0`), atomically. Backing USDC is held in a dedicated **Pocket** contract ([`0x37305B1cD40574E4C5Ce33f8e8306Be057fD7341`](https://etherscan.io/address/0x37305B1cD40574E4C5Ce33f8e8306Be057fD7341)).
 
-Because every USDS is fungible with a DAI (via the converter), the total system collateral securing USDS is the **entire Sky/MakerDAO collateral book** sitting in MCD_VAT — a mix of crypto-backed CDPs (ETH, wstETH, WBTC), USDC PSM reserves, Real-World Asset (RWA) tokenized US Treasury bills, and Direct-Deposit Modules (D3M) into Spark/Aave.
+In addition, USDS supply can also be *issued* (not swapped) through governance-mediated channels: **D3M (Direct-Deposit Modules)** that mint USDS into lending markets (e.g. Spark, Aave-Lido) up to per-market debt ceilings, and **CDP/LockStake borrowers** who post collateral and draw DAI which then routes through the converter into USDS. These additional channels are detailed in the [Funds Management → How USDS Is Issued](#how-usds-is-issued) section.
+
+Because every USDS is fungible with a DAI (via the converter), the total system collateral securing USDS is the **entire Sky/MakerDAO collateral book** sitting in MCD_VAT — a mix of crypto-backed CDPs (ETH, wstETH, WBTC), USDC PSM reserves, Real-World Asset (RWA) tokenized US Treasury bills, and D3M positions.
 
 **sUSDS** is the tokenized Sky Savings Rate vault — an ERC-4626 wrapper deployed September 4, 2024 with a `chi` accumulator that grows continuously at the Sky Savings Rate (**SSR**). Depositing USDS into sUSDS is atomic, fee-free, and so is withdrawal. The SSR is a parameter set by Sky Governance via Chief + PauseProxy (currently a per-second `ssr` of `1.00000000113…` → **~3.65% APY** at the May 20, 2026 snapshot).
 
@@ -592,7 +594,7 @@ Snapshot block 25137266 (May 20, 2026).
 
 **Historical Score: 1.5 / 5** — USDS-specific track record is just shy of 2 years (would map to 2.0), but the underlying MCD core has been multi-billion-dollar production for 8 years with no recent incidents, justifying a slight discount toward 1.0.
 
-**Cat 1 Score = (1.0 + 1.5) / 2 = 1.25 → 1.5 / 5**
+**Cat 1 Score = (1.0 + 1.5) / 2 = 1.25 → 1.3 / 5** (conservative round-up to one decimal)
 
 #### Category 2: Centralization & Control Risks (Weight: 30%)
 
@@ -631,7 +633,7 @@ Snapshot block 25137266 (May 20, 2026).
 
 **Dependencies Score: 2.0 / 5** — Two heavy blue-chip dependencies (USDC + MCD core) with material concentration in USDC. Maps to "1-2 blue-chip dependencies" but with non-trivial criticality, so 2.0 rather than 1.0.
 
-**Cat 2 Score = (2.0 + 1.0 + 2.0) / 3 ≈ 1.67 → 1.5 / 5**
+**Cat 2 Score = (2.0 + 1.0 + 2.0) / 3 ≈ 1.67 → 1.7 / 5** (conservative round-up to one decimal)
 
 #### Category 3: Funds Management (Weight: 30%)
 
@@ -657,7 +659,7 @@ Snapshot block 25137266 (May 20, 2026).
 
 **Provability Score: 1.5 / 5** — Excellent onchain transparency for the live-swap path; mild offchain dependence for RWA fraction.
 
-**Cat 3 Score = (2.0 + 1.5) / 2 = 1.75 → 1.5 / 5** (rounded conservatively)
+**Cat 3 Score = (2.0 + 1.5) / 2 = 1.75 → 1.8 / 5** (conservative round-up to one decimal)
 
 #### Category 4: Liquidity Risk (Weight: 15%)
 
@@ -686,32 +688,34 @@ Snapshot block 25137266 (May 20, 2026).
 
 ### Final Score Calculation
 
+**Rounding rule:** category scores use one-decimal precision; when a subcategory average falls between two 0.1 marks, round **up** (conservative). The weighted sum is then rounded to one decimal place with standard nearest-0.1 rounding, with ties broken up.
+
 | Category | Score | Weight | Weighted |
 |----------|------:|-------:|---------:|
-| Audits & Historical | 1.5 | 20% | 0.300 |
-| Centralization & Control | 1.5 | 30% | 0.450 |
-| Funds Management | 1.5 | 30% | 0.450 |
+| Audits & Historical | 1.3 | 20% | 0.260 |
+| Centralization & Control | 1.7 | 30% | 0.510 |
+| Funds Management | 1.8 | 30% | 0.540 |
 | Liquidity Risk | 1.0 | 15% | 0.150 |
 | Operational Risk | 1.0 |  5% | 0.050 |
-| **Final Score** | | | **1.40 → 1.4 / 5.0** |
+| **Final Score** | | | **1.510 → 1.5 / 5.0** |
 
 **Optional Modifiers Considered:**
-- *Live >2 years with no incidents:* **Not applied** — USDS itself is 20.6 months old, just shy of the 24-month threshold. (If reassessed after September 2026, this modifier would likely apply and could drop the score to 1.0.)
-- *TVL maintained >$500M for >1 year:* **Applied → -0.5 candidate.** USDS supply has exceeded $500M continuously since shortly after launch and stayed multi-billion for >1 year. However, applying this would round down to 0.9 which is below the 1.0 minimum, and is partially already reflected in the Cat-1 Historical 1.5 (rather than 2.0). **Not applied to avoid double-counting**, but it is a strong qualitative tailwind.
+- *Live >2 years with no incidents:* **Not applied** — USDS itself is 20.6 months old, just shy of the 24-month threshold. (If reassessed after September 2026, this modifier would likely apply and could drop the score by 0.5.)
+- *TVL maintained >$500M for >1 year:* The strict criterion is met for USDS (>$500M continuously since shortly after launch, multi-billion for >1 year). The TVL tailwind is already reflected in the Cat-1 Historical 1.5 (rather than 2.0). **Not applied as an additional -0.5** to avoid double-counting.
 
-**Net final: 1.4 / 5.0** (no modifier). Conservative rounding to **1.3 / 5.0** would also be defensible given the modifier consideration; I keep 1.4 to remain on the conservative side of the rubric.
+**Net final: 1.5 / 5.0.** The unrounded weighted sum is 1.510, which sits just above the Minimal-Risk ceiling (1.5). Per the conservative scoring guideline (when uncertain between two tiers, choose the higher / riskier one), this report classifies USDS at the **Low Risk** tier rather than the Minimal-Risk boundary.
 
 ### Risk Tier
 
 | Final Score | Risk Tier | Recommendation |
 |------------|-----------|----------------|
-| **1.0–1.5** | **Minimal Risk** | **Approved, high confidence** |
-| 1.5–2.5 | Low Risk | Approved with standard monitoring |
+| 1.0–1.5 | Minimal Risk | Approved, high confidence |
+| **1.5–2.5** | **Low Risk** | **Approved with standard monitoring** |
 | 2.5–3.5 | Medium Risk | Approved with enhanced monitoring |
 | 3.5–4.5 | Elevated Risk | Limited approval, strict limits |
 | 4.5–5.0 | High Risk | Not recommended |
 
-**Final Risk Tier: Minimal Risk (1.4 / 5.0) — Approved, high confidence**
+**Final Risk Tier: Low Risk (1.5 / 5.0) — Approved with standard monitoring**
 
 ---
 
