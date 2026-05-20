@@ -8,7 +8,7 @@
     "update-stats": "node scripts/update_stats.mjs"
   },
   "dependencies": {
-    "@astrojs/vercel": "10.0.6",
+    "@astrojs/vercel": "10.0.7",
     "@resvg/resvg-js": "2.6.2",
     "astro": "6.2.2",
     "marked": "18.0.3",
