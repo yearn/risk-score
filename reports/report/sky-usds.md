@@ -4,7 +4,7 @@
 - **Token:** USDS (Sky Dollar) and sUSDS (Savings USDS)
 - **Chain:** Ethereum
 - **Token Address:** [`0xdC035D45d973E3EC169d2276DDab16f1e407384F`](https://etherscan.io/address/0xdC035D45d973E3EC169d2276DDab16f1e407384F) (USDS) · [`0xa3931d71877C0E7a3148CB7Eb4463524FEc27fbD`](https://etherscan.io/address/0xa3931d71877C0E7a3148CB7Eb4463524FEc27fbD) (sUSDS)
-- **Final Score: 1.5/5.0**
+- **Final Score: 1.4/5.0**
 
 ## Overview + Links
 
@@ -609,7 +609,7 @@ Snapshot block 25137266 (May 20, 2026).
 | Privileged roles | PauseProxy holds direct wards on USDS, sUSDS, all PSM components, and can `rely` new minters |
 | EOA risk | None |
 
-**Governance Score: 2.0 / 5** — Token-weighted governance with 48 h delay maps to score 2 on the rubric (between "Multisig 7/11+ with timelock 24+ h" and "EOA or <3 signers"). The 48 h delay is shorter than the 7-day rubric-1 threshold; an upgrade is reachable in <48 h via Mom emergency channel for PSM-pause only.
+**Governance Score: 1.0 / 5** — Sky's Chief is one of the most decentralized governance systems in DeFi: token-weighted continuous-approval voting with **no multisig at all**, no EOA roles, and all wards held by PauseProxy. The rubric awards Score 1 to "Immutable OR fully decentralized DAO" with "Multisig above 3/5 threshold, no EOA roles, multi-party approval" — Sky meets the decentralized-DAO criterion and *exceeds* the multisig criterion (the entire SKY-holder set is the approver). The only column where Sky is below Score 1 is the timelock — 48 h vs the 7-day rubric criterion — but the live re-vote capability in Chief (a contentious spell must maintain hat status throughout the delay) extends the effective defense window beyond a static 7-day timelock. **Caveat:** the LITE_PSM_MOM emergency channel lets the elected hat halt PSM swaps *without* the 48 h delay. This is a one-sided emergency mechanism (it can pause but not extract value), and it has never been invoked since deployment.
 
 **Subcategory B: Programmability**
 
@@ -627,13 +627,14 @@ Snapshot block 25137266 (May 20, 2026).
 
 | Factor | Assessment |
 |--------|-----------|
-| Critical dependencies | USDC (Circle) — Pocket holds 3.80B USDC; DAI / MCD core; LITE_PSM_MOM; LayerZero (cross-chain only) |
-| Quality | All blue-chip — Circle and MakerDAO core are the two largest mature dependencies in stablecoin DeFi |
-| Single point of failure | Critical: a USDC freeze/depeg directly impairs the USDS-USDC swap. A bug in MCD_VAT impairs all USDS issuance |
+| True external dependencies | USDC (Circle) — Pocket holds 3.80B USDC; Chainlink oracles (multi-source) for collateral pricing; LayerZero (cross-chain OFT — non-critical for mainnet user) |
+| Not counted as external | MCD core (VAT, Chief, Pause, Join) — this *is* Sky's own infrastructure, not a third-party dependency |
+| Quality | USDC is blue-chip (Circle survived March 2023 SVB depeg without halting); Chainlink is multi-source mature oracle |
+| Single point of failure | A USDC freeze/depeg directly impairs the USDS-USDC swap, but the DAI-USDS converter path still works without USDC |
 
-**Dependencies Score: 2.0 / 5** — Two heavy blue-chip dependencies (USDC + MCD core) with material concentration in USDC. Maps to "1-2 blue-chip dependencies" but with non-trivial criticality, so 2.0 rather than 1.0.
+**Dependencies Score: 1.5 / 5** — One critical blue-chip external dependency (USDC) and one mature mid-criticality dependency (Chainlink). MCD core was previously double-counted as both internal architecture *and* external dependency — removing that, the residual external surface is small. Score 1.5 (between Score 1 "no external dependencies" and Score 2 "1-2 blue-chip non-critical") reflects that USDC is blue-chip but criticality is non-trivial.
 
-**Cat 2 Score = (2.0 + 1.0 + 2.0) / 3 ≈ 1.67 → 1.7 / 5** (conservative round-up to one decimal)
+**Cat 2 Score = (1.0 + 1.0 + 1.5) / 3 ≈ 1.17 → 1.2 / 5** (conservative round-up to one decimal)
 
 #### Category 3: Funds Management (Weight: 30%)
 
@@ -693,29 +694,29 @@ Snapshot block 25137266 (May 20, 2026).
 | Category | Score | Weight | Weighted |
 |----------|------:|-------:|---------:|
 | Audits & Historical | 1.3 | 20% | 0.260 |
-| Centralization & Control | 1.7 | 30% | 0.510 |
+| Centralization & Control | 1.2 | 30% | 0.360 |
 | Funds Management | 1.8 | 30% | 0.540 |
 | Liquidity Risk | 1.0 | 15% | 0.150 |
 | Operational Risk | 1.0 |  5% | 0.050 |
-| **Final Score** | | | **1.510 → 1.5 / 5.0** |
+| **Final Score** | | | **1.360 → 1.4 / 5.0** |
 
 **Optional Modifiers Considered:**
 - *Live >2 years with no incidents:* **Not applied** — USDS itself is 20.6 months old, just shy of the 24-month threshold. (If reassessed after September 2026, this modifier would likely apply and could drop the score by 0.5.)
 - *TVL maintained >$500M for >1 year:* The strict criterion is met for USDS (>$500M continuously since shortly after launch, multi-billion for >1 year). The TVL tailwind is already reflected in the Cat-1 Historical 1.5 (rather than 2.0). **Not applied as an additional -0.5** to avoid double-counting.
 
-**Net final: 1.5 / 5.0.** The unrounded weighted sum is 1.510, which sits just above the Minimal-Risk ceiling (1.5). Per the conservative scoring guideline (when uncertain between two tiers, choose the higher / riskier one), this report classifies USDS at the **Low Risk** tier rather than the Minimal-Risk boundary.
+**Net final: 1.4 / 5.0** — well inside the Minimal-Risk tier (1.0–1.5). The largest single contributor to the residual risk is Cat 3 Funds Management (1.8), driven by the Cat 3A Collateralization sub-score reflecting the offchain-custody RWA component of system backing.
 
 ### Risk Tier
 
 | Final Score | Risk Tier | Recommendation |
 |------------|-----------|----------------|
-| 1.0–1.5 | Minimal Risk | Approved, high confidence |
-| **1.5–2.5** | **Low Risk** | **Approved with standard monitoring** |
+| **1.0–1.5** | **Minimal Risk** | **Approved, high confidence** |
+| 1.5–2.5 | Low Risk | Approved with standard monitoring |
 | 2.5–3.5 | Medium Risk | Approved with enhanced monitoring |
 | 3.5–4.5 | Elevated Risk | Limited approval, strict limits |
 | 4.5–5.0 | High Risk | Not recommended |
 
-**Final Risk Tier: Low Risk (1.5 / 5.0) — Approved with standard monitoring**
+**Final Risk Tier: Minimal Risk (1.4 / 5.0) — Approved, high confidence**
 
 ---
 
