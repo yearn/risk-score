@@ -283,7 +283,18 @@ USDS does **not** have a clean "this collateral backs this token" picture — it
 
 ### DEX Liquidity
 
-USDS DEX liquidity on Ethereum mainnet is meaningful but **not** the primary exit path — most large flows route through the PSM, not AMM pools. Onchain query of one canonical Curve pool (`0x00b321d89A8C36B3929f20B7955080baeD706A1B`) at the snapshot showed zero USDS/USDC balances, suggesting it is not the active pool. **TODO:** identify the most-liquid USDS DEX pools (Curve/Uniswap/Maverick) and quantify ~$10M slippage. Given the no-fee PSM with ~$3.8B Pocket depth, DEX liquidity is largely irrelevant for the size that Yearn would route.
+USDS DEX liquidity on Ethereum mainnet is meaningful but **not** the primary exit path — most large flows route through the PSM, not AMM pools. Top DEX pools touching USDS or sUSDS on Ethereum, from [DefiLlama yields](https://yields.llama.fi/pools) at snapshot:
+
+| Project | Pool | TVL ($) |
+|---------|------|--------:|
+| Curve | PYUSD-USDS | ~$100.0M |
+| Curve | sUSDS-USDT | ~$50.0M |
+| Morpho Blue | sUSDS (multiple markets) | ~$110M aggregate |
+| Curve | DOLA-sUSDS | ~$5.6M |
+| Curve | USDS-stUSDS | ~$7.1M |
+| Uniswap V3 | OHM-sUSDS | ~$10.9M |
+
+Direct **USDS-USDC** DEX liquidity is small (no significant Curve/Uniswap USDS-USDC pool sits above $10M at the snapshot). This is because the **PSM Wrapper provides zero-fee 1:1 USDC↔USDS swaps**, so DEX routes cannot meaningfully out-price the PSM — there is no incentive for LPs to build deep USDS-USDC pools. For any reasonable Yearn integration size, the PSM (with ~$3.80B Pocket depth) is the dominant exit path; DEX liquidity is a secondary concern only at the multi-hundred-million-dollar scale.
 
 ### Cross-Chain Liquidity
 
@@ -292,7 +303,7 @@ USDS bridges to L2s and other chains via the **LayerZero OFT** ([`USDS_OFT`](htt
 ### Historical Liquidity Under Stress
 
 - During the October 2025 stablecoin stress event (USDS min price 0.9953), USDS-USDC swaps via the PSM remained available throughout — the peg deviation was driven by secondary AMM markets, not by Pocket depletion
-- **TODO:** verify whether the LitePSM Mom was ever invoked (`HALT` event) since deployment. No public record of such an event has been found in the chainlog mom/spell history — confirm via event log scan in monitoring follow-up
+- **`LITE_PSM_MOM.halt(...)` has never been invoked.** Full event-log scan of [`0x467b32b0407Ad764f56304420Cddaa563bDab425`](https://etherscan.io/address/0x467b32b0407Ad764f56304420Cddaa563bDab425) returns exactly **4 events** since deployment, none of which are `Halt(address indexed psm, Flow indexed what)` (topic `0x495feb065552316a79c594a4305afbd632955a68b2c6f65ad8b2f62d150fea92`). The 4 events are 2× `SetOwner` and 2× `SetAuthority` from initial deployment (final owner = PauseProxy, final authority = Chief). The emergency-halt channel exists but has never been used
 
 ## Centralization & Control Risks
 
@@ -315,7 +326,10 @@ Sky uses **token-weighted continuous-approval voting** rather than a multisig:
 - No EOA holds direct admin powers on USDS, sUSDS, LitePSM, or the Pocket. All sensitive `wards` mappings point to PauseProxy or other audited Sky contracts
 
 **Weaknesses:**
-- **SKY token concentration risk:** voting weight is proportional to SKY locked. Public sources indicate the top voters historically include former Maker MKR delegate platforms and large MKR-→-SKY upgraders. **TODO:** publish a current top-10 SKY voter snapshot to track concentration (LlamaRisk has previously published these analyses for MKR; equivalent USDS-era data is sparse)
+- **SKY token concentration risk:** voting weight is proportional to SKY locked. Onchain at the snapshot:
+  - Total SKY locked in Chief: **7,020,951,306 SKY** (~29.9% of the 23.46B SKY supply)
+  - Approvals for the current hat ([`0xA005…F596`](https://etherscan.io/address/0xA0059DaDd7Fbdbc81a9bb9d1d17cCB029b6AF596)): **6,523,143,752 SKY** (~27.8% of total supply; **~92.9% of locked SKY votes for the hat**)
+  - Top-10 individual voter concentration is non-trivial to derive purely from contract storage and is not resolved in this assessment — typical sources are Sky's voter dashboard or Chief `Vote`/`Lock` event aggregations. **TODO:** publish a top-10 voter snapshot via the Sky governance UI or a graph-aggregation, to track whether a small set of delegates can unilaterally hold the hat
 - **48 h delay is at the low end** for upgradeable stablecoin systems (compared to 7-day on many newer protocols). A determined attacker with sufficient SKY could theoretically push through harmful changes if they can hold the hat for 48 h without being out-voted
 - **Privileged role: PauseProxy can mint USDS to anyone** by granting `wards = 1` to a new address. This is the same "governance can do anything" property all DAO-controlled stablecoins share. The 48 h delay + onchain visibility is the only constraint
 
@@ -350,7 +364,7 @@ System operations are dominated by programmatic onchain logic. The governance to
 ## Operational Risk
 
 - **Team:** Sky Foundation (formerly MakerDAO) — established 2017, **publicly known team** including Rune Christensen (co-founder), Sébastien Derivaux, and others. Long track record of operating a multi-billion-dollar protocol
-- **Legal entity:** "**Skybase International**" operates the [sky.money](https://sky.money/) front-end per the [user-risks legal page](https://docs.sky.money/legal/skybase-international/user-risks). The Sky Protocol itself is described as "non-custodial blockchain-based software". Specific jurisdiction of Skybase International is not disclosed in the user-risks excerpt — **TODO** confirm jurisdiction from the full Terms of Use
+- **Legal entity:** "**Skybase International**" operates the [sky.money](https://sky.money/) front-end per the [user-risks legal page](https://docs.sky.money/legal/skybase-international/user-risks). The Sky Protocol itself is described as "non-custodial blockchain-based software". Per Section 5 / 6 of the [Skybase International Terms of Use](https://docs.sky.money/legal/skybase-international/terms-of-use), **the Terms (and any non-contractual obligations) are governed by the laws of the Cayman Islands**, with arbitration under the Cayman Islands Association of Mediators and Arbitrators (CI-ArbCA) and the **seat of arbitration in George Town, Grand Cayman**. Courts of the Cayman Islands hold exclusive jurisdiction for non-arbitrable disputes. US residents are explicitly excluded from certain features (Sky Savings Rate and Sky Token Rewards)
 - **Documentation:** Comprehensive — Sky maintains [developers.skyeco.com](https://developers.skyeco.com), [docs.sky.money](https://docs.sky.money), the public chainlog ([chainlog.sky.money](https://chainlog.sky.money)), GitHub org [sky-ecosystem](https://github.com/sky-ecosystem) with all production contract source code, and detailed governance forum at [forum.sky.money](https://forum.sky.money)
 - **Incident response track record:**
   - Black Thursday (March 2020) — Sky/MakerDAO governance held an emergency vote, minted MKR to recapitalize the system, paused vulnerable auctions, and shipped Liquidations 2.0
@@ -406,7 +420,7 @@ MCD_PAUSE.delay()                                   // GSM delay
 Chief.hat()                                         // current elected spell
 ```
 
-For offchain context, monitor the [Sky governance forum](https://forum.sky.money/) for posted spells and [LlamaRisk](https://www.llamarisk.com/) for periodic Sky/Maker risk updates. **TODO:** confirm whether LlamaRisk has published a USDS-specific report (search at time of writing returned no direct match; the most-recent Sky/Maker assessment may pre-date the USDS rebrand).
+For offchain context, monitor the [Sky governance forum](https://forum.sky.money/) for posted spells. The current [LlamaRisk research index](https://llamarisk.com/research) does not list a standalone post-rebrand Sky/USDS assessment (9 articles visible, none on USDS); LlamaRisk has historically published Maker / DAI / RWA-exposure articles and acts as risk advisor for Aave's USDS onboarding, but the most recent dedicated risk report on the Sky stack predates the USDS rebrand.
 
 ## Appendix: Contract Architecture
 
@@ -664,7 +678,7 @@ Snapshot block 25137266 (May 20, 2026).
 |--------|-----------|
 | Team | Sky Foundation / MakerDAO veterans; publicly known leadership (Rune Christensen et al.); established 2017 |
 | Documentation | Comprehensive — developer docs, governance forum, public chainlog, GitHub source |
-| Legal entity | Skybase International runs the sky.money front-end; specific jurisdiction not yet confirmed (TODO) |
+| Legal entity | Skybase International (governed by Cayman Islands law) operates the sky.money front-end; the Sky Protocol itself is non-custodial onchain code |
 | Incident response | Demonstrated across Black Thursday and 2023 USDC depeg |
 | Monitoring | Public chainlog + governance forum + LlamaRisk / Block Analitica dashboards. Yearn's `monitoring` repo already alerts on USDS-adjacent vaults |
 
@@ -727,10 +741,16 @@ Snapshot block 25137266 (May 20, 2026).
 
 ---
 
-## TODOs and Open Items
+## Open Items
 
-- **TODO:** Confirm Skybase International's jurisdiction from the full Sky Terms of Use (the user-risks page references the agreement but does not state the jurisdiction in the public excerpt fetched here)
-- **TODO:** Quantify USDS DEX liquidity (Curve, Uniswap V3, Maverick) for $10M-class swaps as a sanity check on PSM-independent exit (PSM-based exit is already verified ample at 3.80B USDC pocket)
-- **TODO:** Confirm whether `LITE_PSM_MOM.HALT()` has ever been invoked since deployment by scanning event logs on [`0x467b…b425`](https://etherscan.io/address/0x467b32b0407Ad764f56304420Cddaa563bDab425) (no public report of such an event was found, but a full log scan is recommended in monitoring follow-up)
-- **TODO:** Pull current SKY voter concentration / top-10 approvers from Chief to quantify governance-concentration risk (LlamaRisk has historically published MKR/SKY voter dashboards; latest snapshot was not located in this assessment session)
-- **TODO:** Confirm latest LlamaRisk / Steakhouse report on Sky/USDS/sUSDS. Direct queries against [llamarisk.com/research](https://www.llamarisk.com/research) returned articles on adjacent protocols (Ethena USDe, Falcon USDf, Aave GHO, Curve frxUSD) but no USDS-specific report on the visible page — the rebrand may have shifted older Maker reports off the front page
+Resolved in this assessment pass:
+
+- ✅ **Skybase International jurisdiction:** Cayman Islands — confirmed in the [Terms of Use](https://docs.sky.money/legal/skybase-international/terms-of-use) (governing law = Cayman Islands; arbitration seat = George Town, Grand Cayman; exclusive court jurisdiction = Cayman Islands). Reflected in the Operational Risk section
+- ✅ **DEX liquidity sanity check:** verified via DefiLlama yields — top direct USDS-paired pool is Curve PYUSD-USDS at ~$100M; direct USDS-USDC DEX liquidity is intentionally thin because the PSM provides zero-fee 1:1 swaps with $3.80B depth (no LP incentive to build deeper USDS-USDC pools). Reflected in the Liquidity Risk section
+- ✅ **`LITE_PSM_MOM.halt(...)` history:** confirmed via full Etherscan log scan of [`0x467b…b425`](https://etherscan.io/address/0x467b32b0407Ad764f56304420Cddaa563bDab425) — only 4 events ever (2× `SetOwner`, 2× `SetAuthority` from deployment setup). **Halt has never been invoked.** Reflected in the Liquidity Risk section
+- ✅ **Latest LlamaRisk / Steakhouse coverage:** the current [LlamaRisk research index](https://llamarisk.com/research) lists 9 articles, none on Sky/USDS post-rebrand. LlamaRisk has historically published Maker/DAI work (e.g. "MakerDAO Endgame and its Repercussions on Curve Finance", "DAI Exposure to Real World Assets") and has acted as risk advisor for Aave's USDS/sUSDS onboarding — but no standalone post-rebrand assessment exists at the time of this report
+
+Remaining TODOs (true open items, manual follow-up):
+
+- **TODO:** Top-10 SKY voter / approver snapshot. At the snapshot the hat has 6.52B SKY approvals (~92.9% of locked SKY in Chief), but breakdown by individual address requires offchain enrichment (Sky governance UI / a subgraph of `Vote`/`Lock` events). Useful for sizing the realistic minimum SKY budget required to hold the hat in an attack
+- **TODO:** Confirm RWA backing share of total VAT debt at snapshot — Sky publishes attestations on the [governance forum](https://forum.sky.money/) but a programmatic per-ilk aggregation is recommended as part of routine monitoring
