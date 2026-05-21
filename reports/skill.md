@@ -62,3 +62,7 @@ If any answer is "no," use **"unverified"** not **"doesn't exist."**
 - for fetching TVL, use defillama api. Docs: https://api-docs.defillama.com/ or use script: `uv run reports/scripts/fetch_defillama_tvl.py [protocol]`
 - if you use some script multiple times, add it to the `reports/scripts` folder but first ask for permission before committing it.
 - check .env file for environment variables and secrets. if you can't access .env exit asap.
+
+## Post-Assessment
+
+- after the report is finalized, optionally generate the contract dependency graph YAML; procedure defined in skill `generating-dependency-graphs` in `reports/graph/SKILL.md`. The graph publishes to `/graph/<slug>/` and is auto-linked from the report page when the YAML exists.
