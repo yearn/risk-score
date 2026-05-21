@@ -37,6 +37,30 @@ export interface Graph {
   edges: GraphEdge[];
 }
 
+/**
+ * The closed set of edge kinds the renderer + cross-link expansion know how
+ * to handle. A YAML that uses anything outside this set would still render
+ * (with generic fallback styling) but would silently drop out of FLOW_KINDS,
+ * hover chains, and cross-graph expansion. So validate at build time and
+ * fail loudly instead.
+ */
+export const ALLOWED_EDGE_KINDS = new Set([
+  // Money flow
+  "allocates-to",
+  "deposits-into",
+  // Role / control
+  "holds-role",
+  "controls",
+  "manages",
+  // Governance signaling
+  "proposes-on",
+  "cancels-on",
+  // Incidental wiring
+  "routes-through",
+  "routes-fees-to",
+  "deploys",
+]);
+
 const CHAIN_EXPLORERS: Record<string, string> = {
   ethereum: "https://etherscan.io/address/",
   polygon: "https://polygonscan.com/address/",
@@ -83,6 +107,11 @@ function validate(slug: string, raw: unknown): Graph {
     if (!nodeIds.has(e.to))
       throw new Error(
         `[graph:${slug}] edge.to '${e.to}' does not match any node`,
+      );
+    if (typeof e.kind !== "string" || !ALLOWED_EDGE_KINDS.has(e.kind))
+      throw new Error(
+        `[graph:${slug}] edge '${e.from}' → '${e.to}' has unknown kind '${e.kind}'. ` +
+          `Allowed: ${[...ALLOWED_EDGE_KINDS].sort().join(", ")}`,
       );
   }
   return {
