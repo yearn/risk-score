@@ -111,37 +111,49 @@ These enums are fixed — extending them requires coordinated styling changes in
 
 ### Edge kinds (10)
 
-Grouped by the visual style they get (this matches the legend on the rendered page):
+Grouped by the visual style they get (this matches the legend on the rendered page). Three of them — `allocates-to`, `deposits-into`, `routes-through` — are **flow kinds**, which have extra effects (see "Flow kinds" below the tables).
 
 **Money flow** — solid teal lines, prominent:
 
-| `kind` | Meaning | Label convention |
-|--------|---------|------------------|
-| `allocates-to` | Vault → strategy. The vault holds debt in this strategy. | Always carries the `%` share. |
-| `deposits-into` | Strategy → underlying protocol. The strategy parks USDC into this venue. | Optional. Use when the receipt token name adds information ("USDC → aUSDC"). |
+| `kind` | Meaning | Label renders on page? |
+|--------|---------|------------------------|
+| `allocates-to` | Vault → strategy. The vault holds debt in this strategy. | **Yes** — always set it to the `%` share. |
+| `deposits-into` | Strategy → underlying protocol. The strategy parks USDC into this venue. | **Yes** — optional but useful (e.g. `"USDC → aUSDC"`). |
 
 **Role / control** — amber dashed lines:
 
-| `kind` | Meaning | Label convention |
-|--------|---------|------------------|
-| `holds-role` | An account holds a specific privileged role on the target. | Carry the role name(s), e.g. `"ADD_STRATEGY (7d)"`. |
-| `controls` | One contract administers another (e.g. timelock → access-control root). | Carry the scope, e.g. `"GOVERNOR (7d)"`. |
-| `manages` | A registry/factory manages the target contract. | Optional. |
+| `kind` | Meaning | Label renders on page? |
+|--------|---------|------------------------|
+| `holds-role` | An account holds a specific privileged role on the target. | No (documentation-only). Still write the role name in YAML — it helps reviewers reading the file. |
+| `controls` | One contract administers another (e.g. timelock → access-control root). | No (documentation-only). |
+| `manages` | A registry/factory manages the target contract. | No (documentation-only). |
 
 **Governance signaling** — violet dotted lines:
 
-| `kind` | Meaning | Label convention |
-|--------|---------|------------------|
-| `proposes-on` | Multisig → timelock (PROPOSER role). | Optional. `"PROPOSER + CANCELLER"` when both apply. |
-| `cancels-on` | Multisig → timelock (CANCELLER only, no proposer). | Optional. |
+| `kind` | Meaning | Label renders on page? |
+|--------|---------|------------------------|
+| `proposes-on` | Multisig → timelock (PROPOSER role). | No (documentation-only). |
+| `cancels-on` | Multisig → timelock (CANCELLER only, no proposer). | No (documentation-only). |
 
 **Incidental wiring** — thin gray lines:
 
-| `kind` | Meaning | Label convention |
-|--------|---------|------------------|
-| `routes-through` | A → B, where B is a hop in the flow (PSM, exchanger, hook). | Skip unless the hop is non-obvious. |
-| `routes-fees-to` | Vault → accountant → fee recipient. | Skip. |
-| `deploys` | Factory → deployed contract. | Skip. |
+| `kind` | Meaning | Label renders on page? |
+|--------|---------|------------------------|
+| `routes-through` | A → B, where B is a hop in the flow (PSM, exchanger, hook). | No (documentation-only). |
+| `routes-fees-to` | Vault → accountant → fee recipient. | No (documentation-only). |
+| `deploys` | Factory → deployed contract. | No (documentation-only). |
+
+> **Heads-up on labels**: only `allocates-to` and `deposits-into` render their `label` on the canvas. For every other kind, the label is captured in the YAML for the reviewer who reads the file — but it won't appear on the rendered graph. Use labels generously in YAML (they document intent), but don't expect them on screen for non-flow kinds.
+
+### Flow kinds
+
+`allocates-to`, `deposits-into`, and `routes-through` form the **flow set**. Three behaviors depend on it:
+
+1. **Hover-chain highlight** — hovering a card walks the *backward* chain via flow edges only. So if you want a contract A to appear when a reader hovers contract B downstream of it, connect them via a flow kind. Governance/role edges never participate in the chain.
+2. **Cross-graph downstream expansion** — when another graph cross-links to a node in yours, the inlined subgraph in their page traces forward through your flow edges only. Use flow kinds for everything that represents capital movement so the downstream view is complete.
+3. **Visual styling** — flow edges render solid and slightly thicker/greener than other kinds.
+
+The corollary: **don't use `manages` or `routes-through` interchangeably**. `routes-through` participates in flow; `manages` doesn't.
 
 ## Selection rules
 
@@ -202,10 +214,55 @@ When two contracts function as a single dependency, represent them as one node w
 - **`reports/graph/yearn-yvusdc.yaml`** — single-vault, single-token, hierarchical governance. The cleanest starting point when copying.
 - **`reports/graph/infinifi.yaml`** — multi-token (siUSD / iUSD / liUSD), 9-strategy fan-out, dual timelock, includes an offchain EOA counterparty node. Reference this when the protocol has more than one user-facing token or a long farm list.
 
+## Cross-graph linking
+
+When a node's `address` matches a **non-dependency** node in another graph (i.e. that contract is the *vault* / *strategy* / *governance* / *infra* of another graph), three things happen automatically at build time. No new YAML fields are needed — matching is purely address-based, computed in `getGraphIndex()` in `src/lib/graph.ts`.
+
+### What you get for free
+
+1. **Score-color tinted card.** The cross-linked card gets a background gradient and border in the linked report's risk-tier color (`scoreColor()` from `src/lib/colors.ts`). Low-risk dependencies show light green; high-risk would show orange/red. A reviewer reading the host graph sees risk at a glance without leaving the page.
+2. **Risk pill on the card.** A small badge with the linked report's `Final Score` and tier ("2.4 · Low") sits next to the truncated address.
+3. **Whole card click navigates** to `/graph/<linked-slug>/` instead of opening the block explorer. A tiny `↗` icon in the corner keeps the explorer reachable for that specific case.
+4. **Downstream subgraph is inlined.** The linked graph's nodes reachable from the matching node via **flow edges only** (`allocates-to` → `deposits-into` → `routes-through`) are pulled into the host graph at build time. They appear at ~78 % opacity to mark the boundary, and they keep their original categories. Their IDs are namespaced (`<linked-slug>::<original-id>`) so they never collide with native IDs.
+
+**Example.** InfiniFi's `dep-stcusd` node and Cap's `stcUSD` node both carry `0x88887bE…D8888`. On the InfiniFi page:
+- The stcUSD card tints green (Cap = Low Risk).
+- Clicking it navigates to `/graph/cap-stcusd/`.
+- Behind stcUSD, you see cUSD → USDC FRV / Lender / wWTGXX FRV → Morpho / Aave / Operators / Symbiotic / wWTGXX inlined automatically — about 9 extra cards.
+
+### Scope is one layer deep
+
+If your graph references protocol X, and protocol X's graph references protocol Y, only X's downstream is inlined — Y's is not. This is intentional; recursive expansion would make every graph balloon to the sum of all linked graphs. Visit `/graph/X/` if you need to drill further.
+
+### Implications for authors
+
+- **Be careful with addresses.** A typo or chain mismatch breaks the cross-link silently — no error, just no badge or expansion. When authoring a dep node that corresponds to a protocol that has its own graph, copy the address exactly (checksummed form is fine; matching is case-insensitive but verify the digits).
+- **Flow kinds matter for the *other* graph too.** If your graph may be referenced by others as a dependency, the flow edges (`allocates-to` / `deposits-into` / `routes-through`) you draw are what shows up inlined in those graphs. Keep your flow chain clean and complete — governance edges won't make it across, but a missing `deposits-into` will leave a dependency invisible.
+- **Don't manually duplicate the linked graph's nodes** in your YAML. The expansion adds them for you. If you do duplicate, you'll get two cards: one native and one inlined.
+
+### Suppressing a cross-link
+
+Omit `address` from the node. Without an address the matcher can't fire — the card behaves as a plain leaf. Useful when you want a dependency to open Etherscan instead of navigating away (rare).
+
+## Hover & chain highlight
+
+Hovering any card walks the **backward money-flow chain** from that node — recursively, following only flow kinds (`allocates-to`, `deposits-into`, `routes-through`) — and highlights every edge and ancestor card in blue. Governance edges (`holds-role`, `controls`, `manages`, `proposes-on`, `cancels-on`) and incidental edges (`routes-fees-to`, `deploys`) are not traversed.
+
+Example on InfiniFi: hovering the inlined `cUSD (Cap Stablecoin)` lights up:
+`cUSD ← stcUSD ← (CapFarm + SwapFarm) ← iUSD ← (siUSD + LockingController)`
+— the full backward chain. Mint/Redeem controllers connect to iUSD via `manages` edges, so they stay un-highlighted; that's correct — the chain is for capital movement.
+
+### Implications for authors
+
+- **Edge kind affects traceability.** If you want a relationship to participate in the chain (and in cross-graph expansion), use a flow kind. If the relationship is structural but not capital movement (a role grant, a registry pointer), use a non-flow kind so it doesn't pollute the chain.
+- **Make every node reachable through flow edges from a source node.** Otherwise hovering it produces an empty chain. This is rarely a problem for vaults/strategies/dependencies — they live on the flow path by construction — but worth checking for any infra node you decide to include.
+
 ## Common pitfalls
 
 - **Duplicate node `id`** — build fails with `[graph:<slug>] duplicate node id '...'`.
 - **Edge endpoint doesn't match any node** — build fails with `[graph:<slug>] edge.from '...' does not match any node` (or `.to`). Most common cause: typo in an `id` or an edge to a contract you decided to skip.
 - **Unknown category** — build fails with `[graph:<slug>] node '...' has unknown category '...'`. Stick to the 5-category enum.
-- **Too many edge labels** — visual noise. Reserve labels for `allocates-to` (% share) and for `holds-role` / `controls` when the role name is the point. Drop labels from `routes-through`, `routes-fees-to`, and `deploys` unless the value is non-obvious.
+- **Address mismatch breaks cross-linking silently.** If your dependency node's `address` doesn't match the linked graph's vault address exactly (case-insensitive, but every digit must be right), the cross-link and downstream expansion just don't happen — no build error, no warning. When in doubt, copy the address from the source graph or the report's contract-addresses table verbatim.
+- **Wrong edge kind hides a relationship from chains/expansion.** A `manages` or `holds-role` edge that should have been `allocates-to` will still render, but it won't participate in the hover chain or in cross-graph downstream expansion. Use flow kinds for anything that represents capital movement.
+- **Visual noise from over-labeling.** Labels render only for `allocates-to` and `deposits-into`. Labels on other kinds are documentation-only (visible in YAML, not on canvas) — fine to include for reviewer context, but don't expect them on screen.
 - **Invented bright colors / new categories** — if a contract doesn't fit one of the 5, it's almost always `infra` (internal machinery) or `dependency` (external). Don't add a new category without updating `src/pages/graph/[slug].astro` too.
