@@ -17,6 +17,8 @@ export interface GraphNode {
   category: string;
   link?: string;
   note?: string;
+  /** Set at build time by expandCrossLinks; never present in YAML. */
+  _inlinedFromSlug?: string;
 }
 
 export interface GraphEdge {
@@ -107,6 +109,152 @@ export function hasGraph(slug: string): boolean {
     fs.existsSync(path.join(GRAPH_DIR, `${slug}.yaml`)) ||
     fs.existsSync(path.join(GRAPH_DIR, `${slug}.yml`))
   );
+}
+
+export interface CrossLinkEntry {
+  slug: string;
+  label: string;
+}
+
+/**
+ * Build an address → owning-graph index across every YAML in reports/graph/.
+ * "Owning" graph means the graph where a contract appears as something OTHER
+ * than a dependency (i.e. it's the protocol's own vault / strategy / etc).
+ * Used at build time to detect cross-graph references — when a dependency
+ * node's address matches a non-dependency node in another graph, the
+ * dependency card becomes a drill-down link.
+ *
+ * Key is `<chain>:<address-lowercased>`. First write wins (a contract is
+ * normally only "owned" by one graph).
+ */
+export function getGraphIndex(): Map<string, CrossLinkEntry> {
+  const index = new Map<string, CrossLinkEntry>();
+  for (const slug of getGraphSlugs()) {
+    const g = getGraphBySlug(slug);
+    if (!g) continue;
+    for (const n of g.nodes) {
+      if (n.category === "dependency") continue;
+      if (!n.address) continue;
+      const key = `${(n.chain ?? g.chain).toLowerCase()}:${n.address.toLowerCase()}`;
+      if (!index.has(key)) {
+        index.set(key, { slug, label: n.label });
+      }
+    }
+  }
+  return index;
+}
+
+/** Resolve a cross-link target for a single node, or `undefined` when none applies. */
+export function resolveCrossLink(
+  node: GraphNode,
+  graphChain: string,
+  currentSlug: string,
+  index: Map<string, CrossLinkEntry>,
+): CrossLinkEntry | undefined {
+  if (!node.address) return undefined;
+  const key = `${(node.chain ?? graphChain).toLowerCase()}:${node.address.toLowerCase()}`;
+  const entry = index.get(key);
+  if (!entry || entry.slug === currentSlug) return undefined;
+  return entry;
+}
+
+const FLOW_KINDS = new Set(["allocates-to", "deposits-into", "routes-through"]);
+
+/**
+ * For every cross-linked node in `graph`, inline the downstream subgraph from
+ * the linked graph (flow edges only — `allocates-to`, `deposits-into`,
+ * `routes-through`). One level deep: we follow the chain inside the linked
+ * graph but never recurse into a third graph.
+ *
+ * IDs of inlined nodes are namespaced as `<linked-slug>::<original-id>` to
+ * avoid collisions. The start node of the linked subgraph (the contract whose
+ * address matches the cross-linked node) is *merged* into the existing node —
+ * no duplicate.
+ *
+ * Inlined nodes get `_inlinedFromSlug` set so the renderer can style them
+ * differently.
+ */
+export function expandCrossLinks(graph: Graph, currentSlug: string): Graph {
+  const index = getGraphIndex();
+  const mergedNodes: GraphNode[] = graph.nodes.map((n) => ({ ...n }));
+  const mergedEdges: GraphEdge[] = graph.edges.map((e) => ({ ...e }));
+  const mergedCategories: GraphCategory[] = [...graph.categories];
+  const seenIds = new Set(mergedNodes.map((n) => n.id));
+  const seenCategoryIds = new Set(graph.categories.map((c) => c.id));
+
+  for (const hostNode of graph.nodes) {
+    if (!hostNode.address) continue;
+    const key = `${(hostNode.chain ?? graph.chain).toLowerCase()}:${hostNode.address.toLowerCase()}`;
+    const entry = index.get(key);
+    if (!entry || entry.slug === currentSlug) continue;
+
+    const linked = getGraphBySlug(entry.slug);
+    if (!linked) continue;
+
+    // Union categories so the merged graph's legend covers inlined nodes.
+    for (const cat of linked.categories) {
+      if (!seenCategoryIds.has(cat.id)) {
+        mergedCategories.push(cat);
+        seenCategoryIds.add(cat.id);
+      }
+    }
+
+    const startNode = linked.nodes.find((n) => {
+      if (!n.address) return false;
+      const k = `${(n.chain ?? linked.chain).toLowerCase()}:${n.address.toLowerCase()}`;
+      return k === key;
+    });
+    if (!startNode) continue;
+
+    // Map linked-graph id → merged-graph id. The start node maps to the host
+    // node id so the first edge of the inlined subgraph attaches to it.
+    const idMap = new Map<string, string>();
+    idMap.set(startNode.id, hostNode.id);
+
+    const queue: string[] = [startNode.id];
+    const visited = new Set<string>([startNode.id]);
+
+    while (queue.length) {
+      const currentLinkedId = queue.shift()!;
+      const outgoing = linked.edges.filter(
+        (e) => e.from === currentLinkedId && FLOW_KINDS.has(e.kind),
+      );
+      for (const edge of outgoing) {
+        const targetLinkedId = edge.to;
+        if (!idMap.has(targetLinkedId)) {
+          const targetNode = linked.nodes.find((n) => n.id === targetLinkedId);
+          if (!targetNode) continue;
+          const mergedId = `${entry.slug}::${targetLinkedId}`;
+          idMap.set(targetLinkedId, mergedId);
+          if (!seenIds.has(mergedId)) {
+            mergedNodes.push({
+              ...targetNode,
+              id: mergedId,
+              _inlinedFromSlug: entry.slug,
+            });
+            seenIds.add(mergedId);
+          }
+        }
+        if (!visited.has(targetLinkedId)) {
+          visited.add(targetLinkedId);
+          queue.push(targetLinkedId);
+        }
+        mergedEdges.push({
+          from: idMap.get(currentLinkedId)!,
+          to: idMap.get(targetLinkedId)!,
+          kind: edge.kind,
+          label: edge.label,
+        });
+      }
+    }
+  }
+
+  return {
+    ...graph,
+    categories: mergedCategories,
+    nodes: mergedNodes,
+    edges: mergedEdges,
+  };
 }
 
 export function getGraphBySlug(slug: string): Graph | undefined {

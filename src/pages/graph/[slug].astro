@@ -3,29 +3,62 @@ import BaseLayout from "../../layouts/BaseLayout.astro";
 import {
   getGraphSlugs,
   getGraphBySlug,
+  getGraphIndex,
+  resolveCrossLink,
+  expandCrossLinks,
   explorerUrl,
   type GraphCategory,
   type GraphEdge,
   type GraphNode,
 } from "../../lib/graph";
+import { getReportBySlug } from "../../lib/reports";
+import { scoreColor, scoreTier } from "../../lib/colors";
 
 export function getStaticPaths() {
   return getGraphSlugs().map((slug) => ({ params: { slug } }));
 }
 
 const { slug } = Astro.params;
-const graph = getGraphBySlug(slug!);
-if (!graph) return Astro.redirect("/reports/");
+const baseGraph = getGraphBySlug(slug!);
+if (!baseGraph) return Astro.redirect("/reports/");
+
+const graphIndex = getGraphIndex();
+// Inline the downstream subgraph of each cross-linked node so a reviewer
+// sees the strategies/dependencies behind external protocols on the same page.
+const graph = expandCrossLinks(baseGraph, slug!);
 
 const cyData = {
-  nodes: graph.nodes.map((n: GraphNode) => ({
-    id: n.id,
-    label: n.label,
-    category: n.category,
-    address: n.address ?? "",
-    link: n.address ? explorerUrl(n.address, n.chain ?? graph.chain) : "",
-    note: n.note ?? "",
-  })),
+  nodes: graph.nodes.map((n: GraphNode) => {
+    // Suppress cross-link affordance on nodes that were themselves inlined
+    // from another graph — keeps drill-down strictly one level deep.
+    const crossLinkEntry = n._inlinedFromSlug
+      ? undefined
+      : resolveCrossLink(n, graph.chain, slug!, graphIndex);
+    let crossLink:
+      | { slug: string; score: number; tier: string; color: string }
+      | null = null;
+    if (crossLinkEntry) {
+      const report = getReportBySlug(crossLinkEntry.slug);
+      if (report && report.finalScore > 0) {
+        crossLink = {
+          slug: crossLinkEntry.slug,
+          score: report.finalScore,
+          tier: scoreTier(report.finalScore),
+          color: scoreColor(report.finalScore),
+        };
+      }
+    }
+    return {
+      id: n.id,
+      label: n.label,
+      category: n.category,
+      address: n.address ?? "",
+      link: n.address ? explorerUrl(n.address, n.chain ?? graph.chain) : "",
+      note: n.note ?? "",
+      crossLink,
+      inlinedFromSlug: n._inlinedFromSlug ?? null,
+    };
+  }),
   edges: graph.edges.map((e: GraphEdge, i: number) => ({
     id: `e${i}`,
     source: e.from,
@@ -135,6 +168,13 @@ const title = graph.title ?? `${slug} — Contract Dependency Graph`;
       address: string;
       link: string;
       note: string;
+      crossLink: {
+        slug: string;
+        score: number;
+        tier: string;
+        color: string;
+      } | null;
+      inlinedFromSlug: string | null;
     };
     type CyEdge = {
       id: string;
@@ -158,17 +198,51 @@ const title = graph.title ?? `${slug} — Contract Dependency Graph`;
 
     function buildCard(n: CyNode): HTMLElement {
       const wrap = document.createElement("div");
-      wrap.className = `graph-card cat-${n.category}`;
+      const hasCrossLink = n.crossLink !== null;
+      const isInlined = n.inlinedFromSlug !== null;
+      const classes = [`graph-card`, `cat-${n.category}`];
+      if (hasCrossLink) classes.push("has-crosslink");
+      if (isInlined) classes.push("is-inlined");
+      wrap.className = classes.join(" ");
       wrap.dataset.nodeId = n.id;
+
+      if (hasCrossLink && n.crossLink) {
+        // CSS variable picks up the risk-tier color and drives the border +
+        // background tint, so a high-risk dep card looks distinctly different
+        // from a low-risk one.
+        wrap.style.setProperty("--cl-color", n.crossLink.color);
+      }
+
+      const addrFragment = n.address
+        ? `<span class="card-addr">${truncAddr(n.address)}</span>`
+        : "";
+      const riskFragment = hasCrossLink
+        ? `<span class="card-risk" style="background:${n.crossLink!.color}">${n.crossLink!.score.toFixed(1)} · ${n.crossLink!.tier.replace(" Risk", "")}</span>`
+        : "";
+      const extLinkFragment = hasCrossLink && n.link
+        ? `<a class="card-extlink" href="${n.link}" target="_blank" rel="noopener noreferrer" title="Open on block explorer">↗</a>`
+        : "";
+      const eyebrowText = catLabels[n.category] ?? n.category;
+
       wrap.innerHTML = `
         <div class="card-accent"></div>
         <div class="card-body">
-          <div class="card-eyebrow">${catLabels[n.category] ?? n.category}</div>
+          <div class="card-eyebrow">${eyebrowText}</div>
           <div class="card-title">${escapeHtml(n.label)}</div>
-          ${n.address ? `<div class="card-addr">${truncAddr(n.address)}</div>` : ""}
+          ${addrFragment || riskFragment ? `<div class="card-meta">${addrFragment}${riskFragment}</div>` : ""}
         </div>
+        ${extLinkFragment}
       `;
-      if (n.link) {
+
+      if (hasCrossLink) {
+        wrap.style.cursor = "pointer";
+        wrap.addEventListener("click", (e) => {
+          const target = e.target as HTMLElement;
+          if (target.closest(".card-extlink")) return; // let the ↗ link follow its href
+          e.stopPropagation();
+          window.location.href = `/graph/${n.crossLink!.slug}/`;
+        });
+      } else if (n.link) {
         wrap.style.cursor = "pointer";
         wrap.addEventListener("click", (e) => {
           e.stopPropagation();
@@ -208,6 +282,10 @@ const title = graph.title ?? `${slug} — Contract Dependency Graph`;
       if (flow.has(k)) return "rgba(110, 231, 183, 0.55)";
       if (role.has(k)) return "rgba(251, 191, 36, 0.5)";
       if (gov.has(k)) return "rgba(167, 139, 250, 0.55)";
+      // routes-through participates in flow but renders as a thin hop —
+      // muted khaki keeps it visible without competing with the bright
+      // money-flow edges or the amber role edges.
+      if (k === "routes-through") return "rgba(202, 184, 110, 0.75)";
       return "rgba(255, 255, 255, 0.18)";
     };
     const edgeStyle = (k: string): cytoscape.LineStyle => {
@@ -265,8 +343,8 @@ const title = graph.title ?? `${slug} — Contract Dependency Graph`;
         {
           selector: "edge.hl",
           style: {
-            "line-color": "rgba(255,255,255,0.85)",
-            "target-arrow-color": "rgba(255,255,255,0.85)",
+            "line-color": "rgba(110, 167, 255, 0.95)",
+            "target-arrow-color": "rgba(110, 167, 255, 0.95)",
             width: 2.5,
             "z-index": 10,
           },
@@ -293,24 +371,65 @@ const title = graph.title ?? `${slug} — Contract Dependency Graph`;
       cy.fit(undefined, 80);
     });
 
-    // The DOM cards intercept pointer events, so cytoscape's own
-    // node hover never fires. Wire it from the card overlay instead.
+    // The DOM cards intercept pointer events, so cytoscape's own node hover
+    // never fires. Wire it from the card overlay instead.
+    //
+    // Hover behavior: walk the *backward* money-flow chain from the hovered
+    // node (incoming edges of kind allocates-to / deposits-into / routes-through,
+    // recursively) and highlight every edge and ancestor card on that path.
+    // Skips role/governance edges so the chain stays focused on capital flow.
+    const HL_FLOW_KINDS = new Set([
+      "allocates-to",
+      "deposits-into",
+      "routes-through",
+    ]);
+
+    function clearAllHighlights() {
+      cy.edges(".hl").removeClass("hl");
+      document
+        .querySelectorAll(".graph-card.is-hl")
+        .forEach((c) => c.classList.remove("is-hl"));
+    }
+
+    function highlightAncestors(startId: string) {
+      const start = cy.getElementById(startId);
+      if (start.length === 0) return;
+      const visited = new Set<string>([startId]);
+      const queue: cytoscape.NodeSingular[] = [start as cytoscape.NodeSingular];
+      while (queue.length) {
+        const cur = queue.shift()!;
+        const inFlowEdges = cur
+          .incomers("edge")
+          .filter((ed: cytoscape.EdgeSingular) =>
+            HL_FLOW_KINDS.has(ed.data("kind") as string),
+          );
+        inFlowEdges.forEach((ed: cytoscape.EdgeSingular) => {
+          ed.addClass("hl");
+          const src = ed.source() as cytoscape.NodeSingular;
+          if (!visited.has(src.id())) {
+            visited.add(src.id());
+            const card = document.querySelector(
+              `.graph-card[data-node-id="${CSS.escape(src.id())}"]`,
+            );
+            if (card) card.classList.add("is-hl");
+            queue.push(src);
+          }
+        });
+      }
+    }
+
     const cyContainer = document.getElementById("cy")!;
     cyContainer.addEventListener("mouseover", (e) => {
       const card = (e.target as HTMLElement).closest(".graph-card") as HTMLElement | null;
       if (!card?.dataset.nodeId) return;
-      const node = cy.getElementById(card.dataset.nodeId);
-      if (node.length === 0) return;
-      node.connectedEdges().addClass("hl");
+      clearAllHighlights();
       card.classList.add("is-hl");
+      highlightAncestors(card.dataset.nodeId);
     });
     cyContainer.addEventListener("mouseout", (e) => {
       const card = (e.target as HTMLElement).closest(".graph-card") as HTMLElement | null;
       if (!card?.dataset.nodeId) return;
-      const node = cy.getElementById(card.dataset.nodeId);
-      if (node.length === 0) return;
-      node.connectedEdges().removeClass("hl");
-      card.classList.remove("is-hl");
+      clearAllHighlights();
     });
 
     document.getElementById("cy-fit")?.addEventListener("click", () => {
@@ -532,12 +651,13 @@ const title = graph.title ?? `${slug} — Contract Dependency Graph`;
   .line-manages       { border-top: 1.5px dashed rgba(251, 191, 36, 0.85); }
   .line-proposes-on,
   .line-cancels-on    { border-top: 1.5px dotted rgba(167, 139, 250, 0.85); }
-  .line-routes-through,
+  .line-routes-through { border-top: 1.5px solid rgba(202, 184, 110, 0.85); }
   .line-routes-fees-to,
   .line-deploys       { border-top: 1.5px solid rgba(255, 255, 255, 0.3); }
 
   /* === DOM node cards (rendered by cytoscape-dom-node) === */
   .graph-card {
+    position: relative;
     width: 188px;
     height: 70px;
     background: rgba(20, 22, 28, 0.96);
@@ -551,6 +671,42 @@ const title = graph.title ?? `${slug} — Contract Dependency Graph`;
     font-family: system-ui, -apple-system, sans-serif;
     transition: border-color 0.15s, transform 0.15s, box-shadow 0.15s;
   }
+  .graph-card.has-crosslink {
+    border-color: color-mix(in srgb, var(--cl-color, #6ee7b7) 65%, transparent);
+    background:
+      linear-gradient(
+        100deg,
+        color-mix(in srgb, var(--cl-color, #6ee7b7) 22%, transparent),
+        color-mix(in srgb, var(--cl-color, #6ee7b7) 6%, transparent) 60%,
+        rgba(20, 22, 28, 0.96)
+      );
+  }
+  html.light .graph-card.has-crosslink {
+    background:
+      linear-gradient(
+        100deg,
+        color-mix(in srgb, var(--cl-color, #6ee7b7) 28%, #ffffff),
+        color-mix(in srgb, var(--cl-color, #6ee7b7) 10%, #ffffff) 60%,
+        #ffffff
+      );
+  }
+  .graph-card.has-crosslink:hover {
+    border-color: var(--cl-color, #6ee7b7);
+    box-shadow:
+      0 1px 0 rgba(255, 255, 255, 0.06) inset,
+      0 0 0 1px color-mix(in srgb, var(--cl-color, #6ee7b7) 75%, transparent) inset,
+      0 8px 22px color-mix(in srgb, var(--cl-color, #6ee7b7) 35%, transparent);
+  }
+  .graph-card.is-inlined {
+    opacity: 0.78;
+  }
+  .graph-card.is-inlined:hover {
+    opacity: 1;
+  }
+  .graph-card.is-inlined .card-eyebrow {
+    /* "STRATEGY · via cap-stcusd" — slightly de-emphasize the via suffix */
+    font-style: normal;
+  }
   html.light .graph-card {
     background: #ffffff;
     border-color: rgba(0, 0, 0, 0.1);
@@ -558,16 +714,30 @@ const title = graph.title ?? `${slug} — Contract Dependency Graph`;
       0 1px 0 rgba(0, 0, 0, 0.02) inset,
       0 2px 6px rgba(0, 0, 0, 0.08);
   }
-  .graph-card:hover,
+  .graph-card:hover {
+    border-color: rgba(110, 167, 255, 0.9);
+    transform: translateY(-1px);
+    box-shadow:
+      0 1px 0 rgba(255, 255, 255, 0.06) inset,
+      0 0 0 1px rgba(110, 167, 255, 0.35) inset,
+      0 6px 18px rgba(0, 0, 0, 0.55);
+  }
   .graph-card.is-hl {
-    border-color: rgba(255, 255, 255, 0.35);
+    border-color: rgba(110, 167, 255, 0.65);
     transform: translateY(-1px);
     box-shadow:
       0 1px 0 rgba(255, 255, 255, 0.05) inset,
       0 6px 18px rgba(0, 0, 0, 0.55);
   }
   html.light .graph-card:hover {
-    border-color: rgba(0, 0, 0, 0.25);
+    border-color: rgba(6, 117, 249, 0.85);
+    box-shadow:
+      0 1px 0 rgba(0, 0, 0, 0.03) inset,
+      0 0 0 1px rgba(6, 117, 249, 0.3) inset,
+      0 2px 8px rgba(6, 117, 249, 0.15);
+  }
+  html.light .graph-card.is-hl {
+    border-color: rgba(6, 117, 249, 0.55);
   }
   .card-accent {
     width: 3px;
@@ -617,13 +787,59 @@ const title = graph.title ?? `${slug} — Contract Dependency Graph`;
     word-break: normal;
     hyphens: none;
   }
+  .card-meta {
+    margin-top: 3px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6px;
+    line-height: 1;
+  }
   .card-addr {
-    margin-top: 2px;
     font-family: ui-monospace, "SF Mono", Menlo, monospace;
     font-size: 10px;
     color: var(--text-secondary);
     letter-spacing: 0.02em;
     line-height: 1;
+  }
+  .card-risk {
+    font-size: 9px;
+    font-weight: 700;
+    color: #0c0c0c;
+    padding: 2px 6px;
+    border-radius: 3px;
+    letter-spacing: 0.02em;
+    white-space: nowrap;
+    line-height: 1.1;
+  }
+  .card-extlink {
+    position: absolute;
+    top: 4px;
+    right: 5px;
+    width: 16px;
+    height: 16px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    line-height: 1;
+    color: rgba(255, 255, 255, 0.35);
+    text-decoration: none;
+    border-radius: 3px;
+    z-index: 1;
+    transition: color 0.15s, background 0.15s;
+  }
+  .card-extlink:hover {
+    color: rgba(255, 255, 255, 0.95);
+    background: rgba(255, 255, 255, 0.08);
+    text-decoration: none;
+  }
+  html.light .card-extlink {
+    color: rgba(0, 0, 0, 0.4);
+  }
+  html.light .card-extlink:hover {
+    color: rgba(0, 0, 0, 0.85);
+    background: rgba(0, 0, 0, 0.06);
   }
 
   @media (max-width: 720px) {
