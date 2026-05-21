@@ -33,8 +33,30 @@ Before writing any collateralization claims, complete this arithmetic check:
 
 This step must pass before proceeding. A mismatch between supply and reserves is a red flag that the architecture mapping (Pass 1) is incomplete.
 
+### Pass 1.6: Mint Authority Enumeration
+
+Before writing the *Token Mint Authority* section of the report (defined in `reports/TEMPLATE.md`), enumerate every address that can mint the assessed token. Patterns to check, in order:
+
+1. **AccessControl-based tokens** (most modern protocols, OpenZeppelin):
+   - Read the token's source on Etherscan and grep for `onlyRole(...)` modifiers on `mint` / `burn` functions. Note every role name involved (`MINTER_ROLE`, `RECEIPT_TOKEN_MINTER`, custom names).
+   - For each role, enumerate holders: `getRoleMemberCount(role)` and then `getRoleMember(role, i)` for `i = 0..count-1`. Patterns documented in `reports/etherscan/SKILL.md` § "Role & permission enumeration".
+   - Examples: InfiniFi `RECEIPT_TOKEN_MINTER` (4 holders), Cap `AccessControl` (via `0x7731…c683`).
+
+2. **Whitelist-mapping tokens** (Liquity-fork style):
+   - Read `mintList(address)` for known protocol contracts.
+   - Iterate `addToMintList` / `removeFromMintList` events to find every address ever granted, then check current state.
+   - Worked example: `reports/report/mezo-musd.md` lines 67–80.
+
+3. **Ownable tokens**: read `owner()` — that single address can mint via `mint(...)`. Classify owner (EOA, multisig, contract).
+
+4. **Bridge-managed tokens**: read the bridge controller address (Wormhole NTT Manager, LayerZero OFT, etc.). It typically holds the only mint authority on the destination chain. Confirm by reading the token's `mint` function for the access check.
+
+5. **For every role-holder address**, classify it in the *Notes* column of the mint table: EOA, multisig (with threshold + named-vs-anonymous signers), or specific contract (with its purpose, e.g. "MintController — entry-point proxy for user deposits"). If a role-holder is itself a multisig, also document its threshold and signer set.
+
+6. **Cross-check against the dependency-graph** (if a YAML exists at `reports/graph/<slug>.yaml`): every mint-authority contract should appear as a node with a `mints` edge (direction: `minter → token`) connecting to the assessed token. The `mints` edge kind renders red and is reserved for privileged supply-creation authority. If your enumeration finds an address that the graph doesn't, the graph is incomplete; if the graph shows a `mints` edge from an address that you can't reproduce onchain, the graph is wrong. Absence of `mints` edges means the token has no privileged minter (permissionless ERC-4626, collateral-only mint, etc.) — also a valid and important visual signal.
+
 ### Pass 2: Verification and Scoring
-Only after architecture mapping and supply reconciliation are complete, proceed to verify each component onchain and write risk assessments.
+Only after architecture mapping, supply reconciliation, and mint-authority enumeration are complete, proceed to verify each component onchain and write risk assessments.
 
 ### "Doesn't Exist" Checklist
 Before writing any claim that functionality is missing, unverifiable, or doesn't exist onchain, confirm ALL of the following:
@@ -53,7 +75,7 @@ If any answer is "no," use **"unverified"** not **"doesn't exist."**
 - See if asset or protocol is reviewed by Steakhouse, check their reports: https://kitchen.steakhouse.financial/archive
 - When validating protocols, see for info on which focused on protocol decentralization: https://www.defiscan.info/
 - Always include whole `Risk Tier` table and bold the final risk tier.
-- Explain how minting and redeeming works, if present. Verify if minting and redeeming are atomic in a single transaction. Verify if minting needs backing assets, high alert if not. List all accounts with minting role.
+- Explain how minting and redeeming works, if present. Verify whether the operations are atomic and whether minting requires backing — flag any path that lets an admin mint unbacked tokens as a high-risk finding. Full mint-authority enumeration (every role-holder, with classification) goes into the *Token Mint Authority* section of the report; the procedure is in Pass 1.6 above.
 
 ## Tools
 
@@ -62,3 +84,7 @@ If any answer is "no," use **"unverified"** not **"doesn't exist."**
 - for fetching TVL, use defillama api. Docs: https://api-docs.defillama.com/ or use script: `uv run reports/scripts/fetch_defillama_tvl.py [protocol]`
 - if you use some script multiple times, add it to the `reports/scripts` folder but first ask for permission before committing it.
 - check .env file for environment variables and secrets. if you can't access .env exit asap.
+
+## Post-Assessment
+
+- after the report is finalized, optionally generate the contract dependency graph YAML; procedure defined in skill `generating-dependency-graphs` in `reports/graph/SKILL.md`. The graph publishes to `/graph/<slug>/` and is auto-linked from the report page when the YAML exists.
