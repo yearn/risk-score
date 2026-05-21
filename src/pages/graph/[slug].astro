@@ -286,7 +286,10 @@ const title = graph.title ?? `${slug} — Contract Dependency Graph`;
       // muted khaki keeps it visible without competing with the bright
       // money-flow edges or the amber role edges.
       if (k === "routes-through") return "rgba(202, 184, 110, 0.75)";
-      return "rgba(255, 255, 255, 0.18)";
+      // routes-fees-to + deploys: background plumbing (deployment lineage,
+      // fee routing) — mid-gray reads on both dark and light themes;
+      // pure white at low opacity vanishes on light mode.
+      return "rgba(140, 140, 140, 0.6)";
     };
     const edgeStyle = (k: string): cytoscape.LineStyle => {
       if (role.has(k)) return "dashed";
@@ -653,7 +656,7 @@ const title = graph.title ?? `${slug} — Contract Dependency Graph`;
   .line-cancels-on    { border-top: 1.5px dotted rgba(167, 139, 250, 0.85); }
   .line-routes-through { border-top: 1.5px solid rgba(202, 184, 110, 0.85); }
   .line-routes-fees-to,
-  .line-deploys       { border-top: 1.5px solid rgba(255, 255, 255, 0.3); }
+  .line-deploys       { border-top: 1.5px solid rgba(140, 140, 140, 0.85); }
 
   /* === DOM node cards (rendered by cytoscape-dom-node) === */
   .graph-card {
