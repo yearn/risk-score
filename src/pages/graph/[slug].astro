@@ -1,0 +1,637 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import {
+  getGraphSlugs,
+  getGraphBySlug,
+  explorerUrl,
+  type GraphCategory,
+  type GraphEdge,
+  type GraphNode,
+} from "../../lib/graph";
+
+export function getStaticPaths() {
+  return getGraphSlugs().map((slug) => ({ params: { slug } }));
+}
+
+const { slug } = Astro.params;
+const graph = getGraphBySlug(slug!);
+if (!graph) return Astro.redirect("/reports/");
+
+const cyData = {
+  nodes: graph.nodes.map((n: GraphNode) => ({
+    id: n.id,
+    label: n.label,
+    category: n.category,
+    address: n.address ?? "",
+    link: n.address ? explorerUrl(n.address, n.chain ?? graph.chain) : "",
+    note: n.note ?? "",
+  })),
+  edges: graph.edges.map((e: GraphEdge, i: number) => ({
+    id: `e${i}`,
+    source: e.from,
+    target: e.to,
+    kind: e.kind,
+    label: e.label ?? "",
+  })),
+};
+
+const categoryLabels: Record<string, string> = Object.fromEntries(
+  graph.categories.map((c) => [c.id, c.label]),
+);
+
+const usedKinds = Array.from(new Set(graph.edges.map((e) => e.kind)));
+const usedCategories: GraphCategory[] = graph.categories.filter((c) =>
+  graph.nodes.some((n) => n.category === c.id),
+);
+
+const KIND_LABELS: Record<string, string> = {
+  "allocates-to": "Allocation",
+  "deposits-into": "Deposits into",
+  "routes-through": "Routes through",
+  "routes-fees-to": "Fees routed",
+  "holds-role": "Holds role",
+  controls: "Controls",
+  manages: "Manages",
+  "proposes-on": "Proposes on",
+  "cancels-on": "Cancels on",
+  deploys: "Deploys",
+};
+const kindLabel = (k: string) => KIND_LABELS[k] ?? k;
+
+const title = graph.title ?? `${slug} — Contract Dependency Graph`;
+---
+
+<BaseLayout
+  title={`${title} — Yearn Curation`}
+  description="Interactive contract dependency graph for the risk assessment."
+  ogUrl={`/graph/${slug}/`}
+  bare
+>
+  <div class="graph-shell">
+    <div class="graph-topbar">
+      <a href={`/report/${slug}/`} class="graph-back">&larr; Risk report</a>
+      <div class="graph-title">
+        <span class="graph-title-eyebrow">Dependency graph</span>
+        <h1>{title.replace(" — Contract Dependency Graph", "")}</h1>
+      </div>
+      <div class="graph-controls">
+        <button id="cy-fit" type="button" title="Fit to view">Fit</button>
+        <button id="cy-reset" type="button" title="Re-run layout">Re-layout</button>
+      </div>
+    </div>
+
+    <div id="cy" aria-label="Contract dependency graph"></div>
+
+    <div class="graph-legend">
+      <details>
+        <summary>
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="12" cy="12" r="3"/>
+            <circle cx="12" cy="12" r="9"/>
+          </svg>
+          Legend
+        </summary>
+        <div class="legend-grid">
+          <div class="legend-col">
+            <div class="legend-h">Nodes</div>
+            {usedCategories.map((c) => (
+              <div class="legend-row">
+                <span class={`legend-swatch swatch-${c.id}`}></span>
+                <span>{c.label}</span>
+              </div>
+            ))}
+          </div>
+          <div class="legend-col">
+            <div class="legend-h">Edges</div>
+            {usedKinds.map((k) => (
+              <div class="legend-row">
+                <span class={`legend-line line-${k}`}></span>
+                <span>{kindLabel(k)}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </details>
+    </div>
+  </div>
+
+  <script type="application/json" id="cy-data" set:html={JSON.stringify(cyData)}></script>
+  <script type="application/json" id="cy-cat-labels" set:html={JSON.stringify(categoryLabels)}></script>
+
+  <script>
+    import cytoscape from "cytoscape";
+    // @ts-expect-error - no types
+    import dagre from "cytoscape-dagre";
+    // @ts-expect-error - no types
+    import domNode from "cytoscape-dom-node";
+
+    cytoscape.use(dagre);
+    cytoscape.use(domNode);
+
+    type CyNode = {
+      id: string;
+      label: string;
+      category: string;
+      address: string;
+      link: string;
+      note: string;
+    };
+    type CyEdge = {
+      id: string;
+      source: string;
+      target: string;
+      kind: string;
+      label: string;
+    };
+
+    const dataEl = document.getElementById("cy-data");
+    const catEl = document.getElementById("cy-cat-labels");
+    if (!dataEl || !catEl) throw new Error("graph: missing data scripts");
+    const data = JSON.parse(dataEl.textContent ?? "{}") as {
+      nodes: CyNode[];
+      edges: CyEdge[];
+    };
+    const catLabels = JSON.parse(catEl.textContent ?? "{}") as Record<string, string>;
+
+    const truncAddr = (a: string) =>
+      a && a.length > 10 ? `${a.slice(0, 6)}…${a.slice(-4)}` : a;
+
+    function buildCard(n: CyNode): HTMLElement {
+      const wrap = document.createElement("div");
+      wrap.className = `graph-card cat-${n.category}`;
+      wrap.dataset.nodeId = n.id;
+      wrap.innerHTML = `
+        <div class="card-accent"></div>
+        <div class="card-body">
+          <div class="card-eyebrow">${catLabels[n.category] ?? n.category}</div>
+          <div class="card-title">${escapeHtml(n.label)}</div>
+          ${n.address ? `<div class="card-addr">${truncAddr(n.address)}</div>` : ""}
+        </div>
+      `;
+      if (n.link) {
+        wrap.style.cursor = "pointer";
+        wrap.addEventListener("click", (e) => {
+          e.stopPropagation();
+          window.open(n.link, "_blank", "noopener,noreferrer");
+        });
+      }
+      return wrap;
+    }
+
+    function escapeHtml(s: string): string {
+      return s
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
+    }
+
+    const NODE_W = 188;
+    const NODE_H = 70;
+
+    const elements: cytoscape.ElementDefinition[] = [
+      ...data.nodes.map((n) => ({
+        group: "nodes" as const,
+        data: { id: n.id, dom: buildCard(n), category: n.category, link: n.link },
+      })),
+      ...data.edges.map((e) => ({
+        group: "edges" as const,
+        data: { id: e.id, source: e.source, target: e.target, kind: e.kind, label: e.label },
+      })),
+    ];
+
+    const flow = new Set(["allocates-to", "deposits-into"]);
+    const role = new Set(["holds-role", "controls", "manages"]);
+    const gov = new Set(["proposes-on", "cancels-on"]);
+
+    const edgeColor = (k: string) => {
+      if (flow.has(k)) return "rgba(110, 231, 183, 0.55)";
+      if (role.has(k)) return "rgba(251, 191, 36, 0.5)";
+      if (gov.has(k)) return "rgba(167, 139, 250, 0.55)";
+      return "rgba(255, 255, 255, 0.18)";
+    };
+    const edgeStyle = (k: string): cytoscape.LineStyle => {
+      if (role.has(k)) return "dashed";
+      if (gov.has(k)) return "dotted";
+      return "solid";
+    };
+    const edgeWidth = (k: string) => (flow.has(k) ? 2 : 1.5);
+
+    const cy = cytoscape({
+      container: document.getElementById("cy")!,
+      elements,
+      wheelSensitivity: 0.2,
+      minZoom: 0.3,
+      maxZoom: 2.5,
+      style: [
+        {
+          selector: "node",
+          style: {
+            shape: "round-rectangle",
+            "background-opacity": 0,
+            "border-width": 0,
+            width: NODE_W,
+            height: NODE_H,
+            label: "",
+          },
+        },
+        {
+          selector: "edge",
+          style: {
+            "curve-style": "bezier",
+            width: (ele: cytoscape.EdgeSingular) => edgeWidth(ele.data("kind") as string),
+            "line-color": (ele: cytoscape.EdgeSingular) => edgeColor(ele.data("kind") as string),
+            "line-style": (ele: cytoscape.EdgeSingular) =>
+              edgeStyle(ele.data("kind") as string),
+            "target-arrow-shape": "triangle-backcurve",
+            "target-arrow-color": (ele: cytoscape.EdgeSingular) =>
+              edgeColor(ele.data("kind") as string),
+            "arrow-scale": 0.85,
+            label: (ele: cytoscape.EdgeSingular) => {
+              const k = ele.data("kind") as string;
+              const lbl = ele.data("label") as string;
+              return flow.has(k) ? lbl : "";
+            },
+            "font-size": 10,
+            "font-weight": 500,
+            color: "rgba(255,255,255,0.7)",
+            "text-background-color": "#0a0b0e",
+            "text-background-opacity": 0.95,
+            "text-background-padding": "3px",
+            "text-background-shape": "round-rectangle",
+            "text-rotation": "autorotate",
+          },
+        },
+        {
+          selector: "edge.hl",
+          style: {
+            "line-color": "rgba(255,255,255,0.85)",
+            "target-arrow-color": "rgba(255,255,255,0.85)",
+            width: 2.5,
+            "z-index": 10,
+          },
+        },
+      ],
+      layout: {
+        name: "dagre",
+        // @ts-expect-error - dagre options
+        rankDir: "LR",
+        nodeSep: 28,
+        rankSep: 110,
+        edgeSep: 12,
+        ranker: "network-simplex",
+      },
+    });
+
+    // Initialize DOM-node extension AFTER cy is created
+    // @ts-expect-error - added by cytoscape-dom-node
+    cy.domNode();
+
+    // Re-run layout once DOM nodes are sized (dom-node sometimes
+    // measures lazily; one extra fit settles labels & arrows).
+    requestAnimationFrame(() => {
+      cy.fit(undefined, 80);
+    });
+
+    // The DOM cards intercept pointer events, so cytoscape's own
+    // node hover never fires. Wire it from the card overlay instead.
+    const cyContainer = document.getElementById("cy")!;
+    cyContainer.addEventListener("mouseover", (e) => {
+      const card = (e.target as HTMLElement).closest(".graph-card") as HTMLElement | null;
+      if (!card?.dataset.nodeId) return;
+      const node = cy.getElementById(card.dataset.nodeId);
+      if (node.length === 0) return;
+      node.connectedEdges().addClass("hl");
+      card.classList.add("is-hl");
+    });
+    cyContainer.addEventListener("mouseout", (e) => {
+      const card = (e.target as HTMLElement).closest(".graph-card") as HTMLElement | null;
+      if (!card?.dataset.nodeId) return;
+      const node = cy.getElementById(card.dataset.nodeId);
+      if (node.length === 0) return;
+      node.connectedEdges().removeClass("hl");
+      card.classList.remove("is-hl");
+    });
+
+    document.getElementById("cy-fit")?.addEventListener("click", () => {
+      cy.fit(undefined, 60);
+    });
+    document.getElementById("cy-reset")?.addEventListener("click", () => {
+      cy.layout({
+        name: "dagre",
+        // @ts-expect-error - dagre options
+        rankDir: "LR",
+        nodeSep: 28,
+        rankSep: 110,
+        edgeSep: 12,
+        ranker: "network-simplex",
+      }).run();
+      requestAnimationFrame(() => cy.fit(undefined, 80));
+    });
+  </script>
+</BaseLayout>
+
+<style is:global>
+  /* Escape the 960px container — the graph wants the full viewport */
+  body.is-bare main.container {
+    max-width: 100vw;
+    padding: 0;
+  }
+
+  .graph-shell {
+    position: relative;
+    width: 100vw;
+    margin-left: calc(50% - 50vw);
+    margin-right: calc(50% - 50vw);
+    background: #0a0b0e;
+    background-image:
+      radial-gradient(rgba(255, 255, 255, 0.045) 1px, transparent 1px);
+    background-size: 24px 24px;
+    background-position: 0 0;
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    height: calc(100vh - 60px); /* fill below site header */
+    min-height: 640px;
+    overflow: hidden;
+  }
+  html.light .graph-shell {
+    background: #f4f5f8;
+    background-image:
+      radial-gradient(rgba(0, 0, 0, 0.06) 1px, transparent 1px);
+  }
+
+  #cy {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  .graph-topbar {
+    position: absolute;
+    top: 16px;
+    left: 16px;
+    right: 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1rem;
+    z-index: 5;
+    pointer-events: none;
+  }
+  .graph-topbar > * {
+    pointer-events: auto;
+  }
+  .graph-back {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.4rem 0.7rem;
+    font-size: 0.78rem;
+    color: var(--text-secondary);
+    background: rgba(20, 22, 28, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 6px;
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+  }
+  html.light .graph-back {
+    background: rgba(255, 255, 255, 0.7);
+    border-color: rgba(0, 0, 0, 0.1);
+  }
+  .graph-back:hover {
+    color: var(--text-primary);
+    text-decoration: none;
+  }
+  .graph-title {
+    text-align: center;
+    flex: 1;
+  }
+  .graph-title-eyebrow {
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--text-secondary);
+    display: block;
+    margin-bottom: 0.15rem;
+  }
+  .graph-title h1 {
+    font-size: 1rem;
+    font-weight: 600;
+    margin: 0;
+  }
+  .graph-controls {
+    display: flex;
+    gap: 0.4rem;
+  }
+  .graph-controls button {
+    padding: 0.4rem 0.75rem;
+    font-size: 0.75rem;
+    background: rgba(20, 22, 28, 0.7);
+    color: var(--text-secondary);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 6px;
+    cursor: pointer;
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    transition: color 0.15s, border-color 0.15s;
+  }
+  html.light .graph-controls button {
+    background: rgba(255, 255, 255, 0.7);
+    border-color: rgba(0, 0, 0, 0.1);
+  }
+  .graph-controls button:hover {
+    color: var(--text-primary);
+    border-color: rgba(255, 255, 255, 0.2);
+  }
+
+  /* Floating legend */
+  .graph-legend {
+    position: absolute;
+    bottom: 16px;
+    right: 16px;
+    z-index: 5;
+    background: rgba(20, 22, 28, 0.85);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 8px;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    font-size: 0.78rem;
+    max-width: 360px;
+  }
+  html.light .graph-legend {
+    background: rgba(255, 255, 255, 0.9);
+    border-color: rgba(0, 0, 0, 0.08);
+  }
+  .graph-legend summary {
+    cursor: pointer;
+    padding: 0.5rem 0.9rem;
+    list-style: none;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-size: 0.66rem;
+    font-weight: 600;
+    user-select: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+  .graph-legend summary:hover {
+    color: var(--text-primary);
+  }
+  .graph-legend summary::-webkit-details-marker {
+    display: none;
+  }
+  .graph-legend[open] summary {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  }
+  .legend-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0 1.2rem;
+    padding: 0.7rem 0.9rem;
+  }
+  .legend-h {
+    font-size: 0.6rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-secondary);
+    margin-bottom: 0.4rem;
+  }
+  .legend-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.18rem 0;
+    color: var(--text-primary);
+    font-size: 0.78rem;
+  }
+  .legend-swatch {
+    width: 12px;
+    height: 12px;
+    border-radius: 3px;
+    flex-shrink: 0;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+  }
+  .swatch-vault       { background: #2b7fff; }
+  .swatch-strategy    { background: #f59e0b; }
+  .swatch-governance  { background: #ef4444; }
+  .swatch-infra       { background: #94a3b8; }
+  .swatch-dependency  { background: #a78bfa; }
+
+  .legend-line {
+    width: 22px;
+    height: 0;
+    border-top: 1.5px solid rgba(255, 255, 255, 0.4);
+    flex-shrink: 0;
+  }
+  .line-allocates-to,
+  .line-deposits-into { border-top: 2px solid rgba(110, 231, 183, 0.85); }
+  .line-holds-role,
+  .line-controls,
+  .line-manages       { border-top: 1.5px dashed rgba(251, 191, 36, 0.85); }
+  .line-proposes-on,
+  .line-cancels-on    { border-top: 1.5px dotted rgba(167, 139, 250, 0.85); }
+  .line-routes-through,
+  .line-routes-fees-to,
+  .line-deploys       { border-top: 1.5px solid rgba(255, 255, 255, 0.3); }
+
+  /* === DOM node cards (rendered by cytoscape-dom-node) === */
+  .graph-card {
+    width: 188px;
+    height: 70px;
+    background: rgba(20, 22, 28, 0.96);
+    border: 1px solid rgba(255, 255, 255, 0.09);
+    border-radius: 8px;
+    display: flex;
+    overflow: hidden;
+    box-shadow:
+      0 1px 0 rgba(255, 255, 255, 0.03) inset,
+      0 4px 12px rgba(0, 0, 0, 0.4);
+    font-family: system-ui, -apple-system, sans-serif;
+    transition: border-color 0.15s, transform 0.15s, box-shadow 0.15s;
+  }
+  html.light .graph-card {
+    background: #ffffff;
+    border-color: rgba(0, 0, 0, 0.1);
+    box-shadow:
+      0 1px 0 rgba(0, 0, 0, 0.02) inset,
+      0 2px 6px rgba(0, 0, 0, 0.08);
+  }
+  .graph-card:hover,
+  .graph-card.is-hl {
+    border-color: rgba(255, 255, 255, 0.35);
+    transform: translateY(-1px);
+    box-shadow:
+      0 1px 0 rgba(255, 255, 255, 0.05) inset,
+      0 6px 18px rgba(0, 0, 0, 0.55);
+  }
+  html.light .graph-card:hover {
+    border-color: rgba(0, 0, 0, 0.25);
+  }
+  .card-accent {
+    width: 3px;
+    flex-shrink: 0;
+    background: rgba(255, 255, 255, 0.2);
+  }
+  .cat-vault       .card-accent { background: #2b7fff; }
+  .cat-strategy    .card-accent { background: #f59e0b; }
+  .cat-governance  .card-accent { background: #ef4444; }
+  .cat-infra       .card-accent { background: #94a3b8; }
+  .cat-dependency  .card-accent { background: #a78bfa; }
+
+  .card-body {
+    flex: 1;
+    padding: 8px 10px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-width: 0;
+  }
+  .card-eyebrow {
+    font-size: 9px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-secondary);
+    margin-bottom: 2px;
+    line-height: 1;
+  }
+  .cat-vault       .card-eyebrow { color: #6ea7ff; }
+  .cat-strategy    .card-eyebrow { color: #fbbf24; }
+  .cat-governance  .card-eyebrow { color: #f87171; }
+  .cat-infra       .card-eyebrow { color: #cbd5e1; }
+  .cat-dependency  .card-eyebrow { color: #c4b5fd; }
+
+  .card-title {
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--text-primary);
+    line-height: 1.25;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow-wrap: anywhere;
+    word-break: normal;
+    hyphens: none;
+  }
+  .card-addr {
+    margin-top: 2px;
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-size: 10px;
+    color: var(--text-secondary);
+    letter-spacing: 0.02em;
+    line-height: 1;
+  }
+
+  @media (max-width: 720px) {
+    .graph-shell {
+      height: calc(100vh - 56px);
+      min-height: 520px;
+    }
+    .graph-title h1 { font-size: 0.85rem; }
+    .graph-legend { max-width: calc(100vw - 32px); }
+  }
+</style>
