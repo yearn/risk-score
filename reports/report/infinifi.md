@@ -171,7 +171,15 @@ The protocol acts as an asset manager, deploying user funds into other protocols
 
 **Rate limits / supply caps:** None onchain. Mint capacity is implicitly bounded by deposit-asset supply (USDC/USDT held by `MintController`) and by the `maxLossPercentage` first-loss buffer that auto-pauses on excessive losses.
 
-**Backing check at mint time:** Atomic for the user-facing `MintController` path (collateral must transfer in the same call). The `YieldSharing` and `PLSmoother` mints are not against fresh user collateral but are bounded by realized yield / loss-absorption accounting — they cannot mint unbacked supply. Trust surface: the 4 contracts above must individually be sound; a bug in any of them is a mint-out-of-thin-air path. None are pausable individually except via the system-wide pause held by 8 PAUSE-role holders.
+**Backing check at mint time:**
+
+- **`MintController` path** (user-facing USDC/USDT deposits): **atomic.** Collateral must transfer in the same call before `iUSD.mint(...)` fires. Cannot mint unbacked.
+- **`MigrationController` path**: atomic against the migration source (same pull-collateral-then-mint pattern).
+- **`YieldSharing` and `PLSmoother` paths** (protocol-internal yield distribution and P&L smoothing): **not atomic with backing.** The minter contract has no `transferFrom(asset, ...)` before `mint(...)`. PLSmoother's [`smoothProfit(receiptTokenProfit, duration)`](https://etherscan.io/address/0xC324569141697045B9EdE54B5d4623a691ed57A4#code) literally calls `ReceiptToken(receiptToken).mint(address(this), receiptTokenProfit)` with no on-chain assertion that USDC has arrived in the protocol — the caller is trusted to only call it when farms have already reported `receiptTokenProfit` of realized USDC profit. The trust surface here is layered:
+  1. The `FINANCE_MANAGER` role-holder set (currently 3 contracts: `YieldSharing`, `LiquidationFarm`, `PLSmootherHelper`). No EOA or multisig holds the role directly. Adding a new holder requires `GOVERNOR` (Long Timelock, 7d).
+  2. The calling contract correctly accounting realized farm profit before calling `smoothProfit`. A bug in `YieldSharing`'s profit math, or a compromised farm that over-reports yield, would let PLSmoother mint unbacked iUSD. The PLSmoother contract itself would not catch the discrepancy.
+
+**Slashing-order quirk** (from PLSmoother source comment): *"the vesting yield held by this contract … isn't included in the slashing order. As a result, it could hold undistributed rewards (i.e. pending profit) that would otherwise could have been used to mitigate losses."* If losses materialize while iUSD is still mid-vest inside PLSmoother, that pending profit does **not** absorb the loss — losses skip the smoother and hit liUSD / siUSD directly. An audited and acknowledged design property, not a bug, but a real risk-review-relevant point.
 
 ### Collateralization
 
