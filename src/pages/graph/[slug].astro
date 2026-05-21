@@ -118,11 +118,13 @@ const title = graph.title ?? `${slug} — Contract Dependency Graph`;
     <div class="graph-legend">
       <details>
         <summary>
-          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <circle cx="12" cy="12" r="3"/>
-            <circle cx="12" cy="12" r="9"/>
-          </svg>
-          Legend
+          <span class="legend-summary-inner">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <circle cx="12" cy="12" r="3"/>
+              <circle cx="12" cy="12" r="9"/>
+            </svg>
+            Legend
+          </span>
         </summary>
         <div class="legend-grid">
           <div class="legend-col">
@@ -584,6 +586,10 @@ const title = graph.title ?? `${slug} — Contract Dependency Graph`;
     background: rgba(255, 255, 255, 0.9);
     border-color: rgba(0, 0, 0, 0.08);
   }
+  /* Keep <summary> at its default display: list-item — setting it to flex
+     or inline-flex breaks the native <details> toggle on iOS Safari (open
+     fires once, subsequent taps no longer close). Lay the icon + label
+     out with a child flex container instead. */
   .graph-legend summary {
     cursor: pointer;
     padding: 0.5rem 0.9rem;
@@ -594,6 +600,8 @@ const title = graph.title ?? `${slug} — Contract Dependency Graph`;
     font-size: 0.66rem;
     font-weight: 600;
     user-select: none;
+  }
+  .graph-legend .legend-summary-inner {
     display: inline-flex;
     align-items: center;
     gap: 0.4rem;
@@ -601,8 +609,10 @@ const title = graph.title ?? `${slug} — Contract Dependency Graph`;
   .graph-legend summary:hover {
     color: var(--text-primary);
   }
-  .graph-legend summary::-webkit-details-marker {
+  .graph-legend summary::-webkit-details-marker,
+  .graph-legend summary::marker {
     display: none;
+    content: "";
   }
   .graph-legend[open] summary {
     border-bottom: 1px solid rgba(255, 255, 255, 0.06);
