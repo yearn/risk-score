@@ -1,0 +1,184 @@
+slug: yearn-yvdai
+title: yvDAI-1 — Contract Dependency Graph
+chain: ethereum
+
+categories:
+  - id: vault
+    label: Vault
+  - id: strategy
+    label: Strategy
+  - id: governance
+    label: Governance / Multisig
+  - id: infra
+    label: Yearn Infra / Bot
+  - id: dependency
+    label: External Dependency
+
+nodes:
+  # Vault layer
+  - id: yvDAI
+    label: yvDAI-1
+    address: "0x028eC7330ff87667b6dfb0D94b954c820195336c"
+    category: vault
+  - id: accountant
+    label: Accountant (0% mgmt, 10% perf)
+    address: "0x5A74Cb32D36f2f517DB6f7b0A0591e09b22cDE69"
+    category: vault
+  - id: dumper
+    label: Fee Recipient (Dumper)
+    address: "0x590Dd9399bB53f1085097399C3265C7137c1C4Cf"
+    category: vault
+
+  # Governance
+  - id: daddy
+    label: Daddy / ySafe (6-of-9)
+    address: "0xFEB4acf3df3cDEA7399794D0869ef76A6EfAff52"
+    category: governance
+  - id: brain
+    label: Brain (3-of-8)
+    address: "0x16388463d60FFE0661Cf7F1f31a7D658aC790ff7"
+    category: governance
+  - id: security
+    label: Security (4-of-7)
+    address: "0xe5e2Baf96198c56380dDD5E992D7d1ADa0e989c0"
+    category: governance
+  - id: timelock
+    label: Strategy Manager (7-day Timelock)
+    address: "0x88Ba032be87d5EF1fbE87336b7090767F367BF73"
+    category: governance
+  - id: role-manager
+    label: Yearn V3 Role Manager
+    address: "0xb3bd6B2E61753C311EFbCF0111f75D29706D9a41"
+    category: governance
+
+  # Infra / bots
+  - id: keeper
+    label: Keeper (yHaaSRelayer)
+    address: "0x604e586F17cE106B64185A7a0d2c1Da5bAce711E"
+    category: infra
+  - id: debt-allocator
+    label: Debt Allocator
+    address: "0x1e9eB053228B1156831759401dE0E115356b8671"
+    category: infra
+  - id: vault-factory
+    label: Vault Factory (v3.0.2)
+    address: "0x444045c5C13C246e117eD36437303cac8E250aB0"
+    category: infra
+
+  # Strategies
+  - id: dai-to-usdc-depositor
+    label: DAI → yvUSDC-1 Depositor (72.97%)
+    address: "0xfF03Dce6d95aa7a30B75EFbaFD11384221B9f9B5"
+    category: strategy
+  - id: dai-to-usds-depositor
+    label: DAI → yvUSDS-1 Depositor (27.03%)
+    address: "0xAeDF7d5F3112552E110e5f9D08c9997Adce0b78d"
+    category: strategy
+
+  # External dependencies (cross-linked Yearn vaults)
+  - id: yvUSDC
+    label: yvUSDC-1 (intermediate vault)
+    address: "0xBe53A109B494E5c9f97b9Cd39Fe969BE68BF6204"
+    category: dependency
+  - id: yvUSDS
+    label: yvUSDS-1 (intermediate vault)
+    address: "0x182863131F9a4630fF9E27830d945B1413e347E8"
+    category: dependency
+
+  # External dependencies (Sky conversion infrastructure)
+  - id: psm-lite
+    label: MakerDAO PSM Lite (DAI ↔ USDC)
+    address: "0xf6e72Db5454dd049d0788e411b06CfAF16853042"
+    category: dependency
+  - id: dai-usds-exchanger
+    label: Sky DAI ↔ USDS Exchanger
+    address: "0x3225737a9Bbb6473CB4a45b7244ACa2BeFdB276A"
+    category: dependency
+
+edges:
+  # Deployment / vault infrastructure
+  - from: vault-factory
+    to: yvDAI
+    kind: deploys
+    label: minimal proxy
+  - from: yvDAI
+    to: accountant
+    kind: routes-fees-to
+  - from: accountant
+    to: dumper
+    kind: routes-fees-to
+
+  # Vault → strategies (allocation)
+  - from: yvDAI
+    to: dai-to-usdc-depositor
+    kind: allocates-to
+    label: "72.97%"
+  - from: yvDAI
+    to: dai-to-usds-depositor
+    kind: allocates-to
+    label: "27.03%"
+
+  # Governance roles on vault
+  - from: daddy
+    to: yvDAI
+    kind: holds-role
+    label: "all 14 roles"
+  - from: brain
+    to: yvDAI
+    kind: holds-role
+    label: "QUEUE / DEBT / EMERGENCY"
+  - from: security
+    to: yvDAI
+    kind: holds-role
+    label: "DEBT / MAX_DEBT / EMERGENCY"
+  - from: timelock
+    to: yvDAI
+    kind: holds-role
+    label: "ADD_STRATEGY (7d)"
+  - from: keeper
+    to: yvDAI
+    kind: holds-role
+    label: "REPORTING"
+  - from: debt-allocator
+    to: yvDAI
+    kind: holds-role
+    label: "REPORTING + DEBT_MANAGER"
+
+  # Role manager wiring
+  - from: daddy
+    to: role-manager
+    kind: controls
+  - from: security
+    to: role-manager
+    kind: controls
+  - from: role-manager
+    to: yvDAI
+    kind: manages
+
+  # Timelock flow
+  - from: daddy
+    to: timelock
+    kind: proposes-on
+    label: PROPOSER + EXECUTOR
+  - from: brain
+    to: timelock
+    kind: cancels-on
+    label: CANCELLER
+
+  # Strategy → intermediate vault pipelines (vault-of-vaults)
+  - from: dai-to-usdc-depositor
+    to: psm-lite
+    kind: routes-through
+    label: "DAI → USDC"
+  - from: dai-to-usdc-depositor
+    to: yvUSDC
+    kind: deposits-into
+    label: "USDC → yvUSDC-1"
+  - from: dai-to-usds-depositor
+    to: dai-usds-exchanger
+    kind: routes-through
+    label: "DAI → USDS"
+  - from: dai-to-usds-depositor
+    to: yvUSDS
+    kind: deposits-into
+    label: "USDS → yvUSDS-1"

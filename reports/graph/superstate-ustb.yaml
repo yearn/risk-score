@@ -1,0 +1,188 @@
+slug: superstate-ustb
+title: Superstate (USTB) — Contract Dependency Graph
+chain: ethereum
+
+categories:
+  - id: vault
+    label: Token
+  - id: governance
+    label: Governance / Owners
+  - id: infra
+    label: Protocol Infra
+  - id: dependency
+    label: External Dependency
+
+nodes:
+  # === Token layer ===
+  - id: ustb
+    label: USTB (Tokenized T-Bill Fund)
+    address: "0x43415eB6ff9DB7E26A15b704e7A3eDCe97d31C4e"
+    category: vault
+    note: EIP-1967 Proxy → SuperstateTokenV5_1
+
+  # === Protocol infra ===
+  - id: ustb-proxy-admin
+    label: USTB ProxyAdmin
+    address: "0xb9d285dcad879513dc9c1a3b2e0cccb21c3c2146"
+    category: infra
+  - id: allowlist
+    label: AllowList V3.1
+    address: "0x02f1fa8b196d21c7b733eb2700b825611d8a38e5"
+    category: infra
+    note: KYC-gated transfer allowlist
+  - id: allowlist-proxy-admin
+    label: AllowList ProxyAdmin
+    address: "0xb819692a58db9dd4d3b403a875439b6ca155c610"
+    category: infra
+  - id: redemption-idle
+    label: RedemptionIdle (USDC redeem)
+    address: "0x4c21b7577c8fe8b0b0669165ee7c8f67fa1454cf"
+    category: infra
+    note: Onchain USTB→USDC; ~$1.7M capacity
+  - id: redemption-proxy-admin
+    label: RedemptionIdle ProxyAdmin
+    address: "0xcaba8c12873fffed13431d98bf6b836dff08e869"
+    category: infra
+  - id: superstate-oracle
+    label: Superstate Continuous Price Oracle
+    address: "0xe4fa682f94610ccd170680cc3b045d77d9e528a8"
+    category: infra
+    note: Linear interpolation; 5d staleness
+  - id: usdc-sweep
+    label: USDC Sweep Destination (EOA)
+    address: "0x774AE279c21B6a17a6E2BD5ab5398FF98F398807"
+    category: infra
+
+  # === Governance (EOA owners — no multisig, no timelock) ===
+  - id: ustb-owner
+    label: USTB Owner (EOA)
+    address: "0xad309bb6f13074128b4f23ef9ea2fe8552afca83"
+    category: governance
+    note: Mint, adminBurn, pause, upgrade, oracle config
+  - id: allowlist-owner
+    label: AllowList Owner (EOA)
+    address: "0x7747940adbc7191f877a9b90596e0da4f8deb2fe"
+    category: governance
+    note: Whitelist + upgrade AllowList
+  - id: redemption-owner
+    label: RedemptionIdle Owner (EOA)
+    address: "0x8cf40e96e7d7fd8A7A9bEf70d3882fbBC4D40765"
+    category: governance
+    note: Pause, withdraw USDC, set fees, upgrade
+  - id: oracle-owner
+    label: Oracle Owner (EOA)
+    address: "0x4B1df64357a5D484563c9b7c16a80eD8B8fB1395"
+    category: governance
+    note: addCheckpoint (NAV pricing)
+
+  # === External dependencies ===
+  - id: dep-treasuries
+    label: U.S. Treasury Bills (Offchain)
+    category: dependency
+    note: ≥95% short-duration T-Bills + Agency
+  - id: dep-umb-bank
+    label: UMB Bank (Custodian)
+    category: dependency
+    note: OCC-regulated qualified custodian
+  - id: dep-federated-hermes
+    label: Federated Hermes (Sub-Advisor)
+    category: dependency
+    note: Daily portfolio management
+  - id: dep-chainlink-nav
+    label: Chainlink USTB NAV Feed
+    address: "0x289B5036cd942e619E1Ee48670F98d214E745AAC"
+    category: dependency
+    note: Independent NAV oracle
+  - id: dep-circle
+    label: Circle / USDC
+    category: dependency
+    note: Subscription + redemption rail
+
+edges:
+  # === Ownership (EOAs control proxies + tokens) ===
+  - from: ustb-owner
+    to: ustb-proxy-admin
+    kind: controls
+    label: owner (no timelock)
+  - from: ustb-proxy-admin
+    to: ustb
+    kind: manages
+    label: upgradeable proxy
+  - from: ustb-owner
+    to: ustb
+    kind: holds-role
+    label: owner (mint / adminBurn / pause)
+  - from: allowlist-owner
+    to: allowlist-proxy-admin
+    kind: controls
+    label: owner (no timelock)
+  - from: allowlist-proxy-admin
+    to: allowlist
+    kind: manages
+    label: upgradeable proxy
+  - from: allowlist-owner
+    to: allowlist
+    kind: holds-role
+    label: owner (whitelist)
+  - from: redemption-owner
+    to: redemption-proxy-admin
+    kind: controls
+    label: owner (no timelock)
+  - from: redemption-proxy-admin
+    to: redemption-idle
+    kind: manages
+    label: upgradeable proxy
+  - from: redemption-owner
+    to: redemption-idle
+    kind: holds-role
+    label: owner (pause / withdraw / fees)
+  - from: oracle-owner
+    to: superstate-oracle
+    kind: holds-role
+    label: owner (addCheckpoint)
+
+  # === Mint authority on USTB ===
+  - from: ustb-owner
+    to: ustb
+    kind: mints
+    label: mint / bulkMint / adminBurn
+
+  # === Internal wiring ===
+  - from: allowlist
+    to: ustb
+    kind: manages
+    label: transfer gate
+  - from: superstate-oracle
+    to: ustb
+    kind: routes-through
+    label: NAV/share for subscribe/redeem
+  - from: redemption-idle
+    to: ustb
+    kind: routes-through
+    label: USTB → USDC redemption
+  - from: redemption-idle
+    to: usdc-sweep
+    kind: routes-fees-to
+    label: USDC sweep
+
+  # === Backing & external dependencies ===
+  - from: ustb
+    to: dep-treasuries
+    kind: deposits-into
+    label: offchain T-Bill fund
+  - from: dep-treasuries
+    to: dep-umb-bank
+    kind: routes-through
+    label: custody
+  - from: dep-treasuries
+    to: dep-federated-hermes
+    kind: routes-through
+    label: sub-advisor
+  - from: redemption-idle
+    to: dep-circle
+    kind: routes-through
+    label: USDC rail
+  - from: ustb
+    to: dep-chainlink-nav
+    kind: routes-through
+    label: independent NAV feed

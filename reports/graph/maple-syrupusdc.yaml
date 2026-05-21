@@ -1,0 +1,215 @@
+slug: maple-syrupusdc
+title: Maple (syrupUSDC) — Contract Dependency Graph
+chain: ethereum
+
+categories:
+  - id: vault
+    label: Vault / Token
+  - id: strategy
+    label: Strategy / Loan Manager
+  - id: governance
+    label: Governance
+  - id: infra
+    label: Protocol Infra
+  - id: dependency
+    label: External Dependency
+
+nodes:
+  # === Vault / token layer ===
+  - id: syrupUSDC
+    label: syrupUSDC Pool (ERC-4626)
+    address: "0x80ac24aA929eaF5013f6436cdA2a7ba190f5Cc0b"
+    category: vault
+
+  # === Protocol infra ===
+  - id: pool-manager
+    label: PoolManager
+    address: "0x7aD5fFa5fdF509E30186F4609c2f6269f4B6158F"
+    category: infra
+  - id: syrup-router
+    label: SyrupRouter (Deposit Gateway)
+    address: "0x134cCaaA4F1e4552eC8aEcb9E4A2360dDcF8df76"
+    category: infra
+  - id: withdrawal-queue
+    label: WithdrawalManagerQueue (FIFO)
+    address: "0x1bc47a0Dd0FdaB96E9eF982fdf1F34DC6207cfE3"
+    category: infra
+  - id: permission-manager
+    label: PoolPermissionManager
+    address: "0xBe10aDcE8B6E3E02Db384E7FaDA5395DD113D8b3"
+    category: infra
+    note: Deposit allowlist
+  - id: pool-delegate-cover
+    label: PoolDelegateCover (First-loss)
+    address: "0x9e62FE15d0E99cE2b30CE0D256e9Ab7b6893AfF5"
+    category: infra
+  - id: maple-globals
+    label: MapleGlobals (v301)
+    address: "0x804a6F5F667170F545Bf14e5DDB48C70B788390C"
+    category: infra
+    note: 7d default timelock + 2d window
+
+  # === Strategy / loan-manager legs ===
+  - id: open-term-lm
+    label: OpenTermLoanManager (~$1.34B AUM)
+    address: "0x6ACEb4cAbA81Fa6a8065059f3A944fb066A10fAc"
+    category: strategy
+  - id: fixed-term-lm
+    label: FixedTermLoanManager ($0 AUM)
+    address: "0x4A1c3F0D9aD0b3f9dA085bEBfc22dEA54263371b"
+    category: strategy
+    note: Migrated to open-term
+  - id: aave-strategy
+    label: AaveStrategy (dormant)
+    address: "0x560B3A85Af1cEF113BB60105d0Cf21e1d05F91d4"
+    category: strategy
+    note: 10 wei AUM as of May 2026
+  - id: sky-strategy
+    label: SkyStrategy (dormant)
+    address: "0x859C9980931fa0A63765fD8EF2e29918Af5b038C"
+    category: strategy
+    note: 10 wei AUM as of May 2026
+  - id: pool-delegate
+    label: Pool Delegate (Maple Direct EOA)
+    address: "0xC1e18FFD8825FfB286D177DDEbeba345EC70B49f"
+    category: strategy
+    note: Loan origination, impairments
+
+  # === Governance ===
+  - id: governor-timelock
+    label: Governor Timelock (24h)
+    address: "0x2eFFf88747EB5a3FF00d4d8d0f0800E306C0426b"
+    category: governance
+  - id: dao-multisig
+    label: DAO Multisig (4-of-7)
+    address: "0xd6d4Bcde6c816F17889f1Dd3000aF0261B03a196"
+    category: governance
+    note: PROPOSER + ROLE_ADMIN
+  - id: security-admin
+    label: Security Admin (3-of-6)
+    address: "0x6b1A78C1943b03086F7Ee53360f9b0672bD60818"
+    category: governance
+    note: CANCELLER + emergency pause
+  - id: ops-admin
+    label: Operational Admin (3-of-5)
+    address: "0xCe1cE7c7F436DCc4E28Bc8bf86115514d3DC34E8"
+    category: governance
+    note: EXECUTOR on Timelock
+
+  # === External dependencies ===
+  - id: dep-borrowers
+    label: Institutional Borrowers
+    category: dependency
+    note: Overcollateralized loans (BTC/ETH/USTB/etc.)
+  - id: dep-chainlink
+    label: Chainlink Oracles
+    category: dependency
+    note: Collateral pricing for liquidations
+  - id: dep-aave-v3
+    label: Aave V3 (idle deployment)
+    category: dependency
+    note: AaveStrategy target (currently dormant)
+  - id: dep-sky
+    label: Sky / MakerDAO (idle deployment)
+    category: dependency
+    note: SkyStrategy target (currently dormant)
+  - id: dep-ccip
+    label: Chainlink CCIP
+    category: dependency
+    note: Cross-chain syrupUSDC (Base/Arbitrum/Solana)
+
+edges:
+  # === Governance flow ===
+  - from: dao-multisig
+    to: governor-timelock
+    kind: proposes-on
+    label: PROPOSER + ROLE_ADMIN
+  - from: ops-admin
+    to: governor-timelock
+    kind: holds-role
+    label: EXECUTOR
+  - from: security-admin
+    to: governor-timelock
+    kind: cancels-on
+    label: CANCELLER
+  - from: governor-timelock
+    to: maple-globals
+    kind: controls
+    label: governor() (24h + 7d global)
+  - from: maple-globals
+    to: pool-manager
+    kind: manages
+    label: protocol params
+  - from: security-admin
+    to: syrupUSDC
+    kind: holds-role
+    label: emergency pause
+
+  # === Internal pool flow ===
+  - from: syrup-router
+    to: syrupUSDC
+    kind: routes-through
+    label: USDC deposit
+  - from: pool-manager
+    to: syrupUSDC
+    kind: manages
+    label: pool admin
+  - from: syrupUSDC
+    to: withdrawal-queue
+    kind: routes-through
+    label: FIFO redemption
+  - from: permission-manager
+    to: syrupUSDC
+    kind: manages
+    label: deposit allowlist
+  - from: pool-delegate-cover
+    to: syrupUSDC
+    kind: routes-fees-to
+    label: first-loss cover
+
+  # === Allocation: syrupUSDC → loan managers / strategies ===
+  - from: syrupUSDC
+    to: open-term-lm
+    kind: allocates-to
+    label: "~97% (OTLM)"
+  - from: syrupUSDC
+    to: fixed-term-lm
+    kind: allocates-to
+    label: "0% (migrated)"
+  - from: syrupUSDC
+    to: aave-strategy
+    kind: allocates-to
+    label: "dormant"
+  - from: syrupUSDC
+    to: sky-strategy
+    kind: allocates-to
+    label: "dormant"
+
+  # === Loan origination ===
+  - from: pool-delegate
+    to: open-term-lm
+    kind: manages
+    label: loan origination + impairments
+  - from: pool-delegate
+    to: fixed-term-lm
+    kind: manages
+
+  # === Strategy / loan-manager → external ===
+  - from: open-term-lm
+    to: dep-borrowers
+    kind: deposits-into
+    label: overcollateralized loans
+  - from: open-term-lm
+    to: dep-chainlink
+    kind: routes-through
+    label: collateral pricing
+  - from: aave-strategy
+    to: dep-aave-v3
+    kind: deposits-into
+  - from: sky-strategy
+    to: dep-sky
+    kind: deposits-into
+  - from: syrupUSDC
+    to: dep-ccip
+    kind: routes-through
+    label: cross-chain wrapper

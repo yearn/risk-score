@@ -1,0 +1,251 @@
+slug: resolv-rlp
+title: Resolv RLP — Contract Dependency Graph
+chain: ethereum
+
+categories:
+  - id: vault
+    label: Vault / Token
+  - id: strategy
+    label: Strategy / Custody Leg
+  - id: governance
+    label: Governance
+  - id: infra
+    label: Protocol Infra
+  - id: dependency
+    label: External Dependency
+
+nodes:
+  # === Vault / token layer ===
+  - id: RLP
+    label: RLP (Liquidity Pool)
+    address: "0x4956b52aE2fF65D74CA2d61207523288e4528f96"
+    category: vault
+    note: Junior/insurance tranche; first-loss capital
+  - id: USR
+    label: USR (Stablecoin)
+    address: "0x66a1e37c9b0eaddca17d3662d6c05f4decf3e110"
+    category: vault
+    note: Senior tranche; protected by RLP
+
+  # === Internal infra ===
+  - id: rlp-requests-manager
+    label: RLP Requests Manager
+    address: "0x10f4d4EAd6Bcd4de7849898403d88528e3Dfc872"
+    category: infra
+    note: Mint/burn entry; epoch-based batch burn
+  - id: rlp-counter
+    label: RLP Counter
+    address: "0xc7ab90c2ea9271efb31f5fa2843eeb4b331eafa0"
+    category: infra
+    note: Offchain price storage (24h cycle)
+  - id: usr-counter
+    label: USR Counter (TheCounter)
+    address: "0xa27a69Ae180e202fDe5D38189a3F24Fe24E55861"
+    category: infra
+    note: completeSwap() exploited 2026-03-22 — ~80M USR unbacked mint
+  - id: whitelist
+    label: Whitelist
+    address: "0x5943026E21E3936538620ba27e01525bBA311255"
+    category: infra
+    note: Gates mint/redeem to allowlisted wallets
+  - id: reward-distributor
+    label: RewardDistributor
+    address: "0xbE23BB6D817C08E7EC4Cd0adB0E23156189c1bA9"
+    category: infra
+  - id: fee-collector
+    label: Fee Collector
+    address: "0x6E02e225329E32c854178d7c865cF70fE1617f02"
+    category: infra
+  - id: treasury
+    label: Treasury (onchain wallet)
+    address: "0xacb7027f271b03b502d65feba617a0d817d62b8e"
+    category: infra
+
+  # === Governance ===
+  - id: multisig
+    label: Gnosis Safe (3-of-5)
+    address: "0xd6889f307be1b83bb355d5da7d4478fb0d2af547"
+    category: governance
+    note: DEFAULT_ADMIN_ROLE on all core contracts; 5 anonymous EOAs
+  - id: timelock
+    label: TimelockController (3-day)
+    address: "0x290d9544669c9c7a64f6899a0a3b28d563f6ebee"
+    category: governance
+    note: Owns all ProxyAdmins; upgrades only
+
+  # === Strategy / custody legs ===
+  - id: fireblocks-deribit
+    label: Fireblocks (Deribit) Wallet
+    address: "0x22062B644aADD7e7Bb11e58C37BC1b022f4Ec3aC"
+    category: strategy
+    note: Margin for Deribit hedging futures
+  - id: fireblocks-bybit
+    label: Fireblocks (Bybit) Wallet
+    address: "0x2a144e059cd8a8200298976ce55e8938f33b1d3b"
+    category: strategy
+    note: Margin for Bybit hedging futures
+  - id: ceffu-binance
+    label: Ceffu (Binance) Custody
+    category: strategy
+    note: Omnibus wallet; margin for Binance perps
+  - id: defi-allocations
+    label: DeFi / RWA Allocations
+    category: strategy
+    note: Aave v3, Lido, EtherFi, Superstate USCC
+
+  # === External dependencies (hedging venues) ===
+  - id: dep-binance
+    label: Binance (Perp Futures)
+    category: dependency
+    note: Short perp leg of delta-neutral hedge
+  - id: dep-deribit
+    label: Deribit (Perp Futures)
+    category: dependency
+  - id: dep-bybit
+    label: Bybit (Perp Futures)
+    category: dependency
+  - id: dep-hyperliquid
+    label: Hyperliquid (Perp DEX)
+    category: dependency
+  - id: dep-aave
+    label: Aave v3 (ETH Borrowing)
+    category: dependency
+  - id: dep-lido
+    label: Lido (stETH)
+    category: dependency
+  - id: dep-etherfi
+    label: EtherFi (weETH)
+    category: dependency
+  - id: dep-uscc
+    label: Superstate USCC + Aave Horizon RWA
+    category: dependency
+
+edges:
+  # === Governance ===
+  - from: multisig
+    to: timelock
+    kind: proposes-on
+    label: PROPOSER + EXECUTOR (sole)
+  - from: timelock
+    to: RLP
+    kind: manages
+    label: ProxyAdmin owner (upgrades, 3d)
+  - from: timelock
+    to: USR
+    kind: manages
+    label: ProxyAdmin owner (upgrades, 3d)
+  - from: multisig
+    to: RLP
+    kind: holds-role
+    label: DEFAULT_ADMIN_ROLE (no delay)
+  - from: multisig
+    to: USR
+    kind: holds-role
+    label: DEFAULT_ADMIN_ROLE (no delay)
+  - from: multisig
+    to: rlp-requests-manager
+    kind: holds-role
+    label: DEFAULT_ADMIN_ROLE
+  - from: multisig
+    to: rlp-counter
+    kind: holds-role
+    label: SERVICE_ROLE (offchain price)
+  - from: multisig
+    to: whitelist
+    kind: manages
+    label: RDAL controls allowlist
+  - from: multisig
+    to: usr-counter
+    kind: holds-role
+    label: DEFAULT_ADMIN_ROLE
+  - from: multisig
+    to: reward-distributor
+    kind: holds-role
+    label: DEFAULT_ADMIN_ROLE
+
+  # === Mint authority on USR (RLP losses cascade through USR collateral) ===
+  - from: usr-counter
+    to: USR
+    kind: mints
+    label: SERVICE_ROLE (exploited)
+  - from: rlp-requests-manager
+    to: RLP
+    kind: mints
+    label: completeMint (backend)
+
+  # === User flow into RLP ===
+  - from: rlp-requests-manager
+    to: RLP
+    kind: routes-through
+    label: requestMint → completeMint
+  - from: rlp-counter
+    to: rlp-requests-manager
+    kind: routes-through
+    label: 24h price feed (offchain)
+  - from: whitelist
+    to: rlp-requests-manager
+    kind: manages
+    label: allowlist check
+  - from: RLP
+    to: fee-collector
+    kind: routes-fees-to
+
+  # === RLP first-loss absorbs USR strategy losses ===
+  - from: RLP
+    to: USR
+    kind: routes-through
+    label: first-loss tranche over USR collateral
+
+  # === USR collateral pool → strategy/custody legs ===
+  - from: USR
+    to: fireblocks-deribit
+    kind: allocates-to
+    label: "Deribit margin"
+  - from: USR
+    to: fireblocks-bybit
+    kind: allocates-to
+    label: "Bybit margin"
+  - from: USR
+    to: ceffu-binance
+    kind: allocates-to
+    label: "Binance margin"
+  - from: USR
+    to: defi-allocations
+    kind: allocates-to
+    label: "DeFi + RWA"
+  - from: USR
+    to: treasury
+    kind: routes-through
+    label: onchain custody
+
+  # === Custody legs → hedging venues ===
+  - from: fireblocks-deribit
+    to: dep-deribit
+    kind: deposits-into
+    label: short perps
+  - from: fireblocks-bybit
+    to: dep-bybit
+    kind: deposits-into
+    label: short perps
+  - from: ceffu-binance
+    to: dep-binance
+    kind: deposits-into
+    label: short perps
+  - from: treasury
+    to: dep-hyperliquid
+    kind: deposits-into
+    label: short perps (DEX)
+
+  # === DeFi allocations → individual venues ===
+  - from: defi-allocations
+    to: dep-aave
+    kind: deposits-into
+  - from: defi-allocations
+    to: dep-lido
+    kind: deposits-into
+  - from: defi-allocations
+    to: dep-etherfi
+    kind: deposits-into
+  - from: defi-allocations
+    to: dep-uscc
+    kind: deposits-into

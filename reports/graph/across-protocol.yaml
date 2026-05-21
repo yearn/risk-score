@@ -1,0 +1,204 @@
+slug: across-protocol
+title: Across Protocol (V2 LP Tokens) — Contract Dependency Graph
+chain: ethereum
+
+categories:
+  - id: vault
+    label: LP Token
+  - id: strategy
+    label: Spoke / Strategy
+  - id: governance
+    label: Governance / Multisig
+  - id: infra
+    label: Protocol Infra
+  - id: dependency
+    label: External Dependency
+
+nodes:
+  # === LP tokens (user-facing vault layer) ===
+  - id: lp-weth
+    label: Av2-WETH-LP
+    address: "0x28F77208728B0A45cAb24c4868334581Fe86F95B"
+    category: vault
+  - id: lp-usdc
+    label: Av2-USDC-LP
+    address: "0xC9b09405959f63F72725828b5d449488b02be1cA"
+    category: vault
+  - id: lp-usdt
+    label: Av2-USDT-LP
+    address: "0xC2faB88f215f62244d2E32c8a65E8F58DA8415a5"
+    category: vault
+  - id: lp-dai
+    label: Av2-DAI-LP
+    address: "0x4FaBacAC8C41466117D6A38F46d08ddD4948A0cB"
+    category: vault
+  - id: lp-wbtc
+    label: Av2-WBTC-LP
+    address: "0x59C1427c658E97a7d568541DaC780b2E5c8affb4"
+    category: vault
+
+  # === Protocol infra ===
+  - id: hub-pool
+    label: HubPool (immutable, custody)
+    address: "0xc186fA914353c44b2E33eBE05f21846F1048bEda"
+    category: infra
+    note: Non-upgradeable; holds liquidReserves and accounts for utilizedReserves
+  - id: lp-factory
+    label: LpTokenFactory
+    address: "0x7dB69eb9F52eD773E9b03f5068A1ea0275b2fD9d"
+    category: infra
+    note: Deploys per-pool LP tokens; sole minter = HubPool
+  - id: bond-token
+    label: BondToken (ABT)
+    address: "0xee1DC6BCF1Ee967a350e9aC6CaaAA236109002ea"
+    category: infra
+    note: Bond currency; proposer allowlist gated by HubPool Owner
+  - id: config-store
+    label: AcrossConfigStore (LP fee params)
+    address: "0x3B03509645713718B78951126E0A6de6f10043f5"
+    category: infra
+  - id: eth-spoke
+    label: Ethereum SpokePool (UUPS)
+    address: "0x5c7BCd6E7De5423a257D81B442095A1a6ced35C5"
+    category: strategy
+    note: Inflight inventory venue; admin = HubPool
+  - id: l2-spokes
+    label: L2 SpokePools (Arbitrum, Optimism, Base, Polygon, zkSync, Linea, Blast, World Chain, ...)
+    category: strategy
+    note: All UUPS, admin via relaySpokePoolAdminFunction
+
+  # === Governance ===
+  - id: hub-owner-safe
+    label: Hub Pool Owner Safe (3-of-5)
+    address: "0xB524735356985D2f267FA010D681f061DfF03715"
+    category: governance
+    note: No timelock; holds setPaused, haircutReserves, relaySpokePoolAdminFunction; also owns BondToken
+
+  # === External dependencies ===
+  - id: uma-oo
+    label: UMA Optimistic Oracle V3
+    address: "0xfb55F43fB9F48F63f9269DB7Dde3BbBe1ebDC0dE"
+    category: dependency
+    note: 30-min liveness, ACROSS-V2 identifier
+  - id: uma-dvm
+    label: UMA DVM (UMA tokenholders)
+    category: dependency
+    note: Final dispute arbiter
+  - id: canonical-bridges
+    label: Canonical L1↔L2 Bridges
+    category: dependency
+    note: Arbitrum / Optimism / Base / Polygon / zkSync / Linea / Blast / World Chain native bridges
+
+edges:
+  # === Governance — multisig has unilateral control over the HubPool ===
+  - from: hub-owner-safe
+    to: hub-pool
+    kind: holds-role
+    label: owner (no timelock; setPaused, haircutReserves, relaySpokePoolAdminFunction)
+  - from: hub-owner-safe
+    to: bond-token
+    kind: holds-role
+    label: owner (setProposer allowlist)
+  - from: hub-owner-safe
+    to: config-store
+    kind: manages
+    label: LP fee rate params
+  - from: hub-owner-safe
+    to: eth-spoke
+    kind: manages
+    label: UUPS upgrade (via HubPool)
+  - from: hub-owner-safe
+    to: l2-spokes
+    kind: manages
+    label: UUPS upgrade (via HubPool)
+
+  # === Deployment ===
+  - from: lp-factory
+    to: lp-weth
+    kind: deploys
+  - from: lp-factory
+    to: lp-usdc
+    kind: deploys
+  - from: lp-factory
+    to: lp-usdt
+    kind: deploys
+  - from: lp-factory
+    to: lp-dai
+    kind: deploys
+  - from: lp-factory
+    to: lp-wbtc
+    kind: deploys
+
+  # === LP token mint authority ===
+  - from: hub-pool
+    to: lp-weth
+    kind: mints
+    label: sole minter (addLiquidity)
+  - from: hub-pool
+    to: lp-usdc
+    kind: mints
+    label: sole minter (addLiquidity)
+  - from: hub-pool
+    to: lp-usdt
+    kind: mints
+    label: sole minter (addLiquidity)
+  - from: hub-pool
+    to: lp-dai
+    kind: mints
+    label: sole minter (addLiquidity)
+  - from: hub-pool
+    to: lp-wbtc
+    kind: mints
+    label: sole minter (addLiquidity)
+
+  # === Capital flow: LP token → HubPool → SpokePool inventory ===
+  - from: lp-weth
+    to: hub-pool
+    kind: deposits-into
+    label: addLiquidity / removeLiquidity
+  - from: lp-usdc
+    to: hub-pool
+    kind: deposits-into
+    label: addLiquidity / removeLiquidity
+  - from: lp-usdt
+    to: hub-pool
+    kind: deposits-into
+    label: addLiquidity / removeLiquidity
+  - from: lp-dai
+    to: hub-pool
+    kind: deposits-into
+    label: addLiquidity / removeLiquidity
+  - from: lp-wbtc
+    to: hub-pool
+    kind: deposits-into
+    label: addLiquidity / removeLiquidity
+  - from: hub-pool
+    to: eth-spoke
+    kind: allocates-to
+    label: utilizedReserves
+  - from: hub-pool
+    to: l2-spokes
+    kind: allocates-to
+    label: utilizedReserves (cross-chain)
+
+  # === Inflight inventory repatriates via canonical bridges ===
+  - from: l2-spokes
+    to: canonical-bridges
+    kind: routes-through
+    label: repatriate to HubPool
+
+  # === Optimistic oracle dependency ===
+  - from: hub-pool
+    to: uma-oo
+    kind: routes-through
+    label: root bundle dispute
+  - from: uma-oo
+    to: uma-dvm
+    kind: routes-through
+    label: escalate on dispute
+
+  # === Bond token tie-in ===
+  - from: hub-pool
+    to: bond-token
+    kind: routes-through
+    label: proposer bond
