@@ -53,7 +53,7 @@ Before writing the *Token Mint Authority* section of the report (defined in `rep
 
 5. **For every role-holder address**, classify it in the *Notes* column of the mint table: EOA, multisig (with threshold + named-vs-anonymous signers), or specific contract (with its purpose, e.g. "MintController — entry-point proxy for user deposits"). If a role-holder is itself a multisig, also document its threshold and signer set.
 
-6. **Cross-check against the dependency-graph** (if a YAML exists at `reports/graph/<slug>.yaml`): mint-authority contracts should appear as nodes with `holds-role` or `manages` edges to the token. If your enumeration finds an address that the graph doesn't, the graph is incomplete; if the graph shows a mint role for an address that you can't reproduce onchain, the graph is wrong.
+6. **Cross-check against the dependency-graph** (if a YAML exists at `reports/graph/<slug>.yaml`): every mint-authority contract should appear as a node with a `mints` edge (direction: `minter → token`) connecting to the assessed token. The `mints` edge kind renders red and is reserved for privileged supply-creation authority. If your enumeration finds an address that the graph doesn't, the graph is incomplete; if the graph shows a `mints` edge from an address that you can't reproduce onchain, the graph is wrong. Absence of `mints` edges means the token has no privileged minter (permissionless ERC-4626, collateral-only mint, etc.) — also a valid and important visual signal.
 
 ### Pass 2: Verification and Scoring
 Only after architecture mapping, supply reconciliation, and mint-authority enumeration are complete, proceed to verify each component onchain and write risk assessments.

@@ -80,6 +80,7 @@ const usedCategories: GraphCategory[] = graph.categories.filter((c) =>
 const KIND_LABELS: Record<string, string> = {
   "allocates-to": "Allocation",
   "deposits-into": "Deposits into",
+  mints: "Mint authority",
   "routes-through": "Routes through",
   "routes-fees-to": "Fees routed",
   "holds-role": "Holds role",
@@ -282,6 +283,10 @@ const title = graph.title ?? `${slug} — Contract Dependency Graph`;
 
     const edgeColor = (k: string) => {
       if (flow.has(k)) return "rgba(110, 231, 183, 0.55)";
+      // mints: high-trust authority (privileged supply creation) — red is
+      // the strongest signal in the palette, intentional to draw the
+      // reviewer's eye to mint-role holders.
+      if (k === "mints") return "rgba(239, 68, 68, 0.85)";
       if (role.has(k)) return "rgba(251, 191, 36, 0.5)";
       if (gov.has(k)) return "rgba(167, 139, 250, 0.55)";
       // routes-through participates in flow but renders as a thin hop —
@@ -294,11 +299,16 @@ const title = graph.title ?? `${slug} — Contract Dependency Graph`;
       return "rgba(140, 140, 140, 0.6)";
     };
     const edgeStyle = (k: string): cytoscape.LineStyle => {
+      if (k === "mints") return "dashed";
       if (role.has(k)) return "dashed";
       if (gov.has(k)) return "dotted";
       return "solid";
     };
-    const edgeWidth = (k: string) => (flow.has(k) ? 2 : 1.5);
+    const edgeWidth = (k: string) => {
+      if (flow.has(k)) return 2;
+      if (k === "mints") return 2.25; // slightly heavier than role edges
+      return 1.5;
+    };
 
     const cy = cytoscape({
       container: document.getElementById("cy")!,
@@ -659,6 +669,7 @@ const title = graph.title ?? `${slug} — Contract Dependency Graph`;
   }
   .line-allocates-to,
   .line-deposits-into { border-top: 2px solid rgba(110, 231, 183, 0.85); }
+  .line-mints         { border-top: 2.25px dashed rgba(239, 68, 68, 0.95); }
   .line-holds-role,
   .line-controls,
   .line-manages       { border-top: 1.5px dashed rgba(251, 191, 36, 0.85); }

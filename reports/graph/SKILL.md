@@ -109,7 +109,7 @@ These enums are fixed — extending them requires coordinated styling changes in
 | `infra` | Internal protocol machinery that isn't itself governance — mint/redeem controllers, debt allocators, keepers, accountants the graph still benefits from showing. |
 | `dependency` | External protocols the strategies sit on top of — Sky/sUSDS, Spark, Morpho vaults, Maple pools, Midas tokens, escrow counterparties. |
 
-### Edge kinds (10)
+### Edge kinds (11)
 
 Grouped by the visual style they get (this matches the legend on the rendered page). Three of them — `allocates-to`, `deposits-into`, `routes-through` — are **flow kinds**, which have extra effects (see "Flow kinds" below the tables).
 
@@ -119,6 +119,12 @@ Grouped by the visual style they get (this matches the legend on the rendered pa
 |--------|---------|------------------------|
 | `allocates-to` | Vault → strategy. The vault holds debt in this strategy. | **Yes** — always set it to the `%` share. |
 | `deposits-into` | Strategy → underlying protocol. The strategy parks USDC into this venue. | **Yes** — optional but useful (e.g. `"USDC → aUSDC"`). |
+
+**Mint authority** — red dashed lines, highest-trust signal:
+
+| `kind` | Meaning | Label renders on page? |
+|--------|---------|------------------------|
+| `mints` | Account/contract holds privileged authority to create new supply of the target token. Direction: `minter → token`. Pair the minter with a node (typically `infra` for protocol contracts, `governance` if a multisig holds the mint role directly). One `mints` edge per role-holder per token. The absence of `mints` edges in a graph is itself meaningful — it means mint is permissionless (e.g. open ERC-4626) or gated only by collateral deposit. | No (documentation-only). Use the label to record the role name (e.g. `RECEIPT_TOKEN_MINTER`, `MINTER_ROLE`). |
 
 **Role / control** — amber dashed lines:
 

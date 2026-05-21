@@ -48,6 +48,8 @@ export const ALLOWED_EDGE_KINDS = new Set([
   // Money flow
   "allocates-to",
   "deposits-into",
+  // Mint authority (high-trust — privileged ability to create new token supply)
+  "mints",
   // Role / control
   "holds-role",
   "controls",

@@ -45,6 +45,22 @@ nodes:
     label: MintController
     address: "0x49877d937B9a00d50557bdC3D87287b5c3a4C256"
     category: infra
+    note: User-facing mint entry; holds RECEIPT_TOKEN_MINTER
+  - id: migration-controller
+    label: MigrationController
+    address: "0x5F5403656E4Db95aCcF1064A714B1bcE351839F8"
+    category: infra
+    note: ENTRY_POINT + RECEIPT_TOKEN_MINTER (migrations)
+  - id: yield-sharing
+    label: YieldSharing
+    address: "0x90E91f5bfD9a0a4d925BF30b512add8cD2bbAE3b"
+    category: infra
+    note: Distributes farm yield; holds RECEIPT_TOKEN_MINTER + BURNER
+  - id: pl-smoother
+    label: PLSmoother
+    address: "0xC324569141697045B9EdE54B5d4623a691ed57A4"
+    category: infra
+    note: Smooths P&L across siUSD epochs; holds RECEIPT_TOKEN_MINTER + BURNER
   - id: redeem-controller
     label: RedeemController
     address: "0xCb1747E89a43DEdcF4A2b831a0D94859EFeC7601"
@@ -182,10 +198,23 @@ edges:
   - from: gateway
     to: redeem-controller
     kind: routes-through
+  # === Mint authority: who holds RECEIPT_TOKEN_MINTER on iUSD ===
   - from: mint-controller
     to: iUSD
-    kind: manages
-    label: ENTRY_POINT (mints)
+    kind: mints
+    label: RECEIPT_TOKEN_MINTER
+  - from: migration-controller
+    to: iUSD
+    kind: mints
+    label: RECEIPT_TOKEN_MINTER
+  - from: yield-sharing
+    to: iUSD
+    kind: mints
+    label: RECEIPT_TOKEN_MINTER
+  - from: pl-smoother
+    to: iUSD
+    kind: mints
+    label: RECEIPT_TOKEN_MINTER
   - from: redeem-controller
     to: iUSD
     kind: manages
