@@ -26,6 +26,7 @@ LABEL = "reassessment"
 TITLE_PREFIX = "Reassessment: "
 
 ASSESSMENT_LINE_RE = re.compile(r"\*\*Assessment Date:\*\*\s*([^\n]+)", re.IGNORECASE)
+WARNING_LINE_RE = re.compile(r"\*\*Warning:\*\*\s*([^\n]+)", re.IGNORECASE)
 DATE_RE = re.compile(
     r"\b("
     r"January|February|March|April|May|June|July|August|September|October|November|December"
@@ -80,6 +81,8 @@ def parse_report(path: Path) -> dict:
     title = title_match.group(1).strip() if title_match else path.stem
     score_match = SCORE_RE.search(content)
     score = score_match.group(1) if score_match else None
+    warning_match = WARNING_LINE_RE.search(content)
+    warning = warning_match.group(1).strip() if warning_match else None
 
     date = parse_assessment_date(content)
     source = "report-header"
@@ -94,6 +97,7 @@ def parse_report(path: Path) -> dict:
         "score": score,
         "date": date,
         "date_source": source,
+        "warning": warning,
     }
 
 
@@ -196,6 +200,14 @@ def main() -> int:
     failed_count = 0
     for path in sorted(REPORTS_DIR.glob("*.md")):
         report = parse_report(path)
+        if report["warning"]:
+            log.info(
+                "SKIP %s — terminal warning: %s",
+                report["slug"],
+                report["warning"],
+            )
+            skipped_count += 1
+            continue
         if report["date"] is None:
             log.warning("could not determine date for %s; skipping", path.name)
             continue
