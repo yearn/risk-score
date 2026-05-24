@@ -1,0 +1,182 @@
+slug: yearn-yvusdt
+title: yvUSDT-1 — Contract Dependency Graph
+chain: ethereum
+
+categories:
+  - id: vault
+    label: Vault
+  - id: strategy
+    label: Strategy
+  - id: governance
+    label: Governance / Multisig
+  - id: infra
+    label: Yearn Infra / Bot
+  - id: dependency
+    label: External Dependency
+
+nodes:
+  # Vault layer
+  - id: yvUSDT
+    label: yvUSDT-1
+    address: "0x310B7Ea7475A0B449Cfd73bE81522F1B88eFAFaa"
+    category: vault
+  - id: accountant
+    label: Accountant (0% mgmt, 10% perf)
+    address: "0x5A74Cb32D36f2f517DB6f7b0A0591e09b22cDE69"
+    category: vault
+  - id: dumper
+    label: Fee Recipient (Dumper)
+    address: "0x590Dd9399bB53f1085097399C3265C7137c1C4Cf"
+    category: vault
+
+  # Governance
+  - id: daddy
+    label: Daddy / ySafe (6-of-9)
+    address: "0xFEB4acf3df3cDEA7399794D0869ef76A6EfAff52"
+    category: governance
+  - id: brain
+    label: Brain (3-of-8)
+    address: "0x16388463d60FFE0661Cf7F1f31a7D658aC790ff7"
+    category: governance
+  - id: security
+    label: Security (4-of-7)
+    address: "0xe5e2Baf96198c56380dDD5E992D7d1ADa0e989c0"
+    category: governance
+  - id: timelock
+    label: Strategy Manager (7-day Timelock)
+    address: "0x88Ba032be87d5EF1fbE87336b7090767F367BF73"
+    category: governance
+  - id: role-manager
+    label: Yearn V3 Role Manager
+    address: "0xb3bd6B2E61753C311EFbCF0111f75D29706D9a41"
+    category: governance
+
+  # Infra / bots
+  - id: keeper
+    label: Keeper (yHaaSRelayer)
+    address: "0x604e586F17cE106B64185A7a0d2c1Da5bAce711E"
+    category: infra
+  - id: debt-allocator
+    label: Debt Allocator
+    address: "0x1e9eB053228B1156831759401dE0E115356b8671"
+    category: infra
+  - id: vault-factory
+    label: Vault Factory (v3.0.2)
+    address: "0x444045c5C13C246e117eD36437303cac8E250aB0"
+    category: infra
+
+  # Strategies
+  - id: spark-usdt-lender
+    label: Spark USDT Lender (45.58%)
+    address: "0xED48069a2b9982B4eec646CBfA7b81d181f9400B"
+    category: strategy
+  - id: morpho-gauntlet-usdt
+    label: Morpho Gauntlet USDT Prime (54.42%)
+    address: "0x6D2981FF9b8d7edbb7604de7A65BAC8694ac849F"
+    category: strategy
+  - id: morpho-steakhouse-usdt
+    label: Morpho Steakhouse USDT (queued, 0%)
+    address: "0x0a4ea2bDe8496a878a7ca2772056a8e6fe3245c5"
+    category: strategy
+
+  # External dependencies
+  - id: spark-lend-usdt
+    label: Spark Lend USDT Market
+    category: dependency
+    note: Sky sub-DAO; admin keys live under Sky governance
+  - id: morpho-gauntlet-vault
+    label: Morpho Gauntlet USDT Prime Vault
+    category: dependency
+    note: Gauntlet-curated Morpho MetaMorpho vault
+  - id: morpho-steakhouse-vault
+    label: Morpho Steakhouse USDT Vault
+    category: dependency
+    note: Steakhouse-curated Morpho MetaMorpho vault
+
+edges:
+  # Deployment / vault infrastructure
+  - from: vault-factory
+    to: yvUSDT
+    kind: deploys
+    label: minimal proxy
+  - from: yvUSDT
+    to: accountant
+    kind: routes-fees-to
+  - from: accountant
+    to: dumper
+    kind: routes-fees-to
+
+  # Vault → strategies (allocation)
+  - from: yvUSDT
+    to: spark-usdt-lender
+    kind: allocates-to
+    label: "45.58%"
+  - from: yvUSDT
+    to: morpho-gauntlet-usdt
+    kind: allocates-to
+    label: "54.42%"
+  - from: yvUSDT
+    to: morpho-steakhouse-usdt
+    kind: allocates-to
+    label: "queued"
+
+  # Governance roles on vault
+  - from: daddy
+    to: yvUSDT
+    kind: holds-role
+    label: "all 14 roles"
+  - from: brain
+    to: yvUSDT
+    kind: holds-role
+    label: "QUEUE / DEBT / EMERGENCY"
+  - from: security
+    to: yvUSDT
+    kind: holds-role
+    label: "DEBT / MAX_DEBT / EMERGENCY"
+  - from: timelock
+    to: yvUSDT
+    kind: holds-role
+    label: "ADD_STRATEGY (7d)"
+  - from: keeper
+    to: yvUSDT
+    kind: holds-role
+    label: "REPORTING"
+  - from: debt-allocator
+    to: yvUSDT
+    kind: holds-role
+    label: "REPORTING + DEBT_MANAGER"
+
+  # Role manager wiring
+  - from: daddy
+    to: role-manager
+    kind: controls
+  - from: security
+    to: role-manager
+    kind: controls
+  - from: role-manager
+    to: yvUSDT
+    kind: manages
+
+  # Timelock flow
+  - from: daddy
+    to: timelock
+    kind: proposes-on
+    label: PROPOSER + EXECUTOR
+  - from: brain
+    to: timelock
+    kind: cancels-on
+    label: CANCELLER
+
+  # Strategy → underlying protocol
+  - from: spark-usdt-lender
+    to: spark-lend-usdt
+    kind: deposits-into
+    label: "USDT supply"
+  - from: morpho-gauntlet-usdt
+    to: morpho-gauntlet-vault
+    kind: deposits-into
+    label: "USDT deposit"
+  - from: morpho-steakhouse-usdt
+    to: morpho-steakhouse-vault
+    kind: deposits-into
+    label: "USDT deposit (queued)"

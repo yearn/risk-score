@@ -1,0 +1,226 @@
+slug: stakedhype-sthype
+title: StakedHYPE (stHYPE) — Contract Dependency Graph
+chain: hyperevm
+
+categories:
+  - id: vault
+    label: Vault / Token
+  - id: strategy
+    label: Validator Staking Module
+  - id: governance
+    label: Governance
+  - id: infra
+    label: Protocol Infra
+  - id: dependency
+    label: External Dependency
+
+nodes:
+  # === Vault / token layer ===
+  - id: stHYPE
+    label: stHYPE (LST)
+    address: "0xfFaa4a3D97fE9107Cef8a3F48c069F577Ff76cC1"
+    category: vault
+    note: ERC-20 upgradeable proxy
+  - id: wstHYPE
+    label: wstHYPE (Wrapped Shares)
+    address: "0x94e8396e0869c9F2200760aF0621aFd240E1CF38"
+    category: vault
+    note: Wrapped share token; ~$65M used as lending collateral
+  - id: overseer
+    label: OverseerV1 (Mint/Burn)
+    address: "0xB96f07367e69e86d6e9C3F29215885104813eeAE"
+    category: vault
+    note: Mint/burn controller; holds MINTER + BURNER on stHYPE
+
+  # === Protocol infra ===
+  - id: withdrawal-amm
+    label: stHYPE/WHYPE AMM Withdrawal Module
+    address: "0x69e487aa3132708d08a979b2d07c5119bb77f698"
+    category: infra
+    note: Services AMM-pool unstakes (dominant net-receiver)
+  - id: manager-role
+    label: MANAGER (Operator)
+    address: "0x53D6c6594d14f9bBDFC572f048312728F7B2418e"
+    category: infra
+    note: Operational manager per Roles registry
+  - id: rebaser
+    label: REBASER (Exchange-rate trigger)
+    address: "0x4eb038eb501045daa520b972fcad48c429531e10"
+    category: infra
+  - id: fee-recipient
+    label: FEE_RECIPIENT
+    address: "0xa2666b4dd1242def4c3cf5731a85aa8457fe01c1"
+    category: infra
+  - id: hyena-hip3
+    label: HyENA HIP-3 / USDe Quote Asset
+    address: "0xa5101b03675294c87ab7381b41d4225eb8709128"
+    category: infra
+  - id: hyena-deployer
+    label: HyENA HIP-3 Deployer
+    address: "0x358e783c32147b344a1168e0984d3350de4e07cb"
+    category: infra
+
+  # === Validator staking modules ===
+  - id: staking-module-1
+    label: HyperCore Staking Module #1
+    address: "0x591540F231055743A37F691C3ffd50E4E53561ab"
+    category: strategy
+  - id: staking-module-2
+    label: HyperCore Staking Module #2
+    address: "0x16a4814e8eB502C56CeBd73F9c8aC7FDee29c042"
+    category: strategy
+  - id: staking-module-3
+    label: HyperCore Staking Module #3
+    address: "0xf992aa323ec183733213f874b6322b8bd1aAD625"
+    category: strategy
+  - id: staking-module-4
+    label: HyperCore Staking Module #4
+    address: "0x06b5659f16110319137220D1EFd680053F5e72a2"
+    category: strategy
+  - id: staking-module-5
+    label: HyperCore Staking Module #5
+    address: "0xe787dD1347A29e6807D164C4FA43105b64048556"
+    category: strategy
+
+  # === Governance ===
+  - id: multisig
+    label: Governance Multisig (4/6)
+    address: "0x97dee0ea4ca10560f260a0f6f45bdc128a1d51f9"
+    category: governance
+    note: Gnosis Safe v1.3.0; raised from 3/5 on 2026-04-07
+  - id: timelock
+    label: TimelockController (48h)
+    address: "0xc5DEd4F7F53919c714059a17d31371aE847E23D2"
+    category: governance
+    note: OZ TimelockController; owns all ProxyAdmins
+  - id: sthype-proxyadmin
+    label: stHYPE ProxyAdmin
+    address: "0xe7b0f26e8e20e109441f0ad1c885fffbb27125dc"
+    category: governance
+  - id: overseer-proxyadmin
+    label: OverseerV1 ProxyAdmin
+    address: "0x943a7e81373423f7bb0fb6a3e55553638264fd6b"
+    category: governance
+  - id: wsthype-proxyadmin
+    label: wstHYPE ProxyAdmin
+    address: "0xa29a2043b2fcbc9189beb9e6efcb2ba48bb3d586"
+    category: governance
+
+  # === External dependencies ===
+  - id: hyperliquid-l1
+    label: Hyperliquid L1 Validators
+    category: dependency
+    note: Validator delegation via HSM (HSM still unshipped May 2026)
+
+edges:
+  # === Governance ===
+  - from: multisig
+    to: timelock
+    kind: proposes-on
+    label: PROPOSER + EXECUTOR + CANCELLER
+  - from: timelock
+    to: sthype-proxyadmin
+    kind: controls
+    label: owner (48h delay)
+  - from: timelock
+    to: overseer-proxyadmin
+    kind: controls
+    label: owner (48h delay)
+  - from: timelock
+    to: wsthype-proxyadmin
+    kind: controls
+    label: owner (48h delay)
+  - from: sthype-proxyadmin
+    to: stHYPE
+    kind: manages
+    label: upgradeable proxy
+  - from: overseer-proxyadmin
+    to: overseer
+    kind: manages
+    label: upgradeable proxy
+  - from: wsthype-proxyadmin
+    to: wstHYPE
+    kind: manages
+    label: upgradeable proxy
+  - from: multisig
+    to: stHYPE
+    kind: holds-role
+    label: DEFAULT_ADMIN (no timelock)
+  - from: multisig
+    to: overseer
+    kind: holds-role
+    label: DEFAULT_ADMIN (no timelock)
+  - from: manager-role
+    to: overseer
+    kind: holds-role
+    label: MANAGER
+  - from: rebaser
+    to: stHYPE
+    kind: holds-role
+    label: REBASER
+
+  # === Mint authority on stHYPE ===
+  - from: overseer
+    to: stHYPE
+    kind: mints
+    label: MINTER_ROLE + BURNER_ROLE
+
+  # === Internal vault flow ===
+  - from: wstHYPE
+    to: stHYPE
+    kind: deposits-into
+    label: wraps stHYPE shares
+
+  # === Flow: deposits → Overseer → staking modules → validators ===
+  - from: stHYPE
+    to: overseer
+    kind: allocates-to
+    label: "100%"
+  - from: overseer
+    to: withdrawal-amm
+    kind: routes-through
+    label: AMM withdrawal leg
+  - from: overseer
+    to: staking-module-1
+    kind: deposits-into
+  - from: overseer
+    to: staking-module-2
+    kind: deposits-into
+  - from: overseer
+    to: staking-module-3
+    kind: deposits-into
+  - from: overseer
+    to: staking-module-4
+    kind: deposits-into
+  - from: overseer
+    to: staking-module-5
+    kind: deposits-into
+  - from: overseer
+    to: hyena-hip3
+    kind: routes-through
+    label: HIP-3 quote asset
+  - from: hyena-deployer
+    to: hyena-hip3
+    kind: manages
+
+  # === Staking modules → Hyperliquid validators ===
+  - from: staking-module-1
+    to: hyperliquid-l1
+    kind: deposits-into
+  - from: staking-module-2
+    to: hyperliquid-l1
+    kind: deposits-into
+  - from: staking-module-3
+    to: hyperliquid-l1
+    kind: deposits-into
+  - from: staking-module-4
+    to: hyperliquid-l1
+    kind: deposits-into
+  - from: staking-module-5
+    to: hyperliquid-l1
+    kind: deposits-into
+
+  # === Fees ===
+  - from: stHYPE
+    to: fee-recipient
+    kind: routes-fees-to

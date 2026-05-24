@@ -1,0 +1,265 @@
+slug: strata-srusde
+title: Strata (srUSDe) — Contract Dependency Graph
+chain: ethereum
+
+categories:
+  - id: vault
+    label: Vault / Token
+  - id: strategy
+    label: Strategy
+  - id: governance
+    label: Governance
+  - id: infra
+    label: Protocol Infra
+  - id: dependency
+    label: External Dependency
+
+nodes:
+  # === Vault / token layer ===
+  - id: srUSDe
+    label: srUSDe (Senior Tranche)
+    address: "0x3d7d6fdf07EE548B939A80edbc9B2256d0cdc003"
+    category: vault
+    note: ERC-4626 Meta Vault; principal-protected by junior tranche
+  - id: jrUSDe
+    label: jrUSDe (Junior Tranche)
+    address: "0xC58D044404d8B14e953C115E67823784dEA53d8F"
+    category: vault
+    note: ERC-4626 first-loss capital; ~$10M backing
+  - id: tranche-depositor
+    label: TrancheDepositor
+    address: "0x50E850641F43F65BF8fB3a7d0CF082a1D252F47e"
+    category: vault
+    note: Routes deposits into tranches (USDe/sUSDe/USDT/USDC/DAI)
+
+  # === Strategy ===
+  - id: strata-cdo
+    label: StrataCDO (Orchestrator)
+    address: "0x908B3921aaE4fC17191D382BB61020f2Ee6C0e20"
+    category: strategy
+    note: Core orchestrator across tranches/accounting/strategy
+  - id: susde-strategy
+    label: sUSDeStrategy
+    address: "0xdbf4FB6C310C1C85D0b41B5DbCA06096F2E7099F"
+    category: strategy
+    note: Deposits into Ethena sUSDe vault
+
+  # === Protocol infra ===
+  - id: accounting
+    label: Accounting (TVL / fees)
+    address: "0xa436c5Dd1Ba62c55D112C10cd10E988bb3355102"
+    category: infra
+    note: TVL calculations + DYS yield split
+  - id: erc20-cooldown
+    label: ERC20Cooldown
+    address: "0xd6dAD17d025cDdDEd27305aEbAB8b277996A6fAF"
+    category: infra
+    note: Token lockup during cooldown
+  - id: unstake-cooldown
+    label: UnstakeCooldown
+    address: "0x735edDF50Ca2371aa48466469C742e684c610F74"
+    category: infra
+    note: sUSDe unstaking cooldown (~7d)
+  - id: cooldown-request-impl
+    label: SUSDeCooldownRequestImpl
+    address: "0x00A96056c30A22b684fF7a09F4A0AfEaE426dde2"
+    category: infra
+  - id: apr-pair-feed
+    label: AprPairFeed
+    address: "0x2bb416614D740E5313aA64A0E3e419B39e800EC2"
+    category: infra
+    note: Benchmark + collateral APY inputs
+  - id: aave-apr-provider
+    label: AaveAprPairProvider
+    address: "0x1c137776e04803F807616c382AbBA12d9BF0AF73"
+    category: infra
+    note: Fetches benchmark APR from Aave v3
+  - id: two-step-config
+    label: TwoStepConfigManager
+    address: "0x0f93bAC77c3dDD1341d3Ecc388c5F8A180818994"
+    category: infra
+    note: Two-step exit-fee governance
+
+  # === Governance ===
+  - id: admin-multisig
+    label: Admin Multisig (3/4)
+    address: "0xA27cA9292268ee0f0258B749f1D5740c9Bb68B50"
+    category: governance
+    note: Gnosis Safe; internal team + founding contributors
+  - id: ops-multisig
+    label: Operational Multisig (2/3)
+    address: "0x4be3749a0F6557b8fd98F3967e859DbD7C694eF4"
+    category: governance
+    note: 2 signers overlap with Admin Safe
+  - id: timelock-48h
+    label: Timelock (48h)
+    address: "0xb2A3CF69C97AFD4dE7882E5fEE120e4efC77B706"
+    category: governance
+    note: Owns Ownable contracts; open EXECUTOR
+  - id: timelock-24h
+    label: Timelock (24h)
+    address: "0x4f2682b78F37910704fB1AFF29358A1da07E022d"
+    category: governance
+    note: Strategy config / reserves; NO EXECUTOR — inoperative
+  - id: guardian
+    label: Guardian (Patrick Collins)
+    address: "0x277D26a45Add5775F21256159F089769892CEa5B"
+    category: governance
+    note: Cyfrin CEO; CANCELLER on 48h timelock
+  - id: access-control-manager
+    label: AccessControlManager
+    address: "0x1d19E18ECaC4ef332a0d5d6Aa3a0f0f772605f60"
+    category: governance
+    note: Role-based access control
+  - id: cdo-proxyadmin
+    label: StrataCDO ProxyAdmin
+    address: "0xcAb791D0D44eBaC17378fF2AF6356c012F15c9e6"
+    category: governance
+  - id: cooldown-proxyadmin
+    label: ERC20Cooldown ProxyAdmin
+    address: "0xeD6c7b379F73DF0618406d263b13b2386E398166"
+    category: governance
+
+  # === External dependencies ===
+  - id: ethena-susde
+    label: Ethena sUSDe (Yield Source)
+    category: dependency
+    note: Delta-neutral ETH/BTC basis trade
+  - id: aave-v3
+    label: Aave v3 Core (Benchmark Rate)
+    category: dependency
+    note: Supply-weighted USDC/USDT lending rate
+
+edges:
+  # === Governance ===
+  - from: admin-multisig
+    to: timelock-48h
+    kind: proposes-on
+    label: PROPOSER
+  - from: admin-multisig
+    to: timelock-24h
+    kind: proposes-on
+    label: PROPOSER (no executor → blocked)
+  - from: guardian
+    to: timelock-48h
+    kind: cancels-on
+    label: CANCELLER
+  - from: admin-multisig
+    to: timelock-48h
+    kind: cancels-on
+    label: CANCELLER
+  - from: timelock-48h
+    to: cdo-proxyadmin
+    kind: controls
+    label: owner (48h delay)
+  - from: timelock-48h
+    to: cooldown-proxyadmin
+    kind: controls
+    label: owner (48h delay)
+  - from: cdo-proxyadmin
+    to: strata-cdo
+    kind: manages
+    label: upgradeable proxy
+  - from: cdo-proxyadmin
+    to: srUSDe
+    kind: manages
+    label: upgradeable proxy
+  - from: cdo-proxyadmin
+    to: jrUSDe
+    kind: manages
+    label: upgradeable proxy
+  - from: cdo-proxyadmin
+    to: susde-strategy
+    kind: manages
+    label: upgradeable proxy
+  - from: timelock-48h
+    to: access-control-manager
+    kind: holds-role
+    label: DEFAULT_ADMIN
+  - from: timelock-24h
+    to: access-control-manager
+    kind: holds-role
+    label: DEFAULT_ADMIN
+  - from: ops-multisig
+    to: strata-cdo
+    kind: holds-role
+    label: PAUSER_ROLE
+  - from: ops-multisig
+    to: accounting
+    kind: holds-role
+    label: UPDATER_FEED_ROLE
+  - from: admin-multisig
+    to: two-step-config
+    kind: holds-role
+    label: PROPOSER_CONFIG_ROLE
+  - from: ops-multisig
+    to: tranche-depositor
+    kind: holds-role
+    label: DEPOSITOR_CONFIG_ROLE
+  - from: timelock-24h
+    to: strata-cdo
+    kind: holds-role
+    label: RESERVE_MANAGER_ROLE (blocked)
+  - from: access-control-manager
+    to: strata-cdo
+    kind: manages
+    label: gates all roles
+
+  # === Internal flow: senior tranche → CDO → strategy → Ethena ===
+  - from: tranche-depositor
+    to: srUSDe
+    kind: routes-through
+    label: deposit routing
+  - from: tranche-depositor
+    to: jrUSDe
+    kind: routes-through
+    label: deposit routing
+  - from: srUSDe
+    to: strata-cdo
+    kind: allocates-to
+    label: "100% senior"
+  - from: jrUSDe
+    to: strata-cdo
+    kind: allocates-to
+    label: "100% junior (first-loss)"
+  - from: strata-cdo
+    to: susde-strategy
+    kind: routes-through
+    label: orchestrator → strategy
+  - from: susde-strategy
+    to: ethena-susde
+    kind: deposits-into
+    label: stake USDe → sUSDe
+
+  # === Infra wiring ===
+  - from: accounting
+    to: strata-cdo
+    kind: manages
+    label: TVL + fee accrual
+  - from: erc20-cooldown
+    to: srUSDe
+    kind: manages
+    label: withdrawal cooldown
+  - from: unstake-cooldown
+    to: susde-strategy
+    kind: manages
+    label: sUSDe unstaking
+  - from: cooldown-request-impl
+    to: unstake-cooldown
+    kind: manages
+  - from: apr-pair-feed
+    to: accounting
+    kind: manages
+    label: DYS APR inputs
+  - from: aave-apr-provider
+    to: apr-pair-feed
+    kind: routes-through
+    label: benchmark rate
+  - from: aave-apr-provider
+    to: aave-v3
+    kind: deposits-into
+    label: read USDC/USDT supply APR
+  - from: two-step-config
+    to: strata-cdo
+    kind: manages
+    label: exit-fee config

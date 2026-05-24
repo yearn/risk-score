@@ -149,7 +149,7 @@ All 12 scores are summed and mapped to risk levels (Level 1-4). ySec can make ex
 | Circle CCTP | ChainSecurity (V1 2023, V2 March 2025, V2 update April 2025, Gateway July 2025) | Trust-minimized bridge |
 | Sky/MakerDAO | Extensively audited across many years | Blue-chip |
 | Spark | Inherits MakerDAO audit coverage | Blue-chip |
-| Cap (stcUSD) | TODO — no specific audit information found in public documentation | ~$500M TVL. Assessed internally as risk-2 (non-public report) |
+| Cap (stcUSD) | 5+ audits (Electisec, Spearbit, Trail of Bits, Zellic, Certora) | ~$400M TVL. Assessed internally as [risk-2](https://curation.yearn.fi/report/cap-stcusd/) |
 
 ### Bug Bounty
 
@@ -378,8 +378,8 @@ Additionally, Yearn provides a dedicated **yvUSD APR API** ([yvusd-api.yearn.fi]
 | `totalDebt()` / `totalIdle()` | Vault | Capital deployment ratio | Daily |
 | `strategies(address)` | Vault | Per-strategy debt, last report time | Daily |
 | `get_default_queue()` | Vault | Withdrawal queue composition | Weekly |
-| `getThreshold()` / `getOwners()` | Daddy / Brain Safes | Governance integrity | Daily |
-| `getMinDelay()` | Timelock | Delay change detection | Weekly |
+| `getThreshold()` / `getOwners()` | ySafe | Governance integrity | Weekly |
+| `getMinDelay()` | ySafe | Delay change detection | Weekly |
 
 ## Risk Summary
 

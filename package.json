@@ -2,15 +2,20 @@
   "name": "risk-score-frontend",
   "type": "module",
   "scripts": {
-    "dev": "astro dev",
-    "build": "astro build",
-    "preview": "astro preview"
+    "dev": "node scripts/update_stats.mjs && astro dev",
+    "build": "node scripts/update_stats.mjs && astro build",
+    "preview": "astro preview",
+    "update-stats": "node scripts/update_stats.mjs"
   },
   "dependencies": {
-    "@astrojs/vercel": "^8.1.0",
-    "@resvg/resvg-js": "^2.6.2",
-    "astro": "^5.3.0",
-    "marked": "^15.0.0",
-    "satori": "^0.25.0"
+    "@astrojs/vercel": "10.0.7",
+    "@resvg/resvg-js": "2.6.2",
+    "astro": "6.2.2",
+    "cytoscape": "3.33.4",
+    "cytoscape-dagre": "3.0.0",
+    "cytoscape-dom-node": "2.1.0",
+    "js-yaml": "4.1.1",
+    "marked": "18.0.4",
+    "satori": "0.26.0"
   }
 }

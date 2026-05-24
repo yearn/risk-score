@@ -5,7 +5,7 @@
 - **Chain:** Ethereum (primary), multi-chain (Base, BNB, Berachain, Arbitrum, HyperEVM, Soneium, TAC, Plasma)
 - **Token Address:** [`0x4956b52aE2fF65D74CA2d61207523288e4528f96`](https://etherscan.io/address/0x4956b52aE2fF65D74CA2d61207523288e4528f96)
 - **Final Score: 5.0/5.0**
-- **Warning:** HACKED — DO NOT USE
+- **Warning:** HACKED
 
 ## Overview + Links
 
@@ -34,7 +34,7 @@ Resolv is a protocol maintaining USR, a stablecoin pegged to the US Dollar, back
 - [Apostro Proof of Reserves](https://info.apostro.xyz/resolv-reserves)
 - [GitHub](https://github.com/resolv-im/resolv-contracts-public)
 - [Security / Audits](https://docs.resolv.xyz/litepaper/resources/security)
-- [Immunefi Bug Bounty](https://immunefi.com/bug-bounty/resolv/information/)
+- [Immunefi Bug Bounty](https://docs.resolv.xyz/litepaper/resources/security#immunefi-bug-bounty-program)
 - [DeFiLlama](https://defillama.com/protocol/resolv)
 
 ## Contract Addresses
@@ -95,7 +95,7 @@ Resolv has undergone extensive auditing with 4 audit firms across 14+ audit enga
 
 ### Bug Bounty
 
-- **Platform**: [Immunefi](https://immunefi.com/bug-bounty/resolv/information/)
+- **Platform**: [Immunefi](https://docs.resolv.xyz/litepaper/resources/security#immunefi-bug-bounty-program)
 - **Maximum Bounty**: $500,000
 - **Critical Reward**: 10% of funds at risk, up to $500K (minimum $100K guaranteed)
 - **High Reward**: $50,000 - $100,000

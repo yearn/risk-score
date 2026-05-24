@@ -1,0 +1,300 @@
+slug: infinifi
+title: InfiniFi (siUSD) — Contract Dependency Graph
+chain: ethereum
+
+categories:
+  - id: vault
+    label: Vault / Token
+  - id: strategy
+    label: Farm (Strategy)
+  - id: governance
+    label: Governance
+  - id: infra
+    label: Protocol Infra
+  - id: dependency
+    label: External Dependency
+
+nodes:
+  # === Vault / token layer ===
+  - id: siUSD
+    label: siUSD (Staked iUSD)
+    address: "0xDBDC1Ef57537E34680B898E1FEBD3D68c7389bCB"
+    category: vault
+  - id: iUSD
+    label: iUSD (Receipt Token)
+    address: "0x48f9e38f3070AD8945DFEae3FA70987722E3D89c"
+    category: vault
+  - id: gateway
+    label: Gateway (Proxy)
+    address: "0x3f04b65Ddbd87f9CE0A2e7Eb24d80e7fb87625b5"
+    category: vault
+    note: TransparentUpgradeableProxy → InfiniFiGatewayV3
+  - id: locking-controller
+    label: LockingController (liUSD)
+    address: "0x1d95cC100D6Cd9C7BbDbD7Cb328d99b3D6037fF7"
+    category: vault
+    note: First-loss tranche
+  - id: unwinding-module
+    label: UnwindingModule
+    address: "0x7092A43aE5407666C78dBEA657a1891f42b3dFcc"
+    category: vault
+    note: Settles liUSD early exits
+
+  # === Internal infra ===
+  - id: mint-controller
+    label: MintController
+    address: "0x49877d937B9a00d50557bdC3D87287b5c3a4C256"
+    category: infra
+    note: User-facing mint entry; holds RECEIPT_TOKEN_MINTER
+  - id: migration-controller
+    label: MigrationController
+    address: "0x5F5403656E4Db95aCcF1064A714B1bcE351839F8"
+    category: infra
+    note: ENTRY_POINT + RECEIPT_TOKEN_MINTER (migrations)
+  - id: yield-sharing
+    label: YieldSharing
+    address: "0x90E91f5bfD9a0a4d925BF30b512add8cD2bbAE3b"
+    category: infra
+    note: Distributes farm yield; holds RECEIPT_TOKEN_MINTER + BURNER
+  - id: pl-smoother
+    label: PLSmoother
+    address: "0xC324569141697045B9EdE54B5d4623a691ed57A4"
+    category: infra
+    note: Smooths P&L across siUSD epochs; holds RECEIPT_TOKEN_MINTER + BURNER
+  - id: redeem-controller
+    label: RedeemController
+    address: "0xCb1747E89a43DEdcF4A2b831a0D94859EFeC7601"
+    category: infra
+
+  # === Governance ===
+  - id: multisig
+    label: Team Multisig (4/7)
+    address: "0x80608f852D152024c0a2087b16939235fEc2400c"
+    category: governance
+    note: Gnosis Safe v1.4.1, 7 anonymous EOA signers
+  - id: long-timelock
+    label: Long Timelock (7d)
+    address: "0x3D18480CC32B6AB3B833dCabD80E76CfD41c48a9"
+    category: governance
+  - id: short-timelock
+    label: Short Timelock (1d)
+    address: "0x4B174afbeD7b98BA01F50E36109EEE5e6d327c32"
+    category: governance
+  - id: core
+    label: InfiniFiCore (AccessControl)
+    address: "0xF6d48735EcCf12bDC1DF2674b1ce3fcb3bD25490"
+    category: governance
+    note: AccessControlEnumerable, 19 roles; DEFAULT_ADMIN renounced
+
+  # === Active farms (9, ~98% of TVL) ===
+  - id: farm-midas
+    label: MidasFarm — Maturing
+    address: "0x7373A7ce3C023C56Cb66747AFbdF827627D31679"
+    category: strategy
+    note: Matures 2026-06-15
+  - id: farm-cap
+    label: CapFarm — Illiquid
+    address: "0x35F9EbDc02F936e199826778bc06A13272a06B87"
+    category: strategy
+  - id: farm-swap-pyusd
+    label: SwapFarm — PYUSD basket
+    address: "0x84FF7Ef9568807c93436F09E2E613dE2aF3FE4EE"
+    category: strategy
+    note: Matures 2026-05-25 via CoW-swap
+  - id: farm-swap-cap
+    label: SwapFarm — cUSD/stcUSD basket
+    address: "0xe945de0D08E2F39B0740FE2d6e50FE2Bb9751eA4"
+    category: strategy
+    note: Matures 2026-05-19 via CoW-swap
+  - id: farm-spark
+    label: SparkSUSDCFarm — Illiquid
+    address: "0xd880D7C5CaFdbE2AEc281250995abF612235e563"
+    category: strategy
+  - id: farm-rwa-escrow
+    label: RWAEscrowFarm — Maturing
+    address: "0x9E5efC5F387D8661C1AFB2469B7EeF6972451852"
+    category: strategy
+    note: Matures 2026-06-16; offchain counterparty
+  - id: farm-steakhouse
+    label: Steakhouse MetaMorpho Farm
+    address: "0x76D2E84009dAE457f8667D823c7c96e9A7c35B78"
+    category: strategy
+  - id: farm-maple
+    label: MapleFarm — HYSL
+    address: "0xF56E946e92FeF6a050F482C560b5f8DcCB8163B3"
+    category: strategy
+  - id: farm-aave-horizon
+    label: AaveV3Farm — Horizon RWA
+    address: "0x817d93DbdFd8190bbef0a73fCf5Dd9DA5A87E032"
+    category: strategy
+
+  # === External dependencies ===
+  - id: dep-mglobal
+    label: mGLOBAL (Midas / Fasanara)
+    address: "0x7433806912Eae67919e66aea853d46Fa0aef98A8"
+    category: dependency
+    note: Tokenized hedge-fund strategy; offchain NAV
+  - id: dep-stcusd
+    label: stcUSD (Cap Protocol)
+    address: "0x88887bE419578051FF9F4eb6C858A951921D8888"
+    category: dependency
+    note: 2025-vintage stablecoin issuer
+  - id: dep-pyusd
+    label: PYUSD (Paxos)
+    category: dependency
+    note: NYDFS-regulated stablecoin
+  - id: dep-spark-susdc
+    label: sUSDC (Spark Vault)
+    address: "0xBC65ad17c5C0a2A4D159fa5a503f4992c7B545FE"
+    category: dependency
+  - id: dep-steakhouse-vault
+    label: Steakhouse infiniFi USDC (MetaMorpho)
+    address: "0xBEEF1f5bD88285E5b239B6AACB991D38CCa23aC9"
+    category: dependency
+  - id: dep-maple-hysl
+    label: Maple HYSL Pool USDC1
+    address: "0xC39a5a616F0aD1Ff45077fa2DE3F79ab8EB8B8B9"
+    category: dependency
+  - id: dep-rwa-counterparty
+    label: RWA Escrow Counterparty
+    address: "0x4831C121879d3DE0E2B181d9d55E9B0724f5D926"
+    category: dependency
+    note: EOA receiver; identity undisclosed
+  - id: dep-aave-horizon
+    label: Aave Horizon RWA Market
+    category: dependency
+    note: aHorRwaUSDC
+
+edges:
+  # === Governance ===
+  - from: multisig
+    to: long-timelock
+    kind: proposes-on
+    label: PROPOSER + CANCELLER
+  - from: multisig
+    to: short-timelock
+    kind: proposes-on
+    label: PROPOSER + CANCELLER
+  - from: long-timelock
+    to: core
+    kind: controls
+    label: "GOVERNOR (7d)"
+  - from: short-timelock
+    to: core
+    kind: controls
+    label: "PARAMETERS / ORACLE (1d)"
+  - from: multisig
+    to: core
+    kind: holds-role
+    label: "UNPAUSE + EMERGENCY + EXECUTOR"
+  - from: core
+    to: gateway
+    kind: manages
+
+  # === Vault / token internal flow ===
+  - from: gateway
+    to: mint-controller
+    kind: routes-through
+  - from: gateway
+    to: redeem-controller
+    kind: routes-through
+  # === Mint authority: who holds RECEIPT_TOKEN_MINTER on iUSD ===
+  - from: mint-controller
+    to: iUSD
+    kind: mints
+    label: RECEIPT_TOKEN_MINTER
+  - from: migration-controller
+    to: iUSD
+    kind: mints
+    label: RECEIPT_TOKEN_MINTER
+  - from: yield-sharing
+    to: iUSD
+    kind: mints
+    label: RECEIPT_TOKEN_MINTER
+  - from: pl-smoother
+    to: iUSD
+    kind: mints
+    label: RECEIPT_TOKEN_MINTER
+  - from: redeem-controller
+    to: iUSD
+    kind: manages
+    label: burns + FIFO queue
+  - from: siUSD
+    to: iUSD
+    kind: deposits-into
+    label: ERC-4626 stake
+  - from: locking-controller
+    to: iUSD
+    kind: deposits-into
+    label: liUSD (first-loss)
+  - from: locking-controller
+    to: unwinding-module
+    kind: routes-through
+    label: early exit
+
+  # === Allocation: iUSD's backing into farms ===
+  - from: iUSD
+    to: farm-midas
+    kind: allocates-to
+    label: "37.0%"
+  - from: iUSD
+    to: farm-cap
+    kind: allocates-to
+    label: "19.9%"
+  - from: iUSD
+    to: farm-swap-pyusd
+    kind: allocates-to
+    label: "10.9%"
+  - from: iUSD
+    to: farm-swap-cap
+    kind: allocates-to
+    label: "10.0%"
+  - from: iUSD
+    to: farm-spark
+    kind: allocates-to
+    label: "7.3%"
+  - from: iUSD
+    to: farm-rwa-escrow
+    kind: allocates-to
+    label: "6.1%"
+  - from: iUSD
+    to: farm-steakhouse
+    kind: allocates-to
+    label: "4.3%"
+  - from: iUSD
+    to: farm-maple
+    kind: allocates-to
+    label: "2.9%"
+  - from: iUSD
+    to: farm-aave-horizon
+    kind: allocates-to
+    label: "0.9%"
+
+  # === Farms → external dependencies ===
+  - from: farm-midas
+    to: dep-mglobal
+    kind: deposits-into
+  - from: farm-cap
+    to: dep-stcusd
+    kind: deposits-into
+  - from: farm-swap-cap
+    to: dep-stcusd
+    kind: deposits-into
+  - from: farm-swap-pyusd
+    to: dep-pyusd
+    kind: deposits-into
+  - from: farm-spark
+    to: dep-spark-susdc
+    kind: deposits-into
+  - from: farm-rwa-escrow
+    to: dep-rwa-counterparty
+    kind: deposits-into
+  - from: farm-steakhouse
+    to: dep-steakhouse-vault
+    kind: deposits-into
+  - from: farm-maple
+    to: dep-maple-hysl
+    kind: deposits-into
+  - from: farm-aave-horizon
+    to: dep-aave-horizon
+    kind: deposits-into
