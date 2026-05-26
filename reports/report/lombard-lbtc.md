@@ -4,7 +4,7 @@
 - **Token:** LBTC (Lombard Staked Bitcoin)
 - **Chain:** Ethereum
 - **Token Address:** [`0x8236a87084f8B84306f72007F36F2618A5634494`](https://etherscan.io/address/0x8236a87084f8B84306f72007F36F2618A5634494)
-- **Final Score: 2.75/5.0**
+- **Final Score: 2.85/5.0**
 
 > **Context:** This assessment was requested in [issue #216](https://github.com/yearn/risk-score/issues/216) to evaluate LBTC for use as **collateral on Morpho markets**. As of May 26, 2026, ~$58.7M of LBTC is supplied as collateral across Morpho Ethereum markets (dominated by the LBTC/PYUSD market at 86% LLTV, ~$49.7M). See [Liquidity Risk](#liquidity-risk).
 
@@ -46,7 +46,8 @@ Ethereum mainnet, verified onchain May 26, 2026.
 | Treasury Safe | [`0x251a604E8E8f6906d60f8dedC5aAeb8CD38F4892`](https://etherscan.io/address/0x251a604E8E8f6906d60f8dedC5aAeb8CD38F4892) | Gnosis Safe, **3/N** — fee treasury; also Timelock PROPOSER + EXECUTOR |
 | Deployer EOA | [`0x3f6bf1c36ccbb59eaf8415301a0cec73c344a079`](https://etherscan.io/address/0x3f6bf1c36ccbb59eaf8415301a0cec73c344a079) | EOA — deployed LBTC; also a Timelock PROPOSER + CANCELLER |
 | Chainlink LBTC/BTC feed | [`0x5c29868C58b6e15e2b962943278969Ab6a7D3212`](https://etherscan.io/address/0x5c29868C58b6e15e2b962943278969Ab6a7D3212) | Exchange-rate feed (8 dec; reads 1.00495 BTC) |
-| RedStone LBTC PoR/rate feed | [`0xb415eAA355D8440ac7eCB602D3fb67ccC1f0bc81`](https://etherscan.io/address/0xb415eAA355D8440ac7eCB602D3fb67ccC1f0bc81) | RedStone feed (8 dec; reads 1.00409) |
+| RedStone LBTC rate feed | [`0xb415eAA355D8440ac7eCB602D3fb67ccC1f0bc81`](https://etherscan.io/address/0xb415eAA355D8440ac7eCB602D3fb67ccC1f0bc81) | RedStone LBTC/BTC rate feed (8 dec; reads 1.00409) |
+| PoR reserve registry (Base) | [`0xe7Ebc588F4EC9297d9867aD75a9b5D86848c8018`](https://basescan.org/address/0xe7Ebc588F4EC9297d9867aD75a9b5D86848c8018) | `PoR` (proxy, impl `0x0bb6…70cc`) — onchain BTC reserve-address registry, Chainlink PoR std, 28,626 addresses |
 
 ## Audits and Due Diligence Disclosures
 
@@ -67,22 +68,33 @@ Lombard is **extensively audited** — 10 reports from 6 firms ([audits page](ht
 
 Reports are published in the [evm-smart-contracts repo `docs/audit/`](https://github.com/lombard-finance/evm-smart-contracts/tree/main/docs/audit). Multiple top-tier firms (OpenZeppelin ×3, Sherlock) cover the yield-bearing implementation now in production. The onchain surface is moderately complex: an upgradeable AccessControl ERC-20 plus an AssetRouter, BridgeV2, Consortium signature-verification contract, and the Bascule attestation layer.
 
-- **Unresolved findings:** TODO — individual audit PDFs not parsed line-by-line this session. One audit-surfaced issue (a redemption replay where a single BTC tx with the same `ScriptPubKey` could satisfy multiple payloads) was reportedly remediated; confirm final status in the relevant report.
+**Unresolved findings (verified from the raw audit PDFs in Lombard's repo):**
+
+The two **Yield-Bearing** audits (the implementation now in production) carry several findings the team **acknowledged but explicitly chose not to fix**:
+
+- **Sherlock — Yield-Bearing** ([Sherlock_YB.pdf](https://raw.githubusercontent.com/lombard-finance/evm-smart-contracts/main/docs/audit/Sherlock_YB.pdf), audited Jun 24 – Jul 15, 2025): 5 High, 5 Medium. **Three High-severity findings are acknowledged-won't-fix:**
+  - **H-1** — *BridgeV2 deposits are not rate limited.*
+  - **H-2** — *BridgeV2 `deposit()` wrongly burns tokens from the relayer.*
+  - **H-5** — *Swapping CBBTC/BTCB to LBTC via minting breaks per-chain accounting* — described as an inherent design problem where permissioned (non-notarized) mints make the ratio incorrect and **can make some LBTC impossible to redeem back to BTC.** This is the most consequential unresolved item for a collateral assessment.
+- **OpenZeppelin — Yield-Bearing / GMP** ([OZ_YB.pdf](https://raw.githubusercontent.com/lombard-finance/evm-smart-contracts/main/docs/audit/OZ_YB.pdf), Jul 17, 2025): 3 Medium, 5 Low. **M-01** (*missing lower bound on user-specified minting fees*) is **acknowledged, not resolved** (team relies on the claimer choosing acceptable fee payloads; there is an upper bound — `maxMintCommission` = 68 sats — but no lower bound).
+
+These are design trade-offs rather than live bugs, but H-5's redeemability/accounting implication is material and is reflected in the scoring below. Confirm whether any are remediated on the next reassessment.
 
 ### Bug Bounty
 
 - **Platform:** [Immunefi](https://immunefi.com/bug-bounty/lombard-finance/scope/) (live since Sep 2024).
 - **Max payout:** **$250,000** (critical smart-contract). Scope includes LBTC token, Consortium governance, and the proxy upgrade timelock.
-- **Safe Harbor (SEAL):** TODO — not confirmed.
+- **Safe Harbor (SEAL):** Not adopted — Lombard does not appear among the SEAL Safe Harbor adopters (checked May 2026). Lombard's security partners (Veridise, Halborn, Immunefi, Hexagate, TRM) cover audits/monitoring rather than the Safe Harbor whitehat agreement.
 
 ## Historical Track Record
 
 - **LBTC proxy deployed:** May 17, 2024 (block tx [`0xf5cccb…3ea8b`](https://etherscan.io/tx/0xf5cccb27295295cb2655bdcdea55a2aaf855272c578a91e2f0df55a223d3ea8b)); public mainnet launch ~August 2024 (V1 audits). ~21–24 months in production.
-- **Protocol TVL (DefiLlama, May 26, 2026):** ~$1.0B, of which **~$973M is staked BTC** backing. Lombard is the largest BTC LST by share of category. TVL peaked materially higher (~$1.5–2B range) in 2025.
+- **Protocol TVL (DefiLlama, May 26, 2026):** ~$1.0B, of which **~$973M is staked BTC** backing. Lombard is the largest BTC LST by share of category. TVL first crossed **$500M on ~Oct 5, 2024 and has stayed above $500M continuously since (~19 months)**, peaking at **~$2.2B on May 23, 2025** (DefiLlama timeseries; single-source). This makes the optional ">$500M TVL for >1 year" modifier applicable — see scoring.
 - **Market data (CoinGecko, May 26, 2026):** price ~$76,915; **LBTC/BTC ≈ 1.0066**; market cap ~$789M; circulating supply ~10,252 LBTC (all chains).
 - **Onchain supply (Ethereum):** `totalSupply()` = 871,725,021,524 (8 decimals) → **8,717.25 LBTC** on Ethereum. (LBTC is multichain — also on Base, BSC, Avalanche, Solana, Sui, Starknet.)
 - **Peg history:** LBTC/BTC has traded both above and below parity. CoinGecko all-time range is **ATH 1.1277 BTC / ATL 0.9439 BTC** — i.e. a worst-case ~6% discount to BTC has occurred. Currently ~0.66% premium (consistent with accrued yield).
-- **Incidents:** No exploits or protocol-level depeg events found for LBTC. Standing risk factors (not realized): Babylon slashing (a new, relatively untested mechanism), and off-chain custody/consortium collusion. TODO — no LlamaRisk or Steakhouse report on LBTC located this session; recheck.
+- **Incidents:** No exploits or protocol-level depeg events found for LBTC. Standing risk factors (not realized): Babylon slashing (a new, relatively untested mechanism), and off-chain custody/consortium collusion.
+- **Third-party risk coverage:** [Chaos Labs published a "Lombard BTC Risk Assessment"](https://governance.ether.fi/t/lombard-btc-risk-assessment/2308) on the ether.fi governance forum (Sep 13, 2024), flagging limited transparency around consortium membership/decision-making and CubeSigner reliance. **No standalone LlamaRisk report on LBTC was found** — LlamaRisk has only covered LBTC within Aave v3 and Curve governance contexts (collateral onboarding / debt-ceiling methodology). **No Steakhouse Financial report found.**
 
 ## Funds Management
 
@@ -111,20 +123,21 @@ Reports are published in the [evm-smart-contracts repo `docs/audit/`](https://gi
 
 `MINTER_ROLE` is therefore held only by two protocol contracts (AssetRouter, BridgeV2), both behind the Consortium + Bascule authorization gate. New minters can only be added by `DEFAULT_ADMIN_ROLE` = the 24-h Timelock.
 
-**Rate limits / supply caps:** No global onchain supply cap observed on the Ethereum token (`totalSupply` floats with deposits). TODO — confirm whether AssetRouter/BridgeV2 enforce per-epoch mint caps.
+**Rate limits / supply caps (verified onchain, identical on two RPCs):** **No per-epoch or global supply cap.** On the AssetRouter, `depositMinAmount(LBTC)` is set to `type(uint256).max` (the permissionless `deposit()` mint path is effectively disabled on Ethereum — BTC-deposit mints arrive via the notary-gated `batchMint`/`batchMintWithFee`), and `maxMintCommission(LBTC)` = 68 sats, which bounds the *fee* a claimer may charge, not the mint *amount*. BridgeV2 (cross-chain mints) **does** expose configurable per-token, per-source-chain limits (`getTokenRateLimit(token, sourceChainId)` / `setTokenRateLimits`), but Sherlock finding **H-1 ("BridgeV2 deposits are not rate limited") is acknowledged-won't-fix** — so the bridge mint path is not effectively throttled today.
 
 **Backing check at mint time:** Dual off-chain attestation (Consortium 12-of-16 notary signatures + Bascule deposit record). Not an atomic onchain collateral transfer.
 
 ### Collateralization
 
-- LBTC is **1:1 backed by native BTC** held off the Bitcoin chain by the **Lombard Security Consortium** (institutional members using threshold cryptography / CubeSigner HSM key management). Collateral quality is the highest available (native BTC), but **custody is off-chain** — there is no trustless onchain BTC vault.
+- LBTC is **1:1 backed by native BTC** held off the Bitcoin chain by the **Lombard Security Consortium**. There are **no named third-party custodians** (e.g. BitGo/Fireblocks/Copper) — per Lombard's docs the consortium notaries *are* the custodial signers, using threshold cryptography with keys generated inside HSMs via **Cubist / CubeSigner** ("private keys are generated inside HSMs and never leave secure hardware"). Documented custody threshold is **10-of-14** members. Collateral quality is the highest available (native BTC), but **custody is off-chain** — there is no trustless onchain BTC vault, and the custodial set is the consortium itself rather than independent regulated custodians.
 - The staked BTC is delegated into **Babylon**, which introduces **slashing risk** (validator misbehavior could cause partial BTC loss) — a new and relatively untested mechanism.
 - Risk curation for downstream lending (LLTV, caps, liquidation) is set by each integrating market (e.g. Morpho market creators / Yearn-curated vaults), not by Lombard.
 
 ### Provability
 
-- **Proof of Reserve:** Lombard publishes a PoR oracle built with **RedStone and Chainlink**, plus an onchain address registry (on Base) of all Lombard BTC deposit addresses. The Ethereum RedStone feed [`0xb415…0bc81`](https://etherscan.io/address/0xb415eAA355D8440ac7eCB602D3fb67ccC1f0bc81) and Chainlink LBTC/BTC feed [`0x5c29…3212`](https://etherscan.io/address/0x5c29868C58b6e15e2b962943278969Ab6a7D3212) read ~1.004 BTC per LBTC, matching the onchain `getRate()`.
-- **Caveat:** these feeds report an **exchange rate**, not a directly-verifiable BTC reserve quantity. Reconciling circulating LBTC against custodied BTC requires trusting the consortium's reported deposit-address set and the oracle. This is **attestation/oracle-based provability**, not trustless onchain verification. TODO — locate and document the canonical reserve-quantity PoR feed and the Base address registry contract.
+- **Onchain reserve registry (verified):** Lombard publishes its BTC reserve addresses through a **`PoR` registry contract on Base** at [`0xe7Ebc588F4EC9297d9867aD75a9b5D86848c8018`](https://basescan.org/address/0xe7Ebc588F4EC9297d9867aD75a9b5D86848c8018) (TransparentUpgradeableProxy → impl `PoR` `0x0bb6…70cc`). It exposes the **Chainlink Proof-of-Reserve standard interface** (`getPoRAddressListLength()`, `getPoRAddressSignatureMessages()`, plus `addAddresses`/`addRootPubkey` gated by `OPERATOR_ROLE`). As of May 26, 2026 it lists **28,626 reserve addresses** (verified identically on two Base RPCs). This registry is the data source Chainlink/RedStone PoR feeds consume.
+- **Rate feeds vs reserve quantity:** The Ethereum feeds — RedStone [`0xb415…0bc81`](https://etherscan.io/address/0xb415eAA355D8440ac7eCB602D3fb67ccC1f0bc81) and Chainlink [`0x5c29…3212`](https://etherscan.io/address/0x5c29868C58b6e15e2b962943278969Ab6a7D3212) — report the **LBTC/BTC exchange rate** (~1.004, matching `getRate()`), **not** an absolute BTC reserve quantity. There is **no dedicated Chainlink reserve-quantity PoR feed** listed for Ethereum; reserve-quantity provability runs through the Base `PoR` address registry above.
+- **Caveat:** reconciling circulating LBTC against custodied BTC still requires trusting (a) the consortium's reported deposit-address set in the registry and (b) the off-chain BTC actually held at those addresses. This is **registry/attestation-based provability**, stronger than a bare oracle but not trustless onchain verification. Sherlock **H-5** (acknowledged-won't-fix) further notes that permissioned CBBTC/BTCB-swap mints are not notarized, which can make the LBTC/BTC ratio incorrect and some LBTC unredeemable.
 - The LBTC/BTC rate is updated by a privileged oracle/operator role rather than derived algorithmically from onchain reserves.
 
 ## Liquidity Risk
@@ -167,7 +180,8 @@ For Morpho liquidations, what matters is the LBTC/BTC oracle behaving correctly 
 - **Upgradeability:** LBTC is a TransparentUpgradeableProxy. The `ProxyAdmin` ([`0xbAE0…f879`](https://etherscan.io/address/0xbAE061C73876952aA2C5e483b74dfA785425f879)) is owned by the **Lombard Timelock** ([`0x055E…7e59`](https://etherscan.io/address/0x055E84e7FE8955E2781010B866f10Ef6E1E77e59)) with `getMinDelay() = 24 h`. Implementation upgrades and role changes are therefore subject to a 24-hour delay (positive control).
 - **Timelock roles (verified):** PROPOSER = the Treasury Safe (3/N) **and** an **EOA** [`0x3f6b…a079`](https://etherscan.io/address/0x3f6bf1c36ccbb59eaf8415301a0cec73c344a079); EXECUTOR = the Treasury Safe; CANCELLER = both. **An EOA can queue (and cancel) timelock operations** — the 24-h delay and the multisig executor are the mitigating controls, but the EOA proposer is a centralization wart.
 - **Token roles (verified onchain):** `DEFAULT_ADMIN_ROLE` = Timelock; `PAUSER_ROLE` = a **2-of-11 Gnosis Safe**. The low pause threshold (2 of 11) means a small group can **freeze transfers and mint/burn** — a freeze would also block normal liquidation of LBTC collateral on Morpho.
-- **Off-chain notary set (Consortium, verified at epoch 21):** **16 validators, weight threshold 12** → **12-of-16** signatures required to authorize mint/burn/bridge operations. This is distinct from the ~14 named institutional "consortium members" in the docs (Galaxy, OKX, Kraken, DCG, Amber, Wintermute, Antpool, F2Pool, Bitwise, Figment, Kiln, P2P, Cubist, Nansen).
+- **Off-chain notary set (Consortium, verified onchain at epoch 21):** **16 validators, weight threshold 12** → **12-of-16** signatures required to authorize mint/burn/bridge operations.
+- **Documentation-vs-onchain discrepancy:** Lombard's docs list **14 institutional members** with a documented **10-of-14** (two-thirds) policy — Galaxy, OKX, Kraken, DCG, Amber, Wintermute, Antpool, F2Pool, Bitwise, Figment, Kiln, P2P, Cubist, Nansen. The onchain notary set, however, is **16 keys / threshold 12**. These **do not match** and the docs do not state "16/12". The extra keys may be Lombard-operated or otherwise undocumented — this is flagged as an open discrepancy, not reconciled by assumption.
 - **Defense in depth:** The **Bascule** (`GMPBasculeV1`) provides an independent second attestation — a mint requires both the Consortium quorum and a matching Bascule deposit record, so compromising the notary keys alone is insufficient.
 
 ### Programmability
@@ -189,7 +203,7 @@ Failure or compromise of Babylon, the consortium custody, or the rate oracle wou
 
 - **Team:** Partially doxxed. Co-founder **Jacob Phillips** (ex-Polychain) is public; other named team members exist. Backed by a **$16M seed led by Polychain Capital** with Babylon, Foresight, Mirana, OKX Ventures, Binance Labs, and others.
 - **Documentation:** Strong — architecture, security, audits, oracles, and a full smart-contract registry are published on GitBook; contracts are source-verified on Etherscan.
-- **Legal structure / jurisdiction:** TODO — not confirmed this session.
+- **Legal structure / jurisdiction:** The Terms of Service name **Lombard Finance Ltd** as operator, governed by **Cayman Islands law** with disputes via binding arbitration **seated in the Cayman Islands**; US persons and sanctioned jurisdictions are excluded. (ToS does not literally state the place of incorporation, but Cayman governing law + Cayman-seated arbitration strongly indicate a Cayman entity.)
 - **Incident response:** Pauser multisig + 24-h upgrade timelock provide emergency tooling; no public formal IR plan reviewed.
 
 ## Monitoring
@@ -197,7 +211,7 @@ Failure or compromise of Babylon, the consortium custody, or the rate oracle wou
 Recommended monitored addresses, signals, and frequency.
 
 ### 1. Backing / Proof of Reserve (MANDATORY)
-- Compare Ethereum `LBTC.totalSupply()` (and cross-chain supply) against custodied BTC via the PoR oracle/registry.
+- Compare total LBTC supply (Ethereum `LBTC.totalSupply()` + cross-chain) against custodied BTC via the Base `PoR` registry [`0xe7Eb…8018`](https://basescan.org/address/0xe7Ebc588F4EC9297d9867aD75a9b5D86848c8018) — `getPoRAddressListLength()` (28,626 as of this assessment) and the listed addresses; watch `addAddresses`/`deleteAddresses`/`addRootPubkey` events for registry changes.
 - RedStone feed [`0xb415…0bc81`](https://etherscan.io/address/0xb415eAA355D8440ac7eCB602D3fb67ccC1f0bc81) and Chainlink LBTC/BTC [`0x5c29…3212`](https://etherscan.io/address/0x5c29868C58b6e15e2b962943278969Ab6a7D3212) — alert if `getRate()`/feed deviates sharply or stops updating.
 - **Threshold:** flag if reported reserve < circulating LBTC, or rate feed staleness > expected heartbeat.
 
@@ -242,8 +256,9 @@ PROTOCOL / TRUST LAYER                          │
                             │
 UNDERLYING / EXTERNAL                            │
   Babylon Bitcoin staking (slashing)  ◄── staked BTC delegated
-  Native BTC custody (institutional consortium, threshold sig, off-chain)
-  Oracles: Chainlink 0x5c29…3212 + RedStone 0xb415…0bc81  (rate / PoR)
+  Native BTC custody (consortium notaries, Cubist HSM threshold, off-chain)
+  Rate feeds: Chainlink 0x5c29…3212 + RedStone 0xb415…0bc81  (LBTC/BTC rate)
+  Reserve registry: PoR 0xe7Eb…8018 on Base (28,626 addrs, Chainlink PoR std)
 
 DOWNSTREAM (Yearn interest)
   Morpho markets: LBTC collateral (~$58.7M; LBTC/PYUSD 86% LLTV dominant)
@@ -260,19 +275,20 @@ DOWNSTREAM (Yearn interest)
 2. **Native-BTC backing** (highest collateral quality) and largest BTC LST by TVL (~$973M staked BTC).
 3. **24-hour upgrade timelock** owns the ProxyAdmin and holds `DEFAULT_ADMIN_ROLE`; minting restricted to two protocol contracts.
 4. **Defense in depth on mint** — Consortium 12-of-16 notary quorum **plus** an independent Bascule attestation; compromising one is insufficient.
-5. **PoR oracles** (Chainlink + RedStone) and onchain deposit-address registry.
+5. **Onchain PoR registry** — a Chainlink-PoR-standard `PoR` contract on Base publishes 28,626 BTC reserve addresses, consumed by Chainlink + RedStone feeds.
+6. **Long, large track record** — TVL continuously >$500M for ~19 months (peak ~$2.2B), no exploits or protocol depegs.
 
 ### Key Risks
 
-1. **Off-chain BTC custody** — backing depends on an institutional consortium's threshold-controlled custody, not a trustless onchain vault; provability is attestation/oracle-based.
-2. **Babylon slashing** — a new, relatively untested mechanism that could cause partial BTC loss.
-3. **EOA timelock proposer** + **2-of-11 pause multisig** — centralization warts; a pause would freeze transfers and block Morpho liquidations.
-4. **Slow primary exit** — redemption takes ~9 days; direct DEX swap depth is modest (~$8–9M), so large fast exits incur slippage.
-5. **Historical depeg to ~0.944 BTC** — combined with 86–94.5% LLTV Morpho markets, an LBTC discount is the main liquidation-risk vector.
+1. **Three unfixed High-severity audit findings** on the live implementation (Sherlock H-1/H-2/H-5, acknowledged-won't-fix). H-5 in particular can make the LBTC/BTC ratio incorrect and leave some LBTC unredeemable — directly relevant to its use as Morpho collateral.
+2. **Off-chain BTC custody** — backing depends on the consortium's own threshold-controlled custody (no named third-party custodians; keys in Cubist/CubeSigner HSMs), not a trustless onchain vault.
+3. **Babylon slashing** — a new, relatively untested mechanism that could cause partial BTC loss.
+4. **EOA timelock proposer** + **2-of-11 pause multisig** — centralization warts; a pause would freeze transfers and block Morpho liquidations.
+5. **Slow primary exit** — redemption takes ~9 days; direct DEX swap depth is modest (~$8–9M), so large fast exits incur slippage. Historical depeg to ~0.944 BTC combined with 86–94.5% LLTV Morpho markets makes an LBTC discount the main liquidation-risk vector.
 
 ### Critical Risks `[If Any]`
 
-- None that trigger a critical gate. The dominant tail risks are consortium custody compromise (12-of-16 collusion/coercion) and a Babylon slashing event — both would impair backing and could cause a sustained depeg that cascades into LBTC-collateralized Morpho positions.
+- None that trigger a critical gate. The dominant tail risks are consortium custody compromise (12-of-16 collusion/coercion) and a Babylon slashing event — both would impair backing and could cause a sustained depeg that cascades into LBTC-collateralized Morpho positions. Sherlock H-5 (unfixed) is a standing accounting/redeemability weakness rather than a realized loss.
 
 ---
 
@@ -290,27 +306,27 @@ DOWNSTREAM (Yearn interest)
 
 #### Category 1: Audits & Historical Track Record (Weight: 20%)
 
-- Audits: 10 reports / 6 firms incl. 3 top-tier; $250K Immunefi → **1**.
-- Historical: ~21–24 months in production; TVL sustained well above $100M (~$1B) → **2** (time-bracketed).
+- Audits: 10 reports / 6 firms incl. 3 top-tier (coverage → 1); $250K Immunefi bounty (>$200K → 2); moderately complex surface; **3 acknowledged-won't-fix High-severity findings on the live implementation** temper the otherwise excellent posture → **2.0**.
+- Historical: ~21–24 months in production; TVL sustained well above $100M (~$1B), no incidents → **1.5** (time-bracketed).
 
-**Audits & Historical = (1 + 2)/2 = 1.5**
+**Audits & Historical = (2.0 + 1.5)/2 = 1.75**
 
-**Score: 1.5/5**
+**Score: 1.75/5**
 
 #### Category 2: Centralization & Control Risks (Weight: 30%)
 
 - **Governance: 3.0** — 24-h timelock owns upgrades and admin role (good), but an EOA is a timelock proposer/canceller and pausing is only 2-of-11.
-- **Programmability: 3.0** — rate is privileged-role/oracle updated; custody, staking, and notarization are off-chain.
+- **Programmability: 3.5** — rate is privileged-role/oracle updated; custody, staking, and notarization are off-chain; and the live BridgeV2 has **three acknowledged-won't-fix High-severity audit findings** (no bridge rate-limit, relayer-burn, and CBBTC/BTCB-swap accounting break), which are operational/design weaknesses in the mint/bridge path.
 - **External Dependencies: 4.0** — Babylon (new slashing), off-chain consortium custody, Bascule/Cubist, and rate oracles are all critical.
 
-**Centralization = (3.0 + 3.0 + 4.0)/3 = 3.33**
+**Centralization = (3.0 + 3.5 + 4.0)/3 = 3.5**
 
-**Score: 3.33/5**
+**Score: 3.5/5**
 
 #### Category 3: Funds Management (Weight: 30%)
 
 - **Collateralization: 3.0** — 100% native-BTC backing (top quality) but off-chain custodial; Babylon slashing risk.
-- **Provability: 3.0** — PoR oracle + address registry, but attestation-based and rate-feed driven, not trustless onchain reserve verification.
+- **Provability: 3.0** — onchain `PoR` registry on Base (28,626 reserve addresses, Chainlink PoR-standard interface) plus RedStone/Chainlink rate feeds is better than a bare oracle, but it remains attestation of off-chain BTC and the rate feeds are not reserve-quantity feeds; Sherlock H-5 (acknowledged-won't-fix) means the ratio can be incorrect and some LBTC unredeemable. Registry strength and the H-5 concern roughly offset → held at 3.0.
 
 **Funds Management = (3.0 + 3.0)/2 = 3.0**
 
@@ -324,7 +340,7 @@ DOWNSTREAM (Yearn interest)
 
 #### Category 5: Operational Risk (Weight: 5%)
 
-- Doxxed co-founder, reputable backers, strong docs, verified contracts; legal entity unconfirmed (TODO).
+- Doxxed co-founder, reputable backers, strong docs, verified contracts; legal entity is Lombard Finance Ltd under Cayman Islands law.
 
 **Score: 2.0/5**
 
@@ -332,16 +348,18 @@ DOWNSTREAM (Yearn interest)
 
 | Category | Score | Weight | Weighted |
 |----------|-------|--------|----------|
-| Audits & Historical | 1.5 | 20% | 0.30 |
-| Centralization & Control | 3.33 | 30% | 1.00 |
+| Audits & Historical | 1.75 | 20% | 0.35 |
+| Centralization & Control | 3.5 | 30% | 1.05 |
 | Funds Management | 3.0 | 30% | 0.90 |
 | Liquidity Risk | 3.0 | 15% | 0.45 |
 | Operational Risk | 2.0 | 5% | 0.10 |
-| **Final Score** | | | **2.75/5.0** |
+| **Base Weighted Score** | | | **2.85/5.0** |
 
 **Optional Modifiers:**
-- Live >2 years with no incidents: not applied (production ~21–24 months; borderline).
-- TVL >$500M for >1 year: arguably applicable (−0.5) — held conservatively at no modifier pending a TVL-history check (TODO).
+- Live >2 years with no incidents: not applied (production ~21–24 months; just under 2 years).
+- **TVL >$500M for >1 year: QUALIFIES** (−0.5) — DefiLlama shows TVL continuously above $500M since ~Oct 5, 2024 (~19 months). **Applying it would give 2.35 (Low Risk).** However, per the framework's conservative guidance, the modifier is **withheld**: it is meant to reward a clean, mature track record, and that credit is undercut by **three acknowledged-but-unfixed High-severity audit findings on the live implementation** (one of which, H-5, affects LBTC redeemability/accounting). The reviewer may choose to apply it; doing so moves the token to the Low-Risk tier boundary.
+
+**Final Score: 2.85/5.0** (modifier withheld).
 
 ### Risk Tier
 
@@ -353,7 +371,7 @@ DOWNSTREAM (Yearn interest)
 | **3.5-4.5** | **Elevated Risk** | Limited approval, strict limits |
 | **4.5-5.0** | **High Risk** | Not recommended |
 
-**Final Risk Tier: Medium Risk** (2.75/5.0) — approved with enhanced monitoring. Strong audit posture and native-BTC backing are offset by off-chain custodial trust, Babylon slashing exposure, and centralization/liquidity frictions that matter for high-LLTV Morpho collateral use.
+**Final Risk Tier: Medium Risk** (2.85/5.0) — approved with enhanced monitoring. Strong audit posture and native-BTC backing are offset by off-chain custodial trust, Babylon slashing exposure, three unfixed High-severity audit findings, and centralization/liquidity frictions that matter for high-LLTV Morpho collateral use. (If the −0.5 TVL-longevity modifier is applied, the score is 2.35 / Low Risk; held conservatively at Medium given the unresolved Highs.)
 
 ---
 
@@ -368,14 +386,12 @@ DOWNSTREAM (Yearn interest)
 
 ## Open TODOs (for follow-up)
 
-1. **Audit findings:** parse the OZ/Sherlock yield-bearing PDFs for unresolved/medium+ findings and confirm the redemption-replay remediation.
-2. **Reserve PoR specifics:** identify the canonical reserve-quantity PoR feed and the Base deposit-address registry contract; document how circulating-vs-custodied reconciliation is done.
-3. **Named BTC custodians:** confirm the specific custodian entities and the custody threshold (docs describe the model; named custody set not confirmed).
-4. **Legal entity / jurisdiction.**
-5. **Mint caps:** confirm whether AssetRouter/BridgeV2 enforce per-epoch mint limits.
-6. **Consortium count discrepancy:** docs say 14–15 institutional members vs onchain 16 notary keys (threshold 12) — reconcile.
-7. **TVL history:** verify >$500M sustained for >1 year to decide the optional −0.5 modifier.
-8. **Third-party reports:** locate any LlamaRisk / Steakhouse coverage of LBTC.
+Most original TODOs are now resolved (audit findings, PoR registry, mint caps, legal entity, TVL history, custody model, third-party coverage). Remaining open items:
+
+1. **Consortium key discrepancy (unresolved by design):** onchain notary set is 16 keys / threshold 12, but docs state 14 institutional members / 10-of-14. The identity of the extra onchain keys is undocumented — ask Lombard or monitor `Consortium` validator-set changes. Do not reconcile by assumption.
+2. **H-finding remediation tracking:** Sherlock H-1/H-2/H-5 and OZ M-01 are acknowledged-won't-fix today; recheck each future audit/PR for any change in status.
+3. **Legal incorporation specifics:** ToS implies a Cayman entity (Cayman law + Cayman-seated arbitration) but does not state the registered place of incorporation verbatim — confirm if a precise entity record is needed.
+4. **Reserve reconciliation cadence:** the Base `PoR` registry lists addresses but the BTC-balance-vs-LBTC-supply reconciliation still relies on the off-chain feed operator; document the heartbeat/attestation cadence if available.
 
 ## Sources
 
@@ -384,7 +400,12 @@ DOWNSTREAM (Yearn interest)
 - Bug bounty: https://docs.lombard.finance/learn/security/bug-bounty ; https://immunefi.com/bug-bounty/lombard-finance/scope/
 - Smart contracts: https://docs.lombard.finance/learn/transparency/smart-contracts
 - Oracles / PoR: https://docs.lombard.finance/learn/transparency/oracles
-- DefiLlama: https://defillama.com/protocol/lombard ; https://yields.llama.fi/pools
+- DefiLlama: https://defillama.com/protocol/lombard ; https://yields.llama.fi/pools ; https://api.llama.fi/protocol/lombard (TVL history)
+- Consortium members: https://docs.lombard.finance/learn/security/consortium-members
+- Audit PDFs (raw): https://raw.githubusercontent.com/lombard-finance/evm-smart-contracts/main/docs/audit/Sherlock_YB.pdf ; https://raw.githubusercontent.com/lombard-finance/evm-smart-contracts/main/docs/audit/OZ_YB.pdf
+- Terms of Service (legal entity): https://docs.lombard.finance/legals/terms-of-service
+- Chaos Labs LBTC risk assessment: https://governance.ether.fi/t/lombard-btc-risk-assessment/2308
+- Base PoR registry (Basescan): https://basescan.org/address/0xe7Ebc588F4EC9297d9867aD75a9b5D86848c8018
 - CoinGecko LBTC: https://www.coingecko.com/en/coins/lombard-staked-btc
 - Morpho Blue API: https://blue-api.morpho.org/graphql
 - Onchain verification via `cast` (Ethereum) + Etherscan V2 API, May 26, 2026
