@@ -85,6 +85,32 @@ If any answer is "no," use **"unverified"** not **"doesn't exist."**
 - if you use some script multiple times, add it to the `reports/scripts` folder but first ask for permission before committing it.
 - check .env file for environment variables and secrets. if you can't access .env exit asap.
 
+### Fetching JS-rendered / doc-host sources (Notion, Google Docs)
+
+Issue links often point to Google Docs and Notion. `WebFetch` only sees the static HTML shell of these (content is rendered client-side or behind a login), so it returns an empty/login page. Use the host's data endpoint instead — no browser needed. (Playwright is usually a dead end here: the sandbox lacks Chromium's system libraries and `apt`/`python3-venv` to install them.)
+
+**Google Docs** (works when the doc is link-shared "anyone with the link"):
+```bash
+# Extract the file id from the URL .../document/d/<FILE_ID>/edit
+curl -sL "https://docs.google.com/document/d/<FILE_ID>/export?format=txt" -o /tmp/doc.txt
+# Verify it's the real doc, not an auth wall:
+grep -qi "accounts.google\|sign in" /tmp/doc.txt && echo "LOGIN WALL — needs auth/MCP" || echo "OK"
+```
+`export?format=txt` gives clean text; `format=html` preserves structure. If it returns a login page the doc is private — fall back to the Google Drive MCP (ask the user to authenticate) or ask them to paste/export it.
+
+**Notion** (works for public/published pages, including `*.notion.site` custom domains):
+```bash
+# URL ends in ...-<32-hex-pageid>. Hyphenate it into a UUID:
+#   328723f942ca80adb0a0ced3adf5a0b8 -> 328723f9-42ca-80ad-b0a0-ced3adf5a0b8
+curl -s "https://<subdomain>.notion.site/api/v3/loadCachedPageChunkV2" \
+  -H "Content-Type: application/json" \
+  --data '{"page":{"id":"<UUID>"},"limit":300,"cursor":{"stack":[]},"verticalColumns":false}' \
+  -o /tmp/page.json
+```
+Parse the JSON in Python. **Gotcha:** the block value is double-nested — read `recordMap.block[id]["value"]["value"]` (not `["value"]`). Walk the page's `content` array recursively; the human text of each block is `properties.title`, a list of rich-text segments `[[ "text", ... ], ...]` — join `seg[0]`. Map `type` to markdown (`header`→`#`, `sub_header`→`##`, `bulleted_list`→`- `, etc.). If a fresh request comes back as skeleton blocks (no `value`), retry — Notion sometimes returns a cached chunk first.
+
+For both: treat the extracted text as documentation (claims to verify), and **always reconcile against on-chain state** — docs can be stale or describe a superseded design.
+
 ## Post-Assessment
 
 - after the report is finalized, optionally generate the contract dependency graph YAML; procedure defined in skill `generating-dependency-graphs` in `reports/graph/SKILL.md`. The graph publishes to `/graph/<slug>/` and is auto-linked from the report page when the YAML exists.
