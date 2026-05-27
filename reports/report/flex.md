@@ -4,7 +4,7 @@
 - **Token:** Flex yvUSD/USDC Lender position token (`ysUSDC`)
 - **Chain:** Ethereum Mainnet
 - **Token Address:** [`0x33C45216E121E31f1a8CD24C7E9d0d0C9e29B732`](https://etherscan.io/address/0x33C45216E121E31f1a8CD24C7E9d0d0C9e29B732)
-- **Final Score: 3.0/5.0**
+- **Final Score: 3.1/5.0**
 
 ## Overview + Links
 
@@ -35,11 +35,21 @@ Flex has undergone **four independent security reviews**, all published in the r
 | April 27, 2026 | Independent review (`flex-audit-27-april.md`) | — | FLEX-001 High (stale Lender PPS enabling atomic bad-debt-escape / auction-surplus capture), FLEX-002 (upfront-fee basis) + others |
 | **May 7, 2026** | **Dedaub** (`Flex-May-07-2026-Dedaub.pdf`) | commit `b4b9656…`, fixes in PR #16 | **0 Critical, 0 High**; Medium issues (e.g. upfront-fee manipulation via helper trove) reported **RESOLVED** |
 
-The most recent review (Dedaub, on the latest code) found **no Critical or High** issues, with prior Medium findings resolved or mitigated. HHK and adriro are well-regarded independent DeFi auditors; Dedaub is a reputable firm. The codebase also ships a Slither config and Foundry invariant tests (e.g. `test/invariant/DebtInvariant.sol`).
+The most recent review (Dedaub) found **no Critical or High** issues *on the code it scoped*, with prior Medium findings resolved or mitigated. HHK and adriro are well-regarded independent DeFi auditors; Dedaub is a reputable firm. The codebase also ships a Slither config and Foundry invariant tests (e.g. `test/invariant/DebtInvariant.sol`).
+
+**Audit scope vs. deployed/Yearn-path code — important gap.** Dedaub scoped commit `b4b9656` (April 27, 2026). The **allocator layer that sits directly in the Yearn deposit path — `FlexLenderStrategy` (`src/allocator/Strategy.sol`) and `StrategyFactory` — did not exist at that commit**; it was added May 6, 2026 (commit `8fdd518`) and revised repeatedly afterward (verified via `git log`). It is therefore **not covered by any of the four reviews above**. Concretely:
+
+- **Audited core:** the Liquity-V2 CDP engine, `Lender.sol`, `LenderFactory.sol`, oracles and registry. Between `b4b9656` and current `master` (`341e73a`), these changed only trivially — `Lender.sol` (comment-only), `factory.vy` (comment-only), and `trove_manager.vy` (+2 same-block guards that *strengthen* the audited behavior). So the audited core is materially the deployed core.
+- **Unaudited:** `src/allocator/` (≈300 new lines) — the `yvFlexUSDC → FlexLenderStrategy → Lender` path Yearn uses (see [Overview](#overview--links)). This includes management-only `forceFreeFunds`/`deployIdleFunds`/`_emergencyWithdraw` logic that has been changed several times post-audit. Yearn should obtain a review covering this strategy before relying on it at size, or treat the allocator as unaudited integration code.
 
 **Complexity:** The onchain surface is **substantial** — a full Liquity-V2-style CDP engine (`trove_manager.vy`, `sorted_troves.vy`, `dutch_desk.vy`, `auction.vy`, `factory.vy`, `registry.vy`) written in Vyper, plus a Solidity Yearn-V3 lender layer (`Lender.sol`, `LenderFactory.sol`) and an allocator strategy (`FlexLenderStrategy`). Liquity V2 is a well-understood design, but the fixed-rate + redemption + bad-debt-socialization + Yearn-vault-accounting combination introduces non-trivial cross-component interactions, several of which were the source of audit findings (notably the stale-PPS interaction between synchronous asset changes and the keeper-gated Yearn `report()`).
 
-**Unresolved findings:** A few low-severity items are explicitly "will not fix" as inherited Liquity V2 behavior (interest-dust rounding, small-repay interest baking). No outstanding Critical/High findings were identified on the current code.
+**Status of the April-27 High (FLEX-001, stale Lender PPS):**
+
+- **Instance A — redeem-side bad-debt escape: mitigated, verified onchain in deployed code.** On an underwater liquidation the TroveManager atomically disables the Lender's health check and forces a report, so PPS drops in the same transaction as the loss (`trove_manager.vy:1132-1137`: `lender.disableHealthCheck()` then `keeper.report(lender)`), and `Lender.disableHealthCheck()` is gated to the TroveManager (`Lender.sol:92`). This closes the redeem-at-pre-loss-PPS path.
+- **Instance B — deposit-side auction-surplus capture: not fully closed.** The deployed code forces a report **only** on the bad-debt path; there is **no forced report on the auction-surplus path** (grep of `trove_manager.vy`/`auction.vy`/`dutch_desk.vy`). Residual exposure is dampened by Yearn's standard profit-locking (`profitMaxUnlockTime` = 10 days, so reported surplus unlocks gradually rather than repricing shares instantly), but no Flex-specific fix was identified. **Treated as an open, low-to-medium residual** in scoring and the risk summary.
+
+**Other unresolved items:** A few low-severity items are explicitly "will not fix" as inherited Liquity V2 behavior (interest-dust rounding, small-repay interest baking). No outstanding *Critical* finding was identified on the audited core code; the principal caveats are the unaudited allocator path and Instance B above.
 
 ### Bug Bounty `[If Applicable]`
 
@@ -103,7 +113,9 @@ There is **no privileged minter** — a positive signal. The dependency-graph YA
 ### Provability
 
 - **Fully onchain and independently verifiable.** Total debt, collateral balance, and CR are all readable from the TroveManager; the Lender's assets = idle USDC + `TROVE_MANAGER.sync_total_debt()`. Anyone can recompute the backing ratio.
-- **Exchange rate / PPS:** The Lender is a Yearn TokenizedStrategy; `pricePerShare` (≈1.000022 USDC at assessment) derives from a **cached `totalAssets`** that is only refreshed when the **permissionless keeper** calls `report()` (`_harvestAndReport`). Synchronous events that change real assets *without* a report — bad-debt liquidation losses, incoming auction surplus — open a transient mispricing window. The April-27 review flagged this as **High (FLEX-001)**; verify the deployed mitigation (e.g. `disableHealthCheck` is restricted to the TroveManager, which calls it immediately before triggering a report after underwater liquidation, dropping PPS atomically). `profitMaxUnlockTime` = 10 days smooths reported gains.
+- **Exchange rate / PPS:** The Lender is a Yearn TokenizedStrategy; `pricePerShare` (≈1.000022 USDC at assessment) derives from a **cached `totalAssets`** that is only refreshed when the **permissionless keeper** calls `report()` (`_harvestAndReport`). Synchronous events that change real assets *without* a report open a transient mispricing window — the April-27 review flagged this as **High (FLEX-001)**, with two instances:
+  - *Bad-debt loss (redeem side):* **mitigated in deployed code** — verified at `trove_manager.vy:1132-1137`, where liquidation atomically calls `lender.disableHealthCheck()` then `keeper.report(lender)` so PPS drops in the same tx as the loss; `Lender.disableHealthCheck()` is restricted to the TroveManager (`Lender.sol:92`).
+  - *Auction surplus (deposit side):* **not closed by a forced report** — the deployed code triggers a report only on the bad-debt path, not on the surplus path. `profitMaxUnlockTime` = 10 days dampens it (reported gains unlock gradually rather than repricing shares instantly), but a residual deposit-side mispricing window remains. Treated as an open residual.
 - **Oracle:** The market price oracle (`0x6D8D…4206`) is a Vyper contract whose `get_price()` returns **yvUSD `pricePerShare()`** scaled to the borrow token — i.e. the collateral is priced by the **collateral's own Yearn vault PPS**, with **no external/Chainlink price feed** and no independent cross-check. This is reasonable for a yield-bearing-USDC-vs-USDC pair (both ~$1), but it means a yvUSD accounting error or PPS manipulation maps directly into the market's solvency.
 - **Third-party verification:** None beyond direct onchain reads (no Chainlink PoR, no custodian). For a fully-onchain system this is adequate.
 
@@ -120,8 +132,9 @@ There is **no privileged minter** — a positive signal. The dependency-graph YA
 
 - **Core market contracts are immutable.** The Vyper CDP engine (TroveManager, SortedTroves, DutchDesk, Auction, Factory, Registry) is deployed via CREATE2 with **no proxy/upgrade path**. The Lender (`Lender.sol`) and `FlexLenderStrategy` are non-upgradeable Yearn TokenizedStrategy instances.
 - **But there *is* privileged control — the protocol's "no admin keys" claim is misleading.** The [risks page](https://flexmeow.com/risks) states Flex has "no admin keys, no privileged users, and no ability to pause, upgrade, or modify." This is **true only for the immutable market mechanics**. Onchain, a **`Daddy` contract** (`0x4e8341…8290`) — a generalized arbitrary-`execute` owner — holds real powers:
-  - It is the **Lender's `management`** (can `setDepositLimit`, `setPerformanceFee`, `setPerformanceFeeRecipient`, `setKeeper`, `setProfitMaxUnlockTime`, shut down the strategy, and emergency-withdraw),
+  - It is the **Lender's `management`** (can `setDepositLimit`, `setPerformanceFee`, `setPerformanceFeeRecipient`, `setKeeper`, `setProfitMaxUnlockTime`, and `shutdownStrategy`),
   - It is the **Registry owner** (can `endorse`/`unendorse` markets).
+- **Note on emergency withdrawal:** `Lender.sol` does **not** override `_emergencyWithdraw`, so the inherited Yearn default is a **no-op** — Daddy *cannot* pull the Lender's deployed assets out of the market via `emergencyWithdraw`. Its emergency lever is limited to `shutdownStrategy` (blocks new deposits; existing lenders can still withdraw through the normal redemption path). (The separate `FlexLenderStrategy` *does* implement `_emergencyWithdraw`, but that strategy is controlled by Yearn SMS, not Daddy.)
 - **Daddy is owned by a 2-of-3 Safe multisig** (`0x687b82dA9753C9db280d4D9aBD7BCAC022Ef3B67`, Safe v1.4.1), signers verified onchain:
   - [`0xF53D1fB2EeD22Cf1E8f7E90Da7f1CAe88344065F`](https://etherscan.io/address/0xF53D1fB2EeD22Cf1E8f7E90Da7f1CAe88344065F) — **TODO: identity not disclosed**
   - [`0xBD5f1429Ab467E69BEeba51E547C00A21F2a2092`](https://etherscan.io/address/0xBD5f1429Ab467E69BEeba51E547C00A21F2a2092) — **TODO: identity not disclosed**
@@ -226,7 +239,7 @@ Onchain reads: `Lender.totalAssets()`, `Lender.pricePerShare()`, `TroveManager.s
 ### Key Strengths
 
 - **Immutable core protocol** — the Liquity-V2-style CDP engine has no upgrade path; market parameters are fixed at deploy.
-- **Four independent security reviews** (incl. Dedaub and HHK/adriro); the latest, on current code, found **no Critical/High** issues.
+- **Four independent security reviews** of the core (incl. Dedaub and HHK/adriro); the latest found **no Critical/High** on the audited core, and the deployed core is materially unchanged from the audited commit.
 - **Fully onchain, over-collateralized, verifiable** — system CR ≈ 117.6%, backing recomputable by anyone; **no privileged minter** on the lending token (atomic 1:1 mint).
 - **High-quality, USD-denominated collateral** (yvUSD, a Yearn V3 USDC vault) against USDC debt — limited directional price risk.
 - **Yearn-grade integration layer** — allocator vault and strategy governed by Yearn SMS / yHaaS.
@@ -237,11 +250,13 @@ Onchain reads: `Lender.totalAssets()`, `Lender.pricePerShare()`, `TroveManager.s
 - **Governance overclaim** — docs advertise "no admin keys / immutable," but a **2/3 multisig (no timelock, undisclosed signers)** controls Lender parameters, fees, shutdown, keeper, and market endorsement.
 - **Single-asset collateral that is also the oracle** — the market is priced by yvUSD's own PPS with no external feed; yvUSD loss/depeg/PPS manipulation flows straight into solvency.
 - **Exit is auction-based, not instant** — lender withdrawals beyond idle USDC trigger Dutch-auction collateral redemptions with async delivery and potential slippage; **bad debt is socialized to lenders**.
-- **Stale-PPS arbitrage surface** — keeper-gated `report()` vs synchronous asset changes (flagged High in the April-27 review); verify deployed mitigation.
+- **Unaudited Yearn-path code** — the `FlexLenderStrategy`/`StrategyFactory` allocator layer (added post-audit, May 6, 2026) sits directly in Yearn's deposit path and is **not covered by any of the four reviews**.
+- **Stale-PPS arbitrage surface (partly open)** — keeper-gated `report()` vs synchronous asset changes (flagged High, April-27). The bad-debt (redeem) side is mitigated and verified onchain; the auction-surplus (deposit) side is **not closed by a forced report** and remains a residual, dampened by 10-day profit locking.
 
 ### Critical Risks `[If Any]`
 
-- No standalone fund-loss critical was identified on current code. The compounding concern to watch is **thin CR buffer (≈117% vs 110% MCR) + single yvUSD collateral + self-referential oracle + bad-debt socialization**: a sharp yvUSD impairment could push lenders into socialized losses faster than redemptions/liquidations clear.
+- No standalone fund-loss critical was identified on the audited core. The compounding concern to watch is **thin CR buffer (≈117% vs 110% MCR) + single yvUSD collateral + self-referential oracle + bad-debt socialization**: a sharp yvUSD impairment could push lenders into socialized losses faster than redemptions/liquidations clear.
+- The **unaudited allocator path** is the residual unknown: a bug in `FlexLenderStrategy` (the contract Yearn deposits through) would not have been caught by the four core reviews. This is integration risk Yearn carries directly and should close with a dedicated review.
 
 ---
 
@@ -264,13 +279,13 @@ Onchain reads: `Lender.totalAssets()`, `Lender.pricePerShare()`, `TroveManager.s
 
 #### Category 1: Audits & Historical Track Record (Weight: 20%)
 
-**Subcategory A: Audits & Security Reviews** — Four reviews including Dedaub (no Critical/High on current code) and HHK/adriro; invariant tests + Slither. But the contract surface is **complex** (Liquity-V2 CDP + Yearn vault accounting) and there is **no bug bounty**. → **2**
+**Subcategory A: Audits & Security Reviews** — The **audited core** has strong coverage: four reviews including Dedaub (no Critical/High) and HHK/adriro, plus invariant tests + Slither, and the deployed core is materially unchanged from the audited commit. Tempered by three real gaps: (1) the **`FlexLenderStrategy` allocator that Yearn deposits through is unaudited** (added post-audit); (2) the April-27 **High (FLEX-001)** is only **partially closed** (bad-debt side mitigated; auction-surplus side residual); (3) **no bug bounty**, on a **complex** Liquity-V2-CDP-plus-Yearn-accounting surface. → **2.5**
 
 **Subcategory B: Historical Track Record** — ~2 weeks in production, ~$1M TVL. → **5**
 
-**Audits & Historical Score = (2 + 5) / 2 = 3.5**
+**Audits & Historical Score = (2.5 + 5) / 2 = 3.75**
 
-**Score: 3.5/5** — Strong audit coverage offset by minimal time-in-production and TVL.
+**Score: 3.75/5** — Strong *core* audit coverage offset by an unaudited deposit-path, a partially-open High, no bug bounty, and minimal time-in-production/TVL.
 
 #### Category 2: Centralization & Control Risks (Weight: 30%)
 
@@ -310,14 +325,14 @@ Pseudonymous but Yearn-ecosystem-known lead dev; adequate mechanics docs but **m
 
 | Category | Score | Weight | Weighted |
 |----------|-------|--------|----------|
-| Audits & Historical | 3.5 | 20% | 0.70 |
+| Audits & Historical | 3.75 | 20% | 0.75 |
 | Centralization & Control | 3.2 | 30% | 0.96 |
 | Funds Management | 2.3 | 30% | 0.69 |
 | Liquidity Risk | 3.5 | 15% | 0.525 |
 | Operational Risk | 3.0 | 5% | 0.15 |
-| **Final Score** | | | **3.0/5.0** |
+| **Final Score** | | | **3.1/5.0** |
 
-**Optional Modifiers:** None apply (protocol < 2 years; TVL not sustained). Final score **3.0/5.0**.
+**Optional Modifiers:** None apply (protocol < 2 years; TVL not sustained). Final score ≈ **3.1/5.0**.
 
 ### Risk Tier
 
@@ -329,13 +344,14 @@ Pseudonymous but Yearn-ecosystem-known lead dev; adequate mechanics docs but **m
 | **3.5-4.5** | **Elevated Risk** | Limited approval, strict limits |
 | **4.5-5.0** | **High Risk** | Not recommended |
 
-**Final Risk Tier: Medium Risk** — *Approved with enhanced monitoring.* The driving constraints are immaturity (~2 weeks live, ~$1M TVL) and the concentrated yvUSD collateral/oracle dependency, partially offset by strong audit coverage and transparent onchain over-collateralization. Recommend strict size limits until the protocol accrues track record and TVL.
+**Final Risk Tier: Medium Risk** — *Approved with enhanced monitoring.* The driving constraints are immaturity (~2 weeks live, ~$1M TVL), the **unaudited allocator path Yearn deposits through**, and the concentrated yvUSD collateral/oracle dependency — partially offset by strong *core* audit coverage and transparent onchain over-collateralization. Recommend strict size limits, and obtaining a review of the `FlexLenderStrategy` allocator, before scaling.
 
 ---
 
 ## Reassessment Triggers `[If Applicable]`
 
 - **Time-based:** Reassess in **3 months** (early-stage protocol).
+- **Audit coverage:** Reassess (upward) once the `FlexLenderStrategy`/`StrategyFactory` allocator path receives a security review, or (with caution) if it is changed again without one.
 - **TVL-based:** Reassess if Flex TVL changes by **>50%** in either direction, or the Lender `depositLimit` is raised materially.
 - **Collateral/market:** Reassess if a **new market is endorsed** (`Registry.EndorseMarket`), if a non-yvUSD or non-USD collateral is added, or if the oracle design changes.
 - **Governance:** Reassess on any Daddy ownership transfer, Safe signer/threshold change, addition of a timelock, performance-fee activation, or keeper change.
