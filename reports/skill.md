@@ -109,7 +109,16 @@ curl -s "https://<subdomain>.notion.site/api/v3/loadCachedPageChunkV2" \
 ```
 Parse the JSON in Python. **Gotcha:** the block value is double-nested — read `recordMap.block[id]["value"]["value"]` (not `["value"]`). Walk the page's `content` array recursively; the human text of each block is `properties.title`, a list of rich-text segments `[[ "text", ... ], ...]` — join `seg[0]`. Map `type` to markdown (`header`→`#`, `sub_header`→`##`, `bulleted_list`→`- `, etc.). If a fresh request comes back as skeleton blocks (no `value`), retry — Notion sometimes returns a cached chunk first.
 
-For both: treat the extracted text as documentation (claims to verify), and **always reconcile against on-chain state** — docs can be stale or describe a superseded design.
+**GitBook docs** (e.g. `*.gitbook.io`): two tricks.
+- Append `.md` to any page URL to get clean markdown instead of the rendered HTML: `https://<proj>.gitbook.io/<space>/<page>.md`.
+- Many GitBook sites expose a built-in Q&A endpoint — GET the page's `.md` URL with an `ask=<natural-language question>` query param, and it returns a direct answer plus sourced excerpts (look for an "Agent Instructions / Querying This Documentation" note on the site confirming it's enabled):
+  ```bash
+  curl -sL --get "https://<proj>.gitbook.io/<space>/<page>.md" \
+    --data-urlencode "ask=List every audit: firm, date, scope, and report link."
+  ```
+  Great for filling gaps without reading every page (audits, params, governance). Caveats: it only knows what's in the docs *text* — content locked inside linked PDFs/files (e.g. audit firm names) won't be returned. The docs root is often behind a Cloudflare bot-challenge; if `curl` returns a "Just a moment…" page, target a specific sub-page, retry, or use `WebFetch`.
+
+For all of these: treat the extracted text as documentation (claims to verify), and **always reconcile against on-chain state** — docs can be stale or describe a superseded design.
 
 ## Post-Assessment
 

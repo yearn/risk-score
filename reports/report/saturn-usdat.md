@@ -44,7 +44,7 @@ The key risk separation: **USDat's collateral is tokenized U.S. Treasuries (via 
 
 ### Bug Bounty `[If Applicable]`
 
-- No bug bounty program located on the docs site or Immunefi. **TODO: confirm whether a program exists.**
+- No bug bounty program — confirmed absent from the docs (via the GitBook docs Q&A endpoint) and not found on Immunefi.
 - Safe Harbor (SEAL) adoption: **TODO** — not confirmed.
 
 ## Historical Track Record
@@ -341,7 +341,7 @@ YIELD LAYER (context only — not USDat backing)
 ## Pending TODOs (for follow-up)
 
 1. Cross-check the **4 published audit PDFs** (firms identified as Three Sigma + Certora) against the docs — record exact dates, scope, and unresolved findings.
-2. Confirm **bug bounty** existence and Safe Harbor (SEAL) status (none found → likely none).
+2. Confirm **Safe Harbor (SEAL)** status (bug bounty confirmed **none** — not in docs, not on Immunefi).
 3. Confirm the **Accountable PoR feed** is live and record its address; record the **Chainlink NAV oracle** address (cadence known: 24h / 50 bps).
 4. Assess **M0's own risk** (minter collateralization, governance, audits) as the floor on USDat risk; confirm who controls/can-upgrade the **M0 Swap Facility** and accepted assets.
 5. Pull **holder distribution** and **historical peg/price** series (Etherscan Pro / Dune).
