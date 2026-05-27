@@ -29,7 +29,7 @@ The key risk separation: **USDat's collateral is tokenized U.S. Treasuries (via 
 - [Protocol App](https://saturn.credit/)
 - [Key Addresses](https://saturncredit.gitbook.io/saturn-docs/operations-and-governance/key-addresses)
 - [Transparency & Audits](https://saturncredit.gitbook.io/saturn-docs/operations-and-governance/transparency-and-audits)
-- GitHub Repository — Saturn maintains two repos per the DD docs ("USDat Github" = the ERC-20 stablecoin; "sUSDat Github" = staking/vault logic); exact URLs not captured. **TODO: record repo URLs.** Saturn `USDat.sol` extends the open-source [M0 `m-extensions`](https://github.com/m0-foundation) library.
+- GitHub Repositories (per audit reports): [`saturn-organization/saturn-dollar`](https://github.com/saturn-organization/saturn-dollar) (USDat) and [`saturn-organization/saturn-yield-dollar`](https://github.com/saturn-organization/saturn-yield-dollar) (sUSDat/vault). Note: the audited `saturn-dollar` USDat is the *pre-pivot* design; the deployed token is the M0 [`m-extensions`](https://github.com/m0-foundation) `JMIExtension` (see Audits).
 - [M0 Documentation](https://docs.m0.org/) — underlying `$M` token
 - [Serenity Research — USDat Initial Review (May 2026)](https://serenityresearch.substack.com/p/serenity-premium-usdat-by-saturn) (third-party)
 - [Alea Research — Saturn: Building Bitcoin's Credit Layer](https://alearesearch.substack.com/p/saturn-building-bitcoins-credit-layer) (third-party)
@@ -37,10 +37,20 @@ The key risk separation: **USDat's collateral is tokenized U.S. Treasuries (via 
 
 ## Audits and Due Diligence Disclosures
 
-- Per Saturn's due-diligence materials, USDat/sUSDat were audited by **Three Sigma** (USDat received a Three Sigma audit; Three Sigma also did the NAV-tracking and leakage modelling) and **Certora** (formal verification, engaged from mid-January 2026), with a **third audit planned before mainnet**. The Saturn docs [Transparency & Audits](https://saturncredit.gitbook.io/saturn-docs/operations-and-governance/transparency-and-audits) page links **four audit report files**. **TODO: download each of the four reports to confirm firm, date, exact scope, and unresolved findings (the firm list above is from Saturn's DD docs, not yet cross-checked against the published PDFs).**
-- The bulk of USDat's logic is the **M0 `m-extensions` library** (`JMIExtension`, `MYieldToOne`, `Freezable`, `ForcedTransferable`, `Pausable`). This M0 codebase has been independently audited multiple times as part of the M0 protocol. Saturn's own additions are a thin `USDat.sol` wrapper (whitelist gating + forced-transfer wiring), which lowers bespoke-code risk. Saturn states USDat smart-contract risk is "relatively low as the contract is a simple ERC20 token using OpenZeppelin standards … modified to support a blacklist and the ability to rescue tokens."
-- Smart-contract architecture complexity: **moderate**. USDat is a `TransparentUpgradeableProxy` over a well-structured M0 extension. The novel surface is small; the main risk is upgradeability and admin powers, not contract complexity.
-- Unresolved audit findings: **TODO** (pending audit report review).
+**Four audit reports are published** (Saturn [Transparency & Audits](https://saturncredit.gitbook.io/saturn-docs/operations-and-governance/transparency-and-audits)), all reviewed for this assessment:
+
+| # | Firm | Date | Scope (commits) | Findings | Resolution |
+|---|------|------|------|----------|------------|
+| 1 | **Three Sigma** | 30 Dec 2025 – 12 Jan 2026 | `saturn-dollar` `ad2a465` + `saturn-yield-dollar` `aa762cc` (532 nSLOC) | 0 Crit, 2 High, 5 Med, 13 Low, 3 Info | Both High fixed; 1 Med (USDat-depeg share pricing) acknowledged; 2 Low + 1 Info acknowledged |
+| 2 | **Certora** | 16–23 Jan 2026 | `saturn-yield-dollar` `c8c5a4c`→`a55f288`, `saturn-dollar` `bfc6c91` | 0 Crit, 0 High, 2 Med, 8 Low, 5 Info | 11 / 15 fixed; M-02 + several Low acknowledged |
+| 3 | **Certora** (Audit #3) | (follow-up review) | TODO: record commit/date | TODO | TODO |
+| 4 | **Certora** (Formal Verification) | (FV engagement) | TODO: record commit/date | TODO | TODO |
+
+So coverage is strong on paper — two reputable firms, four reports including formal verification.
+
+> **⚠️ Critical caveat — the audits do not cover the deployed USDat token.** All four reports audit a *self-issued* `saturn-dollar/src/USDat.sol` (80 nSLOC) described by both firms as "a simple ERC20… minted 1:1 against stable assets by KYC-verified users," with a `PROCESSOR_ROLE` that **mints** and a `_blacklisted` mapping. The **deployed** USDat (`0x2323…aa71`, impl `0x17ca…e52e`, live 2026-03-10) is instead an **M0 `JMIExtension`** — wrap/unwrap of `$M`, `swapFacility`, `whitelist`, `forceTransfer`, no `PROCESSOR_ROLE` mint. The protocol **pivoted the stablecoin to the M0 model after these audits** (commits audited are from Dec 2025–Jan 2026; deployment is ~2 months later). The deployed USDat token therefore relies on **M0's own audits of the `m-extensions` library** plus an **un-audited thin Saturn wrapper** (whitelist gating + forced-transfer wiring) — it is **not** covered by these four reports. The **sUSDat** staking layer (StakedUSDat / WithdrawalQueue / TokenizedSTRC) does broadly correspond to the audited code. **TODO: obtain the M0 `m-extensions` audit(s) and confirm whether the deployed M0-based USDat was separately reviewed.**
+- **Notable audited findings** (on the prior design, useful context): Three Sigma `H01` — blacklist enforced only on recipient, letting blacklisted senders move tokens (fixed); `H02` / Certora `M-01`,`M-02` — reward-distribution front-running, redistribute-sandwich, and rounding dust leakage in the sUSDat vault (fixed/acknowledged); Three Sigma `M03` / Certora `L-01` — the sUSDat vault assumes USDat = $1, so a USDat depeg or a lag between off-chain STRC purchase and on-chain USDat burn can leave the vault mis-priced/under-backed (acknowledged; client switching the oracle to price STRC in USDat terms and adding a bridge-loan flow). Certora also flagged **no test coverage for StakedUSDat** and that **`PROCESSOR_ROLE` is the dominant trust boundary**.
+- Smart-contract architecture complexity: **moderate**. The deployed USDat is a `TransparentUpgradeableProxy` over a well-structured M0 extension; novel Saturn surface is small. The sUSDat layer is more complex (multi-token NAV vault + ERC-721 withdrawal queue + processor-driven off-chain settlement).
 
 ### Bug Bounty `[If Applicable]`
 
@@ -238,11 +248,13 @@ YIELD LAYER (context only — not USDat backing)
 - **Highly centralized control:** every privileged key is a Fireblocks **2/3 MPC** with **no timelock**; the Admin can **upgrade** the token at will, and Compliance can **freeze, seize, and pause** user funds.
 - **Single critical dependency on M0** — USDat fully inherits `$M`'s peg and M0's (off-chain, attested) Treasury risk; USDat holds ~37% of all `$M`.
 - **Very young** (~2.5 months live) with no track record through stress.
+- **Audit-coverage gap:** the four published audits (Three Sigma + Certora) cover a *pre-pivot, self-issued* USDat design, not the M0-extension token actually deployed. The live token's bespoke surface (Saturn whitelist wrapper) is un-audited by these reports; it leans on M0's separate `m-extensions` audits.
 - **Exit for non-whitelisted holders is secondary-market only** (~$19M Curve depth vs ~$126M supply); direct 1:1 redemption requires onboarding.
 
 ### Critical Risks `[If Any]`
 
 - Upgradeable proxy controlled by a 2/3 MPC with no timelock means **the trust model ultimately rests on the Admin keys** — a compromised/misused Admin MPC could redefine the token (including minting). This does not by itself trip a critical gate (it is not a single EOA, reserves are verifiable, and there are audits), but it is the dominant risk.
+- The deployed USDat token is **not directly covered by the four audit reports** (architecture pivoted to M0 after the audits). Mitigated by the deployed code being a thin wrapper over M0's audited `m-extensions`, but worth confirming M0's audit scope before relying on it.
 
 ---
 
@@ -252,7 +264,7 @@ YIELD LAYER (context only — not USDat backing)
 
 ### Critical Risk Gates
 
-- [ ] **No audit** — Not triggered (Three Sigma + Certora audits per DD docs; underlying M0 library independently audited). *Cross-check published PDFs — TODO.*
+- [ ] **No audit** — Not triggered (four reports reviewed: 1× Three Sigma + 3× Certora incl. formal verification). Caveat: they cover the pre-pivot design, not the deployed M0 token (which leans on M0's `m-extensions` audits).
 - [ ] **Unverifiable reserves** — Not triggered (`$M` backing is verifiable on-chain in real time).
 - [ ] **Total centralization** — Not triggered (2/3 MPC + roles, not a single EOA), though centralization is high.
 
@@ -262,12 +274,12 @@ YIELD LAYER (context only — not USDat backing)
 
 #### Category 1: Audits & Historical Track Record (Weight: 20%)
 
-- **Audits:** Audited by **Three Sigma** and **Certora** (formal verification) with a third planned, plus the heavily-audited M0 library; four reports referenced on the docs site. Firms now identified (still pending PDF cross-check) and no confirmed bug bounty → **2.5**.
+- **Audits:** Strong on paper — four reports (1× Three Sigma + 3× Certora incl. formal verification), zero unresolved Highs/Criticals. But the reports cover a **pre-pivot self-issued design, not the deployed M0 token**, and there is no bug bounty; the deployed token's bespoke surface is un-audited by these reports and leans on M0's separate audits → **3.0**.
 - **Historical:** <3 months in production (→5 on time) but >$100M TVL (→1 on scale); the youth dominates and high TVL this early is not a maturity signal → **4.0**.
 
-**Audits & Historical Score = (2.5 + 4.0) / 2 = 3.25**
+**Audits & Historical Score = (3.0 + 4.0) / 2 = 3.5**
 
-**Score: 3.25/5**
+**Score: 3.5/5**
 
 #### Category 2: Centralization & Control Risks (Weight: 30%)
 
@@ -304,12 +316,12 @@ YIELD LAYER (context only — not USDat backing)
 
 | Category | Score | Weight | Weighted |
 |----------|-------|--------|----------|
-| Audits & Historical | 3.25 | 20% | 0.65 |
+| Audits & Historical | 3.5 | 20% | 0.70 |
 | Centralization & Control | 3.3 | 30% | 0.99 |
 | Funds Management | 2.5 | 30% | 0.75 |
 | Liquidity Risk | 3.0 | 15% | 0.45 |
 | Operational Risk | 2.5 | 5% | 0.125 |
-| **Final Score** | | | **2.97 ≈ 3.0 / 5.0** |
+| **Final Score** | | | **3.02 ≈ 3.0 / 5.0** |
 
 **Optional Modifiers:** none apply (protocol <2 years, TVL history <1 year).
 
@@ -340,15 +352,15 @@ YIELD LAYER (context only — not USDat backing)
 
 ## Pending TODOs (for follow-up)
 
-1. Cross-check the **4 published audit PDFs** (firms identified as Three Sigma + Certora) against the docs — record exact dates, scope, and unresolved findings.
+1. **Obtain M0's `m-extensions` audit(s)** and confirm whether the deployed M0-based USDat token was separately reviewed — the four Saturn audits cover the pre-pivot design only. Also record Certora Audit #3 and Formal Verification commit/date/findings.
 2. Confirm **Safe Harbor (SEAL)** status (bug bounty confirmed **none** — not in docs, not on Immunefi).
 3. Confirm the **Accountable PoR feed** is live and record its address; record the **Chainlink NAV oracle** address (cadence known: 24h / 50 bps).
 4. Assess **M0's own risk** (minter collateralization, governance, audits) as the floor on USDat risk; confirm who controls/can-upgrade the **M0 Swap Facility** and accepted assets.
 5. Pull **holder distribution** and **historical peg/price** series (Etherscan Pro / Dune).
-6. Confirm **team identities** and **seed amount** ($800K vs $2M); record the two **GitHub repo URLs** (USDat / sUSDat).
+6. Confirm **team identities** and **seed amount** ($800K vs $2M). (GitHub repos now recorded: `saturn-organization/saturn-dollar`, `saturn-organization/saturn-yield-dollar`.)
 7. Quote **on-chain slippage** for USDat exit sizes ($1M / $5M / $10M) on the Curve pool.
 8. Optional: generate the contract dependency graph YAML at `reports/graph/saturn-usdat.yaml`.
 
 ### Sources consulted this session
 
-GitBook docs + key addresses; on-chain verification via `cast`/Etherscan; DefiLlama TVL; and the issue's deeper sources rendered via Notion's public page API and a Google Docs text export (Saturn DD FAQ, Product Operations & Risk, STRC Risk Analysis, STRC Product intro, and the contract-spec doc). The Lucidchart flow-of-funds and the X post were not ingested.
+GitBook docs + key addresses; on-chain verification via `cast`/Etherscan; DefiLlama TVL; the issue's deeper sources rendered via Notion's public page API and a Google Docs text export (Saturn DD FAQ, Product Operations & Risk, STRC Risk Analysis, STRC Product intro, and the contract-spec doc); and the **four published audit PDFs** (Three Sigma Audit #1; Certora Audit #2, Audit #3, Formal Verification). The Lucidchart flow-of-funds and the X post were not ingested.
