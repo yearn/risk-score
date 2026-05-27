@@ -76,6 +76,17 @@ The source code includes a `/certora` directory indicating formal verification e
 - **Not listed** on [SEAL Safe Harbor](https://safeharbor.securityalliance.org/)
 - No active bug bounty program found
 
+### Due Diligence Document Disclosure (protocol-provided, May 2026)
+
+3Jane provided a 15-page "USD3 — Due Diligence Document" (primary contact: Josh Fong, Head of DeFi). It is a useful primary source on design intent, but **several claims could not be reconciled with onchain data or public docs and should be treated with caution:**
+
+- **Incorrect contract addresses.** The DD doc's market/token addresses (USD3, sUSD3, MorphoCredit, Helper, MarkdownController) match onchain, but its **governance and insurance addresses are wrong** — the listed TimelockController, Multisig, EmergencyController, InsuranceFund, and RewardsDistributor addresses do not match the live contracts (e.g. its InsuranceFund `0x45077D8e…9935` has no code and a zero `waEthUSDC` balance, whereas the real fund `0x4507B5B2…9935` holds ~868K). This report uses the **onchain-verified** addresses throughout.
+- **Yield split misstated.** The DD doc says USD3/sUSD3 split ~70/30; the public docs and IRM weighting confirm **85/15** (sUSD3 weight 0.15, capped at 15%). This report uses 85/15.
+- **Loss-waterfall ordering.** The DD doc places the Insurance Fund ahead of sUSD3 (Step 2, after net yield) — this is **corroborated** by the [debt-write-off docs](https://docs.3jane.xyz/architecture/credit-slasher/debt-write-off) ("first-loss capital … preemptively makes funds whole at default"), so the report's waterfall was corrected to Insurance Fund → sUSD3 → USD3.
+- **Unverified off-chain ABF sleeve.** The DD doc describes an Asset-Backed Financing sleeve (SPV bank accounts, multisig-pushed valuations, ~$13M "deploying") not reflected onchain or in public docs — see *Provability*.
+- **EmergencyController excluded from audit scope.** The DD doc states the EmergencyController "was added after the audit window," so the four audits do **not** cover it — relevant given it can pause the protocol, zero caps, and revoke credit lines. A claimed audited-vs-deployed code-delta gist is at [gist.github.com/fp-crypto/0c7dd772…](https://gist.github.com/fp-crypto/0c7dd772f20d8867d276d644f0774346).
+- **Corroborated governance details:** 3-of-5 Gnosis Safe with **4 of 5 signers on hardware wallets**, anonymous signer identities, yearly rotation; timelock currently 24h with a **stated plan to extend to 7 days**; no protocol-level management or performance fee; target yield SOFR + 300–500 bps.
+
 ## Historical Track Record
 
 - **Production time:** USD3 deployed August 25, 2025 (~9 months as of May 2026)
@@ -85,6 +96,7 @@ The source code includes a `/certora` directory indicating formal verification e
 - **TVL change since March:** USD3 deposits dropped ~51% (`$20.3M → $9.93M`); idle reserves dropped ~66% (`$9.2M → $3.15M`); borrowed roughly flat (`$7.2M → $6.91M`)
 - **Security incidents:**
   - **April 18–28, 2026 — emergency shutdown / restart event.** Per merged PR [#112](https://github.com/3jane-protocol/moneymarket-contracts/pull/112) the team had already executed `strategy.shutdownStrategy()` and `strategy.emergencyWithdraw(...)` "in prod" before April 27, 2026. DeFiLlama TVL series confirms idle reserves collapsed from ~$4.78M on Apr 19 to ~$269K on Apr 20 and stayed at $120K–$273K for ~7 days, recovering to ~$2.92M by May 2 and ~$3.15M today. Restoration required deploying a new `USD3.restartStrategy()` reinitializer (PR #112 merged Apr 28, 2026); current onchain state is `isShutdown() = false`. Root cause and post-mortem: **TODO — not publicly disclosed by 3Jane.** Verified May 5 2026: no post-mortem on the docs site (FAQ checked), no incident document in the [3jane-protocol/audits](https://github.com/3jane-protocol/audits) or [3jane-protocol/moneymarket-contracts](https://github.com/3jane-protocol/moneymarket-contracts) repos, and no incident announcement surfaced via web search. The only public artefact is PR [#112](https://github.com/3jane-protocol/moneymarket-contracts/pull/112) describing the `restartStrategy()` fix.
+    - **Protocol's framing (per 3Jane DD document, received May 2026):** 3Jane characterizes the action not as an incident but as operational discipline — "3Jane preemptively withdrew its idle USDC from Aave during the Kelp exploit as a precautionary measure" — and states "no prior security incidents have occurred on the 3Jane protocol." The timing supports the precautionary reading: the [KelpDAO/rsETH bridge exploit](https://governance.aave.com/t/rseth-incident-report-april-20-2026/24580) occurred April 18–20, 2026, exactly when idle reserves collapsed. **However**, the protocol's "no incident / routine precaution" framing partially conflicts with the onchain evidence: a precautionary Aave de-risk would not normally require a full `shutdownStrategy()` + a new `restartStrategy()` reinitializer (a 24h-timelocked code upgrade) to reopen deposits/redemptions. Treat the event as a successfully-handled but non-routine stress episode pending an independent post-mortem.
 - **Peg history:** USD3 is USDC-denominated and redeemable from idle reserves; no public depeg event reported. Note that during the April shutdown window, redemptions were effectively unavailable from the Yearn V3 strategy path.
 - **Phase 1 (bootstrapping):** During initial phase, USD3 operates in a "fully risk-off" configuration where funds are only deposited into Aave's USDC market. The unsecured lending component ramps up over time.
 
@@ -101,8 +113,8 @@ USD3 funds are deployed into two channels:
 
 - **Minting:** Deposit USDC → receive USD3 (1:1). Anyone can mint.
 - **Staking:** Stake USD3 → receive sUSD3 (junior tranche). Lock period applies (1 month in Phase 1).
-- **Redemption:** USD3 redeemable for USDC from idle reserves (Aave). A **redemption queue with time-based throttling** exists for liquidity management.
-- Minting/redeeming is not fully atomic — subject to available idle reserves and throttling mechanisms.
+- **Redemption:** USD3 is redeemable for USDC **atomically (T+0) against idle reserves** when the protocol's targeted ~15% idle-liquidity buffer is available (per the DD document and [Suppliers docs](https://docs.3jane.xyz/architecture/core-money-market/suppliers), which describe USD3 as a "fully liquid USDC receipt" in Phase 1). A **FIFO redemption queue is described as "under development"** for scenarios where the buffer is fully utilized — i.e. not yet a live throttling mechanism.
+- Redemption is atomic only while idle reserves suffice; when the buffer is depleted (as during the April 2026 shutdown, when `isShutdown()` blocked the path entirely) redemptions are delayed. There is no live queue today; instead the protocol can raise borrow rates via the IRM to compel repayment and refill the buffer.
 
 ### Collateralization
 
@@ -110,7 +122,7 @@ USD3 is fundamentally different from traditional overcollateralized stablecoins:
 
 - **Not overcollateralized** — USD3 is backed by USDC deposits that are then lent out via unsecured credit lines
 - **Credit-based model:** Borrowing limits are based on offchain reputation and financial records, not onchain collateral
-- **Default risk:** If borrowers default, losses are absorbed first by sUSD3 (junior tranche), then by the Insurance Fund, and finally by USD3 holders (senior tranche)
+- **Default risk / loss waterfall:** For losses on the cryptonative credit sleeve, the **Insurance Fund acts as first-loss capital** — per 3Jane docs ([debt-write-off](https://docs.3jane.xyz/architecture/credit-slasher/debt-write-off)) it "steps in with a `settle()` call that preemptively makes funds whole at the default phase." Beyond the fund's capacity, losses then cascade through the tranche structure: **sUSD3 (junior) absorbs before USD3 (senior)**. Net order: Insurance Fund → sUSD3 → USD3. *(Note: the protocol-provided DD document places net distributable yield ahead of the Insurance Fund as Step 1; that yield cushion is not separately verifiable onchain.)*
 - **Insurance Fund:** [`0x4507B5B23340D248457d955a211C8B0634D29935`](https://etherscan.io/address/0x4507B5B23340D248457d955a211C8B0634D29935) holds **~868,288 waEthUSDC** (≈ $868K, May 5 2026) — `waEthUSDC` is the static-wrapped Aave V3 USDC token at [`0xd4fa2d31b7968e448877f69a96de69f5de8cd23e`](https://etherscan.io/address/0xd4fa2d31b7968e448877f69a96de69f5de8cd23e). The fund is yield-bearing and grows through Aave interest. The earlier "$1M USDC" figure was approximate; **actual onchain balance is ≈$868K**, never funded above ~$868K since deployment.
 - **Markdown mechanism:** `MarkdownController` ([`0xF0eaE71092F3c9411A9EAb8F81E7d91D29726214`](https://etherscan.io/address/0xF0eaE71092F3c9411A9EAb8F81E7d91D29726214)) gradually reduces the value of defaulted loans from their initial value to zero over time, preventing sharp market shocks
 - **No liquidation mechanism** — there is no onchain collateral to liquidate. Default recovery relies on offchain legal enforcement via U.S.-based collection agencies
@@ -125,11 +137,11 @@ Per-loan recovery sequence applied to a defaulted credit line:
 4. NPL Auction: non-performing loans sold to registered U.S. collection agencies via Dutch-style auctions
 5. Offchain legal recovery via credit bureau reporting and regulatory enforcement
 
-Any residual loss after the per-loan recovery above is then absorbed in the **tranche loss waterfall** (same order as in *Collateralization* above):
+Any residual loss after the per-loan recovery above is then absorbed in the **loss waterfall** (see *Collateralization* above):
 
-1. **sUSD3** (junior tranche) — first-loss capital
-2. **Insurance Fund** — ~868,288 `waEthUSDC` (≈$868K, May 5 2026); see *Collateralization* for address details
-3. **USD3** (senior tranche) — last-resort loss absorption
+1. **Insurance Fund** — ~868,288 `waEthUSDC` (≈$868K, May 5 2026); first-loss capital for cryptonative credit/fraud losses via preemptive `settle()` (per [3Jane docs](https://docs.3jane.xyz/architecture/credit-slasher/debt-write-off)). See *Collateralization* for address details.
+2. **sUSD3** (junior tranche) — absorbs losses beyond the fund's capacity
+3. **USD3** (senior tranche) — impaired only after junior + Insurance Fund are exhausted
 
 ### Provability
 
@@ -139,11 +151,12 @@ Any residual loss after the per-loan recovery above is then absorbed in the **tr
 - **zkTLS + Reclaim Protocol** provides zero-knowledge proofs of offchain data (bank statements, credit scores), verified by **EigenLayer AVS** nodes
 - **Offchain data sources:** Plaid (bank data), Credit Karma (credit scores)
 - Total reserves cannot be fully verified onchain because outstanding loan values depend on offchain repayment status
+- **Claimed off-chain ABF sleeve (unverified — provability concern):** The protocol-provided DD document (May 2026) describes a third yield channel beyond Aave idle and on-chain credit lines — an **Asset-Backed Financing (ABF)** sleeve: forward-flow agreements, warehouse facilities, and participation agreements with U.S. fintech lenders, with capital "held in an SPV bank account before deployment" and **interest "calculated weekly and pushed via the protocol multisig"** into the Yearn V3 `report()` path. The DD doc cites ~$13M asset-backed "deploying" alongside ~$7M cryptonative. **This is not corroborated by the public docs** (the [Suppliers](https://docs.3jane.xyz/architecture/core-money-market/suppliers) page lists yield as Aave + on-chain unsecured only) and **is not reflected onchain** (`totalAssets()` ≈ $9.93M, with no on-chain representation of SPV/off-chain receivables). If active, this introduces a material provability gap: off-chain receivable valuations would be multisig-attested rather than onchain-verifiable, and a misreported `report()` could misprice USD3/sUSD3 PPS. **TODO: confirm whether the ABF sleeve is live and how its valuations are sourced/attested.**
 
 ## Liquidity Risk
 
 - **Primary exit:** Redeem USD3 for USDC from idle reserves in the Aave V3 pool
-- **Throttling:** Redemption queue with time-based throttling exists for large withdrawals
+- **Throttling:** No live redemption queue today; a FIFO queue is "under development" (per DD doc). In stressed conditions the protocol raises borrow rates via the IRM to compel repayment and refill the idle buffer.
 - **Utilization risk:** If a high percentage of deposited USDC is lent out to borrowers, idle reserves shrink and redemptions may be delayed
 - **Current utilization:** ~$6.91M borrowed out of ~$9.93M `totalAssets` (~70% utilization, May 5 2026) — up sharply from ~44% in March 2026
 - **Stress event (April 2026):** During the strategy shutdown, Yearn V3 `isShutdown()=true` blocked the standard `deposit/redeem` paths. DeFiLlama-visible idle reserves collapsed from ~$4.78M to ~$269K and stayed depressed for ~7 days before recovering. This is the protocol's first observed liquidity stress event, and it required a contract upgrade (new `restartStrategy()` reinitializer) — i.e. a 24h-timelocked governance action — to fully reopen the strategy.
@@ -338,6 +351,8 @@ All core contracts (MorphoCredit, ProtocolConfig, CreditLine, USD3) are owned by
 - **Novel offchain dependencies:** zkTLS/Reclaim Protocol, EigenLayer AVS, and now Hypernative are early-stage technologies / runtime trust deps with limited battle-testing
 - **Limited team transparency:** Only the founder is publicly known. No disclosed legal entity. No public post-mortem of the April 2026 shutdown event as of this reassessment.
 - **Auditor recommendation only partially addressed:** Veridise asked for a hard split between emergency and configuration roles. EmergencyController v2 split off the emergency role from `Ownable`, but the further `OPERATOR_ROLE` split (PR #111) is merged in code yet **not yet deployed onchain**.
+- **EmergencyController outside audit scope:** Per the protocol DD document, the EmergencyController "was added after the audit window" — so the most powerful safety contract (can pause the protocol, zero caps, revoke credit lines, and is partly controlled by a Hypernative hot EOA) is **not covered by any of the four audits**.
+- **Unverified off-chain ABF sleeve:** The DD document describes an Asset-Backed Financing sleeve (off-chain receivables in SPV bank accounts, valuations pushed weekly via the multisig into the strategy `report()`). It is not corroborated by public docs or onchain state. If live, it adds an off-chain, multisig-attested valuation dependency that can directly move USD3/sUSD3 PPS — see *Provability*.
 
 ### Critical Risks
 
@@ -421,7 +436,7 @@ All core contracts (MorphoCredit, ProtocolConfig, CreditLine, USD3) are owned by
 |--------|-----------|
 | Backing | **Not overcollateralized** — USD3 is backed by USDC that is lent out via unsecured credit lines |
 | Collateral quality | USDC / `waEthUSDC` (high quality) but lent out without onchain collateral |
-| Default protection | Loss waterfall (junior → fund → senior): **sUSD3** junior tranche (~$5.81M supply, ~$6.28M assets) absorbs first, then **Insurance Fund** ~$868K in `waEthUSDC` (verified onchain May 5 2026; previously approximated as "$1M USDC"), then **USD3** senior holders. With ~$6.91M outstanding, sUSD3 alone covers ~91% of the borrow book before the fund or USD3 are touched. |
+| Default protection | Loss waterfall (fund → junior → senior): for cryptonative credit losses the **Insurance Fund** (~$868K in `waEthUSDC`, verified onchain May 5 2026; previously approximated as "$1M USDC") is first-loss capital via preemptive `settle()`, then the **sUSD3** junior tranche (~$5.81M supply, ~$6.28M assets) absorbs, then **USD3** senior holders. Combined first-loss buffer (~$868K + ~$6.28M ≈ $7.15M) covers ~103% of the ~$6.91M borrow book before USD3 is touched. |
 | Verifiability | Onchain idle reserves verifiable; outstanding loan values partially opaque |
 
 **Subcategory A Score: 4/5** — Held. Insurance fund correction (~$868K vs $1M assumed) does not change the rubric placement. sUSD3 buffer is still meaningful relative to the now-smaller total deposits, but the absolute loss-absorbing capacity has not grown while utilization has.
