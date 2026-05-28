@@ -1,0 +1,279 @@
+slug: yearn-yvusd
+title: yvUSD — Contract Dependency Graph
+chain: ethereum
+
+categories:
+  - id: vault
+    label: Vault
+  - id: strategy
+    label: Strategy
+  - id: governance
+    label: Governance / Multisig
+  - id: infra
+    label: Yearn Infra / Bot
+  - id: dependency
+    label: External Dependency
+
+nodes:
+  # Vault layer
+  - id: yvUSD
+    label: yvUSD
+    address: "0x696d02Db93291651ED510704c9b286841d506987"
+    category: vault
+  - id: locked-yvusd
+    label: LockedyvUSD (Cooldown + Accountant)
+    address: "0xAaaFEa48472f77563961Cdb53291DEDfB46F9040"
+    category: vault
+    note: 14d cooldown + 5d withdraw window; also serves as accountant
+  - id: fee-splitter
+    label: Fee Splitter
+    address: "0xd744B7D6bE69b334766802245Db2895e861cb470"
+    category: vault
+    note: Governance still held by Deployer EOA (low-impact)
+
+  # Governance
+  - id: daddy
+    label: Daddy / ySafe (6-of-9)
+    address: "0xFEB4acf3df3cDEA7399794D0869ef76A6EfAff52"
+    category: governance
+  - id: brain
+    label: Brain (3-of-8)
+    address: "0x16388463d60FFE0661Cf7F1f31a7D658aC790ff7"
+    category: governance
+  - id: security
+    label: Security (4-of-7)
+    address: "0xe5e2BAf96198c56380DDd5e992D7d1adA0E989C0"
+    category: governance
+  - id: timelock
+    label: Strategy Manager (7-day Timelock)
+    address: "0x88ba032be87d5eF1FbE87336b7090767f367bF73"
+    category: governance
+  - id: role-manager
+    label: Yearn V3 Role Manager
+    address: "0xb3bd6B2E61753C311EFbCF0111f75D29706D9a41"
+    category: governance
+  - id: deployer-eoa
+    label: Deployer EOA (Fee Splitter only)
+    address: "0x1b5f15DCb82d25f91c65b53CEe151E8b9fBdD271"
+    category: governance
+    note: 0 vault roles; retains Fee Splitter governance
+
+  # Infra / bots
+  - id: keeper
+    label: Keeper (yHaaSRelayer)
+    address: "0x604e586F17cE106B64185a7A0d2c1DA5BaCe711e"
+    category: infra
+  - id: debt-allocator
+    label: Debt Allocator
+    address: "0x1E9eB053228B1156831759401DE0E115356b8671"
+    category: infra
+  - id: vault-factory
+    label: Vault Factory (v3.0.4)
+    address: "0x770D0d1Fb036483Ed4AbB6d53c1C88fb277D812F"
+    category: infra
+
+  # Strategies (≥1% TVL only; 4 strategies with 0%/<1% omitted)
+  - id: syrup-morpho-looper
+    label: syrupUSDC/USDC Morpho Looper (43.35%)
+    address: "0xF28DC8B6DeD7E45F8cf84B9972487C8e1857A442"
+    category: strategy
+  - id: morpho-yearn-og
+    label: Morpho Yearn OG USDC Compounder (24.08%)
+    address: "0x0e297dE4005883C757c9F09fdF7cF1363C20e626"
+    category: strategy
+  - id: infinifi-siusd-looper
+    label: InfiniFi sIUSD Morpho Looper (15.20%)
+    address: "0x5f9DBa2805411a8382FDb4E69d4f2Da8EFaF1F89"
+    category: strategy
+  - id: usdc-to-susds
+    label: USDC → sUSDS Depositor (10.45%)
+    address: "0x7130570BCEfCedBe9d15B5b11A33006156460f8f"
+    category: strategy
+  - id: usdc-to-spark-usds
+    label: USDC → Spark USDS Depositor (2.49%)
+    address: "0x9e0A5943dFc1A85B48C191aa7c10487297aA675b"
+    category: strategy
+  - id: arb-syrup-looper
+    label: Arbitrum syrupUSDC Morpho Looper (2.48%)
+    address: "0x2F56D106C6Df739bdbb777C2feE79FFaED88D179"
+    category: strategy
+  - id: usd3-pendle-pt
+    label: USD3 Pendle PT Maxi (1.24%)
+    address: "0x4C0e4d3cB62B91afBbf1Fe8e830f98A513c7234b"
+    category: strategy
+
+  # External dependencies
+  - id: maple-syrupusdc
+    label: Maple syrupUSDC
+    address: "0x80ac24aA929eaF5013f6436cdA2a7ba190f5Cc0b"
+    category: dependency
+    note: Overcollateralized institutional lending (~$1.7B TVL)
+  - id: morpho-yearn-og-vault
+    label: Morpho Yearn OG USDC Vault
+    category: dependency
+    note: Morpho MetaMorpho vault
+  - id: infinifi-siusd
+    label: InfiniFi siUSD
+    address: "0xDBDC1Ef57537E34680B898E1FEBD3D68c7389bCB"
+    category: dependency
+  - id: sky-susds
+    label: Sky / sUSDS (Savings Rate)
+    address: "0xa3931d71877C0E7a3148CB7Eb4463524FEc27fbD"
+    category: dependency
+  - id: spark-usds-market
+    label: Spark USDS Market (Sky sub-DAO)
+    category: dependency
+  - id: pendle-usd3-pt
+    label: Pendle USD3 PT
+    category: dependency
+    note: Fixed-rate PT backed by 3Jane USD3
+  - id: cctp
+    label: Circle CCTP (cross-chain bridge)
+    category: dependency
+    note: Origin → Arbitrum; trust-minimized, Circle attestation
+  - id: morpho-protocol
+    label: Morpho Protocol (lending base)
+    category: dependency
+    note: Used by all looper strategies and Yearn OG compounder
+
+edges:
+  # Deployment / vault infrastructure
+  - from: vault-factory
+    to: yvUSD
+    kind: deploys
+    label: minimal proxy
+  - from: yvUSD
+    to: locked-yvusd
+    kind: routes-fees-to
+    label: accountant
+  - from: locked-yvusd
+    to: fee-splitter
+    kind: routes-fees-to
+
+  # Vault → strategies (allocation)
+  - from: yvUSD
+    to: syrup-morpho-looper
+    kind: allocates-to
+    label: "43.35%"
+  - from: yvUSD
+    to: morpho-yearn-og
+    kind: allocates-to
+    label: "24.08%"
+  - from: yvUSD
+    to: infinifi-siusd-looper
+    kind: allocates-to
+    label: "15.20%"
+  - from: yvUSD
+    to: usdc-to-susds
+    kind: allocates-to
+    label: "10.45%"
+  - from: yvUSD
+    to: usdc-to-spark-usds
+    kind: allocates-to
+    label: "2.49%"
+  - from: yvUSD
+    to: arb-syrup-looper
+    kind: allocates-to
+    label: "2.48%"
+  - from: yvUSD
+    to: usd3-pendle-pt
+    kind: allocates-to
+    label: "1.24%"
+
+  # Governance roles on vault
+  - from: daddy
+    to: yvUSD
+    kind: holds-role
+    label: "bitmask 0x3FF6 (nearly all roles)"
+  - from: brain
+    to: yvUSD
+    kind: holds-role
+    label: "QUEUE / DEBT / EMERGENCY"
+  - from: security
+    to: yvUSD
+    kind: holds-role
+    label: "DEBT / MAX_DEBT / EMERGENCY"
+  - from: timelock
+    to: yvUSD
+    kind: holds-role
+    label: "ADD_STRATEGY (7d)"
+  - from: keeper
+    to: yvUSD
+    kind: holds-role
+    label: "REPORTING"
+  - from: debt-allocator
+    to: yvUSD
+    kind: holds-role
+    label: "REPORTING + DEBT_MANAGER"
+
+  # Role manager wiring
+  - from: daddy
+    to: role-manager
+    kind: controls
+  - from: security
+    to: role-manager
+    kind: controls
+  - from: role-manager
+    to: yvUSD
+    kind: manages
+
+  # Timelock flow
+  - from: daddy
+    to: timelock
+    kind: proposes-on
+    label: PROPOSER + EXECUTOR
+  - from: brain
+    to: timelock
+    kind: cancels-on
+    label: CANCELLER
+
+  # Deployer EOA → Fee Splitter (residual governance)
+  - from: deployer-eoa
+    to: fee-splitter
+    kind: controls
+    label: "sole governance"
+
+  # Strategy → underlying protocol pipelines
+  - from: syrup-morpho-looper
+    to: maple-syrupusdc
+    kind: deposits-into
+    label: "syrupUSDC collateral"
+  - from: syrup-morpho-looper
+    to: morpho-protocol
+    kind: routes-through
+    label: "loop borrow"
+  - from: morpho-yearn-og
+    to: morpho-yearn-og-vault
+    kind: deposits-into
+    label: "USDC deposit"
+  - from: morpho-yearn-og-vault
+    to: morpho-protocol
+    kind: routes-through
+  - from: infinifi-siusd-looper
+    to: infinifi-siusd
+    kind: deposits-into
+    label: "siUSD collateral"
+  - from: infinifi-siusd-looper
+    to: morpho-protocol
+    kind: routes-through
+    label: "loop borrow"
+  - from: usdc-to-susds
+    to: sky-susds
+    kind: deposits-into
+    label: "USDC → sUSDS"
+  - from: usdc-to-spark-usds
+    to: spark-usds-market
+    kind: deposits-into
+    label: "USDS supply"
+  - from: arb-syrup-looper
+    to: cctp
+    kind: routes-through
+    label: "USDC → Arbitrum"
+  - from: arb-syrup-looper
+    to: maple-syrupusdc
+    kind: deposits-into
+    label: "syrupUSDC collateral (Arb)"
+  - from: usd3-pendle-pt
+    to: pendle-usd3-pt
+    kind: deposits-into
+    label: "PT-USD3"

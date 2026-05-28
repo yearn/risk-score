@@ -1,0 +1,159 @@
+slug: aave-sgho
+title: Aave (sGho) — Contract Dependency Graph
+chain: ethereum
+
+categories:
+  - id: vault
+    label: Vault / Token
+  - id: strategy
+    label: Strategy / Module
+  - id: governance
+    label: Governance
+  - id: infra
+    label: Protocol Infra
+  - id: dependency
+    label: External Dependency
+
+nodes:
+  # === Vault / token layer ===
+  - id: sGho
+    label: sGho (GHO Savings Vault)
+    address: "0xE1753F2e00940cC31213dd92013cF019DFE4ca1d"
+    category: vault
+    note: ERC-4626, TransparentUpgradeableProxy
+  - id: gho
+    label: GHO (Aave Stablecoin)
+    address: "0x40D16FC0246aD3160Ccc09B8D0D3A2cD28aE6C2f"
+    category: vault
+    note: ERC-20, upgradeable
+
+  # === Strategy / module legs ===
+  - id: gsm-usdc
+    label: GSM USDC (Gsm4626)
+    address: "0x3A3868898305f04beC7FEa77BecFf04C13444112"
+    category: strategy
+    note: waEthUSDC ↔ GHO at 1:1
+  - id: gho-reserve
+    label: GHO Reserve (GSM Facilitator)
+    address: "0x54C58157DeF387A880AE62332D1445f03adbE7E9"
+    category: strategy
+    note: Pre-minted GHO pool drawn by GSMs
+
+  # === Infra ===
+  - id: sgho-proxy-admin
+    label: sGho ProxyAdmin
+    address: "0xc15700631020eba02317964550365b95a9a28adb"
+    category: infra
+  - id: oracle-swap-freezer
+    label: Oracle Swap Freezer
+    address: "0x6e51936e0ED4256f9dA4794B536B619c88Ff0047"
+    category: infra
+    note: Chainlink-based auto-freeze on USDC depeg
+
+  # === Governance ===
+  - id: aave-executor-l1
+    label: Aave Governance Executor L1
+    address: "0x5300A1a15135EA4dc7aD5a167152C01EFc9b192A"
+    category: governance
+    note: On-chain DAO timelock executor
+  - id: sgho-steward
+    label: sGho Steward
+    address: "0x60Bf2DF49F17529Cf956D57848ebEB8a0d0a2757"
+    category: governance
+    note: Decomposes YIELD_MANAGER (rate, supply cap)
+  - id: risk-council
+    label: GHO Risk Council (3-of-4 Safe)
+    address: "0x8513e6F37dBc52De87b166980Fa3F50639694B60"
+    category: governance
+  - id: protocol-guardian
+    label: Aave Protocol Guardian
+    address: "0x2CFe3ec4d5a6811f4B8067F0DE7e47DfA938Aa30"
+    category: governance
+    note: Emergency pause
+  - id: gho-gsm-steward
+    label: GHO GSM Steward
+    address: "0xD1E856a947CdF56b4f000ee29d34F5808E0A6848"
+    category: governance
+    note: CONFIGURATOR on GSMs (rate-limited)
+
+  # === External dependencies ===
+  - id: dep-waEthUSDC
+    label: waEthUSDC (Wrapped Aave USDC)
+    address: "0xD4fa2D31b7968E448877f69A96DE69f5de8cD23E"
+    category: dependency
+    note: ERC-4626 staticAToken; Aave V3 USDC supply position
+  - id: dep-aave-v3
+    label: Aave V3 USDC Market
+    category: dependency
+    note: Underlying lending market for waEthUSDC
+
+edges:
+  # === Governance flow ===
+  - from: aave-executor-l1
+    to: sgho-proxy-admin
+    kind: controls
+    label: owner
+  - from: sgho-proxy-admin
+    to: sGho
+    kind: manages
+    label: upgradeable proxy
+  - from: aave-executor-l1
+    to: sGho
+    kind: holds-role
+    label: DEFAULT_ADMIN + TOKEN_RESCUER
+  - from: aave-executor-l1
+    to: sgho-steward
+    kind: controls
+    label: DEFAULT_ADMIN
+  - from: sgho-steward
+    to: sGho
+    kind: holds-role
+    label: YIELD_MANAGER
+  - from: risk-council
+    to: sgho-steward
+    kind: holds-role
+    label: FIXED_RATE / SUPPLY_CAP / FLOAT / AMP
+  - from: protocol-guardian
+    to: sGho
+    kind: holds-role
+    label: PAUSE_GUARDIAN
+  - from: aave-executor-l1
+    to: gsm-usdc
+    kind: holds-role
+    label: DEFAULT_ADMIN + CONFIGURATOR + SWAP_FREEZER
+  - from: gho-gsm-steward
+    to: gsm-usdc
+    kind: holds-role
+    label: CONFIGURATOR (rate-limited)
+  - from: oracle-swap-freezer
+    to: gsm-usdc
+    kind: holds-role
+    label: SWAP_FREEZER (auto)
+
+  # === Mint authority on GHO (via GSM Reserve facilitator) ===
+  - from: gho-reserve
+    to: gho
+    kind: mints
+    label: GSM facilitator (pre-minted pool)
+
+  # === Money flow: USDC pipeline → sGho ===
+  - from: sGho
+    to: gsm-usdc
+    kind: routes-through
+    label: "waEthUSDC → GHO"
+  - from: gsm-usdc
+    to: gho-reserve
+    kind: routes-through
+    label: draws GHO
+  - from: gsm-usdc
+    to: dep-waEthUSDC
+    kind: deposits-into
+    label: "waEthUSDC custody"
+  - from: dep-waEthUSDC
+    to: dep-aave-v3
+    kind: deposits-into
+    label: "USDC supply"
+  - from: sGho
+    to: gho
+    kind: deposits-into
+    label: holds GHO (no rehypothecation)

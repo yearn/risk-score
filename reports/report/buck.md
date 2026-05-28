@@ -5,6 +5,7 @@
 - **Chain:** Ethereum
 - **Token Address:** [`0xdb13997f4D83EF343845d0bAEb27d1173dF8c224`](https://etherscan.io/address/0xdb13997f4D83EF343845d0bAEb27d1173dF8c224)
 - **Final Score: 5.0/5.0**
+- **Warning:** DEAD
 
 ## Overview + Links
 
@@ -24,14 +25,10 @@ BUCK is **not a stablecoin** — its price appreciates over time as yield accrue
 
 **Links:**
 
-- [Protocol Documentation](https://buck.io/docs)
-- [Protocol App](https://buck.io)
-- [Contracts](https://buck.io/buck-docs/technical/contracts)
-- [Safety & Risks](https://buck.io/buck-docs/safety-and-risk/risks)
-- [Transparency Dashboard](https://buck.io/transparency)
+- [Protocol App](https://www.buck.io)
 - [GitHub (buck-v1)](https://github.com/buck-labs/buck-v1)
-- [MiCA Whitepaper (PDF)](https://cdn.buck.io/Buck+Token+MiCA+Whitepaper+-+Update+2.9.2026.pdf)
 - [CoinGecko](https://www.coingecko.com/en/coins/buck-2)
+
 - [CoinDesk: Buck Launches Bitcoin-linked Savings Coin](https://www.coindesk.com/business/2026/01/05/buck-launches-bitcoin-linked-savings-coin-tied-to-michael-saylor-s-strategy)
 
 ## Contract Addresses
@@ -291,7 +288,7 @@ BUCK yield comes from **STRC dividends** — Strategy Inc.'s Variable-Rate Serie
 - **Head of Treasury:** Dan Hillery — founding member of MSTR True North community.
 - **GitHub:** Single pseudonymous contributor (CornBrother0x, 6 commits). "Full git history will be merged in after Buck Labs can properly sanitize the development repo." No updates since January 7, 2026. 2 stars, 0 forks.
 - **Documentation:** Adequate. GitBook-based docs, transparency dashboard, MiCA whitepaper. Some gaps (minting/redeeming details hard to find).
-- **Legal Structure** (source: [MiCA Whitepaper, Part A](https://cdn.buck.io/Buck+Token+MiCA+Whitepaper+-+Update+2.9.2026.pdf)):
+- **Legal Structure** (source: MiCA Whitepaper Part A — link removed; Buck CDN no longer serves the PDF as of 2026-05-12):
   - **Buck Assets Ltd.** (BVI, Company No. 2183723, registered 2025-08-07) — Token issuer. Explicitly **"NOT licensed, registered or otherwise regulated"** in BVI. Directors: Clint Johnson and Gareth Thomas.
   - **Buck Foundation** (Cayman Islands, exempted limited guarantee foundation) — DAO/governance wrapper. Parent company of Buck Assets Ltd.
   - **Buck Labs Inc.** (USA, Miami FL) — Technology company / service provider.

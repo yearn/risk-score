@@ -37,7 +37,7 @@ stcUSD is a **yield-bearing ERC-4626 vault token** issued by Cap (Covered Agent 
 
 - [Cap Documentation](https://docs.cap.app/)
 - [Cap stcUSD Mechanics](https://docs.cap.app/protocol-overview/stcusd-mechanics)
-- [Cap cUSD Mechanics](https://docs.cap.app/protocol-overview/cusd-mechanics)
+- [Cap cUSD Mechanics](https://docs.cap.app/overview/protocol-overview)
 - [Cap Audits](https://docs.cap.app/resources/audits)
 - [DeFi Llama: Cap](https://defillama.com/protocol/cap)
 - [Aave Blog: Cap Integration](https://aave.com/blog/cap)
@@ -197,6 +197,28 @@ Operators generate yield through proprietary strategies: HFT, private credit, cr
 - **cUSD burning:** Receive a single reserve asset at oracle price with dynamic fee
 - **cUSD redemption:** Receive proportional basket of all underlying assets with fixed fee (lower than burn fee)
 - **Restaker withdrawal delay:** Up to 14 days (epoch-based: 7-day epochs)
+
+### Token Mint Authority
+
+Verified onchain on March 20, 2026 by inspecting `StakedCap.sol` and `Vault.sol` source via Etherscan. Cap does **not** implement a privileged `MINTER_ROLE` on either token — both mint paths are permissionless and require collateral in the same transaction.
+
+**Mint mechanism:**
+
+- **stcUSD** ([`0x88887bE…D8888`](https://etherscan.io/address/0x88887bE419578051FF9F4eb6C858A951921D8888)): standard ERC-4626 (`ERC4626Upgradeable`). Anyone with cUSD can call `deposit()` / `mint()` and receive stcUSD. No access check on the mint path.
+- **cUSD** ([`0xcCcc62…cccC`](https://etherscan.io/address/0xcCcc62962d17b8914c62D74FfB843d73B2a3cccC)): `Vault.mint(asset, amountIn, minAmountOut, receiver, deadline)` is `external whenNotPaused`. Anyone can mint cUSD by depositing a whitelisted reserve asset; the asset whitelist is gated by `vault_config_admin` behind the 24-hour Timelock.
+
+**Mint requires backing:** Yes — atomic in both directions. cUSD mints only against a reserve transferIn in the same call (`_mint(asset, amountIn, amountOut, receiver)` is invoked after the transfer); stcUSD mints only against a cUSD transferIn via ERC-4626.
+
+**Per-address mint authority:**
+
+| Address | Can Mint | Can Burn | Role / Mechanism | Notes |
+|---------|:--------:|:--------:|------------------|-------|
+| Any caller of stcUSD `deposit()` / `mint()` | ✓ | ✓ | Permissionless ERC-4626 | Atomic against cUSD |
+| Any caller of cUSD `Vault.mint()` | ✓ | ✓ | Permissionless, asset-whitelisted | Atomic against whitelisted reserve (currently USDC / wWTGXX) |
+
+**Rate limits / supply caps:** Per-asset `getRemainingMintCapacity(asset)` cap, set by `vault_config_admin`. Pause is held by `emergency_admin` and disables both mint and burn. No global supply cap.
+
+**Backing check at mint time:** Atomic. There is no path for the multisig, timelock, or any role-holder to mint cUSD or stcUSD without a corresponding reserve / cUSD inflow. The trust surface is the **asset whitelist** (controlled by `vault_config_admin` via 24h Timelock) and **oracle pricing** (controlled by `oracle_admin` via 24h Timelock — `RedStone` price feeds determine the mint exchange rate). A compromised oracle could let an attacker mint cUSD at the wrong price; a compromised whitelist could add a worthless asset as a reserve. Neither would let the protocol mint unbacked cUSD outright.
 
 ### Provability
 

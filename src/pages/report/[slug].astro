@@ -3,6 +3,7 @@ import BaseLayout from "../../layouts/BaseLayout.astro";
 import ScoreBadge from "../../components/ScoreBadge.astro";
 import ScoreTable from "../../components/ScoreTable.astro";
 import { getAllSlugs, getReportBySlug } from "../../lib/reports";
+import { hasGraph } from "../../lib/graph";
 import { scoreTier } from "../../lib/colors";
 
 export function getStaticPaths() {
@@ -13,6 +14,7 @@ const { slug } = Astro.params;
 const report = getReportBySlug(slug!);
 if (!report) return Astro.redirect("/reports/");
 const ogDescription = `${report.name} — Score: ${report.finalScore.toFixed(1)}/5.0 (${scoreTier(report.finalScore)}). ${report.token} on ${report.chain}.`;
+const graphAvailable = hasGraph(slug!);
 
 const reportIssueUrl = (() => {
   const title = `Report Inaccuracy: ${report.name}`;
@@ -63,14 +65,21 @@ const reportIssueUrl = (() => {
       <span class="sep">/</span>
       <span>{report.date}</span>
     </div>
-    <a
-      href={`https://github.com/yearn/risk-score/blob/master/reports/report/${report.slug}.md`}
-      class="github-link"
-      target="_blank"
-      rel="noopener noreferrer"
-    >
-      View full report on GitHub &rarr;
-    </a>
+    <div class="header-links">
+      <a
+        href={`https://github.com/yearn/risk-score/blob/master/reports/report/${report.slug}.md`}
+        class="github-link"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        View full report on GitHub &rarr;
+      </a>
+      {graphAvailable && (
+        <a href={`/graph/${report.slug}/`} class="graph-link">
+          View dependency graph &rarr;
+        </a>
+      )}
+    </div>
   </div>
 
   <section class="section">
@@ -158,14 +167,21 @@ const reportIssueUrl = (() => {
     margin: 0 0.25rem;
     opacity: 0.4;
   }
-  .github-link {
-    display: inline-block;
+  .header-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.25rem;
     margin-top: 0.75rem;
+  }
+  .github-link,
+  .graph-link {
+    display: inline-block;
     font-size: 1.1rem;
     font-weight: 600;
     color: var(--brand-blue);
   }
-  .github-link:hover {
+  .github-link:hover,
+  .graph-link:hover {
     text-decoration: underline;
   }
   .section {

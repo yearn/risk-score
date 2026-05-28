@@ -1,0 +1,137 @@
+slug: yearn-yvwbtc
+title: yvWBTC-1 — Contract Dependency Graph
+chain: ethereum
+
+categories:
+  - id: vault
+    label: Vault
+  - id: governance
+    label: Governance / Multisig
+  - id: infra
+    label: Yearn Infra / Bot
+  - id: dependency
+    label: External Dependency
+
+nodes:
+  # Vault layer
+  - id: yvWBTC
+    label: yvWBTC-1 (100% idle, empty queue)
+    address: "0x751F0cC6115410A3eE9eC92d08f46Ff6Da98b708"
+    category: vault
+  - id: accountant
+    label: Accountant (0% mgmt, 10% perf)
+    address: "0x5A74Cb32D36f2f517DB6f7b0A0591e09b22cDE69"
+    category: vault
+  - id: dumper
+    label: Fee Recipient (Dumper)
+    address: "0x590Dd9399bB53f1085097399C3265C7137c1C4Cf"
+    category: vault
+
+  # Governance
+  - id: daddy
+    label: Daddy / ySafe (6-of-9)
+    address: "0xFEB4acf3df3cDEA7399794D0869ef76A6EfAff52"
+    category: governance
+  - id: brain
+    label: Brain (3-of-8)
+    address: "0x16388463d60FFE0661Cf7F1f31a7D658aC790ff7"
+    category: governance
+  - id: security
+    label: Security (4-of-7)
+    address: "0xe5e2Baf96198c56380dDD5E992D7d1ADa0e989c0"
+    category: governance
+  - id: timelock
+    label: Strategy Manager (7-day Timelock)
+    address: "0x88Ba032be87d5EF1fbE87336b7090767F367BF73"
+    category: governance
+  - id: role-manager
+    label: Yearn V3 Role Manager
+    address: "0xb3bd6B2E61753C311EFbCF0111f75D29706D9a41"
+    category: governance
+
+  # Infra / bots
+  - id: keeper
+    label: Keeper (yHaaSRelayer)
+    address: "0x604e586F17cE106B64185A7a0d2c1Da5bAce711E"
+    category: infra
+  - id: debt-allocator
+    label: Debt Allocator
+    address: "0x1e9eB053228B1156831759401dE0E115356b8671"
+    category: infra
+  - id: vault-factory
+    label: Vault Factory (v3.0.4)
+    address: "0x770D0d1Fb036483Ed4AbB6d53c1C88fb277D812F"
+    category: infra
+
+  # Underlying asset (only dependency at snapshot)
+  - id: wbtc
+    label: WBTC (BitGo-custodied)
+    address: "0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599"
+    category: dependency
+    note: Underlying asset only — no strategies attached at the snapshot
+
+edges:
+  # Deployment / vault infrastructure
+  - from: vault-factory
+    to: yvWBTC
+    kind: deploys
+    label: minimal proxy
+  - from: yvWBTC
+    to: accountant
+    kind: routes-fees-to
+  - from: accountant
+    to: dumper
+    kind: routes-fees-to
+
+  # Vault holds underlying directly (100% idle)
+  - from: yvWBTC
+    to: wbtc
+    kind: deposits-into
+    label: "100% idle (held at vault)"
+
+  # Governance roles on vault
+  - from: daddy
+    to: yvWBTC
+    kind: holds-role
+    label: "all 14 roles"
+  - from: brain
+    to: yvWBTC
+    kind: holds-role
+    label: "QUEUE / DEBT / EMERGENCY"
+  - from: security
+    to: yvWBTC
+    kind: holds-role
+    label: "DEBT / MAX_DEBT / EMERGENCY"
+  - from: timelock
+    to: yvWBTC
+    kind: holds-role
+    label: "ADD_STRATEGY (7d)"
+  - from: keeper
+    to: yvWBTC
+    kind: holds-role
+    label: "REPORTING"
+  - from: debt-allocator
+    to: yvWBTC
+    kind: holds-role
+    label: "REPORTING + DEBT_MANAGER"
+
+  # Role manager wiring
+  - from: daddy
+    to: role-manager
+    kind: controls
+  - from: security
+    to: role-manager
+    kind: controls
+  - from: role-manager
+    to: yvWBTC
+    kind: manages
+
+  # Timelock flow
+  - from: daddy
+    to: timelock
+    kind: proposes-on
+    label: PROPOSER + EXECUTOR
+  - from: brain
+    to: timelock
+    kind: cancels-on
+    label: CANCELLER

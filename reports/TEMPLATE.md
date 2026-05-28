@@ -62,6 +62,27 @@ Explain what the protocol does, its usage, and yield sources.
 - Is minting/redeeming atomic in a single transaction?
 - Are there fees, rate limits, or cooldown periods?
 
+### Token Mint Authority
+
+Enumerate every address that can mint the assessed token, and the mechanism that gates them. Treat any address with mint authority as part of the trust surface even if it is intended only for a narrow purpose. Onchain enumeration procedure: see `reports/skill.md` § "Pass 1.6: Mint authority enumeration".
+
+**Mint mechanism:** [Open mint via collateral deposit / Role-gated AccessControl / Whitelist mapping / Ownable / Custodial bridge / Other — describe]
+
+**Mint requires backing:** [Yes — collateral must transfer in same tx / No — minter can issue unbacked tokens]
+
+**Per-address mint authority** (verified onchain on [date], from token contract `0x…`):
+
+| Address | Can Mint | Can Burn | Role / Mechanism | Notes |
+|---------|:--------:|:--------:|------------------|-------|
+| [`0x…`](etherscan link) | ✓ | ✓ | `MINTER_ROLE` | Multisig, 3/5, named signers |
+| [`0x…`](etherscan link) | ✓ | — | `mintList` entry | Bridge contract (e.g. Wormhole NTT) |
+
+**Rate limits / supply caps:** [None / Max mint per block of X / Global supply cap of Y / Per-minter caps — describe]
+
+**Backing check at mint time:** [Atomic — minter must deposit collateral in same tx / Deferred — backing settled offchain / None — minter can issue unbacked tokens]
+
+See `reports/report/mezo-musd.md` for a worked example.
+
 ### Collateralization
 
 - Is it collateralized onchain?
@@ -79,8 +100,8 @@ Explain what the protocol does, its usage, and yield sources.
 - How does onchain reporting work? Is the exchange rate computed programmatically or updated by a privileged role?
 - If collateral is offchain, how transparent is the team? How frequently are reserves verified?
 - Are there third-party verification mechanisms? (Chainlink PoR, Merkle proofs, custodian attestations)
-- Can minting be done without backing assets?
-- Can admin mint tokens out of thin air? List all accounts with minting role.
+
+(Mint-authority enumeration and unbacked-mint risk are captured in the *Token Mint Authority* subsection above.)
 
 ## Liquidity Risk
 

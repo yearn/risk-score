@@ -1,0 +1,297 @@
+slug: re-reusd
+title: Re Protocol (reUSD) — Contract Dependency Graph
+chain: ethereum
+
+categories:
+  - id: vault
+    label: Vault / Token
+  - id: strategy
+    label: Capital Deployment
+  - id: governance
+    label: Governance
+  - id: infra
+    label: Protocol Infra
+  - id: dependency
+    label: External Dependency
+
+nodes:
+  # === Vault / token layer ===
+  - id: reusd
+    label: reUSD (Deposit Token)
+    address: "0x5086bf358635B81D8C47C66d1C8b9E567Db70c72"
+    category: vault
+    note: ERC-20 price-appreciation token; UUPS upgradeable
+  - id: icl
+    label: Insurance Capital Layer (ICL)
+    address: "0x4691C475bE804Fa85f91c2D6D0aDf03114de3093"
+    category: vault
+    note: Backed deposit/mint entrypoint; UUPS proxy
+
+  # === Internal infra ===
+  - id: share-price-calc
+    label: Share Price Calculator
+    address: "0xd1D104a7515989ac82F1AFDa15a23650411b05B8"
+    category: infra
+    note: Stores reUSD share price; setSharePrice gated by PRICE_SETTER_ROLE
+  - id: nav-consumer
+    label: NAV Consumer (Chainlink Functions)
+    address: "0x84d4eaeb10f9e57b67622f667c6c13e22fa4b2b6"
+    category: infra
+    note: 10% deviation cap; daily 23:45 UTC update
+  - id: instant-redeem
+    label: Instant Redemption (impl.)
+    address: "0xa31DeeBB3680A3007120e74bcBdf4dF36F042a40"
+    category: infra
+    note: 6 bps fee; 20%/day, 10%/wallet caps; sUSDe payout
+  - id: instant-redeem-interaction
+    label: Instant Redemption Interaction
+    address: "0x8aEb9453EF22Cb38abC7a3Af9c208F65C1BfE31e"
+    category: infra
+    note: User-facing entrypoint; KYC-gated
+  - id: redeem-vault
+    label: Daily Instant Redemption Vault
+    address: "0x5C454f5526e41fBE917b63475CD8CA7E4631B147"
+    category: infra
+    note: Onchain liquidity buffer (~$7.6M sUSDe)
+  - id: minter-burner
+    label: ShareTokenMinterBurner (LZ wrapper)
+    address: "0x0dFb42aa18CEeD719617cd554304F6cA412A6b18"
+    category: infra
+    note: Cross-chain mint/burn for LayerZero OFT
+  - id: oft-adapter
+    label: ReMintBurnAdapter (LayerZero OFT)
+    address: "0x2BB4046022B9161f3F84Ad8E35cac1d5946e0e85"
+    category: infra
+    note: 2.5M reUSD/24h cap per peer chain
+  - id: price-router
+    label: PriceRouter
+    address: "0xFe76cF5eD606593fB7764f33627B8D7E0f9Fab66"
+    category: infra
+  - id: kyc-registry
+    label: KYC Registry
+    address: "0x82F1806AEab5Ecb9a485eb041d5Ed4940b123995"
+    category: infra
+  - id: access-manager
+    label: AccessManager (OZ v5)
+    address: "0x3f0DA1C363e34802C6f12F9C27276dC0e6696FD8"
+    category: infra
+    note: Authority for Instant Redemption
+
+  # === Governance ===
+  - id: gov-safe
+    label: Governance Safe (3-of-5)
+    address: "0x8EEc10616802Ef639ca55C98Ac856553FadeFbAd"
+    category: governance
+    note: DEFAULT_ADMIN + UPGRADER on reUSD/ICL; PROPOSER + CANCELLER on Timelock
+  - id: timelock
+    label: Timelock Controller (48h)
+    address: "0x69dDEa332723cF5407151aAF68B9b076557FCA93"
+    category: governance
+  - id: oracle-admin
+    label: Oracle Admin EOA (MPC 3/5)
+    address: "0x6C15B25E9750Dccb698C1a4023f34015bFe57649"
+    category: governance
+    note: Holds PRICE_SETTER_ROLE; owns minter-burner + OFT adapter; no timelock
+  - id: access-admin
+    label: Access Admin EOA (MPC 5/8)
+    address: "0x80a62B72dF1136aCBc57141FB67Aa46812fECAFc"
+    category: governance
+  - id: custodian-mgr
+    label: Custodian Manager EOA (MPC 3/5)
+    address: "0x9b6d7f2de2E4569297C7e88531E47679cEbE6eC9"
+    category: governance
+    note: CUSTODIAN_MANAGER_ROLE on ICL
+
+  # === Capital deployment legs (~92% of reserves sit at plain EOAs) ===
+  - id: icl-custodial
+    label: ICL Custodial Wallet (EOA, ~$24.4M)
+    address: "0x295F67Fdb21255A3Db82964445628a706FBe689E"
+    category: strategy
+    note: Fireblocks MPC (claimed); plain EOA onchain
+  - id: redeem-custodian
+    label: Redemption Reserves Custodian (EOA, ~$65.4M sUSDe)
+    address: "0x9eA38e09F41A9DE53972a68268BA0Dcc6d2fAdf8"
+    category: strategy
+    note: Fireblocks MPC (claimed); plain EOA onchain
+
+  # === External dependencies ===
+  - id: ethena-susde
+    label: Ethena sUSDe (basis-trade)
+    category: dependency
+    note: ~90% of onchain reserves; 7-day cooldown
+  - id: section114
+    label: §114 Reinsurance Trust
+    category: dependency
+    note: Offchain U.S.-domiciled trust; cash + T-Bills
+  - id: cayman-reinsurer
+    label: Cayman Reinsurer (CIMA Class B(iii))
+    category: dependency
+    note: Issues Surplus Notes to ICL
+  - id: chainlink-functions
+    label: Chainlink Functions + Automation
+    category: dependency
+    note: DON fun-ethereum-mainnet-1, sub 85
+  - id: chainlink-susde
+    label: Chainlink sUSDe/USD aggregator
+    address: "0xFF3BC18cCBd5999CE63E788A1c250a88626aD099"
+    category: dependency
+  - id: tnf-aup
+    label: The Network Firm (offchain AUP)
+    category: dependency
+    note: Daily attestation of §114 trust balances
+  - id: fireblocks
+    label: Fireblocks Custody (MPC, offchain)
+    category: dependency
+    note: Claimed N-of-M signing for reserve EOAs
+
+edges:
+  # === Governance flow ===
+  - from: gov-safe
+    to: timelock
+    kind: proposes-on
+    label: PROPOSER + CANCELLER
+  - from: gov-safe
+    to: reusd
+    kind: holds-role
+    label: DEFAULT_ADMIN + UPGRADER
+  - from: gov-safe
+    to: icl
+    kind: holds-role
+    label: DEFAULT_ADMIN + UPGRADER
+  - from: timelock
+    to: reusd
+    kind: manages
+    label: 48h-delayed upgrades / role changes
+  - from: timelock
+    to: icl
+    kind: manages
+    label: 48h-delayed upgrades / role changes
+  - from: access-admin
+    to: access-manager
+    kind: controls
+    label: admin (grantRole / labelRole)
+  - from: access-manager
+    to: instant-redeem
+    kind: manages
+    label: authority()
+  - from: custodian-mgr
+    to: icl
+    kind: holds-role
+    label: CUSTODIAN_MANAGER_ROLE
+  - from: oracle-admin
+    to: share-price-calc
+    kind: holds-role
+    label: PRICE_SETTER_ROLE (bypasses NAV Consumer)
+  - from: oracle-admin
+    to: nav-consumer
+    kind: holds-role
+    label: DEFAULT_ADMIN + EMERGENCY_UPDATER
+
+  # === Mint authority on reUSD ===
+  - from: icl
+    to: reusd
+    kind: mints
+    label: MINTER_ROLE (backed path)
+  - from: instant-redeem
+    to: reusd
+    kind: mints
+    label: MINTER_ROLE (burn on redeem)
+  - from: minter-burner
+    to: reusd
+    kind: mints
+    label: MINTER_ROLE (OFT cross-chain)
+  - from: oracle-admin
+    to: minter-burner
+    kind: controls
+    label: owner
+  - from: oracle-admin
+    to: oft-adapter
+    kind: controls
+    label: owner
+  - from: oft-adapter
+    to: minter-burner
+    kind: routes-through
+    label: LayerZero adapter
+
+  # === Price path ===
+  - from: chainlink-functions
+    to: nav-consumer
+    kind: routes-through
+    label: offchain NAV
+  - from: nav-consumer
+    to: share-price-calc
+    kind: manages
+    label: setSharePrice (audited path)
+  - from: share-price-calc
+    to: price-router
+    kind: routes-through
+  - from: chainlink-susde
+    to: price-router
+    kind: routes-through
+    label: sUSDe/USD
+
+  # === Capital flow: user → ICL → custodial reserves ===
+  - from: reusd
+    to: icl
+    kind: deposits-into
+    label: USDC deposit → mint reUSD
+  - from: icl
+    to: icl-custodial
+    kind: allocates-to
+    label: ~24%
+  - from: icl
+    to: redeem-custodian
+    kind: allocates-to
+    label: ~65%
+  - from: icl
+    to: redeem-vault
+    kind: allocates-to
+    label: ~8% (instant buffer)
+  - from: icl-custodial
+    to: ethena-susde
+    kind: deposits-into
+    label: sUSDe staking
+  - from: redeem-custodian
+    to: ethena-susde
+    kind: deposits-into
+    label: sUSDe staking
+  - from: redeem-vault
+    to: ethena-susde
+    kind: deposits-into
+    label: sUSDe payout token
+
+  # === Offchain ===
+  - from: icl-custodial
+    to: section114
+    kind: deposits-into
+    label: §114 Trust collateral
+  - from: section114
+    to: cayman-reinsurer
+    kind: routes-through
+    label: surplus notes
+  - from: section114
+    to: tnf-aup
+    kind: routes-fees-to
+    label: daily attestation
+  - from: icl-custodial
+    to: fireblocks
+    kind: routes-through
+    label: MPC custody (offchain)
+  - from: redeem-custodian
+    to: fireblocks
+    kind: routes-through
+    label: MPC custody (offchain)
+
+  # === Redemption flow ===
+  - from: instant-redeem-interaction
+    to: instant-redeem
+    kind: routes-through
+    label: delegate
+  - from: instant-redeem
+    to: redeem-vault
+    kind: routes-through
+    label: source liquidity
+  - from: instant-redeem-interaction
+    to: kyc-registry
+    kind: routes-through
+    label: KYC check

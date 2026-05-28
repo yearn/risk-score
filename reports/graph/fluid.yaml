@@ -1,0 +1,286 @@
+slug: fluid
+title: Fluid Lending Protocol (fTokens) — Contract Dependency Graph
+chain: ethereum
+
+categories:
+  - id: vault
+    label: fToken / Vault
+  - id: strategy
+    label: Strategy / Market
+  - id: governance
+    label: Governance
+  - id: infra
+    label: Protocol Infra
+  - id: dependency
+    label: External Dependency
+
+nodes:
+  # === fToken layer (user-facing) ===
+  - id: fUSDC
+    label: fUSDC (~$193M)
+    address: "0x9Fb7b4477576Fe5B32be4C1843aFB1e55F251B33"
+    category: vault
+    note: ERC-4626 USDC lending vault
+  - id: fUSDT
+    label: fUSDT (~$130M)
+    address: "0x5C20B550819128074FD538Edf79791733ccEdd18"
+    category: vault
+  - id: fWETH
+    label: fWETH (~2,533 WETH)
+    address: "0x90551c1795392094FE6D29B758EcCD233cFAa260"
+    category: vault
+  - id: fwstETH
+    label: fwstETH (~1,768 wstETH)
+    address: "0x2411802D8BEA09be0aF8fD8D08314a63e706b29C"
+    category: vault
+  - id: fGHO
+    label: fGHO (~$12M)
+    address: "0x6A29A46E21C730DcA1d8b23d637c101cec605C5B"
+    category: vault
+  - id: fsUSDS
+    label: fsUSDS
+    address: "0x2BBE31d63E6813E3AC858C04dae43FB2a72B0D11"
+    category: vault
+  - id: fUSDtb
+    label: fUSDtb
+    address: "0x15e8c742614b5D8Db4083A41Df1A14F5D2bFB400"
+    category: vault
+
+  # === Core infra ===
+  - id: liquidity-layer
+    label: Liquidity Layer (Infinite Proxy)
+    address: "0x52Aa899454998Be5b000Ad077a46Bbe360F4e497"
+    category: infra
+    note: Holds ALL deposits across lending / vaults / DEX / stETH
+  - id: liquidity-impl
+    label: Liquidity Layer Impl (Mar 31 2026)
+    address: "0xcc331DaF69752Bece3Dc98DBc63EacD5092266a2"
+    category: infra
+    note: Current dummy impl; module-dispatch lives in module slots
+  - id: lending-factory
+    label: LendingFactory
+    address: "0x54B91A0D94cb471F37f949c60F7Fa7935b551D03"
+    category: infra
+    note: Deploys fToken contracts
+  - id: vault-protocol
+    label: Vault Protocol (Borrowers)
+    category: infra
+    note: Tick-based liquidations; generates fToken yield
+  - id: rebalancer
+    label: Rebalancer (fUSDC/fUSDT)
+    address: "0x724d0c9497Fa89B2C6A4585e08380c91a92ab9b6"
+    category: infra
+    note: Deposits underlying as rewards; cannot withdraw
+
+  # === Governance ===
+  - id: fluid-token
+    label: FLUID Governance Token
+    address: "0x6f40d4A6237C257fff2dB00FA0510DeEECd303eb"
+    category: governance
+    note: 100M max supply; 4M quorum, 1M propose
+  - id: governor-bravo
+    label: GovernorBravo (128 proposals)
+    address: "0x0204Cd037B2ec03605CFdFe482D8e257C765fA1B"
+    category: governance
+    note: 1d delay, 2d voting; 120 executed
+  - id: timelock
+    label: Timelock (1-day delay)
+    address: "0x2386DC45AdDed673317eF068992F19421B481F4c"
+    category: governance
+    note: Admin of all core contracts
+  - id: avocado-guardian
+    label: Avocado Guardian (7-of-14)
+    address: "0x4F6F977aCDD1177DCD81aB83074855EcB9C2D49e"
+    category: governance
+    note: Pause Class-0 only; can cancel timelock txns
+
+  # === Top borrow markets driving fToken yield ===
+  - id: borrow-eth
+    label: ETH/LST Borrow Markets
+    category: strategy
+    note: Top Eth-supply collateral group (~45%)
+  - id: borrow-stable-wrappers
+    label: Yield-Bearing Stable Wrappers
+    category: strategy
+    note: SUSDAI / reUSD / sUSDe — wrap-ratio amplification risk
+  - id: borrow-btc
+    label: BTC Borrow Markets
+    category: strategy
+    note: WBTC / cbBTC (~10% of Eth supply)
+  - id: borrow-stables
+    label: Stablecoin Borrow Markets
+    category: strategy
+    note: USDC / USDT / GHO; high utilization (>85%)
+
+  # === External dependencies ===
+  - id: dep-susdai
+    label: SUSDAI (19.9% top supply)
+    category: dependency
+    note: Sky yield-bearing stable wrapper; #1 supply asset
+  - id: dep-reusd
+    label: reUSD (Re Protocol)
+    address: "0x5086bf358635B81D8C47C66d1C8b9E567Db70c72"
+    category: dependency
+    note: Yield-bearing stable wrapper; structurally similar to wstUSR
+  - id: dep-wsteth
+    label: wstETH (Lido)
+    address: "0x7f39C581F595B53c5cb19bD0b3f8dA6c935E2Ca0"
+    category: dependency
+    note: 16.8% of all-chain supply
+  - id: dep-weeth
+    label: weETH (ether.fi)
+    category: dependency
+    note: 12.9% of all-chain supply
+  - id: dep-wbtc
+    label: WBTC / cbBTC
+    category: dependency
+  - id: dep-chainlink
+    label: Chainlink Oracles
+    category: dependency
+    note: Primary price feeds for liquidations
+  - id: dep-permit2
+    label: Uniswap Permit2
+    address: "0x000000000022D473030F116dDEE9F6B43aC78BA3"
+    category: dependency
+    note: Deposit signatures
+
+edges:
+  # === Governance ===
+  - from: fluid-token
+    to: governor-bravo
+    kind: controls
+    label: token-holder voting
+  - from: governor-bravo
+    to: timelock
+    kind: proposes-on
+    label: queue / execute
+  - from: avocado-guardian
+    to: timelock
+    kind: cancels-on
+    label: cancel queued txns
+  - from: timelock
+    to: liquidity-layer
+    kind: controls
+    label: EIP-1967 admin (upgrade impl)
+  - from: timelock
+    to: lending-factory
+    kind: controls
+    label: owner
+  - from: avocado-guardian
+    to: liquidity-layer
+    kind: holds-role
+    label: pause Class-0
+
+  # === Proxy / deployment wiring ===
+  - from: liquidity-impl
+    to: liquidity-layer
+    kind: manages
+    label: dummy impl (since Mar 31 2026)
+  - from: lending-factory
+    to: fUSDC
+    kind: deploys
+  - from: lending-factory
+    to: fUSDT
+    kind: deploys
+  - from: lending-factory
+    to: fWETH
+    kind: deploys
+  - from: lending-factory
+    to: fwstETH
+    kind: deploys
+  - from: lending-factory
+    to: fGHO
+    kind: deploys
+  - from: lending-factory
+    to: fsUSDS
+    kind: deploys
+  - from: lending-factory
+    to: fUSDtb
+    kind: deploys
+  - from: rebalancer
+    to: fUSDC
+    kind: manages
+    label: deposits as rewards
+  - from: rebalancer
+    to: fUSDT
+    kind: manages
+    label: deposits as rewards
+
+  # === fToken flow: deposits into shared Liquidity Layer ===
+  - from: fUSDC
+    to: liquidity-layer
+    kind: deposits-into
+    label: "USDC supply"
+  - from: fUSDT
+    to: liquidity-layer
+    kind: deposits-into
+    label: "USDT supply"
+  - from: fWETH
+    to: liquidity-layer
+    kind: deposits-into
+    label: "WETH supply"
+  - from: fwstETH
+    to: liquidity-layer
+    kind: deposits-into
+    label: "wstETH supply"
+  - from: fGHO
+    to: liquidity-layer
+    kind: deposits-into
+    label: "GHO supply"
+  - from: fsUSDS
+    to: liquidity-layer
+    kind: deposits-into
+    label: "sUSDS supply"
+  - from: fUSDtb
+    to: liquidity-layer
+    kind: deposits-into
+    label: "USDtb supply"
+
+  # === Yield: Liquidity Layer lends to Vault Protocol borrow markets ===
+  - from: liquidity-layer
+    to: vault-protocol
+    kind: routes-through
+    label: shared borrow pool
+  - from: vault-protocol
+    to: borrow-eth
+    kind: allocates-to
+    label: "~45% Eth supply"
+  - from: vault-protocol
+    to: borrow-stable-wrappers
+    kind: allocates-to
+    label: "~32% (SUSDAI + reUSD)"
+  - from: vault-protocol
+    to: borrow-btc
+    kind: allocates-to
+    label: "~10% Eth supply"
+  - from: vault-protocol
+    to: borrow-stables
+    kind: allocates-to
+    label: "~17% Eth supply"
+
+  # === Borrow markets → collateral / external dependencies ===
+  - from: borrow-stable-wrappers
+    to: dep-susdai
+    kind: deposits-into
+    label: "19.9% top asset"
+  - from: borrow-stable-wrappers
+    to: dep-reusd
+    kind: deposits-into
+    label: "12.7%"
+  - from: borrow-eth
+    to: dep-wsteth
+    kind: deposits-into
+  - from: borrow-eth
+    to: dep-weeth
+    kind: deposits-into
+  - from: borrow-btc
+    to: dep-wbtc
+    kind: deposits-into
+  - from: vault-protocol
+    to: dep-chainlink
+    kind: routes-through
+    label: liquidation oracle
+  - from: liquidity-layer
+    to: dep-permit2
+    kind: routes-through
+    label: deposit signatures

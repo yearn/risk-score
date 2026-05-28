@@ -1,0 +1,229 @@
+slug: kerneldao-hgeth
+title: KernelDAO Kelp Gain (hgETH) — Contract Dependency Graph
+chain: ethereum
+
+categories:
+  - id: vault
+    label: Vault / Token
+  - id: strategy
+    label: Strategy
+  - id: governance
+    label: Governance
+  - id: infra
+    label: Protocol Infra
+  - id: dependency
+    label: External Dependency
+
+nodes:
+  # === Vault / token layer ===
+  - id: hgETH
+    label: hgETH (High Growth Vault)
+    address: "0xc824A08dB624942c5E5F330d56530cD1598859fD"
+    category: vault
+    note: ERC-4626 TransparentUpgradeableProxy → GainLendingPool; paused since 2026-04-18
+  - id: gain-adapter
+    label: GainAdapter (rsETH adapter)
+    address: "0xB185D98056419029daE7120EcBeFa0DbC12c283A"
+    category: vault
+    note: Converts ETH/LST deposits → rsETH before vault entry
+
+  # === Protocol infra ===
+  - id: loans-operator
+    label: Loans Operator
+    address: "0x416e26e331Fc0b77386e9dDB5Ed9AdE73F1241F4"
+    category: infra
+    note: Strategy execution / recalls
+  - id: loans-deployer
+    label: Loans Deployer
+    address: "0x9E053AAA3C435e94C1663a428cdC4ea91F23C556"
+    category: infra
+  - id: scheduled-caller
+    label: Scheduled Caller
+    address: "0x06eada250B02A3614AFce04B8cd7025093312159"
+    category: infra
+  - id: fees-collector
+    label: Fees Collector
+    address: "0x2151A97C7819782fD99efF020CdfE0aE838Ad378"
+    category: infra
+    note: Receives minted hgETH shares (1.5% mgmt fee)
+
+  # === Governance ===
+  - id: vault-multisig
+    label: Vault Multisig (3/5)
+    address: "0x66Bee721697BF17D9Eea28c51C828a43ba597B0b"
+    category: governance
+    note: Gnosis Safe; 4 anonymous + 1 Kelp deployer; no timelock
+  - id: proxyadmin-multisig
+    label: ProxyAdmin Multisig (3/5)
+    address: "0xFD96F6854bc73aeBc6dc6E61A372926186010a91"
+    category: governance
+    note: Same 5 signers as vault multisig
+  - id: hgeth-proxyadmin
+    label: hgETH ProxyAdmin
+    address: "0xd355daae366220a0282cd5d2687fbc395395fc40"
+    category: governance
+    note: No timelock between Safe and ProxyAdmin
+  - id: oracle-proxyadmin-multisig
+    label: Oracle ProxyAdmin Multisig (3/5)
+    address: "0x266f15c63d5D3dE038F2E05D1fA397d92BCB013E"
+    category: governance
+    note: Different 5 signers from vault multisig
+
+  # === Strategy legs (12+ active venues, top categories) ===
+  - id: strat-aave
+    label: Aave Leverage Farming
+    category: strategy
+    note: Leveraged USDe / ETH looper
+  - id: strat-pendle
+    label: Pendle Fixed-Yield
+    category: strategy
+  - id: strat-morpho
+    label: Morpho Lending
+    category: strategy
+  - id: strat-euler
+    label: Euler Lending
+    category: strategy
+  - id: strat-compound
+    label: Compound Lending
+    category: strategy
+  - id: strat-usual
+    label: Usual / Elixir
+    category: strategy
+
+  # === External dependencies ===
+  - id: rsETH
+    label: rsETH (Kelp LRT)
+    address: "0xA1290d69c65A6Fe4DF752f95823fae25cB99e5A7"
+    category: dependency
+    note: Liquid restaked ETH; peg stressed post-2026-04-18 bridge exploit
+  - id: eigenlayer
+    label: EigenLayer Restaking
+    category: dependency
+    note: Underlying restaking infra for rsETH
+  - id: upshift
+    label: Upshift Finance Infra
+    category: dependency
+    note: Vault infrastructure (August subaccounts, policy engine)
+  - id: ultrayield
+    label: UltraYield Curator (Edge Capital)
+    category: dependency
+    note: Allocation curator across 12+ venues
+  - id: morpho-hgeth-weth
+    label: Morpho hgETH/WETH (91.5% LLTV)
+    address: "0x56dbc0f2784cd959e57fcc9cd83c3b7a24ee678c"
+    category: dependency
+    note: Yearn use-case market; 99.5% utilized, oracle un-adjusted
+  - id: hgeth-usd-oracle
+    label: hgETH/USD EOMultiFeedAdapter
+    address: "0x70cf192d6b76d57a46aafc9285ced110034eb013"
+    category: dependency
+    note: Upgradeable Morpho oracle feed proxy
+  - id: nexus-mutual
+    label: Nexus Mutual (Embedded Cover)
+    category: dependency
+    note: ~$30M+ cover; excludes liquidation losses + bridge failures
+
+edges:
+  # === Governance ===
+  - from: vault-multisig
+    to: hgETH
+    kind: holds-role
+    label: owner() (pause/unpause)
+  - from: proxyadmin-multisig
+    to: hgeth-proxyadmin
+    kind: controls
+    label: owner (no timelock)
+  - from: hgeth-proxyadmin
+    to: hgETH
+    kind: manages
+    label: upgradeable proxy
+  - from: oracle-proxyadmin-multisig
+    to: hgeth-usd-oracle
+    kind: manages
+    label: oracle upgrade authority
+
+  # === Internal infra wiring ===
+  - from: loans-operator
+    to: hgETH
+    kind: holds-role
+    label: loansOperator
+  - from: loans-deployer
+    to: hgETH
+    kind: holds-role
+    label: loansDeployerAddress
+  - from: scheduled-caller
+    to: hgETH
+    kind: holds-role
+    label: scheduledCaller
+
+  # === Vault → rsETH conversion ===
+  - from: hgETH
+    to: gain-adapter
+    kind: routes-through
+    label: ETH/LST → rsETH
+  - from: gain-adapter
+    to: rsETH
+    kind: deposits-into
+    label: convert to rsETH
+
+  # === Strategy allocation (paused, but structural) ===
+  - from: hgETH
+    to: strat-aave
+    kind: allocates-to
+    label: leveraged USDe/ETH
+  - from: hgETH
+    to: strat-pendle
+    kind: allocates-to
+    label: fixed-yield
+  - from: hgETH
+    to: strat-morpho
+    kind: allocates-to
+    label: lending
+  - from: hgETH
+    to: strat-euler
+    kind: allocates-to
+    label: lending
+  - from: hgETH
+    to: strat-compound
+    kind: allocates-to
+    label: lending
+  - from: hgETH
+    to: strat-usual
+    kind: allocates-to
+    label: stablecoin
+
+  # === Curation / infra dependencies ===
+  - from: ultrayield
+    to: hgETH
+    kind: manages
+    label: curator
+  - from: upshift
+    to: hgETH
+    kind: manages
+    label: vault infra (August subaccounts)
+
+  # === Strategies → external dependencies ===
+  - from: rsETH
+    to: eigenlayer
+    kind: deposits-into
+    label: restaking
+  - from: hgETH
+    to: morpho-hgeth-weth
+    kind: routes-through
+    label: 91.5% LLTV collateral market
+  - from: hgeth-usd-oracle
+    to: morpho-hgeth-weth
+    kind: manages
+    label: BASE_FEED_1
+
+  # === Fees ===
+  - from: hgETH
+    to: fees-collector
+    kind: routes-fees-to
+    label: 1.5% mgmt + 20% perf
+
+  # === Insurance ===
+  - from: nexus-mutual
+    to: hgETH
+    kind: manages
+    label: embedded cover (~$30M)

@@ -1,0 +1,142 @@
+slug: unit-ubtc
+title: Unit Bitcoin (UBTC) — Contract Dependency Graph
+chain: hyperevm
+
+categories:
+  - id: vault
+    label: Vault / Token
+  - id: strategy
+    label: Custody
+  - id: governance
+    label: Governance
+  - id: infra
+    label: Protocol Infra
+  - id: dependency
+    label: External Dependency
+
+nodes:
+  # === Vault / token layer ===
+  - id: UBTC
+    label: UBTC (HyperEVM proxy)
+    address: "0x9FDBdA0A5e284c32744D2f17Ee5c74B284993463"
+    category: vault
+    note: UUPS ERC-1967 proxy; 8 decimals; 21M cap; verified
+  - id: ubtc-impl
+    label: UBTC Implementation
+    address: "0x1a7689c3b783eb37550efbb9c81e7f468f7034fc"
+    category: vault
+    note: UNVERIFIED; OZ ERC20Upgradeable + Ownable + UUPS + blacklist + compliance
+
+  # === Internal infra ===
+  - id: hypercore-treasury
+    label: HyperCore Treasury (EVM)
+    address: "0x574bAFCe69d9411f662a433896e74e4F153096FA"
+    category: infra
+    note: HyperCore treasury for UBTC reflection
+  - id: hypercore-deployer
+    label: HyperCore Token Deployer
+    address: "0xF036a5261406a394bd63Eb4dF49C464634a66155"
+    category: infra
+    note: Multi-sig user; HIP-1 native token (hardcoded coreDeployer())
+
+  # === Governance ===
+  - id: hyperevm-owner
+    label: HyperEVM Deployer / Owner
+    address: "0xB4FC973924a91362D301E583E839Cdaf4f19cdF8"
+    category: governance
+    note: EOA onchain; claimed-MPC offchain. Holds owner() + complianceAuthority()
+  - id: guardian-network
+    label: Guardian Network (2-of-3 MPC TSS)
+    category: governance
+    note: Unit + Hyperliquid + Infinite Field; DKG keyshares in AWS Nitro enclaves
+
+  # === Custody (offchain) ===
+  - id: btc-treasury
+    label: Bitcoin Treasury
+    category: strategy
+    note: "bc1pdwu79dady576y3fupmm82m3g7p2p9f6hgyeqy0tdg7ztxg7xrayqlkl8j9 — 3,361.95 BTC vs 3,273 UBTC"
+
+  # === External dependencies ===
+  - id: dep-bitcoin
+    label: Bitcoin Network
+    category: dependency
+    note: Native BTC custody chain; 2-conf required
+  - id: dep-hyperliquid-l1
+    label: Hyperliquid L1 (HyperBFT)
+    category: dependency
+    note: Hyper Foundation 56.4% validator stake
+  - id: dep-aws-nitro
+    label: AWS Nitro Enclaves + KMS
+    category: dependency
+    note: Guardian secure enclaves + key encryption at rest
+  - id: dep-morpho
+    label: Morpho Blue UBTC-USDC Market
+    category: dependency
+    note: Market id 0x45af9c…942f; 77% LLTV; uses UBTC as collateral
+
+edges:
+  # === Governance ===
+  - from: hyperevm-owner
+    to: UBTC
+    kind: holds-role
+    label: owner() — UUPS upgrade (no timelock)
+  - from: hyperevm-owner
+    to: UBTC
+    kind: holds-role
+    label: complianceAuthority() — blacklist control
+  - from: guardian-network
+    to: hyperevm-owner
+    kind: controls
+    label: claimed-MPC (offchain only)
+  - from: guardian-network
+    to: btc-treasury
+    kind: controls
+    label: 2-of-3 TSS co-sign Bitcoin spends
+  - from: guardian-network
+    to: hypercore-deployer
+    kind: controls
+    label: HIP-1 multisig user
+
+  # === Mint authority (HyperCore-side) ===
+  - from: hypercore-deployer
+    to: UBTC
+    kind: mints
+    label: HIP-1 native supply via HyperCore↔HyperEVM bridge
+
+  # === Internal vault / bridge flow ===
+  - from: UBTC
+    to: ubtc-impl
+    kind: routes-through
+    label: ERC-1967 delegate (UUPS)
+  - from: hypercore-treasury
+    to: UBTC
+    kind: routes-through
+    label: HyperCore↔HyperEVM bridge reflection
+  - from: hypercore-deployer
+    to: hypercore-treasury
+    kind: manages
+    label: HyperCore token deployer
+
+  # === Bridge custody ===
+  - from: UBTC
+    to: btc-treasury
+    kind: allocates-to
+    label: 1:1 BTC backing (over-backed ~2.7%)
+  - from: btc-treasury
+    to: dep-bitcoin
+    kind: deposits-into
+    label: native BTC custody
+
+  # === External dependencies ===
+  - from: UBTC
+    to: dep-hyperliquid-l1
+    kind: routes-through
+    label: HyperBFT consensus
+  - from: guardian-network
+    to: dep-aws-nitro
+    kind: routes-through
+    label: secure enclave + KMS
+  - from: UBTC
+    to: dep-morpho
+    kind: deposits-into
+    label: collateral on UBTC-USDC market
