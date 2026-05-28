@@ -1,0 +1,49 @@
+# Lychee link checker config (https://github.com/lycheeverse/lychee)
+# Used by .github/workflows/link-check-*.yml
+
+cache = true
+max_cache_age = "1d"
+max_concurrency = 8
+max_retries = 2
+retry_wait_time = 2
+timeout = 20
+no_progress = true
+
+# Accept 200-range, 403 (bot-blocked but URL exists), and 429 (rate-limited).
+# 403 covers the long tail of Cloudflare/bot-protection responses (block explorers,
+# GitBook hosts, DefiLlama, app frontends, etc.) without per-host allowlisting.
+accept = ['200..=299', '403', '429']
+
+# Don't cache transient errors. Cloudflare-fronted hosts occasionally return 5xx
+# or 429 to bots; caching those poisons subsequent daily runs until max_cache_age
+# expires. Re-checking each day yields the steady-state 200/403.
+cache_exclude_status = ['429', '500..=599']
+
+# TEMPLATE.md contains literal `URL` placeholders in markdown link syntax.
+# reports/old/ is archived/legacy material that we don't actively maintain.
+exclude_path = ["reports/TEMPLATE.md", "reports/old"]
+
+# Excludes for non-403 false-positive cases:
+# - rekt.news intermittently returns 500 to crawlers
+# - Morpho GraphQL endpoints are POST-only and 400 on GET
+# - Twitter/X often produces connection errors / soft-blocks
+# - LinkedIn requires auth (returns 999/other non-403 codes)
+# - trust-security.xyz returns 405 on HEAD requests
+# - defillama.com/protocol/ Cloudflare intermittently returns 500 to crawlers;
+#   slugs are validated separately via api.llama.fi in scripts/check_defillama_links.py
+# - maple.finance/syrup Cloudflare returns 404 to bots on this subpath despite
+#   the page existing (verified via Wayback); no other maple.finance subpath
+#   exhibits this so the exclude is kept narrow
+# - businesswire.com/news raises "HTTP/2 protocol error" from lychee's reqwest
+#   client (server-side TLS/HTTP-2 quirk on Businesswire's CDN). URLs resolve
+#   200 in a browser; the failure is checker-specific. Scope kept to /news/.
+exclude = [
+    '^https?://(www\.)?rekt\.news',
+    '^https?://(blue-api|api)\.morpho\.org/graphql',
+    '^https?://(www\.)?(twitter|x)\.com',
+    '^https?://(www\.)?linkedin\.com',
+    '^https?://(www\.)?trust-security\.xyz',
+    '^https?://(www\.)?defillama\.com/protocol/',
+    '^https?://(www\.)?maple\.finance/syrup',
+    '^https?://(www\.)?businesswire\.com/news/',
+]
