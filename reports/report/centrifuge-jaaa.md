@@ -19,7 +19,7 @@ The fund is brought onchain via **Centrifuge V3** (the protocol's Hub-and-Spoke 
 - **Management fee:** 40 bps (0.40%) p.a. per [JAAA factsheet (April 2025)](https://gateway.pinata.cloud/ipfs/QmcWwvqnoUkH1bMYktnMdEywmUkUeK3PPex2i763zVNUmm). All-in **expense ratio: 0.50%** per on-chain pool metadata (mgmt fee + brokerage / custody / admin / audit). **Performance fee:** 0%.
 - **Settlement:** Daily subscriptions and redemptions, **usually T+3** per factsheet
 - **Holders (Ethereum + multichain):** 23 onchain holders per rwa.xyz — institutional only
-- **Holdings (offchain CLO portfolio):** 20 positions, top three: **ARES LOAN FUNDING II LTD (8.68%)**, **MADISON PARK FUNDING XXX LTD (8.08%)**, **AMMC CLO 27 LTD (7.87%)** ([JAAA pool metadata, IPFS](https://ipfs.io/ipfs/QmPzzjsF9xZcXZJhzJR6EHmQpaMmRnrtRnvBSWBRzyBEh1))
+- **Holdings (offchain CLO portfolio):** 21 positions totalling ~$762.7M market value (99.99% allocated). Top three: **ARES LOAN FUNDING II LTD (8.68%)**, **MADISON PARK FUNDING XXX LTD (8.08%)**, **AMMC CLO 27 LTD (7.87%)** — full holdings list available in [JAAA pool metadata IPFS](https://ipfs.io/ipfs/QmPzzjsF9xZcXZJhzJR6EHmQpaMmRnrtRnvBSWBRzyBEh1).
 - **Target APY:** 5.7% (factsheet) | **7-day APY (rwa.xyz):** 5.54%
 - **Third-party rating:** **Particula AAA** ([per on-chain pool metadata](https://ipfs.io/ipfs/QmPzzjsF9xZcXZJhzJR6EHmQpaMmRnrtRnvBSWBRzyBEh1))
 - **Minimum initial investment:** $500,000 USDC (per on-chain pool metadata)
@@ -163,12 +163,12 @@ Centrifuge V3 has received an unusually heavy audit cadence — **20+ engagement
 ### Collateralization
 
 - **Backing:** 1:1 by the **Janus Henderson Anemoy AAA CLO Fund** — a portfolio of AAA-rated, floating-rate CLO tranches. Cash and short-duration AAA CLO debt of multiple underlying CLO issuers.
-- **Specific CLO holdings (issuer mix):** 20 positions; top three (per [on-chain pool metadata](https://ipfs.io/ipfs/QmPzzjsF9xZcXZJhzJR6EHmQpaMmRnrtRnvBSWBRzyBEh1)):
-  - ARES LOAN FUNDING II LTD — 8.68%
-  - MADISON PARK FUNDING XXX LTD — 8.08%
-  - AMMC CLO 27 LTD — 7.87%
-
-  Total portfolio value at metadata snapshot: $381,344,874. Full holdings list with weights and ratings beyond the top 3: TODO — only the top three are surfaced in the public pool metadata; the rest would require Anemoy investor reporting access.
+- **Specific CLO holdings (issuer mix):** **21 positions, $762.7M total market value, 99.99% of portfolio allocated** per the public [on-chain pool metadata IPFS](https://ipfs.io/ipfs/QmPzzjsF9xZcXZJhzJR6EHmQpaMmRnrtRnvBSWBRzyBEh1) (full list with CUSIP/ISIN/ticker/market-value/% available; refetched 2026-05-28). Top five:
+  - ARES LOAN FUNDING II LTD (ARES 2022-ALF2A) — 8.68%
+  - MADISON PARK FUNDING XXX LTD (MDPK 2018-30A) — 8.08%
+  - AMMC CLO 27 LTD (AMMC 2022-27A) — 7.87%
+  - CBAM 2017-1 LTD (CBAMR 2017-1A AR2) — 7.68%
+  - CARLYLE US CLO 2021-10 LTD (CGMS 2021-10A) — 5.26%
 - **Asset quality:** 100% AAA tranches at the senior end of the CLO capital stack. The CLO managers shown (Ares Capital, Credit Suisse Asset Management / Madison Park, American Money Management Corp / AMMC) are large, established institutional CLO managers. Historical loss rates on AAA CLO tranches are near zero through multiple credit cycles. Third-party rating: **Particula AAA** ([pool metadata](https://ipfs.io/ipfs/QmPzzjsF9xZcXZJhzJR6EHmQpaMmRnrtRnvBSWBRzyBEh1)).
 - **Custody / service providers (offchain):**
   - **Custodian:** StoneX Securities Inc. (regulated U.S. broker-dealer) per [rwa.xyz](https://app.rwa.xyz/assets/JAAA) — note: not separately named in the factsheet, but rwa.xyz is operated by the data provider that aggregates issuer disclosures.
@@ -195,14 +195,14 @@ Centrifuge V3 has received an unusually heavy audit cadence — **20+ engagement
 ## Liquidity Risk
 
 - **Primary exit (intended):** Daily 1:1 redemption through Anemoy at NAV, settled in USDC. Async — investor submits `requestRedeem`, operator processes in next daily batch, investor claims USDC. Per the factsheet, settlement is "usually T+3."
-- **Redemption capacity:** Constrained by the underlying CLO portfolio's secondary-market liquidity. AAA CLOs are relatively liquid in normal markets (large institutional buyer base) but liquidity is **historically lower than U.S. Treasuries** and can widen materially in stress (e.g. March 2020). Specific liquidity buffer / cash-on-hand at the fund level: **TODO**.
-- **Onchain liquidity (JAAA share):** Transfer-restricted — no DEX pools available for JAAA itself. Secondary onchain liquidity is only available via the **deJAAA** wrapper or via Aave Horizon collateral position unwinding. (deJAAA DEX pool sizes: TODO — no DefiLlama-listed JAAA/deJAAA pools were located in this session.)
+- **Redemption capacity:** Constrained by the underlying CLO portfolio's secondary-market liquidity. AAA CLOs are relatively liquid in normal markets (large institutional buyer base) but liquidity is **historically lower than U.S. Treasuries** and can widen materially in stress (e.g. March 2020).
+- **Onchain liquidity (JAAA share):** Transfer-restricted — no DEX pools available for JAAA itself. Secondary onchain liquidity is only available via the **deJAAA** wrapper or via Aave Horizon collateral position unwinding.
 - **DeFi integrations providing secondary liquidity:**
   - **Aave Horizon** (institutional market) — JAAA selected as launch collateral; reached ~$100M in first week. ([Centrifuge Q3 2025 recap](https://centrifuge.io/blog/centrifuge-q3-2025-recap))
   - **Resolv × Aave Horizon** — Up to $100M JAAA as actively-managed leveraged collateral (80% LTV). ([Centrifuge blog](https://centrifuge.io/blog/resolv-aave-centrifuge-partnership))
   - **Falcon Finance** — JAAA accepted as collateral to mint USDf. ([Falcon Finance](https://falcon.finance/news/falcon-finance-adds-centrifuges-jaaa-as-collateral-unlocking-onchain-liquidity-for-institutional-grade-credit))
   - **3F (Morpho)** — Leveraged exposure product on JAAA. ([The Block](https://www.theblock.co/post/398686/3f-morpho-funding-everaged-exposure-tokenized-assets))
-- **Concentration risk:** **Holder count = 23** (rwa.xyz). Highly concentrated — likely a small number of institutional holders (Grove, Resolv, Aave Horizon position holders, possibly a few funds). A single large redemption could materially drain pool-level USDC float and force unscheduled liquidation of underlying CLOs.
+- **Concentration risk:** **Holder count = 23** (rwa.xyz). Highly concentrated — likely a small number of institutional holders (Grove, Resolv, Aave Horizon position holders, possibly a few funds). A single large redemption could materially drain pool-level USDC float, in which case Anemoy's offering-memo discretion (see "Withdrawal queue / throttle" below) allows the fund manager to **delay or partially fulfil** the redemption rather than force-sell. Any net liquidation of underlying CLOs happens **offchain** — at StoneX custody, via Anemoy in the secondary market — not via any onchain forced-sale mechanism. JAAA is a claim on the offchain fund, not collateral that smart contracts liquidate.
 - **Withdrawal queue / throttle:** No explicit fixed-cap throttle on `requestRedeem`. Anemoy retains discretion to delay or partially fulfil redemptions if portfolio liquidity is insufficient (typical for open-end credit funds). Specific gating language in the fund offering memorandum: **TODO** (offering memo not publicly downloadable).
 - **Historical drawdown handling:** No stress events observed since JAAA inception in May 2025. Indirect reference points: Janus Henderson's $21B JAAA ETF maintained tight bid-ask in 2024–2025.
 - **Same-value classification:** JAAA is a yield-bearing dollar-denominated security (~5% APY). Not a stablecoin — daily mark-to-market NAV varies slightly with CLO market prices. Acceptable to apply longer exit times for the AAA-credit asset class.
@@ -509,7 +509,7 @@ Both the 3-of-8 Pool Manager Safe `0x742d…be1e` and the EOA `0x7bf090b9…02ec
 - **Two Pool Manager principals on the JAAA pool — including one EOA with unbounded NAV-push authority and the power to replace the manager set.** The current HubRegistry shows `manager(JAAA pool, addr)=true` for both the 3-of-8 Pool Manager Safe [`0x742d…be1e`](https://etherscan.io/address/0x742d100011ffbc6e509e39dbcb0334159e86be1e) and an EOA [`0x7bf090b9…02ec`](https://etherscan.io/address/0x7bf090b97f896fb77e852cc98aa52a8cb7dc02ec) (registered at block 24376421). Either can call `Hub.updateSharePrice` to set JAAA NAV to **any value with no upper bound, no deviation cap and no timelock**, approve/issue shares, force-cancel investor requests, and modify the FullRestrictions allowlist. Either can also call `Hub.updateHubManager` to **add or remove pool managers** (including revoking the other principal), since that function is gated only by `_isManager(poolId)` and writes through directly to `HubRegistry.updateManager`. On Ethereum (Hub-chain), the new price propagates to the Spoke synchronously in the same tx via `notifySharePrice`, so the user-facing `convertToAssets()` and batch-fulfilment prices reflect the manipulated value immediately. The EOA is a **single private key** — compromise of one signer is sufficient to mis-price the fund, extract value via the next deposit/redeem batch, and elevate itself to sole-manager status. See "Critical Risks" below and Appendix tables for the full capability surface.
 - **NAV is admin-pushed, not onchain-derived.** Underlying CLOs are offchain, so a fully onchain proof-of-reserves is structurally impossible. Token holders trust Anemoy / Trident Trust to compute correct NAV and the Pool Manager Safe to push it faithfully. No Chainlink PoR or independent oracle.
 - **Mint-without-backing is technically possible** via the share token's `mint(address,uint256)` (gated only by wards). Standard governance-key risk, mitigated by the 48h Root timelock but not eliminated for paths involving the Pool Manager Safe acting via the Hub.
-- **Highly concentrated holder base.** rwa.xyz reports 23 holders globally; a single large redemption (e.g. Grove unwinding) could deplete the pool's USDC float and force unscheduled CLO sales. Grove appears to have already drawn down a significant portion of its original $1B allocation (current aggregate JAAA NAV ~$437.9M as of 2026-05-28).
+- **Highly concentrated holder base.** rwa.xyz reports 23 holders globally; a single large redemption (e.g. Grove unwinding) could deplete the pool's USDC float, forcing Anemoy to either delay/partially fulfil the redemption per fund discretion or sell CLOs offchain in the secondary market — neither path is enforced onchain. Grove appears to have already drawn down a significant portion of its original $1B allocation (current aggregate JAAA NAV ~$437.9M as of 2026-05-28).
 - **Multiple offchain trust principals.** A failure or adversarial action by Anemoy, Janus Henderson, StoneX, Trident Trust, or the BVI regulatory environment is an existential risk for token holders. None of these can be hedged onchain.
 - **V3.1 is recent (Feb 2026)** and the V3.2 Onchain Portfolio Manager only audited Mar–Apr 2026. New code paths continue to ship.
 - **Pool manager signer identities not publicly disclosed.** Standard for institutional-RWA, but reduces verifiability of "who can move my money."
@@ -622,7 +622,7 @@ Both the 3-of-8 Pool Manager Safe `0x742d…be1e` and the EOA `0x7bf090b9…02ec
 #### Category 4: Liquidity Risk (Weight: 15%)
 
 - **Direct redemption:** Daily through Anemoy, NAV-based, USDC-settled. Async — typically T+1 once redemption batch is processed; full settlement subject to fund-level liquidity.
-- **Liquidity depth:** Aave Horizon position-unwind, Falcon Finance, Resolv, 3F/Morpho provide secondary exit routes (denominated via the deJAAA wrapper). Specific DEX depth on deJAAA: TODO.
+- **Liquidity depth:** Aave Horizon position-unwind, Falcon Finance, Resolv, 3F/Morpho provide secondary exit routes (denominated via the deJAAA wrapper).
 - **Large holder impact:** With only 23 holders globally and ~$437.9M aggregate NAV, a single $50M+ redemption is plausible and could exceed the pool's float, forcing CLO secondary sales over multiple days.
 - **Stress behavior:** Untested through any market dislocation since launch (May 2025). AAA CLOs would historically widen but remain saleable in stress.
 - Best fit: row 3 ("Market-based or short queues; >$1M, 1-3% slippage; 3-7 days for full exit") with a yield-bearing-asset exception (longer exit times acceptable).

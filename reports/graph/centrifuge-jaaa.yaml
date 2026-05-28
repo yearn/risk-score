@@ -1,0 +1,240 @@
+slug: centrifuge-jaaa
+title: Centrifuge (JAAA) — Contract Dependency Graph
+chain: ethereum
+
+categories:
+  - id: vault
+    label: Token / Vault
+  - id: governance
+    label: Governance
+  - id: infra
+    label: Protocol Infra
+  - id: dependency
+    label: External Dependency
+
+nodes:
+  # === Vault layer (user-facing) ===
+  - id: jaaa
+    label: JAAA (Tranche share token)
+    address: "0x5a0F93D040De44e78F251b03c43be9CF317Dcf64"
+    category: vault
+    note: 6dp ERC-20 + ERC-1404; transfer-restricted via FullRestrictions hook
+  - id: async-vault
+    label: AsyncVault (ERC-7540 entry)
+    address: "0x4880799ee5200fc58da299e965df644fbf46780b"
+    category: vault
+    note: requestDeposit / requestRedeem / mint / withdraw
+  - id: dejaaa
+    label: deJAAA (freely-transferable wrapper)
+    address: "0xAAA0008C8CF3A7Dca931adaF04336A5D808C82Cc"
+    category: vault
+    note: 18dp ERC-20 wrapper used by DEX / lending integrations
+
+  # === Protocol infra (Centrifuge V3 — current V3.1+) ===
+  - id: async-request-manager
+    label: AsyncRequestManager
+    address: "0xF48256AbDDf96EcDDc4B3DbD23E8C1921f9761Ae"
+    category: infra
+    note: ERC-7540 state machine; locks depositPrice per-user at fulfilment
+  - id: spoke
+    label: Spoke (Ethereum)
+    address: "0xEC3582fcDc34078a4B7a8c75a5a3AE46f48525aB"
+    category: infra
+    note: Local share/vault registry; sole non-Root ward on JAAA Tranche
+  - id: hub
+    label: Hub (V3.1+)
+    address: "0xA4A7Bb3831958463b3FE3E27A6a160F764341953"
+    category: infra
+    note: updateSharePrice / approveDeposits / issueShares — pool-manager-gated
+  - id: hub-registry
+    label: HubRegistry (current)
+    address: "0x19f46D8130e610C6C0f0116EA40Fb781dEFaDE93"
+    category: infra
+    note: manager(poolId, addr) — authoritative manager map for JAAA pool
+  - id: pool-escrow
+    label: PoolEscrow (JAAA)
+    address: "0x040170aA9AAa916c2e8135777a31f17C440BA52a"
+    category: infra
+    note: Holds queued USDC pre-fulfilment + operational float
+  - id: full-restrictions
+    label: FullRestrictions hook
+    address: "0x3C5E7B28c4fF6F0bc8d9A9587992E96401e680A7"
+    category: infra
+    note: KYC allowlist enforced on every JAAA transfer
+  - id: balance-sheet
+    label: BalanceSheet
+    address: "0x12a110cE5f0FC871cC72Bc7ECaF35cf39DD0f43e"
+    category: infra
+    note: Double-entry onchain accounting layer (V3.1+)
+  - id: message-dispatcher
+    label: MessageDispatcher
+    address: "0xf837a22883e004f705E0D7e1deE08e295Df30B27"
+    category: infra
+    note: Outgoing cross-chain dispatcher; same-chain calls Spoke synchronously
+  - id: root
+    label: Root (48h timelock)
+    address: "0x7Ed48C31f2fdC40d37407cBaBf0870B2b688368f"
+    category: infra
+    note: Master ward; 48h delay on scheduleRely / executeScheduledRely
+
+  # === Governance ===
+  - id: protocol-admin-safe
+    label: ProtocolAdminSafe (4-of-9)
+    address: "0x9711730060C73Ee7Fcfe1890e8A0993858a7D225"
+    category: governance
+    note: Sole live admin path to Root (V3.0 Safe Deny'd at block 24376326)
+  - id: protocol-guardian
+    label: ProtocolGuardian (current)
+    address: "0xCEb7eD5d5B3bAD3088f6A1697738B60d829635c6"
+    category: governance
+    note: safe() = ProtocolAdminSafe; Root.wards()=1; pause / scheduleUpgrade
+  - id: ops-guardian
+    label: OpsGuardian
+    address: "0x055589229506Ee89645EF08ebE9B9a863486d0dE"
+    category: governance
+    note: Day-to-day operational guardian; behind OpsSafe
+  - id: ops-safe
+    label: OpsSafe
+    address: "0xd21413291444C5c104F1b5918cA0D2f6EC91Ad16"
+    category: governance
+  - id: pool-manager-safe
+    label: Pool Manager Safe (3-of-8)
+    address: "0x742d100011ffbc6e509e39dbcb0334159e86be1e"
+    category: governance
+    note: JAAA pool manager — set NAV, approve/issue/revoke, allowlist
+  - id: pool-manager-eoa
+    label: Pool Manager EOA (single key)
+    address: "0x7bf090b97f896fb77e852cc98aa52a8cb7dc02ec"
+    category: governance
+    note: Identical privileges to the 3-of-8 Safe — unbounded NAV-push + can replace co-managers via Hub.updateHubManager
+
+  # === External dependencies ===
+  - id: dep-anemoy
+    label: Anemoy / JH / StoneX / Trident (Offchain)
+    category: dependency
+    note: BVI Professional Fund issuer, Janus Henderson sub-advisor, StoneX custody, Trident Trust admin, MHA Cayman audit — holds the AAA CLO portfolio
+  - id: dep-usdc
+    label: USDC (Circle)
+    address: "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"
+    category: dependency
+    note: Subscription / redemption settlement asset
+  - id: dep-wormhole
+    label: Wormhole (cross-chain adapter)
+    category: dependency
+    note: MultiAdapter routes Hub messages to non-Ethereum chains
+
+edges:
+  # === Governance flow → Root (master ward) ===
+  - from: protocol-admin-safe
+    to: protocol-guardian
+    kind: controls
+    label: safe() = ProtocolAdminSafe
+  - from: protocol-guardian
+    to: root
+    kind: holds-role
+    label: Root.wards() = 1
+  - from: ops-safe
+    to: ops-guardian
+    kind: controls
+  - from: ops-guardian
+    to: root
+    kind: holds-role
+    label: pause / unpause (Root.paused())
+
+  # === Pool manager → registry → Hub (the privileged daily path) ===
+  - from: pool-manager-safe
+    to: hub-registry
+    kind: holds-role
+    label: manager(poolId, addr) = true
+  - from: pool-manager-eoa
+    to: hub-registry
+    kind: holds-role
+    label: manager(poolId, addr) = true — single key
+  - from: pool-manager-safe
+    to: hub
+    kind: holds-role
+    label: _isManager gate — updateSharePrice / issueShares / etc
+  - from: pool-manager-eoa
+    to: hub
+    kind: holds-role
+    label: _isManager gate — unbounded NAV-push authority
+  - from: hub
+    to: hub-registry
+    kind: manages
+    label: updateHubManager → registry.updateManager
+  - from: pool-manager-safe
+    to: full-restrictions
+    kind: manages
+    label: updateMember (KYC allowlist)
+  - from: pool-manager-eoa
+    to: full-restrictions
+    kind: manages
+    label: updateMember (KYC allowlist)
+
+  # === Hub → Spoke (sync on Ethereum) → JAAA mint authority ===
+  - from: hub
+    to: message-dispatcher
+    kind: routes-through
+    label: sender() = MessageDispatcher
+  - from: message-dispatcher
+    to: spoke
+    kind: routes-through
+    label: same-chain → Spoke.updatePricePoolPerShare
+  - from: message-dispatcher
+    to: dep-wormhole
+    kind: routes-through
+    label: cross-chain
+  - from: spoke
+    to: jaaa
+    kind: mints
+    label: wards = 1 (verified onchain)
+  - from: root
+    to: jaaa
+    kind: mints
+    label: wards = 1 (master ward)
+  - from: full-restrictions
+    to: jaaa
+    kind: manages
+    label: onERC20Transfer hook
+
+  # === Investor deposit/redeem flow ===
+  - from: async-vault
+    to: async-request-manager
+    kind: routes-through
+    label: requestDeposit / mint
+  - from: async-request-manager
+    to: pool-escrow
+    kind: routes-through
+    label: USDC in / out
+  - from: async-request-manager
+    to: spoke
+    kind: routes-through
+    label: batch fulfilment → ShareToken.mint
+  - from: async-vault
+    to: jaaa
+    kind: routes-through
+    label: share() = JAAA
+  - from: balance-sheet
+    to: pool-escrow
+    kind: manages
+    label: onchain accounting layer
+
+  # === Capital flow / external dependencies ===
+  - from: pool-escrow
+    to: dep-usdc
+    kind: deposits-into
+    label: USDC float
+  - from: jaaa
+    to: dep-anemoy
+    kind: deposits-into
+    label: 1:1 claim on offchain AAA CLO portfolio
+  - from: dejaaa
+    to: jaaa
+    kind: routes-through
+    label: freely-transferable wrapper
+
+  # === Root admin reach (single symbolic edge — see report role table) ===
+  - from: root
+    to: hub
+    kind: controls
+    label: Root.wards() = 1 on Hub / Spoke / AsyncRequestManager / Tranche
