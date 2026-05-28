@@ -4,7 +4,7 @@
 - **Token:** Flex yvUSD/USDC Lender position token (`ysUSDC`)
 - **Chain:** Ethereum Mainnet
 - **Token Address:** [`0x33C45216E121E31f1a8CD24C7E9d0d0C9e29B732`](https://etherscan.io/address/0x33C45216E121E31f1a8CD24C7E9d0d0C9e29B732)
-- **Final Score: 2.9/5.0**
+- **Final Score: 2.53/5.0**
 
 ## Overview + Links
 
@@ -42,7 +42,7 @@ The most recent review (Dedaub) found **no Critical or High** issues *on the cod
 - **Core (covered by the four reviews):** the Liquity-V2 CDP engine, `Lender.sol`, `LenderFactory.sol`, oracles and registry. Between the Dedaub commit `b4b9656` and current `master` (`341e73a`), these changed only trivially — `Lender.sol` (comment-only), `factory.vy` (comment-only), and `trove_manager.vy` (+2 same-block guards that *strengthen* the audited behavior). So the audited core is materially the deployed core.
 - **Allocator (`FlexLenderStrategy` / `StrategyFactory`, the `yvFlexUSDC → FlexLenderStrategy → Lender` path Yearn deposits through):** added May 6, 2026, after the four core reviews, and **under review in Yearn's own strategy-security process** ([yearn-strategies #756](https://github.com/yearn/yearn-strategies/issues/756), reviewers Schlagonia & fp-crypto). As of this assessment that ticket is **open with the "Review Completed" boxes unchecked** (a preliminary internal risk score is recorded), i.e. the strategy is being reviewed by Yearn's security team but the review is **not yet marked complete**, and it is not a published external audit. Yearn should confirm #756 is closed before scaling.
 
-**Complexity:** The onchain surface is **substantial** — a full Liquity-V2-style CDP engine (`trove_manager.vy`, `sorted_troves.vy`, `dutch_desk.vy`, `auction.vy`, `factory.vy`, `registry.vy`) written in Vyper, plus a Solidity Yearn-V3 lender layer (`Lender.sol`, `LenderFactory.sol`) and an allocator strategy (`FlexLenderStrategy`). Liquity V2 is a well-understood design, but the fixed-rate + redemption + bad-debt-socialization + Yearn-vault-accounting combination introduces non-trivial cross-component interactions, several of which were the source of audit findings (notably the stale-PPS interaction between synchronous asset changes and the keeper-gated Yearn `report()`).
+**Complexity:** The onchain surface is **substantial** — a full Liquity-V2-style CDP engine (`trove_manager.vy`, `sorted_troves.vy`, `dutch_desk.vy`, `auction.vy`, `factory.vy`, `registry.vy`) written in Vyper, plus a Solidity Yearn-V3 lender layer (`Lender.sol`, `LenderFactory.sol`) and an allocator strategy (`FlexLenderStrategy`). Liquity V2 is a well-understood design, but the fixed-rate + redemption + bad-debt-socialization + Yearn-vault-accounting combination introduces non-trivial cross-component interactions, several of which were the source of audit findings (notably the stale-PPS interaction between synchronous asset changes and Yearn `report()` cadence).
 
 **Status of the April-27 High (FLEX-001, stale Lender PPS):**
 
@@ -67,14 +67,14 @@ The most recent review (Dedaub) found **no Critical or High** issues *on the cod
 
 Flex delegates lender funds into a single market today. The fund flow is:
 
-**User USDC → `yvFlexUSDC` (Yearn V3 allocator vault) → `FlexLenderStrategy` → `Lender` (ysUSDC) → market lending**, where borrowers post **yvUSD** collateral to borrow USDC. The Lender's `_freeFunds` calls `TroveManager.redeem(...)`, so lender withdrawals beyond idle USDC are satisfied by **redeeming borrower collateral via Dutch auction** — proceeds can arrive asynchronously and at a conversion loss.
+**User USDC → `yvFlexUSDC` (Yearn V3 allocator vault) → `FlexLenderStrategy` → `Lender` (ysUSDC) → market lending**, where borrowers post **yvUSD** collateral to borrow USDC. The Lender's `_freeFunds` calls `TroveManager.redeem(...)`, so lender withdrawals beyond idle USDC are satisfied by **redeeming borrower collateral via Dutch auction**. In this yvUSD/USDC market, the auction can be taken by redeeming yvUSD for USDC through the `yv_auction_taker`, so the path can clear near 1:1 when taken immediately; otherwise execution depends on auction/taker flow and can settle with delay or slippage.
 
 Monitoring of fund delegation: the set of endorsed markets is enumerable onchain via `Registry.get_all_markets()` (currently returns exactly one TroveManager, `0xd82D…2e49`). New markets require Daddy to call `Registry.endorse(...)`, which is observable. The Yearn-side allocation (which strategies the `yvFlexUSDC` vault funds, and debt caps) is managed by the Yearn Strategist MultiSig (SMS) through standard Yearn V3 vault roles.
 
 ### Accessibility `[If Applicable]`
 
 - **Lending (mint of `ysUSDC`):** Permissionless ERC-4626 deposit of USDC into the Lender — anyone can mint Lender shares 1:1 against deposited assets. The intermediate `FlexLenderStrategy` is access-gated (`openDeposits = false`; only allow-listed addresses such as the `yvFlexUSDC` vault may deposit), but the underlying Lender vault itself is open.
-- **Redeeming (burn of `ysUSDC`):** Permissionless `withdraw`/`redeem`. If idle borrow token is insufficient, redemption triggers a collateral Dutch auction; assets may arrive asynchronously and below par.
+- **Redeeming (burn of `ysUSDC`):** Permissionless `withdraw`/`redeem`. If idle borrow token is insufficient, redemption triggers a collateral Dutch auction; for the current yvUSD/USDC market this can be taken immediately via yvUSD redemption into USDC, but exit still depends on auction takers and yvUSD vault liquidity beyond idle Lender cash.
 - **Borrowing:** Permissionless — anyone can open a Trove with yvUSD collateral.
 - **Fees / rate limits:** Borrowers pay an **upfront fee** (~1 week of market-average rate) and a **premature-rate-adjustment fee**. Docs cite a **10% lender performance fee** to the protocol; the Lender's onchain `performanceFee` reads **0** at assessment time, with `performanceFeeRecipient = Daddy`. There is a per-Lender `depositLimit` (currently $2M) and the allocator vault deposit limit is effectively uncapped.
 
@@ -94,7 +94,7 @@ The assessed token `ysUSDC` is a **Yearn V3 `BaseHooks` TokenizedStrategy** (ERC
 
 **Rate limits / supply caps:** `depositLimit = 2,000,000 USDC` on the Lender (settable by management/Daddy via `setDepositLimit`); `availableDepositLimit` returns 0 once total assets reach the cap.
 
-**Backing check at mint time:** Atomic — depositor transfers USDC in the same tx. (Caveat: share **price** is computed against a *cached* `totalAssets` refreshed only by the keeper-gated `report()`; see *Provability* and the April-27 FLEX-001 finding. This is a mispricing/arbitrage surface, not an unbacked-mint surface.)
+**Backing check at mint time:** Atomic — depositor transfers USDC in the same tx. (Caveat: share **price** is computed against a *cached* `totalAssets` refreshed by permissionless `report()` calls; see *Provability* and the now-mitigated April-27 FLEX-001 finding. This is a mispricing/arbitrage surface, not an unbacked-mint surface.)
 
 There is **no privileged minter** — a positive signal. The dependency-graph YAML (if generated) should therefore contain **no `mints` edge** into `ysUSDC`.
 
@@ -121,10 +121,10 @@ There is **no privileged minter** — a positive signal. The dependency-graph YA
 
 ## Liquidity Risk
 
-- **Exit is market-based, not guaranteed-instant 1:1.** Lenders redeeming `ysUSDC` are first paid from **idle borrow token** (≈$200K of ~$802K, ~25%, at assessment). Beyond idle liquidity, `Lender._freeFunds` calls `TroveManager.redeem`, which **Dutch-auctions borrower collateral**; proceeds are routed to the withdrawer but can arrive **asynchronously** and **below par** (slippage + auction fees). `FlexLenderStrategy.availableWithdrawLimit` is bounded by idle USDC in the strategy + idle USDC in the Lender.
-- **Depth:** TVL is small (~$1M) and depositor concentration is high (essentially Yearn's allocator). There is no deep external DEX market for `ysUSDC`; exit relies on the protocol's own redemption machinery against ~$700K of yvUSD collateral.
-- **Stress behavior:** During collateral stress, redemptions/liquidations could deliver less than 1:1, and bad debt is socialized to lenders. Auctions have a 1-day length with 1-minute price steps. No fixed withdrawal queue, but large exits effectively throttle through the auction mechanism.
-- **Same-value assets:** Both legs are USD, so modest exit delays carry limited price risk, but the async/auction conversion is a real liquidity constraint for large lenders.
+- **Exit is auction-mediated beyond idle cash.** Lenders redeeming `ysUSDC` are first paid from **idle borrow token** (≈$200K of ~$802K, ~25%, at assessment). Beyond idle liquidity, `Lender._freeFunds` calls `TroveManager.redeem`, which **Dutch-auctions borrower collateral**; proceeds are routed to the withdrawer. For the current yvUSD/USDC market, the `yv_auction_taker` can take auctions by redeeming yvUSD for USDC, so redemptions can clear near 1:1 when the auction is taken immediately. `FlexLenderStrategy.availableWithdrawLimit` is bounded by idle USDC in the strategy + idle USDC in the Lender.
+- **Depth:** TVL is small (~$1M) and depositor concentration is high (essentially Yearn's allocator). There is no deep external DEX market for `ysUSDC`; exit relies on the protocol's own redemption machinery against ~$700K of yvUSD collateral and on yvUSD vault liquidity.
+- **Stress behavior:** During collateral stress, redemptions/liquidations could deliver less than 1:1, and bad debt is socialized to lenders. Auctions have a 1-day length with 1-minute price steps; current deployment parameters start at 100% of oracle value and stop below 99%, so the normal yvUSD/USDC path is near par, but delayed or stressed takes can still introduce execution risk. No fixed withdrawal queue, but large exits effectively throttle through the auction mechanism.
+- **Same-value assets:** Both legs are USD, so modest exit delays carry limited price risk, and the yvUSD redemption-taker path is a material mitigant. The remaining liquidity risk is mainly small-market depth, taker execution, and yvUSD vault exit liquidity.
 
 ## Centralization & Control Risks
 
@@ -158,8 +158,8 @@ There is **no privileged minter** — a positive signal. The dependency-graph YA
 
 ## Operational Risk
 
-- **Team:** Pseudonymous. The lead developer is **`johnnyonline` / `johnny.flexmeow.eth`**, an active contributor in the Yearn ecosystem (the protocol reuses Yearn's TokenizedStrategy, SMS, yHaaS and Vault Factory). The other two multisig signers are **not publicly disclosed (TODO)**.
-- **Documentation:** User-facing docs are clear on mechanics (redemptions, liquidations, fees, bad-debt socialization). However, there is **no governance/ownership documentation**, and the risks page's "no admin keys / immutable" claim **contradicts the onchain Daddy multisig** — a transparency gap that should be weighed.
+- **Team:** Pseudonymous. The lead developer is **`johnnyonline` / `johnny.flexmeow.eth`**, an active contributor in the Yearn ecosystem (the protocol reuses Yearn's TokenizedStrategy, SMS, yHaaS and Vault Factory). Per team disclosure, the Daddy Safe signer set is two Flex-dev keys plus two well-known pseudonymous Yearn-ecosystem reviewers ("corn" and Schlagonia); public docs still do not provide an address-to-person signer mapping.
+- **Documentation:** User-facing docs are clear on mechanics (redemptions, liquidations, fees, bad-debt socialization). However, there is **no governance/ownership documentation**, and the risks page's "no admin keys / immutable" claim **contradicts the onchain Daddy multisig** — a transparency gap that should be weighed even though the signer set was disclosed during review.
 - **Legal structure:** **TODO** — no legal entity, jurisdiction, or foundation disclosed.
 - **Incident response:** No documented or tested incident-response plan; no bug bounty found. Daddy can shut down the Lender in an emergency.
 
@@ -251,7 +251,7 @@ Onchain reads: `Lender.totalAssets()`, `Lender.pricePerShare()`, `TroveManager.s
 - **Very new & small** — ~2 weeks live, ~$0.7–1.0M TVL, highly concentrated depositor base.
 - **Governance overclaim + low threshold** — docs advertise "no admin keys / immutable," but a **2/4 multisig with no timelock** controls Lender parameters, fees, shutdown, keeper, and market endorsement. Powers cannot seize user funds and signers are reputable, but only two signatures are required and there is no delay.
 - **Single-asset collateral that is also the oracle** — the market is priced by yvUSD's own PPS with no external feed; yvUSD loss/depeg/PPS manipulation flows straight into solvency.
-- **Exit is auction-based, not instant** — lender withdrawals beyond idle USDC trigger Dutch-auction collateral redemptions with async delivery and potential slippage; **bad debt is socialized to lenders**.
+- **Exit is auction-mediated beyond idle cash** — lender withdrawals beyond idle USDC trigger Dutch-auction collateral redemptions. The yvUSD/USDC market has an immediate yvUSD-redemption taker path that can clear near 1:1, but large exits still rely on taker execution and yvUSD vault liquidity; **bad debt is socialized to lenders**.
 - **Allocator review not yet complete** — the `FlexLenderStrategy`/`StrategyFactory` path Yearn deposits through is under Yearn's internal strategy review ([#756](https://github.com/yearn/yearn-strategies/issues/756)), which is open/unchecked at assessment time — not a published external audit.
 
 ### Critical Risks `[If Any]`
@@ -291,29 +291,29 @@ Onchain reads: `Lender.totalAssets()`, `Lender.pricePerShare()`, `TroveManager.s
 
 **Subcategory A: Governance** — Immutable core. Privileged control is a **2/4 multisig with no timelock** (reputable signers: Flex dev + Schlagonia + "corn") whose powers are genuinely **limited — it cannot seize collateral or lender shares**, only set parameters/fees/keeper, shut the Lender down, and endorse markets. The low signature threshold and absence of a timelock cap this below the well-governed tiers, but the immutable core and bounded, non-custodial powers keep it off the worst tier. → **3**
 
-**Subcategory B: Programmability** — Fully programmatic: borrowing, interest, redemptions, liquidations and auctions are onchain, and PPS is computed onchain (`idle + sync_total_debt`). The only non-determinism is the (permissionless) keeper `report()` cadence; the stale-PPS concern is closed (atomic report on bad debt; profit-locking on surplus). → **1.5**
+**Subcategory B: Programmability** — Fully programmatic: borrowing, interest, redemptions, liquidations and auctions are onchain, and PPS is computed onchain (`idle + sync_total_debt`). The prior stale-PPS concern is closed (atomic report on bad debt; profit-locking on surplus); permissionless `report()` cadence is only a minor liveness consideration. → **1**
 
-**Subcategory C: External Dependencies** — Single-collateral market where the **sole collateral (yvUSD) is also the only oracle input**; plus Yearn V3 framework and USDC. Critical functionality depends on yvUSD. → **3.5**
+**Subcategory C: External Dependencies** — Single-collateral market where the **sole collateral (yvUSD) is also the only oracle input**; plus Yearn V3 framework and USDC. yvUSD is a material dependency, but it is a Yearn-assessed USDC-denominated vault rather than an unknown external dependency, so this fits the established-dependency tier. → **3**
 
-**Centralization Score = (3 + 1.5 + 3.5) / 3 = 2.67**
+**Centralization Score = (3 + 1 + 3) / 3 = 2.33**
 
-**Score: 2.7/5** — Immutable, fully-programmatic mechanics with non-custodial governance, held up mainly by the concentrated, self-referential yvUSD collateral/oracle dependency.
+**Score: 2.33/5** — Immutable, fully-programmatic mechanics with non-custodial governance, held up mainly by the concentrated, self-referential yvUSD collateral/oracle dependency.
 
 #### Category 3: Funds Management (Weight: 30%)
 
 **Subcategory A: Collateralization** — 100%+ onchain over-collateralization (≈117.6%) in high-quality DeFi asset (yvUSD), real-time verifiable; tempered by thin buffer vs 110% MCR, single-asset concentration, and bad-debt socialization. → **2.5**
 
-**Subcategory B: Provability** — Fully onchain and recomputable; minor offchain reliance on keeper-gated PPS refresh. → **2**
+**Subcategory B: Provability** — Fully onchain and recomputable; total debt, collateral, and Lender assets are readable directly, and PPS/reporting is programmatic and permissionless. No offchain reserve or admin reporting dependency remains after the FLEX-001 mitigations. → **1**
 
-**Funds Management Score = (2.5 + 2) / 2 = 2.25 ≈ 2.3**
+**Funds Management Score = (2.5 + 1) / 2 = 1.75**
 
-**Score: 2.3/5** — A clear strength: transparent, onchain over-collateralization.
+**Score: 1.75/5** — A clear strength: transparent, onchain over-collateralization and independently recomputable reserves.
 
 #### Category 4: Liquidity Risk (Weight: 15%)
 
-Market-based exit: idle USDC first (~25%), then Dutch-auction redemption of collateral with async delivery and slippage; TVL small (~$1M). Throttle via auctions (+0.5), but same-value USD legs tolerate some delay. → **3.5**
+Auction-mediated exit: idle USDC first (~25%), then Dutch-auction redemption of yvUSD collateral. The yvUSD/USDC market can clear near 1:1 through immediate `kick + take` using yvUSD redemption, but liquidity depth is small (~$1M), large exits rely on taker execution/yvUSD vault liquidity, and auctions remain the throttle beyond idle cash. Same-value USD legs mitigate price risk. → **3**
 
-**Score: 3.5/5** — Exit depends on redemption machinery, not instant 1:1 redemption.
+**Score: 3/5** — Exit is materially better than a generic delayed auction because yvUSD can be redeemed into USDC for taking, but the rubric still treats this as market-based liquidity, not deep direct instant redemption.
 
 #### Category 5: Operational Risk (Weight: 5%)
 
@@ -326,13 +326,13 @@ Pseudonymous but Yearn-ecosystem-known lead dev; adequate mechanics docs but **m
 | Category | Score | Weight | Weighted |
 |----------|-------|--------|----------|
 | Audits & Historical | 3.5 | 20% | 0.70 |
-| Centralization & Control | 2.7 | 30% | 0.80 |
-| Funds Management | 2.3 | 30% | 0.69 |
-| Liquidity Risk | 3.5 | 15% | 0.525 |
+| Centralization & Control | 2.33 | 30% | 0.70 |
+| Funds Management | 1.75 | 30% | 0.525 |
+| Liquidity Risk | 3.0 | 15% | 0.45 |
 | Operational Risk | 3.0 | 5% | 0.15 |
-| **Final Score** | | | **2.9/5.0** |
+| **Final Score** | | | **2.525 ≈ 2.53/5.0** |
 
-**Optional Modifiers:** None apply (protocol < 2 years; TVL not sustained). Final score ≈ **2.9/5.0**.
+**Optional Modifiers:** None apply (protocol < 2 years; TVL not sustained). Final score ≈ **2.53/5.0**.
 
 ### Risk Tier
 
@@ -344,7 +344,7 @@ Pseudonymous but Yearn-ecosystem-known lead dev; adequate mechanics docs but **m
 | **3.5-4.5** | **Elevated Risk** | Limited approval, strict limits |
 | **4.5-5.0** | **High Risk** | Not recommended |
 
-**Final Risk Tier: Medium Risk** — *Approved with enhanced monitoring.* The driving constraints are immaturity (~2 weeks live, ~$1M TVL) and the concentrated yvUSD collateral/oracle dependency, partially offset by strong core audit coverage, immutable fully-programmatic mechanics, non-custodial governance, and transparent onchain over-collateralization. Recommend strict size limits and confirming the allocator's Yearn strategy review (#756) is complete before scaling.
+**Final Risk Tier: Medium Risk** — *Approved with enhanced monitoring.* The driving constraints are immaturity (~2 weeks live, ~$1M TVL), no bug bounty, and the concentrated yvUSD collateral/oracle dependency, partially offset by strong core audit coverage, immutable fully-programmatic mechanics, non-custodial governance, transparent onchain over-collateralization, and the near-par yvUSD/USDC auction-taker exit path. Recommend strict size limits and confirming the allocator's Yearn strategy review (#756) is complete before scaling.
 
 ---
 
