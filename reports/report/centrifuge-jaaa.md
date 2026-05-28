@@ -160,6 +160,25 @@ Centrifuge V3 has received an unusually heavy audit cadence — **20+ engagement
 - **Transfer restriction:** Share-to-share transfers on the JAAA token are gated by the `FullRestrictions` hook ([`0x3C5E7B28c4fF6F0bc8d9A9587992E96401e680A7`](https://etherscan.io/address/0x3C5E7B28c4fF6F0bc8d9A9587992E96401e680A7)) — only allowlisted addresses can hold or receive JAAA. The allowlist is managed by Anemoy / the pool manager (via `Spoke.updateRestriction` → hook).
 - **Fees:** Management 0.40% p.a., performance 0%, no subscription/redemption fees onchain (rwa.xyz). Gas on each user-initiated request applies normally.
 
+### Token Mint Authority
+
+**Mint mechanism:** Role-gated `auth` (MakerDAO-style `wards` access control). `JAAA.Tranche` inherits `ERC20.mint(address,uint256) public virtual auth` from `src/misc/ERC20.sol` in [centrifuge/protocol](https://github.com/centrifuge/protocol/blob/main/src/misc/ERC20.sol); the `auth` modifier requires `wards[msg.sender] == 1`.
+
+**Mint requires backing:** **No** at the token-contract level. The standard happy-path mint (Anemoy fulfilling a deposit batch) does flow against USDC that was previously escrowed into [`PoolEscrow`](https://etherscan.io/address/0x040170aA9AAa916c2e8135777a31f17C440BA52a) by the investor's `requestDeposit`, but that backing check lives in `AsyncRequestManager.fulfillDepositRequest`, not in `Tranche.mint`. A privileged ward can call `Tranche.mint` directly with no USDC transfer.
+
+**Per-address mint authority** (verified onchain 2026-05-28 via `cast call 0x5a0F93D040De44e78F251b03c43be9CF317Dcf64 "wards(address)(uint256)"`):
+
+| Address | Can Mint | Can Burn | Role / Mechanism | Notes |
+|---------|:--------:|:--------:|------------------|-------|
+| [`0xEC3582fcDc34078a4B7a8c75a5a3AE46f48525aB`](https://etherscan.io/address/0xEC3582fcDc34078a4B7a8c75a5a3AE46f48525aB) | ✓ | ✓ | Spoke, `wards=1` | Routes all production minting from `AsyncRequestManager.fulfillDepositRequest` / batch fulfilment |
+| [`0x7Ed48C31f2fdC40d37407cBaBf0870B2b688368f`](https://etherscan.io/address/0x7Ed48C31f2fdC40d37407cBaBf0870B2b688368f) | ✓ | ✓ | Root, `wards=1` | Master ward; 48h timelock on `scheduleRely` / `executeScheduledRely` before any new ward can be added |
+
+Other governance / infra addresses checked and confirmed **not wards** on the JAAA share token (`wards = 0` for all): `AsyncRequestManager` ([`0xF482…761Ae`](https://etherscan.io/address/0xF48256AbDDf96EcDDc4B3DbD23E8C1921f9761Ae)), `Hub` ([`0xA4A7…1953`](https://etherscan.io/address/0xA4A7Bb3831958463b3FE3E27A6a160F764341953)), `ProtocolAdminSafe` 4-of-9 ([`0x9711…7D225`](https://etherscan.io/address/0x9711730060C73Ee7Fcfe1890e8A0993858a7D225)). Hub-level pool managers (the 3-of-8 Safe and the EOA) therefore cannot call `Tranche.mint` *directly* — they reach mint authority indirectly by calling `Hub.issueShares`, which routes through `AsyncRequestManager` and then `Spoke` (a ward).
+
+**Rate limits / supply caps:** `ERC20.mint` enforces `require(totalSupply <= type(uint128).max, ExceedsMaxSupply())` — effectively unlimited at 6 decimals (~3.4×10²² JAAA). No per-block rate limit, no per-minter cap, no Guardian-pause-on-mint.
+
+**Backing check at mint time:** **None at the `Tranche.mint` level.** The fulfilment path enforces "approved deposits ≤ escrowed USDC" inside `AsyncRequestManager`, but that's a procedural invariant of one specific code path — a compromised Spoke or Root caller can mint outside that path. This is the basis for the "Mint without backing is technically possible" risk flagged in Key Risks; the standard 48h Root timelock and the wards model are the only mitigations.
+
 ### Collateralization
 
 - **Backing:** 1:1 by the **Janus Henderson Anemoy AAA CLO Fund** — a portfolio of AAA-rated, floating-rate CLO tranches. Cash and short-duration AAA CLO debt of multiple underlying CLO issuers.
