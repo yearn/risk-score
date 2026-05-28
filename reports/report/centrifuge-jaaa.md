@@ -4,7 +4,7 @@
 - **Token:** JAAA (Janus Henderson Anemoy AAA CLO Fund Token)
 - **Chain:** Ethereum
 - **Token Address:** [`0x5a0F93D040De44e78F251b03c43be9CF317Dcf64`](https://etherscan.io/address/0x5a0F93D040De44e78F251b03c43be9CF317Dcf64)
-- **Final Score: 3.05/5.0**
+- **Final Score: 3.03/5.0**
 
 ## Overview + Links
 
@@ -632,13 +632,14 @@ Both the 3-of-8 Pool Manager Safe `0x742d…be1e` and the EOA `0x7bf090b9…02ec
 
 #### Category 5: Operational Risk (Weight: 5%)
 
-- Team transparency: Centrifuge team is public; Anemoy/Janus Henderson are public institutional entities.
-- Documentation: Excellent for the Centrifuge protocol; good but not transparent-with-per-issuer-holdings for the JAAA fund.
-- Legal: BVI Professional Fund + Centrifuge Network Foundation. Established entities and clear jurisdiction.
+- **Team transparency:** Centrifuge team is fully public (Lucas Vogelsang, CEO; Martin Quensel, co-founder). Anemoy and Janus Henderson are public institutional entities with named portfolio managers.
+- **Documentation:** Excellent for the Centrifuge protocol (developer + user docs, architecture pages, every audit posted to GitHub). The JAAA fund itself is also transparently disclosed — the full 21-position CLO portfolio with CUSIP/ISIN/market-value/% is in the public pool-metadata IPFS; the Anemoy fund page and monthly factsheet are public.
+- **Legal:** BVI Professional Fund issued by Anemoy Capital SPC Limited (regulated by the BVI FSC), Centrifuge Network Foundation (Switzerland). Both are established legal entities with clear jurisdiction.
+- **Audit cadence on the protocol code:** Heavy and ongoing (20+ engagements, see Category 1).
 
-→ **Score: 2.0**
+→ **Subcategory score: 1.5** — every transparency dimension (team, docs, holdings, legal) is fully public and well-documented. The remaining friction (Pool Manager signer identities not published; investor letters not public) is standard for institutional-RWA and keeps this from a perfect 1.0.
 
-**Score: 2.0/5**
+**Score: 1.5/5**
 
 ### Final Score Calculation
 
@@ -648,17 +649,15 @@ Both the 3-of-8 Pool Manager Safe `0x742d…be1e` and the EOA `0x7bf090b9…02ec
 | Centralization & Control | 4.0 | 30% | 1.20 |
 | Funds Management | 3.0 | 30% | 0.90 |
 | Liquidity Risk | 3.0 | 15% | 0.45 |
-| Operational Risk | 2.0 | 5% | 0.10 |
-| **Final Score** | | | **3.05/5.0** |
+| Operational Risk | 1.5 | 5% | 0.075 |
+| **Final Score** | | | **3.03/5.0** |
 
 **Optional Modifiers:**
 
 - Protocol live >2 years with no incidents: **not eligible** (V3 is ~10 months old).
 - TVL maintained >$500M for >1 year: **not eligible** at JAAA level (Grove redemption has brought aggregate NAV from $1B at launch to ~$437.9M as of 2026-05-28); protocol-level TVL >$1B has been sustained <1 year. No modifier applied.
 
-**Optional add-ons applied:** None. (A prior draft applied +0.10 for "two coexisting governance Safes"; reviewer flagged this as stale — the V3.0 Guardian was in fact `Deny`'d on Root at block 24376326, so there is only one live admin path. Add-on removed.)
-
-**Final Score: 3.05/5.0** — sits in the upper end of the **Medium Risk** band (2.5–3.5), pulled there primarily by the EOA pool-manager + unbounded NAV-push capability documented in the Critical Risks subsection. If the EOA were removed from the HubRegistry and NAV updates were routed through a multisig (or the V3.2 NAVManager / SimplePriceManager were initialized for the JAAA pool), Programmability would compress from 5 to ~3 and the overall score would fall back toward 2.55–2.65.
+**Final Score: 3.03/5.0** — sits in the upper end of the **Medium Risk** band (2.5–3.5), pulled there primarily by the EOA pool-manager + unbounded NAV-push capability documented in the Critical Risks subsection. If the EOA were removed from the HubRegistry and NAV updates were routed through a multisig (or the onchain `NAVManager` / `SimplePriceManager` were initialized for the JAAA pool), Programmability would compress from 5 to ~3 and the overall score would fall back toward 2.50–2.65.
 
 ### Risk Tier
 
