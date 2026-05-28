@@ -220,7 +220,7 @@ Centrifuge V3 has received an unusually heavy audit cadence — **20+ engagement
   Either manager can set prices, approve/issue/revoke shares, force-cancel investor requests, and update the allowlist for the JAAA pool. The **EOA path is a single-key risk** — compromise of one signer is sufficient to mis-price or seize. Investor recourse is to (a) wait for the 48h Root timelock to ratify a Pool Manager change or (b) rely on Guardian pause.
 - **Root timelock:** `delay()` = **172,800 s (48 hours)** for `scheduleRely`/`executeScheduledRely`. The Guardian wraps the Safe and adds a Zodiac Delay module of ~24h per Centrifuge docs (not directly verified onchain in this session). Aggregate "schedule new admin" delay is therefore documented as **72h**; the onchain Root delay alone is 48h.
 - **Guardian pause:** `Guardian.pause()` is callable without delay and freezes the protocol. `Guardian.unpause()` and other privileged paths require the Safe.
-- **CFG token governance:** Centrifuge maintains a [governance forum](https://gov.centrifuge.io/) and [governance portal](https://centrifuge.io/governance/) where CFG holders vote on protocol parameters. The on-chain enforcement linkage between CFG votes and the EVM ProtocolAdminSafe is **not publicly documented**: TODO. As a practical matter, Ethereum-side authority sits with the two Safes above, not directly with CFG holders.
+- **CFG token governance:** CFG holders discuss and signal on protocol parameters via the [Centrifuge Governance Forum](https://gov.centrifuge.io/). There is **no onchain enforcement linkage between CFG votes and the EVM ProtocolAdminSafe** — the Safe signers act independently, and a CFG vote does not automatically trigger any onchain action on Ethereum. CFG-holder influence over Ethereum-side authority is therefore *social/political* (signaling consumed by Safe signers), not contractual. The structural trust anchor on Ethereum is the 4-of-9 Safe + 48h Root timelock, regardless of CFG voting outcomes.
 - **Privileged actions Root/Safes can take:**
   - Upgrade vault / share / hook / hub / spoke implementations
   - Add or remove wards on any protocol contract (including new mint authority on the share token)
@@ -255,7 +255,6 @@ Centrifuge V3 has received an unusually heavy audit cadence — **20+ engagement
 - **Legal structure:**
   - Centrifuge: Centrifuge Network Foundation (Switzerland — per public press kit; legal jurisdiction TODO to verify).
   - JAAA fund: BVI Professional Fund issued by Anemoy Capital SPC Limited, regulated by the BVI FSC under the Securities and Investment Business Act.
-- **Audit/attestation cadence:** Fund-level audits by MHA Cayman are required by BVI; specific cadence and historical reports public availability: TODO.
 - **Incident response:** No public incident-response playbook found, but Guardian-pause and TokenRecoverer flows exist on-protocol. No production incidents have been observed to test response.
 
 ## Monitoring
