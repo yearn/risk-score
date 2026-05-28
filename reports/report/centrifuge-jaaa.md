@@ -1,6 +1,6 @@
 # Protocol Risk Assessment: Centrifuge JAAA
 
-- **Assessment Date:** May 12, 2026
+- **Assessment Date:** May 28, 2026
 - **Token:** JAAA (Janus Henderson Anemoy AAA CLO Fund Token)
 - **Chain:** Ethereum
 - **Token Address:** [`0x5a0F93D040De44e78F251b03c43be9CF317Dcf64`](https://etherscan.io/address/0x5a0F93D040De44e78F251b03c43be9CF317Dcf64)
@@ -12,10 +12,10 @@ JAAA is the tokenized form of the **Janus Henderson Anemoy AAA CLO Fund** — a 
 
 The fund is brought onchain via **Centrifuge V3** (the protocol's Hub-and-Spoke EVM stack). The deployment under assessment is the **transfer-restricted** share class JAAA, deployed on Ethereum (poolId `281474976710663`). Investor flow is asynchronous (ERC-7540 style): an investor submits a deposit request through the `AsyncVault`, Anemoy/Centrifuge processes subscriptions daily, and the investor claims share tokens. Redemption mirrors this in reverse, settled in USDC. JAAA is the **accumulating** version (NAV grows over time; no distributions). Current onchain values:
 
-- **Onchain NAV:** ~1.0344 USDC per JAAA (verified via `AsyncRequestManager.convertToAssets()` at block ~22.9M, price last updated 2026-05-11)
-- **Ethereum supply:** ~147.78M JAAA (verified onchain)
-- **Total cross-chain JAAA NAV:** ~$417M ([rwa.xyz](https://app.rwa.xyz/assets/JAAA), May 2026)
-- **Centrifuge protocol TVL (DefiLlama):** ~$1.64B ([DefiLlama](https://defillama.com/protocol/centrifuge))
+- **Onchain NAV:** ~1.036124 USDC per JAAA (verified via `AsyncRequestManager.convertToAssets()` at block ~25.20M, price last updated 2026-05-27 12:00 UTC)
+- **Ethereum supply:** ~167.98M JAAA (verified onchain) — Ethereum-side NAV ≈ $174.05M
+- **Total cross-chain JAAA NAV:** ~$437.9M ([rwa.xyz](https://app.rwa.xyz/assets/JAAA), 2026-05-28)
+- **Centrifuge protocol TVL (DefiLlama):** ~$1.38B current; peak ~$1.99B on 2026-04-24 ([DefiLlama](https://defillama.com/protocol/centrifuge))
 - **Management fee:** 40 bps (0.40%) p.a. per [JAAA factsheet (April 2025)](https://gateway.pinata.cloud/ipfs/QmcWwvqnoUkH1bMYktnMdEywmUkUeK3PPex2i763zVNUmm). All-in **expense ratio: 0.50%** per on-chain pool metadata (mgmt fee + brokerage / custody / admin / audit). **Performance fee:** 0%.
 - **Settlement:** Daily subscriptions and redemptions, **usually T+3** per factsheet
 - **Holders (Ethereum + multichain):** 23 onchain holders per rwa.xyz — institutional only
@@ -134,13 +134,13 @@ Centrifuge V3 has received an unusually heavy audit cadence — **20+ engagement
 
 ## Historical Track Record
 
-- **Centrifuge V3 launch:** July 24, 2025 (multichain) ([Centrifuge blog](https://centrifuge.io/blog/centrifuge-v3-multichain-launch)). **~10 months in production** as of May 12, 2026.
+- **Centrifuge V3 launch:** July 24, 2025 (multichain) ([Centrifuge blog](https://centrifuge.io/blog/centrifuge-v3-multichain-launch)). **~10 months in production** as of May 28, 2026.
 - **V3.1 launch:** February 11, 2026 — adds Optimism, HyperEVM, Monad; new ProtocolGuardian deployed and the V3.0 Guardian was `Deny`'d on Root at block 24376326 ([Deny event tx](https://etherscan.io/tx/0x559e892f88bedd4042929ddfaa6d92225c6074ba582b9a48168db8138dc4a908)). The new HubRegistry [`0x19f46…ADE93`](https://etherscan.io/address/0x19f46D8130e610C6C0f0116EA40Fb781dEFaDE93) became the authoritative registry; JAAA pool was registered there at block 24376421 ([`UpdateManager` event tx](https://etherscan.io/tx/0x499ec04a42f6f4a961be5333f2d58db0538a8503cc058bb8b63fd9ca0fd5b9f8)). ([Centrifuge blog](https://centrifuge.io/blog/centrifuge-v3-1))
 - **V3.1.x Onchain Portfolio Manager (mainnet) / v3.2.0 (tagged, not yet mainnet-deployed):** An onchain `NAVManager` ([`0x493b…9130`](https://etherscan.io/address/0x493b6C8ccC7BfD43c5a20C4F2C648701f74E9130)) and `SimplePriceManager` ([`0x280C…0823`](https://etherscan.io/address/0x280C94eB440A8a75c2F8f6cA8c6FaFf907000823)) are deployed on Ethereum under the V3.1.0 release per the [Centrifuge deployments docs](https://docs.centrifuge.io/developer/protocol/deployments/). The expanded onchain-PM feature suite (onchain-PM, guards, accounting token — see commit message of [v3.2.0 tag](https://github.com/centrifuge/protocol/commit/41e19975946ac60927f3db7087f6c0b67bf752bb)) was tagged in the codebase on 2026-04-27 and audited Mar–Apr 2026, but the only `deploy-mainnet-v3.*` tags in the protocol repo as of this assessment target v3.1.x — there is **no `deploy-mainnet-v3.2-*` tag yet**, so v3.2.0 is not yet live on Ethereum mainnet. **JAAA does not currently use the deployed contracts** either — verified onchain: `NAVManager.initialized(281474976710663, 1)` = `false`, `NAVManager.navHook(281474976710663)` = `0x0`, and `SimplePriceManager.pricePoolPerShare(281474976710663)` returns the default 1e18. JAAA's price remains pushed manually by the Pool Manager (Safe or EOA).
 - **JAAA fund inception (offchain):** May 1, 2025. ([rwa.xyz](https://app.rwa.xyz/assets/JAAA))
 - **JAAA public onchain launch:** June 25, 2025 with a **$1B seed allocation from Grove** (Sky-incubated credit infrastructure protocol). ([Centrifuge blog](https://centrifuge.io/blog/centrifuge-janus-henderson-grove-tokenized-aaa-clo-fund) · [Businesswire](https://www.businesswire.com/news/home/20250624393365/en/Grove-Announces-Launch-of-Institutional-Grade-Credit-Infrastructure-DeFi-Protocol-with-%241-Billion-Allocation-to-Tokenized-Janus-Henderson-Anemoy-AAA-CLO-Strategy))
-- **Peak TVL (Centrifuge protocol-wide):** ~$1.99B on April 24, 2026 ([DefiLlama](https://defillama.com/protocol/centrifuge)). Current ~$1.64B.
-- **JAAA AUM history:** From $1B at Grove launch (June 2025) to ~$417M aggregate NAV across chains today (May 12, 2026) per rwa.xyz — apparent net Grove redemption / reallocation between launch and current. Specific cause: **TODO** (most likely Grove rebalancing into other Centrifuge products like JTRSY and Apollo's ACRDX, but not confirmed).
+- **Peak TVL (Centrifuge protocol-wide):** ~$1.99B on 2026-04-24 ([DefiLlama](https://defillama.com/protocol/centrifuge)). Current ~$1.38B (latest DefiLlama reading 2026-05-28).
+- **JAAA AUM history:** From $1B at Grove launch (June 2025) to ~$437.9M aggregate NAV across chains as of 2026-05-28 ([rwa.xyz](https://app.rwa.xyz/assets/JAAA)) — apparent net Grove redemption / reallocation between launch and current. Specific cause: **TODO** (most likely Grove rebalancing into other Centrifuge products like JTRSY and Apollo's ACRDX, but not confirmed).
 - **Security incidents:** **None reported** on Centrifuge V3 contracts. (No incident reports on Centrifuge's [security page](https://centrifuge.io/security) or in public disclosures searched.)
 - **Peg / NAV stability:** Onchain NAV reflects fund accumulation (1.000 → 1.034 USDC over ~12 months), consistent with the fund's targeted ~5% AAA-CLO yield.
 
@@ -183,7 +183,7 @@ Centrifuge V3 has received an unusually heavy audit cadence — **20+ engagement
 
 ### Provability
 
-- **Share price source:** The price returned by `AsyncRequestManager.convertToAssets()` (1.034352 USDC/JAAA at this assessment) is a **cached value pushed onchain by the pool manager**, not a real-time onchain computation. `priceLastUpdated(vault)` returned timestamp `1778500800` = 2026-05-11 12:00 UTC, i.e., the price had been refreshed ~24 hours before this assessment.
+- **Share price source:** The price returned by `AsyncRequestManager.convertToAssets()` (1.036124 USDC/JAAA at this assessment, block 25,195,241) is a **cached value pushed onchain by the pool manager**, not a real-time onchain computation. `priceLastUpdated(vault)` returned timestamp `1779883200` = 2026-05-27 12:00 UTC, i.e., the price had been refreshed ~29 hours before this assessment.
 - **Who publishes the price:** Two principals are registered as JAAA pool managers on the current HubRegistry (`manager(281474976710663, addr)==true` verified onchain):
   - **3-of-8 Pool Manager Safe** [`0x742d100011ffbc6e509e39dbcb0334159e86be1e`](https://etherscan.io/address/0x742d100011ffbc6e509e39dbcb0334159e86be1e) — original manager appointed via `HubRegistry.updateManager` at block 22932166.
   - **EOA** [`0x7bf090b97f896fb77e852cc98aa52a8cb7dc02ec`](https://etherscan.io/address/0x7bf090b97f896fb77e852cc98aa52a8cb7dc02ec) — added at block 24376421 during the V3.1 upgrade; no contract code (single-key authority).
@@ -509,7 +509,7 @@ Both the 3-of-8 Pool Manager Safe `0x742d…be1e` and the EOA `0x7bf090b9…02ec
 - **Two Pool Manager principals on the JAAA pool — including one EOA with unbounded NAV-push authority and the power to replace the manager set.** The current HubRegistry shows `manager(JAAA pool, addr)=true` for both the 3-of-8 Pool Manager Safe [`0x742d…be1e`](https://etherscan.io/address/0x742d100011ffbc6e509e39dbcb0334159e86be1e) and an EOA [`0x7bf090b9…02ec`](https://etherscan.io/address/0x7bf090b97f896fb77e852cc98aa52a8cb7dc02ec) (registered at block 24376421). Either can call `Hub.updateSharePrice` to set JAAA NAV to **any value with no upper bound, no deviation cap and no timelock**, approve/issue shares, force-cancel investor requests, and modify the FullRestrictions allowlist. Either can also call `Hub.updateHubManager` to **add or remove pool managers** (including revoking the other principal), since that function is gated only by `_isManager(poolId)` and writes through directly to `HubRegistry.updateManager`. On Ethereum (Hub-chain), the new price propagates to the Spoke synchronously in the same tx via `notifySharePrice`, so the user-facing `convertToAssets()` and batch-fulfilment prices reflect the manipulated value immediately. The EOA is a **single private key** — compromise of one signer is sufficient to mis-price the fund, extract value via the next deposit/redeem batch, and elevate itself to sole-manager status. See "Critical Risks" below and Appendix tables for the full capability surface.
 - **NAV is admin-pushed, not onchain-derived.** Underlying CLOs are offchain, so a fully onchain proof-of-reserves is structurally impossible. Token holders trust Anemoy / Trident Trust to compute correct NAV and the Pool Manager Safe to push it faithfully. No Chainlink PoR or independent oracle.
 - **Mint-without-backing is technically possible** via the share token's `mint(address,uint256)` (gated only by wards). Standard governance-key risk, mitigated by the 48h Root timelock but not eliminated for paths involving the Pool Manager Safe acting via the Hub.
-- **Highly concentrated holder base.** rwa.xyz reports 23 holders globally; a single large redemption (e.g. Grove unwinding) could deplete the pool's USDC float and force unscheduled CLO sales. Grove appears to have already drawn down a significant portion of its original $1B allocation (current aggregate JAAA NAV ~$417M).
+- **Highly concentrated holder base.** rwa.xyz reports 23 holders globally; a single large redemption (e.g. Grove unwinding) could deplete the pool's USDC float and force unscheduled CLO sales. Grove appears to have already drawn down a significant portion of its original $1B allocation (current aggregate JAAA NAV ~$437.9M as of 2026-05-28).
 - **Multiple offchain trust principals.** A failure or adversarial action by Anemoy, Janus Henderson, StoneX, Trident Trust, or the BVI regulatory environment is an existential risk for token holders. None of these can be hedged onchain.
 - **V3.1 is recent (Feb 2026)** and the V3.2 Onchain Portfolio Manager only audited Mar–Apr 2026. New code paths continue to ship.
 - **Pool manager signer identities not publicly disclosed.** Standard for institutional-RWA, but reduces verifiability of "who can move my money."
@@ -555,7 +555,7 @@ Both the 3-of-8 Pool Manager Safe `0x742d…be1e` and the EOA `0x7bf090b9…02ec
 **Subcategory B: Historical Track Record**
 
 - **Time in production:** Centrifuge V3 ~10 months (since July 2025); JAAA share class ~12 months since fund inception (May 2025). Falls in the 6–12 month bracket.
-- **Scale:** Centrifuge protocol-wide TVL has sustained >$1B since late 2025 (current $1.64B). JAAA itself peaked above $1B AUM and currently sits at ~$417M aggregate NAV across chains.
+- **Scale:** Centrifuge protocol-wide TVL has sustained >$1B since late 2025 (current $1.38B, peak $1.99B 2026-04-24). JAAA itself peaked above $1B AUM and currently sits at ~$437.9M aggregate NAV across chains.
 - **Incidents:** None.
 
 → **Subcategory B score: 2.0** — production duration is at the upper end of 6–12 months trending toward 1–2 years; sustained TVL >$1B at protocol level easily satisfies the "$50M+" threshold (and arguably the "$100M+ sustained" threshold for score 1). Score capped at 2 because V3 itself is <1 year old.
@@ -623,7 +623,7 @@ Both the 3-of-8 Pool Manager Safe `0x742d…be1e` and the EOA `0x7bf090b9…02ec
 
 - **Direct redemption:** Daily through Anemoy, NAV-based, USDC-settled. Async — typically T+1 once redemption batch is processed; full settlement subject to fund-level liquidity.
 - **Liquidity depth:** Aave Horizon position-unwind, Falcon Finance, Resolv, 3F/Morpho provide secondary exit routes (denominated via the deJAAA wrapper). Specific DEX depth on deJAAA: TODO.
-- **Large holder impact:** With only 23 holders globally and ~$417M NAV, a single $50M+ redemption is plausible and could exceed the pool's float, forcing CLO secondary sales over multiple days.
+- **Large holder impact:** With only 23 holders globally and ~$437.9M aggregate NAV, a single $50M+ redemption is plausible and could exceed the pool's float, forcing CLO secondary sales over multiple days.
 - **Stress behavior:** Untested through any market dislocation since launch (May 2025). AAA CLOs would historically widen but remain saleable in stress.
 - Best fit: row 3 ("Market-based or short queues; >$1M, 1-3% slippage; 3-7 days for full exit") with a yield-bearing-asset exception (longer exit times acceptable).
 
@@ -655,7 +655,7 @@ Both the 3-of-8 Pool Manager Safe `0x742d…be1e` and the EOA `0x7bf090b9…02ec
 **Optional Modifiers:**
 
 - Protocol live >2 years with no incidents: **not eligible** (V3 is ~10 months old).
-- TVL maintained >$500M for >1 year: **not eligible** at JAAA level (Grove redemption has brought aggregate NAV from $1B at launch to ~$417M); protocol-level TVL >$1B has been sustained <1 year. No modifier applied.
+- TVL maintained >$500M for >1 year: **not eligible** at JAAA level (Grove redemption has brought aggregate NAV from $1B at launch to ~$437.9M as of 2026-05-28); protocol-level TVL >$1B has been sustained <1 year. No modifier applied.
 
 **Optional add-ons applied:** None. (A prior draft applied +0.10 for "two coexisting governance Safes"; reviewer flagged this as stale — the V3.0 Guardian was in fact `Deny`'d on Root at block 24376326, so there is only one live admin path. Add-on removed.)
 
