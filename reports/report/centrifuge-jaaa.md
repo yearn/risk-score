@@ -4,7 +4,7 @@
 - **Token:** JAAA (Janus Henderson Anemoy AAA CLO Fund Token)
 - **Chain:** Ethereum
 - **Token Address:** [`0x5a0F93D040De44e78F251b03c43be9CF317Dcf64`](https://etherscan.io/address/0x5a0F93D040De44e78F251b03c43be9CF317Dcf64)
-- **Final Score: 3.03/5.0**
+- **Final Score: 2.98/5.0**
 
 ## Overview + Links
 
@@ -568,7 +568,7 @@ Both the 3-of-8 Pool Manager Safe `0x742d…be1e` and the EOA `0x7bf090b9…02ec
 - **Bug bounty:** Active Cantina program, $250k max Critical. This sits between the $200K bracket (score 2) and $1M bracket (score 1).
 - **Surface area:** Multi-chain protocol with Hub/Spoke, async ERC-7540, double-entry onchain accounting, transfer hooks — moderate-to-high complexity.
 
-→ **Subcategory A score: 2.0** (well above the "2+ audits by reputable firms" floor and bounty meets the $200K+ tier; complexity offsets pushing toward 1.0).
+→ **Subcategory A score: 1.5** — well above the "≥3 audits by top firms" tier-1 threshold (we have two top firms plus three reputable independents plus a public contest), but held back from a clean 1.0 by (a) the $250K bounty cap sitting below the $1M tier-1 threshold and (b) the genuinely large attack surface (multi-chain Hub/Spoke + ERC-7540 + cross-chain messaging + multiple hook variants).
 
 **Subcategory B: Historical Track Record**
 
@@ -578,9 +578,9 @@ Both the 3-of-8 Pool Manager Safe `0x742d…be1e` and the EOA `0x7bf090b9…02ec
 
 → **Subcategory B score: 2.0** — production duration is at the upper end of 6–12 months trending toward 1–2 years; sustained TVL >$1B at protocol level easily satisfies the "$50M+" threshold (and arguably the "$100M+ sustained" threshold for score 1). Score capped at 2 because V3 itself is <1 year old.
 
-**Audits & Historical Score = (2.0 + 2.0) / 2 = 2.0**
+**Audits & Historical Score = (1.5 + 2.0) / 2 = 1.75**
 
-**Score: 2.0/5**
+**Score: 1.75/5**
 
 #### Category 2: Centralization & Control Risks (Weight: 30%)
 
@@ -664,19 +664,19 @@ Both the 3-of-8 Pool Manager Safe `0x742d…be1e` and the EOA `0x7bf090b9…02ec
 
 | Category | Score | Weight | Weighted |
 |----------|-------|--------|----------|
-| Audits & Historical | 2.0 | 20% | 0.40 |
+| Audits & Historical | 1.75 | 20% | 0.35 |
 | Centralization & Control | 4.0 | 30% | 1.20 |
 | Funds Management | 3.0 | 30% | 0.90 |
 | Liquidity Risk | 3.0 | 15% | 0.45 |
 | Operational Risk | 1.5 | 5% | 0.075 |
-| **Final Score** | | | **3.03/5.0** |
+| **Final Score** | | | **2.98/5.0** |
 
 **Optional Modifiers:**
 
 - Protocol live >2 years with no incidents: **not eligible** (V3 is ~10 months old).
 - TVL maintained >$500M for >1 year: **not eligible** at JAAA level (Grove redemption has brought aggregate NAV from $1B at launch to ~$437.9M as of 2026-05-28); protocol-level TVL >$1B has been sustained <1 year. No modifier applied.
 
-**Final Score: 3.03/5.0** — sits in the upper end of the **Medium Risk** band (2.5–3.5), pulled there primarily by the EOA pool-manager + unbounded NAV-push capability documented in the Critical Risks subsection. If the EOA were removed from the HubRegistry and NAV updates were routed through a multisig (or the onchain `NAVManager` / `SimplePriceManager` were initialized for the JAAA pool), Programmability would compress from 5 to ~3 and the overall score would fall back toward 2.50–2.65.
+**Final Score: 2.98/5.0** — sits in the middle of the **Medium Risk** band (2.5–3.5), pulled there primarily by the EOA pool-manager + unbounded NAV-push capability documented in the Critical Risks subsection. If the EOA were removed from the HubRegistry and NAV updates were routed through a multisig (or the onchain `NAVManager` / `SimplePriceManager` were initialized for the JAAA pool), Programmability would compress from 5 to ~3 and the overall score would fall back toward 2.45–2.60.
 
 ### Risk Tier
 
