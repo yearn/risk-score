@@ -129,7 +129,7 @@ Centrifuge V3 has received an unusually heavy audit cadence — **20+ engagement
 ### Bug Bounty
 
 - **Cantina**: Active program with **$250,000 max payout** for Critical findings (High $50k, Medium $5k). Started July 17, 2025. ~466 findings to date. [Cantina – Centrifuge bounty](https://cantina.xyz/bounties/6cc9d51a-ac1e-4385-a88a-a3924e40c00e)
-- **SEAL Safe Harbor**: TODO — Centrifuge not located on the [Safe Harbor registry](https://safeharbor.securityalliance.org/) as of this assessment.
+- **SEAL Safe Harbor**: Centrifuge not located on the [Safe Harbor registry](https://safeharbor.securityalliance.org/) as of this assessment.
 - **Immunefi**: No public listing found.
 
 ## Historical Track Record
@@ -487,7 +487,7 @@ Both the 3-of-8 Pool Manager Safe `0x742d…be1e` and the EOA `0x7bf090b9…02ec
 **What the pool manager *cannot* do directly** (verified by reading Hub / Spoke / Tranche / Root source on Etherscan):
 
 - **Drain PoolEscrow USDC arbitrarily.** USDC only leaves the escrow as part of an approved redeem batch (`revokeShares`) or as an authorized cross-chain transfer initiated by Spoke/Root, not by a raw withdraw. Mis-pricing a redeem batch is the indirect route.
-- **Mint share tokens outside the AsyncRequestManager flow.** `JAAA.Tranche.mint()` is `auth`-gated to Spoke wards, not Hub managers. Issuance can only happen via step 4 above.
+- **Mint share tokens outside the AsyncRequestManager flow.** `JAAA.Tranche.mint()` is `auth`-gated and only **Spoke** and **Root** are currently wards on the JAAA share token (verified onchain via `cast call ... wards(addr)`: Spoke=1, Root=1; AsyncRequestManager=0, Hub=0, ProtocolAdminSafe=0). Hub managers therefore cannot mint directly — issuance can only happen via Spoke's batch-fulfilment routing in step 4 above.
 - **Bypass the 48h Root timelock or Guardian pause.** Root ward changes, protocol upgrades, adapter swaps and TokenRecoverer authorization all go through Root, which the pool manager is not on.
 - **Pause the protocol.** Pause/unpause are Guardian-only (`ProtocolGuardian` + `OpsGuardian`).
 - **Mutate other pools.** All Hub functions in the table are scoped by `poolId` via `_isManager(poolId)`, which reads `HubRegistry.manager(poolId, msg.sender)`. JAAA's manager has no privileges on deJAAA or any other Centrifuge pool.
