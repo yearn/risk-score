@@ -608,7 +608,7 @@ Both the 3-of-8 Pool Manager Safe `0x742d…be1e` and the EOA `0x7bf090b9…02ec
 **Subcategory B: Provability**
 
 - Reserves are **primarily offchain**. Onchain Tools verify only that the pool manager has pushed a price, not that the price reflects true NAV.
-- Reporting: monthly/periodic Trident Trust NAV (TODO to confirm public cadence); no Chainlink PoR.
+- Reporting: Trident Trust Cayman computes NAV **daily** (required to support the fund's daily subscription/redemption design per the [JAAA factsheet](https://gateway.pinata.cloud/ipfs/QmcWwvqnoUkH1bMYktnMdEywmUkUeK3PPex2i763zVNUmm) and the [Anemoy fund page](https://www.anemoy.io/funds/jaaa)). The Pool Manager pushes that daily NAV onchain via `Hub.updateSharePrice` — verified onchain by sampling `AsyncRequestManager.priceLastUpdated(vault)` over multiple sessions (each reading advances ~24h on the next business day). Anemoy publishes investor-facing factsheets **monthly**. No Chainlink PoR or independent onchain attestation.
 - Verification: regulated administrator + auditor; no third-party onchain attestation.
 - Matches row 3 ("Hybrid onchain/offchain; Manual reporting by admins; Known custodian attestation").
 
