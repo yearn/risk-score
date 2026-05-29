@@ -388,9 +388,17 @@ Apyx uses an OpenZeppelin AccessManager v5 (`0xe167330e2eac88666de253e9607c6d9ae
 
 - **apxUSD contract**: [`0x98a878B1CD98131b271883b390F68d2c90674665`](https://etherscan.io/address/0x98a878B1CD98131b271883b390F68d2c90674665)
   - Monitor `totalSupply()` for unexpected minting events
-  - **Alert**: If supply increases by >1M in 24 hours
+  - **Alert**: If supply increases by >5M in 24 hours (raised from >1M; supply has been adding ~10M/day on average, so a noisy 1M trigger is no longer useful)
   - Monitor `Transfer` events for large movements (>$500K)
   - Monitor `Paused`/`Unpaused` events
+  - Monitor mints (`Transfer` with `from = 0x0`) and **track the destination** — currently 100% are `mint(0x0 → 0xcca1af4d → Guardian Safe)`. **Alert**: If a mint destination is anything other than the documented pass-through, or if the pass-through forwards to any address other than the Guardian Safe.
+
+### Mint Pass-Through Monitoring
+
+- **Pass-through contract**: [`0xcca1af4d4afccc113d7682fbec1c5888f9b7f7b8`](https://etherscan.io/address/0xcca1af4d4afccc113d7682fbec1c5888f9b7f7b8)
+  - Monitor all apxUSD inflows and outflows
+  - **Alert**: If outflow destination is not the Guardian Safe (would indicate fresh mints routed somewhere else)
+  - **Alert**: If `authority()` ever returns an address other than the Apyx AccessManager (`0xe167…2824`)
 
 ### Rate Oracle Monitoring
 
@@ -406,6 +414,11 @@ Apyx uses an OpenZeppelin AccessManager v5 (`0xe167330e2eac88666de253e9607c6d9ae
   - Monitor pool balance ratio (should stay near 50/50)
   - **Alert**: If ratio deviates >10% from balanced (indicates peg pressure)
   - **Alert**: If total pool TVL drops below $10M
+  - **(New) Guardian Safe LP token balance** — Guardian Safe currently holds 40,890,164 of 40,905,346 LP (99.96%). LP withdrawal is permissionless for token holders — Curve `remove_liquidity` has no admin gate, no timelock, and no AccessManager involvement. A Safe-tx with 3-of-6 signatures can drain the LP position in a single transaction.
+    - **Alert (Critical)**: Any `RemoveLiquidity` / `RemoveLiquidityImbalance` / `RemoveLiquidityOneCoin` event from the Guardian Safe larger than 5% of its LP balance.
+    - **Alert (Critical)**: If Guardian Safe's LP balance drops by >10% in 24 hours.
+    - **Alert (High)**: Any LP transfer out of the Guardian Safe (LP token is the Curve pool itself, so `Transfer` event on `0xe1b9…a414` with `from = Guardian Safe`).
+  - **(New) Third-party LP share** — alert if external (non-Apyx) LPs grow above 5% of `totalSupply` (would indicate the protocol-owned-liquidity concern is improving) or fall below 0.02% (would indicate further concentration).
 
 ### Governance Monitoring
 
@@ -425,10 +438,14 @@ Apyx uses an OpenZeppelin AccessManager v5 (`0xe167330e2eac88666de253e9607c6d9ae
 
 ### Supply & Holder Monitoring
 
-- Monitor Guardian/Upgrader Safe (`0xf9862efc1704ac05e687f66e5cd8c130e5663ce2`) balance and movements
+- Monitor Guardian/Upgrader Safe (`0xf9862efc1704ac05e687f66e5cd8c130e5663ce2`) balance and movements (apxUSD, apyUSD, USDC, and Curve LP token)
+- Monitor Operations Safe (`0x37B0779A66edc491df83e59a56D485835323a555`) **STRCX balance** — this is currently the only directly-onchain-verifiable portion of apxUSD backing (~$75–90M)
+  - **Alert (Critical)**: Any STRCX transfer out of the Operations Safe, especially to non-Apyx counterparties (would represent a reduction in onchain reserves)
+  - **Alert (High)**: STRCX balance drops by >5% in 24 hours
 - Monitor Third-Party Safe (`0x81f5d98ea5acf65640ce8bb68aa8449b7c304c50`) balance
-- Monitor Curve pool for large single-sided withdrawals
+- Monitor Curve pool for large single-sided withdrawals (covered above)
 - Monitor MinterV0 for mint execution events
+- **Alert**: If apxUSD `supplyCap` is raised again above 750M without corresponding attestation update
 
 ### Accountable Proof-of-Reserves Monitoring
 
@@ -451,12 +468,17 @@ Apyx uses an OpenZeppelin AccessManager v5 (`0xe167330e2eac88666de253e9607c6d9ae
 |----------|-----------|----------|
 | Rate oracle changes | Real-time | Critical |
 | Proxy upgrade events | Real-time | Critical |
+| **Guardian Safe Curve LP balance** (POL withdrawal) | Real-time | **Critical** |
+| **Operations Safe STRCX balance** (onchain reserves) | Real-time | **Critical** |
+| **Mint pass-through 0xcca1af4d outflow destination** | Real-time | **Critical** |
 | Accountable PoR dashboard freshness / registry status | Real-time | Critical |
 | Chainlink CCIP / Base supply reconciliation | Real-time | Critical |
 | AccessManager role changes | Real-time | Critical |
 | Admin Safe transactions | Real-time | Critical |
+| Guardian Safe transactions (Safe-level) | Real-time | Critical |
 | Curve pool balance ratio | Every 6 hours | High |
 | apxUSD supply changes | Every 6 hours | High |
+| apxUSD `supplyCap` increases | Real-time | High |
 | Large holder movements | Daily | Medium |
 
 ## Risk Summary
