@@ -103,10 +103,10 @@ nodes:
     category: governance
     note: JAAA pool manager — set NAV, approve/issue/revoke, allowlist
   - id: pool-manager-eoa
-    label: Pool Manager EOA (single key)
+    label: Pool Manager MPC (Fordefi multiuser)
     address: "0x7bf090b97f896fb77e852cc98aa52a8cb7dc02ec"
     category: governance
-    note: Identical privileges to the 3-of-8 Safe — unbounded NAV-push + can replace co-managers via Hub.updateHubManager
+    note: Multi-party threshold per Centrifuge's Fordefi attestation — identical privileges to the 3-of-8 Safe; unbounded NAV-push + can replace co-managers via Hub.updateHubManager
 
   # === External dependencies ===
   - id: dep-anemoy
@@ -149,7 +149,7 @@ edges:
   - from: pool-manager-eoa
     to: hub-registry
     kind: holds-role
-    label: manager(poolId, addr) = true — single key
+    label: manager(poolId, addr) = true — Fordefi MPC
   - from: pool-manager-safe
     to: hub
     kind: holds-role
