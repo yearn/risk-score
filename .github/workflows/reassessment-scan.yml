@@ -28,5 +28,6 @@ jobs:
       - name: Scan for stale reports and open reassessment issues
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
           DRY_RUN: ${{ inputs.dry_run && 'true' || '' }}
         run: uv run scripts/check_stale_reports.py
