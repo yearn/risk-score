@@ -4,7 +4,7 @@
 - **Token:** USCC
 - **Chain:** Ethereum
 - **Token Address:** [`0x14d60E7FDC0D71d8611742720E4C50E7a974020c`](https://etherscan.io/address/0x14d60E7FDC0D71d8611742720E4C50E7a974020c)
-- **Final Score: 3.06/5.0**
+- **Final Score: 2.95/5.0**
 
 ## Overview + Links
 
@@ -215,13 +215,13 @@ The only recovery is to be re-whitelisted by Superstate or have Superstate `admi
 
 | Role | Address | Type | Powers |
 |------|---------|------|--------|
-| USCC Token Owner + USCC ProxyAdmin Owner | [`0x8abC89D9b56dFD90dA18e8E18CFaC9111100bDd1`](https://etherscan.io/address/0x8abC89D9b56dFD90dA18e8E18CFaC9111100bDd1) | **EOA** | `mint`, `bulkMint`, `adminBurn`, `pause`/`unpause`, `accountingPause`/`accountingUnpause`, `setOracle`, `setRedemptionContract`, `setStablecoinConfig`, `setChainIdSupport`, `setMaximumOracleDelay`, and `upgrade()`/`upgradeAndCall()` of the USCC implementation via ProxyAdmin. **This single EOA controls both the token and its proxy admin** — strictly more concentrated than USTB, where these two roles sit on different EOAs. |
+| USCC Token Owner + USCC ProxyAdmin Owner | [`0x8abC89D9b56dFD90dA18e8E18CFaC9111100bDd1`](https://etherscan.io/address/0x8abC89D9b56dFD90dA18e8E18CFaC9111100bDd1) | **EOA** | `mint`, `bulkMint`, `adminBurn`, `pause`/`unpause`, `accountingPause`/`accountingUnpause`, `setOracle`, `setRedemptionContract`, `setStablecoinConfig`, `setChainIdSupport`, `setMaximumOracleDelay`, and `upgrade()`/`upgradeAndCall()` of the USCC implementation via ProxyAdmin. **This single EOA controls both the token and its proxy admin**, matching the USTB token/ProxyAdmin ownership pattern rather than improving on it. |
 | AllowList Owner (shared with USTB) | [`0x7747940aDBc7191f877a9B90596E0DA4f8deb2Fe`](https://etherscan.io/address/0x7747940aDBc7191f877a9B90596E0DA4f8deb2Fe) | **EOA** | `setEntityIdForAddress`, `setProtocolAddressPermission`, etc. Can also upgrade AllowList via its ProxyAdmin. |
 | Chainlink USCC NAV Aggregator Owner | [`0x21f73D42Eb58Ba49dDB685dc29D3bF5c0f0373CA`](https://etherscan.io/address/0x21f73D42Eb58Ba49dDB685dc29D3bF5c0f0373CA) | **Chainlink contract** | Chainlink-side governance over the OCR feed; not Superstate-controlled. |
 
 **Critical centralization concerns specific to USCC (in addition to USTB-style risks):**
 
-1. **Single EOA controls both token and ProxyAdmin.** USTB splits token-owner and proxy-admin-owner across separate EOAs (`0xad309b…` for token+proxy admin on USTB — actually USTB also concentrates both into one EOA on its side, but USCC adds further concentration because the same key can `mint` and `upgrade()`). A compromise of `0x8abC89D9…` lets the attacker mint unlimited USCC AND upgrade the implementation to embed any logic. There is no multisig and no timelock.
+1. **Single EOA controls both token and ProxyAdmin.** This matches USTB's token/ProxyAdmin concentration (`0xad309b…` owns both on USTB). A compromise of `0x8abC89D9…` lets the attacker mint unlimited USCC AND upgrade the implementation to embed any logic. There is no multisig and no timelock.
 2. **No timelock on any operation** — proxy upgrades, parameter changes, and mint/burn execute immediately.
 3. **Unlimited admin mint with no onchain backing check** — the owner can call `mint(any_addr, any_amount)` without depositing collateral. The backing-vs-supply relationship is enforced offchain only.
 4. **`adminBurn` confiscation** — the owner can burn tokens from any holder. Documented as a regulatory-compliance tool.
@@ -448,7 +448,7 @@ EXTERNAL / UNDERLYING LAYER
 
 - [x] **No audit** → **PASS** — 11 0xMacro audits + ChainSecurity + Offside Labs + referenced Certora formal verification on the shared V5 codebase.
 - [x] **Unverifiable reserves** → **BORDERLINE PASS** — Offchain reserves (BTC/ETH spot at Anchorage + futures margin at undisclosed venues + T-Bills), with NAV Fund Services as independent NAV agent and EY annual audit. Holdings are not publicly itemized; the futures-venue identity is undisclosed, which is a real provability gap, but the multiple independent attestation layers (custodian, NAV agent, auditor, SEC framework) clear the gate.
-- [x] **Total centralization** → **BORDERLINE PASS** — Single EOA controls both the token and its ProxyAdmin. Mitigated by Turnkey TEE key custody and Superstate's regulatory accountability (SEC-registered transfer agent, Reg D framework). This is a borderline pass — the concentration is materially worse than USTB's (where token-owner and proxy-admin sit on different EOAs across products).
+- [x] **Total centralization** → **BORDERLINE PASS** — Single EOA controls both the token and its ProxyAdmin, matching USTB's token/ProxyAdmin ownership pattern. Mitigated by Turnkey TEE key custody and Superstate's regulatory accountability (SEC-registered transfer agent, Reg D framework). This is a borderline pass because the absolute single-key blast radius remains high: the same EOA can mint/adminBurn and upgrade the token implementation with no multisig or timelock.
 
 **Result:** Protocol passes critical gates. Proceeding to category scoring with **conservative bias** on governance and provability.
 
@@ -472,7 +472,7 @@ EXTERNAL / UNDERLYING LAYER
 
 **Subcategory A: Governance — 5.0**
 
-- **Single EOA controls both USCC token AND its ProxyAdmin** — strictly worse than USTB.
+- **Single EOA controls both USCC token AND its ProxyAdmin** — the same token/ProxyAdmin concentration pattern used by USTB.
 - No multisig anywhere.
 - No timelock on any operation — upgrades, parameter changes, mint, adminBurn all execute immediately.
 - Per the rubric, "EOA or <3 signers" is the level-5 (Critical Gate) governance signal. The fact that the protocol clears the critical gate is on Turnkey TEE + regulatory accountability, not onchain governance.
@@ -561,7 +561,7 @@ Slightly worse than USTB (1.0) because of the public documentation gaps on the b
 - Live >2 years with no incidents (-0.5): **Not applied** — 22 months as of May 2026, just short of 2 years.
 - TVL maintained >$500M for >1 year (-0.5): **Not applied** — onchain TVL is ~$145M.
 
-After modifier review, final score remains **2.95**. Rounded conservatively to **3.06** to reflect the single-EOA-controls-both-token-and-ProxyAdmin concentration and the undisclosed futures-venue counterparty exposure — both are step-change risk factors versus USTB that the weighted average understates.
+After modifier review, final score remains **2.95**. No additional score adjustment is applied; the single-EOA token/ProxyAdmin control and undisclosed futures-venue counterparty exposure are already reflected in the Centralization & Control and Funds Management category scores.
 
 ### Risk Tier
 
@@ -575,7 +575,7 @@ After modifier review, final score remains **2.95**. Rounded conservatively to *
 
 **Final Risk Tier: MEDIUM RISK**
 
-USCC is materially **higher risk than USTB** despite sharing infrastructure. The principal drivers are (a) the crypto-basis-trade strategy itself, which introduces futures-venue counterparty exposure and mark-to-market NAV volatility, (b) more concentrated onchain governance (single EOA controls token + ProxyAdmin), (c) no atomic onchain subscribe or redeem, and (d) thinner public disclosure on operational specifics (futures venues, ETH staking provider, leverage). These are partly offset by the same audit/legal/custodial stack as USTB and 22 months of incident-free operation.
+USCC is materially **higher risk than USTB** despite sharing infrastructure. The principal drivers are (a) the crypto-basis-trade strategy itself, which introduces futures-venue counterparty exposure and mark-to-market NAV volatility, (b) the same single-EOA token/ProxyAdmin control pattern as USTB, with immediate mint/adminBurn/upgrade authority and no timelock, (c) no atomic onchain subscribe or redeem, and (d) thinner public disclosure on operational specifics (futures venues, ETH staking provider, leverage). These are partly offset by the same audit/legal/custodial stack as USTB and 22 months of incident-free operation.
 
 **Key conditions for exposure:**
 
