@@ -503,6 +503,54 @@ Both the 3-of-8 Pool Manager Safe `0x742d…be1e` and the Fordefi multiuser MPC 
 - **Pause the protocol.** Pause/unpause are Guardian-only (`ProtocolGuardian` + `OpsGuardian`).
 - **Mutate other pools.** All Hub functions in the table are scoped by `poolId` via `_isManager(poolId)`, which reads `HubRegistry.manager(poolId, msg.sender)`. JAAA's manager has no privileges on deJAAA or any other Centrifuge pool.
 
+### Appendix: Centrifuge JAAA vs NYSE JAAA — Holdings Comparison
+
+Citation for the Overview's "Centrifuge JAAA ≠ NYSE JAAA" note. They share a sub-advisor (Janus Henderson Global Securitized team) and an investment mandate (AAA-rated floating-rate CLO tranches) but hold **different specific tranches**.
+
+**Sources:** Centrifuge JAAA — full holdings list from the on-chain pool-metadata IPFS [`QmPzzj…BEh1`](https://ipfs.io/ipfs/QmPzzjsF9xZcXZJhzJR6EHmQpaMmRnrtRnvBSWBRzyBEh1) (snapshot 2026-05-28). NYSE JAAA — top 25 visible at [stockanalysis.com/etf/jaaa/holdings](https://stockanalysis.com/etf/jaaa/holdings/) (data via Finnhub, snapshot 2026-05-29); positions 26–604 are subscriber-gated.
+
+#### Aggregate profile
+
+| Metric | Centrifuge JAAA | NYSE JAAA |
+|---|---|---|
+| Total holdings | **21** | **604** |
+| #1 position weight | **8.68%** (ARES 2022-ALF2A) | **1.10%** (cash) / top CLO **0.91%** (KKR 35A) |
+| Top 5 cumulative | **37.6%** | **~4.1%** |
+| Cash sleeve | none (99.99% in CLO tranches) | 1.10% |
+
+Centrifuge JAAA's top position is ~8× larger by weight than NYSE JAAA's top position, and its top-5 is ~9× more concentrated — the expected consequence of a $437M BVI Professional Fund (high-minimum, institutional-only) vs a $21B retail-distributable US ETF.
+
+#### Exact tranche overlap — only 2 of Centrifuge's top 20 are in NYSE's top 25
+
+| Tranche | Ticker | CF rank / weight | NYSE rank / weight |
+|---|---|---|---|
+| CBAM 2017-1 LTD 2017-1A AR2 | `CBAMR.2017-1A AR2` | #4 / **7.68%** | #18 / **0.59%** |
+| CARLYLE US CLO 2021-10 LTD A1R | `CGMS.2021-10A A1R` | #5 / **5.26%** | #10 / **0.64%** |
+
+#### Issuer-overlap-but-different-series (8 names)
+
+Same CLO manager, different deal in each fund:
+
+| Issuer | Centrifuge tranches | NYSE top-25 tranches |
+|---|---|---|
+| Ares | 2022-ALF2A (8.68%) | 2025-ALF9A (0.56%) — different vintage |
+| AMMC | 2022-27A (7.87%) | 2023-26A (0.61%) |
+| KKR | 27A (5.24%), 37A (5.23%) | 35A (0.91%) |
+| CBAM | 2018-5A (5.25%) — *plus* 2017-1A AR2 (matched above) | — |
+| Palmer Square | 2019-1A A1R2 (3.94%) | 2018-2A A1R2 (0.73%), 2024-1A AR (0.56%) |
+| CIFC | 2019-7A (2.63%), 2025-4A (2.63%) | 2014-5A A1R3 (0.60%), 2020-3A A1R2 (0.58%) |
+
+#### Centrifuge holdings with no match in NYSE's top 25
+
+10 of Centrifuge JAAA's top 20 do not appear in NYSE JAAA's visible top 25 (could still be in positions 26–604; not verifiable from the public page):
+
+MADISON PARK FUNDING — three separate tranches (2018-30A 8.08%, 2025-65A 5.25%, 2018-32A 5.24%) · GOLUB CAPITAL PARTNERS — two tranches (2017-19RA 5.24%, 2021-58A 2.62%) · AGL CLO 14 (5.24%) · WELLFLEET 2021-3 (5.24%) · KENNEDY LEWIS 2025-22A (4.20%) · RR 23 2022-23A (2.63%) · REGATTA XX 2021-2A (1.84%).
+
+#### What this confirms
+
+- The two products are genuinely separate portfolios — only **10%** (2/20) of Centrifuge's top 20 tranches appear in NYSE's top 25 by exact match. Most CLO-manager-name overlap is at the *issuer* level (Ares, KKR, CIFC, Palmer Square) with *different specific tranches*.
+- Concentration profiles are fundamentally different (top-5 ≈ 38% vs ≈ 4%). Daily marks can legitimately diverge between the two even with identical mandate, manager team and AAA-CLO universe.
+
 ---
 
 ## Risk Summary
