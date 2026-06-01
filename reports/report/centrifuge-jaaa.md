@@ -12,7 +12,7 @@ JAAA is the tokenized form of the **Janus Henderson Anemoy AAA CLO Fund** — a 
 
 The fund is brought onchain via **Centrifuge V3** (the protocol's Hub-and-Spoke EVM stack). The deployment under assessment is the **transfer-restricted** share class JAAA, deployed on Ethereum (poolId `281474976710663`). Investor flow is asynchronous (ERC-7540 style): an investor submits a deposit request through the `AsyncVault`, Anemoy/Centrifuge processes subscriptions daily, and the investor claims share tokens. Redemption mirrors this in reverse, settled in USDC. JAAA is the **accumulating** version (NAV grows over time; no distributions).
 
-> **Note — Centrifuge JAAA ≠ NYSE JAAA.** The Janus Henderson "JAAA" ticker on NYSE Arca is a separate **US-listed ETF** (open-end 40-Act fund, ~$21B AUM). Centrifuge JAAA is the **BVI Professional Fund** issued by Anemoy Capital SPC Limited (non-US Professional Investors only, KYC-gated). The two share a **sub-advisor and investment mandate** (the same Janus Henderson Global Securitized team, AAA-rated floating-rate CLO tranches) but they are different legal entities holding their own specific tranches. Centrifuge JAAA holds **CLO debt instruments directly** (21 positions custodied at StoneX — see Collateralization), **not** shares of the NYSE JAAA ETF. Daily marks on the two products can legitimately diverge.
+> **Note — Centrifuge JAAA ≠ NYSE JAAA.** The Janus Henderson "JAAA" ticker on NYSE Arca is a separate **US-listed ETF** (open-end 40-Act fund, ~$21B AUM). Centrifuge JAAA is the **BVI Professional Fund** issued by Anemoy Capital SPC Limited (non-US Professional Investors only, KYC-gated). The two share a **sub-advisor and investment mandate** (the same Janus Henderson Global Securitized team, AAA-rated floating-rate CLO tranches) but they are different legal entities holding their own specific tranches. Centrifuge JAAA holds **CLO debt instruments directly** (23 CLO positions + ~7.3% USD cash sleeve custodied at StoneX — see Collateralization), **not** shares of the NYSE JAAA ETF. Daily marks on the two products can legitimately diverge.
 
 Current onchain values:
 
@@ -23,9 +23,9 @@ Current onchain values:
 - **Management fee:** 40 bps (0.40%) p.a. per [JAAA factsheet (April 2025)](https://gateway.pinata.cloud/ipfs/QmcWwvqnoUkH1bMYktnMdEywmUkUeK3PPex2i763zVNUmm). All-in **expense ratio: 0.50%** per on-chain pool metadata (mgmt fee + brokerage / custody / admin / audit). **Performance fee:** 0%.
 - **Settlement:** Daily subscriptions and redemptions, **usually T+3** per factsheet
 - **Holders (Ethereum + multichain):** 23 onchain holders per rwa.xyz — institutional only
-- **Holdings (offchain CLO portfolio):** 21 positions totalling ~$762.7M market value (99.99% allocated). Top three: **ARES LOAN FUNDING II LTD (8.68%)**, **MADISON PARK FUNDING XXX LTD (8.08%)**, **AMMC CLO 27 LTD (7.87%)** — full holdings list available in [JAAA pool metadata IPFS](https://ipfs.io/ipfs/QmPzzjsF9xZcXZJhzJR6EHmQpaMmRnrtRnvBSWBRzyBEh1).
+- **Holdings (offchain CLO portfolio):** **23 CLO positions + a 7.26% USD cash sleeve, ~$443.9M total market value, 100% of portfolio allocated** per the on-chain [JAAA pool metadata IPFS](https://ipfs.io/ipfs/QmeyFrSQViLk7duYL3mpLWDfqX6oN45z2ZTuja4Q8qNs4j) (current pointer per `HubRegistry.metadata(poolId)`). Same data is published by [Chronicle Labs' JAAA Proof-of-Asset dashboard](https://chroniclelabs.org/dashboard/proofofasset/janus-henderson-anemoy-aaa-clo-fund). Top three: **ARES LOAN FUNDING II LTD (7.45%)**, **USD cash (7.26%)**, **MADISON PARK FUNDING XXX LTD (6.95%)**.
 - **Target APY:** 5.7% (factsheet) | **7-day APY (rwa.xyz):** 5.54%
-- **Third-party rating:** **Particula AAA** ([per on-chain pool metadata](https://ipfs.io/ipfs/QmPzzjsF9xZcXZJhzJR6EHmQpaMmRnrtRnvBSWBRzyBEh1))
+- **Third-party rating:** **Particula AAA** ([per on-chain pool metadata](https://ipfs.io/ipfs/QmeyFrSQViLk7duYL3mpLWDfqX6oN45z2ZTuja4Q8qNs4j))
 - **Minimum initial investment:** $500,000 USDC (per on-chain pool metadata)
 
 A separate, **freely-transferable** wrapper of the same fund — **deJAAA** ([`0xAAA0008C8CF3A7Dca931adaF04336A5D808C82Cc`](https://etherscan.io/address/0xAAA0008C8CF3A7Dca931adaF04336A5D808C82Cc), poolId `281474976710659`) — exists for permissionless DeFi integrations. deJAAA has total supply ~6.61M tokens (18 decimals). This report focuses on the KYC-gated JAAA primary share class but documents deJAAA where relevant.
@@ -43,7 +43,7 @@ A separate, **freely-transferable** wrapper of the same fund — **deJAAA** ([`0
 - [Janus Henderson press release – Anemoy partnership](https://www.janushenderson.com/corporate/press-releases/janus-henderson-to-partner-with-anemoy-and-centrifuge-on-its-first-tokenized-fund/)
 - [DefiLlama – Centrifuge](https://defillama.com/protocol/centrifuge)
 - [JAAA factsheet (April 2025, IPFS-linked from on-chain pool metadata)](https://gateway.pinata.cloud/ipfs/QmcWwvqnoUkH1bMYktnMdEywmUkUeK3PPex2i763zVNUmm)
-- [JAAA pool metadata (IPFS, referenced by HubRegistry)](https://ipfs.io/ipfs/QmPzzjsF9xZcXZJhzJR6EHmQpaMmRnrtRnvBSWBRzyBEh1)
+- [JAAA pool metadata (IPFS, referenced by HubRegistry)](https://ipfs.io/ipfs/QmeyFrSQViLk7duYL3mpLWDfqX6oN45z2ZTuja4Q8qNs4j)
 
 ## Contract Addresses
 
@@ -183,16 +183,16 @@ Other governance / infra addresses checked and confirmed **not wards** on the JA
 ### Collateralization
 
 - **Backing:** 1:1 by the **Janus Henderson Anemoy AAA CLO Fund** — a portfolio of AAA-rated, floating-rate CLO tranches. Cash and short-duration AAA CLO debt of multiple underlying CLO issuers.
-- **Specific CLO holdings (issuer mix):** **21 positions, $762.7M total market value, 99.99% of portfolio allocated** per the public [on-chain pool metadata IPFS](https://ipfs.io/ipfs/QmPzzjsF9xZcXZJhzJR6EHmQpaMmRnrtRnvBSWBRzyBEh1) (full list with CUSIP/ISIN/ticker/market-value/% available; refetched 2026-05-28). Top five:
-  - ARES LOAN FUNDING II LTD (ARES 2022-ALF2A) — 8.68%
-  - MADISON PARK FUNDING XXX LTD (MDPK 2018-30A) — 8.08%
-  - AMMC CLO 27 LTD (AMMC 2022-27A) — 7.87%
-  - CBAM 2017-1 LTD (CBAMR 2017-1A AR2) — 7.68%
-  - CARLYLE US CLO 2021-10 LTD (CGMS 2021-10A) — 5.26%
-- **Asset quality:** 100% AAA tranches at the senior end of the CLO capital stack. The CLO managers shown (Ares Capital, Credit Suisse Asset Management / Madison Park, American Money Management Corp / AMMC) are large, established institutional CLO managers. Historical loss rates on AAA CLO tranches are near zero through multiple credit cycles. Third-party rating: **Particula AAA** ([pool metadata](https://ipfs.io/ipfs/QmPzzjsF9xZcXZJhzJR6EHmQpaMmRnrtRnvBSWBRzyBEh1)).
+- **Specific CLO holdings (issuer mix):** **23 CLO positions + a 7.26% USD cash sleeve, ~$443.9M total market value, 100% of portfolio allocated** per the public [on-chain pool metadata IPFS](https://ipfs.io/ipfs/QmeyFrSQViLk7duYL3mpLWDfqX6oN45z2ZTuja4Q8qNs4j) (current pointer per `HubRegistry.metadata(poolId)`; full list with CUSIP/ISIN/ticker/market-value/% available). The metadata's `holdings.data` array contains 24 rows — 23 CLO positions, 1 USD-cash position, plus an empty-CUSIP portfolio-total summary that should not be counted as a position. The on-IPFS portfolio market value ($443.9M) reconciles with the live aggregate JAAA cross-chain NAV from [rwa.xyz](https://app.rwa.xyz/assets/JAAA) (~$437.9M, ~1% delta — within timing/float). Implied per-tranche prices on the CLO positions are all within ±50 bp of par (weighted average near par) — consistent with senior AAA CLO tranches in a tight secondary market. Independent per-tranche verification would require an institutional pricing service (Bloomberg / ICE / Markit); CLO secondary pricing is not available on free public sources. Top five:
+  - ARES LOAN FUNDING II LTD (ARES 2022-ALF2A) — 7.45%
+  - USD cash — 7.26%
+  - MADISON PARK FUNDING XXX LTD (MDPK 2018-30A) — 6.95%
+  - AMMC CLO 27 LTD (AMMC 2022-27A) — 6.76%
+  - CBAM 2017-1 LTD (CBAMR 2017-1A AR2) — 6.62%
+- **Asset quality:** 100% AAA tranches at the senior end of the CLO capital stack. The CLO managers shown (Ares Capital, Credit Suisse Asset Management / Madison Park, American Money Management Corp / AMMC) are large, established institutional CLO managers. Historical loss rates on AAA CLO tranches are near zero through multiple credit cycles. Third-party rating: **Particula AAA** ([pool metadata](https://ipfs.io/ipfs/QmeyFrSQViLk7duYL3mpLWDfqX6oN45z2ZTuja4Q8qNs4j)).
 - **Custody / service providers (offchain):**
   - **Custodian:** StoneX Securities Inc. (regulated U.S. broker-dealer) per [rwa.xyz](https://app.rwa.xyz/assets/JAAA) — note: not separately named in the factsheet, but rwa.xyz is operated by the data provider that aggregates issuer disclosures.
-  - **Fund administrator:** Trident Trust **Cayman** (per [factsheet](https://gateway.pinata.cloud/ipfs/QmcWwvqnoUkH1bMYktnMdEywmUkUeK3PPex2i763zVNUmm) and [pool metadata](https://ipfs.io/ipfs/QmPzzjsF9xZcXZJhzJR6EHmQpaMmRnrtRnvBSWBRzyBEh1))
+  - **Fund administrator:** Trident Trust **Cayman** (per [factsheet](https://gateway.pinata.cloud/ipfs/QmcWwvqnoUkH1bMYktnMdEywmUkUeK3PPex2i763zVNUmm) and [pool metadata](https://ipfs.io/ipfs/QmeyFrSQViLk7duYL3mpLWDfqX6oN45z2ZTuja4Q8qNs4j))
   - **Auditor:** MHA Cayman
   - **Crypto-asset custodian:** Circle (per rwa.xyz)
   - **Regulator:** BVI Financial Services Commission (FSC) — fund is an open-ended BVI Professional Fund
@@ -507,49 +507,51 @@ Both the 3-of-8 Pool Manager Safe `0x742d…be1e` and the Fordefi multiuser MPC 
 
 Citation for the Overview's "Centrifuge JAAA ≠ NYSE JAAA" note. They share a sub-advisor (Janus Henderson Global Securitized team) and an investment mandate (AAA-rated floating-rate CLO tranches) but hold **different specific tranches**.
 
-**Sources:** Centrifuge JAAA — full holdings list from the on-chain pool-metadata IPFS [`QmPzzj…BEh1`](https://ipfs.io/ipfs/QmPzzjsF9xZcXZJhzJR6EHmQpaMmRnrtRnvBSWBRzyBEh1) (snapshot 2026-05-28). NYSE JAAA — top 25 visible at [stockanalysis.com/etf/jaaa/holdings](https://stockanalysis.com/etf/jaaa/holdings/) (data via Finnhub, snapshot 2026-05-29); positions 26–604 are subscriber-gated.
+**Sources:** Centrifuge JAAA — full holdings list from the on-chain pool-metadata IPFS at the current `HubRegistry.metadata(poolId)` pointer [`QmeyFr…Ns4j`](https://ipfs.io/ipfs/QmeyFrSQViLk7duYL3mpLWDfqX6oN45z2ZTuja4Q8qNs4j); equivalent data is on [Chronicle Labs' JAAA Proof-of-Asset dashboard](https://chroniclelabs.org/dashboard/proofofasset/janus-henderson-anemoy-aaa-clo-fund). NYSE JAAA — top 25 visible at [stockanalysis.com/etf/jaaa/holdings](https://stockanalysis.com/etf/jaaa/holdings/) (data via Finnhub, snapshot 2026-05-29); positions 26–604 are subscriber-gated.
 
 #### Aggregate profile
 
 | Metric | Centrifuge JAAA | NYSE JAAA |
 |---|---|---|
-| Total holdings | **21** | **604** |
-| #1 position weight | **8.68%** (ARES 2022-ALF2A) | **1.10%** (cash) / top CLO **0.91%** (KKR 35A) |
-| Top 5 cumulative | **37.6%** | **~4.1%** |
-| Cash sleeve | none (99.99% in CLO tranches) | 1.10% |
+| Total positions | **23 CLO tranches + 1 USD cash sleeve** | **604** |
+| Total portfolio value | **~$443.9M** (reconciles with rwa.xyz aggregate JAAA NAV ~$437.9M, ~1% delta) | **~$21B** |
+| #1 position weight | **7.45%** (ARES 2022-ALF2A) | **1.10%** (cash) / top CLO **0.91%** (KKR 35A) |
+| Top 5 cumulative | **~35.0%** (incl. cash; ~32.3% CLO-only) | **~4.1%** |
+| Cash sleeve | **7.26% USD** | 1.10% |
 
-Centrifuge JAAA's top position is ~8× larger by weight than NYSE JAAA's top position, and its top-5 is ~9× more concentrated — the expected consequence of a $437M BVI Professional Fund (high-minimum, institutional-only) vs a $21B retail-distributable US ETF.
+Centrifuge JAAA's top position is ~7× larger by weight than NYSE JAAA's top position, and its top-5 is ~8× more concentrated — the expected consequence of a $443M BVI Professional Fund (high-minimum, institutional-only) vs a $21B retail-distributable US ETF.
 
-#### Exact tranche overlap — only 2 of Centrifuge's top 20 are in NYSE's top 25
+#### Exact tranche overlap — 3 of Centrifuge's top 23 are in NYSE's top 25
 
 | Tranche | Ticker | CF rank / weight | NYSE rank / weight |
 |---|---|---|---|
-| CBAM 2017-1 LTD 2017-1A AR2 | `CBAMR.2017-1A AR2` | #4 / **7.68%** | #18 / **0.59%** |
-| CARLYLE US CLO 2021-10 LTD A1R | `CGMS.2021-10A A1R` | #5 / **5.26%** | #10 / **0.64%** |
+| CBAM 2017-1 LTD 2017-1A AR2 | `CBAMR.2017-1A AR2` | #5 / **6.62%** | #18 / **0.59%** |
+| CARLYLE US CLO 2021-10 LTD A1R | `CGMS.2021-10A A1R` | #8 / **4.51%** | #10 / **0.64%** |
+| CIFC FUNDING 2014-V LTD 2014-5A A1R3 | `CIFC.2014-5A A1R3` | #20 / **2.26%** | #17 / **0.60%** |
 
-#### Issuer-overlap-but-different-series (8 names)
+#### Issuer-overlap-but-different-series
 
 Same CLO manager, different deal in each fund:
 
 | Issuer | Centrifuge tranches | NYSE top-25 tranches |
 |---|---|---|
-| Ares | 2022-ALF2A (8.68%) | 2025-ALF9A (0.56%) — different vintage |
-| AMMC | 2022-27A (7.87%) | 2023-26A (0.61%) |
-| KKR | 27A (5.24%), 37A (5.23%) | 35A (0.91%) |
-| CBAM | 2018-5A (5.25%) — *plus* 2017-1A AR2 (matched above) | — |
-| Palmer Square | 2019-1A A1R2 (3.94%) | 2018-2A A1R2 (0.73%), 2024-1A AR (0.56%) |
-| CIFC | 2019-7A (2.63%), 2025-4A (2.63%) | 2014-5A A1R3 (0.60%), 2020-3A A1R2 (0.58%) |
+| Ares | 2022-ALF2A (7.45%) | 2025-ALF9A (0.56%) — different vintage |
+| AMMC | 2022-27A (6.76%) | 2023-26A (0.61%) |
+| KKR | 27A (4.51%), 37A (4.50%) | 35A (0.91%) |
+| CBAM | 2018-5A (4.53%) — *plus* 2017-1A AR2 (matched above) | — |
+| Palmer Square | 2019-1A A1R2 (3.39%) | 2018-2A A1R2 (0.73%), 2024-1A AR (0.56%) |
+| CIFC | 2019-7A (2.26%), 2025-4A (2.26%) — *plus* 2014-5A A1R3 (matched above) | 2020-3A A1R2 (0.58%) |
 
 #### Centrifuge holdings with no match in NYSE's top 25
 
-10 of Centrifuge JAAA's top 20 do not appear in NYSE JAAA's visible top 25 (could still be in positions 26–604; not verifiable from the public page):
+The remaining Centrifuge positions don't appear in NYSE JAAA's visible top 25 (could still be in positions 26–604; not verifiable from the public page):
 
-MADISON PARK FUNDING — three separate tranches (2018-30A 8.08%, 2025-65A 5.25%, 2018-32A 5.24%) · GOLUB CAPITAL PARTNERS — two tranches (2017-19RA 5.24%, 2021-58A 2.62%) · AGL CLO 14 (5.24%) · WELLFLEET 2021-3 (5.24%) · KENNEDY LEWIS 2025-22A (4.20%) · RR 23 2022-23A (2.63%) · REGATTA XX 2021-2A (1.84%).
+MADISON PARK FUNDING — three separate tranches (2018-30A 6.95%, 2025-65A 4.52%, 2018-32A 4.51%) · GOLUB CAPITAL PARTNERS — two tranches (2017-19RA 4.50%, 2021-58A 2.25%) · AGL CLO 14 (4.51%) · WELLFLEET 2021-3 (4.51%) · REGATTA XX 2021-2A (3.83%) · KENNEDY LEWIS 2025-22A (3.61%) · RR 23 2022-23A (2.26%) · SIXTH STREET CLO XXIII 2023-23A (2.26%).
 
 #### What this confirms
 
-- The two products are genuinely separate portfolios — only **10%** (2/20) of Centrifuge's top 20 tranches appear in NYSE's top 25 by exact match. Most CLO-manager-name overlap is at the *issuer* level (Ares, KKR, CIFC, Palmer Square) with *different specific tranches*.
-- Concentration profiles are fundamentally different (top-5 ≈ 38% vs ≈ 4%). Daily marks can legitimately diverge between the two even with identical mandate, manager team and AAA-CLO universe.
+- The two products are genuinely separate portfolios — only **3 of Centrifuge's 23 CLO positions** (~13%) appear in NYSE's top 25 by exact tranche match. Most CLO-manager-name overlap is at the *issuer* level (Ares, KKR, CIFC, Palmer Square) with *different specific tranches*.
+- Concentration profiles are fundamentally different (top-5 ≈ 35% vs ≈ 4%). Daily marks can legitimately diverge between the two even with identical mandate, manager team and AAA-CLO universe.
 
 ---
 
@@ -663,7 +665,7 @@ MADISON PARK FUNDING — three separate tranches (2018-30A 8.08%, 2025-65A 5.25%
 **Subcategory B: Provability**
 
 - Reserves are **primarily offchain**. Onchain Tools verify only that the pool manager has pushed a price, not that the price reflects true NAV.
-- Reporting: Trident Trust Cayman computes NAV **daily** (required to support the fund's daily subscription/redemption design per the [JAAA factsheet](https://gateway.pinata.cloud/ipfs/QmcWwvqnoUkH1bMYktnMdEywmUkUeK3PPex2i763zVNUmm) and the [Anemoy fund page](https://www.anemoy.io/funds/jaaa)). The Pool Manager pushes that daily NAV onchain via `Hub.updateSharePrice` — verified onchain by sampling `AsyncRequestManager.priceLastUpdated(vault)` over multiple sessions (each reading advances ~24h on the next business day). Anemoy publishes investor-facing factsheets **monthly**. Full 21-position portfolio is in the public pool-metadata IPFS (also surfaced on the [Centrifuge JAAA pool page](https://app.centrifuge.io/pool/281474976710663/ethereum/0x4880799ee5200fc58da299e965df644fbf46780b) under "Holdings").
+- Reporting: Trident Trust Cayman computes NAV **daily** (required to support the fund's daily subscription/redemption design per the [JAAA factsheet](https://gateway.pinata.cloud/ipfs/QmcWwvqnoUkH1bMYktnMdEywmUkUeK3PPex2i763zVNUmm) and the [Anemoy fund page](https://www.anemoy.io/funds/jaaa)). The Pool Manager pushes that daily NAV onchain via `Hub.updateSharePrice` — verified onchain by sampling `AsyncRequestManager.priceLastUpdated(vault)` over multiple sessions (each reading advances ~24h on the next business day). Anemoy publishes investor-facing factsheets **monthly**. Full 23-position CLO portfolio + cash sleeve is in the public pool-metadata IPFS (also surfaced on the [Centrifuge JAAA pool page](https://app.centrifuge.io/pool/281474976710663/ethereum/0x4880799ee5200fc58da299e965df644fbf46780b) under "Holdings" and on [Chronicle Labs' JAAA Proof-of-Asset dashboard](https://chroniclelabs.org/dashboard/proofofasset/janus-henderson-anemoy-aaa-clo-fund)). The IPFS pointer is dynamic — `HubRegistry.metadata(poolId)` returns the current CID, which the Pool Manager updates on each refresh.
 - **Independent third-party attestation:** [Chronicle Labs publishes a Proof-of-Asset / Proof-of-Holdings dashboard for JAAA](https://chroniclelabs.org/dashboard/proofofasset/janus-henderson-anemoy-aaa-clo-fund) with cryptographic attestation of NAV and holdings, sourced with direct access to the fund administrator. This is a meaningful improvement over typical TradFi-RWA pattern, where the only verification is the administrator's own publication.
 - Verification: regulated administrator + auditor + Chronicle independent attestation.
 
@@ -684,7 +686,7 @@ MADISON PARK FUNDING — three separate tranches (2018-30A 8.08%, 2025-65A 5.25%
 #### Category 5: Operational Risk (Weight: 5%)
 
 - **Team transparency:** Centrifuge team is fully public (Lucas Vogelsang, CEO; Martin Quensel, co-founder). Anemoy and Janus Henderson are public institutional entities with named portfolio managers.
-- **Documentation:** Excellent for the Centrifuge protocol (developer + user docs, architecture pages, every audit posted to GitHub). The JAAA fund itself is also transparently disclosed — the full 21-position CLO portfolio with CUSIP/ISIN/market-value/% is in the public pool-metadata IPFS; the Anemoy fund page and monthly factsheet are public.
+- **Documentation:** Excellent for the Centrifuge protocol (developer + user docs, architecture pages, every audit posted to GitHub). The JAAA fund itself is also transparently disclosed — the full 23-position CLO portfolio + USD cash sleeve, with CUSIP/ISIN/market-value/% for each tranche, is in the public pool-metadata IPFS and on Chronicle Labs' Proof-of-Asset dashboard; the Anemoy fund page and monthly factsheet are public.
 - **Legal:** BVI Professional Fund issued by Anemoy Capital SPC Limited (regulated by the BVI FSC), Centrifuge Network Foundation (Switzerland). Both are established legal entities with clear jurisdiction.
 - **Audit cadence on the protocol code:** Heavy and ongoing (20+ engagements, see Category 1).
 
