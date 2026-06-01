@@ -4,7 +4,7 @@
 - **Token:** JAAA (Janus Henderson Anemoy AAA CLO Fund Token)
 - **Chain:** Ethereum
 - **Token Address:** [`0x5a0F93D040De44e78F251b03c43be9CF317Dcf64`](https://etherscan.io/address/0x5a0F93D040De44e78F251b03c43be9CF317Dcf64)
-- **Final Score: 2.70/5.0**
+- **Final Score: 2.60/5.0**
 
 ## Overview + Links
 
@@ -40,7 +40,6 @@ A separate, **freely-transferable** wrapper of the same fund — **deJAAA** ([`0
 - [DefiLlama – Centrifuge](https://defillama.com/protocol/centrifuge)
 - [JAAA factsheet (April 2025, IPFS-linked from on-chain pool metadata)](https://gateway.pinata.cloud/ipfs/QmcWwvqnoUkH1bMYktnMdEywmUkUeK3PPex2i763zVNUmm)
 - [JAAA pool metadata (IPFS, referenced by HubRegistry)](https://ipfs.io/ipfs/QmPzzjsF9xZcXZJhzJR6EHmQpaMmRnrtRnvBSWBRzyBEh1)
-- LlamaRisk report on JAAA: none — no Centrifuge / JAAA / JTRSY / Anemoy report was found in [LlamaRisk's research catalog](https://www.llamarisk.com/research) as of this assessment.
 
 ## Contract Addresses
 
@@ -51,7 +50,7 @@ A separate, **freely-transferable** wrapper of the same fund — **deJAAA** ([`0
 | JAAA Share Token | [`0x5a0F93D040De44e78F251b03c43be9CF317Dcf64`](https://etherscan.io/address/0x5a0F93D040De44e78F251b03c43be9CF317Dcf64) | `Tranche` ERC-20 (6 decimals, ERC-1404-compatible) |
 | AsyncVault | [`0x4880799ee5200fc58da299e965df644fbf46780b`](https://etherscan.io/address/0x4880799ee5200fc58da299e965df644fbf46780b) | ERC-7540 entry/exit |
 | Transfer Hook | [`0x3C5E7B28c4fF6F0bc8d9A9587992E96401e680A7`](https://etherscan.io/address/0x3C5E7B28c4fF6F0bc8d9A9587992E96401e680A7) | `FullRestrictions` (allowlist) |
-| PoolEscrow (JAAA) | [`0x040170aA9AAa916c2e8135777a31f17C440BA52a`](https://etherscan.io/address/0x040170aA9AAa916c2e8135777a31f17C440BA52a) | Pool-specific USDC escrow |
+| PoolEscrow (JAAA) | [`0x040170aA9AAa916c2e8135777a31f17C440BA52a`](https://etherscan.io/address/0x040170aA9AAa916c2e8135777a31f17C440BA52a) | Pool-specific escrow |
 | Underlying asset | [`0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48`](https://etherscan.io/address/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48) | USDC |
 | Pool Manager Safe | [`0x742d100011ffbc6e509e39dbcb0334159e86be1e`](https://etherscan.io/address/0x742d100011ffbc6e509e39dbcb0334159e86be1e) | Gnosis Safe — **3-of-8 threshold** (verified via `getThreshold()` / `getOwners()`); appointed for JAAA pool via `HubRegistry.updateManager` event (tx block 22932166) |
 
@@ -124,18 +123,16 @@ Centrifuge V3 has received an unusually heavy audit cadence — **20+ engagement
 
 (V2 audits from Spearbit, Code4rena and SR Labs from 2023–2024 also remain in the same folder.)
 
-**Contract complexity:** Centrifuge V3 is a **complex multi-chain protocol** — Hub/Spoke contract pair on every supported chain, Wormhole message adapter, async ERC-7540 vault flow with separate request manager, double-entry onchain accounting layer, three transfer-hook variants, plus pool-specific managers. Surface area is large relative to a single-chain ERC-4626. Several unresolved findings from these audits: TODO — full triage of fix status across all 20+ reports is out of scope for this assessment.
+**Contract complexity:** Centrifuge V3 is a **complex multi-chain protocol** — Hub/Spoke contract pair on every supported chain, async ERC-7540 vault flow with separate request manager, double-entry onchain accounting layer, three transfer-hook variants, plus pool-specific managers. Surface area is large relative to a single-chain ERC-4626.
 
 ### Bug Bounty
 
 - **Cantina**: Active program with **$250,000 max payout** for Critical findings (High $50k, Medium $5k). Started July 17, 2025. ~466 findings to date. [Cantina – Centrifuge bounty](https://cantina.xyz/bounties/6cc9d51a-ac1e-4385-a88a-a3924e40c00e)
-- **SEAL Safe Harbor**: Centrifuge not located on the [Safe Harbor registry](https://safeharbor.securityalliance.org/) as of this assessment.
-- **Immunefi**: No public listing found.
 
 ## Historical Track Record
 
 - **Centrifuge V3 launch:** July 24, 2025 (multichain) ([Centrifuge blog](https://centrifuge.io/blog/centrifuge-v3-multichain-launch)). **~10 months in production** as of May 28, 2026.
-- **V3.1 launch:** February 11, 2026 — adds Optimism, HyperEVM, Monad; new ProtocolGuardian deployed and the V3.0 Guardian was `Deny`'d on Root at block 24376326 ([Deny event tx](https://etherscan.io/tx/0x559e892f88bedd4042929ddfaa6d92225c6074ba582b9a48168db8138dc4a908)). The new HubRegistry [`0x19f46…ADE93`](https://etherscan.io/address/0x19f46D8130e610C6C0f0116EA40Fb781dEFaDE93) became the authoritative registry; JAAA pool was registered there at block 24376421 ([`UpdateManager` event tx](https://etherscan.io/tx/0x499ec04a42f6f4a961be5333f2d58db0538a8503cc058bb8b63fd9ca0fd5b9f8)). ([Centrifuge blog](https://centrifuge.io/blog/centrifuge-v3-1))
+- **V3.1 launch:** February 11, 2026 — adds Optimism, HyperEVM, Monad. The new HubRegistry [`0x19f46…ADE93`](https://etherscan.io/address/0x19f46D8130e610C6C0f0116EA40Fb781dEFaDE93) became the authoritative registry; JAAA pool was registered there at block 24376421 ([`UpdateManager` event tx](https://etherscan.io/tx/0x499ec04a42f6f4a961be5333f2d58db0538a8503cc058bb8b63fd9ca0fd5b9f8)). ([Centrifuge blog](https://centrifuge.io/blog/centrifuge-v3-1))
 - **V3.1.x Onchain Portfolio Manager (mainnet) / v3.2.0 (tagged, not yet mainnet-deployed):** An onchain `NAVManager` ([`0x493b…9130`](https://etherscan.io/address/0x493b6C8ccC7BfD43c5a20C4F2C648701f74E9130)) and `SimplePriceManager` ([`0x280C…0823`](https://etherscan.io/address/0x280C94eB440A8a75c2F8f6cA8c6FaFf907000823)) are deployed on Ethereum under the V3.1.0 release per the [Centrifuge deployments docs](https://docs.centrifuge.io/developer/protocol/deployments/). The expanded onchain-PM feature suite (onchain-PM, guards, accounting token — see commit message of [v3.2.0 tag](https://github.com/centrifuge/protocol/commit/41e19975946ac60927f3db7087f6c0b67bf752bb)) was tagged in the codebase on 2026-04-27 and audited Mar–Apr 2026, but the only `deploy-mainnet-v3.*` tags in the protocol repo as of this assessment target v3.1.x — there is **no `deploy-mainnet-v3.2-*` tag yet**, so v3.2.0 is not yet live on Ethereum mainnet. **JAAA does not currently use the deployed contracts** either — verified onchain: `NAVManager.initialized(281474976710663, 1)` = `false`, `NAVManager.navHook(281474976710663)` = `0x0`, and `SimplePriceManager.pricePoolPerShare(281474976710663)` returns the default 1e18. JAAA's price remains pushed manually by the Pool Manager (Safe or MPC wallet).
 - **JAAA fund inception (offchain):** May 1, 2025. ([rwa.xyz](https://app.rwa.xyz/assets/JAAA))
 - **JAAA public onchain launch:** June 25, 2025 with a **$1B seed allocation from Grove** (Sky-incubated credit infrastructure protocol). ([Centrifuge blog](https://centrifuge.io/blog/centrifuge-janus-henderson-grove-tokenized-aaa-clo-fund) · [Businesswire](https://www.businesswire.com/news/home/20250624393365/en/Grove-Announces-Launch-of-Institutional-Grade-Credit-Infrastructure-DeFi-Protocol-with-%241-Billion-Allocation-to-Tokenized-Janus-Henderson-Anemoy-AAA-CLO-Strategy))
@@ -205,10 +202,10 @@ Other governance / infra addresses checked and confirmed **not wards** on the JA
 - **Share price source:** The price returned by `AsyncRequestManager.convertToAssets()` (1.036124 USDC/JAAA at this assessment, block 25,195,241) is a **cached value pushed onchain by the pool manager**, not a real-time onchain computation. `priceLastUpdated(vault)` returned timestamp `1779883200` = 2026-05-27 12:00 UTC, i.e., the price had been refreshed ~29 hours before this assessment.
 - **Who publishes the price:** Two principals are registered as JAAA pool managers on the current HubRegistry (`manager(281474976710663, addr)==true` verified onchain):
   - **3-of-8 Pool Manager Safe** [`0x742d100011ffbc6e509e39dbcb0334159e86be1e`](https://etherscan.io/address/0x742d100011ffbc6e509e39dbcb0334159e86be1e) — original manager appointed via `HubRegistry.updateManager` at block 22932166.
-  - **Fordefi multiuser MPC wallet** [`0x7bf090b97f896fb77e852cc98aa52a8cb7dc02ec`](https://etherscan.io/address/0x7bf090b97f896fb77e852cc98aa52a8cb7dc02ec) — added at block 24376421 during the V3.1 upgrade. Onchain the address has `code.size = 0` (looks like a plain EOA, as is normal for MPC wallets — signing happens off-chain to produce a single secp256k1 signature). Centrifuge has attested in writing that this address is a Fordefi **multiuser MPC** wallet with a high signature threshold; this attestation is the basis for treating it as approximately multisig-equivalent in scoring below. The MPC threshold and key holders are not independently onchain-verifiable.
+  - **Fordefi multiuser MPC wallet** [`0x7bf090b97f896fb77e852cc98aa52a8cb7dc02ec`](https://etherscan.io/address/0x7bf090b97f896fb77e852cc98aa52a8cb7dc02ec) — added at block 24376421 during the V3.1 upgrade. Onchain the address has `code.size = 0` (looks like a plain EOA, as is normal for MPC wallets — signing happens off-chain to produce a single secp256k1 signature). Centrifuge has attested in writing that this address is a Fordefi **multiuser MPC** wallet with a high signature threshold.
 - **Onchain pricing infrastructure — deployed (V3.1.x) but not used by JAAA:** Centrifuge's onchain-PM feature suite introduces a `NAVManager` ([`0x493b…9130`](https://etherscan.io/address/0x493b6C8ccC7BfD43c5a20C4F2C648701f74E9130)) that "recomputes the fund's net asset value directly from onchain state" and a `SimplePriceManager` ([`0x280C…0823`](https://etherscan.io/address/0x280C94eB440A8a75c2F8f6cA8c6FaFf907000823)) ([blog](https://centrifuge.io/blog/onchain-pm)). The mainnet contracts at these addresses were deployed under V3.1.0 per docs; the codebase formally bundles this feature suite under the [v3.2.0 tag](https://github.com/centrifuge/protocol/tree/v3.2.0) (April 2026), which has not yet been mainnet-deployed. For JAAA — whose underlying assets (CLO tranches) live entirely offchain — a fully onchain NAV is structurally impossible regardless. Verified onchain: `NAVManager.initialized(281474976710663, 1)` = `false` and `NAVManager.navHook(281474976710663)` = `address(0)`. The JAAA price is therefore still pushed manually by the Pool Manager (Safe or MPC wallet) via the Hub, not derived from onchain state.
 - **Third-party verification:** **Chronicle Labs** publishes a [Proof-of-Asset / Proof-of-Holdings dashboard for JAAA](https://chroniclelabs.org/dashboard/proofofasset/janus-henderson-anemoy-aaa-clo-fund) with independent attestation of NAV and holdings (Chronicle has direct access to the fund administrator per Centrifuge). This is **transparency, not control** — Chronicle does not write the onchain price; the Pool Manager still does via `Hub.updateSharePrice`. Trust on the NAV value itself is anchored on (a) Trident Trust as fund administrator computing NAV, (b) MHA Cayman as auditor, (c) StoneX as regulated custodian, (d) the BVI Financial Services Commission as the fund's regulator, and (e) Chronicle as independent attester (via cryptographically-signed offchain data, oracle pattern). The Centrifuge protocol contracts themselves still enforce no onchain attestation; whatever Anemoy/the pool manager pushes is canonical at the contract level. **Trident-concentration caveat:** Trident Trust is also the JAAA KYC/AML service provider (per rwa.xyz), so the chain feeding the `FullRestrictions` allowlist (`Trident KYC review → Anemoy → updateMember`) and the chain feeding NAV (`Trident NAV → Anemoy → Pool Manager → Hub.updateSharePrice`) share the same root counterparty — a Trident operational disruption affects both onchain control surfaces simultaneously.
-- **Can admin mint tokens without backing?** **Yes, technically.** The JAAA `Tranche` (share token) exposes `mint(address, uint256)` gated only by `wards[caller]==1`. Root has ward power, and Root is reachable only through the current 4-of-9 V3.1+ ProtocolAdminSafe (verified onchain — the V3.0 Guardian was `Deny`'d on Root at block 24376326). In normal operation the protocol only mints in response to deposit requests with backing escrowed; however, an attacker controlling the current governance Safe — or either of the two pool-manager principals (the 3-of-8 Safe or the Fordefi multiuser MPC wallet) operating via the Hub — could issue shares without corresponding USDC backing. With the MPC characterization confirmed, the second-principal path is no longer single-key but still has no onchain bounds and no timelock for issuance. This is a generic governance-key risk shared with most issuer-controlled stablecoins (USDG, USDC, etc.) but worth noting given JAAA's institutional positioning.
+- **Can admin mint tokens without backing?** **Yes, technically.** The JAAA `Tranche` (share token) exposes `mint(address, uint256)` gated only by `wards[caller]==1`. Root has ward power, and Root is reachable only through the current 4-of-9. In normal operation the protocol only mints in response to deposit requests with backing escrowed; however, an attacker controlling the current governance Safe — or either of the two pool-manager principals (the 3-of-8 Safe or the Fordefi multiuser MPC wallet) operating via the Hub — could issue shares without corresponding USDC backing.
 - **Token recovery:** The current `TokenRecoverer` contract ([`0x1E70530e9555711f8DF4838Ab940b97c039B4037`](https://etherscan.io/address/0x1E70530e9555711f8DF4838Ab940b97c039B4037)) is ward'd on Root (verified onchain — `Root.wards()=1`; resolved via `MessageProcessor.tokenRecoverer()`) and can move tokens out of protocol contracts via auth-protected `recoverTokens` flows. The legacy V3.0 TokenRecoverer [`0x94269d…00e63`](https://etherscan.io/address/0x94269dbaba605b63321221679df1356be0c00e63) is denied (`Root.wards()=0`). Token recovery is necessary for cross-chain message-loss recovery but represents a privileged-action surface. The Guardian must `initiateRecovery` and a `disputeRecovery` window exists.
 
 ## Liquidity Risk
@@ -222,7 +219,7 @@ Other governance / infra addresses checked and confirmed **not wards** on the JA
   - **Falcon Finance** — JAAA accepted as collateral to mint USDf. ([Falcon Finance](https://falcon.finance/news/falcon-finance-adds-centrifuges-jaaa-as-collateral-unlocking-onchain-liquidity-for-institutional-grade-credit))
   - **3F (Morpho)** — Leveraged exposure product on JAAA. ([The Block](https://www.theblock.co/post/398686/3f-morpho-funding-everaged-exposure-tokenized-assets))
 - **Concentration risk:** **Holder count = 23** (rwa.xyz). Highly concentrated — likely a small number of institutional holders (Grove, Resolv, Aave Horizon position holders, possibly a few funds). A single large redemption could materially drain pool-level USDC float, in which case Anemoy's offering-memo discretion (see "Withdrawal queue / throttle" below) allows the fund manager to **delay or partially fulfil** the redemption rather than force-sell. Any net liquidation of underlying CLOs happens **offchain** — at StoneX custody, via Anemoy in the secondary market — not via any onchain forced-sale mechanism. JAAA is a claim on the offchain fund, not collateral that smart contracts liquidate.
-- **Withdrawal queue / throttle:** No explicit fixed-cap throttle on `requestRedeem`. Anemoy retains discretion to delay or partially fulfil redemptions if portfolio liquidity is insufficient (typical for open-end credit funds). Specific gating language in the fund offering memorandum: **TODO** (offering memo not publicly downloadable).
+- **Withdrawal queue / throttle:** No explicit fixed-cap throttle on `requestRedeem`. Anemoy retains discretion to delay or partially fulfil redemptions if portfolio liquidity is insufficient (typical for open-end credit funds).
 - **Historical drawdown handling:** No stress events observed since JAAA inception in May 2025. Indirect reference points: Janus Henderson's $21B JAAA ETF maintained tight bid-ask in 2024–2025.
 - **Same-value classification:** JAAA is a yield-bearing dollar-denominated security (~5% APY). Not a stablecoin — daily mark-to-market NAV varies slightly with CLO market prices. Acceptable to apply longer exit times for the AAA-credit asset class.
 
@@ -235,17 +232,16 @@ Other governance / infra addresses checked and confirmed **not wards** on the JA
   - The V3.0 Guardian [`0xfee1…3157`](https://etherscan.io/address/0xfee13c017693a4706391d516acabf6789d5c3157) was `Deny`'d on Root at block **24376326** (tx [`0x559e892f…`](https://etherscan.io/tx/0x559e892f88bedd4042929ddfaa6d92225c6074ba582b9a48168db8138dc4a908)) — the V3.0 4-of-8 Safe behind it is dormant.
 - **Pool Manager (Hub-level)** — the JAAA pool has **two registered managers** on the current `HubRegistry` ([`0x19f46…ADE93`](https://etherscan.io/address/0x19f46D8130e610C6C0f0116EA40Fb781dEFaDE93)), both verified by `manager(281474976710663, addr) == true`:
   1. **Pool Manager Safe** [`0x742d100011ffbc6e509e39dbcb0334159e86be1e`](https://etherscan.io/address/0x742d100011ffbc6e509e39dbcb0334159e86be1e) — **3-of-8 Gnosis Safe**.
-  2. **Fordefi multiuser MPC wallet** [`0x7bf090b97f896fb77e852cc98aa52a8cb7dc02ec`](https://etherscan.io/address/0x7bf090b97f896fb77e852cc98aa52a8cb7dc02ec) — onchain `code.size = 0` (looks like a plain EOA, as is normal for MPC wallets — signing happens off-chain to produce a single secp256k1 signature). Registered as a manager at block **24376421** during the V3.1 upgrade ([`UpdateManager` event](https://etherscan.io/tx/0x499ec04a42f6f4a961be5333f2d58db0538a8503cc058bb8b63fd9ca0fd5b9f8)). Centrifuge has attested in writing that this is a **Fordefi multiuser MPC wallet with a high signature threshold** (Fordefi attestation provided); we treat it as **approximately multisig-equivalent in scoring** on the basis of that attestation. The MPC threshold and the identity of the key holders are not independently onchain-verifiable.
-  Either manager can set prices, approve/issue/revoke shares, force-cancel investor requests, and update the allowlist for the JAAA pool. Both paths now require **multi-party threshold approval** (the 3-of-8 Safe or the Fordefi MPC threshold) — compromise of a single key on either path is insufficient. Residual programmatic risk: the unbounded `Hub.updateSharePrice` function still has no onchain bound or timelock; investor recourse on either principal is (a) the 48h Root timelock to ratify a Pool Manager change or (b) Guardian pause.
+  2. **Fordefi multiuser MPC wallet** [`0x7bf090b97f896fb77e852cc98aa52a8cb7dc02ec`](https://etherscan.io/address/0x7bf090b97f896fb77e852cc98aa52a8cb7dc02ec).
 - **Root timelock:** `delay()` = **172,800 s (48 hours)** for `scheduleRely`/`executeScheduledRely`. The Guardian wraps the Safe and adds a Zodiac Delay module of ~24h per Centrifuge docs (not directly verified onchain in this session). Aggregate "schedule new admin" delay is therefore documented as **72h**; the onchain Root delay alone is 48h.
 - **Guardian pause:** `Guardian.pause()` is callable without delay and freezes the protocol. `Guardian.unpause()` and other privileged paths require the Safe.
-- **CFG token governance:** CFG holders discuss and signal on protocol parameters via the [Centrifuge Governance Forum](https://gov.centrifuge.io/). There is **no onchain enforcement linkage between CFG votes and the EVM ProtocolAdminSafe** — the Safe signers act independently, and a CFG vote does not automatically trigger any onchain action on Ethereum. CFG-holder influence over Ethereum-side authority is therefore *social/political* (signaling consumed by Safe signers), not contractual. The structural trust anchor on Ethereum is the 4-of-9 Safe + 48h Root timelock, regardless of CFG voting outcomes.
 - **Privileged actions Root/Safes can take:**
   - Upgrade vault / share / hook / hub / spoke implementations
   - Add or remove wards on any protocol contract (including new mint authority on the share token)
   - Pause the protocol (Guardian, no delay)
   - Recover tokens (TokenRecoverer, dispute window applies)
-  - Add new cross-chain adapters (e.g. wire new Wormhole route)
+  - Add new cross-chain adapters
+- **CFG token governance:** CFG holders discuss and signal on protocol parameters via the [Centrifuge Governance Forum](https://gov.centrifuge.io/). There is **no onchain enforcement linkage between CFG votes and the EVM ProtocolAdminSafe** — the Safe signers act independently, and a CFG vote does not automatically trigger any onchain action on Ethereum. CFG-holder influence over Ethereum-side authority is therefore *social/political* (signaling consumed by Safe signers), not contractual. The structural trust anchor on Ethereum is the 4-of-9 Safe + 48h Root timelock, regardless of CFG voting outcomes.
 - **Fund seizure / freeze:** The `FullRestrictions` hook gives the pool manager the ability to **freeze a user's JAAA balance** (`hookDataOf` / `setHookData`). This is a regulatory feature for sanctions/compliance; it is also a real-world risk for any holder if Anemoy or the pool manager is compelled by court order.
 
 ### Programmability
@@ -257,14 +253,13 @@ Other governance / infra addresses checked and confirmed **not wards** on the JA
 
 ### External Dependencies
 
-- **Cross-chain messaging — 2-of-2 LayerZero V2 + Chainlink CCIP.** The `MultiAdapter` ([`0x35C8…73BE`](https://etherscan.io/address/0x35C837F0A54B715a23D193E1476BFC9BC30073BE)) is now configured with two adapters for JAAA across destination chains: `0xD517BC7b…` (LayerZero V2, confirmed by `endpoint() = 0x1a44…`, the canonical Ethereum LayerZero V2 Endpoint) and `0x34e9…` (Chainlink CCIP per Centrifuge attestation). `quorum() = 2` verified onchain — **both** adapters must sign any non-Ethereum-chain message. Wormhole is no longer in the active adapter array for JAAA. LayerZero side reportedly uses 5 DVNs (DVN count not separately verified in this session).
+- **Cross-chain messaging — 2/2 threshold with LayerZero V2 + Chainlink CCIP.** The `MultiAdapter` ([`0x35C8…73BE`](https://etherscan.io/address/0x35C837F0A54B715a23D193E1476BFC9BC30073BE)) is now configured with two adapters for JAAA across destination chains: `0xD517BC7b…` (LayerZero V2, confirmed by `endpoint() = 0x1a44…`, the canonical Ethereum LayerZero V2 Endpoint) and `0x34e9…` (Chainlink CCIP per Centrifuge attestation). `quorum() = 2` verified onchain — **both** adapters must sign any non-Ethereum-chain message. Wormhole is no longer in the active adapter array for JAAA. LayerZero side reportedly uses 5 DVNs.
 - **Stablecoin settlement (USDC, USDT, USDS)** — JAAA accepts multiple subscription / redemption assets per Centrifuge. USDC inherits Circle's freeze list and reserve risk; USDT inherits Tether's; USDS inherits Sky's. Multi-asset settlement reduces single-issuer concentration.
 - **Anemoy Capital SPC Limited (BVI)** — fund issuer of record. The legal wrapper that holds the underlying CLOs. BVI insolvency or regulatory action against Anemoy would constitute an existential risk for token holders.
 - **Janus Henderson** — sub-advisor; selects and manages the CLO portfolio.
-- **StoneX Securities Inc.** — custodian of the underlying CLO instruments. Custodian failure / fraud risk.
-- **Trident Trust** — **two roles on JAAA, both gating onchain state**: (1) fund administrator (**Trident Trust Company (Cayman) Ltd** per the on-chain pool metadata) computes NAV daily; (2) KYC/AML service provider for Anemoy (per [rwa.xyz](https://app.rwa.xyz/assets/JAAA)) — Trident performs the underlying identity/compliance review that gates which addresses Anemoy/the pool manager adds to the `FullRestrictions` allowlist. rwa.xyz also lists a sister BVI entity (**Trident Trust Company (B.V.I.) Limited**), likely registered agent / corporate services for Anemoy SPC at the fund's BVI jurisdiction. Trident Trust group is an independent fund-services firm with operations in 25 jurisdictions globally. **Concentration note:** a single counterparty (Trident) sits behind two independent onchain control surfaces — NAV freshness and the KYC allowlist. CIMA license status of the Cayman entity is standard for Cayman fund administrators but not independently verified in this assessment.
+- **StoneX Securities Inc.** — custodian of the underlying CLO instruments. Custodian failure.
+- **Trident Trust** — **two roles on JAAA, both gating onchain state**: (1) fund administrator (**Trident Trust Company (Cayman) Ltd** per the on-chain pool metadata) computes NAV daily; (2) KYC/AML service provider for Anemoy (per [rwa.xyz](https://app.rwa.xyz/assets/JAAA)) — Trident performs the underlying identity/compliance review that gates which addresses Anemoy/the pool manager adds to the `FullRestrictions` allowlist. rwa.xyz also lists a sister BVI entity (**Trident Trust Company (B.V.I.) Limited**), likely registered agent / corporate services for Anemoy SPC at the fund's BVI jurisdiction. Trident Trust group is an independent fund-services firm with operations in 25 jurisdictions globally.
 - **MHA Cayman** — fund auditor.
-- **Circle** — crypto custody leg.
 - **Sky / Grove** — until recently the largest single JAAA holder ($1B at launch). Grove redemption flow is the largest single-counterparty risk to JAAA's onchain TVL stability.
 
 ## Operational Risk
@@ -290,15 +285,12 @@ The most consequential signals for JAAA risk are (a) governance Safe actions, (b
    - V3.1+ Safe [`0x9711730060C73Ee7Fcfe1890e8A0993858a7D225`](https://etherscan.io/address/0x9711730060C73Ee7Fcfe1890e8A0993858a7D225) (4-of-9) — sole live admin path to Root
    - Pool Manager Safe [`0x742d100011ffbc6e509e39dbcb0334159e86be1e`](https://etherscan.io/address/0x742d100011ffbc6e509e39dbcb0334159e86be1e) (3-of-8 — JAAA-specific)
    - Pool Manager Fordefi MPC wallet [`0x7bf090b97f896fb77e852cc98aa52a8cb7dc02ec`](https://etherscan.io/address/0x7bf090b97f896fb77e852cc98aa52a8cb7dc02ec) — JAAA-specific; flag *any* outgoing tx, especially calls into `Hub` / `AsyncRequestManager` / `Spoke`
-   - OpsSafe [`0xd21413291444C5c104F1b5918cA0D2f6EC91Ad16`](https://etherscan.io/address/0xd21413291444C5c104F1b5918cA0D2f6EC91Ad16)
-   The V3.0 Safe [`0xD9D30…7e7FD`](https://etherscan.io/address/0xD9D30ab47c0f096b0AA67e9B8B1624504a63e7FD) is dormant after its Guardian was denied (block 24376326) — no longer needs active monitoring.
-   Use [`safe-monitor`](https://github.com/yearn/monitoring-scripts-py/blob/main/safe/main.py) pattern.
 
 5. **Root Rely / Deny events** — log `Rely(address)` and `Deny(address)` on Root. Any new ward added to Root is by definition a new governance principal; should match a known protocol upgrade announcement.
 
 6. **HubRegistry.UpdateManager events on the *current* registry** — `UpdateManager(uint64 poolId, address manager, bool canManage)`, topic0 `0x34d7bc620a98c7bbfc3e91245b8fd8cb1812543d39dffb55d1aafc6a44e3cdab`, on the current registry [`0x19f46D8130e610C6C0f0116EA40Fb781dEFaDE93`](https://etherscan.io/address/0x19f46D8130e610C6C0f0116EA40Fb781dEFaDE93). Filter on poolId topic = `0x0000000000000000000000000000000000000000000000000001000000000007` (= 281474976710663). Any new manager registered = change to who can set JAAA price / issue shares. **Do not watch the legacy registry** [`0x12044…f52cb`](https://etherscan.io/address/0x12044ef361Cc3446Cb7d36541C8411EE4e6f52cb) — it is no longer authoritative under the current Hub.
 
-7. **Aggregate cross-chain JAAA supply** — pull from [rwa.xyz/JAAA](https://app.rwa.xyz/assets/JAAA) (offchain dashboard); cross-check with each chain's `IERC20(JAAA).totalSupply()`.
+7. **Aggregate cross-chain JAAA supply** — could use offchain data [rwa.xyz/JAAA](https://app.rwa.xyz/assets/JAAA).
 
 8. **Anemoy / Janus Henderson disclosures** — periodic fund attestations / factsheets (if/when Anemoy publishes them — TODO to confirm cadence).
 
@@ -339,7 +331,7 @@ Recommended frequency: daily for NAV / Safe / pause monitoring; weekly for aggre
 │                             (legacy HubRegistry 0x1204…f52cb retains stale  │
 │                              pool data but is not consulted by current Hub) │
 │                                          ▲                                  │
-│                                          │ cross-chain via Wormhole         │
+│                                          │ cross-chain via LayerZero + Chainlink CCIP│
 │                                          │ MultiAdapter (current)           │
 │                                          │ 0x35C8…73BE                      │
 │                                          ▼                                  │
@@ -363,9 +355,9 @@ Recommended frequency: daily for NAV / Safe / pause monitoring; weekly for aggre
 │  AsyncVault ───── share() ──▶ JAAA Tranche (ERC-20, 6dp)                    │
 │  0x4880…780b                  0x5a0F…cf64                                   │
 │        │                                                                    │
-│        │ asset = USDC                                                       │
+│        │                                                                    │
 │        ▼                                                                    │
-│  PoolEscrow (operational USDC float)                                        │
+│  PoolEscrow (operational stablecoin float)                                  │
 │  0x0401…a52a                                                                │
 └────────────────────────────────┬────────────────────────────────────────────┘
                                  │ (offchain settlement)
@@ -378,7 +370,6 @@ Recommended frequency: daily for NAV / Safe / pause monitoring; weekly for aggre
 │         │  ├── Custodian: StoneX Securities Inc. (CLO holdings)             │
 │         │  ├── Administrator: Trident Trust (NAV computation)               │
 │         │  ├── Auditor: MHA Cayman                                          │
-│         │  └── Crypto custodian: Circle                                     │
 │         ▼                                                                   │
 │   Portfolio of AAA-rated, floating-rate CLO tranches                        │
 └─────────────────────────────────────────────────────────────────────────────┘
@@ -438,7 +429,7 @@ INVESTOR DEPOSIT — ERC-7540 ASYNC FLOW (JAAA on Ethereum)
 │           Spoke 0xEC35…525aB .updatePricePoolPerShare(...)              │
 │           → AsyncRequestManager.priceLastUpdated set                    │
 │           → convertToAssets() now returns new NAV immediately           │
-│      • else → async cross-chain via Gateway + Wormhole adapter          │
+│      • else → async cross-chain adapter                                 │
 ╰──────────────────────────────────────────────────────────────────────────╯
                                   │
                                   ▼
@@ -488,8 +479,8 @@ Both the 3-of-8 Pool Manager Safe `0x742d…be1e` and the Fordefi multiuser MPC 
 
 | # | Capability | Method (caller → contract) | Onchain bounds / checks | Reversibility | Worst-case if pool-manager principal is compromised |
 |---|---|---|---|---|---|
-| 1 | **Set JAAA NAV to any value** | `Hub.updateSharePrice(poolId, scId, pricePoolPerShare, computedAt)` → `ShareClassManager.updateSharePrice` | Pool exists; `computedAt ≤ block.timestamp`. **No upper bound, no deviation cap, no timelock, no per-epoch limit.** | Irreversible for any fulfilment that prices against it. | Mis-price the fund up or down arbitrarily — convertToAssets, integrators (Aave Horizon, Falcon, 3F/Morpho) all consume the new value the same block on Ethereum. |
-| 2 | **Notify Spoke of new price** | `Hub.notifySharePrice(poolId, scId, chainId)` → `MessageDispatcher.sendNotifyPricePoolPerShare` | Same-chain → synchronous `Spoke.updatePricePoolPerShare`. Cross-chain → async via Wormhole MultiAdapter. | Same as (1). | Propagates the mis-price to lending markets and to other chains. |
+| 1 | **Set JAAA NAV to any value** | `Hub.updateSharePrice(poolId, scId, pricePoolPerShare, computedAt)` → `ShareClassManager.updateSharePrice` | Pool exists; `computedAt ≤ block.timestamp`. **No upper bound, no deviation cap, no timelock, no per-epoch limit.** | Irreversible for any fulfilment that prices against it. | Mis-price the fund up or down arbitrarily — convertToAssets, integrators (Aave Horizon, Falcon, 3F/Morpho) use oracle wrappers with additional verification. |
+| 2 | **Notify Spoke of new price** | `Hub.notifySharePrice(poolId, scId, chainId)` → `MessageDispatcher.sendNotifyPricePoolPerShare` | Same-chain → synchronous `Spoke.updatePricePoolPerShare`. Cross-chain → async via MultiAdapter. | Same as (1). | Propagates the mis-price to lending markets and to other chains. |
 | 3 | **Approve a deposit batch at chosen price** | `Hub.approveDeposits(poolId, scId, pricePoolPerAsset)` | Manager-set price; pool exists. **No price bound.** | Irreversible once shares are issued in step (4). | Approve a self-deposit at near-zero USDC/JAAA price, minting huge JAAA against a small USDC outlay (combined with (1)/(4)). |
 | 4 | **Issue (mint) shares against approved batch** | `Hub.issueShares(poolId, scId, navPerShare)` → `AsyncRequestManager.fulfillDepositRequest` | Approved batch exists; manager-set navPerShare. **No bound.** | Irreversible. | Mint JAAA tokens to depositors (themselves) far in excess of the USDC they queued. |
 | 5 | **Approve a redeem batch at chosen price** | `Hub.approveRedeems(...)` | Manager-set price; pool exists. **No price bound.** | Irreversible once USDC is paid out in (6). | Pay out near-zero USDC for redeemed shares (other users' redeems get robbed). |
@@ -508,8 +499,6 @@ Both the 3-of-8 Pool Manager Safe `0x742d…be1e` and the Fordefi multiuser MPC 
 - **Pause the protocol.** Pause/unpause are Guardian-only (`ProtocolGuardian` + `OpsGuardian`).
 - **Mutate other pools.** All Hub functions in the table are scoped by `poolId` via `_isManager(poolId)`, which reads `HubRegistry.manager(poolId, msg.sender)`. JAAA's manager has no privileges on deJAAA or any other Centrifuge pool.
 
-**Net summary.** Neither pool-manager principal can steal PoolEscrow USDC by direct withdrawal and neither can mint JAAA out of thin air bypassing AsyncRequestManager — but rows 1–6 are a *complete economic capture surface*, and row 11 means either principal can unilaterally elevate itself to sole-manager status (revoking the other). Setting the price (or batch price) to arbitrary values, combined with the manager's own ability to queue and fulfill a deposit/redeem, is functionally equivalent to "mint to self / drain to self" within one batch cycle. Mitigations: (a) **multi-party threshold approval on both paths** — the 3-of-8 Safe and the Fordefi MPC threshold (compromise of any single key is insufficient on either path); (b) offchain operational discipline at Anemoy; (c) post-hoc TokenRecoverer / Guardian-pause response (slow, requires the protocol-admin path); (d) Yearn-side monitoring of *both* pool-manager addresses — especially `UpdateManager` events on the HubRegistry for poolId `281474976710663`.
-
 ---
 
 ## Risk Summary
@@ -521,14 +510,12 @@ Both the 3-of-8 Pool Manager Safe `0x742d…be1e` and the Fordefi multiuser MPC 
 - **Best-in-class collateral class for tokenized RWA:** AAA-rated floating-rate CLO tranches — top of the credit stack, low historical loss rates, large institutional secondary market.
 - **Material onchain protection:** 48h Root timelock, Guardian pause (no delay), a single live 4-of-9 ProtocolAdminSafe (the legacy V3.0 4-of-8 path is `Deny`'d on Root at block 24376326), and a **2-of-2 MultiAdapter cross-chain quorum** (LayerZero V2 + Chainlink CCIP, verified onchain via `quorum() = 2`) with dispute window.
 - **Independent third-party attestation:** [Chronicle Labs publishes a Proof-of-Asset / Proof-of-Holdings dashboard for JAAA](https://chroniclelabs.org/dashboard/proofofasset/janus-henderson-anemoy-aaa-clo-fund), giving an out-of-band cryptographic attestation of NAV and underlying holdings — uncommon for tokenized RWA funds and meaningfully strengthens Provability.
-- **Multi-stablecoin settlement:** USDC, USDT and USDS are all accepted subscription / redemption assets per Centrifuge — reduces single-issuer dependency on Circle.
-- **Pool-manager principals are multi-party threshold signers:** both the 3-of-8 Safe and the Fordefi multiuser MPC wallet (per Centrifuge's attestation) require multi-party approval to sign any transaction — no single-key path exists.
-- **Significant institutional adoption:** Grove ($1B initial seed), Aave Horizon (~$100M in first week), Resolv (up to $100M leveraged), Falcon Finance, 3F/Morpho — demonstrates real demand and provides secondary liquidity routes via the deJAAA wrapper.
+- **Significant institutional adoption:** Grove ($1B initial seed), Aave Horizon (~$100M in first week), Falcon Finance, 3F/Morpho — demonstrates real demand and provides secondary liquidity routes via the deJAAA wrapper.
 
 ### Key Risks
 
-- **Pool-manager principals have unbounded NAV-push authority and the power to replace each other.** Both managers — the 3-of-8 Safe and the Fordefi multiuser MPC wallet ([`0x7bf090b9…02ec`](https://etherscan.io/address/0x7bf090b97f896fb77e852cc98aa52a8cb7dc02ec), treated as approximately multisig-equivalent per the Fordefi attestation supplied by Centrifuge) — can set NAV to any value with no onchain bound or timelock, replace the other via `Hub.updateHubManager`, force-cancel investor requests, and modify the FullRestrictions allowlist. Compromise requires breaking a multi-party threshold on either path, not a single key. See **Critical Risks** below for the full capability surface and the contract-level guardrails (none currently; a price circuit breaker and volume-based circuit breaker are on the Centrifuge roadmap per their team).
-- **NAV is admin-pushed, not onchain-derived.** Underlying CLOs are offchain, so a fully onchain proof-of-reserves is structurally impossible. Token holders trust Anemoy / Trident Trust to compute correct NAV and the Pool Manager Safe to push it faithfully. No Chainlink PoR or independent oracle.
+- **Pool-manager principals have unbounded NAV-push authority and the power to replace each other.** Both managers — the 3-of-8 Safe and the Fordefi multiuser MPC wallet ([`0x7bf090b9…02ec`](https://etherscan.io/address/0x7bf090b97f896fb77e852cc98aa52a8cb7dc02ec), treated as approximately multisig-equivalent per the Fordefi attestation supplied by Centrifuge) — can set NAV to any value with no onchain bound or timelock.
+- **NAV is admin-pushed, not onchain-derived.** Underlying CLOs are offchain, so a fully onchain proof-of-reserves is structurally impossible. Token holders trust Anemoy / Trident Trust to compute correct NAV and the Pool Manager Safe to push it faithfully. No Chainlink PoR or independent oracle, but additional oracle verification is when used as collateral on Aave Horizon and Morpho.
 - **Mint-without-backing is technically possible** via the share token's `mint(address,uint256)` (gated only by wards). Standard governance-key risk, mitigated by the 48h Root timelock but not eliminated for paths involving the Pool Manager Safe acting via the Hub.
 - **Highly concentrated holder base.** rwa.xyz reports 23 holders globally; a single large redemption (e.g. Grove unwinding) could deplete the pool's USDC float, forcing Anemoy to either delay/partially fulfil the redemption per fund discretion or sell CLOs offchain in the secondary market — neither path is enforced onchain. Grove appears to have already drawn down a significant portion of its original $1B allocation (current aggregate JAAA NAV ~$437.9M as of 2026-05-28).
 - **Multiple offchain trust principals — with a Trident dual-role concentration.** A failure or adversarial action by Anemoy, Janus Henderson, StoneX, Trident Trust, or the BVI regulatory environment is an existential risk for token holders; none can be hedged onchain. Trident specifically wears **two hats** on JAAA — fund administrator (NAV computation, the input to every onchain price push) *and* KYC/AML provider for Anemoy (the input to every `FullRestrictions` allowlist update) — so a single Trident disruption hits both onchain control surfaces at once.
@@ -537,11 +524,7 @@ Both the 3-of-8 Pool Manager Safe `0x742d…be1e` and the Fordefi multiuser MPC 
 
 ### Critical Risks `[If Any]`
 
-- **Unbounded NAV-push function + full pool-management API behind the Hub's `_isManager` gate.** The current HubRegistry registers two pool-manager principals: the 3-of-8 Pool Manager Safe ([`0x742d…be1e`](https://etherscan.io/address/0x742d100011ffbc6e509e39dbcb0334159e86be1e)) and a Fordefi multiuser MPC wallet ([`0x7bf090b9…02ec`](https://etherscan.io/address/0x7bf090b97f896fb77e852cc98aa52a8cb7dc02ec)) — both treated as multi-party threshold signers per the Fordefi attestation Centrifuge supplied. Either principal can call `Hub.updateSharePrice(poolId, scId, pricePoolPerShare, computedAt)` on the current Hub [`0xA4A7…1953`](https://etherscan.io/address/0xA4A7Bb3831958463b3FE3E27A6a160F764341953); the only checks in `ShareClassManager.updateSharePrice` are that the share class exists and that `computedAt <= block.timestamp`. **There is no upper bound, no deviation cap, no per-epoch limit, no timelock and no Guardian-pause-on-large-change.** The Spoke-side price is updated synchronously in the same Ethereum transaction via `Hub.notifySharePrice` (which calls `Spoke.updatePricePoolPerShare` directly when `chainId == localCentrifugeId`), so `AsyncRequestManager.convertToAssets()`, batch fulfilment prices and any third-party integrator (Aave Horizon, Falcon, 3F/Morpho, Resolv via deJAAA) consume the manipulated value immediately. Beyond NAV, the same `_isManager` gate also grants either principal: `Hub.updateHubManager` (revoke the other manager or grant it to any address — see Appendix row 11), `Hub.approveDeposits` / `approveRedeems` / `issueShares` / `revokeShares` at manager-chosen prices, `forceCancelDepositRequest` / `forceCancelRedeemRequest` against any investor, and `updateMember` on the FullRestrictions allowlist hook. A multi-party threshold compromise on either principal would be sufficient to:
-  1. set the price to a near-zero value before fulfilling a pending deposit the attacker has queued, minting excess JAAA against a small USDC outlay (shares_out = USDC / price);
-  2. set the price to an arbitrarily high value before processing a pending redeem the attacker has queued, extracting excess USDC against a small share burn (USDC_out = shares × price);
-  3. or, more subtly, drift the published NAV away from the true offchain NAV indefinitely.
-  This is **not** an auto-fail Critical Gate (multi-party threshold approval on both principals + 48h Root timelock + 4-of-9 ProtocolAdminSafe + Guardian pause constrain protocol-level upgrades; PoolEscrow USDC is not directly drainable; **Chronicle Labs publishes an independent NAV/holdings attestation that makes a drift-from-true-NAV detectable**) — but the contract-level *function* still has no programmatic guardrails of any kind. Centrifuge's team has confirmed they are working on a **pool-management timelock + price circuit breaker + volume-based mint/burn circuit breaker** which, once live, would meaningfully fix this category of risk. Yearn integrations should monitor every outgoing transaction from both pool-manager principals in real time and treat *any* call into `Hub`, `AsyncRequestManager` or `Spoke` from them as an incident. See the Appendix capability table for the full set of pool-manager powers.
+- **Unbounded NAV-push function + full pool-management API behind the Hub's `_isManager` gate.** The current HubRegistry registers two pool-manager principals: the 3-of-8 Pool Manager Safe ([`0x742d…be1e`](https://etherscan.io/address/0x742d100011ffbc6e509e39dbcb0334159e86be1e)) and a Fordefi multiuser MPC wallet ([`0x7bf090b9…02ec`](https://etherscan.io/address/0x7bf090b97f896fb77e852cc98aa52a8cb7dc02ec)) — both treated as multi-party threshold signers per the Fordefi attestation Centrifuge supplied. Either principal can call `Hub.updateSharePrice(poolId, scId, pricePoolPerShare, computedAt)` on the current Hub [`0xA4A7…1953`](https://etherscan.io/address/0xA4A7Bb3831958463b3FE3E27A6a160F764341953); the only checks in `ShareClassManager.updateSharePrice` are that the share class exists and that `computedAt <= block.timestamp`. **There is no upper bound, no deviation cap, no per-epoch limit, no timelock and no Guardian-pause-on-large-change.** The Spoke-side price is updated synchronously in the same Ethereum transaction via `Hub.notifySharePrice` (which calls `Spoke.updatePricePoolPerShare` directly when `chainId == localCentrifugeId`), so `AsyncRequestManager.convertToAssets()`, batch fulfilment prices and any third-party integrator (Aave Horizon, Falcon, 3F/Morpho) consume the manipulated value immediately. But both Aave Horizon and Morpho use oracle wrappers with additional verification, see [Oracle Analysis](https://gist.github.com/spalen0/6de3e7fa0a1f0e68e9727de44a576964).
 
 ---
 
@@ -555,11 +538,9 @@ Both the 3-of-8 Pool Manager Safe `0x742d…be1e` and the Fordefi multiuser MPC 
 
 ### Critical Risk Gates
 
-- [x] **No audit** — FAIL → not triggered (20+ audits from multiple top firms).
-- [x] **Unverifiable reserves** — FAIL → not triggered. Reserves are offchain but verifiable through a chain of regulated attestation (BVI FSC → Anemoy → MHA Cayman audit → Trident Trust admin → StoneX custody). Comparable to Paxos USDG / Superstate USTB in transparency model.
-- [x] **Total centralization** — FAIL → not triggered for protocol-level governance. Root is controlled by a 4-of-9 ProtocolAdminSafe behind a 48h timelock + Guardian pause. Both JAAA pool-manager principals — the 3-of-8 Safe and the Fordefi multiuser MPC wallet — are multi-party threshold signers per Centrifuge's Fordefi attestation. PoolEscrow USDC is not directly drainable. The remaining concern is contract-level (`Hub.updateSharePrice` is unbounded), which elevates Programmability scoring but does not trip the centralization auto-fail.
-
-**All gates pass** → proceed to category scoring.
+- [x] **No audit** — PASS → not triggered (20+ audits from multiple top firms).
+- [x] **Unverifiable reserves** — PASS → not triggered. Reserves are offchain but verifiable through a chain of regulated attestation.
+- [x] **Total centralization** — PASS → not triggered for protocol-level governance. Root is controlled by a 4-of-9 ProtocolAdminSafe behind a 48h timelock + Guardian pause. Both JAAA pool-manager principals — the 3-of-8 Safe and the Fordefi multiuser MPC wallet — are multi-party threshold signers per Centrifuge's Fordefi attestation. PoolEscrow USDC is not directly drainable. The remaining concern is contract-level (`Hub.updateSharePrice` is unbounded), which elevates Programmability scoring but does not trip the centralization auto-fail.
 
 ### Category Scores
 
@@ -604,19 +585,17 @@ Both the 3-of-8 Pool Manager Safe `0x742d…be1e` and the Fordefi multiuser MPC 
 - Onchain accounting layer (BalanceSheet) is programmatic; underlying valuation is not. JAAA is not routed through the V3.2 SimplePriceManager / NAVManager (`navHook(poolId) = 0x0`), so the only price input is the manager push.
 - No transparency on parameter changes beyond raw onchain events; no public preview/queue of price updates before they land.
 
-→ **Subcategory B: 4.5** — the *rate-setting operation* is admin-controlled with no programmatic guardrails (row-5 territory on the "admin-controlled rate" axis), but Chronicle's independent NAV/holdings attestation softens the "no transparency" side of the rubric — there is now an external observer publishing what the NAV *should* be. Held above 4.0 because the contract still permits any value and the circuit breakers are not yet live. Will compress toward 3.0 if the planned timelock + price/volume circuit breakers ship and JAAA is migrated to them.
+→ **Subcategory B: 3.5** — the *rate-setting operation* is admin-controlled with no programmatic guardrails (row-5 territory on the "admin-controlled rate" axis), but Chronicle's independent NAV/holdings attestation softens the "no transparency" side of the rubric — there is now an external observer publishing what the NAV *should* be.
 
 **Subcategory C: External Dependencies**
 
-- **Cross-chain:** **2-of-2 MultiAdapter quorum** — LayerZero V2 + Chainlink CCIP. Verified onchain via `MultiAdapter.adapters(...)` and `quorum() = 2`; LayerZero adapter `0xD517BC7b…` confirmed by `endpoint() = 0x1a44…` (canonical LayerZero V2 Endpoint), second adapter `0x34e9…` is per Centrifuge attestation Chainlink CCIP. Both must sign any non-Ethereum-chain message — materially stronger than the prior single-Wormhole setup. Wormhole no longer in the active adapter array for JAAA.
-- **Stablecoin settlement:** USDC, USDT and USDS are all supported subscription / redemption assets (per Centrifuge team). Multi-asset settlement reduces single-issuer dependency on Circle.
+- **Cross-chain:** **2-of-2 MultiAdapter quorum** — LayerZero V2 + Chainlink CCIP. Verified onchain via `MultiAdapter.adapters(...)` and `quorum() = 2`; LayerZero adapter `0xD517BC7b…` confirmed by `endpoint() = 0x1a44…` (canonical LayerZero V2 Endpoint), second adapter `0x34e9…` is per Centrifuge attestation Chainlink CCIP. Both must sign any non-Ethereum-chain message — materially stronger than the prior single-Wormhole setup.
+- **Stablecoin settlement:** USDC, USDT and USDS are all supported subscription / redemption assets (per Centrifuge team).
 - **Offchain stack:** Janus Henderson sub-advisor, Anemoy issuer, StoneX custody, Trident Trust admin+KYC (dual role), MHA Cayman audit. StoneX and Janus Henderson are battle-tested TradFi entities.
 
 → **Subcategory C: 2.5** — 2-of-2 cross-chain bridge with two top-tier providers and multi-stablecoin settlement materially reduce onchain-dependency concentration. Held above 2.0 by the Trident Trust dual-role concentration (see Provability) and the still-newer Anemoy partnership (~12 months onchain).
 
-**Centralization Score = (3.0 + 4.5 + 2.5) / 3 ≈ 3.33**
-
-**Score: 3.33/5**
+**Centralization Score = (3.0 + 3.5 + 2.5) / 3 ≈ 3.00**
 
 #### Category 3: Funds Management (Weight: 30%)
 
@@ -640,19 +619,15 @@ Both the 3-of-8 Pool Manager Safe `0x742d…be1e` and the Fordefi multiuser MPC 
 
 **Funds Management Score = (3.0 + 2.5) / 2 = 2.75**
 
-**Score: 3.0/5**
-
 #### Category 4: Liquidity Risk (Weight: 15%)
 
 - **Direct redemption:** Daily through Anemoy, NAV-based, USDC-settled. Async — typically T+1 once redemption batch is processed; full settlement subject to fund-level liquidity.
-- **Liquidity depth:** Aave Horizon position-unwind, Falcon Finance, Resolv, 3F/Morpho provide secondary exit routes (denominated via the deJAAA wrapper).
+- **Liquidity depth:** Aave Horizon position-unwind, Falcon Finance, 3F/Morpho provide secondary exit routes.
 - **Large holder impact:** With only 23 holders globally and ~$437.9M aggregate NAV, a single $50M+ redemption is plausible and could exceed the pool's float, forcing CLO secondary sales over multiple days.
 - **Stress behavior:** Untested through any market dislocation since launch (May 2025). AAA CLOs would historically widen but remain saleable in stress.
 - Best fit: row 3 ("Market-based or short queues; >$1M, 1-3% slippage; 3-7 days for full exit") with a yield-bearing-asset exception (longer exit times acceptable).
 
-→ **Score: 3.0** — adequate for normal flows; concentration and untested stress behavior keep it from a 2.
-
-**Score: 3.0/5**
+**Score: 3.0** — adequate for normal flows; concentration and untested stress behavior keep it from a 2.
 
 #### Category 5: Operational Risk (Weight: 5%)
 
@@ -670,18 +645,18 @@ Both the 3-of-8 Pool Manager Safe `0x742d…be1e` and the Fordefi multiuser MPC 
 | Category | Score | Weight | Weighted |
 |----------|-------|--------|----------|
 | Audits & Historical | 1.75 | 20% | 0.35 |
-| Centralization & Control | 3.33 | 30% | 1.00 |
+| Centralization & Control | 3.00 | 30% | 0.90 |
 | Funds Management | 2.75 | 30% | 0.825 |
 | Liquidity Risk | 3.0 | 15% | 0.45 |
 | Operational Risk | 1.5 | 5% | 0.075 |
-| **Final Score** | | | **2.70/5.0** |
+| **Final Score** | | | **2.6/5.0** |
 
 **Optional Modifiers:**
 
 - Protocol live >2 years with no incidents: **not eligible** (V3 is ~10 months old).
 - TVL maintained >$500M for >1 year: **not eligible** at JAAA level (Grove redemption has brought aggregate NAV from $1B at launch to ~$437.9M as of 2026-05-28); protocol-level TVL >$1B has been sustained <1 year. No modifier applied.
 
-**Final Score: 2.70/5.0** — sits near the **Low Risk** boundary of the **Medium Risk** band (2.5–3.5). The dominant residual concern is the unbounded `Hub.updateSharePrice` function — both pool-manager principals now have multi-party threshold approval (3-of-8 Safe + Fordefi MPC per Centrifuge's attestation), so single-key risk is gone, but the function still has no onchain bound, timelock or circuit breaker. If the planned **pool-management timelock + price circuit breaker + volume-based mint/burn circuit breaker** ship and JAAA migrates to them, Programmability compresses from 4.5 toward ~3.0 and the overall score moves toward the **Low Risk** band (around 2.40–2.50).
+**Final Score: 2.6/5.0** — sits near the **Low Risk** boundary of the **Medium Risk** band (2.5–3.5). The dominant residual concern is the unbounded `Hub.updateSharePrice` function — both pool-manager principals now have multi-party threshold approval (3-of-8 Safe + Fordefi MPC per Centrifuge's attestation). This is partialy mitigated by onchain oracles on Aave Horizon and Morpho.
 
 ### Risk Tier
 
@@ -704,6 +679,6 @@ Both the 3-of-8 Pool Manager Safe `0x742d…be1e` and the Fordefi multiuser MPC 
 - **Governance:** Reassess on any new `Rely` on Root (new admin principal), any change to the current ProtocolAdminSafe threshold/signer set, or any `UpdateManager` event on the current HubRegistry [`0x19f46…ADE93`](https://etherscan.io/address/0x19f46D8130e610C6C0f0116EA40Fb781dEFaDE93) for poolId `281474976710663` (add/remove of a JAAA Pool Manager — Safe or MPC wallet).
 - **Pricing:** Reassess if the JAAA pool migrates to V3.2's onchain `NAVManager`/`PriceManager`, or conversely if the NAV stops being refreshed at least every 48 hours during business days.
 - **Onchain guardrails ship:** Reassess (Programmability) when Centrifuge's planned **pool-management timelock + price circuit breaker + volume-based mint/burn circuit breaker** go live and JAAA is migrated to them — material score-reducer.
-- **Cross-chain adapter set changes:** Reassess if the active MultiAdapter quorum changes (e.g., a Chainlink CCIP or LayerZero V2 adapter is added/removed for JAAA), if Wormhole is re-added, or if `quorum()` is lowered.
+- **Cross-chain adapter set changes:** Reassess if the active MultiAdapter quorum changes (e.g., a Chainlink CCIP or LayerZero V2 adapter is added/removed for JAAA), or if `quorum()` is lowered.
 - **Counterparty:** Reassess on any material change to Anemoy, Janus Henderson sub-advisory, StoneX custody, Trident Trust administration (admin or KYC role), Chronicle Labs attestation availability, or MHA Cayman audit relationships.
 - **Incident-based:** Reassess after any Centrifuge protocol exploit, any pause event, any token recovery action via `TokenRecoverer`, or any depeg / NAV-discontinuity > 1%.
