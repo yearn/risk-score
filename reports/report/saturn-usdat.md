@@ -29,7 +29,7 @@ The key risk separation: **USDat's collateral is tokenized U.S. Treasuries (via 
 - [Protocol App](https://saturn.credit/)
 - [Key Addresses](https://saturncredit.gitbook.io/saturn-docs/operations-and-governance/key-addresses)
 - [Transparency & Audits](https://saturncredit.gitbook.io/saturn-docs/operations-and-governance/transparency-and-audits)
-- GitHub Repositories (per audit reports): [`saturn-organization/saturn-dollar`](https://github.com/saturn-organization/saturn-dollar) (USDat) and [`saturn-organization/saturn-yield-dollar`](https://github.com/saturn-organization/saturn-yield-dollar) (sUSDat/vault). Note: the audited `saturn-dollar` USDat is the *pre-pivot* design; the deployed token is the M0 [`m-extensions`](https://github.com/m0-foundation) `JMIExtension` (see Audits).
+- GitHub Repositories (per audit reports): [`saturn-organization/saturn-dollar`](https://github.com/saturn-organization/saturn-dollar) (USDat) and [`saturn-organization/saturn-yield-dollar`](https://github.com/saturn-organization/saturn-yield-dollar) (sUSDat/vault). Note: the first Saturn Dollar audits covered the earlier self-issued USDat design; Certora Audit #3 covers the deployed M0 [`m-extensions`](https://github.com/m0-foundation) `JMIExtension` design (see Audits).
 - [M0 Documentation](https://docs.m0.org/) — underlying `$M` token
 - [Serenity Research — USDat Initial Review (May 2026)](https://serenityresearch.substack.com/p/serenity-premium-usdat-by-saturn) (third-party)
 - [Alea Research — Saturn: Building Bitcoin's Credit Layer](https://alearesearch.substack.com/p/saturn-building-bitcoins-credit-layer) (third-party)
@@ -43,13 +43,13 @@ The key risk separation: **USDat's collateral is tokenized U.S. Treasuries (via 
 |---|------|------|------|----------|------------|
 | 1 | **Three Sigma** | 30 Dec 2025 – 12 Jan 2026 | `saturn-dollar` `ad2a465` + `saturn-yield-dollar` `aa762cc` (532 nSLOC) | 0 Crit, 2 High, 5 Med, 13 Low, 3 Info | Both High fixed; 1 Med (USDat-depeg share pricing) acknowledged; 2 Low + 1 Info acknowledged |
 | 2 | **Certora** | 16–23 Jan 2026 | `saturn-yield-dollar` `c8c5a4c`→`a55f288`, `saturn-dollar` `bfc6c91` | 0 Crit, 0 High, 2 Med, 8 Low, 5 Info | 11 / 15 fixed; M-02 + several Low acknowledged |
-| 3 | **Certora** (Audit #3) | (follow-up review) | TODO: record commit/date | TODO | TODO |
-| 4 | **Certora** (Formal Verification) | (FV engagement) | TODO: record commit/date | TODO | TODO |
+| 3 | **Certora** (Audit #3) | Apr 30 2026 | **Saturn Dollar M0 Extensions** - Saturn extension of M0 for USDat/sUSDat; manual code review plus Certora Prover specification and verification | Full report details issues and verified properties; public summary does not enumerate finding counts | See [Certora report](https://www.certora.com/reports/saturn-dollar-m0-extensions) |
+| 4 | **Certora** (Formal Verification) | Apr 30 2026 | Formal verification included in the Saturn Dollar M0 Extensions engagement | Security properties formally proven with Certora Prover | See [Certora report](https://www.certora.com/reports/saturn-dollar-m0-extensions) |
 
-So coverage is strong on paper — two reputable firms, four reports including formal verification.
+So coverage is strong on paper — two reputable firms, four reports including formal verification. Importantly, Certora Audit #3 is specifically the **Saturn Dollar M0 Extensions** review and covers the M0 `JMIExtension` architecture used by deployed USDat (`0x2323…aa71`, impl `0x17ca…e52e`), including manual review and Certora Prover verification of the contracts in scope.
 
-> **⚠️ Critical caveat — the audits do not cover the deployed USDat token.** All four reports audit a *self-issued* `saturn-dollar/src/USDat.sol` (80 nSLOC) described by both firms as "a simple ERC20… minted 1:1 against stable assets by KYC-verified users," with a `PROCESSOR_ROLE` that **mints** and a `_blacklisted` mapping. The **deployed** USDat (`0x2323…aa71`, impl `0x17ca…e52e`, live 2026-03-10) is instead an **M0 `JMIExtension`** — wrap/unwrap of `$M`, `swapFacility`, `whitelist`, `forceTransfer`, no `PROCESSOR_ROLE` mint. The protocol **pivoted the stablecoin to the M0 model after these audits** (commits audited are from Dec 2025–Jan 2026; deployment is ~2 months later). The deployed USDat token therefore relies on **M0's own audits of the `m-extensions` library** plus an **un-audited thin Saturn wrapper** (whitelist gating + forced-transfer wiring) — it is **not** covered by these four reports. The **sUSDat** staking layer (StakedUSDat / WithdrawalQueue / TokenizedSTRC) does broadly correspond to the audited code. **TODO: obtain the M0 `m-extensions` audit(s) and confirm whether the deployed M0-based USDat was separately reviewed.**
-- **Notable audited findings** (on the prior design, useful context): Three Sigma `H01` — blacklist enforced only on recipient, letting blacklisted senders move tokens (fixed); `H02` / Certora `M-01`,`M-02` — reward-distribution front-running, redistribute-sandwich, and rounding dust leakage in the sUSDat vault (fixed/acknowledged); Three Sigma `M03` / Certora `L-01` — the sUSDat vault assumes USDat = $1, so a USDat depeg or a lag between off-chain STRC purchase and on-chain USDat burn can leave the vault mis-priced/under-backed (acknowledged; client switching the oracle to price STRC in USDat terms and adding a bridge-loan flow). Certora also flagged **no test coverage for StakedUSDat** and that **`PROCESSOR_ROLE` is the dominant trust boundary**.
+> **Audit-scope caveat:** the earliest Saturn Dollar audits covered a *self-issued* `saturn-dollar/src/USDat.sol` design (80 nSLOC) described as "a simple ERC20… minted 1:1 against stable assets by KYC-verified users," with a `PROCESSOR_ROLE` that **mints** and a `_blacklisted` mapping. The deployed USDat is instead an **M0 `JMIExtension`** — wrap/unwrap of `$M`, `swapFacility`, `whitelist`, `forceTransfer`, no `PROCESSOR_ROLE` mint. This pivot is covered by Certora Audit #3, so the prior "deployed token not covered" finding is removed. The main residual audit limitation is that the full deployed trust model still depends on M0 and on Saturn's live configuration/roles.
+- **Notable audited findings** (on the prior design, useful context): Three Sigma `H01` — blacklist enforced only on recipient, letting blacklisted senders move tokens (fixed); `H02` / Certora `M-01`,`M-02` — reward-distribution front-running, redistribute-sandwich, and rounding dust leakage in the sUSDat vault (fixed/acknowledged); Three Sigma `M03` / Certora `L-01` — the sUSDat vault assumes USDat = $1, so a USDat depeg or a lag between off-chain STRC purchase and on-chain USDat burn can leave the vault mis-priced/under-backed (acknowledged; client switching the oracle to price STRC in USDat terms and adding a bridge-loan flow). Certora also flagged **no test coverage for StakedUSDat** and that **`PROCESSOR_ROLE` is the dominant trust boundary** in the earlier design.
 - Smart-contract architecture complexity: **moderate**. The deployed USDat is a `TransparentUpgradeableProxy` over a well-structured M0 extension; novel Saturn surface is small. The sUSDat layer is more complex (multi-token NAV vault + ERC-721 withdrawal queue + processor-driven off-chain settlement).
 
 ### Bug Bounty `[If Applicable]`
@@ -114,13 +114,13 @@ USDC  ──(Saturn app, onboarded user)──▶  M0 Swap Facility  ──swap�
 - **Collateral quality:** `$M` is M0's tokenized short-term U.S. Treasuries product — high quality. However, USDat's backing is **one protocol layer removed**: USDat's solvency depends on `$M` holding its peg and on M0's own (off-chain, attested) Treasury reserves. USDat holds ~$126M of `$M` out of `$M`'s ~$342M total supply (~37%) — a large share of a single underlying.
 - **Over-collateralization / liquidations:** USDat is a 1:1 wrapper, not a CDP — no liquidations, no maintenance ratio. Peg stability rests on (a) `$M` redeemability and (b) the Curve/Pancake arbitrage pools.
 - **Custodial / privileged actions on funds:** The compliance MPC can `freeze` any account and `forceTransfer` (seize) tokens from frozen accounts, and can `pause` all transfers. These are disclosed as compliance controls. The Admin MPC can upgrade the contract.
-- **Risk curation:** asset caps for additional backing assets are managed by `ASSET_CAP_MANAGER_ROLE` (Processor MPC).
+- **Risk curation:** asset caps for additional backing assets are managed by `ASSET_CAP_MANAGER_ROLE`, now held by the Saturn Timelock (`0x7d343D17896d2cd87a49B4Fb8872298a883F78f7`; `getMinDelay()` = 432,000 seconds / 5 days, verified June 7, 2026). The prior Processor 2 holder `0xA18f…A3Ad` no longer has the role.
 
 ### Provability
 
 - USDat's `$M` backing is **fully on-chain verifiable in real time** (`M.balanceOf(USDat)` vs `totalSupply()`), and the exchange rate (`currentIndex()`) is read programmatically from M0 — anyone can compute it.
 - The **next layer down** (M0's Treasury reserves backing `$M`) is off-chain and relies on M0's own attestation/governance.
-- Saturn uses **Accountable** for real-time proof-of-reserves of the off-chain assets, and **Chainlink** publishes a NAV oracle from the Accountable feed; per the DD docs the NAV oracle updates **every 24 hours or on a 50 bps move**, and the STRC price feed updates every 24 hours or on a 10 bps move. These primarily serve **sUSDat** NAV (STRC is off-chain, custodied at Clear Street). For **USDat**, the `$M` backing is held in the token contract and is directly verifiable on-chain without relying on these feeds. **TODO: confirm the Accountable PoR feed is live and record its address; confirm the Chainlink NAV oracle address.** A `Saturn STRC Price Feed` (`0x5f7eCD0D045c393da6cb6c933c671AC305A871BF`) and a `Chainlink STRC Price Feed` (`0xf4d2076277fff631EFC4385Ab36b1f7734218d23`) exist on-chain.
+- Saturn uses **Accountable** for proof-of-reserves of the off-chain sUSDat assets, and **Chainlink** publishes a live `Saturn sUSDat NAV` NAVLink feed from Accountable at [`0x73B8E902638a21B4d0319CF99Fa333b2727AD318`](https://etherscan.io/address/0x73B8E902638a21B4d0319CF99Fa333b2727AD318) ([Chainlink feed page](https://data.chain.link/feeds/ethereum/mainnet/susdat-nav)). On-chain verification June 7, 2026: `description()` = `Saturn sUSDat NAV`, `decimals()` = 18, `latestRoundData()` returned answer `1.007071305776136200`. The Chainlink page lists Ethereum Mainnet, NAVLink product type, Accountable as data source, and 0.5% deviation threshold. These feeds primarily serve **sUSDat** NAV (STRC is off-chain, custodied at Clear Street). For **USDat**, the `$M` backing is held in the token contract and is directly verifiable on-chain without relying on these feeds. A `Saturn STRC Price Feed` (`0x5f7eCD0D045c393da6cb6c933c671AC305A871BF`) and a `Chainlink STRC Price Feed` (`0xf4d2076277fff631EFC4385Ab36b1f7734218d23`) also exist on-chain.
 
 ## Liquidity Risk
 
@@ -139,7 +139,7 @@ USDC  ──(Saturn app, onboarded user)──▶  M0 Swap Facility  ──swap�
 ### Governance
 
 - **Upgradeable:** USDat is a `TransparentUpgradeableProxy`. Implementation: [`0x17cac25c6d6bbcb592837fea083a5c8eb4d1e52e`](https://etherscan.io/address/0x17cac25c6d6bbcb592837fea083a5c8eb4d1e52e). ProxyAdmin: [`0xcf1072DA5f0D127AEf99136489BAd08bFa3D1A7D`](https://etherscan.io/address/0xcf1072DA5f0D127AEf99136489BAd08bFa3D1A7D), **owned by the Admin address** `0x6101…6820`.
-- **No on-chain timelock and no Gnosis Safe** — all privileged addresses are **Fireblocks 2-of-3 MPC** wallets (per docs). A 2/3 MPC is functionally a low-threshold, no-timelock controller.
+- **No on-chain timelock for upgrade/admin/compliance keys and no Gnosis Safe** — the Admin, Compliance, and Processor addresses are **Fireblocks 2-of-3 MPC** wallets (per docs). A 2/3 MPC is functionally a low-threshold, no-timelock controller. Exception: `ASSET_CAP_MANAGER_ROLE` has moved to the Saturn Timelock with a 5-day delay.
 - **Privileged roles (verified on-chain via `hasRole`):**
 
 | Role | Holder | Type | Power |
@@ -150,10 +150,10 @@ USDC  ──(Saturn app, onboarded user)──▶  M0 Swap Facility  ──swap�
 | `PAUSER_ROLE` | `0x10D5…703B` (Compliance) | Fireblocks 2/3 MPC | Pause all transfers |
 | `WHITELIST_MANAGER_ROLE` | `0x10D5…703B` (Compliance) | Fireblocks 2/3 MPC | Manage mint/redeem whitelist |
 | `YIELD_RECIPIENT_MANAGER_ROLE` | `0x09D6…729f` (Processor) | Fireblocks 2/3 MPC | Change the yield recipient |
-| `ASSET_CAP_MANAGER_ROLE` | `0xA18f…A3Ad` (Processor 2) | Fireblocks 2/3 MPC | Authorize/cap additional backing assets |
+| `ASSET_CAP_MANAGER_ROLE` | `0x7d34…78f7` (Saturn Timelock) | Timelock contract (`getMinDelay()` = 5 days) | Authorize/cap additional backing assets |
 
 - **Can governance pause, freeze, or seize user funds? Yes** — freeze + forced transfer + pause are all live and held by the Compliance MPC. These are standard regulated-stablecoin compliance controls (cf. USDG, USDC) but represent real holder risk and a notable centralization signal.
-- **Documentation discrepancy (resolved in favour of on-chain):** Saturn's internal Ops/Risk doc describes an *earlier* design in which "funds that back USDat are held in a Copper custodial multisig wallet" (not in the contract) and the admin is a "3-of-5 multisig." The **live, on-chain design supersedes this**: USDat is an M0 extension, the `$M` backing sits **in the token contract** (verified: `M.balanceOf(USDat)` = $126M), and the roles are held by **Fireblocks 2/3 MPC** addresses (per the key-addresses page). Treat on-chain state as authoritative; the "off-chain custody / 3-of-5" framing is stale. The exact MPC signer threshold cannot be verified on-chain (MPC is off-chain) — taken from docs.
+- **Documentation discrepancy (resolved in favour of on-chain):** Saturn's internal Ops/Risk doc describes an *earlier* design in which "funds that back USDat are held in a Copper custodial multisig wallet" (not in the contract) and the admin is a "3-of-5 multisig." The **live, on-chain design supersedes this**: USDat is an M0 extension, the `$M` backing sits **in the token contract** (verified: `M.balanceOf(USDat)` = $126M), and the main admin/compliance roles are held by **Fireblocks 2/3 MPC** addresses (per the key-addresses page), while asset-cap management now sits behind the Saturn Timelock. Treat on-chain state as authoritative; the "off-chain custody / 3-of-5" framing is stale. The exact MPC signer threshold cannot be verified on-chain (MPC is off-chain) — taken from docs.
 
 ### Programmability
 
@@ -164,8 +164,8 @@ USDC  ──(Saturn app, onboarded user)──▶  M0 Swap Facility  ──swap�
 
 - **M0 is a single critical dependency.** USDat is 100% backed by `$M`; if M0 depegs, is paused, or its Treasury backing is impaired, USDat is directly affected. M0 is a permissioned stablecoin protocol with its own governance and minter set. **TODO: assess M0's own risk posture (minter collateralization, governance, audits) — it is the de-facto floor on USDat's risk.**
 - **M0 Swap Facility** (`0xB680…6278`) — the sole mint/redeem contract; an M0/Saturn-controlled component. **TODO: confirm who controls/can-upgrade the Swap Facility and which assets it accepts.**
-- **Fireblocks MPC** infrastructure underpins all admin keys.
-- Oracles: STRC price feeds (Saturn + Chainlink) are relevant to sUSDat NAV, not USDat's 1:1 peg.
+- **Fireblocks MPC** infrastructure underpins the Admin, Compliance, and Processor keys.
+- Oracles: STRC price feeds and the Chainlink `Saturn sUSDat NAV` feed are relevant to sUSDat NAV, not USDat's 1:1 peg. The sUSDat yield is packaged STRC credit/dividend exposure, not generic "stablecoin yield"; it carries off-chain custody/execution, NAV/oracle, and withdrawal-queue liquidity risk.
 
 ## Operational Risk
 
@@ -195,12 +195,13 @@ Recommended frequency: backing ratio and peg **hourly**; governance/upgrade/free
 ## Appendix: Contract Architecture
 
 ```
-GOVERNANCE (Fireblocks 2/3 MPC — no timelock)
+GOVERNANCE (Fireblocks 2/3 MPC for admin/compliance; asset caps timelocked)
   ┌─────────────────────────────────────────────────────────────────────┐
   │ Admin 0x6101…6820   → DEFAULT_ADMIN_ROLE + owns ProxyAdmin (upgrade)  │
   │ Compliance 0x10D5…703B → FREEZE / FORCED_TRANSFER / PAUSER / WHITELIST│
   │ Processor 0x09D6…729f  → YIELD_RECIPIENT_MANAGER                      │
-  │ Processor2 0xA18f…A3Ad → ASSET_CAP_MANAGER                            │
+  │ Timelock 0x7d34…78f7 → ASSET_CAP_MANAGER                         │
+  │   5-day delay                                                       │
   └───────────────┬──────────────────────────────┬────────────────────────┘
                   │ owns                          │ roles
         ┌─────────▼─────────┐                     │
@@ -245,16 +246,16 @@ YIELD LAYER (context only — not USDat backing)
 
 ### Key Risks
 
-- **Highly centralized control:** every privileged key is a Fireblocks **2/3 MPC** with **no timelock**; the Admin can **upgrade** the token at will, and Compliance can **freeze, seize, and pause** user funds.
+- **Highly centralized control:** the Admin, Compliance, and Processor keys are Fireblocks **2/3 MPC** wallets with **no timelock**; the Admin can **upgrade** the token at will, and Compliance can **freeze, seize, and pause** user funds. Asset-cap changes are now behind the Saturn Timelock (5-day delay), which is an improvement but does not reduce the upgrade/admin trust assumption.
 - **Single critical dependency on M0** — USDat fully inherits `$M`'s peg and M0's (off-chain, attested) Treasury risk; USDat holds ~37% of all `$M`.
 - **Very young** (~2.5 months live) with no track record through stress.
-- **Audit-coverage gap:** the four published audits (Three Sigma + Certora) cover a *pre-pivot, self-issued* USDat design, not the M0-extension token actually deployed. The live token's bespoke surface (Saturn whitelist wrapper) is un-audited by these reports; it leans on M0's separate `m-extensions` audits.
+- **sUSDat context risk:** sUSDat yield is packaged STRC credit/dividend exposure with off-chain custody/execution, NAV/oracle reliance, and withdrawal-queue liquidity risk. This is separate from USDat backing but relevant if USDat liquidity or peg support depends on the broader Saturn system.
 - **Exit for non-whitelisted holders is secondary-market only** (~$19M Curve depth vs ~$126M supply); direct 1:1 redemption requires onboarding.
 
 ### Critical Risks `[If Any]`
 
 - Upgradeable proxy controlled by a 2/3 MPC with no timelock means **the trust model ultimately rests on the Admin keys** — a compromised/misused Admin MPC could redefine the token (including minting). This does not by itself trip a critical gate (it is not a single EOA, reserves are verifiable, and there are audits), but it is the dominant risk.
-- The deployed USDat token is **not directly covered by the four audit reports** (architecture pivoted to M0 after the audits). Mitigated by the deployed code being a thin wrapper over M0's audited `m-extensions`, but worth confirming M0's audit scope before relying on it.
+- The deployed USDat token relies on the M0 extension model. Certora Audit #3 covers Saturn's M0 Extensions implementation, but USDat still inherits M0's own governance, reserve, and swap-facility risks.
 
 ---
 
@@ -264,7 +265,7 @@ YIELD LAYER (context only — not USDat backing)
 
 ### Critical Risk Gates
 
-- [ ] **No audit** — Not triggered (four reports reviewed: 1× Three Sigma + 3× Certora incl. formal verification). Caveat: they cover the pre-pivot design, not the deployed M0 token (which leans on M0's `m-extensions` audits).
+- [ ] **No audit** — Not triggered (four reports reviewed: 1× Three Sigma + 3× Certora incl. formal verification; Certora Audit #3 covers the deployed M0-extension design).
 - [ ] **Unverifiable reserves** — Not triggered (`$M` backing is verifiable on-chain in real time).
 - [ ] **Total centralization** — Not triggered (2/3 MPC + roles, not a single EOA), though centralization is high.
 
@@ -274,16 +275,16 @@ YIELD LAYER (context only — not USDat backing)
 
 #### Category 1: Audits & Historical Track Record (Weight: 20%)
 
-- **Audits:** Strong on paper — four reports (1× Three Sigma + 3× Certora incl. formal verification), zero unresolved Highs/Criticals. But the reports cover a **pre-pivot self-issued design, not the deployed M0 token**, and there is no bug bounty; the deployed token's bespoke surface is un-audited by these reports and leans on M0's separate audits → **3.0**.
+- **Audits:** Strong on paper — four reports (1× Three Sigma + 3× Certora incl. formal verification), zero unresolved Highs/Criticals in the public summaries, and Certora Audit #3 covers the deployed M0-extension design. Remaining negatives are young code, centralization/configuration risk, and no bug bounty → **2.5**.
 - **Historical:** <3 months in production (→5 on time) but >$100M TVL (→1 on scale); the youth dominates and high TVL this early is not a maturity signal → **4.0**.
 
-**Audits & Historical Score = (3.0 + 4.0) / 2 = 3.5**
+**Audits & Historical Score = (2.5 + 4.0) / 2 = 3.25**
 
-**Score: 3.5/5**
+**Score: 3.25/5**
 
 #### Category 2: Centralization & Control Risks (Weight: 30%)
 
-- **Governance:** Upgradeable proxy, 2/3 MPC, no timelock, can freeze/seize/pause → **4.0**.
+- **Governance:** Upgradeable proxy controlled by 2/3 MPC with no timelock; Compliance can freeze/seize/pause; asset-cap management is timelocked → **4.0**.
 - **Programmability:** Mostly programmatic; 1:1 non-rebasing, index read on-chain; some off-chain onboarding → **2.0**.
 - **External Dependencies:** Single critical dependency on M0 (plus Fireblocks) → **4.0**.
 
@@ -294,7 +295,7 @@ YIELD LAYER (context only — not USDat backing)
 #### Category 3: Funds Management (Weight: 30%)
 
 - **Collateralization:** 100% on-chain `$M` backing, high-quality (Treasuries) but one layer removed via M0 → **2.5**.
-- **Provability:** `$M` backing real-time on-chain; deeper Treasury layer off-chain/attested; Accountable PoR + Chainlink NAV planned but not confirmed live → **2.5**.
+- **Provability:** `$M` backing real-time on-chain; deeper Treasury layer off-chain/attested; Accountable-backed Chainlink sUSDat NAV feed is live for the yield layer → **2.5**.
 
 **Funds Management Score = (2.5 + 2.5) / 2 = 2.5**
 
@@ -316,12 +317,12 @@ YIELD LAYER (context only — not USDat backing)
 
 | Category | Score | Weight | Weighted |
 |----------|-------|--------|----------|
-| Audits & Historical | 3.5 | 20% | 0.70 |
+| Audits & Historical | 3.25 | 20% | 0.65 |
 | Centralization & Control | 3.3 | 30% | 0.99 |
 | Funds Management | 2.5 | 30% | 0.75 |
 | Liquidity Risk | 3.0 | 15% | 0.45 |
 | Operational Risk | 2.5 | 5% | 0.125 |
-| **Final Score** | | | **3.02 ≈ 3.0 / 5.0** |
+| **Final Score** | | | **2.97 ≈ 3.0 / 5.0** |
 
 **Optional Modifiers:** none apply (protocol <2 years, TVL history <1 year).
 
@@ -352,15 +353,13 @@ YIELD LAYER (context only — not USDat backing)
 
 ## Pending TODOs (for follow-up)
 
-1. **Obtain M0's `m-extensions` audit(s)** and confirm whether the deployed M0-based USDat token was separately reviewed — the four Saturn audits cover the pre-pivot design only. Also record Certora Audit #3 and Formal Verification commit/date/findings.
-2. Confirm **Safe Harbor (SEAL)** status (bug bounty confirmed **none** — not in docs, not on Immunefi).
-3. Confirm the **Accountable PoR feed** is live and record its address; record the **Chainlink NAV oracle** address (cadence known: 24h / 50 bps).
-4. Assess **M0's own risk** (minter collateralization, governance, audits) as the floor on USDat risk; confirm who controls/can-upgrade the **M0 Swap Facility** and accepted assets.
-5. Pull **holder distribution** and **historical peg/price** series (Etherscan Pro / Dune).
-6. Confirm **team identities** and **seed amount** ($800K vs $2M). (GitHub repos now recorded: `saturn-organization/saturn-dollar`, `saturn-organization/saturn-yield-dollar`.)
-7. Quote **on-chain slippage** for USDat exit sizes ($1M / $5M / $10M) on the Curve pool.
-8. Optional: generate the contract dependency graph YAML at `reports/graph/saturn-usdat.yaml`.
+1. Confirm **Safe Harbor (SEAL)** status (bug bounty confirmed **none** — not in docs, not on Immunefi).
+2. Assess **M0's own risk** (minter collateralization, governance, audits) as the floor on USDat risk; confirm who controls/can-upgrade the **M0 Swap Facility** and accepted assets.
+3. Pull **holder distribution** and **historical peg/price** series (Etherscan Pro / Dune).
+4. Confirm **team identities** and **seed amount** ($800K vs $2M). (GitHub repos now recorded: `saturn-organization/saturn-dollar`, `saturn-organization/saturn-yield-dollar`.)
+5. Quote **on-chain slippage** for USDat exit sizes ($1M / $5M / $10M) on the Curve pool.
+6. Optional: generate the contract dependency graph YAML at `reports/graph/saturn-usdat.yaml`.
 
 ### Sources consulted this session
 
-GitBook docs + key addresses; on-chain verification via `cast`/Etherscan; DefiLlama TVL; the issue's deeper sources rendered via Notion's public page API and a Google Docs text export (Saturn DD FAQ, Product Operations & Risk, STRC Risk Analysis, STRC Product intro, and the contract-spec doc); and the **four published audit PDFs** (Three Sigma Audit #1; Certora Audit #2, Audit #3, Formal Verification). The Lucidchart flow-of-funds and the X post were not ingested.
+GitBook docs + key addresses; on-chain verification via `cast`/Etherscan; DefiLlama TVL; the issue's deeper sources rendered via Notion's public page API and a Google Docs text export (Saturn DD FAQ, Product Operations & Risk, STRC Risk Analysis, STRC Product intro, and the contract-spec doc); and the **four published audit PDFs** (Three Sigma Audit #1; Certora Audit #2, Audit #3, Formal Verification), Certora public report pages, Chainlink data feed page. The Lucidchart flow-of-funds and the X post were not ingested.
