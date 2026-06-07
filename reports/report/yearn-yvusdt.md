@@ -273,7 +273,7 @@ ySafe 6-of-9 signers include publicly known DeFi contributors — see [Yearn Mul
 
 Yearn maintains the [`monitoring`](https://github.com/yearn/monitoring) repository with active alerting. **yvUSDT-1 is in the monitored vault list:**
 
-- **Large flow alerts** ([`yearn/alert_large_flows.py`](https://github.com/yearn/monitoring/blob/main/yearn/alert_large_flows.py)) — runs **hourly via GitHub Actions**
+- **Large flow alerts** ([`yearn/alert_large_flows.py`](https://github.com/yearn/monitoring/blob/main/protocols/yearn/alert_large_flows.py)) — runs **hourly via GitHub Actions**
 - **Endorsed vault check** (`yearn/check_endorsed.py`) — weekly
 - **Timelock monitoring** (`timelock/timelock_alerts.py`)
 

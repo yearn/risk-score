@@ -332,7 +332,7 @@ ySafe 6-of-9 signers include publicly known DeFi contributors — see [Yearn Mul
 
 Yearn maintains the [`monitoring`](https://github.com/yearn/monitoring) repository with active alerting. **yvWETH-1 is in the monitored vault list:**
 
-- **Large flow alerts** ([`yearn/alert_large_flows.py`](https://github.com/yearn/monitoring/blob/main/yearn/alert_large_flows.py)) — runs **hourly via GitHub Actions**. Alerts on deposits / withdrawals exceeding threshold via Telegram
+- **Large flow alerts** ([`yearn/alert_large_flows.py`](https://github.com/yearn/monitoring/blob/main/protocols/yearn/alert_large_flows.py)) — runs **hourly via GitHub Actions**. Alerts on deposits / withdrawals exceeding threshold via Telegram
 - **Endorsed vault check** (`yearn/check_endorsed.py`) — weekly
 - **Timelock monitoring** (`timelock/timelock_alerts.py`) — monitors the Yearn TimelockController across multiple chains
 

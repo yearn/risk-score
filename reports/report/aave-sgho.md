@@ -65,7 +65,7 @@ sGHO is an **ERC-4626 compliant yield-bearing savings vault** for GHO, Aave's na
 | sGho Steward | [`0x60Bf2DF49F17529Cf956D57848ebEB8a0d0a2757`](https://etherscan.io/address/0x60Bf2DF49F17529Cf956D57848ebEB8a0d0a2757) | Rate/cap governance (`sGhoSteward.sol`) |
 | GhoRouter | Not deployed — not part of AIP 484 | (Future router; see [gho-origin PR #34](https://github.com/aave-dao/gho-origin/pull/34)) |
 
-Source-of-truth references: [`aave-address-book/GhoEthereum.sol`](https://github.com/bgd-labs/aave-address-book/blob/main/src/GhoEthereum.sol) (`SGHO`, `SGHO_STEWARD`); [AIP-484 payload source](https://github.com/aave-dao/aave-proposals-v3/tree/main/src/20260427_AaveV3Ethereum_SGhoLaunch); [contract creator](https://etherscan.io/address/0x3765a685a401622c060e5d700d9ad89413363a91).
+Source-of-truth references: [`aave-address-book/GhoEthereum.sol`](https://github.com/bgd-labs/aave-address-book/blob/main/src/GhoEthereum.sol) (`SGHO`, `SGHO_STEWARD`); [AIP-484 payload source](https://github.com/aave-dao/aave-proposals-v3/tree/main/src/helpers/gho-launch); [contract creator](https://etherscan.io/address/0x3765a685a401622c060e5d700d9ad89413363a91).
 
 ### GHO Ecosystem Contracts (Deployed)
 
@@ -117,7 +117,7 @@ Mainnet checks performed to confirm sGho is live and the AIP 484 configuration m
 | Check | Result | Source |
 |-------|--------|--------|
 | sGho / SGHO_STEWARD entries in Aave Address Book | **Present** | [`GhoEthereum.sol`](https://github.com/bgd-labs/aave-address-book/blob/main/src/GhoEthereum.sol#L20-L23) |
-| sGho launch proposal in `aave-proposals-v3/src` | **Merged** as `20260427_AaveV3Ethereum_SGhoLaunch` | [proposal source](https://github.com/aave-dao/aave-proposals-v3/tree/main/src/20260427_AaveV3Ethereum_SGhoLaunch) |
+| sGho launch proposal in `aave-proposals-v3/src` | **Merged** as `20260427_AaveV3Ethereum_SGhoLaunch` | [proposal source](https://github.com/aave-dao/aave-proposals-v3/tree/main/src/helpers/gho-launch) |
 | AIP 484 governance state | **Executed** (state=4) | `cast call AaveGov.getProposalState(484)` |
 | AIP 484 payload state | **Executed** at block 25,109,406 (2026-05-16 18:04 UTC) | [tx 0x48ef4e…d404e](https://etherscan.io/tx/0x48ef4e0de1e5684ee05ae0e49c67af781bd497b675c0ea1a24193a5a499d404e) |
 | sGho contract is ERC-4626 with GHO as asset | **Yes** — `asset() = 0x40D1…6C2f` (GHO Token) | `cast call SGHO asset()` |
