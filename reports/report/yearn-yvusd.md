@@ -1,32 +1,33 @@
 # Protocol Risk Assessment: Yearn — yvUSD
 
-- **Assessment Date:** April 3, 2026
+- **Assessment Date:** June 8, 2026
 - **Token:** yvUSD (USD yVault)
-- **Chain:** Ethereum (with cross-chain strategies on Arbitrum)
+- **Chain:** Ethereum (with cross-chain strategies on Arbitrum, Katana, and Base)
 - **Token Address:** [`0x696d02Db93291651ED510704c9b286841d506987`](https://etherscan.io/address/0x696d02Db93291651ED510704c9b286841d506987)
-- **Final Score: 2.3/5.0**
+- **Final Score: 2.4/5.0**
 
 ## Overview + Links
 
-yvUSD is a **USDC-denominated cross-chain Yearn V3 vault** (ERC-4626) that deploys deposited USDC into multiple yield strategies across Ethereum mainnet and Arbitrum. The vault uses **Circle's CCTP (Cross-Chain Transfer Protocol)** to bridge assets to strategies on remote chains, requiring only strategy contracts on those chains rather than full Yearn V3 infrastructure.
+yvUSD is a **USDC-denominated cross-chain Yearn V3 vault** (ERC-4626) that deploys deposited USDC into multiple yield strategies across Ethereum mainnet and three remote chains (Arbitrum, Katana, Base). The vault uses **two distinct cross-chain mechanisms** to bridge assets to strategies on remote chains: **Circle's CCTP (Cross-Chain Transfer Protocol)** for Arbitrum and Base, and the **Polygon AggLayer LxLy unified bridge (via a VaultBridgeToken)** for Katana — requiring only strategy contracts on those chains rather than full Yearn V3 infrastructure.
 
 **Key architecture:**
 
 - **Vault:** Standard Yearn V3 vault (v3.0.4) accepting USDC deposits, issuing yvUSD shares
-- **Cross-chain strategies:** Use a two-contract pattern — an origin `CCTPStrategy` on Ethereum and a remote `CCTPRemoteStrategy` (ERC-4626 variant) on the destination chain. The origin strategy restricts deposits to a single `DEPOSITER` address (the yvUSD vault itself). When `report()` is called on the destination chain, `_harvestAndReport()` reports new assets back to the origin by queuing a CCTP message — no separate keeper relay required. The origin receives updates via `handleReceiveFinalizedMessage` and tracks remote capital via a `remoteAssets` variable. Additional remote vault implementations using different native bridges are currently in development
-- **LockedyvUSD:** Companion cooldown wrapper where users lock yvUSD shares for additional yield. Users locking shares gives the vault better guarantees on duration risk, enabling higher-yield strategies without sacrificing atomic liquidity for non-lockers. Cooldown: 14 days (configurable), withdraw window: 5 days (configurable). Lockers receive a percentage of extra yield as an illiquidity premium. Also serves as the vault's accountant
-- **Strategies:** 11 active strategies deploying into Morpho, Maple syrupUSDC, InfiniFi, Sky/MakerDAO, Spark, 3Jane USD3, Pendle/Spectra PT tokens, Cap stcUSD, and Fluid
-- **Yield sources:** Lending yield (Morpho, Fluid, Spark, Sky), looper strategies (borrow-against-collateral loops on Morpho), and fixed-rate PT tokens (Pendle/Spectra)
+- **Cross-chain strategies (CCTP):** Use a two-contract pattern — an origin `CCTPStrategy` on Ethereum and a remote `CCTPRemoteStrategy` (ERC-4626 variant) on the destination chain. The origin strategy restricts deposits to a single `DEPOSITER` address (the yvUSD vault itself). When `report()` is called on the destination chain, `_harvestAndReport()` reports new assets back to the origin by queuing a CCTP message — no separate keeper relay required. The origin receives updates via `handleReceiveFinalizedMessage` and tracks remote capital via a `remoteAssets` variable. Currently funds Arbitrum; a Base `CCTPStrategy` ([`0x908244B6ef0e52911a380a5454aEC0743598Fb20`](https://etherscan.io/address/0x908244B6ef0e52911a380a5454aEC0743598Fb20)) is added but holds 0 debt
+- **Cross-chain strategy (AggLayer/Katana):** A new `KatanaStrategy` ([`0xc5b16E7eFe1CA05714477b8edcAb4deE9b93a27C`](https://etherscan.io/address/0xc5b16E7eFe1CA05714477b8edcAb4deE9b93a27C)) wraps USDC into a **VaultBridgeToken** ([`0x53E82ABbb12638F09d9e624578ccB666217a765e`](https://etherscan.io/address/0x53E82ABbb12638F09d9e624578ccB666217a765e)) and bridges it to a remote counterpart on **Katana** (AggLayer network ID 20) via the Polygon zkEVM/AggLayer LxLy unified bridge. Reports return through the bridge's `onMessageReceived` callback. This is now the second-largest strategy (27.3% of TVL) and introduces a bridge dependency distinct from CCTP
+- **LockedyvUSD:** Companion cooldown wrapper where users lock yvUSD shares for additional yield (10% locker bonus per the APR oracle). Users locking shares gives the vault better guarantees on duration risk, enabling higher-yield strategies without sacrificing atomic liquidity for non-lockers. Cooldown: 14 days (`cooldownDuration` = 1,209,600 s, confirmed onchain), withdraw window: 5 days (configurable). Also serves as the vault's accountant ([`0xAaaFEa48472f77563961Cdb53291DEDfB46F9040`](https://etherscan.io/address/0xAaaFEa48472f77563961Cdb53291DEDfB46F9040), confirmed onchain)
+- **Strategies:** 15 active strategies (7 funded, 8 idle at 0 debt) deploying into Morpho (V1 + V2), a remote Yearn yvUSDC vault on Katana, Sky/MakerDAO, Maple syrupUSDC, and 3Jane USD3 Pendle PTs. The portfolio rotated heavily since April — leveraged "looper" strategies fell from ~86% to ~3.5% of TVL, and Maple/InfiniFi concentration was replaced by Morpho lending + cross-chain Katana exposure
+- **Yield sources:** Curated Morpho lending vaults (Yearn OG USDC; Sentora-curated Morpho V2 PYUSD/RLUSD markets reached via onchain Dutch auctions), a cross-chain Yearn yvUSDC compounder on Katana, Sky savings (sUSDS), one residual Maple syrupUSDC Morpho looper on Arbitrum, and fixed-rate PT tokens (Pendle)
 
-**Key metrics (April 3, 2026):**
+**Key metrics (June 8, 2026):**
 
-- **TVL:** ~$4,031,087 USDC
-- **Total Supply:** ~4,003,217 yvUSD
-- **Price Per Share:** 1.006961 USDC/yvUSD (~0.70% appreciation in ~74 days, ~3.4% annualized)
+- **TVL:** ~$11,561,917 USDC (`totalAssets()`, confirmed onchain) — **+187% since April**
+- **Total Supply:** ~11,412,307 yvUSD
+- **Price Per Share:** 1.014423 USDC/yvUSD (`convertToAssets(1e6)`; ~1.44% appreciation since the Jan 19 inception, ~3.8% annualized)
 - **Total Debt:** 100% deployed (0 idle)
-- **Deposit Limit:** $5,000,000 (80.6% utilized)
-- **Profit Max Unlock Time:** 7 days
-- **Net APR:** 4.23% | **APY:** 4.32%
+- **Deposit Limit:** $15,000,000 (raised from $5M; ~77.1% utilized)
+- **Profit Max Unlock Time:** 5 days (432,000 s — reduced from 7 days)
+- **Net APR:** 4.60% | **APY:** 4.71% ([yvUSD APR API](https://yvusd-api.yearn.fi/api/aprs); gross APR ~5.12%, 0% management/performance fee, 10% locker bonus)
 
 **Links:**
 
@@ -73,23 +74,29 @@ yvUSD is a **USDC-denominated cross-chain Yearn V3 vault** (ERC-4626) that deplo
 | Tokenized Strategy | [`0xD377919FA87120584B21279a491F82D5265A139c`](https://etherscan.io/address/0xD377919FA87120584B21279a491F82D5265A139c) |
 | Yearn V3 Keeper | [`0x52605BbF54845f520a3E94792d019f62407db2f8`](https://etherscan.io/address/0x52605BbF54845f520a3E94792d019f62407db2f8) |
 
-### Active Strategies (11)
+### Active Strategies (15 — 7 funded, 8 idle)
 
-| # | Strategy | Name | Current Debt (USDC) | Allocation | Protocols Used |
-|---|----------|------|--------------------:|-----------:|----------------|
-| 1 | [`0xF28DC8B6DeD7E45F8cf84B9972487C8e1857A442`](https://etherscan.io/address/0xF28DC8B6DeD7E45F8cf84B9972487C8e1857A442) | syrupUSDC/USDC Morpho Looper | 1,747,438 | 43.35% | Maple syrupUSDC, Morpho |
-| 2 | [`0x0e297dE4005883C757c9F09fdF7cF1363C20e626`](https://etherscan.io/address/0x0e297dE4005883C757c9F09fdF7cF1363C20e626) | Morpho Yearn OG USDC Compounder | 970,687 | 24.08% | Morpho |
-| 3 | [`0x5f9DBa2805411a8382FDb4E69d4f2Da8EFaF1F89`](https://etherscan.io/address/0x5f9DBa2805411a8382FDb4E69d4f2Da8EFaF1F89) | Infinifi sIUSD Morpho Looper | 612,648 | 15.20% | InfiniFi siUSD, Morpho |
-| 4 | [`0x7130570BCEfCedBe9d15B5b11A33006156460f8f`](https://etherscan.io/address/0x7130570BCEfCedBe9d15B5b11A33006156460f8f) | USDC to sUSDS Depositor | 421,438 | 10.45% | Sky/MakerDAO |
-| 5 | [`0x9e0A5943dFc1A85B48C191aa7c10487297aA675b`](https://etherscan.io/address/0x9e0A5943dFc1A85B48C191aa7c10487297aA675b) | USDC To Spark USDS Depositor | 100,257 | 2.49% | Spark, Sky/MakerDAO |
-| 6 | [`0x2F56D106C6Df739bdbb777C2feE79FFaED88D179`](https://etherscan.io/address/0x2F56D106C6Df739bdbb777C2feE79FFaED88D179) | Arbitrum syrupUSDC/USDC Morpho Looper | 100,114 | 2.48% | Maple syrupUSDC, Morpho, CCTP |
-| 7 | [`0x4C0e4d3cB62B91afBbf1Fe8e830f98A513c7234b`](https://etherscan.io/address/0x4C0e4d3cB62B91afBbf1Fe8e830f98A513c7234b) | USD3 Pendle PT Maxi | 50,015 | 1.24% | 3Jane USD3, Pendle |
-| 8 | [`0x7bf1D269bf2CB79E628F51B93763B342fd059D1D`](https://etherscan.io/address/0x7bf1D269bf2CB79E628F51B93763B342fd059D1D) | PT stcUSD Jul 23 Morpho Looper | 28,491 | 0.71% | Cap stcUSD, Morpho, Pendle/Spectra |
-| 9 | [`0x48E66D65006007ef62B50735D070fc30d0242a93`](https://etherscan.io/address/0x48E66D65006007ef62B50735D070fc30d0242a93) | USDC To SKY USDS Depositor | 0 | 0.0% | Sky/MakerDAO |
-| 10 | [`0x00C8a649C9837523ebb406Ceb17a6378Ab5C74cF`](https://etherscan.io/address/0x00C8a649C9837523ebb406Ceb17a6378Ab5C74cF) | USDC Fluid Lender | 0 | 0.0% | Fluid |
-| 11 | [`0x1983923e5a3591AFe036d38A8C8011e66Cd76e9E`](https://etherscan.io/address/0x1983923e5a3591AFe036d38A8C8011e66Cd76e9E) | Arb Yearn Degen Morpho Compounder | 0 | 0.0% | Morpho, CCTP |
+Debts and allocations confirmed onchain via `strategies(address).current_debt`; the 15 active strategies sum exactly to `totalDebt()` = 11,561,916.84 USDC. The strategy set is enumerated from all `StrategyChanged` events since deployment (35 events: 23 adds, 12 revokes).
 
-**Note:** Since the March 2026 assessment, one strategy has been removed (PT siUSD March 25 — matured) and significant rebalancing has occurred. The vault has shifted from 3Jane USD3 dominance (33% → 1.2%) to Maple syrupUSDC dominance (9.4% → 45.8% across two strategies). Active portfolio management continues with multiple strategy additions and revocations over the vault's ~74-day history.
+| # | Strategy | Name | Current Debt (USDC) | Allocation | Protocols / Venue |
+|---|----------|------|--------------------:|-----------:|-------------------|
+| 1 | [`0x0e297dE4005883C757c9F09fdF7cF1363C20e626`](https://etherscan.io/address/0x0e297dE4005883C757c9F09fdF7cF1363C20e626) | Morpho Yearn OG USDC Compounder | 4,043,203 | 34.97% | Morpho V1 (Yearn OG USDC vault `0xF9bd…Ec49`) |
+| 2 | [`0xc5b16E7eFe1CA05714477b8edcAb4deE9b93a27C`](https://etherscan.io/address/0xc5b16E7eFe1CA05714477b8edcAb4deE9b93a27C) | Katana yvUSDC Compounder | 3,152,648 | 27.27% | **Katana L2** (remote yvUSDC), AggLayer LxLy bridge, VaultBridgeToken |
+| 3 | [`0x3D2467Cbf82332dbFb38997cBc4D2192694D9490`](https://etherscan.io/address/0x3D2467Cbf82332dbFb38997cBc4D2192694D9490) | Morpho V2 Sentora PYUSD Convertor | 1,406,847 | 12.17% | **Morpho V2** (Sentora PYUSD vault `senPYUSDmain`), onchain auction USDC⇄PYUSD |
+| 4 | [`0xdA2f1B3CBa732d779cfF56f0cF9d3Bc8AEA6Cd8D`](https://etherscan.io/address/0xdA2f1B3CBa732d779cfF56f0cF9d3Bc8AEA6Cd8D) | USDC To sUSDS Depositor | 1,328,202 | 11.49% | Sky/MakerDAO (sUSDS `0xa393…7fbD`) |
+| 5 | [`0xE0be46Cc5aD2F56a7734A99FF403781b9c54C7B2`](https://etherscan.io/address/0xE0be46Cc5aD2F56a7734A99FF403781b9c54C7B2) | Morpho V2 Sentora RLUSD Convertor | 1,025,317 | 8.87% | **Morpho V2** (Sentora RLUSD vault `senRLUSDv2`), onchain auction USDC⇄RLUSD |
+| 6 | [`0x2F56D106C6Df739bdbb777C2feE79FFaED88D179`](https://etherscan.io/address/0x2F56D106C6Df739bdbb777C2feE79FFaED88D179) | Arbitrum syrupUSDC/USDC Morpho Looper | 401,180 | 3.47% | Maple syrupUSDC, Morpho, CCTP (Arbitrum) |
+| 7 | [`0x4C0e4d3cB62B91afBbf1Fe8e830f98A513c7234b`](https://etherscan.io/address/0x4C0e4d3cB62B91afBbf1Fe8e830f98A513c7234b) | USD3 Pendle PT Maxi | 204,520 | 1.77% | 3Jane USD3, Pendle |
+| 8 | [`0x00C8a649C9837523ebb406Ceb17a6378Ab5C74cF`](https://etherscan.io/address/0x00C8a649C9837523ebb406Ceb17a6378Ab5C74cF) | USDC Fluid Lender | 0 | 0.0% | Fluid |
+| 9 | [`0x9e0A5943dFc1A85B48C191aa7c10487297aA675b`](https://etherscan.io/address/0x9e0A5943dFc1A85B48C191aa7c10487297aA675b) | USDC To Spark USDS Depositor | 0 | 0.0% | Spark, Sky/MakerDAO |
+| 10 | [`0x48E66D65006007ef62B50735D070fc30d0242a93`](https://etherscan.io/address/0x48E66D65006007ef62B50735D070fc30d0242a93) | USDC To SKY USDS Depositor | 0 | 0.0% | Sky/MakerDAO |
+| 11 | [`0x5f9DBa2805411a8382FDb4E69d4f2Da8EFaF1F89`](https://etherscan.io/address/0x5f9DBa2805411a8382FDb4E69d4f2Da8EFaF1F89) | Infinifi sIUSD Morpho Looper | 0 | 0.0% | InfiniFi siUSD, Morpho |
+| 12 | [`0xF28DC8B6DeD7E45F8cf84B9972487C8e1857A442`](https://etherscan.io/address/0xF28DC8B6DeD7E45F8cf84B9972487C8e1857A442) | syrupUSDC/USDC Morpho Looper | 0 | 0.0% | Maple syrupUSDC, Morpho |
+| 13 | [`0x7bf1D269bf2CB79E628F51B93763B342fd059D1D`](https://etherscan.io/address/0x7bf1D269bf2CB79E628F51B93763B342fd059D1D) | PT stcUSD Jul 23 Morpho Looper | 0 | 0.0% | Cap stcUSD, Morpho, Pendle/Spectra |
+| 14 | [`0xb44EE7869b9D47cd605B05022c8Bd8612EBe53EE`](https://etherscan.io/address/0xb44EE7869b9D47cd605B05022c8Bd8612EBe53EE) | sUSD3 Compounder | 0 | 0.0% | 3Jane sUSD3 |
+| 15 | [`0x908244B6ef0e52911a380a5454aEC0743598Fb20`](https://etherscan.io/address/0x908244B6ef0e52911a380a5454aEC0743598Fb20) | Base Yearn Morpho OG USDC | 0 | 0.0% | Base L2, Morpho, CCTP |
+
+**Note:** The portfolio rotated substantially since the April assessment (~66 days). The previously dominant Maple syrupUSDC mainnet looper (43.35%) and InfiniFi sIUSD looper (15.20%) are now at **0 debt**, and leveraged looper exposure collapsed from ~86% to ~3.5% of TVL (only the small Arbitrum syrupUSDC looper remains funded). New funded strategies — Katana yvUSDC Compounder (27.27%), the two Morpho V2 Sentora convertors (21.0% combined), and a refreshed sUSDS depositor — now dominate. Morpho remains the central venue (~56% of TVL across V1 OG + V2 Sentora convertors on mainnet, plus the Arbitrum looper). Active portfolio management continues; the figures above are a point-in-time snapshot.
 
 ### Strategy Protocol Dependencies with Existing Reports
 
@@ -97,11 +104,14 @@ Several underlying protocols have been previously assessed in this repository:
 
 | Protocol | Report Score | yvUSD Allocation |
 |----------|-------------|-----------------|
-| [Maple syrupUSDC](../report/maple-syrupusdc.md) | **2.33/5** (Low Risk) | 45.83% (two strategies) |
-| [InfiniFi](../report/infinifi.md) | **2.8/5** (Medium Risk) | 15.20% |
-| [3Jane USD3](../report/3jane-usd3.md) | **3.5/5** (Medium Risk) | 1.24% |
+| [Maple syrupUSDC](../report/maple-syrupusdc.md) | **2.33/5** (Low Risk) | 3.47% (Arbitrum looper only; down from 45.8%) |
+| [InfiniFi](../report/infinifi.md) | **2.8/5** (Medium Risk) | 0% (idle; was 15.20%) |
+| [3Jane USD3](../report/3jane-usd3.md) | **3.5/5** (Medium Risk) | 1.77% (USD3 Pendle PT) |
 | [Fluid](../report/fluid.md) | **1.1/5** (Minimal Risk) | 0% (currently inactive) |
+| [Cap (stcUSD)](https://curation.yearn.fi/report/cap-stcusd/) | **risk-2** (Low Risk) | 0% (idle PT stcUSD looper) |
 | [Spectra](../report/spectra-finance.md) | **2.25/5** (Low Risk) | Used for PT token infrastructure |
+
+Newer underlying venues **without** an existing repository report — **Katana L2 + AggLayer LxLy bridge** (27.3%), **Morpho V2** and the **Sentora** curator (21.0%, holding PYUSD/RLUSD), and the **VaultBridgeToken** wrapper — are assessed inline in this report and flagged as novel-dependency risk.
 
 ## Audits and Due Diligence Disclosures
 
@@ -144,12 +154,14 @@ All 12 scores are summed and mapped to risk levels (Level 1-4). ySec can make ex
 
 | Protocol | Audit Coverage | Notes |
 |----------|---------------|-------|
-| Morpho | 25+ audits (Trail of Bits, Spearbit, OpenZeppelin, ChainSecurity, Certora) | Blue-chip. Formal verification by Certora |
+| Morpho (V1) | 25+ audits (Trail of Bits, Spearbit, OpenZeppelin, ChainSecurity, Certora) | Blue-chip. Formal verification by Certora. ~35% of TVL (Yearn OG USDC vault) |
+| Morpho V2 | Audited (Morpho V2 launched 2025) but **newer than V1**; Sentora is a newer curator | ~21% of TVL via Sentora PYUSD/RLUSD vaults. Newer codebase + curator = elevated novelty |
 | Pendle | 6+ audits (Ackee, Dedaub, ChainSecurity, Spearbit, Code4rena) | Well-established |
-| Circle CCTP | ChainSecurity (V1 2023, V2 March 2025, V2 update April 2025, Gateway July 2025) | Trust-minimized bridge |
+| Circle CCTP | ChainSecurity (V1 2023, V2 March 2025, V2 update April 2025, Gateway July 2025) | Trust-minimized bridge (Arbitrum, Base) |
+| Polygon AggLayer (LxLy) + VaultBridgeToken | AggLayer/zkEVM bridge audited; VaultBridgeToken wrapper is **newer infrastructure** | New ~27% Katana exposure. Katana is a young (2025) L2; bridge + wrapper not yet covered by an existing repo report — flagged as novel |
 | Sky/MakerDAO | Extensively audited across many years | Blue-chip |
-| Spark | Inherits MakerDAO audit coverage | Blue-chip |
-| Cap (stcUSD) | 5+ audits (Electisec, Spearbit, Trail of Bits, Zellic, Certora) | ~$400M TVL. Assessed internally as [risk-2](https://curation.yearn.fi/report/cap-stcusd/) |
+| Spark | Inherits MakerDAO audit coverage | Blue-chip (idle) |
+| Cap (stcUSD) | 5+ audits (Electisec, Spearbit, Trail of Bits, Zellic, Certora) | Assessed internally as [risk-2](https://curation.yearn.fi/report/cap-stcusd/). Idle (0 debt) |
 
 ### Bug Bounty
 
@@ -160,108 +172,117 @@ All 12 scores are summed and mapped to risk levels (Level 1-4). ySec can make ex
 
 ### On-Chain Complexity
 
-The yvUSD system is moderately complex:
+The yvUSD system is moderately complex, and complexity **increased** since April with two new strategy archetypes:
 
-- **11 active strategies** across 2 chains (Ethereum + Arbitrum)
-- **Cross-chain accounting** via Circle CCTP (destination chain reports back to origin via CCTP on `_harvestAndReport()`)
-- **Looper strategies** using Morpho for leveraged yield (borrow-against-collateral loops)
-- **PT token strategies** with maturity dates requiring rollover
+- **15 active strategies** (7 funded) spanning up to 4 chains (Ethereum + Arbitrum + Katana + Base)
+- **Two cross-chain mechanisms:** Circle CCTP (Arbitrum, Base) and the Polygon AggLayer LxLy bridge + VaultBridgeToken (Katana). Both report remote assets back to the origin asynchronously and track them via a `remoteAssets`-style variable; the Katana position reads 0 locally (`valueOfVault()`) because all capital lives on Katana between bridge reports
+- **Auction-based convertor strategies (new):** the Morpho V2 Sentora PYUSD/RLUSD convertors swap USDC into a yield-bearing want token via onchain Dutch auctions (CoW-style, governance-only kick) and value the position with a management-set Morpho oracle plus a `reportBuffer` haircut — a valuation surface not present in the April snapshot
+- **Residual looper strategy** using Morpho for leveraged yield (now only the Arbitrum syrupUSDC looper, 3.5%)
+- **PT token strategies** with maturity dates requiring rollover (1.77%)
 - **Custom accountant** (LockedyvUSD) combining cooldown/locking mechanics with fee management
-- **Multiple protocol dependencies** (8+ distinct protocols)
+- **Multiple protocol dependencies** (Morpho V1 & V2, Sky, Maple, 3Jane, Pendle, Sentora, AggLayer, CCTP)
 - **V3 vault itself is non-upgradeable** (immutable Vyper minimal proxy)
 
 ## Historical Track Record
 
-- **Vault deployed:** January 19, 2026 (block 24271831) — **~74 days** in production
-- **TVL:** ~$4.03M USDC — early stage with a $5M deposit limit (80.6% utilized)
-- **PPS trend:** 1.000000 → 1.006961 (~0.70% appreciation over 74 days, ~3.4% annualized)
+- **Vault deployed:** January 19, 2026 (block 24271831) — **~140 days** in production
+- **TVL:** ~$11.56M USDC — **+187% since April** ($4.03M). Deposit limit raised to $15M (~77.1% utilized)
+- **PPS trend:** 1.000000 → 1.006961 (April) → 1.014423 (now) — ~1.44% appreciation since inception, ~3.8% annualized; no PPS decrease observed
 - **Security incidents:** None known for this vault or Yearn V3 generally
-- **Strategy changes:** Active portfolio management continues — one strategy removed (PT siUSD March 25 matured), significant rebalancing from 3Jane dominance to Maple dominance
-- **Governance maturation:** Vault migrated from direct Safe governance to standard Yearn RoleManager with 7-day timelock (March 2026)
-- **Yearn V3 track record:** V3 framework has been live since May 2024 (~23 months). No V3 vault exploits
+- **Strategy changes:** High turnover — 35 `StrategyChanged` events (23 adds, 12 revokes). Since April the vault rotated out of leveraged Maple/InfiniFi loopers (now 0 debt) into Morpho lending (V1 OG + V2 Sentora), a cross-chain Katana yvUSDC compounder, and Sky sUSDS. Leveraged looper exposure fell from ~86% to ~3.5%
+- **New cross-chain venues:** Katana L2 (AggLayer LxLy bridge, ~27% of TVL) went live as a funded strategy; a Base CCTP strategy was added (0 debt)
+- **Governance:** Unchanged since the April migration — standard Yearn RoleManager (`0xb3bd…9a41`, confirmed onchain), 7-day timelock (`getMinDelay()` = 604,800 s), Daddy bitmask `0x3FF6`, no pending `future_role_manager`, vault not shut down
+- **Yearn V3 track record:** V3 framework has been live since May 2024 (~25 months). No V3 vault exploits
 
-**Yearn protocol TVL:** ~$240M total across all chains (DeFi Llama, April 2026).
+**Yearn protocol TVL:** ~$153M total across all chains (DeFi Llama, June 2026: Ethereum ~$120M, Katana ~$30M, Optimism/Base/others ~$4M). Down from ~$240M in April; a meaningful share has migrated to Katana.
 
 ## Funds Management
 
-yvUSD deploys deposited USDC across 11 strategies with 100% capital utilization (0 idle). Strategies fall into four categories:
+yvUSD deploys deposited USDC across 15 active strategies (7 funded) with 100% capital utilization (0 idle). The funded book now falls into five categories:
 
 ### Strategy Categories
 
-**1. Looper Strategies (85.8% of TVL)**
+**1. Curated Morpho Lending — mainnet (56.0% of TVL)**
 
-Strategies that borrow against collateral on Morpho to achieve leveraged yield positions. These include:
-- syrupUSDC/USDC Morpho Looper (43.35%)
-- Morpho Yearn OG USDC Compounder (24.08%)
-- Infinifi sIUSD Morpho Looper (15.20%)
-- Arbitrum syrupUSDC/USDC Morpho Looper (2.48%, cross-chain)
-- PT stcUSD Jul 23 Morpho Looper (0.71%)
+- Morpho Yearn OG USDC Compounder (34.97%) — deposits USDC into the Yearn-curated **Morpho V1** "Yearn OG USDC" vault (`ymvOG-USDC`, [`0xF9bdDd4A9b3A45f980e11fDDE96e16364dDBEc49`](https://etherscan.io/address/0xF9bdDd4A9b3A45f980e11fDDE96e16364dDBEc49)). Unleveraged lending compounder
+- Morpho V2 Sentora PYUSD Convertor (12.17%) — converts USDC→PYUSD via onchain Dutch auction and holds **Morpho V2** Sentora `senPYUSDmain` shares ([`0xb576765fB15505433aF24FEe2c0325895C559FB2`](https://etherscan.io/address/0xb576765fB15505433aF24FEe2c0325895C559FB2))
+- Morpho V2 Sentora RLUSD Convertor (8.87%) — same pattern with RLUSD (`senRLUSDv2`, [`0x6dC58a0FdfC8D694e571DC59B9A52EEEa780E6bf`](https://etherscan.io/address/0x6dC58a0FdfC8D694e571DC59B9A52EEEa780E6bf))
 
-**Looper risk:** These strategies are leveraged — they borrow USDC on Morpho against collateral (PT tokens, siUSD, syrupUSDC). If the collateral depegs or the Morpho market becomes illiquid, positions may face liquidation or inability to unwind.
+**Lending/convertor risk:** Morpho V1 is blue-chip; **Morpho V2 and the Sentora curator are newer and unproven by comparison.** The convertors add execution and valuation risk: USDC⇄stablecoin swaps clear through onchain Dutch auctions (governance-only kick), and the position is valued via a management-set Morpho oracle with a `reportBuffer` haircut. A mispriced oracle, a stuck/under-filled auction, or PYUSD/RLUSD depeg would impair the reported value and exit.
 
-**2. Fixed-Rate PT Strategies (1.2% of TVL)**
+**2. Cross-Chain Compounder — Katana (27.27% of TVL)**
 
-- USD3 Pendle PT Maxi (1.24%) — holds Pendle Principal Tokens backed by 3Jane USD3
+- Katana yvUSDC Compounder (27.27%) — wraps USDC into a VaultBridgeToken and bridges to **Katana L2** via the Polygon AggLayer LxLy unified bridge, where a remote counterpart deposits into a Yearn yvUSDC vault. Now the **second-largest single position**
 
-**PT risk:** PT tokens have fixed maturity dates. Before maturity, exit requires selling on AMM (Pendle/Spectra) at potentially unfavorable rates. At maturity, PT is manually rolled over by converting to SY (yield token) via a `rollover()` call on the strategy — this process cannot steal user funds. If not rolled over, the position simply holds the redeemed underlying.
+**Cross-chain risk:** Adds a brand-new dependency stack — a young (2025) L2, the AggLayer/LxLy bridge, the VaultBridgeToken wrapper, and a remote Yearn vault — none of which have an existing repository report. Withdrawals require a bridge round-trip; the local `valueOfVault()` reads 0 between bridge reports, so ~27% of TVL is tracked off the origin chain.
 
-**3. Lending Strategies (12.9% of TVL)**
+**3. Sky Lending (11.49% of TVL)**
 
-- USDC to sUSDS Depositor (10.45%) — deposits into Sky/MakerDAO
-- USDC To Spark USDS Depositor (2.49%) — deposits into Spark
+- USDC To sUSDS Depositor (11.49%) — deposits into Sky/MakerDAO Savings USDS (sUSDS, [`0xa3931d71877C0E7a3148CB7Eb4463524FEc27fbD`](https://etherscan.io/address/0xa3931d71877C0E7a3148CB7Eb4463524FEc27fbD))
 
-**Lending risk:** Standard DeFi lending risk. Sky and Spark are blue-chip protocols with extensive audit coverage.
+**Lending risk:** Standard DeFi lending risk. Sky is blue-chip with extensive audit coverage and deep liquidity.
 
-**4. Cross-Chain Strategies (2.5% active, with inactive allocations)**
+**4. Residual Looper (3.47% of TVL)**
 
-Two strategies bridge USDC to Arbitrum via Circle CCTP:
-- Arbitrum syrupUSDC/USDC Morpho Looper (2.48%)
-- Arb Yearn Degen Morpho Compounder (0%, inactive)
+- Arbitrum syrupUSDC/USDC Morpho Looper (3.47%, cross-chain via CCTP) — the **only remaining funded looper**
 
-**Cross-chain risk:** Bridge delays (CCTP attestation time), and remote chain execution risk.
+**Looper risk:** Leveraged position borrowing USDC on Morpho against syrupUSDC collateral. If syrupUSDC depegs or the Morpho market becomes illiquid, the position may face liquidation or inability to unwind. **Materially de-risked vs April** — looper exposure fell from ~86% to ~3.5%, so a looper cascade can no longer threaten most of the vault.
+
+**5. Fixed-Rate PT (1.77% of TVL)**
+
+- USD3 Pendle PT Maxi (1.77%) — holds Pendle Principal Tokens backed by 3Jane USD3
+
+**PT risk:** PT tokens have fixed maturity dates. Before maturity, exit requires selling on AMM (Pendle) at potentially unfavorable rates. At maturity, PT is manually rolled over via a `rollover()` call — this process cannot steal user funds.
+
+**Idle strategies (8, at 0 debt):** USDC Fluid Lender, USDC→Spark USDS, USDC→SKY USDS, Infinifi sIUSD Morpho Looper, syrupUSDC/USDC Morpho Looper (mainnet), PT stcUSD Jul 23 Morpho Looper, sUSD3 Compounder, and Base Yearn Morpho OG USDC (CCTP). These remain endorsed and can be re-funded by the Debt Allocator without a new timelock proposal.
 
 ### Accessibility
 
-- **Deposits:** Permissionless — anyone can deposit USDC and receive yvUSD (ERC-4626 standard). Subject to $5M deposit limit
+- **Deposits:** Permissionless — anyone can deposit USDC and receive yvUSD (ERC-4626 standard). Subject to the $15M deposit limit (`deposit_limit` confirmed onchain; `deposit_limit_module` = `address(0)`, so the hard cap is the direct limit)
 - **Withdrawals:** ERC-4626 standard. Users can redeem yvUSD for USDC. However:
   - **100% of funds are deployed** (0 idle) — withdrawals require unwinding strategy positions
-  - **Cross-chain strategies** require CCTP bridging back, which takes time
+  - **Cross-chain strategies** require bridging back (CCTP attestation for Arbitrum; AggLayer claim for Katana, ~27% of TVL)
+  - **Convertor strategies** can only service redemptions from loose USDC (`availableWithdrawLimit` returns `balanceOfAsset()`); freeing the ~21% held as PYUSD/RLUSD requires an auction to convert back
   - **PT strategies** may have liquidity constraints before maturity
-  - **Looper strategies** require deleveraging, which may take multiple transactions
-- **LockedyvUSD:** Optional lock wrapper with 14-day cooldown + 5-day withdrawal window. Yields a "locker bonus" but restricts exit timing
-- **No fees on deposits/withdrawals** — fees are taken via the accountant during `process_report` (performance/management fees)
+  - **Looper strategy** (3.5%) requires deleveraging, which may take multiple transactions
+- **LockedyvUSD:** Optional lock wrapper with 14-day cooldown + 5-day withdrawal window. Yields a 10% locker bonus but restricts exit timing
+- **No fees on deposits/withdrawals** — the APR oracle currently reports 0 management/performance fee; the locker bonus is funded from extra yield via the accountant
 
 ### Collateralization
 
 - **100% onchain USDC backing** — all deposits are USDC, all strategy positions ultimately track back to USDC value
 - **Collateral quality varies by strategy:**
-  - Blue-chip (Sky, Spark, Fluid): 12.9% of TVL
-  - Low-risk (Maple syrupUSDC 2.33/5): 45.8% of TVL — now the dominant allocation
-  - Medium-risk (InfiniFi 2.8/5, 3Jane 3.5/5): **16.4% of TVL** — significantly reduced from 65.6% in March
-  - Low-risk (Cap stcUSD, internal risk-2): 0.71% of TVL
-  - Established infrastructure (Morpho, Pendle): used across 85%+ of strategies
-- **Leverage via looper strategies:** Borrowing against collateral on Morpho. Looper allocation increased from ~58% to ~86% of TVL
+  - Blue-chip lending (Morpho V1 OG 34.97%, Sky sUSDS 11.49%): ~46.5% of TVL
+  - Newer-but-reputable (Morpho V2 / Sentora PYUSD+RLUSD): 21.0% of TVL
+  - Cross-chain (Katana yvUSDC via AggLayer): 27.27% of TVL — new
+  - Low-risk (Maple syrupUSDC 2.33/5, Arbitrum looper): 3.47% of TVL — down from 45.8%
+  - Medium-risk (3Jane USD3 3.5/5): 1.77% of TVL — down from 16.4% combined with InfiniFi (now 0%)
+- **Leverage:** Looper allocation **fell from ~86% to ~3.5%** — the single largest risk-profile change since April, sharply reducing liquidation-cascade exposure
+- **New exposures replacing leverage:** cross-chain (Katana, 27%) and newer-protocol (Morpho V2/Sentora, 21%) risk — a quality trade-off rather than an unambiguous improvement
 
 ### Provability
 
 - **yvUSD exchange rate:** Calculated onchain via ERC-4626 standard (`convertToAssets()`/`convertToShares()`). Fully programmatic, no admin input
-- **Strategy positions:** Each strategy's `totalAssets()` is onchain. The vault's `totalAssets()` is the sum of all strategy debts
-- **Cross-chain lag:** For cross-chain strategies, `remoteAssets` on the origin is updated when CCTP messages arrive (sent automatically by `_harvestAndReport()` on the destination chain). Between report cycles, the value can be stale — the vault's reported `totalAssets()` may not reflect real-time changes on Arbitrum
-- **Profit/loss reporting:** Profits are reported by keepers via `process_report()` and locked for gradual distribution over 7 days (`profitMaxUnlockTime`). Losses are immediately reflected in PPS
+- **Strategy positions:** Each strategy's `totalAssets()` is onchain. The vault's `totalAssets()` is the sum of all strategy debts (verified to reconcile exactly with the per-strategy `current_debt`)
+- **Convertor valuation:** The ~21% held via Morpho V2 convertors is valued through a management-set Morpho oracle (`asset = want * price / 1e36`) minus a `reportBuffer`. This is verifiable but introduces an oracle/parameter dependency the April book did not have
+- **Cross-chain lag:** For cross-chain strategies, the origin tracks remote capital via bridge-delivered reports (CCTP for Arbitrum/Base; AggLayer `onMessageReceived` for Katana). Between report cycles, the value can be stale, and ~30.7% of TVL (Katana 27.27% + Arbitrum 3.47%) lives off the origin chain. The Katana strategy's local `valueOfVault()` reads 0 — its value exists only in the last bridged report until the next harvest
+- **Profit/loss reporting:** Profits are reported by keepers via `process_report()` and locked for gradual distribution over **5 days** (`profitMaxUnlockTime` = 432,000 s; reduced from 7 days). Losses are immediately reflected in PPS
 
 ## Liquidity Risk
 
 - **Primary exit:** Redeem yvUSD for USDC via ERC-4626 `withdraw()`/`redeem()`. Subject to strategy liquidity
 - **Zero idle funds:** Currently 100% of vault assets are deployed to strategies. Withdrawals require unwinding positions
-- **Strategy withdrawal constraints:**
-  - Looper strategies: Must deleverage on Morpho (may require multiple keeper transactions)
-  - PT strategies: Before maturity, must sell PTs on AMM (potential slippage). At maturity, manual rollover via `rollover()` call converting PT to SY
-  - Cross-chain strategies: Withdrawal triggers CCTP bridging back from remote chain (hours for CCTP attestation)
-  - Lending strategies (Sky, Spark): Generally liquid for immediate withdrawal
+- **Strategy withdrawal constraints (by current allocation):**
+  - **Liquid (~46%):** Morpho V1 OG lending (35%) and Sky sUSDS (11.5%) are generally available for prompt withdrawal
+  - **Convertor (~21%):** Morpho V2 convertors expose only loose USDC on demand (`availableWithdrawLimit` = `balanceOfAsset()`); converting PYUSD/RLUSD back to USDC requires an onchain Dutch auction to clear, so this slice is not instantly redeemable
+  - **Cross-chain (~31%):** Katana (27%) requires an AggLayer/LxLy bridge round-trip and claim; Arbitrum (3.5%) requires CCTP bridging back (attestation latency)
+  - **Looper (3.5%):** Must deleverage on Morpho (may require multiple keeper transactions) — far smaller drag than April
+  - **PT (1.8%):** Before maturity, must sell PTs on AMM (potential slippage); at maturity, manual `rollover()`
 - **DEX liquidity:** No known DEX liquidity pools for yvUSD. The vault is an ERC-4626 token, not traded on DEXes
-- **LockedyvUSD:** 14-day cooldown + 5-day withdrawal window. Shares in cooldown cannot be transferred
+- **LockedyvUSD:** 14-day cooldown + 5-day withdrawal window. Shares in cooldown cannot be transferred. **~23.1% of yvUSD supply** is locked here (2,637,598 yvUSD of 11.41M; down sharply from ~70.6% in April) — a smaller committed-duration buffer, meaning more supply can request liquidity on demand
 - **Same-value asset:** USDC-denominated vault token — no price divergence risk from the underlying
-- **Deposit limit:** $5M cap limits both concentration risk and indicates early stage
+- **Deposit limit:** $15M cap (raised from $5M; ~77.1% utilized) — limits concentration and still indicates a maturing-but-early vault
+- **Net:** Looper-deleveraging friction is largely gone, but it has been replaced by **auction-conversion (~21%) and cross-chain bridge (~31%) exit latency** — over half of TVL is not instantly redeemable, against a smaller locked-supply buffer
 
 ## Centralization & Control Risks
 
@@ -300,27 +321,28 @@ Since the initial March 2026 assessment, the yvUSD vault has **completed its gov
 
 - **Exchange rate (PPS):** Calculated onchain algorithmically via ERC-4626. Fully programmatic, no admin input
 - **Vault operations:** Deposit/withdraw are permissionless onchain transactions
-- **Strategy profit/loss:** Reported programmatically by keepers via `process_report()`. Profits unlock linearly over 7 days. Losses are immediate
+- **Strategy profit/loss:** Reported programmatically by keepers via `process_report()`. Profits unlock linearly over **5 days** (reduced from 7). Losses are immediate
 - **Debt allocation:** Automated via Debt Allocator contract, with manual override available to DEBT_MANAGER role holders (Daddy, Brain, Security)
-- **Cross-chain accounting:** When `report()` is called on the destination chain, `_harvestAndReport()` automatically queues a CCTP message back to the origin. No separate keeper relay required. Can be stale between report cycles
+- **Convertor valuation (new):** ~21% of TVL (Morpho V2 convertors) is valued via a **management-set Morpho oracle** plus a `reportBuffer` haircut, with USDC⇄want swaps clearing through governance-kicked onchain auctions. This is verifiable but adds a parameterized valuation surface that did not exist in April
+- **Cross-chain accounting:** Remote `_harvestAndReport()` queues a report back to the origin — via CCTP for Arbitrum/Base and via the AggLayer LxLy `onMessageReceived` callback for Katana. No separate keeper relay required. Can be stale between report cycles; ~31% of TVL is tracked off-origin
 - **V3 vaults are immutable** — no proxy upgrades, no admin-changeable implementation
 
 ### External Dependencies
 
 | Dependency | Criticality | Allocation | Notes |
 |-----------|-------------|-----------|-------|
-| **Morpho** | Critical | ~86% (5 strategies) | $6.6B TVL, 25+ audits, formal verification. Used for looper leverage and USDC compounding |
-| **Maple syrupUSDC** | Critical | 45.8% | Report score 2.33/5 (Low Risk). Overcollateralized institutional lending, ~$1.7B TVL. **Highest single-protocol allocation** |
-| **InfiniFi** | High | 15.2% | Report score 2.8/5 (Medium Risk). Stablecoin protocol deploying into various DeFi strategies, ~$150M TVL |
-| **Sky/MakerDAO** | High | 10.5% | Blue-chip, extensively audited. Stable lending yield |
-| **Pendle/Spectra** | Medium | Used in PT strategies | $2.1B TVL (Pendle), 6+ audits. PT token infrastructure for fixed-rate yield |
-| **Spark** | Medium | 2.5% | Part of Sky/MakerDAO ecosystem. Blue-chip |
-| **Circle CCTP** | Medium | Cross-chain bridge | Audited by ChainSecurity (V1 + V2). Trust assumption: Circle attestation (same trust as holding USDC) |
-| **3Jane USD3** | Low | 1.2% | Report score 3.5/5. Significantly reduced from 33% in March. Unsecured credit-based lending |
-| **Cap (stcUSD)** | Low | 0.7% | ~$500M TVL. Yield-bearing stablecoin. Reduced from 5.1% |
-| **Fluid** | Low | 0% (inactive) | Report score 1.1/5. Currently no allocation |
+| **Morpho (V1)** | Critical | ~35% | Blue-chip. 25+ audits, formal verification by Certora. Yearn OG USDC curated vault (unleveraged) |
+| **Morpho V2 + Sentora curator** | Critical | ~21% | **Newer** than V1; Sentora is a newer curator. PYUSD + RLUSD markets reached via onchain auctions. Elevated novelty |
+| **Katana L2 + AggLayer (LxLy) + VaultBridgeToken** | Critical | ~27% | **New, unproven stack** — young (2025) L2, AggLayer unified bridge, VaultBridgeToken wrapper, remote yvUSDC vault. No existing repo report |
+| **Sky/MakerDAO** | High | 11.5% | Blue-chip, extensively audited. sUSDS savings yield |
+| **Maple syrupUSDC** | Medium | 3.5% | Report score 2.33/5. Now only the Arbitrum looper — down from 45.8% |
+| **Pendle** | Medium | 1.8% (PT) | $2B+ TVL, 6+ audits. PT infrastructure for 3Jane USD3 fixed-rate yield |
+| **Circle CCTP** | Medium | Cross-chain (Arbitrum, Base) | Audited by ChainSecurity (V1 + V2). Trust assumption: Circle attestation (same trust as holding USDC) |
+| **3Jane USD3** | Low | 1.8% | Report score 3.5/5. Medium-risk credit-based lending, held via Pendle PT |
+| **PYUSD / RLUSD** | Low | held inside Morpho V2 convertors | Stablecoin exposure introduced by the convertors; depeg would impair convertor value |
+| **InfiniFi / Cap / Fluid / Spark** | Low | 0% (idle) | Endorsed but unfunded strategies; can be re-funded by the Debt Allocator |
 
-**Dependency concentration:** The vault's largest protocol dependency is now Maple syrupUSDC at 45.8% (rated Low Risk 2.33/5), a significant improvement from the previous concentration in medium-risk protocols (65.6% in 3Jane + InfiniFi). Medium-risk protocol exposure has dropped to ~16.4% (InfiniFi 15.2% + 3Jane 1.2%). However, the Maple concentration risk is notable — a single protocol failure could impact nearly half the vault. Morpho remains the critical infrastructure layer across 86% of strategies.
+**Dependency concentration:** The concentration profile **inverted** since April. The previous Maple (45.8%) and InfiniFi/3Jane (16.4% medium-risk) concentrations are gone; the vault is now anchored on **Morpho** (~56% across V1 OG + V2 Sentora convertors on mainnet, plus the Arbitrum looper) and a **cross-chain Katana** position (~27%). This trades single-protocol medium-risk concentration for (a) heavy reliance on Morpho as critical infrastructure and (b) two genuinely new, unproven dependency stacks — Morpho V2/Sentora and the Katana/AggLayer bridge — that together carry ~48% of TVL. Blue-chip exposure (Morpho V1 + Sky) is ~46.5%. The net effect is lower leverage/looper risk but higher cross-chain and newer-protocol novelty risk.
 
 ## Operational Risk
 
@@ -365,9 +387,10 @@ Additionally, Yearn provides a dedicated **yvUSD APR API** ([yvusd-api.yearn.fi]
 - **Emergency actions** — `Shutdown` event on vault
 - **Timelock operations** — pending proposals on the TimelockController (strategy additions, accountant changes, delay changes)
 - **Signer/threshold changes** on the Daddy (6-of-9) and Brain (3-of-8) Safes
-- **Cross-chain strategy accounting** — monitor `remoteAssets` for staleness (compare to actual onchain positions on Arbitrum)
-- **Looper strategy health** — monitor Morpho market positions for proximity to liquidation
-- **Underlying protocol health** — monitor Maple, InfiniFi, and Morpho for incidents
+- **Cross-chain strategy accounting** — monitor remote-asset staleness for both Katana (AggLayer/LxLy, ~27%) and Arbitrum (CCTP, ~3.5%); the Katana strategy's local `valueOfVault()` reads 0, so verify against actual Katana-side positions
+- **Convertor health (new)** — monitor the Morpho V2 Sentora convertors: oracle (`oracle()`) integrity, `reportBuffer`, PYUSD/RLUSD peg, and auction fill/settlement
+- **Looper strategy health** — monitor the Arbitrum syrupUSDC Morpho market for proximity to liquidation (now small)
+- **Underlying protocol health** — monitor Morpho (V1 & V2), Sky, the Sentora curator, Maple, and the Katana/AggLayer bridge for incidents
 
 ### Monitoring Functions
 
@@ -385,27 +408,30 @@ Additionally, Yearn provides a dedicated **yvUSD APR API** ([yvusd-api.yearn.fi]
 
 ### Key Strengths
 
-- **Battle-tested Yearn V3 infrastructure:** V3 framework audited by Statemind, ChainSecurity, and yAcademy. No V3 exploits in ~23 months of production. Immutable vault contracts eliminate proxy upgrade risk
-- **Standard Yearn governance with 7-day timelock:** The vault now uses the standard Yearn V3 governance pattern (same as yvUSDC-1 and 37+ other vaults) with a 7-day TimelockController for critical operations (adding strategies, changing accountant). Daddy/ySafe (6-of-9, with publicly known signers) is the sole proposer/executor. The timelock is self-governed (holds TIMELOCK_ADMIN_ROLE) — any config changes must themselves go through the 7-day delay
+- **Battle-tested Yearn V3 infrastructure:** V3 framework audited by Statemind, ChainSecurity, and yAcademy. No V3 exploits in ~25 months of production. Immutable vault contracts eliminate proxy upgrade risk
+- **Standard Yearn governance with 7-day timelock:** Confirmed unchanged onchain — standard RoleManager, 7-day TimelockController (`getMinDelay()` = 604,800 s) for critical operations. Daddy/ySafe (6-of-9, publicly known signers) is the sole proposer/executor; the timelock is self-governed (holds TIMELOCK_ADMIN_ROLE). No pending `future_role_manager`
 - **Multi-layer security:** Daddy (governance), Brain (operations), Security (emergency), and automated bots (Keeper, Debt Allocator) with differentiated responsibilities. No single point of failure
 - **USDC-denominated:** Stablecoin backing eliminates price volatility risk on the underlying asset
-- **Diversified strategy portfolio:** 11 strategies across 8+ protocols, distributed across lending, looper, PT, and cross-chain categories
-- **Improved dependency quality:** Medium-risk protocol exposure reduced from 65.6% to 16.4%. Largest allocation (Maple, 45.8%) is rated Low Risk (2.33/5)
+- **Sharply reduced leverage:** Looper exposure collapsed from ~86% to ~3.5% of TVL. The April "looper liquidation cascade" critical risk is largely resolved; a residual looper now sits at only 3.5%
+- **Lower medium-risk and single-protocol concentration:** Maple fell 45.8% → 3.5%; InfiniFi 15.2% → 0%. ~46.5% is now in blue-chip lending (Morpho V1 OG + Sky)
+- **Healthy growth:** TVL +187% to ~$11.56M; PPS up monotonically to 1.014423; deposit limit raised to $15M
 - **No EOA role concentration:** Deployer EOA confirmed at 0 vault roles. All vault operations require multisig or contract authorization
-- **Rigorous strategy review process:** 12-metric risk scoring framework with ySec security review. All strategies evaluated across testing coverage, complexity, risk exposure, centralization, and protocol integration dimensions
-- **Active monitoring infrastructure:** Hourly large-flow alerts, weekly endorsed-vault checks, and timelock monitoring across 6 chains via GitHub Actions + Telegram alerts
+- **Rigorous strategy review process:** 12-metric risk scoring framework with ySec security review across testing coverage, complexity, risk exposure, centralization, and protocol integration
+- **Active monitoring infrastructure:** Hourly large-flow alerts, weekly endorsed-vault checks, and timelock monitoring across 6 chains via GitHub Actions + Telegram
 
 ### Key Risks
 
-- **Still early stage:** ~74 days in production with ~$4M TVL. No stress testing. Deposit limit of $5M indicates early stage, though TVL growth is healthy (+34% since March)
-- **No external product-specific audit:** The CCTPStrategy cross-chain code and LockedyvUSD wrapper have no dedicated external audit. CCTPStrategy underwent strict internal ySec review. All strategies follow the rigorous 12-metric risk framework, but external third-party review of these specific components is absent
-- **Maple concentration:** 45.8% of vault funds are in Maple syrupUSDC strategies — a single protocol failure could impact nearly half the vault
-- **High looper allocation:** Looper strategies now represent ~86% of TVL (up from ~58%), increasing leverage exposure
+- **Newer, unproven dependency stacks (~48% of TVL):** Morpho V2 + the Sentora curator (~21%) and the Katana L2 + AggLayer/LxLy bridge + VaultBridgeToken stack (~27%) are materially newer than the blue-chip venues they replaced, and neither has an existing repository report
+- **Cross-chain concentration:** ~31% of TVL now lives off the origin chain (Katana 27.3% + Arbitrum 3.5%) across two distinct bridges (AggLayer + CCTP) — up from ~2.5% in April
+- **Convertor execution & valuation surface:** ~21% of TVL is valued via a management-set Morpho oracle with a `reportBuffer` haircut and is exited via onchain Dutch auctions plus a PYUSD/RLUSD leg — more moving parts than direct ERC-4626 lending
+- **No external product-specific audit:** The CCTPStrategy, the new KatanaStrategy (AggLayer), the BaseConvertor (auctions), and the LockedyvUSD wrapper have no dedicated external audit. All follow Yearn's internal 12-metric framework / ySec review, but external third-party review of these specific components is absent
+- **Still maturing:** ~140 days in production, ~$11.56M TVL, no stress test of the new cross-chain/auction machinery
 
 ### Critical Risks
 
-- **Looper liquidation cascade:** Looper strategies (~86% of TVL) use leveraged positions on Morpho. A collateral depeg (e.g., syrupUSDC or siUSD) could trigger cascading liquidations across multiple strategies simultaneously. The increased looper concentration amplifies this risk compared to March
-- **Cross-chain accounting lag:** Remote strategy positions are updated when `_harvestAndReport()` queues CCTP messages back to the origin. Between report cycles, the vault's reported `totalAssets()` may not reflect real-time changes on Arbitrum
+- **Cross-chain & bridge risk on the Katana position (~27%):** The largest non-mainnet exposure depends on a young L2, the AggLayer/LxLy unified bridge, a VaultBridgeToken wrapper, and a remote Yearn vault — value that reads 0 locally and is known only from the last bridged report. A bridge fault, remote-vault loss, or stuck claim would impair a quarter of the vault and delay redemptions
+- **Cross-chain accounting lag:** Remote positions update only when `_harvestAndReport()` delivers a report (CCTP for Arbitrum/Base; AggLayer for Katana). Between cycles, the vault's `totalAssets()` may not reflect real-time remote changes for ~31% of TVL
+- **Residual looper liquidation:** The Arbitrum syrupUSDC Morpho looper (3.5%) is still a leveraged position; a syrupUSDC depeg or Morpho-market illiquidity could cause a loss — but now capped at a small share of TVL
 
 ---
 
@@ -430,14 +456,14 @@ Additionally, Yearn provides a dedicated **yvUSD APR API** ([yvusd-api.yearn.fi]
 
 | Factor | Assessment |
 |--------|-----------|
-| Audits | V3 framework: 3 audits by top firms (Statemind, ChainSecurity, yAcademy). CCTPStrategy: strict internal ySec review. All strategies: rigorous 12-metric risk framework |
+| Audits | V3 framework: 3 audits by top firms (Statemind, ChainSecurity, yAcademy). CCTPStrategy, **new KatanaStrategy (AggLayer), and BaseConvertor (auctions)**: internal ySec review + 12-metric framework, no dedicated external audit |
 | Bug bounty | $200K on Immunefi (active) + Sherlock bounty |
-| Production history | **~74 days** (Jan 19, 2026). V3 framework: ~23 months |
-| TVL | **~$4M** (small but growing +34%). Deposit limit: $5M (80.6% utilized) |
-| Security incidents | None on V3 |
+| Production history | **~140 days** (Jan 19, 2026). V3 framework: ~25 months |
+| TVL | **~$11.56M** (+187% since April). Deposit limit: $15M (~77.1% utilized) |
+| Security incidents | None on V3; no PPS decrease observed |
 | Strategy review | Rigorous 12-metric framework with ySec security review, testing coverage requirements, complexity scoring, and risk exposure assessment |
 
-**Score: 3.0/5** — The underlying V3 framework has solid audit coverage from 3 reputable firms and a clean 23-month track record. The CCTPStrategy underwent strict internal ySec review, and all strategies follow a rigorous 12-metric risk scoring framework. However, yvUSD itself is still early (~74 days) with modest TVL (~$4M), and no external third-party audit covers the novel yvUSD-specific components. The vault has shown healthy growth (+34% TVL) and no incidents, but remains below the 6-month production history threshold. Score unchanged from March assessment.
+**Score: 3.0/5** — The underlying V3 framework has solid audit coverage from 3 reputable firms and a clean ~25-month track record, and the vault has grown +187% to ~$11.56M with no incidents and monotonic PPS. Offsetting this, two new strategy archetypes now run at scale without dedicated external audits — the KatanaStrategy (AggLayer/LxLy bridge) and the BaseConvertor (auction-based Morpho V2 access) — and yvUSD is still ~140 days old, below the 6-month production threshold. The improved age/TVL and the added novel-component surface roughly offset; score unchanged at 3.0.
 
 #### Category 2: Centralization & Control Risks (Weight: 30%)
 
@@ -461,24 +487,25 @@ Additionally, Yearn provides a dedicated **yvUSD APR API** ([yvusd-api.yearn.fi]
 | Vault operations | Permissionless deposits/withdrawals onchain |
 | Strategy reporting | Programmatic via Keeper (yHaaSRelayer) and Debt Allocator |
 | Debt allocation | Automated via Debt Allocator, with manual override by DEBT_MANAGER holders (Daddy, Brain, Security) |
-| Cross-chain | Programmatic — `_harvestAndReport()` queues CCTP messages automatically. Stale between report cycles |
+| Convertor valuation | ~21% (Morpho V2 convertors) valued via a management-set Morpho oracle + `reportBuffer`; USDC⇄want via governance-kicked onchain auctions |
+| Cross-chain | Programmatic — remote `_harvestAndReport()` reports back via CCTP (Arbitrum/Base) and AggLayer (Katana). ~31% of TVL tracked off-origin; stale between cycles |
 
-**Programmability Score: 1.5/5** — All funds are onchain across Ethereum and Arbitrum and cannot be altered by offchain factors. PPS is calculated onchain algorithmically via ERC-4626. Deposits/withdrawals are permissionless. Strategy reporting is automated via the Keeper (yHaaSRelayer). Debt allocation is automated via the Debt Allocator with manual override available to Daddy, Brain, and Security multisigs. Cross-chain accounting has minor lag between keeper cycles but all positions are verifiable onchain at all times.
+**Programmability Score: 1.5/5** — All funds remain onchain (Ethereum, Arbitrum, Katana) and the PPS is calculated algorithmically via ERC-4626; deposits/withdrawals are permissionless and reporting is automated. New surfaces appeared — the convertors' management-set oracle valuation and the larger, two-bridge cross-chain accounting (Katana reads 0 locally between reports) — but these are still verifiable onchain and do not let governance arbitrarily move funds. Score held at 1.5, with the added valuation/cross-chain lag reflected in Provability (Category 3B) to avoid double-counting.
 
 **Subcategory C: External Dependencies**
 
 | Factor | Assessment |
 |--------|-----------|
-| Protocol count | 8+ distinct protocols |
-| Criticality | Morpho (critical, 86%), Maple (critical, 45.8%), InfiniFi (high, 15.2%) |
-| Dependency quality | Improved: blue-chip (Sky, Spark, Morpho) + low-risk (Maple 2.33/5) + medium-risk (InfiniFi 2.8/5, now 15.2% vs 32.6%) |
-| Cross-chain | Circle CCTP (well-audited, same trust as USDC) |
+| Protocol count | Many (Morpho V1 & V2, Sky, Maple, 3Jane/Pendle, Sentora, AggLayer, CCTP) |
+| Criticality | Morpho (critical, ~56% across V1 OG + V2 convertors); Katana/AggLayer (critical, ~27%); Sky (~11.5%) |
+| Dependency quality | Mixed: ~46.5% blue-chip (Morpho V1 OG, Sky) vs ~48% in newer/unproven stacks (Morpho V2 + Sentora ~21%, Katana/AggLayer ~27%) |
+| Cross-chain | Two bridges now — Circle CCTP (Arbitrum/Base) + Polygon AggLayer LxLy + VaultBridgeToken (Katana, new) |
 
-**Dependencies Score: 3.5/5** — Still many dependencies (8+), and Morpho is critical infrastructure across 86% of strategies. However, the dependency quality has significantly improved: medium-risk protocol exposure dropped from 65.6% to 16.4%, with the largest allocation (Maple, 45.8%) rated Low Risk (2.33/5). The main concern is Maple concentration — a single protocol failure could impact ~46% of the vault. Cross-chain bridge dependency via CCTP remains. Per rubric: many dependencies with critical reliance on Morpho and Maple, but improved quality pulls down from 4 to 3.5.
+**Dependencies Score: 3.5/5** — The concentration profile inverted: the April Maple (45.8%) and medium-risk InfiniFi/3Jane (16.4%) concentrations are gone, replaced by heavy reliance on Morpho as critical infrastructure (~56%) plus a large cross-chain Katana position (~27%). Single-protocol medium-risk concentration improved, but two genuinely new, unproven dependency stacks (Morpho V2/Sentora and the Katana/AggLayer bridge) now carry ~48% of TVL, and cross-chain bridge surface doubled. These risks roughly offset the concentration improvement; score unchanged at 3.5.
 
 **Centralization Score = (1.0 + 1.5 + 3.5) / 3 = 2.0**
 
-**Score: 2.0/5** — Significant improvement from March (was 2.7). The vault now uses the standard Yearn V3 governance pattern with 7-day timelock, Daddy/ySafe (6/9) as sole proposer, and standard RoleManager — the same framework as yvUSDC-1 and 37+ other Yearn vaults. Immutable vault contracts, no EOA vault roles, and multi-layer security are key strengths. All funds remain onchain and fully programmatic. The main remaining concerns are Maple protocol concentration and the Fee Splitter EOA governance.
+**Score: 2.0/5** — Unchanged from April. Governance is confirmed unchanged onchain (standard RoleManager, 7-day timelock, Daddy 6/9 sole proposer, no EOA vault roles, immutable vault). All funds remain onchain and programmatic. The dependency mix shifted character — lower single-protocol/medium-risk concentration, but higher cross-chain and newer-protocol novelty — netting flat. Remaining concerns: Morpho concentration (~56%), the new Katana/AggLayer and Morpho V2/Sentora exposures, and the Fee Splitter EOA governance.
 
 #### Category 3: Funds Management (Weight: 30%)
 
@@ -487,40 +514,42 @@ Additionally, Yearn provides a dedicated **yvUSD APR API** ([yvusd-api.yearn.fi]
 | Factor | Assessment |
 |--------|-----------|
 | Backing | 100% USDC-backed, deployed into DeFi yield strategies |
-| Collateral quality | Improved: 12.9% blue-chip (Sky, Spark), 45.8% low-risk (Maple 2.33/5), 16.4% medium-risk (InfiniFi 2.8/5, 3Jane 3.5/5) |
-| Leverage | Looper strategies (~86% of TVL) use Morpho leverage — increased from ~58% |
-| Verifiability | ERC-4626, all positions onchain |
+| Collateral quality | ~46.5% blue-chip (Morpho V1 OG 35%, Sky 11.5%); ~21% Morpho V2/Sentora; ~27% cross-chain Katana; ~3.5% Maple looper; ~1.8% 3Jane PT |
+| Leverage | **Looper exposure fell from ~86% to ~3.5%** — major de-risking |
+| Verifiability | ERC-4626; mainnet positions direct, ~21% via oracle-valued convertors, ~27% tracked off-origin (Katana) |
 
-**Collateralization Score: 2.5/5** — Onchain USDC backing is fully verifiable. Collateral quality has improved significantly: medium-risk protocol exposure dropped from 65.6% to 16.4%, with the largest allocation now in Maple (low-risk, 2.33/5) and blue-chip protocols (Sky, Spark) at 12.9%. However, looper strategy allocation increased from ~58% to ~86% of TVL, adding more leverage risk. The improved dependency quality offsets the increased leverage concentration.
+**Collateralization Score: 2.5/5** — Onchain USDC backing is fully verifiable. The dramatic leverage reduction (looper 86% → 3.5%) and the removal of Maple/InfiniFi concentration are clear positives for collateral safety. These are offset by new lower-pedigree exposures replacing the leverage: ~27% cross-chain into a young Katana L2 and ~21% into newer Morpho V2/Sentora markets reached via auctions. The de-risking and the added novelty roughly cancel; score held at 2.5.
 
 **Subcategory B: Provability**
 
 | Factor | Assessment |
 |--------|-----------|
-| Reserve transparency | All strategy positions verifiable onchain |
+| Reserve transparency | Mainnet positions verifiable onchain; ~27% (Katana) only via last bridged report (`valueOfVault()` reads 0 locally) |
 | Exchange rate | ERC-4626, programmatic, anyone can verify |
-| Cross-chain lag | remoteAssets updated by keeper, can be stale |
-| Reporting | Automated via keepers with 7-day profit unlock |
+| Convertor valuation | ~21% valued via a management-set Morpho oracle + `reportBuffer` haircut — verifiable but parameter-dependent |
+| Cross-chain lag | ~31% of TVL off-origin across two bridges; stale between reports |
+| Reporting | Automated via keepers with **5-day** profit unlock |
 
-**Provability Score: 1.5/5** — All strategy positions are verifiable onchain on both Ethereum and Arbitrum. ERC-4626 share price is fully programmatic. Cross-chain positions have minor reporting lag between keeper cycles but the actual positions exist onchain at all times. Multiple verification sources available.
+**Provability Score: 2.0/5** — Worse than April (was 1.5). The base vault and mainnet positions remain fully verifiable via ERC-4626, but two new factors weaken real-time provability: ~31% of TVL is now tracked off the origin chain across two bridges (the Katana strategy's local value reads 0 between reports), and ~21% is valued through a management-set oracle plus a `reportBuffer` rather than a direct ERC-4626 read. Positions still exist onchain and are reconcilable, but with more lag and parameter dependence than before.
 
-**Funds Management Score = (2.5 + 1.5) / 2 = 2.0**
+**Funds Management Score = (2.5 + 2.0) / 2 = 2.25**
 
-**Score: 2.0/5** — Improved from March (was 2.25). Strong onchain provability with all positions verifiable across both chains. Collateral quality has improved with the shift from medium-risk to low-risk protocol dependencies. Increased looper concentration partially offsets the improvement.
+**Score: 2.25/5** — Roughly flat vs April (was 2.0). The strong leverage de-risking keeps collateralization at 2.5, but provability slips from 1.5 to 2.0 as cross-chain (~31%, two bridges) and oracle-valued convertor (~21%) exposure grows. All positions remain onchain and reconcilable; the change reflects added reporting lag and valuation surface, not loss of verifiability.
 
 #### Category 4: Liquidity Risk (Weight: 15%)
 
 | Factor | Assessment |
 |--------|-----------|
 | Exit mechanism | ERC-4626 redemption for USDC |
-| Liquidity depth | 0 idle — 100% deployed. Withdrawal requires strategy unwinding |
-| Cross-chain | CCTP bridge delays for Arbitrum strategies |
-| PT maturity | Reduced: PT strategies now only 1.9% of TVL (was 51.5%) |
+| Liquidity depth | 0 idle — 100% deployed. ~46% in promptly-liquid lending (Morpho V1 OG, Sky) |
+| Convertor exit | ~21% (Morpho V2 convertors) only frees loose USDC on demand; PYUSD/RLUSD must clear via auction |
+| Cross-chain | ~31% needs a bridge round-trip — Katana (AggLayer, ~27%) + Arbitrum (CCTP, ~3.5%) |
+| Looper / PT | Looper deleverage friction now small (3.5%); PT ~1.8% |
 | Same-value asset | USDC-denominated — no price impact risk |
-| Deposit limit | $5M cap (80.6% utilized) |
-| Locked supply | ~70.6% of yvUSD supply locked in LockedyvUSD (14-day cooldown + 5-day window) |
+| Deposit limit | $15M cap (~77.1% utilized) |
+| Locked supply | ~23.1% of yvUSD locked in LockedyvUSD (down from ~70.6%) — smaller duration buffer |
 
-**Score: 3.0/5** — USDC-denominated vault eliminates price divergence risk. ERC-4626 redemption mechanism exists. PT maturity constraints are significantly reduced (1.9% vs 51.5% of TVL in March). However, 100% capital deployment means withdrawals require strategy unwinding — and ~86% is in looper strategies requiring deleveraging. No DEX liquidity as alternative exit. ~70.6% of yvUSD supply is locked in LockedyvUSD with 14-day cooldown. The current TVL (~$4M) means withdrawal amounts are relatively small in absolute terms. Same-value asset adjustment: -0.5 applied from a base of 3.5. Score unchanged from March.
+**Score: 3.0/5** — USDC-denominated vault eliminates price divergence risk, and looper-deleverage friction is largely gone. But the constraints shifted rather than disappeared: ~21% can only be freed via onchain auctions and ~31% requires a bridge round-trip (including a young AggLayer/Katana path), so **over half of TVL is not instantly redeemable**, now against a smaller locked-supply buffer (23% vs 71%). ~46% sits in promptly-liquid lending, and there is still no DEX liquidity as an alternative exit. The net liquidity profile is comparable to April; same-value asset adjustment applied. Score unchanged at 3.0.
 
 #### Category 5: Operational Risk (Weight: 5%)
 
@@ -533,19 +562,19 @@ Additionally, Yearn provides a dedicated **yvUSD APR API** ([yvusd-api.yearn.fi]
 | Incident response | Yearn has demonstrated capability across historical events. V3 untested |
 | Monitoring | Active hourly large-flow alerts, weekly endorsed-vault checks, timelock monitoring across 6 chains |
 
-**Score: 1.5/5** — Yearn's brand, track record, and known team provide high confidence. The vault now uses the standard Yearn governance framework (Daddy, Brain, Security, Keeper, Debt Allocator) — the same pattern across 37+ vaults. Comprehensive V3 documentation, active Immunefi + Sherlock bounties, demonstrated incident response capability, and active monitoring infrastructure (hourly alerts, endorsed-vault checks, timelock monitoring via GitHub Actions + Telegram). yvUSD-specific documentation is on the official Yearn docs site, covering cross-chain strategy architecture, LockedyvUSD mechanics, and a dedicated APR API service. Yearn BORG legal entity (Cayman foundation via YIP-87). Score unchanged from March.
+**Score: 1.5/5** — Yearn's brand, track record, and known team provide high confidence. The vault uses the standard Yearn governance framework (Daddy, Brain, Security, Keeper, Debt Allocator). Comprehensive V3 documentation, active Immunefi + Sherlock bounties, demonstrated incident response capability, and active monitoring infrastructure (hourly alerts, endorsed-vault checks, timelock monitoring via GitHub Actions + Telegram). The new cross-chain (Katana/AggLayer) and auction-based convertor strategies expand the monitoring surface and should be added to operational dashboards, but the operational posture remains strong. Yearn BORG legal entity (Cayman foundation via YIP-87). Score unchanged at 1.5.
 
 ### Final Score Calculation
 
 
-| Category | Score | Weight | Weighted | Change from March |
+| Category | Score | Weight | Weighted | Change from April |
 |----------|-------|--------|----------|-------------------|
-| Audits & Historical | 3.0 | 20% | 0.60 | — |
-| Centralization & Control | 2.0 | 30% | 0.60 | ↓ from 2.7 (standard Yearn governance + 7-day timelock) |
-| Funds Management | 2.0 | 30% | 0.60 | ↓ from 2.25 (better dependency quality) |
-| Liquidity Risk | 3.0 | 15% | 0.45 | — |
+| Audits & Historical | 3.0 | 20% | 0.60 | — (older + larger, but new unaudited components) |
+| Centralization & Control | 2.0 | 30% | 0.60 | — (governance unchanged; dependency mix shifted, net flat) |
+| Funds Management | 2.25 | 30% | 0.675 | ↑ from 2.0 (provability 1.5→2.0 on cross-chain + convertor valuation) |
+| Liquidity Risk | 3.0 | 15% | 0.45 | — (looper friction → auction/bridge friction) |
 | Operational Risk | 1.5 | 5% | 0.075 | — |
-| **Final Score** | | | **2.3/5.0** | ↓ from 2.6 |
+| **Final Score** | | | **2.4/5.0** | ↑ from 2.3 |
 
 ### Risk Tier
 
@@ -557,23 +586,25 @@ Additionally, Yearn provides a dedicated **yvUSD APR API** ([yvusd-api.yearn.fi]
 | 3.5-4.5 | Elevated Risk | Limited approval, strict limits |
 | 4.5-5.0 | High Risk | Not recommended |
 
-**Final Risk Tier: Low Risk (2.3/5.0) — Approved with standard monitoring**
+**Final Risk Tier: Low Risk (2.4/5.0) — Approved with standard monitoring**
 
-**Score change rationale:** The score improved from 2.6 (Medium Risk) to 2.3 (Low Risk) primarily due to:
-1. **Governance maturation** (2.7 → 2.0): Migration to the standard Yearn V3 governance pattern with 7-day timelock, Daddy/ySafe (6/9) as sole proposer, no EOA vault roles, and immutable vault contracts — scoring 1.0 on governance per updated rubric
-2. **Improved dependency quality** (Funds Mgmt 2.25 → 2.0): Medium-risk protocol exposure reduced from 65.6% to 16.4%, with the dominant allocation shifting to Maple (Low Risk 2.33/5)
+**Score change rationale:** The score ticks up slightly from 2.3 to 2.4 (still Low Risk). The portfolio transformed since April rather than simply improving:
+1. **De-risking (positive):** Leveraged looper exposure collapsed from ~86% to ~3.5% of TVL, and Maple/InfiniFi concentration (62% combined in April) fell to ~3.5%/0%. This largely resolves the prior "looper liquidation cascade" critical risk.
+2. **New novelty/cross-chain risk (negative):** ~48% of TVL moved into newer, unproven stacks — Morpho V2 + the Sentora curator (~21%, accessed via auctions) and a brand-new Katana L2 + AggLayer/LxLy bridge (~27%). Cross-chain exposure rose from ~2.5% to ~31% across two bridges.
+3. **Net scoring effect:** Funds Management rose from 2.0 to 2.25 (provability 1.5→2.0) as ~31% of TVL is now tracked off-origin and ~21% is oracle-valued via convertors. Governance (confirmed unchanged onchain) and the other categories held flat. The leverage de-risking and the cross-chain/novelty increase roughly offset, leaving the vault firmly in the Low Risk tier.
 
 ---
 
 ## Reassessment Triggers
 
-- **Time-based:** Reassess in 2 months (June 2026) as the vault approaches the 6-month production milestone
-- **TVL-based:** Reassess if TVL exceeds $10M or changes by more than ±50%
-- **Incident-based:** Reassess after any exploit, strategy loss, or underlying protocol incident (especially Maple, InfiniFi, or Morpho)
-- **Governance-based:** Reassess if the timelock delay is modified, Safe compositions change (signer additions/removals, threshold changes), or the Fee Splitter governance is transferred from the deployer EOA to the multisig
-- **Audit-based:** Reassess if CCTPStrategy or yvUSD-specific components receive dedicated external audits (should improve Audits score)
-- **Dependency-based:** Reassess if Maple syrupUSDC or InfiniFi experience significant events. Reassess if Morpho looper markets face liquidation stress
-- **Strategy-based:** Reassess if Maple concentration exceeds 60%, if allocation to medium-risk protocols exceeds 30%, or if looper leverage ratios increase significantly
+- **Time-based:** Reassess in ~2 months (Aug 2026), or at the 6-month production milestone (Jul 2026)
+- **TVL-based:** Reassess if TVL exceeds $20M (approaches the $15M cap), or changes by more than ±50%
+- **Incident-based:** Reassess after any exploit, strategy loss, or underlying protocol incident — especially **Morpho (V1 or V2), the AggLayer/Katana bridge, the Sentora curator, or Sky**
+- **Governance-based:** Reassess if the timelock delay is modified, Safe compositions change (signer/threshold), or the Fee Splitter governance is transferred from the deployer EOA to the multisig
+- **Cross-chain-based:** Reassess if cross-chain exposure exceeds ~40% of TVL, if a new remote chain/bridge is funded (e.g. the Base CCTP strategy activates), or if any bridge experiences downtime or a fault
+- **Convertor-based:** Reassess if the Morpho V2 convertors' oracle is changed, if PYUSD/RLUSD depegs, or if auction settlement shows persistent slippage beyond `maxSlippageBps`
+- **Audit-based:** Reassess if the CCTPStrategy, KatanaStrategy, or BaseConvertor receive dedicated external audits (should improve the Audits score)
+- **Strategy-based:** Reassess if Morpho concentration exceeds ~65%, if the Katana position exceeds ~35% of TVL, or if looper leverage re-expands materially above its current ~3.5%
 
 ---
 
@@ -587,55 +618,57 @@ Additionally, Yearn provides a dedicated **yvUSD APR API** ([yvusd-api.yearn.fi]
 │  │  yvUSD Vault (v3.0.4) │        │  LockedyvUSD                 │  │
 │  │  ERC-4626, immutable  │◀───────│  Cooldown wrapper + accountant│  │
 │  │  0x696d...6987        │        │  14d cooldown, 5d window     │  │
-│  │                       │        │  0xAaaF...9040               │  │
-│  │  deposit() / redeem() │        └──────────────────────────────┘  │
-│  │  totalAssets()        │                                           │
+│  │  TVL ~$11.56M         │        │  ~23% of supply locked       │  │
+│  │  deposit() / redeem() │        │  0xAaaF...9040               │  │
+│  │  totalAssets()        │        └──────────────────────────────┘  │
 │  └──────────┬────────────┘                                           │
-│             │ deploys USDC to 11 strategies                          │
+│             │ deploys USDC to 15 strategies (7 funded)               │
 │             │                                                        │
 │  ┌──────────▼──────────────────────────────────────────────────────┐│
-│  │  STRATEGIES (by allocation)                                      ││
+│  │  FUNDED STRATEGIES (by allocation)                               ││
 │  │                                                                  ││
 │  │  ┌─────────────────────────────────────────────────────────┐    ││
-│  │  │ LOOPER STRATEGIES (~86% of TVL)              via Morpho │    ││
-│  │  │  syrupUSDC/USDC Morpho Looper        43.35%  (Maple)   │    ││
-│  │  │  Morpho Yearn OG USDC Compounder     24.08%  (Morpho)  │    ││
-│  │  │  Infinifi sIUSD Morpho Looper        15.20%  (InfiniFi)│    ││
-│  │  │  Arb syrupUSDC/USDC Morpho Looper     2.48%  (CCTP)    │    ││
-│  │  │  PT stcUSD Jul 23 Morpho Looper       0.71%  (Cap)     │    ││
+│  │  │ MORPHO LENDING (~56% of TVL)                            │    ││
+│  │  │  Morpho Yearn OG USDC Compounder    34.97%  (Morpho V1)│    ││
+│  │  │  Morpho V2 Sentora PYUSD Convertor  12.17%  (V2+auction)│   ││
+│  │  │  Morpho V2 Sentora RLUSD Convertor   8.87%  (V2+auction)│   ││
 │  │  └─────────────────────────────────────────────────────────┘    ││
-│  │  ┌──────────────────────┐  ┌────────────────────────────────┐  ││
-│  │  │ LENDING (~13%)       │  │ PT (~1%)                       │  ││
-│  │  │  sUSDS Depositor     │  │  USD3 Pendle PT Maxi  1.24%   │  ││
-│  │  │            10.45%    │  │  (3Jane USD3, Pendle)          │  ││
-│  │  │  Spark Depositor     │  └────────────────────────────────┘  ││
-│  │  │             2.49%    │                                       ││
-│  │  └──────────────────────┘                                       ││
+│  │  ┌──────────────────────────┐  ┌────────────────────────────┐  ││
+│  │  │ CROSS-CHAIN (~31%)       │  │ LENDING / LOOPER / PT      │  ││
+│  │  │  Katana yvUSDC Compounder│  │  sUSDS Depositor   11.49%  │  ││
+│  │  │    27.27% (AggLayer LxLy)│  │  Arb syrupUSDC      3.47%  │  ││
+│  │  │  Arb syrupUSDC (CCTP)    │  │   looper (Maple, CCTP)     │  ││
+│  │  │    3.47%                 │  │  USD3 Pendle PT     1.77%  │  ││
+│  │  └──────────────────────────┘  └────────────────────────────┘  ││
+│  │  Idle (0 debt): Fluid, Spark, SKY, InfiniFi looper, syrupUSDC   ││
+│  │  mainnet looper, PT stcUSD looper, sUSD3, Base (CCTP)           ││
 │  └─────────────────────────────────────────────────────────────────┘│
 └──────────────────────────────────────────────────────────────────────┘
                                 │
-                  deposits into underlying protocols
+                  deposits into underlying protocols / chains
                                 │
 ┌───────────────────────────────▼──────────────────────────────────────┐
-│                    UNDERLYING PROTOCOLS                                │
+│                    UNDERLYING PROTOCOLS / VENUES                       │
 │                                                                       │
 │  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐               │
-│  │  Morpho      │  │  Maple       │  │  Sky/MakerDAO│               │
-│  │  $6.6B TVL   │  │  syrupUSDC   │  │  sUSDS       │               │
-│  │  25+ audits  │  │  $1.7B TVL   │  │  Blue-chip   │               │
-│  │  86% of strat│  │  45.8% alloc │  │  12.9% alloc │               │
+│  │  Morpho V1   │  │  Morpho V2   │  │  Sky/MakerDAO│               │
+│  │  OG USDC     │  │  + Sentora   │  │  sUSDS       │               │
+│  │  Blue-chip   │  │  PYUSD/RLUSD │  │  Blue-chip   │               │
+│  │  ~35% alloc  │  │  ~21% (new)  │  │  11.5% alloc │               │
 │  └──────────────┘  └──────────────┘  └──────────────┘               │
 │  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐               │
-│  │  InfiniFi    │  │  Pendle/     │  │  Circle CCTP │               │
-│  │  siUSD       │  │  Spectra     │  │  Cross-chain │               │
-│  │  15.2% alloc │  │  PT tokens   │  │  bridge      │               │
+│  │ Katana L2 +  │  │  Maple       │  │  3Jane USD3  │               │
+│  │ AggLayer LxLy│  │  syrupUSDC   │  │  + Pendle PT │               │
+│  │ + vbToken    │  │  (Arb looper)│  │  1.77%       │               │
+│  │ ~27% (new)   │  │  3.47%       │  │              │               │
 │  └──────────────┘  └──────────────┘  └──────────────┘               │
 └───────────────────────────────────────────────────────────────────────┘
 
 Data flow: User deposits USDC → yvUSD vault → strategies deploy to
-Morpho/Maple/Sky/InfiniFi/Pendle. Cross-chain strategies bridge via
-Circle CCTP to Arbitrum. Profits reported by Keeper, locked for 7 days.
-Optional: User locks yvUSD in LockedyvUSD for bonus yield (14d cooldown).
+Morpho V1/V2, Sky, Maple, Pendle, and remote chains. Cross-chain bridges:
+Circle CCTP (Arbitrum, Base) and Polygon AggLayer LxLy + VaultBridgeToken
+(Katana, ~27%). Profits reported by Keeper, locked for 5 days. Optional:
+User locks yvUSD in LockedyvUSD for a 10% bonus yield (14d cooldown).
 ```
 
 ## Appendix: TimelockController Role Structure
