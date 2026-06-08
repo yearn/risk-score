@@ -227,7 +227,7 @@ So fund delegation risk is limited to (a) the HubPool's own custody and (b) ever
 | ACX governance controversy follow-up | Across forum, X | Material updates | Weekly |
 
 **Monitoring implementation:**
-1. Open a PR in [yearn/monitoring-scripts-py](https://github.com/yearn/monitoring-scripts-py) adding the Hub Pool Owner Safe to the safe-monitoring list.
+1. Open a PR in [yearn/monitoring](https://github.com/yearn/monitoring) adding the Hub Pool Owner Safe to the safe-monitoring list.
 2. Add a workflow that polls `HubPool.paused()` and the relevant `pooledTokens()` reserves hourly.
 3. Add Tenderly alerts for the HubPool events listed above.
 4. Configure a Telegram group with the SAM bot (@sam_alerter_bot) for paged events.

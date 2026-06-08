@@ -32,7 +32,7 @@ The fund is structured as a series of **Superstate Asset Trust**, a **Delaware S
 - [GitHub (USTB contracts)](https://github.com/superstateinc/ustb/tree/main)
 - [LlamaRisk Assessment](https://www.llamarisk.com/research/2024-10-07t21-32-09-000z)
 - [Aave Forum — USTB/BUIDL GSM](https://governance.aave.com/t/arfc-ustb-buidl-gsm/19299/3)
-- [DeFiLlama](https://defillama.com/protocol/superstate-ustb)
+- [DeFiLlama](https://defillama.com/token/USTB)
 - [CoinGecko](https://www.coingecko.com/en/coins/superstate-short-duration-us-government-securities-fund-ustb)
 - [Chainlink USTB NAV/Share Feed](https://data.chain.link/feeds/ethereum/mainnet/ustb-nav-per-share)
 - [RWA.xyz](https://app.rwa.xyz/assets/USTB)
