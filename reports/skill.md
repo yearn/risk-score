@@ -1,14 +1,20 @@
 ---
 name: generating-risk-reports
-description: List of actions, guidelines and tools used for generating risk assesment reports for protocols and assets.
-allowed-tools: Read Write Edit Grep Glob Bash(git:*)  Bash(cast:*)
+description: List of actions, guidelines and tools used for generating risk assessment reports for protocols and assets.
+allowed-tools: Read Write Edit Grep Glob Bash(git:*) Bash(gh:*) Bash(cast:*) Bash(curl:*) Bash(uv:*)
 ---
 
-# Generating risk assesment reports
+# Generating risk assessment reports
 
 - Always mark sections as "TODO" if information is unavailable or not found, never assume anything.
 - Follow instructions in `reports/README.md`.
-- Try to validate onchain code with github repository.
+- Try to validate onchain code against the protocol's GitHub repository.
+- Before starting, pull latest `master`.
+- When the report is ready, open a draft pull request with a concise summary, source notes, and validation notes.
+- Every new risk report must include a matching dependency graph at `reports/graph/<slug>.yaml`; follow `reports/graph/SKILL.md`.
+- Never trust protocol documentation alone. Use docs to understand the intended architecture, then verify claims onchain when possible.
+- Back every material claim with a valid link. This includes contracts, transactions, governance records, protocol docs, dashboard/API data, TVL values, and allocation data.
+- Actively search for hidden or indirect fund-loss paths for end users: privileged minting, upgradeable implementations, proxy admins, oracle control, role escalation, pause/blacklist paths, redemption gates, offchain custody, fee switches, strategy migration controls, and dependency failure modes.
 
 ## Pre-Assessment: Architecture First
 
@@ -17,7 +23,7 @@ Before writing any claims about a protocol, complete these steps in order:
 ### Pass 1: Architecture Mapping
 1. **Read the protocol's GitHub README** — understand the contract architecture, what components exist, and how they relate. Browse the repo directory structure (`src/`, `contracts/`, etc.).
 2. **For every contract in the address table, fetch and review its ABI** — use Etherscan or `cast`. Look for references to other contracts (factory → deployed markets, kernel → tranches, vault → strategies). List all public functions.
-3. **Read protocol documentation** (gitbook, docs site) — understand the claimed architecture, fund flow, and governance before verifying onchain.
+3. **Read protocol documentation** (gitbook, docs site) — understand the claimed architecture, fund flow, and governance before verifying onchain. Documentation is not evidence by itself.
 4. **Draw a contract architecture diagram** — map all layers (vault, strategy, factory, markets, governance, underlying protocols). This diagram goes in the report as an appendix. Do this FIRST, not last.
 5. **Trace the fund flow end-to-end onchain** — follow the money from user deposit to final yield source. Check token balances, look at who holds what.
 
@@ -76,15 +82,18 @@ If any answer is "no," use **"unverified"** not **"doesn't exist."**
 - When validating protocols, see for info on which focused on protocol decentralization: https://www.defiscan.info/
 - Always include whole `Risk Tier` table and bold the final risk tier.
 - Explain how minting and redeeming works, if present. Verify whether the operations are atomic and whether minting requires backing — flag any path that lets an admin mint unbacked tokens as a high-risk finding. Full mint-authority enumeration (every role-holder, with classification) goes into the *Token Mint Authority* section of the report; the procedure is in Pass 1.6 above.
+- Treat any path that can move, dilute, freeze, trap, or misprice user funds as a possible end-user loss path, even if it is not described as such in docs.
 
 ## Tools
 
-- use foundry toolkit to fetch blockchain data, foucs on cast tool. Docs: https://www.getfoundry.sh/cast
-- use etherscan to fetch blockchain data, usage defined in skill etherscan in `reports/etherscan/SKILL.md`
-- for fetching TVL, use defillama api. Docs: https://api-docs.defillama.com/ or use script: `uv run reports/scripts/fetch_defillama_tvl.py [protocol]`
-- if you use some script multiple times, add it to the `reports/scripts` folder but first ask for permission before committing it.
-- check .env file for environment variables and secrets. if you can't access .env exit asap.
+- Use Foundry to fetch blockchain data; focus on `cast`. Docs: https://www.getfoundry.sh/cast
+- Use RPC URLs from `.env`. For Ethereum mainnet, use `RPC_1` first and `RPC_2` as fallback. For other chains, use the chain-specific `RPC_<chain_id>` variable when available, for example `RPC_8453` for Base.
+- Use Etherscan to fetch blockchain data; usage is defined in `reports/etherscan/SKILL.md`.
+- For fetching TVL, use the DeFiLlama API. Docs: https://api-docs.defillama.com/ or use script: `uv run reports/scripts/fetch_defillama_tvl.py [protocol]`
+- If you use some script multiple times, add it to the `reports/scripts` folder but first ask for permission before committing it.
+- Check `.env` for environment variables and secrets. If you cannot access `.env`, stop early and report the blocker.
 
 ## Post-Assessment
 
-- after the report is finalized, optionally generate the contract dependency graph YAML; procedure defined in skill `generating-dependency-graphs` in `reports/graph/SKILL.md`. The graph publishes to `/graph/<slug>/` and is auto-linked from the report page when the YAML exists.
+- After the report is finalized, generate or update the contract dependency graph YAML at `reports/graph/<slug>.yaml`; procedure defined in skill `generating-dependency-graphs` in `reports/graph/SKILL.md`. The graph publishes to `/graph/<slug>/` and is auto-linked from the report page when the YAML exists.
+- The report task is not ready for draft PR until the graph exists and `npm run build` validates both the report page and graph schema, unless the graph cannot be produced from available information. If graph data is unavailable, explain why and mark the missing graph facts as `TODO`.
