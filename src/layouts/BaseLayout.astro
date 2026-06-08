@@ -22,6 +22,18 @@ const ogImageUrl = new URL(ogImage, Astro.site ?? Astro.url.origin).href;
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <!--
+      Critical inline styles: applied on the first paint with no network
+      fetch, so the page starts as a correct themed (dark/light) blank
+      instead of flashing unstyled white before the main stylesheet loads.
+      Matches the design tokens in styles/global.css.
+    -->
+    <style is:inline>
+      html { background: #0c0c0c; color-scheme: dark; }
+      html.light { background: #ffffff; color-scheme: light; }
+      body { background: #0c0c0c; color: #f4f4f4; }
+      html.light body { background: #ffffff; color: #0c0c0c; }
+    </style>
     <meta name="description" content={description} />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="canonical" href={canonicalUrl} />
