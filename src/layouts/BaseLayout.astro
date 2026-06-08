@@ -23,16 +23,32 @@ const ogImageUrl = new URL(ogImage, Astro.site ?? Astro.url.origin).href;
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <!--
-      Critical inline styles: applied on the first paint with no network
-      fetch, so the page starts as a correct themed (dark/light) blank
-      instead of flashing unstyled white before the main stylesheet loads.
-      Matches the design tokens in styles/global.css.
+      Avoid the "broken render then snap to correct" flash: mark the document
+      as .loading before first paint and hide the body until the render-blocking
+      stylesheets in <head> have applied. The reveal script at the end of <body>
+      (which a browser only runs after preceding stylesheets load) clears it, so
+      the user sees a themed blank page, then the fully styled page.
+
+      The class is added via JS so no-JS clients fall back to visible content,
+      and a 4s failsafe guarantees the page can never stay blank.
+    -->
+    <script is:inline>
+      document.documentElement.classList.add("loading");
+      setTimeout(function () {
+        document.documentElement.classList.remove("loading");
+      }, 4000);
+    </script>
+    <!--
+      Critical inline styles: applied on the first paint with no network fetch,
+      so the page starts as a correct themed (dark/light) blank instead of
+      flashing unstyled white. Matches the design tokens in styles/global.css.
     -->
     <style is:inline>
       html { background: #0c0c0c; color-scheme: dark; }
       html.light { background: #ffffff; color-scheme: light; }
       body { background: #0c0c0c; color: #f4f4f4; }
       html.light body { background: #ffffff; color: #0c0c0c; }
+      html.loading body { visibility: hidden; }
     </style>
     <meta name="description" content={description} />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
@@ -120,6 +136,11 @@ const ogImageUrl = new URL(ogImage, Astro.site ?? Astro.url.origin).href;
       </div>
     </footer>
     <script is:inline>
+      // This parser-inserted script runs only after the <head> stylesheets
+      // have loaded and applied, so the page is fully styled here — safe to
+      // reveal it (clears the .loading hide set in <head>).
+      document.documentElement.classList.remove("loading");
+
       document.getElementById("theme-toggle").addEventListener("click", () => {
         const html = document.documentElement;
         html.classList.toggle("light");
