@@ -79,7 +79,7 @@ function labelPos(cx: number, cy: number, r: number, start: number, end: number)
 
       <div class="chart-area">
         <div class="chart-container">
-          <svg viewBox="0 0 200 200" class="pie-chart">
+          <svg width="180" height="180" viewBox="0 0 200 200" class="pie-chart">
             {segments.map((seg) => (
               <path
                 d={arcPath(100, 100, 90, seg.startAngle, seg.endAngle)}
