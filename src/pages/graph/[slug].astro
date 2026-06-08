@@ -26,6 +26,8 @@ const graphIndex = getGraphIndex();
 // Inline the downstream subgraph of each cross-linked node so a reviewer
 // sees the strategies/dependencies behind external protocols on the same page.
 const graph = expandCrossLinks(baseGraph, slug!);
+const currentReport = getReportBySlug(slug!);
+const reportDate = currentReport?.date ?? "";
 
 const cyData = {
   nodes: graph.nodes.map((n: GraphNode) => {
@@ -107,6 +109,7 @@ const title = graph.title ?? `${slug} — Contract Dependency Graph`;
       <div class="graph-title">
         <span class="graph-title-eyebrow">Dependency graph</span>
         <h1>{title.replace(" — Contract Dependency Graph", "")}</h1>
+        {reportDate && <div class="graph-report-date">Report date: {reportDate}</div>}
       </div>
       <div class="graph-controls">
         <button id="cy-fit" type="button" title="Fit to view">Fit</button>
@@ -552,6 +555,11 @@ const title = graph.title ?? `${slug} — Contract Dependency Graph`;
     font-size: 1rem;
     font-weight: 600;
     margin: 0;
+  }
+  .graph-report-date {
+    margin-top: 0.2rem;
+    font-size: 0.72rem;
+    color: var(--text-secondary);
   }
   .graph-controls {
     display: flex;
