@@ -72,6 +72,8 @@ Do not spend time redoing static background unless a mutable fact changed. Do no
 
 Use `.env` for RPC URLs and API keys. For Ethereum mainnet, use `RPC_1` first and `RPC_2` as fallback. For other chains, use the chain-specific `RPC_<chain_id>` variable when available, for example `RPC_8453` for Base.
 
+For Python scripts, use `scripts/env.py`: call `load_repo_env()` once, then `get_rpc_url(chain_id)` or `get_explorer_api_key(name)`. Do not duplicate `.env` discovery or env-var alias logic in reassessment scripts.
+
 ### Proxy implementation/admin
 
 For EIP-1967 proxies, read these slots:

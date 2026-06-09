@@ -5,6 +5,7 @@
 - **Code Formatting**: `uv run -m ruff format .`
 - **Update Lock File**: `uv lock` (after changing dependencies in pyproject.toml)
 - Use `.env` for environment variables, RPC URLs, and secrets. Never commit secrets.
+- Python scripts that need `.env`, RPC URLs, or explorer keys should use `scripts/env.py`: call `load_repo_env()` at the entrypoint and use `get_rpc_url(chain_id)` / `get_explorer_api_key(name)` instead of duplicating `load_dotenv` or env-var alias logic.
 
 ## Dependencies
 - **Core Dependencies**:
@@ -34,6 +35,7 @@
 - Back material findings with valid links: contract pages, transaction links, source docs, dashboards, or API outputs. TVL and allocation claims need source links too.
 - Try to use Etherscan for verification of blockchain data.
 - Use Foundry `cast` for direct onchain checks. Load RPC URLs from `.env`: use `RPC_1` first for Ethereum mainnet and `RPC_2` as the fallback; for other chains use the chain-specific `RPC_<chain_id>` variable when available.
+- For Python-based blockchain/API scripts, prefer `scripts/env.py` over direct `os.getenv` lookups for RPC and explorer keys so aliases stay consistent across scripts.
 
 ## Report, Graph, and Reassessment Workflow
 

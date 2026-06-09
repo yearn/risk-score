@@ -88,6 +88,7 @@ If any answer is "no," use **"unverified"** not **"doesn't exist."**
 
 - Use Foundry to fetch blockchain data; focus on `cast`. Docs: https://www.getfoundry.sh/cast
 - Use RPC URLs from `.env`. For Ethereum mainnet, use `RPC_1` first and `RPC_2` as fallback. For other chains, use the chain-specific `RPC_<chain_id>` variable when available, for example `RPC_8453` for Base.
+- For Python scripts, use `scripts/env.py` to load `.env` and resolve RPC/API-key aliases: call `load_repo_env()` once, then `get_rpc_url(chain_id)` or `get_explorer_api_key(name)`. Do not reimplement `.env` path walking or env-var fallback lists in report scripts.
 - Use Etherscan to fetch blockchain data; usage is defined in `reports/etherscan/SKILL.md`.
 - For fetching TVL, use the DeFiLlama API. Docs: https://api-docs.defillama.com/ or use script: `uv run reports/scripts/fetch_defillama_tvl.py [protocol]`
 - If you use some script multiple times, add it to the `reports/scripts` folder but first ask for permission before committing it.
