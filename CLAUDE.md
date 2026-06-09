@@ -1,7 +1,7 @@
 # Yearn Curation Score Guidelines
 
 ## Development Commands
-- **Run Scripts**: `uv run scripts/scan_factories.py` or `uv run reports/old/scripts/veda_scan_auth_events.py`
+- **Run Scripts**: `uv run scripts/scan_factories.py` or `uv run reports/scripts/fetch_defillama_tvl.py`
 - **Code Formatting**: `uv run -m ruff format .`
 - **Update Lock File**: `uv lock` (after changing dependencies in pyproject.toml)
 - use .env file for environment variables and secrets
