@@ -357,11 +357,11 @@ Since the initial March 2026 assessment, the yvUSD vault has **completed its gov
 
 ### Existing Monitoring Infrastructure
 
-Yearn maintains an active monitoring system via the [`monitoring-scripts-py`](https://github.com/yearn/monitoring-scripts-py) repository:
+Yearn maintains an active monitoring system via the [`monitoring`](https://github.com/yearn/monitoring) repository:
 
-- **Large flow alerts** (`yearn/alert_large_flows.py`): Runs **hourly via GitHub Actions**. Monitors deposit/withdrawal events via Envio indexer, alerts on flows exceeding $5M threshold via Telegram. Currently monitors 21 vaults across Ethereum, Base, Arbitrum, and Katana
-- **Endorsed vault check** (`yearn/check_endorsed.py`): Runs weekly, verifies all Yearn V3 vaults are endorsed onchain via the registry contract
-- **Timelock monitoring** (`timelock/timelock_alerts.py`): Monitors Yearn TimelockController across 6 chains
+- **Large flow alerts** (`protocols/yearn/alert_large_flows.py`): Monitors deposit/withdrawal events via Envio indexer, alerts on flows exceeding $5M threshold via Telegram. Currently monitors 21 vaults across Ethereum, Base, Arbitrum, and Katana
+- **Endorsed vault check** (`protocols/yearn/check_endorsed.py`): Runs daily, verifies all Yearn V3 vaults are endorsed onchain via the registry contract
+- **Timelock monitoring** (`protocols/timelock/timelock_alerts.py`): Monitors Yearn TimelockController across 6 chains
 
 **Note:** yvUSD is not yet added to the monitored vault list in `alert_large_flows.py`, but the infrastructure is in place and can be extended.
 
@@ -416,8 +416,8 @@ Additionally, Yearn provides a dedicated **yvUSD APR API** ([yvusd-api.yearn.fi]
 - **Lower medium-risk and single-protocol concentration:** Maple fell 45.8% → 3.5%; InfiniFi 15.2% → 0%. ~46.5% is now in blue-chip lending (Morpho V1 OG + Sky)
 - **Healthy growth:** TVL +187% to ~$11.56M; PPS up monotonically to 1.014423; deposit limit raised to $15M
 - **No EOA role concentration:** Deployer EOA confirmed at 0 vault roles. All vault operations require multisig or contract authorization
-- **Rigorous strategy review process:** 12-metric risk scoring framework with ySec security review across testing coverage, complexity, risk exposure, centralization, and protocol integration
-- **Active monitoring infrastructure:** Hourly large-flow alerts, weekly endorsed-vault checks, and timelock monitoring across 6 chains via GitHub Actions + Telegram
+- **Rigorous strategy review process:** 12-metric risk scoring framework with ySec security review. All strategies evaluated across testing coverage, complexity, risk exposure, centralization, and protocol integration dimensions
+- **Active monitoring infrastructure:** Hourly large-flow alerts, daily endorsed-vault checks, and timelock monitoring across 6 chains via the automation scheduler + Telegram alerts
 
 ### Key Risks
 
@@ -560,9 +560,9 @@ Additionally, Yearn provides a dedicated **yvUSD APR API** ([yvusd-api.yearn.fi]
 | Documentation | V3 docs comprehensive. yvUSD-specific docs published on official Yearn docs site (cross-chain architecture, LockedyvUSD mechanics, dedicated APR API) |
 | Legal | Yearn BORG (Cayman foundation via YIP-87) |
 | Incident response | Yearn has demonstrated capability across historical events. V3 untested |
-| Monitoring | Active hourly large-flow alerts, weekly endorsed-vault checks, timelock monitoring across 6 chains |
+| Monitoring | Active hourly large-flow alerts, daily endorsed-vault checks, timelock monitoring across 6 chains |
 
-**Score: 1.5/5** — Yearn's brand, track record, and known team provide high confidence. The vault uses the standard Yearn governance framework (Daddy, Brain, Security, Keeper, Debt Allocator). Comprehensive V3 documentation, active Immunefi + Sherlock bounties, demonstrated incident response capability, and active monitoring infrastructure (hourly alerts, endorsed-vault checks, timelock monitoring via GitHub Actions + Telegram). The new cross-chain (Katana/AggLayer) and auction-based convertor strategies expand the monitoring surface and should be added to operational dashboards, but the operational posture remains strong. Yearn BORG legal entity (Cayman foundation via YIP-87). Score unchanged at 1.5.
+**Score: 1.5/5** — Yearn's brand, track record, and known team provide high confidence. The vault now uses the standard Yearn governance framework (Daddy, Brain, Security, Keeper, Debt Allocator) — the same pattern across 37+ vaults. Comprehensive V3 documentation, active Immunefi + Sherlock bounties, demonstrated incident response capability, and active monitoring infrastructure (hourly alerts, endorsed-vault checks, timelock monitoring via the automation scheduler + Telegram). yvUSD-specific documentation is on the official Yearn docs site, covering cross-chain strategy architecture, LockedyvUSD mechanics, and a dedicated APR API service. Yearn BORG legal entity (Cayman foundation via YIP-87). Score unchanged from March.
 
 ### Final Score Calculation
 
