@@ -1,0 +1,15 @@
+{
+  "defaultProvider": "opencode-go",
+  "defaultModel": "deepseek-v4-pro",
+  "defaultThinkingLevel": "high",
+  "packages": [
+    "npm:pi-agents"
+  ],
+  "skills": [
+    "../reports/skill.md",
+    "../reports/etherscan/SKILL.md",
+    "../reports/graph/SKILL.md",
+    "../reports/reassessment/SKILL.md"
+  ],
+  "enableSkillCommands": true
+}
