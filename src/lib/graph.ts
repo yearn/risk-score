@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import yaml from "js-yaml";
+import { getReportBySlug } from "./reports";
 
 const GRAPH_DIR = path.resolve("reports/graph");
 
@@ -149,11 +150,10 @@ export interface CrossLinkEntry {
 
 /**
  * Build an address → owning-graph index across every YAML in reports/graph/.
- * "Owning" graph means the graph where a contract appears as something OTHER
- * than a dependency (i.e. it's the protocol's own vault / strategy / etc).
- * Used at build time to detect cross-graph references — when a dependency
- * node's address matches a non-dependency node in another graph, the
- * dependency card becomes a drill-down link.
+ * "Owning" graph means the graph's primary vault / token node, not every
+ * addressed contract in that graph. Used at build time to detect cross-graph
+ * references - when a dependency node's address matches the primary vault node
+ * in another report-backed graph, the dependency card becomes a drill-down link.
  *
  * Key is `<chain>:<address-lowercased>`. First write wins (a contract is
  * normally only "owned" by one graph).
@@ -161,15 +161,14 @@ export interface CrossLinkEntry {
 export function getGraphIndex(): Map<string, CrossLinkEntry> {
   const index = new Map<string, CrossLinkEntry>();
   for (const slug of getGraphSlugs()) {
+    if (!getReportBySlug(slug)) continue;
     const g = getGraphBySlug(slug);
     if (!g) continue;
-    for (const n of g.nodes) {
-      if (n.category === "dependency") continue;
-      if (!n.address) continue;
-      const key = `${(n.chain ?? g.chain).toLowerCase()}:${n.address.toLowerCase()}`;
-      if (!index.has(key)) {
-        index.set(key, { slug, label: n.label });
-      }
+    const owner = g.nodes.find((n) => n.category === "vault" && n.address);
+    if (!owner?.address) continue;
+    const key = `${(owner.chain ?? g.chain).toLowerCase()}:${owner.address.toLowerCase()}`;
+    if (!index.has(key)) {
+      index.set(key, { slug, label: owner.label });
     }
   }
   return index;
@@ -183,6 +182,7 @@ export function resolveCrossLink(
   index: Map<string, CrossLinkEntry>,
 ): CrossLinkEntry | undefined {
   if (!node.address) return undefined;
+  if (node.category !== "dependency") return undefined;
   const key = `${(node.chain ?? graphChain).toLowerCase()}:${node.address.toLowerCase()}`;
   const entry = index.get(key);
   if (!entry || entry.slug === currentSlug) return undefined;
@@ -215,6 +215,7 @@ export function expandCrossLinks(graph: Graph, currentSlug: string): Graph {
 
   for (const hostNode of graph.nodes) {
     if (!hostNode.address) continue;
+    if (hostNode.category !== "dependency") continue;
     const key = `${(hostNode.chain ?? graph.chain).toLowerCase()}:${hostNode.address.toLowerCase()}`;
     const entry = index.get(key);
     if (!entry || entry.slug === currentSlug) continue;
