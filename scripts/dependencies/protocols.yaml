@@ -62,6 +62,7 @@ protocol_tokens:
   USTB: Superstate
   USDT: Tether
   USDC: Circle
+  $M: M0
 protocols:
   aave_v3_core:
     name: Aave V3 Core
@@ -738,3 +739,15 @@ protocols:
     - asset: USDC
     infrastructure:
     - Chainlink
+  saturn:
+    name: Saturn (USDat)
+    chain: ethereum
+    type: stablecoin
+    address: '0x23238f20b894f29041f48D88eE91131C395Aaa71'
+    report: reports/report/saturn-usdat.md
+    collateral:
+    - asset: $M
+      address: '0x866a2bf4e572cbcf37d5071a7a58503bfb36be1b'
+    infrastructure:
+    - Chainlink
+    - Fireblocks
