@@ -285,13 +285,13 @@ YIELD LAYER (context only — not USDat backing)
 
 #### Category 2: Centralization & Control Risks (Weight: 30%)
 
-- **Governance:** Upgradeable proxy controlled by a 5-day timelock (Admin) + 2/3 MPC (Compliance/Processor); asset-cap management is timelocked → **3.0**.
+- **Governance:** Upgradeable proxy controlled by a 5-day timelock (Admin + ProxyAdmin) + 2/3 MPC (Compliance/Processor); asset-cap management is timelocked → **2.5**.
 - **Programmability:** Mostly programmatic; 1:1 non-rebasing, index read on-chain; some off-chain onboarding → **2.0**.
 - **External Dependencies:** Single critical dependency on M0 (plus Fireblocks) → **4.0**.
 
-**Centralization Score = (3.0 + 2.0 + 4.0) / 3 = 3.0**
+**Centralization Score = (2.5 + 2.0 + 4.0) / 3 = 2.83 ≈ 2.8**
 
-**Score: 3.0/5**
+**Score: 2.8/5**
 
 #### Category 3: Funds Management (Weight: 30%)
 
@@ -319,11 +319,11 @@ YIELD LAYER (context only — not USDat backing)
 | Category | Score | Weight | Weighted |
 |----------|-------|--------|----------|
 | Audits & Historical | 3.25 | 20% | 0.65 |
-| Centralization & Control | 3.0 | 30% | 0.90 |
+| Centralization & Control | 2.83 | 30% | 0.85 |
 | Funds Management | 2.5 | 30% | 0.75 |
 | Liquidity Risk | 3.0 | 15% | 0.45 |
 | Operational Risk | 2.5 | 5% | 0.125 |
-| **Final Score** | | | **2.87 ≈ 2.9 / 5.0** |
+| **Final Score** | | | **2.875 ≈ 2.9 / 5.0** |
 
 **Optional Modifiers:** none apply (protocol <2 years, TVL history <1 year).
 
