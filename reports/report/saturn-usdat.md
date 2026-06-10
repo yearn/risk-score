@@ -4,7 +4,7 @@
 - **Token:** USDat (Saturn USD)
 - **Chain:** Ethereum
 - **Token Address:** [`0x23238f20b894f29041f48D88eE91131C395Aaa71`](https://etherscan.io/address/0x23238f20b894f29041f48D88eE91131C395Aaa71)
-- **Final Score: 3.0/5.0**
+- **Final Score: 2.875/5.0**
 
 > Assessment requested in [yearn/risk-score#135](https://github.com/yearn/risk-score/issues/135) — *"USDat as collateral"*. This report assesses **USDat**, the non-yielding stablecoin. The staked, yield-bearing **sUSDat** ([`0xD166337499E176bbC38a1FBd113Ab144e5bd2Df7`](https://etherscan.io/address/0xD166337499E176bbC38a1FBd113Ab144e5bd2Df7)) carries materially different (STRC credit) risk and is discussed only as context.
 
