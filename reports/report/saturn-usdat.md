@@ -100,20 +100,20 @@ USDC  ──(Saturn app, onboarded user)──▶  M0 Swap Facility  ──swap�
 |---------|:--------:|:--------:|------------------|-------|
 | [`0xB6807116b3B1B321a390594e31ECD6e0076f6278`](https://etherscan.io/address/0xB6807116b3B1B321a390594e31ECD6e0076f6278) | ✓ | ✓ | `onlySwapFacility` (`wrap`/`unwrap`) | M0 Swap Facility ("Mint and Redeem Contract"). Sole mint/burn path; mint pulls `$M` 1:1 first. Caller must be whitelisted. |
 | [`0x10D59F776db12b4B271b2609CB8b7Ddd0A82703B`](https://etherscan.io/address/0x10D59F776db12b4B271b2609CB8b7Ddd0A82703B) | — | (seize) | `FORCED_TRANSFER_MANAGER_ROLE` | Compliance (Fireblocks 2/3 MPC). Cannot mint; can `forceTransfer` tokens out of **frozen** accounts. Also holds `FREEZE_MANAGER_ROLE`, `PAUSER_ROLE`, `WHITELIST_MANAGER_ROLE`. |
-| [`0x610182581C93687Ca03F4a8E7f124f8cEC616820`](https://etherscan.io/address/0x610182581C93687Ca03F4a8E7f124f8cEC616820) | (via upgrade) | (via upgrade) | `DEFAULT_ADMIN_ROLE` + ProxyAdmin owner | Admin (Fireblocks 2/3 MPC). Cannot mint directly, but **owns the ProxyAdmin** and can upgrade the implementation to introduce a mint path. |
+| [`0xfD5782E3BFF366601da3973aE30C583dE4F08A67`](https://etherscan.io/address/0xfD5782E3BFF366601da3973aE30C583dE4F08A67) | (via upgrade) | (via upgrade) | `DEFAULT_ADMIN_ROLE` + ProxyAdmin owner | **Admin Saturn Timelock** (5-day delay). Cannot mint directly, but **owns the ProxyAdmin** and can upgrade the implementation to introduce a mint path. |
 
 **Rate limits / supply caps:** No global USDat supply cap. Per-asset caps exist for non-`$M` backing assets (`setAssetCap`, `ASSET_CAP_MANAGER_ROLE`); none are material today.
 
 **Backing check at mint time:** **Atomic** — the Swap Facility/`wrap` path requires the backing asset to be received before USDat is minted.
 
-> No `mints` (privileged unbacked-supply) edge exists for USDat: supply creation is collateral-gated through the Swap Facility, not a privileged minter. The only way to subvert this is a proxy upgrade by the Admin MPC.
+> No `mints` (privileged unbacked-supply) edge exists for USDat: supply creation is collateral-gated through the Swap Facility, not a privileged minter. The only way to subvert this is a proxy upgrade by the Admin Timelock.
 
 ### Collateralization
 
 - **Backing: 100% on-chain in `$M`.** Verified: `M.balanceOf(USDat)` = 126,010,142.17 vs `totalSupply` = 125,957,146.79 → fully backed with a small excess (undistributed yield, `yield()` ≈ $52,992).
 - **Collateral quality:** `$M` is M0's tokenized short-term U.S. Treasuries product — high quality. However, USDat's backing is **one protocol layer removed**: USDat's solvency depends on `$M` holding its peg and on M0's own (off-chain, attested) Treasury reserves. USDat holds ~$126M of `$M` out of `$M`'s ~$342M total supply (~37%) — a large share of a single underlying.
 - **Over-collateralization / liquidations:** USDat is a 1:1 wrapper, not a CDP — no liquidations, no maintenance ratio. Peg stability rests on (a) `$M` redeemability and (b) the Curve/Pancake arbitrage pools.
-- **Custodial / privileged actions on funds:** The compliance MPC can `freeze` any account and `forceTransfer` (seize) tokens from frozen accounts, and can `pause` all transfers. These are disclosed as compliance controls. The Admin MPC can upgrade the contract.
+- **Custodial / privileged actions on funds:** The compliance MPC can `freeze` any account and `forceTransfer` (seize) tokens from frozen accounts, and can `pause` all transfers. These are disclosed as compliance controls. The Admin Timelock can upgrade the contract (5-day delay).
 - **Risk curation:** asset caps for additional backing assets are managed by `ASSET_CAP_MANAGER_ROLE`, now held by the Saturn Timelock (`0x7d343D17896d2cd87a49B4Fb8872298a883F78f7`; `getMinDelay()` = 432,000 seconds / 5 days, verified June 7, 2026). The prior Processor 2 holder `0xA18f…A3Ad` no longer has the role.
 
 ### Provability
@@ -138,13 +138,13 @@ USDC  ──(Saturn app, onboarded user)──▶  M0 Swap Facility  ──swap�
 
 ### Governance
 
-- **Upgradeable:** USDat is a `TransparentUpgradeableProxy`. Implementation: [`0x17cac25c6d6bbcb592837fea083a5c8eb4d1e52e`](https://etherscan.io/address/0x17cac25c6d6bbcb592837fea083a5c8eb4d1e52e). ProxyAdmin: [`0xcf1072DA5f0D127AEf99136489BAd08bFa3D1A7D`](https://etherscan.io/address/0xcf1072DA5f0D127AEf99136489BAd08bFa3D1A7D), **owned by the Admin address** `0x6101…6820`.
-- **No on-chain timelock for upgrade/admin/compliance keys and no Gnosis Safe** — the Admin, Compliance, and Processor addresses are **Fireblocks 2-of-3 MPC** wallets (per docs). A 2/3 MPC is functionally a low-threshold, no-timelock controller. Exception: `ASSET_CAP_MANAGER_ROLE` has moved to the Saturn Timelock with a 5-day delay.
+- **Upgradeable:** USDat is a `TransparentUpgradeableProxy`. Implementation: [`0x17cac25c6d6bbcb592837fea083a5c8eb4d1e52e`](https://etherscan.io/address/0x17cac25c6d6bbcb592837fea083a5c8eb4d1e52e). ProxyAdmin: [`0xcf1072DA5f0D127AEf99136489BAd08bFa3D1A7D`](https://etherscan.io/address/0xcf1072DA5f0D127AEf99136489BAd08bFa3D1A7D), **owned by the Admin Saturn Timelock** `0xfD57…8A67` (5-day delay, verified).
+- **Admin is now timelocked** — the `DEFAULT_ADMIN_ROLE` and ProxyAdmin ownership have moved to the **Admin Saturn Timelock** (`0xfD5782E3BFF366601da3973aE30C583dE4F08A67`; `getMinDelay()` = 432,000 seconds / 5 days, verified). The Compliance and Processor addresses remain **Fireblocks 2-of-3 MPC** wallets (no timelock). `ASSET_CAP_MANAGER_ROLE` remains on the **Asset Cap Manager Timelock** (`0x7D343D17896D2cd87A49B4fB8872298A883f78f7`; 5-day delay).
 - **Privileged roles (verified on-chain via `hasRole`):**
 
 | Role | Holder | Type | Power |
 |------|--------|------|-------|
-| `DEFAULT_ADMIN_ROLE` + ProxyAdmin owner | `0x6101…6820` (Admin) | Fireblocks 2/3 MPC | Grant/revoke roles; **upgrade the implementation** |
+| `DEFAULT_ADMIN_ROLE` + ProxyAdmin owner | `0xfD57…8A67` (Admin Saturn Timelock) | Timelock contract (`getMinDelay()` = 5 days) | Grant/revoke roles; **upgrade the implementation** |
 | `FREEZE_MANAGER_ROLE` | `0x10D5…703B` (Compliance) | Fireblocks 2/3 MPC | Freeze/unfreeze any account |
 | `FORCED_TRANSFER_MANAGER_ROLE` | `0x10D5…703B` (Compliance) | Fireblocks 2/3 MPC | **Seize** tokens from frozen accounts |
 | `PAUSER_ROLE` | `0x10D5…703B` (Compliance) | Fireblocks 2/3 MPC | Pause all transfers |
@@ -153,7 +153,7 @@ USDC  ──(Saturn app, onboarded user)──▶  M0 Swap Facility  ──swap�
 | `ASSET_CAP_MANAGER_ROLE` | `0x7d34…78f7` (Saturn Timelock) | Timelock contract (`getMinDelay()` = 5 days) | Authorize/cap additional backing assets |
 
 - **Can governance pause, freeze, or seize user funds? Yes** — freeze + forced transfer + pause are all live and held by the Compliance MPC. These are standard regulated-stablecoin compliance controls (cf. USDG, USDC) but represent real holder risk and a notable centralization signal.
-- **Documentation discrepancy (resolved in favour of on-chain):** Saturn's internal Ops/Risk doc describes an *earlier* design in which "funds that back USDat are held in a Copper custodial multisig wallet" (not in the contract) and the admin is a "3-of-5 multisig." The **live, on-chain design supersedes this**: USDat is an M0 extension, the `$M` backing sits **in the token contract** (verified: `M.balanceOf(USDat)` = $126M), and the main admin/compliance roles are held by **Fireblocks 2/3 MPC** addresses (per the key-addresses page), while asset-cap management now sits behind the Saturn Timelock. Treat on-chain state as authoritative; the "off-chain custody / 3-of-5" framing is stale. The exact MPC signer threshold cannot be verified on-chain (MPC is off-chain) — taken from docs.
+- **Documentation discrepancy (resolved in favour of on-chain):** Saturn's internal Ops/Risk doc describes an *earlier* design in which "funds that back USDat are held in a Copper custodial multisig wallet" (not in the contract) and the admin is a "3-of-5 multisig." The **live, on-chain design supersedes this**: USDat is an M0 extension, the `$M` backing sits **in the token contract** (verified: `M.balanceOf(USDat)` = $126M), and the main admin/compliance roles are held by **Fireblocks 2/3 MPC** addresses (per the key-addresses page), while **admin and asset-cap management now sit behind timelocks** (5-day delay each). The "off-chain custody / 3-of-5" framing is stale. The exact MPC signer threshold cannot be verified on-chain (MPC is off-chain) — taken from docs.
 
 ### Programmability
 
@@ -164,7 +164,7 @@ USDC  ──(Saturn app, onboarded user)──▶  M0 Swap Facility  ──swap�
 
 - **M0 is a single critical dependency.** USDat is 100% backed by `$M`; if M0 depegs, is paused, or its Treasury backing is impaired, USDat is directly affected. M0 is a permissioned stablecoin protocol with its own governance and minter set. **TODO: assess M0's own risk posture (minter collateralization, governance, audits) — it is the de-facto floor on USDat's risk.**
 - **M0 Swap Facility** (`0xB680…6278`) — the sole mint/redeem contract; an M0/Saturn-controlled component. **TODO: confirm who controls/can-upgrade the Swap Facility and which assets it accepts.**
-- **Fireblocks MPC** infrastructure underpins the Admin, Compliance, and Processor keys.
+- **Fireblocks MPC** infrastructure underpins the Compliance and Processor keys; the Admin key is now behind the Saturn Timelock.
 - Oracles: STRC price feeds and the Chainlink `Saturn sUSDat NAV` feed are relevant to sUSDat NAV, not USDat's 1:1 peg. The sUSDat yield is packaged STRC credit/dividend exposure, not generic "stablecoin yield"; it carries off-chain custody/execution, NAV/oracle, and withdrawal-queue liquidity risk.
 
 ## Operational Risk
@@ -195,12 +195,13 @@ Recommended frequency: backing ratio and peg **hourly**; governance/upgrade/free
 ## Appendix: Contract Architecture
 
 ```
-GOVERNANCE (Fireblocks 2/3 MPC for admin/compliance; asset caps timelocked)
+GOVERNANCE (Admin timelocked; compliance/processor Fireblocks 2/3 MPC; asset caps timelocked)
   ┌─────────────────────────────────────────────────────────────────────┐
-  │ Admin 0x6101…6820   → DEFAULT_ADMIN_ROLE + owns ProxyAdmin (upgrade)  │
+  │ Admin Timelock 0xfD57…8A67 → DEFAULT_ADMIN_ROLE + owns ProxyAdmin   │
+  │   5-day delay                                                       │
   │ Compliance 0x10D5…703B → FREEZE / FORCED_TRANSFER / PAUSER / WHITELIST│
   │ Processor 0x09D6…729f  → YIELD_RECIPIENT_MANAGER                      │
-  │ Timelock 0x7d34…78f7 → ASSET_CAP_MANAGER                         │
+  │ Asset Cap Timelock 0x7d34…78f7 → ASSET_CAP_MANAGER             │
   │   5-day delay                                                       │
   └───────────────┬──────────────────────────────┬────────────────────────┘
                   │ owns                          │ roles
@@ -246,7 +247,7 @@ YIELD LAYER (context only — not USDat backing)
 
 ### Key Risks
 
-- **Highly centralized control:** the Admin, Compliance, and Processor keys are Fireblocks **2/3 MPC** wallets with **no timelock**; the Admin can **upgrade** the token at will, and Compliance can **freeze, seize, and pause** user funds. Asset-cap changes are now behind the Saturn Timelock (5-day delay), which is an improvement but does not reduce the upgrade/admin trust assumption.
+- **Centralized control mitigated by timelock:** the **Admin** and **ProxyAdmin** are now behind the **Admin Saturn Timelock** (5-day delay), meaning upgrades and role changes require a 5-day waiting period. The **Compliance** and **Processor** keys remain Fireblocks **2/3 MPC** wallets with no timelock — they can still **freeze, seize, and pause** user funds. Asset-cap changes are behind the **Asset Cap Manager Timelock** (5-day delay). The timelock is a meaningful improvement over the prior no-timelock MPC setup, but the Compliance/Processor MPCs remain a notable centralization signal.
 - **Single critical dependency on M0** — USDat fully inherits `$M`'s peg and M0's (off-chain, attested) Treasury risk; USDat holds ~37% of all `$M`.
 - **Very young** (~2.5 months live) with no track record through stress.
 - **sUSDat context risk:** sUSDat yield is packaged STRC credit/dividend exposure with off-chain custody/execution, NAV/oracle reliance, and withdrawal-queue liquidity risk. This is separate from USDat backing but relevant if USDat liquidity or peg support depends on the broader Saturn system.
@@ -254,7 +255,7 @@ YIELD LAYER (context only — not USDat backing)
 
 ### Critical Risks `[If Any]`
 
-- Upgradeable proxy controlled by a 2/3 MPC with no timelock means **the trust model ultimately rests on the Admin keys** — a compromised/misused Admin MPC could redefine the token (including minting). This does not by itself trip a critical gate (it is not a single EOA, reserves are verifiable, and there are audits), but it is the dominant risk.
+- Upgradeable proxy controlled by a **5-day timelock** is a meaningful improvement over the prior no-timelock MPC setup, but the trust model still rests on the Admin timelock — a compromised timelock could redefine the token (including minting). The Compliance and Processor MPCs remain no-timelock and can freeze/seize/pause. This does not by itself trip a critical gate (it is not a single EOA, reserves are verifiable, and there are audits), but it remains the dominant risk.
 - The deployed USDat token relies on the M0 extension model. Certora Audit #3 covers Saturn's M0 Extensions implementation, but USDat still inherits M0's own governance, reserve, and swap-facility risks.
 
 ---
@@ -267,7 +268,7 @@ YIELD LAYER (context only — not USDat backing)
 
 - [ ] **No audit** — Not triggered (four reports reviewed: 1× Three Sigma + 3× Certora incl. formal verification; Certora Audit #3 covers the deployed M0-extension design).
 - [ ] **Unverifiable reserves** — Not triggered (`$M` backing is verifiable on-chain in real time).
-- [ ] **Total centralization** — Not triggered (2/3 MPC + roles, not a single EOA), though centralization is high.
+- [ ] **Total centralization** — Not triggered (timelock + 2/3 MPC for compliance/processor, not a single EOA), though centralization remains material.
 
 **All gates pass** → proceed to category scoring.
 
@@ -284,13 +285,13 @@ YIELD LAYER (context only — not USDat backing)
 
 #### Category 2: Centralization & Control Risks (Weight: 30%)
 
-- **Governance:** Upgradeable proxy controlled by 2/3 MPC with no timelock; Compliance can freeze/seize/pause; asset-cap management is timelocked → **4.0**.
+- **Governance:** Upgradeable proxy controlled by a 5-day timelock (Admin) + 2/3 MPC (Compliance/Processor); asset-cap management is timelocked → **3.0**.
 - **Programmability:** Mostly programmatic; 1:1 non-rebasing, index read on-chain; some off-chain onboarding → **2.0**.
 - **External Dependencies:** Single critical dependency on M0 (plus Fireblocks) → **4.0**.
 
-**Centralization Score = (4.0 + 2.0 + 4.0) / 3 = 3.33**
+**Centralization Score = (3.0 + 2.0 + 4.0) / 3 = 3.0**
 
-**Score: 3.3/5**
+**Score: 3.0/5**
 
 #### Category 3: Funds Management (Weight: 30%)
 
@@ -318,11 +319,11 @@ YIELD LAYER (context only — not USDat backing)
 | Category | Score | Weight | Weighted |
 |----------|-------|--------|----------|
 | Audits & Historical | 3.25 | 20% | 0.65 |
-| Centralization & Control | 3.3 | 30% | 0.99 |
+| Centralization & Control | 3.0 | 30% | 0.90 |
 | Funds Management | 2.5 | 30% | 0.75 |
 | Liquidity Risk | 3.0 | 15% | 0.45 |
 | Operational Risk | 2.5 | 5% | 0.125 |
-| **Final Score** | | | **2.97 ≈ 3.0 / 5.0** |
+| **Final Score** | | | **2.87 ≈ 2.9 / 5.0** |
 
 **Optional Modifiers:** none apply (protocol <2 years, TVL history <1 year).
 
@@ -336,7 +337,7 @@ YIELD LAYER (context only — not USDat backing)
 | 3.5-4.5 | Elevated Risk | Limited approval, strict limits |
 | 4.5-5.0 | High Risk | Not recommended |
 
-**Final Risk Tier: MEDIUM RISK (3.0/5.0) — Approved with enhanced monitoring**
+**Final Risk Tier: MEDIUM RISK (2.9/5.0) — Approved with enhanced monitoring**
 
 ---
 
