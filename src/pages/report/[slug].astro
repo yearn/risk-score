@@ -76,7 +76,16 @@ const reportIssueUrl = (() => {
       </a>
       {graphAvailable && (
         <a href={`/graph/${report.slug}/`} class="graph-link">
-          View dependency graph &rarr;
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="5" cy="6" r="2.5"/>
+            <circle cx="19" cy="6" r="2.5"/>
+            <circle cx="12" cy="18" r="2.5"/>
+            <line x1="6.8" y1="7.6" x2="10.2" y2="16.4"/>
+            <line x1="17.2" y1="7.6" x2="13.8" y2="16.4"/>
+            <line x1="7.5" y1="6" x2="16.5" y2="6"/>
+          </svg>
+          <span>View dependency graph</span>
+          <span class="arrow" aria-hidden="true">&rarr;</span>
         </a>
       )}
     </div>
@@ -170,19 +179,46 @@ const reportIssueUrl = (() => {
   .header-links {
     display: flex;
     flex-wrap: wrap;
-    gap: 1.25rem;
+    align-items: center;
+    gap: 1rem;
     margin-top: 0.75rem;
   }
-  .github-link,
-  .graph-link {
+  .github-link {
     display: inline-block;
     font-size: 1.1rem;
     font-weight: 600;
     color: var(--brand-blue);
   }
-  .github-link:hover,
-  .graph-link:hover {
+  .github-link:hover {
     text-decoration: underline;
+  }
+  .graph-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 0.9rem;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--brand-blue);
+    background: color-mix(in srgb, var(--brand-blue) 10%, transparent);
+    border: 1px solid color-mix(in srgb, var(--brand-blue) 35%, transparent);
+    border-radius: 999px;
+    transition: background 0.2s, border-color 0.2s, transform 0.2s;
+  }
+  .graph-link:hover {
+    background: color-mix(in srgb, var(--brand-blue) 18%, transparent);
+    border-color: var(--brand-blue);
+    text-decoration: none;
+    transform: translateY(-1px);
+  }
+  .graph-link svg {
+    flex-shrink: 0;
+  }
+  .graph-link .arrow {
+    transition: transform 0.2s;
+  }
+  .graph-link:hover .arrow {
+    transform: translateX(2px);
   }
   .section {
     margin-bottom: 2.5rem;

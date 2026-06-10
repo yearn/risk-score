@@ -568,6 +568,232 @@ def reserve_ethplus_data() -> dict:
     }
 
 
+def three_jane_usd3_data() -> dict:
+    """3Jane (USD3) dependency data from risk assessment report."""
+    return {
+        "name": "3Jane (USD3)",
+        "chain": "ethereum",
+        "type": "private_credit",
+        "address": "0x056B269Eb1f75477a8666ae8C7fE01b64dD55eCc",
+        "report": "reports/report/3jane-usd3.md",
+        "collateral": [
+            {"asset": "USDC"},
+        ],
+        "yield_sources": [
+            {"protocol": "aave_v3_core", "assets": ["USDC"]},
+        ],
+        "infrastructure": ["Reclaim Protocol", "EigenLayer"],
+    }
+
+
+def aave_sgho_data() -> dict:
+    """Aave (sGHO) dependency data from risk assessment report."""
+    return {
+        "name": "Aave (sGHO)",
+        "chain": "ethereum",
+        "type": "stablecoin_savings_vault",
+        "address": "0xE1753F2e00940cC31213dd92013cF019DFE4ca1d",
+        "report": "reports/report/aave-sgho.md",
+        "collateral": [
+            {"asset": "GHO"},
+        ],
+        "yield_sources": [
+            {
+                "protocol": "aave_v3_core",
+                "assets": ["USDC"],
+                "label": "waEthUSDC via GHO GSM",
+            },
+        ],
+        "infrastructure": ["Chainlink"],
+    }
+
+
+def across_protocol_data() -> dict:
+    """Across Protocol (V2 LP Tokens) dependency data from risk assessment report."""
+    return {
+        "name": "Across Protocol (V2 LP Tokens)",
+        "chain": "ethereum",
+        "type": "bridge_liquidity_pool",
+        "address": "0xc186fA914353c44b2E33eBE05f21846F1048bEda",
+        "report": "reports/report/across-protocol.md",
+        "collateral": [
+            {"asset": "WETH"},
+            {"asset": "USDC"},
+            {"asset": "USDT"},
+            {"asset": "DAI"},
+            {"asset": "WBTC"},
+        ],
+        "infrastructure": ["UMA"],
+    }
+
+
+def apyx_apxusd_data() -> dict:
+    """Apyx (apxUSD / apyUSD) dependency data from risk assessment report."""
+    return {
+        "name": "Apyx (apxUSD / apyUSD)",
+        "chain": "ethereum",
+        "type": "tokenized_yield",
+        "address": "0x98a878B1CD98131b271883b390F68d2c90674665",
+        "report": "reports/report/apyx-apxusd.md",
+        "collateral": [
+            {"asset": "STRC"},
+            {"asset": "SATA"},
+        ],
+        "infrastructure": ["Curve", "Chainlink"],
+    }
+
+
+def cap_stcusd_data() -> dict:
+    """Cap (stcUSD) dependency data from risk assessment report."""
+    return {
+        "name": "Cap (stcUSD)",
+        "chain": "ethereum",
+        "type": "stablecoin",
+        "address": "0x88887bE419578051FF9F4eb6C858A951921D8888",
+        "report": "reports/report/cap-stcusd.md",
+        "collateral": [
+            {"asset": "USDC"},
+            {"asset": "wWTGXX"},
+        ],
+        "yield_sources": [
+            {
+                "protocol": "morpho",
+                "assets": ["USDC"],
+                "label": "Steakhouse Prime / Gauntlet USDC Prime",
+            },
+        ],
+        "infrastructure": ["Symbiotic"],
+    }
+
+
+def fx_fxusd_data() -> dict:
+    """f(x) Protocol (fxUSD) dependency data from risk assessment report."""
+    return {
+        "name": "f(x) Protocol (fxUSD)",
+        "chain": "ethereum",
+        "type": "stablecoin",
+        "address": "0x085780639CC2cACd35E474e71f4d000e2405d8f6",
+        "report": "reports/report/fx-fxusd.md",
+        "collateral": [
+            {"asset": "wstETH"},
+            {"asset": "WBTC"},
+        ],
+        "yield_sources": [
+            {
+                "protocol": "aave_v3_core",
+                "assets": ["USDC", "wstETH"],
+                "label": "Stability Pool deployment",
+            },
+        ],
+        "infrastructure": ["Chainlink", "Curve", "Uniswap"],
+    }
+
+
+def kerneldao_hgeth_data() -> dict:
+    """KernelDAO Kelp Gain (hgETH) dependency data from risk assessment report."""
+    return {
+        "name": "KernelDAO Kelp Gain (hgETH)",
+        "chain": "ethereum",
+        "type": "leveraged_restaking_vault",
+        "address": "0xc824A08dB624942c5E5F330d56530cD1598859fD",
+        "report": "reports/report/kerneldao-hgeth.md",
+        "collateral": [
+            {"asset": "rsETH"},
+        ],
+        "yield_sources": [
+            {"protocol": "aave_v3_core", "assets": ["USDe", "ETH"]},
+            {"protocol": "pendle", "assets": ["rsETH"]},
+            {"protocol": "morpho", "assets": ["WETH"]},
+        ],
+        "infrastructure": ["EigenLayer", "Nexus Mutual"],
+    }
+
+
+def mezo_musd_data() -> dict:
+    """Mezo (MUSD) dependency data from risk assessment report."""
+    return {
+        "name": "Mezo (MUSD)",
+        "chain": "ethereum",
+        "type": "cdp_stablecoin",
+        "address": "0xdD468A1DDc392dcdbEf6db6e34E89AA338F9F186",
+        "report": "reports/report/mezo-musd.md",
+        "collateral": [
+            {"asset": "tBTC"},
+        ],
+        "infrastructure": ["Wormhole", "Mezo"],
+    }
+
+
+def paxos_usdg_data() -> dict:
+    """Paxos (USDG) dependency data from risk assessment report."""
+    return {
+        "name": "Paxos (USDG)",
+        "chain": "ethereum",
+        "type": "fiat_stablecoin",
+        "address": "0xe343167631d89B6Ffc58B88d6b7fB0228795491D",
+        "report": "reports/report/paxos-usdg.md",
+        "collateral": [
+            {"asset": "T-Bills"},
+            {"asset": "Cash"},
+        ],
+        "infrastructure": ["LayerZero"],
+    }
+
+
+def re_reusd_data() -> dict:
+    """Re Protocol (reUSD) dependency data from risk assessment report."""
+    return {
+        "name": "Re Protocol (reUSD)",
+        "chain": "ethereum",
+        "type": "tokenized_insurance",
+        "address": "0x5086bf358635B81D8C47C66d1C8b9E567Db70c72",
+        "report": "reports/report/re-reusd.md",
+        "collateral": [
+            {"asset": "sUSDe"},
+            {"asset": "T-Bills"},
+        ],
+        "infrastructure": ["Chainlink", "LayerZero", "Fireblocks"],
+    }
+
+
+def royco_srroyusdc_data() -> dict:
+    """Royco Dawn (srRoyUSDC) dependency data from risk assessment report."""
+    return {
+        "name": "Royco Dawn (srRoyUSDC)",
+        "chain": "ethereum",
+        "type": "async_credit_vault",
+        "address": "0xcD9f5907F92818bC06c9Ad70217f089E190d2a32",
+        "report": "reports/report/royco-srroyusdc.md",
+        "collateral": [
+            {"asset": "USDC"},
+        ],
+        "yield_sources": [
+            {
+                "protocol": "aave_v3_core",
+                "assets": ["USDC"],
+                "label": "liquidity reserve",
+            },
+        ],
+        "infrastructure": ["Concrete", "Royco"],
+    }
+
+
+def superstate_ustb_data() -> dict:
+    """Superstate (USTB) dependency data from risk assessment report."""
+    return {
+        "name": "Superstate (USTB)",
+        "chain": "ethereum",
+        "type": "tokenized_treasury",
+        "address": "0x43415eB6ff9DB7E26A15b704e7A3eDCe97d31C4e",
+        "report": "reports/report/superstate-ustb.md",
+        "collateral": [
+            {"asset": "T-Bills"},
+            {"asset": "USDC"},
+        ],
+        "infrastructure": ["Chainlink"],
+    }
+
+
 def main():
     data: dict = {
         "protocol_tokens": PROTOCOL_TOKENS,
@@ -634,6 +860,20 @@ def main():
 
     # Unit Bitcoin UBTC
     data["protocols"]["unit_ubtc"] = unit_ubtc_data()
+
+    # Manual entries reconciled from risk reports (one per report slug)
+    data["protocols"]["three_jane_usd3"] = three_jane_usd3_data()
+    data["protocols"]["aave_sgho"] = aave_sgho_data()
+    data["protocols"]["across_protocol"] = across_protocol_data()
+    data["protocols"]["apyx_apxusd"] = apyx_apxusd_data()
+    data["protocols"]["cap_stcusd"] = cap_stcusd_data()
+    data["protocols"]["fx_fxusd"] = fx_fxusd_data()
+    data["protocols"]["kerneldao_hgeth"] = kerneldao_hgeth_data()
+    data["protocols"]["mezo_musd"] = mezo_musd_data()
+    data["protocols"]["paxos_usdg"] = paxos_usdg_data()
+    data["protocols"]["re_reusd"] = re_reusd_data()
+    data["protocols"]["royco_srroyusdc"] = royco_srroyusdc_data()
+    data["protocols"]["superstate_ustb"] = superstate_ustb_data()
 
     # Write YAML
     with open(OUTPUT_PATH, "w") as f:
