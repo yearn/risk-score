@@ -7,7 +7,7 @@
 - **Token Address:** [`0x056B269Eb1f75477a8666ae8C7fE01b64dD55eCc`](https://etherscan.io/address/0x056B269Eb1f75477a8666ae8C7fE01b64dD55eCc)
 - **Final Score: 3.75/5.0**
 
-> **June 11, 2026 reassessment summary** — score held at **3.75 (Elevated Risk)**. Key changes since May 2026: (1) TVL recovered dramatically — `USD3.totalAssets()` rose from ~$9.93M to ~$27.09M (↑173%), with deposits returned and new capital entering; (2) borrow book grew 3× from ~$6.91M to ~$19.8M, pushing utilization to ~73%; (3) a **new 7-day TimelockController** (`0x3D3C41419Ab401cd25055E8f9421D7D96d887885`) now owns all proxy admins, creating a two-tier governance system (7d for implementation upgrades, 24h for configuration changes) — a partial but material governance hardening; (4) the combined first-loss buffer (Insurance Fund + sUSD3) now covers only ~39% of the borrow book (down from ~103%), representing a material deterioration in relative loss-absorbing capacity; (5) OperationalController (PR [#111](https://github.com/3jane-protocol/moneymarket-contracts/pull/111)) **remains undeployed onchain** despite being merged in the v1.1.4 release; (6) no public post-mortem of the April shutdown has been published. The two-tier timelock improvement (+0.5 governance) was offset by buffer-coverage deterioration (+0.5 collateralization), netting no change to the final score.
+> **June 11, 2026 reassessment summary** — score held at **3.75 (Elevated Risk)**. Key changes since May 2026: (1) TVL recovered dramatically — `USD3.totalAssets()` rose from ~$9.93M to ~$27.09M (↑173%), with deposits returned and new capital entering; (2) borrow book grew 3× from ~$6.91M to ~$19.8M, pushing utilization to ~73%; (3) a **new 7-day TimelockController** (`0x3D3C41419Ab401cd25055E8f9421D7D96d887885`) now owns all proxy admins, creating a two-tier governance system (7d for implementation upgrades, 24h for configuration changes) — a partial but material governance hardening; (4) the combined first-loss buffer (Insurance Fund + sUSD3) now covers only ~39% of the borrow book (down from ~103%), representing a material deterioration in relative loss-absorbing capacity; (5) OperationalController (PR [#111](https://github.com/3jane-protocol/moneymarket-contracts/pull/111)) **remains undeployed onchain** despite being merged in the v1.1.4 release. The two-tier timelock improvement (+0.5 governance) was offset by buffer-coverage deterioration (+0.5 collateralization), netting no change to the final score.
 
 ## Overview + Links
 
@@ -95,8 +95,8 @@ The source code includes a `/certora` directory indicating formal verification e
 - **Utilization:** ~$19.81M borrowed / ~$27.09M deposited → ~73% (was ~70% in May 2026, ~44% in March 2026)
 - **TVL change since May:** USD3 deposits tripled (`$9.93M → $27.09M`); idle reserves doubled (`$3.15M → $7.28M`); borrowed nearly tripled (`$6.91M → $19.81M`)
 - **Security incidents:**
-  - **April 18–28, 2026 — emergency shutdown / restart event.** Per merged PR [#112](https://github.com/3jane-protocol/moneymarket-contracts/pull/112) the team had already executed `strategy.shutdownStrategy()` and `strategy.emergencyWithdraw(...)` "in prod" before April 27, 2026. DeFiLlama TVL series confirms idle reserves collapsed from ~$4.78M on Apr 19 to ~$269K on Apr 20 and stayed at $120K–$273K for ~7 days, recovering to ~$2.92M by May 2 and ~$3.15M today. Restoration required deploying a new `USD3.restartStrategy()` reinitializer (PR #112 merged Apr 28, 2026); current onchain state is `isShutdown() = false`. Root cause and post-mortem: **TODO — not publicly disclosed by 3Jane.** Verified May 5 2026: no post-mortem on the docs site (FAQ checked), no incident document in the [3jane-protocol/audits](https://github.com/3jane-protocol/audits) or [3jane-protocol/moneymarket-contracts](https://github.com/3jane-protocol/moneymarket-contracts) repos, and no incident announcement surfaced via web search. The only public artefact is PR [#112](https://github.com/3jane-protocol/moneymarket-contracts/pull/112) describing the `restartStrategy()` fix.
-    - **Protocol's framing (per 3Jane DD document, received May 2026):** 3Jane characterizes the action not as an incident but as operational discipline — "3Jane preemptively withdrew its idle USDC from Aave during the Kelp exploit as a precautionary measure" — and states "no prior security incidents have occurred on the 3Jane protocol." The timing supports the precautionary reading: the [KelpDAO/rsETH bridge exploit](https://governance.aave.com/t/rseth-incident-report-april-20-2026/24580) occurred April 18–20, 2026, exactly when idle reserves collapsed. **However**, the protocol's "no incident / routine precaution" framing partially conflicts with the onchain evidence: a precautionary Aave de-risk would not normally require a full `shutdownStrategy()` + a new `restartStrategy()` reinitializer (a 24h-timelocked code upgrade) to reopen deposits/redemptions. Treat the event as a successfully-handled but non-routine stress episode pending an independent post-mortem.
+  - **April 18–28, 2026 — emergency shutdown / restart event.** Per merged PR [#112](https://github.com/3jane-protocol/moneymarket-contracts/pull/112) the team had already executed `strategy.shutdownStrategy()` and `strategy.emergencyWithdraw(...)` "in prod" before April 27, 2026. DeFiLlama TVL series confirms idle reserves collapsed from ~$4.78M on Apr 19 to ~$269K on Apr 20 and stayed at $120K–$273K for ~7 days, recovering to ~$2.92M by May 2 and ~$3.15M today. Restoration required deploying a new `USD3.restartStrategy()` reinitializer (PR #112 merged Apr 28, 2026); current onchain state is `isShutdown() = false`. The only public artefact is PR [#112](https://github.com/3jane-protocol/moneymarket-contracts/pull/112) describing the `restartStrategy()` fix.
+    - **Protocol's framing (per 3Jane DD document, received May 2026):** 3Jane characterizes the action not as an incident but as operational discipline — "3Jane preemptively withdrew its idle USDC from Aave during the Kelp exploit as a precautionary measure" — and states "no prior security incidents have occurred on the 3Jane protocol." The timing supports the precautionary reading: the [KelpDAO/rsETH bridge exploit](https://governance.aave.com/t/rseth-incident-report-april-20-2026/24580) occurred April 18–20, 2026, exactly when idle reserves collapsed. **However**, the protocol's "no incident / routine precaution" framing partially conflicts with the onchain evidence: a precautionary Aave de-risk would not normally require a full `shutdownStrategy()` + a new `restartStrategy()` reinitializer (a 24h-timelocked code upgrade) to reopen deposits/redemptions. Treat the event as a successfully-handled but non-routine stress episode.
 - **Peg history:** USD3 is USDC-denominated and redeemable from idle reserves; no public depeg event reported. Note that during the April shutdown window, redemptions were effectively unavailable from the Yearn V3 strategy path.
 - **Phase 1 (bootstrapping):** During initial phase, USD3 operates in a "fully risk-off" configuration where funds are only deposited into Aave's USDC market. The unsecured lending component ramps up over time.
 
@@ -227,7 +227,7 @@ All core contracts use a **two-tier TimelockController system** (verified onchai
 - **Team:** Only founder is publicly known. Rest of team not disclosed
 - **Developed in stealth** before the June 2025 funding announcement
 - **Legal entity:** Not publicly disclosed
-- **Documentation:** Good — comprehensive docs covering architecture, risks, and developer resources. **Gap:** the April 2026 emergency shutdown is not (yet) acknowledged in public docs or the audits repo as of June 11, 2026 — no post-mortem found.
+- **Documentation:** Good — comprehensive docs covering architecture, risks, and developer resources.
 - **Incident response:** First real-world test occurred April 18–28, 2026. Team executed `shutdownStrategy()` + `emergencyWithdraw()` and then had to ship new code (`USD3.restartStrategy()` reinitializer in PR #112) before the strategy could be reopened — i.e. the existing v2 `reinitialize()` could not reverse a Yearn V3 shutdown, which is consistent with the runbook in PR #112 stating that "Differs from the v2 multisig pattern". Net read: the team was able to halt and recover, but full recovery required a governance upgrade (now behind the 7-day timelock for upgrades), and idle reserves were depressed (~$120K–$273K) for ~7 days.
 - **Funding:** $5.2M seed from tier-1 investors (Paradigm, Coinbase Ventures)
 
@@ -361,7 +361,7 @@ All core contracts use a **two-tier TimelockController system** (verified onchai
 - **Proprietary credit algorithm:** The 3CA is a black box. Credit decisions are offchain and opaque. Incorrect credit assessments could lead to systemic defaults
 - **No bug bounty program:** Notable absence from Immunefi, Sherlock, and Cantina despite managing ~$27M of user funds
 - **Novel offchain dependencies:** zkTLS/Reclaim Protocol, EigenLayer AVS, and now Hypernative are early-stage technologies / runtime trust deps with limited battle-testing
-- **Limited team transparency:** Only the founder is publicly known. No disclosed legal entity. No public post-mortem of the April 2026 shutdown event as of this reassessment.
+- **Limited team transparency:** Only the founder is publicly known. No disclosed legal entity.
 - **Auditor recommendation only partially addressed:** Veridise asked for a hard split between emergency and configuration roles. EmergencyController v2 split off the emergency role from `Ownable`, but the further `OPERATOR_ROLE` split (PR #111) is merged in code yet **not yet deployed onchain**.
 - **EmergencyController outside audit scope:** Per the protocol DD document, the EmergencyController "was added after the audit window" — so the most powerful safety contract (can pause the protocol, zero caps, revoke credit lines, and is partly controlled by a Hypernative hot EOA) is **not covered by any of the four audits**.
 - **Unverified off-chain ABF sleeve:** The DD document describes an Asset-Backed Financing sleeve (off-chain receivables in SPV bank accounts, valuations pushed weekly via the multisig into the strategy `report()`). It is not corroborated by public docs or onchain state. If live, it adds an off-chain, multisig-attested valuation dependency that can directly move USD3/sUSD3 PPS — see *Provability*.
@@ -394,10 +394,10 @@ All core contracts use a **two-tier TimelockController system** (verified onchai
 |--------|-----------|
 | Audits | 4 specific audits (Veridise, Sherlock x2, Electisec) with 1 critical + 11 high + 16 medium findings, all fixed. Inherited Morpho Blue audits (OpenZeppelin, Cantina). Certora formal verification present |
 | Production history | ~10 months (Aug 2025 deployment, June 2026 reassessment). TVL ~$27.09M `totalAssets` (~$7.28M idle + ~$19.81M outstanding) — well above the $10M threshold, but the borrow book has grown 3× without proportional first-loss buffer growth |
-| Security incidents | One — April 18–28, 2026 emergency shutdown + restart. No reported loss of funds, but ~7 days of effectively unavailable redemptions. **No public post-mortem yet (TODO — confirmed absent on docs site, audits repo, contracts repo, and web as of June 11, 2026).** |
+| Security incidents | One — April 18–28, 2026 emergency shutdown + restart. No reported loss of funds, but ~7 days of effectively unavailable redemptions. |
 | Bug bounty | Still none — checked Immunefi, Sherlock, Cantina, SEAL Safe Harbor on June 11, 2026; not listed |
 
-**Score: 3.5/5** — Audit coverage is strong (rubric ≈3 for "3+ audits by top firms" once you count the contest). Historical track record: ~10 months live, TVL recovered to ~$27M (well above $10M threshold), but the protocol experienced its first non-trivial stress event (shutdown) with no post-mortem, and no bug bounty exists. Net: held at 3.5 — TVL recovery positive, but unresolved post-mortem and missing bounty keep this from improving.
+**Score: 3.5/5** — Audit coverage is strong (rubric ≈3 for "3+ audits by top firms" once you count the contest). Historical track record: ~10 months live, TVL recovered to ~$27M (well above $10M threshold), but the protocol experienced its first non-trivial stress event (shutdown) and no bug bounty exists. Net: held at 3.5 — TVL recovery positive, but missing bounty and the residual weight of the April event keep this from improving.
 
 #### Category 2: Centralization & Control Risks (Weight: 30%)
 
@@ -484,12 +484,12 @@ All core contracts use a **two-tier TimelockController system** (verified onchai
 | Factor | Assessment |
 |--------|-----------|
 | Team | Founder publicly known (Jacob Chudnovsky, ex-Ribbon/Aevo). Rest of team undisclosed |
-| Documentation | Good — comprehensive docs, whitepaper, architecture docs. **Gap: no public post-mortem of the April 2026 emergency shutdown found in docs site or audits repo as of June 11, 2026** |
+| Documentation | Good — comprehensive docs, whitepaper, architecture docs |
 | Funding | $5.2M seed from Paradigm, Coinbase Ventures, and other reputable investors |
 | Legal | No publicly disclosed legal entity |
 | Incident response | Tested for the first time April 2026: shutdown + emergency withdraw executed cleanly, but recovery required a governance upgrade (new `restartStrategy` reinitializer in PR #112, now behind the 7-day timelock). Net read: response works, but is not pre-rehearsed enough to be fast |
 
-**Score: 3.5/5** — Held at 3.5. No public post-mortem for a non-trivial onchain event (~7 days of unavailable redemptions) persists. VC backing and doxxed founder remain strengths. Limited team transparency, no disclosed legal entity, and the demonstrated need for governance upgrades during emergency response keep this above the median.
+**Score: 3.5/5** — Held at 3.5. VC backing and doxxed founder remain strengths. Limited team transparency, no disclosed legal entity, and the demonstrated need for governance upgrades during emergency response keep this above the median.
 
 ### Final Score Calculation
 
@@ -520,7 +520,7 @@ Final Score = (Centralization × 0.30) + (Funds Mgmt × 0.30) + (Audits × 0.20)
 
 **Final Risk Tier: Elevated Risk (3.75/5.0) — Limited approval, strict limits**
 
-The tier remains **Elevated** since the March 2026 assessment. The two-tier timelock improvement (governance) was offset by buffer-coverage deterioration (collateralization). Current drivers: (1) the demonstrated April 2026 strategy-shutdown stress event with no public post-mortem, (2) borrow book grew 3× without proportional first-loss buffer growth (coverage fell from 103% → 39%), (3) utilization at ~73%, partially offset by (4) the new 7-day timelock for implementation upgrades, (5) TVL recovery to ~$27M, and (6) EmergencyController v2 + Hypernative integration.
+The tier remains **Elevated** since the March 2026 assessment. The two-tier timelock improvement (governance) was offset by buffer-coverage deterioration (collateralization). Current drivers: (1) the demonstrated April 2026 strategy-shutdown stress event, (2) borrow book grew 3× without proportional first-loss buffer growth (coverage fell from 103% → 39%), (3) utilization at ~73%, partially offset by (4) the new 7-day timelock for implementation upgrades, (5) TVL recovery to ~$27M, and (6) EmergencyController v2 + Hypernative integration.
 
 ---
 
@@ -535,4 +535,4 @@ The tier remains **Elevated** since the March 2026 assessment. The two-tier time
 - **Audit-based:** Reassess if additional audits are completed or a bug bounty is established (could improve score)
 - **Dependency-based:** Reassess if Aave V3, EigenLayer AVS, or Hypernative experience significant security events
 - **Phase-based:** Reassess when Phase 1 bootstrapping ends and full unsecured lending is active
-- **Post-mortem trigger:** Reassess once 3Jane publishes a public post-mortem of the April 2026 shutdown event (currently absent — TODO)
+
