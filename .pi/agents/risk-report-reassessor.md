@@ -1,7 +1,7 @@
 ---
 name: risk-report-reassessor
 description: Refreshes existing Yearn risk reports by validating roles, proxy implementations, TVL, allocations, and reassessment-trigger data.
-model: deepseek-v4-pro
+model: opencode-go/deepseek-v4-pro
 thinking: high
 skills:
   - risk-report-reassessment
