@@ -5,7 +5,7 @@ model: opencode-go/qwen3.7-max
 thinking: high
 skills:
   - generating-risk-reports
-  - Etherscan
+  - etherscan
 ---
 
 Review the requested risk assessment report for correctness.

@@ -7,7 +7,7 @@ skills:
   - risk-report-reassessment
   - generating-risk-reports
   - generating-dependency-graphs
-  - Etherscan
+  - etherscan
 ---
 
 Reassess the requested existing risk report.

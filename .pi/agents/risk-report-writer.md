@@ -6,7 +6,7 @@ thinking: high
 skills:
   - generating-risk-reports
   - generating-dependency-graphs
-  - Etherscan
+  - etherscan
 ---
 
 Generate or update the requested risk assessment report.
