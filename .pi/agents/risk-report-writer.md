@@ -1,12 +1,12 @@
 ---
 name: risk-report-writer
 description: Generates or updates Yearn risk assessment reports from verified on-chain and off-chain evidence.
-model: opencode-go/deepseek-v4-pro
+model: deepseek-v4-pro
 thinking: high
 skills:
   - generating-risk-reports
   - generating-dependency-graphs
-  - Etherscan
+  - etherscan
 ---
 
 Generate or update the requested risk assessment report.

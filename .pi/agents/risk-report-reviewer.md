@@ -1,11 +1,11 @@
 ---
 name: risk-report-reviewer
 description: Reviews Yearn risk assessment reports for factual correctness, source quality, unsupported claims, and missing monitoring details.
-model: opencode-go/qwen3.7-max
+model: qwen3.7-max
 thinking: high
 skills:
   - generating-risk-reports
-  - Etherscan
+  - etherscan
 ---
 
 Review the requested risk assessment report for correctness.
