@@ -4,8 +4,8 @@
 - **Token:** FT Lend market (supply / borrow); system tokens ftUSD and FT
 - **Chain:** Ethereum Mainnet
 - **Core Contract:** PositionsManager [`0xbe4050a73a7Fb384c65E885a15C33461A4B20055`](https://etherscan.io/address/0xbe4050a73a7Fb384c65E885a15C33461A4B20055)
-- **Final Score: 5.0/5.0**
-- **High Risk** — gated by "No audit" of the in-scope contracts. Absent the audit gap, the weighted category subtotal is ≈3.5 (Elevated). See [Risk Score Assessment](#risk-score-assessment). (Also deployed on Sonic; this report covers Ethereum.)
+- **Final Score: 3.3/5.0**
+- **Medium Risk** — near the Elevated boundary. The prior "No audit" gate is not triggered after reviewing the investor-relations audit portal, but the profile remains high-concern because audits are investor-gated/draft-heavy, ftUSD has open medium findings, and admin/oracle control is still unilateral. See [Risk Score Assessment](#risk-score-assessment). (Also deployed on Sonic; this report covers Ethereum.)
 
 > **Scope.** Yearn's interest (issue [yearn/risk-score#234](https://github.com/yearn/risk-score/issues/234)) is the risk of supplying ("just lend") and/or borrowing in the **FT Lend** market. This report focuses on the lending engine and the assets it touches. The unrelated `tulip.garden` protocol on Solana is **not** Flying Tulip and is excluded. All onchain values were verified on **June 7, 2026 at block `25264957`** via `cast` against an Ethereum mainnet RPC.
 
@@ -32,21 +32,25 @@
 
 ## Audits and Due Diligence Disclosures
 
-**The in-scope FT Lend lending engine and the ftUSD stablecoin have no published, dedicated audit.** This is the most important finding of this assessment. The contracts *are* source-verified on Etherscan (Solidity 0.8.30, OpenZeppelin UUPS proxies), but verified bytecode is not a security review.
+**Update (June 12, 2026): Flying Tulip's investor-relations portal contains a dedicated audit section with 36 audit entries / PDF attachments.** This materially changes the original assessment: the in-scope FT Lend / ftDNMM contracts and ftUSD do have dedicated reviews by reputable firms. The caveat is that the reports are investor-gated rather than fully public, several are marked draft/confidential, and the latest ftUSD report still lists open medium findings.
 
 | # | Firm / Platform | Date | Scope | Findings | Relevant to FT Lend? |
 |---|------|------|-------|----------|----------------------|
-| 1 | PeckShield (#2025-170) | Oct 6, 2025 | `Escrow.sol` (token-sale helper) only | 0C / 0H / 0M / 2L | No — token sale only |
-| 2 | Cantina (Managed) | Oct 14, 2025 | `Escrow.sol` only | No issues (under trust assumptions) | No |
-| 3 | Sherlock contest #1223 | Jan 5–17, 2026 | **ftPUT** (PutManager, pFT, **ftYieldWrapper**, **FlyingTulipOracle**, **ftACL**, **CircuitBreaker**, **AaveStrategy**) | Contest; no official Sherlock report published in `sherlock-reports`; "0 valid M/H" claimed by secondary sources, **unverified** | **Partial** — the yield-wrapper, Aave-strategy, oracle-wrapper and circuit-breaker *patterns* shared with Lend were in scope; the lending **engine** was not |
+| 1 | ChainSecurity | Feb 27, 2026 | **ftDNMM / FT Lend** (`PositionsManager`, `AccountValuesRouter`, `RfqEngine`, `MetaActions`, etc.) | Draft v3: 0C / 2H resolved / 0M / 5L (1 low pending) | **Yes** |
+| 2 | ChainSecurity | Feb 11, 2026 | **ftUSD** | Draft: 0C / 1H resolved / 6M (4 corrected, **2 pending**) / 19L (mixed corrected, accepted, pending) | **Yes** |
+| 3 | ChainSecurity | Jan 9, 2026 | **ftDNMM** | Confidential report; earlier review showed open critical/medium items, superseded by later draft v3 | **Yes** |
+| 4 | Cantina | Dec 8, 2025 | **ftDNMM re-audit** | 0C / 0H / 4M (3 fixed, 1 acknowledged) / 5L (1 fixed, 4 acknowledged) | **Yes** |
+| 5 | PeckShield | Oct 18 & Oct 24, 2025 | **ftDNMM** | 0C / 0H / 0M / 4L | **Yes** |
+| 6 | Cantina | Oct 14, 2025 | **ftUSD Position Manager** | 0C / 0H / 3M / 3L / 5I | **Partial** |
+| 7 | PeckShield / Cantina / ChainSecurity / MixBytes | Sep 2025–Mar 2026 | FT token/OFT, ftPUT, ftAMM, FtCLOB, Escrow, LayerZero setup, pFT marketplace, Yieldclaimer, VaultManagerS | Various | Mostly adjacent / partial |
 
-- **ftDNMM lending contracts** (`PositionsManager`, `ConfigRegistry`, `AccountValuesRouter`, `RfqEngine`/`LeverageRfqEngine`, `StableIRM`/`MajorIRM`/`LongTailIRM`, `MetaActions`): **no public audit found.**
-- **ftUSD contracts** (`FlyingTulipUSD`, `ftUSD Core`, `MintAndRedeem`, `CircuitBreakerV2`): **no public audit found.**
+- **ftDNMM lending contracts** (`PositionsManager`, `ConfigRegistry`, `AccountValuesRouter`, `RfqEngine`/`LeverageRfqEngine`, `StableIRM`/`MajorIRM`/`LongTailIRM`, `MetaActions`): dedicated ChainSecurity, Cantina and PeckShield coverage exists in the investor portal. The most recent ChainSecurity ftDNMM draft lists **one open low** issue (PositionsManager code size) after two high findings were resolved.
+- **ftUSD contracts** (`FlyingTulipUSD`, `ftUSD Core`, `MintAndRedeem`, `CircuitBreakerV2`): dedicated ChainSecurity coverage exists. The latest draft lists **two open medium** findings ("Historical Mint Ratio in Redemption Can Cause Insolvency" and "Permanent Reward Lock for Blacklisted Users in EpochRewardsVault") plus multiple low accepted/pending issues.
 - **Formal verification (Certora/Halmos):** NOT FOUND.
-- The docs' [Risks page](https://docs.flyingtulip.com/risks/) states a policy of "external audits before enabling capital-bearing features" and search snapshots referenced "at least 3 independent audits," but **no lending/ftUSD audit report is published** and there is no `…/risks/audits/` page. Stated policy ≠ delivered evidence.
+- The docs' [Risks page](https://docs.flyingtulip.com/risks/) states a policy of "external audits before enabling capital-bearing features." The audit evidence is now verified in the investor portal, not on the public docs site.
 - **Accepted risks** from the Sherlock ftPUT contest README (relevant because the same team/patterns build Lend): "protocol-level loss handling and backstops are out-of-scope," "malicious strategy manager cannot be removed," "caps updates can be front-run," and a circuit-breaker that does not cover all flows. These are design choices that carry into the lending product.
 
-**Contract complexity is high:** a novel dynamic-LTV money market with snapshot LTVs, an RFQ/relayer/session layer, flash-liquidations, epoch settlement, and cross-product shared collateral. Complex, novel, and unaudited is the worst combination for this category.
+**Contract complexity is high:** a novel dynamic-LTV money market with snapshot LTVs, an RFQ/relayer/session layer, flash-liquidations, epoch settlement, and cross-product shared collateral. Multiple audits reduce the binary audit-gate risk, but draft/confidential status and open accepted findings keep the category materially risky.
 
 ### Bug Bounty
 
@@ -104,14 +108,14 @@ For FT Lend lenders this matters only insofar as ftUSD is accepted collateral (c
 
 - **Backing:** Borrowing is over-collateralized and enforced onchain via per-asset maintenance margins (`ConfigRegistry.assetCfg`) and account health factors: `marginHfSafeBps = 15000` (1.50), `marginHfTargetBps = 12500` (1.25), `marginMinEquityUSDWad = 250e18` ($250 minimum position equity).
 - **Collateral quality:** blue-chip (ETH, WBTC, wstETH, USDC, USDT) plus ftUSD. Good quality.
-- **Liquidations:** onchain, keeper-driven, time-sliced and RFQ-routed (`liquidateFlash`, `RfqEngine` [`0xEB00B335…Dc32`](https://etherscan.io/address/0xEB00B335Ca52216Fb60fdFFA361397367C39Dc32), `LeverageRfqEngine` [`0x8263a075…40e2`](https://etherscan.io/address/0x8263a07504d93cB95e0a74f3627bb15faaf140e2)). **This liquidation design is novel and untested at scale and has never been audited.** Per the team's own accepted-risk list there is **no protocol-level loss backstop / insurance fund** for bad debt.
+- **Liquidations:** onchain, keeper-driven, time-sliced and RFQ-routed (`liquidateFlash`, `RfqEngine` [`0xEB00B335…Dc32`](https://etherscan.io/address/0xEB00B335Ca52216Fb60fdFFA361397367C39Dc32), `LeverageRfqEngine` [`0x8263a075…40e2`](https://etherscan.io/address/0x8263a07504d93cB95e0a74f3627bb15faaf140e2)). **This liquidation design has audit coverage but remains novel and untested at scale.** Per the team's own accepted-risk list there is **no protocol-level loss backstop / insurance fund** for bad debt.
 - **Curation:** the 3/5 Safe sets every risk parameter — which assets are enabled/collateral/borrowable, maintenance margins, supply/borrow caps, IRMs, the oracle, and the oracle prices themselves.
 
 ### Provability
 
 - **Reserves are fully onchain and verifiable:** per-asset `astate` on the `PositionsManager`, wrapper share supply, and the underlying Aave/Spark positions can all be read by anyone. The supply index is computed onchain.
 - **Oracle:** `OracleRouterChainlink` [`0xe4372dB4…674A`](https://etherscan.io/address/0xe4372dB43D2814750a19b93950157AD81D93674A) maps assets to **canonical Chainlink feeds** — e.g. USDC/USD [`0x8fFfFfd4…18f6`](https://etherscan.io/address/0x8fFfFfd4AfB6115b954Bd326cbe7B4BA576818f6), ETH/USD [`0x5f4eC3Df…8419`](https://etherscan.io/address/0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419), plus per-asset deviation/staleness handling. **Caveat:** the owner (3/5 Safe) can `setPriceFeed`, `setStaleFallback`, and **`setLastGoodPrice(asset, price)` — i.e. directly write an arbitrary oracle price** — and the guardian can `disablePrice`. So pricing is Chainlink-anchored but **admin-overridable**, which materially weakens provability.
-- **Source availability:** verified on Etherscan but **not in a public GitHub repo** and **never independently audited.**
+- **Source availability:** verified on Etherscan but **not in a public GitHub repo**; independent audits are available only through the investor-gated portal.
 
 ## Liquidity Risk
 
@@ -158,12 +162,12 @@ Lending accounting (supply/borrow indices, health factors) is onchain and the or
 - **Team:** Founder **Andre Cronje** (public; founded Yearn, Keep3r, co-founded Sonic/Fantom) — strong but mixed reputation (history of abandoned/incomplete launches). The rest of the team (~15) is **anonymous**. Key-person dependency on Cronje.
 - **Legal entity / jurisdiction:** **NOT FOUND** / undisclosed (docs reference a "Foundation" with no domicile). CoinList sale excluded the US, Canada and ~21 other jurisdictions.
 - **Funding:** ~$200M seed (Sep 2025, $1B FDV), ~$25.5M Series A (Jan 2026), public sale; the official sale-update blog reports total raised ≈ **$184M** (below the "$200M seed" headline — a reconciliation gap worth noting). FT: 10B pre-minted, ~9.98B current supply, ~$0.098, ~$120M mcap.
-- **Documentation:** product docs are reasonable conceptually, but **lending oracle design, risk parameters, and the admin/multisig setup are not transparently documented**, and audits the docs imply exist are not published.
+- **Documentation:** product docs are reasonable conceptually, but **lending oracle design, risk parameters, and the admin/multisig setup are not transparently documented**, and audit reports are hosted in the investor portal rather than linked from the public docs site.
 - **Governance transparency:** no DAO, no forum/Snapshot, multisig signer identities undisclosed.
 
 ## Monitoring
 
-Recommended frequency: **daily** for governance/oracle/caps; **hourly** for pause/circuit-breaker and large supply/borrow swings given the market's small size and unaudited code.
+Recommended frequency: **daily** for governance/oracle/caps; **hourly** for pause/circuit-breaker and large supply/borrow swings given the market's small size, complex code, and investor-gated/open-finding audit profile.
 
 ### Contracts to monitor
 
@@ -224,7 +228,7 @@ SUPPLY ROUTING (yield)                                  UNDERLYING YIELD
 
 ### Key Risks
 
-- **The in-scope lending engine and ftUSD are unaudited** (no public/dedicated audit, no bug bounty, not in Safe Harbor), and the code is novel and complex.
+- **Audit coverage is investor-gated and draft-heavy, with open ftUSD medium findings** (no public docs audit page, no bug bounty, not in Safe Harbor), and the code is novel and complex.
 - **Single 3/5 multisig controls everything with no timelock** — instant upgrade of any contract, arbitrary oracle price override (`setLastGoodPrice`), pause of user funds, and (for ftUSD) mint/blacklist/seize. Guardian Safe shares the same signers; signer identities undisclosed.
 - **Very new (~3.5 months) and tiny (~$2.7M lending TVL)**, with **~59% concentration** in one WBTC depositor and no stress history.
 - **Untested, novel liquidation engine** (time-sliced, RFQ/keeper-routed) with **no protocol-level loss backstop** for bad debt.
@@ -232,7 +236,7 @@ SUPPLY ROUTING (yield)                                  UNDERLYING YIELD
 
 ### Critical Risks
 
-- **Unaudited capital-bearing contracts** that a Yearn deposit would sit in. A latent bug has no audit, no bounty, and no insurance fund behind it.
+- **Open/accepted audit findings in capital-bearing contracts** that a Yearn deposit would touch, especially ftUSD medium findings and accepted design risks. There is still no public bounty or insurance fund behind the system.
 - **Unilateral, instant admin control:** a 3/5 (effectively single-party) multisig can upgrade the engine or rewrite the oracle price and drain or freeze positions with no delay and no independent check.
 
 ---
@@ -241,20 +245,20 @@ SUPPLY ROUTING (yield)                                  UNDERLYING YIELD
 
 ### Critical Risk Gates
 
-- [x] **No audit** — the FT Lend engine (`PositionsManager`, `ConfigRegistry`, IRMs, RFQ engines) and ftUSD have **no published, dedicated audit by reputable firms**. Only the token-sale `Escrow` (PeckShield, Cantina) and the *separate* ftPUT product (Sherlock contest) were reviewed. **TRIGGERED for the assessed contracts.**
+- [ ] **No audit** — Not triggered after reviewing the investor-relations audit portal: ftDNMM / FT Lend and ftUSD have dedicated ChainSecurity/Cantina/PeckShield coverage. Caveat: the reports are investor-gated, some are draft/confidential, and ftUSD still has open medium findings.
 - [ ] **Unverifiable reserves** — Not triggered: reserves are fully onchain and verifiable.
 - [ ] **Total centralization (single EOA)** — Not cleanly triggered: control is a 3/5 multisig (not a lone EOA), though with no timelock and overlapping guardian signers it is close.
 
-**Per the framework, a triggered gate sets the score to 5.0 (High Risk).** The category scoring below is provided so the residual risk profile is visible *if and when a credible audit of the lending + ftUSD contracts is published* (which would clear the gate); on its own it lands at ≈3.5 (Elevated).
+**No critical gate is triggered.** The final score therefore uses the weighted category scoring below.
 
 ### Category Scores
 
 #### Category 1: Audits & Historical Track Record (Weight: 20%)
 
-- **Audits:** in-scope contracts unaudited; no bug bounty; not in Safe Harbor; complex/novel surface. **5/5.**
+- **Audits:** multiple in-scope reviews by reputable firms, including dedicated ftDNMM and ftUSD ChainSecurity reports, Cantina re-audits, and PeckShield coverage. Downgraded by investor-gated/draft/confidential status, open ftUSD medium findings, no bug bounty, and no Safe Harbor. **3/5.**
 - **Historical:** ~3.5 months live; ~$2.7M lending TVL (<$10M); no track record. **4.5/5.**
 
-**Score: 4.75/5**
+**Score: 3.75/5**
 
 #### Category 2: Centralization & Control Risks (Weight: 30%)
 
@@ -277,19 +281,18 @@ Market-based exit from un-borrowed liquidity + Aave/Spark; low utilization today
 
 #### Category 5: Operational Risk (Weight: 5%)
 
-Public founder with mixed reputation + anonymous team; no disclosed legal entity; docs adequate conceptually but omit oracle/risk-param/multisig detail and imply unpublished audits; no DAO/forum. **Score: 3.5/5**
+Public founder with mixed reputation + anonymous team; no disclosed legal entity; docs adequate conceptually but omit oracle/risk-param/multisig detail and do not link the investor-portal audits from public docs; no DAO/forum. **Score: 3.5/5**
 
 ### Final Score Calculation
 
 | Category | Score | Weight | Weighted |
 |----------|-------|--------|----------|
-| Audits & Historical | 4.75 | 20% | 0.95 |
+| Audits & Historical | 3.75 | 20% | 0.75 |
 | Centralization & Control | 3.5 | 30% | 1.05 |
 | Funds Management | 3.0 | 30% | 0.90 |
 | Liquidity Risk | 3.0 | 15% | 0.45 |
 | Operational Risk | 3.5 | 5% | 0.175 |
-| **Weighted subtotal** | | | **≈3.5** |
-| **Critical gate (no audit) → override** | | | **5.0/5.0** |
+| **Final Score** | | | **≈3.3/5.0** |
 
 No positive modifiers apply (protocol is <1 year old, TVL well under $500M).
 
@@ -301,15 +304,15 @@ No positive modifiers apply (protocol is <1 year old, TVL well under $500M).
 | 1.5-2.5 | Low Risk | Approved with standard monitoring |
 | 2.5-3.5 | Medium Risk | Approved with enhanced monitoring |
 | 3.5-4.5 | Elevated Risk | Limited approval, strict limits |
-| **4.5-5.0** | **High Risk** | **Not recommended** |
+| 4.5-5.0 | High Risk | Not recommended |
 
-**Final Risk Tier: High Risk — Not recommended** (gated by the absence of any audit of the in-scope lending and ftUSD contracts). If a reputable audit of `PositionsManager`/`ConfigRegistry`/IRMs/ftUSD is published and a timelock is added to the admin Safe, the residual profile would be **Elevated Risk (~3.5)** and could justify limited, strictly-capped supply-only exposure.
+**Final Risk Tier: Medium Risk — Approved only with enhanced monitoring and strict sizing discipline.** The numerical score is close to the Elevated boundary, and a single 3/5 Safe with no timelock can still upgrade contracts, override prices, pause withdrawals, and mint/seize ftUSD.
 
 ---
 
 ## Reassessment Triggers
 
-- **Audit published:** reassess immediately if a reputable audit of the FT Lend engine and/or ftUSD is released (this clears the critical gate).
+- **Audit status changes:** reassess if final/non-draft public audit reports are released, if the open ftUSD medium findings are fixed, or if new audit findings are disclosed.
 - **Governance hardening:** reassess if a timelock is added or the admin Safe's threshold/independent-signer set is materially improved.
 - **Time-based:** reassess in **3 months** regardless (fast-moving, early-stage protocol).
 - **TVL/usage-based:** reassess if lending TVL grows >3× (≈$8M) or if single-asset/single-depositor concentration changes materially.
