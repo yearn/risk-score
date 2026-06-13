@@ -8,7 +8,7 @@
 
 ## Overview + Links
 
-USTB is a tokenized investment fund issued by Superstate Inc. that provides exposure to short-duration U.S. Treasury Bills and Agency securities. The fund's investment objective is to seek current income consistent with liquidity and stability of principal, targeting returns in line with the federal funds rate.
+USTB is a tokenized investment fund that provides exposure to short-duration U.S. Treasury Bills and Agency securities. The fund's investment objective is to seek current income consistent with liquidity and stability of principal, targeting returns in line with the federal funds rate. The fund was originally issued by **Superstate Inc.**; as of June 2026, the [superstate.com/assets/ustb](https://superstate.com/assets/ustb) page title references "Invesco Short Duration US Government Securities Fund," suggesting a rebrand or acquisition by Invesco. TODO: confirm relationship between Superstate and Invesco.
 
 USTB uses a **price appreciation model** (non-rebasing) — each USTB token represents one share in the fund, and the NAV per share increases daily as interest income from Treasury Bills accrues. The token price has grown from ~$10.00 at inception (February 2024) to ~$11.11 as of June 2026.
 
@@ -16,12 +16,13 @@ Investors undergo KYC/AML onboarding, get their wallet addresses whitelisted on 
 
 The fund is structured as a series of **Superstate Asset Trust**, a **Delaware Statutory Trust**, providing bankruptcy remoteness from Superstate Inc. The sub-advisor is **Federated Hermes**, the custodian is **UMB Bank** (OCC-regulated), and the auditor is **Ernst & Young**.
 
-- **Current NAV/Share:** $11.113624 (SuperstateOracle), $11.111716 (Chainlink) — verified onchain June 2026
+- **Current NAV/Share:** $11.113624 (SuperstateOracle), $11.111716 (Chainlink) — verified onchain June 2026. Superstate.com reports $11.113629 as of June 13, 2026.
 - **Onchain Supply (Ethereum):** 67.13M USTB (~$746M onchain market cap)
 - **DeFiLlama TVL:** ~$754M (June 13, 2026, includes multi-chain)
+- **Total AUM (all networks + book-entry):** ~$948.7M with 82.12M shares outstanding (per [superstate.com/assets/ustb](https://superstate.com/assets/ustb), June 13, 2026)
 - **Onchain Holders (Ethereum):** ~70
-- **Current APY:** TODO — check [superstate.com/assets/ustb](https://superstate.com/assets/ustb) for latest 30-day APY
-- **Management Fee:** 0.15% annually (waived until AUM exceeds $200M — now exceeded)
+- **Current APY:** 3.58% (30-day yield), 3.35% (7-day yield), 3.32% (1-day yield) — scraped from [superstate.com/assets/ustb](https://superstate.com/assets/ustb), as of June 11, 2026
+- **Management Fee:** ≤ 0.15% annually (waived until AUM exceeds $200M — now exceeded)
 
 **Links:**
 
@@ -117,7 +118,7 @@ Superstate is **not** listed on the SEAL Safe Harbor registry. This is typical f
   - Mar 2025: ~$300M allocated by Spark alone
   - Mar 2026: ~$650M+ total AUM, ~$572M onchain TVL (DeFiLlama)
   - Apr 2026: ~$625M onchain (56.59M USTB × $11.045 NAV, verified onchain)
-  - Jun 2026: ~$746M onchain (67.13M USTB × $11.114 NAV), ~$754M DeFiLlama TVL (verified onchain)
+  - Jun 2026: ~$746M onchain (67.13M USTB × $11.114 NAV), ~$754M DeFiLlama TVL, ~$948.7M total AUM with 82.12M shares across all networks (per superstate.com, verified onchain)
 - **Holder Distribution:** ~70 onchain holders on Ethereum. Top 10 holders hold ~83.5% of supply. This concentration is expected for an institutional-grade permissioned fund. Top holders include EOAs (institutional investors) and smart contracts (DeFi integrations).
 - **Incidents:** None. No hacks, exploits, or adverse events involving Superstate or USTB.
 
@@ -310,7 +311,7 @@ The fund uses a **laddered approach** with holdings spread across various near-t
 3. **Institutional-grade service providers** — UMB Bank (OCC-regulated custodian), Federated Hermes (sub-advisor, $800B+ AUM), Ernst & Young (auditor), NAV Consulting (independent NAV)
 4. **Strong team and backing** — Compound Finance founders, $100.5M raised from Bain Capital Crypto, Distributed Global, Brevan Howard, Galaxy Digital, Haun Ventures
 5. **Bankruptcy-remote legal structure** — Delaware Statutory Trust with inter-series liability protection, SEC-regulated framework
-6. **Large AUM** — $754M+ with strong institutional adoption (Spark $300M, Aave Horizon, M^0)
+6. **Large AUM** — $948.7M total across all networks ($754M DeFiLlama onchain), with strong institutional adoption (Spark $300M, Aave Horizon, M^0)
 
 ### Key Risks
 
@@ -348,7 +349,7 @@ The fund uses a **laddered approach** with holdings spread across various near-t
 | Audits | 11 audits by 3 firms (0xMacro ×9, ChainSecurity, Offside Labs) + Certora formal verification. Continuous audit relationship — each version audited before deployment. |
 | Bug Bounty | Self-hosted, no formal monetary rewards. Weaker than Immunefi-style programs. |
 | Time in Production | ~25 months with TVL >$1M (since Feb 2024 — DeFiLlama first data point Mar 8, 2024 already at ~$38M). Contracts deployed Dec 2023. Multiple version upgrades, all audited. |
-| TVL | ~$754M+ total AUM (DeFiLlama), ~$746M onchain (67.13M USTB × $11.114 NAV) |
+| TVL | ~$948.7M total AUM across all networks (superstate.com), ~$754M onchain TVL (DeFiLlama), ~$746M Ethereum onchain (67.13M USTB × $11.114 NAV) |
 | Historical Incidents | None. No security incidents, exploits, or adverse events. |
 
 **Subcategory A: Audits — 1.5** Great audit coverage (11 audits + formal verification) is among the strongest in the RWA space. The lack of a formal bug bounty with monetary rewards prevents a perfect score.
