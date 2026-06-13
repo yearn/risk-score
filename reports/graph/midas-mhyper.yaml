@@ -89,24 +89,25 @@ nodes:
     address: "0xbf25b58cB8DfaD688F7BcB2b87D71C23A6600AaC"
     category: governance
 
-  # === Strategy venues ===
+  # === Strategy venues (June 2026 per SumCap) ===
+  - id: strat-unclassified
+    label: Unclassified (76.8%)
+    category: strategy
+    note: Likely non-Ethereum chains + offchain/CEX
   - id: strat-fluid
-    label: Fluid (28.7%)
+    label: Fluid (15.4%)
     category: strategy
-  - id: strat-aave
-    label: Aave Leveraged USDe (21.6%)
+  - id: strat-uniswapv4
+    label: Uniswap V4 (5.6%)
     category: strategy
-  - id: strat-kamino
-    label: Kamino (Solana) (19.3%)
+  - id: strat-onchain-wallets
+    label: Onchain Wallets (1.5%)
     category: strategy
-  - id: strat-morpho
-    label: Morpho Vaults (15.0%)
+  - id: strat-merkl
+    label: Merkl (0.1%)
     category: strategy
-  - id: strat-pendle
-    label: Pendle (14.7%)
-    category: strategy
-  - id: strat-hyperliquid
-    label: Hyperliquid Basis (<0.1%)
+  - id: strat-other
+    label: Other (Euler, Pendle V2, Morpho V2, Hyperliquid — each <0.01%)
     category: strategy
 
   # === Attestation Engine (March 2026) ===
@@ -224,7 +225,7 @@ edges:
     kind: manages
     label: price at redeem
 
-  # === Capital flow: vault → custody → strategies ===
+  # === Capital flow: vault → custody → strategies (June 2026) ===
   - from: mHYPER
     to: fordefi
     kind: routes-through
@@ -234,27 +235,27 @@ edges:
     kind: routes-through
     label: offchain strategy execution
   - from: hyperithm
+    to: strat-unclassified
+    kind: allocates-to
+    label: "76.8%"
+  - from: hyperithm
     to: strat-fluid
     kind: allocates-to
-    label: "28.7%"
+    label: "15.4%"
   - from: hyperithm
-    to: strat-aave
+    to: strat-uniswapv4
     kind: allocates-to
-    label: "21.6%"
+    label: "5.6%"
   - from: hyperithm
-    to: strat-kamino
+    to: strat-onchain-wallets
     kind: allocates-to
-    label: "19.3%"
+    label: "1.5%"
   - from: hyperithm
-    to: strat-morpho
+    to: strat-merkl
     kind: allocates-to
-    label: "15.0%"
+    label: "0.1%"
   - from: hyperithm
-    to: strat-pendle
-    kind: allocates-to
-    label: "14.7%"
-  - from: hyperithm
-    to: strat-hyperliquid
+    to: strat-other
     kind: allocates-to
     label: "<0.1%"
 

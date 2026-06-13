@@ -24,11 +24,11 @@ Legally, mHYPER tokens are structured as **subordinated debt instruments** of Mi
 
 **Key Stats:**
 
-- **mHYPER Market Cap:** ~$32.5M (Ethereum total supply × oracle price = ~29.5M × $1.103, June 13, 2026; cross-chain total supply not verified onchain)
-- **Total Supply (Ethereum):** ~29,512,770 mHYPER ([onchain](https://etherscan.io/token/0x9b5528528656DBC094765E2abB79F293c21191B9), June 13, 2026)
+- **mHYPER Market Cap:** ~$36.0M (total NAV per [attestation report](https://drive.google.com/drive/folders/1MJi_xq8aR0TaL0DJw6Q91SFxM_z0OcYZ), June 12, 2026; total supply 32,651,929 mHYPER × $1.10312)
+- **Total Supply:** 32,651,929 mHYPER across 4 chains per [attestation PDF](https://drive.google.com/file/d/1hYCD-3ypY71xbbVmy0JLz_0HaXIsZXKl/view) (June 12, 2026): Ethereum 29,463,808, Monad 2,693,208, Plasma 494,909, Katana 4. Ethereum [onchain supply](https://etherscan.io/token/0x9b5528528656DBC094765E2abB79F293c21191B9): ~29,512,770
 - **Holders:** ~467 addresses (Ethereum only, [last verified April 2026](https://etherscan.io/token/0x9b5528528656DBC094765E2abB79F293c21191B9))
 - **APY:** ~9.24% (last verified April 2026)
-- **Midas Platform TVL:** ~$110M [DeFiLlama](https://defillama.com/protocol/midas-rwa) (June 13, 2026; DeFiLlama does not count all Midas positions). Previously ~$216.6M in April 2026
+- **Midas Platform TVL:** ~$78.7M Ethereum [DeFiLlama](https://defillama.com/protocol/midas-rwa) (June 13, 2026; DeFiLlama does not count all Midas positions — total platform TVL ~$110M per [SumCap](https://midas.sumcap.xyz/), down from ~$216.6M in April 2026)
 - **KYC Required:** Yes (greenlist enforced onchain)
 
 **Links:**
@@ -127,9 +127,9 @@ All contracts use OpenZeppelin's `TransparentUpgradeableProxy` pattern with a sh
 ## Historical Track Record
 
 - **Production History:** mHYPER token created on Ethereum [July 15, 2025](https://etherscan.io/tx/0x8dd0b1216e7970be06bd897ed57ebfba3f4213ec63d68aa622740608e93ffd5f) (~9 months in production). Midas platform launched with mTBILL in mid-2024 (~22 months total)
-- **TVL Growth:** Midas grew from ~$4M (July 2024) to ~$275M (February 2026), now ~$216.6M (April 2026)
-- **mHYPER Market Cap:** ~$45M with ~467 holders
-- **Price History:** mHYPER has traded between $1.024 (ATL, Sep 2025) and ~$1.103 (latest, Jun 2026) — steady appreciation consistent with yield accrual. Oracle price: $1.10312 (round 97, last updated June 12, 2026 [onchain](https://etherscan.io/address/0x43881B05C3BE68B2d33eb70aDdF9F666C5005f68))
+- **TVL Growth:** Midas grew from ~$4M (July 2024) to a peak of ~$925M (September 2025, DeFiLlama), declining to ~$78.7M Ethereum / ~$110M platform (June 2026). See [DeFiLlama](https://defillama.com/protocol/midas-rwa)
+- **mHYPER Market Cap:** ~$36.0M (June 2026), down from ~$50.7M (April 2026)
+- **Price History:** mHYPER has traded between $1.024 (ATL, Sep 2025) and $1.10312 (ATH, Jun 2026) — steady appreciation consistent with yield accrual. Oracle price: $1.10312 (round 97, last updated June 12, 2026 [onchain](https://etherscan.io/address/0x43881B05C3BE68B2d33eb70aDdF9F666C5005f68)). Per [attestation PDF](https://drive.google.com/file/d/1hYCD-3ypY71xbbVmy0JLz_0HaXIsZXKl/view): Market Neutral Strategy $35.67M, Settlement Reserve $337K, Funds in Process $12K, Total assets $36.02M at price $1.10312380
 
 **Hyperithm Track Record:**
 
@@ -143,7 +143,7 @@ All contracts use OpenZeppelin's `TransparentUpgradeableProxy` pattern with a sh
 Hyperithm is the strategy manager for mHYPER, deploying funds across multiple DeFi protocols using market-neutral, stablecoin-focused strategies. Funds remain under Midas control via Fordefi custody.
 
 - **Fund Manager:** Hyperithm (Tokyo/Seoul, founded 2018, AUM $300M+)
-- **Strategy:** Multi-chain stablecoin yield — leveraged USDe on Aave, farming on Pendle, basis trading on Hyperliquid, Morpho vault liquidity, carry trades, liquidation arbitrage. Per [transparency page](https://midas.app/transparency?token=mhyper) (April 10, 2026 — last verifiable snapshot): Fluid 28.7%, Aave 21.6%, Kamino 19.3% (Solana lending), Morpho 15.0%, Pendle 14.7%, Wallet 0.7%, Hyperliquid/Lighter <0.1%. Total NAV ~$49.6M. **Current allocations could not be verified as of June 2026** — the Midas transparency page is gated and the latest attestation report on [Google Drive](https://drive.google.com/drive/folders/1MJi_xq8aR0TaL0DJw6Q91SFxM_z0OcYZ) could not be parsed programmatically. The DeFiLlama-reported Midas TVL has declined to ~$110M (from ~$216.6M), but this aggregates all Midas products, not just mHYPER
+- **Strategy:** Multi-chain stablecoin yield — leveraged USDe on Aave, farming on Pendle, basis trading on Hyperliquid, Morpho vault liquidity, carry trades, liquidation arbitrage. **Previous allocation snapshot** ([transparency page](https://midas.app/transparency?token=mhyper), April 10, 2026): Fluid 28.7%, Aave 21.6%, Kamino 19.3% (Solana lending), Morpho 15.0%, Pendle 14.7%, Wallet 0.7%, Hyperliquid/Lighter <0.1%. Total NAV ~$49.6M. **Current allocation (June 13, 2026) per [SumCap tracker](https://midas.sumcap.xyz/mhyper):** Fluid 15.4% ($5.55M), Uniswap V4 5.6% ($2.02M), Onchain Wallets 1.5% ($548K), Assets to be Deployed 0.4% ($153K), Liquidity Buffer 0.1% ($37K), Merkl 0.1% ($30K), others <0.01%. **76.8% of mHYPER NAV ($27.7M) is classified as "Unclassified" by SumCap** — likely positions on non-Ethereum chains (Kamino/Solana, Monad, Plasma, Katana) that SumCap does not index, or offchain/CEX allocations. The strategy landscape has shifted materially from the April snapshot: Aave, Kamino, Morpho, and Pendle are no longer individually visible in onchain tracked positions, and total mHYPER NAV has declined ~27% (from $49.6M to $36.0M). **The Midas transparency page is Cloudflare-gated and the [attestation PDF](https://drive.google.com/file/d/1hYCD-3ypY71xbbVmy0JLz_0HaXIsZXKl/view) (June 12, 2026) only reports a single "Market Neutral Strategy" line ($35.67M) without protocol-level breakdown**
 - **Strategy Execution:** Offchain by Hyperithm with discretionary investment decisions
 - **Custody:** Fordefi MPC custody with tri-party quorum per [Fordefi case study](https://web.fordefi.com/customer-stories/how-midas-brings-tokenized-investment-opportunities-on-chain-with-fordefis-defi-native-custody-2ti85) (Midas + Hyperithm + independent signer — operations outside predefined rules require all three parties). Blockaid co-signer provides automated onchain transaction monitoring and threat protection (per Midas). Fordefi is the primary custodian for LYT products; Midas also uses Fireblocks for other product lines
 - **Monitoring:** NAV updates provided by Hyperithm, reviewed by Midas, then published onchain twice per week
@@ -170,7 +170,7 @@ Hyperithm is the strategy manager for mHYPER, deploying funds across multiple De
 ### Provability
 
 - **Reserve Transparency:** Hybrid. Strategy wallets are partially onchain, but full portfolio composition requires offchain reporting. The [Midas Attestation Engine](https://docs.midas.app/transparency/the-midas-attestation-engine) (SAVE, introduced March 2026) adds a multi-party verification layer via three contracts: [KeystoneForwarder](https://etherscan.io/address/0x0b93082D9b3C7C97fAcd250082899BAcf3af3885) (Chainlink DON router), [SaveCreReceiverProxy](https://etherscan.io/address/0xC50102b6598924Aa8deB201c757bFb9a3dBdB9b6) (receiver), and [MidasSaveRegistryWithClaim](https://etherscan.io/address/0x2D6e9F608807436DE5D9603B00Abe3FEd1Bc809d) (registry). The registry is a hash-only store: it records proof IDs, attestation hashes, claim hashes, verifier hashes, timestamps, and attestor/verifier addresses. It does **not** expose the actual reserve data, wallet balances, document content, or an onchain URI/CID that lets users retrieve the source artifact from the registry alone. Midas docs state that notarized source material is stored on IPFS, while public weekly PDF reports are available on [Google Drive](https://drive.google.com/drive/folders/1MJi_xq8aR0TaL0DJw6Q91SFxM_z0OcYZ). The onchain registry proves that a specific hash was attested and independently verified, but interpreting the underlying NAV/reserve data still depends on offchain-disclosed artifacts and links
-- **NAV/Price Updates:** Token price updated **twice per week** by Midas via a privileged role on the `CustomAggregatorFeed` oracle. Current price: ~$1.089 (round 79, 8 decimals). The oracle enforces onchain bounds: `maxAnswerDeviation` of 0.35% per update (35000000 in 8-decimal precision), `minAnswer` of $0.10, and `maxAnswer` of $1,000 — providing tight deviation control per update. The oracle price is deterministic onchain at deposit time (users know the exact token amount). For standard redemptions, the price may update before processing — this ensures the payout accurately reflects current NAV, avoiding over/under-payment to either the redeemer or remaining holders. The Attestation Engine separately verifies and anchors NAV source-data hashes, but does not currently enforce oracle update correctness onchain
+- **NAV/Price Updates:** Token price updated **twice per week** by Midas via a privileged role on the `MHyperCustomAggregatorFeed` oracle (implementation upgraded to [`0xa19f5e16dc09641b17adf95bc950f71dbe5cb11b`](https://etherscan.io/address/0xa19f5e16dc09641b17adf95bc950f71dbe5cb11b), June 2026). Current price: ~$1.10312 (round 97, 8 decimals, last updated June 12, 2026). The oracle enforces onchain bounds: `maxAnswerDeviation` of 0.35% per update (35000000 in 8-decimal precision), `minAnswer` of $0.10, and `maxAnswer` of $1,000 — providing tight deviation control per update. The oracle price is deterministic onchain at deposit time (users know the exact token amount). For standard redemptions, the price may update before processing — this ensures the payout accurately reflects current NAV, avoiding over/under-payment to either the redeemer or remaining holders. The Attestation Engine separately verifies and anchors NAV source-data hashes, but does not currently enforce oracle update correctness onchain
 - **Verification Agent:** [The Attestation Engine](https://docs.midas.app/transparency/the-midas-attestation-engine) introduces **LlamaRisk** and **Canary Protocol** as independent third-party verifiers that confirm data origins, processes, and handling meet defined criteria
 - **Third-Party Verification:** For Morpho integration, eOracle independently verifies and publishes pricing. Steakhouse applies market discounts for liquidation optimization. The Attestation Engine publishes verified hashes onchain via **Chainlink Runtime Environment**, replacing the previous self-generated attestation reports. The oracle wraps the Chainlink AggregatorV3 interface but the underlying price feed is **not** a Chainlink data feed
 
@@ -180,9 +180,9 @@ Hyperithm is the strategy manager for mHYPER, deploying funds across multiple De
 - **Primary Exit:** Via Midas redemption vaults (instant or standard mode)
 - **Instant Redemption:** 1-2% target capacity, topped up multiple times per day
 - **Standard Redemption:** 1-3 business day queue when instant capacity is insufficient
-- **Pendle:** ~$10.14M TVL in mHYPER Pendle pools across 5 markets (yield tokenization, not direct swap liquidity). Up from ~$5.53M in February
+- **Pendle:** ~$10.14M TVL in mHYPER Pendle pools across 5 markets (yield tokenization, not direct swap liquidity). Up from ~$5.53M in February. **As of June 2026, Pendle V2 has <0.01% of mHYPER NAV per [SumCap](https://midas.sumcap.xyz/mhyper)**, suggesting Pendle liquidity is likely from other holders, not the primary strategy wallet
 - **Stress Test:** mHYPER processed $150M+ in redemptions in 48 hours when Stream Finance unwound its $75M leveraged position. This is a positive signal for the redemption mechanism but required standard (non-instant) processing and active coordination
-- **Large Holder Impact:** With ~467 holders and $45M market cap, average position is ~$96K. Large holders likely face multi-day standard redemption queues
+- **Large Holder Impact:** With ~467 holders and $36.0M market cap, average position is ~$77K. Large holders likely face multi-day standard redemption queues
 
 ## Centralization & Control Risks
 
@@ -233,13 +233,14 @@ Hyperithm is the strategy manager for mHYPER, deploying funds across multiple De
 
 - **Hyperithm (Critical):** Strategy management, NAV calculation, risk monitoring. Single external dependency for core value proposition. If Hyperithm fails or misreports, token holders have no onchain recourse
 - **Fordefi (Critical):** MPC custody of underlying assets with tri-party MPC governance. All fund movements depend on it
-- **Strategy Counterparties (Critical):**
-  - **Fluid** — 28.7% of NAV, borrow/lend
-  - **Aave** — 21.6% of NAV, leveraged USDe positions (blue-chip)
-  - **Kamino** — 19.3% of NAV, Solana lending protocol (rebranded from Hubble Protocol, launched 2022)
-  - **Morpho** — 15.0% of NAV, vault liquidity provision (established)
-  - **Pendle** — 14.7% of NAV, yield token farming (established)
-  - **Hyperliquid** — <0.1% of NAV, basis trading (newer, centralized perps DEX)
+- **Strategy Counterparties (Critical, June 13, 2026 per [SumCap](https://midas.sumcap.xyz/mhyper)):**
+  - **Unclassified** — 76.8% ($27.7M) of mHYPER NAV is untracked by SumCap. Likely includes positions on non-Ethereum chains (Kamino/Solana, Monad, Plasma) and offchain/CEX allocations. **This opacity is a material risk increase from April 2026**, when most positions were individually identifiable
+  - **Fluid** — 15.4% ($5.55M), borrow/lend
+  - **Uniswap V4** — 5.6% ($2.02M), liquidity provision
+  - **Onchain Wallets** — 1.5% ($548K), idle capital
+  - **Merkl** — 0.1% ($30K), reward farming
+  - **Euler, Pendle V2, Morpho V2, Hyperliquid** — each <0.01%, near-zero positions
+  - ⚠ **Aave, Kamino, Morpho, Pendle** — previously major counterparties (April 2026), now either unwound or untracked on non-Ethereum chains. The loss of visible diversification is notable
 - **Stablecoin Dependencies:** USDC, USDe (Ethena) — depegging events could impact strategy performance
 - **Oracle:** NAV reported via custom contract, now with independent verification through the Midas Attestation Engine (Chainlink CRE, LlamaRisk, Canary Protocol, vlayer)
 - **MPC wallet platform (Critical):** Midas holds distributed backup shares for the Fordefi workspace, allowing them to recover and secure key material in case of counterparty failure. Dual controls are enforced in all recovery procedures, preventing any single point of failure.
