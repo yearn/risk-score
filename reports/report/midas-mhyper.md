@@ -10,7 +10,7 @@
 
 mHYPER is a tokenized certificate (Liquid Yield Token / LYT) issued by Midas Software GmbH, a German-incorporated tokenization platform. It references the performance of **market-neutral, stablecoin-focused strategies** managed by [Hyperithm](https://www.hyperithm.com/), a digital asset management firm based in Tokyo and Seoul.
 
-mHYPER is **not** a stablecoin — its value floats based on strategy performance. Yield is auto-compounded into the token price (NAV), updated onchain twice per week via a custom oracle (see [oracle history](https://etherscan.io/address/0x43881B05C3BE68B2d33eb70aDdF9F666C5005f68)). The token has appreciated from $1.00 at inception to ~$1.089 as of April 2026.
+mHYPER is **not** a stablecoin — its value floats based on strategy performance. Yield is auto-compounded into the token price (NAV), updated onchain twice per week via a custom oracle (see [oracle history](https://etherscan.io/address/0x43881B05C3BE68B2d33eb70aDdF9F666C5005f68)). The token has appreciated from $1.00 at inception to ~$1.1031 as of June 2026 (per [Midas app](https://midas.app/mhyper)).
 
 The yield strategy includes:
 
@@ -24,10 +24,10 @@ Legally, mHYPER tokens are structured as **subordinated debt instruments** of Mi
 
 **Key Stats:**
 
-- **mHYPER Market Cap:** ~$36.0M (total NAV per [attestation report](https://drive.google.com/drive/folders/1MJi_xq8aR0TaL0DJw6Q91SFxM_z0OcYZ), June 12, 2026; total supply 32,651,929 mHYPER × $1.10312)
+- **mHYPER Market Cap / TVL:** ~$36.17M per [Midas app](https://midas.app/mhyper) (June 13, 2026; total supply 32,651,929 mHYPER × $1.1031)
 - **Total Supply:** 32,651,929 mHYPER across 4 chains per [attestation PDF](https://drive.google.com/file/d/1hYCD-3ypY71xbbVmy0JLz_0HaXIsZXKl/view) (June 12, 2026): Ethereum 29,463,808, Monad 2,693,208, Plasma 494,909, Katana 4. Ethereum [onchain supply](https://etherscan.io/token/0x9b5528528656DBC094765E2abB79F293c21191B9): ~29,512,770
 - **Holders:** ~467 addresses (Ethereum only, [last verified April 2026](https://etherscan.io/token/0x9b5528528656DBC094765E2abB79F293c21191B9))
-- **APY:** ~9.24% (last verified April 2026)
+- **APY:** 10.46% per [Midas app](https://midas.app/mhyper) (June 13, 2026)
 - **Midas Platform TVL:** ~$78.7M Ethereum [DeFiLlama](https://defillama.com/protocol/midas-rwa) (June 13, 2026; DeFiLlama does not count all Midas positions — total platform TVL ~$110M per [SumCap](https://midas.sumcap.xyz/), down from ~$216.6M in April 2026)
 - **KYC Required:** Yes (greenlist enforced onchain)
 
@@ -516,7 +516,7 @@ Hyperithm is the strategy manager for mHYPER, deploying funds across multiple De
 │  │  0x43881B05..f68         │    │  0x92004DCC..dE               │  │
 │  │                          │    │                               │  │
 │  │  Weekly admin-set price  │    │  Feeds price data to vaults   │  │
-│  │  Current: $1.089 (r78)   │    │                               │  │
+│  │  Current: $1.1031 (r97)  │    │                               │  │
 │  └──────────────────────────┘    └───────────────────────────────┘  │
 │                                                                     │
 │  ┌──────────────────────────────────────────────────────────────┐   │
