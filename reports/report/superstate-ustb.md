@@ -8,19 +8,19 @@
 
 ## Overview + Links
 
-USTB is a tokenized investment fund that provides exposure to short-duration U.S. Treasury Bills and Agency securities. The fund's investment objective is to seek current income consistent with liquidity and stability of principal, targeting returns in line with the federal funds rate. The fund was originally issued by **Superstate Inc.**; as of June 2026, the [superstate.com/assets/ustb](https://superstate.com/assets/ustb) page title references "Invesco Short Duration US Government Securities Fund," suggesting a rebrand or acquisition by Invesco. TODO: confirm relationship between Superstate and Invesco.
+USTB is a tokenized investment fund that provides exposure to short-duration U.S. Treasury Bills and Agency securities. The fund's investment objective is to seek current income consistent with liquidity and stability of principal, targeting returns in line with the federal funds rate. As of June 2026, the fund is officially named the **"Invesco Short Duration US Government Securities Fund"** and is externally managed by **Invesco Advisers, Inc.** under a strategic partnership with Superstate. Superstate announced the partnership in March 2026 ([newsroom](https://superstate.com/newsroom/invesco-superstate-bring-world-class-funds-onchain)), bringing Invesco as the first external asset manager on the Superstate platform. The placement agent is **Invesco Distributors, Inc.** and the transfer agent is **Superstate Services LLC** (not affiliated with Invesco).
 
 USTB uses a **price appreciation model** (non-rebasing) — each USTB token represents one share in the fund, and the NAV per share increases daily as interest income from Treasury Bills accrues. The token price has grown from ~$10.00 at inception (February 2024) to ~$11.11 as of June 2026.
 
 Investors undergo KYC/AML onboarding, get their wallet addresses whitelisted on the AllowList smart contract, and can then subscribe (mint) or redeem (burn) USTB tokens via USDC or USD. Onchain atomic subscription and redemption is available through the Protocol Mint and Redeem system, with a USDC instant redemption facility (currently ~$8.0M, capacity varies as it is refilled regularly).
 
-The fund is structured as a series of **Superstate Asset Trust**, a **Delaware Statutory Trust**, providing bankruptcy remoteness from Superstate Inc. The sub-advisor is **Federated Hermes**, the custodian is **UMB Bank** (OCC-regulated), and the auditor is **Ernst & Young**.
+The fund is structured as a series of **Superstate Asset Trust**, a **Delaware Statutory Trust**, providing bankruptcy remoteness from Superstate Inc. The investment manager is **Invesco Advisers, Inc.** (replacing Federated Hermes as of the March 2026 partnership), the custodian is **The Bank of New York Mellon** (replacing UMB Bank), and the auditor is **Ernst & Young**. NAV calculation is performed by **NAV Fund Services**.
 
 - **Current NAV/Share:** $11.113624 (SuperstateOracle), $11.111716 (Chainlink) — verified onchain June 2026. Superstate.com reports $11.113629 as of June 13, 2026.
 - **Onchain Supply (Ethereum):** 67.13M USTB (~$746M onchain market cap)
 - **DeFiLlama TVL:** ~$754M (June 13, 2026, includes multi-chain)
 - **Total AUM (all networks + book-entry):** ~$948.7M with 82.12M shares outstanding (per [superstate.com/assets/ustb](https://superstate.com/assets/ustb), June 13, 2026)
-- **Onchain Holders (Ethereum):** ~70
+- **Onchain Holders (Ethereum):** 79 (per Ethplorer, June 2026)
 - **Current APY:** 3.58% (30-day yield), 3.35% (7-day yield), 3.32% (1-day yield) — scraped from [superstate.com/assets/ustb](https://superstate.com/assets/ustb), as of June 11, 2026
 - **Management Fee:** ≤ 0.15% annually (waived until AUM exceeds $200M — now exceeded)
 
@@ -116,10 +116,10 @@ Superstate is **not** listed on the SEAL Safe Harbor registry. This is typical f
   - Feb 2024: Launch
   - Oct 2024: ~$114M (per LlamaRisk report)
   - Mar 2025: ~$300M allocated by Spark alone
-  - Mar 2026: ~$650M+ total AUM, ~$572M onchain TVL (DeFiLlama)
+  - Mar 2026: Invesco partnership announced — Invesco Advisers becomes external investment manager, BNY Mellon replaces UMB Bank as custodian. ~$650M+ total AUM, ~$572M onchain TVL (DeFiLlama)
   - Apr 2026: ~$625M onchain (56.59M USTB × $11.045 NAV, verified onchain)
-  - Jun 2026: ~$746M onchain (67.13M USTB × $11.114 NAV), ~$754M DeFiLlama TVL, ~$948.7M total AUM with 82.12M shares across all networks (per superstate.com, verified onchain)
-- **Holder Distribution:** ~70 onchain holders on Ethereum. Top 10 holders hold ~83.5% of supply. This concentration is expected for an institutional-grade permissioned fund. Top holders include EOAs (institutional investors) and smart contracts (DeFi integrations).
+  - Jun 2026: ~$746M onchain (67.13M USTB × $11.114 NAV), ~$754M DeFiLlama TVL, ~$948.7M total AUM with 82.12M shares across all networks (per superstate.com, verified onchain). DeFi integrations: Midas RedemptionVault ~$49.2M, Frax FrxUSDCustodian ~$50.2M (verified onchain)
+- **Holder Distribution:** 79 onchain holders on Ethereum (per Ethplorer, June 2026). Top 10 holders hold ~83.5% of supply. This concentration is expected for an institutional-grade permissioned fund. Top holders include EOAs (institutional investors) and smart contracts (DeFi integrations).
 - **Incidents:** None. No hacks, exploits, or adverse events involving Superstate or USTB.
 
 ## Funds Management
@@ -147,19 +147,19 @@ The fund uses a **laddered approach** with holdings spread across various near-t
 
 ### Collateralization
 
-- **Backing Model:** Offchain — USTB tokens represent shares in a fund that holds U.S. Treasury Bills and Agency securities at **UMB Bank** (OCC-regulated qualified custodian).
+- **Backing Model:** Offchain — USTB tokens represent shares in a fund that holds U.S. Treasury Bills and Agency securities at **The Bank of New York Mellon** (systemically important U.S. custodian bank, replacing UMB Bank as of the Invesco partnership).
 - **Collateral Quality:** U.S. Treasury Bills are considered the **lowest-risk financial instrument** globally — backed by the full faith and credit of the U.S. government.
-- **Sub-Advisor:** **Federated Hermes** — a major institutional asset manager managing $800B+ AUM — handles daily portfolio management.
+- **Investment Manager:** **Invesco Advisers, Inc.** — a subsidiary of Invesco Ltd. (publicly traded, $1.7T+ AUM) — handles daily portfolio management, replacing Federated Hermes as of the March 2026 partnership. No sub-advisor.
 - **Bankruptcy Remoteness:** The fund is a separate legal entity (series within a Delaware Statutory Trust) with inter-series liability protection, bankruptcy-remote from Superstate Inc.
-- **Verification:** Ernst & Young conducts annual audits. NAV Consulting / NAV Fund Services provides independent NAV calculation.
+- **Verification:** Ernst & Young conducts annual audits. NAV Fund Services provides independent NAV calculation.
 
 ### Provability
 
 - **NAV/Price Updates:** The Superstate Continuous Price Oracle ([`0xe4fa682f94610ccd170680cc3b045d77d9e528a8`](https://etherscan.io/address/0xe4fa682f94610ccd170680cc3b045d77d9e528a8)) extrapolates real-time prices using linear interpolation between NAV/S checkpoints. Updates every second, 24/7/365. Compatible with Chainlink AggregatorV3Interface. **Checkpoint expiration: 5 days** — if the Oracle Owner does not post a new checkpoint within 5 days, `latestRoundData()` reverts with `StaleCheckpoint()`, which causes both `subscribe()` and `redeem()` to revert, freezing all onchain USTB operations. The 5-day window covers weekends and U.S. holidays. **Note:** Since prices are linearly interpolated between checkpoints, the onchain price is an estimate that may diverge from the actual NAV between checkpoint updates — the price catches up only when the next checkpoint is posted by Superstate.
 - **Chainlink NAV Feed:** Chainlink provides an independent NAV/Share data feed ([`0x289B5036cd942e619E1Ee48670F98d214E745AAC`](https://etherscan.io/address/0x289B5036cd942e619E1Ee48670F98d214E745AAC)).
 - **Onchain Supply:** Total USTB supply is verifiable onchain via `totalSupply()`.
-- **Offchain Assets:** The underlying Treasury portfolio is held offchain at UMB Bank. Token holders cannot independently verify the specific Treasury holdings onchain. However:
-  - Independent NAV calculation by NAV Consulting/NAV Fund Services
+- **Offchain Assets:** The underlying Treasury portfolio is held offchain at BNY Mellon. Token holders cannot independently verify the specific Treasury holdings onchain. However:
+  - Independent NAV calculation by NAV Fund Services
   - Annual audit by Ernst & Young
   - Chainlink Proof of Reserves was in development (per LlamaRisk, Oct 2024)
   - Redundant record-keeping across fund calculation agent, internal records, and onchain records
@@ -225,7 +225,7 @@ The fund uses a **laddered approach** with holdings spread across various near-t
 - **Two-step ownership transfer** — `Ownable2StepUpgradeable` requires propose + accept for ownership changes, preventing accidental transfer.
 - **`renounceOwnership` disabled** — Cannot accidentally or maliciously renounce ownership.
 - **Regulatory accountability** — Superstate Inc. is a U.S. corporation operating under SEC exemptions, with registered transfer agent status. Malicious admin actions would have direct legal consequences.
-- **Institutional-grade service providers** — UMB Bank (custodian), Ernst & Young (auditor), and Federated Hermes (sub-advisor) provide independent oversight of the underlying fund.
+- **Institutional-grade service providers** — BNY Mellon (custodian), Ernst & Young (auditor), Invesco Advisers (investment manager), and NAV Fund Services (NAV agent) provide independent oversight of the underlying fund.
 
 ### Programmability
 
@@ -239,13 +239,13 @@ The fund uses a **laddered approach** with holdings spread across various near-t
 ### External Dependencies
 
 1. **U.S. Treasury Market (Critical)** — Fund holds U.S. Treasury Bills and Agency securities. An unprecedented U.S. government default would directly impact the fund. Extremely low probability.
-2. **UMB Bank (Critical)** — Qualified custodian for the underlying assets. UMB is an OCC-regulated national bank.
-3. **Federated Hermes (Critical)** — Sub-advisor handling daily portfolio management. Major institutional asset manager with $800B+ AUM.
+2. **BNY Mellon (Critical)** — Qualified custodian for the underlying assets. The Bank of New York Mellon is one of the world's largest custodian banks with ~$50T+ assets under custody.
+3. **Invesco (Critical)** — Investment manager handling daily portfolio management via Invesco Advisers, Inc., a subsidiary of Invesco Ltd. (publicly traded, NYSE: IVZ, $1.7T+ AUM). Replaced Federated Hermes as of March 2026.
 4. **Circle (High)** — USDC subscriptions and redemptions route through Circle. A USDC depeg would not affect USTB NAV (backed by Treasuries) but would affect the USDC redemption path.
 5. **Chainlink (Medium)** — NAV/Share oracle feed. Superstate also runs their own Continuous Price Oracle as primary source.
 6. **Turnkey (Medium)** — Non-custodial key management via secure enclaves. Failure could delay admin operations.
 7. **Ernst & Young (Low)** — Annual audit of the fund. Provides independent verification.
-8. **NAV Consulting (Low)** — Independent NAV calculation agent.
+8. **NAV Fund Services (Low)** — Independent NAV calculation agent.
 
 ## Operational Risk
 
@@ -308,7 +308,7 @@ The fund uses a **laddered approach** with holdings spread across various near-t
 
 1. **Safest underlying asset class** — 95%+ invested in U.S. Treasury Bills, the lowest-risk financial instrument globally, backed by the full faith and credit of the U.S. government
 2. **Great audit coverage** — 11 audits from 3 firms (0xMacro, ChainSecurity, Offside Labs) plus Certora formal verification, with ongoing audit relationship as code evolves
-3. **Institutional-grade service providers** — UMB Bank (OCC-regulated custodian), Federated Hermes (sub-advisor, $800B+ AUM), Ernst & Young (auditor), NAV Consulting (independent NAV)
+3. **Institutional-grade service providers** — BNY Mellon (custodian, ~$50T+ AUC), Invesco Advisers (investment manager, $1.7T+ AUM), Ernst & Young (auditor), NAV Fund Services (independent NAV)
 4. **Strong team and backing** — Compound Finance founders, $100.5M raised from Bain Capital Crypto, Distributed Global, Brevan Howard, Galaxy Digital, Haun Ventures
 5. **Bankruptcy-remote legal structure** — Delaware Statutory Trust with inter-series liability protection, SEC-regulated framework
 6. **Large AUM** — $948.7M total across all networks ($754M DeFiLlama onchain), with strong institutional adoption (Spark $300M, Aave Horizon, M^0)
@@ -316,7 +316,7 @@ The fund uses a **laddered approach** with holdings spread across various near-t
 ### Key Risks
 
 1. **EOA-controlled admin** — 4 distinct EOAs control token minting, forced burning, pausing, oracle changes, and proxy upgrades. No multisig, no timelock on any. The separation across 4 keys reduces single-key blast radius but none have multisig protection.
-2. **Offchain assets** — Underlying Treasury portfolio held offchain at UMB Bank. Token holders cannot independently verify holdings onchain. Must rely on NAV agent, auditor, and regulatory framework.
+2. **Offchain assets** — Underlying Treasury portfolio held offchain at BNY Mellon. Token holders cannot independently verify holdings onchain. Must rely on NAV agent, auditor, and regulatory framework.
 3. **No DEX liquidity** — Exit exclusively through Superstate's mint/redeem system. No secondary market. Transfer restricted to allowlisted addresses only.
 4. **No formal bug bounty rewards** — Researchers explicitly told not to expect compensation for vulnerability discoveries.
 5. **Permissioned access** — Only Qualified Purchasers ($5M+) who pass KYC can hold or transfer USTB. Limits DeFi composability.
@@ -335,7 +335,7 @@ The fund uses a **laddered approach** with holdings spread across various near-t
 ### Critical Risk Gates
 
 - [x] **No audit** → **PASS** — 11 audits by 3 firms + Certora formal verification. Great coverage.
-- [x] **Unverifiable reserves** → **PASS** — Offchain reserves, but verified by independent NAV agent (NAV Consulting), annual EY audit, SEC regulatory framework, bankruptcy-remote trust structure. Chainlink NAV feed provides onchain pricing. Not fully onchain verifiable, but multiple independent verification layers.
+- [x] **Unverifiable reserves** → **PASS** — Offchain reserves, but verified by independent NAV agent (NAV Fund Services), annual EY audit, SEC regulatory framework, bankruptcy-remote trust structure. Chainlink NAV feed provides onchain pricing. Not fully onchain verifiable, but multiple independent verification layers.
 - [x] **Total centralization** → **BORDERLINE PASS** — 4 distinct EOAs control admin functions (token, allowlist, redemption, oracle) with no multisig or timelock on any. However, Superstate is a U.S. corporation under SEC regulation, with registered transfer agent status, institutional custodian, and institutional-grade key management via Turnkey secure enclaves. The separation across 4 keys and the regulatory accountability partially compensate for the lack of onchain governance.
 
 **Result:** Protocol passes critical gates. Proceeding to category scoring with conservative bias on centralization.
@@ -386,8 +386,8 @@ The fund uses a **laddered approach** with holdings spread across various near-t
 **Subcategory C: External Dependencies — 2.0**
 
 - U.S. Treasury Bills: Safest possible underlying asset
-- UMB Bank: OCC-regulated, established custodian
-- Federated Hermes: $800B+ AUM institutional asset manager
+- BNY Mellon: Systemically important custodian bank, ~$50T+ assets under custody
+- Invesco: $1.7T+ AUM publicly traded institutional asset manager (NYSE: IVZ)
 - Circle: USDC infrastructure, blue-chip stablecoin provider
 - Chainlink: Established oracle network
 - All external dependencies are institutional-grade with long track records
@@ -400,8 +400,8 @@ The fund uses a **laddered approach** with holdings spread across various near-t
 
 - U.S. Treasury Bills are the **safest underlying asset class** — backed by the full faith and credit of the U.S. government
 - Fund structured as a bankruptcy-remote Delaware Statutory Trust with inter-series liability protection
-- UMB Bank (OCC-regulated) as qualified custodian
-- Federated Hermes as institutional sub-advisor managing the portfolio
+- BNY Mellon as qualified custodian (~$50T+ AUC)
+- Invesco Advisers, Inc. as investment manager ($1.7T+ parent AUM), no sub-advisor
 - At least 95% in Treasuries, up to 5% cash for liquidity
 - Virtually zero credit risk on the underlying assets
 
@@ -439,7 +439,7 @@ The fund uses a **laddered approach** with holdings spread across various near-t
 
 - **Team:** Fully doxxed, prominent founders (Robert Leshner — Compound Finance), institutional backgrounds (CFA, Goldman Sachs, SEC, Coinbase)
 - **Funding:** $100.5M from top-tier investors (Bain Capital Crypto, Distributed Global, Brevan Howard, Galaxy Digital, Haun Ventures)
-- **Service Providers:** UMB Bank (custodian), Ernst & Young (auditor), Federated Hermes (sub-advisor), NAV Consulting (NAV agent) — all institutional-grade
+- **Service Providers:** BNY Mellon (custodian), Ernst & Young (auditor), Invesco Advisers, Inc. (investment manager), NAV Fund Services (NAV agent) — all institutional-grade
 - **Documentation:** Comprehensive, actively maintained, publicly available
 - **Legal:** U.S. corporation, SEC-registered transfer agent, Delaware Statutory Trust, Reg D/Section 3(c)(7) compliance
 - **Incident Response:** Turnkey secure enclaves, dual pause mechanism, admin capabilities for wallet recovery
@@ -599,10 +599,10 @@ EXTERNAL / UNDERLYING LAYER
 ════════════════════════════
 
   [USDC] USDC                 [CL] Chainlink NAV Feed       Offchain
-  Used for subscribe/redeem   Independent NAV source         ├── UMB Bank (custodian)
-                                                             ├── Federated Hermes (sub-adv)
+  Used for subscribe/redeem   Independent NAV source         ├── BNY Mellon (custodian)
+                                                             ├── Invesco Advisers (investment mgr)
   [SWEEP] Sweep destination                                  ├── Ernst & Young (auditor)
-  (subscription + redemption USDC)                           ├── NAV Consulting (NAV agent)
+  (subscription + redemption USDC)                           ├── NAV Fund Services (NAV agent)
                                                              └── U.S. Treasury Bills (~95%)
 ```
 
