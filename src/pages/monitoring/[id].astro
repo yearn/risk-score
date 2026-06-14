@@ -125,7 +125,6 @@ const apiProtocol = protocol.apiProtocol ?? "";
     let cursor: string | null = null;
     let maxId = 0;
     let generation = 0; // bumped on each (re)load so stale fetches can't write to the DOM
-    let loadingMore = false;
     let listEl: HTMLUListElement | null = null;
 
     function filters(): { protocol: string; severity?: Severity; source?: string } {
@@ -138,13 +137,16 @@ const apiProtocol = protocol.apiProtocol ?? "";
 
     function renderAlert(alert: AlertEvent): string {
       const meta = severityMeta(alert.severity);
+      // meta.label is the raw severity for off-enum values, so escape it; color/emoji are from
+      // the trusted severity map.
+      const sev = escapeHtml(meta.label);
       return `
         <li class="alert-row">
-          <span class="alert-dot" style="background:${meta.color}" title="${meta.label}"></span>
+          <span class="alert-dot" style="background:${meta.color}" title="${sev}"></span>
           <div class="alert-body">
             <p class="alert-message">${escapeHtml(alert.message)}</p>
             <div class="alert-meta">
-              <span class="alert-sev" style="color:${meta.color}">${meta.emoji} ${meta.label}</span>
+              <span class="alert-sev" style="color:${meta.color}">${meta.emoji} ${sev}</span>
               <span class="alert-sep">·</span>
               <span>${escapeHtml(alert.source)}</span>
               <span class="alert-sep">·</span>
@@ -164,6 +166,10 @@ const apiProtocol = protocol.apiProtocol ?? "";
     function setMore(next: string | null) {
       cursor = next;
       if (moreWrap) moreWrap.hidden = !next;
+      if (moreBtn) {
+        moreBtn.disabled = false;
+        moreBtn.textContent = "Load more";
+      }
     }
 
     function showState(cls: string, html: string) {
@@ -206,32 +212,22 @@ const apiProtocol = protocol.apiProtocol ?? "";
     }
 
     async function loadMore() {
-      if (loadingMore || !listEl || !cursor) return;
+      // The disabled button is the re-entrancy guard (loadMore is only fired by its click).
+      if (!moreBtn || moreBtn.disabled || !listEl || !cursor) return;
       const gen = generation;
-      loadingMore = true;
-      if (moreBtn) {
-        moreBtn.disabled = true;
-        moreBtn.textContent = "Loading…";
-      }
+      moreBtn.disabled = true;
+      moreBtn.textContent = "Loading…";
       let resp;
       try {
         resp = await fetchAlerts({ ...filters(), cursor, limit: PAGE });
       } catch {
-        loadingMore = false;
-        if (moreBtn) {
-          moreBtn.textContent = "Couldn't load — retry";
-          moreBtn.disabled = false;
-        }
+        moreBtn.textContent = "Couldn't load — retry";
+        moreBtn.disabled = false;
         return;
       }
-      loadingMore = false;
-      if (gen !== generation || !listEl) return; // filters changed mid-flight
+      if (gen !== generation || !listEl) return; // superseded by a filter change (which resets the button)
       listEl.insertAdjacentHTML("beforeend", resp.data.map(renderAlert).join(""));
-      setMore(resp.next_cursor);
-      if (moreBtn) {
-        moreBtn.disabled = false;
-        moreBtn.textContent = "Load more";
-      }
+      setMore(resp.next_cursor); // re-enables the button
       setStatus();
     }
 

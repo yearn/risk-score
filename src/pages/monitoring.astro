@@ -195,11 +195,11 @@ import { protocols } from "../data/monitoring";
       const info = protoMeta.get(alert.protocol);
       const name = escapeHtml(info?.name || alert.protocol);
       const label = info?.href
-        ? `<a class="recent-proto" href="${info.href}">${name}</a>`
+        ? `<a class="recent-proto" href="${escapeHtml(info.href)}">${name}</a>`
         : `<span class="recent-proto">${name}</span>`;
       return `
         <li class="recent-row">
-          <span class="recent-dot" style="background:${meta.color}" title="${meta.label}"></span>
+          <span class="recent-dot" style="background:${meta.color}" title="${escapeHtml(meta.label)}"></span>
           ${label}
           <span class="recent-msg">${escapeHtml(truncate(alert.message, 110))}</span>
           <time class="recent-time" datetime="${escapeHtml(alert.created_at)}">${escapeHtml(formatRelativeTime(alert.created_at))}</time>

@@ -10,7 +10,9 @@ const siteProtocols = protocols.map((p) => ({
   apiProtocol: p.apiProtocol ?? null,
 }));
 const noJob = siteProtocols.filter((p) => !p.apiProtocol);
-const siteJson = JSON.stringify(siteProtocols);
+// Escape `<` so a future protocol name/id containing `</script>` can't break out of the
+// embedded JSON block below. The `<` escape parses back to `<` via JSON.parse.
+const siteJson = JSON.stringify(siteProtocols).replace(/</g, "\\u003c");
 ---
 
 <BaseLayout

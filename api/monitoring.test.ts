@@ -42,6 +42,11 @@ describe('getUpstreamPath', () => {
     expect(getUpstreamPath(url)).toEqual({ error: 'invalid severity', status: 400 })
   })
 
+  test('rejects a param outside the allowlist (e.g. since)', () => {
+    const url = new URL('http://localhost/api/monitoring/alerts?since=2026-06-11T00:00:00Z')
+    expect(getUpstreamPath(url)).toEqual({ error: 'unsupported query param: since', status: 400 })
+  })
+
   test('rejects a non-numeric limit', () => {
     const url = new URL('http://localhost/api/monitoring/alerts?limit=abc')
     expect(getUpstreamPath(url)).toEqual({ error: 'invalid limit', status: 400 })

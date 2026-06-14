@@ -35,7 +35,6 @@ export interface AlertsQuery {
   source?: string;
   from?: string;
   to?: string;
-  since?: string;
   cursor?: string;
   limit?: number;
 }
@@ -122,7 +121,6 @@ export function formatRelativeTime(iso: string, now: number = Date.now()): strin
   const then = new Date(iso).getTime();
   if (Number.isNaN(then)) return "";
   const sec = Math.round((now - then) / 1000);
-  if (sec < 0) return "just now";
   if (sec < 45) return "just now";
   const min = Math.round(sec / 60);
   if (min < 60) return `${min}m ago`;

@@ -6,13 +6,14 @@ export const config = { runtime: 'edge' }
 // CORS + caching. Only the read-only `/v1/protocols`, `/v1/alerts` and `/v1/alerts/{id}` endpoints
 // are exposed, and the alerts querystring is whitelisted to avoid open proxying.
 
-const ALLOWED_PARAMS = ['protocol', 'severity', 'source', 'from', 'to', 'since', 'cursor', 'limit']
+const ALLOWED_PARAMS = ['protocol', 'severity', 'source', 'from', 'to', 'cursor', 'limit']
 const SEVERITIES = new Set(['LOW', 'MEDIUM', 'HIGH', 'CRITICAL'])
 
 type UpstreamResult = { path: string } | { error: string; status: number }
 
-function validateAlertsQuery(search: URLSearchParams): { query: URLSearchParams } | { error: string; status: number } {
-  const out = new URLSearchParams()
+// Rejects any non-allowlisted or malformed alerts param. On success the (already validated)
+// querystring is forwarded verbatim, so there is nothing to return.
+function validateAlertsQuery(search: URLSearchParams): { error: string; status: number } | null {
   for (const [key, value] of search) {
     if (!ALLOWED_PARAMS.includes(key)) {
       return { error: `unsupported query param: ${key}`, status: 400 }
@@ -26,12 +27,11 @@ function validateAlertsQuery(search: URLSearchParams): { query: URLSearchParams 
     if ((key === 'protocol' || key === 'source') && !/^[a-zA-Z0-9_-]+$/.test(value)) {
       return { error: `invalid ${key}`, status: 400 }
     }
-    if ((key === 'from' || key === 'to' || key === 'since') && !/^[0-9T:+.\- Z]+$/.test(value)) {
+    if ((key === 'from' || key === 'to') && !/^[0-9T:+.\- Z]+$/.test(value)) {
       return { error: `invalid ${key}`, status: 400 }
     }
-    out.append(key, value)
   }
-  return { query: out }
+  return null
 }
 
 // Maps an inbound `/api/monitoring/*` URL to the upstream path under MONITORING_API_URL.
@@ -46,9 +46,9 @@ export function getUpstreamPath(url: URL): UpstreamResult {
   }
 
   if (sub === 'alerts') {
-    const result = validateAlertsQuery(url.searchParams)
-    if ('error' in result) return result
-    const qs = result.query.toString()
+    const error = validateAlertsQuery(url.searchParams)
+    if (error) return error
+    const qs = url.searchParams.toString()
     return { path: qs ? `/v1/alerts?${qs}` : '/v1/alerts' }
   }
 
