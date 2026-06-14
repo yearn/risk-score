@@ -135,6 +135,23 @@ export function formatRelativeTime(iso: string, now: number = Date.now()): strin
   return `${Math.round(mo / 12)}y ago`;
 }
 
+const ESCAPE_MAP: Record<string, string> = {
+  "&": "&amp;",
+  "<": "&lt;",
+  ">": "&gt;",
+  '"': "&quot;",
+  "'": "&#39;",
+};
+
+// Escape untrusted alert text before injecting it into innerHTML.
+export function escapeHtml(value: string): string {
+  return value.replace(/[&<>"']/g, (c) => ESCAPE_MAP[c]);
+}
+
+export function truncate(value: string, max = 140): string {
+  return value.length > max ? `${value.slice(0, max - 1).trimEnd()}…` : value;
+}
+
 export function formatTimestamp(iso: string): string {
   const date = new Date(iso);
   if (Number.isNaN(date.getTime())) return iso;

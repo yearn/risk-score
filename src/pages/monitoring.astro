@@ -36,6 +36,14 @@ import { protocols } from "../data/monitoring";
     </a>
   </div>
 
+  <section class="recent-alerts" id="recent-alerts" hidden>
+    <div class="recent-head">
+      <span class="recent-title">Recent alerts</span>
+      <span class="recent-sub">across all monitored protocols</span>
+    </div>
+    <ul class="recent-list" id="recent-list"></ul>
+  </section>
+
   <div class="block-head">
     <span class="block-meta"><span id="visible-count">{protocols.length}</span> of {protocols.length} protocols</span>
   </div>
@@ -100,6 +108,10 @@ import { protocols } from "../data/monitoring";
     <p>No monitored protocols match your search.</p>
   </div>
 
+  <p class="monitoring-footer">
+    <a href="/monitoring/status/">API integration status &rarr;</a>
+  </p>
+
   <script is:inline>
     (() => {
       // Accordion toggle
@@ -144,38 +156,107 @@ import { protocols } from "../data/monitoring";
   </script>
 
   <script>
-    // Live "last alert" badges. One request fetches the recent alert feed and we bucket the
-    // newest alert per protocol; cards whose protocol has no recent alert simply stay static.
-    // Failures degrade silently to the static view.
-    import { fetchAlerts, severityMeta, formatRelativeTime, latestByProtocol } from "../lib/monitoring";
+    // Live data for the monitoring page: a cross-protocol "recent alerts" feed and a per-card
+    // "last alert" badge, both filled from one request and refreshed while the tab is visible.
+    // Everything degrades silently to the static view on error.
+    import {
+      fetchAlerts,
+      severityMeta,
+      formatRelativeTime,
+      latestByProtocol,
+      escapeHtml,
+      truncate,
+      type AlertEvent,
+    } from "../lib/monitoring";
 
     const cards = Array.from(
       document.querySelectorAll<HTMLElement>(".protocol-accordion[data-api-protocol]"),
     );
 
-    if (cards.length > 0) {
-      fetchAlerts({ limit: 100 })
-        .then((resp) => {
-          const latest = latestByProtocol(resp.data);
-          const now = Date.now();
-          for (const card of cards) {
-            const proto = card.dataset.apiProtocol;
-            if (!proto) continue;
-            const alert = latest.get(proto);
-            const badge = card.querySelector<HTMLElement>(".last-alert");
-            if (!badge || !alert) continue;
-            const meta = severityMeta(alert.severity);
-            const dot = badge.querySelector<HTMLElement>(".last-alert-dot");
-            const text = badge.querySelector<HTMLElement>(".last-alert-text");
-            if (dot) dot.style.background = meta.color;
-            if (text) text.textContent = formatRelativeTime(alert.created_at, now);
-            badge.title = `${meta.emoji} ${meta.label} · ${alert.message}`;
-            badge.hidden = false;
-          }
-        })
-        .catch(() => {
-          /* keep the static view */
-        });
+    // apiProtocol -> { name, href }, read from the rendered cards so we don't duplicate the
+    // protocol registry in client code.
+    const protoMeta = new Map<string, { name: string; href: string | null }>();
+    for (const card of cards) {
+      const proto = card.dataset.apiProtocol;
+      if (!proto) continue;
+      const name = card.querySelector(".protocol-name")?.textContent?.trim() || proto;
+      const href =
+        card.querySelector<HTMLAnchorElement>(".history-link")?.getAttribute("href") ?? null;
+      protoMeta.set(proto, { name, href });
+    }
+
+    const feedSection = document.getElementById("recent-alerts");
+    const feedList = document.getElementById("recent-list");
+    const FEED_SIZE = 8;
+    const REFRESH_MS = 60000;
+
+    function renderFeedRow(alert: AlertEvent): string {
+      const meta = severityMeta(alert.severity);
+      const info = protoMeta.get(alert.protocol);
+      const name = escapeHtml(info?.name || alert.protocol);
+      const label = info?.href
+        ? `<a class="recent-proto" href="${info.href}">${name}</a>`
+        : `<span class="recent-proto">${name}</span>`;
+      return `
+        <li class="recent-row">
+          <span class="recent-dot" style="background:${meta.color}" title="${meta.label}"></span>
+          ${label}
+          <span class="recent-msg">${escapeHtml(truncate(alert.message, 110))}</span>
+          <time class="recent-time" datetime="${escapeHtml(alert.created_at)}">${escapeHtml(formatRelativeTime(alert.created_at))}</time>
+        </li>`;
+    }
+
+    function applyBadges(alerts: AlertEvent[]) {
+      const latest = latestByProtocol(alerts);
+      const now = Date.now();
+      for (const card of cards) {
+        const proto = card.dataset.apiProtocol;
+        if (!proto) continue;
+        const badge = card.querySelector<HTMLElement>(".last-alert");
+        if (!badge) continue;
+        const alert = latest.get(proto);
+        if (!alert) {
+          badge.hidden = true;
+          continue;
+        }
+        const meta = severityMeta(alert.severity);
+        const dot = badge.querySelector<HTMLElement>(".last-alert-dot");
+        const text = badge.querySelector<HTMLElement>(".last-alert-text");
+        if (dot) dot.style.background = meta.color;
+        if (text) text.textContent = formatRelativeTime(alert.created_at, now);
+        badge.title = `${meta.emoji} ${meta.label} · ${alert.message}`;
+        badge.hidden = false;
+      }
+    }
+
+    function applyFeed(alerts: AlertEvent[]) {
+      if (!feedSection || !feedList) return;
+      if (!alerts.length) {
+        feedSection.hidden = true;
+        return;
+      }
+      feedList.innerHTML = alerts.slice(0, FEED_SIZE).map(renderFeedRow).join("");
+      feedSection.hidden = false;
+    }
+
+    async function refresh() {
+      try {
+        const resp = await fetchAlerts({ limit: 100 });
+        applyBadges(resp.data);
+        applyFeed(resp.data);
+      } catch {
+        /* keep whatever is currently shown */
+      }
+    }
+
+    if (cards.length > 0 || feedList) {
+      refresh();
+      setInterval(() => {
+        if (!document.hidden) refresh();
+      }, REFRESH_MS);
+      document.addEventListener("visibilitychange", () => {
+        if (!document.hidden) refresh();
+      });
     }
   </script>
 </BaseLayout>
@@ -493,6 +574,86 @@ import { protocols } from "../data/monitoring";
     transform: translateX(2px);
   }
 
+  /* === Recent alerts feed === */
+  .recent-alerts {
+    margin: 0 0 1.25rem;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: color-mix(in srgb, var(--bg-card) 55%, transparent);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    padding: 0.85rem 1rem;
+  }
+  .recent-head {
+    display: flex;
+    align-items: baseline;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+  }
+  .recent-title {
+    font-weight: 600;
+    font-size: 0.92rem;
+    letter-spacing: -0.01em;
+  }
+  .recent-sub {
+    font-size: 0.74rem;
+    color: var(--text-secondary);
+  }
+  .recent-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  .recent-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.4rem 0;
+    font-size: 0.83rem;
+    border-bottom: 1px solid color-mix(in srgb, var(--border) 35%, transparent);
+    min-width: 0;
+  }
+  .recent-row:last-child {
+    border-bottom: none;
+  }
+  .recent-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .recent-proto {
+    font-weight: 600;
+    color: var(--text-primary);
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  a.recent-proto:hover {
+    color: var(--brand-blue);
+    text-decoration: none;
+  }
+  .recent-msg {
+    color: var(--text-secondary);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    flex: 1;
+    min-width: 0;
+  }
+  .recent-time {
+    color: var(--text-secondary);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+    flex-shrink: 0;
+    font-size: 0.76rem;
+  }
+  @media (max-width: 640px) {
+    .recent-sub,
+    .recent-msg {
+      display: none;
+    }
+  }
+
   /* Chevron */
   .chevron {
     color: var(--text-secondary);
@@ -543,6 +704,19 @@ import { protocols } from "../data/monitoring";
   }
   .monitor-desc {
     color: var(--text-secondary);
+  }
+
+  /* Footer link to the integration-status page */
+  .monitoring-footer {
+    text-align: center;
+    margin: 0 0 2.5rem;
+    font-size: 0.8rem;
+  }
+  .monitoring-footer a {
+    color: var(--text-secondary);
+  }
+  .monitoring-footer a:hover {
+    color: var(--brand-blue);
   }
 
   /* Empty state */

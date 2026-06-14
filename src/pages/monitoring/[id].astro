@@ -63,8 +63,35 @@ const apiProtocol = protocol.apiProtocol ?? "";
       <h2>Alert history</h2>
       <span class="history-status" id="history-status"></span>
     </div>
+    {apiProtocol && (
+      <div class="history-filters">
+        <label class="filter-field">
+          <span>Severity</span>
+          <select id="filter-severity">
+            <option value="">All</option>
+            <option value="CRITICAL">Critical</option>
+            <option value="HIGH">High</option>
+            <option value="MEDIUM">Medium</option>
+            <option value="LOW">Low</option>
+          </select>
+        </label>
+        <label class="filter-field">
+          <span>Source</span>
+          <select id="filter-source">
+            <option value="">All</option>
+            <option value="protocol">protocol</option>
+            <option value="ops_error">ops_error</option>
+            <option value="crash">crash</option>
+            <option value="automation_digest">automation_digest</option>
+          </select>
+        </label>
+      </div>
+    )}
     <div class="alert-history" id="alert-history" data-api-protocol={apiProtocol}>
       <div class="history-empty">Loading recent alerts…</div>
+    </div>
+    <div class="history-more" id="history-more" hidden>
+      <button type="button" class="load-more-btn" id="load-more">Load more</button>
     </div>
     <p class="history-note">
       Alerts are also streamed to
@@ -79,16 +106,34 @@ const apiProtocol = protocol.apiProtocol ?? "";
       severityMeta,
       formatRelativeTime,
       formatTimestamp,
+      escapeHtml,
       type AlertEvent,
+      type Severity,
     } from "../../lib/monitoring";
 
     const root = document.getElementById("alert-history");
     const statusEl = document.getElementById("history-status");
+    const moreWrap = document.getElementById("history-more");
+    const moreBtn = document.getElementById("load-more") as HTMLButtonElement | null;
+    const sevSel = document.getElementById("filter-severity") as HTMLSelectElement | null;
+    const srcSel = document.getElementById("filter-source") as HTMLSelectElement | null;
+    const proto = root?.dataset.apiProtocol || "";
 
-    function escapeHtml(value: string): string {
-      return value.replace(/[&<>"']/g, (c) =>
-        ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c] as string,
-      );
+    const PAGE = 20;
+    const REFRESH_MS = 60000;
+
+    let cursor: string | null = null;
+    let maxId = 0;
+    let generation = 0; // bumped on each (re)load so stale fetches can't write to the DOM
+    let loadingMore = false;
+    let listEl: HTMLUListElement | null = null;
+
+    function filters(): { protocol: string; severity?: Severity; source?: string } {
+      return {
+        protocol: proto,
+        severity: (sevSel?.value || undefined) as Severity | undefined,
+        source: srcSel?.value || undefined,
+      };
     }
 
     function renderAlert(alert: AlertEvent): string {
@@ -109,35 +154,124 @@ const apiProtocol = protocol.apiProtocol ?? "";
         </li>`;
     }
 
-    async function load() {
-      if (!root) return;
-      const proto = root.dataset.apiProtocol || "";
-
-      if (!proto) {
-        if (statusEl) statusEl.textContent = "";
-        root.innerHTML =
-          '<div class="history-empty">Live alert history is not yet available for this protocol.</div>';
-        return;
-      }
-
-      try {
-        const resp = await fetchAlerts({ protocol: proto, limit: 20 });
-        if (!resp.data.length) {
-          if (statusEl) statusEl.textContent = "";
-          root.innerHTML =
-            '<div class="history-empty">No alerts recorded yet — this protocol is monitored but has not fired any alerts.</div>';
-          return;
-        }
-        if (statusEl) statusEl.textContent = `${resp.data.length} most recent`;
-        root.innerHTML = `<ul class="alert-list">${resp.data.map(renderAlert).join("")}</ul>`;
-      } catch {
-        if (statusEl) statusEl.textContent = "";
-        root.innerHTML =
-          '<div class="history-error">Couldn\'t load alert history right now. Please try again later.</div>';
+    function setStatus() {
+      if (statusEl) {
+        const n = listEl?.children.length ?? 0;
+        statusEl.textContent = n ? `${n} shown` : "";
       }
     }
 
-    load();
+    function setMore(next: string | null) {
+      cursor = next;
+      if (moreWrap) moreWrap.hidden = !next;
+    }
+
+    function showState(cls: string, html: string) {
+      if (root) root.innerHTML = `<div class="${cls}">${html}</div>`;
+      listEl = null;
+      if (moreWrap) moreWrap.hidden = true;
+      setStatus();
+    }
+
+    async function loadFirst() {
+      if (!root) return;
+      const gen = ++generation;
+      if (statusEl) statusEl.textContent = "Loading…";
+      if (moreWrap) moreWrap.hidden = true;
+      let resp;
+      try {
+        resp = await fetchAlerts({ ...filters(), limit: PAGE });
+      } catch {
+        if (gen === generation) {
+          showState("history-error", "Couldn't load alert history right now. Please try again later.");
+        }
+        return;
+      }
+      if (gen !== generation) return; // superseded by a newer filter change
+      if (!resp.data.length) {
+        maxId = 0;
+        cursor = null;
+        showState(
+          "history-empty",
+          "No alerts match — this protocol is monitored but nothing has fired for this filter.",
+        );
+        return;
+      }
+      root.innerHTML = '<ul class="alert-list"></ul>';
+      listEl = root.querySelector(".alert-list");
+      if (listEl) listEl.innerHTML = resp.data.map(renderAlert).join("");
+      maxId = resp.data[0].id;
+      setMore(resp.next_cursor);
+      setStatus();
+    }
+
+    async function loadMore() {
+      if (loadingMore || !listEl || !cursor) return;
+      const gen = generation;
+      loadingMore = true;
+      if (moreBtn) {
+        moreBtn.disabled = true;
+        moreBtn.textContent = "Loading…";
+      }
+      let resp;
+      try {
+        resp = await fetchAlerts({ ...filters(), cursor, limit: PAGE });
+      } catch {
+        loadingMore = false;
+        if (moreBtn) {
+          moreBtn.textContent = "Couldn't load — retry";
+          moreBtn.disabled = false;
+        }
+        return;
+      }
+      loadingMore = false;
+      if (gen !== generation || !listEl) return; // filters changed mid-flight
+      listEl.insertAdjacentHTML("beforeend", resp.data.map(renderAlert).join(""));
+      setMore(resp.next_cursor);
+      if (moreBtn) {
+        moreBtn.disabled = false;
+        moreBtn.textContent = "Load more";
+      }
+      setStatus();
+    }
+
+    // Poll the newest page and prepend alerts above the current top, respecting active filters.
+    async function pollNew() {
+      if (!listEl) return;
+      const gen = generation;
+      let resp;
+      try {
+        resp = await fetchAlerts({ ...filters(), limit: PAGE });
+      } catch {
+        return;
+      }
+      if (gen !== generation || !listEl) return;
+      const fresh = resp.data.filter((a) => a.id > maxId);
+      if (!fresh.length) return;
+      listEl.insertAdjacentHTML("afterbegin", fresh.map(renderAlert).join(""));
+      maxId = fresh[0].id;
+      setStatus();
+    }
+
+    function start() {
+      if (!root) return;
+      if (!proto) {
+        showState("history-empty", "Live alert history is not yet available for this protocol.");
+        return;
+      }
+      loadFirst();
+      moreBtn?.addEventListener("click", loadMore);
+      sevSel?.addEventListener("change", loadFirst);
+      srcSel?.addEventListener("change", loadFirst);
+      setInterval(() => {
+        if (!document.hidden) pollNew();
+      }, REFRESH_MS);
+      document.addEventListener("visibilitychange", () => {
+        if (!document.hidden) pollNew();
+      });
+    }
+
+    start();
   </script>
 </BaseLayout>
 
@@ -336,6 +470,69 @@ const apiProtocol = protocol.apiProtocol ?? "";
   }
   .history-note a {
     color: var(--brand-blue);
+  }
+
+  /* === Filters === */
+  .history-filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+  }
+  .filter-field {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.78rem;
+    color: var(--text-secondary);
+  }
+  .filter-field select {
+    appearance: none;
+    -webkit-appearance: none;
+    background-color: color-mix(in srgb, var(--bg-card) 60%, transparent);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%239ca3af' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.55rem center;
+    color: var(--text-primary);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0.35rem 1.7rem 0.35rem 0.6rem;
+    font-size: 0.82rem;
+    font-family: inherit;
+    cursor: pointer;
+    transition: border-color 0.15s;
+  }
+  .filter-field select:focus {
+    outline: none;
+    border-color: var(--brand-blue);
+  }
+
+  /* === Load more === */
+  .history-more {
+    display: flex;
+    justify-content: center;
+    margin-top: 1.25rem;
+  }
+  .load-more-btn {
+    padding: 0.55rem 1.3rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--brand-blue);
+    background: color-mix(in srgb, var(--brand-blue) 10%, transparent);
+    border: 1px solid color-mix(in srgb, var(--brand-blue) 35%, transparent);
+    border-radius: 999px;
+    cursor: pointer;
+    font-family: inherit;
+    transition: background 0.2s, border-color 0.2s, transform 0.2s;
+  }
+  .load-more-btn:hover:not(:disabled) {
+    background: color-mix(in srgb, var(--brand-blue) 18%, transparent);
+    border-color: var(--brand-blue);
+    transform: translateY(-1px);
+  }
+  .load-more-btn:disabled {
+    opacity: 0.6;
+    cursor: default;
   }
 
   @media (max-width: 640px) {
