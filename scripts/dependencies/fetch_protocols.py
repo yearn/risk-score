@@ -666,6 +666,22 @@ def cap_stcusd_data() -> dict:
     }
 
 
+def centrifuge_jaaa_data() -> dict:
+    """Centrifuge (JAAA) dependency data from risk assessment report."""
+    return {
+        "name": "Centrifuge (JAAA)",
+        "chain": "ethereum",
+        "type": "tokenized_fund",
+        "address": "0x5a0F93D040De44e78F251b03c43be9CF317Dcf64",
+        "report": "reports/report/centrifuge-jaaa.md",
+        "collateral": [
+            {"asset": "USDC"},
+            {"asset": "AAA CLO Tranches"},
+        ],
+        "infrastructure": ["Chronicle"],
+    }
+
+
 def fx_fxusd_data() -> dict:
     """f(x) Protocol (fxUSD) dependency data from risk assessment report."""
     return {
@@ -867,6 +883,7 @@ def main():
     data["protocols"]["across_protocol"] = across_protocol_data()
     data["protocols"]["apyx_apxusd"] = apyx_apxusd_data()
     data["protocols"]["cap_stcusd"] = cap_stcusd_data()
+    data["protocols"]["centrifuge_jaaa"] = centrifuge_jaaa_data()
     data["protocols"]["fx_fxusd"] = fx_fxusd_data()
     data["protocols"]["kerneldao_hgeth"] = kerneldao_hgeth_data()
     data["protocols"]["mezo_musd"] = mezo_musd_data()
