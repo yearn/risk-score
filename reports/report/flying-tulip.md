@@ -4,8 +4,8 @@
 - **Token:** FT Lend market (supply / borrow); system tokens ftUSD and FT
 - **Chain:** Ethereum Mainnet
 - **Core Contract:** PositionsManager [`0xbe4050a73a7Fb384c65E885a15C33461A4B20055`](https://etherscan.io/address/0xbe4050a73a7Fb384c65E885a15C33461A4B20055)
-- **Final Score: 3.3/5.0**
-- **Medium Risk** — near the Elevated boundary. The codebase has been audited multiple times by reputable firms, but the reports and finding-level detail are kept private by the team. The profile remains high-concern because the system is young, complex, centrally controlled, and has no public bug bounty. See [Risk Score Assessment](#risk-score-assessment). (Also deployed on Sonic; this report covers Ethereum.)
+- **Final Score: 3.5/5.0**
+- **Elevated Risk** — limited approval, strict limits. The codebase has been audited multiple times by reputable firms, but the reports and finding-level detail are kept private by the team. The profile remains high-concern because the system is young, complex, centrally controlled, and its core invariants can be changed by a 3/5 Safe with no timelock. See [Risk Score Assessment](#risk-score-assessment). (Also deployed on Sonic; this report covers Ethereum.)
 
 > **Scope.** Yearn's interest (issue [yearn/risk-score#234](https://github.com/yearn/risk-score/issues/234)) is the risk of supplying ("just lend") and/or borrowing in the **FT Lend** market. This report focuses on the lending engine and the assets it touches. The unrelated `tulip.garden` protocol on Solana is **not** Flying Tulip and is excluded. All onchain values were verified on **June 7, 2026 at block `25264957`** via `cast` against an Ethereum mainnet RPC.
 
@@ -219,7 +219,7 @@ SUPPLY ROUTING (yield)                                  UNDERLYING YIELD
 ### Key Risks
 
 - **Audit reports and findings are private** (no public audit reports, no bug bounty, not in Safe Harbor), and the code is novel and complex.
-- **Single 3/5 multisig controls everything with no timelock** — instant upgrade of any contract, arbitrary oracle price override (`setLastGoodPrice`), pause of user funds, and (for ftUSD) mint/blacklist/seize. Guardian Safe shares the same signers; signer identities undisclosed.
+- **Single 3/5 multisig controls everything with no timelock** — instant upgrade of core contracts, arbitrary oracle price override (`setLastGoodPrice`), pause of user funds, and (for ftUSD) mint/blacklist/seize. Guardian Safe shares the same signers; signer identities undisclosed. This means audited code can be replaced and protocol invariants can change without a delay window.
 - **Very new (~3.5 months) and tiny (~$2.7M lending TVL)**, with **~59% concentration** in one WBTC depositor and no stress history.
 - **Untested, novel liquidation engine** (time-sliced, RFQ/keeper-routed) with **no protocol-level loss backstop** for bad debt.
 - **External dependency on Aave/Spark** for yield and exit liquidity, and on Chainlink for solvency pricing.
@@ -227,7 +227,7 @@ SUPPLY ROUTING (yield)                                  UNDERLYING YIELD
 ### Critical Risks
 
 - **Private audit details for capital-bearing contracts** that a Yearn deposit would touch. There is still no public bounty or insurance fund behind the system.
-- **Unilateral, instant admin control:** a 3/5 (effectively single-party) multisig can upgrade the engine or rewrite the oracle price and drain or freeze positions with no delay and no independent check.
+- **Unilateral, instant admin control:** a 3/5 (effectively single-party) multisig can upgrade the engine or rewrite the oracle price and drain or freeze positions with no delay and no independent check. This materially undermines decentralization and makes the current code invariants non-durable.
 
 ---
 
@@ -252,11 +252,11 @@ SUPPLY ROUTING (yield)                                  UNDERLYING YIELD
 
 #### Category 2: Centralization & Control Risks (Weight: 30%)
 
-- **Governance:** all contracts UUPS-upgradeable by a 3/5 Safe with **no timelock**; guardian Safe shares signers; admin can override oracle prices and (for ftUSD) mint/seize; signers undisclosed. Between "3/5, <12h, powerful roles" (4) and "no timelock, unlimited powers" (5). **4.5/5.**
-- **Programmability:** onchain accounting + Chainlink oracle, but admin-settable prices, RFQ/relayer/session/keeper offchain surface, whitelisted engines. **3/5.**
+- **Governance:** core contracts are UUPS-upgradeable by a 3/5 Safe with **no timelock**; guardian Safe shares signers; admin can override oracle prices and (for ftUSD) mint/seize; signers undisclosed. Because the Safe can replace audited implementations and change core invariants without notice, this sits near the top of the governance-risk range. **5/5.**
+- **Programmability:** onchain accounting + Chainlink oracle, but admin-settable prices, immediate proxy upgrades, RFQ/relayer/session/keeper offchain surface, and whitelisted engines mean the system is only partially programmatic from a depositor's perspective. **4/5.**
 - **External Dependencies:** Aave + Spark (hold idle supply) + Chainlink + Spot AMM; several established but some critical. **3/5.**
 
-**Score: 3.5/5**
+**Score: 4.0/5**
 
 #### Category 3: Funds Management (Weight: 30%)
 
@@ -278,11 +278,11 @@ Public founder with mixed reputation + anonymous team; no disclosed legal entity
 | Category | Score | Weight | Weighted |
 |----------|-------|--------|----------|
 | Audits & Historical | 3.75 | 20% | 0.75 |
-| Centralization & Control | 3.5 | 30% | 1.05 |
+| Centralization & Control | 4.0 | 30% | 1.20 |
 | Funds Management | 3.0 | 30% | 0.90 |
 | Liquidity Risk | 3.0 | 15% | 0.45 |
 | Operational Risk | 3.5 | 5% | 0.175 |
-| **Final Score** | | | **≈3.3/5.0** |
+| **Final Score** | | | **≈3.5/5.0** |
 
 No positive modifiers apply (protocol is <1 year old, TVL well under $500M).
 
@@ -296,7 +296,7 @@ No positive modifiers apply (protocol is <1 year old, TVL well under $500M).
 | 3.5-4.5 | Elevated Risk | Limited approval, strict limits |
 | 4.5-5.0 | High Risk | Not recommended |
 
-**Final Risk Tier: Medium Risk — Approved only with enhanced monitoring and strict sizing discipline.** The numerical score is close to the Elevated boundary, and a single 3/5 Safe with no timelock can still upgrade contracts, override prices, pause withdrawals, and mint/seize ftUSD.
+**Final Risk Tier: Elevated Risk — Limited approval, strict limits.** A single 3/5 Safe with no timelock can upgrade core contracts, override prices, pause withdrawals, and mint/seize ftUSD, so Yearn should treat the deployed invariants as mutable rather than durable.
 
 ---
 
