@@ -195,6 +195,12 @@ protocols:
       address: '0x3de0ff76e8b528c092d47b9dac775931cef80f49'
     - asset: PT-srUSDe-2APR2026
       address: '0x9bf45ab47747f4b4dd09b3c2c73953484b4eb375'
+    - asset: BTC.b
+      address: '0xb0f70c0bd6fd87dbeb7c10dc692a2a6106817072'
+    - asset: PT-srUSDe-25JUN2026
+      address: '0x619d75e3b790ebc21c289f2805bb7177a7d732e2'
+    - asset: PT-USDG-28MAY2026
+      address: '0x9db38d74a0d29380899ad354121dfb521adb0548'
     infrastructure:
     - Chainlink
   compound_v3_usdc:
@@ -635,6 +641,17 @@ protocols:
       label: Steakhouse Prime / Gauntlet USDC Prime
     infrastructure:
     - Symbiotic
+  centrifuge_jaaa:
+    name: Centrifuge (JAAA)
+    chain: ethereum
+    type: tokenized_fund
+    address: '0x5a0F93D040De44e78F251b03c43be9CF317Dcf64'
+    report: reports/report/centrifuge-jaaa.md
+    collateral:
+    - asset: USDC
+    - asset: AAA CLO Tranches
+    infrastructure:
+    - Chronicle
   fx_fxusd:
     name: f(x) Protocol (fxUSD)
     chain: ethereum
