@@ -5,6 +5,10 @@ export const config = { runtime: 'edge' }
 // browser cannot call it directly. This function fetches the internal API server-side and injects
 // CORS + caching. Only the read-only `/v1/protocols`, `/v1/alerts` and `/v1/alerts/{id}` endpoints
 // are exposed, and the alerts querystring is whitelisted to avoid open proxying.
+//
+// Config (Vercel project env): MONITORING_API_URL (required) is the public reverse-proxied base
+// URL; MONITORING_API_TOKEN (optional) is forwarded as `Authorization: Bearer <token>` and stays
+// server-side — never sent to the browser.
 
 const ALLOWED_PARAMS = ['protocol', 'severity', 'source', 'from', 'to', 'cursor', 'limit']
 const SEVERITIES = new Set(['LOW', 'MEDIUM', 'HIGH', 'CRITICAL'])
@@ -101,9 +105,13 @@ export default async function handler(req: Request): Promise<Response> {
       return jsonError(resolved.status, code, resolved.error)
     }
 
-    const upstreamRes = await fetch(`${base}${resolved.path}`, {
-      headers: { accept: 'application/json' },
-    })
+    // Forward a bearer token if configured. It stays server-side in the edge function and is
+    // never sent to the browser. Optional so the unauthenticated local backend still works.
+    const requestHeaders: Record<string, string> = { accept: 'application/json' }
+    const token = process.env.MONITORING_API_TOKEN
+    if (token) requestHeaders.authorization = `Bearer ${token}`
+
+    const upstreamRes = await fetch(`${base}${resolved.path}`, { headers: requestHeaders })
 
     const body = await upstreamRes.text()
     const headers = new Headers({
