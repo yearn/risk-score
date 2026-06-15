@@ -332,11 +332,11 @@ The yvUSDC-1 vault uses the **standard Yearn V3 governance pattern** via the Yea
 
 ### Existing Monitoring Infrastructure
 
-Yearn maintains an active monitoring system via the [`monitoring-scripts-py`](https://github.com/yearn/monitoring-scripts-py) repository. **yvUSDC-1 is actively monitored:**
+Yearn maintains an active monitoring system via the [`monitoring`](https://github.com/yearn/monitoring) repository. **yvUSDC-1 is actively monitored:**
 
-- **Large flow alerts** (`yearn/alert_large_flows.py`): Runs **hourly via GitHub Actions**. yvUSDC-1 is in the monitored vault list. Alerts on deposits/withdrawals exceeding threshold via Telegram
-- **Endorsed vault check** (`yearn/check_endorsed.py`): Runs weekly, verifies all Yearn V3 vaults are endorsed onchain via the registry contract
-- **Timelock monitoring** (`timelock/timelock_alerts.py`): Monitors the Yearn TimelockController (Strategy Manager) across 6 chains
+- **Large flow alerts** (`protocols/yearn/alert_large_flows.py`): yvUSDC-1 is in the monitored vault list. Alerts on deposits/withdrawals exceeding threshold via Telegram
+- **Endorsed vault check** (`protocols/yearn/check_endorsed.py`): Runs daily, verifies all Yearn V3 vaults are endorsed onchain via the registry contract
+- **Timelock monitoring** (`protocols/timelock/timelock_alerts.py`): Monitors the Yearn TimelockController (Strategy Manager) across 6 chains
 
 ### Key Contracts
 

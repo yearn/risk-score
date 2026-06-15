@@ -10,6 +10,8 @@ Each risk report in `reports/report/` documents a protocol's contracts and their
 
 This skill turns a finished risk report into the corresponding YAML.
 
+Follow the project workflow in `CLAUDE.md`: pull latest `master` before starting and open a draft PR when the graph task is ready.
+
 ## When to invoke
 
 - After a risk report at `reports/report/<slug>.md` is finalized and the next natural step is to publish its graph.

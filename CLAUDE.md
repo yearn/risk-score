@@ -1,10 +1,11 @@
 # Yearn Curation Score Guidelines
 
 ## Development Commands
-- **Run Scripts**: `uv run scripts/scan_factories.py` or `uv run reports/old/scripts/veda_scan_auth_events.py`
+- **Run Scripts**: `uv run scripts/scan_factories.py` or `uv run reports/scripts/fetch_defillama_tvl.py`
 - **Code Formatting**: `uv run -m ruff format .`
 - **Update Lock File**: `uv lock` (after changing dependencies in pyproject.toml)
-- use .env file for environment variables and secrets
+- Use `.env` for environment variables, RPC URLs, and secrets. Never commit secrets.
+- Python scripts that need `.env`, RPC URLs, or explorer keys should use `scripts/env.py`: call `load_repo_env()` at the entrypoint and use `get_rpc_url(chain_id)` / `get_explorer_api_key(name)` instead of duplicating `load_dotenv` or env-var alias logic.
 
 ## Dependencies
 - **Core Dependencies**:
@@ -30,15 +31,18 @@
 - Log important information with appropriate log levels
 - Organize data output in markdown tables for readability
 - Never assume, always verify and provide reference to the source of the data
-- Try to use etherscan for verification of the blockchain data
+- Do not trust protocol documentation alone. Treat docs as a map, then verify claims onchain when possible.
+- Back material findings with valid links: contract pages, transaction links, source docs, dashboards, or API outputs. TVL and allocation claims need source links too.
+- Try to use Etherscan for verification of blockchain data.
+- Use Foundry `cast` for direct onchain checks. Load RPC URLs from `.env`: use `RPC_1` first for Ethereum mainnet and `RPC_2` as the fallback; for other chains use the chain-specific `RPC_<chain_id>` variable when available.
+- For Python-based blockchain/API scripts, prefer `scripts/env.py` over direct `os.getenv` lookups for RPC and explorer keys so aliases stay consistent across scripts.
 
-## Genearing Risk Reports
+## Report, Graph, and Reassessment Workflow
 
-- For generating a risk assessment report or making any changes to the risk assessment report, always focus only on folder `reports`.
-- If you don't have information or can't find it, ask for it, never assume anything
-- Mark sections as "TODO" if information is unavailable
-- Try to add Etherscan links to the data you are using
-- Try to use LlamaRisk for additional data
-- For link addresses, use the following format, don't shorten the address: [`0xDEaDbeefdEAdbeefdEadbEEFdeadbeEFdEaDbeeF`](https://etherscan.io/address/0xDEaDbeefdEAdbeefdEadbEEFdeadbeEFdEaDbeeF)
-- Always take time to read the report and understand the context before generating report or making any changes.
-- Use skill `generating-risk-reports` to generate risk assessment reports defined in `reports/SKILL.md`
+- Before starting a report, graph, or reassessment task, pull latest `master`.
+- When the report, graph, or reassessment task is ready, open a draft pull request with a concise summary and validation notes.
+- For generating a risk assessment report or making report changes, focus only on `reports` unless the user asks otherwise.
+- Always read the existing report and understand the context before generating a report, graph, or reassessment.
+- If information is unavailable, mark it as `TODO`; do not guess.
+- Look for hidden or indirect fund-loss paths, not only documented happy paths. Check privileged minting, upgrade paths, oracle controls, emergency roles, offchain custody, redemption queues, and dependency failure modes.
+- Use skill `generating-risk-reports` for new or updated risk reports (`reports/skill.md`), `generating-dependency-graphs` for dependency graphs (`reports/graph/SKILL.md`), and `risk-report-reassessment` for focused refreshes (`reports/reassessment/SKILL.md`).

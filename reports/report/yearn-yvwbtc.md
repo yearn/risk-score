@@ -242,8 +242,8 @@ Yearn maintains the [`monitoring`](https://github.com/yearn/monitoring) reposito
 
 Other monitoring that does cover yvWBTC-1 implicitly via the broader Yearn V3 set:
 
-- **Endorsed vault check** (`yearn/check_endorsed.py`) — weekly
-- **Timelock monitoring** (`timelock/timelock_alerts.py`)
+- **Endorsed vault check** (`protocols/yearn/check_endorsed.py`) — daily
+- **Timelock monitoring** (`protocols/timelock/timelock_alerts.py`)
 
 ### Key Contracts
 
