@@ -11,7 +11,7 @@
     "@astrojs/vercel": "10.0.8",
     "@resvg/resvg-js": "2.6.2",
     "astro": "6.4.2",
-    "cytoscape": "3.33.4",
+    "cytoscape": "3.34.0",
     "cytoscape-dagre": "3.0.0",
     "cytoscape-dom-node": "2.1.0",
     "js-yaml": "4.2.0",
