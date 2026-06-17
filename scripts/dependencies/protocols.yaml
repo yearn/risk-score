@@ -431,6 +431,19 @@ protocols:
     collateral:
     - asset: HYPE
     infrastructure: []
+  midas_mglobal:
+    name: Midas (mGLOBAL)
+    chain: ethereum
+    type: tokenized_fund
+    address: '0x7433806912Eae67919e66aea853d46Fa0aef98A8'
+    report: reports/report/midas-mglobal.md
+    collateral:
+    - asset: USDC
+    yield_sources:
+    - protocol: aave_v3_core
+      assets:
+      - USDC
+    infrastructure: []
   midas_mhyper:
     name: Midas (mHYPER)
     chain: ethereum
