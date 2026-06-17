@@ -1,0 +1,117 @@
+slug: saturn-usdat
+title: Saturn USDat — Contract Dependency Graph
+chain: ethereum
+
+categories:
+  - id: vault
+    label: Vault / Token
+  - id: governance
+    label: Governance
+  - id: infra
+    label: Protocol Infra
+  - id: dependency
+    label: External Dependency
+
+nodes:
+  # === Vault / token layer ===
+  - id: usdat
+    label: USDat (Saturn USD)
+    address: "0x23238f20b894f29041f48D88eE91131C395Aaa71"
+    category: vault
+    note: TransparentUpgradeableProxy, impl 0x17ca…e52e (M0 JMIExtension)
+  - id: susdat
+    label: sUSDat (Staked USDat)
+    address: "0xD166337499E176bbC38a1FBd113Ab144e5bd2Df7"
+    category: vault
+    note: ERC-4626 vault; yield from STRC; queued redemptions
+
+  # === Governance ===
+  - id: admin-timelock
+    label: Saturn Admin Timelock (5d)
+    address: "0xfD5782E3BFF366601da3973aE30C583dE4F08A67"
+    category: governance
+    note: DEFAULT_ADMIN_ROLE + ProxyAdmin owner; 432,000s delay
+  - id: compliance-mpc
+    label: Saturn Compliance (Fireblocks 2/3 MPC)
+    address: "0x10D59F776db12b4B271b2609CB8b7Ddd0A82703B"
+    category: governance
+    note: FREEZE / FORCED_TRANSFER / PAUSER / WHITELIST; no timelock
+  - id: assetcap-timelock
+    label: Saturn Asset Cap Timelock (5d)
+    address: "0x7d343D17896d2cd87a49B4Fb8872298a883F78f7"
+    category: governance
+    note: ASSET_CAP_MANAGER_ROLE; 432,000s delay
+
+  # === Infra ===
+  - id: proxyadmin
+    label: ProxyAdmin
+    address: "0xcf1072DA5f0D127AEf99136489BAd08bFa3D1A7D"
+    category: infra
+    note: Owned by Admin Timelock; can upgrade USDat implementation
+  - id: swap-facility
+    label: M0 Swap Facility
+    address: "0xB6807116b3B1B321a390594e31ECD6e0076f6278"
+    category: infra
+    note: Sole mint/redeem contract; onlySwapFacility on wrap/unwrap
+
+  # === External Dependencies ===
+  - id: m0-m-token
+    label: M0 $M Token
+    address: "0x866A2BF4E572e5Bf23A1D5A1Bf6E41B1a8be1b"
+    category: dependency
+    note: Tokenized U.S. Treasuries; USDat 1:1 backing asset
+  - id: m0-treasury
+    label: M0 Treasury (US Treasuries)
+    category: dependency
+    note: Off-chain M0 reserves backing $M; attested by M0 governance
+  - id: strc
+    label: STRC (Strategy Perpetual Preferred)
+    category: dependency
+    note: Off-chain BTC-backed preferred equity; custodied at Clear Street; sUSDat yield source
+
+edges:
+  # Governance wiring
+  - from: admin-timelock
+    to: proxyadmin
+    kind: controls
+    label: owns ProxyAdmin
+  - from: admin-timelock
+    to: usdat
+    kind: holds-role
+    label: DEFAULT_ADMIN_ROLE
+  - from: compliance-mpc
+    to: usdat
+    kind: holds-role
+    label: FREEZE / FORCED_TRANSFER / PAUSER / WHITELIST
+  - from: assetcap-timelock
+    to: usdat
+    kind: holds-role
+    label: ASSET_CAP_MANAGER_ROLE
+  - from: proxyadmin
+    to: usdat
+    kind: controls
+    label: can upgrade implementation
+
+  # Mint / redeem path
+  - from: swap-facility
+    to: usdat
+    kind: mints
+    label: collateral-gated (onlySwapFacility)
+
+  # Capital flow
+  - from: usdat
+    to: m0-m-token
+    kind: deposits-into
+    label: "1:1 $M backing"
+  - from: m0-m-token
+    to: m0-treasury
+    kind: deposits-into
+    label: backed by US Treasuries
+  - from: susdat
+    to: usdat
+    kind: deposits-into
+    label: stakes USDat
+  - from: susdat
+    to: strc
+    kind: deposits-into
+    label: STRC yield source

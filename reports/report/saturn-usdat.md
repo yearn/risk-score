@@ -1,6 +1,6 @@
 # Protocol Risk Assessment: Saturn (USDat)
 
-- **Assessment Date:** May 27, 2026
+- **Assessment Date:** May 27, 2026 (updated June 17, 2026)
 - **Token:** USDat (Saturn USD)
 - **Chain:** Ethereum
 - **Token Address:** [`0x23238f20b894f29041f48D88eE91131C395Aaa71`](https://etherscan.io/address/0x23238f20b894f29041f48D88eE91131C395Aaa71)
@@ -17,10 +17,11 @@
 
 The key risk separation: **USDat's collateral is tokenized U.S. Treasuries (via M0)**, while the STRC/Bitcoin credit exposure sits in the sUSDat yield layer. Yearn's integration target is USDat as collateral.
 
-**On-chain facts (verified May 27, 2026):**
-- USDat total supply: **125,957,146.79 USDat** (`totalSupply()` = `125957146785226`, 6 decimals)
-- `$M` held by the USDat contract: **126,010,142.17 M** (`M.balanceOf(USDat)`) → ~100% backed, small excess ≈ accrued yield
-- DefiLlama TVL (Saturn): **$125.06M** — reconciles with supply
+**On-chain facts (verified June 17, 2026):**
+- USDat total supply: **118,250,954.018485 USDat** (`totalSupply()` = `118250954018485`, 6 decimals)
+- `$M` held by the USDat contract: **118,273,798.719855 M** (`M.balanceOf(USDat)`) → fully backed with small excess ≈ accrued yield
+- DefiLlama TVL (Saturn): **~$118.3M** — reconciles with supply
+- sUSDat total supply: **~98.34M shares** (18 decimals), totalAssets: **~$92.48M**
 - Deployed: **2026-03-10** (proxy creation block 24,629,431)
 
 **Links:**
@@ -59,12 +60,12 @@ So coverage is strong on paper — two reputable firms, four reports including f
 
 ## Historical Track Record
 
-- **Time in production: ~2.5 months** (USDat deployed 2026-03-10). This is very young.
-- TVL: ~$126M, reached quickly after launch. High TVL in a <3-month-old protocol is itself a concentration consideration rather than a maturity signal.
+- **Time in production: ~3 months** (USDat deployed 2026-03-10). This is very young.
+- TVL: ~$118.3M (was ~$126M on May 27, 2026). Reached quickly after launch. High TVL in a <3-month-old protocol is itself a concentration consideration rather than a maturity signal.
 - Past security incidents: none known (none expected given age).
 - Peg history: USDat trades near $1; the Curve USDC/USDat pool is roughly balanced (see Liquidity). No depeg events observed. **TODO: pull historical peg/price series for a fuller picture.**
-- Concentration risk from large depositors / holder distribution: **TODO** (holder list requires Etherscan Pro). A large fraction of supply is staked into sUSDat (sUSDat supply ≈ 106.5M shares).
-- Funding: seed round (Jan 2026) led by **YZi Labs** and **Sora Ventures** plus angels. Reported amount conflicts across sources ($800K vs $2M) — **TODO: confirm**.
+- Concentration risk from large depositors / holder distribution: **TODO** (holder list requires Etherscan Pro). A large fraction of supply is staked into sUSDat (sUSDat supply ≈ 98.34M shares, totalAssets ≈ $92.48M).
+- Funding: **Pre-Seed**: $800K led by **YZi Labs** and **Sora Ventures**. **Seed**: $2M led by **Spartan**.
 - **STRC stability history** (sUSDat-layer context, from Saturn's risk analysis): STRC's annualized realized volatility fell from ~15.25% to ~2.14% after a $2.25B reserve was implemented (~Feb 2026); max observed intraday drawdown ~6.03% (2025-11-20). STRC has traded below par 10 times since inception, with the last five recoveries each under 10 days.
 
 ## Funds Management
@@ -72,12 +73,19 @@ So coverage is strong on paper — two reputable firms, four reports including f
 USDat is an M0 extension. The fund flow is:
 
 ```
-USDC  ──(Saturn app, onboarded user)──▶  M0 Swap Facility  ──swap──▶  $M  ──wrap──▶  USDat (1:1)
-                                                                                       │
-                                              M0 Treasury yield ───────────────────────┘──▶ yieldRecipient (Saturn)
+Mint (wrap):  USDC ──(Saturn app, whitelisted user)──▶  M0 Swap Facility ──wrap──▶ USDat (1:1, atomic)
+                 │
+                 └──▶ solver asynchronously swaps USDC ──▶ $M (1:1) ──▶ USDat becomes fully $M-backed
+
+Redeem (unwrap):  USDat ──(M0 Swap Facility)──▶ wM (0x437c…B291) ──(Uniswap wM/USDC 1 bps)──▶ USDC
+                  wM can also be sold via M0's limit-order OTC desk (async, partial fills by solvers)
+
+Yield routing:  M0 Treasury yield ──▶ yieldRecipient (Saturn)
 ```
 
 - The protocol delegates backing entirely to **M0** (the `$M` token). There is no other delegation for USDat itself. The collateral asset is held as `$M` on the USDat contract.
+- Minting involves two steps: (1) the user's USDC deposit mints USDat 1:1 atomically through the `swapFacility`, and (2) a `solver` asynchronously swaps the USDC to `$M` 1:1, at which point USDat becomes fully backed by `$M`. Minting fails if the contract has more than the allowed USDC exposure (currently $10M cap).
+- Redemption flows through **wM** ([`0x437cc33344a0B27A429f795ff6B469C72698B291`](https://etherscan.io/address/0x437cc33344a0B27A429f795ff6B469C72698B291)), the M0-maintained stablecoin equivalent to USDat, which can be swapped to USDC via the Uniswap wM/USDC pool (1 bps fee) or via M0's limit-order OTC desk where solvers fill orders partially or fully (async).
 - **Monitoring delegation changes:** the `ASSET_CAP_MANAGER_ROLE` can authorize additional backing assets (the M0 "JMI / Just Mint It" model supports collateral assets beyond `$M`). Today `totalAssets()` ≈ 0 (backing is effectively all `$M`), but this is a parameter to watch — see Monitoring.
 
 ### Accessibility `[If Applicable]`
@@ -85,7 +93,7 @@ USDC  ──(Saturn app, onboarded user)──▶  M0 Swap Facility  ──swap�
 - **Who can mint/redeem:** only **whitelisted ("onboarded") addresses**. The whitelist is enforced on `wrap` (mint) and `unwrap` (redeem) via `_revertIfNotWhitelisted` (verified in source). `isWhitelistEnabled()` = **true** on-chain.
 - **Regular transfers are NOT whitelist-gated** — verified: the whitelist hooks fire only on `_beforeWrap`/`_beforeUnwrap`, not on `transfer`/`transferFrom`. This is why the Curve pool (not whitelisted) trades freely. **Implication for Yearn: a non-onboarded holder can hold and transfer USDat but cannot mint or redeem directly — its only exit is the secondary market (Curve/Pancake) unless Yearn is whitelisted.**
 - **Atomicity:** the on-chain wrap (M → USDat) and unwrap (USDat → M) are atomic. The USDC↔M leg runs through the M0 Swap Facility in the same user flow. USDat→USDC redemption for onboarded users is effectively 1:1 and prompt (Treasury-backed, no queue). The **sUSDat** layer has a withdrawal queue (STRC liquidation); USDat itself does not.
-- **Redemption path (verified against Saturn DD docs):** an onboarded user redeems in two on-chain legs — (1) `swap`/`swapWithPermit` on the M0 Swap Facility to turn USDat into **wM** ([`0x437cc33344a0B27A429f795ff6B469C72698B291`](https://etherscan.io/address/0x437cc33344a0B27A429f795ff6B469C72698B291)), then (2) swap wM → USDC via the Uniswap wM/USDC pool (**1 bps fee** on that leg). Non-KYC'd users cannot redeem and must exit via the Curve pool.
+- **Redemption path (verified against Saturn DD docs):** an onboarded user redeems by converting USDat to **wM** ([`0x437cc33344a0B27A429f795ff6B469C72698B291`](https://etherscan.io/address/0x437cc33344a0B27A429f795ff6B469C72698B291)) via the M0 Swap Facility, then swapping wM → USDC via the Uniswap wM/USDC pool (**1 bps fee** on that leg). M0 has also built a limit-order protocol acting as an OTC desk where solvers can fill orders partially or fully — this flow is async unlike the Uniswap pool. Non-KYC'd users cannot redeem and must exit via the Curve pool.
 - **Fees / cooldowns on USDat:** mint is 1:1 with USDC and effectively fee-free aside from the 1 bps Uniswap leg on the wM→USDC redemption path; no cooldown or queue on USDat itself. (The **10 bps fee** in Saturn's docs and the withdrawal **queue** apply to the **sUSDat** staking layer, not USDat.)
 
 ### Token Mint Authority
@@ -94,7 +102,7 @@ USDC  ──(Saturn app, onboarded user)──▶  M0 Swap Facility  ──swap�
 
 **Mint requires backing:** **Yes** — `wrap` pulls in `$M` (or an allowed asset, 1:1) before minting USDat. No role can mint unbacked USDat under the current implementation. **Caveat:** the contract is an upgradeable proxy; the Admin (ProxyAdmin owner) could upgrade the implementation to alter this. See Centralization.
 
-**Per-address mint authority** (verified on-chain May 27, 2026, from token contract `0x23238f20b894f29041f48D88eE91131C395Aaa71`):
+**Per-address mint authority** (verified on-chain June 17, 2026, from token contract `0x23238f20b894f29041f48D88eE91131C395Aaa71`):
 
 | Address | Can Mint | Can Burn | Role / Mechanism | Notes |
 |---------|:--------:|:--------:|------------------|-------|
@@ -102,7 +110,7 @@ USDC  ──(Saturn app, onboarded user)──▶  M0 Swap Facility  ──swap�
 | [`0x10D59F776db12b4B271b2609CB8b7Ddd0A82703B`](https://etherscan.io/address/0x10D59F776db12b4B271b2609CB8b7Ddd0A82703B) | — | (seize) | `FORCED_TRANSFER_MANAGER_ROLE` | Compliance (Fireblocks 2/3 MPC). Cannot mint; can `forceTransfer` tokens out of **frozen** accounts. Also holds `FREEZE_MANAGER_ROLE`, `PAUSER_ROLE`, `WHITELIST_MANAGER_ROLE`. |
 | [`0xfD5782E3BFF366601da3973aE30C583dE4F08A67`](https://etherscan.io/address/0xfD5782E3BFF366601da3973aE30C583dE4F08A67) | (via upgrade) | (via upgrade) | `DEFAULT_ADMIN_ROLE` + ProxyAdmin owner | **Admin Saturn Timelock** (5-day delay). Cannot mint directly, but **owns the ProxyAdmin** and can upgrade the implementation to introduce a mint path. |
 
-**Rate limits / supply caps:** No global USDat supply cap. Per-asset caps exist for non-`$M` backing assets (`setAssetCap`, `ASSET_CAP_MANAGER_ROLE`); none are material today.
+**Rate limits / supply caps:** No global USDat supply cap. Per-asset caps exist for non-`$M` backing assets (`setAssetCap`, `ASSET_CAP_MANAGER_ROLE`) to limit maximum exposure to each minting asset. Currently **USDC is the only allowed non-`$M` minting asset** with a cap of **$10 million** — minting fails if the contract has more than $10M in USDC exposure.
 
 **Backing check at mint time:** **Atomic** — the Swap Facility/`wrap` path requires the backing asset to be received before USDat is minted.
 
@@ -110,8 +118,8 @@ USDC  ──(Saturn app, onboarded user)──▶  M0 Swap Facility  ──swap�
 
 ### Collateralization
 
-- **Backing: 100% on-chain in `$M`.** Verified: `M.balanceOf(USDat)` = 126,010,142.17 vs `totalSupply` = 125,957,146.79 → fully backed with a small excess (undistributed yield, `yield()` ≈ $52,992).
-- **Collateral quality:** `$M` is M0's tokenized short-term U.S. Treasuries product — high quality. However, USDat's backing is **one protocol layer removed**: USDat's solvency depends on `$M` holding its peg and on M0's own (off-chain, attested) Treasury reserves. USDat holds ~$126M of `$M` out of `$M`'s ~$342M total supply (~37%) — a large share of a single underlying.
+- **Backing: 100% on-chain in `$M`.** Verified (June 17, 2026): `M.balanceOf(USDat)` = 118,273,798.719855 vs `totalSupply` = 118,250,954.018485 → fully backed with a small excess (undistributed yield).
+- **Collateral quality:** `$M` is M0's tokenized short-term U.S. Treasuries product — high quality. However, USDat's backing is **one protocol layer removed**: USDat's solvency depends on `$M` holding its peg and on M0's own (off-chain, attested) Treasury reserves. USDat holds ~$118.3M of `$M` out of `$M`'s total supply — a large share of a single underlying.
 - **Over-collateralization / liquidations:** USDat is a 1:1 wrapper, not a CDP — no liquidations, no maintenance ratio. Peg stability rests on (a) `$M` redeemability and (b) the Curve/Pancake arbitrage pools.
 - **Custodial / privileged actions on funds:** The compliance MPC can `freeze` any account and `forceTransfer` (seize) tokens from frozen accounts, and can `pause` all transfers. These are disclosed as compliance controls. The Admin Timelock can upgrade the contract (5-day delay).
 - **Risk curation:** asset caps for additional backing assets are managed by `ASSET_CAP_MANAGER_ROLE`, now held by the Saturn Timelock (`0x7d343D17896d2cd87a49B4Fb8872298a883F78f7`; `getMinDelay()` = 432,000 seconds / 5 days, verified June 7, 2026). The prior Processor 2 holder `0xA18f…A3Ad` no longer has the role.
@@ -120,16 +128,16 @@ USDC  ──(Saturn app, onboarded user)──▶  M0 Swap Facility  ──swap�
 
 - USDat's `$M` backing is **fully on-chain verifiable in real time** (`M.balanceOf(USDat)` vs `totalSupply()`), and the exchange rate (`currentIndex()`) is read programmatically from M0 — anyone can compute it.
 - The **next layer down** (M0's Treasury reserves backing `$M`) is off-chain and relies on M0's own attestation/governance.
-- Saturn uses **Accountable** for proof-of-reserves of the off-chain sUSDat assets, and **Chainlink** publishes a live `Saturn sUSDat NAV` NAVLink feed from Accountable at [`0x73B8E902638a21B4d0319CF99Fa333b2727AD318`](https://etherscan.io/address/0x73B8E902638a21B4d0319CF99Fa333b2727AD318) ([Chainlink feed page](https://data.chain.link/feeds/ethereum/mainnet/susdat-nav)). On-chain verification June 7, 2026: `description()` = `Saturn sUSDat NAV`, `decimals()` = 18, `latestRoundData()` returned answer `1.007071305776136200`. The Chainlink page lists Ethereum Mainnet, NAVLink product type, Accountable as data source, and 0.5% deviation threshold. These feeds primarily serve **sUSDat** NAV (STRC is off-chain, custodied at Clear Street). For **USDat**, the `$M` backing is held in the token contract and is directly verifiable on-chain without relying on these feeds. A `Saturn STRC Price Feed` (`0x5f7eCD0D045c393da6cb6c933c671AC305A871BF`) and a `Chainlink STRC Price Feed` (`0xf4d2076277fff631EFC4385Ab36b1f7734218d23`) also exist on-chain.
+- Saturn uses **Accountable** for proof-of-reserves of the off-chain sUSDat assets, and **Chainlink** publishes a live `Saturn sUSDat NAV` NAVLink feed from Accountable at [`0x73B8E902638a21B4d0319CF99Fa333b2727AD318`](https://etherscan.io/address/0x73B8E902638a21B4d0319CF99Fa333b2727AD318) ([Chainlink feed page](https://data.chain.link/feeds/ethereum/mainnet/susdat-nav)). The Chainlink page lists Ethereum Mainnet, NAVLink product type, Accountable as data source, and 0.5% deviation threshold. These feeds primarily serve **sUSDat** NAV (STRC is off-chain, custodied at Clear Street). For **USDat**, the `$M` backing is held in the token contract and is directly verifiable on-chain without relying on these feeds. A `Saturn STRC Price Feed` (`0x5f7eCD0D045c393da6cb6c933c671AC305A871BF`) and a `Chainlink STRC Price Feed` (`0xf4d2076277fff631EFC4385Ab36b1f7734218d23`) also exist on-chain.
 
 ## Liquidity Risk
 
 - **Primary exit for onboarded users:** direct 1:1 redemption USDat → `$M`/USDC via the Swap Facility (Treasury-backed, prompt, no queue).
 - **Exit for non-whitelisted holders (e.g., a Yearn vault that is not onboarded):** secondary market only.
-  - **Curve USDC/USDat pool** [`0xf4d0cf32908b2c7f1021339c43df0f77f06896d7`](https://etherscan.io/address/0xf4d0cf32908b2c7f1021339c43df0f77f06896d7): ~$9.72M USDC + ~$9.66M USDat ≈ **$19.4M, balanced** (verified on-chain).
-  - **Curve USDC/sUSDat pool** [`0x6206ca315c2fcdd2a857b47efb285aa12c529a7a`](https://etherscan.io/address/0x6206ca315c2fcdd2a857b47efb285aa12c529a7a) (sUSDat layer).
+  - **Curve USDC/USDat pool** [`0xf4d0cf32908b2c7f1021339c43df0f77f06896d7`](https://etherscan.io/address/0xf4d0cf32908b2c7f1021339c43df0f77f06896d7): ~$10.26M USDC + ~$10.32M USDat ≈ **$20.6M, balanced** (verified on-chain June 17, 2026).
+  - **Curve USDC/sUSDat pool** [`0x6206ca315c2fcdd2a857b47efb285aa12c529a7a`](https://etherscan.io/address/0x6206ca315c2fcdd2a857b47efb285aa12c529a7a) (sUSDat layer, balances updated June 17, 2026).
   - **PancakeSwap USDT/USDat pool on BSC** [`0xF80Ab3Cc041d8Ccc1c51AcC295AFdba26AD70Aa9`](https://bscscan.com/address/0xF80Ab3Cc041d8Ccc1c51AcC295AFdba26AD70Aa9).
-- For a ~$126M token, ~$19M of on-chain USDat liquidity is moderate. Small-to-mid exits clear with low slippage; a large exit ($5M+) by a non-whitelisted holder would move the Curve pool meaningfully. **Slippage curve per size: TODO (quote on-chain).**
+- For a ~$118.3M token, ~$20.6M of on-chain USDat liquidity is moderate. Small-to-mid exits clear with low slippage; a large exit ($5M+) by a non-whitelisted holder would move the Curve pool meaningfully. **Slippage curve per size: TODO (quote on-chain).**
 - The cleanest mitigation for Yearn is to be **whitelisted** so it can redeem 1:1 directly, removing dependence on pool depth.
 - USDat itself has **no withdrawal queue**. (The queue applies to sUSDat / STRC liquidation.)
 - Behavior under stress / historical drawdown liquidity: **TODO** (insufficient history — <3 months).
@@ -153,7 +161,7 @@ USDC  ──(Saturn app, onboarded user)──▶  M0 Swap Facility  ──swap�
 | `ASSET_CAP_MANAGER_ROLE` | `0x7d34…78f7` (Saturn Timelock) | Timelock contract (`getMinDelay()` = 5 days) | Authorize/cap additional backing assets |
 
 - **Can governance pause, freeze, or seize user funds? Yes** — freeze + forced transfer + pause are all live and held by the Compliance MPC. These are standard regulated-stablecoin compliance controls (cf. USDG, USDC) but represent real holder risk and a notable centralization signal.
-- **Documentation discrepancy (resolved in favour of on-chain):** Saturn's internal Ops/Risk doc describes an *earlier* design in which "funds that back USDat are held in a Copper custodial multisig wallet" (not in the contract) and the admin is a "3-of-5 multisig." The **live, on-chain design supersedes this**: USDat is an M0 extension, the `$M` backing sits **in the token contract** (verified: `M.balanceOf(USDat)` = $126M), and the main admin/compliance roles are held by **Fireblocks 2/3 MPC** addresses (per the key-addresses page), while **admin and asset-cap management now sit behind timelocks** (5-day delay each). The "off-chain custody / 3-of-5" framing is stale. The exact MPC signer threshold cannot be verified on-chain (MPC is off-chain) — taken from docs.
+- **Documentation discrepancy (resolved in favour of on-chain):** Saturn's internal Ops/Risk doc describes an *earlier* design in which "funds that back USDat are held in a Copper custodial multisig wallet" (not in the contract) and the admin is a "3-of-5 multisig." The **live, on-chain design supersedes this**: USDat is an M0 extension, the `$M` backing sits **in the token contract** (verified June 17, 2026: `M.balanceOf(USDat)` = 118,273,798.719855 M vs `totalSupply` = 118,250,954.018485 USDat), and the main admin/compliance roles are held by **Fireblocks 2/3 MPC** addresses (per the key-addresses page), while **admin and asset-cap management now sit behind timelocks** (5-day delay each). The "off-chain custody / 3-of-5" framing is stale. The exact MPC signer threshold cannot be verified on-chain (MPC is off-chain) — taken from docs.
 
 ### Programmability
 
@@ -169,7 +177,7 @@ USDC  ──(Saturn app, onboarded user)──▶  M0 Swap Facility  ──swap�
 
 ## Operational Risk
 
-- **Team:** Backed by reputable investors (**YZi Labs**, **Sora Ventures**). Founder/team identities and track record: **TODO** (not fully verified this session).
+- **Team:** Backed by reputable investors (**YZi Labs**, **Sora Ventures**, **Spartan**). Founder/team identities and track record: **TODO** (not fully verified this session).
 - **Documentation:** GitBook plus a detailed private DD pack (FAQ, contract spec, ops/risk, STRC analysis). Reasonably thorough, but contains **internal inconsistencies** — see the Governance note on the stale "Copper custodial / 3-of-5" description. Quality: good for a young protocol, with version drift.
 - **Legal structure / jurisdiction (from DD docs):** A **Cayman foundation** owns a **BVI token issuer ("Saturn Capital")** that receives user stablecoins and issues USDat. When USDat is staked, Saturn Capital invests via a **regulated BVI fund ("Saturn Fund")** that holds the STRC; the smart-contract layer is launched under **Panama** jurisdiction. Off-chain service providers: **Galaxy** (execution broker / on-off-ramp), **Clear Street** (STRC custody, Galaxy's partner), **Securitize** (fund administrator/transfer agent), **Fireblocks** (key management). Note: per the DD docs, "ownership claims cannot be enforced in court for the capital backing the protocol" — relevant mainly to the **sUSDat/STRC** layer (USDat's `$M` backing is on-chain).
 - **Incident response:** Documented compliance levers (pause, blacklist + fund recall via forced transfer) exist; a formal tested incident-response plan is **TODO**.
@@ -243,15 +251,15 @@ YIELD LAYER (context only — not USDat backing)
 - **Closed, collateral-gated mint** — no `MINTER_ROLE`; USDat can only be minted by depositing backing through the M0 Swap Facility (no unbacked-mint path absent an upgrade).
 - **Freely transferable** despite the whitelist (whitelist gates only mint/redeem), so secondary-market holding/transfer is unrestricted.
 - High-quality, well-audited underlying codebase (M0 `m-extensions`); thin bespoke Saturn surface.
-- Reputable backers (YZi Labs, Sora Ventures); 1:1 prompt redemption for onboarded users.
+- Reputable backers (YZi Labs, Sora Ventures, Spartan); 1:1 prompt redemption for onboarded users.
 
 ### Key Risks
 
 - **Centralized control mitigated by timelock:** the **Admin** and **ProxyAdmin** are now behind the **Admin Saturn Timelock** (5-day delay), meaning upgrades and role changes require a 5-day waiting period. The **Compliance** and **Processor** keys remain Fireblocks **2/3 MPC** wallets with no timelock — they can still **freeze, seize, and pause** user funds. Asset-cap changes are behind the **Asset Cap Manager Timelock** (5-day delay). The timelock is a meaningful improvement over the prior no-timelock MPC setup, but the Compliance/Processor MPCs remain a notable centralization signal.
-- **Single critical dependency on M0** — USDat fully inherits `$M`'s peg and M0's (off-chain, attested) Treasury risk; USDat holds ~37% of all `$M`.
-- **Very young** (~2.5 months live) with no track record through stress.
+- **Single critical dependency on M0** — USDat fully inherits `$M`'s peg and M0's (off-chain, attested) Treasury risk; USDat holds a substantial share of all `$M`.
+- **Very young** (~3 months live) with no track record through stress.
 - **sUSDat context risk:** sUSDat yield is packaged STRC credit/dividend exposure with off-chain custody/execution, NAV/oracle reliance, and withdrawal-queue liquidity risk. This is separate from USDat backing but relevant if USDat liquidity or peg support depends on the broader Saturn system.
-- **Exit for non-whitelisted holders is secondary-market only** (~$19M Curve depth vs ~$126M supply); direct 1:1 redemption requires onboarding.
+- **Exit for non-whitelisted holders is secondary-market only** (~$20.6M Curve depth vs ~$118.3M supply); direct 1:1 redemption requires onboarding.
 
 ### Critical Risks `[If Any]`
 
@@ -304,7 +312,7 @@ YIELD LAYER (context only — not USDat backing)
 
 #### Category 4: Liquidity Risk (Weight: 15%)
 
-- 1:1 direct redemption for onboarded users; for others, market-based exit via ~$19M Curve pool against ~$126M supply (1–3% slippage on mid-size, more on large exits) → **3.0**.
+- 1:1 direct redemption for onboarded users; for others, market-based exit via ~$20.6M Curve pool against ~$118.3M supply (1–3% slippage on mid-size, more on large exits) → **3.0**.
 
 **Score: 3.0/5**
 
@@ -357,9 +365,8 @@ YIELD LAYER (context only — not USDat backing)
 1. Confirm **Safe Harbor (SEAL)** status (bug bounty confirmed **none** — not in docs, not on Immunefi).
 2. Assess **M0's own risk** (minter collateralization, governance, audits) as the floor on USDat risk; confirm who controls/can-upgrade the **M0 Swap Facility** and accepted assets.
 3. Pull **holder distribution** and **historical peg/price** series (Etherscan Pro / Dune).
-4. Confirm **team identities** and **seed amount** ($800K vs $2M). (GitHub repos now recorded: `saturn-organization/saturn-dollar`, `saturn-organization/saturn-yield-dollar`.)
+4. Confirm **team identities**. (GitHub repos now recorded: `saturn-organization/saturn-dollar`, `saturn-organization/saturn-yield-dollar`.)
 5. Quote **on-chain slippage** for USDat exit sizes ($1M / $5M / $10M) on the Curve pool.
-6. Optional: generate the contract dependency graph YAML at `reports/graph/saturn-usdat.yaml`.
 
 ### Sources consulted this session
 
