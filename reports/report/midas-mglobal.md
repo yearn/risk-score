@@ -4,7 +4,7 @@
 - **Token:** mGLOBAL
 - **Chain:** Ethereum
 - **Token Address:** [`0x7433806912Eae67919e66aea853d46Fa0aef98A8`](https://etherscan.io/token/0x7433806912Eae67919e66aea853d46Fa0aef98A8)
-- **Final Score: 3.2/5.0**
+- **Final Score: 3.5/5.0**
 
 ## Overview + Links
 
@@ -614,30 +614,29 @@ updater EOA. User redeems via RedemptionVaultWithAave or RedemptionVaultWithSwap
 - Bound feeds deployed but inactive — safety net not operational
 - No smart contract restrictions on how the funds are managed. Tokens can be minted without backing
 
-**Subcategory C: External Dependencies — 3.5**
+**Subcategory C: External Dependencies — 4.0**
 
-- Fasanara Capital: single critical dependency for strategy management and NAV calculation. Due diligence incomplete — **dependency risk is HIGHER than mHYPER's Hyperithm** due to unverified track record
+- Fasanara Capital: single critical dependency for strategy management and NAV calculation. **Fasanara provides zero public information about how mGLOBAL funds are deployed** — the strategy is a complete black box (92% unclassified). This is a single point of failure for core value creation with no transparency on the dependency's operations
 - Aave: idle capital integration (blue-chip, positive). Aave failure would impact vault idle capital but not core strategy
 - Fordefi: MPC custody with tri-party governance (established, tested)
 - MidasAccessControl: shared across all Midas products — single compromise affects entire platform
 - Strategy counterparties: unverifiable without access to Midas transparency data
 - Distributed backup shares for the Fordefi workspace, allowing Midas to recover and secure key material in case of counterparty failure
 
-**Centralization Score = (3.0 + 4.0 + 3.5) / 3 ≈ 3.5**
+**Centralization Score = (3.0 + 4.0 + 4.0) / 3 ≈ 3.7**
 
-**Score: 3.5/5** — Same structural centralization risks as mHYPER, with additional concerns: (a) oracle bounds are 285x looser (100% vs 0.35%), (b) bound feeds are deployed but inactive, (c) Fasanara due diligence is incomplete, increasing external dependency risk. The Aave integration partially offsets programmability concerns. The 48-hour timelock on upgrades is meaningful; role changes bypassing it entirely is not.
+**Score: 3.7/5** — Same structural centralization risks as mHYPER, with additional concerns: (a) oracle bounds are 285x looser (100% vs 0.35%), (b) bound feeds are deployed but inactive, (c) Fasanara is a single point of failure with complete opacity on funds deployment — no public information about how user capital is managed. The Aave integration partially offsets programmability concerns. The 48-hour timelock on upgrades is meaningful; role changes bypassing it entirely is not.
 
 #### 3. Funds Management (Weight: 30%)
 
-**Subcategory A: Collateralization — 4.0**
+**Subcategory A: Collateralization — 4.5**
 
 - Tokens are subordinated debt instruments — not direct claims on collateral
-- Strategy composition, collateral quality, and asset allocation are **unknown** (Fasanara's strategy framework not verified)
-- Aave integration means idle USDC → aUSDC is onchain and verifiable — this is a partial positive, but only covers idle capital, not the active strategy
+- Strategy composition, collateral quality, and asset allocation are **92% unclassified and completely opaque** — Fasanara provides zero public information about how mGLOBAL funds are managed. Unlike mHYPER's Hyperithm which had identifiable onchain counterparties, mGLOBAL's strategy is a black box
+- Aave integration means idle USDC → aUSDC is onchain and verifiable ($2.55M / 6.78%), but this only covers idle capital, not the active strategy
 - No onchain collateral verification in smart contracts; admin can mint tokens without backing
-- Strategy manager's credentials are unverified (vs mHYPER's well-documented Hyperithm)
 - Tri-party MPC custody via Fordefi should prevent unilateral fund access
-- **Score is HIGHER (riskier) than mHYPER's 3.5** due to unknown strategy composition and unverified manager
+- **Score is HIGHER (riskier) than mHYPER's 3.5** due to complete strategy opacity and unverifiable asset quality
 
 **Subcategory B: Provability — 3.5**
 
@@ -648,9 +647,9 @@ updater EOA. User redeems via RedemptionVaultWithAave or RedemptionVaultWithSwap
 - mGLOBAL-specific proof IDs in the registry have not been identified
 - **Score is HIGHER than mHYPER's 3.0** because: (a) Fasanara's reporting practices are unverified, (b) strategy allocation is completely opaque, (c) shorter history means fewer attestation cycles to build trust
 
-**Funds Management Score = (4.0 + 3.5) / 2 = 3.75 ≈ 3.8**
+**Funds Management Score = (4.5 + 3.5) / 2 = 4.0**
 
-**Score: 3.8/5** — Offchain funds management with subordinated debt structure. The Aave integration provides a positive onchain anchor, but it only covers idle capital, not active strategies. Fasanara's unverified track record and the completely opaque strategy allocation are material concerns. The Attestation Engine provides a verification pipeline, but it cannot compensate for the unknown manager and strategy risks.
+**Score: 4.0/5** — Offchain funds management with subordinated debt structure. The Aave integration provides a positive onchain anchor, but it only covers idle capital, not active strategies. **Fasanara provides zero public information about how mGLOBAL funds are deployed** — 92% of NAV is unclassified. This is a black-box strategy dependency. The Attestation Engine provides a verification pipeline, but it cannot compensate for complete strategy opacity.
 
 #### 4. Liquidity Risk (Weight: 15%)
 
@@ -658,9 +657,11 @@ updater EOA. User redeems via RedemptionVaultWithAave or RedemptionVaultWithSwap
 - **DEX Liquidity:** non, principal can be redeemed with a fee or full after cycle
 - **Instant Redemption Capacity:** 1.15% withdrawable with additional 6.78% deposited into aave.
 - **Redemption Vault Duality:** Two vaults provide redundancy — if one faces issues, the other may still process redemptions.
+- **Holder Concentration (EXTREME):** [InfiniFi's MidasFarm](https://etherscan.io/address/0x7373A7ce3C023C56Cb66747AFbdF827627D31679) holds **81%** of supply (~$30.6M) and **matured June 15, 2026** — it can redeem at any time, which would collapse market cap from ~$37.6M to ~$7M overnight
+- **Vault Liquidity (onchain, June 17, 2026):** DepositVault $0, RedemptionVaultWithAave $0, RedemptionVaultWithSwapper ~$734 USDC. Instant-redemption capacity at the vault level is effectively **near zero** — a large redemption depends on Fasanara unwinding offchain positions
 - **Stress Performance:** No stress events for mGLOBAL
 
-**Score: 3.0/5** — Redemption mechanism exists but parameters are unverified
+**Score: 4.0/5** — No secondary market (zero DEX liquidity), so exit is entirely dependent on Midas redemption infrastructure, which currently holds near-zero idle USDC. Combined with extreme holder concentration (81% in a now-matured InfiniFi position that can exit at will), large or simultaneous redemptions would have to wait on offchain unwinds of a 92%-unclassified strategy. The dual-vault redundancy and 6.78% Aave-backed idle capital are partial mitigants, but instant exit is not assured at scale
 
 #### 5. Operational Risk (Weight: 5%)
 
@@ -673,14 +674,14 @@ updater EOA. User redeems via RedemptionVaultWithAave or RedemptionVaultWithSwap
 
 ### Final Score
 
-| Category                 | Score | Weight | Weighted    |
+| Category | Score | Weight | Weighted |
 | ------------------------ | ----- | ------ | ----------- |
 | Audits & Historical      | 2.5   | 20%    | 0.50        |
-| Centralization & Control | 3.5   | 30%    | 1.05        |
-| Funds Management         | 3.8   | 30%    | 1.14        |
-| Liquidity Risk           | 3.0   | 15%    | 0.45        |
+| Centralization & Control | 3.7   | 30%    | 1.11        |
+| Funds Management         | 4.0   | 30%    | 1.20        |
+| Liquidity Risk           | 4.0   | 15%    | 0.60        |
 | Operational Risk         | 2.0   | 5%     | 0.10        |
-| **Final Score**          |       |        | **3.2/5.0** |
+| **Final Score**          |       |        | **3.5/5.0** |
 
 
 ### Risk Tier
@@ -689,14 +690,16 @@ updater EOA. User redeems via RedemptionVaultWithAave or RedemptionVaultWithSwap
 | ----------- | --------------- | ------------------------------------- |
 | 1.0-1.5     | Minimal Risk    | Approved, high confidence             |
 | 1.5-2.5     | Low Risk        | Approved with standard monitoring     |
-| **2.5-3.5** | **Medium Risk** | **Approved with enhanced monitoring** |
-| 3.5-4.5     | Elevated Risk   | Limited approval, strict limits       |
+| 2.5-3.5     | Medium Risk     | Approved with enhanced monitoring     |
+| **3.5-4.5** | **Elevated Risk** | **Limited approval, strict limits** |
 | 4.5-5.0     | High Risk       | Not recommended                       |
 
 
-**Final Risk Tier: Medium Risk (3.2/5.0)**
+**Final Risk Tier: Elevated Risk (3.5/5.0)**
 
-**Recommendation:** Approved with enhanced monitoring. The elevated Funds Management score (3.2) due to unverified strategy manager and opaque allocations warrants particular caution. **Strongly recommend completing mGLOBAL-specific Fasanara due diligence before any allocation**. Talk directly to Fasanara team for more information.
+**Recommendation:** Limited approval with strict limits. The score is driven by (a) complete strategy opacity — 92% of NAV unclassified, a Funds Management score of 4.0 — and (b) Liquidity risk (4.0): no secondary market, near-zero idle vault USDC, and extreme holder concentration (81% in a now-matured InfiniFi position). **Strongly recommend completing mGLOBAL-specific Fasanara due diligence before any allocation**. Talk directly to Fasanara team for more information.
+
+**Path to a lower score:** This assessment is constrained primarily by opacity, not by a verified flaw. A clear investment deck, strategy mandate, or attested allocation breakdown that classifies the 92% "Unclassified" NAV would directly lower Collateralization, Provability, and External Dependencies — plausibly moving the final score back into the Medium tier (2.5–3.5). Resumption of regular oracle/NAV updates and tighter oracle bounds would reinforce that. The manager itself (Fasanara) is already verified as FCA-authorised; the gap is mGLOBAL-specific strategy disclosure.
 
 **Required Conditions:**
 
