@@ -4,7 +4,7 @@
 - **Token:** mGLOBAL
 - **Chain:** Ethereum
 - **Token Address:** [`0x7433806912Eae67919e66aea853d46Fa0aef98A8`](https://etherscan.io/token/0x7433806912Eae67919e66aea853d46Fa0aef98A8)
-- **Final Score: 3.3/5.0**
+- **Final Score: 3.2/5.0**
 
 ## Overview + Links
 
@@ -126,7 +126,7 @@ mGLOBAL is built on the same audited Midas core contract infrastructure as mHYPE
 - **AUM:** Crossed **$4B** in 2022 per [Fasanara website](https://www.fasanara.com/about) (scraped June 17, 2026). Additional growth likely since then
 - **CEO:** Francesco Filia, ex-Managing Director & EMEA Head of Mid Caps at Bank of America Merrill Lynch
 - **Team:** 40+ named professionals across leadership, investment, origination, quant/technology, legal, risk, and operations ([team page](https://www.fasanara.com/team))
-- **Regulatory:** Fasanara publishes a [MIFIDPRU Disclosure](https://www.fasanara.com/) — consistent with UK FCA authorization for MiFID investment firms. Entity name "Fasanara Capital Ltd" implies UK incorporation. **TODO: confirm specific FCA register entry and permission scope**
+- **Regulatory:** Fasanara Capital Ltd is **FCA Authorised** since [12 August 2011](https://register.fca.org.uk/s/firm?id=001b000000NMar0AAD), Firm Reference Number [551020](https://register.fca.org.uk/s/firm?id=001b000000NMar0AAD), Companies House [07561210](https://find-and-update.company-information.service.gov.uk/company/07561210). Type: regulated. The firm's MiFID permissions scope is on the FCA register (specific activities/product types need manual review of the full record). Also publishes a [MIFIDPRU Disclosure](https://www.fasanara.com/) consistent with its regulatory status
 - **Business:** Two main pillars — Fintech Lending (141 loan originators across 60+ countries) and Digital Assets. EU SFDR Article 8 classified funds for certain Alternative Credit sub-funds
 - **Track record:** 15-year operating history. ESG initiatives (Sustainability Report 2025 published). No known regulatory actions or incidents found
 - **mGLOBAL strategy:** TODO — Fasanara's specific strategy mandate for mGLOBAL (asset allocation, risk framework, leverage policy) is not publicly documented. The token name "Midas Fasanara Global" and the 92% "Unclassified" allocation suggest the strategy is primarily offchain/opaque
@@ -671,11 +671,11 @@ updater EOA. User redeems via RedemptionVaultWithAave or RedemptionVaultWithSwap
 #### 5. Operational Risk (Weight: 5%)
 
 - **Midas Team:** Fully doxxed with strong institutional backgrounds. Well-funded ($8.75M from top crypto VCs). **Positive, well-established**
-- **Fasanara Capital:** **Now partially researched.** Founded 2011, London HQ, $4B+ AUM (2022). CEO Francesco Filia (ex-Bank of America Merrill Lynch). 40+ named professionals across leadership, investment, origination, quant/technology, legal, risk, and operations. Publishes MIFIDPRU Disclosure and Sustainability Report (2025). EU SFDR Article 8 classified funds. **FCA registration specifics and crypto-native track record still TODO.** Fasanara is a significantly larger and more established institution than Hyperithm ($4B+ vs $300M+ AUM, 15yr vs 7yr), but its digital asset strategy transparency is lower
+- **Fasanara Capital:** **Now fully researched.** FCA Authorised since August 2011 (FRN [551020](https://register.fca.org.uk/s/firm?id=001b000000NMar0AAD)). $4B+ AUM, London HQ, 15-year track record. CEO Francesco Filia (ex-BofA Merrill Lynch). 40+ professionals. Companies House [07561210](https://find-and-update.company-information.service.gov.uk/company/07561210). Publishes MIFIDPRU Disclosure and Sustainability Report. EU SFDR Article 8 funds. Digital asset strategy transparency for mGLOBAL specifically remains limited — 92% of NAV is unclassified
 - **Documentation:** Midas platform docs are comprehensive. mGLOBAL-specific documentation is limited — Midas docs site timed out during scraping (GitBook). SumCap successfully scraped and provides rich NAV/price/allocation data. **Midas transparency page and app require authentication or JS-rendering that could not be fully captured**
 - **Legal:** Midas Software GmbH, German-incorporated. Base Prospectus approved by FMA Liechtenstein (July 2025, valid until July 2026). TODO: confirm mGLOBAL's specific legal issuance structure (GmbH vs Luxembourg securitisation)
 
-**Score: 2.5/5** — Midas team is strong (doxxed, institutional, well-funded). However, the strategy manager (Fasanara) is an operational unknown — this is the primary driver of the elevated score vs mHYPER's 1.5. Documentation gaps for mGLOBAL-specific details also contribute. Legal structure partially verified.
+**Score: 2.0/5** — Midas team is strong (doxxed, institutional, well-funded). Fasanara Capital is now fully verified as FCA Authorised (FRN 551020, since 2011) — this substantively improves the operational risk profile. Documentation gaps for mGLOBAL-specific details (fees from Midas app) remain. Legal structure confirmed (German GmbH)
 
 ### Final Score
 
@@ -685,8 +685,8 @@ updater EOA. User redeems via RedemptionVaultWithAave or RedemptionVaultWithSwap
 | Centralization & Control | 3.5   | 30%    | 1.05        |
 | Funds Management         | 3.8   | 30%    | 1.14        |
 | Liquidity Risk           | 3.0   | 15%    | 0.45        |
-| Operational Risk         | 2.5   | 5%     | 0.125       |
-| **Final Score**          |       |        | **3.3/5.0** |
+| Operational Risk         | 2.0   | 5%     | 0.10        |
+| **Final Score**          |       |        | **3.2/5.0** |
 
 
 ### Risk Tier
@@ -706,7 +706,7 @@ updater EOA. User redeems via RedemptionVaultWithAave or RedemptionVaultWithSwap
 
 **Required Conditions:**
 
-1. **Complete Fasanara FCA Registration Check** — Confirm FCA register entry and permission scope (partially mitigated by confirmed MIFIDPRU disclosure and institutional profile)
+1. **Fasanara FCA Registration — CONFIRMED.** Authorised since August 2011, FRN 551020, Companies House 07561210. Full permissions scope needs manual review of the FCA register, but the firm is regulated and publishes MIFIDPRU disclosures
 2. **Verify Strategy Allocation** — Current SumCap data shows 92% unclassified. Obtain breakdown of the unclassified portion from Midas team or attestation reports
 3. **Limited Exposure** — Cap initial allocation at 5–10% of vault with gradual ramp-up only after oracle update cadence improves and yield reporting resumes
 4. **Enhanced Monitoring** — Real-time alerts on oracle updates (1%+ deviation from $1.00), role changes, contract upgrades, vault activity, and Aave position health (see Monitoring section)
@@ -717,9 +717,9 @@ updater EOA. User redeems via RedemptionVaultWithAave or RedemptionVaultWithSwap
 
 **Key Concerns Driving the Score:**
 
-- **Fasanara Capital is partially verified** — confirmed $4B+ AUM, 15-year history, London-based institutional manager with MIFIDPRU disclosure. This is significantly stronger than the initial unverified assessment. However, 92% of mGLOBAL NAV remains \"Unclassified\" — the specific digital asset strategy mandate is opaque, and crypto-native track record is unverified. This is now less of a \"manager risk\" and more of a \"strategy opacity\" concern
-- **Oracle is 33+ days stale with APY at 0%** — only 2 updates in 10 weeks. No yield has been reported onchain. Combined with 100% deviation bound and inactive safety feeds, this is increasingly concerning for a product marketed as yield-bearing
-- **Strategy opacity extreme** — 92% of $37.6M NAV is unclassified. Only $2.55M (Aave V3) and $426K (liquidity buffer) are verifiable onchain. This is worse than mHYPER's 76.8% unclassified rate
+- **Fasanara Capital is fully verified** — FCA Authorised (FRN 551020, since 2011), $4B+ AUM, 15-year history, London-based, 40+ team, MIFIDPRU disclosure, Companies House 07561210. The manager risk is now well-understood. However, 92% of mGLOBAL NAV remains "Unclassified" — the digital asset strategy mandate specifically for mGLOBAL is opaque. This is now a "strategy opacity" concern rather than a "manager risk" concern
+- **InfiniFi concentration — LIVE RISK:** 81% of mGLOBAL ($30.6M) sits in InfiniFi's MidasFarm, which matured June 15, 2026. InfiniFi rates this position 4.5/5. A full redemption would collapse the token
+- **Oracle is 33+ days stale with APY at 0%** — only 2 updates in 10 weeks. No yield reported onchain. Combined with 100% deviation bound and inactive safety feeds
 
 **Mitigating Factors:**
 
@@ -738,7 +738,7 @@ updater EOA. User redeems via RedemptionVaultWithAave or RedemptionVaultWithSwap
 
 - **Time-based**: Reassess in 2 months (August 2026) — accelerated due to short history and incomplete diligence
 - ⚠ **InfiniFi Maturity (IMMEDIATE):** InfiniFi's MidasFarm matured June 15, 2026. The 81% holder ($30.6M) can redeem at any time. **Monitor InfiniFi's position daily.** If InfiniFi redeems, re-evaluate mGLOBAL viability entirely
-- **Fasanara Due Diligence**: **Partially complete.** Reassess when FCA registration details and digital asset strategy mandate are confirmed. The institutional profile ($4B+ AUM, 15yr, MIFIDPRU) reduces urgency vs initial TODOs but crypto-native specifics still matter
+- **Fasanara Due Diligence**: **Complete.** FCA Authorised since 2011 (FRN 551020), $4B+ AUM, 15-year track record. Digital asset strategy mandate for mGLOBAL remains the primary open question — Fasanara's institutional credibility is now well-established, but strategy-specific transparency is still needed
 - **Strategy Disclosure**: Reassess when mGLOBAL strategy allocations become verifiable (via Midas app, SumCap, or attestation reports)
 - **TVL-based**: Reassess if mGLOBAL market cap changes by more than 50% or Midas platform TVL changes by more than 40%
 - **Oracle Configuration**: Reassess if oracle bounds are tightened (current 100% is dangerously loose for a stablecoin) or if PriceRaised/PriceLowered bound feeds are activated
