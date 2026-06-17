@@ -17,8 +17,10 @@ Legally, mGLOBAL tokens are structured as **subordinated debt instruments** of M
 **Key Stats:**
 
 - **mGLOBAL Market Cap / TVL:** ~$37.6M (June 17, 2026; total supply ~37,611,592 mGLOBAL × $1.00)
-- **Total Supply:** ~37,611,592 mGLOBAL per [Etherscan](https://etherscan.io/token/0x7433806912Eae67919e66aea853d46Fa0aef98A8) (all on Ethereum; no cross-chain deployments active)
-- **Holders:** TODO — holder count and concentration not yet verified
+- **Total Supply:** ~37,611,592.37 mGLOBAL — 18 decimals, verified onchain via `totalSupply()` on [token contract](https://etherscan.io/address/0x7433806912Eae67919e66aea853d46Fa0aef98A8) (all on Ethereum; no cross-chain deployments active)
+- **Decimals:** 18 (verified onchain, not 6 as typical for Midas tokens)
+- **Token Name:** "Midas Fasanara Global" — explicitly naming Fasanara as the strategy partner
+- **Holders:** TODO — holder count requires Etherscan API Pro tier. Token created April 3, 2026; holder base expected to be small given 10-week history and KYC requirement
 - **Creation:** [Block 24798265](https://etherscan.io/tx/0xacc1f08c1f1ea036fa35444b67328ae3d3098d6cbbc520eacc81116156eb7772) (April 3, 2026, ~10 weeks in production)
 - **Midas Platform TVL:** ~$109.5M per [DeFiLlama](https://defillama.com/protocol/midas-rwa) (June 17, 2026) — down from peak of ~$927.8M (October 27, 2025)
 - **Ethereum TVL:** ~$85M per [DeFiLlama](https://defillama.com/protocol/midas-rwa)
@@ -177,7 +179,7 @@ Fasanara Capital is the strategy manager for mGLOBAL. Unlike mHYPER which uses H
 ### Provability
 
 - **Reserve Transparency:** Hybrid. The shared Midas [Attestation Engine](https://docs.midas.app/transparency/the-midas-attestation-engine) (SAVE, introduced March 2026) adds a multi-party verification layer via three contracts: [KeystoneForwarder](https://etherscan.io/address/0x0b93082D9b3C7C97fAcd250082899BAcf3af3885), [SaveCreReceiverProxy](https://etherscan.io/address/0xC50102b6598924Aa8deB201c757bFb9a3dBdB9b6), and [MidasSaveRegistryWithClaim](https://etherscan.io/address/0x2D6e9F608807436DE5D9603B00Abe3FEd1Bc809d). The registry stores hashes only — not actual reserve data or NAV
-- **NAV/Price Updates:** Token price updated via privileged role on the `MGlobalCustomAggregatorFeedGrowth` oracle ([`0x66aa9fcd63df74e1f67a9452e6e59fbc67f75e38`](https://etherscan.io/address/0x66aa9fcd63df74e1f67a9452e6e59fbc67f75e38)). Current price: $1.00000000 (round 2, last updated ~June 4, 2026). **Update frequency:** TODO
+- **NAV/Price Updates:** Token price updated via privileged role on the `MGlobalCustomAggregatorFeedGrowth` oracle ([`0x66aa9fcd63df74e1f67a9452e6e59fbc67f75e38`](https://etherscan.io/address/0x66aa9fcd63df74e1f67a9452e6e59fbc67f75e38)). Current price: $1.00000000 (round 2). **Update history (verified onchain):** The oracle has been updated only **2 times since deployment**: [April 5, 2026](https://etherscan.io/tx/0x45c0c4f317741da7b1e210e7228c5fbc190cb44d07fcef68bd5c0e2f56ddcd39) (initial price set) and [May 15, 2026](https://etherscan.io/tx/0x08076ea85feaac8ae1e276a23f9f93e91ff0bf8c62f6bc0e37a5e40f03be1ad4). **The oracle is now 33+ days stale** (last update May 15, 2026; snapshot June 17, 2026). This is atypical — mHYPER's oracle is updated twice per week. For a stablecoin product, the price has been static at $1.00, but the lack of regular updates is notable
 - **Oracle Bounds:** `maxAnswerDeviation` = 100000000 ($1.00, effectively 100% deviation per update — very loose), `minAnswer` = $0.10, `maxAnswer` = $1,000. These are much looser than mHYPER's 0.35% deviation cap
 - **Oracle Model:** Uses MGlobalCustomAggregatorFeedGrowth with separate PriceRaised ([`0x494f142c35167cfbdd3887e8d7897822e63c9618`](https://etherscan.io/address/0x494f142c35167cfbdd3887e8d7897822e63c9618)) and PriceLowered ([`0x4c825154d02eafab7f3c779d96c279bcdb9fcf6f`](https://etherscan.io/address/0x4c825154d02eafab7f3c779d96c279bcdb9fcf6f)) bound feeds. These appear to define upper/lower acceptable price bounds, but currently have **no role holders assigned** — suggesting this safety feature is not yet active
 - **Attestation Engine Data:** The registry stores proof IDs, attestation hashes, claim hashes, verifier hashes, timestamps, and attestor/verifier addresses. It does **not** expose actual reserve data or an onchain URI/CID. TODO: identify mGLOBAL-specific proof IDs in the registry
@@ -185,15 +187,20 @@ Fasanara Capital is the strategy manager for mGLOBAL. Unlike mHYPER which uses H
 
 ## Liquidity Risk
 
-- **DEX Liquidity:** TODO — mGLOBAL DEX liquidity has not been verified. Given mHYPER's negligible DEX liquidity (~$11.5K on Uniswap V4) and mGLOBAL's shorter production history, DEX liquidity is expected to be minimal or nonexistent
+- **DEX Liquidity:** **Zero** — No Uniswap V3 pools found for mGLOBAL/USDC at any fee tier (500/3000/10000 bps) via [Uniswap V3 Factory](https://etherscan.io/address/0x1F98431c8aD98523631AE4a59f267346ea31F984). Zero DEX pairs on DexScreener. The token has no secondary market — exit is entirely dependent on Midas redemption infrastructure
 - **Primary Exit:** Via Midas redemption vaults (MGlobalRedemptionVaultWithAave + MGlobalRedemptionVaultWithSwapper)
 - **Redemption Mechanism:**
   - **MGlobalRedemptionVaultWithAave** — primary redemption with Aave integration. Likely supports instant redemptions when liquidity available
   - **MGlobalRedemptionVaultWithSwapper** — secondary redemption with swapper functionality
   - TODO: specific redemption parameters (fees, delays, capacity limits) for each vault
 - **Redemption Speed:** TODO — likely similar to mHYPER (instant when capacity available, 1–3 business day standard queue)
-- **Large Holder Impact:** With ~$37.6M market cap and TODO holders, concentration risk is unknown
-  - TODO: verify holder count and top holder concentrations via Etherscan
+- **Large Holder Impact:** With ~$37.6M market cap and holder count requiring Etherscan Pro tier, concentration risk is unknown
+  - Holder count requires Etherscan API Pro tier — not verifiable with free tier
+- **Vault USDC Balances (onchain, June 17, 2026):** 
+  - [DepositVault](https://etherscan.io/address/0xce29c36c6d4556f2d01d79414c1354b968dddef1): **$0 USDC**
+  - [RedemptionVaultWithAave](https://etherscan.io/address/0xa0fc8bdfb1e6a705c1375810989b1d70a982b01b): **$0 USDC**
+  - [RedemptionVaultWithSwapper](https://etherscan.io/address/0x1e0fd66753198c7b8ba64edee8d41d8628bf20d7): **~$734 USDC**
+  - The vaults hold negligible idle USDC — funds are either deployed to Aave (aUSDC) or moved offchain to Fasanara custody. This means instant redemption capacity is currently **near zero** at the vault level
 
 ## Centralization & Control Risks
 
