@@ -21,11 +21,11 @@ Legally, mGLOBAL tokens are structured as **subordinated debt instruments** of M
 - **Decimals:** 18 (verified onchain, not 6 as typical for Midas tokens)
 - **Token Name:** "Midas Fasanara Global" — explicitly naming Fasanara as the strategy partner
 - **Holders:** 8 total holders per [Etherscan](https://etherscan.io/token/0x7433806912Eae67919e66aea853d46Fa0aef98A8), 4 real holders:
-  - **[MidasFarm](https://etherscan.io/address/0x7373A7ce3C023C56Cb66747AFbdF827627D31679):** **81%** — Midas staking contract where users deposit mGLOBAL for yield. This is NOT a single entity; the 81% represents aggregated user deposits through the farm
-  - **[EOA](https://etherscan.io/address/0x882C825405fBBE45DCc1ad52b639aFbC4592EDb7):** **10.46%** — single institutional holder/investor. Has interacted with DepositVault and USDC approval
-  - **[Gnosis Safe](https://etherscan.io/address/0xaB05c0DB9D26e96A9dcEDCAFCA23341316F6fe6F):** **6%** — 3/4 multisig (likely DAO or institutional treasury)
-  - **[BeaconProxy](https://etherscan.io/address/0xD36f095556d5717fd9231a2091e8e98bEb7cB621):** **2.3%** — proxy contract
-  - Concentration is moderate — the 81% farm share is distributed across stakers, largest single entity is 10.46% EOA. However, the farm's internal staker concentration cannot be assessed onchain without MidasFarm-specific data
+  - ⚠ **[MidasFarm / InfiniFi](https://etherscan.io/address/0x7373A7ce3C023C56Cb66747AFbdF827627D31679):** **81%** — This is [InfiniFi's](https://app.infinifi.xyz/) MidasFarm contract, representing InfiniFi depositor funds. **The farm matured June 15, 2026** (yesterday as of this writing) — the position can be redeemed at any time. Per the [InfiniFi report](https://github.com/yearn/risk-score/blob/master/reports/report/infinifi.md), this is a $30.60M position (37% of InfiniFi's total deployed assets) with a **4.5/5 internal risk score** — InfiniFi's second-highest risk farm. If InfiniFi redeems, mGLOBAL market cap drops from ~$37.6M to ~$7M overnight
+  - **[EOA](https://etherscan.io/address/0x882C825405fBBE45DCc1ad52b639aFbC4592EDb7):** **10.46%** (~$3.9M) — single institutional holder
+  - **[Gnosis Safe](https://etherscan.io/address/0xaB05c0DB9D26e96A9dcEDCAFCA23341316F6fe6F):** **6%** (~$2.3M) — 3/4 multisig (likely treasury)
+  - **[BeaconProxy](https://etherscan.io/address/0xD36f095556d5717fd9231a2091e8e98bEb7cB621):** **2.3%** (~$870K) — proxy contract
+  - **Concentration is EXTREME:** The InfiniFi MidasFarm alone holds 81% of all mGLOBAL. If this single counterparty exits, the token's market cap collapses. This is the most significant concentration risk in any Midas product
 - **Creation:** [Block 24798265](https://etherscan.io/tx/0xacc1f08c1f1ea036fa35444b67328ae3d3098d6cbbc520eacc81116156eb7772) (April 3, 2026, ~10 weeks in production)
 - **Midas Platform TVL:** ~$109.5M per [DeFiLlama](https://defillama.com/protocol/midas-rwa) (June 17, 2026) — down from peak of ~$927.8M (October 27, 2025)
 - **Ethereum TVL:** ~$85M per [DeFiLlama](https://defillama.com/protocol/midas-rwa)
@@ -207,8 +207,7 @@ Fasanara Capital is the strategy manager for mGLOBAL. Unlike mHYPER which uses H
   - **MGlobalRedemptionVaultWithSwapper** — secondary redemption with swapper functionality
   - TODO: specific redemption parameters (fees, delays, capacity limits) for each vault
 - **Redemption Speed:** TODO — likely similar to mHYPER (instant when capacity available, 1–3 business day standard queue)
-- **Large Holder Impact:** 8 holders total, 4 real holders. [MidasFarm](https://etherscan.io/address/0x7373A7ce3C023C56Cb66747AFbdF827627D31679) holds 81% (user deposits aggregated via staking contract), largest single entity is an [EOA](https://etherscan.io/address/0x882C825405fBBE45DCc1ad52b639aFbC4592EDb7) with 10.46% (~$3.9M). A [3/4 Gnosis Safe](https://etherscan.io/address/0xaB05c0DB9D26e96A9dcEDCAFCA23341316F6fe6F) holds 6% (~$2.3M). The farm's internal staker concentration cannot be assessed onchain
-  - Holder count and top holder data from [Etherscan token page](https://etherscan.io/token/0x7433806912Eae67919e66aea853d46Fa0aef98A8) — the free-tier token page shows the full holder list for this token (only 8 total)
+- **Large Holder Impact:** **EXTREME.** [InfiniFi's MidasFarm](https://etherscan.io/address/0x7373A7ce3C023C56Cb66747AFbdF827627D31679) holds 81% of all mGLOBAL (~$30.6M). Farm matured June 15, 2026 (yesterday). A full redemption by InfiniFi would collapse mGLOBAL market cap from $37.6M to ~$7M. InfiniFi rates this farm **4.5/5 risk** internally — their second-highest risk position. The remaining holders (EOA 10.46%, Safe 6%, BeaconProxy 2.3%) would be severely impacted by any InfiniFi exit
 - **Vault USDC Balances (onchain, June 17, 2026):** 
   - [DepositVault](https://etherscan.io/address/0xce29c36c6d4556f2d01d79414c1354b968dddef1): **$0 USDC**
   - [RedemptionVaultWithAave](https://etherscan.io/address/0xa0fc8bdfb1e6a705c1375810989b1d70a982b01b): **$0 USDC**
@@ -549,6 +548,7 @@ updater EOA. User redeems via RedemptionVaultWithAave or RedemptionVaultWithSwap
 
 - **Fasanara due diligence gap (partially resolved):** Fasanara Capital Ltd is now confirmed as a London-based, $4B+ AUM institutional manager with 15-year history, MIFIDPRU disclosure, and a large professional team. This is significantly stronger than the initial "unverified" assessment. However, its specific digital asset strategy for mGLOBAL remains opaque — 92% of NAV is "Unclassified." Fasanara's crypto-native track record is less established than Hyperithm's
 - **Oracle can report any price:** With 100% maxAnswerDeviation and no active bound feeds, a compromised oracle updater can set the price anywhere between $0.10 and $1,000 in a single transaction. Combined with no-timelock role grants and unbacked minting, this creates a path to significant token holder loss
+- **InfiniFi concentration — immediate:** 81% of mGLOBAL ($30.6M) is held by [InfiniFi's MidasFarm](https://etherscan.io/address/0x7373A7ce3C023C56Cb66747AFbdF827627D31679). **The farm matured yesterday (June 15, 2026)** — InfiniFi can redeem at any moment. A full redemption would collapse mGLOBAL market cap from $37.6M to ~$7M. InfiniFi rates this position 4.5/5 risk (their second-highest). This is not a theoretical concern — the maturity trigger has already fired
 
 ---
 
@@ -737,6 +737,7 @@ updater EOA. User redeems via RedemptionVaultWithAave or RedemptionVaultWithSwap
 ## Reassessment Triggers
 
 - **Time-based**: Reassess in 2 months (August 2026) — accelerated due to short history and incomplete diligence
+- ⚠ **InfiniFi Maturity (IMMEDIATE):** InfiniFi's MidasFarm matured June 15, 2026. The 81% holder ($30.6M) can redeem at any time. **Monitor InfiniFi's position daily.** If InfiniFi redeems, re-evaluate mGLOBAL viability entirely
 - **Fasanara Due Diligence**: **Partially complete.** Reassess when FCA registration details and digital asset strategy mandate are confirmed. The institutional profile ($4B+ AUM, 15yr, MIFIDPRU) reduces urgency vs initial TODOs but crypto-native specifics still matter
 - **Strategy Disclosure**: Reassess when mGLOBAL strategy allocations become verifiable (via Midas app, SumCap, or attestation reports)
 - **TVL-based**: Reassess if mGLOBAL market cap changes by more than 50% or Midas platform TVL changes by more than 40%

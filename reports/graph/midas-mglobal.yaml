@@ -129,7 +129,7 @@ nodes:
   - id: fasanara
     label: Fasanara Capital (Strategy Mgr)
     category: dependency
-    note: "TODO: unverified track record, AUM, regulatory status, strategy allocation"
+    note: "$4B+ AUM, 15yr, London, MIFIDPRU. 92% of NAV Unclassified"
   - id: fordefi
     label: Fordefi MPC Custody
     category: dependency
@@ -145,6 +145,10 @@ nodes:
   - id: vlayer
     label: vlayer (Notarization)
     category: dependency
+  - id: infinifi
+    label: InfiniFi (81% holder)
+    category: dependency
+    note: "MidasFarm matured Jun 15 2026. $30.6M position, 4.5/5 internal risk"
 
 edges:
   # === Governance chain ===
@@ -322,3 +326,9 @@ edges:
     to: mGLOBAL
     kind: manages
     label: deployed but NO mGLOBAL roles (inactive)
+
+  # === InfiniFi concentration ===
+  - from: infinifi
+    to: mGLOBAL
+    kind: manages
+    label: 81% holder ($30.6M). Farm matured Jun 15 2026
