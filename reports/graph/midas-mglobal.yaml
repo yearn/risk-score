@@ -1,0 +1,324 @@
+slug: midas-mglobal
+title: Midas (mGLOBAL) — Contract Dependency Graph
+chain: ethereum
+
+categories:
+  - id: vault
+    label: Vault / Token
+  - id: strategy
+    label: Strategy Venue
+  - id: governance
+    label: Governance
+  - id: infra
+    label: Protocol Infra
+  - id: dependency
+    label: External Dependency
+
+nodes:
+  # === Vault / token layer ===
+  - id: mGLOBAL
+    label: mGLOBAL (LYT Stablecoin)
+    address: "0x7433806912Eae67919e66aea853d46Fa0aef98A8"
+    category: vault
+    note: Subordinated debt instrument; TransparentUpgradeableProxy. ~37.6M supply @ $1.00 (Jun 2026)
+  - id: deposit-vault
+    label: MGlobalDepositVaultWithAave
+    address: "0xce29c36c6d4556f2d01d79414c1354b968dddef1"
+    category: vault
+    note: User-facing mint entry (USDC → mGLOBAL). Idle capital → Aave
+  - id: redemption-vault-aave
+    label: RedemptionVaultWithAave
+    address: "0xa0fc8bdfb1e6a705c1375810989b1d70a982b01b"
+    category: vault
+    note: Primary redemption vault. Idle capital → Aave
+  - id: redemption-vault-swapper
+    label: RedemptionVaultWithSwapper
+    address: "0x1e0fd66753198c7b8ba64edee8d41d8628bf20d7"
+    category: vault
+    note: Secondary redemption vault with swapper
+
+  # === Protocol infra ===
+  - id: access-control
+    label: MidasAccessControl
+    address: "0x0312A9D1Ff2372DDEdCBB21e4B6389aFc919aC4B"
+    category: infra
+    note: Shared role-based permission system (all Midas products)
+  - id: oracle
+    label: MGlobalCustomAggregatorFeedGrowth (NAV)
+    address: "0x66aa9fcd63df74e1f67a9452e6e59fbc67f75e38"
+    category: infra
+    note: "Admin-set NAV oracle. Price $1.00. maxAnswerDeviation=100% (very loose). Impl: 0x96ac55...5e49"
+  - id: oracle-raised
+    label: PriceRaised Feed (inactive)
+    address: "0x494f142c35167cfbdd3887e8d7897822e63c9618"
+    category: infra
+    note: Upper bound feed. NO role holders — inactive safety net
+  - id: oracle-lowered
+    label: PriceLowered Feed (inactive)
+    address: "0x4c825154d02eafab7f3c779d96c279bcdb9fcf6f"
+    category: infra
+    note: Lower bound feed. NO role holders — inactive safety net
+  - id: data-feed-1
+    label: MGlobalDataFeed (Proxy 1)
+    address: "0x58476f452df10e6bf17dc1fee418e98de9e14868"
+    category: infra
+    note: Feeds price data to vaults
+  - id: data-feed-2
+    label: MGlobalDataFeed (Proxy 2)
+    address: "0xb468a6f63868cb6c6d99105edfbe73d6b21f139e"
+    category: infra
+    note: Feeds price data to vaults
+  - id: oft-adapter
+    label: LayerZero OFT Adapter (inactive)
+    address: "0xb67f81069e890a1b3e02c7bed3a9f78ba54a445c"
+    category: infra
+    note: Deployed but holds NO mGLOBAL roles (cross-chain inactive)
+  - id: mint-burn-eoa
+    label: Mint/Burn/Pause Operator EOA
+    address: "0x76e350c5a674db787918e5f728466c7356d4d361"
+    category: infra
+    note: Fordefi MPC (nonce 3); holds MINT/BURN/PAUSE/BLACKLIST/GREENLIST
+  - id: oracle-updater-eoa
+    label: Oracle Updater EOA
+    address: "0x088a74de7df74e6a6eb832d28878a9f134ee4f05"
+    category: infra
+    note: Single EOA, no timelock on price updates (nonce 4)
+  - id: greenlist-blacklist-eoa
+    label: Greenlist/Blacklist Operator EOA
+    address: "0x9ba8c38ae60e6e6311d53f8a85e5cf4004d3c987"
+    category: infra
+    note: Generic GREENLIST_OP + BLACKLIST_OP. Nonce 0 — never transacted
+
+  # === Governance ===
+  - id: admin-safe
+    label: Admin Safe (1/3)
+    address: "0xB60842E9DaBCd1C52e354ac30E82a97661cB7E89"
+    category: governance
+    note: Gnosis Safe; DEFAULT_ADMIN + Timelock proposer/executor
+  - id: admin-eoa-fordefi
+    label: DEFAULT_ADMIN EOA (Fordefi MPC)
+    address: "0xd4195cf4df289a4748c1a7b6ddbe770e27ba1227"
+    category: governance
+    note: Bypasses timelock for role grants
+  - id: timelock
+    label: MidasTimelockController (48h)
+    address: "0xE3EEe3e0D2398799C884a47FC40C029C8e241852"
+    category: governance
+    note: OZ TimelockController; gates proxy upgrades only
+  - id: proxy-admin
+    label: ProxyAdmin (shared)
+    address: "0xbf25b58cB8DfaD688F7BcB2b87D71C23A6600AaC"
+    category: governance
+
+  # === Attestation Engine (shared) ===
+  - id: keystone-forwarder
+    label: KeystoneForwarder (Chainlink DON)
+    address: "0x0b93082D9b3C7C97fAcd250082899BAcf3af3885"
+    category: infra
+  - id: save-cre-receiver
+    label: SaveCreReceiverProxy
+    address: "0xC50102b6598924Aa8deB201c757bFb9a3dBdB9b6"
+    category: infra
+  - id: save-registry
+    label: MidasSaveRegistryWithClaim
+    address: "0x2D6e9F608807436DE5D9603B00Abe3FEd1Bc809d"
+    category: infra
+    note: Onchain proof / attestation registry (hash-only)
+
+  # === External dependencies ===
+  - id: fasanara
+    label: Fasanara Capital (Strategy Mgr)
+    category: dependency
+    note: "TODO: unverified track record, AUM, regulatory status, strategy allocation"
+  - id: fordefi
+    label: Fordefi MPC Custody
+    category: dependency
+    note: Tri-party MPC custody (Midas + Fasanara + Independent)
+  - id: aave
+    label: Aave (Idle Capital)
+    category: dependency
+    note: Blue-chip DeFi; idle USDC → aUSDC in vaults
+  - id: llamarisk-canary
+    label: LlamaRisk + Canary (Verifiers)
+    category: dependency
+    note: Attestation Engine third-party verifiers
+  - id: vlayer
+    label: vlayer (Notarization)
+    category: dependency
+
+edges:
+  # === Governance chain ===
+  - from: admin-safe
+    to: timelock
+    kind: proposes-on
+    label: PROPOSER + EXECUTOR (1/3)
+  - from: timelock
+    to: proxy-admin
+    kind: controls
+    label: owner (48h delay)
+  - from: proxy-admin
+    to: mGLOBAL
+    kind: manages
+    label: upgradeable proxy
+  - from: proxy-admin
+    to: deposit-vault
+    kind: manages
+  - from: proxy-admin
+    to: redemption-vault-aave
+    kind: manages
+  - from: proxy-admin
+    to: redemption-vault-swapper
+    kind: manages
+  - from: proxy-admin
+    to: oracle
+    kind: manages
+  - from: proxy-admin
+    to: access-control
+    kind: manages
+  - from: proxy-admin
+    to: data-feed-1
+    kind: manages
+  - from: proxy-admin
+    to: data-feed-2
+    kind: manages
+  - from: admin-safe
+    to: access-control
+    kind: holds-role
+    label: DEFAULT_ADMIN (no timelock)
+  - from: admin-eoa-fordefi
+    to: access-control
+    kind: holds-role
+    label: DEFAULT_ADMIN (no timelock)
+  - from: access-control
+    to: mGLOBAL
+    kind: manages
+    label: gates mint/burn/pause/greenlist/blacklist
+  - from: oracle-updater-eoa
+    to: oracle
+    kind: holds-role
+    label: M_GLOBAL_CUSTOM_AGGREGATOR_FEED_ADMIN_ROLE (no timelock)
+
+  # === Mint/burn authority on mGLOBAL ===
+  - from: deposit-vault
+    to: mGLOBAL
+    kind: mints
+    label: M_GLOBAL_MINT_OPERATOR_ROLE
+  - from: mint-burn-eoa
+    to: mGLOBAL
+    kind: mints
+    label: MINT + BURN (no collateral check)
+  - from: redemption-vault-aave
+    to: mGLOBAL
+    kind: holds-role
+    label: M_GLOBAL_BURN_OPERATOR_ROLE
+  - from: redemption-vault-swapper
+    to: mGLOBAL
+    kind: holds-role
+    label: M_GLOBAL_BURN_OPERATOR_ROLE
+
+  # === Oracle → vault flow ===
+  - from: oracle
+    to: data-feed-1
+    kind: manages
+    label: NAV price feed
+  - from: oracle
+    to: data-feed-2
+    kind: manages
+  - from: data-feed-1
+    to: deposit-vault
+    kind: manages
+    label: price at deposit
+  - from: data-feed-1
+    to: redemption-vault-aave
+    kind: manages
+    label: price at redeem
+  - from: data-feed-2
+    to: redemption-vault-swapper
+    kind: manages
+    label: price at redeem
+
+  # === Oracle bound feeds (inactive — no role holders) ===
+  - from: oracle
+    to: oracle-raised
+    kind: manages
+    label: upper bound (inactive)
+  - from: oracle
+    to: oracle-lowered
+    kind: manages
+    label: lower bound (inactive)
+
+  # === Capital flow: vault → custody → strategy ===
+  - from: deposit-vault
+    to: mGLOBAL
+    kind: routes-through
+    label: USDC → mGLOBAL
+  - from: mGLOBAL
+    to: fordefi
+    kind: routes-through
+    label: tri-party MPC custody
+  - from: fordefi
+    to: fasanara
+    kind: routes-through
+    label: offchain strategy execution
+  - from: fasanara
+    to: fasanara
+    kind: allocates-to
+    label: "100% (TODO: verify allocation)"
+
+  # === Aave integration (idle capital in vaults) ===
+  - from: deposit-vault
+    to: aave
+    kind: deposits-into
+    label: idle USDC → aUSDC
+  - from: redemption-vault-aave
+    to: aave
+    kind: deposits-into
+    label: idle USDC → aUSDC
+
+  # === Redemption flow ===
+  - from: redemption-vault-aave
+    to: mGLOBAL
+    kind: routes-through
+    label: mGLOBAL → USDC (primary)
+  - from: redemption-vault-swapper
+    to: mGLOBAL
+    kind: routes-through
+    label: mGLOBAL → USDC (secondary)
+
+  # === Greenlist / blacklist operators ===
+  - from: mint-burn-eoa
+    to: mGLOBAL
+    kind: holds-role
+    label: GREENLIST_OP + BLACKLIST_OP + PAUSE
+  - from: greenlist-blacklist-eoa
+    to: mGLOBAL
+    kind: holds-role
+    label: GREENLIST_OP + BLACKLIST_OP (nonce 0)
+
+  # === Attestation Engine ===
+  - from: keystone-forwarder
+    to: save-cre-receiver
+    kind: routes-through
+    label: onReport()
+  - from: save-cre-receiver
+    to: save-registry
+    kind: routes-through
+    label: setAttestation()
+  - from: save-registry
+    to: oracle
+    kind: manages
+    label: NAV hash anchor
+  - from: llamarisk-canary
+    to: keystone-forwarder
+    kind: routes-through
+    label: verifier signatures
+  - from: vlayer
+    to: keystone-forwarder
+    kind: routes-through
+    label: cryptographic notarization
+
+  # === OFT adapter (inactive) ===
+  - from: oft-adapter
+    to: mGLOBAL
+    kind: manages
+    label: deployed but NO mGLOBAL roles (inactive)
