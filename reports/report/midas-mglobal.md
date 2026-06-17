@@ -4,7 +4,7 @@
 - **Token:** mGLOBAL
 - **Chain:** Ethereum
 - **Token Address:** [`0x7433806912Eae67919e66aea853d46Fa0aef98A8`](https://etherscan.io/token/0x7433806912Eae67919e66aea853d46Fa0aef98A8)
-- **Final Score: 3.2/5.0**
+- **Final Score: 3.4/5.0**
 
 ## Overview + Links
 
@@ -614,30 +614,29 @@ updater EOA. User redeems via RedemptionVaultWithAave or RedemptionVaultWithSwap
 - Bound feeds deployed but inactive — safety net not operational
 - No smart contract restrictions on how the funds are managed. Tokens can be minted without backing
 
-**Subcategory C: External Dependencies — 3.5**
+**Subcategory C: External Dependencies — 4.0**
 
-- Fasanara Capital: single critical dependency for strategy management and NAV calculation. Due diligence incomplete — **dependency risk is HIGHER than mHYPER's Hyperithm** due to unverified track record
+- Fasanara Capital: single critical dependency for strategy management and NAV calculation. **Fasanara provides zero public information about how mGLOBAL funds are deployed** — the strategy is a complete black box (92% unclassified). This is a single point of failure for core value creation with no transparency on the dependency's operations
 - Aave: idle capital integration (blue-chip, positive). Aave failure would impact vault idle capital but not core strategy
 - Fordefi: MPC custody with tri-party governance (established, tested)
 - MidasAccessControl: shared across all Midas products — single compromise affects entire platform
 - Strategy counterparties: unverifiable without access to Midas transparency data
 - Distributed backup shares for the Fordefi workspace, allowing Midas to recover and secure key material in case of counterparty failure
 
-**Centralization Score = (3.0 + 4.0 + 3.5) / 3 ≈ 3.5**
+**Centralization Score = (3.0 + 4.0 + 4.0) / 3 ≈ 3.7**
 
-**Score: 3.5/5** — Same structural centralization risks as mHYPER, with additional concerns: (a) oracle bounds are 285x looser (100% vs 0.35%), (b) bound feeds are deployed but inactive, (c) Fasanara due diligence is incomplete, increasing external dependency risk. The Aave integration partially offsets programmability concerns. The 48-hour timelock on upgrades is meaningful; role changes bypassing it entirely is not.
+**Score: 3.7/5** — Same structural centralization risks as mHYPER, with additional concerns: (a) oracle bounds are 285x looser (100% vs 0.35%), (b) bound feeds are deployed but inactive, (c) Fasanara is a single point of failure with complete opacity on funds deployment — no public information about how user capital is managed. The Aave integration partially offsets programmability concerns. The 48-hour timelock on upgrades is meaningful; role changes bypassing it entirely is not.
 
 #### 3. Funds Management (Weight: 30%)
 
-**Subcategory A: Collateralization — 4.0**
+**Subcategory A: Collateralization — 4.5**
 
 - Tokens are subordinated debt instruments — not direct claims on collateral
-- Strategy composition, collateral quality, and asset allocation are **unknown** (Fasanara's strategy framework not verified)
-- Aave integration means idle USDC → aUSDC is onchain and verifiable — this is a partial positive, but only covers idle capital, not the active strategy
+- Strategy composition, collateral quality, and asset allocation are **92% unclassified and completely opaque** — Fasanara provides zero public information about how mGLOBAL funds are managed. Unlike mHYPER's Hyperithm which had identifiable onchain counterparties, mGLOBAL's strategy is a black box
+- Aave integration means idle USDC → aUSDC is onchain and verifiable ($2.55M / 6.78%), but this only covers idle capital, not the active strategy
 - No onchain collateral verification in smart contracts; admin can mint tokens without backing
-- Strategy manager's credentials are unverified (vs mHYPER's well-documented Hyperithm)
 - Tri-party MPC custody via Fordefi should prevent unilateral fund access
-- **Score is HIGHER (riskier) than mHYPER's 3.5** due to unknown strategy composition and unverified manager
+- **Score is HIGHER (riskier) than mHYPER's 3.5** due to complete strategy opacity and unverifiable asset quality
 
 **Subcategory B: Provability — 3.5**
 
@@ -648,9 +647,9 @@ updater EOA. User redeems via RedemptionVaultWithAave or RedemptionVaultWithSwap
 - mGLOBAL-specific proof IDs in the registry have not been identified
 - **Score is HIGHER than mHYPER's 3.0** because: (a) Fasanara's reporting practices are unverified, (b) strategy allocation is completely opaque, (c) shorter history means fewer attestation cycles to build trust
 
-**Funds Management Score = (4.0 + 3.5) / 2 = 3.75 ≈ 3.8**
+**Funds Management Score = (4.5 + 3.5) / 2 = 4.0**
 
-**Score: 3.8/5** — Offchain funds management with subordinated debt structure. The Aave integration provides a positive onchain anchor, but it only covers idle capital, not active strategies. Fasanara's unverified track record and the completely opaque strategy allocation are material concerns. The Attestation Engine provides a verification pipeline, but it cannot compensate for the unknown manager and strategy risks.
+**Score: 4.0/5** — Offchain funds management with subordinated debt structure. The Aave integration provides a positive onchain anchor, but it only covers idle capital, not active strategies. **Fasanara provides zero public information about how mGLOBAL funds are deployed** — 92% of NAV is unclassified. This is a black-box strategy dependency. The Attestation Engine provides a verification pipeline, but it cannot compensate for complete strategy opacity.
 
 #### 4. Liquidity Risk (Weight: 15%)
 
@@ -673,14 +672,14 @@ updater EOA. User redeems via RedemptionVaultWithAave or RedemptionVaultWithSwap
 
 ### Final Score
 
-| Category                 | Score | Weight | Weighted    |
+| Category | Score | Weight | Weighted |
 | ------------------------ | ----- | ------ | ----------- |
 | Audits & Historical      | 2.5   | 20%    | 0.50        |
-| Centralization & Control | 3.5   | 30%    | 1.05        |
-| Funds Management         | 3.8   | 30%    | 1.14        |
+| Centralization & Control | 3.7   | 30%    | 1.11        |
+| Funds Management         | 4.0   | 30%    | 1.20        |
 | Liquidity Risk           | 3.0   | 15%    | 0.45        |
 | Operational Risk         | 2.0   | 5%     | 0.10        |
-| **Final Score**          |       |        | **3.2/5.0** |
+| **Final Score**          |       |        | **3.4/5.0** |
 
 
 ### Risk Tier
