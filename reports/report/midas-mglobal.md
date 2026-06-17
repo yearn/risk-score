@@ -156,7 +156,12 @@ Fasanara Capital is the strategy manager for mGLOBAL. Unlike mHYPER which uses H
 - **Redemption:** Two paths:
   - **MGlobalRedemptionVaultWithAave:** Primary redemption vault with Aave integration for idle capital. Holds `M_GLOBAL_BURN_OPERATOR_ROLE`
   - **MGlobalRedemptionVaultWithSwapper:** Secondary redemption vault with swapper functionality. Also holds `M_GLOBAL_BURN_OPERATOR_ROLE`
-- **Fees:** TODO — mGLOBAL-specific mint/redeem/management/performance fees not yet verified. Expected to match Midas standard: 0% management fee, 20% performance fee, 0% standard mint/redeem fees, 0.50% instant redemption fee (per mHYPER precedent and Midas docs)
+- **Fees (mGLOBAL-specific):**
+  - **Management fee:** 0.40% annual on AUM
+  - **Performance fee:** 0% on yield
+  - **Instant Minting:** 0%
+  - **Instant Redemption:** 0.50%
+  - This is a different fee model from mHYPER (which charges 0% management / 20% performance). mGLOBAL uses AUM-based fees with no performance cut — the 0.40% management fee is a drag on yield but predictable. The 0% performance fee means all strategy yield accrues to token holders
 - **Geographic Restrictions:** TODO — likely same as mHYPER (not available to US persons, UK, China, and sanctioned countries per [Midas docs](https://docs.midas.app/)). Needs mGLOBAL-specific confirmation
 
 ### Token Mint Authority
