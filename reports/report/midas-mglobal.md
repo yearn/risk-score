@@ -693,9 +693,9 @@ updater EOA. User redeems via RedemptionVaultWithAave or RedemptionVaultWithSwap
 | 4.5-5.0     | High Risk       | Not recommended                       |
 
 
-**Final Risk Tier: Medium Risk (3.2/5.0)**
+**Final Risk Tier: Medium Risk (3.4/5.0)**
 
-**Recommendation:** Approved with enhanced monitoring. The elevated Funds Management score (3.2) due to unverified strategy manager and opaque allocations warrants particular caution. **Strongly recommend completing mGLOBAL-specific Fasanara due diligence before any allocation**. Talk directly to Fasanara team for more information.
+**Recommendation:** Approved with enhanced monitoring. The elevated Funds Management score (4.0) — driven by complete strategy opacity (92% of NAV unclassified), not manager risk — warrants particular caution. **Strongly recommend completing mGLOBAL-specific Fasanara due diligence before any allocation**. Talk directly to Fasanara team for more information.
 
 **Required Conditions:**
 
