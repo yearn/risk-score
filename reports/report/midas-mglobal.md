@@ -4,7 +4,7 @@
 - **Token:** mGLOBAL
 - **Chain:** Ethereum
 - **Token Address:** [`0x7433806912Eae67919e66aea853d46Fa0aef98A8`](https://etherscan.io/token/0x7433806912Eae67919e66aea853d46Fa0aef98A8)
-- **Final Score: 3.4/5.0**
+- **Final Score: 3.5/5.0**
 
 ## Overview + Links
 
@@ -657,9 +657,11 @@ updater EOA. User redeems via RedemptionVaultWithAave or RedemptionVaultWithSwap
 - **DEX Liquidity:** non, principal can be redeemed with a fee or full after cycle
 - **Instant Redemption Capacity:** 1.15% withdrawable with additional 6.78% deposited into aave.
 - **Redemption Vault Duality:** Two vaults provide redundancy — if one faces issues, the other may still process redemptions.
+- **Holder Concentration (EXTREME):** [InfiniFi's MidasFarm](https://etherscan.io/address/0x7373A7ce3C023C56Cb66747AFbdF827627D31679) holds **81%** of supply (~$30.6M) and **matured June 15, 2026** — it can redeem at any time, which would collapse market cap from ~$37.6M to ~$7M overnight
+- **Vault Liquidity (onchain, June 17, 2026):** DepositVault $0, RedemptionVaultWithAave $0, RedemptionVaultWithSwapper ~$734 USDC. Instant-redemption capacity at the vault level is effectively **near zero** — a large redemption depends on Fasanara unwinding offchain positions
 - **Stress Performance:** No stress events for mGLOBAL
 
-**Score: 3.0/5** — Redemption mechanism exists but parameters are unverified
+**Score: 4.0/5** — No secondary market (zero DEX liquidity), so exit is entirely dependent on Midas redemption infrastructure, which currently holds near-zero idle USDC. Combined with extreme holder concentration (81% in a now-matured InfiniFi position that can exit at will), large or simultaneous redemptions would have to wait on offchain unwinds of a 92%-unclassified strategy. The dual-vault redundancy and 6.78% Aave-backed idle capital are partial mitigants, but instant exit is not assured at scale
 
 #### 5. Operational Risk (Weight: 5%)
 
@@ -677,9 +679,9 @@ updater EOA. User redeems via RedemptionVaultWithAave or RedemptionVaultWithSwap
 | Audits & Historical      | 2.5   | 20%    | 0.50        |
 | Centralization & Control | 3.7   | 30%    | 1.11        |
 | Funds Management         | 4.0   | 30%    | 1.20        |
-| Liquidity Risk           | 3.0   | 15%    | 0.45        |
+| Liquidity Risk           | 4.0   | 15%    | 0.60        |
 | Operational Risk         | 2.0   | 5%     | 0.10        |
-| **Final Score**          |       |        | **3.4/5.0** |
+| **Final Score**          |       |        | **3.5/5.0** |
 
 
 ### Risk Tier
@@ -688,14 +690,16 @@ updater EOA. User redeems via RedemptionVaultWithAave or RedemptionVaultWithSwap
 | ----------- | --------------- | ------------------------------------- |
 | 1.0-1.5     | Minimal Risk    | Approved, high confidence             |
 | 1.5-2.5     | Low Risk        | Approved with standard monitoring     |
-| **2.5-3.5** | **Medium Risk** | **Approved with enhanced monitoring** |
-| 3.5-4.5     | Elevated Risk   | Limited approval, strict limits       |
+| 2.5-3.5     | Medium Risk     | Approved with enhanced monitoring     |
+| **3.5-4.5** | **Elevated Risk** | **Limited approval, strict limits** |
 | 4.5-5.0     | High Risk       | Not recommended                       |
 
 
-**Final Risk Tier: Medium Risk (3.4/5.0)**
+**Final Risk Tier: Elevated Risk (3.5/5.0)**
 
-**Recommendation:** Approved with enhanced monitoring. The elevated Funds Management score (4.0) — driven by complete strategy opacity (92% of NAV unclassified), not manager risk — warrants particular caution. **Strongly recommend completing mGLOBAL-specific Fasanara due diligence before any allocation**. Talk directly to Fasanara team for more information.
+**Recommendation:** Limited approval with strict limits. The score is driven by (a) complete strategy opacity — 92% of NAV unclassified, a Funds Management score of 4.0 — and (b) Liquidity risk (4.0): no secondary market, near-zero idle vault USDC, and extreme holder concentration (81% in a now-matured InfiniFi position). **Strongly recommend completing mGLOBAL-specific Fasanara due diligence before any allocation**. Talk directly to Fasanara team for more information.
+
+**Path to a lower score:** This assessment is constrained primarily by opacity, not by a verified flaw. A clear investment deck, strategy mandate, or attested allocation breakdown that classifies the 92% "Unclassified" NAV would directly lower Collateralization, Provability, and External Dependencies — plausibly moving the final score back into the Medium tier (2.5–3.5). Resumption of regular oracle/NAV updates and tighter oracle bounds would reinforce that. The manager itself (Fasanara) is already verified as FCA-authorised; the gap is mGLOBAL-specific strategy disclosure.
 
 **Required Conditions:**
 
