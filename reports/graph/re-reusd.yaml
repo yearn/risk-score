@@ -118,7 +118,7 @@ nodes:
   - id: ethena-susde
     label: Ethena sUSDe (basis-trade)
     category: dependency
-    note: ~90% of onchain reserves; 7-day cooldown
+    note: ~88% of onchain reUSD reserves; 7-day cooldown
   - id: section114
     label: §114 Reinsurance Trust
     category: dependency
@@ -136,9 +136,14 @@ nodes:
     address: "0xFF3BC18cCBd5999CE63E788A1c250a88626aD099"
     category: dependency
   - id: tnf-aup
-    label: The Network Firm (offchain AUP)
+    label: The Network Firm (offchain AUP + LedgerLens)
     category: dependency
-    note: Daily attestation of §114 trust balances
+    note: Attests §114 trust balances; feeds the Chainlink PoR via LedgerLens API
+  - id: chainlink-por
+    label: Chainlink PoR "Re Offchain Reserves" (Avalanche)
+    address: "0xc79a363a3f849d8b3F6A1932f748eA9d4fB2f607"
+    category: dependency
+    note: OCR2 PoR feed (~$176.8M); TNF LedgerLens source; non-value-securing; NOT consumed by Ethereum reUSD logic
   - id: fireblocks
     label: Fireblocks Custody (MPC, offchain)
     category: dependency
@@ -272,7 +277,11 @@ edges:
   - from: section114
     to: tnf-aup
     kind: routes-fees-to
-    label: daily attestation
+    label: reserve attestation
+  - from: tnf-aup
+    to: chainlink-por
+    kind: routes-through
+    label: LedgerLens → Chainlink PoR (Avalanche, transparency mirror)
   - from: icl-custodial
     to: fireblocks
     kind: routes-through
