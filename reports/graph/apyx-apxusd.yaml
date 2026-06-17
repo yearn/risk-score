@@ -1,0 +1,187 @@
+slug: apyx-apxusd
+title: Apyx (apxUSD / apyUSD) — Contract Dependency Graph
+chain: ethereum
+
+categories:
+  - id: vault
+    label: Vault / Token
+  - id: governance
+    label: Governance
+  - id: infra
+    label: Protocol Infra
+  - id: dependency
+    label: External Dependency
+
+nodes:
+  # === Vault / token layer ===
+  - id: apxUSD
+    label: apxUSD (Dividend-Backed USD)
+    address: "0x98a878B1CD98131b271883b390F68d2c90674665"
+    category: vault
+    note: ERC-20, UUPS Proxy
+  - id: apyUSD
+    label: apyUSD (Yield Vault)
+    address: "0x38eeb52f0771140d10c4e9a9a72349a329fe8a6a"
+    category: vault
+    note: ERC-4626 yield vault, UUPS Proxy
+  - id: unlock-token
+    label: UnlockToken (30-day cooldown)
+    address: "0x93775e2dfa4e716c361a1f53f212c7ae031bf4e6"
+    category: vault
+    note: apyUSD redemption queue
+
+  # === Protocol infra ===
+  - id: access-manager
+    label: AccessManager (OZ v5)
+    address: "0xe167330e2eac88666de253e9607c6d9ae0ca2824"
+    category: infra
+  - id: minter-v0
+    label: MinterV0 (EIP-712)
+    address: "0x2c36e1adfaa80ee0324b04cc814f5207bb7ba76e"
+    category: infra
+    note: MINT_STRAT_ROLE (60s / 4h delays)
+  - id: rate-oracle
+    label: ApxUSDRateOracle
+    address: "0xa2ef2e7bf32248083e514a737259f3785ea8d37d"
+    category: infra
+    note: Admin-set Curve pool oracle (0 delay)
+  - id: yield-distributor
+    label: YieldDistributor
+    address: "0xdbca79adc13a0fa6f921d5cf5b3fae2b8a739c2a"
+    category: infra
+  - id: linear-vest
+    label: LinearVestV0 (~17d vesting)
+    address: "0x0d62b4cc02b4b51ed19ddf41d7a7979cf394c99f"
+    category: infra
+  - id: address-list
+    label: AddressList (Allow/Deny)
+    address: "0x2c271ddf484ac0386d216eb7eb9ff02d4dc0f6aa"
+    category: infra
+  - id: order-delegate
+    label: OrderDelegate
+    address: "0x5c697433e214b1a6d7a2ddd4cdca1505c98f75f1"
+    category: infra
+
+  # === Governance ===
+  - id: admin-safe
+    label: Admin Safe (4-of-6)
+    address: "0xabdd8c8ee69e5f5180eb9352aeffc5ceead65e96"
+    category: governance
+    note: ADMIN_ROLE; 0 exec delay
+  - id: guardian-safe
+    label: Guardian / Upgrader Safe (3-of-6)
+    address: "0xf9862efc1704ac05e687f66e5cd8c130e5663ce2"
+    category: governance
+    note: UPGRADER (3d), PAUSER (0), UNPAUSER (4h), YIELD_OPERATOR (0)
+  - id: ops-safe
+    label: Operations Safe (3-of-5)
+    address: "0x37b0779a66edc491df83e59a56d485835323a555"
+    category: governance
+    note: No AccessManager roles
+
+  # === External dependencies ===
+  - id: dep-preferred-shares
+    label: DAT Preferred Shares (STRC / SATA)
+    category: dependency
+    note: Offchain Nasdaq-listed equities; ~11-12% dividend
+  - id: dep-mpc-custody
+    label: MPC Prime-Brokerage Custody
+    category: dependency
+    note: Third-party prime brokerage accounts; custodians not publicly named
+  - id: dep-curve
+    label: Curve apxUSD/USDC StableSwap-NG
+    address: "0xe1b96555bbeca40e583bbb41a11c68ca4706a414"
+    category: dependency
+    note: Primary exit; ~$29M TVL
+  - id: dep-ccip
+    label: Chainlink CCIP (Base)
+    category: dependency
+    note: Cross-chain expansion to Base
+
+edges:
+  # === Governance flow ===
+  - from: admin-safe
+    to: access-manager
+    kind: holds-role
+    label: ADMIN_ROLE (0 delay)
+  - from: guardian-safe
+    to: access-manager
+    kind: holds-role
+    label: UPGRADER (3d) + PAUSER + UNPAUSER + YIELD_OPERATOR
+  - from: access-manager
+    to: apxUSD
+    kind: manages
+    label: role-gated calls
+  - from: access-manager
+    to: apyUSD
+    kind: manages
+    label: role-gated calls
+  - from: access-manager
+    to: minter-v0
+    kind: manages
+  - from: access-manager
+    to: rate-oracle
+    kind: manages
+    label: setRate (0 delay)
+  - from: access-manager
+    to: yield-distributor
+    kind: manages
+  - from: access-manager
+    to: linear-vest
+    kind: manages
+  - from: access-manager
+    to: address-list
+    kind: manages
+  - from: access-manager
+    to: unlock-token
+    kind: manages
+
+  # === Mint authority on apxUSD ===
+  - from: minter-v0
+    to: apxUSD
+    kind: mints
+    label: MINT_STRAT_ROLE
+  - from: order-delegate
+    to: minter-v0
+    kind: routes-through
+    label: minting delegate
+
+  # === Internal vault flow ===
+  - from: apyUSD
+    to: apxUSD
+    kind: deposits-into
+    label: ERC-4626 stake
+  - from: apyUSD
+    to: unlock-token
+    kind: routes-through
+    label: "30-day cooldown"
+
+  # === Yield distribution ===
+  - from: yield-distributor
+    to: linear-vest
+    kind: routes-through
+    label: ~17d linear
+  - from: linear-vest
+    to: apyUSD
+    kind: deposits-into
+    label: vested apxUSD yield
+
+  # === Oracle wiring ===
+  - from: rate-oracle
+    to: dep-curve
+    kind: routes-through
+    label: pool pricing
+
+  # === Backing & external dependencies ===
+  - from: apxUSD
+    to: dep-preferred-shares
+    kind: deposits-into
+    label: offchain backing
+  - from: dep-preferred-shares
+    to: dep-mpc-custody
+    kind: routes-through
+    label: custody
+  - from: apxUSD
+    to: dep-ccip
+    kind: routes-through
+    label: Base bridge

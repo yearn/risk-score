@@ -1,0 +1,35 @@
+name: Dependency Coverage
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+    paths:
+      - 'reports/report/**'
+      - 'scripts/dependencies/protocols.yaml'
+      - 'scripts/check_dependency_coverage.py'
+      - 'tests/test_check_dependency_coverage.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: dependency-coverage-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  coverage:
+    # Skip draft PRs — they iterate a lot. Runs once the PR is marked ready.
+    if: github.event_name != 'pull_request' || github.event.pull_request.draft == false
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@fac544c07dec837d0ccb6301d7b5580bf5edae39 # v8.2.0
+
+      - name: Unit tests for the coverage check
+        run: uv run python -m unittest tests.test_check_dependency_coverage
+
+      - name: Assert reports and protocols.yaml are in sync
+        run: uv run scripts/check_dependency_coverage.py

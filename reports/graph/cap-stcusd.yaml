@@ -1,0 +1,159 @@
+slug: cap-stcusd
+title: Cap (stcUSD) — Contract Dependency Graph
+chain: ethereum
+
+categories:
+  - id: vault
+    label: Vault / Token
+  - id: strategy
+    label: Strategy
+  - id: governance
+    label: Governance
+  - id: dependency
+    label: External Dependency
+
+nodes:
+  # === Vault / token layer ===
+  - id: stcUSD
+    label: stcUSD (Staked cUSD)
+    address: "0x88887bE419578051FF9F4eb6C858A951921D8888"
+    category: vault
+    note: ERC-4626 upgradeable proxy
+  - id: cUSD
+    label: cUSD (Cap Stablecoin)
+    address: "0xcCcc62962d17b8914c62D74FfB843d73B2a3cccC"
+    category: vault
+    note: ERC-20 upgradeable proxy; backed ~95% USDC / ~5% wWTGXX
+
+  # === Strategies (capital deployment legs) ===
+  - id: usdc-frv
+    label: USDC Fractional Reserve (Yearn V3)
+    address: "0x3Ed6aa32c930253fc990dE58fF882B9186cd0072"
+    category: strategy
+  - id: wwtgxx-frv
+    label: wWTGXX Fractional Reserve (Yearn V3)
+    address: "0xb1c1C80FDbBde5B40264e1410550F3C864113bF8"
+    category: strategy
+  - id: lender
+    label: Lender (Operator Borrowing)
+    address: "0x15622c3dbbc5614E6DFa9446603c1779647f01FC"
+    category: strategy
+    note: Engine for institutional operator loans
+
+  # === Governance ===
+  - id: multisig
+    label: Multisig (3-of-5)
+    address: "0xb8FC49402dF3ee4f8587268FB89fda4d621a8793"
+    category: governance
+    note: Gnosis Safe v1.4.1; anonymous signers
+  - id: timelock
+    label: Timelock (24h)
+    address: "0xD8236031d8279d82E615aF2BFab5FC0127A329ab"
+    category: governance
+  - id: deployer-eoa
+    label: Deployer EOA
+    address: "0xc1ab5a9593e6e1662a9a44f84df4f31fc8a76b52"
+    category: governance
+    note: Retains EXECUTOR_ROLE on Timelock (residual)
+  - id: access-control
+    label: Access Control
+    address: "0x7731129a10d51e18cDE607C5C115F26503D2c683"
+    category: governance
+    note: Role-based permission system; DEFAULT_ADMIN held by Timelock
+
+  # === External dependencies ===
+  - id: morpho-steakhouse-prime
+    label: Morpho Steakhouse Prime USDC
+    address: "0xbeef088055857739C12CD3765F20b7679Def0f51"
+    category: dependency
+    note: ~$29.13M (60% of USDC FRV)
+  - id: morpho-usdc-prime
+    label: Morpho Gauntlet USDC Prime
+    address: "0x8c106EEDAd96553e64287A5A6839c3Cc78afA3D0"
+    category: dependency
+    note: ~$19.73M (40% of USDC FRV)
+  - id: aave-v3-usdc
+    label: Aave V3 USDC Core
+    category: dependency
+    note: Strategy wired in but max_debt=0 since Apr/May 2026 (effectively unused)
+  - id: wwtgxx
+    label: wWTGXX (WisdomTree Gov MMF)
+    category: dependency
+    note: Tokenized money-market fund; minimal DeFi adoption
+  - id: operators
+    label: Institutional Operators
+    category: dependency
+    note: IMC Trading / Edge Capital / Susquehanna Crypto
+  - id: symbiotic
+    label: Symbiotic Restaking
+    category: dependency
+    note: Per-operator vaults; instant slashing on default
+
+edges:
+  # === Governance flow ===
+  - from: multisig
+    to: timelock
+    kind: proposes-on
+    label: PROPOSER + EXECUTOR + CANCELLER
+  - from: deployer-eoa
+    to: timelock
+    kind: holds-role
+    label: EXECUTOR (residual)
+  - from: timelock
+    to: access-control
+    kind: controls
+    label: "DEFAULT_ADMIN (24h)"
+  - from: access-control
+    to: cUSD
+    kind: manages
+    label: upgradeable proxy
+  - from: access-control
+    to: stcUSD
+    kind: manages
+    label: upgradeable proxy
+
+  # === Internal vault flow ===
+  - from: stcUSD
+    to: cUSD
+    kind: deposits-into
+    label: "ERC-4626 (76% staked)"
+
+  # === Allocation: cUSD reserves into strategy legs ===
+  - from: cUSD
+    to: usdc-frv
+    kind: allocates-to
+    label: "~$48.9M USDC"
+  - from: cUSD
+    to: lender
+    kind: allocates-to
+    label: "~$43.8M op debt"
+  - from: cUSD
+    to: wwtgxx-frv
+    kind: allocates-to
+    label: "~$5.08M wWTGXX"
+
+  # === Strategy legs → external dependencies ===
+  - from: usdc-frv
+    to: morpho-steakhouse-prime
+    kind: deposits-into
+    label: "60%"
+  - from: usdc-frv
+    to: morpho-usdc-prime
+    kind: deposits-into
+    label: "40%"
+  - from: usdc-frv
+    to: aave-v3-usdc
+    kind: deposits-into
+    label: "0% (deactivated)"
+  - from: wwtgxx-frv
+    to: wwtgxx
+    kind: deposits-into
+    label: holder strategy
+  - from: lender
+    to: operators
+    kind: deposits-into
+    label: hurdle ~5.2%
+  - from: lender
+    to: symbiotic
+    kind: routes-through
+    label: slashing collateral

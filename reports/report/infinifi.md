@@ -143,6 +143,44 @@ The protocol acts as an asset manager, deploying user funds into other protocols
   - **Queue**: With liquid reserves depleted, redemption requests enter a **FIFO Queue**. Pending requests are fulfilled as capital is unwound from illiquid strategies or new deposits enter.
   - **Whitelisting**: No whitelist for redemption; anyone holding iUSD can redeem or enter the queue.
 
+### Token Mint Authority
+
+**Mint mechanism:**
+
+- **siUSD** ([`0xDBDC…7389bCB`](https://etherscan.io/address/0xDBDC1Ef57537E34680B898E1FEBD3D68c7389bCB)): standard ERC-4626 (`StakedToken`) wrapping iUSD. Anyone with iUSD can call `deposit()` / `mint()` and receive siUSD. No privileged role on the share token.
+- **iUSD** ([`0x48f9…3D89c`](https://etherscan.io/address/0x48f9e38f3070AD8945DFEae3FA70987722E3D89c)): role-gated mint via `RECEIPT_TOKEN_MINTER` on `InfiniFiCore` ([`0xF6d4…25490`](https://etherscan.io/address/0xF6d48735EcCf12bDC1DF2674b1ce3fcb3bD25490)). Only contracts holding the role can call `mint(...)`. User-facing mint flow: deposit USDC/USDT → `Gateway` → `MintController` → `iUSD.mint`.
+
+**Mint requires backing:** Yes for the user-facing path — `MintController` only mints iUSD against USDC/USDT collateral pulled in the same transaction. The protocol-internal mints (`YieldSharing`, `PLSmoother`) are bounded by the same loss-socialization accounting (PPS can only rise by realized yield) and do not represent admin-mintable supply.
+
+**Per-address mint authority** (verified onchain on May 18, 2026 by enumerating `RECEIPT_TOKEN_MINTER` and `RECEIPT_TOKEN_BURNER` on `InfiniFiCore`):
+
+| Address | Can Mint | Can Burn | Role / Mechanism | Notes |
+|---------|:--------:|:--------:|------------------|-------|
+| Any caller of siUSD `deposit()` / `mint()` | ✓ | ✓ | Permissionless ERC-4626 | Atomic against iUSD |
+| [`MintController`](https://etherscan.io/address/0x49877d937B9a00d50557bdC3D87287b5c3a4C256) | ✓ | — | `RECEIPT_TOKEN_MINTER` | User-facing mint controller; only mints against USDC/USDT collateral |
+| [`MigrationController`](https://etherscan.io/address/0x5F5403656E4Db95aCcF1064A714B1bcE351839F8) | ✓ | — | `RECEIPT_TOKEN_MINTER` | Additional `ENTRY_POINT` for migrations |
+| [`YieldSharing` (proxy)](https://etherscan.io/address/0x90E91f5bfD9a0a4d925BF30b512add8cD2bbAE3b) | ✓ | ✓ | `RECEIPT_TOKEN_MINTER` + `RECEIPT_TOKEN_BURNER` | Distributes farm yield as new iUSD; bounded by realized yield |
+| [`PLSmoother`](https://etherscan.io/address/0xC324569141697045B9EdE54B5d4623a691ed57A4) | ✓ | ✓ | `RECEIPT_TOKEN_MINTER` + `RECEIPT_TOKEN_BURNER` | Smooths profit/loss across siUSD epochs |
+| [`siUSD` (StakedToken)](https://etherscan.io/address/0xDBDC1Ef57537E34680B898E1FEBD3D68c7389bCB) | — | ✓ | `RECEIPT_TOKEN_BURNER` | Burns iUSD on stcUSD redemptions |
+| [`UnwindingModule`](https://etherscan.io/address/0x7092A43aE5407666C78dBEA657a1891f42b3dFcc) | — | ✓ | `RECEIPT_TOKEN_BURNER` | Burns iUSD during liUSD early-exit settlement |
+| [`LockingController`](https://etherscan.io/address/0x1d95cC100D6Cd9C7BbDbD7Cb328d99b3D6037fF7) | — | ✓ | `RECEIPT_TOKEN_BURNER` | Burns iUSD when liUSD positions are slashed |
+| [`RedeemController`](https://etherscan.io/address/0xCb1747E89a43DEdcF4A2b831a0D94859EFeC7601) | — | ✓ | `RECEIPT_TOKEN_BURNER` | Burns iUSD when redemptions clear the FIFO queue |
+| [`PLSmootherHelper`](https://etherscan.io/address/0x215C7fA0E620FCE99Ed4891BCcb7523388b010b8) | — | ✓ | `RECEIPT_TOKEN_BURNER` | Helper for PLSmoother burn flow |
+
+**Adding a new `RECEIPT_TOKEN_MINTER`:** `DEFAULT_ADMIN_ROLE` on `InfiniFiCore` has been renounced (0 holders), so OpenZeppelin's default `grantRole` path is closed. Role grants flow through `GOVERNOR` (held by Long Timelock, 7-day delay). `MINOR_ROLES_MANAGER` (held by multisig + Long Timelock) only covers `PAUSE` / `PERIODIC_REBALANCER` / `FARM_SWAP_CALLER` and explicitly *cannot* add a new mint role — adding a minter requires Long Timelock execution.
+
+**Rate limits / supply caps:** None onchain. Mint capacity is implicitly bounded by deposit-asset supply (USDC/USDT held by `MintController`) and by the `maxLossPercentage` first-loss buffer that auto-pauses on excessive losses.
+
+**Backing check at mint time:**
+
+- **`MintController` path** (user-facing USDC/USDT deposits): **atomic.** Collateral must transfer in the same call before `iUSD.mint(...)` fires. Cannot mint unbacked.
+- **`MigrationController` path**: atomic against the migration source (same pull-collateral-then-mint pattern).
+- **`YieldSharing` and `PLSmoother` paths** (protocol-internal yield distribution and P&L smoothing): **not atomic with backing.** The minter contract has no `transferFrom(asset, ...)` before `mint(...)`. PLSmoother's [`smoothProfit(receiptTokenProfit, duration)`](https://etherscan.io/address/0xC324569141697045B9EdE54B5d4623a691ed57A4#code) literally calls `ReceiptToken(receiptToken).mint(address(this), receiptTokenProfit)` with no on-chain assertion that USDC has arrived in the protocol — the caller is trusted to only call it when farms have already reported `receiptTokenProfit` of realized USDC profit. The trust surface here is layered:
+  1. The `FINANCE_MANAGER` role-holder set (currently 3 contracts: `YieldSharing`, `LiquidationFarm`, `PLSmootherHelper`). No EOA or multisig holds the role directly. Adding a new holder requires `GOVERNOR` (Long Timelock, 7d).
+  2. The calling contract correctly accounting realized farm profit before calling `smoothProfit`. A bug in `YieldSharing`'s profit math, or a compromised farm that over-reports yield, would let PLSmoother mint unbacked iUSD. The PLSmoother contract itself would not catch the discrepancy.
+
+**Slashing-order quirk** (from PLSmoother source comment): *"the vesting yield held by this contract … isn't included in the slashing order. As a result, it could hold undistributed rewards (i.e. pending profit) that would otherwise could have been used to mitigate losses."* If losses materialize while iUSD is still mid-vest inside PLSmoother, that pending profit does **not** absorb the loss — losses skip the smoother and hit liUSD / siUSD directly. An audited and acknowledged design property, not a bug, but a real risk-review-relevant point.
+
 ### Collateralization
 
 - **Backing**: iUSD is backed by the assets deployed in the underlying strategies.

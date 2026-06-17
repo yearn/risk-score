@@ -24,8 +24,11 @@ REPORTS_DIR = Path("reports/report")
 STALE_DAYS = 60
 LABEL = "reassessment"
 TITLE_PREFIX = "Reassessment: "
+DEFAULT_REPO = "yearn/risk-score"
+PUBLIC_REPORT_BASE_URL = "https://risk.yearn.farm/report"
 
 ASSESSMENT_LINE_RE = re.compile(r"\*\*Assessment Date:\*\*\s*([^\n]+)", re.IGNORECASE)
+WARNING_LINE_RE = re.compile(r"\*\*Warning:\*\*\s*([^\n]+)", re.IGNORECASE)
 DATE_RE = re.compile(
     r"\b("
     r"January|February|March|April|May|June|July|August|September|October|November|December"
@@ -80,6 +83,8 @@ def parse_report(path: Path) -> dict:
     title = title_match.group(1).strip() if title_match else path.stem
     score_match = SCORE_RE.search(content)
     score = score_match.group(1) if score_match else None
+    warning_match = WARNING_LINE_RE.search(content)
+    warning = warning_match.group(1).strip() if warning_match else None
 
     date = parse_assessment_date(content)
     source = "report-header"
@@ -94,6 +99,7 @@ def parse_report(path: Path) -> dict:
         "score": score,
         "date": date,
         "date_source": source,
+        "warning": warning,
     }
 
 
@@ -117,23 +123,52 @@ def open_reassessment_titles() -> set[str]:
     return {issue["title"] for issue in json.loads(out)}
 
 
-def repo_slug() -> str | None:
-    return os.environ.get("GITHUB_REPOSITORY")
+def extract_repo_slug(remote_url: str) -> str | None:
+    """Return owner/repo from common GitHub remote URL forms."""
+    patterns = (
+        r"github\.com[:/]([^/\s]+)/([^/\s]+?)(?:\.git)?$",
+        r"^git@github\.com:([^/\s]+)/([^/\s]+?)(?:\.git)?$",
+    )
+    for pattern in patterns:
+        match = re.search(pattern, remote_url.strip())
+        if match:
+            return f"{match.group(1)}/{match.group(2)}"
+    return None
+
+
+def git_remote_repo_slug() -> str | None:
+    try:
+        remote_url = subprocess.check_output(
+            ["git", "remote", "get-url", "origin"],
+            text=True,
+            stderr=subprocess.DEVNULL,
+        ).strip()
+    except subprocess.CalledProcessError:
+        return None
+    return extract_repo_slug(remote_url)
+
+
+def repo_slug() -> str:
+    return os.environ.get("GITHUB_REPOSITORY") or git_remote_repo_slug() or DEFAULT_REPO
+
+
+def public_report_url(slug: str) -> str:
+    return f"{PUBLIC_REPORT_BASE_URL}/{slug}/"
+
+
+def source_report_url(slug: str) -> str:
+    return f"https://github.com/{repo_slug()}/blob/master/reports/report/{slug}.md"
 
 
 def build_issue_body(report: dict, days: int) -> str:
-    repo = repo_slug()
     rel = f"reports/report/{report['slug']}.md"
-    if repo:
-        link = f"https://github.com/{repo}/blob/master/{rel}"
-    else:
-        link = rel
     date_str = report["date"].date().isoformat() if report["date"] else "unknown"
     score_str = f"{report['score']}/5.0" if report["score"] else "unknown"
     return (
         f"The risk assessment **{report['title']}** has not been updated in "
         f"{days} days and is due for reassessment.\n\n"
-        f"- **Report:** [`{rel}`]({link})\n"
+        f"- **Report:** [{report['slug']}]({public_report_url(report['slug'])})\n"
+        f"- **Source:** [`{rel}`]({source_report_url(report['slug'])})\n"
         f"- **Last Assessment Date:** {date_str} (source: {report['date_source']})\n"
         f"- **Current Score:** {score_str}\n"
         f"- **Days Since Last Assessment:** {days}\n"
@@ -196,6 +231,14 @@ def main() -> int:
     failed_count = 0
     for path in sorted(REPORTS_DIR.glob("*.md")):
         report = parse_report(path)
+        if report["warning"]:
+            log.info(
+                "SKIP %s — terminal warning: %s",
+                report["slug"],
+                report["warning"],
+            )
+            skipped_count += 1
+            continue
         if report["date"] is None:
             log.warning("could not determine date for %s; skipping", path.name)
             continue
