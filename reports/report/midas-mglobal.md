@@ -20,7 +20,12 @@ Legally, mGLOBAL tokens are structured as **subordinated debt instruments** of M
 - **Total Supply:** ~37,611,592.37 mGLOBAL — 18 decimals, verified onchain via `totalSupply()` on [token contract](https://etherscan.io/address/0x7433806912Eae67919e66aea853d46Fa0aef98A8) (all on Ethereum; no cross-chain deployments active)
 - **Decimals:** 18 (verified onchain, not 6 as typical for Midas tokens)
 - **Token Name:** "Midas Fasanara Global" — explicitly naming Fasanara as the strategy partner
-- **Holders:** TODO — holder count requires Etherscan API Pro tier. Token created April 3, 2026; holder base expected to be small given 10-week history and KYC requirement
+- **Holders:** 8 total holders per [Etherscan](https://etherscan.io/token/0x7433806912Eae67919e66aea853d46Fa0aef98A8), 4 real holders:
+  - **[MidasFarm](https://etherscan.io/address/0x7373A7ce3C023C56Cb66747AFbdF827627D31679):** **81%** — Midas staking contract where users deposit mGLOBAL for yield. This is NOT a single entity; the 81% represents aggregated user deposits through the farm
+  - **[EOA](https://etherscan.io/address/0x882C825405fBBE45DCc1ad52b639aFbC4592EDb7):** **10.46%** — single institutional holder/investor. Has interacted with DepositVault and USDC approval
+  - **[Gnosis Safe](https://etherscan.io/address/0xaB05c0DB9D26e96A9dcEDCAFCA23341316F6fe6F):** **6%** — 3/4 multisig (likely DAO or institutional treasury)
+  - **[BeaconProxy](https://etherscan.io/address/0xD36f095556d5717fd9231a2091e8e98bEb7cB621):** **2.3%** — proxy contract
+  - Concentration is moderate — the 81% farm share is distributed across stakers, largest single entity is 10.46% EOA. However, the farm's internal staker concentration cannot be assessed onchain without MidasFarm-specific data
 - **Creation:** [Block 24798265](https://etherscan.io/tx/0xacc1f08c1f1ea036fa35444b67328ae3d3098d6cbbc520eacc81116156eb7772) (April 3, 2026, ~10 weeks in production)
 - **Midas Platform TVL:** ~$109.5M per [DeFiLlama](https://defillama.com/protocol/midas-rwa) (June 17, 2026) — down from peak of ~$927.8M (October 27, 2025)
 - **Ethereum TVL:** ~$85M per [DeFiLlama](https://defillama.com/protocol/midas-rwa)
@@ -202,8 +207,8 @@ Fasanara Capital is the strategy manager for mGLOBAL. Unlike mHYPER which uses H
   - **MGlobalRedemptionVaultWithSwapper** — secondary redemption with swapper functionality
   - TODO: specific redemption parameters (fees, delays, capacity limits) for each vault
 - **Redemption Speed:** TODO — likely similar to mHYPER (instant when capacity available, 1–3 business day standard queue)
-- **Large Holder Impact:** With ~$37.6M market cap and holder count requiring Etherscan Pro tier, concentration risk is unknown
-  - Holder count requires Etherscan API Pro tier — not verifiable with free tier
+- **Large Holder Impact:** 8 holders total, 4 real holders. [MidasFarm](https://etherscan.io/address/0x7373A7ce3C023C56Cb66747AFbdF827627D31679) holds 81% (user deposits aggregated via staking contract), largest single entity is an [EOA](https://etherscan.io/address/0x882C825405fBBE45DCc1ad52b639aFbC4592EDb7) with 10.46% (~$3.9M). A [3/4 Gnosis Safe](https://etherscan.io/address/0xaB05c0DB9D26e96A9dcEDCAFCA23341316F6fe6F) holds 6% (~$2.3M). The farm's internal staker concentration cannot be assessed onchain
+  - Holder count and top holder data from [Etherscan token page](https://etherscan.io/token/0x7433806912Eae67919e66aea853d46Fa0aef98A8) — the free-tier token page shows the full holder list for this token (only 8 total)
 - **Vault USDC Balances (onchain, June 17, 2026):** 
   - [DepositVault](https://etherscan.io/address/0xce29c36c6d4556f2d01d79414c1354b968dddef1): **$0 USDC**
   - [RedemptionVaultWithAave](https://etherscan.io/address/0xa0fc8bdfb1e6a705c1375810989b1d70a982b01b): **$0 USDC**
