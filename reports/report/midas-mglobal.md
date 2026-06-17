@@ -4,7 +4,7 @@
 - **Token:** mGLOBAL
 - **Chain:** Ethereum
 - **Token Address:** [`0x7433806912Eae67919e66aea853d46Fa0aef98A8`](https://etherscan.io/token/0x7433806912Eae67919e66aea853d46Fa0aef98A8)
-- **Final Score: 3.5/5.0**
+- **Final Score: 3.51/5.0**
 
 ## Overview + Links
 
@@ -681,7 +681,7 @@ updater EOA. User redeems via RedemptionVaultWithAave or RedemptionVaultWithSwap
 | Funds Management         | 4.0   | 30%    | 1.20        |
 | Liquidity Risk           | 4.0   | 15%    | 0.60        |
 | Operational Risk         | 2.0   | 5%     | 0.10        |
-| **Final Score**          |       |        | **3.5/5.0** |
+| **Final Score**          |       |        | **3.51/5.0** |
 
 
 ### Risk Tier
