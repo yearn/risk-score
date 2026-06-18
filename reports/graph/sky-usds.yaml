@@ -15,7 +15,7 @@ nodes:
     label: sUSDS
     address: "0xa3931d71877C0E7a3148CB7Eb4463524FEc27fbD"
     category: vault
-    note: "ERC-4626 savings wrapper; totalAssets() ~5.89B USDS at June 17, 2026 reassessment."
+    note: "ERC-4626 savings wrapper; totalAssets() ~5.89B USDS at June 18, 2026 reassessment."
   - id: usds
     label: USDS
     address: "0xdC035D45d973E3EC169d2276DDab16f1e407384F"
@@ -40,7 +40,7 @@ nodes:
     label: USDC Pocket
     address: "0x37305B1cD40574E4C5Ce33f8e8306Be057fD7341"
     category: infra
-    note: "Holds ~4.11B USDC at June 17, 2026 reassessment."
+    note: "Holds ~4.11B USDC at June 18, 2026 reassessment."
   - id: vat
     label: MCD VAT
     address: "0x35D1b3F3D7966A1DFe207aa4514C12a259A0492B"
