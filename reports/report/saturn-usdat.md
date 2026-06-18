@@ -93,7 +93,7 @@ Yield routing:  M0 Treasury yield ──▶ yieldRecipient (Saturn)
 - **Who can mint/redeem:** only **whitelisted ("onboarded") addresses**. The whitelist is enforced on `wrap` (mint) and `unwrap` (redeem) via `_revertIfNotWhitelisted` (verified in source). `isWhitelistEnabled()` = **true** on-chain.
 - **Regular transfers are NOT whitelist-gated** — verified: the whitelist hooks fire only on `_beforeWrap`/`_beforeUnwrap`, not on `transfer`/`transferFrom`. This is why the Curve pool (not whitelisted) trades freely. **Implication for Yearn: a non-onboarded holder can hold and transfer USDat but cannot mint or redeem directly — its only exit is the secondary market (Curve/Pancake) unless Yearn is whitelisted.**
 - **Atomicity:** the on-chain wrap (M → USDat) and unwrap (USDat → M) are atomic. The USDC↔M leg runs through the M0 Swap Facility in the same user flow. USDat→USDC redemption for onboarded users is effectively 1:1 and prompt (Treasury-backed, no queue). The **sUSDat** layer has a withdrawal queue (STRC liquidation); USDat itself does not.
-- **Redemption path (verified against Saturn DD docs):** an onboarded user redeems by converting USDat to **wM** ([`0x437cc33344a0B27A429f795ff6B469C72698B291`](https://etherscan.io/address/0x437cc33344a0B27A429f795ff6B469C72698B291)) via the M0 Swap Facility, then swapping wM → USDC via the Uniswap wM/USDC pool (**1 bps fee** on that leg). M0 has also built a limit-order protocol acting as an OTC desk where solvers can fill orders partially or fully — this flow is async unlike the Uniswap pool. Non-KYC'd users cannot redeem and must exit via the Curve pool.
+- **Redemption path (verified against Saturn DD docs):** an onboarded user redeems by converting USDat to **wM** ([`0x437cc33344a0B27A429f795ff6B469C72698B291`](https://etherscan.io/address/0x437cc33344a0B27A429f795ff6B469C72698B291)) via the M0 Swap Facility, then swapping wM → USDC via the Uniswap wM/USDC pool (**1 bps fee** on that leg). M0 has also built a limit-order protocol acting as an OTC desk where solvers can fill orders partially or fully — this flow is async unlike the Uniswap pool. Non-onboarded users cannot redeem and must exit via the Curve pool.
 - **Fees / cooldowns on USDat:** mint is 1:1 with USDC and effectively fee-free aside from the 1 bps Uniswap leg on the wM→USDC redemption path; no cooldown or queue on USDat itself. (The **10 bps fee** in Saturn's docs and the withdrawal **queue** apply to the **sUSDat** staking layer, not USDat.)
 
 ### Token Mint Authority
@@ -166,7 +166,7 @@ Yield routing:  M0 Treasury yield ──▶ yieldRecipient (Saturn)
 ### Programmability
 
 - Core mint/redeem and accounting are **programmatic and on-chain**: USDat is 1:1 non-rebasing; the index/exchange rate is read from M0 (`currentIndex()`); backing is verifiable on-chain.
-- Off-chain dependencies: user **onboarding/KYC** (whitelist), the USDC↔`$M` swap routing in Saturn's app, and the sUSDat STRC management (off-chain). For USDat-as-collateral the critical accounting is on-chain.
+- Off-chain dependencies: user **onboarding/whitelist**, the USDC↔`$M` swap routing in Saturn's app, and the sUSDat STRC management (off-chain). For USDat-as-collateral the critical accounting is on-chain.
 
 ### External Dependencies
 

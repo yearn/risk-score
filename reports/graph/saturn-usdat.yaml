@@ -57,7 +57,7 @@ nodes:
   # === External Dependencies ===
   - id: m0-m-token
     label: M0 $M Token
-    address: "0x866A2BF4E572e5Bf23A1D5A1Bf6E41B1a8be1b"
+    address: "0x866A2BF4E572CbcF37D5071A7a58503Bfb36be1b"
     category: dependency
     note: Tokenized U.S. Treasuries; USDat 1:1 backing asset
   - id: m0-treasury
