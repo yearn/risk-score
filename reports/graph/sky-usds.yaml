@@ -75,9 +75,9 @@ nodes:
     address: "0x6B175474E89094C44Da98b954EedeAC495271d0F"
     category: dependency
   - id: layerzero
-    label: LayerZero OFT
+    label: LayerZero V2
     category: dependency
-    note: "Cross-chain transport only; owner is PauseProxy."
+    note: "Cross-chain messaging protocol. Sky uses OFT Adapters for USDS/sUSDS bridging. KelpDAO incident April 2026: single-DVN config exploited; LZ now enforces multi-DVN. Sky's OFT owner = PauseProxy, no mint authority on underlying tokens."
   - id: chainlink
     label: Chainlink / Chronicle
     category: dependency
@@ -93,8 +93,8 @@ edges:
   - { from: pocket, to: circle-usdc, kind: deposits-into, label: "USDC" }
   - { from: dai-usds, to: dai, kind: routes-through, label: "1:1 converter" }
   - { from: vat, to: chainlink, kind: routes-through, label: "oracle-priced ilks" }
-  - { from: usds, to: layerzero, kind: routes-through, label: "OFT bridge" }
-  - { from: susds, to: layerzero, kind: routes-through, label: "OFT bridge" }
+  - { from: usds, to: layerzero, kind: routes-through, label: "OFT bridge (adapter: 0x1e1D...01B8)" }
+  - { from: susds, to: layerzero, kind: routes-through, label: "OFT bridge (adapter: 0x85A3...f0f1)" }
   - { from: sky, to: chief, kind: deposits-into, label: "locked voting" }
   - { from: chief, to: pause, kind: controls, label: "hat schedules spells" }
   - { from: pause, to: pause-proxy, kind: controls, label: "exec after 48h" }

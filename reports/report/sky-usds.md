@@ -1,6 +1,6 @@
 # Protocol Risk Assessment: Sky — USDS & sUSDS
 
-- **Assessment Date:** June 17, 2026
+- **Assessment Date:** June 18, 2026 (reassessment)
 - **Token:** USDS (Sky Dollar) and sUSDS (Savings USDS)
 - **Chain:** Ethereum
 - **Token Address:** [`0xdC035D45d973E3EC169d2276DDab16f1e407384F`](https://etherscan.io/address/0xdC035D45d973E3EC169d2276DDab16f1e407384F) (USDS) · [`0xa3931d71877C0E7a3148CB7Eb4463524FEc27fbD`](https://etherscan.io/address/0xa3931d71877C0E7a3148CB7Eb4463524FEc27fbD) (sUSDS)
@@ -21,17 +21,17 @@ Because every USDS is fungible with a DAI (via the converter), the total system 
 
 **sUSDS** is the tokenized Sky Savings Rate vault — an ERC-4626 wrapper deployed September 4, 2024 with a `chi` accumulator that grows continuously at the Sky Savings Rate (**SSR**). Depositing USDS into sUSDS is atomic, fee-free, and so is withdrawal. The SSR is a parameter set by Sky Governance via Chief + PauseProxy (currently a per-second `ssr` of `1.00000000112…` → **~3.60% APY** at the June 17, 2026 snapshot).
 
-**Key onchain metrics (June 17, 2026, block 25336940):**
+**Key onchain metrics (June 18, 2026, block 25345447):**
 
 | Metric | Value |
 |--------|-------|
-| USDS total supply (Ethereum mainnet) | **7,841,094,249 USDS** (~$7.84B) |
-| USDS total supply (cross-chain incl. OFT) | ~8,190,769,747 USDS ([DefiLlama](https://stablecoins.llama.fi/stablecoincharts/all?stablecoin=209)) |
-| sUSDS supply (shares) | 5,352,160,858 sUSDS |
-| sUSDS `totalAssets()` | **5,887,788,452 USDS** (~75.1% of mainnet USDS supply) |
-| sUSDS price-per-share (`chi`) | 1.1001 USDS/sUSDS |
-| Sky Savings Rate (SSR) | `1.000000001121484…` per second → **~3.600% APY** |
-| USDC held in LitePSM Pocket | **4,107,503,934 USDC** (~$4.11B) |
+| USDS total supply (Ethereum mainnet) | **7,821,339,325 USDS** (~$7.82B) |
+| USDS total supply (cross-chain incl. OFT) | ~8,177,298,635 USDS ([DefiLlama](https://stablecoins.llama.fi/stablecoincharts/all?stablecoin=209)) |
+| sUSDS supply (shares) | 5,339,985,406 sUSDS |
+| sUSDS `totalAssets()` | **5,875,069,384 USDS** (~75.1% of mainnet USDS supply) |
+| sUSDS price-per-share (`chi`) | 1.1002 USDS/sUSDS |
+| Sky Savings Rate (SSR) | `1.000000001121484…` per second → **~3.60% APY** (unchanged) |
+| USDC held in LitePSM Pocket | **4,109,011,415 USDC** (~$4.11B) |
 | MCD_VAT total system debt | ~12.76B (DAI + USDS combined) |
 | 1-year USDS peg range | 0.9953 (2025-10-11) – 1.0008 (2026-04-29); current 0.9997 |
 
@@ -53,7 +53,7 @@ Because every USDS is fungible with a DAI (via the converter), the total system 
 
 ## Contract Addresses
 
-All addresses retrieved from the live Sky Chainlog and verified onchain. Snapshot block: **25336940** (June 17, 2026).
+All addresses retrieved from the live Sky Chainlog and verified onchain. Snapshot block: **25345447** (June 18, 2026).
 
 ### Tokens & Conversion Layer
 
@@ -67,8 +67,8 @@ All addresses retrieved from the live Sky Chainlog and verified onchain. Snapsho
 | USDC | [`0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48`](https://etherscan.io/address/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48) | Circle USDC, gem for the LitePSM Wrapper |
 | **DAI-USDS Converter** | [`0x3225737a9Bbb6473CB4a45b7244ACa2BeFdB276A`](https://etherscan.io/address/0x3225737a9Bbb6473CB4a45b7244ACa2BeFdB276A) | `DAI_USDS`. Atomic, fee-free 1:1 conversion |
 | USDS Join | [`0x3C0f895007CA717Aa01c8693e59DF1e8C3777FEB`](https://etherscan.io/address/0x3C0f895007CA717Aa01c8693e59DF1e8C3777FEB) | Mints/burns USDS against VAT internal balances. `wards[MCD_PAUSE_PROXY] == 1`; `wards[USDS] == 1` |
-| USDS LayerZero OFT | [`0x1e1D42781FC170EF9da004Fb735f56F0276d01B8`](https://etherscan.io/address/0x1e1D42781FC170EF9da004Fb735f56F0276d01B8) | Cross-chain transport; owner = PauseProxy |
-| sUSDS LayerZero OFT | [`0x85A3FE4DA2a6cB98A5bdF62458B0dB8471B9f0f1`](https://etherscan.io/address/0x85A3FE4DA2a6cB98A5bdF62458B0dB8471B9f0f1) | Cross-chain transport for sUSDS |
+| USDS LayerZero OFT Adapter | [`0x1e1D42781FC170EF9da004Fb735f56F0276d01B8`](https://etherscan.io/address/0x1e1D42781FC170EF9da004Fb735f56F0276d01B8) | LayerZero V2 OApp (OFT Adapter). Locks USDS for cross-chain bridging. `owner = PauseProxy`, `endpoint = 0x1a44…728c` (LZ V2). Does NOT hold `wards` on USDS |
+| sUSDS LayerZero OFT Adapter | [`0x85A3FE4DA2a6cB98A5bdF62458B0dB8471B9f0f1`](https://etherscan.io/address/0x85A3FE4DA2a6cB98A5bdF62458B0dB8471B9f0f1) | LayerZero V2 OApp for sUSDS cross-chain bridging. `owner = PauseProxy`, `endpoint = 0x1a44…728c` (LZ V2). Does NOT hold `wards` on sUSDS |
 
 ### USDS-USDC PSM Stack
 
@@ -97,7 +97,7 @@ All addresses retrieved from the live Sky Chainlog and verified onchain. Snapsho
 | SPK token | [`0xc20059e0317DE91738d13af027DfC4a50781b066`](https://etherscan.io/address/0xc20059e0317DE91738d13af027DfC4a50781b066) | Spark/Sky governance subsystem token (USDS Staking Rewards) |
 | USDS Staking Rewards | [`0x173e314C7635B45322cd8Cb14f44b312e079F3af`](https://etherscan.io/address/0x173e314C7635B45322cd8Cb14f44b312e079F3af) | `REWARDS_USDS_SPK`. Out-of-scope for this report but referenced by yvUSDS-1 |
 
-### Ward / Auth Verification (onchain, snapshot block 25336940)
+### Ward / Auth Verification (onchain, snapshot block 25345447)
 
 ```
 USDS.wards(MCD_PAUSE_PROXY) = 1        # governance can upgrade & administer
@@ -303,7 +303,20 @@ Direct **USDS-USDC** DEX liquidity is small (no significant Curve/Uniswap USDS-U
 
 ### Cross-Chain Liquidity
 
-USDS bridges to L2s and other chains via the **LayerZero OFT** ([`USDS_OFT`](https://etherscan.io/address/0x1e1D42781FC170EF9da004Fb735f56F0276d01B8), owner = PauseProxy) and sister deployments on Base, Arbitrum, Optimism, Unichain, Avalanche, and Solana. DefiLlama chain balances report roughly $0.50B of USDS outside Ethereum at the snapshot. For an Ethereum-mainnet-only Yearn strategy, OFT exposure is operationally none.
+USDS bridges to L2s and other chains via **LayerZero V2 OFT Adapters**:
+
+| OFT Adapter | Address | Underlying | Owner | Endpoint |
+|------------|---------|-----------|-------|----------|
+| USDS OFT Adapter | [`0x1e1D…01B8`](https://etherscan.io/address/0x1e1D42781FC170EF9da004Fb735f56F0276d01B8) | USDS | PauseProxy | [`0x1a44…728c`](https://etherscan.io/address/0x1a44076050125825900e736c501f859c50fE728c) |
+| sUSDS OFT Adapter | [`0x85A3…f0f1`](https://etherscan.io/address/0x85A3FE4DA2a6cB98A5bdF62458B0dB8471B9f0f1) | sUSDS | PauseProxy | [`0x1a44…728c`](https://etherscan.io/address/0x1a44076050125825900e736c501f859c50fE728c) |
+
+Onchain verification confirms:
+- **Neither OFT adapter holds `wards` on USDS or sUSDS** — they have no mint authority over the underlying tokens.
+- Both adapters are owned by PauseProxy, same as the USDS/sUSDS tokens themselves.
+- Trusted remote peers are configured for Avalanche (EID 30106) and Solana (EID 30168) on the USDS OFT; sUSDS OFT has Avalanche (EID 30106) configured.
+- The adapters use the standard LayerZero V2 endpoint at [`0x1a44076050125825900e736c501f859c50fE728c`](https://etherscan.io/address/0x1a44076050125825900e736c501f859c50fE728c).
+
+DefiLlama chain balances report roughly $0.36B of USDS outside Ethereum at the snapshot. For an Ethereum-mainnet-only Yearn strategy, OFT exposure is operationally none. See the [LayerZero dependency section](#layerzero-v2-dependency) for cross-chain risk analysis.
 
 ### Historical Liquidity Under Stress
 
@@ -374,9 +387,29 @@ System operations are dominated by programmatic onchain logic. The governance to
 | **Circle / USDC** | LitePSM Wrapper, Pocket holds 4.11B USDC | **Critical** for USDS-USDC swap path. A USDC freeze/blacklist on the Pocket or a USDC depeg would directly impair USDS-USDC convertibility | Circle has blacklisted addresses before (TornadoCash, OFAC sanctions). The Pocket has not been blacklisted but is on-chain visible and bounded by Circle's policy |
 | **DAI / MakerDAO core (VAT, Join, Pot, Pause, Chief)** | All conversion paths | **Critical** — USDS shares the VAT with DAI. A bug in any MCD core contract impairs USDS | 8+ years of production with documented incidents (Black Thursday) but no exploit since |
 | **RWA / offchain-credit custodians** | Legacy `RWA00x` ilks are ~0.7% of VAT debt; broader tokenized treasury / corporate credit / private-credit / OTC credit backing is ~25.9% of VAT debt | High but indirect for the USDC→USDS user | Custodians and credit venues include TradFi/tokenized-credit issuers such as BlackRock BUIDL, Janus Henderson Anemoy/Centrifuge, Securitize, Maple, Anchorage, and legacy RWA vault parties. Failures propagate to system solvency but do not directly impair PSM swap atomicity |
-| **LayerZero (USDS_OFT, sUSDS_OFT)** | Cross-chain bridging only | Low for Ethereum-mainnet user | Owner = PauseProxy. Affects cross-chain users, not mainnet |
+| **LayerZero V2 (USDS_OFT, sUSDS_OFT)** | Cross-chain bridging via OFT Adapters | **Low** for Ethereum-mainnet-only user; **Moderate** for cross-chain users | See expanded LayerZero dependency section below |
 | **Chainlink / Oracle price feeds (MCD_SPOT)** | Sets per-ilk liquidation prices for collateral CDPs | Indirect — bad oracle → bad liquidations → solvency hit | Mature oracle setup with multi-source feeds |
 | **LITE_PSM_MOM emergency halter** | Can pause USDC-USDS PSM swaps instantly | Trust dependency: the elected hat can halt PSM at will | Visible onchain; governance can override |
+
+### LayerZero V2 Dependency
+
+**What LayerZero Is:** LayerZero is a cross-chain interoperability protocol that provides a generic messaging layer between blockchains. It uses a modular verification architecture where each OApp (Omnichain Application) configures one or more **DVNs** (Decentralized Verifier Networks) to attest to cross-chain messages. When a message receives sufficient attestations (as configured by the OApp's security settings), the destination contract executes the payload.
+
+**What Sky Uses It For:** USDS and sUSDS deploy **OFT Adapters** (Omnichain Fungible Token) on Ethereum that lock the native token and authorize minting of a corresponding OFT token on destination chains. This enables USDS to circulate on Avalanche, Solana, Base, Arbitrum, Optimism, and Unichain. Each destination chain has its own OFT deployment that mirrors the supply locked in the Ethereum adapter. The OFT adapters on Ethereum are controlled by the same governance path as USDS itself — ownership sits with PauseProxy, and any changes require Chief vote + 48 h GSM delay.
+
+**KelpDAO Incident Context (April 18, 2026):** On April 18, 2026, the KelpDAO rsETH bridge — also built on LayerZero — was attacked by the DPRK-affiliated TraderTraitor threat actor, resulting in a loss of ~$292M. The attacker socially engineered a LayerZero Labs developer, pivoted into LayerZero's cloud environment, and poisoned internal RPC nodes to forge DVN attestations for a malicious cross-chain message. The critical vulnerability was that the affected OApp had a **single-verifier configuration** — it relied on the LayerZero Labs DVN alone without requiring a second, independent DVN to confirm. The forged attestation was therefore sufficient to unlock rsETH on the destination chain.
+
+**Impact on Sky:**
+- **No other OApps or channels were compromised** — the attack was specific to the KelpDAO OApp's configuration.
+- **LayerZero Labs changed operating stance** post-incident: the LayerZero Labs DVN now refuses to sign as the *sole required attestor* on any channel. It enforces a baseline security configuration requiring at least one additional independent verifier.
+- **Sky's OFT configuration at the June 18, 2026 snapshot** uses the same LayerZero V2 infrastructure. The specific DVN configuration for Sky's OFT channels is set by the OApp delegate (or owner, since no delegate is separately configured on the adapters) and is not directly readable via onchain `cast` calls at this snapshot. The delegate/security-stack configuration should be confirmed via Sky governance records or the LayerZero Scan explorer.
+- **Risk assessment for mainnet users:** The LayerZero dependency is **a nil risk** for users who hold USDS/sUSDS only on Ethereum mainnet and never bridge. The OFT adapters on Ethereum have no mint authority over the underlying tokens — they lock USDS 1:1 via standard OFT mechanics. A LayerZero exploit on a remote chain could theoretically mint unbacked OFT tokens on that chain, but could not create USDS on Ethereum mainnet. Mainnet USDS supply integrity is protected by the `wards` system on the USDS token itself (only USDS_JOIN and PauseProxy hold `wards == 1`).
+- **Risk assessment for cross-chain users:** USDS holders on Avalanche, Solana, Base, Arbitrum, Optimism, or Unichain have **moderate** LayerZero dependency risk. If the OFT channel for their chain were compromised (e.g., via a forged DVN attestation), unbacked USDS could be minted on that chain, potentially draining the Ethereum-side locked supply. The practical severity depends on (1) whether Sky's OFT channels use multi-DVN configuration (required by LZ's new policy) and (2) whether Sky governance can quickly halt the affected OFT adapter via PauseProxy — which it can, with the standard 48 h GSM delay (or instantly, if a spell with emergency powers exists).
+
+**Mitigating factors specific to Sky:**
+- Sky governance controls the OFT adapters via PauseProxy and can upgrade or pause them through the same Chief + 48 h GSM delay used for all other protocol changes.
+- Cross-chain USDS supply represents only ~$0.36B out of ~$8.18B total (~4.4%) — small relative to mainnet.
+- The KelpDAO incident prompted LayerZero Labs to enforce multi-DVN configurations, substantially reducing the risk of single-DVN attestation forgery for newly configured or reconfigured channels.
 
 **Quality:** dependencies are predominantly **blue-chip** (Circle, MakerDAO core, Chainlink). The most material concentration is the **USDC dependency**: the on-chain USDC reserve currently makes up ~30%+ of the direct backing of USDS issued via the swap path, and *any* USDS holder who plans to exit to USDC implicitly trusts Circle.
 
@@ -410,6 +443,8 @@ System operations are dominated by programmatic onchain logic. The governance to
 | Chief | [`0x929d9A1435662357F54AdcF64DcEE4d6b867a6f9`](https://etherscan.io/address/0x929d9A1435662357F54AdcF64DcEE4d6b867a6f9) | `hat()` rotation, top approvals |
 | DAI-USDS Converter | [`0x3225737a9Bbb6473CB4a45b7244ACa2BeFdB276A`](https://etherscan.io/address/0x3225737a9Bbb6473CB4a45b7244ACa2BeFdB276A) | Volume |
 | USDC token at Pocket | [`USDC.balanceOf(pocket)`](https://etherscan.io/address/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48) | Pocket reserve level |
+| USDS LayerZero OFT Adapter | [`0x1e1D42781FC170EF9da004Fb735f56F0276d01B8`](https://etherscan.io/address/0x1e1D42781FC170EF9da004Fb735f56F0276d01B8) | `owner()` (should always equal PauseProxy), `endpoint()`, any `Upgraded` events on underlying token; LayerZero Scan for DVN config changes |
+| sUSDS LayerZero OFT Adapter | [`0x85A3FE4DA2a6cB98A5bdF62458B0dB8471B9f0f1`](https://etherscan.io/address/0x85A3FE4DA2a6cB98A5bdF62458B0dB8471B9f0f1) | `owner()` (should always equal PauseProxy), `endpoint()`; any cross-chain supply anomalies |
 
 ### Critical Values, Thresholds, and Frequency
 
@@ -424,6 +459,8 @@ System operations are dominated by programmatic onchain logic. The governance to
 | USDS / sUSDS implementation slot | EIP-1967 slot | Any change → `Upgraded` event | Real time on event |
 | `Chief.hat()` rotation | onchain | New hat address | Real time on event |
 | USDS total supply (cross-chain via OFT) | DefiLlama API | Sudden >5% drop in 24 h | Daily |
+| LayerZero OFT `owner()` | onchain | Any change from PauseProxy | Real time on event |
+| LayerZero OFT cross-chain supply diverg | DefiLlama stablecoin per-chain vs. onchain `USDS.totalSupply()` | >10% unexplained gap between mainnet supply and cross-chain reported supply | Daily |
 
 ### Recommended Functions for Programmatic Monitoring
 
@@ -443,7 +480,7 @@ For offchain context, monitor the [Sky governance forum](https://forum.sky.money
 
 ## Appendix: Contract Architecture
 
-Snapshot block 25336940 (June 17, 2026).
+Snapshot block 25345447 (June 18, 2026).
 
 ```
 ┌──────────────────────────────────────────────────────────────────────────┐
@@ -739,21 +776,25 @@ Snapshot block 25336940 (June 17, 2026).
 
 ## Reassessment Triggers
 
-- **Time-based:** Reassess in 6 months (November 2026) or annually. After September 2026, the >2-year-no-incident modifier becomes available and may reduce the score further.
+- **Time-based:** Reassess in 6 months (December 2026) or annually. After September 2026, the >2-year-no-incident modifier becomes available and may reduce the score further.
 - **TVL-based:**
-  - USDS supply drops >25% from snapshot (~$7.84B → <$5.9B) — would indicate material loss of confidence or large policy event
-  - sUSDS share of USDS supply drops below 50% (currently ~75%) — would indicate SSR has been cut materially or savers are exiting
+  - USDS supply drops >25% from snapshot (~$7.82B → <$5.9B) — would indicate material loss of confidence or large policy event
+  - sUSDS share of USDS supply drops below 50% (currently ~75.1%) — would indicate SSR has been cut materially or savers are exiting
   - USDC Pocket balance drops below $500M — would indicate sustained exit pressure and compromise of the deep-redemption story
+  - Cross-chain USDS supply (currently ~$0.36B) spikes >$2B — would indicate material OFT/LayerZero dependency exposure
 - **Parameter-based:**
   - `LITE_PSM_USDC_A.tin` or `tout` changes from zero (fees introduced) → harden Liquidity score
   - `LITE_PSM_USDC_A.buf` changes materially → re-evaluate exit capacity for USDC→USDS direction
   - `sUSDS.ssr` changes by >50 bps APY → not a risk event but warrants user-facing notice
   - `MCD_PAUSE.delay()` is reduced below 48 h → governance score worsens
   - `USDS.wards()` grants a ward outside the current set (USDS_JOIN, PauseProxy) → re-review mint authority
+  - `USDS_OFT.owner()` or `SUSDS_OFT.owner()` changes from PauseProxy → re-review OFT adapter governance
 - **Incident-based:**
   - Any `LITE_PSM_MOM.HALT()` invocation (emergency PSM halt)
   - Any USDS depeg deeper than ±1% sustained for >24 h
   - Any USDC depeg event (would propagate to USDS via PSM)
+  - Any LayerZero protocol-level or DVN-level incident (especially if Sky's OFT uses the affected DVN)
+  - Cross-chain USDS supply discrepancy >5% between onchain mainnet `USDS.totalSupply()` and DefiLlama aggregate — would signal a potential OFT exploit or bridge state mismatch
   - Any exploit or governance attack on the Sky/MCD core (Chief, Pause, VAT, USDS, sUSDS, LitePSM, USDS_JOIN, DAI_USDS, Pocket, OFT)
   - Any blacklisting of the USDC Pocket by Circle
 - **Governance-based:**
@@ -773,3 +814,15 @@ Resolved in this assessment pass:
 - ✅ **Latest LlamaRisk / Steakhouse coverage:** the current [LlamaRisk research index](https://llamarisk.com/research) lists 9 articles, none on Sky/USDS post-rebrand. LlamaRisk has historically published Maker/DAI work (e.g. "MakerDAO Endgame and its Repercussions on Curve Finance", "DAI Exposure to Real World Assets") and has acted as risk advisor for Aave's USDS/sUSDS onboarding — but no standalone post-rebrand assessment exists at the time of this report
 - ✅ **Top-10 SKY voter / approver snapshot:** resolved via Sky's [current-hat API](https://vote.sky.money/api/executive/hat?network=mainnet), [supporter API](https://vote.sky.money/api/executive/supporters?network=mainnet), and address metadata API. At the snapshot, current-hat approvals are **6.52B SKY**; top-3 supporters account for **~95.95%** of approvals and top-5 for **~98.46%**. Reflected in the Governance Risks and Reassessment Triggers sections
 - ✅ **RWA / offchain backing share:** resolved via SkyEco / Block Analitica's [LLM guide](https://financial.skyeco.com/llms.txt), [USDS collateral-backing API](https://observatory.data.blockanalitica.com/sky/backed/items/), and [balance-sheet aggregate](https://observatory.data.blockanalitica.com/financials/balance-sheet/aggregates/?group_by=month). Legacy `RWA00x` ilks are **~$94.0M** (~0.7% of VAT debt); broader offchain/tokenized treasury and credit backing is **~$3.30B** (~25.9% of VAT debt, ~32.6% of Observatory loan-coverage backing). Reflected in the Collateralization, Provability, and External Dependencies sections
+
+Resolved in this reassessment pass (June 18, 2026):
+
+- ✅ **LayerZero dependency analysis:** added comprehensive LayerZero V2 dependency section covering the KelpDAO incident (April 2026), Sky's OFT adapter architecture, and risk analysis for mainnet vs. cross-chain users. OFT adapters confirmed to have no mint authority on underlying tokens. Reflected in Contract Addresses, Cross-Chain Liquidity, External Dependencies, Monitoring, and Reassessment Triggers sections
+- ✅ **Onchain ward verification (block 25345447):** all ward states confirmed unchanged — USDS.wards[PauseProxy]=1, USDS.wards[USDS_JOIN]=1, USDS.wards[OFT]=0; sUSDS.wards[PauseProxy]=1, sUSDS.wards[OFT]=0
+- ✅ **Proxy implementation verification:** USDS implementation = `0x1923DfeE706A8E78157416C29cBCCFDe7cdF4102` (unchanged), sUSDS implementation = `0x4e7991e5C547ce825BdEb665EE14a3274f9F61e0` (unchanged)
+- ✅ **LitePSM parameter check:** `tin=0`, `tout=0`, `buf=400M DAI` — all unchanged since last snapshot
+- ✅ **MCD_PAUSE:** `delay=172800` (unchanged), `owner=address(0)` (unchanged), `authority=Chief` (unchanged)
+- ✅ **Chief.hat():** `0x0aE3371e9C4e37515259D124C685fe6722c5e253` (unchanged)
+- ✅ **LITE_PSM_MOM Halt events:** still only 4 events total (2× SetOwner, 2× SetAuthority) — no Halt events ever emitted
+- ✅ **TVL refresh:** USDS TVL stable at ~$8.18B (down ~0.1% from June 17 reassessment). sUSDS staking rate steady at ~75.1%
+- ✅ **USDC Pocket balance:** ~$4.109B (up slightly from ~$4.108B)
