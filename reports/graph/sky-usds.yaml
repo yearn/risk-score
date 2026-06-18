@@ -7,15 +7,19 @@ categories:
   - { id: infra, label: Protocol Infrastructure }
   - { id: dependency, label: External Dependency }
 nodes:
-  - id: usds
-    label: USDS
-    address: "0xdC035D45d973E3EC169d2276DDab16f1e407384F"
-    category: vault
+  # sUSDS is listed before USDS on purpose: getGraphIndex() registers the
+  # FIRST `vault` node as this graph's cross-link anchor. Integrating graphs
+  # (yvUSDS / yvUSDC / yvUSD) depend on the sUSDS address, not USDS directly,
+  # so sUSDS must be the anchor for their dependency cards to drill in here.
   - id: susds
     label: sUSDS
     address: "0xa3931d71877C0E7a3148CB7Eb4463524FEc27fbD"
     category: vault
     note: "ERC-4626 savings wrapper; totalAssets() ~5.89B USDS at June 17, 2026 reassessment."
+  - id: usds
+    label: USDS
+    address: "0xdC035D45d973E3EC169d2276DDab16f1e407384F"
+    category: vault
   - id: wrapper
     label: USDS LitePSM Wrapper
     address: "0xA188EEC8F81263234dA3622A406892F3D630f98c"
