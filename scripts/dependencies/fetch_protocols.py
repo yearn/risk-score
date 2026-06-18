@@ -114,6 +114,7 @@ PROTOCOL_TOKENS: dict[str, str] = {
     "USTB": "Superstate",
     "USDT": "Tether",
     "USDC": "Circle",
+    "$M": "M0",
 }
 
 # Compound V3 Comet markets on Ethereum mainnet
@@ -810,6 +811,21 @@ def superstate_ustb_data() -> dict:
     }
 
 
+def saturn_data() -> dict:
+    """Saturn (USDat) dependency data from risk assessment report (May 2026)."""
+    return {
+        "name": "Saturn (USDat)",
+        "chain": "ethereum",
+        "type": "stablecoin",
+        "address": "0x23238f20b894f29041f48D88eE91131C395Aaa71",
+        "report": "reports/report/saturn-usdat.md",
+        "collateral": [
+            {"asset": "$M", "address": "0x866a2bf4e572cbcf37d5071a7a58503bfb36be1b"},
+        ],
+        "infrastructure": ["Chainlink", "Fireblocks"],
+    }
+
+
 def main():
     data: dict = {
         "protocol_tokens": PROTOCOL_TOKENS,
@@ -891,6 +907,7 @@ def main():
     data["protocols"]["re_reusd"] = re_reusd_data()
     data["protocols"]["royco_srroyusdc"] = royco_srroyusdc_data()
     data["protocols"]["superstate_ustb"] = superstate_ustb_data()
+    data["protocols"]["saturn"] = saturn_data()
 
     # Write YAML
     with open(OUTPUT_PATH, "w") as f:
