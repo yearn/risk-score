@@ -23,7 +23,7 @@ nodes:
     label: cUSD (Cap Stablecoin)
     address: "0xcCcc62962d17b8914c62D74FfB843d73B2a3cccC"
     category: vault
-    note: ERC-20 upgradeable proxy; backed 96% USDC / 4% wWTGXX
+    note: ERC-20 upgradeable proxy; backed ~95% USDC / ~5% wWTGXX
 
   # === Strategies (capital deployment legs) ===
   - id: usdc-frv
@@ -62,14 +62,20 @@ nodes:
     note: Role-based permission system; DEFAULT_ADMIN held by Timelock
 
   # === External dependencies ===
+  - id: morpho-steakhouse-prime
+    label: Morpho Steakhouse Prime USDC
+    address: "0xbeef088055857739C12CD3765F20b7679Def0f51"
+    category: dependency
+    note: ~$29.13M (60% of USDC FRV)
   - id: morpho-usdc-prime
     label: Morpho Gauntlet USDC Prime
+    address: "0x8c106EEDAd96553e64287A5A6839c3Cc78afA3D0"
     category: dependency
-    note: ~$50.2M (67% of USDC FRV)
+    note: ~$19.73M (40% of USDC FRV)
   - id: aave-v3-usdc
     label: Aave V3 USDC Core
     category: dependency
-    note: ~$25.0M (33% of USDC FRV)
+    note: Strategy wired in but max_debt=0 since Apr/May 2026 (effectively unused)
   - id: wwtgxx
     label: wWTGXX (WisdomTree Gov MMF)
     category: dependency
@@ -116,25 +122,29 @@ edges:
   - from: cUSD
     to: usdc-frv
     kind: allocates-to
-    label: "~$75M USDC"
+    label: "~$48.9M USDC"
   - from: cUSD
     to: lender
     kind: allocates-to
-    label: "~$49M op debt"
+    label: "~$43.8M op debt"
   - from: cUSD
     to: wwtgxx-frv
     kind: allocates-to
-    label: "~$5M wWTGXX"
+    label: "~$5.08M wWTGXX"
 
   # === Strategy legs → external dependencies ===
   - from: usdc-frv
+    to: morpho-steakhouse-prime
+    kind: deposits-into
+    label: "60%"
+  - from: usdc-frv
     to: morpho-usdc-prime
     kind: deposits-into
-    label: "67%"
+    label: "40%"
   - from: usdc-frv
     to: aave-v3-usdc
     kind: deposits-into
-    label: "33%"
+    label: "0% (deactivated)"
   - from: wwtgxx-frv
     to: wwtgxx
     kind: deposits-into

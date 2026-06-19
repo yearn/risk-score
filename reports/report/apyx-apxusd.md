@@ -1,10 +1,10 @@
 # Protocol Risk Assessment: Apyx
 
-- **Assessment Date:** April 19, 2026 (Updated May 7, 2026)
+- **Assessment Date:** April 19, 2026 (Updated May 29, 2026)
 - **Token:** apxUSD
 - **Chain:** Ethereum + Base
 - **Token Address:** [`0x98a878B1CD98131b271883b390F68d2c90674665`](https://etherscan.io/address/0x98a878B1CD98131b271883b390F68d2c90674665)
-- **Final Score: 3.48/5.0**
+- **Final Score: 3.66/5.0**
 
 ## Overview + Links
 
@@ -25,15 +25,15 @@ Yes. apxUSD is intended to trade near $1, but it is not backed by onchain stable
 
 apyUSD inherits the same risk because it is redeemable into apxUSD. Its exchange rate can rise in apxUSD terms while the USD value of apxUSD itself falls. The 30-day redemption cooldown can also delay exits during stress.
 
-**Key metrics (May 7, 2026):**
-- apxUSD Total Supply (Ethereum): ~306.86M (supply cap raised to 500M)
-- Base supply: ~14.34M apxUSD and ~0.75M apyUSD via Chainlink CCIP
-- apyUSD vault totalAssets: ~103.61M apxUSD (~33.8% of Ethereum apxUSD supply); apyUSD totalSupply: ~76.01M shares; exchange rate: 1.3632 apxUSD per apyUSD
-- Curve apxUSD/USDC Pool: ~$29.07M TVL (14.50M apxUSD + 14.57M USDC); virtual price 1.000301
-- Uniswap V4 PoolManager: ~10.47M apxUSD
+**Key metrics (May 29, 2026):**
+- apxUSD Total Supply (Ethereum): **~524.66M** (supply cap raised again, now 750M). Up from ~306.86M on May 7 — **+71% in 22 days**, with zero onchain burns over the period (all redemption is offchain).
+- Base supply: ~14.34M apxUSD and ~0.75M apyUSD via Chainlink CCIP (May 7 figures; not re-verified for this update)
+- apyUSD vault totalAssets: ~103.61M apxUSD; exchange rate: 1.3632 apxUSD per apyUSD (May 7 figures)
+- Curve apxUSD/USDC Pool: ~$29.07M nominal TVL (May 7 figures), but **99.96% of the LP is held by the Guardian/Upgrader Safe** ([`0xf9862efc…`](https://etherscan.io/address/0xf9862efc1704ac05e687f66e5cd8c130e5663ce2)); see *Protocol-Owned Liquidity* under Liquidity Risk.
+- Uniswap V4 PoolManager: ~10.47M apxUSD (May 7); the Guardian Safe is the dominant counterparty here as well.
 - Listed on CoinGecko
 - Chains: Ethereum and Base (via Chainlink CCIP; Solana planned)
-- Protocol launched: February 18, 2026 (~78 days ago)
+- Protocol launched: February 18, 2026 (~100 days ago)
 
 **Links:**
 
@@ -73,6 +73,7 @@ apyUSD inherits the same risk because it is redeemable into apxUSD. Its exchange
 | CommitToken (apxUSD) | [`0x17122d869d981d184118b301313bcd157c79871e`](https://etherscan.io/address/0x17122d869d981d184118b301313bcd157c79871e) | CT-apxUSD |
 | CommitToken (LP) | [`0xdfc3cf7e540628a52862907dc1ab935cd5859375`](https://etherscan.io/address/0xdfc3cf7e540628a52862907dc1ab935cd5859375) | CT-apxUSDUSDC |
 | OrderDelegate | [`0x5c697433e214b1a6d7a2ddd4cdca1505c98f75f1`](https://etherscan.io/address/0x5c697433e214b1a6d7a2ddd4cdca1505c98f75f1) | Minting Delegate |
+| Mint Pass-Through | [`0xcca1af4d4afccc113d7682fbec1c5888f9b7f7b8`](https://etherscan.io/address/0xcca1af4d4afccc113d7682fbec1c5888f9b7f7b8) | Apyx-controlled hop contract: `asset()` returns apxUSD; `authority()` returns the Apyx AccessManager. In the last 28 days, **100% of newly minted apxUSD (277.8M)** flowed `mint(0x0 → 0xcca1af4d)` and was auto-forwarded to the Guardian/Upgrader Safe. |
 
 ### Base / Cross-Chain Contracts
 
@@ -98,6 +99,13 @@ apyUSD inherits the same risk because it is redeemable into apxUSD. Its exchange
 | Contract | Address | Type |
 |----------|---------|------|
 | Curve apxUSD/USDC Pool | [`0xe1b96555bbeca40e583bbb41a11c68ca4706a414`](https://etherscan.io/address/0xe1b96555bbeca40e583bbb41a11c68ca4706a414) | CurveStableSwapNG |
+| Uniswap V4 Pool Manager | [`0x000000000004444c5dc75cb358380d2e3de08a90`](https://etherscan.io/address/0x000000000004444c5dc75cb358380d2e3de08a90) | Uniswap V4 singleton — large bidirectional USDC flows with the Guardian Safe last 7 days (23.94M in / 5.56M out). |
+
+### Onchain Backing References
+
+| Contract | Address | Type |
+|----------|---------|------|
+| STRCX (Strategy PP Variable xStock) | [`0x1aad217b8f78dba5e6693460e8470f8b1a3977f3`](https://etherscan.io/token/0x1aad217b8f78dba5e6693460e8470f8b1a3977f3) | Tokenized STRC preferred share (Payward / xStocks line). Total supply 1,618,605; Apyx Operations Safe holds **757,187 (~47%)** — partial onchain visibility into the STRC component of apxUSD backing. |
 
 ### On-Chain Verification (Etherscan, April 19, 2026)
 
@@ -176,34 +184,38 @@ The architecture is moderately complex:
 
 ## Historical Track Record
 
-- **Time in Production**: apxUSD proxy deployed February 18, 2026 (block [24481772](https://etherscan.io/tx/0xfb528661b410cce683a1ee40b49a5249dbd677e8304a102927bc6639486f450b)). In production for **~78 days** as of May 7, 2026. Still under 3 months.
+- **Time in Production**: apxUSD proxy deployed February 18, 2026 (block [24481772](https://etherscan.io/tx/0xfb528661b410cce683a1ee40b49a5249dbd677e8304a102927bc6639486f450b)). In production for **~100 days** as of May 29, 2026. Still under 4 months.
 - **GitHub Repository**: [`apyx-labs/evm-contracts`](https://github.com/apyx-labs/evm-contracts) — public Foundry repo. Contains all core contract source code, comprehensive test suite (invariant tests, audit-remediation tests), Slither CI. No license specified.
-- **TVL History**: Not tracked by DeFi Llama. Listed on CoinGecko. Based on onchain data (May 7, 2026):
-  - Ethereum apxUSD supply: ~306.86M (supply cap raised from 300M to 500M)
-  - Base supply: ~14.34M apxUSD and ~0.75M apyUSD
-  - apyUSD vault totalAssets: ~103.61M apxUSD (~33.8% of Ethereum apxUSD supply)
-  - Uniswap V4 PoolManager: ~10.47M apxUSD
-  - Curve pool: ~$29.07M (14.50M apxUSD + 14.57M USDC) — up from ~$16.5M on April 19 and ~$5.5M on March 26
-  - Guardian/Upgrader Safe (former Admin): ~3.22M apxUSD
-  - Third-Party Safe: ~0.32M apxUSD
-- **Supply Growth**: Continued — ~13M at launch → ~67M on March 26 → ~175M on April 19 → ~306.86M Ethereum apxUSD supply on May 7. Curve TVL grew from ~$5.5M on March 26 to ~$16.5M on April 19 and ~$29.07M on May 7; Uniswap V4 PoolManager balance increased from 7.84M on March 26 to 15.15M on April 19, then declined to ~10.47M on May 7.
+- **TVL History**: Not tracked by DeFi Llama. Listed on CoinGecko. Based on onchain data (May 29, 2026):
+  - Ethereum apxUSD `totalSupply`: **~524.66M** (supply cap raised again, now 750M)
+  - Base supply: ~14.34M apxUSD and ~0.75M apyUSD (May 7 figures; not re-verified)
+  - apyUSD vault totalAssets: ~103.61M apxUSD (May 7 figures; not re-verified)
+  - Curve pool: ~$29.07M nominal (May 7 figures) — **99.96% Apyx-owned** (Guardian Safe holds 40,890,164 of 40,905,346 LP tokens)
+  - Guardian/Upgrader Safe: **~16.95M apxUSD + ~2.50M apyUSD + ~7.18M USDC** (~$28M, up from ~$3.22M on May 7)
+  - Operations Safe: 0 apxUSD/apyUSD/USDC, but holds **757,187 STRCX (~47% of all STRCX supply)** as onchain backing
+  - Third-Party Safe: ~0.32M apxUSD (May 7 figures; not re-verified)
+- **Supply Growth**: Continued, accelerating — ~13M at launch → ~67M on March 26 → ~175M on April 19 → ~306.86M on May 7 → **~524.66M on May 29 (+71% in 22 days)**. No onchain burns observed in the last 28 days; redemption is entirely offchain.
+- **Newly-minted supply concentration**: Last 28 days, 27 mint events totalling 277.8M apxUSD — **100% routed `mint(0x0 → 0xcca1af4d → 0xf9 Guardian Safe)`**. Guardian Safe then deploys this apxUSD as protocol-owned liquidity into Curve and Uniswap V4.
 - **Incidents**: None reported.
 - **Peg Stability**: Curve pool virtual price is 1.000301 with near-balanced composition. Peg has held stable since launch, though untested under market stress.
 
-### Ethereum apxUSD Supply Distribution (May 7, 2026)
+### Ethereum apxUSD Supply Distribution
 
-| Holder | Balance | % of Supply |
-|--------|---------|-------------|
-| apyUSD Vault (direct apxUSD balance) | 103,608,254 | 33.8% |
-| Curve Pool (apxUSD/USDC) | 14,504,193 | 4.7% |
-| Uniswap V4 PoolManager | 10,466,487 | 3.4% |
-| Guardian/Upgrader Safe (former Admin) | 3,223,845 | 1.1% |
-| Third-Party Safe (2-of-3) | 321,749 | 0.1% |
-| Admin Safe (4-of-6, current) | 0 | 0% |
-| Operations Safe | 0 | 0% |
-| Other (Pendle, users, LPs, bridge/token-pool accounts, etc.) | ~174,734,819 | ~56.9% |
+The full holder table was last fully refreshed on May 7, 2026 (supply ~306.86M). Spot checks on May 29, 2026 against the new ~524.66M supply:
 
-Base apxUSD totalSupply is ~14,336,153 and Base apyUSD totalSupply is ~748,518; these are not included in the Ethereum holder percentages above. Cross-chain economic supply should be reconciled through CCIP token-pool accounting and Accountable distribution data rather than inferred from a single-chain holder table.
+| Holder | Balance (May 29) | % of Supply (May 29) |
+|--------|------------------|----------------------|
+| Guardian/Upgrader Safe (`0xf986…3ce2`) | ~16.95M apxUSD | ~3.2% |
+| Curve Pool (apxUSD/USDC) | 14.50M apxUSD (May 7 figure; not re-verified) | ~2.8% |
+| Uniswap V4 PoolManager | 10.47M apxUSD (May 7 figure; not re-verified) | ~2.0% |
+| apyUSD Vault (direct apxUSD balance) | 103.61M apxUSD (May 7 figure; not re-verified) | ~19.7% |
+| Admin Safe (4-of-6) | 0 | 0% |
+| Operations Safe | 0 apxUSD (holds 757,187 STRCX instead) | 0% |
+| Other (Pendle, users, LPs, bridge/token-pool accounts, etc.) | balance | balance |
+
+Note: Curve LP ownership concentration is documented under *Liquidity Risk → Protocol-Owned Liquidity*. The Guardian Safe holds 99.96% of the Curve LP token, so the Curve pool's apxUSD-side balance above is effectively co-owned by Apyx.
+
+Base apxUSD totalSupply is ~14,336,153 and Base apyUSD totalSupply is ~748,518 as of May 7; these are not included in the Ethereum holder percentages above and were not re-verified on May 29. Cross-chain economic supply should be reconciled through CCIP token-pool accounting and Accountable distribution data rather than inferred from a single-chain holder table.
 
 ## Funds Management
 
@@ -243,11 +255,12 @@ General users acquire apxUSD through secondary markets (Curve, Uniswap).
 - **Collateral quality**: Variable-rate perpetual preferred shares. These are equities (not stablecoins or crypto assets). They sit subordinated to debt obligations in the capital structure. The preferred shares have dividend adjustment mechanisms that theoretically stabilize their price near par value.
 - **Cash & equivalents**: Apyx docs state that the backing includes cash and short-term Treasuries as a liquidity/volatility buffer, but do **not** publicly specify the exact instruments, allocation, maturity profile, account type, bank/broker/custodian, or whether any portion is held as bank cash, brokerage sweep cash, money-market exposure, Treasury bills/notes, or another cash-equivalent instrument. No CEX custody for this buffer is described in the docs reviewed.
 - **Custody**: Docs describe collateral as held in "third-party prime brokerage accounts" with multi-party MPC key management. **Custodian(s) still not publicly named** in the docs.
-- **Onchain verification**: Still not possible (collateral is entirely offchain). Off-chain verification now exists via third-party attestation:
-  - **March 2026 PCAOB-registered attestation published** (Wolf & Company, examination-level opinion)
-  - Monthly attestations committed to
-  - Accountable Proof-of-Reserves dashboard launched after the April 19 assessment; Accountable registry lists the integration as live since April 23, 2026
-  - Underlying shares are publicly-traded and priced transparently on Nasdaq
+- **Onchain verification**: Partial. The bulk of backing remains offchain (STRC and SATA preferred shares held in prime brokerage). However, as of May 29, 2026, the Apyx Operations Safe ([`0x37b0…a555`](https://etherscan.io/address/0x37b0779a66edc491df83e59a56d485835323a555)) holds **757,187 STRCX** ([`0x1aad…77f3`](https://etherscan.io/token/0x1aad217b8f78dba5e6693460e8470f8b1a3977f3)), the Payward-issued tokenized version of STRC (xStocks line, custodied 1:1 against the underlying preferred shares). This is **~47% of all onchain STRCX supply** and represents the only directly verifiable portion of apxUSD's reserves. At ~$100 par, this covers roughly **$75–90M (~14–17%) of the 524.66M apxUSD supply** — the remaining ~85% depends on offchain STRC, SATA, and cash buffer attestations.
+- Off-chain verification:
+  - **March 2026 PCAOB-registered attestation published** (Wolf & Company, examination-level opinion). The attested period had supply ~67M; today's supply is ~7.8× higher, with no fresh attestation yet covering the new supply.
+  - Monthly attestations committed to; April 2026 attestation still not yet published as of this update.
+  - Accountable Proof-of-Reserves dashboard launched after the April 19 assessment; Accountable registry lists the integration as live since April 23, 2026.
+  - Underlying shares are publicly-traded and priced transparently on Nasdaq.
 
 ### Provability
 
@@ -270,11 +283,21 @@ For the Morpho collateral use case, the relevant question is: how can liquidator
 
 ### Liquidity Assessment
 
-- **Pool quality**: Curve pool is near-balanced (virtual price 1.000301) and its apxUSD side represents ~4.7% of Ethereum apxUSD supply.
-- **Liquidity trajectory**: Curve pool grew from ~$5.5M on March 26 to ~$16.5M on April 19 and ~$29.07M on May 7, partially offsetting supply growth. Uniswap V4 PoolManager balance is still above March 26 (7.84M → 10.47M apxUSD) but lower than April 19 (15.15M).
-- **No stress testing**: Protocol is ~78 days old; no market stress data available.
-- **Morpho context**: For Morpho liquidations, the ~$29.07M Curve pool provides meaningfully deeper absolute headroom than on March 26 and April 19, though supply-to-liquidity ratio remains elevated.
+- **Pool quality**: Curve pool is near-balanced (virtual price 1.000301) and its apxUSD side represents ~2.8% of the May-29 Ethereum apxUSD supply.
+- **Liquidity trajectory (nominal)**: Curve pool grew from ~$5.5M on March 26 to ~$16.5M on April 19 and ~$29.07M on May 7. Uniswap V4 PoolManager balance is above March 26 (7.84M → 10.47M apxUSD) but below April 19 (15.15M).
+- **No stress testing**: Protocol is ~100 days old; no market stress data available.
+- **Morpho context**: Nominal Curve depth is the primary exit path. After accounting for protocol-owned LP, *effective* third-party exit depth is materially lower (see below).
 - **Pendle integration**: PT-apxUSD positions exist on Pendle, providing additional secondary market activity.
+
+### Protocol-Owned Liquidity (POL) Concentration
+
+This is the most material liquidity-risk finding in this update.
+
+- The Curve apxUSD/USDC pool [`0xe1b9…a414`](https://etherscan.io/address/0xe1b96555bbeca40e583bbb41a11c68ca4706a414) has LP `totalSupply` = 40,905,346. The Guardian/Upgrader Safe ([`0xf986…3ce2`](https://etherscan.io/address/0xf9862efc1704ac05e687f66e5cd8c130e5663ce2)) holds **40,890,164 LP tokens = 99.96%**. The Admin Safe, Operations Safe, and Third-Party Safe hold 0 LP. **External LPs hold roughly 0.04% of the pool.**
+- The Guardian Safe is also the dominant counterparty against Uniswap V4 — net 18.4M USDC pulled out of the V4 PoolManager in the 7 days ending May 29, with bidirectional flows in the tens of millions.
+- The Guardian Safe is the destination of 100% of the 277.8M apxUSD minted in the last 28 days (via the [`0xcca1af4d`](https://etherscan.io/address/0xcca1af4d4afccc113d7682fbec1c5888f9b7f7b8) pass-through). It then deploys that apxUSD as protocol-owned liquidity.
+- **Implication for liquidators**: The ~$29M Curve pool depth previously cited as a liquidity strength is almost entirely Apyx-owned. The Guardian Safe is operationally free to withdraw its LP at any time; doing so would near-completely drain the only permissionless exit path. For Morpho liquidation modelling, third-party Curve depth should be treated as a small fraction of the nominal TVL, not the headline number.
+- **The user-facing "$210M concern" framing**: Community concern was raised that two Apyx safes hold ~$210M of apxUSD and STRCX and that they recursively mint apxUSD using their own backing. The combined balances are smaller (~$100–120M) and the STRCX held by the Operations Safe is the *tokenized backing asset itself*, not wrapped apyUSD. The directional flow appears legitimate (USDC routed through CoW Protocol to acquire STRCX). However, the *spirit* of the concern — that Apyx is acting as its own counterparty in DEX liquidity and that headline pool depth overstates real exit capacity — is supported by the LP-ownership concentration above. A separate "third Apyx-affiliated wallet" claim (`0x197fb887…fae5`) was investigated and found unsupported: that wallet has 24 lifetime txs, no Morpho Supply or Borrow events as `onBehalf` over the last ~280 days, and the only recent ERC-20 movement is a 1-HEX spam airdrop.
 
 ## Centralization & Control Risks
 
@@ -365,9 +388,17 @@ Apyx uses an OpenZeppelin AccessManager v5 (`0xe167330e2eac88666de253e9607c6d9ae
 
 - **apxUSD contract**: [`0x98a878B1CD98131b271883b390F68d2c90674665`](https://etherscan.io/address/0x98a878B1CD98131b271883b390F68d2c90674665)
   - Monitor `totalSupply()` for unexpected minting events
-  - **Alert**: If supply increases by >1M in 24 hours
+  - **Alert**: If supply increases by >5M in 24 hours (raised from >1M; supply has been adding ~10M/day on average, so a noisy 1M trigger is no longer useful)
   - Monitor `Transfer` events for large movements (>$500K)
   - Monitor `Paused`/`Unpaused` events
+  - Monitor mints (`Transfer` with `from = 0x0`) and **track the destination** — currently 100% are `mint(0x0 → 0xcca1af4d → Guardian Safe)`. **Alert**: If a mint destination is anything other than the documented pass-through, or if the pass-through forwards to any address other than the Guardian Safe.
+
+### Mint Pass-Through Monitoring
+
+- **Pass-through contract**: [`0xcca1af4d4afccc113d7682fbec1c5888f9b7f7b8`](https://etherscan.io/address/0xcca1af4d4afccc113d7682fbec1c5888f9b7f7b8)
+  - Monitor all apxUSD inflows and outflows
+  - **Alert**: If outflow destination is not the Guardian Safe (would indicate fresh mints routed somewhere else)
+  - **Alert**: If `authority()` ever returns an address other than the Apyx AccessManager (`0xe167…2824`)
 
 ### Rate Oracle Monitoring
 
@@ -383,6 +414,11 @@ Apyx uses an OpenZeppelin AccessManager v5 (`0xe167330e2eac88666de253e9607c6d9ae
   - Monitor pool balance ratio (should stay near 50/50)
   - **Alert**: If ratio deviates >10% from balanced (indicates peg pressure)
   - **Alert**: If total pool TVL drops below $10M
+  - **(New) Guardian Safe LP token balance** — Guardian Safe currently holds 40,890,164 of 40,905,346 LP (99.96%). LP withdrawal is permissionless for token holders — Curve `remove_liquidity` has no admin gate, no timelock, and no AccessManager involvement. A Safe-tx with 3-of-6 signatures can drain the LP position in a single transaction.
+    - **Alert (Critical)**: Any `RemoveLiquidity` / `RemoveLiquidityImbalance` / `RemoveLiquidityOneCoin` event from the Guardian Safe larger than 5% of its LP balance.
+    - **Alert (Critical)**: If Guardian Safe's LP balance drops by >10% in 24 hours.
+    - **Alert (High)**: Any LP transfer out of the Guardian Safe (LP token is the Curve pool itself, so `Transfer` event on `0xe1b9…a414` with `from = Guardian Safe`).
+  - **(New) Third-party LP share** — alert if external (non-Apyx) LPs grow above 5% of `totalSupply` (would indicate the protocol-owned-liquidity concern is improving) or fall below 0.02% (would indicate further concentration).
 
 ### Governance Monitoring
 
@@ -402,10 +438,14 @@ Apyx uses an OpenZeppelin AccessManager v5 (`0xe167330e2eac88666de253e9607c6d9ae
 
 ### Supply & Holder Monitoring
 
-- Monitor Guardian/Upgrader Safe (`0xf9862efc1704ac05e687f66e5cd8c130e5663ce2`) balance and movements
+- Monitor Guardian/Upgrader Safe (`0xf9862efc1704ac05e687f66e5cd8c130e5663ce2`) balance and movements (apxUSD, apyUSD, USDC, and Curve LP token)
+- Monitor Operations Safe (`0x37B0779A66edc491df83e59a56D485835323a555`) **STRCX balance** — this is currently the only directly-onchain-verifiable portion of apxUSD backing (~$75–90M)
+  - **Alert (Critical)**: Any STRCX transfer out of the Operations Safe, especially to non-Apyx counterparties (would represent a reduction in onchain reserves)
+  - **Alert (High)**: STRCX balance drops by >5% in 24 hours
 - Monitor Third-Party Safe (`0x81f5d98ea5acf65640ce8bb68aa8449b7c304c50`) balance
-- Monitor Curve pool for large single-sided withdrawals
+- Monitor Curve pool for large single-sided withdrawals (covered above)
 - Monitor MinterV0 for mint execution events
+- **Alert**: If apxUSD `supplyCap` is raised again above 750M without corresponding attestation update
 
 ### Accountable Proof-of-Reserves Monitoring
 
@@ -428,12 +468,17 @@ Apyx uses an OpenZeppelin AccessManager v5 (`0xe167330e2eac88666de253e9607c6d9ae
 |----------|-----------|----------|
 | Rate oracle changes | Real-time | Critical |
 | Proxy upgrade events | Real-time | Critical |
+| **Guardian Safe Curve LP balance** (POL withdrawal) | Real-time | **Critical** |
+| **Operations Safe STRCX balance** (onchain reserves) | Real-time | **Critical** |
+| **Mint pass-through 0xcca1af4d outflow destination** | Real-time | **Critical** |
 | Accountable PoR dashboard freshness / registry status | Real-time | Critical |
 | Chainlink CCIP / Base supply reconciliation | Real-time | Critical |
 | AccessManager role changes | Real-time | Critical |
 | Admin Safe transactions | Real-time | Critical |
+| Guardian Safe transactions (Safe-level) | Real-time | Critical |
 | Curve pool balance ratio | Every 6 hours | High |
 | apxUSD supply changes | Every 6 hours | High |
+| apxUSD `supplyCap` increases | Real-time | High |
 | Large holder movements | Daily | Medium |
 
 ## Risk Summary
@@ -447,7 +492,8 @@ Apyx uses an OpenZeppelin AccessManager v5 (`0xe167330e2eac88666de253e9607c6d9ae
 - **Onchain timelocks on core admin functions**: 3-day execution delay on apxUSD/apyUSD proxy upgrades (via role 24), 7-day role-grant delay for ADMIN_ROLE and role 24, 5-day `minSetback` on delay reductions, 3-day `targetAdminDelay` on core contracts, 4-hour unpause delay.
 - **Governance separation**: Proxy upgrades now require the Guardian/Upgrader 3-of-6 Safe (not the current 4-of-6 Admin Safe); pauser and upgrader are operationally separated from day-to-day admin.
 - **Increased Admin-Safe threshold**: Moved from 3-of-6 to 4-of-6.
-- **Improved liquidity**: Curve pool TVL up to ~$29.07M; Uniswap V4 PoolManager holds ~10.47M apxUSD.
+- **Nominal liquidity headroom grew**: Curve pool TVL up to ~$29.07M nominal; Uniswap V4 PoolManager holds ~10.47M apxUSD (May 7 figures). *Effective* third-party depth is much smaller — see *Protocol-Owned Liquidity* under Liquidity Risk.
+- **Partial onchain backing visibility**: Apyx Operations Safe holds 757,187 STRCX (~47% of all STRCX onchain supply), the Payward-issued tokenized version of the STRC preferred share that backs apxUSD. This gives independent reviewers a small but directly verifiable slice of reserves.
 - **Open-source code**: Full Foundry project with invariant tests and Slither CI.
 - **Public, credentialed team**: Six named founding contributors with verifiable backgrounds at Kraken, Goldman Sachs, Binance, and DeFi Development Corp.
 
@@ -458,10 +504,12 @@ Apyx uses an OpenZeppelin AccessManager v5 (`0xe167330e2eac88666de253e9607c6d9ae
 - **Weekend market-gap risk (inferred stress path)**: Apyx docs do not explicitly describe weekend/holiday stale-price handling or Accountable's pricing source for STRC/SATA when Nasdaq is closed. The risk follows from the documented structure: BTC trades 24/7, while STRC/SATA are Nasdaq-listed preferreds held offchain. If BTC falls sharply over a weekend or market holiday, STRC/SATA marks may be stale, modeled, or broker-marked until pre-market/regular trading resumes. During that window, ordinary apxUSD holders still cannot redeem directly, but they can sell apxUSD through onchain liquidity venues, potentially causing a secondary-market run before preferred-share prices and Accountable collateral coverage fully update. On Monday, STRC/SATA could gap down, reserve coverage could update lower, and apxUSD liquidity could already be impaired.
 - **Rate Oracle retains zero-delay admin control**: The current 4-of-6 Admin Safe can upgrade the Rate Oracle proxy or call `setRate()` instantly. A compromised admin could manipulate the Curve pool's reported price.
 - **Unbacked-mint design**: `ApxUSD.mint()` creates tokens without any onchain collateral transfer — backing is verified only off-chain via attestations. The mint execution delay (60 seconds via role 1, 4 hours via role 4) plus role-grant/admin-delay constraints materially slow, but do not eliminate, the ability of a compromised admin to initiate unbacked minting.
+- **Protocol-owned liquidity concentration (new)**: The Guardian/Upgrader Safe holds **99.96% of the Curve apxUSD/USDC LP** and is the dominant counterparty in Uniswap V4. The nominal "$29M Curve pool" depth materially overstates real third-party exit capacity for liquidators or end users. If Apyx withdraws its LP, the only permissionless exit path drains.
+- **Supply growth outpacing attestation cadence (new)**: apxUSD `totalSupply` jumped from ~67M at the March 2026 attestation period to ~524.66M on May 29 (~7.8×). The only published attestation does not cover the bulk of currently-circulating supply, and the April 2026 attestation has still not been published.
 - **CCIP / Base bridge dependency**: apxUSD and apyUSD are live on Base using Chainlink CCIP for cross-chain support. This is stronger than an ad hoc bridge, but it adds dependency on CCIP, token-pool configuration, Base-side AccessManager/admin controls, and cross-chain supply reconciliation. A CCIP outage, misconfiguration, or compromised cross-chain admin path could impair Base exits or create supply-accounting issues.
-- **Young protocol**: ~78 days in production; still under 3 months, untested under market stress.
+- **Young protocol**: ~100 days in production; still under 4 months, untested under market stress.
 - **DFDV concentration**: All six founding contributors are executives at DeFi Development Corp. (Nasdaq: DFDV), which is also the protocol's first institutional investor. BVI legal entity with $100 liability cap.
-- **No bug bounty program**: Notable absence for a protocol with >$300M Ethereum apxUSD supply.
+- **No bug bounty program**: Notable absence for a protocol with >$500M Ethereum apxUSD supply.
 
 ### Critical Risks
 
@@ -491,11 +539,11 @@ Apyx uses an OpenZeppelin AccessManager v5 (`0xe167330e2eac88666de253e9607c6d9ae
 
 - **Audits**: 3 confirmed audits from reputable firms (Quantstamp, Zellic, Certora), all publicly published with remediation evidence. Certora identified 14 findings (1 High, fixed).
 - **Bug Bounty**: None found.
-- **Time in Production**: ~78 days. Still under 3 months.
-- **TVL**: ~306.86M Ethereum apxUSD supply, plus ~14.34M Base apxUSD supply. Listed on CoinGecko.
+- **Time in Production**: ~100 days. Just over 3 months.
+- **TVL**: ~524.66M Ethereum apxUSD supply (up 71% in 22 days; supply cap raised to 750M), plus ~14.34M Base apxUSD supply (May 7 figure, not re-verified). Listed on CoinGecko.
 - **Incidents**: None.
 
-**Score: 3.5/5** -- Three reputable audits with public reports and onchain remediation evidence. Open-source code with comprehensive tests. Between score 3 (multiple audits, 3-6 months) and score 4 (single audit, <3 months). ~78 days (<3 months) and absent bug bounty keep this from lowering the score.
+**Score: 3.5/5** -- Three reputable audits with public reports and onchain remediation evidence. Open-source code with comprehensive tests. Between score 3 (multiple audits, 3-6 months) and score 4 (single audit, <3 months). The ~100-day track record is still short relative to current >$500M supply, and the bug bounty remains absent.
 
 #### Category 2: Centralization & Control Risks (Weight: 30%)
 
@@ -540,35 +588,38 @@ Apyx uses an OpenZeppelin AccessManager v5 (`0xe167330e2eac88666de253e9607c6d9ae
 - Cash/short-term Treasuries buffer documented, but exact instruments, location, custodian, and maturity profile are undisclosed
 - Overcollateralized (specific ratio undisclosed)
 - Custody in "third-party prime brokerage accounts" (custodian not publicly named); multi-party MPC key management
-- Cannot verify collateral onchain
+- Partial onchain verification via Apyx Operations Safe's 757,187 STRCX holding (~$75–90M, ~14–17% of 524.66M apxUSD supply). Bulk of backing remains offchain.
 - Reserve is equity (not stablecoins) — more volatile than typical stablecoin collateral
-- PCAOB-registered examination-level attestation published for March 2026 (Wolf & Company)
+- PCAOB-registered examination-level attestation published for March 2026 (Wolf & Company); covers a period when supply was ~67M vs current ~524.66M.
 - Accountable Proof-of-Reserves dashboard listed as live by Accountable since April 23, 2026
 
-**Collateralization Score: 3.5** -- Between score 3 (100% collateral, some offchain, periodic attestation) and score 4 (partially collateralized or custodial, opaque reporting). Improved from 4.0: an examination-level PCAOB-registered attestation is now published and the monthly cadence has been committed to (one period attested). This score explicitly penalizes the holder-loss path from offchain preferred-share collateral: the reserves are equity-like instruments rather than cash-equivalents, can decline in value, and cannot be redeemed or verified onchain by ordinary holders. Remaining concerns: custodian name undisclosed, overcollateralization ratio undisclosed, asset class is equity rather than cash-equivalents, and the cash/Treasuries buffer lacks public instrument/location/maturity detail.
+**Collateralization Score: 3.5** -- Held at 3.5. Two opposing updates roughly cancel: (a) **partial onchain visibility via STRCX** in the Operations Safe is new and positive, but only covers ~14–17% of current supply; (b) **the March attestation now covers <13% of circulating supply**, since supply has risen ~7.8× since the attestation period without a fresh assertion. Other concerns unchanged: custodian undisclosed, OC ratio undisclosed, equity-not-cash, cash buffer composition opaque.
 
 **Subcategory B: Provability**
 
 - apyUSD exchange rate: onchain (ERC-4626)
-- apxUSD collateral: offchain. **One published PCAOB-registered examination-level attestation** (Wolf & Company, March 2026). Monthly cadence committed to; April attestation not yet published.
+- apxUSD collateral: offchain. **One published PCAOB-registered examination-level attestation** (Wolf & Company, March 2026), covering a period when supply was ~67M. April attestation **still not published** as of May 29 (now ~2 months behind), against current supply ~524.66M.
 - Accountable data verification: live proof-of-reserves integration listed in Accountable's DVN registry (`frequency = live`, `connectors = 3`, `verifiability = 4`) since April 23, 2026; detailed current values not independently extracted due dashboard/API 403s from this environment. Pricing methodology for offchain STRC/SATA marks, especially outside Nasdaq market hours, is not independently verified.
+- Onchain backing visibility: STRCX in the Operations Safe (~$75–90M, ~14–17% of supply) is directly verifiable; the remaining ~85% depends on offchain custody.
 - Rate oracle: manually set, no third-party verification.
+- Onchain supply growth: 277.8M apxUSD minted in the last 28 days, all routed through `0xcca1af4d` to the Guardian Safe; zero onchain burns over the same period. The mint/redeem pipeline is intentionally asymmetric — supply only goes up onchain — which makes timely third-party attestation cadence load-bearing.
 
-**Provability Score: 4.0** -- PCAOB-registered examination-level attestation has been published (stronger than typical AUP engagements), and Accountable now provides a live third-party verification layer, but missing April report. Missing data on how and where funds marked as "Cash & Equivalents".
+**Provability Score: 4.25** -- Up from 4.0. The PCAOB-registered examination-level attestation, Accountable integration, and new STRCX onchain visibility are all positives, but the April attestation slip and the **~7.8× supply expansion since the last attested period** materially weaken the proof-of-reserves claim. Holders relying on attestation evidence currently have one data point covering <13% of circulating supply.
 
-**Funds Management Score = (3.5 + 4.0) / 2 = 3.75**
+**Funds Management Score = (3.5 + 4.25) / 2 = 3.875**
 
-**Score: 3.75/5** -- Reserve attestation now exists and is examination-level, and Accountable adds live third-party verification, but the score remains elevated because apxUSD/apyUSD holders can still lose money if offchain preferred-share collateral loses value, becomes unavailable, or is not accurately reflected in reserve reporting. Custodian opacity, missing April attestation, undisclosed cash-equivalent details, and inability to independently pull Accountable dashboard values in this environment keep this elevated.
+**Score: 3.875/5** -- Up from 3.75. The score remains elevated because apxUSD/apyUSD holders can still lose money if offchain preferred-share collateral loses value, becomes unavailable, or is not accurately reflected in reserve reporting. The supply-vs-attestation gap is the dominant driver of the increase.
 
 #### Category 4: Liquidity Risk (Weight: 15%)
 
-- **Curve pool**: ~$29.07M (up from ~$16.5M on April 19 and ~$5.5M on March 26), near-balanced, with the apxUSD side at ~4.7% of Ethereum apxUSD supply.
-- **Uniswap V4**: ~10.47M apxUSD in pool manager (up from 7.84M on March 26, down from 15.15M on April 19).
-- **Direct redemption**: Permissioned only (not available to general users/liquidators).
-- **No market stress data**: Protocol is ~78 days old.
+- **Curve pool**: ~$29.07M nominal (May 7 figure), but **99.96% protocol-owned** by the Guardian Safe. Effective third-party exit depth is small fraction of headline TVL.
+- **Uniswap V4**: ~10.47M apxUSD in pool manager (May 7); Guardian Safe is the dominant counterparty here too (net 18.4M USDC pulled out in 7 days ending May 29).
+- **Direct redemption**: Permissioned only (not available to general users/liquidators); zero onchain burns in the last 28 days.
+- **Supply-to-liquidity ratio**: With supply ~524.66M and nominal Curve depth ~$29M, the supply:Curve ratio is ~18×. After adjusting for POL, effective third-party Curve depth is materially smaller.
+- **No market stress data**: Protocol is ~100 days old.
 - **Peg stability**: Currently stable (1.000301 virtual price); untested under stress.
 
-**Score: 3/5** -- Deep liquidty, but direct redemptions are premissioned.
+**Score: 4.0/5** -- Up from 3.0. The headline pool depth that earned the May-7 3.0 score is almost entirely Apyx's own protocol-owned liquidity. Apyx can unilaterally withdraw its LP at any time, in which case the only permissionless exit path drains. Supply has grown ~71% in 22 days while real third-party depth has not visibly scaled with it. Direct redemption remains permissioned, so liquidators rely on the (now thin in third-party terms) AMM pools.
 
 #### Category 5: Operational Risk (Weight: 5%)
 
@@ -590,10 +641,10 @@ Final Score = (Centralization × 0.30) + (Funds Mgmt × 0.30) + (Audits × 0.20)
 |----------|-------|--------|----------|
 | Audits & Historical | 3.5 | 20% | 0.70 |
 | Centralization & Control | 3.5 | 30% | 1.05 |
-| Funds Management | 3.75 | 30% | 1.125 |
-| Liquidity Risk | 3.0 | 15% | 0.45 |
+| Funds Management | 3.875 | 30% | 1.1625 |
+| Liquidity Risk | 4.0 | 15% | 0.60 |
 | Operational Risk | 3.0 | 5% | 0.15 |
-| **Final Score** | | | **3.475/5.0 (~3.48)** |
+| **Final Score** | | | **3.6625/5.0 (~3.66)** |
 
 ### Risk Tier
 
@@ -605,19 +656,23 @@ Final Score = (Centralization × 0.30) + (Funds Mgmt × 0.30) + (Audits × 0.20)
 | **3.5-4.5** | **Elevated Risk** | Limited approval, strict limits |
 | **4.5-5.0** | **High Risk** | Not recommended |
 
-**Final Risk Tier: Medium Risk — Approved with enhanced monitoring**
+**Final Risk Tier: Elevated Risk — Limited approval, strict limits**
+
+> Tier change from May 7 (Medium → Elevated). Drivers: protocol-owned liquidity concentration (~99.96% of Curve LP), supply growth outpacing attestation cadence, and supply-side asymmetry (mints only, no onchain burns).
 
 ---
 
-Apyx's apxUSD is a novel "Dividend-Backed Stablecoin" bridging offchain corporate dividends into onchain yield. Following the March 20-21 governance restructure, the March 2026 Wolf & Company attestation, and the April 23 Accountable Proof-of-Reserves integration, the three gaps identified at the March 26 assessment are materially addressed: proof of reserves, admin timelocks, and liquidity depth.
+Apyx's apxUSD is a novel "Dividend-Backed Stablecoin" bridging offchain corporate dividends into onchain yield. Following the March 20-21 governance restructure, the March 2026 Wolf & Company attestation, and the April 23 Accountable Proof-of-Reserves integration, the three gaps identified at the March 26 assessment are materially addressed: proof of reserves, admin timelocks, and headline liquidity depth. However, an independent May 29 onchain review found that (1) headline Curve liquidity is overwhelmingly Apyx-owned, and (2) supply has grown faster than the attestation cadence has kept up with.
 
-**Residual concerns that keep the score at 3.48 (Medium Risk, close to Elevated):**
-- **Rate Oracle has no timelock.** ADMIN_ROLE can upgrade the oracle and call `setRate()` with zero delay. This remains the most acute centralization risk.
+**Residual concerns that drive the score to 3.66 (Elevated Risk):**
+- **Protocol-owned liquidity concentration (new).** The Guardian/Upgrader Safe holds 99.96% of the Curve apxUSD/USDC LP and is the dominant Uniswap V4 counterparty. Headline pool depth significantly overstates real third-party exit capacity.
+- **Supply growth has outpaced attestations.** apxUSD `totalSupply` rose from ~67M at the attested period (March 2026) to ~524.66M on May 29 — an ~7.8× increase — with no fresh PCAOB-registered attestation yet covering the new supply, and the April attestation now ~2 months late.
+- **Rate Oracle has no timelock.** ADMIN_ROLE can upgrade the oracle and call `setRate()` with zero delay. This remains the most acute pure-centralization risk.
 - **Custodian is still not publicly named.** Accountable adds live third-party reserve verification, and Apyx says the dashboard includes collateral coverage, but the custody black-box persists and this review could not independently extract current Accountable dashboard values.
-- **Monthly attestation cadence is one data point.** Track record must be established over several consecutive months.
-- **Protocol is still young** (~78 days) and untested under market stress.
+- **Monthly attestation cadence is one data point.** Track record must be established over several consecutive months; the cadence has already slipped once.
+- **Protocol is still young** (~100 days) and untested under market stress.
 - **BTC/DAT stress remains untested.** A fast BTC drawdown could indirectly pressure reserve marks and secondary liquidity because the collateral depends on publicly-traded DAT preferred shares.
-- **No bug bounty program** at >$300M Ethereum apxUSD supply.
+- **No bug bounty program** at >$500M Ethereum apxUSD supply.
 
 **Conditions for continued or increased exposure:**
 1. April 2026 attestation published on schedule (maintains monthly cadence).
@@ -648,8 +703,9 @@ Apyx's apxUSD is a novel "Dividend-Backed Stablecoin" bridging offchain corporat
 - **Accountable verification**: Reassess downward if the dashboard becomes unavailable/stale, Accountable removes or downgrades the Apyx registry entry, connector count decreases, verifiability level decreases, or current reserve coverage cannot be independently reviewed. Reassess upward if Apyx moves to a higher Accountable verifiability tier, especially level 5 / zkTLS, or publishes stronger methodology/source coverage for the connectors.
 - **Cross-chain / CCIP**: Reassess if Chainlink CCIP Ethereum/Base transfers are paused or impaired, Base token-pool/admin configuration changes materially, Base apxUSD/apyUSD supply diverges from expected cross-chain reconciliation, or Apyx migrates to a different bridge provider.
 - **Governance-based**: Reassess on any ownership/threshold change to either multisig, any change to `targetAdminDelay` or `roleGrantDelay` on AccessManager, or any rate-oracle change (upgrade or `setRate`).
-- **Time-based**: Reassess in 1 month (June 2026).
-- **Supply/TVL-based**: The prior 250M supply trigger has now been crossed. Reassess again if Ethereum apxUSD supply exceeds 400M (toward the 500M cap), if the supply cap is raised again, if Base apxUSD supply grows materially without clear CCIP/Accountable reconciliation, if Curve pool TVL drops below $15M, or if supply-to-Curve-pool ratio exceeds 25x.
+- **Time-based**: Reassess in 1 month (late June 2026).
+- **Supply/TVL-based**: 524.66M Ethereum apxUSD supply now exceeds the prior reassessment trigger. The supply cap was raised again (now 750M). Reassess if supply exceeds 650M (toward the 750M cap), if the supply cap is raised again, if Base apxUSD supply grows materially without clear CCIP/Accountable reconciliation, if Curve pool TVL drops below $15M, if supply-to-Curve-pool ratio exceeds 25× (currently ~18×), or if Guardian Safe Curve LP share falls materially below 99.96% (indicating either deliberate POL reduction or third-party LP inflows changing the picture).
+- **POL movement-based**: Reassess if the Guardian/Upgrader Safe withdraws >25% of its Curve LP position, or if Curve LP token ownership distribution shifts materially (e.g. external LPs above 10%).
 - **Market-stress based**: Reassess if BTC falls >10% in 1 hour or >20% in 24 hours and STRC/SATA prices, Accountable collateral coverage, Curve balance, or apxUSD peg quality deteriorate. Reassess urgently if this happens over a weekend/holiday while STRC/SATA marks are stale and apxUSD sells off before Nasdaq trading reopens.
 - **Incident-based**: Reassess after any exploit, unplanned oracle change, or peg deviation >1%.
 - **Bug bounty**: Reassess if a bug bounty program is launched.

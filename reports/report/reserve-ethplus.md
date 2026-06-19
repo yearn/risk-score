@@ -324,7 +324,7 @@ The primary spot pool (Curve ETH+/WETH) has ~$12.6M TVL. With Convex/Beefy/Stake
 | Guardian Safe | `0xd5fe2780eb882d1da78f2136b81c2a4395488c98` | Owner changes, threshold changes, all executions (yearn safe-monitoring) |
 | Main (`hasRole`) | `0xb6A7d481719E97e142114e905E86a39a2Fa0dfD2` | `RoleGranted`, `RoleRevoked` for OWNER / PAUSER / SHORT_FREEZER / LONG_FREEZER |
 
-**Action:** add to [yearn/monitoring-scripts-py](https://github.com/yearn/monitoring-scripts-py). Recommended cadence: hourly poll for queued timelock calls; immediate alert on any RoleGranted/Revoked or Guardian Safe execution.
+**Action:** add to [yearn/monitoring](https://github.com/yearn/monitoring). Recommended cadence: hourly poll for queued timelock calls; immediate alert on any RoleGranted/Revoked or Guardian Safe execution.
 
 **Important:** the deployer EOA `0xe3e34fa93575af41bef3476236e1a3cdb3f60b85` still has PAUSER. Add to the role-watch list and alert on any transaction from it.
 
