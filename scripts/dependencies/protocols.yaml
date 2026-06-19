@@ -332,6 +332,7 @@ protocols:
     infrastructure:
     - Chainlink
     - Chronicle
+    - SkyLink
     - LayerZero
   infinifi:
     name: InfiniFi (siUSD)

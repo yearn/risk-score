@@ -78,6 +78,10 @@ nodes:
     label: LayerZero V2
     category: dependency
     note: "Cross-chain messaging protocol. Sky uses OFT Adapters for USDS/sUSDS bridging. KelpDAO incident April 2026: single-DVN config exploited; LZ now enforces multi-DVN. Sky's OFT owner = PauseProxy, no mint authority on underlying tokens."
+  - id: skylink
+    label: SkyLink
+    category: dependency
+    note: "Cross-chain transport for USDS/sUSDS. SkyLink is a LayerZero-compatible bridge that allows for cross-chain transfers of USDS/sUSDS between Ethereum and other chains."
   - id: chainlink
     label: Chainlink / Chronicle
     category: dependency
