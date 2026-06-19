@@ -781,3 +781,14 @@ protocols:
     infrastructure:
     - Chainlink
     - Fireblocks
+  flex_lender:
+    name: Flex yvUSD/USDC Lender
+    chain: ethereum
+    type: lending_market
+    address: '0x33C45216E121E31f1a8CD24C7E9d0d0C9e29B732'
+    base_asset: USDC
+    report: reports/report/flex.md
+    collateral:
+    - asset: yvUSD
+      address: '0x696d02Db93291651ED510704c9b286841d506987'
+    infrastructure: []
