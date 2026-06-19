@@ -98,6 +98,7 @@ edges:
   - { from: dai-usds, to: dai, kind: routes-through, label: "1:1 converter" }
   - { from: vat, to: chainlink, kind: routes-through, label: "oracle-priced ilks" }
   - { from: usds, to: layerzero, kind: routes-through, label: "OFT bridge (adapter: 0x1e1D...01B8)" }
+  - { from: usds, to: skylink, kind: routes-through, label: "SkyLink bridge" }
   - { from: sky, to: chief, kind: deposits-into, label: "locked voting" }
   - { from: chief, to: pause, kind: controls, label: "hat schedules spells" }
   - { from: pause, to: pause-proxy, kind: controls, label: "exec after 48h" }
