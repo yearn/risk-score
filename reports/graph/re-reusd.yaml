@@ -52,7 +52,7 @@ nodes:
     label: Daily Instant Redemption Vault
     address: "0x5C454f5526e41fBE917b63475CD8CA7E4631B147"
     category: infra
-    note: Onchain liquidity buffer (~$7.6M sUSDe)
+    note: Onchain liquidity buffer (~$12.7M sUSDe)
   - id: minter-burner
     label: ShareTokenMinterBurner (LZ wrapper)
     address: "0x0dFb42aa18CEeD719617cd554304F6cA412A6b18"
@@ -82,16 +82,17 @@ nodes:
     label: Governance Safe (3-of-5)
     address: "0x8EEc10616802Ef639ca55C98Ac856553FadeFbAd"
     category: governance
-    note: DEFAULT_ADMIN + UPGRADER on reUSD/ICL; PROPOSER + CANCELLER on Timelock
+    note: DEFAULT_ADMIN on reUSD/ICL/NAVConsumer; owns minter-burner + OFT adapter; PROPOSER + CANCELLER on Timelock
   - id: timelock
     label: Timelock Controller (48h)
     address: "0x69dDEa332723cF5407151aAF68B9b076557FCA93"
     category: governance
+    note: UPGRADER_ROLE on reUSD/ICL; CUSTODIAN_MANAGER_ROLE on ICL; 48h delay
   - id: oracle-admin
     label: Oracle Admin EOA (MPC 3/5)
     address: "0x6C15B25E9750Dccb698C1a4023f34015bFe57649"
     category: governance
-    note: Holds PRICE_SETTER_ROLE; owns minter-burner + OFT adapter; no timelock
+    note: Former PRICE_SETTER; retains UPDATER_ROLE only; roles revoked Jun 2026
   - id: access-admin
     label: Access Admin EOA (MPC 5/8)
     address: "0x80a62B72dF1136aCBc57141FB67Aa46812fECAFc"
@@ -100,16 +101,16 @@ nodes:
     label: Custodian Manager EOA (MPC 3/5)
     address: "0x9b6d7f2de2E4569297C7e88531E47679cEbE6eC9"
     category: governance
-    note: CUSTODIAN_MANAGER_ROLE on ICL
+    note: Former CUSTODIAN_MANAGER; role moved to Timelock Jun 2026
 
-  # === Capital deployment legs (~92% of reserves sit at plain EOAs) ===
+  # === Capital deployment legs (~86% of reserves sit at plain EOAs) ===
   - id: icl-custodial
-    label: ICL Custodial Wallet (EOA, ~$24.4M)
+    label: ICL Custodial Wallet (EOA, ~$24.95M)
     address: "0x295F67Fdb21255A3Db82964445628a706FBe689E"
     category: strategy
     note: Fireblocks MPC (claimed); plain EOA onchain
   - id: redeem-custodian
-    label: Redemption Reserves Custodian (EOA, ~$65.4M sUSDe)
+    label: Redemption Reserves Custodian (EOA, ~$52.95M sUSDe)
     address: "0x9eA38e09F41A9DE53972a68268BA0Dcc6d2fAdf8"
     category: strategy
     note: Fireblocks MPC (claimed); plain EOA onchain
@@ -118,7 +119,7 @@ nodes:
   - id: ethena-susde
     label: Ethena sUSDe (basis-trade)
     category: dependency
-    note: ~90% of onchain reserves; 7-day cooldown
+    note: ~73% of onchain reserves; 7-day cooldown
   - id: section114
     label: §114 Reinsurance Trust
     category: dependency
@@ -153,19 +154,31 @@ edges:
   - from: gov-safe
     to: reusd
     kind: holds-role
-    label: DEFAULT_ADMIN + UPGRADER
+    label: DEFAULT_ADMIN
   - from: gov-safe
     to: icl
     kind: holds-role
-    label: DEFAULT_ADMIN + UPGRADER
+    label: DEFAULT_ADMIN
+  - from: gov-safe
+    to: nav-consumer
+    kind: holds-role
+    label: DEFAULT_ADMIN
   - from: timelock
     to: reusd
     kind: manages
     label: 48h-delayed upgrades / role changes
   - from: timelock
+    to: reusd
+    kind: holds-role
+    label: UPGRADER_ROLE
+  - from: timelock
     to: icl
     kind: manages
     label: 48h-delayed upgrades / role changes
+  - from: timelock
+    to: icl
+    kind: holds-role
+    label: UPGRADER_ROLE + CUSTODIAN_MANAGER_ROLE
   - from: access-admin
     to: access-manager
     kind: controls
@@ -174,18 +187,6 @@ edges:
     to: instant-redeem
     kind: manages
     label: authority()
-  - from: custodian-mgr
-    to: icl
-    kind: holds-role
-    label: CUSTODIAN_MANAGER_ROLE
-  - from: oracle-admin
-    to: share-price-calc
-    kind: holds-role
-    label: PRICE_SETTER_ROLE (bypasses NAV Consumer)
-  - from: oracle-admin
-    to: nav-consumer
-    kind: holds-role
-    label: DEFAULT_ADMIN + EMERGENCY_UPDATER
 
   # === Mint authority on reUSD ===
   - from: icl
@@ -196,22 +197,18 @@ edges:
     to: reusd
     kind: mints
     label: MINTER_ROLE (burn on redeem)
-  - from: minter-burner
-    to: reusd
-    kind: mints
-    label: MINTER_ROLE (OFT cross-chain)
-  - from: oracle-admin
-    to: minter-burner
-    kind: controls
-    label: owner
-  - from: oracle-admin
-    to: oft-adapter
-    kind: controls
-    label: owner
   - from: oft-adapter
     to: minter-burner
     kind: routes-through
     label: LayerZero adapter
+  - from: gov-safe
+    to: minter-burner
+    kind: controls
+    label: owner
+  - from: gov-safe
+    to: oft-adapter
+    kind: controls
+    label: owner
 
   # === Price path ===
   - from: chainlink-functions
@@ -238,15 +235,15 @@ edges:
   - from: icl
     to: icl-custodial
     kind: allocates-to
-    label: ~24%
+    label: ~27%
   - from: icl
     to: redeem-custodian
     kind: allocates-to
-    label: ~65%
+    label: ~57%
   - from: icl
     to: redeem-vault
     kind: allocates-to
-    label: ~8% (instant buffer)
+    label: ~14% (instant buffer)
   - from: icl-custodial
     to: ethena-susde
     kind: deposits-into
