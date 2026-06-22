@@ -219,7 +219,7 @@ Re's modeled impairment likelihoods are the probability of the portfolio combine
 
 - **Custody / asset-movement surface — ~86% of reserves sit at plain EOAs (critical):**
 
-  Of the $93.66M onchain reserve, **$80.95M (~86.4%) sits at three plain EOAs**: the ICL Custodial Wallet (~$24.95M), the Redemption Reserves Custodian (~$52.95M), and the auxiliary address `0xd4374008…B25831e9` (~$3.05M). Only $12.71M (the Daily Instant Redemption Vault) sits behind contract-enforced role gating. From the chain's perspective, each EOA is indistinguishable from an ordinary single-key wallet. One ECDSA signature, one `transfer(...)` call, and those funds move anywhere — no onchain delay, no destination whitelist, no role check.
+  Of the $93.66M onchain reserve, **$80.95M (~86.4%) sits at three plain EOAs**: the ICL Custodial Wallet (~$24.95M), the Redemption Reserves Custodian (~$52.95M), and `0xd4374008…B25831e9` (~$3.05M, the **reUSDe** ICL custodian per team feedback — counted here because the EOA custody *risk* is token-agnostic, but excluded from the reUSD-only coverage ratio above). Only $12.71M (the Daily Instant Redemption Vault) sits behind contract-enforced role gating. From the chain's perspective, each EOA is indistinguishable from an ordinary single-key wallet. One ECDSA signature, one `transfer(...)` call, and those funds move anywhere — no onchain delay, no destination whitelist, no role check.
 
   Re's documentation and the October 2025 AUP describe these as **"Fireblocks MPC (Multi-Party Computation) wallets"** in which *"the associated private key is split into encrypted 'shares'"* (AUP Report 2025, footnote 2). Important caveats about what the AUP actually proves:
 
