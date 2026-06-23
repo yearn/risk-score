@@ -98,16 +98,52 @@ The vault is part of the broader Gauntlet ecosystem ($1.45B total TVL across all
 - **Backing ratio**: The vault is effectively 100%+ collateralized. Every gtUSDa token represents a pro-rata claim on the vault's USDC deployed across strategies plus any accrued yield.
 - **Yield risk**: Funds are deployed to Morpho lending markets. While USDC principal is generally safe, yield is variable and depends on Morpho market conditions. The vault does not employ leverage.
 - **Liquidations**: Not applicable — this is not a lending protocol. The vault does not take loans or face liquidation risk.
-- **Peg stability**: The unit price of gtUSDa is set administratively via `setUnitPrice()` on the PriceAndFeeCalculator, not determined by market forces. The oracle hard-codes USDC = $1 as per [Gauntlet docs](https://vaultbook.gauntlet.xyz/resources/frequently-asked-questions/oracles). This means the gtUSDa exchange rate (PPS) is an admin-updated value reflecting accrued yield.
+- **Peg stability**: The unit price of gtUSDa is set via `setUnitPrice()` on the PriceAndFeeCalculator. The oracle hard-codes USDC = $1 as per [Gauntlet docs](https://vaultbook.gauntlet.xyz/resources/frequently-asked-questions/oracles). The price value is computed **offchain** by Gauntlet's optimization engine (total USDC across all chains + accrued yield ÷ gtUSDa total supply) and then submitted onchain by a keeper. This means the gtUSDa exchange rate (PPS) is an admin-updated value reflecting accrued yield — see [Price-Setting Flow](#price-setting-flow) below for the full onchain-verified mechanism.
 - **Risk curation**: Gauntlet's automated risk management system curates allocations, applying risk constraints (40% max non-blue-chip exposure, liquidity caps, etc.).
 
 ### Provability
 
 - **Onchain verification**: The total supply of gtUSDa is fully onchain (`totalSupply()`). The Provisioner's USDC balance and vault's USDC balance are partially onchain — but USDC deployed to cross-chain Morpho vaults requires cross-chain tracking. On Ethereum mainnet, the vault and provisioner hold minimal USDC ($0 and ~$14K respectively).
-- **Yield calculation**: Yield is reflected in the unit price, which is updated by the admin via `setUnitPrice()` on the PriceAndFeeCalculator. This is not programmatically computed onchain — it relies on offchain yield data reported by the Gauntlet optimization engine.
-- **PPS (Price Per Share)**: The conversion between gtUSDa and USDC is managed by `convertTokenToUnits()` / `convertUnitsToToken()` on the PriceAndFeeCalculator, which references the admin-set unit price. The price can be set via `setUnitPrice()` requiring auth (timelock-controlled).
+- **Yield calculation**: Yield is reflected in the unit price. The price is computed **offchain** by Gauntlet's optimization engine (aggregating USDC positions across Ethereum, Base, Arbitrum, and Optimism Morpho markets), then submitted onchain by a keeper EOA. It is **not** computed programmatically from onchain data in a single transaction.
+- **PPS (Price Per Share)**: The conversion between gtUSDa and USDC is managed by `convertTokenToUnits()` / `convertUnitsToToken()` on the PriceAndFeeCalculator, which references the stored unit price. The price is set via `setUnitPrice()` — see [Price-Setting Flow](#price-setting-flow) below for the complete onchain-verified mechanism.
 - **Reserve transparency**: While individual balance snapshots are onchain, the full cross-chain position requires aggregation. The Gauntlet App provides live market allocations per docs.
 - **Third-party verification**: None identified. No Chainlink Proof of Reserve or external attestation mechanisms.
+
+### Price-Setting Flow
+
+The unit price of gtUSDa is determined through a multi-step offchain→onchain pipeline. The following is verified onchain from contract source and transaction traces.
+
+**Step 1 — Offchain computation:** Gauntlet's optimization engine aggregates total USDC deployed across all chains (Ethereum, Base, Arbitrum, Optimism Morpho markets), adds accrued yield, and divides by gtUSDa `totalSupply()`. This produces the new unit price. This computation is **entirely offchain** — it is not performed by any single onchain contract call.
+
+**Step 2 — Keeper submission:** A keeper EOA (e.g., [`0xdd998274ed12bb12d818800915cfb8f87cbc2801`](https://etherscan.io/address/0xdd998274ed12bb12d818800915cfb8f87cbc2801)) submits the price onchain by calling the **Forwarder** contract [`0xc219d47B645e3446b81889F18B34238310c792d0`](https://etherscan.io/address/0xc219d47B645e3446b81889F18B34238310c792d0) (unverified, owned by the main TimelockController). The Forwarder is the vault's designated **accountant** (`vaultAccountant[gtUSDa]`). The call batches two operations:
+
+1. `checkSetUnitPrice(PriceAndFeeCalculator, vault, timestamp)` on **MinimumUpdateIntervalGuard** [`0xbfb2040d37f5da34938a367ef3ae0786fd6a861a`](https://etherscan.io/address/0xbfb2040d37f5da34938a367ef3ae0786fd6a861a) — pre-validates that the minimum update interval has elapsed.
+2. `setUnitPrice(vault, price, timestamp)` on **PriceAndFeeCalculator** [`0x8F3FfA11CD5915f0E869192663b905504A2Ef4a5`](https://etherscan.io/address/0x8F3FfA11CD5915f0E869192663b905504A2Ef4a5).
+
+Example transaction: [`0xe5aebe0ef8a7470b85964b143cbf45ced0a81e7eedb91b14832fca6422719499`](https://etherscan.io/tx/0xe5aebe0ef8a7470b85964b143cbf45ced0a81e7eedb91b14832fca6422719499) (block 25381302).
+
+**Step 3 — Onchain validation in `setUnitPrice()`:** The PriceAndFeeCalculator applies two layers of checks.
+
+*Hard validations (revert if violated):*
+| Guard | Rule |
+|-------|------|
+| Non-zero price | `price != 0` |
+| Monotonic timestamp | `timestamp > lastTimestamp` |
+| No future timestamps | `timestamp <= block.timestamp` |
+| Not stale | `maxPriceAge + timestamp >= block.timestamp` |
+
+*Soft guards / pause triggers (violation = vault pause, but price is **always written**):*
+| Guard | Current gtUSDa Threshold | Source |
+|-------|--------------------------|--------|
+| Max price **decrease** | **0.10%** (`minPriceToleranceRatio = 9990 BPS`) | [`ThresholdsSet` event block 23971333](https://etherscan.io/tx/0x8da0ba49dca82b18232dd605e997359a0edd25f5dfad3e0186ea98ee79b88441#eventlog) |
+| Max price **increase** | **0.10%** (`maxPriceToleranceRatio = 10010 BPS`) | Same as above |
+| Min update interval | **60 minutes** | Same as above |
+| Max price age | **255 seconds** (~4.25 min) | Same as above |
+| Max update delay | `maxUpdateDelayDays` (value not emitted in event) | `setThresholds()` call |
+
+**Critical finding:** When a soft guard is violated, `_shouldPause()` returns `true` and the vault is paused — but the new price is **still written to storage** (`vaultPriceState.unitPrice = price`). The vault owner can subsequently call `unpauseVault(vault, price, timestamp)` to resume operations at that price. There are **no hard limits** preventing arbitrary price setting — the tolerance bounds are a circuit breaker that the vault owner can override, not a prevention mechanism.
+
+**Step 4 — Usage:** Deposits and withdrawals use the stored unit price via `convertTokenToUnits()` / `convertUnitsToToken()`. When the vault is paused, the `*IfActive` conversion variants revert (blocking deposits/withdrawals), but the non-`IfActive` versions still return the paused price.
 
 ## Liquidity Risk
 
@@ -134,7 +170,7 @@ The vault is part of the broader Gauntlet ecosystem ($1.45B total TVL across all
 | Change provisioner address | Timelock (1-day delay) | Owner of vault | High — could set malicious provisioner that mints unbacked gtUSDa or steals deposited USDC |
 | Pause vault | Timelock OR Guardian | `requiresAuth` or guardian | Medium — freezes deposits/withdrawals temporarily |
 | Unpause vault | Timelock only | `requiresAuth` | Time-locked — cannot be done without 1-day delay |
-| Set unit price | FeeCalc Timelock (1-day) | `setUnitPrice()` requires auth | High — could manipulate gtUSDa exchange rate |
+| Set unit price | Keeper EOA → Forwarder (owned by Timelock 1-day) | `setUnitPrice()` only callable by vault's designated accountant (Forwarder `0xc219…92d0`). Soft guards trigger pause if price deviates >±0.10% or update interval <60 min, but price is **always set** regardless. Vault owner can unpause at new price. | High — could manipulate gtUSDa exchange rate; soft guards only pause, never block |
 | Set fees | FeeCalc Timelock (1-day) | `setVaultFees()` requires auth | Medium — could increase fee extraction |
 | Add/remove guardians | Timelock | `setGuardianRoot()` requires auth | Medium — guardians can submit arbitrary operations |
 | Set provisioner (vault) | Timelock | `setProvisioner()` requires auth | High — controls who can mint/burn |
@@ -146,7 +182,7 @@ The vault is part of the broader Gauntlet ecosystem ($1.45B total TVL across all
 ### Programmability
 
 - **System operations**: Mostly programmatic — deposits and withdrawals are handled by the Provisioner contract automatically. However, the unit price (PPS) is set administratively, and strategy allocations are determined by Gauntlet's offchain optimization engine.
-- **PPS definition**: The price per share is admin-set via `setUnitPrice()` on the PriceAndFeeCalculator, not computed programmatically from onchain data. This means the PPS relies on the admin accurately reporting accrued yield.
+- **PPS definition**: The price per share is set offchain by Gauntlet's engine and submitted onchain by a keeper EOA via the Forwarder → `setUnitPrice()`. It is **not** computed programmatically from onchain data within the transaction. The current tolerance thresholds (verified onchain from `ThresholdsSet` event at [block 23971333](https://etherscan.io/tx/0x8da0ba49dca82b18232dd605e997359a0edd25f5dfad3e0186ea98ee79b88441)): max price increase **+0.10%**, max decrease **−0.10%**, min update interval **60 minutes**, max price age **255 seconds**. These are **soft guards** — violating them triggers a vault pause but the new price is **always written**. See [Price-Setting Flow](#price-setting-flow) for the complete mechanism.
 - **Offchain dependencies**: The Gauntlet optimization engine (offchain) determines strategy allocations. The Provisioner executes onchain transactions based on these offchain decisions. If the offchain engine fails or provides incorrect data, allocations could be suboptimal.
 - **Keepers/relayers**: Settlement of async requests depends on a solver. `solveRequestsVault()` requires authorization through the vault's RolesAuthority (`requiresAuth`), so the privileged settlement path is a Gauntlet-operated keeper/solver. The `solveRequestsDirect()` path is permissionless and tip-incentivized, providing a fallback if the privileged solver is offline — though without an active solver, async redemptions wait until their `deadline`. The specific offchain keeper service operated by Gauntlet is not separately identifiable onchain beyond the authorized solver address(es) in RolesAuthority.
 
@@ -180,7 +216,9 @@ The vault is part of the broader Gauntlet ecosystem ($1.45B total TVL across all
 | [`0xC14604f43ED73011B60426FE6c48317d6583e67e`](https://etherscan.io/address/0xC14604f43ED73011B60426FE6c48317d6583e67e) | RolesAuthority (Vault) | Access control for vault functions |
 | [`0xA83C037DF3b27bF7224AB0a40a2c4531FF1B2f40`](https://etherscan.io/address/0xA83C037DF3b27bF7224AB0a40a2c4531FF1B2f40) | RolesAuthority (FeeCalc) | Access control for fee calculator |
 | [`0xdDfd960a7150520548dD1F6E53CC2f201b364692`](https://etherscan.io/address/0xdDfd960a7150520548dD1F6E53CC2f201b364692) | Whitelist | Address whitelist for vault interactions |
-| [`0xD56098b1B02153879D1A74fd3070ceacf7Dc9683`](https://etherscan.io/address/0xD56098b1B02153879D1A74fd3070ceacf7Dc9683) | OracleRegistry | Oracle registry for fee calculator |
+| [`0xc219d47B645e3446b81889F18B34238310c792d0`](https://etherscan.io/address/0xc219d47B645e3446b81889F18B34238310c792d0) | Forwarder (Accountant) | Keeper → setUnitPrice() relay, owner = TimelockController (Vault) |
+| [`0xbfb2040d37f5da34938a367ef3ae0786fd6a861a`](https://etherscan.io/address/0xbfb2040d37f5da34938a367ef3ae0786fd6a861a) | MinimumUpdateIntervalGuard | Pre-checks min update interval before price updates |
+| [`0xdd998274ed12bb12d818800915cfb8f87cbc2801`](https://etherscan.io/address/0xdd998274ed12bb12d818800915cfb8f87cbc2801) | Keeper EOA (example) | Offchain bot that submits unit price updates via Forwarder |
 
 ### Critical Events & Functions
 
@@ -204,9 +242,19 @@ The vault is part of the broader Gauntlet ecosystem ($1.45B total TVL across all
 - `totalSupply()` on vault → circulating gtUSDa
 - `balanceOf(vault)` of USDC → idle USDC in vault
 - `balanceOf(provisioner)` of USDC → pending USDC in provisioner
-- `getVaultState(vault)` on PriceAndFeeCalculator → vault parameters (unit price, active state)
+- `getVaultState(vault)` on PriceAndFeeCalculator → vault parameters (unit price, active state, thresholds)
 - `getMinDelay()` on both Timelocks → timelock delay (should remain ≥86400)
-- `depositCap()` (fails onchain, may need events) on Provisioner → deposit limits
+- `depositCap()` on Provisioner → deposit limits
+- `vaultAccountant(vault)` on PriceAndFeeCalculator → accountant (should be Forwarder `0xc219…92d0`)
+- `getVaultsPriceAge(vault)` on PriceAndFeeCalculator → seconds since last price update
+
+**Threshold monitoring (verify against current values):**
+- `minPriceToleranceRatio`: should be **9990 BPS** (max −0.10% decrease per update)
+- `maxPriceToleranceRatio`: should be **10010 BPS** (max +0.10% increase per update)
+- `minUpdateIntervalMinutes`: should be **60 minutes**
+- `maxPriceAge`: should be **255 seconds**
+- Unit price deviation from expected (NAV-based): >0.10% triggers vault pause
+- `vaultAccountant` address change: critical — controls who can submit price updates
 - `WHITELIST()` on vault → whitelist contract address
 - `getActiveGuardians()` on vault → guardian set (currently reverts, may need events)
 
@@ -319,7 +367,7 @@ Fund Flow:
 
 ### Key Risks
 
-- Admin-controlled unit price (PPS) — exchange rate is set manually, not computed programmatically
+- Admin-controlled unit price (PPS) — exchange rate is keeper-submitted from offchain NAV with soft-guard-only limits (±0.10%, 60-min cooldown) that pause but never block malicious prices
 - Highly concentrated holder base — top holder ~53%, top 3 ~82% of supply (27 holders total)
 - Small Ethereum TVL ($1.53M) limits battle-testing at scale
 - Guardian system with arbitrary execution capability via Merkle proofs
@@ -329,7 +377,7 @@ Fund Flow:
 
 ### Critical Risks
 
-- **Admin-controlled PPS**: The unit price is set by the fee calculator governance (timelock with 1-day delay). A malicious or compromised fee governance could manipulate the gtUSDa/USDC exchange rate arbitrarily, affecting all holders.
+- **Admin-controlled PPS**: The unit price is set offchain and submitted by a keeper EOA via the Forwarder. Soft guards (±0.10% per update tolerance, 60-min cooldown, 255s max price age) trigger a vault pause if exceeded — but the new price is **always written** and the vault owner can unpause at that price. There are no hard limits preventing arbitrary price manipulation. A malicious or compromised keeper/governance could manipulate the gtUSDa/USDC exchange rate arbitrarily, affecting all holders. See [Price-Setting Flow](#price-setting-flow) for the full mechanism.
 - **Holder concentration**: A single EOA holds ~53% and the top 3 hold ~82% of supply. In an async-redemption model with $0 idle USDC, a large-holder exit could force rapid cross-chain unwinding and leave smaller holders waiting on the request queue.
 
 ---
@@ -381,17 +429,17 @@ Score: **3.5/5** — Relatively new deployment with small TVL. The broader Gaunt
 
 | Upgradeability | Timelock | Privileged Roles |
 |---------------|----------|-----------------|
-| Immutable vault (non-proxy). Cannot upgrade. | 1-day (24 hours) on both vault and fee timelocks | 3/9 multisig proposer. Provisioner can mint/burn. Timelock can change provisioner. Guardians can execute arbitrary operations. |
+| Immutable vault (non-proxy). Cannot upgrade. | 1-day (24 hours) on both vault and fee timelocks | 3/9 multisig proposer. Provisioner can mint/burn. Timelock can change provisioner. Guardians can execute arbitrary operations. Keeper EOA submits unit price via Forwarder with soft guards (±0.10% tolerance, 60-min cooldown) that pause but never block. |
 
-Score: **3.0/5** — The 3/9 multisig with 1-day timelock is reasonable. However, the guardian system with arbitrary execution capability and the admin-controlled PPS are significant concerns. The immutable vault is a positive.
+Score: **3.0/5** — The 3/9 multisig with 1-day timelock is reasonable. However, the guardian system with arbitrary execution capability and the admin-controlled PPS (with soft-guard-only limits) are significant concerns. The immutable vault is a positive.
 
 **Subcategory B: Programmability**
 
 | System Operations | PPS/Rate Definition |
 |------------------|---------------------|
-| Mostly programmatic deposits/withdrawals via Provisioner. Strategy allocation determined by offchain engine. | Admin-set unit price (`setUnitPrice()`), not programmatically computed. |
+| Mostly programmatic deposits/withdrawals via Provisioner. Strategy allocation determined by offchain engine. | Keeper-submitted unit price (offchain NAV computation). Soft guards (±0.10%, 60-min, 255s age) pause vault on violation but **never block** the price update. Vault owner can unpause. |
 
-Score: **3.0/5** — Hybrid onchain/offchain operations. The PPS is manually updated by governance, creating a trust dependency on the admin accurately reporting yield.
+Score: **3.0/5** — Hybrid onchain/offchain operations. The PPS is keeper-submitted with soft-guard-only limits, creating a trust dependency on the offchain engine accurately reporting yield and the keeper not acting maliciously.
 
 **Subcategory C: External Dependencies**
 
@@ -419,9 +467,9 @@ Score: **1.5/5** — Fully backed by blue-chip USDC collateral. The backing is s
 
 | Reserve Transparency | Reporting Mechanism | Third-Party Verification |
 |---------------------|--------------------|-----------------------|
-| Total supply onchain; USDC balances onchain; cross-chain positions require offchain aggregation | Admin-updated unit price; Gauntlet App provides allocation data | None identified |
+| Total supply onchain; USDC balances onchain; cross-chain positions require offchain aggregation | Keeper-submitted unit price (offchain NAV) with soft-guard-only limits (±0.10%); Gauntlet App provides allocation data | None identified |
 
-Score: **3.0/5** — Hybrid onchain/offchain reporting. The admin-set PPS means yield reporting depends on the team's accuracy. No third-party verification mechanism.
+Score: **3.0/5** — Hybrid onchain/offchain reporting. The keeper-submitted PPS means yield reporting depends on the offchain engine's accuracy, with soft guards that pause but never block malicious prices. No third-party verification mechanism.
 
 **Funds Management Score = (1.5 + 3.0) / 2 = 2.25**
 
