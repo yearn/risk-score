@@ -170,7 +170,7 @@ Example transaction: [`0xe5aebe0ef8a7470b85964b143cbf45ced0a81e7eedb91b14832fca6
 | Change provisioner address | Timelock (1-day delay) | Owner of vault | High — could set malicious provisioner that mints unbacked gtUSDa or steals deposited USDC |
 | Pause vault | Timelock OR Guardian | `requiresAuth` or guardian | Medium — freezes deposits/withdrawals temporarily |
 | Unpause vault | Timelock only | `requiresAuth` | Time-locked — cannot be done without 1-day delay |
-| Set unit price | Keeper EOA → Forwarder (owned by Timelock 1-day) | `setUnitPrice()` only callable by vault's designated accountant (Forwarder `0xc219…92d0`). Soft guards trigger pause if price deviates >±0.10% or update interval <60 min, but price is **always set** regardless. Vault owner can unpause at new price. | High — could manipulate gtUSDa exchange rate; soft guards only pause, never block |
+| Set unit price | Keeper EOA → Forwarder (owner = Timelock 1-day) | `setUnitPrice()` only callable by vault's designated accountant (Forwarder `0xc219…92d0`). **Price updates bypass the timelock** — the keeper calls the Forwarder directly. Soft guards trigger pause if price deviates >±0.10% or update interval <60 min, but price is **always set** regardless. Vault owner can unpause at new price. | High — could manipulate gtUSDa exchange rate instantly; soft guards only pause, never block; no timelock delay on price changes |
 | Set fees | FeeCalc Timelock (1-day) | `setVaultFees()` requires auth | Medium — could increase fee extraction |
 | Add/remove guardians | Timelock | `setGuardianRoot()` requires auth | Medium — guardians can submit arbitrary operations |
 | Set provisioner (vault) | Timelock | `setProvisioner()` requires auth | High — controls who can mint/burn |
