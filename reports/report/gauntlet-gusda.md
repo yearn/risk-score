@@ -4,7 +4,7 @@
 - **Token:** gtUSDa (Gauntlet USD Alpha)
 - **Chain:** Ethereum (also deployed on Base, Optimism, Arbitrum)
 - **Token Address:** [`0x3bd9248048df95db4fbd748c6cd99c1baa40bad0`](https://etherscan.io/token/0x3bd9248048df95db4fbd748c6cd99c1baa40bad0)
-- **Final Score: 2.7/5.0**
+- **Final Score: 2.5/5.0**
 
 ## Overview + Links
 
@@ -388,7 +388,7 @@ Score: **2.5/5** — Relatively new deployment (~6.5 months) but with meaningful
 |---------------|----------|-----------------|
 | Immutable vault (non-proxy). Cannot upgrade. | 1-day (24 hours) on both vault and fee timelocks | 3/9 multisig proposer. Provisioner can mint/burn. Timelock can change provisioner. Guardians can execute arbitrary operations. Keeper EOA submits unit price via Forwarder with soft guards (±0.10% tolerance, 60-min cooldown) that pause but never block. |
 
-Score: **3.0/5** — The 3/9 multisig with 1-day timelock is reasonable. However, the guardian system with arbitrary execution capability and the admin-controlled PPS (with soft-guard-only limits) are significant concerns. The immutable vault is a positive.
+Score: **2.0/5** — The 3/9 multisig with 1-day timelock is reasonable. However, the guardian system with arbitrary execution capability and the admin-controlled PPS (with soft-guard-only limits) are significant concerns. The immutable vault is a positive.
 
 **Subcategory B: Programmability**
 
@@ -396,7 +396,7 @@ Score: **3.0/5** — The 3/9 multisig with 1-day timelock is reasonable. However
 |------------------|---------------------|
 | Mostly programmatic deposits/withdrawals via Provisioner. Strategy allocation determined by offchain engine. | Keeper-submitted unit price (offchain NAV computation). Soft guards (±0.10%, 60-min, 255s age) pause vault on violation but **never block** the price update. Vault owner can unpause. |
 
-Score: **3.0/5** — Hybrid onchain/offchain operations. The PPS is keeper-submitted with soft-guard-only limits, creating a trust dependency on the offchain engine accurately reporting yield and the keeper not acting maliciously.
+Score: **3.5/5** — Hybrid onchain/offchain operations. The PPS is keeper-submitted with soft-guard-only limits, creating a trust dependency on the offchain engine accurately reporting yield and the keeper not acting maliciously.
 
 **Subcategory C: External Dependencies**
 
@@ -406,9 +406,9 @@ Score: **3.0/5** — Hybrid onchain/offchain operations. The PPS is keeper-submi
 
 Score: **3.0/5** — Multiple dependencies, but all on established protocols: Morpho, USDC, and the canonical Circle CCTP bridge (identified onchain via `TokenMinterV2`), which removes the previously unquantified bridge risk. Residual surface is multi-curator Morpho market risk across 4 chains and dependence on the Aera Protocol contracts. Morpho failure would disrupt yield but not directly cause principal loss (funds are in lending markets).
 
-**Centralization Score = (3.0 + 3.0 + 3.0) / 3 = 3.0**
+**Centralization Score = (2.0 + 3.5 + 3.0) / 3 = 2.83**
 
-**Score: 3.0/5** — Adequate governance structure with timelock, but admin-controlled PPS and guardian system are concerns.
+**Score: 2.83/5** — Adequate governance structure with timelock, but admin-controlled PPS and guardian system are concerns.
 
 #### Category 3: Funds Management (Weight: 30%)
 
@@ -430,7 +430,7 @@ Score: **3.0/5** — Hybrid onchain/offchain reporting. The keeper-submitted PPS
 
 **Funds Management Score = (1.5 + 3.0) / 2 = 2.25**
 
-**Score: 2.3/5** — Strong collateralization with USDC, but the admin-controlled PPS and lack of independent verification are significant.
+**Score: 2.25/5** — Strong collateralization with USDC, but the admin-controlled PPS and lack of independent verification are significant.
 
 #### Category 4: Liquidity Risk (Weight: 15%)
 
@@ -438,11 +438,7 @@ Score: **3.0/5** — Hybrid onchain/offchain reporting. The keeper-submitted PPS
 |---------------|----------------|---------------------|
 | Direct redemption through Provisioner; async request-solve flow available | ~$60M aggregate TVL across 4 chains; Ethereum vault has $0 idle USDC | Top Ethereum holder ~53%; cross-chain recall may delay large exits |
 
-Score: **3.0/5** — Redemption mechanism exists. The Ethereum vault has zero idle USDC and a concentrated holder base, but the $60M aggregate TVL (mostly on Base) provides more exit capacity. Cross-chain fund deployment means large withdrawals may face delays.
-
-- Cross-chain fund recall adds withdrawal latency: +0.5
-
-**Score: 3.5/5** — Small scale means even modest redemptions are large in percentage terms. Cross-chain positions may introduce significant withdrawal delays.
+Score: **3.0/5** — Redemption mechanism exists. The Ethereum vault has zero idle USDC and a concentrated holder base, but the $60M aggregate TVL (mostly on Base) provides more exit capacity. Cross-chain fund deployment means large withdrawals may face delays; same-value USDC redemption mitigates price risk.
 
 #### Category 5: Operational Risk (Weight: 5%)
 
@@ -457,13 +453,13 @@ Score: **1.5/5** — Strong reputation, extensive documentation, identified lega
 | Category | Score | Weight | Weighted |
 |----------|-------|--------|----------|
 | Audits & Historical | 2.5 | 20% | 0.50 |
-| Centralization & Control | 3.0 | 30% | 0.90 |
-| Funds Management | 2.3 | 30% | 0.69 |
-| Liquidity Risk | 3.5 | 15% | 0.525 |
+| Centralization & Control | 2.83 | 30% | 0.849 |
+| Funds Management | 2.25 | 30% | 0.675 |
+| Liquidity Risk | 3.0 | 15% | 0.45 |
 | Operational Risk | 1.5 | 5% | 0.075 |
-| **Final Score** | | | **2.69/5.0** |
+| **Final Score** | | | **2.549/5.0** |
 
-**Final Score: 2.7/5.0** (rounded)
+**Final Score: 2.5/5.0** (rounded from 2.549)
 
 ### Risk Tier
 
