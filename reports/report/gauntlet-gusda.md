@@ -1,0 +1,468 @@
+# Protocol Risk Assessment: Gauntlet USD Alpha (gtUSDa)
+
+- **Assessment Date:** June 23, 2026
+- **Token:** gtUSDa (Gauntlet USD Alpha)
+- **Chain:** Ethereum
+- **Token Address:** [`0x3bd9248048df95db4fbd748c6cd99c1baa40bad0`](https://etherscan.io/token/0x3bd9248048df95db4fbd748c6cd99c1baa40bad0)
+- **Final Score: 3.1/5.0**
+
+## Overview + Links
+
+Gauntlet USD Alpha (gtUSDa) is a yield-bearing stablecoin vault built on the Aera Protocol. It seeks to achieve the highest risk-adjusted yield on USDC by allocating across Morpho lending markets on Ethereum, Base, Arbitrum, and Optimism. The vault combines variable-rate and fixed-rate yield opportunities and is curated by Gauntlet's optimization engine.
+
+The vault is part of the broader Gauntlet ecosystem ($1.45B total TVL across all chains) and targets institutional and crypto-native users. gtUSDa tokens represent a pro-rata claim on the vault's USDC deployed across strategies.
+
+**Links:**
+
+- [Protocol Documentation](https://vaultbook.gauntlet.xyz/vaults/gauntlet-usd-alpha-vault)
+- [Protocol Dashboard/App](https://app.gauntlet.xyz/vaults/gtusda)
+- [Integration Documentation](https://docs.gauntlet.xyz/onboarding/index)
+- [Gauntlet Website](https://www.gauntlet.xyz)
+- [Gauntlet DefiLlama](https://defillama.com/protocol/gauntlet)
+
+## Audits and Due Diligence Disclosures
+
+- **No specific audit reports for the Gauntlet USD Alpha vault were found.** The Gauntlet documentation states that "Certified audits from top industry auditors are required before vault inclusion" but individual audit reports are not publicly linked in the docs or on Etherscan.
+- **Aera Protocol audits**: TODO — The vault is built on the Aera Protocol (`MultiDepositorVault` contract). Audit reports for the underlying Aera protocol contracts were not located during this assessment. The Gauntlet docs reference audit requirements for vault curation but do not enumerate specific audit firm names, dates, or report links.
+- The MultiDepositorVault is not upgradeable (non-proxy contract), which reduces complexity but also means code changes require full redeployment.
+- Contract architecture involves multiple interacting components: MultiDepositorVault, Provisioner, PriceAndFeeCalculator, RolesAuthority (x2), TimelockController (x2), Gnosis Safe multisig, and a Whitelist contract. The architecture is moderately complex.
+- DefiLlama reports 0 audits for the Gauntlet protocol: [Gauntlet on DefiLlama](https://defillama.com/protocol/gauntlet)
+
+### Bug Bounty
+
+TODO — No bug bounty program was found for the Gauntlet USD Alpha vault or on Immunefi, Code4rena, HackerOne, Sherlock, or Cantina at the time of assessment. Safe Harbor status is also unverified.
+
+## Historical Track Record
+
+- **Time in production**: ~6.5 months (deployed December 8, 2025, at block [23971333](https://etherscan.io/tx/0x8da0ba49dca82b18232dd605e997359a0edd25f5dfad3e0186ea98ee79b88441))
+- **Past incidents**: No known security incidents or exploits affecting the gtUSDa vault
+- **TVL**: ~$1.53M on Ethereum as of June 23, 2026 (total supply: 1,528,185 gtUSDa). The broader Gauntlet protocol has $1.45B TVL across all chains.
+  - Source: Onchain `totalSupply()` at [`0x3bd9248048df95db4fbd748c6cd99c1baa40bad0`](https://etherscan.io/token/0x3bd9248048df95db4fbd748c6cd99c1baa40bad0) and [Gauntlet on DefiLlama](https://defillama.com/protocol/gauntlet)
+- **TVL history**: The Ethereum gtUSDa TVL is relatively small ($1.53M) compared to the Base deployment (~$528M Gauntlet TVL on Base includes other vaults). The vault has not yet attracted significant TVL on Ethereum.
+- **Concentration risk**: TODO — Large holder analysis not performed. Given the small TVL, concentration is possible.
+- **Historical peg**: gtUSDa is a yield-bearing token, not a stablecoin. Its price increases over time as yield accrues (admin-set unit price). No depeg events are applicable.
+
+## Funds Management
+
+- **Yield strategy**: The vault allocates USDC to Morpho lending markets across Ethereum mainnet, Base, Arbitrum, and Optimism. The Gauntlet optimization engine allocates to the highest risk-adjusted yield opportunities.
+- **Strategy constraints** (from [docs](https://vaultbook.gauntlet.xyz/vaults/gauntlet-usd-alpha-vault/optimization-and-risk-management-considerations)):
+  - Max 40% exposure to non-blue-chip stablecoins
+  - Position sizes constrained by vault and DEX liquidity
+  - Collateral exposure constrained by DEX liquidity
+  - Token turnover constrained by spot DEX liquidity
+- **Fees**: Administered via the PriceAndFeeCalculator. Fee parameters can be changed by the fee-calculator governance (separate timelock).
+- **Fund custody**: USDC flows through the Provisioner contract to cross-chain Morpho vaults. The vault itself holds $0 USDC (all deployed).
+
+### Accessibility
+
+- **Deposits (mint)**: Anyone can deposit USDC to mint gtUSDa via the Provisioner's `deposit()` and `mint()` functions, subject to a deposit cap. The flow is: User approves USDC to Provisioner → Provisioner pulls USDC and calls `enter()` on vault → Vault mints gtUSDa.
+- **Withdrawals (redeem)**: Anyone can redeem gtUSDa for USDC via the Provisioner's `requestRedeem()` / `solveRequestsVault()` flow, or through direct redemption if liquidity is available.
+- **Atomicity**: Minting is atomic — USDC is pulled and gtUSDa minted in the same transaction (`enter()` on vault). Redemption involves a request-solve flow that may not be fully atomic in all cases (sync vs async).
+- **Rate limits**: A deposit cap is enforced on the Provisioner (`depositCap`/`_requireDepositCapNotExceeded`). The specific cap value was not decoded from the onchain storage. Withdrawals are subject to available vault liquidity.
+
+### Token Mint Authority
+
+**Mint mechanism:** Role-gated via the Provisioner contract. The MultiDepositorVault restricts minting (`enter()`) and burning (`exit()`) to the single `provisioner` address via the `onlyProvisioner` modifier (direct address equality check, not through the authority system).
+
+**Mint requires backing:** Yes — atomic. The Provisioner always transfers USDC from the depositor before calling `vault.enter()` which mints gtUSDa. There is no path for unbacked mint through the deposit flow.
+
+**Per-address mint authority** (verified onchain on June 23, 2026, from token contract [`0x3bd9248048df95db4fbd748c6cd99c1baa40bad0`](https://etherscan.io/address/0x3bd9248048df95db4fbd748c6cd99c1baa40bad0)):
+
+| Address | Can Mint | Can Burn | Role / Mechanism | Notes |
+|---------|:--------:|:--------:|------------------|-------|
+| [`0x74C4A66CE4F4779B11E7c63D42e51EEef3A80D11`](https://etherscan.io/address/0x74C4A66CE4F4779B11E7c63D42e51EEef3A80D11) | ✓ | ✓ | `provisioner` (direct address check) | Provisioner contract. Owner = TimelockController [`0x72820eA60C344186465152e4b11e260CAE391d77`](https://etherscan.io/address/0x72820eA60C344186465152e4b11e260CAE391d77) (1-day delay). The provisioner can be changed by the timelock via `setProvisioner()`. |
+
+**Provisioner owner governance chain:**
+- Gauntlet Multisig (Gnosis Safe, 3/9 threshold) [`0xCa75ab43dABD026466f8DA9CC0938eD7bDea0a6f`](https://etherscan.io/address/0xCa75ab43dABD026466f8DA9CC0938eD7bDea0a6f) — holds PROPOSER_ROLE and EXECUTOR_ROLE on the TimelockController
+- TimelockController [`0x72820eA60C344186465152e4b11e260CAE391d77`](https://etherscan.io/address/0x72820eA60C344186465152e4b11e260CAE391d77) — 1-day delay (`getMinDelay()` = 86400), owner of vault, provisioner, and RolesAuthority
+
+**Rate limits / supply caps:** A deposit cap is enforced by the Provisioner. This cap is configurable by governance (timelock).
+
+**Backing check at mint time:** Atomic — minter (Provisioner) must deposit USDC in same transaction. The Provisioner's `deposit()` function pulls `tokensIn` USDC before calling `vault.enter()` which mints `unitsOut` gtUSDa. No path exists to mint without backing.
+
+### Collateralization
+
+- **Collateral type**: 100% backed by USDC. The vault's supply asset is USDC [`0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48`](https://etherscan.io/token/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48).
+- **Collateral quality**: Blue-chip stablecoin (USDC, issued by Circle). This is the highest quality stablecoin collateral available.
+- **Backing ratio**: The vault is effectively 100%+ collateralized. Every gtUSDa token represents a pro-rata claim on the vault's USDC deployed across strategies plus any accrued yield.
+- **Yield risk**: Funds are deployed to Morpho lending markets. While USDC principal is generally safe, yield is variable and depends on Morpho market conditions. The vault does not employ leverage.
+- **Liquidations**: Not applicable — this is not a lending protocol. The vault does not take loans or face liquidation risk.
+- **Peg stability**: The unit price of gtUSDa is set administratively via `setUnitPrice()` on the PriceAndFeeCalculator, not determined by market forces. The oracle hard-codes USDC = $1 as per [Gauntlet docs](https://vaultbook.gauntlet.xyz/resources/frequently-asked-questions/oracles). This means the gtUSDa exchange rate (PPS) is an admin-updated value reflecting accrued yield.
+- **Risk curation**: Gauntlet's automated risk management system curates allocations, applying risk constraints (40% max non-blue-chip exposure, liquidity caps, etc.).
+
+### Provability
+
+- **Onchain verification**: The total supply of gtUSDa is fully onchain (`totalSupply()`). The Provisioner's USDC balance and vault's USDC balance are partially onchain — but USDC deployed to cross-chain Morpho vaults requires cross-chain tracking. On Ethereum mainnet, the vault and provisioner hold minimal USDC ($0 and ~$14K respectively).
+- **Yield calculation**: Yield is reflected in the unit price, which is updated by the admin via `setUnitPrice()` on the PriceAndFeeCalculator. This is not programmatically computed onchain — it relies on offchain yield data reported by the Gauntlet optimization engine.
+- **PPS (Price Per Share)**: The conversion between gtUSDa and USDC is managed by `convertTokenToUnits()` / `convertUnitsToToken()` on the PriceAndFeeCalculator, which references the admin-set unit price. The price can be set via `setUnitPrice()` requiring auth (timelock-controlled).
+- **Reserve transparency**: While individual balance snapshots are onchain, the full cross-chain position requires aggregation. The Gauntlet App provides live market allocations per docs.
+- **Third-party verification**: None identified. No Chainlink Proof of Reserve or external attestation mechanisms.
+
+## Liquidity Risk
+
+- **Exit mechanism**: Users redeem gtUSDa for USDC via the Provisioner. The flow can be synchronous (`deposit()`/`redeem()` with direct vault interaction) or asynchronous (`requestRedeem()` + `solveRequestsVault()`). Synchronous redemption is available only when vault has idle USDC.
+- **Liquidity depth**: The Ethereum vault holds $0 idle USDC. Withdrawals likely depend on the Provisioner unwinding or rebalancing cross-chain positions. This may introduce delays for large withdrawals.
+- **Slippage**: Not applicable in the traditional DEX sense — redemptions are at the admin-set unit price. However, large redemptions may face delays if cross-chain funds need to be recalled.
+- **Withdrawal queues**: The Provisioner supports request-based redemptions (`requestRedeem()`, `solveRequestsVault()`), suggesting a queue or batch-settlement mechanism. TODO — Specific queue mechanics not fully verified onchain.
+- **Historical liquidity**: No periods of market stress observed since deployment (~6.5 months). The vault has not experienced a major withdrawal event.
+- **Large holder impact**: Given the small TVL (~$1.53M), even modest withdrawals could represent a significant percentage. Cross-chain fund recall may introduce additional latency.
+
+## Centralization & Control Risks
+
+### Governance
+
+- **Contract upgradeability**: The MultiDepositorVault is NOT a proxy — it is an immutable deployed contract. Code changes require full redeployment. The Provisioner and PriceAndFeeCalculator are also non-proxy contracts.
+- **Owner**: The vault owner is a TimelockController [`0x72820eA60C344186465152e4b11e260CAE391d77`](https://etherscan.io/address/0x72820eA60C344186465152e4b11e260CAE391d77) with a 1-day delay (`getMinDelay()` = 86400).
+- **Multisig**: Gauntlet Gnosis Safe [`0xCa75ab43dABD026466f8DA9CC0938eD7bDea0a6f`](https://etherscan.io/address/0xCa75ab43dABD026466f8DA9CC0938eD7bDea0a6f) — 3-of-9 multisig, holds PROPOSER_ROLE and EXECUTOR_ROLE on the timelock. Signer identities: not validated per assessment rules.
+- **Separate Fee governance**: The PriceAndFeeCalculator has its own governance path via TimelockController [`0xce75E223E6DbB0503D2B6f55bC5907d1A0372E2B`](https://etherscan.io/address/0xce75E223E6DbB0503D2B6f55bC5907d1A0372E2B) (1-day delay), owner of RolesAuthority [`0xA83C037DF3b27bF7224AB0a40a2c4531FF1B2f40`](https://etherscan.io/address/0xA83C037DF3b27bF7224AB0a40a2c4531FF1B2f40). **Notable**: Onchain verification shows the FeeCalc timelock holds `DEFAULT_ADMIN_ROLE` on itself but no external address holds `PROPOSER_ROLE` or `EXECUTOR_ROLE`. This suggests the FeeCalc governance may be intentionally frozen (immutable fee parameters) or that proposal rights are managed through a non-standard mechanism. The deployer EOA (0x34a0...2fa8) holds no roles.
+
+**Privileged roles and potential harm paths:**
+
+| Action | Who | Constraint | Harm potential |
+|--------|-----|-----------|----------------|
+| Change provisioner address | Timelock (1-day delay) | Owner of vault | High — could set malicious provisioner that mints unbacked gtUSDa or steals deposited USDC |
+| Pause vault | Timelock OR Guardian | `requiresAuth` or guardian | Medium — freezes deposits/withdrawals temporarily |
+| Unpause vault | Timelock only | `requiresAuth` | Time-locked — cannot be done without 1-day delay |
+| Set unit price | FeeCalc Timelock (1-day) | `setUnitPrice()` requires auth | High — could manipulate gtUSDa exchange rate |
+| Set fees | FeeCalc Timelock (1-day) | `setVaultFees()` requires auth | Medium — could increase fee extraction |
+| Add/remove guardians | Timelock | `setGuardianRoot()` requires auth | Medium — guardians can submit arbitrary operations |
+| Set provisioner (vault) | Timelock | `setProvisioner()` requires auth | High — controls who can mint/burn |
+| Set fee recipient | Timelock | `setFeeRecipient()` requires auth | Low-Medium — controls fee destination |
+
+- **Guardian system**: The vault has a guardian mechanism where approved addresses (with Merkle roots) can call `submit()` to execute arbitrary operations. This is a powerful capability that deserves scrutiny. The set of active guardians was not enumerable via the vault's `getActiveGuardians()` function (reverted on call).
+- **Pause/freeze/seize**: Governance can pause the vault. While paused, deposits and withdrawals are halted. The vault has a whitelist contract that can restrict interactions.
+
+### Programmability
+
+- **System operations**: Mostly programmatic — deposits and withdrawals are handled by the Provisioner contract automatically. However, the unit price (PPS) is set administratively, and strategy allocations are determined by Gauntlet's offchain optimization engine.
+- **PPS definition**: The price per share is admin-set via `setUnitPrice()` on the PriceAndFeeCalculator, not computed programmatically from onchain data. This means the PPS relies on the admin accurately reporting accrued yield.
+- **Offchain dependencies**: The Gauntlet optimization engine (offchain) determines strategy allocations. The Provisioner executes onchain transactions based on these offchain decisions. If the offchain engine fails or provides incorrect data, allocations could be suboptimal.
+- **Keepers/relayers**: The Provisioner's `solveRequestsVault()` and `solveRequestsDirect()` functions suggest keeper/relayer infrastructure for processing requests. TODO — specific keeper infrastructure not verified.
+
+### External Dependencies
+
+- **Morpho**: The vault deploys USDC into Morpho lending markets across multiple chains. Morpho is a well-established lending protocol. Risk depends on specific Morpho vault curators.
+- **Cross-chain bridging**: Since funds move between Ethereum, Base, Arbitrum, and Optimism, the vault depends on cross-chain messaging/bridging infrastructure. TODO — the specific bridge protocol used (e.g., Hyperlane, LayerZero, native bridges) was not identified.
+- **USDC (Circle)**: The underlying asset is USDC, which carries its own regulatory and custodial risks. USDC is one of the most established stablecoins with ~$60B market cap.
+- **Oracle**: No external oracle dependency — USDC is hard-coded to $1. The vault unit price is admin-set, so Chainlink or other oracle failure does not directly affect gtUSDa.
+- **Aera Protocol**: The vault and its infrastructure contracts are built on Aera Protocol. Any vulnerability in Aera's MultiDepositorVault, RolesAuthority, Provisioner, or Guardian system would affect gtUSDa.
+
+## Operational Risk
+
+- **Team**: Gauntlet is a well-known entity in DeFi with 8+ years of experience. The team has a strong reputation for risk management and has managed substantial TVL across DeFi protocols. The multisig signers are not individually validated per assessment rules.
+- **Documentation**: Gauntlet provides extensive, well-maintained documentation via [VaultBook](https://vaultbook.gauntlet.xyz) and separate [integration docs](https://docs.gauntlet.xyz). However, specific audit reports for gtUSDa are not publicly available, and the full contract reference for Aera Protocol is not documented in the integration site.
+- **Legal structure**: TODO — Gauntlet's legal entity structure was not verified.
+- **Incident response**: TODO — No specific incident response plan was found in the documentation.
+
+## Monitoring
+
+### Key Addresses to Monitor
+
+| Address | Name | Purpose |
+|---------|------|---------|
+| [`0x3bd9248048df95db4fbd748c6cd99c1baa40bad0`](https://etherscan.io/address/0x3bd9248048df95db4fbd748c6cd99c1baa40bad0) | MultiDepositorVault | gtUSDa token contract |
+| [`0x74C4A66CE4F4779B11E7c63D42e51EEef3A80D11`](https://etherscan.io/address/0x74C4A66CE4F4779B11E7c63D42e51EEef3A80D11) | Provisioner | Deposit/withdrawal handler, mint authority |
+| [`0x8F3FfA11CD5915f0E869192663b905504A2Ef4a5`](https://etherscan.io/address/0x8F3FfA11CD5915f0E869192663b905504A2Ef4a5) | PriceAndFeeCalculator | Unit price oracle, fee calculator |
+| [`0x72820eA60C344186465152e4b11e260CAE391d77`](https://etherscan.io/address/0x72820eA60C344186465152e4b11e260CAE391d77) | TimelockController (Vault) | Vault governance timelock (1-day delay) |
+| [`0xce75E223E6DbB0503D2B6f55bC5907d1A0372E2B`](https://etherscan.io/address/0xce75E223E6DbB0503D2B6f55bC5907d1A0372E2B) | TimelockController (FeeCalc) | Fee calculator governance timelock (1-day delay) |
+| [`0xCa75ab43dABD026466f8DA9CC0938eD7bDea0a6f`](https://etherscan.io/address/0xCa75ab43dABD026466f8DA9CC0938eD7bDea0a6f) | Gnosis Safe (3/9) | Gauntlet multisig, PROPOSER and EXECUTOR on vault timelock |
+| [`0xC14604f43ED73011B60426FE6c48317d6583e67e`](https://etherscan.io/address/0xC14604f43ED73011B60426FE6c48317d6583e67e) | RolesAuthority (Vault) | Access control for vault functions |
+| [`0xA83C037DF3b27bF7224AB0a40a2c4531FF1B2f40`](https://etherscan.io/address/0xA83C037DF3b27bF7224AB0a40a2c4531FF1B2f40) | RolesAuthority (FeeCalc) | Access control for fee calculator |
+| [`0xdDfd960a7150520548dD1F6E53CC2f201b364692`](https://etherscan.io/address/0xdDfd960a7150520548dD1F6E53CC2f201b364692) | Whitelist | Address whitelist for vault interactions |
+| [`0xD56098b1B02153879D1A74fd3070ceacf7Dc9683`](https://etherscan.io/address/0xD56098b1B02153879D1A74fd3070ceacf7Dc9683) | OracleRegistry | Oracle registry for fee calculator |
+
+### Critical Events & Functions
+
+**Governance changes (monitor daily):**
+- `setProvisioner(address)` on vault — mint authority change
+- `setUnitPrice()` on PriceAndFeeCalculator — PPS manipulation
+- `setVaultFees()` on PriceAndFeeCalculator — fee change
+- `setGuardianRoot()` / `removeGuardian()` on vault — guardian set changes
+- `setAuthority()` on RolesAuthority — authority override
+- Timelock `schedule()` / `execute()` calls — any pending governance action
+- Multisig `addOwner()` / `removeOwner()` / `changeThreshold()` — signer set changes
+
+**Operational events (monitor hourly):**
+- `Enter()` / `Exit()` on vault — large deposit/withdrawal activity
+- `pause()` / `unpause()` on vault — vault paused state changes
+- `setPublicCapability()` on RolesAuthority — access control changes
+- `submit()` on vault — guardian-executed operations
+- Token transfers of gtUSDa — concentration monitoring
+
+**Data fetching functions:**
+- `totalSupply()` on vault → circulating gtUSDa
+- `balanceOf(vault)` of USDC → idle USDC in vault
+- `balanceOf(provisioner)` of USDC → pending USDC in provisioner
+- `getVaultState(vault)` on PriceAndFeeCalculator → vault parameters (unit price, active state)
+- `getMinDelay()` on both Timelocks → timelock delay (should remain ≥86400)
+- `depositCap()` (fails onchain, may need events) on Provisioner → deposit limits
+- `WHITELIST()` on vault → whitelist contract address
+- `getActiveGuardians()` on vault → guardian set (currently reverts, may need events)
+
+**Offchain data sources:**
+- [Gauntlet App](https://app.gauntlet.xyz/vaults/gtusda) — live market allocations, APY
+- [DeFi Llama — Gauntlet](https://defillama.com/protocol/gauntlet) — TVL tracking
+- [Morpho](https://morpho.org) — underlying market health
+
+### Threshold Suggestions
+
+| Metric | Warning | Critical |
+|--------|---------|----------|
+| Timelock delay change | < 24 hours | < 6 hours |
+| Provisioner address change | Any change | Any change |
+| Unit price deviation from 1:1 | >1% from expected | >3% from expected |
+| USDC idle in vault | <10% of TVL | <5% of TVL |
+| Multisig signer count | <5 signers | <3 signers |
+| Multisig threshold increase | >5 | >7 |
+| Vault paused state | Paused >1 hour | Paused >24 hours |
+| Guardian set change | Any addition | Any addition |
+
+## Appendix: Contract Architecture
+
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│                        GOVERNANCE LAYER                              │
+│                                                                      │
+│  ┌─────────────────────────────────────────────┐                    │
+│  │ Gauntlet Multisig (Gnosis Safe, 3/9)        │                    │
+│  │ 0xCa75ab43dABD026466f8DA9CC0938eD7bDea0a6f  │                    │
+│  └─────┬───────────────────────────────┬───────┘                    │
+│        │ PROPOSER_ROLE                │ EXECUTOR_ROLE                │
+│        ▼                              ▼                              │
+│  ┌─────────────────────────────────────────────────────────┐        │
+│  │ TimelockController (Vault, 1-day delay)                 │        │
+│  │ 0x72820eA60C344186465152e4b11e260CAE391d77              │        │
+│  │ Owner of: Vault, Provisioner, RolesAuthority(Vault)      │        │
+│  └──┬──────────────────┬──────────────────┬───────────────┘        │
+│     │ owns             │ owns             │ owns                     │
+│     ▼                  ▼                  ▼                          │
+│  ┌──────────┐  ┌────────────────┐  ┌──────────────────────┐        │
+│  │ Vault    │  │ Provisioner    │  │ RolesAuthority(Vault) │        │
+│  │ 0x3bd... │  │ 0x74C4A...     │  │ 0xC146...             │        │
+│  └──────────┘  └────────────────┘  └──────────────────────┘        │
+│        ▲              │                                                │
+│        │ onlyProvisioner (mint/burn)                                   │
+│        └──────────────┘                                                │
+│                                                                      │
+│  ┌─────────────────────────────────────────────────────────┐        │
+│  │ TimelockController (FeeCalc, 1-day delay)               │        │
+│  │ 0xce75E223E6DbB0503D2B6f55bC5907d1A0372E2B             │        │
+│  │ Owner of: PriceAndFeeCalculator, RolesAuthority(FeeCalc) │        │
+│  └──┬────────────────────────┬────────────────────────────┘        │
+│     │ owns                   │ owns                                  │
+│     ▼                        ▼                                       │
+│  ┌────────────────────┐  ┌──────────────────────────┐              │
+│  │PriceAndFeeCalculator│  │ RolesAuthority(FeeCalc)  │              │
+│  │ 0x8F3FfA...        │  │ 0xA83C...                │              │
+│  └────────────────────┘  └──────────────────────────┘              │
+└─────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────┐
+│                        INFRASTRUCTURE LAYER                           │
+│                                                                      │
+│  ┌──────────────────┐    ┌──────────────────┐    ┌──────────────┐  │
+│  │ Whitelist        │    │ OracleRegistry   │    │ Guardians     │  │
+│  │ 0xdDfd...        │    │ 0xD560...        │    │ (Merkle root  │  │
+│  │                  │    │                  │    │  set by vault)│  │
+│  └──────────────────┘    └──────────────────┘    └──────────────┘  │
+└─────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────┐
+│                     EXTERNAL DEPENDENCY LAYER                         │
+│                                                                      │
+│  ┌──────────────────────────────────────────────────────────────┐   │
+│  │ Morpho Lending Markets (multi-chain)                          │   │
+│  │  • Ethereum: USDC markets                                    │   │
+│  │  • Base: USDC markets                                        │   │
+│  │  • Arbitrum: USDC markets                                    │   │
+│  │  • Optimism: USDC markets                                    │   │
+│  └──────────────────────────────────────────────────────────────┘   │
+│                                                                      │
+│  ┌──────────────┐    ┌──────────────────┐                           │
+│  │ USDC (Circle)│    │ Cross-chain      │                           │
+│  │ 0xA0b869...  │    │ Bridge/Messaging │ (TODO: specific protocol) │
+│  └──────────────┘    └──────────────────┘                           │
+└─────────────────────────────────────────────────────────────────────┘
+
+Fund Flow:
+  User USDC ──→ Provisioner ──→ Vault ──→ Cross-chain ──→ Morpho Markets
+                          │                    │
+                          │ mint gtUSDa        │ yield accrues
+                          ▼                    ▼
+                         User             Unit Price updated
+                         (gtUSDa)         by admin
+```
+
+---
+
+## Risk Summary
+
+### Key Strengths
+
+- Built on Aera Protocol by Gauntlet, a team with 8+ years of DeFi experience and $1.45B in managed TVL
+- Fully USDC-backed — every gtUSDa represents a 1:1 claim on USDC, no leverage
+- Non-upgradeable vault contract (immutable) eliminates proxy upgrade risk
+- Dual-timelock governance (1-day delay) for both vault and fee operations
+- Blue-chip collateral (USDC) and established underlying protocol (Morpho)
+
+### Key Risks
+
+- No publicly available audit reports for the vault or underlying Aera Protocol contracts
+- Admin-controlled unit price (PPS) — exchange rate is set manually, not computed programmatically
+- Cross-chain complexity — funds deployed across 4 chains, introducing bridging risk
+- Small Ethereum TVL ($1.53M) limits battle-testing at scale
+- Guardian system with arbitrary execution capability via Merkle proofs
+- Provisioner address change could redirect all deposited USDC
+
+### Critical Risks
+
+- **Unverified audit status**: Without verified audit reports, the security of the MultiDepositorVault, Provisioner, and related contracts is unconfirmed. This triggers a critical gate consideration — while not an automatic fail (the Gauntlet team claims audits were performed), the absence of public reports is a serious concern.
+- **Admin-controlled PPS**: The unit price is set by the fee calculator governance (timelock with 1-day delay). A malicious or compromised fee governance could manipulate the gtUSDa/USDC exchange rate arbitrarily, affecting all holders.
+
+---
+
+## Risk Score Assessment
+
+**Scoring Guidelines:**
+- Be conservative: when uncertain between two scores, choose the higher (riskier) one
+- Use decimals (e.g., 2.5) when a subcategory falls between scores
+- Prioritize onchain evidence over documentation claims
+
+### Critical Risk Gates
+
+If ANY gate is triggered, the protocol automatically receives a score of **5** (High Risk).
+
+- [ ] **No audit** — Audits are claimed but no public reports found. The Gauntlet docs state audits are required for vault inclusion but specific reports for Aera/MultiDepositorVault are not available. This is borderline: the protocol claims audits exist but evidence is missing.
+- [ ] **Unverifiable reserves** — Reserves are partially onchain. gtUSDa supply and USDC balances are verifiable, but cross-chain positions require aggregation. Not a full gate trigger.
+- [ ] **Total centralization** — Not triggered. Governance is a 3/9 multisig with 1-day timelock. Not a single EOA.
+
+**Gate assessment: Borderline on "No audit" — the documentation claims audits exist but none are publicly available. Since Gauntlet is a reputable entity claiming audit coverage, we treat this as insufficient documentation rather than a hard gate. Score accordingly in Audit category.**
+
+### Category Scores
+
+#### Category 1: Audits & Historical Track Record (Weight: 20%)
+
+**Subcategory A: Audits & Security Reviews**
+
+| Audits | Bug Bounty |
+|--------|------------|
+| No publicly available audit reports. Gauntlet docs claim audits are "required before vault inclusion." DefiLlama shows 0 audits for Gauntlet protocol. | No bug bounty program found. |
+
+Score: **4/5** — No publicly verifiable audits. While the Gauntlet team claims audits exist, the absence of public reports prevents independent verification. Complex multi-contract architecture increases the importance of audit coverage.
+
+**Subcategory B: Historical Track Record**
+
+| Time in Production | Scale (TVL) |
+|-------------------|-------------|
+| ~6.5 months (Dec 2025) | ~$1.53M on Ethereum |
+
+Score: **3.5/5** — Relatively new deployment with small TVL. The broader Gauntlet protocol has significant TVL ($1.45B) and a long track record, but this specific vault has not been battle-tested at scale.
+
+**Audits & Historical Score = (4 + 3.5) / 2 = 3.75**
+
+**Score: 3.8/5** — No public audits and limited track record for this specific vault, despite the team's strong reputation.
+
+#### Category 2: Centralization & Control Risks (Weight: 30%)
+
+**Subcategory A: Governance**
+
+| Upgradeability | Timelock | Privileged Roles |
+|---------------|----------|-----------------|
+| Immutable vault (non-proxy). Cannot upgrade. | 1-day (24 hours) on both vault and fee timelocks | 3/9 multisig proposer. Provisioner can mint/burn. Timelock can change provisioner. Guardians can execute arbitrary operations. |
+
+Score: **3.0/5** — The 3/9 multisig with 1-day timelock is reasonable. However, the guardian system with arbitrary execution capability and the admin-controlled PPS are significant concerns. The immutable vault is a positive.
+
+**Subcategory B: Programmability**
+
+| System Operations | PPS/Rate Definition |
+|------------------|---------------------|
+| Mostly programmatic deposits/withdrawals via Provisioner. Strategy allocation determined by offchain engine. | Admin-set unit price (`setUnitPrice()`), not programmatically computed. |
+
+Score: **3.0/5** — Hybrid onchain/offchain operations. The PPS is manually updated by governance, creating a trust dependency on the admin accurately reporting yield.
+
+**Subcategory C: External Dependencies**
+
+| Protocol Dependencies | Criticality |
+|----------------------|-------------|
+| Morpho (4 chains), USDC, cross-chain bridge (TODO), Aera Protocol | Morpho and USDC are established. Cross-chain bridge is a material dependency. Aera Protocol is the foundational layer. |
+
+Score: **3.0/5** — Multiple dependencies on established protocols (Morpho, USDC). Cross-chain bridging adds an unquantified risk surface (specific bridge protocol not identified). Morpho failure would disrupt yield but not cause principal loss (funds are in lending markets).
+
+**Centralization Score = (3.0 + 3.0 + 3.0) / 3 = 3.0**
+
+**Score: 3.0/5** — Adequate governance structure with timelock, but admin-controlled PPS and guardian system are concerns.
+
+#### Category 3: Funds Management (Weight: 30%)
+
+**Subcategory A: Collateralization**
+
+| Backing | Collateral Quality | Verifiability |
+|---------|-------------------|---------------|
+| 100% USDC-backed | Blue-chip (USDC) | Total supply onchain; cross-chain positions require aggregation |
+
+Score: **1.5/5** — Fully backed by blue-chip USDC collateral. The backing is strong and the collateral is high quality. Minor deduction for cross-chain verifiability complexity.
+
+**Subcategory B: Provability**
+
+| Reserve Transparency | Reporting Mechanism | Third-Party Verification |
+|---------------------|--------------------|-----------------------|
+| Total supply onchain; USDC balances onchain; cross-chain positions require offchain aggregation | Admin-updated unit price; Gauntlet App provides allocation data | None identified |
+
+Score: **3.0/5** — Hybrid onchain/offchain reporting. The admin-set PPS means yield reporting depends on the team's accuracy. No third-party verification mechanism.
+
+**Funds Management Score = (1.5 + 3.0) / 2 = 2.25**
+
+**Score: 2.3/5** — Strong collateralization with USDC, but the admin-controlled PPS and lack of independent verification are significant.
+
+#### Category 4: Liquidity Risk (Weight: 15%)
+
+| Exit Mechanism | Liquidity Depth | Large Holder Impact |
+|---------------|----------------|---------------------|
+| Direct redemption through Provisioner; async request-solve flow available | ~$1.53M TVL (small); idle USDC = $0 | Cross-chain recall may delay large exits |
+
+Score: **3.0/5** — Redemption mechanism exists but the small TVL, zero idle USDC, and cross-chain fund deployment mean large withdrawals likely face delays. No maintained liquidity buffer.
+
+- Cross-chain fund recall adds withdrawal latency: +0.5
+
+**Score: 3.5/5** — Small scale means even modest redemptions are large in percentage terms. Cross-chain positions may introduce significant withdrawal delays.
+
+#### Category 5: Operational Risk (Weight: 5%)
+
+| Team Transparency | Documentation | Legal/Compliance |
+|------------------|---------------|-----------------|
+| Gauntlet is well-known, 8+ years in DeFi | Extensive docs via VaultBook, but missing audit reports and full contract reference | TODO |
+
+Score: **2.0/5** — Gauntlet has a strong reputation and extensive documentation. The main gap is the absence of public audit reports.
+
+### Final Score Calculation
+
+| Category | Score | Weight | Weighted |
+|----------|-------|--------|----------|
+| Audits & Historical | 3.8 | 20% | 0.76 |
+| Centralization & Control | 3.0 | 30% | 0.90 |
+| Funds Management | 2.3 | 30% | 0.69 |
+| Liquidity Risk | 3.5 | 15% | 0.525 |
+| Operational Risk | 2.0 | 5% | 0.10 |
+| **Final Score** | | | **2.975/5.0** |
+
+**Final Score: 3.0/5.0** (rounded)
+
+### Risk Tier
+
+| Final Score | Risk Tier | Recommendation |
+|------------|-----------|----------------|
+| **2.5-3.5** | **Medium Risk** | Approved with enhanced monitoring |
+| 3.5-4.5 | Elevated Risk | Limited approval, strict limits |
+| 4.5-5.0 | High Risk | Not recommended |
+
+**Final Risk Tier: Medium Risk**
+
+---
+
+## Reassessment Triggers
+
+- **Time-based**: Reassess in 3 months (September 2026)
+- **TVL-based**: Reassess if Ethereum TVL exceeds $10M or drops below $500K
+- **Incident-based**: Reassess after any exploit, governance change (multisig signer set, timelock delay), provisioner change, unit price manipulation event, or strategy allocation change >50%
+- **Audit-based**: Reassess if public audit reports become available for the Aera Protocol contracts or Gauntlet vault
+- **Bridge-based**: Reassess if the cross-chain bridge protocol is identified and undergoes significant changes

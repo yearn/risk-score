@@ -1,0 +1,120 @@
+slug: gauntlet-gusda
+title: Gauntlet USD Alpha (gtUSDa) — Contract Dependency Graph
+chain: ethereum
+
+categories:
+  - id: vault
+    label: Vault / Token
+  - id: governance
+    label: Governance
+  - id: infra
+    label: Protocol Infra
+  - id: dependency
+    label: External Dependency
+
+nodes:
+  # === Vault layer ===
+  - id: gtusda-vault
+    label: gtUSDa Vault
+    address: "0x3bd9248048df95db4fbd748c6cd99c1baa40bad0"
+    category: vault
+    note: MultiDepositorVault; non-proxy (immutable)
+
+  # === Infra ===
+  - id: provisioner
+    label: Provisioner
+    address: "0x74C4A66CE4F4779B11E7c63D42e51EEef3A80D11"
+    category: infra
+    note: Sole mint authority; deposit/withdrawal handler
+  - id: price-fee-calculator
+    label: Price & Fee Calculator
+    address: "0x8F3FfA11CD5915f0E869192663b905504A2Ef4a5"
+    category: infra
+    note: Admin-set unit price; fee calculator
+
+  # === Governance ===
+  - id: gauntlet-multisig
+    label: Gauntlet Multisig (3/9)
+    address: "0xCa75ab43dABD026466f8DA9CC0938eD7bDea0a6f"
+    category: governance
+    note: Gnosis Safe; PROPOSER_ROLE + EXECUTOR_ROLE on vault timelock; feeRecipient
+  - id: timelock-vault
+    label: Vault Timelock (1-day)
+    address: "0x72820eA60C344186465152e4b11e260CAE391d77"
+    category: governance
+    note: Owner of vault, provisioner, and RolesAuthority (Vault)
+  - id: timelock-feecalc
+    label: FeeCalc Timelock (1-day)
+    address: "0xce75E223E6DbB0503D2B6f55bC5907d1A0372E2B"
+    category: governance
+    note: Owner of PriceAndFeeCalculator and RolesAuthority (FeeCalc)
+  - id: roles-authority-vault
+    label: RolesAuthority (Vault)
+    address: "0xC14604f43ED73011B60426FE6c48317d6583e67e"
+    category: governance
+    note: Access-control root for vault functions
+  - id: roles-authority-feecalc
+    label: RolesAuthority (FeeCalc)
+    address: "0xA83C037DF3b27bF7224AB0a40a2c4531FF1B2f40"
+    category: governance
+    note: Access-control root for fee calculator
+
+  # === External dependencies ===
+  - id: cross-chain-bridge
+    label: Cross-chain Bridge
+    category: dependency
+    note: "TODO: specific protocol not identified. Routes USDC to Ethereum, Base, Arbitrum, Optimism."
+  - id: morpho
+    label: Morpho Lending Markets
+    category: dependency
+    note: Multi-chain USDC lending markets (Ethereum, Base, Arbitrum, Optimism)
+
+edges:
+  # === Governance: multisig → timelock ===
+  - from: gauntlet-multisig
+    to: timelock-vault
+    kind: proposes-on
+    label: PROPOSER_ROLE + EXECUTOR_ROLE
+
+  # === Governance: timelocks control their owned contracts ===
+  - from: timelock-vault
+    to: gtusda-vault
+    kind: controls
+    label: owner
+  - from: timelock-vault
+    to: provisioner
+    kind: controls
+    label: owner
+  - from: timelock-vault
+    to: roles-authority-vault
+    kind: controls
+    label: owner
+  - from: timelock-feecalc
+    to: price-fee-calculator
+    kind: controls
+    label: owner
+  - from: timelock-feecalc
+    to: roles-authority-feecalc
+    kind: controls
+    label: owner
+
+  # === Mint authority ===
+  - from: provisioner
+    to: gtusda-vault
+    kind: mints
+    label: onlyProvisioner
+
+  # === Capital flow: vault → bridge → Morpho ===
+  - from: gtusda-vault
+    to: cross-chain-bridge
+    kind: routes-through
+  - from: cross-chain-bridge
+    to: morpho
+    kind: deposits-into
+    label: USDC
+
+  # === Fee flow ===
+  - from: gtusda-vault
+    to: gauntlet-multisig
+    kind: routes-fees-to
+    label: feeRecipient
