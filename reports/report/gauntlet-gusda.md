@@ -418,7 +418,7 @@ Score: **3.0/5** — Multiple dependencies, but all on established protocols: Mo
 |---------|-------------------|---------------|
 | 100% USDC-backed | Blue-chip (USDC) | Total supply onchain; cross-chain positions require aggregation |
 
-Score: **1.5/5** — Fully backed by blue-chip USDC collateral. The backing is strong and the collateral is high quality. Minor deduction for cross-chain verifiability complexity.
+Score: **2.0/5** — Backed by blue-chip USDC collateral, but most collateral is deployed into cross-chain Morpho lending markets rather than sitting idle in the Ethereum vault. Realized backing depends on Morpho market solvency/liquidity and cross-chain position accounting, so this is stronger than opaque or volatile collateral but not equivalent to idle USDC.
 
 **Subcategory B: Provability**
 
@@ -428,9 +428,9 @@ Score: **1.5/5** — Fully backed by blue-chip USDC collateral. The backing is s
 
 Score: **3.0/5** — Hybrid onchain/offchain reporting. The keeper-submitted PPS means yield reporting depends on the offchain engine's accuracy, with soft guards that pause but never block malicious prices. No third-party verification mechanism.
 
-**Funds Management Score = (1.5 + 3.0) / 2 = 2.25**
+**Funds Management Score = (2.0 + 3.0) / 2 = 2.5**
 
-**Score: 2.25/5** — Strong collateralization with USDC, but the admin-controlled PPS and lack of independent verification are significant.
+**Score: 2.5/5** — Strong collateral quality, but Morpho market exposure, cross-chain aggregation, admin-controlled PPS, and lack of independent verification are significant.
 
 #### Category 4: Liquidity Risk (Weight: 15%)
 
@@ -454,12 +454,12 @@ Score: **1.5/5** — Strong reputation, extensive documentation, identified lega
 |----------|-------|--------|----------|
 | Audits & Historical | 2.5 | 20% | 0.50 |
 | Centralization & Control | 3.17 | 30% | 0.951 |
-| Funds Management | 2.25 | 30% | 0.675 |
+| Funds Management | 2.5 | 30% | 0.75 |
 | Liquidity Risk | 3.0 | 15% | 0.45 |
 | Operational Risk | 1.5 | 5% | 0.075 |
-| **Final Score** | | | **2.651/5.0** |
+| **Final Score** | | | **2.726/5.0** |
 
-**Final Score: 2.7/5.0** (rounded from 2.651)
+**Final Score: 2.7/5.0** (rounded from 2.726)
 
 ### Risk Tier
 
