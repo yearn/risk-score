@@ -38,9 +38,9 @@ The HYPE++ vault is currently in epoch 20. Onchain state verified on June 23, 20
 | Contract | Address | Type |
 |----------|---------|------|
 | HYPE++ Vault | [`0x75288264FDFEA8ce68e6D852696aB1cE2f3E5004`](https://arbiscan.io/address/0x75288264FDFEA8ce68e6D852696aB1cE2f3E5004) | `VaultV1Whitelisted`, ERC-4626-style vault |
-| HYPE++ Trader / OMS | [`0x8CaBD8b787e8c69C5f24091cFDA197fF570345B3`](https://arbiscan.io/address/0x8CaBD8b787e8c69C5f24091cFDA197fF570345B3) | Verified `Strategy` proxy / selector router |
-| Trader Implementation | [`0xc8071ad5560904b3b721e7e5d29742f523a69111`](https://arbiscan.io/address/0xc8071ad5560904b3b721e7e5d29742f523a69111) | Strategy implementation |
-| Vault Owner | [`0x0E8c0470773c65498F438cac380648B314399A46`](https://arbiscan.io/address/0x0E8c0470773c65498F438cac380648B314399A46) | EOA, owns HYPE++ vault |
+| HYPE++ Trader / OMS | [`0x8CaBD8b787e8c69C5f24091cFDA197fF570345B3`](https://arbiscan.io/address/0x8CaBD8b787e8c69C5f24091cFDA197fF570345B3) | Verified selector router (non-upgradeable; delegatecalls modules) |
+| Trader Module (legacy) | [`0xc8071ad5560904b3b721e7e5d29742f523a69111`](https://arbiscan.io/address/0xc8071ad5560904b3b721e7e5d29742f523a69111) | Standalone AccessControl contract; deployed earlier, not proxy-linked to trader |
+| Vault Owner | [`0x0E8c0470773c65498F438cac380648B314399A46`](https://arbiscan.io/address/0x0E8c0470773c65498F438cac380648B314399A46) | EOA, owns BOTH HYPE++ vault and dgnHYPE vault |
 | Trader Admin / Executor / Fee Receiver | [`0x7ab129978091DEE65A319c5FC728818D73221999`](https://arbiscan.io/address/0x7ab129978091DEE65A319c5FC728818D73221999) | EOA with `DEFAULT_ADMIN_ROLE` and `EXECUTOR_ROLE` on trader |
 | D2 Vault Multisig | [`0xB2fEDed045F3fd9FcCCF8E7e95729c4182916CE0`](https://arbiscan.io/address/0xB2fEDed045F3fd9FcCCF8E7e95729c4182916CE0) | Safe, 4-of-7; also trader admin/executor |
 | dgnHYPE Vault | [`0x64167cd42859F64cfF2Aa4B63c3175cceF9659dd`](https://arbiscan.io/address/0x64167cd42859F64cfF2Aa4B63c3175cceF9659dd) | Nested D2 ERC-4626 vault held by HYPE++ trader |
@@ -52,7 +52,9 @@ The HYPE++ vault is currently in epoch 20. Onchain state verified on June 23, 20
 Deployment metadata:
 
 - HYPE++ vault and trader were deployed in transaction [`0xf5642a6a...6265e`](https://arbiscan.io/tx/0xf5642a6afa068616ac286c0c26ef32f46bc43333edf79fe071ff3f60b346265e) at Arbitrum block `276124793` on November 19, 2024.
-- Trader implementation was deployed in transaction [`0xe432dabc...8675`](https://arbiscan.io/tx/0xe432dabfc9572c103e858399f29530b458fdbb882b4ab0e94245eeae553a8675) at block `218684412`.
+- The vault is NOT behind a proxy (both EIP-1967 and OpenZeppelin transparent proxy slots are zero); it is a standalone `VaultV1Whitelisted` contract. Ownership is transferable via the standard Ownable `transferOwnership()`.
+- The trader is NOT a standard proxy (EIP-1967/beacon/transparent proxy slots are zero); it is a standalone selector router that delegatecalls to pre-configured modules.
+- The contract at [`0xc8071ad5560904b3b721e7e5d29742f523a69111`](https://arbiscan.io/address/0xc8071ad5560904b3b721e7e5d29742f523a69111) was deployed earlier (block `218684412`, tx [`0xe432dabc...8675`](https://arbiscan.io/tx/0xe432dabfc9572c103e858399f29530b458fdbb882b4ab0e94245eeae553a8675)) by a different EOA (`0x00Aa367B7692be05E47B9c461fF35410208158b0`) and is not referenced in the trader's bytecode; it does not serve as a proxy implementation for the HYPE++ trader.
 
 ## Audits and Due Diligence Disclosures
 
@@ -69,7 +71,7 @@ Paladin's public page lists the September 2023 strategy audit as completed with 
 
 ### Bug Bounty
 
-No active Immunefi, Sherlock, Cantina, HackerOne, Code4rena, or Safe Harbor program was found in the D2 docs reviewed for this assessment, and targeted searches for D2 Finance on Immunefi and Safe Harbor did not return a listed program. D2 publishes audit links and security process statements, but no public bounty with payout terms was verified.
+No active Immunefi, Sherlock, Cantina, HackerOne, Code4rena, or Safe Harbor program was found in the D2 docs reviewed for this assessment. Targeted manual searches on Immunefi ("D2 Finance") and the [Safe Harbor registry](https://safeharbor.securityalliance.org/) (SEAL) returned no listed program. D2 publishes audit links and security process statements, but no public bounty with payout terms was verified onchain or through the platforms checked.
 
 ## Historical Track Record
 
@@ -98,6 +100,8 @@ Current reserve reconciliation, verified June 23, 2026:
 | dgnHYPE trader custody type | 3-of-5 Safe |
 
 The HYPE++ top-level arithmetic reconciles: direct USDC (~5.52M) plus dgnHYPE reported assets (~6.90M) equals HYPE++ `totalAssets()` (~12.42M). However, dgnHYPE itself is a nested active D2 strategy with custodied funds. Its `trader()` is a 3-of-5 Safe, and dgnHYPE uses the same custodied accounting pattern: while custodied, `totalAssets()` returns the stored `custodiedAmount` rather than live token balances. Only ~1.0M real Arbitrum USDC was found at the dgnHYPE Safe during this pass; the remaining dgnHYPE reported assets are therefore not fully verifiable from simple ERC-20 balances. Recent dgnHYPE Safe token-transfer history also includes a non-USDC token with a visually confusable symbol (`0xd13CEB6071cAe7d0A880059A022c1750E096D3ED`), which was not counted as backing.
+
+**Control concentration:** The dgnHYPE vault's `owner()` is the same EOA ([`0x0E8c0470773c65498F438cac380648B314399A46`](https://arbiscan.io/address/0x0E8c0470773c65498F438cac380648B314399A46)) that owns the HYPE++ vault, concentrating control of both vaults in a single EOA.
 
 ### Accessibility
 
@@ -131,7 +135,7 @@ HYPE++ is not overcollateralized. It is a share token over an actively managed U
 - While custodied, the vault's `totalAssets()` is the stored `custodiedAmount`, not a live mark-to-market of all current trader positions.
 - The verified source comments on `returnFunds()` state that losses may be sustained during trading and investors suffer the loss.
 - HYPE++ currently depends on dgnHYPE for ~55.6% of reported assets by value, creating recursive D2 strategy exposure.
-- The trader's allowed token list contains 32 tokens and the allowed spender list contains 30 addresses, including major Arbitrum DeFi venues and D2 strategy vaults.
+- The trader's allowed token list contains 32 tokens (including volatile assets: WETH [`0x82aF49447D8a07e3bd95BD0d56f35241523fBab1`](https://arbiscan.io/address/0x82aF49447D8a07e3bd95BD0d56f35241523fBab1), WBTC [`0x2f2a2543B76A4166549F7aaB2e75Bef0aefC5B0f`](https://arbiscan.io/address/0x2f2a2543B76A4166549F7aaB2e75Bef0aefC5B0f), ARB, GMX, GRAIL, PENDLE, LINK, wstETH, and old bridged USDC.e [`0xFF970A61A04b1cA14834A43f5dE4533eDBBD5CC8`](https://arbiscan.io/address/0xFF970A61A04b1cA14834A43f5dE4533eDBBD5CC8)) and the allowed spender list contains 30 addresses, including major Arbitrum DeFi venues and D2 strategy vaults.
 - dgnHYPE's `trader()` is a 3-of-5 Safe; only ~1.0M real USDC was directly observed there versus ~6.90M reported `totalAssets()`.
 
 ### Provability
@@ -156,13 +160,15 @@ No meaningful onchain DEX liquidity for HYPE++ was identified in this pass. The 
 The largest risk is centralization:
 
 - HYPE++ vault owner is an EOA, not the documented D2 Vault MS.
-- The owner EOA can call `startEpoch()`, `setMaxDeposits()`, `setWhitelistAsset()`, `setWhitelistBalance()`, and whitelist status functions.
+- The owner EOA can call `startEpoch()`, `setMaxDeposits()`, `setWhitelistAsset()`, `setWhitelistBalance()`, `transferOwnership()`, and whitelist status functions.
+- The HYPE++ vault is NOT behind a proxy (EIP-1967/beacon/transparent proxy slots verified zero). This means the vault logic cannot be upgraded, but ownership can be transferred at any time via `transferOwnership()`.
 - HYPE++ trader `DEFAULT_ADMIN_ROLE` holders are the D2 Vault MS and an EOA.
 - HYPE++ trader `EXECUTOR_ROLE` holders are the D2 Vault MS and the same EOA.
 - The EOA also receives trader fees via `feeReceiver()`.
 - The D2 Vault MS is a 4-of-7 Safe, matching D2's documented vault multisig address, but there is no onchain timelock on trader role changes or vault owner actions.
+- dgnHYPE vault has the same EOA owner as HYPE++, further concentrating control.
 
-The trader contract is a selector router that delegatecalls modules based on `msg.sig`. The constructor wires many selectors to module targets. Operationally, this gives the executor a broad DeFi action surface, bounded by the strategy's allowed tokens/spenders/modules, but still much more discretionary than a passive vault.
+The trader contract is a standalone selector router (code size ~4.2KB; EIP-1967/beacon/transparent proxy slots all zero) that delegatecalls modules based on `msg.sig`. The constructor wires selectors to module targets. The trader uses OpenZeppelin `AccessControl` (not `AccessControlEnumerable`), so `getRoleMemberCount` and `getRoleMember` are not available — role-holder enumeration requires scanning `RoleGranted`/`RoleRevoked` events. Operationally, this gives the executor a broad DeFi action surface, bounded by the strategy's allowed tokens/spenders/modules, but still much more discretionary than a passive vault.
 
 ### Programmability
 
@@ -207,16 +213,22 @@ Monitor these contracts and values:
   - Events: `EpochStarted`, `FundsCustodied`, `FundsReturned`, `NewMaxDeposits`, `NewWhitelistStatus`, `OwnershipTransferred`
 - HYPE++ trader [`0x8CaB...45B3`](https://arbiscan.io/address/0x8CaBD8b787e8c69C5f24091cFDA197fF570345B3)
   - `hasRole(DEFAULT_ADMIN_ROLE, account)` and `hasRole(EXECUTOR_ROLE, account)` for known holders
-  - Events: `RoleGranted`, `RoleRevoked`
+  - The trader uses plain `AccessControl` (not `AccessControlEnumerable`); `getRoleMemberCount` and `getRoleMember` are unavailable. Monitor `RoleGranted`/`RoleRevoked` events for role-holder enumeration.
+  - Events: `RoleGranted(bytes32,address,address)`, `RoleRevoked(bytes32,address,address)`
   - `getAllowedTokens()`, `getAllowedSpenders()`, `feeReceiver()`, `performanceFeeRate()`, `managementFeeRate()`
+  - Note: `setFeeReceiver()` is gated by `DEFAULT_ADMIN_ROLE` (verified onchain). `setPerformanceFeeRate` and `setManagementFeeRate` selectors were not found on the trader's direct interface — fee changes may route through modules.
 - Vault owner EOA [`0x0E8c...9A46`](https://arbiscan.io/address/0x0E8c0470773c65498F438cac380648B314399A46)
-  - All outbound transactions to the HYPE++ vault.
+  - All outbound transactions to HYPE++ vault, dgnHYPE vault, and any vault factory.
+  - Note: This EOA owns both HYPE++ and dgnHYPE vaults.
 - Trader role EOA [`0x7ab1...1999`](https://arbiscan.io/address/0x7ab129978091DEE65A319c5FC728818D73221999)
   - All role/admin/trading transactions.
 - D2 Vault MS [`0xB2fE...6CE0`](https://arbiscan.io/address/0xB2fEDed045F3fd9FcCCF8E7e95729c4182916CE0)
-  - Safe threshold/owner changes and trader role changes.
+  - Safe: `getThreshold()`, `getOwners()`; monitor `AddedOwner`, `RemovedOwner`, `ChangedThreshold` events.
+  - Trader role changes via this Safe.
 - dgnHYPE vault [`0x6416...59dd`](https://arbiscan.io/address/0x64167cd42859F64cfF2Aa4B63c3175cceF9659dd)
-  - `totalAssets()`, `totalSupply()`, `custodied()`, `trader()`
+  - `totalAssets()`, `totalSupply()`, `custodied()`, `trader()`, `owner()`
+- dgnHYPE Safe [`0x155d...66fb`](https://arbiscan.io/address/0x155d0B27B754ebC664aeD565945C1AaEa91966fb)
+  - `getThreshold()`, `getOwners()`; monitor threshold/owner changes and direct USDC balance against reported `custodiedAmount`.
 
 Suggested alert thresholds:
 
@@ -233,34 +245,43 @@ Suggested alert thresholds:
 User USDC
    |
    v
-[HYPE++ Vault / VaultV1Whitelisted]
+[HYPE++ Vault / VaultV1Whitelisted]  (non-upgradeable, no proxy)
    - ERC-4626 share token
-   - owner: EOA 0x0E8c...
+   - owner: EOA 0x0E8c... (Ownable, transferOwnership available)
    - deposits only during funding window
    - withdrawals only after epoch and when not custodied
+   - trader is immutable (set at construction, no setTrader function)
    |
-   | custodyFunds() during epoch
+   | custodyFunds() during epoch (only trader can call)
    v
-[HYPE++ Trader / Strategy OMS]
+[HYPE++ Trader / Strategy OMS]  (selector router, not a proxy, ~4.2KB)
+   - delegatecalls modules by msg.sig; AccessControl (not Enumerable)
    - DEFAULT_ADMIN_ROLE: Vault MS + EOA 0x7ab1...
    - EXECUTOR_ROLE: Vault MS + EOA 0x7ab1...
-   - fee receiver: EOA 0x7ab1...
+   - fee receiver: EOA 0x7ab1... (performanceFeeRate = 20%)
    - allowed tokens/spenders define trading surface
    |
    +--> Direct USDC balance (~5.52M)
    |
-   +--> [dgnHYPE Vault shares] (~5.27M shares)
+   +--> [dgnHYPE Vault shares] (~5.27M shares = 100% of supply)
           |
           v
-        [dgnHYPE Trader / nested D2 strategy]
-          - reports ~6.90M USDC totalAssets
-          - 3-of-5 custody Safe; ~1.0M real USDC directly observed
+        [dgnHYPE Vault / VaultV1Whitelisted]  (non-upgradeable, no proxy)
+          - owner: EOA 0x0E8c... (same EOA as HYPE++ vault owner)
+          - trader: 3-of-5 Safe 0x155d...
+          |
+          v
+        [dgnHYPE Trader / 3-of-5 Safe]
+          - reports ~6.90M USDC totalAssets (custodiedAmount)
+          - ~1.0M real USDC directly observed; remainder in active positions
 
 Governance / control:
 
-[EOA 0x0E8c...] ----controls----> [HYPE++ Vault]
-[Vault MS 4/7] ----roles-------> [HYPE++ Trader]
-[EOA 0x7ab1...] ----roles------> [HYPE++ Trader]
+[EOA 0x0E8c...] --owns--> [HYPE++ Vault]
+[EOA 0x0E8c...] --owns--> [dgnHYPE Vault]
+[Vault MS 4/7]  --DEFAULT_ADMIN+EXECUTOR--> [HYPE++ Trader]
+[EOA 0x7ab1...] --DEFAULT_ADMIN+EXECUTOR--> [HYPE++ Trader]
+[EOA 0x7ab1...] <--feeReceiver-- [HYPE++ Trader]
 ```
 
 ---
@@ -271,21 +292,23 @@ Governance / control:
 
 - HYPE++ share minting requires USDC deposit; no privileged unbacked share minter was found.
 - Top-level HYPE++ assets reconcile to direct USDC plus dgnHYPE shares.
+- The vault is not upgradeable (no proxy); the trader is a non-proxy selector router — no hidden upgrade path was found.
 - D2 publishes architecture docs, multisig docs, contract lists, and audit links.
 - The D2 Vault MS is a 4-of-7 Safe and holds trader admin/executor roles alongside the EOA.
 
 ### Key Risks
 
-- HYPE++ vault owner is an EOA with direct control over epoch scheduling, deposit caps, and whitelist settings.
+- HYPE++ vault owner is an EOA with direct control over epoch scheduling, deposit caps, and whitelist settings. The same EOA also owns the dgnHYPE vault.
 - Trader admin/executor authority includes an EOA with no timelock.
+- The trader's allowed token list includes volatile assets (WETH, WBTC, ARB, GMX, GRAIL, PENDLE, LINK, wstETH) and old bridged USDC.e, expanding the strategy risk surface.
 - Funds are actively custodied by the trader during epochs; users cannot withdraw while custodied.
-- HYPE++ currently has large nested exposure to dgnHYPE, another D2 active strategy.
+- HYPE++ currently has large nested exposure to dgnHYPE (~55.6% of assets), another D2 active strategy controlled by the same EOA owner.
 - End-to-end backing is not a simple live reserve balance; it depends on D2 trader execution and return of funds.
 
 ### Critical Risks
 
-- A compromised or malicious trader executor can interact with a broad allowed DeFi surface and cause trading losses before funds are returned.
-- A compromised or malicious vault owner can manipulate epoch timing and access controls, delaying exits or changing who can deposit/redeem.
+- A compromised or malicious trader executor can interact with a broad allowed DeFi surface (32 tokens, 30 spenders) and cause trading losses before funds are returned.
+- A compromised or malicious vault owner can manipulate epoch timing, transfer ownership, and change access controls for BOTH vaults, delaying exits or changing who can deposit/redeem.
 
 ---
 
