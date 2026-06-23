@@ -61,9 +61,10 @@ nodes:
 
   # === External dependencies ===
   - id: cross-chain-bridge
-    label: Cross-chain Bridge
+    label: Circle CCTP v2
+    address: "0xfd78ee919681417d192449715b2594ab58f5d002"
     category: dependency
-    note: "TODO: specific protocol not identified. Routes USDC to Ethereum, Base, Arbitrum, Optimism."
+    note: "Circle CCTP v2 (native USDC burn-and-mint via TokenMinterV2). Routes USDC to Base, Arbitrum, Optimism. Verified onchain from vault USDC flows."
   - id: morpho
     label: Morpho Lending Markets
     category: dependency

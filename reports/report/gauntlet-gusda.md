@@ -4,7 +4,7 @@
 - **Token:** gtUSDa (Gauntlet USD Alpha)
 - **Chain:** Ethereum
 - **Token Address:** [`0x3bd9248048df95db4fbd748c6cd99c1baa40bad0`](https://etherscan.io/token/0x3bd9248048df95db4fbd748c6cd99c1baa40bad0)
-- **Final Score: 3.1/5.0**
+- **Final Score: 2.8/5.0**
 
 ## Overview + Links
 
@@ -22,24 +22,35 @@ The vault is part of the broader Gauntlet ecosystem ($1.45B total TVL across all
 
 ## Audits and Due Diligence Disclosures
 
-- **No specific audit reports for the Gauntlet USD Alpha vault were found.** The Gauntlet documentation states that "Certified audits from top industry auditors are required before vault inclusion" but individual audit reports are not publicly linked in the docs or on Etherscan.
-- **Aera Protocol audits**: TODO — The vault is built on the Aera Protocol (`MultiDepositorVault` contract). Audit reports for the underlying Aera protocol contracts were not located during this assessment. The Gauntlet docs reference audit requirements for vault curation but do not enumerate specific audit firm names, dates, or report links.
+- The gtUSDa vault is the **Aera V3** `MultiDepositorVault` (deployed source on Etherscan imports `src/core/MultiDepositorVault.sol` and references the Aera codebase 120×; compiler v0.8.29). Audit coverage applies at the Aera Protocol level, and Aera publishes its audits on its [security page](https://docs.aera.finance/the-protocol/security).
+- **Aera Protocol audits** (verified against the Aera security page on June 23, 2026):
+
+| Firm | Date | Scope | Report |
+|------|------|-------|--------|
+| Spearbit | June 2025 | **Aera V3** (the MultiDepositorVault / Provisioner generation deployed here) | [Spearbit V3 PDF](https://drive.google.com/file/d/1YYJI6AIzcJku0VfWqDxyx7Jn7m0nIjtE/view?usp=sharing) (linked from Aera docs; hosted on Google Drive) |
+| Cantina / Spearbit | June 2025 | Aera V3 audit competition (commit `4c24979c…`; $15K pool, 397 submissions) | [Cantina competition](https://cantina.xyz/competitions/ffe90f03-ffd0-449b-a15f-6e7702323d16) |
+| Spearbit | Aug 2023 | Aera V2 | [Spearbit V2 PDF](https://github.com/aera-finance/aera-contracts-public/blob/main/v2/audits/spearbit/2023-09-22.pdf) |
+| OpenZeppelin | May 2024 | Aera V2 — LlamaPay integration | [OpenZeppelin V2 PDF](https://github.com/aera-finance/aera-contracts-public/blob/main/v2/audits/openzeppelin/2024-05-15.pdf) |
+
+- Aera docs state "all relevant issues identified by auditors were addressed prior to the launch of V3."
+- **Caveat**: The V3 Spearbit report is hosted on Google Drive (not in the public `aera-contracts-public` repo), and the only V3 review by a tier-1 firm found is the single Spearbit engagement plus the small ($15K-pool) Cantina competition. No Trail of Bits / ChainSecurity / Sherlock engagement was located. The gtUSDa vault instance itself (its specific configuration) is not separately audited — coverage is at the protocol/contract level.
 - The MultiDepositorVault is not upgradeable (non-proxy contract), which reduces complexity but also means code changes require full redeployment.
 - Contract architecture involves multiple interacting components: MultiDepositorVault, Provisioner, PriceAndFeeCalculator, RolesAuthority (x2), TimelockController (x2), Gnosis Safe multisig, and a Whitelist contract. The architecture is moderately complex.
-- DefiLlama reports 0 audits for the Gauntlet protocol: [Gauntlet on DefiLlama](https://defillama.com/protocol/gauntlet)
+- Note: DefiLlama lists 0 audits for the Gauntlet protocol ([Gauntlet on DefiLlama](https://defillama.com/protocol/gauntlet)) because the audits are published under the Aera Protocol, not the Gauntlet listing.
 
 ### Bug Bounty
 
-TODO — No bug bounty program was found for the Gauntlet USD Alpha vault or on Immunefi, Code4rena, HackerOne, Sherlock, or Cantina at the time of assessment. Safe Harbor status is also unverified.
+- **Active** — Aera runs a bug bounty on [Immunefi](https://immunefi.com/bug-bounty/aera/information/) with a max payout of **$500,000** (critical smart-contract bug, calculated as 10% of directly affected funds, min $20K). High = $10K, Medium = $2K, paid in USDC. Scope covers 5 assets across Ethereum, Arbitrum, Base, Polygon, and Optimism. KYC and a PoC are mandatory; the program runs under "Primacy of Rules."
+- **Safe Harbor / SEAL**: not confirmed — no Safe Harbor or SEAL adoption is referenced on the Aera Immunefi page or docs.
 
 ## Historical Track Record
 
-- **Time in production**: ~6.5 months (deployed December 8, 2025, at block [23971333](https://etherscan.io/tx/0x8da0ba49dca82b18232dd605e997359a0edd25f5dfad3e0186ea98ee79b88441))
+- **Time in production**: ~6.5 months (deployed December 8, 2025, block 23971333; [deployment tx](https://etherscan.io/tx/0x8da0ba49dca82b18232dd605e997359a0edd25f5dfad3e0186ea98ee79b88441))
 - **Past incidents**: No known security incidents or exploits affecting the gtUSDa vault
 - **TVL**: ~$1.53M on Ethereum as of June 23, 2026 (total supply: 1,528,185 gtUSDa). The broader Gauntlet protocol has $1.45B TVL across all chains.
   - Source: Onchain `totalSupply()` at [`0x3bd9248048df95db4fbd748c6cd99c1baa40bad0`](https://etherscan.io/token/0x3bd9248048df95db4fbd748c6cd99c1baa40bad0) and [Gauntlet on DefiLlama](https://defillama.com/protocol/gauntlet)
 - **TVL history**: The Ethereum gtUSDa TVL is relatively small ($1.53M) compared to the Base deployment (~$528M Gauntlet TVL on Base includes other vaults). The vault has not yet attracted significant TVL on Ethereum.
-- **Concentration risk**: TODO — Large holder analysis not performed. Given the small TVL, concentration is possible.
+- **Concentration risk**: **High.** Holder balances reconstructed from all 272 ERC-20 `Transfer` events (deploy block 23971333 → present) show only **27 holders**, with the top holder controlling **53.3%** of supply (≈814,764 gtUSDa, an EOA `0xe1464a9a…`), the top 3 holding **~82%** (all EOAs), and the top 5 holding **~93%**. A single-address exit would dominate the vault. (Source: onchain Transfer logs, reconciled to `totalSupply()` = 1,528,185 gtUSDa.)
 - **Historical peg**: gtUSDa is a yield-bearing token, not a stablecoin. Its price increases over time as yield accrues (admin-set unit price). No depeg events are applicable.
 
 ## Funds Management
@@ -103,7 +114,7 @@ TODO — No bug bounty program was found for the Gauntlet USD Alpha vault or on 
 - **Exit mechanism**: Users redeem gtUSDa for USDC via the Provisioner. The flow can be synchronous (`deposit()`/`redeem()` with direct vault interaction) or asynchronous (`requestRedeem()` + `solveRequestsVault()`). Synchronous redemption is available only when vault has idle USDC.
 - **Liquidity depth**: The Ethereum vault holds $0 idle USDC. Withdrawals likely depend on the Provisioner unwinding or rebalancing cross-chain positions. This may introduce delays for large withdrawals.
 - **Slippage**: Not applicable in the traditional DEX sense — redemptions are at the admin-set unit price. However, large redemptions may face delays if cross-chain funds need to be recalled.
-- **Withdrawal queues**: The Provisioner supports request-based redemptions (`requestRedeem()`, `solveRequestsVault()`), suggesting a queue or batch-settlement mechanism. TODO — Specific queue mechanics not fully verified onchain.
+- **Withdrawal queues**: Verified from the Provisioner source on Etherscan. Async exits use `requestRedeem(token, unitsIn, minTokensOut, solverTip, deadline, …)`, which escrows the user's gtUSDa and posts a request carrying a user-set `solverTip` and `deadline`. Requests are settled by a **solver** in one of two ways: `solveRequestsVault(token, Request[])` — gated by `requiresAuth` (RolesAuthority), i.e. only a Gauntlet-permissioned solver settling against vault liquidity — or `solveRequestsDirect(token, Request[])` — **permissionless**, where any party fills the request from its own funds and collects the `solverTip`. Synchronous `deposit()`/`mint()` are `anyoneButVault` and execute atomically when vault liquidity allows.
 - **Historical liquidity**: No periods of market stress observed since deployment (~6.5 months). The vault has not experienced a major withdrawal event.
 - **Large holder impact**: Given the small TVL (~$1.53M), even modest withdrawals could represent a significant percentage. Cross-chain fund recall may introduce additional latency.
 
@@ -137,12 +148,12 @@ TODO — No bug bounty program was found for the Gauntlet USD Alpha vault or on 
 - **System operations**: Mostly programmatic — deposits and withdrawals are handled by the Provisioner contract automatically. However, the unit price (PPS) is set administratively, and strategy allocations are determined by Gauntlet's offchain optimization engine.
 - **PPS definition**: The price per share is admin-set via `setUnitPrice()` on the PriceAndFeeCalculator, not computed programmatically from onchain data. This means the PPS relies on the admin accurately reporting accrued yield.
 - **Offchain dependencies**: The Gauntlet optimization engine (offchain) determines strategy allocations. The Provisioner executes onchain transactions based on these offchain decisions. If the offchain engine fails or provides incorrect data, allocations could be suboptimal.
-- **Keepers/relayers**: The Provisioner's `solveRequestsVault()` and `solveRequestsDirect()` functions suggest keeper/relayer infrastructure for processing requests. TODO — specific keeper infrastructure not verified.
+- **Keepers/relayers**: Settlement of async requests depends on a solver. `solveRequestsVault()` requires authorization through the vault's RolesAuthority (`requiresAuth`), so the privileged settlement path is a Gauntlet-operated keeper/solver. The `solveRequestsDirect()` path is permissionless and tip-incentivized, providing a fallback if the privileged solver is offline — though without an active solver, async redemptions wait until their `deadline`. The specific offchain keeper service operated by Gauntlet is not separately identifiable onchain beyond the authorized solver address(es) in RolesAuthority.
 
 ### External Dependencies
 
 - **Morpho**: The vault deploys USDC into Morpho lending markets across multiple chains. Morpho is a well-established lending protocol. Risk depends on specific Morpho vault curators.
-- **Cross-chain bridging**: Since funds move between Ethereum, Base, Arbitrum, and Optimism, the vault depends on cross-chain messaging/bridging infrastructure. TODO — the specific bridge protocol used (e.g., Hyperlane, LayerZero, native bridges) was not identified.
+- **Cross-chain bridging**: The bridge is **Circle CCTP (Cross-Chain Transfer Protocol, V2)** — native USDC burn-and-mint, not a third-party lock-and-mint bridge. Verified onchain: vault USDC outflows go to Circle's CCTP V2 `TokenMinterV2` ([`0xfd78ee919681417d192449715b2594ab58f5d002`](https://etherscan.io/address/0xfd78ee919681417d192449715b2594ab58f5d002)) on the burn side, and USDC inflows to the vault arrive minted from the zero address (~$3.1M observed) on the receive side — the burn/mint signature of CCTP. Using canonical CCTP means there is no extra bridge-operator trust assumption beyond Circle itself; cross-chain risk reduces to Circle/CCTP availability and message-attestation finality rather than a bespoke bridge's security. (USDC is also routed through a `CurveStableSwapNG` pool and two Ethereum-mainnet MetaMorpho V1.1 vaults for same-chain allocation.)
 - **USDC (Circle)**: The underlying asset is USDC, which carries its own regulatory and custodial risks. USDC is one of the most established stablecoins with ~$60B market cap.
 - **Oracle**: No external oracle dependency — USDC is hard-coded to $1. The vault unit price is admin-set, so Chainlink or other oracle failure does not directly affect gtUSDa.
 - **Aera Protocol**: The vault and its infrastructure contracts are built on Aera Protocol. Any vulnerability in Aera's MultiDepositorVault, RolesAuthority, Provisioner, or Guardian system would affect gtUSDa.
@@ -151,8 +162,8 @@ TODO — No bug bounty program was found for the Gauntlet USD Alpha vault or on 
 
 - **Team**: Gauntlet is a well-known entity in DeFi with 8+ years of experience. The team has a strong reputation for risk management and has managed substantial TVL across DeFi protocols. The multisig signers are not individually validated per assessment rules.
 - **Documentation**: Gauntlet provides extensive, well-maintained documentation via [VaultBook](https://vaultbook.gauntlet.xyz) and separate [integration docs](https://docs.gauntlet.xyz). However, specific audit reports for gtUSDa are not publicly available, and the full contract reference for Aera Protocol is not documented in the integration site.
-- **Legal structure**: TODO — Gauntlet's legal entity structure was not verified.
-- **Incident response**: TODO — No specific incident response plan was found in the documentation.
+- **Legal structure**: The operating entity is **Gauntlet Networks, Inc.**, a US company headquartered in New York City, founded in 2018 by Tarun Chitra (CEO), John Morrow, and Rei Chiang; it is a Series-B-funded firm ([Gauntlet team](https://www.gauntlet.xyz/our-team), [Crunchbase](https://www.crunchbase.com/person/tarun-chitra)). The exact state of incorporation and the contracting entity for vault terms were not separately verified.
+- **Incident response**: No formal, published incident-response plan was found in the Gauntlet/Aera docs. The closest documented emergency controls are protocol-level: per the [Aera security page](https://docs.aera.finance/the-protocol/security), the vault owner "has the power to stop vault operations at any point and to remove the guardian role." Vulnerability disclosure is handled through the [Immunefi bug bounty](https://immunefi.com/bug-bounty/aera/information/); no dedicated `security.txt` or published security contact was located.
 
 ## Monitoring
 
@@ -279,8 +290,8 @@ TODO — No bug bounty program was found for the Gauntlet USD Alpha vault or on 
 │  └──────────────────────────────────────────────────────────────┘   │
 │                                                                      │
 │  ┌──────────────┐    ┌──────────────────┐                           │
-│  │ USDC (Circle)│    │ Cross-chain      │                           │
-│  │ 0xA0b869...  │    │ Bridge/Messaging │ (TODO: specific protocol) │
+│  │ USDC (Circle)│    │ Circle CCTP v2   │                           │
+│  │ 0xA0b869...  │    │ TokenMinter      │ 0xfd78ee91... (burn/mint) │
 │  └──────────────┘    └──────────────────┘                           │
 └─────────────────────────────────────────────────────────────────────┘
 
@@ -299,25 +310,27 @@ Fund Flow:
 
 ### Key Strengths
 
-- Built on Aera Protocol by Gauntlet, a team with 8+ years of DeFi experience and $1.45B in managed TVL
+- Built on the audited Aera V3 Protocol by Gauntlet (Gauntlet Networks, Inc.), a team with 8+ years of DeFi experience and $1.45B in managed TVL
+- Audited (Spearbit V3, June 2025 + Cantina competition) with an active $500K Immunefi bug bounty
 - Fully USDC-backed — every gtUSDa represents a 1:1 claim on USDC, no leverage
 - Non-upgradeable vault contract (immutable) eliminates proxy upgrade risk
 - Dual-timelock governance (1-day delay) for both vault and fee operations
-- Blue-chip collateral (USDC) and established underlying protocol (Morpho)
+- Blue-chip collateral (USDC), established underlying protocol (Morpho), and canonical Circle CCTP for cross-chain transfers
 
 ### Key Risks
 
-- No publicly available audit reports for the vault or underlying Aera Protocol contracts
 - Admin-controlled unit price (PPS) — exchange rate is set manually, not computed programmatically
-- Cross-chain complexity — funds deployed across 4 chains, introducing bridging risk
+- Highly concentrated holder base — top holder ~53%, top 3 ~82% of supply (27 holders total)
 - Small Ethereum TVL ($1.53M) limits battle-testing at scale
 - Guardian system with arbitrary execution capability via Merkle proofs
 - Provisioner address change could redirect all deposited USDC
+- Cross-chain complexity — funds deployed across 4 chains (via Circle CCTP), adding operational surface
+- Audit coverage rests on a single tier-1 V3 engagement (Spearbit) plus a small audit competition; the V3 report is only Google-Drive-hosted
 
 ### Critical Risks
 
-- **Unverified audit status**: Without verified audit reports, the security of the MultiDepositorVault, Provisioner, and related contracts is unconfirmed. This triggers a critical gate consideration — while not an automatic fail (the Gauntlet team claims audits were performed), the absence of public reports is a serious concern.
 - **Admin-controlled PPS**: The unit price is set by the fee calculator governance (timelock with 1-day delay). A malicious or compromised fee governance could manipulate the gtUSDa/USDC exchange rate arbitrarily, affecting all holders.
+- **Holder concentration**: A single EOA holds ~53% and the top 3 hold ~82% of supply. In an async-redemption model with $0 idle USDC, a large-holder exit could force rapid cross-chain unwinding and leave smaller holders waiting on the request queue.
 
 ---
 
@@ -332,11 +345,11 @@ Fund Flow:
 
 If ANY gate is triggered, the protocol automatically receives a score of **5** (High Risk).
 
-- [ ] **No audit** — Audits are claimed but no public reports found. The Gauntlet docs state audits are required for vault inclusion but specific reports for Aera/MultiDepositorVault are not available. This is borderline: the protocol claims audits exist but evidence is missing.
-- [ ] **Unverifiable reserves** — Reserves are partially onchain. gtUSDa supply and USDC balances are verifiable, but cross-chain positions require aggregation. Not a full gate trigger.
+- [ ] **No audit** — Not triggered. The Aera V3 contracts deployed here (MultiDepositorVault, Provisioner) were audited by Spearbit (June 2025) and reviewed in a Cantina audit competition, with V2 audits by Spearbit (2023) and OpenZeppelin (2024), plus an active $500K Immunefi bug bounty. Reports are public on the [Aera security page](https://docs.aera.finance/the-protocol/security).
+- [ ] **Unverifiable reserves** — Reserves are partially onchain. gtUSDa supply and USDC balances are verifiable, but cross-chain positions (via Circle CCTP to Morpho on Base/Arbitrum/Optimism) require aggregation. Not a full gate trigger.
 - [ ] **Total centralization** — Not triggered. Governance is a 3/9 multisig with 1-day timelock. Not a single EOA.
 
-**Gate assessment: Borderline on "No audit" — the documentation claims audits exist but none are publicly available. Since Gauntlet is a reputable entity claiming audit coverage, we treat this as insufficient documentation rather than a hard gate. Score accordingly in Audit category.**
+**Gate assessment: No gate triggered. Audits are now confirmed public (Aera V3 / Spearbit + Cantina competition + Immunefi bounty), reserves are verifiable onchain with cross-chain aggregation via canonical CCTP, and governance is a multisig + timelock.**
 
 ### Category Scores
 
@@ -346,9 +359,9 @@ If ANY gate is triggered, the protocol automatically receives a score of **5** (
 
 | Audits | Bug Bounty |
 |--------|------------|
-| No publicly available audit reports. Gauntlet docs claim audits are "required before vault inclusion." DefiLlama shows 0 audits for Gauntlet protocol. | No bug bounty program found. |
+| Aera V3 audited by Spearbit (June 2025) + Cantina audit competition; V2 by Spearbit (2023) & OpenZeppelin (2024). Reports public on the [Aera security page](https://docs.aera.finance/the-protocol/security). | Active — Immunefi, up to **$500K** ([link](https://immunefi.com/bug-bounty/aera/information/)). |
 
-Score: **4/5** — No publicly verifiable audits. While the Gauntlet team claims audits exist, the absence of public reports prevents independent verification. Complex multi-contract architecture increases the importance of audit coverage.
+Score: **2.5/5** — The deployed Aera V3 contracts have a public tier-1 audit (Spearbit) plus an audit competition and an active $500K bug bounty. Score is not lower because V3 coverage rests on a single tier-1 firm plus a small ($15K-pool) competition, the V3 report is only Google-Drive-hosted, and the specific gtUSDa vault configuration is not separately audited.
 
 **Subcategory B: Historical Track Record**
 
@@ -358,9 +371,9 @@ Score: **4/5** — No publicly verifiable audits. While the Gauntlet team claims
 
 Score: **3.5/5** — Relatively new deployment with small TVL. The broader Gauntlet protocol has significant TVL ($1.45B) and a long track record, but this specific vault has not been battle-tested at scale.
 
-**Audits & Historical Score = (4 + 3.5) / 2 = 3.75**
+**Audits & Historical Score = (2.5 + 3.5) / 2 = 3.0**
 
-**Score: 3.8/5** — No public audits and limited track record for this specific vault, despite the team's strong reputation.
+**Score: 3.0/5** — Audited Aera V3 codebase with an active bug bounty, offset by a limited track record and small TVL for this specific vault.
 
 #### Category 2: Centralization & Control Risks (Weight: 30%)
 
@@ -384,9 +397,9 @@ Score: **3.0/5** — Hybrid onchain/offchain operations. The PPS is manually upd
 
 | Protocol Dependencies | Criticality |
 |----------------------|-------------|
-| Morpho (4 chains), USDC, cross-chain bridge (TODO), Aera Protocol | Morpho and USDC are established. Cross-chain bridge is a material dependency. Aera Protocol is the foundational layer. |
+| Morpho (4 chains), USDC, Circle CCTP v2 bridge, Aera Protocol | Morpho, USDC, and CCTP are all established. Cross-chain bridge is now identified as canonical Circle CCTP (no bespoke bridge-operator trust). Aera Protocol is the foundational layer. |
 
-Score: **3.0/5** — Multiple dependencies on established protocols (Morpho, USDC). Cross-chain bridging adds an unquantified risk surface (specific bridge protocol not identified). Morpho failure would disrupt yield but not cause principal loss (funds are in lending markets).
+Score: **3.0/5** — Multiple dependencies, but all on established protocols: Morpho, USDC, and the canonical Circle CCTP bridge (identified onchain via `TokenMinterV2`), which removes the previously unquantified bridge risk. Residual surface is multi-curator Morpho market risk across 4 chains and dependence on the Aera Protocol contracts. Morpho failure would disrupt yield but not directly cause principal loss (funds are in lending markets).
 
 **Centralization Score = (3.0 + 3.0 + 3.0) / 3 = 3.0**
 
@@ -418,9 +431,9 @@ Score: **3.0/5** — Hybrid onchain/offchain reporting. The admin-set PPS means 
 
 | Exit Mechanism | Liquidity Depth | Large Holder Impact |
 |---------------|----------------|---------------------|
-| Direct redemption through Provisioner; async request-solve flow available | ~$1.53M TVL (small); idle USDC = $0 | Cross-chain recall may delay large exits |
+| Direct redemption through Provisioner; async request-solve flow available | ~$1.53M TVL (small); idle USDC = $0 | Top holder ~53%, top 3 ~82% of supply; cross-chain recall may delay large exits |
 
-Score: **3.0/5** — Redemption mechanism exists but the small TVL, zero idle USDC, and cross-chain fund deployment mean large withdrawals likely face delays. No maintained liquidity buffer.
+Score: **3.0/5** — Redemption mechanism exists but the small TVL, zero idle USDC, highly concentrated holder base (single EOA ~53%), and cross-chain fund deployment mean large withdrawals likely face delays. No maintained liquidity buffer.
 
 - Cross-chain fund recall adds withdrawal latency: +0.5
 
@@ -430,27 +443,29 @@ Score: **3.0/5** — Redemption mechanism exists but the small TVL, zero idle US
 
 | Team Transparency | Documentation | Legal/Compliance |
 |------------------|---------------|-----------------|
-| Gauntlet is well-known, 8+ years in DeFi | Extensive docs via VaultBook, but missing audit reports and full contract reference | TODO |
+| Gauntlet Networks, Inc. (NYC, US; founded 2018; Series B) — well-known, 8+ years in DeFi | Extensive docs via VaultBook + Aera security page; full Aera contract reference still thin | No formal incident-response plan published; disclosure via Immunefi; legal entity identified |
 
-Score: **2.0/5** — Gauntlet has a strong reputation and extensive documentation. The main gap is the absence of public audit reports.
+Score: **1.5/5** — Strong reputation, extensive documentation, identified legal entity (Gauntlet Networks, Inc.), and confirmed audits. Residual gaps: no formal published incident-response plan and multisig signers not individually validated.
 
 ### Final Score Calculation
 
 | Category | Score | Weight | Weighted |
 |----------|-------|--------|----------|
-| Audits & Historical | 3.8 | 20% | 0.76 |
+| Audits & Historical | 3.0 | 20% | 0.60 |
 | Centralization & Control | 3.0 | 30% | 0.90 |
 | Funds Management | 2.3 | 30% | 0.69 |
 | Liquidity Risk | 3.5 | 15% | 0.525 |
-| Operational Risk | 2.0 | 5% | 0.10 |
-| **Final Score** | | | **2.975/5.0** |
+| Operational Risk | 1.5 | 5% | 0.075 |
+| **Final Score** | | | **2.79/5.0** |
 
-**Final Score: 3.0/5.0** (rounded)
+**Final Score: 2.8/5.0** (rounded)
 
 ### Risk Tier
 
 | Final Score | Risk Tier | Recommendation |
 |------------|-----------|----------------|
+| 1.0-1.5 | Minimal Risk | Approved, high confidence |
+| 1.5-2.5 | Low Risk | Approved with standard monitoring |
 | **2.5-3.5** | **Medium Risk** | Approved with enhanced monitoring |
 | 3.5-4.5 | Elevated Risk | Limited approval, strict limits |
 | 4.5-5.0 | High Risk | Not recommended |
@@ -464,5 +479,6 @@ Score: **2.0/5** — Gauntlet has a strong reputation and extensive documentatio
 - **Time-based**: Reassess in 3 months (September 2026)
 - **TVL-based**: Reassess if Ethereum TVL exceeds $10M or drops below $500K
 - **Incident-based**: Reassess after any exploit, governance change (multisig signer set, timelock delay), provisioner change, unit price manipulation event, or strategy allocation change >50%
-- **Audit-based**: Reassess if public audit reports become available for the Aera Protocol contracts or Gauntlet vault
-- **Bridge-based**: Reassess if the cross-chain bridge protocol is identified and undergoes significant changes
+- **Audit-based**: Reassess if a new Aera version is deployed without a fresh audit, or if additional tier-1 audits of Aera V3 are published
+- **Bridge-based**: Reassess if the vault migrates off Circle CCTP to a different (e.g. third-party lock-and-mint) bridge, or if CCTP undergoes significant changes
+- **Concentration-based**: Reassess if the top holder exceeds 60% of supply or if holder count drops materially below the current ~27
