@@ -1,0 +1,133 @@
+slug: d2-hypeplus
+title: D2 Finance HYPE++ - Contract Dependency Graph
+chain: arbitrum
+
+categories:
+  - id: vault
+    label: Vault / Token
+  - id: strategy
+    label: Strategy
+  - id: governance
+    label: Governance
+  - id: infra
+    label: Protocol Infra
+  - id: dependency
+    label: External Dependency
+
+nodes:
+  - id: hypeplus-vault
+    label: HYPE++ Vault
+    address: "0x75288264FDFEA8ce68e6D852696aB1cE2f3E5004"
+    category: vault
+    note: VaultV1Whitelisted; ERC-4626-style USDC vault
+  - id: hypeplus-trader
+    label: HYPE++ Trader OMS
+    address: "0x8CaBD8b787e8c69C5f24091cFDA197fF570345B3"
+    category: strategy
+    note: Strategy selector router; funds custodied here during epochs
+  - id: dgnhype-vault
+    label: dgnHYPE Vault
+    address: "0x64167cd42859F64cfF2Aa4B63c3175cceF9659dd"
+    category: strategy
+    note: Nested D2 strategy held by HYPE++ trader
+  - id: dgnhype-trader
+    label: dgnHYPE Custody Safe
+    address: "0x155d0B27B754ebC664aeD565945C1AaEa91966fb"
+    category: strategy
+    note: Nested 3-of-5 Safe; only part of reported backing observed as real USDC
+  - id: usdc
+    label: Arbitrum USDC
+    address: "0xaf88d065e77c8cC2239327C5EDb3A432268e5831"
+    category: dependency
+  - id: allowed-defi
+    label: Allowed DeFi Venues
+    category: dependency
+    note: 32 allowed tokens and 30 allowed spender/protocol addresses
+  - id: arbitrum
+    label: Arbitrum One
+    category: dependency
+    note: Stage 1 optimistic rollup per L2BEAT
+
+  - id: vault-owner-eoa
+    label: Vault Owner EOA
+    address: "0x0E8c0470773c65498F438cac380648B314399A46"
+    category: governance
+    note: Owns HYPE++ vault; can set epochs, deposit caps, and whitelist parameters
+  - id: trader-role-eoa
+    label: Trader Role EOA
+    address: "0x7ab129978091DEE65A319c5FC728818D73221999"
+    category: governance
+    note: DEFAULT_ADMIN_ROLE + EXECUTOR_ROLE; fee receiver
+  - id: vault-ms
+    label: D2 Vault MS (4/7)
+    address: "0xB2fEDed045F3fd9FcCCF8E7e95729c4182916CE0"
+    category: governance
+    note: D2-documented Vault MS; Safe threshold 4 of 7
+  - id: vault-factory
+    label: Vault Factory
+    address: "0xb5B272EF918835651375f84D463b1Ba7B61eF028"
+    category: infra
+  - id: strategy-factory
+    label: Strategy Factory
+    address: "0x2AA01FdE174aB160b4e4F49F152C20d6Ec029d67"
+    category: infra
+
+edges:
+  - from: vault-factory
+    to: hypeplus-vault
+    kind: deploys
+    label: deployed Nov 19 2024
+  - from: strategy-factory
+    to: hypeplus-trader
+    kind: deploys
+    label: deployed Nov 19 2024
+
+  - from: vault-owner-eoa
+    to: hypeplus-vault
+    kind: controls
+    label: owner
+  - from: vault-ms
+    to: hypeplus-trader
+    kind: holds-role
+    label: DEFAULT_ADMIN_ROLE + EXECUTOR_ROLE
+  - from: trader-role-eoa
+    to: hypeplus-trader
+    kind: holds-role
+    label: DEFAULT_ADMIN_ROLE + EXECUTOR_ROLE
+  - from: hypeplus-trader
+    to: trader-role-eoa
+    kind: routes-fees-to
+    label: feeReceiver
+
+  - from: hypeplus-vault
+    to: hypeplus-trader
+    kind: allocates-to
+    label: "100%"
+  - from: hypeplus-trader
+    to: usdc
+    kind: deposits-into
+    label: direct USDC
+  - from: hypeplus-trader
+    to: dgnhype-vault
+    kind: deposits-into
+    label: dgnHYPE shares
+  - from: dgnhype-vault
+    to: dgnhype-trader
+    kind: allocates-to
+    label: "100%"
+  - from: dgnhype-trader
+    to: usdc
+    kind: deposits-into
+    label: direct USDC
+  - from: hypeplus-trader
+    to: allowed-defi
+    kind: deposits-into
+    label: allowed modules
+  - from: dgnhype-trader
+    to: allowed-defi
+    kind: deposits-into
+    label: nested strategy
+  - from: allowed-defi
+    to: arbitrum
+    kind: routes-through
+    label: Arbitrum execution
