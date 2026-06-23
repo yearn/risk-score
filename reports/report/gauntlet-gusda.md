@@ -4,7 +4,7 @@
 - **Token:** gtUSDa (Gauntlet USD Alpha)
 - **Chain:** Ethereum (also deployed on Base, Optimism, Arbitrum)
 - **Token Address:** [`0x3bd9248048df95db4fbd748c6cd99c1baa40bad0`](https://etherscan.io/token/0x3bd9248048df95db4fbd748c6cd99c1baa40bad0)
-- **Final Score: 2.5/5.0**
+- **Final Score: 2.7/5.0**
 
 ## Overview + Links
 
@@ -388,7 +388,7 @@ Score: **2.5/5** — Relatively new deployment (~6.5 months) but with meaningful
 |---------------|----------|-----------------|
 | Immutable vault (non-proxy). Cannot upgrade. | 1-day (24 hours) on both vault and fee timelocks | 3/9 multisig proposer. Provisioner can mint/burn. Timelock can change provisioner. Guardians can execute arbitrary operations. Keeper EOA submits unit price via Forwarder with soft guards (±0.10% tolerance, 60-min cooldown) that pause but never block. |
 
-Score: **2.0/5** — The 3/9 multisig with 1-day timelock is reasonable. However, the guardian system with arbitrary execution capability and the admin-controlled PPS (with soft-guard-only limits) are significant concerns. The immutable vault is a positive.
+Score: **3.0/5** — The 3/9 multisig with 1-day timelock fits rubric score 3 ("Multisig 5/9 with timelock, 24+ hours, some powerful roles constrained by timelock"). The guardian system allows arbitrary execution — the multisig can update the Merkle root via timelock, then guardians execute instantly. Combined with the keeper-submitted PPS and provisioner-change capability, powerful roles exist but are partially constrained (root changes require 1-day delay). The immutable vault is a positive, preventing score 4.
 
 **Subcategory B: Programmability**
 
@@ -406,9 +406,9 @@ Score: **3.5/5** — Hybrid onchain/offchain operations. The PPS is keeper-submi
 
 Score: **3.0/5** — Multiple dependencies, but all on established protocols: Morpho, USDC, and the canonical Circle CCTP bridge (identified onchain via `TokenMinterV2`), which removes the previously unquantified bridge risk. Residual surface is multi-curator Morpho market risk across 4 chains and dependence on the Aera Protocol contracts. Morpho failure would disrupt yield but not directly cause principal loss (funds are in lending markets).
 
-**Centralization Score = (2.0 + 3.5 + 3.0) / 3 = 2.83**
+**Centralization Score = (3.0 + 3.5 + 3.0) / 3 = 3.17**
 
-**Score: 2.83/5** — Adequate governance structure with timelock, but admin-controlled PPS and guardian system are concerns.
+**Score: 3.17/5** — Adequate governance structure with timelock, but admin-controlled PPS, guardian arbitrary execution, and 3/9 multisig concentration are concerns.
 
 #### Category 3: Funds Management (Weight: 30%)
 
@@ -453,13 +453,13 @@ Score: **1.5/5** — Strong reputation, extensive documentation, identified lega
 | Category | Score | Weight | Weighted |
 |----------|-------|--------|----------|
 | Audits & Historical | 2.5 | 20% | 0.50 |
-| Centralization & Control | 2.83 | 30% | 0.849 |
+| Centralization & Control | 3.17 | 30% | 0.951 |
 | Funds Management | 2.25 | 30% | 0.675 |
 | Liquidity Risk | 3.0 | 15% | 0.45 |
 | Operational Risk | 1.5 | 5% | 0.075 |
-| **Final Score** | | | **2.549/5.0** |
+| **Final Score** | | | **2.651/5.0** |
 
-**Final Score: 2.5/5.0** (rounded from 2.549)
+**Final Score: 2.7/5.0** (rounded from 2.651)
 
 ### Risk Tier
 
