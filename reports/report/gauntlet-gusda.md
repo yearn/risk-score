@@ -91,8 +91,8 @@ The vault is part of the broader Gauntlet ecosystem ($1.45B total TVL across all
 
 - **Collateral type**: 100% backed by USDC. The vault's supply asset is USDC [`0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48`](https://etherscan.io/token/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48).
 - **Collateral quality**: Blue-chip stablecoin (USDC, issued by Circle). This is the highest quality stablecoin collateral available.
-- **Backing ratio**: The vault is effectively 100%+ collateralized. Every gtUSDa token represents a pro-rata claim on the vault's USDC deployed across strategies plus any accrued yield.
-- **Yield risk**: Funds are deployed to Morpho lending markets. While USDC principal is generally safe, yield is variable and depends on Morpho market conditions. The vault does not employ leverage.
+- **Backing ratio**: The vault is designed to be 100%+ collateralized. Every gtUSDa token represents a pro-rata claim on the vault's USDC deployed across strategies plus any accrued yield, but realized backing still depends on the solvency and liquidity of the underlying Morpho lending markets and cross-chain positions.
+- **Yield / market risk**: Funds are deployed to Morpho lending markets. Yield is variable, and principal can be impaired if a market suffers bad debt, collateral/oracle failure, curator misconfiguration, or insufficient liquidity during withdrawals. The vault does not employ leverage directly, but lending-market exposure remains a principal-loss path.
 - **Liquidations**: Not applicable — this is not a lending protocol. The vault does not take loans or face liquidation risk.
 - **Peg stability**: The unit price of gtUSDa is set via `setUnitPrice()` on the PriceAndFeeCalculator. The oracle hard-codes USDC = $1 as per [Gauntlet docs](https://vaultbook.gauntlet.xyz/resources/frequently-asked-questions/oracles). The price value is computed **offchain** by Gauntlet's optimization engine (total USDC across all chains + accrued yield ÷ gtUSDa total supply) and then submitted onchain by a keeper. This means the gtUSDa exchange rate (PPS) is an admin-updated value reflecting accrued yield — see [Price-Setting Flow](#price-setting-flow) below for the full onchain-verified mechanism.
 - **Risk curation**: Gauntlet's automated risk management system curates allocations, applying risk constraints (40% max non-blue-chip exposure, liquidity caps, etc.).
@@ -175,7 +175,7 @@ Example transaction: [`0xe5aebe0ef8a7470b85964b143cbf45ced0a81e7eedb91b14832fca6
 
 ### External Dependencies
 
-- **Morpho**: The vault deploys USDC into Morpho lending markets across multiple chains. Morpho is a well-established lending protocol. Risk depends on specific Morpho vault curators.
+- **Morpho**: The vault deploys USDC into Morpho lending markets across multiple chains. Morpho is a well-established lending protocol, but risk depends on specific market collateral, oracle configuration, borrower health, liquidation performance, and curator choices. A severe Morpho market failure can impair principal, not just yield.
 - **Cross-chain bridging**: The bridge is **Circle CCTP (Cross-Chain Transfer Protocol, V2)** — native USDC burn-and-mint, not a third-party lock-and-mint bridge. Verified onchain: vault USDC outflows go to Circle's CCTP V2 `TokenMinterV2` ([`0xfd78ee919681417d192449715b2594ab58f5d002`](https://etherscan.io/address/0xfd78ee919681417d192449715b2594ab58f5d002)) on the burn side, and USDC inflows to the vault arrive minted from the zero address (~$3.1M observed) on the receive side — the burn/mint signature of CCTP. Using canonical CCTP means there is no extra bridge-operator trust assumption beyond Circle itself; cross-chain risk reduces to Circle/CCTP availability and message-attestation finality rather than a bespoke bridge's security. (USDC is also routed through a `CurveStableSwapNG` pool and two Ethereum-mainnet MetaMorpho V1.1 vaults for same-chain allocation.)
 - **USDC (Circle)**: The underlying asset is USDC, which carries its own regulatory and custodial risks. USDC is one of the most established stablecoins with ~$60B market cap.
 - **Oracle**: No external oracle dependency — USDC is hard-coded to $1. The vault unit price is admin-set, so Chainlink or other oracle failure does not directly affect gtUSDa.
@@ -404,7 +404,7 @@ Score: **3.5/5** — Hybrid onchain/offchain operations. The PPS is keeper-submi
 |----------------------|-------------|
 | Morpho (4 chains), USDC, Circle CCTP v2 bridge, Aera Protocol | Morpho, USDC, and CCTP are all established. Cross-chain bridge is now identified as canonical Circle CCTP (no bespoke bridge-operator trust). Aera Protocol is the foundational layer. |
 
-Score: **3.0/5** — Multiple dependencies, but all on established protocols: Morpho, USDC, and the canonical Circle CCTP bridge (identified onchain via `TokenMinterV2`), which removes the previously unquantified bridge risk. Residual surface is multi-curator Morpho market risk across 4 chains and dependence on the Aera Protocol contracts. Morpho failure would disrupt yield but not directly cause principal loss (funds are in lending markets).
+Score: **3.0/5** — Multiple dependencies, but all on established protocols: Morpho, USDC, and the canonical Circle CCTP bridge (identified onchain via `TokenMinterV2`), which removes the previously unquantified bridge risk. Residual surface is multi-curator Morpho market risk across 4 chains and dependence on the Aera Protocol contracts. Morpho market failure can directly affect principal through bad debt, oracle/collateral failure, or liquidity shortfalls, so the dependency risk is material even though the venues are established.
 
 **Centralization Score = (3.0 + 3.5 + 3.0) / 3 = 3.17**
 

@@ -31,6 +31,21 @@ nodes:
     address: "0x8F3FfA11CD5915f0E869192663b905504A2Ef4a5"
     category: infra
     note: Admin-set unit price; fee calculator
+  - id: keeper-eoa
+    label: Keeper EOA
+    address: "0xdd998274ed12bb12d818800915cfb8f87cbc2801"
+    category: infra
+    note: Example offchain bot that submits unit-price updates
+  - id: forwarder-accountant
+    label: Forwarder Accountant
+    address: "0xc219d47B645e3446b81889F18B34238310c792d0"
+    category: infra
+    note: Vault accountant; relays keeper PPS updates to PriceAndFeeCalculator
+  - id: min-update-guard
+    label: Min Update Guard
+    address: "0xbfb2040d37f5da34938a367ef3ae0786fd6a861a"
+    category: infra
+    note: Pre-checks minimum update interval; soft guard only
 
   # === Governance ===
   - id: gauntlet-multisig
@@ -90,6 +105,10 @@ edges:
     to: roles-authority-vault
     kind: controls
     label: owner
+  - from: timelock-vault
+    to: forwarder-accountant
+    kind: controls
+    label: owner
   - from: timelock-feecalc
     to: price-fee-calculator
     kind: controls
@@ -104,6 +123,24 @@ edges:
     to: gtusda-vault
     kind: mints
     label: onlyProvisioner
+
+  # === PPS authority: keeper → Forwarder → guard / PriceAndFeeCalculator ===
+  - from: keeper-eoa
+    to: forwarder-accountant
+    kind: routes-through
+    label: submit PPS
+  - from: forwarder-accountant
+    to: min-update-guard
+    kind: routes-through
+    label: pre-check interval
+  - from: forwarder-accountant
+    to: price-fee-calculator
+    kind: holds-role
+    label: vaultAccountant / setUnitPrice
+  - from: price-fee-calculator
+    to: gtusda-vault
+    kind: manages
+    label: unit price
 
   # === Capital flow: vault → bridge → Morpho ===
   - from: gtusda-vault
