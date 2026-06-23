@@ -125,13 +125,24 @@ All contracts use OpenZeppelin's `TransparentUpgradeableProxy` pattern with a sh
 - **CEO:** Francesco Filia, ex-Managing Director & EMEA Head of Mid Caps at Bank of America Merrill Lynch
 - **Team:** 40+ named professionals across leadership, investment, origination, quant/technology, legal, risk, and operations ([team page](https://www.fasanara.com/team))
 - **Regulatory:** Fasanara Capital Ltd is **FCA Authorised** since [12 August 2011](https://register.fca.org.uk/s/firm?id=001b000000NMar0AAD), Firm Reference Number [551020](https://register.fca.org.uk/s/firm?id=001b000000NMar0AAD), Companies House [07561210](https://find-and-update.company-information.service.gov.uk/company/07561210). Type: regulated. The firm's MiFID permissions scope is on the FCA register (specific activities/product types need manual review of the full record). Also publishes a [MIFIDPRU Disclosure](https://www.fasanara.com/) consistent with its regulatory status
-- **Business:** Two main pillars — Fintech Lending (141 loan originators across 60+ countries) and Digital Assets. EU SFDR Article 8 classified funds for certain Alternative Credit sub-funds
+- **Business:** Two main pillars — Fintech Lending (141 loan originators across 60+ countries, $115bn+ total volumes traded per [Fasanara lending](https://www.fasanara.com/lending)) and Digital Assets. EU SFDR Article 8 classified funds for certain Alternative Credit sub-funds
+- **Flagship strategy:** The [Global Diversified Alternative Debt Fund](https://www.fasanara.com/lending) (the multi-strategy receivables flagship that mGLOBAL's "Global Fund" mirrors) has ~10.5 years of history and $3B+ dedicated AUM. Fasanara reports ~$4.5–5.5B firm-wide AUM ([Alternatives Watch interview, 2024](https://www.alternativeswatch.com/2024/07/29/interview-alternative-credit-manager-fasanara-francesco-filia-fintech-lending/))
 - **Track record:** 15-year operating history. ESG initiatives (Sustainability Report 2025 published). No known regulatory actions or incidents found
-- **mGLOBAL strategy:** Fasanara's specific strategy mandate for mGLOBAL (asset allocation, risk framework, leverage policy) is not publicly documented. The token name "Midas Fasanara Global" and the 92% "Unclassified" allocation suggest the strategy is primarily offchain/opaque
+- **mGLOBAL strategy (documented, not onchain-verifiable):** Per [RWA.xyz](https://app.rwa.xyz/assets/mGLOBAL) and [Fasanara](https://www.fasanara.com/lending), mGLOBAL gives exposure to Fasanara's "Global Fund," which follows the same strategy as the Global Diversified Alternative Debt Fund: an asset-backed lending portfolio investing primarily in **short-dated trade receivables, digital invoices, and SME loans** bought from a network of ~141 fintech originators. The 92% "Unclassified" label reflects that these are offchain receivables (not onchain protocol positions), so the *strategy* is documented but the *specific allocation* (originators, geographies, sectors, delinquency/loss rates for this vehicle) is not disclosed or verifiable. See [Funds Management](#funds-management)
 
 ## Funds Management
 
-Fasanara Capital is the strategy manager for mGLOBAL. Unlike mHYPER which uses Hyperithm for market-neutral DeFi strategies, **the specific strategy allocation, risk parameters, and target yield sources for mGLOBAL can't be fetched**. mGLOBAL integrates with **Aave** at the vault level (DepositVault and RedemptionVault both use Aave for idle capital).
+Fasanara Capital is the strategy manager for mGLOBAL. Unlike mHYPER which uses Hyperithm for market-neutral DeFi strategies, mGLOBAL's yield comes from **offchain private credit** — and while the *strategy* is now documented (below), **the position-level allocation and current credit metrics for the mGLOBAL pool cannot be fetched or verified onchain**. mGLOBAL integrates with **Aave** at the vault level (DepositVault and RedemptionVault both use Aave for idle capital).
+
+### Underlying Strategy & Yield Source (documented)
+
+Where the funds end up, and what generates the yield (per [Fasanara lending](https://www.fasanara.com/lending), [RWA.xyz](https://app.rwa.xyz/assets/mGLOBAL), [Hedge Fund Journal](https://thehedgefundjournal.com/fasanara-capital-digital-finance-smart-fintech-lending/), and [Alternatives Watch](https://www.alternativeswatch.com/2024/07/29/interview-alternative-credit-manager-fasanara-francesco-filia-fintech-lending/)):
+
+- **Capital flow:** USDC deposit → Midas DepositVault (mints mGLOBAL) → Fordefi tri-party MPC custody → Fasanara's "Global Fund" (mirrors the Global Diversified Alternative Debt Fund) → purchase of short-dated **trade receivables, digital invoices, and SME loans**.
+- **What earns the yield:** This is **asset-backed private credit / trade-finance income**, not DeFi yield or T-bills. Fasanara buys invoices/receivables at a discount; when the SME obligor repays at face value (typically within ~3 months), the spread is the return. Fasanara sits at the top of a **hub-and-spoke network of ~141 fintech originators across 60+ countries** ($115bn+ total volume) that source the underlying borrowers — Fasanara is the capital provider, not the originator.
+- **Risk profile of the assets:** ~3-month average duration, self-liquidating; **no leverage** on most vehicles; 10,000+ obligors per fund (claimed 20–30× more diversified than a CLO); proprietary credit scoring (Fasanara Credit Model / Debtor Rating); first-loss structuring and **credit insurance** (e.g. the Allianz Trade partnership). Fund-level target return is ~10–20% net p.a. depending on the sleeve.
+- **Why onchain APY shows 0%:** mGLOBAL's oracle is 39 days stale, so accrued yield has not been published onchain since May 15, 2026 — a reporting gap, not a zero-yield strategy.
+- **Residual gap:** This describes *what kind* of credit risk backs mGLOBAL (defensive: short-dated, insured, unlevered, diversified SME trade finance), but **not whether this specific book is healthy** — no attested per-vehicle allocation, geography/sector mix, or delinquency/loss data is disclosed. Verifiability, not strategy legitimacy, remains the binding constraint.
 
 - **Fund Manager:** [Fasanara Capital Ltd](https://www.fasanara.com/) (London, founded 2011, AUM $4B+) — one of Europe's largest fintech-focused asset managers
 - **Strategy Allocations (per [SumCap](https://midas.sumcap.xyz/mglobal), June 16, 2026):**
@@ -635,7 +646,7 @@ updater EOA. User redeems via RedemptionVaultWithAave or RedemptionVaultWithSwap
 
 **Subcategory C: External Dependencies — 4.0**
 
-- Fasanara Capital: single critical dependency for strategy management and NAV calculation. **Fasanara provides zero public information about how mGLOBAL funds are deployed** — the strategy is a complete black box (92% unclassified). This is a single point of failure for core value creation with no transparency on the dependency's operations
+- Fasanara Capital: single critical dependency for strategy management and NAV calculation. The strategy *type* is documented (short-dated SME trade receivables / invoices via ~141 fintech originators), but **the position-level allocation for the mGLOBAL pool is undisclosed and not onchain-verifiable** (92% unclassified). This is a single point of failure for core value creation, with no transparency on the specific book's composition or credit health
 - Aave: idle capital integration (blue-chip, positive). Aave failure would impact vault idle capital but not core strategy
 - Fordefi: MPC custody with tri-party governance (established, tested)
 - MidasAccessControl: shared across all Midas products — single compromise affects entire platform
@@ -644,14 +655,14 @@ updater EOA. User redeems via RedemptionVaultWithAave or RedemptionVaultWithSwap
 
 **Centralization Score = (3.0 + 4.0 + 4.0) / 3 ≈ 3.7**
 
-**Score: 3.7/5** — Same structural centralization risks as mHYPER, with additional concerns: (a) oracle bounds are 285x looser (100% vs 0.35%), (b) bound feeds are deployed but inactive, (c) Fasanara is a single point of failure with complete opacity on funds deployment — no public information about how user capital is managed. The Aave integration partially offsets programmability concerns. The 48-hour timelock on upgrades is meaningful; role changes bypassing it entirely is not.
+**Score: 3.7/5** — Same structural centralization risks as mHYPER, with additional concerns: (a) oracle bounds are 285x looser (100% vs 0.35%), (b) bound feeds are deployed but inactive, (c) Fasanara is a single point of failure whose documented strategy (SME trade receivables) is established but whose per-vehicle allocation and credit metrics are undisclosed and unverifiable onchain. The Aave integration partially offsets programmability concerns. The 48-hour timelock on upgrades is meaningful; role changes bypassing it entirely is not.
 
 #### 3. Funds Management (Weight: 30%)
 
 **Subcategory A: Collateralization — 4.5**
 
 - Tokens are subordinated debt instruments — not direct claims on collateral
-- Strategy composition, collateral quality, and asset allocation are **92% unclassified and completely opaque** — Fasanara provides zero public information about how mGLOBAL funds are managed. Unlike mHYPER's Hyperithm which had identifiable onchain counterparties, mGLOBAL's strategy is a black box
+- Strategy *type* is documented (short-dated SME trade receivables / digital invoices, ~3-month duration, unlevered, credit-insured), but the **position-level composition, collateral quality, and current loss/delinquency metrics are 92% unclassified and undisclosed for this vehicle**. Unlike mHYPER's Hyperithm which had identifiable onchain counterparties, mGLOBAL's assets sit offchain and cannot be independently verified
 - Aave integration means idle USDC → aUSDC is onchain and verifiable ($2.55M / 6.78%), but this only covers idle capital, not the active strategy
 - No onchain collateral verification in smart contracts; admin can mint tokens without backing
 - Tri-party MPC custody via Fordefi should prevent unilateral fund access
@@ -668,7 +679,7 @@ updater EOA. User redeems via RedemptionVaultWithAave or RedemptionVaultWithSwap
 
 **Funds Management Score = (4.5 + 3.5) / 2 = 4.0**
 
-**Score: 4.0/5** — Offchain funds management with subordinated debt structure. The Aave integration provides a positive onchain anchor, but it only covers idle capital, not active strategies. **Fasanara provides zero public information about how mGLOBAL funds are deployed** — 92% of NAV is unclassified. This is a black-box strategy dependency. The Attestation Engine provides a verification pipeline, but it cannot compensate for complete strategy opacity.
+**Score: 4.0/5** — Offchain funds management with subordinated debt structure. The Aave integration provides a positive onchain anchor, but it only covers idle capital, not active strategies. The underlying strategy is now documented (Fasanara SME trade-receivable private credit — a defensive, established profile), but **92% of NAV is unclassified and the per-vehicle allocation is undisclosed/unverifiable onchain**. The Attestation Engine provides a verification pipeline, but it cannot compensate for the missing position-level transparency. Score unchanged: verifiability, not strategy legitimacy, is the binding constraint.
 
 #### 4. Liquidity Risk (Weight: 15%)
 
