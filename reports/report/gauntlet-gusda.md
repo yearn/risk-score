@@ -2,15 +2,15 @@
 
 - **Assessment Date:** June 23, 2026
 - **Token:** gtUSDa (Gauntlet USD Alpha)
-- **Chain:** Ethereum
+- **Chain:** Ethereum (also deployed on Base, Optimism, Arbitrum)
 - **Token Address:** [`0x3bd9248048df95db4fbd748c6cd99c1baa40bad0`](https://etherscan.io/token/0x3bd9248048df95db4fbd748c6cd99c1baa40bad0)
-- **Final Score: 2.8/5.0**
+- **Final Score: 2.7/5.0**
 
 ## Overview + Links
 
 Gauntlet USD Alpha (gtUSDa) is a yield-bearing stablecoin vault built on the Aera Protocol. It seeks to achieve the highest risk-adjusted yield on USDC by allocating across Morpho lending markets on Ethereum, Base, Arbitrum, and Optimism. The vault combines variable-rate and fixed-rate yield opportunities and is curated by Gauntlet's optimization engine.
 
-The vault is part of the broader Gauntlet ecosystem ($1.45B total TVL across all chains) and targets institutional and crypto-native users. gtUSDa tokens represent a pro-rata claim on the vault's USDC deployed across strategies.
+The vault is part of the broader Gauntlet ecosystem ($1.45B total TVL across all chains) and targets institutional and crypto-native users. gtUSDa is deployed on 4 chains: Ethereum ($1.5M), Base ($58.5M), Optimism ($23K), and Arbitrum ($4K) — **~$60M aggregate TVL**. gtUSDa tokens represent a pro-rata claim on the vault's USDC deployed across strategies.
 
 **Links:**
 
@@ -47,9 +47,9 @@ The vault is part of the broader Gauntlet ecosystem ($1.45B total TVL across all
 
 - **Time in production**: ~6.5 months (deployed December 8, 2025, block 23971333; [deployment tx](https://etherscan.io/tx/0x8da0ba49dca82b18232dd605e997359a0edd25f5dfad3e0186ea98ee79b88441))
 - **Past incidents**: No known security incidents or exploits affecting the gtUSDa vault
-- **TVL**: ~$1.53M on Ethereum as of June 23, 2026 (total supply: 1,528,185 gtUSDa). The broader Gauntlet protocol has $1.45B TVL across all chains.
+- **TVL**: ~$60M aggregate across 4 chains (Ethereum $1.53M, Base $58.5M, Optimism $23K, Arbitrum $4K) as of June 23, 2026. The broader Gauntlet protocol has $1.45B TVL across all chains.
   - Source: Onchain `totalSupply()` at [`0x3bd9248048df95db4fbd748c6cd99c1baa40bad0`](https://etherscan.io/token/0x3bd9248048df95db4fbd748c6cd99c1baa40bad0) and [Gauntlet on DefiLlama](https://defillama.com/protocol/gauntlet)
-- **TVL history**: The Ethereum gtUSDa TVL is relatively small ($1.53M) compared to the Base deployment (~$528M Gauntlet TVL on Base includes other vaults). The vault has not yet attracted significant TVL on Ethereum.
+- **TVL history**: The Ethereum deployment is small ($1.53M), but Base carries $58.5M of the ~$60M aggregate gtUSDa TVL. The vault series has grown to meaningful scale since December 2025 deployment.
 - **Concentration risk**: **High.** Holder balances reconstructed from all 272 ERC-20 `Transfer` events (deploy block 23971333 → present) show only **27 holders**, with the top holder controlling **53.3%** of supply (≈814,764 gtUSDa, an EOA `0xe1464a9a…`), the top 3 holding **~82%** (all EOAs), and the top 5 holding **~93%**. A single-address exit would dominate the vault. (Source: onchain Transfer logs, reconciled to `totalSupply()` = 1,528,185 gtUSDa.)
 - **Historical peg**: gtUSDa is a yield-bearing token, not a stablecoin. Its price increases over time as yield accrues (admin-set unit price). No depeg events are applicable.
 
@@ -152,7 +152,7 @@ Example transaction: [`0xe5aebe0ef8a7470b85964b143cbf45ced0a81e7eedb91b14832fca6
 - **Slippage**: Not applicable in the traditional DEX sense — redemptions are at the admin-set unit price. However, large redemptions may face delays if cross-chain funds need to be recalled.
 - **Withdrawal queues**: Verified from the Provisioner source on Etherscan. Async exits use `requestRedeem(token, unitsIn, minTokensOut, solverTip, deadline, …)`, which escrows the user's gtUSDa and posts a request carrying a user-set `solverTip` and `deadline`. Requests are settled by a **solver** in one of two ways: `solveRequestsVault(token, Request[])` — gated by `requiresAuth` (RolesAuthority), i.e. only a Gauntlet-permissioned solver settling against vault liquidity — or `solveRequestsDirect(token, Request[])` — **permissionless**, where any party fills the request from its own funds and collects the `solverTip`. Synchronous `deposit()`/`mint()` are `anyoneButVault` and execute atomically when vault liquidity allows.
 - **Historical liquidity**: No periods of market stress observed since deployment (~6.5 months). The vault has not experienced a major withdrawal event.
-- **Large holder impact**: Given the small TVL (~$1.53M), even modest withdrawals could represent a significant percentage. Cross-chain fund recall may introduce additional latency.
+- **Large holder impact**: The Ethereum deployment is small ($1.53M) with a single EOA holding ~53% of that chain's supply. Across all chains, the $60M aggregate TVL provides more exit capacity, but cross-chain fund recall may introduce latency for large withdrawals from any single chain.
 
 ## Centralization & Control Risks
 
@@ -207,7 +207,10 @@ Example transaction: [`0xe5aebe0ef8a7470b85964b143cbf45ced0a81e7eedb91b14832fca6
 
 | Address | Name | Purpose |
 |---------|------|---------|
-| [`0x3bd9248048df95db4fbd748c6cd99c1baa40bad0`](https://etherscan.io/address/0x3bd9248048df95db4fbd748c6cd99c1baa40bad0) | MultiDepositorVault | gtUSDa token contract |
+| [`0x3bd9248048df95db4fbd748c6cd99c1baa40bad0`](https://etherscan.io/address/0x3bd9248048df95db4fbd748c6cd99c1baa40bad0) | MultiDepositorVault (Ethereum) | gtUSDa token contract — $1.53M TVL |
+| [`0x000000000001CdB57E58Fa75Fe420a0f4D6640D5`](https://basescan.org/address/0x000000000001CdB57E58Fa75Fe420a0f4D6640D5) | MultiDepositorVault (Base) | gtUSDa token contract — $58.5M TVL |
+| [`0x000000001DC8bd45d7E7829fb1c969cbe4D0D1eC`](https://optimistic.etherscan.io/address/0x000000001DC8bd45d7E7829fb1c969cbe4D0D1eC) | MultiDepositorVault (Optimism) | gtUSDa token contract — $23K TVL |
+| [`0x000000001DC8bd45d7E7829fb1c969cbe4D0D1eC`](https://arbiscan.io/address/0x000000001DC8bd45d7E7829fb1c969cbe4D0D1eC) | MultiDepositorVault (Arbitrum) | gtUSDa token contract — $4K TVL |
 | [`0x74C4A66CE4F4779B11E7c63D42e51EEef3A80D11`](https://etherscan.io/address/0x74C4A66CE4F4779B11E7c63D42e51EEef3A80D11) | Provisioner | Deposit/withdrawal handler, mint authority |
 | [`0x8F3FfA11CD5915f0E869192663b905504A2Ef4a5`](https://etherscan.io/address/0x8F3FfA11CD5915f0E869192663b905504A2Ef4a5) | PriceAndFeeCalculator | Unit price oracle, fee calculator |
 | [`0x72820eA60C344186465152e4b11e260CAE391d77`](https://etherscan.io/address/0x72820eA60C344186465152e4b11e260CAE391d77) | TimelockController (Vault) | Vault governance timelock (1-day delay) |
@@ -369,7 +372,7 @@ Fund Flow:
 
 - Admin-controlled unit price (PPS) — exchange rate is keeper-submitted from offchain NAV with soft-guard-only limits (±0.10%, 60-min cooldown) that pause but never block malicious prices
 - Highly concentrated holder base — top holder ~53%, top 3 ~82% of supply (27 holders total)
-- Small Ethereum TVL ($1.53M) limits battle-testing at scale
+- Small Ethereum TVL ($1.53M) limits battle-testing of that deployment, but $60M aggregate across 4 chains shows meaningful adoption
 - Guardian system with arbitrary execution capability via Merkle proofs
 - Provisioner address change could redirect all deposited USDC
 - Cross-chain complexity — funds deployed across 4 chains (via Circle CCTP), adding operational surface
@@ -415,13 +418,13 @@ Score: **2.5/5** — The deployed Aera V3 contracts have a public tier-1 audit (
 
 | Time in Production | Scale (TVL) |
 |-------------------|-------------|
-| ~6.5 months (Dec 2025) | ~$1.53M on Ethereum |
+| ~6.5 months (Dec 2025) | ~$60M across 4 chains (Ethereum $1.5M, Base $58.5M, Optimism $23K, Arbitrum $4K) |
 
-Score: **3.5/5** — Relatively new deployment with small TVL. The broader Gauntlet protocol has significant TVL ($1.45B) and a long track record, but this specific vault has not been battle-tested at scale.
+Score: **2.5/5** — Relatively new deployment (~6.5 months) but with meaningful scale ($60M aggregate). The Base vault carries the vast majority of TVL. The broader Gauntlet protocol has $1.45B total TVL and a long track record, but this specific vault series has not been battle-tested through a major market stress event.
 
-**Audits & Historical Score = (2.5 + 3.5) / 2 = 3.0**
+**Audits & Historical Score = (2.5 + 2.5) / 2 = 2.5**
 
-**Score: 3.0/5** — Audited Aera V3 codebase with an active bug bounty, offset by a limited track record and small TVL for this specific vault.
+**Score: 2.5/5** — Audited Aera V3 codebase with an active bug bounty, moderate track record with $60M multi-chain TVL.
 
 #### Category 2: Centralization & Control Risks (Weight: 30%)
 
@@ -479,9 +482,9 @@ Score: **3.0/5** — Hybrid onchain/offchain reporting. The keeper-submitted PPS
 
 | Exit Mechanism | Liquidity Depth | Large Holder Impact |
 |---------------|----------------|---------------------|
-| Direct redemption through Provisioner; async request-solve flow available | ~$1.53M TVL (small); idle USDC = $0 | Top holder ~53%, top 3 ~82% of supply; cross-chain recall may delay large exits |
+| Direct redemption through Provisioner; async request-solve flow available | ~$60M aggregate TVL across 4 chains; Ethereum vault has $0 idle USDC | Top Ethereum holder ~53%; cross-chain recall may delay large exits |
 
-Score: **3.0/5** — Redemption mechanism exists but the small TVL, zero idle USDC, highly concentrated holder base (single EOA ~53%), and cross-chain fund deployment mean large withdrawals likely face delays. No maintained liquidity buffer.
+Score: **3.0/5** — Redemption mechanism exists. The Ethereum vault has zero idle USDC and a concentrated holder base, but the $60M aggregate TVL (mostly on Base) provides more exit capacity. Cross-chain fund deployment means large withdrawals may face delays.
 
 - Cross-chain fund recall adds withdrawal latency: +0.5
 
@@ -499,14 +502,14 @@ Score: **1.5/5** — Strong reputation, extensive documentation, identified lega
 
 | Category | Score | Weight | Weighted |
 |----------|-------|--------|----------|
-| Audits & Historical | 3.0 | 20% | 0.60 |
+| Audits & Historical | 2.5 | 20% | 0.50 |
 | Centralization & Control | 3.0 | 30% | 0.90 |
 | Funds Management | 2.3 | 30% | 0.69 |
 | Liquidity Risk | 3.5 | 15% | 0.525 |
 | Operational Risk | 1.5 | 5% | 0.075 |
-| **Final Score** | | | **2.79/5.0** |
+| **Final Score** | | | **2.69/5.0** |
 
-**Final Score: 2.8/5.0** (rounded)
+**Final Score: 2.7/5.0** (rounded)
 
 ### Risk Tier
 
