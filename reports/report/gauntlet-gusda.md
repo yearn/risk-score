@@ -34,8 +34,6 @@ The vault is part of the broader Gauntlet ecosystem ($1.45B total TVL across all
 
 - Aera docs state "all relevant issues identified by auditors were addressed prior to the launch of V3."
 - **Caveat**: The V3 Spearbit report is hosted on Google Drive (not in the public `aera-contracts-public` repo), and the only V3 review by a tier-1 firm found is the single Spearbit engagement plus the small ($15K-pool) Cantina competition. No Trail of Bits / ChainSecurity / Sherlock engagement was located. The gtUSDa vault instance itself (its specific configuration) is not separately audited — coverage is at the protocol/contract level.
-- The MultiDepositorVault is not upgradeable (non-proxy contract), which reduces complexity but also means code changes require full redeployment.
-- Contract architecture involves multiple interacting components: MultiDepositorVault, Provisioner, PriceAndFeeCalculator, RolesAuthority (x2), TimelockController (x2), Gnosis Safe multisig, and a Whitelist contract. The architecture is moderately complex.
 - Note: DefiLlama lists 0 audits for the Gauntlet protocol ([Gauntlet on DefiLlama](https://defillama.com/protocol/gauntlet)) because the audits are published under the Aera Protocol, not the Gauntlet listing.
 
 ### Bug Bounty
@@ -50,7 +48,6 @@ The vault is part of the broader Gauntlet ecosystem ($1.45B total TVL across all
 - **TVL**: ~$60M aggregate across 4 chains (Ethereum $1.53M, Base $58.5M, Optimism $23K, Arbitrum $4K) as of June 23, 2026. The broader Gauntlet protocol has $1.45B TVL across all chains.
   - Source: Onchain `totalSupply()` at [`0x3bd9248048df95db4fbd748c6cd99c1baa40bad0`](https://etherscan.io/token/0x3bd9248048df95db4fbd748c6cd99c1baa40bad0) and [Gauntlet on DefiLlama](https://defillama.com/protocol/gauntlet)
 - **TVL history**: The Ethereum deployment is small ($1.53M), but Base carries $58.5M of the ~$60M aggregate gtUSDa TVL. The vault series has grown to meaningful scale since December 2025 deployment.
-- **Concentration risk**: **High.** Holder balances reconstructed from all 272 ERC-20 `Transfer` events (deploy block 23971333 → present) show only **27 holders**, with the top holder controlling **53.3%** of supply (≈814,764 gtUSDa, an EOA `0xe1464a9a…`), the top 3 holding **~82%** (all EOAs), and the top 5 holding **~93%**. A single-address exit would dominate the vault. (Source: onchain Transfer logs, reconciled to `totalSupply()` = 1,528,185 gtUSDa.)
 - **Historical peg**: gtUSDa is a yield-bearing token, not a stablecoin. Its price increases over time as yield accrues (admin-set unit price). No depeg events are applicable.
 
 ## Funds Management
@@ -62,7 +59,6 @@ The vault is part of the broader Gauntlet ecosystem ($1.45B total TVL across all
   - Collateral exposure constrained by DEX liquidity
   - Token turnover constrained by spot DEX liquidity
 - **Fees**: Administered via the PriceAndFeeCalculator. Fee parameters can be changed by the fee-calculator governance (separate timelock).
-- **Fund custody**: USDC flows through the Provisioner contract to cross-chain Morpho vaults. The vault itself holds $0 USDC (all deployed).
 
 ### Accessibility
 
@@ -122,15 +118,7 @@ The unit price of gtUSDa is determined through a multi-step offchain→onchain p
 
 Example transaction: [`0xe5aebe0ef8a7470b85964b143cbf45ced0a81e7eedb91b14832fca6422719499`](https://etherscan.io/tx/0xe5aebe0ef8a7470b85964b143cbf45ced0a81e7eedb91b14832fca6422719499) (block 25381302).
 
-**Step 3 — Onchain validation in `setUnitPrice()`:** The PriceAndFeeCalculator applies two layers of checks.
-
-*Hard validations (revert if violated):*
-| Guard | Rule |
-|-------|------|
-| Non-zero price | `price != 0` |
-| Monotonic timestamp | `timestamp > lastTimestamp` |
-| No future timestamps | `timestamp <= block.timestamp` |
-| Not stale | `maxPriceAge + timestamp >= block.timestamp` |
+**Step 3 — Onchain validation in `setUnitPrice()`:**
 
 *Soft guards / pause triggers (violation = vault pause, but price is **always written**):*
 | Guard | Current gtUSDa Threshold | Source |
@@ -152,7 +140,6 @@ Example transaction: [`0xe5aebe0ef8a7470b85964b143cbf45ced0a81e7eedb91b14832fca6
 - **Slippage**: Not applicable in the traditional DEX sense — redemptions are at the admin-set unit price. However, large redemptions may face delays if cross-chain funds need to be recalled.
 - **Withdrawal queues**: Verified from the Provisioner source on Etherscan. Async exits use `requestRedeem(token, unitsIn, minTokensOut, solverTip, deadline, …)`, which escrows the user's gtUSDa and posts a request carrying a user-set `solverTip` and `deadline`. Requests are settled by a **solver** in one of two ways: `solveRequestsVault(token, Request[])` — gated by `requiresAuth` (RolesAuthority), i.e. only a Gauntlet-permissioned solver settling against vault liquidity — or `solveRequestsDirect(token, Request[])` — **permissionless**, where any party fills the request from its own funds and collects the `solverTip`. Synchronous `deposit()`/`mint()` are `anyoneButVault` and execute atomically when vault liquidity allows.
 - **Historical liquidity**: No periods of market stress observed since deployment (~6.5 months). The vault has not experienced a major withdrawal event.
-- **Large holder impact**: The Ethereum deployment is small ($1.53M) with a single EOA holding ~53% of that chain's supply. Across all chains, the $60M aggregate TVL provides more exit capacity, but cross-chain fund recall may introduce latency for large withdrawals from any single chain.
 
 ## Centralization & Control Risks
 
@@ -239,45 +226,19 @@ Example transaction: [`0xe5aebe0ef8a7470b85964b143cbf45ced0a81e7eedb91b14832fca6
 - `pause()` / `unpause()` on vault — vault paused state changes
 - `setPublicCapability()` on RolesAuthority — access control changes
 - `submit()` on vault — guardian-executed operations
-- Token transfers of gtUSDa — concentration monitoring
 
 **Data fetching functions:**
 - `totalSupply()` on vault → circulating gtUSDa
-- `balanceOf(vault)` of USDC → idle USDC in vault
-- `balanceOf(provisioner)` of USDC → pending USDC in provisioner
 - `getVaultState(vault)` on PriceAndFeeCalculator → vault parameters (unit price, active state, thresholds)
 - `getMinDelay()` on both Timelocks → timelock delay (should remain ≥86400)
 - `depositCap()` on Provisioner → deposit limits
 - `vaultAccountant(vault)` on PriceAndFeeCalculator → accountant (should be Forwarder `0xc219…92d0`)
 - `getVaultsPriceAge(vault)` on PriceAndFeeCalculator → seconds since last price update
 
-**Threshold monitoring (verify against current values):**
-- `minPriceToleranceRatio`: should be **9990 BPS** (max −0.10% decrease per update)
-- `maxPriceToleranceRatio`: should be **10010 BPS** (max +0.10% increase per update)
-- `minUpdateIntervalMinutes`: should be **60 minutes**
-- `maxPriceAge`: should be **255 seconds**
-- Unit price deviation from expected (NAV-based): >0.10% triggers vault pause
-- `vaultAccountant` address change: critical — controls who can submit price updates
-- `WHITELIST()` on vault → whitelist contract address
-- `getActiveGuardians()` on vault → guardian set (currently reverts, may need events)
-
 **Offchain data sources:**
 - [Gauntlet App](https://app.gauntlet.xyz/vaults/gtusda) — live market allocations, APY
 - [DeFi Llama — Gauntlet](https://defillama.com/protocol/gauntlet) — TVL tracking
 - [Morpho](https://morpho.org) — underlying market health
-
-### Threshold Suggestions
-
-| Metric | Warning | Critical |
-|--------|---------|----------|
-| Timelock delay change | < 24 hours | < 6 hours |
-| Provisioner address change | Any change | Any change |
-| Unit price deviation from 1:1 | >1% from expected | >3% from expected |
-| USDC idle in vault | <10% of TVL | <5% of TVL |
-| Multisig signer count | <5 signers | <3 signers |
-| Multisig threshold increase | >5 | >7 |
-| Vault paused state | Paused >1 hour | Paused >24 hours |
-| Guardian set change | Any addition | Any addition |
 
 ## Appendix: Contract Architecture
 
@@ -380,17 +341,11 @@ Fund Flow:
 
 ### Critical Risks
 
-- **Admin-controlled PPS**: The unit price is set offchain and submitted by a keeper EOA via the Forwarder. Soft guards (±0.10% per update tolerance, 60-min cooldown, 255s max price age) trigger a vault pause if exceeded — but the new price is **always written** and the vault owner can unpause at that price. There are no hard limits preventing arbitrary price manipulation. A malicious or compromised keeper/governance could manipulate the gtUSDa/USDC exchange rate arbitrarily, affecting all holders. See [Price-Setting Flow](#price-setting-flow) for the full mechanism.
-- **Holder concentration**: A single EOA holds ~53% and the top 3 hold ~82% of supply. In an async-redemption model with $0 idle USDC, a large-holder exit could force rapid cross-chain unwinding and leave smaller holders waiting on the request queue.
+- **Admin-controlled PPS**: The unit price is set offchain and submitted by a keeper EOA via the Forwarder. Soft guards (±0.10% per update tolerance, 60-min cooldown, 255s max price age) trigger a vault pause if exceeded — but the new price is **always written** and the vault owner can unpause at that price. There are no hard limits preventing arbitrary price manipulation, but pausing is triggered if the price is outside the guards. A malicious or compromised keeper/governance could manipulate the gtUSDa/USDC exchange rate arbitrarily, affecting all holders. See [Price-Setting Flow](#price-setting-flow) for the full mechanism.
 
 ---
 
 ## Risk Score Assessment
-
-**Scoring Guidelines:**
-- Be conservative: when uncertain between two scores, choose the higher (riskier) one
-- Use decimals (e.g., 2.5) when a subcategory falls between scores
-- Prioritize onchain evidence over documentation claims
 
 ### Critical Risk Gates
 
@@ -400,7 +355,6 @@ If ANY gate is triggered, the protocol automatically receives a score of **5** (
 - [ ] **Unverifiable reserves** — Reserves are partially onchain. gtUSDa supply and USDC balances are verifiable, but cross-chain positions (via Circle CCTP to Morpho on Base/Arbitrum/Optimism) require aggregation. Not a full gate trigger.
 - [ ] **Total centralization** — Not triggered. Governance is a 3/9 multisig with 1-day timelock. Not a single EOA.
 
-**Gate assessment: No gate triggered. Audits are now confirmed public (Aera V3 / Spearbit + Cantina competition + Immunefi bounty), reserves are verifiable onchain with cross-chain aggregation via canonical CCTP, and governance is a multisig + timelock.**
 
 ### Category Scores
 
