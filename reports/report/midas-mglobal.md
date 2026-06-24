@@ -1,10 +1,10 @@
 # Protocol Risk Assessment: Midas mGLOBAL
 
-- **Assessment Date:** June 17, 2026
+- **Assessment Date:** June 23, 2026
 - **Token:** mGLOBAL
 - **Chain:** Ethereum
 - **Token Address:** [`0x7433806912Eae67919e66aea853d46Fa0aef98A8`](https://etherscan.io/token/0x7433806912Eae67919e66aea853d46Fa0aef98A8)
-- **Final Score: 3.51/5.0**
+- **Final Score: 3.43/5.0**
 
 ## Overview + Links
 
@@ -14,17 +14,17 @@ The token price is maintained at ~$1.00000000 via a custom oracle (`MGlobalCusto
 
 **Key Stats:**
 
-- **mGLOBAL Market Cap / TVL:** ~$37.6M (June 17, 2026; total supply ~37,611,592 mGLOBAL × $1.00)
-- **Total Supply:** ~37,611,592.37 mGLOBAL — 18 decimals, verified onchain via `totalSupply()` on [token contract](https://etherscan.io/address/0x7433806912Eae67919e66aea853d46Fa0aef98A8) (all on Ethereum; no cross-chain deployments active)
+- **mGLOBAL Market Cap / TVL:** ~$52.63M (June 23, 2026; total supply ~52,628,653 mGLOBAL × $1.00) — **up ~40% from ~$37.6M on June 17**, driven largely by Aave Horizon adoption
+- **Total Supply:** ~52,628,652.70 mGLOBAL — 18 decimals, verified onchain via `totalSupply()` on [token contract](https://etherscan.io/address/0x7433806912Eae67919e66aea853d46Fa0aef98A8) at block 25,382,793 (all tracked supply on Ethereum; no non-Ethereum mGLOBAL deployment identified)
 - **Decimals:** 18 (verified onchain, not 6 as typical for Midas tokens)
 - **Token Name:** "Midas Fasanara Global" — explicitly naming Fasanara as the strategy partner
-- **Holders:** 8 total holders per [Etherscan](https://etherscan.io/token/0x7433806912Eae67919e66aea853d46Fa0aef98A8), 4 real holders:
-  - ⚠ **[MidasFarm / InfiniFi](https://etherscan.io/address/0x7373A7ce3C023C56Cb66747AFbdF827627D31679):** **81%** — This is [InfiniFi's](https://app.infinifi.xyz/) MidasFarm contract, representing InfiniFi depositor funds. **The farm matured June 15, 2026** (yesterday as of this writing) — the position can be redeemed at any time. Per the [InfiniFi report](https://github.com/yearn/risk-score/blob/master/reports/report/infinifi.md), this is a $30.60M position (37% of InfiniFi's total deployed assets), InfiniFi's second-highest risk farm. If InfiniFi redeems, mGLOBAL market cap drops from ~$37.6M to ~$7M overnight
-  - **[EOA](https://etherscan.io/address/0x882C825405fBBE45DCc1ad52b639aFbC4592EDb7):** **10.46%** (~$3.9M) — single institutional holder
-  - **[Gnosis Safe](https://etherscan.io/address/0xaB05c0DB9D26e96A9dcEDCAFCA23341316F6fe6F):** **6%** (~$2.3M) — 3/4 multisig (likely treasury)
-  - **[BeaconProxy](https://etherscan.io/address/0xD36f095556d5717fd9231a2091e8e98bEb7cB621):** **2.3%** (~$870K) — proxy contract
-- **Creation:** [Block 24798265](https://etherscan.io/tx/0xacc1f08c1f1ea036fa35444b67328ae3d3098d6cbbc520eacc81116156eb7772) (April 3, 2026, ~10 weeks in production)
-- **Midas Platform TVL:** ~$109.5M per [DeFiLlama](https://defillama.com/protocol/midas-rwa) (June 17, 2026)
+- **Holders (verified onchain June 23, 2026):**
+  - ⚠ **[MidasFarm / InfiniFi (renewed)](https://etherscan.io/address/0xf4ea3ec87b1c254f17a2fb68164db0caf6c4cecf):** **57.94%** ($30.49M) — InfiniFi's original MidasFarm ([`0x7373…1679`](https://etherscan.io/address/0x7373A7ce3C023C56Cb66747AFbdF827627D31679)) matured June 15, 2026 and **did not redeem**. On June 18 it transferred its entire $30,490,833 position into a **new** MidasFarm contract ([`0xf4ea3ec…`](https://etherscan.io/address/0xf4ea3ec87b1c254f17a2fb68164db0caf6c4cecf), deployed June 16, verified `MidasFarm`). The new farm's `maturity()` is **July 21, 2026** — so the maturity/exit trigger is deferred ~1 month, not eliminated. Concentration in this single holder eased from 81% → ~58% as supply grew. Per the [InfiniFi report](https://github.com/yearn/risk-score/blob/master/reports/report/infinifi.md), this represents InfiniFi depositor funds; a full redemption at maturity would still strain mGLOBAL's near-zero vault liquidity
+  - **[Aave Horizon aMGLOBAL](https://etherscan.io/address/0x49d3cdE03813eE32DFD47F6aA3957d5F9CbAB985):** **37.71%** ($19.85M) — mGLOBAL supplied as collateral on the permissioned [Aave Horizon RWA market](https://app.aave.com/reserve-overview/?underlyingAsset=0x7433806912eae67919e66aea853d46fa0aef98a8&marketName=proto_horizon_v3). New, independent institutional demand that did not exist at the prior assessment
+  - **[Gnosis Safe](https://etherscan.io/address/0xaB05c0DB9D26e96A9dcEDCAFCA23341316F6fe6F):** **4.35%** (~$2.29M) — 3/4 multisig (likely treasury); position grew slightly
+  - The prior EOA holder ([`0x882C…EDb7`](https://etherscan.io/address/0x882C825405fBBE45DCc1ad52b639aFbC4592EDb7), formerly 10.46%) and prior BeaconProxy holder ([`0xD36f…B621`](https://etherscan.io/address/0xD36f095556d5717fd9231a2091e8e98bEb7cB621), formerly 1.77%) now hold **0**
+- **Creation:** [Block 24798265](https://etherscan.io/tx/0xacc1f08c1f1ea036fa35444b67328ae3d3098d6cbbc520eacc81116156eb7772) (April 3, 2026, ~11.5 weeks in production)
+- **Midas Platform TVL:** ~$112.7M per [DeFiLlama](https://defillama.com/protocol/midas-rwa) (June 23, 2026)
 - **KYC Required:** Yes (greenlist enforced onchain — confirmed via GREENLISTED_ROLE / GREENLIST_OPERATOR_ROLE)
 
 **Links:**
@@ -53,7 +53,8 @@ All contracts use OpenZeppelin's `TransparentUpgradeableProxy` pattern with a sh
 | **DepositVault** (MGlobalDepositVaultWithAave) | [`0xce29c36c6d4556f2d01d79414c1354b968dddef1`](https://etherscan.io/address/0xce29c36c6d4556f2d01d79414c1354b968dddef1) | [`0x08e4432f84e660235821c63764fb2ffcc7e2b477`](https://etherscan.io/address/0x08e4432f84e660235821c63764fb2ffcc7e2b477) |
 | **RedemptionVaultWithAave** | [`0xa0fc8bdfb1e6a705c1375810989b1d70a982b01b`](https://etherscan.io/address/0xa0fc8bdfb1e6a705c1375810989b1d70a982b01b) | [`0xf687e76e3d62d62fe6f6a7f66ce9fae21df6438d`](https://etherscan.io/address/0xf687e76e3d62d62fe6f6a7f66ce9fae21df6438d) |
 | **RedemptionVaultWithSwapper** | [`0x1e0fd66753198c7b8ba64edee8d41d8628bf20d7`](https://etherscan.io/address/0x1e0fd66753198c7b8ba64edee8d41d8628bf20d7) | [`0xe98a4fb7a2e87ad888ccef0587dc820cf1a7cabb`](https://etherscan.io/address/0xe98a4fb7a2e87ad888ccef0587dc820cf1a7cabb) |
-| **OFT Adapter** (MidasLzMintBurnOFTAdapter) | [`0xb67f81069e890a1b3e02c7bed3a9f78ba54a445c`](https://etherscan.io/address/0xb67f81069e890a1b3e02c7bed3a9f78ba54a445c) | N/A |
+
+**Cross-chain status:** No non-Ethereum mGLOBAL deployment was identified. [RWA.xyz](https://app.rwa.xyz/assets/mGLOBAL) lists only Ethereum as the mGLOBAL network, and current mGLOBAL mint/burn roles are held only by the operator EOA, DepositVault, and RedemptionVaults listed in [Token Mint Authority](#token-mint-authority).
 
 ### Shared Infrastructure (shared with all Midas products)
 
@@ -88,8 +89,6 @@ All contracts use OpenZeppelin's `TransparentUpgradeableProxy` pattern with a sh
 
 **Hacken Audit Results (Dec 2023):**
 
-- Security Score: 10/10 (post-fix). 100% branch coverage
-- 0 Critical, 1 High (Accepted — USD tokens with custom decimals), 2 Medium, 1 Low, 4 Observations
 - **Critical note:** Auditors explicitly flagged the protocol as **"highly centralized"** with system admins controlling all critical roles
 
 **Smart Contract Complexity:** Low-Moderate
@@ -103,15 +102,15 @@ All contracts use OpenZeppelin's `TransparentUpgradeableProxy` pattern with a sh
 ### Bug Bounty
 
 - **$1,000,000 USD** total allocated across two platforms per [Midas docs](https://docs.midas.app/security/smart-contract-security):
-  - **[Sherlock Bug Bounty](https://audits.sherlock.xyz/bug-bounties/122)** — Live since March 31, 2026. Max payout: $500,000 USDC. Tiers: Critical $25K–$500K (10% of affected funds), High $5K–$25K, Medium $5K, Low $500–$1K
-  - **[Cantina Bug Bounty](https://cantina.xyz/bounties/d77405e5-99ce-4ba5-846c-885820b030e1)** — Live since March 23, 2026. Max payout: $500,000. Tiers: Critical $500K, High $25K, Medium $5K, Low $1K
+  - **[Sherlock Bug Bounty](https://audits.sherlock.xyz/bug-bounties/122)** — Live since March 31, 2026. Max payout: $500,000
+  - **[Cantina Bug Bounty](https://cantina.xyz/bounties/d77405e5-99ce-4ba5-846c-885820b030e1)** — Live since March 23, 2026. Max payout: $500,000
 
 ## Historical Track Record
 
 - **Production History:** mGLOBAL token created on Ethereum [April 3, 2026](https://etherscan.io/tx/0xacc1f08c1f1ea036fa35444b67328ae3d3098d6cbbc520eacc81116156eb7772) (~10 weeks in production). Midas platform launched with mTBILL in mid-2024 (~22 months total)
-- **TVL Growth:** Midas grew from ~$4M (July 2024) to a peak of ~$927.8M (October 27, 2025), declining to ~$109.5M (June 2026). See [DeFiLlama](https://defillama.com/protocol/midas-rwa)
-- **mGLOBAL Market Cap:** ~$37.6M (June 2026), representing ~34% of Midas total TVL
-- **Price History:** mGLOBAL targets $1.00. Oracle price is $1.00000000 (round 2, 8 decimals, last updated ~June 4, 2026 per [onchain data](https://etherscan.io/address/0x66aa9fcd63df74e1f67a9452e6e59fbc67f75e38)). The token has been in production for only 10 weeks; limited price history available
+- **TVL Growth:** Midas grew from ~$4M (July 2024) to a peak of ~$927.8M (October 27, 2025), declining to ~$112.7M (June 23, 2026). See [DeFiLlama](https://defillama.com/protocol/midas-rwa)
+- **mGLOBAL Market Cap:** ~$52.63M (June 23, 2026), representing ~47% of Midas total TVL — up ~40% in a week despite InfiniFi's matured farm rolling over, driven by Aave Horizon adoption
+- **Price History:** mGLOBAL targets $1.00. Oracle price is $1.00000000 (round 2, 8 decimals, last updated May 15, 2026 per [onchain data](https://etherscan.io/address/0x66aa9fcd63df74e1f67a9452e6e59fbc67f75e38) — now **39 days stale**). The token has been in production for ~11.5 weeks; limited price history available. No yield has been reported onchain since mid-May.
 - **No known security incidents** for mGLOBAL or Midas platform
 
 **Fasanara Capital Track Record:**
@@ -121,26 +120,38 @@ All contracts use OpenZeppelin's `TransparentUpgradeableProxy` pattern with a sh
 - **CEO:** Francesco Filia, ex-Managing Director & EMEA Head of Mid Caps at Bank of America Merrill Lynch
 - **Team:** 40+ named professionals across leadership, investment, origination, quant/technology, legal, risk, and operations ([team page](https://www.fasanara.com/team))
 - **Regulatory:** Fasanara Capital Ltd is **FCA Authorised** since [12 August 2011](https://register.fca.org.uk/s/firm?id=001b000000NMar0AAD), Firm Reference Number [551020](https://register.fca.org.uk/s/firm?id=001b000000NMar0AAD), Companies House [07561210](https://find-and-update.company-information.service.gov.uk/company/07561210). Type: regulated. The firm's MiFID permissions scope is on the FCA register (specific activities/product types need manual review of the full record). Also publishes a [MIFIDPRU Disclosure](https://www.fasanara.com/) consistent with its regulatory status
-- **Business:** Two main pillars — Fintech Lending (141 loan originators across 60+ countries) and Digital Assets. EU SFDR Article 8 classified funds for certain Alternative Credit sub-funds
+- **Business:** Two main pillars — Fintech Lending (141 loan originators across 60+ countries, $115bn+ total volumes traded per [Fasanara lending](https://www.fasanara.com/lending)) and Digital Assets. EU SFDR Article 8 classified funds for certain Alternative Credit sub-funds
+- **Flagship strategy:** The [Global Diversified Alternative Debt Fund](https://www.fasanara.com/lending) (the multi-strategy receivables flagship that mGLOBAL's "Global Fund" mirrors) has ~10.5 years of history and $3B+ dedicated AUM. Fasanara reports ~$4.5–5.5B firm-wide AUM ([Alternatives Watch interview, 2024](https://www.alternativeswatch.com/2024/07/29/interview-alternative-credit-manager-fasanara-francesco-filia-fintech-lending/))
 - **Track record:** 15-year operating history. ESG initiatives (Sustainability Report 2025 published). No known regulatory actions or incidents found
-- **mGLOBAL strategy:** Fasanara's specific strategy mandate for mGLOBAL (asset allocation, risk framework, leverage policy) is not publicly documented. The token name "Midas Fasanara Global" and the 92% "Unclassified" allocation suggest the strategy is primarily offchain/opaque
+- **mGLOBAL strategy (documented, not onchain-verifiable):** Per [RWA.xyz](https://app.rwa.xyz/assets/mGLOBAL) and [Fasanara](https://www.fasanara.com/lending), mGLOBAL gives exposure to Fasanara's "Global Fund," which follows the same strategy as the Global Diversified Alternative Debt Fund: an asset-backed lending portfolio investing primarily in **short-dated trade receivables, digital invoices, and SME loans** bought from a network of ~141 fintech originators. The 88.61% "Unclassified" label reflects that these are offchain receivables (not onchain protocol positions), so the *strategy* is documented but the *specific allocation* (originators, geographies, sectors, delinquency/loss rates for this vehicle) is not disclosed or verifiable. See [Funds Management](#funds-management)
 
 ## Funds Management
 
-Fasanara Capital is the strategy manager for mGLOBAL. Unlike mHYPER which uses Hyperithm for market-neutral DeFi strategies, **the specific strategy allocation, risk parameters, and target yield sources for mGLOBAL can't be fetched**. mGLOBAL integrates with **Aave** at the vault level (DepositVault and RedemptionVault both use Aave for idle capital).
+Fasanara Capital is the strategy manager for mGLOBAL. Unlike mHYPER which uses Hyperithm for market-neutral DeFi strategies, mGLOBAL's yield comes from **offchain private credit** — and while the *strategy* is now documented (below), **the position-level allocation and current credit metrics for the mGLOBAL pool cannot be fetched or verified onchain**. mGLOBAL integrates with **Aave** at the vault level (DepositVault and RedemptionVault both use Aave for idle capital).
+
+### Underlying Strategy & Yield Source (documented)
+
+Where the funds end up, and what generates the yield (per [Fasanara lending](https://www.fasanara.com/lending), [RWA.xyz](https://app.rwa.xyz/assets/mGLOBAL), [Hedge Fund Journal](https://thehedgefundjournal.com/fasanara-capital-digital-finance-smart-fintech-lending/), and [Alternatives Watch](https://www.alternativeswatch.com/2024/07/29/interview-alternative-credit-manager-fasanara-francesco-filia-fintech-lending/)):
+
+- **Capital flow:** USDC deposit → Midas DepositVault (mints mGLOBAL) → Fordefi tri-party MPC custody → Fasanara's "Global Fund" (mirrors the Global Diversified Alternative Debt Fund) → purchase of short-dated **trade receivables, digital invoices, and SME loans**.
+- **What earns the yield:** This is **asset-backed private credit / trade-finance income**, not DeFi yield or T-bills. Fasanara buys invoices/receivables at a discount; when the SME obligor repays at face value (typically within ~3 months), the spread is the return. Fasanara sits at the top of a **hub-and-spoke network of ~141 fintech originators across 60+ countries** ($115bn+ total volume) that source the underlying borrowers — Fasanara is the capital provider, not the originator.
+- **Risk profile of the assets:** ~3-month average duration, self-liquidating; **no leverage** on most vehicles; 10,000+ obligors per fund (claimed 20–30× more diversified than a CLO); proprietary credit scoring (Fasanara Credit Model / Debtor Rating); first-loss structuring and **credit insurance** (e.g. the Allianz Trade partnership). Fund-level target return is ~10–20% net p.a. depending on the sleeve.
+- **Why onchain APY shows 0%:** The last oracle update on May 15, 2026 set round 2 to $1.00000000 with `growthApr = 0`; no subsequent NAV/yield update has been published onchain. Public onchain data does not verify accrued profit or any yield-airdrop mechanism.
+- **Residual gap:** This describes *what kind* of credit risk backs mGLOBAL (defensive: short-dated, insured, unlevered, diversified SME trade finance), but **not whether this specific book is healthy** — no attested per-vehicle allocation, geography/sector mix, or delinquency/loss data is disclosed. Verifiability, not strategy legitimacy, remains the binding constraint.
 
 - **Fund Manager:** [Fasanara Capital Ltd](https://www.fasanara.com/) (London, founded 2011, AUM $4B+) — one of Europe's largest fintech-focused asset managers
-- **Strategy Allocations (per [SumCap](https://midas.sumcap.xyz/mglobal), June 16, 2026):**
-  - **Unclassified: $34.64M (92.09%)** — offchain/opaque positions not attributable to specific onchain protocols
-  - **Aave V3: $2.55M (6.78%)** — idle capital deployed on Aave (blue-chip DeFi)
-  - **Liquidity Buffer: $426K (1.13%)** — onchain wallet liquidity
-  - **Assets To be Deployed: ~$0** — fully allocated
-  - **NAV:** $37.61M; **Price:** $1.0000; **APY:** 0.00% (static since May 15, 2026)
+- **Strategy Allocations (per [SumCap](https://midas.sumcap.xyz/mglobal), June 24, 2026):**
+  - **Unclassified: $46.63M (88.61%)** — offchain/opaque positions not attributable to specific onchain protocols
+  - **Liquidity Buffer: $3.44M (6.54%)** — onchain wallet liquidity
+  - **Aave V3: $2.55M (4.85%)** — idle capital deployed on Aave (blue-chip DeFi)
+  - **Assets To be Deployed: $3.66 (0.00%)** — fully allocated
+  - **NAV:** ~$52.63M; **Price:** $1.0000; **APY:** 0.00% (static since May 15, 2026)
+  - **Change vs prior SumCap snapshot (June 16):** Unclassified fell from 92.09% → 88.61%, Liquidity Buffer rose from 1.13% → 6.54%, and Aave V3 fell from 6.78% → 4.85% as total NAV grew from $37.61M to ~$52.63M
   - SumCap methodology: \"NAV is computed as the maximum between total onchain supply × most recent oracle price and NAV tracked by Delta Y across all vault allocator addresses\"
-  - ⚠ **92% of mGLOBAL NAV is unclassified** — the majority of the strategy portfolio cannot be verified onchain
+  - ⚠ **88.61% of mGLOBAL NAV is unclassified** — the majority of the strategy portfolio cannot be verified onchain
 - **Custody:** Fordefi MPC custody with tri-party quorum per [Fordefi case study](https://web.fordefi.com/customer-stories/how-midas-brings-tokenized-investment-opportunities-on-chain-with-fordefis-defi-native-custody-2ti85) (Midas + Fasanara + independent signer)
 - **Aave Integration:** The DepositVault (MGlobalDepositVaultWithAave) and RedemptionVaultWithAave suggest idle USDC is deposited into Aave for yield — a positive structural feature. SumCap confirms $2.55M is on Aave V3
-- **Monitoring:** NAV updates provided by Fasanara, reviewed by Midas, then published onchain. Oracle last updated May 15, 2026 — **33+ days stale**. APY has been 0.00% since that date, suggesting no yield has been reported or accrued onchain since mid-May
+- **Monitoring:** NAV updates provided by Fasanara, reviewed by Midas, then published onchain. Oracle last updated May 15, 2026 — **39 days stale as of June 23, 2026** (still round 2; staleness worsened since the prior assessment). The May 15 `AnswerUpdated` event kept the answer at $1.00000000 and set `growthApr = 0`, so no yield has been reported onchain since mid-May
 
 ### Accessibility
 
@@ -180,7 +191,7 @@ Fasanara Capital is the strategy manager for mGLOBAL. Unlike mHYPER which uses H
 ### Collateralization
 
 - **Backing Model:** Offchain / hybrid — mGLOBAL is a **subordinated debt instrument** of Midas Software GmbH, not a direct claim on underlying assets
-- **Collateral Quality:** Per [SumCap](https://midas.sumcap.xyz/mglobal) (June 16, 2026): 92.09% Unclassified (offchain/opaque), 6.78% Aave V3 aUSDC (blue-chip DeFi), 1.13% Liquidity Buffer (USDC). The 92% unclassified portion cannot be assessed for quality — this is the primary collateralization concern
+- **Collateral Quality:** Per [SumCap](https://midas.sumcap.xyz/mglobal) (June 24, 2026): 88.61% Unclassified (offchain/opaque), 6.54% Liquidity Buffer (USDC), 4.85% Aave V3 aUSDC (blue-chip DeFi). The 88.61% unclassified portion cannot be assessed for quality — this is the primary collateralization concern
 - **Verifiability:** Hybrid. The Aave integration in vaults provides partial onchain visibility of idle capital. Full strategy portfolio composition requires offchain reporting
 - **Risk Curation:** Fasanara has discretion over allocation within the strategy framework. Midas enforces policy limits via Fordefi policy engine
 - **Tri-Party Governance (via Fordefi):** Per Fordefi case study: Midas Treasury + Fasanara (Asset Manager) + Independent Oversight Signer. Operations within predefined rules clear automatically; anything outside routes to tri-party quorum
@@ -189,7 +200,7 @@ Fasanara Capital is the strategy manager for mGLOBAL. Unlike mHYPER which uses H
 ### Provability
 
 - **Reserve Transparency:** Hybrid. The shared Midas [Attestation Engine](https://docs.midas.app/transparency/the-midas-attestation-engine) (SAVE, introduced March 2026) adds a multi-party verification layer via three contracts: [KeystoneForwarder](https://etherscan.io/address/0x0b93082D9b3C7C97fAcd250082899BAcf3af3885), [SaveCreReceiverProxy](https://etherscan.io/address/0xC50102b6598924Aa8deB201c757bFb9a3dBdB9b6), and [MidasSaveRegistryWithClaim](https://etherscan.io/address/0x2D6e9F608807436DE5D9603B00Abe3FEd1Bc809d). The registry stores hashes only — not actual reserve data or NAV
-- **NAV/Price Updates:** Token price updated via privileged role on the `MGlobalCustomAggregatorFeedGrowth` oracle ([`0x66aa9fcd63df74e1f67a9452e6e59fbc67f75e38`](https://etherscan.io/address/0x66aa9fcd63df74e1f67a9452e6e59fbc67f75e38)). Current price: $1.00000000 (round 2). **Update history (verified onchain):** The oracle has been updated only **2 times since deployment**: [April 5, 2026](https://etherscan.io/tx/0x45c0c4f317741da7b1e210e7228c5fbc190cb44d07fcef68bd5c0e2f56ddcd39) (initial price set) and [May 15, 2026](https://etherscan.io/tx/0x08076ea85feaac8ae1e276a23f9f93e91ff0bf8c62f6bc0e37a5e40f03be1ad4). **The oracle is now 33+ days stale** (last update May 15, 2026; snapshot June 17, 2026). This is atypical — mHYPER's oracle is updated twice per week. For a stablecoin product, the price has been static at $1.00, but the lack of regular updates is notable
+- **NAV/Price Updates:** Token price updated via privileged role on the `MGlobalCustomAggregatorFeedGrowth` oracle ([`0x66aa9fcd63df74e1f67a9452e6e59fbc67f75e38`](https://etherscan.io/address/0x66aa9fcd63df74e1f67a9452e6e59fbc67f75e38)). Current price: $1.00000000 (round 2). **Update history (verified onchain):** The oracle has been updated only **2 times since deployment**: [April 5, 2026](https://etherscan.io/tx/0x45c0c4f317741da7b1e210e7228c5fbc190cb44d07fcef68bd5c0e2f56ddcd39) (initial price set) and [May 15, 2026](https://etherscan.io/tx/0x08076ea85feaac9198f8462badd0946323ac33fa98a9cc4b6afc0e587f374d4d) (`AnswerUpdated`: answer $1.00000000, round 2, `growthApr = 0`). **The oracle is now 39 days stale** (last update May 15, 2026; snapshot June 23, 2026 — still round 2). This is atypical — mHYPER's oracle is updated twice per week. For a stablecoin product, the price has been static at $1.00, but the lack of regular updates is notable
 - **Oracle Bounds:** `maxAnswerDeviation` = 100000000 ($1.00, effectively 100% deviation per update — very loose), `minAnswer` = $0.10, `maxAnswer` = $1,000. These are much looser than mHYPER's 0.35% deviation cap
 - **Oracle Model:** Uses MGlobalCustomAggregatorFeedGrowth with separate PriceRaised ([`0x494f142c35167cfbdd3887e8d7897822e63c9618`](https://etherscan.io/address/0x494f142c35167cfbdd3887e8d7897822e63c9618)) and PriceLowered ([`0x4c825154d02eafab7f3c779d96c279bcdb9fcf6f`](https://etherscan.io/address/0x4c825154d02eafab7f3c779d96c279bcdb9fcf6f)) bound feeds. These appear to define upper/lower acceptable price bounds, but currently have **no role holders assigned** — suggesting this safety feature is not yet active
 - **Attestation Engine Data:** The registry stores proof IDs, attestation hashes, claim hashes, verifier hashes, timestamps, and attestor/verifier addresses. It does **not** expose actual reserve data or an onchain URI/CID
@@ -198,16 +209,17 @@ Fasanara Capital is the strategy manager for mGLOBAL. Unlike mHYPER which uses H
 ## Liquidity Risk
 
 - **DEX Liquidity:** **Zero** — No Uniswap V3 pools found for mGLOBAL/USDC at any fee tier (500/3000/10000 bps) via [Uniswap V3 Factory](https://etherscan.io/address/0x1F98431c8aD98523631AE4a59f267346ea31F984). Zero DEX pairs on DexScreener. The token has no secondary market — exit is entirely dependent on Midas redemption infrastructure
+- **Aave Horizon collateral listing (June 2026):** mGLOBAL is now an **active collateral reserve** on the permissioned [Aave Horizon RWA market](https://app.aave.com/reserve-overview/?underlyingAsset=0x7433806912eae67919e66aea853d46fa0aef98a8&marketName=proto_horizon_v3) (Pool [`0xAe05…32C8`](https://etherscan.io/address/0xAe05Cd22df81871bc7cC2a04BeCfb516bFe332C8)). Verified onchain: `usageAsCollateral = true`, **but LTV = 0.05% and liquidation threshold = 0.10%** (no eMode), so the credit currently extendable against mGLOBAL is effectively **zero** — this is a conservative "onboarded-but-throttled" listing, not a meaningful borrowing market. Supply cap 50M; **$19.85M already supplied** (aMGLOBAL [`0x49d3…B985`](https://etherscan.io/address/0x49d3cdE03813eE32DFD47F6aA3957d5F9CbAB985)); borrowing of mGLOBAL itself disabled; liquidation bonus 6%. It does **not** add a redemption exit for holders (Horizon suppliers must withdraw, then redeem via Midas), but it is a genuine third-party institutional onboarding signal (Horizon is permissioned and curator-vetted) and a source of independent demand
 - **Primary Exit:** Via Midas redemption vaults (MGlobalRedemptionVaultWithAave + MGlobalRedemptionVaultWithSwapper)
 - **Redemption Mechanism:**
   - **MGlobalRedemptionVaultWithAave** — primary redemption with Aave integration. Likely supports instant redemptions when liquidity available
   - **MGlobalRedemptionVaultWithSwapper** — secondary redemption with swapper functionality
-- **Large Holder Impact:** **EXTREME.** [InfiniFi's MidasFarm](https://etherscan.io/address/0x7373A7ce3C023C56Cb66747AFbdF827627D31679) holds 81% of all mGLOBAL (~$30.6M). Farm matured June 15, 2026 (yesterday). The remaining holders (EOA 10.46%, Safe 6%, BeaconProxy 2.3%) would be severely impacted by any InfiniFi exit
-- **Vault USDC Balances (onchain, June 17, 2026):**
+- **Large Holder Impact (HIGH, eased from EXTREME):** The top holder is now [InfiniFi's renewed MidasFarm](https://etherscan.io/address/0xf4ea3ec87b1c254f17a2fb68164db0caf6c4cecf) at **57.94%** (~$30.49M), down from 81%. InfiniFi's original farm matured June 15, 2026 and **renewed rather than redeemed** — rolling its position into a new MidasFarm with `maturity()` of **July 21, 2026**. This removed the *immediate* exit trigger (a sophisticated counterparty chose to re-lock) but a fresh maturity re-arms in ~1 month. Aave Horizon (37.71%) and the Safe (4.35%) now hold the balance, so a single exit is less catastrophic than at 81% — but a ~58% holder unwinding into ~$0 vault liquidity remains a risk.
+- **Vault USDC Balances (onchain, June 23, 2026):**
   - [DepositVault](https://etherscan.io/address/0xce29c36c6d4556f2d01d79414c1354b968dddef1): **$0 USDC**
   - [RedemptionVaultWithAave](https://etherscan.io/address/0xa0fc8bdfb1e6a705c1375810989b1d70a982b01b): **$0 USDC**
-  - [RedemptionVaultWithSwapper](https://etherscan.io/address/0x1e0fd66753198c7b8ba64edee8d41d8628bf20d7): **~$734 USDC**
-  - The vaults hold negligible idle USDC — funds are either deployed to Aave (aUSDC) or moved offchain to Fasanara custody. This means instant redemption capacity is currently **near zero** at the vault level
+  - [RedemptionVaultWithSwapper](https://etherscan.io/address/0x1e0fd66753198c7b8ba64edee8d41d8628bf20d7): **~$0.73 USDC**
+  - The vaults hold negligible idle USDC — funds are either deployed to Aave (aUSDC) or moved offchain to Fasanara custody. This means instant redemption capacity is currently **near zero** at the vault level (unchanged from prior assessment)
 
 ## Centralization & Control Risks
 
@@ -224,7 +236,6 @@ Fasanara Capital is the strategy manager for mGLOBAL. Unlike mHYPER which uses H
 - **DEFAULT_ADMIN_ROLE holders (2):** Two addresses hold `DEFAULT_ADMIN_ROLE` on MidasAccessControl — **role changes (mint/burn/pause/blacklist grants) bypass the timelock** and can be executed immediately:
   - The 1/3 Gnosis Safe ([`0xB60842E9DaBCd1C52e354ac30E82a97661cB7E89`](https://etherscan.io/address/0xB60842E9DaBCd1C52e354ac30E82a97661cB7E89))
   - [`0xd4195cf4df289a4748c1a7b6ddbe770e27ba1227`](https://etherscan.io/address/0xd4195cf4df289a4748c1a7b6ddbe770e27ba1227) — EOA. [Per Midas](https://docs.midas.app/security/smart-contract-security#midas-controller), Fordefi MPC (3/n) — not verifiable onchain
-  - ⚠️ [`0x875c06a295c41c27840b9c9dfda7f3d819d8bc6a`](https://etherscan.io/address/0x875c06a295c41c27840b9c9dfda7f3d819d8bc6a) was **revoked** — does NOT hold `DEFAULT_ADMIN_ROLE` (verified onchain June 17, 2026)
   - **Either of the two remaining admins can grant/revoke any role with no timelock.** Midas states they are working on gating specific functions behind a timelock
 - **Governance Model:** No onchain governance. Midas controls all admin functions
 - **Privileged Roles:**
@@ -260,11 +271,10 @@ Fasanara Capital is the strategy manager for mGLOBAL. Unlike mHYPER which uses H
 
 ### External Dependencies
 
-- **Fasanara Capital (Critical):** Strategy management, NAV calculation, risk monitoring. **Due diligence on Fasanara is partially complete** — confirmed $4B+ AUM, 15-year history, London-based institutional manager with MIFIDPRU disclosure. However, crypto-native track record and mGLOBAL-specific mandate remain unverified. 92% NAV opacity is a key concern. Fasanara is larger ($4B vs $300M AUM) and more established (15yr vs 7yr), but its digital asset strategy transparency is lower
+- **Fasanara Capital (Critical):** Strategy management, NAV calculation, risk monitoring. **Due diligence on Fasanara is partially complete** — confirmed $4B+ AUM, 15-year history, London-based institutional manager with MIFIDPRU disclosure. However, crypto-native track record and mGLOBAL-specific mandate remain unverified. 88.61% NAV opacity is a key concern. Fasanara is larger ($4B vs $300M AUM) and more established (15yr vs 7yr), but its digital asset strategy transparency is lower
 - **Fordefi (Critical):** MPC custody of underlying assets with tri-party MPC governance
-- **Aave (Important):** The DepositVault and RedemptionVault integrate directly with Aave for idle capital management. Aave is a blue-chip DeFi protocol — this is a positive dependency compared to mHYPER's fully offchain idle capital handling
-- **Strategy Counterparties:** cannot verify specific strategy counterparties, 92% of NAV is unclassified
-- **Stablecoin Dependencies:** USDC is the deposit asset. Any USDC depeg would directly impact mGLOBAL value
+- **Aave (Important):** Two distinct relationships. (1) The DepositVault and RedemptionVault integrate directly with Aave V3 for idle capital management — a positive dependency vs mHYPER's fully offchain handling. (2) As of June 2026, mGLOBAL is also a **collateral reserve on Aave Horizon** ($19.85M supplied, but LTV 0.05% → near-zero credit). This makes Aave's mGLOBAL price oracle ([`0xB92A…8193`](https://etherscan.io/address/0xB92A68763b2F83e094595c7B41a7FB9D0f8Da193), currently $1.00) a downstream consumer of mGLOBAL's price — relevant given mGLOBAL's own oracle is loose (100% deviation) and 39 days stale. The conservative 0.05% LTV likely reflects Aave/curator caution about exactly that
+- **Strategy Counterparties:** cannot verify specific strategy counterparties, 88.61% of NAV is unclassified
 - **Oracle:** NAV reported via custom contract (MGlobalCustomAggregatorFeedGrowth). **Not** a Chainlink data feed. Bound feeds (PriceRaised/PriceLowered) exist but have no active role holders
 - **MidasAccessControl (Critical):** Shared across all Midas products. A failure or compromise of this contract would affect mGLOBAL alongside mHYPER, mTBILL, and other Midas tokens
 
@@ -284,7 +294,6 @@ Fasanara Capital is the strategy manager for mGLOBAL. Unlike mHYPER which uses H
   - **Monitor:** `AnswerUpdated` events, `latestRoundData()` values, `setRoundData` calls
   - **Alert:** Any price deviation from $1.00 (the stable peg), stale price (>7 days without update), unexpected price jumps
   - **Frequency:** Hourly
-  - **Thresholds:** Price < $0.995 or > $1.005, staleness > 7 days
 
 2. **Oracle Bound Feeds (RECOMMENDED)**
   - **Contracts:**
@@ -320,17 +329,16 @@ Fasanara Capital is the strategy manager for mGLOBAL. Unlike mHYPER which uses H
 
 5. **Token Supply & Transfers (CRITICAL)**
   - **Contract:** [`0x7433806912Eae67919e66aea853d46Fa0aef98A8`](https://etherscan.io/address/0x7433806912Eae67919e66aea853d46Fa0aef98A8) (mGLOBAL)
-  - **Monitor:** `totalSupply()` via `cast call`, `Paused`/`Unpaused` events, large mint/burn events, `Blacklisted`/`Greenlisted` events
+  - **Monitor:** `totalSupply()`, `Paused`/`Unpaused` events, large mint/burn events, `Blacklisted`/`Greenlisted` events
   - **Alert:** Supply change > 5% in 24 hours, pause events, any blacklist changes
   - **Frequency:** On event / daily
   - **Thresholds:** Mint > $1M, Burn > $1M, supply delta > 5%
 
 6. **Vault Activity (RECOMMENDED)**
   - **Contracts:**
-    - [`0xce29c36c6d4556f2d01d79414c1354b968dddef1`](https://etherscan.io/address/0xce29c36c6d4556f2d01d79414c1354b968dddef1) (DepositVault)
     - [`0xa0fc8bdfb1e6a705c1375810989b1d70a982b01b`](https://etherscan.io/address/0xa0fc8bdfb1e6a705c1375810989b1d70a982b01b) (RedemptionVaultWithAave)
     - [`0x1e0fd66753198c7b8ba64edee8d41d8628bf20d7`](https://etherscan.io/address/0x1e0fd66753198c7b8ba64edee8d41d8628bf20d7) (RedemptionVaultWithSwapper)
-  - **Monitor:** Large deposits/redemptions, vault USDC balances
+  - **Monitor:** Large redemptions, vault USDC balances
   - **Alert:** Redemptions >$5M in 24 hours, vault USDC balance <$100K
   - **Frequency:** Hourly
 
@@ -338,18 +346,25 @@ Fasanara Capital is the strategy manager for mGLOBAL. Unlike mHYPER which uses H
   - **Contract:** [`0xE3EEe3e0D2398799C884a47FC40C029C8e241852`](https://etherscan.io/address/0xE3EEe3e0D2398799C884a47FC40C029C8e241852) (MidasTimelockController)
   - **Monitor:** `CallScheduled`, `CallExecuted`, `CallCancelled` events
   - **Alert:** Any scheduled call (indicates pending contract upgrade)
-  - **Frequency:** Hourly
+  - **Frequency:** On event
 
 8. **Aave Position Health (RECOMMENDED)**
   - **Contracts:** MGlobalDepositVaultWithAave and MGlobalRedemptionVaultWithAave
-  - **Monitor:** Aave aUSDC balances held by mGLOBAL vaults via `cast call` on Aave aUSDC token
+  - **Monitor:** Aave aUSDC balances held by mGLOBAL vaults
   - **Alert:** Significant aUSDC balance decrease (indicating withdrawal from Aave)
   - **Frequency:** Daily
 
-9. **External Protocol Health (RECOMMENDED)**
-  - Monitor Aave for incidents that could impact mGLOBAL's deposited idle capital
-  - Monitor USDC for depeg events
-  - Monitor MidasAccessControl for any DEFAULT_ADMIN_ROLE changes (affects all Midas products)
+9. **Aave Horizon Reserve (RECOMMENDED)**
+  - **Contracts:** Horizon Pool [`0xAe05Cd22df81871bc7cC2a04BeCfb516bFe332C8`](https://etherscan.io/address/0xAe05Cd22df81871bc7cC2a04BeCfb516bFe332C8), aMGLOBAL [`0x49d3cdE03813eE32DFD47F6aA3957d5F9CbAB985`](https://etherscan.io/address/0x49d3cdE03813eE32DFD47F6aA3957d5F9CbAB985)
+  - **Monitor:** mGLOBAL reserve config (LTV, liquidation threshold, supply cap, frozen flag) via `getReserveConfigurationData`, aMGLOBAL total supply
+  - **Alert:** LTV/liquidation threshold raised above ~0.10% (Aave extending real credit — stronger endorsement but larger liquidation dependency on mGLOBAL's loose/stale oracle), supply approaching the 50M cap, reserve frozen/paused
+  - **Frequency:** Daily / on event
+
+10. **InfiniFi Farm Maturity (CRITICAL)**
+  - **Contract:** new MidasFarm [`0xf4ea3ec87b1c254f17a2fb68164db0caf6c4cecf`](https://etherscan.io/address/0xf4ea3ec87b1c254f17a2fb68164db0caf6c4cecf)
+  - **Monitor:** mGLOBAL `balanceOf`, farm `maturity()` (currently July 21, 2026)
+  - **Alert:** Balance drop (redemption rather than renewal), approach of maturity date
+  - **Frequency:** Daily
 
 ## Appendix: Contract Architecture
 
@@ -379,13 +394,13 @@ Fasanara Capital is the strategy manager for mGLOBAL. Unlike mHYPER which uses H
 │  │  metadata(key) / setMetadata(key, data)                              │    │
 │  └──────────────────────────────────────────────────────────────────────┘    │
 │                                                                              │
-│  ┌──────────────────────────────────┐  ┌──────────────────────────────────┐  │
-│  │  MGlobalRedemptionVaultWithSwapper│  │  MidasLzMintBurnOFTAdapter      │  │
-│  │  (TransparentProxy)              │  │  0xb67f8106..445c                │  │
-│  │  0x1e0fd667..20d7                │  │                                  │  │
-│  │                                  │  │  Has: NO mGLOBAL roles           │  │
-│  │  Has: BURN_OPERATOR_ROLE         │  │  (cross-chain not active yet)   │  │
-│  └──────────────────────────────────┘  └──────────────────────────────────┘  │
+│  ┌──────────────────────────────────┐                                      │
+│  │  MGlobalRedemptionVaultWithSwapper│                                      │
+│  │  (TransparentProxy)              │                                      │
+│  │  0x1e0fd667..20d7                │                                      │
+│  │                                  │                                      │
+│  │  Has: BURN_OPERATOR_ROLE         │                                      │
+│  └──────────────────────────────────┘                                      │
 │                                                                              │
 └──────────────────────────────────────────────────────────────────────────────┘
 
@@ -397,7 +412,7 @@ Fasanara Capital is the strategy manager for mGLOBAL. Unlike mHYPER which uses H
 │  │  Proxy: 0x66aa9fcd63df74e1f67a9452e6e59fbc67f75e38                   │    │
 │  │  Impl:  0x96ac55e782b9ee3f1dd72b3ba033352b5af95e49                   │    │
 │  │                                                                      │    │
-│  │  Price: $1.00000000 (r2, updated ~Jun 4 2026)                        │    │
+│  │  Price: $1.00000000 (r2, updated May 15 2026 — 39d stale)            │    │
 │  │  maxAnswerDeviation: 100% ($1.00) — VERY LOOSE                       │    │
 │  │  minAnswer: $0.10, maxAnswer: $1,000                                 │    │
 │  │  Updater: EOA 0x088a74de..f05 (no timelock)                          │    │
@@ -505,7 +520,6 @@ Fasanara Capital is the strategy manager for mGLOBAL. Unlike mHYPER which uses H
 │  ⚠ Oracle maxAnswerDeviation = 100% ($1.00) — very loose                    │
 │  ⚠ PriceRaised/PriceLowered bound feeds have NO role holders (inactive)     │
 │  ⚠ Either of 2 DEFAULT_ADMIN can grant MINT → unbacked tokens              │
-│  ⚠ OFT adapter deployed but holds no mGLOBAL roles (bridging inactive)     │
 │                                                                              │
 └──────────────────────────────────────────────────────────────────────────────┘
 
@@ -528,32 +542,27 @@ updater EOA. User redeems via RedemptionVaultWithAave or RedemptionVaultWithSwap
 - **Aave integration at vault level** — idle capital is verifiably deposited on Aave (blue-chip DeFi), providing partial onchain transparency not present in mHYPER
 - **Strong $1M bug bounty** across Sherlock + Cantina platforms
 - **Stable peg product** — $1.00 target is simpler to verify than floating NAV tokens
+- **Third-party institutional onboarding** — mGLOBAL is now a collateral reserve on the permissioned, curator-vetted [Aave Horizon RWA market](https://app.aave.com/reserve-overview/?underlyingAsset=0x7433806912eae67919e66aea853d46fa0aef98a8&marketName=proto_horizon_v3) ($19.85M supplied). A genuine due-diligence signal — though the 0.05% LTV means Aave extends near-zero credit against it
+- **Counterparty re-commitment** — InfiniFi renewed its ~$30M position after the June 15 maturity rather than exiting, and total supply grew ~40% in a week, indicating continued institutional demand
 
 ### Key Risks
 
-- **Incomplete strategy manager due diligence** — Fasanara Capital Ltd is now partially researched (founded 2011, $4B+ AUM, London-based, large team, MIFIDPRU disclosure). However, its specific** digital asset strategy mandate for mGLOBAL, crypto-native track record, and FCA registration details remain unverified. 92% of mGLOBAL NAV is classified as \"Unclassified\" — significantly more opaque than even mHYPER's 76.8%
-- **Very loose oracle bounds** — maxAnswerDeviation of 100% ($1.00) means the oracle price can move from $1.00 to $0.10 or $1,000 in a single update. The PriceRaised/PriceLowered bound feeds are deployed but inactive. **Oracle is 33+ days stale** (last update May 15, 2026) with APY stuck at 0.00%
+- **Incomplete strategy manager due diligence** — Fasanara Capital Ltd is now partially researched (founded 2011, $4B+ AUM, London-based, large team, MIFIDPRU disclosure). However, its specific digital asset strategy mandate for mGLOBAL, crypto-native track record, and FCA registration details remain unverified. 88.61% of mGLOBAL NAV is classified as \"Unclassified\" — significantly more opaque than even mHYPER's 76.8%
+- **Very loose oracle bounds** — maxAnswerDeviation of 100% ($1.00) means the oracle price can move from $1.00 to $0.10 or $1,000 in a single update. The PriceRaised/PriceLowered bound feeds are deployed but inactive. **Oracle is 39 days stale** (last update May 15, 2026; worse than the prior assessment) with APY stuck at 0.00%
 - **Short production history** — ~10 weeks vs mHYPER's ~9+ months. No stress-test events. APY has been 0% since inception (no yield reported onchain)
 - **Unbacked minting possible** — tokens can be minted without collateral by any address holding `M_GLOBAL_MINT_OPERATOR_ROLE`. Role grants bypass the 48-hour timelock entirely
 - **Weak access control** — `DEFAULT_ADMIN_ROLE` held by two addresses (1/3 Safe + one EOA). Either can grant/revoke any role immediately
 - **Zero secondary market** — No Uniswap V3 pools, no DexScreener pairs. Exit entirely dependent on Midas redemption infrastructure. Vaults hold near-zero USDC for instant redemptions
-- **OFT adapter deployed but inactive** — no mGLOBAL bridge roles granted. Cross-chain expansion state is unclear
 
 ### Critical Risks
 
-- **Fasanara due diligence gap (partially resolved):** Fasanara Capital Ltd is now confirmed as a London-based, $4B+ AUM institutional manager with 15-year history, MIFIDPRU disclosure, and a large professional team. This is significantly stronger than the initial "unverified" assessment. However, its specific digital asset strategy for mGLOBAL remains opaque — 92% of NAV is "Unclassified." Fasanara's crypto-native track record is less established than Hyperithm's
+- **Fasanara due diligence gap (partially resolved):** Fasanara Capital Ltd is now confirmed as a London-based, $4B+ AUM institutional manager with 15-year history, MIFIDPRU disclosure, and a large professional team. This is significantly stronger than the initial "unverified" assessment. However, its specific digital asset strategy for mGLOBAL remains opaque — 92% of NAV is "Unclassified."
 - **Oracle can report any price:** With 100% maxAnswerDeviation and no active bound feeds, a compromised oracle updater can set the price anywhere between $0.10 and $1,000 in a single transaction. Combined with no-timelock role grants and unbacked minting, this creates a path to significant token holder loss
-- **InfiniFi concentration — immediate:** 81% of mGLOBAL ($30.6M) is held by [InfiniFi's MidasFarm](https://etherscan.io/address/0x7373A7ce3C023C56Cb66747AFbdF827627D31679). **The farm matured yesterday (June 15, 2026)** — InfiniFi can redeem at any moment. A full redemption would collapse mGLOBAL market cap from $37.6M to ~$7M. InfiniFi rates this position 4.5/5 risk (their second-highest). This is not a theoretical concern — the maturity trigger has already fired
+- **InfiniFi concentration — eased but not gone:** Originally 81% of mGLOBAL ($30.6M) sat in [InfiniFi's MidasFarm](https://etherscan.io/address/0x7373A7ce3C023C56Cb66747AFbdF827627D31679). That farm matured June 15, 2026 and InfiniFi **renewed** rather than redeemed — rolling the full $30.49M into a [new MidasFarm](https://etherscan.io/address/0xf4ea3ec87b1c254f17a2fb68164db0caf6c4cecf) with maturity July 21, 2026. Combined with $19.85M of new Aave Horizon demand, top-holder concentration fell to **57.94%**. The renewal is a positive signal (a sophisticated counterparty re-locked), but a ~58% holder remains and the maturity/exit trigger simply re-arms in ~1 month against ~$0 vault liquidity
 
 ---
 
 ## Risk Score Assessment
-
-**Scoring Guidelines:**
-
-- Be conservative: when uncertain between two scores, choose the higher (riskier) one
-- Use decimals (e.g., 2.5) when a subcategory falls between scores
-- Prioritize onchain evidence over documentation claims
 
 ### Critical Risk Gates
 
@@ -583,7 +592,7 @@ updater EOA. User redeems via RedemptionVaultWithAave or RedemptionVaultWithSwap
 
 - mGLOBAL: ~10 weeks (April 2026)
 - Midas platform: ~22 months (mTBILL since mid-2024)
-- Market cap: ~$37.6M, platform TVL: ~$109.5M (down from ~$927.8M peak)
+- Market cap: ~$52.63M, platform TVL: ~$112.7M (down from ~$927.8M peak)
 - No security incidents for mGLOBAL
 - No stress-test events (mHYPER processed $150M+ during Stream Finance, but mGLOBAL has no comparable test)
 
@@ -616,7 +625,7 @@ updater EOA. User redeems via RedemptionVaultWithAave or RedemptionVaultWithSwap
 
 **Subcategory C: External Dependencies — 4.0**
 
-- Fasanara Capital: single critical dependency for strategy management and NAV calculation. **Fasanara provides zero public information about how mGLOBAL funds are deployed** — the strategy is a complete black box (92% unclassified). This is a single point of failure for core value creation with no transparency on the dependency's operations
+- Fasanara Capital: single critical dependency for strategy management and NAV calculation. The strategy *type* is documented (short-dated SME trade receivables / invoices via ~141 fintech originators), but **the position-level allocation for the mGLOBAL pool is undisclosed and not onchain-verifiable** (88.61% unclassified). This is a single point of failure for core value creation, with no transparency on the specific book's composition or credit health
 - Aave: idle capital integration (blue-chip, positive). Aave failure would impact vault idle capital but not core strategy
 - Fordefi: MPC custody with tri-party governance (established, tested)
 - MidasAccessControl: shared across all Midas products — single compromise affects entire platform
@@ -625,18 +634,18 @@ updater EOA. User redeems via RedemptionVaultWithAave or RedemptionVaultWithSwap
 
 **Centralization Score = (3.0 + 4.0 + 4.0) / 3 ≈ 3.7**
 
-**Score: 3.7/5** — Same structural centralization risks as mHYPER, with additional concerns: (a) oracle bounds are 285x looser (100% vs 0.35%), (b) bound feeds are deployed but inactive, (c) Fasanara is a single point of failure with complete opacity on funds deployment — no public information about how user capital is managed. The Aave integration partially offsets programmability concerns. The 48-hour timelock on upgrades is meaningful; role changes bypassing it entirely is not.
+**Score: 3.7/5** — Same structural centralization risks as mHYPER, with additional concerns: (a) oracle bounds are 285x looser (100% vs 0.35%), (b) bound feeds are deployed but inactive, (c) Fasanara is a single point of failure whose documented strategy (SME trade receivables) is established but whose per-vehicle allocation and credit metrics are undisclosed and unverifiable onchain. The Aave integration partially offsets programmability concerns. The 48-hour timelock on upgrades is meaningful; role changes bypassing it entirely is not.
 
 #### 3. Funds Management (Weight: 30%)
 
 **Subcategory A: Collateralization — 4.5**
 
 - Tokens are subordinated debt instruments — not direct claims on collateral
-- Strategy composition, collateral quality, and asset allocation are **92% unclassified and completely opaque** — Fasanara provides zero public information about how mGLOBAL funds are managed. Unlike mHYPER's Hyperithm which had identifiable onchain counterparties, mGLOBAL's strategy is a black box
-- Aave integration means idle USDC → aUSDC is onchain and verifiable ($2.55M / 6.78%), but this only covers idle capital, not the active strategy
+- Strategy *type* is documented (short-dated SME trade receivables / digital invoices, ~3-month duration, unlevered, credit-insured), but the **position-level composition, collateral quality, and current loss/delinquency metrics are 88.61% unclassified and undisclosed for this vehicle**. Unlike mHYPER's Hyperithm which had identifiable onchain counterparties, mGLOBAL's assets sit offchain and cannot be independently verified
+- Aave integration means idle USDC → aUSDC is onchain and verifiable ($2.55M / 4.85%), but this only covers idle capital, not the active strategy
 - No onchain collateral verification in smart contracts; admin can mint tokens without backing
 - Tri-party MPC custody via Fordefi should prevent unilateral fund access
-- **Score is HIGHER (riskier) than mHYPER's 3.5** due to complete strategy opacity and unverifiable asset quality
+- **Score is HIGHER (riskier) than mHYPER's 3.5** due to high strategy opacity and unverifiable asset quality
 
 **Subcategory B: Provability — 3.5**
 
@@ -649,24 +658,23 @@ updater EOA. User redeems via RedemptionVaultWithAave or RedemptionVaultWithSwap
 
 **Funds Management Score = (4.5 + 3.5) / 2 = 4.0**
 
-**Score: 4.0/5** — Offchain funds management with subordinated debt structure. The Aave integration provides a positive onchain anchor, but it only covers idle capital, not active strategies. **Fasanara provides zero public information about how mGLOBAL funds are deployed** — 92% of NAV is unclassified. This is a black-box strategy dependency. The Attestation Engine provides a verification pipeline, but it cannot compensate for complete strategy opacity.
+**Score: 4.0/5** — Offchain funds management with subordinated debt structure. The Aave integration provides a positive onchain anchor, but it only covers idle capital, not active strategies. The underlying strategy is now documented (Fasanara SME trade-receivable private credit — a defensive, established profile), but **88.61% of NAV is unclassified and the per-vehicle allocation is undisclosed/unverifiable onchain**. The Attestation Engine provides a verification pipeline, but it cannot compensate for the missing position-level transparency. Score unchanged: verifiability, not strategy legitimacy, is the binding constraint.
 
 #### 4. Liquidity Risk (Weight: 15%)
 
 - **Exit Mechanism:** Two redemption vaults (WithAave + WithSwapper). 0.5% fee on instant redemption
-- **DEX Liquidity:** non, principal can be redeemed with a fee or full after cycle
-- **Instant Redemption Capacity:** 1.15% withdrawable with additional 6.78% deposited into aave.
+- **DEX Liquidity:** none, principal can be redeemed with a fee or full after cycle. Note: the Aave Horizon listing is **not** an exit venue — it lets qualified users borrow stablecoins against mGLOBAL (currently throttled to ~0 via 0.05% LTV); Horizon suppliers still exit by withdrawing and redeeming through Midas
 - **Redemption Vault Duality:** Two vaults provide redundancy — if one faces issues, the other may still process redemptions.
-- **Holder Concentration (EXTREME):** [InfiniFi's MidasFarm](https://etherscan.io/address/0x7373A7ce3C023C56Cb66747AFbdF827627D31679) holds **81%** of supply (~$30.6M) and **matured June 15, 2026** — it can redeem at any time, which would collapse market cap from ~$37.6M to ~$7M overnight
-- **Vault Liquidity (onchain, June 17, 2026):** DepositVault $0, RedemptionVaultWithAave $0, RedemptionVaultWithSwapper ~$734 USDC. Instant-redemption capacity at the vault level is effectively **near zero** — a large redemption depends on Fasanara unwinding offchain positions
-- **Stress Performance:** No stress events for mGLOBAL
+- **Holder Concentration (HIGH, eased from EXTREME):** Top holder fell from 81% to **57.94%** ([InfiniFi's renewed MidasFarm](https://etherscan.io/address/0xf4ea3ec87b1c254f17a2fb68164db0caf6c4cecf), ~$30.49M). InfiniFi's matured farm **renewed rather than redeemed** (new maturity July 21, 2026), removing the immediate exit trigger; $19.85M of independent Aave Horizon demand and a growing supply diluted the concentration. A ~58% holder unwinding at the next maturity into ~$0 vault liquidity remains a serious risk
+- **Vault Liquidity (onchain, June 23, 2026):** DepositVault $0, RedemptionVaultWithAave $0, RedemptionVaultWithSwapper ~$0.73 USDC. Instant-redemption capacity at the vault level is effectively **near zero** — a large redemption depends on Fasanara unwinding offchain positions
+- **Stress Performance:** No forced-redemption stress event, but the June 15 InfiniFi maturity — the report's prior worst-case trigger — passed without incident (the counterparty renewed and supply grew)
 
-**Score: 4.0/5** — No secondary market (zero DEX liquidity), so exit is entirely dependent on Midas redemption infrastructure, which currently holds near-zero idle USDC. Combined with extreme holder concentration (81% in a now-matured InfiniFi position that can exit at will), large or simultaneous redemptions would have to wait on offchain unwinds of a 92%-unclassified strategy. The dual-vault redundancy and 6.78% Aave-backed idle capital are partial mitigants, but instant exit is not assured at scale
+**Score: 3.5/5** (was 4.0) — Still no secondary market and near-zero idle vault USDC, so exit remains dependent on Midas redemption infrastructure and offchain unwinds of an 88.61%-unclassified strategy. But the acute concentration risk eased: the InfiniFi maturity trigger that had already fired resolved via renewal, top-holder concentration dropped 81% → ~58%, and Aave Horizon added an independent institutional holder base. The score improves one notch but stays elevated because the structural illiquidity is unchanged and a ~58% holder can still exit at the next maturity (July 21, 2026)
 
 #### 5. Operational Risk (Weight: 5%)
 
 - **Midas Team:** Fully doxxed with strong institutional backgrounds. Well-funded ($8.75M from top crypto VCs). **Positive, well-established**
-- **Fasanara Capital:** **Now fully researched.** FCA Authorised since August 2011 (FRN [551020](https://register.fca.org.uk/s/firm?id=001b000000NMar0AAD)). $4B+ AUM, London HQ, 15-year track record. CEO Francesco Filia (ex-BofA Merrill Lynch). 40+ professionals. Companies House [07561210](https://find-and-update.company-information.service.gov.uk/company/07561210). Publishes MIFIDPRU Disclosure and Sustainability Report. EU SFDR Article 8 funds. Digital asset strategy transparency for mGLOBAL specifically remains limited — 92% of NAV is unclassified
+- **Fasanara Capital:** **Now fully researched.** FCA Authorised since August 2011 (FRN [551020](https://register.fca.org.uk/s/firm?id=001b000000NMar0AAD)). $4B+ AUM, London HQ, 15-year track record. CEO Francesco Filia (ex-BofA Merrill Lynch). 40+ professionals. Companies House [07561210](https://find-and-update.company-information.service.gov.uk/company/07561210). Publishes MIFIDPRU Disclosure and Sustainability Report. EU SFDR Article 8 funds. Digital asset strategy transparency for mGLOBAL specifically remains limited — 88.61% of NAV is unclassified
 - **Documentation:** Midas platform docs are comprehensive. mGLOBAL-specific documentation is limited — Midas docs site timed out during scraping (GitBook). SumCap successfully scraped and provides rich NAV/price/allocation data. **Midas transparency page and app require authentication or JS-rendering that could not be fully captured**
 - **Legal:** Midas Software GmbH, German-incorporated. Base Prospectus approved by FMA Liechtenstein (July 2025, valid until July 2026).
 
@@ -679,9 +687,9 @@ updater EOA. User redeems via RedemptionVaultWithAave or RedemptionVaultWithSwap
 | Audits & Historical      | 2.5   | 20%    | 0.50        |
 | Centralization & Control | 3.7   | 30%    | 1.11        |
 | Funds Management         | 4.0   | 30%    | 1.20        |
-| Liquidity Risk           | 4.0   | 15%    | 0.60        |
+| Liquidity Risk           | 3.5   | 15%    | 0.525       |
 | Operational Risk         | 2.0   | 5%     | 0.10        |
-| **Final Score**          |       |        | **3.51/5.0** |
+| **Final Score**          |       |        | **3.43/5.0** |
 
 
 ### Risk Tier
@@ -690,21 +698,21 @@ updater EOA. User redeems via RedemptionVaultWithAave or RedemptionVaultWithSwap
 | ----------- | --------------- | ------------------------------------- |
 | 1.0-1.5     | Minimal Risk    | Approved, high confidence             |
 | 1.5-2.5     | Low Risk        | Approved with standard monitoring     |
-| 2.5-3.5     | Medium Risk     | Approved with enhanced monitoring     |
-| **3.5-4.5** | **Elevated Risk** | **Limited approval, strict limits** |
+| **2.5-3.5** | **Medium Risk** | **Approved with enhanced monitoring** |
+| 3.5-4.5     | Elevated Risk   | Limited approval, strict limits       |
 | 4.5-5.0     | High Risk       | Not recommended                       |
 
 
-**Final Risk Tier: Elevated Risk (3.5/5.0)**
+**Final Risk Tier: Medium Risk (3.43/5.0) — borderline, just below the Elevated threshold**
 
-**Recommendation:** Limited approval with strict limits. The score is driven by (a) complete strategy opacity — 92% of NAV unclassified, a Funds Management score of 4.0 — and (b) Liquidity risk (4.0): no secondary market, near-zero idle vault USDC, and extreme holder concentration (81% in a now-matured InfiniFi position). **Strongly recommend completing mGLOBAL-specific Fasanara due diligence before any allocation**. Talk directly to Fasanara team for more information.
+**Recommendation:** Approved with enhanced monitoring and conservative limits. At 3.43 the score sits right at the Medium/Elevated boundary. It is driven by (a) high strategy opacity — 88.61% of NAV unclassified, down from 92.09% but still dominant, with a Funds Management score of 4.0, **unchanged** at this reassessment — and (b) residual liquidity risk (3.5): no secondary market and near-zero idle vault USDC, partly offset by eased holder concentration (81% → ~58% after InfiniFi renewed rather than exited) and new Aave Horizon demand. The Aave Horizon collateral listing is a positive third-party onboarding signal but at 0.05% LTV extends near-zero credit — it should not be over-weighted. **Strongly recommend completing mGLOBAL-specific Fasanara due diligence before any allocation**. Talk directly to Fasanara team for more information.
 
-**Path to a lower score:** This assessment is constrained primarily by opacity, not by a verified flaw. A clear investment deck, strategy mandate, or attested allocation breakdown that classifies the 92% "Unclassified" NAV would directly lower Collateralization, Provability, and External Dependencies — plausibly moving the final score back into the Medium tier (2.5–3.5). Resumption of regular oracle/NAV updates and tighter oracle bounds would reinforce that. The manager itself (Fasanara) is already verified as FCA-authorised; the gap is mGLOBAL-specific strategy disclosure.
+**Path to a lower score:** This assessment is constrained primarily by opacity, not by a verified flaw. A clear investment deck, strategy mandate, or attested allocation breakdown that classifies the 88.61% "Unclassified" NAV would directly lower Collateralization, Provability, and External Dependencies — plausibly moving the final score toward the middle of the Medium tier (2.5–3.5). Resumption of regular oracle/NAV updates and tighter oracle bounds would reinforce that. The manager itself (Fasanara) is already verified as FCA-authorised; the gap is mGLOBAL-specific strategy disclosure. Note the Aave Horizon listing does **not** itself lower the score materially — at 0.05% LTV it signals onboarding, not capital-backed conviction; a future LTV increase would be the stronger signal.
 
 **Required Conditions:**
 
 1. **Fasanara FCA Registration** Authorised since August 2011, FRN 551020, Companies House 07561210. Full permissions scope needs manual review of the FCA register, but the firm is regulated and publishes MIFIDPRU disclosures
-2. **Verify Strategy Allocation** — Current SumCap data shows 92% unclassified. Obtain breakdown of the unclassified portion from Midas team or attestation reports
+2. **Verify Strategy Allocation** — Current SumCap data shows 88.61% unclassified. Obtain breakdown of the unclassified portion from Midas team or attestation reports
 3. **Limited Exposure** — Cap initial allocation at 5–10% of vault with gradual ramp-up only after oracle update cadence improves and yield reporting resumes
 4. **Enhanced Monitoring** — Real-time alerts on oracle updates (1%+ deviation from $1.00), role changes, contract upgrades, vault activity, and Aave position health (see Monitoring section)
 5. **Verify Oracle Bounds** — Confirm whether the 100% oracle deviation is intentional for a stablecoin product. If not, push for tighter bounds and activation of PriceRaised/PriceLowered bound feeds
@@ -714,14 +722,16 @@ updater EOA. User redeems via RedemptionVaultWithAave or RedemptionVaultWithSwap
 
 **Key Concerns Driving the Score:**
 
-- **Fasanara Capital is fully verified** — FCA Authorised (FRN 551020, since 2011), $4B+ AUM, 15-year history, London-based, 40+ team, MIFIDPRU disclosure, Companies House 07561210. The manager risk is now well-understood. However, 92% of mGLOBAL NAV remains "Unclassified" — the digital asset strategy mandate specifically for mGLOBAL is opaque. This is now a "strategy opacity" concern rather than a "manager risk" concern
-- **InfiniFi concentration:** 81% of mGLOBAL ($30.6M) sits in InfiniFi's MidasFarm, which matured June 15, 2026
-- **Oracle is 33+ days stale with APY at 0%** — only 2 updates in 10 weeks. No yield reported onchain. Profit is probably airdropped to the token holders.
+- **Fasanara Capital is fully verified** — FCA Authorised (FRN 551020, since 2011), $4B+ AUM, 15-year history, London-based, 40+ team, MIFIDPRU disclosure, Companies House 07561210. The manager risk is now well-understood. However, 88.61% of mGLOBAL NAV remains "Unclassified" — the digital asset strategy mandate specifically for mGLOBAL is opaque. This is now a "strategy opacity" concern rather than a "manager risk" concern
+- **Holder concentration eased to ~58%:** Down from 81%. InfiniFi renewed its ~$30.49M position (new MidasFarm, maturity July 21, 2026) instead of redeeming; Aave Horizon now holds 37.71%. Still concentrated, and the maturity trigger re-arms in ~1 month
+- **Oracle is 39 days stale with APY at 0%** — only 2 updates since deployment. The May 15 update kept the price at $1.00000000 and set `growthApr = 0`; no onchain evidence of yield accrual or holder airdrops was found.
 
 **Mitigating Factors:**
 
 - **Fasanara Capital is an established institution** — $4B+ AUM, 15-year track record, large professional team, MIFIDPRU disclosure. This substantially improves the operational risk profile vs the initial unverified assessment
 - **Aave integration** — $2.55M idle capital verifiably on blue-chip DeFi protocol. Structural improvement over mHYPER
+- **Aave Horizon collateral listing** — onboarded to the permissioned, curator-vetted Horizon RWA market ($19.85M supplied), a third-party institutional due-diligence signal (tempered by the 0.05% LTV)
+- **InfiniFi renewal** — the largest counterparty re-locked ~$30M after maturity rather than exiting; supply grew ~40% in a week
 - **Extensively audited shared infrastructure** — 10 audits across 3 years + $1M bug bounty
 - **Strong Midas team and institutional backing** — doxxed, well-funded, regulated
 - **Attestation Engine** — multi-party verification pipeline with onchain hash publication
@@ -734,13 +744,14 @@ updater EOA. User redeems via RedemptionVaultWithAave or RedemptionVaultWithSwap
 ## Reassessment Triggers
 
 - **Time-based**: Reassess in 2 months (August 2026) — accelerated due to short history and incomplete diligence
-- **InfiniFi Maturity:** InfiniFi's MidasFarm matured June 15, 2026. The 81% holder ($30.6M) can redeem at any time. Monitor InfiniFi's position daily. If InfiniFi redeems, re-evaluate mGLOBAL viability entirely
+- **InfiniFi Maturity (re-armed):** InfiniFi renewed its ~$30.49M position into a [new MidasFarm](https://etherscan.io/address/0xf4ea3ec87b1c254f17a2fb68164db0caf6c4cecf) maturing **July 21, 2026**. Monitor this holder daily and re-check `maturity()`. If InfiniFi redeems (rather than renewing again) around that date, re-evaluate mGLOBAL liquidity and concentration immediately
+- **Aave Horizon Parameters:** mGLOBAL is a collateral reserve on Aave Horizon at LTV 0.05% (near-zero credit). Reassess if the LTV / liquidation threshold is raised materially (would indicate Aave extending real credit and a stronger endorsement — and a larger liquidation dependency on mGLOBAL's loose oracle), if the supply cap (50M) is approached, or if the reserve is frozen/delisted
 - **Fasanara Due Diligence**: FCA Authorised since 2011 (FRN 551020), $4B+ AUM, 15-year track record. Digital asset strategy mandate for mGLOBAL remains the primary open question — Fasanara's institutional credibility is now well-established, but strategy-specific transparency is still needed
 - **Strategy Disclosure**: Reassess when mGLOBAL strategy allocations become verifiable (via Midas app, SumCap, or attestation reports)
 - **TVL-based**: Reassess if mGLOBAL market cap changes by more than 50% or Midas platform TVL changes by more than 40%
 - **Oracle Configuration**: Reassess if oracle bounds are tightened (current 100% is dangerously loose for a stablecoin) or if PriceRaised/PriceLowered bound feeds are activated
 - **Incident-based**: Reassess after any exploit, NAV discrepancy, governance change, contract upgrade, or regulatory action affecting Midas or Fasanara
-- **Bridge Activation**: Reassess if OFT adapter is granted mGLOBAL mint/burn roles (indicating cross-chain activation)
+- **Cross-chain Activation**: Reassess if mGLOBAL is deployed on another chain or any bridge adapter is granted mGLOBAL mint/burn roles
 - **Audit**: If new audit covering mGLOBAL-specific contracts (Aave vaults, growth oracle) is published, reassess
 - **Redemption Stress**: If mGLOBAL processes a significant redemption event, reassess based on performance
 - **Attestation Engine**: If mGLOBAL-specific attestations are confirmed flowing through the pipeline, reassess for Provability score improvement
