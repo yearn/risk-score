@@ -683,6 +683,22 @@ protocols:
       label: Steakhouse Prime / Gauntlet USDC Prime
     infrastructure:
     - Symbiotic
+  gauntlet:
+    name: Gauntlet USD Alpha (gtUSDa)
+    chain: ethereum
+    type: yield_vault
+    address: '0x3bd9248048df95db4fbd748c6cd99c1baa40bad0'
+    report: reports/report/gauntlet-gusda.md
+    collateral:
+    - asset: USDC
+    yield_sources:
+    - protocol: morpho
+      assets:
+      - USDC
+      label: Morpho USDC lending markets
+    infrastructure:
+    - Aera
+    - Circle CCTP
   centrifuge_jaaa:
     name: Centrifuge (JAAA)
     chain: ethereum

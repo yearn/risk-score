@@ -667,6 +667,28 @@ def cap_stcusd_data() -> dict:
     }
 
 
+def gauntlet_gusda_data() -> dict:
+    """Gauntlet USD Alpha (gtUSDa) dependency data from risk assessment report."""
+    return {
+        "name": "Gauntlet USD Alpha (gtUSDa)",
+        "chain": "ethereum",
+        "type": "yield_vault",
+        "address": "0x3bd9248048df95db4fbd748c6cd99c1baa40bad0",
+        "report": "reports/report/gauntlet-gusda.md",
+        "collateral": [
+            {"asset": "USDC"},
+        ],
+        "yield_sources": [
+            {
+                "protocol": "morpho",
+                "assets": ["USDC"],
+                "label": "Morpho USDC lending markets",
+            },
+        ],
+        "infrastructure": ["Aera", "Circle CCTP"],
+    }
+
+
 def centrifuge_jaaa_data() -> dict:
     """Centrifuge (JAAA) dependency data from risk assessment report."""
     return {
@@ -899,6 +921,7 @@ def main():
     data["protocols"]["across_protocol"] = across_protocol_data()
     data["protocols"]["apyx_apxusd"] = apyx_apxusd_data()
     data["protocols"]["cap_stcusd"] = cap_stcusd_data()
+    data["protocols"]["gauntlet"] = gauntlet_gusda_data()
     data["protocols"]["centrifuge_jaaa"] = centrifuge_jaaa_data()
     data["protocols"]["fx_fxusd"] = fx_fxusd_data()
     data["protocols"]["kerneldao_hgeth"] = kerneldao_hgeth_data()
