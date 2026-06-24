@@ -4,7 +4,7 @@
 - **Token:** HYPE++
 - **Chain:** Arbitrum
 - **Token Address:** [`0x75288264FDFEA8ce68e6D852696aB1cE2f3E5004`](https://arbiscan.io/address/0x75288264FDFEA8ce68e6D852696aB1cE2f3E5004)
-- **Final Score: 3.73/5.0**
+- **Final Score: 3.85/5.0**
 
 ## Overview + Links
 
@@ -396,7 +396,7 @@ The total-centralization gate is not marked because the D2 Vault MS also holds t
 | **4** | Many or newer protocol dependencies | Critical functionality depends on them |
 | **5** | Single point of failure dependency | Failure breaks entire protocol |
 
-**Centralization Score = (4.5 + 4.0 + 4.0) / 3 = 4.17/5** - EOA owner and EOA trader admin/executor roles, no timelock, broad manual trading, nested D2 strategy exposure, and many allowed external venues.
+**Centralization Score = (5.0 + 4.0 + 4.0) / 3 = 4.33/5** - Governance raised to 5.0: EOA owner can block all withdrawals via `setWhitelistBalance(uint256.max)` in one transaction with no recovery path; dgnHYPE Safe (unrestricted Gnosis Safe) is a separate custody trust surface for 55.6% of assets with no on-chain guardrails. No timelock, broad manual trading, and many allowed external venues.
 
 #### Category 3: Funds Management (Weight: 30%)
 
@@ -420,7 +420,7 @@ The total-centralization gate is not marked because the D2 Vault MS also holds t
 | **4** | Primarily offchain | Infrequent reporting | Self-reported only |
 | **5** | Opaque, cannot verify | No reporting | No verification |
 
-**Funds Management Score = (4.0 + 4.5) / 2 = 4.25/5** - Top-level balances reconcile, but funds are custodied during active trading, `totalAssets()` is not a live full-position valuation while custodied, and nested dgnHYPE backing is only partially visible from ERC-20 balances.
+**Funds Management Score = (4.5 + 4.5) / 2 = 4.50/5** - Collateralization raised to 4.5: dgnHYPE Safe (55.6% of assets) is a standard Gnosis Safe with unrestricted custody — signers can transfer funds to any address with no on-chain guardrails. Top-level balances reconcile, but `totalAssets()` is not a live full-position valuation while custodied, and nested dgnHYPE backing is only partially visible from ERC-20 balances.
 
 #### Category 4: Liquidity Risk (Weight: 15%)
 
@@ -451,11 +451,11 @@ The total-centralization gate is not marked because the D2 Vault MS also holds t
 | Category | Score | Weight | Weighted |
 |----------|-------|--------|----------|
 | Audits & Historical | 2.25 | 20% | 0.45 |
-| Centralization & Control | 4.17 | 30% | 1.25 |
-| Funds Management | 4.25 | 30% | 1.28 |
+| Centralization & Control | 4.33 | 30% | 1.30 |
+| Funds Management | 4.50 | 30% | 1.35 |
 | Liquidity Risk | 4.00 | 15% | 0.60 |
 | Operational Risk | 3.00 | 5% | 0.15 |
-| **Final Score** | | | **3.73/5.0** |
+| **Final Score** | | | **3.85/5.0** |
 
 ### Risk Tier
 
