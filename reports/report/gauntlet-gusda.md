@@ -362,17 +362,15 @@ If ANY gate is triggered, the protocol automatically receives a score of **5** (
 
 **Subcategory A: Audits & Security Reviews**
 
-| Audits | Bug Bounty |
-|--------|------------|
-| Aera V3 audited by Spearbit (June 2025) + Cantina audit competition; V2 by Spearbit (2023) & OpenZeppelin (2024). Reports public on the [Aera security page](https://docs.aera.finance/the-protocol/security). | Active — Immunefi, up to **$500K** ([link](https://immunefi.com/bug-bounty/aera/information/)). |
+- Aera V3 was audited by Spearbit in June 2025 and reviewed in a Cantina audit competition. Aera V2 was reviewed by Spearbit in 2023 and OpenZeppelin in 2024. Reports are public on the [Aera security page](https://docs.aera.finance/the-protocol/security).
+- Aera has an active Immunefi bug bounty with a maximum payout of **$500K** ([link](https://immunefi.com/bug-bounty/aera/information/)).
 
 Score: **2.5/5** — The deployed Aera V3 contracts have a public tier-1 audit (Spearbit) plus an audit competition and an active $500K bug bounty. Score is not lower because V3 coverage rests on a single tier-1 firm plus a small ($15K-pool) competition, the V3 report is only Google-Drive-hosted, and the specific gtUSDa vault configuration is not separately audited.
 
 **Subcategory B: Historical Track Record**
 
-| Time in Production | Scale (TVL) |
-|-------------------|-------------|
-| ~6.5 months (Dec 2025) | ~$60M across 4 chains (Ethereum $1.5M, Base $58.5M, Optimism $23K, Arbitrum $4K) |
+- Time in production is ~6.5 months, based on a December 2025 deployment.
+- Scale is ~$60M across 4 chains: Ethereum $1.5M, Base $58.5M, Optimism $23K, and Arbitrum $4K.
 
 Score: **2.5/5** — Relatively new deployment (~6.5 months) but with meaningful scale ($60M aggregate). The Base vault carries the vast majority of TVL. The broader Gauntlet protocol has $1.45B total TVL and a long track record, but this specific vault series has not been battle-tested through a major market stress event.
 
@@ -384,25 +382,23 @@ Score: **2.5/5** — Relatively new deployment (~6.5 months) but with meaningful
 
 **Subcategory A: Governance**
 
-| Upgradeability | Timelock | Privileged Roles |
-|---------------|----------|-----------------|
-| Immutable vault (non-proxy). Cannot upgrade. | 1-day (24 hours) on both vault and fee timelocks | 3/9 multisig proposer. Provisioner can mint/burn. Timelock can change provisioner. Guardians can execute arbitrary operations. Keeper EOA submits unit price via Forwarder with soft guards (±0.10% tolerance, 60-min cooldown) that pause but never block. |
+- The vault is immutable and non-proxy, so code cannot be upgraded in place.
+- Vault and fee operations each sit behind a 1-day timelock.
+- A 3/9 multisig can propose actions. The Provisioner can mint/burn, the timelock can change the provisioner, guardians can execute arbitrary approved operations, and the keeper EOA submits unit price updates via the Forwarder. PPS soft guards (±0.10% tolerance, 60-minute cooldown) pause but do not block price writes.
 
 Score: **3.0/5** — The 3/9 multisig with 1-day timelock fits rubric score 3 ("Multisig 5/9 with timelock, 24+ hours, some powerful roles constrained by timelock"). The guardian system allows arbitrary execution — the multisig can update the Merkle root via timelock, then guardians execute instantly. Combined with the keeper-submitted PPS and provisioner-change capability, powerful roles exist but are partially constrained (root changes require 1-day delay). The immutable vault is a positive, preventing score 4.
 
 **Subcategory B: Programmability**
 
-| System Operations | PPS/Rate Definition |
-|------------------|---------------------|
-| Mostly programmatic deposits/withdrawals via Provisioner. Strategy allocation determined by offchain engine. | Keeper-submitted unit price (offchain NAV computation). Soft guards (±0.10%, 60-min, 255s age) pause vault on violation but **never block** the price update. Vault owner can unpause. |
+- Deposits and withdrawals are mostly programmatic through the Provisioner, but strategy allocation is determined by Gauntlet's offchain engine.
+- PPS is keeper-submitted from offchain NAV computation. Soft guards (±0.10%, 60-minute minimum interval, 255-second price age) pause the vault on violation but **never block** the price update. The vault owner can unpause.
 
 Score: **3.5/5** — Hybrid onchain/offchain operations. The PPS is keeper-submitted with soft-guard-only limits, creating a trust dependency on the offchain engine accurately reporting yield and the keeper not acting maliciously.
 
 **Subcategory C: External Dependencies**
 
-| Protocol Dependencies | Criticality |
-|----------------------|-------------|
-| Morpho (4 chains), USDC, Circle CCTP v2 bridge, Aera Protocol | Morpho, USDC, and CCTP are all established. Cross-chain bridge is now identified as canonical Circle CCTP (no bespoke bridge-operator trust). Aera Protocol is the foundational layer. |
+- Dependencies are Morpho across 4 chains, USDC, Circle CCTP v2, and Aera Protocol.
+- Morpho, USDC, and CCTP are established, and the cross-chain bridge is canonical Circle CCTP rather than a bespoke bridge. Aera Protocol remains the foundational contract layer.
 
 Score: **3.0/5** — Multiple dependencies, but all on established protocols: Morpho, USDC, and the canonical Circle CCTP bridge (identified onchain via `TokenMinterV2`), which removes the previously unquantified bridge risk. Residual surface is multi-curator Morpho market risk across 4 chains and dependence on the Aera Protocol contracts. Morpho market failure can directly affect principal through bad debt, oracle/collateral failure, or liquidity shortfalls, so the dependency risk is material even though the venues are established.
 
@@ -414,17 +410,17 @@ Score: **3.0/5** — Multiple dependencies, but all on established protocols: Mo
 
 **Subcategory A: Collateralization**
 
-| Backing | Collateral Quality | Verifiability |
-|---------|-------------------|---------------|
-| 100% USDC-backed | Blue-chip (USDC) | Total supply onchain; cross-chain positions require aggregation |
+- The vault is 100% USDC-backed by design.
+- Collateral quality is strong because USDC is a blue-chip stablecoin.
+- Verifiability is partial: total supply is onchain, but cross-chain positions require aggregation.
 
 Score: **2.0/5** — Backed by blue-chip USDC collateral, but most collateral is deployed into cross-chain Morpho lending markets rather than sitting idle in the Ethereum vault. Realized backing depends on Morpho market solvency/liquidity and cross-chain position accounting, so this is stronger than opaque or volatile collateral but not equivalent to idle USDC.
 
 **Subcategory B: Provability**
 
-| Reserve Transparency | Reporting Mechanism | Third-Party Verification |
-|---------------------|--------------------|-----------------------|
-| Total supply onchain; USDC balances onchain; cross-chain positions require offchain aggregation | Keeper-submitted unit price (offchain NAV) with soft-guard-only limits (±0.10%); Gauntlet App provides allocation data | None identified |
+- Total supply and USDC balances are onchain, but cross-chain positions require offchain aggregation.
+- The reporting mechanism is a keeper-submitted unit price based on offchain NAV, with soft-guard-only limits of ±0.10%. The Gauntlet App provides allocation data.
+- No independent third-party verification mechanism was identified.
 
 Score: **3.0/5** — Hybrid onchain/offchain reporting. The keeper-submitted PPS means yield reporting depends on the offchain engine's accuracy, with soft guards that pause but never block malicious prices. No third-party verification mechanism.
 
@@ -434,17 +430,17 @@ Score: **3.0/5** — Hybrid onchain/offchain reporting. The keeper-submitted PPS
 
 #### Category 4: Liquidity Risk (Weight: 15%)
 
-| Exit Mechanism | Liquidity Depth | Large Holder Impact |
-|---------------|----------------|---------------------|
-| Direct redemption through Provisioner; async request-solve flow available | ~$60M aggregate TVL across 4 chains; Ethereum vault has $0 idle USDC | Top Ethereum holder ~53%; cross-chain recall may delay large exits |
+- Users can redeem through the Provisioner, with both direct redemption and async request-solve flow available.
+- Aggregate TVL is ~$60M across 4 chains, but the Ethereum vault has $0 idle USDC.
+- The top Ethereum holder controls ~53% of supply, and cross-chain recall may delay large exits.
 
 Score: **3.0/5** — Redemption mechanism exists. The Ethereum vault has zero idle USDC and a concentrated holder base, but the $60M aggregate TVL (mostly on Base) provides more exit capacity. Cross-chain fund deployment means large withdrawals may face delays; same-value USDC redemption mitigates price risk.
 
 #### Category 5: Operational Risk (Weight: 5%)
 
-| Team Transparency | Documentation | Legal/Compliance |
-|------------------|---------------|-----------------|
-| Gauntlet Networks, Inc. (NYC, US; founded 2018; Series B) — well-known, 8+ years in DeFi | Extensive docs via VaultBook + Aera security page; full Aera contract reference still thin | No formal incident-response plan published; disclosure via Immunefi; legal entity identified |
+- Team transparency is strong: Gauntlet Networks, Inc. is a well-known New York-based firm founded in 2018, with 8+ years in DeFi.
+- Documentation is extensive through VaultBook and the Aera security page, although the full Aera contract reference remains thin.
+- Legal/compliance posture is partially documented. The legal entity is identified and disclosure runs through Immunefi, but no formal incident-response plan was found.
 
 Score: **1.5/5** — Strong reputation, extensive documentation, identified legal entity (Gauntlet Networks, Inc.), and confirmed audits. Residual gaps: no formal published incident-response plan and multisig signers not individually validated.
 
