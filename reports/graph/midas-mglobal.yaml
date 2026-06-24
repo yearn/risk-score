@@ -124,7 +124,7 @@ nodes:
   - id: fasanara
     label: Fasanara Capital (Strategy Mgr)
     category: dependency
-    note: "$4B+ AUM, 15yr, London, MIFIDPRU. 92% of NAV Unclassified"
+    note: "$4B+ AUM, 15yr, London, MIFIDPRU. 88.61% of NAV Unclassified"
   - id: fordefi
     label: Fordefi MPC Custody
     category: dependency
