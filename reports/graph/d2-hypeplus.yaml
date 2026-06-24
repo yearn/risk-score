@@ -52,7 +52,7 @@ nodes:
     label: Vault Owner EOA
     address: "0x0E8c0470773c65498F438cac380648B314399A46"
     category: governance
-    note: EOA; owns BOTH HYPE++ vault and dgnHYPE vault; can set epochs, deposit caps, and whitelist parameters
+    note: EOA; owns BOTH vaults; can blacklist users or set infinite whitelistBalance to block all withdraw+deposit on both HYPE++ and dgnHYPE
   - id: trader-role-eoa
     label: Trader Role EOA
     address: "0x7ab129978091DEE65A319c5FC728818D73221999"
