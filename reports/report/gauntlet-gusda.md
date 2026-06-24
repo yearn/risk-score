@@ -4,7 +4,7 @@
 - **Token:** gtUSDa (Gauntlet USD Alpha)
 - **Chain:** Ethereum (also deployed on Base, Optimism, Arbitrum)
 - **Token Address:** [`0x3bd9248048df95db4fbd748c6cd99c1baa40bad0`](https://etherscan.io/token/0x3bd9248048df95db4fbd748c6cd99c1baa40bad0)
-- **Final Score: 2.7/5.0**
+- **Final Score: 2.9/5.0**
 
 ## Overview + Links
 
@@ -92,6 +92,7 @@ The vault is part of the broader Gauntlet ecosystem ($1.45B total TVL across all
 - **Collateral type**: 100% backed by USDC. The vault's supply asset is USDC [`0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48`](https://etherscan.io/token/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48).
 - **Collateral quality**: Blue-chip stablecoin (USDC, issued by Circle). This is the highest quality stablecoin collateral available.
 - **Backing ratio**: The vault is designed to be 100%+ collateralized. Every gtUSDa token represents a pro-rata claim on the vault's USDC deployed across strategies plus any accrued yield, but realized backing still depends on the solvency and liquidity of the underlying Morpho lending markets and cross-chain positions.
+- **Underlying assets**: Decent allocation is in Morpho Vault [`GauntletUSDC Frontier V2`](https://app.morpho.org/ethereum/vault/0x9a1D6bd5b8642C41F25e0958129B85f8E1176F3e/gauntlet-usdc-frontier#overview) which allocates to much riskier assets than standard bluechip. Extensive monitoring is recommended for activities in this vault.
 - **Yield / market risk**: Funds are deployed to Morpho lending markets. Yield is variable, and principal can be impaired if a market suffers bad debt, collateral/oracle failure, curator misconfiguration, or insufficient liquidity during withdrawals. The vault does not employ leverage directly, but lending-market exposure remains a principal-loss path.
 - **Liquidations**: Not applicable — this is not a lending protocol. The vault does not take loans or face liquidation risk.
 - **Peg stability**: The unit price of gtUSDa is set via `setUnitPrice()` on the PriceAndFeeCalculator. The oracle hard-codes USDC = $1 as per [Gauntlet docs](https://vaultbook.gauntlet.xyz/resources/frequently-asked-questions/oracles). The price value is computed **offchain** by Gauntlet's optimization engine (total USDC across all chains + accrued yield ÷ gtUSDa total supply) and then submitted onchain by a keeper. This means the gtUSDa exchange rate (PPS) is an admin-updated value reflecting accrued yield — see [Price-Setting Flow](#price-setting-flow) below for the full onchain-verified mechanism.
@@ -178,6 +179,7 @@ Example transaction: [`0xe5aebe0ef8a7470b85964b143cbf45ced0a81e7eedb91b14832fca6
 - **Morpho**: The vault deploys USDC into Morpho lending markets across multiple chains. Morpho is a well-established lending protocol, but risk depends on specific market collateral, oracle configuration, borrower health, liquidation performance, and curator choices. A severe Morpho market failure can impair principal, not just yield.
 - **Cross-chain bridging**: The bridge is **Circle CCTP (Cross-Chain Transfer Protocol, V2)** — native USDC burn-and-mint, not a third-party lock-and-mint bridge. Verified onchain: vault USDC outflows go to Circle's CCTP V2 `TokenMinterV2` ([`0xfd78ee919681417d192449715b2594ab58f5d002`](https://etherscan.io/address/0xfd78ee919681417d192449715b2594ab58f5d002)) on the burn side, and USDC inflows to the vault arrive minted from the zero address (~$3.1M observed) on the receive side — the burn/mint signature of CCTP. Using canonical CCTP means there is no extra bridge-operator trust assumption beyond Circle itself; cross-chain risk reduces to Circle/CCTP availability and message-attestation finality rather than a bespoke bridge's security. (USDC is also routed through a `CurveStableSwapNG` pool and two Ethereum-mainnet MetaMorpho V1.1 vaults for same-chain allocation.)
 - **USDC (Circle)**: The underlying asset is USDC, which carries its own regulatory and custodial risks. USDC is one of the most established stablecoins with ~$60B market cap.
+- **Riskier assets**: Most of the assets in this vault are considiered riskier [`GauntletUSDC Frontier V2`](https://app.morpho.org/ethereum/vault/0x9a1D6bd5b8642C41F25e0958129B85f8E1176F3e/gauntlet-usdc-frontier#overview)
 - **Oracle**: No external oracle dependency — USDC is hard-coded to $1. The vault unit price is admin-set, so Chainlink or other oracle failure does not directly affect gtUSDa.
 - **Aera Protocol**: The vault and its infrastructure contracts are built on Aera Protocol. Any vulnerability in Aera's MultiDepositorVault, RolesAuthority, Provisioner, or Guardian system would affect gtUSDa.
 
@@ -338,6 +340,7 @@ Fund Flow:
 - Provisioner address change could redirect all deposited USDC
 - Cross-chain complexity — funds deployed across 4 chains (via Circle CCTP), adding operational surface
 - Audit coverage rests on a single tier-1 V3 engagement (Spearbit) plus a small audit competition; the V3 report is only Google-Drive-hosted
+- Risky assets as collateral in [`GauntletUSDC Frontier V2`](https://app.morpho.org/ethereum/vault/0x9a1D6bd5b8642C41F25e0958129B85f8E1176F3e/gauntlet-usdc-frontier#overview)
 
 ### Critical Risks
 
@@ -413,8 +416,9 @@ Score: **3.0/5** — Multiple dependencies, but all on established protocols: Mo
 - The vault is 100% USDC-backed by design.
 - Collateral quality is strong because USDC is a blue-chip stablecoin.
 - Verifiability is partial: total supply is onchain, but cross-chain positions require aggregation.
+- Riskier collateral asset in some Morpho markets, especially in this vault [`GauntletUSDC Frontier V2`](https://app.morpho.org/ethereum/vault/0x9a1D6bd5b8642C41F25e0958129B85f8E1176F3e/gauntlet-usdc-frontier#overview)
 
-Score: **2.0/5** — Backed by blue-chip USDC collateral, but most collateral is deployed into cross-chain Morpho lending markets rather than sitting idle in the Ethereum vault. Realized backing depends on Morpho market solvency/liquidity and cross-chain position accounting, so this is stronger than opaque or volatile collateral but not equivalent to idle USDC.
+Score: **3.0/5** — Mostly backed by blue-chip USDC collateral, but some collaterals like [`sUSDD`](https://app.morpho.org/ethereum/market/0xf02d2e8f427a2b91785b3d09690ef9d3811bf674ba97b00bafc7665004a6dd97/pt-susdd-27aug2026-usdc#market) and [`PRIME`](https://app.morpho.org/ethereum/market/0x755f954513d31d5f24aaf3d0cdc5e913a28383f8ea8ff85be9ffffa7371fb64d/prime-usdc) need additional analysis and monitoring.
 
 **Subcategory B: Provability**
 
@@ -424,9 +428,9 @@ Score: **2.0/5** — Backed by blue-chip USDC collateral, but most collateral is
 
 Score: **3.0/5** — Hybrid onchain/offchain reporting. The keeper-submitted PPS means yield reporting depends on the offchain engine's accuracy, with soft guards that pause but never block malicious prices. No third-party verification mechanism.
 
-**Funds Management Score = (2.0 + 3.0) / 2 = 2.5**
+**Funds Management Score = (3.0 + 3.0) / 2 = 3.0**
 
-**Score: 2.5/5** — Strong collateral quality, but Morpho market exposure, cross-chain aggregation, admin-controlled PPS, and lack of independent verification are significant.
+**Score: 3.0/5** — Strong collateral quality, but Morpho market exposure, cross-chain aggregation, admin-controlled PPS, and lack of independent verification are significant.
 
 #### Category 4: Liquidity Risk (Weight: 15%)
 
@@ -450,12 +454,12 @@ Score: **1.5/5** — Strong reputation, extensive documentation, identified lega
 |----------|-------|--------|----------|
 | Audits & Historical | 2.5 | 20% | 0.50 |
 | Centralization & Control | 3.17 | 30% | 0.951 |
-| Funds Management | 2.5 | 30% | 0.75 |
+| Funds Management | 3.0 | 30% | 0.90 |
 | Liquidity Risk | 3.0 | 15% | 0.45 |
 | Operational Risk | 1.5 | 5% | 0.075 |
-| **Final Score** | | | **2.726/5.0** |
+| **Final Score** | | | **2.876/5.0** |
 
-**Final Score: 2.7/5.0** (rounded from 2.726)
+**Final Score: 2.9/5.0** (rounded from 2.876)
 
 ### Risk Tier
 
@@ -474,6 +478,7 @@ Score: **1.5/5** — Strong reputation, extensive documentation, identified lega
 ## Reassessment Triggers
 
 - **Time-based**: Reassess in 3 months (September 2026)
+- **Collateral-based**: Reassess if the market allocation more into riskier markets, especially [`sUSDD`](https://app.morpho.org/ethereum/market/0xf02d2e8f427a2b91785b3d09690ef9d3811bf674ba97b00bafc7665004a6dd97/pt-susdd-27aug2026-usdc#market) and [`PRIME`](https://app.morpho.org/ethereum/market/0x755f954513d31d5f24aaf3d0cdc5e913a28383f8ea8ff85be9ffffa7371fb64d/prime-usdc). New markets added or removed.
 - **TVL-based**: Reassess if Ethereum TVL exceeds $10M or drops below $500K
 - **Incident-based**: Reassess after any exploit, governance change (multisig signer set, timelock delay), provisioner change, unit price manipulation event, or strategy allocation change >50%
 - **Audit-based**: Reassess if a new Aera version is deployed without a fresh audit, or if additional tier-1 audits of Aera V3 are published
