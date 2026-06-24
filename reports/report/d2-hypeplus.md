@@ -137,7 +137,7 @@ HYPE++ is not overcollateralized. It is a share token over an actively managed U
 - The verified source comments on `returnFunds()` state that losses may be sustained during trading and investors suffer the loss.
 - HYPE++ currently depends on dgnHYPE for ~55.6% of reported assets by value, creating recursive D2 strategy exposure.
 - The trader's allowed token list contains 32 tokens (including volatile assets: WETH [`0x82aF49447D8a07e3bd95BD0d56f35241523fBab1`](https://arbiscan.io/address/0x82aF49447D8a07e3bd95BD0d56f35241523fBab1), WBTC [`0x2f2a2543B76A4166549F7aaB2e75Bef0aefC5B0f`](https://arbiscan.io/address/0x2f2a2543B76A4166549F7aaB2e75Bef0aefC5B0f), ARB, GMX, GRAIL, PENDLE, LINK, wstETH, and old bridged USDC.e [`0xFF970A61A04b1cA14834A43f5dE4533eDBBD5CC8`](https://arbiscan.io/address/0xFF970A61A04b1cA14834A43f5dE4533eDBBD5CC8)) and the allowed spender list contains 30 addresses, including major Arbitrum DeFi venues and D2 strategy vaults.
-- dgnHYPE's `trader()` is a 3-of-5 Safe; only ~1.0M real USDC was directly observed there versus ~6.90M reported `totalAssets()`.
+- dgnHYPE's `trader()` is a 3-of-5 Safe; only ~1.0M real USDC was directly observed there versus ~6.90M reported `totalAssets()`. **The Safe is a standard Gnosis Safe with no on-chain guardrails** — 3-of-5 signers can call `execTransaction` to send assets to any address. Unlike the HYPE++ trader OMS (constrained to 32 pre-approved tokens and 30 venues), the dgnHYPE Safe has unrestricted custody over 55.6% of HYPE++ assets.
 
 ### Provability
 
@@ -308,7 +308,7 @@ Governance / control:
 - Trader admin/executor authority includes an EOA with no timelock.
 - The trader's allowed token list includes volatile assets (WETH, WBTC, ARB, GMX, GRAIL, PENDLE, LINK, wstETH) and old bridged USDC.e, expanding the strategy risk surface.
 - Funds are actively custodied by the trader during epochs; users cannot withdraw while custodied.
-- HYPE++ currently has large nested exposure to dgnHYPE (~55.6% of assets), another D2 active strategy controlled by the same EOA owner.
+- HYPE++ currently has large nested exposure to dgnHYPE (~55.6% of assets), another D2 active strategy controlled by the same EOA owner. The dgnHYPE custody Safe has no on-chain guardrails (standard Gnosis Safe, not a constrained OMS) — a separate trust surface for the majority of HYPE++ capital.
 - End-to-end backing is not a simple live reserve balance; it depends on D2 trader execution and return of funds.
 
 ### Critical Risks
@@ -318,6 +318,7 @@ Governance / control:
   2. **Balance gate:** `setWhitelistBalance(type(uint256).max)` — no user can satisfy `whitelistAsset.balanceOf(user) >= uint256.max`, so every `withdraw()` and `redeem()` reverts. One transaction, no enumeration needed, blocks every shareholder indiscriminately.
   Both paths work because the `onlyWhitelisted()` modifier gates `withdraw()` and `redeem()` — not just `deposit()` and `mint()` — confirmed via bytecode analysis on June 24, 2026. There is no onchain bypass. The same attack applies to dgnHYPE (also `VaultV1Whitelisted`, same owner EOA, identical bytecode pattern), where the HYPE++ trader is the sole dgnHYPE holder — blocking dgnHYPE redemptions traps $6.90M (55.6% of HYPE++ assets). The vault holds zero USDC while custodied, so the trader must return funds before blocked users could even attempt an exit, but even after `returnFunds()` the gated `withdraw`/`redeem` would revert. Combined with `transferOwnership()`, a hacked EOA can transfer this power to a new attacker address, making the block permanent.
 - A compromised or malicious trader executor can interact with a broad allowed DeFi surface (32 tokens, 30 spenders) and cause trading losses before funds are returned.
+- **The dgnHYPE Safe (3-of-5) can steal $6.90M with no guardrails.** Unlike the HYPE++ trader OMS, which is constrained to pre-approved tokens and venues, the dgnHYPE custody Safe is a standard Gnosis Safe. 3-of-5 signers can call `execTransaction` to execute `USDC.transfer(attacker, amount)` — or any other arbitrary call — with no on-chain restriction. The Safe currently holds $1.00M in direct USDC and controls deployed positions worth ~$5.90M. Neither the dgnHYPE vault, the HYPE++ vault, nor the HYPE++ trader has any mechanism to constrain or override the Safe signers. This is a fundamentally different custody model from the HYPE++ OMS: restricted smart-contract execution vs unrestricted multisig custody. The Safe signers (5 addresses distinct from the HYPE++ trader roles) represent a separate trust surface for 55.6% of HYPE++ assets.
 - A compromised or malicious vault owner can manipulate epoch timing, transfer ownership, and change access controls for BOTH vaults, delaying exits or changing who can deposit/redeem.
 
 ---
