@@ -4,7 +4,7 @@
 - **Token:** HYPE++
 - **Chain:** Arbitrum
 - **Token Address:** [`0x75288264FDFEA8ce68e6D852696aB1cE2f3E5004`](https://arbiscan.io/address/0x75288264FDFEA8ce68e6D852696aB1cE2f3E5004)
-- **Final Score: 3.74/5.0**
+- **Final Score: 3.73/5.0**
 
 ## Overview + Links
 
@@ -444,7 +444,7 @@ The total-centralization gate is not marked because the D2 Vault MS also holds t
 | Funds Management | 4.25 | 30% | 1.28 |
 | Liquidity Risk | 4.00 | 15% | 0.60 |
 | Operational Risk | 3.00 | 5% | 0.15 |
-| **Final Score** | | | **3.74/5.0** |
+| **Final Score** | | | **3.73/5.0** |
 
 ### Risk Tier
 
