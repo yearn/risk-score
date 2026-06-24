@@ -18,7 +18,7 @@ The token price is maintained at ~$1.00000000 via a custom oracle (`MGlobalCusto
 **Key Stats:**
 
 - **mGLOBAL Market Cap / TVL:** ~$52.63M (June 23, 2026; total supply ~52,628,653 mGLOBAL × $1.00) — **up ~40% from ~$37.6M on June 17**, driven largely by Aave Horizon adoption
-- **Total Supply:** ~52,628,652.70 mGLOBAL — 18 decimals, verified onchain via `totalSupply()` on [token contract](https://etherscan.io/address/0x7433806912Eae67919e66aea853d46Fa0aef98A8) at block 25,382,793 (all on Ethereum; no cross-chain deployments active)
+- **Total Supply:** ~52,628,652.70 mGLOBAL — 18 decimals, verified onchain via `totalSupply()` on [token contract](https://etherscan.io/address/0x7433806912Eae67919e66aea853d46Fa0aef98A8) at block 25,382,793 (all tracked supply on Ethereum; no non-Ethereum mGLOBAL deployment identified)
 - **Decimals:** 18 (verified onchain, not 6 as typical for Midas tokens)
 - **Token Name:** "Midas Fasanara Global" — explicitly naming Fasanara as the strategy partner
 - **Holders (verified onchain June 23, 2026):**
@@ -56,7 +56,8 @@ All contracts use OpenZeppelin's `TransparentUpgradeableProxy` pattern with a sh
 | **DepositVault** (MGlobalDepositVaultWithAave) | [`0xce29c36c6d4556f2d01d79414c1354b968dddef1`](https://etherscan.io/address/0xce29c36c6d4556f2d01d79414c1354b968dddef1) | [`0x08e4432f84e660235821c63764fb2ffcc7e2b477`](https://etherscan.io/address/0x08e4432f84e660235821c63764fb2ffcc7e2b477) |
 | **RedemptionVaultWithAave** | [`0xa0fc8bdfb1e6a705c1375810989b1d70a982b01b`](https://etherscan.io/address/0xa0fc8bdfb1e6a705c1375810989b1d70a982b01b) | [`0xf687e76e3d62d62fe6f6a7f66ce9fae21df6438d`](https://etherscan.io/address/0xf687e76e3d62d62fe6f6a7f66ce9fae21df6438d) |
 | **RedemptionVaultWithSwapper** | [`0x1e0fd66753198c7b8ba64edee8d41d8628bf20d7`](https://etherscan.io/address/0x1e0fd66753198c7b8ba64edee8d41d8628bf20d7) | [`0xe98a4fb7a2e87ad888ccef0587dc820cf1a7cabb`](https://etherscan.io/address/0xe98a4fb7a2e87ad888ccef0587dc820cf1a7cabb) |
-| **OFT Adapter** (MidasLzMintBurnOFTAdapter) | [`0xb67f81069e890a1b3e02c7bed3a9f78ba54a445c`](https://etherscan.io/address/0xb67f81069e890a1b3e02c7bed3a9f78ba54a445c) | N/A |
+
+**Cross-chain status:** No mGLOBAL OFT/bridge adapter was identified. The previously listed [`0xb67f81069e890a1b3e02c7bed3a9f78ba54a445c`](https://etherscan.io/address/0xb67f81069e890a1b3e02c7bed3a9f78ba54a445c) is a `MidasLzMintBurnOFTAdapter`, but its `token()` is [`0xC8495EAFf71D3A563b906295fCF2f685b1783085`](https://etherscan.io/address/0xC8495EAFf71D3A563b906295fCF2f685b1783085) (`mHyperBTC`), not mGLOBAL. It has a LayerZero peer configured for EID 30390 and does not hold any current mGLOBAL mint/burn role. [RWA.xyz](https://app.rwa.xyz/assets/mGLOBAL) lists only Ethereum as the mGLOBAL network.
 
 ### Shared Infrastructure (shared with all Midas products)
 
@@ -407,11 +408,11 @@ Where the funds end up, and what generates the yield (per [Fasanara lending](htt
 │  └──────────────────────────────────────────────────────────────────────┘    │
 │                                                                              │
 │  ┌──────────────────────────────────┐  ┌──────────────────────────────────┐  │
-│  │  MGlobalRedemptionVaultWithSwapper│  │  MidasLzMintBurnOFTAdapter      │  │
-│  │  (TransparentProxy)              │  │  0xb67f8106..445c                │  │
-│  │  0x1e0fd667..20d7                │  │                                  │  │
-│  │                                  │  │  Has: NO mGLOBAL roles           │  │
-│  │  Has: BURN_OPERATOR_ROLE         │  │  (cross-chain not active yet)   │  │
+│  │  MGlobalRedemptionVaultWithSwapper│  │  Cross-chain status             │  │
+│  │  (TransparentProxy)              │  │                                  │  │
+│  │  0x1e0fd667..20d7                │  │  No mGLOBAL OFT/bridge adapter   │  │
+│  │                                  │  │  identified. Prior 0xb67f..445c  │  │
+│  │  Has: BURN_OPERATOR_ROLE         │  │  points to mHyperBTC, not mGLOBAL│  │
 │  └──────────────────────────────────┘  └──────────────────────────────────┘  │
 │                                                                              │
 └──────────────────────────────────────────────────────────────────────────────┘
@@ -532,7 +533,7 @@ Where the funds end up, and what generates the yield (per [Fasanara lending](htt
 │  ⚠ Oracle maxAnswerDeviation = 100% ($1.00) — very loose                    │
 │  ⚠ PriceRaised/PriceLowered bound feeds have NO role holders (inactive)     │
 │  ⚠ Either of 2 DEFAULT_ADMIN can grant MINT → unbacked tokens              │
-│  ⚠ OFT adapter deployed but holds no mGLOBAL roles (bridging inactive)     │
+│  ⚠ No mGLOBAL bridge adapter identified; prior OFT adapter was mHyperBTC   │
 │                                                                              │
 └──────────────────────────────────────────────────────────────────────────────┘
 
@@ -566,7 +567,7 @@ updater EOA. User redeems via RedemptionVaultWithAave or RedemptionVaultWithSwap
 - **Unbacked minting possible** — tokens can be minted without collateral by any address holding `M_GLOBAL_MINT_OPERATOR_ROLE`. Role grants bypass the 48-hour timelock entirely
 - **Weak access control** — `DEFAULT_ADMIN_ROLE` held by two addresses (1/3 Safe + one EOA). Either can grant/revoke any role immediately
 - **Zero secondary market** — No Uniswap V3 pools, no DexScreener pairs. Exit entirely dependent on Midas redemption infrastructure. Vaults hold near-zero USDC for instant redemptions
-- **OFT adapter deployed but inactive** — no mGLOBAL bridge roles granted. Cross-chain expansion state is unclear
+- **No mGLOBAL bridge adapter identified** — RWA.xyz lists only Ethereum for mGLOBAL, and the previously listed OFT adapter points to `mHyperBTC`, not mGLOBAL. A future mGLOBAL bridge deployment would need fresh review because it could introduce new mint/burn or message-passing dependencies
 
 ### Critical Risks
 
@@ -771,7 +772,7 @@ updater EOA. User redeems via RedemptionVaultWithAave or RedemptionVaultWithSwap
 - **TVL-based**: Reassess if mGLOBAL market cap changes by more than 50% or Midas platform TVL changes by more than 40%
 - **Oracle Configuration**: Reassess if oracle bounds are tightened (current 100% is dangerously loose for a stablecoin) or if PriceRaised/PriceLowered bound feeds are activated
 - **Incident-based**: Reassess after any exploit, NAV discrepancy, governance change, contract upgrade, or regulatory action affecting Midas or Fasanara
-- **Bridge Activation**: Reassess if OFT adapter is granted mGLOBAL mint/burn roles (indicating cross-chain activation)
+- **Bridge Activation**: Reassess if any mGLOBAL OFT/bridge adapter is deployed or granted mGLOBAL mint/burn roles (indicating cross-chain activation)
 - **Audit**: If new audit covering mGLOBAL-specific contracts (Aave vaults, growth oracle) is published, reassess
 - **Redemption Stress**: If mGLOBAL processes a significant redemption event, reassess based on performance
 - **Attestation Engine**: If mGLOBAL-specific attestations are confirmed flowing through the pipeline, reassess for Provability score improvement

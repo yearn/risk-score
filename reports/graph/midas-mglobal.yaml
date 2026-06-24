@@ -68,11 +68,6 @@ nodes:
     address: "0xb468a6f63868cb6c6d99105edfbe73d6b21f139e"
     category: infra
     note: Feeds price data to vaults
-  - id: oft-adapter
-    label: LayerZero OFT Adapter (inactive)
-    address: "0xb67f81069e890a1b3e02c7bed3a9f78ba54a445c"
-    category: infra
-    note: Deployed but holds NO mGLOBAL roles (cross-chain inactive)
   - id: mint-burn-eoa
     label: Mint/Burn/Pause Operator EOA
     address: "0x76e350c5a674db787918e5f728466c7356d4d361"
@@ -326,12 +321,6 @@ edges:
     to: keystone-forwarder
     kind: routes-through
     label: cryptographic notarization
-
-  # === OFT adapter (inactive) ===
-  - from: oft-adapter
-    to: mGLOBAL
-    kind: manages
-    label: deployed but NO mGLOBAL roles (inactive)
 
   # === InfiniFi concentration ===
   - from: infinifi
