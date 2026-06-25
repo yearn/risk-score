@@ -4,7 +4,7 @@
 - **Token:** OUSD (Origin Dollar)
 - **Chain:** Ethereum Mainnet
 - **Token Address:** [`0x2A8e1E676Ec238d8A992307B495b45B3fEAa5e86`](https://etherscan.io/address/0x2A8e1E676Ec238d8A992307B495b45B3fEAa5e86)
-- **Final Score: 1.90/5.0**
+- **Final Score: 1.85/5.0**
 
 ## Overview + Links
 
@@ -279,7 +279,7 @@ No single-point-of-failure that would break the protocol entirely, but USDC depe
 
 ### Category Scores
 
-#### Category 1: Audits & Historical Track Record (Weight: 20%) — **1.75**
+#### Category 1: Audits & Historical Track Record (Weight: 20%) — **1.5**
 
 **Subcategory A: Audits & Security Reviews — 1.0**
 
@@ -290,16 +290,17 @@ No single-point-of-failure that would break the protocol entirely, but USDC depe
 | Formal Verification | Certora formal verification (December 2024) |
 | Continuous Review | OpenZeppelin reviews 100% of contract changes |
 
-**Subcategory B: Historical Track Record — 2.5**
+**Subcategory B: Historical Track Record — 2.0**
 
 | Aspect | Assessment |
 |--------|-----------|
 | Time in Production | ~5.5 years total, ~5 years since secure relaunch |
-| Past Incidents | $7.7M hack (Nov 2020) on original codebase; fully compensated users; different code since relaunch |
-| TVL | ~$7.43M (modest, down from $275M peak) |
-| Price Stability | Peg maintained within basis points since relaunch |
+| Past Incidents | $7.7M flash-loan reentrancy hack (Nov 2020) on pre-relaunch code; users fully compensated; different code since relaunch |
+| TVL | ~$7.43M — down ~97% from ~$275M peak (Dec 2021); modest current size |
+| Price Stability | Peg maintained within basis points of $1.00 since relaunch |
+| Holder pressure | Active withdrawal queue of ~$1.68M (~22.7% of OUSD supply) signals sustained exit intent |
 
-**Score: (1.0 + 2.5) / 2 = 1.75**
+**Score: (1.0 + 2.0) / 2 = 1.5**
 
 #### Category 2: Centralization & Control Risks (Weight: 30%) — **2.0**
 
@@ -361,19 +362,19 @@ No single-point-of-failure that would break the protocol entirely, but USDC depe
 
 ```
 Final Score = (Audits × 0.20) + (Centralization × 0.30) + (Funds Mgmt × 0.30) + (Liquidity × 0.15) + (Operational × 0.05)
-            = (1.75 × 0.20) + (2.0 × 0.30) + (1.75 × 0.30) + (2.5 × 0.15) + (1.0 × 0.05)
-            = 0.350 + 0.600 + 0.525 + 0.375 + 0.050
-            = 1.900
+            = (1.5 × 0.20) + (2.0 × 0.30) + (1.75 × 0.30) + (2.5 × 0.15) + (1.0 × 0.05)
+            = 0.300 + 0.600 + 0.525 + 0.375 + 0.050
+            = 1.850
 ```
 
 | Category | Score | Weight | Weighted |
 |----------|-------|--------|----------|
-| Audits & Historical | 1.75 | 20% | 0.350 |
+| Audits & Historical | 1.5 | 20% | 0.300 |
 | Centralization & Control | 2.0 | 30% | 0.600 |
 | Funds Management | 1.75 | 30% | 0.525 |
 | Liquidity Risk | 2.5 | 15% | 0.375 |
 | Operational Risk | 1.0 | 5% | 0.050 |
-| **Final Score** | | | **1.90 / 5.0** |
+| **Final Score** | | | **1.85 / 5.0** |
 
 ### Risk Tier
 
