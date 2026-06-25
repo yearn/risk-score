@@ -22,6 +22,12 @@ describe('getUpstreamPath', () => {
     expect(getUpstreamPath(url)).toEqual({ path: '/v1/alerts?cursor=5021&limit=100' })
   })
 
+  test('strips the `path` param injected by the vercel rewrite', () => {
+    // Vercel's /api/monitoring/:path* rewrite appends ?path=alerts to the destination.
+    const url = new URL('http://localhost/api/monitoring/alerts?path=alerts&protocol=aave&limit=5')
+    expect(getUpstreamPath(url)).toEqual({ path: '/v1/alerts?protocol=aave&limit=5' })
+  })
+
   test('maps single-alert path /api/monitoring/alerts/{id}', () => {
     const url = new URL('http://localhost/api/monitoring/alerts/5021')
     expect(getUpstreamPath(url)).toEqual({ path: '/v1/alerts/5021' })

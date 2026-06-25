@@ -13,12 +13,19 @@ export const config = { runtime: 'edge' }
 const ALLOWED_PARAMS = ['protocol', 'severity', 'source', 'from', 'to', 'cursor', 'limit']
 const SEVERITIES = new Set(['LOW', 'MEDIUM', 'HIGH', 'CRITICAL'])
 
+// The vercel.json `/api/monitoring/:path*` rewrite injects the matched sub-path as a `path`
+// query param. It's a routing artifact (routing uses url.pathname), so skip it here instead of
+// rejecting it as an unsupported param or forwarding it upstream.
+const REWRITE_PARAM = 'path'
+
 type UpstreamResult = { path: string } | { error: string; status: number }
 
-// Rejects any non-allowlisted or malformed alerts param. On success the (already validated)
-// querystring is forwarded verbatim, so there is nothing to return.
-function validateAlertsQuery(search: URLSearchParams): { error: string; status: number } | null {
+// Validates the alerts params and returns the allowlisted query to forward (the `path` rewrite
+// artifact and anything non-allowlisted are excluded / rejected).
+function validateAlertsQuery(search: URLSearchParams): { query: URLSearchParams } | { error: string; status: number } {
+  const out = new URLSearchParams()
   for (const [key, value] of search) {
+    if (key === REWRITE_PARAM) continue
     if (!ALLOWED_PARAMS.includes(key)) {
       return { error: `unsupported query param: ${key}`, status: 400 }
     }
@@ -34,8 +41,9 @@ function validateAlertsQuery(search: URLSearchParams): { error: string; status: 
     if ((key === 'from' || key === 'to') && !/^[0-9T:+.\- Z]+$/.test(value)) {
       return { error: `invalid ${key}`, status: 400 }
     }
+    out.append(key, value)
   }
-  return null
+  return { query: out }
 }
 
 // Maps an inbound `/api/monitoring/*` URL to the upstream path under MONITORING_API_URL.
@@ -50,9 +58,9 @@ export function getUpstreamPath(url: URL): UpstreamResult {
   }
 
   if (sub === 'alerts') {
-    const error = validateAlertsQuery(url.searchParams)
-    if (error) return error
-    const qs = url.searchParams.toString()
+    const result = validateAlertsQuery(url.searchParams)
+    if ('error' in result) return result
+    const qs = result.query.toString()
     return { path: qs ? `/v1/alerts?${qs}` : '/v1/alerts' }
   }
 
