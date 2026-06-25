@@ -4,12 +4,14 @@ interface Props {
   description?: string;
   ogImage?: string;
   ogUrl?: string;
+  bare?: boolean;
 }
 const {
   title,
-  description = "Independent risk evaluations for DeFi protocols and assets",
+  description = "Risk evaluations for DeFi protocols and assets",
   ogImage = "/og/default.png",
   ogUrl,
+  bare = false,
 } = Astro.props;
 const canonicalUrl = ogUrl ? new URL(ogUrl, Astro.site ?? Astro.url.origin).href : (Astro.site ?? Astro.url.origin).toString();
 const ogImageUrl = new URL(ogImage, Astro.site ?? Astro.url.origin).href;
@@ -20,6 +22,34 @@ const ogImageUrl = new URL(ogImage, Astro.site ?? Astro.url.origin).href;
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <!--
+      Avoid the "broken render then snap to correct" flash: mark the document
+      as .loading before first paint and hide the body until the render-blocking
+      stylesheets in <head> have applied. The reveal script at the end of <body>
+      (which a browser only runs after preceding stylesheets load) clears it, so
+      the user sees a themed blank page, then the fully styled page.
+
+      The class is added via JS so no-JS clients fall back to visible content,
+      and a 4s failsafe guarantees the page can never stay blank.
+    -->
+    <script is:inline>
+      document.documentElement.classList.add("loading");
+      setTimeout(function () {
+        document.documentElement.classList.remove("loading");
+      }, 4000);
+    </script>
+    <!--
+      Critical inline styles: applied on the first paint with no network fetch,
+      so the page starts as a correct themed (dark/light) blank instead of
+      flashing unstyled white. Matches the design tokens in styles/global.css.
+    -->
+    <style is:inline>
+      html { background: #0c0c0c; color-scheme: dark; }
+      html.light { background: #ffffff; color-scheme: light; }
+      body { background: #0c0c0c; color: #f4f4f4; }
+      html.light body { background: #ffffff; color: #0c0c0c; }
+      html.loading body { visibility: hidden; }
+    </style>
     <meta name="description" content={description} />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="canonical" href={canonicalUrl} />
@@ -46,12 +76,23 @@ const ogImageUrl = new URL(ogImage, Astro.site ?? Astro.url.origin).href;
       }
     </script>
   </head>
-  <body>
+  <body class={bare ? "is-bare" : "has-bg"}>
+    {!bare && (
+      <div class="bg-deco" aria-hidden="true">
+        <div class="bg-glow"></div>
+        <img src="/pills/blue-pill.png" alt="" class="pill pill-1" />
+        <img src="/pills/blue-pill.png" alt="" class="pill pill-2" />
+        <img src="/pills/blue-pill.png" alt="" class="pill pill-3" />
+        <img src="/pills/blue-pill.png" alt="" class="pill pill-4" />
+        <img src="/pills/blue-pill.png" alt="" class="pill pill-5" />
+        <img src="/pills/blue-pill.png" alt="" class="pill pill-6" />
+      </div>
+    )}
     <header class="site-header">
       <div class="container header-row">
         <div class="header-left">
         <a href="https://yearn.fi" class="logo-link" aria-label="Yearn Home" target="_blank" rel="noopener noreferrer">
-          <svg viewBox="85 100 390 115" fill="none" xmlns="http://www.w3.org/2000/svg" class="logo-img">
+          <svg width="95" height="28" viewBox="85 100 390 115" fill="none" xmlns="http://www.w3.org/2000/svg" class="logo-img">
             <path d="M307.601 124.989C303.535 122.91 298.842 121.867 293.509 121.867C288.177 121.867 283.623 122.973 279.626 125.191C275.63 127.409 272.52 130.544 270.297 134.601C268.074 138.658 266.966 143.41 266.966 148.864C266.966 154.318 268.106 158.969 270.398 163.026C272.685 167.084 275.966 170.199 280.234 172.386C284.503 174.566 289.576 175.659 295.454 175.659C299.963 175.659 303.96 174.857 307.443 173.258C310.927 171.659 313.726 169.46 315.848 166.66C317.963 163.867 319.299 160.726 319.844 157.25H305.6C304.986 159.702 303.706 161.56 301.756 162.824C299.811 164.088 297.367 164.714 294.428 164.714C290.735 164.714 287.835 163.627 285.719 161.44C283.597 159.26 282.369 156.258 282.027 152.441V152.03H320.25C320.522 150.596 320.661 148.965 320.661 147.12C320.592 142.008 319.413 137.559 317.127 133.779C314.841 129.994 311.661 127.068 307.595 124.989H307.601ZM282.343 142.627C282.755 139.562 284.034 137.122 286.188 135.315C288.341 133.508 290.989 132.604 294.13 132.604C297.272 132.604 300.122 133.476 302.275 135.208C304.428 136.946 305.739 139.416 306.221 142.621H282.343V142.627Z" fill="currentColor"/>
             <path d="M252.43 122.48L239.928 160.214L227.115 122.48H211.744L232.036 175.343L230.706 178.819C229.953 180.589 229.167 181.783 228.35 182.396C227.533 183.009 226.197 183.319 224.354 183.319H216.361V195.49H230.402C233.069 195.49 235.235 195.029 236.907 194.113C238.579 193.19 239.966 191.831 241.055 190.024C242.145 188.216 243.31 185.714 244.539 182.51L267.903 122.486H252.43V122.48Z" fill="currentColor"/>
             <path d="M465.065 127.593C461.101 123.776 456.047 121.867 449.897 121.867C446.071 121.867 442.86 122.499 440.263 123.757C437.667 125.02 435.45 126.771 433.601 129.021L432.27 122.474H419.667V175.04H434.114V148.15C434.114 143.581 435.14 140.036 437.185 137.514C439.237 134.993 442.138 133.729 445.894 133.729C453 133.729 456.553 138.266 456.553 147.329V175.04H471V146.513C471 137.717 469.018 131.416 465.059 127.599L465.065 127.593Z" fill="currentColor"/>
@@ -62,11 +103,10 @@ const ogImageUrl = new URL(ogImage, Astro.site ?? Astro.url.origin).href;
           </svg>
         </a>
         <nav class="header-nav">
-          <a href="/">Reports</a>
+          <a href="/">Home</a>
+          <a href="/reports/">Reports</a>
           <a href="/tokens/">Tokens</a>
           <a href="/monitoring/">Monitoring</a>
-
-          <a href="https://app.morpho.org/ethereum/curator/yearn" target="_blank" rel="noopener noreferrer" class="nav-external">Morpho <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></a>
         </nav>
         </div>
         <button id="theme-toggle" class="theme-toggle" aria-label="Toggle light mode">
@@ -96,6 +136,11 @@ const ogImageUrl = new URL(ogImage, Astro.site ?? Astro.url.origin).href;
       </div>
     </footer>
     <script is:inline>
+      // This parser-inserted script runs only after the <head> stylesheets
+      // have loaded and applied, so the page is fully styled here — safe to
+      // reveal it (clears the .loading hide set in <head>).
+      document.documentElement.classList.remove("loading");
+
       document.getElementById("theme-toggle").addEventListener("click", () => {
         const html = document.documentElement;
         html.classList.toggle("light");
@@ -113,6 +158,137 @@ const ogImageUrl = new URL(ogImage, Astro.site ?? Astro.url.origin).href;
 </style>
 
 <style>
+  /* === Orbital pills background (Option C) === */
+  body.has-bg {
+    position: relative;
+    overflow-x: hidden;
+  }
+  .bg-deco {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    overflow: hidden;
+  }
+  .bg-glow {
+    position: absolute;
+    top: -20%;
+    right: -15%;
+    width: 70vw;
+    height: 70vw;
+    max-width: 1100px;
+    max-height: 1100px;
+    background: radial-gradient(
+      circle at center,
+      rgba(6, 117, 249, 0.28) 0%,
+      rgba(6, 117, 249, 0.08) 40%,
+      transparent 70%
+    );
+    filter: blur(20px);
+  }
+  :global(html.light) .bg-glow {
+    background: radial-gradient(
+      circle at center,
+      rgba(6, 117, 249, 0.18) 0%,
+      rgba(6, 117, 249, 0.06) 40%,
+      transparent 70%
+    );
+  }
+  .pill {
+    position: absolute;
+    pointer-events: none;
+    user-select: none;
+    will-change: transform;
+    opacity: 0.55;
+    filter: drop-shadow(0 0 30px rgba(6, 117, 249, 0.35));
+  }
+  :global(html.light) .pill {
+    opacity: 0.28;
+    filter: drop-shadow(0 0 20px rgba(6, 117, 249, 0.25));
+  }
+  .pill-1 {
+    width: 320px;
+    top: 6vh;
+    left: -90px;
+    transform: rotate(-22deg);
+    animation: float-a 8.8s ease-in-out infinite;
+  }
+  .pill-2 {
+    width: 220px;
+    top: 28vh;
+    right: -60px;
+    transform: rotate(35deg);
+    animation: float-b 11.2s ease-in-out infinite;
+  }
+  .pill-3 {
+    width: 160px;
+    top: 62vh;
+    left: 8vw;
+    transform: rotate(12deg);
+    opacity: 0.35;
+    animation: float-c 7.2s ease-in-out infinite;
+  }
+  .pill-4 {
+    width: 280px;
+    top: 78vh;
+    right: 10vw;
+    transform: rotate(-48deg);
+    opacity: 0.4;
+    animation: float-a 10.4s ease-in-out infinite reverse;
+  }
+  .pill-5 {
+    width: 130px;
+    top: 110vh;
+    left: 38vw;
+    transform: rotate(60deg);
+    opacity: 0.3;
+    animation: float-b 8s ease-in-out infinite;
+  }
+  .pill-6 {
+    width: 200px;
+    top: 145vh;
+    right: -30px;
+    transform: rotate(-15deg);
+    opacity: 0.32;
+    animation: float-c 9.6s ease-in-out infinite reverse;
+  }
+  @keyframes float-a {
+    0%, 100% { translate: 0 0; }
+    50% { translate: 0 -28px; }
+  }
+  @keyframes float-b {
+    0%, 100% { translate: 0 0; }
+    50% { translate: -18px 22px; }
+  }
+  @keyframes float-c {
+    0%, 100% { translate: 0 0; }
+    50% { translate: 14px -16px; }
+  }
+  @media (max-width: 720px) {
+    .pill-1 { width: 220px; }
+    .pill-2 { width: 160px; }
+    .pill-3 { width: 110px; }
+    .pill-4 { width: 180px; right: -50px; }
+    .pill-5 { display: none; }
+    .pill-6 { width: 140px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .pill { animation: none; }
+  }
+
+  /* Header / content sit above the deco */
+  .site-header,
+  main.container,
+  .site-footer {
+    position: relative;
+    z-index: 1;
+  }
+  body.has-bg .site-header {
+    background: color-mix(in srgb, var(--bg-primary) 70%, transparent);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+
   .site-header {
     border-bottom: 1px solid var(--border);
     padding: 0.75rem 0;
@@ -126,16 +302,29 @@ const ogImageUrl = new URL(ogImage, Astro.site ?? Astro.url.origin).href;
     display: flex;
     align-items: center;
     gap: 1.5rem;
+    min-width: 0;
   }
   .header-left {
     display: flex;
     align-items: center;
     gap: 1.5rem;
+    min-width: 0;
+    flex: 1;
   }
   .header-nav {
     display: flex;
     gap: 1rem;
     font-size: 0.85rem;
+    min-width: 0;
+    overflow-x: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  .header-nav::-webkit-scrollbar {
+    display: none;
+  }
+  .header-nav a {
+    white-space: nowrap;
   }
   .header-nav a {
     color: var(--text-secondary);
@@ -200,6 +389,17 @@ const ogImageUrl = new URL(ogImage, Astro.site ?? Astro.url.origin).href;
   main.container {
     padding-top: 2rem;
     padding-bottom: 4rem;
+  }
+  @media (max-width: 720px) {
+    .header-row {
+      gap: 0.75rem;
+    }
+    .header-left {
+      gap: 0.85rem;
+    }
+    .container {
+      padding: 0 0.85rem;
+    }
   }
   @media (max-width: 540px) {
     .nav-external {

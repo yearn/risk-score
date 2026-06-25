@@ -56,18 +56,40 @@ const sortedShared = [...shared].sort((a: any, b: any) => {
 });
 
 const uniqueTokens = [...new Set(dependencies.map((d: any) => d.asset))].sort();
-
 ---
 
-<BaseLayout title="Token Exposures - Yearn Curation">
-  <h1>Token Exposures</h1>
-  <section>
-    <h2>Shared Token Exposure</h2>
-    <p class="section-desc">Tokens accepted by multiple protocols. If one depegs or its parent protocol fails, all listed protocols are affected.</p>
-    <div class="search-row">
+<BaseLayout title="Token Exposures — Yearn Curation" ogUrl="/tokens/" ogImage="/og/default.png">
+  <section class="page-hero">
+    <div class="section-eyebrow">
+      <span class="pulse-dot"></span>
+      Cross-protocol exposure
+    </div>
+    <h1>Token Exposures</h1>
+    <p class="page-sub">
+      Where assets in curated protocols overlap. If a shared token depegs or
+      its parent protocol fails, every protocol that holds it is affected —
+      this page maps the chain.
+    </p>
+  </section>
+
+  <section class="block">
+    <div class="block-head">
+      <div>
+        <h2>Shared Token Exposure</h2>
+      </div>
+      <span class="block-meta">{sortedShared.length} tokens</span>
+    </div>
+    <p class="block-desc">
+      Tokens accepted by multiple curated protocols. Sorted by risk band, then
+      by number of exposed protocols.
+    </p>
+
+    <div class="search-wrap">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="search-icon"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
       <input type="text" id="token-search" placeholder="Search tokens…" autocomplete="off" />
     </div>
-    <div class="table-wrap">
+
+    <div class="table-card">
       <table id="shared-table">
         <thead>
           <tr>
@@ -75,7 +97,7 @@ const uniqueTokens = [...new Set(dependencies.map((d: any) => d.asset))].sort();
             <th>Token</th>
             <th>Parent Protocol</th>
             <th>Exposed Protocols</th>
-            <th class="col-num">Score</th>
+            <th class="col-num">Risk</th>
           </tr>
         </thead>
         <tbody>
@@ -84,16 +106,16 @@ const uniqueTokens = [...new Set(dependencies.map((d: any) => d.asset))].sort();
               <td class="col-icon">
                 {row.address ? (
                   <Fragment>
-                    <img src={tokenIconUrl(row.address)} alt="" width="20" height="20" class="token-icon" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='block'" />
+                    <img src={tokenIconUrl(row.address)} alt="" width="22" height="22" class="token-icon" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='block'" />
                     <div class="icon-placeholder small" style="display:none" />
                   </Fragment>
                 ) : (
                   <div class="icon-placeholder small" />
                 )}
               </td>
-              <td class="mono">{row.asset}</td>
-              <td>{row.parent || <span class="muted">-</span>}</td>
-              <td>{row.protocols.join(", ")}</td>
+              <td class="mono token-cell">{row.asset}</td>
+              <td>{row.parent || <span class="muted">—</span>}</td>
+              <td class="protocols-cell">{row.protocols.join(", ")}</td>
               <td class="col-num">
                 <span class={`risk-badge risk-${tokenRisk(row.asset)}`}>{tokenRisk(row.asset)}</span>
               </td>
@@ -104,15 +126,29 @@ const uniqueTokens = [...new Set(dependencies.map((d: any) => d.asset))].sort();
     </div>
   </section>
 
-  <section>
-    <h2>Protocols</h2>
-    <div class="protocol-cards">
+  <section class="block">
+    <div class="block-head">
+      <div>
+        <div class="section-eyebrow">
+          <span class="pulse-dot"></span>
+          Protocols
+        </div>
+        <h2>Curated protocols</h2>
+      </div>
+      <span class="block-meta">{protocolsWithIcons.length} tracked</span>
+    </div>
+    <p class="block-desc">
+      Click a card to filter the dependency table below to that protocol.
+    </p>
+
+    <div class="protocol-grid">
       {protocolsWithIcons.map((p: any) => (
-        <div class="protocol-card" data-name={p.name}>
-          <div class="card-header">
+        <button class="protocol-card" data-name={p.name} type="button">
+          <div class="card-glow" aria-hidden="true"></div>
+          <div class="card-row">
             <div class="icon-stack">
               {p.iconUrl ? (
-                <img src={p.iconUrl} alt="" width="24" height="24" class="protocol-icon" loading="lazy" />
+                <img src={p.iconUrl} alt="" width="32" height="32" class="protocol-icon" loading="lazy" />
               ) : (
                 <div class="icon-placeholder" />
               )}
@@ -120,37 +156,63 @@ const uniqueTokens = [...new Set(dependencies.map((d: any) => d.asset))].sort();
                 <img src={p.chainIconUrl} alt="" width="14" height="14" class="chain-icon" loading="lazy" />
               )}
             </div>
-            <div class="card-name">{p.name}</div>
+            <div class="card-title">
+              <div class="card-name">{p.name}</div>
+              <div class="card-meta">
+                <span class="mono">{p.chain}</span>
+                <span class="sep">·</span>
+                <span>{p.type.replace(/_/g, " ")}</span>
+              </div>
+            </div>
+            <div class="card-count">
+              <div class="count-num">{p.assetCount}</div>
+              <div class="count-label">tokens</div>
+            </div>
           </div>
-          <div class="card-meta">
-            <span class="mono">{p.chain}</span>
-            <span class="muted">{p.type.replace("_", " ")}</span>
-            <span>{p.assetCount} tokens</span>
-          </div>
-        </div>
+        </button>
       ))}
     </div>
   </section>
 
-  <section>
-    <h2>Full Dependency Table</h2>
-    <div class="filter-row">
-      <label for="protocol-filter">Protocol:</label>
-      <select id="protocol-filter">
-        <option value="all">All</option>
-        {protocols.map((p: any) => (
-          <option value={p.name}>{p.name}</option>
-        ))}
-      </select>
-      <label for="token-filter">Token:</label>
-      <select id="token-filter">
-        <option value="all">All</option>
-        {uniqueTokens.map((t: string) => (
-          <option value={t}>{t}</option>
-        ))}
-      </select>
+  <section class="block">
+    <div class="block-head">
+      <div>
+        <div class="section-eyebrow">
+          <span class="pulse-dot"></span>
+          Full table
+        </div>
+        <h2>Dependencies</h2>
+      </div>
+      <span class="block-meta" id="dep-meta">{dependencies.length} rows</span>
     </div>
-    <div class="table-wrap">
+    <p class="block-desc">
+      Every protocol-token relationship the curation team tracks, with type
+      and allocation when available.
+    </p>
+
+    <div class="filter-row">
+      <div class="select-wrap">
+        <label for="protocol-filter">Protocol</label>
+        <select id="protocol-filter">
+          <option value="all">All</option>
+          {protocols.map((p: any) => (
+            <option value={p.name}>{p.name}</option>
+          ))}
+        </select>
+      </div>
+      <div class="select-wrap">
+        <label for="token-filter">Token</label>
+        <select id="token-filter">
+          <option value="all">All</option>
+          {uniqueTokens.map((t: string) => (
+            <option value={t}>{t}</option>
+          ))}
+        </select>
+      </div>
+      <button class="filter-reset" id="filter-reset" type="button">Reset</button>
+    </div>
+
+    <div class="table-card">
       <table id="dep-table">
         <thead>
           <tr>
@@ -163,13 +225,12 @@ const uniqueTokens = [...new Set(dependencies.map((d: any) => d.asset))].sort();
           </tr>
         </thead>
         <tbody>
-          {dependencies.map((row: any) => {
-            return (
+          {dependencies.map((row: any) => (
             <tr data-protocol={row.protocol} data-token={row.asset}>
               <td class="col-icon">
                 {row.address ? (
                   <Fragment>
-                    <img src={tokenIconUrl(row.address)} alt="" width="20" height="20" class="token-icon" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='block'" />
+                    <img src={tokenIconUrl(row.address)} alt="" width="22" height="22" class="token-icon" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='block'" />
                     <div class="icon-placeholder small" style="display:none" />
                   </Fragment>
                 ) : (
@@ -177,93 +238,324 @@ const uniqueTokens = [...new Set(dependencies.map((d: any) => d.asset))].sort();
                 )}
               </td>
               <td>{row.protocol}</td>
-              <td class="mono">{row.asset}</td>
-              <td><span class={`type-badge type-${row.type}`}>{row.type}</span></td>
-              <td>{row.parent || <span class="muted">-</span>}</td>
-              <td class="mono">{row.allocation || <span class="muted">-</span>}</td>
+              <td class="mono token-cell">{row.asset}</td>
+              <td><span class={`type-badge type-${row.type}`}>{row.type.replace(/_/g, " ")}</span></td>
+              <td>{row.parent || <span class="muted">—</span>}</td>
+              <td class="mono">{row.allocation || <span class="muted">—</span>}</td>
             </tr>
-            );
-          })}
+          ))}
         </tbody>
       </table>
     </div>
   </section>
 
   <script is:inline>
-    // Shared Token Exposure search
-    const tokenSearch = document.getElementById("token-search");
-    const sharedRows = document.querySelectorAll("#shared-table tbody tr");
-    tokenSearch.addEventListener("input", () => {
-      const q = tokenSearch.value.toLowerCase();
-      sharedRows.forEach((row) => {
-        const text = row.textContent.toLowerCase();
-        row.style.display = text.includes(q) ? "" : "none";
+    (() => {
+      // Shared Token Exposure search
+      const tokenSearch = document.getElementById("token-search");
+      const sharedRows = document.querySelectorAll("#shared-table tbody tr");
+      tokenSearch.addEventListener("input", () => {
+        const q = tokenSearch.value.toLowerCase();
+        sharedRows.forEach((row) => {
+          const text = row.textContent.toLowerCase();
+          row.style.display = text.includes(q) ? "" : "none";
+        });
       });
-    });
 
-    // Dependency table filters
-    const protocolFilter = document.getElementById("protocol-filter");
-    const tokenFilter = document.getElementById("token-filter");
-    const depRows = document.querySelectorAll("#dep-table tbody tr");
+      // Dependency filters
+      const protocolFilter = document.getElementById("protocol-filter");
+      const tokenFilter = document.getElementById("token-filter");
+      const reset = document.getElementById("filter-reset");
+      const depRows = document.querySelectorAll("#dep-table tbody tr");
+      const depMeta = document.getElementById("dep-meta");
 
-    function applyDepFilters() {
-      const pVal = protocolFilter.value;
-      const tVal = tokenFilter.value;
-      depRows.forEach((row) => {
-        const matchProtocol = pVal === "all" || row.dataset.protocol === pVal;
-        const matchToken = tVal === "all" || row.dataset.token === tVal;
-        row.style.display = matchProtocol && matchToken ? "" : "none";
-      });
-    }
+      function applyDepFilters() {
+        const pVal = protocolFilter.value;
+        const tVal = tokenFilter.value;
+        let visible = 0;
+        depRows.forEach((row) => {
+          const matchProtocol = pVal === "all" || row.dataset.protocol === pVal;
+          const matchToken = tVal === "all" || row.dataset.token === tVal;
+          const show = matchProtocol && matchToken;
+          row.style.display = show ? "" : "none";
+          if (show) visible++;
+        });
+        depMeta.textContent = visible === depRows.length
+          ? `${depRows.length} rows`
+          : `${visible} of ${depRows.length} rows`;
+      }
 
-    protocolFilter.addEventListener("change", applyDepFilters);
-    tokenFilter.addEventListener("change", applyDepFilters);
-
-    document.querySelectorAll(".protocol-card").forEach((card) => {
-      card.addEventListener("click", () => {
-        protocolFilter.value = card.dataset.name;
+      protocolFilter.addEventListener("change", applyDepFilters);
+      tokenFilter.addEventListener("change", applyDepFilters);
+      reset.addEventListener("click", () => {
+        protocolFilter.value = "all";
         tokenFilter.value = "all";
         applyDepFilters();
-        protocolFilter.scrollIntoView({ behavior: "smooth", block: "start" });
       });
-    });
+
+      // Protocol cards filter the dep table
+      document.querySelectorAll(".protocol-card").forEach((card) => {
+        card.addEventListener("click", () => {
+          protocolFilter.value = card.dataset.name;
+          tokenFilter.value = "all";
+          applyDepFilters();
+          document.getElementById("dep-table").scrollIntoView({ behavior: "smooth", block: "start" });
+        });
+        card.addEventListener("pointermove", (e) => {
+          const r = card.getBoundingClientRect();
+          card.style.setProperty("--mx", `${e.clientX - r.left}px`);
+          card.style.setProperty("--my", `${e.clientY - r.top}px`);
+        });
+        card.addEventListener("pointerleave", () => {
+          card.style.removeProperty("--mx");
+          card.style.removeProperty("--my");
+        });
+      });
+    })();
   </script>
 </BaseLayout>
 
 <style>
-  h1 { margin-bottom: 0.25rem; }
-  section { margin-bottom: 2.5rem; }
-  h2 { margin-bottom: 0.5rem; }
-  .search-row {
-    margin-bottom: 0.75rem;
+  /* === Hero === */
+  .page-hero {
+    padding: 2rem 0 1.5rem;
+    text-align: center;
   }
-  .search-row input {
+  .page-hero h1 {
+    font-size: clamp(1.75rem, 3.4vw, 2.4rem);
+    letter-spacing: -0.02em;
+    margin: 0 auto 0.75rem;
+    line-height: 1.15;
+    max-width: 22ch;
+  }
+  .page-sub {
+    color: var(--text-secondary);
+    max-width: 60ch;
+    margin: 0 auto;
+    font-size: 0.95rem;
+    line-height: 1.5;
+  }
+
+  /* === Section eyebrow === */
+  .section-eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    color: var(--brand-blue);
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+  }
+  .pulse-dot {
+    width: 6px;
+    height: 6px;
+    background: var(--brand-blue);
+    border-radius: 50%;
+    box-shadow: 0 0 0 0 rgba(6, 117, 249, 0.6);
+    animation: pulse 2s ease-out infinite;
+  }
+  @keyframes pulse {
+    0% { box-shadow: 0 0 0 0 rgba(6, 117, 249, 0.6); }
+    70% { box-shadow: 0 0 0 8px rgba(6, 117, 249, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(6, 117, 249, 0); }
+  }
+
+  /* === Block === */
+  .block { margin: 2.5rem 0; }
+  .block-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 1rem;
+    margin-bottom: 0.5rem;
+    flex-wrap: wrap;
+  }
+  .block h2 {
+    font-size: 1.3rem;
+    letter-spacing: -0.01em;
+  }
+  .block-meta {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    padding: 0.3rem 0.7rem;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--bg-card) 50%, transparent);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    font-variant-numeric: tabular-nums;
+  }
+  .block-desc {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    line-height: 1.5;
+    margin-bottom: 1rem;
+    max-width: 70ch;
+  }
+
+  /* === Search === */
+  .search-wrap {
+    position: relative;
+    max-width: 480px;
+    margin-bottom: 0.85rem;
+  }
+  .search-icon {
+    position: absolute;
+    left: 0.85rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-secondary);
+    pointer-events: none;
+  }
+  .search-wrap input {
     width: 100%;
-    max-width: 360px;
-    background: var(--bg-secondary);
+    padding: 0.65rem 0.85rem 0.65rem 2.4rem;
+    background: color-mix(in srgb, var(--bg-card) 55%, transparent);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
     color: var(--text-primary);
     border: 1px solid var(--border);
-    border-radius: 4px;
-    padding: 0.4rem 0.6rem;
-    font-size: 0.85rem;
+    border-radius: 10px;
+    font-size: 0.9rem;
+    transition: border-color 0.15s, background 0.15s;
   }
-  .search-row input::placeholder {
+  .search-wrap input::placeholder {
     color: var(--text-secondary);
   }
-  .section-desc {
-    color: var(--text-secondary);
-    font-size: 0.85rem;
-    margin-bottom: 1rem;
+  .search-wrap input:focus {
+    outline: none;
+    border-color: var(--brand-blue);
+    background: color-mix(in srgb, var(--bg-card) 75%, transparent);
   }
-  .mono { font-family: "SF Mono", "Fira Code", monospace; font-size: 0.85em; }
-  .muted { color: var(--text-secondary); }
-  .col-num { text-align: center; width: 60px; }
-  .risk-badge {
-    display: inline-block;
-    padding: 0.15rem 0.5rem;
-    border-radius: 999px;
-    font-size: 0.8rem;
+
+  /* === Filter row === */
+  .filter-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 0.75rem;
+    margin-bottom: 0.85rem;
+  }
+  .select-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+  .select-wrap label {
+    font-size: 0.7rem;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
     font-weight: 600;
+  }
+  .select-wrap select {
+    appearance: none;
+    -webkit-appearance: none;
+    min-width: 200px;
+    padding: 0.55rem 2.2rem 0.55rem 0.85rem;
+    background: color-mix(in srgb, var(--bg-card) 55%, transparent);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    color: var(--text-primary);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%239d9d9d' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'/%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 0.75rem center;
+    transition: border-color 0.15s;
+  }
+  .select-wrap select:focus {
+    outline: none;
+    border-color: var(--brand-blue);
+  }
+  .filter-reset {
+    padding: 0.55rem 1rem;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: color-mix(in srgb, var(--bg-card) 50%, transparent);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    font-family: inherit;
+    cursor: pointer;
+    transition: color 0.15s, border-color 0.15s;
+  }
+  .filter-reset:hover {
+    color: var(--text-primary);
+    border-color: var(--text-secondary);
+  }
+
+  /* === Table card === */
+  .table-card {
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: color-mix(in srgb, var(--bg-card) 55%, transparent);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    overflow: hidden;
+  }
+  .table-card table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.88rem;
+    margin: 0;
+  }
+  .table-card thead th {
+    background: color-mix(in srgb, var(--bg-secondary) 60%, transparent);
+    color: var(--text-secondary);
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    padding: 0.7rem 0.85rem;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+  }
+  .table-card tbody td {
+    padding: 0.6rem 0.85rem;
+    border-bottom: 1px solid color-mix(in srgb, var(--border) 50%, transparent);
+    vertical-align: middle;
+  }
+  .table-card tbody tr:last-child td { border-bottom: none; }
+  .table-card tbody tr {
+    transition: background 0.15s;
+  }
+  .table-card tbody tr:hover {
+    background: color-mix(in srgb, var(--brand-blue) 6%, transparent);
+  }
+  .table-card .col-icon {
+    width: 36px;
+    padding-right: 0;
+  }
+  .table-card .col-num {
+    text-align: center;
+    width: 60px;
+  }
+  .token-cell { font-weight: 500; }
+  .protocols-cell {
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+  }
+  .mono { font-family: "SF Mono", "Fira Code", monospace; font-size: 0.92em; }
+  .muted { color: var(--text-secondary); }
+
+  /* === Risk badges === */
+  .risk-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 28px;
+    height: 24px;
+    padding: 0 0.5rem;
+    border-radius: 6px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
   }
   .risk-1 { background: #22C55E; color: #0c0c0c; }
   .risk-2 { background: #86EFAC; color: #0c0c0c; }
@@ -272,95 +564,157 @@ const uniqueTokens = [...new Set(dependencies.map((d: any) => d.asset))].sort();
   .risk-5 { background: #EF4444; color: #fff; }
   .risk-\? { background: #64748B; color: #fff; }
 
+  /* === Type badges === */
   .type-badge {
-    font-size: 0.75rem;
-    padding: 0.15rem 0.4rem;
-    border-radius: 4px;
+    display: inline-block;
+    font-size: 0.72rem;
+    padding: 0.2rem 0.5rem;
+    border-radius: 999px;
     font-weight: 500;
+    text-transform: capitalize;
+    letter-spacing: 0.01em;
   }
-  .type-collateral { background: var(--brand-blue); color: #fff; }
-  .type-base { background: #22C55E; color: #0c0c0c; }
-  .type-yield_source { background: #A78BFA; color: #0c0c0c; }
+  .type-collateral { background: color-mix(in srgb, var(--brand-blue) 18%, transparent); color: #7eb4ff; border: 1px solid color-mix(in srgb, var(--brand-blue) 35%, transparent); }
+  .type-base { background: color-mix(in srgb, #22C55E 18%, transparent); color: #86EFAC; border: 1px solid color-mix(in srgb, #22C55E 35%, transparent); }
+  .type-yield_source { background: color-mix(in srgb, #A78BFA 18%, transparent); color: #c4b5fd; border: 1px solid color-mix(in srgb, #A78BFA 35%, transparent); }
 
-  .protocol-cards {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-    gap: 0.75rem;
-    margin-bottom: 1rem;
+  /* === Icon stacks === */
+  .icon-stack {
+    position: relative;
+    width: 32px;
+    height: 32px;
+    flex-shrink: 0;
   }
-  .protocol-card {
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 0.75rem 1rem;
-    background: var(--bg-card);
-    cursor: pointer;
-    transition: border-color 0.2s;
-  }
-  .protocol-card:hover {
-    border-color: var(--brand-blue);
-    background: rgba(6, 117, 249, 0.08);
-  }
-  .card-header {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    margin-bottom: 0.25rem;
-  }
-  .card-name { font-weight: 600; }
-
-  .col-icon { width: 36px; padding-right: 0; }
-  .icon-stack { position: relative; width: 24px; height: 24px; flex-shrink: 0; }
   .protocol-icon { display: block; border-radius: 50%; }
   .chain-icon {
     position: absolute;
-    bottom: -4px;
-    right: -6px;
+    bottom: -3px;
+    right: -4px;
     border-radius: 50%;
-    border: 1.5px solid var(--bg-primary);
-    background: var(--bg-primary);
+    border: 2px solid var(--bg-card);
+    background: var(--bg-card);
   }
+  .token-icon { display: block; border-radius: 50%; }
   .icon-placeholder {
-    width: 24px;
-    height: 24px;
+    width: 100%;
+    height: 100%;
     border-radius: 50%;
     background: var(--bg-secondary);
   }
   .icon-placeholder.small {
-    width: 20px;
-    height: 20px;
+    width: 22px;
+    height: 22px;
   }
-  .token-icon {
-    display: block;
-    border-radius: 50%;
+
+  /* === Protocol cards === */
+  .protocol-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.75rem;
+  }
+  @media (max-width: 720px) {
+    .protocol-grid { grid-template-columns: 1fr; }
+  }
+  .protocol-card {
+    --accent: var(--brand-blue);
+    --mx: 50%;
+    --my: 50%;
+    position: relative;
+    text-align: left;
+    padding: 0.95rem 1.1rem;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: color-mix(in srgb, var(--bg-card) 60%, transparent);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    color: var(--text-primary);
+    cursor: pointer;
+    overflow: hidden;
+    isolation: isolate;
+    font-family: inherit;
+    transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+  }
+  .protocol-card:hover {
+    transform: translateY(-2px);
+    border-color: color-mix(in srgb, var(--accent) 65%, var(--border));
+    box-shadow:
+      0 12px 30px -18px rgba(0, 0, 0, 0.6),
+      0 0 0 1px color-mix(in srgb, var(--accent) 25%, transparent);
+  }
+  .card-glow {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    opacity: 0;
+    background: radial-gradient(
+      260px circle at var(--mx, 50%) var(--my, 50%),
+      color-mix(in srgb, var(--accent) 18%, transparent),
+      transparent 60%
+    );
+    transition: opacity 0.25s;
+  }
+  .protocol-card:hover .card-glow { opacity: 1; }
+  .card-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+  .card-title {
+    flex: 1;
+    min-width: 0;
+  }
+  .card-name {
+    font-size: 0.95rem;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    color: var(--text-primary);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
   .card-meta {
     display: flex;
-    gap: 0.5rem;
-    font-size: 0.8rem;
-    color: var(--text-secondary);
-  }
-
-  .filter-row {
-    display: flex;
     align-items: center;
-    gap: 0.5rem;
-    margin-bottom: 0.75rem;
-    font-size: 0.85rem;
+    gap: 0.4rem;
+    font-size: 0.78rem;
+    color: var(--text-secondary);
+    margin-top: 0.15rem;
+    text-transform: capitalize;
   }
-  .filter-row label { color: var(--text-secondary); }
-  .filter-row select {
-    background: var(--bg-secondary);
+  .card-meta .sep { opacity: 0.4; }
+  .card-count {
+    text-align: right;
+    flex-shrink: 0;
+    padding-left: 0.5rem;
+  }
+  .count-num {
+    font-size: 1.25rem;
+    font-weight: 700;
+    line-height: 1;
     color: var(--text-primary);
-    border: 1px solid var(--border);
-    border-radius: 4px;
-    padding: 0.3rem 0.5rem;
-    font-size: 0.85rem;
+    font-variant-numeric: tabular-nums;
+  }
+  .count-label {
+    font-size: 0.7rem;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-top: 0.2rem;
   }
 
   @media (max-width: 640px) {
-    table { font-size: 0.8rem; }
-    th, td { padding: 0.4rem 0.5rem; }
-    .protocol-cards { grid-template-columns: 1fr; }
-    .filter-row { flex-wrap: wrap; }
+    .table-card { font-size: 0.78rem; }
+    .table-card thead th,
+    .table-card tbody td {
+      padding: 0.5rem 0.6rem;
+    }
+    .protocols-cell { font-size: 0.78rem; }
+    .filter-row { gap: 0.5rem; }
+    .select-wrap select { min-width: 0; width: 100%; }
+    .select-wrap { flex: 1; min-width: 140px; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .pulse-dot { animation: none; }
   }
 </style>

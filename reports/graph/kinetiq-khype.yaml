@@ -1,0 +1,186 @@
+slug: kinetiq-khype
+title: Kinetiq (kHYPE) — Contract Dependency Graph
+chain: hyperevm
+
+categories:
+  - id: vault
+    label: Vault / Token
+  - id: strategy
+    label: Validator Delegation
+  - id: governance
+    label: Governance
+  - id: infra
+    label: Protocol Infra
+  - id: dependency
+    label: External Dependency
+
+nodes:
+  # === Vault / token layer ===
+  - id: kHYPE
+    label: kHYPE (LST)
+    address: "0xfd739d4e423301ce9385c1fb8850539d657c296d"
+    category: vault
+    note: ERC-20 upgradeable proxy; exchange-rate model
+  - id: staking-pool
+    label: StakingPool (Diamond/Router)
+    address: "0x393D0B87Ed38fc779FD9611144aE649BA6082109"
+    category: vault
+    note: Minter/Burner of kHYPE; StakingManagerRouter (7 facets)
+  - id: instant-unstake-pool
+    label: InstantUnstakePool
+    address: "0x665b67793594fc5C251a3C95cbEb4B6245Cd2123"
+    category: vault
+    note: Instant-unstake liquidity pool (~42K HYPE)
+
+  # === Protocol infra ===
+  - id: staking-accountant
+    label: StakingAccountant
+    address: "0x9209648Ec9D448EF57116B73A2f081835643dc7A"
+    category: infra
+    note: kHYPE↔HYPE exchange-rate aggregator
+  - id: validator-manager
+    label: ValidatorManager
+    address: "0x4b797A93DfC3D18Cf98B7322a2b142FA8007508f"
+    category: infra
+    note: Delegation engine
+  - id: oracle-manager
+    label: OracleManager
+    address: "0x192826e470bd65FDC2CB472eDd834D096233049b"
+    category: infra
+    note: Validator performance oracle
+  - id: reward-tracker
+    label: RewardShareTracker
+    address: "0xE5FbA07C7b3CfbC29633f3D3Ab38b36007F35983"
+    category: infra
+  - id: pauser-registry
+    label: PauserRegistry
+    address: "0x752E76ea71960Da08644614E626c9F9Ff5a50547"
+    category: infra
+  - id: facet-registry
+    label: FacetRegistry (7 facets)
+    address: "0x4841eCC9Ffb18aEA197E4d1dd1633cEA5e834225"
+    category: infra
+    note: Diamond facet registry
+  - id: operator-eoa
+    label: Operator EOA (Bot)
+    address: "0x23A4604cDFe8e9e2e9Cf7C10D7492B0F3f4B4038"
+    category: infra
+    note: Kinetiq automated keeper; holds OPERATOR
+
+  # === Governance ===
+  - id: multisig
+    label: Governance Multisig (4/8)
+    address: "0x18A82c968b992D28D4D812920eB7b4305306f8F1"
+    category: governance
+    note: Gnosis Safe v1.3.0; pseudonymous signers; no timelock
+  - id: treasury-multisig
+    label: Treasury Multisig (4/7)
+    address: "0x64bD77698Ab7C3Fd0a1F54497b228ED7a02098E3"
+    category: governance
+  - id: khype-proxyadmin
+    label: kHYPE ProxyAdmin
+    address: "0x9c1e8db004d8158a52e83ffdc63e37eabea8304c"
+    category: governance
+  - id: staking-pool-proxyadmin
+    label: StakingPool ProxyAdmin
+    address: "0x8194aa9eca9225f96a690072b22a9ad0dd064f64"
+    category: governance
+  - id: pauser-proxyadmin
+    label: PauserRegistry ProxyAdmin
+    address: "0xd26c2c4a8bd4f78c64212318424ed794be120ea6"
+    category: governance
+
+  # === External dependencies (validators / Hyperliquid L1) ===
+  - id: hyperliquid-l1
+    label: Hyperliquid L1 Validators (15)
+    category: dependency
+    note: Delegations spread across 15 validators; 0% to Hyper Foundation
+
+edges:
+  # === Governance ===
+  - from: multisig
+    to: khype-proxyadmin
+    kind: controls
+    label: owner (no timelock)
+  - from: multisig
+    to: staking-pool-proxyadmin
+    kind: controls
+    label: owner (no timelock)
+  - from: multisig
+    to: pauser-proxyadmin
+    kind: controls
+    label: owner (no timelock)
+  - from: khype-proxyadmin
+    to: kHYPE
+    kind: manages
+    label: upgradeable proxy
+  - from: staking-pool-proxyadmin
+    to: staking-pool
+    kind: manages
+    label: upgradeable proxy
+  - from: pauser-proxyadmin
+    to: pauser-registry
+    kind: manages
+    label: upgradeable proxy
+  - from: multisig
+    to: kHYPE
+    kind: holds-role
+    label: DEFAULT_ADMIN
+  - from: multisig
+    to: staking-pool
+    kind: holds-role
+    label: DEFAULT_ADMIN + MANAGER
+  - from: multisig
+    to: pauser-registry
+    kind: holds-role
+    label: DEFAULT_ADMIN + PAUSER
+  - from: multisig
+    to: staking-accountant
+    kind: holds-role
+    label: MANAGER
+  - from: operator-eoa
+    to: staking-pool
+    kind: holds-role
+    label: OPERATOR (EOA)
+
+  # === Mint authority on kHYPE ===
+  - from: staking-pool
+    to: kHYPE
+    kind: mints
+    label: MINTER + BURNER
+
+  # === Internal vault / infra wiring ===
+  - from: facet-registry
+    to: staking-pool
+    kind: manages
+    label: 7 facets
+  - from: staking-accountant
+    to: kHYPE
+    kind: manages
+    label: exchange-rate aggregator
+  - from: validator-manager
+    to: staking-pool
+    kind: manages
+    label: delegation engine
+  - from: oracle-manager
+    to: validator-manager
+    kind: manages
+    label: validator performance
+  - from: reward-tracker
+    to: staking-pool
+    kind: manages
+    label: reward distribution
+
+  # === Flow: user HYPE → StakingPool → validators ===
+  - from: kHYPE
+    to: staking-pool
+    kind: allocates-to
+    label: "100%"
+  - from: staking-pool
+    to: instant-unstake-pool
+    kind: routes-through
+    label: instant-unstake leg
+  - from: staking-pool
+    to: hyperliquid-l1
+    kind: deposits-into
+    label: "HYPE → validators (15)"

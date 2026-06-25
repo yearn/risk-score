@@ -29,3 +29,10 @@ export function getAllSlugs(): string[] {
     .filter((f) => f.endsWith(".md"))
     .map((f) => f.replace(".md", ""));
 }
+
+export function getRecentReports(n = 5): ReportData[] {
+  return getAllReports()
+    .slice()
+    .sort((a, b) => b.dateSortable - a.dateSortable)
+    .slice(0, n);
+}

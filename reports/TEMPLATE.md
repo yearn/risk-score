@@ -1,10 +1,24 @@
 # Protocol Risk Assessment: [Protocol Name]
 
-- **Assessment Date:** [Date]
+- **Assessment Date:** [Month Day, Year]
 - **Token:** [Token Name]
 - **Chain:** [Chain Name]
 - **Token Address:** [`[Token Address]`]([Token Explorer Link])
 - **Final Score: X/5.0**
+
+<!--
+Assessment Date format:
+  - Use full English month name and four-digit year, e.g. "March 4, 2026".
+  - When a report is reassessed, append the new date in parentheses on the
+    same line, e.g.
+        **Assessment Date:** February 8, 2026 (Updated: March 22, 2026)
+    or, when reassessing in response to an event:
+        **Assessment Date:** April 27, 2026 (reassessment after April 18, 2026 exploit)
+  - The reassessment-scan workflow parses every "Month Day, Year" date on this
+    line and uses the latest one to decide whether the report is stale, so the
+    appended date keeps the staleness clock honest.
+-->
+
 
 ## Overview + Links
 
@@ -48,6 +62,27 @@ Explain what the protocol does, its usage, and yield sources.
 - Is minting/redeeming atomic in a single transaction?
 - Are there fees, rate limits, or cooldown periods?
 
+### Token Mint Authority
+
+Enumerate every address that can mint the assessed token, and the mechanism that gates them. Treat any address with mint authority as part of the trust surface even if it is intended only for a narrow purpose. Onchain enumeration procedure: see `reports/skill.md` § "Pass 1.6: Mint authority enumeration".
+
+**Mint mechanism:** [Open mint via collateral deposit / Role-gated AccessControl / Whitelist mapping / Ownable / Custodial bridge / Other — describe]
+
+**Mint requires backing:** [Yes — collateral must transfer in same tx / No — minter can issue unbacked tokens]
+
+**Per-address mint authority** (verified onchain on [date], from token contract `0x…`):
+
+| Address | Can Mint | Can Burn | Role / Mechanism | Notes |
+|---------|:--------:|:--------:|------------------|-------|
+| [`0x…`](etherscan link) | ✓ | ✓ | `MINTER_ROLE` | Multisig, 3/5, named signers |
+| [`0x…`](etherscan link) | ✓ | — | `mintList` entry | Bridge contract (e.g. Wormhole NTT) |
+
+**Rate limits / supply caps:** [None / Max mint per block of X / Global supply cap of Y / Per-minter caps — describe]
+
+**Backing check at mint time:** [Atomic — minter must deposit collateral in same tx / Deferred — backing settled offchain / None — minter can issue unbacked tokens]
+
+See `reports/report/mezo-musd.md` for a worked example.
+
 ### Collateralization
 
 - Is it collateralized onchain?
@@ -61,12 +96,12 @@ Explain what the protocol does, its usage, and yield sources.
 ### Provability
 
 - How easy is it to prove that reserves exist where documentation claims?
-- If yield-bearing, how is the yield calculated? onchain or off-chain? Can anyone compute it?
+- If yield-bearing, how is the yield calculated? onchain or offchain? Can anyone compute it?
 - How does onchain reporting work? Is the exchange rate computed programmatically or updated by a privileged role?
-- If collateral is off-chain, how transparent is the team? How frequently are reserves verified?
+- If collateral is offchain, how transparent is the team? How frequently are reserves verified?
 - Are there third-party verification mechanisms? (Chainlink PoR, Merkle proofs, custodian attestations)
-- Can minting be done without backing assets?
-- Can admin mint tokens out of thin air? List all accounts with minting role.
+
+(Mint-authority enumeration and unbacked-mint risk are captured in the *Token Mint Authority* subsection above.)
 
 ## Liquidity Risk
 
@@ -90,8 +125,8 @@ Explain what the protocol does, its usage, and yield sources.
 ### Programmability
 
 - How programmatic is the system? How much is handled by smart contracts vs manual intervention?
-- If the protocol relies on vaults, how is PPS (price per share) defined? onchain or off-chain accounting?
-- Are there off-chain dependencies for critical functions? (keepers, relayers, backends)
+- If the protocol relies on vaults, how is PPS (price per share) defined? onchain or offchain accounting?
+- Are there offchain dependencies for critical functions? (keepers, relayers, backends)
 
 ### External Dependencies
 
@@ -116,7 +151,7 @@ List key contracts and events to monitor. At minimum, cover governance changes a
 - Critical values or events to watch like parameter changes, governance actions, redeption liquidity, collateral allocation.
 - If protocol is using trenches or some kind of loss coverage define which contracts should be monitored to track the coverage ratio.
 - Define which functions can be used to get specific data.
-- If data can't be fetched on-chain then fallback to using off-chain data.
+- If data can't be fetched onchain then fallback to using offchain data.
 - Try to define threshold values.
 - Recommended monitoring frequency, hourly, daily, weekly, etc.
 
@@ -218,8 +253,8 @@ If ANY gate is triggered, the protocol automatically receives a score of **5** (
 |-------|------------------|---------------------|
 | **1** | Fully programmatic | Calculated onchain algorithmically |
 | **2** | Mostly programmatic with minor admin input | onchain with some parameters |
-| **3** | Hybrid onchain/off-chain operations | onchain but reliant on admin updates |
-| **4** | Significant manual intervention required | Off-chain accounting with periodic reporting |
+| **3** | Hybrid onchain/offchain operations | onchain but reliant on admin updates |
+| **4** | Significant manual intervention required | Offchain accounting with periodic reporting |
 | **5** | Fully custodial/centralized operations | Admin-controlled rate, no transparency |
 
 **Subcategory C: External Dependencies**
@@ -244,7 +279,7 @@ If ANY gate is triggered, the protocol automatically receives a score of **5** (
 |-------|---------|-------------------|---------------|
 | **1** | 100%+ onchain, over-collateralized | Blue-chip assets (ETH, WBTC, stablecoins) | Real-time onchain verification |
 | **2** | 100% onchain collateral | High-quality DeFi assets (LSTs, major LPs) | onchain with some complexity |
-| **3** | 100% collateral, some off-chain | Mixed quality or newer protocols | Periodic custodian attestation |
+| **3** | 100% collateral, some offchain | Mixed quality or newer protocols | Periodic custodian attestation |
 | **4** | Partially collateralized or custodial | Lower-quality or illiquid assets | Opaque or infrequent reporting |
 | **5** | Uncollateralized or unverifiable (CRITICAL GATE) | Unknown or very high-risk assets | No verification possible |
 
@@ -253,9 +288,9 @@ If ANY gate is triggered, the protocol automatically receives a score of **5** (
 | Score | Reserve Transparency | Reporting Mechanism | Third-Party Verification |
 |-------|---------------------|--------------------|-----------------------|
 | **1** | Fully onchain, anyone can verify | Programmatic, real-time | Multiple verification sources |
-| **2** | Mostly onchain, some off-chain | onchain with periodic updates | Single reliable source |
-| **3** | Hybrid onchain/off-chain | Manual reporting by admins | Known custodian attestation |
-| **4** | Primarily off-chain | Infrequent reporting | Self-reported only |
+| **2** | Mostly onchain, some offchain | onchain with periodic updates | Single reliable source |
+| **3** | Hybrid onchain/offchain | Manual reporting by admins | Known custodian attestation |
+| **4** | Primarily offchain | Infrequent reporting | Self-reported only |
 | **5** | Opaque, cannot verify | No reporting | No verification |
 
 **Funds Management Score = (Collateralization + Provability) / 2**

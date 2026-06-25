@@ -1,5 +1,5 @@
 ---
-name: Etherscan
+name: etherscan
 description: Documentation and capabilities reference for Etherscan
 metadata:
   mintlify-proj: etherscan
@@ -42,6 +42,50 @@ Etherscan and other scan sites enables agents to query and analyze blockchain da
 * **Verify Stylus Contract**: Submit Stylus projects with `action=verifystylus`
 * **Verify Proxy Contract**: Submit proxy contracts with `action=verifyproxycontract`
 * **Check Verification Status**: Monitor verification progress using `action=checkverifystatus`
+
+### Role & Permission Enumeration
+
+For tokens / contracts that use OpenZeppelin `AccessControl` (or `AccessControlEnumerable`) — common in mint authority, governance, and timelock contracts — use `eth_call` to read the role registry directly. Roles are `bytes32` values; well-known names hash to predictable values.
+
+* **Resolve a role hash**: roles are `keccak256(<NAME>)`. With `cast`:
+  ```bash
+  cast keccak "MINTER_ROLE"
+  # 0x9f2df0fed2c77648de5860a4cc508cd0818c85b8b8a1ab4ceeef8d981c8956a6
+  ```
+  Or off the JS side: `ethers.id("MINTER_ROLE")`.
+  Special case: `DEFAULT_ADMIN_ROLE` is the all-zero bytes32, `0x0000…0000`.
+
+* **Count role holders**: `getRoleMemberCount(bytes32 role) returns (uint256)` — only available on `AccessControlEnumerable`.
+  ```bash
+  cast call <contract> "getRoleMemberCount(bytes32)(uint256)" $(cast keccak "MINTER_ROLE")
+  ```
+
+* **Enumerate role holders by index**: `getRoleMember(bytes32 role, uint256 index) returns (address)`.
+  ```bash
+  for i in $(seq 0 $((count - 1))); do
+    cast call <contract> "getRoleMember(bytes32,uint256)(address)" $(cast keccak "MINTER_ROLE") $i
+  done
+  ```
+
+* **Check a specific address**: `hasRole(bytes32 role, address account) returns (bool)`.
+  ```bash
+  cast call <contract> "hasRole(bytes32,address)(bool)" $(cast keccak "MINTER_ROLE") 0xACCOUNT
+  ```
+
+* **Plain `AccessControl` (no Enumerable)**: there is no on-chain way to enumerate holders. You must trace `RoleGranted(role, account, sender)` and `RoleRevoked(role, account, sender)` events:
+  ```
+  GET /v2/api?module=logs&action=getLogs
+      &address=0xCONTRACT
+      &topic0=0x2f8788117e7eff1d82e926ec794901d17c78024a50270940304540a733656f0d   # RoleGranted
+      &topic1=<role-hash-padded-to-32-bytes>
+  ```
+  Then verify each candidate is still active with `hasRole`.
+
+* **Liquity-fork whitelist mapping** (e.g. MUSD on Ethereum): the token exposes a plain `mintList(address) returns (bool)` mapping. There is no enumerator. Walk `addToMintList(address)` events and check each result with `mintList`.
+
+* **Role admins**: `getRoleAdmin(bytes32 role) returns (bytes32)` — tells you which role can grant/revoke this role. Useful for tracing the privilege chain (e.g. `MINTER_ROLE` admin = `DEFAULT_ADMIN_ROLE` → which is held by the timelock).
+
+* **Ownable / single-owner contracts**: `owner() returns (address)`. The owner is implicitly the mint authority on Ownable token patterns.
 
 ### Event Logs & Monitoring
 
@@ -95,6 +139,17 @@ Etherscan and other scan sites enables agents to query and analyze blockchain da
 2. Submit for verification: `POST /v2/api?module=contract&action=verifysourcecode&contractaddress=0x...&sourceCode=...&compilerversion=v0.8.24`
 3. Check verification status: `GET /v2/api?module=contract&action=checkverifystatus&guid=...`
 4. Once verified, retrieve ABI: `GET /v2/api?module=contract&action=getabi&address=0x...`
+
+### Mint-Authority Enumeration Workflow
+
+Used to produce the *Token Mint Authority* section of a risk report (see `reports/skill.md` § Pass 1.6).
+
+1. Read the token's verified source: `GET /v2/api?module=contract&action=getsourcecode&address=0xTOKEN`. Grep `mint(` and `burn(` to find the access-control modifier(s).
+2. For each role-gated path, hash the role name: `cast keccak "MINTER_ROLE"`. Repeat for any other minter-class roles you find (e.g. `RECEIPT_TOKEN_MINTER`).
+3. If the contract is `AccessControlEnumerable`: get `getRoleMemberCount` then iterate `getRoleMember(role, i)`. If plain `AccessControl`: scan `RoleGranted` / `RoleRevoked` events and verify with `hasRole`.
+4. For each holder address, decide what it is: EOA, multisig (read `getOwners()` and `getThreshold()` on a Gnosis Safe), or a known protocol contract. Use the address-metadata endpoint or the contract's name/source to identify it.
+5. Also resolve `getRoleAdmin(role)` to know who can *grant* the role — that is the next layer of trust to document.
+6. Drop the address list (with role + classification + notes) into the report's mint-authority table.
 
 ### Event Log Analysis Workflow
 

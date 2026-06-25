@@ -731,10 +731,10 @@
         }
     },
     "0x6701dea9809deaf068b8445798d0e19b025480fe": {
-        "riskLevel": 1,
+        "riskLevel": 2,
         "riskScore": {
-            "centralizationRisk": 1,
-            "comment": "",
+            "centralizationRisk": 3,
+            "comment": "Mix of blue chip and rikier collaterals",
             "complexity": 1,
             "externalProtocolAudit": 1,
             "externalProtocolCentralisation": 1,
@@ -884,10 +884,10 @@
         }
     },
     "0x7ee351aa702c8fc735d77fb229b7676ac15d7c79": {
-        "riskLevel": 1,
+        "riskLevel": 2,
         "riskScore": {
-            "centralizationRisk": 1,
-            "comment": "",
+            "centralizationRisk": 3,
+            "comment": "Mix of blue chip and rikier collaterals",
             "complexity": 1,
             "externalProtocolAudit": 1,
             "externalProtocolCentralisation": 1,
