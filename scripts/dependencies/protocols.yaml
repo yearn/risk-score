@@ -508,6 +508,30 @@ protocols:
       label: Morpho (Yearn WETH ARM vault)
     infrastructure:
     - Lido
+  origin_ousd:
+    name: Origin OUSD
+    chain: ethereum
+    type: stablecoin
+    address: '0x2A8e1E676Ec238d8A992307B495b45B3fEAa5e86'
+    report: reports/report/origin-ousd.md
+    collateral:
+    - asset: USDC
+    yield_sources:
+    - protocol: morpho
+      assets:
+      - USDC
+      label: MetaMorpho mOUSD-V2 (~45% of TVL)
+    - protocol: curve
+      assets:
+      - USDC
+      label: Curve OUSD/USDC AMO (~14% of TVL)
+    - protocol: circle_cctp
+      assets:
+      - USDC
+      label: Cross-Chain Base + HyperEVM (~42% of TVL)
+    infrastructure:
+    - Chainlink
+    - CoW Protocol
   resolv_wstusr:
     name: Resolv (wstUSR)
     chain: ethereum
