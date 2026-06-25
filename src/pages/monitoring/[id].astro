@@ -104,6 +104,7 @@ const apiProtocol = protocol.apiProtocol ?? "";
     import {
       fetchAlerts,
       severityMeta,
+      SEVERITY_META,
       formatRelativeTime,
       formatTimestamp,
       escapeHtml,
@@ -137,21 +138,28 @@ const apiProtocol = protocol.apiProtocol ?? "";
 
     function renderAlert(alert: AlertEvent): string {
       const meta = severityMeta(alert.severity);
-      // meta.label is the raw severity for off-enum values, so escape it; color/emoji are from
-      // the trusted severity map.
-      const sev = escapeHtml(meta.label);
+      const known = Boolean(SEVERITY_META[alert.severity]);
+      // Only show parts that carry signal. Most alerts have a null severity and source
+      // "protocol", so rendering those verbatim ("Unknown · protocol") is just noise — show the
+      // severity chip only for a known level, and the source only when it isn't the default.
+      const parts: string[] = [];
+      if (known) {
+        parts.push(
+          `<span class="alert-sev" style="color:${meta.color}">${meta.emoji} ${escapeHtml(meta.label)}</span>`,
+        );
+      }
+      if (alert.source && alert.source !== "protocol") {
+        parts.push(`<span>${escapeHtml(alert.source)}</span>`);
+      }
+      parts.push(
+        `<time datetime="${escapeHtml(alert.created_at)}" title="${escapeHtml(formatTimestamp(alert.created_at))}">${escapeHtml(formatRelativeTime(alert.created_at))}</time>`,
+      );
       return `
         <li class="alert-row">
-          <span class="alert-dot" style="background:${meta.color}" title="${sev}"></span>
+          <span class="alert-dot" style="background:${meta.color}"${known ? ` title="${escapeHtml(meta.label)}"` : ""}></span>
           <div class="alert-body">
             <p class="alert-message">${escapeHtml(alert.message)}</p>
-            <div class="alert-meta">
-              <span class="alert-sev" style="color:${meta.color}">${meta.emoji} ${sev}</span>
-              <span class="alert-sep">·</span>
-              <span>${escapeHtml(alert.source)}</span>
-              <span class="alert-sep">·</span>
-              <time datetime="${escapeHtml(alert.created_at)}" title="${escapeHtml(formatTimestamp(alert.created_at))}">${escapeHtml(formatRelativeTime(alert.created_at))}</time>
-            </div>
+            <div class="alert-meta">${parts.join('<span class="alert-sep">·</span>')}</div>
           </div>
         </li>`;
     }
