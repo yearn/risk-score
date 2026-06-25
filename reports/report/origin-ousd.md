@@ -1,6 +1,6 @@
 # Protocol Risk Assessment: Origin OUSD
 
-- **Assessment Date:** April 10, 2026
+- **Assessment Date:** June 25, 2026
 - **Token:** OUSD (Origin Dollar)
 - **Chain:** Ethereum Mainnet
 - **Token Address:** [`0x2A8e1E676Ec238d8A992307B495b45B3fEAa5e86`](https://etherscan.io/address/0x2A8e1E676Ec238d8A992307B495b45B3fEAa5e86)
@@ -11,15 +11,15 @@
 Origin Dollar (OUSD) is a rebasing stablecoin backed 100% by USDC. Holders' wallet balances automatically increase as yield accrues, without staking, locking, or manual compounding. Smart contracts must opt in to receive rebased yield; those that don't forfeit rewards to standard holders, amplifying returns for participants. An ERC-4626 wrapper (wOUSD) is available for DeFi composability, appreciating in value instead of rebasing.
 
 OUSD generates yield through three mechanisms:
-1. **Morpho Lending** (~$3.00M, ~55% of TVL) — Deposits USDC into a MetaMorpho vault for over-collateralized lending yield
-2. **Curve AMO** (~$955K, ~17% of TVL) — Algorithmic Market Operations providing liquidity in the Curve OUSD/USDC pool, earning trading fees and CRV incentives
-3. **Cross-Chain Strategies** (~$1.51M, ~28% of TVL) — Bridges USDC via Circle CCTP to HyperEVM (~$914K) and Base (~$600K)
+1. **Morpho Lending** (~$3.33M, ~45% of TVL) — Deposits USDC into a MetaMorpho vault for over-collateralized lending yield
+2. **Curve AMO** (~$1.02M, ~14% of TVL) — Algorithmic Market Operations providing liquidity in the Curve OUSD/USDC pool, earning trading fees and CRV incentives
+3. **Cross-Chain Strategies** (~$3.09M, ~42% of TVL) — Bridges USDC via Circle CCTP to Base (~$2.11M) and HyperEVM (~$977K)
 
 Collateral was simplified from multi-stablecoin (USDT, DAI, USDC) to **USDC-only** via governance proposal in November 2025.
 
 - **Launch Date:** September 18, 2020 (relaunched January 5, 2021 after November 2020 hack)
 - **Performance Fee:** 20% (2,000 bps), collected by Trustee multisig
-- **Total Value:** ~$5.47M (vault `totalValue()` at block 25074136)
+- **Total Value:** ~$7.43M (vault `totalValue()` at block 25394922)
 
 **Links:**
 
@@ -38,7 +38,7 @@ Collateral was simplified from multi-stablecoin (USDT, DAI, USDC) to **USDC-only
 | OUSD Token Implementation | [`0xA7B7c59a1705e4a624ea8a4ad8a06f9de22dcc33`](https://etherscan.io/address/0xA7B7c59a1705e4a624ea8a4ad8a06f9de22dcc33) |
 | wOUSD (ERC-4626) | [`0xD2af830E8CBdFed6CC11Bab697bB25496ed6FA62`](https://etherscan.io/address/0xD2af830E8CBdFed6CC11Bab697bB25496ed6FA62) |
 | OUSD Vault (Proxy) | [`0xE75D77B1865Ae93c7eaa3040B038D7aA7BC02F70`](https://etherscan.io/address/0xE75D77B1865Ae93c7eaa3040B038D7aA7BC02F70) |
-| OUSD Vault Implementation | [`0xe3a9f4edaf8abd275beea7e6a19fdbe6b314578e`](https://etherscan.io/address/0xe3a9f4edaf8abd275beea7e6a19fdbe6b314578e) |
+| OUSD Vault Implementation | [`0x82948060c4b72684bededec342350ab344975145`](https://etherscan.io/address/0x82948060c4b72684bededec342350ab344975145) |
 | Curve USDC AMO Strategy | [`0x26a02ec47ACC2A3442b757F45E0A82B8e993Ce11`](https://etherscan.io/address/0x26a02ec47ACC2A3442b757F45E0A82B8e993Ce11) |
 | Morpho V2 Strategy | [`0x3643cafA6eF3dd7Fcc2ADaD1cabf708075AFFf6e`](https://etherscan.io/address/0x3643cafA6eF3dd7Fcc2ADaD1cabf708075AFFf6e) |
 | Cross-Chain Strategy (Base) | [`0xB1d624fc40824683e2bFBEfd19eB208DbBE00866`](https://etherscan.io/address/0xB1d624fc40824683e2bFBEfd19eB208DbBE00866) |
@@ -96,21 +96,21 @@ Origin Protocol maintains 30+ audit reports across all products in their [securi
   - **Compensation:** Users <=1,000 OUSD received 100% in newly minted OUSD. Users >1,000 OUSD received 25% OUSD + 75% in OGN tokens (1-year lock, 25% interest). Founders received no compensation.
   - **Source:** [PeckShield Root Cause Analysis](https://peckshield.medium.com/origin-dollar-incident-root-cause-analysis-f27e11988c90), [rekt.news](https://rekt.news/origin-rekt/)
 - **Post-relaunch incidents:** None in ~5 years since relaunch
-- **TVL history:** Peak ~$275M (December 2021), current ~$5.47M — significant decline from peak
+- **TVL history:** Peak ~$275M (December 2021), current ~$7.43M — significant decline from peak
 - **Price stability:** Post-relaunch peg maintained within a few basis points of $1.00. Minor deviation to $0.9671 in March 2022.
 - **Team:** Origin Protocol since 2017. Founded by Josh Fraser & Matthew Liu. CEO: Rafael Ugolini. Backed by Pantera Capital, Founders Fund.
 
 ## Funds Management
 
-**Strategy Allocation** (from vault `totalValue()` = ~$5,465,565 at block 25074136):
+**Strategy Allocation** (from vault `totalValue()` = ~$7,426,782 at block 25394922):
 
 | Strategy | Balance (USDC) | % of TVL | Description |
 |----------|---------------|----------|-------------|
-| Morpho V2 | ~2,996,074 | ~55% | MetaMorpho vault (mOUSD-V2) lending |
-| Curve USDC AMO | ~955,010 | ~17% | Curve OUSD/USDC pool + gauge staking |
-| Cross-Chain (HyperEVM) | ~914,310 | ~17% | USDC bridged via Circle CCTP to HyperEVM |
-| Cross-Chain (Base) | ~600,170 | ~11% | USDC bridged via Circle CCTP to Base |
-| Vault (idle) | ~0 | <0.01% | Effective idle vault USDC (raw balance ~17,204 fully reserved against the withdrawal queue's `queued − claimed`); `vaultBuffer` parameter = 0 |
+| Morpho V2 | ~3,325,590 | ~45% | MetaMorpho vault (mOUSD-V2) lending |
+| Curve USDC AMO | ~1,015,370 | ~14% | Curve OUSD/USDC pool + gauge staking |
+| Cross-Chain (Base) | ~2,108,562 | ~28% | USDC bridged via Circle CCTP to Base |
+| Cross-Chain (HyperEVM) | ~977,259 | ~13% | USDC bridged via Circle CCTP to HyperEVM |
+| Vault (idle) | ~0 | <0.01% | Effective idle vault USDC (raw balance ~17,205 fully reserved against the withdrawal queue's `queued − claimed`); `vaultBuffer` parameter = 0 |
 
 Reward tokens (CRV, MORPHO) are sold via CoW Protocol into USDC and returned to the vault, where they are distributed to holders via rebase.
 
@@ -122,7 +122,7 @@ Reward tokens (CRV, MORPHO) are sold via CoW Protocol into USDC and returned to 
   1. `requestWithdrawal(amount)` burns OUSD immediately and enqueues a withdrawal (NFT-like request ID).
   2. `claimWithdrawal(id)` / `claimWithdrawals(ids[])` pays out USDC after `withdrawalClaimDelay` (600s = **10 minutes minimum**, verified on-chain) AND when the queue's claimable liquidity has caught up to the request.
   There is no on-chain upper bound on claim time — if the queue is ahead of deposits/strategy withdrawals, a claim can wait indefinitely. The strategist (or anyone permissionlessly, via `allocate()` / strategy pulls) must supply USDC to advance the queue.
-- **DEX Swaps:** Instant exits via Curve OUSD/USDC pool (~$956K TVL).
+- **DEX Swaps:** Instant exits via Curve OUSD/USDC pool (~$1.10M TVL).
 - **Fees:** 20% performance fee (2,000 bps), no deposit/withdrawal fees.
 
 ### AMO Minting Analysis
@@ -141,10 +141,10 @@ Reward tokens (CRV, MORPHO) are sold via CoW Protocol into USDC and returned to 
 ### Collateralization
 
 - 100% backed by USDC (single collateral since November 2025)
-- Funds deployed across 4 strategies; `vaultBuffer` parameter = 0 (no idle reserve target). Raw vault USDC at the snapshot block is ~17,204, fully reserved against pending withdrawal requests (effective idle ≈ 0)
+- Funds deployed across 4 strategies; `vaultBuffer` parameter = 0 (no idle reserve target). Raw vault USDC at the snapshot block is ~17,205, fully reserved against pending withdrawal requests (effective idle ≈ 0)
 - No debt, leverage, or liquidation mechanics in the vault itself
 - Morpho strategy uses over-collateralized lending markets
-- Cross-chain strategies bridge ~28% of TVL to HyperEVM and Base via Circle CCTP — these funds are not immediately accessible for Ethereum redemptions
+- Cross-chain strategies bridge ~42% of TVL to HyperEVM and Base via Circle CCTP — these funds are not immediately accessible for Ethereum redemptions
 
 ### Provability
 
@@ -153,14 +153,15 @@ Reward tokens (CRV, MORPHO) are sold via CoW Protocol into USDC and returned to 
 - Rebase calculated programmatically: `rebasingCreditsPerToken` determines each holder's share of rebased yield
 - Oracle Router ([`0x36CFB852d3b84afB3909BCf4ea0dbe8C82eE1C3c`](https://etherscan.io/address/0x36CFB852d3b84afB3909BCf4ea0dbe8C82eE1C3c)) is non-upgradeable with hardcoded Chainlink feeds (USDC/USD)
 - Cross-chain strategy balances are self-reported from CCTP bridge amounts — require checking destination chains for full verification
-- 100% on-chain for Ethereum-based strategies; cross-chain portion (~28%) requires multi-chain verification
+- 100% on-chain for Ethereum-based strategies; cross-chain portion (~42%) requires multi-chain verification
 
 ## Liquidity Risk
 
-- **Primary exit:** Async withdrawal queue via `requestWithdrawal()` → `claimWithdrawal()`. OUSD is burned at request time; USDC is paid only after (a) `withdrawalClaimDelay` of 10 minutes AND (b) queue claimable liquidity has advanced past the request. No on-chain upper bound on wait time — effective wait depends on how quickly strategies return USDC. Per the on-chain queue (`withdrawalQueueMetadata()`), `queued = claimable` and there are 52 historical requests, so the queue is currently caught up; a flush of large new requests would have to wait on Morpho redemptions or CCTP unwinds.
-- **DEX liquidity:** Curve OUSD/USDC pool ([`0x6d18E1a7faeB1F0467A77C0d293872ab685426dc`](https://etherscan.io/address/0x6d18E1a7faeB1F0467A77C0d293872ab685426dc)) at the snapshot block holds ~628K OUSD + ~328K USDC (nominal TVL ~$956K). `get_dy(0,1, 100k OUSD)` ≈ 99,903 USDC and `get_dy(0,1, 300k OUSD)` ≈ 297,718 USDC, but the USDC side is only ~$328K (down ~30% since the prior snapshot), so swap exits beyond ~$300K OUSD will deplete it quickly.
-- **Vault buffer:** `vaultBuffer` parameter = 0; raw vault USDC at the snapshot block is ~17,204, fully reserved against pending claims (effective idle ≈ 0). Queue advancement therefore depends on the strategist pulling from strategies (`withdrawFromStrategy` / `withdrawAllFromStrategies`) or on new deposits auto-allocating to cover requests.
-- **Cross-chain assets:** ~$1.51M (~28% of TVL) on HyperEVM and Base — cannot be immediately redeemed on Ethereum, requires CCTP bridging back (minutes to hours).
+- **Primary exit:** Async withdrawal queue via `requestWithdrawal()` → `claimWithdrawal()`. OUSD is burned at request time; USDC is paid only after (a) `withdrawalClaimDelay` of 10 minutes AND (b) queue claimable liquidity has advanced past the request. No on-chain upper bound on wait time — effective wait depends on how quickly strategies return USDC. Per the on-chain queue (`withdrawalQueueMetadata()`), `queued = claimable ≈ $1,684,584` with `nextWithdrawalIndex = 67`, so the queue is currently caught up; a flush of large new requests would have to wait on Morpho redemptions or CCTP unwinds.
+- **DEX liquidity:** Curve OUSD/USDC pool ([`0x6d18E1a7faeB1F0467A77C0d293872ab685426dc`](https://etherscan.io/address/0x6d18E1a7faeB1F0467A77C0d293872ab685426dc)) at the snapshot block holds ~653K OUSD + ~448K USDC (nominal TVL ~$1.10M). `get_dy(0,1, 100k OUSD)` ≈ 99,945 USDC, `get_dy(0,1, 300k OUSD)` ≈ 299,557 USDC, and `get_dy(0,1, 500k OUSD)` ≈ 446,294 USDC; the USDC side is only ~$448K, so swap exits beyond ~$450K OUSD will deplete it quickly.
+- **Vault buffer:** `vaultBuffer` parameter = 0; raw vault USDC at the snapshot block is ~17,205, fully reserved against pending claims (effective idle ≈ 0). Queue advancement therefore depends on the strategist pulling from strategies (`withdrawFromStrategy` / `withdrawAllFromStrategies`) or on new deposits auto-allocating to cover requests.
+- **Withdrawal queue depth:** `withdrawalQueueMetadata()` reports `queued = claimable ≈ $1,684,584` with `nextWithdrawalIndex = 67`. The queue represents ~22.7% of the ~7,414,516 OUSD `totalSupply()` — a meaningful concentration of exit intent, but the queue is fully caught up (claimable = queued) and the strategist is actively servicing claims (`claimWithdrawal` / `addWithdrawalQueueLiquidity` calls observed in recent blocks).
+- **Cross-chain assets:** ~$3.09M (~42% of TVL) on Base and HyperEVM — cannot be immediately redeemed on Ethereum, requires CCTP bridging back (minutes to hours).
 - **No priority mechanism** — first-come-first-served queue ordering.
 - **Same-value assets** (USD stablecoins) mitigate price impact risk during any waiting period.
 - **Legacy OUSD/3CRV pool:** ~$30K TVL, effectively deprecated.
@@ -183,8 +184,8 @@ Reward tokens (CRV, MORPHO) are sold via CoW Protocol into USDC and returned to 
 - Total time from proposal to execution: ~5 days minimum (24h voting delay + 48h voting + 48h timelock)
 - No backdoor — only Origin DeFi Governance can propose/execute
 
-**GOV Multisig Signers (5-of-8, verified via `getOwners()` at block 25074136):**
-`0x530d3F8C`, `0xce96ae6D`, `0x336C02D3`, `0x6AC8d65D`, `0x617a3582`, `0x17aBc3F0`, `0x39772922`, `0x9990C10c`
+**GOV Multisig Signers (5-of-8, verified via `getOwners()` at block 25394922):**
+`0x530d3F8C`, `0x052c01a2`, `0x336C02D3`, `0x6AC8d65D`, `0x617a3582`, `0x17aBc3F0`, `0x39772922`, `0x9990C10c`
 
 **Privileged Roles:**
 
@@ -213,9 +214,9 @@ Reward tokens (CRV, MORPHO) are sold via CoW Protocol into USDC and returned to 
 ### External Dependencies
 
 1. **USDC / Circle (Critical)** — Sole collateral asset. OUSD is 100% backed by USDC. Circle can freeze/blacklist addresses holding USDC, which could impact vault or strategy contracts.
-2. **Morpho (Critical)** — ~55% of TVL deployed into MetaMorpho vault (mOUSD-V2). Curator: [`0xe5e2Baf96198c56380dDD5E992D7d1ADa0e989c0`](https://etherscan.io/address/0xe5e2Baf96198c56380dDD5E992D7d1ADa0e989c0) (Gnosis Safe). Largest single dependency.
-3. **Curve (High)** — AMO yield generation (~17% of TVL) and primary on-Ethereum DEX liquidity (~$956K pool TVL, ~$328K USDC side). AMO strategy deposits into Curve OUSD/USDC pool.
-4. **Circle CCTP (High)** — Cross-chain strategies use Circle CCTP V2 to bridge USDC to HyperEVM and Base. ~28% of TVL is held on remote chains.
+2. **Morpho (Critical)** — ~45% of TVL deployed into MetaMorpho vault (mOUSD-V2). Curator: [`0xe5e2Baf96198c56380dDD5E992D7d1ADa0e989c0`](https://etherscan.io/address/0xe5e2Baf96198c56380dDD5E992D7d1ADa0e989c0) (Gnosis Safe). Largest single dependency.
+3. **Curve (High)** — AMO yield generation (~14% of TVL) and primary on-Ethereum DEX liquidity (~$1.10M pool TVL, ~$448K USDC side). AMO strategy deposits into Curve OUSD/USDC pool.
+4. **Circle CCTP (High)** — Cross-chain strategies use Circle CCTP V2 to bridge USDC to HyperEVM and Base. ~42% of TVL is held on remote chains.
 5. **Chainlink (High)** — Oracle Router uses Chainlink USDC/USD feed for price verification. Non-upgradeable router contract.
 6. **CoW Protocol (Low)** — Used for reward token swaps (CRV, MORPHO → USDC). Not critical for core functionality.
 
@@ -255,10 +256,11 @@ No single-point-of-failure that would break the protocol entirely, but USDC depe
 1. AMO `mintForStrategy()` can mint OUSD without direct backing (constrained to ~0.2% of supply), and historical vault-level cap has been deprecated
 2. Strategist (2-of-8 multisig) has broad untimelocked power: AMO operations, strategy allocation (`withdrawAllFromStrategies`, `setDefaultStrategy`, `depositToStrategy`), vault parameters (`setVaultBuffer`, `setDripDuration`, `setRebaseRateMax`), pause controls, **and yield delegation** (`delegateYield` / `undelegateYield` can redirect any account's rebase yield)
 3. Single collateral dependency on USDC (Circle) — centralized stablecoin with freeze capabilities
-4. Cross-chain strategies (~28% of TVL) add bridge risk and reduce immediate redemption liquidity
-5. Morpho concentration: ~55% of TVL sits in a single MetaMorpho vault (mOUSD-V2), dependent on its curator's market allocations
-6. Modest TVL (~$5.47M, down from $275M peak) suggests concentration risk and reduced market confidence; the Curve OUSD/USDC pool only holds ~$328K USDC on the buy-side, capping instant DEX exit
+4. Cross-chain strategies (~42% of TVL) add bridge risk and reduce immediate redemption liquidity
+5. Morpho concentration: ~45% of TVL sits in a single MetaMorpho vault (mOUSD-V2), dependent on its curator's market allocations
+6. Modest TVL (~$7.43M, down from $275M peak) suggests concentration risk and reduced market confidence; the Curve OUSD/USDC pool only holds ~$448K USDC on the buy-side, capping instant DEX exit
 7. `vaultBuffer` parameter is 0 — effective idle USDC is ~0 after subtracting queue reserve; redemptions flow through async withdrawal queue with no on-chain upper bound on claim time
+8. Active withdrawal queue of ~$1.68M (≈22.7% of OUSD supply) signals meaningful exit intent; queue is currently caught up and the strategist is processing claims, but a large new wave of redemptions would depend on Morpho liquidity or cross-chain unwinds
 
 ### Critical Risks
 
@@ -294,7 +296,7 @@ No single-point-of-failure that would break the protocol entirely, but USDC depe
 |--------|-----------|
 | Time in Production | ~5.5 years total, ~5 years since secure relaunch |
 | Past Incidents | $7.7M hack (Nov 2020) on original codebase; fully compensated users; different code since relaunch |
-| TVL | ~$5.47M (modest, down from $275M peak) |
+| TVL | ~$7.43M (modest, down from $275M peak) |
 | Price Stability | Peg maintained within basis points since relaunch |
 
 **Score: (1.0 + 2.5) / 2 = 1.75**
@@ -314,8 +316,8 @@ No single-point-of-failure that would break the protocol entirely, but USDC depe
 - Bounded by governor's approved-strategy list and the 99.8% solvency threshold, but the set of untimelocked levers is meaningfully larger than pause/allocate alone
 
 **Subcategory C: External Dependencies — 2.5**
-- Critical: USDC (single collateral, centralized stablecoin), Morpho (~55% of TVL in a single MetaMorpho vault)
-- High: Curve (AMO yield + primary DEX exit), Circle CCTP (~28% of TVL on remote chains), Chainlink (oracle)
+- Critical: USDC (single collateral, centralized stablecoin), Morpho (~45% of TVL in a single MetaMorpho vault)
+- High: Curve (AMO yield + primary DEX exit), Circle CCTP (~42% of TVL on remote chains), Chainlink (oracle)
 - Low: CoW Protocol (reward swaps)
 - More dependencies than Origin ARM due to AMO, Morpho, and cross-chain strategies
 
@@ -326,9 +328,9 @@ No single-point-of-failure that would break the protocol entirely, but USDC depe
 **Subcategory A: Collateralization — 2.0**
 - 100% backed by USDC (high-quality stablecoin)
 - AMO can temporarily create up to ~0.2% unbacked OUSD (solvency check)
-- Funds deployed across 4 strategies including cross-chain; ~55% concentrated in Morpho mOUSD-V2
+- Funds deployed across 4 strategies including cross-chain; ~45% concentrated in Morpho mOUSD-V2
 - `vaultBuffer` parameter = 0; effective idle USDC ≈ 0 at the snapshot block (all raw vault USDC reserved against pending claims)
-- Cross-chain assets (~28%) not immediately accessible on Ethereum
+- Cross-chain assets (~42%) not immediately accessible on Ethereum
 
 **Subcategory B: Provability — 1.5**
 - On-chain verification via `totalValue()` (vault) and `totalSupply()` (OUSD token); reconstructing components requires reading strategy `checkBalance()` calls plus `withdrawalQueueMetadata()` because `totalValue()` already nets out the queue reserve
@@ -341,9 +343,10 @@ No single-point-of-failure that would break the protocol entirely, but USDC depe
 #### Category 4: Liquidity Risk (Weight: 15%) — **2.5**
 
 - Async withdrawal queue: 10-minute minimum delay (`withdrawalClaimDelay` = 600s) plus queue liquidity catch-up; no on-chain upper bound
-- Curve OUSD/USDC pool ~$956K TVL (~628K OUSD + ~328K USDC) — instant swap path works for small exits but the ~$328K USDC side caps useful capacity at a few hundred thousand OUSD
+- Current queue depth ~$1,684,584 queued/claimable (≈22.7% of OUSD supply, `nextWithdrawalIndex = 67`) — queue is caught up and the strategist is actively servicing claims, but a large new wave of requests would depend on Morpho liquidity or cross-chain unwinds
+- Curve OUSD/USDC pool ~$1.10M TVL (~653K OUSD + ~448K USDC) — instant swap path works for small exits but the ~$448K USDC side caps useful capacity at ~$450K OUSD
 - `vaultBuffer` = 0 and effective idle USDC ≈ 0 at the snapshot block — larger redemptions require strategy unwinding (Morpho is the deepest source)
-- Cross-chain assets (~$1.51M, ~28% of TVL) require CCTP bridging back to Ethereum
+- Cross-chain assets (~$3.09M, ~42% of TVL) require CCTP bridging back to Ethereum
 - Same-value assets (USD stablecoins) mitigate waiting risk
 - No priority mechanism; first-come-first-served
 
@@ -416,7 +419,7 @@ Final Score = (Audits × 0.20) + (Centralization × 0.30) + (Funds Mgmt × 0.30)
 │         ├──────────────────────────────────────────────────────────┐     │
 │         ▼                                                          ▼     │
 │  OUSD Token (0x2A8e...)                                OUSD Vault (0xE75D│
-│  [Rebasing ERC-20, proxy]                              [Proxy, impl: 0xe3│
+│  [Rebasing ERC-20, proxy]                              [Proxy, impl: 0x82│
 │  impl: 0xA7B7...                                                         │
 │                                                                          │
 └──────────────────────────────────────────────────────────────────────────┘
@@ -458,13 +461,13 @@ Final Score = (Audits × 0.20) + (Centralization × 0.30) + (Funds Mgmt × 0.30)
 │ Curve USDC   │ │ Morpho V2    │ │ Cross-Chain  │ │ Cross-Chain          │
 │ AMO Strategy │ │ Strategy     │ │ (Base)       │ │ (HyperEVM)           │
 │ (0x26a0...)  │ │ (0x3643...)  │ │ (0xB1d6...)  │ │ (0xE022...)          │
-│ ~$955K (17%) │ │ ~$3.00M (55%)│ │ ~$600K (11%) │ │ ~$914K (17%)         │
+│ ~$1.02M (14%)│ │ ~$3.33M (45%)│ │ ~$2.11M (28%)│ │ ~$977K (13%)         │
 │              │ │              │ │              │ │                      │
 │ ┌──────────┐ │ │ ┌──────────┐ │ │ Circle CCTP  │ │ Circle CCTP          │
 │ │Curve Pool│ │ │ │MetaMorpho│ │ │ → Base USDC  │ │ → HyperEVM USDC      │
 │ │OUSD/USDC │ │ │ │mOUSD-V2  │ │ │              │ │                      │
 │ │(0x6d18..)│ │ │ │(0xFB15..)│ │ └──────────────┘ └──────────────────────┘
-│ │~$956K    │ │ │ │~$3.00M   │ │
+│ │~$1.10M   │ │ │ │~$3.33M   │ │
 │ └──────────┘ │ │ └──────────┘ │
 │       │      │ │       │      │
 │   Gauge      │ │   MORPHO     │
@@ -496,7 +499,7 @@ Final Score = (Audits × 0.20) + (Centralization × 0.30) + (Funds Mgmt × 0.30)
 │                    SECONDARY LIQUIDITY                                   │
 │                                                                          │
 │  Curve Pool: OUSD/USDC (CurveStableSwapNG)                             │
-│  (0x6d18...)  ~$956K TVL (~628K OUSD + ~328K USDC)                     │
+│  (0x6d18...)  ~$1.10M TVL (~653K OUSD + ~448K USDC)                    │
 │                                                                          │
 │  Legacy: OUSD/3CRV Metapool (0x8765...)  ~$30K TVL [deprecated]        │
 │                                                                          │
