@@ -20,7 +20,7 @@ nodes:
     label: mGLOBAL (LYT Stablecoin)
     address: "0x7433806912Eae67919e66aea853d46Fa0aef98A8"
     category: vault
-    note: Subordinated debt instrument; TransparentUpgradeableProxy. ~37.6M supply @ $1.00 (Jun 2026)
+    note: Subordinated debt instrument; TransparentUpgradeableProxy. ~52.63M supply @ $1.00 (Jun 23 2026, block 25382793)
   - id: deposit-vault
     label: MGlobalDepositVaultWithAave
     address: "0xce29c36c6d4556f2d01d79414c1354b968dddef1"
@@ -68,11 +68,6 @@ nodes:
     address: "0xb468a6f63868cb6c6d99105edfbe73d6b21f139e"
     category: infra
     note: Feeds price data to vaults
-  - id: oft-adapter
-    label: LayerZero OFT Adapter (inactive)
-    address: "0xb67f81069e890a1b3e02c7bed3a9f78ba54a445c"
-    category: infra
-    note: Deployed but holds NO mGLOBAL roles (cross-chain inactive)
   - id: mint-burn-eoa
     label: Mint/Burn/Pause Operator EOA
     address: "0x76e350c5a674db787918e5f728466c7356d4d361"
@@ -129,7 +124,7 @@ nodes:
   - id: fasanara
     label: Fasanara Capital (Strategy Mgr)
     category: dependency
-    note: "$4B+ AUM, 15yr, London, MIFIDPRU. 92% of NAV Unclassified"
+    note: "$4B+ AUM, 15yr, London, MIFIDPRU. 88.61% of NAV Unclassified"
   - id: fordefi
     label: Fordefi MPC Custody
     category: dependency
@@ -146,9 +141,15 @@ nodes:
     label: vlayer (Notarization)
     category: dependency
   - id: infinifi
-    label: InfiniFi (81% holder)
+    label: InfiniFi (~58% holder — renewed)
+    address: "0xf4ea3ec87b1c254f17a2fb68164db0caf6c4cecf"
     category: dependency
-    note: "MidasFarm matured Jun 15 2026. $30.6M position, 4.5/5 internal risk"
+    note: "Original farm matured Jun 15 2026 and renewed into new MidasFarm (0xf4ea3ec, maturity Jul 21 2026). $30.49M position (57.94%), 4.5/5 internal risk"
+  - id: aave-horizon
+    label: Aave Horizon (collateral mkt)
+    address: "0xAe05Cd22df81871bc7cC2a04BeCfb516bFe332C8"
+    category: dependency
+    note: "mGLOBAL listed as collateral reserve (Jun 2026). $19.85M supplied (37.71%); LTV 0.05% — near-zero credit. aMGLOBAL 0x49d3...B985"
 
 edges:
   # === Governance chain ===
@@ -321,14 +322,14 @@ edges:
     kind: routes-through
     label: cryptographic notarization
 
-  # === OFT adapter (inactive) ===
-  - from: oft-adapter
-    to: mGLOBAL
-    kind: manages
-    label: deployed but NO mGLOBAL roles (inactive)
-
   # === InfiniFi concentration ===
   - from: infinifi
     to: mGLOBAL
     kind: manages
-    label: 81% holder ($30.6M). Farm matured Jun 15 2026
+    label: 57.94% holder ($30.49M). Renewed; new maturity Jul 21 2026
+
+  # === Aave Horizon collateral listing ===
+  - from: aave-horizon
+    to: mGLOBAL
+    kind: manages
+    label: 37.71% holder ($19.85M supplied as collateral; LTV 0.05%)
