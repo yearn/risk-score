@@ -408,7 +408,7 @@ The absence of a formal public bug bounty with monetary rewards is a weakness fo
 
 **Centralization Score = (3.5 + 3.5 + 1.5) / 3 = 2.83**
 
-**Score: 2.8/5** — Governance is held by an **MPC wallet** (likely Fordefi) with key sharding across multiple parties. The 24h timelock on critical changes and MPC multi-party structure provide reasonable governance security. Reserves are entirely offchain and Paxos controls minting. The unknown internal MPC quorum is a transparency gap.
+**Score: 2.8/5** — Governance was previously split across two multisigs (a 7-owner DEFAULT_ADMIN multisig and a 3-of-7 operational multisig) but has since been consolidated into a single MPC wallet (likely Fordefi) with key sharding across multiple parties. The 24h timelock on critical changes and MPC multi-party structure provide reasonable governance security. Reserves are entirely offchain and Paxos controls minting. The unknown internal MPC quorum is a transparency gap.
 
 #### Category 3: Funds Management (Weight: 30%)
 
