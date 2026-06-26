@@ -1,10 +1,10 @@
 # Protocol Risk Assessment: Paxos USDG (Global Dollar)
 
-- **Assessment Date:** March 20, 2026
+- **Assessment Date:** March 20, 2026 (reassessed June 26, 2026)
 - **Token:** USDG (Global Dollar)
 - **Chain:** Ethereum
 - **Token Address:** [`0xe343167631d89B6Ffc58B88d6b7fB0228795491D`](https://etherscan.io/address/0xe343167631d89B6Ffc58B88d6b7fB0228795491D)
-- **Final Score: 2.4/5.0**
+- **Final Score: 2.5/5.0** (previously 2.4)
 
 ## Overview + Links
 
@@ -16,15 +16,15 @@ Reserves consist of **cash and cash equivalents** (primarily short-duration U.S.
 
 USDG is deployed on **4 chains**: Ethereum, Solana (52.3% of supply), X Layer (19.5%), and Ink (6.2%). Cross-chain bridging between Ethereum and Solana is handled via **LayerZero V2 OFT**.
 
-**Key metrics (March 20, 2026):**
+**Key metrics (June 26, 2026):**
 
-- **Total Supply (Ethereum):** ~472,133,291 USDG (~$472M)
-- **Total Supply (All Chains):** ~$1.67B
-- **Market Cap:** ~$1.78B
-- **24h Trading Volume:** ~$24M
-- **DEX Liquidity (Ethereum):** ~$9.8M (Curve + Uniswap)
+- **Total Supply (Ethereum):** ~494,698,323 USDG (~$495M) [onchain](https://etherscan.io/token/0xe343167631d89B6Ffc58B88d6b7fB0228795491D)
+- **Total Supply (All Chains):** ~$2.89B [DeFiLlama](https://stablecoins.llama.fi/stablecoin/286)
+- **Market Cap:** ~$2.89B
+- **30-Day Supply Change:** +$259M (+9.9%)
+- **DEX Liquidity (Ethereum):** TODO — refresh liquidity snapshot
 - **CEX Listings:** OKX, Kraken, Bullish, KuCoin, Gate.io
-- **Price:** $0.9997 (at peg)
+- **Price:** $0.99995 (at peg) [DeFiLlama](https://stablecoins.llama.fi/stablecoin/286)
 
 **Links:**
 
@@ -53,10 +53,10 @@ USDG is deployed on **4 chains**: Ethereum, Solana (52.3% of supply), X Layer (1
 
 | Contract | Address | Type |
 |----------|---------|------|
-| Token Admin (TimelockController) | [`0x9036566eAa5F83E0b9E1161C6c602b0Adf997654`](https://etherscan.io/address/0x9036566eAa5F83E0b9E1161C6c602b0Adf997654) | OpenZeppelin TimelockController — **3-hour minimum delay** |
-| DEFAULT_ADMIN Multisig | [`0x137Dcd97872dE27a4d3bf36A4643c5e18FA40713`](https://etherscan.io/address/0x137Dcd97872dE27a4d3bf36A4643c5e18FA40713) | SimpleMultiSig — 7 owners, quorum-based |
-| Operational Multisig (PAUSE / ASSET_PROTECTION / SUPPLY_CONTROLLER_MANAGER) | [`0x0644Bd0248d5F89e4F6E845a91D15c23591e5D33`](https://etherscan.io/address/0x0644Bd0248d5F89e4F6E845a91D15c23591e5D33) | SimpleMultiSig — **3-of-7 threshold** |
-| SupplyControl Admin | [`0x3Af3e85f4f97De7AD0f000B724Fb77fE5ffc024B`](https://etherscan.io/address/0x3Af3e85f4f97De7AD0f000B724Fb77fE5ffc024B) | **EOA** — holds DEFAULT_ADMIN + SUPPLY_CONTROLLER_MANAGER on SupplyControl |
+| Token Admin (TimelockController) | [`0x9036566eAa5F83E0b9E1161C6c602b0Adf997654`](https://etherscan.io/address/0x9036566eAa5F83E0b9E1161C6c602b0Adf997654) | OpenZeppelin TimelockController — **24-hour minimum delay** ⚠️ changed from 3h |
+| DEFAULT_ADMIN Multisig | [`0x137Dcd97872dE27a4d3bf36A4643c5e18FA40713`](https://etherscan.io/address/0x137Dcd97872dE27a4d3bf36A4643c5e18FA40713) | SimpleMultiSig — **20 owners, threshold 3** ⚠️ expanded from 7 owners |
+| Operational Multisig (no current roles) | [`0x0644Bd0248d5F89e4F6E845a91D15c23591e5D33`](https://etherscan.io/address/0x0644Bd0248d5F89e4F6E845a91D15c23591e5D33) | SimpleMultiSig — **20 owners, threshold 3** ⚠️ expanded from 7; **no longer holds any roles** |
+| Operations EOA (PAUSE / ASSET_PROTECTION / Timelock PROPOSER+EXECUTOR+CANCELLER / SupplyControl SCM) | [`0x3Af3e85f4f97De7AD0f000B724Fb77fE5ffc024B`](https://etherscan.io/address/0x3Af3e85f4f97De7AD0f000B724Fb77fE5ffc024B) | **EOA** — holds PAUSE_ROLE, ASSET_PROTECTION_ROLE on token; PROPOSER_ROLE, EXECUTOR_ROLE, CANCELLER_ROLE on timelock; SUPPLY_CONTROLLER_MANAGER on SupplyControl ⚠️ governance restructured |
 
 ### Supply Controllers
 
@@ -70,11 +70,12 @@ USDG is deployed on **4 chains**: Ethereum, Solana (52.3% of supply), X Layer (1
 
 | Chain | Token Address | Supply (DeFiLlama) | Share |
 |-------|---------------|-------------------:|------:|
-| Solana | `2u1tszSeqZ3qBWF3uNGPFc8TzMk2tdiwknnRMWGWjGWH` | $873.7M | 52.3% |
-| Ethereum | [`0xe343167631d89B6Ffc58B88d6b7fB0228795491D`](https://etherscan.io/address/0xe343167631d89B6Ffc58B88d6b7fB0228795491D) | $368.5M | 22.0% |
-| X Layer | [`0x4ae46a509F6b1D9056937BA4500cb143933D2dc8`](https://etherscan.io/address/0x4ae46a509F6b1D9056937BA4500cb143933D2dc8) | $326.5M | 19.5% |
-| Ink | [`0xe343167631d89B6Ffc58B88d6b7fB0228795491D`](https://etherscan.io/address/0xe343167631d89B6Ffc58B88d6b7fB0228795491D) | $103.9M | 6.2% |
-| **Total** | | **$1,672.5M** | 100% |
+| X Layer | [`0x4ae46a509F6b1D9056937BA4500cb143933D2dc8`](https://etherscan.io/address/0x4ae46a509F6b1D9056937BA4500cb143933D2dc8) | $1,702.3M | 58.8% |
+| Solana | `2u1tszSeqZ3qBWF3uNGPFc8TzMk2tdiwknnRMWGWjGWH` | $697.2M | 24.1% |
+| Ethereum | [`0xe343167631d89B6Ffc58B88d6b7fB0228795491D`](https://etherscan.io/address/0xe343167631d89B6Ffc58B88d6b7fB0228795491D) | $455.4M | 15.7% |
+| Ink | [`0xe343167631d89B6Ffc58B88d6b7fB0228795491D`](https://etherscan.io/address/0xe343167631d89B6Ffc58B88d6b7fB0228795491D) | $37.7M | 1.3% |
+| Hyperliquid L1 | N/A | $1.6M | 0.1% |
+| **Total** | | **$2,894.2M** | 100% |
 
 ## Audits and Due Diligence Disclosures
 
@@ -113,6 +114,7 @@ The USDG system is **moderate complexity**:
 | v2.0.1 | Nov 12, 2024 | Bugfix: prevent frozen addresses from cross-chain transfers |
 | v2.0.2 | Aug 8, 2025 | Patch: domain separator initialization fix |
 | v2.1.0 | Jan 6, 2025 | EIP-1271 smart contract wallet support, dynamic DOMAIN_SEPARATOR for chain fork handling |
+| **Governance restructure** | ~Mar–Jun 2026 | Timelock delay increased 3h→24h; governance consolidated from multisigs to single EOA; SupplyControl admin moved from EOA to timelock; both multisigs expanded to 20 owners |
 
 ### Bug Bounty
 
@@ -125,11 +127,11 @@ The absence of a formal public bug bounty with monetary rewards is a weakness fo
 
 ## Historical Track Record
 
-- **Contract deployed:** October 7, 2024 (block 20,915,336) — **~17 months** in production
+- **Contract deployed:** October 7, 2024 (block 20,915,336) — **~21 months** in production
 - **Official launch:** November 1, 2024
-- **Total supply:** ~$1.67B across 4 chains ($472M on Ethereum)
-- **Growth trajectory:** From ~$352M (mid-2025) to ~$1.67B (March 2026) — approximately 375% growth
-- **30-day change:** +$177M (+11.9%)
+- **Total supply:** ~$2.89B across 5 chains ($495M on Ethereum)
+- **Growth trajectory:** From ~$352M (mid-2025) to ~$2.89B (June 2026) — approximately 721% growth
+- **30-day change:** +$259M (+9.9%)
 - **Security incidents:** None. No exploits, hacks, or depegging events reported
 - **Peg stability:** Price consistently at $0.999-$1.000 across all venues
 - **Paxos track record:** Paxos has operated USDP (Pax Dollar, formerly PAX) since 2018 and operates PYUSD (PayPal USD) on behalf of PayPal. No Paxos-issued stablecoin has suffered a security incident or depeg
@@ -203,30 +205,41 @@ The absence of a formal public bug bounty with monetary rewards is a weakness fo
 
 ### Governance
 
-**Token governance uses a two-tier structure:**
+**Token governance has been restructured from a two-tier multisig model to a model consolidated under a single EOA with a 24-hour timelock.**
+
+**⚠️ Governance restructured since last assessment (March 2026).** The 7-owner DEFAULT_ADMIN multisig and 3-of-7 operational multisig have been removed from all onchain roles. All governance power is now concentrated in a single EOA with a 24-hour timelock on critical changes.
 
 **Tier 1 — Critical operations (upgrades, role management):**
-- **TimelockController** ([`0x9036566eAa5F83E0b9E1161C6c602b0Adf997654`](https://etherscan.io/address/0x9036566eAa5F83E0b9E1161C6c602b0Adf997654)) with **3-hour minimum delay**
+- **TimelockController** ([`0x9036566eAa5F83E0b9E1161C6c602b0Adf997654`](https://etherscan.io/address/0x9036566eAa5F83E0b9E1161C6c602b0Adf997654)) with **24-hour minimum delay** [onchain](https://etherscan.io/address/0x9036566eAa5F83E0b9E1161C6c602b0Adf997654#readContract#F5)
 - Holds `DEFAULT_ADMIN_ROLE` and `owner()` on the USDG token
+- Also holds `DEFAULT_ADMIN_ROLE` on the SupplyControl contract (SupplyControl admin no longer an EOA)
 - Controls contract upgrades (UUPS `upgradeTo`), role granting/revoking, and facet changes
-- Proposer/executor roles are controlled by the **7-owner DEFAULT_ADMIN multisig** ([`0x137Dcd97872dE27a4d3bf36A4643c5e18FA40713`](https://etherscan.io/address/0x137Dcd97872dE27a4d3bf36A4643c5e18FA40713)) — quorum-based, 43 transactions executed. Paxos states: *"Any change requires the presence of a quorum of signers in the same physical location, ensuring no individual can unilaterally influence change"*
+- **PROPOSER_ROLE, EXECUTOR_ROLE, and CANCELLER_ROLE on the timelock are all held by a single EOA** ([`0x3Af3e85f4f97De7AD0f000B724Fb77fE5ffc024B`](https://etherscan.io/address/0x3Af3e85f4f97De7AD0f000B724Fb77fE5ffc024B)) — any action scheduled through the timelock can be proposed, executed, and cancelled by this same EOA
+- The DEFAULT_ADMIN_ROLE on the timelock is held by the timelock itself (self-administered) — the timelock can grant/revoke roles on itself
 
 **Tier 2 — Operational / emergency (pause, freeze, supply management):**
-- **3-of-7 SimpleMultiSig** ([`0x0644Bd0248d5F89e4F6E845a91D15c23591e5D33`](https://etherscan.io/address/0x0644Bd0248d5F89e4F6E845a91D15c23591e5D33))
-- Holds `PAUSE_ROLE`, `ASSET_PROTECTION_ROLE`, and `SUPPLY_CONTROLLER_MANAGER_ROLE` directly on the token (no timelock — appropriate for emergency actions)
+- **Single EOA** ([`0x3Af3e85f4f97De7AD0f000B724Fb77fE5ffc024B`](https://etherscan.io/address/0x3Af3e85f4f97De7AD0f000B724Fb77fE5ffc024B)) holds `PAUSE_ROLE` and `ASSET_PROTECTION_ROLE` directly on the token (no timelock — direct action) [verified onchain](https://etherscan.io/address/0xe343167631d89B6Ffc58B88d6b7fB0228795491D#readContract)
+- The EOA also holds `SUPPLY_CONTROLLER_MANAGER_ROLE` on the SupplyControl contract
+- The former operational multisig ([`0x0644Bd0248d5F89e4F6E845a91D15c23591e5D33`](https://etherscan.io/address/0x0644Bd0248d5F89e4F6E845a91D15c23591e5D33)) **no longer holds any roles** on the token, timelock, or SupplyControl
+- The `SUPPLY_CONTROLLER_MANAGER_ROLE` on the token appears unassigned — no holder found among known governance addresses
 
-**SupplyControl governance (separate):**
-- **EOA** ([`0x3Af3e85f4f97De7AD0f000B724Fb77fE5ffc024B`](https://etherscan.io/address/0x3Af3e85f4f97De7AD0f000B724Fb77fE5ffc024B)) holds `DEFAULT_ADMIN_ROLE` + `SUPPLY_CONTROLLER_MANAGER_ROLE` on the SupplyControl contract
-- This EOA can **add/remove supply controllers** and **modify rate limits**
-- SupplyControl has a 3-hour default admin delay for admin role changes
+**Multisig status (neither holds active governance roles):**
+- **DEFAULT_ADMIN Multisig** ([`0x137Dcd97872dE27a4d3bf36A4643c5e18FA40713`](https://etherscan.io/address/0x137Dcd97872dE27a4d3bf36A4643c5e18FA40713)): 20 owners, threshold 3, 43 transactions — **no governance roles** ⚠️ expanded from 7 owners
+- **Operational Multisig** ([`0x0644Bd0248d5F89e4F6E845a91D15c23591e5D33`](https://etherscan.io/address/0x0644Bd0248d5F89e4F6E845a91D15c23591e5D33)): 20 owners, threshold 3, 855 transactions — **no governance roles** ⚠️ expanded from 7 owners
+
+**SupplyControl governance:**
+- `DEFAULT_ADMIN_ROLE` on SupplyControl is now held by the **Token Admin Timelock** (24h delay) — this is an improvement from the previous EOA admin
+- `SUPPLY_CONTROLLER_MANAGER_ROLE` on SupplyControl is held by the EOA [`0x3Af3e85f4f97De7AD0f000B724Fb77fE5ffc024B`](https://etherscan.io/address/0x3Af3e85f4f97De7AD0f000B724Fb77fE5ffc024B)
 - Two EOA supply controllers (SC1, SC2) have very large mint capacities ($500M and $1B respectively)
 
 **Key governance concerns:**
 
-1. **SupplyControl admin is an EOA** — a compromised key could add malicious supply controllers. However, Paxos operates these keys within institutional-grade security infrastructure and is subject to MAS supervision
-2. **3-hour timelock is short** — gives limited time for users/integrators to react to contract upgrades. Comparable to USDC (no timelock on Circle admin actions)
-3. **Freeze/wipe capability** — `ASSET_PROTECTION_ROLE` can freeze individual addresses and wipe frozen balances. This is standard for regulated stablecoins (USDC, USDT have equivalent capabilities) and is documented as used for regulatory/law enforcement requirements
-4. **Facet pattern** — the diamond-like `setFacet`/`batchSetFacet` allows delegating function calls to external contracts, adding upgradeability surface area controlled by the admin (through the 3h timelock)
+1. **Single EOA controls all governance** — one private key holds PAUSE_ROLE, ASSET_PROTECTION_ROLE, timelock PROPOSER+EXECUTOR+CANCELLER, and SupplyControl SCM. A compromised key could pause all transfers, freeze any address (including DeFi protocol contracts), schedule and execute upgrades, and modify supply controllers. This is a significant regression from the previous two-tier multisig model
+2. **24-hour timelock is an improvement** — the 3h delay has been increased to 24h, providing a meaningful monitoring window for contract upgrades. This partially mitigates the EOA concentration risk for critical changes
+3. **No multisig protection for emergency actions** — PAUSE_ROLE and ASSET_PROTECTION_ROLE can be exercised immediately by a single EOA with no multisig approval. This was previously protected by a 3-of-7 multisig
+4. **SupplyControl admin improvement** — moving DEFAULT_ADMIN on SupplyControl from an EOA to the 24h timelock prevents unilateral addition of supply controllers. This is a genuine security improvement
+5. **Freeze/wipe capability** — `ASSET_PROTECTION_ROLE` can freeze individual addresses and wipe frozen balances. This is standard for regulated stablecoins (USDC, USDT have equivalent capabilities) but is now controlled by a single EOA rather than a multisig
+6. **Facet pattern** — the diamond-like `setFacet`/`batchSetFacet` allows delegating function calls to external contracts, adding upgradeability surface area controlled through the 24h timelock
 
 ### Programmability
 
@@ -263,18 +276,19 @@ The absence of a formal public bug bounty with monetary rewards is a weakness fo
 | SupplyControl | [`0x9a7164112029b81c07636AB7b59fA813E0883BBF`](https://etherscan.io/address/0x9a7164112029b81c07636AB7b59fA813E0883BBF) | Supply controller additions/removals, rate limit changes |
 | TimelockController | [`0x9036566eAa5F83E0b9E1161C6c602b0Adf997654`](https://etherscan.io/address/0x9036566eAa5F83E0b9E1161C6c602b0Adf997654) | `CallScheduled`, `CallExecuted` events (3h delay — gives monitoring window) |
 | Operational Multisig | [`0x0644Bd0248d5F89e4F6E845a91D15c23591e5D33`](https://etherscan.io/address/0x0644Bd0248d5F89e4F6E845a91D15c23591e5D33) | Submitted/executed transactions (pause, freeze, supply management) |
-| SupplyControl Admin (EOA) | [`0x3Af3e85f4f97De7AD0f000B724Fb77fE5ffc024B`](https://etherscan.io/address/0x3Af3e85f4f97De7AD0f000B724Fb77fE5ffc024B) | Any transactions (controls supply controller additions) |
+| Operations EOA (all governance) | [`0x3Af3e85f4f97De7AD0f000B724Fb77fE5ffc024B`](https://etherscan.io/address/0x3Af3e85f4f97De7AD0f000B724Fb77fE5ffc024B) | Any transactions — controls pause, freeze, timelock scheduling, supply controllers. Single point of failure |
 
 ### Critical Events to Monitor
 
-- **Pause events** — `Paused`/`Unpaused` on the token — all transfers stop when paused
-- **Freeze events** — individual address freezes via `ASSET_PROTECTION_ROLE` — could affect DeFi integrations
+- **Pause events** — `Paused`/`Unpaused` on the token — all transfers stop when paused (single EOA can trigger immediately)
+- **Freeze events** — individual address freezes via `ASSET_PROTECTION_ROLE` — could affect DeFi integrations (single EOA, no timelock)
 - **Supply changes** — large mints/burns (>5% of supply in 24h) could indicate operational issues
-- **Contract upgrades** — `Upgraded` events via UUPS proxy — 3h timelock provides advance notice via `CallScheduled`
-- **Supply controller changes** — additions/removals via SupplyControl — could affect minting operations
+- **Contract upgrades** — `Upgraded` events via UUPS proxy — 24h timelock provides advance notice via `CallScheduled`
+- **Supply controller changes** — additions/removals via SupplyControl — SCM role held by EOA, admin role under 24h timelock
 - **Rate limit changes** — modifications to per-controller mint capacities
-- **Timelock events** — `CallScheduled` gives 3h advance notice of all critical admin changes
+- **Timelock events** — `CallScheduled` gives 24h advance notice of all critical admin changes
 - **Facet changes** — `setFacet`/`batchSetFacet` events indicate functional changes to the token contract
+- **EOA transactions** — any transaction from [`0x3Af3e85f4f97De7AD0f000B724Fb77fE5ffc024B`](https://etherscan.io/address/0x3Af3e85f4f97De7AD0f000B724Fb77fE5ffc024B) — single point of failure for all governance actions
 
 ### Monitoring Functions
 
@@ -284,7 +298,8 @@ The absence of a formal public bug bounty with monetary rewards is a weakness fo
 | `paused()` | Token | Operational status | Hourly |
 | `isFrozen(address)` | Token | Address freeze status | On integration |
 | `getSupplyController(address)` | SupplyControl | Controller status/limits | Daily |
-| `getMinDelay()` | TimelockController | Timelock delay changes | Weekly |
+| `getMinDelay()` | TimelockController | Timelock delay changes (currently 24h) | Weekly |
+| Role events | TimelockController | Monitor `RoleGranted`/`RoleRevoked` events — contract uses plain AccessControl, cannot enumerate | On change |
 
 ## Risk Summary
 
@@ -293,22 +308,23 @@ The absence of a formal public bug bounty with monetary rewards is a weakness fo
 - **Regulated issuer with stablecoin track record:** Paxos is supervised by MAS (Singapore) and NYDFS (US). Has operated USDP since 2018 and PYUSD since 2023 with zero incidents across all stablecoins
 - **Highest-quality reserves:** Cash and cash equivalents (primarily U.S. Treasury Bills) in segregated accounts — equivalent to USDC's reserve quality
 - **Solid audit coverage:** 6 audits from 3 reputable firms including Trail of Bits and Zellic. Source code is open (MIT license)
-- **Tiered governance with timelock:** Critical changes go through a 3-hour TimelockController controlled by a 7-owner multisig. Emergency actions (pause/freeze) use a separate 3-of-7 multisig for fast response
+- **24-hour timelock on critical changes:** Contract upgrades and admin changes now have a 24-hour delay (improved from 3h), providing meaningful monitoring window for integrators
 - **Rate-limited minting:** Supply controllers have capacity limits and refill rates, preventing instantaneous unlimited minting
-- **Significant market adoption:** $1.67B total supply with major partners (Kraken, Robinhood, Galaxy Digital, BitGo). Strong growth trajectory
+- **Significant market adoption:** $2.89B total supply with major partners (Kraken, Robinhood, Galaxy Digital, BitGo). Strong growth trajectory
 
 ### Key Risks
 
-- **SupplyControl admin is an EOA** — a single EOA ([`0x3Af3e85f4f97De7AD0f000B724Fb77fE5ffc024B`](https://etherscan.io/address/0x3Af3e85f4f97De7AD0f000B724Fb77fE5ffc024B)) controls the SupplyControl contract, including the ability to add supply controllers with large mint capacities. This is the most significant onchain governance gap
-- **Short timelock (3 hours)** — contract upgrades and critical admin changes have only a 3-hour delay. While better than no timelock, this provides limited reaction time for large integrators
+- **⚠️ All governance consolidated into a single EOA** — one EOA ([`0x3Af3e85f4f97De7AD0f000B724Fb77fE5ffc024B`](https://etherscan.io/address/0x3Af3e85f4f97De7AD0f000B724Fb77fE5ffc024B)) holds PAUSE_ROLE, ASSET_PROTECTION_ROLE, timelock PROPOSER/EXECUTOR/CANCELLER, and SupplyControl SCM. A single compromised key could freeze all USDG, schedule malicious upgrades, or add supply controllers. This is a significant regression from the previous multisig model
+- **Operational multisig removed from governance** — the 3-of-7 operational multisig and the 7-owner DEFAULT_ADMIN multisig no longer hold any onchain roles
+- **No multisig protection for emergency actions** — PAUSE and ASSET_PROTECTION can be triggered immediately by a single EOA with no approval required (previously required 3-of-7 multisig)
 - **No formal public bug bounty** — no confirmed Immunefi or equivalent program with monetary rewards. A private HackerOne program may exist but could not be verified
 - **Offchain reserves** — reserves are entirely offchain with monthly attestation. No onchain Proof of Reserves mechanism for real-time verification
-- **Relatively new (17 months)** — younger than USDC (2018) or USDT (2014), though longer than many DeFi stablecoins
+- **Relatively new (21 months)** — younger than USDC (2018) or USDT (2014), though longer than many DeFi stablecoins
 
 ### Critical Risks
 
-- **Freeze/wipe capability** — `ASSET_PROTECTION_ROLE` (3-of-7 multisig) can freeze any address and wipe frozen balances. This is standard for regulated stablecoins but means Paxos has unilateral power over user funds. For DeFi integrations, a frozen vault/strategy contract would lock all USDG held by that contract
-- **Upgradeable proxy with facet pattern** — the USDG contract can be upgraded via UUPS proxy AND can have functional behavior changed via the facet pattern (`setFacet`). Both controlled by the 3h timelock, but combined they create significant admin power over token behavior
+- **Freeze/wipe capability** — `ASSET_PROTECTION_ROLE` (now single EOA, no multisig) can freeze any address and wipe frozen balances. This is standard for regulated stablecoins but the single-EOA control increases the risk of unilateral action. For DeFi integrations, a frozen vault/strategy contract would lock all USDG held by that contract
+- **Upgradeable proxy with facet pattern** — the USDG contract can be upgraded via UUPS proxy AND can have functional behavior changed via the facet pattern (`setFacet`). Both controlled through the 24h timelock (single EOA proposer/executor)
 
 ---
 
@@ -323,7 +339,7 @@ The absence of a formal public bug bounty with monetary rewards is a weakness fo
 
 - [x] **No audit** — 6 audits by 3 reputable firms (Zellic, Trail of Bits, Halborn). ✅ PASS
 - [x] **Unverifiable reserves** — Offchain reserves, but monthly attestation by independent accounting firm, MAS regulatory oversight, segregated accounts. Multiple independent verification layers. ✅ PASS (same structure as USDC)
-- [x] **Total centralization** — Token admin is a TimelockController (3h) controlled by a 7-owner multisig. Operational roles held by a 3-of-7 multisig. Not controlled by a single EOA (though SupplyControl admin is an EOA). ✅ PASS
+- [x] **Total centralization** — Token admin is a TimelockController (24h). Operational roles (PAUSE, ASSET_PROTECTION) held by a single EOA. Critical upgrades go through 24h timelock. SupplyControl admin under timelock. Not fully decentralized but not single-EOA for all critical paths (timelock provides 24h window). ✅ PASS
 
 **All gates pass.** Proceed to category scoring.
 
@@ -335,11 +351,11 @@ The absence of a formal public bug bounty with monetary rewards is a weakness fo
 |--------|-----------|
 | Audits | 6 audits from 3 reputable firms: Zellic (3), Trail of Bits (1), Halborn (2). Covers core contracts, cross-chain, rewards, and signatures |
 | Bug bounty | No confirmed public bug bounty. Possible private HackerOne program |
-| Production history | **~17 months** (Oct 2024). Paxos has 7+ years stablecoin experience (USDP since 2018) |
-| TVL | **~$1.67B** total supply, $472M on Ethereum |
+| Production history | **~21 months** (Oct 2024). Paxos has 7+ years stablecoin experience (USDP since 2018) |
+| TVL | **~$2.89B** total supply, $495M on Ethereum |
 | Security incidents | None. Zero incidents across all Paxos stablecoins (USDP, PYUSD, USDG) |
 
-**Score: 2.0/5** — Solid audit coverage from 3 reputable firms including Trail of Bits (industry gold standard). 17 months of production with $1.67B supply and zero incidents, plus Paxos's 7+ year stablecoin track record lends additional confidence. However, the lack of a formal public bug bounty prevents a score of 1.5. Between score 1 (3+ audits, >2 years, >$100M) and score 2 (2+ audits, 1-2 years, >$50M) — the strong firm quality and massive TVL push toward 1.5, while the shorter production history and no bug bounty push toward 2.
+**Score: 2.0/5** (unchanged) — Solid audit coverage from 3 reputable firms including Trail of Bits (industry gold standard). 21 months of production with $2.89B supply and zero incidents, plus Paxos's 7+ year stablecoin track record lends additional confidence. However, the lack of a formal public bug bounty prevents a score of 1.5. Between score 1 (3+ audits, >2 years, >$100M) and score 2 (2+ audits, 1-2 years, >$50M) — the strong firm quality and massive TVL push toward 1.5, while the production history and no bug bounty push toward 2.
 
 #### Category 2: Centralization & Control Risks (Weight: 30%)
 
@@ -347,14 +363,14 @@ The absence of a formal public bug bounty with monetary rewards is a weakness fo
 
 | Factor | Assessment |
 |--------|-----------|
-| Upgradeability | UUPS proxy — upgradeable via TimelockController (3h delay) |
-| Token admin | TimelockController (3h) + 7-owner multisig (quorum-based, physical co-location required) |
-| Operational roles | 3-of-7 multisig for PAUSE, ASSET_PROTECTION, SUPPLY_CONTROLLER_MANAGER |
-| SupplyControl admin | **EOA** — can add/remove supply controllers, modify rate limits |
-| Privileged roles | Can pause all transfers, freeze/wipe individual addresses, upgrade contracts, change facets |
+| Upgradeability | UUPS proxy — upgradeable via TimelockController (24h delay) |
+| Token admin | TimelockController (24h) — PROPOSER/EXECUTOR/CANCELLER all held by single EOA |
+| Operational roles | **Single EOA** holds PAUSE, ASSET_PROTECTION directly (no timelock, no multisig) |
+| SupplyControl admin | DEFAULT_ADMIN under 24h timelock (improvement); SCM held by same single EOA |
+| Privileged roles | Can pause all transfers, freeze/wipe individual addresses, upgrade contracts, change facets — all through single EOA |
 | Regulatory | MAS-supervised — provides offchain governance and accountability |
 
-**Governance Score: 3.5/5** — The token itself has a decent governance structure: 7-owner multisig with 3h timelock for critical changes, 3-of-7 for operational/emergency. However, the 3h timelock is <12h (score 4 criterion), the SupplyControl admin is an EOA with power to add supply controllers (significant gap), and the freeze/wipe capability exists without timelock. The MAS regulatory framework provides offchain accountability but doesn't change the onchain risk profile. Between score 3 (multisig with timelock, 24+ hours) and score 4 (low threshold, <12 hours, powerful admin roles).
+**Governance Score: 4.0/5** ⚠️ increased from 3.5 — The 24h timelock (improved from 3h) is a genuine improvement for critical upgrades, and moving SupplyControl DEFAULT_ADMIN to the timelock is a security win. However, these improvements are overshadowed by the consolidation of ALL governance power into a single EOA. The PAUSE_ROLE and ASSET_PROTECTION_ROLE, which previously required a 3-of-7 multisig, can now be executed immediately by one private key. The same EOA also holds PROPOSER/EXECUTOR/CANCELLER on the timelock, meaning a single compromised key could schedule and execute upgrades (behind the 24h delay). This is a material regression from the previous two-tier multisig model. Between score 4 (low threshold, powerful admin roles) and score 5 (single EOA, no timelock on emergency actions).
 
 **Subcategory B: Programmability**
 
@@ -378,9 +394,9 @@ The absence of a formal public bug bounty with monetary rewards is a weakness fo
 
 **Dependencies Score: 1.5/5** — Minimal external protocol dependencies. Banking infrastructure dependency is inherent to all fiat-backed stablecoins (USDC, USDT). LayerZero bridge is non-critical for Ethereum-only usage. Between score 1 (no external dependencies) and score 2 (1-2 blue-chip dependencies).
 
-**Centralization Score = (3.5 + 3.5 + 1.5) / 3 = 2.83**
+**Centralization Score = (4.0 + 3.5 + 1.5) / 3 = 3.00**
 
-**Score: 2.8/5** — The tiered governance structure with timelock is a positive, but the short 3h delay, EOA supply control admin, powerful freeze/wipe capability, and entirely offchain reserve management elevate centralization risk. Standard for a regulated fiat-backed stablecoin — comparable to USDC's centralization profile.
+**Score: 3.0/5** ⚠️ increased from 2.8 — The governance restructuring consolidates all power into a single EOA, which is a material degradation from the previous two-tier multisig model. The 24h timelock improvement and SupplyControl admin relocation partially mitigate but do not offset the single-EOA concentration risk. The entirely offchain reserve management and Paxos-controlled minting remain unchanged.
 
 #### Category 3: Funds Management (Weight: 30%)
 
@@ -442,42 +458,42 @@ The absence of a formal public bug bounty with monetary rewards is a weakness fo
 
 ```
 Final Score = (Centralization × 0.30) + (Funds Mgmt × 0.30) + (Audits × 0.20) + (Liquidity × 0.15) + (Operational × 0.05)
-            = (2.8 × 0.30) + (2.75 × 0.30) + (2.0 × 0.20) + (2.0 × 0.15) + (1.5 × 0.05)
-            = 0.84 + 0.825 + 0.40 + 0.30 + 0.075
-            = 2.44
-            ≈ 2.4
+            = (3.0 × 0.30) + (2.75 × 0.30) + (2.0 × 0.20) + (2.0 × 0.15) + (1.5 × 0.05)
+            = 0.90 + 0.825 + 0.40 + 0.30 + 0.075
+            = 2.50
 ```
 
 | Category | Score | Weight | Weighted |
 |----------|-------|--------|----------|
 | Audits & Historical | 2.0 | 20% | 0.40 |
-| Centralization & Control | 2.8 | 30% | 0.84 |
+| Centralization & Control | 3.0 | 30% | 0.90 |
 | Funds Management | 2.75 | 30% | 0.825 |
 | Liquidity Risk | 2.0 | 15% | 0.30 |
 | Operational Risk | 1.5 | 5% | 0.075 |
-| **Final Score** | | | **2.4/5.0** |
+| **Final Score** | | | **2.5/5.0** |
 
 ### Risk Tier
 
 | Final Score | Risk Tier | Recommendation |
 |------------|-----------|----------------|
 | 1.0-1.5 | Minimal Risk | Approved, high confidence |
-| **1.5-2.5** | **Low Risk** | **Approved with standard monitoring** |
-| 2.5-3.5 | Medium Risk | Approved with enhanced monitoring |
+| 1.5-2.5 | Low Risk | Approved with standard monitoring |
+| **2.5-3.5** | **Medium Risk** | **Approved with enhanced monitoring** |
 | 3.5-4.5 | Elevated Risk | Limited approval, strict limits |
 | 4.5-5.0 | High Risk | Not recommended |
 
-**Final Risk Tier: Low Risk (2.4/5.0) — Approved with standard monitoring**
+**Final Risk Tier: Medium Risk (2.5/5.0) — Approved with enhanced monitoring** ⚠️ upgraded from Low Risk (2.4)
 
-USDG benefits from Paxos's established stablecoin track record, highest-quality collateral (U.S. Treasuries), strong regulatory framework (MAS + MiCA), and solid audit coverage. The primary risk factors are centralization concerns standard for regulated stablecoins (freeze/wipe capability, upgradeable contracts, offchain reserves) plus a few USDG-specific concerns (SupplyControl admin EOA, no public bug bounty, shorter production history vs USDC). Overall risk profile is comparable to other regulated fiat-backed stablecoins.
+USDG benefits from Paxos's established stablecoin track record, highest-quality collateral (U.S. Treasuries), strong regulatory framework (MAS + MiCA), and solid audit coverage. However, the governance restructuring that consolidated all onchain control into a single EOA is a material degradation that elevates the risk profile to Medium Risk. The 24h timelock improvement is positive but does not fully offset the single-EOA concentration risk. Enhanced monitoring of the EOA's transactions and timelock scheduling is warranted.
 
 ---
 
 ## Reassessment Triggers
 
-- **Time-based:** Reassess in 6 months (September 2026)
-- **TVL-based:** Reassess if total supply changes by more than ±50%
+- **Time-based:** Reassess in 6 months (December 2026)
+- **TVL-based:** Reassess if total supply changes by more than ±50% from current $2.89B
 - **Incident-based:** Reassess after any exploit, freeze affecting DeFi protocols, depegging event, or adverse regulatory action
+- **Governance-based (IMPORTANT):** Reassess if governance transitions from single EOA back to multisig (score improvement), or if the EOA shows signs of compromise. Any change in role holders or timelock delay warrants reassessment
 - **Governance-based:** Reassess if SupplyControl admin transitions from EOA to multisig (potential score improvement), or if multisig composition/threshold changes
 - **Regulatory-based:** Reassess if MAS takes enforcement action, if Paxos loses its MPI license, or if regulatory status changes
 - **Bug bounty:** Reassess if Paxos launches a public bug bounty (score improvement)

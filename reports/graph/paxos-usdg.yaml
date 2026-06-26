@@ -44,25 +44,25 @@ nodes:
 
   # === Governance ===
   - id: token-timelock
-    label: Token Admin Timelock (3h)
+    label: Token Admin Timelock (24h)
     address: "0x9036566eAa5F83E0b9E1161C6c602b0Adf997654"
     category: governance
-    note: OpenZeppelin TimelockController
+    note: OpenZeppelin TimelockController; also DEFAULT_ADMIN on SupplyControl
   - id: default-admin-multisig
-    label: DEFAULT_ADMIN Multisig (7 owners)
+    label: DEFAULT_ADMIN Multisig (20 owners, thresh 3)
     address: "0x137Dcd97872dE27a4d3bf36A4643c5e18FA40713"
     category: governance
-    note: SimpleMultiSig; proposer/executor on Timelock
+    note: SimpleMultiSig; NO current governance roles (was proposer/executor)
   - id: ops-multisig
-    label: Operational Multisig (3-of-7)
+    label: Operational Multisig (20 owners, thresh 3)
     address: "0x0644Bd0248d5F89e4F6E845a91D15c23591e5D33"
     category: governance
-    note: PAUSE / ASSET_PROTECTION / SUPPLY_CONTROLLER_MANAGER
-  - id: supply-control-admin
-    label: SupplyControl Admin (EOA)
+    note: SimpleMultiSig; NO current governance roles
+  - id: ops-eoa
+    label: Operations EOA (single key)
     address: "0x3Af3e85f4f97De7AD0f000B724Fb77fE5ffc024B"
     category: governance
-    note: DEFAULT_ADMIN + SUPPLY_CONTROLLER_MANAGER on SupplyControl
+    note: PAUSE + ASSET_PROTECTION on token; PROPOSER+EXECUTOR+CANCELLER on Timelock; SUPPLY_CONTROLLER_MANAGER on SupplyControl
 
   # === External dependencies ===
   - id: dep-paxos-custody
@@ -76,22 +76,26 @@ nodes:
 
 edges:
   # === Governance flow ===
-  - from: default-admin-multisig
+  - from: ops-eoa
     to: token-timelock
-    kind: proposes-on
-    label: PROPOSER + EXECUTOR
+    kind: holds-role
+    label: PROPOSER + EXECUTOR + CANCELLER
   - from: token-timelock
     to: usdg
     kind: controls
-    label: DEFAULT_ADMIN + owner (3h delay)
-  - from: ops-multisig
+    label: DEFAULT_ADMIN + owner (24h delay)
+  - from: ops-eoa
     to: usdg
     kind: holds-role
-    label: PAUSE + ASSET_PROTECTION + SUPPLY_CONTROLLER_MANAGER
-  - from: supply-control-admin
+    label: PAUSE + ASSET_PROTECTION (no timelock)
+  - from: token-timelock
+    to: supply-control
+    kind: controls
+    label: DEFAULT_ADMIN (24h delay)
+  - from: ops-eoa
     to: supply-control
     kind: holds-role
-    label: DEFAULT_ADMIN + SUPPLY_CONTROLLER_MANAGER
+    label: SUPPLY_CONTROLLER_MANAGER
 
   # === Mint authority on USDG ===
   - from: sc1
