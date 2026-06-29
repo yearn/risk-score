@@ -4,7 +4,7 @@
 - **Token:** hgETH (High Growth ETH)
 - **Chain:** Ethereum
 - **Token Address:** [`0xc824A08dB624942c5E5F330d56530cD1598859fD`](https://etherscan.io/address/0xc824A08dB624942c5E5F330d56530cD1598859fD)
-- **Final Score: 3.55/5.0** (Elevated Risk; reassessment down from 3.75/5.0 in April 2026)
+- **Final Score: 3.70/5.0** (Elevated Risk; essentially flat from 3.75/5.0 in April 2026)
 
 > **Status (June 29, 2026):** hgETH vault is **UNPAUSED** for both deposits and withdrawals (verified onchain via `depositsPaused()` = false and `withdrawalsPaused()` = false). The vault was paused from April 18, 2026 until sometime between late April and late June 2026 in response to the **KelpDAO LayerZero bridge exploit**. The vault is now operational, but the hgETH exchange rate has **decreased** from 1.0368 rsETH/hgETH (April 27) to 0.9941 rsETH/hgETH (June 29), representing a realized ~4.1% loss in share value. The management fee has been cut to 0%, total supply has fallen 23%, and the vault buffer is nearly exhausted at 0.745 rsETH.
 
@@ -517,7 +517,7 @@ The rsETH layer has notably better governance than the hgETH vault layer (higher
 - rsETH layer: 6-of-8 multisig with 10-day timelock (unchanged) — but the LayerZero OFT bridge configuration that was exploited was an operational/deployment setting outside this timelock
 - $KERNEL governance token launched April 2025 (DAO still maturing)
 
-**Governance Score: 3.0** (was 3.5) — Architecture unchanged, but the vault being unpaused demonstrates the multisig's willingness to restore operations. The April 2026 pause was precautionary, not indefinite. However, the 3-of-5 structure with 4 anonymous signers and no onchain timelock remains a concern.
+**Governance Score: 3.5** (was 3.5) — Unchanged. The vault being unpaused is a return to the prior operational state, not a governance improvement. The governance structure is identical: same 3-of-5 multisig with 4 anonymous signers, same no onchain timelock, same unilateral control over pause/unpause. The April 2026 incident demonstrated that the multisig can and will pause the vault — the fact that it was later unpaused does not reduce the structural centralization risk.
 
 **Subcategory B: Programmability**
 
@@ -538,9 +538,9 @@ The rsETH layer has notably better governance than the hgETH vault layer (higher
 
 **Dependencies Score: 4.0** (was 3.5) — Heavy dependency chain that has now produced a real, large-magnitude failure outside hgETH's direct contracts. Curator and Upshift architectural mitigants remain, but cross-chain messaging risk is elevated.
 
-**Centralization Score = (3.0 + 3.5 + 4.0) / 3 = 3.50**
+**Centralization Score = (3.5 + 3.5 + 4.0) / 3 = 3.67**
 
-**Score: 3.50/5** (was 3.67) — Architecture unchanged but governance score improves as vault is no longer paused. The heavy dependency chain and the demonstrated cross-chain failure keep this category elevated.
+**Score: 3.67/5** (was 3.67) — Unchanged. The governance, programmability, and dependency architecture are all the same as in April. The vault unpause is operational restoration, not a structural governance improvement. The heavy dependency chain and demonstrated cross-chain failure keep this category elevated.
 
 #### Category 3: Funds Management (Weight: 30%)
 
@@ -579,7 +579,7 @@ The rsETH layer has notably better governance than the hgETH vault layer (higher
 - **Morpho market**: Previously a critical risk at 99.5% utilization. Now essentially empty (~0.1 WETH supply) — the liquidation cascade risk is **resolved**
 - **Same-denomination**: hgETH → rsETH → ETH. All notionally ETH-denominated, but the rsETH/ETH peg remains uncertain
 
-**Score: 3.5/5** (was 4.5) — Significant improvement: vault is unpaused and exit is now possible. However, liquidity remains constrained: near-zero buffer forces 3-4 day withdrawals, DEX liquidity is negligible, and the rsETH peg has not recovered. This corresponds to "withdrawal delay 3-4 days, limited instant exit capacity."
+**Score: 4.0/5** (was 4.5) — Moderate improvement: vault is unpaused and exit is now technically possible. However, the near-zero buffer (0.745 rsETH, ~0.007% of assets) means there is **essentially no instant exit capacity** — even a single small withdrawal requires 3-4 day strategy recall. DEX liquidity remains negligible, the rsETH peg is structurally uncertain, and the hgETH/USD oracle feed is degraded. This is worse than "limited instant exit capacity" (3.5 rubric) because the buffer cannot service any withdrawal of meaningful size, but better than the April state when the vault was entirely paused (4.5 rubric).
 
 #### Category 5: Operational Risk (Weight: 5%)
 
@@ -602,13 +602,13 @@ Final Score = (Centralization × 0.30) + (Funds Mgmt × 0.30) + (Audits × 0.20)
 | Category | Score (Jun 2026) | Score (Apr 2026) | Weight | Weighted (Jun 2026) |
 |----------|------------------|------------------|--------|---------------------|
 | Audits & Historical | 3.5 | 3.5 | 20% | 0.700 |
-| Centralization & Control | 3.50 | 3.67 | 30% | 1.050 |
+| Centralization & Control | 3.67 | 3.67 | 30% | 1.101 |
 | Funds Management | 3.75 | 3.75 | 30% | 1.125 |
-| Liquidity Risk | 3.5 | 4.5 | 15% | 0.525 |
+| Liquidity Risk | 4.0 | 4.5 | 15% | 0.600 |
 | Operational Risk | 3.0 | 3.0 | 5% | 0.150 |
-| **Final Score** | | | | **3.55** |
+| **Final Score** | | | | **3.70** |
 
-**Final Score: 3.55/5.0** (was 3.75/5.0 in April 2026, 2.8/5.0 in March 2026). Subcategory means are used directly; no half-point bucketing. The score decrease from April is driven by improved liquidity (vault unpaused) and slightly improved governance perception (pause was not indefinite).
+**Final Score: 3.70/5.0** (was 3.75/5.0 in April 2026, 2.8/5.0 in March 2026). Subcategory means are used directly; no half-point bucketing. The score is essentially flat from April: the vault unpause and Morpho market unwinding are offset by the near-zero buffer (effectively no instant exit), the realized 4.1% exchange-rate decrease, the degraded oracle feed, and continued TVL decline. The rsETH bridge exploit's ~$292M impact on the underlying asset ecosystem remains unresolved.
 
 ### Risk Tier
 
