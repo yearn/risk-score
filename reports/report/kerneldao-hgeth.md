@@ -4,7 +4,7 @@
 - **Token:** hgETH (High Growth ETH)
 - **Chain:** Ethereum
 - **Token Address:** [`0xc824A08dB624942c5E5F330d56530cD1598859fD`](https://etherscan.io/address/0xc824A08dB624942c5E5F330d56530cD1598859fD)
-- **Final Score: 3.70/5.0** (Elevated Risk; essentially flat from 3.75/5.0 in April 2026)
+- **Final Score: 3.80/5.0** (Elevated Risk; up from 3.75/5.0 in April 2026 — the realized share-value loss and collapsed buffer raise risk despite the vault unpause)
 - **Losses:** **~$763K direct hgETH share-value loss** (~4.1% exchange-rate decrease × 11,343 hgETH supply, onchain verified). **~$292M ecosystem loss** from the April 18, 2026 KelpDAO LayerZero bridge exploit (~116,500 rsETH / ~18% of rsETH supply released from escrow to attacker)
 
 > **Status (June 29, 2026):** hgETH vault is **UNPAUSED** for both deposits and withdrawals (verified onchain via `depositsPaused()` = false and `withdrawalsPaused()` = false). The vault was paused from April 18, 2026 until sometime between late April and late June 2026 in response to the **KelpDAO LayerZero bridge exploit** (~$292M / ~116,500 rsETH). The vault is now operational, but the hgETH exchange rate has **decreased** from 1.0368 rsETH/hgETH (April 27) to 0.9941 rsETH/hgETH (June 29), representing a realized ~4.1% loss in share value (~$763K across remaining 11,343 hgETH supply at current ETH prices). The management fee has been cut to 0%, total supply has fallen 23%, and the vault buffer is nearly exhausted at 0.745 rsETH.
@@ -235,7 +235,7 @@ Only **~0.007% of assets** are available as buffer (0.745 rsETH, down from 117.1
 - **Withdrawals**: **Unpaused** — 3-4 day processing period via `requestRedeem()` → `claim()` flow (not instant). Assets recalled from 172 deployed strategy positions; only 0.745 rsETH (~0.007%) buffer available — any withdrawal >0.745 rsETH requires strategy recall
 - **Composability**: hgETH can be used across DeFi (Morpho, Euler, Pendle) for additional yield, but secondary markets are extremely thin and the underlying rsETH peg is currently stressed
 
-### Fees (onchain verified, April 27, 2026)
+### Fees (onchain verified, June 29, 2026)
 
 | Fee | Value | Mechanism |
 |-----|-------|-----------|
@@ -555,7 +555,7 @@ The rsETH layer has notably better governance than the hgETH vault layer (higher
 - Management fee cut to 0% by governance — eliminates ongoing fee dilution, but the circumstances are not publicly explained
 - Nexus Mutual embedded cover for $30M+ of vault positions exists, but cover scope is for protocol-level smart-contract exploits, oracle failures, and liquidation mechanism failures. **Bridge / cross-chain messaging failures (the actual April 2026 cause) are likely outside the Nexus cover terms** based on standard exclusions
 
-**Collateralization Score: 4.0** (was 4.0) — Unchanged. The realized ~4.1% loss is a concrete onchain decrease in backing, but is relatively contained. The larger concern remains the unresolved rsETH bridge under-collateralization (~18%) and its indirect impact on hgETH.
+**Collateralization Score: 4.25** (was 4.0) — Worsened. The ~4.1% per-share loss (1.0368 → 0.9941 rsETH/hgETH, onchain verified) is no longer a feared risk but a *realized*, confirmed decrease in backing — and its cause is undocumented, so forward risk is unbounded. An ERC-4626 share should never fall in value absent a loss event; that this one did, with no published explanation, materializes the exact risk the prior 4.0 was hedging against. The unresolved rsETH bridge under-collateralization (~18%) compounds it.
 
 **Subcategory B: Provability**
 
@@ -565,11 +565,11 @@ The rsETH layer has notably better governance than the hgETH vault layer (higher
 - Strategy positions: onchain in DeFi protocols (transparent)
 - NAV updates: bounded, with anomaly detection — but the anomaly that occurred (cross-chain backing loss) is not visible to the vault's NAV checks
 
-**Provability Score: 3.5** (was 3.5) — Unchanged. The onchain exchange rate now reflects the loss (down to 0.9941), which is transparent, but the hgETH/USD oracle feed is degraded (`latestAnswer()` reverts). The *meaningful* provability question — "what is the economic value of my rsETH?" — remains uncertain given unresolved bridge exploit accounting.
+**Provability Score: 3.75** (was 3.5) — Worsened. Two new provability regressions this period: (1) the share value fell for an *undocumented* reason — holders cannot prove what caused their backing to drop; and (2) the hgETH/USD oracle feed is degraded — `latestAnswer()` now reverts onchain (verified June 29, 2026), and `latestRoundData()` returns anomalous zero-filled fields (roundId=0, startedAt=0). The onchain exchange rate is transparent, but the *meaningful* question — "what is the economic value of my rsETH, and why did it drop?" — is less provable than in April.
 
-**Funds Management Score = (4.0 + 3.5) / 2 = 3.75**
+**Funds Management Score = (4.25 + 3.75) / 2 = 4.0**
 
-**Score: 3.75/5** (was 3.75) — Unchanged. Architecture unchanged, but the realized onchain loss and the unresolved rsETH bridge situation keep this category elevated. The management fee elimination is positive but the circumstances are unclear.
+**Score: 4.0/5** (was 3.75) — Worsened. The realized, undocumented per-share loss and the degraded oracle feed both push this category up. The management fee elimination is nominally positive, but its circumstances are unexplained and coincide with the loss, so it does not offset.
 
 #### Category 4: Liquidity Risk (Weight: 15%)
 
@@ -580,7 +580,7 @@ The rsETH layer has notably better governance than the hgETH vault layer (higher
 - **Morpho market**: Previously a critical risk at 99.5% utilization. Now essentially empty (~0.1 WETH supply) — the liquidation cascade risk is **resolved**
 - **Same-denomination**: hgETH → rsETH → ETH. All notionally ETH-denominated, but the rsETH/ETH peg remains uncertain
 
-**Score: 4.0/5** (was 4.5) — Moderate improvement: vault is unpaused and exit is now technically possible. However, the near-zero buffer (0.745 rsETH, ~0.007% of assets) means there is **essentially no instant exit capacity** — even a single small withdrawal requires 3-4 day strategy recall. DEX liquidity remains negligible, the rsETH peg is structurally uncertain, and the hgETH/USD oracle feed is degraded. This is worse than "limited instant exit capacity" (3.5 rubric) because the buffer cannot service any withdrawal of meaningful size, but better than the April state when the vault was entirely paused (4.5 rubric).
+**Score: 4.25/5** (was 4.5) — Marginal improvement only. The vault unpause makes exit *technically* possible, but instant-exit capacity actually deteriorated ~150×: the buffer fell from 117.13 rsETH (0.77%) to 0.745 rsETH (0.007% of assets). Any withdrawal above 0.745 rsETH still requires a 3-4 day strategy recall, so for any redemption of meaningful size the practical exit is barely better than the paused state. DEX liquidity remains negligible, the rsETH peg is structurally uncertain, and the hgETH/USD oracle feed is degraded. The unpause earns only a 0.25 reduction from the April 4.5, not a full half-point.
 
 #### Category 5: Operational Risk (Weight: 5%)
 
@@ -592,7 +592,7 @@ The rsETH layer has notably better governance than the hgETH vault layer (higher
 - **Incident response (April–June 2026)**: Operations multisig paused rsETH and hgETH within an hour of detection (April 18). Coordination with Aave Labs, LayerZero, Arbitrum, EtherFi, Compound. Vault was eventually unpaused. Management fee cut to 0% suggests restructuring. However, the exchange rate decrease (~4.1%) and the cause of that loss have not been publicly explained
 - **Root cause (April 2026, unchanged)**: 1-of-1 DVN configuration on a production OFT route — serious deployment/configuration failure
 
-**Score: 3.0/5** (was 3.0) — Unchanged. Team credentials remain strong and incident response was competent. The unexplained exchange-rate decrease and continued TVL decline offset any improvement from the vault unpause.
+**Score: 3.25/5** (was 3.0) — Worsened. Team credentials and the April incident response remain credible, but a *new* adverse, opaque event occurred this period: an unexplained ~4.1% share-value loss plus an undocumented restructuring (management fee cut 1.5% → 0% with no published rationale, coinciding with the loss). Unexplained loss-and-restructuring during a pause is a fresh operational-transparency negative, not merely a wash against the unpause.
 
 ### Final Score Calculation
 
@@ -604,12 +604,12 @@ Final Score = (Centralization × 0.30) + (Funds Mgmt × 0.30) + (Audits × 0.20)
 |----------|------------------|------------------|--------|---------------------|
 | Audits & Historical | 3.5 | 3.5 | 20% | 0.700 |
 | Centralization & Control | 3.67 | 3.67 | 30% | 1.101 |
-| Funds Management | 3.75 | 3.75 | 30% | 1.125 |
-| Liquidity Risk | 4.0 | 4.5 | 15% | 0.600 |
-| Operational Risk | 3.0 | 3.0 | 5% | 0.150 |
-| **Final Score** | | | | **3.70** |
+| Funds Management | 4.0 | 3.75 | 30% | 1.200 |
+| Liquidity Risk | 4.25 | 4.5 | 15% | 0.638 |
+| Operational Risk | 3.25 | 3.0 | 5% | 0.163 |
+| **Final Score** | | | | **3.80** |
 
-**Final Score: 3.70/5.0** (was 3.75/5.0 in April 2026, 2.8/5.0 in March 2026). Subcategory means are used directly; no half-point bucketing. The score is essentially flat from April: the vault unpause and Morpho market unwinding are offset by the near-zero buffer (effectively no instant exit), the realized 4.1% exchange-rate decrease, the degraded oracle feed, and continued TVL decline. The rsETH bridge exploit's ~$292M impact on the underlying asset ecosystem remains unresolved.
+**Final Score: 3.80/5.0** (was 3.75/5.0 in April 2026, 2.8/5.0 in March 2026). Subcategory means are used directly; no half-point bucketing. The score **rises** from April: while the vault unpause and Morpho market unwinding are genuine positives (and partially reduce Liquidity risk), they are outweighed by a *realized*, onchain-confirmed ~4.1% per-share loss of undocumented cause, a ~150× collapse in the instant-exit buffer (117 → 0.745 rsETH), a degraded hgETH/USD oracle feed, an unexplained fee restructuring, and continued TVL decline. A realized loss should raise risk, not leave it flat — the prior "essentially flat" framing understated the period's adverse developments. The rsETH bridge exploit's ~$292M impact on the underlying asset ecosystem also remains unresolved.
 
 ### Risk Tier
 
@@ -631,7 +631,7 @@ hgETH is an actively managed ERC-4626 vault token built by a well-funded, experi
 
 The original assessment (March 2026, score 2.8 — Medium Risk) flagged three concerns: layered smart-contract risk, an upgradeable oracle for the Morpho market, and weaker governance on the hgETH layer than on rsETH. **The April 18, 2026 LayerZero OFT bridge exploit (~116,500 rsETH / ~$292M released from escrow) materialized exactly the "tail event in a layered dependency chain" risk the prior report warned about.** The bug was not in hgETH/Gain code, but cascading effects on the rsETH peg and hgETH operations were material.
 
-**As of June 2026, the situation has partially stabilized:**
+**As of June 2026, the picture is mixed — operationally restored, but with a realized loss and weakened backing:**
 
 - The hgETH vault is **unpaused** — deposits and withdrawals are operational again
 - The hgETH/WETH Morpho market has been **almost entirely unwound** (<0.1 WETH supply, <0.05 WETH borrow) — the earlier liquidation cascade concern is resolved
