@@ -49,7 +49,7 @@ Each layer introduces additional smart contract risk, oracle risk, and counterpa
 
 - [KernelDAO](https://kerneldao.com)
 - [Kelp Growth Vault](https://kerneldao.com/kelp/gain/growth-vault/)
-- [Kelp Documentation](https://kelp.gitbook.io/kelp/)
+- [KernelDAO / Kelp Documentation](https://kerneldao.gitbook.io/kernel)
 - [Upshift Finance Documentation](https://docs.upshift.finance/)
 - [DeFiLlama - Kelp](https://defillama.com/protocol/kelp)
 - [DeFiLlama - Gain](https://defillama.com/protocol/gain)
