@@ -4,7 +4,7 @@
 - **Token:** reUSD (Re Protocol Deposit Token)
 - **Chain:** Ethereum (primary), multi-chain (Avalanche, Arbitrum, Base, Katana, BNB Chain, Ink)
 - **Token Address:** [`0x5086bf358635B81D8C47C66d1C8b9E567Db70c72`](https://etherscan.io/address/0x5086bf358635B81D8C47C66d1C8b9E567Db70c72)
-- **Final Score: 3.5/5.0 (Elevated)** — verified governance improvements are offset by thin reUSD-only onchain coverage (~50.2%, near the 50% floor) and reUSD's 115% loss-attachment; see Risk Score Assessment.
+- **Final Score: 3.51/5.0** — verified governance improvements are offset by thin reUSD-only onchain coverage (~50.2%, near the 50% floor) and reUSD's 115% loss-attachment; see Risk Score Assessment.
 
 ## Overview + Links
 
@@ -608,7 +608,7 @@ Combined ~$69.3M of Re reUSD is supplied into Fluid + Morpho lending markets onc
 | Operational Risk | 2.5 | 5% | 0.125 |
 | **Final Score** | | | **3.5125** |
 
-**Final Score: 3.5** (3.5125 rounded; was 3.6 in April 2026). The governance improvements that lift Centralization are offset by thin reUSD-only coverage and a 115% loss-attachment (Funds Management) and contracting liquidity, holding the protocol just inside Elevated.
+**Final Score: 3.51** (3.5125 rounded). The governance improvements that lift Centralization are offset by thin reUSD-only coverage and a 115% loss-attachment (Funds Management) and contracting liquidity, holding the protocol just inside Elevated.
 
 ### Risk Tier
 
@@ -642,7 +642,7 @@ reUSD is a novel product that bridges DeFi capital with traditional reinsurance 
 ## Reassessment Triggers
 
 - **Time-based**: Reassess in 6 months (December 2026) or sooner if instant redemption vault remains empty for >30 days
-- **Governance-based**: Reassess after roles are changed, or funds are 
+- **Governance-based**: Reassess after roles are changed, or funds are redeployed
 - **Incident-based**: Reassess after any exploit, governance change, reinsurer insolvency, or material claim event
 - **Liquidity-based**: Reassess if DEX liquidity drops below $5M or if instant redemption vault remains empty for >30 days
 - **Regulatory-based**: Reassess if CIMA regulatory status changes or new jurisdictional restrictions apply
