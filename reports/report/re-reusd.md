@@ -4,7 +4,7 @@
 - **Token:** reUSD (Re Protocol Deposit Token)
 - **Chain:** Ethereum (primary), multi-chain (Avalanche, Arbitrum, Base, Katana, BNB Chain, Ink)
 - **Token Address:** [`0x5086bf358635B81D8C47C66d1C8b9E567Db70c72`](https://etherscan.io/address/0x5086bf358635B81D8C47C66d1C8b9E567Db70c72)
-- **Final Score: 3.5/5.0 (Elevated)** — verified governance improvements are offset by thin reUSD-only onchain coverage (~50.2%, near the 50% floor) and reUSD's 115% loss-attachment; see Risk Score Assessment.
+- **Final Score: 3.5/5.0** (Elevated Risk) — verified governance improvements are offset by thin reUSD-only onchain coverage (~50.2%, near the 50% floor) and reUSD's 115% loss-attachment; see Risk Score Assessment.
 
 ## Overview + Links
 
