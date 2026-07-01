@@ -1,6 +1,6 @@
 # Protocol Risk Assessment: Unit Bitcoin (UBTC)
 
-- **Assessment Date:** July 1, 2026 (reassessment; previous: May 19, 2026)
+- **Assessment Date:** May 19, 2026 (reassessed July 1, 2026)
 - **Token:** UBTC
 - **Chain:** HyperEVM (Hyperliquid L1 ecosystem)
 - **Token Address:** [`0x9FDBdA0A5e284c32744D2f17Ee5c74B284993463`](https://hyperevmscan.io/address/0x9FDBdA0A5e284c32744D2f17Ee5c74B284993463)
@@ -16,26 +16,6 @@ The protocol uses a **Guardian Network** — a distributed leader-verifier netwo
 UBTC is a **1:1 BTC-backed token** with no yield component. It represents a custodial claim on Bitcoin held in Unit's treasury addresses on the Bitcoin network.
 
 **Context:** UBTC is being evaluated as collateral on Morpho on HyperEVM, specifically the [UBTC-USDC market](https://app.morpho.org/hyperevm/market/0x45af9c72aa97978e143a646498c8922058b7c6f18b6f7b05d7316c8cf7ab942f/ubtc-usdc).
-
-## Reassessment Notes (2026-07-01)
-
-Re-check performed July 1, 2026. Summary of changes since the May 19, 2026 assessment:
-
-- **Score unchanged at 5.0/5.0** — the "no audit" critical gate is still triggered (re-verified via DeFiLlama API, Etherscan V2 API on chainId=999, and Immunefi).
-- **Implementation `0x1a7689c3b783eb37550efbb9c81e7f468f7034fc` remains source-unverified** on HyperEVMScan. Etherscan V2 API (chainId=999) returns empty `SourceCode`/`ContractName`. Bytecode size (11,660 bytes) and selector list (22 selectors) unchanged from May 2026.
-- **No contract changes:** Only one `Upgraded` and one `OwnershipTransferred` event ever emitted (both at deployment block 1,513,232). Implementation slot, owner, and complianceAuthority all identical. Re-verified via Etherscan V2 logs API.
-- **BTC treasury balance increased significantly:** 3,361.95 → 4,765.12 BTC (+42%). Backing ratio now ~145.6% (4,765.12 BTC vs 3,272.76 UBTC circulating). Verified via blockchain.info and blockstream.info.
-- **TVL roughly flat:** ~$418M (was ~$414M). 30-day range: $405M–$449M.
-- **UBTC price declined with BTC:** ~$76,859 → ~$58,650 (−24%). Peg widened to 30-day range ±1.3% (prior ±0.2%).
-- **Morpho UBTC exposure continued shrinking:** collateral supply $4.14M → $2.29M; UBTC-USDC market supply $836K → $646K, borrows $698K → $582K.
-- **Hyperliquid L1 UBTC pool TVL:** 23 pools, $25.5M total (down from 28 pools, $43.7M).
-- **New dependency identified:** Yearn VaultV3 "HyperliquidTwentyOne" (hXXI) at [`0xf44f49e6577b3934f981c6f0629d15154d2606e6`](https://hyperevmscan.io/address/0xf44f49e6577b3934f981c6f0629d15154d2606e6) — a Yearn-deployed vault with UBTC as its `asset()`, holding 33.2 UBTC (~$1.95M).
-
-**Scoring critique noted:** The "no audit" critical gate forces a binary 5.0/5.0 score for UBTC, placing it in the same tier as protocols with catastrophic loss events (hacks, dead protocols). The ungated weighted score is ~3.20/5.0 (Medium), and UBTC has had no loss event in ~16 months of operation with verifiable over-collateralization. The gap between the gated score (5.0) and ungated score (3.20) is a known limitation of the binary gate design — it does not distinguish between unaudited protocols with strong on-chain collateral backing and operational history vs unaudited protocols with known exploits. Several of the reassessment triggers below would remove the gate if met.
-
-**Outstanding TODOs:**
-- Implementation source code remains unverified on HyperEVMScan — highest priority gap.
-- No public reserve dashboard (confirmed absent from all Unit web properties: hyperunit.xyz, docs.hyperunit.xyz, explorer.hyperunit.xyz).
 
 **Links:**
 
@@ -253,10 +233,9 @@ Per DeFiLlama yields API (July 1, 2026), 23 UBTC pools on Hyperliquid L1 with **
 ### Liquidity Assessment
 
 - **Primary exit:** Hyperliquid spot CLOB with ~$30M daily UBTC volume — adequate for most position sizes.
-- **Secondary exit:** Protocol withdrawal back to native BTC (queue-based, ~3 Bitcoin block batches). Withdrawal queue not re-checked this reassessment (TODO).
+- **Secondary exit:** Protocol withdrawal back to native BTC (queue-based, ~3 Bitcoin block batches). BTC withdrawal queue: 6 pending, ETH: 1 pending (July 1, 2026).
 - **Hyperliquid L1 DEX + lending TVL:** ~$25.5M across 23 pools — notable decline from $43.7M (28 pools) in May 2026. Reduced liquidity breadth.
 - **All liquidity is within the Hyperliquid ecosystem** — still no CEX listings.
-- **New dependency:** Yearn VaultV3 "HyperliquidTwentyOne" (hXXI) at [`0xf44f49e6577b3934f981c6f0629d15154d2606e6`](https://hyperevmscan.io/address/0xf44f49e6577b3934f981c6f0629d15154d2606e6) holds 33.2 UBTC (~$1.95M). This is a Yearn-deployed ERC-4626 vault with UBTC as its `asset()`; not controlled by Unit Protocol. Adds a small external dependency on Yearn's vault infrastructure.
 
 ## Centralization & Control Risks
 
@@ -487,17 +466,15 @@ Rationale:
 
 ## Reassessment Triggers
 
-| Trigger | Status (July 2026) |
-|---------|-------------------|
-| Time-based (3 months) | Next: ~October 2026 |
-| TVL change >50% | Not triggered (TVL flat at ~$418M) |
-| 1. Publication of any smart contract audit | **Not triggered** — still 0 audits |
-| 2. Source code verification on block explorers | **Not triggered** — implementation still unverified |
-| 3. Launch of a bug bounty program | **Not triggered** — no bounty program |
-| 4. Contract implementation upgrade | **Not triggered** — implementation unchanged since deployment |
-| 5. Ownership transfer of UBTC contract | **Not triggered** — owner unchanged since deployment |
-| 6. Change in Guardian Network composition | **Not triggered** — documented participants (Unit, Hyperliquid, Infinite Field) unchanged since deployment. Verified via [docs key-addresses page](https://docs.hyperunit.xyz/developers/key-addresses/mainnet) (last updated ~May 2026). Guardian public keys (`unit-node`, `hl-node`, `field-node`) available for independent verification of address generation integrity. |
-| 7. Introduction of timelock governance | **Not triggered** — no timelock |
+- **Time-based**: Reassess in 3 months or upon completion of an audit
+- **TVL-based**: Reassess if TVL changes by more than 50%
+1. Publication of any smart contract audit for Unit Protocol / UBTC
+2. Source code verification on block explorers
+3. Launch of a bug bounty program
+4. Contract implementation upgrade on HyperEVM
+5. Ownership transfer of the UBTC contract
+6. Change in Guardian Network composition (addition/removal of Guardians)
+7. Introduction of timelock governance (positive trigger — would improve score)
 
 ## Appendix: What Would Improve the Score
 
@@ -542,7 +519,7 @@ Source not verified — the function set below was reconstructed from the deploy
 |---|---|---|
 | `0x44337ea1` | `addToBlacklist(address)` | resolved via 4byte directory |
 | `0x537df3b6` | `removeFromBlacklist(address)` | resolved via 4byte directory |
-| `0xfe575a87` | `isBlacklisted(address)` | resolved via 4byte directory; `isBlacklisted(0x0)=false`, `isBlacklisted(owner)=false`, `isBlacklisted(HyperCoreTreasury)=false`, `isBlacklisted(hXXI_vault)=false` as of 2026-07-01 |
+| `0xfe575a87` | `isBlacklisted(address)` | resolved via 4byte directory; `isBlacklisted(0x0)=false`, `isBlacklisted(owner)=false`, `isBlacklisted(HyperCoreTreasury)=false` as of 2026-07-01 |
 | `0x309f477a` | `complianceAuthority()` | resolved via OpenChain DB; returns `0xB4FC973924a91362D301E583E839Cdaf4f19cdF8` (= current `owner()`) |
 | `0x6b9be885` | unknown setter `(address)`, nonpayable | not in 4byte/OpenChain; reverts when called from a non-authority; inferred as `updateComplianceAuthority(address)` |
 | `0xb768259d` | unknown pure getter | not in 4byte/OpenChain; returns the constant `0xF036a5261406a394bd63Eb4dF49C464634a66155` (the HyperCore deployer multi-sig); inferred as `coreDeployer()` |
@@ -591,7 +568,7 @@ curl -s "https://api.etherscan.io/v2/api?chainid=999&module=contract&action=gets
 - [x] Same 22 selectors? → ✅ Confirmed July 1, 2026.
 - [ ] Implementation source code verified on HyperEVMScan? → ❌ STILL NOT VERIFIED as of July 1, 2026.
 - [x] `complianceAuthority` still equals `owner`? → ✅ Yes, both `0xB4FC97…cdF8`.
-- [x] Any address showing `isBlacklisted(addr)=true`? → ✅ None found (checked owner, zero addr, HyperCore treasury, hXXI vault).
+- [x] Any address showing `isBlacklisted(addr)=true`? → ✅ None found (checked owner, zero addr, HyperCore treasury).
 - [x] Any new `Upgraded` event on the proxy? → ✅ None beyond deployment (verified via Etherscan V2 logs API).
 
 ## Sources
