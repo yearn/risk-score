@@ -13,7 +13,10 @@ export function getStaticPaths() {
 const { slug } = Astro.params;
 const report = getReportBySlug(slug!);
 if (!report) return Astro.redirect("/reports/");
-const ogDescription = `${report.name} — Score: ${report.finalScore.toFixed(1)}/5.0 (${scoreTier(report.finalScore)}). ${report.token} on ${report.chain}.`;
+const ogDescription =
+  report.finalScore != null
+    ? `${report.name} — Score: ${report.finalScore.toFixed(1)}/5.0 (${scoreTier(report.finalScore)}). ${report.token} on ${report.chain}.`
+    : `${report.name} — ${report.status ?? "Not Rated"} (Not Rated). ${report.token} on ${report.chain}.`;
 const graphAvailable = hasGraph(slug!);
 
 const reportIssueUrl = (() => {
@@ -42,9 +45,16 @@ const reportIssueUrl = (() => {
 >
   <a href="/reports/" class="back-link">&larr; All Reports</a>
 
-  {report.warning && (
-    <div class="warning-banner">
-      <strong>&#9888; {report.warning}</strong>
+  {report.status && (
+    <div class:list={["status-banner", report.statusKind]}>
+      <strong>
+        &#9888; {report.status}
+        {report.statusKind === "terminal"
+          ? " — Not Rated (superseded by a terminal event)"
+          : report.status === "GATED"
+            ? " — score capped by a critical gate"
+            : ""}
+      </strong>
     </div>
   )}
 
@@ -56,7 +66,11 @@ const reportIssueUrl = (() => {
         )}
         <h1>{report.name}</h1>
       </div>
-      <ScoreBadge score={report.finalScore} size="large" />
+      {report.finalScore != null ? (
+        <ScoreBadge score={report.finalScore} size="large" />
+      ) : (
+        <span class="na-badge">Not Rated</span>
+      )}
     </div>
     <div class="meta">
       <span>{report.token}</span>
@@ -91,10 +105,22 @@ const reportIssueUrl = (() => {
     </div>
   </div>
 
-  <section class="section">
-    <h2>Score Breakdown</h2>
-    <ScoreTable scores={report.scoreTable} finalScore={report.finalScore} />
-  </section>
+  {report.finalScore != null ? (
+    <section class="section">
+      <h2>Score Breakdown</h2>
+      <ScoreTable scores={report.scoreTable} finalScore={report.finalScore} />
+    </section>
+  ) : (
+    <section class="section">
+      <h2>Score</h2>
+      <div class="not-rated-note">
+        <strong>Not Rated{report.status ? ` — ${report.status}` : ""}.</strong>
+        This assessment sits off the 1–5 risk scale: a terminal event (exploit
+        or wind-down) supersedes a forward-looking risk score. See the Risk
+        Summary and full report below for details.
+      </div>
+    </section>
+  )}
 
   <section class="section">
     <h2>Overview</h2>
@@ -128,7 +154,7 @@ const reportIssueUrl = (() => {
 </BaseLayout>
 
 <style>
-  .warning-banner {
+  .status-banner {
     background: #dc2626;
     color: #fff;
     padding: 0.75rem 1rem;
@@ -136,6 +162,32 @@ const reportIssueUrl = (() => {
     margin-bottom: 1rem;
     font-size: 1rem;
     text-align: center;
+  }
+  .status-banner.caution {
+    background: #b45309;
+  }
+  .na-badge {
+    display: inline-flex;
+    align-items: center;
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--text-secondary);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0.4rem 0.8rem;
+  }
+  .not-rated-note {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-left: 3px solid #dc2626;
+    border-radius: 8px;
+    padding: 1rem 1.25rem;
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+    line-height: 1.55;
+  }
+  .not-rated-note strong {
+    color: var(--text-primary);
   }
   .back-link {
     display: inline-block;

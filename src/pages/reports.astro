@@ -2,7 +2,10 @@
 import BaseLayout from "../layouts/BaseLayout.astro";
 import ScoreBadge from "../components/ScoreBadge.astro";
 import { getAllReports } from "../lib/reports";
+import type { ReportData } from "../lib/parseReport";
 import { scoreColor, scoreTier } from "../lib/colors";
+
+type ScoredReport = ReportData & { finalScore: number };
 
 const formatRelative = (ts: number): string => {
   if (!ts) return "—";
@@ -15,6 +18,10 @@ const formatRelative = (ts: number): string => {
 };
 
 const reports = getAllReports();
+const scored = reports.filter(
+  (r): r is ScoredReport => r.finalScore != null,
+);
+const unscored = reports.filter((r) => r.finalScore == null);
 const tierOrder = [
   "Minimal Risk",
   "Low Risk",
@@ -24,7 +31,7 @@ const tierOrder = [
 ];
 const tierCounts = tierOrder.map((t) => ({
   tier: t,
-  count: reports.filter((r) => scoreTier(r.finalScore) === t).length,
+  count: scored.filter((r) => scoreTier(r.finalScore) === t).length,
 }));
 ---
 
@@ -36,8 +43,7 @@ const tierCounts = tierOrder.map((t) => ({
     </div>
     <h1>Risk Assessment Reports</h1>
     <p class="reports-sub">
-      {reports.length} independent assessments across DeFi protocols, vaults
-      and assets. Sorted by score — safest first.
+      Independent assessments across DeFi protocols, vaults and assets.
     </p>
   </section>
 
@@ -61,7 +67,7 @@ const tierCounts = tierOrder.map((t) => ({
         All <span class="pill-count">{reports.length}</span>
       </button>
       {tierCounts.filter(t => t.count > 0).map(({ tier, count }) => {
-        const sample = reports.find(r => scoreTier(r.finalScore) === tier);
+        const sample = scored.find(r => scoreTier(r.finalScore) === tier);
         const accent = sample ? scoreColor(sample.finalScore) : "var(--brand-blue)";
         return (
           <button
@@ -79,7 +85,7 @@ const tierCounts = tierOrder.map((t) => ({
   </div>
 
   <div class="reports-grid is-list" id="reports-grid">
-    {reports.map((r) => (
+    {scored.map((r) => (
       <a
         href={`/report/${r.slug}/`}
         class="report-card"
@@ -108,10 +114,10 @@ const tierCounts = tierOrder.map((t) => ({
               <span title={r.date}>{formatRelative(r.dateSortable)}</span>
             </div>
           </div>
-          {r.warning && (
-            <div class="warning-banner">
+          {r.status && (
+            <div class:list={["warning-banner", r.statusKind]}>
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-              <span>{r.warning}</span>
+              <span>{r.status}</span>
             </div>
           )}
           <ScoreBadge score={r.finalScore} />
@@ -132,6 +138,57 @@ const tierCounts = tierOrder.map((t) => ({
       </a>
     ))}
   </div>
+
+  {unscored.length > 0 && (
+    <section class="not-rated-section" id="not-rated-section">
+      <div class="not-rated-head">
+        <h2>Not Rated <span class="nr-count">{unscored.length}</span></h2>
+        <p>
+          Off the 1–5 scale. A terminal event — exploit or wind-down.
+        </p>
+      </div>
+      <div class="reports-grid is-list not-rated-grid">
+        {unscored.map((r) => (
+          <a
+            href={`/report/${r.slug}/`}
+            class="report-card not-rated-card"
+            data-name={r.name.toLowerCase()}
+            data-token={r.token.toLowerCase()}
+            data-tier="Not Rated"
+          >
+            <div class="card-glow" aria-hidden="true"></div>
+            <div class="card-head">
+              <div class="icon-stack">
+                {r.iconUrl ? (
+                  <img src={r.iconUrl} alt="" width="36" height="36" class="protocol-icon" loading="lazy" />
+                ) : (
+                  <div class="icon-placeholder" />
+                )}
+                {r.chainIconUrl && (
+                  <img src={r.chainIconUrl} alt="" width="16" height="16" class="chain-icon" loading="lazy" />
+                )}
+              </div>
+              <div class="card-title">
+                <div class="card-name">{r.name}</div>
+                <div class="card-meta">
+                  <span class="mono">{r.token}</span>
+                  <span class="sep">·</span>
+                  <span title={r.date}>{formatRelative(r.dateSortable)}</span>
+                </div>
+              </div>
+              {r.status && (
+                <div class:list={["warning-banner", r.statusKind]}>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                  <span>{r.status}</span>
+                </div>
+              )}
+              <span class="na-badge">N/A</span>
+            </div>
+          </a>
+        ))}
+      </div>
+    </section>
+  )}
 
   <div class="empty-state" id="empty-state" hidden>
     <div class="empty-icon">
@@ -161,6 +218,13 @@ const tierCounts = tierOrder.map((t) => ({
           card.style.display = show ? "" : "none";
           if (show) visible++;
         });
+        // Hide the "Not Rated" heading when none of its cards are visible.
+        const nrSection = document.getElementById("not-rated-section");
+        if (nrSection) {
+          const anyVisible = Array.from(nrSection.querySelectorAll(".report-card"))
+            .some((c) => c.style.display !== "none");
+          nrSection.style.display = anyVisible ? "" : "none";
+        }
         empty.hidden = visible > 0;
       }
 
@@ -556,6 +620,68 @@ const tierCounts = tierOrder.map((t) => ({
     order: 1;
     flex-basis: 100%;
     align-self: flex-start;
+  }
+  /* Caution status (e.g. GATED): amber instead of the terminal red. */
+  .warning-banner.caution {
+    color: #fbbf24;
+    background: color-mix(in srgb, #d97706 18%, transparent);
+    border-color: color-mix(in srgb, #d97706 40%, transparent);
+  }
+
+  .na-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 44px;
+    padding: 0.3rem 0.55rem;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text-secondary);
+    font-size: 0.82rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    flex-shrink: 0;
+  }
+
+  .not-rated-section {
+    margin: 0 0 3rem;
+  }
+  .not-rated-head {
+    margin: 0.5rem 0 0.85rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--border);
+  }
+  .not-rated-head h2 {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 1rem;
+    letter-spacing: -0.01em;
+    margin-bottom: 0.3rem;
+  }
+  .nr-count {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    padding: 0.05rem 0.45rem;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--bg-secondary) 80%, transparent);
+    font-variant-numeric: tabular-nums;
+  }
+  .not-rated-head p {
+    color: var(--text-secondary);
+    font-size: 0.82rem;
+    line-height: 1.5;
+    max-width: 72ch;
+  }
+  .not-rated-grid {
+    gap: 0.5rem;
+  }
+  .not-rated-card {
+    opacity: 0.82;
+  }
+  .not-rated-card:hover {
+    opacity: 1;
   }
 
   .card-foot {

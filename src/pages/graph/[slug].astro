@@ -41,7 +41,7 @@ const cyData = {
       | null = null;
     if (crossLinkEntry) {
       const report = getReportBySlug(crossLinkEntry.slug);
-      if (report && report.finalScore > 0) {
+      if (report && report.finalScore != null && report.finalScore > 0) {
         crossLink = {
           slug: crossLinkEntry.slug,
           score: report.finalScore,
