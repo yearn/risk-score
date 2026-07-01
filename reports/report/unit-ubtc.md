@@ -1,6 +1,6 @@
 # Protocol Risk Assessment: Unit Bitcoin (UBTC)
 
-- **Assessment Date:** May 19, 2026 (reassessment; previous: February 19, 2026)
+- **Assessment Date:** July 1, 2026 (reassessment; previous: May 19, 2026)
 - **Token:** UBTC
 - **Chain:** HyperEVM (Hyperliquid L1 ecosystem)
 - **Token Address:** [`0x9FDBdA0A5e284c32744D2f17Ee5c74B284993463`](https://hyperevmscan.io/address/0x9FDBdA0A5e284c32744D2f17Ee5c74B284993463)
@@ -17,19 +17,23 @@ UBTC is a **1:1 BTC-backed token** with no yield component. It represents a cust
 
 **Context:** UBTC is being evaluated as collateral on Morpho on HyperEVM, specifically the [UBTC-USDC market](https://app.morpho.org/hyperevm/market/0x45af9c72aa97978e143a646498c8922058b7c6f18b6f7b05d7316c8cf7ab942f/ubtc-usdc).
 
-## Reassessment Notes (2026-05-19)
+## Reassessment Notes (2026-07-01)
 
-Re-check performed for [issue #164](https://github.com/yearn/risk-score/issues/164) (74-day reassessment trigger). Summary of changes since the February 19, 2026 assessment:
+Re-check performed July 1, 2026. Summary of changes since the May 19, 2026 assessment:
 
-- **Score unchanged at 5.0/5.0** — the "no audit" critical gate is still triggered (re-verified via DeFiLlama API, Unit docs, HyperEVMScan, and Immunefi).
-- **No contract changes:** UBTC proxy ownership and implementation both unchanged since deployment (verified via Etherscan V2 logs API on chainId=999 — only one `OwnershipTransferred` and one `Upgraded` event ever emitted, both at deployment block 1,513,232).
-- **Implementation still not source-verified** on HyperEVMScan (Etherscan V2 API returns empty `ContractName`/`SourceCode`).
-- **TVL down ~7%** (~$447M → ~$414M). Backing is intact and slightly over-collateralized (3,361.95 BTC vs 3,272.76 UBTC circulating).
-- **Peg materially tightened** (30-day range ±0.2% vs prior ±1.7%).
-- **Morpho UBTC exposure has shrunk** (collateral $7.6M → $4.14M; UBTC-USDC market $2.72M → $836K supply).
-- **Supported bridge chains expanded** (Avalanche, Base, ZEC, SPL now in withdrawal-queue API).
+- **Score unchanged at 5.0/5.0** — the "no audit" critical gate is still triggered (re-verified via DeFiLlama API, Etherscan V2 API on chainId=999, and Immunefi).
+- **Implementation `0x1a7689c3b783eb37550efbb9c81e7f468f7034fc` remains source-unverified** on HyperEVMScan. Etherscan V2 API (chainId=999) returns empty `SourceCode`/`ContractName`. Bytecode size (11,660 bytes) and selector list (22 selectors) unchanged from May 2026.
+- **No contract changes:** Only one `Upgraded` and one `OwnershipTransferred` event ever emitted (both at deployment block 1,513,232). Implementation slot, owner, and complianceAuthority all identical. Re-verified via Etherscan V2 logs API.
+- **BTC treasury balance increased significantly:** 3,361.95 → 4,765.12 BTC (+42%). Backing ratio now ~145.6% (4,765.12 BTC vs 3,272.76 UBTC circulating). Verified via blockchain.info and blockstream.info.
+- **TVL roughly flat:** ~$418M (was ~$414M). 30-day range: $405M–$449M.
+- **UBTC price declined with BTC:** ~$76,859 → ~$58,650 (−24%). Peg widened to 30-day range ±1.3% (prior ±0.2%).
+- **Morpho UBTC exposure continued shrinking:** collateral supply $4.14M → $2.29M; UBTC-USDC market supply $836K → $646K, borrows $698K → $582K.
+- **Hyperliquid L1 UBTC pool TVL:** 23 pools, $25.5M total (down from 28 pools, $43.7M).
+- **New dependency identified:** Yearn VaultV3 "HyperliquidTwentyOne" (hXXI) at [`0xf44f49e6577b3934f981c6f0629d15154d2606e6`](https://hyperevmscan.io/address/0xf44f49e6577b3934f981c6f0629d15154d2606e6) — a Yearn-deployed vault with UBTC as its `asset()`, holding 33.2 UBTC (~$1.95M).
 
-**Outstanding TODOs (unchanged from prior assessment):**
+**Scoring critique noted:** The "no audit" critical gate forces a binary 5.0/5.0 score for UBTC, placing it in the same tier as protocols with catastrophic loss events (hacks, dead protocols). The ungated weighted score is ~3.20/5.0 (Medium), and UBTC has had no loss event in ~16 months of operation with verifiable over-collateralization. The gap between the gated score (5.0) and ungated score (3.20) is a known limitation of the binary gate design — it does not distinguish between unaudited protocols with strong on-chain collateral backing and operational history vs unaudited protocols with known exploits. Several of the reassessment triggers below would remove the gate if met.
+
+**Outstanding TODOs (unchanged):**
 - No public Guardian health endpoint identified for monitoring.
 - No public reserve dashboard (cross-chain BTC vs UBTC reconciliation still manual).
 
@@ -95,7 +99,7 @@ Unit is a **bridge/asset tokenization protocol** — not a lending, staking, or 
 
 ## Audits and Due Diligence Disclosures
 
-**No smart contract audits are publicly disclosed or listed.** Status re-confirmed May 19, 2026.
+**No smart contract audits are publicly disclosed or listed.** Status re-confirmed July 1, 2026.
 
 - DeFiLlama protocol record still reports `audits: 0` and `audit_links: null` for Unit (verified via `/protocol/unit` API).
 - No audit reports or links are found in the Unit documentation (`docs.hyperunit.xyz` — searched for audit / bug bounty / Immunefi / Sherlock / Cantina / OpenZeppelin / Trail of Bits / Halborn / ChainSecurity: no matches).
@@ -111,49 +115,49 @@ Unit is a **bridge/asset tokenization protocol** — not a lending, staking, or 
 
 ### Source Code
 
-- **Proxy contract** ([`0x9FDBdA0A5e284c32744D2f17Ee5c74B284993463`](https://hyperevmscan.io/address/0x9FDBdA0A5e284c32744D2f17Ee5c74B284993463#code)) **is source-code verified** on HyperEVMScan — `ERC1967Proxy` (Solidity v0.8.24, MIT). Re-verified May 19, 2026 via Etherscan V2 multi-chain API (chainId=999): `ContractName=ERC1967Proxy`, `Proxy=1`, `Implementation=0x1a7689c3b783eb37550efbb9c81e7f468f7034fc`.
-- **Implementation contract** ([`0x1a7689c3b783eb37550efbb9c81e7f468f7034fc`](https://hyperevmscan.io/address/0x1a7689c3b783eb37550efbb9c81e7f468f7034fc)) **is STILL NOT source-code verified** — the actual token logic remains opaque. Etherscan V2 API returns empty `ContractName` and `SourceCode` (verified May 19, 2026).
+- **Proxy contract** ([`0x9FDBdA0A5e284c32744D2f17Ee5c74B284993463`](https://hyperevmscan.io/address/0x9FDBdA0A5e284c32744D2f17Ee5c74B284993463#code)) **is source-code verified** on HyperEVMScan — `ERC1967Proxy` (Solidity v0.8.24, MIT). Re-verified July 1, 2026 via Etherscan V2 multi-chain API (chainId=999): `ContractName=ERC1967Proxy`, `Proxy=1`, `Implementation=0x1a7689c3b783eb37550efbb9c81e7f468f7034fc`.
+- **Implementation contract** ([`0x1a7689c3b783eb37550efbb9c81e7f468f7034fc`](https://hyperevmscan.io/address/0x1a7689c3b783eb37550efbb9c81e7f468f7034fc)) **is STILL NOT source-code verified** — the actual token logic remains opaque. Etherscan V2 API returns empty `ContractName` and `SourceCode` (verified July 1, 2026).
 - Selector + string extraction from the bytecode confirms a **USDT-style sender blacklist** plus a **separate compliance-authority role** layered on top of OZ ERC20Upgradeable + OwnableUpgradeable + UUPSUpgradeable. See **Appendix: Implementation Surface (bytecode-derived)** for the full selector list and verification commands.
 - No public GitHub repository found for Unit Protocol smart contracts (DeFiLlama lists no GitHub).
 - Implementation bytecode is 11,660 bytes. Proxy bytecode is 163 bytes (minimal ERC-1967 proxy).
 
 ## Historical Track Record
 
-- **DeFiLlama listing date:** February 14, 2025 (~15 months at reassessment date).
-- **Current protocol TVL:** ~$414M (May 19, 2026) — Bitcoin $258M, Ethereum $85M, Solana $57M, Plasma $12M, Monad $3M (per DeFiLlama). Down ~7% since prior assessment ($447M).
+- **DeFiLlama listing date:** February 14, 2025 (~16 months at reassessment date).
+- **Current protocol TVL:** ~$418M (July 1, 2026) — Bitcoin $258M, Ethereum $85M, Solana $57M, Plasma $12M, Monad $3M (per DeFiLlama). Roughly flat since prior assessment (~$414M).
 - **Peak TVL:** ~$1.48B (October 8, 2025).
-- **TVL trend:** ~28% of ATH; ~7% decline since prior assessment.
+- **TVL trend:** ~28% of ATH; flat over the past 6 weeks (30-day range $405M–$449M).
 
-**CoinGecko market data (UBTC, May 19, 2026):**
+**CoinGecko market data (UBTC, July 1, 2026):**
 
 | Metric | Value |
 |--------|-------|
-| Price | ~$76,859 |
-| Market Cap | ~$251.5M |
-| 24h Volume | ~$43.3M |
-| Circulating Supply | ~3,273 UBTC |
+| Price | ~$58,650 |
+| Market Cap | ~$192.2M |
+| 24h Volume | ~$38.4M |
+| Circulating Supply | ~3,272.76 UBTC |
 | Total Supply (cap) | 21,000,000 UBTC |
 | ATH | $126,087 (Oct 6, 2025) |
-| ATL | $60,537 (Feb 6, 2026) |
-| 30-day Price Change | +1.64% |
+| ATL | $58,003 (Jun 25, 2026) |
+| 30-day Price Change | −19.3% |
 
-**Onchain supply (verified May 19, 2026):**
+**Onchain supply (verified July 1, 2026):**
 - `totalSupply()` on UBTC proxy returns `2,100,000,000,000,000` (8 decimals) → 21,000,000 UBTC (Bitcoin hard cap; unchanged).
-- Circulating supply per CoinGecko: ~3,273 UBTC — most of the 21M cap is uncirculated.
-- **Bitcoin treasury balance:** 3,361.95 BTC at `bc1pdwu79dady576y3fupmm82m3g7p2p9f6hgyeqy0tdg7ztxg7xrayqlkl8j9` (per [blockstream.info](https://blockstream.info/address/bc1pdwu79dady576y3fupmm82m3g7p2p9f6hgyeqy0tdg7ztxg7xrayqlkl8j9), 34,425 txs).
-- Reserves (3,361.95 BTC) > circulating UBTC (3,272.76) — over-backed by ~89 BTC (~2.7%). 1:1 backing claim verified.
+- Circulating supply per CoinGecko: ~3,272.76 UBTC — most of the 21M cap is uncirculated.
+- **Bitcoin treasury balance:** 4,765.12 BTC at `bc1pdwu79dady576y3fupmm82m3g7p2p9f6hgyeqy0tdg7ztxg7xrayqlkl8j9` (verified July 1, 2026 via [blockchain.info](https://blockchain.info/q/addressbalance/bc1pdwu79dady576y3fupmm82m3g7p2p9f6hgyeqy0tdg7ztxg7xrayqlkl8j9) and [blockstream.info](https://blockstream.info/api/address/bc1pdwu79dady576y3fupmm82m3g7p2p9f6hgyeqy0tdg7ztxg7xrayqlkl8j9), 37,393 txs).
+- Reserves (4,765.12 BTC) > circulating UBTC (3,272.76) — over-backed by ~1,492 BTC (~45.6%). 1:1 backing claim verified and improved.
 
-**Peg stability (30-day UBTC/BTC ratio per CoinGecko, through May 19, 2026):**
-- Current: 1.0016 (0.16% above peg)
-- 30-day min: 0.9980 (0.20% below peg)
-- 30-day max: 1.0016 (0.16% above peg)
+**Peg stability (30-day UBTC/BTC ratio per CoinGecko, through July 1, 2026):**
+- Current: 0.9997 (−0.03% below peg)
+- 30-day min: 0.9946 (−0.54% below peg)
+- 30-day max: 1.0132 (+1.32% above peg)
 - 30-day avg: 0.9999
-- Peg materially tighter than the prior assessment window (±0.2% vs prior ±1.7%).
+- Peg widened since prior assessment (±1.3% vs prior ±0.2%), likely reflecting broader BTC market volatility (BTC dropped ~19% in 30 days).
 
 **Incidents:**
-- No Unit/UBTC exploits found in DeFiLlama hacks database (cross-checked May 19, 2026) or Rekt News.
+- No Unit/UBTC exploits found in DeFiLlama hacks database (cross-checked July 1, 2026) or Rekt News.
 - **Guardian offline incident (April 15, 2025):** A Guardian went offline, causing delays in Bitcoin withdrawals and deposit address generation. This exposed fault tolerance gaps in the 2-of-3 Guardian Network. Community feedback called for permissionless Guardian participation to improve decentralization ([source](https://blog.impossible.finance/hyperunit-cross-chain-asset-infrastructure-for-hyperliquid/)).
-- No new incidents reported since prior assessment.
+- No new incidents reported since prior assessment. ~16 months incident-free for UBTC token contract.
 
 ## Funds Management
 
@@ -161,7 +165,7 @@ Unit is a **bridge/asset tokenization protocol** — not a lending, staking, or 
 
 - **Deposits:** Permissionless — anyone can deposit BTC to receive UBTC.
 - **Withdrawals:** Queue-based — withdrawal batches process every ~3 Bitcoin blocks for BTC, ~21 Ethereum slots for ETH.
-- **Current withdrawal queue (May 19, 2026, from Unit API):** Bitcoin: 2, Ethereum: 1, Solana: 0, Plasma: 0, Monad: 0, Avalanche: 0, Base: 0, SPL: 0, ZEC: 0. Supported chain set has expanded since prior assessment (Avalanche, Base, ZEC added).
+- **Current withdrawal queue (July 1, 2026, from Unit API):** TODO — queue status not re-checked this reassessment.
 - **Fees:** No protocol fee; only native network gas fees.
 - **Minimum deposit:** 0.0003 BTC.
 - **Revert mechanism:** Failed deposits can be reverted after sufficient confirmations (20 blocks for BTC = ~3+ hours). Not all failed deposits are revertible.
@@ -180,6 +184,7 @@ UBTC is a **1:1 BTC-backed bridged asset**. For every UBTC in circulation, the p
 - **Bitcoin reserves** are verifiable onchain via the Bitcoin treasury address.
 - **UBTC supply** on HyperCore/HyperEVM is verifiable via `totalSupply()`.
 - **The backing ratio requires comparing two chains** (Bitcoin balance vs Hyperliquid UBTC supply), which complicates real-time verification but is deterministic.
+- **Bitcoin reserves are significantly over-collateralized** — 4,765.12 BTC backs 3,272.76 UBTC (145.6% backing ratio). The treasury balance grew +1,403 BTC (+42%) since the prior assessment. While this provides a large safety buffer for UBTC holders, it also means the treasury holds 1,492 BTC (~$87.6M at current prices) beyond what is needed to back circulating UBTC. The reason for this excess is not publicly documented and could reflect in-flight deposits, protocol-held BTC, or other Unit obligations.
 - No Chainlink Proof of Reserve (PoR) or equivalent third-party attestation mechanism is in place.
 - Unit operates an [explorer](https://explorer.hyperunit.xyz) for transaction tracking.
 - The protocol does not have a public dashboard showing real-time reserve status.
@@ -188,37 +193,39 @@ UBTC is a **1:1 BTC-backed bridged asset**. For every UBTC in circulation, the p
 
 ### HyperCore Spot Orderbook (Primary Liquidity)
 
-UBTC trades on Hyperliquid's native spot CLOB (Central Limit Order Book). Per CoinGecko (May 19, 2026):
+UBTC trades on Hyperliquid's native spot CLOB (Central Limit Order Book). Per CoinGecko (July 1, 2026):
 
 | Venue | Pair | 24h Volume |
 |-------|------|-----------|
-| Hyperliquid | UBTC/USDC | ~$27.1M |
-| Hyperliquid | UBTC/USDH | ~$2.6M |
+| Hyperliquid | UBTC/USDC | ~$27.8M |
+| Hyperliquid | UBTC/USDH | ~$2.3M |
 
 This is the primary exit liquidity for UBTC — the spot orderbook provides market-based exit at BTC spot prices.
 
 ### HyperEVM DEX & Lending Liquidity
 
-Per DeFiLlama yields API (May 19, 2026), 28 UBTC pools on HyperEVM with **~$43.7M total TVL**. Top pools by TVL:
+Per DeFiLlama yields API (July 1, 2026), 23 UBTC pools on Hyperliquid L1 with **~$25.5M total TVL** (down from 28 pools, $43.7M). Top pools by TVL:
 
 | Protocol | Pool | TVL |
 |----------|------|-----|
-| Takara Lend | UBTC | $19,174,083 |
-| Project X | WHYPE-UBTC | $7,382,817 |
-| HyperLend (pooled) | UBTC | $5,497,047 |
-| Felix CDP | feUBTC | $2,215,272 |
-| Morpho Blue | UBTC (multiple) | $5,536,000 (sum across markets) |
-| HyperSwap V3 | WHYPE-UBTC | $949,836 |
-| Project X | UBTC-USDT0 | $728,165 |
-| Nest V1 | WHYPE-UBTC | $626,046 |
-| HypurrFi (pooled) | UBTC | $469,140 |
+| HyperLend (pooled) | UBTC | $7,740,976 |
+| Project X | WHYPE-UBTC | $6,800,116 |
+| HyperSwap V3 | WHYPE-UBTC | $1,714,058 |
+| Morpho Blue | UBTC | $1,668,860 |
+| Felix CDP | feUBTC | $1,668,710 |
+| Nest CL | WHYPE-UBTC | $1,662,041 |
+| Morpho Blue | UBTC | $1,432,202 |
+| Project X | UBTC-USDT0 | $501,108 |
+| Project X | UBTC-UETH | $453,849 |
+| Project X | UBTC-USDC | $414,403 |
+| Others (13 pools, <$250K each) | — | $1,478,600 |
 
 ### Morpho Markets (UBTC as Collateral)
 
-14 Morpho markets use UBTC as collateral. Verified via Morpho Blue API (May 19, 2026):
+14 Morpho markets use UBTC as collateral. Verified via Morpho Blue API (July 1, 2026):
 
-- **Total UBTC collateral supply:** ~$4.14M (down from ~$7.6M)
-- **Total borrows against UBTC:** ~$2.67M (down from ~$6.4M)
+- **Total UBTC collateral supply (loan-asset-denominated):** ~$2.29M (down from $4.14M)
+- **Total borrows against UBTC:** ~$1.99M (down from $2.67M)
 
 **The specific market from the issue (UBTC-USDC):**
 
@@ -227,16 +234,17 @@ Per DeFiLlama yields API (May 19, 2026), 28 UBTC pools on HyperEVM with **~$43.7
 | Market ID | [`0x45af9c72aa97978e143a646498c8922058b7c6f18b6f7b05d7316c8cf7ab942f`](https://app.morpho.org/hyperevm/market/0x45af9c72aa97978e143a646498c8922058b7c6f18b6f7b05d7316c8cf7ab942f/ubtc-usdc) |
 | Loan Asset | USDC |
 | LLTV | 77.0% |
-| Supply | ~$836,542 (down from $2.72M) |
-| Borrow | ~$697,892 (down from $2.45M) |
-| Utilization | 83.4% (down from 90%) |
+| Supply | ~$645,846 (down from $836,542) |
+| Borrow | ~$582,421 (down from $697,892) |
+| Utilization | 90.2% (up from 83.4%) |
 
 ### Liquidity Assessment
 
 - **Primary exit:** Hyperliquid spot CLOB with ~$30M daily UBTC volume — adequate for most position sizes.
-- **Secondary exit:** Protocol withdrawal back to native BTC (queue-based, ~3 Bitcoin block batches). Current BTC withdrawal queue: 2 pending.
-- **HyperEVM DEX + lending TVL:** ~$43.7M across 28 pools — improved breadth since prior assessment.
+- **Secondary exit:** Protocol withdrawal back to native BTC (queue-based, ~3 Bitcoin block batches). Withdrawal queue not re-checked this reassessment (TODO).
+- **Hyperliquid L1 DEX + lending TVL:** ~$25.5M across 23 pools — notable decline from $43.7M (28 pools) in May 2026. Reduced liquidity breadth.
 - **All liquidity is within the Hyperliquid ecosystem** — still no CEX listings.
+- **New dependency:** Yearn VaultV3 "HyperliquidTwentyOne" (hXXI) at [`0xf44f49e6577b3934f981c6f0629d15154d2606e6`](https://hyperevmscan.io/address/0xf44f49e6577b3934f981c6f0629d15154d2606e6) holds 33.2 UBTC (~$1.95M). This is a Yearn-deployed ERC-4626 vault with UBTC as its `asset()`; not controlled by Unit Protocol. Adds a small external dependency on Yearn's vault infrastructure.
 
 ## Centralization & Control Risks
 
@@ -244,11 +252,11 @@ Per DeFiLlama yields API (May 19, 2026), 28 UBTC pools on HyperEVM with **~$43.7
 
 **UBTC HyperEVM token contract:**
 - **Owner:** [`0xB4FC973924a91362D301E583E839Cdaf4f19cdF8`](https://hyperevmscan.io/address/0xB4FC973924a91362D301E583E839Cdaf4f19cdF8)
-- **Onchain code-size: 0** — this is an **EOA** (Externally Owned Account). Re-verified May 19, 2026 (`cast code` returns `0x`).
-- **Owner unchanged since deployment** — only one `OwnershipTransferred` event ever emitted (from `0x0` at block 1,513,232, ts 1742779080 / Mar 24, 2025); no subsequent transfers.
+- **Onchain code-size: 0** — this is an **EOA** (Externally Owned Account). Re-verified July 1, 2026 (`cast code` returns `0x`).
+- **Owner unchanged since deployment** — only one `OwnershipTransferred` event ever emitted (from `0x0` at block 1,513,232, ts 1742779080 / Mar 24, 2025); no subsequent transfers. Re-verified July 1, 2026 via Etherscan V2 logs API.
 - **Per Unit docs:** The HyperEVM deployer is "controlled via multi-party computation (MPC), requiring key-shares from multiple signers to construct and perform transactions." However, this is **not verifiable onchain** — it appears as a regular EOA.
 - **Contract type:** UUPS upgradeable proxy — the owner can upgrade the implementation without timelock.
-- **Implementation unchanged:** only one `Upgraded` event ever emitted (at deployment). Current implementation slot still points to [`0x1a7689c3b783eb37550efbb9c81e7f468f7034fc`](https://hyperevmscan.io/address/0x1a7689c3b783eb37550efbb9c81e7f468f7034fc) (verified May 19, 2026 via `cast implementation`).
+- **Implementation unchanged:** only one `Upgraded` event ever emitted (at deployment). Current implementation slot still points to [`0x1a7689c3b783eb37550efbb9c81e7f468f7034fc`](https://hyperevmscan.io/address/0x1a7689c3b783eb37550efbb9c81e7f468f7034fc) (verified July 1, 2026 via `cast storage`). Bytecode size (11,660 bytes) and selector list (22 selectors) also unchanged.
 - **No timelock** detected onchain.
 - **No multisig** onchain — the MPC claim is offchain only.
 
@@ -339,20 +347,21 @@ Key addresses and data to monitor:
 ### Key Strengths
 
 1. **Simple architecture** — UBTC is a straightforward 1:1 BTC wrapper with minimal onchain complexity.
-2. **Sustained protocol TVL** (~$414M) and meaningful trading volume (~$43M/day) — modest decline from prior assessment but still strong product-market fit.
-3. **Bitcoin reserves are verifiable** onchain via the Bitcoin treasury address (3,361.95 BTC vs 3,273 UBTC circulating — over-backed).
-4. **Peg has tightened materially** since prior assessment (30-day deviation ±0.2% vs prior ±1.7%).
-5. **No implementation upgrades or ownership transfers** since deployment (Mar 24, 2025).
+2. **Sustained protocol TVL** (~$418M) and meaningful trading volume (~$38M/day) — flat since May 2026, still strong product-market fit.
+3. **Bitcoin reserves are verifiable** onchain via the Bitcoin treasury address (4,765.12 BTC vs 3,272.76 UBTC circulating — significantly over-backed at 145.6%).
+4. **Peg has widened but remains reasonable** (30-day deviation ±1.3% vs prior ±0.2%), consistent with broader BTC market volatility.
+5. **No implementation upgrades or ownership transfers** since deployment (Mar 24, 2025). Re-verified July 1, 2026.
 6. **No protocol fees** — reduces attack surface and misalignment incentives.
 7. **Regulatory compliance measures** — OFAC screening, geofencing, law enforcement cooperation.
 
 ### Key Risks
 
-1. **No public smart contract audits** — no audit reports found anywhere, confirmed by multiple independent sources. This is a critical concern for a bridge holding ~$447M.
+1. **No public smart contract audits** — no audit reports found anywhere, confirmed by multiple independent sources. This is a critical concern for a bridge holding ~$418M.
 2. **No bug bounty program** — no Immunefi, Sherlock, or Cantina listing found.
 3. **Implementation source code unverified** — the proxy is verified (standard OpenZeppelin ERC1967Proxy), but the actual token implementation at [`0x1a7689c3b783eb37550efbb9c81e7f468f7034fc`](https://hyperevmscan.io/address/0x1a7689c3b783eb37550efbb9c81e7f468f7034fc) is **not verified**. Bytecode analysis suggests undisclosed allowlist/blacklist features.
 4. **EOA ownership on HyperEVM** — the MPC claim is not verifiable onchain. The contract owner (`Unit: Deployer`) appears as a single EOA that can upgrade the implementation instantly.
 5. **No timelock** on contract upgrades — implementation can be swapped instantly.
+6. **Liquidity concentration** — Hyperliquid L1 UBTC pool TVL dropped from $43.7M to $25.5M. All liquidity within the Hyperliquid ecosystem.
 7. **2-of-3 MPC** is a relatively low threshold — compromise of any 2 Guardians (one of which is Unit itself) could compromise the system.
 8. **Hyperliquid chain centralization** — Hyper Foundation controls 56.4% of validator stake.
 
@@ -374,10 +383,10 @@ Key addresses and data to monitor:
 **Critical gate "No audit" is triggered.** Per the scoring guidelines, this automatically results in a score of **5** (High Risk).
 
 However, given that:
-1. The protocol has been operational for ~15 months with ~$414M TVL
+1. The protocol has been operational for ~16 months with ~$418M TVL
 2. The onchain token contract interface is relatively simple (standard ERC-20 + UUPS)
 3. The 2-of-3 MPC Guardian architecture provides some multi-party security
-4. Bitcoin reserves are transparently verifiable (and currently over-backed)
+4. Bitcoin reserves are transparently verifiable (and currently significantly over-backed at 145.6%)
 
 We assess whether the automatic 5 should be applied strictly or with contextual modifiers. **Given the framework's explicit instruction ("If ANY gate is triggered, the protocol automatically receives a score of 5"), we apply the automatic score.**
 
@@ -387,10 +396,10 @@ Even though the critical gate is triggered, we provide category scores for refer
 
 #### Category 1: Audits & Historical Track Record (Weight: 20%)
 
-- **No audits** from any firm (re-confirmed May 19, 2026 via DeFiLlama API, Unit docs search, and HyperEVMScan).
+- **No audits** from any firm (re-confirmed July 1, 2026 via DeFiLlama API, Unit docs search, and HyperEVMScan).
 - No bug bounty program (Immunefi pages 404).
 - Implementation source code still unverified (proxy verified as standard OpenZeppelin ERC1967Proxy).
-- ~15 months in production, TVL ~$414M (peaked ~$1.48B).
+- ~16 months in production, TVL ~$418M (peaked ~$1.48B).
 - One operational incident: Guardian offline (April 15, 2025) causing BTC withdrawal delays. No new incidents since.
 
 **Score: 5.0/5** — No audit (critical gate triggered).
@@ -409,22 +418,22 @@ Centralization score = (4.5 + 2.0 + 3.5) / 3 = **3.33**
 #### Category 3: Funds Management (Weight: 30%)
 
 Subscores:
-- **Collateralization: 2.0** — 1:1 BTC-backed onchain. Collateral is native BTC (highest quality). No offchain or mixed collateral.
+- **Collateralization: 1.5** — 1:1 BTC-backed onchain with significant over-collateralization (145.6%). Collateral is native BTC (highest quality). Reason for excess reserves not publicly documented.
 - **Provability: 2.5** — Bitcoin reserves verifiable onchain. UBTC supply verifiable on Hyperliquid. Requires cross-chain comparison. No Proof of Reserve oracle or third-party attestation. No public reserve dashboard.
 
-Funds management score = (2.0 + 2.5) / 2 = **2.25**
+Funds management score = (1.5 + 2.5) / 2 = **2.0**
 
-**Score: 2.25/5**
+**Score: 2.0/5** (improved from 2.25 due to higher over-collateralization)
 
 #### Category 4: Liquidity Risk (Weight: 15%)
 
 - Primary exit via Hyperliquid CLOB: ~$30M daily UBTC/USDC + USDH volume — adequate.
-- Secondary exit via native BTC withdrawal: queue-based, currently 2 pending BTC withdrawals.
-- HyperEVM DEX + lending TVL: ~$43.7M across 28 pools.
+- Secondary exit via native BTC withdrawal: queue-based, currently TODO pending BTC withdrawals.
+- Hyperliquid L1 DEX + lending TVL: ~$25.5M across 23 pools (down from $43.7M).
 - All within Hyperliquid ecosystem — no CEX listings.
-- Peg deviations only ±0.2% in last 30 days (tighter than prior window).
+- Peg deviations ±1.3% in last 30 days (wider than prior ±0.2%, consistent with BTC volatility).
 
-**Score: 2.5/5** (unchanged — broader pool count offset by lower Morpho deposits)
+**Score: 2.5/5** (unchanged — lower pool TVL but still adequate primary exit liquidity)
 
 #### Category 5: Operational Risk (Weight: 5%)
 
@@ -445,10 +454,10 @@ For reference, the weighted score without the critical gate would be:
 |----------|-------|--------|----------|
 | Audits & Historical | 5.0 | 20% | 1.00 |
 | Centralization & Control | 3.3 | 30% | 0.99 |
-| Funds Management | 2.25 | 30% | 0.675 |
+| Funds Management | 2.0 | 30% | 0.60 |
 | Liquidity Risk | 2.5 | 15% | 0.375 |
 | Operational Risk | 3.0 | 5% | 0.15 |
-| **Weighted Score** | | | **3.19 / 5.0** |
+| **Weighted Score** | | | **3.12 / 5.0** |
 
 **But critical gate applies → Final Score: 5.0 / 5.0**
 
@@ -457,24 +466,26 @@ For reference, the weighted score without the critical gate would be:
 ### Risk Tier: **HIGH RISK**
 
 Rationale:
-- **The critical gate "No audit" is still triggered.** Unit Protocol has no publicly disclosed audits despite managing ~$414M in TVL (re-confirmed May 19, 2026).
+- **The critical gate "No audit" is still triggered.** Unit Protocol has no publicly disclosed audits despite managing ~$418M in TVL (re-confirmed July 1, 2026).
 - Implementation source code remains unverified on HyperEVMScan.
 - No bug bounty program exists.
 - HyperEVM contract owner is still an EOA (MPC claim not verifiable onchain) with UUPS upgradeability and no timelock; no ownership transfer or implementation upgrade since deployment.
-- Without the critical gate, the weighted score would be 3.19/5.0 (Medium Risk), primarily elevated by the audit gap and centralization concerns.
+- Without the critical gate, the weighted score would be 3.12/5.0 (Medium Risk), primarily elevated by the audit gap and centralization concerns.
 - If audits are conducted and code is verified, the score could improve significantly to the Low-Medium range.
 
 ## Reassessment Triggers
 
-- **Time-based**: Reassess in 3 months or upon completion of an audit
-- **TVL-based**: Reassess if TVL changes by more than 50%
-1. Publication of any smart contract audit for Unit Protocol / UBTC
-2. Source code verification on block explorers
-3. Launch of a bug bounty program
-4. Contract implementation upgrade on HyperEVM
-5. Ownership transfer of the UBTC contract
-6. Change in Guardian Network composition (addition/removal of Guardians)
-7. Introduction of timelock governance (positive trigger — would improve score)
+| Trigger | Status (July 2026) |
+|---------|-------------------|
+| Time-based (3 months) | Next: ~October 2026 |
+| TVL change >50% | Not triggered (TVL flat at ~$418M) |
+| 1. Publication of any smart contract audit | **Not triggered** — still 0 audits |
+| 2. Source code verification on block explorers | **Not triggered** — implementation still unverified |
+| 3. Launch of a bug bounty program | **Not triggered** — no bounty program |
+| 4. Contract implementation upgrade | **Not triggered** — implementation unchanged since deployment |
+| 5. Ownership transfer of UBTC contract | **Not triggered** — owner unchanged since deployment |
+| 6. Change in Guardian Network composition | TODO — not checked this reassessment |
+| 7. Introduction of timelock governance | **Not triggered** — no timelock |
 
 ## Appendix: What Would Improve the Score
 
@@ -488,9 +499,9 @@ If the following were addressed, the score could improve from 5.0 to approximate
 
 ## Appendix: Implementation Surface (bytecode-derived)
 
-Source not verified — the function set below was reconstructed from the deployed bytecode on May 19, 2026 and is the baseline to **diff against on the next reassessment**. Any new selector, removed selector, or changed bytecode size means a hidden upgrade or unrecorded behavior change.
+Source not verified — the function set below was reconstructed from the deployed bytecode and re-verified on **July 1, 2026**. This is the baseline to **diff against on the next reassessment**. Any new selector, removed selector, or changed bytecode size means a hidden upgrade or unrecorded behavior change.
 
-**Implementation:** [`0x1a7689c3b783eb37550efbb9c81e7f468f7034fc`](https://hyperevmscan.io/address/0x1a7689c3b783eb37550efbb9c81e7f468f7034fc) — bytecode size **11,660 bytes**.
+**Implementation:** [`0x1a7689c3b783eb37550efbb9c81e7f468f7034fc`](https://hyperevmscan.io/address/0x1a7689c3b783eb37550efbb9c81e7f468f7034fc) — bytecode size **11,660 bytes** (unchanged from May 2026). Selector count: **22** (unchanged).
 
 **Standard OZ surface (callable through the proxy):**
 
@@ -519,7 +530,7 @@ Source not verified — the function set below was reconstructed from the deploy
 |---|---|---|
 | `0x44337ea1` | `addToBlacklist(address)` | resolved via 4byte directory |
 | `0x537df3b6` | `removeFromBlacklist(address)` | resolved via 4byte directory |
-| `0xfe575a87` | `isBlacklisted(address)` | resolved via 4byte directory; `isBlacklisted(0x0)=false`, `isBlacklisted(owner)=false` as of 2026-05-19 |
+| `0xfe575a87` | `isBlacklisted(address)` | resolved via 4byte directory; `isBlacklisted(0x0)=false`, `isBlacklisted(owner)=false`, `isBlacklisted(HyperCoreTreasury)=false`, `isBlacklisted(hXXI_vault)=false` as of 2026-07-01 |
 | `0x309f477a` | `complianceAuthority()` | resolved via OpenChain DB; returns `0xB4FC973924a91362D301E583E839Cdaf4f19cdF8` (= current `owner()`) |
 | `0x6b9be885` | unknown setter `(address)`, nonpayable | not in 4byte/OpenChain; reverts when called from a non-authority; inferred as `updateComplianceAuthority(address)` |
 | `0xb768259d` | unknown pure getter | not in 4byte/OpenChain; returns the constant `0xF036a5261406a394bd63Eb4dF49C464634a66155` (the HyperCore deployer multi-sig); inferred as `coreDeployer()` |
@@ -564,12 +575,12 @@ curl -s "https://api.etherscan.io/v2/api?chainid=999&module=contract&action=gets
 
 **Checklist for the next reassessment:**
 
-- [ ] Bytecode size still 11,660 bytes? If not → hidden upgrade.
-- [ ] Same 22 selectors? Any addition (especially `mint`, `pause`, `seize`, `destroyBlackFunds`) → investigate.
-- [ ] Implementation source code verified on HyperEVMScan? If yes → drop the bytecode-derived appendix and replace with a real source review (blacklist semantics, role transfer, transfer hook).
-- [ ] `complianceAuthority` still equals `owner`? Any divergence is worth recording.
-- [ ] Any address showing `isBlacklisted(addr)=true`? Track and report.
-- [ ] Any new `Upgraded` event on the proxy? Already a monitoring trigger; re-check.
+- [x] Bytecode size still 11,660 bytes? → ✅ Confirmed July 1, 2026.
+- [x] Same 22 selectors? → ✅ Confirmed July 1, 2026.
+- [ ] Implementation source code verified on HyperEVMScan? → ❌ STILL NOT VERIFIED as of July 1, 2026.
+- [x] `complianceAuthority` still equals `owner`? → ✅ Yes, both `0xB4FC97…cdF8`.
+- [x] Any address showing `isBlacklisted(addr)=true`? → ✅ None found (checked owner, zero addr, HyperCore treasury, hXXI vault).
+- [x] Any new `Upgraded` event on the proxy? → ✅ None beyond deployment (verified via Etherscan V2 logs API).
 
 ## Sources
 
