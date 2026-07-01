@@ -33,9 +33,11 @@ Re-check performed July 1, 2026. Summary of changes since the May 19, 2026 asses
 
 **Scoring critique noted:** The "no audit" critical gate forces a binary 5.0/5.0 score for UBTC, placing it in the same tier as protocols with catastrophic loss events (hacks, dead protocols). The ungated weighted score is ~3.20/5.0 (Medium), and UBTC has had no loss event in ~16 months of operation with verifiable over-collateralization. The gap between the gated score (5.0) and ungated score (3.20) is a known limitation of the binary gate design — it does not distinguish between unaudited protocols with strong on-chain collateral backing and operational history vs unaudited protocols with known exploits. Several of the reassessment triggers below would remove the gate if met.
 
-**Outstanding TODOs (unchanged):**
-- No public Guardian health endpoint identified for monitoring.
-- No public reserve dashboard (cross-chain BTC vs UBTC reconciliation still manual).
+**Outstanding TODOs:**
+- Implementation source code remains unverified on HyperEVMScan — highest priority gap.
+- Guardian liveness not independently verifiable (no public API; docs page lists public keys but not real-time status).
+- No public reserve dashboard (confirmed absent from all Unit web properties: hyperunit.xyz, docs.hyperunit.xyz, explorer.hyperunit.xyz).
+- HyperCore Solana treasury address not yet identified from docs.
 
 **Links:**
 
@@ -66,6 +68,21 @@ Re-check performed July 1, 2026. Summary of changes since the May 19, 2026 asses
 | Native Chain | Treasury Address | HyperCore Treasury |
 |-------------|-----------------|-------------------|
 | Bitcoin | `bc1pdwu79dady576y3fupmm82m3g7p2p9f6hgyeqy0tdg7ztxg7xrayqlkl8j9` | [`0x574bAFCe69d9411f662a433896e74e4F153096FA`](https://hyperevmscan.io/address/0x574bAFCe69d9411f662a433896e74e4F153096FA) |
+| Ethereum | [`0xBEa9f7FD27f4EE20066F18DEF0bc586eC221055A`](https://etherscan.io/address/0xBEa9f7FD27f4EE20066F18DEF0bc586eC221055A) | [`0x8DAfBe89302656a7Df43c470e9EbCB4c540835c0`](https://hyperevmscan.io/address/0x8DAfBe89302656a7Df43c470e9EbCB4c540835c0) |
+| Solana | `9SLPTL41SPsYkgWQJgJ8QaobS7i7JBfhUYSr7Le5VnDw` | TODO — HyperCore Solana treasury |
+| Base (Fee Payer) | [`0xd6FB008b153ccb78D615941F982f38a1c67cE270`](https://basescan.org/address/0xd6FB008b153ccb78D615941F982f38a1c67cE270), [`0x2fB00942D628FEcD6aBb933C1173eEd2dD6Fe2f4`](https://basescan.org/address/0x2fB00942D628FEcD6aBb933C1173eEd2dD6Fe2f4) | N/A — fee payer, not treasury |
+
+### Guardian Public Keys
+
+Per the [key addresses docs](https://docs.hyperunit.xyz/developers/key-addresses/mainnet) (last updated ~May 2026), three Guardian nodes attest to deposit/withdrawal address generation:
+
+| Guardian Name | Public Key (identifier) |
+|--------------|------------------------|
+| `unit-node` | Unit Protocol |
+| `hl-node` | Hyperliquid |
+| `field-node` | Infinite Field |
+
+Guardian composition unchanged since protocol launch. The public keys can be used to independently verify address generation integrity.
 
 ### HyperCore Token Deployer
 
@@ -165,7 +182,7 @@ Unit is a **bridge/asset tokenization protocol** — not a lending, staking, or 
 
 - **Deposits:** Permissionless — anyone can deposit BTC to receive UBTC.
 - **Withdrawals:** Queue-based — withdrawal batches process every ~3 Bitcoin blocks for BTC, ~21 Ethereum slots for ETH.
-- **Current withdrawal queue (July 1, 2026, from Unit API):** TODO — queue status not re-checked this reassessment.
+- **Current withdrawal queue (July 1, 2026, from [Unit API](https://api.hyperunit.xyz/withdrawal-queue)):** Bitcoin: 6, Ethereum: 1, all other chains (Avalanche, Base, Monad, Plasma, Solana, SPL, ZEC): 0. BTC queue length of 6 is elevated (prior assessment: 2) but within normal operating parameters (<10 threshold).
 - **Fees:** No protocol fee; only native network gas fees.
 - **Minimum deposit:** 0.0003 BTC.
 - **Revert mechanism:** Failed deposits can be reverted after sufficient confirmations (20 blocks for BTC = ~3+ hours). Not all failed deposits are revertible.
@@ -340,7 +357,7 @@ Key addresses and data to monitor:
 ### 6. Guardian Network Health
 
 - Monitor for any Guardian downtime or signing failures
-- TODO: No public endpoint for Guardian health status identified
+- TODO: No public endpoint for Guardian health status identified. Confirmed July 1, 2026: Unit API (`api.hyperunit.xyz`) only publicly exposes `withdrawal-queue` and `explorer` endpoints; all other attempted endpoints (`status`, `health`, `guardians`, `reserves`, `stats`, `config`) return HTTP 200 with empty bodies. No third-party Guardian monitoring service identified.
 
 ## Risk Summary
 
@@ -356,9 +373,9 @@ Key addresses and data to monitor:
 
 ### Key Risks
 
-1. **No public smart contract audits** — no audit reports found anywhere, confirmed by multiple independent sources. This is a critical concern for a bridge holding ~$418M.
-2. **No bug bounty program** — no Immunefi, Sherlock, or Cantina listing found.
-3. **Implementation source code unverified** — the proxy is verified (standard OpenZeppelin ERC1967Proxy), but the actual token implementation at [`0x1a7689c3b783eb37550efbb9c81e7f468f7034fc`](https://hyperevmscan.io/address/0x1a7689c3b783eb37550efbb9c81e7f468f7034fc) is **not verified**. Bytecode analysis suggests undisclosed allowlist/blacklist features.
+1. **Implementation source code unverified** — the proxy is verified (standard OpenZeppelin ERC1967Proxy), but the actual token implementation at [`0x1a7689c3b783eb37550efbb9c81e7f468f7034fc`](https://hyperevmscan.io/address/0x1a7689c3b783eb37550efbb9c81e7f468f7034fc) is **not verified**. Token logic remains opaque; bytecode analysis reveals undisclosed blacklist/compliance features. This is the single most critical transparency gap — without source, there is no way to audit transfer-path safety, blacklist exemptions, or allowance behavior.
+2. **No public smart contract audits** — no audit reports found anywhere, confirmed by multiple independent sources. Compounding the unverified implementation, no third-party has reviewed the code for a bridge holding ~$418M.
+3. **No bug bounty program** — no Immunefi, Sherlock, or Cantina listing found.
 4. **EOA ownership on HyperEVM** — the MPC claim is not verifiable onchain. The contract owner (`Unit: Deployer`) appears as a single EOA that can upgrade the implementation instantly.
 5. **No timelock** on contract upgrades — implementation can be swapped instantly.
 6. **Liquidity concentration** — Hyperliquid L1 UBTC pool TVL dropped from $43.7M to $25.5M. All liquidity within the Hyperliquid ecosystem.
@@ -367,7 +384,7 @@ Key addresses and data to monitor:
 
 ### Critical Risks
 
-- **No audit combined with unverified implementation source code and EOA upgradeability** — the UBTC implementation could contain vulnerabilities or be upgraded to a malicious contract. Bytecode hints at undisclosed allowlist/blacklist mechanisms.
+- **Unverified implementation source code combined with no audit and EOA upgradeability** — the UBTC implementation at [`0x1a7689c3b783eb37550efbb9c81e7f468f7034fc`](https://hyperevmscan.io/address/0x1a7689c3b783eb37550efbb9c81e7f468f7034fc) is not source-verified on HyperEVMScan. Combined with zero audits and an EOA owner (claimed-MPC, onchain-unverifiable) that can instantly upgrade via UUPS without timelock, the entire token logic is opaque and could be swapped at any time. Bytecode reveals undisclosed blacklist/compliance controls whose exact semantics (exemptions, allowance behavior, destruction paths) cannot be confirmed without source or audit.
 - **2-of-3 MPC with only 3 Guardians** — a coordinated compromise of Unit + one other Guardian (Hyperliquid or Infinite Field) gives full control over bridge funds.
 
 ---
@@ -484,7 +501,7 @@ Rationale:
 | 3. Launch of a bug bounty program | **Not triggered** — no bounty program |
 | 4. Contract implementation upgrade | **Not triggered** — implementation unchanged since deployment |
 | 5. Ownership transfer of UBTC contract | **Not triggered** — owner unchanged since deployment |
-| 6. Change in Guardian Network composition | TODO — not checked this reassessment |
+| 6. Change in Guardian Network composition | **Not triggered** — documented participants (Unit, Hyperliquid, Infinite Field) unchanged since deployment. Verified via [docs key-addresses page](https://docs.hyperunit.xyz/developers/key-addresses/mainnet) (last updated ~May 2026). Guardian public keys (`unit-node`, `hl-node`, `field-node`) available for independent verification of address generation integrity. |
 | 7. Introduction of timelock governance | **Not triggered** — no timelock |
 
 ## Appendix: What Would Improve the Score
