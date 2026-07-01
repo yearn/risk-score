@@ -35,9 +35,7 @@ Re-check performed July 1, 2026. Summary of changes since the May 19, 2026 asses
 
 **Outstanding TODOs:**
 - Implementation source code remains unverified on HyperEVMScan — highest priority gap.
-- Guardian liveness not independently verifiable (no public API; docs page lists public keys but not real-time status).
 - No public reserve dashboard (confirmed absent from all Unit web properties: hyperunit.xyz, docs.hyperunit.xyz, explorer.hyperunit.xyz).
-- HyperCore Solana treasury address not yet identified from docs.
 
 **Links:**
 
@@ -69,9 +67,6 @@ Re-check performed July 1, 2026. Summary of changes since the May 19, 2026 asses
 |-------------|-----------------|-------------------|
 | Bitcoin | `bc1pdwu79dady576y3fupmm82m3g7p2p9f6hgyeqy0tdg7ztxg7xrayqlkl8j9` | [`0x574bAFCe69d9411f662a433896e74e4F153096FA`](https://hyperevmscan.io/address/0x574bAFCe69d9411f662a433896e74e4F153096FA) |
 | Ethereum | [`0xBEa9f7FD27f4EE20066F18DEF0bc586eC221055A`](https://etherscan.io/address/0xBEa9f7FD27f4EE20066F18DEF0bc586eC221055A) | [`0x8DAfBe89302656a7Df43c470e9EbCB4c540835c0`](https://hyperevmscan.io/address/0x8DAfBe89302656a7Df43c470e9EbCB4c540835c0) |
-| Solana | `9SLPTL41SPsYkgWQJgJ8QaobS7i7JBfhUYSr7Le5VnDw` | TODO — HyperCore Solana treasury |
-| Base (Fee Payer) | [`0xd6FB008b153ccb78D615941F982f38a1c67cE270`](https://basescan.org/address/0xd6FB008b153ccb78D615941F982f38a1c67cE270), [`0x2fB00942D628FEcD6aBb933C1173eEd2dD6Fe2f4`](https://basescan.org/address/0x2fB00942D628FEcD6aBb933C1173eEd2dD6Fe2f4) | N/A — fee payer, not treasury |
-
 ### Guardian Public Keys
 
 Per the [key addresses docs](https://docs.hyperunit.xyz/developers/key-addresses/mainnet) (last updated ~May 2026), three Guardian nodes attest to deposit/withdrawal address generation:
