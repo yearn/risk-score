@@ -81,6 +81,8 @@ If any answer is "no," use **"unverified"** not **"doesn't exist."**
 - See if asset or protocol is reviewed by Steakhouse, check their reports: https://kitchen.steakhouse.financial/archive
 - When validating protocols, see for info on which focused on protocol decentralization: https://www.defiscan.info/
 - Always include whole `Risk Tier` table and bold the final risk tier.
+- Treat an unverified contract source as a triggered critical gate (score 5, the first gate): if the assessed contract — or its implementation behind a proxy — is not source-verified on a public block explorer, it fails the gate. Verify via Etherscan `getsourcecode` / `cast` (see `reports/etherscan/SKILL.md`).
+- Set the header `Status:` field for exception reports (see `reports/TEMPLATE.md`): `GATED` keeps the numeric score (gate-capped, still live), while terminal states `HACKED`/`DEAD` use `Final Score: N/A` and render off the scale under "Not Rated". Omit `Status:` for normal reports.
 - Explain how minting and redeeming works, if present. Verify whether the operations are atomic and whether minting requires backing — flag any path that lets an admin mint unbacked tokens as a high-risk finding. Full mint-authority enumeration (every role-holder, with classification) goes into the *Token Mint Authority* section of the report; the procedure is in Pass 1.6 above.
 - Treat any path that can move, dilute, freeze, trap, or misprice user funds as a possible end-user loss path, even if it is not described as such in docs.
 
