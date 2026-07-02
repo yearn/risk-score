@@ -30,10 +30,6 @@ if (API_URL) {
 
 <BaseLayout title="Monitoring — Yearn Curation" ogUrl="/monitoring/" ogImage="/og/default.png">
   <section class="page-hero">
-    <div class="section-eyebrow">
-      <span class="pulse-dot"></span>
-      Continuous monitoring
-    </div>
     <h1>Live protocol monitors</h1>
     <p class="page-sub">
       Protocols actively monitored by Yearn Curation. Alerts are streamed to
@@ -306,32 +302,6 @@ if (API_URL) {
   }
   .page-sub a {
     color: var(--brand-blue);
-  }
-
-  /* === Section eyebrow === */
-  .section-eyebrow {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.4rem;
-    color: var(--brand-blue);
-    font-size: 0.72rem;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    font-weight: 600;
-    margin-bottom: 0.5rem;
-  }
-  .pulse-dot {
-    width: 6px;
-    height: 6px;
-    background: var(--brand-blue);
-    border-radius: 50%;
-    box-shadow: 0 0 0 0 rgba(6, 117, 249, 0.6);
-    animation: pulse 2s ease-out infinite;
-  }
-  @keyframes pulse {
-    0% { box-shadow: 0 0 0 0 rgba(6, 117, 249, 0.6); }
-    70% { box-shadow: 0 0 0 8px rgba(6, 117, 249, 0); }
-    100% { box-shadow: 0 0 0 0 rgba(6, 117, 249, 0); }
   }
 
   /* === Tools row === */
@@ -772,7 +742,4 @@ if (API_URL) {
     }
   }
 
-  @media (prefers-reduced-motion: reduce) {
-    .pulse-dot { animation: none; }
-  }
 </style>
