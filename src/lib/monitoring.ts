@@ -106,12 +106,16 @@ export async function fetchProtocols(init?: RequestInit): Promise<ProtocolsRespo
   return (await res.json()) as ProtocolsResponse;
 }
 
-// Buckets a newest-first alert list into the most recent alert per protocol.
+// Buckets a newest-first alert list into the most recent alert per protocol. Keys are
+// lowercased because the backend stores `protocol` with inconsistent casing (e.g. both `aave`
+// and `AAVE`); lowercasing merges those so a card matches all of its alerts. Forward-compatible:
+// a no-op once the backend canonicalizes the field.
 export function latestByProtocol(alerts: AlertEvent[]): Map<string, AlertEvent> {
   const latest = new Map<string, AlertEvent>();
   for (const alert of alerts) {
-    if (!latest.has(alert.protocol)) {
-      latest.set(alert.protocol, alert);
+    const key = alert.protocol.toLowerCase();
+    if (!latest.has(key)) {
+      latest.set(key, alert);
     }
   }
   return latest;
