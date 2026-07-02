@@ -211,7 +211,7 @@ if (API_URL) {
 
     function renderFeedRow(alert: AlertEvent): string {
       const meta = severityMeta(alert.severity);
-      const info = protoMeta.get(alert.protocol);
+      const info = protoMeta.get(alert.protocol.toLowerCase());
       const name = escapeHtml(info?.name || alert.protocol);
       const label = info?.href
         ? `<a class="recent-proto" href="${escapeHtml(info.href)}">${name}</a>`
