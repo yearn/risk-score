@@ -70,6 +70,19 @@ const SLUG_TO_DEFILLAMA: Record<string, string> = {
   yearn: "yearn-finance",
 };
 
+// monitoring.yaml slugs -> backend alert.protocol values.
+// The monitoring.yaml slug may differ from the PROTOCOL constant used in
+// the per-protocol Python scripts (e.g. slug "compound" but scripts use
+// "comp"). This maps the slug to the actual alert.protocol value for live
+// badge/feed matching. Slugs not in this map use the slug itself.
+const SLUG_TO_ALERT_PROTOCOL: Record<string, string> = {
+  compound: "comp",
+  rtoken: "ethplus",
+  // lrt-pegs sub-scripts emit different protocol values ("origin", "pegs")
+  // so there is no single canonical match — leave apiProtocol empty.
+  "lrt-pegs": "",
+};
+
 /** Transform the API response into the shape the monitoring page expects. */
 export function transformApiProtocols(apiProtocols: ApiProtocol[]): Protocol[] {
   return apiProtocols
@@ -78,7 +91,7 @@ export function transformApiProtocols(apiProtocols: ApiProtocol[]): Protocol[] {
       id: p.slug,
       name: p.display_name,
       defillamaSlug: SLUG_TO_DEFILLAMA[p.slug] ?? "",
-      apiProtocol: p.slug,
+      apiProtocol: SLUG_TO_ALERT_PROTOCOL[p.slug] ?? p.slug,
       items: p.monitors.map((m) => ({
         label: m.name,
         description: m.description,
@@ -172,7 +185,7 @@ export const FALLBACK_PROTOCOLS: Protocol[] = [
     id: "compound-v3",
     name: "Compound V3",
     defillamaSlug: "compound-v3",
-    apiProtocol: "compound",
+    apiProtocol: "comp",
     items: [
       {
         label: "Market Utilization",
@@ -312,7 +325,6 @@ export const FALLBACK_PROTOCOLS: Protocol[] = [
     id: "lrt-pegs",
     name: "LRT Pegs",
     defillamaSlug: "",
-    apiProtocol: "lrt-pegs",
     items: [
       {
         label: "Curve Pool Depegs",
@@ -446,7 +458,7 @@ export const FALLBACK_PROTOCOLS: Protocol[] = [
     id: "rtoken",
     name: "RToken (ETH+)",
     defillamaSlug: "reserve-protocol",
-    apiProtocol: "rtoken",
+    apiProtocol: "ethplus",
     items: [
       {
         label: "Collateral Coverage",
