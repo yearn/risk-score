@@ -21,6 +21,15 @@ marked.use({
   },
 });
 
+/**
+ * "terminal" — a realized event (exploit or wind-down) supersedes a
+ * forward-looking risk score. These reports are Not Rated (finalScore = null)
+ * and listed separately, off the 1–5 scale.
+ * "caution" — the report keeps its numeric score but carries a flag
+ * (e.g. GATED: score capped by a critical gate).
+ */
+export type StatusKind = "caution" | "terminal";
+
 export interface ReportMeta {
   slug: string;
   name: string;
@@ -29,11 +38,15 @@ export interface ReportMeta {
   dateSortable: number;
   token: string;
   chain: string;
-  finalScore: number;
+  /** null when Not Rated: a terminal status (HACKED/DEAD) or an explicit "Final Score: N/A". */
+  finalScore: number | null;
   type: "Protocol" | "Asset";
   iconUrl: string;
   chainIconUrl: string;
-  warning?: string;
+  /** Normalized status tag, e.g. "GATED" | "HACKED" | "DEAD". Absent = active. */
+  status?: string;
+  /** Whether the status pulls the report off the scale ("terminal") or just flags it ("caution"). */
+  statusKind?: StatusKind;
 }
 
 export interface CategoryScore {
@@ -66,6 +79,29 @@ function parseDefillamaSlug(slug: string, content: string): string {
   return match?.[1] ?? "";
 }
 
+/** Statuses that pull a report off the numeric scale (score → null, listed under "Not Rated"). */
+const TERMINAL_STATUSES = new Set([
+  "HACKED",
+  "DEAD",
+  "DEPRECATED",
+  "WIND-DOWN",
+  "WINDDOWN",
+]);
+
+function classifyStatus(raw?: string): {
+  status?: string;
+  statusKind?: StatusKind;
+} {
+  if (!raw) return {};
+  // Take the first word (e.g. "HACKED" from "HACKED (2026-03-22)") and normalize.
+  const status = raw.trim().toUpperCase().split(/[\s(]/)[0].replace(/[^A-Z-]/g, "");
+  if (!status) return {};
+  const statusKind: StatusKind = TERMINAL_STATUSES.has(status)
+    ? "terminal"
+    : "caution";
+  return { status, statusKind };
+}
+
 function parseDateSortable(raw: string): number {
   if (!raw) return 0;
   // If there's a parenthetical "(Updated: <date>)" / "(updated <date>)",
@@ -90,8 +126,26 @@ function parseMeta(slug: string, content: string): ReportMeta {
   const dateMatch = content.match(/\*\*Assessment Date:\*\*\s*(.+)/);
   const tokenMatch = content.match(/\*\*Token:\*\*\s*(.+)/);
   const chainMatch = content.match(/\*\*Chain:\*\*\s*(.+)/);
-  const scoreMatch = content.match(/\*\*Final Score:\s*([\d.]+)\/5\.0\*\*/);
-  const warningMatch = content.match(/\*\*Warning:\*\*\s*(.+)/);
+  // Metadata lives in the header block — the bullet list before the first "## "
+  // section. Scope status/score matching to it so body prose like
+  // "**Status:** Live since…" (e.g. a bug-bounty status line) is never mistaken
+  // for a report status tag.
+  const header = content.split(/\n## /)[0];
+  const scoreMatch = header.match(/\*\*Final Score:\s*([\d.]+)\/5\.0\*\*/);
+  const naMatch = /\*\*Final Score:\s*N\/?A/i.test(header);
+  // Prefer the newer "Status:" field; fall back to legacy "Warning:".
+  const statusMatch =
+    header.match(/\*\*Status:\*\*\s*(.+)/) ??
+    header.match(/\*\*Warning:\*\*\s*(.+)/);
+  const { status, statusKind } = classifyStatus(statusMatch?.[1]);
+
+  // Not Rated when explicitly "N/A" or when a terminal event supersedes the score.
+  const finalScore =
+    naMatch || statusKind === "terminal"
+      ? null
+      : scoreMatch
+        ? parseFloat(scoreMatch[1])
+        : null;
 
   const defillamaSlug = parseDefillamaSlug(slug, content);
   const chainStr = chainMatch?.[1]?.trim() ?? "";
@@ -104,11 +158,12 @@ function parseMeta(slug: string, content: string): ReportMeta {
     dateSortable: parseDateSortable(dateRaw),
     token: tokenMatch?.[1]?.trim() ?? "",
     chain: chainStr,
-    finalScore: parseFloat(scoreMatch?.[1] ?? "0"),
+    finalScore,
     type,
     iconUrl: protocolIconUrl(defillamaSlug),
     chainIconUrl: chainIconUrl(chainStr),
-    warning: warningMatch?.[1]?.trim(),
+    status,
+    statusKind,
   };
 }
 

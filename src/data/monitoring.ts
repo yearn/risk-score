@@ -8,6 +8,11 @@ export interface Protocol {
   name: string;
   defillamaSlug: string;
   items: MonitoringItem[];
+  // Protocol name in the alerts API (= the `protocols/<name>/` dir in yearn/monitoring, as
+  // returned by GET /v1/protocols). Site ids differ from API names (e.g. aave-v3 -> aave), so
+  // this is the join key for live alert history. Left unset for protocols with no enabled
+  // backend job yet (euler, pendle, silo) — the UI omits live data for those.
+  apiProtocol?: string;
 }
 
 // --- API response types ---
@@ -71,6 +76,7 @@ export function transformApiProtocols(apiProtocols: ApiProtocol[]): Protocol[] {
     id: p.slug,
     name: p.display_name,
     defillamaSlug: SLUG_TO_DEFILLAMA[p.slug] ?? "",
+    apiProtocol: p.slug,
     items: p.monitors.map((m) => ({
       label: m.name,
       description: m.description,
@@ -86,6 +92,7 @@ export const FALLBACK_PROTOCOLS: Protocol[] = [
     id: "3jane",
     name: "3Jane",
     defillamaSlug: "3jane",
+    apiProtocol: "3jane",
     items: [
       {
         label: "Price Per Share",
@@ -117,6 +124,7 @@ export const FALLBACK_PROTOCOLS: Protocol[] = [
     id: "aave-v3",
     name: "Aave V3",
     defillamaSlug: "aave-v3",
+    apiProtocol: "aave",
     items: [
       {
         label: "Bad Debt Ratio",
@@ -145,6 +153,7 @@ export const FALLBACK_PROTOCOLS: Protocol[] = [
     id: "cap",
     name: "CAP",
     defillamaSlug: "cap-protocol",
+    apiProtocol: "cap",
     items: [
       {
         label: "Withdrawable Liquidity",
@@ -161,6 +170,7 @@ export const FALLBACK_PROTOCOLS: Protocol[] = [
     id: "compound-v3",
     name: "Compound V3",
     defillamaSlug: "compound-v3",
+    apiProtocol: "compound",
     items: [
       {
         label: "Market Utilization",
@@ -189,6 +199,7 @@ export const FALLBACK_PROTOCOLS: Protocol[] = [
     id: "ethena",
     name: "Ethena",
     defillamaSlug: "ethena",
+    apiProtocol: "ethena",
     items: [
       {
         label: "USDe Backing Ratio",
@@ -236,6 +247,7 @@ export const FALLBACK_PROTOCOLS: Protocol[] = [
     id: "fluid",
     name: "Fluid",
     defillamaSlug: "fluid",
+    apiProtocol: "fluid",
     items: [
       {
         label: "Governance Proposals",
@@ -251,6 +263,7 @@ export const FALLBACK_PROTOCOLS: Protocol[] = [
     id: "infinifi",
     name: "Infinifi",
     defillamaSlug: "infinifi",
+    apiProtocol: "infinifi",
     items: [
       {
         label: "Reserves & Backing",
@@ -286,6 +299,7 @@ export const FALLBACK_PROTOCOLS: Protocol[] = [
     id: "lido",
     name: "Lido",
     defillamaSlug: "lido",
+    apiProtocol: "lido",
     items: [
       {
         label: "DAO Voting",
@@ -319,6 +333,7 @@ export const FALLBACK_PROTOCOLS: Protocol[] = [
     id: "lrt-pegs",
     name: "LRT Pegs",
     defillamaSlug: "",
+    apiProtocol: "lrt-pegs",
     items: [
       {
         label: "Curve Pool Depegs",
@@ -355,6 +370,7 @@ export const FALLBACK_PROTOCOLS: Protocol[] = [
     id: "maker-dao",
     name: "Maker DAO",
     defillamaSlug: "sky",
+    apiProtocol: "maker",
     items: [
       {
         label: "Executive Proposals",
@@ -382,6 +398,7 @@ export const FALLBACK_PROTOCOLS: Protocol[] = [
     id: "maple",
     name: "Maple Finance",
     defillamaSlug: "maple",
+    apiProtocol: "maple",
     items: [
       {
         label: "Price Per Share",
@@ -417,6 +434,7 @@ export const FALLBACK_PROTOCOLS: Protocol[] = [
     id: "morpho",
     name: "Morpho",
     defillamaSlug: "morpho",
+    apiProtocol: "morpho",
     items: [
       {
         label: "Governance Timelock",
@@ -473,6 +491,7 @@ export const FALLBACK_PROTOCOLS: Protocol[] = [
     id: "rtoken",
     name: "RToken (ETH+)",
     defillamaSlug: "reserve-protocol",
+    apiProtocol: "rtoken",
     items: [
       {
         label: "Collateral Coverage",
@@ -520,6 +539,7 @@ export const FALLBACK_PROTOCOLS: Protocol[] = [
     id: "strata",
     name: "Strata",
     defillamaSlug: "strata-finance",
+    apiProtocol: "strata",
     items: [
       {
         label: "srUSDe Exchange Rate",
@@ -557,6 +577,7 @@ export const FALLBACK_PROTOCOLS: Protocol[] = [
     id: "superstate-ustb",
     name: "Superstate USTB",
     defillamaSlug: "superstate",
+    apiProtocol: "ustb",
     items: [
       {
         label: "NAV/Share Monotonicity",
@@ -591,6 +612,7 @@ export const FALLBACK_PROTOCOLS: Protocol[] = [
     id: "usdai",
     name: "USDAI",
     defillamaSlug: "",
+    apiProtocol: "usdai",
     items: [
       {
         label: "Collateral Backing",
@@ -619,6 +641,7 @@ export const FALLBACK_PROTOCOLS: Protocol[] = [
     id: "yearn",
     name: "Yearn",
     defillamaSlug: "yearn-finance",
+    apiProtocol: "yearn",
     items: [
       {
         label: "Large Flows",
