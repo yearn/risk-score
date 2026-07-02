@@ -72,16 +72,18 @@ const SLUG_TO_DEFILLAMA: Record<string, string> = {
 
 /** Transform the API response into the shape the monitoring page expects. */
 export function transformApiProtocols(apiProtocols: ApiProtocol[]): Protocol[] {
-  return apiProtocols.map((p) => ({
-    id: p.slug,
-    name: p.display_name,
-    defillamaSlug: SLUG_TO_DEFILLAMA[p.slug] ?? "",
-    apiProtocol: p.slug,
-    items: p.monitors.map((m) => ({
-      label: m.name,
-      description: m.description,
-    })),
-  }));
+  return apiProtocols
+    .filter((p) => !p.disabled)
+    .map((p) => ({
+      id: p.slug,
+      name: p.display_name,
+      defillamaSlug: SLUG_TO_DEFILLAMA[p.slug] ?? "",
+      apiProtocol: p.slug,
+      items: p.monitors.map((m) => ({
+        label: m.name,
+        description: m.description,
+      })),
+    }));
 }
 
 // --- Static fallback (used when the API is unreachable at build time) ---
@@ -217,29 +219,6 @@ export const FALLBACK_PROTOCOLS: Protocol[] = [
       {
         label: "Reserve Buffer",
         description: "Adequacy of reserve buffer",
-      },
-    ],
-  },
-  {
-    id: "euler",
-    name: "Euler",
-    defillamaSlug: "euler",
-    items: [
-      {
-        label: "Vault Risk Levels",
-        description: "Computed risk vs maximum threshold",
-      },
-      {
-        label: "Vault Allocation Ratios",
-        description: "Risk-adjusted allocation thresholds",
-      },
-      {
-        label: "Debt Supply Ratio",
-        description: "Alerts if ratio exceeds 60%",
-      },
-      {
-        label: "Safe Multisig",
-        description: "4/7 multisig transaction queue monitoring",
       },
     ],
   },
@@ -464,30 +443,6 @@ export const FALLBACK_PROTOCOLS: Protocol[] = [
     ],
   },
   {
-    id: "pendle",
-    name: "Pendle",
-    defillamaSlug: "pendle",
-    items: [
-      {
-        label: "Safe Multisig",
-        description: "2/4 governance on Mainnet and Arbitrum",
-      },
-      {
-        label: "Proxy Ownership",
-        description: "Governance proxy contract ownership monitoring",
-      },
-      {
-        label: "SY Token Governance",
-        description: "SY token governance and pause functionality",
-      },
-      {
-        label: "Core Contracts",
-        description:
-          "vePENDLE, PENDLE, RewardDistributor, and Voting contract monitoring",
-      },
-    ],
-  },
-  {
     id: "rtoken",
     name: "RToken (ETH+)",
     defillamaSlug: "reserve-protocol",
@@ -512,26 +467,6 @@ export const FALLBACK_PROTOCOLS: Protocol[] = [
       {
         label: "Timelock",
         description: "Contract monitoring (2-day delay)",
-      },
-    ],
-  },
-  {
-    id: "silo",
-    name: "Silo",
-    defillamaSlug: "silo-v2",
-    items: [
-      {
-        label: "Bad Debt",
-        description: "Positions with riskFactor > 1",
-      },
-      {
-        label: "Timelock",
-        description: "Contract monitoring (2-day minimum delay)",
-      },
-      {
-        label: "Safe Multisig",
-        description:
-          "3/6 multisig monitoring on Mainnet, Optimism, and Arbitrum",
       },
     ],
   },
