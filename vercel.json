@@ -9,6 +9,10 @@
     {
       "source": "/api/cdn/:path*",
       "destination": "/api/cdn"
+    },
+    {
+      "source": "/api/monitoring/:path*",
+      "destination": "/api/monitoring"
     }
   ],
   "installCommand": "npm ci"

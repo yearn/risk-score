@@ -1,0 +1,549 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import { protocolIconUrl } from "../../lib/icons";
+import { protocols } from "../../data/monitoring";
+
+export function getStaticPaths() {
+  return protocols.map((p) => ({ params: { id: p.id }, props: { protocol: p } }));
+}
+
+const { protocol } = Astro.props;
+const iconUrl = protocolIconUrl(protocol.defillamaSlug);
+const apiProtocol = protocol.apiProtocol ?? "";
+---
+
+<BaseLayout
+  title={`${protocol.name} Monitoring — Yearn Curation`}
+  description={`Live alert history and monitors for ${protocol.name}, tracked by Yearn Curation.`}
+  ogUrl={`/monitoring/${protocol.id}/`}
+  ogImage="/og/default.png"
+>
+  <a href="/monitoring/" class="back-link">&larr; All monitors</a>
+
+  <div class="detail-header">
+    <div class="icon-wrap">
+      {iconUrl ? (
+        <img
+          src={iconUrl}
+          alt=""
+          width="40"
+          height="40"
+          class="protocol-icon"
+          loading="lazy"
+          onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"
+        />
+      ) : null}
+      <div class="icon-placeholder" style={iconUrl ? "display:none" : ""}>
+        <span>{protocol.name.charAt(0)}</span>
+      </div>
+    </div>
+    <div class="detail-title">
+      <h1>{protocol.name}</h1>
+      <div class="detail-meta">
+        <span class="meta-pill">{protocol.items.length} monitors</span>
+        <span class="meta-pill meta-pill--blue">{protocol.frequency}</span>
+      </div>
+    </div>
+  </div>
+
+  <section class="section">
+    <h2>What we monitor</h2>
+    <ul class="monitor-list">
+      {protocol.items.map((item) => (
+        <li>
+          <span class="monitor-label">{item.label}</span>
+          <span class="monitor-desc">{item.description}</span>
+        </li>
+      ))}
+    </ul>
+  </section>
+
+  <section class="section">
+    <div class="section-head">
+      <h2>Alert history</h2>
+      <span class="history-status" id="history-status"></span>
+    </div>
+    {apiProtocol && (
+      <div class="history-filters">
+        <label class="filter-field">
+          <span>Severity</span>
+          <select id="filter-severity">
+            <option value="">All</option>
+            <option value="CRITICAL">Critical</option>
+            <option value="HIGH">High</option>
+            <option value="MEDIUM">Medium</option>
+            <option value="LOW">Low</option>
+          </select>
+        </label>
+        <label class="filter-field">
+          <span>Source</span>
+          <select id="filter-source">
+            <option value="">All</option>
+            <option value="protocol">protocol</option>
+            <option value="automation_digest">automation_digest</option>
+          </select>
+        </label>
+      </div>
+    )}
+    <div class="alert-history" id="alert-history" data-api-protocol={apiProtocol}>
+      <div class="history-empty">Loading recent alerts…</div>
+    </div>
+    <div class="history-more" id="history-more" hidden>
+      <button type="button" class="load-more-btn" id="load-more">Load more</button>
+    </div>
+    <p class="history-note">
+      Alerts are also streamed to
+      <a href="https://t.me/yearn_curation_alerts" target="_blank" rel="noopener noreferrer">Telegram</a>
+      in real time.
+    </p>
+  </section>
+
+  <script>
+    import {
+      fetchAlerts,
+      severityMeta,
+      SEVERITY_META,
+      formatRelativeTime,
+      formatTimestamp,
+      escapeHtml,
+      type AlertEvent,
+      type Severity,
+    } from "../../lib/monitoring";
+
+    const root = document.getElementById("alert-history");
+    const statusEl = document.getElementById("history-status");
+    const moreWrap = document.getElementById("history-more");
+    const moreBtn = document.getElementById("load-more") as HTMLButtonElement | null;
+    const sevSel = document.getElementById("filter-severity") as HTMLSelectElement | null;
+    const srcSel = document.getElementById("filter-source") as HTMLSelectElement | null;
+    const proto = root?.dataset.apiProtocol || "";
+
+    const PAGE = 20;
+    const REFRESH_MS = 60000;
+
+    let cursor: string | null = null;
+    let maxId = 0;
+    let generation = 0; // bumped on each (re)load so stale fetches can't write to the DOM
+    let listEl: HTMLUListElement | null = null;
+
+    function filters(): { protocol: string; severity?: Severity; source?: string } {
+      return {
+        protocol: proto,
+        severity: (sevSel?.value || undefined) as Severity | undefined,
+        source: srcSel?.value || undefined,
+      };
+    }
+
+    function renderAlert(alert: AlertEvent): string {
+      const meta = severityMeta(alert.severity);
+      const known = Boolean(SEVERITY_META[alert.severity]);
+      // Only show parts that carry signal. Most alerts have a null severity and source
+      // "protocol", so rendering those verbatim ("Unknown · protocol") is just noise — show the
+      // severity chip only for a known level, and the source only when it isn't the default.
+      const parts: string[] = [];
+      if (known) {
+        parts.push(
+          `<span class="alert-sev" style="color:${meta.color}">${meta.emoji} ${escapeHtml(meta.label)}</span>`,
+        );
+      }
+      if (alert.source && alert.source !== "protocol") {
+        parts.push(`<span>${escapeHtml(alert.source)}</span>`);
+      }
+      parts.push(
+        `<time datetime="${escapeHtml(alert.created_at)}" title="${escapeHtml(formatTimestamp(alert.created_at))}">${escapeHtml(formatRelativeTime(alert.created_at))}</time>`,
+      );
+      return `
+        <li class="alert-row">
+          <span class="alert-dot" style="background:${meta.color}"${known ? ` title="${escapeHtml(meta.label)}"` : ""}></span>
+          <div class="alert-body">
+            <p class="alert-message">${escapeHtml(alert.message)}</p>
+            <div class="alert-meta">${parts.join('<span class="alert-sep">·</span>')}</div>
+          </div>
+        </li>`;
+    }
+
+    function setStatus() {
+      if (statusEl) {
+        const n = listEl?.children.length ?? 0;
+        statusEl.textContent = n ? `${n} shown` : "";
+      }
+    }
+
+    function setMore(next: string | null) {
+      cursor = next;
+      if (moreWrap) moreWrap.hidden = !next;
+      if (moreBtn) {
+        moreBtn.disabled = false;
+        moreBtn.textContent = "Load more";
+      }
+    }
+
+    function showState(cls: string, html: string) {
+      if (root) root.innerHTML = `<div class="${cls}">${html}</div>`;
+      listEl = null;
+      if (moreWrap) moreWrap.hidden = true;
+      setStatus();
+    }
+
+    async function loadFirst() {
+      if (!root) return;
+      const gen = ++generation;
+      if (statusEl) statusEl.textContent = "Loading…";
+      if (moreWrap) moreWrap.hidden = true;
+      let resp;
+      try {
+        resp = await fetchAlerts({ ...filters(), limit: PAGE });
+      } catch {
+        if (gen === generation) {
+          showState("history-error", "Couldn't load alert history right now. Please try again later.");
+        }
+        return;
+      }
+      if (gen !== generation) return; // superseded by a newer filter change
+      if (!resp.data.length) {
+        maxId = 0;
+        cursor = null;
+        showState(
+          "history-empty",
+          "No alerts match — this protocol is monitored but nothing has fired for this filter.",
+        );
+        return;
+      }
+      root.innerHTML = '<ul class="alert-list"></ul>';
+      listEl = root.querySelector(".alert-list");
+      if (listEl) listEl.innerHTML = resp.data.map(renderAlert).join("");
+      maxId = resp.data[0].id;
+      setMore(resp.next_cursor);
+      setStatus();
+    }
+
+    async function loadMore() {
+      // The disabled button is the re-entrancy guard (loadMore is only fired by its click).
+      if (!moreBtn || moreBtn.disabled || !listEl || !cursor) return;
+      const gen = generation;
+      moreBtn.disabled = true;
+      moreBtn.textContent = "Loading…";
+      let resp;
+      try {
+        resp = await fetchAlerts({ ...filters(), cursor, limit: PAGE });
+      } catch {
+        moreBtn.textContent = "Couldn't load — retry";
+        moreBtn.disabled = false;
+        return;
+      }
+      if (gen !== generation || !listEl) return; // superseded by a filter change (which resets the button)
+      listEl.insertAdjacentHTML("beforeend", resp.data.map(renderAlert).join(""));
+      setMore(resp.next_cursor); // re-enables the button
+      setStatus();
+    }
+
+    // Poll the newest page and prepend alerts above the current top, respecting active filters.
+    async function pollNew() {
+      if (!listEl) return;
+      const gen = generation;
+      let resp;
+      try {
+        resp = await fetchAlerts({ ...filters(), limit: PAGE });
+      } catch {
+        return;
+      }
+      if (gen !== generation || !listEl) return;
+      const fresh = resp.data.filter((a) => a.id > maxId);
+      if (!fresh.length) return;
+      listEl.insertAdjacentHTML("afterbegin", fresh.map(renderAlert).join(""));
+      maxId = fresh[0].id;
+      setStatus();
+    }
+
+    function start() {
+      if (!root) return;
+      if (!proto) {
+        showState("history-empty", "Live alert history is not yet available for this protocol.");
+        return;
+      }
+      loadFirst();
+      moreBtn?.addEventListener("click", loadMore);
+      sevSel?.addEventListener("change", loadFirst);
+      srcSel?.addEventListener("change", loadFirst);
+      setInterval(() => {
+        if (!document.hidden) pollNew();
+      }, REFRESH_MS);
+      document.addEventListener("visibilitychange", () => {
+        if (!document.hidden) pollNew();
+      });
+    }
+
+    start();
+  </script>
+</BaseLayout>
+
+<style>
+  .back-link {
+    display: inline-block;
+    margin-bottom: 1.5rem;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+  }
+
+  /* === Header === */
+  .detail-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .icon-wrap {
+    width: 40px;
+    height: 40px;
+    flex-shrink: 0;
+    position: relative;
+  }
+  .protocol-icon {
+    display: block;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+  }
+  .icon-placeholder {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--bg-secondary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text-secondary);
+  }
+  .detail-title h1 {
+    font-size: 1.5rem;
+    margin: 0 0 0.4rem;
+    letter-spacing: -0.01em;
+  }
+  .detail-meta {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    flex-wrap: wrap;
+    font-size: 0.72rem;
+  }
+  .meta-pill {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.15rem 0.5rem;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--bg-secondary) 70%, transparent);
+    color: var(--text-secondary);
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+  }
+  .meta-pill--blue {
+    background: color-mix(in srgb, var(--brand-blue) 12%, transparent);
+    color: #7eb4ff;
+    border: 1px solid color-mix(in srgb, var(--brand-blue) 25%, transparent);
+  }
+
+  /* === Sections === */
+  .section {
+    margin-bottom: 2.5rem;
+  }
+  .section-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .section h2 {
+    font-size: 1.2rem;
+    margin: 0;
+  }
+  .section > h2 {
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .history-status {
+    font-size: 0.78rem;
+    color: var(--text-secondary);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+
+  /* === Monitor list (mirrors monitoring.astro) === */
+  .monitor-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  .monitor-list li {
+    display: flex;
+    gap: 0.75rem;
+    padding: 0.55rem 0;
+    font-size: 0.88rem;
+    line-height: 1.45;
+    border-bottom: 1px solid color-mix(in srgb, var(--border) 45%, transparent);
+  }
+  .monitor-list li:last-child {
+    border-bottom: none;
+  }
+  .monitor-label {
+    font-weight: 600;
+    white-space: nowrap;
+    color: var(--text-primary);
+    min-width: 180px;
+    flex-shrink: 0;
+    font-size: 0.85rem;
+  }
+  .monitor-desc {
+    color: var(--text-secondary);
+  }
+
+  /* === Alert history === */
+  .alert-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  .alert-row {
+    display: flex;
+    gap: 0.75rem;
+    padding: 0.85rem 0;
+    border-bottom: 1px solid color-mix(in srgb, var(--border) 45%, transparent);
+  }
+  .alert-row:last-child {
+    border-bottom: none;
+  }
+  .alert-dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    margin-top: 0.4rem;
+    flex-shrink: 0;
+  }
+  .alert-body {
+    min-width: 0;
+  }
+  .alert-message {
+    margin: 0 0 0.3rem;
+    font-size: 0.9rem;
+    line-height: 1.45;
+    color: var(--text-primary);
+    word-break: break-word;
+  }
+  .alert-meta {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    flex-wrap: wrap;
+    font-size: 0.76rem;
+    color: var(--text-secondary);
+  }
+  .alert-sev {
+    font-weight: 600;
+  }
+  .alert-sep {
+    opacity: 0.4;
+  }
+
+  .history-empty,
+  .history-error {
+    padding: 1.5rem;
+    text-align: center;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    border: 1px dashed var(--border);
+    border-radius: 10px;
+    background: color-mix(in srgb, var(--bg-card) 40%, transparent);
+  }
+  .history-error {
+    color: #fca5a5;
+    border-color: color-mix(in srgb, #ef4444 35%, var(--border));
+  }
+  .history-note {
+    margin-top: 1rem;
+    font-size: 0.82rem;
+    color: var(--text-secondary);
+  }
+  .history-note a {
+    color: var(--brand-blue);
+  }
+
+  /* === Filters === */
+  .history-filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+  }
+  .filter-field {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.78rem;
+    color: var(--text-secondary);
+  }
+  .filter-field select {
+    appearance: none;
+    -webkit-appearance: none;
+    background-color: color-mix(in srgb, var(--bg-card) 60%, transparent);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%239ca3af' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.55rem center;
+    color: var(--text-primary);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0.35rem 1.7rem 0.35rem 0.6rem;
+    font-size: 0.82rem;
+    font-family: inherit;
+    cursor: pointer;
+    transition: border-color 0.15s;
+  }
+  .filter-field select:focus {
+    outline: none;
+    border-color: var(--brand-blue);
+  }
+
+  /* === Load more === */
+  .history-more {
+    display: flex;
+    justify-content: center;
+    margin-top: 1.25rem;
+  }
+  .load-more-btn {
+    padding: 0.55rem 1.3rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--brand-blue);
+    background: color-mix(in srgb, var(--brand-blue) 10%, transparent);
+    border: 1px solid color-mix(in srgb, var(--brand-blue) 35%, transparent);
+    border-radius: 999px;
+    cursor: pointer;
+    font-family: inherit;
+    transition: background 0.2s, border-color 0.2s, transform 0.2s;
+  }
+  .load-more-btn:hover:not(:disabled) {
+    background: color-mix(in srgb, var(--brand-blue) 18%, transparent);
+    border-color: var(--brand-blue);
+    transform: translateY(-1px);
+  }
+  .load-more-btn:disabled {
+    opacity: 0.6;
+    cursor: default;
+  }
+
+  @media (max-width: 640px) {
+    .monitor-list li {
+      flex-direction: column;
+      gap: 0.1rem;
+    }
+    .monitor-label {
+      min-width: unset;
+    }
+  }
+</style>

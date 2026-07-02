@@ -9,6 +9,11 @@ export interface Protocol {
   defillamaSlug: string;
   frequency: string;
   items: MonitoringItem[];
+  // Protocol name in the alerts API (= the `protocols/<name>/` dir in yearn/monitoring, as
+  // returned by GET /v1/protocols). Site ids differ from API names (e.g. aave-v3 -> aave), so
+  // this is the join key for live alert history. Left unset for protocols with no enabled
+  // backend job yet (euler, pendle, silo) — the UI omits live data for those.
+  apiProtocol?: string;
 }
 
 export const protocols: Protocol[] = [
@@ -17,6 +22,7 @@ export const protocols: Protocol[] = [
     name: "3Jane",
     defillamaSlug: "3jane",
     frequency: "Hourly",
+    apiProtocol: "3jane",
     items: [
       {
         label: "Price Per Share",
@@ -49,6 +55,7 @@ export const protocols: Protocol[] = [
     name: "Aave V3",
     defillamaSlug: "aave-v3",
     frequency: "Hourly",
+    apiProtocol: "aave",
     items: [
       {
         label: "Bad Debt Ratio",
@@ -78,6 +85,7 @@ export const protocols: Protocol[] = [
     name: "CAP",
     defillamaSlug: "cap-protocol",
     frequency: "Daily",
+    apiProtocol: "cap",
     items: [
       {
         label: "Withdrawable Liquidity",
@@ -95,6 +103,7 @@ export const protocols: Protocol[] = [
     name: "Compound V3",
     defillamaSlug: "compound-v3",
     frequency: "Hourly / Daily",
+    apiProtocol: "compound",
     items: [
       {
         label: "Market Utilization",
@@ -124,6 +133,7 @@ export const protocols: Protocol[] = [
     name: "Ethena",
     defillamaSlug: "ethena",
     frequency: "Daily",
+    apiProtocol: "ethena",
     items: [
       {
         label: "USDe Backing Ratio",
@@ -173,6 +183,7 @@ export const protocols: Protocol[] = [
     name: "Fluid",
     defillamaSlug: "fluid",
     frequency: "Hourly",
+    apiProtocol: "fluid",
     items: [
       {
         label: "Governance Proposals",
@@ -189,6 +200,7 @@ export const protocols: Protocol[] = [
     name: "Infinifi",
     defillamaSlug: "infinifi",
     frequency: "Hourly",
+    apiProtocol: "infinifi",
     items: [
       {
         label: "Reserves & Backing",
@@ -225,6 +237,7 @@ export const protocols: Protocol[] = [
     name: "Lido",
     defillamaSlug: "lido",
     frequency: "Hourly / Real-time",
+    apiProtocol: "lido",
     items: [
       {
         label: "DAO Voting",
@@ -259,6 +272,7 @@ export const protocols: Protocol[] = [
     name: "LRT Pegs",
     defillamaSlug: "",
     frequency: "Hourly",
+    apiProtocol: "lrt-pegs",
     items: [
       {
         label: "Curve Pool Depegs",
@@ -296,6 +310,7 @@ export const protocols: Protocol[] = [
     name: "Maker DAO",
     defillamaSlug: "sky",
     frequency: "Hourly",
+    apiProtocol: "maker",
     items: [
       {
         label: "Executive Proposals",
@@ -324,6 +339,7 @@ export const protocols: Protocol[] = [
     name: "Maple Finance",
     defillamaSlug: "maple",
     frequency: "Hourly / Daily",
+    apiProtocol: "maple",
     items: [
       {
         label: "Price Per Share",
@@ -360,6 +376,7 @@ export const protocols: Protocol[] = [
     name: "Morpho",
     defillamaSlug: "morpho",
     frequency: "Hourly / Daily",
+    apiProtocol: "morpho",
     items: [
       {
         label: "Governance Timelock",
@@ -418,6 +435,7 @@ export const protocols: Protocol[] = [
     name: "RToken (ETH+)",
     defillamaSlug: "reserve-protocol",
     frequency: "Hourly / Real-time",
+    apiProtocol: "rtoken",
     items: [
       {
         label: "Collateral Coverage",
@@ -467,6 +485,7 @@ export const protocols: Protocol[] = [
     name: "Strata",
     defillamaSlug: "strata-finance",
     frequency: "Daily",
+    apiProtocol: "strata",
     items: [
       {
         label: "srUSDe Exchange Rate",
@@ -505,6 +524,7 @@ export const protocols: Protocol[] = [
     name: "Superstate USTB",
     defillamaSlug: "superstate",
     frequency: "Hourly",
+    apiProtocol: "ustb",
     items: [
       {
         label: "NAV/Share Monotonicity",
@@ -540,6 +560,7 @@ export const protocols: Protocol[] = [
     name: "USDAI",
     defillamaSlug: "",
     frequency: "Hourly",
+    apiProtocol: "usdai",
     items: [
       {
         label: "Collateral Backing",
@@ -569,6 +590,7 @@ export const protocols: Protocol[] = [
     name: "Yearn",
     defillamaSlug: "yearn-finance",
     frequency: "Hourly",
+    apiProtocol: "yearn",
     items: [
       {
         label: "Large Flows",
