@@ -5,8 +5,22 @@
 - **Chain:** [Chain Name]
 - **Token Address:** [`[Token Address]`]([Token Explorer Link])
 - **Final Score: X/5.0**
+<!-- Status: omit this line entirely for normal/active reports. See the Status comment below. -->
 
 <!--
+Status field (optional — omit for active reports):
+  Add a "- **Status:** <TAG>" line only when a report is an exception. The
+  taxonomy is:
+    - GATED   — score is retained but was capped by a critical gate (e.g. no
+                audit) rather than earned organically. Keep the numeric
+                "Final Score: X/5.0"; the site shows it with an amber GATED chip.
+    - HACKED  — confirmed exploit / unbacked mint / realized loss event.
+    - DEAD    — deprecated, wind-down, or discretionary-only redemption.
+  HACKED and DEAD are "terminal": a realized event supersedes a forward-looking
+  score, so set the header to "- **Final Score: N/A**" (the site renders these
+  off the 1–5 scale under a separate "Not Rated" section). Retain the gate/
+  override derivation in the Risk Score Assessment section for the record.
+
 Assessment Date format:
   - Use full English month name and four-digit year, e.g. "March 4, 2026".
   - When a report is reassessed, append the new date in parentheses on the
@@ -199,11 +213,21 @@ Show the data/fund flow between layers. Note key admin powers and trust boundari
 
 If ANY gate is triggered, the protocol automatically receives a score of **5** (High Risk).
 
+- [ ] **Unverified contract source** - The assessed contract, or its implementation behind a proxy, is not source-verified on a public block explorer (bytecode cannot be independently reviewed)
 - [ ] **No audit** - Protocol has not been audited by reputable firms
 - [ ] **Unverifiable reserves** - Reserves cannot be verified onchain or through transparent attestation
 - [ ] **Total centralization** - Controlled by a single EOA with no multisig or governance
 
 **If ALL gates pass**, proceed to category scoring.
+
+> **A triggered gate is not the same as a realized loss.** A gate on an
+> otherwise-live protocol caps the score at 5.0 — set `Status: GATED` in the
+> header and keep the number so it stays comparable on the scale. Reserve
+> `N/A` / the "Not Rated" bucket for **terminal** states (`HACKED` / `DEAD`),
+> where an actual exploit or wind-down has occurred. Do not let a gate flatten
+> a distinguishable, still-live protocol into the same cell as a corpse — record
+> the ungated weighted score in the reasoning so the underlying risk stays
+> visible.
 
 ### Category Scores
 
@@ -350,8 +374,17 @@ If ANY gate is triggered, the protocol automatically receives a score of **5** (
 | **2.5-3.5** | **Medium Risk** | Approved with enhanced monitoring |
 | **3.5-4.5** | **Elevated Risk** | Limited approval, strict limits |
 | **4.5-5.0** | **High Risk** | Not recommended |
+| **N/A** | **Not Rated** | Terminal — do not use (exploited or wound down) |
 
 **Final Risk Tier: [TIER]**
+
+<!--
+Not Rated: for terminal reports (Status: HACKED / DEAD), set Final Score to
+"N/A" and Final Risk Tier to "Not Rated". These are excluded from the numeric
+1–5 ranking and grouped separately on the site.
+-->
+
+
 
 ---
 

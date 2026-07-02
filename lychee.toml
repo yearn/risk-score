@@ -37,6 +37,9 @@ exclude_path = ["reports/TEMPLATE.md", "reports/old"]
 # - businesswire.com/news raises "HTTP/2 protocol error" from lychee's reqwest
 #   client (server-side TLS/HTTP-2 quirk on Businesswire's CDN). URLs resolve
 #   200 in a browser; the failure is checker-specific. Scope kept to /news/.
+# - github.com/resolv-im/resolv-contracts-public returns 404 (repo is private or
+#   removed). Referenced by the Resolv reports (now HACKED / Not Rated), which we
+#   are intentionally not modifying; excluded so the dead link doesn't fail CI.
 exclude = [
     '^https?://(www\.)?rekt\.news',
     '^https?://(blue-api|api)\.morpho\.org/graphql',
@@ -46,4 +49,5 @@ exclude = [
     '^https?://(www\.)?defillama\.com/protocol/',
     '^https?://(www\.)?maple\.finance/syrup',
     '^https?://(www\.)?businesswire\.com/news/',
+    '^https?://github\.com/resolv-im/resolv-contracts-public',
 ]
