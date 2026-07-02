@@ -102,10 +102,18 @@ if (API_URL) {
                 </li>
               ))}
             </ul>
-            <a class="history-link" href={`/monitoring/${p.id}/`}>
-              View alert history
-              <span aria-hidden="true">&rarr;</span>
-            </a>
+            <div class="monitor-links">
+              <a class="history-link" href={`/monitoring/${p.id}/`}>
+                View alert history
+                <span aria-hidden="true">&rarr;</span>
+              </a>
+              {p.reportSlug && (
+                <a class="report-link" href={`/report/${p.reportSlug}/`}>
+                  View risk report
+                  <span aria-hidden="true">&rarr;</span>
+                </a>
+              )}
+            </div>
           </div>
         </div>
       );
@@ -560,23 +568,37 @@ if (API_URL) {
     flex-shrink: 0;
   }
 
-  /* Link from a card to its per-protocol detail page */
-  .history-link {
+  /* Links from a card to detail page / risk report */
+  .monitor-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-top: 0.85rem;
+  }
+  .history-link,
+  .report-link {
     display: inline-flex;
     align-items: center;
     gap: 0.35rem;
-    margin-top: 0.85rem;
     font-size: 0.82rem;
     font-weight: 600;
+  }
+  .history-link {
     color: var(--brand-blue);
   }
-  .history-link:hover {
+  .report-link {
+    color: var(--text-secondary);
+  }
+  .history-link:hover,
+  .report-link:hover {
     text-decoration: underline;
   }
-  .history-link span {
+  .history-link span,
+  .report-link span {
     transition: transform 0.2s;
   }
-  .history-link:hover span {
+  .history-link:hover span,
+  .report-link:hover span {
     transform: translateX(2px);
   }
 

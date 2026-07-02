@@ -37,10 +37,6 @@ const tierCounts = tierOrder.map((t) => ({
 
 <BaseLayout title="Reports — Yearn Curation" ogUrl="/reports/" ogImage="/og/default.png">
   <section class="reports-hero">
-    <div class="section-eyebrow">
-      <span class="pulse-dot"></span>
-      All assessments
-    </div>
     <h1>Risk Assessment Reports</h1>
     <p class="reports-sub">
       Independent assessments across DeFi protocols, vaults and assets.
@@ -273,30 +269,6 @@ const tierCounts = tierOrder.map((t) => ({
   .reports-hero {
     padding: 2rem 0 1.5rem;
     text-align: center;
-  }
-  .section-eyebrow {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.4rem;
-    color: var(--brand-blue);
-    font-size: 0.72rem;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    font-weight: 600;
-    margin-bottom: 0.5rem;
-  }
-  .pulse-dot {
-    width: 6px;
-    height: 6px;
-    background: var(--brand-blue);
-    border-radius: 50%;
-    box-shadow: 0 0 0 0 rgba(6, 117, 249, 0.6);
-    animation: pulse 2s ease-out infinite;
-  }
-  @keyframes pulse {
-    0% { box-shadow: 0 0 0 0 rgba(6, 117, 249, 0.6); }
-    70% { box-shadow: 0 0 0 8px rgba(6, 117, 249, 0); }
-    100% { box-shadow: 0 0 0 0 rgba(6, 117, 249, 0); }
   }
   .reports-hero h1 {
     font-size: clamp(1.75rem, 3.4vw, 2.4rem);
@@ -727,7 +699,4 @@ const tierCounts = tierOrder.map((t) => ({
     color: var(--text-secondary);
   }
 
-  @media (prefers-reduced-motion: reduce) {
-    .pulse-dot { animation: none; }
-  }
 </style>

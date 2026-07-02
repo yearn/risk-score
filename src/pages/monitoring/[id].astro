@@ -41,7 +41,6 @@ const apiProtocol = protocol.apiProtocol ?? "";
       <h1>{protocol.name}</h1>
       <div class="detail-meta">
         <span class="meta-pill">{protocol.items.length} monitors</span>
-        <span class="meta-pill meta-pill--blue">{protocol.frequency}</span>
       </div>
     </div>
   </div>
@@ -85,8 +84,18 @@ const apiProtocol = protocol.apiProtocol ?? "";
         </label>
       </div>
     )}
-    <div class="alert-history" id="alert-history" data-api-protocol={apiProtocol}>
-      <div class="history-empty">Loading recent alerts…</div>
+    <table class="alert-table" id="alert-table" data-api-protocol={apiProtocol} hidden>
+      <thead>
+        <tr>
+          <th>Message</th>
+          <th>Severity</th>
+          <th>Time</th>
+        </tr>
+      </thead>
+      <tbody id="alert-tbody"></tbody>
+    </table>
+    <div class="history-empty" id="history-empty" data-api-protocol={apiProtocol}>
+      Loading recent alerts…
     </div>
     <div class="history-more" id="history-more" hidden>
       <button type="button" class="load-more-btn" id="load-more">Load more</button>
@@ -99,10 +108,10 @@ const apiProtocol = protocol.apiProtocol ?? "";
   </section>
 
   <script>
+    import { marked } from "marked";
     import {
       fetchAlerts,
       severityMeta,
-      SEVERITY_META,
       formatRelativeTime,
       formatTimestamp,
       escapeHtml,
@@ -110,21 +119,22 @@ const apiProtocol = protocol.apiProtocol ?? "";
       type Severity,
     } from "../../lib/monitoring";
 
-    const root = document.getElementById("alert-history");
+    const table = document.getElementById("alert-table") as HTMLTableElement | null;
+    const tbody = document.getElementById("alert-tbody") as HTMLTableSectionElement | null;
+    const emptyDiv = document.getElementById("history-empty");
     const statusEl = document.getElementById("history-status");
     const moreWrap = document.getElementById("history-more");
     const moreBtn = document.getElementById("load-more") as HTMLButtonElement | null;
     const sevSel = document.getElementById("filter-severity") as HTMLSelectElement | null;
     const srcSel = document.getElementById("filter-source") as HTMLSelectElement | null;
-    const proto = root?.dataset.apiProtocol || "";
+    const proto = table?.dataset.apiProtocol || "";
 
     const PAGE = 20;
     const REFRESH_MS = 60000;
 
     let cursor: string | null = null;
     let maxId = 0;
-    let generation = 0; // bumped on each (re)load so stale fetches can't write to the DOM
-    let listEl: HTMLUListElement | null = null;
+    let generation = 0;
 
     function filters(): { protocol: string; severity?: Severity; source?: string } {
       return {
@@ -136,35 +146,28 @@ const apiProtocol = protocol.apiProtocol ?? "";
 
     function renderAlert(alert: AlertEvent): string {
       const meta = severityMeta(alert.severity);
-      const known = Boolean(SEVERITY_META[alert.severity]);
-      // Only show parts that carry signal. Most alerts have a null severity and source
-      // "protocol", so rendering those verbatim ("Unknown · protocol") is just noise — show the
-      // severity chip only for a known level, and the source only when it isn't the default.
-      const parts: string[] = [];
-      if (known) {
-        parts.push(
-          `<span class="alert-sev" style="color:${meta.color}">${meta.emoji} ${escapeHtml(meta.label)}</span>`,
-        );
+
+      let msg: string;
+      if (alert.plain_text) {
+        msg = escapeHtml(alert.message);
+      } else {
+        msg = marked.parse(alert.message, { async: false }) as string;
       }
-      if (alert.source && alert.source !== "protocol") {
-        parts.push(`<span>${escapeHtml(alert.source)}</span>`);
-      }
-      parts.push(
-        `<time datetime="${escapeHtml(alert.created_at)}" title="${escapeHtml(formatTimestamp(alert.created_at))}">${escapeHtml(formatRelativeTime(alert.created_at))}</time>`,
-      );
+
+      const timeTitle = escapeHtml(formatTimestamp(alert.created_at));
+      const timeLabel = escapeHtml(formatRelativeTime(alert.created_at));
+
       return `
-        <li class="alert-row">
-          <span class="alert-dot" style="background:${meta.color}"${known ? ` title="${escapeHtml(meta.label)}"` : ""}></span>
-          <div class="alert-body">
-            <p class="alert-message">${escapeHtml(alert.message)}</p>
-            <div class="alert-meta">${parts.join('<span class="alert-sep">·</span>')}</div>
-          </div>
-        </li>`;
+        <tr class="alert-row">
+          <td class="alert-cell alert-cell--msg">${msg}</td>
+          <td class="alert-cell alert-cell--sev">${escapeHtml(meta.label)}</td>
+          <td class="alert-cell alert-cell--time"><time datetime="${escapeHtml(alert.created_at)}" title="${timeTitle}">${timeLabel}</time></td>
+        </tr>`;
     }
 
     function setStatus() {
       if (statusEl) {
-        const n = listEl?.children.length ?? 0;
+        const n = tbody?.children.length ?? 0;
         statusEl.textContent = n ? `${n} shown` : "";
       }
     }
@@ -178,15 +181,37 @@ const apiProtocol = protocol.apiProtocol ?? "";
       }
     }
 
-    function showState(cls: string, html: string) {
-      if (root) root.innerHTML = `<div class="${cls}">${html}</div>`;
-      listEl = null;
+    function showEmpty(html: string) {
+      if (table) table.hidden = true;
+      if (emptyDiv) {
+        emptyDiv.innerHTML = html;
+        emptyDiv.hidden = false;
+        emptyDiv.className = "history-empty";
+      }
+      if (tbody) tbody.innerHTML = "";
       if (moreWrap) moreWrap.hidden = true;
       setStatus();
     }
 
+    function showError(html: string) {
+      if (table) table.hidden = true;
+      if (emptyDiv) {
+        emptyDiv.innerHTML = html;
+        emptyDiv.hidden = false;
+        emptyDiv.className = "history-error";
+      }
+      if (tbody) tbody.innerHTML = "";
+      if (moreWrap) moreWrap.hidden = true;
+      setStatus();
+    }
+
+    function showTable() {
+      if (table) table.hidden = false;
+      if (emptyDiv) emptyDiv.hidden = true;
+    }
+
     async function loadFirst() {
-      if (!root) return;
+      if (!tbody) return;
       const gen = ++generation;
       if (statusEl) statusEl.textContent = "Loading…";
       if (moreWrap) moreWrap.hidden = true;
@@ -195,31 +220,26 @@ const apiProtocol = protocol.apiProtocol ?? "";
         resp = await fetchAlerts({ ...filters(), limit: PAGE });
       } catch {
         if (gen === generation) {
-          showState("history-error", "Couldn't load alert history right now. Please try again later.");
+          showError("Couldn't load alert history right now. Please try again later.");
         }
         return;
       }
-      if (gen !== generation) return; // superseded by a newer filter change
+      if (gen !== generation) return;
       if (!resp.data.length) {
         maxId = 0;
         cursor = null;
-        showState(
-          "history-empty",
-          "No alerts match — this protocol is monitored but nothing has fired for this filter.",
-        );
+        showEmpty("No alerts match — this protocol is monitored but nothing has fired for this filter.");
         return;
       }
-      root.innerHTML = '<ul class="alert-list"></ul>';
-      listEl = root.querySelector(".alert-list");
-      if (listEl) listEl.innerHTML = resp.data.map(renderAlert).join("");
+      showTable();
+      tbody.innerHTML = resp.data.map(renderAlert).join("");
       maxId = resp.data[0].id;
       setMore(resp.next_cursor);
       setStatus();
     }
 
     async function loadMore() {
-      // The disabled button is the re-entrancy guard (loadMore is only fired by its click).
-      if (!moreBtn || moreBtn.disabled || !listEl || !cursor) return;
+      if (!moreBtn || moreBtn.disabled || !tbody || !cursor) return;
       const gen = generation;
       moreBtn.disabled = true;
       moreBtn.textContent = "Loading…";
@@ -231,15 +251,14 @@ const apiProtocol = protocol.apiProtocol ?? "";
         moreBtn.disabled = false;
         return;
       }
-      if (gen !== generation || !listEl) return; // superseded by a filter change (which resets the button)
-      listEl.insertAdjacentHTML("beforeend", resp.data.map(renderAlert).join(""));
-      setMore(resp.next_cursor); // re-enables the button
+      if (gen !== generation || !tbody) return;
+      tbody.insertAdjacentHTML("beforeend", resp.data.map(renderAlert).join(""));
+      setMore(resp.next_cursor);
       setStatus();
     }
 
-    // Poll the newest page and prepend alerts above the current top, respecting active filters.
     async function pollNew() {
-      if (!listEl) return;
+      if (!tbody) return;
       const gen = generation;
       let resp;
       try {
@@ -247,18 +266,18 @@ const apiProtocol = protocol.apiProtocol ?? "";
       } catch {
         return;
       }
-      if (gen !== generation || !listEl) return;
+      if (gen !== generation || !tbody) return;
       const fresh = resp.data.filter((a) => a.id > maxId);
       if (!fresh.length) return;
-      listEl.insertAdjacentHTML("afterbegin", fresh.map(renderAlert).join(""));
+      tbody.insertAdjacentHTML("afterbegin", fresh.map(renderAlert).join(""));
       maxId = fresh[0].id;
       setStatus();
     }
 
     function start() {
-      if (!root) return;
+      if (!tbody && !emptyDiv) return;
       if (!proto) {
-        showState("history-empty", "Live alert history is not yet available for this protocol.");
+        showEmpty("Live alert history is not yet available for this protocol.");
         return;
       }
       loadFirst();
@@ -340,12 +359,6 @@ const apiProtocol = protocol.apiProtocol ?? "";
     font-weight: 500;
     font-variant-numeric: tabular-nums;
   }
-  .meta-pill--blue {
-    background: color-mix(in srgb, var(--brand-blue) 12%, transparent);
-    color: #7eb4ff;
-    border: 1px solid color-mix(in srgb, var(--brand-blue) 25%, transparent);
-  }
-
   /* === Sections === */
   .section {
     margin-bottom: 2.5rem;
@@ -405,50 +418,63 @@ const apiProtocol = protocol.apiProtocol ?? "";
   }
 
   /* === Alert history === */
-  .alert-list {
-    list-style: none;
-    padding: 0;
-    margin: 0;
+  .alert-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.85rem;
+  }
+  .alert-table thead {
+    border-bottom: 1px solid color-mix(in srgb, var(--border) 50%, transparent);
+  }
+  .alert-table th {
+    text-align: left;
+    font-size: 0.72rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-secondary);
+    padding: 0.3rem 0.5rem 0.5rem;
+    white-space: nowrap;
   }
   .alert-row {
-    display: flex;
-    gap: 0.75rem;
-    padding: 0.85rem 0;
-    border-bottom: 1px solid color-mix(in srgb, var(--border) 45%, transparent);
+    border-bottom: 1px solid color-mix(in srgb, var(--border) 30%, transparent);
   }
   .alert-row:last-child {
     border-bottom: none;
   }
-  .alert-dot {
-    width: 9px;
-    height: 9px;
-    border-radius: 50%;
-    margin-top: 0.4rem;
-    flex-shrink: 0;
+  .alert-cell {
+    padding: 0.55rem 0.5rem;
+    vertical-align: top;
   }
-  .alert-body {
-    min-width: 0;
-  }
-  .alert-message {
-    margin: 0 0 0.3rem;
-    font-size: 0.9rem;
-    line-height: 1.45;
+  .alert-cell--msg {
     color: var(--text-primary);
+    line-height: 1.45;
     word-break: break-word;
   }
-  .alert-meta {
-    display: flex;
-    align-items: center;
-    gap: 0.4rem;
-    flex-wrap: wrap;
-    font-size: 0.76rem;
+  .alert-cell--msg p {
+    margin: 0;
+  }
+  .alert-cell--msg code {
+    font-size: 0.8rem;
+    background: color-mix(in srgb, var(--bg-secondary) 70%, transparent);
+    padding: 0.1em 0.35em;
+    border-radius: 4px;
+  }
+  .alert-cell--msg a {
+    color: var(--brand-blue);
+  }
+  .alert-cell--sev {
+    white-space: nowrap;
+    font-size: 0.8rem;
     color: var(--text-secondary);
   }
-  .alert-sev {
-    font-weight: 600;
-  }
-  .alert-sep {
-    opacity: 0.4;
+  .alert-cell--time {
+    white-space: nowrap;
+    text-align: right;
+    font-size: 0.78rem;
+    color: var(--text-secondary);
+    font-variant-numeric: tabular-nums;
+    min-width: 80px;
   }
 
   .history-empty,
