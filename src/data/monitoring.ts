@@ -7,16 +7,85 @@ export interface Protocol {
   id: string;
   name: string;
   defillamaSlug: string;
-  frequency: string;
   items: MonitoringItem[];
 }
 
-export const protocols: Protocol[] = [
+// --- API response types ---
+
+export interface ApiMonitor {
+  name: string;
+  description: string;
+  severity?: string;
+}
+
+export interface ApiProtocol {
+  slug: string;
+  display_name: string;
+  description: string;
+  cadence: string;
+  monitor_count: number;
+  disabled: boolean;
+  tasks: string[];
+  monitors: ApiMonitor[];
+}
+
+export interface ApiMonitoringResponse {
+  version: string;
+  data: ApiProtocol[];
+  count: number;
+}
+
+// --- DefiLlama slug mapping (API slug -> defillamaSlug) ---
+// Not provided by the monitoring API; maintained here.
+
+const SLUG_TO_DEFILLAMA: Record<string, string> = {
+  "3jane": "3jane",
+  aave: "aave-v3",
+  apyusd: "",
+  cap: "cap-protocol",
+  compound: "compound-v3",
+  ethena: "ethena",
+  euler: "euler",
+  fluid: "fluid",
+  infinifi: "infinifi",
+  lido: "lido",
+  "lrt-pegs": "",
+  maker: "sky",
+  maple: "maple",
+  morpho: "morpho",
+  pendle: "pendle",
+  rtoken: "reserve-protocol",
+  safe: "",
+  silo: "silo-v2",
+  stables: "",
+  strata: "strata-finance",
+  timelock: "",
+  ustb: "superstate",
+  usdai: "",
+  yearn: "yearn-finance",
+};
+
+/** Transform the API response into the shape the monitoring page expects. */
+export function transformApiProtocols(apiProtocols: ApiProtocol[]): Protocol[] {
+  return apiProtocols.map((p) => ({
+    id: p.slug,
+    name: p.display_name,
+    defillamaSlug: SLUG_TO_DEFILLAMA[p.slug] ?? "",
+    items: p.monitors.map((m) => ({
+      label: m.name,
+      description: m.description,
+    })),
+  }));
+}
+
+// --- Static fallback (used when the API is unreachable at build time) ---
+// Last synced from monitoring.yaml on 2026-07-02.
+
+export const FALLBACK_PROTOCOLS: Protocol[] = [
   {
     id: "3jane",
     name: "3Jane",
     defillamaSlug: "3jane",
-    frequency: "Hourly",
     items: [
       {
         label: "Price Per Share",
@@ -48,7 +117,6 @@ export const protocols: Protocol[] = [
     id: "aave-v3",
     name: "Aave V3",
     defillamaSlug: "aave-v3",
-    frequency: "Hourly",
     items: [
       {
         label: "Bad Debt Ratio",
@@ -77,7 +145,6 @@ export const protocols: Protocol[] = [
     id: "cap",
     name: "CAP",
     defillamaSlug: "cap-protocol",
-    frequency: "Daily",
     items: [
       {
         label: "Withdrawable Liquidity",
@@ -94,7 +161,6 @@ export const protocols: Protocol[] = [
     id: "compound-v3",
     name: "Compound V3",
     defillamaSlug: "compound-v3",
-    frequency: "Hourly / Daily",
     items: [
       {
         label: "Market Utilization",
@@ -123,7 +189,6 @@ export const protocols: Protocol[] = [
     id: "ethena",
     name: "Ethena",
     defillamaSlug: "ethena",
-    frequency: "Daily",
     items: [
       {
         label: "USDe Backing Ratio",
@@ -148,7 +213,6 @@ export const protocols: Protocol[] = [
     id: "euler",
     name: "Euler",
     defillamaSlug: "euler",
-    frequency: "Hourly",
     items: [
       {
         label: "Vault Risk Levels",
@@ -172,7 +236,6 @@ export const protocols: Protocol[] = [
     id: "fluid",
     name: "Fluid",
     defillamaSlug: "fluid",
-    frequency: "Hourly",
     items: [
       {
         label: "Governance Proposals",
@@ -188,7 +251,6 @@ export const protocols: Protocol[] = [
     id: "infinifi",
     name: "Infinifi",
     defillamaSlug: "infinifi",
-    frequency: "Hourly",
     items: [
       {
         label: "Reserves & Backing",
@@ -224,7 +286,6 @@ export const protocols: Protocol[] = [
     id: "lido",
     name: "Lido",
     defillamaSlug: "lido",
-    frequency: "Hourly / Real-time",
     items: [
       {
         label: "DAO Voting",
@@ -258,7 +319,6 @@ export const protocols: Protocol[] = [
     id: "lrt-pegs",
     name: "LRT Pegs",
     defillamaSlug: "",
-    frequency: "Hourly",
     items: [
       {
         label: "Curve Pool Depegs",
@@ -295,7 +355,6 @@ export const protocols: Protocol[] = [
     id: "maker-dao",
     name: "Maker DAO",
     defillamaSlug: "sky",
-    frequency: "Hourly",
     items: [
       {
         label: "Executive Proposals",
@@ -323,7 +382,6 @@ export const protocols: Protocol[] = [
     id: "maple",
     name: "Maple Finance",
     defillamaSlug: "maple",
-    frequency: "Hourly / Daily",
     items: [
       {
         label: "Price Per Share",
@@ -359,7 +417,6 @@ export const protocols: Protocol[] = [
     id: "morpho",
     name: "Morpho",
     defillamaSlug: "morpho",
-    frequency: "Hourly / Daily",
     items: [
       {
         label: "Governance Timelock",
@@ -392,7 +449,6 @@ export const protocols: Protocol[] = [
     id: "pendle",
     name: "Pendle",
     defillamaSlug: "pendle",
-    frequency: "Hourly",
     items: [
       {
         label: "Safe Multisig",
@@ -417,7 +473,6 @@ export const protocols: Protocol[] = [
     id: "rtoken",
     name: "RToken (ETH+)",
     defillamaSlug: "reserve-protocol",
-    frequency: "Hourly / Real-time",
     items: [
       {
         label: "Collateral Coverage",
@@ -445,7 +500,6 @@ export const protocols: Protocol[] = [
     id: "silo",
     name: "Silo",
     defillamaSlug: "silo-v2",
-    frequency: "Hourly",
     items: [
       {
         label: "Bad Debt",
@@ -466,7 +520,6 @@ export const protocols: Protocol[] = [
     id: "strata",
     name: "Strata",
     defillamaSlug: "strata-finance",
-    frequency: "Daily",
     items: [
       {
         label: "srUSDe Exchange Rate",
@@ -504,7 +557,6 @@ export const protocols: Protocol[] = [
     id: "superstate-ustb",
     name: "Superstate USTB",
     defillamaSlug: "superstate",
-    frequency: "Hourly",
     items: [
       {
         label: "NAV/Share Monotonicity",
@@ -539,7 +591,6 @@ export const protocols: Protocol[] = [
     id: "usdai",
     name: "USDAI",
     defillamaSlug: "",
-    frequency: "Hourly",
     items: [
       {
         label: "Collateral Backing",
@@ -568,7 +619,6 @@ export const protocols: Protocol[] = [
     id: "yearn",
     name: "Yearn",
     defillamaSlug: "yearn-finance",
-    frequency: "Hourly",
     items: [
       {
         label: "Large Flows",
