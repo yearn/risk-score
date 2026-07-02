@@ -58,7 +58,7 @@ const siteJson = JSON.stringify(siteProtocols).replace(/</g, "\\u003c");
 
   <section class="section">
     <div class="section-head">
-      <h2>On the site, no backend job</h2>
+      <h2>Paused jobs</h2>
       <span class="status-pill status-pill--muted">{noJob.length}</span>
     </div>
     <p class="section-note">
@@ -90,14 +90,6 @@ const siteJson = JSON.stringify(siteProtocols).replace(/</g, "\\u003c");
     const mapStatus = document.getElementById("map-status");
     const extraBody = document.getElementById("extra-body");
     const extraStatus = document.getElementById("extra-status");
-
-    function crons(entry: ProtocolEntry): string {
-      const seen = new Set<string>();
-      for (const task of entry.tasks) {
-        if (task.cron) seen.add(task.cron);
-      }
-      return Array.from(seen).join(", ") || "—";
-    }
 
     function fail(message: string) {
       const html = `<div class="status-error">${escapeHtml(message)}</div>`;
@@ -136,14 +128,13 @@ const siteJson = JSON.stringify(siteProtocols).replace(/</g, "\\u003c");
             <td><code>${escapeHtml(p.id)}</code></td>
             <td><code>${escapeHtml(p.apiProtocol as string)}</code></td>
             <td>${status}</td>
-            <td class="cron">${entry ? escapeHtml(crons(entry)) : "—"}</td>
           </tr>`;
         })
         .join("");
 
       if (mapBody) {
         mapBody.innerHTML = `<div class="table-wrap"><table class="status-table">
-          <thead><tr><th>Protocol</th><th>Site id</th><th>apiProtocol</th><th>Status</th><th>Cron</th></tr></thead>
+          <thead><tr><th>Protocol</th><th>Site id</th><th>apiProtocol</th><th>Status</th></tr></thead>
           <tbody>${rows}</tbody></table></div>`;
       }
       if (mapStatus) {
@@ -161,13 +152,12 @@ const siteJson = JSON.stringify(siteProtocols).replace(/</g, "\\u003c");
             .map(
               (e) => `<tr>
                 <td><code>${escapeHtml(e.name)}</code></td>
-                <td class="cron">${escapeHtml(crons(e))}</td>
                 <td>${e.tasks.length}</td>
               </tr>`,
             )
             .join("");
           extraBody.innerHTML = `<div class="table-wrap"><table class="status-table">
-            <thead><tr><th>API protocol</th><th>Cron</th><th>Tasks</th></tr></thead>
+            <thead><tr><th>API protocol</th><th>Tasks</th></tr></thead>
             <tbody>${extraRows}</tbody></table></div>`;
         }
       }
@@ -277,10 +267,6 @@ const siteJson = JSON.stringify(siteProtocols).replace(/</g, "\\u003c");
     text-transform: uppercase;
     letter-spacing: 0.04em;
     font-weight: 600;
-  }
-  .status-table .cron {
-    font-variant-numeric: tabular-nums;
-    color: var(--text-secondary);
   }
   .tag {
     display: inline-block;
