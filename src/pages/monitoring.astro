@@ -36,14 +36,6 @@ import { protocols } from "../data/monitoring";
     </a>
   </div>
 
-  <section class="recent-alerts" id="recent-alerts" hidden>
-    <div class="recent-head">
-      <span class="recent-title">Recent alerts</span>
-      <span class="recent-sub">across all monitored protocols</span>
-    </div>
-    <ul class="recent-list" id="recent-list"></ul>
-  </section>
-
   <div class="block-head">
     <span class="block-meta"><span id="visible-count">{protocols.length}</span> of {protocols.length} protocols</span>
   </div>
@@ -107,6 +99,14 @@ import { protocols } from "../data/monitoring";
     </div>
     <p>No monitored protocols match your search.</p>
   </div>
+
+  <section class="recent-alerts" id="recent-alerts" hidden>
+    <div class="recent-head">
+      <span class="recent-title">Recent alerts</span>
+      <span class="recent-sub">across all monitored protocols</span>
+    </div>
+    <ul class="recent-list" id="recent-list"></ul>
+  </section>
 
   <p class="monitoring-footer">
     <a href="/monitoring/status/">API integration status &rarr;</a>
