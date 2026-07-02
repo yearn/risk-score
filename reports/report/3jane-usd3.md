@@ -344,6 +344,72 @@ All core contracts use a **two-tier TimelockController system** (verified onchai
 - The CreditLine contract trusts an `ozd` for credit-line approval / repayment posting / debt settlement; today this resolves to EmergencyController v2, which is the same address as `emergencyAdmin`. The pending OperationalController (PR #111) is the planned split.
 - The `restartStrategy()` reinitializer added in PR #112 demonstrated that recovery from a Yearn V3 shutdown sits behind the timelock-gated upgrade path — now with the 7-day timelock, worst-case redemption-restart latency is at least 7 days (assuming the upgrade is already coded and ready to schedule).
 
+## Appendix: Default → USD3 Loss Flow
+
+USD3 PPS is defined by the ERC-4626 standard: `convertToAssets(1 share) = totalAssets() / totalSupply()`. It is **fully programmatic** — no admin sets or reports the rate. When a borrower defaults, the loss propagates through onchain state changes, not through an admin-pushed valuation.
+
+```
+                    NO TIMELOCK                           PROGRAMMATIC
+                    ════════════                          ═════════════
+
+  ┌──────────────────────┐
+  │ CreditLine.ozd       │  1. Admin marks borrower DEFAULTED
+  │ = EmergencyCtrl v2   │     (3/5 Safe OR Hypernative EOA)
+  │ (bypasses timelock)  │
+  └────────┬─────────────┘
+           │
+           ▼
+  ┌─────────────────────────────────────────────────────┐
+  │ MarkdownController                                  │
+  │ owner = 24h Timelock (params only, not per-event)    │
+  │                                                     │
+  │  Loan value decays 100% → 0% over fixed period      │
+  │  (e.g. 30 days). Fully programmatic once triggered.  │
+  │  No admin touches it per tick.                       │
+  └────────┬────────────────────────────────────────────┘
+           │
+           ▼
+  ┌─────────────────────────────────────────────────────┐
+  │ MorphoCredit.totalBorrowAssets() shrinks            │
+  │      ↓                                              │
+  │ USD3.totalAssets() drops                            │
+  │      ↓                                              │
+  │ USD3 PPS = totalAssets / totalSupply  ←  auto-drop  │
+  └─────────────────────────────────────────────────────┘
+
+                    IF INSURANCE FUND COVERS IT:
+
+  ┌──────────────────────┐
+  │ CreditLine.ozd       │  2. Admin calls settle()
+  │ = EmergencyCtrl v2   │     → InsuranceFund.bring()
+  │ (bypasses timelock)  │     → waEthUSDC sent to CreditLine
+  └────────┬─────────────┘     → borrower loss made whole
+           │                   → PPS NOT impacted
+           ▼
+  ┌──────────────────────┐
+  │ Insurance Fund       │  Fund depletes first.
+  │ ~$1.02M waEthUSDC    │  If exhausted → waterfall continues.
+  └──────────────────────┘
+
+                    IF INSURANCE FUND EXHAUSTED:
+
+  sUSD3 PPS drops  →  junior absorbs remaining loss
+  If sUSD3 gone    →  USD3 PPS drops  →  senior takes the hit
+```
+
+| Step | Who | Timelock? |
+|------|-----|-----------|
+| Mark borrower defaulted | CreditLine.ozd = EmergencyController v2 (3/5 Safe or Hypernative EOA) | **No** |
+| Loan value decays | MarkdownController (programmatic decay curve) | **N/A — automatic** |
+| PPS drops | `totalAssets() / totalSupply()` recomputes onchain | **N/A — pure math** |
+| Settle via Insurance Fund | CreditLine.ozd = EmergencyController v2 | **No** |
+| Adjust markdown decay rate | MarkdownController.owner | **24h timelock** |
+| Upgrade MarkdownController logic | Proxy admin (standalone contract, not a proxy) | **N/A — immutable code** |
+
+Key takeaway: the multisig never "reports" a negative value. There is no admin `report(-X)` call for onchain credit losses. The loss is visible because the defaulted loan's onchain value shrinks under the MarkdownController decay, and `totalAssets()` reads that shrinking value directly. PPS drops as a mathematical consequence.
+
+*(Note: if the unverified off-chain ABF sleeve described in the DD document goes live, the multisig would call `strategy.report(gain, loss)` weekly to push offchain receivable valuations onchain — a separate and currently inactive path.)*
+
 ## Risk Summary
 
 ### Key Strengths
