@@ -13,6 +13,8 @@ export interface Protocol {
   // this is the join key for live alert history. Left unset for protocols with no enabled
   // backend job yet (euler, pendle, silo) — the UI omits live data for those.
   apiProtocol?: string;
+  // Risk assessment report slug (optional). Links to /report/<slug>/ on the monitoring card.
+  reportSlug?: string;
 }
 
 // --- API response types ---
@@ -83,6 +85,22 @@ const SLUG_TO_ALERT_PROTOCOL: Record<string, string> = {
   "lrt-pegs": "",
 };
 
+// monitoring.yaml slugs -> risk report slugs.
+// Reports live at /report/<slug>/; omit entries for protocols without a
+// dedicated report.
+const SLUG_TO_REPORT: Record<string, string> = {
+  "3jane": "3jane-usd3",
+  aave: "aave-sgho",
+  cap: "cap-stcusd",
+  fluid: "fluid",
+  infinifi: "infinifi",
+  maker: "sky-usds",
+  maple: "maple-syrupusdc",
+  rtoken: "reserve-ethplus",
+  strata: "strata-srusde",
+  ustb: "superstate-ustb",
+};
+
 /** Transform the API response into the shape the monitoring page expects. */
 export function transformApiProtocols(apiProtocols: ApiProtocol[]): Protocol[] {
   return apiProtocols
@@ -92,6 +110,7 @@ export function transformApiProtocols(apiProtocols: ApiProtocol[]): Protocol[] {
       name: p.display_name,
       defillamaSlug: SLUG_TO_DEFILLAMA[p.slug] ?? "",
       apiProtocol: SLUG_TO_ALERT_PROTOCOL[p.slug] ?? p.slug,
+      reportSlug: SLUG_TO_REPORT[p.slug],
       items: p.monitors.map((m) => ({
         label: m.name,
         description: m.description,
@@ -108,6 +127,7 @@ export const FALLBACK_PROTOCOLS: Protocol[] = [
     name: "3Jane",
     defillamaSlug: "3jane",
     apiProtocol: "3jane",
+    reportSlug: "3jane-usd3",
     items: [
       {
         label: "Price Per Share",
@@ -140,6 +160,7 @@ export const FALLBACK_PROTOCOLS: Protocol[] = [
     name: "Aave V3",
     defillamaSlug: "aave-v3",
     apiProtocol: "aave",
+    reportSlug: "aave-sgho",
     items: [
       {
         label: "Bad Debt Ratio",
@@ -169,6 +190,7 @@ export const FALLBACK_PROTOCOLS: Protocol[] = [
     name: "CAP",
     defillamaSlug: "cap-protocol",
     apiProtocol: "cap",
+    reportSlug: "cap-stcusd",
     items: [
       {
         label: "Withdrawable Liquidity",
@@ -240,6 +262,7 @@ export const FALLBACK_PROTOCOLS: Protocol[] = [
     name: "Fluid",
     defillamaSlug: "fluid",
     apiProtocol: "fluid",
+    reportSlug: "fluid",
     items: [
       {
         label: "Governance Proposals",
@@ -256,6 +279,7 @@ export const FALLBACK_PROTOCOLS: Protocol[] = [
     name: "Infinifi",
     defillamaSlug: "infinifi",
     apiProtocol: "infinifi",
+    reportSlug: "infinifi",
     items: [
       {
         label: "Reserves & Backing",
@@ -362,6 +386,7 @@ export const FALLBACK_PROTOCOLS: Protocol[] = [
     name: "Maker DAO",
     defillamaSlug: "sky",
     apiProtocol: "maker",
+    reportSlug: "sky-usds",
     items: [
       {
         label: "Executive Proposals",
@@ -390,6 +415,7 @@ export const FALLBACK_PROTOCOLS: Protocol[] = [
     name: "Maple Finance",
     defillamaSlug: "maple",
     apiProtocol: "maple",
+    reportSlug: "maple-syrupusdc",
     items: [
       {
         label: "Price Per Share",
@@ -459,6 +485,7 @@ export const FALLBACK_PROTOCOLS: Protocol[] = [
     name: "RToken (ETH+)",
     defillamaSlug: "reserve-protocol",
     apiProtocol: "ethplus",
+    reportSlug: "reserve-ethplus",
     items: [
       {
         label: "Collateral Coverage",
@@ -487,6 +514,7 @@ export const FALLBACK_PROTOCOLS: Protocol[] = [
     name: "Strata",
     defillamaSlug: "strata-finance",
     apiProtocol: "strata",
+    reportSlug: "strata-srusde",
     items: [
       {
         label: "srUSDe Exchange Rate",
@@ -525,6 +553,7 @@ export const FALLBACK_PROTOCOLS: Protocol[] = [
     name: "Superstate USTB",
     defillamaSlug: "superstate",
     apiProtocol: "ustb",
+    reportSlug: "superstate-ustb",
     items: [
       {
         label: "NAV/Share Monotonicity",
