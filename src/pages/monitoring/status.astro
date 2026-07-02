@@ -1,10 +1,10 @@
 ---
 import BaseLayout from "../../layouts/BaseLayout.astro";
-import { protocols } from "../../data/monitoring";
+import { FALLBACK_PROTOCOLS } from "../../data/monitoring";
 
 // Static snapshot of the site's protocol registry + the API join key. The client compares this
 // against the live GET /v1/protocols to surface drift between the two repos.
-const siteProtocols = protocols.map((p) => ({
+const siteProtocols = FALLBACK_PROTOCOLS.map((p) => ({
   id: p.id,
   name: p.name,
   apiProtocol: p.apiProtocol ?? null,

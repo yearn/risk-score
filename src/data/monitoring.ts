@@ -7,7 +7,6 @@ export interface Protocol {
   id: string;
   name: string;
   defillamaSlug: string;
-  frequency: string;
   items: MonitoringItem[];
   // Protocol name in the alerts API (= the `protocols/<name>/` dir in yearn/monitoring, as
   // returned by GET /v1/protocols). Site ids differ from API names (e.g. aave-v3 -> aave), so
@@ -16,12 +15,98 @@ export interface Protocol {
   apiProtocol?: string;
 }
 
-export const protocols: Protocol[] = [
+// --- API response types ---
+
+export interface ApiMonitor {
+  name: string;
+  description: string;
+  severity?: string;
+}
+
+export interface ApiProtocol {
+  slug: string;
+  display_name: string;
+  description: string;
+  cadence: string;
+  monitor_count: number;
+  disabled: boolean;
+  tasks: string[];
+  monitors: ApiMonitor[];
+}
+
+export interface ApiMonitoringResponse {
+  version: string;
+  data: ApiProtocol[];
+  count: number;
+}
+
+// --- DefiLlama slug mapping (API slug -> defillamaSlug) ---
+// Not provided by the monitoring API; maintained here.
+
+const SLUG_TO_DEFILLAMA: Record<string, string> = {
+  "3jane": "3jane",
+  aave: "aave-v3",
+  apyusd: "",
+  cap: "cap-protocol",
+  compound: "compound-v3",
+  ethena: "ethena",
+  euler: "euler",
+  fluid: "fluid",
+  infinifi: "infinifi",
+  lido: "lido",
+  "lrt-pegs": "",
+  maker: "sky",
+  maple: "maple",
+  morpho: "morpho",
+  pendle: "pendle",
+  rtoken: "reserve-protocol",
+  safe: "",
+  silo: "silo-v2",
+  stables: "",
+  strata: "strata-finance",
+  timelock: "",
+  ustb: "superstate",
+  usdai: "",
+  yearn: "yearn-finance",
+};
+
+// monitoring.yaml slugs -> backend alert.protocol values.
+// The monitoring.yaml slug may differ from the PROTOCOL constant used in
+// the per-protocol Python scripts (e.g. slug "compound" but scripts use
+// "comp"). This maps the slug to the actual alert.protocol value for live
+// badge/feed matching. Slugs not in this map use the slug itself.
+const SLUG_TO_ALERT_PROTOCOL: Record<string, string> = {
+  compound: "comp",
+  rtoken: "ethplus",
+  // lrt-pegs sub-scripts emit different protocol values ("origin", "pegs")
+  // so there is no single canonical match — leave apiProtocol empty.
+  "lrt-pegs": "",
+};
+
+/** Transform the API response into the shape the monitoring page expects. */
+export function transformApiProtocols(apiProtocols: ApiProtocol[]): Protocol[] {
+  return apiProtocols
+    .filter((p) => !p.disabled)
+    .map((p) => ({
+      id: p.slug,
+      name: p.display_name,
+      defillamaSlug: SLUG_TO_DEFILLAMA[p.slug] ?? "",
+      apiProtocol: SLUG_TO_ALERT_PROTOCOL[p.slug] ?? p.slug,
+      items: p.monitors.map((m) => ({
+        label: m.name,
+        description: m.description,
+      })),
+    }));
+}
+
+// --- Static fallback (used when the API is unreachable at build time) ---
+// Last synced from monitoring.yaml on 2026-07-02.
+
+export const FALLBACK_PROTOCOLS: Protocol[] = [
   {
     id: "3jane",
     name: "3Jane",
     defillamaSlug: "3jane",
-    frequency: "Hourly",
     apiProtocol: "3jane",
     items: [
       {
@@ -54,7 +139,6 @@ export const protocols: Protocol[] = [
     id: "aave-v3",
     name: "Aave V3",
     defillamaSlug: "aave-v3",
-    frequency: "Hourly",
     apiProtocol: "aave",
     items: [
       {
@@ -84,7 +168,6 @@ export const protocols: Protocol[] = [
     id: "cap",
     name: "CAP",
     defillamaSlug: "cap-protocol",
-    frequency: "Daily",
     apiProtocol: "cap",
     items: [
       {
@@ -102,8 +185,7 @@ export const protocols: Protocol[] = [
     id: "compound-v3",
     name: "Compound V3",
     defillamaSlug: "compound-v3",
-    frequency: "Hourly / Daily",
-    apiProtocol: "compound",
+    apiProtocol: "comp",
     items: [
       {
         label: "Market Utilization",
@@ -132,7 +214,6 @@ export const protocols: Protocol[] = [
     id: "ethena",
     name: "Ethena",
     defillamaSlug: "ethena",
-    frequency: "Daily",
     apiProtocol: "ethena",
     items: [
       {
@@ -155,34 +236,9 @@ export const protocols: Protocol[] = [
     ],
   },
   {
-    id: "euler",
-    name: "Euler",
-    defillamaSlug: "euler",
-    frequency: "Hourly",
-    items: [
-      {
-        label: "Vault Risk Levels",
-        description: "Computed risk vs maximum threshold",
-      },
-      {
-        label: "Vault Allocation Ratios",
-        description: "Risk-adjusted allocation thresholds",
-      },
-      {
-        label: "Debt Supply Ratio",
-        description: "Alerts if ratio exceeds 60%",
-      },
-      {
-        label: "Safe Multisig",
-        description: "4/7 multisig transaction queue monitoring",
-      },
-    ],
-  },
-  {
     id: "fluid",
     name: "Fluid",
     defillamaSlug: "fluid",
-    frequency: "Hourly",
     apiProtocol: "fluid",
     items: [
       {
@@ -199,7 +255,6 @@ export const protocols: Protocol[] = [
     id: "infinifi",
     name: "Infinifi",
     defillamaSlug: "infinifi",
-    frequency: "Hourly",
     apiProtocol: "infinifi",
     items: [
       {
@@ -236,7 +291,6 @@ export const protocols: Protocol[] = [
     id: "lido",
     name: "Lido",
     defillamaSlug: "lido",
-    frequency: "Hourly / Real-time",
     apiProtocol: "lido",
     items: [
       {
@@ -271,8 +325,6 @@ export const protocols: Protocol[] = [
     id: "lrt-pegs",
     name: "LRT Pegs",
     defillamaSlug: "",
-    frequency: "Hourly",
-    apiProtocol: "lrt-pegs",
     items: [
       {
         label: "Curve Pool Depegs",
@@ -309,7 +361,6 @@ export const protocols: Protocol[] = [
     id: "maker-dao",
     name: "Maker DAO",
     defillamaSlug: "sky",
-    frequency: "Hourly",
     apiProtocol: "maker",
     items: [
       {
@@ -338,7 +389,6 @@ export const protocols: Protocol[] = [
     id: "maple",
     name: "Maple Finance",
     defillamaSlug: "maple",
-    frequency: "Hourly / Daily",
     apiProtocol: "maple",
     items: [
       {
@@ -375,7 +425,6 @@ export const protocols: Protocol[] = [
     id: "morpho",
     name: "Morpho",
     defillamaSlug: "morpho",
-    frequency: "Hourly / Daily",
     apiProtocol: "morpho",
     items: [
       {
@@ -406,36 +455,10 @@ export const protocols: Protocol[] = [
     ],
   },
   {
-    id: "pendle",
-    name: "Pendle",
-    defillamaSlug: "pendle",
-    frequency: "Hourly",
-    items: [
-      {
-        label: "Safe Multisig",
-        description: "2/4 governance on Mainnet and Arbitrum",
-      },
-      {
-        label: "Proxy Ownership",
-        description: "Governance proxy contract ownership monitoring",
-      },
-      {
-        label: "SY Token Governance",
-        description: "SY token governance and pause functionality",
-      },
-      {
-        label: "Core Contracts",
-        description:
-          "vePENDLE, PENDLE, RewardDistributor, and Voting contract monitoring",
-      },
-    ],
-  },
-  {
     id: "rtoken",
     name: "RToken (ETH+)",
     defillamaSlug: "reserve-protocol",
-    frequency: "Hourly / Real-time",
-    apiProtocol: "rtoken",
+    apiProtocol: "ethplus",
     items: [
       {
         label: "Collateral Coverage",
@@ -460,31 +483,9 @@ export const protocols: Protocol[] = [
     ],
   },
   {
-    id: "silo",
-    name: "Silo",
-    defillamaSlug: "silo-v2",
-    frequency: "Hourly",
-    items: [
-      {
-        label: "Bad Debt",
-        description: "Positions with riskFactor > 1",
-      },
-      {
-        label: "Timelock",
-        description: "Contract monitoring (2-day minimum delay)",
-      },
-      {
-        label: "Safe Multisig",
-        description:
-          "3/6 multisig monitoring on Mainnet, Optimism, and Arbitrum",
-      },
-    ],
-  },
-  {
     id: "strata",
     name: "Strata",
     defillamaSlug: "strata-finance",
-    frequency: "Daily",
     apiProtocol: "strata",
     items: [
       {
@@ -523,7 +524,6 @@ export const protocols: Protocol[] = [
     id: "superstate-ustb",
     name: "Superstate USTB",
     defillamaSlug: "superstate",
-    frequency: "Hourly",
     apiProtocol: "ustb",
     items: [
       {
@@ -559,7 +559,6 @@ export const protocols: Protocol[] = [
     id: "usdai",
     name: "USDAI",
     defillamaSlug: "",
-    frequency: "Hourly",
     apiProtocol: "usdai",
     items: [
       {
@@ -589,7 +588,6 @@ export const protocols: Protocol[] = [
     id: "yearn",
     name: "Yearn",
     defillamaSlug: "yearn-finance",
-    frequency: "Hourly",
     apiProtocol: "yearn",
     items: [
       {

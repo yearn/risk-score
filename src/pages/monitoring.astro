@@ -1,15 +1,35 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
 import { protocolIconUrl } from "../lib/icons";
-import { protocols } from "../data/monitoring";
+import { FALLBACK_PROTOCOLS, transformApiProtocols } from "../data/monitoring";
+import type { ApiMonitoringResponse } from "../data/monitoring";
+
+const API_URL = import.meta.env.MONITORING_API_URL;
+const API_TOKEN = import.meta.env.MONITORING_API_TOKEN;
+
+let protocols = FALLBACK_PROTOCOLS;
+
+if (API_URL) {
+  try {
+    const headers: Record<string, string> = { Accept: "application/json" };
+    if (API_TOKEN) {
+      headers["Authorization"] = `Bearer ${API_TOKEN}`;
+    }
+    const res = await fetch(`${API_URL}/v1/monitoring`, { headers });
+    if (res.ok) {
+      const json: ApiMonitoringResponse = await res.json();
+      protocols = transformApiProtocols(json.data);
+    } else {
+      console.warn(`Monitoring API returned ${res.status}, using fallback data.`);
+    }
+  } catch (e) {
+    console.warn(`Monitoring API unreachable (${(e as Error).message}), using fallback data.`);
+  }
+}
 ---
 
 <BaseLayout title="Monitoring — Yearn Curation" ogUrl="/monitoring/" ogImage="/og/default.png">
   <section class="page-hero">
-    <div class="section-eyebrow">
-      <span class="pulse-dot"></span>
-      Continuous monitoring
-    </div>
     <h1>Live protocol monitors</h1>
     <p class="page-sub">
       Protocols actively monitored by Yearn Curation. Alerts are streamed to
@@ -60,7 +80,6 @@ import { protocols } from "../data/monitoring";
                 <span class="protocol-name">{p.name}</span>
                 <span class="protocol-meta">
                   <span class="meta-pill">{p.items.length} monitors</span>
-                  <span class="meta-pill meta-pill--blue">{p.frequency}</span>
                   {p.apiProtocol && (
                     <span class="last-alert" hidden title="Most recent alert">
                       <span class="last-alert-dot"></span>
@@ -105,7 +124,16 @@ import { protocols } from "../data/monitoring";
       <span class="recent-title">Recent alerts</span>
       <span class="recent-sub">across all monitored protocols</span>
     </div>
-    <ul class="recent-list" id="recent-list"></ul>
+    <table class="recent-table" id="recent-table">
+      <thead>
+        <tr>
+          <th>Protocol</th>
+          <th>Message</th>
+          <th>Time</th>
+        </tr>
+      </thead>
+      <tbody id="recent-tbody"></tbody>
+    </table>
   </section>
 
   <p class="monitoring-footer">
@@ -159,6 +187,7 @@ import { protocols } from "../data/monitoring";
     // Live data for the monitoring page: a cross-protocol "recent alerts" feed and a per-card
     // "last alert" badge, both filled from one request and refreshed while the tab is visible.
     // Everything degrades silently to the static view on error.
+    import { marked } from "marked";
     import {
       fetchAlerts,
       severityMeta,
@@ -186,24 +215,32 @@ import { protocols } from "../data/monitoring";
     }
 
     const feedSection = document.getElementById("recent-alerts");
-    const feedList = document.getElementById("recent-list");
-    const FEED_SIZE = 8;
+    const feedTbody = document.getElementById("recent-tbody");
+    const FEED_SIZE = 10;
     const REFRESH_MS = 60000;
 
     function renderFeedRow(alert: AlertEvent): string {
       const meta = severityMeta(alert.severity);
-      const info = protoMeta.get(alert.protocol);
+      const info = protoMeta.get(alert.protocol.toLowerCase());
       const name = escapeHtml(info?.name || alert.protocol);
       const label = info?.href
         ? `<a class="recent-proto" href="${escapeHtml(info.href)}">${name}</a>`
         : `<span class="recent-proto">${name}</span>`;
+      const dot = `<span class="recent-dot" style="background:${meta.color}" title="${escapeHtml(meta.label)}"></span>`;
+
+      let msg: string;
+      if (alert.plain_text) {
+        msg = escapeHtml(truncate(alert.message, 140));
+      } else {
+        msg = marked.parse(alert.message, { async: false }) as string;
+      }
+
       return `
-        <li class="recent-row">
-          <span class="recent-dot" style="background:${meta.color}" title="${escapeHtml(meta.label)}"></span>
-          ${label}
-          <span class="recent-msg">${escapeHtml(truncate(alert.message, 110))}</span>
-          <time class="recent-time" datetime="${escapeHtml(alert.created_at)}">${escapeHtml(formatRelativeTime(alert.created_at))}</time>
-        </li>`;
+        <tr class="recent-row">
+          <td class="recent-cell recent-cell--proto">${dot} ${label}</td>
+          <td class="recent-cell recent-cell--msg">${msg}</td>
+          <td class="recent-cell recent-cell--time"><time datetime="${escapeHtml(alert.created_at)}">${escapeHtml(formatRelativeTime(alert.created_at))}</time></td>
+        </tr>`;
     }
 
     function applyBadges(alerts: AlertEvent[]) {
@@ -230,12 +267,12 @@ import { protocols } from "../data/monitoring";
     }
 
     function applyFeed(alerts: AlertEvent[]) {
-      if (!feedSection || !feedList) return;
+      if (!feedSection || !feedTbody) return;
       if (!alerts.length) {
         feedSection.hidden = true;
         return;
       }
-      feedList.innerHTML = alerts.slice(0, FEED_SIZE).map(renderFeedRow).join("");
+      feedTbody.innerHTML = alerts.slice(0, FEED_SIZE).map(renderFeedRow).join("");
       feedSection.hidden = false;
     }
 
@@ -249,7 +286,7 @@ import { protocols } from "../data/monitoring";
       }
     }
 
-    if (cards.length > 0 || feedList) {
+    if (cards.length > 0 || feedTbody) {
       refresh();
       setInterval(() => {
         if (!document.hidden) refresh();
@@ -283,32 +320,6 @@ import { protocols } from "../data/monitoring";
   }
   .page-sub a {
     color: var(--brand-blue);
-  }
-
-  /* === Section eyebrow === */
-  .section-eyebrow {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.4rem;
-    color: var(--brand-blue);
-    font-size: 0.72rem;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    font-weight: 600;
-    margin-bottom: 0.5rem;
-  }
-  .pulse-dot {
-    width: 6px;
-    height: 6px;
-    background: var(--brand-blue);
-    border-radius: 50%;
-    box-shadow: 0 0 0 0 rgba(6, 117, 249, 0.6);
-    animation: pulse 2s ease-out infinite;
-  }
-  @keyframes pulse {
-    0% { box-shadow: 0 0 0 0 rgba(6, 117, 249, 0.6); }
-    70% { box-shadow: 0 0 0 8px rgba(6, 117, 249, 0); }
-    100% { box-shadow: 0 0 0 0 rgba(6, 117, 249, 0); }
   }
 
   /* === Tools row === */
@@ -528,11 +539,6 @@ import { protocols } from "../data/monitoring";
     font-weight: 500;
     font-variant-numeric: tabular-nums;
   }
-  .meta-pill--blue {
-    background: color-mix(in srgb, var(--brand-blue) 12%, transparent);
-    color: #7eb4ff;
-    border: 1px solid color-mix(in srgb, var(--brand-blue) 25%, transparent);
-  }
 
   /* Live last-alert badge (populated client-side) */
   .last-alert {
@@ -599,58 +605,94 @@ import { protocols } from "../data/monitoring";
     font-size: 0.74rem;
     color: var(--text-secondary);
   }
-  .recent-list {
-    list-style: none;
-    margin: 0;
-    padding: 0;
+
+  .recent-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.83rem;
+  }
+  .recent-table thead {
+    border-bottom: 1px solid color-mix(in srgb, var(--border) 50%, transparent);
+  }
+  .recent-table th {
+    text-align: left;
+    font-size: 0.72rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-secondary);
+    padding: 0.3rem 0.5rem 0.5rem;
+    white-space: nowrap;
   }
   .recent-row {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.4rem 0;
-    font-size: 0.83rem;
-    border-bottom: 1px solid color-mix(in srgb, var(--border) 35%, transparent);
-    min-width: 0;
+    border-bottom: 1px solid color-mix(in srgb, var(--border) 30%, transparent);
   }
   .recent-row:last-child {
     border-bottom: none;
   }
+  .recent-cell {
+    padding: 0.4rem 0.5rem;
+    vertical-align: top;
+  }
+  .recent-cell--proto {
+    white-space: nowrap;
+    min-width: 120px;
+  }
+  .recent-cell--msg {
+    color: var(--text-secondary);
+    line-height: 1.4;
+    word-break: break-word;
+  }
+  .recent-cell--msg p {
+    margin: 0;
+  }
+  .recent-cell--msg code {
+    font-size: 0.8rem;
+    background: color-mix(in srgb, var(--bg-secondary) 70%, transparent);
+    padding: 0.1em 0.35em;
+    border-radius: 4px;
+  }
+  .recent-cell--msg a {
+    color: var(--brand-blue);
+  }
+  .recent-cell--time {
+    white-space: nowrap;
+    text-align: right;
+    min-width: 70px;
+  }
+  time {
+    color: var(--text-secondary);
+    font-variant-numeric: tabular-nums;
+    font-size: 0.76rem;
+  }
+
   .recent-dot {
+    display: inline-block;
     width: 7px;
     height: 7px;
     border-radius: 50%;
     flex-shrink: 0;
+    vertical-align: middle;
+    margin-right: 3px;
   }
   .recent-proto {
     font-weight: 600;
     color: var(--text-primary);
-    white-space: nowrap;
-    flex-shrink: 0;
   }
   a.recent-proto:hover {
     color: var(--brand-blue);
     text-decoration: none;
   }
-  .recent-msg {
-    color: var(--text-secondary);
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    flex: 1;
-    min-width: 0;
-  }
-  .recent-time {
-    color: var(--text-secondary);
-    font-variant-numeric: tabular-nums;
-    white-space: nowrap;
-    flex-shrink: 0;
-    font-size: 0.76rem;
-  }
+
   @media (max-width: 640px) {
-    .recent-sub,
-    .recent-msg {
+    .recent-sub {
       display: none;
+    }
+    .recent-cell--proto {
+      min-width: unset;
+      max-width: 80px;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
   }
 
@@ -754,7 +796,4 @@ import { protocols } from "../data/monitoring";
     }
   }
 
-  @media (prefers-reduced-motion: reduce) {
-    .pulse-dot { animation: none; }
-  }
 </style>
