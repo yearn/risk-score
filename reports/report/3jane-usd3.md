@@ -1,13 +1,13 @@
 # Protocol Risk Assessment: 3Jane — USD3
 
-- **Assessment Date:** March 4, 2026 (Updated: June 11, 2026)
-- **Reassessment trigger:** Time-based reassessment (2 months from May 2026). See summary below.
+- **Assessment Date:** March 4, 2026 (Updated: July 3, 2026)
+- **Reassessment trigger:** Time-based reassessment. See summary below.
 - **Token:** USD3
 - **Chain:** Ethereum
 - **Token Address:** [`0x056B269Eb1f75477a8666ae8C7fE01b64dD55eCc`](https://etherscan.io/address/0x056B269Eb1f75477a8666ae8C7fE01b64dD55eCc)
 - **Final Score: 3.75/5.0**
 
-> **June 11, 2026 reassessment summary** — score held at **3.75 (Elevated Risk)**. Key changes since May 2026: (1) TVL recovered dramatically — `USD3.totalAssets()` rose from ~$9.93M to ~$27.09M (↑173%), with deposits returned and new capital entering; (2) borrow book grew 3× from ~$6.91M to ~$19.8M, pushing utilization to ~73%; (3) a **new 7-day TimelockController** (`0x3D3C41419Ab401cd25055E8f9421D7D96d887885`) now owns all proxy admins, creating a two-tier governance system (7d for implementation upgrades, 24h for configuration changes) — a partial but material governance hardening; (4) the combined first-loss buffer (Insurance Fund + sUSD3) now covers only ~39% of the borrow book (down from ~103%), representing a material deterioration in relative loss-absorbing capacity; (5) OperationalController (PR [#111](https://github.com/3jane-protocol/moneymarket-contracts/pull/111)) **remains undeployed onchain** despite being merged in the v1.1.4 release. The two-tier timelock improvement (+0.5 governance) was offset by buffer-coverage deterioration (+0.5 collateralization), netting no change to the final score.
+> **July 3, 2026 reassessment summary** — score held at **3.75 (Elevated Risk)**. Key changes since June 2026: (1) TVL nearly tripled again — `USD3.totalAssets()` rose from ~$27.09M to ~$70.0M (↑158%), driven overwhelmingly by borrowing demand; (2) borrow book surged from ~$19.81M to ~$52.1M (↑163%), pushing utilization to ~74%; (3) the combined first-loss buffer (Insurance Fund + sUSD3) now covers only **~17%** of the borrow book (down from ~39% in June, ~103% in May) — the protocol is scaling credit risk much faster than loss-absorbing capacity; (4) OperationalController (PR [#111](https://github.com/3jane-protocol/moneymarket-contracts/pull/111)) **remains undeployed onchain**; (5) all governance, timelock, and role configurations unchanged from June. The buffer-coverage collapse is material but collateralization was already near the rubric ceiling (4.5/5); net score unchanged.
 
 ## Overview + Links
 
@@ -89,11 +89,11 @@ The source code includes a `/certora` directory indicating formal verification e
 
 ## Historical Track Record
 
-- **Production time:** USD3 deployed August 25, 2025 (~10 months as of June 2026)
-- **TVL:** ~$7.28M idle reserves in MorphoCredit `waEthUSDC`, with ~$19.81M borrowed and ~$27.09M total `USD3.totalAssets()` (sources: [DeFiLlama](https://defillama.com/protocol/3jane) ~$6.2M–$7.2M TVL, onchain `totalAssets()` call June 11, 2026)
-- **Token supply:** ~$23.41M USD3 supply (`totalSupply()`), ~$6.10M sUSD3 supply; PPS = `1.157119` USDC/USD3 and `1.096092` USD3/sUSD3 (June 11, 2026)
-- **Utilization:** ~$19.81M borrowed / ~$27.09M deposited → ~73% (was ~70% in May 2026, ~44% in March 2026)
-- **TVL change since May:** USD3 deposits tripled (`$9.93M → $27.09M`); idle reserves doubled (`$3.15M → $7.28M`); borrowed nearly tripled (`$6.91M → $19.81M`)
+- **Production time:** USD3 deployed August 25, 2025 (~11 months as of July 2026)
+- **TVL:** ~$17.89M idle reserves in MorphoCredit `waEthUSDC`, with ~$52.1M borrowed and ~$70.0M total `USD3.totalAssets()` (sources: [DeFiLlama](https://defillama.com/protocol/3jane) ~$21.1M TVL, onchain `totalAssets()` call July 3, 2026)
+- **Token supply:** ~$60.26M USD3 supply (`totalSupply()`), ~$6.17M sUSD3 supply; PPS = `1.161621` USDC/USD3 and `1.100133` USD3/sUSD3 (July 3, 2026)
+- **Utilization:** ~$52.1M borrowed / ~$70.0M deposited → ~74% (was ~73% in June 2026, ~70% in May, ~44% in March)
+- **TVL change since June:** USD3 deposits more than doubled (`$27.09M → $70.0M`); borrow book nearly tripled (`$19.81M → $52.1M`); idle reserves more than doubled (`$7.28M → $17.89M`)
 - **Security incidents:**
   - **April 18–28, 2026 — emergency shutdown / restart event.** Per merged PR [#112](https://github.com/3jane-protocol/moneymarket-contracts/pull/112) the team had already executed `strategy.shutdownStrategy()` and `strategy.emergencyWithdraw(...)` "in prod" before April 27, 2026. DeFiLlama TVL series confirms idle reserves collapsed from ~$4.78M on Apr 19 to ~$269K on Apr 20 and stayed at $120K–$273K for ~7 days, recovering to ~$2.92M by May 2 and ~$3.15M today. Restoration required deploying a new `USD3.restartStrategy()` reinitializer (PR #112 merged Apr 28, 2026); current onchain state is `isShutdown() = false`. The only public artefact is PR [#112](https://github.com/3jane-protocol/moneymarket-contracts/pull/112) describing the `restartStrategy()` fix.
     - **Protocol's framing (per 3Jane DD document, received May 2026):** 3Jane characterizes the action not as an incident but as operational discipline — "3Jane preemptively withdrew its idle USDC from Aave during the Kelp exploit as a precautionary measure" — and states "no prior security incidents have occurred on the 3Jane protocol." The timing supports the precautionary reading: the [KelpDAO/rsETH bridge exploit](https://governance.aave.com/t/rseth-incident-report-april-20-2026/24580) occurred April 18–20, 2026, exactly when idle reserves collapsed. **However**, the protocol's "no incident / routine precaution" framing partially conflicts with the onchain evidence: a precautionary Aave de-risk would not normally require a full `shutdownStrategy()` + a new `restartStrategy()` reinitializer (a 24h-timelocked code upgrade) to reopen deposits/redemptions. Treat the event as a successfully-handled but non-routine stress episode.
@@ -123,7 +123,7 @@ USD3 is fundamentally different from traditional overcollateralized stablecoins:
 - **Not overcollateralized** — USD3 is backed by USDC deposits that are then lent out via unsecured credit lines
 - **Credit-based model:** Borrowing limits are based on offchain reputation and financial records, not onchain collateral
 - **Default risk / loss waterfall:** For losses on the cryptonative credit sleeve, the **Insurance Fund acts as first-loss capital** — per 3Jane docs ([debt-write-off](https://docs.3jane.xyz/architecture/credit-slasher/debt-write-off)) it "steps in with a `settle()` call that preemptively makes funds whole at the default phase." Beyond the fund's capacity, losses then cascade through the tranche structure: **sUSD3 (junior) absorbs before USD3 (senior)**. Net order: Insurance Fund → sUSD3 → USD3. *(Note: the protocol-provided DD document places net distributable yield ahead of the Insurance Fund as Step 1; that yield cushion is not separately verifiable onchain.)*
-- **Insurance Fund:** [`0x4507B5B23340D248457d955a211C8B0634D29935`](https://etherscan.io/address/0x4507B5B23340D248457d955a211C8B0634D29935) holds **~868,288 waEthUSDC** — the `waEthUSDC` static-wrapped Aave V3 USDC token at [`0xd4fa2d31b7968e448877f69a96de69f5de8cd23e`](https://etherscan.io/address/0xd4fa2d31b7968e448877f69a96de69f5de8cd23e). The fund is yield-bearing: the underlying `aEthUSDC` accrues Aave interest, and the `waEthUSDC` wrapper reflects this via `convertToAssets`. Current USDC value: **~$1.02M** (June 11, 2026 — up from ~$868K in May due to Aave yield on `waEthUSDC`). The fund has never been topped up with additional deposits beyond the initial seed.
+- **Insurance Fund:** [`0x4507B5B23340D248457d955a211C8B0634D29935`](https://etherscan.io/address/0x4507B5B23340D248457d955a211C8B0634D29935) holds **~868,288 waEthUSDC** — the `waEthUSDC` static-wrapped Aave V3 USDC token at [`0xd4fa2d31b7968e448877f69a96de69f5de8cd23e`](https://etherscan.io/address/0xd4fa2d31b7968e448877f69a96de69f5de8cd23e). The fund is yield-bearing: the underlying `aEthUSDC` accrues Aave interest, and the `waEthUSDC` wrapper reflects this via `convertToAssets`. Current USDC value: **~$1.02M** (July 3, 2026 — essentially unchanged, ~$868K nominal with growth via Aave yield only). The fund has never been topped up with additional deposits beyond the initial seed.
 - **Markdown mechanism:** `MarkdownController` ([`0xF0eaE71092F3c9411A9EAb8F81E7d91D29726214`](https://etherscan.io/address/0xF0eaE71092F3c9411A9EAb8F81E7d91D29726214)) gradually reduces the value of defaulted loans from their initial value to zero over time, preventing sharp market shocks
 - **No liquidation mechanism** — there is no onchain collateral to liquidate. Default recovery relies on offchain legal enforcement via U.S.-based collection agencies
 
@@ -139,7 +139,7 @@ Per-loan recovery sequence applied to a defaulted credit line:
 
 Any residual loss after the per-loan recovery above is then absorbed in the **loss waterfall** (see *Collateralization* above):
 
-1. **Insurance Fund** — ~868,288 `waEthUSDC` (≈$1.02M USDC at current `waEthUSDC` rate, June 11 2026); first-loss capital for cryptonative credit/fraud losses via preemptive `settle()` (per [3Jane docs](https://docs.3jane.xyz/architecture/credit-slasher/debt-write-off)). See *Collateralization* for address details.
+1. **Insurance Fund** — ~868,288 `waEthUSDC` (≈$1.02M USDC at current `waEthUSDC` rate, July 3 2026); first-loss capital for cryptonative credit/fraud losses via preemptive `settle()` (per [3Jane docs](https://docs.3jane.xyz/architecture/credit-slasher/debt-write-off)). See *Collateralization* for address details.
 2. **sUSD3** (junior tranche) — absorbs losses beyond the fund's capacity
 3. **USD3** (senior tranche) — impaired only after junior + Insurance Fund are exhausted
 
@@ -158,9 +158,9 @@ Any residual loss after the per-loan recovery above is then absorbed in the **lo
 - **Primary exit:** Redeem USD3 for USDC from idle reserves in the Aave V3 pool
 - **Throttling:** No live redemption queue today; a FIFO queue is "under development" (per DD doc). In stressed conditions the protocol raises borrow rates via the IRM to compel repayment and refill the idle buffer.
 - **Utilization risk:** If a high percentage of deposited USDC is lent out to borrowers, idle reserves shrink and redemptions may be delayed
-- **Current utilization:** ~$19.81M borrowed out of ~$27.09M `totalAssets` (~73% utilization, June 11, 2026) — up from ~70% in May 2026 and ~44% in March 2026
+- **Current utilization:** ~$52.1M borrowed out of ~$70.0M `totalAssets` (~74% utilization, July 3, 2026) — up from ~73% in June 2026, ~70% in May, ~44% in March
 - **Stress event (April 2026):** During the strategy shutdown, Yearn V3 `isShutdown()=true` blocked the standard `deposit/redeem` paths. DeFiLlama-visible idle reserves collapsed from ~$4.78M to ~$269K and stayed depressed for ~7 days before recovering. This is the protocol's first observed liquidity stress event, and it required a contract upgrade (new `restartStrategy()` reinitializer) — a governance action now behind the 7-day timelock — to fully reopen the strategy.
-- **DEX liquidity is effectively zero.** Verified onchain June 11, 2026: only one pair exists, a Uniswap V3 USD3/USDC 0.01% pool at [`0x8E12388Ea7366Aa87445d747F83B810aD538a981`](https://etherscan.io/address/0x8E12388Ea7366Aa87445d747F83B810aD538a981) holding dust. No Uniswap V2 USD3/USDC or USD3/WETH pair, no Curve pool. All meaningful exit liquidity is therefore via the protocol's own redemption path against idle reserves.
+- **DEX liquidity is effectively zero.** Verified onchain July 3, 2026: only one pair exists, a Uniswap V3 USD3/USDC 0.01% pool at [`0x8E12388Ea7366Aa87445d747F83B810aD538a981`](https://etherscan.io/address/0x8E12388Ea7366Aa87445d747F83B810aD538a981) holding dust. No Uniswap V2 USD3/USDC or USD3/WETH pair, no Curve pool. All meaningful exit liquidity is therefore via the protocol's own redemption path against idle reserves.
 - **sUSD3 exit:** Subject to lock period (1 month in Phase 1) plus cooldown mechanism. During the April incident, sUSD3 supply was largely unchanged while USD3 supply contracted, which is consistent with senior holders redeeming and junior holders being locked.
 
 ## Centralization & Control Risks
@@ -169,7 +169,7 @@ Any residual loss after the per-loan recovery above is then absorbed in the **lo
 
 **Ownership structure:**
 
-All core contracts use a **two-tier TimelockController system** (verified onchain June 11, 2026):
+All core contracts use a **two-tier TimelockController system** (verified onchain July 3, 2026):
 
 - **TimelockController (7d, upgrades):** [`0x3D3C41419Ab401cd25055E8f9421D7D96d887885`](https://etherscan.io/address/0x3D3C41419Ab401cd25055E8f9421D7D96d887885) — 7-day minimum delay (`getMinDelay() = 604800`). Owns all five ProxyAdmins (USD3, sUSD3, MorphoCredit, ProtocolConfig, AdaptiveCurveIRM). Controls implementation upgrades only. Self-administered.
 - **TimelockController (24h, config):** [`0x1dCcD4628d48a50C1A7adEA3848bcC869f08f8C2`](https://etherscan.io/address/0x1dCcD4628d48a50C1A7adEA3848bcC869f08f8C2) — 24h minimum delay (`getMinDelay() = 86400`). Remains `owner()` of MorphoCredit (proxy), ProtocolConfig (proxy), CreditLine, and MarkdownController. Controls configuration changes. Self-administered.
@@ -192,7 +192,7 @@ All core contracts use a **two-tier TimelockController system** (verified onchai
 - `EMERGENCY_AUTHORIZED_ROLE` (count 2): the multisig + an EOA [`0x48c59b01af01515e69460b6b5b55e557e914941d`](https://etherscan.io/address/0x48c59b01af01515e69460b6b5b55e557e914941d) — per PR #111 description, this is the **Hypernative monitoring/automation address**. (Identity inferred from PR text "Hypernative + multisig"; not labeled on Etherscan.)
 - Capabilities: pause protocol, set debt cap to 0, stop USD3 deployments to MorphoCredit, stop new deposits, revoke individual borrower credit lines. Emergency actions bypass the 24h timelock (binary stop controls only).
 
-**OperationalController (PR [#111](https://github.com/3jane-protocol/moneymarket-contracts/pull/111), merged Apr 29, 2026, included in v1.1.4 release June 5, 2026 — NOT yet wired in onchain):** designed to introduce an additional `OPERATOR_ROLE` for routine credit operations (`setCreditLines`, `closeCycleAndPostObligations`, `addObligationsToLatestCycle`, `settle`) so frequent ops can run via a smaller operational multisig while emergency actions remain on Hypernative + main multisig. As of June 11, 2026, `ProtocolConfig.emergencyAdmin` and `CreditLine.ozd` still resolve to the v2 EmergencyController above — i.e. the role split is **code-complete but not yet executed onchain**.
+**OperationalController (PR [#111](https://github.com/3jane-protocol/moneymarket-contracts/pull/111), merged Apr 29, 2026, included in v1.1.4 release June 5, 2026 — NOT yet wired in onchain):** designed to introduce an additional `OPERATOR_ROLE` for routine credit operations (`setCreditLines`, `closeCycleAndPostObligations`, `addObligationsToLatestCycle`, `settle`) so frequent ops can run via a smaller operational multisig while emergency actions remain on Hypernative + main multisig. As of July 3, 2026, `ProtocolConfig.emergencyAdmin` and `CreditLine.ozd` still resolve to the v2 EmergencyController above — i.e. the role split is **code-complete but not yet executed onchain**.
 
 **Privileged roles (from Veridise audit trust model):**
 
@@ -417,15 +417,15 @@ Key takeaway: the multisig never "reports" a negative value. There is no admin `
 - **Tier-1 backing:** $5.2M seed led by Paradigm, with Coinbase Ventures, Robot Ventures, Wintermute Ventures
 - **Solid governance structure:** 3-of-5 multisig with **two-tier timelock**: 7-day delay on implementation upgrades (proxy admins), 24h delay on configuration changes (contract owners). Both timelocks are self-administered with the multisig as proposer/executor/canceller. This addresses the Veridise recommendation for different delays by action type.
 - **Inherited Morpho Blue security:** Core lending logic based on extensively audited Morpho Blue codebase
-- **Dual-tranche protection:** sUSD3 junior tranche (~$6.10M supply, ~$6.68M assets) + Insurance Fund (~$1.02M in `waEthUSDC`) absorb losses before senior USD3 holders
+- **Dual-tranche protection:** sUSD3 junior tranche (~$6.17M supply, ~$7.89M USDC-equivalent assets) + Insurance Fund (~$1.02M in `waEthUSDC`) absorb losses before senior USD3 holders
 - **Improved emergency tooling:** EmergencyController v2 (deployed Feb 2026) introduces role separation; `EMERGENCY_AUTHORIZED_ROLE` is now held by both the multisig and a Hypernative automation agent for 24/7 monitored response
-- **Demonstrated incident response:** Team successfully halted and later restarted the strategy during the April 2026 shutdown event without any loss of funds, share-price (PPS) preservation visible onchain (USD3 PPS = 1.157119 USDC; sUSD3 PPS = 1.096092 USD3 on June 11, 2026)
+- **Demonstrated incident response:** Team successfully halted and later restarted the strategy during the April 2026 shutdown event without any loss of funds, share-price (PPS) preservation visible onchain (USD3 PPS = 1.161621 USDC; sUSD3 PPS = 1.100133 USD3 on July 3, 2026)
 
 ### Key Risks
 
 - **Unsecured lending model:** Fundamentally higher risk than overcollateralized DeFi lending. Default recovery depends entirely on offchain legal mechanisms and U.S. collection agencies — novel and untested in DeFi
 - **Proprietary credit algorithm:** The 3CA is a black box. Credit decisions are offchain and opaque. Incorrect credit assessments could lead to systemic defaults
-- **No bug bounty program:** Notable absence from Immunefi, Sherlock, and Cantina despite managing ~$27M of user funds
+- **No bug bounty program:** Notable absence from Immunefi, Sherlock, and Cantina despite managing ~$70M of user funds
 - **Novel offchain dependencies:** zkTLS/Reclaim Protocol, EigenLayer AVS, and now Hypernative are early-stage technologies / runtime trust deps with limited battle-testing
 - **Limited team transparency:** Only the founder is publicly known. No disclosed legal entity.
 - **Auditor recommendation only partially addressed:** Veridise asked for a hard split between emergency and configuration roles. EmergencyController v2 split off the emergency role from `Ownable`, but the further `OPERATOR_ROLE` split (PR #111) is merged in code yet **not yet deployed onchain**.
@@ -434,11 +434,11 @@ Key takeaway: the multisig never "reports" a negative value. There is no admin `
 
 ### Critical Risks
 
-- **Default contagion:** If multiple borrowers default simultaneously, the sUSD3 junior tranche + ~$1.02M Insurance Fund may be insufficient to cover losses, directly impacting USD3 holders. With ~$19.81M outstanding loans and ~$6.68M sUSD3 assets + ~$1.02M fund, the combined first-loss buffer covers only **~39%** of the borrow book — i.e. once cumulative defaults exceed ~$7.70M (≈39% of outstanding), USD3 senior holders begin to take losses. This is a material deterioration from May 2026 (~103% coverage on a ~$6.91M borrow book).
+- **Default contagion:** If multiple borrowers default simultaneously, the sUSD3 junior tranche + ~$1.02M Insurance Fund may be insufficient to cover losses, directly impacting USD3 holders. With ~$52.1M outstanding loans and ~$7.89M sUSD3 USDC-equivalent assets + ~$1.02M fund, the combined first-loss buffer covers only **~17%** of the borrow book — i.e. once cumulative defaults exceed ~$8.91M (≈17% of outstanding), USD3 senior holders begin to take losses. This is a steep deterioration from June 2026 (~39% coverage on a ~$19.81M borrow book) and May 2026 (~103% on ~$6.91M).
 - **Offchain legal dependency:** Entire default recovery mechanism depends on U.S. legal system, licensed collection agencies, and credit bureau reporting — none of which have been tested at scale in a DeFi context
 - **Upgrade risk + Yearn V3 shutdown semantics:** The April 2026 incident showed that recovering from `shutdownStrategy()` required a brand-new `restartStrategy()` reinitializer (PR #112). Future shutdowns may again require timelocked upgrades to fully reopen — a hidden coupling between emergency response and governance.
-- **Liquidity risk under stress:** Utilization is now ~73% (up from ~70% in May, ~44% in March). The April 2026 event demonstrated that when the strategy is shut down, idle reserves available for redemption can collapse to near-zero for a week+ window. The new 7-day upgrade timelock means worst-case restart latency from a shutdown is now at least 7 days.
-- **TVL concentration:** USD3 deposits have recovered to ~$27M, but the borrow book is now ~3× its May size without proportional buffer growth — the protocol is taking on more credit risk relative to its loss-absorbing capacity.
+- **Liquidity risk under stress:** Utilization is now ~74% (up from ~73% in June, ~70% in May, ~44% in March). The April 2026 event demonstrated that when the strategy is shut down, idle reserves available for redemption can collapse to near-zero for a week+ window. The new 7-day upgrade timelock means worst-case restart latency from a shutdown is now at least 7 days.
+- **TVL scale-outpacing buffer:** USD3 deposits have surged to ~$70M, but the borrow book is now ~7.5× its May size while the first-loss buffer has barely grown — the protocol is scaling credit risk far faster than its loss-absorbing capacity.
 
 ---
 
@@ -459,11 +459,11 @@ Key takeaway: the multisig never "reports" a negative value. There is no admin `
 | Factor | Assessment |
 |--------|-----------|
 | Audits | 4 specific audits (Veridise, Sherlock x2, Electisec) with 1 critical + 11 high + 16 medium findings, all fixed. Inherited Morpho Blue audits (OpenZeppelin, Cantina). Certora formal verification present |
-| Production history | ~10 months (Aug 2025 deployment, June 2026 reassessment). TVL ~$27.09M `totalAssets` (~$7.28M idle + ~$19.81M outstanding) — well above the $10M threshold, but the borrow book has grown 3× without proportional first-loss buffer growth |
+| Production history | ~11 months (Aug 2025 deployment, July 2026 reassessment). TVL ~$70.0M `totalAssets` (~$17.89M idle + ~$52.1M outstanding) — well above the $10M threshold, but the borrow book has grown ~7.5× since May without proportional first-loss buffer growth |
 | Security incidents | One — April 18–28, 2026 emergency shutdown + restart. No reported loss of funds, but ~7 days of effectively unavailable redemptions. |
-| Bug bounty | Still none — checked Immunefi, Sherlock, Cantina, SEAL Safe Harbor on June 11, 2026; not listed |
+| Bug bounty | Still none — checked Immunefi, Sherlock, Cantina, SEAL Safe Harbor on July 3, 2026; not listed |
 
-**Score: 3.5/5** — Audit coverage is strong (rubric ≈3 for "3+ audits by top firms" once you count the contest). Historical track record: ~10 months live, TVL recovered to ~$27M (well above $10M threshold), but the protocol experienced its first non-trivial stress event (shutdown) and no bug bounty exists. Net: held at 3.5 — TVL recovery positive, but missing bounty and the residual weight of the April event keep this from improving.
+**Score: 3.5/5** — Audit coverage is strong (rubric ≈3 for "3+ audits by top firms" once you count the contest). Historical track record: ~11 months live, TVL surged to ~$70M (well above $10M threshold), but the protocol experienced its first non-trivial stress event (shutdown), buffer coverage has cratered to 17%, and no bug bounty exists. Net: held at 3.5 — TVL growth positive, but missing bounty, the April event, and deteriorating coverage keep this from improving.
 
 #### Category 2: Centralization & Control Risks (Weight: 30%)
 
@@ -471,8 +471,8 @@ Key takeaway: the multisig never "reports" a negative value. There is no admin `
 
 | Factor | Assessment |
 |--------|-----------|
-| Upgradeability | MorphoCredit, USD3, sUSD3, ProtocolConfig, AdaptiveCurveIRM upgradeable via TransparentUpgradeableProxy. As of June 11, 2026: **all five ProxyAdmins are now owned by a NEW 7-day TimelockController** (`0x3D3C41419Ab401cd25055E8f9421D7D96d887885`), replacing the old 24h timelock for the proxy-admin role. USD3/sUSD3 implementations were upgraded (current impls: USD3 → `0xb606fb370eaaad03d71b49ae5e42aa4aec7458d9`, sUSD3 → `0x529cbf11ffbc272d63858ca40a2c7f2695712073`) |
-| Timelock | **Two-tier system** (verified onchain June 11, 2026): (a) **New 7-day TimelockController** at `0x3D3C41419Ab401cd25055E8f9421D7D96d887885` (`getMinDelay() = 604800`) owns all ProxyAdmins — implementation upgrades require 7 days; (b) **Original 24h TimelockController** at `0x1dCcD4628d48a50C1A7adEA3848bcC869f08f8C2` (`getMinDelay() = 86400`) remains `owner()` of MorphoCredit (proxy), CreditLine, ProtocolConfig, and MarkdownController — configuration changes still require 24h. Both timelocks are self-administered; the 3-of-5 multisig holds PROPOSER + EXECUTOR + CANCELLER on both. This split materially addresses the Veridise recommendation for different delays by action type. |
+| Upgradeability | MorphoCredit, USD3, sUSD3, ProtocolConfig, AdaptiveCurveIRM upgradeable via TransparentUpgradeableProxy. As of July 3, 2026: **all five ProxyAdmins are owned by the 7-day TimelockController** (`0x3D3C41419Ab401cd25055E8f9421D7D96d887885`). USD3/sUSD3 implementations unchanged since v1.1.4 (USD3 → `0xb606fb370eaaad03d71b49ae5e42aa4aec7458d9`, sUSD3 → `0x529cbf11ffbc272d63858ca40a2c7f2695712073`) |
+| Timelock | **Two-tier system** (re-verified onchain July 3, 2026, unchanged since June): (a) **7-day TimelockController** at `0x3D3C41419Ab401cd25055E8f9421D7D96d887885` (`getMinDelay() = 604800`) owns all ProxyAdmins — implementation upgrades require 7 days; (b) **24h TimelockController** at `0x1dCcD4628d48a50C1A7adEA3848bcC869f08f8C2` (`getMinDelay() = 86400`) remains `owner()` of MorphoCredit (proxy), CreditLine, ProtocolConfig, and MarkdownController — configuration changes still require 24h. Both timelocks are self-administered; the 3-of-5 multisig holds PROPOSER + EXECUTOR + CANCELLER on both. This split materially addresses the Veridise recommendation for different delays by action type. |
 | Privileged roles | Pause, config changes, credit line approval, contract upgrades, debt settlement. EmergencyController v2 (Feb 2026) split emergency role from owner role; OperationalController split (Apr 2026) merged in v1.1.4 but **still not executed onchain** (`ProtocolConfig.emergencyAdmin` and `CreditLine.ozd` still return `0x84b31b8...`). |
 | Emergency | EmergencyController v2 at `0x84b31b8...` holds `EMERGENCY_AUTHORIZED_ROLE` for the multisig + a Hypernative agent EOA — bypasses both timelocks for binary stop controls only |
 
@@ -514,10 +514,10 @@ Key takeaway: the multisig never "reports" a negative value. There is no admin `
 |--------|-----------|
 | Backing | **Not overcollateralized** — USD3 is backed by USDC that is lent out via unsecured credit lines |
 | Collateral quality | USDC / `waEthUSDC` (high quality) but lent out without onchain collateral |
-| Default protection | Loss waterfall (fund → junior → senior): for cryptonative credit losses the **Insurance Fund** (~$1.02M USDC in `waEthUSDC`, verified onchain June 11, 2026) is first-loss capital via preemptive `settle()`, then the **sUSD3** junior tranche (~$6.10M supply, ~$6.68M assets) absorbs, then **USD3** senior holders. Combined first-loss buffer (~$1.02M + ~$6.68M ≈ $7.70M) covers only **~39%** of the ~$19.81M borrow book before USD3 is touched — down from ~103% in May 2026, as the borrow book grew 3× while the buffer barely grew. |
+| Default protection | Loss waterfall (fund → junior → senior): for cryptonative credit losses the **Insurance Fund** (~$1.02M USDC in `waEthUSDC`, verified onchain July 3, 2026) is first-loss capital via preemptive `settle()`, then the **sUSD3** junior tranche (~$6.17M supply, ~$7.89M USDC-equivalent assets) absorbs, then **USD3** senior holders. Combined first-loss buffer (~$1.02M + ~$7.89M ≈ $8.91M) covers only **~17%** of the ~$52.1M borrow book before USD3 is touched — down from ~39% in June 2026 and ~103% in May 2026. Borrow book grew ~7.5× since May while the buffer barely grew. |
 | Verifiability | Onchain idle reserves verifiable; outstanding loan values partially opaque |
 
-**Subcategory A Score: 4.5/5** — Moved from 4 → 4.5. The first-loss buffer coverage ratio deteriorated materially (103% → 39%) because borrows grew ~3× (`$6.91M → $19.81M`) while sUSD3 and the Insurance Fund grew only modestly. While the absolute buffer increased (~$7.15M → ~$7.70M), the relative protection for senior depositors has weakened substantially.
+**Subcategory A Score: 4.5/5** — Held at 4.5 (previously moved from 4 in June). The first-loss buffer coverage ratio continues to deteriorate (103% → 39% → 17%) because borrows grew ~7.5× (`$6.91M → $52.1M`) while sUSD3 and the Insurance Fund grew only modestly. The absolute buffer increased (~$7.15M → ~$8.91M), but relative protection for senior depositors is now critically thin at just 17% of the borrow book.
 
 **Subcategory B: Provability**
 
@@ -531,19 +531,19 @@ Key takeaway: the multisig never "reports" a negative value. There is no admin `
 
 **Funds Management Score = (4.5 + 3.5) / 2 = 4.0/5**
 
-**Score: 4.0/5** — Moved from 3.75 → 4.0. The unsecured lending model remains the core risk, and the buffer-coverage deterioration (103% → 39%) pushes the collateralization sub-score higher. The provability characteristics are unchanged.
+**Score: 4.0/5** — Held at 4.0 (previously moved from 3.75 in June). The unsecured lending model remains the core risk, and the buffer-coverage deterioration continues (103% → 39% → 17%). Collateralization is already at the rubric ceiling short of the critical gate, so further deterioration does not move this score higher. Provability characteristics unchanged.
 
 #### Category 4: Liquidity Risk (Weight: 15%)
 
 | Factor | Assessment |
 |--------|-----------|
 | Exit mechanism | Redeem USD3 for USDC from idle reserves. Throttling mechanism exists. **Risk demonstrated April 2026:** when `isShutdown()` flips, redemption via the standard ERC-4626 path is blocked entirely. |
-| Liquidity depth | Depends on idle reserves. Currently ~$7.28M idle vs ~$19.81M outstanding (~27% headroom on `totalAssets`). No DEX liquidity: only Uniswap V3 0.01% pool [`0x8E12388Ea7366Aa87445d747F83B810aD538a981`](https://etherscan.io/address/0x8E12388Ea7366Aa87445d747F83B810aD538a981) exists and holds dust (~$0.001). No Uniswap V2 / Curve pools (verified onchain June 11, 2026). |
-| Utilization risk | **~73% (from ~70% in May 2026, ~44% in March 2026).** High utilization + the shutdown coupling means idle reserves can fall to near-zero quickly — observed for ~7 days in April. The new 7-day upgrade timelock extends worst-case restart latency. |
+| Liquidity depth | Depends on idle reserves. Currently ~$17.89M idle vs ~$52.1M outstanding (~26% headroom on `totalAssets`). No DEX liquidity: only Uniswap V3 0.01% pool [`0x8E12388Ea7366Aa87445d747F83B810aD538a981`](https://etherscan.io/address/0x8E12388Ea7366Aa87445d747F83B810aD538a981) exists and holds dust (~$0.001). No Uniswap V2 / Curve pools (verified onchain July 3, 2026). |
+| Utilization risk | **~74% (from ~73% in June 2026, ~70% in May, ~44% in March).** High utilization + the shutdown coupling means idle reserves can fall to near-zero quickly — observed for ~7 days in April. The 7-day upgrade timelock extends worst-case restart latency. |
 | Lock periods | sUSD3 has 1-month lock period; sUSD3 supply was approximately flat through the April incident (locks held) |
 | Same-value asset | USDC-denominated — lower urgency for exit speed |
 
-**Score: 3.5/5** — Held at 3.5. The April 2026 incident was a real-world demonstration of stress-window redemption failure. The Yearn V3 shutdown semantics make redemption availability a function of (a) credit utilization and (b) governance willingness to keep the strategy live. With idle reserves now at ~$7.28M against ~$23.41M USD3 supply (~31% headroom for redemptions), there is adequate buffer for normal flows, but the historical worst-case (idle ≈$120K in April) remains recent. The new 7-day upgrade timelock extends the worst-case restart latency from a shutdown event. Held at 3.5.
+**Score: 3.5/5** — Held at 3.5. The April 2026 incident was a real-world demonstration of stress-window redemption failure. The Yearn V3 shutdown semantics make redemption availability a function of (a) credit utilization and (b) governance willingness to keep the strategy live. With idle reserves now at ~$17.89M against ~$60.26M USD3 supply (~30% headroom for redemptions), there is adequate buffer for normal flows, but the historical worst-case (idle ≈$120K in April) remains recent. The 7-day upgrade timelock extends worst-case restart latency from a shutdown event.
 
 #### Category 5: Operational Risk (Weight: 5%)
 
@@ -586,14 +586,14 @@ Final Score = (Centralization × 0.30) + (Funds Mgmt × 0.30) + (Audits × 0.20)
 
 **Final Risk Tier: Elevated Risk (3.75/5.0) — Limited approval, strict limits**
 
-The tier remains **Elevated** since the March 2026 assessment. The two-tier timelock improvement (governance) was offset by buffer-coverage deterioration (collateralization). Current drivers: (1) the demonstrated April 2026 strategy-shutdown stress event, (2) borrow book grew 3× without proportional first-loss buffer growth (coverage fell from 103% → 39%), (3) utilization at ~73%, partially offset by (4) the new 7-day timelock for implementation upgrades, (5) TVL recovery to ~$27M, and (6) EmergencyController v2 + Hypernative integration.
+The tier remains **Elevated** since the March 2026 assessment. The two-tier timelock improvement (governance) was offset by buffer-coverage deterioration (collateralization). Current drivers: (1) the demonstrated April 2026 strategy-shutdown stress event, (2) borrow book grew ~7.5× without proportional first-loss buffer growth (coverage fell from 103% → 39% → 17%), (3) utilization at ~74%, partially offset by (4) the new 7-day timelock for implementation upgrades, (5) TVL surge to ~$70M, and (6) EmergencyController v2 + Hypernative integration.
 
 ---
 
 ## Reassessment Triggers
 
-- **Time-based:** Reassess in 2 months (August 2026) — shorter cadence given Elevated Risk tier and pending OperationalController deployment
-- **TVL-based:** Reassess if `USD3.totalAssets()` changes by more than ±30% from the June 2026 baseline of ~$27.09M, or if idle reserves drop below $1M for >24h (raised from $500K due to larger scale)
+- **Time-based:** Reassess in 2 months (September 2026) — shorter cadence given Elevated Risk tier, pending OperationalController deployment, and deteriorating buffer coverage
+- **TVL-based:** Reassess if `USD3.totalAssets()` changes by more than ±30% from the July 2026 baseline of ~$70.0M, or if idle reserves drop below $2M for >24h (raised from $1M due to larger scale)
 - **Shutdown-based:** Reassess on any `USD3.isShutdown() = true` event, with target turnaround <72h
 - **Governance-based:** Reassess once OperationalController (PR #111) is deployed onchain — this is a pending governance change with material impact on role separation
 - **Incident-based:** Reassess after any borrower default exceeding $500K, any exploit, any further emergency shutdown, or any change to the multisig signer set
