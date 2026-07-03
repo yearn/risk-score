@@ -20,7 +20,7 @@ Investors must clear KYC/AML, be **Qualified Purchasers** ($5M+ individuals, $25
 - **Ethereum Supply:** 6,229,050.91 USCC ($72.43M, verified onchain Jul 3, 2026)
 - **Total Shares (incl. book-entry):** ~13,999,991 USCC (per [superstate.com](https://superstate.com/assets/uscc))
 - **Total AUM (incl. book-entry):** $162.79M (per [superstate.com](https://superstate.com/assets/uscc), Jul 3, 2026)
-- **Public TVL:** $136.18M (per [DeFiLlama](https://defillama.com/protocol/superstate-uscc), Jul 3, 2026). DeFiLlama currently reports Ethereum $72.43M, Solana $47.32M, and Plume $16.43M; Superstate's own network table reports Ethereum $72.43M, Solana $23.66M, Plume $16.43M, and book-entry $50.27M.
+- **Public TVL:** $136.18M (per [DeFiLlama](https://defillama.com/protocol/bitwise-uscc), Jul 3, 2026). DeFiLlama currently reports Ethereum $72.43M, Solana $47.32M, and Plume $16.43M; Superstate's own network table reports Ethereum $72.43M, Solana $23.66M, Plume $16.43M, and book-entry $50.27M.
 - **Onchain Holders (Ethereum):** 55 in the latest RWA.xyz snapshot available during review; holder count not refreshed in this TVL update
 - **30-day Yield:** 2.60% (variable, depends on basis spread)
 - **Management Fee:** 0.75% annually (waived until AUM exceeds $50M — now exceeded)
@@ -34,7 +34,7 @@ Investors must clear KYC/AML, be **Qualified Purchasers** ($5M+ individuals, $25
 - [Smart Contract Addresses](https://docs.superstate.com/investors/smart-contracts)
 - [Security Documentation](https://docs.superstate.com/welcome-to-superstate/security)
 - [GitHub (USTB/USCC contracts)](https://github.com/superstateinc/ustb)
-- [DeFiLlama](https://defillama.com/protocol/superstate-uscc)
+- [DeFiLlama](https://defillama.com/protocol/bitwise-uscc)
 - [Etherscan Token Page](https://etherscan.io/token/0x14d60E7FDC0D71d8611742720E4C50E7a974020c)
 - [Chainlink USCC NAV Feed](https://etherscan.io/address/0xAfFd8F5578E8590665de561bdE9E7BAdb99300d9)
 - [RWA.xyz](https://app.rwa.xyz/assets/USCC)
@@ -105,11 +105,11 @@ So **all USCC mint operations are admin-driven** (`mint`/`bulkMint` by the owner
 
 ## Historical Track Record
 
-- **Fund Launch:** July 15, 2024 onchain (first mint at [block 20312293](https://etherscan.io/tx/0xeefda6ce766bca7c431bb6ef157b4b78925d9a0a3527a811d2ea54e41485fb1b), Unix ts 1721051099). DeFiLlama [first records Sep 9, 2024](https://defillama.com/protocol/superstate-uscc) at ~$15.7M TVL. **Nearly 24 months in production** as of Jul 3, 2026.
+- **Fund Launch:** July 15, 2024 onchain (first mint at [block 20312293](https://etherscan.io/tx/0xeefda6ce766bca7c431bb6ef157b4b78925d9a0a3527a811d2ea54e41485fb1b), Unix ts 1721051099). DeFiLlama [first records Sep 9, 2024](https://defillama.com/protocol/bitwise-uscc) at ~$15.7M TVL. **Nearly 24 months in production** as of Jul 3, 2026.
 - **Contract Upgrades:** Token implementation reports `VERSION "5"`. Earlier USCC versions (V1→V4) were upgraded through the same ProxyAdmin path used by USTB. Each version was audited prior to deployment.
 - **Smart Contract Exploits:** None reported.
 - **Ownership Changes:** USCC token ownership was transferred Oct 31, 2024 from [`0x8c7db8a9…`](https://etherscan.io/address/0x8c7db8a96d39f76d9f456db23d591c2fdd0e2f8a) to [`0x8abC89D9…`](https://etherscan.io/address/0x8abC89D9b56dFD90dA18e8E18CFaC9111100bDd1) via the two-step Ownable flow ([Etherscan tx](https://etherscan.io/tx/0xd2d1c711f5f7ecf9053637145d218e33f0b22d2d26d59a63d94535e88ca46c72)).
-- **TVL History ([DeFiLlama](https://defillama.com/protocol/superstate-uscc)):**
+- **TVL History ([DeFiLlama](https://defillama.com/protocol/bitwise-uscc)):**
   - Sep 2024 (first record): ~$15.7M
   - Oct 2024: ~$27M
   - Nov 21, 2025 peak: ~$496.61M
