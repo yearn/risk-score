@@ -127,7 +127,25 @@ So **all USCC mint operations are admin-driven** (`mint`/`bulkMint` by the owner
 
 The fund "will trade only those digital assets for which the CFTC has permitted exchange-listed futures contracts" (per [Steakhouse overview](https://kitchen.steakhouse.financial/p/overview-of-uscc)). Bitwise's current public holdings identify CME and Coinbase futures exposure, but the public documents still do not fully disclose margin policy, counterparty concentration limits, or whether the displayed venues are exhaustive over time.
 
-**Public holdings snapshot:** Bitwise publishes current USCC holdings on its [USCC fund page](https://bitwiseinvestments.com/crypto-funds/uscc). As of Jun 28, 2026 4pm EDT, the largest positive notional positions were USD collateral ($32.27M, 19.45%), USTB ($31.13M, 18.76%), staked SOL ($33.31M, 20.08%), weETH ($31.73M, 19.12%), XRP custody ($30.72M, 18.52%), ETH custody ($3.82M, 2.30%), and BTC custody ($2.37M, 1.43%). Offsetting short futures included BTC, ETH, SOL, and XRP JUL26 contracts on CME, plus a smaller XRP JUL26 contract on Coinbase. Holdings are unaudited and may change at the investment manager's discretion.
+**Public holdings snapshot:** Bitwise publishes current USCC holdings on its [USCC fund page](https://bitwiseinvestments.com/crypto-funds/uscc). The table below uses the public holdings shown there as of **Jun 28, 2026 4pm EDT**. Holdings are unaudited and may change at the investment manager's discretion; refresh this table from the Bitwise page during the next reassessment.
+
+| Holding | Quantity | Implied Yield | Notional Value | Portfolio % | Notes |
+|---------|---------:|--------------:|---------------:|------------:|-------|
+| USD Collateral | 32,267,833.00 | 0.82% | $32.27M | 19.45% | Cash / margin collateral |
+| USTB | 2,796,828.74 | 3.47% | $31.13M | 18.76% | Tokenized T-Bill exposure |
+| Bitcoin Custody | 39.20 BTC | 0.00% | $2.37M | 1.43% | Spot crypto custody |
+| Ether Custody | 2,350.99 ETH | 0.00% | $3.82M | 2.30% | Spot crypto custody |
+| Solana Custody | 7,578.53 SOL | 0.00% | $0.57M | 0.35% | Spot crypto custody |
+| Solana Staked | 439,118.49 SOL | 6.29% | $33.31M | 20.08% | Staking / validator risk |
+| EtherFi Wrapped eETH | 17,801.49 weETH | 2.49% | $31.73M | 19.12% | Liquid-staking-token risk |
+| Ripple Custody | 28,631,438.36 XRP | 0.00% | $30.72M | 18.52% | Spot crypto custody |
+| JitoSOL Custody | 4.02 JitoSOL | 5.68% | $393 | 0.00% | Small liquid-staking-token position |
+| SOL JUL26 75 Call (CME) | 6,000.00 | 0.00% | $42,300 | 0.03% | Option exposure |
+| BTC Future JUL26 (CME) | -35.00 | 3.00% | -$2.13M | -1.28% | Short futures hedge |
+| ETH Future JUL26 (CME) | -21,600.00 | 2.93% | -$35.14M | -21.18% | Short futures hedge |
+| SOL Future JUL26 (CME) | -445,000.00 | 2.91% | -$33.84M | -20.40% | Short futures hedge |
+| XRP Future JUL26 (CME) | -27,950,000.00 | 5.41% | -$30.13M | -18.16% | Short futures hedge |
+| XRP Future JUL26 (Coinbase) | -560,000.00 | 9.42% | -$0.61M | -0.37% | Short futures hedge |
 
 ### Accessibility
 

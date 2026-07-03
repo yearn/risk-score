@@ -52,6 +52,42 @@ nodes:
     label: Offchain Fund Portfolio
     category: dependency
     note: USD collateral + USTB/T-Bills + spot/staked crypto + futures margin
+  - id: dep-usd-collateral
+    label: USD Collateral
+    category: dependency
+    note: 19.45% of portfolio; Bitwise holdings as of Jun 28 2026
+  - id: dep-ustb
+    label: USTB
+    category: dependency
+    note: 18.76% of portfolio; tokenized T-Bill exposure
+  - id: dep-staked-sol
+    label: Staked SOL
+    category: dependency
+    note: 20.08% of portfolio; staking / validator risk
+  - id: dep-weeth
+    label: weETH
+    category: dependency
+    note: 19.12% of portfolio; liquid-staking-token risk
+  - id: dep-xrp
+    label: XRP Custody
+    category: dependency
+    note: 18.52% of portfolio; spot crypto custody and market risk
+  - id: dep-eth
+    label: ETH Custody
+    category: dependency
+    note: 2.30% of portfolio; spot crypto custody and market risk
+  - id: dep-btc
+    label: BTC Custody
+    category: dependency
+    note: 1.43% of portfolio; spot crypto custody and market risk
+  - id: dep-futures-cme
+    label: CME Futures
+    category: dependency
+    note: Short BTC/ETH/SOL/XRP futures plus SOL call; negative notional hedges spot/staked legs
+  - id: dep-futures-coinbase
+    label: Coinbase Futures
+    category: dependency
+    note: Small short XRP futures leg; -0.37% of portfolio
   - id: dep-anchorage
     label: Anchorage Digital (Custodian)
     category: dependency
@@ -123,9 +159,45 @@ edges:
     kind: routes-through
     label: spot/staked crypto custody
   - from: dep-treasuries
+    to: dep-usd-collateral
+    kind: deposits-into
+    label: 19.45%
+  - from: dep-treasuries
+    to: dep-ustb
+    kind: deposits-into
+    label: 18.76%
+  - from: dep-treasuries
+    to: dep-staked-sol
+    kind: deposits-into
+    label: 20.08%
+  - from: dep-treasuries
+    to: dep-weeth
+    kind: deposits-into
+    label: 19.12%
+  - from: dep-treasuries
+    to: dep-xrp
+    kind: deposits-into
+    label: 18.52%
+  - from: dep-treasuries
+    to: dep-eth
+    kind: deposits-into
+    label: 2.30%
+  - from: dep-treasuries
+    to: dep-btc
+    kind: deposits-into
+    label: 1.43%
+  - from: dep-treasuries
     to: dep-futures-venues
     kind: routes-through
     label: futures trading
+  - from: dep-futures-venues
+    to: dep-futures-cme
+    kind: routes-through
+    label: CME futures
+  - from: dep-futures-venues
+    to: dep-futures-coinbase
+    kind: routes-through
+    label: Coinbase futures
   - from: dep-treasuries
     to: dep-bitwise
     kind: routes-through
