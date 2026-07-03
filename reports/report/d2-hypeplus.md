@@ -1,6 +1,6 @@
 # Protocol Risk Assessment: D2 Finance HYPE++
 
-- **Assessment Date:** June 23, 2026
+- **Assessment Date:** June 24, 2026
 - **Token:** HYPE++
 - **Chain:** Arbitrum
 - **Token Address:** [`0x75288264FDFEA8ce68e6D852696aB1cE2f3E5004`](https://arbiscan.io/address/0x75288264FDFEA8ce68e6D852696aB1cE2f3E5004)
@@ -75,7 +75,7 @@ No active Immunefi, Sherlock, Cantina, HackerOne, Code4rena, or Safe Harbor prog
 
 ## Historical Track Record
 
-HYPE++ was deployed on November 19, 2024, giving the scoped vault roughly 19 months of onchain history at the June 23, 2026 assessment date. Current scoped TVL is approximately $12.42M based on `totalAssets()` in USDC terms.
+HYPE++ was deployed on November 19, 2024, giving the scoped vault roughly 19 months of onchain history at the June 24, 2026 assessment date. Current scoped TVL is approximately $12.42M based on `totalAssets()` in USDC terms.
 
 D2 documentation describes a broader multi-year strategy record and states that the team combines DeFi-native and traditional finance derivatives experience. This is useful context, but the report scores the onchain HYPE++ vault rather than offchain performance history.
 
@@ -101,13 +101,13 @@ Current reserve reconciliation, verified June 23, 2026:
 
 The HYPE++ top-level arithmetic reconciles: direct USDC (~5.52M) plus dgnHYPE reported assets (~6.90M) equals HYPE++ `totalAssets()` (~12.42M). However, dgnHYPE itself is a nested active D2 strategy with custodied funds. Its `trader()` is a 3-of-5 Safe, and dgnHYPE uses the same custodied accounting pattern: while custodied, `totalAssets()` returns the stored `custodiedAmount` rather than live token balances. Only ~1.0M real Arbitrum USDC was found at the dgnHYPE Safe during this pass; the remaining dgnHYPE reported assets are therefore not fully verifiable from simple ERC-20 balances. Recent dgnHYPE Safe token-transfer history also includes a non-USDC token with a visually confusable symbol (`0xd13CEB6071cAe7d0A880059A022c1750E096D3ED`), which was not counted as backing.
 
-**Control concentration:** The dgnHYPE vault's `owner()` is the same EOA ([`0x0E8c0470773c65498F438cac380648B314399A46`](https://arbiscan.io/address/0x0E8c0470773c65498F438cac380648B314399A46)) that owns the HYPE++ vault, concentrating control of both vaults in a single EOA. dgnHYPE is also a `VaultV1Whitelisted` with the same whitelist-gated `withdraw`/`redeem` pattern confirmed via bytecode analysis — the same blacklist and balance-gate attacks apply to both vaults. The HYPE++ trader holds 100% of dgnHYPE supply, so blocking dgnHYPE redemptions would trap ~55.6% of HYPE++ assets (~$6.90M) inside the nested strategy.
+**Control concentration:** The dgnHYPE vault's `owner()` is the same EOA ([`0x0E8c0470773c65498F438cac380648B314399A46`](https://arbiscan.io/address/0x0E8c0470773c65498F438cac380648B314399A46)) that owns the HYPE++ vault, concentrating control of both vaults in a single EOA. dgnHYPE is a different contract — its verified source is `VaultV0` (distinct bytecode/codehash from the HYPE++ `VaultV1Whitelisted` vault), and its `whitelistBalance()`/`whitelistAsset()` do not exist (they revert). Its `withdraw`/`redeem` are still gated by `onlyWhitelisted`, but VaultV0's modifier is a pure `require(whitelisted[msg.sender])` with no holder-balance branch. So the **blacklist path applies to dgnHYPE** (the owner can remove its sole holder, the HYPE++ trader), but the `setWhitelistBalance(uint256.max)` balance-gate path does **not** exist there. The HYPE++ trader holds 100% of dgnHYPE supply, so blocking dgnHYPE redemptions would trap ~55.6% of HYPE++ assets (~$6.90M) inside the nested strategy.
 
 ### Accessibility
 
 - Deposit and mint are available only during the funding phase, only while not custodied, and only for whitelisted users or users holding more than `whitelistBalance` of `whitelistAsset`.
 - Current `whitelistAsset` is USDC and `whitelistBalance` is `1,000,000` base units (1 USDC), meaning users with more than 1 USDC can satisfy the holder branch of `onlyWhitelisted()`.
-- **Withdraw and redeem are also gated by `onlyWhitelisted()`** — verified via bytecode analysis on June 24, 2026. All four functions (`deposit`, `mint`, `withdraw`, `redeem`) share the same whitelist modifier. A user blacklisted via `setWhitelistStatus(user, false)` cannot withdraw shares even when the vault is not custodied and not in an active epoch. See § Critical Risks.
+- **Withdraw and redeem are also gated by `onlyWhitelisted()`** — verified against the verified source on June 24, 2026. All four functions (`deposit`, `mint`, `withdraw`, `redeem`) share the same modifier, which is `require(whitelisted[msg.sender] || IERC20(whitelistAsset).balanceOf(msg.sender) > whitelistBalance)`. Because of the holder branch, `setWhitelistStatus(user, false)` alone does **not** block a user who still holds more than `whitelistBalance` (currently >1 USDC) of `whitelistAsset` — they continue to satisfy the modifier and can withdraw. The reliable block is `setWhitelistBalance(type(uint256).max)`, which disables the holder branch for everyone. See § Critical Risks.
 - Withdrawals are also blocked while custodied or during an active epoch.
 - Current `maxDeposits` is 12,500,000 USDC, and current `totalDeposits` is 12,417,628.982186 USDC.
 
@@ -163,15 +163,15 @@ The largest risk is centralization:
 - HYPE++ vault owner is an EOA, not the documented D2 Vault MS.
 - The owner EOA can call `startEpoch()`, `setMaxDeposits()`, `setWhitelistAsset()`, `setWhitelistBalance()`, `transferOwnership()`, `setWhitelistStatus()`, `setWhitelistStatuses()`, and `renounceOwnership()`.
 - **Critical:** The owner can block all withdrawals via two one-transaction paths verified on June 24, 2026:
-  1. `setWhitelistStatus(user, false)` / `setWhitelistStatuses([...], [false,...])` — blacklists specific users from `withdraw`/`redeem` (not just `deposit`/`mint`).
-  2. `setWhitelistBalance(type(uint256).max)` — no user can hold `uint256.max` tokens, so every `withdraw()` and `redeem()` reverts. One transaction, zero enumeration, blocks every shareholder indiscriminately.
-  The same `onlyWhitelisted()` modifier is applied to all four functions (`deposit`, `mint`, `withdraw`, `redeem`) — confirmed via bytecode analysis on both the HYPE++ and dgnHYPE vaults.
+  1. `setWhitelistStatus(user, false)` / `setWhitelistStatuses([...], [false,...])` — removes specific users from the whitelist mapping for `withdraw`/`redeem` (not just `deposit`/`mint`). On HYPE++ this only bites users who do not independently satisfy the holder branch, so to block a target it must be paired with a raised `whitelistBalance`; on dgnHYPE (`VaultV0`, no holder branch) it is fully effective on its own.
+  2. `setWhitelistBalance(type(uint256).max)` — no user can hold more than `uint256.max` tokens, so the holder branch can never pass and every non-whitelisted `withdraw()`/`redeem()` reverts. One transaction, zero enumeration, blocks every shareholder indiscriminately. (This selector exists on the HYPE++ `VaultV1Whitelisted` vault, not on the dgnHYPE `VaultV0`.)
+  The `onlyWhitelisted()` modifier gates all four functions (`deposit`, `mint`, `withdraw`, `redeem`) on both vaults — verified against verified source. On HYPE++ (`VaultV1Whitelisted`) the modifier includes the `balanceOf > whitelistBalance` holder branch; on dgnHYPE (`VaultV0`) it is a pure `whitelisted[msg.sender]` mapping check.
 - The HYPE++ vault is NOT behind a proxy (EIP-1967/beacon/transparent proxy slots verified zero). This means the vault logic cannot be upgraded, but ownership can be transferred at any time via `transferOwnership()`.
 - HYPE++ trader `DEFAULT_ADMIN_ROLE` holders are the D2 Vault MS and an EOA.
 - HYPE++ trader `EXECUTOR_ROLE` holders are the D2 Vault MS and the same EOA.
 - The EOA also receives trader fees via `feeReceiver()`.
 - The D2 Vault MS is a 4-of-7 Safe, matching D2's documented vault multisig address, but there is no onchain timelock on trader role changes or vault owner actions.
-- dgnHYPE vault has the same EOA owner as HYPE++, further concentrating control. dgnHYPE is also `VaultV1Whitelisted` with identical whitelist-gated `withdraw`/`redeem` — confirmed via bytecode analysis. The HYPE++ trader holds 100% of dgnHYPE supply, so a dgnHYPE-level block would trap ~55.6% of HYPE++ assets (~$6.90M).
+- dgnHYPE vault has the same EOA owner as HYPE++, further concentrating control. dgnHYPE is a `VaultV0` (distinct bytecode) whose `withdraw`/`redeem` are also `onlyWhitelisted`, but with no holder-balance branch — so blacklisting its sole holder (the HYPE++ trader) via `setWhitelistStatus` blocks redemptions; the `setWhitelistBalance(uint256.max)` path does not exist on VaultV0. The HYPE++ trader holds 100% of dgnHYPE supply, so a dgnHYPE-level block would trap ~55.6% of HYPE++ assets (~$6.90M).
 
 The trader contract is a standalone selector router (code size ~4.2KB; EIP-1967/beacon/transparent proxy slots all zero) that delegatecalls modules based on `msg.sig`. The constructor wires selectors to module targets. The trader uses OpenZeppelin `AccessControl` (not `AccessControlEnumerable`), so `getRoleMemberCount` and `getRoleMember` are not available — role-holder enumeration requires scanning `RoleGranted`/`RoleRevoked` events. Operationally, this gives the executor a broad DeFi action surface, bounded by the strategy's allowed tokens/spenders/modules, but still much more discretionary than a passive vault.
 
@@ -272,7 +272,7 @@ User USDC
    +--> [dgnHYPE Vault shares] (~5.27M shares = 100% of supply)
           |
           v
-        [dgnHYPE Vault / VaultV1Whitelisted]  (non-upgradeable, no proxy)
+        [dgnHYPE Vault / VaultV0]  (non-upgradeable, no proxy)
           - owner: EOA 0x0E8c... (same EOA as HYPE++ vault owner)
           - trader: 3-of-5 Safe 0x155d...
           |
@@ -304,7 +304,7 @@ Governance / control:
 
 ### Key Risks
 
-- HYPE++ vault owner is an EOA with direct control over epoch scheduling, deposit caps, and whitelist settings — including the ability to block all users from **withdrawing** (not just depositing) via either blacklist or `setWhitelistBalance(uint256.max)`. The same EOA also owns the dgnHYPE vault, which has the identical vulnerability (confirmed via bytecode).
+- HYPE++ vault owner is an EOA with direct control over epoch scheduling, deposit caps, and whitelist settings — including the ability to block all users from **withdrawing** (not just depositing) via either blacklist (paired with a raised `whitelistBalance`) or `setWhitelistBalance(uint256.max)`. The same EOA also owns the dgnHYPE vault (a `VaultV0`), which is exposed to the blacklist path only — its `onlyWhitelisted` has no balance-gate branch.
 - Trader admin/executor authority includes an EOA with no timelock.
 - The trader's allowed token list includes volatile assets (WETH, WBTC, ARB, GMX, GRAIL, PENDLE, LINK, wstETH) and old bridged USDC.e, expanding the strategy risk surface.
 - Funds are actively custodied by the trader during epochs; users cannot withdraw while custodied.
@@ -314,9 +314,9 @@ Governance / control:
 ### Critical Risks
 
 - **A compromised vault owner EOA can permanently block all users from withdrawing** via two independent one-transaction paths:
-  1. **Blacklist:** `setWhitelistStatus(victim, false)` or `setWhitelistStatuses([...], [false,...])` — batch-blacklists specific users. Requires enumerating shareholder addresses but can be done at scale via the batch function.
-  2. **Balance gate:** `setWhitelistBalance(type(uint256).max)` — no user can satisfy `whitelistAsset.balanceOf(user) >= uint256.max`, so every `withdraw()` and `redeem()` reverts. One transaction, no enumeration needed, blocks every shareholder indiscriminately.
-  Both paths work because the `onlyWhitelisted()` modifier gates `withdraw()` and `redeem()` — not just `deposit()` and `mint()` — confirmed via bytecode analysis on June 24, 2026. There is no onchain bypass. The same attack applies to dgnHYPE (also `VaultV1Whitelisted`, same owner EOA, identical bytecode pattern), where the HYPE++ trader is the sole dgnHYPE holder — blocking dgnHYPE redemptions traps $6.90M (55.6% of HYPE++ assets). The vault holds zero USDC while custodied, so the trader must return funds before blocked users could even attempt an exit, but even after `returnFunds()` the gated `withdraw`/`redeem` would revert. Combined with `transferOwnership()`, a hacked EOA can transfer this power to a new attacker address, making the block permanent.
+  1. **Blacklist:** `setWhitelistStatus(victim, false)` or `setWhitelistStatuses([...], [false,...])` — removes specific users from the whitelist mapping. On HYPE++ this is not sufficient on its own: the `onlyWhitelisted()` holder branch still lets a removed user withdraw as long as they hold more than `whitelistBalance` (currently >1 USDC) of `whitelistAsset`, so this path must be paired with a raised `whitelistBalance` to bite. (On the dgnHYPE `VaultV0`, which has no holder branch, the blacklist path is fully effective on its own.)
+  2. **Balance gate:** `setWhitelistBalance(type(uint256).max)` — no user can satisfy `whitelistAsset.balanceOf(user) > uint256.max`, so the holder branch can never pass and every non-whitelisted `withdraw()` and `redeem()` reverts. One transaction, no enumeration needed, blocks every shareholder indiscriminately. This is the reliable single-transaction block on HYPE++.
+  Both paths work because the `onlyWhitelisted()` modifier gates `withdraw()` and `redeem()` — not just `deposit()` and `mint()` — verified against the verified `VaultV1Whitelisted` source on June 24, 2026. There is no onchain bypass. The blacklist path also applies to dgnHYPE, a separate `VaultV0` contract (distinct bytecode; `whitelistBalance`/`whitelistAsset` do not exist there), where the HYPE++ trader is the sole dgnHYPE holder — blacklisting it traps $6.90M (55.6% of HYPE++ assets). The vault holds zero USDC while custodied, so the trader must return funds before blocked users could even attempt an exit, but even after `returnFunds()` the gated `withdraw`/`redeem` would revert. Combined with `transferOwnership()`, a hacked EOA can transfer this power to a new attacker address, making the block permanent.
 - A compromised or malicious trader executor can interact with a broad allowed DeFi surface (32 tokens, 30 spenders) and cause trading losses before funds are returned.
 - **The dgnHYPE Safe (3-of-5) can steal $6.90M with no guardrails.** Unlike the HYPE++ trader OMS, which is constrained to pre-approved tokens and venues, the dgnHYPE custody Safe is a standard Gnosis Safe. 3-of-5 signers can call `execTransaction` to execute `USDC.transfer(attacker, amount)` — or any other arbitrary call — with no on-chain restriction. The Safe currently holds $1.00M in direct USDC and controls deployed positions worth ~$5.90M. Neither the dgnHYPE vault, the HYPE++ vault, nor the HYPE++ trader has any mechanism to constrain or override the Safe signers. This is a fundamentally different custody model from the HYPE++ OMS: restricted smart-contract execution vs unrestricted multisig custody. The Safe signers (5 addresses distinct from the HYPE++ trader roles) represent a separate trust surface for 55.6% of HYPE++ assets.
 - A compromised or malicious vault owner can manipulate epoch timing, transfer ownership, and change access controls for BOTH vaults, delaying exits or changing who can deposit/redeem.
