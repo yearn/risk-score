@@ -1,0 +1,264 @@
+slug: origin-ousd
+title: Origin OUSD — Contract Dependency Graph
+chain: ethereum
+
+categories:
+  - id: vault
+    label: Vault / Token
+  - id: strategy
+    label: Strategy
+  - id: governance
+    label: Governance
+  - id: infra
+    label: Protocol Infra
+  - id: dependency
+    label: External Dependency
+
+nodes:
+  # === Vault / token layer ===
+  - id: ousd-token
+    label: OUSD Token (Proxy)
+    address: "0x2A8e1E676Ec238d8A992307B495b45B3fEAa5e86"
+    category: vault
+    note: EIP-1967 rebasing ERC-20 (1e18 base units, 1:1 USDC)
+  - id: ousd-impl
+    label: OUSD Token Implementation
+    address: "0xA7B7c59a1705e4a624ea8a4ad8a06f9de22dcc33"
+    category: vault
+  - id: wousd
+    label: wOUSD (ERC-4626 Wrapper)
+    address: "0xD2af830E8CBdFed6CC11Bab697bB25496ed6FA62"
+    category: vault
+    note: Appreciating wrapper for DeFi composability
+  - id: vault
+    label: OUSD Vault (Proxy)
+    address: "0xE75D77B1865Ae93c7eaa3040B038D7aA7BC02F70"
+    category: vault
+    note: Holds USDC; 4 strategies; async withdrawal queue
+  - id: vault-impl
+    label: OUSD Vault Implementation
+    address: "0x82948060c4b72684bededec342350ab344975145"
+    category: vault
+    note: Upgraded 2026 (block 25106912) post-Feb 2026 Sigma Prime audit
+  - id: trustee
+    label: Trustee Safe (1/3, fee collector)
+    address: "0xBB077E716A5f1F1B63ed5244eBFf5214E50fec8c"
+    category: vault
+    note: Receives 20% performance fee
+
+  # === Governance ===
+  - id: xogn
+    label: xOGN Governance Token
+    address: "0x63898b3b6Ef3d39332082178656E9862bee45C57"
+    category: governance
+    note: Staked OGN — proposes via Origin DeFi Governance
+  - id: origin-gov
+    label: Origin DeFi Governance
+    address: "0x1D3fBD4d129Ddd2372EA85c5Fa00b2682081c9EC"
+    category: governance
+    note: PROPOSER + EXECUTOR + CANCELLER on Timelock
+  - id: timelock
+    label: Timelock Controller (48h)
+    address: "0x35918cDE7233F2dD33fA41ae3Cb6aE0e42E0e69F"
+    category: governance
+    note: Self-administered TIMELOCK_ADMIN_ROLE
+  - id: gov-multisig
+    label: GOV Multisig (5/8, cancel-only)
+    address: "0xbe2AB3d3d8F6a32b96414ebbd865dBD276d3d899"
+    category: governance
+  - id: strategist
+    label: 'Strategist Safe (2/8, "Origin: Guardian")'
+    address: "0x4FF1b9D9ba8558F5EAfCec096318eA0d8b541971"
+    category: governance
+    note: 'Untimelocked — AMO ops, strategy allocation, vault params, delegateYield'
+
+  # === Protocol infra ===
+  - id: oracle
+    label: Oracle Router (Chainlink USDC/USD)
+    address: "0x36CFB852d3b84afB3909BCf4ea0dbe8C82eE1C3c"
+    category: infra
+    note: Non-upgradeable; hardcoded Chainlink feeds
+  - id: cow-harvester
+    label: CoW Harvester (reward swaps)
+    address: "0xD400341aEfED0BC75176714cFdE82e8BDAA2D3b8"
+    category: infra
+    note: Sells CRV + MORPHO rewards → USDC
+
+  # === Active strategies (4) ===
+  - id: morpho-strategy
+    label: Morpho V2 Strategy (~45%)
+    address: "0x3643cafA6eF3dd7Fcc2ADaD1cabf708075AFFf6e"
+    category: strategy
+  - id: amo-strategy
+    label: Curve USDC AMO Strategy (~14%)
+    address: "0x26a02ec47ACC2A3442b757F45E0A82B8e993Ce11"
+    category: strategy
+    note: ONLY mint-whitelisted strategy; mintForStrategy OUSD
+  - id: cc-base
+    label: Cross-Chain Strategy (Base, ~28%)
+    address: "0xB1d624fc40824683e2bFBEfd19eB208DbBE00866"
+    category: strategy
+  - id: cc-hyperevm
+    label: Cross-Chain Strategy (HyperEVM, ~13%)
+    address: "0xE0228DB13F8C4Eb00fD1e08e076b09eF5cD0EA1e"
+    category: strategy
+
+  # === External dependencies ===
+  - id: morphousd-vault
+    label: MetaMorpho Vault mOUSD-V2
+    address: "0xFB154c729A16802c4ad1E8f7FF539a8b9f49c960"
+    category: dependency
+    note: Largest single dependency; curator 0xe5e2...98c0
+  - id: curve-pool
+    label: Curve OUSD/USDC Pool
+    address: "0x6d18E1a7faeB1F0467A77C0d293872ab685426dc"
+    category: dependency
+    note: StableSwapNG; ~$1.10M TVL; AMO venue + DEX exit
+  - id: curve-gauge
+    label: Curve Gauge
+    address: "0x1eF8B6Ea6434e722C916314caF8Bf16C81cAF2f9"
+    category: dependency
+    note: LP staking; CRV rewards
+  - id: cctp-base
+    label: Circle CCTP V2 → Base USDC
+    address: "0xB1d624fc40824683e2bFBEfd19eB208DbBE00866"
+    chain: base
+    category: dependency
+    note: Destination-side USDC; peer strategy is the same address
+  - id: cctp-hyperevm
+    label: Circle CCTP V2 → HyperEVM USDC
+    address: "0xE0228DB13F8C4Eb00fD1e08e076b09eF5cD0EA1e"
+    chain: hyperevm
+    category: dependency
+    note: Destination-side USDC; peer strategy is the same address
+
+edges:
+  # === Governance flow: xOGN → Origin Gov → Timelock → Vault ===
+  - from: xogn
+    to: origin-gov
+    kind: controls
+    label: voting token
+  - from: origin-gov
+    to: timelock
+    kind: proposes-on
+    label: PROPOSER + EXECUTOR + CANCELLER
+  - from: gov-multisig
+    to: timelock
+    kind: cancels-on
+    label: CANCELLER only
+  - from: timelock
+    to: vault
+    kind: controls
+    label: governor (upgrade, approveStrategy, setTrusteeFeeBps, ...)
+  - from: timelock
+    to: ousd-token
+    kind: controls
+    label: governor (governanceRebaseOptIn)
+
+  # === Strategist roles (untimelocked) ===
+  - from: strategist
+    to: vault
+    kind: holds-role
+    label: "strategistAddr (deposit/withdraw strategy, AMO, vault params, pause)"
+  - from: strategist
+    to: ousd-token
+    kind: holds-role
+    label: "delegateYield / undelegateYield (any account)"
+  - from: strategist
+    to: amo-strategy
+    kind: controls
+    label: "operator (mintAndAdd / removeAndBurn / harvest)"
+
+  # === Proxy implementations ===
+  - from: ousd-impl
+    to: ousd-token
+    kind: manages
+    label: EIP-1967 implementation
+  - from: vault-impl
+    to: vault
+    kind: manages
+    label: EIP-1967 implementation
+
+  # === Internal vault wiring ===
+  - from: oracle
+    to: vault
+    kind: routes-through
+    label: Chainlink USDC/USD price
+  - from: vault
+    to: trustee
+    kind: routes-fees-to
+    label: 20% performance fee
+
+  # === Mint authority: AMO is the only mint-whitelisted strategy ===
+  - from: amo-strategy
+    to: ousd-token
+    kind: mints
+    label: "mintForStrategy whitelisted; 99.8% solvency check"
+
+  # === wOUSD wrapper ===
+  - from: wousd
+    to: ousd-token
+    kind: deposits-into
+    label: ERC-4626 wrap
+
+  # === Allocation fan: vault → strategies ===
+  - from: vault
+    to: morpho-strategy
+    kind: allocates-to
+    label: "44.8%"
+  - from: vault
+    to: amo-strategy
+    kind: allocates-to
+    label: "13.7%"
+  - from: vault
+    to: cc-base
+    kind: allocates-to
+    label: "28.4%"
+  - from: vault
+    to: cc-hyperevm
+    kind: allocates-to
+    label: "13.2%"
+
+  # === Strategies → external dependencies ===
+  - from: morpho-strategy
+    to: morphousd-vault
+    kind: deposits-into
+    label: USDC supply
+  - from: amo-strategy
+    to: curve-gauge
+    kind: deposits-into
+    label: "stake Curve LP"
+  - from: curve-gauge
+    to: curve-pool
+    kind: routes-through
+    label: "claim CRV → CoW swap"
+
+  # === Cross-chain bridges ===
+  - from: cc-base
+    to: cctp-base
+    kind: routes-through
+    label: "CCTP V2 bridge"
+  - from: cc-hyperevm
+    to: cctp-hyperevm
+    kind: routes-through
+    label: "CCTP V2 bridge"
+
+  # === Reward harvesting fan-in ===
+  - from: morphousd-vault
+    to: cow-harvester
+    kind: routes-fees-to
+    label: MORPHO rewards
+  - from: curve-gauge
+    to: cow-harvester
+    kind: routes-fees-to
+    label: CRV rewards
+  - from: cow-harvester
+    to: vault
+    kind: routes-fees-to
+    label: USDC
+
+  # === Secondary liquidity ===
+  - from: vault
+    to: curve-pool
+    kind: routes-through
+    label: "secondary DEX exit"

@@ -38,7 +38,7 @@ nodes:
     label: RedemptionIdle (USDC redeem)
     address: "0x4c21b7577c8fe8b0b0669165ee7c8f67fa1454cf"
     category: infra
-    note: Onchain USTB→USDC; ~$1.7M capacity
+    note: Onchain USTB→USDC; ~$8.0M capacity
   - id: redemption-proxy-admin
     label: RedemptionIdle ProxyAdmin
     address: "0xcaba8c12873fffed13431d98bf6b836dff08e869"
@@ -80,14 +80,14 @@ nodes:
     label: U.S. Treasury Bills (Offchain)
     category: dependency
     note: ≥95% short-duration T-Bills + Agency
-  - id: dep-umb-bank
-    label: UMB Bank (Custodian)
+  - id: dep-bny-mellon
+    label: BNY Mellon (Custodian)
     category: dependency
-    note: OCC-regulated qualified custodian
-  - id: dep-federated-hermes
-    label: Federated Hermes (Sub-Advisor)
+    note: ~$50T+ AUC systemically important custodian; replaced UMB Bank
+  - id: dep-invesco
+    label: Invesco Advisers (Investment Manager)
     category: dependency
-    note: Daily portfolio management
+    note: $1.7T+ AUM (NYSE:IVZ); replaced Federated Hermes Mar 2026
   - id: dep-chainlink-nav
     label: Chainlink USTB NAV Feed
     address: "0x289B5036cd942e619E1Ee48670F98d214E745AAC"
@@ -171,13 +171,13 @@ edges:
     kind: deposits-into
     label: offchain T-Bill fund
   - from: dep-treasuries
-    to: dep-umb-bank
+    to: dep-bny-mellon
     kind: routes-through
     label: custody
   - from: dep-treasuries
-    to: dep-federated-hermes
+    to: dep-invesco
     kind: routes-through
-    label: sub-advisor
+    label: investment manager
   - from: redemption-idle
     to: dep-circle
     kind: routes-through
