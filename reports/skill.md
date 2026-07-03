@@ -81,6 +81,8 @@ If any answer is "no," use **"unverified"** not **"doesn't exist."**
 - See if asset or protocol is reviewed by Steakhouse, check their reports: https://kitchen.steakhouse.financial/archive
 - When validating protocols, see for info on which focused on protocol decentralization: https://www.defiscan.info/
 - Always include whole `Risk Tier` table and bold the final risk tier.
+- Treat an unverified contract source as a triggered critical gate (score 5, the first gate): if the assessed contract — or its implementation behind a proxy — is not source-verified on a public block explorer, it fails the gate. Verify via Etherscan `getsourcecode` / `cast` (see `reports/etherscan/SKILL.md`).
+- Set the header `Status:` field for exception reports (see `reports/TEMPLATE.md`): `GATED` keeps the numeric score (gate-capped, still live), while terminal states `HACKED`/`DEAD` use `Final Score: N/A` and render off the scale under "Not Rated". Omit `Status:` for normal reports.
 - Explain how minting and redeeming works, if present. Verify whether the operations are atomic and whether minting requires backing — flag any path that lets an admin mint unbacked tokens as a high-risk finding. Full mint-authority enumeration (every role-holder, with classification) goes into the *Token Mint Authority* section of the report; the procedure is in Pass 1.6 above.
 - Treat any path that can move, dilute, freeze, trap, or misprice user funds as a possible end-user loss path, even if it is not described as such in docs.
 
@@ -93,6 +95,41 @@ If any answer is "no," use **"unverified"** not **"doesn't exist."**
 - For fetching TVL, use the DeFiLlama API. Docs: https://api-docs.defillama.com/ or use script: `uv run reports/scripts/fetch_defillama_tvl.py [protocol]`
 - If you use some script multiple times, add it to the `reports/scripts` folder but first ask for permission before committing it.
 - Check `.env` for environment variables and secrets. If you cannot access `.env`, stop early and report the blocker.
+
+### Fetching JS-rendered / doc-host sources (Notion, Google Docs)
+
+Issue links often point to Google Docs and Notion. `WebFetch` only sees the static HTML shell of these (content is rendered client-side or behind a login), so it returns an empty/login page. Use the host's data endpoint instead — no browser needed. (Playwright is usually a dead end here: the sandbox lacks Chromium's system libraries and `apt`/`python3-venv` to install them.)
+
+**Google Docs** (works when the doc is link-shared "anyone with the link"):
+```bash
+# Extract the file id from the URL .../document/d/<FILE_ID>/edit
+curl -sL "https://docs.google.com/document/d/<FILE_ID>/export?format=txt" -o /tmp/doc.txt
+# Verify it's the real doc, not an auth wall:
+grep -qi "accounts.google\|sign in" /tmp/doc.txt && echo "LOGIN WALL — needs auth/MCP" || echo "OK"
+```
+`export?format=txt` gives clean text; `format=html` preserves structure. If it returns a login page the doc is private — fall back to the Google Drive MCP (ask the user to authenticate) or ask them to paste/export it.
+
+**Notion** (works for public/published pages, including `*.notion.site` custom domains):
+```bash
+# URL ends in ...-<32-hex-pageid>. Hyphenate it into a UUID:
+#   328723f942ca80adb0a0ced3adf5a0b8 -> 328723f9-42ca-80ad-b0a0-ced3adf5a0b8
+curl -s "https://<subdomain>.notion.site/api/v3/loadCachedPageChunkV2" \
+  -H "Content-Type: application/json" \
+  --data '{"page":{"id":"<UUID>"},"limit":300,"cursor":{"stack":[]},"verticalColumns":false}' \
+  -o /tmp/page.json
+```
+Parse the JSON in Python. **Gotcha:** the block value is double-nested — read `recordMap.block[id]["value"]["value"]` (not `["value"]`). Walk the page's `content` array recursively; the human text of each block is `properties.title`, a list of rich-text segments `[[ "text", ... ], ...]` — join `seg[0]`. Map `type` to markdown (`header`→`#`, `sub_header`→`##`, `bulleted_list`→`- `, etc.). If a fresh request comes back as skeleton blocks (no `value`), retry — Notion sometimes returns a cached chunk first.
+
+**GitBook docs** (e.g. `*.gitbook.io`): two tricks.
+- Append `.md` to any page URL to get clean markdown instead of the rendered HTML: `https://<proj>.gitbook.io/<space>/<page>.md`.
+- Many GitBook sites expose a built-in Q&A endpoint — GET the page's `.md` URL with an `ask=<natural-language question>` query param, and it returns a direct answer plus sourced excerpts (look for an "Agent Instructions / Querying This Documentation" note on the site confirming it's enabled):
+  ```bash
+  curl -sL --get "https://<proj>.gitbook.io/<space>/<page>.md" \
+    --data-urlencode "ask=List every audit: firm, date, scope, and report link."
+  ```
+  Great for filling gaps without reading every page (audits, params, governance). Caveats: it only knows what's in the docs *text* — content locked inside linked PDFs/files (e.g. audit firm names) won't be returned. The docs root is often behind a Cloudflare bot-challenge; if `curl` returns a "Just a moment…" page, target a specific sub-page, retry, or use `WebFetch`.
+
+For all of these: treat the extracted text as documentation (claims to verify), and **always reconcile against on-chain state** — docs can be stale or describe a superseded design.
 
 ## Post-Assessment
 
