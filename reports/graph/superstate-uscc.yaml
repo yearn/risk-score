@@ -1,5 +1,5 @@
 slug: superstate-uscc
-title: Superstate (USCC) — Contract Dependency Graph
+title: Superstate / Bitwise (USCC) — Contract Dependency Graph
 chain: ethereum
 
 categories:
@@ -15,7 +15,7 @@ categories:
 nodes:
   # === Token layer ===
   - id: uscc
-    label: USCC (Crypto Carry Fund)
+    label: USCC (Bitwise Crypto Carry Fund)
     address: "0x14d60E7FDC0D71d8611742720E4C50E7a974020c"
     category: vault
     note: EIP-1967 Proxy → SuperstateTokenV5; price-appreciation; mark-to-market NAV
@@ -51,19 +51,19 @@ nodes:
   - id: dep-treasuries
     label: Offchain Fund Portfolio
     category: dependency
-    note: T-Bills + spot BTC/ETH + futures margin
+    note: USD collateral + USTB/T-Bills + spot/staked crypto + futures margin
   - id: dep-anchorage
     label: Anchorage Digital (Custodian)
     category: dependency
-    note: OCC-regulated; spot BTC/ETH + cash custody
+    note: OCC-regulated; spot/staked crypto + cash custody
   - id: dep-futures-venues
     label: Futures Trading Venues
     category: dependency
-    note: CFTC-permitted futures exchanges; identities undisclosed
+    note: Current public holdings identify CME and Coinbase; margin policy not fully public
   - id: dep-bitwise
     label: Bitwise Investment Manager
     category: dependency
-    note: Sub-advisor effective Jun 1 2026
+    note: Investment manager effective Jun 1 2026
   - id: dep-chainlink-nav
     label: Chainlink USCC NAV Feed
     address: "0xAfFd8F5578E8590665de561bdE9E7BAdb99300d9"
@@ -121,7 +121,7 @@ edges:
   - from: dep-treasuries
     to: dep-anchorage
     kind: routes-through
-    label: spot BTC/ETH custody
+    label: spot/staked crypto custody
   - from: dep-treasuries
     to: dep-futures-venues
     kind: routes-through
