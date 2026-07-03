@@ -837,6 +837,19 @@ protocols:
     - asset: USDC
     infrastructure:
     - Chainlink
+  superstate_uscc:
+    name: Superstate (USCC)
+    chain: ethereum
+    type: tokenized_fund
+    address: '0x14d60E7FDC0D71d8611742720E4C50E7a974020c'
+    report: reports/report/superstate-uscc.md
+    collateral:
+    - asset: BTC
+    - asset: ETH
+    - asset: T-Bills
+    - asset: USDC
+    infrastructure:
+    - Chainlink
   saturn:
     name: Saturn (USDat)
     chain: ethereum

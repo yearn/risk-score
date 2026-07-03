@@ -12,6 +12,8 @@ USCC is the **Superstate Crypto Carry Fund** — a tokenized investment fund iss
 
 USCC uses a **price-appreciation model** (non-rebasing). Unlike USTB, USCC's NAV **is not monotonic** — daily NAV reflects mark-to-market gains and losses on the futures leg, so the share price can decrease during basis-expansion episodes even when the trade economics remain intact (per the protocol's own [risk disclosure](https://docs.superstate.com/llms-full.txt)).
 
+This means USCC holders can suffer **principal loss**, not merely delayed yield or temporary illiquidity. Losses can arise from basis widening, forced futures unwinds, futures-venue counterparty failure, crypto custody loss, ETH slashing if ETH is staked, or adverse mark-to-market movement during the offchain redemption window.
+
 Investors must clear KYC/AML, be **Qualified Purchasers** ($5M+ individuals, $25M+ institutions) **and** Accredited Investors, get whitelisted in the same shared AllowList contract used by USTB, then subscribe/redeem either onchain (offchain-settled) or via book-entry shares.
 
 - **Current NAV/Share:** $11.604523 (Chainlink USCC NAV feed, verified onchain May 31, 2026)
@@ -55,6 +57,8 @@ Investors must clear KYC/AML, be **Qualified Purchasers** ($5M+ individuals, $25
 ### Owner Addresses
 
 Verified onchain May 31, 2026. **All Superstate-controlled admin keys are EOAs (code size 0)**:
+
+Onchain, these owners are plain EOAs. Superstate states that admin keys use Turnkey secure enclaves, but that is an offchain operational control and cannot be independently verified from Ethereum contract state. This report therefore scores the owner addresses as EOAs for governance purposes; any MPC / TEE / Turnkey protection is treated only as an offchain mitigation.
 
 | Role | Address |
 |------|---------|
@@ -164,6 +168,7 @@ The fund "will trade only those digital assets for which the CFTC has permitted 
   - T-Bills are the safest asset class globally
   - Spot BTC/ETH custody at Anchorage carries crypto custody risk (key management, slashing if ETH is staked, custodian operational risk)
   - **Futures-leg margin posted at trading venues is the dominant counterparty risk** — if a futures exchange becomes insolvent (FTX-style), the margin and any unrealized P&L on that venue is at risk. CFTC-regulated futures clearinghouses (CME-style) significantly reduce this risk vs offshore venues, but Superstate has not publicly committed to CME-only execution.
+  - Basis-trade losses flow through NAV. If futures basis widens, futures positions are forcibly unwound, or posted margin is impaired, USCC holders can realize losses on principal.
 - **Sub-Advisor:**
   - **Current (as of May 31, 2026):** Superstate Inc. (self-managed)
   - **Effective June 1, 2026:** **Bitwise Investment Manager, LLC** ([per superstate.com/assets/uscc](https://superstate.com/assets/uscc))
@@ -181,7 +186,7 @@ The fund "will trade only those digital assets for which the CFTC has permitted 
   - Anchorage Digital (regulated digital-asset custody)
   - SEC regulatory framework (Reg D / Section 3(c)(7))
 - **Reserve Transparency:** Superstate publishes headline NAV/AUM/yield on [superstate.com/assets/uscc](https://superstate.com/assets/uscc). **Granular holdings (spot BTC quantity, futures positions, exchange venues, margin balances, T-Bill CUSIPs) are not publicly disclosed** — they are accessible only through the authenticated investor portal.
-- **NAV Mark-to-Market Risk:** Because the futures leg is mark-to-market daily, the share price reflects unrealized basis-trade P&L in real time. The protocol explicitly warns of "unrealized losses" during basis expansion. This is fundamentally different from USTB whose underlying T-Bills have a much smoother mark-to-market profile.
+- **NAV Mark-to-Market Risk:** Because the futures leg is mark-to-market daily, the share price reflects unrealized basis-trade P&L in real time. The protocol explicitly warns of "unrealized losses" during basis expansion. This is fundamentally different from USTB whose underlying T-Bills have a much smoother mark-to-market profile. A Yearn position redeeming through USCC's T+1/T+2 offchain process may realize losses if NAV falls before settlement.
 
 ## Liquidity Risk
 
@@ -190,7 +195,7 @@ The fund "will trade only those digital assets for which the CFTC has permitted 
 - **No DEX Liquidity:** $0 DEX volume by design. AllowList-gated transfers prevent secondary markets.
 - **Transfer Restrictions:** All transfers require both sender and receiver to be on the AllowList (the same shared V3.1 contract as USTB). Removing an address from the AllowList freezes their tokens.
 - **DeFi Integrations:** Smaller than USTB. [Steakhouse Financial publicly evaluated USCC](https://kitchen.steakhouse.financial/p/overview-of-uscc) for inclusion in Morpho vaults; integration status / final decision is TODO. We could not identify large Aave / Spark / M^0 integrations for USCC equivalent to those listed for USTB.
-- **Stress Scenario:** In a basis-blowup scenario (futures premium collapse, exchange counterparty event, slashing of staked ETH, or simultaneous redemption surge), the fund's liquidity depends on (a) unwinding futures positions at potentially worse-than-market prices, (b) Anchorage's ability to deliver spot, and (c) the futures venues' ability to honor margin. T-Bills are highly liquid; spot BTC/ETH are highly liquid; futures positions are liquid in normal markets but can become illiquid during stress (basis spreads can widen materially before they converge). **The mark-to-market NAV will reflect this stress in real time, potentially producing meaningful unrealized losses for holders who do not exit before the basis converges.**
+- **Stress Scenario:** In a basis-blowup scenario (futures premium collapse, exchange counterparty event, slashing of staked ETH, or simultaneous redemption surge), the fund's liquidity depends on (a) unwinding futures positions at potentially worse-than-market prices, (b) Anchorage's ability to deliver spot, and (c) the futures venues' ability to honor margin. T-Bills are highly liquid; spot BTC/ETH are highly liquid; futures positions are liquid in normal markets but can become illiquid during stress (basis spreads can widen materially before they converge). **The mark-to-market NAV will reflect this stress in real time, potentially producing principal losses for holders and realized losses for users redeeming through the offchain settlement window.**
 
 ### AllowList Freeze Risk (Critical for DeFi Integrations)
 
@@ -230,7 +235,7 @@ The only recovery is to be re-whitelisted by Superstate or have Superstate `admi
 
 **Mitigations (same shape as USTB):**
 
-- Turnkey secure enclaves for admin keys
+- Superstate states it uses Turnkey secure enclaves for admin keys. This may reduce operational key-compromise risk, but it is not verifiable onchain and does not change the contract-level fact that the owner is a single EOA.
 - `Ownable2StepUpgradeable` two-step transfer
 - `renounceOwnership` disabled
 - Regulatory accountability: Superstate Inc. is a U.S. corporation under SEC exemptions, SEC-registered transfer agent (Superstate Services LLC), Reg D / 3(c)(7) framework
@@ -425,7 +430,7 @@ EXTERNAL / UNDERLYING LAYER
 ### Key Risks
 
 1. **EOA-controlled admin with token + ProxyAdmin concentrated in a single key.** The same EOA can `mint` unlimited tokens AND `upgrade()` the implementation. No multisig, no timelock.
-2. **Mark-to-market NAV with basis-trade exposure.** Unlike USTB, USCC's NAV can decrease — daily P&L from futures positions flows into the share price. Holders can experience real (unrealized or realized) losses if basis spreads widen.
+2. **Mark-to-market NAV with basis-trade exposure.** Unlike USTB, USCC's NAV can decrease — daily P&L from futures positions flows into the share price. Holders can suffer principal loss if basis spreads widen, futures positions are unwound at a loss, posted margin is impaired, or crypto custody / staking losses occur.
 3. **Undisclosed counterparty exposure to futures venues.** Public docs do not name the futures exchanges, margin levels, or counterparty diversification. This is the dominant risk and we cannot quantify it from public information.
 4. **No atomic onchain redemption** — `redemptionContract() = 0x0` onchain. Subscribe is also disabled onchain (`OnchainSubscriptionsDisabled`). All mints/redeems flow through offchain operations with T+1/T+2 settlement.
 5. **Sole onchain NAV oracle is Chainlink-OCR-only** — no Superstate-run fallback price feed; between transmissions the onchain price is just stale.
@@ -436,9 +441,9 @@ EXTERNAL / UNDERLYING LAYER
 ### Critical Risks
 
 - **AllowList freeze risk** (shared with USTB) — if Superstate revokes Yearn's AllowList permission, the entire USCC position is frozen with zero exit paths.
-- **Single-key compromise** — compromise of [`0x8abC89D9…`](https://etherscan.io/address/0x8abC89D9b56dFD90dA18e8E18CFaC9111100bDd1) lets the attacker mint unlimited USCC AND upgrade the implementation to malicious code in a single transaction. No multisig, no timelock. Turnkey TEE custody is the only mitigation.
+- **Single-key compromise** — compromise of [`0x8abC89D9…`](https://etherscan.io/address/0x8abC89D9b56dFD90dA18e8E18CFaC9111100bDd1) lets the attacker mint unlimited USCC AND upgrade the implementation to malicious code in a single transaction. No multisig, no timelock. Superstate's claimed Turnkey TEE custody is an offchain mitigation only and cannot be verified from contract state.
 - **Admin burn capability** — owner can confiscate tokens from any holder via `adminBurn`.
-- **Futures-venue counterparty failure** — an FTX-style event at one of the (undisclosed) futures exchanges holding USCC margin would impair the fund's NAV directly. We have no public information on venue diversification.
+- **Futures-venue counterparty failure** — an FTX-style event at one of the (undisclosed) futures exchanges holding USCC margin would impair the fund's NAV directly and can cause principal loss. We have no public information on venue diversification.
 
 ---
 
