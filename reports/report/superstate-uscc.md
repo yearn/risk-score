@@ -10,18 +10,17 @@
 
 USCC is the **Bitwise Crypto Carry Fund** (formerly Superstate Crypto Carry Fund) — a tokenized investment fund issued through the Superstate infrastructure that runs **crypto cash-and-carry (basis) trades** across multiple crypto assets alongside U.S. Treasury Bills / USTB and cash collateral. The fund's investment objective is to capture the differential between spot and futures prices on CFTC-regulated venues while idle collateral earns short-term rates.
 
-USCC uses a **price-appreciation model** (non-rebasing). Unlike USTB, USCC's NAV **is not monotonic** — daily NAV reflects mark-to-market gains and losses on the futures leg, so the share price can decrease during basis-expansion episodes even when the trade economics remain intact (per the protocol's own [risk disclosure](https://docs.superstate.com/llms-full.txt)).
+USCC uses a **price-appreciation model** (non-rebasing). Unlike USTB, USCC's NAV **is not monotonic** — daily NAV reflects mark-to-market gains and losses on the futures leg, so the share price can decrease during basis-expansion episodes even when the trade economics remain intact (per the protocol's own [risk disclosure](https://superstate.com/assets/uscc#disclaimers)).
 
 This means USCC holders can suffer **principal loss**, not merely delayed yield or temporary illiquidity. Losses can arise from basis widening, forced futures unwinds, futures-venue counterparty failure, crypto custody loss, staking / liquid-staking losses, or adverse mark-to-market movement during the offchain redemption window.
 
-Investors must clear KYC/AML, be **Qualified Purchasers** ($5M+ individuals, $25M+ institutions) **and** Accredited Investors, get whitelisted in the same shared AllowList contract used by USTB, then subscribe/redeem either onchain (offchain-settled) or via book-entry shares.
+Investors must clear KYC/AML, be Qualified Purchasers and Accredited Investors, get whitelisted in the same shared AllowList contract used by USTB, then subscribe/redeem either onchain (offchain-settled) or via book-entry shares.
 
 - **Current NAV/Share:** $11.628080 (Chainlink USCC NAV feed, latest round updated Jul 2, 2026 13:10 UTC; verified onchain Jul 3, 2026)
 - **Ethereum Supply:** 6,229,050.91 USCC ($72.43M, verified onchain Jul 3, 2026)
 - **Total Shares (incl. book-entry):** ~13,999,991 USCC (per [superstate.com](https://superstate.com/assets/uscc))
 - **Total AUM (incl. book-entry):** $162.79M (per [superstate.com](https://superstate.com/assets/uscc), Jul 3, 2026)
-- **Public TVL:** $136.18M (per [DeFiLlama](https://defillama.com/protocol/bitwise-uscc), Jul 3, 2026). DeFiLlama currently reports Ethereum $72.43M, Solana $47.32M, and Plume $16.43M; Superstate's own network table reports Ethereum $72.43M, Solana $23.66M, Plume $16.43M, and book-entry $50.27M.
-- **Onchain Holders (Ethereum):** 55 in the latest RWA.xyz snapshot available during review; holder count not refreshed in this TVL update
+- **Public TVL:** $136.18M (per [DeFiLlama](https://defillama.com/protocol/bitwise-uscc), Jul 3, 2026)
 - **30-day Yield:** 2.60% (variable, depends on basis spread)
 - **Management Fee:** 0.75% annually (waived until AUM exceeds $50M — now exceeded)
 - **Minimum Investment:** $100,000
@@ -59,7 +58,7 @@ Investors must clear KYC/AML, be **Qualified Purchasers** ($5M+ individuals, $25
 
 ### Owner Addresses
 
-Verified onchain Jul 3, 2026. **All Superstate-controlled admin keys are EOAs (code size 0)**:
+Verified onchain Jul 3, 2026. **All Superstate-controlled admin keys are EOAs**:
 
 Onchain, these owners are plain EOAs. Superstate states that admin keys use Turnkey secure enclaves, but that is an offchain operational control and cannot be independently verified from Ethereum contract state. This report therefore scores the owner addresses as EOAs for governance purposes; any MPC / TEE / Turnkey protection is treated only as an offchain mitigation.
 
@@ -77,14 +76,13 @@ USCC reuses the same SuperstateTokenV5 implementation family as USTB and the sam
 
 ### Audit History
 
-| # | Firm | Approx. Date | Scope | Notes |
-|---|------|---|---|---|
-| A-1..9 | **0xMacro** | Jul 2024 – Jul 2025 | Token + Redemption + AllowList across V1→V3.1 — see [USTB report](https://github.com/yearn/risk-score/blob/master/reports/report/superstate-ustb.md) for individual findings | Findings fixed; 2H/4M/7M cumulative |
-| A-10 | **0xMacro** | TODO (post-Jul 2025) | TODO — fetch from [0xmacro.com/library/audits/superstate-10](https://0xmacro.com/library/audits/superstate-10) | Audit page lists this exists; full PDF not loaded |
-| A-11 | **0xMacro** | TODO (post-Jul 2025) | TODO — fetch from [0xmacro.com/library/audits/superstate-11](https://0xmacro.com/library/audits/superstate-11) | Audit page lists this exists; full PDF not loaded |
-| -- | **ChainSecurity** | 2023 | Compound SUPTB (original USTB token) | 2 Critical, fixed pre-launch |
-| -- | **Offside Labs** | May 2025 | Solana AllowList | Separate program |
-| -- | **Certora** | — | Formal verification | Referenced but no public report URL |
+| # | Firm | Approx. Date | Scope |
+|---|------|---|---|
+| A-1..9 | **0xMacro** | Jul 2024 – Jul 2025 | Token + Redemption + AllowList across V1→V3.1 — see [USTB report](https://github.com/yearn/risk-score/blob/master/reports/report/superstate-ustb.md) for individual findings |
+| A-10 | **0xMacro** | Jul 2024 - Nov 2025 | [0xmacro.com/library/audits/superstate-10](https://0xmacro.com/library/audits/superstate-10) |
+| A-11 | **0xMacro** | Feb 2026 | [0xmacro.com/library/audits/superstate-11](https://0xmacro.com/library/audits/superstate-11) |
+| -- | **ChainSecurity** | 2023 | [Compound SUPTB (original USTB token)](https://chainsecurity.com/security-audit/compound-suptb/) |
+| -- | **Certora** | April 2025 | [Formal verification](https://1275722710-files.gitbook.io/~/files/v0/b/gitbook-x-prod.appspot.com/o/spaces%2FvEZgAuuCGOpJUFqcgO0l%2Fuploads%2Fv0ktODEvUrKfIVnyeNkN%2FSuperstat%20audit%20report%20by%20Certora.pdf?alt=media&token=4d2af22c-57cc-4c0d-a11e-6867a48049e7) |
 
 **Smart Contract Complexity:** Moderate. Standard upgradeable EIP-1967 transparent proxy (legacy storage slot pattern: implementation accessible via `ProxyAdmin.getProxyImplementation`, not the canonical EIP-1967 slot). ERC-20 with AllowList-gated transfers, `Ownable2StepUpgradeable` access, cross-chain bridging via burn-and-mint to Solana (Token-2022) and Plume.
 
@@ -116,8 +114,7 @@ So **all USCC mint operations are admin-driven** (`mint`/`bulkMint` by the owner
   - Oct 2024: ~$27M
   - Nov 21, 2025 peak: ~$496.61M
   - Jul 3, 2026: ~$136.18M public TVL; Superstate reports $162.79M AUM including book-entry
-- **NAV History:** NAV launched near $10.00, sits at $11.628080 as of the latest Chainlink USCC round (updated Jul 2, 2026 13:10 UTC; verified Jul 3, 2026). Unlike USTB, NAV is **not monotonic** — the protocol's own docs warn that "daily NAV reflects mark-to-market gains and losses, including unrealized valuation changes" and that basis expansion can produce temporary NAV declines. TODO: enumerate any specific NAV-drawdown episodes; historical per-day NAV data is not available on the public Chainlink feed without scraping `NewTransmission` logs from aggregator [`0x5C00518D3d…`](https://etherscan.io/address/0x5C00518D3d423EC59D553Af123Be8a63B11078CF).
-- **Holder Distribution:** 55 onchain holders in the latest RWA.xyz snapshot available during review. TODO: refresh current holder count via Etherscan Pro / Dune query and top-10 concentration.
+- **NAV History:** NAV launched near $10.00, sits at $11.628080 as of the latest Chainlink USCC round (updated Jul 2, 2026 13:10 UTC; verified Jul 3, 2026). Unlike USTB, NAV is **not monotonic** — the protocol's own docs warn that "daily NAV reflects mark-to-market gains and losses, including unrealized valuation changes" and that basis expansion can produce temporary NAV declines.
 - **Incidents:** None publicly reported.
 
 ## Funds Management
@@ -185,14 +182,13 @@ The fund "will trade only those digital assets for which the CFTC has permitted 
 ### Provability
 
 - **NAV/Price Updates:** **Chainlink USCC NAV feed** [`0xAfFd8F5578E8590665de561bdE9E7BAdb99300d9`](https://etherscan.io/address/0xAfFd8F5578E8590665de561bdE9E7BAdb99300d9) — an OCR (off-chain reporting) aggregator wrapper around [`0x5C00518D3d…`](https://etherscan.io/address/0x5C00518D3d423EC59D553Af123Be8a63B11078CF). 16 Chainlink-operated transmitters reach consensus on the daily NAV from Superstate. The aggregator owner is [`0x21f73D42…`](https://etherscan.io/address/0x21f73D42Eb58Ba49dDB685dc29D3bF5c0f0373CA), a Chainlink-controlled contract (not Superstate). **This is the only onchain NAV source for USCC** — unlike USTB, USCC has no Superstate Continuous Price Oracle, so there is no linear-interpolation extrapolation between checkpoints; the price is the most recent OCR transmission only.
-- **No Chainlink Proof-of-Reserves onchain:** A [Chronicle Labs PoR dashboard](https://chroniclelabs.org/dashboard/proofofasset/superstate-uscc) is referenced by Superstate but we were unable to load it during this assessment (HTTP 429); TODO confirm the live PoR feed exists and what its update cadence is.
 - **Offchain Assets:** Cash collateral, USTB / Treasury exposure, spot crypto, staked / liquid-staked crypto, and futures positions are all held offchain. Token holders cannot independently verify positions onchain. Independent verification layers:
   - NAV Fund Services (independent NAV agent)
   - Ernst & Young (annual audit)
   - Anchorage Digital (regulated digital-asset custody)
   - SEC regulatory framework (Reg D / Section 3(c)(7))
 - **Reserve Transparency:** Bitwise publishes headline NAV/AUM/yield, network balances, DeFi integrations, and current holdings on [bitwiseinvestments.com/crypto-funds/uscc](https://bitwiseinvestments.com/crypto-funds/uscc). Public holdings now include asset quantities, implied yields, notional values, portfolio weights, and current futures venues, but margin balances, counterparty concentration policy, historical venue usage, and T-Bill / USTB look-through details are still not fully disclosed publicly.
-- **NAV Mark-to-Market Risk:** Because the futures leg is mark-to-market daily, the share price reflects unrealized basis-trade P&L in real time. The protocol explicitly warns of "unrealized losses" during basis expansion. This is fundamentally different from USTB whose underlying T-Bills have a much smoother mark-to-market profile. A Yearn position redeeming through USCC's T+1/T+2 offchain process may realize losses if NAV falls before settlement.
+- **NAV Mark-to-Market Risk:** Because the futures leg is mark-to-market daily, the share price reflects unrealized basis-trade P&L in real time. The protocol explicitly warns of "unrealized losses" during basis expansion. This is fundamentally different from USTB whose underlying T-Bills have a much smoother mark-to-market profile.
 
 ## Liquidity Risk
 
@@ -200,7 +196,7 @@ The fund "will trade only those digital assets for which the CFTC has permitted 
 - **No Onchain Atomic Redemption:** Verified onchain: `redemptionContract() = 0x0`. There is no USDC-backed RedemptionIdle contract like USTB has — **USCC has zero instant onchain exit capacity at any size**.
 - **No DEX Liquidity:** $0 DEX volume by design. AllowList-gated transfers prevent secondary markets.
 - **Transfer Restrictions:** All transfers require both sender and receiver to be on the AllowList (the same shared V3.1 contract as USTB). Removing an address from the AllowList freezes their tokens.
-- **DeFi Integrations:** Smaller than USTB but live. Bitwise reports USCC support in Aave on Ethereum (~4.60M USCC / $53.47M TVL), Kamino on Solana (~652k USCC / $7.58M TVL), and Morpho on Ethereum (de minimis USCC) as of Jul 2, 2026.
+- **DeFi Integrations:** Smaller than USTB but live. Bitwise reports USCC support in Aave on Ethereum (~4.60M USCC / $53.47M TVL), Kamino on Solana (~652k USCC / $7.58M TVL), and Morpho on Ethereum (de minimis USCC) as of Jul 2, 2026.  Active [Morpho Market](https://app.morpho.org/ethereum/market/0x1a9ccaca2dba9469cd9cba3d077466761b05f465c412d2bf2c71614c4963dd84/uscc-usdc#market) but without borrowing TVL on July 3, 2026.
 - **Stress Scenario:** In a basis-blowup scenario (futures premium collapse, exchange counterparty event, staking / liquid-staking impairment, or simultaneous redemption surge), the fund's liquidity depends on (a) unwinding futures positions at potentially worse-than-market prices, (b) Anchorage's and related venues' ability to deliver spot / staked assets, and (c) the futures venues' ability to honor margin. T-Bills and USTB are highly liquid; major spot crypto is normally liquid but can gap during stress; futures positions can become illiquid during stress because basis spreads can widen materially before they converge. **The mark-to-market NAV will reflect this stress in real time, potentially producing principal losses for holders and realized losses for users redeeming through the offchain settlement window.**
 
 ### AllowList Freeze Risk (Critical for DeFi Integrations)
@@ -213,8 +209,6 @@ Identical to USTB: if an address is removed from the shared AllowList, USCC toke
 4. No DEX fallback ($0 liquidity + AllowList-gated DEX contracts would need permission too)
 
 The only recovery is to be re-whitelisted by Superstate or have Superstate `adminBurn` and process an offchain payment manually.
-
-**Implication for Yearn:** Yearn's vault/strategy contract must hold an active AllowList permission. If Superstate revokes it (regulatory action, dispute, sanctions, operational error), Yearn's entire USCC position becomes frozen and unredeemable. The risk profile here matches USTB.
 
 ## Centralization & Control Risks
 
@@ -248,7 +242,7 @@ The only recovery is to be re-whitelisted by Superstate or have Superstate `admi
 
 ### Programmability
 
-- **NAV pricing:** Chainlink OCR feed only. Updated as the Chainlink network transmits new rounds (cadence depends on heartbeat / deviation thresholds — TODO verify exact heartbeat for this feed). **No SuperstateOracle with linear interpolation as USTB has** — between transmissions, the onchain price is simply stale.
+- **NAV pricing:** Chainlink OCR feed only. Updated as the Chainlink network transmits new rounds (cadence depends on heartbeat / deviation thresholds).
 - **Subscriptions:** Admin-driven (`mint`/`bulkMint` only). Onchain user `subscribe()` is explicitly disabled (`OnchainSubscriptionsDisabled()`).
 - **Redemptions:** User-initiated burn (`offchainRedeem`) is onchain and programmatic, but settlement is offchain (T+1/T+2). No atomic onchain payout.
 - **Transfers:** AllowList enforcement on every transfer (onchain and programmatic).
@@ -311,8 +305,7 @@ USCC is materially **less programmatic than USTB**: no atomic onchain subscribe,
 - **Contract Upgrades:** Monitor USCC ProxyAdmin [`0x2Bb7B8B4dF7fD96baF7CB9a2Ce9e292eCd5BAF3D`](https://etherscan.io/address/0x2Bb7B8B4dF7fD96baF7CB9a2Ce9e292eCd5BAF3D) for `Upgraded` events. **No timelock — upgrades are instant.**
 - **AllowList Changes:** Monitor `ProtocolAddressPermissionSet` events on the shared AllowList for revocation of any contract holding USCC.
 - **Ownership Transfers:** Monitor `OwnershipTransferStarted` on USCC token and ProxyAdmin.
-- **Large Supply Changes:** Alert on mints/burns >5% of total supply in 24h. Current Ethereum supply: ~6.23M USCC; Superstate reports ~14.00M total shares including book-entry.
-- **Offchain Disclosures:** Track Superstate Q&A / website AUM figures and Chronicle Labs PoR (if live) — the onchain `totalSupply()` × Chainlink NAV is only a backing claim if the underlying portfolio is verified independently.
+- **Large Supply Changes:** Alert on mints/burns >5% of total supply in 24h.
 - **Manager Transition (effective Jun 1, 2026):** Track for any operational disruption after the Superstate → Bitwise handoff.
 - **Recommended Frequency:** Per-transmission for NAV. Hourly for pause/admin events. Daily for AllowList changes.
 
@@ -517,15 +510,12 @@ EXTERNAL / UNDERLYING LAYER
 - 100% collateralized in principle but held entirely offchain across multiple counterparties.
 - Anchorage is a strong, regulated custodian for the crypto leg. Current public holdings identify CME and Coinbase futures exposure, but margin balances and concentration policy are not directly verifiable.
 - The basis-trade design is sound under normal market conditions but exposes holders to mark-to-market drawdowns during basis widening.
-- This fits the level-3 description: "100% collateral, some offchain; Mixed quality or newer protocols; Periodic custodian attestation."
 
 **Subcategory B: Provability — 3.0**
 
 - NAV is reported daily via Chainlink (independent feed) and calculated by NAV Fund Services.
 - Annual audit by EY.
 - **Granular risk controls (margin balances, counterparty concentration policy, historical venue usage, and T-Bill maturities) are not fully publicly disclosed** — investor-portal-only or not available in public docs.
-- Chronicle Labs PoR is referenced but we could not confirm it is live (HTTP 429 during this assessment) — TODO.
-- Fits level 3: "Hybrid onchain/offchain; Manual reporting by admins; Known custodian attestation."
 
 **Score: (3.0 + 3.0) / 2 = 3.0/5**
 
@@ -537,9 +527,7 @@ EXTERNAL / UNDERLYING LAYER
 - No DEX liquidity; AllowList-gated transfers.
 - AllowList freeze risk (shared with USTB) — zero exit paths if Superstate revokes permission.
 - Same-value-asset character (USD-denominated fund) somewhat mitigates the multi-day settlement risk per the rubric note, but the mark-to-market NAV means waiting through a basis-widening episode costs holders real money.
-- 55 holders only — very thin secondary-market-equivalent population.
-
-Closer to level 4 ("Withdrawal queues or restrictions"; "<$1M") than to level 3 because the onchain instant-exit facility is **zero**, not "small." Compromise at **3.5**.
+- 43 holders only — very thin secondary-market-equivalent population.
 
 **Score: 3.5/5**
 
@@ -570,7 +558,6 @@ Slightly worse than USTB (1.0) because of the public documentation gaps on the b
 **Optional Modifiers:**
 
 - Live >2 years with no incidents (-0.5): **Not applied** — nearly 24 months as of Jul 3, 2026, still short of 2 years.
-- TVL maintained >$500M for >1 year (-0.5): **Not applied** — current DeFiLlama public TVL is $136.18M; Superstate AUM including book-entry is $162.79M.
 
 After modifier review, final score remains **2.95**. No additional score adjustment is applied; the single-EOA token/ProxyAdmin control and offchain counterparty / margin opacity are already reflected in the Centralization & Control and Funds Management category scores.
 
