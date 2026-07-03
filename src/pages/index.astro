@@ -2,7 +2,8 @@
 import BaseLayout from "../layouts/BaseLayout.astro";
 import ScoreBadge from "../components/ScoreBadge.astro";
 import stats from "../data/stats.json";
-import { getRecentReports } from "../lib/reports";
+import { getAllReports } from "../lib/reports";
+import type { ReportData } from "../lib/parseReport";
 import { scoreColor, scoreTier } from "../lib/colors";
 
 const formatRelative = (ts: number): string => {
@@ -28,7 +29,11 @@ const reportCount = stats.reportCount;
 
 const morphoUrl = "https://app.morpho.org/ethereum/curator/yearn";
 
-const recent = getRecentReports(4);
+// Homepage highlights scored assessments; Not Rated (terminal) reports live on /reports.
+const recent = getAllReports()
+  .filter((r): r is ReportData & { finalScore: number } => r.finalScore != null)
+  .sort((a, b) => b.dateSortable - a.dateSortable)
+  .slice(0, 4);
 const featured = recent[0];
 const followups = recent.slice(1);
 ---

@@ -20,7 +20,7 @@ nodes:
     label: hgETH (High Growth Vault)
     address: "0xc824A08dB624942c5E5F330d56530cD1598859fD"
     category: vault
-    note: ERC-4626 TransparentUpgradeableProxy → GainLendingPool; paused since 2026-04-18
+    note: ERC-4626 TransparentUpgradeableProxy → GainLendingPool; unpaused since ~Jun 2026; exchange rate decreased to 0.9941 rsETH/hgETH
   - id: gain-adapter
     label: GainAdapter (rsETH adapter)
     address: "0xB185D98056419029daE7120EcBeFa0DbC12c283A"
@@ -45,7 +45,7 @@ nodes:
     label: Fees Collector
     address: "0x2151A97C7819782fD99efF020CdfE0aE838Ad378"
     category: infra
-    note: Receives minted hgETH shares (1.5% mgmt fee)
+    note: Receives minted hgETH shares (mgmt fee now 0%, was 1.5%)
 
   # === Governance ===
   - id: vault-multisig
@@ -112,12 +112,12 @@ nodes:
     label: Morpho hgETH/WETH (91.5% LLTV)
     address: "0x56dbc0f2784cd959e57fcc9cd83c3b7a24ee678c"
     category: dependency
-    note: Yearn use-case market; 99.5% utilized, oracle un-adjusted
+    note: Yearn use-case market; essentially empty (<0.1 WETH supply); was 99.5% utilized in Apr 2026
   - id: hgeth-usd-oracle
     label: hgETH/USD EOMultiFeedAdapter
     address: "0x70cf192d6b76d57a46aafc9285ced110034eb013"
     category: dependency
-    note: Upgradeable Morpho oracle feed proxy
+    note: Upgradeable Morpho oracle feed proxy; latestAnswer() reverts (degraded)
   - id: nexus-mutual
     label: Nexus Mutual (Embedded Cover)
     category: dependency

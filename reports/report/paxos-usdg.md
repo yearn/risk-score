@@ -1,6 +1,6 @@
 # Protocol Risk Assessment: Paxos USDG (Global Dollar)
 
-- **Assessment Date:** March 20, 2026
+- **Assessment Date:** March 20, 2026 (reassessed June 26, 2026)
 - **Token:** USDG (Global Dollar)
 - **Chain:** Ethereum
 - **Token Address:** [`0xe343167631d89B6Ffc58B88d6b7fB0228795491D`](https://etherscan.io/address/0xe343167631d89B6Ffc58B88d6b7fB0228795491D)
@@ -16,15 +16,15 @@ Reserves consist of **cash and cash equivalents** (primarily short-duration U.S.
 
 USDG is deployed on **4 chains**: Ethereum, Solana (52.3% of supply), X Layer (19.5%), and Ink (6.2%). Cross-chain bridging between Ethereum and Solana is handled via **LayerZero V2 OFT**.
 
-**Key metrics (March 20, 2026):**
+**Key metrics (June 26, 2026):**
 
-- **Total Supply (Ethereum):** ~472,133,291 USDG (~$472M)
-- **Total Supply (All Chains):** ~$1.67B
-- **Market Cap:** ~$1.78B
-- **24h Trading Volume:** ~$24M
-- **DEX Liquidity (Ethereum):** ~$9.8M (Curve + Uniswap)
+- **Total Supply (Ethereum):** ~494,698,323 USDG (~$495M) [onchain](https://etherscan.io/token/0xe343167631d89B6Ffc58B88d6b7fB0228795491D)
+- **Total Supply (All Chains):** ~$2.89B [DeFiLlama](https://stablecoins.llama.fi/stablecoin/286)
+- **Market Cap:** ~$2.89B
+- **30-Day Supply Change:** +$259M (+9.9%)
+- **DEX Liquidity (Ethereum):** TODO — refresh liquidity snapshot
 - **CEX Listings:** OKX, Kraken, Bullish, KuCoin, Gate.io
-- **Price:** $0.9997 (at peg)
+- **Price:** $0.99995 (at peg) [DeFiLlama](https://stablecoins.llama.fi/stablecoin/286)
 
 **Links:**
 
@@ -53,10 +53,10 @@ USDG is deployed on **4 chains**: Ethereum, Solana (52.3% of supply), X Layer (1
 
 | Contract | Address | Type |
 |----------|---------|------|
-| Token Admin (TimelockController) | [`0x9036566eAa5F83E0b9E1161C6c602b0Adf997654`](https://etherscan.io/address/0x9036566eAa5F83E0b9E1161C6c602b0Adf997654) | OpenZeppelin TimelockController — **3-hour minimum delay** |
-| DEFAULT_ADMIN Multisig | [`0x137Dcd97872dE27a4d3bf36A4643c5e18FA40713`](https://etherscan.io/address/0x137Dcd97872dE27a4d3bf36A4643c5e18FA40713) | SimpleMultiSig — 7 owners, quorum-based |
-| Operational Multisig (PAUSE / ASSET_PROTECTION / SUPPLY_CONTROLLER_MANAGER) | [`0x0644Bd0248d5F89e4F6E845a91D15c23591e5D33`](https://etherscan.io/address/0x0644Bd0248d5F89e4F6E845a91D15c23591e5D33) | SimpleMultiSig — **3-of-7 threshold** |
-| SupplyControl Admin | [`0x3Af3e85f4f97De7AD0f000B724Fb77fE5ffc024B`](https://etherscan.io/address/0x3Af3e85f4f97De7AD0f000B724Fb77fE5ffc024B) | **EOA** — holds DEFAULT_ADMIN + SUPPLY_CONTROLLER_MANAGER on SupplyControl |
+| Token Admin (TimelockController) | [`0x9036566eAa5F83E0b9E1161C6c602b0Adf997654`](https://etherscan.io/address/0x9036566eAa5F83E0b9E1161C6c602b0Adf997654) | OpenZeppelin TimelockController — **24-hour minimum delay** |
+| DEFAULT_ADMIN Multisig | [`0x137Dcd97872dE27a4d3bf36A4643c5e18FA40713`](https://etherscan.io/address/0x137Dcd97872dE27a4d3bf36A4643c5e18FA40713) | SimpleMultiSig — **20 owners, threshold 3** |
+| Operational Multisig (no current roles) | [`0x0644Bd0248d5F89e4F6E845a91D15c23591e5D33`](https://etherscan.io/address/0x0644Bd0248d5F89e4F6E845a91D15c23591e5D33) | SimpleMultiSig — **20 owners, threshold 3**; no longer holds any onchain roles |
+| Operations MPC Wallet (PAUSE / ASSET_PROTECTION / Timelock PROPOSER+EXECUTOR+CANCELLER / SupplyControl SCM) | [`0x3Af3e85f4f97De7AD0f000B724Fb77fE5ffc024B`](https://etherscan.io/address/0x3Af3e85f4f97De7AD0f000B724Fb77fE5ffc024B) | **MPC wallet** (likely Fordefi — see governance section for evidence) — holds PAUSE_ROLE, ASSET_PROTECTION_ROLE on token; PROPOSER_ROLE, EXECUTOR_ROLE, CANCELLER_ROLE on timelock; SUPPLY_CONTROLLER_MANAGER on SupplyControl |
 
 ### Supply Controllers
 
@@ -70,11 +70,12 @@ USDG is deployed on **4 chains**: Ethereum, Solana (52.3% of supply), X Layer (1
 
 | Chain | Token Address | Supply (DeFiLlama) | Share |
 |-------|---------------|-------------------:|------:|
-| Solana | `2u1tszSeqZ3qBWF3uNGPFc8TzMk2tdiwknnRMWGWjGWH` | $873.7M | 52.3% |
-| Ethereum | [`0xe343167631d89B6Ffc58B88d6b7fB0228795491D`](https://etherscan.io/address/0xe343167631d89B6Ffc58B88d6b7fB0228795491D) | $368.5M | 22.0% |
-| X Layer | [`0x4ae46a509F6b1D9056937BA4500cb143933D2dc8`](https://etherscan.io/address/0x4ae46a509F6b1D9056937BA4500cb143933D2dc8) | $326.5M | 19.5% |
-| Ink | [`0xe343167631d89B6Ffc58B88d6b7fB0228795491D`](https://etherscan.io/address/0xe343167631d89B6Ffc58B88d6b7fB0228795491D) | $103.9M | 6.2% |
-| **Total** | | **$1,672.5M** | 100% |
+| X Layer | [`0x4ae46a509F6b1D9056937BA4500cb143933D2dc8`](https://etherscan.io/address/0x4ae46a509F6b1D9056937BA4500cb143933D2dc8) | $1,702.3M | 58.8% |
+| Solana | `2u1tszSeqZ3qBWF3uNGPFc8TzMk2tdiwknnRMWGWjGWH` | $697.2M | 24.1% |
+| Ethereum | [`0xe343167631d89B6Ffc58B88d6b7fB0228795491D`](https://etherscan.io/address/0xe343167631d89B6Ffc58B88d6b7fB0228795491D) | $455.4M | 15.7% |
+| Ink | [`0xe343167631d89B6Ffc58B88d6b7fB0228795491D`](https://etherscan.io/address/0xe343167631d89B6Ffc58B88d6b7fB0228795491D) | $37.7M | 1.3% |
+| Hyperliquid L1 | N/A | $1.6M | 0.1% |
+| **Total** | | **$2,894.2M** | 100% |
 
 ## Audits and Due Diligence Disclosures
 
@@ -113,6 +114,7 @@ The USDG system is **moderate complexity**:
 | v2.0.1 | Nov 12, 2024 | Bugfix: prevent frozen addresses from cross-chain transfers |
 | v2.0.2 | Aug 8, 2025 | Patch: domain separator initialization fix |
 | v2.1.0 | Jan 6, 2025 | EIP-1271 smart contract wallet support, dynamic DOMAIN_SEPARATOR for chain fork handling |
+| **Governance restructure** | ~Mar–Jun 2026 | Timelock delay increased 3h→24h; governance consolidated from multisigs to MPC wallet (Fordefi); SupplyControl admin moved from EOA to timelock; both multisigs expanded to 20 owners |
 
 ### Bug Bounty
 
@@ -125,11 +127,11 @@ The absence of a formal public bug bounty with monetary rewards is a weakness fo
 
 ## Historical Track Record
 
-- **Contract deployed:** October 7, 2024 (block 20,915,336) — **~17 months** in production
+- **Contract deployed:** October 7, 2024 (block 20,915,336) — **~21 months** in production
 - **Official launch:** November 1, 2024
-- **Total supply:** ~$1.67B across 4 chains ($472M on Ethereum)
-- **Growth trajectory:** From ~$352M (mid-2025) to ~$1.67B (March 2026) — approximately 375% growth
-- **30-day change:** +$177M (+11.9%)
+- **Total supply:** ~$2.89B across 5 chains ($495M on Ethereum)
+- **Growth trajectory:** From ~$352M (mid-2025) to ~$2.89B (June 2026) — approximately 721% growth
+- **30-day change:** +$259M (+9.9%)
 - **Security incidents:** None. No exploits, hacks, or depegging events reported
 - **Peg stability:** Price consistently at $0.999-$1.000 across all venues
 - **Paxos track record:** Paxos has operated USDP (Pax Dollar, formerly PAX) since 2018 and operates PYUSD (PayPal USD) on behalf of PayPal. No Paxos-issued stablecoin has suffered a security incident or depeg
@@ -203,30 +205,51 @@ The absence of a formal public bug bounty with monetary rewards is a weakness fo
 
 ### Governance
 
-**Token governance uses a two-tier structure:**
+**Token governance has been restructured from a two-tier multisig model to a model consolidated under an MPC wallet with a 24-hour timelock.**
+
+**⚠️ Governance restructured since last assessment (March 2026).** The 7-owner DEFAULT_ADMIN multisig and 3-of-7 operational multisig have been removed from all onchain roles. All governance power is now concentrated in an MPC wallet (likely Fordefi) with a 24-hour timelock on critical changes.
+
+**MPC wallet evidence:** The operations address [`0x3Af3e85f4f97De7AD0f000B724Fb77fE5ffc024B`](https://etherscan.io/address/0x3Af3e85f4f97De7AD0f000B724Fb77fE5ffc024B) exhibits a classic MPC custody wallet pattern:
+- **Gas station funding:** A dedicated gas station ([`0x264bd8291fae1d75db2c5f573b07faa6715997b5`](https://etherscan.io/address/0x264bd8291fae1d75db2c5f573b07faa6715997b5), nonce 5.6M+, balance ~4,986 ETH, funding 62+ distinct EOAs) sends just-in-time ETH (~0.02–0.05 ETH) before each batch of operations. The account never holds large ETH balances independently.
+- **Rotating gas stations:** Multiple funding addresses have serviced this EOA over its lifetime (`0x9195`, `0x4b39`, `0xf492`, `0xca67`, `0x264bd`), consistent with MPC provider infrastructure rotation.
+- **No single key holder:** In MPC wallets, the private key is cryptographically sharded across multiple parties — no individual ever holds the full key. Transactions require internal policy-based approvals within the workspace.
+- **Provider:** The pattern (dedicated gas station with 5.6M+ nonce, just-in-time funding, multi-address servicing) is consistent with institutional MPC custody infrastructure. Paxos's website lists **"Fordefi by Paxos"** — a comprehensive MPC wallet platform — in its footer navigation, indicating Paxos has a direct relationship with an MPC wallet provider. This strongly suggests Paxos uses Fordefi (or similar) MPC technology for its own operational key management.
+
+**Important caveat:** The internal MPC quorum/threshold and policy configuration are not publicly verifiable onchain. The security depends on the provider's implementation and Paxos's internal policy controls (e.g., requiring multiple workspace members to approve transactions). While this is significantly stronger than a single-EOA held by one person, the exact risk profile depends on the unknown internal parameters.
+
+**Documentation is stale:** The [USDG GitHub README](https://github.com/paxosglobal/usdg-contract) still lists the old multisig addresses as role holders and states "the addresses above utilize multisignature contracts." The [live docs site](https://docs.paxos.com/guides/stablecoin/usdg/mainnet) (checked via Playwright rendering) does not document governance structure at all — neither the old multisig model nor the new MPC wallet. No public disclosure of the governance restructure exists.
 
 **Tier 1 — Critical operations (upgrades, role management):**
-- **TimelockController** ([`0x9036566eAa5F83E0b9E1161C6c602b0Adf997654`](https://etherscan.io/address/0x9036566eAa5F83E0b9E1161C6c602b0Adf997654)) with **3-hour minimum delay**
+- **TimelockController** ([`0x9036566eAa5F83E0b9E1161C6c602b0Adf997654`](https://etherscan.io/address/0x9036566eAa5F83E0b9E1161C6c602b0Adf997654)) with **24-hour minimum delay** [onchain](https://etherscan.io/address/0x9036566eAa5F83E0b9E1161C6c602b0Adf997654#readContract#F5)
 - Holds `DEFAULT_ADMIN_ROLE` and `owner()` on the USDG token
+- Also holds `DEFAULT_ADMIN_ROLE` on the SupplyControl contract (SupplyControl admin no longer an EOA)
 - Controls contract upgrades (UUPS `upgradeTo`), role granting/revoking, and facet changes
-- Proposer/executor roles are controlled by the **7-owner DEFAULT_ADMIN multisig** ([`0x137Dcd97872dE27a4d3bf36A4643c5e18FA40713`](https://etherscan.io/address/0x137Dcd97872dE27a4d3bf36A4643c5e18FA40713)) — quorum-based, 43 transactions executed. Paxos states: *"Any change requires the presence of a quorum of signers in the same physical location, ensuring no individual can unilaterally influence change"*
+- **PROPOSER_ROLE, EXECUTOR_ROLE, and CANCELLER_ROLE on the timelock are all held by the MPC wallet** ([`0x3Af3e85f4f97De7AD0f000B724Fb77fE5ffc024B`](https://etherscan.io/address/0x3Af3e85f4f97De7AD0f000B724Fb77fE5ffc024B)) — any action scheduled through the timelock can be proposed, executed, and cancelled by this same address. However, MPC policy controls mean multiple internal approvals are typically required to initiate transactions
+- The DEFAULT_ADMIN_ROLE on the timelock is held by the timelock itself (self-administered) — the timelock can grant/revoke roles on itself
 
 **Tier 2 — Operational / emergency (pause, freeze, supply management):**
-- **3-of-7 SimpleMultiSig** ([`0x0644Bd0248d5F89e4F6E845a91D15c23591e5D33`](https://etherscan.io/address/0x0644Bd0248d5F89e4F6E845a91D15c23591e5D33))
-- Holds `PAUSE_ROLE`, `ASSET_PROTECTION_ROLE`, and `SUPPLY_CONTROLLER_MANAGER_ROLE` directly on the token (no timelock — appropriate for emergency actions)
+- **MPC wallet** ([`0x3Af3e85f4f97De7AD0f000B724Fb77fE5ffc024B`](https://etherscan.io/address/0x3Af3e85f4f97De7AD0f000B724Fb77fE5ffc024B)) holds `PAUSE_ROLE` and `ASSET_PROTECTION_ROLE` directly on the token (no onchain timelock — but internal MPC policy likely requires multiple approvals) [verified onchain](https://etherscan.io/address/0xe343167631d89B6Ffc58B88d6b7fB0228795491D#readContract)
+- The MPC wallet also holds `SUPPLY_CONTROLLER_MANAGER_ROLE` on the SupplyControl contract
+- The former operational multisig ([`0x0644Bd0248d5F89e4F6E845a91D15c23591e5D33`](https://etherscan.io/address/0x0644Bd0248d5F89e4F6E845a91D15c23591e5D33)) **no longer holds any roles** on the token, timelock, or SupplyControl
+- The `SUPPLY_CONTROLLER_MANAGER_ROLE` on the token appears unassigned — no holder found among known governance addresses
 
-**SupplyControl governance (separate):**
-- **EOA** ([`0x3Af3e85f4f97De7AD0f000B724Fb77fE5ffc024B`](https://etherscan.io/address/0x3Af3e85f4f97De7AD0f000B724Fb77fE5ffc024B)) holds `DEFAULT_ADMIN_ROLE` + `SUPPLY_CONTROLLER_MANAGER_ROLE` on the SupplyControl contract
-- This EOA can **add/remove supply controllers** and **modify rate limits**
-- SupplyControl has a 3-hour default admin delay for admin role changes
+**Multisig status (neither holds active governance roles):**
+- **DEFAULT_ADMIN Multisig** ([`0x137Dcd97872dE27a4d3bf36A4643c5e18FA40713`](https://etherscan.io/address/0x137Dcd97872dE27a4d3bf36A4643c5e18FA40713)): 20 owners, threshold 3, 43 transactions — no governance roles
+- **Operational Multisig** ([`0x0644Bd0248d5F89e4F6E845a91D15c23591e5D33`](https://etherscan.io/address/0x0644Bd0248d5F89e4F6E845a91D15c23591e5D33)): 20 owners, threshold 3, 855 transactions — no governance roles
+
+**SupplyControl governance:**
+- `DEFAULT_ADMIN_ROLE` on SupplyControl is now held by the **Token Admin Timelock** (24h delay) — this is an improvement from the previous EOA admin
+- `SUPPLY_CONTROLLER_MANAGER_ROLE` on SupplyControl is held by the MPC wallet [`0x3Af3e85f4f97De7AD0f000B724Fb77fE5ffc024B`](https://etherscan.io/address/0x3Af3e85f4f97De7AD0f000B724Fb77fE5ffc024B)
 - Two EOA supply controllers (SC1, SC2) have very large mint capacities ($500M and $1B respectively)
 
 **Key governance concerns:**
 
-1. **SupplyControl admin is an EOA** — a compromised key could add malicious supply controllers. However, Paxos operates these keys within institutional-grade security infrastructure and is subject to MAS supervision
-2. **3-hour timelock is short** — gives limited time for users/integrators to react to contract upgrades. Comparable to USDC (no timelock on Circle admin actions)
-3. **Freeze/wipe capability** — `ASSET_PROTECTION_ROLE` can freeze individual addresses and wipe frozen balances. This is standard for regulated stablecoins (USDC, USDT have equivalent capabilities) and is documented as used for regulatory/law enforcement requirements
-4. **Facet pattern** — the diamond-like `setFacet`/`batchSetFacet` allows delegating function calls to external contracts, adding upgradeability surface area controlled by the admin (through the 3h timelock)
+1. **All governance consolidated into an MPC wallet** — the MPC wallet ([`0x3Af3e85f4f97De7AD0f000B724Fb77fE5ffc024B`](https://etherscan.io/address/0x3Af3e85f4f97De7AD0f000B724Fb77fE5ffc024B)) holds PAUSE_ROLE, ASSET_PROTECTION_ROLE, timelock PROPOSER+EXECUTOR+CANCELLER, and SupplyControl SCM. However, as an MPC wallet (likely Fordefi), the private key is sharded across multiple parties — no single individual can unilaterally sign transactions. The risk is comparable to a multisig with an unknown internal quorum, not a standard single-key EOA
+2. **24-hour timelock is a strong improvement** — the 3h delay increased to 24h, providing a meaningful monitoring window for contract upgrades. Combined with MPC policy controls, this creates defense-in-depth for critical changes
+3. **Emergency actions have no onchain timelock but benefit from MPC controls** — PAUSE_ROLE and ASSET_PROTECTION_ROLE can be exercised immediately onchain, but the MPC wallet's internal policy layer typically requires multiple approvals
+4. **SupplyControl admin improvement** — moving DEFAULT_ADMIN on SupplyControl from an EOA to the 24h timelock prevents unilateral addition of supply controllers
+5. **Freeze/wipe capability** — `ASSET_PROTECTION_ROLE` can freeze individual addresses and wipe frozen balances. This is standard for regulated stablecoins (USDC, USDT have equivalent capabilities). The MPC wallet structure provides internal governance but the onchain capability remains unilateral from the contract's perspective
+6. **Internal MPC quorum unknown** — while MPC is inherently multi-party, the exact number of key shards, approval threshold, and policy rules are not publicly verifiable. This is a transparency gap
 
 ### Programmability
 
@@ -263,18 +286,20 @@ The absence of a formal public bug bounty with monetary rewards is a weakness fo
 | SupplyControl | [`0x9a7164112029b81c07636AB7b59fA813E0883BBF`](https://etherscan.io/address/0x9a7164112029b81c07636AB7b59fA813E0883BBF) | Supply controller additions/removals, rate limit changes |
 | TimelockController | [`0x9036566eAa5F83E0b9E1161C6c602b0Adf997654`](https://etherscan.io/address/0x9036566eAa5F83E0b9E1161C6c602b0Adf997654) | `CallScheduled`, `CallExecuted` events (3h delay — gives monitoring window) |
 | Operational Multisig | [`0x0644Bd0248d5F89e4F6E845a91D15c23591e5D33`](https://etherscan.io/address/0x0644Bd0248d5F89e4F6E845a91D15c23591e5D33) | Submitted/executed transactions (pause, freeze, supply management) |
-| SupplyControl Admin (EOA) | [`0x3Af3e85f4f97De7AD0f000B724Fb77fE5ffc024B`](https://etherscan.io/address/0x3Af3e85f4f97De7AD0f000B724Fb77fE5ffc024B) | Any transactions (controls supply controller additions) |
+| Operations MPC Wallet (all governance) | [`0x3Af3e85f4f97De7AD0f000B724Fb77fE5ffc024B`](https://etherscan.io/address/0x3Af3e85f4f97De7AD0f000B724Fb77fE5ffc024B) | Any transactions — controls pause, freeze, timelock scheduling, supply controllers. MPC wallet (likely Fordefi) — key sharded across multiple parties. Monitor for unexpected transactions |
+| Gas Station | [`0x264bd8291fae1d75db2c5f573b07faa6715997b5`](https://etherscan.io/address/0x264bd8291fae1d75db2c5f573b07faa6715997b5) | Funds MPC wallet before transactions — unusual ETH outflows could indicate MPC key migration or provider change |
 
 ### Critical Events to Monitor
 
-- **Pause events** — `Paused`/`Unpaused` on the token — all transfers stop when paused
-- **Freeze events** — individual address freezes via `ASSET_PROTECTION_ROLE` — could affect DeFi integrations
+- **Pause events** — `Paused`/`Unpaused` on the token — all transfers stop when paused (MPC wallet can trigger immediately, but internal policy likely requires multiple approvals)
+- **Freeze events** — individual address freezes via `ASSET_PROTECTION_ROLE` — could affect DeFi integrations (MPC wallet, no onchain timelock)
 - **Supply changes** — large mints/burns (>5% of supply in 24h) could indicate operational issues
-- **Contract upgrades** — `Upgraded` events via UUPS proxy — 3h timelock provides advance notice via `CallScheduled`
-- **Supply controller changes** — additions/removals via SupplyControl — could affect minting operations
+- **Contract upgrades** — `Upgraded` events via UUPS proxy — 24h timelock provides advance notice via `CallScheduled`
+- **Supply controller changes** — additions/removals via SupplyControl — SCM role held by MPC wallet, admin role under 24h timelock
 - **Rate limit changes** — modifications to per-controller mint capacities
-- **Timelock events** — `CallScheduled` gives 3h advance notice of all critical admin changes
+- **Timelock events** — `CallScheduled` gives 24h advance notice of all critical admin changes
 - **Facet changes** — `setFacet`/`batchSetFacet` events indicate functional changes to the token contract
+- **MPC wallet transactions** — any transaction from [`0x3Af3e85f4f97De7AD0f000B724Fb77fE5ffc024B`](https://etherscan.io/address/0x3Af3e85f4f97De7AD0f000B724Fb77fE5ffc024B) — controls all governance actions. MPC structure provides multi-party security, but the address remains the single onchain governance point
 
 ### Monitoring Functions
 
@@ -284,7 +309,8 @@ The absence of a formal public bug bounty with monetary rewards is a weakness fo
 | `paused()` | Token | Operational status | Hourly |
 | `isFrozen(address)` | Token | Address freeze status | On integration |
 | `getSupplyController(address)` | SupplyControl | Controller status/limits | Daily |
-| `getMinDelay()` | TimelockController | Timelock delay changes | Weekly |
+| `getMinDelay()` | TimelockController | Timelock delay changes (currently 24h) | Weekly |
+| Role events | TimelockController | Monitor `RoleGranted`/`RoleRevoked` events — contract uses plain AccessControl, cannot enumerate | On change |
 
 ## Risk Summary
 
@@ -293,22 +319,23 @@ The absence of a formal public bug bounty with monetary rewards is a weakness fo
 - **Regulated issuer with stablecoin track record:** Paxos is supervised by MAS (Singapore) and NYDFS (US). Has operated USDP since 2018 and PYUSD since 2023 with zero incidents across all stablecoins
 - **Highest-quality reserves:** Cash and cash equivalents (primarily U.S. Treasury Bills) in segregated accounts — equivalent to USDC's reserve quality
 - **Solid audit coverage:** 6 audits from 3 reputable firms including Trail of Bits and Zellic. Source code is open (MIT license)
-- **Tiered governance with timelock:** Critical changes go through a 3-hour TimelockController controlled by a 7-owner multisig. Emergency actions (pause/freeze) use a separate 3-of-7 multisig for fast response
+- **24-hour timelock on critical changes:** Contract upgrades and admin changes now have a 24-hour delay (improved from 3h), providing meaningful monitoring window for integrators
 - **Rate-limited minting:** Supply controllers have capacity limits and refill rates, preventing instantaneous unlimited minting
-- **Significant market adoption:** $1.67B total supply with major partners (Kraken, Robinhood, Galaxy Digital, BitGo). Strong growth trajectory
+- **Significant market adoption:** $2.89B total supply with major partners (Kraken, Robinhood, Galaxy Digital, BitGo). Strong growth trajectory
 
 ### Key Risks
 
-- **SupplyControl admin is an EOA** — a single EOA ([`0x3Af3e85f4f97De7AD0f000B724Fb77fE5ffc024B`](https://etherscan.io/address/0x3Af3e85f4f97De7AD0f000B724Fb77fE5ffc024B)) controls the SupplyControl contract, including the ability to add supply controllers with large mint capacities. This is the most significant onchain governance gap
-- **Short timelock (3 hours)** — contract upgrades and critical admin changes have only a 3-hour delay. While better than no timelock, this provides limited reaction time for large integrators
+- **Governance consolidated into an MPC wallet** — the MPC wallet ([`0x3Af3e85f4f97De7AD0f000B724Fb77fE5ffc024B`](https://etherscan.io/address/0x3Af3e85f4f97De7AD0f000B724Fb77fE5ffc024B)) holds PAUSE_ROLE, ASSET_PROTECTION_ROLE, timelock PROPOSER/EXECUTOR/CANCELLER, and SupplyControl SCM. The MPC structure (likely Fordefi) means the key is sharded across multiple parties, but the internal quorum and policy configuration are not publicly verifiable
+- **Multisigs removed from governance** — the 3-of-7 operational multisig (now 20 owners) and the 7-owner DEFAULT_ADMIN multisig (now 20 owners) no longer hold any onchain roles
+- **Emergency actions have no onchain multisig** — PAUSE and ASSET_PROTECTION are controlled by the MPC wallet with no onchain timelock. Internal MPC policy controls are the sole protection (previous model used a 3-of-7 multisig)
 - **No formal public bug bounty** — no confirmed Immunefi or equivalent program with monetary rewards. A private HackerOne program may exist but could not be verified
 - **Offchain reserves** — reserves are entirely offchain with monthly attestation. No onchain Proof of Reserves mechanism for real-time verification
-- **Relatively new (17 months)** — younger than USDC (2018) or USDT (2014), though longer than many DeFi stablecoins
+- **Relatively new (21 months)** — younger than USDC (2018) or USDT (2014), though longer than many DeFi stablecoins
 
 ### Critical Risks
 
-- **Freeze/wipe capability** — `ASSET_PROTECTION_ROLE` (3-of-7 multisig) can freeze any address and wipe frozen balances. This is standard for regulated stablecoins but means Paxos has unilateral power over user funds. For DeFi integrations, a frozen vault/strategy contract would lock all USDG held by that contract
-- **Upgradeable proxy with facet pattern** — the USDG contract can be upgraded via UUPS proxy AND can have functional behavior changed via the facet pattern (`setFacet`). Both controlled by the 3h timelock, but combined they create significant admin power over token behavior
+- **Freeze/wipe capability** — `ASSET_PROTECTION_ROLE` (held by MPC wallet) can freeze any address and wipe frozen balances. This is standard for regulated stablecoins. The MPC structure provides internal governance, but from the contract's perspective this is a unilateral capability. For DeFi integrations, a frozen vault/strategy contract would lock all USDG held by that contract
+- **Upgradeable proxy with facet pattern** — the USDG contract can be upgraded via UUPS proxy AND can have functional behavior changed via the facet pattern (`setFacet`). Both controlled through the 24h timelock (MPC wallet as proposer/executor)
 
 ---
 
@@ -323,7 +350,7 @@ The absence of a formal public bug bounty with monetary rewards is a weakness fo
 
 - [x] **No audit** — 6 audits by 3 reputable firms (Zellic, Trail of Bits, Halborn). ✅ PASS
 - [x] **Unverifiable reserves** — Offchain reserves, but monthly attestation by independent accounting firm, MAS regulatory oversight, segregated accounts. Multiple independent verification layers. ✅ PASS (same structure as USDC)
-- [x] **Total centralization** — Token admin is a TimelockController (3h) controlled by a 7-owner multisig. Operational roles held by a 3-of-7 multisig. Not controlled by a single EOA (though SupplyControl admin is an EOA). ✅ PASS
+- [x] **Total centralization** — Token admin is a TimelockController (24h). Operational roles (PAUSE, ASSET_PROTECTION) held by an MPC wallet (key sharded across multiple parties). Critical upgrades go through 24h timelock. SupplyControl admin under timelock. Not fully decentralized but not a single-key EOA — MPC structure provides multi-party security. ✅ PASS
 
 **All gates pass.** Proceed to category scoring.
 
@@ -335,11 +362,11 @@ The absence of a formal public bug bounty with monetary rewards is a weakness fo
 |--------|-----------|
 | Audits | 6 audits from 3 reputable firms: Zellic (3), Trail of Bits (1), Halborn (2). Covers core contracts, cross-chain, rewards, and signatures |
 | Bug bounty | No confirmed public bug bounty. Possible private HackerOne program |
-| Production history | **~17 months** (Oct 2024). Paxos has 7+ years stablecoin experience (USDP since 2018) |
-| TVL | **~$1.67B** total supply, $472M on Ethereum |
+| Production history | **~21 months** (Oct 2024). Paxos has 7+ years stablecoin experience (USDP since 2018) |
+| TVL | **~$2.89B** total supply, $495M on Ethereum |
 | Security incidents | None. Zero incidents across all Paxos stablecoins (USDP, PYUSD, USDG) |
 
-**Score: 2.0/5** — Solid audit coverage from 3 reputable firms including Trail of Bits (industry gold standard). 17 months of production with $1.67B supply and zero incidents, plus Paxos's 7+ year stablecoin track record lends additional confidence. However, the lack of a formal public bug bounty prevents a score of 1.5. Between score 1 (3+ audits, >2 years, >$100M) and score 2 (2+ audits, 1-2 years, >$50M) — the strong firm quality and massive TVL push toward 1.5, while the shorter production history and no bug bounty push toward 2.
+**Score: 2.0/5** — Solid audit coverage from 3 reputable firms including Trail of Bits (industry gold standard). 21 months of production with $2.89B supply and zero incidents, plus Paxos's 7+ year stablecoin track record lends additional confidence. However, the lack of a formal public bug bounty prevents a score of 1.5. Between score 1 (3+ audits, >2 years, >$100M) and score 2 (2+ audits, 1-2 years, >$50M) — the strong firm quality and massive TVL push toward 1.5, while the production history and no bug bounty push toward 2.
 
 #### Category 2: Centralization & Control Risks (Weight: 30%)
 
@@ -347,14 +374,15 @@ The absence of a formal public bug bounty with monetary rewards is a weakness fo
 
 | Factor | Assessment |
 |--------|-----------|
-| Upgradeability | UUPS proxy — upgradeable via TimelockController (3h delay) |
-| Token admin | TimelockController (3h) + 7-owner multisig (quorum-based, physical co-location required) |
-| Operational roles | 3-of-7 multisig for PAUSE, ASSET_PROTECTION, SUPPLY_CONTROLLER_MANAGER |
-| SupplyControl admin | **EOA** — can add/remove supply controllers, modify rate limits |
-| Privileged roles | Can pause all transfers, freeze/wipe individual addresses, upgrade contracts, change facets |
+| Upgradeability | UUPS proxy — upgradeable via TimelockController (24h delay) |
+| Token admin | TimelockController (24h) — PROPOSER/EXECUTOR/CANCELLER all held by MPC wallet |
+| Operational roles | **MPC wallet** holds PAUSE, ASSET_PROTECTION directly (no onchain timelock, but MPC provides multi-party internal approvals) |
+| SupplyControl admin | DEFAULT_ADMIN under 24h timelock (improvement); SCM held by same MPC wallet |
+| Privileged roles | Can pause all transfers, freeze/wipe individual addresses, upgrade contracts, change facets — all through MPC wallet with 24h timelock on critical changes |
+| MPC transparency | Internal quorum/threshold and policy configuration not publicly verifiable — security depends on Paxos's internal controls |
 | Regulatory | MAS-supervised — provides offchain governance and accountability |
 
-**Governance Score: 3.5/5** — The token itself has a decent governance structure: 7-owner multisig with 3h timelock for critical changes, 3-of-7 for operational/emergency. However, the 3h timelock is <12h (score 4 criterion), the SupplyControl admin is an EOA with power to add supply controllers (significant gap), and the freeze/wipe capability exists without timelock. The MAS regulatory framework provides offchain accountability but doesn't change the onchain risk profile. Between score 3 (multisig with timelock, 24+ hours) and score 4 (low threshold, <12 hours, powerful admin roles).
+**Governance Score: 3.5/5** — The 24h timelock and SupplyControl DEFAULT_ADMIN under timelock are genuine security improvements. All governance power is held by an **MPC wallet** (likely Fordefi) where the private key is sharded across multiple parties — fundamentally different from a standard single-key EOA. The gas station funding pattern (5.6M+ nonce gas station funding 62+ EOAs, just-in-time ETH top-ups) is definitive evidence of institutional MPC custody infrastructure. However, the internal MPC quorum and policy configuration are not publicly verifiable. The emergency actions (pause/freeze) have no onchain timelock but benefit from MPC multi-party controls. Between score 3 (multisig with timelock, 24+ hours, moderate admin powers) and score 4 (low threshold, <12h timelock, powerful admin roles) — the MPC structure and 24h timelock support score 3, while the unknown internal quorum and powerful emergency capabilities (no onchain timelock) push toward 3.5.
 
 **Subcategory B: Programmability**
 
@@ -380,7 +408,7 @@ The absence of a formal public bug bounty with monetary rewards is a weakness fo
 
 **Centralization Score = (3.5 + 3.5 + 1.5) / 3 = 2.83**
 
-**Score: 2.8/5** — The tiered governance structure with timelock is a positive, but the short 3h delay, EOA supply control admin, powerful freeze/wipe capability, and entirely offchain reserve management elevate centralization risk. Standard for a regulated fiat-backed stablecoin — comparable to USDC's centralization profile.
+**Score: 2.8/5** — Governance was previously split across two multisigs (a 7-owner DEFAULT_ADMIN multisig and a 3-of-7 operational multisig) but has since been consolidated into a single MPC wallet (likely Fordefi) with key sharding across multiple parties. The 24h timelock on critical changes and MPC multi-party structure provide reasonable governance security. Reserves are entirely offchain and Paxos controls minting. The unknown internal MPC quorum is a transparency gap.
 
 #### Category 3: Funds Management (Weight: 30%)
 
@@ -469,16 +497,18 @@ Final Score = (Centralization × 0.30) + (Funds Mgmt × 0.30) + (Audits × 0.20)
 
 **Final Risk Tier: Low Risk (2.4/5.0) — Approved with standard monitoring**
 
-USDG benefits from Paxos's established stablecoin track record, highest-quality collateral (U.S. Treasuries), strong regulatory framework (MAS + MiCA), and solid audit coverage. The primary risk factors are centralization concerns standard for regulated stablecoins (freeze/wipe capability, upgradeable contracts, offchain reserves) plus a few USDG-specific concerns (SupplyControl admin EOA, no public bug bounty, shorter production history vs USDC). Overall risk profile is comparable to other regulated fiat-backed stablecoins.
+USDG benefits from Paxos's established stablecoin track record, highest-quality collateral (U.S. Treasuries), strong regulatory framework (MAS + MiCA), and solid audit coverage. The governance restructuring consolidated onchain control into a single MPC wallet (likely Fordefi) with key sharding across multiple parties — onchain investigation confirms this is institutional-grade MPC infrastructure, not a standard single-key EOA. The 24h timelock on critical changes provides a meaningful monitoring window. While the internal MPC quorum is not publicly verifiable, the overall risk profile remains comparable to other regulated fiat-backed stablecoins.
 
 ---
 
 ## Reassessment Triggers
 
-- **Time-based:** Reassess in 6 months (September 2026)
-- **TVL-based:** Reassess if total supply changes by more than ±50%
+- **Time-based:** Reassess in 6 months (December 2026)
+- **TVL-based:** Reassess if total supply changes by more than ±50% from current $2.89B
 - **Incident-based:** Reassess after any exploit, freeze affecting DeFi protocols, depegging event, or adverse regulatory action
-- **Governance-based:** Reassess if SupplyControl admin transitions from EOA to multisig (potential score improvement), or if multisig composition/threshold changes
+- **Governance-based (IMPORTANT):** Reassess if governance transitions from MPC wallet back to multisig (score improvement), or if MPC wallet shows signs of compromise. Any change in role holders, timelock delay, or MPC provider/gas station infrastructure warrants reassessment
+- **MPC transparency:** Reassess if Paxos discloses MPC provider, quorum, and policy configuration (potential score improvement from reduced uncertainty)
+- **Governance-based:** Reassess if SupplyControl admin or SCM transitions, or if multisig composition/threshold changes
 - **Regulatory-based:** Reassess if MAS takes enforcement action, if Paxos loses its MPI license, or if regulatory status changes
 - **Bug bounty:** Reassess if Paxos launches a public bug bounty (score improvement)
 - **Proof of Reserves:** Reassess if onchain reserve verification (e.g., Chainlink PoR) is deployed (score improvement)
@@ -499,12 +529,12 @@ USDG benefits from Paxos's established stablecoin track record, highest-quality 
 
 **Smart Contract Risk: LOW-MEDIUM**
 - 6 audits from reputable firms, source code is open and verified
-- UUPS upgradeable proxy with 3h timelock + 7-owner multisig — short timelock but present
+- UUPS upgradeable proxy with 24h timelock + MPC wallet governance
 - Diamond-like facet pattern adds upgradeability surface area
 - Contract complexity is moderate (standard ERC-20 + AccessControl + rate-limited supply)
 
 **Freeze Risk: MEDIUM**
-- Paxos can freeze any address and wipe frozen balances via `ASSET_PROTECTION_ROLE` (3-of-7 multisig)
+- Paxos can freeze any address and wipe frozen balances via `ASSET_PROTECTION_ROLE` (held by MPC wallet)
 - If a Yearn vault or strategy contract holding USDG gets frozen, those funds become inaccessible until unfreezing
 - This is the same risk profile as USDC (Circle can freeze addresses) — it has never been used against DeFi protocols but the capability exists
 - **Mitigation:** Ensure the vault/strategy addresses are known to Paxos and not on any sanctions list

@@ -4,8 +4,8 @@
 - **Token:** BUCK
 - **Chain:** Ethereum
 - **Token Address:** [`0xdb13997f4D83EF343845d0bAEb27d1173dF8c224`](https://etherscan.io/address/0xdb13997f4D83EF343845d0bAEb27d1173dF8c224)
-- **Final Score: 5.0/5.0**
-- **Warning:** DEAD
+- **Final Score: N/A** (Not Rated — superseded by protocol wind-down; see gate/override derivation in the Risk Score Assessment section)
+- **Status:** DEAD
 
 ## Overview + Links
 

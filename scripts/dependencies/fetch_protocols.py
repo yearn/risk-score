@@ -114,6 +114,7 @@ PROTOCOL_TOKENS: dict[str, str] = {
     "USTB": "Superstate",
     "USDT": "Tether",
     "USDC": "Circle",
+    "$M": "M0",
 }
 
 # Compound V3 Comet markets on Ethereum mainnet
@@ -666,6 +667,44 @@ def cap_stcusd_data() -> dict:
     }
 
 
+def gauntlet_gusda_data() -> dict:
+    """Gauntlet USD Alpha (gtUSDa) dependency data from risk assessment report."""
+    return {
+        "name": "Gauntlet USD Alpha (gtUSDa)",
+        "chain": "ethereum",
+        "type": "yield_vault",
+        "address": "0x3bd9248048df95db4fbd748c6cd99c1baa40bad0",
+        "report": "reports/report/gauntlet-gusda.md",
+        "collateral": [
+            {"asset": "USDC"},
+        ],
+        "yield_sources": [
+            {
+                "protocol": "morpho",
+                "assets": ["USDC"],
+                "label": "Morpho USDC lending markets",
+            },
+        ],
+        "infrastructure": ["Aera", "Circle CCTP"],
+    }
+
+
+def centrifuge_jaaa_data() -> dict:
+    """Centrifuge (JAAA) dependency data from risk assessment report."""
+    return {
+        "name": "Centrifuge (JAAA)",
+        "chain": "ethereum",
+        "type": "tokenized_fund",
+        "address": "0x5a0F93D040De44e78F251b03c43be9CF317Dcf64",
+        "report": "reports/report/centrifuge-jaaa.md",
+        "collateral": [
+            {"asset": "USDC"},
+            {"asset": "AAA CLO Tranches"},
+        ],
+        "infrastructure": ["Chronicle"],
+    }
+
+
 def fx_fxusd_data() -> dict:
     """f(x) Protocol (fxUSD) dependency data from risk assessment report."""
     return {
@@ -794,6 +833,21 @@ def superstate_ustb_data() -> dict:
     }
 
 
+def saturn_data() -> dict:
+    """Saturn (USDat) dependency data from risk assessment report (May 2026)."""
+    return {
+        "name": "Saturn (USDat)",
+        "chain": "ethereum",
+        "type": "stablecoin",
+        "address": "0x23238f20b894f29041f48D88eE91131C395Aaa71",
+        "report": "reports/report/saturn-usdat.md",
+        "collateral": [
+            {"asset": "$M", "address": "0x866a2bf4e572cbcf37d5071a7a58503bfb36be1b"},
+        ],
+        "infrastructure": ["Chainlink", "Fireblocks"],
+    }
+
+
 def main():
     data: dict = {
         "protocol_tokens": PROTOCOL_TOKENS,
@@ -867,6 +921,8 @@ def main():
     data["protocols"]["across_protocol"] = across_protocol_data()
     data["protocols"]["apyx_apxusd"] = apyx_apxusd_data()
     data["protocols"]["cap_stcusd"] = cap_stcusd_data()
+    data["protocols"]["gauntlet"] = gauntlet_gusda_data()
+    data["protocols"]["centrifuge_jaaa"] = centrifuge_jaaa_data()
     data["protocols"]["fx_fxusd"] = fx_fxusd_data()
     data["protocols"]["kerneldao_hgeth"] = kerneldao_hgeth_data()
     data["protocols"]["mezo_musd"] = mezo_musd_data()
@@ -874,6 +930,7 @@ def main():
     data["protocols"]["re_reusd"] = re_reusd_data()
     data["protocols"]["royco_srroyusdc"] = royco_srroyusdc_data()
     data["protocols"]["superstate_ustb"] = superstate_ustb_data()
+    data["protocols"]["saturn"] = saturn_data()
 
     # Write YAML
     with open(OUTPUT_PATH, "w") as f:

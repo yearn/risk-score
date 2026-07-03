@@ -49,7 +49,7 @@ Do not spend time redoing static background unless a mutable fact changed. Do no
    - governance path, timelocks, role managers, or proxy admins
    - mint authority or privileged supply paths
    If any changed, update `reports/graph/<slug>.yaml` using `reports/graph/SKILL.md`. If no graph exists, create one when the report has enough data; otherwise mark the missing graph inputs as `TODO`.
-6. Patch only affected sections. Common sections:
+6. Patch only affected sections **in place**. Do not add a "Reassessment Notes", changelog, or "what changed" section to the report body. Common sections:
    - header assessment date / updated date
    - Overview + Links
    - Contract Addresses
@@ -127,6 +127,9 @@ Always recompute percentages from current values. If a strategy/farm is dust, qu
 
 - Keep changes factual and scoped.
 - Preserve the report's structure and tone.
+- Write the report as a clean, current-state document: update stale values in place so the prose reads as if freshly written for today. Do not narrate the refresh or compare against the previous version — avoid phrasings like "changed from last report", "up/down from prior assessment", "previously X", "now Y (was Z)", inline parentheticals such as "(down from $7.6M)", and dedicated "Reassessment Notes" / changelog sections.
+- Material historical events (incidents, exploits, depegs, large TVL swings) belong in Historical Track Record as dated facts, not as diffs against the prior report.
+- Record what changed in the PR description / task summary (step 8), not in the report body.
 - Include absolute dates for snapshots.
 - Include source links for changed facts.
 - Do not lower or raise a score unless the verified change affects the scoring rubric.

@@ -934,6 +934,23 @@
             "testing": 0
         }
     },
+    "0x696d02db93291651ed510704c9b286841d506987": {
+        "riskLevel": 2,
+        "riskScore": {
+            "centralizationRisk": 0,
+            "comment": "",
+            "complexity": 0,
+            "externalProtocolAudit": 0,
+            "externalProtocolCentralisation": 0,
+            "externalProtocolLongevity": 0,
+            "externalProtocolTvl": 0,
+            "externalProtocolType": 0,
+            "protocolIntegration": 0,
+            "review": 0,
+            "riskExposure": 0,
+            "testing": 0
+        }
+    },
     "0x832c30802054f60f0cedb5be1f9a0e3da2a0cab4": {
         "riskLevel": 1,
         "riskScore": {
