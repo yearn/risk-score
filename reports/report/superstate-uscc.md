@@ -91,8 +91,8 @@ A key observation onchain: **USCC has a strict subset of the V5 token's capabili
 - `superstateOracle() = 0x0` — no Superstate Continuous Price Oracle attached
 - `redemptionContract() = 0x0` — no RedemptionIdle / atomic onchain redemption
 - `supportedStablecoins(USDC) = 0x0` — no onchain stablecoin subscribe config
-- `supportedChainIds(1) = false` … bridging destinations all return `false` via the `uint256` getter — TODO: verify how the active bridge destinations are configured (Solana mainnet ID, Plume ID); we observed a Solana `Bridge` event in production (block 22934217), so the path is live but the read path here may use a different signature than what was probed
-- `subscribe()` reverts with `OnchainSubscriptionsDisabled()` (selector `0xdbf0cc51`)
+- `supportedChainIds(1) = false` - bridging destinations all return `false` via the `uint256` getter
+- `subscribe()` - reverts with `OnchainSubscriptionsDisabled()` (selector `0xdbf0cc51`)
 
 So **all USCC mint operations are admin-driven** (`mint`/`bulkMint` by the owner EOA) and the only onchain user actions are `transfer` (AllowList-gated), `offchainRedeem` (burn, settled offchain T+1), and `bridge` to Solana/Plume.
 
