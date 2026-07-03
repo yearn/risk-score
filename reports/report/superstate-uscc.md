@@ -8,11 +8,11 @@
 
 ## Overview + Links
 
-USCC is the **Superstate Crypto Carry Fund** — a tokenized investment fund issued by Superstate Inc. that runs **crypto cash-and-carry (basis) trades** on Bitcoin and Ether (including staked ETH) alongside U.S. Treasury Bills. The fund's investment objective is to capture the differential between spot and futures prices on CFTC-regulated venues while idle collateral earns the federal-funds rate via T-Bills.
+USCC is the **Bitwise Crypto Carry Fund** (formerly Superstate Crypto Carry Fund) — a tokenized investment fund issued through the Superstate infrastructure that runs **crypto cash-and-carry (basis) trades** across multiple crypto assets alongside U.S. Treasury Bills / USTB and cash collateral. The fund's investment objective is to capture the differential between spot and futures prices on CFTC-regulated venues while idle collateral earns short-term rates.
 
 USCC uses a **price-appreciation model** (non-rebasing). Unlike USTB, USCC's NAV **is not monotonic** — daily NAV reflects mark-to-market gains and losses on the futures leg, so the share price can decrease during basis-expansion episodes even when the trade economics remain intact (per the protocol's own [risk disclosure](https://docs.superstate.com/llms-full.txt)).
 
-This means USCC holders can suffer **principal loss**, not merely delayed yield or temporary illiquidity. Losses can arise from basis widening, forced futures unwinds, futures-venue counterparty failure, crypto custody loss, ETH slashing if ETH is staked, or adverse mark-to-market movement during the offchain redemption window.
+This means USCC holders can suffer **principal loss**, not merely delayed yield or temporary illiquidity. Losses can arise from basis widening, forced futures unwinds, futures-venue counterparty failure, crypto custody loss, staking / liquid-staking losses, or adverse mark-to-market movement during the offchain redemption window.
 
 Investors must clear KYC/AML, be **Qualified Purchasers** ($5M+ individuals, $25M+ institutions) **and** Accredited Investors, get whitelisted in the same shared AllowList contract used by USTB, then subscribe/redeem either onchain (offchain-settled) or via book-entry shares.
 
@@ -29,6 +29,8 @@ Investors must clear KYC/AML, be **Qualified Purchasers** ($5M+ individuals, $25
 **Links:**
 
 - [Protocol Documentation](https://docs.superstate.com/)
+- [Bitwise USCC Fund Page](https://bitwiseinvestments.com/crypto-funds/uscc)
+- [Bitwise USCC Fact Sheet](https://s3.us-east-1.amazonaws.com/static.bitwiseinvestments.com/uscc/bitwise-crypto-carry-fund-uscc-fact-sheet.pdf)
 - [USCC Fund Info](https://superstate.com/assets/uscc)
 - [USCC Docs Page](https://docs.superstate.com/superstate-funds/uscc)
 - [Smart Contract Addresses](https://docs.superstate.com/investors/smart-contracts)
@@ -122,11 +124,13 @@ So **all USCC mint operations are admin-driven** (`mint`/`bulkMint` by the owner
 
 ### Yield Sources
 
-1. **Crypto basis (cash-and-carry):** Long spot/custodied crypto assets, short futures at CFTC-permitted Trading Venues. Current Superstate public holdings identify BTC, ETH, SOL, and XRP futures exposure, with futures on CME and an XRP futures leg on Coinbase.
-2. **Staked crypto / liquid staking tokens:** Current public holdings include staked SOL and weETH exposure; staking and liquid-staking losses can flow through NAV.
+1. **Crypto basis (cash-and-carry):** Long spot/custodied crypto assets, short futures at CFTC-permitted Trading Venues. Current Bitwise public holdings identify BTC, ETH, SOL, and XRP exposure, with futures on CME and an XRP futures leg on Coinbase.
+2. **Staked crypto / liquid staking tokens:** Current public holdings include staked SOL, weETH, and a small JitoSOL position; staking and liquid-staking losses can flow through NAV.
 3. **U.S. Treasury Bills:** Idle cash and futures-margin reserves earn short-dated Treasury yield (federal-funds-rate-like).
 
-The fund "will trade only those digital assets for which the CFTC has permitted exchange-listed futures contracts" (per [Steakhouse overview](https://kitchen.steakhouse.financial/p/overview-of-uscc)). Superstate's current public holdings identify CME and Coinbase futures exposure, but the public documents still do not fully disclose margin policy, counterparty concentration limits, or whether the displayed venues are exhaustive over time.
+The fund "will trade only those digital assets for which the CFTC has permitted exchange-listed futures contracts" (per [Steakhouse overview](https://kitchen.steakhouse.financial/p/overview-of-uscc)). Bitwise's current public holdings identify CME and Coinbase futures exposure, but the public documents still do not fully disclose margin policy, counterparty concentration limits, or whether the displayed venues are exhaustive over time.
+
+**Public holdings snapshot:** Bitwise publishes current USCC holdings on its [USCC fund page](https://bitwiseinvestments.com/crypto-funds/uscc). As of Jun 28, 2026 4pm EDT, the largest positive notional positions were USD collateral ($32.27M, 19.45%), USTB ($31.13M, 18.76%), staked SOL ($33.31M, 20.08%), weETH ($31.73M, 19.12%), XRP custody ($30.72M, 18.52%), ETH custody ($3.82M, 2.30%), and BTC custody ($2.37M, 1.43%). Offsetting short futures included BTC, ETH, SOL, and XRP JUL26 contracts on CME, plus a smaller XRP JUL26 contract on Coinbase. Holdings are unaudited and may change at the investment manager's discretion.
 
 ### Accessibility
 
@@ -182,12 +186,12 @@ The fund "will trade only those digital assets for which the CFTC has permitted 
 
 - **NAV/Price Updates:** **Chainlink USCC NAV feed** [`0xAfFd8F5578E8590665de561bdE9E7BAdb99300d9`](https://etherscan.io/address/0xAfFd8F5578E8590665de561bdE9E7BAdb99300d9) — an OCR (off-chain reporting) aggregator wrapper around [`0x5C00518D3d…`](https://etherscan.io/address/0x5C00518D3d423EC59D553Af123Be8a63B11078CF). 16 Chainlink-operated transmitters reach consensus on the daily NAV from Superstate. The aggregator owner is [`0x21f73D42…`](https://etherscan.io/address/0x21f73D42Eb58Ba49dDB685dc29D3bF5c0f0373CA), a Chainlink-controlled contract (not Superstate). **This is the only onchain NAV source for USCC** — unlike USTB, USCC has no Superstate Continuous Price Oracle, so there is no linear-interpolation extrapolation between checkpoints; the price is the most recent OCR transmission only.
 - **No Chainlink Proof-of-Reserves onchain:** A [Chronicle Labs PoR dashboard](https://chroniclelabs.org/dashboard/proofofasset/superstate-uscc) is referenced by Superstate but we were unable to load it during this assessment (HTTP 429); TODO confirm the live PoR feed exists and what its update cadence is.
-- **Offchain Assets:** Treasury, BTC, ETH, and futures positions are all held offchain. Token holders cannot independently verify positions onchain. Independent verification layers:
+- **Offchain Assets:** Cash collateral, USTB / Treasury exposure, spot crypto, staked / liquid-staked crypto, and futures positions are all held offchain. Token holders cannot independently verify positions onchain. Independent verification layers:
   - NAV Fund Services (independent NAV agent)
   - Ernst & Young (annual audit)
   - Anchorage Digital (regulated digital-asset custody)
   - SEC regulatory framework (Reg D / Section 3(c)(7))
-- **Reserve Transparency:** Superstate publishes headline NAV/AUM/yield and current holdings on [superstate.com/assets/uscc](https://superstate.com/assets/uscc). Public holdings now include asset quantities, notional values, and current futures venues, but margin balances, counterparty concentration policy, historical venue usage, and T-Bill CUSIPs are still not fully disclosed publicly.
+- **Reserve Transparency:** Bitwise publishes headline NAV/AUM/yield, network balances, DeFi integrations, and current holdings on [bitwiseinvestments.com/crypto-funds/uscc](https://bitwiseinvestments.com/crypto-funds/uscc). Public holdings now include asset quantities, implied yields, notional values, portfolio weights, and current futures venues, but margin balances, counterparty concentration policy, historical venue usage, and T-Bill / USTB look-through details are still not fully disclosed publicly.
 - **NAV Mark-to-Market Risk:** Because the futures leg is mark-to-market daily, the share price reflects unrealized basis-trade P&L in real time. The protocol explicitly warns of "unrealized losses" during basis expansion. This is fundamentally different from USTB whose underlying T-Bills have a much smoother mark-to-market profile. A Yearn position redeeming through USCC's T+1/T+2 offchain process may realize losses if NAV falls before settlement.
 
 ## Liquidity Risk
@@ -196,8 +200,8 @@ The fund "will trade only those digital assets for which the CFTC has permitted 
 - **No Onchain Atomic Redemption:** Verified onchain: `redemptionContract() = 0x0`. There is no USDC-backed RedemptionIdle contract like USTB has — **USCC has zero instant onchain exit capacity at any size**.
 - **No DEX Liquidity:** $0 DEX volume by design. AllowList-gated transfers prevent secondary markets.
 - **Transfer Restrictions:** All transfers require both sender and receiver to be on the AllowList (the same shared V3.1 contract as USTB). Removing an address from the AllowList freezes their tokens.
-- **DeFi Integrations:** Smaller than USTB. [Steakhouse Financial publicly evaluated USCC](https://kitchen.steakhouse.financial/p/overview-of-uscc) for inclusion in Morpho vaults; integration status / final decision is TODO. We could not identify large Aave / Spark / M^0 integrations for USCC equivalent to those listed for USTB.
-- **Stress Scenario:** In a basis-blowup scenario (futures premium collapse, exchange counterparty event, slashing of staked ETH, or simultaneous redemption surge), the fund's liquidity depends on (a) unwinding futures positions at potentially worse-than-market prices, (b) Anchorage's ability to deliver spot, and (c) the futures venues' ability to honor margin. T-Bills are highly liquid; spot BTC/ETH are highly liquid; futures positions are liquid in normal markets but can become illiquid during stress (basis spreads can widen materially before they converge). **The mark-to-market NAV will reflect this stress in real time, potentially producing principal losses for holders and realized losses for users redeeming through the offchain settlement window.**
+- **DeFi Integrations:** Smaller than USTB but live. Bitwise reports USCC support in Aave on Ethereum (~4.60M USCC / $53.47M TVL), Kamino on Solana (~652k USCC / $7.58M TVL), and Morpho on Ethereum (de minimis USCC) as of Jul 2, 2026.
+- **Stress Scenario:** In a basis-blowup scenario (futures premium collapse, exchange counterparty event, staking / liquid-staking impairment, or simultaneous redemption surge), the fund's liquidity depends on (a) unwinding futures positions at potentially worse-than-market prices, (b) Anchorage's and related venues' ability to deliver spot / staked assets, and (c) the futures venues' ability to honor margin. T-Bills and USTB are highly liquid; major spot crypto is normally liquid but can gap during stress; futures positions can become illiquid during stress because basis spreads can widen materially before they converge. **The mark-to-market NAV will reflect this stress in real time, potentially producing principal losses for holders and realized losses for users redeeming through the offchain settlement window.**
 
 ### AllowList Freeze Risk (Critical for DeFi Integrations)
 
@@ -263,7 +267,7 @@ USCC is materially **less programmatic than USTB**: no atomic onchain subscribe,
 7. **Ernst & Young (Low)** — annual audit.
 8. **NAV Fund Services (Low)** — independent NAV calculator.
 9. **Turnkey (Medium)** — admin key custody (same as USTB).
-10. **Ethereum staking infrastructure (Medium, provider not disclosed)** — if any ETH leg is staked, slashing risk applies. TODO: provider identity.
+10. **Staking / liquid-staking infrastructure (Medium)** — current holdings include staked SOL, weETH, and JitoSOL exposure. Slashing, validator, liquid-staking-token, or staking-provider failures can flow through NAV; public materials do not fully describe provider concentration or risk controls.
 
 ## Operational Risk
 
@@ -389,7 +393,7 @@ PROTOCOL LAYER
 EXTERNAL / UNDERLYING LAYER
 ════════════════════════════
   Offchain:
-  ├── Anchorage Digital Bank N.A. (spot BTC/ETH + cash custody)
+  ├── Anchorage Digital Bank N.A. and related venues (spot / staked crypto + cash custody)
   ├── Trading Venues (futures + margin) — current holdings identify CME and Coinbase; margin policy not fully public
   ├── Bitwise Investment Manager (investment manager, effective Jun 1, 2026)
   ├── Ernst & Young (annual auditor)
@@ -432,7 +436,7 @@ EXTERNAL / UNDERLYING LAYER
 ### Key Risks
 
 1. **EOA-controlled admin with token + ProxyAdmin concentrated in a single key.** The same EOA can `mint` unlimited tokens AND `upgrade()` the implementation. No multisig, no timelock.
-2. **Mark-to-market NAV with basis-trade exposure.** Unlike USTB, USCC's NAV can decrease — daily P&L from futures positions flows into the share price. Holders can suffer principal loss if basis spreads widen, futures positions are unwound at a loss, posted margin is impaired, or crypto custody / staking losses occur.
+2. **Mark-to-market NAV with basis-trade exposure.** Unlike USTB, USCC's NAV can decrease — daily P&L from futures positions flows into the share price. Holders can suffer principal loss if basis spreads widen, futures positions are unwound at a loss, posted margin is impaired, or crypto custody / staking / liquid-staking losses occur.
 3. **Opaque counterparty and margin exposure.** Current public holdings identify CME and Coinbase futures exposure, but public docs still do not disclose margin levels, concentration limits, or whether the displayed venues are exhaustive over time. This is the dominant risk and we cannot quantify it from public information.
 4. **No atomic onchain redemption** — `redemptionContract() = 0x0` onchain. Subscribe is also disabled onchain (`OnchainSubscriptionsDisabled`). All mints/redeems flow through offchain operations with T+1/T+2 settlement.
 5. **Sole onchain NAV oracle is Chainlink-OCR-only** — no Superstate-run fallback price feed; between transmissions the onchain price is just stale.
@@ -509,7 +513,7 @@ EXTERNAL / UNDERLYING LAYER
 
 **Subcategory A: Collateralization — 3.0**
 
-- Mixed collateral: spot BTC/ETH (high quality, with custodial risk), short futures positions (counterparty risk), T-Bills (highest quality), potentially staked ETH (slashing risk).
+- Mixed collateral: USD collateral / USTB / T-Bills (high quality), spot BTC / ETH / SOL / XRP (custodial and market risk), staked SOL / weETH / JitoSOL (staking and liquid-staking risk), and short futures positions (counterparty / margin risk).
 - 100% collateralized in principle but held entirely offchain across multiple counterparties.
 - Anchorage is a strong, regulated custodian for the crypto leg. Current public holdings identify CME and Coinbase futures exposure, but margin balances and concentration policy are not directly verifiable.
 - The basis-trade design is sound under normal market conditions but exposes holders to mark-to-market drawdowns during basis widening.
@@ -609,5 +613,5 @@ USCC is materially **higher risk than USTB** despite sharing infrastructure. The
 - **Time-based:** Reassess in 3 months (Oct 2026) — shorter interval than USTB due to (a) the recent Bitwise manager transition effective Jun 1, 2026, (b) basis-trade NAV volatility warrants more frequent review, and (c) onchain-redemption infrastructure could change.
 - **TVL-based:** Reassess if AUM changes by more than 30% (more sensitive than USTB given thinner holder base).
 - **Incident-based:** Reassess after any exploit, admin key compromise, contract upgrade, AllowList policy change, manager transition issue, or any large NAV drawdown (>5% in a single day).
-- **Strategy-based:** Reassess on any change to futures venues, ETH staking provider, leverage policy, or asset mix (e.g., addition of new basis pairs).
+- **Strategy-based:** Reassess on any change to futures venues, staking / liquid-staking provider policy, leverage policy, or asset mix (e.g., addition of new basis pairs).
 - **Governance-based:** Reassess if Superstate adopts multisig or timelock for USCC admin controls.
