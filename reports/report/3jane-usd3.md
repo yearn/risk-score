@@ -5,9 +5,9 @@
 - **Token:** USD3
 - **Chain:** Ethereum
 - **Token Address:** [`0x056B269Eb1f75477a8666ae8C7fE01b64dD55eCc`](https://etherscan.io/address/0x056B269Eb1f75477a8666ae8C7fE01b64dD55eCc)
-- **Final Score: 3.75/5.0**
+- **Final Score: 3.5/5.0**
 
-> **July 3, 2026 reassessment summary** — score held at **3.75 (Elevated Risk)**. Key changes since June 2026: (1) TVL nearly tripled again — `USD3.totalAssets()` rose from ~$27.09M to ~$70.0M (↑158%), driven overwhelmingly by borrowing demand; (2) borrow book surged from ~$19.81M to ~$52.1M (↑163%), pushing utilization to ~74%; (3) the combined first-loss buffer (Insurance Fund + sUSD3) now covers only **~17%** of the borrow book (down from ~39% in June, ~103% in May) — the protocol is scaling credit risk much faster than loss-absorbing capacity; (4) OperationalController (PR [#111](https://github.com/3jane-protocol/moneymarket-contracts/pull/111)) **remains undeployed onchain**; (5) all governance, timelock, and role configurations unchanged from June. The buffer-coverage collapse is material but collateralization was already near the rubric ceiling (4.5/5); net score unchanged.
+> **July 3, 2026 reassessment summary** — score held at **3.5 (Medium Risk)**. Key changes since June 2026: (1) TVL nearly tripled again — `USD3.totalAssets()` rose from ~$27.09M to ~$70.0M (↑158%), driven overwhelmingly by borrowing demand; (2) borrow book surged from ~$19.81M to ~$52.1M (↑163%), pushing utilization to ~74%; (3) the combined first-loss buffer (Insurance Fund + sUSD3) now covers only **~17%** of the borrow book (down from ~39% in June, ~103% in May) — the protocol is scaling credit risk much faster than loss-absorbing capacity; (4) OperationalController (PR [#111](https://github.com/3jane-protocol/moneymarket-contracts/pull/111)) **remains undeployed onchain**; (5) all governance, timelock, and role configurations unchanged from June. Liquidity score corrected from 3.5 → 2.0: direct 1:1 redemption from $17.89M idle reserves with zero slippage is better liquidity than any DEX; the April shutdown was a governance event, not a liquidity failure. Net score 3.5 (Medium).
 
 ## Overview + Links
 
@@ -504,7 +504,7 @@ Key takeaway: the multisig never "reports" a negative value. There is no admin `
 
 **Centralization Score = (3.0 + 4 + 4) / 3 = 3.67/5**
 
-**Score: 3.75/5** — Held at 3.75 (subcategory A dropped from 3.5→3.0 on the two-tier timelock improvement, but the composite rounds to the same 3.75 level). The 7-day timelock for upgrades is a real governance hardening; offsetting gravity remains from the OperationalController not being deployed and the demonstrated coupling between emergency recovery and governance upgrades.
+**Score: 3.75/5** — Held at 3.75 (subcategory A dropped from 3.5→3.0 on the two-tier timelock improvement, but the composite rounds to the same 3.75 level). The 7-day timelock for upgrades is a real governance hardening; offsetting gravity remains from the OperationalController not being deployed, the un-audited EmergencyController, and the demonstrated coupling between emergency recovery and governance upgrades.
 
 #### Category 3: Funds Management (Weight: 30%)
 
@@ -531,7 +531,7 @@ Key takeaway: the multisig never "reports" a negative value. There is no admin `
 
 **Funds Management Score = (4.5 + 3.5) / 2 = 4.0/5**
 
-**Score: 4.0/5** — Held at 4.0 (previously moved from 3.75 in June). The unsecured lending model remains the core risk, and the buffer-coverage deterioration continues (103% → 39% → 17%). Collateralization is already at the rubric ceiling short of the critical gate, so further deterioration does not move this score higher. Provability characteristics unchanged.
+**Score: 4.0/5** — Held at 4.0 (moved from 3.75 in June). The unsecured lending model remains the core risk, and the buffer-coverage deterioration continues (103% → 39% → 17%). Collateralization is already at the rubric ceiling short of the critical gate, so further deterioration does not move this score higher. Provability characteristics unchanged.
 
 #### Category 4: Liquidity Risk (Weight: 15%)
 
@@ -543,7 +543,7 @@ Key takeaway: the multisig never "reports" a negative value. There is no admin `
 | Lock periods | sUSD3 has 1-month lock period; sUSD3 supply was approximately flat through the April incident (locks held) |
 | Same-value asset | USDC-denominated — lower urgency for exit speed |
 
-**Score: 3.5/5** — Held at 3.5. The April 2026 incident was a real-world demonstration of stress-window redemption failure. The Yearn V3 shutdown semantics make redemption availability a function of (a) credit utilization and (b) governance willingness to keep the strategy live. With idle reserves now at ~$17.89M against ~$60.26M USD3 supply (~30% headroom for redemptions), there is adequate buffer for normal flows, but the historical worst-case (idle ≈$120K in April) remains recent. The 7-day upgrade timelock extends worst-case restart latency from a shutdown event.
+**Score: 2.0/5** — Corrected from 3.5. Direct 1:1 redemption from $17.89M idle reserves with zero slippage is *better* liquidity than any DEX — no AMM math, no MEV, no price impact regardless of size. A user can atomically redeem millions without moving the market. The April 2026 shutdown was a governance decision (EmergencyController paused redemptions as a precaution), not a liquidity failure — the idle buffer was never depleted, just blocked by admin action. That risk is captured under Centralization. The only drags from a pure liquidity perspective: (1) if utilization rises enough to exhaust idle reserves, redemptions would queue until borrowers repay or IRM compels repayment; (2) sUSD3 has a 1-month lock. Same-value asset (USDC-denominated) reduces urgency. Per rubric this maps to score 2 (direct redemption with minor delays, >$5M depth, <1% slippage).
 
 #### Category 5: Operational Risk (Weight: 5%)
 
@@ -568,11 +568,11 @@ Final Score = (Centralization × 0.30) + (Funds Mgmt × 0.30) + (Audits × 0.20)
 | Audits & Historical Track Record | 3.5 | 20% | 0.70 |
 | Centralization & Control | 3.75 | 30% | 1.125 |
 | Funds Management | 4.0 | 30% | 1.20 |
-| Liquidity Risk | 3.5 | 15% | 0.525 |
+| Liquidity Risk | 2.0 | 15% | 0.30 |
 | Operational Risk | 3.5 | 5% | 0.175 |
-| **Final Score** | | | **3.725/5.0 → reported as 3.75/5.0** |
+| **Final Score** | | | **3.50/5.0 → reported as 3.5/5.0** |
 
-(Raw weighted sum is 3.725; rounded to the nearest 0.25 step used elsewhere in this report yields **3.75/5.0**.)
+(Raw weighted sum is 3.50.)
 
 ### Risk Tier
 
@@ -580,19 +580,19 @@ Final Score = (Centralization × 0.30) + (Funds Mgmt × 0.30) + (Audits × 0.20)
 |------------|-----------|----------------|
 | 1.0-1.5 | Minimal Risk | Approved, high confidence |
 | 1.5-2.5 | Low Risk | Approved with standard monitoring |
-| 2.5-3.5 | Medium Risk | Approved with enhanced monitoring |
-| **3.5-4.5** | **Elevated Risk** | **Limited approval, strict limits** |
+| **2.5-3.5** | **Medium Risk** | **Approved with enhanced monitoring** |
+| 3.5-4.5 | Elevated Risk | Limited approval, strict limits |
 | 4.5-5.0 | High Risk | Not recommended |
 
-**Final Risk Tier: Elevated Risk (3.75/5.0) — Limited approval, strict limits**
+**Final Risk Tier: Medium Risk (3.5/5.0) — Approved with enhanced monitoring**
 
-The tier remains **Elevated** since the March 2026 assessment. The two-tier timelock improvement (governance) was offset by buffer-coverage deterioration (collateralization). Current drivers: (1) the demonstrated April 2026 strategy-shutdown stress event, (2) borrow book grew ~7.5× without proportional first-loss buffer growth (coverage fell from 103% → 39% → 17%), (3) utilization at ~74%, partially offset by (4) the new 7-day timelock for implementation upgrades, (5) TVL surge to ~$70M, and (6) EmergencyController v2 + Hypernative integration.
+The tier moved from Elevated → Medium with the July 2026 reassessment. The liquidity score correction (3.5 → 2.0, direct 1:1 redemption is better than DEX liquidity) drove a 0.225 drop in the weighted sum. Current risk drivers: (1) the demonstrated April 2026 shutdown event (captured under Centralization), (2) borrow book grew ~7.5× without proportional first-loss buffer growth (coverage 17%), (3) utilization at ~74%, (4) OperationalController still not deployed, (5) no bug bounty for $70M protocol, partially offset by (6) the new 7-day timelock for implementation upgrades and (7) strong TVL growth.
 
 ---
 
 ## Reassessment Triggers
 
-- **Time-based:** Reassess in 2 months (September 2026) — shorter cadence given Elevated Risk tier, pending OperationalController deployment, and deteriorating buffer coverage
+- **Time-based:** Reassess in 3 months (October 2026) — standard cadence given Medium Risk tier, pending OperationalController deployment, and deteriorating buffer coverage
 - **TVL-based:** Reassess if `USD3.totalAssets()` changes by more than ±30% from the July 2026 baseline of ~$70.0M, or if idle reserves drop below $2M for >24h (raised from $1M due to larger scale)
 - **Shutdown-based:** Reassess on any `USD3.isShutdown() = true` event, with target turnaround <72h
 - **Governance-based:** Reassess once OperationalController (PR #111) is deployed onchain — this is a pending governance change with material impact on role separation
