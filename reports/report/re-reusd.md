@@ -34,7 +34,7 @@ The resulting "Applicable APY" is converted to a daily rate, and reUSD's **token
 **Links:**
 
 - [Protocol Documentation](https://docs.re.xyz/)
-- [Protocol App (reUSD)](https://app.re.xyz/reusd)
+- [Protocol App (reUSD)](https://app.re.xyz/)
 - [DeFiLlama](https://defillama.com/protocol/re)
 - [CoinGecko](https://www.coingecko.com/en/coins/re-protocol-reusd)
 - [RWA.xyz](https://app.rwa.xyz/assets/reUSD)
