@@ -28,7 +28,6 @@ DEFAULT_REPO = "yearn/risk-score"
 PUBLIC_REPORT_BASE_URL = "https://risk.yearn.farm/report"
 
 ASSESSMENT_LINE_RE = re.compile(r"\*\*Assessment Date:\*\*\s*([^\n]+)", re.IGNORECASE)
-WARNING_LINE_RE = re.compile(r"\*\*Warning:\*\*\s*([^\n]+)", re.IGNORECASE)
 STATUS_LINE_RE = re.compile(r"\*\*Status:\*\*\s*([^\n]+)", re.IGNORECASE)
 DATE_RE = re.compile(
     r"\b("
@@ -114,9 +113,6 @@ def parse_report(path: Path) -> dict:
     title = title_match.group(1).strip() if title_match else path.stem
     score_match = SCORE_RE.search(header)
     score = score_match.group(1) if score_match else None
-    warning_match = WARNING_LINE_RE.search(header)
-    warning = warning_match.group(1).strip() if warning_match else None
-
     date = parse_assessment_date(content)
     source = "report-header"
     if date is None:
@@ -130,7 +126,6 @@ def parse_report(path: Path) -> dict:
         "score": score,
         "date": date,
         "date_source": source,
-        "warning": warning,
         "terminal_status": terminal_status(header),
     }
 
@@ -268,14 +263,6 @@ def main() -> int:
                 "SKIP %s — terminal status: %s",
                 report["slug"],
                 report["terminal_status"],
-            )
-            skipped_count += 1
-            continue
-        if report["warning"]:
-            log.info(
-                "SKIP %s — terminal warning: %s",
-                report["slug"],
-                report["warning"],
             )
             skipped_count += 1
             continue
