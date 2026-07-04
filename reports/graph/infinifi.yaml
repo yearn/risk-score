@@ -86,46 +86,44 @@ nodes:
     category: governance
     note: AccessControlEnumerable, 19 roles; DEFAULT_ADMIN renounced
 
-  # === Active farms (9, ~98% of TVL) ===
+  # === Active farms (~99% of funded TVL) ===
   - id: farm-midas
-    label: MidasFarm — Maturing
-    address: "0x7373A7ce3C023C56Cb66747AFbdF827627D31679"
+    label: MidasFarm — Maturing (47%)
+    address: "0xF4Ea3Ec87B1c254f17a2Fb68164dB0CAf6c4cecF"
     category: strategy
-    note: Matures 2026-06-15
-  - id: farm-cap
-    label: CapFarm — Illiquid
-    address: "0x35F9EbDc02F936e199826778bc06A13272a06B87"
+    note: Matures 2026-08-01; mGLOBAL tokenized hedge fund
+  - id: farm-rwa-escrow-1
+    label: RWAEscrowFarm — Maturing (16%)
+    address: "0x04d5521ac09F8823338e8163Dd8BAdAEE39F3271"
     category: strategy
-  - id: farm-swap-pyusd
-    label: SwapFarm — PYUSD basket
-    address: "0x84FF7Ef9568807c93436F09E2E613dE2aF3FE4EE"
-    category: strategy
-    note: Matures 2026-05-25 via CoW-swap
-  - id: farm-swap-cap
-    label: SwapFarm — cUSD/stcUSD basket
-    address: "0xe945de0D08E2F39B0740FE2d6e50FE2Bb9751eA4"
-    category: strategy
-    note: Matures 2026-05-19 via CoW-swap
-  - id: farm-spark
-    label: SparkSUSDCFarm — Illiquid
-    address: "0xd880D7C5CaFdbE2AEc281250995abF612235e563"
-    category: strategy
-  - id: farm-rwa-escrow
-    label: RWAEscrowFarm — Maturing
+    note: Matures 2026-07-11; escrow receiver = Team Multisig
+  - id: farm-rwa-escrow-2
+    label: RWAEscrowFarm — Maturing (8%)
     address: "0x9E5efC5F387D8661C1AFB2469B7EeF6972451852"
     category: strategy
-    note: Matures 2026-06-16; offchain counterparty
+    note: Matures 2026-08-01; offchain EOA counterparty
+  - id: farm-rwa-escrow-3
+    label: RWAEscrowFarm — Maturing (8%)
+    address: "0x277FdF6Dc5c53C5c2828188Da84B9593A50884C1"
+    category: strategy
+    note: Matures 2026-08-29; offchain EOA counterparty
+  - id: farm-swap-pyusd
+    label: SwapFarm — PYUSD / Sentora PRIME (7%)
+    address: "0x75381e9Bc6B908a2e9bC31A535fC48CeCeAc568E"
+    category: strategy
+    note: Matures 2026-07-11 via CoW-swap
+  - id: farm-cap
+    label: CapFarm — Illiquid (6%)
+    address: "0xAc21B22B5aEb11bc32De4ecF59E4538fCa48b694"
+    category: strategy
+  - id: farm-aave-v4
+    label: AaveV4Farm — USDG (5%)
+    address: "0x2CdF51ca20C2DD56480c35adEA667A6653Fb7657"
+    category: strategy
+    note: Matures 2026-07-11; Aave V4 Global Dollar market
   - id: farm-steakhouse
-    label: Steakhouse MetaMorpho Farm
+    label: Steakhouse MetaMorpho Farm (3%)
     address: "0x76D2E84009dAE457f8667D823c7c96e9A7c35B78"
-    category: strategy
-  - id: farm-maple
-    label: MapleFarm — HYSL
-    address: "0xF56E946e92FeF6a050F482C560b5f8DcCB8163B3"
-    category: strategy
-  - id: farm-aave-horizon
-    label: AaveV3Farm — Horizon RWA
-    address: "0x817d93DbdFd8190bbef0a73fCf5Dd9DA5A87E032"
     category: strategy
 
   # === External dependencies ===
@@ -134,36 +132,40 @@ nodes:
     address: "0x7433806912Eae67919e66aea853d46Fa0aef98A8"
     category: dependency
     note: Tokenized hedge-fund strategy; offchain NAV
+  - id: dep-rwa-cp-multisig
+    label: RWA Escrow Receiver — Team Multisig
+    address: "0x80608f852D152024c0a2087b16939235fEc2400c"
+    category: dependency
+    note: Escrow receiver is the protocol's own multisig
+  - id: dep-rwa-cp-1
+    label: RWA Escrow Counterparty (EOA)
+    address: "0x4831C121879d3DE0E2B181d9d55E9B0724f5D926"
+    category: dependency
+    note: EOA receiver; identity undisclosed
+  - id: dep-rwa-cp-2
+    label: RWA Escrow Counterparty (EOA)
+    address: "0xa03B88D7985E1C6A847Cfb123C786c1d7eA8d211"
+    category: dependency
+    note: EOA receiver; identity undisclosed
+  - id: dep-pyusd
+    label: PYUSD / Sentora PRIME
+    address: "0x6c3ea9036406852006290770BEdFcAbA0e23A0e8"
+    category: dependency
+    note: Paxos NYDFS stablecoin + Sentora PRIME wrapper
   - id: dep-stcusd
     label: stcUSD (Cap Protocol)
     address: "0x88887bE419578051FF9F4eb6C858A951921D8888"
     category: dependency
     note: 2025-vintage stablecoin issuer
-  - id: dep-pyusd
-    label: PYUSD (Paxos)
+  - id: dep-usdg
+    label: USDG (Global Dollar) via Aave V4
+    address: "0xe343167631d89B6Ffc58B88d6b7fB0228795491D"
     category: dependency
-    note: NYDFS-regulated stablecoin
-  - id: dep-spark-susdc
-    label: sUSDC (Spark Vault)
-    address: "0xBC65ad17c5C0a2A4D159fa5a503f4992c7B545FE"
-    category: dependency
+    note: Paxos/Global Dollar Network stablecoin
   - id: dep-steakhouse-vault
     label: Steakhouse infiniFi USDC (MetaMorpho)
     address: "0xBEEF1f5bD88285E5b239B6AACB991D38CCa23aC9"
     category: dependency
-  - id: dep-maple-hysl
-    label: Maple HYSL Pool USDC1
-    address: "0xC39a5a616F0aD1Ff45077fa2DE3F79ab8EB8B8B9"
-    category: dependency
-  - id: dep-rwa-counterparty
-    label: RWA Escrow Counterparty
-    address: "0x4831C121879d3DE0E2B181d9d55E9B0724f5D926"
-    category: dependency
-    note: EOA receiver; identity undisclosed
-  - id: dep-aave-horizon
-    label: Aave Horizon RWA Market
-    category: dependency
-    note: aHorRwaUSDC
 
 edges:
   # === Governance ===
@@ -232,69 +234,62 @@ edges:
     kind: routes-through
     label: early exit
 
-  # === Allocation: iUSD's backing into farms ===
+  # === Allocation: iUSD's backing into farms (2026-07-04) ===
   - from: iUSD
     to: farm-midas
     kind: allocates-to
-    label: "37.0%"
+    label: "47.3%"
   - from: iUSD
-    to: farm-cap
+    to: farm-rwa-escrow-1
     kind: allocates-to
-    label: "19.9%"
+    label: "15.6%"
+  - from: iUSD
+    to: farm-rwa-escrow-2
+    kind: allocates-to
+    label: "7.8%"
+  - from: iUSD
+    to: farm-rwa-escrow-3
+    kind: allocates-to
+    label: "7.7%"
   - from: iUSD
     to: farm-swap-pyusd
     kind: allocates-to
-    label: "10.9%"
+    label: "7.2%"
   - from: iUSD
-    to: farm-swap-cap
+    to: farm-cap
     kind: allocates-to
-    label: "10.0%"
+    label: "6.5%"
   - from: iUSD
-    to: farm-spark
+    to: farm-aave-v4
     kind: allocates-to
-    label: "7.3%"
-  - from: iUSD
-    to: farm-rwa-escrow
-    kind: allocates-to
-    label: "6.1%"
+    label: "4.6%"
   - from: iUSD
     to: farm-steakhouse
     kind: allocates-to
-    label: "4.3%"
-  - from: iUSD
-    to: farm-maple
-    kind: allocates-to
-    label: "2.9%"
-  - from: iUSD
-    to: farm-aave-horizon
-    kind: allocates-to
-    label: "0.9%"
+    label: "3.3%"
 
   # === Farms → external dependencies ===
   - from: farm-midas
     to: dep-mglobal
     kind: deposits-into
-  - from: farm-cap
-    to: dep-stcusd
+  - from: farm-rwa-escrow-1
+    to: dep-rwa-cp-multisig
     kind: deposits-into
-  - from: farm-swap-cap
-    to: dep-stcusd
+  - from: farm-rwa-escrow-2
+    to: dep-rwa-cp-1
+    kind: deposits-into
+  - from: farm-rwa-escrow-3
+    to: dep-rwa-cp-2
     kind: deposits-into
   - from: farm-swap-pyusd
     to: dep-pyusd
     kind: deposits-into
-  - from: farm-spark
-    to: dep-spark-susdc
+  - from: farm-cap
+    to: dep-stcusd
     kind: deposits-into
-  - from: farm-rwa-escrow
-    to: dep-rwa-counterparty
+  - from: farm-aave-v4
+    to: dep-usdg
     kind: deposits-into
   - from: farm-steakhouse
     to: dep-steakhouse-vault
-    kind: deposits-into
-  - from: farm-maple
-    to: dep-maple-hysl
-    kind: deposits-into
-  - from: farm-aave-horizon
-    to: dep-aave-horizon
     kind: deposits-into

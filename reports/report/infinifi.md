@@ -1,14 +1,14 @@
 # Protocol Risk Assessment: InfiniFi
 
-- **Assessment Date:** May 18, 2026
+- **Assessment Date:** July 4, 2026
 - **Token:** siUSD (Staked iUSD)
 - **Chain:** Ethereum Mainnet
 - **Token Address:** [`0xDBDC1Ef57537E34680B898E1FEBD3D68c7389bCB`](https://etherscan.io/address/0xDBDC1Ef57537E34680B898E1FEBD3D68c7389bCB)
-- **Final Score: 3.2/5.0**
+- **Final Score: 3.4/5.0**
 
 ## Overview + Links
 
-InfiniFi is a stablecoin protocol that allows users to deposit assets (USDC, USDT) to mint iUSD, a stablecoin pegged to the US Dollar. The protocol automatically deploys deposited collateral into a portfolio of farm contracts categorized as **Liquid** (instant withdrawal), **Illiquid** (perpetual but exit-controlled), and **Maturing** (locked until fixed maturity dates). As of this assessment the largest allocations are Midas-tokenized **Fasanara Global** (~37% of TVL), **Cap Protocol stcUSD** (~20%), CoW-swap fixed-maturity baskets into PYUSD and cUSD/stcUSD (~21% combined), Spark sUSDC (~7%), an active RWA escrow (~6%), Steakhouse-curated MetaMorpho (~4%), and Maple HYSL (~3%). See Appendix A for detailed analysis of the largest farm deployments.
+InfiniFi is a stablecoin protocol that allows users to deposit assets (USDC, USDT) to mint iUSD, a stablecoin pegged to the US Dollar. The protocol automatically deploys deposited collateral into a portfolio of farm contracts categorized as **Liquid** (instant withdrawal), **Illiquid** (perpetual but exit-controlled), and **Maturing** (locked until fixed maturity dates). As of this assessment the largest allocations are Midas-tokenized **Fasanara Global** (~47% of TVL), three **offchain RWA escrow** positions (~31% combined), a CoW-swap fixed-maturity **PYUSD / Sentora PRIME** basket (~7%), **Cap Protocol stcUSD** (~6%), an **Aave V4 USDG** market (~5%), and Steakhouse-curated MetaMorpho (~3%). Roughly **78% of TVL now sits in offchain-custodied or NAV-attested positions** (Midas mGLOBAL + the RWA escrows). See Appendix A for detailed analysis of the largest farm deployments.
 
 The protocol offers three tiers of tokens:
 
@@ -37,7 +37,7 @@ All contracts verified on Etherscan. Compiled with Solidity 0.8.28 (except Gnosi
 - **Gateway (Proxy)**: [`0x3f04b65Ddbd87f9CE0A2e7Eb24d80e7fb87625b5`](https://etherscan.io/address/0x3f04b65Ddbd87f9CE0A2e7Eb24d80e7fb87625b5) — TransparentUpgradeableProxy → InfiniFiGatewayV3 (`0xb44e494535A8fC1f0081F4F9289BCc7c57FbffB6`)
 - **Gateway ProxyAdmin**: [`0x21071E0f9D600571Ffe47873e95fffF2FAc9141c`](https://etherscan.io/address/0x21071E0f9D600571Ffe47873e95fffF2FAc9141c) — Owned by Long Timelock (7-day delay for upgrades)
 - **Accounting**: [`0x7A5C5dbA4fbD0e1e1A2eCDBe752fAe55f6E842B3`](https://etherscan.io/address/0x7A5C5dbA4fbD0e1e1A2eCDBe752fAe55f6E842B3) — aggregates farm TVL via FarmRegistry
-- **FarmRegistry**: [`0xF5f2718708f471e43968271956CC01aaA8c46119`](https://etherscan.io/address/0xF5f2718708f471e43968271956CC01aaA8c46119) — canonical list of approved farms (4 Liquid, 5 Illiquid, 12 Maturing)
+- **FarmRegistry**: [`0xF5f2718708f471e43968271956CC01aaA8c46119`](https://etherscan.io/address/0xF5f2718708f471e43968271956CC01aaA8c46119) — canonical list of approved farms (23 enumerated: 5 Liquid, 5 Illiquid, 13 Maturing; most sit at $0 / dust)
 - **YieldSharing (Proxy → V3)**: [`0x90E91f5bfD9a0a4d925BF30b512add8cD2bbAE3b`](https://etherscan.io/address/0x90E91f5bfD9a0a4d925BF30b512add8cD2bbAE3b) — TransparentUpgradeableProxy → YieldSharingV3 (`0x0d5dBF208A9a7540018D204a9A0aD08A091407e5`). Upgraded from V2 since previous assessment.
 - **LockingController (liUSD positions)**: [`0x1d95cC100D6Cd9C7BbDbD7Cb328d99b3D6037fF7`](https://etherscan.io/address/0x1d95cC100D6Cd9C7BbDbD7Cb328d99b3D6037fF7) — first-loss tranche
 - **UnwindingModule**: [`0x7092A43aE5407666C78dBEA657a1891f42b3dFcc`](https://etherscan.io/address/0x7092A43aE5407666C78dBEA657a1891f42b3dFcc) — settles liUSD early exits over time
@@ -58,9 +58,9 @@ All contracts verified on Etherscan. Compiled with Solidity 0.8.28 (except Gnosi
 
 **Team Multisig & Timelocks:**
 
-- **Team Multisig**: [`0x80608f852D152024c0a2087b16939235fEc2400c`](https://etherscan.io/address/0x80608f852D152024c0a2087b16939235fEc2400c) — Gnosis Safe v1.4.1, **4/7 threshold**, 7 EOA signers, nonce 452 (≈ 165 transactions since previous assessment). Signer #1 has been rotated since prior report (`0x7055…E9eE5` → `0x7A82…D421`).
+- **Team Multisig**: [`0x80608f852D152024c0a2087b16939235fEc2400c`](https://etherscan.io/address/0x80608f852D152024c0a2087b16939235fEc2400c) — Gnosis Safe v1.4.1, **4/7 threshold**, 7 EOA signers, nonce 519. Signer set unchanged (7 anonymous EOAs).
 - **Long Timelock (7 days)**: [`0x3D18480CC32B6AB3B833dCabD80E76CfD41c48a9`](https://etherscan.io/address/0x3D18480CC32B6AB3B833dCabD80E76CfD41c48a9) — 604,800s delay (verified)
-- **Short Timelock (1 day)**: [`0x4B174afbeD7b98BA01F50E36109EEE5e6d327c32`](https://etherscan.io/address/0x4B174afbeD7b98BA01F50E36109EEE5e6d327c32) — 86,400s delay (verified)
+- **Short Timelock (1 hour)**: [`0x4B174afbeD7b98BA01F50E36109EEE5e6d327c32`](https://etherscan.io/address/0x4B174afbeD7b98BA01F50E36109EEE5e6d327c32) — `getMinDelay()` returns **3,600s (1 hour)**, verified onchain 2026-07-04. This is the delay governing PROTOCOL_PARAMETERS, ORACLE_MANAGER (setOracle/setPrice), and farm add/remove actions — the early-warning window for those changes is now one hour.
 
 **Active farms** (see Funds Management § Asset Allocation for full table and Appendix A for risk analysis).
 
@@ -88,45 +88,45 @@ Note: The initial Spearbit audit and "Cantina Code" review appear to be the **sa
 ## Historical Track Record
 
 - **Production History**: The protocol launched in June 2025 with a points program beginning June 1, 2025, designed to reward participation during its six month launch phase.
-- **TVL**: $82.66M (verified onchain via `Accounting.totalAssetsValue()` and corroborated by [DefiLlama](https://defillama.com/protocol/infinifi) on 2026-05-18). **TVL has contracted ~54% since the previous assessment ($177.69M → $82.66M).**
-- **Incidents**: No reported security incidents or exploits found. iUSD oracle still reports 1.0 (no loss-socialization event).
+- **TVL**: $65.31M (verified onchain via `Accounting.totalAssetsValue()` and corroborated by [DefiLlama](https://defillama.com/protocol/infinifi) at $65.3M on 2026-07-04). TVL has continued to decline from a ~$177M peak in early 2026, through ~$83M in May, ~$80M in mid-June, and now ~$65M — a slow, steady contraction rather than a run.
+- **June 2026 maturity wave settled without a depeg**: the mid-May-to-June cluster of maturities (the cUSD/stcUSD CoW-swap basket, the first PYUSD basket, and the original Midas mGLOBAL tranche) rolled off or rolled forward without a loss-socialization event; those farm positions are now at $0 or have been re-established at new maturities. This is the protocol's first observed settlement of a large maturity cluster.
+- **Incidents**: No reported security incidents or exploits found. iUSD oracle still reports 1.0 (verified onchain 2026-07-04 — no loss-socialization event).
 - **Peg Stability**: iUSD is designed to be redeemable 1:1. Users can mint iUSD against deposits.
+- **liUSD unwinding**: The `UnwindingModule` holds ~16.87M iUSD (versus ~4.48M at the prior snapshot), indicating a meaningful volume of locked-token (liUSD) holders exiting early — the first-loss buffer is being drawn down as those positions unwind.
 
 ## Funds Management
 
 The protocol acts as an asset manager, deploying user funds into other protocols.
 
-- **Strategy**: Funds are deployed via 21 enabled farm contracts grouped into three `AssetType` buckets in `FarmRegistry`: **Liquid** (4 farms — instant withdrawal), **Illiquid** (5 farms — perpetual but slow to unwind), and **Maturing** (12 farms — locked until a fixed maturity date). The current portfolio is concentrated in tokenized RWA (Midas-Fasanara), Cap Protocol stablecoins, and CoW-swap fixed-maturity baskets. **Critical: Several farms involve high-risk strategies — see Appendix A.**
-- **Asset Allocation** (verified onchain via `Accounting.totalAssetsValueOf(type)` and per-farm `assets()`, 2026-05-18):
+- **Strategy**: Funds are deployed via farm contracts grouped into three `AssetType` buckets in `FarmRegistry`: **Liquid** (instant withdrawal), **Illiquid** (perpetual but slow to unwind), and **Maturing** (locked until a fixed maturity date). The current portfolio is heavily concentrated in tokenized RWA (Midas-Fasanara) and offchain RWA escrow positions, with smaller onchain positions in a PYUSD/Sentora basket, Cap Protocol stcUSD, an Aave V4 USDG market, and Steakhouse MetaMorpho. **Critical: The two largest exposures — Midas mGLOBAL and the three RWA escrows, ~78% of TVL combined — are offchain-custodied. See Appendix A.**
+- **Asset Allocation** (verified onchain via `Accounting.totalAssetsValueOf(type)` and per-farm `assets()`, 2026-07-04):
 
   | Bucket | Value (USD) | Share |
   |--------|------------:|------:|
   | Liquid (USDC instant) | **~$0.7** | **~0%** |
-  | Illiquid (perpetual) | $23.26M | 28.1% |
-  | Maturing (fixed-term) | $59.40M | 71.9% |
-  | **Total** | **$82.66M** | 100% |
+  | Illiquid (perpetual) | $4.23M | 6.5% |
+  | Maturing (fixed-term) | $61.08M | 93.5% |
+  | **Total** | **$65.31M** | 100% |
 
-  **Critical observation**: The Liquid bucket is currently empty in practice (only dust in `SwapFarmV2`/`RedeemController`). All ~$82.66M of TVL is sitting in Illiquid or Maturing farms. The previous report showed $37.78M in liquid reserves; that buffer has been fully redeployed. **There is currently no instant-redemption capacity for iUSD holders without entering the queue.**
+  **Critical observation**: The Liquid bucket is empty in practice (only dust in `SwapFarmV2`/`RedeemController`, ~$0.67 total). Effectively all ~$65.31M of TVL sits in Illiquid or Maturing farms, and the Maturing bucket alone is now 93.5%. **There is no instant-redemption capacity for iUSD holders without entering the queue.**
 
   Top farms by deployed value:
 
   | Farm | Type | Target | Assets | Share |
   |------|------|--------|-------:|------:|
-  | [`MidasFarm`](https://etherscan.io/address/0x7373A7ce3C023C56Cb66747AFbdF827627D31679) | Maturing | mGLOBAL — Midas Fasanara Global ([`0x7433…98A8`](https://etherscan.io/address/0x7433806912Eae67919e66aea853d46Fa0aef98A8)). Maturity 2026-06-15. | $30.60M | 37.0% |
-  | [`CapFarm`](https://etherscan.io/address/0x35F9EbDc02F936e199826778bc06A13272a06B87) | Illiquid | stcUSD — Cap Protocol staked cUSD ([`0x8888…8888`](https://etherscan.io/address/0x88887bE419578051FF9F4eb6C858A951921D8888)) | $16.48M | 19.9% |
-  | [`SwapFarmV2WithMaturity`](https://etherscan.io/address/0x84FF7Ef9568807c93436F09E2E613dE2aF3FE4EE) | Maturing | CoW-swap USDC ↔ PYUSD / senPYUSDmain. Maturity 2026-05-25. | $9.00M | 10.9% |
-  | [`SwapFarmV2WithMaturity`](https://etherscan.io/address/0xe945de0D08E2F39B0740FE2d6e50FE2Bb9751eA4) | Maturing | CoW-swap USDC ↔ cUSD / stcUSD. Maturity 2026-05-19. | $8.29M | 10.0% |
-  | [`SparkSUSDCFarm`](https://etherscan.io/address/0xd880D7C5CaFdbE2AEc281250995abF612235e563) | Illiquid | Spark USDC Vault sUSDC ([`0xBC65…45FE`](https://etherscan.io/address/0xBC65ad17c5C0a2A4D159fa5a503f4992c7B545FE)) | $6.06M | 7.3% |
-  | [`RWAEscrowFarm`](https://etherscan.io/address/0x9E5efC5F387D8661C1AFB2469B7EeF6972451852) | Maturing | RWA escrow [`0x868C…741A`](https://etherscan.io/address/0x868C82b7BAa3675F9Da1404510DB60c1f6A7741A) → receiver [`0x4831…D926`](https://etherscan.io/address/0x4831C121879d3DE0E2B181d9d55E9B0724f5D926) (EOA). Maturity 2026-06-16. **Counterparty TODO.** | $5.08M | 6.1% |
-  | [`ERC4626FarmWithMaturity`](https://etherscan.io/address/0x76D2E84009dAE457f8667D823c7c96e9A7c35B78) | Maturing | Steakhouse infiniFi USDC ([`0xBEEF…3aC9`](https://etherscan.io/address/0xBEEF1f5bD88285E5b239B6AACB991D38CCa23aC9)) — dedicated MetaMorpho V1.1 vault | $3.52M | 4.3% |
-  | [`MapleFarm`](https://etherscan.io/address/0xF56E946e92FeF6a050F482C560b5f8DcCB8163B3) | Maturing | Maple High Yield Secured Lending Pool USDC1 ([`0xC39a…b8B9`](https://etherscan.io/address/0xC39a5a616F0aD1Ff45077fa2DE3F79ab8EB8B8B9)) | $2.37M | 2.9% |
-  | [`AaveV3Farm`](https://etherscan.io/address/0x817d93DbdFd8190bbef0a73fCf5Dd9DA5A87E032) | Illiquid | Aave Horizon RWA market (aHorRwaUSDC) | $0.72M | 0.9% |
-  | [`FxSaveFarm`](https://etherscan.io/address/0xc9c06c49Ed83d12BCA88BEd999d4920f049Beabc) | Maturing | f(x) Protocol fxSAVE / fxUSD via CoW | $0.53M | 0.6% |
-  | Remaining (dust / matured / inactive) | mixed | sGHO, autoUSD/infinifiUSD AutoFinance pools, RWA escrows at 0, Euler eUSDC-70, USDT Aave market | ~$0.01M | <0.1% |
+  | [`MidasFarm`](https://etherscan.io/address/0xF4Ea3Ec87B1c254f17a2Fb68164dB0CAf6c4cecF) | Maturing | mGLOBAL — Midas Fasanara Global ([`0x7433…98A8`](https://etherscan.io/address/0x7433806912Eae67919e66aea853d46Fa0aef98A8)). Maturity 2026-08-01. | $30.87M | 47.3% |
+  | [`RWAEscrowFarm`](https://etherscan.io/address/0x04d5521ac09F8823338e8163Dd8BAdAEE39F3271) | Maturing | RWA escrow [`0x4962…26Dd`](https://etherscan.io/address/0x4962762Bd3BA495CeDb9c33F5775C007e37b26Dd) → receiver = **Team Multisig** [`0x8060…400c`](https://etherscan.io/address/0x80608f852D152024c0a2087b16939235fEc2400c). Maturity 2026-07-11. | $10.21M | 15.6% |
+  | [`RWAEscrowFarm`](https://etherscan.io/address/0x9E5efC5F387D8661C1AFB2469B7EeF6972451852) | Maturing | RWA escrow [`0x868C…741A`](https://etherscan.io/address/0x868C82b7BAa3675F9Da1404510DB60c1f6A7741A) → receiver [`0x4831…D926`](https://etherscan.io/address/0x4831C121879d3DE0E2B181d9d55E9B0724f5D926) (EOA). Maturity 2026-08-01. **Counterparty TODO.** | $5.10M | 7.8% |
+  | [`RWAEscrowFarm`](https://etherscan.io/address/0x277FdF6Dc5c53C5c2828188Da84B9593A50884C1) | Maturing | RWA escrow [`0x1532…94bB`](https://etherscan.io/address/0x1532f095F8daa79d22a2475FD50c7109add394bB) → receiver [`0xa03B…d211`](https://etherscan.io/address/0xa03B88D7985E1C6A847Cfb123C786c1d7eA8d211) (EOA). Maturity 2026-08-29. **Counterparty TODO.** | $5.05M | 7.7% |
+  | [`SwapFarmV2WithMaturity`](https://etherscan.io/address/0x75381e9Bc6B908a2e9bC31A535fC48CeCeAc568E) | Maturing | CoW-swap USDC ↔ PYUSD ([`0x6c3e…A0e8`](https://etherscan.io/address/0x6c3ea9036406852006290770BEdFcAbA0e23A0e8)) / Sentora PRIME senPYUSDPRIMEv2 ([`0xC21b…8BbD`](https://etherscan.io/address/0xC21b08C16458202593D4D9B26b9984Ee67b38BbD)). Maturity 2026-07-11. | $4.73M | 7.2% |
+  | [`CapFarm`](https://etherscan.io/address/0xAc21B22B5aEb11bc32De4ecF59E4538fCa48b694) | Illiquid | stcUSD — Cap Protocol staked cUSD ([`0x8888…8888`](https://etherscan.io/address/0x88887bE419578051FF9F4eb6C858A951921D8888)) | $4.23M | 6.5% |
+  | [`AaveV4Farm`](https://etherscan.io/address/0x2CdF51ca20C2DD56480c35adEA667A6653Fb7657) | Maturing | Aave V4 USDG market — Global Dollar ([`0xe343…491D`](https://etherscan.io/address/0xe343167631d89B6Ffc58B88d6b7fB0228795491D)). Maturity 2026-07-11. | $2.99M | 4.6% |
+  | [`ERC4626FarmWithMaturity`](https://etherscan.io/address/0x76D2E84009dAE457f8667D823c7c96e9A7c35B78) | Maturing | Steakhouse infiniFi USDC ([`0xBEEF…3aC9`](https://etherscan.io/address/0xBEEF1f5bD88285E5b239B6AACB991D38CCa23aC9)) — dedicated MetaMorpho V1.1 vault | $2.13M | 3.3% |
+  | Remaining (dust / matured / inactive) | mixed | SparkSUSDCFarm, AaveV3Farm (Horizon), MapleFarm, FxSaveFarm, cUSD/stcUSD swap, old PYUSD swap, PrimeBrokerFarm — all at $0 / dust | ~$0.01M | <0.1% |
 
-  Notable concentrations: **Midas-Fasanara ≈ 37%**, **Cap Protocol exposure (CapFarm + cUSD/stcUSD swap) ≈ 30%**, **PYUSD swap basket ≈ 11%**, **Spark + Steakhouse MetaMorpho + Aave Horizon ≈ 12%**, **RWA escrow ≈ 6%**, **Maple ≈ 3%**.
+  Notable concentrations: **Midas-Fasanara mGLOBAL ≈ 47%**, **offchain RWA escrow (3 farms) ≈ 31%**, **PYUSD / Sentora PRIME basket ≈ 7%**, **Cap Protocol stcUSD ≈ 6%**, **Aave V4 USDG ≈ 5%**, **Steakhouse MetaMorpho ≈ 3%**.
 
-  Compared to the previous report, **explicit Gauntlet Frontier, Reservoir wsrUSD, direct Pendle, direct Ethena, regular Aave aEthUSDC, and Fluid fUSDC farm positions are no longer present** (those farm addresses are either removed or sit at $0). However the Fasanara exposure has not gone away — it has moved into Midas's tokenized `mGLOBAL` wrapper and grown to be the single largest position. The new heavyweights (Cap Protocol stcUSD and the cUSD/stcUSD swap basket) introduce a fresh concentration in a single younger stablecoin issuer.
+  The book is now highly consolidated. The Spark sUSDC, Aave Horizon, Maple HYSL, f(x) Protocol, and cUSD/stcUSD CoW-swap positions carried in the prior assessment currently hold $0. Cap Protocol exposure is a single $4.23M stcUSD position (6.5%). The dominant weights are Midas mGLOBAL at nearly half of TVL and the offchain RWA escrow footprint of **three farms totalling ~$20.4M (31%)**. Two new farm types are present: `AaveV4Farm` (Aave V4 USDG market, $2.99M) and `PrimeBrokerFarm` (a Liquid-type farm currently at $0).
 
 - **Risk Hierarchy**: Losses are socialized based on a "liability ladder":
   1. liUSD (Locked) holders take the first loss.
@@ -139,7 +139,7 @@ The protocol acts as an asset manager, deploying user funds into other protocols
 - **Minting**: Users deposit USDC/USDT through the Gateway → `MintController` to mint iUSD.
 - **Redemption**:
 
-  - **Instant**: Capped by liquidity in the four Liquid farms (`MintController`, `RedeemController`, `SwapFarmV2`, `LiquidationFarm`). **Currently effectively $0** — instant redemptions are paused in practice until allocators rebalance funds back into liquid farms or maturing positions roll off.
+  - **Instant**: Capped by liquidity in the Liquid-type farms (`MintController`, `RedeemController`, `SwapFarmV2`, `LiquidationFarm`, `PrimeBrokerFarm`). **Currently effectively $0** (~$0.67 total) — instant redemptions are paused in practice until allocators rebalance funds back into liquid farms or maturing positions roll off.
   - **Queue**: With liquid reserves depleted, redemption requests enter a **FIFO Queue**. Pending requests are fulfilled as capital is unwound from illiquid strategies or new deposits enter.
   - **Whitelisting**: No whitelist for redemption; anyone holding iUSD can redeem or enter the queue.
 
@@ -176,7 +176,7 @@ The protocol acts as an asset manager, deploying user funds into other protocols
 - **`MintController` path** (user-facing USDC/USDT deposits): **atomic.** Collateral must transfer in the same call before `iUSD.mint(...)` fires. Cannot mint unbacked.
 - **`MigrationController` path**: atomic against the migration source (same pull-collateral-then-mint pattern).
 - **`YieldSharing` and `PLSmoother` paths** (protocol-internal yield distribution and P&L smoothing): **not atomic with backing.** The minter contract has no `transferFrom(asset, ...)` before `mint(...)`. PLSmoother's [`smoothProfit(receiptTokenProfit, duration)`](https://etherscan.io/address/0xC324569141697045B9EdE54B5d4623a691ed57A4#code) literally calls `ReceiptToken(receiptToken).mint(address(this), receiptTokenProfit)` with no on-chain assertion that USDC has arrived in the protocol — the caller is trusted to only call it when farms have already reported `receiptTokenProfit` of realized USDC profit. The trust surface here is layered:
-  1. The `FINANCE_MANAGER` role-holder set (currently 3 contracts: `YieldSharing`, `LiquidationFarm`, `PLSmootherHelper`). No EOA or multisig holds the role directly. Adding a new holder requires `GOVERNOR` (Long Timelock, 7d).
+  1. The `FINANCE_MANAGER` role-holder set (currently 4 contracts: `YieldSharing`, `LiquidationFarm`, `PLSmootherHelper`, and the new `PrimeBrokerFarm`). No EOA or multisig holds the role directly. Adding a new holder requires `GOVERNOR` (Long Timelock, 7d).
   2. The calling contract correctly accounting realized farm profit before calling `smoothProfit`. A bug in `YieldSharing`'s profit math, or a compromised farm that over-reports yield, would let PLSmoother mint unbacked iUSD. The PLSmoother contract itself would not catch the discrepancy.
 
 **Slashing-order quirk** (from PLSmoother source comment): *"the vesting yield held by this contract … isn't included in the slashing order. As a result, it could hold undistributed rewards (i.e. pending profit) that would otherwise could have been used to mitigate losses."* If losses materialize while iUSD is still mid-vest inside PLSmoother, that pending profit does **not** absorb the loss — losses skip the smoother and hit liUSD / siUSD directly. An audited and acknowledged design property, not a bug, but a real risk-review-relevant point.
@@ -186,38 +186,37 @@ The protocol acts as an asset manager, deploying user funds into other protocols
 - **Backing**: iUSD is backed by the assets deployed in the underlying strategies.
 - **Verification**: The protocol uses a "Self-Laddering Engine" to match asset duration with liability duration (locked periods).
 - **Offchain / High-Risk Exposures** (verified onchain, see Appendix A for detail):
-  - **Midas-tokenized Fasanara Global (mGLOBAL)** — single largest position at $30.6M (37%). Midas is a tokenization issuer; the underlying is Fasanara Capital's hedge-fund strategy. Custody and valuation are entirely offchain.
-  - **Cap Protocol stcUSD** — $16.5M direct deposit + $8.3M maturing swap basket = ~$24.8M combined (30% of TVL). Cap is a relatively young (2025) stablecoin issuer.
-  - **Maple HYSL Pool** — $2.37M of institutional secured lending exposure.
-  - **Aave Horizon (aHorRwaUSDC)** — $0.72M in RWA-collateralized lending market.
-  - **RWA Escrow Farm** — $5.08M sent to an EOA receiver ([`0x4831…D926`](https://etherscan.io/address/0x4831C121879d3DE0E2B181d9d55E9B0724f5D926)), value maintained by `RWAEscrowRateManager` ([`0x11F6…4189`](https://etherscan.io/address/0x11F6FAb3f4D8635880C3e80cbae8AEF8136D4189)). Pure trust-based offchain exposure during the lock period.
-- **Token Breakdown** (verified onchain 2026-05-18, all in iUSD-equivalent):
+  - **Midas-tokenized Fasanara Global (mGLOBAL)** — single largest position at $30.87M (47%). Midas is a tokenization issuer; the underlying is Fasanara Capital's hedge-fund strategy. Custody and valuation are entirely offchain.
+  - **Three RWA Escrow Farms** — ~$20.4M combined (31% of TVL): $10.21M via escrow [`0x4962…26Dd`](https://etherscan.io/address/0x4962762Bd3BA495CeDb9c33F5775C007e37b26Dd) (receiver = the **Team Multisig** itself), $5.10M via escrow [`0x868C…741A`](https://etherscan.io/address/0x868C82b7BAa3675F9Da1404510DB60c1f6A7741A) (receiver EOA [`0x4831…D926`](https://etherscan.io/address/0x4831C121879d3DE0E2B181d9d55E9B0724f5D926)), and $5.05M via escrow [`0x1532…94bB`](https://etherscan.io/address/0x1532f095F8daa79d22a2475FD50c7109add394bB) (receiver EOA [`0xa03B…d211`](https://etherscan.io/address/0xa03B88D7985E1C6A847Cfb123C786c1d7eA8d211)). All three escrow positions are value-attested onchain by the same keeper/rate manager `RWAEscrowRateManager` ([`0x11F6…4189`](https://etherscan.io/address/0x11F6FAb3f4D8635880C3e80cbae8AEF8136D4189)) but the underlying funds sit with offchain counterparties. Pure trust-based offchain exposure during the lock period.
+  - **Cap Protocol stcUSD** — $4.23M (6.5% of TVL). Cap is a relatively young (2025) stablecoin issuer.
+  - **Aave V4 USDG market** — $2.99M supplied into Aave's V4 Global Dollar (USDG) market.
+- **Token Breakdown** (verified onchain 2026-07-04, all in iUSD-equivalent):
 
   | Component | Value | Source |
   |-----------|------:|--------|
-  | iUSD totalSupply | 82.66M | `iUSD.totalSupply()` |
-  | — held by siUSD (Staked) | 45.60M | `iUSD.balanceOf(siUSD)` |
-  | — held by LockingController (liUSD active) | 26.87M | `iUSD.balanceOf(LockingController)` |
-  | — held by UnwindingModule (liUSD in unwind) | 4.48M | `iUSD.balanceOf(UnwindingModule)` |
+  | iUSD totalSupply | 65.31M | `iUSD.totalSupply()` |
+  | — held by siUSD (Staked) | 36.98M | `iUSD.balanceOf(siUSD)` |
+  | — held by LockingController (liUSD active) | 10.97M | `iUSD.balanceOf(LockingController)` |
+  | — held by UnwindingModule (liUSD in unwind) | 16.87M | `iUSD.balanceOf(UnwindingModule)` |
   | — held by YieldSharing (dust) | 0.03M | `iUSD.balanceOf(YieldSharing)` |
-  | — circulating / in user wallets | ~5.69M | residual |
-  | siUSD totalSupply | 42.66M shares | exchange rate 1.069 iUSD/siUSD |
-  | LockingController totalBalance (liUSD) | 31.35M | `LockingController.totalBalance()` |
+  | — circulating / in user wallets | ~0.47M | residual |
+  | siUSD totalSupply | 34.35M shares | exchange rate ≈1.077 iUSD/siUSD |
+  | LockingController totalBalance (liUSD) | 27.83M | `LockingController.totalBalance()` |
 
-  Compared to previous assessment: siUSD-backed iUSD dropped from 115.07M → 45.60M (-60%), liUSD positions from 43.34M → 31.35M (-28%), free iUSD from 24.86M → ~5.69M (-77%).
+  A large share of the locked tranche is now mid-unwind: the `UnwindingModule` holds 16.87M iUSD against 10.97M still active in `LockingController`, i.e. roughly 60% of the outstanding liUSD notional is being drawn down through early exits. The first-loss buffer (`LockingController.totalBalance()` = 27.83M) is smaller than the single Midas mGLOBAL position ($30.87M) and far below the combined offchain exposure (~$51.2M).
 
 ### Provability
 
 - **Transparency**: Reserves and allocations are verifiable onchain via `FarmRegistry.getFarms()` and per-farm `assets()`.
-- **Reserves**: Onchain DeFi positions (Spark, Aave Horizon, MetaMorpho, Cap, Maple, sGHO, FxSave, AutoFinance) are fully verifiable. Offchain-backed positions (Midas mGLOBAL, RWAEscrow, partially Cap) cannot be independently audited on-chain.
+- **Reserves**: Onchain DeFi positions (Cap stcUSD, Aave V4 USDG, Steakhouse MetaMorpho, the PYUSD/Sentora basket) are fully verifiable. The dominant offchain-backed positions — Midas mGLOBAL (47%) and the three RWA escrow farms (31%) — cannot be independently audited onchain; together they are ~78% of TVL, so the majority of backing now rests on offchain attestation.
 
 ## Liquidity Risk
 
 - **Exit Liquidity**:
-  - **iUSD**: ~$5.69M circulating outside protocol contracts. Instant-redemption buffer is currently ~$0; **any iUSD holder wanting to exit today must enter the FIFO queue** and wait for maturing positions to roll off or new deposits to come in.
+  - **iUSD**: only ~$0.47M circulating outside protocol contracts. Instant-redemption buffer is ~$0; **any iUSD holder wanting to exit today must enter the FIFO queue** and wait for maturing positions to roll off or new deposits to come in.
   - **siUSD**: Staked holders can withdraw to iUSD via `siUSD.withdraw()` (ERC4626) but then face the same redemption queue.
-  - **liUSD**: Locked positions (1-13 weeks). Early exits route through `UnwindingModule` and incur a slashing penalty.
-- **Withdrawal Queues**: With the liquid buffer at $0 the queue is the only path for iUSD-to-USDC. The earliest material relief is **2026-05-19** ($8.29M Cap swap basket maturity), followed by **2026-05-25** (~$9.0M PYUSD swap + Auto Finance positions), and **2026-06-15/16** ($30.6M Midas-Fasanara + $5.08M RWA escrow). In practice the queue can only be cleared as these maturities trigger.
+  - **liUSD**: Locked positions (1-13 weeks). Early exits route through `UnwindingModule` and incur a slashing penalty. ~16.87M iUSD is currently mid-unwind, indicating active locked-holder exit pressure.
+- **Withdrawal Queues**: With the liquid buffer at ~$0 the queue is the only path for iUSD-to-USDC. Upcoming maturities that can restore liquidity are **2026-07-11** (~$17.9M cluster: $10.21M RWA escrow + $4.73M PYUSD/Sentora swap + $2.99M Aave V4 USDG), **2026-08-01** ($30.87M Midas mGLOBAL + $5.10M RWA escrow — the single largest event), and **2026-08-29** ($5.05M RWA escrow). In practice the queue can only be cleared as these maturities trigger (or are rolled forward, which does not release cash).
 
 ## Centralization & Control Risks
 
@@ -226,16 +225,16 @@ The protocol acts as an asset manager, deploying user funds into other protocols
 The governance system is split into three branches to check and balance power:
 
 1.  **Allocators (Active Management)**: Decide "How much" capital goes to specific strategies. They cannot route funds to arbitrary addresses.
-    - _Timelock_: Changes to capital allocation parameters (e.g., Farm Registry updates) use the **Short Timelock** (1 day delay).
+    - _Timelock_: Changes to capital allocation parameters (e.g., Farm Registry updates) use the **Short Timelock** (1 hour delay).
 2.  **Verifiers (Token Holders - liUSD)**: Vote to approve the "Allowlist" of safe protocols.
-    - _Scope_: Adding a new protocol to the allowlist requires a governance vote and must pass through the **Short Timelock** (1 day delay).
+    - _Scope_: Adding a new protocol to the allowlist requires a governance vote and must pass through the **Short Timelock** (1 hour delay).
 3.  **Vetoers (Guardians)**: A council of 5 entities. A single Vetoer can block any new protocol or product. This acts as a safety brake.
 
-- **Team Multisig**: Gnosis Safe v1.4.1 at [`0x80608f852D152024c0a2087b16939235fEc2400c`](https://etherscan.io/address/0x80608f852D152024c0a2087b16939235fEc2400c). **4/7 threshold**, 7 anonymous EOA signers (verified onchain via `getOwners()` and `getThreshold()` on 2026-05-18). Nonce 452. Signer #1 has been rotated since the prior report.
+- **Team Multisig**: Gnosis Safe v1.4.1 at [`0x80608f852D152024c0a2087b16939235fEc2400c`](https://etherscan.io/address/0x80608f852D152024c0a2087b16939235fEc2400c). **4/7 threshold**, 7 anonymous EOA signers (verified onchain via `getOwners()` and `getThreshold()` on 2026-07-04). Nonce 519. Signer set unchanged since the prior assessment.
 
   | # | Signer | Additional Roles (verified onchain) |
   |---|--------|------------------|
-  | 1 | [`0x7A823623B18335A9c1284AC45315fe89972FD421`](https://etherscan.io/address/0x7A823623B18335A9c1284AC45315fe89972FD421) | — (new since prior report; replaced `0x7055E782B94b15BB6142aaFB326a9CeC36399eE5`) |
+  | 1 | [`0x7A823623B18335A9c1284AC45315fe89972FD421`](https://etherscan.io/address/0x7A823623B18335A9c1284AC45315fe89972FD421) | — |
   | 2 | [`0xDAdB38219425c761dd0f3a4d684Fc36f533af7bD`](https://etherscan.io/address/0xDAdB38219425c761dd0f3a4d684Fc36f533af7bD) | EXECUTOR_ROLE |
   | 3 | [`0xa9BDBEb17c81677Cb1830B74B1832C16Ec5CEF61`](https://etherscan.io/address/0xa9BDBEb17c81677Cb1830B74B1832C16Ec5CEF61) | — |
   | 4 | [`0x6DFa1A32604088EB969242AafFb92420F78373f6`](https://etherscan.io/address/0x6DFa1A32604088EB969242AafFb92420F78373f6) | EXECUTOR_ROLE |
@@ -245,8 +244,8 @@ The governance system is split into three branches to check and balance power:
 
 - **Timelocks**: Both are custom `Timelock.sol` extending OZ TimelockController. They override `hasRole()` to delegate role checks to the central `InfiniFiCore` contract. Both have DEFAULT_ADMIN_ROLE renounced (immutable role configuration).
 
-  - **Long Timelock (7 days)**: [`0x3D18480CC32B6AB3B833dCabD80E76CfD41c48a9`](https://etherscan.io/address/0x3D18480CC32B6AB3B833dCabD80E76CfD41c48a9) — `getMinDelay()` returns 604,800s (verified 2026-05-18).
-  - **Short Timelock (1 day)**: [`0x4B174afbeD7b98BA01F50E36109EEE5e6d327c32`](https://etherscan.io/address/0x4B174afbeD7b98BA01F50E36109EEE5e6d327c32) — `getMinDelay()` returns 86,400s (verified 2026-05-18).
+  - **Long Timelock (7 days)**: [`0x3D18480CC32B6AB3B833dCabD80E76CfD41c48a9`](https://etherscan.io/address/0x3D18480CC32B6AB3B833dCabD80E76CfD41c48a9) — `getMinDelay()` returns 604,800s (verified 2026-07-04).
+  - **Short Timelock (1 hour)**: [`0x4B174afbeD7b98BA01F50E36109EEE5e6d327c32`](https://etherscan.io/address/0x4B174afbeD7b98BA01F50E36109EEE5e6d327c32) — `getMinDelay()` returns **3,600s (1 hour)** (verified 2026-07-04). The delay governing parameter, oracle, and farm-add/remove actions is now one hour — a materially shorter early-warning window than the 7-day Long Timelock, and short enough that offchain monitoring must be near-real-time to react before execution.
 
   **Timelock-controlling roles on InfiniFiCore** (verified by enumerating `getRoleMember()`):
 
@@ -269,10 +268,10 @@ The governance system is split into three branches to check and balance power:
     **Long Timelock (7 days) — GOVERNOR role (and PROTOCOL_PARAMETERS, PAUSE, MINOR_ROLES_MANAGER it also now holds):**
     enableBucket, setMaxLossPercentage, setAddress (gateway), setAfterMintHook, setBeforeRedeemHook, setYieldSharing, enableAsset, disableAsset, setLendingPool, setSafeAddress, emergencyAction, proxy upgrades (owns ProxyAdmin), all role grants/revokes.
 
-    **Short Timelock (1 day) — PROTOCOL_PARAMETERS role:**
+    **Short Timelock (1 hour) — PROTOCOL_PARAMETERS role:**
     setBucketMultiplier, setMinAssetAmount, setSafetyBufferSize, setPerformanceFeeAndRecipient, setLiquidReturnMultiplier, setTargetIlliquidRatio, setCap, setMaxSlippage, addFarms, removeFarms, setEnabledRouter, setPendleRouter, setCooldown, setAssetRebalanceThreshold.
 
-    **Short Timelock (1 day) — ORACLE_MANAGER role:**
+    **Short Timelock (1 hour) — ORACLE_MANAGER role:**
     setOracle, setPrice.
     Verified onchain: ORACLE_MANAGER has 4 holders — Short Timelock, Accounting (`0x7A5C…42B3`), YieldSharing proxy (`0x90E9…AE3b`), and OracleFactory (`0xA2b3…Ed91`).
 
@@ -281,7 +280,7 @@ The governance system is split into three branches to check and balance power:
     |------|-----------|
     | UNPAUSE (2 holders: multisig + EmergencyWithdrawal) | Unpause any paused contract |
     | EMERGENCY_WITHDRAWAL (1 holder: multisig) | Move funds from farms to predefined safe address, deprecate farms |
-    | MANUAL_REBALANCER (3 holders: multisig + Short Timelock + LiquidationFarm) | Rebalance funds between whitelisted farms |
+    | MANUAL_REBALANCER (4 holders: multisig + Short Timelock + LiquidationFarm + PrimeBrokerFarm) | Rebalance funds between whitelisted farms |
     | FARM_SWAP_CALLER (3 holders: multisig + EOA `0x7345…2cbB` + Short Timelock) | Trigger swap operations in farms |
     | MINOR_ROLES_MANAGER (2 holders: multisig + Long Timelock) | Grant/revoke PAUSE, PERIODIC_REBALANCER, FARM_SWAP_CALLER |
     | CANCELLER_ROLE / PROPOSER_ROLE | Cancel/propose timelock actions |
@@ -297,7 +296,7 @@ The governance system is split into three branches to check and balance power:
   - [`0x607b5aB25b2ed5575D296a1caFc3A17161D4fa56`](https://etherscan.io/address/0x607b5aB25b2ed5575D296a1caFc3A17161D4fa56) (MaturedFarmCleaner contract)
   - [`0x80608f852D152024c0a2087b16939235fEc2400c`](https://etherscan.io/address/0x80608f852D152024c0a2087b16939235fEc2400c) (Multisig)
 
-- **Other onchain role membership** (verified 2026-05-18 by enumerating `keccak256` of each role name in `CoreRoles`):
+- **Other onchain role membership** (verified 2026-07-04 by enumerating `keccak256` of each role name in `CoreRoles`):
 
   | Role | Count | Notable holders |
   |------|------:|-----------------|
@@ -307,7 +306,7 @@ The governance system is split into three branches to check and balance power:
   | LOCKED_TOKEN_MANAGER | 1 | LockingController |
   | TRANSFER_RESTRICTOR | 1 | AllocationVoting |
   | FARM_MANAGER | 4 | ManualRebalancer, AfterMintHook, BeforeRedeemHook, EmergencyWithdrawal |
-  | FINANCE_MANAGER | 3 | YieldSharing, LiquidationFarm, PLSmootherHelper |
+  | FINANCE_MANAGER | 4 | YieldSharing, LiquidationFarm, PLSmootherHelper, PrimeBrokerFarm |
   | PERIODIC_REBALANCER | 1 | EOA `0x2Cba…aB1a` (keeper bot) |
   | PROTOCOL_PARAMETERS | 3 | Short Timelock, Long Timelock, MaturedFarmCleaner |
   | DEFAULT_ADMIN_ROLE | **0** | — (renounced) |
@@ -322,8 +321,8 @@ The governance system is split into three branches to check and balance power:
 
 ### External Dependencies
 
-- **Top dependencies (by deployed value)**: **Midas** (mGLOBAL tokenization layer over Fasanara Capital) ~37%, **Cap Protocol** (cUSD/stcUSD as direct deposit and swap target) ~30%, **PYUSD / Paxos** ~11%, **Spark / MakerDAO** ~7%, **Unidentified RWA escrow counterparty** (TODO) ~6%, **Steakhouse-curated Morpho MetaMorpho** ~4%, **Maple Finance** ~3%, **Aave Horizon RWA** ~1%, **f(x) Protocol** ~1%. Smaller exposures to Auto Finance (formerly Tokemak) and Aave sGHO via dust positions.
-- **Stablecoin dependencies**: USDC and USDT enabled as deposit assets (verified onchain). The protocol also takes indirect exposure to PYUSD (via maturing swap basket), cUSD/stcUSD (Cap), USDS (via Spark), and indirectly to T-Bill-backed RWAs (via Midas mGLOBAL and unidentified RWA escrow counterparty). USDe and sUSDe are no longer enabled deposit assets on FarmRegistry.
+- **Top dependencies (by deployed value)**: **Midas** (mGLOBAL tokenization layer over Fasanara Capital) ~47%, **Unidentified RWA escrow counterparties** (three separate escrows; one routes to the team multisig, two to external EOAs — TODO identify) ~31%, **PYUSD / Paxos + Sentora PRIME** (via maturing CoW-swap basket) ~7%, **Cap Protocol** (stcUSD) ~6%, **Aave (V4) / Global Dollar (USDG)** ~5%, **Steakhouse-curated Morpho MetaMorpho** ~3%. The Spark/MakerDAO, Aave Horizon, Maple Finance, and f(x) Protocol dependencies present in the prior assessment are now $0. The CoW-Protocol solver set remains a settlement dependency for the maturing swap baskets.
+- **Stablecoin dependencies**: USDC and USDT enabled as deposit assets (verified onchain). The protocol also takes indirect exposure to PYUSD (via the maturing swap basket), USDG / Global Dollar (via the Aave V4 market), cUSD/stcUSD (Cap), and to T-Bill-backed / hedge-fund RWAs (via Midas mGLOBAL and the three RWA escrow counterparties). USDe and sUSDe remain not enabled as deposit assets on FarmRegistry.
 
 ## Operational Risk
 
@@ -398,27 +397,27 @@ Autonomous events triggered by protocol state, not governance actions.
 - Strong risk segmentation design with liability ladder (liUSD first-loss → siUSD → iUSD)
 - Comprehensive audit coverage: Spearbit/Cantina Code main review + 6 ongoing upgrade reviews + Certora formal verification + public competition
 - Robust governance: 4/7 multisig + dual timelock (7d/1d) + separation of powers. DEFAULT_ADMIN renounced. emergencyAction bypass prevented via no-op override in Timelock.
-- All contracts verified onchain, all farms properly target expected DeFi protocols
+- All contracts verified onchain, all funded farms properly target their stated protocols/counterparties
+- First large maturity cluster (May–June 2026) settled without a loss-socialization event or depeg
 - Backed by reputable investors (Electric Capital, Sam Kazemian)
 
 ### Key Risks
 
-- **Liquid reserves fully depleted**: Onchain `Accounting.totalAssetsValueOf(Liquid)` returns <$1; all four Liquid-type farms (MintController, RedeemController, SwapFarmV2, LiquidationFarm) currently hold dust. iUSD instant redemption is effectively disabled — every redeemer must enter the FIFO queue.
-- **Heavy concentration in tokenized RWA**: Midas-Fasanara mGLOBAL is ~37% of TVL ($30.6M) and matures 2026-06-15. This is the single largest position and a pure offchain counterparty.
-- **Heavy concentration in Cap Protocol**: Direct stcUSD + the cUSD/stcUSD swap basket combine to ~30% of TVL. Cap is a 2025-vintage stablecoin issuer with limited track record.
-- **Concentrated maturity wall**: Roughly $26M of maturities cluster between 2026-05-19 and 2026-05-25 — protocol relies on these rolling off (or being rolled forward) to restore any liquidity.
-- **TVL down 54%** since prior assessment ($177.69M → $82.66M) — directionally consistent with the loss of liquid buffer and may reflect ongoing redemption pressure.
-- **Offchain/RWA exposure**: Contrary to initial marketing as "100% onchain DeFi", at least 43% of TVL (Midas-Fasanara + unidentified RWA escrow + Aave Horizon RWA + Maple) sits in offchain or RWA-backed strategies whose valuations cannot be verified onchain.
-- **Multisig powers expanded since prior assessment**: multisig now directly holds EMERGENCY_WITHDRAWAL, MANUAL_REBALANCER, UNPAUSE, MINOR_ROLES_MANAGER, PAUSE, **and EXECUTOR_ROLE** on InfiniFiCore — meaning it can both propose and execute its own timelock actions. This concentrates effective control to a 4/7 anonymous signer set.
-- **Short operational history** (<1 year in production since June 2025).
-- **Compounded smart contract risk** from layered protocols (Cap stcUSD, Spark, Maple, Morpho/MetaMorpho, Auto Finance, f(x) Protocol, Midas vault flow).
+- **~78% of TVL is offchain-custodied or NAV-attested**: Midas-Fasanara mGLOBAL (~47%) plus three RWA escrow farms (~31%) together hold roughly $51M whose backing cannot be verified onchain. This is a large increase in offchain exposure versus the prior assessment (~43%), and it now dominates the book.
+- **Single-position concentration crosses 40%**: Midas-Fasanara mGLOBAL is ~47% of TVL ($30.87M), maturing 2026-08-01. This exceeds the entire liUSD first-loss buffer ($27.83M) on its own.
+- **RWA escrow footprint tripled**: three separate `RWAEscrowFarm` positions now hold ~$20.4M (31%). Funds sit with offchain counterparties (one escrow's receiver is the team multisig itself; two are external EOAs), value-attested by a single onchain rate manager. This is the most opaque exposure in the portfolio and its recovery at maturity is a trust/legal matter, not a smart-contract guarantee.
+- **Liquid reserves remain fully depleted**: onchain `Accounting.totalAssetsValueOf(Liquid)` returns ~$0.67; the Liquid-type farms hold only dust. iUSD instant redemption stays effectively disabled — every redeemer must enter the FIFO queue.
+- **Short Timelock delay cut to 1 hour**: parameter, oracle (`setPrice`/`setOracle`), and farm add/remove actions now execute after only a 1-hour delay (was 1 day), materially shrinking the early-warning window for those changes.
+- **TVL continues to contract**: now ~$65.31M, on a steady downtrend from a ~$177M peak earlier in 2026, with ~16.87M iUSD of locked (liUSD) positions currently mid-unwind — signs of ongoing exit pressure.
+- **Multisig retains broad non-timelocked powers** — EMERGENCY_WITHDRAWAL, MANUAL_REBALANCER, UNPAUSE, MINOR_ROLES_MANAGER, PAUSE, and EXECUTOR_ROLE on InfiniFiCore — so a 4/7 anonymous signer set can both propose and execute its own timelock actions and move farm funds to a safe address.
+- **Short operational history** (~13 months in production since June 2025); the June 2026 maturity cluster settled without a depeg but the book is now more concentrated, not less.
 - **Pseudonymous team** with notable history concerns: key contributor (RobAnon) authored Revest Finance contracts exploited for $2M; lead dev's prior projects (Fei, ECG) have wound down.
 - **No disclosed legal entity or incident response plan**.
 - **Certora formal verification** report published but finding severity breakdown not available on the landing page (full PDF required for detailed review).
 
 ### Critical Risks
 
-- **Effective queue-only redemption today**. Liquid reserves are essentially $0. Combined with the 54% TVL contraction since the prior report, this looks like an active redemption stress event being managed by waiting for maturities to roll off rather than honoring instant withdrawals. Operators of any vault that requires reliable USDC exit should treat InfiniFi as queue-mode until the Liquid bucket is rebuilt.
+- **Queue-only redemption backed by a concentrated, offchain book**. Liquid reserves are ~$0 and ~78% of TVL is in Midas mGLOBAL plus three offchain RWA escrows that only settle at their 2026-07-11 / 08-01 / 08-29 maturities. A holder needing USDC today must wait for those maturities, and the single largest ($30.87M Midas, 2026-08-01) exceeds the entire first-loss buffer. Operators of any vault that requires reliable USDC exit should treat InfiniFi as queue-mode with heavy offchain-counterparty credit exposure.
 
 ---
 
@@ -435,59 +434,60 @@ Autonomous events triggered by protocol state, not governance actions.
 #### Category 1: Audits & Historical Track Record (Weight: 20%)
 
 - **Audits**: Strong coverage — Spearbit/Cantina Code main review (8H/6M/25L), Certora formal verification ([report](https://www.certora.com/reports/infinifi-protocol-formal-verification-report)), Cantina public competition, multiple upgrade reviews (YieldSharing V2 → V3 upgrade reviewed).
-- **History**: ~11 months in production (mainnet launch June 2025; this reassessment May 2026). TVL ~$83M (down ~54% from previous report's $179M peak figure).
+- **History**: ~13 months in production (mainnet launch June 2025; this reassessment July 2026). TVL ~$65M (down from a ~$177M peak and from ~$83M at the prior assessment).
 - **Bounty**: [Active on Cantina](https://cantina.xyz/bounties/509e46d0-a107-43aa-b46e-b2fe7e2ea591).
-- **Incidents**: No known exploits or loss events since launch. One multisig signer rotation handled cleanly.
+- **Incidents**: No known exploits or loss events since launch. The May–June 2026 maturity cluster settled without a depeg — a first observed stress data point.
 
-**Score: 2.5/5** — Extensive audit coverage including formal verification and ongoing upgrade reviews; ~11 months production with no losses. Held at 2.5 (rather than improving toward 2.0) because TVL has materially contracted and the protocol has not yet weathered a stress event.
+**Score: 2.5/5** — Extensive audit coverage including formal verification and ongoing upgrade reviews; ~13 months production with no losses, and a first maturity cluster settled cleanly. Held at 2.5 (rather than improving toward 2.0) because TVL has continued to contract and the protocol has not yet weathered an adverse credit event in one of its now-dominant offchain positions.
 
 #### Category 2: Centralization & Control Risks (Weight: 30%)
 
-**Subcategory A: Governance — 3.0**
-- 4/7 multisig (Gnosis Safe v1.4.1) with dual timelocks (7d Long for GOVERNOR-scope, 1d Short for parameters) remains in place.
+**Subcategory A: Governance — 3.2**
+- 4/7 multisig (Gnosis Safe v1.4.1) with dual timelocks (7d Long for GOVERNOR-scope, Short for parameters) remains in place.
 - DEFAULT_ADMIN_ROLE renounced on Core and both timelocks; `Timelock.emergencyAction` is a no-op override.
-- All 7 multisig signers remain anonymous EOAs. Signer #1 has been rotated since the prior assessment — process worked but the signer set is opaque.
-- **New finding**: the multisig now holds EXECUTOR_ROLE on the Long Timelock alongside the deployer EOA and 4 individual signer EOAs. The multisig can therefore both schedule and execute its own proposals; the timelock delay still applies but the execution gate is no longer held by a distinct party.
+- All 7 multisig signers remain anonymous EOAs; the signer set is unchanged since the prior assessment.
+- The multisig holds EXECUTOR_ROLE on the Long Timelock alongside the deployer EOA and individual signer EOAs, so it can both schedule and execute its own proposals; the timelock delay still applies but the execution gate is not held by a distinct party.
+- **New this assessment**: the Short Timelock delay has been reduced from 1 day to **1 hour**. Parameter, oracle, and farm add/remove actions now clear after only an hour, materially shrinking the early-warning window for those changes.
 - Multisig retains significant non-timelocked direct powers: UNPAUSE, EMERGENCY_WITHDRAWAL, MANUAL_REBALANCER, FARM_SWAP_CALLER, MINOR_ROLES_MANAGER, PAUSE.
 
 **Subcategory B: Programmability — 3.0**
-- Hybrid model: algorithmic Self-Laddering Engine + active Allocator management. Asset/liability matching is the design intent but in practice the allocator decisions have produced a portfolio with effectively zero liquid buffer.
-- Oracle-dependent for pricing (Chainlink + protocol-specific oracles for stcUSD, mGLOBAL); ORACLE_MANAGER role is under Short Timelock (1d).
+- Hybrid model: algorithmic Self-Laddering Engine + active Allocator management. Asset/liability matching is the design intent but in practice the allocator decisions have produced a portfolio with effectively zero liquid buffer and ~78% offchain concentration.
+- Oracle-dependent for pricing (Chainlink + protocol-specific oracles for stcUSD, mGLOBAL, RWA escrow rate manager); ORACLE_MANAGER role is under the Short Timelock (now 1h).
 - emergencyAction safely disabled on timelocks (unchanged).
 
-**Subcategory C: Dependencies — 3.5**
-- Direct exposure to 8+ external protocols and issuers: Midas (mGLOBAL wrapping Fasanara), Cap Protocol (cUSD/stcUSD), Spark (sUSDC), Aave (Horizon RWA market), Steakhouse MetaMorpho V1.1, Maple Finance (HYSL), f(x) Protocol, AutoFinance.
-- Pegs depended on: USDC, USDT, cUSD, mGLOBAL NAV, PYUSD, GHO.
-- The CoW-swap maturing baskets create a settlement dependency on CoW Protocol's solvers in addition to the underlying asset issuers.
+**Subcategory C: Dependencies — 3.8**
+- Exposure has consolidated into a small number of largely offchain counterparties: Midas (mGLOBAL wrapping Fasanara) ~47%, three RWA escrow counterparties ~31%, plus smaller onchain positions in Cap Protocol (stcUSD), Aave V4 (USDG), Steakhouse MetaMorpho, and a PYUSD/Sentora PRIME swap basket.
+- One RWA escrow routes to the team multisig itself; two route to external EOAs whose identities are undisclosed. All three depend on a single onchain rate manager for valuation.
+- Pegs / NAVs depended on: USDC, USDT, cUSD, PYUSD, USDG, and — most heavily — the offchain mGLOBAL NAV and the RWA escrow attestations.
+- The CoW-swap maturing baskets add a settlement dependency on CoW Protocol's solvers. Fewer distinct DeFi integrations than before, but far more concentrated offchain-counterparty trust.
 
-**Score: 3.2/5** — (3.0 + 3.0 + 3.5) / 3 ≈ 3.17, rounded to 3.2. Slight increase from 3.0 in the prior assessment driven by the EXECUTOR_ROLE consolidation onto the multisig and a wider, more concentrated dependency set.
+**Score: 3.3/5** — (3.2 + 3.0 + 3.8) / 3 ≈ 3.33. Up from 3.2 at the prior assessment, driven by the Short Timelock reduction to 1 hour and a dependency set that is now concentrated in offchain RWA counterparties (Midas + three escrows ≈ 78%).
 
 #### Category 3: Funds Management (Weight: 30%)
 
-**Subcategory A: Collateralization — 4.0**
-- Reserves are 100% accounted for onchain via `FarmRegistry` and per-farm `assets()` — total matches `Accounting.totalAssetsValue()` of ~$82.66M against an iUSD supply of 82.66M (parity within rounding).
-- However ~43% of TVL is in positions whose backing cannot be independently audited onchain:
-  - **Midas mGLOBAL** (37%, $30.6M) wraps Fasanara Capital's hedge-fund strategy — TradFi custody and NAV.
-  - **RWAEscrowFarm** (6%, $5.08M) sends funds to an EOA receiver, with value attested by an onchain rate manager. Pure trust-based offchain exposure during the maturity period.
-- Another ~30% sits in Cap Protocol's stcUSD/cUSD — a young (2025) stablecoin issuer with limited history.
-- Maple HYSL ($2.4M) and Aave Horizon ($0.7M) add further RWA-collateralized lending exposure.
-- Liability ladder (liUSD → siUSD → iUSD) is intact and the first-loss buffer ($31.35M of liUSD) is meaningful, but its protective ratio has weakened: liUSD = 38% of supply versus higher prior assessment levels, and the absolute size of higher-risk positions (Midas + RWAEscrow + Cap) exceeds the liUSD buffer.
+**Subcategory A: Collateralization — 4.5**
+- Reserves are 100% accounted for onchain via `FarmRegistry` and per-farm `assets()` — total matches `Accounting.totalAssetsValue()` of ~$65.31M against an iUSD supply of 65.31M (parity within rounding).
+- However ~**78% of TVL** is in positions whose backing cannot be independently audited onchain:
+  - **Midas mGLOBAL** (47%, $30.87M) wraps Fasanara Capital's hedge-fund strategy — TradFi custody and NAV.
+  - **Three RWAEscrowFarms** (31%, ~$20.4M) send funds to offchain counterparties (one receiver is the team multisig, two are external EOAs), with value attested by a single onchain rate manager. Pure trust-based offchain exposure during the maturity period.
+- The remaining ~22% sits in onchain-verifiable positions: Cap stcUSD (young 2025 issuer), Aave V4 USDG, Steakhouse MetaMorpho, and a PYUSD/Sentora PRIME swap basket.
+- Liability ladder (liUSD → siUSD → iUSD) is intact but the first-loss buffer has weakened: `LockingController.totalBalance()` = $27.83M, with ~$16.87M of liUSD already mid-unwind. The buffer is now smaller than the single Midas position ($30.87M) and roughly a third of the combined offchain exposure (~$51M) — a single adverse credit event in Midas or the RWA escrows could exhaust it before iUSD holders are protected.
 
-**Subcategory B: Provability — 3.0**
-- Allocations and book values are fully transparent onchain.
-- True underlying value of mGLOBAL, RWAEscrow, and (in part) Cap Protocol relies on offchain attestations — Yearn would have to trust Midas, the RWA escrow rate manager, and Cap's reserve attestations.
+**Subcategory B: Provability — 3.5**
+- Allocations and book values are fully transparent onchain (which farm holds what, and the attested value).
+- But the *true* underlying value of the two dominant exposures — Midas mGLOBAL (47%) and the three RWA escrows (31%) — rests entirely on offchain attestation. Yearn would have to trust Midas/Fasanara's NAV and a single `RWAEscrowRateManager` for ~78% of the book, with no onchain proof of the underlying assets.
 - siUSD exchange rate is ERC4626-standard and verifiable.
 
-**Score: 3.5/5** — (4.0 + 3.0) / 2 = 3.5, up from 3.3. The shift is driven by (a) heavier concentration in a single tokenized hedge-fund position and a single young stablecoin issuer, and (b) reduced provability of the largest holdings.
+**Score: 4.0/5** — (4.5 + 3.5) / 2 = 4.0, up from 3.5. Driven by offchain/unverifiable exposure rising from ~43% to ~78% of TVL, a single 47% tokenized-hedge-fund position that exceeds the first-loss buffer, and an RWA escrow footprint that has tripled to ~31%.
 
 #### Category 4: Liquidity Risk (Weight: 15%)
 
-- **Exit**: Onchain `Accounting.totalAssetsValueOf(Liquid)` returns <$1; the four Liquid farms (`MintController`, `RedeemController`, `SwapFarmV2`, `LiquidationFarm`) collectively hold dust. There is **no instant-redemption capacity for iUSD today**.
-- **Queue**: With the liquid buffer depleted, redemptions must enter the FIFO queue and wait for maturing positions to roll off. Material reliefs are 2026-05-19 ($8.29M Cap swap), 2026-05-25 (~$9M PYUSD swap), 2026-06-15/16 ($30.6M Midas + $5.08M RWA escrow).
+- **Exit**: Onchain `Accounting.totalAssetsValueOf(Liquid)` returns ~$0.67; the Liquid-type farms collectively hold dust. There is **no instant-redemption capacity for iUSD today**.
+- **Queue**: With the liquid buffer depleted, redemptions must enter the FIFO queue and wait for maturing positions to roll off. Reliefs are 2026-07-11 (~$17.9M: RWA escrow + PYUSD/Sentora swap + Aave V4 USDG), 2026-08-01 ($30.87M Midas + $5.10M RWA escrow), 2026-08-29 ($5.05M RWA escrow) — but a roll-forward at maturity releases no cash.
 - **Depth (secondary)**: iUSD/siUSD DEX depth is thin relative to supply; secondary-market exit at par cannot be assumed under stress.
-- **Free supply**: Only ~$5.69M of iUSD sits in user wallets outside protocol contracts — a small absolute exposure if redemptions stayed limited to free supply, but the same is not true if siUSD/liUSD holders attempted to exit en masse.
+- **Free supply**: Only ~$0.47M of iUSD sits in user wallets outside protocol contracts, and ~$16.87M of liUSD is already mid-unwind — the queue is the binding constraint for any material exit.
 
-**Score: 4.0/5** — Sharp increase from 2.0. The previously cited buffer ($37.78M) is gone; the protocol is now structurally queue-only for iUSD-to-USDC. The design contemplates this state, but the practical risk to a holder needing same-day liquidity is materially higher than at the prior assessment.
+**Score: 4.0/5** — Unchanged. The protocol remains structurally queue-only for iUSD-to-USDC with a ~$0 liquid buffer. The design contemplates this state and the May–June maturities did settle, but the practical risk to a holder needing same-day liquidity remains high and now sits behind a longer, more offchain-dependent maturity schedule.
 
 #### Category 5: Operational Risk (Weight: 5%)
 
@@ -495,7 +495,7 @@ Autonomous events triggered by protocol state, not governance actions.
 - **Funding**: $3M Pre-Seed from reputable VCs.
 - **Docs**: Above-average technical documentation; transparency dashboard ([stats.infinifi.xyz](https://stats.infinifi.xyz/)) shows live allocation data.
 - **Legal**: No disclosed legal entity or jurisdiction.
-- **Incident response**: No publicly documented plan. Emergency capabilities exist onchain (pause + emergency withdrawal). The multisig signer rotation since the last assessment shows the operational machinery functions.
+- **Incident response**: No publicly documented plan. Emergency capabilities exist onchain (pause + emergency withdrawal). The clean settlement of the May–June maturity cluster shows the operational machinery functions.
 
 **Score: 2.5/5** — Unchanged.
 
@@ -504,13 +504,13 @@ Autonomous events triggered by protocol state, not governance actions.
 | Category | Score | Weight | Weighted |
 |----------|-------|--------|----------|
 | Audits & Historical | 2.5 | 20% | 0.50 |
-| Centralization & Control | 3.2 | 30% | 0.96 |
-| Funds Management | 3.5 | 30% | 1.05 |
+| Centralization & Control | 3.3 | 30% | 0.99 |
+| Funds Management | 4.0 | 30% | 1.20 |
 | Liquidity Risk | 4.0 | 15% | 0.60 |
 | Operational Risk | 2.5 | 5% | 0.125 |
-| **Final Score** | | | **3.235** |
+| **Final Score** | | | **3.415** |
 
-**Final Score: 3.2**
+**Final Score: 3.4**
 
 ### Risk Tier
 
@@ -522,50 +522,50 @@ Autonomous events triggered by protocol state, not governance actions.
 | 3.5-4.5 | Elevated Risk | Limited approval, strict limits |
 | 4.5-5.0 | High Risk | Not recommended |
 
-**Final Risk Tier: MEDIUM RISK (high end of band)**
+**Final Risk Tier: MEDIUM RISK (top of band, near the Elevated boundary)**
 
-The composite score is up from 2.8 → 3.2, driven primarily by the disappearance of the liquid redemption buffer and increased concentration in tokenized-RWA / younger-issuer positions. The key risks at this reassessment are:
-- **No liquid redemption buffer**: ~$0 in Liquid farms versus $37.78M at the prior assessment. iUSD-to-USDC is effectively queue-only until maturities settle starting 2026-05-19.
-- **Concentration in Midas-Fasanara mGLOBAL** (37% of TVL): single largest position, tokenized hedge-fund exposure, offchain custody and valuation.
-- **Concentration in Cap Protocol** (~30% combined between CapFarm and the cUSD/stcUSD swap basket): a young 2025-vintage stablecoin issuer.
-- **RWAEscrowFarm** (6%): funds escrowed to an EOA receiver, value attested by an onchain rate manager — pure trust-based offchain exposure during the lock.
-- **Multisig retains broad non-timelocked powers** and now also holds EXECUTOR_ROLE on the Long Timelock; signers are still anonymous EOAs.
-- **Short operational history** (~11 months) — not yet stress-tested.
+The composite score is up from 3.2 → 3.4, driven primarily by the sharp rise in offchain/unverifiable exposure and single-position concentration on the funds-management side. The key risks at this reassessment are:
+- **~78% of TVL is offchain-custodied / NAV-attested**: Midas mGLOBAL (~47%) plus three RWA escrow farms (~31%), ~$51M whose backing cannot be verified onchain.
+- **Concentration in Midas-Fasanara mGLOBAL** (~47% of TVL): single largest position, tokenized hedge-fund exposure, offchain custody and valuation — larger than the entire liUSD first-loss buffer.
+- **RWA escrow footprint tripled to ~$20.4M (31%)** across three farms; one receiver is the team multisig, two are external EOAs, all value-attested by one rate manager.
+- **No liquid redemption buffer**: ~$0 in Liquid farms; iUSD-to-USDC is queue-only until maturities settle (2026-07-11 / 08-01 / 08-29).
+- **Short Timelock cut to 1 hour**, shrinking the early-warning window for parameter/oracle/farm changes.
+- **Multisig retains broad non-timelocked powers** and holds EXECUTOR_ROLE on the Long Timelock; signers are still anonymous EOAs.
+- **Short operational history** (~13 months); one maturity cluster settled cleanly but the book is now more concentrated and more offchain.
 
 ---
 
 ## Reassessment Triggers
 
-- **Time-based**: Reassess in 60 days (target 2026-07-17), or immediately after the 2026-06-15/16 Midas-mGLOBAL and RWAEscrow maturities settle.
-- **Liquidity-based**: Reassess immediately if (a) the FIFO redemption queue forms a backlog that does not clear at the next scheduled maturity, or (b) `Accounting.totalAssetsValueOf(Liquid)` remains <1% of total supply for more than 30 days after the May/June maturity wave.
-- **TVL-based**: Reassess if TVL moves by more than 30% in either direction from the current ~$82.66M.
-- **Concentration-based**: Reassess if any single farm exceeds 40% of TVL, or if combined Cap Protocol exposure (CapFarm + cUSD/stcUSD swap baskets) exceeds 35% of TVL.
-- **Issuer-based**: Reassess on any material event at Midas, Fasanara Capital, Cap Protocol, or Maple Finance (depeg, custodian change, restructure, regulatory action).
-- **Governance-based**: Reassess after any signer change on the multisig, any new EXECUTOR_ROLE / PROPOSER_ROLE / CANCELLER_ROLE grant, any change to the `Timelock.emergencyAction` no-op override, or any role grant on `InfiniFiCore` outside the Long Timelock.
+- **Time-based**: Reassess in 60 days (target 2026-09-02), or immediately after the 2026-08-01 Midas-mGLOBAL maturity settles.
+- **Liquidity-based**: Reassess immediately if (a) the FIFO redemption queue forms a backlog that does not clear at the next scheduled maturity, or (b) `Accounting.totalAssetsValueOf(Liquid)` remains <1% of total supply for more than 30 days.
+- **TVL-based**: Reassess if TVL moves by more than 30% in either direction from the current ~$65.31M.
+- **Concentration-based**: Midas-Fasanara mGLOBAL already exceeds the 40% single-farm threshold (~47%). Reassess if it exceeds 55%, if combined offchain exposure (Midas + RWA escrows) exceeds 85% of TVL, or if any *other* single farm exceeds 40%.
+- **Issuer / counterparty-based**: Reassess on any material event at Midas, Fasanara Capital, Cap Protocol, Paxos (PYUSD/USDG), or the RWA escrow counterparties (depeg, custodian change, restructure, regulatory action, failure to settle at maturity).
+- **Governance-based**: Reassess after any signer change on the multisig, any new EXECUTOR_ROLE / PROPOSER_ROLE / CANCELLER_ROLE grant, any further change to either timelock's `getMinDelay()`, any change to the `Timelock.emergencyAction` no-op override, or any role grant on `InfiniFiCore` outside the Long Timelock.
 - **Incident-based**: Reassess after any exploit, oracle failure, or material loss event at the protocol or in any farm with >$2M of InfiniFi exposure.
-- **Architecture-based**: Reassess on any new farm category (new `AssetType` bucket), new asset enablement on `FarmRegistry`, or any change to YieldSharing/Accounting beyond the V2→V3 line.
+- **Architecture-based**: Reassess on any new farm category (new `AssetType` bucket), new asset enablement on `FarmRegistry`, new RWA escrow counterparty, or any change to YieldSharing/Accounting beyond the V3 line.
 
 ---
 
 ## Appendix A: Top Farm Exposure Analysis
 
-Onchain inspection of `FarmRegistry.getFarms()` and per-farm `assets()` on 2026-05-18 shows the portfolio is concentrated in a small number of large positions, most of which are "Maturing" (locked until a fixed date) or "Illiquid" (perpetual but exit-controlled). The Liquid bucket is currently empty in practice. The farms below cover ~98% of TVL.
+Onchain inspection of `FarmRegistry.getFarms()` and per-farm `assets()` on 2026-07-04 shows the portfolio is concentrated in a small number of large positions, most of which are "Maturing" (locked until a fixed date). The Liquid bucket is empty in practice. The farms below cover ~99% of TVL.
 
-Per the previous assessment's appendix, the Gauntlet Frontier (gtUSDa), Reservoir wsrUSD, direct Fasanara Genesis Fund deposit, and Tokemak autoUSD positions are **no longer present** at material weight — those farm addresses are removed from `FarmRegistry` or hold $0 / dust. The Fasanara strategy is, however, still indirectly held via Midas-tokenized `mGLOBAL` (see entry 1).
+Since the previous assessment the book has consolidated sharply: the Spark sUSDC, Aave Horizon (V3 RWA), Maple HYSL, f(x) Protocol, and the entire cUSD/stcUSD CoW-swap basket positions are **now at $0**. Cap Protocol exposure has fallen from ~$24.8M to a single $4.23M stcUSD deposit. In their place, Midas mGLOBAL has grown to ~47% of TVL and the offchain RWA escrow footprint has expanded from one $5.08M farm to **three farms totalling ~$20.4M**. Two new farm types appear: `AaveV4Farm` (Aave V4 USDG market) and `PrimeBrokerFarm` (Liquid-type, currently $0). Farm contracts were also redeployed to new addresses (e.g. MidasFarm `0x7373…` → `0xF4Ea…`, CapFarm `0x35F9…` → `0xAc21…`).
 
 ### Summary Table: Top Farms by Deployed Value
 
 | Farm | Type | Underlying | Assets (USD) | Share | Individual Risk |
 |------|------|------------|-------------:|------:|----------------:|
-| **MidasFarm (mGLOBAL)** | Maturing (2026-06-15) | Midas-tokenized Fasanara Global hedge-fund strategy | $30.60M | 37.0% | **4.5/5** |
-| **CapFarm (stcUSD)** | Illiquid | Cap Protocol staked cUSD | $16.48M | 19.9% | **4.0/5** |
-| **SwapFarmV2WithMaturity (PYUSD)** | Maturing (2026-05-25) | CoW-swap basket USDC ↔ PYUSD / senPYUSDmain | $9.00M | 10.9% | **3.0/5** |
-| **SwapFarmV2WithMaturity (cUSD/stcUSD)** | Maturing (2026-05-19) | CoW-swap basket USDC ↔ cUSD / stcUSD | $8.29M | 10.0% | **4.0/5** |
-| **SparkSUSDCFarm** | Illiquid | Spark USDC Vault (sUSDC) | $6.06M | 7.3% | **2.5/5** |
-| **RWAEscrowFarm** | Maturing (2026-06-16) | Funds sent to offchain receiver EOA; rate-managed onchain | $5.08M | 6.1% | **4.5/5** |
-| **ERC4626FarmWithMaturity (Steakhouse)** | Maturing | Steakhouse-curated MetaMorpho V1.1 USDC vault | $3.52M | 4.3% | **2.5/5** |
-| **MapleFarm** | Maturing | Maple Finance High Yield Secured Lending USDC1 | $2.37M | 2.9% | **3.5/5** |
-| **AaveV3Farm (Horizon)** | Illiquid | Aave Horizon RWA market (aHorRwaUSDC) | $0.72M | 0.9% | **3.5/5** |
+| **MidasFarm (mGLOBAL)** | Maturing (2026-08-01) | Midas-tokenized Fasanara Global hedge-fund strategy | $30.87M | 47.3% | **4.5/5** |
+| **RWAEscrowFarm** `0x04d5` | Maturing (2026-07-11) | Offchain escrow; receiver = **Team Multisig** | $10.21M | 15.6% | **4.5/5** |
+| **RWAEscrowFarm** `0x9E5e` | Maturing (2026-08-01) | Offchain escrow; receiver EOA `0x4831…D926` | $5.10M | 7.8% | **4.5/5** |
+| **RWAEscrowFarm** `0x277F` | Maturing (2026-08-29) | Offchain escrow; receiver EOA `0xa03B…d211` | $5.05M | 7.7% | **4.5/5** |
+| **SwapFarmV2WithMaturity (PYUSD)** | Maturing (2026-07-11) | CoW-swap basket USDC ↔ PYUSD / Sentora PRIME | $4.73M | 7.2% | **3.0/5** |
+| **CapFarm (stcUSD)** | Illiquid | Cap Protocol staked cUSD | $4.23M | 6.5% | **4.0/5** |
+| **AaveV4Farm (USDG)** | Maturing (2026-07-11) | Aave V4 Global Dollar (USDG) market | $2.99M | 4.6% | **3.0/5** |
+| **ERC4626FarmWithMaturity (Steakhouse)** | Maturing | Steakhouse-curated MetaMorpho V1.1 USDC vault | $2.13M | 3.3% | **2.5/5** |
 
 ### Detailed Farm Risk Assessments
 
@@ -576,23 +576,23 @@ Per the previous assessment's appendix, the Gauntlet Frontier (gtUSDa), Reservoi
 **Risk Score: 4.5/5**
 
 **Description:**
-`MidasFarm` ([`0x7373A7ce3C023C56Cb66747AFbdF827627D31679`](https://etherscan.io/address/0x7373A7ce3C023C56Cb66747AFbdF827627D31679)) holds [`mGLOBAL`](https://etherscan.io/address/0x7433806912Eae67919e66aea853d46Fa0aef98A8), an ERC-20 token issued by Midas (a tokenization-as-a-service issuer) that represents a claim on the Fasanara Capital "Global" strategy. The underlying is the same Fasanara hedge-fund family flagged in the prior report — but now wrapped in Midas's permissioned-issuance + offchain-NAV-attestation architecture rather than held directly. Maturity in this farm: **2026-06-15**.
+`MidasFarm` ([`0xF4Ea3Ec87B1c254f17a2Fb68164dB0CAf6c4cecF`](https://etherscan.io/address/0xF4Ea3Ec87B1c254f17a2Fb68164dB0CAf6c4cecF)) holds [`mGLOBAL`](https://etherscan.io/address/0x7433806912Eae67919e66aea853d46Fa0aef98A8), an ERC-20 token issued by Midas (a tokenization-as-a-service issuer) that represents a claim on the Fasanara Capital "Global" strategy. The underlying is wrapped in Midas's permissioned-issuance + offchain-NAV-attestation architecture rather than held directly. Maturity in this farm: **2026-08-01**. At ~47% of TVL this is now, by a wide margin, the single dominant position — larger than the entire liUSD first-loss buffer.
 
 **Key Risk Factors:**
 
 | Risk Category | Assessment | Details |
 |--------------|------------|---------|
-| **Concentration** | **Very High** | 37% of total InfiniFi TVL in a single position |
+| **Concentration** | **Very High** | ~47% of total InfiniFi TVL in a single position, exceeding the liUSD first-loss buffer |
 | **Off-Chain Custody** | **Very High** | Underlying hedge-fund strategy assets held by traditional custodians at Fasanara |
 | **NAV / Valuation** | **High** | mGLOBAL price reflects an off-chain NAV attestation from Midas / Fasanara |
 | **Issuer Risk** | High | Two stacked issuers (Midas + Fasanara) plus their respective custodians |
 | **Regulatory Risk** | High | Tokenized fund products are subject to securities regulation in EU/UK/US |
-| **Liquidity Risk** | High | InfiniFi position is locked until the 2026-06-15 maturity; secondary mGLOBAL liquidity is thin |
+| **Liquidity Risk** | High | InfiniFi position is locked until the 2026-08-01 maturity; secondary mGLOBAL liquidity is thin |
 
 **Why This Matters:**
-- Single largest exposure: a loss event large enough to impair mGLOBAL value would consume the liUSD first-loss buffer before iUSD holders are protected.
-- The strategy is the same one (Fasanara) the prior report flagged at 4.5/5; the wrapping change reduces direct counterparty surface but adds a second issuer (Midas) on top.
-- The 2026-06-15 maturity is the single most important upcoming event for InfiniFi liquidity.
+- Single largest exposure: a loss event large enough to impair mGLOBAL value would consume the entire liUSD first-loss buffer ($27.83M) before iUSD holders are protected.
+- Two stacked issuers (Midas + Fasanara) plus their respective custodians; valuation is a pure offchain NAV attestation.
+- The 2026-08-01 maturity is the single most important upcoming event for InfiniFi liquidity.
 
 **References:**
 - [mGLOBAL token on Etherscan](https://etherscan.io/address/0x7433806912Eae67919e66aea853d46Fa0aef98A8)
@@ -601,26 +601,61 @@ Per the previous assessment's appendix, the Gauntlet Frontier (gtUSDa), Reservoi
 
 ---
 
-#### 2. CapFarm — Cap Protocol stcUSD
+#### 2. RWAEscrowFarms — Three Offchain Counterparties
 
-**Risk Score: 4.0/5**
+**Risk Score: 4.5/5**
 
 **Description:**
-`CapFarm` ([`0x35F9EbDc02F936e199826778bc06A13272a06B87`](https://etherscan.io/address/0x35F9EbDc02F936e199826778bc06A13272a06B87)) holds [`stcUSD`](https://etherscan.io/address/0x88887bE419578051FF9F4eb6C858A951921D8888), the staked yield-bearing version of Cap Protocol's `cUSD` stablecoin. Cap is a 2025-vintage stablecoin issuer whose yield is sourced from delegated operator strategies backed by restaked collateral. Note: a second InfiniFi farm — `SwapFarmV2WithMaturity` for the cUSD/stcUSD basket — adds another $8.29M of Cap exposure, bringing the combined Cap concentration to ~30% of TVL.
+Three separate `RWAEscrowFarm` contracts now hold ~$20.4M combined (~31% of TVL). Each sends underlying USDC to a dedicated `RWAEscrow` contract that forwards to an offchain receiver; position value during the lock is attested onchain by a single shared `RWAEscrowRateManager` keeper ([`0x11F6FAb3f4D8635880C3e80cbae8AEF8136D4189`](https://etherscan.io/address/0x11F6FAb3f4D8635880C3e80cbae8AEF8136D4189)).
+
+| Farm | Escrow | Receiver | Maturity | Value |
+|------|--------|----------|----------|------:|
+| [`0x04d5…3271`](https://etherscan.io/address/0x04d5521ac09F8823338e8163Dd8BAdAEE39F3271) | [`0x4962…26Dd`](https://etherscan.io/address/0x4962762Bd3BA495CeDb9c33F5775C007e37b26Dd) | **Team Multisig** [`0x8060…400c`](https://etherscan.io/address/0x80608f852D152024c0a2087b16939235fEc2400c) | 2026-07-11 | $10.21M |
+| [`0x9E5e…1852`](https://etherscan.io/address/0x9E5efC5F387D8661C1AFB2469B7EeF6972451852) | [`0x868C…741A`](https://etherscan.io/address/0x868C82b7BAa3675F9Da1404510DB60c1f6A7741A) | EOA [`0x4831…D926`](https://etherscan.io/address/0x4831C121879d3DE0E2B181d9d55E9B0724f5D926) | 2026-08-01 | $5.10M |
+| [`0x277F…84C1`](https://etherscan.io/address/0x277FdF6Dc5c53C5c2828188Da84B9593A50884C1) | [`0x1532…94bB`](https://etherscan.io/address/0x1532f095F8daa79d22a2475FD50c7109add394bB) | EOA [`0xa03B…d211`](https://etherscan.io/address/0xa03B88D7985E1C6A847Cfb123C786c1d7eA8d211) | 2026-08-29 | $5.05M |
 
 **Key Risk Factors:**
 
 | Risk Category | Assessment | Details |
 |--------------|------------|---------|
-| **Issuer Maturity** | **High** | Cap is <1 year old, limited stress-test history |
-| **Concentration (combined)** | **Very High** | CapFarm + cUSD/stcUSD swap basket ≈ 30% of TVL — exceeds the liUSD first-loss buffer's notional |
+| **Counterparty Risk** | **Very High** | Funds custodied offchain during the lock — pure trust. Two receivers are external EOAs; one is the team multisig itself, an internal-transfer arrangement whose ultimate use is not onchain-visible. |
+| **Identity (TODO)** | Unknown | Counterparty identities behind `0x4831…D926` and `0xa03B…d211` are not disclosed in public docs |
+| **Concentration** | **Very High** | ~31% of TVL across three escrows, up from ~6% (one farm) at the prior assessment |
+| **Valuation** | High | Position value during lock is driven by a single rate-manager keeper whose inputs come offchain |
+| **Recovery** | Low | If a receiver does not return funds at maturity, recovery is a legal matter, not a smart-contract one |
+
+**Why This Matters:**
+- Collectively the most opaque exposure in the portfolio, and it has tripled since the prior assessment. Even Midas mGLOBAL has a tokenization issuer with public attestations; these farms rely on private bilateral arrangements.
+- The three maturities (2026-07-11, 08-01, 08-29) straddle the Midas mGLOBAL roll-off (08-01), so a delay or default at any would compound queue pressure precisely when the largest position also matures.
+
+---
+
+#### 3. SwapFarmV2WithMaturity (PYUSD / Sentora PRIME basket)
+
+**Risk Score: 3.0/5**
+
+**Description:**
+Maturing CoW-swap farm at [`0x75381e9Bc6B908a2e9bC31A535fC48CeCeAc568E`](https://etherscan.io/address/0x75381e9Bc6B908a2e9bC31A535fC48CeCeAc568E) routing USDC into a basket of [`PYUSD`](https://etherscan.io/address/0x6c3ea9036406852006290770BEdFcAbA0e23A0e8) and Sentora PRIME [`senPYUSDPRIMEv2`](https://etherscan.io/address/0xC21b08C16458202593D4D9B26b9984Ee67b38BbD). Maturity: **2026-07-11**. $4.73M deployed.
+
+**Key Risk Factors:** PYUSD is a Paxos-issued, NYDFS-regulated stablecoin — a high credit standard. The Sentora PRIME wrapper adds a credit-vault layer over PYUSD. Primary risks are the CoW-solver settlement dependency at maturity and the Sentora PRIME redemption mechanics.
+
+---
+
+#### 4. CapFarm — Cap Protocol stcUSD
+
+**Risk Score: 4.0/5**
+
+**Description:**
+`CapFarm` ([`0xAc21B22B5aEb11bc32De4ecF59E4538fCa48b694`](https://etherscan.io/address/0xAc21B22B5aEb11bc32De4ecF59E4538fCa48b694)) holds [`stcUSD`](https://etherscan.io/address/0x88887bE419578051FF9F4eb6C858A951921D8888), the staked yield-bearing version of Cap Protocol's `cUSD` stablecoin. Cap is a 2025-vintage stablecoin issuer whose yield is sourced from delegated operator strategies backed by restaked collateral. $4.23M — the only remaining Illiquid-bucket position, and materially smaller than the ~$24.8M combined Cap exposure at the prior assessment (the cUSD/stcUSD swap basket has fully exited).
+
+**Key Risk Factors:**
+
+| Risk Category | Assessment | Details |
+|--------------|------------|---------|
+| **Issuer Maturity** | **High** | Cap is ~1 year old, limited stress-test history |
 | **Peg Risk** | High | cUSD peg integrity relies on Cap's reserve attestations and operator soundness |
 | **Smart Contract** | Medium | Cap's contracts have been audited but are young in production |
 | **Liquidity (secondary)** | Medium | stcUSD secondary liquidity is thin |
-
-**Why This Matters:**
-- A Cap depeg or operator insolvency event would hit InfiniFi twice: directly via CapFarm and indirectly via the maturing cUSD/stcUSD swap basket.
-- Combined Cap notional exceeds the protocol's available first-loss buffer.
 
 **References:**
 - [stcUSD on Etherscan](https://etherscan.io/address/0x88887bE419578051FF9F4eb6C858A951921D8888)
@@ -628,115 +663,45 @@ Per the previous assessment's appendix, the Gauntlet Frontier (gtUSDa), Reservoi
 
 ---
 
-#### 3. SwapFarmV2WithMaturity (cUSD/stcUSD basket)
-
-**Risk Score: 4.0/5**
-
-**Description:**
-Maturing CoW-swap farm at [`0xe945de0D08E2F39B0740FE2d6e50FE2Bb9751eA4`](https://etherscan.io/address/0xe945de0D08E2F39B0740FE2d6e50FE2Bb9751eA4) used to route USDC into a cUSD/stcUSD basket. Maturity: **2026-05-19** (imminent). $8.29M deployed.
-
-**Key Risk Factors:** Same Cap Protocol issuer risk as entry #2; plus a CoW-Protocol solver dependency for settlement around the maturity window.
-
-**Why This Matters:**
-- 2026-05-19 maturity is the first material redemption-queue relief, but it is fully Cap-Protocol-denominated — so depeg or settlement issues at that exact window are the highest-impact short-term risk.
-
----
-
-#### 4. SwapFarmV2WithMaturity (PYUSD basket)
+#### 5. AaveV4Farm — Aave V4 USDG market
 
 **Risk Score: 3.0/5**
 
 **Description:**
-Maturing CoW-swap farm at [`0x84FF7Ef9568807c93436F09E2E613dE2aF3FE4EE`](https://etherscan.io/address/0x84FF7Ef9568807c93436F09E2E613dE2aF3FE4EE), denominated in PYUSD / senPYUSDmain. Maturity: **2026-05-25**. $9.00M deployed.
+`AaveV4Farm` ([`0x2CdF51ca20C2DD56480c35adEA667A6653Fb7657`](https://etherscan.io/address/0x2CdF51ca20C2DD56480c35adEA667A6653Fb7657)) supplies into an Aave V4 market for [`USDG`](https://etherscan.io/address/0xe343167631d89B6Ffc58B88d6b7fB0228795491D) (Global Dollar, a Paxos/Global Dollar Network stablecoin) via an Aave V4 hub/spoke deployment. Maturity: **2026-07-11**. $2.99M. A new farm type this assessment.
 
-**Key Risk Factors:** PYUSD is a Paxos-issued, NYDFS-regulated stablecoin — the credit standard is materially higher than for cUSD. Primary risks are CoW solver dependency at maturity and the senPYUSDmain wrapper's redemption mechanics.
+**Key Risk Factors:** Aave V4 is a newer codebase than V3; the position also carries USDG issuer/peg risk. Onchain-verifiable lending exposure, moderate risk.
 
 ---
 
-#### 5. SparkSUSDCFarm — Spark USDC Vault
+#### 6. ERC4626FarmWithMaturity — Steakhouse-curated MetaMorpho
 
 **Risk Score: 2.5/5**
 
 **Description:**
-`SparkSUSDCFarm` ([`0xd880D7C5CaFdbE2AEc281250995abF612235e563`](https://etherscan.io/address/0xd880D7C5CaFdbE2AEc281250995abF612235e563)) holds [`sUSDC`](https://etherscan.io/address/0xBC65ad17c5C0a2A4D159fa5a503f4992c7B545FE), the Spark Protocol USDC vault. $6.06M.
-
-**Key Risk Factors:** Spark/MakerDAO ecosystem dependency; sUSDC is a known well-audited integration. Low independent risk; included for completeness.
-
----
-
-#### 6. RWAEscrowFarm — Offchain Counterparty
-
-**Risk Score: 4.5/5**
-
-**Description:**
-`RWAEscrowFarm` ([`0x9E5efC5F387D8661C1AFB2469B7EeF6972451852`](https://etherscan.io/address/0x9E5efC5F387D8661C1AFB2469B7EeF6972451852)) sends underlying USDC to escrow address [`0x868C82b7BAa3675F9Da1404510DB60c1f6A7741A`](https://etherscan.io/address/0x868C82b7BAa3675F9Da1404510DB60c1f6A7741A), with funds onward-routed to receiver EOA [`0x4831C121879d3DE0E2B181d9d55E9B0724f5D926`](https://etherscan.io/address/0x4831C121879d3DE0E2B181d9d55E9B0724f5D926). Position value during the lock is set by `RWAEscrowRateManager` ([`0x11F6FAb3f4D8635880C3e80cbae8AEF8136D4189`](https://etherscan.io/address/0x11F6FAb3f4D8635880C3e80cbae8AEF8136D4189)). Maturity: **2026-06-16**. $5.08M.
-
-**Key Risk Factors:**
-
-| Risk Category | Assessment | Details |
-|--------------|------------|---------|
-| **Counterparty Risk** | **Very High** | Funds custodied by an EOA receiver during the lock — pure offchain trust |
-| **Identity (TODO)** | Unknown | Counterparty identity behind `0x4831…D926` is not disclosed in public docs |
-| **Valuation** | High | Position value during lock is driven by a rate-manager contract whose inputs come offchain |
-| **Audit trail** | Low | Onchain only sees the escrow + rate; offchain operation is not verifiable |
-| **Recovery** | Low | If the receiver EOA does not return funds at maturity, recovery is a legal matter, not a smart-contract one |
-
-**Why This Matters:**
-- The most opaque exposure in the portfolio. Even Midas mGLOBAL has a tokenization issuer with public attestations; this farm relies on a private bilateral arrangement.
-- 2026-06-16 maturity coincides almost exactly with the Midas-mGLOBAL roll-off, so a delay or default at either would compound queue pressure.
-
----
-
-#### 7. ERC4626FarmWithMaturity — Steakhouse-curated MetaMorpho
-
-**Risk Score: 2.5/5**
-
-**Description:**
-`ERC4626FarmWithMaturity` ([`0x76D2E84009dAE457f8667D823c7c96e9A7c35B78`](https://etherscan.io/address/0x76D2E84009dAE457f8667D823c7c96e9A7c35B78)) deposits into a dedicated Steakhouse-curated MetaMorpho V1.1 USDC vault [`0xBEEF1f5bD88285E5b239B6AACB991D38CCa23aC9`](https://etherscan.io/address/0xBEEF1f5bD88285E5b239B6AACB991D38CCa23aC9) ("infiniFi USDC"). $3.52M.
+`ERC4626FarmWithMaturity` ([`0x76D2E84009dAE457f8667D823c7c96e9A7c35B78`](https://etherscan.io/address/0x76D2E84009dAE457f8667D823c7c96e9A7c35B78)) deposits into a dedicated Steakhouse-curated MetaMorpho V1.1 USDC vault [`0xBEEF1f5bD88285E5b239B6AACB991D38CCa23aC9`](https://etherscan.io/address/0xBEEF1f5bD88285E5b239B6AACB991D38CCa23aC9) ("infiniFi USDC"). $2.13M.
 
 **Key Risk Factors:** Standard MetaMorpho stack risk (Morpho Blue isolated markets + curator allocation) under a reputable curator. Low independent risk; included for completeness.
 
 ---
 
-#### 8. MapleFarm — Maple Finance HYSL
-
-**Risk Score: 3.5/5**
-
-**Description:**
-`MapleFarm` ([`0xF56E946e92FeF6a050F482C560b5f8DcCB8163B3`](https://etherscan.io/address/0xF56E946e92FeF6a050F482C560b5f8DcCB8163B3)) deposits into Maple's High Yield Secured Lending Pool USDC1 ([`0xC39a5a616F0aD1Ff45077fa2DE3F79ab8EB8B8B9`](https://etherscan.io/address/0xC39a5a616F0aD1Ff45077fa2DE3F79ab8EB8B8B9)). $2.37M.
-
-**Key Risk Factors:** Institutional secured-lending credit exposure with offchain borrower workflows and pool-level default history (Maple has had pool defaults in prior cycles, though the current HYSL design uses overcollateralization and waterfall protections).
-
----
-
-#### 9. AaveV3Farm — Aave Horizon RWA market
-
-**Risk Score: 3.5/5**
-
-**Description:**
-`AaveV3Farm` ([`0x817d93DbdFd8190bbef0a73fCf5Dd9DA5A87E032`](https://etherscan.io/address/0x817d93DbdFd8190bbef0a73fCf5Dd9DA5A87E032)) supplies USDC into Aave's Horizon RWA market (`aHorRwaUSDC` receipt token). $0.72M.
-
-**Key Risk Factors:** Borrower side is collateralized by tokenized RWA collateral types; depends on RWA-specific liquidation paths Aave Horizon has not yet had to exercise at scale.
-
----
-
 ### Aggregate Risk Assessment
 
-**Concentration:** ~67% of TVL is in three issuers/strategies — Midas-Fasanara (37%), Cap Protocol (combined 30%) — well above the protocol's $31.35M liUSD first-loss notional. Either issuer suffering a material adverse event would test, and could exhaust, the liability ladder before iUSD holders are protected.
+**Concentration:** ~78% of TVL is in two offchain exposures — Midas-Fasanara mGLOBAL (~47%) and three RWA escrow counterparties (~31%) — far above the protocol's $27.83M liUSD first-loss notional. The single Midas position alone exceeds the buffer. An adverse event at either would test, and could exhaust, the liability ladder before iUSD holders are protected.
 
-**Liquidity:** The Liquid bucket holding zero is itself a material change versus the prior assessment. iUSD-to-USDC is queue-only until the maturity sequence (2026-05-19 → 2026-05-25 → 2026-06-15 → 2026-06-16) begins to settle.
+**Liquidity:** The Liquid bucket holds ~$0. iUSD-to-USDC is queue-only until the maturity sequence (2026-07-11 → 2026-08-01 → 2026-08-29) settles — and a roll-forward at any of those dates releases no cash.
 
-**Offchain exposure:** Midas-Fasanara (37%) + RWAEscrowFarm (6%) + Maple HYSL (3%) + Aave Horizon RWA (1%) = **~47% of TVL** has material offchain custodial, valuation, or counterparty dependence.
+**Offchain exposure:** Midas-Fasanara (~47%) + three RWAEscrowFarms (~31%) = **~78% of TVL** has material offchain custodial, valuation, or counterparty dependence — up from ~47% at the prior assessment.
 
 **Stress sequence to monitor:**
-1. **2026-05-19** — Cap cUSD/stcUSD swap basket maturity (~$8.29M). First test of CoW-swap solver maturity routing under load.
-2. **2026-05-25** — PYUSD swap basket maturity (~$9.00M).
-3. **2026-06-15** — Midas mGLOBAL maturity (~$30.60M). The single largest scheduled event for the protocol.
-4. **2026-06-16** — RWA escrow maturity (~$5.08M). Counterparty identity unverified — most binary outcome of the wave.
+1. **2026-07-11** — ~$17.9M cluster: RWA escrow ($10.21M, receiver = multisig) + PYUSD/Sentora swap ($4.73M) + Aave V4 USDG ($2.99M).
+2. **2026-08-01** — Midas mGLOBAL ($30.87M) + RWA escrow ($5.10M). The single largest scheduled event for the protocol.
+3. **2026-08-29** — RWA escrow ($5.05M). Counterparty identity unverified.
 
 **Recommendation:**
-Treat current InfiniFi exposure as primarily a credit exposure to **(a) a tokenized Fasanara hedge-fund position, (b) Cap Protocol's young stablecoin issuance, and (c) one undisclosed RWA escrow counterparty**, rather than as a diversified DeFi yield strategy. Reassessment should be triggered immediately if any of the four upcoming maturities fail to settle on schedule.
+Treat current InfiniFi exposure as primarily a credit exposure to **(a) a tokenized Fasanara hedge-fund position (~47%) and (b) three undisclosed RWA escrow counterparties (~31%)**, rather than as a diversified DeFi yield strategy — the onchain-verifiable DeFi positions are now a minority of the book. Reassessment should be triggered immediately if any of the upcoming maturities fail to settle on schedule.
 
 **Data Sources:**
-- Onchain: `FarmRegistry.getFarms()`, per-farm `assets()`, `Accounting.totalAssetsValue()` and `.totalAssetsValueOf(AssetType)` (verified 2026-05-18).
+- Onchain: `FarmRegistry.getFarms()` / `getTypeFarms()`, per-farm `assets()` and `maturity()`, per-escrow `receiver()`/`totalAssets()`, `Accounting.totalAssetsValue()` and `.totalAssetsValueOf(uint256)` (verified 2026-07-04).
+- [DefiLlama](https://defillama.com/protocol/infinifi) — TVL cross-check ($65.3M on 2026-07-04).
 - [InfiniFi Transparency Dashboard](https://stats.infinifi.xyz/) — cross-checked but not used as the primary source.
