@@ -90,8 +90,8 @@ The source code includes a `/certora` directory indicating formal verification e
 - **TVL:** ~$17.89M idle reserves in MorphoCredit `waEthUSDC`, with ~$52.1M borrowed and ~$70.0M total `USD3.totalAssets()` (sources: [DeFiLlama](https://defillama.com/protocol/3jane) ~$21.1M TVL, onchain `totalAssets()` call July 3, 2026)
 - **Token supply:** ~$60.26M USD3 supply (`totalSupply()`), ~$6.17M sUSD3 supply; PPS = `1.161621` USDC/USD3 and `1.100133` USD3/sUSD3 (July 3, 2026)
 - **Utilization:** ~$52.1M borrowed / ~$70.0M deposited → ~74%
-- **Security incidents:**
-  - **April 18–28, 2026 — emergency shutdown / restart event.** Per merged PR [#112](https://github.com/3jane-protocol/moneymarket-contracts/pull/112) the team had already executed `strategy.shutdownStrategy()` and `strategy.emergencyWithdraw(...)` "in prod" before April 27, 2026. DeFiLlama TVL series confirms idle reserves collapsed from ~$4.78M on Apr 19 to ~$269K on Apr 20 and stayed at $120K–$273K for ~7 days, recovering to ~$2.92M by May 2 and ~$3.15M today. Restoration required deploying a new `USD3.restartStrategy()` reinitializer (PR #112 merged Apr 28, 2026); current onchain state is `isShutdown() = false`. The only public artefact is PR [#112](https://github.com/3jane-protocol/moneymarket-contracts/pull/112) describing the `restartStrategy()` fix.
+- **Notable events:**
+  - **April 18–28, 2026 — strategy shutdown / restart.** Per merged PR [#112](https://github.com/3jane-protocol/moneymarket-contracts/pull/112) the team had already executed `strategy.shutdownStrategy()` and `strategy.emergencyWithdraw(...)` "in prod" before April 27, 2026. DeFiLlama TVL series confirms idle reserves collapsed from ~$4.78M on Apr 19 to ~$269K on Apr 20 and stayed at $120K–$273K for ~7 days, recovering to ~$2.92M by May 2 and ~$3.15M today. Restoration required deploying a new `USD3.restartStrategy()` reinitializer (PR #112 merged Apr 28, 2026); current onchain state is `isShutdown() = false`. The only public artefact is PR [#112](https://github.com/3jane-protocol/moneymarket-contracts/pull/112) describing the `restartStrategy()` fix.
     - **Protocol's framing (per 3Jane DD document, received May 2026):** 3Jane characterizes the action not as an incident but as operational discipline — "3Jane preemptively withdrew its idle USDC from Aave during the Kelp exploit as a precautionary measure" — and states "no prior security incidents have occurred on the 3Jane protocol." The timing supports the precautionary reading: the [KelpDAO/rsETH bridge exploit](https://governance.aave.com/t/rseth-incident-report-april-20-2026/24580) occurred April 18–20, 2026, exactly when idle reserves collapsed. **However**, the protocol's "no incident / routine precaution" framing partially conflicts with the onchain evidence: a precautionary Aave de-risk would not normally require a full `shutdownStrategy()` + a new `restartStrategy()` reinitializer (a 24h-timelocked code upgrade) to reopen deposits/redemptions. Treat the event as a successfully-handled but non-routine stress episode.
 - **Peg history:** USD3 is USDC-denominated and redeemable from idle reserves; no public depeg event reported. Note that during the April shutdown window, redemptions were effectively unavailable from the Yearn V3 strategy path.
 - **Phase 1 (bootstrapping):** During initial phase, USD3 operates in a "fully risk-off" configuration where funds are only deposited into Aave's USDC market. The unsecured lending component ramps up over time.
@@ -156,7 +156,7 @@ Any residual loss after the per-loan recovery above is then absorbed in the **lo
 - **Utilization risk:** If a high percentage of deposited USDC is lent out to borrowers, idle reserves shrink and redemptions may be delayed
 - **Current utilization:** ~$52.1M borrowed out of ~$70.0M `totalAssets` (~74% utilization, July 3, 2026). The April 2026 event demonstrated that when `isShutdown()` flips, the standard ERC-4626 redemption path is blocked entirely.
 - **Stress event (April 2026):** During the strategy shutdown, Yearn V3 `isShutdown()=true` blocked the standard `deposit/redeem` paths. DeFiLlama-visible idle reserves collapsed from ~$4.78M to ~$269K and stayed depressed for ~7 days before recovering. This is the protocol's first observed liquidity stress event, and it required a contract upgrade (new `restartStrategy()` reinitializer) — a governance action now behind the 7-day timelock — to fully reopen the strategy.
-- **DEX liquidity is effectively zero.** Verified onchain July 3, 2026: only one pair exists, a Uniswap V3 USD3/USDC 0.01% pool at [`0x8E12388Ea7366Aa87445d747F83B810aD538a981`](https://etherscan.io/address/0x8E12388Ea7366Aa87445d747F83B810aD538a981) holding dust. No Uniswap V2 USD3/USDC or USD3/WETH pair, no Curve pool. All meaningful exit liquidity is therefore via the protocol's own redemption path against idle reserves.
+- **DEX liquidity:** A Curve frxUSD/USD3 pool exists at [`0x7ba89bc658c07569cfa6d7947adaa80181a24568`](https://etherscan.io/address/0x7ba89bc658c07569cfa6d7947adaa80181a24568) with ~$955K USD3 (July 3, 2026). A Uniswap V3 USD3/USDC 0.01% pool at [`0x8E12388Ea7366Aa87445d747F83B810aD538a981`](https://etherscan.io/address/0x8E12388Ea7366Aa87445d747F83B810aD538a981) holds dust. No Uniswap V2 pairs exist. Together these provide minimal exit capacity relative to the $70M protocol scale — the primary exit path remains direct 1:1 redemption from idle reserves.
 - **sUSD3 exit:** Subject to lock period (1 month in Phase 1) plus cooldown mechanism. During the April incident, sUSD3 supply was largely unchanged while USD3 supply contracted, which is consistent with senior holders redeeming and junior holders being locked.
 
 ## Centralization & Control Risks
@@ -366,7 +366,7 @@ USD3 PPS is defined by the ERC-4626 standard: `convertToAssets(1 share) = totalA
            │
            ▼
   ┌─────────────────────────────────────────────────────┐
-  │ MorphoCredit.totalBorrowAssets() shrinks            │
+  │ MorphoCredit supply (market totalSupply) shrinks     │
   │      ↓                                              │
   │ USD3.totalAssets() drops                            │
   │      ↓                                              │
@@ -456,7 +456,7 @@ Key takeaway: the multisig never "reports" a negative value. There is no admin `
 |--------|-----------|
 | Audits | 4 specific audits (Veridise, Sherlock x2, Electisec) with 1 critical + 11 high + 16 medium findings, all fixed. Inherited Morpho Blue audits (OpenZeppelin, Cantina). Certora formal verification present |
 | Production history | ~11 months (Aug 2025 deployment, July 2026 reassessment). TVL ~$70.0M `totalAssets` (~$17.89M idle + ~$52.1M outstanding). One prior stress event (April 2026 shutdown, no loss of funds). |
-| Security incidents | One — April 18–28, 2026 emergency shutdown + restart. No reported loss of funds, but ~7 days of effectively unavailable redemptions. |
+| Notable events | April 2026 strategy shutdown + restart (precautionary Aave withdrawal during KelpDAO exploit). No loss of funds. ~7 days of unavailable redemptions; recovery required a governance upgrade. |
 | Bug bounty | Still none — checked Immunefi, Sherlock, Cantina, SEAL Safe Harbor on July 3, 2026; not listed |
 
 **Score: 3.5/5** — Strong audit coverage with 4 independent security reviews. ~11 months in production, TVL ~$70M, but one non-trivial stress event (April 2026 shutdown) and no bug bounty program.
@@ -534,7 +534,7 @@ Key takeaway: the multisig never "reports" a negative value. There is no admin `
 | Factor | Assessment |
 |--------|-----------|
 | Exit mechanism | Redeem USD3 for USDC from idle reserves. Throttling mechanism exists. **Risk demonstrated April 2026:** when `isShutdown()` flips, redemption via the standard ERC-4626 path is blocked entirely. |
-| Liquidity depth | Depends on idle reserves. Currently ~$17.89M idle vs ~$52.1M outstanding (~26% headroom on `totalAssets`). No DEX liquidity: only Uniswap V3 0.01% pool [`0x8E12388Ea7366Aa87445d747F83B810aD538a981`](https://etherscan.io/address/0x8E12388Ea7366Aa87445d747F83B810aD538a981) exists and holds dust (~$0.001). No Uniswap V2 / Curve pools (verified onchain July 3, 2026). |
+| Liquidity depth | Depends on idle reserves. Currently ~$17.89M idle vs ~$52.1M outstanding (~26% headroom on `totalAssets`). DEX liquidity is thin: a Curve frxUSD/USD3 pool at [`0x7ba89bc658c07569cfa6d7947adaa80181a24568`](https://etherscan.io/address/0x7ba89bc658c07569cfa6d7947adaa80181a24568) holds ~$955K USD3; a Uniswap V3 USD3/USDC pool at [`0x8E12388Ea7366Aa87445d747F83B810aD538a981`](https://etherscan.io/address/0x8E12388Ea7366Aa87445d747F83B810aD538a981) holds dust. No Uniswap V2 pairs. Primary exit is via protocol redemption against idle reserves. |
 | Utilization risk | **~74% (from ~73% in June 2026, ~70% in May, ~44% in March).** High utilization + the shutdown coupling means idle reserves can fall to near-zero quickly — observed for ~7 days in April. The 7-day upgrade timelock extends worst-case restart latency. |
 | Lock periods | sUSD3 has 1-month lock period; sUSD3 supply was approximately flat through the April incident (locks held) |
 | Same-value asset | USDC-denominated — lower urgency for exit speed |
