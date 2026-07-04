@@ -77,7 +77,7 @@ nodes:
     address: "0x3D18480CC32B6AB3B833dCabD80E76CfD41c48a9"
     category: governance
   - id: short-timelock
-    label: Short Timelock (1d)
+    label: Short Timelock (1h)
     address: "0x4B174afbeD7b98BA01F50E36109EEE5e6d327c32"
     category: governance
   - id: core
@@ -184,7 +184,7 @@ edges:
   - from: short-timelock
     to: core
     kind: controls
-    label: "PARAMETERS / ORACLE (1d)"
+    label: "PARAMETERS / ORACLE (1h)"
   - from: multisig
     to: core
     kind: holds-role
