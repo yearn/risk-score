@@ -455,11 +455,11 @@ Key takeaway: the multisig never "reports" a negative value. There is no admin `
 | Factor | Assessment |
 |--------|-----------|
 | Audits | 4 specific audits (Veridise, Sherlock x2, Electisec) with 1 critical + 11 high + 16 medium findings, all fixed. Inherited Morpho Blue audits (OpenZeppelin, Cantina). Certora formal verification present |
-| Production history | ~11 months (Aug 2025 deployment, July 2026 reassessment). TVL ~$70.0M `totalAssets` (~$17.89M idle + ~$52.1M outstanding). One prior stress event (April 2026 shutdown, no loss of funds). |
+| Production history | ~11 months (Aug 2025 deployment, July 2026 reassessment). TVL ~$70.0M `totalAssets` (~$17.89M idle + ~$52.1M outstanding). One notable event (April 2026 precautionary shutdown during KelpDAO exploit, no loss of funds). |
 | Notable events | April 2026 strategy shutdown + restart (precautionary Aave withdrawal during KelpDAO exploit). No loss of funds. ~7 days of unavailable redemptions; recovery required a governance upgrade. |
 | Bug bounty | Still none — checked Immunefi, Sherlock, Cantina, SEAL Safe Harbor on July 3, 2026; not listed |
 
-**Score: 3.5/5** — Strong audit coverage with 4 independent security reviews. ~11 months in production, TVL ~$70M, but one non-trivial stress event (April 2026 shutdown) and no bug bounty program.
+**Score: 3.0/5** — Strong audit coverage with 4 independent security reviews, but no bug bounty program. ~11 months in production, TVL ~$70M. The April 2026 shutdown was a precautionary operational action, not a security incident.
 
 #### Category 2: Centralization & Control Risks (Weight: 30%)
 
@@ -549,9 +549,9 @@ Key takeaway: the multisig never "reports" a negative value. There is no admin `
 | Documentation | Good — comprehensive docs, whitepaper, architecture docs |
 | Funding | $5.2M seed from Paradigm, Coinbase Ventures, and other reputable investors |
 | Legal | No publicly disclosed legal entity |
-| Incident response | Tested for the first time April 2026: shutdown + emergency withdraw executed cleanly, but recovery required a governance upgrade (new `restartStrategy` reinitializer in PR #112, now behind the 7-day timelock). Net read: response works, but is not pre-rehearsed enough to be fast |
+| Incident response | Team demonstrated ability to execute a precautionary shutdown and recovery during the April 2026 KelpDAO event. The shutdown and emergency withdrawal were handled cleanly, though recovery required a governance upgrade (now behind the 7-day timelock). |
 
-**Score: 3.5/5** — Tested once during the April 2026 incident: shutdown + emergency withdraw executed cleanly, but recovery required a governance upgrade (new `restartStrategy` reinitializer, now behind the 7-day timelock). VC backing and doxxed founder remain strengths. Limited team transparency and no disclosed legal entity keep this above the median.
+**Score: 3.0/5** — Doxxed founder with strong VC backing (Paradigm, Coinbase Ventures). Team demonstrated operational capability during the April 2026 precautionary shutdown. Documentation is good. Limited team transparency beyond the founder and no disclosed legal entity remain concerns.
 
 ### Final Score Calculation
 
@@ -561,14 +561,14 @@ Final Score = (Centralization × 0.30) + (Funds Mgmt × 0.30) + (Audits × 0.20)
 
 | Category | Score | Weight | Weighted |
 |----------|-------|--------|----------|
-| Audits & Historical Track Record | 3.5 | 20% | 0.70 |
+| Audits & Historical Track Record | 3.0 | 20% | 0.60 |
 | Centralization & Control | 3.75 | 30% | 1.125 |
 | Funds Management | 4.0 | 30% | 1.20 |
 | Liquidity Risk | 2.0 | 15% | 0.30 |
-| Operational Risk | 3.5 | 5% | 0.175 |
-| **Final Score** | | | **3.50/5.0 → reported as 3.5/5.0** |
+| Operational Risk | 3.0 | 5% | 0.15 |
+| **Final Score** | | | **3.375/5.0 → reported as 3.5/5.0** |
 
-(Raw weighted sum is 3.50.)
+(Raw weighted sum is 3.375; rounded to the nearest 0.25 step.)
 
 ### Risk Tier
 
