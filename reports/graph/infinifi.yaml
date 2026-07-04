@@ -80,6 +80,9 @@ nodes:
     label: Short Timelock (1h)
     address: "0x4B174afbeD7b98BA01F50E36109EEE5e6d327c32"
     category: governance
+    note: >-
+      PROTOCOL_PARAMETERS + ORACLE_MANAGER (setPrice/setOracle, addFarms/removeFarms).
+      Delay is only 1 hour — a narrow early-warning window for these changes.
   - id: core
     label: InfiniFiCore (AccessControl)
     address: "0xF6d48735EcCf12bDC1DF2674b1ce3fcb3bD25490"
