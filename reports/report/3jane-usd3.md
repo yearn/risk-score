@@ -4,7 +4,7 @@
 - **Token:** USD3
 - **Chain:** Ethereum
 - **Token Address:** [`0x056B269Eb1f75477a8666ae8C7fE01b64dD55eCc`](https://etherscan.io/address/0x056B269Eb1f75477a8666ae8C7fE01b64dD55eCc)
-- **Final Score: 3.5/5.0**
+- **Final Score: 3.4/5.0**
 
 ## Overview + Links
 
@@ -566,7 +566,7 @@ Final Score = (Centralization × 0.30) + (Funds Mgmt × 0.30) + (Audits × 0.20)
 | Funds Management | 4.0 | 30% | 1.20 |
 | Liquidity Risk | 2.0 | 15% | 0.30 |
 | Operational Risk | 3.0 | 5% | 0.15 |
-| **Final Score** | | | **3.5/5.0** |
+| **Final Score** | | | **3.4/5.0** |
 
 ### Risk Tier
 
@@ -578,9 +578,9 @@ Final Score = (Centralization × 0.30) + (Funds Mgmt × 0.30) + (Audits × 0.20)
 | 3.5-4.5 | Elevated Risk | Limited approval, strict limits |
 | 4.5-5.0 | High Risk | Not recommended |
 
-**Final Risk Tier: Medium Risk (3.5/5.0) — Approved with enhanced monitoring**
+**Final Risk Tier: Medium Risk (3.4/5.0) — Approved with enhanced monitoring**
 
-The tier is **Medium** (3.5/5.0). Risk drivers: (1) the April 2026 shutdown demonstrated governance-coupled redemption risk, (2) first-loss buffer covers only 17% of the borrow book, (3) utilization at 74%, (4) OperationalController not yet deployed, and (5) no bug bounty for a $70M protocol. Mitigants: two-tier timelock (7d upgrades, 24h config), EmergencyController v2 + Hypernative automation, strong TVL, and direct 1:1 redemption from healthy idle reserves.
+The tier is **Medium** (3.4/5.0). Risk drivers: (1) the April 2026 shutdown demonstrated governance-coupled redemption risk, (2) first-loss buffer covers only 17% of the borrow book, (3) utilization at 74%, (4) OperationalController not yet deployed, and (5) no bug bounty for a $70M protocol. Mitigants: two-tier timelock (7d upgrades, 24h config), EmergencyController v2 + Hypernative automation, strong TVL, and direct 1:1 redemption from healthy idle reserves.
 
 ---
 
