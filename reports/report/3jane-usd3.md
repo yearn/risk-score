@@ -566,9 +566,7 @@ Final Score = (Centralization × 0.30) + (Funds Mgmt × 0.30) + (Audits × 0.20)
 | Funds Management | 4.0 | 30% | 1.20 |
 | Liquidity Risk | 2.0 | 15% | 0.30 |
 | Operational Risk | 3.0 | 5% | 0.15 |
-| **Final Score** | | | **3.375/5.0 → reported as 3.5/5.0** |
-
-(Raw weighted sum is 3.375; rounded to the nearest 0.25 step.)
+| **Final Score** | | | **3.5/5.0** |
 
 ### Risk Tier
 
