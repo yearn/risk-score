@@ -77,8 +77,7 @@ const apiProtocol = protocol.apiProtocol ?? "";
         <label class="filter-field">
           <span>Source</span>
           <select id="filter-source">
-            <option value="">All</option>
-            <option value="protocol">protocol</option>
+            <option value="protocol" selected>protocol</option>
             <option value="automation_digest">automation_digest</option>
           </select>
         </label>
@@ -131,6 +130,7 @@ const apiProtocol = protocol.apiProtocol ?? "";
 
     const PAGE = 20;
     const REFRESH_MS = 60000;
+    const DEFAULT_SOURCE = "protocol";
 
     let cursor: string | null = null;
     let maxId = 0;
@@ -140,7 +140,7 @@ const apiProtocol = protocol.apiProtocol ?? "";
       return {
         protocol: proto,
         severity: (sevSel?.value || undefined) as Severity | undefined,
-        source: srcSel?.value || undefined,
+        source: srcSel?.value || DEFAULT_SOURCE,
       };
     }
 
@@ -179,6 +179,10 @@ const apiProtocol = protocol.apiProtocol ?? "";
         moreBtn.disabled = false;
         moreBtn.textContent = "Load more";
       }
+    }
+
+    function pageCursor(resp: { data: AlertEvent[]; next_cursor: string | null }): string | null {
+      return resp.data.length === PAGE ? resp.next_cursor : null;
     }
 
     function showEmpty(html: string) {
@@ -234,7 +238,7 @@ const apiProtocol = protocol.apiProtocol ?? "";
       showTable();
       tbody.innerHTML = resp.data.map(renderAlert).join("");
       maxId = resp.data[0].id;
-      setMore(resp.next_cursor);
+      setMore(pageCursor(resp));
       setStatus();
     }
 
@@ -252,8 +256,13 @@ const apiProtocol = protocol.apiProtocol ?? "";
         return;
       }
       if (gen !== generation || !tbody) return;
+      if (!resp.data.length) {
+        setMore(null);
+        setStatus();
+        return;
+      }
       tbody.insertAdjacentHTML("beforeend", resp.data.map(renderAlert).join(""));
-      setMore(resp.next_cursor);
+      setMore(pageCursor(resp));
       setStatus();
     }
 
