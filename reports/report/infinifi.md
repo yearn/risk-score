@@ -711,5 +711,5 @@ Treat current InfiniFi exposure as primarily a credit exposure to **(a) a tokeni
 | Date | Score | Notes |
 | --- | --- | --- |
 | February 4, 2026 | 2.3 | Initial assessment |
-| May 18, 2026 | 3.2 | Reassessment |
+| May 18, 2026 | 3.2 | Reassessment — high concentration in APYX (apxUSD) |
 | July 4, 2026 | 3.4 | Reassessment — offchain concentration up, TVL down |
