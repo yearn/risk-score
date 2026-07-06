@@ -596,3 +596,10 @@ The tier is **Medium** (3.4/5.0). Risk drivers: (1) the April 2026 shutdown demo
 - **Dependency-based:** Reassess if Aave V3, EigenLayer AVS, or Hypernative experience significant security events
 - **Phase-based:** Reassess when Phase 1 bootstrapping ends and full unsecured lending is active
 
+## Assessment History
+
+| Date | Score | Notes |
+| --- | --- | --- |
+| March 4, 2026 | 3.5 | Initial assessment |
+| July 3, 2026 | 3.4 | Reassessment after April 2026 emergency shutdown |
+

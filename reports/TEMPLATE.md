@@ -1,6 +1,14 @@
 # Protocol Risk Assessment: [Protocol Name]
 
 - **Assessment Date:** [Month Day, Year]
+<!--
+  Keep the ORIGINAL assessment date here. When a report is reassessed/updated,
+  do NOT overwrite it — append the new date in parentheses, e.g.:
+    - **Assessment Date:** May 27, 2026 (Updated: June 17, 2026)
+  The website reads both: the earliest date becomes "Original", the latest
+  becomes "Latest", and the page is tagged "Updated report". Overwriting the
+  single date loses that history and the report shows as brand new.
+-->
 - **Token:** [Token Name]
 - **Chain:** [Chain Name]
 - **Token Address:** [`[Token Address]`]([Token Explorer Link])
@@ -393,3 +401,17 @@ Not Rated: for terminal reports (Status: HACKED / DEAD), set Final Score to
 - **Time-based**: Reassess in [X months]
 - **TVL-based**: Reassess if TVL changes by more than [X%]
 - **Incident-based**: Reassess after any exploit, governance change, or collateral modification
+
+## Assessment History
+
+<!--
+  One row per assessment, oldest first. Add a new row on every reassessment —
+  never edit past rows. The website renders this table at the bottom of the
+  report so score changes are traceable over time. Keep the date format
+  consistent with the header "Assessment Date". Score is the Final Score at that
+  point in time (or the status tag, e.g. HACKED, for Not Rated reports).
+-->
+
+| Date | Score | Notes |
+| --- | --- | --- |
+| [Month Day, Year] | [X.X] | Initial assessment |

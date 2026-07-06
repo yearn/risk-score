@@ -1,6 +1,6 @@
 # Protocol Risk Assessment: InfiniFi
 
-- **Assessment Date:** July 4, 2026
+- **Assessment Date:** February 4, 2026 (Updated: July 4, 2026)
 - **Token:** siUSD (Staked iUSD)
 - **Chain:** Ethereum Mainnet
 - **Token Address:** [`0xDBDC1Ef57537E34680B898E1FEBD3D68c7389bCB`](https://etherscan.io/address/0xDBDC1Ef57537E34680B898E1FEBD3D68c7389bCB)
@@ -705,3 +705,11 @@ Treat current InfiniFi exposure as primarily a credit exposure to **(a) a tokeni
 - Onchain: `FarmRegistry.getFarms()` / `getTypeFarms()`, per-farm `assets()` and `maturity()`, per-escrow `receiver()`/`totalAssets()`, `Accounting.totalAssetsValue()` and `.totalAssetsValueOf(uint256)` (verified 2026-07-04).
 - [DefiLlama](https://defillama.com/protocol/infinifi) — TVL cross-check ($65.3M on 2026-07-04).
 - [InfiniFi Transparency Dashboard](https://stats.infinifi.xyz/) — cross-checked but not used as the primary source.
+
+## Assessment History
+
+| Date | Score | Notes |
+| --- | --- | --- |
+| February 4, 2026 | 2.3 | Initial assessment |
+| May 18, 2026 | 3.2 | Reassessment |
+| July 4, 2026 | 3.4 | Reassessment — offchain concentration up, TVL down |
