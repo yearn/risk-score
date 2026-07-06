@@ -711,5 +711,5 @@ Treat current InfiniFi exposure as primarily a credit exposure to **(a) a tokeni
 | Date | Score | Notes |
 | --- | --- | --- |
 | February 4, 2026 | 2.3 | Initial assessment |
-| May 18, 2026 | 3.2 | Reassessment — Liquidity 2.0→4.0: iUSD redemption queue-only pending maturity wave; multisig gained EXECUTOR_ROLE on Long Timelock |
+| May 18, 2026 | 3.2 | Reassessment — Liquidity 2.0→4.0: iUSD redemption queue-only pending maturity wave |
 | July 4, 2026 | 3.4 | Reassessment — offchain concentration up, TVL down |
