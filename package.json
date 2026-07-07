@@ -14,7 +14,7 @@
     "cytoscape": "3.33.4",
     "cytoscape-dagre": "4.0.0",
     "cytoscape-dom-node": "2.1.0",
-    "js-yaml": "4.2.0",
+    "js-yaml": "5.2.0",
     "marked": "18.0.5",
     "satori": "0.26.0"
   }
