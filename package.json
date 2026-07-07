@@ -1,5 +1,6 @@
 {
   "name": "risk-score-frontend",
+  "license": "AGPL-3.0-only",
   "type": "module",
   "scripts": {
     "dev": "node scripts/update_stats.mjs && astro dev",
