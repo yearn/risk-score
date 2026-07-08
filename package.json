@@ -9,6 +9,7 @@
   },
   "dependencies": {
     "@astrojs/vercel": "10.0.8",
+    "@plausible-analytics/tracker": "0.4.5",
     "@resvg/resvg-js": "2.6.2",
     "astro": "6.4.2",
     "cytoscape": "3.33.4",
