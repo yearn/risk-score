@@ -5,7 +5,7 @@
 - **Token:** brBTC
 - **Chain:** Ethereum
 - **Token Address:** [`0x2eC37d45FCAE65D9787ECf71dc85a444968f6646`](https://etherscan.io/address/0x2eC37d45FCAE65D9787ECf71dc85a444968f6646)
-- **Final Score: 4.0/5.0**
+- **Final Score: 3.6/5.0**
 
 ## Overview + Links
 
@@ -222,7 +222,7 @@ Undisclosed custody/signing setup
 
 ### Critical Risks
 
-- brBTC does not trigger a terminal critical gate because it has a published audit and multisig governance, but the combination of no public PoR, undocumented redemption, near-zero secondary liquidity, and no timelock makes the asset unsuitable for large exposure without strict caps and enhanced monitoring.
+- brBTC does not trigger a terminal critical gate because it has a published audit, verified contracts, and multisig governance. The unresolved risk is narrower than the original combined Bedrock scope, but no public brBTC PoR, undocumented redemption, thin liquidity, and no timelock still require strict caps and enhanced monitoring.
 
 ---
 
@@ -243,8 +243,8 @@ Undisclosed custody/signing setup
 **Subcategory A: Audits & Security Reviews**
 - One brBTC-specific BlockSec audit.
 - No public bug bounty program.
-- Complex cross-chain / restaking allocation surface.
-- **Score: 3.5**
+- Moderate brBTC-specific contract surface, with cross-chain and restaking allocation components.
+- **Score: 3.0**
 
 **Subcategory B: Historical Track Record**
 - brBTC live since roughly December 2024.
@@ -252,9 +252,9 @@ Undisclosed custody/signing setup
 - Small scale and limited public liquidity history.
 - **Score: 3.0**
 
-**Audits & Historical Score = (3.5 + 3.0) / 2 = 3.25**
+**Audits & Historical Score = (3.0 + 3.0) / 2 = 3.0**
 
-**Score: 3.25/5**
+**Score: 3.0/5** — One dedicated audit and no brBTC-specific incident justify a lower score than the original combined Bedrock assessment, though no bug bounty and limited production history keep it above low risk.
 
 #### Category 2: Centralization & Control Risks (Weight: 30%)
 
@@ -262,19 +262,19 @@ Undisclosed custody/signing setup
 - 3-of-5 Safe owns brBTC ProxyAdmin; 3-of-4 Safe controls brBTC Vault admin role.
 - No timelock, no Safe Guard / Delay module in the original verification pass.
 - Signer overlap across Bedrock Safes.
-- **Score: 4.0**
+- **Score: 3.8**
 
 **Subcategory B: Programmability**
 - Mint is onchain, but restaking venue allocation and operational management are privileged/admin-driven.
-- **Score: 3.5**
+- **Score: 3.25**
 
 **Subcategory C: External Dependencies**
 - Six restaking venues, multiple wrapped BTC issuers, Chainlink CCIP, and undisclosed custody/signing setup.
-- **Score: 4.5**
+- **Score: 4.25**
 
-**Centralization Score = (4.0 + 3.5 + 4.5) / 3 = 4.0**
+**Centralization Score = (3.8 + 3.25 + 4.25) / 3 = 3.77**
 
-**Score: 4.0/5**
+**Score: 3.8/5**
 
 #### Category 3: Funds Management (Weight: 30%)
 
@@ -282,50 +282,50 @@ Undisclosed custody/signing setup
 - Intended BTC-denominated backing through accepted BTC wrappers and restaking positions.
 - Collateral quality is mixed and includes multiple issuer/custody dependencies.
 - Per-venue balances and brBTC-specific reserve reconciliation are not publicly available.
-- **Score: 4.0**
+- **Score: 3.75**
 
 **Subcategory B: Provability**
 - No brBTC-specific PoR.
 - No public per-venue reserve dashboard sufficient to independently reconcile backing.
-- **Score: 4.5**
+- **Score: 4.0**
 
-**Funds Management Score = (4.0 + 4.5) / 2 = 4.25**
+**Funds Management Score = (3.75 + 4.0) / 2 = 3.875**
 
-**Score: 4.25/5**
+**Score: 3.9/5** — The absence of public reserve proofs remains the main constraint, but the brBTC-only scope removes unrelated uniBTC/uniETH mechanics from this category.
 
 #### Category 4: Liquidity Risk (Weight: 15%)
 
 - brBTC has effectively no useful secondary DEX exit.
 - Protocol redemption is the binding exit path, but redemption mechanics are not publicly documented.
-- **Score: 4.5**
+- **Score: 4.0**
 
-**Score: 4.5/5**
+**Score: 4.0/5** — Thin secondary liquidity and undocumented redemption still warrant an elevated liquidity score, but this is brBTC-specific rather than a combined liquidity assessment across three assets.
 
 #### Category 5: Operational Risk (Weight: 5%)
 
 - Doxxed leadership and legal entity are positives.
 - Documentation gaps are material for brBTC specifically.
 - Prior uniBTC incident is an organizational caution but not direct brBTC code history.
-- **Score: 2.5**
+- **Score: 2.25**
 
-**Score: 2.5/5**
+**Score: 2.25/5**
 
 ### Final Score Calculation
 
 | Category | Score | Weight | Weighted |
 |----------|-------|--------|----------|
-| Audits & Historical | 3.25 | 20% | 0.650 |
-| Centralization & Control | 4.0 | 30% | 1.200 |
-| Funds Management | 4.25 | 30% | 1.275 |
-| Liquidity Risk | 4.5 | 15% | 0.675 |
-| Operational Risk | 2.5 | 5% | 0.125 |
-| **Subtotal** | | | **3.925** |
+| Audits & Historical | 3.0 | 20% | 0.600 |
+| Centralization & Control | 3.8 | 30% | 1.140 |
+| Funds Management | 3.9 | 30% | 1.170 |
+| Liquidity Risk | 4.0 | 15% | 0.600 |
+| Operational Risk | 2.25 | 5% | 0.113 |
+| **Subtotal** | | | **3.623** |
 
 **Modifiers:**
 - No brBTC-specific public PoR and undocumented redemption mechanics are already captured in Funds Management and Liquidity; no extra modifier applied.
 - Prior uniBTC exploit is not applied as a direct brBTC incident modifier because brBTC uses a separate codebase.
 
-**Adjusted Final Score: ~4.0 / 5.0**
+**Adjusted Final Score: ~3.6 / 5.0**
 
 ### Risk Tier
 
@@ -339,7 +339,7 @@ Undisclosed custody/signing setup
 
 **Final Risk Tier: Elevated Risk**
 
-brBTC should be treated as a high-complexity, low-liquidity BTC restaking asset. Any integration should use strict caps until Bedrock publishes brBTC-specific reserve proofs and complete redemption mechanics.
+brBTC should be treated as an elevated-risk BTC restaking asset. Narrowing the scope to brBTC lowers the score materially versus the original combined Bedrock report, but strict caps remain appropriate until Bedrock publishes brBTC-specific reserve proofs and complete redemption mechanics.
 
 ---
 
