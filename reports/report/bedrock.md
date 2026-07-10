@@ -4,7 +4,7 @@
 - **Token:** brBTC
 - **Chain:** Ethereum
 - **Token Address:** [`0x2eC37d45FCAE65D9787ECf71dc85a444968f6646`](https://etherscan.io/address/0x2eC37d45FCAE65D9787ECf71dc85a444968f6646)
-- **Final Score: 3.7/5.0**
+- **Final Score: 3.8/5.0**
 
 ## Overview + Links
 
@@ -49,6 +49,13 @@ This report is scoped to **brBTC only**. It does not assess uniBTC or uniETH as 
 | Free Tunnel brBTC bridge proxy | [`0x70aF4743F85E5E74E3b6dDFa38926c0a762Ad21C`](https://etherscan.io/address/0x70aF4743F85E5E74E3b6dDFa38926c0a762Ad21C) | `DelayedERC1967Proxy`; holds `MINTER_ROLE` on brBTC token |
 | Free Tunnel implementation | [`0x06B4660a3b7999a4817cd2FF3c1832F08FC95DD9`](https://etherscan.io/address/0x06B4660a3b7999a4817cd2FF3c1832F08FC95DD9) | `TunnelContract` (Free Tunnel cross-chain framework) |
 
+### Operational Layer
+
+| Contract | Address | Role |
+|----------|---------|------|
+| TransferProxy | [`0x28BfF185E5874E67dc03d8C096e27b775D5058A2`](https://etherscan.io/address/0x28bff185e5874e67dc03d8c096e27b775d5058a2) | Sole `OPERATOR_ROLE` holder on brBTC Vault; moves vault collateral to an immutable destination (the brBTC ops Safe); `owner()` = EOA `0x9251Fd3D…` |
+| TransferProxy owner | [`0x9251Fd3D79522bB2243a58FFf1dB43E25A495aaB`](https://etherscan.io/address/0x9251fd3d79522bb2243a58fff1db43e25a495aab) | EOA that can trigger vault→Safe collateral transfers; formerly also held brBTC token `DEFAULT_ADMIN_ROLE`/`MINTER_ROLE` (revoked) |
+
 ### Governance Layer
 
 | Safe | Address | Threshold | Controls |
@@ -67,7 +74,8 @@ All thresholds/owners were read live via `getThreshold()` / `getOwners()` in the
 - **Restaking allocations:** Babylon Labs, Kernel DAO, SatLayer, Pell Network, Symbiotic, and Mellow Finance. Each venue is a distinct smart-contract and/or protocol counterparty.
 - **PoR:** No public Chainlink Proof-of-Reserve feed or equivalent independent reserve feed was found for brBTC. Reserve accounting appears internal to the Bedrock system.
 - **Vault status:** `outOfService = false` in the original onchain verification pass.
-- **Redemption:** TODO — Bedrock's public documentation does not specify brBTC redemption fee, delay, or queue mechanics. The brBTC docs pages document minting/bridging rather than a complete redemption flow; the dApp is JS-rendered. Treat this as a material disclosure gap.
+- **Redemption:** **The brBTC Vault has no redemption function.** Verified in the `brVault` implementation source ([`0xC7D81a22…`](https://etherscan.io/address/0xC7D81a22b384e4bBE6cC3a860e246501728334C7#code)): the only user-facing function is `mint(address,uint256)`; there is no `redeem`/`withdraw` path. Exit therefore depends entirely on Bedrock's offchain/operational process (or bridging to other chains), and the fee/delay/queue mechanics of that process remain undocumented (TODO).
+- **Collateral flow (verified onchain July 10, 2026):** deposits sit in the vault until moved out through an `OPERATOR_ROLE`-gated `execute()` restricted to a two-address target whitelist (the uniBTC and M-BTC token contracts, per `TargetAllowed` events). The sole `OPERATOR_ROLE` holder is a `TransferProxy` contract ([`0x28BfF185…`](https://etherscan.io/address/0x28bff185e5874e67dc03d8c096e27b775d5058a2#code)) whose destination is immutably fixed to the brBTC ops Safe and whose `owner()` — the address that can trigger transfers — is the EOA [`0x9251Fd3D…`](https://etherscan.io/address/0x9251fd3d79522bb2243a58fff1db43e25a495aab). Of ≈1,284 BTC-denominated tokens ever deposited, only ≈15.5 remain in the vault; the ops Safe balance is zero, so ≈1,268 BTC of collateral has moved beyond onchain-traceable brBTC contracts to restaking venues/custody.
 
 ## Audits and Due Diligence Disclosures
 
@@ -86,6 +94,7 @@ brBTC has one published BlockSec audit. The brBTC codebase is separate from Bedr
 
 - **Time in production:** brBTC has been live since approximately December 2024, or about 19 months as of July 2026.
 - **Scale:** brBTC is materially smaller than Bedrock's uniBTC product. The original onchain verification pass read **121.37 brBTC** total supply on Ethereum (`12,137,141,779` sats). brBTC is not tracked as a separate DeFiLlama protocol page in the same way as Bedrock aggregate / uniBTC.
+- **Multichain footprint (verified July 10, 2026):** the Ethereum-resident supply materially understates brBTC's global size. Cumulative Ethereum vault deposits are ≈1,284 BTC-denominated tokens, and remote supplies read live were **518.457 brBTC on Base** ([`0x3376eBcA…`](https://basescan.org/address/0x3376ebca0a85fc8d791b1001a571c41fdd61514a)) and **1.304 brBTC on BNB Chain** ([`0x733A6C29…`](https://bscscan.com/address/0x733a6c29eda4a58931ae81b8d91e29f2eaf01df3)); Berachain and the non-EVM CCIP lanes were not read this session. A full cross-chain supply-to-backing reconciliation remains open.
 - **Bedrock aggregate TVL context:** DeFiLlama reported **$310.87M** Bedrock aggregate TVL on July 10, 2026. This should be treated as ecosystem context, not brBTC-specific TVL.
 - **Incident history:** No brBTC-specific exploit was identified in this review. Bedrock did suffer a September 2024 uniBTC mint-validation exploit, but that occurred in a different codebase and before brBTC's launch. It remains relevant only as an operational-history signal for the same organization.
 
@@ -95,7 +104,7 @@ brBTC has one published BlockSec audit. The brBTC codebase is separate from Bedr
 
 | Token | Mint | Redeem | Fees | Permissioning |
 |-------|------|--------|------|---------------|
-| brBTC | Atomic through brBTC Vault | TODO (delay/queue not documented) | TODO | Permissionless |
+| brBTC | Atomic through brBTC Vault | **None onchain** — `brVault` has no redeem/withdraw function (verified in source); exit is offchain/operational or via bridges | TODO (offchain process undocumented) | Mint permissionless; exit not permissionless |
 
 ### Token Mint Authority
 
@@ -110,8 +119,8 @@ The role is not enumerable onchain (`getRoleMemberCount` reverts), so holders we
 | Address | Can Mint | Can Burn | Role / Mechanism | Notes |
 |---------|:--------:|:--------:|------------------|-------|
 | [`0x1419b48e…E3386`](https://etherscan.io/address/0x1419b48e5C1f5ce413Cf02D6dcbe1314170E3386) | ✓ | — | `MINTER_ROLE` | brBTC Vault — collateralized user mint path |
-| [`0x512c2Ddf…b0d8`](https://etherscan.io/address/0x512c2Ddf5f7F48a6c44cFF73CD8d7edEC5e6b0d8) | ✓ | ✓ | `MINTER_ROLE` | Chainlink CCIP `BurnMintTokenPool 1.5.1`; `owner()` = Bedrock admin Safe (3/5) |
-| [`0x70aF4743…Ad21C`](https://etherscan.io/address/0x70aF4743F85E5E74E3b6dDFa38926c0a762Ad21C) | ✓ | ✓ | `MINTER_ROLE` | Free Tunnel bridge — `DelayedERC1967Proxy` over `TunnelContract` [`0x06B4660a…`](https://etherscan.io/address/0x06B4660a3b7999a4817cd2FF3c1832F08FC95DD9); third-party bridge framework with offchain signature executors. **Not mentioned in Bedrock's public brBTC bridge docs, which document Chainlink CCIP only.** Upgrade/executor control: TODO (managed via the Free Tunnel hub, not a standard proxy admin) |
+| [`0x512c2Ddf…b0d8`](https://etherscan.io/address/0x512c2Ddf5f7F48a6c44cFF73CD8d7edEC5e6b0d8) | ✓ | ✓ | `MINTER_ROLE` | Chainlink CCIP `BurnMintTokenPool 1.5.1`; `owner()` = Bedrock admin Safe (3/5). Rate limits enabled on all 8 configured lanes: 1–2 brBTC bucket capacity, ≈2 brBTC/day refill per lane |
+| [`0x70aF4743…Ad21C`](https://etherscan.io/address/0x70aF4743F85E5E74E3b6dDFa38926c0a762Ad21C) | ✓ | ✓ | `MINTER_ROLE` | Free Tunnel bridge — `DelayedERC1967Proxy` over `TunnelContract` [`0x06B4660a…`](https://etherscan.io/address/0x06B4660a3b7999a4817cd2FF3c1832F08FC95DD9); third-party bridge framework. **Not mentioned in Bedrock's public brBTC bridge docs, which document Chainlink CCIP only.** Mints require 3-of-4 executor signatures; admin is EOA `0x0014Eb4A…`; executor rotation has a 36h–5d built-in delay |
 | `0x0000…0000` (zero address) | ✓ | — | `MINTER_ROLE` | Granted in the initialization tx (block 21,434,675) and never revoked. Inert in practice (the zero address cannot originate calls), but an initialization artifact worth noting |
 | [`0x1f3c54ec…1aC9`](https://etherscan.io/address/0x1f3c54ec74f1a5c0BC19af04dadFa1A677231aC9) | grants | grants | `DEFAULT_ADMIN_ROLE` | brBTC ops Safe (3/4) — can grant `MINTER_ROLE` to any address **with no timelock**; this is an unbacked-mint escalation path |
 
@@ -125,7 +134,21 @@ The role is not enumerable onchain (`getRoleMemberCount` reverts), so holders we
 
 - **Accepted backing assets:** uniBTC, FBTC, cbBTC, WBTC, and M-BTC. This creates issuer/custody dependencies on multiple wrapped BTC providers and on Bedrock's own uniBTC.
 - **Restaking venue spread:** brBTC allocates across Babylon, Kernel DAO, SatLayer, Pell, Symbiotic, and Mellow. This diversification reduces dependence on one venue but compounds the number of independent slashing, oracle, upgrade, and smart-contract failure paths.
-- **Custody / reserve visibility:** TODO — no brBTC-specific public PoR feed, no complete per-venue allocation report, and no named BTC custodian/signing arrangement was found in public Bedrock materials.
+
+**Ethereum vault deposits vs. current holdings** (read onchain July 10, 2026 via `tokenUsedCaps` / `tokenCaps` / `balanceOf`):
+
+| Token | Cumulative deposited | Vault balance now | Deposit cap |
+|-------|---------------------:|------------------:|------------:|
+| uniBTC | 271.240 | 13.672 | 3,000 |
+| WBTC | 0.526 | 0.526 | 500 |
+| FBTC | 0.002 | 0.002 | 500 |
+| cbBTC | 0.055 | 0.055 | 500 |
+| M-BTC | 1,012.367 | 1.217 | 1,038.046 |
+| **Total (BTC-denominated)** | **≈1,284.19** | **≈15.47** | |
+
+- Only uniBTC and M-BTC can leave the vault (their token contracts are the only `allowedTargets` for `execute()`); the WBTC/FBTC/cbBTC balances still equal their cumulative deposits exactly.
+- All outflows go through the `TransferProxy` to the brBTC ops Safe (3/4), whose current balances of all five assets are **zero** — the collateral has moved onward to restaking venues/custody that cannot be traced further from the brBTC contracts alone.
+- **Custody / reserve visibility:** TODO — no brBTC-specific public PoR feed, no complete per-venue allocation report, and no named BTC custodian/signing arrangement was found in public Bedrock materials. The onchain trail verified above ends at the ops Safe's outbound transfers.
 
 ### Provability
 
@@ -146,11 +169,14 @@ brBTC has weak public reserve provability relative to uniBTC. The report found n
 - The brBTC ops Safe is 3-of-4 and holds `DEFAULT_ADMIN_ROLE` on the brBTC Vault **and on the brBTC token itself**. The token-level admin role means three ops-Safe signatures can grant `MINTER_ROLE` to an arbitrary address and mint unbacked brBTC, with no timelock in the path (see *Token Mint Authority*).
 - Two bridge contracts hold live `MINTER_ROLE` on the token: the Chainlink CCIP `BurnMintTokenPool` (owned by the Bedrock admin Safe) and a Free Tunnel bridge contract whose upgrade/executor control sits in a third-party framework.
 - No Safe Guard or Delay module was configured on the relevant Bedrock Safes in the original onchain verification pass. A threshold signature can therefore execute upgrades or privileged actions without an onchain delay.
+- **Collateral movement is EOA-triggered.** The vault's only `OPERATOR_ROLE` holder is the `TransferProxy`, owned by EOA `0x9251Fd3D…`. The blast radius is limited — the proxy's destination is immutably the ops Safe, and `execute()` targets are whitelisted to the uniBTC/M-BTC token contracts — but a single hot key controls when and how much collateral leaves the vault, and the same EOA formerly held token-level admin and mint rights.
+- **No active pauser.** `PAUSER_ROLE` on the vault has zero current holders (the deployer's grant was revoked at block 25,006,479 and never reassigned). Pausing deposits of a compromised collateral token would first require the ops Safe to grant the role.
+- **Free Tunnel control (verified from contract getters):** admin is EOA [`0x0014Eb4A…`](https://etherscan.io/address/0x0014Eb4Ac6Dd1473b258d088E6EF214b2BCdc53C) (can add/remove proposers and transfer admin); bridge mints require 3-of-4 executor signatures (executors: `0x9E498DD0…`, `0xdE9a5Ab5…`, `0xa5ED5Aa2…`, `0xdA084147…`); executor-set rotation requires existing executor signatures plus a built-in 36-hour-to-5-day activation delay. Executor `0xdA084147…` is also a brBTC ops Safe signer.
 - Signer overlap across Bedrock Safes weakens practical separation between product lines.
 
 ### Programmability
 
-brBTC's user-facing mint is atomic, but venue allocation is operator/admin driven across six restaking venues. The system is not a simple immutable wrapper; it depends on privileged operational choices and upgradeable contracts.
+brBTC's user-facing mint is atomic, but everything after the deposit is manual: an EOA-owned `TransferProxy` moves collateral from the vault to the ops Safe, the Safe forwards it to restaking venues offchain-coordinated, and there is no onchain redemption function at all. The system is not a simple immutable wrapper; it depends on privileged operational choices, manual capital movement, and upgradeable contracts.
 
 ### External Dependencies
 
@@ -164,8 +190,8 @@ brBTC's user-facing mint is atomic, but venue allocation is operator/admin drive
 | Pell Network | BTC restaking venue | High |
 | Symbiotic | Restaking venue | High |
 | Mellow Finance | Restaking / vault venue | High |
-| Chainlink CCIP | Cross-chain path — `BurnMintTokenPool` holds `MINTER_ROLE` | High — bridge security affects multi-chain peg and supply integrity |
-| Free Tunnel (Free Protocol) | Cross-chain path — bridge contract holds `MINTER_ROLE`, undocumented in Bedrock docs | High — third-party bridge with mint rights; executor/upgrade control not fully disclosed |
+| Chainlink CCIP | Cross-chain path — `BurnMintTokenPool` holds `MINTER_ROLE`; 8 lanes configured (docs list 3 networks); per-lane rate limits enabled (1–2 brBTC capacity, ≈2 brBTC/day) | High — bridge security affects multi-chain peg and supply integrity, partially mitigated by rate limits |
+| Free Tunnel (Free Protocol) | Cross-chain path — bridge contract holds `MINTER_ROLE`, undocumented in Bedrock docs | High — third-party bridge with mint rights; 3-of-4 executor signatures, EOA admin, delayed executor rotation |
 | Undisclosed custody/signing setup | BTC backing control | Critical unknown |
 
 ## Operational Risk
@@ -182,7 +208,9 @@ brBTC's user-facing mint is atomic, but venue allocation is operator/admin drive
 1. **brBTC Vault** [`0x1419b48e5C1f5ce413Cf02D6dcbe1314170E3386`](https://etherscan.io/address/0x1419b48e5C1f5ce413Cf02D6dcbe1314170E3386):
    - `outOfService()` state changes.
    - `Upgraded` events.
-   - `RoleGranted` / `RoleRevoked` for `DEFAULT_ADMIN_ROLE`, `OPERATOR_ROLE`, and other privileged roles.
+   - `RoleGranted` / `RoleRevoked` for `DEFAULT_ADMIN_ROLE`, `OPERATOR_ROLE`, and `PAUSER_ROLE` (a new `OPERATOR_ROLE` holder is a new fund-exit path; `PAUSER_ROLE` currently has no holder).
+   - `TargetAllowed` / `TargetDenied` and `TokenAllowed` / `TokenDenied` events — a new allowed target widens where `execute()` can send vault funds.
+   - Vault collateral balances vs. `tokenUsedCaps` (baseline July 10, 2026: ≈15.47 of ≈1,284.19 BTC-denominated deposits remain in the vault).
 2. **brBTC token** [`0x2eC37d45FCAE65D9787ECf71dc85a444968f6646`](https://etherscan.io/address/0x2eC37d45FCAE65D9787ECf71dc85a444968f6646):
    - `totalSupply()` changes.
    - Implementation upgrades.
@@ -192,8 +220,14 @@ brBTC's user-facing mint is atomic, but venue allocation is operator/admin drive
    - Bedrock admin Safe [`0xAeE017052DF6Ac002647229D58B786E380B9721A`](https://etherscan.io/address/0xAeE017052DF6Ac002647229D58B786E380B9721A).
    - brBTC ops Safe [`0x1f3c54ec74f1a5c0BC19af04dadFa1A677231aC9`](https://etherscan.io/address/0x1f3c54ec74f1a5c0BC19af04dadFa1A677231aC9).
    - Monitor owner additions/removals and threshold changes.
-4. **Restaking venue changes:** alert if Bedrock adds/removes a brBTC venue or materially changes allocation methodology.
-5. **Public reserve disclosures:** alert if Bedrock publishes a brBTC PoR feed, per-venue allocation report, or custodian disclosure.
+4. **Operational pipeline:**
+   - TransferProxy [`0x28BfF185…`](https://etherscan.io/address/0x28bff185e5874e67dc03d8c096e27b775d5058a2): `OwnershipTransferred` events and transfer activity of its EOA owner [`0x9251Fd3D…`](https://etherscan.io/address/0x9251fd3d79522bb2243a58fff1db43e25a495aab).
+   - Ops Safe outbound collateral transfers (where uniBTC / M-BTC go after leaving the vault).
+5. **Bridge minters:**
+   - CCIP token pool [`0x512c2Ddf…`](https://etherscan.io/address/0x512c2Ddf5f7F48a6c44cFF73CD8d7edEC5e6b0d8): rate-limit config changes, `ChainAdded`/`ChainRemoved`, ownership transfer.
+   - Free Tunnel [`0x70aF4743…`](https://etherscan.io/address/0x70aF4743F85E5E74E3b6dDFa38926c0a762Ad21C): executor-set updates, admin transfer, abnormal mint volume.
+6. **Restaking venue changes:** alert if Bedrock adds/removes a brBTC venue or materially changes allocation methodology.
+7. **Public reserve disclosures:** alert if Bedrock publishes a brBTC PoR feed, per-venue allocation report, or custodian disclosure.
 
 ### Recommended Frequency
 
@@ -220,22 +254,26 @@ brBTC Ops Safe 0x1f3c54ec… (3/4)
 Token / Vault Layer
 ===================
 brBTC token 0x2eC37d…646
-  ├── mint/redeem through brBTC Vault 0x1419b4…3386
+  ├── mint through brBTC Vault 0x1419b4…3386 (no onchain redeem)
   │     └── accepts deposits: uniBTC, FBTC, cbBTC, WBTC, M-BTC
-  ├── MINTER_ROLE: CCIP BurnMintTokenPool 0x512c2D… (owner: Admin Safe)
-  ├── MINTER_ROLE: Free Tunnel bridge 0x70aF47… (third-party framework)
+  ├── MINTER_ROLE: CCIP BurnMintTokenPool 0x512c2D… (owner: Admin Safe, rate-limited)
+  ├── MINTER_ROLE: Free Tunnel bridge 0x70aF47… (3/4 executors, EOA admin)
   └── MINTER_ROLE: zero address (init artifact, inert)
 
-Restaking / External Layer
-==========================
-brBTC Vault
-  └── allocates across Babylon, Kernel DAO, SatLayer, Pell, Symbiotic, Mellow
+Collateral Outflow / Restaking Layer
+====================================
+brBTC Vault (holds ≈15.5 of ≈1,284 BTC deposited)
+  └── execute() by TransferProxy 0x28BfF1… (OPERATOR_ROLE)
+        │   owner: EOA 0x9251Fd… — triggers transfers
+        └── fixed destination: brBTC Ops Safe (balance now: 0)
+              └── onward to Babylon, Kernel DAO, SatLayer, Pell,
+                  Symbiotic, Mellow (not traceable from brBTC contracts)
 
 Critical Unknowns
 =================
 No brBTC-specific public PoR
-No public brBTC redemption fee/delay documentation
-Undisclosed custody/signing setup
+No onchain redemption; offchain exit process undocumented
+Undisclosed custody/signing setup beyond the ops Safe hop
 ```
 
 ---
@@ -248,17 +286,19 @@ Undisclosed custody/signing setup
 2. **Multisig governance rather than single EOA:** brBTC admin paths are controlled by Safes.
 3. **Doxxed leadership and known legal entity:** Bedrock / RockX leadership is public, and Terms of Use identify a BVI operating entity.
 4. **Venue diversification:** brBTC is not dependent on a single BTC restaking venue.
+5. **Bounded operational blast radius on verified paths:** the collateral-moving `TransferProxy` can only send funds to the ops Safe (immutable destination), CCIP lanes are rate-limited to ≈2 brBTC/day each, and Free Tunnel executor rotation has a built-in 36h–5d delay.
 
 ### Key Risks
 
 1. **No brBTC-specific public Proof-of-Reserve.** Users cannot independently reconcile brBTC supply to per-venue reserves from a public feed.
-2. **Redemption mechanics are not publicly documented.** Fee, delay, queue, and processing path remain TODO.
-3. **Very thin secondary liquidity.** Material exits appear dependent on protocol redemption.
-4. **Upgradeable contracts with no onchain timelock.** Safe threshold signatures can upgrade contracts or change privileged roles without an onchain delay. In particular, the 3/4 ops Safe holds `DEFAULT_ADMIN_ROLE` on the brBTC token and can grant `MINTER_ROLE` (an unbacked-mint path) with no delay.
-5. **Bridge contracts hold live mint authority — one of them undocumented.** The Chainlink CCIP token pool and a Free Tunnel bridge contract can each mint brBTC; a compromise of either bridge (or of the Free Tunnel executor set) can inflate supply on Ethereum. Bedrock's public bridge documentation covers only Chainlink CCIP; the Free Tunnel minter is disclosed nowhere in the docs.
-6. **Compounded restaking/counterparty exposure.** Babylon, Kernel DAO, SatLayer, Pell, Symbiotic, and Mellow each add independent failure/slashing paths.
-7. **Accepted-asset risk.** brBTC accepts multiple wrapped BTC assets, including uniBTC, so upstream issuer/custody failures can affect brBTC.
-8. **One audit only and no public bug bounty.**
+2. **No onchain redemption path exists.** The `brVault` contract has no redeem/withdraw function (verified in source); exit depends entirely on Bedrock's undocumented offchain process or on bridging out.
+3. **Very thin secondary liquidity.** Material exits depend on an operational redemption process that is neither onchain nor documented.
+4. **Collateral custody leaves the observable system.** Only ≈15.5 of ≈1,284 BTC-denominated deposits remain in the vault; outflows are triggered by a single EOA (via the TransferProxy) and pass through the ops Safe (current balance zero) to untraceable venue/custody positions.
+5. **Upgradeable contracts with no onchain timelock.** Safe threshold signatures can upgrade contracts or change privileged roles without an onchain delay. In particular, the 3/4 ops Safe holds `DEFAULT_ADMIN_ROLE` on the brBTC token and can grant `MINTER_ROLE` (an unbacked-mint path) with no delay.
+6. **Bridge contracts hold live mint authority — one of them undocumented.** The Chainlink CCIP token pool and a Free Tunnel bridge contract can each mint brBTC; a compromise of either bridge (or of the Free Tunnel executor set) can inflate supply on Ethereum. Bedrock's public bridge documentation covers only Chainlink CCIP; the Free Tunnel minter is disclosed nowhere in the docs. Per-lane CCIP rate limits and the Free Tunnel 3-of-4 executor threshold partially mitigate.
+7. **Compounded restaking/counterparty exposure.** Babylon, Kernel DAO, SatLayer, Pell, Symbiotic, and Mellow each add independent failure/slashing paths.
+8. **Accepted-asset risk.** brBTC accepts multiple wrapped BTC assets, including uniBTC, so upstream issuer/custody failures can affect brBTC.
+9. **One audit only and no public bug bounty.**
 
 ### Critical Risks
 
@@ -306,41 +346,41 @@ Undisclosed custody/signing setup
 - **Score: 4.25**
 
 **Subcategory B: Programmability**
-- Mint is onchain, but restaking venue allocation and operational management are privileged/admin-driven.
-- **Score: 3.25**
+- Mint is onchain, but everything downstream is manual: collateral outflow is triggered by an EOA-owned `TransferProxy`, venue allocation happens from Safe custody offchain, and there is no onchain redemption function.
+- **Score: 3.5**
 
 **Subcategory C: External Dependencies**
 - Six restaking venues, multiple wrapped BTC issuers, two bridge frameworks with live mint authority (Chainlink CCIP, Free Tunnel), and undisclosed custody/signing setup.
 - **Score: 4.25**
 
-**Centralization Score = (4.25 + 3.25 + 4.25) / 3 = 3.92**
+**Centralization Score = (4.25 + 3.5 + 4.25) / 3 = 4.0**
 
-**Score: 3.92/5**
+**Score: 4.0/5**
 
 #### Category 3: Funds Management (Weight: 30%)
 
 **Subcategory A: Collateralization**
 - Intended BTC-denominated backing through accepted BTC wrappers and restaking positions.
 - Collateral quality is mixed and includes multiple issuer/custody dependencies.
-- Per-venue balances and brBTC-specific reserve reconciliation are not publicly available.
-- **Score: 3.75**
+- Verified onchain that only ≈15.5 of ≈1,284 BTC-denominated cumulative deposits remain in the vault; the rest moved through the ops Safe to positions that cannot be traced from the brBTC contracts. Per-venue balances and brBTC-specific reserve reconciliation are not publicly available.
+- **Score: 4.0**
 
 **Subcategory B: Provability**
 - No brBTC-specific PoR.
 - No public per-venue reserve dashboard sufficient to independently reconcile backing.
 - **Score: 4.0**
 
-**Funds Management Score = (3.75 + 4.0) / 2 = 3.875**
+**Funds Management Score = (4.0 + 4.0) / 2 = 4.0**
 
-**Score: 3.875/5** — The absence of public reserve proofs remains the main constraint, but the brBTC-only scope removes unrelated uniBTC/uniETH mechanics from this category.
+**Score: 4.0/5** — The absence of public reserve proofs remains the main constraint, now compounded by the verified fact that nearly all collateral sits beyond the onchain-traceable brBTC contracts. The brBTC-only scope still removes unrelated uniBTC/uniETH mechanics from this category.
 
 #### Category 4: Liquidity Risk (Weight: 15%)
 
 - brBTC has effectively no useful secondary DEX exit.
-- Protocol redemption is the binding exit path, but redemption mechanics are not publicly documented.
-- **Score: 4.0**
+- There is no onchain redemption function in the vault (verified in source); exit depends on an undocumented offchain process or on bridging to other chains' liquidity.
+- **Score: 4.25**
 
-**Score: 4.0/5** — Thin secondary liquidity and undocumented redemption still warrant an elevated liquidity score, but this is brBTC-specific rather than a combined liquidity assessment across three assets.
+**Score: 4.25/5** — Between rubric rows 4 and 5: exits are restricted and the mechanism is not verifiable, but bridges and an operational redemption process appear to exist, so this is not scored as a full "no clear exit mechanism".
 
 #### Category 5: Operational Risk (Weight: 5%)
 
@@ -356,18 +396,18 @@ Undisclosed custody/signing setup
 | Category | Score | Weight | Weighted |
 |----------|-------|--------|----------|
 | Audits & Historical | 3.0 | 20% | 0.600 |
-| Centralization & Control | 3.92 | 30% | 1.175 |
-| Funds Management | 3.875 | 30% | 1.163 |
-| Liquidity Risk | 4.0 | 15% | 0.600 |
+| Centralization & Control | 4.0 | 30% | 1.200 |
+| Funds Management | 4.0 | 30% | 1.200 |
+| Liquidity Risk | 4.25 | 15% | 0.638 |
 | Operational Risk | 2.25 | 5% | 0.113 |
-| **Subtotal** | | | **3.650** |
+| **Subtotal** | | | **3.750** |
 
 **Modifiers:**
-- No brBTC-specific public PoR and undocumented redemption mechanics are already captured in Funds Management and Liquidity; no extra modifier applied.
-- The token-level unbacked-mint escalation path (ops Safe `DEFAULT_ADMIN_ROLE`, no timelock) and bridge mint authority are captured in the Governance subscore; no extra modifier applied.
+- No brBTC-specific public PoR, the missing onchain redemption function, and the collateral-custody opacity are already captured in Funds Management and Liquidity; no extra modifier applied.
+- The token-level unbacked-mint escalation path (ops Safe `DEFAULT_ADMIN_ROLE`, no timelock), the EOA-triggered collateral pipeline, and bridge mint authority are captured in the Centralization subscores; no extra modifier applied.
 - Prior uniBTC exploit is not applied as a direct brBTC incident modifier because brBTC uses a separate codebase.
 
-**Adjusted Final Score: ~3.7 / 5.0**
+**Adjusted Final Score: ~3.8 / 5.0**
 
 ### Risk Tier
 
@@ -381,7 +421,7 @@ Undisclosed custody/signing setup
 
 **Final Risk Tier: Elevated Risk**
 
-brBTC should be treated as an elevated-risk BTC restaking asset. Narrowing the scope to brBTC lowers the score materially versus the original combined Bedrock report, but strict caps remain appropriate until Bedrock publishes brBTC-specific reserve proofs and complete redemption mechanics.
+brBTC should be treated as an elevated-risk BTC restaking asset. The brBTC-only scope removes uniBTC/uniETH mechanics from the assessment, but the July 10, 2026 verification pass hardened the risk picture: there is no onchain redemption path, collateral custody exits the observable contract system through an EOA-triggered pipeline, and two bridge contracts (one undocumented) hold mint authority. Strict caps remain appropriate until Bedrock publishes brBTC-specific reserve proofs and a documented redemption process.
 
 ---
 
@@ -404,11 +444,13 @@ brBTC should be treated as an elevated-risk BTC restaking asset. Narrowing the s
 
 ## Open TODOs (Items Not Verifiable This Session)
 
-- **brBTC reserve proof / per-venue allocations** — no public brBTC-specific PoR or independently reconciliable allocation feed found.
-- **brBTC redemption flow** — exact fee, delay, and queue mechanics are not documented publicly.
-- **Custody/signing setup** for accepted BTC assets and restaked positions is not fully disclosed.
-- **Free Tunnel bridge control** — the executor signer set and upgrade authority of the Free Tunnel brBTC contract (`0x70aF4743…`, managed through the Free Tunnel hub rather than a standard proxy admin) are not fully enumerated.
-- **CCIP token pool rate limits** — the configured mint/burn rate limits on the CCIP `BurnMintTokenPool` were not read this session.
+- **brBTC reserve proof / per-venue allocations** — no public brBTC-specific PoR or independently reconciliable allocation feed found. The onchain trail was traced as far as it goes (vault → TransferProxy → ops Safe, current Safe balance zero); the venue-level positions beyond that hop remain unverifiable.
+- **brBTC offchain redemption process** — verified onchain that the vault has no redemption function; the fee, delay, and processing mechanics of whatever offchain exit process Bedrock operates are not documented publicly.
+- **Custody/signing setup** for accepted BTC assets and restaked positions beyond the ops Safe hop is not disclosed.
+- **Full cross-chain supply reconciliation** — Ethereum (121.37), Base (518.457), and BNB Chain (1.304) brBTC supplies were read live; Berachain and the non-EVM CCIP lanes were not, so global supply vs. cumulative deposits (≈1,284) is not fully reconciled.
+- **Free Tunnel upgrade authority** — executor set (3-of-4) and admin EOA were enumerated from contract getters; the exact hub-level implementation-upgrade path for the tunnel proxy was not fully traced.
+
+**Resolved this session (July 10, 2026):** CCIP token pool rate limits (enabled on all 8 lanes, 1–2 brBTC capacity, ≈2 brBTC/day refill); Free Tunnel executor/admin control (3-of-4 executor signatures, EOA admin, 36h–5d rotation delay); vault redemption (none exists onchain); collateral flow and vault operator enumeration (TransferProxy, EOA owner, fixed Safe destination).
 
 ## Sources
 
@@ -425,3 +467,4 @@ brBTC should be treated as an elevated-risk BTC restaking asset. Narrowing the s
 - Onchain verification July 10, 2026: re-read of the above, plus full `RoleGranted`/`RoleRevoked` event scan on the brBTC token (blocks 21,000,000 → latest), `hasRole` confirmation of every current `MINTER_ROLE` / `DEFAULT_ADMIN_ROLE` holder, `typeAndVersion()`/`owner()` on the CCIP token pool, and Etherscan source review of the token implementation (`mint` is `onlyRole(MINTER_ROLE)`, no supply cap) and the Free Tunnel proxy/implementation.
 - Bedrock brBTC bridge docs (documents Chainlink CCIP only): https://docs.bedrock.technology/multi-asset-liquid-staking/brbtc/bridge
 - Free Tunnel contract source (verified on Etherscan): https://etherscan.io/address/0x70aF4743F85E5E74E3b6dDFa38926c0a762Ad21C#code
+- Onchain verification July 10, 2026 (TODO-closure pass): `brVault` source review (no redeem function; `execute` target whitelist), `TargetAllowed`/`TokenAllowed` and vault `RoleGranted`/`RoleRevoked` event scans, `tokenCaps`/`tokenUsedCaps`/`balanceOf` reads for all five deposit assets on vault and ops Safe, TransferProxy source + `owner()`/`to()` reads, CCIP pool `getSupportedChains` + per-lane in/outbound rate-limiter states + `getRemoteToken`, Free Tunnel `getAdmin()`/`getActiveExecutors()`/`proposerOfIndex()` reads and `updateExecutors` source review, brBTC `totalSupply()` on Base (`RPC_8453`) and BNB Chain.

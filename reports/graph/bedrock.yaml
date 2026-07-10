@@ -27,7 +27,17 @@ nodes:
     label: brBTC Vault
     address: "0x1419b48e5C1f5ce413Cf02D6dcbe1314170E3386"
     category: infra
-    note: Mint/allocation vault for brBTC; redemption details not publicly documented
+    note: Mint-only vault (no onchain redeem function); holds ~15.5 of ~1,284 BTC-denominated cumulative deposits
+  - id: transfer-proxy
+    label: TransferProxy (Operator)
+    address: "0x28BfF185E5874E67dc03d8C096e27b775D5058A2"
+    category: infra
+    note: Sole OPERATOR_ROLE holder on vault; moves uniBTC/M-BTC to fixed destination (ops Safe); owner is EOA 0x9251Fd3D
+  - id: operator-eoa
+    label: TransferProxy Owner (EOA)
+    address: "0x9251Fd3D79522bB2243a58FFf1dB43E25A495aaB"
+    category: governance
+    note: EOA hot key that triggers vault-to-Safe collateral transfers; formerly held token DEFAULT_ADMIN/MINTER (revoked)
   - id: brBTC-proxyadmin
     label: brBTC ProxyAdmin
     address: "0x9F63269196A8828f05F2E49D1078eA7C44e7f002"
@@ -36,7 +46,7 @@ nodes:
     label: CCIP BurnMintTokenPool
     address: "0x512c2Ddf5f7F48a6c44cFF73CD8d7edEC5e6b0d8"
     category: infra
-    note: Chainlink CCIP token pool 1.5.1; holds MINTER_ROLE on brBTC; owner is Bedrock admin Safe
+    note: Chainlink CCIP token pool 1.5.1; holds MINTER_ROLE on brBTC; owner is Bedrock admin Safe; rate limits enabled on all 8 lanes (1-2 brBTC capacity, ~2 brBTC/day)
 
   # === Governance ===
   - id: bedrock-safe
@@ -52,9 +62,9 @@ nodes:
 
   # === Strategy / custody layer ===
   - id: brBTC-restaking
-    label: brBTC Restaking Allocator
+    label: Offchain Restaking Allocation
     category: strategy
-    note: Allocates BTC variants across six restaking venues; no public brBTC PoR
+    note: Collateral leaves onchain trail at the ops Safe (balance zero) and is allocated to six restaking venues; no public brBTC PoR
 
   # === Accepted input assets ===
   - id: dep-uniBTC
@@ -76,7 +86,7 @@ nodes:
     label: Free Tunnel Bridge
     address: "0x70aF4743F85E5E74E3b6dDFa38926c0a762Ad21C"
     category: dependency
-    note: Third-party Free Tunnel bridge (TunnelContract behind DelayedERC1967Proxy); holds MINTER_ROLE on brBTC; not documented in Bedrock bridge docs
+    note: Third-party Free Tunnel bridge (TunnelContract behind DelayedERC1967Proxy); holds MINTER_ROLE on brBTC; not documented in Bedrock bridge docs; 3-of-4 executor signatures, EOA admin, 36h-5d executor-rotation delay
   - id: dep-babylon
     label: Babylon Labs
     category: dependency
@@ -116,9 +126,14 @@ edges:
   - { from: ccip-token-pool, to: brBTC, kind: mints, label: MINTER_ROLE (CCIP burn/mint) }
   - { from: free-tunnel, to: brBTC, kind: mints, label: "MINTER_ROLE (bridge mint, undocumented)" }
 
+  # === Operational collateral pipeline ===
+  - { from: operator-eoa, to: transfer-proxy, kind: controls, label: owner() }
+  - { from: transfer-proxy, to: brBTC-vault, kind: holds-role, label: OPERATOR_ROLE (execute) }
+
   # === Capital flow ===
-  - { from: brBTC, to: brBTC-vault, kind: routes-through, label: mint (redeem TODO) }
-  - { from: brBTC-vault, to: brBTC-restaking, kind: allocates-to, label: "% split TODO" }
+  - { from: brBTC, to: brBTC-vault, kind: routes-through, label: mint (no onchain redeem) }
+  - { from: brBTC-vault, to: brBTC-safe, kind: routes-through, label: "uniBTC/M-BTC outflow via TransferProxy" }
+  - { from: brBTC-safe, to: brBTC-restaking, kind: allocates-to, label: "% split TODO" }
   - { from: brBTC-vault, to: dep-uniBTC, kind: routes-through, label: accepted input asset }
   - { from: brBTC-vault, to: dep-wrapped-btc, kind: routes-through, label: accepted input assets }
   - { from: brBTC-restaking, to: dep-babylon, kind: deposits-into, label: restaking venue }
