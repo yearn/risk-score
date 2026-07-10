@@ -1,0 +1,216 @@
+slug: reserve-ethplus
+title: Reserve Protocol (ETH+) — Contract Dependency Graph
+chain: ethereum
+
+categories:
+  - id: vault
+    label: Vault / Token
+  - id: strategy
+    label: Collateral Strategy
+  - id: governance
+    label: Governance
+  - id: infra
+    label: Protocol Infra
+  - id: dependency
+    label: External Dependency
+
+nodes:
+  # === Vault / token layer ===
+  - id: ethplus
+    label: ETH+ (RToken)
+    address: "0xE72B141DF173b999AE7c1aDcbF60Cc9833Ce56a8"
+    category: vault
+    note: ERC-1967 proxy; basket-of-LSTs
+  - id: strsr
+    label: stRSR (RSR overcollateralization)
+    address: "0xffa151Ad0A0e2e40F39f9e5E9F87cF9E45e819dd"
+    category: vault
+    note: First-loss buffer (~$1.4M / 2.9% OC)
+
+  # === Internal infra ===
+  - id: main
+    label: Main (AccessController)
+    address: "0xb6A7d481719E97e142114e905E86a39a2Fa0dfD2"
+    category: infra
+    note: Access controller for all roles; version 4.2.0
+  - id: backing-mgr
+    label: BackingManager (holds collateral)
+    address: "0x608e1e01EF072c15E5Da7235ce793f4d24eCa67B"
+    category: infra
+  - id: basket-handler
+    label: BasketHandler
+    category: infra
+    note: Defines basket weights; fullyCollateralized check
+
+  # === Governance ===
+  - id: governor
+    label: Governor Anastasius v1
+    address: "0xa8a608b9b558235e7f87d7024cc05e6f47d62022"
+    category: governance
+    note: OZ Governor; 2d delay + 3d vote; stRSR voting token
+  - id: timelock
+    label: Timelock Controller (3d)
+    address: "0xd7985a7c617febc4a833b5f70cfa79b40c313ad2"
+    category: governance
+    note: OWNER on Main
+  - id: guardian
+    label: Guardian Safe (3-of-6)
+    address: "0xd5fe2780eb882d1da78f2136b81c2a4395488c98"
+    category: governance
+    note: PAUSER + SHORT/LONG_FREEZER + Timelock CANCELLER
+  - id: deployer-eoa
+    label: Deployer EOA (residual PAUSER)
+    address: "0xe3e34fa93575af41bef3476236e1a3cdb3f60b85"
+    category: governance
+    note: PAUSER role since 2023 deployment; not revoked
+
+  # === Collateral strategies (LST plugins) ===
+  - id: wsteth
+    label: wstETH (50%)
+    category: strategy
+    note: Lido collateral plugin
+  - id: weeth
+    label: weETH (22%)
+    category: strategy
+    note: Ether.fi collateral plugin
+  - id: sfrxeth
+    label: sfrxETH (10%)
+    category: strategy
+    note: Frax collateral plugin
+  - id: reth
+    label: rETH (10%)
+    category: strategy
+    note: Rocket Pool collateral plugin
+  - id: ethx
+    label: ETHx (8%)
+    category: strategy
+    note: Stader collateral plugin
+
+  # === External dependencies ===
+  - id: lido
+    label: Lido (stETH)
+    category: dependency
+  - id: etherfi
+    label: Ether.fi (eETH)
+    category: dependency
+  - id: frax
+    label: Frax (frxETH)
+    category: dependency
+  - id: rocketpool
+    label: Rocket Pool
+    category: dependency
+  - id: stader
+    label: Stader
+    category: dependency
+  - id: chainlink
+    label: Chainlink price feeds
+    category: dependency
+    note: Per-collateral plugins; vetted alternates where unavailable
+
+edges:
+  # === Governance flow ===
+  - from: governor
+    to: timelock
+    kind: proposes-on
+    label: PROPOSER + EXECUTOR (~8d total)
+  - from: guardian
+    to: timelock
+    kind: cancels-on
+    label: CANCELLER
+  - from: timelock
+    to: main
+    kind: holds-role
+    label: OWNER
+  - from: guardian
+    to: main
+    kind: holds-role
+    label: PAUSER + SHORT_FREEZER + LONG_FREEZER
+  - from: deployer-eoa
+    to: main
+    kind: holds-role
+    label: PAUSER (residual)
+  - from: main
+    to: ethplus
+    kind: manages
+    label: upgrades, basket, throttles
+  - from: main
+    to: strsr
+    kind: manages
+    label: upgrades, params
+  - from: main
+    to: backing-mgr
+    kind: manages
+  - from: main
+    to: basket-handler
+    kind: manages
+
+  # === Capital flow: ETH+ → BackingManager → LST plugins → LST issuers ===
+  - from: ethplus
+    to: backing-mgr
+    kind: deposits-into
+    label: issue/redeem basket
+  - from: backing-mgr
+    to: wsteth
+    kind: allocates-to
+    label: "50.0%"
+  - from: backing-mgr
+    to: weeth
+    kind: allocates-to
+    label: "22.0%"
+  - from: backing-mgr
+    to: sfrxeth
+    kind: allocates-to
+    label: "10.0%"
+  - from: backing-mgr
+    to: reth
+    kind: allocates-to
+    label: "10.0%"
+  - from: backing-mgr
+    to: ethx
+    kind: allocates-to
+    label: "8.0%"
+  - from: basket-handler
+    to: backing-mgr
+    kind: manages
+    label: basket weights
+
+  # === LST → underlying staking protocol ===
+  - from: wsteth
+    to: lido
+    kind: deposits-into
+  - from: weeth
+    to: etherfi
+    kind: deposits-into
+  - from: sfrxeth
+    to: frax
+    kind: deposits-into
+  - from: reth
+    to: rocketpool
+    kind: deposits-into
+  - from: ethx
+    to: stader
+    kind: deposits-into
+
+  # === Oracle dependency ===
+  - from: wsteth
+    to: chainlink
+    kind: routes-through
+    label: ETH/USD feed
+  - from: weeth
+    to: chainlink
+    kind: routes-through
+    label: ETH/USD feed
+  - from: reth
+    to: chainlink
+    kind: routes-through
+    label: ETH/USD feed
+  - from: ethx
+    to: chainlink
+    kind: routes-through
+    label: ETH/USD feed
+
+  # === RSR overcollateralization buffer ===
+  - from: strsr
+    to: ethplus
+    kind: routes-through
+    label: first-loss capital

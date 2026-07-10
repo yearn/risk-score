@@ -1,0 +1,204 @@
+slug: 3jane-usd3
+title: 3Jane (USD3) — Contract Dependency Graph
+chain: ethereum
+
+categories:
+  - id: vault
+    label: Vault / Token
+  - id: strategy
+    label: Strategy
+  - id: governance
+    label: Governance
+  - id: infra
+    label: Protocol Infra
+  - id: dependency
+    label: External Dependency
+
+nodes:
+  # === Vault / token layer ===
+  - id: USD3
+    label: USD3 (Senior Tranche)
+    address: "0x056B269Eb1f75477a8666ae8C7fE01b64dD55eCc"
+    category: vault
+    note: ERC-4626 senior tranche; TransparentUpgradeableProxy
+  - id: sUSD3
+    label: sUSD3 (Junior / First-Loss)
+    address: "0xf689555121e529Ff0463e191F9Bd9d1E496164a7"
+    category: vault
+    note: Staked USD3; absorbs losses first; 1-month lock
+
+  # === Protocol infra ===
+  - id: morpho-credit
+    label: MorphoCredit (Lending Engine)
+    address: "0xDe6e08ac208088cc62812Ba30608D852c6B0EcBc"
+    category: infra
+    note: Morpho Blue fork with credit-based markets
+  - id: credit-line
+    label: CreditLine (Borrower Approval)
+    address: "0x26389b03298BA5DA0664FfD6bF78cF3A7820c6A9"
+    category: infra
+    note: Approves credit lines, posts minimum repayments
+  - id: protocol-config
+    label: ProtocolConfig
+    address: "0x6b276A2A7dd8b629adBA8A06AD6573d01C84f34E"
+    category: infra
+    note: Pause, debt cap, tranche ratios, IRM bounds
+  - id: irm
+    label: AdaptiveCurveIRM
+    address: "0x1d434D2899f81F3C3fdf52C814A6E23318f9C7Df"
+    category: infra
+    note: Interest rate model proxy
+  - id: helper
+    label: Helper (Borrower Interactions)
+    address: "0x82736F81A56935c8429ADdbDa4aEBec737444505"
+    category: infra
+
+  # === Governance ===
+  - id: multisig
+    label: Multisig (3-of-5 Safe)
+    address: "0x33333333bd7045f1a601a1e289d7ab21036fb5ef"
+    category: governance
+    note: PROPOSER + EXECUTOR + CANCELLER on both timelocks
+  - id: timelock-24h
+    label: TimelockController (24h, config)
+    address: "0x1dCcD4628d48a50C1A7adEA3848bcC869f08f8C2"
+    category: governance
+    note: Owner of MorphoCredit, ProtocolConfig, CreditLine, MarkdownController; 24h delay
+  - id: timelock-7d
+    label: TimelockController (7d, upgrades)
+    address: "0x3D3C41419Ab401cd25055E8f9421D7D96d887885"
+    category: governance
+    note: Owns all 5 ProxyAdmins; 7-day delay for implementation upgrades; self-administered
+  - id: emergency-controller
+    label: EmergencyController v2
+    address: "0x84b31b84917485e221305edf590b8e3660d2e051"
+    category: governance
+    note: EMERGENCY_AUTHORIZED_ROLE; bypasses both timelocks for binary pause / debt-cap=0
+
+  # === Strategies / Capital deployment ===
+  - id: aave-strategy
+    label: Aave V3 Idle Reserves
+    category: strategy
+    note: Baseline yield on idle USDC (~$7.28M, ~27% of totalAssets)
+  - id: unsecured-loans
+    label: Unsecured Credit Lines
+    category: strategy
+    note: ~$19.81M borrowed (~73% utilization); base rate + risk premium
+
+  # === External dependencies ===
+  - id: aave-v3-usdc
+    label: Aave V3 USDC Market
+    category: dependency
+    note: Blue-chip lending venue for idle reserves
+  - id: borrowers
+    label: Approved Borrowers
+    category: dependency
+    note: Offchain-underwritten credit lines (3CA algorithm)
+  - id: zk-tls
+    label: zkTLS / Reclaim Protocol
+    category: dependency
+    note: Zero-knowledge proofs of offchain bank/credit data
+  - id: eigenlayer-avs
+    label: EigenLayer AVS
+    category: dependency
+    note: Verifies zkTLS proofs; early-stage infra
+  - id: insurance-fund
+    label: Insurance Fund (~$1.02M USDC)
+    address: "0x4507B5B23340D248457d955a211C8B0634D29935"
+    category: dependency
+    note: First-loss buffer (waEthUSDC); ~39% borrow-book coverage
+
+edges:
+  # === Governance flow ===
+  - from: multisig
+    to: timelock-24h
+    kind: proposes-on
+    label: PROPOSER + EXECUTOR + CANCELLER (24h)
+  - from: multisig
+    to: timelock-7d
+    kind: proposes-on
+    label: PROPOSER + EXECUTOR + CANCELLER (7d)
+  - from: timelock-24h
+    to: morpho-credit
+    kind: controls
+    label: owner (24h delay)
+  - from: timelock-24h
+    to: protocol-config
+    kind: controls
+    label: owner (24h delay)
+  - from: timelock-24h
+    to: credit-line
+    kind: controls
+    label: owner (24h delay)
+  - from: timelock-7d
+    to: USD3
+    kind: controls
+    label: proxy admin (7d delay)
+  - from: timelock-7d
+    to: morpho-credit
+    kind: controls
+    label: proxy admin (7d delay)
+  - from: emergency-controller
+    to: morpho-credit
+    kind: holds-role
+    label: EMERGENCY_AUTHORIZED_ROLE (bypass both timelocks)
+
+  # === Internal vault flow ===
+  - from: sUSD3
+    to: USD3
+    kind: deposits-into
+    label: "stake (85/15 yield split)"
+  - from: USD3
+    to: morpho-credit
+    kind: deposits-into
+    label: USDC supply
+
+  # === Allocation: lending pool into strategies ===
+  - from: morpho-credit
+    to: aave-strategy
+    kind: allocates-to
+    label: "idle reserves (~27%)"
+  - from: morpho-credit
+    to: unsecured-loans
+    kind: allocates-to
+    label: "~73% utilization"
+
+  # === Credit underwriting wiring ===
+  - from: credit-line
+    to: morpho-credit
+    kind: manages
+    label: approves credit lines
+  - from: protocol-config
+    to: morpho-credit
+    kind: manages
+    label: pause / debt cap / tranche ratios
+  - from: irm
+    to: morpho-credit
+    kind: manages
+    label: borrow rate model
+  - from: helper
+    to: morpho-credit
+    kind: routes-through
+    label: borrower entry point
+
+  # === Strategy → external dependencies ===
+  - from: aave-strategy
+    to: aave-v3-usdc
+    kind: deposits-into
+    label: "USDC supply"
+  - from: unsecured-loans
+    to: borrowers
+    kind: deposits-into
+    label: "uncollateralized loans"
+  - from: borrowers
+    to: zk-tls
+    kind: routes-through
+    label: bank / credit-score proofs
+  - from: zk-tls
+    to: eigenlayer-avs
+    kind: routes-through
+    label: ZK proof verification
+  - from: USD3
+    to: insurance-fund
+    kind: routes-through
+    label: first-loss buffer ($1.02M)

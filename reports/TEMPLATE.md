@@ -1,12 +1,34 @@
 # Protocol Risk Assessment: [Protocol Name]
 
 - **Assessment Date:** [Month Day, Year]
+<!--
+  Keep the ORIGINAL assessment date here. When a report is reassessed/updated,
+  do NOT overwrite it — append the new date in parentheses, e.g.:
+    - **Assessment Date:** May 27, 2026 (Updated: June 17, 2026)
+  The website reads both: the earliest date becomes "Original", the latest
+  becomes "Latest", and the page is tagged "Updated report". Overwriting the
+  single date loses that history and the report shows as brand new.
+-->
 - **Token:** [Token Name]
 - **Chain:** [Chain Name]
 - **Token Address:** [`[Token Address]`]([Token Explorer Link])
 - **Final Score: X/5.0**
+<!-- Status: omit this line entirely for normal/active reports. See the Status comment below. -->
 
 <!--
+Status field (optional — omit for active reports):
+  Add a "- **Status:** <TAG>" line only when a report is an exception. The
+  taxonomy is:
+    - GATED   — score is retained but was capped by a critical gate (e.g. no
+                audit) rather than earned organically. Keep the numeric
+                "Final Score: X/5.0"; the site shows it with an amber GATED chip.
+    - HACKED  — confirmed exploit / unbacked mint / realized loss event.
+    - DEAD    — deprecated, wind-down, or discretionary-only redemption.
+  HACKED and DEAD are "terminal": a realized event supersedes a forward-looking
+  score, so set the header to "- **Final Score: N/A**" (the site renders these
+  off the 1–5 scale under a separate "Not Rated" section). Retain the gate/
+  override derivation in the Risk Score Assessment section for the record.
+
 Assessment Date format:
   - Use full English month name and four-digit year, e.g. "March 4, 2026".
   - When a report is reassessed, append the new date in parentheses on the
@@ -62,6 +84,27 @@ Explain what the protocol does, its usage, and yield sources.
 - Is minting/redeeming atomic in a single transaction?
 - Are there fees, rate limits, or cooldown periods?
 
+### Token Mint Authority
+
+Enumerate every address that can mint the assessed token, and the mechanism that gates them. Treat any address with mint authority as part of the trust surface even if it is intended only for a narrow purpose. Onchain enumeration procedure: see `reports/skill.md` § "Pass 1.6: Mint authority enumeration".
+
+**Mint mechanism:** [Open mint via collateral deposit / Role-gated AccessControl / Whitelist mapping / Ownable / Custodial bridge / Other — describe]
+
+**Mint requires backing:** [Yes — collateral must transfer in same tx / No — minter can issue unbacked tokens]
+
+**Per-address mint authority** (verified onchain on [date], from token contract `0x…`):
+
+| Address | Can Mint | Can Burn | Role / Mechanism | Notes |
+|---------|:--------:|:--------:|------------------|-------|
+| [`0x…`](etherscan link) | ✓ | ✓ | `MINTER_ROLE` | Multisig, 3/5, named signers |
+| [`0x…`](etherscan link) | ✓ | — | `mintList` entry | Bridge contract (e.g. Wormhole NTT) |
+
+**Rate limits / supply caps:** [None / Max mint per block of X / Global supply cap of Y / Per-minter caps — describe]
+
+**Backing check at mint time:** [Atomic — minter must deposit collateral in same tx / Deferred — backing settled offchain / None — minter can issue unbacked tokens]
+
+See `reports/report/mezo-musd.md` for a worked example.
+
 ### Collateralization
 
 - Is it collateralized onchain?
@@ -79,8 +122,8 @@ Explain what the protocol does, its usage, and yield sources.
 - How does onchain reporting work? Is the exchange rate computed programmatically or updated by a privileged role?
 - If collateral is offchain, how transparent is the team? How frequently are reserves verified?
 - Are there third-party verification mechanisms? (Chainlink PoR, Merkle proofs, custodian attestations)
-- Can minting be done without backing assets?
-- Can admin mint tokens out of thin air? List all accounts with minting role.
+
+(Mint-authority enumeration and unbacked-mint risk are captured in the *Token Mint Authority* subsection above.)
 
 ## Liquidity Risk
 
@@ -178,11 +221,21 @@ Show the data/fund flow between layers. Note key admin powers and trust boundari
 
 If ANY gate is triggered, the protocol automatically receives a score of **5** (High Risk).
 
+- [ ] **Unverified contract source** - The assessed contract, or its implementation behind a proxy, is not source-verified on a public block explorer (bytecode cannot be independently reviewed)
 - [ ] **No audit** - Protocol has not been audited by reputable firms
 - [ ] **Unverifiable reserves** - Reserves cannot be verified onchain or through transparent attestation
 - [ ] **Total centralization** - Controlled by a single EOA with no multisig or governance
 
 **If ALL gates pass**, proceed to category scoring.
+
+> **A triggered gate is not the same as a realized loss.** A gate on an
+> otherwise-live protocol caps the score at 5.0 — set `Status: GATED` in the
+> header and keep the number so it stays comparable on the scale. Reserve
+> `N/A` / the "Not Rated" bucket for **terminal** states (`HACKED` / `DEAD`),
+> where an actual exploit or wind-down has occurred. Do not let a gate flatten
+> a distinguishable, still-live protocol into the same cell as a corpse — record
+> the ungated weighted score in the reasoning so the underlying risk stays
+> visible.
 
 ### Category Scores
 
@@ -329,8 +382,17 @@ If ANY gate is triggered, the protocol automatically receives a score of **5** (
 | **2.5-3.5** | **Medium Risk** | Approved with enhanced monitoring |
 | **3.5-4.5** | **Elevated Risk** | Limited approval, strict limits |
 | **4.5-5.0** | **High Risk** | Not recommended |
+| **N/A** | **Not Rated** | Terminal — do not use (exploited or wound down) |
 
 **Final Risk Tier: [TIER]**
+
+<!--
+Not Rated: for terminal reports (Status: HACKED / DEAD), set Final Score to
+"N/A" and Final Risk Tier to "Not Rated". These are excluded from the numeric
+1–5 ranking and grouped separately on the site.
+-->
+
+
 
 ---
 
@@ -339,3 +401,17 @@ If ANY gate is triggered, the protocol automatically receives a score of **5** (
 - **Time-based**: Reassess in [X months]
 - **TVL-based**: Reassess if TVL changes by more than [X%]
 - **Incident-based**: Reassess after any exploit, governance change, or collateral modification
+
+## Assessment History
+
+<!--
+  One row per assessment, oldest first. Add a new row on every reassessment —
+  never edit past rows. The website renders this table at the bottom of the
+  report so score changes are traceable over time. Keep the date format
+  consistent with the header "Assessment Date". Score is the Final Score at that
+  point in time (or the status tag, e.g. HACKED, for Not Rated reports).
+-->
+
+| Date | Score | Notes |
+| --- | --- | --- |
+| [Month Day, Year] | [X.X] | Initial assessment |

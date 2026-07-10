@@ -1,0 +1,286 @@
+slug: midas-mhyper
+title: Midas (mHYPER) — Contract Dependency Graph
+chain: ethereum
+
+categories:
+  - id: vault
+    label: Vault / Token
+  - id: strategy
+    label: Strategy Venue
+  - id: governance
+    label: Governance
+  - id: infra
+    label: Protocol Infra
+  - id: dependency
+    label: External Dependency
+
+nodes:
+  # === Vault / token layer ===
+  - id: mHYPER
+    label: mHYPER (LYT)
+    address: "0x9b5528528656DBC094765E2abB79F293c21191B9"
+    category: vault
+    note: Subordinated debt instrument; TransparentUpgradeableProxy. ~29.5M supply (Jun 2026)
+  - id: deposit-vault
+    label: DepositVault
+    address: "0x6Be2f55816efd0d91f52720f096006d63c366e98"
+    category: vault
+    note: User-facing mint entry (USDC → mHYPER)
+  - id: redemption-vault
+    label: RedemptionVaultWithSwapper
+    address: "0xbA9FD2850965053Ffab368Df8AA7eD2486f11024"
+    category: vault
+    note: Instant + standard redemption
+
+  # === Protocol infra ===
+  - id: access-control
+    label: MidasAccessControl
+    address: "0x0312A9D1Ff2372DDEdCBB21e4B6389aFc919aC4B"
+    category: infra
+    note: Role-based permission system
+  - id: oracle
+    label: MHyperCustomAggregatorFeed (NAV)
+    address: "0x43881B05C3BE68B2d33eb70aDdF9F666C5005f68"
+    category: infra
+    note: "Admin-set NAV oracle (2x/week). Impl: 0xa19f5e16dc09641b17adf95bc950f71dbe5cb11b"
+  - id: data-feed
+    label: mHYPER DataFeed
+    address: "0x92004DCC5359eD67f287F32d12715A37916deCdE"
+    category: infra
+    note: Feeds price data to vaults
+  - id: oft-adapter
+    label: LayerZero OFT Adapter
+    address: "0x148c86390a4ae6f7a02df5903bc0a89e8b4581a0"
+    category: infra
+    note: Cross-chain bridge; holds MINT + BURN
+  - id: mint-burn-eoa
+    label: Mint/Burn Operator EOA
+    address: "0x5683de280d0c3967fba2f04d707fa1ef5a044e25"
+    category: infra
+    note: Fordefi MPC; holds MINT/BURN/PAUSE/BLACKLIST/GREENLIST
+  - id: oracle-updater-eoa
+    label: Oracle Updater EOA
+    address: "0xd1e01471f3e1002d4eec1b39b7dbd7aff952a99f"
+    category: infra
+    note: Single EOA, no timelock on price updates
+  - id: tokens-receiver
+    label: Tokens Receiver
+    address: "0xF356c5e9F69DaDB332Bb098C7Ed960Db1d3376DD"
+    category: infra
+
+  # === Governance ===
+  - id: admin-safe
+    label: Admin Safe (1/3)
+    address: "0xB60842E9DaBCd1C52e354ac30E82a97661cB7E89"
+    category: governance
+    note: Gnosis Safe; DEFAULT_ADMIN + Timelock proposer/executor
+  - id: admin-eoa-fordefi
+    label: DEFAULT_ADMIN EOA (Fordefi MPC)
+    address: "0xd4195cf4df289a4748c1a7b6ddbe770e27ba1227"
+    category: governance
+    note: Bypasses timelock for role grants
+  - id: timelock
+    label: MidasTimelockController (48h)
+    address: "0xE3EEe3e0D2398799C884a47FC40C029C8e241852"
+    category: governance
+    note: OZ TimelockController; gates proxy upgrades only
+  - id: proxy-admin
+    label: ProxyAdmin (shared)
+    address: "0xbf25b58cB8DfaD688F7BcB2b87D71C23A6600AaC"
+    category: governance
+
+  # === Strategy venues (June 2026 per SumCap) ===
+  - id: strat-unclassified
+    label: Unclassified (76.8%)
+    category: strategy
+    note: Likely non-Ethereum chains + offchain/CEX
+  - id: strat-fluid
+    label: Fluid (15.4%)
+    category: strategy
+  - id: strat-uniswapv4
+    label: Uniswap V4 (5.6%)
+    category: strategy
+  - id: strat-onchain-wallets
+    label: Onchain Wallets (1.5%)
+    category: strategy
+  - id: strat-merkl
+    label: Merkl (0.1%)
+    category: strategy
+  - id: strat-other
+    label: Other (Euler, Pendle V2, Morpho V2, Hyperliquid — each <0.01%)
+    category: strategy
+
+  # === Attestation Engine (March 2026) ===
+  - id: keystone-forwarder
+    label: KeystoneForwarder (Chainlink DON)
+    address: "0x0b93082D9b3C7C97fAcd250082899BAcf3af3885"
+    category: infra
+  - id: save-cre-receiver
+    label: SaveCreReceiverProxy
+    address: "0xC50102b6598924Aa8deB201c757bFb9a3dBdB9b6"
+    category: infra
+  - id: save-registry
+    label: MidasSaveRegistryWithClaim
+    address: "0x2D6e9F608807436DE5D9603B00Abe3FEd1Bc809d"
+    category: infra
+    note: Onchain proof / attestation registry
+
+  # === External dependencies ===
+  - id: hyperithm
+    label: Hyperithm (Strategy Manager)
+    category: dependency
+    note: Offchain fund manager; AUM $300M+
+  - id: fordefi
+    label: Fordefi MPC Custody
+    category: dependency
+    note: Tri-party MPC custody (Midas + Hyperithm + Independent)
+  - id: llamarisk-canary
+    label: LlamaRisk + Canary (Verifiers)
+    category: dependency
+    note: Attestation Engine third-party verifiers
+  - id: vlayer
+    label: vlayer (Notarization)
+    category: dependency
+
+edges:
+  # === Governance ===
+  - from: admin-safe
+    to: timelock
+    kind: proposes-on
+    label: PROPOSER + EXECUTOR (1/3)
+  - from: timelock
+    to: proxy-admin
+    kind: controls
+    label: owner (48h delay)
+  - from: proxy-admin
+    to: mHYPER
+    kind: manages
+    label: upgradeable proxy
+  - from: proxy-admin
+    to: deposit-vault
+    kind: manages
+  - from: proxy-admin
+    to: redemption-vault
+    kind: manages
+  - from: proxy-admin
+    to: oracle
+    kind: manages
+  - from: proxy-admin
+    to: access-control
+    kind: manages
+  - from: admin-safe
+    to: access-control
+    kind: holds-role
+    label: DEFAULT_ADMIN (no timelock)
+  - from: admin-eoa-fordefi
+    to: access-control
+    kind: holds-role
+    label: DEFAULT_ADMIN (no timelock)
+  - from: access-control
+    to: mHYPER
+    kind: manages
+    label: gates mint/burn/pause/blacklist
+  - from: oracle-updater-eoa
+    to: oracle
+    kind: holds-role
+    label: M_HYPER_CUSTOM_AGGREGATOR_FEED_ADMIN_ROLE (no timelock)
+
+  # === Mint/burn authority on mHYPER ===
+  - from: deposit-vault
+    to: mHYPER
+    kind: mints
+    label: M_HYPER_MINT_OPERATOR_ROLE
+  - from: deposit-vault
+    to: mHYPER
+    kind: holds-role
+    label: M_HYPER_BURN_OPERATOR_ROLE
+  - from: mint-burn-eoa
+    to: mHYPER
+    kind: mints
+    label: MINT + BURN (no collateral check)
+  - from: oft-adapter
+    to: mHYPER
+    kind: mints
+    label: cross-chain MINT + BURN
+
+  # === Internal flow ===
+  - from: deposit-vault
+    to: mHYPER
+    kind: routes-through
+    label: USDC → mHYPER
+  - from: redemption-vault
+    to: mHYPER
+    kind: routes-through
+    label: mHYPER → USDC
+  - from: oracle
+    to: data-feed
+    kind: manages
+    label: NAV price feed
+  - from: data-feed
+    to: deposit-vault
+    kind: manages
+    label: price at deposit
+  - from: data-feed
+    to: redemption-vault
+    kind: manages
+    label: price at redeem
+
+  # === Capital flow: vault → custody → strategies (June 2026) ===
+  - from: mHYPER
+    to: fordefi
+    kind: routes-through
+    label: tri-party MPC custody
+  - from: fordefi
+    to: hyperithm
+    kind: routes-through
+    label: offchain strategy execution
+  - from: hyperithm
+    to: strat-unclassified
+    kind: allocates-to
+    label: "76.8%"
+  - from: hyperithm
+    to: strat-fluid
+    kind: allocates-to
+    label: "15.4%"
+  - from: hyperithm
+    to: strat-uniswapv4
+    kind: allocates-to
+    label: "5.6%"
+  - from: hyperithm
+    to: strat-onchain-wallets
+    kind: allocates-to
+    label: "1.5%"
+  - from: hyperithm
+    to: strat-merkl
+    kind: allocates-to
+    label: "0.1%"
+  - from: hyperithm
+    to: strat-other
+    kind: allocates-to
+    label: "<0.1%"
+
+  # === Attestation Engine (NAV verification pipeline) ===
+  - from: keystone-forwarder
+    to: save-cre-receiver
+    kind: routes-through
+    label: onReport()
+  - from: save-cre-receiver
+    to: save-registry
+    kind: routes-through
+    label: setAttestation()
+  - from: save-registry
+    to: oracle
+    kind: manages
+    label: NAV hash anchor
+  - from: llamarisk-canary
+    to: keystone-forwarder
+    kind: routes-through
+    label: verifier signatures
+  - from: vlayer
+    to: keystone-forwarder
+    kind: routes-through
+    label: cryptographic notarization
+  - from: tokens-receiver
+    to: deposit-vault
+    kind: routes-through
+    label: USDC receiver

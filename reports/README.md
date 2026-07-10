@@ -103,6 +103,7 @@ Each category receives a score from 1-5 (1 = safest, 5 = highest risk), which ar
 
 ### Red Flags
 
+- Unverified contract source (bytecode cannot be independently reviewed)
 - Unaudited or poorly audited code
 - Unlimited admin powers without timelocks
 - Opaque reserves or offchain dependencies
@@ -112,6 +113,6 @@ Each category receives a score from 1-5 (1 = safest, 5 = highest risk), which ar
 
 ## Related Resources
 
-- [Yearn Monitoring Scripts](https://github.com/yearn/monitoring-scripts-py)
-- [Safe Multisig Monitoring](https://github.com/yearn/monitoring-scripts-py/blob/main/safe/main.py)
-- [Workflow Definitions](https://github.com/yearn/monitoring-scripts-py/tree/main/.github/workflows)
+- [Yearn Monitoring Scripts](https://github.com/yearn/monitoring)
+- [Safe Multisig Monitoring](https://github.com/yearn/monitoring/blob/main/protocols/safe/main.py)
+- [Job Definitions](https://github.com/yearn/monitoring/blob/main/automation/jobs.yaml)

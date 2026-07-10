@@ -234,6 +234,22 @@ Three Morpho compounders that were active at the prior April 3 assessment have b
 - **No cooldown or lock period** — unlike yvUSD's LockedyvUSD wrapper
 - **Fees:** 0% management fee, 10% performance fee (taken via accountant during `process_report`)
 
+### Token Mint Authority
+
+**Mint mechanism:** Permissionless ERC-4626 deposit. Anyone can call `deposit(uint256, address)` or `mint(uint256, address)` on the yvUSDC-1 vault and receive shares proportional to USDC deposited. Yearn V3 vaults do not implement a privileged `MINTER_ROLE` on the share token.
+
+**Mint requires backing:** Yes — atomic. Shares are minted only against USDC transferred into the vault in the same transaction. The vault cannot mint shares without a corresponding USDC inflow.
+
+**Per-address mint authority** (verified onchain via Yearn V3 source; `0xBe53A109B494E5c9f97b9Cd39Fe969BE68BF6204`):
+
+| Address | Can Mint | Can Burn | Role / Mechanism | Notes |
+|---------|:--------:|:--------:|------------------|-------|
+| Any caller of `deposit()` / `mint()` | ✓ | ✓ | Permissionless ERC-4626 | Subject to the $50M `depositLimit` set by `DEPOSIT_LIMIT_MANAGER` (Daddy / Brain) |
+
+**Rate limits / supply caps:** `depositLimit = 50,000,000 USDC` (configurable by `DEPOSIT_LIMIT_MANAGER`). No per-block mint cap.
+
+**Backing check at mint time:** Atomic. The Vyper vault's `_deposit` enforces `asset.transferFrom(caller, vault, assets)` before `_mint(receiver, shares)` — minting without an asset inflow is impossible.
+
 ### Collateralization
 
 - **100% onchain USDC backing** — all deposits are USDC, deployed into Sky-governed lending venues (sUSDS Lender ~97% and Spark USDC Lender ~3%)
@@ -316,11 +332,11 @@ The yvUSDC-1 vault uses the **standard Yearn V3 governance pattern** via the Yea
 
 ### Existing Monitoring Infrastructure
 
-Yearn maintains an active monitoring system via the [`monitoring-scripts-py`](https://github.com/yearn/monitoring-scripts-py) repository. **yvUSDC-1 is actively monitored:**
+Yearn maintains an active monitoring system via the [`monitoring`](https://github.com/yearn/monitoring) repository. **yvUSDC-1 is actively monitored:**
 
-- **Large flow alerts** (`yearn/alert_large_flows.py`): Runs **hourly via GitHub Actions**. yvUSDC-1 is in the monitored vault list. Alerts on deposits/withdrawals exceeding threshold via Telegram
-- **Endorsed vault check** (`yearn/check_endorsed.py`): Runs weekly, verifies all Yearn V3 vaults are endorsed onchain via the registry contract
-- **Timelock monitoring** (`timelock/timelock_alerts.py`): Monitors the Yearn TimelockController (Strategy Manager) across 6 chains
+- **Large flow alerts** (`protocols/yearn/alert_large_flows.py`): yvUSDC-1 is in the monitored vault list. Alerts on deposits/withdrawals exceeding threshold via Telegram
+- **Endorsed vault check** (`protocols/yearn/check_endorsed.py`): Runs daily, verifies all Yearn V3 vaults are endorsed onchain via the registry contract
+- **Timelock monitoring** (`protocols/timelock/timelock_alerts.py`): Monitors the Yearn TimelockController (Strategy Manager) across 6 chains
 
 ### Key Contracts
 

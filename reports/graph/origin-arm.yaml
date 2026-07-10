@@ -1,0 +1,150 @@
+slug: origin-arm
+title: Origin ARM (ARM-WETH-stETH) — Contract Dependency Graph
+chain: ethereum
+
+categories:
+  - id: vault
+    label: Vault / Token
+  - id: strategy
+    label: Strategy / Market
+  - id: governance
+    label: Governance
+  - id: infra
+    label: Protocol Infra
+  - id: dependency
+    label: External Dependency
+
+nodes:
+  # === Vault / token layer ===
+  - id: arm
+    label: ARM-WETH-stETH (LidoARM Proxy)
+    address: "0x85B78AcA6Deae198fBF201c82DAF6Ca21942acc6"
+    category: vault
+    note: EIP-1967 proxy; ERC-4626 LP token
+  - id: arm-impl
+    label: ARM Implementation (LidoARM)
+    address: "0xC0297a0E39031F09406F0987C9D9D41c5dfbc3df"
+    category: vault
+  - id: fee-collector
+    label: Fee Collector (Safe 1/3)
+    address: "0xBB077E716A5f1F1B63ed5244eBFf5214E50fec8c"
+    category: vault
+
+  # === Governance ===
+  - id: xogn
+    label: xOGN Governance Token
+    address: "0x63898b3b6Ef3d39332082178656E9862bee45C57"
+    category: governance
+    note: Staked OGN — proposes via Origin DeFi Governance
+  - id: origin-gov
+    label: Origin DeFi Governance
+    address: "0x1D3fBD4d129Ddd2372EA85c5Fa00b2682081c9EC"
+    category: governance
+    note: PROPOSER + EXECUTOR + CANCELLER on Timelock
+  - id: timelock
+    label: Timelock Controller (48h)
+    address: "0x35918cDE7233F2dD33fA41ae3Cb6aE0e42E0e69F"
+    category: governance
+    note: Self-administered TIMELOCK_ADMIN_ROLE
+  - id: gov-multisig
+    label: GOV Multisig (5/8, cancel-only)
+    address: "0xbe2AB3d3d8F6a32b96414ebbd865dBD276d3d899"
+    category: governance
+
+  # === Protocol infra ===
+  - id: operator
+    label: Operator EOA (price setter)
+    address: "0x39878253374355DBcc15C86458F084fb6f2d6DE7"
+    category: infra
+    note: No timelock; sets traderate0/1, bounded by crossPrice
+  - id: morpho-wrapper
+    label: MorphoMarket Wrapper
+    address: "0xB7CeFE4CB483Be80C2963D3D9Edb991e69ff39cf"
+    category: infra
+    note: Abstract4626MarketWrapper; owner = Timelock
+  - id: harvester
+    label: Harvester Safe (MORPHO rewards)
+    address: "0x4FF1b9D9ba8558F5EAfCec096318eA0d8b541971"
+    category: infra
+
+  # === Strategy / external markets ===
+  - id: lido-wq
+    label: Lido Withdrawal Queue
+    address: "0x889edC2eDab5f40e902b864aD4d7AdE8E412F9B1"
+    category: dependency
+    note: Core yield mechanism — stETH 1:1 redemption
+  - id: morpho-vault
+    label: WETH ARM Morpho Vault (Yearn-curated)
+    address: "0x3Dfe70B05657949A5dB340754aD664810ac63b21"
+    category: dependency
+    note: MetaMorpho v1.1; idle WETH lending
+
+  # === Secondary liquidity ===
+  - id: curve-pool
+    label: Curve OETH / ARM-WETH-stETH
+    address: "0x95753095f15870acc0cb0ed224478ea61aeb0b8e"
+    category: dependency
+    note: ~$222K TVL secondary exit venue
+
+edges:
+  # === Governance flow: xOGN → Origin Gov → Timelock → ARM ===
+  - from: xogn
+    to: origin-gov
+    kind: controls
+    label: voting token
+  - from: origin-gov
+    to: timelock
+    kind: proposes-on
+    label: PROPOSER + EXECUTOR + CANCELLER
+  - from: gov-multisig
+    to: timelock
+    kind: cancels-on
+    label: CANCELLER only
+  - from: timelock
+    to: arm
+    kind: controls
+    label: owner (upgrade, setCrossPrice, setFee, setOperator)
+  - from: timelock
+    to: morpho-wrapper
+    kind: controls
+    label: owner
+
+  # === Operator role on vault (no timelock) ===
+  - from: operator
+    to: arm
+    kind: holds-role
+    label: operator (setPrices, requestLidoWithdrawals, setActiveMarket)
+
+  # === Vault internal wiring ===
+  - from: arm-impl
+    to: arm
+    kind: manages
+    label: EIP-1967 implementation
+  - from: arm
+    to: fee-collector
+    kind: routes-fees-to
+    label: 20% performance fee
+
+  # === Capital flow: ARM → strategies → external dependencies ===
+  - from: arm
+    to: lido-wq
+    kind: deposits-into
+    label: ~99% (request → claim 1-3d)
+  - from: arm
+    to: morpho-wrapper
+    kind: allocates-to
+    label: idle WETH buffer
+  - from: morpho-wrapper
+    to: morpho-vault
+    kind: deposits-into
+    label: WETH supply
+  - from: morpho-vault
+    to: harvester
+    kind: routes-fees-to
+    label: MORPHO rewards
+
+  # === Secondary liquidity ===
+  - from: arm
+    to: curve-pool
+    kind: routes-through
+    label: secondary DEX exit

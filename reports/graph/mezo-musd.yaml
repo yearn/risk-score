@@ -1,0 +1,226 @@
+slug: mezo-musd
+title: Mezo (MUSD) — Contract Dependency Graph
+chain: ethereum
+
+categories:
+  - id: vault
+    label: Vault / Token
+  - id: strategy
+    label: CDP / Pool
+  - id: governance
+    label: Governance
+  - id: infra
+    label: Protocol Infra
+  - id: dependency
+    label: External Dependency
+
+nodes:
+  # === Vault / token layer ===
+  - id: MUSD
+    label: MUSD (Ethereum)
+    address: "0xdD468A1DDc392dcdbEf6db6e34E89AA338F9F186"
+    category: vault
+    note: Bridged from Mezo via Wormhole NTT; ~1.72M on Ethereum
+  - id: musd-mezo
+    label: MUSD (Native — Mezo Chain)
+    category: vault
+    note: Mezo L1 (chain id 31612); ~$19.85M TVL
+
+  # === Protocol infra ===
+  - id: ntt-manager
+    label: NTT Manager (Wormhole Bridge)
+    address: "0x5293158bf7a81ED05418DA497a80F7e6Dbf4477E"
+    category: infra
+    note: Burn/mint mode; only active minter on Ethereum
+  - id: wormhole-transceiver
+    label: Wormhole Transceiver
+    address: "0x76ddB3f1dDe02391Ef0A28664499B74C29d18d3E"
+    category: infra
+    note: ERC1967Proxy
+  - id: active-pool
+    label: ActivePool (Mezo)
+    category: infra
+    note: Holds active trove BTC collateral
+  - id: default-pool
+    label: DefaultPool (Mezo)
+    category: infra
+    note: Holds redistributed collateral
+  - id: trove-manager
+    label: TroveManager (Mezo)
+    category: infra
+    note: CDP accounting (Liquity V1 fork)
+  - id: borrower-ops
+    label: BorrowerOperations (Mezo)
+    category: infra
+    note: Open / adjust / close troves
+  - id: stability-pool
+    label: StabilityPool (Mezo)
+    category: infra
+    note: First-loss buffer; 100M PCV bootstrap loan
+  - id: interest-rate-manager
+    label: InterestRateManager (Mezo)
+    category: infra
+    note: Governance-set fixed rates (1-5% APR)
+  - id: price-feed
+    label: PriceFeed (Mezo)
+    category: infra
+    note: Consumes Skip Connect precompile (60s staleness)
+
+  # === Governance ===
+  - id: mezo-multisig
+    label: Mezo Multisig (5-of-9 Safe)
+    address: "0x98D8899c3030741925BE630C710A98B57F397C7a"
+    category: governance
+    note: Owner of MUSD token + bridge; NO timelock; anon signers
+  - id: ntt-pauser
+    label: NTT Pauser Multisig (2-of-4)
+    address: "0x40C7b9612B394212394EA860cACd0e176CA4Ae5B"
+    category: governance
+    note: Low-threshold emergency bridge pause
+  - id: mezo-validators
+    label: Mezo Validator Set
+    category: governance
+    note: veBTC/veMEZO governance on Mezo L1
+
+  # === CDP / Strategy ===
+  - id: trove-cdps
+    label: BTC-Collateralized Troves
+    category: strategy
+    note: Liquity-style CDPs; MCR 110% / CCR 150%
+
+  # === External dependencies ===
+  - id: dep-tbtc
+    label: tBTC (Threshold Network)
+    category: dependency
+    note: Sole collateral asset; decentralized BTC bridge
+  - id: dep-wormhole
+    label: Wormhole Guardian Network
+    category: dependency
+    note: 19 guardians, 13/19 threshold
+  - id: dep-skip-connect
+    label: Skip Connect (BTC/USD Oracle)
+    category: dependency
+    note: Cosmos vote-extension oracle; 9 CEX feeds
+  - id: dep-mezo-chain
+    label: Mezo L1 (Cosmos SDK)
+    category: dependency
+    note: New EVM L1; chain id 31612
+  - id: dep-curve-pool
+    label: Curve MUSD/crv2pool
+    address: "0xB5571E76693ba60110B5811DD650FFefce1C955f"
+    category: dependency
+    note: ~$1.14M; 74% MUSD imbalance
+  - id: dep-uni-pool
+    label: Uniswap V3 MUSD/USDC
+    address: "0x748C05B80d07de9692d976bd3173F301356aB945"
+    category: dependency
+    note: ~$645K; 61% MUSD imbalance
+
+edges:
+  # === Governance: Ethereum side ===
+  - from: mezo-multisig
+    to: MUSD
+    kind: controls
+    label: owner — set mintList / burnList
+  - from: mezo-multisig
+    to: ntt-manager
+    kind: controls
+    label: owner — proxy upgrade
+  - from: mezo-multisig
+    to: wormhole-transceiver
+    kind: controls
+    label: owner
+  - from: ntt-pauser
+    to: ntt-manager
+    kind: holds-role
+    label: pause bridge (2/4)
+
+  # === Governance: Mezo side ===
+  - from: mezo-validators
+    to: interest-rate-manager
+    kind: controls
+    label: veBTC/veMEZO rate-setting
+  - from: mezo-validators
+    to: dep-mezo-chain
+    kind: controls
+    label: consensus / validator set
+
+  # === Mint authority on Ethereum MUSD ===
+  - from: ntt-manager
+    to: MUSD
+    kind: mints
+    label: bridge mint/burn (only active minter)
+
+  # === Bridge flow: Mezo native ↔ Ethereum ===
+  - from: musd-mezo
+    to: ntt-manager
+    kind: routes-through
+    label: Wormhole NTT (burn on Mezo)
+  - from: ntt-manager
+    to: MUSD
+    kind: routes-through
+    label: mint on Ethereum
+  - from: ntt-manager
+    to: wormhole-transceiver
+    kind: routes-through
+    label: cross-chain message
+
+  # === Mezo-side CDP flow ===
+  - from: musd-mezo
+    to: trove-cdps
+    kind: allocates-to
+    label: "100% BTC-backed CDPs"
+  - from: trove-cdps
+    to: active-pool
+    kind: deposits-into
+    label: collateral custody
+  - from: trove-cdps
+    to: default-pool
+    kind: deposits-into
+    label: redistributed debt
+  - from: borrower-ops
+    to: trove-manager
+    kind: manages
+    label: open / adjust / close
+  - from: trove-manager
+    to: active-pool
+    kind: manages
+    label: CDP accounting
+  - from: stability-pool
+    to: musd-mezo
+    kind: routes-through
+    label: liquidation absorption + 100M PCV
+  - from: interest-rate-manager
+    to: trove-manager
+    kind: manages
+    label: fixed rate per loan
+  - from: price-feed
+    to: trove-manager
+    kind: routes-through
+    label: BTC/USD for liquidation
+
+  # === External dependencies ===
+  - from: active-pool
+    to: dep-tbtc
+    kind: deposits-into
+    label: BTC via tBTC bridge
+  - from: wormhole-transceiver
+    to: dep-wormhole
+    kind: routes-through
+    label: guardian signatures
+  - from: price-feed
+    to: dep-skip-connect
+    kind: routes-through
+    label: precompile (Chainlink-compatible)
+  - from: musd-mezo
+    to: dep-mezo-chain
+    kind: routes-through
+    label: hosted on Mezo L1
+  - from: MUSD
+    to: dep-curve-pool
+    kind: routes-through
+    label: secondary DEX exit
+  - from: MUSD
+    to: dep-uni-pool
+    kind: routes-through
+    label: secondary DEX exit

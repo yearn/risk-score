@@ -1,0 +1,249 @@
+slug: fx-fxusd
+title: f(x) Protocol (fxUSD) — Contract Dependency Graph
+chain: ethereum
+
+categories:
+  - id: vault
+    label: Vault / Token
+  - id: strategy
+    label: Collateral / Pool
+  - id: governance
+    label: Governance
+  - id: infra
+    label: Protocol Infra
+  - id: dependency
+    label: External Dependency
+
+nodes:
+  # === Vault / token layer ===
+  - id: fxUSD
+    label: fxUSD (Stablecoin)
+    address: "0x085780639CC2cACd35E474e71f4d000e2405d8f6"
+    category: vault
+    note: TransparentUpgradeableProxy; ~$53.9M supply; 156% CR
+  - id: fxSAVE
+    label: fxSAVE (Auto-Compounding Vault)
+    address: "0x7743e50F534a7f9F1791DdE7dCD89F7783Eefc39"
+    category: vault
+    note: ~$30M; wraps fxSP for stability-pool yield
+  - id: fxSP
+    label: fxSP (Stability Pool)
+    address: "0x65C9A641afCEB9C0E6034e558A319488FA0FA3be"
+    category: vault
+    note: Holds fxUSD + USDC for peg defense
+
+  # === Protocol infra ===
+  - id: pool-manager
+    label: PoolManager (Long, Primary Custody)
+    address: "0x250893CA4Ba5d05626C785e8da758026928FCD24"
+    category: infra
+    note: Custodies ALL V2 collateral (~$84M)
+  - id: short-pool-manager
+    label: ShortPoolManager (sPOSITION)
+    address: "0xaCDc0AB51178d0Ae8F70c1EAd7d3cF5421FDd66D"
+    category: infra
+  - id: peg-keeper
+    label: PegKeeper
+    address: "0x50562fe7e870420F5AAe480B7F94EB4ace2fcd70"
+    category: infra
+    note: Buys fxUSD below peg using USDC
+  - id: configuration
+    label: Configuration
+    address: "0x16b334f2644cc00b85DB1A1efF0C2C395e00C28d"
+    category: infra
+    note: Protocol parameter store
+  - id: gateway-router
+    label: GatewayRouter
+    address: "0xA5e2Ec4682a32605b9098Ddd7204fe84Ab932fE4"
+    category: infra
+    note: User-facing router
+  - id: proxy-admin
+    label: ProxyAdmin
+    address: "0x9b54b7703551d9d0ced177a78367560a8b2edda4"
+    category: infra
+    note: Upgrades all proxies; owned by Timelock since Apr 20 2026
+  - id: reserve-pool
+    label: Reserve Pool
+    address: "0xE93F5DD55eC9bdAbbba5eA88E4b4f3C253ee45Ed"
+    category: infra
+    note: 17.43 wstETH + 0.38 WBTC + 1,229 fxUSD
+
+  # === Governance ===
+  - id: operational-multisig
+    label: Operational Multisig (6-of-9)
+    address: "0x26B2ec4E02ebe2F54583af25b647b1D619e67BbF"
+    category: governance
+    note: PROPOSER + EXECUTOR + CANCELLER on Timelock
+  - id: emergency-multisig
+    label: Emergency Multisig (3-of-4)
+    address: "0x28c921adAC4c1072658eB01a28DA06b5F651eF62"
+    category: governance
+    note: Direct pause on xPOSITION/sPOSITION (no timelock)
+  - id: timelock
+    label: TimelockController (3-day)
+    address: "0x68863fb8855b04509a835082478D6E3D0bE4E61a"
+    category: governance
+    note: Owns ProxyAdmin since Apr 20 2026
+  - id: vefxn
+    label: veFXN (Vote Escrow)
+    address: "0xEC6B8A3F3605B083F7044C0F31f2cac0caf1d469"
+    category: governance
+    note: Snapshot voting power (fxn.eth)
+  - id: fxn-token
+    label: FXN Governance Token
+    address: "0x365AccFCa291e7D3914637ABf1F7635dB165Bb09"
+    category: governance
+
+  # === Strategy / collateral legs ===
+  - id: xsteth-pool
+    label: xstETH Pool (wstETH collateral)
+    address: "0x6ecfa38fee8a5277b91efda204c235814f0122e8"
+    category: strategy
+    note: ~4,452 wstETH (~$12.4M) custody in PoolManager
+  - id: xwbtc-pool
+    label: xWBTC Pool (WBTC collateral)
+    address: "0xab709e26fa6b0a30c119d8c55b887ded24952473"
+    category: strategy
+    note: ~902 WBTC (~$71.8M) custody in PoolManager
+
+  # === External dependencies ===
+  - id: dep-wsteth
+    label: wstETH (Lido)
+    category: dependency
+    note: Primary ETH collateral
+  - id: dep-wbtc
+    label: WBTC
+    category: dependency
+    note: BTC collateral
+  - id: dep-chainlink
+    label: Chainlink (ETH/USD, BTC/USD)
+    category: dependency
+    note: Primary price oracle (critical)
+  - id: dep-curve
+    label: Curve (EMA + USDC/fxUSD)
+    address: "0x5018BE882DccE5E3F2f3B0913AE2096B9b3fB61f"
+    category: dependency
+    note: Peg-monitoring EMA + $7.7M DEX pool
+  - id: dep-aave
+    label: Aave (USDC + wstETH yield)
+    category: dependency
+    note: Stability Pool deploys ≤80% USDC to Aave Core
+  - id: dep-uniswap
+    label: Uniswap V3 (TWAP Oracle)
+    category: dependency
+    note: Validation price source
+
+edges:
+  # === Governance flow ===
+  - from: operational-multisig
+    to: timelock
+    kind: proposes-on
+    label: PROPOSER + EXECUTOR + CANCELLER
+  - from: timelock
+    to: proxy-admin
+    kind: controls
+    label: owner (3d delay)
+  - from: proxy-admin
+    to: fxUSD
+    kind: manages
+    label: TransparentUpgradeableProxy admin
+  - from: proxy-admin
+    to: pool-manager
+    kind: manages
+  - from: proxy-admin
+    to: fxSAVE
+    kind: manages
+  - from: emergency-multisig
+    to: pool-manager
+    kind: holds-role
+    label: pause (no timelock)
+  - from: emergency-multisig
+    to: short-pool-manager
+    kind: holds-role
+    label: pause (no timelock)
+  - from: fxn-token
+    to: vefxn
+    kind: routes-through
+    label: lock for voting power
+  - from: vefxn
+    to: operational-multisig
+    kind: controls
+    label: Snapshot signaling (fxn.eth)
+
+  # === Internal vault flow ===
+  - from: fxSAVE
+    to: fxSP
+    kind: deposits-into
+    label: auto-compounding wrapper
+  - from: fxSP
+    to: fxUSD
+    kind: deposits-into
+    label: peg-defense reserve
+  - from: fxUSD
+    to: peg-keeper
+    kind: routes-through
+    label: Stability-Pool peg defense
+  - from: fxUSD
+    to: gateway-router
+    kind: routes-through
+    label: user mint/redeem entry
+  - from: gateway-router
+    to: pool-manager
+    kind: routes-through
+    label: V2 position entry
+
+  # === Mint authority on fxUSD ===
+  - from: pool-manager
+    to: fxUSD
+    kind: mints
+    label: V2 collateral-backed mint
+  - from: short-pool-manager
+    to: fxUSD
+    kind: mints
+    label: sPOSITION mint
+
+  # === Configuration / reserve wiring ===
+  - from: configuration
+    to: pool-manager
+    kind: manages
+    label: LTV / fees / oracle params
+  - from: reserve-pool
+    to: pool-manager
+    kind: routes-through
+    label: recapitalization buffer
+
+  # === Collateral allocation ===
+  - from: pool-manager
+    to: xsteth-pool
+    kind: allocates-to
+    label: "wstETH ~$12.4M"
+  - from: pool-manager
+    to: xwbtc-pool
+    kind: allocates-to
+    label: "WBTC ~$71.8M"
+
+  # === Strategy → external dependencies ===
+  - from: xsteth-pool
+    to: dep-wsteth
+    kind: deposits-into
+    label: wstETH collateral
+  - from: xwbtc-pool
+    to: dep-wbtc
+    kind: deposits-into
+    label: WBTC collateral
+  - from: fxSP
+    to: dep-aave
+    kind: deposits-into
+    label: USDC ≤80% to Aave Core
+  - from: pool-manager
+    to: dep-chainlink
+    kind: routes-through
+    label: ETH/USD + BTC/USD
+  - from: pool-manager
+    to: dep-uniswap
+    kind: routes-through
+    label: TWAP validation
+  - from: peg-keeper
+    to: dep-curve
+    kind: routes-through
+    label: EMA price + USDC/fxUSD pool

@@ -1,0 +1,191 @@
+slug: spectra-finance
+title: Spectra Finance — Contract Dependency Graph
+chain: ethereum
+
+categories:
+  - id: vault
+    label: Vault / Token
+  - id: strategy
+    label: PT/YT Market
+  - id: governance
+    label: Governance
+  - id: infra
+    label: Protocol Infra
+  - id: dependency
+    label: External Dependency
+
+nodes:
+  # === Vault / token layer ===
+  - id: metavault
+    label: MetaVault (ERC-7540)
+    category: vault
+    note: AsyncVault + MetavaultWrapper; e.g. Gami Spectra USDC (Base), vbUSDC (Katana)
+  - id: pt
+    label: Principal Tokens (PT)
+    category: vault
+    note: Per-market PT tokens; redeem 1:1 at maturity (minus negative yield)
+  - id: yt
+    label: Yield Tokens (YT)
+    category: vault
+    note: Claim on future yield until maturity
+  - id: spectra-token
+    label: SPECTRA (governance token)
+    address: "0x6a89228055c7c28430692e342f149f37462b478b"
+    category: vault
+    note: veSPECTRA for governance + fee share
+
+  # === Internal infra ===
+  - id: registry
+    label: Spectra Registry
+    address: "0x4973b53b300d64ab72147EFF8C9d962f6b1dA02e"
+    category: infra
+    note: Implementation registry; fee config
+  - id: pt-factory
+    label: PrincipalToken Factory (AMBeacon)
+    category: infra
+    note: Permissionless market deployment
+  - id: oracle-factories
+    label: Oracle Factories
+    category: infra
+    note: SpectraPriceOracleFactory, TwapOracleFactoryNG, TwapOracleFactorySNG (12 feed types)
+  - id: zodiac-roles
+    label: Zodiac Roles Module (Curator)
+    category: infra
+    note: Whitelisted curator actions; receivers restricted to SAFE
+  - id: zodiac-delay
+    label: Zodiac Delay Module (Guardian)
+    category: infra
+    note: Time-locked sensitive operations
+  - id: metavault-safe
+    label: MetaVault SAFE (Gnosis)
+    category: infra
+    note: Holds Accountant/Curator/Guardian roles; can pause AsyncVault
+
+  # === Governance ===
+  - id: dao-multisig
+    label: DAO Multisig (3-of-5 Safe)
+    address: "0xDbbfc051D200438dd5847b093B22484B842de9E7"
+    category: governance
+    note: ADMIN (role 0) + UPGRADE (role 1) + roles 2-8,11,14,101; 5 EOAs; getRoleGrantDelay(1)=0
+  - id: access-manager
+    label: AccessManager (OZ 5.0)
+    address: "0x7EA3097E2AF59eA705398544e0f58EdDb7bd1852"
+    category: governance
+    note: Central role authority; 0-second grant/execution delay
+
+  # === Strategy / PT-YT markets ===
+  - id: market-pt-cusd
+    label: PT-cUSD Spectra Market
+    category: strategy
+    note: "Example: cUSD market backing PT-cUSD-29JAN2026"
+  - id: curve-pool
+    label: Curve Pool (PT/IBT)
+    category: strategy
+    note: Per-market Curve AMM pool — twocrypto-ng / stableswap-ng
+
+  # === External dependencies ===
+  - id: dep-curve
+    label: Curve Finance (AMM + price_oracle)
+    category: dependency
+    note: Battle-tested since 2020; CurveOracleLib for TWAP
+  - id: dep-ibt
+    label: Underlying ERC-4626 IBT
+    category: dependency
+    note: Source of yield; PT inherits IBT risk (negative yield)
+  - id: dep-morpho
+    label: Morpho Blue (PT collateral)
+    category: dependency
+    note: e.g. PT-cUSD/USDC market; uses Spectra hybrid oracle
+
+edges:
+  # === Governance ===
+  - from: dao-multisig
+    to: access-manager
+    kind: controls
+    label: ADMIN_ROLE (0) — no delay
+  - from: access-manager
+    to: registry
+    kind: manages
+    label: upgrade authority
+  - from: access-manager
+    to: pt-factory
+    kind: manages
+    label: AMBeacon admin
+  - from: dao-multisig
+    to: spectra-token
+    kind: manages
+    label: 60% swap fees → veSPECTRA voters
+
+  # === MetaVault governance ===
+  - from: metavault-safe
+    to: zodiac-roles
+    kind: manages
+    label: enables curator module
+  - from: metavault-safe
+    to: zodiac-delay
+    kind: manages
+    label: guardian time-lock
+  - from: metavault-safe
+    to: metavault
+    kind: manages
+    label: pause/unpause AsyncVault
+  - from: zodiac-roles
+    to: metavault
+    kind: controls
+    label: curator execTransactionWithRole (whitelisted actions)
+  - from: zodiac-delay
+    to: metavault
+    kind: controls
+    label: guardian-verified ops
+
+  # === MetaVault → PT markets ===
+  - from: metavault
+    to: market-pt-cusd
+    kind: allocates-to
+    label: curator allocation
+  - from: market-pt-cusd
+    to: pt
+    kind: routes-through
+    label: split IBT → PT + YT
+  - from: market-pt-cusd
+    to: yt
+    kind: routes-through
+    label: split IBT → PT + YT
+  - from: pt-factory
+    to: market-pt-cusd
+    kind: deploys
+    label: permissionless market
+  - from: oracle-factories
+    to: market-pt-cusd
+    kind: deploys
+    label: deterministic / TWAP / hybrid
+
+  # === Liquidity routing ===
+  - from: pt
+    to: curve-pool
+    kind: routes-through
+    label: PT/IBT trading
+  - from: curve-pool
+    to: dep-curve
+    kind: deposits-into
+    label: AMM pool
+
+  # === PT backing → underlying IBT ===
+  - from: market-pt-cusd
+    to: dep-ibt
+    kind: deposits-into
+    label: 1 PT = 1 unit at maturity
+
+  # === External oracle consumption ===
+  - from: oracle-factories
+    to: dep-curve
+    kind: routes-through
+    label: price_oracle() for TWAP
+  - from: dep-morpho
+    to: oracle-factories
+    kind: routes-through
+    label: hybrid oracle for PT collateral
+  - from: pt
+    to: dep-morpho
+    kind: deposits-into
+    label: PT as collateral

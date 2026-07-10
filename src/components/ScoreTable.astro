@@ -4,7 +4,7 @@ import type { CategoryScore } from "../lib/parseReport";
 
 interface Props {
   scores: CategoryScore[];
-  finalScore: number;
+  finalScore: number | null;
 }
 
 const { scores, finalScore } = Astro.props;
@@ -69,9 +69,13 @@ function labelPos(cx: number, cy: number, r: number, start: number, end: number)
               <td colspan="2">
                 <strong>Final Score</strong>
               </td>
-              <td style={`color:${scoreColor(finalScore)};font-weight:700;`}>
-                {finalScore.toFixed(1)} / 5.0
-              </td>
+              {finalScore != null ? (
+                <td style={`color:${scoreColor(finalScore)};font-weight:700;`}>
+                  {finalScore.toFixed(1)} / 5.0
+                </td>
+              ) : (
+                <td style="font-weight:700;">N/A</td>
+              )}
             </tr>
           </tfoot>
         </table>
@@ -79,7 +83,7 @@ function labelPos(cx: number, cy: number, r: number, start: number, end: number)
 
       <div class="chart-area">
         <div class="chart-container">
-          <svg viewBox="0 0 200 200" class="pie-chart">
+          <svg width="180" height="180" viewBox="0 0 200 200" class="pie-chart">
             {segments.map((seg) => (
               <path
                 d={arcPath(100, 100, 90, seg.startAngle, seg.endAngle)}
@@ -105,8 +109,15 @@ function labelPos(cx: number, cy: number, r: number, start: number, end: number)
           </svg>
           <div class="chart-tooltip" id="chart-tooltip"></div>
         </div>
-        <div class="risk-tier-badge" style={`background:${scoreColor(finalScore)};color:${scoreTextColor(finalScore)}`}>
-          {scoreTier(finalScore)}
+        <div
+          class="risk-tier-badge"
+          style={
+            finalScore != null
+              ? `background:${scoreColor(finalScore)};color:${scoreTextColor(finalScore)}`
+              : "background:#dc2626;color:#fff"
+          }
+        >
+          {finalScore != null ? scoreTier(finalScore) : "Not Rated"}
         </div>
       </div>
     </div>

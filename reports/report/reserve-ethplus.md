@@ -1,6 +1,6 @@
 # Protocol Risk Assessment: Reserve Protocol
 
-- **Assessment Date:** April 27, 2026
+- **Assessment Date:** May 18, 2026
 - **Token:** ETH+
 - **Chain:** Ethereum Mainnet
 - **Token Address:** [`0xE72B141DF173b999AE7c1aDcbF60Cc9833Ce56a8`](https://etherscan.io/address/0xE72B141DF173b999AE7c1aDcbF60Cc9833Ce56a8)
@@ -10,35 +10,35 @@
 
 ETH+ is a yield-bearing diversified Ethereum LST basket built on Reserve Protocol. It is an over-collateralized RToken backed by a basket of liquid staking tokens. Staking rewards from underlying LSTs accrue to ETH+ holders through an appreciating basket-to-token ratio (`basketsNeeded / totalSupply`). RSR stakers provide a first-loss overcollateralization buffer in exchange for a share of revenue.
 
-**Yield Source:** Ethereum staking rewards from the underlying LSTs (currently 3.41% APY per DefiLlama).
+**Yield Source:** Ethereum staking rewards from the underlying LSTs (currently 3.85% APY per DefiLlama).
 
 **Current Basket (basket nonce 9, set 2026-04-23):**
 | Asset | Issuer | Quantity per BU | ETH per BU | Share of basket |
 |-------|--------|-----------------|------------|-----------------|
-| wstETH | Lido | 0.40556 | 0.5001 | 50.0% |
-| weETH | Ether.fi | 0.20120 | 0.2200 | 22.0% |
-| sfrxETH | Frax | 0.08645 | 0.1000 | 10.0% |
-| rETH | Rocket Pool | 0.08605 | 0.1000 | 10.0% |
-| ETHx | Stader | 0.07355 | 0.0800 | 8.0% |
+| wstETH | Lido | 0.40500 | 0.5001 | 50.0% |
+| weETH | Ether.fi | 0.20094 | 0.2200 | 22.0% |
+| sfrxETH | Frax | 0.08630 | 0.1000 | 10.0% |
+| rETH | Rocket Pool | 0.08595 | 0.1000 | 10.0% |
+| ETHx | Stader | 0.07346 | 0.0800 | 8.0% |
 
 Onchain values fetched from `BasketHandler.quote(1e18, ROUND)` and each LST's exchange-rate function. Total ETH per BU ≈ 1.00.
 
-**Supply / Backing (as of 2026-04-27, block ~24,974,544):**
+**Supply / Backing (as of 2026-05-18, block ~25,124,102):**
 
 | Metric | Value | Source |
 |--------|-------|--------|
-| ETH+ totalSupply | 27,247.85 ETH+ | `totalSupply()` |
-| basketsNeeded | 29,318.59 BU | `RToken.basketsNeeded()` |
-| ETH+ → BU ratio | 1.0760 BU per ETH+ | computed |
-| Backing held by BackingManager | ~29,406 ETH-equivalent | LST balances × exchange rates |
+| ETH+ totalSupply | 21,065.86 ETH+ | `totalSupply()` |
+| basketsNeeded | 22,720.73 BU | `RToken.basketsNeeded()` |
+| ETH+ → BU ratio | 1.0786 BU per ETH+ | computed |
+| Backing held by BackingManager | ~22,803 ETH-equivalent | LST balances × exchange rates |
 | `fullyCollateralized()` | true | `BasketHandler.fullyCollateralized()` |
 | `status()` | 0 (SOUND) | `BasketHandler.status()` |
 | Trading paused / Issuance paused / Frozen | false / false / false | `Main` |
 
 **TVL:**
-- ETH+ alone: **~$66.98M** (DefiLlama yield pool, ETH price $2,293)
-- Reserve Protocol total: $100M (DefiLlama, peak $530M on 2025-09-13)
-- Net change since prior assessment (2025-12-22): **−38%** in USD ($108M → $67M), **−25%** in ETH terms (36,246 → 27,248 ETH+)
+- ETH+ alone: **~$47.59M** (DefiLlama yield pool, ETH price $2,102)
+- Reserve Protocol total: $77.55M on Ethereum / ~$87M total (DefiLlama, peak $530M on 2025-09-13)
+- Net change since last refresh (2026-04-27): **−29%** in USD ($67.0M → $47.6M), **−22.7%** in ETH+ (27,248 → 21,066). Cumulatively since 2025-12-22 assessment: **−56%** USD ($108M → $47.6M), **−42%** ETH+ (36,246 → 21,066) — supply contraction continues; current TVL is ~19% above the **$40M reassessment trigger**
 
 **Links:**
 - [Reserve Protocol Documentation](https://docs.reserve.org/introduction)
@@ -87,23 +87,23 @@ Reserve Protocol is **not** enrolled in the SEAL Safe Harbor agreement (verified
 **Time in Production:**
 - Reserve Protocol RTokens: live since 2023-04 (~3 years)
 - ETH+ specifically: deployed in basket nonce 1 at block 17,086,178 (2023-04-26), ~3 years
-- Current architecture upgraded to v4.2.0 on 2026-04-23 (4 days before this assessment) — material change worth flagging
+- Current architecture upgraded to v4.2.0 on 2026-04-23 (25 days before this assessment) — still inside the 30-day post-upgrade monitoring window, no incidents observed
 
 **Past Security Incidents:**
 - No exploits or hacks on Reserve Protocol or ETH+
 - No collateral default events triggered for ETH+
-- StRSR exchange rate is monotonically increasing (1.162 RSR/stRSR currently) — no RSR has been seized to cover losses
+- StRSR exchange rate is monotonically increasing (1.1654 RSR/stRSR currently, up from 1.162 at prior refresh) — no RSR has been seized to cover losses
 
 **Peg / Basket Stability:**
-- ETH+ has no fixed peg to ETH; it tracks the appreciating basket value (currently 1.076 ETH per ETH+)
+- ETH+ has no fixed peg to ETH; it tracks the appreciating basket value (currently 1.079 ETH per ETH+)
 - No significant deviations from basket value have been observed
 - Direct redemption provides a hard floor
 
 **TVL History:**
-- Peak: ~36,246 ETH (~$108M) at 2025-12-22
-- Today: 27,248 ETH+ (~$67M) — supply contracted ~25% in ~4 months
-- Reserve total TVL peaked at $530M on 2025-09-13, now $100M
-- The supply contraction is large enough to warrant monitoring, but the protocol remains fully collateralized and `status()` is SOUND
+- Peak: ~36,246 ETH+ (~$108M) at 2025-12-22
+- Today: 21,066 ETH+ (~$47.6M) — supply has contracted ~42% in ~5 months, including ~22.7% in the last 21 days
+- Reserve total TVL peaked at $530M on 2025-09-13, now ~$87M ($77.55M Ethereum + $2.34M Base + ~$10k Arbitrum + staking)
+- The supply contraction is large enough to warrant continued monitoring; protocol remains fully collateralized and `status()` is SOUND. Current ETH+ TVL is within 19% of the $40M reassessment trigger
 
 **Team Track Record:**
 - Reserve has been building since 2018; previously launched RSV (USD-pegged stablecoin)
@@ -135,12 +135,12 @@ Reserve Protocol is **not** enrolled in the SEAL Safe Harbor agreement (verified
 **Minting:**
 - Permissionless. Anyone can call `RToken.issue()` / `issueTo()`
 - Atomic in a single transaction; users deposit the proportional basket of LSTs (or a single asset using the Reserve "zap" router)
-- Subject to issuance throttle: `amtRate = 1,700 ETH+/hr`, `pctRate = 10%/hr`. Effective hourly cap is the larger of the two; `issuanceAvailable() = 2,724.78 ETH+` at the time of writing
+- Subject to issuance throttle: `amtRate = 1,700 ETH+/hr`, `pctRate = 10%/hr`. Effective hourly cap is the larger of the two; `issuanceAvailable() = 2,106.59 ETH+` at the time of writing
 - Backing is **required** to mint. There is no admin-controlled mint function; `MAIN` cannot mint ETH+ directly, and there is no role labeled "minter"
 
 **Redemption:**
 - Permissionless. `RToken.redeem(amount)` returns the prorata basket (or a custom basket if redeeming during a basket switch via `redeemCustom`)
-- Throttle: `amtRate = 2,000 ETH+/hr`, `pctRate = 12.5%/hr`. `redemptionAvailable() = 3,405.98 ETH+` currently
+- Throttle: `amtRate = 2,000 ETH+/hr`, `pctRate = 12.5%/hr`. `redemptionAvailable() = 2,633.23 ETH+` currently
 - A full redemption of the entire supply would take ~8 hours under the current pctRate cap
 - No fees, no cooldown. Redemption is paused only if `tradingPaused` or system frozen
 
@@ -152,15 +152,15 @@ Reserve Protocol is **not** enrolled in the SEAL Safe Harbor agreement (verified
 
 **On-Chain Collateralization:** Yes — 100%, fully onchain.
 - All collateral is held in the `BackingManager` ([`0x608e1e01EF072c15E5Da7235ce793f4d24eCa67B`](https://etherscan.io/address/0x608e1e01EF072c15E5Da7235ce793f4d24eCa67B))
-- Verified directly: backing manager holds ~11,925 wstETH, ~5,915 weETH, ~2,543 sfrxETH, ~2,530 rETH, ~2,163 ETHx → ~29,406 ETH-equivalent vs. 27,248 ETH+ supply
+- Verified directly: backing manager holds ~9,233 wstETH, ~4,581 weETH, ~1,970 sfrxETH, ~1,959 rETH, ~1,675 ETHx → ~22,803 ETH-equivalent vs. 21,066 ETH+ supply
 - `BasketHandler.fullyCollateralized()` returns `true`
 
 **Collateral Quality:** High. All five collateral assets are established Ethereum LSTs, each with independent audits, Chainlink-style price feeds (or vetted alternates), and active markets.
 
 **Over-Collateralization (RSR buffer):**
-- StRSR contract holds **~898M RSR** as a first-loss buffer
-- At the current RSR price (~$0.00180), this is **~$1.61M of buffer for $66.98M of ETH+ TVL → ~2.4% OC**
-- This is in line with LlamaRisk's 2024 finding (2%) and remains the protocol's main material weakness. The buffer scales with RSR price, not ETH+ TVL
+- StRSR contract holds **~794M RSR** as a first-loss buffer (down ~12% from ~898M at the prior refresh)
+- At the current RSR price (~$0.001735), this is **~$1.38M of buffer for $47.59M of ETH+ TVL → ~2.90% OC**
+- The OC ratio is up from ~2.4% (prior refresh) because ETH+ TVL contracted faster than the RSR buffer in USD terms; still close to LlamaRisk's 2024 finding (2%) and remains the protocol's main material weakness. The buffer scales with RSR price, not ETH+ TVL
 
 **Default Handling:**
 - `BasketHandler.refresh()` checks each collateral's price/peg every interaction
@@ -195,20 +195,20 @@ Reserve Protocol is **not** enrolled in the SEAL Safe Harbor agreement (verified
 
 **Direct Redemption:** Always available (subject to throttle). 1:1 with the basket.
 
-**On-Chain DEX Liquidity (per DefiLlama, 2026-04-27):**
+**On-Chain DEX Liquidity (per DefiLlama, 2026-05-18):**
 
 | Pool | TVL |
 |------|-----|
-| Curve ETH+/WETH | $12.5M |
-| Convex ETH+/WETH (boosted Curve) | $7.3M |
-| Beefy ETH+/WETH | $5.6M |
-| StakeDAO ETH+/WETH | $5.4M |
-| Curve ETH+/EUSD-RSR | $2.6M |
-| Curve ETH+/ETH | $0.5M |
-| Uniswap v3 WETH/ETH+ | $1.0M |
-| Morpho Blue ETH+ | $3.9M |
+| Curve ETH+/WETH | $12.6M |
+| Convex ETH+/WETH (boosted Curve) | $7.8M |
+| Beefy ETH+/WETH | $5.8M |
+| StakeDAO ETH+/WETH | $5.1M |
+| Curve ETH+/EUSD-RSR | $2.5M |
+| Curve ETH+/ETH | $0.4M |
+| Uniswap v3 WETH/ETH+ | $0.9M |
+| Morpho Blue ETH+ | $2.3M |
 
-The primary spot pool (Curve ETH+/WETH) has ~$12.5M TVL. With Convex/Beefy/StakeDAO wrappers around the same Curve pool, the underlying Curve LP TVL is the binding liquidity for direct DEX exits.
+The primary spot pool (Curve ETH+/WETH) has ~$12.6M TVL. With Convex/Beefy/StakeDAO wrappers around the same Curve pool, the underlying Curve LP TVL is the binding liquidity for direct DEX exits. Morpho Blue ETH+ collateral exposure has contracted from $3.9M to $2.3M since the prior refresh.
 
 **Slippage Analysis (rule-of-thumb):**
 - <$100k: Minimal (<0.5%) via direct redemption
@@ -216,12 +216,12 @@ The primary spot pool (Curve ETH+/WETH) has ~$12.5M TVL. With Convex/Beefy/Stake
 - >$1M: Direct redemption preferred; selling components on their own deep markets is the cleanest exit
 
 **Withdrawal Restrictions:**
-- Throttle limits redemption to ~12.5% of supply per hour (~3,406 ETH+ now)
+- Throttle limits redemption to ~12.5% of supply per hour (~2,633 ETH+ now)
 - A full exit of the entire ETH+ supply would take ~8 hours
 
 **Historical Liquidity:**
 - No liquidity-stress incidents recorded
-- DEX liquidity has tracked the supply contraction since Q1 2026
+- DEX liquidity has tracked the supply contraction since Q1 2026; primary Curve pool TVL is roughly flat over the last 3 weeks
 
 ## Centralization & Control Risks
 
@@ -243,7 +243,7 @@ The primary spot pool (Curve ETH+/WETH) has ~$12.5M TVL. With Convex/Beefy/Stake
 - Voting delay: 172,800s (2 days)
 - Voting period: 259,200s (3 days)
 - Quorum: 10% of staked RSR (`quorumNumerator/quorumDenominator = 10/100`)
-- Proposal threshold: 76,720.92 stRSR
+- Proposal threshold: 66,236.65 stRSR (down from 76,720.92 at the prior refresh — this is a percentage of stRSR supply, so it tracks RSR un-staking)
 
 **End-to-end change cadence:** ~2 days (voting delay) + 3 days (vote) + 3 days (timelock) = **~8 days** from proposal to execution, assuming quorum.
 
@@ -257,7 +257,7 @@ The primary spot pool (Curve ETH+/WETH) has ~$12.5M TVL. With Convex/Beefy/Stake
 | LONG_FREEZER | Guardian Safe `0xd5fe2780…` | Freeze for an extended period (governance-set) |
 | Timelock CANCELLER | Guardian Safe `0xd5fe2780…` | Cancel queued timelock proposals |
 
-**Finding:** The deployer EOA [`0xe3e34fa93575af41bef3476236e1a3cdb3f60b85`](https://etherscan.io/address/0xe3e34fa93575af41bef3476236e1a3cdb3f60b85) **still holds the PAUSER role** on `Main`. It was granted at deployment (block 17,086,220) and was not revoked in the 4.2.0 upgrade transaction. PAUSER cannot freeze the system or seize funds, but a single private-key compromise here would let an attacker pause issuance and trading, disrupting the protocol. The condition has existed since 2023 deployment with no incident; documented here for the role-holder watch list rather than scored as a discrete penalty.
+**Finding:** The deployer EOA [`0xe3e34fa93575af41bef3476236e1a3cdb3f60b85`](https://etherscan.io/address/0xe3e34fa93575af41bef3476236e1a3cdb3f60b85) **still holds the PAUSER role** on `Main` (re-verified onchain on 2026-05-18 via `hasRole`). It was granted at deployment (block 17,086,220) and was not revoked in the 4.2.0 upgrade transaction. PAUSER cannot freeze the system or seize funds, but a single private-key compromise here would let an attacker pause issuance and trading, disrupting the protocol. The condition has existed since 2023 deployment with no incident; documented here for the role-holder watch list rather than scored as a discrete penalty.
 
 **Old governance (pre-upgrade, no longer authoritative):** the previous timelock [`0x5f4A10aE2fF68bE3cdA7d7FB432b10C6BFA6457B`](https://etherscan.io/address/0x5f4A10aE2fF68bE3cdA7d7FB432b10C6BFA6457B) was revoked from OWNER, PAUSER, SHORT_FREEZER, and LONG_FREEZER at block 24,944,370.
 
@@ -324,7 +324,7 @@ The primary spot pool (Curve ETH+/WETH) has ~$12.5M TVL. With Convex/Beefy/Stake
 | Guardian Safe | `0xd5fe2780eb882d1da78f2136b81c2a4395488c98` | Owner changes, threshold changes, all executions (yearn safe-monitoring) |
 | Main (`hasRole`) | `0xb6A7d481719E97e142114e905E86a39a2Fa0dfD2` | `RoleGranted`, `RoleRevoked` for OWNER / PAUSER / SHORT_FREEZER / LONG_FREEZER |
 
-**Action:** add to [yearn/monitoring-scripts-py](https://github.com/yearn/monitoring-scripts-py). Recommended cadence: hourly poll for queued timelock calls; immediate alert on any RoleGranted/Revoked or Guardian Safe execution.
+**Action:** add to [yearn/monitoring](https://github.com/yearn/monitoring). Recommended cadence: hourly poll for queued timelock calls; immediate alert on any RoleGranted/Revoked or Guardian Safe execution.
 
 **Important:** the deployer EOA `0xe3e34fa93575af41bef3476236e1a3cdb3f60b85` still has PAUSER. Add to the role-watch list and alert on any transaction from it.
 
@@ -346,7 +346,7 @@ Recommended cadence: hourly.
 | StRSR | [`0xffa151Ad0A0e2e40F39f9e5E9F87cF9E45e819dd`](https://etherscan.io/address/0xffa151Ad0A0e2e40F39f9e5E9F87cF9E45e819dd) | `exchangeRate()` — alert on any decrease (RSR seizure) |
 | RSR balance held by StRSR | `RSR.balanceOf(StRSR)` | track absolute value; alert on >10% drop |
 
-OC ratio = `(RSR_balance × RSR_price) / ETH+_TVL` — currently ~2.4%. Alert if it drops below 1%.
+OC ratio = `(RSR_balance × RSR_price) / ETH+_TVL` — currently ~2.90%. Alert if it drops below 1%.
 
 ### 4. Throttle Monitoring
 
@@ -367,7 +367,7 @@ ERC-1967 implementation slot (`0x360894a13ba1a3210667c828492db98dca3e2076cc3735a
                            │      │ • 2d voting delay                │
                            │      │ • 3d voting period               │
                            │      │ • 10% StRSR quorum               │
-                           │      │ • 76,720 stRSR proposal threshold│
+                           │      │ • 66,237 stRSR proposal threshold│
                            │      └──────────────────────────────────┘
                            │ proposals
                            ▼
@@ -409,7 +409,7 @@ ERC-1967 implementation slot (`0x360894a13ba1a3210667c828492db98dca3e2076cc3735a
         │           │      │   Lido / Ether.fi / Rocket Pool │
         │           │      │   / Frax / Stader               │
         │           │      └─────────────────────────────────┘
-        │           │ provides 1st-loss capital (≈2.4% OC)
+        │           │ provides 1st-loss capital (≈2.90% OC)
         │           ▼
         │      ┌──────────────┐
         └─────▶│ ETH+ holders │
@@ -436,11 +436,11 @@ ERC-1967 implementation slot (`0x360894a13ba1a3210667c828492db98dca3e2076cc3735a
 
 ### Key Risks
 
-- **Recently rotated governance (4 days old).** The v4.2.0 upgrade and new timelock/governor went live on 2026-04-23. Track record on the new governance is by definition <1 week
+- **Recently rotated governance (25 days old).** The v4.2.0 upgrade and new timelock/governor went live on 2026-04-23. Inside the 30-day post-deployment monitoring window; no incidents observed
 - **Guardian Safe concentration.** A 3-of-6 multisig can pause, freeze, and cancel governance proposals — the binding constraint inside any 3-day timelock window
-- **Deployer EOA still holds PAUSER role.** In place since the 2023 deployment without incident; bounded (cannot freeze redemption, cannot seize funds) but a single private-key compromise could disrupt issuance/trading. Tracked on the role-holder watch list
-- **Thin RSR overcollateralization (~2.4%).** The first-loss buffer is small relative to TVL and scales with RSR price, not ETH+ TVL
-- **TVL contraction.** Supply has dropped 25% in ETH terms and 38% in USD since the prior assessment, with no obvious onchain cause — worth understanding before increasing exposure
+- **Deployer EOA still holds PAUSER role.** Re-verified onchain on 2026-05-18; in place since the 2023 deployment without incident; bounded (cannot freeze redemption, cannot seize funds) but a single private-key compromise could disrupt issuance/trading. Tracked on the role-holder watch list
+- **Thin RSR overcollateralization (~2.90%).** Up from 2.4% at the prior refresh, but only because TVL contracted faster than the RSR buffer; the first-loss buffer remains small in absolute terms (~$1.38M) and scales with RSR price, not ETH+ TVL
+- **Sustained TVL contraction.** Supply has dropped ~42% in ETH+ and ~56% in USD since the 2025-12-22 assessment, with another −22.7% in the 21 days between refreshes. Current TVL ($47.6M) is within 19% of the $40M reassessment trigger; no obvious onchain cause — worth understanding before increasing exposure
 
 ### Critical Risks
 
@@ -481,7 +481,7 @@ All gates pass. Proceed to category scoring.
 - 3-day timelock — meets the rubric Score-1 bar of "7+ days" only when combined with the 5-day governance vote (~8 days end-to-end)
 - Guardian Safe is 3-of-6 (rubric Score 4 says "3/5 threshold" for governance-controlled multisigs; this is only a guardian, with cancel/pause but not upgrade)
 - Deployer EOA holds PAUSER — not catastrophic but a real centralization vector
-- New governance is 4 days old — not yet battle-tested
+- New governance is 25 days old — still inside the 30-day monitoring window, no incidents observed
 
 **Subcategory B — Programmability:** 2
 - Mostly programmatic with governance-set parameters (basket, throttles, oracle plugins)
@@ -501,7 +501,7 @@ All gates pass. Proceed to category scoring.
 **Subcategory A — Collateralization:** 2
 - 100% onchain backing ✓
 - Five high-quality DeFi LSTs (rubric Score 2: "high-quality DeFi assets, LSTs, major LPs")
-- RSR over-collateralization buffer is thin (~2.4%) but exists
+- RSR over-collateralization buffer is thin (~2.90%) but exists
 
 **Subcategory B — Provability:** 1
 - Reserves fully onchain, real-time verifiable
@@ -542,7 +542,7 @@ Base score 2 (rubric: ">$5M, <1% slippage, 1-3 days"); +0.5 for throttle ≈ **2
 
 **Modifiers:**
 - Protocol live >2 years with no incidents: **−0.5** would apply, but offset by:
-  - Major version upgrade (v4.2.0) and full governance rotation 4 days before assessment: **+0.5** for unproven new governance state
+  - Major version upgrade (v4.2.0) and full governance rotation 25 days before assessment: **+0.5** for the still-young (under 30-day) post-rotation governance state
 - Net modifier: **0**
 
 **Final score (rounded): 1.8**
@@ -564,9 +564,9 @@ The deployer EOA holding PAUSER is documented as a role-holder watch item, not a
 ### Risk Tier: **LOW RISK**
 
 **Recommendation:** ✅ **APPROVED** for Yearn integration with standard monitoring, conditional on:
-1. Tracking the new (v4.2.0) governance for at least 30 days post-deployment for unexpected behavior
+1. Completing the 30-day post-v4.2.0 monitoring window (5 more days from this refresh); no incidents observed to date
 2. Adding all governance / role / backing checks listed in **Monitoring** to yearn's monitoring repo, including the EOA pauser address
-3. Watching the supply contraction trend; reassess if TVL drops below $40M
+3. Watching the supply contraction trend closely — TVL now $47.6M, within 19% of the $40M reassessment trigger; trigger a full reassessment immediately on breach
 
 ---
 

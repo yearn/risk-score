@@ -3,6 +3,7 @@ import BaseLayout from "../../layouts/BaseLayout.astro";
 import ScoreBadge from "../../components/ScoreBadge.astro";
 import ScoreTable from "../../components/ScoreTable.astro";
 import { getAllSlugs, getReportBySlug } from "../../lib/reports";
+import { hasGraph } from "../../lib/graph";
 import { scoreTier } from "../../lib/colors";
 
 export function getStaticPaths() {
@@ -12,7 +13,11 @@ export function getStaticPaths() {
 const { slug } = Astro.params;
 const report = getReportBySlug(slug!);
 if (!report) return Astro.redirect("/reports/");
-const ogDescription = `${report.name} — Score: ${report.finalScore.toFixed(1)}/5.0 (${scoreTier(report.finalScore)}). ${report.token} on ${report.chain}.`;
+const ogDescription =
+  report.finalScore != null
+    ? `${report.name} — Score: ${report.finalScore.toFixed(1)}/5.0 (${scoreTier(report.finalScore)}). ${report.token} on ${report.chain}.`
+    : `${report.name} — ${report.status ?? "Not Rated"} (Not Rated). ${report.token} on ${report.chain}.`;
+const graphAvailable = hasGraph(slug!);
 
 const reportIssueUrl = (() => {
   const title = `Report Inaccuracy: ${report.name}`;
@@ -40,9 +45,21 @@ const reportIssueUrl = (() => {
 >
   <a href="/reports/" class="back-link">&larr; All Reports</a>
 
-  {report.warning && (
-    <div class="warning-banner">
-      <strong>&#9888; {report.warning}</strong>
+  <div class:list={["assessment-badge", report.isUpdated ? "updated" : "new"]}>
+    <span class="dot" aria-hidden="true"></span>
+    <strong>{report.isUpdated ? "Updated report" : "New report"}</strong>
+  </div>
+
+  {report.status && (
+    <div class:list={["status-banner", report.statusKind]}>
+      <strong>
+        &#9888; {report.status}
+        {report.statusKind === "terminal"
+          ? " — Not Rated (superseded by a terminal event)"
+          : report.status === "GATED"
+            ? " — score capped by a critical gate"
+            : ""}
+      </strong>
     </div>
   )}
 
@@ -54,29 +71,73 @@ const reportIssueUrl = (() => {
         )}
         <h1>{report.name}</h1>
       </div>
-      <ScoreBadge score={report.finalScore} size="large" />
+      {report.finalScore != null ? (
+        <ScoreBadge score={report.finalScore} size="large" />
+      ) : (
+        <span class="na-badge">Not Rated</span>
+      )}
     </div>
     <div class="meta">
       <span>{report.token}</span>
       <span class="sep">/</span>
       <span>{report.chain}</span>
       <span class="sep">/</span>
-      <span>{report.date}</span>
+      {report.isUpdated ? (
+        <>
+          <span>Latest: {report.latestDate}</span>
+          {report.originalDate !== report.latestDate && (
+            <>
+              <span class="sep">/</span>
+              <span>Original: {report.originalDate}</span>
+            </>
+          )}
+        </>
+      ) : (
+        <span>{report.latestDate}</span>
+      )}
     </div>
-    <a
-      href={`https://github.com/yearn/risk-score/blob/master/reports/report/${report.slug}.md`}
-      class="github-link"
-      target="_blank"
-      rel="noopener noreferrer"
-    >
-      View full report on GitHub &rarr;
-    </a>
+    <div class="header-links">
+      <a
+        href={`https://github.com/yearn/risk-score/blob/master/reports/report/${report.slug}.md`}
+        class="github-link"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        View full report on GitHub &rarr;
+      </a>
+      {graphAvailable && (
+        <a href={`/graph/${report.slug}/`} class="graph-link">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="5" cy="6" r="2.5"/>
+            <circle cx="19" cy="6" r="2.5"/>
+            <circle cx="12" cy="18" r="2.5"/>
+            <line x1="6.8" y1="7.6" x2="10.2" y2="16.4"/>
+            <line x1="17.2" y1="7.6" x2="13.8" y2="16.4"/>
+            <line x1="7.5" y1="6" x2="16.5" y2="6"/>
+          </svg>
+          <span>View dependency graph</span>
+          <span class="arrow" aria-hidden="true">&rarr;</span>
+        </a>
+      )}
+    </div>
   </div>
 
-  <section class="section">
-    <h2>Score Breakdown</h2>
-    <ScoreTable scores={report.scoreTable} finalScore={report.finalScore} />
-  </section>
+  {report.finalScore != null ? (
+    <section class="section">
+      <h2>Score Breakdown</h2>
+      <ScoreTable scores={report.scoreTable} finalScore={report.finalScore} />
+    </section>
+  ) : (
+    <section class="section">
+      <h2>Score</h2>
+      <div class="not-rated-note">
+        <strong>Not Rated{report.status ? ` — ${report.status}` : ""}.</strong>
+        This assessment sits off the 1–5 risk scale: a terminal event (exploit
+        or wind-down) supersedes a forward-looking risk score. See the Risk
+        Summary and full report below for details.
+      </div>
+    </section>
+  )}
 
   <section class="section">
     <h2>Overview</h2>
@@ -98,6 +159,32 @@ const reportIssueUrl = (() => {
     <div class="prose" set:html={report.fullReportHtml} />
   </details>
 
+  {report.history.length > 0 && (
+    <section class="section">
+      <h2>Assessment History</h2>
+      <div class="history-wrap">
+        <table class="history-table">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Score</th>
+              <th>Notes</th>
+            </tr>
+          </thead>
+          <tbody>
+            {report.history.map((h) => (
+              <tr>
+                <td class="history-date">{h.date}</td>
+                <td class="history-score">{h.score}</td>
+                <td>{h.notes}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </section>
+  )}
+
   <div class="report-footer">
     <a href={reportIssueUrl} class="report-issue-btn" target="_blank" rel="noopener noreferrer">
       <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
@@ -110,7 +197,44 @@ const reportIssueUrl = (() => {
 </BaseLayout>
 
 <style>
-  .warning-banner {
+  .assessment-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+    padding: 0.4rem 0.85rem;
+    border-radius: 999px;
+    font-size: 0.85rem;
+    line-height: 1.3;
+    border: 1px solid var(--border);
+    background: var(--bg-secondary);
+    color: var(--text-secondary);
+  }
+  .assessment-badge strong {
+    color: var(--text-primary);
+  }
+  .assessment-badge .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    background: var(--text-secondary);
+  }
+  .assessment-badge.updated {
+    border-color: color-mix(in srgb, var(--brand-blue) 40%, transparent);
+    background: color-mix(in srgb, var(--brand-blue) 10%, transparent);
+  }
+  .assessment-badge.updated .dot {
+    background: var(--brand-blue);
+  }
+  .assessment-badge.new {
+    border-color: color-mix(in srgb, #16a34a 40%, transparent);
+    background: color-mix(in srgb, #16a34a 10%, transparent);
+  }
+  .assessment-badge.new .dot {
+    background: #16a34a;
+  }
+  .status-banner {
     background: #dc2626;
     color: #fff;
     padding: 0.75rem 1rem;
@@ -118,6 +242,32 @@ const reportIssueUrl = (() => {
     margin-bottom: 1rem;
     font-size: 1rem;
     text-align: center;
+  }
+  .status-banner.caution {
+    background: #b45309;
+  }
+  .na-badge {
+    display: inline-flex;
+    align-items: center;
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--text-secondary);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0.4rem 0.8rem;
+  }
+  .not-rated-note {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-left: 3px solid #dc2626;
+    border-radius: 8px;
+    padding: 1rem 1.25rem;
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+    line-height: 1.55;
+  }
+  .not-rated-note strong {
+    color: var(--text-primary);
   }
   .back-link {
     display: inline-block;
@@ -158,15 +308,49 @@ const reportIssueUrl = (() => {
     margin: 0 0.25rem;
     opacity: 0.4;
   }
+  .header-links {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 1rem;
+    margin-top: 0.75rem;
+  }
   .github-link {
     display: inline-block;
-    margin-top: 0.75rem;
     font-size: 1.1rem;
     font-weight: 600;
     color: var(--brand-blue);
   }
   .github-link:hover {
     text-decoration: underline;
+  }
+  .graph-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 0.9rem;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--brand-blue);
+    background: color-mix(in srgb, var(--brand-blue) 10%, transparent);
+    border: 1px solid color-mix(in srgb, var(--brand-blue) 35%, transparent);
+    border-radius: 999px;
+    transition: background 0.2s, border-color 0.2s, transform 0.2s;
+  }
+  .graph-link:hover {
+    background: color-mix(in srgb, var(--brand-blue) 18%, transparent);
+    border-color: var(--brand-blue);
+    text-decoration: none;
+    transform: translateY(-1px);
+  }
+  .graph-link svg {
+    flex-shrink: 0;
+  }
+  .graph-link .arrow {
+    transition: transform 0.2s;
+  }
+  .graph-link:hover .arrow {
+    transform: translateX(2px);
   }
   .section {
     margin-bottom: 2.5rem;
@@ -272,6 +456,42 @@ const reportIssueUrl = (() => {
     font-weight: 600;
     font-size: 0.75rem;
     text-transform: uppercase;
+  }
+  .history-wrap {
+    overflow-x: auto;
+  }
+  .history-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+  }
+  .history-table th,
+  .history-table td {
+    padding: 0.6rem 0.75rem;
+    border-bottom: 1px solid var(--border);
+    text-align: left;
+    vertical-align: top;
+  }
+  .history-table th {
+    background: var(--bg-secondary);
+    color: var(--text-secondary);
+    font-weight: 600;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+  }
+  .history-date {
+    white-space: nowrap;
+    color: var(--text-secondary);
+  }
+  .history-score {
+    white-space: nowrap;
+    font-weight: 700;
+    color: var(--text-primary);
+    font-variant-numeric: tabular-nums;
+  }
+  .history-table tbody tr:last-child td {
+    border-bottom: none;
   }
   .report-footer {
     margin-top: 1rem;
