@@ -30,8 +30,13 @@ nodes:
     note: Mint/allocation vault for brBTC; redemption details not publicly documented
   - id: brBTC-proxyadmin
     label: brBTC ProxyAdmin
-    address: "0x9f63269196a8828f05f2e49d1078ea7c44e7f002"
+    address: "0x9F63269196A8828f05F2E49D1078eA7C44e7f002"
     category: governance
+  - id: ccip-token-pool
+    label: CCIP BurnMintTokenPool
+    address: "0x512c2Ddf5f7F48a6c44cFF73CD8d7edEC5e6b0d8"
+    category: infra
+    note: Chainlink CCIP token pool 1.5.1; holds MINTER_ROLE on brBTC; owner is Bedrock admin Safe
 
   # === Governance ===
   - id: bedrock-safe
@@ -43,7 +48,7 @@ nodes:
     label: brBTC Ops Safe (3/4)
     address: "0x1f3c54ec74f1a5c0BC19af04dadFa1A677231aC9"
     category: governance
-    note: DEFAULT_ADMIN_ROLE on brBTC Vault; no guard/module in original verification
+    note: DEFAULT_ADMIN_ROLE on brBTC Vault and brBTC token; can grant MINTER_ROLE with no timelock; no guard/module in original verification
 
   # === Strategy / custody layer ===
   - id: brBTC-restaking
@@ -66,7 +71,12 @@ nodes:
   - id: dep-chainlink-ccip
     label: Chainlink CCIP
     category: dependency
-    note: Documented cross-chain route for brBTC
+    note: Documented cross-chain route for brBTC (via BurnMintTokenPool)
+  - id: free-tunnel
+    label: Free Tunnel Bridge
+    address: "0x70aF4743F85E5E74E3b6dDFa38926c0a762Ad21C"
+    category: dependency
+    note: Third-party Free Tunnel bridge (TunnelContract behind DelayedERC1967Proxy); holds MINTER_ROLE on brBTC; not documented in Bedrock bridge docs
   - id: dep-babylon
     label: Babylon Labs
     category: dependency
@@ -98,13 +108,17 @@ edges:
   - { from: brBTC-proxyadmin, to: brBTC, kind: manages, label: token upgrade authority }
   - { from: brBTC-proxyadmin, to: brBTC-vault, kind: manages, label: vault upgrade authority }
   - { from: brBTC-safe, to: brBTC-vault, kind: holds-role, label: DEFAULT_ADMIN_ROLE }
+  - { from: brBTC-safe, to: brBTC, kind: holds-role, label: "DEFAULT_ADMIN_ROLE (can grant MINTER_ROLE, no timelock)" }
+  - { from: bedrock-safe, to: ccip-token-pool, kind: controls, label: owner() }
 
   # === Mint / receipt issuance ===
-  - { from: brBTC-vault, to: brBTC, kind: mints, label: collateralized mint via brVault }
+  - { from: brBTC-vault, to: brBTC, kind: mints, label: MINTER_ROLE (collateralized mint via brVault) }
+  - { from: ccip-token-pool, to: brBTC, kind: mints, label: MINTER_ROLE (CCIP burn/mint) }
+  - { from: free-tunnel, to: brBTC, kind: mints, label: "MINTER_ROLE (bridge mint, undocumented)" }
 
   # === Capital flow ===
-  - { from: brBTC, to: brBTC-vault, kind: routes-through, label: mint/redeem }
-  - { from: brBTC-vault, to: brBTC-restaking, kind: allocates-to, label: multi-venue BTC restaking }
+  - { from: brBTC, to: brBTC-vault, kind: routes-through, label: mint (redeem TODO) }
+  - { from: brBTC-vault, to: brBTC-restaking, kind: allocates-to, label: "% split TODO" }
   - { from: brBTC-vault, to: dep-uniBTC, kind: routes-through, label: accepted input asset }
   - { from: brBTC-vault, to: dep-wrapped-btc, kind: routes-through, label: accepted input assets }
   - { from: brBTC-restaking, to: dep-babylon, kind: deposits-into, label: restaking venue }
@@ -116,3 +130,4 @@ edges:
 
   # === Bridge dependency ===
   - { from: brBTC, to: dep-chainlink-ccip, kind: routes-through, label: cross-chain path }
+  - { from: ccip-token-pool, to: dep-chainlink-ccip, kind: routes-through, label: CCIP lane }
