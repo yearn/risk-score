@@ -52,7 +52,7 @@ This report is scoped to **uniBTC only**. Bedrock brBTC is a separate codebase a
 |------|---------|-----------|----------|
 | uniBTC ops Safe | [`0xC9dA980fFABbE2bbe15d4734FDae5761B86b5Fc3`](https://etherscan.io/address/0xC9dA980fFABbE2bbe15d4734FDae5761B86b5Fc3) | 3/5 | Owns uniBTC ProxyAdmin; holds `DEFAULT_ADMIN_ROLE` on uniBTC Vault |
 
-The original onchain verification pass read Safe thresholds/owners via `getThreshold()` / `getOwners()`, ProxyAdmin ownership via `owner()`, and Vault roles via `hasRole(bytes32,address)`. No `.env` is available in this worktree, so the values above were not freshly re-run in this pass.
+Fresh onchain verification on July 10, 2026 read Safe thresholds/owners via `getThreshold()` / `getOwners()`, ProxyAdmin ownership via `owner()`, Vault roles via `hasRole(bytes32,address)`, and EIP-1967 implementation/admin slots. The uniBTC ops Safe currently has no modules and no guard configured.
 
 **Signer overlap:** signer [`0x09610d4239c8f3413509202DCcC7e27C6B0a47A3`](https://etherscan.io/address/0x09610d4239c8f3413509202DCcC7e27C6B0a47A3) appears in multiple Bedrock governance Safes, and signer [`0x1fc76b7C6F092e0566Ce9Bbb9c6803Ba5e45Ba32`](https://etherscan.io/address/0x1fc76b7C6F092e0566Ce9Bbb9c6803Ba5e45Ba32) appears in both the uniBTC and brBTC Safe set. This reduces effective independence across Bedrock product lines.
 
@@ -60,8 +60,8 @@ The original onchain verification pass read Safe thresholds/owners via `getThres
 
 - **Deposit assets accepted:** WBTC, FBTC, cbBTC, M-BTC, and uniBTC itself for cross-chain routing.
 - **Mint flow:** User deposits a permitted wrapped BTC asset into the Vault `mint` function and atomically receives uniBTC 1:1 in 8-decimal BTC units.
-- **PoR gate:** Minting checks Chainlink PoR reserves against circulating supply reported by the uniBTC supply feeder. In the original onchain verification pass, `chainlinkReserveFeeder = 0xc590D9fb...`, `uniBTCSupplyFeeder = 0xE542919E...`, `feederHeartbeat = 86,400s`, and `outOfService = false`.
-- **Adequacy ratio:** The Vault explicitly permits minting while PoR-reported reserves are at least 90% of supply. The original verification read `adequacyRatio = 900`, and source review found `checkReserve` requiring `supply * adequacyRatio / 1000 <= reserves`. This is not a strict 1:1 mint gate.
+- **PoR gate:** Minting checks Chainlink PoR reserves against circulating supply reported by the uniBTC supply feeder. Fresh onchain verification on July 10, 2026 read `chainlinkReserveFeeder = 0xc590D9fb...`, `uniBTCSupplyFeeder = 0xE542919E...`, `feederHeartbeat = 86,400s`, `outOfService = false`, and `paused = false`.
+- **Adequacy ratio:** The Vault explicitly permits minting while PoR-reported reserves are at least 90% of supply. Fresh onchain verification read `adequacyRatio = 900`, and source review found `checkReserve` requiring `supply * adequacyRatio / 1000 <= reserves`. This is not a strict 1:1 mint gate.
 - **Redeem flow:** Bedrock docs describe claim-based unstaking with an **8-day delay**, **0.5% redemption fee**, and **2 WBTC/day Ethereum cap**.
 - **Custody:** TODO - Bedrock docs do not name the BTC custodian(s), signers, or full address-control model for the backing wallets monitored by Chainlink PoR.
 - **Cross-chain:** Chainlink CCIP is the documented canonical bridge path. uniBTC is deployed across many chains; Ethereum is one slice of total supply.
@@ -71,7 +71,7 @@ The original onchain verification pass read Safe thresholds/owners via `getThres
 | Minter / Role Holder | Address | Notes |
 |----------------------|---------|-------|
 | uniBTC Vault | [`0x047D41F2544B7F63A8e991aF2068a363d210d6Da`](https://etherscan.io/address/0x047D41F2544B7F63A8e991aF2068a363d210d6Da) | Collateralized mint path for supported wrapped BTC deposits. Mint is PoR-gated but allows a 10% reserve shortfall via `adequacyRatio = 900`. |
-| Cross-chain bridge / routing contracts | TODO | uniBTC is deployed cross-chain and docs identify Chainlink CCIP as canonical; complete current bridge mint/burn authority enumeration across every chain was not re-run in this pass because no `.env` RPC configuration is available. |
+| Cross-chain bridge / routing contracts | TODO | uniBTC is deployed cross-chain and docs identify Chainlink CCIP as canonical; complete current bridge mint/burn authority enumeration across every non-Ethereum deployment remains TODO. |
 
 ## Audits and Due Diligence Disclosures
 
@@ -94,8 +94,8 @@ The October 2024 audits are post-exploit re-engagements covering the patched uni
 - **TVL (DeFiLlama, July 10, 2026):** Bedrock uniBTC reported **$291.37M** across 18 chains. Major slices: Bitcoin $107.6M, Ethereum $81.2M, Merlin $61.0M, BOB $25.3M, BSC $15.6M.
 - **Peak TVL:** Bedrock uniBTC peaked at **$638.3M** on July 15, 2025.
 - **Minimum after launch:** $109.4M on Nov 2, 2024, shortly after the Sept 2024 exploit.
-- **Ethereum total supply:** Original onchain verification read **2,981.38 uniBTC** (`298,138,175,772` sats).
-- **PoR reserves:** Original onchain verification read Chainlink PoR `latestAnswer = 4,615.31 BTC` (18 decimals), which exceeded circulating supply at that snapshot.
+- **Ethereum total supply:** Fresh onchain verification on July 10, 2026 read **2,985.80444007 uniBTC** (`298,580,444,007` sats).
+- **PoR reserves:** Fresh onchain verification read Chainlink PoR `latestAnswer = 4,614.724024573852871295 BTC` (18 decimals), updated at `2026-07-09T19:35:35Z`, which exceeded circulating supply at that snapshot.
 
 ### Security Incident: September 27, 2024 - uniBTC Mint Exploit
 
@@ -120,8 +120,8 @@ The exploit occurred on the same vault proxy that remains in production. Post-ex
 
 - uniBTC is intended to be backed 1:1 by wrapped BTC assets and native/restaked BTC positions.
 - Accepted deposit assets include WBTC, FBTC, cbBTC, and M-BTC. Counterparty quality is mixed: WBTC and cbBTC are more established; FBTC and M-BTC are newer issuer/custody dependencies.
-- Chainlink PoR reported backing above circulating supply in the original verification pass, but the mint gate permits up to 10% under-collateralization via `adequacyRatio = 900`.
-- Only a small amount of WBTC was held directly in the Ethereum Vault in the original verification pass (0.32249593 WBTC). The majority of backing sits outside the Ethereum vault contract, including native BTC/restaking/custody arrangements monitored through PoR.
+- Chainlink PoR reported backing above circulating supply in the July 10, 2026 verification pass, but the mint gate permits up to 10% under-collateralization via `adequacyRatio = 900`.
+- Only a small amount of WBTC was held directly in the Ethereum Vault in the July 10, 2026 verification pass (1.90156049 WBTC, plus 0.01 WBTC in the ops Safe). The majority of backing sits outside the Ethereum vault contract, including native BTC/restaking/custody arrangements monitored through PoR.
 
 ### Provability
 
@@ -146,7 +146,7 @@ uniBTC has materially better reserve provability than brBTC because a Chainlink 
 - uniBTC token and uniBTC Vault are upgradeable transparent proxies.
 - The uniBTC ops Safe is 3-of-5 and owns the ProxyAdmin.
 - The same Safe holds `DEFAULT_ADMIN_ROLE` on the uniBTC Vault.
-- No Safe Guard or Delay module was configured on the relevant Bedrock Safes in the original verification pass. A 3-of-5 signature can therefore upgrade implementations or execute privileged actions without an onchain delay.
+- No Safe Guard or Delay module was configured on the uniBTC ops Safe in the July 10, 2026 verification pass. A 3-of-5 signature can therefore upgrade implementations or execute privileged actions without an onchain delay.
 - Signer overlap across Bedrock Safes weakens practical separation between product lines.
 
 ### Programmability
@@ -242,7 +242,7 @@ Public restitution txs for Sept 2024 exploit
 
 1. **Chainlink PoR is wired into the Vault mint path.** Minting is not purely admin-attested; the Vault checks public reserve data before issuing new uniBTC.
 2. **Three uniBTC-specific audits** including two post-exploit re-audits.
-3. **Verified source and multisig governance** in the original review.
+3. **Verified source and multisig governance** in the July 10, 2026 review.
 4. **Large ecosystem scale** with $291.37M DeFiLlama uniBTC TVL on July 10, 2026.
 5. **Public team and known legal entity** via Bedrock/RockX leadership and Bedrock Terms of Use.
 
@@ -296,7 +296,7 @@ Public restitution txs for Sept 2024 exploit
 
 **Subcategory A: Governance**
 - 3-of-5 Safe controls ProxyAdmin and Vault admin role.
-- No onchain timelock or Safe Delay module in the original verification.
+- No onchain timelock or Safe Delay module in the July 10, 2026 verification.
 - **Score: 4.0**
 
 **Subcategory B: Programmability**
@@ -315,7 +315,7 @@ Public restitution txs for Sept 2024 exploit
 #### Category 3: Funds Management (Weight: 30%)
 
 **Subcategory A: Collateralization**
-- PoR showed backing above supply in the original verification pass.
+- PoR showed backing above supply in the July 10, 2026 verification pass.
 - Mixed collateral issuer quality and offchain/native BTC custody opacity.
 - Explicit 90% adequacy threshold weakens the mint gate.
 - **Score: 3.5**
@@ -400,7 +400,6 @@ uniBTC is stronger than brBTC on reserve provability because Chainlink PoR is wi
 - **Custodian identity / signing setup** for BTC backing uniBTC.
 - **Complete current cross-chain mint/burn authority enumeration** for every non-Ethereum uniBTC deployment.
 - **September 2024 restitution transactions** - onchain Fuzzland-to-Bedrock reimbursement tx hashes are not published.
-- **Fresh onchain re-run** - no `.env` is available in this worktree, so original verification values were not freshly re-run with `cast`.
 
 ## Sources
 
@@ -416,4 +415,4 @@ uniBTC is stronger than brBTC on reserve provability because Chainlink PoR is wi
 - QuillAudits hack analysis: https://www.quillaudits.com/blog/hack-analysis/bedrock-2million-exploit
 - BlockApex hack analysis: https://blockapex.medium.com/unibtc-hack-analysis-bffd6cebd4a8
 - Babylon Labs: https://babylonlabs.io/
-- Onchain verification from original review: `totalSupply()`, `name()`, `symbol()`, `decimals()`, EIP-1967 implementation/admin slots, `owner()` on ProxyAdmins, `getThreshold()` / `getOwners()` on Safes, `hasRole(bytes32,address)` on Vaults, `chainlinkReserveFeeder()`, `uniBTCSupplyFeeder()`, `outOfService()`, `paused()`, and Chainlink feed `latestAnswer()`, `description()`, `decimals()`.
+- Onchain verification on July 10, 2026: `totalSupply()`, `name()`, `symbol()`, `decimals()`, EIP-1967 implementation/admin slots, `owner()` on ProxyAdmin, `getThreshold()` / `getOwners()` / `getModulesPaginated()` and guard storage on the Safe, `hasRole(bytes32,address)` on Vault/token, `chainlinkReserveFeeder()`, `uniBTCSupplyFeeder()`, `feederHeartbeat()`, `outOfService()`, `paused()`, `adequacyRatio()`, WBTC `balanceOf(address)`, and Chainlink feed `latestAnswer()`, `latestRoundData()`, `description()`, `decimals()`.
