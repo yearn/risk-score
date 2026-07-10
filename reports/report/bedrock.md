@@ -1,6 +1,7 @@
 # Protocol Risk Assessment: Bedrock (uniBTC, brBTC, uniETH)
 
 - **Assessment Date:** May 18, 2026
+- **TVL Refresh:** July 10, 2026
 - **Tokens:** uniBTC, brBTC, uniETH
 - **Chain:** Ethereum
 - **Token Addresses:**
@@ -123,10 +124,10 @@ Five audit reports total by two reputable firms (PeckShield, BlockSec). The Octo
 ## Historical Track Record
 
 - **Time in production:** uniETH live since February 2024; uniBTC vault deployed mid-2024 (initial DefiLlama listing Oct 29, 2024); brBTC live since December 2024. **~2 years total** at assessment date.
-- **TVL (DefiLlama, May 18, 2026):**
-  - Bedrock uniBTC (sub-protocol): **$354.83M** across 17 chains (Ethereum slice $98.9M; Bitcoin $130.3M; Merlin $74.9M; BOB $30.8M; BSC $19.0M).
-  - Bedrock aggregate (all products including uniETH): **$379.14M** (Ethereum $121.4M).
-  - Peak uniBTC TVL: ~$638M (July 15, 2025).
+- **TVL (DefiLlama, refreshed July 10, 2026):**
+  - Bedrock uniBTC (sub-protocol): **$291.37M** across 18 chains (Bitcoin $107.6M; Ethereum $81.2M; Merlin $61.0M; BOB $25.3M; BSC $15.6M).
+  - Bedrock aggregate (all products including uniETH): **$310.87M** (Ethereum $99.6M; Bitcoin $107.6M; Merlin $61.0M; BOB $25.3M; BSC $15.6M).
+  - Peak aggregate TVL: ~$704.4M (Aug 14, 2025). Peak uniBTC TVL: ~$638.3M (July 15, 2025).
   - Minimum: $109M (Nov 2, 2024, just after the exploit).
   - Volatility ratio: 5.8× (peak / min).
 - **uniBTC totalSupply (Ethereum, verified onchain):** 2,981.38 uniBTC (`298,138,175,772` sats).
@@ -387,7 +388,7 @@ Undisclosed BTC custodian(s)  ←── TODO
 
 **Subcategory B: Historical Track Record**
 - ~2 years in production (uniETH since Feb 2024; uniBTC mid-2024; brBTC Dec 2024).
-- Bedrock combined TVL $379M today (Ethereum $121M); peak $638M; sustained >$100M for >1 year.
+- Bedrock aggregate TVL $310.9M as of July 10, 2026 (Ethereum $99.6M); aggregate peak $704.4M; sustained >$100M for >1 year.
 - One major exploit (Sept 2024, ~$2M) — pulls score up.
 - **Score: 2.5** (1–2 years sustained, >$50M, with prior incident penalty)
 
@@ -501,7 +502,7 @@ A vault implementer should treat these as three different assets with different 
 ## Reassessment Triggers
 
 - **Time-based:** Reassess in 3 months, or sooner on any of the events below.
-- **TVL-based:** Reassess if Bedrock aggregate TVL changes by ±40% from $379M.
+- **TVL-based:** Reassess if Bedrock aggregate TVL changes by ±40% from the July 10, 2026 baseline of $310.9M.
 - **Incident-based:** Any exploit, depeg >2% sustained >1h, redemption queue freeze, or governance compromise.
 - **Specific triggers:**
   1. Chainlink uniBTC PoR feed reports backing < circulating supply (immediate alert).
