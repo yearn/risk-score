@@ -1,5 +1,5 @@
 slug: bedrock
-title: Bedrock (uniBTC, brBTC, uniETH) — Contract Dependency Graph
+title: Bedrock brBTC — Contract Dependency Graph
 chain: ethereum
 
 categories:
@@ -16,192 +16,103 @@ categories:
 
 nodes:
   # === User-facing token layer ===
-  - id: uniBTC
-    label: uniBTC Token
-    address: "0x004E9C3EF86bc1ca1f0bB5C7662861Ee93350568"
-    category: vault
-    note: EIP-1967 transparent proxy; BTC LRT; 8 decimals
   - id: brBTC
     label: brBTC Token
     address: "0x2eC37d45FCAE65D9787ECf71dc85a444968f6646"
     category: vault
     note: EIP-1967 transparent proxy; BTC meta-LRT; 8 decimals
-  - id: uniETH
-    label: uniETH Token
-    address: "0xF1376bceF0f78459C0Ed0ba5ddce976F1ddF51F4"
-    category: vault
-    note: EIP-1967 transparent proxy; ETH LST/LRT; value-accruing
 
   # === Protocol infra ===
-  - id: uniBTC-vault
-    label: uniBTC Vault
-    address: "0x047D41F2544B7F63A8e991aF2068a363d210d6Da"
-    category: infra
-    note: Mint/redeem vault; PoR-gated; same proxy address as Sept 2024 exploit
   - id: brBTC-vault
     label: brBTC Vault
     address: "0x1419b48e5C1f5ce413Cf02D6dcbe1314170E3386"
     category: infra
     note: Mint/allocation vault for brBTC; redemption details not publicly documented
-  - id: uniETH-staking
-    label: uniETH Staking
-    address: "0x4beFa2aA9c305238AA3E0b5D17eB20C045269E9d"
-    category: infra
-    note: Native ETH staking entry point; mints uniETH
-  - id: uniETH-restaking
-    label: uniETH Restaking
-    address: "0x3f4eAceb930b0EdFa78A1Dfcbae5C5494E6E9850"
-    category: infra
-    note: EigenLayer restaking wrapper
-  - id: eigenpod
-    label: uniETH EigenPod
-    address: "0x926720Ae39114D0e2043b79570A1e08f00D01cCE"
-    category: infra
-    note: EigenLayer EigenPod for uniETH validators
-  - id: chainlink-por
-    label: Chainlink uniBTC PoR
-    address: "0xc590D9fb8eE78a0909dFF341ccf717000b7b7fF2"
-    category: infra
-    note: PoR feed wired into uniBTC Vault; 24h heartbeat; self-declared address set
-  - id: supply-feeder
-    label: uniBTC Supply Feeder
-    address: "0xE542919E4b281f10b437F947c8Ba224DdfaBc716"
-    category: infra
-    note: Aggregates global uniBTC supply for PoR comparison
-
-  # === Governance ===
-  - id: unibtc-safe
-    label: uniBTC Ops Safe (3/5)
-    address: "0xC9dA980fFABbE2bbe15d4734FDae5761B86b5Fc3"
-    category: governance
-    note: Owns uniBTC ProxyAdmin; DEFAULT_ADMIN_ROLE on uniBTC Vault; no guard/module
-  - id: unieth-safe
-    label: uniETH Upgrade Safe (3/5)
-    address: "0x3050620423f4dB43E1904815E898C466526387b8"
-    category: governance
-    note: Owns uniETH ProxyAdmin; no guard/module
-  - id: bedrock-safe
-    label: Bedrock Admin Safe (3/5)
-    address: "0xAeE017052DF6Ac002647229D58B786E380B9721A"
-    category: governance
-    note: Owns brBTC ProxyAdmin; DEFAULT_ADMIN_ROLE on uniETH Staking; no guard/module
-  - id: brbtc-safe
-    label: brBTC Ops Safe (3/4)
-    address: "0x1f3c54ec74f1a5c0BC19af04dadFa1A677231aC9"
-    category: governance
-    note: DEFAULT_ADMIN_ROLE on brBTC Vault; no guard/module
-  - id: unibtc-proxyadmin
-    label: uniBTC ProxyAdmin
-    address: "0x029e4fbdaa31de075dd74b2238222a08233978f6"
-    category: governance
-  - id: unieth-proxyadmin
-    label: uniETH ProxyAdmin
-    address: "0xa5f2b6ab5b38b88ba221741b3a189999b4c889c6"
-    category: governance
-  - id: brbtc-proxyadmin
+  - id: brBTC-proxyadmin
     label: brBTC ProxyAdmin
     address: "0x9f63269196a8828f05f2e49d1078ea7c44e7f002"
     category: governance
 
+  # === Governance ===
+  - id: bedrock-safe
+    label: Bedrock Admin Safe (3/5)
+    address: "0xAeE017052DF6Ac002647229D58B786E380B9721A"
+    category: governance
+    note: Owns brBTC ProxyAdmin; no guard/module in original verification
+  - id: brBTC-safe
+    label: brBTC Ops Safe (3/4)
+    address: "0x1f3c54ec74f1a5c0BC19af04dadFa1A677231aC9"
+    category: governance
+    note: DEFAULT_ADMIN_ROLE on brBTC Vault; no guard/module in original verification
+
   # === Strategy / custody layer ===
-  - id: unibtc-btc-custody
-    label: uniBTC BTC Custody / Restaking
-    category: strategy
-    note: Wrapped/native BTC backing; custodian not publicly named; DeFiLlama uniBTC TVL $291.37M on 2026-07-10
-  - id: brbtc-restaking
+  - id: brBTC-restaking
     label: brBTC Restaking Allocator
     category: strategy
-    note: Allocates BTC variants across six restaking venues; no public PoR
-  - id: rockx-validators
-    label: RockX Validators
-    category: strategy
-    note: Sole validator operator for uniETH
+    note: Allocates BTC variants across six restaking venues; no public brBTC PoR
 
-  # === External dependencies ===
-  - id: dep-bitcoin
-    label: Bitcoin Network
+  # === Accepted input assets ===
+  - id: dep-uniBTC
+    label: uniBTC
+    address: "0x004E9C3EF86bc1ca1f0bB5C7662861Ee93350568"
     category: dependency
-    note: Native BTC custody/restaking settlement layer
-  - id: dep-babylon
-    label: Babylon Labs
-    category: dependency
-    note: BTC restaking dependency used by uniBTC and brBTC
-  - id: dep-chainlink
-    label: Chainlink PoR + CCIP
-    category: dependency
-    note: PoR feed gates uniBTC minting; CCIP is documented bridge path
-  - id: dep-eigenlayer
-    label: EigenLayer
-    category: dependency
-    note: uniETH restaking dependency
+    note: Accepted brBTC deposit asset; not assessed as a standalone asset in this report
   - id: dep-wrapped-btc
     label: WBTC / FBTC / cbBTC / M-BTC
     category: dependency
-    note: Accepted wrapped BTC assets; mixed issuer quality
+    note: Accepted BTC wrappers; mixed issuer/custody risk
+
+  # === External dependencies ===
+  - id: dep-chainlink-ccip
+    label: Chainlink CCIP
+    category: dependency
+    note: Documented cross-chain route for brBTC
+  - id: dep-babylon
+    label: Babylon Labs
+    category: dependency
+    note: BTC restaking venue
   - id: dep-kernel
     label: Kernel DAO
     category: dependency
+    note: BTC restaking venue
   - id: dep-satlayer
     label: SatLayer
     category: dependency
+    note: BTC restaking venue
   - id: dep-pell
     label: Pell Network
     category: dependency
+    note: BTC restaking venue
   - id: dep-symbiotic
     label: Symbiotic
     category: dependency
+    note: Restaking venue
   - id: dep-mellow
     label: Mellow Finance
     category: dependency
+    note: Restaking / vault venue
 
 edges:
   # === Governance and upgrade control ===
-  - { from: unibtc-safe, to: unibtc-proxyadmin, kind: controls, label: owner() }
-  - { from: unibtc-proxyadmin, to: uniBTC, kind: manages, label: token upgrade authority }
-  - { from: unibtc-proxyadmin, to: uniBTC-vault, kind: manages, label: vault upgrade authority }
-  - { from: unibtc-safe, to: uniBTC-vault, kind: holds-role, label: DEFAULT_ADMIN_ROLE }
-
-  - { from: unieth-safe, to: unieth-proxyadmin, kind: controls, label: owner() }
-  - { from: unieth-proxyadmin, to: uniETH, kind: manages, label: token upgrade authority }
-  - { from: unieth-proxyadmin, to: uniETH-staking, kind: manages, label: staking upgrade authority }
-  - { from: bedrock-safe, to: uniETH-staking, kind: holds-role, label: DEFAULT_ADMIN_ROLE }
-
-  - { from: bedrock-safe, to: brbtc-proxyadmin, kind: controls, label: owner() }
-  - { from: brbtc-proxyadmin, to: brBTC, kind: manages, label: token upgrade authority }
-  - { from: brbtc-proxyadmin, to: brBTC-vault, kind: manages, label: vault upgrade authority }
-  - { from: brbtc-safe, to: brBTC-vault, kind: holds-role, label: DEFAULT_ADMIN_ROLE }
+  - { from: bedrock-safe, to: brBTC-proxyadmin, kind: controls, label: owner() }
+  - { from: brBTC-proxyadmin, to: brBTC, kind: manages, label: token upgrade authority }
+  - { from: brBTC-proxyadmin, to: brBTC-vault, kind: manages, label: vault upgrade authority }
+  - { from: brBTC-safe, to: brBTC-vault, kind: holds-role, label: DEFAULT_ADMIN_ROLE }
 
   # === Mint / receipt issuance ===
-  - { from: uniBTC-vault, to: uniBTC, kind: mints, label: collateralized mint via Vault }
   - { from: brBTC-vault, to: brBTC, kind: mints, label: collateralized mint via brVault }
-  - { from: uniETH-staking, to: uniETH, kind: mints, label: ETH deposit mint }
 
   # === Capital flow ===
-  - { from: uniBTC, to: uniBTC-vault, kind: routes-through, label: mint/redeem }
-  - { from: uniBTC-vault, to: unibtc-btc-custody, kind: allocates-to, label: BTC backing }
-  - { from: unibtc-btc-custody, to: dep-wrapped-btc, kind: deposits-into, label: accepted BTC wrappers }
-  - { from: unibtc-btc-custody, to: dep-bitcoin, kind: deposits-into, label: native BTC custody }
-  - { from: unibtc-btc-custody, to: dep-babylon, kind: deposits-into, label: BTC restaking }
-
   - { from: brBTC, to: brBTC-vault, kind: routes-through, label: mint/redeem }
-  - { from: brBTC-vault, to: brbtc-restaking, kind: allocates-to, label: multi-venue BTC restaking }
-  - { from: brbtc-restaking, to: dep-babylon, kind: deposits-into, label: restaking venue }
-  - { from: brbtc-restaking, to: dep-kernel, kind: deposits-into, label: restaking venue }
-  - { from: brbtc-restaking, to: dep-satlayer, kind: deposits-into, label: restaking venue }
-  - { from: brbtc-restaking, to: dep-pell, kind: deposits-into, label: restaking venue }
-  - { from: brbtc-restaking, to: dep-symbiotic, kind: deposits-into, label: restaking venue }
-  - { from: brbtc-restaking, to: dep-mellow, kind: deposits-into, label: restaking venue }
+  - { from: brBTC-vault, to: brBTC-restaking, kind: allocates-to, label: multi-venue BTC restaking }
+  - { from: brBTC-vault, to: dep-uniBTC, kind: routes-through, label: accepted input asset }
+  - { from: brBTC-vault, to: dep-wrapped-btc, kind: routes-through, label: accepted input assets }
+  - { from: brBTC-restaking, to: dep-babylon, kind: deposits-into, label: restaking venue }
+  - { from: brBTC-restaking, to: dep-kernel, kind: deposits-into, label: restaking venue }
+  - { from: brBTC-restaking, to: dep-satlayer, kind: deposits-into, label: restaking venue }
+  - { from: brBTC-restaking, to: dep-pell, kind: deposits-into, label: restaking venue }
+  - { from: brBTC-restaking, to: dep-symbiotic, kind: deposits-into, label: restaking venue }
+  - { from: brBTC-restaking, to: dep-mellow, kind: deposits-into, label: restaking venue }
 
-  - { from: uniETH, to: uniETH-staking, kind: routes-through, label: ETH deposit / queued exit }
-  - { from: uniETH-staking, to: rockx-validators, kind: allocates-to, label: staked ETH }
-  - { from: rockx-validators, to: dep-eigenlayer, kind: deposits-into, label: restaking }
-  - { from: uniETH-staking, to: uniETH-restaking, kind: routes-through, label: restaking wrapper }
-  - { from: uniETH-restaking, to: eigenpod, kind: routes-through, label: EigenPod }
-  - { from: eigenpod, to: dep-eigenlayer, kind: deposits-into, label: EigenLayer restaking }
-
-  # === Oracle / bridge wiring ===
-  - { from: uniBTC-vault, to: chainlink-por, kind: routes-through, label: reserve check }
-  - { from: uniBTC-vault, to: supply-feeder, kind: routes-through, label: supply check }
-  - { from: chainlink-por, to: dep-chainlink, kind: manages, label: PoR oracle network }
-  - { from: uniBTC, to: dep-chainlink, kind: routes-through, label: CCIP cross-chain }
-  - { from: brBTC, to: dep-chainlink, kind: routes-through, label: CCIP cross-chain }
+  # === Bridge dependency ===
+  - { from: brBTC, to: dep-chainlink-ccip, kind: routes-through, label: cross-chain path }
