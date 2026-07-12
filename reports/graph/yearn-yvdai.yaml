@@ -67,11 +67,11 @@ nodes:
 
   # Strategies
   - id: dai-to-usdc-depositor
-    label: DAI → yvUSDC-1 Depositor (72.97%)
+    label: DAI → yvUSDC-1 Depositor (73.19%)
     address: "0xfF03Dce6d95aa7a30B75EFbaFD11384221B9f9B5"
     category: strategy
   - id: dai-to-usds-depositor
-    label: DAI → yvUSDS-1 Depositor (27.03%)
+    label: DAI → yvUSDS-1 Depositor (26.81%)
     address: "0xAeDF7d5F3112552E110e5f9D08c9997Adce0b78d"
     category: strategy
 
@@ -112,11 +112,11 @@ edges:
   - from: yvDAI
     to: dai-to-usdc-depositor
     kind: allocates-to
-    label: "72.97%"
+    label: "73.19%"
   - from: yvDAI
     to: dai-to-usds-depositor
     kind: allocates-to
-    label: "27.03%"
+    label: "26.81%"
 
   # Governance roles on vault
   - from: daddy
