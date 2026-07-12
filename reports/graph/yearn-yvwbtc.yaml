@@ -5,6 +5,8 @@ chain: ethereum
 categories:
   - id: vault
     label: Vault
+  - id: strategy
+    label: Strategy
   - id: governance
     label: Governance / Multisig
   - id: infra
@@ -15,7 +17,7 @@ categories:
 nodes:
   # Vault layer
   - id: yvWBTC
-    label: yvWBTC-1 (100% idle, empty queue)
+    label: yvWBTC-1 (100% deployed)
     address: "0x751F0cC6115410A3eE9eC92d08f46Ff6Da98b708"
     category: vault
   - id: accountant
@@ -26,6 +28,13 @@ nodes:
     label: Fee Recipient (Dumper)
     address: "0x590Dd9399bB53f1085097399C3265C7137c1C4Cf"
     category: vault
+
+  # Strategy
+  - id: ymv-wbtc
+    label: ymv-WBTC (MetaMorpho)
+    address: "0x2bB005127069A0F0325Fb7370967E8A2b64FB77E"
+    category: strategy
+    note: "Immutable MetaMorpho V1_1 ERC-4626 vault. Owner: Security 4-of-7 / Guardian: ySafe 6-of-9 / Curator: 2-of-3 Safe. Fee: 0%, 3-day curator timelock."
 
   # Governance
   - id: daddy
@@ -48,6 +57,10 @@ nodes:
     label: Yearn V3 Role Manager
     address: "0xb3bd6B2E61753C311EFbCF0111f75D29706D9a41"
     category: governance
+  - id: curator
+    label: Curator (2-of-3)
+    address: "0x90D0f26025571295D18a6c041E47450B81886B51"
+    category: governance
 
   # Infra / bots
   - id: keeper
@@ -63,12 +76,27 @@ nodes:
     address: "0x770D0d1Fb036483Ed4AbB6d53c1C88fb277D812F"
     category: infra
 
-  # Underlying asset (only dependency at snapshot)
+  # External dependencies
   - id: wbtc
     label: WBTC (BitGo-custodied)
     address: "0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599"
     category: dependency
-    note: Underlying asset only — no strategies attached at the snapshot
+    note: Underlying asset for vault and Morpho Blue loan token
+  - id: morpho-blue
+    label: Morpho Blue
+    address: "0xBBBBBbbBBb9cC5e90e3b3Af64bdAF62C37EEFFCb"
+    category: dependency
+    note: Immutable lending primitive (v1). Holds 100% of strategy TVL (82% idle market, 18% WBTC/LBTC market).
+  - id: lbtc
+    label: LBTC (Lombard BTC)
+    address: "0x8236a87084f8B84306f72007F36F2618A5634494"
+    category: dependency
+    note: Collateral token in active WBTC/LBTC market (94.5% LLTV)
+  - id: cbbtc
+    label: cbBTC (Coinbase BTC)
+    address: "0xcbB7C0000aB88B473b1f5aFd9ef808440eed33Bf"
+    category: dependency
+    note: Collateral token in queued WBTC/cbBTC market (no current position)
 
 edges:
   # Deployment / vault infrastructure
@@ -83,11 +111,25 @@ edges:
     to: dumper
     kind: routes-fees-to
 
-  # Vault holds underlying directly (100% idle)
+  # Capital flow: vault → strategy → Morpho Blue
   - from: yvWBTC
-    to: wbtc
+    to: ymv-wbtc
+    kind: allocates-to
+    label: "100%"
+  - from: ymv-wbtc
+    to: morpho-blue
     kind: deposits-into
-    label: "100% idle (held at vault)"
+    label: "82% idle / 18% WBTC-LBTC"
+
+  # Morpho Blue dependency chain
+  - from: morpho-blue
+    to: lbtc
+    kind: routes-through
+    label: "collateral (active)"
+  - from: morpho-blue
+    to: cbbtc
+    kind: routes-through
+    label: "collateral (queued)"
 
   # Governance roles on vault
   - from: daddy
@@ -135,3 +177,17 @@ edges:
     to: timelock
     kind: cancels-on
     label: CANCELLER
+
+  # MetaMorpho governance
+  - from: security
+    to: ymv-wbtc
+    kind: holds-role
+    label: "owner"
+  - from: daddy
+    to: ymv-wbtc
+    kind: holds-role
+    label: "guardian"
+  - from: curator
+    to: ymv-wbtc
+    kind: holds-role
+    label: "curator"
