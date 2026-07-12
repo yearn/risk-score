@@ -12,22 +12,24 @@ yvDAI-1 is a **DAI-denominated Yearn V3 vault** (ERC-4626) that deploys deposite
 
 **Material downstream rewiring since May 11:** the intermediate vaults have both changed their strategy compositions. **yvUSDC-1** now has 4 strategies in its queue — a new **"Yearn USDC"** strategy ([`0x68Aea7b82Df6CcdF76235D46445Ed83f85F845A3`](https://etherscan.io/address/0x68Aea7b82Df6CcdF76235D46445Ed83f85F845A3)) holds 8.41% of tracked debt, and a new `Spark USDC Lender` ([`0x654a7c4Ae5ac3C853a99F8dbEAD2bC85090F753a`](https://etherscan.io/address/0x654a7c4Ae5ac3C853a99F8dbEAD2bC85090F753a)) replaces the old one at [`0x25f893276544d86a82b1ce407182836F45cb6673`](https://etherscan.io/address/0x25f893276544d86a82b1ce407182836F45cb6673) (now with 0 tracked debt). **yvUSDS-1** has added a new **"USDS Sky Rewards Compounder"** strategy ([`0x0868076663Bbc6638ceDd27704cc8F0Fa53d5b81`](https://etherscan.io/address/0x0868076663Bbc6638ceDd27704cc8F0Fa53d5b81), v3.0.3 TokenizedStrategy) at queue position 0 with near-zero debt — a successor to the existing `Spark USDS Compounder`. The yvUSDS-1 split is now 84.09% `sUSDS Lender` / 15.91% `Spark USDS Compounder`.
 
+The **"Yearn USDC"** strategy is a **Yearn-curated Morpho MetaMorpho vault** (verified on-chain). It supplies USDC into four Morpho Blue lending markets: cbBTC collateral via oracle [`0xA6D6950c9F177F1De7f7757FB33539e3Ec60182a`](https://etherscan.io/address/0xA6D6950c9F177F1De7f7757FB33539e3Ec60182a) (LLTV 86%), WBTC via oracle [`0xDddd770BADd886dF3864029e4B377B5F6a2B6b83`](https://etherscan.io/address/0xDddd770BADd886dF3864029e4B377B5F6a2B6b83) (LLTV 86%), and wstETH via two oracles ([`0x48F7E36EB6B826B2dF4B2E630B62Cd25e89E40E2`](https://etherscan.io/address/0x48F7E36EB6B826B2dF4B2E630B62Cd25e89E40E2) and [`0x167D283aCAC1b9ff39466A75aA82902f340f1F4D`](https://etherscan.io/address/0x167D283aCAC1b9ff39466A75aA82902f340f1F4D), both LLTV 86%). All four markets use the same AdaptiveCurveIRM ([`0x870aC11D48B15DB9a138Cf899d20F13F79Ba00BC`](https://etherscan.io/address/0x870aC11D48B15DB9a138Cf899d20F13F79Ba00BC)). The vault is governed by Yearn's ySafe as guardian, has a 3-day timelock, 0% fee, and Yearn Security as fee recipient. Strategy-level allocation: cbBTC ~74.7% / WBTC ~14.7% / wstETH ~10.7% of the ~$2.15M MetaMorpho TVL.
+
 **Effective endpoint mix for yvDAI-1's deployed DAI (July 12):**
 
 | Endpoint | Path | Effective share |
 |----------|------|----------------:|
 | Sky **sUSDS** (Sky Savings Rate) | yvDAI-1 → yvUSDC-1 → sUSDS Lender **AND** yvDAI-1 → yvUSDS-1 → sUSDS Lender | **~89.6%** |
-| **Yearn USDC** strategy (yield source unverified) | yvDAI-1 → yvUSDC-1 → Yearn USDC | **~6.2%** |
+| **Morpho Blue** (cbBTC + WBTC + wstETH lending) | yvDAI-1 → yvUSDC-1 → Yearn USDC (Morpho MetaMorpho) | **~6.2%** |
 | Sky **USDS Staking Rewards** (SPK farm) | yvDAI-1 → yvUSDS-1 → Spark USDS Compounder | **~4.3%** |
 
-The cascade remains at most **two Yearn V3 vault layers deep**. Sky-ecosystem concentration (sUSDS + USDS Staking) is ~93.9%, down from ~100% at May 11 due to the new Yearn USDC strategy introducing a non-Sky dependent leg. The exact yield destination of the Yearn USDC strategy could not be verified on-chain and merits further investigation.
+The cascade remains at most **two Yearn V3 vault layers deep** (three when counting the MetaMorpho layer inside the Yearn USDC strategy). Sky-ecosystem concentration (sUSDS + USDS Staking) is ~93.9%, down from ~100% at May 11. The ~6.2% Yearn USDC leg is a Yearn-curated Morpho MetaMorpho vault — same governance as yvDAI-1 — that supplies USDC into Morpho Blue lending markets against cbBTC, WBTC, and wstETH collateral, diversifying the vault beyond the Sky ecosystem.
 
 **Key architecture:**
 
 - **Vault:** Standard Yearn V3 vault (v3.0.2) accepting DAI deposits, issuing yvDAI-1 shares. Deployed as an immutable Vyper minimal proxy (EIP-1167) via the v3.0.2 Yearn V3 Vault Factory ([`0x444045c5C13C246e117eD36437303cac8E250aB0`](https://etherscan.io/address/0x444045c5C13C246e117eD36437303cac8E250aB0))
 - **Default queue (2 strategies, both funded):**
-  - **DAI To USDC-1 Depositor** ([`0xfF03Dce6d95aa7a30B75EFbaFD11384221B9f9B5`](https://etherscan.io/address/0xfF03Dce6d95aa7a30B75EFbaFD11384221B9f9B5)) — 6,908,481.99 DAI (72.97%). DAI → USDC (Maker PSM Lite, 1:1 at 0% fee) → yvUSDC-1 deposit. yvUSDC-1 routes ~97.15% via its `USDC to sUSDS Lender` strategy directly into sUSDS, plus ~2.85% via `Spark USDC Lender` into Spark Lend
-  - **DAI to USDS Depositor** ([`0xAeDF7d5F3112552E110e5f9D08c9997Adce0b78d`](https://etherscan.io/address/0xAeDF7d5F3112552E110e5f9D08c9997Adce0b78d)) — 2,559,595.76 DAI (27.03%). DAI → USDS (Sky DAI-USDS Exchanger, 1:1, no fee) → yvUSDS-1 deposit. yvUSDS-1 currently routes 80.03% via its `sUSDS Lender` strategy (Sky Savings Rate) and 19.97% via its `Spark USDS Compounder` (Sky USDS Staking Rewards)
+  - **DAI To USDC-1 Depositor** ([`0xfF03Dce6d95aa7a30B75EFbaFD11384221B9f9B5`](https://etherscan.io/address/0xfF03Dce6d95aa7a30B75EFbaFD11384221B9f9B5)) — 6,951,724.02 DAI (73.19%). DAI → USDC (Maker PSM Lite, 1:1 at 0% fee) → yvUSDC-1 deposit. yvUSDC-1 routes ~91.59% via its `USDC to sUSDS Lender` strategy directly into sUSDS, plus ~8.41% via its `Yearn USDC` strategy (Morpho MetaMorpho vault) into Morpho Blue lending markets
+  - **DAI to USDS Depositor** ([`0xAeDF7d5F3112552E110e5f9D08c9997Adce0b78d`](https://etherscan.io/address/0xAeDF7d5F3112552E110e5f9D08c9997Adce0b78d)) — 2,545,516.51 DAI (26.81%). DAI → USDS (Sky DAI-USDS Exchanger, 1:1, no fee) → yvUSDS-1 deposit. yvUSDS-1 currently routes 84.09% via its `sUSDS Lender` strategy (Sky Savings Rate) and 15.91% via its `Spark USDS Compounder` (Sky USDS Staking Rewards)
 - **Removed from queue between April 27 and May 5:** Savings Dai (sDAI), Spark DAI Lender, Aave V3 DAI Lender — all previously zero-debt; remain absent at block 25073237
 - **Governance:** Standard **Yearn V3 Role Manager** ([`0xb3bd6B2E61753C311EFbCF0111f75D29706D9a41`](https://etherscan.io/address/0xb3bd6B2E61753C311EFbCF0111f75D29706D9a41)) governed by the **Yearn 6-of-9 ySafe** with **7-day TimelockController** for strategy additions
 
@@ -93,14 +95,14 @@ The cascade remains at most **two Yearn V3 vault layers deep**. Sky-ecosystem co
 
 ### Active Strategies (2 in default queue, 2 with debt)
 
-Default queue order at block 25073237:
+Default queue order at block 25519075:
 
 | # | Strategy | Name | Activation | Current Debt (DAI) | Allocation |
 |---|----------|------|------------|-------------------:|-----------:|
-| 1 | [`0xAeDF7d5F3112552E110e5f9D08c9997Adce0b78d`](https://etherscan.io/address/0xAeDF7d5F3112552E110e5f9D08c9997Adce0b78d) | **DAI to USDS Depositor** | 2025-05-15 | **2,559,595.76** | **27.03%** |
-| 2 | [`0xfF03Dce6d95aa7a30B75EFbaFD11384221B9f9B5`](https://etherscan.io/address/0xfF03Dce6d95aa7a30B75EFbaFD11384221B9f9B5) | **DAI To USDC-1 Depositor** | 2025-10-24 | **6,908,481.99** | **72.97%** |
+| 1 | [`0xAeDF7d5F3112552E110e5f9D08c9997Adce0b78d`](https://etherscan.io/address/0xAeDF7d5F3112552E110e5f9D08c9997Adce0b78d) | **DAI to USDS Depositor** | 2025-05-15 | **2,545,516.51** | **26.81%** |
+| 2 | [`0xfF03Dce6d95aa7a30B75EFbaFD11384221B9f9B5`](https://etherscan.io/address/0xfF03Dce6d95aa7a30B75EFbaFD11384221B9f9B5) | **DAI To USDC-1 Depositor** | 2025-10-24 | **6,951,724.02** | **73.19%** |
 
-Last reports: DAI to USDS Depositor 2026-05-03 (`last_report = 1777780343`); DAI To USDC-1 Depositor 2026-05-03 (`last_report = 1777777319`).
+Last reports: DAI to USDS Depositor 2026-07-12; DAI To USDC-1 Depositor 2026-07-12.
 
 **Removed from queue between April 27 and May 5 (no longer in `get_default_queue()`):**
 
@@ -117,14 +119,14 @@ After the vault-of-vaults unwind:
 | Effective endpoint | Path | Effective share |
 |--------------------|------|----------------:|
 | **Sky / sUSDS (Sky Savings Rate)** | yvDAI-1 → yvUSDC-1 → `USDC to sUSDS Lender` (~67.0%) **AND** yvDAI-1 → yvUSDS-1 → `sUSDS Lender` (~22.6%) | **~89.6%** |
-| **Yearn USDC** (yield source unverified) | yvDAI-1 → yvUSDC-1 → `Yearn USDC` | **~6.2%** |
+| **Morpho Blue lending** (cbBTC + WBTC + wstETH) | yvDAI-1 → yvUSDC-1 → `Yearn USDC` (Morpho MetaMorpho) | **~6.2%** |
 | **Sky USDS Staking Rewards (SPK farm)** | yvDAI-1 → yvUSDS-1 → Spark USDS Compounder → Sky USDS Staking | **~4.3%** |
 | **MakerDAO PSM Lite** (USDC ↔ DAI) | Used by `DAI To USDC-1 Depositor` for inbound DAI → USDC conversion (and reverse on withdrawal) | High during routing |
 | **Sky DAI-USDS Exchanger** (DAI ↔ USDS) | Used by `DAI to USDS Depositor` for inbound DAI → USDS conversion (and reverse on withdrawal) | High during routing |
 | **yvUSDC-1** (intermediate vault) | 73.19% of yvDAI-1 routes through it | Vault-of-vaults dependency |
 | **yvUSDS-1** (intermediate vault) | 26.81% of yvDAI-1 routes through it | Vault-of-vaults dependency |
 
-Net Sky-ecosystem concentration: ~93.9% of deployed DAI (sUSDS + Sky USDS Staking). The remaining ~6.2% is deployed through the `Yearn USDC` strategy whose exact yield destination could not be verified on-chain — marked TODO for further investigation.
+Net Sky-ecosystem concentration: ~93.9% of deployed DAI (sUSDS + Sky USDS Staking). The remaining ~6.2% is deployed through the `Yearn USDC` strategy — a **Yearn-curated Morpho MetaMorpho vault** that supplies USDC into Morpho Blue lending markets against cbBTC, WBTC, and wstETH collateral, providing diversification beyond the Sky ecosystem under the same Yearn governance.
 
 ## Audits and Due Diligence Disclosures
 
@@ -163,6 +165,7 @@ All strategies pass through Yearn's **12-metric risk-scoring framework** ([RISK_
 - **Yearn (Immunefi):** active, **$200,000** max payout (Critical). https://immunefi.com/bounty/yearnfinance/
 - **Yearn (Sherlock):** also listed at https://audits.sherlock.xyz/bug-bounties/30
 - **Sky / MakerDAO (Immunefi):** active, **$10,000,000** max payout (Critical). Scope includes DAI, USDS, sUSDS, PSM. https://immunefi.com/bug-bounty/sky/
+- **Morpho Blue (Immunefi):** active, **$2,500,000** max payout (Critical). https://immunefi.com/bug-bounty/morpho/
 - **Safe Harbor (SEAL):** Yearn is **not** listed on the SEAL Safe Harbor registry
 
 ### On-Chain Complexity
@@ -189,7 +192,7 @@ The vault-of-vaults composition is **not leverage** but is a real complexity sur
 - **Strategy changes:** active management. Between April 27 and May 5, three direct-deposit fallbacks (sDAI, Spark DAI Lender, Aave V3 DAI Lender) were removed from the default queue (and remain absent at July 12). Between May 5 and May 11, the depositor allocation shifted from 79.44 / 20.56 to 72.97 / 27.03 (USDC / USDS). The allocation at July 12 is 73.19 / 26.81 — largely stable since May 11
 - **Vault-of-vaults rewiring (downstream):**
   - Between May 11 and July 12, both intermediate vaults added new strategies. **yvUSDC-1** added a new "Yearn USDC" strategy ([`0x68Aea7b82Df6CcdF76235D46445Ed83f85F845A3`](https://etherscan.io/address/0x68Aea7b82Df6CcdF76235D46445Ed83f85F845A3)) that now holds 8.41% of tracked debt, replacing the old `Spark USDC Lender` ([`0x25f893276544d86a82b1ce407182836F45cb6673`](https://etherscan.io/address/0x25f893276544d86a82b1ce407182836F45cb6673)) which now has 0 tracked debt. The Spark USDC Lender was replaced by a new version at [`0x654a7c4Ae5ac3C853a99F8dbEAD2bC85090F753a`](https://etherscan.io/address/0x654a7c4Ae5ac3C853a99F8dbEAD2bC85090F753a) (currently 0 debt). **yvUSDS-1** added a new "USDS Sky Rewards Compounder" strategy ([`0x0868076663Bbc6638ceDd27704cc8F0Fa53d5b81`](https://etherscan.io/address/0x0868076663Bbc6638ceDd27704cc8F0Fa53d5b81), v3.0.3 TokenizedStrategy) as a successor to the existing `Spark USDS Compounder`, currently with near-zero debt
-  - **Net effect at July 12:** effective endpoint mix is ~89.6% sUSDS / ~6.2% Yearn USDC (yield source unverified) / ~4.3% Sky USDS Staking. Overall Sky-ecosystem concentration dropped from ~100% to ~93.9% as the Spark Lend USDC leg was replaced by the Yearn USDC strategy
+  - **Net effect at July 12:** effective endpoint mix is ~89.6% sUSDS / ~6.2% Morpho Blue lending (via Yearn USDC MetaMorpho) / ~4.3% Sky USDS Staking. Overall Sky-ecosystem concentration dropped from ~100% to ~93.9% as the Spark Lend USDC leg was replaced by the Yearn USDC MetaMorpho vault deploying into Morpho Blue markets
 - **Yearn V3 track record:** V3 framework has been live since May 2024 (~26 months). No V3 vault exploits
 
 **Yearn protocol TVL:** ~$197.5M total across all chains ([DeFiLlama](https://defillama.com/protocol/yearn), April 2026).
@@ -198,7 +201,7 @@ The vault-of-vaults composition is **not leverage** but is a real complexity sur
 
 ## Funds Management
 
-yvDAI-1 deploys ~99.9999% of its DAI via two depositor strategies. Both routes terminate mostly inside the Sky ecosystem, with a ~6.2% leg through a new Yearn USDC strategy whose exact yield source is unverified.
+yvDAI-1 deploys ~99.9999% of its DAI via two depositor strategies. The majority terminates inside the Sky ecosystem, with a ~6.2% leg through the Yearn USDC strategy — a Yearn-curated Morpho MetaMorpho vault that supplies USDC into Morpho Blue lending markets against cbBTC, WBTC, and wstETH collateral.
 
 ### Strategy 1: DAI To USDC-1 Depositor (73.19% allocation)
 
@@ -208,9 +211,9 @@ yvDAI-1 deploys ~99.9999% of its DAI via two depositor strategies. Both routes t
 
 1. **DAI → USDC** via MakerDAO PSM Lite ([`0xf6e72Db5454dd049d0788e411b06CfAF16853042`](https://etherscan.io/address/0xf6e72Db5454dd049d0788e411b06CfAF16853042)) — 1:1 at **0% fee** (`tin = tout = 0`)
 2. **USDC → yvUSDC-1** deposit (ERC-4626)
-3. yvUSDC-1 internally routes ~91.59% to its `USDC to sUSDS Lender` strategy ([`0x7130570BCEfCedBe9d15B5b11A33006156460f8f`](https://etherscan.io/address/0x7130570BCEfCedBe9d15B5b11A33006156460f8f)) → USDC → USDS (or sUSDS-internal conversion) → sUSDS, plus ~8.41% to its `Yearn USDC` strategy ([`0x68Aea7b82Df6CcdF76235D46445Ed83f85F845A3`](https://etherscan.io/address/0x68Aea7b82Df6CcdF76235D46445Ed83f85F845A3)) whose yield destination could not be verified on-chain (TODO). The `Spark USDC Lender` (new version at [`0x654a7c4Ae5ac3C853a99F8dbEAD2bC85090F753a`](https://etherscan.io/address/0x654a7c4Ae5ac3C853a99F8dbEAD2bC85090F753a)) holds 0 debt. The old Spark USDC Lender at [`0x25f893276544d86a82b1ce407182836F45cb6673`](https://etherscan.io/address/0x25f893276544d86a82b1ce407182836F45cb6673) has 0 tracked debt and is no longer in the default queue
+3. yvUSDC-1 internally routes ~91.59% to its `USDC to sUSDS Lender` strategy ([`0x7130570BCEfCedBe9d15B5b11A33006156460f8f`](https://etherscan.io/address/0x7130570BCEfCedBe9d15B5b11A33006156460f8f)) → USDC → USDS (or sUSDS-internal conversion) → sUSDS, plus ~8.41% to its `Yearn USDC` strategy ([`0x68Aea7b82Df6CcdF76235D46445Ed83f85F845A3`](https://etherscan.io/address/0x68Aea7b82Df6CcdF76235D46445Ed83f85F845A3)) — a **Yearn-curated Morpho MetaMorpho vault** that supplies USDC into four Morpho Blue markets against cbBTC, WBTC, and wstETH collateral (LLTV 86% each, AdaptiveCurveIRM). The `Spark USDC Lender` (new version at [`0x654a7c4Ae5ac3C853a99F8dbEAD2bC85090F753a`](https://etherscan.io/address/0x654a7c4Ae5ac3C853a99F8dbEAD2bC85090F753a)) holds 0 debt. The old Spark USDC Lender at [`0x25f893276544d86a82b1ce407182836F45cb6673`](https://etherscan.io/address/0x25f893276544d86a82b1ce407182836F45cb6673) has 0 tracked debt and is no longer in the default queue
 
-**Withdrawal:** reverse path. The user's `redeem` on yvDAI-1 triggers `withdraw` from this strategy → `redeem` from yvUSDC-1 → `withdraw` from yvUSDC-1's downstream (sUSDS Lender or Spark USDC Lender) → unwind into USDC → DAI via PSM. All atomic in the same transaction.
+**Withdrawal:** reverse path. The user's `redeem` on yvDAI-1 triggers `withdraw` from this strategy → `redeem` from yvUSDC-1 → `withdraw` from yvUSDC-1's downstream (sUSDS Lender or Yearn USDC MetaMorpho → Morpho Blue) → unwind into USDC → DAI via PSM. All atomic in the same transaction.
 
 **Strategy parameters:**
 - Activated: 2025-10-24
@@ -260,7 +263,7 @@ The removal of all three direct-deposit fallbacks eliminates the on-chain single
 
 - **PPS:** ERC-4626, fully algorithmic
 - **Strategy `totalAssets()`:** reads the underlying yvUSDC-1 / yvUSDS-1 share balance and converts via ERC-4626 `convertToAssets()` — fully on-chain, real-time
-- **Multi-layer verification:** anyone can independently verify yvDAI-1 → yvUSDC-1 → (sUSDS or Spark Lend USDC) and yvDAI-1 → yvUSDS-1 → Spark USDS Compounder on-chain. Each layer's exchange rate is its own ERC-4626 calculation
+- **Multi-layer verification:** anyone can independently verify yvDAI-1 → yvUSDC-1 → (sUSDS or Yearn USDC MetaMorpho → Morpho Blue) and yvDAI-1 → yvUSDS-1 → Spark USDS Compounder on-chain. Each layer's exchange rate is its own ERC-4626 calculation
 - **Profit / loss reporting:** keepers via `process_report()`, profits unlock over 10 days
 
 The vault-of-vaults adds a small surface area to verify (multiple `totalAssets()` reads) but does not add any off-chain dependency.
@@ -268,13 +271,13 @@ The vault-of-vaults adds a small surface area to verify (multiple `totalAssets()
 ## Liquidity Risk
 
 - **Primary exit:** Redeem yvDAI-1 for DAI via ERC-4626 `withdraw()` / `redeem()`. Triggers reverse pipeline through yvUSDC-1 / yvUSDS-1 (atomic, multi-step in the same transaction)
-- **Highly liquid underlying:** sUSDS holds multi-billion TVL; USDS Staking Rewards has multi-billion USDS staked. yvDAI-1's ~$9.47M is a tiny fraction of underlying capacity
+- **Highly liquid underlying:** sUSDS holds multi-billion TVL; USDS Staking Rewards has multi-billion USDS staked; Morpho Blue markets for cbBTC, WBTC, and wstETH are deep and liquid. yvDAI-1's ~$9.50M is a tiny fraction of underlying capacity
 - **PSM liquidity:** MakerDAO PSM Lite provides deep DAI ↔ USDC liquidity at 1:1, 0% fee. PSM capacity is managed by Sky governance and typically holds billions of USDC
-- **Cascading withdrawal mechanics:** both depositor paths traverse **two Yearn V3 vault layers** (yvDAI-1 → yvUSDC-1 or yvDAI-1 → yvUSDS-1) plus the terminal unstake (sUSDS withdrawal, Spark Lend supply withdrawal, or Spark Compounder unwind). Neither intermediate vault chains through the other, so the cascade is bounded at two Yearn-vault layers. All steps execute atomically in the same transaction
-- **No DEX liquidity needed** — exit is via Sky's own contracts (PSM, Exchanger, sUSDS, USDS Staking) and Spark Lend
+- **Cascading withdrawal mechanics:** both depositor paths traverse **two Yearn V3 vault layers** (yvDAI-1 → yvUSDC-1 or yvDAI-1 → yvUSDS-1) plus the terminal unstake (sUSDS withdrawal, Morpho Blue withdrawal, or Spark Compounder unwind). The Yearn USDC path adds an additional MetaMorpho layer (bounded). Neither intermediate vault chains through the other. All steps execute atomically in the same transaction
+- **No DEX liquidity needed** — exit is via Sky's own contracts (PSM, Exchanger, sUSDS, USDS Staking) and Morpho Blue
 - **Same-value asset:** DAI-denominated vault token — no price-divergence risk
 - **No withdrawal queue or cooldown** — atomic redemption
-- **Deposit limit:** 50M DAI cap vs ~$9.47M TVL (room for +428%)
+- **Deposit limit:** 50M DAI cap vs ~$9.50M TVL (room for +426%)
 
 The cascading multi-layer withdrawal is atomic but has a higher gas cost than a single-strategy vault. For a large institutional withdrawal, the gas of unwinding through both layers plus the terminal Sky / Spark unstakes should be considered when sizing the redemption.
 
@@ -318,13 +321,13 @@ After resolving the vault-of-vaults composition, yvDAI-1's effective dependencie
 | **yvUSDC-1** (intermediate vault) | Critical — 73.19% of deployed funds route through it | Same governance, audits, code as yvDAI-1. See [yvUSDC-1 report](./yearn-yvusdc.md) |
 | **yvUSDS-1** (intermediate vault) | Critical — 26.81% of deployed funds route through it | Same governance, audits, code. See [yvUSDS-1 report](./yearn-yvusds.md) |
 | **Sky / sUSDS** (Sky Savings Rate) | Critical — ~89.6% of effective deployment (via both intermediate vaults) | Multi-billion sUSDS TVL, $10M Immunefi bounty |
-| **Yearn USDC strategy** | Moderate — ~6.2% of effective deployment (via yvUSDC-1) | Custom Yearn-branded strategy (not a standard TokenizedStrategy); yield source could not be verified on-chain (TODO) |
+| **Yearn USDC (Morpho MetaMorpho)** | Moderate — ~6.2% of effective deployment (via yvUSDC-1) | Yearn-curated Morpho MetaMorpho vault supplying USDC into Morpho Blue (cbBTC, WBTC, wstETH collateral; LLTV 86%; AdaptiveCurveIRM). Same Yearn governance (ySafe guardian, Security fee recipient, 3-day timelock). Morpho Blue audited by Cantina, Spearbit, ChainSecurity |
 | **Sky USDS Staking Rewards (SPK farm)** | Moderate — ~4.3% of effective deployment (via yvUSDS-1) | First-party Sky contract; share decreased from ~5.4% at May 11 |
 | **MakerDAO PSM Lite** | High during routing (used by yvUSDC-1 path) | 1:1, 0% fee, audited |
 | **Sky DAI-USDS Exchanger** | High during routing (used by yvUSDS-1 path) | 1:1, no fee, audited |
 | **DAI / USDS / USDC tokens** | Critical | Inherited from each conversion hop |
 
-**Dependency quality:** most dependencies are top-tier — Sky / MakerDAO infrastructure plus Yearn V3 itself. The vault-of-vaults composition concentrates dependency on the Sky ecosystem (~93.9% of effective deployment across sUSDS + USDS Staking) and on Yearn V3's own vault accounting working correctly across two layers. The ~6.2% `Yearn USDC` leg represents an _unverified_ dependency whose yield destination and associated protocol risk could not be determined.
+**Dependency quality:** all dependencies are top-tier — Sky / MakerDAO infrastructure, Morpho Blue (audited by 3+ firms, battle-tested lending primitive), plus Yearn V3 itself. The vault-of-vaults composition concentrates dependency on the Sky ecosystem (~93.9% of effective deployment across sUSDS + USDS Staking) and on Yearn V3's own vault accounting working correctly across two vault layers. The ~6.2% Yearn USDC leg is a Yearn-curated Morpho MetaMorpho vault under the same Yearn governance, with the Morpho Blue protocol as a well-audited, non-Sky dependency that provides collateral diversification.
 
 ## Operational Risk
 
@@ -355,7 +358,7 @@ Yearn maintains the [`monitoring`](https://github.com/yearn/monitoring) reposito
 | DAI to USDS Depositor | [`0xAeDF7d5F3112552E110e5f9D08c9997Adce0b78d`](https://etherscan.io/address/0xAeDF7d5F3112552E110e5f9D08c9997Adce0b78d) | `totalAssets()`, `isShutdown()`, keeper report |
 | yvUSDC-1 (upstream dependency) | [`0xBe53A109B494E5c9f97b9Cd39Fe969BE68BF6204`](https://etherscan.io/address/0xBe53A109B494E5c9f97b9Cd39Fe969BE68BF6204) | PPS, shutdown state, strategy queue |
 | yvUSDS-1 (upstream dependency) | [`0x182863131F9a4630fF9E27830d945B1413e347E8`](https://etherscan.io/address/0x182863131F9a4630fF9E27830d945B1413e347E8) | PPS, shutdown state, strategy queue |
-| Yearn USDC strategy | [`0x68Aea7b82Df6CcdF76235D46445Ed83f85F845A3`](https://etherscan.io/address/0x68Aea7b82Df6CcdF76235D46445Ed83f85F845A3) | `totalAssets()`, yield destination (TODO: unverified) |
+| Yearn USDC (Morpho MetaMorpho) | [`0x68Aea7b82Df6CcdF76235D46445Ed83f85F845A3`](https://etherscan.io/address/0x68Aea7b82Df6CcdF76235D46445Ed83f85F845A3) | `totalAssets()`, `totalSupply()`, `supplyQueue()`, Morpho Blue market utilization rates |
 | USDS Sky Rewards Compounder | [`0x0868076663Bbc6638ceDd27704cc8F0Fa53d5b81`](https://etherscan.io/address/0x0868076663Bbc6638ceDd27704cc8F0Fa53d5b81) | `totalAssets()`, debt migration from Spark USDS Compounder |
 | MakerDAO PSM Lite | [`0xf6e72Db5454dd049d0788e411b06CfAF16853042`](https://etherscan.io/address/0xf6e72Db5454dd049d0788e411b06CfAF16853042) | `tin`, `tout` (fee parameters) |
 | Sky DAI-USDS Exchanger | [`0x3225737a9Bbb6473CB4a45b7244ACa2BeFdB276A`](https://etherscan.io/address/0x3225737a9Bbb6473CB4a45b7244ACa2BeFdB276A) | Pause state |
@@ -370,7 +373,7 @@ Yearn maintains the [`monitoring`](https://github.com/yearn/monitoring) reposito
 - **DAI-USDS Exchanger pause state**
 - **Sky USDS Staking Rewards pause / migration** (affects ~4.3% of effective deployment via yvUSDS-1)
 - **Sky sUSDS pause / migration** (affects ~89.6% of effective deployment via both intermediate vaults — dominant exposure)
-- **Yearn USDC strategy event or exploit** (affects ~6.2% of effective deployment via yvUSDC-1; yield source unverified)
+- **Yearn USDC MetaMorpho: guardian or curator changes, market removal, or exploit** (affects ~6.2% of effective deployment via yvUSDC-1)
 - **ySafe / Brain / Security signer or threshold changes**
 
 ### Monitoring Functions
@@ -403,14 +406,14 @@ Yearn maintains the [`monitoring`](https://github.com/yearn/monitoring) reposito
 ### Key Risks
 
 - **Vault-of-vaults composition (2 layers):** both depositor paths traverse two Yearn V3 vault layers. A bug or accounting issue at any layer cascades. Each layer's emergency state (shutdown, deposit pause) directly affects yvDAI-1
-- **Effective concentration into Sky ecosystem:** ~93.9% of deployed DAI ultimately ends up in Sky-ecosystem contracts (sUSDS ~89.6%, Sky USDS Staking ~4.3%). The remaining ~6.2% is deployed through the `Yearn USDC` strategy whose exact yield destination is unverified. A bug or governance failure at the sUSDS contract would affect ~89.6% of deployed value; a Sky-wide systemic failure would affect ~93.9%
+- **Effective concentration into Sky ecosystem:** ~93.9% of deployed DAI ultimately ends up in Sky-ecosystem contracts (sUSDS ~89.6%, Sky USDS Staking ~4.3%). The remaining ~6.2% is deployed through the `Yearn USDC` MetaMorpho vault into Morpho Blue lending markets (cbBTC, WBTC, wstETH collateral) — a non-Sky dependency under the same Yearn governance. A bug or governance failure at the sUSDS contract would affect ~89.6% of deployed value; a Sky-wide systemic failure would affect ~93.9%
 - **Sky Savings Rate / SPK reward rate variability:** affects yield, not principal
 - **PSM fee risk:** currently 0%, but Sky governance can change. Above 0.05% the strategy can fall back to Uniswap V3 with 0.5% slippage
 - **Intermediate-vault dependency:** both paths have a single intermediate Yearn V3 vault (yvUSDC-1 or yvUSDS-1) between yvDAI-1 and the terminal Sky / Spark contracts
 
 ### Critical Risks
 
-- None identified. The dominant systemic risk is a Sky USDS / sUSDS / USDS Staking failure, which would simultaneously impair the four risk-1 stable vaults — but that is a system-wide DeFi event, not a Yearn-specific risk. The ~6.2% `Yearn USDC` leg uses an unverified yield source; a bug or exploit in that strategy would affect ~6.2% of deployed DAI.
+- None identified. The dominant systemic risk is a Sky USDS / sUSDS / USDS Staking failure, which would simultaneously impair the four risk-1 stable vaults — but that is a system-wide DeFi event, not a Yearn-specific risk. The ~6.2% Yearn USDC Morpho leg diversifies into non-Sky collateral (cbBTC/WBTC/wstETH) under Yearn governance, reducing the single-ecosystem concentration from ~100% to ~93.9%. A bug or exploit in the Yearn USDC MetaMorpho strategy would affect ~6.2% of deployed DAI.
 
 ---
 
@@ -475,11 +478,11 @@ Yearn maintains the [`monitoring`](https://github.com/yearn/monitoring) reposito
 
 | Factor | Assessment |
 |--------|-----------|
-| Protocol count (effective) | 1 ecosystem (Sky) for ~93.9% of effective deployment plus a ~6.2% unverified Yearn USDC leg; plus dependency on Yearn V3's own vault-of-vaults accounting (bounded at 2 layers) |
-| Criticality | Sky sUSDS critical (~89.6% of deployed funds, via both intermediate vaults); Yearn USDC strategy moderate (~6.2% via yvUSDC-1, yield source unverified); Sky USDS Staking moderate (~4.3% via yvUSDS-1); same-team Yearn V3 dependency at both intermediate vaults |
-| Quality | Top-tier (Sky $10M bounty, multi-billion sUSDS TVL) plus same Yearn V3 framework; Yearn USDC strategy quality unverified |
+| Protocol count (effective) | 2 ecosystems (Sky ~93.9%, Morpho Blue ~6.2%); plus dependency on Yearn V3's own vault-of-vaults accounting (bounded at 2 Yearn vault layers, 3 including MetaMorpho) |
+| Criticality | Sky sUSDS critical (~89.6% of deployed funds, via both intermediate vaults); Yearn USDC MetaMorpho moderate (~6.2% via yvUSDC-1, deploys into Morpho Blue cbBTC/WBTC/wstETH lending under Yearn governance); Sky USDS Staking moderate (~4.3% via yvUSDS-1); same-team Yearn V3 dependency at both intermediate vaults |
+| Quality | Top-tier: Sky $10M bounty, multi-billion sUSDS TVL; Morpho Blue audited by Cantina, Spearbit, ChainSecurity with $2.5M Immunefi bounty; same Yearn V3 framework throughout |
 
-**Dependencies Score: 2.5 / 5** — Sky-ecosystem effective concentration (~93.9%) plus a two-layer vault-of-vaults dependency on Yearn V3 itself, with an unverified 6.2% leg through a custom Yearn USDC strategy. The Sky ecosystem quality is excellent, but the concentration and unverified leg warrant 2.5.
+**Dependencies Score: 2.5 / 5** — Sky-ecosystem effective concentration (~93.9%) plus a two-layer vault-of-vaults dependency on Yearn V3 itself (three layers including the MetaMorpho vault). The ~6.2% Morpho Blue leg provides collateral diversification under the same Yearn governance. Both Sky and Morpho are top-tier protocols. The concentration still warrants 2.5, but the composition is now verified and understood.
 
 **Centralization Score = (1.0 + 1.0 + 2.5) / 3 ≈ 1.5**
 
@@ -573,7 +576,7 @@ Yearn maintains the [`monitoring`](https://github.com/yearn/monitoring) reposito
 - **Downstream rewiring (the dominant change vector at recent snapshots):**
   - if yvUSDC-1 reroutes materially away from its current `USDC to sUSDS Lender` strategy, yvDAI-1's effective endpoint mix changes accordingly — ~67.0 percentage points of the sUSDS share is inherited from yvUSDC-1
   - if yvUSDS-1 rewires its current 84.09 / 15.91 sUSDS Lender / Spark Compounder split, yvDAI-1's secondary exposure changes accordingly — ~22.6 percentage points of the sUSDS share and the entire ~4.3% USDS Staking share are inherited from yvUSDS-1
-  - **Yearn USDC strategy:** reassess if the `Yearn USDC` strategy's yield destination is identified or changed materially; the strategy currently holds ~6.2% of effective deployment and its protocol risk is unverified
+  - **Yearn USDC MetaMorpho:** reassess if the strategy's Morpho Blue market allocations change materially, if markets are added/removed from the supply queue, or if the guardian/curator changes. Current allocation: cbBTC ~74.7% / WBTC ~14.7% / wstETH ~10.7% of ~$2.15M TVL
   - **USDS Sky Rewards Compounder:** reassess if the new `USDS Sky Rewards Compounder` ([`0x0868076663Bbc6638ceDd27704cc8F0Fa53d5b81`](https://etherscan.io/address/0x0868076663Bbc6638ceDd27704cc8F0Fa53d5b81), v3.0.3) replaces the existing `Spark USDS Compounder` in the yvUSDS-1 default queue and begins receiving meaningful debt
 - **Vault-of-vaults composition:**
   - **reassess if a new strategy is added that creates a third Yearn-vault layer** (the cascade is currently 2 layers deep)
@@ -632,12 +635,12 @@ Yearn maintains the [`monitoring`](https://github.com/yearn/monitoring) reposito
 │            │                                   │                          │
 │            ▼                                   ▼                          │
 │   sUSDS (Sky Savings Rate)             sUSDS + Sky USDS Staking Rewards │
-│   + Yearn USDC (yield TBD)             (SPK farm)                       │
+│   + Morpho Blue (cbBTC/WBTC/wstETH)    (SPK farm)                       │
 └─────────────────────────────────────────────────────────────────────────┘
 
 Effective endpoint mix for yvDAI-1's deployed DAI (July 12, 2026):
   ~89.6%  Sky sUSDS         (combined: yvUSDC-1→sUSDS Lender ~67.0% + yvUSDS-1→sUSDS Lender ~22.6%)
-  ~6.2%   Yearn USDC        (via yvUSDC-1 → Yearn USDC, yield source unverified)
+  ~6.2%   Morpho Blue        (via yvUSDC-1 → Yearn USDC MetaMorpho → Morpho Blue lending: cbBTC, WBTC, wstETH)
   ~4.3%   Sky USDS Staking   (via yvUSDS-1 → Spark USDS Compounder)
 ```
 
@@ -664,4 +667,4 @@ To shorten the delay, Daddy 6/9 must propose `updateDelay()`, wait 7 days during
 | Date | Score | Notes |
 |------|-------|-------|
 | May 11, 2026 | 1.3/5.0 | Initial assessment. yvDAI-1 with vault-of-vaults composition routing ~100% into Sky ecosystem via yvUSDC-1 (73%) and yvUSDS-1 (27%). Spark Lend USDC and sUSDS legs. |
-| July 12, 2026 | 1.3/5.0 | Reassessment: TVL stable at ~$9.50M. yvUSDC-1 added new "Yearn USDC" strategy (8.41% tracked debt, yield source unverified — TODO). Old Spark USDC Lender replaced. yvUSDS-1 added v3.0.3 "USDS Sky Rewards Compounder" (currently near-zero debt). Sky-ecosystem concentration dropped from ~100% to ~93.9%. Effective endpoint mix: ~89.6% sUSDS / ~6.2% Yearn USDC / ~4.3% Sky USDS Staking. All governance roles, multisig thresholds, and timelock delay unchanged. Score unchanged at 1.3. |
+| July 12, 2026 | 1.3/5.0 | Reassessment: TVL stable at ~$9.50M. yvUSDC-1 added new "Yearn USDC" strategy (8.41% tracked debt) — verified as a Yearn-curated Morpho MetaMorpho vault supplying USDC into Morpho Blue (cbBTC, WBTC, wstETH collateral, LLTV 86%). Old Spark USDC Lender replaced. yvUSDS-1 added v3.0.3 "USDS Sky Rewards Compounder" (currently near-zero debt). Sky-ecosystem concentration dropped from ~100% to ~93.9%. Effective endpoint mix: ~89.6% sUSDS / ~6.2% Morpho Blue / ~4.3% Sky USDS Staking. All governance roles, multisig thresholds, and timelock delay unchanged. Score unchanged at 1.3. |

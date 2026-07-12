@@ -85,6 +85,16 @@ nodes:
     address: "0x182863131F9a4630fF9E27830d945B1413e347E8"
     category: dependency
 
+  # External dependencies (Morpho MetaMorpho, downstream of yvUSDC-1)
+  - id: yearn-usdc-metamorpho
+    label: Yearn USDC (Morpho MetaMorpho)
+    address: "0x68Aea7b82Df6CcdF76235D46445Ed83f85F845A3"
+    category: dependency
+  - id: morpho-blue
+    label: Morpho Blue
+    address: "0xBBBBBbbBBb9cC5e90e3b3Af64bdAF62C37EEFFCb"
+    category: dependency
+
   # External dependencies (Sky conversion infrastructure)
   - id: psm-lite
     label: MakerDAO PSM Lite (DAI ↔ USDC)
@@ -182,3 +192,13 @@ edges:
     to: yvUSDS
     kind: deposits-into
     label: "USDS → yvUSDS-1"
+
+  # yvUSDC-1 downstream: sUSDS Lender (~91.59%) and Yearn USDC MetaMorpho (~8.41%)
+  - from: yvUSDC
+    to: yearn-usdc-metamorpho
+    kind: deposits-into
+    label: "~8.41% via Yearn USDC"
+  - from: yearn-usdc-metamorpho
+    to: morpho-blue
+    kind: deposits-into
+    label: "cbBTC, WBTC, wstETH markets"
