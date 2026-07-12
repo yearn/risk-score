@@ -54,7 +54,7 @@ nodes:
   - id: btc-treasury
     label: Bitcoin Treasury
     category: strategy
-    note: "bc1pdwu79dady576y3fupmm82m3g7p2p9f6hgyeqy0tdg7ztxg7xrayqlkl8j9 — 3,361.95 BTC vs 3,273 UBTC"
+    note: "bc1pdwu79dady576y3fupmm82m3g7p2p9f6hgyeqy0tdg7ztxg7xrayqlkl8j9 — 4,765.12 BTC vs 3,272.76 UBTC"
 
   # === External dependencies ===
   - id: dep-bitcoin
@@ -73,6 +73,11 @@ nodes:
     label: Morpho Blue UBTC-USDC Market
     category: dependency
     note: Market id 0x45af9c…942f; 77% LLTV; uses UBTC as collateral
+  - id: dep-hxxi
+    label: VaultV3 hXXI
+    address: "0xf44f49e6577b3934f981c6f0629d15154d2606e6"
+    category: dependency
+    note: HyperliquidTwentyOne vault; 33.2 UBTC (~$1.95M); UBTC as asset()
 
 edges:
   # === Governance ===
@@ -121,7 +126,7 @@ edges:
   - from: UBTC
     to: btc-treasury
     kind: allocates-to
-    label: 1:1 BTC backing (over-backed ~2.7%)
+    label: 1:1 BTC backing (over-backed ~45.6%)
   - from: btc-treasury
     to: dep-bitcoin
     kind: deposits-into
@@ -140,3 +145,7 @@ edges:
     to: dep-morpho
     kind: deposits-into
     label: collateral on UBTC-USDC market
+  - from: UBTC
+    to: dep-hxxi
+    kind: deposits-into
+    label: underlying asset for hXXI vault

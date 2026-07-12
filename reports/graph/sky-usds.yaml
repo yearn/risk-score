@@ -1,0 +1,111 @@
+slug: sky-usds
+title: Sky USDS / sUSDS - Contract Dependency Graph
+chain: ethereum
+categories:
+  - { id: vault, label: Token / Vault }
+  - { id: governance, label: Governance }
+  - { id: infra, label: Protocol Infrastructure }
+  - { id: dependency, label: External Dependency }
+nodes:
+  # sUSDS is listed before USDS on purpose: getGraphIndex() registers the
+  # FIRST `vault` node as this graph's cross-link anchor. Integrating graphs
+  # (yvUSDS / yvUSDC / yvUSD) depend on the sUSDS address, not USDS directly,
+  # so sUSDS must be the anchor for their dependency cards to drill in here.
+  - id: susds
+    label: sUSDS
+    address: "0xa3931d71877C0E7a3148CB7Eb4463524FEc27fbD"
+    category: vault
+    note: "ERC-4626 savings wrapper; totalAssets() ~5.89B USDS at June 18, 2026 reassessment."
+  - id: usds
+    label: USDS
+    address: "0xdC035D45d973E3EC169d2276DDab16f1e407384F"
+    category: vault
+  - id: wrapper
+    label: USDS LitePSM Wrapper
+    address: "0xA188EEC8F81263234dA3622A406892F3D630f98c"
+    category: infra
+  - id: dai-usds
+    label: DAI-USDS Converter
+    address: "0x3225737a9Bbb6473CB4a45b7244ACa2BeFdB276A"
+    category: infra
+  - id: usds-join
+    label: USDS Join
+    address: "0x3C0f895007CA717Aa01c8693e59DF1e8C3777FEB"
+    category: infra
+  - id: lite-psm
+    label: DAI-USDC LitePSM
+    address: "0xf6e72Db5454dd049d0788e411b06CfAF16853042"
+    category: infra
+  - id: pocket
+    label: USDC Pocket
+    address: "0x37305B1cD40574E4C5Ce33f8e8306Be057fD7341"
+    category: infra
+    note: "Holds ~4.11B USDC at June 18, 2026 reassessment."
+  - id: vat
+    label: MCD VAT
+    address: "0x35D1b3F3D7966A1DFe207aa4514C12a259A0492B"
+    category: infra
+  - id: lite-psm-mom
+    label: LitePSM Mom
+    address: "0x467b32b0407Ad764f56304420Cddaa563bDab425"
+    category: governance
+  - id: chief
+    label: MCD Chief
+    address: "0x929d9A1435662357F54AdcF64DcEE4d6b867a6f9"
+    category: governance
+  - id: pause
+    label: MCD Pause
+    address: "0xbE286431454714F511008713973d3B053A2d38f3"
+    category: governance
+    note: "48 hour GSM delay."
+  - id: pause-proxy
+    label: MCD PauseProxy
+    address: "0xBE8E3e3618f7474F8cB1d074A26afFef007E98FB"
+    category: governance
+  - id: sky
+    label: SKY
+    address: "0x56072C95FAA701256059aa122697B133aDEd9279"
+    category: governance
+  - id: circle-usdc
+    label: Circle USDC
+    address: "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"
+    category: dependency
+  - id: dai
+    label: DAI
+    address: "0x6B175474E89094C44Da98b954EedeAC495271d0F"
+    category: dependency
+  - id: layerzero
+    label: LayerZero V2
+    category: dependency
+    note: "Cross-chain messaging protocol. Sky uses OFT Adapters for USDS/sUSDS bridging. KelpDAO incident April 2026: single-DVN config exploited; LZ now enforces multi-DVN. Sky's OFT owner = PauseProxy, no mint authority on underlying tokens."
+  - id: skylink
+    label: SkyLink
+    category: dependency
+    note: "Cross-chain transport for USDS/sUSDS. SkyLink is a LayerZero-compatible bridge that allows for cross-chain transfers of USDS/sUSDS between Ethereum and other chains."
+  - id: chainlink
+    label: Chainlink / Chronicle
+    category: dependency
+    note: "Oracle infrastructure for collateral pricing through MCD_SPOT."
+edges:
+  - { from: usds, to: susds, kind: deposits-into, label: "USDS -> sUSDS" }
+  - { from: wrapper, to: lite-psm, kind: routes-through, label: "USDS <-> USDC" }
+  - { from: wrapper, to: dai-usds, kind: routes-through, label: "DAI <-> USDS" }
+  - { from: dai-usds, to: usds-join, kind: routes-through, label: "mint/burn via join" }
+  - { from: usds-join, to: usds, kind: mints, label: "ward" }
+  - { from: usds-join, to: vat, kind: routes-through, label: "settles internal debt" }
+  - { from: lite-psm, to: pocket, kind: routes-through, label: "USDC reserves" }
+  - { from: pocket, to: circle-usdc, kind: deposits-into, label: "USDC" }
+  - { from: dai-usds, to: dai, kind: routes-through, label: "1:1 converter" }
+  - { from: vat, to: chainlink, kind: routes-through, label: "oracle-priced ilks" }
+  - { from: usds, to: layerzero, kind: routes-through, label: "OFT bridge (adapter: 0x1e1D...01B8)" }
+  - { from: usds, to: skylink, kind: routes-through, label: "SkyLink bridge" }
+  - { from: sky, to: chief, kind: deposits-into, label: "locked voting" }
+  - { from: chief, to: pause, kind: controls, label: "hat schedules spells" }
+  - { from: pause, to: pause-proxy, kind: controls, label: "exec after 48h" }
+  - { from: pause-proxy, to: usds, kind: holds-role, label: "ward / upgrade authority" }
+  - { from: pause-proxy, to: susds, kind: holds-role, label: "ward / upgrade authority" }
+  - { from: pause-proxy, to: usds, kind: mints, label: "ward can grant new minters" }
+  - { from: pause-proxy, to: lite-psm, kind: controls, label: "file parameters" }
+  - { from: pause-proxy, to: lite-psm-mom, kind: controls, label: "owner" }
+  - { from: chief, to: lite-psm-mom, kind: controls, label: "authority" }
+  - { from: lite-psm-mom, to: lite-psm, kind: controls, label: "emergency halt" }

@@ -1,5 +1,6 @@
 {
   "name": "risk-score-frontend",
+  "license": "AGPL-3.0-only",
   "type": "module",
   "scripts": {
     "dev": "node scripts/update_stats.mjs && astro dev",
@@ -8,14 +9,15 @@
     "update-stats": "node scripts/update_stats.mjs"
   },
   "dependencies": {
-    "@astrojs/vercel": "10.0.7",
+    "@astrojs/vercel": "10.0.8",
+    "@plausible-analytics/tracker": "0.4.5",
     "@resvg/resvg-js": "2.6.2",
-    "astro": "6.3.8",
+    "astro": "6.4.2",
     "cytoscape": "3.33.4",
-    "cytoscape-dagre": "3.0.0",
+    "cytoscape-dagre": "4.0.0",
     "cytoscape-dom-node": "2.1.0",
-    "js-yaml": "4.1.1",
-    "marked": "18.0.4",
+    "js-yaml": "4.2.0",
+    "marked": "18.0.5",
     "satori": "0.26.0"
   }
 }

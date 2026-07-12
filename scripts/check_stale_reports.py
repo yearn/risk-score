@@ -28,7 +28,7 @@ DEFAULT_REPO = "yearn/risk-score"
 PUBLIC_REPORT_BASE_URL = "https://risk.yearn.farm/report"
 
 ASSESSMENT_LINE_RE = re.compile(r"\*\*Assessment Date:\*\*\s*([^\n]+)", re.IGNORECASE)
-WARNING_LINE_RE = re.compile(r"\*\*Warning:\*\*\s*([^\n]+)", re.IGNORECASE)
+STATUS_LINE_RE = re.compile(r"\*\*Status:\*\*\s*([^\n]+)", re.IGNORECASE)
 DATE_RE = re.compile(
     r"\b("
     r"January|February|March|April|May|June|July|August|September|October|November|December"
@@ -36,6 +36,13 @@ DATE_RE = re.compile(
 )
 TITLE_RE = re.compile(r"^#\s+(.+)$", re.MULTILINE)
 SCORE_RE = re.compile(r"\*\*Final Score:\s*([\d.]+)\s*/\s*5\.0\*\*")
+TERMINAL_STATUSES = {
+    "HACKED",
+    "DEAD",
+    "DEPRECATED",
+    "WIND-DOWN",
+    "WINDDOWN",
+}
 
 logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
 log = logging.getLogger("stale-reports")
@@ -64,6 +71,28 @@ def parse_assessment_date(content: str) -> datetime | None:
     return max(dates) if dates else None
 
 
+def header_block(content: str) -> str:
+    """Return the title/metadata block before the first report section."""
+    return content.split("\n## ", 1)[0]
+
+
+def normalize_status(raw: str | None) -> str | None:
+    """Return the normalized status tag, matching the website parser."""
+    if not raw:
+        return None
+    status = re.split(r"[\s(]", raw.strip().upper(), maxsplit=1)[0]
+    status = re.sub(r"[^A-Z-]", "", status)
+    return status or None
+
+
+def terminal_status(header: str) -> str | None:
+    match = STATUS_LINE_RE.search(header)
+    status = normalize_status(match.group(1) if match else None)
+    if status in TERMINAL_STATUSES:
+        return status
+    return None
+
+
 def git_last_modified(path: Path) -> datetime | None:
     try:
         out = subprocess.check_output(
@@ -79,13 +108,11 @@ def git_last_modified(path: Path) -> datetime | None:
 
 def parse_report(path: Path) -> dict:
     content = path.read_text()
+    header = header_block(content)
     title_match = TITLE_RE.search(content)
     title = title_match.group(1).strip() if title_match else path.stem
-    score_match = SCORE_RE.search(content)
+    score_match = SCORE_RE.search(header)
     score = score_match.group(1) if score_match else None
-    warning_match = WARNING_LINE_RE.search(content)
-    warning = warning_match.group(1).strip() if warning_match else None
-
     date = parse_assessment_date(content)
     source = "report-header"
     if date is None:
@@ -99,7 +126,7 @@ def parse_report(path: Path) -> dict:
         "score": score,
         "date": date,
         "date_source": source,
-        "warning": warning,
+        "terminal_status": terminal_status(header),
     }
 
 
@@ -231,11 +258,11 @@ def main() -> int:
     failed_count = 0
     for path in sorted(REPORTS_DIR.glob("*.md")):
         report = parse_report(path)
-        if report["warning"]:
+        if report["terminal_status"]:
             log.info(
-                "SKIP %s — terminal warning: %s",
+                "SKIP %s — terminal status: %s",
                 report["slug"],
-                report["warning"],
+                report["terminal_status"],
             )
             skipped_count += 1
             continue

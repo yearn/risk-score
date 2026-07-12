@@ -75,6 +75,9 @@ const ogImageUrl = new URL(ogImage, Astro.site ?? Astro.url.origin).href;
         document.documentElement.classList.add("light");
       }
     </script>
+    <script>
+      import "../scripts/plausible";
+    </script>
   </head>
   <body class={bare ? "is-bare" : "has-bg"}>
     {!bare && (

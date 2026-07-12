@@ -58,26 +58,32 @@ nodes:
     label: Multisig (3-of-5 Safe)
     address: "0x33333333bd7045f1a601a1e289d7ab21036fb5ef"
     category: governance
-    note: PROPOSER + EXECUTOR + CANCELLER on Timelock
-  - id: timelock
-    label: TimelockController (24h)
+    note: PROPOSER + EXECUTOR + CANCELLER on both timelocks
+  - id: timelock-24h
+    label: TimelockController (24h, config)
     address: "0x1dCcD4628d48a50C1A7adEA3848bcC869f08f8C2"
     category: governance
-    note: Owner of all core contracts
-  - id: emergency-controller
-    label: EmergencyController
+    note: Owner of MorphoCredit, ProtocolConfig, CreditLine, MarkdownController; 24h delay
+  - id: timelock-7d
+    label: TimelockController (7d, upgrades)
+    address: "0x3D3C41419Ab401cd25055E8f9421D7D96d887885"
     category: governance
-    note: EMERGENCY_AUTHORIZED_ROLE; bypasses timelock for binary pause / debt-cap=0
+    note: Owns all 5 ProxyAdmins; 7-day delay for implementation upgrades; self-administered
+  - id: emergency-controller
+    label: EmergencyController v2
+    address: "0x84b31b84917485e221305edf590b8e3660d2e051"
+    category: governance
+    note: EMERGENCY_AUTHORIZED_ROLE; bypasses both timelocks for binary pause / debt-cap=0
 
   # === Strategies / Capital deployment ===
   - id: aave-strategy
     label: Aave V3 Idle Reserves
     category: strategy
-    note: Baseline yield on idle USDC; Phase 1 "risk-off" mode
+    note: Baseline yield on idle USDC (~$7.28M, ~27% of totalAssets)
   - id: unsecured-loans
     label: Unsecured Credit Lines
     category: strategy
-    note: ~$7.2M borrowed (44% utilization); base rate + risk premium
+    note: ~$19.81M borrowed (~73% utilization); base rate + risk premium
 
   # === External dependencies ===
   - id: aave-v3-usdc
@@ -97,36 +103,45 @@ nodes:
     category: dependency
     note: Verifies zkTLS proofs; early-stage infra
   - id: insurance-fund
-    label: Insurance Fund ($1M USDC)
+    label: Insurance Fund (~$1.02M USDC)
+    address: "0x4507B5B23340D248457d955a211C8B0634D29935"
     category: dependency
-    note: Second-loss buffer after sUSD3
+    note: First-loss buffer (waEthUSDC); ~39% borrow-book coverage
 
 edges:
   # === Governance flow ===
   - from: multisig
-    to: timelock
+    to: timelock-24h
     kind: proposes-on
-    label: PROPOSER + EXECUTOR + CANCELLER
-  - from: timelock
+    label: PROPOSER + EXECUTOR + CANCELLER (24h)
+  - from: multisig
+    to: timelock-7d
+    kind: proposes-on
+    label: PROPOSER + EXECUTOR + CANCELLER (7d)
+  - from: timelock-24h
     to: morpho-credit
     kind: controls
     label: owner (24h delay)
-  - from: timelock
-    to: USD3
-    kind: controls
-    label: proxy admin (24h delay)
-  - from: timelock
+  - from: timelock-24h
     to: protocol-config
     kind: controls
     label: owner (24h delay)
-  - from: timelock
+  - from: timelock-24h
     to: credit-line
     kind: controls
-    label: owner
+    label: owner (24h delay)
+  - from: timelock-7d
+    to: USD3
+    kind: controls
+    label: proxy admin (7d delay)
+  - from: timelock-7d
+    to: morpho-credit
+    kind: controls
+    label: proxy admin (7d delay)
   - from: emergency-controller
     to: morpho-credit
     kind: holds-role
-    label: EMERGENCY_AUTHORIZED_ROLE (bypass timelock)
+    label: EMERGENCY_AUTHORIZED_ROLE (bypass both timelocks)
 
   # === Internal vault flow ===
   - from: sUSD3
@@ -142,11 +157,11 @@ edges:
   - from: morpho-credit
     to: aave-strategy
     kind: allocates-to
-    label: "idle reserves (~56%)"
+    label: "idle reserves (~27%)"
   - from: morpho-credit
     to: unsecured-loans
     kind: allocates-to
-    label: "~44% utilization"
+    label: "~73% utilization"
 
   # === Credit underwriting wiring ===
   - from: credit-line
@@ -186,4 +201,4 @@ edges:
   - from: USD3
     to: insurance-fund
     kind: routes-through
-    label: $1M loss buffer
+    label: first-loss buffer ($1.02M)

@@ -1,15 +1,35 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
 import { protocolIconUrl } from "../lib/icons";
-import { protocols } from "../data/monitoring";
+import { FALLBACK_PROTOCOLS, transformApiProtocols } from "../data/monitoring";
+import type { ApiMonitoringResponse } from "../data/monitoring";
+
+const API_URL = import.meta.env.MONITORING_API_URL;
+const API_TOKEN = import.meta.env.MONITORING_API_TOKEN;
+
+let protocols = FALLBACK_PROTOCOLS;
+
+if (API_URL) {
+  try {
+    const headers: Record<string, string> = { Accept: "application/json" };
+    if (API_TOKEN) {
+      headers["Authorization"] = `Bearer ${API_TOKEN}`;
+    }
+    const res = await fetch(`${API_URL}/v1/monitoring`, { headers });
+    if (res.ok) {
+      const json: ApiMonitoringResponse = await res.json();
+      protocols = transformApiProtocols(json.data);
+    } else {
+      console.warn(`Monitoring API returned ${res.status}, using fallback data.`);
+    }
+  } catch (e) {
+    console.warn(`Monitoring API unreachable (${(e as Error).message}), using fallback data.`);
+  }
+}
 ---
 
 <BaseLayout title="Monitoring — Yearn Curation" ogUrl="/monitoring/" ogImage="/og/default.png">
   <section class="page-hero">
-    <div class="section-eyebrow">
-      <span class="pulse-dot"></span>
-      Continuous monitoring
-    </div>
     <h1>Live protocol monitors</h1>
     <p class="page-sub">
       Protocols actively monitored by Yearn Curation. Alerts are streamed to
@@ -44,7 +64,7 @@ import { protocols } from "../data/monitoring";
     {protocols.map((p) => {
       const iconUrl = protocolIconUrl(p.defillamaSlug);
       return (
-        <div class="protocol-accordion" data-name={p.name.toLowerCase()}>
+        <div class="protocol-accordion" data-name={p.name.toLowerCase()} data-api-protocol={p.apiProtocol}>
           <div class="card-glow" aria-hidden="true"></div>
           <button class="accordion-trigger" aria-expanded="false">
             <div class="accordion-left">
@@ -60,7 +80,12 @@ import { protocols } from "../data/monitoring";
                 <span class="protocol-name">{p.name}</span>
                 <span class="protocol-meta">
                   <span class="meta-pill">{p.items.length} monitors</span>
-                  <span class="meta-pill meta-pill--blue">{p.frequency}</span>
+                  {p.apiProtocol && (
+                    <span class="last-alert" hidden title="Most recent alert">
+                      <span class="last-alert-dot"></span>
+                      <span class="last-alert-text"></span>
+                    </span>
+                  )}
                 </span>
               </div>
             </div>
@@ -77,6 +102,18 @@ import { protocols } from "../data/monitoring";
                 </li>
               ))}
             </ul>
+            <div class="monitor-links">
+              <a class="history-link" href={`/monitoring/${p.id}/`}>
+                View alert history
+                <span aria-hidden="true">&rarr;</span>
+              </a>
+              {p.reportSlug && (
+                <a class="report-link" href={`/report/${p.reportSlug}/`}>
+                  View risk report
+                  <span aria-hidden="true">&rarr;</span>
+                </a>
+              )}
+            </div>
           </div>
         </div>
       );
@@ -89,6 +126,27 @@ import { protocols } from "../data/monitoring";
     </div>
     <p>No monitored protocols match your search.</p>
   </div>
+
+  <section class="recent-alerts" id="recent-alerts" hidden>
+    <div class="recent-head">
+      <span class="recent-title">Recent alerts</span>
+      <span class="recent-sub">across all monitored protocols</span>
+    </div>
+    <table class="recent-table" id="recent-table">
+      <thead>
+        <tr>
+          <th>Protocol</th>
+          <th>Message</th>
+          <th>Time</th>
+        </tr>
+      </thead>
+      <tbody id="recent-tbody"></tbody>
+    </table>
+  </section>
+
+  <p class="monitoring-footer">
+    <a href="/monitoring/status/">API integration status &rarr;</a>
+  </p>
 
   <script is:inline>
     (() => {
@@ -132,6 +190,120 @@ import { protocols } from "../data/monitoring";
       });
     })();
   </script>
+
+  <script>
+    // Live data for the monitoring page: a cross-protocol "recent alerts" feed and a per-card
+    // "last alert" badge, both filled from one request and refreshed while the tab is visible.
+    // Everything degrades silently to the static view on error.
+    import { marked } from "marked";
+    import {
+      fetchAlerts,
+      severityMeta,
+      formatRelativeTime,
+      latestByProtocol,
+      escapeHtml,
+      truncate,
+      type AlertEvent,
+    } from "../lib/monitoring";
+
+    const cards = Array.from(
+      document.querySelectorAll<HTMLElement>(".protocol-accordion[data-api-protocol]"),
+    );
+
+    // apiProtocol -> { name, href }, read from the rendered cards so we don't duplicate the
+    // protocol registry in client code.
+    const protoMeta = new Map<string, { name: string; href: string | null }>();
+    for (const card of cards) {
+      const proto = card.dataset.apiProtocol;
+      if (!proto) continue;
+      const name = card.querySelector(".protocol-name")?.textContent?.trim() || proto;
+      const href =
+        card.querySelector<HTMLAnchorElement>(".history-link")?.getAttribute("href") ?? null;
+      protoMeta.set(proto, { name, href });
+    }
+
+    const feedSection = document.getElementById("recent-alerts");
+    const feedTbody = document.getElementById("recent-tbody");
+    const FEED_SIZE = 10;
+    const REFRESH_MS = 60000;
+
+    function renderFeedRow(alert: AlertEvent): string {
+      const meta = severityMeta(alert.severity);
+      const info = protoMeta.get(alert.protocol.toLowerCase());
+      const name = escapeHtml(info?.name || alert.protocol);
+      const label = info?.href
+        ? `<a class="recent-proto" href="${escapeHtml(info.href)}">${name}</a>`
+        : `<span class="recent-proto">${name}</span>`;
+      const dot = `<span class="recent-dot" style="background:${meta.color}" title="${escapeHtml(meta.label)}"></span>`;
+
+      let msg: string;
+      if (alert.plain_text) {
+        msg = escapeHtml(truncate(alert.message, 140));
+      } else {
+        msg = marked.parse(alert.message, { async: false }) as string;
+      }
+
+      return `
+        <tr class="recent-row">
+          <td class="recent-cell recent-cell--proto">${dot} ${label}</td>
+          <td class="recent-cell recent-cell--msg">${msg}</td>
+          <td class="recent-cell recent-cell--time"><time datetime="${escapeHtml(alert.created_at)}">${escapeHtml(formatRelativeTime(alert.created_at))}</time></td>
+        </tr>`;
+    }
+
+    function applyBadges(alerts: AlertEvent[]) {
+      const latest = latestByProtocol(alerts);
+      const now = Date.now();
+      for (const card of cards) {
+        const proto = card.dataset.apiProtocol;
+        if (!proto) continue;
+        const badge = card.querySelector<HTMLElement>(".last-alert");
+        if (!badge) continue;
+        const alert = latest.get(proto);
+        if (!alert) {
+          badge.hidden = true;
+          continue;
+        }
+        const meta = severityMeta(alert.severity);
+        const dot = badge.querySelector<HTMLElement>(".last-alert-dot");
+        const text = badge.querySelector<HTMLElement>(".last-alert-text");
+        if (dot) dot.style.background = meta.color;
+        if (text) text.textContent = formatRelativeTime(alert.created_at, now);
+        badge.title = `${meta.emoji} ${meta.label} · ${alert.message}`;
+        badge.hidden = false;
+      }
+    }
+
+    function applyFeed(alerts: AlertEvent[]) {
+      if (!feedSection || !feedTbody) return;
+      if (!alerts.length) {
+        feedSection.hidden = true;
+        return;
+      }
+      feedTbody.innerHTML = alerts.slice(0, FEED_SIZE).map(renderFeedRow).join("");
+      feedSection.hidden = false;
+    }
+
+    async function refresh() {
+      try {
+        const resp = await fetchAlerts({ limit: 100 });
+        applyBadges(resp.data);
+        applyFeed(resp.data);
+      } catch {
+        /* keep whatever is currently shown */
+      }
+    }
+
+    if (cards.length > 0 || feedTbody) {
+      refresh();
+      setInterval(() => {
+        if (!document.hidden) refresh();
+      }, REFRESH_MS);
+      document.addEventListener("visibilitychange", () => {
+        if (!document.hidden) refresh();
+      });
+    }
+  </script>
 </BaseLayout>
 
 <style>
@@ -156,32 +328,6 @@ import { protocols } from "../data/monitoring";
   }
   .page-sub a {
     color: var(--brand-blue);
-  }
-
-  /* === Section eyebrow === */
-  .section-eyebrow {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.4rem;
-    color: var(--brand-blue);
-    font-size: 0.72rem;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    font-weight: 600;
-    margin-bottom: 0.5rem;
-  }
-  .pulse-dot {
-    width: 6px;
-    height: 6px;
-    background: var(--brand-blue);
-    border-radius: 50%;
-    box-shadow: 0 0 0 0 rgba(6, 117, 249, 0.6);
-    animation: pulse 2s ease-out infinite;
-  }
-  @keyframes pulse {
-    0% { box-shadow: 0 0 0 0 rgba(6, 117, 249, 0.6); }
-    70% { box-shadow: 0 0 0 8px rgba(6, 117, 249, 0); }
-    100% { box-shadow: 0 0 0 0 rgba(6, 117, 249, 0); }
   }
 
   /* === Tools row === */
@@ -401,10 +547,175 @@ import { protocols } from "../data/monitoring";
     font-weight: 500;
     font-variant-numeric: tabular-nums;
   }
-  .meta-pill--blue {
-    background: color-mix(in srgb, var(--brand-blue) 12%, transparent);
-    color: #7eb4ff;
-    border: 1px solid color-mix(in srgb, var(--brand-blue) 25%, transparent);
+
+  /* Live last-alert badge (populated client-side) */
+  .last-alert {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.15rem 0.5rem;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--bg-secondary) 70%, transparent);
+    color: var(--text-secondary);
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+  }
+  .last-alert-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--text-secondary);
+    flex-shrink: 0;
+  }
+
+  /* Links from a card to detail page / risk report */
+  .monitor-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-top: 0.85rem;
+  }
+  .history-link,
+  .report-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 0.82rem;
+    font-weight: 600;
+  }
+  .history-link {
+    color: var(--brand-blue);
+  }
+  .report-link {
+    color: var(--text-secondary);
+  }
+  .history-link:hover,
+  .report-link:hover {
+    text-decoration: underline;
+  }
+  .history-link span,
+  .report-link span {
+    transition: transform 0.2s;
+  }
+  .history-link:hover span,
+  .report-link:hover span {
+    transform: translateX(2px);
+  }
+
+  /* === Recent alerts feed === */
+  .recent-alerts {
+    margin: 0 0 1.25rem;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: color-mix(in srgb, var(--bg-card) 55%, transparent);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    padding: 0.85rem 1rem;
+  }
+  .recent-head {
+    display: flex;
+    align-items: baseline;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+  }
+  .recent-title {
+    font-weight: 600;
+    font-size: 0.92rem;
+    letter-spacing: -0.01em;
+  }
+  .recent-sub {
+    font-size: 0.74rem;
+    color: var(--text-secondary);
+  }
+
+  .recent-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.83rem;
+  }
+  .recent-table thead {
+    border-bottom: 1px solid color-mix(in srgb, var(--border) 50%, transparent);
+  }
+  .recent-table th {
+    text-align: left;
+    font-size: 0.72rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-secondary);
+    padding: 0.3rem 0.5rem 0.5rem;
+    white-space: nowrap;
+  }
+  .recent-row {
+    border-bottom: 1px solid color-mix(in srgb, var(--border) 30%, transparent);
+  }
+  .recent-row:last-child {
+    border-bottom: none;
+  }
+  .recent-cell {
+    padding: 0.4rem 0.5rem;
+    vertical-align: top;
+  }
+  .recent-cell--proto {
+    white-space: nowrap;
+    min-width: 120px;
+  }
+  .recent-cell--msg {
+    color: var(--text-secondary);
+    line-height: 1.4;
+    word-break: break-word;
+  }
+  .recent-cell--msg p {
+    margin: 0;
+  }
+  .recent-cell--msg code {
+    font-size: 0.8rem;
+    background: color-mix(in srgb, var(--bg-secondary) 70%, transparent);
+    padding: 0.1em 0.35em;
+    border-radius: 4px;
+  }
+  .recent-cell--msg a {
+    color: var(--brand-blue);
+  }
+  .recent-cell--time {
+    white-space: nowrap;
+    text-align: right;
+    min-width: 70px;
+  }
+  time {
+    color: var(--text-secondary);
+    font-variant-numeric: tabular-nums;
+    font-size: 0.76rem;
+  }
+
+  .recent-dot {
+    display: inline-block;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    vertical-align: middle;
+    margin-right: 3px;
+  }
+  .recent-proto {
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+  a.recent-proto:hover {
+    color: var(--brand-blue);
+    text-decoration: none;
+  }
+
+  @media (max-width: 640px) {
+    .recent-sub {
+      display: none;
+    }
+    .recent-cell--proto {
+      min-width: unset;
+      max-width: 80px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
   }
 
   /* Chevron */
@@ -459,6 +770,19 @@ import { protocols } from "../data/monitoring";
     color: var(--text-secondary);
   }
 
+  /* Footer link to the integration-status page */
+  .monitoring-footer {
+    text-align: center;
+    margin: 0 0 2.5rem;
+    font-size: 0.8rem;
+  }
+  .monitoring-footer a {
+    color: var(--text-secondary);
+  }
+  .monitoring-footer a:hover {
+    color: var(--brand-blue);
+  }
+
   /* Empty state */
   .empty-state {
     margin: 3rem auto;
@@ -494,7 +818,4 @@ import { protocols } from "../data/monitoring";
     }
   }
 
-  @media (prefers-reduced-motion: reduce) {
-    .pulse-dot { animation: none; }
-  }
 </style>
