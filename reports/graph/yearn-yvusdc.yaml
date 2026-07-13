@@ -105,9 +105,15 @@ nodes:
     address: "0xBBBBBbbBBb9cC5e90e3b3Af64bdAF62C37EEFFCb"
     category: dependency
   - id: stcUSD
-    label: stcUSD (MetaMorpho)
+    label: stcUSD — Cap (ERC-4626)
+    address: "0x88887bE419578051FF9F4eb6C858A951921D8888"
     category: dependency
-    note: Collateral asset in Pawn Broker market. Exact vault address and governance TBD.
+    note: Cap staked USD vault token. Collateral in Pawn Broker market. 3-of-5 anonymous multisig, upgradeable UUPS proxy, 24h timelock, 8 audits.
+  - id: cap-governance
+    label: Cap Multisig (3-of-5)
+    address: "0xb8FC49402dF3ee4f8587268FB89fda4d621a8793"
+    category: governance
+    note: 3-of-5 anonymous Gnosis Safe → 24h Timelock → Access Control. Governs all Cap core contracts including stcUSD.
   - id: spark-lend
     label: Spark Lend USDC Market (Sky sub-DAO)
     category: dependency
@@ -226,6 +232,14 @@ edges:
     to: stcUSD
     kind: depends-on
     label: "stcUSD as collateral"
+  - from: pawn-broker
+    to: cap-governance
+    kind: depends-on
+    label: "Cap governance (3-of-5 multi)"
+  - from: cap-governance
+    to: stcUSD
+    kind: controls
+    label: "Governs (via Timelock)"
   - from: spark-usdc-lender
     to: spark-lend
     kind: deposits-into
