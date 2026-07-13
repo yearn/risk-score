@@ -8,7 +8,7 @@
 
 ## Overview + Links
 
-yvUSDC-1 is a **USDC-denominated Yearn V3 vault** (ERC-4626) that deploys deposited USDC into yield strategies on Ethereum mainnet. The vault holds **~$25.47M USDC** and is **100% deployed** at the snapshot (`totalIdle ≈ 0`, `totalDebt = totalAssets`). The default queue holds **four strategies** with **three funded**: USDC to sUSDS Lender (~77.9%), Yearn USDC / Morpho MetaMorpho (~7.2%), and stcUSD/USDC Pawn Broker Market (~14.9% — active but NOT in the default withdrawal queue). The USDC to USDS Depositor and a new Spark USDC Lender remain queued at 0 debt.
+yvUSDC-1 is a **USDC-denominated Yearn V3 vault** (ERC-4626) that deploys deposited USDC into yield strategies on Ethereum mainnet. The vault holds **~$25.49M USDC** and is **100% deployed** at the snapshot (`totalIdle ≈ 0`, `totalDebt = totalAssets`). The default queue holds **four strategies** with **three funded**: USDC to sUSDS Lender (~77.9%), Yearn USDC / Morpho MetaMorpho (~7.2%), and stcUSD/USDC Pawn Broker Market (~14.9% — active but NOT in the default withdrawal queue). The USDC to USDS Depositor and a new Spark USDC Lender remain queued at 0 debt.
 
 Since the May 11 snapshot, the old Spark USDC Lender has been **removed** from the queue (residual dust, ~2 USDC), and a **new Morpho MetaMorpho strategy** ("Yearn USDC", 0x68Aea7) has been added and funded. A third funded strategy — **stcUSD/USDC Pawn Broker Market** (0xe63a2a) — was also discovered, holding ~14.9% of debt and active but not in the default withdrawal queue. Funded debt is now split between Sky (~77.9%), Morpho Blue (~7.2%), and Cap (~14.9% via the Pawn Broker's stcUSD collateral), ending the ~100% Sky-governance-coupled concentration observed at the May snapshot. A new Spark USDC Lender (0x654a7c) has also been added to the queue at 0 debt. All previously revoked Morpho, Fluid, and Aave V3 strategies remain revoked (`activation = 0`).
 
@@ -27,7 +27,7 @@ Since the May 11 snapshot, the old Spark USDC Lender has been **removed** from t
 - **Total Debt:** 25,486,008.14 USDC (100% of TVL)
 - **Total Idle:** ~0 USDC (dust)
 - **Debt distribution:**
-  - USDC to sUSDS Lender: 19,841,123.66 USDC (**77.9%**)
+  - USDC to sUSDS Lender: 19,856,568.16 USDC (**77.9%**)
   - Yearn USDC (Morpho MetaMorpho): 1,823,387.70 USDC (**7.2%**)
   - stcUSD/USDC Pawn Broker Market: 3,806,052.28 USDC (**14.9%** — active, NOT in default withdrawal queue)
   - USDC to USDS Depositor: 0 (queued, unfunded)
@@ -36,7 +36,7 @@ Since the May 11 snapshot, the old Spark USDC Lender has been **removed** from t
 - **Profit Max Unlock Time:** 10 days
 - **Fees:** 0% management fee, 10% performance fee
 
-**Dependency concentration note:** The sUSDS Lender (~77.9%) sits under Sky governance. The Yearn USDC strategy (~7.2%) is on Morpho Blue — a non-Sky protocol. The stcUSD/USDC Pawn Broker Market strategy (~14.9%) is a **self-contained Yearn V3 lending strategy**: it holds stcUSD directly as borrower collateral and lends USDC from its own balance — it does **not** route through Morpho Blue or any external lending protocol. Effective Sky-governance exposure is **~77.9%** of debt; Morpho Blue exposure is **~7.2%** (Yearn USDC MetaMorpho only); and Cap (stcUSD) exposure is **~14.9%** (Pawn Broker). The Pawn Broker's stcUSD collateral is **Cap's stcUSD** ([`0x88887bE419578051FF9F4eb6C858A951921D8888`](https://etherscan.io/address/0x88887bE419578051FF9F4eb6C858A951921D8888)), an ERC-4626 vault token governed by a 3-of-5 anonymous Gnosis Safe multisig → 24-hour Timelock → Access Control system (all core contracts are upgradeable UUPS proxies; 8 audit firms, $1M Sherlock bug bounty, ~9 months in production). Cap governance is a separate concern from Yearn-managed MetaMorpho. Two additional strategies sit queued at 0 debt.
+**Dependency concentration note:** The sUSDS Lender (~77.9%) sits under Sky governance. The Yearn USDC strategy (~7.2%) is on Morpho Blue — a non-Sky protocol. The stcUSD/USDC Pawn Broker Market strategy (~14.9%) is a **self-contained Yearn V3 lending strategy**: it holds stcUSD directly as borrower collateral and lends USDC from its own balance — it does **not** route through Morpho Blue or any external lending protocol. Effective Sky-governance exposure is **~77.9%** of debt; Morpho Blue exposure is **~7.2%** (Yearn USDC MetaMorpho only); and Cap (stcUSD) exposure is **~14.9%** (Pawn Broker). The Pawn Broker's stcUSD collateral is **Cap's stcUSD** ([`0x88887bE419578051FF9F4eb6C858A951921D8888`](https://etherscan.io/address/0x88887bE419578051FF9F4eb6C858A951921D8888)), an ERC-4626 vault token governed by a 3-of-5 anonymous Gnosis Safe multisig → 24-hour Timelock → Access Control system (all core contracts are upgradeable UUPS proxies; 8 audit firms, $1M Sherlock bug bounty, ~11 months in production). Cap governance is a separate concern from Yearn-managed MetaMorpho. Two additional strategies sit queued at 0 debt.
 
 **Links:**
 
@@ -82,7 +82,7 @@ Since the May 11 snapshot, the old Spark USDC Lender has been **removed** from t
 | # | Strategy | Name | Current Debt (USDC) | Allocation |
 |---|----------|------|--------------------:|-----------:|
 | 1 | [`0x39c0aEc5738ED939876245224aFc7E09C8480a52`](https://etherscan.io/address/0x39c0aEc5738ED939876245224aFc7E09C8480a52) | USDC to USDS Depositor | 0 | 0% |
-| 2 | [`0x7130570BCEfCedBe9d15B5b11A33006156460f8f`](https://etherscan.io/address/0x7130570BCEfCedBe9d15B5b11A33006156460f8f) | **USDC to sUSDS Lender** | **19,841,123.66** | **77.9%** |
+| 2 | [`0x7130570BCEfCedBe9d15B5b11A33006156460f8f`](https://etherscan.io/address/0x7130570BCEfCedBe9d15B5b11A33006156460f8f) | **USDC to sUSDS Lender** | **19,856,568.16** | **77.9%** |
 | 3 | [`0x68Aea7b82Df6CcdF76235D46445Ed83f85F845A3`](https://etherscan.io/address/0x68Aea7b82Df6CcdF76235D46445Ed83f85F845A3) | **Yearn USDC (Morpho MetaMorpho)** | **1,823,387.70** | **7.2%** |
 | 4 | [`0x654a7c4Ae5ac3C853a99F8dbEAD2bC85090F753a`](https://etherscan.io/address/0x654a7c4Ae5ac3C853a99F8dbEAD2bC85090F753a) | Spark USDC Lender (new) | 0 | 0% |
 | 5 | [`0xe63a2abc24cd9538398d825a4bfe5778d25687df`](https://etherscan.io/address/0xe63a2abc24cd9538398d825a4bfe5778d25687df) | **stcUSD/USDC Pawn Broker Market** | **3,806,052.28** | **14.9%** (active, NOT in default withdrawal queue) |
@@ -195,7 +195,7 @@ The yvUSDC-1 system is **low complexity**:
 
 ## Funds Management
 
-yvUSDC-1 deploys deposited USDC into yield strategies with 100% capital utilization. At the July 12 snapshot debt is split across **three funded strategies**: USDC to sUSDS Lender (~77.9%), Yearn USDC / Morpho MetaMorpho (~7.2%), and stcUSD/USDC Pawn Broker Market (~14.9%). The Pawn Broker is a **self-contained Yearn V3 lending strategy** (v3.0.4) — it holds stcUSD directly as borrower collateral and lends USDC from its own balance sheet; it does NOT route through Morpho Blue. The Pawn Broker strategy is active and funded but **not in the default withdrawal queue** — it will not participate in withdrawals unless explicitly targeted, representing a potential liquidity consideration. Two further strategies sit in the queue at 0 debt: USDC to USDS Depositor and a new Spark USDC Lender. All `current_debt` values sum to ~$25.47M, matching `totalDebt` with negligible rounding. There is no accounting gap.
+yvUSDC-1 deploys deposited USDC into yield strategies with 100% capital utilization. At the July 12 snapshot debt is split across **three funded strategies**: USDC to sUSDS Lender (~77.9%), Yearn USDC / Morpho MetaMorpho (~7.2%), and stcUSD/USDC Pawn Broker Market (~14.9%). The Pawn Broker is a **self-contained Yearn V3 lending strategy** (v3.0.4) — it holds stcUSD directly as borrower collateral and lends USDC from its own balance sheet; it does NOT route through Morpho Blue. The Pawn Broker strategy is active and funded but **not in the default withdrawal queue** — it will not participate in withdrawals unless explicitly targeted, representing a potential liquidity consideration. Two further strategies sit in the queue at 0 debt: USDC to USDS Depositor and a new Spark USDC Lender. All `current_debt` values sum to ~$25.49M, matching `totalDebt` with negligible rounding. There is no accounting gap.
 
 ### Strategy 1: USDC to USDS Depositor (0% — queued, unfunded)
 
@@ -315,12 +315,12 @@ The old Spark USDC Lender ([`0x25f893276544d86a82b1ce407182836F45cb6673`](https:
 ## Liquidity Risk
 
 - **Primary exit:** Redeem yvUSDC-1 for USDC via ERC-4626 `withdraw()`/`redeem()`. Triggers reverse pipeline through sUSDS → USDS → DAI → USDC (~77.9% of debt), Morpho MetaMorpho redemption (~7.2%), or Pawn Broker withdrawal (~14.9% — not in default queue, requires targeted withdrawal or queue addition)
-- **Highly liquid underlying:** sUSDS holds multi-billion-dollar USDS reserves; Morpho MetaMorpho markets have deep USDC liquidity on Morpho Blue. The Pawn Broker is a self-contained lender; its USDC liquidity is limited to the strategy's own idle balance plus borrower repayments. The vault's ~$25.47M is a small fraction of underlying pool capacity
+- **Highly liquid underlying:** sUSDS holds multi-billion-dollar USDS reserves; Morpho MetaMorpho markets have deep USDC liquidity on Morpho Blue. The Pawn Broker is a self-contained lender; its USDC liquidity is limited to the strategy's own idle balance plus borrower repayments. The vault's ~$25.49M is a small fraction of underlying pool capacity
 - **PSM liquidity:** The MakerDAO PSM Lite provides deep DAI ↔ USDC liquidity at 0% fee. PSM capacity is managed by Sky Governance and typically holds billions of USDC. The Morpho MetaMorpho exit is directly to USDC through redemption — no PSM needed. The Pawn Broker path exits by recalling USDC loans from borrowers or through queue-targeted withdrawal
 - **No DEX liquidity needed** in the base case — exit is via the protocol's own pipeline (PSM + Exchanger for Sky; MetaMorpho redemption for Morpho; borrower loan recall for Pawn Broker), not DEX AMMs. Uniswap V3 fallback applies only for the Sky leg if PSM fees rise above 0.05%
 - **Same-value asset:** USDC-denominated vault token — no price divergence risk from the underlying
 - **No withdrawal queue or cooldown** — atomic redemption through the pipeline. Note: the Pawn Broker strategy (~14.9%) is not in the default withdrawal queue; its debt requires targeted withdrawal or queue addition
-- **Deposit limit:** $50M cap — generous relative to current TVL of $25.47M
+- **Deposit limit:** $50M cap — generous relative to current TVL of $25.49M
 
 ## Centralization & Control Risks
 
@@ -627,10 +627,11 @@ Yearn maintains an active monitoring system via the [`monitoring`](https://githu
 | Date | Score | Notes |
 |------|------:|-------|
 | May 11, 2026 | 1.3 | Initial assessment. ~100% Sky-governance-coupled; 3 strategies in queue (2 funded: sUSDS Lender ~97%, Spark USDC Lender ~3%); TVL ~$29.84M |
-| July 12, 2026 | 1.3 | Reassessment. TVL down to ~$25.47M; new Morpho MetaMorpho strategy added (7.2%); Pawn Broker strategy (stcUSD/USDC, 14.9%) discovered — active with debt but not in default withdrawal queue; old Spark Lender removed; Cat 2C remains 2.0; Cat 2 remains 1.3; final score unchanged at 1.3 (1.265 rounds to 1.3). Three funded strategies. All `current_debt` values sum to `totalDebt` with negligible rounding — no accounting gap. Morpho Blue exposure now ~22.1% (7.2% MetaMorpho + 14.9% Pawn Broker) |
+| July 12, 2026 | 1.3 | Reassessment. TVL down to ~$25.49M; new Morpho MetaMorpho strategy added (7.2%); Pawn Broker strategy (stcUSD/USDC, 14.9%) discovered — active with debt but not in default withdrawal queue; old Spark Lender removed; Cat 2C remains 2.0; Cat 2 remains 1.3; final score unchanged at 1.3 (1.265 rounds to 1.3). Three funded strategies. All `current_debt` values sum to `totalDebt` with negligible rounding — no accounting gap. Morpho Blue exposure now ~22.1% (7.2% MetaMorpho + 14.9% Pawn Broker) |
 | July 13, 2026 | 1.3 | stcUSD identity and governance verified: stcUSD = Cap's ERC-4626 vault token ([`0x88887bE419578051FF9F4eb6C858A951921D8888`](https://etherscan.io/address/0x88887bE419578051FF9F4eb6C858A951921D8888)). Cap governance: 3-of-5 anonymous Gnosis Safe → 24h Timelock → Access Control, upgradeable UUPS proxies, 8 audits, $1M Sherlock bounty. All "unverified"/TODO stcUSD references resolved. Cap added as tracked external dependency in the dependency table, monitoring section, and dependency graph. Final score unchanged at 1.3; Cat 2C remains 2.0 — Cap (~14.9% via Morpho) is a secondary governance concern within the Morpho Blue dependency ecosystem |
 | July 13, 2026 | 1.3 | **Correction:** Pawn Broker strategy (0xe63a2a) verified onchain as a self-contained Yearn V3 TokenizedStrategy (v3.0.4) — holds USDC and stcUSD directly, does NOT route through Morpho Blue. Morpho Blue exposure corrected from ~22.1% to ~7.2% (Yearn USDC MetaMorpho only). Pawn Broker's only external dependency is Cap (stcUSD as collateral). Three distinct ecosystems: Sky ~77.9%, Morpho Blue ~7.2%, Cap ~14.9%. Cat 2C dependency subscore revised from 2.0 → 2.5 (three ecosystems, one with weaker governance). Cat 2 changes 1.3 → 1.5. Final score unchanged at 1.3 (1.325 rounds to 1.3). Dependency graph updated |
 | July 13, 2026 | 1.5 | Cat 3A collateralization: 1.0 → 2.0 (~15% Pawn Broker holds Cap stcUSD collateral — 3-of-5 anonymous multisig, upgradeable UUPS proxies). Funds Management: 1.0 → 1.5. Final: 1.475 → 1.5 (Minimal Risk). Broken link cap-stcusd.md fixed |
+| July 13, 2026 | 1.5 | **Data fix:** sUSDS Lender `current_debt` corrected 19,841,123.66 → 19,856,568.16 USDC (onchain value at block 25519099; prior figure was $15.4K low). The three funded strategies' `current_debt` now sum exactly to `totalDebt` (25,486,008.14). TVL references normalized to ~$25.49M; Cap production age corrected to ~11 months. No score change |
 
 ---
 
