@@ -70,17 +70,17 @@ nodes:
     label: sUSDS Lender (84.08%)
     address: "0x3F2dE801629116A83B9734bB72012A554e01CfC1"
     category: strategy
-    note: "EIP-1967 proxy; impl 0x254a93feff3beef9ca004e913bb5443754e8ab19 (TokenizedStrategy); management = Brain 3-of-8"
+    note: "EIP-1967 proxy (admin = 0x0); impl 0x254a93feff3beef9ca004e913bb5443754e8ab19 (TokenizedStrategy); management = Brain 3-of-8"
   - id: spark-usds-compounder
     label: Spark USDS Compounder (15.92%)
     address: "0xc9f01b5c6048B064E6d925d1c2d7206d4fEeF8a3"
     category: strategy
-    note: "EIP-1967 proxy; impl 0xd377919fa87120584b21279a491f82d5265a139c (TokenizedStrategy); management = Brain 3-of-8"
+    note: "EIP-1967 proxy (admin = 0x0); impl 0xd377919fa87120584b21279a491f82d5265a139c (TokenizedStrategy); management = Brain 3-of-8"
   - id: usds-sky-rewards-compounder
     label: USDS Sky Rewards Compounder (queued, 0%)
     address: "0x0868076663Bbc6638ceDd27704cc8F0Fa53d5b81"
     category: strategy
-    note: "EIP-1967 proxy; same impl as sUSDS Lender (0x254a...ab19); management = Brain 3-of-8"
+    note: "EIP-1967 proxy (admin = 0x0); same impl as sUSDS Lender (0x254a...ab19); management = Brain 3-of-8"
 
   # External dependencies
   - id: sky-susds
@@ -169,6 +169,20 @@ edges:
     to: timelock
     kind: cancels-on
     label: CANCELLER
+
+  # Brain controls strategies (management / upgrade authority)
+  - from: brain
+    to: susds-lender
+    kind: controls
+    label: "management / upgrade"
+  - from: brain
+    to: spark-usds-compounder
+    kind: controls
+    label: "management / upgrade"
+  - from: brain
+    to: usds-sky-rewards-compounder
+    kind: controls
+    label: "management / upgrade"
 
   # Strategy → underlying protocol
   - from: susds-lender
