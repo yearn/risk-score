@@ -165,7 +165,7 @@ All strategies pass through Yearn's **12-metric risk-scoring framework** ([RISK_
 - **Yearn (Immunefi):** active, **$200,000** max payout (Critical). https://immunefi.com/bounty/yearnfinance/
 - **Yearn (Sherlock):** also listed at https://audits.sherlock.xyz/bug-bounties/30
 - **Sky / MakerDAO (Immunefi):** active, **$10,000,000** max payout (Critical). Scope includes DAI, USDS, sUSDS, PSM. https://immunefi.com/bug-bounty/sky/
-- **Morpho Blue (Immunefi):** active, **$2,500,000** max payout (Critical). https://immunefi.com/bug-bounty/morpho/
+- **Morpho (Cantina):** active, **$2,500,000** max payout (Critical). https://cantina.xyz/bounties/35a5f0a1-2ffd-432c-8f3b-77d169add8c3
 - **Safe Harbor (SEAL):** Yearn is **not** listed on the SEAL Safe Harbor registry
 
 ### On-Chain Complexity
