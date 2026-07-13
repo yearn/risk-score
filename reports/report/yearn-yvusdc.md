@@ -154,6 +154,8 @@ All strategies go through Yearn's formal **12-metric risk scoring framework** ([
 - **Yearn (Sherlock):** Also listed: https://audits.sherlock.xyz/bug-bounties/30
 - **Sky/MakerDAO (Immunefi):** Active bug bounty. Max payout: **$10,000,000** (Critical). Scope includes DAI, USDS, sUSDS, PSM, and all core contracts
   - Link: https://immunefi.com/bug-bounty/sky/
+- **Morpho (Cantina):** Active bug bounty. Max payout: **$2,500,000** (Critical).
+  - Link: https://cantina.xyz/bounties/35a5f0a1-2ffd-432c-8f3b-77d169add8c3
 - **Safe Harbor:** Yearn is not listed on the SEAL Safe Harbor registry
 
 ### On-Chain Complexity
@@ -447,7 +449,7 @@ Yearn maintains an active monitoring system via the [`monitoring`](https://githu
 | Factor | Assessment |
 |--------|-----------|
 | Audits | V3 framework: 3 audits by top firms (Statemind, ChainSecurity, yAcademy). Sky/sUSDS: 7+ auditors (ChainSecurity, Cantina, Sherlock, Trail of Bits, etc.). Morpho Blue: audits by Spearbit, Cantina, and others |
-| Bug bounty | $200K on Immunefi (Yearn); $10M on Sky |
+| Bug bounty | $200K on Immunefi (Yearn); $10M on Sky (Immunefi); $2.5M on Morpho (Cantina) |
 | Production history | **~16 months** (March 12, 2024). V3 framework: ~26 months |
 | TVL | **~$25.49M** USDC. Deposit limit: $50M |
 | Security incidents | None on V3. None on sUSDS or Spark Lend |
