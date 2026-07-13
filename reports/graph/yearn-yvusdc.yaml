@@ -74,6 +74,10 @@ nodes:
     label: Yearn USDC — Morpho (7.2%)
     address: "0x68Aea7b82Df6CcdF76235D46445Ed83f85F845A3"
     category: strategy
+  - id: pawn-broker
+    label: stcUSD/USDC Pawn Broker (14.9%, not in queue)
+    address: "0xe63a2abc24cd9538398d825a4bfe5778d25687df"
+    category: strategy
   - id: spark-usdc-lender
     label: Spark USDC Lender (queued)
     address: "0x654a7c4Ae5ac3C853a99F8dbEAD2bC85090F753a"
@@ -100,6 +104,10 @@ nodes:
     label: Morpho Blue
     address: "0xBBBBBbbBBb9cC5e90e3b3Af64bdAF62C37EEFFCb"
     category: dependency
+  - id: steakhouse-stcUSD
+    label: Steakhouse stcUSD (MetaMorpho)
+    category: dependency
+    note: Managed by Steakhouse Financial; collateral asset in Pawn Broker market. Exact vault address TBD.
   - id: spark-lend
     label: Spark Lend USDC Market (Sky sub-DAO)
     category: dependency
@@ -131,6 +139,10 @@ edges:
     to: yearn-usdc
     kind: allocates-to
     label: "7.2%"
+  - from: yvUSDC
+    to: pawn-broker
+    kind: allocates-to
+    label: "14.9% (not in default queue)"
   - from: yvUSDC
     to: usds-depositor
     kind: allocates-to
@@ -205,7 +217,15 @@ edges:
   - from: yearn-usdc
     to: morpho-blue
     kind: deposits-into
-    label: "USDC supply"
+    label: "USDC supply (MetaMorpho)"
+  - from: pawn-broker
+    to: morpho-blue
+    kind: deposits-into
+    label: "USDC supply (Pawn Broker)"
+  - from: pawn-broker
+    to: steakhouse-stcUSD
+    kind: depends-on
+    label: "stcUSD as collateral"
   - from: spark-usdc-lender
     to: spark-lend
     kind: deposits-into
