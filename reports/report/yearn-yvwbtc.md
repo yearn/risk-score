@@ -289,7 +289,7 @@ ySafe 6-of-9 signers include publicly known DeFi contributors — see [Yearn Mul
 - **PPS:** ERC-4626, fully algorithmic
 - **Vault operations:** permissionless deposit / withdraw on-chain
 - **Strategy reporting:** automated via keeper (when strategy is funded)
-- **Debt allocation:** Debt Allocator (automated) + Brain (manual) — currently 0 deployed
+- **Debt allocation:** Debt Allocator (automated) + Brain (manual) — fully deployed to MetaMorpho strategy via the vault queue
 - **Off-chain inputs:** none
 
 ### External Dependencies
@@ -361,7 +361,7 @@ Other monitoring that does cover yvWBTC-1 implicitly via the broader Yearn V3 se
 - **MetaMorpho supply queue changes** — `setSupplyQueue` by curator
 - **LBTC market utilization spikes** — currently 79.4%; approaching 90%+ significantly degrades withdrawal capacity
 - **Morpho Blue market parameter changes** — LLTV or oracle changes on the active markets (requires new Morpho Blue market creation since core is immutable)
-- **Emergency actions** — vault `Shutdown` or Morpho Blue market pause (guardian can pause)
+- **Emergency actions** — vault `Shutdown`; MetaMorpho guardian (ySafe 6-of-9) can revoke markets from the supply queue and set caps to zero. Morpho Blue core is immutable with no pause mechanism
 - **ySafe / Brain / Security / Curator signer or threshold changes**
 - **PPS decrease** — should only increase outside of explicit loss events
 - **Deposit-limit changes** — particularly relevant given the current oversized cap
