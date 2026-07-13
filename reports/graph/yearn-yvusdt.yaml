@@ -67,31 +67,24 @@ nodes:
 
   # Strategies
   - id: spark-usdt-lender
-    label: Spark USDT Lender (45.58%)
-    address: "0xED48069a2b9982B4eec646CBfA7b81d181f9400B"
+    label: Spark USDT Lender (56.06%)
+    address: "0x176Caf15f1793fc16898458E0ba295ec6523E9E2"
     category: strategy
-  - id: morpho-gauntlet-usdt
-    label: Morpho Gauntlet USDT Prime (54.42%)
-    address: "0x6D2981FF9b8d7edbb7604de7A65BAC8694ac849F"
-    category: strategy
-  - id: morpho-steakhouse-usdt
-    label: Morpho Steakhouse USDT (queued, 0%)
-    address: "0x0a4ea2bDe8496a878a7ca2772056a8e6fe3245c5"
+  - id: metamorpo-usdt
+    label: MetaMorpho Vault (ymv-USDT) (43.94%)
+    address: "0x0963232eB842BAF53E8e517691f81745C1F228a0"
     category: strategy
 
   # External dependencies
   - id: spark-lend-usdt
     label: Spark Lend USDT Market
+    address: "0xC13e21B648A5Ee794902342038FF3aDAB66BE987"
     category: dependency
     note: Sky sub-DAO; admin keys live under Sky governance
-  - id: morpho-gauntlet-vault
-    label: Morpho Gauntlet USDT Prime Vault
+  - id: morpho
+    label: Morpho Protocol
+    address: "0xBBBBBbbBBb9cC5e90e3b3Af64bdAF62C37EEFFCb"
     category: dependency
-    note: Gauntlet-curated Morpho MetaMorpho vault
-  - id: morpho-steakhouse-vault
-    label: Morpho Steakhouse USDT Vault
-    category: dependency
-    note: Steakhouse-curated Morpho MetaMorpho vault
 
 edges:
   # Deployment / vault infrastructure
@@ -110,15 +103,11 @@ edges:
   - from: yvUSDT
     to: spark-usdt-lender
     kind: allocates-to
-    label: "45.58%"
+    label: "56.06%"
   - from: yvUSDT
-    to: morpho-gauntlet-usdt
+    to: metamorpo-usdt
     kind: allocates-to
-    label: "54.42%"
-  - from: yvUSDT
-    to: morpho-steakhouse-usdt
-    kind: allocates-to
-    label: "queued"
+    label: "43.94%"
 
   # Governance roles on vault
   - from: daddy
@@ -146,6 +135,12 @@ edges:
     kind: holds-role
     label: "REPORTING + DEBT_MANAGER"
 
+  # MetaMorpho vault ownership — Security is the owner
+  - from: security
+    to: metamorpo-usdt
+    kind: controls
+    label: "MetaMorpho owner"
+
   # Role manager wiring
   - from: daddy
     to: role-manager
@@ -172,11 +167,7 @@ edges:
     to: spark-lend-usdt
     kind: deposits-into
     label: "USDT supply"
-  - from: morpho-gauntlet-usdt
-    to: morpho-gauntlet-vault
+  - from: metamorpo-usdt
+    to: morpho
     kind: deposits-into
     label: "USDT deposit"
-  - from: morpho-steakhouse-usdt
-    to: morpho-steakhouse-vault
-    kind: deposits-into
-    label: "USDT deposit (queued)"
