@@ -142,7 +142,7 @@ All strategies pass through Yearn's **12-metric risk-scoring framework** ([RISK_
 
 - **Yearn (Immunefi):** active, **$200,000** max payout (Critical). https://immunefi.com/bounty/yearnfinance/
 - **Yearn (Sherlock):** also listed at https://audits.sherlock.xyz/bug-bounties/30
-- **Underlying-protocol bug bounties:** [Morpho (Immunefi)](https://immunefi.com/bounty/morpho/) — **$2,500,000** max payout (Critical)
+- **Underlying-protocol bug bounties:** [Morpho (Cantina)](https://cantina.xyz/bounties/35a5f0a1-2ffd-432c-8f3b-77d169add8c3) — **$2,500,000** max payout (Critical)
 - **Safe Harbor (SEAL):** Yearn is **not** listed on the SEAL Safe Harbor registry
 
 ### On-Chain Complexity
@@ -438,7 +438,7 @@ Other monitoring that does cover yvWBTC-1 implicitly via the broader Yearn V3 se
 | Factor | Assessment |
 |--------|-----------|
 | Audits | V3 framework: 3 audits. Morpho Blue: 3 audits. MetaMorpho: multiple audits. Strategy reviewed via Yearn's 12-metric framework |
-| Bug bounty | $200K (Yearn Immunefi) + $2.5M (Morpho Immunefi) |
+| Bug bounty | $200K (Yearn Immunefi) + $2.5M (Morpho Cantina) |
 | Production history | Vault: **~14 months** (mostly undeployed until May 24, 2026). Strategy: **~49 days** (activated May 24). V3 framework: ~26 months. Morpho Blue: ~30 months |
 | TVL | **47.5099 WBTC** (~$3.05M). Deposit limit: 100,000 WBTC (oversized). Strategy maxDebt: 1,000 WBTC |
 | Security incidents | None on any component |
