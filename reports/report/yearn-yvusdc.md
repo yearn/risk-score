@@ -15,8 +15,8 @@ Since the May 11 snapshot, the old Spark USDC Lender has been **removed** from t
 **Key architecture:**
 
 - **Vault:** Standard Yearn V3 vault (v3.0.2) accepting USDC deposits, issuing yvUSDC-1 shares. Deployed as an immutable Vyper minimal proxy (EIP-1167) via the Yearn V3 Vault Factory
-- **Strategy pipelines:** sUSDS Lender path: USDC → DAI (via MakerDAO PSM Lite at 1:1, 0 fee) → USDS (via DAI-USDS Exchanger at 1:1) → sUSDS (Sky Savings vault). Yearn USDC (Morpho) path: USDC → Morpho MetaMorpho vault → Morpho Blue isolated lending markets. Pawn Broker path: USDC → Morpho Blue's Pawn Broker module (stcUSD/USDC market), supplying USDC against stcUSD (Steakhouse MetaMorpho vault) collateral. New Spark USDC Lender (queued, 0 debt): would supply USDC directly to Spark Lend's USDC market. USDC to USDS Depositor (queued, 0 debt): would deposit USDC-converted USDS into yvUSDS-1
-- **Governance:** Managed via the standard **Yearn V3 Role Manager** contract, governed by the **Yearn 6-of-9 global multisig (ySafe)** with **7-day TimelockController** for strategy additions. The Yearn USDC MetaMorpho vault has its own governance: Security 4/7 multisig as owner, ySafe 6/9 as guardian, 3-day ownership timelock. The stcUSD MetaMorpho vault (counterparty in Pawn Broker market) is managed by Steakhouse Financial
+- **Strategy pipelines:** sUSDS Lender path: USDC → DAI (via MakerDAO PSM Lite at 1:1, 0 fee) → USDS (via DAI-USDS Exchanger at 1:1) → sUSDS (Sky Savings vault). Yearn USDC (Morpho) path: USDC → Morpho MetaMorpho vault → Morpho Blue isolated lending markets. Pawn Broker path: USDC → Morpho Blue's Pawn Broker module (stcUSD/USDC market), supplying USDC against stcUSD (MetaMorpho vault) collateral. New Spark USDC Lender (queued, 0 debt): would supply USDC directly to Spark Lend's USDC market. USDC to USDS Depositor (queued, 0 debt): would deposit USDC-converted USDS into yvUSDS-1
+- **Governance:** Managed via the standard **Yearn V3 Role Manager** contract, governed by the **Yearn 6-of-9 global multisig (ySafe)** with **7-day TimelockController** for strategy additions. The Yearn USDC MetaMorpho vault has its own governance: Security 4/7 multisig as owner, ySafe 6/9 as guardian, 3-day ownership timelock. The stcUSD MetaMorpho vault governance (counterparty in Pawn Broker market) is unverified — see TODO below
 - **Default queue:** 4 strategies (sUSDS Lender funded, Yearn USDC — Morpho funded, USDS Depositor queued at 0 debt, new Spark USDC Lender queued at 0 debt). The stcUSD/USDC Pawn Broker Market strategy (3rd funded strategy, 14.9%) is active but NOT in the default withdrawal queue. Legacy Morpho Gauntlet / Steakhouse / OEV strategies and three other lenders (Fluid, Aave V3, Aave V3 Lido) remain revoked at prior cleanups. The old Spark USDC Lender (0x25f893) removed from queue between May 11 and July 12; a new Morpho MetaMorpho strategy has been added and funded, re-establishing the non-Sky re-diversification leg
 
 **Key metrics (July 12, 2026, snapshot at block 25519099):**
@@ -36,7 +36,7 @@ Since the May 11 snapshot, the old Spark USDC Lender has been **removed** from t
 - **Profit Max Unlock Time:** 10 days
 - **Fees:** 0% management fee, 10% performance fee
 
-**Dependency concentration note:** The sUSDS Lender (~77.9%) sits under Sky governance. The Yearn USDC strategy (~7.2%) and the Pawn Broker Market strategy (~14.9%) are both on Morpho Blue — a non-Sky protocol. Effective Sky-governance exposure is **~77.9%** of debt; Morpho Blue exposure is **~22.1%** (7.2% Yearn USDC MetaMorpho + 14.9% Pawn Broker). The stcUSD collateral in the Pawn Broker market is the Steakhouse USDC MetaMorpho vault, managed by Steakhouse Financial — an additional governance consideration distinct from the Yearn-managed MetaMorpho. Two additional strategies sit queued at 0 debt.
+**Dependency concentration note:** The sUSDS Lender (~77.9%) sits under Sky governance. The Yearn USDC strategy (~7.2%) and the Pawn Broker Market strategy (~14.9%) are both on Morpho Blue — a non-Sky protocol. Effective Sky-governance exposure is **~77.9%** of debt; Morpho Blue exposure is **~22.1%** (7.2% Yearn USDC MetaMorpho + 14.9% Pawn Broker). The stcUSD collateral in the Pawn Broker market is a MetaMorpho vault whose governance is unverified — the stcUSD vault governance is a separate concern distinct from the Yearn-managed MetaMorpho. Two additional strategies sit queued at 0 debt.
 
 **Links:**
 
@@ -113,7 +113,7 @@ Since the May 11 snapshot, the old Spark USDC Lender has been **removed** from t
 |----------|----------|-----------:|-------|
 | **Sky / sUSDS** | USDC to sUSDS Lender | **77.9%** | Sky Savings Rate via sUSDS — Sky-governed |
 | **Morpho Blue** | Yearn USDC (MetaMorpho) | **7.2%** | Non-Sky; MetaMorpho vault managed by Yearn (Security 4/7 owner, ySafe 6/9 guardian) |
-| **Morpho Blue** (Pawn Broker) | stcUSD/USDC Pawn Broker Market | **14.9%** | Non-Sky; Morpho Pawn Broker module. USDC supplied against stcUSD (Steakhouse MetaMorpho vault, managed by Steakhouse Financial) collateral — NOT in default withdrawal queue |
+| **Morpho Blue** (Pawn Broker) | stcUSD/USDC Pawn Broker Market | **14.9%** | Non-Sky; Morpho Pawn Broker module. USDC supplied against stcUSD (MetaMorpho vault, governance unverified) collateral — NOT in default withdrawal queue |
 | Sky (yvUSDS via Depositor) | USDC to USDS Depositor | 0% (queued) | Previously the dominant strategy; currently unfunded |
 | Spark Lend (Sky sub-DAO) | Spark USDC Lender (new) | 0% (queued) | New strategy, unfunded; replaces the old 0x25f893 Spark Lender |
 
@@ -248,9 +248,9 @@ yvUSDC-1 deploys deposited USDC into yield strategies with 100% capital utilizat
 
 **Contract:** [`0xe63a2abc24cd9538398d825a4bfe5778d25687df`](https://etherscan.io/address/0xe63a2abc24cd9538398d825a4bfe5778d25687df)
 
-**Pipeline:** USDC is supplied into a **Morpho Blue Pawn Broker market** — specifically the stcUSD/USDC market. The Pawn Broker module on Morpho Blue enables isolated lending markets between any two tokens via MetaMorpho vault shares. This market pairs **stcUSD** (the Steakhouse USDC MetaMorpho vault share token) as collateral with USDC as the loan asset. The strategy supplies USDC liquidity that borrowers can access using stcUSD as collateral.
+**Pipeline:** USDC is supplied into a **Morpho Blue Pawn Broker market** — specifically the stcUSD/USDC market. The Pawn Broker module on Morpho Blue enables isolated lending markets between any two tokens via MetaMorpho vault shares. This market pairs **stcUSD** (a MetaMorpho vault share token; exact vault address and governance TBD) as collateral with USDC as the loan asset. The strategy supplies USDC liquidity that borrowers can access using stcUSD as collateral.
 
-**stcUSD governance:** stcUSD is the Steakhouse USDC MetaMorpho vault, **managed by Steakhouse Financial** — a distinct governance entity from Yearn. This introduces an additional governance layer: Steakhouse controls the stcUSD vault (owner, guardian, curator, fee parameters) which is the collateral asset in this Pawn Broker market.
+**stcUSD governance:** The stcUSD vault governance is **unverified**. The exact stcUSD vault address is TODO — verify the address and then confirm the vault's owner, guardian, curator, and fee parameters onchain. This is a separate governance concern from Yearn.
 
 **Queue status:** This strategy is **active with $3.81M debt but NOT in the default withdrawal queue**. During normal withdrawals, the vault iterates through the default queue and will skip this strategy. Its debt must be explicitly targeted or the strategy must be added to the queue before it can participate in withdrawals. This creates a potential liquidity bottleneck for ~14.9% of deployed capital under heavy redemptions.
 
@@ -258,7 +258,7 @@ yvUSDC-1 deploys deposited USDC into yield strategies with 100% capital utilizat
 - Deposit limit: 10,000,000 USDC (max_debt)
 - Morpho Blue: 0xBBBBBbbBBb9cC5e90e3b3Af64bdAF62C37EEFFCb
 - Pawn Broker module — isolated market (stcUSD/USDC)
-- stcUSD counterparty governance: Steakhouse Financial
+- stcUSD counterparty governance: unverified (TODO: verify vault address and governance)
 - Activation: 1782490163 (active)
 - Keeper: yHaaSRelayer
 
@@ -300,7 +300,7 @@ The old Spark USDC Lender ([`0x25f893276544d86a82b1ce407182836F45cb6673`](https:
 ### Collateralization
 
 - **100% onchain USDC backing** — all deposits are USDC, deployed into Sky-governed (sUSDS Lender ~77.9%), Morpho Blue (Yearn USDC MetaMorpho ~7.2%), and Morpho Pawn Broker (stcUSD/USDC ~14.9%) venues
-- **Collateral quality:** sUSDS is backed by over-collateralized loans and RWA (Treasury bills) via MakerDAO. The Morpho MetaMorpho vault supplies USDC into Morpho Blue markets — fully onchain, isolated markets with immutable parameters. The Pawn Broker market supplies USDC against stcUSD (Steakhouse MetaMorpho vault) collateral, adding Steakhouse Financial governance to the dependency chain
+- **Collateral quality:** sUSDS is backed by over-collateralized loans and RWA (Treasury bills) via MakerDAO. The Morpho MetaMorpho vault supplies USDC into Morpho Blue markets — fully onchain, isolated markets with immutable parameters. The Pawn Broker market supplies USDC against stcUSD (MetaMorpho vault, governance unverified) collateral, adding an unverified governance entity to the dependency chain
 - **No leverage** — unlike yvUSD's looper strategies, these are simple deposits into savings rate and lending products
 - **All positions are fully redeemable** — sUSDS and Spark vaults support standard ERC-4626 / aToken withdrawal. USDS converts 1:1 to DAI via the Exchanger. The Pawn Broker position (~14.9%) is not in the default withdrawal queue and requires targeted withdrawal or queue addition
 
@@ -359,13 +359,13 @@ The yvUSDC-1 vault uses the **standard Yearn V3 governance pattern** via the Yea
 | Dependency | Criticality | Notes |
 |-----------|-------------|-------|
 | **Sky / sUSDS** | Critical | ~77.9% of current allocation via the sUSDS Lender. Multi-billion-dollar sUSDS TVL. Blue-chip, extensively audited, $10M bug bounty |
-| **Morpho Blue** | High | ~22.1% of current allocation combined (7.2% via Yearn USDC MetaMorpho + 14.9% via Pawn Broker). Morpho Blue is a non-Sky, isolated-market lending protocol with $1B+ TVL. Audited by Spearbit, Cantina, and others. The Yearn USDC MetaMorpho wrapper is managed by Yearn (Security 4/7 owner, ySafe 6/9 guardian, 3-day timelock). The Pawn Broker leg involves stcUSD (Steakhouse MetaMorpho vault), managed by Steakhouse Financial — an additional governance entity. Pawn Broker strategy is not in the default withdrawal queue |
+| **Morpho Blue** | High | ~22.1% of current allocation combined (7.2% via Yearn USDC MetaMorpho + 14.9% via Pawn Broker). Morpho Blue is a non-Sky, isolated-market lending protocol with $1B+ TVL. Audited by Spearbit, Cantina, and others. The Yearn USDC MetaMorpho wrapper is managed by Yearn (Security 4/7 owner, ySafe 6/9 guardian, 3-day timelock). The Pawn Broker leg involves stcUSD (MetaMorpho vault, governance unverified) — an additional governance concern. Pawn Broker strategy is not in the default withdrawal queue |
 | **MakerDAO PSM Lite** | High | USDC ↔ DAI conversion at 1:1 for the sUSDS Lender path. 0% fee. Deep liquidity. Audited by ChainSecurity and Cantina |
 | **Sky DAI-USDS Exchanger** | High | DAI ↔ USDS 1:1 conversion for the sUSDS Lender path. Core Sky infrastructure |
 | **Spark Lend (Sky sub-DAO)** | Low | New Spark USDC Lender currently queued at 0 debt. No exposure unless funded |
 | **Uniswap V3 (fallback)** | Low | Only used if PSM fee exceeds 0.05%. Currently not active (PSM fee is 0%) |
 
-**Dependency quality:** Funded dependencies are split between Sky (~77.9%) and Morpho Blue (~22.1%) — two distinct governance ecosystems. Within the Morpho Blue exposure, the Yearn USDC MetaMorpho leg (7.2%) is Yearn-managed while the Pawn Broker leg (14.9%) involves Steakhouse Financial's stcUSD MetaMorpho vault as the collateral asset, introducing a third governance entity. Sky is top-tier (8+ years of history, $10M bug bounty, multi-billion-dollar sUSDS TVL). Morpho Blue is a well-audited, isolated-market lending protocol with $1B+ TVL. The Morpho re-diversification leg significantly improves the dependency concentration profile compared to the prior ~100% Sky-governance-coupled snapshot. Note: the Pawn Broker strategy (14.9%) is not in the default withdrawal queue, adding a liquidity nuance. Two additional strategies remain queued at 0 debt (USDS Depositor and new Spark USDC Lender).
+**Dependency quality:** Funded dependencies are split between Sky (~77.9%) and Morpho Blue (~22.1%) — two distinct governance ecosystems. Within the Morpho Blue exposure, the Yearn USDC MetaMorpho leg (7.2%) is Yearn-managed while the Pawn Broker leg (14.9%) involves the stcUSD MetaMorpho vault (governance unverified) as the collateral asset, introducing a third governance concern. Sky is top-tier (8+ years of history, $10M bug bounty, multi-billion-dollar sUSDS TVL). Morpho Blue is a well-audited, isolated-market lending protocol with $1B+ TVL. The Morpho re-diversification leg significantly improves the dependency concentration profile compared to the prior ~100% Sky-governance-coupled snapshot. Note: the Pawn Broker strategy (14.9%) is not in the default withdrawal queue, adding a liquidity nuance. Two additional strategies remain queued at 0 debt (USDS Depositor and new Spark USDC Lender).
 
 ## Operational Risk
 
@@ -400,7 +400,7 @@ Yearn maintains an active monitoring system via the [`monitoring`](https://githu
 | Sky Savings Rate | [`0xa3931d71877C0E7a3148CB7Eb4463524FEc27fbD`](https://etherscan.io/address/0xa3931d71877C0E7a3148CB7Eb4463524FEc27fbD) | SSR rate changes, sUSDS TVL |
 | Morpho MetaMorpho Vault | [`0x68Aea7b82Df6CcdF76235D46445Ed83f85F845A3`](https://etherscan.io/address/0x68Aea7b82Df6CcdF76235D46445Ed83f85F845A3) | `owner()`, `guardian()`, `curator()`, `timelock()`, `fee()` — governance integrity |
 | Morpho Blue | [`0xBBBBBbbBBb9cC5e90e3b3Af64bdAF62C37EEFFCb`](https://etherscan.io/address/0xBBBBBbbBBb9cC5e90e3b3Af64bdAF62C37EEFFCb) | Market parameters, supply/borrow caps, Pawn Broker market state |
-| Steakhouse stcUSD Vault | Vault address TBD | stcUSD governance (owner, guardian, curator, fee), total supply, exchange rate — stcUSD is the collateral asset in the Pawn Broker market, managed by Steakhouse Financial. TODO: verify exact stcUSD vault address |
+| stcUSD Vault | Vault address TBD | stcUSD governance (owner, guardian, curator, fee), total supply, exchange rate — stcUSD is the collateral asset in the Pawn Broker market. Governance is unverified. TODO: verify exact stcUSD vault address and governance |
 
 ### Critical Events to Monitor
 
@@ -413,7 +413,7 @@ Yearn maintains an active monitoring system via the [`monitoring`](https://githu
 - **PSM fee changes** — if `tin` or `tout` are set above 0, it may trigger the Uniswap V3 fallback path
 - **Morpho MetaMorpho governance changes** — owner (`0xe5e2...`), guardian (`0xFEB4...`), or curator (`0x90D0...`) changes. The vault has a 3-day timelock on ownership transfers
 - **Pawn Broker queue status** — monitor whether the Pawn Broker strategy (0xe63a2a) remains out of or gets added to the default withdrawal queue. While out of queue, its $3.81M debt (~14.9%) requires targeted withdrawal or queue addition to serve redemptions
-- **stcUSD governance changes** — monitor Steakhouse Financial's control of the stcUSD MetaMorpho vault (owner, guardian, curator, fee). Changes affect the collateral asset in the Pawn Broker market
+- **stcUSD governance changes** — monitor the stcUSD MetaMorpho vault governance (owner, guardian, curator, fee). Governance is unverified — changes affect the collateral asset in the Pawn Broker market
 - **`totalDebt` vs sum of strategy `current_debt`** — monitor that the sum of all active strategy `current_debt` values stays aligned with `totalDebt`. Any material gap could indicate an un-tracked strategy with debt or an unreported loss
 
 ### Monitoring Functions
@@ -434,7 +434,7 @@ Yearn maintains an active monitoring system via the [`monitoring`](https://githu
 ### Key Strengths
 
 - **Battle-tested Yearn V3 infrastructure:** V3 framework audited by Statemind, ChainSecurity, and yAcademy. No V3 exploits in ~26 months of production. Immutable vault contracts eliminate proxy upgrade risk
-- **Multi-ecosystem deployment:** ~77.9% of debt is supplied to sUSDS (Sky Savings Rate, multi-billion-dollar TVL, 7+ auditors, $10M Immunefi bounty) and ~22.1% to Morpho Blue (isolated-market lending, $1B+ TVL, split across Yearn-managed MetaMorpho and Pawn Broker market with Steakhouse stcUSD collateral). The re-established Morpho leg provides meaningful diversification away from the single-ecosystem Sky concentration observed at prior snapshots. The Pawn Broker strategy is active but not in the default withdrawal queue
+- **Multi-ecosystem deployment:** ~77.9% of debt is supplied to sUSDS (Sky Savings Rate, multi-billion-dollar TVL, 7+ auditors, $10M Immunefi bounty) and ~22.1% to Morpho Blue (isolated-market lending, $1B+ TVL, split across Yearn-managed MetaMorpho and Pawn Broker market with stcUSD collateral). The re-established Morpho leg provides meaningful diversification away from the single-ecosystem Sky concentration observed at prior snapshots. The Pawn Broker strategy is active but not in the default withdrawal queue
 - **Standard Yearn governance:** Uses the Yearn V3 Role Manager with the 6-of-9 ySafe multisig (named, prominent DeFi signers). No EOA role concentration. Strategy additions go through 7-day timelock (self-governed — config changes must also go through 7-day delay)
 - **Simple, low-complexity pipelines:** sUSDS: USDC → DAI → USDS → sUSDS via 1:1 conversions. Morpho: USDC → MetaMorpho vault. No leverage, no cross-chain bridging, no looper mechanics
 - **Established track record:** ~16 months in production with ~$25.49M TVL, ~11.1% cumulative return, zero incidents
@@ -446,7 +446,7 @@ Yearn maintains an active monitoring system via the [`monitoring`](https://githu
 - **Sky Savings Rate variability:** SSR has been reduced from 15% → 6.5% → 4.5% → 4.0% over the past year. Further reductions would decrease vault yield from the sUSDS strategy but do not affect principal
 - **PSM fee risk:** Currently 0%, but Sky Governance can set fees. If fees exceed 0.05%, the sUSDS Lender strategy falls back to Uniswap V3 with 0.5% slippage tolerance, which could cause minor losses on large withdrawals
 - **Pawn Broker withdrawal queue gap:** The Pawn Broker strategy (~14.9%, $3.81M) is active with debt but **not in the default withdrawal queue**. Standard `withdraw()`/`redeem()` calls iterate the queue and skip this strategy. Withdrawals from this position require a targeted `redeem(uint256, address, address, uint256)` or the strategy must be added to the queue. Under heavy redemptions, the $3.81M could be less accessible than queue-included strategies
-- **Steakhouse Financial governance risk:** The Pawn Broker market pairs USDC against stcUSD collateral, where stcUSD is managed by **Steakhouse Financial** — a governance entity distinct from Yearn. Steakhouse controls the stcUSD MetaMorpho vault parameters, and governance changes could affect Pawn Broker market dynamics
+- **stcUSD governance risk (unverified):** The Pawn Broker market pairs USDC against stcUSD collateral, where stcUSD is a MetaMorpho vault whose governance is **unverified**. The vault address is TODO. Governance changes to the stcUSD vault could affect Pawn Broker market dynamics
 
 ### Critical Risks
 
@@ -515,15 +515,15 @@ Yearn maintains an active monitoring system via the [`monitoring`](https://githu
 | Factor | Assessment |
 |--------|-----------|
 | Protocol count (funded) | 3 funded strategies: sUSDS Lender 77.9% (Sky), Yearn USDC / Morpho MetaMorpho 7.2% (Morpho Blue), stcUSD/USDC Pawn Broker Market 14.9% (Morpho Pawn Broker, not in default queue). Two additional strategies queued at 0 debt (USDS Depositor, new Spark USDC Lender) |
-| Criticality | Sky / sUSDS: ~77.9% via sUSDS Lender. Morpho Blue: ~22.1% via MetaMorpho vault (7.2%) + Pawn Broker (14.9%, stcUSD collateral managed by Steakhouse Financial) |
-| Concentration | **~77.9% Sky-governed** at the snapshot — down from ~100% at May 11. Two distinct protocol ecosystems (Sky, Morpho Blue); three governance entities (Yearn, Steakhouse Financial, Sky) |
-| Quality | Both funded protocols are top-tier: Sky ($10M bug bounty, 7+ auditors) and Morpho Blue (well-audited, $1B+ TVL). The Yearn USDC MetaMorpho wrapper is Yearn-managed with its own governance checks (Security 4/7 owner, ySafe 6/9 guardian, 3-day timelock). The Pawn Broker leg involves stcUSD (Steakhouse MetaMorpho vault), managed by Steakhouse Financial — an additional governance entity |
+| Criticality | Sky / sUSDS: ~77.9% via sUSDS Lender. Morpho Blue: ~22.1% via MetaMorpho vault (7.2%) + Pawn Broker (14.9%, stcUSD collateral, governance unverified) |
+| Concentration | **~77.9% Sky-governed** at the snapshot — down from ~100% at May 11. Two distinct protocol ecosystems (Sky, Morpho Blue); two verified governance entities (Sky, Yearn); stcUSD governance unverified |
+| Quality | Both funded protocols are top-tier: Sky ($10M bug bounty, 7+ auditors) and Morpho Blue (well-audited, $1B+ TVL). The Yearn USDC MetaMorpho wrapper is Yearn-managed with its own governance checks (Security 4/7 owner, ySafe 6/9 guardian, 3-day timelock). The Pawn Broker leg involves stcUSD (MetaMorpho vault) whose governance is unverified — a separate concern |
 
-**Dependencies Score: 2.0 / 5** — funded debt is backed by two blue-chip protocols (Sky and Morpho Blue) with three distinct governance entities (Sky, Yearn, Steakhouse Financial). The rubric assigns 2.0 for "1–2 blue-chip dependencies." Despite three funded strategies, the protocol dependency surface remains two ecosystems. The Pawn Broker strategy is not in the default withdrawal queue, which is a liquidity nuance but does not affect the dependency concentration score.
+**Dependencies Score: 2.0 / 5** — funded debt is backed by two blue-chip protocols (Sky and Morpho Blue) with two verified governance entities (Sky, Yearn); stcUSD governance is unverified. The rubric assigns 2.0 for "1–2 blue-chip dependencies." Despite three funded strategies, the protocol dependency surface remains two ecosystems. The Pawn Broker strategy is not in the default withdrawal queue, which is a liquidity nuance but does not affect the dependency concentration score.
 
 **Centralization Score = (1.0 + 1.0 + 2.0) / 3 ≈ 1.3**
 
-**Score: 1.3 / 5** — Immutable vault with 6/9 named-signer multisig. 7-day timelock on the most critical action (strategy additions), with Daddy as sole proposer and no EOA vault roles. Fully programmatic operations with all funds onchain. **Dependency concentration is improved from the prior snapshot**: two distinct protocol ecosystems (Sky ~77.9%, Morpho Blue ~22.1%) with three governance entities (Sky, Yearn, Steakhouse Financial).
+**Score: 1.3 / 5** — Immutable vault with 6/9 named-signer multisig. 7-day timelock on the most critical action (strategy additions), with Daddy as sole proposer and no EOA vault roles. Fully programmatic operations with all funds onchain. **Dependency concentration is improved from the prior snapshot**: two distinct protocol ecosystems (Sky ~77.9%, Morpho Blue ~22.1%) with two verified governance entities (Sky, Yearn); stcUSD governance unverified.
 
 #### Category 3: Funds Management (Weight: 30%)
 
@@ -532,7 +532,7 @@ Yearn maintains an active monitoring system via the [`monitoring`](https://githu
 | Factor | Assessment |
 |--------|-----------|
 | Backing | 100% USDC-backed, deployed: sUSDS Lender (~77.9%, Sky), Yearn USDC / Morpho MetaMorpho (~7.2%, Morpho Blue), and stcUSD/USDC Pawn Broker Market (~14.9%, Morpho Blue Pawn Broker). All `current_debt` values sum to `totalDebt` with negligible rounding — no accounting gap |
-| Collateral quality | sUSDS: backed by over-collateralized loans and Treasury bills (RWA) via MakerDAO. Morpho Blue: isolated lending markets with immutable parameters. stcUSD (Pawn Broker collateral): Steakhouse MetaMorpho vault, managed by Steakhouse Financial — distinct governance from Yearn |
+| Collateral quality | sUSDS: backed by over-collateralized loans and Treasury bills (RWA) via MakerDAO. Morpho Blue: isolated lending markets with immutable parameters. stcUSD (Pawn Broker collateral): MetaMorpho vault, governance unverified — distinct governance concern from Yearn |
 | Leverage | None |
 | Verifiability | ERC-4626, all positions onchain |
 
@@ -612,7 +612,7 @@ Yearn maintains an active monitoring system via the [`monitoring`](https://githu
 - **Incident-based:** Reassess after any exploit, strategy loss, governance change, or Sky / Morpho / Spark Lend incident
 - **Allocation-based:** Reassess if the combined Morpho Blue exposure (currently ~22.1%) grows above 50% (material diversification achieved) or if new strategies are added/removed from the queue. Conversely, reassess if Sky-coupled strategies return to >90% concentration. Also reassess if the Pawn Broker strategy is added to or removed from the default withdrawal queue, or if any active strategy with material debt is not in the default queue
 - **SSR-based:** Reassess if Sky Savings Rate drops below 2% (may indicate Sky governance issues) or if PSM fees are introduced
-- **Governance-based:** Reassess if ySafe composition changes (signer additions/removals, threshold changes), if the MetaMorpho vault governance changes (owner, guardian, curator), or if Steakhouse Financial's stcUSD governance changes materially affect the Pawn Broker market
+- **Governance-based:** Reassess if ySafe composition changes (signer additions/removals, threshold changes), if the MetaMorpho vault governance changes (owner, guardian, curator), or if the stcUSD vault governance (currently unverified) changes materially and affects the Pawn Broker market
 - **Withdrawal-queue gap:** Reassess if the Pawn Broker strategy remains out of the default queue with >$5M in debt, creating a liquidity pressure point under potential redemption spikes
 
 ---
@@ -658,7 +658,8 @@ Yearn maintains an active monitoring system via the [`monitoring`](https://githu
 │  │  │                                                         │    ││
 │  │  │  stcUSD/USDC Pawn Broker Market             14.9%        │    ││
 │  │  │  Pipeline: USDC supplied into Morpho Pawn               │    ││
-│  │  │  Broker market; stcUSD (Steakhouse vault)               │    ││
+│  │  │  Broker market; stcUSD (MetaMorpho vault,              │    ││
+│  │  │  governance unverified)                                │    ││
 │  │  │  as collateral. NOT in default withdrawal queue         │    ││
 │  │  └─────────────────────────────────────────────────────────┘    ││
 │  │                                                                  ││

@@ -104,10 +104,10 @@ nodes:
     label: Morpho Blue
     address: "0xBBBBBbbBBb9cC5e90e3b3Af64bdAF62C37EEFFCb"
     category: dependency
-  - id: steakhouse-stcUSD
-    label: Steakhouse stcUSD (MetaMorpho)
+  - id: stcUSD
+    label: stcUSD (MetaMorpho)
     category: dependency
-    note: Managed by Steakhouse Financial; collateral asset in Pawn Broker market. Exact vault address TBD.
+    note: Collateral asset in Pawn Broker market. Exact vault address and governance TBD.
   - id: spark-lend
     label: Spark Lend USDC Market (Sky sub-DAO)
     category: dependency
@@ -223,7 +223,7 @@ edges:
     kind: deposits-into
     label: "USDC supply (Pawn Broker)"
   - from: pawn-broker
-    to: steakhouse-stcUSD
+    to: stcUSD
     kind: depends-on
     label: "stcUSD as collateral"
   - from: spark-usdc-lender
