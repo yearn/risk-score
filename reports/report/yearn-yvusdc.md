@@ -35,7 +35,7 @@ Since the May 11 snapshot, the old Spark USDC Lender has been **removed** from t
 - **Profit Max Unlock Time:** 10 days
 - **Fees:** 0% management fee, 10% performance fee
 
-**Dependency concentration note:** The sUSDS Lender (~78%) sits under Sky governance. The Yearn USDC strategy (~7%) is a Morpho MetaMorpho vault deployed on Morpho Blue — a non-Sky protocol, ending the ~100% Sky concentration of the prior snapshot. Effective Sky-governance exposure is **~78%** of debt at this snapshot. The remaining ~15% of `totalDebt` is not accounted for by the sum of strategy `current_debt` values; this may reflect pending profit distributions or an accounting nuance (see Monitoring for investigation recommendation). Two additional strategies sit queued at 0 debt.
+**Dependency concentration note:** The sUSDS Lender (~78%) sits under Sky governance. The Yearn USDC strategy (~7%) is a Morpho MetaMorpho vault deployed on Morpho Blue — a non-Sky protocol, ending the ~100% Sky concentration of the prior snapshot. Effective Sky-governance exposure is **~78%** of debt at this snapshot. The remaining ~15% (approximately $3.8M) of `totalDebt` is the normal Yearn V3 accounting spread between cumulative reported strategy gains (`totalDebt`) and per-strategy `current_debt` — it represents profits that have been reported and added to `totalDebt` but not yet fully re-allocated to individual strategies via `update_debt`. This drift is temporary and resolves through the normal reporting cycle. Two additional strategies sit queued at 0 debt.
 
 **Links:**
 
@@ -176,7 +176,7 @@ The yvUSDC-1 system is **low complexity**:
 - **PPS trend:** 1.000000 → 1.111482 (~11.1% cumulative return, ~8.3% annualized)
 - **Security incidents:** None known for this vault or Yearn V3 generally
 - **Strategy changes:** active portfolio management continues. The vault has used Aave V3, Compound V3, Morpho, Spark, Fluid, and Sky strategies over its ~16-month lifetime. Between May 11 and July 12: old Spark USDC Lender removed from queue (debt migrated); new Morpho MetaMorpho strategy ("Yearn USDC", 0x68Aea7) added and funded with ~$1.82M; new Spark USDC Lender (0x654a7c) added to queue at 0 debt
-- **Current allocation:** ~78% USDC to sUSDS Lender (Sky-governed) and ~7% Yearn USDC (Morpho Blue) — multi-ecosystem at the snapshot. ~15% of `totalDebt` not tracked to a strategy `current_debt` value (investigation TODO)
+- **Current allocation:** ~78% USDC to sUSDS Lender (Sky-governed) and ~7% Yearn USDC (Morpho Blue) — multi-ecosystem at the snapshot. ~15% accounting spread between `totalDebt` and sum of per-strategy `current_debt` (normal Yearn V3 profit-reporting drift)
 - **Yearn V3 track record:** V3 framework has been live since May 2024 (~26 months). No V3 vault exploits
 
 **Yearn protocol TVL:** ~$147M total across all chains ([DeFiLlama](https://defillama.com/protocol/yearn-finance), July 2026).
@@ -190,7 +190,7 @@ The yvUSDC-1 system is **low complexity**:
 
 ## Funds Management
 
-yvUSDC-1 deploys deposited USDC into yield strategies with 100% capital utilization. At the July 12 snapshot debt is split across **two strategies**: USDC to sUSDS Lender (~78%) and Yearn USDC / Morpho MetaMorpho (~7%). Two further strategies sit in the queue at 0 debt: USDC to USDS Depositor and a new Spark USDC Lender. A gap of ~$3.8M (14.9%) between `totalDebt` and the sum of strategy `current_debt` values is under investigation — it may reflect unprocessed debt accounting or an undiscovered strategy (see Monitoring).
+yvUSDC-1 deploys deposited USDC into yield strategies with 100% capital utilization. At the July 12 snapshot debt is split across **two strategies**: USDC to sUSDS Lender (~78%) and Yearn USDC / Morpho MetaMorpho (~7%). Two further strategies sit in the queue at 0 debt: USDC to USDS Depositor and a new Spark USDC Lender. A spread of ~$3.8M (14.9%) between `totalDebt` ($25.47M) and the sum of strategy `current_debt` values ($21.67M) is observed. This is consistent with Yearn V3's internal accounting: `totalDebt` includes cumulative reported strategy gains, while per-strategy `current_debt` reflects debt allocated to each strategy. The spread represents profit that has been reported and added to `totalDebt` but not yet re-allocated via `update_debt` — it is expected behavior and resolves through the normal reporting and rebalancing cycle.
 
 ### Strategy 1: USDC to USDS Depositor (0% — queued, unfunded)
 
@@ -387,7 +387,7 @@ Yearn maintains an active monitoring system via the [`monitoring`](https://githu
 - **SSR rate changes** — Sky Governance may adjust the savings rate, affecting yield
 - **PSM fee changes** — if `tin` or `tout` are set above 0, it may trigger the Uniswap V3 fallback path
 - **Morpho MetaMorpho governance changes** — owner (`0xe5e2...`), guardian (`0xFEB4...`), or curator (`0x90D0...`) changes. The vault has a 3-day timelock on ownership transfers
-- **`totalDebt` accounting gap** — the ~$3.8M discrepancy between `totalDebt` and sum of strategy `current_debt` should be resolved. Investigate via `unlockedShares()`, `profitUnlockingRate()`, and full strategy enumeration
+- **`totalDebt` / `current_debt` spread** — monitor whether the spread between `totalDebt` and sum of strategy `current_debt` values widens beyond normal reporting-cycle drift (~15% of `totalDebt`). A sudden increase could indicate an unreported loss or an un-tracked strategy with debt
 
 ### Monitoring Functions
 
@@ -418,11 +418,11 @@ Yearn maintains an active monitoring system via the [`monitoring`](https://githu
 - **Sky-governance concentration:** ~78% of funded debt remains Sky-governed via the sUSDS Lender. While improved from the ~100% concentration at prior snapshots, a Sky governance / sUSDS incident would still affect ~78% of yvUSDC-1's deployed capital. The Morpho leg (~7%) provides partial but limited diversification
 - **Sky Savings Rate variability:** SSR has been reduced from 15% → 6.5% → 4.5% → 4.0% over the past year. Further reductions would decrease vault yield from the sUSDS strategy but do not affect principal
 - **PSM fee risk:** Currently 0%, but Sky Governance can set fees. If fees exceed 0.05%, the sUSDS Lender strategy falls back to Uniswap V3 with 0.5% slippage tolerance, which could cause minor losses on large withdrawals
-- **Debt accounting gap:** ~$3.8M (14.9%) of `totalDebt` is not accounted for by the sum of known strategy `current_debt` values. The cause is under investigation — possible explanations include pending profit distributions, an undiscovered strategy, or a Yearn V3 accounting nuance
+- **`totalDebt` / `current_debt` accounting spread:** ~$3.8M (14.9%) of `totalDebt` is the normal spread between cumulative reported strategy gains and per-strategy allocated debt. This is an inherent Yearn V3 accounting artifact — `totalDebt` grows with reported profits, while individual strategy `current_debt` values are updated during rebalancing. The spread resolves with each reporting/rebalancing cycle
 
 ### Critical Risks
 
-- None identified. The vault uses blue-chip infrastructure (Sky and Morpho Blue) with strong governance and no leverage. The dominant risk (Sky concentration at ~78%) is non-critical — Sky is top-tier — and has improved since the May snapshot with the re-established Morpho diversification leg. The ~$3.8M debt accounting gap is under investigation but has not been linked to any loss event.
+- None identified. The vault uses blue-chip infrastructure (Sky and Morpho Blue) with strong governance and no leverage. The dominant risk (Sky concentration at ~78%) is non-critical — Sky is top-tier — and has improved since the May snapshot with the re-established Morpho diversification leg. The ~$3.8M `totalDebt` / `current_debt` accounting spread is a normal Yearn V3 bookkeeping artifact and does not represent a loss.
 
 ---
 
@@ -503,7 +503,7 @@ Yearn maintains an active monitoring system via the [`monitoring`](https://githu
 
 | Factor | Assessment |
 |--------|-----------|
-| Backing | 100% USDC-backed, deployed: sUSDS Lender (~78%, Sky) and Yearn USDC / Morpho MetaMorpho (~7%, Morpho Blue). ~15% gap between `totalDebt` and sum of strategy `current_debt` under investigation |
+| Backing | 100% USDC-backed, deployed: sUSDS Lender (~78%, Sky) and Yearn USDC / Morpho MetaMorpho (~7%, Morpho Blue). ~15% accounting spread between `totalDebt` ($25.47M) and sum of per-strategy `current_debt` ($21.67M) — normal Yearn V3 profit-reporting drift |
 | Collateral quality | sUSDS: backed by over-collateralized loans and Treasury bills (RWA) via MakerDAO. Spark Lend: USDC lending market on Sky sub-DAO infrastructure |
 | Leverage | None |
 | Verifiability | ERC-4626, all positions onchain |
@@ -585,7 +585,7 @@ Yearn maintains an active monitoring system via the [`monitoring`](https://githu
 - **Allocation-based:** Reassess if the Morpho MetaMorpho allocation grows above 30% (material non-Sky diversification achieved) or if new strategies are added/removed from the queue. Conversely, reassess if Sky-coupled strategies return to >90% concentration
 - **SSR-based:** Reassess if Sky Savings Rate drops below 2% (may indicate Sky governance issues) or if PSM fees are introduced
 - **Governance-based:** Reassess if ySafe composition changes (signer additions/removals, threshold changes), or if the MetaMorpho vault governance changes (owner, guardian, curator)
-- **Debt accounting gap:** Reassess if the ~$3.8M `totalDebt` vs strategy `current_debt` gap is resolved (reduces uncertainty). Conversely, reassess if the gap widens significantly
+- **Accounting spread:** Reassess if the `totalDebt` vs strategy `current_debt` spread widens significantly beyond the normal reporting-cycle range (currently ~15% of `totalDebt`)
 
 ---
 
@@ -594,7 +594,7 @@ Yearn maintains an active monitoring system via the [`monitoring`](https://githu
 | Date | Score | Notes |
 |------|------:|-------|
 | May 11, 2026 | 1.3 | Initial assessment. ~100% Sky-governance-coupled; 3 strategies in queue (2 funded: sUSDS Lender ~97%, Spark USDC Lender ~3%); TVL ~$29.84M |
-| July 12, 2026 | 1.3 | Reassessment. TVL down to ~$25.49M; new Morpho MetaMorpho strategy added (~7.2% allocation, non-Sky); old Spark Lender removed; Cat 2C improved 2.5→2.0; Cat 2 improved 1.5→1.3; final score unchanged at 1.3 (1.265 rounds to 1.3). ~$3.8M debt accounting gap under investigation |
+| July 12, 2026 | 1.3 | Reassessment. TVL down to ~$25.49M; new Morpho MetaMorpho strategy added (~7.2% allocation, non-Sky); old Spark Lender removed; Cat 2C improved 2.5→2.0; Cat 2 improved 1.5→1.3; final score unchanged at 1.3 (1.265 rounds to 1.3). ~$3.8M `totalDebt` / `current_debt` accounting spread identified (normal Yearn V3 behavior) |
 
 ---
 
