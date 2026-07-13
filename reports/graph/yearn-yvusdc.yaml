@@ -75,8 +75,9 @@ nodes:
     address: "0x68Aea7b82Df6CcdF76235D46445Ed83f85F845A3"
     category: strategy
   - id: pawn-broker
-    label: stcUSD/USDC Pawn Broker (14.9%, not in queue)
+    label: stcUSD/USDC Pawn Broker (14.9%, not in queue, self-contained)
     address: "0xe63a2abc24cd9538398d825a4bfe5778d25687df"
+    note: Self-contained Yearn V3 TokenizedStrategy (v3.0.4). Holds stcUSD directly as borrower collateral, lends USDC from own balance. Does NOT route through Morpho Blue.
     category: strategy
   - id: spark-usdc-lender
     label: Spark USDC Lender (queued)
@@ -225,17 +226,13 @@ edges:
     kind: deposits-into
     label: "USDC supply (MetaMorpho)"
   - from: pawn-broker
-    to: morpho-blue
-    kind: deposits-into
-    label: "USDC supply (Pawn Broker)"
-  - from: pawn-broker
     to: stcUSD
     kind: depends-on
-    label: "stcUSD as collateral"
+    label: "stcUSD as collateral (held directly)"
   - from: pawn-broker
     to: cap-governance
     kind: depends-on
-    label: "Cap governance (3-of-5 multi)"
+    label: "Cap governance (3-of-5 multi) — strategy's only external dependency"
   - from: cap-governance
     to: stcUSD
     kind: controls
