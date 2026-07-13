@@ -1,6 +1,6 @@
 # Protocol Risk Assessment: Yearn — yvUSDS-1
 
-- **Assessment Date:** May 11, 2026
+- **Assessment Date:** May 11, 2026 (Updated: July 13, 2026)
 - **Token:** yvUSDS-1 (USDS-1 yVault)
 - **Chain:** Ethereum
 - **Token Address:** [`0x182863131F9a4630fF9E27830d945B1413e347E8`](https://etherscan.io/address/0x182863131F9a4630fF9E27830d945B1413e347E8)
@@ -8,9 +8,9 @@
 
 ## Overview + Links
 
-yvUSDS-1 is a **USDS-denominated Yearn V3 vault** (ERC-4626) that deploys deposited USDS into yield strategies on Ethereum mainnet. At the May 11 snapshot the vault is **100% deployed** and split across two funded strategies: **sUSDS Lender (~80.0%)** depositing into the Sky Savings vault, and **Spark USDS Compounder (~20.0%)** staking USDS into the Sky **USDS Staking Rewards** contract for SPK token rewards. The third queued strategy (USDS Sky Rewards Compounder) holds zero current debt.
+yvUSDS-1 is a **USDS-denominated Yearn V3 vault** (ERC-4626) that deploys deposited USDS into yield strategies on Ethereum mainnet. At the July 13 snapshot the vault is **100% deployed** and split across two funded strategies: **sUSDS Lender (~84.1%)** depositing into the Sky Savings vault, and **Spark USDS Compounder (~15.9%)** staking USDS into the Sky **USDS Staking Rewards** contract for SPK token rewards. The third queued strategy (USDS Sky Rewards Compounder) holds zero current debt.
 
-**Material change since the prior snapshot (May 5 → May 11):** Brain re-funded the sUSDS Lender — it went from 0 USDS at the May 5 snapshot to **5,524,421.92 USDS (80.03%)**, while the Spark USDS Compounder share dropped from 100% to 19.97%. TVL also recovered from ~6.01M to **~6.90M USDS** (+14.9%). The dependency profile is no longer single-venue: the vault now sits across two distinct Sky-ecosystem contracts (Savings Rate vs USDS Staking Rewards SPK farm).
+Since the prior snapshot (May 11 → July 13, 61 days): TVL drifted modestly from 6.90M to **6.23M USDS** (−9.7%) and the allocation between the two funded strategies shifted from 80.03/19.97 to **84.08/15.92**. Both active strategies reported within the last few days (last_report dates of July 10–11, 2026), confirming normal keeper operation. No new strategies were added and the default queue composition is unchanged.
 
 This vault is **no longer the terminal layer** for the broader Yearn V3 mainnet risk-1 stable stack. yvDAI-1 still routes ~27.0% (~2.56M DAI) directly here via `DAI to USDS Depositor`, but yvUSDC-1 (which now routes USDC into a direct-to-sUSDS strategy) is no longer a depositor.
 
@@ -19,16 +19,16 @@ This vault is **no longer the terminal layer** for the broader Yearn V3 mainnet 
 - **Vault:** Standard Yearn V3 vault (v3.0.3) accepting USDS deposits, issuing yvUSDS-1 shares. Deployed as an immutable Vyper minimal proxy (EIP-1167) via the v3.0.3 Yearn V3 Vault Factory ([`0x5577EdcB8A856582297CdBbB07055E6a6E38eb5f`](https://etherscan.io/address/0x5577EdcB8A856582297CdBbB07055E6a6E38eb5f))
 - **Default queue (3 strategies, 2 funded):**
   1. **USDS Sky Rewards Compounder** ([`0x0868076663Bbc6638ceDd27704cc8F0Fa53d5b81`](https://etherscan.io/address/0x0868076663Bbc6638ceDd27704cc8F0Fa53d5b81)) — 0 USDS debt at snapshot
-  2. **Spark USDS Compounder** ([`0xc9f01b5c6048B064E6d925d1c2d7206d4fEeF8a3`](https://etherscan.io/address/0xc9f01b5c6048B064E6d925d1c2d7206d4fEeF8a3)) — **1,378,654.31 USDS (19.97%)**, stakes USDS into the Sky **USDS Staking Rewards** contract ([`0x173e314C7635B45322cd8Cb14f44b312e079F3af`](https://etherscan.io/address/0x173e314C7635B45322cd8Cb14f44b312e079F3af)) and harvests SPK ([`0xc20059e0317DE91738d13af027DfC4a50781b066`](https://etherscan.io/address/0xc20059e0317DE91738d13af027DfC4a50781b066)) back to USDS
-  3. **sUSDS Lender** ([`0x3F2dE801629116A83B9734bB72012A554e01CfC1`](https://etherscan.io/address/0x3F2dE801629116A83B9734bB72012A554e01CfC1)) — **5,524,421.92 USDS (80.03%)**, deposits USDS into the Sky Savings vault ([`0xa3931d71877C0E7a3148CB7Eb4463524FEc27fbD`](https://etherscan.io/address/0xa3931d71877C0E7a3148CB7Eb4463524FEc27fbD)) earning the Sky Savings Rate
+  2. **Spark USDS Compounder** ([`0xc9f01b5c6048B064E6d925d1c2d7206d4fEeF8a3`](https://etherscan.io/address/0xc9f01b5c6048B064E6d925d1c2d7206d4fEeF8a3)) — **992,299.38 USDS (15.92%)**, stakes USDS into the Sky **USDS Staking Rewards** contract ([`0x173e314C7635B45322cd8Cb14f44b312e079F3af`](https://etherscan.io/address/0x173e314C7635B45322cd8Cb14f44b312e079F3af)) and harvests SPK ([`0xc20059e0317DE91738d13af027DfC4a50781b066`](https://etherscan.io/address/0xc20059e0317DE91738d13af027DfC4a50781b066)) back to USDS
+  3. **sUSDS Lender** ([`0x3F2dE801629116A83B9734bB72012A554e01CfC1`](https://etherscan.io/address/0x3F2dE801629116A83B9734bB72012A554e01CfC1)) — **5,241,170.22 USDS (84.08%)**, deposits USDS into the Sky Savings vault ([`0xa3931d71877C0E7a3148CB7Eb4463524FEc27fbD`](https://etherscan.io/address/0xa3931d71877C0E7a3148CB7Eb4463524FEc27fbD)) earning the Sky Savings Rate
 - **Governance:** Standard **Yearn V3 Role Manager** ([`0xb3bd6B2E61753C311EFbCF0111f75D29706D9a41`](https://etherscan.io/address/0xb3bd6B2E61753C311EFbCF0111f75D29706D9a41)) governed by the **Yearn 6-of-9 ySafe** with **7-day TimelockController** for strategy additions
 
-**Key metrics (May 11, 2026, snapshot at block 25073237, timestamp 1778519075 = 17:04:35 UTC):**
+**Key metrics (July 13, 2026, snapshot at on-chain query):**
 
-- **TVL:** 6,903,076.23 USDS
-- **Total Supply:** 6,289,656.87 yvUSDS-1
-- **Price Per Share:** 1.097528 USDS/yvUSDS-1 (~9.75% cumulative appreciation over ~19.1 months, ~6.0% annualized)
-- **Total Debt:** 6,903,076.23 USDS (100% deployed)
+- **TVL:** 6,233,469.60 USDS
+- **Total Supply:** 5,647,642.26 yvUSDS-1
+- **Price Per Share:** 1.103730 USDS/yvUSDS-1 (~10.37% cumulative appreciation over ~21.2 months, ~5.8% annualized)
+- **Total Debt:** 6,233,469.60 USDS (100% deployed)
 - **Total Idle:** 0 USDS
 - **Deposit Limit:** 100,000,000 USDS
 - **Profit Max Unlock Time:** 3 days
@@ -82,22 +82,22 @@ Default queue order at block 25073237:
 | # | Strategy | Name | Activation | Current Debt (USDS) | Allocation |
 |---|----------|------|------------|--------------------:|-----------:|
 | 1 | [`0x0868076663Bbc6638ceDd27704cc8F0Fa53d5b81`](https://etherscan.io/address/0x0868076663Bbc6638ceDd27704cc8F0Fa53d5b81) | USDS Sky Rewards Compounder | 2025-05-16 | 0 | 0% |
-| 2 | [`0xc9f01b5c6048B064E6d925d1c2d7206d4fEeF8a3`](https://etherscan.io/address/0xc9f01b5c6048B064E6d925d1c2d7206d4fEeF8a3) | **Spark USDS Compounder** | 2025-07-14 | **1,378,654.31** | **19.97%** |
-| 3 | [`0x3F2dE801629116A83B9734bB72012A554e01CfC1`](https://etherscan.io/address/0x3F2dE801629116A83B9734bB72012A554e01CfC1) | **sUSDS Lender** | 2025-05-15 | **5,524,421.92** | **80.03%** |
+| 2 | [`0xc9f01b5c6048B064E6d925d1c2d7206d4fEeF8a3`](https://etherscan.io/address/0xc9f01b5c6048B064E6d925d1c2d7206d4fEeF8a3) | **Spark USDS Compounder** | 2025-07-14 | **992,299.38** | **15.92%** |
+| 3 | [`0x3F2dE801629116A83B9734bB72012A554e01CfC1`](https://etherscan.io/address/0x3F2dE801629116A83B9734bB72012A554e01CfC1) | **sUSDS Lender** | 2025-05-15 | **5,241,170.22** | **84.08%** |
 
 **Removed from queue at prior reshape (between April 27 and May 5, still absent at May 11):**
 
 - Aave V3 Lido USDS Lender ([`0xC08d81aba10f2dcBA50F9A3Efbc0988439223978`](https://etherscan.io/address/0xC08d81aba10f2dcBA50F9A3Efbc0988439223978))
 - Aave V3 USDS Lender ([`0xD144eAFf17b0308a5154444907781382398AaC61`](https://etherscan.io/address/0xD144eAFf17b0308a5154444907781382398AaC61))
 
-**Current funding posture:** **80.03% in sUSDS Lender (Sky Savings vault) and 19.97% in Spark USDS Compounder (Sky USDS Staking Rewards)**. The May 5 single-venue 100% posture was reversed within 6 days: Brain re-funded sUSDS Lender and reduced the Spark Compounder share. The USDS Sky Rewards Compounder remains queued at 0 debt. Last reports: Spark Compounder 2026-05-10 (`last_report = 1778389175`), sUSDS Lender 2026-05-10 (`last_report = 1777868495`), USDS Sky Rewards Compounder 2026-02-05 (still stale, consistent with zero allocated debt).
+**Current funding posture:** **84.08% in sUSDS Lender (Sky Savings vault) and 15.92% in Spark USDS Compounder (Sky USDS Staking Rewards)**. The USDS Sky Rewards Compounder remains queued at 0 debt. Last reports: Spark Compounder 2026-07-11 (`last_report = 1783655795`), sUSDS Lender 2026-07-10 (`last_report = 1783656383`), USDS Sky Rewards Compounder 2026-02-05 (still stale, consistent with zero allocated debt).
 
 ### Strategy Protocol Dependencies
 
 | Protocol | Strategy | Allocation |
 |----------|----------|-----------|
-| **Sky (sUSDS Savings Rate)** | sUSDS Lender | **80.03%** |
-| **Sky / Spark (USDS Staking Rewards SPK farm)** | Spark USDS Compounder | **19.97%** |
+| **Sky (sUSDS Savings Rate)** | sUSDS Lender | **84.08%** |
+| **Sky / Spark (USDS Staking Rewards SPK farm)** | Spark USDS Compounder | **15.92%** |
 | Sky USDS Staking (alt compounder) | USDS Sky Rewards Compounder | 0% (queue only) |
 
 ## Audits and Due Diligence Disclosures
@@ -158,15 +158,15 @@ The main accounting subtlety is the SPK reward harvest: the Spark Compounder per
 
 ## Historical Track Record
 
-- **Vault deployed:** October 8, 2024 (deployment [tx](https://etherscan.io/tx/0x6a1996554455945f9ba5f58b831c86f9afaeb1a5c36b9166099a7d3ac0106803)) — **~19.1 months** in production
-- **TVL:** 6,903,076.23 USDS at the May 11 snapshot — well within the 100M USDS deposit limit. TVL is up ~14.9% from the May 5 snapshot of ~6.01M; still down ~80% from the pre-redirection ~35.24M April 27 high
-- **PPS trend:** 1.000000 → 1.097528 (~9.75% cumulative return over ~19.1 months, ~6.0% annualized)
+- **Vault deployed:** October 8, 2024 (deployment [tx](https://etherscan.io/tx/0x6a1996554455945f9ba5f58b831c86f9afaeb1a5c36b9166099a7d3ac0106803)) — **~21.2 months** in production
+- **TVL:** 6,233,469.60 USDS at the July 13 snapshot — well within the 100M USDS deposit limit. TVL is down ~9.7% from the May 11 snapshot of ~6.90M; still down ~82% from the pre-redirection ~35.24M April 27 high
+- **PPS trend:** 1.000000 → 1.103730 (~10.37% cumulative return over ~21.2 months, ~5.8% annualized)
 - **Security incidents:** None known for this vault or for the Yearn V3 framework generally
-- **Strategy changes (May 5 → May 11):** Brain re-funded the sUSDS Lender from 0 → 5.52M USDS (80.03% of TVL), and reduced the Spark USDS Compounder allocation from 100% to 1.38M USDS (19.97%). The 3-strategy queue composition is unchanged
+- **Strategy changes (May 11 → July 13):** Allocation drifted from 80.03/19.97 to 84.08/15.92 (sUSDS Lender / Spark Compounder), reflecting a modest shift toward the Sky Savings Rate leg. The 3-strategy queue composition is unchanged; no new strategies added. The USDS Sky Rewards Compounder remains queued at 0 debt
 - **Prior reshape (April 27 → May 5):** Aave V3 Lido USDS Lender and Aave V3 USDS Lender both removed from the default queue; sUSDS Lender debt was drained to zero. yvUSDC-1's `USDC to USDS Depositor` strategy stopped routing into this vault and yvUSDC-1 redirected USDC into a new direct-to-sUSDS strategy
-- **Yearn V3 track record:** V3 framework has been live since May 2024 (~24 months). No V3 vault exploits
+- **Yearn V3 track record:** V3 framework has been live since May 2024 (~26 months). No V3 vault exploits
 
-**Yearn protocol TVL:** ~$197.5M total across all chains ([DeFiLlama](https://defillama.com/protocol/yearn), April 2026). Ethereum dominant at ~$149.6M.
+**Yearn protocol TVL:** ~$147.0M total across all chains ([DeFiLlama](https://defillama.com/protocol/yearn), July 2026). Ethereum dominant at ~$118.9M.
 
 **Sky / sUSDS / USDS Staking track record:**
 
@@ -177,9 +177,9 @@ The main accounting subtlety is the SPK reward harvest: the Spark Compounder per
 
 ## Funds Management
 
-yvUSDS-1 is **100% deployed** across two strategies at the May 11 snapshot: **sUSDS Lender (~80.0%)** depositing into the Sky Savings vault, and **Spark USDS Compounder (~20.0%)** staking USDS into the Sky USDS Staking Rewards contract. The third queued strategy (USDS Sky Rewards Compounder) holds zero debt.
+yvUSDS-1 is **100% deployed** across two strategies at the July 13 snapshot: **sUSDS Lender (~84.1%)** depositing into the Sky Savings vault, and **Spark USDS Compounder (~15.9%)** staking USDS into the Sky USDS Staking Rewards contract. The third queued strategy (USDS Sky Rewards Compounder) holds zero debt.
 
-### Strategy 1: sUSDS Lender (~80.0% allocation)
+### Strategy 1: sUSDS Lender (~84.1% allocation)
 
 **Contract:** [`0x3F2dE801629116A83B9734bB72012A554e01CfC1`](https://etherscan.io/address/0x3F2dE801629116A83B9734bB72012A554e01CfC1)
 
@@ -192,11 +192,11 @@ yvUSDS-1 is **100% deployed** across two strategies at the May 11 snapshot: **sU
 
 **Strategy parameters:**
 - Activated: 2025-05-15
-- Last reported: 2026-05-10 (`last_report = 1777868495`)
+- Last reported: 2026-07-10 (`last_report = 1783656383`)
 - Management: Brain multisig (3-of-8) and Debt Allocator
 - Keeper: yHaaSRelayer ([`0x604e586F17cE106B64185A7a0d2c1Da5bAce711E`](https://etherscan.io/address/0x604e586F17cE106B64185A7a0d2c1Da5bAce711E))
 
-### Strategy 2: Spark USDS Compounder (~20.0% allocation)
+### Strategy 2: Spark USDS Compounder (~15.9% allocation)
 
 **Contract:** [`0xc9f01b5c6048B064E6d925d1c2d7206d4fEeF8a3`](https://etherscan.io/address/0xc9f01b5c6048B064E6d925d1c2d7206d4fEeF8a3)
 
@@ -210,7 +210,7 @@ yvUSDS-1 is **100% deployed** across two strategies at the May 11 snapshot: **sU
 
 **Strategy parameters:**
 - Activated: 2025-07-14
-- Last reported: 2026-05-10 (`last_report = 1778389175`)
+- Last reported: 2026-07-11 (`last_report = 1783655795`)
 - Management: Brain multisig (3-of-8) and Debt Allocator
 - Keeper: yHaaSRelayer ([`0x604e586F17cE106B64185A7a0d2c1Da5bAce711E`](https://etherscan.io/address/0x604e586F17cE106B64185A7a0d2c1Da5bAce711E))
 
@@ -230,7 +230,7 @@ The rationale for removing both Aave V3 USDS strategies has not been independent
 ### Accessibility
 
 - **Deposits:** Permissionless — anyone can deposit USDS and receive yvUSDS-1 (ERC-4626 standard). Subject to 100M USDS deposit limit
-- **Withdrawals:** ERC-4626 standard. Users redeem yvUSDS-1 for USDS. Pipeline unwinds across both funded strategies: sUSDS Lender (~80%) calls `redeem()` against the Sky Savings vault; Spark Compounder (~20%) unstakes USDS from the Sky USDS Staking Rewards contract. Both are atomic against multi-billion-USDS underlying capacity
+- **Withdrawals:** ERC-4626 standard. Users redeem yvUSDS-1 for USDS. Pipeline unwinds across both funded strategies: sUSDS Lender (~84%) calls `redeem()` against the Sky Savings vault; Spark Compounder (~16%) unstakes USDS from the Sky USDS Staking Rewards contract. Both are atomic against multi-billion-USDS underlying capacity
 - **No cooldown or lock period**
 - **Fees:** 0% management fee, 10% performance fee (taken via accountant during `process_report`)
 - **Profit unlock:** 3 days
@@ -252,13 +252,13 @@ The rationale for removing both Aave V3 USDS strategies has not been independent
 
 ## Liquidity Risk
 
-- **Primary exit:** Redeem yvUSDS-1 for USDS via ERC-4626 `withdraw()` / `redeem()`. Triggers strategy `withdraw()` calls across both funded legs — sUSDS Lender redeems against the Sky Savings vault (~80%), Spark Compounder unstakes from Sky USDS Staking Rewards (~20%). Both unwind atomically in the same transaction
-- **Highly liquid underlying:** the Sky Savings vault holds ~$5.38B+ in sUSDS; the USDS Staking Rewards contract holds multi-billion USDS staked. yvUSDS-1's 6.90M USDS is a tiny fraction of either underlying capacity
+- **Primary exit:** Redeem yvUSDS-1 for USDS via ERC-4626 `withdraw()` / `redeem()`. Triggers strategy `withdraw()` calls across both funded legs — sUSDS Lender redeems against the Sky Savings vault (~84%), Spark Compounder unstakes from Sky USDS Staking Rewards (~16%). Both unwind atomically in the same transaction
+- **Highly liquid underlying:** the Sky Savings vault holds ~$5.38B+ in sUSDS; the USDS Staking Rewards contract holds multi-billion USDS staked. yvUSDS-1's 6.23M USDS is a tiny fraction of either underlying capacity
 - **No DEX liquidity needed** — both exits are via Sky's own contracts (`redeem` / unstake), not DEX AMMs
 - **Same-value asset:** USDS-denominated vault token — no price-divergence risk from the underlying
 - **No withdrawal queue or cooldown** — atomic redemption
-- **Deposit limit:** 100M USDS cap — generous relative to current TVL of 6.90M USDS
-- **Two-venue diversification:** unwind capacity is split across two distinct Sky contracts (Savings vault and USDS Staking Rewards). A pause / migration of either contract would only block ~20% or ~80% of redemptions atomically; Brain could re-route the affected share to the other (and the queued USDS Sky Rewards Compounder is also fundable)
+- **Deposit limit:** 100M USDS cap — generous relative to current TVL of 6.23M USDS
+- **Two-venue diversification:** unwind capacity is split across two distinct Sky contracts (Savings vault and USDS Staking Rewards). A pause / migration of either contract would only block ~16% or ~84% of redemptions atomically; Brain could re-route the affected share to the other (and the queued USDS Sky Rewards Compounder is also fundable)
 
 **Note on cascading withdrawals:** yvUSDC-1 no longer routes through this vault (its `USDC to USDS Depositor` strategy holds 0 USDC at the snapshot). yvDAI-1 still routes ~27.0% (~2.56M DAI) directly here via `DAI to USDS Depositor`. Large coordinated withdrawals from yvDAI-1 will translate into pressure on the funded sUSDS Lender / Spark Compounder; each layer settles atomically in the same transaction.
 
@@ -295,19 +295,20 @@ The yvUSDS-1 vault uses the **standard Yearn V3 governance pattern** via the Yea
 - **Vault operations:** Deposit / withdraw are permissionless on-chain transactions
 - **Strategy profit / loss:** Reported programmatically by keepers via `process_report()`. Profits unlock linearly over 3 days
 - **Debt allocation:** Managed by both the Debt Allocator (automated) and Brain multisig (manual)
-- **V3 vaults are immutable** — no proxy upgrades, no admin-changeable implementation
+- **V3 vaults are immutable** — no proxy upgrades, no admin-changeable implementation.
+- **Strategies are proxy-upgradeable** — all three strategies (sUSDS Lender, Spark USDS Compounder, USDS Sky Rewards Compounder) are deployed as EIP-1967 proxy contracts with verified TokenizedStrategy implementations on Etherscan. Each strategy's `management()` address is the Brain multisig ([`0x16388463d60FFE0661Cf7F1f31a7D658aC790ff7`](https://etherscan.io/address/0x16388463d60FFE0661Cf7F1f31a7D658aC790ff7), 3-of-8), which can initiate implementation upgrades. The sUSDS Lender and USDS Sky Rewards Compounder share the same implementation ([`0x254a93feff3beef9ca004e913bb5443754e8ab19`](https://etherscan.io/address/0x254a93feff3beef9ca004e913bb5443754e8ab19)); the Spark Compounder uses a separate implementation ([`0xd377919fa87120584b21279a491f82d5265a139c`](https://etherscan.io/address/0xd377919fa87120584b21279a491f82d5265a139c)). No pending management transfers detected on any strategy. This is the standard Yearn V3 Tokenized Strategy pattern — strategy upgrades require Brain (3-of-8) consensus but bypass the 7-day timelock (only vault-level `addStrategy()` goes through the timelock).
 
 ### External Dependencies
 
 | Dependency | Criticality | Notes |
 |-----------|-------------|-------|
-| **Sky / sUSDS (Sky Savings Rate)** | Critical | **~80% of allocation** via the sUSDS Lender. ~$5.38B sUSDS TVL. First-party Sky contract |
-| **Sky USDS Staking Rewards** | Critical | **~20% of allocation** via Spark USDS Compounder. Core part of the Sky Endgame tokenomics; SPK rewards distributed to USDS stakers |
+| **Sky / sUSDS (Sky Savings Rate)** | Critical | **~84% of allocation** via the sUSDS Lender. ~$5.38B sUSDS TVL. First-party Sky contract |
+| **Sky USDS Staking Rewards** | Critical | **~16% of allocation** via Spark USDS Compounder. Core part of the Sky Endgame tokenomics; SPK rewards distributed to USDS stakers |
 | **USDS itself** | Critical | The underlying asset of the vault — failure of USDS would be terminal regardless of strategy mix |
 | **SPK token** | Low | Reward token sold back to USDS during compounding. SPK price exposure between harvests is small relative to vault TVL but non-zero |
 | Sky USDS Staking (alt compounder) | Standby | USDS Sky Rewards Compounder is in the queue with 0 debt. Available as on-chain fallback |
 
-**Dependency quality:** both funded dependencies are first-party Sky / Spark contracts plus the underlying USDS token. Sky has 8+ years of history (inheriting MakerDAO's track record), $5.38B in sUSDS, and a $10M bug bounty. The concentration improved materially since the May 5 snapshot: from 100% single-venue (USDS Staking Rewards) to a **two-venue 80/20 split** across functionally distinct Sky contracts (Savings Rate vs Staking Rewards). A pause / bug in one of the two would impair only its respective share, with the queued USDS Sky Rewards Compounder providing an additional on-chain fallback.
+**Dependency quality:** both funded dependencies are first-party Sky / Spark contracts plus the underlying USDS token. Sky has 8+ years of history (inheriting MakerDAO's track record), $5.38B in sUSDS, and a $10M bug bounty. The vault maintains a **two-venue ~84/16 split** across functionally distinct Sky contracts (Savings Rate vs Staking Rewards). A pause / bug in one of the two would impair only its respective share, with the queued USDS Sky Rewards Compounder providing an additional on-chain fallback.
 
 ## Operational Risk
 
@@ -316,8 +317,8 @@ The yvUSDS-1 vault uses the **standard Yearn V3 governance pattern** via the Yea
 - **Documentation:** Comprehensive Yearn V3 documentation. Strategy code verified on Etherscan
 - **Legal:** Yearn Finance has converted ychad.eth into a BORG via [YIP-87](https://gov.yearn.fi/t/yip-87-convert-ychad-eth-into-a-borg/14540), wrapping it in a Cayman Islands foundation
 - **Incident response:** Yearn has demonstrated incident response across 4 historical events (all V1 / legacy). V3 framework has not been tested under stress. The $200K Immunefi bug bounty provides a responsible disclosure channel
-- **V3 immutability:** Vault contracts cannot be upgraded — eliminates proxy upgrade risk but means bugs cannot be patched in place; a critical bug requires deploying a new vault and migrating users
-- **Recent allocation activity (May 5 → May 11):** Brain re-funded the sUSDS Lender from 0 → 5.52M USDS (80.03%) and trimmed the Spark Compounder share from 100% → 19.97% (1.38M USDS). This re-diversifies the dependency profile across two distinct Sky contracts. TVL also recovered ~14.9% in the same window
+- **V3 immutability:** Vault contracts cannot be upgraded — eliminates proxy upgrade risk for the vault itself but means bugs cannot be patched in place; a critical bug requires deploying a new vault and migrating users. Strategies are EIP-1967 proxy-upgradeable under Brain (3-of-8) per the standard Yearn V3 Tokenized Strategy pattern
+- **Recent allocation activity (May 11 → July 13):** TVL drifted modestly from 6.90M to 6.23M USDS (−9.7%). Allocation between the two funded strategies shifted from 80.03/19.97 to 84.08/15.92 — a modest rebalancing toward the Sky Savings Rate leg. Both active strategies last reported within 2-3 days of the snapshot (July 10–11, 2026). No new strategies were added; the queued USDS Sky Rewards Compounder remains at 0 debt.
 - **Prior reshape (April 27 → May 5):** sUSDS Lender debt drained from ~7.4% to 0; two Aave V3 USDS strategies removed from the default queue; vault TVL dropped ~83% (largely upstream-driven, as yvUSDC-1 redirected its USDC→USDS routing). Rationale not independently verifiable on-chain
 
 ## Monitoring
@@ -351,10 +352,10 @@ Yearn maintains an active monitoring system via the [`monitoring`](https://githu
 - **TVL inflow event** — sustained TVL re-rise above 20M would justify reassessment, since current TVL reflects the post-redirection range
 - **Emergency actions** — `Shutdown` event on vault
 - **ySafe / Brain / Security signer or threshold changes** — governance integrity
-- **SSR rate changes** — affects ~80% of vault TVL via the sUSDS Lender yield
-- **SPK reward rate changes** — affects ~20% of vault TVL via Spark USDS Compounder yield
-- **Sky USDS Staking Rewards pause / migration** — would impair ~20% of vault unwind capacity; monitor `paused()` state
-- **Sky Savings vault (`pot`/sUSDS) pause / migration** — would impair ~80% of vault unwind capacity
+- **SSR rate changes** — affects ~84% of vault TVL via the sUSDS Lender yield
+- **SPK reward rate changes** — affects ~16% of vault TVL via Spark USDS Compounder yield
+- **Sky USDS Staking Rewards pause / migration** — would impair ~16% of vault unwind capacity; monitor `paused()` state
+- **Sky Savings vault (`pot`/sUSDS) pause / migration** — would impair ~84% of vault unwind capacity
 
 ### Monitoring Functions
 
@@ -374,24 +375,25 @@ Yearn maintains an active monitoring system via the [`monitoring`](https://githu
 
 ### Key Strengths
 
-- **Battle-tested Yearn V3 infrastructure:** V3 framework audited by Statemind, ChainSecurity, and yAcademy. No V3 exploits in ~24 months of production. Immutable vault contracts eliminate proxy upgrade risk
-- **Top-tier underlying:** ~80% Sky Savings vault (sUSDS) and ~20% Sky USDS Staking Rewards — both first-party Sky contracts with $10M Immunefi bounty and 8+ years of MakerDAO heritage
-- **Two-venue diversification:** the 80/20 split is across functionally distinct Sky contracts (Savings Rate vs Staking Rewards SPK farm). A pause / bug in one would impair only its share
-- **Standard Yearn governance:** Yearn V3 Role Manager + 6-of-9 ySafe (named, prominent DeFi signers). No EOA role concentration. Strategy additions go through a 7-day self-governed timelock
+- **Battle-tested Yearn V3 infrastructure:** V3 framework audited by Statemind, ChainSecurity, and yAcademy. No V3 exploits in ~26 months of production. Vault contracts are immutable; strategies are proxy-upgradeable under Brain (3-of-8) per the standard Yearn V3 Tokenized Strategy pattern
+- **Top-tier underlying:** ~84% Sky Savings vault (sUSDS) and ~16% Sky USDS Staking Rewards — both first-party Sky contracts with $10M Immunefi bounty and 8+ years of MakerDAO heritage
+- **Two-venue diversification:** the ~84/16 split is across functionally distinct Sky contracts (Savings Rate vs Staking Rewards SPK farm). A pause / bug in one would impair only its share
+- **Standard Yearn governance:** Yearn V3 Role Manager + 6-of-9 ySafe (named, prominent DeFi signers). No EOA role concentration on vault roles. Strategy additions go through a 7-day self-governed timelock
 - **Simple, low-complexity strategies:** direct USDS → sUSDS deposit and USDS → Sky Staking Rewards stake — no conversions, no leverage, no cross-chain
-- **Established track record:** ~19.1 months in production, ~9.75% cumulative return, zero incidents at the vault or strategy level
+- **Established track record:** ~21.2 months in production, ~10.37% cumulative return, zero incidents at the vault or strategy level
 - **On-chain redundancy in the queue:** USDS Sky Rewards Compounder sits in the queue with 0 debt, immediately fundable by Brain
-- **Atomic unwind:** ~6.90M USDS unwinds in a single `withdraw()` call against multi-billion underlying capacity across both legs
+- **Atomic unwind:** ~6.23M USDS unwinds in a single `withdraw()` call against multi-billion underlying capacity across both legs
 - **Active monitoring:** yvUSDS-1 is in Yearn's hourly monitoring system with Telegram alerts
 
 ### Key Risks
 
 - **Single-ecosystem coupling (Sky / Spark):** both funded venues sit inside the Sky governance umbrella. A Sky-governance-level incident (e.g., USDS depeg, governance attack) would simultaneously affect both legs. Diversification at the contract level (sUSDS vs USDS Staking Rewards) does not protect against ecosystem-wide events
-- **TVL still well below the ~35M April 27 high:** TVL has recovered ~14.9% (6.01M → 6.90M) since May 5 but remains ~80% below the pre-redirection peak. Smaller TVL reduces the operational cushion for fixed-cost components (keepers, harvests)
+- **TVL still well below the ~35M April 27 high:** TVL drifted modestly from 6.90M to 6.23M and remains ~82% below the pre-redirection peak. Smaller TVL reduces the operational cushion for fixed-cost components (keepers, harvests)
 - **Queue trimmed:** Aave V3 Lido USDS Lender and Aave V3 USDS Lender remain absent from the default queue (removed in the prior reshape). Rationale not independently verifiable on-chain
-- **SSR rate variability:** Sky Savings Rate is governance-set and has been reduced from ~15% to ~4.0% over the past year. Affects ~80% of yield, not principal
-- **SPK reward rate variability:** SPK reward rate is governance-set and has been adjusted in the past. Affects ~20% of yield, not principal
+- **SSR rate variability:** Sky Savings Rate is governance-set and has been reduced from ~15% to ~4.0% over the past year. Affects ~84% of yield, not principal
+- **SPK reward rate variability:** SPK reward rate is governance-set and has been adjusted in the past. Affects ~16% of yield, not principal
 - **SPK token price exposure between harvests:** small relative to vault TVL but non-zero — large SPK price drops between Spark Compounder harvest cycles would slightly underdeliver expected yield
+- **Strategy proxy upgradeability:** all three strategies are EIP-1967 proxies with `management() = Brain` (3-of-8). Strategy implementation upgrades bypass the 7-day timelock; Brain consensus alone can change strategy logic. This is the standard Yearn V3 Tokenized Strategy design, not a deviation
 - **yvDAI-1 dependency:** yvDAI-1 still routes ~27.0% (~2.56M DAI) of its TVL here. Coordinated yvDAI-1 withdrawals translate into pressure on the funded legs; settlement is atomic but multi-step
 
 ### Critical Risks
@@ -424,12 +426,12 @@ Yearn maintains an active monitoring system via the [`monitoring`](https://githu
 |--------|-----------|
 | Audits | V3 framework: 3 audits by top firms (Statemind, ChainSecurity, yAcademy). Sky / sUSDS / USDS Staking: 7+ auditors (ChainSecurity, Cantina, Sherlock, Trail of Bits, etc.) |
 | Bug bounty | $200K on Immunefi (Yearn); $10M on Immunefi (Sky) |
-| Production history | **~19.1 months** (October 8, 2024). V3 framework: ~24 months |
-| TVL | 6,903,076 USDS at snapshot (up ~14.9% from May 5, still down ~80% from 35.24M April 27 peak). Deposit limit: 100M |
+| Production history | **~21.2 months** (October 8, 2024). V3 framework: ~26 months |
+| TVL | 6,233,469.60 USDS at snapshot (down ~9.7% from 6.90M May 11; still down ~82% from 35.24M April 27 peak). Deposit limit: 100M |
 | Security incidents | None on V3, none on USDS / sUSDS / USDS Staking |
 | Strategy review | Rigorous 12-metric framework with ySec security review |
 
-**Score: 1.5 / 5** — Strong audit coverage on both layers (vault + Sky). ~19.1 months of clean production. The TVL drop is upstream-routing-driven and does not change the historical-track-record scoring.
+**Score: 1.5 / 5** — Strong audit coverage on both layers (vault + Sky). ~21.2 months of clean production. The TVL drop is upstream-routing-driven and does not change the historical-track-record scoring.
 
 #### Category 2: Centralization & Control Risks (Weight: 30%)
 
@@ -437,13 +439,13 @@ Yearn maintains an active monitoring system via the [`monitoring`](https://githu
 
 | Factor | Assessment |
 |--------|-----------|
-| Upgradeability | V3 vault is **immutable** (no proxy upgrades) |
+| Upgradeability | V3 vault is **immutable** (no proxy upgrades). Strategies are EIP-1967 proxy-upgradeable under Brain (3-of-8) — standard Yearn V3 Tokenized Strategy pattern |
 | Multisig | 6-of-9 ySafe with **publicly named, prominent DeFi signers** |
 | Timelock | Strategy additions and accountant changes through **7-day TimelockController** |
 | Privileged roles | Well-distributed: Daddy (6/9, all roles), Brain (3/8, operational), Security (4/7), Keeper + Debt Allocator (bots) |
 | EOA risk | None — no EOA holds direct vault roles |
 
-**Governance Score: 1.0 / 5** — Immutable + 7-day self-governed timelock + 6/9 named signers + no EOA roles = textbook score-1 governance per the rubric.
+**Governance Score: 1.0 / 5** — Immutable vault + 7-day self-governed timelock + 6/9 named signers + no EOA roles on vault = textbook score-1 governance per the rubric. Strategy proxy upgradeability is managed by the existing Brain multisig and does not change the governance score.
 
 **Subcategory B: Programmability**
 
@@ -460,13 +462,13 @@ Yearn maintains an active monitoring system via the [`monitoring`](https://githu
 
 | Factor | Assessment |
 |--------|-----------|
-| Funded protocol count | **2** funded venues — sUSDS Lender (~80%, Sky Savings vault), Spark USDS Compounder (~20%, Sky USDS Staking Rewards) |
+| Funded protocol count | **2** funded venues — sUSDS Lender (~84%, Sky Savings vault), Spark USDS Compounder (~16%, Sky USDS Staking Rewards) |
 | Queued, 0-debt fallback | USDS Sky Rewards Compounder (alternate Sky Staking implementation) |
-| Criticality | Sky / sUSDS critical (~80%); Sky USDS Staking Rewards critical (~20%); plus dependency on the underlying USDS token itself |
+| Criticality | Sky / sUSDS critical (~84%); Sky USDS Staking Rewards critical (~16%); plus dependency on the underlying USDS token itself |
 | Concentration | 100% Sky-ecosystem (governance umbrella), but split across two functionally distinct contracts |
 | Quality | Top-tier — Sky has $10M bounty, ~$5.38B sUSDS TVL, and 8+ years of MakerDAO heritage |
 
-**Dependencies Score: 2.5 / 5** — two funded venues at an 80 / 20 split across functionally distinct Sky contracts. Per the rubric, two blue-chip dependencies map to 2.0; the +0.5 reflects that both still sit under the Sky-governance umbrella (single-ecosystem coupling) even though contract-level diversification has improved versus the May 5 snapshot.
+**Dependencies Score: 2.5 / 5** — two funded venues at an ~84/16 split across functionally distinct Sky contracts. Per the rubric, two blue-chip dependencies map to 2.0; the +0.5 reflects that both still sit under the Sky-governance umbrella (single-ecosystem coupling).
 
 **Centralization Score = (1.0 + 1.0 + 2.5) / 3 ≈ 1.5**
 
@@ -504,9 +506,9 @@ Yearn maintains an active monitoring system via the [`monitoring`](https://githu
 
 | Factor | Assessment |
 |--------|-----------|
-| Exit mechanism | sUSDS Lender `redeem()` against Sky Savings vault (~80%) and Spark Compounder unstake from Sky USDS Staking Rewards (~20%) — both atomic |
-| Liquidity depth | sUSDS: ~$5.38B TVL. USDS Staking Rewards: multi-billion USDS staked. 6.90M vault is a tiny fraction of either capacity |
-| Large holder impact | 6.90M vault vs multi-billion underlying pools — negligible |
+| Exit mechanism | sUSDS Lender `redeem()` against Sky Savings vault (~84%) and Spark Compounder unstake from Sky USDS Staking Rewards (~16%) — both atomic |
+| Liquidity depth | sUSDS: ~$5.38B TVL. USDS Staking Rewards: multi-billion USDS staked. 6.23M vault is a tiny fraction of either capacity |
+| Large holder impact | 6.23M vault vs multi-billion underlying pools — negligible |
 | Same-value asset | USDS-denominated — no price-divergence risk |
 | Withdrawal restrictions | None — atomic redemption, no cooldown |
 | Two-venue diversification | Unwind capacity split across two distinct Sky contracts; pause / migration of either would block only its respective share |
@@ -537,7 +539,7 @@ Yearn maintains an active monitoring system via the [`monitoring`](https://githu
 | Operational Risk | 1.0 | 5% | 0.050 |
 | **Final Score** | | | **1.325 → 1.3 / 5.0** |
 
-**Change from prior snapshot (May 5 = 1.4):** Cat 2C dependencies moved from 3.0 → 2.5 because the dependency profile diversified from 100% single-venue (Sky USDS Staking Rewards) to a two-venue 80 / 20 split (sUSDS Lender + Spark Compounder) across functionally distinct Sky contracts. The other category scores are unchanged. 1.325 rounds to **1.3** per the standard nearest-0.1 rule.
+**Change from prior snapshot (May 11 = 1.3):** No category score changed. TVL drifted modestly (6.90M → 6.23M) and allocations shifted from 80/20 to 84/16, but the two-venue dependency profile is unchanged. Strategy proxy upgradeability (all three strategies are EIP-1967 proxies under Brain 3-of-8) was identified as a new finding but does not change the governance score — Brain already holds operational vault roles and the pattern is the standard Yearn V3 Tokenized Strategy design. Final score remains **1.3**.
 
 ### Risk Tier
 
@@ -555,8 +557,8 @@ Yearn maintains an active monitoring system via the [`monitoring`](https://githu
 
 ## Reassessment Triggers
 
-- **Time-based:** Reassess in 6 months (November 2026) or annually
-- **TVL-based:** Reassess if TVL exceeds 50M USDS or changes by more than ±50% from the May 11 snapshot of 6.90M (would indicate either material upstream re-routing back into this vault or further contraction)
+- **Time-based:** Reassess in 6 months (January 2027) or annually
+- **TVL-based:** Reassess if TVL exceeds 50M USDS or changes by more than ±50% from the July 13 snapshot of 6.23M (would indicate either material upstream re-routing back into this vault or further contraction)
 - **Allocation drift:**
   - if the funded mix collapses back toward a single venue (>90% in one strategy), Cat 2C dependencies should harden from 2.5 toward 3.0
   - if the queued USDS Sky Rewards Compounder is removed from the queue or shut down, Cat 2C should also harden (no on-chain fallback)
@@ -576,7 +578,7 @@ Yearn maintains an active monitoring system via the [`monitoring`](https://githu
 
 ## Appendix: Contract Architecture
 
-Snapshot at block 25073237 (May 11, 2026, 17:04 UTC).
+Snapshot at on-chain query (July 13, 2026).
 
 ```
 ┌──────────────────────────────────────────────────────────────────────┐
@@ -587,16 +589,16 @@ Snapshot at block 25073237 (May 11, 2026, 17:04 UTC).
 │  │  ERC-4626, immutable Vyper proxy       │                          │
 │  │  0x1828…47E8                           │                          │
 │  │                                        │                          │
-│  │  TVL: 6,903,076.23 USDS                │                          │
+│  │  TVL: 6,233,469.60 USDS                │                          │
 │  │   ├── 0 idle                           │                          │
-│  │   ├── 5,524,421.92 → sUSDS Lender     │                          │
-│  │   └── 1,378,654.31 → Spark Compounder │                          │
+│  │   ├── 5,241,170.22 → sUSDS Lender     │                          │
+│  │   └── 992,299.38 → Spark Compounder   │                          │
 │  └─────────────────┬──────────────────────┘                          │
 │                    │                                                  │
 │       ┌────────────┴───────────┐                                      │
 │       ▼                        ▼                                      │
 │  ┌──────────────────────┐  ┌──────────────────────────────────────┐  │
-│  │ sUSDS LENDER (80%)   │  │ SPARK USDS COMPOUNDER (20%)          │  │
+│  │ sUSDS LENDER (84%)   │  │ SPARK USDS COMPOUNDER (16%)          │  │
 │  │ 0x3F2d…CfC1          │  │ 0xc9f0…f8a3                          │  │
 │  │   USDS → sUSDS       │  │   USDS → Sky USDS Staking Rewards    │  │
 │  │   (Sky Savings vault │  │   → SPK → USDS                       │  │
@@ -606,7 +608,7 @@ Snapshot at block 25073237 (May 11, 2026, 17:04 UTC).
 │  Queued, 0 debt at snapshot (on-chain fallback):                      │
 │   • USDS Sky Rewards Compounder — 0x0868…5b81 (alternate Sky Staking) │
 │                                                                       │
-│  Removed from queue (Apr 27 → May 5; still absent at May 11):         │
+│  Removed from queue (Apr 27 → May 5; still absent at July 13):         │
 │   • Aave V3 Lido USDS Lender — 0xC08d…3978                            │
 │   • Aave V3 USDS Lender      — 0xD144…AaC61                           │
 └──────────────────────────────────────────────────────────────────────┘
@@ -623,12 +625,11 @@ Snapshot at block 25073237 (May 11, 2026, 17:04 UTC).
 │                  $10M Immunefi bug bounty (Sky)                       │
 └──────────────────────────────────────────────────────────────────────┘
 
-Upstream composition (vault-of-vaults) at block 25073237:
+Upstream composition (vault-of-vaults) at July 13 snapshot:
   yvUSDC-1 → USDC to USDS Depositor       — 0 USDC debt (no longer routes here)
   yvDAI-1  → DAI to USDS Depositor        — ~2.56M DAI (~27.0% of yvDAI TVL)
 
-Net effect: ~2.56M of upstream depositor flow currently lands here
-(up from ~1.61M at the May 5 snapshot).
+Net effect: ~2.56M of upstream depositor flow currently lands here (yvDAI-1).
 ```
 
 ## Appendix: TimelockController Role Structure
@@ -650,3 +651,12 @@ TimelockController [`0x88Ba032be87d5EF1fbE87336b7090767F367BF73`](https://ethers
 ### Why the 7-day delay cannot be bypassed
 
 To shorten the delay, an attacker would need to (1) control Daddy 6/9 to **propose** `updateDelay()` — only Daddy can propose; (2) wait 7 days, during which Brain or Daddy can cancel; (3) execute via Daddy, Brain (via TimelockExecutor), or the deployer EOA — but the operation is already visible on-chain for 7 days. DEFAULT_ADMIN was never granted, so no one can self-grant PROPOSER or TIMELOCK_ADMIN to skip the flow.
+
+---
+
+## Assessment History
+
+| Date | Score | Notes |
+| --- | --- | --- |
+| May 11, 2026 | 1.3 | Initial assessment |
+| July 13, 2026 | 1.3 | Reassessment: TVL $6.23M (down 9.7% since May 11); allocations drifted to 84/16 sUSDS/Spark; all governance roles, multisig thresholds, and timelock parameters confirmed unchanged; strategies identified as EIP-1967 proxy-upgradeable under Brain (3-of-8) — standard Yearn V3 Tokenized Strategy pattern, no score impact |
