@@ -115,15 +115,6 @@ The MetaMorpho strategy allocates capital to **Morpho Blue** lending markets:
 
 The **v3.0.4 patch release** (used by yvWBTC-1) was reviewed **internally** by the Yearn team rather than re-engaging external auditors. The diff from v3.0.2 is a minor patch-level change; the external audits cover the core architecture. Source: [yearn-vaults-v3 GitHub releases](https://github.com/yearn/yearn-vaults-v3/releases).
 
-### Underlying Protocol Audits: Morpho Blue & MetaMorpho
-
-| Auditor | Date | Scope | Report |
-|---------|------|-------|--------|
-| [ChainSecurity](https://github.com/morpho-org/morpho-blue/blob/main/audits/2024-01-05-chainsecurity.pdf) | Jan 5, 2024 | Morpho Blue | PDF |
-| [Spearbit](https://github.com/morpho-org/morpho-blue/blob/main/audits/2024-01-08-spearbit.pdf) | Jan 8, 2024 | Morpho Blue | PDF |
-| [Cantina](https://github.com/morpho-org/morpho-blue/blob/main/audits/2024-02-02-cantina.pdf) | Feb 2, 2024 | Morpho Blue | PDF |
-| [Cantina](https://cantina.xyz/competitions/47418e9c-6540-47bd-a205-7f410b6bea43) | May 2024 | MetaMorpho | Competition |
-| [OpenZeppelin](https://github.com/morpho-org/morpho-blue/blob/main/audits/2024-09-17-openzeppelin-timelock.pdf) | Sep 17, 2024 | Timelock | PDF |
 
 Morpho Blue core contracts are **immutable** (no proxy, no upgrade mechanism). MetaMorpho V1_1 is also immutable. The historical Aave V3 attachment (which was revoked) is documented in the Historical Track Record below.
 
