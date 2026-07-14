@@ -227,12 +227,8 @@ edges:
     label: "USDC supply (MetaMorpho)"
   - from: pawn-broker
     to: stcUSD
-    kind: depends-on
+    kind: deposits-into
     label: "stcUSD as collateral (held directly)"
-  - from: pawn-broker
-    to: cap-governance
-    kind: depends-on
-    label: "Cap governance (3-of-5 multi) — strategy's only external dependency"
   - from: cap-governance
     to: stcUSD
     kind: controls
