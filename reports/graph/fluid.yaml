@@ -17,24 +17,24 @@ categories:
 nodes:
   # === fToken layer (user-facing) ===
   - id: fUSDC
-    label: fUSDC (~$193M)
+    label: fUSDC (~$134M)
     address: "0x9Fb7b4477576Fe5B32be4C1843aFB1e55F251B33"
     category: vault
     note: ERC-4626 USDC lending vault
   - id: fUSDT
-    label: fUSDT (~$130M)
+    label: fUSDT (~$131M)
     address: "0x5C20B550819128074FD538Edf79791733ccEdd18"
     category: vault
   - id: fWETH
-    label: fWETH (~2,533 WETH)
+    label: fWETH (~1,600 WETH)
     address: "0x90551c1795392094FE6D29B758EcCD233cFAa260"
     category: vault
   - id: fwstETH
-    label: fwstETH (~1,768 wstETH)
+    label: fwstETH (~360 wstETH)
     address: "0x2411802D8BEA09be0aF8fD8D08314a63e706b29C"
     category: vault
   - id: fGHO
-    label: fGHO (~$12M)
+    label: fGHO (~$15M)
     address: "0x6A29A46E21C730DcA1d8b23d637c101cec605C5B"
     category: vault
   - id: fsUSDS
@@ -68,7 +68,7 @@ nodes:
     note: Tick-based liquidations; generates fToken yield
   - id: rebalancer
     label: Rebalancer (fUSDC/fUSDT)
-    address: "0x724d0c9497Fa89B2C6A4585e08380c91a92ab9b6"
+    address: "0x264786EF916af64a1DB19F513F24a3681734ce92"
     category: infra
     note: Deposits underlying as rewards; cannot withdraw
 
@@ -79,10 +79,10 @@ nodes:
     category: governance
     note: 100M max supply; 4M quorum, 1M propose
   - id: governor-bravo
-    label: GovernorBravo (128 proposals)
+    label: GovernorBravo (135 proposals)
     address: "0x0204Cd037B2ec03605CFdFe482D8e257C765fA1B"
     category: governance
-    note: 1d delay, 2d voting; 120 executed
+    note: 1d delay, 2d voting; 127 of 135 executed (3 Canceled, 3 Defeated, 2 Expired)
   - id: timelock
     label: Timelock (1-day delay)
     address: "0x2386DC45AdDed673317eF068992F19421B481F4c"
@@ -106,7 +106,7 @@ nodes:
   - id: borrow-btc
     label: BTC Borrow Markets
     category: strategy
-    note: WBTC / cbBTC (~10% of Eth supply)
+    note: WBTC / cbBTC (~9% of Eth supply)
   - id: borrow-stables
     label: Stablecoin Borrow Markets
     category: strategy
@@ -114,23 +114,24 @@ nodes:
 
   # === External dependencies ===
   - id: dep-susdai
-    label: SUSDAI (19.9% top supply)
+    label: SUSDAI (31.2% top supply)
     category: dependency
-    note: Sky yield-bearing stable wrapper; #1 supply asset
+    note: USD.AI synthetic dollar (AI hardware loans); #1 supply asset; Fluid holds ~2/3 of total sUSDAI supply; above 30% trigger
   - id: dep-reusd
-    label: reUSD (Re Protocol)
+    label: reUSD (Re Protocol, score 3.51 Medium Risk)
     address: "0x5086bf358635B81D8C47C66d1C8b9E567Db70c72"
     category: dependency
-    note: Yield-bearing stable wrapper; structurally similar to wstUSR
+    note: 6.1% of Fluid TVL (~26.7% of reUSD supply); ~50% offchain backing, admin-written price, EOA custody, no bug bounty
+    ref: reports/report/re-reusd.md
   - id: dep-wsteth
     label: wstETH (Lido)
     address: "0x7f39C581F595B53c5cb19bD0b3f8dA6c935E2Ca0"
     category: dependency
-    note: 16.8% of all-chain supply
+    note: 20.8% of all-chain supply
   - id: dep-weeth
     label: weETH (ether.fi)
     category: dependency
-    note: 12.9% of all-chain supply
+    note: 3.2% of all-chain supply (was 12.9%)
   - id: dep-wbtc
     label: WBTC / cbBTC
     category: dependency
@@ -248,25 +249,25 @@ edges:
   - from: vault-protocol
     to: borrow-stable-wrappers
     kind: allocates-to
-    label: "~32% (SUSDAI + reUSD)"
+    label: "~37% (SUSDAI + reUSD)"
   - from: vault-protocol
     to: borrow-btc
     kind: allocates-to
-    label: "~10% Eth supply"
+    label: "~9% Eth supply"
   - from: vault-protocol
     to: borrow-stables
     kind: allocates-to
-    label: "~17% Eth supply"
+    label: "~13% Eth supply"
 
   # === Borrow markets → collateral / external dependencies ===
   - from: borrow-stable-wrappers
     to: dep-susdai
     kind: deposits-into
-    label: "19.9% top asset"
+    label: "31.2% top asset (USD.AI)"
   - from: borrow-stable-wrappers
     to: dep-reusd
     kind: deposits-into
-    label: "12.7%"
+    label: "6.1%"
   - from: borrow-eth
     to: dep-wsteth
     kind: deposits-into
