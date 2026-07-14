@@ -102,13 +102,6 @@ The MetaMorpho strategy allocates capital to **Morpho Blue** lending markets:
 | Morpho Blue | [`0xBBBBBbbBBb9cC5e90e3b3Af64bdAF62C37EEFFCb`](https://etherscan.io/address/0xBBBBBbbBBb9cC5e90e3b3Af64bdAF62C37EEFFCb) | Immutable lending primitive (v1) |
 | WBTC/LBTC Market (94.5% LLTV) | `0xf6a056627a51e511ec7f48332421432ea6971fc148d8f3c451e14ea108026549` | Active: 18.0% of TVL |
 | WBTC/cbBTC Market (94.5% LLTV) | `0x39d6cc9211d023cc16708a2378d821d394d8cfaa3640e3a4d4638d292e10035d` | In queue, cap 500 WBTC, no position |
-| LBTC (Lombard BTC) | [`0x8236a87084f8B84306f72007F36F2618A5634494`](https://etherscan.io/address/0x8236a87084f8B84306f72007F36F2618A5634494) | Collateral token in active market |
-| cbBTC (Coinbase BTC) | [`0xcbB7C0000aB88B473b1f5aFd9ef808440eed33Bf`](https://etherscan.io/address/0xcbB7C0000aB88B473b1f5aFd9ef808440eed33Bf) | Collateral token in queued market |
-| MorphoChainlinkOracleV2 (LBTC) | [`0xa98105B8227E0f2157816Feb7A331364A9B74F80`](https://etherscan.io/address/0xa98105B8227E0f2157816Feb7A331364A9B74F80) | Chainlink LBTC/USD oracle |
-| MorphoChainlinkOracleV2 (cbBTC) | [`0x3eF1F71723d633deE9834c5a7577c39B13C17aeb`](https://etherscan.io/address/0x3eF1F71723d633deE9834c5a7577c39B13C17aeb) | Chainlink cbBTC/USD oracle |
-| AdaptiveCurveIrm | [`0x870aC11D48B15DB9a138Cf899d20F13F79Ba00BC`](https://etherscan.io/address/0x870aC11D48B15DB9a138Cf899d20F13F79Ba00BC) | Interest rate model (shared by both markets) |
-
-**Note:** yvWBTC-1 remains **outside the Sky/USDS concentration** affecting yvUSDC-1 / yvUSDS-1 / yvDAI-1. The strategy routes exclusively through WBTC-native Morpho Blue markets with BTC-collateral pairs.
 
 ## Audits and Due Diligence Disclosures
 
@@ -203,21 +196,6 @@ yvWBTC-1 deploys all WBTC through a single MetaMorpho V1_1 strategy (ymv-WBTC). 
 | Morpho Blue WBTC/LBTC (94.5% LLTV) | 8.55 | 18.0% | 79.4% | 95.2% |
 | Morpho Blue WBTC/cbBTC (94.5% LLTV) | 0 | 0% | ~0% | N/A |
 
-**LBTC market context:** The active WBTC/LBTC market has 8.98 WBTC total supply with 7.13 WBTC borrowed (79.4% utilization). The yvWBTC-1 strategy provides 95.2% of all supply — it is the dominant (and essentially sole) liquidity provider. At 79.4% utilization, ~1.85 WBTC of available liquidity remains; large withdrawals from this market would require borrower repayments or new depositor inflows. However, 82% of TVL is in the idle market (immediately redeemable), so redemptions up to ~82% of TVL can be serviced without touching the LBTC market.
-
-**Morpho market parameters:**
-
-| Parameter | WBTC/LBTC Market | WBTC/cbBTC Market |
-|-----------|------------------|--------------------|
-| Market ID | `0xf6a056…` | `0x39d6cc…` |
-| Loan token | WBTC | WBTC |
-| Collateral token | LBTC (Lombard BTC) | cbBTC (Coinbase BTC) |
-| Oracle | MorphoChainlinkOracleV2 (LBTC/USD) | MorphoChainlinkOracleV2 (cbBTC/USD) |
-| IRM | AdaptiveCurveIrm | AdaptiveCurveIrm |
-| LLTV | 94.5% | 94.5% |
-| MetaMorpho supply cap | 250 WBTC | 500 WBTC |
-| Strategy position | 8.55 WBTC | 0 WBTC |
-
 ### Accessibility
 
 - **Deposits:** Permissionless ERC-4626. Subject to 100,000 WBTC deposit limit (cap remains oversized — see Reassessment Triggers)
@@ -305,15 +283,12 @@ The strategy introduces a structured dependency chain. The complete external dep
 | **Chainlink (cbBTC/USD oracle)** | Low (no current exposure) | Identical architecture to LBTC oracle. Currently unused |
 | **LBTC (Lombard BTC)** | Moderate (collateral) | Bitcoin liquid staking derivative. Newer than cbBTC/wBTC. Used as collateral at 94.5% LLTV. If LBTC depegs or has custody issues, borrowers face liquidation, which would release WBTC back to the market (beneficial for lenders) unless the oracle lags |
 | **cbBTC (Coinbase BTC)** | Low (no current exposure) | Coinbase wrapped Bitcoin. Well-established, strong custody. In supply queue but no position |
-| **AdaptiveCurveIrm** | Low (interest rate model) | Morpho's standard adaptive IRM. Battle-tested, no known issues |
 
 **Concentration note:** The strategy is currently single-market for its deployed portion (100% of deployed capital → one WBTC/LBTC market). While only 18% of TVL is deployed, this is a single-point dependency within the deployed segment. The available-but-unused cbBTC market provides a diversification path that the curator can activate.
 
 **Oracle dependency depth:** Both markets use a two-layer oracle stack:
 1. MorphoChainlinkOracleV2 — adapter contract (immutable, Morpho-maintained)
 2. Chainlink AggregatorV3 — the underlying price feed
-
-Chainlink oracle failure is a systemic risk shared by most DeFi lending protocols. For the LBTC/USD feed specifically, it has less historical data than BTC/USD or ETH/USD, but the feed architecture is identical.
 
 ## Operational Risk
 
@@ -394,7 +369,6 @@ Other monitoring that does cover yvWBTC-1 implicitly via the broader Yearn V3 se
 - **Standard Yearn governance:** Yearn V3 Role Manager + 6-of-9 ySafe (named DeFi signers) + 7-day self-governed timelock
 - **Morpho Blue is immutable and heavily audited:** 3 top-tier audits, ~30 months of production, $1B+ markets, no exploits
 - **Conservative allocation:** 82% idle within MetaMorpho provides substantial redemption buffer. Only 18% deployed to a single Morpho Blue market
-- **No Sky / USDS exposure:** Pure WBTC → Morpho Blue → WBTC lending markets. No routing through the Sky/USDS stack that creates concentration risk in yvUSDC-1 / yvUSDS-1 / yvDAI-1
 - **No leverage. No cross-chain. No conversion hops** — WBTC-native throughout
 - **7-day Yearn timelock + 3-day MetaMorpho timelock** — dual-delay guard on strategy changes and market cap adjustments
 - **Good yield resumption:** PPS moved from 1.000037 to 1.000305 in ~49 days since strategy activation
@@ -406,11 +380,10 @@ Other monitoring that does cover yvWBTC-1 implicitly via the broader Yearn V3 se
 - **Market dominance:** The strategy is 95.2% of the LBTC market supply — large withdrawals from the deployed portion would face significant friction at the current 79.4% utilization
 - **Vault immaturity:** ~14 months old, with only ~49 days of yield-bearing history. The vault itself is still the youngest in the mainnet risk-1 set
 - **Oversized deposit cap:** 100,000 WBTC cap vs 47.5 WBTC TVL remains a governance hygiene concern
-- **Missing monitoring:** yvWBTC-1 is still not in `alert_large_flows.py`
 
 ### Critical Risks
 
-- None identified. All gates pass. The current posture — 82% idle, 18% in over-collateralized lending at a blue-chip protocol (Morpho Blue) with conservative LLTV and dual-timelock governance — presents a well-structured risk profile.
+- None identified.
 
 ---
 
