@@ -10,14 +10,14 @@
     "check-bridges": "node scripts/check_bridges.mjs --strict"
   },
   "dependencies": {
-    "@astrojs/vercel": "10.0.8",
+    "@astrojs/vercel": "11.0.2",
     "@plausible-analytics/tracker": "0.4.5",
     "@resvg/resvg-js": "2.6.2",
-    "astro": "6.4.2",
+    "astro": "7.0.6",
     "cytoscape": "3.33.4",
     "cytoscape-dagre": "4.0.0",
     "cytoscape-dom-node": "2.1.0",
-    "js-yaml": "4.2.0",
+    "js-yaml": "4.3.0",
     "marked": "18.0.5",
     "satori": "0.26.0"
   }
