@@ -48,7 +48,8 @@ Do not spend time redoing static background unless a mutable fact changed. Do no
    - external dependencies
    - governance path, timelocks, role managers, or proxy admins
    - mint authority or privileged supply paths
-   If any changed, update `reports/graph/<slug>.yaml` using `reports/graph/SKILL.md`. If no graph exists, create one when the report has enough data; otherwise mark the missing graph inputs as `TODO`.
+   - cross-chain bridge / messaging dependencies (LayerZero/OFT, Chainlink CCIP, CCTP, Wormhole, Axelar, Stargate, etc.)
+   If any changed, update `reports/graph/<slug>.yaml` using `reports/graph/SKILL.md`. If no graph exists, create one when the report has enough data; otherwise mark the missing graph inputs as `TODO`. If a bridge dependency was added, removed, or changed, also update `src/data/bridges.json` so the `/bridges/` page stays in sync (see the "Bridge dependencies" bullet in `reports/skill.md`); `npm run build` runs `scripts/check_bridges.mjs` and will warn about any bridge the report mentions but that isn't listed.
 6. Patch only affected sections **in place**. Do not add a "Reassessment Notes", changelog, or "what changed" section to the report body. Common sections:
    - header assessment date: keep the original date and append the new one in
      parentheses, e.g. `- **Assessment Date:** May 27, 2026 (Updated: June 17, 2026)`.

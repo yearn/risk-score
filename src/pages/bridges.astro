@@ -1,0 +1,354 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { getAllReports } from "../lib/reports";
+import { defillamaIconUrl } from "../lib/icons";
+import data from "../data/bridges.json";
+
+// Reuse the icon each report already derives (DefiLlama slug -> protocol icon,
+// plus chain badge) so bridge rows share the exact icons of the Reports page.
+const reportBySlug = new Map(getAllReports().map((r) => [r.slug, r]));
+
+const { bridges } = data as {
+  bridges: {
+    id: string;
+    name: string;
+    type: string;
+    url: string;
+    description: string;
+    dependencies: {
+      slug: string;
+      name: string;
+      kind: "direct" | "indirect";
+      integration: string;
+      detail: string;
+      icon?: string;
+    }[];
+  }[];
+};
+
+// Direct rows first, then indirect, each group alphabetical by name.
+const kindOrder = (k: string) => (k === "direct" ? 0 : 1);
+const bridgesView = bridges.map((b) => {
+  const deps = [...b.dependencies]
+    .sort((a, c) => {
+      const ko = kindOrder(a.kind) - kindOrder(c.kind);
+      return ko !== 0 ? ko : a.name.localeCompare(c.name);
+    })
+    .map((d) => {
+      const rep = reportBySlug.get(d.slug);
+      // Prefer an explicit typed icon override, else the report's own icon.
+      const iconUrl = d.icon ? defillamaIconUrl(d.icon) : (rep?.iconUrl ?? "");
+      return {
+        ...d,
+        iconUrl,
+        chainIconUrl: rep?.chainIconUrl ?? "",
+      };
+    });
+  return {
+    ...b,
+    deps,
+    directCount: deps.filter((d) => d.kind === "direct").length,
+    indirectCount: deps.filter((d) => d.kind === "indirect").length,
+  };
+});
+
+const totalDeps = bridges.reduce((n, b) => n + b.dependencies.length, 0);
+---
+
+<BaseLayout
+  title="Bridge Dependencies — Yearn Curation"
+  description="Cross-chain bridges and messaging layers that curated protocols and tokens depend on."
+  ogUrl="/bridges/"
+  ogImage="/og/default.png"
+>
+  <section class="page-hero">
+    <h1>Bridge Dependencies</h1>
+  </section>
+
+  <div class="search-wrap">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="search-icon"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    <input type="text" id="bridge-search" placeholder="Search protocols or tokens…" autocomplete="off" />
+  </div>
+
+  {bridgesView.map((bridge) => (
+    <section class="block bridge-block" data-bridge={bridge.id}>
+      <div class="block-head">
+        <div>
+          <h2>
+            <a href={bridge.url} target="_blank" rel="noopener noreferrer">{bridge.name}</a>
+          </h2>
+          <div class="bridge-type">{bridge.type}</div>
+        </div>
+        <span class="block-meta">
+          {bridge.directCount} direct{bridge.indirectCount > 0 ? ` · ${bridge.indirectCount} indirect` : ""}
+        </span>
+      </div>
+      <p class="block-desc">{bridge.description}</p>
+
+      <div class="table-card">
+        <table>
+          <thead>
+            <tr>
+              <th class="col-icon"></th>
+              <th>Protocol / Token</th>
+              <th class="col-kind">Type</th>
+              <th>Integration</th>
+              <th>Details</th>
+            </tr>
+          </thead>
+          <tbody>
+            {bridge.deps.map((d) => (
+              <tr data-search={d.name.toLowerCase()} class={d.kind === "indirect" ? "row-indirect" : ""}>
+                <td class="col-icon">
+                  <a href={`/report/${d.slug}/`} class="icon-stack" aria-label={d.name}>
+                    {d.iconUrl ? (
+                      <img src={d.iconUrl} alt="" width="28" height="28" class="protocol-icon" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='block'" />
+                    ) : null}
+                    <div class="icon-placeholder" style={d.iconUrl ? "display:none" : ""} />
+                    {d.chainIconUrl && (
+                      <img src={d.chainIconUrl} alt="" width="14" height="14" class="chain-icon" loading="lazy" />
+                    )}
+                  </a>
+                </td>
+                <td class="name-cell">
+                  <a href={`/report/${d.slug}/`}>{d.name}</a>
+                </td>
+                <td class="col-kind">
+                  <span class={`kind-badge kind-${d.kind}`}>{d.kind}</span>
+                </td>
+                <td class="integration-cell">{d.integration}</td>
+                <td class="detail-cell">{d.detail}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </section>
+  ))}
+
+  <p class="footnote">
+    {totalDeps} dependencies across {bridges.length} bridges. Each row links to
+    its risk report. This table is maintained from the reports — see the report
+    and reassessment workflows for how new bridge dependencies are added.
+  </p>
+
+  <script is:inline>
+    (() => {
+      const input = document.getElementById("bridge-search");
+      if (!input) return;
+      const rows = Array.from(document.querySelectorAll("tbody tr[data-search]"));
+      const blocks = Array.from(document.querySelectorAll(".bridge-block"));
+      input.addEventListener("input", () => {
+        const q = input.value.trim().toLowerCase();
+        rows.forEach((r) => {
+          const hit = !q || r.getAttribute("data-search").includes(q);
+          r.style.display = hit ? "" : "none";
+        });
+        // Hide a bridge block entirely when none of its rows match.
+        blocks.forEach((b) => {
+          const anyVisible = Array.from(b.querySelectorAll("tbody tr[data-search]")).some(
+            (r) => r.style.display !== "none"
+          );
+          b.style.display = anyVisible ? "" : "none";
+        });
+      });
+    })();
+  </script>
+</BaseLayout>
+
+<style>
+  /* === Hero === */
+  .page-hero {
+    padding: 2rem 0 1.5rem;
+    text-align: center;
+  }
+  .page-hero h1 {
+    font-size: clamp(1.75rem, 3.4vw, 2.4rem);
+    letter-spacing: -0.02em;
+    margin: 0 auto 0.75rem;
+    line-height: 1.15;
+    max-width: 22ch;
+  }
+  /* === Search === */
+  .search-wrap {
+    position: relative;
+    max-width: 480px;
+    margin: 0 0 2rem;
+  }
+  .search-icon {
+    position: absolute;
+    left: 0.85rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-secondary);
+    pointer-events: none;
+  }
+  .search-wrap input {
+    width: 100%;
+    padding: 0.65rem 0.85rem 0.65rem 2.4rem;
+    background: color-mix(in srgb, var(--bg-card) 55%, transparent);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    color: var(--text-primary);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    font-size: 0.9rem;
+    transition: border-color 0.15s, background 0.15s;
+  }
+  .search-wrap input::placeholder { color: var(--text-secondary); }
+  .search-wrap input:focus {
+    outline: none;
+    border-color: var(--brand-blue);
+    background: color-mix(in srgb, var(--bg-card) 75%, transparent);
+  }
+
+  /* === Block === */
+  .block { margin: 2rem 0; }
+  .block-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 1rem;
+    margin-bottom: 0.5rem;
+    flex-wrap: wrap;
+  }
+  .block h2 {
+    font-size: 1.3rem;
+    letter-spacing: -0.01em;
+    margin: 0;
+  }
+  .block h2 a {
+    color: var(--text-primary);
+    text-decoration: none;
+  }
+  .block h2 a:hover { color: var(--brand-blue); }
+  .bridge-type {
+    color: var(--text-secondary);
+    font-size: 0.8rem;
+    margin-top: 0.2rem;
+  }
+  .block-meta {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    padding: 0.3rem 0.7rem;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--bg-card) 50%, transparent);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    font-variant-numeric: tabular-nums;
+  }
+  .block-desc {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    line-height: 1.5;
+    margin-bottom: 1rem;
+    max-width: 78ch;
+  }
+
+  /* === Table card === */
+  .table-card {
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: color-mix(in srgb, var(--bg-card) 55%, transparent);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    overflow-x: auto;
+  }
+  .table-card table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.88rem;
+    margin: 0;
+  }
+  .table-card thead th {
+    background: color-mix(in srgb, var(--bg-secondary) 60%, transparent);
+    color: var(--text-secondary);
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    padding: 0.7rem 0.85rem;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+  }
+  .table-card tbody td {
+    padding: 0.6rem 0.85rem;
+    border-bottom: 1px solid color-mix(in srgb, var(--border) 50%, transparent);
+    vertical-align: middle;
+  }
+  .table-card tbody tr:last-child td { border-bottom: none; }
+  .table-card tbody tr { transition: background 0.15s; }
+  .table-card tbody tr:hover { background: color-mix(in srgb, var(--brand-blue) 6%, transparent); }
+  .row-indirect { background: color-mix(in srgb, #F59E0B 6%, transparent); }
+  .row-indirect:hover { background: color-mix(in srgb, #F59E0B 11%, transparent); }
+  .col-icon { width: 44px; padding-right: 0; }
+  .col-kind { width: 96px; }
+
+  /* === Icons (reused from Reports page) === */
+  .icon-stack {
+    position: relative;
+    display: block;
+    width: 28px;
+    height: 28px;
+    flex-shrink: 0;
+  }
+  .protocol-icon { display: block; border-radius: 50%; }
+  .chain-icon {
+    position: absolute;
+    bottom: -3px;
+    right: -4px;
+    border-radius: 50%;
+    border: 2px solid var(--bg-card);
+    background: var(--bg-card);
+  }
+  .icon-placeholder {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: var(--bg-secondary);
+  }
+  .name-cell { font-weight: 500; white-space: nowrap; }
+  .name-cell a { color: var(--text-primary); text-decoration: none; }
+  .name-cell a:hover { color: var(--brand-blue); text-decoration: underline; }
+  .integration-cell { color: var(--text-secondary); white-space: nowrap; }
+  .detail-cell { color: var(--text-secondary); font-size: 0.85rem; }
+
+  /* === Kind badges === */
+  .kind-badge {
+    display: inline-block;
+    font-size: 0.72rem;
+    padding: 0.2rem 0.55rem;
+    border-radius: 999px;
+    font-weight: 600;
+    text-transform: capitalize;
+    letter-spacing: 0.01em;
+  }
+  .kind-direct {
+    background: color-mix(in srgb, #22C55E 18%, transparent);
+    color: #86EFAC;
+    border: 1px solid color-mix(in srgb, #22C55E 35%, transparent);
+  }
+  .kind-indirect {
+    background: color-mix(in srgb, #F59E0B 18%, transparent);
+    color: #FCD34D;
+    border: 1px solid color-mix(in srgb, #F59E0B 40%, transparent);
+  }
+  :global(html.light) .kind-direct { color: #15803D; }
+  :global(html.light) .kind-indirect { color: #B45309; }
+
+  .footnote {
+    color: var(--text-secondary);
+    font-size: 0.82rem;
+    line-height: 1.5;
+    max-width: 70ch;
+    margin: 2.5rem auto 0;
+    text-align: center;
+  }
+
+  @media (max-width: 720px) {
+    .table-card { font-size: 0.8rem; }
+    .detail-cell { min-width: 220px; }
+  }
+</style>

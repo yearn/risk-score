@@ -3,10 +3,11 @@
   "license": "AGPL-3.0-only",
   "type": "module",
   "scripts": {
-    "dev": "node scripts/update_stats.mjs && astro dev",
-    "build": "node scripts/update_stats.mjs && astro build",
+    "dev": "node scripts/update_stats.mjs && node scripts/check_bridges.mjs && astro dev",
+    "build": "node scripts/update_stats.mjs && node scripts/check_bridges.mjs && astro build",
     "preview": "astro preview",
-    "update-stats": "node scripts/update_stats.mjs"
+    "update-stats": "node scripts/update_stats.mjs",
+    "check-bridges": "node scripts/check_bridges.mjs --strict"
   },
   "dependencies": {
     "@astrojs/vercel": "10.0.8",
