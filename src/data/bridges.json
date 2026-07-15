@@ -1,5 +1,5 @@
 {
-  "_comment": "Cross-chain bridge / messaging dependencies detected in Yearn Curation risk reports. Add a bridge and/or a dependency ONLY when a report actually relies on it (a mere mention is not a dependency). Each dependency 'slug' MUST match a file in reports/report/<slug>.md so the row can link to the report and pass scripts/check_bridges.mjs. 'kind' is 'direct' (the assessed asset/protocol itself bridges through it) or 'indirect' (it depends on something else that does). 'keywords' drives the reminder scan; 'ignore' lists report slugs that mention the bridge but are NOT dependencies (reviewed, e.g. the report says it does NOT use it). By default a row shows its report's DefiLlama icon; override with optional 'icon' (a DefiLlama protocol slug) or 'iconToken' (a token address, optional 'iconChain', default 1) when the report has no usable icon. Bridges are ordered alphabetically by name; keep dependencies sorted direct before indirect. See reports/skill.md and reports/reassessment/SKILL.md for the update flow.",
+  "_comment": "Cross-chain bridge / messaging dependencies detected in Yearn Curation risk reports. Add a bridge and/or a dependency ONLY when a report actually relies on it (a mere mention is not a dependency). Each dependency 'slug' MUST match a file in reports/report/<slug>.md so the row can link to the report and pass scripts/check_bridges.mjs. 'kind' is 'direct' (the assessed asset/protocol itself bridges through it) or 'indirect' (it depends on something else that does). 'keywords' drives the reminder scan; 'ignore' lists report slugs that mention the bridge but are NOT dependencies (reviewed, e.g. the report says it does NOT use it). By default a row shows its report's DefiLlama icon; when the report has no usable icon, override with an optional typed 'icon' reference: 'protocol:<slug>', 'stablecoin:<slug>', 'token:<address>', or 'token:<chainId>:<address>'. Bridges are ordered alphabetically by name; keep dependencies sorted direct before indirect. See reports/skill.md and reports/reassessment/SKILL.md for the update flow.",
   "bridges": [
     {
       "id": "ccip",
@@ -10,7 +10,7 @@
       "keywords": ["ccip", "chainlink ccip"],
       "ignore": ["aave-sgho"],
       "dependencies": [
-        { "slug": "apyx-apxusd", "name": "Apyx apxUSD", "kind": "direct", "integration": "Chainlink CCIP", "detail": "Uses CCIP for cross-chain transfers (no LayerZero dependency)", "icon": "apyx-protocol" },
+        { "slug": "apyx-apxusd", "name": "Apyx apxUSD", "kind": "direct", "integration": "Chainlink CCIP", "detail": "Uses CCIP for cross-chain transfers (no LayerZero dependency)", "icon": "protocol:apyx-protocol" },
         { "slug": "centrifuge-jaaa", "name": "Centrifuge JAAA", "kind": "direct", "integration": "Chainlink CCIP (2-of-2 MultiAdapter)", "detail": "Second half of the 2-of-2 quorum alongside LayerZero V2" },
         { "slug": "infinifi", "name": "InfiniFi", "kind": "direct", "integration": "Chainlink CCIP + LayerZero", "detail": "Cross-chain support added in PR 224" },
         { "slug": "maple-syrupusdc", "name": "Maple (syrupUSDC)", "kind": "direct", "integration": "Chainlink CCIP (LockReleaseTokenPool)", "detail": "" }
@@ -39,7 +39,7 @@
       "keywords": ["layerzero", "layer zero", "lz v2"],
       "ignore": ["apyx-apxusd", "yearn-yvweth"],
       "dependencies": [
-        { "slug": "paxos-usdg", "name": "Paxos USDG", "kind": "direct", "integration": "LayerZero V2 OFT", "detail": "Cross-chain bridging (Ethereum↔Solana, X Layer, Ink); 45M USDG capacity", "iconToken": "0xe343167631d89B6Ffc58B88d6b7fB0228795491D" },
+        { "slug": "paxos-usdg", "name": "Paxos USDG", "kind": "direct", "integration": "LayerZero V2 OFT", "detail": "Cross-chain bridging (Ethereum↔Solana, X Layer, Ink); 45M USDG capacity", "icon": "stablecoin:global-dollar" },
         { "slug": "sky-usds", "name": "Sky USDS", "kind": "direct", "integration": "LayerZero V2 OFT Adapters", "detail": "Bridging to Solana + Avalanche (~$48.7M locked); 2-of-2 DVN config" },
         { "slug": "re-reusd", "name": "Re (reUSD)", "kind": "direct", "integration": "LayerZero OFT", "detail": "ReMintBurnAdapter pattern; live on Avalanche, Arbitrum, Base, BNB; 2.5M/24h rate limit" },
         { "slug": "centrifuge-jaaa", "name": "Centrifuge JAAA", "kind": "direct", "integration": "LayerZero V2 (2-of-2 MultiAdapter)", "detail": "2-of-2 quorum with Chainlink CCIP; 5 DVNs on the LZ side" },
