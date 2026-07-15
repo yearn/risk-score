@@ -1,6 +1,7 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
 import { getAllReports } from "../lib/reports";
+import { protocolIconUrl, defillamaTokenIconUrl } from "../lib/icons";
 import data from "../data/bridges.json";
 
 // Reuse the icon each report already derives (DefiLlama slug -> protocol icon,
@@ -20,6 +21,9 @@ const { bridges } = data as {
       kind: "direct" | "indirect";
       integration: string;
       detail: string;
+      icon?: string;
+      iconToken?: string;
+      iconChain?: number;
     }[];
   }[];
 };
@@ -34,9 +38,15 @@ const bridgesView = bridges.map((b) => {
     })
     .map((d) => {
       const rep = reportBySlug.get(d.slug);
+      // Prefer an explicit override, else fall back to the report's own icon.
+      const iconUrl = d.icon
+        ? protocolIconUrl(d.icon)
+        : d.iconToken
+          ? defillamaTokenIconUrl(d.iconToken, d.iconChain ?? 1)
+          : (rep?.iconUrl ?? "");
       return {
         ...d,
-        iconUrl: rep?.iconUrl ?? "",
+        iconUrl,
         chainIconUrl: rep?.chainIconUrl ?? "",
       };
     });

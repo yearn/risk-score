@@ -18,6 +18,16 @@ export function tokenIconUrl(address: string, chainId: number = 1): string {
   return `https://token-assets-one.vercel.app/api/tokens/${chainId}/${address}/logo-32.png`;
 }
 
+// DefiLlama's token-icon CDN, keyed by chain id + address. Use for tokens that
+// have a DefiLlama token page (e.g. /token/USDG) but no protocol icon.
+export function defillamaTokenIconUrl(
+  address: string,
+  chainId: number = 1,
+): string {
+  if (!address) return "";
+  return `https://token-icons.llamao.fi/icons/tokens/${chainId}/${address}?h=48&w=48`;
+}
+
 export function chainIconUrl(chain: string): string {
   const lower = chain.toLowerCase();
   if (lower.includes("hyperliquid") || lower.includes("hyperev")) {
