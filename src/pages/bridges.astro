@@ -35,9 +35,9 @@ const MODEL_LABEL: Record<string, string> = {
   unknown: "TODO",
 };
 const MODEL_TITLE: Record<string, string> = {
-  mint: "The bridge holds mint authority on the native token — a compromise can mint unbacked native supply, diluting every holder.",
+  mint: "The bridge-controlled message path can mint native token supply. A compromise of the required bridge trust path can create unbacked native supply; account for any quorum before assessing the blast radius.",
   lock: "The canonical token is locked/escrowed on its origin chain; the remote token is only a bridged representation. A compromise is bounded by remote supply and locked collateral.",
-  transport: "The protocol bridges an underlying asset (e.g. USDC) to remote strategies. The assessed token itself is not bridged; exposure is funds in transit.",
+  transport: "The protocol bridges an underlying asset (e.g. USDC) to remote strategies. The assessed token itself is not bridged, but exposure can persist while assets remain remote and may include bridge-dependent custody, accounting, and return paths.",
   unknown: "Not yet verified — see the report. Do not assume a model.",
 };
 
