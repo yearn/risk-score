@@ -48,10 +48,10 @@
         { "slug": "centrifuge-jaaa", "name": "Centrifuge JAAA", "kind": "direct", "model": "unknown", "integration": "LayerZero V2 (2-of-2 MultiAdapter)", "detail": "2-of-2 quorum with Chainlink CCIP; 5 DVNs on the LZ side" },
         { "slug": "fx-fxusd", "name": "fxUSD", "kind": "direct", "model": "unknown", "integration": "LayerZero OFT", "detail": "Omnichain bridging" },
         { "slug": "infinifi", "name": "InfiniFi", "kind": "direct", "model": "unknown", "integration": "LayerZero + Chainlink CCIP", "detail": "Cross-chain support added in PR 224" },
-        { "slug": "resolv-rlp", "name": "Resolv RLP", "kind": "direct", "model": "unknown", "integration": "LayerZero OFT", "detail": "Cross-chain transfers via Stargate" },
-        { "slug": "resolv-wstusr", "name": "Resolv wstUSR", "kind": "direct", "model": "unknown", "integration": "LayerZero OFT", "detail": "Available on Ethereum, Arbitrum, Base, Plasma" },
-        { "slug": "fluid", "name": "Fluid", "kind": "indirect", "model": "unknown", "integration": "rsETH market exposure", "detail": "" },
-        { "slug": "kerneldao-hgeth", "name": "KernelDAO hgETH", "kind": "indirect", "model": "unknown", "integration": "Wraps rsETH (Kelp DAO)", "detail": "" }
+        { "slug": "resolv-rlp", "name": "Resolv RLP", "kind": "direct", "model": "lock", "integration": "LayerZero OFT Adapter", "detail": "OFT Adapter `0x234c…d06c` escrows canonical RLP on Ethereum (133,516 RLP locked of 14.64M supply); remotes are bridged OFTs" },
+        { "slug": "resolv-wstusr", "name": "Resolv wstUSR", "kind": "direct", "model": "lock", "integration": "LayerZero OFT Adapter", "detail": "OFT Adapter `0xab17…1978` escrows canonical wstUSR (406,723 locked, ~22% of supply); live on Arbitrum, Base, BSC, Bera, Soneium, HyperEVM, TAC" },
+        { "slug": "fluid", "name": "Fluid", "kind": "indirect", "model": "lock", "integration": "rsETH market exposure", "detail": "Inherits rsETH's LayerZero OFT Adapter model (canonical rsETH escrowed on Ethereum)" },
+        { "slug": "kerneldao-hgeth", "name": "KernelDAO hgETH", "kind": "indirect", "model": "lock", "integration": "Wraps rsETH (Kelp DAO)", "detail": "rsETH bridges via OFT Adapter `0x85d4…8Ef3`, which escrows 46,254 rsETH (~9.6% of supply) — it cannot mint native rsETH" }
       ]
     }
   ]
