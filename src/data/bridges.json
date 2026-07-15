@@ -1,5 +1,5 @@
 {
-  "_comment": "Cross-chain bridge / messaging dependencies detected in Yearn Curation risk reports. Add a bridge and/or a dependency ONLY when a report actually relies on it (a mere mention is not a dependency). Each dependency 'slug' MUST match a file in reports/report/<slug>.md so the row can link to the report and pass scripts/check_bridges.mjs. 'kind' is 'direct' (the assessed asset/protocol itself bridges through it) or 'indirect' (it depends on something else that does). 'keywords' drives the reminder scan; 'ignore' lists report slugs that mention the bridge but are NOT dependencies (reviewed, e.g. the report says it does NOT use it). By default a row shows its report's DefiLlama icon; when the report has no usable icon, override with an optional typed 'icon' reference: 'protocol:<slug>', 'stablecoin:<slug>', 'token:<address>', or 'token:<chainId>:<address>'. Bridges are ordered alphabetically by name; keep dependencies sorted direct before indirect. See reports/skill.md and reports/reassessment/SKILL.md for the update flow.",
+  "_comment": "Cross-chain bridge / messaging dependencies detected in Yearn Curation risk reports. Add a bridge and/or a dependency ONLY when a report actually relies on it (a mere mention is not a dependency). Each dependency 'slug' MUST match a file in reports/report/<slug>.md so the row can link to the report and pass scripts/check_bridges.mjs. 'kind' is 'direct' (the assessed asset/protocol itself bridges through it) or 'indirect' (it depends on something else that does). 'model' segments the blast radius of a bridge compromise and MUST be verified, never guessed: 'mint' = the bridge holds mint authority on the NATIVE token (compromise mints unbacked native supply, diluting every holder); 'lock' = the canonical token is locked/escrowed on the origin chain and the remote is only a bridged representation (compromise is bounded by remote supply + locked collateral); 'transport' = the protocol bridges an UNDERLYING asset (e.g. USDC via CCTP) to remote strategies and the assessed token itself is not bridged; 'unknown' = not yet verified, renders as TODO. 'keywords' drives the reminder scan; 'ignore' lists report slugs that mention the bridge but are NOT dependencies (reviewed, e.g. the report says it does NOT use it). By default a row shows its report's DefiLlama icon; when the report has no usable icon, override with an optional typed 'icon' reference: 'protocol:<slug>', 'stablecoin:<slug>', 'token:<address>', or 'token:<chainId>:<address>'. Bridges are ordered alphabetically by name; keep dependencies sorted direct before indirect. See reports/skill.md and reports/reassessment/SKILL.md for the update flow.",
   "bridges": [
     {
       "id": "ccip",
@@ -10,10 +10,10 @@
       "keywords": ["ccip", "chainlink ccip"],
       "ignore": ["aave-sgho"],
       "dependencies": [
-        { "slug": "apyx-apxusd", "name": "Apyx apxUSD", "kind": "direct", "integration": "Chainlink CCIP", "detail": "Uses CCIP for cross-chain transfers (no LayerZero dependency)", "icon": "protocol:apyx-protocol" },
-        { "slug": "centrifuge-jaaa", "name": "Centrifuge JAAA", "kind": "direct", "integration": "Chainlink CCIP (2-of-2 MultiAdapter)", "detail": "Second half of the 2-of-2 quorum alongside LayerZero V2" },
-        { "slug": "infinifi", "name": "InfiniFi", "kind": "direct", "integration": "Chainlink CCIP + LayerZero", "detail": "Cross-chain support added in PR 224" },
-        { "slug": "maple-syrupusdc", "name": "Maple (syrupUSDC)", "kind": "direct", "integration": "Chainlink CCIP (LockReleaseTokenPool)", "detail": "" }
+        { "slug": "apyx-apxusd", "name": "Apyx apxUSD", "kind": "direct", "model": "unknown", "integration": "Chainlink CCIP", "detail": "Uses CCIP for cross-chain transfers (no LayerZero dependency)", "icon": "protocol:apyx-protocol" },
+        { "slug": "centrifuge-jaaa", "name": "Centrifuge JAAA", "kind": "direct", "model": "unknown", "integration": "Chainlink CCIP (2-of-2 MultiAdapter)", "detail": "Second half of the 2-of-2 quorum alongside LayerZero V2" },
+        { "slug": "infinifi", "name": "InfiniFi", "kind": "direct", "model": "unknown", "integration": "Chainlink CCIP + LayerZero", "detail": "Cross-chain support added in PR 224" },
+        { "slug": "maple-syrupusdc", "name": "Maple (syrupUSDC)", "kind": "direct", "model": "lock", "integration": "Chainlink CCIP (LockReleaseTokenPool)", "detail": "LockReleaseTokenPool holds ~13% of supply on mainnet, backing bridged syrupUSDC on Base/Arbitrum/Solana" }
       ]
     },
     {
@@ -24,10 +24,10 @@
       "description": "Circle's Cross-Chain Transfer Protocol moves native USDC by burning on the source chain and minting on the destination, gated by Circle's off-chain attestation service. Using canonical CCTP removes third-party lock-and-mint bridge risk; the trust assumption reduces to Circle's availability and attestation finality.",
       "keywords": ["cctp", "cross-chain transfer protocol"],
       "dependencies": [
-        { "slug": "gauntlet-gusda", "name": "Gauntlet gtUSDa", "kind": "direct", "integration": "Circle CCTP V2 (native burn/mint)", "detail": "Bridges USDC across Base/Arbitrum/Optimism to Morpho" },
-        { "slug": "origin-ousd", "name": "Origin OUSD", "kind": "direct", "integration": "Circle CCTP V2", "detail": "Cross-chain strategies bridge ~42% of TVL to Base and HyperEVM" },
-        { "slug": "yearn-yvusd", "name": "Yearn yvUSD", "kind": "direct", "integration": "Circle CCTP V2 (CCTPStrategy)", "detail": "Bridges USDC to Arbitrum (funded, ~3.5%) and Base (added, 0 debt); Katana uses AggLayer separately" },
-        { "slug": "flex", "name": "Flex", "kind": "indirect", "integration": "Collateral is yvUSD (which bridges via CCTP)", "detail": "" }
+        { "slug": "gauntlet-gusda", "name": "Gauntlet gtUSDa", "kind": "direct", "model": "transport", "integration": "Circle CCTP V2 (native burn/mint)", "detail": "Bridges USDC across Base/Arbitrum/Optimism to Morpho" },
+        { "slug": "origin-ousd", "name": "Origin OUSD", "kind": "direct", "model": "transport", "integration": "Circle CCTP V2", "detail": "Cross-chain strategies bridge ~42% of TVL to Base and HyperEVM" },
+        { "slug": "yearn-yvusd", "name": "Yearn yvUSD", "kind": "direct", "model": "transport", "integration": "Circle CCTP V2 (CCTPStrategy)", "detail": "Bridges USDC to Arbitrum (funded, ~3.5%) and Base (added, 0 debt); Katana uses AggLayer separately" },
+        { "slug": "flex", "name": "Flex", "kind": "indirect", "model": "transport", "integration": "Collateral is yvUSD (which bridges via CCTP)", "detail": "" }
       ]
     },
     {
@@ -37,22 +37,21 @@
       "url": "https://layerzero.network",
       "description": "Generic cross-chain messaging. Tokens bridge via the OFT / OFT-Adapter standard; security depends on the configured DVN (Decentralized Verifier Network) set and the token's mint/burn authority on each chain.",
       "keywords": ["layerzero", "layer zero", "lz v2"],
-      "ignore": ["apyx-apxusd", "yearn-yvweth"],
+      "ignore": ["apyx-apxusd", "yearn-yvweth", "midas-mglobal"],
       "dependencies": [
-        { "slug": "paxos-usdg", "name": "Paxos USDG", "kind": "direct", "integration": "LayerZero V2 OFT", "detail": "Cross-chain bridging (Ethereum↔Solana, X Layer, Ink); 45M USDG capacity", "icon": "stablecoin:global-dollar" },
-        { "slug": "sky-usds", "name": "Sky USDS", "kind": "direct", "integration": "LayerZero V2 OFT Adapters", "detail": "Bridging to Solana + Avalanche (~$48.7M locked); 2-of-2 DVN config" },
-        { "slug": "re-reusd", "name": "Re (reUSD)", "kind": "direct", "integration": "LayerZero OFT", "detail": "ReMintBurnAdapter pattern; live on Avalanche, Arbitrum, Base, BNB; 2.5M/24h rate limit" },
-        { "slug": "centrifuge-jaaa", "name": "Centrifuge JAAA", "kind": "direct", "integration": "LayerZero V2 (2-of-2 MultiAdapter)", "detail": "2-of-2 quorum with Chainlink CCIP; 5 DVNs on the LZ side" },
-        { "slug": "midas-mhyper", "name": "Midas mHYPER", "kind": "direct", "integration": "LayerZero OFT Adapter", "detail": "Adapter holds MINTER and BURNER roles" },
-        { "slug": "midas-mglobal", "name": "Midas mGLOBAL", "kind": "direct", "integration": "LayerZero / Axelar", "detail": "Shares bridge infrastructure with mHYPER" },
-        { "slug": "resolv-rlp", "name": "Resolv RLP", "kind": "direct", "integration": "LayerZero OFT", "detail": "Standard cross-chain transfers via Stargate" },
-        { "slug": "resolv-wstusr", "name": "Resolv wstUSR", "kind": "direct", "integration": "LayerZero OFT", "detail": "Available on Ethereum, Arbitrum, Base, Plasma" },
-        { "slug": "fx-fxusd", "name": "fxUSD", "kind": "direct", "integration": "LayerZero OFT", "detail": "Omnichain bridging" },
-        { "slug": "infinifi", "name": "InfiniFi", "kind": "direct", "integration": "LayerZero + Chainlink CCIP", "detail": "Cross-chain support added in PR 224" },
-        { "slug": "across-protocol", "name": "Across Protocol", "kind": "direct", "integration": "LayerZero OFT", "detail": "Standard cross-chain transfers" },
-        { "slug": "cap-stcusd", "name": "Cap stcUSD", "kind": "direct", "integration": "LayerZero vault component", "detail": "" },
-        { "slug": "kerneldao-hgeth", "name": "KernelDAO hgETH", "kind": "indirect", "integration": "Wraps rsETH (Kelp DAO)", "detail": "" },
-        { "slug": "fluid", "name": "Fluid", "kind": "indirect", "integration": "rsETH market exposure", "detail": "" }
+        { "slug": "paxos-usdg", "name": "Paxos USDG", "kind": "direct", "model": "mint", "integration": "LayerZero V2 OFT (OFTWrapper)", "detail": "OFTWrapper is Supply Controller SC3 with 45M USDG mint capacity (~521 USDG/sec refill) — the bridge can mint native USDG", "icon": "stablecoin:global-dollar" },
+        { "slug": "re-reusd", "name": "Re (reUSD)", "kind": "direct", "model": "mint", "integration": "LayerZero OFT (ReMintBurnAdapter)", "detail": "ReMintBurnAdapter holds a live cross-chain mint path on reUSD; active on Avalanche, Arbitrum, Base, BNB; 2.5M/24h rate limit" },
+        { "slug": "midas-mhyper", "name": "Midas mHYPER", "kind": "direct", "model": "mint", "integration": "LayerZero OFT Adapter (MidasLzMintBurnOFTAdapter)", "detail": "Adapter holds M_HYPER_MINT_OPERATOR_ROLE (mint has no onchain backing check) and the burn role" },
+        { "slug": "sky-usds", "name": "Sky USDS", "kind": "direct", "model": "lock", "integration": "LayerZero V2 OFT Adapter", "detail": "Adapter locks USDS for Solana + Avalanche (~48.7M locked) and does NOT hold `wards` on USDS — it cannot mint native USDS" },
+        { "slug": "across-protocol", "name": "Across Protocol", "kind": "direct", "model": "unknown", "integration": "LayerZero OFT", "detail": "Standard cross-chain transfers" },
+        { "slug": "cap-stcusd", "name": "Cap stcUSD", "kind": "direct", "model": "unknown", "integration": "LayerZero vault component", "detail": "" },
+        { "slug": "centrifuge-jaaa", "name": "Centrifuge JAAA", "kind": "direct", "model": "unknown", "integration": "LayerZero V2 (2-of-2 MultiAdapter)", "detail": "2-of-2 quorum with Chainlink CCIP; 5 DVNs on the LZ side" },
+        { "slug": "fx-fxusd", "name": "fxUSD", "kind": "direct", "model": "unknown", "integration": "LayerZero OFT", "detail": "Omnichain bridging" },
+        { "slug": "infinifi", "name": "InfiniFi", "kind": "direct", "model": "unknown", "integration": "LayerZero + Chainlink CCIP", "detail": "Cross-chain support added in PR 224" },
+        { "slug": "resolv-rlp", "name": "Resolv RLP", "kind": "direct", "model": "unknown", "integration": "LayerZero OFT", "detail": "Cross-chain transfers via Stargate" },
+        { "slug": "resolv-wstusr", "name": "Resolv wstUSR", "kind": "direct", "model": "unknown", "integration": "LayerZero OFT", "detail": "Available on Ethereum, Arbitrum, Base, Plasma" },
+        { "slug": "fluid", "name": "Fluid", "kind": "indirect", "model": "unknown", "integration": "rsETH market exposure", "detail": "" },
+        { "slug": "kerneldao-hgeth", "name": "KernelDAO hgETH", "kind": "indirect", "model": "unknown", "integration": "Wraps rsETH (Kelp DAO)", "detail": "" }
       ]
     }
   ]

@@ -19,11 +19,26 @@ const { bridges } = data as {
       slug: string;
       name: string;
       kind: "direct" | "indirect";
+      model: "mint" | "lock" | "transport" | "unknown";
       integration: string;
       detail: string;
       icon?: string;
     }[];
   }[];
+};
+
+// What a bridge compromise can actually reach, per dependency.
+const MODEL_LABEL: Record<string, string> = {
+  mint: "Mints native",
+  lock: "Bridged",
+  transport: "Transport",
+  unknown: "TODO",
+};
+const MODEL_TITLE: Record<string, string> = {
+  mint: "The bridge holds mint authority on the native token — a compromise can mint unbacked native supply, diluting every holder.",
+  lock: "The canonical token is locked/escrowed on its origin chain; the remote token is only a bridged representation. A compromise is bounded by remote supply and locked collateral.",
+  transport: "The protocol bridges an underlying asset (e.g. USDC) to remote strategies. The assessed token itself is not bridged; exposure is funds in transit.",
+  unknown: "Not yet verified — see the report. Do not assume a model.",
 };
 
 // Direct rows first, then indirect, each group alphabetical by name.
@@ -92,6 +107,7 @@ const totalDeps = bridges.reduce((n, b) => n + b.dependencies.length, 0);
               <th class="col-icon"></th>
               <th>Protocol / Token</th>
               <th class="col-kind">Type</th>
+              <th class="col-model">Model</th>
               <th>Integration</th>
               <th>Details</th>
             </tr>
@@ -115,6 +131,11 @@ const totalDeps = bridges.reduce((n, b) => n + b.dependencies.length, 0);
                 </td>
                 <td class="col-kind">
                   <span class={`kind-badge kind-${d.kind}`}>{d.kind}</span>
+                </td>
+                <td class="col-model">
+                  <span class={`model-badge model-${d.model}`} title={MODEL_TITLE[d.model]}>
+                    {MODEL_LABEL[d.model]}
+                  </span>
                 </td>
                 <td class="integration-cell">{d.integration}</td>
                 <td class="detail-cell">{d.detail}</td>
@@ -285,6 +306,7 @@ const totalDeps = bridges.reduce((n, b) => n + b.dependencies.length, 0);
   .row-indirect:hover { background: color-mix(in srgb, #F59E0B 11%, transparent); }
   .col-icon { width: 44px; padding-right: 0; }
   .col-kind { width: 96px; }
+  .col-model { width: 118px; }
 
   /* === Icons (reused from Reports page) === */
   .icon-stack {
@@ -337,6 +359,44 @@ const totalDeps = bridges.reduce((n, b) => n + b.dependencies.length, 0);
   }
   :global(html.light) .kind-direct { color: #15803D; }
   :global(html.light) .kind-indirect { color: #B45309; }
+
+  /* === Model badges: what a bridge compromise can reach === */
+  .model-badge {
+    display: inline-block;
+    font-size: 0.72rem;
+    padding: 0.2rem 0.55rem;
+    border-radius: 6px;
+    font-weight: 600;
+    white-space: nowrap;
+    cursor: help;
+  }
+  /* Bridge can mint the native token — highest blast radius. */
+  .model-mint {
+    background: color-mix(in srgb, #EF4444 20%, transparent);
+    color: #FCA5A5;
+    border: 1px solid color-mix(in srgb, #EF4444 45%, transparent);
+  }
+  /* Remote is only a bridged representation; canonical stays escrowed. */
+  .model-lock {
+    background: color-mix(in srgb, var(--brand-blue) 18%, transparent);
+    color: #7eb4ff;
+    border: 1px solid color-mix(in srgb, var(--brand-blue) 35%, transparent);
+  }
+  /* Underlying asset moved to remote strategies; token itself not bridged. */
+  .model-transport {
+    background: color-mix(in srgb, #A78BFA 18%, transparent);
+    color: #c4b5fd;
+    border: 1px solid color-mix(in srgb, #A78BFA 35%, transparent);
+  }
+  .model-unknown {
+    background: color-mix(in srgb, #64748B 18%, transparent);
+    color: #94A3B8;
+    border: 1px dashed color-mix(in srgb, #64748B 50%, transparent);
+  }
+  :global(html.light) .model-mint { color: #B91C1C; }
+  :global(html.light) .model-lock { color: #1D4ED8; }
+  :global(html.light) .model-transport { color: #6D28D9; }
+  :global(html.light) .model-unknown { color: #475569; }
 
   .footnote {
     color: var(--text-secondary);
