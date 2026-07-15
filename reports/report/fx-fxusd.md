@@ -256,9 +256,9 @@ In V2, all fxUSD position collateral is custodied by the PoolManager contract ([
 - **Curve:** stETH/ETH EMA oracle + fxUSD/USDC pool for peg monitoring
 - **Aave:** Stability Pool deploys USDC to Aave Core (up to 80% cap) and wstETH to Aave Prime (up to 80%)
 - **Lido:** wstETH is the primary ETH collateral in V2 (~$12.38M)
-- **LayerZero:** Used for omnichain fxUSD bridging (cross-chain OFT)
+- **LayerZero:** **Not a fxUSD dependency** (corrected July 15, 2026). f(x) uses LayerZero `ProxyOFT` for *other* tokens (fETH, xETH, FXN, arUSD), but **fxUSD itself is not bridged**: the docs list fxUSD with a single Ethereum address and no bridging entry, [DeFiLlama](https://api.llama.fi/protocol/fx-protocol) reports f(x) Protocol on Ethereum only, fxUSD is not a native OFT (`endpoint()` and `oftVersion()` revert on [`0x0857…d8f6`](https://etherscan.io/address/0x085780639CC2cACd35E474e71f4d000e2405d8f6)), it is absent from [LayerZero's OFT registry](https://metadata.layerzero-api.com/v1/metadata/experiment/ofts/list), and it has no Chainlink CCIP token pool (`TokenAdminRegistry.getPool` returns the zero address). An earlier revision of this report described fxUSD as omnichain-bridged; that claim was unverified and is withdrawn.
 
-The protocol depends on multiple well-established DeFi protocols. Chainlink is the most critical dependency — oracle failure would impair pricing and liquidations. Aave exposure is capped and non-critical to core fxUSD backing.
+The protocol depends on multiple well-established DeFi protocols. Chainlink is the most critical dependency — oracle failure would impair pricing and liquidations. Aave exposure is capped and non-critical to core fxUSD backing. fxUSD carries **no cross-chain bridge dependency**.
 
 ## Operational Risk
 
