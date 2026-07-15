@@ -14,7 +14,6 @@
   - requests: For API calls
 - **Dev Dependencies**:
   - ruff: For code formatting and linting
-- **Dependency Aging Policy**: All dependency version bumps (npm, pip, etc.) must target versions that have been published for at least 7 days. Verify with `npm view <pkg>@<ver> time` or the equivalent for the package manager. This reduces supply-chain risk by ensuring packages have had time for community scrutiny before adoption.
 
 ## Style Guidelines
 - **Imports**: Group standard library imports first, followed by third-party imports, then local imports
