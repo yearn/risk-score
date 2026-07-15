@@ -36,8 +36,10 @@
       "url": "https://layerzero.network",
       "description": "Generic cross-chain messaging. Tokens bridge via the OFT / OFT-Adapter standard; security depends on the configured DVN (Decentralized Verifier Network) set and the token's mint/burn authority on each chain.",
       "keywords": ["layerzero", "layer zero", "lz v2"],
-      "ignore": ["apyx-apxusd", "yearn-yvweth", "midas-mglobal", "cap-stcusd", "fx-fxusd", "infinifi"],
+      "ignore": ["apyx-apxusd", "yearn-yvweth", "midas-mglobal", "fx-fxusd"],
       "dependencies": [
+        { "slug": "cap-stcusd", "name": "Cap stcUSD", "kind": "direct", "model": "lock", "integration": "LayerZero OFT Adapter (\"LayerZero vault\")", "detail": "Adapter `0x983a…4137` escrows 25,311,191 stcUSD — ~52% of the 48.68M supply, the largest locked share on this page; Katana runs a native OFT at the same vanity address `0x8888…8888`" },
+        { "slug": "infinifi", "name": "InfiniFi", "kind": "direct", "model": "lock", "integration": "LayerZero OFT Adapters (siUSD + iUSD)", "detail": "siUSD adapter `0x5f21…c3c0` escrows 29,340 siUSD and iUSD adapter `0xdd1c…3005` escrows 4.33 iUSD; both mint native OFTs on Katana. Neither adapter holds RECEIPT_TOKEN_MINTER, so they cannot mint native supply" },
         { "slug": "paxos-usdg", "name": "Paxos USDG", "kind": "direct", "model": "mint", "integration": "LayerZero V2 OFT (OFTWrapper)", "detail": "OFTWrapper is Supply Controller SC3 with 45M USDG mint capacity (~521 USDG/sec refill) — the bridge can mint native USDG", "icon": "stablecoin:global-dollar" },
         { "slug": "re-reusd", "name": "Re (reUSD)", "kind": "direct", "model": "mint", "integration": "LayerZero OFT (ReMintBurnAdapter)", "detail": "ReMintBurnAdapter holds a live cross-chain mint path on reUSD; active on Avalanche, Arbitrum, Base, BNB; 2.5M/24h rate limit" },
         { "slug": "midas-mhyper", "name": "Midas mHYPER", "kind": "direct", "model": "mint", "integration": "LayerZero OFT Adapter (MidasLzMintBurnOFTAdapter)", "detail": "Adapter holds M_HYPER_MINT_OPERATOR_ROLE (mint has no onchain backing check) and the burn role" },
