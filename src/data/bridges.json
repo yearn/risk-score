@@ -1,0 +1,59 @@
+{
+  "_comment": "Cross-chain bridge / messaging dependencies detected in Yearn Curation risk reports. Add a bridge and/or a dependency ONLY when a report actually relies on it (a mere mention is not a dependency). Each dependency 'slug' MUST match a file in reports/report/<slug>.md so the row can link to the report and pass scripts/check_bridges.mjs. 'kind' is 'direct' (the assessed asset/protocol itself bridges through it) or 'indirect' (it depends on something else that does). 'keywords' drives the reminder scan; 'ignore' lists report slugs that mention the bridge but are NOT dependencies (reviewed, e.g. the report says it does NOT use it). Keep dependencies sorted: direct before indirect. See reports/skill.md and reports/reassessment/SKILL.md for the update flow.",
+  "bridges": [
+    {
+      "id": "layerzero",
+      "name": "LayerZero",
+      "type": "Omnichain messaging (OFT / OApp)",
+      "url": "https://layerzero.network",
+      "description": "Generic cross-chain messaging. Tokens bridge via the OFT / OFT-Adapter standard; security depends on the configured DVN (Decentralized Verifier Network) set and the token's mint/burn authority on each chain.",
+      "keywords": ["layerzero", "layer zero", "lz v2"],
+      "ignore": ["apyx-apxusd", "yearn-yvweth"],
+      "dependencies": [
+        { "slug": "paxos-usdg", "name": "Paxos USDG", "kind": "direct", "integration": "LayerZero V2 OFT", "detail": "Cross-chain bridging (Ethereum↔Solana, X Layer, Ink); 45M USDG capacity" },
+        { "slug": "sky-usds", "name": "Sky USDS", "kind": "direct", "integration": "LayerZero V2 OFT Adapters", "detail": "Bridging to Solana + Avalanche (~$48.7M locked); 2-of-2 DVN config" },
+        { "slug": "re-reusd", "name": "Re (reUSD)", "kind": "direct", "integration": "LayerZero OFT", "detail": "ReMintBurnAdapter pattern; live on Avalanche, Arbitrum, Base, BNB; 2.5M/24h rate limit" },
+        { "slug": "centrifuge-jaaa", "name": "Centrifuge JAAA", "kind": "direct", "integration": "LayerZero V2 (2-of-2 MultiAdapter)", "detail": "2-of-2 quorum with Chainlink CCIP; 5 DVNs on the LZ side" },
+        { "slug": "midas-mhyper", "name": "Midas mHYPER", "kind": "direct", "integration": "LayerZero OFT Adapter", "detail": "Adapter holds MINTER and BURNER roles" },
+        { "slug": "midas-mglobal", "name": "Midas mGLOBAL", "kind": "direct", "integration": "LayerZero / Axelar", "detail": "Shares bridge infrastructure with mHYPER" },
+        { "slug": "resolv-rlp", "name": "Resolv RLP", "kind": "direct", "integration": "LayerZero OFT", "detail": "Standard cross-chain transfers via Stargate" },
+        { "slug": "resolv-wstusr", "name": "Resolv wstUSR", "kind": "direct", "integration": "LayerZero OFT", "detail": "Available on Ethereum, Arbitrum, Base, Plasma" },
+        { "slug": "fx-fxusd", "name": "fxUSD", "kind": "direct", "integration": "LayerZero OFT", "detail": "Omnichain bridging" },
+        { "slug": "infinifi", "name": "InfiniFi", "kind": "direct", "integration": "LayerZero + Chainlink CCIP", "detail": "Cross-chain support added in PR 224" },
+        { "slug": "across-protocol", "name": "Across Protocol", "kind": "direct", "integration": "LayerZero OFT", "detail": "Standard cross-chain transfers" },
+        { "slug": "cap-stcusd", "name": "Cap stcUSD", "kind": "direct", "integration": "LayerZero vault component", "detail": "" },
+        { "slug": "kerneldao-hgeth", "name": "KernelDAO hgETH", "kind": "indirect", "integration": "Wraps rsETH (Kelp DAO)", "detail": "" },
+        { "slug": "fluid", "name": "Fluid", "kind": "indirect", "integration": "rsETH market exposure", "detail": "" }
+      ]
+    },
+    {
+      "id": "ccip",
+      "name": "Chainlink CCIP",
+      "type": "Cross-chain interoperability protocol",
+      "url": "https://chain.link/cross-chain",
+      "description": "Chainlink's cross-chain interoperability protocol. Messages are validated by the Chainlink DON with a Risk Management Network; tokens move via burn/mint or lock/mint token pools.",
+      "keywords": ["ccip", "chainlink ccip"],
+      "ignore": ["aave-sgho"],
+      "dependencies": [
+        { "slug": "apyx-apxusd", "name": "Apyx apxUSD", "kind": "direct", "integration": "Chainlink CCIP", "detail": "Uses CCIP for cross-chain transfers (no LayerZero dependency)" },
+        { "slug": "centrifuge-jaaa", "name": "Centrifuge JAAA", "kind": "direct", "integration": "Chainlink CCIP (2-of-2 MultiAdapter)", "detail": "Second half of the 2-of-2 quorum alongside LayerZero V2" },
+        { "slug": "infinifi", "name": "InfiniFi", "kind": "direct", "integration": "Chainlink CCIP + LayerZero", "detail": "Cross-chain support added in PR 224" },
+        { "slug": "maple-syrupusdc", "name": "Maple (syrupUSDC)", "kind": "direct", "integration": "Chainlink CCIP (LockReleaseTokenPool)", "detail": "" }
+      ]
+    },
+    {
+      "id": "cctp",
+      "name": "Circle CCTP",
+      "type": "Native USDC burn-and-mint bridge",
+      "url": "https://www.circle.com/cross-chain-transfer-protocol",
+      "description": "Circle's Cross-Chain Transfer Protocol moves native USDC by burning on the source chain and minting on the destination, gated by Circle's off-chain attestation service. Using canonical CCTP removes third-party lock-and-mint bridge risk; the trust assumption reduces to Circle's availability and attestation finality.",
+      "keywords": ["cctp", "cross-chain transfer protocol"],
+      "dependencies": [
+        { "slug": "gauntlet-gusda", "name": "Gauntlet gtUSDa", "kind": "direct", "integration": "Circle CCTP V2 (native burn/mint)", "detail": "Bridges USDC across Base/Arbitrum/Optimism to Morpho" },
+        { "slug": "origin-ousd", "name": "Origin OUSD", "kind": "direct", "integration": "Circle CCTP V2", "detail": "Cross-chain strategies bridge ~42% of TVL to Base and HyperEVM" },
+        { "slug": "yearn-yvusd", "name": "Yearn yvUSD", "kind": "direct", "integration": "Circle CCTP V2 (CCTPStrategy)", "detail": "Bridges USDC to Arbitrum (funded, ~3.5%) and Base (added, 0 debt); Katana uses AggLayer separately" },
+        { "slug": "flex", "name": "Flex", "kind": "indirect", "integration": "Collateral is yvUSD (which bridges via CCTP)", "detail": "" }
+      ]
+    }
+  ]
+}
