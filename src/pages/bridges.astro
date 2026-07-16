@@ -23,7 +23,7 @@ const { bridges } = data as {
       integration: string;
       detail: string;
       icon?: string;
-      // Per-bridge security posture. Currently only LayerZero populates this
+      // Per-route security posture. Currently only LayerZero populates this
       // (the DVN quorum); reusable for other bridges' verifier models later.
       security?: {
         label: string;
@@ -54,8 +54,8 @@ const MODEL_TITLE: Record<string, string> = {
   unknown: "Not yet verified — see the report. Do not assume a model.",
 };
 
-// Security-posture tooltip. For LayerZero this is the DVN quorum: how many
-// independent verifiers must attest a message. Reusable for other bridges.
+// Route-security tooltip. For LayerZero this is the receive-side DVN quorum:
+// how many independent verifiers must attest a message on the named route.
 function securityTitle(sec: {
   label: string;
   confirmations?: number;
@@ -70,7 +70,7 @@ function securityTitle(sec: {
   }
   const lead = sec.note
     ? `${sec.label} — ${sec.note}`
-    : `${sec.label} DVN quorum — this many independent LayerZero verifiers must attest a cross-chain message before it executes. A 1-of-1 is a single point of failure.`;
+    : `${sec.label} DVN quorum for the route named below — this many independent LayerZero verifiers must attest before the receive-side message executes. A 1-of-1 is a single point of failure; other routes may use different configurations.`;
   const parts = [lead];
   if (sec.providers?.length)
     parts.push(`${sec.providersLabel ?? "Verifiers"}: ${sec.providers.join(", ")}.`);
@@ -155,7 +155,7 @@ const totalDeps = bridges.reduce((n, b) => n + b.dependencies.length, 0);
               <th>Protocol / Token</th>
               <th class="col-kind">Type</th>
               <th class="col-model">Model</th>
-              {bridge.hasSecurity && <th class="col-sec">Security</th>}
+              {bridge.hasSecurity && <th class="col-sec">Route Security</th>}
               <th class="col-integration">Integration</th>
               <th>Details</th>
             </tr>
@@ -188,24 +188,27 @@ const totalDeps = bridges.reduce((n, b) => n + b.dependencies.length, 0);
                 {bridge.hasSecurity && (
                   <td class="col-sec">
                     {d.security ? (
-                      d.security.link ? (
-                        <a
-                          href={d.security.link}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          class={`sec-badge sec-${d.security.label === "TODO" ? "todo" : d.security.weak ? "weak" : "ok"}`}
-                          title={securityTitle(d.security)}
-                        >
-                          {d.security.label}
-                        </a>
-                      ) : (
-                        <span
-                          class={`sec-badge sec-${d.security.label === "TODO" ? "todo" : d.security.weak ? "weak" : "ok"}`}
-                          title={securityTitle(d.security)}
-                        >
-                          {d.security.label}
-                        </span>
-                      )
+                      <>
+                        {d.security.link ? (
+                          <a
+                            href={d.security.link}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            class={`sec-badge sec-${d.security.label === "TODO" ? "todo" : d.security.weak ? "weak" : "ok"}`}
+                            title={securityTitle(d.security)}
+                          >
+                            {d.security.label}
+                          </a>
+                        ) : (
+                          <span
+                            class={`sec-badge sec-${d.security.label === "TODO" ? "todo" : d.security.weak ? "weak" : "ok"}`}
+                            title={securityTitle(d.security)}
+                          >
+                            {d.security.label}
+                          </span>
+                        )}
+                        <span class="sec-route">{d.security.route ?? "Route not recorded"}</span>
+                      </>
                     ) : (
                       <span class="sec-na">—</span>
                     )}
@@ -410,7 +413,7 @@ const totalDeps = bridges.reduce((n, b) => n + b.dependencies.length, 0);
   .col-icon { width: 44px; padding-right: 0; }
   .col-kind { width: 96px; }
   .col-model { width: 118px; }
-  .col-sec { width: 84px; }
+  .col-sec { width: 160px; min-width: 160px; }
   .col-integration { min-width: 150px; }
 
   /* === Icons (reused from Reports page) === */
@@ -539,6 +542,15 @@ const totalDeps = bridges.reduce((n, b) => n + b.dependencies.length, 0);
     border: 1px dashed color-mix(in srgb, #64748B 50%, transparent);
   }
   .sec-na { color: var(--text-secondary); opacity: 0.5; }
+  .sec-route {
+    display: block;
+    margin-top: 0.3rem;
+    color: var(--text-secondary);
+    font-size: 0.68rem;
+    font-weight: 400;
+    line-height: 1.25;
+    white-space: normal;
+  }
   :global(html.light) .sec-ok { color: #15803D; }
   :global(html.light) .sec-weak { color: #B91C1C; }
   :global(html.light) .sec-todo { color: #475569; }
