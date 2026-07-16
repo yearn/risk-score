@@ -23,7 +23,9 @@ const { bridges } = data as {
       integration: string;
       detail: string;
       icon?: string;
-      dvn?: {
+      // Per-bridge security posture. Currently only LayerZero populates this
+      // (the DVN quorum); reusable for other bridges' verifier models later.
+      security?: {
         label: string;
         confirmations?: number;
         providers?: string[];
@@ -51,8 +53,9 @@ const MODEL_TITLE: Record<string, string> = {
   unknown: "Not yet verified — see the report. Do not assume a model.",
 };
 
-// LayerZero DVN (Decentralized Verifier Network) quorum tooltip.
-function dvnTitle(dvn: {
+// Security-posture tooltip. For LayerZero this is the DVN quorum: how many
+// independent verifiers must attest a message. Reusable for other bridges.
+function securityTitle(sec: {
   label: string;
   confirmations?: number;
   providers?: string[];
@@ -60,16 +63,16 @@ function dvnTitle(dvn: {
   note?: string;
   verifiedAt?: string;
 }): string {
-  if (dvn.label === "TODO") {
-    return `DVN quorum not yet resolved${dvn.note ? ` — ${dvn.note}` : ""}. See linked issue.`;
+  if (sec.label === "TODO") {
+    return `Verifier quorum not yet resolved${sec.note ? ` — ${sec.note}` : ""}. See linked issue.`;
   }
   const parts = [
-    `${dvn.label} DVN quorum — this many independent LayerZero verifiers must attest a cross-chain message before it executes. A 1-of-1 is a single point of failure.`,
+    `${sec.label} DVN quorum — this many independent LayerZero verifiers must attest a cross-chain message before it executes. A 1-of-1 is a single point of failure.`,
   ];
-  if (dvn.providers?.length) parts.push(`DVNs: ${dvn.providers.join(", ")}.`);
-  if (dvn.confirmations) parts.push(`Block confirmations: ${dvn.confirmations}.`);
-  if (dvn.route) parts.push(`Route: ${dvn.route}.`);
-  if (dvn.verifiedAt) parts.push(`Verified onchain ${dvn.verifiedAt}.`);
+  if (sec.providers?.length) parts.push(`DVNs: ${sec.providers.join(", ")}.`);
+  if (sec.confirmations) parts.push(`Block confirmations: ${sec.confirmations}.`);
+  if (sec.route) parts.push(`Route: ${sec.route}.`);
+  if (sec.verifiedAt) parts.push(`Verified onchain ${sec.verifiedAt}.`);
   return parts.join(" ");
 }
 
@@ -96,6 +99,8 @@ const bridgesView = bridges.map((b) => {
     deps,
     directCount: deps.filter((d) => d.kind === "direct").length,
     indirectCount: deps.filter((d) => d.kind === "indirect").length,
+    // Only render the Security column for bridges that populate it (LayerZero).
+    hasSecurity: deps.some((d) => d.security),
   };
 });
 
@@ -111,6 +116,13 @@ const totalDeps = bridges.reduce((n, b) => n + b.dependencies.length, 0);
   <section class="page-hero">
     <h1>Bridge Dependencies</h1>
   </section>
+
+  <div class="model-legend">
+    <span class="legend-title">Model</span>
+    <span class="legend-item"><span class="model-badge model-mint">Mints native</span> bridge can mint the native token — a compromise dilutes every holder</span>
+    <span class="legend-item"><span class="model-badge model-lock">Bridged</span> canonical token escrowed on origin; the remote is only a representation</span>
+    <span class="legend-item"><span class="model-badge model-transport">Transport</span> an underlying asset is bridged; the assessed token itself is not</span>
+  </div>
 
   <div class="search-wrap">
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="search-icon"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
@@ -140,8 +152,8 @@ const totalDeps = bridges.reduce((n, b) => n + b.dependencies.length, 0);
               <th>Protocol / Token</th>
               <th class="col-kind">Type</th>
               <th class="col-model">Model</th>
-              <th class="col-dvn">DVN</th>
-              <th>Integration</th>
+              {bridge.hasSecurity && <th class="col-sec">Security</th>}
+              <th class="col-integration">Integration</th>
               <th>Details</th>
             </tr>
           </thead>
@@ -170,30 +182,32 @@ const totalDeps = bridges.reduce((n, b) => n + b.dependencies.length, 0);
                     {MODEL_LABEL[d.model]}
                   </span>
                 </td>
-                <td class="col-dvn">
-                  {d.dvn ? (
-                    d.dvn.link ? (
-                      <a
-                        href={d.dvn.link}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        class={`dvn-badge dvn-${d.dvn.label === "TODO" ? "todo" : d.dvn.weak ? "weak" : "ok"}`}
-                        title={dvnTitle(d.dvn)}
-                      >
-                        {d.dvn.label}
-                      </a>
+                {bridge.hasSecurity && (
+                  <td class="col-sec">
+                    {d.security ? (
+                      d.security.link ? (
+                        <a
+                          href={d.security.link}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          class={`sec-badge sec-${d.security.label === "TODO" ? "todo" : d.security.weak ? "weak" : "ok"}`}
+                          title={securityTitle(d.security)}
+                        >
+                          {d.security.label}
+                        </a>
+                      ) : (
+                        <span
+                          class={`sec-badge sec-${d.security.label === "TODO" ? "todo" : d.security.weak ? "weak" : "ok"}`}
+                          title={securityTitle(d.security)}
+                        >
+                          {d.security.label}
+                        </span>
+                      )
                     ) : (
-                      <span
-                        class={`dvn-badge dvn-${d.dvn.label === "TODO" ? "todo" : d.dvn.weak ? "weak" : "ok"}`}
-                        title={dvnTitle(d.dvn)}
-                      >
-                        {d.dvn.label}
-                      </span>
-                    )
-                  ) : (
-                    <span class="dvn-na" title="Not a LayerZero route — no DVN set (CCIP uses a Risk Management Network; CCTP/AggLayer use their own validation).">—</span>
-                  )}
-                </td>
+                      <span class="sec-na">—</span>
+                    )}
+                  </td>
+                )}
                 <td class="integration-cell">{d.integration}</td>
                 <td class="detail-cell">{d.detail}</td>
               </tr>
@@ -247,6 +261,35 @@ const totalDeps = bridges.reduce((n, b) => n + b.dependencies.length, 0);
     line-height: 1.15;
     max-width: 22ch;
   }
+
+  /* === Model legend === */
+  .model-legend {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem 1.25rem;
+    margin: 0 0 1.5rem;
+    padding: 0.85rem 1rem;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: color-mix(in srgb, var(--bg-card) 40%, transparent);
+    font-size: 0.82rem;
+    color: var(--text-secondary);
+    line-height: 1.4;
+  }
+  .legend-title {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-weight: 700;
+    color: var(--text-primary);
+  }
+  .legend-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+
   /* === Search === */
   .search-wrap {
     position: relative;
@@ -364,7 +407,8 @@ const totalDeps = bridges.reduce((n, b) => n + b.dependencies.length, 0);
   .col-icon { width: 44px; padding-right: 0; }
   .col-kind { width: 96px; }
   .col-model { width: 118px; }
-  .col-dvn { width: 78px; }
+  .col-sec { width: 84px; }
+  .col-integration { min-width: 150px; }
 
   /* === Icons (reused from Reports page) === */
   .icon-stack {
@@ -392,8 +436,13 @@ const totalDeps = bridges.reduce((n, b) => n + b.dependencies.length, 0);
   .name-cell { font-weight: 500; white-space: nowrap; }
   .name-cell a { color: var(--text-primary); text-decoration: none; }
   .name-cell a:hover { color: var(--brand-blue); text-decoration: underline; }
-  .integration-cell { color: var(--text-secondary); white-space: nowrap; }
-  .detail-cell { color: var(--text-secondary); font-size: 0.85rem; }
+  .integration-cell { color: var(--text-secondary); min-width: 150px; }
+  .detail-cell {
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    min-width: 300px;
+    line-height: 1.45;
+  }
 
   /* === Kind badges === */
   .kind-badge {
@@ -456,8 +505,8 @@ const totalDeps = bridges.reduce((n, b) => n + b.dependencies.length, 0);
   :global(html.light) .model-transport { color: #6D28D9; }
   :global(html.light) .model-unknown { color: #475569; }
 
-  /* === DVN quorum badges (LayerZero verifier threshold) === */
-  .dvn-badge {
+  /* === Security badges (LayerZero DVN quorum today; reusable) === */
+  .sec-badge {
     display: inline-block;
     font-size: 0.72rem;
     padding: 0.2rem 0.5rem;
@@ -468,28 +517,28 @@ const totalDeps = bridges.reduce((n, b) => n + b.dependencies.length, 0);
     cursor: help;
     text-decoration: none;
   }
-  .dvn-badge:hover { text-decoration: none; filter: brightness(1.08); }
+  .sec-badge:hover { text-decoration: none; filter: brightness(1.08); }
   /* Healthy quorum (≥ 2 independent verifiers). */
-  .dvn-ok {
+  .sec-ok {
     background: color-mix(in srgb, #22C55E 16%, transparent);
     color: #86EFAC;
     border: 1px solid color-mix(in srgb, #22C55E 32%, transparent);
   }
   /* 1-of-1 / single point of failure — the rsETH-incident failure mode. */
-  .dvn-weak {
+  .sec-weak {
     background: color-mix(in srgb, #EF4444 22%, transparent);
     color: #FCA5A5;
     border: 1px solid color-mix(in srgb, #EF4444 48%, transparent);
   }
-  .dvn-todo {
+  .sec-todo {
     background: color-mix(in srgb, #64748B 18%, transparent);
     color: #94A3B8;
     border: 1px dashed color-mix(in srgb, #64748B 50%, transparent);
   }
-  .dvn-na { color: var(--text-secondary); opacity: 0.5; cursor: help; }
-  :global(html.light) .dvn-ok { color: #15803D; }
-  :global(html.light) .dvn-weak { color: #B91C1C; }
-  :global(html.light) .dvn-todo { color: #475569; }
+  .sec-na { color: var(--text-secondary); opacity: 0.5; }
+  :global(html.light) .sec-ok { color: #15803D; }
+  :global(html.light) .sec-weak { color: #B91C1C; }
+  :global(html.light) .sec-todo { color: #475569; }
 
   .footnote {
     color: var(--text-secondary);
