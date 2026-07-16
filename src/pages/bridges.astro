@@ -29,6 +29,7 @@ const { bridges } = data as {
         label: string;
         confirmations?: number;
         providers?: string[];
+        providersLabel?: string;
         route?: string;
         note?: string;
         weak?: boolean;
@@ -59,6 +60,7 @@ function securityTitle(sec: {
   label: string;
   confirmations?: number;
   providers?: string[];
+  providersLabel?: string;
   route?: string;
   note?: string;
   verifiedAt?: string;
@@ -66,10 +68,12 @@ function securityTitle(sec: {
   if (sec.label === "TODO") {
     return `Verifier quorum not yet resolved${sec.note ? ` — ${sec.note}` : ""}. See linked issue.`;
   }
-  const parts = [
-    `${sec.label} DVN quorum — this many independent LayerZero verifiers must attest a cross-chain message before it executes. A 1-of-1 is a single point of failure.`,
-  ];
-  if (sec.providers?.length) parts.push(`DVNs: ${sec.providers.join(", ")}.`);
+  const lead = sec.note
+    ? `${sec.label} — ${sec.note}`
+    : `${sec.label} DVN quorum — this many independent LayerZero verifiers must attest a cross-chain message before it executes. A 1-of-1 is a single point of failure.`;
+  const parts = [lead];
+  if (sec.providers?.length)
+    parts.push(`${sec.providersLabel ?? "Verifiers"}: ${sec.providers.join(", ")}.`);
   if (sec.confirmations) parts.push(`Block confirmations: ${sec.confirmations}.`);
   if (sec.route) parts.push(`Route: ${sec.route}.`);
   if (sec.verifiedAt) parts.push(`Verified onchain ${sec.verifiedAt}.`);
