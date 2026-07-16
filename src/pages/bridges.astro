@@ -118,10 +118,9 @@ const totalDeps = bridges.reduce((n, b) => n + b.dependencies.length, 0);
   </section>
 
   <div class="model-legend">
-    <span class="legend-title">Model</span>
-    <span class="legend-item"><span class="model-badge model-mint">Mints native</span> bridge can mint the native token — a compromise dilutes every holder</span>
-    <span class="legend-item"><span class="model-badge model-lock">Bridged</span> canonical token escrowed on origin; the remote is only a representation</span>
-    <span class="legend-item"><span class="model-badge model-transport">Transport</span> an underlying asset is bridged; the assessed token itself is not</span>
+    <span class="legend-item"><span class="model-badge model-mint">Mints native</span> bridge can mint the native token (unbacked supply dilutes every holder)</span>
+    <span class="legend-item"><span class="model-badge model-lock">Bridged</span> token is locked at home; only a bridged copy exists on remote chains</span>
+    <span class="legend-item"><span class="model-badge model-transport">Transport</span> token is not bridged, only the underlying asset is bridged (e.g. USDC)</span>
   </div>
 
   <div class="search-wrap">
