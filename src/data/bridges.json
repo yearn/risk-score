@@ -6,7 +6,7 @@
       "name": "AggLayer (LxLy)",
       "type": "Unified canonical bridge (Polygon CDK / AggLayer)",
       "url": "https://docs.agglayer.dev/",
-      "description": "The AggLayer LxLy unified bridge (`PolygonZkEVMBridgeV2`, same address on every connected chain) links Ethereum (network 0) to AggLayer chains such as Katana (network 20). Assets are escrowed in the L1 bridge and a wrapped representation is minted on the destination. Katana additionally uses \"Vault Bridge\" tokens (e.g. vbUSDC), which deposit the escrowed asset into yield vaults — so holders of the bridged token are exposed to both the bridge and the underlying vault.",
+      "description": "The AggLayer LxLy unified bridge (`PolygonZkEVMBridgeV2`) links Ethereum to AggLayer chains such as Katana. Assets are escrowed in the L1 bridge and a wrapped representation is minted on the destination. Katana additionally uses \"Vault Bridge\" tokens (e.g. vbUSDC) that deposit the escrowed asset into yield vaults, so a bridge exploit or a fault in that vault can strand or impair the remote backing — holders are exposed to both.",
       "keywords": ["agglayer", "lxly", "vault bridge", "vaultbridge", "vbusdc", "katana"],
       "ignore": ["cap-stcusd", "fx-fxusd", "infinifi", "midas-mhyper", "re-reusd"],
       "dependencies": [
@@ -20,7 +20,7 @@
       "name": "Chainlink CCIP",
       "type": "Cross-chain interoperability protocol",
       "url": "https://chain.link/cross-chain",
-      "description": "Chainlink's cross-chain interoperability protocol. Security has two layers. (1) Message verification is Chainlink-operated and NOT protocol-configurable: a committing DON signs each batch, and an independent Risk Management Network (RMN) can bless or \"curse\" (halt) a lane on anomaly — comparable to Circle's CCTP attesters in that a protocol cannot change it. (2) Token movement runs through a token pool the protocol itself deploys, owns, and configures — burn/mint or lock/release, registered in CCIP's TokenAdminRegistry — and this is where per-protocol risk lives: the owner sets per-lane rate limits (capacity caps that bound how much can be bridged), the supported lanes, and who can change them. So the model column reflects the pool mechanism (mint vs lock), and the real protocol-specific knobs are rate limits + pool ownership rather than a verifier quorum. Verified onchain: the integrated pools run with rate limiting enabled (Apyx apxUSD ~5M per lane; Maple syrupUSDC ~9.5M in / ~8.6M out per lane).",
+      "description": "Chainlink's cross-chain interoperability protocol. Two layers: message verification is Chainlink-operated and not protocol-configurable (a committing DON plus an independent Risk Management Network that can halt a lane), comparable to Circle's CCTP attesters. Token movement runs through a token pool the protocol itself deploys and owns — burn/mint or lock/release — where the per-protocol risk lives: the owner sets per-lane rate limits, supported lanes, and who can change them. So the model column reflects the pool mechanism, and the real protocol knobs are rate limits and pool ownership rather than a verifier quorum.",
       "keywords": ["ccip", "chainlink ccip"],
       "ignore": ["aave-sgho", "infinifi", "fx-fxusd"],
       "dependencies": [
@@ -34,7 +34,7 @@
       "name": "Circle CCTP",
       "type": "Native USDC burn-and-mint bridge",
       "url": "https://www.circle.com/cross-chain-transfer-protocol",
-      "description": "Circle's Cross-Chain Transfer Protocol moves native USDC by burning on the source chain and minting on the destination, gated by Circle's off-chain attestation service. Using canonical CCTP removes third-party lock-and-mint bridge risk; the trust assumption reduces to Circle's availability and attestation finality.",
+      "description": "Circle's Cross-Chain Transfer Protocol moves native USDC by burning on the source chain and minting on the destination, gated by Circle's attestation service — a 2-of-2 signature quorum whose attesters are both Circle-operated and swappable by Circle. Canonical CCTP removes third-party lock-and-mint bridge risk, but the trust assumption reduces to Circle's availability and attestation finality.",
       "keywords": ["cctp", "cross-chain transfer protocol"],
       "dependencies": [
         { "slug": "gauntlet-gusda", "name": "Gauntlet gtUSDa", "kind": "direct", "model": "transport", "integration": "Circle CCTP V2 (native burn/mint)", "detail": "Bridges USDC across Base/Arbitrum/Optimism to Morpho" },
@@ -71,7 +71,7 @@
       "name": "Native Rollup Bridges",
       "type": "Canonical L2 bridges (OP Stack / Arbitrum Nitro)",
       "url": "https://l2beat.com/scaling/risk",
-      "description": "Each rollup's own canonical token bridge (OP Stack StandardBridge, Arbitrum Nitro gateway, etc.). L1 tokens are escrowed and minted 1:1 on the L2 by the rollup's bridge; security inherits the L2's proof system and challenge window rather than an external validator set — generally the lowest-trust bridge class, but still a dependency for any asset held on an L2. No DVN concept applies.",
+      "description": "Each rollup's own canonical bridge — the OP Stack StandardBridge (Base, Optimism, Unichain), the Arbitrum Nitro gateway, and equivalents. L1 tokens are escrowed and minted 1:1 on the L2, secured by the rollup's proof system and Ethereum rather than an external validator set or attestation service. That makes it the lowest added third-party trust of any bridge class here — no separate verifier network to trust. The main residual risk is upgradeability: the bridge contracts can be upgraded, so a malicious or faulty upgrade by their admin is the primary path by which escrowed funds could be moved or minted.",
       "keywords": ["skylink", "op stack canonical", "arbitrum nitro gateway", "standardbridge"],
       "dependencies": [
         { "slug": "sky-usds", "name": "Sky USDS", "kind": "direct", "model": "lock", "integration": "OP Stack + Arbitrum Nitro canonical bridges (SkyLink)", "detail": "Primary USDS/sUSDS cross-chain route: ~$0.45B USDS + ~812M sUSDS escrowed on L1 and minted 1:1 on Base, Optimism, Unichain (OP Stack) and Arbitrum (Nitro). No bridge holds `wards` on USDS; LayerZero carries only Solana + Avalanche (<0.7%)" }
