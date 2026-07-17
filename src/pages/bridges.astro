@@ -412,7 +412,7 @@ const totalDeps = bridges.reduce((n, b) => n + b.dependencies.length, 0);
   .row-indirect:hover { background: color-mix(in srgb, #F59E0B 11%, transparent); }
   .col-icon { width: 44px; padding-right: 0; }
   .col-kind { width: 96px; }
-  .col-model { width: 118px; }
+  .col-model { width: 132px; }
   .col-sec { width: 160px; min-width: 160px; }
   .col-integration { min-width: 150px; }
 
@@ -476,6 +476,9 @@ const totalDeps = bridges.reduce((n, b) => n + b.dependencies.length, 0);
   /* === Model badges: what a bridge compromise can reach === */
   .model-badge {
     display: inline-block;
+    box-sizing: border-box;
+    min-width: 6.5rem;
+    text-align: center;
     font-size: 0.72rem;
     padding: 0.2rem 0.55rem;
     border-radius: 6px;
