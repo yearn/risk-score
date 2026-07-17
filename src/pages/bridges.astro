@@ -396,7 +396,7 @@ const totalDeps = bridges.reduce((n, b) => n + b.dependencies.length, 0);
     text-transform: uppercase;
     letter-spacing: 0.08em;
     padding: 0.7rem 0.85rem;
-    text-align: left;
+    text-align: center;
     border-bottom: 1px solid var(--border);
     white-space: nowrap;
   }
@@ -411,7 +411,7 @@ const totalDeps = bridges.reduce((n, b) => n + b.dependencies.length, 0);
   .row-indirect { background: color-mix(in srgb, #F59E0B 6%, transparent); }
   .row-indirect:hover { background: color-mix(in srgb, #F59E0B 11%, transparent); }
   .col-icon { width: 44px; padding-right: 0; }
-  .col-kind { width: 96px; }
+  .col-kind { width: 96px; text-align: center; }
   .col-model { width: 132px; }
   .col-sec { width: 160px; min-width: 160px; }
   .col-integration { min-width: 150px; }
