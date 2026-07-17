@@ -299,6 +299,7 @@ Cap's governance flows through a **3-of-5 Gnosis Safe multisig** → **24-hour T
 | **RedStone** | High | cUSD price oracle (0.05% deviation threshold). Stale prices disable minting/burning |
 | **wWTGXX (WisdomTree)** | Low | ~$5.08M tokenized gov money market fund. Minimal DeFi adoption and few holders |
 | **USDC (Circle)** | High | Primary reserve asset (~95% of cUSD backing) |
+| **LayerZero V2** | High | The Ethereum OFT Adapter [`0x983a…4137`](https://etherscan.io/address/0x983aeaaa0d0426839158435c43725ea7f45d4137) escrows 25,311,191 stcUSD, **51.99% of the 48.68M supply**, backing the native Katana OFT. The adapter cannot mint canonical stcUSD, so compromise risk is bounded by the remote supply and locked collateral, but the integration affects a majority of current supply |
 | **USDT, pyUSD, BENJI, BUIDL** | Low | Listed in docs as potential reserve assets but **not currently whitelisted onchain** (`Vault.assets()` returns only USDC and wWTGXX) |
 | **Institutional Operators** | High | IMC Trading, Edge Capital, Susquehanna Crypto generate yield via offchain strategies. Counterparty risk mitigated by Symbiotic restaking |
 
@@ -426,12 +427,13 @@ Cap's governance flows through a **3-of-5 Gnosis Safe multisig** → **24-hour T
 
 | Factor | Assessment |
 |--------|-----------|
-| Protocol count | Morpho (critical), Symbiotic (critical), RedStone (high), USDC/Circle (high), wWTGXX/WisdomTree (low). Aave V3 is wired in but no longer holds reserves |
+| Protocol count | Morpho (critical), Symbiotic (critical), RedStone (high), USDC/Circle (high), LayerZero V2 (high), wWTGXX/WisdomTree (low). Aave V3 is wired in but no longer holds reserves |
 | Morpho concentration | ~$48.9M USDC — **100%** of deployed USDC reserves are in Morpho (Steakhouse Prime + Gauntlet Prime). Concentration on a single underlying lending protocol increased materially vs. March's 67/33 Morpho/Aave split |
 | Symbiotic | Novel restaking infrastructure, less battle-tested than established alternatives |
+| LayerZero concentration | The OFT Adapter escrows 25.31M stcUSD (**51.99% of supply**) for Katana. This is a lock-and-mint representation, not a canonical-token mint authority, but bridge failure or compromise can affect the majority escrowed share |
 | Operator counterparties | Institutional firms (IMC, Susquehanna, Edge) — blue-chip but opaque |
 
-**Dependencies Score: 3.0/5** — The total dependency count is similar, but reserve concentration has shifted: 100% of the deployed USDC reserve now sits in Morpho (across two MetaMorpho curators), removing the Aave V3 diversification leg. This raises Morpho-specific risk while keeping cross-protocol risk count flat. Symbiotic integration adds complexity. Multiple oracle dependencies (RedStone). The operator model introduces counterparty risk with institutional firms. Score remains 3.0 — diversification across two curators (Steakhouse, Gauntlet) partially offsets the loss of the Aave leg, and Morpho Blue itself is battle-tested.
+**Dependencies Score: 3.0/5** — Reserve concentration has shifted: 100% of the deployed USDC reserve now sits in Morpho (across two MetaMorpho curators), removing the Aave V3 diversification leg. The live LayerZero integration also escrows 51.99% of stcUSD supply for Katana. Its lock-and-mint model cannot dilute canonical stcUSD, but it adds a material availability and escrow dependency that must be monitored. Symbiotic integration, RedStone oracles, and opaque institutional operator strategies add further complexity. Score remains 3.0 because the bridge blast radius is bounded by its locked collateral and the category already reflects several high-impact dependencies; the newly documented LayerZero concentration reinforces rather than changes that assessment.
 
 **Centralization Score = (2.0 + 2.5 + 3.0) / 3 = 2.5**
 

@@ -19,12 +19,66 @@ const { bridges } = data as {
       slug: string;
       name: string;
       kind: "direct" | "indirect";
+      model: "mint" | "lock" | "transport" | "unknown";
       integration: string;
       detail: string;
       icon?: string;
+      // Per-route security posture. Currently only LayerZero populates this
+      // (the DVN quorum); reusable for other bridges' verifier models later.
+      security?: {
+        label: string;
+        confirmations?: number;
+        providers?: string[];
+        providersLabel?: string;
+        route?: string;
+        note?: string;
+        weak?: boolean;
+        verifiedAt?: string;
+        link?: string;
+      };
     }[];
   }[];
 };
+
+// What a bridge compromise can actually reach, per dependency.
+const MODEL_LABEL: Record<string, string> = {
+  mint: "Mints native",
+  lock: "Bridged",
+  transport: "Transport",
+  unknown: "TODO",
+};
+const MODEL_TITLE: Record<string, string> = {
+  mint: "The bridge-controlled message path can mint native token supply. A compromise of the required bridge trust path can create unbacked native supply; account for any quorum before assessing the blast radius.",
+  lock: "The canonical token is locked/escrowed on its origin chain; the remote token is only a bridged representation. A compromise is bounded by remote supply and locked collateral.",
+  transport: "The protocol bridges an underlying asset (e.g. USDC) to remote strategies. The assessed token itself is not bridged, but exposure can persist while assets remain remote and may include bridge-dependent custody, accounting, and return paths.",
+  unknown: "Not yet verified — see the report. Do not assume a model.",
+};
+
+// Route-security tooltip. For LayerZero this is the receive-side DVN quorum:
+// how many independent verifiers must attest a message on the named route.
+function securityTitle(sec: {
+  label: string;
+  confirmations?: number;
+  providers?: string[];
+  providersLabel?: string;
+  route?: string;
+  note?: string;
+  verifiedAt?: string;
+}): string {
+  if (sec.label === "TODO") {
+    return `Verifier quorum not yet resolved${sec.note ? ` — ${sec.note}` : ""}. See linked issue.`;
+  }
+  const lead = sec.note
+    ? `${sec.label} — ${sec.note}`
+    : `${sec.label} DVN quorum for the route named below — this many independent LayerZero verifiers must attest before the receive-side message executes. A 1-of-1 is a single point of failure; other routes may use different configurations.`;
+  const parts = [lead];
+  if (sec.providers?.length)
+    parts.push(`${sec.providersLabel ?? "Verifiers"}: ${sec.providers.join(", ")}.`);
+  if (sec.confirmations) parts.push(`Block confirmations: ${sec.confirmations}.`);
+  if (sec.route) parts.push(`Route: ${sec.route}.`);
+  if (sec.verifiedAt) parts.push(`Verified onchain ${sec.verifiedAt}.`);
+  return parts.join(" ");
+}
 
 // Direct rows first, then indirect, each group alphabetical by name.
 const kindOrder = (k: string) => (k === "direct" ? 0 : 1);
@@ -49,6 +103,8 @@ const bridgesView = bridges.map((b) => {
     deps,
     directCount: deps.filter((d) => d.kind === "direct").length,
     indirectCount: deps.filter((d) => d.kind === "indirect").length,
+    // Only render the Security column for bridges that populate it (LayerZero).
+    hasSecurity: deps.some((d) => d.security),
   };
 });
 
@@ -65,6 +121,12 @@ const totalDeps = bridges.reduce((n, b) => n + b.dependencies.length, 0);
     <h1>Bridge Dependencies</h1>
   </section>
 
+  <div class="model-legend">
+    <span class="legend-item"><span class="model-badge model-mint">Mints native</span> bridge can mint the native token, unbacked supply dilutes every holder</span>
+    <span class="legend-item"><span class="model-badge model-lock">Bridged</span> token is locked at source chain, only a bridged copy exists on remote chains</span>
+    <span class="legend-item"><span class="model-badge model-transport">Transport</span> protocol token is not bridged, only the underlying asset is bridged (e.g. USDC)</span>
+  </div>
+
   <div class="search-wrap">
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="search-icon"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
     <input type="text" id="bridge-search" placeholder="Search protocols or tokens…" autocomplete="off" />
@@ -75,7 +137,10 @@ const totalDeps = bridges.reduce((n, b) => n + b.dependencies.length, 0);
       <div class="block-head">
         <div>
           <h2>
-            <a href={bridge.url} target="_blank" rel="noopener noreferrer">{bridge.name}</a>
+            <a href={bridge.url} target="_blank" rel="noopener noreferrer" class="bridge-link">
+              <span>{bridge.name}</span>
+              <svg class="link-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+            </a>
           </h2>
           <div class="bridge-type">{bridge.type}</div>
         </div>
@@ -92,7 +157,9 @@ const totalDeps = bridges.reduce((n, b) => n + b.dependencies.length, 0);
               <th class="col-icon"></th>
               <th>Protocol / Token</th>
               <th class="col-kind">Type</th>
-              <th>Integration</th>
+              <th class="col-model">Model</th>
+              {bridge.hasSecurity && <th class="col-sec">Route Security</th>}
+              <th class="col-integration">Integration</th>
               <th>Details</th>
             </tr>
           </thead>
@@ -116,6 +183,40 @@ const totalDeps = bridges.reduce((n, b) => n + b.dependencies.length, 0);
                 <td class="col-kind">
                   <span class={`kind-badge kind-${d.kind}`}>{d.kind}</span>
                 </td>
+                <td class="col-model">
+                  <span class={`model-badge model-${d.model}`} title={MODEL_TITLE[d.model]}>
+                    {MODEL_LABEL[d.model]}
+                  </span>
+                </td>
+                {bridge.hasSecurity && (
+                  <td class="col-sec">
+                    {d.security ? (
+                      <>
+                        {d.security.link ? (
+                          <a
+                            href={d.security.link}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            class={`sec-badge sec-${d.security.label === "TODO" ? "todo" : d.security.weak ? "weak" : "ok"}`}
+                            title={securityTitle(d.security)}
+                          >
+                            {d.security.label}
+                          </a>
+                        ) : (
+                          <span
+                            class={`sec-badge sec-${d.security.label === "TODO" ? "todo" : d.security.weak ? "weak" : "ok"}`}
+                            title={securityTitle(d.security)}
+                          >
+                            {d.security.label}
+                          </span>
+                        )}
+                        <span class="sec-route">{d.security.route ?? "Route not recorded"}</span>
+                      </>
+                    ) : (
+                      <span class="sec-na">—</span>
+                    )}
+                  </td>
+                )}
                 <td class="integration-cell">{d.integration}</td>
                 <td class="detail-cell">{d.detail}</td>
               </tr>
@@ -169,6 +270,31 @@ const totalDeps = bridges.reduce((n, b) => n + b.dependencies.length, 0);
     line-height: 1.15;
     max-width: 22ch;
   }
+
+  /* === Model legend === */
+  .model-legend {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem 1.25rem;
+    margin: 0 0 1.5rem;
+    font-size: 0.82rem;
+    color: var(--text-secondary);
+    line-height: 1.4;
+  }
+  .legend-title {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-weight: 700;
+    color: var(--text-primary);
+  }
+  .legend-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+
   /* === Search === */
   .search-wrap {
     position: relative;
@@ -222,6 +348,19 @@ const totalDeps = bridges.reduce((n, b) => n + b.dependencies.length, 0);
     text-decoration: none;
   }
   .block h2 a:hover { color: var(--brand-blue); }
+  .bridge-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+  }
+  .link-icon {
+    flex-shrink: 0;
+    opacity: 0.45;
+    transition: opacity 0.15s;
+    position: relative;
+    top: 1px;
+  }
+  .bridge-link:hover .link-icon { opacity: 1; }
   .bridge-type {
     color: var(--text-secondary);
     font-size: 0.8rem;
@@ -269,7 +408,7 @@ const totalDeps = bridges.reduce((n, b) => n + b.dependencies.length, 0);
     text-transform: uppercase;
     letter-spacing: 0.08em;
     padding: 0.7rem 0.85rem;
-    text-align: left;
+    text-align: center;
     border-bottom: 1px solid var(--border);
     white-space: nowrap;
   }
@@ -284,7 +423,10 @@ const totalDeps = bridges.reduce((n, b) => n + b.dependencies.length, 0);
   .row-indirect { background: color-mix(in srgb, #F59E0B 6%, transparent); }
   .row-indirect:hover { background: color-mix(in srgb, #F59E0B 11%, transparent); }
   .col-icon { width: 44px; padding-right: 0; }
-  .col-kind { width: 96px; }
+  .col-kind { width: 96px; text-align: center; }
+  .col-model { width: 132px; }
+  .col-sec { width: 160px; min-width: 160px; }
+  .col-integration { min-width: 150px; }
 
   /* === Icons (reused from Reports page) === */
   .icon-stack {
@@ -312,8 +454,13 @@ const totalDeps = bridges.reduce((n, b) => n + b.dependencies.length, 0);
   .name-cell { font-weight: 500; white-space: nowrap; }
   .name-cell a { color: var(--text-primary); text-decoration: none; }
   .name-cell a:hover { color: var(--brand-blue); text-decoration: underline; }
-  .integration-cell { color: var(--text-secondary); white-space: nowrap; }
-  .detail-cell { color: var(--text-secondary); font-size: 0.85rem; }
+  .integration-cell { color: var(--text-secondary); min-width: 150px; }
+  .detail-cell {
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    min-width: 300px;
+    line-height: 1.45;
+  }
 
   /* === Kind badges === */
   .kind-badge {
@@ -337,6 +484,90 @@ const totalDeps = bridges.reduce((n, b) => n + b.dependencies.length, 0);
   }
   :global(html.light) .kind-direct { color: #15803D; }
   :global(html.light) .kind-indirect { color: #B45309; }
+
+  /* === Model badges: what a bridge compromise can reach === */
+  .model-badge {
+    display: inline-block;
+    box-sizing: border-box;
+    min-width: 6.5rem;
+    text-align: center;
+    font-size: 0.72rem;
+    padding: 0.2rem 0.55rem;
+    border-radius: 6px;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  /* Bridge can mint the native token — highest blast radius. */
+  .model-mint {
+    background: color-mix(in srgb, #F43F5E 18%, transparent);
+    color: #FDA4AF;
+    border: 1px solid color-mix(in srgb, #F43F5E 40%, transparent);
+  }
+  /* Remote is only a bridged representation; canonical stays escrowed. */
+  .model-lock {
+    background: color-mix(in srgb, var(--brand-blue) 18%, transparent);
+    color: #7eb4ff;
+    border: 1px solid color-mix(in srgb, var(--brand-blue) 35%, transparent);
+  }
+  /* Underlying asset moved to remote strategies; token itself not bridged. */
+  .model-transport {
+    background: color-mix(in srgb, #A78BFA 18%, transparent);
+    color: #c4b5fd;
+    border: 1px solid color-mix(in srgb, #A78BFA 35%, transparent);
+  }
+  .model-unknown {
+    background: color-mix(in srgb, #64748B 18%, transparent);
+    color: #94A3B8;
+    border: 1px dashed color-mix(in srgb, #64748B 50%, transparent);
+  }
+  :global(html.light) .model-mint { color: #BE123C; }
+  :global(html.light) .model-lock { color: #1D4ED8; }
+  :global(html.light) .model-transport { color: #6D28D9; }
+  :global(html.light) .model-unknown { color: #475569; }
+
+  /* === Security badges (LayerZero DVN quorum today; reusable) === */
+  .sec-badge {
+    display: inline-block;
+    font-size: 0.72rem;
+    padding: 0.2rem 0.5rem;
+    border-radius: 6px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+    cursor: help;
+    text-decoration: none;
+  }
+  .sec-badge:hover { text-decoration: none; filter: brightness(1.08); }
+  /* Healthy quorum (≥ 2 independent verifiers). */
+  .sec-ok {
+    background: color-mix(in srgb, #22C55E 16%, transparent);
+    color: #86EFAC;
+    border: 1px solid color-mix(in srgb, #22C55E 32%, transparent);
+  }
+  /* 1-of-1 / single point of failure — the rsETH-incident failure mode. */
+  .sec-weak {
+    background: color-mix(in srgb, #EF4444 22%, transparent);
+    color: #FCA5A5;
+    border: 1px solid color-mix(in srgb, #EF4444 48%, transparent);
+  }
+  .sec-todo {
+    background: color-mix(in srgb, #64748B 18%, transparent);
+    color: #94A3B8;
+    border: 1px dashed color-mix(in srgb, #64748B 50%, transparent);
+  }
+  .sec-na { color: var(--text-secondary); opacity: 0.5; }
+  .sec-route {
+    display: block;
+    margin-top: 0.3rem;
+    color: var(--text-secondary);
+    font-size: 0.68rem;
+    font-weight: 400;
+    line-height: 1.25;
+    white-space: normal;
+  }
+  :global(html.light) .sec-ok { color: #15803D; }
+  :global(html.light) .sec-weak { color: #B91C1C; }
+  :global(html.light) .sec-todo { color: #475569; }
 
   .footnote {
     color: var(--text-secondary);
