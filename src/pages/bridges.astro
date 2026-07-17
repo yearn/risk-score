@@ -122,9 +122,9 @@ const totalDeps = bridges.reduce((n, b) => n + b.dependencies.length, 0);
   </section>
 
   <div class="model-legend">
-    <span class="legend-item"><span class="model-badge model-mint">Mints native</span> bridge can mint the native token (unbacked supply dilutes every holder)</span>
-    <span class="legend-item"><span class="model-badge model-lock">Bridged</span> token is locked at home; only a bridged copy exists on remote chains</span>
-    <span class="legend-item"><span class="model-badge model-transport">Transport</span> token is not bridged, only the underlying asset is bridged (e.g. USDC)</span>
+    <span class="legend-item"><span class="model-badge model-mint">Mints native</span> bridge can mint the native token, unbacked supply dilutes every holder</span>
+    <span class="legend-item"><span class="model-badge model-lock">Bridged</span> token is locked at source chain, only a bridged copy exists on remote chains</span>
+    <span class="legend-item"><span class="model-badge model-transport">Transport</span> protocol token is not bridged, only the underlying asset is bridged (e.g. USDC)</span>
   </div>
 
   <div class="search-wrap">
@@ -137,7 +137,10 @@ const totalDeps = bridges.reduce((n, b) => n + b.dependencies.length, 0);
       <div class="block-head">
         <div>
           <h2>
-            <a href={bridge.url} target="_blank" rel="noopener noreferrer">{bridge.name}</a>
+            <a href={bridge.url} target="_blank" rel="noopener noreferrer" class="bridge-link">
+              <span>{bridge.name}</span>
+              <svg class="link-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+            </a>
           </h2>
           <div class="bridge-type">{bridge.type}</div>
         </div>
@@ -275,10 +278,6 @@ const totalDeps = bridges.reduce((n, b) => n + b.dependencies.length, 0);
     align-items: center;
     gap: 0.5rem 1.25rem;
     margin: 0 0 1.5rem;
-    padding: 0.85rem 1rem;
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    background: color-mix(in srgb, var(--bg-card) 40%, transparent);
     font-size: 0.82rem;
     color: var(--text-secondary);
     line-height: 1.4;
@@ -349,6 +348,19 @@ const totalDeps = bridges.reduce((n, b) => n + b.dependencies.length, 0);
     text-decoration: none;
   }
   .block h2 a:hover { color: var(--brand-blue); }
+  .bridge-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+  }
+  .link-icon {
+    flex-shrink: 0;
+    opacity: 0.45;
+    transition: opacity 0.15s;
+    position: relative;
+    top: 1px;
+  }
+  .bridge-link:hover .link-icon { opacity: 1; }
   .bridge-type {
     color: var(--text-secondary);
     font-size: 0.8rem;
@@ -484,13 +496,12 @@ const totalDeps = bridges.reduce((n, b) => n + b.dependencies.length, 0);
     border-radius: 6px;
     font-weight: 600;
     white-space: nowrap;
-    cursor: help;
   }
   /* Bridge can mint the native token — highest blast radius. */
   .model-mint {
-    background: color-mix(in srgb, #EF4444 20%, transparent);
-    color: #FCA5A5;
-    border: 1px solid color-mix(in srgb, #EF4444 45%, transparent);
+    background: color-mix(in srgb, #F43F5E 18%, transparent);
+    color: #FDA4AF;
+    border: 1px solid color-mix(in srgb, #F43F5E 40%, transparent);
   }
   /* Remote is only a bridged representation; canonical stays escrowed. */
   .model-lock {
@@ -509,7 +520,7 @@ const totalDeps = bridges.reduce((n, b) => n + b.dependencies.length, 0);
     color: #94A3B8;
     border: 1px dashed color-mix(in srgb, #64748B 50%, transparent);
   }
-  :global(html.light) .model-mint { color: #B91C1C; }
+  :global(html.light) .model-mint { color: #BE123C; }
   :global(html.light) .model-lock { color: #1D4ED8; }
   :global(html.light) .model-transport { color: #6D28D9; }
   :global(html.light) .model-unknown { color: #475569; }
