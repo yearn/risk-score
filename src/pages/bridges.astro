@@ -2,6 +2,7 @@
 import BaseLayout from "../layouts/BaseLayout.astro";
 import { getAllReports } from "../lib/reports";
 import { defillamaIconUrl } from "../lib/icons";
+import { marked } from "marked";
 import data from "../data/bridges.json";
 
 // Reuse the icon each report already derives (DefiLlama slug -> protocol icon,
@@ -15,6 +16,8 @@ const { bridges } = data as {
     type: string;
     url: string;
     description: string;
+    finality?: string;
+    admin?: string;
     dependencies: {
       slug: string;
       name: string;
@@ -22,6 +25,7 @@ const { bridges } = data as {
       model: "mint" | "lock" | "transport" | "unknown";
       integration: string;
       detail: string;
+      owner?: string;
       icon?: string;
       // Per-route security posture. Currently only LayerZero populates this
       // (the DVN quorum); reusable for other bridges' verifier models later.
@@ -92,10 +96,20 @@ const bridgesView = bridges.map((b) => {
       const rep = reportBySlug.get(d.slug);
       // Prefer an explicit typed icon override, else the report's own icon.
       const iconUrl = d.icon ? defillamaIconUrl(d.icon) : (rep?.iconUrl ?? "");
+      // `detail` is a short markdown string so addresses can be wrapped in
+      // `[`0xABCD…EF12`](https://etherscan.io/address/0x<full>)` and stay
+      // clickable on the /bridges/ page. Backticks alone leave the address
+      // unlinkable — never write a truncated address without a link.
+      const detailHtml = marked.parse(d.detail, { async: false }) as string;
+      const ownerHtml = d.owner
+        ? (marked.parseInline(d.owner, { async: false }) as string)
+        : "";
       return {
         ...d,
         iconUrl,
         chainIconUrl: rep?.chainIconUrl ?? "",
+        detailHtml,
+        ownerHtml,
       };
     });
   return {
@@ -105,6 +119,12 @@ const bridgesView = bridges.map((b) => {
     indirectCount: deps.filter((d) => d.kind === "indirect").length,
     // Only render the Security column for bridges that populate it (LayerZero).
     hasSecurity: deps.some((d) => d.security),
+    finalityHtml: b.finality
+      ? (marked.parseInline(b.finality, { async: false }) as string)
+      : "",
+    adminHtml: b.admin
+      ? (marked.parseInline(b.admin, { async: false }) as string)
+      : "",
   };
 });
 
@@ -150,6 +170,17 @@ const totalDeps = bridges.reduce((n, b) => n + b.dependencies.length, 0);
       </div>
       <p class="block-desc">{bridge.description}</p>
 
+      {(bridge.finalityHtml || bridge.adminHtml) && (
+        <div class="bridge-facts">
+          {bridge.finalityHtml && (
+            <span class="fact"><span class="fact-label">Finality</span> <span set:html={bridge.finalityHtml} /></span>
+          )}
+          {bridge.adminHtml && (
+            <span class="fact"><span class="fact-label">Admin</span> <span set:html={bridge.adminHtml} /></span>
+          )}
+        </div>
+      )}
+
       <div class="table-card">
         <table>
           <thead>
@@ -158,7 +189,7 @@ const totalDeps = bridges.reduce((n, b) => n + b.dependencies.length, 0);
               <th>Protocol / Token</th>
               <th class="col-kind">Type</th>
               <th class="col-model">Model</th>
-              {bridge.hasSecurity && <th class="col-sec">Route Security</th>}
+              {bridge.hasSecurity && <th class="col-sec">DVN</th>}
               <th class="col-integration">Integration</th>
               <th>Details</th>
             </tr>
@@ -218,7 +249,10 @@ const totalDeps = bridges.reduce((n, b) => n + b.dependencies.length, 0);
                   </td>
                 )}
                 <td class="integration-cell">{d.integration}</td>
-                <td class="detail-cell">{d.detail}</td>
+                <td class="detail-cell">
+                  <span set:html={d.detailHtml} />
+                  {d.ownerHtml && <div class="owner-line" set:html={d.ownerHtml} />}
+                </td>
               </tr>
             ))}
           </tbody>
@@ -226,12 +260,6 @@ const totalDeps = bridges.reduce((n, b) => n + b.dependencies.length, 0);
       </div>
     </section>
   ))}
-
-  <p class="footnote">
-    {totalDeps} dependencies across {bridges.length} bridges. Each row links to
-    its risk report. This table is maintained from the reports — see the report
-    and reassessment workflows for how new bridge dependencies are added.
-  </p>
 
   <script is:inline>
     (() => {
@@ -381,9 +409,42 @@ const totalDeps = bridges.reduce((n, b) => n + b.dependencies.length, 0);
     color: var(--text-secondary);
     font-size: 0.9rem;
     line-height: 1.5;
-    margin-bottom: 1rem;
+    margin-bottom: 0.75rem;
     max-width: 78ch;
   }
+
+  /* === Per-bridge facts line (finality + admin) === */
+  .bridge-facts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem 1.5rem;
+    margin-bottom: 1rem;
+    font-size: 0.82rem;
+    line-height: 1.5;
+    color: var(--text-secondary);
+  }
+  .bridge-facts .fact {
+    max-width: 72ch;
+  }
+  .fact-label {
+    display: inline-block;
+    font-size: 0.68rem;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-right: 0.15rem;
+  }
+  .bridge-facts :global(a) { color: var(--brand-blue); }
+  .bridge-facts :global(code) { font-size: 0.92em; }
+
+  .owner-line {
+    margin-top: 0.4rem;
+    font-size: 0.78rem;
+    color: var(--text-secondary);
+    opacity: 0.85;
+  }
+  .owner-line :global(a) { color: var(--brand-blue); }
 
   /* === Table card === */
   .table-card {
