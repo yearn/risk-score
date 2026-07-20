@@ -66,24 +66,22 @@ nodes:
     category: infra
 
   # Strategies
-  - id: morpho-gauntlet-weth
-    label: Morpho Gauntlet WETH Prime (71.26%)
-    address: "0xeEB6Be70fF212238419cD638FAB17910CF61CBE7"
-    category: strategy
   - id: steth-accumulator
-    label: stETH Accumulator (24.68%)
+    label: stETH Accumulator (58.6%)
     address: "0x470e0e048F85CFD72EEf325895e02c8D297E7435"
     category: strategy
   - id: spark-weth-lender
-    label: Spark WETH Lender (4.03%)
-    address: "0x365cC9c28Df1663fA37C565A3aC1Addc3A219e15"
+    label: Spark WETH Lender (31.2%)
+    address: "0xfca3F21D60d5bC8B4C5c35F169bb5B6402510151"
     category: strategy
+    note: New strategy replacing old Spark WETH Lender (0x365c…9e15, fully drained)
+  - id: yearn-og-weth
+    label: Yearn OG WETH (1.8% / 9.1% effective)
+    address: "0xE89371eAaAC6D46d4C3ED23453241987916224FC"
+    category: strategy
+    note: Morpho MetaMorpho vault — confirmed via MORPHO() returning 0xBBBBBbbBBb9cC5e90e3b3Af64bdAF62C37EEFFCb
 
   # External dependencies
-  - id: morpho-gauntlet-vault
-    label: Morpho Gauntlet WETH Prime Vault
-    category: dependency
-    note: Gauntlet-curated Morpho MetaMorpho vault
   - id: lido-steth
     label: Lido stETH
     address: "0xae7ab96520DE3A18E5e111B5EaAb095312D7fE84"
@@ -96,10 +94,13 @@ nodes:
     label: Lido Withdrawal Queue
     address: "0x889edC2eDab5f40e902b864aD4d7AdE8E412F9B1"
     category: dependency
-  - id: spark-lend-weth
-    label: Spark Lend WETH Market
+  - id: spark-lend
+    label: Spark Lend WETH Market (Sky)
     category: dependency
-    note: Sky sub-DAO; admin keys live under Sky governance
+  - id: morpho
+    label: Morpho Lending Markets
+    address: "0xBBBBBbbBBb9cC5e90e3b3Af64bdAF62C37EEFFCb"
+    category: dependency
 
 edges:
   # Deployment / vault infrastructure
@@ -116,17 +117,17 @@ edges:
 
   # Vault → strategies (allocation)
   - from: yvWETH
-    to: morpho-gauntlet-weth
-    kind: allocates-to
-    label: "71.26%"
-  - from: yvWETH
     to: steth-accumulator
     kind: allocates-to
-    label: "24.68%"
+    label: "58.6%"
   - from: yvWETH
     to: spark-weth-lender
     kind: allocates-to
-    label: "4.03%"
+    label: "31.2%"
+  - from: yvWETH
+    to: yearn-og-weth
+    kind: allocates-to
+    label: "1.8% (158 WETH debt; 807 WETH totalAssets)"
 
   # Governance roles on vault
   - from: daddy
@@ -176,10 +177,6 @@ edges:
     label: CANCELLER
 
   # Strategy → underlying protocol pipelines
-  - from: morpho-gauntlet-weth
-    to: morpho-gauntlet-vault
-    kind: deposits-into
-    label: "WETH deposit"
   - from: steth-accumulator
     to: curve-steth-pool
     kind: routes-through
@@ -193,6 +190,15 @@ edges:
     kind: routes-through
     label: "stETH → ETH (1:1 redeem)"
   - from: spark-weth-lender
-    to: spark-lend-weth
+    to: spark-lend
     kind: deposits-into
-    label: "WETH supply"
+    label: "WETH supply (atomic)"
+  - from: yearn-og-weth
+    to: morpho
+    kind: deposits-into
+    label: "WETH → Morpho lending (atomic)"
+  # Security multisig owns the Yearn OG WETH MetaMorpho vault contract
+  - from: security
+    to: yearn-og-weth
+    kind: controls
+    label: "owner()"
