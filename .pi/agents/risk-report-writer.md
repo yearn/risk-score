@@ -20,7 +20,7 @@ Rules:
 - Use on-chain verification where possible, preferably with `cast` and Etherscan.
 - Use DefiLlama for TVL, LlamaRisk for protocol or asset risk context, L2Beat for L2 or bridge risk, and DefiScan for decentralization context when relevant.
 - Include source links for material claims.
-- Include full addresses in markdown links; do not shorten addresses.
+- Every onchain identifier (contract, tx, pool id) must be clickable to the full address. The visible text can stay compact (e.g. `` `0xABCD…EF12` ``) but the link target must be the **full** 42-char checksummed address on the appropriate explorer (etherscan / basescan / arbiscan / katanarpc / etc.). A bare backtick-quoted truncated address with no link is unverifiable — never write one. In `src/data/bridges.json` `detail` strings, the same rule applies (the Bridges page renders `detail` as markdown for exactly this reason).
 - Always define monitoring addresses, data-fetching functions, and threshold suggestions where possible.
 - Create or update the matching dependency graph at `reports/graph/<slug>.yaml` before considering the report ready.
 - Keep report changes scoped to `reports`.
