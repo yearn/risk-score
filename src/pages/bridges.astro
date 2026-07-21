@@ -189,7 +189,21 @@ const totalDeps = bridges.reduce((n, b) => n + b.dependencies.length, 0);
               <th>Protocol / Token</th>
               <th class="col-kind">Type</th>
               <th class="col-model">Model</th>
-              {bridge.hasSecurity && <th class="col-sec">DVN</th>}
+              {bridge.hasSecurity && (
+                <th class="col-sec">
+                  DVN
+                  <a
+                    href="https://docs.layerzero.network/v2/concepts/modular-security/security-stack-dvns"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="info-link"
+                    title="What is a DVN? Decentralized Verifier Networks independently attest each cross-chain message. Read the LayerZero docs."
+                    aria-label="What is a DVN? (LayerZero docs)"
+                  >
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+                  </a>
+                </th>
+              )}
               <th class="col-integration">Integration</th>
               <th>Details</th>
             </tr>
@@ -389,6 +403,19 @@ const totalDeps = bridges.reduce((n, b) => n + b.dependencies.length, 0);
     top: 1px;
   }
   .bridge-link:hover .link-icon { opacity: 1; }
+
+  /* Info icon in a column header linking to explanatory docs. */
+  .info-link {
+    display: inline-flex;
+    vertical-align: middle;
+    margin-left: 0.2rem;
+    color: var(--text-secondary);
+    opacity: 0.6;
+    position: relative;
+    top: -1px;
+    transition: opacity 0.15s, color 0.15s;
+  }
+  .info-link:hover { opacity: 1; color: var(--brand-blue); }
   .bridge-type {
     color: var(--text-secondary);
     font-size: 0.8rem;
