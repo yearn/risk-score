@@ -119,6 +119,9 @@ const bridgesView = bridges.map((b) => {
     indirectCount: deps.filter((d) => d.kind === "indirect").length,
     // Only render the Security column for bridges that populate it (LayerZero).
     hasSecurity: deps.some((d) => d.security),
+    descriptionHtml: marked.parseInline(b.description, {
+      async: false,
+    }) as string,
     finalityHtml: b.finality
       ? (marked.parseInline(b.finality, { async: false }) as string)
       : "",
@@ -168,7 +171,7 @@ const totalDeps = bridges.reduce((n, b) => n + b.dependencies.length, 0);
           {bridge.directCount} direct{bridge.indirectCount > 0 ? ` · ${bridge.indirectCount} indirect` : ""}
         </span>
       </div>
-      <p class="block-desc">{bridge.description}</p>
+      <p class="block-desc" set:html={bridge.descriptionHtml}></p>
 
       {(bridge.finalityHtml || bridge.adminHtml) && (
         <div class="bridge-facts">
@@ -439,6 +442,8 @@ const totalDeps = bridges.reduce((n, b) => n + b.dependencies.length, 0);
     margin-bottom: 0.75rem;
     max-width: 78ch;
   }
+  .block-desc :global(a) { color: var(--brand-blue); }
+  .block-desc :global(code) { font-size: 0.92em; }
 
   /* === Per-bridge facts line (finality + admin) === */
   .bridge-facts {
