@@ -170,7 +170,7 @@ See `reports/report/mezo-musd.md` for a worked example.
 List key contracts and events to monitor. At minimum, cover governance changes and backing ratio.
 
 - Key contract addresses to monitor, always define which addresses should be monitored.
-- Critical values or events to watch like parameter changes, governance actions, redeption liquidity, collateral allocation.
+- Critical values or events to watch like parameter changes, governance actions, redemption liquidity, collateral allocation.
 - If protocol is using trenches or some kind of loss coverage define which contracts should be monitored to track the coverage ratio.
 - Define which functions can be used to get specific data.
 - If data can't be fetched onchain then fallback to using offchain data.
