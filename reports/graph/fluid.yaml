@@ -118,22 +118,34 @@ nodes:
     address: "0x0b2b2b2076d95dda7817e785989fe353fe955ef9"
     chain: arbitrum
     category: dependency
-    note: USD.AI ERC-4626 vault backed by USDai; source-chain asset behind the cross-chain position; Fluid holds ~2/3 of total sUSDai supply
+    note: USD.AI ERC-4626 vault backed by USDai; the Arbitrum OAdapter's authenticated receive path can mint this canonical supply; Fluid holds ~2/3 of total sUSDai supply
   - id: susdai-ethereum
     label: Ethereum sUSDai OToken
     address: "0x0b2b2b2076d95dda7817e785989fe353fe955ef9"
     category: dependency
     note: Bridged representation, not an ERC-4626 vault; Fluid held ~96% of mainnet supply when checked Jul 22, 2026
-  - id: susdai-oadapter
-    label: sUSDai OAdapter
+  - id: susdai-oadapter-ethereum
+    label: Ethereum sUSDai OAdapter
     address: "0xffB20098FD7B8E84762eea4609F299D101427f24"
     category: infra
-    note: Sole BRIDGE_ADMIN_ROLE holder on Ethereum sUSDai; LayerZero adapter with privileged mint and burn authority
-  - id: susdai-admin-safe
-    label: USD.AI Admin Safe (3-of-3)
+    note: Sole BRIDGE_ADMIN_ROLE holder on Ethereum sUSDai; Arbitrum→Ethereum route is 3-of-3 DVNs with 20 confirmations
+  - id: susdai-oadapter-arbitrum
+    label: Arbitrum sUSDai OAdapter
+    address: "0xffB20098FD7B8E84762eea4609F299D101427f24"
+    chain: arbitrum
+    category: infra
+    note: Authenticated receive path can mint canonical sUSDai; Ethereum→Arbitrum route is 3-of-3 DVNs with 15 confirmations; 10M/hour limiter is outbound-only
+  - id: susdai-admin-safe-ethereum
+    label: Ethereum USD.AI Admin Safe (3-of-3)
     address: "0x5F0BC72FB5952b2f3F2E11404398eD507B25841F"
     category: governance
-    note: Owns OAdapter and holds Ethereum sUSDai DEFAULT_ADMIN_ROLE
+    note: Owns the Ethereum OAdapter and holds Ethereum sUSDai DEFAULT_ADMIN_ROLE
+  - id: susdai-admin-safe-arbitrum
+    label: Arbitrum USD.AI Admin Safe (3-of-3)
+    address: "0x5F0BC72FB5952b2f3F2E11404398eD507B25841F"
+    chain: arbitrum
+    category: governance
+    note: Owns the Arbitrum OAdapter; threshold and all three owners match the Ethereum Safe
   - id: susdai-upgrade-timelock
     label: sUSDai Upgrade Timelock (48h)
     address: "0x0EEA1EE08611fF4A4E83BFe3916712751995639b"
@@ -293,16 +305,24 @@ edges:
   - from: susdai-ethereum
     to: dep-susdai
     kind: routes-through
-    label: bridged claim on canonical Arbitrum sUSDai
-  - from: susdai-oadapter
+    label: LayerZero burn/mint supply correspondence
+  - from: susdai-oadapter-ethereum
     to: susdai-ethereum
     kind: mints
     label: BRIDGE_ADMIN_ROLE
-  - from: susdai-admin-safe
-    to: susdai-oadapter
+  - from: susdai-oadapter-arbitrum
+    to: dep-susdai
+    kind: mints
+    label: authenticated LayerZero receive
+  - from: susdai-admin-safe-ethereum
+    to: susdai-oadapter-ethereum
     kind: controls
     label: owner
-  - from: susdai-admin-safe
+  - from: susdai-admin-safe-arbitrum
+    to: susdai-oadapter-arbitrum
+    kind: controls
+    label: owner
+  - from: susdai-admin-safe-ethereum
     to: susdai-ethereum
     kind: holds-role
     label: DEFAULT_ADMIN_ROLE
