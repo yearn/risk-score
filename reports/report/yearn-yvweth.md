@@ -12,14 +12,12 @@ yvWETH-1 is a **WETH-denominated Yearn V3 vault** (ERC-4626) that deploys deposi
 
 The vault's `totalDebt()` (~8,927 WETH) fully reconciles with strategy debt: stETH Accumulator (5,212) + Spark WETH Lender (2,521) + wstETH/WETH Spark Looper (1,001) + Yearn OG WETH (193) = ~8,927 WETH (100% of totalDebt).
 
-Between the May 11 snapshot and July 22, vault TVL grew from 5,333.06 WETH to ~8,927 WETH (+67%). The Morpho and old Spark strategies were fully drained (Morpho: 3,800 → 0 debt; old Spark: 215 → 0 debt). The stETH Accumulator absorbed much of the reallocation (1,316 → 5,212 current_debt). The **new Spark WETH Lender** and the **wstETH/WETH Spark Looper** were both activated June 25, 2026. **Yearn OG WETH** was activated May 22, 2026.
-
 **Key architecture:**
 
 - **Vault:** Standard Yearn V3 vault (v3.0.2) accepting WETH deposits, issuing yvWETH-1 shares. Deployed as an immutable Vyper minimal proxy (EIP-1167) via the v3.0.2 Yearn V3 Vault Factory ([`0x444045c5C13C246e117eD36437303cac8E250aB0`](https://etherscan.io/address/0x444045c5C13C246e117eD36437303cac8E250aB0))
 - **Funded strategies (4 total; 3 in default queue):**
   - **stETH Accumulator** ([`0x470e0e048F85CFD72EEf325895e02c8D297E7435`](https://etherscan.io/address/0x470e0e048F85CFD72EEf325895e02c8D297E7435)) — 5,212 WETH current_debt (58.4% of totalDebt; 5,212.53 WETH strategy totalAssets)
-  - **Spark WETH Lender** ([`0xfca3F21D60d5bC8B4C5c35F169bb5B6402510151`](https://etherscan.io/address/0xfca3F21D60d5bC8B4C5c35F169bb5B6402510151)) — 2,521 WETH current_debt (28.2% of totalDebt; 2,521.35 WETH strategy totalAssets). This is a new strategy deployment replacing the old Spark WETH Lender at `0x365cC9c28Df1663fA37C565A3aC1Addc3A219e15` which has been fully drained.
+  - **Spark WETH Lender** ([`0xfca3F21D60d5bC8B4C5c35F169bb5B6402510151`](https://etherscan.io/address/0xfca3F21D60d5bC8B4C5c35F169bb5B6402510151)) — 2,521 WETH current_debt (28.2% of totalDebt; 2,521.35 WETH strategy totalAssets).
   - **wstETH/WETH Spark Looper** ([`0x68A14629cb07c74259f481382fE8b6cFD8970121`](https://etherscan.io/address/0x68A14629cb07c74259f481382fE8b6cFD8970121)) — 1,001 WETH current_debt (11.2% of totalDebt; 1,001.28 WETH strategy totalAssets). This strategy leverages wstETH as collateral to borrow WETH on Spark Lend (an Aave-fork lending market). **Not in the default queue** but holds active debt. Implementation is an LSTAaveLooper at [`0xd377919fa87120584b21279a491f82d5265a139c`](https://etherscan.io/address/0xd377919fa87120584b21279a491f82d5265a139c).
   - **Yearn OG WETH** ([`0xE89371eAaAC6D46d4C3ED23453241987916224FC`](https://etherscan.io/address/0xE89371eAaAC6D46d4C3ED23453241987916224FC)) — 193 WETH current_debt (2.2% of totalDebt; 807.41 WETH strategy totalAssets including unreported Morpho lending yield). This is a **Morpho MetaMorpho vault** (confirmed by `MORPHO()` returning [`0xBBBBBbbBBb9cC5e90e3b3Af64bdAF62C37EEFFCb`](https://etherscan.io/address/0xBBBBBbbBBb9cC5e90e3b3Af64bdAF62C37EEFFCb)). Listed at https://app.morpho.org/ethereum/vault/0xE89371eAaAC6D46d4C3ED23453241987916224FC/yearn-og-weth
 - **Withdrawal mechanics:** The stETH Accumulator (~58% of totalDebt) **does not auto-unwind on user withdrawal** — `availableWithdrawLimit()` returns only the strategy's loose WETH balance. Larger redemptions touching the Accumulator portion are management-paced (manual unwind via Curve or the Lido withdrawal queue). The Spark WETH Lender (28.2%), wstETH/WETH Spark Looper (11.2%), and Yearn OG WETH (2.2% of totalDebt; 9.1% effective) provide withdrawal from deep Spark Lend and Morpho markets. The looper may require partial deleveraging to exit fully.
@@ -96,17 +94,6 @@ Between the May 11 snapshot and July 22, vault TVL grew from 5,333.06 WETH to ~8
 | 2 | [`0xfca3F21D60d5bC8B4C5c35F169bb5B6402510151`](https://etherscan.io/address/0xfca3F21D60d5bC8B4C5c35F169bb5B6402510151) | **Spark WETH Lender** | **2,521** | **28.2%** | 2,521.35 | YES |
 | 3 | [`0x68A14629cb07c74259f481382fE8b6cFD8970121`](https://etherscan.io/address/0x68A14629cb07c74259f481382fE8b6cFD8970121) | **wstETH/WETH Spark Looper** | **1,001** | **11.2%** | 1,001.28 | NO |
 | 4 | [`0xE89371eAaAC6D46d4C3ED23453241987916224FC`](https://etherscan.io/address/0xE89371eAaAC6D46d4C3ED23453241987916224FC) | Yearn OG WETH (Morpho MetaMorpho) | 193 | 2.2% | 807.41 | YES |
-
-**Debt reconciliation:** strategy current_debt sum (5,212 + 2,521 + 1,001 + 193 = 8,927 WETH) covers 100% of `totalDebt()` (~8,927 WETH). Fully reconciled.
-
-**Previously funded, now fully drained (`activation = 0`, `current_debt = 0` at block 25574582):**
-
-- Morpho Gauntlet WETH Prime Compounder ([`0xeEB6Be70fF212238419cD638FAB17910CF61CBE7`](https://etherscan.io/address/0xeEB6Be70fF212238419cD638FAB17910CF61CBE7)) — 62.73 WETH residual totalAssets (outside vault accounting)
-- Old Spark WETH Lender ([`0x365cC9c28Df1663fA37C565A3aC1Addc3A219e15`](https://etherscan.io/address/0x365cC9c28Df1663fA37C565A3aC1Addc3A219e15)) — 0.16 WETH dust
-- Aave V3 Lido WETH Lender ([`0xC7baE383738274ea8C3292d53AfBB3b42B348DF0`](https://etherscan.io/address/0xC7baE383738274ea8C3292d53AfBB3b42B348DF0)) — 0.04 WETH dust
-- Aave V3 WETH Lender ([`0x5ABcBBDbf617a21F7667e8cfD17Fa16475D20dB8`](https://etherscan.io/address/0x5ABcBBDbf617a21F7667e8cfD17Fa16475D20dB8)) — 0.15 WETH dust
-
-**Current funding posture:** vault is ~100% deployed across four active strategies (~0.28 WETH idle). The stETH Accumulator dominates at ~58% of totalDebt, followed by the Spark WETH Lender (~28%), the wstETH/WETH Spark Looper (~11%), and Yearn OG WETH (~2% of totalDebt, ~9% effective with accumulated yield). The looper holds active debt but is **not in the default queue** — it will not receive new deposits via automatic allocation but can still be harvested.
 
 ### Strategy Protocol Dependencies
 
@@ -200,25 +187,6 @@ The contract code (`Strategy.sol` / `BaseLSTAccumulator.sol`, verified on Ethers
 | `initiateLSTWithdrawal()` | Queues stETH in the Lido withdrawal queue ([`0x889edC2eDab5f40e902b864aD4d7AdE8E412F9B1`](https://etherscan.io/address/0x889edC2eDab5f40e902b864aD4d7AdE8E412F9B1)) for guaranteed 1:1 redemption | 1–7 days under normal load |
 | `manualClaimWithdrawals()` | Claims finalized Lido withdrawals back to ETH | Immediate after finalization |
 
-**Accounting buffer:**
-
-- `reportBuffer` haircuts the LST value in `estimatedTotalAssets()` to absorb peg slippage
-- `pendingRedemptions` blocks `_harvestAndReport()` from running while withdrawal requests are in flight (preventing double-counting)
-
-**Current strategy state (snapshot block 25574582):**
-
-| Field | Value |
-|-------|-------|
-| Loose WETH balance on strategy | 0 WETH (verified at snapshot via `WETH.balanceOf(strategy)`) |
-| `pendingRedemptions` | **0 stETH** (request #121758 remains finalized and claimed) |
-| `estimatedTotalAssets()` | 5,212.53 WETH |
-| `totalAssets()` (TokenizedStrategy) | 5,212.53 WETH |
-| Vault `current_debt` for this strategy | 5,212 WETH |
-| Strategy stETH balance | 5,212.53 stETH (entire backing held as stETH; 0 wstETH, 0 WETH) |
-| Lido request #121758 | **isFinalized = true, isClaimed = true** at block 25574582 |
-
-The accounting-lag mechanism (`pendingRedemptions > 0` blocks `_harvestAndReport()`) is **dormant** at this snapshot — there is no in-flight Lido withdrawal. If the strategy initiates a new `initiateLSTWithdrawal()` later, the lag mechanism will re-engage; captured under Reassessment Triggers.
-
 **Strategy parameters:**
 - Activated: April 14, 2026 (`activation = 1776351539`)
 - Last reported: July 9, 2026 (`last_report = 1783748183`)
@@ -230,20 +198,7 @@ The accounting-lag mechanism (`pendingRedemptions > 0` blocks `_harvestAndReport
 
 **Contract:** [`0xfca3F21D60d5bC8B4C5c35F169bb5B6402510151`](https://etherscan.io/address/0xfca3F21D60d5bC8B4C5c35F169bb5B6402510151)
 
-New strategy deployed to replace the old Spark WETH Lender (`0x365cC9c28Df1663fA37C565A3aC1Addc3A219e15`), which has been fully drained. The strategy supplies WETH to **Spark Lend** on Ethereum mainnet, earning variable-rate lending yield. Withdrawal is atomic against the deep Spark Lend WETH market.
-
-**Current strategy state:**
-
-| Field | Value |
-|-------|-------|
-| Vault `current_debt` | 2,521 WETH |
-| Strategy `totalAssets()` | 2,521.35 WETH |
-| Strategy WETH balance | 0 WETH |
-| Strategy ETH balance | 0 WETH |
-| `activation` | June 25, 2026 (1782490163) |
-| `last_report` | July 15, 2026 (1784261003) |
-| `max_debt` | 15,000 WETH |
-| Underlying protocol | Spark Lend / Sky |
+The strategy supplies WETH to **Spark Lend** on Ethereum mainnet, earning variable-rate lending yield. Withdrawal is atomic against the deep Spark Lend WETH market.
 
 ### Strategy 3: wstETH/WETH Spark Looper (~11.2% of vault totalDebt)
 
@@ -261,50 +216,12 @@ This strategy leverages wstETH as collateral to borrow WETH on **Spark Lend** (a
 
 **Withdrawal:** Exiting the looper requires partial deleveraging (repaying the borrowed WETH, withdrawing wstETH collateral, and unwrapping wstETH → stETH → WETH). This is not fully atomic like the Spark WETH Lender.
 
-**Current strategy state:**
-
-| Field | Value |
-|-------|-------|
-| Vault `current_debt` | 1,001 WETH |
-| Strategy `totalAssets()` | 1,001.28 WETH |
-| Strategy `balanceOfAsset()` | 0 WETH |
-| Strategy WETH balance | 0 WETH |
-| Strategy stETH balance | 0 WETH |
-| Strategy wstETH balance | 0 WETH |
-| `activation` | June 25, 2026 (1782490163) |
-| `last_report` | July 17, 2026 (1783998623) |
-| `max_debt` | 2,000 WETH |
-| Underlying protocol | Spark Lend / Sky (leveraged via wstETH collateral) |
-| Implementation | LSTAaveLooper ([`0xd377919fa87120584b21279a491f82d5265a139c`](https://etherscan.io/address/0xd377919fa87120584b21279a491f82d5265a139c)) |
-| In default queue | **No** (not in `default_queue`; holds active debt but will not receive automatic allocations) |
-
 ### Strategy 4: Yearn OG WETH (~2.2% of vault totalDebt; 807.41 WETH strategy totalAssets)
 
 **Contract:** [`0xE89371eAaAC6D46d4C3ED23453241987916224FC`](https://etherscan.io/address/0xE89371eAaAC6D46d4C3ED23453241987916224FC)
 
 New strategy added to the default queue after the May 11 assessment. This is a **Morpho MetaMorpho vault**, confirmed by `MORPHO()` returning [`0xBBBBBbbBBb9cC5e90e3b3Af64bdAF62C37EEFFCb`](https://etherscan.io/address/0xBBBBBbbBBb9cC5e90e3b3Af64bdAF62C37EEFFCb) (the Morpho protocol). Listed on Morpho's app at https://app.morpho.org/ethereum/vault/0xE89371eAaAC6D46d4C3ED23453241987916224FC/yearn-og-weth. WETH is deployed into Morpho lending markets. The strategy's PPS is 1.0366 (strategy-level), implying 3.66% yield since deployment. The gap between `current_debt` (193 WETH) and `totalAssets()` (807.41 WETH) represents ~614 WETH of accumulated Morpho lending yield awaiting keeper report — normal behavior for a Yearn strategy.
-
-**Current strategy state:**
-
-| Field | Value |
-|-------|-------|
-| Vault `current_debt` | 193 WETH |
-| Strategy `totalAssets()` | 807.41 WETH |
-| Strategy `totalSupply()` | 778.90 shares |
-| Strategy PPS (`convertToAssets(1e18)`) | 1.036598 |
-| Strategy WETH balance | 0 WETH |
-| `activation` | May 22, 2026 (1779638639) |
-| `last_report` | July 12, 2026 (1784004371) |
-| `max_debt` | 15,000 WETH |
-| Underlying protocol | Morpho (MetaMorpho vault) |
-| `owner()` | [`0xe5e2Baf96198c56380dDD5E992D7d1ADa0e989c0`](https://etherscan.io/address/0xe5e2Baf96198c56380dDD5E992D7d1ADa0e989c0) (Security multisig 4-of-7) |
-
-### Drained strategies (`activation = 0`, `current_debt = 0` at snapshot)
-
-- **Morpho Gauntlet WETH Prime Compounder** ([`0xeEB6Be70fF212238419cD638FAB17910CF61CBE7`](https://etherscan.io/address/0xeEB6Be70fF212238419cD638FAB17910CF61CBE7)) — 62.73 WETH residual totalAssets (outside vault accounting); `isShutdown = false`
-- **Old Spark WETH Lender** ([`0x365cC9c28Df1663fA37C565A3aC1Addc3A219e15`](https://etherscan.io/address/0x365cC9c28Df1663fA37C565A3aC1Addc3A219e15)) — 0.16 WETH residual; `isShutdown = false`
-- **Aave V3 Lido WETH Lender** ([`0xC7baE383738274ea8C3292d53AfBB3b42B348DF0`](https://etherscan.io/address/0xC7baE383738274ea8C3292d53AfBB3b42B348DF0)) — 0.04 WETH residual
-- **Aave V3 WETH Lender** ([`0x5ABcBBDbf617a21F7667e8cfD17Fa16475D20dB8`](https://etherscan.io/address/0x5ABcBBDbf617a21F7667e8cfD17Fa16475D20dB8)) — 0.15 WETH residual
+- Morpho Vault `owner()` is [`0xe5e2Baf96198c56380dDD5E992D7d1ADa0e989c0`](https://etherscan.io/address/0xe5e2Baf96198c56380dDD5E992D7d1ADa0e989c0) Yearn Security multisig 4-of-7.
 
 ### Accessibility
 
@@ -405,7 +322,6 @@ ySafe 6-of-9 signers include publicly known DeFi contributors — see [Yearn Mul
 - **Incident response:** 4 historical V1 events handled. V3 framework not yet stress-tested by an exploit. $200K Immunefi bug bounty for responsible disclosure
 - **V3 immutability:** vault cannot be upgraded — eliminates proxy upgrade risk but means a critical bug requires deploying a new vault and migrating
 - **Strategy-level operational risk:** the management-paced unwind for the stETH Accumulator covers the majority of TVL (~58% of totalDebt). The Spark WETH Lender (~28%), wstETH/WETH Spark Looper (~11%), and Yearn OG WETH (Morpho MetaMorpho, ~2% of totalDebt, ~9% effective) provide withdrawal paths, reducing Brain's operational burden for non-Accumulator redemptions
-- **Operational note:** between May 11 and July 22, **Brain/Debt Allocator executed a strategy reshuffle** — fully draining Morpho Gauntlet (formerly 71%) and old Spark WETH (formerly 4%) while redeploying into the stETH Accumulator, a new Spark WETH Lender, a wstETH/WETH Spark Looper (leveraged, not in default queue), and a new Yearn OG WETH (Morpho MetaMorpho vault)
 
 ## Monitoring
 
@@ -480,7 +396,6 @@ Yearn maintains the [`monitoring`](https://github.com/yearn/monitoring) reposito
 - **stETH peg risk under stress:** Curve ETH/stETH peg has been stable post-Shapella but historical depeg events have happened. The peg risk applies to ~58% of totalDebt
 - **Lido queue extension under stress:** normal 1–7 days can extend significantly during large coordinated unstake events, affecting the majority of TVL
 - **Moderate leverage via wstETH/WETH Spark Looper:** ~11% of totalDebt is exposed to a leveraged wstETH/WETH position on Spark Lend. While wstETH/WETH is one of the safest collateral pairs, extreme exchange-rate divergence could trigger liquidations
-- **Strategy reshuffle:** four previously-core strategies (Morpho Gauntlet, old Spark, both Aaves) drained fully and replaced with stETH Accumulator, Spark WETH Lender, wstETH/WETH Spark Looper, and Yearn OG WETH (Morpho MetaMorpho vault)
 
 ### Critical Risks
 
@@ -656,7 +571,6 @@ Yearn maintains the [`monitoring`](https://github.com/yearn/monitoring) reposito
 - **Strategy changes (`addStrategy()` proposals at the Strategy Manager TimelockController, [`0x88Ba032be87d5EF1fbE87336b7090767F367BF73`](https://etherscan.io/address/0x88Ba032be87d5EF1fbE87336b7090767F367BF73), 7-day delay):**
   - any new strategy proposed for inclusion — re-review during the 7-day timelock window
   - any new strategy with leverage, looping, cross-chain bridging, or non-blue-chip routing
-  - re-funding of any previously-drained strategy (Morpho Gauntlet, old Spark WETH, or Aave variants)
 - **Lido-specific:**
   - extended Lido withdrawal queue (>14 days) — degrades the 1:1 unwind path (affecting ~58% of totalDebt)
   - stETH/ETH peg deviation > 1% sustained — affects the ~58% Accumulator portion and the ~11% leveraged looper (liquidation risk)
@@ -724,12 +638,6 @@ Snapshot at block 25574582 (July 20, 2026). Updated with July 22, 2026 strategy 
 │ │ pendingRedemptions=0 │ │              │ │ Proxy:       │ │Security││
 │ │                      │ │              │ │ LSTAaveLooper│ │(4-of-7)││
 │ └──────────────────────┘ └──────────────┘ └──────────────┘ └────────┘│
-│                                                                       │
-│  Drained (activation=0, current_debt=0 at snapshot):                   │
-│   • Morpho Gauntlet WETH Prime    — 0xeEB6…CBE7 (62.73 WETH residual)  │
-│   • Old Spark WETH Lender         — 0x365c…9e15 (0.16 dust)            │
-│   • Aave V3 Lido WETH Lender      — 0xC7bA…8DF0 (0.04 dust)            │
-│   • Aave V3 WETH Lender           — 0x5ABc…0dB8 (0.15 dust)            │
 └──────────────────────────────────────────────────────────────────────┘
                                 │
                                 ▼
