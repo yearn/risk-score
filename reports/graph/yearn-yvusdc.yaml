@@ -67,12 +67,21 @@ nodes:
 
   # Strategies
   - id: susds-lender
-    label: USDC → sUSDS Lender (97.15%)
+    label: USDC → sUSDS Lender (77.9%)
     address: "0x7130570BCEfCedBe9d15B5b11A33006156460f8f"
     category: strategy
-  - id: spark-lender
-    label: Spark USDC Lender (2.85%)
-    address: "0x25f893276544d86a82b1ce407182836F45cb6673"
+  - id: yearn-usdc
+    label: Yearn USDC — Morpho (7.2%)
+    address: "0x68Aea7b82Df6CcdF76235D46445Ed83f85F845A3"
+    category: strategy
+  - id: pawn-broker
+    label: stcUSD/USDC Pawn Broker (14.9%, not in queue, self-contained)
+    address: "0xe63a2abc24cd9538398d825a4bfe5778d25687df"
+    note: Self-contained Yearn V3 TokenizedStrategy (v3.0.4). Holds stcUSD directly as borrower collateral, lends USDC from own balance. Does NOT route through Morpho Blue.
+    category: strategy
+  - id: spark-usdc-lender
+    label: Spark USDC Lender (queued)
+    address: "0x654a7c4Ae5ac3C853a99F8dbEAD2bC85090F753a"
     category: strategy
   - id: usds-depositor
     label: USDC → USDS Depositor (queued, 0%)
@@ -92,10 +101,28 @@ nodes:
     label: Sky DAI ↔ USDS Exchanger
     address: "0x3225737a9Bbb6473CB4a45b7244ACa2BeFdB276A"
     category: dependency
+  - id: morpho-blue
+    label: Morpho Blue
+    address: "0xBBBBBbbBBb9cC5e90e3b3Af64bdAF62C37EEFFCb"
+    category: dependency
+  - id: stcUSD
+    label: stcUSD — Cap (ERC-4626)
+    address: "0x88887bE419578051FF9F4eb6C858A951921D8888"
+    category: dependency
+    note: Cap staked USD vault token. Collateral in Pawn Broker market. 3-of-5 anonymous multisig, upgradeable UUPS proxy, 24h timelock, 8 audits.
+  - id: cap-governance
+    label: Cap Multisig (3-of-5)
+    address: "0xb8FC49402dF3ee4f8587268FB89fda4d621a8793"
+    category: governance
+    note: 3-of-5 anonymous Gnosis Safe → 24h Timelock → Access Control. Governs all Cap core contracts including stcUSD.
   - id: spark-lend
     label: Spark Lend USDC Market (Sky sub-DAO)
     category: dependency
     note: Sky sub-DAO; admin keys live under Sky governance
+  - id: morpho-curator
+    label: Morpho Curator (Yearn Ops)
+    address: "0x90D0f26025571295D18a6c041E47450B81886B51"
+    category: governance
 
 edges:
   # Deployment / vault infrastructure
@@ -114,13 +141,21 @@ edges:
   - from: yvUSDC
     to: susds-lender
     kind: allocates-to
-    label: "97.15%"
+    label: "77.9%"
   - from: yvUSDC
-    to: spark-lender
+    to: yearn-usdc
     kind: allocates-to
-    label: "2.85%"
+    label: "7.2%"
+  - from: yvUSDC
+    to: pawn-broker
+    kind: allocates-to
+    label: "14.9% (not in default queue)"
   - from: yvUSDC
     to: usds-depositor
+    kind: allocates-to
+    label: "queued"
+  - from: yvUSDC
+    to: spark-usdc-lender
     kind: allocates-to
     label: "queued"
 
@@ -128,7 +163,7 @@ edges:
   - from: daddy
     to: yvUSDC
     kind: holds-role
-    label: "all 14 roles"
+    label: "12 of 14 roles"
   - from: brain
     to: yvUSDC
     kind: holds-role
@@ -186,7 +221,33 @@ edges:
   - from: usds-depositor
     to: dai-usds-exchanger
     kind: routes-through
-  - from: spark-lender
+  - from: yearn-usdc
+    to: morpho-blue
+    kind: deposits-into
+    label: "USDC supply (MetaMorpho)"
+  - from: pawn-broker
+    to: stcUSD
+    kind: deposits-into
+    label: "stcUSD as collateral (held directly)"
+  - from: cap-governance
+    to: stcUSD
+    kind: controls
+    label: "Governs (via Timelock)"
+  - from: spark-usdc-lender
     to: spark-lend
     kind: deposits-into
     label: "USDC supply"
+
+  # Morpho MetaMorpho governance
+  - from: security
+    to: yearn-usdc
+    kind: holds-role
+    label: "Owner (3d timelock)"
+  - from: daddy
+    to: yearn-usdc
+    kind: holds-role
+    label: "Guardian"
+  - from: morpho-curator
+    to: yearn-usdc
+    kind: holds-role
+    label: "Curator"

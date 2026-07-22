@@ -113,7 +113,7 @@ edges:
   - from: daddy
     to: yvUSDT
     kind: holds-role
-    label: "all 14 roles"
+    label: "12 of 14 roles"
   - from: brain
     to: yvUSDT
     kind: holds-role

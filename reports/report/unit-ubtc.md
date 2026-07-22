@@ -1,6 +1,6 @@
 # Protocol Risk Assessment: Unit Bitcoin (UBTC)
 
-- **Assessment Date:** May 19, 2026 (reassessed July 1, 2026)
+- **Assessment Date:** May 19, 2026 (reassessed July 1, 2026; implementation decompiled July 22, 2026)
 - **Token:** UBTC
 - **Chain:** HyperEVM (Hyperliquid L1 ecosystem)
 - **Token Address:** [`0x9FDBdA0A5e284c32744D2f17Ee5c74B284993463`](https://hyperevmscan.io/address/0x9FDBdA0A5e284c32744D2f17Ee5c74B284993463)
@@ -111,6 +111,7 @@ Unit is a **bridge/asset tokenization protocol** — not a lending, staking, or 
 - **Proxy contract** ([`0x9FDBdA0A5e284c32744D2f17Ee5c74B284993463`](https://hyperevmscan.io/address/0x9FDBdA0A5e284c32744D2f17Ee5c74B284993463#code)) **is source-code verified** on HyperEVMScan — `ERC1967Proxy` (Solidity v0.8.24, MIT). Re-verified July 1, 2026 via Etherscan V2 multi-chain API (chainId=999): `ContractName=ERC1967Proxy`, `Proxy=1`, `Implementation=0x1a7689c3b783eb37550efbb9c81e7f468f7034fc`.
 - **Implementation contract** ([`0x1a7689c3b783eb37550efbb9c81e7f468f7034fc`](https://hyperevmscan.io/address/0x1a7689c3b783eb37550efbb9c81e7f468f7034fc)) **is STILL NOT source-code verified** — the actual token logic remains opaque. Etherscan V2 API returns empty `ContractName` and `SourceCode` (verified July 1, 2026).
 - Selector + string extraction from the bytecode confirms a **USDT-style sender blacklist** plus a **separate compliance-authority role** layered on top of OZ ERC20Upgradeable + OwnableUpgradeable + UUPSUpgradeable. See **Appendix: Implementation Surface (bytecode-derived)** for the full selector list and verification commands.
+- **The implementation was fully decompiled on July 22, 2026** (evmole for signatures/args/mutability/storage layout + Panoramix HLIL for the transfer path + hand disassembly of the six custom-function bodies). This resolves the previously open questions: the two "unknown" selectors are confirmed (`0x6b9be885` = `transferComplianceAuthority(address)`, owner-gated; `0xb768259d` = `hyperCoreDeployer()`, a pure constant getter), the blacklist is enforced **sender/`_from`-side only** (recipients are never checked), there is **no `destroyBlackFunds`-style siphon** (no function outside `transfer`/`transferFrom` writes the balances mapping), and blacklisting does **not** touch allowances. The reconstructed logic is a clean OZ v5 ERC20 + Ownable + UUPS with a USDT-style blacklist and a separate compliance-authority role — no hidden mint, no siphon, no upgrade backdoor beyond the standard UUPS `upgradeToAndCall`. See the decompilation subsection in the Appendix. Source is still not verified on HyperEVMScan, so this remains a bytecode reconstruction, not vendor-published source.
 - No public GitHub repository found for Unit Protocol smart contracts (DeFiLlama lists no GitHub).
 - Implementation bytecode is 11,660 bytes. Proxy bytecode is 163 bytes (minimal ERC-1967 proxy).
 
@@ -267,8 +268,8 @@ Per DeFiLlama yields API (July 1, 2026), 23 UBTC pools on Hyperliquid L1 with **
 
 - The UBTC token contract is an **OZ ERC20Upgradeable + OwnableUpgradeable + UUPSUpgradeable**, with two non-OZ additions confirmed from selectors and bytecode strings:
   1. **USDT-style sender blacklist** — functions `addToBlacklist(address)`, `removeFromBlacklist(address)`, `isBlacklisted(address)` are present, and the bytecode contains the revert string `"UBTC: sender blacklisted"`. The blacklist is enforced inside the transfer path → a blacklisted holder cannot move their UBTC. This implies **freeze risk for any HyperEVM holder, including Morpho borrowers** (a frozen position cannot be liquidated normally).
-  2. **Compliance-authority role** separate from `owner()` — `complianceAuthority()` returns the address authorized to manage the blacklist; revert strings include `"UBTC: caller is not compliance authority"` and `"UBTC: new compliance authority cannot be zero"`. Currently the compliance authority equals the owner EOA `0xB4FC973924a91362D301E583E839Cdaf4f19cdF8`. There is a setter (selector `0x6b9be885`, signature unrecovered, almost certainly `updateComplianceAuthority(address)`).
-- **No `mint(address,uint256)` (`0x40c10f19`) or `burn` selector** is present on the EVM implementation. Supply changes happen on the **HyperCore** side under HIP-1 native token semantics; `totalSupply()` is the fixed 21M Bitcoin cap and tokens move into HyperEVM via the HyperCore↔HyperEVM bridge. The constant `coreDeployer` (selector `0xb768259d`) is hardcoded to `0xF036a5261406a394bd63Eb4dF49C464634a66155`.
+  2. **Compliance-authority role** separate from `owner()` — `complianceAuthority()` returns the address authorized to manage the blacklist; revert strings include `"UBTC: caller is not compliance authority"` and `"UBTC: new compliance authority cannot be zero"`. Currently the compliance authority equals the owner EOA `0xB4FC973924a91362D301E583E839Cdaf4f19cdF8`. Decompilation (July 22, 2026) confirms a **two-tier privilege split**: `addToBlacklist`/`removeFromBlacklist` are gated by `msg.sender == complianceAuthority` (custom string revert), while the setter `0x6b9be885` = `transferComplianceAuthority(address)` is gated by **`onlyOwner`** (reverts `OwnableUnauthorizedAccount(address)`, selector `0x118cdaa7`) and rejects the zero address. In effect: the **owner appoints/replaces the compliance authority** (and can appoint itself), and the **compliance authority freezes accounts**. Both roles resolve to the same EOA today, so the split provides no practical separation currently.
+- **No `mint(address,uint256)` (`0x40c10f19`) or `burn` selector** is present on the EVM implementation. Supply changes happen on the **HyperCore** side under HIP-1 native token semantics; `totalSupply()` is the fixed 21M Bitcoin cap and tokens move into HyperEVM via the HyperCore↔HyperEVM bridge. The constant `hyperCoreDeployer` (selector `0xb768259d`) is hardcoded to `0xF036a5261406a394bd63Eb4dF49C464634a66155`.
 - No `paused()`, `cap()`, `MINTER_ROLE()`, `DEFAULT_ADMIN_ROLE()`, or `DOMAIN_SEPARATOR()` functions exposed.
 - The bridge operations (deposit/withdrawal) are handled entirely offchain by the Guardian Network — the onchain HyperEVM contract is the ERC-20 reflection plus the freeze/compliance surface above.
 - The deterministic state machine underlying all protocol actions guarantees strict, verifiable workflows per the security docs.
@@ -359,7 +360,7 @@ Key addresses and data to monitor:
 
 ### Critical Risks
 
-- **Unverified implementation source code combined with no audit and EOA upgradeability** — the UBTC implementation at [`0x1a7689c3b783eb37550efbb9c81e7f468f7034fc`](https://hyperevmscan.io/address/0x1a7689c3b783eb37550efbb9c81e7f468f7034fc) is not source-verified on HyperEVMScan. Combined with zero audits and an EOA owner (claimed-MPC, onchain-unverifiable) that can instantly upgrade via UUPS without timelock, the entire token logic is opaque and could be swapped at any time. Bytecode reveals undisclosed blacklist/compliance controls whose exact semantics (exemptions, allowance behavior, destruction paths) cannot be confirmed without source or audit.
+- **Unverified implementation source code combined with no audit and EOA upgradeability** — the UBTC implementation at [`0x1a7689c3b783eb37550efbb9c81e7f468f7034fc`](https://hyperevmscan.io/address/0x1a7689c3b783eb37550efbb9c81e7f468f7034fc) is not source-verified on HyperEVMScan. Combined with zero audits and an EOA owner (claimed-MPC, onchain-unverifiable) that can instantly upgrade via UUPS without timelock, the entire token logic could be swapped at any time. Full decompilation (July 22, 2026) confirms the *current* logic is a clean OZ v5 ERC20/Ownable/UUPS with a sender-side blacklist and compliance-authority role — no hidden mint, siphon, or blacklist exemption (see Appendix: Decompilation) — but this snapshot is only as durable as the next upgrade, which the owner can execute instantly and without timelock.
 - **2-of-3 MPC with only 3 Guardians** — a coordinated compromise of Unit + one other Guardian (Hyperliquid or Infinite Field) gives full control over bridge funds.
 
 ---
@@ -522,8 +523,8 @@ Source not verified — the function set below was reconstructed from the deploy
 | `0x537df3b6` | `removeFromBlacklist(address)` | resolved via 4byte directory |
 | `0xfe575a87` | `isBlacklisted(address)` | resolved via 4byte directory; `isBlacklisted(0x0)=false`, `isBlacklisted(owner)=false`, `isBlacklisted(HyperCoreTreasury)=false` as of 2026-07-01 |
 | `0x309f477a` | `complianceAuthority()` | resolved via OpenChain DB; returns `0xB4FC973924a91362D301E583E839Cdaf4f19cdF8` (= current `owner()`) |
-| `0x6b9be885` | unknown setter `(address)`, nonpayable | not in 4byte/OpenChain; reverts when called from a non-authority; inferred as `updateComplianceAuthority(address)` |
-| `0xb768259d` | unknown pure getter | not in 4byte/OpenChain; returns the constant `0xF036a5261406a394bd63Eb4dF49C464634a66155` (the HyperCore deployer multi-sig); inferred as `coreDeployer()` |
+| `0x6b9be885` | `transferComplianceAuthority(address)`, nonpayable | **confirmed by decompilation (2026-07-22)**; name recovered by brute-forcing the selector (not in 4byte/OpenChain). `onlyOwner`-gated (reverts `OwnableUnauthorizedAccount`, `0x118cdaa7`), rejects zero address (`"UBTC: new compliance authority cannot be zero"`), emits `ComplianceAuthorityTransferred`, writes the compliance-authority slot `0x44271b…e33` |
+| `0xb768259d` | `hyperCoreDeployer()`, pure | **confirmed by decompilation (2026-07-22)**; name recovered by brute-forcing the selector. Pure function returning the hardcoded constant `0xF036a5261406a394bd63Eb4dF49C464634a66155` (the HyperCore deployer multi-sig) |
 
 **Notably absent selectors:** no `mint(address,uint256)` (`0x40c10f19`), no `burn(uint256)`/`burnFrom(address,uint256)`, no `pause()`/`unpause()`. Supply changes occur on the HyperCore side; the HyperEVM contract has no mint/burn entrypoint of its own.
 
@@ -536,9 +537,13 @@ Source not verified — the function set below was reconstructed from the deploy
 
 **Risk implications of the custom surface:**
 
-1. The owner / compliance authority can freeze any HyperEVM UBTC holder's balance. Downstream protocols (Morpho UBTC-USDC etc.) inherit this risk: a frozen borrower's position cannot be liquidated through normal `transfer`.
-2. The `complianceAuthority` role is currently the same EOA as `owner` (`0xB4FC97…cdF8`), which is claimed-MPC but onchain just an EOA. Compromise of that key gives both upgrade rights AND freeze rights.
-3. We cannot confirm from bytecode whether the blacklist's transfer-block exempts approved bridge addresses, whether there is a `destroyBlackFunds`-style siphon, or what happens to allowances when an address is blacklisted. **These require source verification or audit to answer.**
+1. The compliance authority can freeze any HyperEVM UBTC holder's balance. Downstream protocols (Morpho UBTC-USDC etc.) inherit this risk: a frozen borrower's position cannot be liquidated through normal `transfer` (nor can the borrower repay), so a freeze can strand a lending market's collateral.
+2. The `complianceAuthority` role is currently the same EOA as `owner` (`0xB4FC97…cdF8`), which is claimed-MPC but onchain just an EOA. Compromise of that key gives both upgrade rights AND freeze rights. Even if the roles were split onto different keys, the owner can unilaterally re-point the compliance authority to itself via `transferComplianceAuthority`, so the owner is effectively the root of trust for both upgrade and freeze.
+3. The three questions previously flagged as "require source verification or audit" are now **answered by decompilation (July 22, 2026):**
+   - **No bridge-address exemption / allowlist bypass.** The blacklist check in both `transfer` and `transferFrom` is unconditional — there is no branch that skips it for approved bridge, treasury, or system addresses. A blacklisted address cannot move funds under any path.
+   - **No `destroyBlackFunds`-style siphon.** The balances mapping (`0x52c6…bace00`) is written **only** by `transfer` and `transferFrom` (confirmed by evmole storage analysis and by hand disassembly of every custom function). No owner or compliance function can move, burn, or reassign another account's balance. Freezing is the strongest available action; confiscation is not possible with the current implementation.
+   - **Blacklisting does not touch allowances.** The allowance mapping (`0x52c6…bace01`) is written only by `approve` and `transferFrom`. A pre-existing allowance from a later-blacklisted account survives, but any `transferFrom` where the blacklisted account is `_from` reverts regardless, so the surviving allowance is not exploitable.
+   - **Blacklist is sender-side only.** `transfer` checks `isBlacklisted(msg.sender)`; `transferFrom` checks `isBlacklisted(_from)`. The recipient is never checked, so tokens can still be *sent to* a blacklisted address (matching the `"UBTC: sender blacklisted"` revert string).
 
 **Reproduction commands** (rerun on next reassessment and diff):
 
@@ -557,7 +562,7 @@ cast call 0x9FDBdA0A5e284c32744D2f17Ee5c74B284993463 "owner()(address)" \
 cast call 0x9FDBdA0A5e284c32744D2f17Ee5c74B284993463 "complianceAuthority()(address)" \
   --rpc-url https://rpc.hyperliquid.xyz/evm
 cast call 0x9FDBdA0A5e284c32744D2f17Ee5c74B284993463 0xb768259d \
-  --rpc-url https://rpc.hyperliquid.xyz/evm   # coreDeployer constant
+  --rpc-url https://rpc.hyperliquid.xyz/evm   # hyperCoreDeployer constant
 
 # verify source-verification status (chainId 999 = HyperEVM)
 curl -s "https://api.etherscan.io/v2/api?chainid=999&module=contract&action=getsourcecode&address=0x1a7689c3b783eb37550efbb9c81e7f468f7034fc&apikey=$ETHERSCAN_API_KEY"
@@ -571,6 +576,82 @@ curl -s "https://api.etherscan.io/v2/api?chainid=999&module=contract&action=gets
 - [x] `complianceAuthority` still equals `owner`? → ✅ Yes, both `0xB4FC97…cdF8`.
 - [x] Any address showing `isBlacklisted(addr)=true`? → ✅ None found (checked owner, zero addr, HyperCore treasury).
 - [x] Any new `Upgraded` event on the proxy? → ✅ None beyond deployment (verified via Etherscan V2 logs API).
+
+## Appendix: Decompilation (July 22, 2026)
+
+The implementation at [`0x1a7689c3b783eb37550efbb9c81e7f468f7034fc`](https://hyperevmscan.io/address/0x1a7689c3b783eb37550efbb9c81e7f468f7034fc) is unverified, so the deployed bytecode (11,660 bytes, fetched via `cast code` from `rpc.hyperliquid.xyz/evm`) was decompiled directly:
+
+- **[evmole](https://github.com/cdump/evmole)** — recovered all 22 selectors with argument types, state mutability, and the ERC-7201 storage layout (which slot each function reads/writes).
+- **[Panoramix](https://github.com/palkeo/panoramix)** — HLIL for the `transfer`/`transferFrom` paths (confirmed the blacklist guard and standard balance math).
+- **Hand disassembly** of the six custom-function bodies and the shared `onlyOwner` / `onlyComplianceAuthority` modifiers to pin down access control.
+
+### Storage layout (ERC-7201 namespaced, OZ v5)
+
+| Namespace slot | Contents | Written by |
+|---|---|---|
+| `0x52c6…bace00` | `balances` `mapping(address=>uint256)` | `transfer`, `transferFrom` only |
+| `0x52c6…bace01` | `allowances` `mapping(address=>mapping(address=>uint256))` | `approve`, `transferFrom` only |
+| `0x52c6…bace02` | `totalSupply` `uint256` | (mutated only inside transfer math; no mint/burn entrypoint) |
+| `0x52c6…bace03` / `bace04` | `name` / `symbol` strings | `initialize` only |
+| `0x9016…9300` | `owner` (OZ Ownable) | `initialize`, `transferOwnership`, `renounceOwnership` |
+| `0x4427…e33` | `complianceAuthority` `address` | `transferComplianceAuthority` (`onlyOwner`) |
+| `0x4427…e34` | `blacklist` `mapping(address=>bool)` | `addToBlacklist`, `removeFromBlacklist` (`onlyComplianceAuthority`) |
+| `0xf0c5…6a00` | Initializable `_initialized` / `_initializing` | `initialize` |
+| `0x3608…2bbc` | ERC1967/UUPS implementation slot | `upgradeToAndCall` |
+
+The two custom slots `…e33` / `…e34` are a dedicated ERC-7201 namespace (adjacent slots), consistent with a hand-written compliance mixin rather than a modification of the OZ ERC20 storage.
+
+### Reconstructed access-control model
+
+```
+owner (OZ Ownable, EOA 0xB4FC97…cdF8)
+ ├── upgradeToAndCall(newImpl, data)            // UUPS, no timelock
+ ├── transferOwnership / renounceOwnership
+ └── transferComplianceAuthority(address)         // onlyOwner; rejects address(0)
+        └── complianceAuthority (currently == owner)
+              ├── addToBlacklist(address)        // onlyComplianceAuthority
+              └── removeFromBlacklist(address)   // onlyComplianceAuthority
+
+transfer(to, value):     require !blacklist[msg.sender] ("UBTC: sender blacklisted"); standard ERC20
+transferFrom(from,to,v): spend allowance; require !blacklist[from]  ("UBTC: sender blacklisted"); standard ERC20
+hyperCoreDeployer():          pure -> 0xF036a5261406a394bd63Eb4dF49C464634a66155 (constant)
+```
+
+### Net assessment from decompilation
+
+The reconstructed implementation is a **standard OpenZeppelin v5 `ERC20Upgradeable` + `OwnableUpgradeable` + `UUPSUpgradeable`** with a **USDT-style sender-side blacklist** and a **separate compliance-authority role**. No mint/burn entrypoint, no balance-confiscation ("destroyBlackFunds") path, no allowance manipulation, and no blacklist exemption/allowlist were found. The residual risks are unchanged and are governance-shaped, not hidden-logic-shaped: (1) instant `onlyOwner` UUPS upgrade with no timelock can swap this logic for anything, and (2) account-freeze via the compliance authority (same EOA today). The **"no audit" critical gate still applies** — decompilation narrows the transparency gap but is not a substitute for source verification or a third-party audit.
+
+Custom events emitted (topic0 verified against the deployed bytecode): `AddedToBlacklist(address)` (`0xf9b68063…`), `RemovedFromBlacklist(address)` (`0x2b6bf71b…`), `ComplianceAuthorityTransferred(address,address)` (`0x1c5096a0…`), alongside the inherited `Transfer`/`Approval`/`OwnershipTransferred`/`Initialized`/`Upgraded`.
+
+A full behavioral Solidity reconstruction was written from this analysis and compiled (solc 0.8.24, OZ upgradeable v5.0.2): its ABI matches the deployment on **all 22 selectors** and **all 8 event topic0 hashes**, with only `proxiableUUID`/`UPGRADE_INTERFACE_VERSION` differing as `view` vs `pure` (a benign OZ static-classification artifact). It is a behavioral model, **not** byte-identical, so it cannot be used to verify the contract on the explorer. The reconstructed source and its verification notes are kept out of this report deliberately (it is not vendor source and must not be mistaken for it) and are referenced externally:
+
+- Decompilation writeup (function surface, storage layout, access-control model): [gist](https://gist.github.com/spalen0/aa7fb4a8f83cc71c49543a57d9a02d6f)
+- Solidity reconstruction + selector/event verification: [gist](https://gist.github.com/spalen0/12294e070e38d50aef877fc41618565f)
+
+### Problems with the reconstructed code
+
+The decompilation removes the "hidden logic" worry but surfaces (or confirms) the following code-level problems, none of which the current bytecode can fix on its own:
+
+1. **Implementation source is unverified on HyperEVMScan.** Everything here is reconstructed from bytecode. The reconstruction is behavioral-only and cannot be published as verified source, so third parties still have no vendor-published, audited source to review. This is the same gap that triggers the "no audit" critical gate.
+2. **Instant, timelock-free upgradeability.** `upgradeToAndCall` is `onlyOwner` with no timelock and no guardian, so the entire (currently benign) logic can be swapped for arbitrary code in a single transaction. The clean decompilation is only a snapshot.
+3. **Freeze / censorship surface.** The compliance authority can blacklist any holder; the guard sits on the sender/`from` side of `_update`, so a frozen account can neither send nor be pulled from. Downstream lenders (Morpho UBTC markets) inherit this: a frozen borrower cannot be liquidated via normal `transfer` and cannot repay — collateral can be stranded.
+4. **Single-key root of trust.** `owner` and `complianceAuthority` are the same EOA (`0xB4FC97…cdF8`), and `owner` can re-point the authority to itself anyway. One key compromise yields both upgrade and freeze power. No onchain multisig or timelock backs the claimed MPC.
+5. **Non-standard compliance storage.** The blacklist/authority live at hand-pinned slots `…e33`/`…e34` rather than a standard ERC-7201 namespace (a masked namespace ends in `00`, not `33`), and the namespace-id string could not be recovered from 784 candidates — a minor upgrade-safety footgun if future implementations don't preserve the exact slots.
+6. **Unverifiable-by-bytecode assumptions.** Three items are inferred, not provable from runtime bytecode: the constructor's `_disableInitializers()`, `__Ownable_init(msg.sender)` in `initialize()`, and the compliance namespace string. If the missing constructor guard were in fact absent, the implementation could be initialized directly — worth confirming if/when source is published.
+
+**Reproduce:**
+
+```bash
+cast code 0x1a7689c3b783eb37550efbb9c81e7f468f7034fc \
+  --rpc-url https://rpc.hyperliquid.xyz/evm > ubtc_impl.hex
+# signatures + storage layout
+python -c "import evmole; c=evmole.contract_info(open('ubtc_impl.hex').read().strip(), \
+  selectors=True, arguments=True, state_mutability=True, storage=True); \
+  [print(f.selector, f.state_mutability, f.arguments) for f in c.functions]"
+# HLIL for the transfer path
+python -c "from panoramix.decompiler import decompile_bytecode as d; \
+  print(d(open('ubtc_impl.hex').read().strip().removeprefix('0x'), only_func_name='transfer').text)"
+```
 
 ## Sources
 
@@ -590,6 +671,7 @@ curl -s "https://api.etherscan.io/v2/api?chainid=999&module=contract&action=gets
 - HyperEVMScan UBTC proxy (verified): https://hyperevmscan.io/address/0x9FDBdA0A5e284c32744D2f17Ee5c74B284993463#code
 - HyperEVMScan UBTC implementation (unverified): https://hyperevmscan.io/address/0x1a7689c3b783eb37550efbb9c81e7f468f7034fc
 - Onchain verification via `cast` against HyperEVM RPC (`rpc.hyperliquid.xyz/evm`)
+- Decompilation tooling: evmole (https://github.com/cdump/evmole), Panoramix (https://github.com/palkeo/panoramix)
 - Morpho Blue API: https://blue-api.morpho.org/graphql
 - DeFiLlama Yields API: https://yields.llama.fi/pools
 - DeFiLlama Hacks: https://api.llama.fi/hacks
