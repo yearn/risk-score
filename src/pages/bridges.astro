@@ -1,0 +1,678 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { getAllReports } from "../lib/reports";
+import { defillamaIconUrl } from "../lib/icons";
+import { marked } from "marked";
+import data from "../data/bridges.json";
+
+// Reuse the icon each report already derives (DefiLlama slug -> protocol icon,
+// plus chain badge) so bridge rows share the exact icons of the Reports page.
+const reportBySlug = new Map(getAllReports().map((r) => [r.slug, r]));
+
+const { bridges } = data as {
+  bridges: {
+    id: string;
+    name: string;
+    type: string;
+    url: string;
+    description: string;
+    finality?: string;
+    admin?: string;
+    dependencies: {
+      slug: string;
+      name: string;
+      kind: "direct" | "indirect";
+      model: "mint" | "lock" | "transport" | "unknown";
+      integration: string;
+      detail: string;
+      owner?: string;
+      icon?: string;
+      // Per-route security posture. Currently only LayerZero populates this
+      // (the DVN quorum); reusable for other bridges' verifier models later.
+      security?: {
+        label: string;
+        confirmations?: number;
+        providers?: string[];
+        providersLabel?: string;
+        route?: string;
+        note?: string;
+        weak?: boolean;
+        verifiedAt?: string;
+        link?: string;
+      };
+    }[];
+  }[];
+};
+
+// What a bridge compromise can actually reach, per dependency.
+const MODEL_LABEL: Record<string, string> = {
+  mint: "Mints native",
+  lock: "Bridged",
+  transport: "Transport",
+  unknown: "TODO",
+};
+const MODEL_TITLE: Record<string, string> = {
+  mint: "The bridge-controlled message path can mint native token supply. A compromise of the required bridge trust path can create unbacked native supply; account for any quorum before assessing the blast radius.",
+  lock: "The canonical token is locked/escrowed on its origin chain; the remote token is only a bridged representation. A compromise is bounded by remote supply and locked collateral.",
+  transport: "The protocol bridges an underlying asset (e.g. USDC) to remote strategies. The assessed token itself is not bridged, but exposure can persist while assets remain remote and may include bridge-dependent custody, accounting, and return paths.",
+  unknown: "Not yet verified — see the report. Do not assume a model.",
+};
+
+// Route-security tooltip. For LayerZero this is the receive-side DVN quorum:
+// how many independent verifiers must attest a message on the named route.
+function securityTitle(sec: {
+  label: string;
+  confirmations?: number;
+  providers?: string[];
+  providersLabel?: string;
+  route?: string;
+  note?: string;
+  verifiedAt?: string;
+}): string {
+  if (sec.label === "TODO") {
+    return `Verifier quorum not yet resolved${sec.note ? ` — ${sec.note}` : ""}. See linked issue.`;
+  }
+  const lead = sec.note
+    ? `${sec.label} — ${sec.note}`
+    : `${sec.label} DVN quorum for the route named below — this many independent LayerZero verifiers must attest before the receive-side message executes. A 1-of-1 is a single point of failure; other routes may use different configurations.`;
+  const parts = [lead];
+  if (sec.providers?.length)
+    parts.push(`${sec.providersLabel ?? "Verifiers"}: ${sec.providers.join(", ")}.`);
+  if (sec.confirmations) parts.push(`Block confirmations: ${sec.confirmations}.`);
+  if (sec.route) parts.push(`Route: ${sec.route}.`);
+  if (sec.verifiedAt) parts.push(`Verified onchain ${sec.verifiedAt}.`);
+  return parts.join(" ");
+}
+
+// Direct rows first, then indirect, each group alphabetical by name.
+const kindOrder = (k: string) => (k === "direct" ? 0 : 1);
+const bridgesView = bridges.map((b) => {
+  const deps = [...b.dependencies]
+    .sort((a, c) => {
+      const ko = kindOrder(a.kind) - kindOrder(c.kind);
+      return ko !== 0 ? ko : a.name.localeCompare(c.name);
+    })
+    .map((d) => {
+      const rep = reportBySlug.get(d.slug);
+      // Prefer an explicit typed icon override, else the report's own icon.
+      const iconUrl = d.icon ? defillamaIconUrl(d.icon) : (rep?.iconUrl ?? "");
+      // `detail` is a short markdown string so addresses can be wrapped in
+      // `[`0xABCD…EF12`](https://etherscan.io/address/0x<full>)` and stay
+      // clickable on the /bridges/ page. Backticks alone leave the address
+      // unlinkable — never write a truncated address without a link.
+      const detailHtml = marked.parse(d.detail, { async: false }) as string;
+      const ownerHtml = d.owner
+        ? (marked.parseInline(d.owner, { async: false }) as string)
+        : "";
+      return {
+        ...d,
+        iconUrl,
+        chainIconUrl: rep?.chainIconUrl ?? "",
+        detailHtml,
+        ownerHtml,
+      };
+    });
+  return {
+    ...b,
+    deps,
+    directCount: deps.filter((d) => d.kind === "direct").length,
+    indirectCount: deps.filter((d) => d.kind === "indirect").length,
+    // Only render the Security column for bridges that populate it (LayerZero).
+    hasSecurity: deps.some((d) => d.security),
+    descriptionHtml: marked.parseInline(b.description, {
+      async: false,
+    }) as string,
+    finalityHtml: b.finality
+      ? (marked.parseInline(b.finality, { async: false }) as string)
+      : "",
+    adminHtml: b.admin
+      ? (marked.parseInline(b.admin, { async: false }) as string)
+      : "",
+  };
+});
+
+const totalDeps = bridges.reduce((n, b) => n + b.dependencies.length, 0);
+---
+
+<BaseLayout
+  title="Bridge Dependencies — Yearn Curation"
+  description="Cross-chain bridges and messaging layers that curated protocols and tokens depend on."
+  ogUrl="/bridges/"
+  ogImage="/og/default.png"
+>
+  <section class="page-hero">
+    <h1>Bridge Dependencies</h1>
+  </section>
+
+  <div class="model-legend">
+    <span class="legend-item"><span class="model-badge model-mint">Mints native</span> bridge can mint the native token, unbacked supply dilutes every holder</span>
+    <span class="legend-item"><span class="model-badge model-lock">Bridged</span> token is locked at source chain, only a bridged copy exists on remote chains</span>
+    <span class="legend-item"><span class="model-badge model-transport">Transport</span> protocol token is not bridged, only the underlying asset is bridged (e.g. USDC)</span>
+  </div>
+
+  <div class="search-wrap">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="search-icon"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    <input type="text" id="bridge-search" placeholder="Search protocols or tokens…" autocomplete="off" />
+  </div>
+
+  {bridgesView.map((bridge) => (
+    <section class="block bridge-block" data-bridge={bridge.id}>
+      <div class="block-head">
+        <div>
+          <h2>
+            <a href={bridge.url} target="_blank" rel="noopener noreferrer" class="bridge-link">
+              <span>{bridge.name}</span>
+              <svg class="link-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+            </a>
+          </h2>
+          <div class="bridge-type">{bridge.type}</div>
+        </div>
+        <span class="block-meta">
+          {bridge.directCount} direct{bridge.indirectCount > 0 ? ` · ${bridge.indirectCount} indirect` : ""}
+        </span>
+      </div>
+      <p class="block-desc" set:html={bridge.descriptionHtml}></p>
+
+      {(bridge.finalityHtml || bridge.adminHtml) && (
+        <div class="bridge-facts">
+          {bridge.finalityHtml && (
+            <span class="fact"><span class="fact-label">Finality</span> <span set:html={bridge.finalityHtml} /></span>
+          )}
+          {bridge.adminHtml && (
+            <span class="fact"><span class="fact-label">Admin</span> <span set:html={bridge.adminHtml} /></span>
+          )}
+        </div>
+      )}
+
+      <div class="table-card">
+        <table>
+          <thead>
+            <tr>
+              <th class="col-icon"></th>
+              <th>Protocol / Token</th>
+              <th class="col-kind">Type</th>
+              <th class="col-model">Model</th>
+              {bridge.hasSecurity && (
+                <th class="col-sec">
+                  DVN
+                  <a
+                    href="https://docs.layerzero.network/v2/concepts/modular-security/security-stack-dvns"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="info-link"
+                    title="What is a DVN? Decentralized Verifier Networks independently attest each cross-chain message. Read the LayerZero docs."
+                    aria-label="What is a DVN? (LayerZero docs)"
+                  >
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+                  </a>
+                </th>
+              )}
+              <th class="col-integration">Integration</th>
+              <th>Details</th>
+            </tr>
+          </thead>
+          <tbody>
+            {bridge.deps.map((d) => (
+              <tr data-search={d.name.toLowerCase()} class={d.kind === "indirect" ? "row-indirect" : ""}>
+                <td class="col-icon">
+                  <a href={`/report/${d.slug}/`} class="icon-stack" aria-label={d.name}>
+                    {d.iconUrl ? (
+                      <img src={d.iconUrl} alt="" width="28" height="28" class="protocol-icon" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='block'" />
+                    ) : null}
+                    <div class="icon-placeholder" style={d.iconUrl ? "display:none" : ""} />
+                    {d.chainIconUrl && (
+                      <img src={d.chainIconUrl} alt="" width="14" height="14" class="chain-icon" loading="lazy" />
+                    )}
+                  </a>
+                </td>
+                <td class="name-cell">
+                  <a href={`/report/${d.slug}/`}>{d.name}</a>
+                </td>
+                <td class="col-kind">
+                  <span class={`kind-badge kind-${d.kind}`}>{d.kind}</span>
+                </td>
+                <td class="col-model">
+                  <span class={`model-badge model-${d.model}`} title={MODEL_TITLE[d.model]}>
+                    {MODEL_LABEL[d.model]}
+                  </span>
+                </td>
+                {bridge.hasSecurity && (
+                  <td class="col-sec">
+                    {d.security ? (
+                      <>
+                        {d.security.link ? (
+                          <a
+                            href={d.security.link}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            class={`sec-badge sec-${d.security.label === "TODO" ? "todo" : d.security.weak ? "weak" : "ok"}`}
+                            title={securityTitle(d.security)}
+                          >
+                            {d.security.label}
+                          </a>
+                        ) : (
+                          <span
+                            class={`sec-badge sec-${d.security.label === "TODO" ? "todo" : d.security.weak ? "weak" : "ok"}`}
+                            title={securityTitle(d.security)}
+                          >
+                            {d.security.label}
+                          </span>
+                        )}
+                        <span class="sec-route">{d.security.route ?? "Route not recorded"}</span>
+                      </>
+                    ) : (
+                      <span class="sec-na">—</span>
+                    )}
+                  </td>
+                )}
+                <td class="integration-cell">{d.integration}</td>
+                <td class="detail-cell">
+                  <span set:html={d.detailHtml} />
+                  {d.ownerHtml && <div class="owner-line" set:html={d.ownerHtml} />}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </section>
+  ))}
+
+  <script is:inline>
+    (() => {
+      const input = document.getElementById("bridge-search");
+      if (!input) return;
+      const rows = Array.from(document.querySelectorAll("tbody tr[data-search]"));
+      const blocks = Array.from(document.querySelectorAll(".bridge-block"));
+      input.addEventListener("input", () => {
+        const q = input.value.trim().toLowerCase();
+        rows.forEach((r) => {
+          const hit = !q || r.getAttribute("data-search").includes(q);
+          r.style.display = hit ? "" : "none";
+        });
+        // Hide a bridge block entirely when none of its rows match.
+        blocks.forEach((b) => {
+          const anyVisible = Array.from(b.querySelectorAll("tbody tr[data-search]")).some(
+            (r) => r.style.display !== "none"
+          );
+          b.style.display = anyVisible ? "" : "none";
+        });
+      });
+    })();
+  </script>
+</BaseLayout>
+
+<style>
+  /* === Hero === */
+  .page-hero {
+    padding: 2rem 0 1.5rem;
+    text-align: center;
+  }
+  .page-hero h1 {
+    font-size: clamp(1.75rem, 3.4vw, 2.4rem);
+    letter-spacing: -0.02em;
+    margin: 0 auto 0.75rem;
+    line-height: 1.15;
+    max-width: 22ch;
+  }
+
+  /* === Model legend === */
+  .model-legend {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem 1.25rem;
+    margin: 0 0 1.5rem;
+    font-size: 0.82rem;
+    color: var(--text-secondary);
+    line-height: 1.4;
+  }
+  .legend-title {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-weight: 700;
+    color: var(--text-primary);
+  }
+  .legend-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+
+  /* === Search === */
+  .search-wrap {
+    position: relative;
+    max-width: 480px;
+    margin: 0 0 2rem;
+  }
+  .search-icon {
+    position: absolute;
+    left: 0.85rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-secondary);
+    pointer-events: none;
+  }
+  .search-wrap input {
+    width: 100%;
+    padding: 0.65rem 0.85rem 0.65rem 2.4rem;
+    background: color-mix(in srgb, var(--bg-card) 55%, transparent);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    color: var(--text-primary);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    font-size: 0.9rem;
+    transition: border-color 0.15s, background 0.15s;
+  }
+  .search-wrap input::placeholder { color: var(--text-secondary); }
+  .search-wrap input:focus {
+    outline: none;
+    border-color: var(--brand-blue);
+    background: color-mix(in srgb, var(--bg-card) 75%, transparent);
+  }
+
+  /* === Block === */
+  .block { margin: 2rem 0; }
+  .block-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 1rem;
+    margin-bottom: 0.5rem;
+    flex-wrap: wrap;
+  }
+  .block h2 {
+    font-size: 1.3rem;
+    letter-spacing: -0.01em;
+    margin: 0;
+  }
+  .block h2 a {
+    color: var(--text-primary);
+    text-decoration: none;
+  }
+  .block h2 a:hover { color: var(--brand-blue); }
+  .bridge-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+  }
+  .link-icon {
+    flex-shrink: 0;
+    opacity: 0.45;
+    transition: opacity 0.15s;
+    position: relative;
+    top: 1px;
+  }
+  .bridge-link:hover .link-icon { opacity: 1; }
+
+  /* Info icon in a column header linking to explanatory docs. */
+  .info-link {
+    display: inline-flex;
+    vertical-align: middle;
+    margin-left: 0.2rem;
+    color: var(--text-secondary);
+    opacity: 0.6;
+    position: relative;
+    top: -1px;
+    transition: opacity 0.15s, color 0.15s;
+  }
+  .info-link:hover { opacity: 1; color: var(--brand-blue); }
+  .bridge-type {
+    color: var(--text-secondary);
+    font-size: 0.8rem;
+    margin-top: 0.2rem;
+  }
+  .block-meta {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    padding: 0.3rem 0.7rem;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--bg-card) 50%, transparent);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    font-variant-numeric: tabular-nums;
+  }
+  .block-desc {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    line-height: 1.5;
+    margin-bottom: 0.75rem;
+    max-width: 78ch;
+  }
+  .block-desc :global(a) { color: var(--brand-blue); }
+  .block-desc :global(code) { font-size: 0.92em; }
+
+  /* === Per-bridge facts line (finality + admin) === */
+  .bridge-facts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem 1.5rem;
+    margin-bottom: 1rem;
+    font-size: 0.82rem;
+    line-height: 1.5;
+    color: var(--text-secondary);
+  }
+  .bridge-facts .fact {
+    max-width: 72ch;
+  }
+  .fact-label {
+    display: inline-block;
+    font-size: 0.68rem;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-right: 0.15rem;
+  }
+  .bridge-facts :global(a) { color: var(--brand-blue); }
+  .bridge-facts :global(code) { font-size: 0.92em; }
+
+  .owner-line {
+    margin-top: 0.4rem;
+    font-size: 0.78rem;
+    color: var(--text-secondary);
+    opacity: 0.85;
+  }
+  .owner-line :global(a) { color: var(--brand-blue); }
+
+  /* === Table card === */
+  .table-card {
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: color-mix(in srgb, var(--bg-card) 55%, transparent);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    overflow-x: auto;
+  }
+  .table-card table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.88rem;
+    margin: 0;
+  }
+  .table-card thead th {
+    background: color-mix(in srgb, var(--bg-secondary) 60%, transparent);
+    color: var(--text-secondary);
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    padding: 0.7rem 0.85rem;
+    text-align: center;
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+  }
+  .table-card tbody td {
+    padding: 0.6rem 0.85rem;
+    border-bottom: 1px solid color-mix(in srgb, var(--border) 50%, transparent);
+    vertical-align: middle;
+  }
+  .table-card tbody tr:last-child td { border-bottom: none; }
+  .table-card tbody tr { transition: background 0.15s; }
+  .table-card tbody tr:hover { background: color-mix(in srgb, var(--brand-blue) 6%, transparent); }
+  .row-indirect { background: color-mix(in srgb, #F59E0B 6%, transparent); }
+  .row-indirect:hover { background: color-mix(in srgb, #F59E0B 11%, transparent); }
+  .col-icon { width: 44px; padding-right: 0; }
+  .col-kind { width: 96px; text-align: center; }
+  .col-model { width: 132px; }
+  .col-sec { width: 160px; min-width: 160px; }
+  .col-integration { min-width: 150px; }
+
+  /* === Icons (reused from Reports page) === */
+  .icon-stack {
+    position: relative;
+    display: block;
+    width: 28px;
+    height: 28px;
+    flex-shrink: 0;
+  }
+  .protocol-icon { display: block; border-radius: 50%; }
+  .chain-icon {
+    position: absolute;
+    bottom: -3px;
+    right: -4px;
+    border-radius: 50%;
+    border: 2px solid var(--bg-card);
+    background: var(--bg-card);
+  }
+  .icon-placeholder {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: var(--bg-secondary);
+  }
+  .name-cell { font-weight: 500; white-space: nowrap; }
+  .name-cell a { color: var(--text-primary); text-decoration: none; }
+  .name-cell a:hover { color: var(--brand-blue); text-decoration: underline; }
+  .integration-cell { color: var(--text-secondary); min-width: 150px; }
+  .detail-cell {
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    min-width: 300px;
+    line-height: 1.45;
+  }
+
+  /* === Kind badges === */
+  .kind-badge {
+    display: inline-block;
+    font-size: 0.72rem;
+    padding: 0.2rem 0.55rem;
+    border-radius: 999px;
+    font-weight: 600;
+    text-transform: capitalize;
+    letter-spacing: 0.01em;
+  }
+  .kind-direct {
+    background: color-mix(in srgb, #22C55E 18%, transparent);
+    color: #86EFAC;
+    border: 1px solid color-mix(in srgb, #22C55E 35%, transparent);
+  }
+  .kind-indirect {
+    background: color-mix(in srgb, #F59E0B 18%, transparent);
+    color: #FCD34D;
+    border: 1px solid color-mix(in srgb, #F59E0B 40%, transparent);
+  }
+  :global(html.light) .kind-direct { color: #15803D; }
+  :global(html.light) .kind-indirect { color: #B45309; }
+
+  /* === Model badges: what a bridge compromise can reach === */
+  .model-badge {
+    display: inline-block;
+    box-sizing: border-box;
+    min-width: 6.5rem;
+    text-align: center;
+    font-size: 0.72rem;
+    padding: 0.2rem 0.55rem;
+    border-radius: 6px;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  /* Bridge can mint the native token — highest blast radius. */
+  .model-mint {
+    background: color-mix(in srgb, #F43F5E 18%, transparent);
+    color: #FDA4AF;
+    border: 1px solid color-mix(in srgb, #F43F5E 40%, transparent);
+  }
+  /* Remote is only a bridged representation; canonical stays escrowed. */
+  .model-lock {
+    background: color-mix(in srgb, var(--brand-blue) 18%, transparent);
+    color: #7eb4ff;
+    border: 1px solid color-mix(in srgb, var(--brand-blue) 35%, transparent);
+  }
+  /* Underlying asset moved to remote strategies; token itself not bridged. */
+  .model-transport {
+    background: color-mix(in srgb, #A78BFA 18%, transparent);
+    color: #c4b5fd;
+    border: 1px solid color-mix(in srgb, #A78BFA 35%, transparent);
+  }
+  .model-unknown {
+    background: color-mix(in srgb, #64748B 18%, transparent);
+    color: #94A3B8;
+    border: 1px dashed color-mix(in srgb, #64748B 50%, transparent);
+  }
+  :global(html.light) .model-mint { color: #BE123C; }
+  :global(html.light) .model-lock { color: #1D4ED8; }
+  :global(html.light) .model-transport { color: #6D28D9; }
+  :global(html.light) .model-unknown { color: #475569; }
+
+  /* === Security badges (LayerZero DVN quorum today; reusable) === */
+  .sec-badge {
+    display: inline-block;
+    font-size: 0.72rem;
+    padding: 0.2rem 0.5rem;
+    border-radius: 6px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+    cursor: help;
+    text-decoration: none;
+  }
+  .sec-badge:hover { text-decoration: none; filter: brightness(1.08); }
+  /* Healthy quorum (≥ 2 independent verifiers). */
+  .sec-ok {
+    background: color-mix(in srgb, #22C55E 16%, transparent);
+    color: #86EFAC;
+    border: 1px solid color-mix(in srgb, #22C55E 32%, transparent);
+  }
+  /* 1-of-1 / single point of failure — the rsETH-incident failure mode. */
+  .sec-weak {
+    background: color-mix(in srgb, #EF4444 22%, transparent);
+    color: #FCA5A5;
+    border: 1px solid color-mix(in srgb, #EF4444 48%, transparent);
+  }
+  .sec-todo {
+    background: color-mix(in srgb, #64748B 18%, transparent);
+    color: #94A3B8;
+    border: 1px dashed color-mix(in srgb, #64748B 50%, transparent);
+  }
+  .sec-na { color: var(--text-secondary); opacity: 0.5; }
+  .sec-route {
+    display: block;
+    margin-top: 0.3rem;
+    color: var(--text-secondary);
+    font-size: 0.68rem;
+    font-weight: 400;
+    line-height: 1.25;
+    white-space: normal;
+  }
+  :global(html.light) .sec-ok { color: #15803D; }
+  :global(html.light) .sec-weak { color: #B91C1C; }
+  :global(html.light) .sec-todo { color: #475569; }
+
+  .footnote {
+    color: var(--text-secondary);
+    font-size: 0.82rem;
+    line-height: 1.5;
+    max-width: 70ch;
+    margin: 2.5rem auto 0;
+    text-align: center;
+  }
+
+  @media (max-width: 720px) {
+    .table-card { font-size: 0.8rem; }
+    .detail-cell { min-width: 220px; }
+  }
+</style>

@@ -1,0 +1,218 @@
+#!/usr/bin/env node
+/**
+ * Validates src/data/bridges.json against the reports.
+ *
+ * Two jobs:
+ *  1. STRICT (fails the build): every dependency `slug` in bridges.json must
+ *     point to an existing reports/report/<slug>.md file, so every row on the
+ *     Bridges page links to a real report.
+ *  2. SOFT (warns only): scan report markdown for each bridge's `keywords`. Any
+ *     report that mentions a bridge but is NOT listed under that bridge (and is
+ *     not in its `ignore` list) is printed as a reminder to review it — a mere
+ *     mention is not always a dependency, so this never fails the build unless
+ *     run with --strict (used in CI to force a conscious decision).
+ *
+ * Usage: node scripts/check_bridges.mjs [--strict]
+ */
+import fs from "node:fs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const ROOT = path.resolve(__dirname, "..");
+const REPORTS_DIR = path.join(ROOT, "reports", "report");
+const BRIDGES_JSON = path.join(ROOT, "src", "data", "bridges.json");
+
+const STRICT = process.argv.includes("--strict");
+
+function isHttpUrl(value) {
+  if (typeof value !== "string" || value.length === 0) return false;
+  try {
+    const url = new URL(value);
+    return url.protocol === "http:" || url.protocol === "https:";
+  } catch {
+    return false;
+  }
+}
+
+function validateLayerZeroSecurity(dep, errors, warnings) {
+  const prefix = `[layerzero] dependency "${dep.name}"`;
+  const security = dep.security;
+  if (!security) {
+    warnings.push(
+      `${prefix} has no "security" — read EndpointV2.getConfig(...) and record the route-specific DVN quorum, or set label "TODO" with a tracking link.`
+    );
+    return;
+  }
+  if (typeof security !== "object" || Array.isArray(security)) {
+    errors.push(`${prefix} has invalid "security" (expected an object)`);
+    return;
+  }
+  if (security.label === "TODO") {
+    if (
+      typeof security.note !== "string" ||
+      security.note.trim().length === 0
+    ) {
+      errors.push(`${prefix} has security label "TODO" without a note`);
+    }
+    if (!isHttpUrl(security.link)) {
+      errors.push(
+        `${prefix} has security label "TODO" without a valid tracking link`
+      );
+    }
+    return;
+  }
+
+  const quorum = /^(\d+)-of-(\d+)$/.exec(security.label ?? "");
+  if (!quorum) {
+    errors.push(
+      `${prefix} has invalid security label "${security.label}" (expected N-of-M or TODO)`
+    );
+    return;
+  }
+  const required = Number(quorum[1]);
+  const total = Number(quorum[2]);
+  if (required < 1 || total < required) {
+    errors.push(`${prefix} has impossible security quorum "${security.label}"`);
+  }
+  if (!Number.isInteger(security.confirmations) || security.confirmations < 0) {
+    errors.push(`${prefix} must record a non-negative integer "confirmations"`);
+  }
+  if (
+    !Array.isArray(security.providers) ||
+    security.providers.length !== total ||
+    security.providers.some(
+      (provider) =>
+        typeof provider !== "string" || provider.trim().length === 0
+    )
+  ) {
+    errors.push(
+      `${prefix} must list exactly ${total} non-empty provider name(s) for ${security.label}`
+    );
+  } else if (new Set(security.providers).size !== security.providers.length) {
+    errors.push(`${prefix} has duplicate provider names in "security.providers"`);
+  }
+  if (
+    typeof security.route !== "string" ||
+    security.route.trim().length === 0
+  ) {
+    errors.push(
+      `${prefix} must name the directional route covered by the security quorum`
+    );
+  }
+  const verifiedDate = new Date(`${security.verifiedAt}T00:00:00Z`);
+  if (
+    typeof security.verifiedAt !== "string" ||
+    !/^\d{4}-\d{2}-\d{2}$/.test(security.verifiedAt) ||
+    Number.isNaN(verifiedDate.getTime()) ||
+    verifiedDate.toISOString().slice(0, 10) !== security.verifiedAt
+  ) {
+    errors.push(`${prefix} must record "verifiedAt" as a valid YYYY-MM-DD date`);
+  }
+  if (!isHttpUrl(security.link)) {
+    errors.push(`${prefix} must link to the receive-side OApp used for the recorded route`);
+  }
+  if (typeof security.weak !== "boolean" || security.weak !== (required === 1)) {
+    errors.push(`${prefix} must set "weak" to ${required === 1} for quorum ${security.label}`);
+  }
+}
+
+function main() {
+  const { bridges } = JSON.parse(fs.readFileSync(BRIDGES_JSON, "utf-8"));
+  const reportFiles = fs
+    .readdirSync(REPORTS_DIR)
+    .filter((f) => f.endsWith(".md"));
+  const reportSlugs = new Set(reportFiles.map((f) => f.replace(/\.md$/, "")));
+
+  const errors = [];
+  const warnings = [];
+
+  // 0. STRICT: bridges must stay ordered alphabetically by name (the page
+  // renders them in file order, so the file is the source of truth).
+  const names = bridges.map((b) => b.name);
+  const sorted = [...names].sort((a, b) =>
+    a.toLowerCase().localeCompare(b.toLowerCase())
+  );
+  if (names.join("\u0000") !== sorted.join("\u0000")) {
+    errors.push(
+      `bridges are not in alphabetical order by name: got [${names.join(
+        ", "
+      )}], expected [${sorted.join(", ")}]`
+    );
+  }
+
+  for (const bridge of bridges) {
+    // 1. STRICT: dependency slugs must resolve to a report.
+    for (const dep of bridge.dependencies) {
+      if (!reportSlugs.has(dep.slug)) {
+        errors.push(
+          `[${bridge.id}] dependency "${dep.name}" -> slug "${dep.slug}" has no reports/report/${dep.slug}.md`
+        );
+      }
+      if (dep.kind !== "direct" && dep.kind !== "indirect") {
+        errors.push(
+          `[${bridge.id}] dependency "${dep.name}" has invalid kind "${dep.kind}" (expected direct|indirect)`
+        );
+      }
+      // Every dependency must declare what a bridge compromise can reach.
+      const MODELS = ["mint", "lock", "transport", "unknown"];
+      if (!MODELS.includes(dep.model)) {
+        errors.push(
+          `[${bridge.id}] dependency "${dep.name}" has invalid model "${dep.model}" (expected ${MODELS.join("|")})`
+        );
+      }
+      if (dep.model === "unknown") {
+        warnings.push(
+          `[${bridge.id}] dependency "${dep.name}" has model "unknown" — verify whether the bridge holds mint authority on the native token (mint), the canonical token is escrowed (lock), or it only moves an underlying asset (transport).`
+        );
+      }
+      // LayerZero rows carry a route-specific DVN quorum. Validate the entire
+      // shape so malformed data cannot silently render as a healthy badge.
+      if (bridge.id === "layerzero") {
+        validateLayerZeroSecurity(dep, errors, warnings);
+      }
+    }
+
+    // 2. SOFT: find reports mentioning this bridge but not listed under it.
+    const keywords = (bridge.keywords ?? []).map((k) => k.toLowerCase());
+    if (keywords.length === 0) continue;
+    const listed = new Set(bridge.dependencies.map((d) => d.slug));
+    const ignore = new Set(bridge.ignore ?? []);
+    for (const file of reportFiles) {
+      const slug = file.replace(/\.md$/, "");
+      if (listed.has(slug) || ignore.has(slug)) continue;
+      const text = fs
+        .readFileSync(path.join(REPORTS_DIR, file), "utf-8")
+        .toLowerCase();
+      const hit = keywords.find((k) => text.includes(k));
+      if (hit) {
+        warnings.push(
+          `[${bridge.id}] report "${slug}" mentions "${hit}" but is not listed under ${bridge.name}. ` +
+            `If it depends on ${bridge.name}, add it to bridges.json; otherwise add "${slug}" to that bridge's "ignore" list.`
+        );
+      }
+    }
+  }
+
+  for (const w of warnings) console.warn(`[check_bridges] WARN  ${w}`);
+  for (const e of errors) console.error(`[check_bridges] ERROR ${e}`);
+
+  if (errors.length > 0) {
+    console.error(`[check_bridges] ${errors.length} error(s) — see above.`);
+    process.exit(1);
+  }
+  if (warnings.length > 0 && STRICT) {
+    console.error(
+      `[check_bridges] ${warnings.length} unreviewed bridge mention(s) in --strict mode.`
+    );
+    process.exit(1);
+  }
+  console.log(
+    `[check_bridges] ok — ${bridges.length} bridges, ${bridges.reduce(
+      (n, b) => n + b.dependencies.length,
+      0
+    )} dependencies, ${warnings.length} warning(s).`
+  );
+}
+
+main();

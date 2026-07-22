@@ -257,7 +257,7 @@ The four live JAAA BalanceSheet managers are two Gnosis Safes ([`0x02eb…5bc7`]
 
 ### External Dependencies
 
-- **Cross-chain messaging — 2/2 threshold with LayerZero V2 + Chainlink CCIP.** Live `MultiAdapter` configuration was rechecked for JAAA's configured destinations. Each uses quorum 2 / threshold 2 with LayerZero adapter `0xD517…0295` plus a Chainlink CCIP adapter (`0x34e9…6484` on destination IDs 2/3/5/6; `0x39CF…D955` on 11/12). Both adapters must attest to a non-Ethereum message.
+- **Cross-chain messaging — 2/2 threshold with LayerZero V2 + Chainlink CCIP.** The [`MultiAdapter`](https://etherscan.io/address/0x35C837F0A54B715a23D193E1476BFC9BC30073BE) configuration was rechecked for JAAA's destinations. Each uses quorum 2 / threshold 2 with [LayerZero V2 adapter `0xD517…0295`](https://etherscan.io/address/0xD517BC7ba17271A8D87bE7355B2523bf5c750295) plus a Chainlink CCIP adapter (`0x34e9…6484` on destination IDs 2/3/5/6; `0x39CF…D955` on 11/12). Both must attest to a non-Ethereum message. The six live LayerZero inbound routes use 15 confirmations and require Deutsche Telekom + Canary plus 2-of-3 P2P/Nansen/Nethermind DVNs (**4-of-5 effective DVN quorum**).
 - **Stablecoin settlement (USDC, USDT, USDS)** — JAAA accepts multiple subscription / redemption assets per Centrifuge. USDC inherits Circle's freeze list and reserve risk; USDT inherits Tether's; USDS inherits Sky's. Multi-asset settlement reduces single-issuer concentration.
 - **Anemoy Capital SPC Limited (BVI)** — fund issuer of record. The legal wrapper that holds the underlying CLOs. BVI insolvency or regulatory action against Anemoy would constitute an existential risk for token holders.
 - **Janus Henderson** — sub-advisor; selects and manages the CLO portfolio.
@@ -610,7 +610,7 @@ Centrifuge JAAA remains more concentrated than the NYSE ETF, but diversification
 
 **Subcategory C: External Dependencies**
 
-- **Cross-chain:** **2-of-2 MultiAdapter quorum** — LayerZero V2 + Chainlink CCIP. Live configurations were rechecked across JAAA's configured destination IDs; both adapters must attest to each non-Ethereum message.
+- **Cross-chain:** **2-of-2 MultiAdapter quorum** — LayerZero V2 + Chainlink CCIP. Live destination configurations require both adapters. The LayerZero leg's six inbound routes use 15 confirmations and a 4-of-5 effective DVN quorum (Deutsche Telekom + Canary required, plus 2-of-3 P2P/Nansen/Nethermind), materially stronger than the prior single-Wormhole setup.
 - **Stablecoin settlement:** USDC, USDT and USDS are all supported subscription / redemption assets (per Centrifuge team).
 - **Offchain stack:** Janus Henderson sub-advisor, Anemoy issuer, J.P. Morgan custody/brokerage, Trident Trust admin+KYC (dual role), and MHA Cayman audit.
 
