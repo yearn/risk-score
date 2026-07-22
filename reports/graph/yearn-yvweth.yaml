@@ -67,16 +67,20 @@ nodes:
 
   # Strategies
   - id: steth-accumulator
-    label: stETH Accumulator (58.6%)
+    label: stETH Accumulator (58.4%)
     address: "0x470e0e048F85CFD72EEf325895e02c8D297E7435"
     category: strategy
   - id: spark-weth-lender
-    label: Spark WETH Lender (31.2%)
+    label: Spark WETH Lender (28.2%)
     address: "0xfca3F21D60d5bC8B4C5c35F169bb5B6402510151"
     category: strategy
-    note: New strategy replacing old Spark WETH Lender (0x365c…9e15, fully drained)
+  - id: wsteth-weth-looper
+    label: wstETH/WETH Spark Looper (11.2%)
+    address: "0x68A14629cb07c74259f481382fE8b6cFD8970121"
+    category: strategy
+    note: LSTAaveLooper — leverages wstETH collateral to borrow WETH on Spark Lend. Upgradeable proxy (impl 0xd377…139c). NOT in default queue.
   - id: yearn-og-weth
-    label: Yearn OG WETH (1.8% / 9.1% effective)
+    label: Yearn OG WETH (2.2% / 9.1% effective)
     address: "0xE89371eAaAC6D46d4C3ED23453241987916224FC"
     category: strategy
     note: Morpho MetaMorpho vault — confirmed via MORPHO() returning 0xBBBBBbbBBb9cC5e90e3b3Af64bdAF62C37EEFFCb
@@ -119,15 +123,19 @@ edges:
   - from: yvWETH
     to: steth-accumulator
     kind: allocates-to
-    label: "58.6%"
+    label: "58.4%"
   - from: yvWETH
     to: spark-weth-lender
     kind: allocates-to
-    label: "31.2%"
+    label: "28.2%"
+  - from: yvWETH
+    to: wsteth-weth-looper
+    kind: allocates-to
+    label: "11.2% (not in default queue)"
   - from: yvWETH
     to: yearn-og-weth
     kind: allocates-to
-    label: "1.8% (158 WETH debt; 807 WETH totalAssets)"
+    label: "2.2% (193 WETH debt; 807 WETH totalAssets)"
 
   # Governance roles on vault
   - from: daddy
@@ -193,6 +201,14 @@ edges:
     to: spark-lend
     kind: deposits-into
     label: "WETH supply (atomic)"
+  - from: wsteth-weth-looper
+    to: spark-lend
+    kind: routes-through
+    label: "wstETH collateral → borrow WETH (leveraged loop)"
+  - from: wsteth-weth-looper
+    to: lido-steth
+    kind: routes-through
+    label: "WETH → wstETH (collateral)"
   - from: yearn-og-weth
     to: morpho
     kind: deposits-into
