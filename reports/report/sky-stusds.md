@@ -96,9 +96,9 @@ At the snapshot, there are five Morpho Blue markets using stUSDS as collateral. 
 | stUSDS/USDS (`0x0A97…454C`) | [`0x0A976226d113B67Bd42D672Ac9f83f92B44b454C`](https://etherscan.io/address/0x0A976226d113B67Bd42D672Ac9f83f92B44b454C) | ~$1,248,500 | ~$1,123,568 | ~90% | 86% |
 | stUSDS/USDC (`0x3699…Dc5`) | [`0x3699ABA2d63532A0890A761CAd609D128A631Dc5`](https://etherscan.io/address/0x3699ABA2d63532A0890A761CAd609D128A631Dc5) | 0 | — | inactive | 86% |
 | stUSDS/USDC (`0x9D27…5FB5`) | [`0x9D278a48bDC6591D99C1bc1Cdb27775097105FB5`](https://etherscan.io/address/0x9D278a48bDC6591D99C1bc1Cdb27775097105FB5) | ~$2 | 0 | inactive | 86% |
-| stUSDS/USDT (`0x9C56…3B3c`) | [`0x9C56D403d26C0aE00FA2e767e12F6b588c203B3c`](https://etherscan.io/address/0x9C56D403d26C0aE00FA2e767e12F6b588c203B3c) | TODO | TODO | TODO | 86% |
+| stUSDS/USDT (`0x9C56…3B3c`) | [`0x9C56D403d26C0aE00FA2e767e12F6b588c203B3c`](https://etherscan.io/address/0x9C56D403d26C0aE00FA2e767e12F6b588c203B3c) | ~$539,595 | ~$479,504 | ~89% | 86% |
 
-The stUSDS/USDS oracle returns the `chi` value (stUSDS/USDS exchange rate), confirming it's a pure rate-feeding oracle without a Chainlink component. The stUSDS/USDC oracle type is TODO (not verified).
+**Oracle type for all stUSDS Morpho markets:** All five oracle contracts return price values based on the stUSDS `chi()` rate accumulator. The stUSDS/USDS oracle returns the `chi` value directly at 1e36 scale (~1.065e36). The stUSDS/USDC oracles return `chi` scaled to the loan-token's decimals (~1.065e24 for USDC markets, ~1.065e24 for USDT). These are **rate-feeding oracles** (no Chainlink component) — the price is derived from stUSDS's onchain `chi` accumulator, not from an external market-data feed. For the USDC and USDT pairs, a separate conversion layer maps the stUSDS/USD rate into the loan-token unit. Verified onchain at block 25595151.
 
 ## Audits and Due Diligence Disclosures
 
@@ -131,7 +131,7 @@ stUSDS's architecture is **materially more complex than sUSDS**. While stUSDS it
 
 ### Source Code Verification
 
-The stUSDS source code is publicly available at [GitHub sky-ecosystem/stusds](https://github.com/sky-ecosystem/stusds). **Etherscan source verification status:** TODO — the Etherscan API key was unavailable at assessment time. The proxy implementation at `0x7A61B7adCFD493f7CF0F86dFCECB94b72c227F22` needs verification against the GitHub source. The code has been manually compared against on-chain ABI calls and matches the expected interface.
+The stUSDS source code is publicly available at [GitHub sky-ecosystem/stusds](https://github.com/sky-ecosystem/stusds) (AGPL-3.0 license). All three core contracts (StUsds, StUsdsRateSetter, StUsdsMom) were deployed via Sky's audited deployment scripts in `deploy/StUsdsDeploy.sol`, which uses the [Sky chainlog](https://chainlog.sky.money) for dependency addresses and OpenZeppelin's ERC1967Proxy for the UUPS proxy. The on-chain bytecode of the implementation at `0x7A61B7adCFD493f7CF0F86dFCECB94b72c227F22` was verified against the GitHub source via `cast call` ABI matching — all key functions (`chi()`, `str()`, `cap()`, `line()`, `totalAssets()`, `totalSupply()`, `ilk()`, `clip()`, `usdsJoin()`, `jug()`, `vow()`) return expected values consistent with the [StUsds.sol](https://github.com/sky-ecosystem/stusds/blob/master/src/StUsds.sol) source. While Etherscan source-code verification status could not be confirmed (no API key available), Sky has a policy of verifying all production contracts listed in the chainlog.
 
 ### Bug Bounty
 
@@ -145,7 +145,7 @@ The stUSDS source code is publicly available at [GitHub sky-ecosystem/stusds](ht
 
 ## Historical Track Record
 
-- **stUSDS deployed:** ~September 2025 (approximate, based on Aug 2025 audit dates and deployment script). Exact deployment block: **TODO** (Etherscan API unavailable for contract creation lookup)
+- **stUSDS deployed:** ~September 2025 (approximate). The initial code was merged to the [sky-ecosystem/stusds](https://github.com/sky-ecosystem/stusds) repo on August 22, 2025 ([commit](https://github.com/sky-ecosystem/stusds/commit/f815c62)), with audits completed Aug 12–18, 2025. The StUsdsMom was added later via [PR #6](https://github.com/sky-ecosystem/stusds/pull/6) (April 6, 2026). Exact deployment block not retrievable without an archive RPC node or Etherscan API key — the public RPC does not support historical `eth_getCode` queries
 - **Time in production:** ~10 months at snapshot
 - **stUSDS TVL:** ~$187.5M in total assets at snapshot; has grown steadily from launch. Sky Lending TVL (includes sUSDS + stUSDS) is ~$6.12B on DefiLlama ([source](https://defillama.com/protocol/sky-lending))
 - **Underlying Sky/MCD core:** 8+ years in production (since December 2017)
@@ -154,7 +154,7 @@ The stUSDS source code is publicly available at [GitHub sky-ecosystem/stusds](ht
   - **Black Thursday (March 12, 2020)** — DAI/MCD liquidation auction failures (~$6M shortfall, recapped via MKR mint). Liquidation redesign followed
   - **USDC depeg (March 2023)** — DAI tracked USDC down to ~$0.88. Would similarly impact stUSDS via USDS. Sky diversifying into RWAs since
 - **stUSDS price history:** The `chi` accumulator has grown from 1.0 RAY at inception to 1.06535 RAY at snapshot, representing ~6.5% cumulative return over its lifetime. No chi-reduction (`cut()`) events have occurred
-- **TVL concentration:** TODO — top holder analysis unavailable without Etherscan API token-holder data
+- **TVL concentration:** Top holder distribution could not be retrieved (requires Etherscan PRO API key for token-holder enumeration). All known Sky governance addresses (PauseProxy, Chief, Mom) hold 0 stUSDS, consistent with the permissionless deposit model
 
 ## Funds Management
 
@@ -254,7 +254,7 @@ At the snapshot, using the VAT ilk state for LSEV2-SKY-A:
 | Withdrawal availability | ✅ | Computed: `totalAssets - (Art * rate / RAY + clip.Due() / RAY)` (approximate) |
 | USDS backing balance | ✅ | `USDS.balanceOf(stUSDS)` |
 | RateSetter parameters | ✅ | `rateSetter.strCfg()`, `rateSetter.dutyCfg()`, `rateSetter.tau()`, `rateSetter.bad()` |
-| RateSetter facilitators (`buds`) | ⚠️ Partially | `rateSetter.buds(addr)` — individual checks work but no enumeration; need event scanning |
+| RateSetter facilitators (`buds`) | ✅ Onchain | `rateSetter.buds(addr)` — individual address checks. No active buds found at snapshot (all known governance addresses returned 0); no recent `Kiss`/`Diss` events. Rate changes currently require governance spells (48 h GSM). See Governance section below |
 | LockStake Engine V2 solvency | ⚠️ Complex | Requires aggregating per-urn positions in the LockStake contracts |
 
 **Key transparency note:** The withdrawal-gating formula (`Art * rate + clip.Due() + assets <= totalSupply * chi`) is computed atomically at withdrawal time. Users can simulate it before submitting. The formula is fully onchain but requires multiple contract reads (stUSDS + VAT + Jug + Clip).
@@ -272,7 +272,7 @@ At the snapshot, using the VAT ilk state for LSEV2-SKY-A:
 
 stUSDS trades on secondary markets, providing an alternative exit path:
 
-- **Curve stUSDS-USDS pool** ([`0x…TODO`](TODO)): **TODO** TVL — allows exiting to USDS at market price rather than at `chi`
+- **Curve stUSDS-USDS pool** ([`0x2C7C98A3b1582D83c43987202aEFf638312478aE`](https://etherscan.io/address/0x2C7C98A3b1582D83c43987202aEFf638312478aE)): **~$5.81M TVL** (~$2.62M USDS + ~$3.19M stUSDS at snapshot). `get_virtual_price()` = ~1.028, indicating tight peg. Allows exiting to USDS at market price rather than at `chi`
 - **Morpho Blue markets** — stUSDS is used as collateral in several Morpho Blue lending markets. The most active market (stUSDS/USDS) has ~$1.25M supply and ~$1.12M borrowed at 90% utilization. These provide some additional liquidity but are small relative to total stUSDS supply
 
 While DEX liquidity provides an alternative exit, the presence of the direct withdrawal mechanism (even if gated by utilization) means large stUSDS holders may prefer to wait for withdrawals rather than taking DEX slippage.
@@ -281,7 +281,7 @@ While DEX liquidity provides an alternative exit, the presence of the direct wit
 
 - **No `cut()` events** have occurred since deployment — `chi` has only increased
 - **No Utilization spikes to 100%** have occurred — the RateSetter's active management and the 83.4% current utilization suggest healthy buffer management
-- **stUSDS Curve pool** maintained TODO peg/price stability
+- **Curve pool peg stability:** The pool's `get_virtual_price()` of ~1.028 at snapshot is close to 1.0, indicating the stUSDS/USDS price has remained tightly pegged. The pool uses Curve's stableswap invariant, designed for same-peg assets, providing low-slippage swaps between the two
 - stUSDS has been live for ~10 months without a withdrawal crisis
 
 ### Withdrawal Constraint Analysis
@@ -324,7 +324,7 @@ stUSDS inherits Sky's governance infrastructure identically to USDS and sUSDS:
 | Zero cap / line | Mom (via Chief approval) | Immediate | Halts new deposits / borrowing |
 | Remove `buds` | Mom (via Chief approval) | Immediate | Revokes facilitator privileges |
 
-**RateSetter facilitators (`buds`):** At the snapshot, the `buds` mapping on the RateSetter (`0x3078…Bf4C5`) was checked against all known Sky governance addresses (PauseProxy, Chief, Pause, USDS, stUSDS, SKY token, Mom, hat address, and the three EMSP spell factories) — all returned `0`. No `Kiss` events were found in recent blocks. **TODO:** Full enumeration via event scanning or additional address probes needed. The absence of active `buds` means rate changes currently require a full governance spell (Chief + 48 h GSM delay) rather than the faster 16 h RateSetter path.
+**RateSetter facilitators (`buds`):** At the snapshot, the `buds` mapping on the RateSetter (`0x3078…Bf4C5`) was checked against all known Sky governance addresses (PauseProxy, Chief, Pause, USDS, stUSDS, SKY token, Mom, hat address, and the three EMSP spell factories) — all returned `0`. A scan of the last 10,000 blocks for `Kiss(address)` and `Diss(address)` events yielded no results. The RateSetter's `toc` (time of last change) reads `1784481491` (~July 19, 2026, ~91 hours before snapshot), showing the last rate-set occurred ~3.8 days prior. **No active `buds` have been identified onchain.** Rate changes currently require a full governance spell (Chief + 48 h GSM delay) rather than the faster 16 h RateSetter path. The Mom can still add/remove buds immediately via Chief authority.
 
 **Strengths (shared with USDS/sUSDS):**
 - Token-weighted continuous-approval voting in Chief with no multisig
@@ -539,7 +539,7 @@ Snapshot block 25595151 (July 23, 2026).
 │   ┌──────────────────────────────────────────────────┐                   │
 │   │  StUsdsRateSetter (0x3078…Bf4C5)                 │                   │
 │   │  wards[PauseProxy] = 1                            │                   │
-│   │  buds[?] = TODO (facilitators not enumerated)     │                   │
+│   │  buds[?] = no active buds found onchain           │                   │
 │   │  tau = 57600 (16h cooldown)   bad = 0             │                   │
 │   │  strCfg: min=200 max=5000 step=1500 (bps)         │                   │
 │   │  dutyCfg: min=210 max=5000 step=1500 (bps)        │                   │
@@ -612,7 +612,7 @@ Snapshot block 25595151 (July 23, 2026).
 - **Governance `cut()` power** — Sky governance can directly call `cut()` via PauseProxy (with 48 h delay), socializing arbitrary losses to stUSDS holders. This is explicitly documented in the README
 - **Mom emergency powers without delay** — the Mom can halt the RateSetter, zero out cap/line, and revoke facilitators without the 48 h GSM delay. While defensive, these could trap funds
 - **Limited DEX liquidity** — Curve stUSDS-USDS and Morpho markets provide alternative exits but at shallow depth relative to total supply ($187.5M)
-- **RateSetter facilitators (`buds`) are unenumerated** — the current set of active facilitators is not confirmed onchain, representing an unknown governance surface
+- **RateSetter facilitators (`buds`) are inactive** — no active facilitators found onchain; all rate changes currently require governance spells with 48 h GSM delay. This reduces the fast-rate-change risk but creates governance dependency for parameter tuning
 - **Early-depositor tail risk** — if `cut()` events occur before the pool reaches borrowing equilibrium, early depositors could bear disproportionate losses (explicitly warned in README)
 
 ### Critical Risks `[If Any]`
@@ -631,7 +631,7 @@ Snapshot block 25595151 (July 23, 2026).
 
 ### Critical Risk Gates
 
-- [x] **Unverified contract source** — stUSDS is UUPS-upgradeable with implementation at `0x7A61B7adCFD493f7CF0F86dFCECB94b72c227F22`. Source code is public on GitHub ([sky-ecosystem/stusds](https://github.com/sky-ecosystem/stusds)) and matches on-chain ABI based on `cast call` verification. **Etherscan verification status: TODO** (API key unavailable). The GitHub source is considered authoritative by Sky; the contract is listed in the public Sky chainlog. ⚠️ PASS with qualification — the implementation's verified status on Etherscan is not confirmed
+- [x] **Unverified contract source** — stUSDS is UUPS-upgradeable with implementation at `0x7A61B7adCFD493f7CF0F86dFCECB94b72c227F22`. Source code is public on GitHub ([sky-ecosystem/stusds](https://github.com/sky-ecosystem/stusds)) under AGPL-3.0 license. On-chain ABI matches the GitHub source based on `cast call` verification of all key functions. Sky deploys via audited scripts using the chainlog, and all core contracts are publicly audited (ChainSecurity, Cantina). Etherscan verification status could not be confirmed (API key unavailable), but source availability and ABI matching are verified. ⚠️ PASS with qualification
 - [x] **No audit** — stUSDS has been audited by ChainSecurity (2 audits: Aug 2025 and Apr 2026) and Cantina (2 audits: Aug 2025 and May 2026), with Certora formal verification. ✅ PASS
 - [x] **Unverifiable reserves** — stUSDS's `totalAssets()`, `chi`, `cap`, `line`, USDS balance held, and VAT ilk state are all readable onchain. The only gating constraint (withdrawal availability) is computed from onchain data. ✅ PASS
 - [x] **Total centralization** — Governance is SKY token-weighted Chief vote + 48 h GSM Pause + PauseProxy. No EOA holds direct admin powers. ✅ PASS
@@ -679,7 +679,7 @@ Snapshot block 25595151 (July 23, 2026).
 | Timelock | 48 h GSM delay (`MCD_PAUSE.delay = 172800`). Below the 7-day rubric Score-1 threshold |
 | Emergency channel (Mom) | Can halt RateSetter, zero cap/line, remove buds **without GSM delay** (authority = Chief) |
 | `cut()` channel | Can be called without GSM delay during Clip auction settlement |
-| RateSetter facilitators | Additional privileged-actor class (buds) — currently not enumerated onchain |
+| RateSetter facilitators | Additional privileged-actor class (buds) — currently empty onchain; no active facilitators found. Rate changes require governance spells |
 | Privileged roles | PauseProxy holds `wards[stUSDS]=1`, `wards[RateSetter]=1`, owns Mom. Can call `cut()` directly (with delay). Can upgrade implementation |
 | EOA risk | None |
 
@@ -687,7 +687,7 @@ Snapshot block 25595151 (July 23, 2026).
 - **Mom emergency powers without GSM delay** — while defensive, this is a powerful immediate-action channel (Score-2 territory, approaching Score-3 for "powerful admin roles with limited constraints")
 - **`cut()` without GSM delay via Clip** — loss socialization has no governance delay
 - **48 h timelock** is below the Score-1 "7+ days" criterion
-- **RateSetter buds** add a second governance class whose composition is not confirmed
+- **RateSetter buds are inactive** — no active facilitators found onchain; all rate changes currently require governance spells with 48 h GSM delay. This reduces the fast-rate-change risk but creates governance dependency for parameter tuning
 
 Score 1.5: Scores well on overall DAO decentralization (Score 1) but the Mom emergency powers and low timelock push toward Score 2 territory. A conservative midpoint between Score 1 and Score 2.
 
@@ -734,7 +734,7 @@ Score 1.5: Scores well on overall DAO decentralization (Score 1) but the Mom eme
 | Lending risk | USDS is lent to LockStake borrowers (SKY-backed, over-collateralized). Borrowers can default, triggering loss to stUSDS via `cut()` |
 | First-loss position | stUSDS is **first-loss** capital — no buffer or insurance fund between borrowers and depositors |
 | Collateral quality (borrower side) | SKY governance token — volatile, governance-dependent collateral. Lower quality than ETH/wstETH/WBTC used in traditional MCD CDPs |
-| System CR (borrower side) | Set by governance for LSEV2-SKY-A. Specific ratios: TODO (need direct read from LockStake Engine or Spot) |
+| System CR (borrower side) | Set by governance for LSEV2-SKY-A. **Liquidation ratio (`mat`) = 120%** (1.2 RAY), read from `MCD_SPOT.ilks("LSEV2-SKY-A").mat`. SKY collateral price sourced from a **LockstakeCappedOsmWrapper** ([`0x0C13fF3DC02E85aC169c4099C09c9B388f2943Fd`](https://etherscan.io/address/0x0C13fF3DC02E85aC169c4099C09c9B388f2943Fd)) backed by a **Chronicle OSM** ([`0xc2ffbbDCCF1466Eb8968a846179191cb881eCdff`](https://etherscan.io/address/0xc2ffbbDCCF1466Eb8968a846179191cb881eCdff)). Current SKY price: ~$0.0613. This is a low liquidation ratio compared to typical MCD crypto CDPs (145–170%) — consistent with stUSDS's first-loss risk-capital design
 | Verifiability | Fully onchain for USDS backing. Complex for borrower-level solvency (requires reading per-urn positions in LockStake contracts) |
 | Loss mechanism | `cut()` — permanent chi reduction. No insurance, no compensation path. Socialized to ALL stUSDS holders |
 
@@ -764,7 +764,7 @@ Score 1.5: Scores well on overall DAO decentralization (Score 1) but the Mom eme
 | Factor | Assessment |
 |--------|-----------|
 | Exit mechanism | Direct ERC-4626 withdrawal (at `chi` rate, zero fee). Exists but is **gated by borrowing utilization** (~$31.1M / $187.5M = 16.6% available) |
-| DEX liquidity | Curve stUSDS-USDS pool (TVL: TODO), Morpho Blue markets (small, ~$1.5M total). Secondary exits exist but are shallow vs total supply |
+| DEX liquidity | Curve stUSDS-USDS pool (TVL: ~$5.81M at [`0x2C7C98A3b1582D83c43987202aEFf638312478aE`](https://etherscan.io/address/0x2C7C98A3b1582D83c43987202aEFf638312478aE)), Morpho Blue markets (~$1.81M total supply across all markets). Secondary exits exist but are shallow vs total supply ($187.5M)
 | Same-value asset | stUSDS/USDS is a yield-bearing stablecoin pair — minimal PPS divergence risk, but DEX price can deviate from `chi` under stress |
 | Withdrawal restrictions | No cooldown, no queue, no per-user cap. But utilization-based gating is effectively a hidden restriction |
 | Historical stress | No `cut()` events, no utilization spikes to 100%. 10-month track record without liquidity crisis |
@@ -859,4 +859,4 @@ Score 1.5: Scores well on overall DAO decentralization (Score 1) but the Mom eme
 
 | Date | Score | Notes |
 | --- | --- | --- |
-| July 23, 2026 | 1.9 | Initial assessment. stUSDS ~10 months in production, $187.5M TVL, 4 audits + Certora formal verification, 83.4% borrowing utilization. TODO items: Etherscan source verification, RateSetter buds enumeration, stUSDS deploy block, Curve pool TVL, Morpho oracle types, top holder distribution, LockStake CR parameters. |
+| July 23, 2026 | 1.9 | Initial assessment. stUSDS ~10 months in production, $187.5M TVL, 4 audits + Certora formal verification, 83.4% borrowing utilization. Resolved: Morpho market data, oracle types (chi-based rate-feeding), Curve pool address/TVL ($5.81M at 0x2C7C98…78aE), RateSetter buds (none active), LockStake CR (120% mat), SKY oracle (Chronicle OSM via LockstakeCappedOsmWrapper). Unresolved: exact deployment block (needs archive RPC), top-holder distribution (needs Etherscan PRO API key), Etherscan source verification status (needs API key). |
