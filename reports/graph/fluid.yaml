@@ -102,7 +102,7 @@ nodes:
   - id: borrow-stable-wrappers
     label: Yield-Bearing Stable Wrappers
     category: strategy
-    note: SUSDAI / reUSD / sUSDe — wrap-ratio amplification risk
+    note: sUSDai / reUSD / sUSDe — wrap-ratio amplification risk
   - id: borrow-btc
     label: BTC Borrow Markets
     category: strategy
@@ -169,6 +169,11 @@ nodes:
   - id: dep-wbtc
     label: WBTC / cbBTC
     category: dependency
+  - id: dep-pst
+    label: PST (Huma PayFi, ~4.2%)
+    address: "0x22ae3d9a738471f405169af055d31c687087d4c7"
+    category: dependency
+    note: Non-blue-chip RWA — off-chain PayFi receivables backing; Ethereum PST is a Chainlink CCIP BurnMintERC20 bridged solely from Solana (pool 0xBE77…0D3d), carrying RWA credit + CCIP + Solana source-chain risk
   - id: dep-chainlink
     label: Chainlink Oracles
     category: dependency
@@ -283,7 +288,7 @@ edges:
   - from: vault-protocol
     to: borrow-stable-wrappers
     kind: allocates-to
-    label: "~37% (SUSDAI + reUSD)"
+    label: "~37% (sUSDai + reUSD)"
   - from: vault-protocol
     to: borrow-btc
     kind: allocates-to
@@ -343,6 +348,10 @@ edges:
   - from: borrow-btc
     to: dep-wbtc
     kind: deposits-into
+  - from: vault-protocol
+    to: dep-pst
+    kind: deposits-into
+    label: PST collateral (Solana/CCIP RWA)
   - from: vault-protocol
     to: dep-chainlink
     kind: routes-through
