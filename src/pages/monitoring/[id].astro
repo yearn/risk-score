@@ -1,10 +1,13 @@
 ---
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import { protocolIconUrl } from "../../lib/icons";
-import { FALLBACK_PROTOCOLS } from "../../data/monitoring";
+import { fetchProtocols } from "../../data/monitoring";
 
-export function getStaticPaths() {
-  return FALLBACK_PROTOCOLS.map((p) => ({ params: { id: p.id }, props: { protocol: p } }));
+export async function getStaticPaths() {
+  const API_URL = import.meta.env.MONITORING_API_URL;
+  const API_TOKEN = import.meta.env.MONITORING_API_TOKEN;
+  const protocols = await fetchProtocols(API_URL, API_TOKEN);
+  return protocols.map((p) => ({ params: { id: p.id }, props: { protocol: p } }));
 }
 
 const { protocol } = Astro.props;

@@ -118,6 +118,35 @@ export function transformApiProtocols(apiProtocols: ApiProtocol[]): Protocol[] {
     }));
 }
 
+/**
+ * Resolve the live list of monitored protocols, falling back to FALLBACK_PROTOCOLS when the
+ * monitoring API is unreachable. Used by both /monitoring/ (the index) and the dynamic
+ * /monitoring/[id]/ route's getStaticPaths() so the rendered cards and the pre-rendered detail
+ * pages always use the same slugs — otherwise a slug returned by the API but missing from the
+ * fallback (e.g. safe, spark, stables, timelock, apyusd) would 404, and any fallback-only slug
+ * (e.g. compound-v3, aave-v3) would 404 when the index page links to the API's id (compound).
+ */
+export async function fetchProtocols(
+  apiUrl?: string,
+  apiToken?: string,
+): Promise<Protocol[]> {
+  if (!apiUrl) return FALLBACK_PROTOCOLS;
+
+  try {
+    const headers: Record<string, string> = { Accept: "application/json" };
+    if (apiToken) headers["Authorization"] = `Bearer ${apiToken}`;
+    const res = await fetch(`${apiUrl}/v1/monitoring`, { headers });
+    if (res.ok) {
+      const json: ApiMonitoringResponse = await res.json();
+      return transformApiProtocols(json.data);
+    }
+    console.warn(`Monitoring API returned ${res.status}, using fallback data.`);
+  } catch (e) {
+    console.warn(`Monitoring API unreachable (${(e as Error).message}), using fallback data.`);
+  }
+  return FALLBACK_PROTOCOLS;
+}
+
 // --- Static fallback (used when the API is unreachable at build time) ---
 // Last synced from monitoring.yaml on 2026-07-02.
 
