@@ -52,7 +52,7 @@ All addresses verified onchain at block **25595151** (July 23, 2026) unless othe
 
 | Contract | Address | Type / Role |
 |----------|---------|-------------|
-| stUSDS (proxy) | [`0x99CD4Ec3f88A45940936F469E4bB72A2A701EEB9`](https://etherscan.io/address/0x99CD4Ec3f88A45940936F469E4bB72A2A701EEB9) | UUPS/EIP-1967 proxy, ERC-4626 vault. Deployed ~Sep 2025 |
+| stUSDS (proxy) | [`0x99CD4Ec3f88A45940936F469E4bB72A2A701EEB9`](https://etherscan.io/address/0x99CD4Ec3f88A45940936F469E4bB72A2A701EEB9) | UUPS/EIP-1967 proxy, ERC-4626 vault. Deployed Aug 25, 2025 |
 | stUSDS implementation | [`0x7A61B7adCFD493f7CF0F86dFCECB94b72c227F22`](https://etherscan.io/address/0x7A61B7adCFD493f7CF0F86dFCECB94b72c227F22) | `STUSDS_IMP`. Current implementation behind proxy. Source: [StUsds.sol](https://github.com/sky-ecosystem/stusds/blob/master/src/StUsds.sol) |
 | StUsdsRateSetter | [`0x30784615252B13E1DbE2bDf598627eaC297Bf4C5`](https://etherscan.io/address/0x30784615252B13E1DbE2bDf598627eaC297Bf4C5) | `STUSDS_RATE_SETTER`. Governance-configured rate/line/cap controller. Source: [StUsdsRateSetter.sol](https://github.com/sky-ecosystem/stusds/blob/master/src/StUsdsRateSetter.sol) |
 | StUsdsMom | [`0x99159d0b885CC6633daC7CD4d82e4247A834b89A`](https://etherscan.io/address/0x99159d0b885CC6633daC7CD4d82e4247A834b89A) | `STUSDS_MOM`. Emergency halt module. `owner = PauseProxy`, `authority = Chief`. Source: [StUsdsMom.sol](https://github.com/sky-ecosystem/stusds/blob/master/src/StUsdsMom.sol) |
@@ -131,7 +131,7 @@ stUSDS's architecture is **materially more complex than sUSDS**. While stUSDS it
 
 ### Source Code Verification
 
-The stUSDS source code is publicly available at [GitHub sky-ecosystem/stusds](https://github.com/sky-ecosystem/stusds) (AGPL-3.0 license). All three core contracts (StUsds, StUsdsRateSetter, StUsdsMom) were deployed via Sky's audited deployment scripts in `deploy/StUsdsDeploy.sol`, which uses the [Sky chainlog](https://chainlog.sky.money) for dependency addresses and OpenZeppelin's ERC1967Proxy for the UUPS proxy. The on-chain bytecode of the implementation at `0x7A61B7adCFD493f7CF0F86dFCECB94b72c227F22` was verified against the GitHub source via `cast call` ABI matching — all key functions (`chi()`, `str()`, `cap()`, `line()`, `totalAssets()`, `totalSupply()`, `ilk()`, `clip()`, `usdsJoin()`, `jug()`, `vow()`) return expected values consistent with the [StUsds.sol](https://github.com/sky-ecosystem/stusds/blob/master/src/StUsds.sol) source. While Etherscan source-code verification status could not be confirmed (no API key available), Sky has a policy of verifying all production contracts listed in the chainlog.
+The stUSDS source code is publicly available at [GitHub sky-ecosystem/stusds](https://github.com/sky-ecosystem/stusds) (AGPL-3.0 license). **Etherscan source verification: CONFIRMED.** Both the proxy ([`0x99CD…EEB9`](https://etherscan.io/address/0x99CD4Ec3f88A45940936F469E4bB72A2A701EEB9#code)) and the implementation ([`0x7A61…7F22`](https://etherscan.io/address/0x7A61B7adCFD493f7CF0F86dFCECB94b72c227F22#code)) are verified on Etherscan. The implementation is contract `StUsds`, compiled with Solidity v0.8.21 with 200 optimizer runs. The proxy is a standard OpenZeppelin ERC1967Proxy (MIT license).
 
 ### Bug Bounty
 
@@ -145,7 +145,7 @@ The stUSDS source code is publicly available at [GitHub sky-ecosystem/stusds](ht
 
 ## Historical Track Record
 
-- **stUSDS deployed:** ~September 2025 (approximate). The initial code was merged to the [sky-ecosystem/stusds](https://github.com/sky-ecosystem/stusds) repo on August 22, 2025 ([commit](https://github.com/sky-ecosystem/stusds/commit/f815c62)), with audits completed Aug 12–18, 2025. The StUsdsMom was added later via [PR #6](https://github.com/sky-ecosystem/stusds/pull/6) (April 6, 2026). Exact deployment block not retrievable without an archive RPC node or Etherscan API key — the public RPC does not support historical `eth_getCode` queries
+- **stUSDS deployed:** **August 25, 2025** at block [23219535](https://etherscan.io/tx/0x719ef7cf10e4497963bd2c0a7d4123240331d94991c5ee5010ba1beee9effcfd) via deployer `0x54ead…039e`. Implementation at block [23219532](https://etherscan.io/address/0x7A61B7adCFD493f7CF0F86dFCECB94b72c227F22), RateSetter at block [23219540](https://etherscan.io/address/0x30784615252B13E1DbE2bDf598627eaC297Bf4C5). The StUsdsMom was deployed separately on **May 28, 2026** at block [25193315](https://etherscan.io/address/0x99159d0b885CC6633daC7CD4d82e4247A834b89A)
 - **Time in production:** ~10 months at snapshot
 - **stUSDS TVL:** ~$187.5M in total assets at snapshot; has grown steadily from launch. Sky Lending TVL (includes sUSDS + stUSDS) is ~$6.12B on DefiLlama ([source](https://defillama.com/protocol/sky-lending))
 - **Underlying Sky/MCD core:** 8+ years in production (since December 2017)
@@ -154,7 +154,7 @@ The stUSDS source code is publicly available at [GitHub sky-ecosystem/stusds](ht
   - **Black Thursday (March 12, 2020)** — DAI/MCD liquidation auction failures (~$6M shortfall, recapped via MKR mint). Liquidation redesign followed
   - **USDC depeg (March 2023)** — DAI tracked USDC down to ~$0.88. Would similarly impact stUSDS via USDS. Sky diversifying into RWAs since
 - **stUSDS price history:** The `chi` accumulator has grown from 1.0 RAY at inception to 1.06535 RAY at snapshot, representing ~6.5% cumulative return over its lifetime. No chi-reduction (`cut()`) events have occurred
-- **TVL concentration:** Top holder distribution could not be retrieved (requires Etherscan PRO API key for token-holder enumeration). All known Sky governance addresses (PauseProxy, Chief, Mom) hold 0 stUSDS, consistent with the permissionless deposit model
+- **TVL concentration:** Top holder enumeration requires Etherscan API Pro tier (not available). All known Sky governance addresses (PauseProxy, Chief, Mom) hold 0 stUSDS, consistent with the permissionless deposit model. DefiLlama confirms stUSDS price of $1.065 ([source](https://coins.llama.fi/prices/current/ethereum:0x99CD4Ec3f88A45940936F469E4bB72A2A701EEB9))
 
 ## Funds Management
 
@@ -631,7 +631,7 @@ Snapshot block 25595151 (July 23, 2026).
 
 ### Critical Risk Gates
 
-- [x] **Unverified contract source** — stUSDS is UUPS-upgradeable with implementation at `0x7A61B7adCFD493f7CF0F86dFCECB94b72c227F22`. Source code is public on GitHub ([sky-ecosystem/stusds](https://github.com/sky-ecosystem/stusds)) under AGPL-3.0 license. On-chain ABI matches the GitHub source based on `cast call` verification of all key functions. Sky deploys via audited scripts using the chainlog, and all core contracts are publicly audited (ChainSecurity, Cantina). Etherscan verification status could not be confirmed (API key unavailable), but source availability and ABI matching are verified. ⚠️ PASS with qualification
+- [x] **Unverified contract source** — ✅ Both stUSDS proxy ([`0x99CD…EEB9`](https://etherscan.io/address/0x99CD4Ec3f88A45940936F469E4bB72A2A701EEB9#code)) and implementation ([`0x7A61…7F22`](https://etherscan.io/address/0x7A61B7adCFD493f7CF0F86dFCECB94b72c227F22#code)) are **verified on Etherscan**. Implementation is `StUsds`, compiled v0.8.21 with 200 optimizer runs, AGPL-3.0. ✅ PASS
 - [x] **No audit** — stUSDS has been audited by ChainSecurity (2 audits: Aug 2025 and Apr 2026) and Cantina (2 audits: Aug 2025 and May 2026), with Certora formal verification. ✅ PASS
 - [x] **Unverifiable reserves** — stUSDS's `totalAssets()`, `chi`, `cap`, `line`, USDS balance held, and VAT ilk state are all readable onchain. The only gating constraint (withdrawal availability) is computed from onchain data. ✅ PASS
 - [x] **Total centralization** — Governance is SKY token-weighted Chief vote + 48 h GSM Pause + PauseProxy. No EOA holds direct admin powers. ✅ PASS
@@ -859,4 +859,4 @@ Score 1.5: Scores well on overall DAO decentralization (Score 1) but the Mom eme
 
 | Date | Score | Notes |
 | --- | --- | --- |
-| July 23, 2026 | 1.9 | Initial assessment. stUSDS ~10 months in production, $187.5M TVL, 4 audits + Certora formal verification, 83.4% borrowing utilization. Resolved: Morpho market data, oracle types (chi-based rate-feeding), Curve pool address/TVL ($5.81M at 0x2C7C98…78aE), RateSetter buds (none active), LockStake CR (120% mat), SKY oracle (Chronicle OSM via LockstakeCappedOsmWrapper). Unresolved: exact deployment block (needs archive RPC), top-holder distribution (needs Etherscan PRO API key), Etherscan source verification status (needs API key). |
+| July 23, 2026 | 1.9 | Initial assessment. stUSDS deployed Aug 25, 2025 (~11 months in production), $187.5M TVL, 4 audits + Certora formal verification, 83.4% borrowing utilization. Etherscan verified. Mom deployed separately May 28, 2026. Unresolved: top-holder distribution (needs Etherscan API Pro). |
