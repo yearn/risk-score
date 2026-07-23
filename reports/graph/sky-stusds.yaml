@@ -53,6 +53,7 @@ nodes:
     label: Clip (LSEV2-SKY-A)
     address: "0x836F56750517b1528B5078Cba4Ac4B94fBE4A399"
     category: infra
+    note: "Liquidation and loss-realization module. stopped() = 3 at block 25595151, disabling kick, redo, and take since Sep 8, 2025."
   - id: pause
     label: MCD Pause (48h GSM)
     address: "0xbE286431454714F511008713973d3B053A2d38f3"

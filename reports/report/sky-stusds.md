@@ -4,7 +4,7 @@
 - **Token:** stUSDS (Staked USDS)
 - **Chain:** Ethereum
 - **Token Address:** [`0x99CD4Ec3f88A45940936F469E4bB72A2A701EEB9`](https://etherscan.io/address/0x99CD4Ec3f88A45940936F469E4bB72A2A701EEB9)
-- **Final Score: 1.9/5.0**
+- **Final Score: 2.5/5.0**
 
 ## Overview + Links
 
@@ -13,6 +13,8 @@
 The architecture pits stUSDS depositors (risk-capital providers) against SKY-staking borrowers. Deposited USDS is lent out to borrowers in the `LSEV2-SKY-A` ilk (LockStake Engine V2), where it can be borrowed against locked SKY governance tokens. Yield accrues continuously via the `str` rate, funded by `vat.suck()` against the Vow. Borrowed USDS is protected by over-collateralized SKY positions; if a borrower defaults, the loss is socialized to stUSDS holders through the `cut()` mechanism — stUSDS's `chi` (rate accumulator) is reduced, permanently impairing all holders.
 
 Because stUSDS deposits are lent out, **withdrawals are constrained** by the debt ceiling and current borrowing utilization. At the snapshot, ~$187.5M USDS is deposited, with ~$156.4M borrowed (83.4% utilization), leaving ~$31.1M available for withdrawal. This is a fundamental liquidity risk absent from sUSDS.
+
+The borrower-side liquidation backstop was **fully disabled at the snapshot**: [`Clip.stopped()`](https://etherscan.io/address/0x836F56750517b1528B5078Cba4Ac4B94fBE4A399#readContract) returned `3`, which the [verified source](https://github.com/sky-ecosystem/lockstake/blob/master/src/LockstakeClipper.sol#L108-L113) defines as disabling new `kick()`, `redo()`, and `take()` operations. It had remained at level 3 since [September 8, 2025](https://etherscan.io/tx/0x0032e26b8e4b284e3c61ea8aeb0870e3f0dbb7d3173945faf0449ca6ec5138e8). Exact per-urn reconstruction found **11 unsafe urns carrying ~$70.01M of debt** under the $0.025 capped feed. Their SKY collateral still covered principal at the $0.0613 market price, but the disabled liquidation path allows losses to accumulate if SKY falls and requires governance to restore auction execution.
 
 The **StUsdsRateSetter** contract enables governance-appointed facilitators (`buds`) to adjust the stUSDS supply rate (`str`), the borrower rate (`duty` on the ilk), the supply cap (`cap`), and the debt ceiling (`line`) within predefined bounds, with a 16-hour cooldown between changes. The **StUsdsMom** provides emergency halt capabilities without the standard 48 h GSM delay.
 
@@ -31,6 +33,8 @@ The **StUsdsRateSetter** contract enables governance-appointed facilitators (`bu
 | LSEV2-SKY-A accumulated rate (`rate`) | 1.15871 RAY → actual debt ~$156.4M |
 | LSEV2-SKY-A ilk debt ceiling (`line`) | ~187.5M RAD |
 | Withdrawal availability | ~$31.1M USDS (16.6% of total assets) |
+| LockStake Clipper circuit breaker | **`stopped = 3` — `kick`, `redo`, and `take` disabled** |
+| Unsafe LSE urns at capped feed | **11 urns / ~$70.01M debt** |
 | Current block / timestamp | 25595151 / 1784806426 (Jul 23, 2026) |
 
 **Links:**
@@ -75,7 +79,7 @@ All addresses verified onchain at block **25595151** (July 23, 2026) unless othe
 | MCD VAT (core ledger) | [`0x35D1b3F3D7966A1DFe207aa4514C12a259A0492B`](https://etherscan.io/address/0x35D1b3F3D7966A1DFe207aa4514C12a259A0492B) | `vat.suck(vow, stUSDS, diff)` funds yield from Vow. Holds ilk `LSEV2-SKY-A` debt |
 | MCD Jug | [`0x19c0976f590D67707E62397C87829d896Dc0f1F1`](https://etherscan.io/address/0x19c0976f590D67707E62397C87829d896Dc0f1F1) | Stability fee accumulator; `jug.drip(ilk)` called on each deposit/withdraw to update debt |
 | MCD Vow | [`0xA950524441892A31ebddF91d3cEEFa04Bf454466`](https://etherscan.io/address/0xA950524441892A31ebddF91d3cEEFa04Bf454466) | Surplus buffer; source of yield via `vat.suck(vow, stUSDS, diff)` |
-| Clip (LSEV2-SKY-A) | [`0x836F56750517b1528B5078Cba4Ac4B94fBE4A399`](https://etherscan.io/address/0x836F56750517b1528B5078Cba4Ac4B94fBE4A399) | Liquidation module for LSEV2-SKY-A. `Due()` tracks pending auction value; `cut()` calls originate from or are compatible with Clip |
+| Clip (LSEV2-SKY-A) | [`0x836F56750517b1528B5078Cba4Ac4B94fBE4A399`](https://etherscan.io/address/0x836F56750517b1528B5078Cba4Ac4B94fBE4A399) | Liquidation module for LSEV2-SKY-A. **`stopped() = 3` at the snapshot, disabling `kick`, `redo`, and `take` since Sep 8, 2025.** `Due()` was zero because no auctions were active |
 | LockStake Engine V2 | (multiple contracts) | The SKY-staking borrowers. Borrow USDS from LSEV2-SKY-A ilk against locked SKY |
 
 ### Governance (shared with all Sky contracts)
@@ -156,7 +160,7 @@ The stUSDS source code is publicly available at [GitHub sky-ecosystem/stusds](ht
   - **Black Thursday (March 12, 2020)** — DAI/MCD liquidation auction failures (~$6M shortfall, recapped via MKR mint). Liquidation redesign followed
   - **USDC depeg (March 2023)** — DAI tracked USDC down to ~$0.88. Would similarly impact stUSDS via USDS. Sky diversifying into RWAs since
 - **stUSDS price history:** The `chi` accumulator has grown from 1.0 RAY at inception to 1.06535 RAY at snapshot, representing ~6.5% cumulative return over its lifetime. No chi-reduction (`cut()`) events have occurred
-- **TVL concentration:** Top holder enumeration requires Etherscan API Pro tier (not available). All known Sky governance addresses (PauseProxy, Chief, Mom) hold 0 stUSDS, consistent with the permissionless deposit model. DefiLlama confirms stUSDS price of $1.065 ([source](https://coins.llama.fi/prices/current/ethereum:0x99CD4Ec3f88A45940936F469E4bB72A2A701EEB9))
+- **Holder concentration (reconstructed from all 15,571 `Transfer` events through the snapshot):** 661 non-zero holders reconcile exactly to `totalSupply = 176,034,192.969180880861547285` shares. Top-1 held **15.71%**, top-5 **45.41%**, top-10 **55.05%**, and top-20 **67.56%**. The largest holder was an EOA ([`0xee28…1268`](https://etherscan.io/address/0xee2826453A4Fd5AfeB7ceffeEF3fFA2320081268), 27.66M shares / 15.71%); Morpho held 22.33M shares / 12.69% as pooled borrower collateral; the Curve pool held 3.19M shares / 1.81%. All known Sky governance addresses (PauseProxy, Chief, Mom) held 0 stUSDS. Reproducible analysis: [`reports/scripts/analyze_erc20_holders_snapshot.mjs`](https://github.com/yearn/risk-score/blob/stusds/reports/scripts/analyze_erc20_holders_snapshot.mjs)
 
 ## Funds Management
 
@@ -242,6 +246,8 @@ At the snapshot, using the VAT ilk state for LSEV2-SKY-A:
 - Actual borrow utilization: $156.4M / $187.5M = **83.4%**
 - The LSEV2-SKY-A `line` is set by stUSDS dynamically but capped by the RateSetter's `maxLine`
 - The `dust` parameter (30,000 RAD) prevents dust loans from persisting
+- Exact reconstruction of all 6,244 opened urns found 3,015 active urns and 36 debt-bearing urns. At the capped $0.025 feed, **11 urns with ~$70.01M debt were unsafe**
+- The configured Clipper could not liquidate those urns: `stopped() = 3` disables `kick`, `redo`, and `take`. The breaker had been at level 3 since September 8, 2025, with no later `File("stopped", ...)` event through the snapshot
 
 ### Provability
 
@@ -257,7 +263,8 @@ At the snapshot, using the VAT ilk state for LSEV2-SKY-A:
 | USDS backing balance | ✅ | `USDS.balanceOf(stUSDS)` |
 | RateSetter parameters | ✅ | `rateSetter.strCfg()`, `rateSetter.dutyCfg()`, `rateSetter.tau()`, `rateSetter.bad()` |
 | RateSetter facilitators (`buds`) | ✅ Onchain | `rateSetter.buds(addr)` — individual address checks. No active buds found at snapshot (all known governance addresses returned 0); no recent `Kiss`/`Diss` events. Rate changes currently require governance spells (48 h GSM). See Governance section below |
-| LockStake Engine V2 solvency | ⚠️ Complex | Requires aggregating per-urn positions in the LockStake contracts |
+| LockStake Engine V2 solvency | ✅ Onchain, computationally complex | Enumerate `Open` events, then aggregate pinned `vat.urns(ilk, urn)` reads. Snapshot analysis reconciles exactly to VAT `Art` and `lsSKY.totalSupply()`; see [`analyze_lse_snapshot.mjs`](https://github.com/yearn/risk-score/blob/stusds/reports/scripts/analyze_lse_snapshot.mjs) |
+| stUSDS holder concentration | ✅ Onchain, computationally complex | Replay all ERC-20 `Transfer` events through the snapshot and reconcile balances to `totalSupply()`; see [`analyze_erc20_holders_snapshot.mjs`](https://github.com/yearn/risk-score/blob/stusds/reports/scripts/analyze_erc20_holders_snapshot.mjs) |
 
 **Key transparency note:** The withdrawal-gating formula (`Art * rate + clip.Due() + assets <= totalSupply * chi`) is computed atomically at withdrawal time. Users can simulate it before submitting. The formula is fully onchain but requires multiple contract reads (stUSDS + VAT + Jug + Clip).
 
@@ -339,6 +346,7 @@ stUSDS inherits Sky's governance infrastructure identically to USDS and sUSDS:
 2. **Mom has immediate emergency powers** — can halt RateSetter, zero cap, zero line without 48 h GSM delay. These are defensive mechanisms but could be used to trap funds
 3. **RateSetter adds a governance dependency layer** — the `buds` facilitators (even if currently empty) are an additional class of privileged actors distinct from the Chief/PauseProxy path
 4. **48 h GSM delay is non-standard during high-utilization periods** — if utilization is near 100%, holders cannot exit during the delay even if they detect a malicious spell
+5. **The liquidation breaker was persistently fully engaged** — `Clip.stopped() = 3` had disabled `kick`, `redo`, and `take` since September 8, 2025. Eleven urns with ~$70.01M debt were unsafe at the snapshot feed, so restoring the core liquidation backstop required an explicit governance action
 
 ### Programmability
 
@@ -351,9 +359,10 @@ stUSDS inherits Sky's governance infrastructure identically to USDS and sUSDS:
 | `duty` borrower rate | **Governance-set** | Via RateSetter buds (16 h cooldown) |
 | `cap`, `line` | **Governance-set** | Via RateSetter buds (16 h cooldown) |
 | `cut()` loss socialization | **Governance/Clip** | Clip during auction settlement; governance with 48 h delay |
+| LSE liquidation | **Disabled / governance-dependent at snapshot** | `Clip.stopped() = 3`; no `kick`, `redo`, or `take` until an authorized `file("stopped", lowerLevel)` transaction |
 | Upgrading stUSDS implementation | **Governance** | 48 h delay |
 
-System operations are predominantly programmatic, but stUSDS has more governance touchpoints than sUSDS — the active rate-setting model requires ongoing parameter adjustments by either facilitators or governance.
+User accounting remains programmatic, but the core borrower-loss-control path was not operational at the snapshot. Rate management also requires ongoing parameter adjustments by facilitators or governance. This makes the live system hybrid rather than fully autonomous.
 
 ### External Dependencies
 
@@ -362,7 +371,7 @@ System operations are predominantly programmatic, but stUSDS has more governance
 | **USDS** | Core functionality | **Critical** — stUSDS wraps USDS. A USDS failure breaks stUSDS completely | See [sky-usds.md](sky-usds.md) for USDS risk assessment (Score 1.3 — Minimal Risk) |
 | **Sky/MCD Core (VAT, Vow, Jug, Chief, Pause, PauseProxy)** | All operations | **Critical** — stUSDS is built on the same infrastructure. VAT ilk accounting, Vow-based yield, Chief governance all directly affect stUSDS | 8+ years production, extensively audited |
 | **LockStake Engine V2** | Borrower side | **Critical** — all lending risk depends on LockStake borrower solvency and the liquidation module | SKY-backed, over-collateralized. Specific CR parameters are governance-set |
-| **LockStake Clipper** (`0x836F…A399`) | Bad-debt absorption | **High** — if the Clipper fails to liquidate underwater borrowers, losses accrue to stUSDS via `cut()` | Standard Sky/MCD liquidation infrastructure |
+| **LockStake Clipper** (`0x836F…A399`) | Bad-debt absorption | **Critical and unavailable at snapshot** — `stopped() = 3` disabled `kick`, `redo`, and `take`; unsafe debt could not enter or clear auctions | Breaker level 3 set Sep 8, 2025 and not lowered through block 25595151 |
 | **Conv (rates-conv)** | RateSetter rate conversion | **Low** — pure math contract (`btor` / `rtob`), no state, no admin | Part of shared Sky rate-conversion infrastructure |
 | **SPBEAM** | RateSetter design origin | **Indirect** — architectural dependency on SPBEAM's proven rate-control model | Audited separately ([reports](https://github.com/sky-ecosystem/sp-beam/tree/master/audits)) |
 | **Morpho Blue** | External leverage venue (stUSDS as collateral) | **Low for stUSDS core / High for affected borrowers** — not required for stUSDS to function, but a `chi` cut can trigger same-block liquidations and lender losses | ~$22.74M supplied and ~$18.81M borrowed at snapshot; this is lending exposure, not spot exit liquidity |
@@ -426,7 +435,8 @@ This transparency is a positive signal for operational maturity.
 | `MCD_PAUSE` spells touching stUSDS | `Plot` event | **Any** — provides 48 h warning | Behind timelock |
 | stUSDS `Upgraded` event | event log | Any implementation change | Behind 48 h GSM delay |
 | **SKY/USD price and LSE feed** | Underlying OSM plus [`LockstakeCappedOsmWrapper`](https://etherscan.io/address/0x0C13fF3DC02E85aC169c4099C09c9B388f2943Fd) | Wrapper feed is `min(OSM, cap)`. **< $0.025** means the market price has crossed the snapshot cap and further declines reduce LSE collateral value; do not infer liquidations from aggregate CR alone | 15 min |
-| **Per-urn LSEV2 safety** | For each urn: `ink × vatSpot / (art × rate)`; aggregate collateral from `lsSKY.totalSupply()` plus unsold auction lots | **< 1.10** warning; **< 1.00** urn is unsafe and can be barked. Report count and debt of unsafe urns rather than treating aggregate CR as a position-level threshold | Hourly |
+| **Per-urn LSEV2 safety** | For each urn: `ink × vatSpot / (art × rate)`; aggregate collateral from `lsSKY.totalSupply()` plus unsold auction lots | **< 1.10** warning; **< 1.00** urn is unsafe and would be barkable only when `clip.stopped() < 1`. Report count and debt of unsafe urns rather than treating aggregate CR as a position-level threshold | Hourly |
+| **Clip `stopped()`** | onchain | **Any value >0** means liquidation functionality is restricted; **3 is critical** because `kick`, `redo`, and `take` are all disabled. Snapshot was 3 | Every block / Real time |
 | **Dog.dirt(ilk)** approaching **Dog.hole** | onchain | `dirt > 0.8 × hole` — liquidation throughput saturated; queued auctions at risk of further price deterioration | On every `Bark` event |
 | **Clip `Take` events** | event log on [`0x836F56750517b1528B5078Cba4Ac4B94fBE4A399`](https://etherscan.io/address/0x836F56750517b1528B5078Cba4Ac4B94fBE4A399) | **Spike >3 auctions/hour** — active liquidation cascade; sustained >10/hour = crisis mode | Real time |
 | **Clip `Due()` > 0 for >24 h** | onchain | Stale auction — potential failed liquidation, bad debt may flow to stUSDS | Hourly |
@@ -473,6 +483,7 @@ spot.ilks("LSEV2-SKY-A") → (pip, mat)  # Oracle address & liquidation ratio
 dog.ilks("LSEV2-SKY-A") → (clip, chop, hole, dirt)  # Liquidation engine state
 clip.kicks() → uint256          # Total auction count; rising = liquidation activity
 clip.Due() → uint256            # Pending auction value (RAD). Non-zero beyond 1 h = stale auction
+clip.stopped() → uint256        # 0 active; 1 blocks kick; 2 also blocks redo; 3 also blocks take
 lsSKY.totalSupply() → uint256    # Locked SKY in active urns (WAD)
 clip.list() / clip.sales(id)     # Add unsold auction lots while Due() > 0
 
@@ -702,9 +713,9 @@ Snapshot block 25595151 (July 23, 2026).
 | stUSDS-specific incidents | **None** since launch |
 | TVL stability | Steady growth from launch; no forced unwind or crisis |
 
-**Historical Score: 2.0 / 5** — stUSDS itself has only ~10 months of production (Score 3 threshold = 6–12 months, Score 2 = 1–2 years). TVL is well above $100M (Score 1 criterion). **The younger age of the specific contract is the binding constraint** — the underlying MCD core is 8+ years old, but stUSDS introduces novel mechanisms (dynamic debt ceiling, withdrawal gating, RateSetter) that are less battle-tested. Score 2.0: at the boundary between 1-2 years and $100M+ TVL.
+**Historical Score: 3.0 / 5** — stUSDS had ~11 months of production, which directly matches the rubric's 6–12 month Score-3 band. The $187.5M scale and long MCD-core history are positives, but they do not move the younger stUSDS/RateSetter/Clip integration into the 1–2 year band. The persistent level-3 Clipper breaker also means the product has not accumulated live liquidation experience.
 
-**Cat 1 Score = (1.0 + 2.0) / 2 = 1.5 / 5**
+**Cat 1 Score = (1.0 + 3.0) / 2 = 2.0 / 5**
 
 #### Category 2: Centralization & Control Risks (Weight: 30%)
 
@@ -741,10 +752,10 @@ Score 1.5: Scores well on overall DAO decentralization (Score 1) but the Mom eme
 | Off-chain dependencies | RateSetter facilitators need off-chain algorithms to compute optimal rates |
 | Keeper dependency | None for critical user flows; `drip()` is permissionless |
 
-**Programmability Score: 2.0 / 5** — The system is "mostly programmatic with minor admin input" (Score 2) rather than "fully programmatic" (Score 1) because:
+**Programmability Score: 3.0 / 5** — The system matches the rubric's hybrid onchain/admin-dependent band:
 - The `str`, `duty`, `cap`, and `line` parameters require ongoing active management by facilitators or governance
 - The `cut()` mechanism is a manual governance/auction action, not a pure algorithmic operation
-- sUSDS's `ssr` is comparatively static (Score 1); stUSDS's actively managed rate model is fundamentally different
+- Most importantly, the live Clipper was fully stopped: level 3 disabled all auction starts, resets, and purchases. Restoring the critical liquidation backstop requires an authorized parameter transaction
 
 **Subcategory C: External Dependencies**
 
@@ -757,9 +768,9 @@ Score 1.5: Scores well on overall DAO decentralization (Score 1) but the Mom eme
 | Morpho Blue | External leverage venue — non-critical for stUSDS function, but `chi` cuts can liquidate borrowers and impair Morpho lenders |
 | Chainlink / MCD Spot (OSM) | Mature multi-source oracle for LockStake collateral pricing. Indirect but critical for liquidation integrity |
 
-**Dependencies Score: 2.0 / 5** — stUSDS has multiple critical dependencies (USDS, MCD core, LockStake Engine + Clip, oracles), but they are all blue-chip/MCD-internal. This places it at Score 2 ("2-3 established protocol dependencies, some critical functions depend on them") rather than Score 1 (no dependencies) or Score 3 (many or newer dependencies). The LockStake Engine V2 is the newest dependency and the one with the least production history.
+**Dependencies Score: 3.0 / 5** — stUSDS depends critically on USDS, MCD accounting/governance, LockStake Engine V2, Clipper, and the SKY oracle path. The components are established or MCD-internal, but failure of the LockStake/Clip path directly exposes principal. That matches the rubric's Score-3 condition: multiple established dependencies with critical functions depending on them. The snapshot demonstrates that this is not theoretical because the configured Clipper was fully stopped.
 
-**Cat 2 Score = (1.5 + 2.0 + 2.0) / 3 = 1.83 → 1.8 / 5**
+**Cat 2 Score = (1.5 + 3.0 + 3.0) / 3 = 2.5 / 5**
 
 #### Category 3: Funds Management (Weight: 30%)
 
@@ -772,15 +783,17 @@ Score 1.5: Scores well on overall DAO decentralization (Score 1) but the Mom eme
 | Lending risk | USDS is lent to LockStake borrowers (SKY-backed, over-collateralized). Borrowers can default, triggering loss to stUSDS via `cut()` |
 | First-loss position | stUSDS is **first-loss** capital — no buffer or insurance fund between borrowers and depositors |
 | Collateral quality (borrower side) | SKY governance token — volatile, governance-dependent collateral. Lower quality than ETH/wstETH/WBTC used in traditional MCD CDPs |
-| System CR (borrower side) | Set by governance for LSEV2-SKY-A. **Liquidation ratio (`mat`) = 120%** (1.2 RAY), read from `MCD_SPOT.ilks("LSEV2-SKY-A").mat`. SKY collateral price sourced from a **LockstakeCappedOsmWrapper** ([`0x0C13fF3DC02E85aC169c4099C09c9B388f2943Fd`](https://etherscan.io/address/0x0C13fF3DC02E85aC169c4099C09c9B388f2943Fd)) backed by a **Chronicle OSM** ([`0xc2ffbbDCCF1466Eb8968a846179191cb881eCdff`](https://etherscan.io/address/0xc2ffbbDCCF1466Eb8968a846179191cb881eCdff)). Current SKY price: ~$0.0613. This is a low liquidation ratio compared to typical MCD crypto CDPs (145–170%) — consistent with stUSDS's first-loss risk-capital design
+| System CR (borrower side) | **Liquidation ratio (`mat`) = 120%**. SKY is priced through the $0.025 capped wrapper. Exact reconstruction found 11 unsafe urns with ~$70.01M debt, while the Clipper was fully stopped |
 | Verifiability | Fully onchain for USDS backing. Complex for borrower-level solvency (requires reading per-urn positions in LockStake contracts) |
 | Loss mechanism | `cut()` — permanent chi reduction. No insurance, no compensation path. Socialized to ALL stUSDS holders |
 
-**Collateralization Score: 2.5 / 5** — 100% backed onchain (Score 1-2 criteria), but with critical caveats:
-- The USDS is lent to borrowers posting **SKY governance tokens** as collateral — a materially riskier collateral class than the ETH/wstETH/WBTC backing traditional MCD vaults
-- stUSDS is in a **first-loss position** with no intermediate buffer. A single large borrower default directly impairs all holders
-- The borrower-side over-collateralization parameters are set by the same governance that oversees stUSDS — a potential conflict during crisis
-- Score 2.5: between "100% onchain, high-quality collateral" (Score 1-2) and "mixed quality" (Score 3). The USDS backing is Score-1 quality, but the lending-book quality and first-loss position warrant a higher score
+**Collateralization Score: 3.5 / 5** — the balance sheet is fully onchain, but its economic protection is materially weaker than the raw aggregate CR suggests:
+- stUSDS is unbuffered first-loss capital against volatile SKY collateral
+- 11 urns representing **44.8% of LSE debt** were already unsafe under the live capped feed
+- the only configured auction path was fully stopped, so the protocol could neither start nor clear those liquidations
+- the current $0.0613 market value provided economic coverage, but a fall below $0.02546 begins principal shortfall in the first urn and losses can accumulate without programmatic disposal
+
+This falls between the rubric's Score-3 mixed-quality collateral band and Score-4 impaired/illiquid protection band.
 
 **Subcategory B: Provability**
 
@@ -795,7 +808,7 @@ Score 1.5: Scores well on overall DAO decentralization (Score 1) but the Mom eme
 
 **Provability Score: 1.5 / 5** — Excellent onchain transparency for the core metrics (chi, backing, withdrawal availability formula). The borrower-side solvency assessment is more complex but still onchain. Score 1.5: between "fully onchain, anyone can verify" (Score 1 — sUSDS lands here because it has no borrower complexity) and "mostly onchain, some offchain" (Score 2).
 
-**Cat 3 Score = (2.5 + 1.5) / 2 = 2.0 / 5**
+**Cat 3 Score = (3.5 + 1.5) / 2 = 2.5 / 5**
 
 #### Category 4: Liquidity Risk (Weight: 15%)
 
@@ -808,11 +821,11 @@ Score 1.5: Scores well on overall DAO decentralization (Score 1) but the Mom eme
 | Historical stress | No `cut()` events, no utilization spikes to 100%. ~11-month track record without liquidity crisis |
 | Large holder impact | A whale exiting >$31.1M would temporarily exhaust withdrawal capacity; subsequent withdrawals would be blocked until utilization drops |
 
-**Score: 2.5 / 5** — The formal mechanism (ERC-4626, zero fee, no queue) reads like a Score 1-2 profile, but the **utilization-based gating** is a structural liquidity constraint not present in sUSDS. At 83.4% utilization, only 16.6% of assets are liquid. Key considerations:
-- **Score 2.5-3.0 territory:** "Direct redemption with minor delays" (Score-2) is too generous — the delay could be indefinite if utilization reaches 100%. "Market-based or short queues" (Score-3) is closer, but stUSDS has a direct withdrawal path when idle funds exist
+**Score: 3.5 / 5** — The formal mechanism is ERC-4626, but the effective exit sits between the rubric's Score-3 market/short-queue band and Score-4 restricted-withdrawal band. At 83.4% utilization, only 16.6% of assets were liquid. Key considerations:
+- The largest holder's position represented ~15.7% of shares and nearly all immediately withdrawable USDS at `chi`; the top two holders together exceeded available withdrawals
 - **No throttle mechanism to speak of** — withdrawals stop cold, not gradually
 - **DEX liquidity is insufficient** for large exits (the Curve secondary path would likely trade at a poor price if direct withdrawals are gated)
-- Score 2.5: midpoint between a normally redeemable ERC-4626 vault and market-only exit, recognizing both the live direct path and its hard utilization constraint
+- Disabled liquidations prevent the normal borrower-side unwind that would otherwise restore USDS liquidity from unsafe positions
 
 #### Category 5: Operational Risk (Weight: 5%)
 
@@ -833,33 +846,33 @@ Score 1.5: Scores well on overall DAO decentralization (Score 1) but the Mom eme
 
 | Category | Score | Weight | Weighted |
 |----------|------:|-------:|---------:|
-| Audits & Historical | 1.5 | 20% | 0.300 |
-| Centralization & Control | 2.0 | 30% | 0.600 |
-| Funds Management | 2.0 | 30% | 0.600 |
-| Liquidity Risk | 2.5 | 15% | 0.375 |
+| Audits & Historical | 2.0 | 20% | 0.400 |
+| Centralization & Control | 2.5 | 30% | 0.750 |
+| Funds Management | 2.5 | 30% | 0.750 |
+| Liquidity Risk | 3.5 | 15% | 0.525 |
 | Operational Risk | 1.0 |  5% | 0.050 |
-| **Final Score** | | | **1.925 → 1.9 / 5.0** |
+| **Final Score** | | | **2.475 → 2.5 / 5.0** |
 
 **Score justification notes:**
-- **Audits & Historical (1.5):** Top-tier audits (2 firms, 4 reports + Certora formal verification) earn Score 1.0 for audits, but only ~11 months of production for stUSDS specifically (Score 2 for historical). Average = 1.5.
-- **Centralization & Control (2.0):** Sky's Chief DAO is highly decentralized (Score 1 territory), but stUSDS adds Mom emergency powers without GSM delay (Mom itself only ~2 months in production), `cut()` without delay via Clip, and actively managed RateSetter parameters (buds currently inactive but infrastructure exists). Programmability is less automatic than sUSDS (active rate management vs static SSR). Dependencies are blue-chip but multi-layered (MCD core + LockStake + Clip). Raw average = 1.83, conservatively rounded to 2.0 per rubric guidance.
-- **Funds Management (2.0):** 1:1 USDS backing is Score 1, but the lending book quality (SKY-token-collateralized loans, first-loss position) pushes collateralization to 2.5. Provability is excellent (1.5) with all metrics onchain. The LockStake borrower solvency assessment adds complexity. Average = 2.0.
-- **Liquidity Risk (2.5):** Direct ERC-4626 withdrawal exists but is gated by borrowing utilization (only ~$31.1M / $187.5M = 16.6% available at snapshot). Below the Score-2 threshold for frictionless exit but above Score-3 for market-only exit. The structural risk of 0% withdrawal capability at 100% utilization + the absence of a gradual throttling mechanism (it's a hard stop) warrants Score 2.5.
+- **Audits & Historical (2.0):** Top-tier audits earn 1.0, while ~11 months of production directly matches the rubric's 3.0 band. Average = 2.0.
+- **Centralization & Control (2.5):** Governance remains strong, but rate management is active and the borrower liquidation backstop required governance to lower a persistent level-3 breaker. Critical dependencies include USDS, MCD, LockStake, Clipper, and the oracle path.
+- **Funds Management (2.5):** stUSDS is transparent but unbuffered first-loss capital. Eleven unsafe urns carried ~$70.01M debt and could not be auctioned while the Clipper was stopped. The exact position set is now provable, but verifiability does not remove the economic risk.
+- **Liquidity Risk (3.5):** Only ~$31.1M / 16.6% was immediately withdrawable, the largest holder alone could consume nearly all of it, the top two exceeded it, and the stopped liquidation path could not recycle unsafe collateral into USDS.
 - **Operational Risk (1.0):** Top-tier team, documentation, bug bounty, and incident response.
 
-**Final Score: 1.9 / 5.0** — within the Low-Risk tier (1.5–2.5), clearly differentiated from sUSDS (1.3 — Minimal Risk) due to the withdrawal-gating, first-loss exposure, and active-rate-setting governance dependencies inherent to the risk-capital model.
+**Final Score: 2.5 / 5.0 — Medium Risk.** The decisive evidence is not merely theoretical SKY volatility: at the snapshot, 44.8% of LSE debt sat in unsafe urns under the configured feed while the sole Clipper was fully stopped. Strong audits, governance, and onchain transparency prevent a higher score, but standard Low-Risk monitoring is not sufficient.
 
 ### Risk Tier
 
 | Final Score | Risk Tier | Recommendation |
 |------------|-----------|----------------|
 | 1.0–1.5 | Minimal Risk | Approved, high confidence |
-| **1.5–2.5** | **Low Risk** | **Approved with standard monitoring** |
-| 2.5–3.5 | Medium Risk | Approved with enhanced monitoring |
+| 1.5–<2.5 | Low Risk | Approved with standard monitoring |
+| **2.5–3.5** | **Medium Risk** | **Approved with enhanced monitoring** |
 | 3.5–4.5 | Elevated Risk | Limited approval, strict limits |
 | 4.5–5.0 | High Risk | Not recommended |
 
-**Final Risk Tier: Low Risk (1.9 / 5.0) — Approved with standard monitoring**
+**Final Risk Tier: Medium Risk (2.5 / 5.0) — Approved with enhanced monitoring**
 
 ---
 
@@ -891,29 +904,33 @@ SKY price alone does not determine realized bad debt. LSE bad debt depends on ea
 | Liquidation ratio (`mat`) | **120%** | `MCD_SPOT.ilks("LSEV2-SKY-A").mat` |
 | Liquidation penalty (`chop`) | **13%** | `Dog.ilks("LSEV2-SKY-A").chop = 1.13` |
 | Per-ilk active-auction limit (`hole`) | **250,000 USDS** | `Dog.ilks("LSEV2-SKY-A").hole`; maximum debt-plus-fees targeted by concurrently active auctions, not an amount per cooldown |
+| Clipper breaker | **`stopped = 3`** | Disables `kick`, `redo`, and `take`; set in [this Sep 8, 2025 transaction](https://etherscan.io/tx/0x0032e26b8e4b284e3c61ea8aeb0870e3f0dbb7d3173945faf0449ca6ec5138e8) and not lowered through the snapshot |
+| Exact urn set | **6,244 opened / 3,015 active / 36 debt-bearing** | Reconstructed from every engine `Open` event and pinned `vat.urns()` reads; [`analysis script`](https://github.com/yearn/risk-score/blob/stusds/reports/scripts/analyze_lse_snapshot.mjs) |
 | stUSDS total assets | **$187.5M** | `stUSDS.totalAssets()` |
 | stUSDS withdrawal availability | **$31.1M** (16.6% idle) | Computed from `totalAssets − (Art×rate + Due)` |
 | Morpho stUSDS markets | **~$22.74M supplied / ~$18.81M borrowed** | [`Morpho.market(id)`](https://etherscan.io/address/0xBBBBBbbBBb9cC5e90e3b3Af64bdAF62C37EEFFCb) across the five market IDs |
 
 `SKY.balanceOf(engine)` is incomplete because the engine can transfer SKY to a selected vote delegate while retaining the same VAT collateral credit. The [engine lock path](https://github.com/sky-ecosystem/lockstake/blob/master/src/LockstakeEngine.sol#L291-L308) mints one `lsSKY` per SKY locked; at this snapshot there were no active auctions, making `lsSKY.totalSupply()` the reconciled locked-collateral measure. When `Clip.Due() > 0`, monitoring must also add each active auction's unsold `lot` because `lsSKY` is burned when an urn is kicked.
 
-### Aggregate SKY Price Sensitivity
+### Per-Urn SKY Price Sensitivity
 
-| SKY Market Price | Drop from $0.0613 | LSE Feed Used | Aggregate CR | What Can Be Concluded |
-|-----------------:|------------------:|--------------:|-------------:|------------------------|
-| $0.0613 | 0% | $0.0250 cap | 276.3% effective | Market price is above the cap; individual urn safety is evaluated using $0.025 |
-| $0.0307 | 49.9% | $0.0250 cap | 276.3% effective | No feed deterioration yet because the market remains above the cap |
-| **$0.0250** | **59.2%** | **$0.0250** | **276.3%** | Cap boundary; further OSM declines reduce VAT collateral value |
-| $0.0184 | 70.0% | $0.0184 | 203.3% | Some urns may be unsafe, but aggregate CR does not identify which or how much debt |
-| $0.0153 | 75.0% | $0.0153 | 169.1% | Aggregate collateral still exceeds debt and the 120% liquidation ratio |
-| **$0.01086** | **82.3%** | **$0.01086** | **120.0%** | Aggregate CR reaches `mat`; this still does not mean every urn crosses simultaneously |
-| **$0.00905** | **85.2%** | **$0.00905** | **100.0%** | Aggregate collateral equals aggregate debt before auction slippage; isolated urn losses can occur above this price |
+The position reconstruction reconciles to **17.281430792B SKY** and **$156.3892195M debt**, matching `lsSKY.totalSupply()` and VAT ilk debt. The most leveraged urn held 4.0619M SKY against $103,410 debt: its 120%-CR liquidation threshold was **$0.0305503**, above the $0.025 capped feed, and its principal-parity price was **$0.0254586**. It was therefore already unsafe under the configured feed. Across the book, **11 urns carrying $70.005M debt were unsafe at the snapshot**, but `stopped = 3` prevented them from entering auctions.
 
-**TODO — per-urn LSE distribution:** enumerate every active LSEV2 urn and pin its `vat.urns(ilk, urn)` collateral/debt at the snapshot. Without this distribution, the report cannot claim a first-liquidation price, the fraction of debt liquidatable at a given SKY price, or a deterministic LSE bad-debt range.
+| SKY Market Price | Drop from $0.0613 | LSE Feed | Aggregate CR | Unsafe Urns / Debt | Idealized Principal Shortfall | Implied `chi` Loss |
+|-----------------:|------------------:|---------:|-------------:|-------------------:|-------------------------------:|-------------------:|
+| $0.0613 | 0% | $0.0250 cap | 276.3% | 11 / $70.01M | $0 at current market clearing value | 0% |
+| $0.0307 | 49.9% | $0.0250 cap | 276.3% | 11 / $70.01M | $0 | 0% |
+| **$0.0250** | **59.2%** | **$0.0250** | **276.3%** | **11 / $70.01M** | **$10,066** | **0.005%** |
+| $0.0184 | 70.0% | $0.0184 | 203.3% | 23 / $105.01M | $10.30M | 5.49% |
+| $0.0153 | 75.0% | $0.0153 | 169.1% | 30 / $155.50M | $23.98M | 12.79% |
+| $0.01086 | 82.3% | $0.01086 | 120.0% | 33 / $155.93M | $59.42M | 31.68% |
+| $0.00905 | 85.2% | $0.00905 | 100.0% | 33 / $155.93M | $75.48M | 40.25% |
+
+The idealized shortfall is `Σ max(debt_i − collateral_i × marketPrice, 0)`. It assumes every underwater urn ultimately clears at the stated market price, with no additional auction slippage. It is not a prediction of immediate `cut()` size—especially while the Clipper is stopped—but it bounds the principal deficit embedded in the reconstructed book.
 
 ### When LSE Bad Debt Reaches stUSDS
 
-An unsafe urn starts an auction, but that event alone does not reduce `chi`. [`LockstakeClipper.kick()`](https://github.com/sky-ecosystem/lockstake/blob/master/src/LockstakeClipper.sol#L240-L280) tracks `due = tab / chop`, representing original debt without the liquidation penalty. While the auction is active, `Due()` replaces the removed VAT debt in the stUSDS withdrawal check and reduces withdrawable liquidity.
+Normally an unsafe urn can be barked into an auction, but that event alone does not reduce `chi`. [`LockstakeClipper.kick()`](https://github.com/sky-ecosystem/lockstake/blob/master/src/LockstakeClipper.sol#L240-L280) tracks `due = tab / chop`, representing original debt without the liquidation penalty. While the auction is active, `Due()` replaces the removed VAT debt in the stUSDS withdrawal check and reduces withdrawable liquidity. At this snapshot, however, `stopped = 3` made `kick`, `redo`, and `take` revert. Unsafe debt therefore remained in VAT rather than being auctioned, and no automatic Clip-originated `cut()` could occur until governance lowered the breaker.
 
 The irreversible loss occurs only when an auction exhausts its SKY collateral and the remaining original `due` exceeds the final auction payment `owe`; the [clipper then calls `stUSDS.cut(due - owe)`](https://github.com/sky-ecosystem/lockstake/blob/master/src/LockstakeClipper.sol#L430-L448). Ignoring auction timing and slippage, the per-urn principal shortfall at clearing price `p` is:
 
@@ -949,11 +966,19 @@ The following results use all 24 non-zero borrower positions reconstructed from 
 | 12.0% | $22.50M | ~$17.16M | ~$3.3K |
 | 20.0% | $37.51M | ~$17.16M | ~$1.44M |
 
+Combining the exact LSE shortfall curve with these Morpho thresholds gives the requested end-to-end boundaries under the idealized clearing assumption:
+
+- **First LSE principal shortfall:** SKY below **$0.0254586** (−58.47% from $0.0613).
+- **First Morpho liquidation caused by a realized LSE loss:** approximately **$1.934M** of LSE loss / 1.031% `chi` cut, reached at SKY **$0.0208919** (−65.92%).
+- **First modeled Morpho lender bad debt:** approximately **$20.921M** of LSE loss / 11.156% `chi` cut, reached at SKY **$0.0158955** (−74.07%).
+
+Because the Clipper was fully stopped, these SKY prices describe latent economic shortfall, not automatic realization timing. Loss could be crystallized discontinuously after a governance restart and auction clearing, or directly through a governance `cut()`.
+
 ### Key Assumptions & Caveats
 
 1. **Aggregate CR masks individual leverage.** LSE liquidation is per urn. Aggregate thresholds are structural reference points, not predictions that all positions liquidate together.
 
-2. **Auction execution is path-dependent.** Clip prices decay and auctions can require resets; keeper availability, `stopped`, oracle validity, gas conditions, and SKY depth all affect clearing. The report must not assume that every auction clears or assign a loss range from price alone.
+2. **Auction execution was disabled, not merely uncertain.** `stopped = 3` prevented `kick`, `redo`, and `take`. If governance re-enables the Clipper, subsequent execution remains path-dependent on keeper availability, oracle validity, gas conditions, and SKY depth.
 
 3. **`Dog.hole` limits concurrent auction target, not debt per cooldown.** At $250,000, new `bark()` calls can be constrained when per-ilk `dirt` approaches `hole`; capacity returns as auction payments call `Dog.digs()`. Throughput depends on how fast keepers take auctions, not a fixed reset interval.
 
@@ -980,6 +1005,7 @@ The following results use all 24 non-zero borrower positions reconstructed from 
 - **Incident-based:**
   - **Any `cut()` call on stUSDS** — loss socialization event; immediate reassessment required
   - **Any `chi()` decrease** — permanent holder impairment
+  - **Any Clipper breaker change** — `stopped > 0` restricts liquidation; level 3 disables all `kick`, `redo`, and `take`. Reassess immediately when lowered because accumulated unsafe debt can enter auctions
   - **Any Mom emergency action** (`DissRateSetterBud`, `HaltRateSetter`, `ZeroCap`, `ZeroLine`) — emergency response or governance crisis
   - RateSetter `bad` set to 1 — circuit breaker triggered
   - Any LockStake Engine V2 exploit or governance attack
@@ -995,4 +1021,5 @@ The following results use all 24 non-zero borrower positions reconstructed from 
 
 | Date | Score | Notes |
 | --- | --- | --- |
-| July 23, 2026 | 1.9 | Initial assessment. stUSDS deployed Aug 25, 2025 (~11 months in production), $187.5M TVL, 4 audits + Certora formal verification, 83.4% borrowing utilization. Etherscan verified. SKY stress model uses the $0.025 capped LSE feed and 17.281B reconciled locked SKY; Morpho exposure is ~$22.74M supplied / ~$18.81M borrowed with account-level `chi`-cut thresholds. Mom deployed separately May 28, 2026. Unresolved: top-holder distribution (needs Etherscan API Pro). |
+| July 23, 2026 | 1.9 | Initial assessment before exact per-urn and holder reconstruction. |
+| July 23, 2026 | 2.5 | Corrected assessment. All 6,244 opened LSE urns and 15,571 stUSDS transfers were reconstructed at block 25595151. Eleven unsafe urns carried ~$70.01M debt while `Clip.stopped() = 3` had disabled `kick`, `redo`, and `take` since Sep 8, 2025. Holder concentration: top-1 15.71%, top-5 45.41%, top-10 55.05%. Integrated thresholds: first Morpho liquidation at ~$1.934M realized LSE loss / SKY ~$0.02089; first modeled Morpho lender bad debt at ~$20.921M loss / SKY ~$0.01590. Score raised to 2.5 (Medium Risk). |
