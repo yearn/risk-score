@@ -14,6 +14,7 @@ allowed-tools: Read Write Edit Grep Glob Bash(git:*) Bash(gh:*) Bash(cast:*) Bas
 - Every new risk report must include a matching dependency graph at `reports/graph/<slug>.yaml`; follow `reports/graph/SKILL.md`.
 - Never trust protocol documentation alone. Use docs to understand the intended architecture, then verify claims onchain when possible.
 - Back every material claim with a valid link. This includes contracts, transactions, governance records, protocol docs, dashboard/API data, TVL values, and allocation data.
+- **Never quote a truncated address without a link to the full one.** A bare `` `0xABCD…EF12` `` is unverifiable — the user cannot click it, and search engines/explorers cannot resolve it. Always wrap it as `` [`0xABCD…EF12`](https://etherscan.io/address/0x<full address>) `` (or the appropriate chain explorer), so the visible text stays compact but the full address is one click away. This applies in every report file and in `src/data/bridges.json` `detail` strings (the Bridges page renders `detail` as markdown for exactly this reason). Same rule for tx hashes, pool ids, and any other short identifier a reader might want to verify onchain.
 - Actively search for hidden or indirect fund-loss paths for end users: privileged minting, upgradeable implementations, proxy admins, oracle control, role escalation, pause/blacklist paths, redemption gates, offchain custody, fee switches, strategy migration controls, and dependency failure modes.
 
 ## Pre-Assessment: Architecture First
