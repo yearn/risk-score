@@ -1,0 +1,123 @@
+slug: sky-stusds
+title: stUSDS — Contract Dependency Graph
+chain: ethereum
+
+categories:
+  - id: vault
+    label: Vault
+  - id: governance
+    label: Governance
+  - id: infra
+    label: Sky Infra
+  - id: dependency
+    label: External Dependency
+
+nodes:
+  # Vault
+  - id: stusds
+    label: stUSDS (ERC-4626 Vault)
+    address: "0x99CD4Ec3f88A45940936F469E4bB72A2A701EEB9"
+    category: vault
+
+  # Dependencies (external to stUSDS)
+  - id: usds
+    label: USDS
+    address: "0xdC035D45d973E3EC169d2276DDab16f1e407384F"
+    category: dependency
+  - id: vat
+    label: MCD VAT (Core Ledger)
+    address: "0x35D1b3F3D7966A1DFe207aa4514C12a259A0492B"
+    category: dependency
+    note: Holds LSEV2-SKY-A ilk debt accounting. Routes yield from Vow via vat.suck.
+  - id: lockstake
+    label: LockStake Engine V2
+    category: dependency
+    note: SKY-backed borrowers access USDS from stUSDS pool via LSEV2-SKY-A ilk. Multiple contracts — no single address.
+  - id: morpho-blue
+    label: Morpho Blue
+    address: "0xBBBBBbbBBb9cC5e90e3b3Af64bdAF62C37EEFFCb"
+    category: dependency
+    note: stUSDS used as collateral in several Morpho Blue markets (~$1.5M, secondary liquidity).
+
+  # Infra (Sky internal machinery)
+  - id: rate-setter
+    label: StUsdsRateSetter
+    address: "0x30784615252B13E1DbE2bDf598627eaC297Bf4C5"
+    category: infra
+  - id: mom
+    label: StUsdsMom (Emergency Halt)
+    address: "0x99159d0b885CC6633daC7CD4d82e4247A834b89A"
+    category: infra
+  - id: clip
+    label: Clip (LSEV2-SKY-A)
+    address: "0x836F56750517b1528B5078Cba4Ac4B94fBE4A399"
+    category: infra
+  - id: pause
+    label: MCD Pause (48h GSM)
+    address: "0xbE286431454714F511008713973d3B053A2d38f3"
+    category: infra
+
+  # Governance
+  - id: pause-proxy
+    label: PauseProxy
+    address: "0xBE8E3e3618f7474F8cB1d074A26afFef007E98FB"
+    category: governance
+  - id: chief
+    label: MCD Chief
+    address: "0x929d9A1435662357F54AdcF64DcEE4d6b867a6f9"
+    category: governance
+
+edges:
+  # Capital flow
+  - from: stusds
+    to: usds
+    kind: deposits-into
+    label: "USDS wrapping"
+  - from: stusds
+    to: lockstake
+    kind: allocates-to
+    label: "~83.4% utilization"
+  - from: stusds
+    to: vat
+    kind: routes-through
+    label: "yield via vat.suck"
+
+  # Governance signaling
+  - from: chief
+    to: pause
+    kind: proposes-on
+  - from: pause
+    to: pause-proxy
+    kind: controls
+
+  # PauseProxy holds wards / control over stUSDS ecosystem
+  - from: pause-proxy
+    to: stusds
+    kind: holds-role
+    label: "wards=1"
+  - from: pause-proxy
+    to: rate-setter
+    kind: holds-role
+    label: "wards=1"
+  - from: pause-proxy
+    to: mom
+    kind: controls
+    label: "owner"
+
+  # RateSetter manages stUSDS parameters
+  - from: rate-setter
+    to: stusds
+    kind: manages
+    label: "str, cap, line"
+
+  # Mom emergency control over RateSetter
+  - from: mom
+    to: rate-setter
+    kind: controls
+    label: "halt, zero params"
+
+  # Clip can socialize losses to stUSDS
+  - from: clip
+    to: stusds
+    kind: holds-role
+    label: "cut() auth"
