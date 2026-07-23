@@ -92,11 +92,13 @@ At the snapshot, there are five Morpho Blue markets using stUSDS as collateral. 
 
 | Market | Oracle | Supply | Borrow | Utilization | LLTV |
 |--------|--------|--------|--------|-------------|------|
-| stUSDS/USDC (`0xba3D…9DD0`) | [`0xba3D2Dc1670763c6729CC923A922C7513C0f9DD0`](https://etherscan.io/address/0xba3D2Dc1670763c6729CC923A922C7513C0f9DD0) | ~$20,950 | ~$17,208 | ~82% | 86% |
+| stUSDS/USDC (`0xba3D…9DD0`) | [`0xba3D2Dc1670763c6729CC923A922C7513C0f9DD0`](https://etherscan.io/address/0xba3D2Dc1670763c6729CC923A922C7513C0f9DD0) | ~$20,950,474 | ~$17,208,627 | ~82% | 86% |
 | stUSDS/USDS (`0x0A97…454C`) | [`0x0A976226d113B67Bd42D672Ac9f83f92B44b454C`](https://etherscan.io/address/0x0A976226d113B67Bd42D672Ac9f83f92B44b454C) | ~$1,248,500 | ~$1,123,568 | ~90% | 86% |
 | stUSDS/USDC (`0x3699…Dc5`) | [`0x3699ABA2d63532A0890A761CAd609D128A631Dc5`](https://etherscan.io/address/0x3699ABA2d63532A0890A761CAd609D128A631Dc5) | 0 | — | inactive | 86% |
 | stUSDS/USDC (`0x9D27…5FB5`) | [`0x9D278a48bDC6591D99C1bc1Cdb27775097105FB5`](https://etherscan.io/address/0x9D278a48bDC6591D99C1bc1Cdb27775097105FB5) | ~$2 | 0 | inactive | 86% |
 | stUSDS/USDT (`0x9C56…3B3c`) | [`0x9C56D403d26C0aE00FA2e767e12F6b588c203B3c`](https://etherscan.io/address/0x9C56D403d26C0aE00FA2e767e12F6b588c203B3c) | ~$539,595 | ~$479,504 | ~89% | 86% |
+
+Across the five markets, total loan-token supply was **~$22.74M** and total borrowing was **~$18.81M** at the snapshot. Morpho market utilization is `totalBorrowAssets / totalSupplyAssets`; it measures available loan-token liquidity and is **not** borrower LTV. Borrower health must be computed per account from `Morpho.position(marketId, borrower)`, the market share conversion, and the oracle price.
 
 **Oracle type for all stUSDS Morpho markets:** All five oracle contracts return price values based on the stUSDS `chi()` rate accumulator. The stUSDS/USDS oracle returns the `chi` value directly at 1e36 scale (~1.065e36). The stUSDS/USDC oracles return `chi` scaled to the loan-token's decimals (~1.065e24 for USDC markets, ~1.065e24 for USDT). These are **rate-feeding oracles** (no Chainlink component) — the price is derived from stUSDS's onchain `chi` accumulator, not from an external market-data feed. For the USDC and USDT pairs, a separate conversion layer maps the stUSDS/USD rate into the loan-token unit. Verified onchain at block 25595151.
 
@@ -273,7 +275,7 @@ At the snapshot, using the VAT ilk state for LSEV2-SKY-A:
 stUSDS trades on secondary markets, providing an alternative exit path:
 
 - **Curve stUSDS-USDS pool** ([`0x2C7C98A3b1582D83c43987202aEFf638312478aE`](https://etherscan.io/address/0x2C7C98A3b1582D83c43987202aEFf638312478aE)): **~$5.81M TVL** (~$2.62M USDS + ~$3.19M stUSDS at snapshot). `get_virtual_price()` = ~1.028, indicating tight peg. Allows exiting to USDS at market price rather than at `chi`
-- **Morpho Blue markets** — stUSDS is used as collateral in several Morpho Blue lending markets. The most active market (stUSDS/USDS) has ~$1.25M supply and ~$1.12M borrowed at 90% utilization. These provide some additional liquidity but are small relative to total stUSDS supply
+- **Morpho Blue markets** — stUSDS is used as collateral in five Morpho Blue lending markets. The largest, stUSDS/USDC, had ~$20.95M supplied and ~$17.21M borrowed; all markets totaled ~$22.74M supplied and ~$18.81M borrowed. These markets let holders borrow against stUSDS but are **not spot exit liquidity**: the holder retains encumbered stUSDS and incurs debt and liquidation risk
 
 While DEX liquidity provides an alternative exit, the presence of the direct withdrawal mechanism (even if gated by utilization) means large stUSDS holders may prefer to wait for withdrawals rather than taking DEX slippage.
 
@@ -363,7 +365,7 @@ System operations are predominantly programmatic, but stUSDS has more governance
 | **LockStake Clipper** (`0x836F…A399`) | Bad-debt absorption | **High** — if the Clipper fails to liquidate underwater borrowers, losses accrue to stUSDS via `cut()` | Standard Sky/MCD liquidation infrastructure |
 | **Conv (rates-conv)** | RateSetter rate conversion | **Low** — pure math contract (`btor` / `rtob`), no state, no admin | Part of shared Sky rate-conversion infrastructure |
 | **SPBEAM** | RateSetter design origin | **Indirect** — architectural dependency on SPBEAM's proven rate-control model | Audited separately ([reports](https://github.com/sky-ecosystem/sp-beam/tree/master/audits)) |
-| **Morpho Blue** | Secondary liquidity (stUSDS as collateral) | **Low** — not required for stUSDS to function. Would affect holders using stUSDS as Morpho collateral | Active markets are small (<$1.5M total) relative to $187.5M stUSDS supply |
+| **Morpho Blue** | External leverage venue (stUSDS as collateral) | **Low for stUSDS core / High for affected borrowers** — not required for stUSDS to function, but a `chi` cut can trigger same-block liquidations and lender losses | ~$22.74M supplied and ~$18.81M borrowed at snapshot; this is lending exposure, not spot exit liquidity |
 | **Chainlink / MCD Spot (OSM)** | Collateral pricing for LSEV2-SKY-A liquidations | **Indirect but critical** — oracle failures could allow underwater borrowers to avoid liquidation, passing losses to stUSDS | Mature multi-source oracle infrastructure |
 
 ## Operational Risk
@@ -417,20 +419,21 @@ This transparency is a positive signal for operational maturity.
 | RateSetter `bad` flag | onchain | Any change to 1 (catastrophic) | Real time |
 | Mom event | event log | **Any event** (emergency action) | Real time |
 | `cut()` call on stUSDS | transaction | **Any call** (loss socialization) | Real time |
-| stUSDS `cap` utilization | `totalSupply / cap` | >95% — deposit gating imminent | Hourly |
+| stUSDS `cap` utilization | `totalAssets / cap` | >95% — deposit gating imminent | Hourly |
 | stUSDS daily deposit/withdraw volume | event logs `Deposit` / `Withdraw` | >20% of totalSupply in 24 h — bank-run signal | Daily |
 | stUSDS `str` rate | onchain | Change >200 bps APY — material yield change | On `Set` event |
 | USDS depeg | CoinGecko / DEX | >±1% sustained >24 h | 15 min |
 | `MCD_PAUSE` spells touching stUSDS | `Plot` event | **Any** — provides 48 h warning | Behind timelock |
 | stUSDS `Upgraded` event | event log | Any implementation change | Behind 48 h GSM delay |
-| **SKY/USD price** | OSM `peek()` via [`0xc2ffbbDCCF1466Eb8968a846179191cb881eCdff`](https://etherscan.io/address/0xc2ffbbDCCF1466Eb8968a846179191cb881eCdff) | **< $0.030** (−50% from snapshot) — widespread LockStake liquidations likely; **< $0.020** (−67%) — system CR approaching 120% mat, mass liquidations imminent | 15 min |
-| **LSEV2-SKY-A system CR** | Computed: `SKY_locked × SKY_price / (Art × rate)` | **< 200%** — liquidation risk escalating; **< 150%** — majority of vault positions eligible for liquidation; **< 120%** — system-wide underwater | Hourly |
+| **SKY/USD price and LSE feed** | Underlying OSM plus [`LockstakeCappedOsmWrapper`](https://etherscan.io/address/0x0C13fF3DC02E85aC169c4099C09c9B388f2943Fd) | Wrapper feed is `min(OSM, cap)`. **< $0.025** means the market price has crossed the snapshot cap and further declines reduce LSE collateral value; do not infer liquidations from aggregate CR alone | 15 min |
+| **Per-urn LSEV2 safety** | For each urn: `ink × vatSpot / (art × rate)`; aggregate collateral from `lsSKY.totalSupply()` plus unsold auction lots | **< 1.10** warning; **< 1.00** urn is unsafe and can be barked. Report count and debt of unsafe urns rather than treating aggregate CR as a position-level threshold | Hourly |
 | **Dog.dirt(ilk)** approaching **Dog.hole** | onchain | `dirt > 0.8 × hole` — liquidation throughput saturated; queued auctions at risk of further price deterioration | On every `Bark` event |
 | **Clip `Take` events** | event log on [`0x836F56750517b1528B5078Cba4Ac4B94fBE4A399`](https://etherscan.io/address/0x836F56750517b1528B5078Cba4Ac4B94fBE4A399) | **Spike >3 auctions/hour** — active liquidation cascade; sustained >10/hour = crisis mode | Real time |
 | **Clip `Due()` > 0 for >24 h** | onchain | Stale auction — potential failed liquidation, bad debt may flow to stUSDS | Hourly |
 | **SKY DEX 24h volume** | CoinGecko | <$5M during liquidation cascade — insufficient depth to absorb Clip auction supply | Hourly during stress |
-| **Morpho stUSDS market utilization** | onchain (see Monitoring Functions below) | >90% on any stUSDS-collateral market — LTV headroom thin, vulnerable to chi drops | Hourly |
-| **LockStake Engine SKY balance** | `SKY.balanceOf(LockStakeEngine)` | Drop >10% in 24 h — mass withdrawal or liquidation event in progress | Hourly |
+| **Morpho stUSDS market utilization** | onchain (see Monitoring Functions below) | >90% means loan-token liquidity is thin; it does **not** measure borrower liquidation headroom | Hourly |
+| **Morpho borrower LTV** | `position()` + accrued market share conversion + oracle `price()` | Any borrower >85% against 86% LLTV is within ~1.2% of liquidation from a `chi` cut | Hourly; every block after `Cut` |
+| **Total locked SKY** | `lsSKY.totalSupply()` plus unsold `clip.sales(id).lot` while auctions are active | Drop >10% in 24 h — mass withdrawal or liquidation event in progress. Do not use `SKY.balanceOf(engine)`, which excludes delegated collateral | Hourly |
 
 ### Monitoring Functions
 
@@ -450,7 +453,7 @@ vat.ilks("LSEV2-SKY-A") → (Art, rate, spot, line, dust)
 jug.ilks("LSEV2-SKY-A") → (duty, rho)
 clip.Due() → uint256
 USDS.balanceOf(stUSDS) → uint256
-# withdrawable ≈ balanceOf - (Art * rate / RAY)
+# withdrawable ≈ totalAssets - (Art * rate + Due) / RAY
 
 # RateSetter
 rateSetter.bad() → uint8       # Circuit breaker (0 = ok, 1 = halted)
@@ -470,16 +473,20 @@ spot.ilks("LSEV2-SKY-A") → (pip, mat)  # Oracle address & liquidation ratio
 dog.ilks("LSEV2-SKY-A") → (clip, chop, hole, dirt)  # Liquidation engine state
 clip.kicks() → uint256          # Total auction count; rising = liquidation activity
 clip.Due() → uint256            # Pending auction value (RAD). Non-zero beyond 1 h = stale auction
-SKY.balanceOf(lockstakeEngine) → uint256  # Total SKY collateral (WAD)
+lsSKY.totalSupply() → uint256    # Locked SKY in active urns (WAD)
+clip.list() / clip.sales(id)     # Add unsold auction lots while Due() > 0
 
-# System CR (computed)
-# systemCR = (SKY_balance × SKY_price) / (Art × rate / 1e27)
-# Alert thresholds: <200% (warning), <150% (critical), <120% (system underwater)
+# Aggregate LSE collateral diagnostic (does not replace per-urn health checks)
+# collateral = lsSKY.totalSupply + sum(active clip sales[id].lot)
+# feedPrice = min(underlyingOSMPrice, wrapper.cap)
+# atRiskDebt = (Art * rate + Due) / 1e27
+# aggregateCR = collateral * feedPrice / atRiskDebt
 
 # Morpho stUSDS market health (for market id, see Contract Addresses table)
 morpho.market(marketId) → (totalSupplyAssets, totalSupplyShares, totalBorrowAssets, ...)
 # Utilization = totalBorrowAssets / totalSupplyAssets
-# Alert: >90% on any stUSDS market (borrowers near max LTV, vulnerable to chi drops)
+# Utilization alert: >90% means thin loan-token liquidity, not high borrower LTV
+# Borrower alert: compute each position's accrued debt / oracle-valued collateral
 # Alert: any `Liquidate` event on stUSDS-collateral Morpho markets
 ```
 
@@ -496,7 +503,7 @@ Snapshot block 25595151 (July 23, 2026).
 │                                                                           │
 │   stUSDS holder ───── withdraw(stUSDS) ────→ receives USDS (if idle)      │
 │                        redeem(stUSDS)                                     │
-│                        OR sell stUSDS on Curve/Morpho                     │
+│               OR sell stUSDS on Curve / borrow against it on Morpho      │
 └──────────────────────────────────────────────────────────────────────────┘
                                   │
                                   │
@@ -642,7 +649,7 @@ Snapshot block 25595151 (July 23, 2026).
 - **Active rate-setter governance** — the `str` rate, `duty` rate, `cap`, and `line` are actively managed by RateSetter facilitators (`buds`) or governance. Poor rate-setting could drive utilization to 100% or create unsustainable yield expectations
 - **Governance `cut()` power** — Sky governance can directly call `cut()` via PauseProxy (with 48 h delay), socializing arbitrary losses to stUSDS holders. This is explicitly documented in the README
 - **Mom emergency powers without delay** — the Mom can halt the RateSetter, zero out cap/line, and revoke facilitators without the 48 h GSM delay. While defensive, these could trap funds
-- **Limited DEX liquidity** — Curve stUSDS-USDS and Morpho markets provide alternative exits but at shallow depth relative to total supply ($187.5M)
+- **Limited DEX liquidity** — the Curve stUSDS-USDS pool is the identified spot exit and is shallow relative to total supply ($187.5M). Morpho markets provide leverage against stUSDS, not a sale or redemption path
 - **RateSetter facilitators (`buds`) are inactive** — no active facilitators found onchain; all rate changes currently require governance spells with 48 h GSM delay. This reduces the fast-rate-change risk but creates governance dependency for parameter tuning
 - **Early-depositor tail risk** — if `cut()` events occur before the pool reaches borrowing equilibrium, early depositors could bear disproportionate losses (explicitly warned in README)
 
@@ -747,7 +754,7 @@ Score 1.5: Scores well on overall DAO decentralization (Score 1) but the Mom eme
 | MCD Core (VAT, Vow, Jug, etc.) | Sky's own infrastructure — battle-tested, 8+ years. Critical for accounting, yield generation, and governance |
 | LockStake Engine V2 + Clip | SKY-collateralized borrowing infrastructure. Critical for stUSDS's risk-capital model |
 | Conv (rates-conv) | Pure math contract, no state. Non-critical |
-| Morpho Blue | Secondary liquidity — non-critical for stUSDS function |
+| Morpho Blue | External leverage venue — non-critical for stUSDS function, but `chi` cuts can liquidate borrowers and impair Morpho lenders |
 | Chainlink / MCD Spot (OSM) | Mature multi-source oracle for LockStake collateral pricing. Indirect but critical for liquidation integrity |
 
 **Dependencies Score: 2.0 / 5** — stUSDS has multiple critical dependencies (USDS, MCD core, LockStake Engine + Clip, oracles), but they are all blue-chip/MCD-internal. This places it at Score 2 ("2-3 established protocol dependencies, some critical functions depend on them") rather than Score 1 (no dependencies) or Score 3 (many or newer dependencies). The LockStake Engine V2 is the newest dependency and the one with the least production history.
@@ -795,17 +802,17 @@ Score 1.5: Scores well on overall DAO decentralization (Score 1) but the Mom eme
 | Factor | Assessment |
 |--------|-----------|
 | Exit mechanism | Direct ERC-4626 withdrawal (at `chi` rate, zero fee). Exists but is **gated by borrowing utilization** (~$31.1M / $187.5M = 16.6% available) |
-| DEX liquidity | Curve stUSDS-USDS pool (TVL: ~$5.81M at [`0x2C7C98A3b1582D83c43987202aEFf638312478aE`](https://etherscan.io/address/0x2C7C98A3b1582D83c43987202aEFf638312478aE)), Morpho Blue markets (~$1.81M total supply across all markets). Secondary exits exist but are shallow vs total supply ($187.5M)
+| DEX liquidity | Curve stUSDS-USDS pool (TVL: ~$5.81M at [`0x2C7C98A3b1582D83c43987202aEFf638312478aE`](https://etherscan.io/address/0x2C7C98A3b1582D83c43987202aEFf638312478aE)). Morpho had ~$22.74M supplied and ~$18.81M borrowed against stUSDS, but borrowing against collateral is not a spot exit. The identified spot liquidity is shallow vs total supply ($187.5M) |
 | Same-value asset | stUSDS/USDS is a yield-bearing stablecoin pair — minimal PPS divergence risk, but DEX price can deviate from `chi` under stress |
 | Withdrawal restrictions | No cooldown, no queue, no per-user cap. But utilization-based gating is effectively a hidden restriction |
-| Historical stress | No `cut()` events, no utilization spikes to 100%. 10-month track record without liquidity crisis |
+| Historical stress | No `cut()` events, no utilization spikes to 100%. ~11-month track record without liquidity crisis |
 | Large holder impact | A whale exiting >$31.1M would temporarily exhaust withdrawal capacity; subsequent withdrawals would be blocked until utilization drops |
 
-**Score: 3.0 / 5** — The formal mechanism (ERC-4626, zero fee, no queue) reads like a Score 1-2 profile, but the **utilization-based gating** is a structural liquidity constraint not present in sUSDS. At 83.4% utilization, only 16.6% of assets are liquid. Key considerations:
+**Score: 2.5 / 5** — The formal mechanism (ERC-4626, zero fee, no queue) reads like a Score 1-2 profile, but the **utilization-based gating** is a structural liquidity constraint not present in sUSDS. At 83.4% utilization, only 16.6% of assets are liquid. Key considerations:
 - **Score 2.5-3.0 territory:** "Direct redemption with minor delays" (Score-2) is too generous — the delay could be indefinite if utilization reaches 100%. "Market-based or short queues" (Score-3) is closer, but stUSDS has a direct withdrawal path when idle funds exist
 - **No throttle mechanism to speak of** — withdrawals stop cold, not gradually
-- **DEX liquidity is insufficient** for large exits (secondary path exists but at likely poor price if utilization is high)
-- Score 3.0: conservative assessment recognizing the fundamental liquidity risk of the lending-backed model
+- **DEX liquidity is insufficient** for large exits (the Curve secondary path would likely trade at a poor price if direct withdrawals are gated)
+- Score 2.5: midpoint between a normally redeemable ERC-4626 vault and market-only exit, recognizing both the live direct path and its hard utilization constraint
 
 #### Category 5: Operational Risk (Weight: 5%)
 
@@ -858,50 +865,105 @@ Score 1.5: Scores well on overall DAO decentralization (Score 1) but the Mom eme
 
 ## Appendix B: SKY Price Crash — Liquidation & Bad Debt Simulations
 
-This appendix models the impact of severe SKY price crashes on the LockStake Engine V2 (LSEV2-SKY-A) vault, the resulting bad-debt flow to stUSDS via `cut()`, and the downstream effect on Morpho Blue markets where stUSDS serves as collateral.
+This appendix separates three events that must not be conflated:
+
+1. a SKY price decline makes an individual LSEV2 urn unsafe;
+2. a SKY auction exhausts its collateral without recovering the urn's original debt, causing `stUSDS.cut()` and a permanent `chi` reduction; and
+3. that `chi` reduction makes individual Morpho borrowers liquidatable and, after a sufficiently large same-block gap, can create Morpho lender bad debt.
+
+SKY price alone does not determine realized bad debt. LSE bad debt depends on each urn's collateral and debt plus auction execution; Morpho effects depend on each borrower's LTV at the moment `chi` falls.
 
 ### Baseline Data (snapshot block 25595151, July 23, 2026)
 
 | Metric | Value | Source |
 |--------|-------|--------|
-| SKY price | $0.0613 | Chronicle OSM via [`LockstakeCappedOsmWrapper`](https://etherscan.io/address/0x0C13fF3DC02E85aC169c4099C09c9B388f2943Fd) |
+| Underlying SKY OSM price | $0.0613 | Chronicle [`PIP_SKY`](https://etherscan.io/address/0xc2ffbbDCCF1466Eb8968a846179191cb881eCdff) |
+| LSE capped-oracle price | **$0.0250** | [`LockstakeCappedOsmWrapper.cap()`](https://etherscan.io/address/0x0C13fF3DC02E85aC169c4099C09c9B388f2943Fd); the [verified source](https://github.com/sky-ecosystem/lockstake/blob/master/src/LockstakeCappedOsmWrapper.sol#L132-L148) returns `min(OSM, cap)` |
 | SKY 24h DEX volume | $12.58M | [CoinGecko](https://www.coingecko.com/en/coins/sky) |
 | SKY market cap | $1.42B | CoinGecko |
-| Total SKY locked as collateral | **~10.17B SKY** (43.4% of 23.46B total supply) | `SKY.balanceOf(LockStakeEngine)` onchain |
-| Total collateral value | **~$623.7M** | 10.17B × $0.0613 |
-| Total debt (LSEV2-SKY-A) | **~$156.4M** | `vat.ilks("LSEV2-SKY-A").Art × rate` |
-| Aggregate system CR | **~399%** | $623.7M / $156.4M |
+| Total SKY locked in active urns | **~17.281B SKY** | [`lsSKY.totalSupply()`](https://etherscan.io/address/0xf9A9cfD3229E985B91F99Bc866d42938044FFa1C); `Clip.Due() = 0`, so no auction lots needed to be added |
+| Raw `SKY.balanceOf(engine)` | ~10.174B SKY | [`SKY.balanceOf(LockStakeEngine)`](https://etherscan.io/token/0x56072C95FAA701256059aa122697B133aDEd9279?a=0xCe01C90dE7FD1bcFa39e237FE6D8D9F569e8A6a3); excludes SKY moved to vote delegates and must not be used as total collateral |
+| Collateral value at market price | **~$1.059B** | 17.281B × $0.0613 |
+| Collateral value at capped LSE feed | **~$432.0M** | 17.281B × $0.025 |
+| Total debt (LSEV2-SKY-A) | **~$156.389M** | [`vat.ilks("LSEV2-SKY-A").Art × rate`](https://etherscan.io/address/0x35D1b3F3D7966A1DFe207aa4514C12a259A0492B) |
+| Aggregate CR at market price | **~677.4%** | $1.059B / $156.389M |
+| Aggregate CR at capped LSE feed | **~276.3%** | $432.0M / $156.389M |
 | Liquidation ratio (`mat`) | **120%** | `MCD_SPOT.ilks("LSEV2-SKY-A").mat` |
 | Liquidation penalty (`chop`) | **13%** | `Dog.ilks("LSEV2-SKY-A").chop = 1.13` |
-| Liquidation debt ceiling (`hole`) | **250,000 DAI** (per cooldown period) | `Dog.ilks("LSEV2-SKY-A").hole` |
+| Per-ilk active-auction limit (`hole`) | **250,000 USDS** | `Dog.ilks("LSEV2-SKY-A").hole`; maximum debt-plus-fees targeted by concurrently active auctions, not an amount per cooldown |
 | stUSDS total assets | **$187.5M** | `stUSDS.totalAssets()` |
 | stUSDS withdrawal availability | **$31.1M** (16.6% idle) | Computed from `totalAssets − (Art×rate + Due)` |
+| Morpho stUSDS markets | **~$22.74M supplied / ~$18.81M borrowed** | [`Morpho.market(id)`](https://etherscan.io/address/0xBBBBBbbBBb9cC5e90e3b3Af64bdAF62C37EEFFCb) across the five market IDs |
 
-### Simulation Results
+`SKY.balanceOf(engine)` is incomplete because the engine can transfer SKY to a selected vote delegate while retaining the same VAT collateral credit. The [engine lock path](https://github.com/sky-ecosystem/lockstake/blob/master/src/LockstakeEngine.sol#L291-L308) mints one `lsSKY` per SKY locked; at this snapshot there were no active auctions, making `lsSKY.totalSupply()` the reconciled locked-collateral measure. When `Clip.Due() > 0`, monitoring must also add each active auction's unsold `lot` because `lsSKY` is burned when an urn is kicked.
 
-| Scenario | SKY Price | Collateral Value | Aggregate CR | Liquidations | Estimated Bad Debt | stUSDS Chi Impact | Morpho Impact |
-|----------|----------|-----------------|-------------|-------------|-------------------|-------------------|---------------|
-| **Current** | $0.0613 | $623.7M | 399% | None | $0 | 0% | None |
-| **−30% drop** | $0.0429 | $436.6M | 279% | Isolated — only most-leveraged positions (~120% CR) | $0–2M | 0–1% | Minimal (<1% chi move won't trigger Morpho LTV breaches) |
-| **−50% drop** | $0.0307 | $311.9M | 199% | Widespread — significant portion of vault positions under water | $0–10M | 0–5.3% | Modest. At 5% chi drop, Morpho stUSDS/USDS borrowers need 90.5% original-LTV-equivalent to stay safe. Most positions at <90% utilization remain safe |
-| **−70% drop** | $0.0184 | $187.7M | **120%** | **System-wide trigger** — aggregate CR hits `mat`. All positions eligible for liquidation | $10–40M | 5.3–21.3% | **Significant.** 10%+ chi drop liquidates near-max-LTV Morpho borrowers (~$1.8M across all markets). Liquidation path via stUSDS→USDS→PSM remains functional |
-| **−75% drop** | $0.0153 | $155.9M | **99.7%** | **System underwater** — collateral < debt at aggregate level | $40–80M | **21.3–42.7%** | **Severe.** Mass Morpho liquidations. All stUSDS-collateral borrowers underwater. ~$1.81M Morpho market at risk of bad debt if liquidations cascade |
+### Aggregate SKY Price Sensitivity
+
+| SKY Market Price | Drop from $0.0613 | LSE Feed Used | Aggregate CR | What Can Be Concluded |
+|-----------------:|------------------:|--------------:|-------------:|------------------------|
+| $0.0613 | 0% | $0.0250 cap | 276.3% effective | Market price is above the cap; individual urn safety is evaluated using $0.025 |
+| $0.0307 | 49.9% | $0.0250 cap | 276.3% effective | No feed deterioration yet because the market remains above the cap |
+| **$0.0250** | **59.2%** | **$0.0250** | **276.3%** | Cap boundary; further OSM declines reduce VAT collateral value |
+| $0.0184 | 70.0% | $0.0184 | 203.3% | Some urns may be unsafe, but aggregate CR does not identify which or how much debt |
+| $0.0153 | 75.0% | $0.0153 | 169.1% | Aggregate collateral still exceeds debt and the 120% liquidation ratio |
+| **$0.01086** | **82.3%** | **$0.01086** | **120.0%** | Aggregate CR reaches `mat`; this still does not mean every urn crosses simultaneously |
+| **$0.00905** | **85.2%** | **$0.00905** | **100.0%** | Aggregate collateral equals aggregate debt before auction slippage; isolated urn losses can occur above this price |
+
+**TODO — per-urn LSE distribution:** enumerate every active LSEV2 urn and pin its `vat.urns(ilk, urn)` collateral/debt at the snapshot. Without this distribution, the report cannot claim a first-liquidation price, the fraction of debt liquidatable at a given SKY price, or a deterministic LSE bad-debt range.
+
+### When LSE Bad Debt Reaches stUSDS
+
+An unsafe urn starts an auction, but that event alone does not reduce `chi`. [`LockstakeClipper.kick()`](https://github.com/sky-ecosystem/lockstake/blob/master/src/LockstakeClipper.sol#L240-L280) tracks `due = tab / chop`, representing original debt without the liquidation penalty. While the auction is active, `Due()` replaces the removed VAT debt in the stUSDS withdrawal check and reduces withdrawable liquidity.
+
+The irreversible loss occurs only when an auction exhausts its SKY collateral and the remaining original `due` exceeds the final auction payment `owe`; the [clipper then calls `stUSDS.cut(due - owe)`](https://github.com/sky-ecosystem/lockstake/blob/master/src/LockstakeClipper.sol#L430-L448). Ignoring auction timing and slippage, the per-urn principal shortfall at clearing price `p` is:
+
+`LSE bad debt_i = max(debt_i − SKY collateral_i × p, 0)`
+
+Actual loss can be higher if SKY falls while auctions wait or clear below the reference price. It can be lower or zero if keepers clear auctions before collateral value falls below original debt. The aggregate $0.00905 parity price is therefore **not** the first-bad-debt price.
+
+For realized LSE loss `B`, the [`stUSDS.cut()` implementation](https://github.com/sky-ecosystem/stusds/blob/master/src/StUsds.sol#L250-L259) reduces total assets and `chi` proportionally:
+
+`chi loss fraction ≈ B / stUSDS totalAssets`
+
+At the snapshot, each 1% `chi` cut corresponds to approximately **$1.875M** of realized LSE bad debt.
+
+### Morpho Contagion From a `chi` Cut
+
+All five Morpho oracles follow stUSDS `chi`, so a loss is reflected in collateral values in the same block. Morpho's [liquidation implementation](https://github.com/morpho-org/morpho-blue/blob/main/src/Morpho.sol#L347-L415) and [constants](https://github.com/morpho-org/morpho-blue/blob/main/src/libraries/ConstantsLib.sol) give the 86% LLTV markets a liquidation incentive factor of:
+
+`LIF = min(1.15, 1 / (1 − 0.3 × (1 − 0.86))) ≈ 1.04384`
+
+A borrower becomes liquidatable when `LTV / (1 − chiLoss) > 86%`. If a liquidator seizes all collateral, Morpho realizes lender bad debt when the post-cut LTV exceeds `1 / LIF ≈ 95.8%`.
+
+The following results use all 24 non-zero borrower positions reconstructed from `Morpho.position()` at snapshot block 25595151, with accrued borrow shares converted using the pinned market state:
+
+| Instantaneous `chi` Loss | Realized LSE Loss Implied | Morpho Debt Liquidatable | Modeled Morpho Bad Debt |
+|-------------------------:|--------------------------:|-------------------------:|--------------------------:|
+| 1.0% | $1.875M | $0 | $0 |
+| **1.031%** | **$1.934M** | **First position: ~$345K** | $0 |
+| 2.0% | $3.751M | ~$345K | $0 |
+| 3.0% | $5.626M | ~$10.58M | $0 |
+| 5.0% | $9.377M | ~$17.09M | $0 |
+| 10.0% | $18.75M | ~$17.16M | $0 |
+| **11.156%** | **$20.92M** | ~$17.16M | **First position reaches bad-debt boundary** |
+| 12.0% | $22.50M | ~$17.16M | ~$3.3K |
+| 20.0% | $37.51M | ~$17.16M | ~$1.44M |
 
 ### Key Assumptions & Caveats
 
-1. **Aggregate CR masks individual leverage.** The 399% system CR is an average. Individual LockStake positions may be leveraged closer to 120% mat and would liquidate at much smaller price drops. A single highly-leveraged whale could trigger outsized liquidations.
+1. **Aggregate CR masks individual leverage.** LSE liquidation is per urn. Aggregate thresholds are structural reference points, not predictions that all positions liquidate together.
 
-2. **Clip Dutch auctions always find a clearing price.** The Maker Clip liquidation mechanism starts auctions at a high price and decays linearly. In theory, auctions always clear — the question is at what price. If SKY DEX volume ($12.6M/day) is insufficient to absorb a flood of auctioned SKY, prices could crash further, widening the bad-debt gap. At a 75% crash, ~$155.9M of SKY would need to be auctioned — over 12× the daily DEX volume.
+2. **Auction execution is path-dependent.** Clip prices decay and auctions can require resets; keeper availability, `stopped`, oracle validity, gas conditions, and SKY depth all affect clearing. The report must not assume that every auction clears or assign a loss range from price alone.
 
-3. **Dog.hole limits liquidation throughput.** The `hole` parameter (250,000 DAI per cooldown period) caps how much debt can be liquidated per batch. During a cascading crash, liquidations queue up. While they wait, SKY price can deteriorate further, increasing the eventual bad-debt shortfall. The `hole` is a governor-set parameter and can be increased via spell (48 h GSM delay).
+3. **`Dog.hole` limits concurrent auction target, not debt per cooldown.** At $250,000, new `bark()` calls can be constrained when per-ilk `dirt` approaches `hole`; capacity returns as auction payments call `Dog.digs()`. Throughput depends on how fast keepers take auctions, not a fixed reset interval.
 
-4. **Morpho oracle follows chi.** The Morpho oracle for stUSDS markets reads the stUSDS `chi()` value directly. If chi drops 20%, the oracle reports a 20% lower collateral value within the same block. Morpho borrowers at >80% LTV pre-drop would be immediately eligible for liquidation post-drop. However, the Morpho market sizes are small (~$1.81M total supply vs $187.5M stUSDS), limiting systemic contagion.
+4. **Morpho results model an instantaneous gap.** In practice, borrowers or liquidators may act after smaller cuts, so positions can be repaid or collateral sold before the 11.156% first-bad-debt boundary. Conversely, withdrawal gating and limited Curve depth may reduce liquidation profitability.
 
-5. **Liquidation path remains functional.** Even with reduced chi, a Morpho liquidator can: receive stUSDS → `stUSDS.redeem()` → receive USDS at current chi → swap USDS→USDC via LitePSM (zero-fee, atomic). The only bottleneck is the stUSDS withdrawal gate — if utilization is near 100%, the liquidator may be unable to redeem.
+5. **The Morpho liquidation path is conditional.** A liquidator receives stUSDS and can redeem to USDS only up to `maxWithdraw`; otherwise it must hold stUSDS or sell through Curve. Morpho itself does not provide a spot exit, and the LitePSM path begins only after a successful stUSDS redemption.
 
 6. **No historical stress test.** stUSDS has never experienced a `cut()` event (chi reduction) or a mass LockStake liquidation. The SKY token has not experienced a >50% drawdown since stUSDS deployment. These simulations are theoretical and based on onchain parameters.
 
-- **Time-based:** Reassess in 6 months (January 2026) or earlier if utilization or TVL change materially
+- **Time-based:** Reassess in 6 months (January 2027) or earlier if utilization or TVL change materially
 - **TVL-based:**
   - stUSDS `totalAssets()` drops >30% from snapshot ($187.5M → <$131M) — would indicate material depositor exit or loss event
   - stUSDS `totalAssets()` grows >3× ($187.5M → >$562M) — would increase systemic footprint materially
@@ -933,4 +995,4 @@ This appendix models the impact of severe SKY price crashes on the LockStake Eng
 
 | Date | Score | Notes |
 | --- | --- | --- |
-| July 23, 2026 | 1.9 | Initial assessment. stUSDS deployed Aug 25, 2025 (~11 months in production), $187.5M TVL, 4 audits + Certora formal verification, 83.4% borrowing utilization. Etherscan verified. Mom deployed separately May 28, 2026. Unresolved: top-holder distribution (needs Etherscan API Pro). |
+| July 23, 2026 | 1.9 | Initial assessment. stUSDS deployed Aug 25, 2025 (~11 months in production), $187.5M TVL, 4 audits + Certora formal verification, 83.4% borrowing utilization. Etherscan verified. SKY stress model uses the $0.025 capped LSE feed and 17.281B reconciled locked SKY; Morpho exposure is ~$22.74M supplied / ~$18.81M borrowed with account-level `chi`-cut thresholds. Mom deployed separately May 28, 2026. Unresolved: top-holder distribution (needs Etherscan API Pro). |

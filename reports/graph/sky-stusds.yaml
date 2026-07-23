@@ -31,13 +31,14 @@ nodes:
     note: Holds LSEV2-SKY-A ilk debt accounting. Routes yield from Vow via vat.suck.
   - id: lockstake
     label: LockStake Engine V2
+    address: "0xCe01C90dE7FD1bcFa39e237FE6D8D9F569e8A6a3"
     category: dependency
-    note: SKY-backed borrowers access USDS from stUSDS pool via LSEV2-SKY-A ilk. Multiple contracts — no single address.
+    note: SKY-backed borrowers access USDS from stUSDS risk capital via the LSEV2-SKY-A ilk. This is the engine address; the system also includes per-user urns, lsSKY, Dog, and Clip.
   - id: morpho-blue
     label: Morpho Blue
     address: "0xBBBBBbbBBb9cC5e90e3b3Af64bdAF62C37EEFFCb"
     category: dependency
-    note: stUSDS used as collateral in several Morpho Blue markets (~$1.5M, secondary liquidity).
+    note: stUSDS used as collateral in five Morpho Blue markets (~$22.74M supplied, ~$18.81M borrowed). This is leverage exposure, not spot exit liquidity.
 
   # Infra (Sky internal machinery)
   - id: rate-setter
