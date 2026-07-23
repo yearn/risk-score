@@ -118,6 +118,43 @@ export function transformApiProtocols(apiProtocols: ApiProtocol[]): Protocol[] {
     }));
 }
 
+async function loadProtocols(
+  apiUrl?: string,
+  apiToken?: string,
+): Promise<Protocol[]> {
+  if (!apiUrl) return FALLBACK_PROTOCOLS;
+
+  try {
+    const headers: Record<string, string> = { Accept: "application/json" };
+    if (apiToken) headers["Authorization"] = `Bearer ${apiToken}`;
+    const res = await fetch(`${apiUrl}/v1/monitoring`, { headers });
+    if (res.ok) {
+      const json: ApiMonitoringResponse = await res.json();
+      return transformApiProtocols(json.data);
+    }
+    console.warn(`Monitoring API returned ${res.status}, using fallback data.`);
+  } catch (e) {
+    console.warn(`Monitoring API unreachable (${(e as Error).message}), using fallback data.`);
+  }
+  return FALLBACK_PROTOCOLS;
+}
+
+let protocolsPromise: Promise<Protocol[]> | undefined;
+
+/**
+ * Resolve the monitored protocols once per build, falling back when the API is unreachable.
+ *
+ * The index and dynamic route paths must share this result so a transient API failure cannot
+ * make the index link to slugs that were not pre-rendered.
+ */
+export function fetchProtocols(
+  apiUrl?: string,
+  apiToken?: string,
+): Promise<Protocol[]> {
+  protocolsPromise ??= loadProtocols(apiUrl, apiToken);
+  return protocolsPromise;
+}
+
 // --- Static fallback (used when the API is unreachable at build time) ---
 // Last synced from monitoring.yaml on 2026-07-02.
 
