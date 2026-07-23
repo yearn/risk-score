@@ -400,6 +400,11 @@ This transparency is a positive signal for operational maturity.
 | Clip (LSEV2-SKY-A) | [`0x836F56750517b1528B5078Cba4Ac4B94fBE4A399`](https://etherscan.io/address/0x836F56750517b1528B5078Cba4Ac4B94fBE4A399) | `Due()` — any non-zero value means an auction is pending (withdrawals are further constrained); `Take` events — liquidation activity |
 | USDS balance at stUSDS | [`0xdC035D45d973E3EC169d2276DDab16f1e407384F`](https://etherscan.io/address/0xdC035D45d973E3EC169d2276DDab16f1e407384F) | `balanceOf(stUSDS)` — idle reserve gauge |
 | Morpho markets | (see Contract Addresses table) | stUSDS collateral utilization; oracle price feeds for stUSDS |
+| SKY price oracle (OSM) | [`0xc2ffbbDCCF1466Eb8968a846179191cb881eCdff`](https://etherscan.io/address/0xc2ffbbDCCF1466Eb8968a846179191cb881eCdff) | `peek()` → SKY/USD price (with 1 h OSM delay). Monitor for sudden drops approaching liquidation thresholds |
+| Dog (Liquidation Engine) | [`0x135954d155898D42C90D2a57824C690e0c7BEf1B`](https://etherscan.io/address/0x135954d155898D42C90D2a57824C690e0c7BEf1B) | `ilks("LSEV2-SKY-A")` → `chop`, `hole`, `dirt`; `Bark` events — liquidation initiations; `dirt` approaching `hole` means liquidation throughput is saturated |
+| LockStake Engine V2 | [`0xCe01C90dE7FD1bcFa39e237FE6D8D9F569e8A6a3`](https://etherscan.io/address/0xCe01C90dE7FD1bcFa39e237FE6D8D9F569e8A6a3) | `SKY.balanceOf(LockStakeEngine)` — total SKY collateral locked. Decreasing = liquidations or withdrawals; increasing = new borrowers |
+| SKY token DEX volume | Coingecko [`0x56072C95FAA701256059aa122697B133aDEd9279`](https://www.coingecko.com/en/coins/sky) | 24h volume — gauge of liquidation absorption capacity. <$5M/day during a crash raises auction-clearing risk |
+| Morpho stUSDS/USDS market | Market ID `0x77e6…7f82` via Morpho [`0xBBBBBbbBBb9cC5e90e3b3Af64bdAF62C37EEFFCb`](https://etherscan.io/address/0xBBBBBbbBBb9cC5e90e3b3Af64bdAF62C37EEFFCb) | `market(id)` → `totalBorrowAssets`, `totalSupplyAssets`. Utilization >95% = borrowers near max LTV, vulnerable to chi changes |
 
 ### Critical Values, Thresholds, and Frequency
 
@@ -418,6 +423,14 @@ This transparency is a positive signal for operational maturity.
 | USDS depeg | CoinGecko / DEX | >±1% sustained >24 h | 15 min |
 | `MCD_PAUSE` spells touching stUSDS | `Plot` event | **Any** — provides 48 h warning | Behind timelock |
 | stUSDS `Upgraded` event | event log | Any implementation change | Behind 48 h GSM delay |
+| **SKY/USD price** | OSM `peek()` via [`0xc2ffbbDCCF1466Eb8968a846179191cb881eCdff`](https://etherscan.io/address/0xc2ffbbDCCF1466Eb8968a846179191cb881eCdff) | **< $0.030** (−50% from snapshot) — widespread LockStake liquidations likely; **< $0.020** (−67%) — system CR approaching 120% mat, mass liquidations imminent | 15 min |
+| **LSEV2-SKY-A system CR** | Computed: `SKY_locked × SKY_price / (Art × rate)` | **< 200%** — liquidation risk escalating; **< 150%** — majority of vault positions eligible for liquidation; **< 120%** — system-wide underwater | Hourly |
+| **Dog.dirt(ilk)** approaching **Dog.hole** | onchain | `dirt > 0.8 × hole` — liquidation throughput saturated; queued auctions at risk of further price deterioration | On every `Bark` event |
+| **Clip `Take` events** | event log on [`0x836F56750517b1528B5078Cba4Ac4B94fBE4A399`](https://etherscan.io/address/0x836F56750517b1528B5078Cba4Ac4B94fBE4A399) | **Spike >3 auctions/hour** — active liquidation cascade; sustained >10/hour = crisis mode | Real time |
+| **Clip `Due()` > 0 for >24 h** | onchain | Stale auction — potential failed liquidation, bad debt may flow to stUSDS | Hourly |
+| **SKY DEX 24h volume** | CoinGecko | <$5M during liquidation cascade — insufficient depth to absorb Clip auction supply | Hourly during stress |
+| **Morpho stUSDS market utilization** | onchain (see Monitoring Functions below) | >90% on any stUSDS-collateral market — LTV headroom thin, vulnerable to chi drops | Hourly |
+| **LockStake Engine SKY balance** | `SKY.balanceOf(LockStakeEngine)` | Drop >10% in 24 h — mass withdrawal or liquidation event in progress | Hourly |
 
 ### Monitoring Functions
 
@@ -450,6 +463,24 @@ rateSetter.buds(address) → uint256  # Check specific facilitators
 # Mom
 mom.owner() → address           # Should always equal PauseProxy
 mom.authority() → address       # Should always equal Chief
+
+# SKY price & LockStake liquidation monitoring
+osm.peek() → (bytes32, bool)    # SKY/USD price (price × 1e18 in bytes32). 1 h OSM delay
+spot.ilks("LSEV2-SKY-A") → (pip, mat)  # Oracle address & liquidation ratio
+dog.ilks("LSEV2-SKY-A") → (clip, chop, hole, dirt)  # Liquidation engine state
+clip.kicks() → uint256          # Total auction count; rising = liquidation activity
+clip.Due() → uint256            # Pending auction value (RAD). Non-zero beyond 1 h = stale auction
+SKY.balanceOf(lockstakeEngine) → uint256  # Total SKY collateral (WAD)
+
+# System CR (computed)
+# systemCR = (SKY_balance × SKY_price) / (Art × rate / 1e27)
+# Alert thresholds: <200% (warning), <150% (critical), <120% (system underwater)
+
+# Morpho stUSDS market health (for market id, see Contract Addresses table)
+morpho.market(marketId) → (totalSupplyAssets, totalSupplyShares, totalBorrowAssets, ...)
+# Utilization = totalBorrowAssets / totalSupplyAssets
+# Alert: >90% on any stUSDS market (borrowers near max LTV, vulnerable to chi drops)
+# Alert: any `Liquidate` event on stUSDS-collateral Morpho markets
 ```
 
 ## Appendix A: Contract Architecture
