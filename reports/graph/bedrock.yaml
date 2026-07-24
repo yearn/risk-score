@@ -1,0 +1,148 @@
+slug: bedrock
+title: Bedrock brBTC — Contract Dependency Graph
+chain: ethereum
+
+categories:
+  - id: vault
+    label: Vault / Token
+  - id: strategy
+    label: Strategy / Custody
+  - id: governance
+    label: Governance
+  - id: infra
+    label: Protocol Infra
+  - id: dependency
+    label: External Dependency
+
+nodes:
+  # === User-facing token layer ===
+  - id: brBTC
+    label: brBTC Token
+    address: "0x2eC37d45FCAE65D9787ECf71dc85a444968f6646"
+    category: vault
+    note: EIP-1967 transparent proxy; BTC meta-LRT; 8 decimals
+
+  # === Protocol infra ===
+  - id: brBTC-vault
+    label: brBTC Vault
+    address: "0x1419b48e5C1f5ce413Cf02D6dcbe1314170E3386"
+    category: infra
+    note: Mint-only vault (no onchain redeem function); holds ~15.5 of ~1,284 BTC-denominated cumulative deposits
+  - id: transfer-proxy
+    label: TransferProxy (Operator)
+    address: "0x28BfF185E5874E67dc03d8C096e27b775D5058A2"
+    category: infra
+    note: Sole OPERATOR_ROLE holder on vault; moves uniBTC/M-BTC to fixed destination (ops Safe); owner is EOA 0x9251Fd3D
+  - id: operator-eoa
+    label: TransferProxy Owner (EOA)
+    address: "0x9251Fd3D79522bB2243a58FFf1dB43E25A495aaB"
+    category: governance
+    note: EOA hot key that triggers vault-to-Safe collateral transfers; formerly held token DEFAULT_ADMIN/MINTER (revoked)
+  - id: brBTC-proxyadmin
+    label: brBTC ProxyAdmin
+    address: "0x9F63269196A8828f05F2E49D1078eA7C44e7f002"
+    category: governance
+  - id: ccip-token-pool
+    label: CCIP BurnMintTokenPool
+    address: "0x512c2Ddf5f7F48a6c44cFF73CD8d7edEC5e6b0d8"
+    category: infra
+    note: Chainlink CCIP token pool 1.5.1; holds MINTER_ROLE on brBTC; owner is Bedrock admin Safe; rate limits enabled on all 8 lanes (1-2 brBTC capacity, ~2 brBTC/day)
+
+  # === Governance ===
+  - id: bedrock-safe
+    label: Bedrock Admin Safe (3/5)
+    address: "0xAeE017052DF6Ac002647229D58B786E380B9721A"
+    category: governance
+    note: Owns brBTC ProxyAdmin; no guard/module in original verification
+  - id: brBTC-safe
+    label: brBTC Ops Safe (3/4)
+    address: "0x1f3c54ec74f1a5c0BC19af04dadFa1A677231aC9"
+    category: governance
+    note: DEFAULT_ADMIN_ROLE on brBTC Vault and brBTC token; can grant MINTER_ROLE with no timelock; no guard/module in original verification
+
+  # === Strategy / custody layer ===
+  - id: brBTC-restaking
+    label: Offchain Restaking Allocation
+    category: strategy
+    note: Collateral leaves onchain trail at the ops Safe (balance zero) and is allocated to six restaking venues; no public brBTC PoR
+
+  # === Accepted input assets ===
+  - id: dep-uniBTC
+    label: uniBTC
+    address: "0x004E9C3EF86bc1ca1f0bB5C7662861Ee93350568"
+    category: dependency
+    note: Accepted brBTC deposit asset; not assessed as a standalone asset in this report
+  - id: dep-wrapped-btc
+    label: WBTC / FBTC / cbBTC / M-BTC
+    category: dependency
+    note: Accepted BTC wrappers; mixed issuer/custody risk
+
+  # === External dependencies ===
+  - id: dep-chainlink-ccip
+    label: Chainlink CCIP
+    category: dependency
+    note: Documented cross-chain route for brBTC (via BurnMintTokenPool)
+  - id: free-tunnel
+    label: Free Tunnel Bridge
+    address: "0x70aF4743F85E5E74E3b6dDFa38926c0a762Ad21C"
+    category: dependency
+    note: Third-party Free Tunnel bridge (TunnelContract behind DelayedERC1967Proxy); holds MINTER_ROLE on brBTC; not documented in Bedrock bridge docs; 3-of-4 executor signatures, EOA admin, 36h-5d executor-rotation delay
+  - id: dep-babylon
+    label: Babylon Labs
+    category: dependency
+    note: BTC restaking venue
+  - id: dep-kernel
+    label: Kernel DAO
+    category: dependency
+    note: BTC restaking venue
+  - id: dep-satlayer
+    label: SatLayer
+    category: dependency
+    note: BTC restaking venue
+  - id: dep-pell
+    label: Pell Network
+    category: dependency
+    note: BTC restaking venue
+  - id: dep-symbiotic
+    label: Symbiotic
+    category: dependency
+    note: Restaking venue
+  - id: dep-mellow
+    label: Mellow Finance
+    category: dependency
+    note: Restaking / vault venue
+
+edges:
+  # === Governance and upgrade control ===
+  - { from: bedrock-safe, to: brBTC-proxyadmin, kind: controls, label: owner() }
+  - { from: brBTC-proxyadmin, to: brBTC, kind: manages, label: token upgrade authority }
+  - { from: brBTC-proxyadmin, to: brBTC-vault, kind: manages, label: vault upgrade authority }
+  - { from: brBTC-safe, to: brBTC-vault, kind: holds-role, label: DEFAULT_ADMIN_ROLE }
+  - { from: brBTC-safe, to: brBTC, kind: holds-role, label: "DEFAULT_ADMIN_ROLE (can grant MINTER_ROLE, no timelock)" }
+  - { from: bedrock-safe, to: ccip-token-pool, kind: controls, label: owner() }
+
+  # === Mint / receipt issuance ===
+  - { from: brBTC-vault, to: brBTC, kind: mints, label: MINTER_ROLE (collateralized mint via brVault) }
+  - { from: ccip-token-pool, to: brBTC, kind: mints, label: MINTER_ROLE (CCIP burn/mint) }
+  - { from: free-tunnel, to: brBTC, kind: mints, label: "MINTER_ROLE (bridge mint, undocumented)" }
+
+  # === Operational collateral pipeline ===
+  - { from: operator-eoa, to: transfer-proxy, kind: controls, label: owner() }
+  - { from: transfer-proxy, to: brBTC-vault, kind: holds-role, label: OPERATOR_ROLE (execute) }
+
+  # === Capital flow ===
+  - { from: brBTC, to: brBTC-vault, kind: routes-through, label: mint (no onchain redeem) }
+  - { from: brBTC-vault, to: brBTC-safe, kind: routes-through, label: "uniBTC/M-BTC outflow via TransferProxy" }
+  - { from: brBTC-safe, to: brBTC-restaking, kind: allocates-to, label: "% split TODO" }
+  - { from: brBTC-vault, to: dep-uniBTC, kind: routes-through, label: accepted input asset }
+  - { from: brBTC-vault, to: dep-wrapped-btc, kind: routes-through, label: accepted input assets }
+  - { from: brBTC-restaking, to: dep-babylon, kind: deposits-into, label: restaking venue }
+  - { from: brBTC-restaking, to: dep-kernel, kind: deposits-into, label: restaking venue }
+  - { from: brBTC-restaking, to: dep-satlayer, kind: deposits-into, label: restaking venue }
+  - { from: brBTC-restaking, to: dep-pell, kind: deposits-into, label: restaking venue }
+  - { from: brBTC-restaking, to: dep-symbiotic, kind: deposits-into, label: restaking venue }
+  - { from: brBTC-restaking, to: dep-mellow, kind: deposits-into, label: restaking venue }
+
+  # === Bridge dependency ===
+  - { from: brBTC, to: dep-chainlink-ccip, kind: routes-through, label: cross-chain path }
+  - { from: ccip-token-pool, to: dep-chainlink-ccip, kind: routes-through, label: CCIP lane }
