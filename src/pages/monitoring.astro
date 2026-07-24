@@ -1,31 +1,12 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
 import { protocolIconUrl } from "../lib/icons";
-import { FALLBACK_PROTOCOLS, transformApiProtocols } from "../data/monitoring";
-import type { ApiMonitoringResponse } from "../data/monitoring";
+import { fetchProtocols } from "../data/monitoring";
 
 const API_URL = import.meta.env.MONITORING_API_URL;
 const API_TOKEN = import.meta.env.MONITORING_API_TOKEN;
 
-let protocols = FALLBACK_PROTOCOLS;
-
-if (API_URL) {
-  try {
-    const headers: Record<string, string> = { Accept: "application/json" };
-    if (API_TOKEN) {
-      headers["Authorization"] = `Bearer ${API_TOKEN}`;
-    }
-    const res = await fetch(`${API_URL}/v1/monitoring`, { headers });
-    if (res.ok) {
-      const json: ApiMonitoringResponse = await res.json();
-      protocols = transformApiProtocols(json.data);
-    } else {
-      console.warn(`Monitoring API returned ${res.status}, using fallback data.`);
-    }
-  } catch (e) {
-    console.warn(`Monitoring API unreachable (${(e as Error).message}), using fallback data.`);
-  }
-}
+const protocols = await fetchProtocols(API_URL, API_TOKEN);
 ---
 
 <BaseLayout title="Monitoring — Yearn Curation" ogUrl="/monitoring/" ogImage="/og/default.png">

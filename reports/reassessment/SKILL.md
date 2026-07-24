@@ -137,6 +137,9 @@ Always recompute percentages from current values. If a strategy/farm is dust, qu
 - Keep changes factual and scoped.
 - Preserve the report's structure and tone.
 - Write the report as a clean, current-state document: update stale values in place so the prose reads as if freshly written for today. Do not narrate the refresh or compare against the previous version — avoid phrasings like "changed from last report", "up/down from prior assessment", "previously X", "now Y (was Z)", inline parentheticals such as "(down from $7.6M)", and dedicated "Reassessment Notes" / changelog sections.
+- Do not annotate what is new or unchanged: no `(NEW)`, `(new)`, `(unchanged)`, `(unchanged since …)` markers on rows, bullets, or headings. If a value is unchanged you simply leave it; if something changed the current value stands on its own. The reader does not need to know what moved since the last assessment.
+- Do not narrate verification in the body: avoid "verified onchain at block X", "re-verified", "rechecked at block …" phrasing sprinkled through sections. Provenance lives once in the header assessment date (and block, if useful); the body states current facts. If a fact were untrue you would have corrected it — saying "verified" adds nothing.
+- Prefer compact tables over long verification bullet lists for contract inventories: `Contract | Address | Role / Key facts`. Drop audit issue-count columns (list firm/date/scope only) and bug-bounty reward tables (state the single highest reward). Omit deep implementation trivia (proxy dummy-impl slot mechanics, full multisig signer lists) unless it is itself a risk.
 - Material historical events (incidents, exploits, depegs, large TVL swings) belong in Historical Track Record as dated facts, not as diffs against the prior report.
 - Record what changed in the PR description / task summary (step 8), not in the report body.
 - Include absolute dates for snapshots.

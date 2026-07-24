@@ -22,6 +22,7 @@ Primary focus:
 - Check the existing dependency graph and regenerate it if allocations, dependencies, governance, proxy, or mint-authority facts changed.
 - Check reassessment triggers against current data.
 - Update only the sections affected by verified current-state changes.
+- When an address, tx, or pool id changes during reassessment, the new full address must land in the link target — never just swap the displayed truncated form. If a link is broken, fix it as part of the same edit.
 
 Do not perform a full rewrite. Do not check Safe multisig signer identities; report only threshold and signer count.
 

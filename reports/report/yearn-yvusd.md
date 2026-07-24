@@ -359,7 +359,7 @@ Since the initial March 2026 assessment, the yvUSD vault has **completed its gov
 
 Yearn maintains an active monitoring system via the [`monitoring`](https://github.com/yearn/monitoring) repository:
 
-- **Large flow alerts** (`protocols/yearn/alert_large_flows.py`): Monitors deposit/withdrawal events via Envio indexer, alerts on flows exceeding $5M threshold via Telegram. Currently monitors 21 vaults across Ethereum, Base, Arbitrum, and Katana
+- **Large flow alerts** (`protocols/yearn/alert_large_flows.py`): Monitors deposit/withdrawal events via indexer, alerts on flows exceeding $5M threshold via Telegram. Currently monitors 21 vaults across Ethereum, Base, Arbitrum, and Katana
 - **Endorsed vault check** (`protocols/yearn/check_endorsed.py`): Runs daily, verifies all Yearn V3 vaults are endorsed onchain via the registry contract
 - **Timelock monitoring** (`protocols/timelock/timelock_alerts.py`): Monitors Yearn TimelockController across 6 chains
 
