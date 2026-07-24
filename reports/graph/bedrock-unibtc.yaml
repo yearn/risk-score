@@ -1,0 +1,123 @@
+slug: bedrock-unibtc
+title: Bedrock uniBTC - Contract Dependency Graph
+chain: ethereum
+
+categories:
+  - id: vault
+    label: Vault / Token
+  - id: strategy
+    label: Strategy / Custody
+  - id: governance
+    label: Governance
+  - id: infra
+    label: Protocol Infra
+  - id: dependency
+    label: External Dependency
+
+nodes:
+  # === User-facing token layer ===
+  - id: uniBTC
+    label: uniBTC Token
+    address: "0x004E9C3EF86bc1ca1f0bB5C7662861Ee93350568"
+    category: vault
+    note: EIP-1967 transparent proxy; BTC LRT; 8 decimals
+
+  # === Protocol infra ===
+  - id: uniBTC-vault
+    label: uniBTC Vault
+    address: "0x047D41F2544B7F63A8e991aF2068a363d210d6Da"
+    category: infra
+    note: Mint/redeem vault; PoR-gated; same proxy address as Sept 2024 exploit
+  - id: uniBTC-proxyadmin
+    label: uniBTC ProxyAdmin
+    address: "0x029e4fbdaa31de075dd74b2238222a08233978f6"
+    category: governance
+  - id: chainlink-por
+    label: Chainlink uniBTC PoR
+    address: "0xc590D9fb8eE78a0909dFF341ccf717000b7b7fF2"
+    category: infra
+    note: PoR feed wired into uniBTC Vault; 24h heartbeat; self-declared address set
+  - id: supply-feeder
+    label: uniBTC Supply Feeder
+    address: "0xE542919E4b281f10b437F947c8Ba224DdfaBc716"
+    category: infra
+    note: Aggregates global uniBTC supply for PoR comparison
+
+  # === Governance ===
+  - id: uniBTC-safe
+    label: uniBTC Ops Safe (3/5)
+    address: "0xC9dA980fFABbE2bbe15d4734FDae5761B86b5Fc3"
+    category: governance
+    note: Owns uniBTC ProxyAdmin; DEFAULT_ADMIN_ROLE on uniBTC Vault; no guard/module in original verification
+
+  # === Custody / strategy layer ===
+  - id: btc-custody-restaking
+    label: BTC Custody / Restaking
+    category: strategy
+    note: Wrapped/native BTC backing; custodian/signers not publicly named; DeFiLlama uniBTC TVL $291.37M on 2026-07-10
+
+  # === Accepted input assets ===
+  - id: dep-wbtc
+    label: WBTC
+    category: dependency
+    note: Accepted wrapped BTC asset
+  - id: dep-fbtc
+    label: FBTC
+    category: dependency
+    note: Accepted wrapped BTC asset; newer issuer dependency
+  - id: dep-cbbtc
+    label: cbBTC
+    category: dependency
+    note: Accepted wrapped BTC asset
+  - id: dep-mbtc
+    label: M-BTC
+    category: dependency
+    note: Accepted wrapped BTC asset; newer issuer dependency
+
+  # === External dependencies ===
+  - id: dep-bitcoin
+    label: Bitcoin Network
+    category: dependency
+    note: Native BTC custody/restaking settlement layer
+  - id: dep-babylon
+    label: Babylon Labs
+    category: dependency
+    note: BTC restaking dependency
+  - id: dep-chainlink
+    label: Chainlink PoR + CCIP
+    category: dependency
+    note: PoR feed gates minting; CCIP is documented cross-chain path
+  - id: dep-brbtc
+    label: brBTC Downstream
+    address: "0x2eC37d45FCAE65D9787ECf71dc85a444968f6646"
+    category: dependency
+    note: brBTC accepts uniBTC as a deposit asset; not part of uniBTC backing
+
+edges:
+  # === Governance and upgrade control ===
+  - { from: uniBTC-safe, to: uniBTC-proxyadmin, kind: controls, label: owner() }
+  - { from: uniBTC-proxyadmin, to: uniBTC, kind: manages, label: token upgrade authority }
+  - { from: uniBTC-proxyadmin, to: uniBTC-vault, kind: manages, label: vault upgrade authority }
+  - { from: uniBTC-safe, to: uniBTC-vault, kind: holds-role, label: DEFAULT_ADMIN_ROLE }
+
+  # === Mint / receipt issuance ===
+  - { from: uniBTC-vault, to: uniBTC, kind: mints, label: collateralized mint via Vault }
+
+  # === Capital flow ===
+  - { from: uniBTC, to: uniBTC-vault, kind: routes-through, label: mint/redeem }
+  - { from: uniBTC-vault, to: btc-custody-restaking, kind: allocates-to, label: BTC backing }
+  - { from: uniBTC-vault, to: dep-wbtc, kind: routes-through, label: accepted input asset }
+  - { from: uniBTC-vault, to: dep-fbtc, kind: routes-through, label: accepted input asset }
+  - { from: uniBTC-vault, to: dep-cbbtc, kind: routes-through, label: accepted input asset }
+  - { from: uniBTC-vault, to: dep-mbtc, kind: routes-through, label: accepted input asset }
+  - { from: btc-custody-restaking, to: dep-bitcoin, kind: deposits-into, label: native BTC custody }
+  - { from: btc-custody-restaking, to: dep-babylon, kind: deposits-into, label: BTC restaking }
+
+  # === Oracle / bridge wiring ===
+  - { from: uniBTC-vault, to: chainlink-por, kind: routes-through, label: reserve check }
+  - { from: uniBTC-vault, to: supply-feeder, kind: routes-through, label: supply check }
+  - { from: chainlink-por, to: dep-chainlink, kind: manages, label: PoR oracle network }
+  - { from: uniBTC, to: dep-chainlink, kind: routes-through, label: CCIP cross-chain }
+
+  # === Downstream use ===
+  - { from: uniBTC, to: dep-brbtc, kind: routes-through, label: accepted by brBTC }
