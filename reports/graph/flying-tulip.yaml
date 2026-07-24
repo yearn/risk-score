@@ -1,0 +1,260 @@
+slug: flying-tulip
+title: Flying Tulip FT Lend - Contract Dependency Graph
+chain: ethereum
+
+categories:
+  - id: vault
+    label: Market / Token
+  - id: strategy
+    label: Yield Wrapper
+  - id: governance
+    label: Governance
+  - id: infra
+    label: Protocol Infra
+  - id: dependency
+    label: External Dependency
+
+nodes:
+  # === Market / token layer ===
+  - id: positions-manager
+    label: PositionsManager
+    address: "0xbe4050a73a7Fb384c65E885a15C33461A4B20055"
+    category: vault
+    note: Core FT Lend engine; UUPS proxy
+  - id: ftusd
+    label: ftUSD
+    address: "0xF7D85EC4E7710f71992752eac2111312e73E9C9C"
+    category: vault
+    note: FiatToken-style stablecoin; collateral asset in FT Lend
+  - id: ft-token
+    label: FT Token
+    address: "0x5DD1A7A369e8273371d2DBf9d83356057088082c"
+    category: vault
+    note: Enabled long-tail asset; not borrowable/collateral in assessed market
+
+  # === Internal protocol infra ===
+  - id: config-registry
+    label: ConfigRegistry
+    address: "0xA8777c3D446fa7F0b0FC97a80C1Ea1d37F1ca33E"
+    category: infra
+    note: Asset configs, margins, caps, IRMs, oracle pointer
+  - id: account-values-router
+    label: AccountValuesRouter
+    category: infra
+    note: Account health/value router referenced by the lend engine
+  - id: oracle-router
+    label: OracleRouterChainlink
+    address: "0xe4372dB43D2814750a19b93950157AD81D93674A"
+    category: infra
+    note: Chainlink-anchored prices; owner can override last good price
+  - id: rfq-engine
+    label: RFQ Engines
+    address: "0xEB00B335Ca52216Fb60fdFFA361397367C39Dc32"
+    category: infra
+    note: RfqEngine plus LeverageRfqEngine for routed liquidations
+  - id: lend-circuit-breaker
+    label: Lend CircuitBreaker
+    address: "0x9676E697399581AB288844cDE5F73d0887eC18e0"
+    category: infra
+    note: Guardian-controlled emergency flow halt
+  - id: pm-wrapper
+    label: PMWrapper
+    address: "0xBDD80028c9e4b9A2D268D2cF62Fb54Ec8697C68B"
+    category: infra
+    note: Admin wrapper for PositionsManager upgrades, caps, pauses, reserves
+  - id: ftusd-core
+    label: ftUSD Core
+    address: "0x56c5892B0cF41B792217CCDD208f0FA85B178ca9"
+    category: infra
+    note: Sole ftUSD minter at assessment block
+  - id: mint-and-redeem
+    label: MintAndRedeem
+    address: "0xAa48EcBC843cF7E9A29155D112b8Cb27902bD23C"
+    category: infra
+    note: User collateral in, ftUSD out
+  - id: relayer-session
+    label: Relayer / Sessions
+    address: "0x823a97a2c32985e0f5457fc8103F36698D1F53F4"
+    category: infra
+    note: RelayerAuth plus SessionManager and meta-action modules
+
+  # === Yield wrappers / strategies ===
+  - id: usdc-wrapper
+    label: USDC YieldWrapper
+    address: "0xD2e4A5ac4B4Da102317cF7C9A1289aDF082639E2"
+    category: strategy
+  - id: weth-wrapper
+    label: WETH YieldWrapper
+    address: "0x460494aF61BcB92B59797B4e09C26A5ADecb2da2"
+    category: strategy
+  - id: usdt-wrapper
+    label: USDT YieldWrapper
+    address: "0x28b0905d83BCe5FFA6c54651F25858828A38123B"
+    category: strategy
+  - id: wbtc-wrapper
+    label: WBTC YieldWrapper
+    address: "0x1A5730c71576D77048E9FdC79DD40e4B1E8Fe042"
+    category: strategy
+
+  # === Governance ===
+  - id: admin-safe
+    label: Admin Safe (3/5)
+    address: "0x1118e1c057211306a40A4d7006C040dbfE1370Cb"
+    category: governance
+    note: No timelock; root owner/masterMinter/pauser/blacklister
+  - id: guardian-safe
+    label: Guardian Safe (3/4)
+    address: "0x22246a9183cE2CE6e2c2a9973F94aEA91435017C"
+    category: governance
+    note: Signers overlap with admin Safe; pause/oracle guardian
+  - id: fee-collector
+    label: Fee Collector
+    category: governance
+    note: Receives reserves/fees and settles epochs
+
+  # === External dependencies ===
+  - id: dep-aave
+    label: Aave
+    category: dependency
+    note: Idle supply venue for yield wrappers
+  - id: dep-spark
+    label: Spark
+    category: dependency
+    note: Idle supply venue for yield wrappers
+  - id: dep-chainlink
+    label: Chainlink Feeds
+    category: dependency
+    note: USDC, USDT, ETH, BTC, wstETH, ftUSD pricing
+  - id: dep-spot-clob
+    label: FT Spot AMM / CLOB
+    category: dependency
+    note: Depth/volatility inputs and liquidation venue
+  - id: dep-permit2
+    label: Permit2
+    address: "0xEB450d21ae68D3303Cf5775A54Cc84EE7c3fC8eC"
+    category: dependency
+
+edges:
+  # === Governance and control ===
+  - from: admin-safe
+    to: config-registry
+    kind: controls
+    label: owner - asset config, margins, IRMs
+  - from: admin-safe
+    to: oracle-router
+    kind: controls
+    label: owner - feeds and price override
+  - from: admin-safe
+    to: pm-wrapper
+    kind: controls
+    label: admin - upgrades, caps, pauses
+  - from: pm-wrapper
+    to: positions-manager
+    kind: controls
+    label: upgradePM / setCaps / pauses
+  - from: admin-safe
+    to: ftusd
+    kind: controls
+    label: owner + masterMinter + pauser + blacklister
+  - from: admin-safe
+    to: mint-and-redeem
+    kind: controls
+    label: owner
+  - from: guardian-safe
+    to: oracle-router
+    kind: holds-role
+    label: disablePrice guardian
+  - from: guardian-safe
+    to: lend-circuit-breaker
+    kind: controls
+    label: emergency pause
+  - from: fee-collector
+    to: positions-manager
+    kind: holds-role
+    label: collector / epoch settler
+
+  # === ftUSD mint / redeem path ===
+  - from: mint-and-redeem
+    to: ftusd-core
+    kind: routes-through
+    label: collateralized mint/redeem entry
+  - from: ftusd-core
+    to: ftusd
+    kind: mints
+    label: sole minter
+  - from: admin-safe
+    to: ftusd
+    kind: mints
+    label: masterMinter can configure arbitrary minter
+
+  # === Lending engine wiring ===
+  - from: positions-manager
+    to: config-registry
+    kind: routes-through
+    label: asset config
+  - from: positions-manager
+    to: account-values-router
+    kind: routes-through
+    label: health factor / account values
+  - from: account-values-router
+    to: oracle-router
+    kind: routes-through
+    label: priceUSD
+  - from: oracle-router
+    to: dep-chainlink
+    kind: routes-through
+    label: Chainlink feeds
+  - from: positions-manager
+    to: rfq-engine
+    kind: routes-through
+    label: liquidations / RFQ
+  - from: positions-manager
+    to: relayer-session
+    kind: routes-through
+    label: meta-actions / session layer
+  - from: positions-manager
+    to: lend-circuit-breaker
+    kind: routes-through
+    label: pause / circuit breaker
+  - from: rfq-engine
+    to: dep-spot-clob
+    kind: routes-through
+    label: liquidation venue
+  - from: relayer-session
+    to: dep-permit2
+    kind: routes-through
+    label: token approvals
+
+  # === Asset supply routing ===
+  - from: positions-manager
+    to: usdc-wrapper
+    kind: allocates-to
+    label: "USDC idle supply"
+  - from: positions-manager
+    to: weth-wrapper
+    kind: allocates-to
+    label: "WETH idle supply"
+  - from: positions-manager
+    to: usdt-wrapper
+    kind: allocates-to
+    label: "USDT idle supply"
+  - from: positions-manager
+    to: wbtc-wrapper
+    kind: allocates-to
+    label: "WBTC idle supply"
+  - from: usdc-wrapper
+    to: dep-spark
+    kind: deposits-into
+    label: Spark strategy
+  - from: weth-wrapper
+    to: dep-spark
+    kind: deposits-into
+    label: Spark strategy
+  - from: usdt-wrapper
+    to: dep-spark
+    kind: deposits-into
+    label: Spark strategy
+  - from: wbtc-wrapper
+    to: dep-aave
+    kind: deposits-into
+    label: Aave / Spark yield
