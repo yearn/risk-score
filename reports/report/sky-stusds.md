@@ -990,6 +990,8 @@ Combining the exact LSE shortfall curve with these Morpho thresholds gives the r
 - **First Morpho liquidation caused by a realized LSE loss:** approximately **$1.934M** of LSE loss / 1.031% `chi` cut, reached at SKY **$0.0208919** (−65.92%).
 - **First modeled Morpho lender bad debt:** approximately **$20.921M** of LSE loss / 11.156% `chi` cut, reached at SKY **$0.0158955** (−74.07%).
 
+These thresholds are sequential, not equivalent. An LSE principal shortfall first reduces the stUSDS exchange rate when the Clipper [calls `cut()` for an auction's unrecovered residual](https://github.com/sky-ecosystem/lockstake/blob/master/src/LockstakeClipper.sol#L430-L448); Morpho lenders incur bad debt only if that impairment is large enough that a [Morpho liquidation](https://github.com/morpho-org/morpho-blue/blob/main/src/Morpho.sol#L347-L415) exhausts a borrower's stUSDS collateral while USDC debt remains.
+
 Because the Clipper was fully stopped, these SKY prices describe latent economic shortfall, not automatic realization timing. Loss could be crystallized discontinuously after a governance restart and auction clearing, or directly through a governance `cut()`.
 
 ### Governance Restart Delay and SKY Auction Depth
