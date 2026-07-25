@@ -221,7 +221,7 @@ FIRST-LOSS ABSORPTION (cut):
 |-----------|-----------|---------|------|--------|
 | USDS → stUSDS (deposit) | Permissionless | Yes (1 tx) | 0 | `cap` = 211M USDS max supply |
 | stUSDS → USDS (withdraw) | Permissionless | Yes (1 tx) | 0 | **Constrained by available idle funds** (~$31.1M at snapshot) |
-| Cut (loss socialization) | **Auth-gated** (wards/PauseProxy) | N/A | 0 (loss event) | Reduces chi for all holders |
+| Cut (loss socialization) | **Auth-gated** (Clip or PauseProxy) | N/A | 0 (loss event) | Clip can call after auction settlement without delay; a direct governance call requires a Pause spell and at least 48 h after scheduling. Both reduce chi for all holders |
 | Yield accrual (`drip`) | Permissionless (anyone can call) | N/A | Gas cost only | — |
 
 **Critical distinction from sUSDS:** stUSDS is **not** a 1:1 liquid vault. Withdrawals are constrained by the borrowing pool's utilization. At the snapshot, only ~16.6% of deposited USDS is withdrawable. If utilization reaches 100%, no withdrawals are possible. This is a fundamental architectural difference from sUSDS, where all deposits are always withdrawable.
@@ -253,7 +253,7 @@ stUSDS is **not directly collateralized by external assets** in the way a lendin
 1. **Every stUSDS is backed 1:1 by USDS** held in the stUSDS contract (at `chi > 1`, the backing exceeds 1:1 due to accumulated yield)
 2. **The USDS held by stUSDS is partially lent** to LockStake Engine V2 borrowers. The loans are over-collateralized by locked SKY tokens (specific liquidation ratios are set by Sky governance for the LSEV2-SKY-A ilk)
 3. **If a borrower defaults**, the loss cascades to stUSDS holders via `cut()`. There is no separate insurance fund or buffer — stUSDS **is** the first-loss capital
-4. **System-wide solvency** for stUSDS depends on: (a) LockStake borrower over-collateralization holding, (b) the Clip liquidation module functioning correctly, and (c) governance not abusing the `cut()` capability
+4. **stUSDS depositor solvency and value preservation** depend on: (a) LockStake borrower over-collateralization holding, (b) the Clip liquidation module functioning correctly, and (c) governance using its direct `cut()` authority only to socialize correctly measured losses. A direct governance `cut()` is not an immediate or hidden power under the current permissions: it requires a Chief-approved Pause spell, at least the 48 h Pause delay after scheduling, and execution through PauseProxy. That observable window materially reduces surprise risk and gives holders time to react to a queued slash, although high utilization can still prevent a complete withdrawal. The separate Clip-originated `cut()` path after auction settlement has no governance delay
 
 At the snapshot, using the VAT ilk state for LSEV2-SKY-A:
 - Actual borrow utilization: $156.4M / $187.5M = **83.4%**
@@ -338,7 +338,7 @@ stUSDS inherits Sky's governance infrastructure identically to USDS and sUSDS:
 | Power | Who | Delay | Impact |
 |-------|-----|-------|--------|
 | Upgrade stUSDS implementation | PauseProxy (via Chief + 48 h) | 48 h | Can change all contract logic |
-| Call `cut()` to socialize losses | PauseProxy or Clip | None (Clip: during auction) | **Permanently reduces chi** — impairs all holders |
+| Call `cut()` to socialize losses | PauseProxy or Clip | Governance: **at least 48 h after the spell is scheduled**; Clip: none after auction settlement | **Permanently reduces chi** — impairs all holders. The governance path is observable during the timelock; the Clip path is not |
 | Change `str` (supply rate), `cap`, `line` | RateSetter `buds` or PauseProxy | 16 h cooldown (RateSetter); 48 h (PauseProxy via spell) | Affects yield, deposit capacity, borrowing capacity |
 | Change RateSetter config (bounds, cooldown) | PauseProxy (wards) | 48 h | Can widen/restrict rate-step bounds |
 | Add/remove RateSetter `buds` | PauseProxy (wards) | 48 h | Changes who can set rates |
@@ -356,7 +356,7 @@ stUSDS inherits Sky's governance infrastructure identically to USDS and sUSDS:
 - No EOA holds direct admin powers on stUSDS, RateSetter, or Mom
 
 **Weaknesses (unique to stUSDS):**
-1. **`cut()` can be called without GSM delay** — losses are socialized immediately when Clip concludes an auction with bad debt. Governance can also call `cut()` directly via PauseProxy (with 48 h delay). The irreversible chi reduction means stUSDS holders cannot "wait out" a governance decision
+1. **`cut()` has two timing paths** — losses are socialized immediately when Clip concludes an auction with bad debt, with no GSM delay. A direct governance `cut()` must instead be queued through MCD Pause and wait at least 48 h after scheduling. Monitoring decoded Pause spells therefore provides a reaction window and makes an unannounced governance slash unlikely under current permissions, but it does not guarantee an exit because utilization may leave insufficient withdrawable USDS
 2. **Mom has immediate emergency powers** — can halt RateSetter, zero cap, zero line without 48 h GSM delay. These are defensive mechanisms but could be used to trap funds
 3. **RateSetter adds a governance dependency layer** — the `buds` facilitators (even if currently empty) are an additional class of privileged actors distinct from the Chief/PauseProxy path
 4. **48 h GSM delay is non-standard during high-utilization periods** — if utilization is near 100%, holders cannot exit during the delay even if they detect a malicious spell
@@ -402,7 +402,7 @@ User accounting remains programmatic, but the core borrower-loss-control path wa
 
 **Notable: stUSDS's README explicitly lists 15+ trust assumptions and risk considerations**, including:
 - Governance can upgrade the contract, and during the 48 h delay all funds could become borrowed, preventing withdrawals
-- `cut()` can be called by governance directly, not just by Clip
+- `cut()` can be called by governance directly, not just by Clip, but the direct governance path is subject to the 48 h Pause delay and can be detected from the queued spell
 - RateSetter operators can set rates so that all funds are borrowed
 - No debt-ceiling Instant Access Module (autoline) — borrowing can move very fast
 - Deposits can be griefed by other deposits; withdrawals can be griefed by borrowers
@@ -421,7 +421,7 @@ This transparency is a positive signal for operational maturity.
 | StUsdsRateSetter | [`0x30784615252B13E1DbE2bDf598627eaC297Bf4C5`](https://etherscan.io/address/0x30784615252B13E1DbE2bDf598627eaC297Bf4C5) | `Set(strBps, dutyBps, line, cap)` events; `bad` flag — any change to 1 is a critical halt; `Kiss(usr)` / `Diss(usr)` — facilitator changes; `File("bad", 1)` — circuit breaker; `toc`, `tau` — cooldown parameters |
 | StUsdsMom | [`0x99159d0b885CC6633daC7CD4d82e4247A834b89A`](https://etherscan.io/address/0x99159d0b885CC6633daC7CD4d82e4247A834b89A) | **Any call** — Mom actions are emergency-level events: `DissRateSetterBud`, `HaltRateSetter`, `ZeroCap`, `ZeroLine`; `SetOwner` / `SetAuthority` |
 | VAT LSEV2-SKY-A | [`0x35D1b3F3D7966A1DFe207aa4514C12a259A0492B`](https://etherscan.io/address/0x35D1b3F3D7966A1DFe207aa4514C12a259A0492B) | `ilks("LSEV2-SKY-A")` → `Art`, `rate`, `line` — debt growth, interest accrual, ceiling changes |
-| MCD Pause | [`0xbE286431454714F511008713973d3B053A2d38f3`](https://etherscan.io/address/0xbE286431454714F511008713973d3B053A2d38f3) | `Plot` events — any spell touching stUSDS, RateSetter, Mom, or `LSEV2-SKY-A` ilk; `delay()` changes |
+| MCD Pause | [`0xbE286431454714F511008713973d3B053A2d38f3`](https://etherscan.io/address/0xbE286431454714F511008713973d3B053A2d38f3) | Monitor every `Plot` in real time and decode the spell before its ETA. Treat any direct stUSDS `cut()`, ward change, upgrade, or Clipper restart as critical. Under current permissions, this supplies at least 48 h warning for a direct governance slash; it does not warn before a Clip-originated auction slash |
 | Clip (LSEV2-SKY-A) | [`0x836F56750517b1528B5078Cba4Ac4B94fBE4A399`](https://etherscan.io/address/0x836F56750517b1528B5078Cba4Ac4B94fBE4A399) | `Due()` — any non-zero value means an auction is pending (withdrawals are further constrained); `Take` events — liquidation activity |
 | USDS balance at stUSDS | [`0xdC035D45d973E3EC169d2276DDab16f1e407384F`](https://etherscan.io/address/0xdC035D45d973E3EC169d2276DDab16f1e407384F) | `balanceOf(stUSDS)` — idle reserve gauge |
 | Morpho markets | (see Contract Addresses table) | stUSDS collateral utilization; oracle price feeds for stUSDS |
@@ -429,6 +429,7 @@ This transparency is a positive signal for operational maturity.
 | Dog (Liquidation Engine) | [`0x135954d155898D42C90D2a57824C690e0c7BEf1B`](https://etherscan.io/address/0x135954d155898D42C90D2a57824C690e0c7BEf1B) | `ilks("LSEV2-SKY-A")` → `chop`, `hole`, `dirt`; `Bark` events — liquidation initiations; `dirt` approaching `hole` means liquidation throughput is saturated |
 | LockStake Engine V2 | [`0xCe01C90dE7FD1bcFa39e237FE6D8D9F569e8A6a3`](https://etherscan.io/address/0xCe01C90dE7FD1bcFa39e237FE6D8D9F569e8A6a3) | `SKY.balanceOf(LockStakeEngine)` — total SKY collateral locked. Decreasing = liquidations or withdrawals; increasing = new borrowers |
 | SKY liquidation-market depth | [DEX Screener Ethereum pairs](https://api.dexscreener.com/token-pairs/v1/ethereum/0x56072C95FAA701256059aa122697B133aDEd9279) and direct pool reserve reads | Track total Ethereum DEX volume/liquidity and executable SKY→USDS quotes. Headline TVL includes SKY-side inventory and must not be treated as stablecoin exit capacity |
+| Curve stUSDS/USDS pool | [`0x2C7C…78aE`](https://etherscan.io/address/0x2C7C98A3b1582D83c43987202aEFf638312478aE) | Monitor token balances, `TokenExchange` activity, and executable stUSDS→USDS quotes against `convertToAssets`/`chi`. This is the secondary liquidation/holder exit route when direct stUSDS redemption is constrained |
 | Primary Morpho stUSDS/USDC market | [Market ID `0xd570…af93d`](https://app.morpho.org/ethereum/variable/0xd570c19c0dc0fbe4ab7faf4a37c4150e1c141c8aada8ca3e1b4b6c1b712af93d) via Morpho [`0xBBBBB…FFCb`](https://etherscan.io/address/0xBBBBBbbBBb9cC5e90e3b3Af64bdAF62C37EEFFCb) | `market(id)` → supply, borrow, and free USDC; `position(id, borrower)` plus oracle price → borrower LTV. Utilization >90% means thin lender exit liquidity; it does not imply borrower LTV |
 | Morpho stUSDS/USDS market | [Market ID `0x77e6…7f82`](https://app.morpho.org/ethereum/variable/0x77e624dd9dd980810c2b804249e88f3598d9c7ec91f16aa5fbf6e3fdf6087f82) via Morpho [`0xBBBBB…FFCb`](https://etherscan.io/address/0xBBBBBbbBBb9cC5e90e3b3Af64bdAF62C37EEFFCb) | Same market-utilization and per-borrower LTV checks, denominated in USDS |
 
@@ -447,7 +448,7 @@ This transparency is a positive signal for operational maturity.
 | stUSDS daily deposit/withdraw volume | event logs `Deposit` / `Withdraw` | >20% of totalSupply in 24 h — bank-run signal | Daily |
 | stUSDS `str` rate | onchain | Change >200 bps APY — material yield change | On `Set` event |
 | USDS depeg | CoinGecko / DEX | >±1% sustained >24 h | 15 min |
-| `MCD_PAUSE` spells touching stUSDS | `Plot` event | **Any** — provides 48 h warning | Behind timelock |
+| `MCD_PAUSE` spells touching stUSDS | `Plot` event plus decoded spell calldata/actions | **Any** — review immediately. A queued direct `cut()` is critical and starts the exit window; alert with its ETA, proposed `rad`, and implied chi loss. The minimum 48 h warning begins when the spell is scheduled, not when voting or the underlying incident begins | Real time |
 | stUSDS `Upgraded` event | event log | Any implementation change | Behind 48 h GSM delay |
 | **SKY/USD price and LSE feed** | Underlying OSM plus [`LockstakeCappedOsmWrapper`](https://etherscan.io/address/0x0C13fF3DC02E85aC169c4099C09c9B388f2943Fd) | Wrapper feed is `min(OSM, cap)`. **< $0.025** means the market price has crossed the snapshot cap and further declines reduce LSE collateral value; do not infer liquidations from aggregate CR alone | 15 min |
 | **Per-urn LSEV2 safety** | For each urn: `ink × vatSpot / (art × rate)`; aggregate collateral from `lsSKY.totalSupply()` plus unsold auction lots | **< 1.10** warning; **< 1.00** urn is unsafe and would be barkable only when `clip.stopped() < 1`. Report count and debt of unsafe urns rather than treating aggregate CR as a position-level threshold | Hourly |
@@ -456,6 +457,7 @@ This transparency is a positive signal for operational maturity.
 | **Clip `Take` events** | event log on [`0x836F56750517b1528B5078Cba4Ac4B94fBE4A399`](https://etherscan.io/address/0x836F56750517b1528B5078Cba4Ac4B94fBE4A399) | **Spike >3 auctions/hour** — active liquidation cascade; sustained >10/hour = crisis mode | Real time |
 | **Clip `Due()` > 0 for >24 h** | onchain | Stale auction — potential failed liquidation, bad debt may flow to stUSDS | Hourly |
 | **SKY liquidation-market depth** | [DEX Screener pairs](https://api.dexscreener.com/token-pairs/v1/ethereum/0x56072C95FAA701256059aa122697B133aDEd9279), dominant [SKY/USDS pool](https://dexscreener.com/ethereum/0x2621cc0b3f3c079c1db0e80794aa24976f0b9e3c), executable route quotes | Alert if a SKY→USDS sale sized to `Dog.hole` ($250K reference notional) has >5% impact, or if depth/volume falls while unsafe debt rises. At the July 25 live check, the direct dominant-pool estimate was already ~5.97% | Hourly; every block during stress |
+| **Curve stUSDS/USDS executable depth** | [`0x2C7C…78aE`](https://etherscan.io/address/0x2C7C98A3b1582D83c43987202aEFf638312478aE) pool balances and executable stUSDS→USDS quote versus `convertToAssets`/`chi` | Alert if stUSDS trades >1% below its chi-implied USDS value, or if selling collateral equal to the largest active Morpho borrower would incur >5% price impact. Requote after any `cut()` or material balance change | Hourly; every block during stress |
 | **Morpho stUSDS market utilization** | onchain (see Monitoring Functions below) | >90% means loan-token liquidity is thin; it does **not** measure borrower liquidation headroom | Hourly |
 | **Morpho borrower LTV** | `position()` + accrued market share conversion + oracle `price()` | Any borrower >85% against 86% LLTV is within ~1.2% of liquidation from a `chi` cut | Hourly; every block after `Cut` |
 | **Total locked SKY** | `lsSKY.totalSupply()` plus unsold `clip.sales(id).lot` while auctions are active | Drop >10% in 24 h — mass withdrawal or liquidation event in progress. Do not use `SKY.balanceOf(engine)`, which excludes delegated collateral | Hourly |
@@ -673,7 +675,7 @@ Snapshot block 25595151 (July 23, 2026).
 - **Withdrawal gating risk** — stUSDS is fundamentally different from sUSDS in that withdrawals are constrained by borrowing utilization. At the snapshot, only ~16.6% of assets ($31.1M) are withdrawable. In a crisis, 100% utilization would prevent all withdrawals
 - **First-loss exposure** — stUSDS holders bear the first-loss risk from LockStake Engine V2 borrower defaults via the `cut()` mechanism. Chi can be permanently reduced without the 48 h GSM delay (during Clip auction settlement)
 - **Active rate-setter governance** — the `str` rate, `duty` rate, `cap`, and `line` are actively managed by RateSetter facilitators (`buds`) or governance. Poor rate-setting could drive utilization to 100% or create unsustainable yield expectations
-- **Governance `cut()` power** — Sky governance can directly call `cut()` via PauseProxy (with 48 h delay), socializing arbitrary losses to stUSDS holders. This is explicitly documented in the README
+- **Governance `cut()` power** — Sky governance can directly call `cut()` via PauseProxy, socializing an arbitrary amount up to all stUSDS assets. The current path requires a queued spell and at least the 48 h Pause delay, making it observable and materially reducing surprise risk; monitor the proposed amount and exit during the warning window where liquidity permits
 - **Mom emergency powers without delay** — the Mom can halt the RateSetter, zero out cap/line, and revoke facilitators without the 48 h GSM delay. While defensive, these could trap funds
 - **Limited DEX liquidity** — the Curve stUSDS-USDS pool is the identified spot exit and is shallow relative to total supply ($187.5M). Morpho markets provide leverage against stUSDS, not a sale or redemption path
 - **Thin SKY liquidation-market depth** — at the July 25 live check, Ethereum SKY pairs showed only ~$19.11M of headline liquidity and ~$0.80M of 24 h DEX volume; the dominant SKY/USDS pool held just ~$4.14M USDS. This is small relative to the ~$70.03M debt then sitting in feed-unsafe urns, and headline liquidity overstates executable stablecoin capacity because it includes SKY-side inventory and concentrated-liquidity ranges
@@ -1048,7 +1050,7 @@ This comparison does **not** assume all ~$70.03M of unsafe debt is auctioned or 
   - stUSDS implementation upgrade — new code to re-audit
 - **Governance-based:**
   - SKY voter concentration changes materially (any single supporter exceeds 50% of Chief approvals)
-  - stUSDS-specific governance spell passes — revalidate all parameters post-change
+  - Any stUSDS-specific governance spell is proposed or scheduled — decode it immediately. A queued direct `cut()` is a critical exit signal with at least the 48 h Pause window after scheduling
   - New LockStake Engine version deployed — changes borrower-side dynamics
 
 ## Assessment History
@@ -1058,4 +1060,4 @@ This comparison does **not** assume all ~$70.03M of unsafe debt is auctioned or 
 | July 23, 2026 | 1.9 | Initial assessment before exact per-urn and holder reconstruction. |
 | July 23, 2026 | 2.5 | Corrected assessment. All 6,244 opened LSE urns and 15,571 stUSDS transfers were reconstructed at block 25595151. Eleven unsafe urns carried ~$70.01M debt while `Clip.stopped() = 3` had disabled `kick`, `redo`, and `take` since Sep 8, 2025. Holder concentration: top-1 15.71%, top-5 45.41%, top-10 55.05%. Integrated thresholds: first Morpho liquidation at ~$1.934M realized LSE loss / SKY ~$0.02089; first modeled Morpho lender bad debt at ~$20.921M loss / SKY ~$0.01590. Score raised to 2.5 (Medium Risk). |
 | July 24, 2026 | 2.5 | Reviewer follow-up corrected the compounded `str` APY to 6.48% and production age to ~11 months, added exact Morpho market IDs and the stUSDS-holder/USDC-lender scope distinction, and confirmed `Clip.stopped() = 3` persisted through block 25603427. Primary stUSDS/USDC utilization had risen from 82.14% to 89.07%; no score change. |
-| July 25, 2026 | 2.5 | Confirmed `Clip.stopped() = 3` persisted through block 25609984 and validated that the current practical restart path requires a PauseProxy governance spell plus the 48 h Pause delay. Added current SKY DEX depth: ~$19.11M headline Ethereum liquidity, ~$0.80M 24 h volume, and only ~$4.14M USDS in the dominant pool; a $250K direct-pool SKY sale modeled ~5.97% impact. Added the live zero-fee LitePSM USDS→USDC liquidation route and ChainSecurity's bad-debt, slashing, and withdrawal-risk notes. Classified the combination as a high-severity failure mode already reflected in the existing score; no score change. |
+| July 25, 2026 | 2.5 | Confirmed `Clip.stopped() = 3` persisted through block 25609984 and validated that the current practical restart path requires a PauseProxy governance spell plus the 48 h Pause delay. Added current SKY DEX depth: ~$19.11M headline Ethereum liquidity, ~$0.80M 24 h volume, and only ~$4.14M USDS in the dominant pool; a $250K direct-pool SKY sale modeled ~5.97% impact. Added the live zero-fee LitePSM USDS→USDC liquidation route and ChainSecurity's bad-debt, slashing, and withdrawal-risk notes. Clarified that a direct governance `cut()` is observable behind the 48 h Pause delay and added decoded-spell and Curve stUSDS/USDS executable-depth monitoring. Classified the combination as a high-severity failure mode already reflected in the existing score; no score change. |
