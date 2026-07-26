@@ -23,7 +23,7 @@ nodes:
     label: cUSD (Cap Stablecoin)
     address: "0xcCcc62962d17b8914c62D74FfB843d73B2a3cccC"
     category: vault
-    note: ERC-20 upgradeable proxy; backed ~95% USDC / ~5% wWTGXX
+    note: ERC-20 upgradeable proxy; backed ~93% USDC / ~7% wWTGXX
 
   # === Strategies (capital deployment legs) ===
   - id: usdc-frv
@@ -86,8 +86,44 @@ nodes:
     note: IMC Trading / Edge Capital / Susquehanna Crypto
   - id: symbiotic
     label: Symbiotic Restaking
+    address: "0x09A3976d8D63728d20DCDFEe1e531C206Ba91225"
     category: dependency
-    note: Per-operator vaults; instant slashing on default
+    note: Primary collateral network; 14 live debt positions
+  - id: eigenlayer
+    label: EigenLayer
+    address: "0xe65c3eccd18879e103dbc96d854e376ced4cc7dd"
+    category: dependency
+    note: Five OETH-backed operator allocations
+  - id: unibtc
+    label: uniBTC (Bedrock)
+    address: "0x004E9C3EF86bc1ca1f0bB5C7662861Ee93350568"
+    category: dependency
+    note: Secures ~$18.35M of agent debt (40.35%)
+  - id: wsteth
+    label: wstETH (Lido)
+    address: "0x7f39C581F595B53c5cb19bD0b3f8dA6c935E2Ca0"
+    category: dependency
+    note: Secures ~$7.48M of agent debt (16.45%)
+  - id: lbtc
+    label: LBTC (Lombard)
+    address: "0x8236a87084f8B84306f72007F36F2618A5634494"
+    category: dependency
+    note: Secures ~$7.01M of agent debt (15.41%)
+  - id: weeth
+    label: weETH (Ether.fi)
+    address: "0xcd5fe23c85820f7b72d0926fc9b05b43e359b7ee"
+    category: dependency
+    note: Secures ~$6.90M of agent debt (15.18%)
+  - id: solvbtc
+    label: SolvBTC (Solv)
+    address: "0x7A56E1C57C7475CCf742a1832B028F0456652F97"
+    category: dependency
+    note: Secures ~$4.60M of agent debt (10.12%)
+  - id: oeth
+    label: OETH (Origin)
+    address: "0x856c4Efb76C1D1AE02e20CEB03A2A6a08b0b8dC3"
+    category: dependency
+    note: Secures ~$1.02M via five EigenLayer allocations
 
 edges:
   # === Governance flow ===
@@ -116,7 +152,7 @@ edges:
   - from: stcUSD
     to: cUSD
     kind: deposits-into
-    label: "ERC-4626 (85% staked)"
+    label: "ERC-4626 (91.5% of cUSD staked)"
 
   # === Allocation: cUSD reserves into strategy legs ===
   - from: cUSD
@@ -156,4 +192,32 @@ edges:
   - from: lender
     to: symbiotic
     kind: routes-through
-    label: slashing collateral
+    label: 14 live collateral positions
+  - from: lender
+    to: eigenlayer
+    kind: routes-through
+    label: 5 OETH-backed positions
+  - from: symbiotic
+    to: unibtc
+    kind: routes-through
+    label: "backs ~$18.35M debt"
+  - from: symbiotic
+    to: wsteth
+    kind: routes-through
+    label: "backs ~$7.48M debt"
+  - from: symbiotic
+    to: lbtc
+    kind: routes-through
+    label: "backs ~$7.01M debt"
+  - from: symbiotic
+    to: weeth
+    kind: routes-through
+    label: "backs ~$6.90M debt"
+  - from: symbiotic
+    to: solvbtc
+    kind: routes-through
+    label: "backs ~$4.60M debt"
+  - from: eigenlayer
+    to: oeth
+    kind: routes-through
+    label: "backs ~$1.02M debt"
