@@ -17,6 +17,7 @@ protocol_tokens:
   USDe: Ethena
   USDS: Sky
   sUSDS: Sky
+  stUSDS: Sky
   sDAI: MakerDAO
   DAI: MakerDAO
   GHO: Aave
@@ -334,6 +335,22 @@ protocols:
     - Chronicle
     - SkyLink
     - LayerZero
+  sky_stusds:
+    name: Sky stUSDS
+    chain: ethereum
+    type: yield_vault
+    address: '0x99CD4Ec3f88A45940936F469E4bB72A2A701EEB9'
+    report: reports/report/sky-stusds.md
+    collateral:
+    - asset: USDS
+      address: '0xdC035D45d973E3EC169d2276DDab16f1e407384F'
+    yield_sources:
+    - protocol: sky
+      assets:
+      - USDS
+      label: LockStake Engine V2 (SKY-backed)
+    infrastructure:
+    - Sky OSM
   infinifi:
     name: InfiniFi (siUSD)
     chain: ethereum
