@@ -428,16 +428,12 @@ protocols:
     yield_sources:
     - protocol: aave_v3_core
       assets:
-      - USDC
-      - USDT
-      - WETH
       - WBTC
     - protocol: spark
       assets:
       - USDC
       - USDT
       - WETH
-      - WBTC
     infrastructure:
     - Chainlink
   strata:

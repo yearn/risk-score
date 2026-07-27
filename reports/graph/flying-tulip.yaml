@@ -38,11 +38,6 @@ nodes:
     address: "0xA8777c3D446fa7F0b0FC97a80C1Ea1d37F1ca33E"
     category: infra
     note: Asset configs, margins, caps, IRMs, oracle pointer
-  - id: account-values-router
-    label: AccountValuesRouter
-    address: "0x7aD77FddEf64Ec8325E8d2d02c2708AA2a412eF7"
-    category: infra
-    note: Account health/value router referenced by the lend engine
   - id: oracle-router
     label: OracleRouterChainlink
     address: "0xe4372dB43D2814750a19b93950157AD81D93674A"
@@ -100,6 +95,7 @@ nodes:
     label: ftUSD YieldWrapper
     address: "0xc67D966f761e8cf13Faa0a1E774425290c8453d9"
     category: strategy
+    note: No strategy configured at assessment block; idle ftUSD held in wrapper
 
   # === Governance ===
   - id: admin-safe
@@ -114,6 +110,7 @@ nodes:
     note: Signers overlap with admin Safe; pause/oracle guardian
   - id: fee-collector
     label: Fee Collector
+    address: "0x5cd6Abe67f8af1C0c699dF36d90a6469Eaf1958a"
     category: governance
     note: Receives reserves/fees and settles epochs
 
@@ -193,34 +190,18 @@ edges:
     label: masterMinter can configure arbitrary minter
 
   # === Lending engine wiring ===
-  - from: positions-manager
-    to: config-registry
-    kind: routes-through
-    label: asset config
-  - from: positions-manager
-    to: account-values-router
-    kind: routes-through
-    label: health factor / account values
-  - from: account-values-router
-    to: oracle-router
-    kind: routes-through
-    label: priceUSD
   - from: oracle-router
     to: dep-chainlink
-    kind: routes-through
-    label: Chainlink feeds
+    kind: manages
+    label: configured price feeds
   - from: positions-manager
     to: rfq-engine
     kind: routes-through
     label: liquidations / RFQ
   - from: positions-manager
     to: relayer-session
-    kind: routes-through
+    kind: manages
     label: meta-actions / session layer
-  - from: positions-manager
-    to: lend-circuit-breaker
-    kind: routes-through
-    label: pause / circuit breaker
   - from: rfq-engine
     to: dep-spot-clob
     kind: routes-through
@@ -234,19 +215,19 @@ edges:
   - from: positions-manager
     to: usdc-wrapper
     kind: allocates-to
-    label: "USDC idle supply"
+    label: "~25.5% TVL"
   - from: positions-manager
     to: weth-wrapper
     kind: allocates-to
-    label: "WETH idle supply"
+    label: "~11.7% TVL"
   - from: positions-manager
     to: usdt-wrapper
     kind: allocates-to
-    label: "USDT idle supply"
+    label: "~11.4% TVL"
   - from: positions-manager
     to: wbtc-wrapper
     kind: allocates-to
-    label: "WBTC idle supply"
+    label: "~39.7% TVL"
   - from: usdc-wrapper
     to: dep-spark
     kind: deposits-into
@@ -262,12 +243,8 @@ edges:
   - from: wbtc-wrapper
     to: dep-aave
     kind: deposits-into
-    label: Aave / Spark yield
+    label: Aave strategy
   - from: positions-manager
     to: ftusd-wrapper
     kind: allocates-to
-    label: "ftUSD idle supply"
-  - from: ftusd-wrapper
-    to: dep-aave
-    kind: deposits-into
-    label: Aave / Spark yield
+    label: "~11.6% TVL"
