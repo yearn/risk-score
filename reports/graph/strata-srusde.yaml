@@ -25,7 +25,7 @@ nodes:
     label: jrUSDe (Junior Tranche)
     address: "0xC58D044404d8B14e953C115E67823784dEA53d8F"
     category: vault
-    note: ERC-4626 first-loss capital; ~$10M backing
+    note: ERC-4626 first-loss capital; ~$6.6M backing
   - id: tranche-depositor
     label: TrancheDepositor
     address: "0x50E850641F43F65BF8fB3a7d0CF082a1D252F47e"
@@ -115,6 +115,22 @@ nodes:
     label: StrataCDO ProxyAdmin
     address: "0xcAb791D0D44eBaC17378fF2AF6356c012F15c9e6"
     category: governance
+  - id: srusde-proxyadmin
+    label: srUSDe ProxyAdmin
+    address: "0x30a17D6bcBdbf1579D6FbBA453aCf776d01fBb50"
+    category: governance
+  - id: jrusde-proxyadmin
+    label: jrUSDe ProxyAdmin
+    address: "0x89d2573471Dc0BF81c7c553fFfc1E31Ce9E75BF1"
+    category: governance
+  - id: susde-strategy-proxyadmin
+    label: sUSDeStrategy ProxyAdmin
+    address: "0x32D0D70A8dA4c0c2f354a986fD3738aFe92542f7"
+    category: governance
+  - id: accounting-proxyadmin
+    label: Accounting ProxyAdmin
+    address: "0x25A733FEBA393A48C07a76441777324B471d212E"
+    category: governance
   - id: cooldown-proxyadmin
     label: ERC20Cooldown ProxyAdmin
     address: "0xeD6c7b379F73DF0618406d263b13b2386E398166"
@@ -129,6 +145,11 @@ nodes:
     label: Aave v3 Core (Benchmark Rate)
     category: dependency
     note: Supply-weighted USDC/USDT lending rate
+  - id: pendle-srusde
+    label: Pendle PT-srUSDe-22OCT2026
+    address: "0x66ec657c59cdcaf171ab43b83da3942758bf8a97"
+    category: dependency
+    note: Secondary DEX liquidity venue (~$4.7M LP)
 
 edges:
   # === Governance ===
@@ -153,6 +174,22 @@ edges:
     kind: controls
     label: owner (48h delay)
   - from: timelock-48h
+    to: srusde-proxyadmin
+    kind: controls
+    label: owner (48h delay)
+  - from: timelock-48h
+    to: jrusde-proxyadmin
+    kind: controls
+    label: owner (48h delay)
+  - from: timelock-48h
+    to: susde-strategy-proxyadmin
+    kind: controls
+    label: owner (48h delay)
+  - from: timelock-48h
+    to: accounting-proxyadmin
+    kind: controls
+    label: owner (48h delay)
+  - from: timelock-48h
     to: cooldown-proxyadmin
     kind: controls
     label: owner (48h delay)
@@ -160,16 +197,24 @@ edges:
     to: strata-cdo
     kind: manages
     label: upgradeable proxy
-  - from: cdo-proxyadmin
+  - from: srusde-proxyadmin
     to: srUSDe
     kind: manages
     label: upgradeable proxy
-  - from: cdo-proxyadmin
+  - from: jrusde-proxyadmin
     to: jrUSDe
     kind: manages
     label: upgradeable proxy
-  - from: cdo-proxyadmin
+  - from: susde-strategy-proxyadmin
     to: susde-strategy
+    kind: manages
+    label: upgradeable proxy
+  - from: accounting-proxyadmin
+    to: accounting
+    kind: manages
+    label: upgradeable proxy
+  - from: cooldown-proxyadmin
+    to: erc20-cooldown
     kind: manages
     label: upgradeable proxy
   - from: timelock-48h
@@ -263,3 +308,8 @@ edges:
     to: strata-cdo
     kind: manages
     label: exit-fee config
+  # === Secondary liquidity ===
+  - from: srUSDe
+    to: pendle-srusde
+    kind: routes-through
+    label: PT market (secondary exit)
