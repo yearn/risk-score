@@ -1,13 +1,13 @@
 # Protocol Risk Assessment: Flying Tulip — FT Lend (ftDNMM)
 
-- **Assessment Date:** June 7, 2026
+- **Assessment Date:** June 7, 2026 (Updated: July 27, 2026)
 - **Token:** FT Lend market (supply / borrow); system tokens ftUSD and FT
 - **Chain:** Ethereum Mainnet
 - **Core Contract:** PositionsManager [`0xbe4050a73a7Fb384c65E885a15C33461A4B20055`](https://etherscan.io/address/0xbe4050a73a7Fb384c65E885a15C33461A4B20055)
 - **Final Score: 3.5/5.0**
 - **Elevated Risk** — limited approval, strict limits. The codebase has been audited multiple times by reputable firms, but the reports and finding-level detail are kept private by the team. The profile remains high-concern because the system is young, complex, centrally controlled, and its core invariants can be changed by a 3/5 Safe with no timelock. See [Risk Score Assessment](#risk-score-assessment). (Also deployed on Sonic; this report covers Ethereum.)
 
-> **Scope.** Yearn's interest (issue [yearn/risk-score#234](https://github.com/yearn/risk-score/issues/234)) is the risk of supplying ("just lend") and/or borrowing in the **FT Lend** market. This report focuses on the lending engine and the assets it touches. The unrelated `tulip.garden` protocol on Solana is **not** Flying Tulip and is excluded. All onchain values were verified on **June 7, 2026 at block `25264957`** via `cast` against an Ethereum mainnet RPC.
+> **Scope.** Yearn's interest (issue [yearn/risk-score#234](https://github.com/yearn/risk-score/issues/234)) is the risk of supplying ("just lend") and/or borrowing in the **FT Lend** market. This report focuses on the lending engine and the assets it touches. The unrelated `tulip.garden` protocol on Solana is **not** Flying Tulip and is excluded. All onchain values in the original assessment were verified on **June 7, 2026 at block `25264957`**; current-state values in this update were verified on **July 27, 2026 at block `25625422`** via `cast` against an Ethereum mainnet RPC.
 
 ## Overview + Links
 
@@ -48,26 +48,26 @@ The in-scope FT Lend / ftDNMM contracts and ftUSD code have been audited multipl
 
 ## Historical Track Record
 
-- **Production history:** TGE / mainnet ~**Feb 23, 2026**; ftUSD live at launch; FT Lend opened to deposits ~early–mid March 2026. At this assessment the lending market is **~3.5 months old.**
-- **TVL (DeFiLlama, whole protocol):** **~$4.79M** on June 7, 2026 (Ethereum ~$4.47M, Sonic ~$0.30M). Peak ~$5.75M (Jun 1, 2026); DeFiLlama only began tracking ~May 12, 2026 (28 data points). The marketed "$126M+ TVL" figure is **raise capital parked in Aave**, not organic protocol usage — treat it with skepticism.
-- **FT Lend onchain TVL (this assessment, block `25264957`):** **~$2.69M supplied / ~$0.18M borrowed** across 6 assets (table below). Utilization is low except USDT (~22%).
-- **Concentration:** A single **WBTC** position (~25.6 WBTC ≈ $1.60M) is **~59% of lending TVL** and is 0% borrowed — i.e. one depositor parking BTC for Aave/Spark yield. USDT supply ($0.73M) is the next largest. This is severe single-depositor / single-asset concentration, expected for a market this young.
+- **Production history:** TGE / mainnet ~**Feb 23, 2026**; ftUSD live at launch; FT Lend opened to deposits ~early–mid March 2026. At this reassessment the lending market is **~5 months old.**
+- **TVL (DeFiLlama, whole protocol):** **~$12.61M** on July 27, 2026 (Ethereum dominant). Peak ~$12.61M (July 27, 2026); DeFiLlama tracking since ~May 12, 2026 (78 data points). The marketed "$126M+ TVL" figure is **raise capital parked in Aave**, not organic protocol usage — treat it with skepticism.
+- **FT Lend onchain TVL (this reassessment, block `25625422`):** **~$12.25M supplied / ~$0.78M borrowed** across 6 assets (table below). Utilization is low (~6% overall) but has grown from a near-zero base.
+- **Concentration:** A single **WBTC** position (~75.2 WBTC ≈ $4.87M) is **~40% of lending TVL** and remains 0% borrowed. USDC supply ($3.13M) and WETH supply ($1.43M) are the next largest. Single-depositor / single-asset concentration remains material though less extreme than before.
 - **Incidents / exploits / depegs:** **NONE FOUND** for Flying Tulip itself through June 2026. (An April 23, 2026 news item is about Flying Tulip *adding* a withdrawal circuit breaker in response to *other* protocols' April exploits — a preventive measure, not a breach.)
-- **ftUSD:** trading at peg (~$1.00); supply only ~**$1.78M** onchain (cap 5M), thinly traded.
+- **ftUSD:** trading at peg (~$1.00); supply ~**$4.14M** onchain (cap raised to **100M**), thinly traded.
 
-### FT Lend market state — onchain, block `25264957` (June 7, 2026)
+### FT Lend market state — onchain, block `25625422` (July 27, 2026)
 
 | Asset | IRM | Maint. margin | Borrowable | Collateral | Supplied (onchain) | Borrowed | Supply cap | Borrow cap |
 |-------|-----|:---:|:---:|:---:|---|---|---|---|
-| [USDC](https://etherscan.io/address/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48) | Stable | 1.50% | ✓ | ✓ | ~120,998 ($0.12M) | ~17,618 | 10M | 2M |
-| [USDT](https://etherscan.io/address/0xdAC17F958D2ee523a2206206994597C13D831ec7) | Stable | 1.50% | ✓ | ✓ | ~734,681 ($0.73M) | ~162,914 | 10M | 2M |
-| [WETH](https://etherscan.io/address/0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2) | Major | 19.0% | ✓ | ✓ | ~146.45 ($0.24M) | 0 | 1,000 | 100 |
-| [WBTC](https://etherscan.io/address/0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599) | Major | 22.0% | ✓ | ✓ | ~25.60 ($1.60M) | 0 | 100 | 20 |
+| [USDC](https://etherscan.io/address/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48) | Stable | 1.50% | ✓ | ✓ | ~3,127,228 ($3.13M) | ~230,746 | 10M | 2M |
+| [USDT](https://etherscan.io/address/0xdAC17F958D2ee523a2206206994597C13D831ec7) | Stable | 1.50% | ✓ | ✓ | ~1,394,423 ($1.39M) | ~223,334 | 10M | 2M |
+| [WETH](https://etherscan.io/address/0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2) | Major | 19.0% | ✓ | ✓ | ~736.82 ($1.43M) | ~0.35 | 1,000 | 100 |
+| [WBTC](https://etherscan.io/address/0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599) | Major | 22.0% | ✓ | ✓ | ~75.18 ($4.87M) | 0 | 100 | 20 |
 | [wstETH](https://etherscan.io/address/0x7f39C581F595B53c5cb19bD0b3f8dA6c935E2Ca0) | Major | 21.0% | — | ✓ | 0 | 0 | 300 | 1 |
-| [ftUSD](https://etherscan.io/address/0xF7D85EC4E7710f71992752eac2111312e73E9C9C) | Stable | 1.50% | — | ✓ | ~98 | 0 | 100k | ~0 |
+| [ftUSD](https://etherscan.io/address/0xF7D85EC4E7710f71992752eac2111312e73E9C9C) | Stable | 1.50% | ✓ | ✓ | ~1,427,261 ($1.43M) | ~302,530 | 10M | 2M |
 | [FT](https://etherscan.io/address/0x5DD1A7A369e8273371d2DBf9d83356057088082c) | LongTail | 0% | — | — | enabled only | — | — | — |
 
-USD values use the protocol's own Chainlink oracle prices read at the same block (USDC $0.9997, USDT $0.9995, WETH $1,632.33, WBTC $62,364.91, wstETH $2,017.73, ftUSD $0.9984). The `mmBps` is the per-asset maintenance-margin floor (e.g. stables 1.5% → high baseline leverage; ETH/BTC/LSTs 19–22%); the docs state the *effective* LTV is reduced dynamically from this floor by AMM depth and volatility and snapshotted at position open.
+USD values use the protocol's own Chainlink oracle prices read at block `25625422` (USDC ~$0.9999, USDT ~$0.9991, WETH ~$1,935.25, WBTC ~$64,717.71, wstETH ~$2,400.82, ftUSD ~$0.9989). The `mmBps` is the per-asset maintenance-margin floor (e.g. stables 1.5% → high baseline leverage; ETH/BTC/LSTs 19–22%); the docs state the *effective* LTV is reduced dynamically from this floor by AMM depth and volatility and snapshotted at position open.
 
 ## Funds Management
 
@@ -75,7 +75,7 @@ USD values use the protocol's own Chainlink oracle prices read at the same block
 
 A lender calls `deposit(asset, amount)` on the `PositionsManager`. Idle liquidity is forwarded by the asset's `ftYieldWrapper` into Aave/Spark; borrower interest plus the Aave/Spark yield accrue to the supply index (`astate` supply index was 1.0019 for USDC, 1.0008 for WETH at the assessment block — i.e. accruing). Withdrawals (`withdraw`) pull from un-borrowed liquidity, unwinding the Aave/Spark position as needed.
 
-The yield wrappers/strategies live at: USDC wrapper [`0xD2e4A5ac…39E2`](https://etherscan.io/address/0xD2e4A5ac4B4Da102317cF7C9A1289aDF082639E2) (Spark strat `0xfBE0736e…`), wNative/WETH wrapper [`0x460494aF…2da2`](https://etherscan.io/address/0x460494aF61BcB92B59797B4e09C26A5ADecb2da2) (Spark strat `0x4df6f4f8…`), USDT wrapper [`0x28b0905d…123B`](https://etherscan.io/address/0x28b0905d83BCe5FFA6c54651F25858828A38123B) (Spark strat `0x852dc763…`), wBTC wrapper [`0x1A5730c7…E042`](https://etherscan.io/address/0x1A5730c71576D77048E9FdC79DD40e4B1E8Fe042), and ftUSD/FT/stakedNative wrappers.
+The yield wrappers/strategies reside at: USDC wrapper [`0xD2e4A5ac…39E2`](https://etherscan.io/address/0xD2e4A5ac4B4Da102317cF7C9A1289aDF082639E2) (Spark strat), WETH/wNative wrapper [`0x460494aF…2da2`](https://etherscan.io/address/0x460494aF61BcB92B59797B4e09C26A5ADecb2da2) (Spark strat), USDT wrapper [`0x28b0905d…123B`](https://etherscan.io/address/0x28b0905d83BCe5FFA6c54651F25858828A38123B) (Spark strat), WBTC wrapper [`0x1A5730c7…E042`](https://etherscan.io/address/0x1A5730c71576D77048E9FdC79DD40e4B1E8Fe042), wstETH wrapper [`0x01980BD1…3db7`](https://etherscan.io/address/0x01980BD1B58313bD3767f6adc75Af8b6464f3db7), ftUSD wrapper [`0xc67D966f…53d9`](https://etherscan.io/address/0xc67D966f761e8cf13Faa0a1E774425290c8453d9), and FT wrapper [`0x7127BB9d…840E`](https://etherscan.io/address/0x7127BB9d9ad0f47B8dA7e634D67F3946F840E).
 
 ### Accessibility & Token Mint Authority (ftUSD)
 
@@ -88,8 +88,8 @@ ftUSD is a collateral asset in FT Lend (borrow disabled), so its mint authority 
 | [`0x56c5892B…8ca9`](https://etherscan.io/address/0x56c5892B0cF41B792217CCDD208f0FA85B178ca9) | ✓ | ✓ | sole `minter()` (allowance ≈ unlimited) | **ftUSD Core (proxy)** — entry point behind `MintAndRedeem` [`0xAa48EcBC…D23C`](https://etherscan.io/address/0xAa48EcBC843cF7E9A29155D112b8Cb27902bD23C) |
 | [`0x1118e1c0…70Cb`](https://etherscan.io/address/0x1118e1c057211306a40A4d7006C040dbfE1370Cb) | indirectly | — | `owner` + `masterMinter` | **3/5 Safe** — can `configureMinter`/`removeMinter`, set a new minter, `setMaxSupply`, `pause`, **`blacklist`/`wipeBlacklistedAddress` (freeze & burn user balances)**, and `upgradeToAndCall` |
 
-- **Supply:** ~1.78M ftUSD; **max supply cap:** 5.00M (`maxSupply`).
-- **Rate limits / caps:** global `maxSupply` 5M; minter allowance ≈ unbounded.
+- **Supply:** ~4.14M ftUSD; **max supply cap:** 100M (`maxSupply` — raised from 5M since original assessment).
+- **Rate limits / caps:** global `maxSupply` 100M; minter allowance ≈ unbounded.
 - **Backing check:** atomic at the `MintAndRedeem` layer (collateral in, ftUSD out). However the masterMinter (3/5 Safe) **can configure an arbitrary minter** that issues ftUSD without backing — a high-trust power. ftUSD also carries **blacklist + balance-wipe (seizure)** powers.
 
 For FT Lend lenders this matters only insofar as ftUSD is accepted collateral (currently ~$98 of it), but it illustrates the protocol-wide centralization pattern.
@@ -110,7 +110,7 @@ For FT Lend lenders this matters only insofar as ftUSD is accepted collateral (c
 ## Liquidity Risk
 
 - **Exit mechanism:** suppliers withdraw un-borrowed liquidity on demand; idle funds in Aave/Spark are liquid and can be unwound. At current utilization a USDC/WETH/WBTC supplier can exit fully today (e.g. USDC ~$0.10M of ~$0.12M is un-borrowed; WBTC/WETH are 0% borrowed). USDT is the tightest (~22% utilized).
-- **Depth:** very thin in absolute terms — each market is sub-$1M except WBTC. A large supplier *is* the market (single WBTC depositor ≈ 59% of TVL). There is little secondary liquidity for the supply receipts.
+- **Depth:** thin in absolute terms: the largest pool (USDC) is $3.1M and WBTC is $4.9M, both are small by DeFi lending standards. WBTC is 0% borrowed and a single depositor is ~40% of TVL. There is little secondary liquidity for the supply receipts.
 - **Throttles / pause:** the admin can pause deposits/borrows/withdrawals per asset (`setDepositPaused`/`setBorrowPaused`/`setWithdrawPaused`), a `Lend CircuitBreaker` [`0x9676E697…18e0`](https://etherscan.io/address/0x9676E697399581AB288844cDE5F73d0887eC18e0) can halt flows, and config flags (`marginRestrictWithdrawToSettlement`, `marginWithdrawRequiresNoDebt`) can gate withdrawals (both currently `false`).
 - **Stress history:** none — the market has not experienced a drawdown or mass-exit event.
 - **Dependency:** exit liquidity for idle funds depends on **Aave/Spark** having withdrawable liquidity in the relevant asset.
@@ -134,7 +134,7 @@ This means the 3/5 Safe can, **with no delay**: upgrade any contract (including 
 | Owner (ConfigRegistry, OracleRouter, LendingLens, AccountValuesRouter, MintAndRedeem; ftUSD owner/masterMinter/pauser/blacklister) | 3/5 Safe `0x1118…70Cb` | Enable/disable assets, set maintenance margins, set IRMs, set/override oracle & prices, upgrade all proxies, mint/seize ftUSD |
 | PositionsManager admin (via PMWrapper) | 3/5 Safe (`PMWrapper.admin()`) | `upgradePM`, `setCaps`, `setBorrowPaused`/`setDepositPaused`/`setWithdrawPaused`, `setLiquidationModule`, `setEngine`, `withdrawReserves`, `settleEpoch` |
 | Guardian | 3/4 Safe `0x22246a…017C` | `disablePrice`, circuit-breaker, pause |
-| Fee collector / epoch settler | `0x5cd6Abe6…1958a` | receives reserves/fees, settles epochs |
+| Fee collector / epoch settler | [`0x5cd6Abe6…958a`](https://etherscan.io/address/0x5cd6Abe67f8af1C0c699dF36d90a6469Eaf1958a) | receives reserves/fees, settles epochs |
 
 ### Programmability
 
@@ -171,14 +171,14 @@ Recommended frequency: **daily** for governance/oracle/caps; **hourly** for paus
 | Guardian Safe (3/4) | [`0x22246a9183cE2CE6e2c2a9973F94aEA91435017C`](https://etherscan.io/address/0x22246a9183cE2CE6e2c2a9973F94aEA91435017C) | Pause / circuit-breaker / `disablePrice` actions |
 | Lend CircuitBreaker | [`0x9676E697399581AB288844cDE5F73d0887eC18e0`](https://etherscan.io/address/0x9676E697399581AB288844cDE5F73d0887eC18e0) | Trips that halt flows |
 | ftUSD | [`0xF7D85EC4E7710f71992752eac2111312e73E9C9C`](https://etherscan.io/address/0xF7D85EC4E7710f71992752eac2111312e73E9C9C) | `MinterConfigured`/`setMaxSupply`/`Blacklisted`/`Upgraded`; `totalSupply` vs cap; peg |
-| Yield wrappers / Aave-Spark strats | USDC [`0xD2e4A5ac…39E2`](https://etherscan.io/address/0xD2e4A5ac4B4Da102317cF7C9A1289aDF082639E2), wNative [`0x460494aF…2da2`](https://etherscan.io/address/0x460494aF61BcB92B59797B4e09C26A5ADecb2da2), USDT [`0x28b0905d…123B`](https://etherscan.io/address/0x28b0905d83BCe5FFA6c54651F25858828A38123B), wBTC [`0x1A5730c7…E042`](https://etherscan.io/address/0x1A5730c71576D77048E9FdC79DD40e4B1E8Fe042) | Idle funds deployed to Aave/Spark; strategy changes; available liquidity for exit |
+| Yield wrappers / Aave-Spark strats | USDC [`0xD2e4A5ac…39E2`](https://etherscan.io/address/0xD2e4A5ac4B4Da102317cF7C9A1289aDF082639E2), WETH [`0x460494aF…2da2`](https://etherscan.io/address/0x460494aF61BcB92B59797B4e09C26A5ADecb2da2), USDT [`0x28b0905d…123B`](https://etherscan.io/address/0x28b0905d83BCe5FFA6c54651F25858828A38123B), WBTC [`0x1A5730c7…E042`](https://etherscan.io/address/0x1A5730c71576D77048E9FdC79DD40e4B1E8Fe042), wstETH [`0x01980BD1…3db7`](https://etherscan.io/address/0x01980BD1B58313bD3767f6adc75Af8b6464f3db7), ftUSD [`0xc67D966f…53d9`](https://etherscan.io/address/0xc67D966f761e8cf13Faa0a1E774425290c8453d9) | Idle funds deployed to Aave/Spark; strategy changes; available liquidity for exit |
 
 ### Key thresholds / values
 
 - **Backing/health:** monitor that each market's borrowed ≤ supplied and that no asset's oracle `priceUSD` deviates from its Chainlink feed (admin-override detection). Alert on any `setLastGoodPrice`.
 - **Caps:** alert on `setCaps` and on supply approaching cap.
 - **Governance:** alert on **any** admin/guardian Safe execution and **any** proxy `Upgraded` event (no timelock means zero warning).
-- **Concentration:** alert if any single asset/depositor exceeds ~40% of lending TVL (currently WBTC ~59%).
+- **Concentration:** alert if any single asset/depositor exceeds ~40% of lending TVL (currently WBTC ~40%).
 - **Solvency fallback:** if onchain bad-debt is not directly readable, monitor liquidations and the `collector`/reserves.
 
 ## Appendix: Contract Architecture
@@ -194,7 +194,7 @@ TOKEN/STABLE LAYER                                       LEND ENGINE (ftDNMM)
   ftUSD Core (sole minter) 0x56c5892B…8ca9                  ├─ config → ConfigRegistry 0xA8777c3D…a33E
   MintAndRedeem            0xAa48EcBC…D23C                  │     • per-asset: IRM, mmBps, wrapper, borrow/collat flags
   FT token                 0x5DD1A7A3…082c                  │     • margins: HF safe 1.50 / target 1.25 / minEq $250
-                                                            ├─ valuesLens → AccountValuesRouter 0x7aD77Fdd…2eF7
+                                                            ├─ valuesLens → AccountValuesRouter [`0x7aD77Fdd…2eF7`](https://etherscan.io/address/0x7aD77FddEf64Ec8325E8d2d02c2708AA2a412eF7)
 LEND ASSETS (Ethereum)                                      ├─ oracle → OracleRouterChainlink 0xe4372dB4…674A → Chainlink feeds
   USDC USDT ftUSD (Stable IRM, 1.5% MM)                     ├─ IRMs: Stable 0x3253739A / Major 0x07eC8583 / LongTail 0x09cd852f
   WETH WBTC wstETH (Major IRM, 19/22/21% MM)                ├─ RFQ: RfqEngine 0xEB00B335 / LeverageRfqEngine 0x8263a075
@@ -220,7 +220,7 @@ SUPPLY ROUTING (yield)                                  UNDERLYING YIELD
 
 - **Audit reports and findings are private** (no public audit reports, no bug bounty, not in Safe Harbor), and the code is novel and complex.
 - **Single 3/5 multisig controls everything with no timelock** — instant upgrade of core contracts, arbitrary oracle price override (`setLastGoodPrice`), pause of user funds, and (for ftUSD) mint/blacklist/seize. Guardian Safe shares the same signers; signer identities undisclosed. This means audited code can be replaced and protocol invariants can change without a delay window.
-- **Very new (~3.5 months) and tiny (~$2.7M lending TVL)**, with **~59% concentration** in one WBTC depositor and no stress history.
+- **Very new (~5 months) and small (~$12.3M lending TVL)**, with **~40% concentration** in one WBTC depositor and no stress history.
 - **Untested, novel liquidation engine** (time-sliced, RFQ/keeper-routed) with **no protocol-level loss backstop** for bad debt.
 - **External dependency on Aave/Spark** for yield and exit liquidity, and on Chainlink for solvency pricing.
 
@@ -246,7 +246,7 @@ SUPPLY ROUTING (yield)                                  UNDERLYING YIELD
 #### Category 1: Audits & Historical Track Record (Weight: 20%)
 
 - **Audits:** multiple in-scope reviews by reputable firms. Downgraded because reports/findings are private, no public bug bounty is available, and the protocol is not in Safe Harbor. **3/5.**
-- **Historical:** ~3.5 months live; ~$2.7M lending TVL (<$10M); no track record. **4.5/5.**
+- **Historical:** ~5 months live; ~$12.3M lending TVL; no stress history. **4.5/5.**
 
 **Score: 3.75/5**
 
@@ -267,7 +267,7 @@ SUPPLY ROUTING (yield)                                  UNDERLYING YIELD
 
 #### Category 4: Liquidity Risk (Weight: 15%)
 
-Market-based exit from un-borrowed liquidity + Aave/Spark; low utilization today so exit is currently easy, but markets are sub-$1M (ex-WBTC), highly concentrated, pausable by admin, and untested under stress. **Score: 3.0/5**
+Market-based exit from un-borrowed liquidity + Aave/Spark; low utilization today so exit is currently easy, but markets are thin (ex-WBTC, the largest pool is USDC at $3.1M), still concentrated, pausable by admin, and untested under stress. **Score: 3.0/5**
 
 #### Category 5: Operational Risk (Weight: 5%)
 
@@ -304,6 +304,15 @@ No positive modifiers apply (protocol is <1 year old, TVL well under $500M).
 
 - **Audit status changes:** reassess if public audit reports are released or if new audit findings are disclosed.
 - **Governance hardening:** reassess if a timelock is added or the admin Safe's threshold/independent-signer set is materially improved.
-- **Time-based:** reassess in **3 months** regardless (fast-moving, early-stage protocol).
+- **Time-based:** reassess in **3 months** from this refresh (fast-moving, early-stage protocol).
 - **TVL/usage-based:** reassess if lending TVL grows >3× (≈$8M) or if single-asset/single-depositor concentration changes materially.
 - **Incident-based:** reassess after any exploit, bad-debt event, oracle override (`setLastGoodPrice`), proxy upgrade, ftUSD depeg, or Aave/Spark incident affecting the strategies.
+
+---
+
+## Assessment History
+
+| Date | Score | Notes |
+| --- | --- | --- |
+| June 7, 2026 | 3.5 | Initial assessment |
+| July 27, 2026 | 3.5 | Reassessment: TVL refreshed (~$12.6M protocol / ~$12.3M lending), market state table updated, AccountValuesRouter and fee collector addresses corrected, ftUSD maxSupply raised to 100M, wrapper addresses refreshed. Scores unchanged.

@@ -40,6 +40,7 @@ nodes:
     note: Asset configs, margins, caps, IRMs, oracle pointer
   - id: account-values-router
     label: AccountValuesRouter
+    address: "0x7aD77FddEf64Ec8325E8d2d02c2708AA2a412eF7"
     category: infra
     note: Account health/value router referenced by the lend engine
   - id: oracle-router
@@ -94,6 +95,10 @@ nodes:
   - id: wbtc-wrapper
     label: WBTC YieldWrapper
     address: "0x1A5730c71576D77048E9FdC79DD40e4B1E8Fe042"
+    category: strategy
+  - id: ftusd-wrapper
+    label: ftUSD YieldWrapper
+    address: "0xc67D966f761e8cf13Faa0a1E774425290c8453d9"
     category: strategy
 
   # === Governance ===
@@ -255,6 +260,14 @@ edges:
     kind: deposits-into
     label: Spark strategy
   - from: wbtc-wrapper
+    to: dep-aave
+    kind: deposits-into
+    label: Aave / Spark yield
+  - from: positions-manager
+    to: ftusd-wrapper
+    kind: allocates-to
+    label: "ftUSD idle supply"
+  - from: ftusd-wrapper
     to: dep-aave
     kind: deposits-into
     label: Aave / Spark yield
