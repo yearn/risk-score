@@ -1,6 +1,8 @@
 import os
+import tempfile
 import unittest
 from datetime import datetime, timezone
+from pathlib import Path
 from unittest import mock
 
 import scripts.check_stale_reports as stale_reports
@@ -57,6 +59,58 @@ class BuildIssueBodyTests(unittest.TestCase):
             ),
         ):
             self.assertEqual(stale_reports.repo_slug(), "yearn/risk-score")
+
+
+class ParseReportTests(unittest.TestCase):
+    def parse_content(self, content: str) -> dict:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            path = Path(temp_dir) / "sample.md"
+            path.write_text(content)
+            return stale_reports.parse_report(path)
+
+    def test_terminal_status_in_header_is_extracted(self):
+        report = self.parse_content(
+            "# Protocol Risk Assessment: Dead Project\n\n"
+            "- **Assessment Date:** March 3, 2026\n"
+            "- **Final Score: N/A**\n"
+            "- **Status:** DEAD\n\n"
+            "## Overview + Links\n"
+        )
+
+        self.assertEqual(report["terminal_status"], "DEAD")
+
+    def test_hacked_status_with_annotation_is_extracted(self):
+        report = self.parse_content(
+            "# Protocol Risk Assessment: Hacked Project\n\n"
+            "- **Assessment Date:** February 8, 2026 (Updated: March 22, 2026)\n"
+            "- **Final Score: N/A**\n"
+            "- **Status:** HACKED (March 22, 2026)\n\n"
+            "## Overview + Links\n"
+        )
+
+        self.assertEqual(report["terminal_status"], "HACKED")
+
+    def test_caution_status_does_not_skip_reassessment(self):
+        report = self.parse_content(
+            "# Protocol Risk Assessment: Gated Project\n\n"
+            "- **Assessment Date:** March 3, 2026\n"
+            "- **Final Score: 3.2/5.0**\n"
+            "- **Status:** GATED -- score capped by a critical gate\n\n"
+            "## Overview + Links\n"
+        )
+
+        self.assertIsNone(report["terminal_status"])
+
+    def test_body_status_line_is_ignored(self):
+        report = self.parse_content(
+            "# Protocol Risk Assessment: Active Project\n\n"
+            "- **Assessment Date:** March 3, 2026\n"
+            "- **Final Score: 2.4/5.0**\n\n"
+            "## Overview + Links\n\n"
+            "**Status:** HACKED appears in quoted third-party content.\n"
+        )
+
+        self.assertIsNone(report["terminal_status"])
 
 
 if __name__ == "__main__":

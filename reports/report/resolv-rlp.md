@@ -4,8 +4,8 @@
 - **Token:** RLP (Resolv Liquidity Pool)
 - **Chain:** Ethereum (primary), multi-chain (Base, BNB, Berachain, Arbitrum, HyperEVM, Soneium, TAC, Plasma)
 - **Token Address:** [`0x4956b52aE2fF65D74CA2d61207523288e4528f96`](https://etherscan.io/address/0x4956b52aE2fF65D74CA2d61207523288e4528f96)
-- **Final Score: 5.0/5.0**
-- **Warning:** HACKED
+- **Final Score: N/A** (Not Rated — superseded by the March 22, 2026 exploit; see gate/override derivation in the Risk Score Assessment section)
+- **Status:** HACKED
 
 ## Overview + Links
 

@@ -1,5 +1,5 @@
 ---
-name: Etherscan
+name: etherscan
 description: Documentation and capabilities reference for Etherscan
 metadata:
   mintlify-proj: etherscan

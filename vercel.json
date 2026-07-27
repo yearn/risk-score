@@ -9,6 +9,14 @@
     {
       "source": "/api/cdn/:path*",
       "destination": "/api/cdn"
+    },
+    {
+      "source": "/api/monitoring/:path*",
+      "destination": "/api/monitoring"
+    },
+    {
+      "source": "/proxy/plausible/:path*",
+      "destination": "https://plausible.io/:path*"
     }
   ],
   "installCommand": "npm ci"

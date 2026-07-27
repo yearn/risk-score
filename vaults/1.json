@@ -513,7 +513,7 @@
         "riskLevel": 3,
         "riskScore": {
             "centralizationRisk": 2,
-            "comment": "More than 15% of collateral is in delta-netural stablecoin USR.\nRisk depends heavily on the specific vault configuration and the curator managing the vault.",
+            "comment": "More than 15% of collateral is in delta-neutral stablecoin USR.\nRisk depends heavily on the specific vault configuration and the curator managing the vault.",
             "complexity": 1,
             "externalProtocolAudit": 1,
             "externalProtocolCentralisation": 2,
@@ -734,7 +734,7 @@
         "riskLevel": 2,
         "riskScore": {
             "centralizationRisk": 3,
-            "comment": "Mix of blue chip and rikier collaterals",
+            "comment": "Mix of blue chip and riskier collaterals",
             "complexity": 1,
             "externalProtocolAudit": 1,
             "externalProtocolCentralisation": 1,
@@ -887,7 +887,7 @@
         "riskLevel": 2,
         "riskScore": {
             "centralizationRisk": 3,
-            "comment": "Mix of blue chip and rikier collaterals",
+            "comment": "Mix of blue chip and riskier collaterals",
             "complexity": 1,
             "externalProtocolAudit": 1,
             "externalProtocolCentralisation": 1,
@@ -919,6 +919,23 @@
     },
     "0x82c24073a19f4c46ab2646323b322427eb98f616": {
         "riskLevel": 1,
+        "riskScore": {
+            "centralizationRisk": 0,
+            "comment": "",
+            "complexity": 0,
+            "externalProtocolAudit": 0,
+            "externalProtocolCentralisation": 0,
+            "externalProtocolLongevity": 0,
+            "externalProtocolTvl": 0,
+            "externalProtocolType": 0,
+            "protocolIntegration": 0,
+            "review": 0,
+            "riskExposure": 0,
+            "testing": 0
+        }
+    },
+    "0x696d02db93291651ed510704c9b286841d506987": {
+        "riskLevel": 2,
         "riskScore": {
             "centralizationRisk": 0,
             "comment": "",

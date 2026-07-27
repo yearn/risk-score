@@ -2,6 +2,7 @@
 name = "yearn-risk-score"
 version = "0.1.0"
 description = "Yearn Curation Score tooling"
+license = "AGPL-3.0-only"
 requires-python = ">=3.10"
 dependencies = [
     "web3>=7.10.0",

@@ -20,7 +20,7 @@ nodes:
     label: mHYPER (LYT)
     address: "0x9b5528528656DBC094765E2abB79F293c21191B9"
     category: vault
-    note: Subordinated debt instrument; TransparentUpgradeableProxy
+    note: Subordinated debt instrument; TransparentUpgradeableProxy. ~29.5M supply (Jun 2026)
   - id: deposit-vault
     label: DepositVault
     address: "0x6Be2f55816efd0d91f52720f096006d63c366e98"
@@ -39,10 +39,10 @@ nodes:
     category: infra
     note: Role-based permission system
   - id: oracle
-    label: CustomAggregatorFeed (NAV)
+    label: MHyperCustomAggregatorFeed (NAV)
     address: "0x43881B05C3BE68B2d33eb70aDdF9F666C5005f68"
     category: infra
-    note: Admin-set NAV oracle (2x/week)
+    note: "Admin-set NAV oracle (2x/week). Impl: 0xa19f5e16dc09641b17adf95bc950f71dbe5cb11b"
   - id: data-feed
     label: mHYPER DataFeed
     address: "0x92004DCC5359eD67f287F32d12715A37916deCdE"
@@ -79,11 +79,6 @@ nodes:
     address: "0xd4195cf4df289a4748c1a7b6ddbe770e27ba1227"
     category: governance
     note: Bypasses timelock for role grants
-  - id: admin-eoa-fireblocks
-    label: DEFAULT_ADMIN EOA (Fireblocks MPC)
-    address: "0x875c06a295c41c27840b9c9dfda7f3d819d8bc6a"
-    category: governance
-    note: Bypasses timelock for role grants
   - id: timelock
     label: MidasTimelockController (48h)
     address: "0xE3EEe3e0D2398799C884a47FC40C029C8e241852"
@@ -94,24 +89,25 @@ nodes:
     address: "0xbf25b58cB8DfaD688F7BcB2b87D71C23A6600AaC"
     category: governance
 
-  # === Strategy venues ===
+  # === Strategy venues (June 2026 per SumCap) ===
+  - id: strat-unclassified
+    label: Unclassified (76.8%)
+    category: strategy
+    note: Likely non-Ethereum chains + offchain/CEX
   - id: strat-fluid
-    label: Fluid (28.7%)
+    label: Fluid (15.4%)
     category: strategy
-  - id: strat-aave
-    label: Aave Leveraged USDe (21.6%)
+  - id: strat-uniswapv4
+    label: Uniswap V4 (5.6%)
     category: strategy
-  - id: strat-kamino
-    label: Kamino (Solana) (19.3%)
+  - id: strat-onchain-wallets
+    label: Onchain Wallets (1.5%)
     category: strategy
-  - id: strat-morpho
-    label: Morpho Vaults (15.0%)
+  - id: strat-merkl
+    label: Merkl (0.1%)
     category: strategy
-  - id: strat-pendle
-    label: Pendle (14.7%)
-    category: strategy
-  - id: strat-hyperliquid
-    label: Hyperliquid Basis (<0.1%)
+  - id: strat-other
+    label: Other (Euler, Pendle V2, Morpho V2, Hyperliquid — each <0.01%)
     category: strategy
 
   # === Attestation Engine (March 2026) ===
@@ -180,10 +176,6 @@ edges:
     to: access-control
     kind: holds-role
     label: DEFAULT_ADMIN (no timelock)
-  - from: admin-eoa-fireblocks
-    to: access-control
-    kind: holds-role
-    label: DEFAULT_ADMIN (no timelock)
   - from: access-control
     to: mHYPER
     kind: manages
@@ -191,13 +183,17 @@ edges:
   - from: oracle-updater-eoa
     to: oracle
     kind: holds-role
-    label: NAV updater (no timelock)
+    label: M_HYPER_CUSTOM_AGGREGATOR_FEED_ADMIN_ROLE (no timelock)
 
-  # === Mint authority on mHYPER ===
+  # === Mint/burn authority on mHYPER ===
   - from: deposit-vault
     to: mHYPER
     kind: mints
     label: M_HYPER_MINT_OPERATOR_ROLE
+  - from: deposit-vault
+    to: mHYPER
+    kind: holds-role
+    label: M_HYPER_BURN_OPERATOR_ROLE
   - from: mint-burn-eoa
     to: mHYPER
     kind: mints
@@ -229,7 +225,7 @@ edges:
     kind: manages
     label: price at redeem
 
-  # === Capital flow: vault → custody → strategies ===
+  # === Capital flow: vault → custody → strategies (June 2026) ===
   - from: mHYPER
     to: fordefi
     kind: routes-through
@@ -239,27 +235,27 @@ edges:
     kind: routes-through
     label: offchain strategy execution
   - from: hyperithm
+    to: strat-unclassified
+    kind: allocates-to
+    label: "76.8%"
+  - from: hyperithm
     to: strat-fluid
     kind: allocates-to
-    label: "28.7%"
+    label: "15.4%"
   - from: hyperithm
-    to: strat-aave
+    to: strat-uniswapv4
     kind: allocates-to
-    label: "21.6%"
+    label: "5.6%"
   - from: hyperithm
-    to: strat-kamino
+    to: strat-onchain-wallets
     kind: allocates-to
-    label: "19.3%"
+    label: "1.5%"
   - from: hyperithm
-    to: strat-morpho
+    to: strat-merkl
     kind: allocates-to
-    label: "15.0%"
+    label: "0.1%"
   - from: hyperithm
-    to: strat-pendle
-    kind: allocates-to
-    label: "14.7%"
-  - from: hyperithm
-    to: strat-hyperliquid
+    to: strat-other
     kind: allocates-to
     label: "<0.1%"
 

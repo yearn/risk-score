@@ -57,3 +57,7 @@ Vault addresses are case-insensitive and normalized to lowercase.
 | Base | 8453 |
 | Arbitrum | 42161 |
 | Katana | 747474 |
+
+## License
+
+This repository is licensed under the GNU Affero General Public License v3.0. See [LICENSE](./LICENSE).

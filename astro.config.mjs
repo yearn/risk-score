@@ -4,7 +4,8 @@ import vercel from "@astrojs/vercel";
 export default defineConfig({
   output: "static",
   adapter: vercel(),
-  site: process.env.VERCEL_URL
-    ? `https://${process.env.VERCEL_URL}`
-    : "https://curation.yearn.fi",
+  // Always the stable production domain. Using VERCEL_URL here leaks the
+  // per-deployment hostname (e.g. risk-score-<hash>-yearn.vercel.app) into
+  // canonical/og URLs, splitting SEO signal across throwaway aliases.
+  site: "https://curation.yearn.fi",
 });

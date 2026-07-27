@@ -1,6 +1,6 @@
 # Protocol Risk Assessment: Midas mHYPER
 
-- **Assessment Date:** February 7, 2026 (Updated: April 9, 2026)
+- **Assessment Date:** February 7, 2026 (Updated: June 13, 2026)
 - **Token:** mHYPER
 - **Chain:** Ethereum (also deployed on Monad, Plasma, Katana)
 - **Token Address:** [`0x9b5528528656DBC094765E2abB79F293c21191B9`](https://etherscan.io/token/0x9b5528528656dbc094765e2abb79f293c21191b9)
@@ -10,7 +10,7 @@
 
 mHYPER is a tokenized certificate (Liquid Yield Token / LYT) issued by Midas Software GmbH, a German-incorporated tokenization platform. It references the performance of **market-neutral, stablecoin-focused strategies** managed by [Hyperithm](https://www.hyperithm.com/), a digital asset management firm based in Tokyo and Seoul.
 
-mHYPER is **not** a stablecoin — its value floats based on strategy performance. Yield is auto-compounded into the token price (NAV), updated onchain twice per week via a custom oracle (see [oracle history](https://etherscan.io/address/0x43881B05C3BE68B2d33eb70aDdF9F666C5005f68)). The token has appreciated from $1.00 at inception to ~$1.089 as of April 2026.
+mHYPER is **not** a stablecoin — its value floats based on strategy performance. Yield is auto-compounded into the token price (NAV), updated onchain twice per week via a custom oracle (see [oracle history](https://etherscan.io/address/0x43881B05C3BE68B2d33eb70aDdF9F666C5005f68)). The token has appreciated from $1.00 at inception to ~$1.1031 as of June 2026 (per [Midas app](https://midas.app/mhyper)).
 
 The yield strategy includes:
 
@@ -24,11 +24,11 @@ Legally, mHYPER tokens are structured as **subordinated debt instruments** of Mi
 
 **Key Stats:**
 
-- **mHYPER Market Cap:** ~$50.7M (total NAV across all chains per [attestation report](https://drive.google.com/drive/folders/1MJi_xq8aR0TaL0DJw6Q91SFxM_z0OcYZ), April 7, 2026)
-- **Total Supply:** ~46,590,889 mHYPER across 4 chains (Ethereum ~41.5M, Monad ~2.5M, Katana ~1.8M, Plasma ~717K)
-- **Holders:** ~467 addresses (Ethereum only)
-- **APY:** ~9.24%
-- **Midas Platform TVL:** ~$368M [SumCap tracker](https://midas.sumcap.xyz/), [DeFiLlama](https://defillama.com/protocol/midas-rwa) doesn't count all positions
+- **mHYPER Market Cap / TVL:** ~$36.17M per [Midas app](https://midas.app/mhyper) (June 13, 2026; total supply 32,651,929 mHYPER × $1.1031)
+- **Total Supply:** 32,651,929 mHYPER across 4 chains per [attestation PDF](https://drive.google.com/file/d/1hYCD-3ypY71xbbVmy0JLz_0HaXIsZXKl/view) (June 12, 2026): Ethereum 29,463,808, Monad 2,693,208, Plasma 494,909, Katana 4. Ethereum [onchain supply](https://etherscan.io/token/0x9b5528528656DBC094765E2abB79F293c21191B9): ~29,512,770
+- **Holders:** ~467 addresses (Ethereum only, [last verified April 2026](https://etherscan.io/token/0x9b5528528656DBC094765E2abB79F293c21191B9))
+- **APY:** 10.46% per [Midas app](https://midas.app/mhyper) (June 13, 2026)
+- **Midas Platform TVL:** ~$78.7M Ethereum [DeFiLlama](https://defillama.com/protocol/midas-rwa) (June 13, 2026; DeFiLlama does not count all Midas positions — total platform TVL ~$110M per [SumCap](https://midas.sumcap.xyz/), down from ~$216.6M in April 2026)
 - **KYC Required:** Yes (greenlist enforced onchain)
 
 **Links:**
@@ -47,7 +47,7 @@ All contracts use OpenZeppelin's `TransparentUpgradeableProxy` pattern with a sh
 | Contract                                     | Proxy Address                                                                                                         | Implementation Address                                                                                                |
 | -------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
 | **mHYPER Token**                             | [0x9b5528528656DBC094765E2abB79F293c21191B9](https://etherscan.io/address/0x9b5528528656DBC094765E2abB79F293c21191B9) | [0xE4386180dF7285E7D78794148E1B31c9EDfb0689](https://etherscan.io/address/0xE4386180dF7285E7D78794148E1B31c9EDfb0689) |
-| **mHYPER/USD Oracle** (CustomAggregatorFeed) | [0x43881B05C3BE68B2d33eb70aDdF9F666C5005f68](https://etherscan.io/address/0x43881B05C3BE68B2d33eb70aDdF9F666C5005f68) | [0xFcA6c2087e6321385745f3080D586d088a7f707f](https://etherscan.io/address/0xFcA6c2087e6321385745f3080D586d088a7f707f) |
+| **mHYPER/USD Oracle** ([MHyperCustomAggregatorFeed](https://etherscan.io/address/0xa19f5e16dc09641b17adf95bc950f71dbe5cb11b)) | [0x43881B05C3BE68B2d33eb70aDdF9F666C5005f68](https://etherscan.io/address/0x43881B05C3BE68B2d33eb70aDdF9F666C5005f68) | [0xa19f5e16dc09641b17adf95bc950f71dbe5cb11b](https://etherscan.io/address/0xa19f5e16dc09641b17adf95bc950f71dbe5cb11b) |
 | **mHYPER DataFeed**                          | [0x92004DCC5359eD67f287F32d12715A37916deCdE](https://etherscan.io/address/0x92004DCC5359eD67f287F32d12715A37916deCdE) | [0xE3240302aCEc5922b8549509615c16a97C05654A](https://etherscan.io/address/0xE3240302aCEc5922b8549509615c16a97C05654A) |
 | **DepositVault**                             | [0x6Be2f55816efd0d91f52720f096006d63c366e98](https://etherscan.io/address/0x6Be2f55816efd0d91f52720f096006d63c366e98) | [0x570C15bC5faF98531A8b351d69E22E41e3505E47](https://etherscan.io/address/0x570C15bC5faF98531A8b351d69E22E41e3505E47) |
 | **RedemptionVaultWithSwapper**               | [0xbA9FD2850965053Ffab368Df8AA7eD2486f11024](https://etherscan.io/address/0xbA9FD2850965053Ffab368Df8AA7eD2486f11024) | [0xd2B5f8f1DED3D6e00965b8215b57A33c21101c63](https://etherscan.io/address/0xd2B5f8f1DED3D6e00965b8215b57A33c21101c63) |
@@ -115,8 +115,8 @@ All contracts use OpenZeppelin's `TransparentUpgradeableProxy` pattern with a sh
 
 - mHYPER extends mTBILL (simple ERC-20 with pausable, role-controlled mint/burn)
 - Standard OpenZeppelin TransparentUpgradeableProxy pattern
-- Custom oracle (CustomAggregatorFeed) wrapping Chainlink's AggregatorV3 interface — **not** a Chainlink data feed
-- Role-based access control via shared MidasAccessControl contract
+- **Custom oracle (MHyperCustomAggregatorFeed) wrapping Chainlink's AggregatorV3 interface — **not** a Chainlink data feed
+- Access control via shared MidasAccessControl contract (`M_HYPER_CUSTOM_AGGREGATOR_FEED_ADMIN_ROLE`)
 
 ### Bug Bounty
 
@@ -127,9 +127,9 @@ All contracts use OpenZeppelin's `TransparentUpgradeableProxy` pattern with a sh
 ## Historical Track Record
 
 - **Production History:** mHYPER token created on Ethereum [July 15, 2025](https://etherscan.io/tx/0x8dd0b1216e7970be06bd897ed57ebfba3f4213ec63d68aa622740608e93ffd5f) (~9 months in production). Midas platform launched with mTBILL in mid-2024 (~22 months total)
-- **TVL Growth:** Midas grew from ~$4M (July 2024) to ~$275M (February 2026), now ~$216.6M (April 2026)
-- **mHYPER Market Cap:** ~$45M with ~467 holders
-- **Price History:** mHYPER has traded between $1.024 (ATL, Sep 2025) and $1.089 (ATH, Apr 2026) — steady appreciation consistent with yield accrual. Oracle price: $1.08858 (round 78, last updated April 7, 2026)
+- **TVL Growth:** Midas grew from ~$4M (July 2024) to a peak of ~$925M (September 2025, DeFiLlama), declining to ~$78.7M Ethereum / ~$110M platform (June 2026). See [DeFiLlama](https://defillama.com/protocol/midas-rwa)
+- **mHYPER Market Cap:** ~$36.0M (June 2026), down from ~$50.7M (April 2026)
+- **Price History:** mHYPER has traded between $1.024 (ATL, Sep 2025) and $1.10312 (ATH, Jun 2026) — steady appreciation consistent with yield accrual. Oracle price: $1.10312 (round 97, last updated June 12, 2026 [onchain](https://etherscan.io/address/0x43881B05C3BE68B2d33eb70aDdF9F666C5005f68)). Per [attestation PDF](https://drive.google.com/file/d/1hYCD-3ypY71xbbVmy0JLz_0HaXIsZXKl/view): Market Neutral Strategy $35.67M, Settlement Reserve $337K, Funds in Process $12K, Total assets $36.02M at price $1.10312380
 
 **Hyperithm Track Record:**
 
@@ -143,7 +143,7 @@ All contracts use OpenZeppelin's `TransparentUpgradeableProxy` pattern with a sh
 Hyperithm is the strategy manager for mHYPER, deploying funds across multiple DeFi protocols using market-neutral, stablecoin-focused strategies. Funds remain under Midas control via Fordefi custody.
 
 - **Fund Manager:** Hyperithm (Tokyo/Seoul, founded 2018, AUM $300M+)
-- **Strategy:** Multi-chain stablecoin yield — leveraged USDe on Aave, farming on Pendle, basis trading on Hyperliquid, Morpho vault liquidity, carry trades, liquidation arbitrage. Per [transparency page](https://midas.app/transparency?token=mhyper) (April 10, 2026): Fluid 28.7%, Aave 21.6%, Kamino 19.3% (Solana lending), Morpho 15.0%, Pendle 14.7%, Wallet 0.7%, Hyperliquid/Lighter <0.1%. Total NAV ~$49.6M
+- **Strategy:** Multi-chain stablecoin yield — leveraged USDe on Aave, farming on Pendle, basis trading on Hyperliquid, Morpho vault liquidity, carry trades, liquidation arbitrage. **Previous allocation snapshot** ([transparency page](https://midas.app/transparency?token=mhyper), April 10, 2026): Fluid 28.7%, Aave 21.6%, Kamino 19.3% (Solana lending), Morpho 15.0%, Pendle 14.7%, Wallet 0.7%, Hyperliquid/Lighter <0.1%. Total NAV ~$49.6M. **Current allocation (June 13, 2026) per [SumCap tracker](https://midas.sumcap.xyz/mhyper):** Fluid 15.4% ($5.55M), Uniswap V4 5.6% ($2.02M), Onchain Wallets 1.5% ($548K), Assets to be Deployed 0.4% ($153K), Liquidity Buffer 0.1% ($37K), Merkl 0.1% ($30K), others <0.01%. **76.8% of mHYPER NAV ($27.7M) is classified as "Unclassified" by SumCap** — likely positions on non-Ethereum chains (Kamino/Solana, Monad, Plasma, Katana) that SumCap does not index, or offchain/CEX allocations. The strategy landscape has shifted materially from the April snapshot: Aave, Kamino, Morpho, and Pendle are no longer individually visible in onchain tracked positions, and total mHYPER NAV has declined ~27% (from $49.6M to $36.0M). **The Midas transparency page is Cloudflare-gated and the [attestation PDF](https://drive.google.com/file/d/1hYCD-3ypY71xbbVmy0JLz_0HaXIsZXKl/view) (June 12, 2026) only reports a single "Market Neutral Strategy" line ($35.67M) without protocol-level breakdown**
 - **Strategy Execution:** Offchain by Hyperithm with discretionary investment decisions
 - **Custody:** Fordefi MPC custody with tri-party quorum per [Fordefi case study](https://web.fordefi.com/customer-stories/how-midas-brings-tokenized-investment-opportunities-on-chain-with-fordefis-defi-native-custody-2ti85) (Midas + Hyperithm + independent signer — operations outside predefined rules require all three parties). Blockaid co-signer provides automated onchain transaction monitoring and threat protection (per Midas). Fordefi is the primary custodian for LYT products; Midas also uses Fireblocks for other product lines
 - **Monitoring:** NAV updates provided by Hyperithm, reviewed by Midas, then published onchain twice per week
@@ -170,7 +170,7 @@ Hyperithm is the strategy manager for mHYPER, deploying funds across multiple De
 ### Provability
 
 - **Reserve Transparency:** Hybrid. Strategy wallets are partially onchain, but full portfolio composition requires offchain reporting. The [Midas Attestation Engine](https://docs.midas.app/transparency/the-midas-attestation-engine) (SAVE, introduced March 2026) adds a multi-party verification layer via three contracts: [KeystoneForwarder](https://etherscan.io/address/0x0b93082D9b3C7C97fAcd250082899BAcf3af3885) (Chainlink DON router), [SaveCreReceiverProxy](https://etherscan.io/address/0xC50102b6598924Aa8deB201c757bFb9a3dBdB9b6) (receiver), and [MidasSaveRegistryWithClaim](https://etherscan.io/address/0x2D6e9F608807436DE5D9603B00Abe3FEd1Bc809d) (registry). The registry is a hash-only store: it records proof IDs, attestation hashes, claim hashes, verifier hashes, timestamps, and attestor/verifier addresses. It does **not** expose the actual reserve data, wallet balances, document content, or an onchain URI/CID that lets users retrieve the source artifact from the registry alone. Midas docs state that notarized source material is stored on IPFS, while public weekly PDF reports are available on [Google Drive](https://drive.google.com/drive/folders/1MJi_xq8aR0TaL0DJw6Q91SFxM_z0OcYZ). The onchain registry proves that a specific hash was attested and independently verified, but interpreting the underlying NAV/reserve data still depends on offchain-disclosed artifacts and links
-- **NAV/Price Updates:** Token price updated **twice per week** by Midas via a privileged role on the `CustomAggregatorFeed` oracle. Current price: ~$1.089 (round 79, 8 decimals). The oracle enforces onchain bounds: `maxAnswerDeviation` of 0.35% per update (35000000 in 8-decimal precision), `minAnswer` of $0.10, and `maxAnswer` of $1,000 — providing tight deviation control per update. The oracle price is deterministic onchain at deposit time (users know the exact token amount). For standard redemptions, the price may update before processing — this ensures the payout accurately reflects current NAV, avoiding over/under-payment to either the redeemer or remaining holders. The Attestation Engine separately verifies and anchors NAV source-data hashes, but does not currently enforce oracle update correctness onchain
+- **NAV/Price Updates:** Token price updated **twice per week** by Midas via a privileged role on the `MHyperCustomAggregatorFeed` oracle (implementation upgraded to [`0xa19f5e16dc09641b17adf95bc950f71dbe5cb11b`](https://etherscan.io/address/0xa19f5e16dc09641b17adf95bc950f71dbe5cb11b), June 2026). Current price: ~$1.10312 (round 97, 8 decimals, last updated June 12, 2026). The oracle enforces onchain bounds: `maxAnswerDeviation` of 0.35% per update (35000000 in 8-decimal precision), `minAnswer` of $0.10, and `maxAnswer` of $1,000 — providing tight deviation control per update. The oracle price is deterministic onchain at deposit time (users know the exact token amount). For standard redemptions, the price may update before processing — this ensures the payout accurately reflects current NAV, avoiding over/under-payment to either the redeemer or remaining holders. The Attestation Engine separately verifies and anchors NAV source-data hashes, but does not currently enforce oracle update correctness onchain
 - **Verification Agent:** [The Attestation Engine](https://docs.midas.app/transparency/the-midas-attestation-engine) introduces **LlamaRisk** and **Canary Protocol** as independent third-party verifiers that confirm data origins, processes, and handling meet defined criteria
 - **Third-Party Verification:** For Morpho integration, eOracle independently verifies and publishes pricing. Steakhouse applies market discounts for liquidation optimization. The Attestation Engine publishes verified hashes onchain via **Chainlink Runtime Environment**, replacing the previous self-generated attestation reports. The oracle wraps the Chainlink AggregatorV3 interface but the underlying price feed is **not** a Chainlink data feed
 
@@ -180,9 +180,9 @@ Hyperithm is the strategy manager for mHYPER, deploying funds across multiple De
 - **Primary Exit:** Via Midas redemption vaults (instant or standard mode)
 - **Instant Redemption:** 1-2% target capacity, topped up multiple times per day
 - **Standard Redemption:** 1-3 business day queue when instant capacity is insufficient
-- **Pendle:** ~$10.14M TVL in mHYPER Pendle pools across 5 markets (yield tokenization, not direct swap liquidity). Up from ~$5.53M in February
+- **Pendle:** ~$10.14M TVL in mHYPER Pendle pools across 5 markets (yield tokenization, not direct swap liquidity). Up from ~$5.53M in February. **As of June 2026, Pendle V2 has <0.01% of mHYPER NAV per [SumCap](https://midas.sumcap.xyz/mhyper)**, suggesting Pendle liquidity is likely from other holders, not the primary strategy wallet
 - **Stress Test:** mHYPER processed $150M+ in redemptions in 48 hours when Stream Finance unwound its $75M leveraged position. This is a positive signal for the redemption mechanism but required standard (non-instant) processing and active coordination
-- **Large Holder Impact:** With ~467 holders and $45M market cap, average position is ~$96K. Large holders likely face multi-day standard redemption queues
+- **Large Holder Impact:** With ~467 holders and $36.0M market cap, average position is ~$77K. Large holders likely face multi-day standard redemption queues
 
 ## Centralization & Control Risks
 
@@ -195,24 +195,27 @@ Hyperithm is the strategy manager for mHYPER, deploying funds across multiple De
   - [`0x82B30194bEae06D991Bc71850F949ec8cB7E0CB7`](https://etherscan.io/address/0x82B30194bEae06D991Bc71850F949ec8cB7E0CB7) — Nested Gnosis Safe (3/7)
   - [`0xC50BD8430545C80a681C7cb33E6560fB0Bd86880`](https://etherscan.io/address/0xC50BD8430545C80a681C7cb33E6560fB0Bd86880) — EOA onchain. Per Midas, controlled by a Fireblocks MPC policy with 3/n approvers — not verifiable onchain
 - **Access Control:** Role-based via `MidasAccessControl` ([`0x0312A9D1Ff2372DDEdCBB21e4B6389aFc919aC4B`](https://etherscan.io/address/0x0312A9D1Ff2372DDEdCBB21e4B6389aFc919aC4B))
-- **DEFAULT_ADMIN_ROLE holders:** Three addresses hold `DEFAULT_ADMIN_ROLE` on MidasAccessControl — **role changes (mint/burn/pause/blacklist grants) bypass the timelock** and can be executed immediately:
+- **DEFAULT_ADMIN_ROLE holders:** Two addresses hold `DEFAULT_ADMIN_ROLE` on MidasAccessControl — **role changes (mint/burn/pause/blacklist grants) bypass the timelock** and can be executed immediately:
   - The 1/3 Gnosis Safe ([`0xB60842E9DaBCd1C52e354ac30E82a97661cB7E89`](https://etherscan.io/address/0xB60842E9DaBCd1C52e354ac30E82a97661cB7E89))
   - [`0xd4195cf4df289a4748c1a7b6ddbe770e27ba1227`](https://etherscan.io/address/0xd4195cf4df289a4748c1a7b6ddbe770e27ba1227) — EOA onchain. [Per Midas](https://docs.midas.app/security/smart-contract-security#midas-controller), Fordefi MPC (3/n) — not verifiable onchain
-  - [`0x875c06a295c41c27840b9c9dfda7f3d819d8bc6a`](https://etherscan.io/address/0x875c06a295c41c27840b9c9dfda7f3d819d8bc6a) — EOA onchain. [Per Midas](https://docs.midas.app/security/smart-contract-security#midas-controller), Fireblocks MPC (3/n) — not verifiable onchain
-  - **Any one of these three can grant/revoke any role with no timelock.** Midas states they are working on gating specific functions behind a timelock
+  - ⚠️ **Reduced from 3 to 2** since April 2026: [`0x875c06a295c41c27840b9c9dfda7f3d819d8bc6a`](https://etherscan.io/address/0x875c06a295c41c27840b9c9dfda7f3d819d8bc6a) no longer holds `DEFAULT_ADMIN_ROLE` (verified onchain June 13, 2026). This address was originally granted the role at [block 18691340](https://etherscan.io/tx/0x45a857fa7949fec06c1cc124a26a199ff2a4d3f6b4665a7830db7b4a7c3c729c) (Dec 2023) alongside 7 other roles but was effectively removed through a past implementation upgrade (no `RoleRevoked` event onchain)
+  - **Either of the two remaining admins can grant/revoke any role with no timelock.** Midas states they are working on gating specific functions behind a timelock
 - **Governance Model:** No onchain governance. Midas controls all admin functions
 - **Privileged Roles:**
   1. **`M_HYPER_MINT_OPERATOR_ROLE`** (`0xe6046a6e8c55ddf579e30dbcefd2018a368c8b9d4836e839e4858921fb6305d7`) — Can mint unlimited mHYPER tokens. **The `mint()` function has no onchain collateral check** — it only verifies the caller has the mint role, then calls OpenZeppelin `_mint()` directly. Currently held by:
     - [`0x5683de280d0c3967fba2f04d707fa1ef5a044e25`](https://etherscan.io/address/0x5683de280d0c3967fba2f04d707fa1ef5a044e25) — EOA onchain. Per Midas, Fordefi MPC (3/n) used for operational processes — not verifiable onchain. Also holds BURN, PAUSE, BLACKLIST, and GREENLIST roles (5 total, all mHYPER-only). Nonce 0 (never sent a transaction). **Not listed as a mint role holder in [Midas security docs](https://docs.midas.app/security/smart-contract-security#role-based-access-control)** (docs only mention DepositVault and OFT bridge). All roles [granted](https://etherscan.io/tx/0x4254a910f7133d2ef54913662f19a0af1f9974d33391ca84ca8c60dffa025301) in a single batch on July 16, 2025
     - [`0xbA9FD2850965053Ffab368Df8AA7eD2486f11024`](https://etherscan.io/address/0xbA9FD2850965053Ffab368Df8AA7eD2486f11024) — DepositVault (mints when users deposit USDC)
     - [`0x148c86390a4ae6f7a02df5903bc0a89e8b4581a0`](https://etherscan.io/address/0x148c86390a4ae6f7a02df5903bc0a89e8b4581a0) — LayerZero OFT adapter (cross-chain bridge)
-  2. **`M_HYPER_BURN_OPERATOR_ROLE`** — Can burn mHYPER tokens from any address. Currently held by the same EOA [`0x5683de280d0c3967fba2f04d707fa1ef5a044e25`](https://etherscan.io/address/0x5683de280d0c3967fba2f04d707fa1ef5a044e25), plus the RedemptionVault and LayerZero adapter
+  2. **`M_HYPER_BURN_OPERATOR_ROLE`** — Can burn mHYPER tokens from any address. **Changed since April 2026:** RedemptionVault was removed, DepositVault was added. Currently held by:
+    - [`0x5683de280d0c3967fba2f04d707fa1ef5a044e25`](https://etherscan.io/address/0x5683de280d0c3967fba2f04d707fa1ef5a044e25) — same EOA as above (Fordefi MPC)
+    - [`0x6Be2f55816efd0d91f52720f096006d63c366e98`](https://etherscan.io/address/0x6Be2f55816efd0d91f52720f096006d63c366e98) — DepositVault (🆕 added)
+    - [`0x148c86390a4ae6f7a02df5903bc0a89e8b4581a0`](https://etherscan.io/address/0x148c86390a4ae6f7a02df5903bc0a89e8b4581a0) — LayerZero OFT adapter (cross-chain bridge)
   3. **`M_HYPER_PAUSE_OPERATOR_ROLE`** — Can pause/unpause the contract (freezing all transfers)
   4. **`DEFAULT_ADMIN_ROLE`** — Can grant/revoke all other roles (held by 1/3 Safe + two standalone EOAs, no timelock). A compromised admin can grant itself the MINT role and mint unbacked tokens in two transactions
   5. **ProxyAdmin owner** — Can upgrade all contract implementations (via 48hr timelock)
-  6. **Oracle updater** — Can set the NAV price via `CustomAggregatorFeed`. Currently held by EOA [`0xd1e01471f3e1002d4eec1b39b7dbd7aff952a99f`](https://etherscan.io/address/0xd1e01471f3e1002d4eec1b39b7dbd7aff952a99f) — a single EOA with no timelock on price updates. Onchain bounds: max 0.35% deviation per update, price range $0.10-$1,000
+  6. **Oracle updater** — Can set the NAV price via `MHyperCustomAggregatorFeed` (implementation upgraded from `CustomAggregatorFeed` to [`0xa19f5e16dc09641b17adf95bc950f71dbe5cb11b`](https://etherscan.io/address/0xa19f5e16dc09641b17adf95bc950f71dbe5cb11b) since April 2026). The new implementation uses `M_HYPER_CUSTOM_AGGREGATOR_FEED_ADMIN_ROLE` (previously `UPDATER_ROLE`) for access control via MidasAccessControl. Currently held by EOA [`0xd1e01471f3e1002d4eec1b39b7dbd7aff952a99f`](https://etherscan.io/address/0xd1e01471f3e1002d4eec1b39b7dbd7aff952a99f) — a single EOA with no timelock on price updates. The new implementation has both [`setRoundData`](https://etherscan.io/address/0xa19f5e16dc09641b17adf95bc950f71dbe5cb11b#code) and `setRoundDataSafe` functions. Onchain bounds unchanged: max 0.35% deviation per update, price range $0.10-$1,000
   7. **Blacklist operator** — Can blacklist addresses from interacting with the token
-- **Fund Seizure / Unbacked Minting:** The mint operator can create tokens without depositing collateral (no onchain backing check). The burn operator can burn from any address. The blacklist/pause operators can freeze activity. Role grants bypass the timelock — any of the three `DEFAULT_ADMIN_ROLE` holders can grant themselves these roles immediately and unilaterally. `renounceRole` is disabled (always reverts)
+- **Fund Seizure / Unbacked Minting:** The mint operator can create tokens without depositing collateral (no onchain backing check). The burn operator can burn from any address (now includes DepositVault in addition to the EOA and OFT adapter). The blacklist/pause operators can freeze activity. Role grants bypass the timelock — either of the two `DEFAULT_ADMIN_ROLE` holders can grant themselves these roles immediately and unilaterally. `renounceRole` is disabled (always reverts)
 - **Audit Assessment:** Hacken auditors explicitly flagged the protocol as **"highly centralized"** with system admins controlling all critical roles
 
 ### Programmability
@@ -230,13 +233,14 @@ Hyperithm is the strategy manager for mHYPER, deploying funds across multiple De
 
 - **Hyperithm (Critical):** Strategy management, NAV calculation, risk monitoring. Single external dependency for core value proposition. If Hyperithm fails or misreports, token holders have no onchain recourse
 - **Fordefi (Critical):** MPC custody of underlying assets with tri-party MPC governance. All fund movements depend on it
-- **Strategy Counterparties (Critical):**
-  - **Fluid** — 28.7% of NAV, borrow/lend
-  - **Aave** — 21.6% of NAV, leveraged USDe positions (blue-chip)
-  - **Kamino** — 19.3% of NAV, Solana lending protocol (rebranded from Hubble Protocol, launched 2022)
-  - **Morpho** — 15.0% of NAV, vault liquidity provision (established)
-  - **Pendle** — 14.7% of NAV, yield token farming (established)
-  - **Hyperliquid** — <0.1% of NAV, basis trading (newer, centralized perps DEX)
+- **Strategy Counterparties (Critical, June 13, 2026 per [SumCap](https://midas.sumcap.xyz/mhyper)):**
+  - **Unclassified** — 76.8% ($27.7M) of mHYPER NAV is untracked by SumCap. Likely includes positions on non-Ethereum chains (Kamino/Solana, Monad, Plasma) and offchain/CEX allocations. **This opacity is a material risk increase from April 2026**, when most positions were individually identifiable
+  - **Fluid** — 15.4% ($5.55M), borrow/lend
+  - **Uniswap V4** — 5.6% ($2.02M), liquidity provision
+  - **Onchain Wallets** — 1.5% ($548K), idle capital
+  - **Merkl** — 0.1% ($30K), reward farming
+  - **Euler, Pendle V2, Morpho V2, Hyperliquid** — each <0.01%, near-zero positions
+  - ⚠ **Aave, Kamino, Morpho, Pendle** — previously major counterparties (April 2026), now either unwound or untracked on non-Ethereum chains. The loss of visible diversification is notable
 - **Stablecoin Dependencies:** USDC, USDe (Ethena) — depegging events could impact strategy performance
 - **Oracle:** NAV reported via custom contract, now with independent verification through the Midas Attestation Engine (Chainlink CRE, LlamaRisk, Canary Protocol, vlayer)
 - **MPC wallet platform (Critical):** Midas holds distributed backup shares for the Fordefi workspace, allowing them to recover and secure key material in case of counterparty failure. Dual controls are enforced in all recovery procedures, preventing any single point of failure.
@@ -252,8 +256,8 @@ Hyperithm is the strategy manager for mHYPER, deploying funds across multiple De
 ## Monitoring
 
 1. **Oracle/NAV Updates (CRITICAL)**
-  - **Contract:** [0x43881B05C3BE68B2d33eb70aDdF9F666C5005f68](https://etherscan.io/address/0x43881B05C3BE68B2d33eb70aDdF9F666C5005f68) (CustomAggregatorFeed)
-  - **Monitor:** `AnswerUpdated` events, `latestRoundData()` values
+  - **Contract:** [0x43881B05C3BE68B2d33eb70aDdF9F666C5005f68](https://etherscan.io/address/0x43881B05C3BE68B2d33eb70aDdF9F666C5005f68) (MHyperCustomAggregatorFeed, impl [0xa19f5e16dc09641b17adf95bc950f71dbe5cb11b](https://etherscan.io/address/0xa19f5e16dc09641b17adf95bc950f71dbe5cb11b))
+  - **Monitor:** `AnswerUpdated` events, `latestRoundData()` values, `setRoundData`/`setRoundDataSafe` calls
   - **Alert:** Price decrease >1%, stale price (>10 days without update), unexpected large price jumps
   - **Frequency:** Hourly
 2. **Access Control Changes (CRITICAL)**
@@ -294,7 +298,7 @@ Hyperithm is the strategy manager for mHYPER, deploying funds across multiple De
 
 - **NAV reporting trust assumptions** — Hyperithm reports NAV, which is now checked through the [Attestation Engine](https://docs.midas.app/transparency/the-midas-attestation-engine) (LlamaRisk + Canary verify, vlayer notarizes, Chainlink CRE publishes hashes onchain). This is a significant improvement over previous single-party reporting, but source artifacts and full portfolio composition remain offchain, and the oracle update itself is still admin-triggered
 - **Negligible onchain liquidity** — ~$11.5K on Uniswap (down from ~$32K), effectively $0 daily volume. Exit is entirely dependent on Midas's redemption infrastructure (1-3 days). There is limited instant liquidity 1-2% of total supply to mitigate this
-- **Weak access control and partial timelock** — While contract upgrades have a 48-hour timelock, `DEFAULT_ADMIN_ROLE` is held by three direct addresses: the 1/3 Gnosis Safe plus two EOAs. The Safe owner set includes two Midas-claimed MPC-controlled EOAs and one nested 3/7 Safe, but the two direct admin EOAs are a separate control plane. Any direct admin can grant mint/burn/pause/blacklist roles and seize or freeze user funds without delay. The oracle price is also controlled by a single EOA with no timelock
+- **Weak access control and partial timelock** — While contract upgrades have a 48-hour timelock, `DEFAULT_ADMIN_ROLE` is held by two direct addresses: the 1/3 Gnosis Safe and one EOA (reduced from three, June 2026). The Safe owner set includes two Midas-claimed MPC-controlled EOAs and one nested 3/7 Safe, but the single direct admin EOA is a separate control plane. Any direct admin can grant mint/burn/pause/blacklist roles and seize or freeze user funds without delay. The oracle price is also controlled by a single EOA with no timelock
 - **Unbacked minting** - tokens can be minted without collateral by the admin
 
 ---
@@ -449,7 +453,7 @@ Hyperithm is the strategy manager for mHYPER, deploying funds across multiple De
 **Key Concerns Driving the Score:**
 
 - Offchain strategy execution with NAV determined offchain (verification pipeline improves trust but does not eliminate offchain dependency)
-- Role changes (mint/burn/pause/blacklist grants) bypass the 48-hour timelock. `DEFAULT_ADMIN_ROLE` is held by the 1/3 Safe plus two direct EOAs. The Safe owner set has one nested 3/7 Safe and two Midas-claimed MPC signers, but those offchain controls cannot be confirmed onchain and do not cover the two direct admin EOAs unless separately confirmed
+- Role changes (mint/burn/pause/blacklist grants) bypass the 48-hour timelock. `DEFAULT_ADMIN_ROLE` is now held by two addresses (the 1/3 Safe and one direct EOA), reduced from three in April 2026. The Safe owner set has one nested 3/7 Safe and two Midas-claimed MPC signers, but the single direct admin EOA's offchain controls cannot be confirmed onchain
 - Negligible secondary market liquidity, relying on Midas to keep instant redemption vault at 1-2% of total supply
 - Dependency on Hyperithm for strategy execution (NAV verification now multi-party via Attestation Engine)
 - No smart contract restrictions on how the funds are managed. Tokens can be minted without backing
@@ -467,14 +471,15 @@ Hyperithm is the strategy manager for mHYPER, deploying funds across multiple De
 
 ## Reassessment Triggers
 
-- **Time-based**: Reassess in 3 months (July 2026)
-- **TVL-based**: Reassess if mHYPER market cap changes by more than 50%
+- **Time-based**: Reassess in 3 months (July 2026) — approaching
+- **TVL-based**: Reassess if mHYPER market cap changes by more than 50%. Current mHYPER market cap ~$32.5M (down ~36% from ~$50.7M in April 2026). Midas platform TVL declined ~49% to ~$110M — approaching but not yet triggering
 - **Incident-based**: Reassess after any exploit, NAV discrepancy, governance change, contract upgrade, or regulatory action
 - **Hyperithm regulatory outcome**: Reassess when South Korean regulatory filing matter is resolved
-- **Timelock expansion**: If Midas extends the 48-hour timelock to cover role changes (not just upgrades)
-- **Minting**: If Midas removes the option to mint unbacked tokens
-- **Audit**: If new audit covering current mHYPER contracts is published, reassess
+- **Timelock expansion**: If Midas extends the 48-hour timelock to cover role changes (not just upgrades). Partially addressed: `DEFAULT_ADMIN_ROLE` reduced from 3 to 2 holders (Fireblocks EOA revoked, June 2026)
+- **Minting**: If Midas removes the option to mint unbacked tokens — no change
+- **Audit**: If new audit covering current mHYPER contracts is published, reassess. Note: Oracle implementation upgraded since last report
 - **Attestation Engine maturity**: If the Attestation Engine demonstrates sustained operation and expanded coverage (e.g., real-time attestations, additional verifiers), reassess for potential Provability score improvement
+- **Oracle upgrade**: The Oracle implementation was upgraded from `CustomAggregatorFeed` to `MHyperCustomAggregatorFeed` ([`0xa19f5e16dc09641b17adf95bc950f71dbe5cb11b`](https://etherscan.io/address/0xa19f5e16dc09641b17adf95bc950f71dbe5cb11b)) — this is a material contract change warranting monitoring of the new code path
 
 ---
 
@@ -511,7 +516,7 @@ Hyperithm is the strategy manager for mHYPER, deploying funds across multiple De
 │  │  0x43881B05..f68         │    │  0x92004DCC..dE               │  │
 │  │                          │    │                               │  │
 │  │  Weekly admin-set price  │    │  Feeds price data to vaults   │  │
-│  │  Current: $1.089 (r78)   │    │                               │  │
+│  │  Current: $1.1031 (r97)  │    │                               │  │
 │  └──────────────────────────┘    └───────────────────────────────┘  │
 │                                                                     │
 │  ┌──────────────────────────────────────────────────────────────┐   │
@@ -568,23 +573,28 @@ Hyperithm is the strategy manager for mHYPER, deploying funds across multiple De
 ┌─────────────────────────────────────────────────────────────────────┐
 │                        GOVERNANCE                                   │
 │                                                                     │
-│  DEFAULT_ADMIN_ROLE (3 holders, can grant/revoke ANY role):         │
+│  DEFAULT_ADMIN_ROLE (2 holders, can grant/revoke ANY role):         │
 │  ├─ 0xd4195cf4df289a4748c1a7b6ddbe770e27ba1227 (Fordefi MPC?)      │
-│  ├─ 0x875c06a295c41c27840b9c9dfda7f3d819d8bc6a (Fireblocks MPC?)   │
 │  └─ 1/3 Gnosis Safe 0xB60842E9DaBCd1C52e354ac30E82a97661cB7E89    │
 │     ├─ EOA 0x8003544D32eE074aA8A1fb72129Fa8Ef7fe02E5f (Fordefi?)  │
 │     ├─ 3/7 Safe 0x82B30194bEae06D991Bc71850F949ec8cB7E0CB7        │
 │     └─ EOA 0xC50BD8430545C80a681C7cb33E6560fB0Bd86880 (Fireblocks?)│
 │                                                                     │
+│  └─ ⚠ 0x875c06a295c41c27840b9c9dfda7f3d819d8bc6a (Fireblocks) ── REVOKED │
+│                                                                     │
 │  Mint/Burn Operator EOA (holds BOTH roles):                         │
 │  └─ 0x5683de280d0c3967fba2f04d707fa1ef5a044e25                     │
+│                                                                     │
+│  Additional BURN holders:                                           │
+│  ├─ DepositVault 0x6Be2f55816efd0d91f52720f096006d63c366e98 (🆕)   │
+│  └─ LayerZero OFT Adapter 0x148c86390a4ae6f7a02df5903bc0a89e8b4581a0│
 │                                                                     │
 │  Oracle Updater EOA (sets NAV price, no timelock):                  │
 │  └─ 0xd1e01471f3e1002d4eec1b39b7dbd7aff952a99f                     │
 │                                                                     │
 │  ⚠ Role changes bypass timelock (only upgrades go through 48h)     │
 │  ⚠ mint() has no onchain collateral check                         │
-│  ⚠ Any single DEFAULT_ADMIN can grant MINT role → unbacked tokens  │
+│  ⚠ Either of 2 remaining DEFAULT_ADMIN can grant MINT → unbacked  │
 │                                                                     │
 └─────────────────────────────────────────────────────────────────────┘
 

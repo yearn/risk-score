@@ -14,6 +14,7 @@ allowed-tools: Read Write Edit Grep Glob Bash(git:*) Bash(gh:*) Bash(cast:*) Bas
 - Every new risk report must include a matching dependency graph at `reports/graph/<slug>.yaml`; follow `reports/graph/SKILL.md`.
 - Never trust protocol documentation alone. Use docs to understand the intended architecture, then verify claims onchain when possible.
 - Back every material claim with a valid link. This includes contracts, transactions, governance records, protocol docs, dashboard/API data, TVL values, and allocation data.
+- **Never quote a truncated address without a link to the full one.** A bare `` `0xABCD…EF12` `` is unverifiable — the user cannot click it, and search engines/explorers cannot resolve it. Always wrap it as `` [`0xABCD…EF12`](https://etherscan.io/address/0x<full address>) `` (or the appropriate chain explorer), so the visible text stays compact but the full address is one click away. This applies in every report file and in `src/data/bridges.json` `detail` strings (the Bridges page renders `detail` as markdown for exactly this reason). Same rule for tx hashes, pool ids, and any other short identifier a reader might want to verify onchain.
 - Actively search for hidden or indirect fund-loss paths for end users: privileged minting, upgradeable implementations, proxy admins, oracle control, role escalation, pause/blacklist paths, redemption gates, offchain custody, fee switches, strategy migration controls, and dependency failure modes.
 
 ## Pre-Assessment: Architecture First
@@ -55,7 +56,18 @@ Before writing the *Token Mint Authority* section of the report (defined in `rep
 
 3. **Ownable tokens**: read `owner()` — that single address can mint via `mint(...)`. Classify owner (EOA, multisig, contract).
 
-4. **Bridge-managed tokens**: read the bridge controller address (Wormhole NTT Manager, LayerZero OFT, etc.). It typically holds the only mint authority on the destination chain. Confirm by reading the token's `mint` function for the access check.
+4. **Bridge-managed tokens**: read the bridge controller address (Wormhole NTT Manager, LayerZero OFT/OFT-Adapter, CCIP token pool, etc.) and trace the complete message-to-mint path. The bridge may hold mint authority directly or authenticate a downstream controller that holds it. Confirm by reading the token's `mint` function and every caller-side access check.
+   - **Always segment the bridge model — this is a material risk difference, so verify it, never assume:**
+     - **Bridge path mints the native token** (`mint`): the bridge-controlled message path can mint the *canonical* token, either because the bridge controller holds mint authority directly or because an authenticated downstream controller does. A compromise of the required bridge trust path can mint **unbacked native supply and dilute every holder, including on mainnet**. Record quorum requirements rather than implying that one provider can act alone. Worked examples: Midas mHYPER — the LayerZero OFT adapter `0x148c…81a0` holds `M_HYPER_MINT_OPERATOR_ROLE` (`reports/report/midas-mhyper.md`); Paxos USDG — the `OFTWrapper` is Supply Controller SC3 with a 45M USDG mint capacity (`reports/report/paxos-usdg.md`); Centrifuge JAAA — the Spoke holds `wards`, while a 2-of-2 MultiAdapter authenticates the bridge message before the Spoke mints (`reports/report/centrifuge-jaaa.md`).
+     - **Bridged representation** (`lock`): the canonical token is locked/escrowed on its origin chain and the remote token is only a bridged claim. Blast radius is bounded by remote supply plus the locked collateral. Worked example: Sky USDS — the OFT Adapter locks USDS and **does not hold `wards` on USDS**, so it cannot mint native (`reports/report/sky-usds.md`).
+     - **Underlying transport** (`transport`): the protocol bridges an *underlying* asset (e.g. USDC via CCTP) to remote strategies; the assessed token is not bridged at all. Exposure may persist while assets remain remote and can include bridge-dependent custody, accounting callbacks, and return paths — it is not necessarily limited to funds between chains. Worked example: `reports/report/yearn-yvusd.md`.
+   - To tell them apart, trace both direct and downstream mint authority: check `wards(<adapter-or-controller>)` (Sky/Centrifuge-style), `hasRole(MINTER_ROLE, <adapter-or-controller>)` / the role enumeration in this pass, the token's supply-controller table, and the bridge receiver's authentication logic. State the model, quorum, and evidence explicitly in the report, **and record the adapter and downstream controller addresses** — several reports named a bridge without them, forcing later re-derivation.
+   - **Finding the adapter — do not conclude "no bridge" from these alone.** The most common LayerZero shape is a **plain ERC-20 on mainnet + a separate OFT Adapter + a native OFT on the remote chain**. Three checks that look authoritative but miss it:
+     - *"The mainnet token isn't an OFT"* (`endpoint()` reverts) — expected under this shape; the adapter is a different contract.
+     - *LayerZero's public OFT registry* (`https://metadata.layerzero-api.com/v1/metadata/experiment/ofts/list`) — useful when it hits, but **incomplete** (it lists Resolv, but not Cap or InfiniFi).
+     - *DeFiLlama `chains`* — tracks **protocol TVL by chain, not token deployments**; it reported "Ethereum only" for protocols whose token was live on Katana.
+     Instead, work **backwards from the remote chain**: find the token on the destination explorer (a same-address CREATE2/vanity deployment is a strong hint), confirm it is an OFT (`oftVersion()`, `endpoint()`), then read `peers(<origin eid>)` (Ethereum = `30101`) to get the mainnet adapter. Verify with `adapter.token()`, `adapter.endpoint()` (canonical LZ V2 `EndpointV2` = `0x1a44076050125825900e736c501f859c50fE728c`), and the escrowed `balanceOf(adapter)`.
+   - **Check every bridge family, not just one.** A negative LayerZero result is not a negative bridge result: also check Chainlink CCIP (`TokenAdminRegistry.getPool(token)` on Ethereum = `0xb22764f98dD05c789929716D677382Df22C05Cb6`, then the pool's `typeAndVersion()` — `LockRelease…` ⇒ `lock`, `BurnMint…` ⇒ `mint`), Circle CCTP, and the AggLayer/LxLy unified bridge (`PolygonZkEVMBridgeV2` `0x2a3DD3EB832aF982ec71669E178424b10Dca2EDe`, same address on every connected chain; `getTokenWrappedAddress(0, <mainnet token>)` on the destination reveals a canonical wrapper).
 
 5. **For every role-holder address**, classify it in the *Notes* column of the mint table: EOA, multisig (with threshold + named-vs-anonymous signers), or specific contract (with its purpose, e.g. "MintController — entry-point proxy for user deposits"). If a role-holder is itself a multisig, also document its threshold and signer set.
 
@@ -81,6 +93,8 @@ If any answer is "no," use **"unverified"** not **"doesn't exist."**
 - See if asset or protocol is reviewed by Steakhouse, check their reports: https://kitchen.steakhouse.financial/archive
 - When validating protocols, see for info on which focused on protocol decentralization: https://www.defiscan.info/
 - Always include whole `Risk Tier` table and bold the final risk tier.
+- Treat an unverified contract source as a triggered critical gate (score 5, the first gate): if the assessed contract — or its implementation behind a proxy — is not source-verified on a public block explorer, it fails the gate. Verify via Etherscan `getsourcecode` / `cast` (see `reports/etherscan/SKILL.md`).
+- Set the header `Status:` field for exception reports (see `reports/TEMPLATE.md`): `GATED` keeps the numeric score (gate-capped, still live), while terminal states `HACKED`/`DEAD` use `Final Score: N/A` and render off the scale under "Not Rated". Omit `Status:` for normal reports.
 - Explain how minting and redeeming works, if present. Verify whether the operations are atomic and whether minting requires backing — flag any path that lets an admin mint unbacked tokens as a high-risk finding. Full mint-authority enumeration (every role-holder, with classification) goes into the *Token Mint Authority* section of the report; the procedure is in Pass 1.6 above.
 - Treat any path that can move, dilute, freeze, trap, or misprice user funds as a possible end-user loss path, even if it is not described as such in docs.
 
@@ -94,7 +108,43 @@ If any answer is "no," use **"unverified"** not **"doesn't exist."**
 - If you use some script multiple times, add it to the `reports/scripts` folder but first ask for permission before committing it.
 - Check `.env` for environment variables and secrets. If you cannot access `.env`, stop early and report the blocker.
 
+### Fetching JS-rendered / doc-host sources (Notion, Google Docs)
+
+Issue links often point to Google Docs and Notion. `WebFetch` only sees the static HTML shell of these (content is rendered client-side or behind a login), so it returns an empty/login page. Use the host's data endpoint instead — no browser needed. (Playwright is usually a dead end here: the sandbox lacks Chromium's system libraries and `apt`/`python3-venv` to install them.)
+
+**Google Docs** (works when the doc is link-shared "anyone with the link"):
+```bash
+# Extract the file id from the URL .../document/d/<FILE_ID>/edit
+curl -sL "https://docs.google.com/document/d/<FILE_ID>/export?format=txt" -o /tmp/doc.txt
+# Verify it's the real doc, not an auth wall:
+grep -qi "accounts.google\|sign in" /tmp/doc.txt && echo "LOGIN WALL — needs auth/MCP" || echo "OK"
+```
+`export?format=txt` gives clean text; `format=html` preserves structure. If it returns a login page the doc is private — fall back to the Google Drive MCP (ask the user to authenticate) or ask them to paste/export it.
+
+**Notion** (works for public/published pages, including `*.notion.site` custom domains):
+```bash
+# URL ends in ...-<32-hex-pageid>. Hyphenate it into a UUID:
+#   328723f942ca80adb0a0ced3adf5a0b8 -> 328723f9-42ca-80ad-b0a0-ced3adf5a0b8
+curl -s "https://<subdomain>.notion.site/api/v3/loadCachedPageChunkV2" \
+  -H "Content-Type: application/json" \
+  --data '{"page":{"id":"<UUID>"},"limit":300,"cursor":{"stack":[]},"verticalColumns":false}' \
+  -o /tmp/page.json
+```
+Parse the JSON in Python. **Gotcha:** the block value is double-nested — read `recordMap.block[id]["value"]["value"]` (not `["value"]`). Walk the page's `content` array recursively; the human text of each block is `properties.title`, a list of rich-text segments `[[ "text", ... ], ...]` — join `seg[0]`. Map `type` to markdown (`header`→`#`, `sub_header`→`##`, `bulleted_list`→`- `, etc.). If a fresh request comes back as skeleton blocks (no `value`), retry — Notion sometimes returns a cached chunk first.
+
+**GitBook docs** (e.g. `*.gitbook.io`): two tricks.
+- Append `.md` to any page URL to get clean markdown instead of the rendered HTML: `https://<proj>.gitbook.io/<space>/<page>.md`.
+- Many GitBook sites expose a built-in Q&A endpoint — GET the page's `.md` URL with an `ask=<natural-language question>` query param, and it returns a direct answer plus sourced excerpts (look for an "Agent Instructions / Querying This Documentation" note on the site confirming it's enabled):
+  ```bash
+  curl -sL --get "https://<proj>.gitbook.io/<space>/<page>.md" \
+    --data-urlencode "ask=List every audit: firm, date, scope, and report link."
+  ```
+  Great for filling gaps without reading every page (audits, params, governance). Caveats: it only knows what's in the docs *text* — content locked inside linked PDFs/files (e.g. audit firm names) won't be returned. The docs root is often behind a Cloudflare bot-challenge; if `curl` returns a "Just a moment…" page, target a specific sub-page, retry, or use `WebFetch`.
+
+For all of these: treat the extracted text as documentation (claims to verify), and **always reconcile against on-chain state** — docs can be stale or describe a superseded design.
+
 ## Post-Assessment
 
 - After the report is finalized, generate or update the contract dependency graph YAML at `reports/graph/<slug>.yaml`; procedure defined in skill `generating-dependency-graphs` in `reports/graph/SKILL.md`. The graph publishes to `/graph/<slug>/` and is auto-linked from the report page when the YAML exists.
 - The report task is not ready for draft PR until the graph exists and `npm run build` validates both the report page and graph schema, unless the graph cannot be produced from available information. If graph data is unavailable, explain why and mark the missing graph facts as `TODO`.
+- **Bridge dependencies:** if the assessed asset/protocol depends on a cross-chain bridge or messaging layer (LayerZero / OFT, Chainlink CCIP, Circle CCTP, AggLayer / LxLy (Katana), Wormhole, Axelar, Stargate, etc.), record it in `src/data/bridges.json` so it appears on the `/bridges/` page. Add the report's `slug` under the matching bridge with `kind: "direct"` (the assessed asset itself bridges through it) or `kind: "indirect"` (it depends on something else that does), a `model` (`mint` / `lock` / `transport` — the segmentation defined in Pass 1.6 item 4; use `unknown` only if genuinely unverified, which the checker warns on), plus a short `integration` and `detail`. **For LayerZero rows, also record a route-specific `security` quorum** (the DVN quorum — how many independent verifiers must attest — a `1-of-1` is a single point of failure, the April 2026 rsETH failure mode). LayerZero configuration is directional and can differ by route: for `mint`, prioritize the receive path that can mint canonical/native supply; for `lock`, prioritize the receive path that can release canonical escrow, and do not present one sampled route as protocol-wide coverage. Read it onchain from the relevant receive-side ULN config: `lib = EndpointV2.getReceiveLibrary(oapp, srcEid)`, then `EndpointV2.getConfig(oapp, lib, srcEid, 2)` decodes to `(confirmations, requiredDVNCount, optionalDVNCount, optionalDVNThreshold, requiredDVNs[], optionalDVNs[])`; map DVN addresses to provider names via `https://metadata.layerzero-api.com/v1/metadata` (per-chain `dvns`). EndpointV2 (Ethereum) `0x1a44076050125825900e736c501f859c50fE728c`, Katana eid `30375`. Store it in a `security` object `{ label, confirmations, providers, route, weak, verifiedAt, link }`, where `link` points to the receive-side OApp; set `label: "TODO"` with a tracking `link` if the config can't be resolved (e.g. non-OFT MultiAdapter designs). The Route Security column renders the route visibly below the badge and only for bridges that populate it (LayerZero today; reusable for others). The checker validates the full object and warns if a LayerZero row omits it. If the bridge isn't listed yet, add a new bridge object (`id`, `name`, `type`, `url`, `description`, `keywords`), inserted in alphabetical order by `name` (the checker enforces this). The build runs `scripts/check_bridges.mjs`, which (a) fails if a dependency `slug` has no report, and (b) warns when a report mentions a bridge keyword but isn't listed — resolve every warning by either adding the dependency or adding the slug to that bridge's `ignore` list (for genuine non-dependency mentions). Run `npm run check-bridges` to enforce zero unreviewed mentions.
