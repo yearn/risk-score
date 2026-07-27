@@ -25,7 +25,7 @@ nodes:
     label: jrUSDe (Junior Tranche)
     address: "0xC58D044404d8B14e953C115E67823784dEA53d8F"
     category: vault
-    note: ERC-4626 first-loss capital; ~$6.6M backing
+    note: ERC-4626 first-loss capital; ~$6.55M backing (10.76% of senior)
   - id: tranche-depositor
     label: TrancheDepositor
     address: "0x50E850641F43F65BF8fB3a7d0CF082a1D252F47e"
@@ -54,12 +54,12 @@ nodes:
     label: ERC20Cooldown
     address: "0xd6dAD17d025cDdDEd27305aEbAB8b277996A6fAF"
     category: infra
-    note: Token lockup during cooldown
+    note: sUSDe exit path; cooldown disabled — atomic redemption
   - id: unstake-cooldown
     label: UnstakeCooldown
     address: "0x735edDF50Ca2371aa48466469C742e684c610F74"
     category: infra
-    note: sUSDe unstaking cooldown (~7d)
+    note: USDe exit path via Ethena unstaking (~1d)
   - id: cooldown-request-impl
     label: SUSDeCooldownRequestImpl
     address: "0x00A96056c30A22b684fF7a09F4A0AfEaE426dde2"
@@ -149,7 +149,7 @@ nodes:
     label: Pendle PT-srUSDe-22OCT2026
     address: "0x66ec657c59cdcaf171ab43b83da3942758bf8a97"
     category: dependency
-    note: Secondary DEX liquidity venue (~$4.7M LP)
+    note: Secondary liquidity venue ($4.67M LP, ~7.7% of senior TVL)
 
 edges:
   # === Governance ===
@@ -284,11 +284,11 @@ edges:
   - from: erc20-cooldown
     to: srUSDe
     kind: manages
-    label: withdrawal cooldown
+    label: sUSDe exit (atomic)
   - from: unstake-cooldown
     to: susde-strategy
     kind: manages
-    label: sUSDe unstaking
+    label: USDe exit (~1d)
   - from: cooldown-request-impl
     to: unstake-cooldown
     kind: manages
