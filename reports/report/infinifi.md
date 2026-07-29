@@ -285,8 +285,8 @@ The governance system is split into three branches to check and balance power:
     |------|-----------|
     | UNPAUSE (2 holders: multisig + EmergencyWithdrawal) | Unpause any paused contract |
     | EMERGENCY_WITHDRAWAL (1 holder: multisig) | Move funds from farms to predefined safe address, deprecate farms |
-    | MANUAL_REBALANCER (4 holders: multisig + Short Timelock + LiquidationFarm + PrimeBrokerFarm) | Rebalance funds between whitelisted farms |
-    | FARM_SWAP_CALLER (3 holders: multisig + EOA `0x7345…2cbB` + Short Timelock) | Trigger swap operations in farms |
+    | MANUAL_REBALANCER (4 holders: multisig + Short Timelock + LiquidationFarm + [`0xfD1Ea…83dE4`](https://etherscan.io/address/0xfD1Ea12d29B90630b265DBbc6Af88266d1a83dE4)) | Rebalance funds between whitelisted farms |
+    | FARM_SWAP_CALLER (4 holders: multisig + EOA `0x7345…2cbB` + Short Timelock + keeper EOA `0x2Cba…aB1a`) | Trigger swap operations in farms |
     | MINOR_ROLES_MANAGER (2 holders: multisig + Long Timelock) | Grant/revoke PAUSE, PERIODIC_REBALANCER, FARM_SWAP_CALLER |
     | CANCELLER_ROLE / PROPOSER_ROLE | Cancel/propose timelock actions |
     | PAUSE (multisig holds it directly) | Emergency pause |
@@ -312,6 +312,7 @@ The governance system is split into three branches to check and balance power:
   | TRANSFER_RESTRICTOR | 1 | AllocationVoting |
   | FARM_MANAGER | 4 | ManualRebalancer, AfterMintHook, BeforeRedeemHook, EmergencyWithdrawal |
   | FINANCE_MANAGER | 4 | YieldSharing, LiquidationFarm, PLSmootherHelper, [`0xfD1Ea…83dE4`](https://etherscan.io/address/0xfD1Ea12d29B90630b265DBbc6Af88266d1a83dE4) (replaced former PrimeBrokerFarm; **TODO** identify new contract) |
+  | FARM_SWAP_CALLER | 4 | Multisig, EOA `0x7345…2cbB`, Short Timelock, keeper EOA `0x2Cba…aB1a` |
   | PERIODIC_REBALANCER | 1 | EOA `0x2Cba…aB1a` (keeper bot) |
   | PROTOCOL_PARAMETERS | 3 | Short Timelock, Long Timelock, MaturedFarmCleaner |
   | DEFAULT_ADMIN_ROLE | **0** | — (renounced) |
