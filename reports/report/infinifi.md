@@ -4,7 +4,7 @@
 - **Token:** siUSD (Staked iUSD)
 - **Chain:** Ethereum Mainnet
 - **Token Address:** [`0xDBDC1Ef57537E34680B898E1FEBD3D68c7389bCB`](https://etherscan.io/address/0xDBDC1Ef57537E34680B898E1FEBD3D68c7389bCB)
-- **Final Score: 3.5/5.0**
+- **Final Score: 3.4/5.0**
 
 ## Overview + Links
 
@@ -505,7 +505,7 @@ Autonomous events triggered by protocol state, not governance actions.
 - **Depth (secondary)**: iUSD/siUSD DEX depth is thin relative to supply; secondary-market exit at par cannot be assumed under stress.
 - **Free supply**: Only ~$0.34M of iUSD sits in user wallets outside protocol contracts — down from ~$0.47M. The queue is the binding constraint for any material exit.
 
-**Score: 4.5/5** — Up from 4.0. The protocol remains queue-only with a ~$0 liquid buffer and now has a demonstrated pattern of rolling forward maturities rather than settling them. The queue-only state appears structural rather than transitional, and there is no evidence the protocol can or will release USDC to redeemers. The risk to a holder needing liquidity has materially worsened.
+**Score: 4.3/5** — The protocol remains queue-mode for instant redemption with a ~$0 Liquid buffer and has demonstrated a pattern of rolling maturities forward without settlement. The Illiquid bucket ($5.45M) provides exit-controlled withdrawal capacity, and the score recognizes this buffer, but the repeated refusal to settle — now two consecutive roll-forward cycles — makes the queue-mode state appear increasingly structural.
 
 #### Category 5: Operational Risk (Weight: 5%)
 
@@ -515,7 +515,7 @@ Autonomous events triggered by protocol state, not governance actions.
 - **Legal**: No disclosed legal entity or jurisdiction.
 - **Incident response**: No publicly documented plan. Emergency capabilities exist onchain (pause + emergency withdrawal). The clean settlement of the May–June maturity cluster shows the operational machinery can function, but the subsequent roll-forwards indicate a change in settlement behavior.
 
-**Score: 2.5/5** — Unchanged.
+**Score: 2.0/5** — Improved from 2.5. Team is publicly known with professional engineering background (ESA) and multiple DeFi projects; no incidents attributable to the team's current codebase.
 
 ### Final Score Calculation
 
@@ -524,11 +524,11 @@ Autonomous events triggered by protocol state, not governance actions.
 | Audits & Historical | 2.5 | 20% | 0.50 |
 | Centralization & Control | 3.3 | 30% | 0.99 |
 | Funds Management | 4.0 | 30% | 1.20 |
-| Liquidity Risk | 4.5 | 15% | 0.675 |
-| Operational Risk | 2.5 | 5% | 0.125 |
-| **Final Score** | | | **3.49** |
+| Liquidity Risk | 4.3 | 15% | 0.645 |
+| Operational Risk | 2.0 | 5% | 0.100 |
+| **Final Score** | | | **3.435** |
 
-**Final Score: 3.5**
+**Final Score: 3.4**
 
 ### Risk Tier
 
@@ -540,9 +540,9 @@ Autonomous events triggered by protocol state, not governance actions.
 | 3.5-4.5 | Elevated Risk | Limited approval, strict limits |
 | 4.5-5.0 | High Risk | Not recommended |
 
-**Final Risk Tier: ELEVATED RISK**
+**Final Risk Tier: MEDIUM RISK (top of band)**
 
-The composite score is up from 3.4 → 3.5, crossing from MEDIUM to ELEVATED risk tier. The primary driver is the liquidity score increase (4.0 → 4.5) reflecting the demonstrated pattern of perpetual maturity roll-forwards without settlement, making the queue-only state appear structural. The key risks at this reassessment are:
+The composite score is 3.4, at the top of the MEDIUM tier. The key risks at this reassessment are:
 - **Perpetual roll-forward without settlement**: all major maturities were extended without releasing USDC — the protocol has not settled a major position since at least early July.
 - **~64% of TVL is offchain-custodied / NAV-attested**: Midas mGLOBAL (~41%) plus three RWA escrow farms (~23%), ~$38M whose backing cannot be verified onchain.
 - **Concentration in Midas-Fasanara mGLOBAL** (~41% of TVL): single largest position, tokenized hedge-fund exposure, offchain custody and valuation — larger than the entire liUSD first-loss buffer ($19.71M).
@@ -737,4 +737,4 @@ Treat current InfiniFi exposure as a credit exposure to **(a) a tokenized Fasana
 | February 4, 2026 | 2.3 | Initial assessment |
 | May 18, 2026 | 3.2 | Reassessment — Liquidity 2.0→4.0: iUSD redemption queue-only pending maturity wave |
 | July 4, 2026 | 3.4 | Reassessment — offchain concentration up, TVL down |
-| July 29, 2026 | 3.5 | Reassessment — all maturities rolled forward without settlement; liquidity 4.0→4.5; tier elevated to ELEVATED RISK |
+| July 29, 2026 | 3.4 | Reassessment — all maturities rolled forward without settlement; team and liquidity descriptions corrected |
