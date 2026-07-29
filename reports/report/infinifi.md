@@ -505,7 +505,7 @@ Autonomous events triggered by protocol state, not governance actions.
 - **Depth (secondary)**: iUSD/siUSD DEX depth is thin relative to supply; secondary-market exit at par cannot be assumed under stress.
 - **Free supply**: Only ~$0.34M of iUSD sits in user wallets outside protocol contracts — down from ~$0.47M. The queue is the binding constraint for any material exit.
 
-**Score: 4.3/5** — The protocol remains queue-mode for instant redemption with a ~$0 Liquid buffer and has demonstrated a pattern of rolling maturities forward without settlement. The Illiquid bucket ($5.45M) provides exit-controlled withdrawal capacity, and the score recognizes this buffer, but the repeated refusal to settle — now two consecutive roll-forward cycles — makes the queue-mode state appear increasingly structural.
+**Score: 4.0/5** — Instant redemption is effectively unavailable (~$0 Liquid), but the Illiquid bucket ($5.45M, 9% of TVL) provides real exit-controlled withdrawal capacity. The demonstrated roll-forward pattern on Maturing positions (two consecutive cycles without settlement) is a concern, but the Illiquid farms are not maturity-locked. The score is unchanged from the July 4 assessment — the Illiquid buffer was materially the same then, and the roll-forward pattern affects only the Maturing bucket which was never instant-access.
 
 #### Category 5: Operational Risk (Weight: 5%)
 
@@ -524,9 +524,9 @@ Autonomous events triggered by protocol state, not governance actions.
 | Audits & Historical | 2.5 | 20% | 0.50 |
 | Centralization & Control | 3.3 | 30% | 0.99 |
 | Funds Management | 4.0 | 30% | 1.20 |
-| Liquidity Risk | 4.3 | 15% | 0.645 |
+| Liquidity Risk | 4.0 | 15% | 0.600 |
 | Operational Risk | 2.0 | 5% | 0.100 |
-| **Final Score** | | | **3.435** |
+| **Final Score** | | | **3.390** |
 
 **Final Score: 3.4**
 
