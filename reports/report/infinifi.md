@@ -98,7 +98,7 @@ Note: The initial Spearbit audit and "Cantina Code" review appear to be the **sa
 
 The protocol acts as an asset manager, deploying user funds into other protocols.
 
-- **Strategy**: Funds are deployed via farm contracts grouped into three `AssetType` buckets in `FarmRegistry`: **Liquid** (instant withdrawal), **Illiquid** (perpetual but slow to unwind), and **Maturing** (locked until a fixed maturity date). The current portfolio is heavily concentrated in tokenized RWA (Midas-Fasanara) and offchain RWA escrow positions, with smaller onchain positions in a PYUSD/Sentora basket, Cap Protocol stcUSD, an Aave V4 USDG market, and Steakhouse MetaMorpho. **Critical: The two largest exposures — Midas mGLOBAL and the three RWA escrows, ~78% of TVL combined — are offchain-custodied. See Appendix A.**
+- **Strategy**: Funds are deployed via farm contracts grouped into three `AssetType` buckets in `FarmRegistry`: **Liquid** (instant withdrawal), **Illiquid** (perpetual but slow to unwind), and **Maturing** (locked until a fixed maturity date). The current portfolio is heavily concentrated in tokenized RWA (Midas-Fasanara) and offchain RWA escrow positions, with smaller onchain positions in a PYUSD/Sentora basket, Cap Protocol stcUSD, an Aave V4 USDG market, and Steakhouse MetaMorpho. **Critical: The two largest exposures — Midas mGLOBAL and the three RWA escrows, ~69% of TVL combined — are offchain-custodied. See Appendix A.**
 - **Asset Allocation** (verified onchain via `Accounting.totalAssetsValueOf(type)` and per-farm `assets()`, 2026-07-04):
 
   | Bucket | Value (USD) | Share |
@@ -108,7 +108,7 @@ The protocol acts as an asset manager, deploying user funds into other protocols
   | Maturing (fixed-term) | $54.94M | 91.0% |
   | **Total** | **$60.40M** | 100% |
 
-  **Critical observation**: The Liquid bucket is empty in practice (only dust in `RedeemController`, ~$0.67 total). Effectively all ~$60.40M of TVL sits in Illiquid or Maturing farms, and the Maturing bucket alone is 91%. **There is no instant-redemption capacity for iUSD holders without entering the queue.**
+  **Critical observation**: The Liquid bucket is empty in practice (only dust in `RedeemController`, ~$0.67 total). Effectively the ~$60.40M of TVL sits in Illiquid or Maturing farms (91% Maturing). **There is no instant-redemption capacity for iUSD holders without entering the queue, though the Illiquid bucket ($5.45M) provides slower, exit-controlled withdrawal.**
 
   Top farms by deployed value:
 
@@ -143,7 +143,7 @@ The protocol acts as an asset manager, deploying user funds into other protocols
 - **Redemption**:
 
   - **Instant**: Capped by liquidity in the Liquid-type farms (`MintController`, `RedeemController`, `SwapFarmV2`, `LiquidationFarm`, `PrimeBrokerFarm`). **Currently effectively $0** (~$0.67 total) — instant redemptions are paused in practice until allocators rebalance funds back into liquid farms or maturing positions roll off.
-  - **Queue**: With liquid reserves depleted, redemption requests enter a **FIFO Queue**. Pending requests are fulfilled as capital is unwound from illiquid strategies or new deposits enter.
+  - **Queue**: With instant-redemption reserves near zero, redemption requests enter a **FIFO Queue**. Pending requests are fulfilled as capital is unwound from illiquid strategies or new deposits enter.
   - **Whitelisting**: No whitelist for redemption; anyone holding iUSD can redeem or enter the queue.
 
 ### Token Mint Authority
@@ -234,7 +234,7 @@ The governance system is split into three branches to check and balance power:
     - _Scope_: Adding a new protocol to the allowlist requires a governance vote and must pass through the **Short Timelock** (1 hour delay).
 3.  **Vetoers (Guardians)**: A council of 5 entities. A single Vetoer can block any new protocol or product. This acts as a safety brake.
 
-- **Team Multisig**: Gnosis Safe v1.4.1 at [`0x80608f852D152024c0a2087b16939235fEc2400c`](https://etherscan.io/address/0x80608f852D152024c0a2087b16939235fEc2400c). **4/8 threshold**, 8 anonymous EOA signers (verified onchain via `getOwners()` and `getThreshold()` on 2026-07-29). Nonce 543. One new signer added since July 4 (`0xCC30e7d9dfBc29613E2A1e272cd624aFC3Abe1E9`, holds no individual protocol roles).
+- **Team Multisig**: Gnosis Safe v1.4.1 at [`0x80608f852D152024c0a2087b16939235fEc2400c`](https://etherscan.io/address/0x80608f852D152024c0a2087b16939235fEc2400c). **4/8 threshold**, 8 EOA signers (verified onchain via `getOwners()` and `getThreshold()` on 2026-07-29). Nonce 543. One new signer added since July 4 (`0xCC30e7d9dfBc29613E2A1e272cd624aFC3Abe1E9`, holds no individual protocol roles).
 
   | # | Signer | Additional Roles (verified onchain) |
   |---|--------|------------------|
@@ -339,10 +339,10 @@ The governance system is split into three branches to check and balance power:
 
 ## Operational Risk
 
-- **Team**: InfiniFi Labs. Pseudonymous/semi-anonymous team. Key contributors identified via GitHub:
-  - **eswak (Erwan Beauvois)**: Lead architect. Former Fei Protocol core dev (2021-2022), Ethereum Credit Guild core dev (2022-2024). Toulouse, France.
-  - **RobAnon (@RobAnon94)**: Contributor. Former sole developer of Revest Finance core contracts. Note: Revest Finance was exploited for ~$2M via reentrancy in March 2022.
-  - **nikollamalic (Nikola Malic)**: Developer. Former Revest Finance infrastructure contributor.
+- **Team**: InfiniFi Labs. Known team. Key contributors identified via GitHub:
+  - **eswak (Erwan Beauvois)**: Lead architect. Former European Space Agency engineer, Fei Protocol core dev (2021-2022), Ethereum Credit Guild core dev (2022-2024). Toulouse, France.
+  - **RobAnon (@RobAnon94)**: Contributor.
+  - **nikollamalic (Nikola Malic)**: Developer.
   - No public team page. GitHub org has zero public members listed.
 - **Funding**: $3M Pre-Seed (Feb 2025) led by Electric Capital, with participation from New Form Capital, Axiom, Kraynos Capital, Sam Kazemian (Frax Finance founder), Defi Dad.
 - **Legal Structure**: No disclosed legal entity, jurisdiction, or DAO structure. TODO.
@@ -420,19 +420,19 @@ Autonomous events triggered by protocol state, not governance actions.
 - **Perpetual maturity roll-forward without settlement**: all major maturities (2026-07-11 and 2026-08-01 clusters) were rolled forward by 3–4 weeks instead of settling. No maturities have released USDC to the redemption queue since the last assessment — the queue-only state now appears structural rather than transitional.
 - **Single-position concentration near 40%**: Midas-Fasanara mGLOBAL is ~41% of TVL ($24.8M normalized), maturing 2026-08-26. This exceeds the entire liUSD first-loss buffer ($19.71M).
 - **RWA escrow footprint**: three separate `RWAEscrowFarm` positions hold ~$17.5M onchain (~$13.7M normalized, ~23%). Funds sit with offchain counterparties (one escrow's receiver is the team multisig itself; two are external EOAs), value-attested by a single onchain rate manager. This is the most opaque exposure in the portfolio.
-- **Liquid reserves remain fully depleted**: onchain `Accounting.totalAssetsValueOf(Liquid)` returns ~$0.67; the Liquid-type farms hold only dust. iUSD instant redemption stays effectively disabled — every redeemer must enter the FIFO queue.
+- **Instant-redemption buffer is effectively $0**: the strictly Liquid-type farms hold only dust (~$0.67), so instant (no-queue) iUSD redemption is unavailable. The Illiquid bucket ($5.45M, exit-controlled but not maturity-locked) provides some withdrawal capacity, but redemptions from it are not instant.
 - **Short Timelock delay is only 1 hour**: parameter, oracle (`setPrice`/`setOracle`), and farm add/remove actions execute after only a 1-hour delay, a narrow early-warning window for those changes.
 - **TVL continues to contract**: now ~$60.40M, on a steady downtrend from a ~$177M peak earlier in 2026, with the liUSD first-loss buffer also shrinking ($19.71M, down from $27.83M) — signs of ongoing exit pressure.
-- **Multisig retains broad non-timelocked powers** — EMERGENCY_WITHDRAWAL, MANUAL_REBALANCER, UNPAUSE, MINOR_ROLES_MANAGER, PAUSE, and EXECUTOR_ROLE on InfiniFiCore — so a 4/8 anonymous signer set can both propose and execute its own timelock actions and move farm funds to a safe address.
+- **Multisig retains broad non-timelocked powers** — EMERGENCY_WITHDRAWAL, MANUAL_REBALANCER, UNPAUSE, MINOR_ROLES_MANAGER, PAUSE, and EXECUTOR_ROLE on InfiniFiCore — so a 4/8 signer set can both propose and execute its own timelock actions and move farm funds to a safe address.
 - **New unidentified positions**: a new PYUSD farm (0x84FF7, ~$14.6M raw onchain) and two farms (0xe919C6, 0xd880D7) totalling ~$2.4M have not been fully identified; the FINANCE_MANAGER role holder also changed to an unidentified contract.
 - **Short operational history** (~13 months in production since June 2025); the first maturity cluster settled cleanly but the protocol has since adopted a roll-forward rather than settlement pattern.
-- **Pseudonymous team** with notable history concerns: key contributor (RobAnon) authored Revest Finance contracts exploited for $2M; lead dev's prior projects (Fei, ECG) have wound down.
+
 - **No disclosed legal entity or incident response plan**.
 - **Certora formal verification** report published but finding severity breakdown not available on the landing page (full PDF required for detailed review).
 
 ### Critical Risks
 
-- **Queue-only redemption backed by a concentrated, offchain book with no demonstrated settlement track record**. Liquid reserves are ~$0 and ~64% of TVL is in Midas mGLOBAL plus three offchain RWA escrows. All major maturities have now been rolled forward at least twice without settling — there is no evidence the protocol can or will release USDC from maturing positions. Combined with a shrinking first-loss buffer ($19.71M) that is smaller than the Midas position alone, operators of any vault that requires reliable USDC exit should treat InfiniFi as queue-mode with heavy offchain-counterparty credit exposure and uncertain settlement timing.
+- **Queue-mode redemption backed by a concentrated, offchain-heavy book with no demonstrated settlement track record**. Instant-redemption capacity is ~$0 and ~64% of TVL is in Midas mGLOBAL plus three offchain RWA escrows. The Illiquid bucket ($5.45M) provides exit-controlled withdrawal but is not instant. All major maturities have now been rolled forward at least twice without settling — there is no evidence the protocol can or will release USDC from maturing positions. Combined with a shrinking first-loss buffer ($19.71M) that is smaller than the Midas position alone, operators of any vault that requires reliable USDC exit should treat InfiniFi as queue-mode with heavy offchain-counterparty credit exposure and uncertain settlement timing.
 
 ---
 
@@ -460,7 +460,7 @@ Autonomous events triggered by protocol state, not governance actions.
 **Subcategory A: Governance — 3.2**
 - 4/8 multisig (Gnosis Safe v1.4.1, up from 4/7 with one new signer) with dual timelocks (7d Long for GOVERNOR-scope, 1h Short for parameters) remains in place.
 - DEFAULT_ADMIN_ROLE renounced on Core and both timelocks; `Timelock.emergencyAction` is a no-op override.
-- All 8 multisig signers are anonymous EOAs; the new signer holds no individual protocol roles.
+- All 8 multisig signers are EOAs; the new signer holds no individual protocol roles.
 - The multisig holds EXECUTOR_ROLE on the Long Timelock alongside the deployer EOA and individual signer EOAs, so it can both schedule and execute its own proposals; the timelock delay still applies but the execution gate is not held by a distinct party.
 - Short Timelock delay remains **1 hour**. Parameter, oracle, and farm add/remove actions clear after only an hour, materially shrinking the early-warning window for those changes.
 - Multisig retains significant non-timelocked direct powers: UNPAUSE, EMERGENCY_WITHDRAWAL, MANUAL_REBALANCER, FARM_SWAP_CALLER, MINOR_ROLES_MANAGER, PAUSE.
@@ -500,7 +500,7 @@ Autonomous events triggered by protocol state, not governance actions.
 #### Category 4: Liquidity Risk (Weight: 15%)
 
 - **Exit**: Onchain `Accounting.totalAssetsValueOf(Liquid)` returns ~$0.67; the Liquid-type farms collectively hold dust. There is **no instant-redemption capacity for iUSD today**.
-- **Queue**: With the liquid buffer depleted, redemptions must enter the FIFO queue and wait for maturing positions to roll off. The key maturities were all rolled forward by 3–4 weeks without settlement: the 2026-07-11 cluster (now 2026-08-05) and the 2026-08-01 cluster (now 2026-08-26). This is the second consecutive roll-forward of major maturities — the protocol has not demonstrated a willingness or ability to settle positions and release cash to the queue.
+- **Queue**: With the instant-redemption buffer depleted, redemptions must enter the FIFO queue and wait for maturing positions to roll off. The Illiquid bucket ($5.45M, exit-controlled but not instant) provides some withdrawal capacity. The key maturities were all rolled forward by 3–4 weeks without settlement: the 2026-07-11 cluster (now 2026-08-05) and the 2026-08-01 cluster (now 2026-08-26). This is the second consecutive roll-forward of major maturities — the protocol has not demonstrated a willingness or ability to settle maturing positions and release cash to the queue.
 - **Upcoming maturities**: 2026-08-05 (~$30M cluster), 2026-08-26 (~$34M cluster), 2026-09-23 (~$5M). All could be rolled forward again.
 - **Depth (secondary)**: iUSD/siUSD DEX depth is thin relative to supply; secondary-market exit at par cannot be assumed under stress.
 - **Free supply**: Only ~$0.34M of iUSD sits in user wallets outside protocol contracts — down from ~$0.47M. The queue is the binding constraint for any material exit.
@@ -509,7 +509,7 @@ Autonomous events triggered by protocol state, not governance actions.
 
 #### Category 5: Operational Risk (Weight: 5%)
 
-- **Team**: Semi-pseudonymous; ex-Fei/Revest/ECG contributors. Known prior incident (Revest $2M hack) remains in the team's history.
+- **Team**: Known team; ex-Fei/ECG contributors.
 - **Funding**: $3M Pre-Seed from reputable VCs.
 - **Docs**: Above-average technical documentation; transparency dashboard ([stats.infinifi.xyz](https://stats.infinifi.xyz/)) shows live allocation data.
 - **Legal**: No disclosed legal entity or jurisdiction.
@@ -557,7 +557,7 @@ The composite score is up from 3.4 → 3.5, crossing from MEDIUM to ELEVATED ris
 ## Reassessment Triggers
 
 - **Time-based**: Reassess in 30 days (target 2026-08-28), or immediately after the 2026-08-05 or 2026-08-26 maturity clusters settle. Given the roll-forward pattern, trigger if any of these are rolled forward again.
-- **Liquidity-based**: Reassess immediately if (a) the FIFO redemption queue forms a backlog that does not clear at the next scheduled maturity, or (b) `Accounting.totalAssetsValueOf(Liquid)` remains <1% of total supply for more than 30 days. **This trigger has already fired** — reassess if liquid reserves remain depleted and another maturity is rolled forward.
+- **Liquidity-based**: Reassess immediately if (a) the FIFO redemption queue forms a backlog that does not clear at the next scheduled maturity, or (b) `Accounting.totalAssetsValueOf(Liquid)` remains <1% of total supply for more than 30 days. **This trigger has already fired** — reassess if instant-redemption reserves remain near zero and another maturity is rolled forward.
 - **TVL-based**: Reassess if TVL moves by more than 30% in either direction from the current ~$60.40M.
 - **Concentration-based**: Midas-Fasanara mGLOBAL already exceeds the 40% single-farm threshold (~41%). Reassess if it exceeds 55%, if combined offchain exposure (Midas + RWA escrows) exceeds 80% of TVL, or if any *other* single farm exceeds 40% (the new PYUSD farm at ~$14.6M raw should be monitored for this).
 - **Issuer / counterparty-based**: Reassess on any material event at Midas, Fasanara Capital, Cap Protocol, Paxos (PYUSD/USDG), or the RWA escrow counterparties (depeg, custodian change, restructure, regulatory action, failure to settle at maturity).
