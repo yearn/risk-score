@@ -1,6 +1,6 @@
 # Protocol Risk Assessment: Paxos USDG (Global Dollar)
 
-- **Assessment Date:** March 20, 2026 (reassessed June 26, 2026)
+- **Assessment Date:** March 20, 2026 (reassessed July 30, 2026)
 - **Token:** USDG (Global Dollar)
 - **Chain:** Ethereum
 - **Token Address:** [`0xe343167631d89B6Ffc58B88d6b7fB0228795491D`](https://etherscan.io/address/0xe343167631d89B6Ffc58B88d6b7fB0228795491D)
@@ -14,14 +14,14 @@ USDG's differentiating feature is its **distribution partner model** — ecosyst
 
 Reserves consist of **cash and cash equivalents** (primarily short-duration U.S. Treasury Bills) held in **segregated accounts** at regulated custodians, with **monthly attestation reports** from independent accounting firms published on the Paxos transparency portal.
 
-USDG is deployed on **5 chains**: X Layer (58.8% of supply), Solana (24.1%), Ethereum (15.7%), Ink (1.3%), and Hyperliquid L1 (0.1%). Cross-chain bridging between Ethereum and Solana is handled via **LayerZero V2 OFT**.
+USDG is deployed on **6 chains**: X Layer (57.3% of supply), Solana (19.3%), Ethereum (12.6%), Robinhood Chain (9.5%), Ink (1.2%), and Hyperliquid L1 (0.1%). Cross-chain bridging is handled via **LayerZero V2 OFT**.
 
-**Key metrics (June 26, 2026):**
+**Key metrics (July 30, 2026):**
 
-- **Total Supply (Ethereum):** ~494,698,323 USDG (~$495M) [onchain](https://etherscan.io/token/0xe343167631d89B6Ffc58B88d6b7fB0228795491D)
-- **Total Supply (All Chains):** ~$2.89B [DeFiLlama](https://stablecoins.llama.fi/stablecoin/286)
-- **Market Cap:** ~$2.89B
-- **30-Day Supply Change:** +$259M (+9.9%)
+- **Total Supply (Ethereum):** ~451,669,600 USDG (~$415M) [onchain](https://etherscan.io/token/0xe343167631d89B6Ffc58B88d6b7fB0228795491D)
+- **Total Supply (All Chains):** ~$3.29B [DeFiLlama](https://stablecoins.llama.fi/stablecoin/286)
+- **Market Cap:** ~$3.29B
+- **30-Day Supply Change:** TODO — refresh from historical charts
 - **DEX Liquidity (Ethereum):** TODO — refresh liquidity snapshot
 - **CEX Listings:** OKX, Kraken, Bullish, KuCoin, Gate.io
 - **Price:** $0.99995 (at peg) [DeFiLlama](https://stablecoins.llama.fi/stablecoin/286)
