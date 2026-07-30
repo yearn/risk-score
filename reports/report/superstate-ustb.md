@@ -473,7 +473,7 @@ The fund uses a **laddered approach** with holdings spread across various near-t
 
 USTB benefits from the safest possible underlying asset class (U.S. Treasury Bills), great audit coverage, institutional-grade service providers, a strong legal structure, and over 2 years of incident-free operation. The primary risk factors are the centralized admin (4 distinct EOAs with no multisig or timelock) and heavy offchain dependencies for reserve provability (holdings gated behind investor portal, no Chainlink Proof of Reserves yet). These are partially mitigated by key separation across 4 EOAs, regulatory accountability, secure key management (Turnkey TEEs), and the institutional framework around the fund.
 
-**Score change from prior assessment (March 2026: 2.38 → April 2026: 2.33):** Driven by improved Historical subscore (>2 years in production, score 1 vs prior ~2) and updated onchain verification revealing 4 separate EOAs (modest positive vs prior assumption).
+**Score change from prior assessment (March 2026: 2.38 → June 2026: 2.33):** Driven by improved Historical subscore (>2 years in production, score 1 vs prior ~2) and updated onchain verification revealing 4 separate EOAs (modest positive vs prior assumption).
 
 **Key conditions for exposure:**
 
