@@ -14,7 +14,7 @@ USDG's differentiating feature is its **distribution partner model** — ecosyst
 
 Reserves consist of **cash and cash equivalents** (primarily short-duration U.S. Treasury Bills) held in **segregated accounts** at regulated custodians, with **monthly attestation reports** from independent accounting firms published on the Paxos transparency portal.
 
-USDG is deployed on **4 chains**: Ethereum, Solana (52.3% of supply), X Layer (19.5%), and Ink (6.2%). Cross-chain bridging between Ethereum and Solana is handled via **LayerZero V2 OFT**.
+USDG is deployed on **5 chains**: X Layer (58.8% of supply), Solana (24.1%), Ethereum (15.7%), Ink (1.3%), and Hyperliquid L1 (0.1%). Cross-chain bridging between Ethereum and Solana is handled via **LayerZero V2 OFT**.
 
 **Key metrics (June 26, 2026):**
 
