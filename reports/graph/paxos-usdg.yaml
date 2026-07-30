@@ -77,7 +77,7 @@ nodes:
   - id: dep-layerzero
     label: LayerZero V2 OFT
     category: dependency
-    note: Cross-chain bridge to Solana / X Layer / Ink / Robinhood Chain / Hyperliquid L1
+    note: OFTWrapper peers (onchain) — Solana / X Layer / Ink / Arbitrum / Robinhood Chain; 3-of-3 DVN quorum
 
 edges:
   # === Governance flow ===
