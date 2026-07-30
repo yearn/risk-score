@@ -188,8 +188,8 @@ The contract code (`Strategy.sol` / `BaseLSTAccumulator.sol`, verified on Ethers
 | `manualClaimWithdrawals()` | Claims finalized Lido withdrawals back to ETH | Immediate after finalization |
 
 **Strategy parameters:**
-- Activated: April 14, 2026 (`activation = 1776351539`)
-- Last reported: July 9, 2026 (`last_report = 1783748183`)
+- Activated: April 16, 2026 (`activation = 1776351539`)
+- Last reported: July 11, 2026 (`last_report = 1783748183`)
 - max_debt: 15,000 WETH
 - Management: Brain multisig (3-of-8) and Debt Allocator
 - Keeper: yHaaSRelayer ([`0x604e586F17cE106B64185A7a0d2c1Da5bAce711E`](https://etherscan.io/address/0x604e586F17cE106B64185A7a0d2c1Da5bAce711E))
