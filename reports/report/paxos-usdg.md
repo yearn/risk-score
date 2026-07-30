@@ -284,7 +284,7 @@ The absence of a formal public bug bounty with monetary rewards is a weakness fo
 |----------|---------|---------|
 | USDG Token | [`0xe343167631d89B6Ffc58B88d6b7fB0228795491D`](https://etherscan.io/address/0xe343167631d89B6Ffc58B88d6b7fB0228795491D) | `totalSupply()`, `paused()`, Transfer events, Mint/Burn events |
 | SupplyControl | [`0x9a7164112029b81c07636AB7b59fA813E0883BBF`](https://etherscan.io/address/0x9a7164112029b81c07636AB7b59fA813E0883BBF) | Supply controller additions/removals, rate limit changes |
-| TimelockController | [`0x9036566eAa5F83E0b9E1161C6c602b0Adf997654`](https://etherscan.io/address/0x9036566eAa5F83E0b9E1161C6c602b0Adf997654) | `CallScheduled`, `CallExecuted` events (3h delay — gives monitoring window) |
+| TimelockController | [`0x9036566eAa5F83E0b9E1161C6c602b0Adf997654`](https://etherscan.io/address/0x9036566eAa5F83E0b9E1161C6c602b0Adf997654) | `CallScheduled`, `CallExecuted` events (24h delay — gives monitoring window) |
 | Operational Multisig | [`0x0644Bd0248d5F89e4F6E845a91D15c23591e5D33`](https://etherscan.io/address/0x0644Bd0248d5F89e4F6E845a91D15c23591e5D33) | Submitted/executed transactions (pause, freeze, supply management) |
 | Operations MPC Wallet (all governance) | [`0x3Af3e85f4f97De7AD0f000B724Fb77fE5ffc024B`](https://etherscan.io/address/0x3Af3e85f4f97De7AD0f000B724Fb77fE5ffc024B) | Any transactions — controls pause, freeze, timelock scheduling, supply controllers. MPC wallet (likely Fordefi) — key sharded across multiple parties. Monitor for unexpected transactions |
 | Gas Station | [`0x264bd8291fae1d75db2c5f573b07faa6715997b5`](https://etherscan.io/address/0x264bd8291fae1d75db2c5f573b07faa6715997b5) | Funds MPC wallet before transactions — unusual ETH outflows could indicate MPC key migration or provider change |
@@ -550,7 +550,7 @@ USDG benefits from Paxos's established stablecoin track record, highest-quality 
 | Risk Factor | Level | Notes |
 |------------|-------|-------|
 | Depeg | Low | Regulated, T-Bill backed, 7+ year Paxos track record |
-| Smart Contract | Low-Medium | 6 audits, but upgradeable with 3h timelock |
+| Smart Contract | Low-Medium | 6 audits, but upgradeable with 24h timelock |
 | Freeze | Medium | Standard for regulated stablecoins, never used vs DeFi |
 | Liquidity | Low-Medium | $9.8M DEX adequate for current yvUSD scale |
 | **Overall** | **Low-Medium** | Suitable with position size limits |
