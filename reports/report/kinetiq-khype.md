@@ -482,7 +482,7 @@ Funds management score = (2.0 + 1.5) / 2 = **1.75**
 
 ## Overall Risk Score: **2.3 / 5.0**
 
-### Risk Tier: **MEDIUM RISK**
+### Risk Tier: **LOW RISK**
 
 Rationale:
 - kHYPE is a well-audited LST with significant TVL ($932M, up ~36% over the last quarter) and deep DeFi integration.
