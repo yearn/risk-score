@@ -264,7 +264,7 @@ Decoded from `FluidLiquidityResolver.getTokenRateData(token)` for each token (`(
 **Stablecoins and ETH — current curves:**
 
 | Token | Version | Kink 1 | Rate@K1 | Kink 2 | Rate@K2 | Max Rate |
-|-------|---------|--------|---------|--------|---------|----------|------------|
+|-------|---------|--------|---------|--------|---------|----------|
 | USDC | V2 | 85% | **5.40%** | 93% | **7.50%** | 40.00% |
 | USDT | V2 | 85% | **5.40%** | 93% | **7.50%** | 40.00% |
 | GHO  | V2 | 85% | **6.50%** | 93% | **9.50%** | 40.00% |
