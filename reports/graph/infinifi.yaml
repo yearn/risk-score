@@ -68,10 +68,10 @@ nodes:
 
   # === Governance ===
   - id: multisig
-    label: Team Multisig (4/7)
+    label: Team Multisig (4/8)
     address: "0x80608f852D152024c0a2087b16939235fEc2400c"
     category: governance
-    note: Gnosis Safe v1.4.1, 7 anonymous EOA signers
+    note: Gnosis Safe v1.4.1, 8 EOA signers
   - id: long-timelock
     label: Long Timelock (7d)
     address: "0x3D18480CC32B6AB3B833dCabD80E76CfD41c48a9"
@@ -89,45 +89,72 @@ nodes:
     category: governance
     note: AccessControlEnumerable, 19 roles; DEFAULT_ADMIN renounced
 
-  # === Active farms (~99% of funded TVL) ===
+  # === Funded farms (>99.9% of TVL, 2026-07-29) ===
+  # Bucket names follow the FarmTypes library: LIQUID = instant principal withdrawal,
+  # MATURITY = rolling notice period (maturity() returns block.timestamp + duration).
   - id: farm-midas
-    label: MidasFarm — Maturing (47%)
+    label: MidasFarm — MATURITY 28d (51.4%)
     address: "0xF4Ea3Ec87B1c254f17a2Fb68164dB0CAf6c4cecF"
     category: strategy
-    note: Matures 2026-08-01; mGLOBAL tokenized hedge fund
+    note: >-
+      $31.02M. mGLOBAL tokenized Fasanara hedge fund; offchain NAV.
+      28-day rolling notice period; 1.57x the liUSD first-loss buffer.
   - id: farm-rwa-escrow-1
-    label: RWAEscrowFarm — Maturing (16%)
+    label: RWAEscrowFarm — MATURITY 7d (17.0%)
     address: "0x04d5521ac09F8823338e8163Dd8BAdAEE39F3271"
     category: strategy
-    note: Matures 2026-07-11; escrow receiver = Team Multisig
+    note: >-
+      $10.29M. Escrow receiver = Team Multisig. 7-day rolling notice.
   - id: farm-rwa-escrow-2
-    label: RWAEscrowFarm — Maturing (8%)
+    label: RWAEscrowFarm — MATURITY 28d (4.3%)
     address: "0x9E5efC5F387D8661C1AFB2469B7EeF6972451852"
     category: strategy
-    note: Matures 2026-08-01; offchain EOA counterparty
+    note: >-
+      $2.58M. Offchain EOA counterparty. 28-day rolling notice.
   - id: farm-rwa-escrow-3
-    label: RWAEscrowFarm — Maturing (8%)
+    label: RWAEscrowFarm — MATURITY 56d (8.4%)
     address: "0x277FdF6Dc5c53C5c2828188Da84B9593A50884C1"
     category: strategy
-    note: Matures 2026-08-29; offchain EOA counterparty
+    note: >-
+      $5.09M. Offchain EOA counterparty. 56-day rolling notice.
   - id: farm-swap-pyusd
-    label: SwapFarm — PYUSD / Sentora PRIME (7%)
+    label: SwapFarm — MATURITY 7d (1.0%)
     address: "0x75381e9Bc6B908a2e9bC31A535fC48CeCeAc568E"
     category: strategy
-    note: Matures 2026-07-11 via CoW-swap
+    note: >-
+      $0.59M. PYUSD and USDC legs fully withdrawn; holds only
+      residual Sentora PRIME. 7-day rolling notice.
   - id: farm-cap
-    label: CapFarm — Illiquid (6%)
+    label: CapFarm — LIQUID (7.3%)
     address: "0xAc21B22B5aEb11bc32De4ecF59E4538fCa48b694"
     category: strategy
+    note: >-
+      $4.41M. LIQUID bucket — liquidity() equals full balance, withdrawn
+      same-block inside a user redemption. 81% of instant-exit capacity.
   - id: farm-aave-v4
-    label: AaveV4Farm — USDG (5%)
+    label: AaveV4Farm — MATURITY 7d (3.7%)
     address: "0x2CdF51ca20C2DD56480c35adEA667A6653Fb7657"
     category: strategy
-    note: Matures 2026-07-11; Aave V4 Global Dollar market
+    note: >-
+      $2.25M. Aave V4 Global Dollar market. 7-day rolling notice.
   - id: farm-steakhouse
-    label: Steakhouse MetaMorpho Farm (3%)
+    label: Steakhouse MetaMorpho — MATURITY 7d (1.9%)
     address: "0x76D2E84009dAE457f8667D823c7c96e9A7c35B78"
     category: strategy
+    note: $1.13M. 7-day rolling notice.
+  - id: farm-rwa-escrow-4
+    label: RWAEscrowFarm — MATURITY 7d (3.3%)
+    address: "0xe919C66475f2F30d285c768853E6B5b23ef181Cf"
+    category: strategy
+    note: >-
+      $2.00M. Offchain EOA counterparty. 7-day rolling notice.
+  - id: farm-spark
+    label: SparkSUSDCFarm — LIQUID (1.7%)
+    address: "0xd880D7C5CaFdbE2AEc281250995abF612235e563"
+    category: strategy
+    note: >-
+      $1.04M. LIQUID bucket — unwinds sUSDC to USDS/DAI to the Sky
+      LitePSM for USDC, same-block inside a user redemption.
 
   # === External dependencies ===
   - id: dep-mglobal
@@ -150,11 +177,11 @@ nodes:
     address: "0xa03B88D7985E1C6A847Cfb123C786c1d7eA8d211"
     category: dependency
     note: EOA receiver; identity undisclosed
-  - id: dep-pyusd
-    label: PYUSD / Sentora PRIME
-    address: "0x6c3ea9036406852006290770BEdFcAbA0e23A0e8"
+  - id: dep-sentora
+    label: Sentora PRIME (senPYUSDPRIMEv2)
+    address: "0xC21b08C16458202593D4D9B26b9984Ee67b38BbD"
     category: dependency
-    note: Paxos NYDFS stablecoin + Sentora PRIME wrapper
+    note: PYUSD credit-vault wrapper; $0.59M residual
   - id: dep-stcusd
     label: stcUSD (Cap Protocol)
     address: "0x88887bE419578051FF9F4eb6C858A951921D8888"
@@ -165,6 +192,23 @@ nodes:
     address: "0xe343167631d89B6Ffc58B88d6b7fB0228795491D"
     category: dependency
     note: Paxos/Global Dollar Network stablecoin
+  - id: dep-rwa-cp-3
+    label: RWA Escrow Counterparty (EOA)
+    address: "0xf7583D86D9fB25391Af6e30ad17786572792d83c"
+    category: dependency
+    note: EOA receiver; identity undisclosed
+  - id: dep-rwa-rate-manager
+    label: RWAEscrowRateManager (keeper)
+    address: "0x11F6FAb3f4D8635880C3e80cbae8AEF8136D4189"
+    category: dependency
+    note: >-
+      Sole keeper attesting the value of all four RWA escrows —
+      33.0% of TVL valued by one offchain attester.
+  - id: dep-sky-psm
+    label: Sky LitePSM USDC pocket
+    address: "0x37305B1cD40574E4C5Ce33f8e8306Be057fD7341"
+    category: dependency
+    note: USDC source when the Spark farm unwinds
   - id: dep-steakhouse-vault
     label: Steakhouse infiniFi USDC (MetaMorpho)
     address: "0xBEEF1f5bD88285E5b239B6AACB991D38CCa23aC9"
@@ -237,39 +281,47 @@ edges:
     kind: routes-through
     label: early exit
 
-  # === Allocation: iUSD's backing into farms (2026-07-04) ===
+  # === Allocation: iUSD's backing into farms (2026-07-29) ===
   - from: iUSD
     to: farm-midas
     kind: allocates-to
-    label: "47.3%"
+    label: "51.4%"
   - from: iUSD
     to: farm-rwa-escrow-1
     kind: allocates-to
-    label: "15.6%"
-  - from: iUSD
-    to: farm-rwa-escrow-2
-    kind: allocates-to
-    label: "7.8%"
+    label: "17.0%"
   - from: iUSD
     to: farm-rwa-escrow-3
     kind: allocates-to
-    label: "7.7%"
-  - from: iUSD
-    to: farm-swap-pyusd
-    kind: allocates-to
-    label: "7.2%"
+    label: "8.4%"
   - from: iUSD
     to: farm-cap
     kind: allocates-to
-    label: "6.5%"
+    label: "7.3% (instant)"
+  - from: iUSD
+    to: farm-rwa-escrow-2
+    kind: allocates-to
+    label: "4.3%"
   - from: iUSD
     to: farm-aave-v4
     kind: allocates-to
-    label: "4.6%"
+    label: "3.7%"
+  - from: iUSD
+    to: farm-rwa-escrow-4
+    kind: allocates-to
+    label: "3.3%"
   - from: iUSD
     to: farm-steakhouse
     kind: allocates-to
-    label: "3.3%"
+    label: "1.9%"
+  - from: iUSD
+    to: farm-spark
+    kind: allocates-to
+    label: "1.7% (instant)"
+  - from: iUSD
+    to: farm-swap-pyusd
+    kind: allocates-to
+    label: "1.0%"
 
   # === Farms → external dependencies ===
   - from: farm-midas
@@ -284,12 +336,36 @@ edges:
   - from: farm-rwa-escrow-3
     to: dep-rwa-cp-2
     kind: deposits-into
-  - from: farm-swap-pyusd
-    to: dep-pyusd
+  - from: farm-rwa-escrow-4
+    to: dep-rwa-cp-3
     kind: deposits-into
+  - from: dep-rwa-rate-manager
+    to: farm-rwa-escrow-1
+    kind: controls
+    label: attests value
+  - from: dep-rwa-rate-manager
+    to: farm-rwa-escrow-2
+    kind: controls
+    label: attests value
+  - from: dep-rwa-rate-manager
+    to: farm-rwa-escrow-3
+    kind: controls
+    label: attests value
+  - from: dep-rwa-rate-manager
+    to: farm-rwa-escrow-4
+    kind: controls
+    label: attests value
+  - from: farm-swap-pyusd
+    to: dep-sentora
+    kind: deposits-into
+    label: residual
   - from: farm-cap
     to: dep-stcusd
     kind: deposits-into
+  - from: farm-spark
+    to: dep-sky-psm
+    kind: routes-through
+    label: USDC on unwind
   - from: farm-aave-v4
     to: dep-usdg
     kind: deposits-into
