@@ -24,7 +24,7 @@ class BuildIssueBodyTests(unittest.TestCase):
             body = stale_reports.build_issue_body(sample_report(), days=68)
 
         self.assertIn(
-            "- **Report:** [cap-stcusd](https://risk.yearn.farm/report/cap-stcusd/)",
+            "- **Report:** [cap-stcusd](https://curation.yearn.fi/report/cap-stcusd/)",
             body,
         )
         self.assertIn(
