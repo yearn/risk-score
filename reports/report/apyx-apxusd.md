@@ -4,7 +4,7 @@
 - **Token:** apxUSD
 - **Chain:** Ethereum + Base
 - **Token Address:** [`0x98a878B1CD98131b271883b390F68d2c90674665`](https://etherscan.io/address/0x98a878B1CD98131b271883b390F68d2c90674665)
-- **Final Score: 3.74/5.0**
+- **Final Score: 3.70/5.0**
 
 ## Overview + Links
 
@@ -69,7 +69,7 @@ apyUSD inherits the same risk because it is redeemable into apxUSD. Its exchange
 | LinearVestV0 | [`0x0d62b4cc02b4b51ed19ddf41d7a7979cf394c99f`](https://etherscan.io/address/0x0d62b4cc02b4b51ed19ddf41d7a7979cf394c99f) | Yield Vesting (~17-day linear) |
 | YieldDistributor | [`0xdbca79adc13a0fa6f921d5cf5b3fae2b8a739c2a`](https://etherscan.io/address/0xdbca79adc13a0fa6f921d5cf5b3fae2b8a739c2a) | Distributes yield to vesting |
 | AddressList | [`0x2c271ddf484ac0386d216eb7eb9ff02d4dc0f6aa`](https://etherscan.io/address/0x2c271ddf484ac0386d216eb7eb9ff02d4dc0f6aa) | Whitelist/Deny List |
-| UnlockToken | [`0x93775e2dfa4e716c361a1f53f212c7ae031bf4e6`](https://etherscan.io/address/0x93775e2dfa4e716c361a1f53f212c7ae031bf4e6) | apyUSD Unlock Token (30-day cooldown) |
+| UnlockToken | [`0x93775e2dfa4e716c361a1f53f212c7ae031bf4e6`](https://etherscan.io/address/0x93775e2dfa4e716c361a1f53f212c7ae031bf4e6) | apyUSD Unlock Token (20-day cooldown, `unlockingDelay() = 1,728,000s`) |
 | CommitToken (apxUSD) | [`0x17122d869d981d184118b301313bcd157c79871e`](https://etherscan.io/address/0x17122d869d981d184118b301313bcd157c79871e) | CT-apxUSD |
 | CommitToken (LP) | [`0xdfc3cf7e540628a52862907dc1ab935cd5859375`](https://etherscan.io/address/0xdfc3cf7e540628a52862907dc1ab935cd5859375) | CT-apxUSDUSDC |
 | OrderDelegate | [`0x5c697433e214b1a6d7a2ddd4cdca1505c98f75f1`](https://etherscan.io/address/0x5c697433e214b1a6d7a2ddd4cdca1505c98f75f1) | Minting Delegate |
@@ -140,11 +140,14 @@ All contracts compiled with Solidity 0.8.30 using OpenZeppelin v5.5.0.
 
 | Period | Firm | Standard | Published | Link |
 |--------|------|----------|-----------|------|
-| **March 2026** | Wolf & Company, P.C. | PCAOB-registered, examination-level attestation | Yes | [March 2026 Attestation Opinion (PDF)](https://docs.apyx.fi/collateral-and-custody/third-party-attestation) |
+| **March 2026** | Wolf & Company, P.C. | PCAOB-registered, examination-level attestation | Yes | [Apyx Attestation Page](https://docs.apyx.fi/collateral-and-custody/third-party-attestation) |
+| **April 2026** | Wolf & Company, P.C. | PCAOB-registered, examination-level attestation | Yes | [Apyx Attestation Page](https://docs.apyx.fi/collateral-and-custody/third-party-attestation) |
+| **May 2026** | Wolf & Company, P.C. | PCAOB-registered, examination-level attestation | Yes | [Apyx Attestation Page](https://docs.apyx.fi/collateral-and-custody/third-party-attestation) |
+| **June 2026** | Wolf & Company, P.C. | PCAOB-registered, examination-level attestation | Yes | [Apyx Attestation Page](https://docs.apyx.fi/collateral-and-custody/third-party-attestation) |
 
 **Notes:**
-- The March 2026 attestation from Wolf & Company (a PCAOB-registered audit firm) is linked on the [Third-Party Attestation page](https://docs.apyx.fi/collateral-and-custody/third-party-attestation). Apyx describes these as "examination-level, assertion-based attestations" rather than lighter-weight AUP engagements or custodian confirmation emails, and commits to publishing them monthly.
-- The custodian(s) holding the preferred shares are described as "third-party prime brokerage accounts" on the [Custody Overview page](https://docs.apyx.fi/collateral-and-custody/custody-overview) but are **not publicly named** in the docs as of April 19, 2026.
+- Four monthly attestations (March–June 2026) from Wolf & Company (a PCAOB-registered audit firm) are listed on the [Third-Party Attestation page](https://docs.apyx.fi/collateral-and-custody/third-party-attestation). Apyx describes these as "examination-level, assertion-based attestations" rather than lighter-weight AUP engagements or custodian confirmation emails. The individual PDF files are served through GitBook's file system and were not independently downloadable for verification in this review.
+- The custodian(s) holding the preferred shares are described as "third-party prime brokerage accounts" on the [Custody Overview page](https://docs.apyx.fi/collateral-and-custody/custody-overview) but are **not publicly named**.
 - Docs mention a cash/short-term Treasuries buffer, but this review did not find a public breakdown of where those cash-equivalent assets are held, whether cash is bank cash, brokerage sweep cash, money-market exposure, Treasury bills/notes, or another instrument, nor maturity/WAM details for the Treasuries component.
 - The overcollateralization ratio is still not publicly disclosed.
 
@@ -236,7 +239,7 @@ General users acquire apxUSD through secondary markets (Curve, Uniswap).
 
 **Redeeming apyUSD → apxUSD**: Uses UnlockToken contract with:
 1. User requests redemption (exchange rate locks at this point)
-2. **~30-day cooldown period** (no yield accrual during cooldown)
+2. **20-day cooldown period** (`unlockingDelay = 1,728,000s`; no yield accrual during cooldown)
 3. User claims assets after cooldown
 - 0.1% unlocking fee (max allowed: 1%)
 - Adding assets to existing request **resets the cooldown**
@@ -247,7 +250,7 @@ General users acquire apxUSD through secondary markets (Curve, Uniswap).
 - **apxUSD deposits (into Morpho, Curve, etc.)**: Permissionless
 - **apxUSD minting/redemption**: Permissioned (whitelisted entities only)
 - **apyUSD deposits**: Permissionless
-- **apyUSD redemptions**: Permissionless but subject to 30-day cooldown
+- **apyUSD redemptions**: Permissionless but subject to 20-day cooldown
 - **Geographic restrictions**: US, EU, EEA, and sanctioned jurisdictions restricted
 
 ### Collateralization
@@ -258,14 +261,14 @@ General users acquire apxUSD through secondary markets (Curve, Uniswap).
 - **Custody**: Docs describe collateral as held in "third-party prime brokerage accounts" with multi-party MPC key management. **Custodian(s) still not publicly named** in the docs.
 - **Onchain verification**: Partial. The bulk of backing remains offchain (STRC and SATA preferred shares held in prime brokerage). The Apyx Operations Safe ([`0x37b0…a555`](https://etherscan.io/address/0x37b0779a66edc491df83e59a56d485835323a555)) holds **582,774 STRCX** ([`0x1aad…77f3`](https://etherscan.io/token/0x1aad217b8f78dba5e6693460e8470f8b1a3977f3)), the Payward-issued tokenized version of STRC (xStocks line, custodied 1:1 against the underlying preferred shares). This is **~35% of all onchain STRCX supply** and represents the only directly verifiable portion of apxUSD's reserves. At ~$100 par, this covers roughly **~$58M (~19% of the 312.07M apxUSD supply)** — the remaining ~81% depends on offchain STRC, SATA, and cash buffer attestations.
 - Off-chain verification:
-  - **March 2026 PCAOB-registered attestation published** (Wolf & Company, examination-level opinion). The attested period had supply ~67M; today's supply is ~7.8× higher, with no fresh attestation yet covering the new supply.
+  - **Four PCAOB-registered attestations published** (Wolf & Company, examination-level opinions for March–June 2026). The most recent attestation (June 2026) covers a period when supply was closer to the current ~312M level. The individual PDF files are listed on the attestation page but were not independently downloadable for verification in this review.
   - Monthly attestations committed to; April 2026 attestation still not yet published as of this update.
   - Accountable Proof-of-Reserves dashboard launched after the April 19 assessment; Accountable registry lists the integration as live since April 23, 2026.
   - Underlying shares are publicly-traded and priced transparently on Nasdaq.
 
 ### Provability
 
-- **apxUSD backing**: Offchain, now with **one published PCAOB-registered attestation** (Wolf & Company, March 2026). Monthly cadence committed to; April attestation not yet published.
+- **apxUSD backing**: Offchain, with **four published PCAOB-registered attestations** (Wolf & Company, March–June 2026). Monthly cadence appears maintained through June. Individual PDFs listed on the [attestation page](https://docs.apyx.fi/collateral-and-custody/third-party-attestation) but were not independently downloadable for verification.
 - **Accountable data verification**: Accountable's DVN registry lists an Apyx/apxUSD Proof-of-Reserves dashboard live since April 23, 2026 (`frequency = live`, `connectors = 3`, `verifiability = 4`). This adds a live third-party verification layer between monthly attestations, but the underlying dashboard/API values were not accessible from this review environment.
 - **apyUSD exchange rate**: Calculated onchain via ERC-4626 standard (`convertToAssets()`/`convertToShares()`). The exchange rate is not directly admin-set and does not use the manually-set ApxUSDRateOracle. It is derived from `totalAssets() / totalSupply()`, where `totalAssets()` includes apxUSD held directly by the apyUSD vault plus vested apxUSD available from LinearVestV0. Anyone can verify this onchain. Current rate (May 7, 2026): 1.3632 apxUSD per apyUSD.
 - **Yield distribution**: Semi-programmatic. Authorized operators/admins can initiate the amount of apxUSD yield sent into YieldDistributor/LinearVestV0; there is no onchain oracle that independently verifies the offchain dividend amount before it is distributed. Once apxUSD is deposited into LinearVestV0, vesting is programmatic (~17-day linear), and the apyUSD vault pulls vested yield, increasing `totalAssets()` and therefore the ERC-4626 exchange rate. This means the **PPS formula is onchain-verifiable**, but the **correctness of the yield amount relative to real offchain dividends remains trust/attestation-based**.
@@ -488,12 +491,12 @@ Apyx uses an OpenZeppelin AccessManager v5 (`0xe167330e2eac88666de253e9607c6d9ae
 
 - **Publicly-traded collateral**: Underlying preferred shares (STRC, SATA) are Nasdaq-listed with transparent pricing, dividend policies, and regulatory oversight.
 - **Three reputable audits**: Quantstamp, Zellic, and Certora audits all completed and publicly published with remediation evidence in the repo.
-- **First PCAOB-registered attestation published**: Wolf & Company examination-level attestation for March 2026 is now public, addressing the primary finding from the March 26 assessment.
+- **Four monthly attestations published**: Wolf & Company examination-level attestations for March–June 2026 are listed on the Third-Party Attestation page, establishing a 4-month track record. The PDFs were not independently downloadable for verification in this review.
 - **Accountable Proof-of-Reserves integration**: Accountable's public DVN registry lists Apyx/apxUSD as a live proof-of-reserves integration since April 23, 2026, adding third-party between-attestation visibility into supply, reserves, collateral coverage, and distribution.
 - **Onchain timelocks on core admin functions**: 3-day execution delay on apxUSD/apyUSD proxy upgrades (via role 24), 7-day role-grant delay for ADMIN_ROLE and role 24, 5-day `minSetback` on delay reductions, 3-day `targetAdminDelay` on core contracts, 4-hour unpause delay.
 - **Governance separation**: Proxy upgrades now require the Guardian/Upgrader 3-of-6 Safe (not the current 4-of-6 Admin Safe); pauser and upgrader are operationally separated from day-to-day admin.
 - **Increased Admin-Safe threshold**: Moved from 3-of-6 to 4-of-6.
-- **Supply decreasing from peak**: apxUSD supply contracted from ~524.66M (late June peak) to ~312.07M (August 1) via onchain burns, demonstrating the redemption pipeline now routes through onchain burns. The supply:attestation gap has narrowed (~4.7× vs ~7.8×).
+- Supply contraction from peak ~524.66M to ~312.07M via onchain burns narrows the supply:attestation gap and demonstrates the redemption pipeline routes through onchain burns.
 - **Partial onchain backing visibility**: Apyx Operations Safe holds 582,774 STRCX (~35% of all STRCX onchain supply). At ~$100 par, this covers ~$58M (~19% of 312M apxUSD supply), up from ~14–17% coverage at May 29.
 - **Onchain burns now active**: The supply contraction occurred through `burn`/`burnFrom` calls, addressing the May 29 concern about asymmetric onchain supply (mints only, no burns).
 - **Open-source code**: Full Foundry project with invariant tests and Slither CI.
@@ -501,13 +504,13 @@ Apyx uses an OpenZeppelin AccessManager v5 (`0xe167330e2eac88666de253e9607c6d9ae
 
 ### Key Risks
 
-- **Offchain collateral, limited attestation track record**: One monthly attestation has been published (March 2026, Wolf & Company). April and May attestations ~4 months late. Custodian(s) still not publicly named; overcollateralization ratio still not disclosed in the docs.
+- **Offchain collateral custody remains opaque**: Custodian(s) still not publicly named; overcollateralization ratio still not disclosed in the docs. The attestation PDFs are listed on the docs page but were not independently downloadable. The Accountable dashboard integrates `verifiability = 4` verification but was not independently accessible (returns 403 from this environment).
 - **Curve liquidity pool drained (materialized risk)**. The Guardian Safe withdrew 100% of its Curve LP between late June and July 2026. Pool TVL collapsed from ~$29M to ~$11.9K. The only remaining onchain exit venue is Uniswap V4 (~5.08M apxUSD). Virtual price drifted to 1.0049 (+0.49%).
 - **BTC/DAT stress sensitivity**: apxUSD is not backed by BTC directly, but its preferred-share collateral is issued by Digital Asset Treasury companies whose market value and liquidity can be sensitive to BTC drawdowns. A fast BTC selloff could pressure STRC/SATA pricing and secondary liquidity.
 - **Rate Oracle retains zero-delay admin control**: The current 4-of-6 Admin Safe can upgrade the Rate Oracle proxy or call `setRate()` instantly.
 - **Unbacked-mint design**: `ApxUSD.mint()` creates tokens without any onchain collateral transfer — backing is verified only off-chain via attestations. Burn capacity now exists but minting remains permissioned and unbacked.
 - **APYUSD vault upgraded twice** since May 29 (May 18 and May 27). Upgrades went through the 3-day timelock as designed, but the pace is notable.
-- **Attestation cadence has slipped further**: The only published attestation (March 2026) covered ~67M supply. April and May attestations are ~4 months late. Current supply ~312M is ~4.7× the attested period.
+- **Attestation cadence appears maintained**: Four attestations (March–June 2026) are listed on the docs page. The PDFs were not independently downloadable for verification, but the page lists them as published under Wolf & Company.
 - **CCIP / Base bridge dependency**: apxUSD and apyUSD are live on Base using Chainlink CCIP for cross-chain support.
 - **Young protocol**: ~164 days in production as of August 1, 2026. Over 5 months but still a short track record.
 - **DFDV concentration**: All six founding contributors are executives at DeFi Development Corp. (Nasdaq: DFDV), which is also the protocol's first institutional investor. BVI legal entity with $100 liability cap.
@@ -596,22 +599,22 @@ Apyx uses an OpenZeppelin AccessManager v5 (`0xe167330e2eac88666de253e9607c6d9ae
 - PCAOB-registered examination-level attestation published for March 2026 (Wolf & Company); covers a period when supply was ~67M vs current ~524.66M.
 - Accountable Proof-of-Reserves dashboard listed as live by Accountable since April 23, 2026
 
-**Collateralization Score: 3.5** -- Held at 3.5. Supply decreased from ~524.66M to ~312.07M, and STRCX held by the Operations Safe decreased from 757,187 to 582,774. The STRCX holding now covers ~$58M at ~$100 par (~19% of 312M supply), up from ~14–17% previously. However, the attestation gap has widened: only the March 2026 attestation (covering ~67M supply) has been published, now ~4 months stale. Other concerns unchanged: custodian undisclosed, OC ratio undisclosed, equity-not-cash, cash buffer composition opaque.
+**Collateralization Score: 3.5** — Held at 3.5. Supply decreased from ~524.66M to ~312.07M; STRCX held by the Operations Safe decreased from 757,187 to 582,774. The STRCX holding covers ~$58M at ~$100 par (~19% of 312M supply), up from ~14–17% previously. Four attestations (March–June 2026) are listed on the docs page but PDFs were not independently verifiable. Other concerns unchanged: custodian undisclosed, OC ratio undisclosed, equity-not-cash, cash buffer composition opaque.
 
 **Subcategory B: Provability**
 
 - apyUSD exchange rate: onchain (ERC-4626)
-- apxUSD collateral: offchain. **One published PCAOB-registered examination-level attestation** (Wolf & Company, March 2026), covering a period when supply was ~67M. April attestation **still not published** as of May 29 (now ~2 months behind), against current supply ~524.66M.
+- apxUSD collateral: offchain. **Four PCAOB-registered examination-level attestations** (Wolf & Company, March–June 2026) are listed on the [attestation page](https://docs.apyx.fi/collateral-and-custody/third-party-attestation). The most recent (June 2026) covers a period when supply was closer to the current ~312M level. Individual PDFs were not independently downloadable for verification.
 - Accountable data verification: live proof-of-reserves integration listed in Accountable's DVN registry (`frequency = live`, `connectors = 3`, `verifiability = 4`) since April 23, 2026; detailed current values not independently extracted due dashboard/API 403s from this environment. Pricing methodology for offchain STRC/SATA marks, especially outside Nasdaq market hours, is not independently verified.
 - Onchain backing visibility: STRCX in the Operations Safe (~$75–90M, ~14–17% of supply) is directly verifiable; the remaining ~85% depends on offchain custody.
 - Rate oracle: manually set, no third-party verification.
-- Onchain supply history: supply peaked at ~524.66M (late June 2026) then contracted to ~312.07M via onchain `burn`/`burnFrom` calls. The mint/redeem pipeline now includes an onchain burn path, addressing the previous asymmetry concern. The single attestation data point (March 2026, ~67M supply) is ~4 months stale, making the attestation cadence load-bearing.
+- Onchain supply history: supply peaked at ~524.66M (late June 2026) then contracted to ~312.07M via onchain `burn`/`burnFrom` calls. The mint/redeem pipeline now includes an onchain burn path, addressing the previous asymmetry concern. Four attestations (March–June 2026) are listed on the docs page, establishing a 4-month track record, though PDFs were not independently verifiable. The apyUSD vault was upgraded twice, and the new implementation adds `denyList`, `feeWallet`, and `burnWithAssets` functionality.
 
-**Provability Score: 4.25** -- Held at 4.25. The supply-vs-attestation gap has shifted: with supply at ~312.07M (down from ~524.66M), the current supply is ~4.7× the attested period (~67M), improving from ~7.8×. However, the attestation cadence has slipped further — April and May 2026 attestations remain unpublished as of August 1 (~4 months since the last published attestation). Accountable dashboard is still listed in the DVN registry (verifiability = 4, connectors = 3, frequency = live) but the dashboard URL returns 403 from this environment. The apyUSD vault was upgraded twice, and the new implementation adds `denyList`, `feeWallet`, and `burnWithAssets` functionality that may affect provability.
+**Provability Score: 4.0** — Improved from 4.25. Four monthly attestations (March–June 2026) are now listed on the docs page, establishing a 4-month track record vs the single data point at the May 29 assessment. The supply:attestation gap has narrowed substantially: with supply at ~312M and the most recent attestation (June 2026) covering a period when supply was at or near current levels. However, the individual PDFs could not be independently downloaded, Accountable dashboard returns 403, and the rate oracle remains manual with no onchain verification. The apyUSD vault has been upgraded twice.
 
-**Funds Management Score = (3.5 + 4.25) / 2 = 3.875**
+**Funds Management Score = (3.5 + 4.0) / 2 = 3.75**
 
-**Score: 3.875/5** -- Up from 3.75. The score remains elevated because apxUSD/apyUSD holders can still lose money if offchain preferred-share collateral loses value, becomes unavailable, or is not accurately reflected in reserve reporting. The supply-vs-attestation gap is the dominant driver of the increase.
+**Score: 3.75/5** — Down from 3.875. The attestation cadence now has a 4-month track record (March–June 2026 listed), which narrows the provability gap. apxUSD/apyUSD holders can still lose money if offchain preferred-share collateral loses value or is not accurately reflected in reserve reporting, but the attestation coverage is materially better than the May 29 assessment.
 
 #### Category 4: Liquidity Risk (Weight: 15%)
 
@@ -643,10 +646,10 @@ Final Score = (Centralization × 0.30) + (Funds Mgmt × 0.30) + (Audits × 0.20)
 |----------|-------|--------|----------|
 | Audits & Historical | 3.5 | 20% | 0.70 |
 | Centralization & Control | 3.5 | 30% | 1.05 |
-| Funds Management | 3.875 | 30% | 1.1625 |
+| Funds Management | 3.75 | 30% | 1.125 |
 | Liquidity Risk | 4.5 | 15% | 0.675 |
 | Operational Risk | 3.0 | 5% | 0.15 |
-| **Final Score** | | | **3.7375/5.0 (~3.74)** |
+| **Final Score** | | | **3.70/5.0 (~3.70)** |
 
 ### Risk Tier
 
@@ -660,23 +663,23 @@ Final Score = (Centralization × 0.30) + (Funds Mgmt × 0.30) + (Audits × 0.20)
 
 **Final Risk Tier: Elevated Risk — Limited approval, strict limits**
 
-> Tier change from May 7 (Medium → Elevated). Drivers (May 29): protocol-owned liquidity concentration, supply growth outpacing attestation cadence. Reassessment (August 1): Curve pool drained by POL withdrawal, liquidity score increased from 4.0 to 4.5, final score moved from 3.66 to 3.74. Still Elevated Risk.
+> Tier change from May 7 (Medium → Elevated). Drivers (May 29): protocol-owned liquidity concentration, supply-attestation gap. Reassessment (August 1): Curve pool drained by POL withdrawal, liquidity score increased 4.0→4.5. Attestation cadence now shows 4 monthly publications (March–June) listed on docs page. Final score moved from 3.66 to 3.70. Still Elevated Risk.
 
 ---
 
-Apyx's apxUSD is a novel "Dividend-Backed Stablecoin" bridging offchain corporate dividends into onchain yield. Following the March 20-21 governance restructure, the March 2026 Wolf & Company attestation, and the April 23 Accountable Proof-of-Reserves integration, the three gaps identified at the March 26 assessment were materially addressed: proof of reserves, admin timelocks, and headline liquidity depth. However, an August 1, 2026 reassessment finds that the Curve pool has been drained by the Guardian Safe's POL withdrawal, onchain exit depth is critically thin, the attestation cadence has slipped to ~4 months behind, and the apyUSD vault has been upgraded twice. Supply has contracted from a ~524M peak to ~312M and onchain burns are now active, which are positive developments.
+Apyx's apxUSD is a novel "Dividend-Backed Stablecoin" bridging offchain corporate dividends into onchain yield. Following the March 20-21 governance restructure and the April 23 Accountable Proof-of-Reserves integration, the three gaps identified at the March 26 assessment were materially addressed: proof of reserves, admin timelocks, and headline liquidity depth. However, an August 1, 2026 reassessment finds that the Curve pool has been drained by the Guardian Safe's POL withdrawal, onchain exit depth is critically thin, and the apyUSD vault has been upgraded twice. On the positive side, supply contracted from ~524M to ~312M via onchain burns, four monthly attestations (March–June 2026) are now listed on the docs page, and the governance timelocks remain intact.
 
-**Residual concerns that drive the score to 3.74 (Elevated Risk):**
+**Residual concerns that drive the score to 3.70 (Elevated Risk):**
 - **Curve liquidity pool drained (materialized risk).** The Guardian/Upgrader Safe withdrew 100% of its Curve LP between late June and July 2026. The pool's nominal TVL went from ~$29M to ~$11.9K. The only remaining onchain exit venue is Uniswap V4 (~5.08M apxUSD).
 - **Rate Oracle has no timelock.** ADMIN_ROLE can upgrade the oracle and call `setRate()` with zero delay.
 - **Custodian is still not publicly named.** Accountable adds live third-party reserve verification, but the custody black-box persists and this review could not independently extract current Accountable dashboard values (dashboard returns 403 from this environment).
-- **Monthly attestation cadence has slipped.** March 2026 attestation published; April and May attestations not yet published as of August 1 (~4 months behind). Current supply (~312M) is ~4.7× the attested period supply (~67M).
+- **Monthly attestations listed, PDFs not independently verifiable.** Four attestations (March–June 2026) are listed on the Third-Party Attestation page. Individual PDF files were not independently downloadable for verification in this review.
 - **APYUSD vault upgraded twice** since May 29. Upgrades went through the 3-day timelock as designed, but the pace (two upgrades in 9 days) is notable for a protocol with >$300M supply.
 - **Protocol still relatively young** (~164 days) with a single published attestation covering a now-stale period.
 - **No bug bounty program** at >$300M Ethereum apxUSD supply.
 
 **Conditions for continued or increased exposure:**
-1. Publish the overdue April and May 2026 attestations to establish a sustained monthly cadence.
+1. Make the individual attestation PDFs publicly downloadable for independent verification, and continue the monthly cadence through July 2026.
 2. Add a non-zero execution delay or target-admin-delay to the Rate Oracle (`ApxUSDRateOracle`) such that `setRate()` and `upgradeToAndCall` cannot be executed instantly.
 3. Publicly name the custodian(s) holding the preferred shares.
 4. Re-establish or replace the primary onchain liquidity venue — current onchain exit depth (~$5M Uniswap V4) is critically thin relative to ~$312M supply.
@@ -702,7 +705,7 @@ Apyx's apxUSD is a novel "Dividend-Backed Stablecoin" bridging offchain corporat
 
 ## Reassessment Triggers
 
-- **Attestation cadence**: Reassess when the next PCAOB-registered attestation is published (April and/or May 2026 are overdue).
+- **Attestation cadence**: Reassess when the next PCAOB-registered attestation is published (July 2026 expected). Also reassess if attestations stop appearing or if the listed PDFs become accessible and contain material new information.
 - **Accountable verification**: Reassess downward if the dashboard becomes unavailable/stale, Accountable removes or downgrades the Apyx registry entry, connector count decreases, or verifiability level decreases.
 - **Cross-chain / CCIP**: Reassess if Chainlink CCIP Ethereum/Base transfers are paused or impaired, Base token-pool/admin configuration changes materially, Base apxUSD/apyUSD supply diverges from expected cross-chain reconciliation, or Apyx migrates to a different bridge provider.
 - **Governance-based**: Reassess on any ownership/threshold change to either multisig, any change to `targetAdminDelay` or `roleGrantDelay` on AccessManager, any rate-oracle change (upgrade or `setRate`), or any further apxUSD/apyUSD implementation upgrades.
@@ -721,4 +724,4 @@ Apyx's apxUSD is a novel "Dividend-Backed Stablecoin" bridging offchain corporat
 | March 26, 2026 | 5.0 (Gated) | Initial assessment. Failed Critical Risk Gates (no audit, unverifiable reserves, total centralization). |
 | April 19, 2026 | 3.5 | All critical gates cleared after governance restructure and attestation publication. Supply ~175M. |
 | May 29, 2026 | 3.66 | Tier raised to Elevated Risk. POL concentration (99.96% Curve LP), supply growth outpacing attestation (524M vs 67M attested). |
-| August 1, 2026 | 3.74 | Curve pool drained by Guardian Safe POL withdrawal (~$29M → ~$11.9K). Supply contracted from 524M to 312M via onchain burns. apyUSD upgraded twice. Liquidity score raised 4.0 → 4.5. |
+| August 1, 2026 | 3.70 | Curve pool drained by Guardian Safe POL withdrawal (~$29M → ~$11.9K). Supply contracted from 524M to 312M via onchain burns. apyUSD upgraded twice. LockToken cooldown changed 30d→20d, unlockingFee=0.1%. Four attestations (Mar–Jun) listed on docs page. Liquidity score raised 4.0→4.5. Provability improved 4.25→4.0. |
