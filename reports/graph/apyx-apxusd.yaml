@@ -74,10 +74,10 @@ nodes:
     category: governance
     note: UPGRADER (3d), PAUSER (0), UNPAUSER (4h), YIELD_OPERATOR (0)
   - id: ops-safe
-    label: Operations Safe (3-of-5)
+    label: Operations Safe (3-of-6)
     address: "0x37b0779a66edc491df83e59a56d485835323a555"
     category: governance
-    note: No AccessManager roles
+    note: No AccessManager roles; holds 582,774 STRCX (~35% of supply)
 
   # === External dependencies ===
   - id: dep-preferred-shares
@@ -89,10 +89,15 @@ nodes:
     category: dependency
     note: Third-party prime brokerage accounts; custodians not publicly named
   - id: dep-curve
-    label: Curve apxUSD/USDC StableSwap-NG
+    label: Curve apxUSD/USDC (drained)
     address: "0xe1b96555bbeca40e583bbb41a11c68ca4706a414"
     category: dependency
-    note: Primary exit; ~$29M TVL
+    note: Former primary exit; ~$11.9K TVL after POL withdrawal
+  - id: dep-uniswapv4
+    label: Uniswap V4 (Primary Exit)
+    address: "0x000000000004444c5dc75cb358380d2e3de08a90"
+    category: dependency
+    note: Now the main onchain venue; ~5.08M apxUSD
   - id: dep-ccip
     label: Chainlink CCIP (Base)
     category: dependency
@@ -170,7 +175,17 @@ edges:
   - from: rate-oracle
     to: dep-curve
     kind: routes-through
-    label: pool pricing
+    label: pool pricing (pool drained)
+
+  # === Liquidity exits ===
+  - from: apxUSD
+    to: dep-curve
+    kind: deposits-into
+    label: exit (drained)
+  - from: apxUSD
+    to: dep-uniswapv4
+    kind: deposits-into
+    label: primary exit (~5.08M)
 
   # === Backing & external dependencies ===
   - from: apxUSD
