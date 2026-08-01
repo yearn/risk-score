@@ -600,6 +600,6 @@ The tier is **Medium** (3.4/5.0). Risk drivers: (1) the April 2026 shutdown demo
 
 | Date | Score | Notes |
 | --- | --- | --- |
-| March 4, 2026 | 3.5 | Initial assessment |
-| July 3, 2026 | 3.4 | Reassessment after April 2026 emergency shutdown |
+| [March 4, 2026](https://github.com/yearn/risk-score/pull/77) | 3.5 | Initial assessment |
+| [July 3, 2026](https://github.com/yearn/risk-score/pull/168) | 3.4 | Reassessment after April 2026 emergency shutdown |
 
