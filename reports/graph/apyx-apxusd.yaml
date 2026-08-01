@@ -25,10 +25,10 @@ nodes:
     category: vault
     note: ERC-4626 yield vault, UUPS Proxy
   - id: unlock-token
-    label: UnlockToken (30-day cooldown)
+    label: UnlockToken (20-day cooldown)
     address: "0x93775e2dfa4e716c361a1f53f212c7ae031bf4e6"
     category: vault
-    note: apyUSD redemption queue
+    note: apyUSD redemption queue; unlockingDelay 1,728,000s; reads the deny list
 
   # === Protocol infra ===
   - id: access-manager
@@ -61,6 +61,11 @@ nodes:
     label: OrderDelegate
     address: "0x5c697433e214b1a6d7a2ddd4cdca1505c98f75f1"
     category: infra
+  - id: fee-wallet
+    label: Fee Wallet
+    address: "0x6F93635F2A1C19b4F7f1BD9BA655F6A073C629Dc"
+    category: infra
+    note: Recipient of the apyUSD unlocking fee; admin-settable via setFeeWallet
 
   # === Governance ===
   - id: admin-safe
@@ -77,7 +82,7 @@ nodes:
     label: Operations Safe (3-of-6)
     address: "0x37b0779a66edc491df83e59a56d485835323a555"
     category: governance
-    note: No AccessManager roles; holds 582,774 STRCX (~35% of supply)
+    note: No AccessManager roles; holds the STRCX position that is the only onchain-verifiable backing
 
   # === External dependencies ===
   - id: dep-preferred-shares
@@ -89,15 +94,15 @@ nodes:
     category: dependency
     note: Third-party prime brokerage accounts; custodians not publicly named
   - id: dep-curve
-    label: Curve apxUSD/USDC (drained)
+    label: Curve apxUSD/USDC
     address: "0xe1b96555bbeca40e583bbb41a11c68ca4706a414"
     category: dependency
-    note: Former primary exit; ~$11.9K TVL after POL withdrawal
+    note: Former primary exit; drained by the Guardian Safe's POL withdrawal (June-July 2026)
   - id: dep-uniswapv4
-    label: Uniswap V4 (Primary Exit)
+    label: Uniswap V4 PoolManager
     address: "0x000000000004444c5dc75cb358380d2e3de08a90"
     category: dependency
-    note: Now the main onchain venue; ~5.08M apxUSD
+    note: Sole remaining onchain exit venue; singleton inventory overstates executable depth
   - id: dep-ccip
     label: Chainlink CCIP (Base)
     category: dependency
@@ -159,7 +164,21 @@ edges:
   - from: apyUSD
     to: unlock-token
     kind: routes-through
-    label: "30-day cooldown"
+    label: "20-day cooldown"
+
+  # === Fees & exit gating ===
+  - from: apyUSD
+    to: fee-wallet
+    kind: routes-fees-to
+    label: unlocking fee (0.1%)
+  - from: address-list
+    to: apyUSD
+    kind: controls
+    label: deny list gate on redemption
+  - from: address-list
+    to: unlock-token
+    kind: controls
+    label: deny list gate on the unlock queue
 
   # === Yield distribution ===
   - from: yield-distributor
@@ -175,7 +194,7 @@ edges:
   - from: rate-oracle
     to: dep-curve
     kind: routes-through
-    label: pool pricing (pool drained)
+    label: pool pricing
 
   # === Liquidity exits ===
   - from: apxUSD
@@ -185,7 +204,7 @@ edges:
   - from: apxUSD
     to: dep-uniswapv4
     kind: deposits-into
-    label: primary exit (~5.08M)
+    label: sole onchain exit
 
   # === Backing & external dependencies ===
   - from: apxUSD
