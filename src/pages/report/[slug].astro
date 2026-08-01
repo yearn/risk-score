@@ -174,9 +174,9 @@ const reportIssueUrl = (() => {
           <tbody>
             {report.history.map((h) => (
               <tr>
-                <td class="history-date">{h.date}</td>
+                <td class="history-date" set:html={h.dateHtml} />
                 <td class="history-score">{h.score}</td>
-                <td>{h.notes}</td>
+                <td set:html={h.notesHtml} />
               </tr>
             ))}
           </tbody>
