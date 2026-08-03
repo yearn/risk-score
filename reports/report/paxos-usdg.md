@@ -541,9 +541,9 @@ USDG benefits from Paxos's established stablecoin track record, highest-quality 
 
 | Date | Score | Notes |
 | --- | --- | --- |
-| March 20, 2026 | 2.4 | Initial assessment |
-| June 26, 2026 | 2.4 | Reassessment: governance restructured to a single MPC wallet, timelock 3h → 24h; score unchanged |
-| July 30, 2026 | 2.4 | Reassessment: supply/chain refresh (Robinhood Chain added, 6 chains with material supply), LayerZero peer set and DVN quorum enumerated onchain; score unchanged |
+| [March 20, 2026](https://github.com/yearn/risk-score/pull/102) | 2.4 | Initial assessment |
+| [June 26, 2026](https://github.com/yearn/risk-score/pull/270) | 2.4 | Reassessment: governance restructured to a single MPC wallet, timelock 3h → 24h; score unchanged |
+| [July 30, 2026](https://github.com/yearn/risk-score/pull/366) | 2.4 | Reassessment: supply/chain refresh (Robinhood Chain added, 6 chains with material supply), LayerZero peer set and DVN quorum enumerated onchain; score unchanged |
 
 ---
 
