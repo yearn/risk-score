@@ -4,8 +4,7 @@
 - **Token:** apxUSD
 - **Chain:** Ethereum + Base + BNB Chain
 - **Token Address:** [`0x98a878B1CD98131b271883b390F68d2c90674665`](https://etherscan.io/address/0x98a878B1CD98131b271883b390F68d2c90674665)
-- **Final Score: 5.0/5.0** (critical gate "unverifiable reserves" triggered; ungated weighted score: 3.84)
-- **Status:** GATED — reserve existence and coverage cannot currently be verified through a retrievable attestation or dashboard. No realized insolvency is established.
+- **Final Score: 3.80/5.0**
 
 ## Overview + Links
 
@@ -31,6 +30,7 @@ apyUSD inherits the same risk because it is redeemable into apxUSD. Its exchange
 **Key metrics (August 1, 2026):**
 - apxUSD market price: **$0.881** — 11.9% below par, sustained since early June ([DefiLlama](https://coins.llama.fi/prices/current/ethereum:0x98a878B1CD98131b271883b390F68d2c90674665))
 - apxUSD Total Supply (Ethereum): **~312.07M** (supply cap 750M)
+- Accountable Proof of Solvency (August 3, 11:26 UTC): **$217.04M asset reserves / $235.30M circulating supply = 92.24% collateralization**; redemption value **$0.9131** ([dashboard](https://accountable.apyx.fi/), [API](https://api.accountable.apyx.fi/dashboard))
 - Base supply: ~9.77M apxUSD and ~0.57M apyUSD via Chainlink CCIP
 - BNB Chain supply: ~2.44M apxUSD via Chainlink CCIP ([token](https://bscscan.com/token/0x6b3788fd6604bbf03c5378d24e57bb334baad4af))
 - apyUSD vault totalAssets: ~180.91M apxUSD; exchange rate: ~1.405 apxUSD per apyUSD
@@ -170,15 +170,17 @@ All contracts compiled with Solidity 0.8.30 using OpenZeppelin v5.5.0.
 **Notes:**
 - Accountable's registry lists Apyx as a `por` integration for ticker `apxUSD`, with API URL `https://api.accountable.apyx.fi/dashboard` and dashboard URL `https://accountable.apyx.fi`.
 - [Apyx announced](https://telemetr.io/en/channels/3567636548-apyx_announcements/posts) that Accountable provides third-party assurance on reserves with near-real-time visibility into outstanding supply, reserve composition, collateral coverage, and cross-platform distribution.
-- The dashboard methodology has not been independently verified in this review. Specifically, it is not clear whether STRC/SATA reserve coverage uses last traded market prices, broker/custodian marks, modeled fair values, bid-side liquidation marks, or another source when Nasdaq is closed. This means Accountable may show a reserve value.
+- **Live data retrieved through Chromium/Playwright on August 3, 2026 at 11:26 UTC:** the API returned `$217,035,429.31` of asset reserves against `$235,301,450.21` of circulating supply, a `0.922372` collateral ratio and `$0.9131` redemption value. The response separately reported `$31,929,748.28` of inventory and `$44,842,316.33` of protocol-owned liquidity; including those categories produced `$293,807,493.92` of total reserves against `$312,073,514.82` total supply. Accountable marked the snapshot `verifiability = 100` and included Nitro-enclave attestation material.
+- The API identities reconcile: asset reserves equal STRC (`$183,285,475.70`) plus Cash & Equivalents (`$33,743,189.09`) plus Other (`$6,764.52`), while circulating supply equals total supply less inventory and protocol-owned liquidity. The displayed collateral ratio is asset reserves divided by circulating supply, rather than all reported reserve categories divided by total supply.
+- The remaining methodological limitation is valuation, not availability. The API does not expose source-level timestamps or explain whether STRC/SATA coverage uses last-traded prices, broker/custodian marks, modeled fair values, bid-side liquidation marks, or another source when Nasdaq is closed.
 
 **How Accountable works (as understood from public materials):**
 - [Accountable](https://docs.accountable.capital/accountable-documentation/data-verification-network-dvn) is a third-party data-verification provider. Its system connects to data sources, ingests reserve/liability data, and publishes a dashboard/API for proof-of-reserves or proof-of-solvency reporting.
 - Accountable's public DVN registry assigns Apyx `verifiability = 4`, `connectors = 3`, and `frequency = live`. In Accountable's own verification-level model, level 3 is direct connector-based data sourcing, level 4 adds secure-enclave based verification (hardware-level attestation such as SGX/Nitro), and level 5 is zkTLS. Therefore, the Apyx integration should be treated as a live third-party connector/enclave verification system, **not** as a fully onchain or fully zkTLS-backed proof.
-- For Apyx, the dashboard is expected to compare token liabilities/outstanding supply against offchain reserve assets and show reserve composition, collateral coverage, and distribution across venues.
+- For Apyx, the live dashboard compares token liabilities/outstanding supply against offchain reserve assets and shows reserve composition and collateral coverage. Its API `supply_split` currently itemizes Ethereum only, so route-level Base/BNB reconciliation is still not available there.
 
 **Trustworthiness assessment:**
-- **Useful and materially better than self-reporting.** A live Accountable dashboard is a meaningful improvement over a monthly PDF alone because it introduces an independent data-verification layer between attestations.
+- **Useful and materially better than self-reporting.** The live Accountable dashboard and public JSON API are independently inspectable and introduce a data-verification layer between attestations. This is sufficient to clear the framework's unverifiable-reserves gate.
 - **Not trustless.** Accountable does not make the preferred-share collateral onchain, does not by itself enforce minting limits, and does not remove the need to trust the completeness of connected accounts, custody setup, connector configuration, enclave implementation, and Accountable's own operations.
 - **Not a substitute for formal attestation/audit.** The Wolf & Company attestation remains important because it is an examination-level accounting opinion. Accountable is best treated as continuous monitoring evidence.
 
@@ -209,7 +211,7 @@ The architecture is moderately complex:
   - Operations Safe: ~1 apxUSD, 0 apyUSD, ~0.9 USDC, holds **582,774 STRCX (~35% of all STRCX supply)** as onchain backing
   - Third-Party Safe: ~0.65M apxUSD
 - **Supply History**: ~13M at launch → ~67M on March 26 → ~175M on April 19 → ~306.86M on May 7 → ~524.66M peak (late May/June) → **~312.07M on August 1**. The ~212M contraction from peak was executed through onchain `burn`/`burnFrom` calls and reflects the redemption wave that followed the June depeg. The mint/redeem pipeline is no longer onchain-asymmetric: burns are now observable onchain rather than settled exclusively offchain.
-- **Incidents**: **One material incident — the June 2026 depeg (below).** No exploit, no loss of protocol solvency, and no smart-contract failure.
+- **Incidents**: **One material incident — the June 2026 depeg (below).** No exploit, realized custody loss, or smart-contract failure was identified. The live Accountable snapshot now reports 92.24% asset-reserve coverage of circulating supply, so dollar-par solvency should not be inferred.
 - **Peg Stability**: **Broken since early June 2026 and not recovered.** apxUSD trades at **$0.881** as of August 1 (−11.9%). Note that the Curve pool's `get_virtual_price()` (1.0049) is *not* a peg measure — it is a cumulative LP-share accumulator that only rises with fee accrual and cannot fall during a depeg. Peg quality must be read from market price, not virtual price.
 
 ### June 2026 Depeg
@@ -234,9 +236,9 @@ The protocol's first major stress event, documented by Apyx in a [post-mortem pu
 4. **Operational plumbing** — mint/redeem is manual by design (multisig, time delays, daily caps); the coordination required exceeded what the setup could deliver at the pace of the event.
 5. **POL withdrawal** — the Guardian Safe removed the bulk of the only permissionless exit venue during the drawdown (see *Protocol-Owned Liquidity*).
 
-**What Apyx reports held**: Apyx states that the protocol remained solvent throughout and that reserves exceeded the market value of circulating supply. That solvency claim cannot currently be independently verified because the attestation files and Accountable dashboard are not retrievable. Independently observable onchain outcomes are narrower: the apyUSD/apxUSD redemption rate did not decline; the unlock window remained active; and the apyUSD/apxUSD Morpho market saw no STRC-driven liquidations because its oracle is the redemption rate rather than spot or DEX price. Apyx also reports that redemptions were processed proportionally across the asset basket.
+**What held**: Apyx states that the protocol remained solvent throughout and that reserves exceeded the market value of circulating supply. The current Accountable API is retrievable and reports a 92.24% asset-reserve ratio, consistent with redemption below par rather than full dollar backing; it does not retroactively prove every reserve mark during the June event. Independently observable outcomes are narrower: the apyUSD/apxUSD redemption rate did not decline; the unlock window remained active; and the apyUSD/apxUSD Morpho market saw no STRC-driven liquidations because its oracle is the redemption rate rather than spot or DEX price. Apyx also reports that redemptions were processed proportionally across the asset basket.
 
-**Why it has not recovered**: no deep onchain pool remains for arbitrage, the redemption path is gated (up to 20 days) and permissioned for apxUSD, and Apyx 2.0 moved redemption to an explicit redemption-value model, so the market now prices forward STRC drawdown risk into apxUSD rather than treating $1 as a floor. STRC itself traded around **$84 (−16% below par)** by [July 1, 2026](https://blog.apyx.fi/strategy-strc-everyones-wrong-but-were-right/).
+**Why it has not recovered**: no deep onchain pool remains for arbitrage, direct apxUSD redemption is permissioned and priced at redemption value, and the separate apyUSD exit can take up to 20 days. Apyx 2.0's explicit redemption-value model means the market prices forward STRC drawdown risk into apxUSD rather than treating $1 as a floor. STRC itself traded around **$84 (−16% below par)** by [July 1, 2026](https://blog.apyx.fi/strategy-strc-everyones-wrong-but-were-right/).
 
 ### Ethereum apxUSD Supply Distribution
 
@@ -255,7 +257,7 @@ Snapshot at block ~25,660,831 (August 1, 2026), supply ~312.07M:
 
 Notes: the apyUSD vault row is `totalAssets()`, which includes apxUSD held directly by the vault **plus** vested apxUSD claimable from LinearVestV0 — it is not purely a token balance. The Curve pool was drained by the Guardian Safe in two stages: ~88% of the LP between June 1 and June 5, 2026, and the remainder by July 6 (LP balance 40,890,164 → 0).
 
-Base apxUSD totalSupply is ~9,768,204, Base apyUSD totalSupply is ~568,119, and BNB Chain apxUSD supply is ~2.44M as of August 1; these are not included in the Ethereum holder percentages above. The BNB token and Ethereum LockReleaseTokenPool route are verified onchain, but a full cross-chain liability-versus-escrow reconciliation remains **TODO** while Accountable distribution data is inaccessible.
+Base apxUSD totalSupply is ~9,768,204, Base apyUSD totalSupply is ~568,119, and BNB Chain apxUSD supply is ~2.44M as of August 1; these are not included in the Ethereum holder percentages above. The BNB token and Ethereum LockReleaseTokenPool route are verified onchain, but a full cross-chain liability-versus-escrow reconciliation remains **TODO** because Accountable's current `supply_split` itemizes Ethereum only.
 
 ## Funds Management
 
@@ -294,25 +296,25 @@ General users acquire apxUSD through secondary markets (Curve, Uniswap).
 
 ### Collateralization
 
-- **Backing**: Offchain preferred shares from publicly-traded DAT companies (STRC, SATA on Nasdaq), plus a documented cash/short-term Treasuries buffer. Overcollateralized but specific ratio still not publicly disclosed.
+- **Backing**: Offchain preferred shares from publicly-traded DAT companies (STRC, SATA on Nasdaq), plus a documented cash/short-term Treasuries buffer. Although Apyx describes the design as overcollateralized, Accountable's August 3 snapshot reports **92.24% asset-reserve coverage of circulating supply** and a **$0.9131 redemption value**.
 - **Collateral quality**: Variable-rate perpetual preferred shares. These are equities (not stablecoins or crypto assets). They sit subordinated to debt obligations in the capital structure. The preferred shares have dividend adjustment mechanisms that theoretically stabilize their price near par value.
 - **Cash & equivalents**: Apyx docs state that the backing includes cash and short-term Treasuries as a liquidity/volatility buffer, but do **not** publicly specify the exact instruments, allocation, maturity profile, account type, bank/broker/custodian, or whether any portion is held as bank cash, brokerage sweep cash, money-market exposure, Treasury bills/notes, or another cash-equivalent instrument. No CEX custody for this buffer is described in the docs reviewed.
 - **Custody**: Docs describe collateral as held in "third-party prime brokerage accounts" with multi-party MPC key management. **Custodian(s) still not publicly named** in the docs.
 - **Onchain verification**: Partial. The bulk of backing remains offchain (STRC and SATA preferred shares held in prime brokerage). The Apyx Operations Safe ([`0x37b0…a555`](https://etherscan.io/address/0x37b0779a66edc491df83e59a56d485835323a555)) holds **582,774 STRCX** ([`0x1aad…77f3`](https://etherscan.io/token/0x1aad217b8f78dba5e6693460e8470f8b1a3977f3)), the Payward-issued tokenized version of STRC (xStocks line, custodied 1:1 against the underlying preferred shares). This is **~35% of all onchain STRCX supply** and represents the only directly verifiable portion of apxUSD's reserves. **Marking it is no longer straightforward**: at $100 par it covers ~$58M (~19% of the 312.07M supply), but STRC has not traded at par since May — it fell to $90.38 during the June drawdown and was around **$84 (−16%)** by July 1, which puts the same holding nearer **~$49M (~16%)**. The remaining ~84% depends on offchain STRC, SATA, and cash buffer attestations.
 - Off-chain verification:
   - **Four PCAOB-registered attestations listed** (Wolf & Company, examination-level opinions for March–June 2026). The individual PDF files are served through GitBook's file system and returned 404 on direct access, so the listing itself is the only evidence available to an outside reviewer — the opinions, their scope, and their as-of dates could not be read.
-  - Accountable Proof-of-Reserves dashboard launched after the April 19 assessment; Accountable registry lists the integration as live since April 23, 2026. The dashboard returns 403 from this review environment.
+  - Accountable Proof-of-Solvency dashboard launched after the April 19 assessment; Accountable's public API was retrieved through Chromium/Playwright on August 3. It reports `$217.04M` asset reserves against `$235.30M` circulating supply (92.24%), with `verifiability = 100` and Nitro-enclave attestation material.
   - Underlying shares are publicly-traded and priced transparently on Nasdaq — which also means reserve marks move with a volatile equity, as June demonstrated.
 
 ### Provability
 
 - **apxUSD backing**: Offchain. The [attestation page](https://docs.apyx.fi/collateral-and-custody/third-party-attestation) lists **four monthly PCAOB-registered attestations** (Wolf & Company, March–June 2026). The PDFs return 404 on direct access, so an outside reviewer can confirm the *listing* but not the opinions, scope, or as-of dates. Treat this as a claimed cadence, not verified evidence.
 - **Reserve reporting failed during the stress event.** Apyx's own post-mortem records that the public transparency dashboard displayed an **inflated NAV** throughout the June drawdown, caused by a bug in the STRCX pricing feed, and that the team's internal admin dashboard carried different, more accurate numbers. The Accountable dashboard separately grouped protocol-owned liquidity and inventory into "Cash & Equivalents," which Apyx says led multiple external analysts to misread collateral composition. The proof-of-reserves surface was wrong precisely when holders most needed it — this is the single strongest argument against treating the reporting stack as reliable.
-- **Accountable data verification**: Accountable's DVN registry lists an Apyx/apxUSD Proof-of-Reserves dashboard live since April 23, 2026 (`frequency = live`, `connectors = 3`, `verifiability = 4`). This adds a live third-party verification layer between monthly attestations, but the underlying dashboard/API values were not accessible from this review environment (403), and the June NAV incident shows a live dashboard is not the same as a correct one.
+- **Accountable data verification**: Accountable's DVN registry lists an Apyx/apxUSD Proof-of-Reserves dashboard live since April 23, 2026 (`frequency = live`, `connectors = 3`, registry verification level `4`). The [public API](https://api.accountable.apyx.fi/dashboard) was retrieved through Chromium/Playwright and returned a fresh, internally reconcilable snapshot with `verifiability = 100` plus Nitro-enclave attestation material. This is meaningful transparent verification and clears the critical gate. It does not make the reserve assets onchain or eliminate valuation/model risk, particularly given the June NAV incident and the absence of source-level freshness metadata in the response.
 - **apyUSD exchange rate**: Calculated onchain via ERC-4626 standard (`convertToAssets()`/`convertToShares()`). The exchange rate is not directly admin-set and does not use the manually-set ApxUSDRateOracle. It is derived from `totalAssets() / totalSupply()`, where `totalAssets()` includes apxUSD held directly by the apyUSD vault plus vested apxUSD available from LinearVestV0. Anyone can verify this onchain. Current rate: **~1.405 apxUSD per apyUSD** (`totalAssets` ~180.91M / `totalSupply` ~128.75M). This rate held through the June drawdown — LinearVestV0 ingests only realized dividends and never references STRC market price, so the ratchet did not reverse. Note that a stable apyUSD/apxUSD rate says nothing about the USD value of apxUSD itself.
 - **Yield distribution**: Semi-programmatic. Authorized operators/admins can initiate the amount of apxUSD yield sent into YieldDistributor/LinearVestV0; there is no onchain oracle that independently verifies the offchain dividend amount before it is distributed. Once apxUSD is deposited into LinearVestV0, vesting is programmatic (~17-day linear), and the apyUSD vault pulls vested yield, increasing `totalAssets()` and therefore the ERC-4626 exchange rate. This means the **PPS formula is onchain-verifiable**, but the **correctness of the yield amount relative to real offchain dividends remains trust/attestation-based**.
 - **Rate oracle**: The ApxUSDRateOracle is **manually set** by a role-0 caller via `setRate()`. Currently 1.000000. No onchain price feed, no TWAP, no staleness check. **Crucially, `getTargetFunctionRole(oracle, setRate)` is 0 (ADMIN_ROLE) and `getTargetAdminDelay(oracle)` is 0 — the current Admin Safe can change the oracle rate instantly with no timelock.** Used by the Curve StableSwap-NG pool for pricing.
-- **Cross-chain supply**: apxUSD and apyUSD trade on Base, and apxUSD is also live on BNB Chain. The Ethereum CCIP LockReleaseTokenPool maps both remote token addresses and escrows canonical apxUSD. This adds a bridge/infrastructure dependency: remote liquidity and cross-chain supply accounting depend on CCIP operation, token-pool/admin configuration, and escrow remaining reconciled to remote supply. Full route-by-route reconciliation is **TODO** while Accountable distribution data is inaccessible.
+- **Cross-chain supply**: apxUSD and apyUSD trade on Base, and apxUSD is also live on BNB Chain. The Ethereum CCIP LockReleaseTokenPool maps both remote token addresses and escrows canonical apxUSD. This adds a bridge/infrastructure dependency: remote liquidity and cross-chain supply accounting depend on CCIP operation, token-pool/admin configuration, and escrow remaining reconciled to remote supply. Accountable's API currently itemizes Ethereum only in `supply_split`, so full route-by-route reconciliation remains **TODO**.
 
 ## Liquidity Risk
 
@@ -528,10 +530,12 @@ apxUSD is currently depegged; these are the primary user-impact signals.
 ### Accountable Proof-of-Reserves Monitoring
 
 - **Dashboard**: [`https://accountable.apyx.fi/`](https://accountable.apyx.fi/)
+- **Public JSON API**: [`https://api.accountable.apyx.fi/dashboard`](https://api.accountable.apyx.fi/dashboard). Fetch this endpoint directly or through a browser context; the frontend host's `/dashboard` route is not the JSON endpoint.
 - **Registry entry**: [`https://dvn.accountable.capital/v1/stats`](https://dvn.accountable.capital/v1/stats) should continue to list `name = apyx`, `ticker = apxUSD`, `frequency = live`, `connectors = 3`, and `verifiability = 4`.
 - **Alert**: If the Accountable dashboard/API becomes unavailable, stale, degraded, or removed from the DVN registry.
 - **Alert**: If connector count or verifiability level decreases.
-- **Alert**: If dashboard collateral coverage falls below the protocol's stated minimum or reserve composition shifts materially toward less liquid/non-public assets.
+- **Ratio calculation**: Recompute asset coverage from `(STRC + Cash & Equivalents + Other) / (total_supply - inventory - pol)` rather than trusting the rounded `collateralization` field. August 3 baseline: `217,035,429.31 / 235,301,450.21 = 92.2372%`.
+- **Alert (Critical)**: Coverage below 100% on two consecutive newer reports; **Alert (High)** below 105% or on a material shift toward less liquid/non-public assets. Re-polling the same `ts` must not confirm a critical condition.
 
 ### Chainlink CCIP / Base / BNB Chain Monitoring
 
@@ -572,10 +576,10 @@ apxUSD is currently depegged; these are the primary user-impact signals.
 - **Publicly-traded collateral**: Underlying preferred shares (STRC, SATA) are Nasdaq-listed with transparent pricing, dividend policies, and regulatory oversight.
 - **Three reputable audits**: Quantstamp, Zellic, and Certora audits all completed and publicly published with remediation evidence in the repo.
 - **Four monthly attestations listed**: Wolf & Company examination-level attestations for March–June 2026 appear on the Third-Party Attestation page, indicating the committed monthly cadence has been kept. The PDFs return 404, so the listing is the extent of what an outside reviewer can confirm.
-- **Reported solvency through the first stress test**: Apyx states that reserves exceeded the market value of circulating supply and that redemptions were proportional; the apyUSD/apxUSD rate ratchet remaining intact is observable onchain. The reserve-coverage claim is not independently verified because neither attestation files nor Accountable values are retrievable.
+- **Live third-party reserve verification**: Accountable's public API returned a fresh, internally reconcilable snapshot with 100% dashboard verifiability and Nitro-enclave attestation material. It independently exposes both the present 92.24% coverage shortfall and reserve composition rather than requiring reliance on Apyx's solvency claim.
 - **Structural safeguards worked as designed under stress**: the unlock window prevented a bank run, and the apyUSD/apxUSD Morpho market saw zero liquidations from the STRC move because its oracle is the redemption rate rather than spot price.
 - **Credible incident response**: a detailed, self-critical post-mortem was published within days, naming the NAV feed bug and the operational shortfalls explicitly rather than attributing the depeg solely to market conditions.
-- **Accountable Proof-of-Reserves integration**: Accountable's public DVN registry lists Apyx/apxUSD as a live proof-of-reserves integration since April 23, 2026, adding third-party between-attestation visibility into supply, reserves, collateral coverage, and distribution.
+- **Accountable Proof-of-Reserves integration**: Accountable's public DVN registry lists Apyx/apxUSD as a live proof-of-reserves integration since April 23, 2026, and its dashboard/API are publicly retrievable, adding third-party between-attestation visibility into supply, reserves, and collateral coverage.
 - **Onchain timelocks on core admin functions**: 3-day execution delay on apxUSD/apyUSD proxy upgrades (via role 24), 7-day role-grant delay for ADMIN_ROLE and role 24, 5-day `minSetback` on delay reductions, 3-day `targetAdminDelay` on core contracts, 4-hour unpause delay.
 - **Governance separation**: Proxy upgrades now require the Guardian/Upgrader 3-of-6 Safe (not the current 4-of-6 Admin Safe); pauser and upgrader are operationally separated from day-to-day admin.
 - **Admin Safe threshold at 4-of-6**.
@@ -589,8 +593,8 @@ apxUSD is currently depegged; these are the primary user-impact signals.
 - **Sustained depeg**: apxUSD has traded below par since early June 2026, bottoming at ~$0.75 and sitting at $0.881 on August 1. Eight weeks without recovery indicates the discount reflects a repriced view of the collateral and exit mechanics, not a transient dislocation.
 - **BTC/DAT stress sensitivity (realized)**: the preferred-share collateral is issued by Digital Asset Treasury companies whose market value tracks BTC. A ~30% BTC drawdown transmitted straight through STRC into the apxUSD market price. This was flagged as an inferred stress path at the prior assessment and has now been observed end-to-end.
 - **Weekend/overnight market-gap risk (realized)**: the deepest dislocations occurred while Nasdaq was closed and STRC marks were stale. Apyx describes overnight liquidity arrangements and possible STRCX-based onchain sales as mitigations; neither is verifiable onchain yet.
-- **Offchain collateral custody remains opaque**: custodian(s) not publicly named; overcollateralization ratio not disclosed; attestation PDFs return 404; Accountable dashboard returns 403.
-- **Reserve reporting failed during the incident**: the public NAV was inflated by a pricing-feed bug for the duration of the drawdown, and the Accountable dashboard's asset bucketing misled analysts. The transparency stack has not been independently re-verified since.
+- **Current reserve coverage is below par**: Accountable reports `$217.04M` asset reserves against `$235.30M` circulating supply (92.24%) and a `$0.9131` redemption value. Custodian(s) remain unnamed and the formal attestation PDFs still return 404.
+- **Reserve reporting failed during the incident**: the public NAV was inflated by a pricing-feed bug for the duration of the drawdown, and Accountable's earlier asset bucketing misled analysts. The live API is now retrievable and separates STRC, POL, cash/equivalents, inventory, and other reserves, but it does not expose source-level timestamps or the off-hours marking method.
 - **Rate Oracle retains zero-delay admin control**: the 4-of-6 Admin Safe can upgrade the Rate Oracle proxy or call `setRate()` instantly.
 - **Unbacked-mint design**: `ApxUSD.mint()` creates tokens without any onchain collateral transfer — backing is verified only offchain via attestations.
 - **Admin freeze path across transfers and the exit**: the deny list is wired into apxUSD, apyUSD, and the UnlockToken redemption queue; apxUSD redemption is permissioned and priced at redemption value rather than par.
@@ -605,7 +609,7 @@ apxUSD is currently depegged; these are the primary user-impact signals.
 
 - **No functioning Ethereum exit at par for a meaningful position**: Uniswap V4 has ~5.07M tokens of singleton inventory against ~312M Ethereum supply, Curve is drained, and holders have taken a 12–25% discount to exit. Small remote-chain pools do not provide enough depth to change the Ethereum liquidator outcome. Whitelisted apxUSD redemption is a separate permissioned/manual path priced at redemption value; the 20-day UnlockToken cooldown applies to apyUSD, not apxUSD.
 - **Rate oracle manipulation (no timelock)**: the Admin Safe can upgrade the ApxUSDRateOracle implementation and call `setRate()` with zero delay. No staleness check or bounds validation exists onchain.
-- **Offchain collateral opacity, with a demonstrated reporting failure**: if preferred shares are not actually held or are liquidated without disclosure, apxUSD could be undercollateralized. The June NAV bug shows the public reserve-reporting surface can be wrong for an extended period during exactly the conditions that matter, and the attestation PDFs backing the alternative evidence path are not retrievable.
+- **Documented reserve shortfall and valuation risk**: Accountable currently reports only 92.24% asset-reserve coverage of circulating supply. The preferred-share marks remain exposed to equity volatility and off-hours valuation gaps; the June NAV bug shows that even a live reserve-reporting surface can be wrong during the conditions that matter.
 
 ---
 
@@ -620,10 +624,10 @@ apxUSD is currently depegged; these are the primary user-impact signals.
 
 - [x] **Unverified contract source** -- Assessed proxies and current implementations are source-verified on public explorers. **PASS**
 - [x] **No audit** -- Three reputable audits confirmed: Quantstamp (Feb 2026), Zellic (Mar 2026), Certora (Mar 2026). All publicly published. **PASS**
-- [ ] **Unverifiable reserves** -- **TRIGGERED.** The [Third-Party Attestation page](https://docs.apyx.fi/collateral-and-custody/third-party-attestation) lists four Wolf & Company files for March–June 2026, but every file returns 404, so the opinions, scope, as-of dates, reserve amounts, and coverage cannot be inspected. The Accountable dashboard and API both return 403; the custodian and overcollateralization ratio are undisclosed; only ~16–19% of supply is represented by directly visible STRCX; and Apyx's post-mortem confirms that the public NAV was inflated during the June drawdown. A docs-page listing and a service-registry entry do not make reserves verifiable through transparent attestation.
+- [x] **Unverifiable reserves** -- The [Accountable dashboard](https://accountable.apyx.fi/) and [public API](https://api.accountable.apyx.fi/dashboard) were retrieved through Chromium/Playwright on August 3, 2026. The fresh response exposes reserve composition, supply, a 92.24% collateral ratio, `verifiability = 100`, and Nitro-enclave attestation material. The inaccessible Wolf & Company PDFs, unnamed custodian, historical NAV bug, and valuation methodology remain category risks, but current reserves are verifiable through a transparent third-party feed. **PASS**
 - [x] **Total centralization** -- 4-of-6 Gnosis Safe for ADMIN_ROLE, 3-of-6 Safe for pause/upgrade. Not a single EOA. **PASS**
 
-**Critical gate "Unverifiable reserves" is triggered. Per the framework, the final score is capped at 5.0 (High Risk) with `Status: GATED`.** Category scores remain below as the ungated reference score; the gate can be cleared if a current reserve opinion or equivalent independently inspectable evidence becomes available.
+**All critical gates pass.** Proceeding to category scoring; the current reserve shortfall and remaining transparency limitations are reflected in Funds Management rather than a gate override.
 
 ### Category Scores
 
@@ -633,7 +637,7 @@ apxUSD is currently depegged; these are the primary user-impact signals.
 - **Bug Bounty**: None found.
 - **Time in Production**: ~164 days.
 - **TVL**: ~312.07M Ethereum apxUSD supply (cap 750M), plus ~9.77M Base and ~2.44M BNB Chain apxUSD supply. Listed on CoinGecko.
-- **Incidents**: **One material incident.** The June 2026 depeg — apxUSD to $0.90, then a daily low of $0.749, and $0.881 at eight weeks. No exploit or independently established insolvency, but the inaccessible reserve evidence also prevents independently confirming Apyx's solvency claim. A stablecoin that has not traded at par in two months is a track-record fact, not a liquidity footnote. Response was strong: a self-critical post-mortem within days, proportional redemptions, and structural safeguards (unlock window, rate ratchet, redemption-rate oracle on Morpho) that all performed as designed.
+- **Incidents**: **One material incident.** The June 2026 depeg — apxUSD to $0.90, then a daily low of $0.749, and $0.881 at eight weeks. No exploit, realized custody loss, or smart-contract failure was identified, but the current Accountable snapshot reports only 92.24% asset-reserve coverage of circulating supply. A stablecoin that has not traded at par in two months is a track-record fact, not a liquidity footnote. Response was strong: a self-critical post-mortem within days, proportional redemptions, and structural safeguards (unlock window, rate ratchet, redemption-rate oracle on Morpho) that all performed as designed.
 
 **Audits subcategory: ~3** — three top-firm audits with public remediation evidence would score 1 on coverage alone, pulled toward the middle of the range by the complete absence of a bug bounty at >$300M supply.
 
@@ -682,31 +686,31 @@ apxUSD is currently depegged; these are the primary user-impact signals.
 
 - Offchain backing by publicly-traded preferred shares (Nasdaq-listed)
 - Cash/short-term Treasuries buffer documented, but exact instruments, location, custodian, and maturity profile are undisclosed
-- Overcollateralized (specific ratio undisclosed)
+- Accountable currently reports 92.24% asset-reserve coverage of circulating supply and a $0.9131 redemption value; the protocol is therefore not dollar-overcollateralized under the dashboard's current methodology
 - Custody in "third-party prime brokerage accounts" (custodian not publicly named); multi-party MPC key management
 - Partial onchain verification via Apyx Operations Safe's 582,774 STRCX holding — ~$58M at $100 par, ~$49M at STRC's July level, i.e. ~16–19% of the 312M supply. Bulk of backing remains offchain.
 - Reserve is equity (not stablecoins) — **and the volatility is no longer theoretical**: STRC posted its largest-ever drawdown from par in June, reaching $90.38, and was around $84 by July 1.
 - Collateral is concentrated in a single issuer (majority STRC).
 - Four PCAOB-registered examination-level attestations listed for March–June 2026 (Wolf & Company); PDFs return 404.
-- Accountable Proof-of-Reserves dashboard listed as live since April 23, 2026; returns 403 from this environment.
+- Accountable Proof-of-Reserves dashboard/API live since April 23, 2026; independently retrieved through Chromium/Playwright on August 3 with a fresh timestamp, `verifiability = 100`, and Nitro-enclave attestation material.
 
-**Collateralization Score: 3.5** — Held at 3.5, on offsetting observable movements. Against: the collateral demonstrated equity-like drawdown, remains concentrated in one issuer, and the "$100 par" convention previously used to size STRCX coverage no longer holds. In favour: supply contracted ~40% while the visible STRCX holding fell less, so proportional onchain coverage improved. Apyx's claim that reserves remained above circulating supply is not counted as independently verified evidence. Unchanged: custodian undisclosed, OC ratio undisclosed, cash buffer composition opaque.
+**Collateralization Score: 4.0** — Raised from 3.5. Accountable now makes the present condition observable rather than assumed: `$217.04M` of asset reserves cover `$235.30M` of circulating supply (92.24%), with redemption value `$0.9131`. That fits the rubric's partially collateralized band. The collateral also demonstrated equity-like drawdown, remains concentrated in one issuer, and is held primarily through an unnamed offchain custodian. Supply contraction and separately identified inventory/POL are mitigants, but they do not restore dollar coverage.
 
 **Subcategory B: Provability**
 
 - apyUSD exchange rate: onchain (ERC-4626)
 - apxUSD collateral: offchain. Four PCAOB-registered examination-level attestations (Wolf & Company, March–June 2026) are **listed** on the [attestation page](https://docs.apyx.fi/collateral-and-custody/third-party-attestation), but the PDFs return 404 — the cadence is claimed, not verifiable.
 - **Reserve reporting was wrong during the June drawdown**: the public transparency dashboard displayed an inflated NAV for the duration of the event due to an STRCX pricing-feed bug, diverging from the team's internal figures, and the Accountable dashboard grouped POL and inventory into "Cash & Equivalents" in a way Apyx says misled external analysts.
-- Accountable data verification: live proof-of-reserves integration listed in the DVN registry (`frequency = live`, `connectors = 3`, `verifiability = 4`) since April 23, 2026; values not independently extracted (403). Pricing methodology for offchain STRC/SATA marks, especially outside Nasdaq market hours, is not independently verified — and this is exactly where the June failure occurred.
+- Accountable data verification: live proof-of-reserves integration listed in the DVN registry (`frequency = live`, `connectors = 3`, verification level `4`) since April 23, 2026. Its public API was independently extracted through Chromium/Playwright and returned an internally reconcilable snapshot, `verifiability = 100`, and Nitro-enclave attestation material. Pricing methodology for offchain STRC/SATA marks, especially outside Nasdaq market hours, is still not independently established — and this is exactly where the June failure occurred.
 - Onchain backing visibility: 582,774 STRCX in the Operations Safe (~16–19% of supply) is directly verifiable; the remainder depends on offchain custody.
 - Rate oracle: manually set, no third-party verification.
 - Onchain supply history: the ~212M contraction from peak settled through `burn`/`burnFrom` calls, so redemption pressure is now observable onchain — a genuine improvement over the previously mints-only picture.
 
-**Provability Score: 4.25** — Held at 4.25. Four listed attestations look like an improvement over one, but the PDFs are not retrievable: the evidence available to an outside reviewer is a docs-page listing, not an opinion anyone can read, and scores do not move on documentation alone. Set against that improvement in claimed cadence — and against the genuine gain in onchain burn visibility — are two facts pointing the other way: the public NAV was inflated by a feed bug for the duration of the June event, and the Accountable dashboard remains inaccessible (403). A live dashboard is not a correct one. On balance these offset.
+**Provability Score: 3.5** — Improved from 4.25. The Accountable dashboard and public JSON API are retrievable, fresh, internally reconcilable, and backed by enclave-attestation material, which is materially stronger than self-reporting and sufficient to clear the critical gate. The score remains above the rubric's 3 anchor because most assets and custody are offchain, Wolf & Company's opinion files remain inaccessible, source-level freshness and valuation methods are not exposed, and the public NAV was wrong during the June event.
 
-**Funds Management Score = (3.5 + 4.25) / 2 = 3.875**
+**Funds Management Score = (4.0 + 3.5) / 2 = 3.75**
 
-**Score: 3.875/5** — Held at 3.875 as the ungated category score. Holders can lose money if offchain preferred-share collateral loses value or is not accurately reflected in reserve reporting; in June, both happened at once. Apyx reports that the protocol remained solvent, but the inaccessible evidence paths and demonstrated NAV failure prevent treating that claim as independently verified. The separate critical gate therefore overrides the weighted result.
+**Score: 3.75/5** — Lowered slightly from 3.875 because the newly retrievable Accountable feed materially improves provability; that improvement is partly offset by the feed's direct evidence that asset reserves currently cover only 92.24% of circulating supply. Holders remain exposed to preferred-share losses, offchain custody, and valuation/reporting errors, but the risk is now transparently observable rather than unverifiable.
 
 #### Category 4: Liquidity Risk (Weight: 15%)
 
@@ -739,12 +743,10 @@ Final Score = (Centralization × 0.30) + (Funds Mgmt × 0.30) + (Audits × 0.20)
 |----------|-------|--------|----------|
 | Audits & Historical | 4.0 | 20% | 0.80 |
 | Centralization & Control | 3.5 | 30% | 1.05 |
-| Funds Management | 3.875 | 30% | 1.1625 |
+| Funds Management | 3.75 | 30% | 1.125 |
 | Liquidity Risk | 4.5 | 15% | 0.675 |
 | Operational Risk | 3.0 | 5% | 0.15 |
-| **Ungated Weighted Score** | | | **3.8375/5.0 (~3.84)** |
-
-**Critical gate applies → Final Score: 5.0/5.0**
+| **Final Score** | | | **3.80/5.0** |
 
 ### Risk Tier
 
@@ -757,25 +759,25 @@ Final Score = (Centralization × 0.30) + (Funds Mgmt × 0.30) + (Audits × 0.20)
 | **4.5-5.0** | **High Risk** | Not recommended |
 | **N/A** | **Not Rated** | Terminal — do not use (exploited or wound down) |
 
-**Final Risk Tier: High Risk — Not recommended (GATED)**
+**Final Risk Tier: Elevated Risk — Limited approval, strict limits**
 
-> The ungated weighted score is 3.84 (Elevated), driven by the June 2026 depeg entering the track record and the collapse of Ethereum exit capacity. The published score is nevertheless capped at 5.0 because current reserve existence and coverage cannot be independently verified through any retrievable attestation or dashboard.
+> The final score is 3.80 (Elevated), driven by the June 2026 depeg, current 92.24% Accountable collateral ratio, and collapse of Ethereum exit capacity. The transparent Accountable feed clears the unverifiable-reserves gate; its current shortfall is reflected directly in Funds Management.
 
 ---
 
 Apyx's apxUSD is a novel "Dividend-Backed Stablecoin" bridging offchain corporate dividends into onchain yield. The governance architecture built after the March 20–21 restructure is sound and verified intact: role assignments, multi-day upgrade timelocks, role-grant delays, and multisig thresholds are all unchanged this period, and every apyUSD upgrade routed correctly through the Guardian Safe's 3-day delay.
 
-What the June 2026 stress test showed is that the governance was never the binding constraint. A record STRC drawdown transmitted directly into the apxUSD market price; the deepest dislocations landed overnight while Nasdaq was closed and collateral marks were stale; the public NAV dashboard was displaying inflated numbers throughout; and the Guardian Safe withdrew the bulk of the only permissionless Ethereum exit venue in the same week. Apyx reports that the protocol stayed solvent, while the apyUSD ratchet and absence of Morpho liquidations are observable onchain. The inaccessible reserve evidence prevents independently validating the solvency claim. apxUSD has not traded at par since, and at eight weeks the discount is a repricing rather than a dislocation.
+What the June 2026 stress test showed is that the governance was never the binding constraint. A record STRC drawdown transmitted directly into the apxUSD market price; the deepest dislocations landed overnight while Nasdaq was closed and collateral marks were stale; the public NAV dashboard was displaying inflated numbers throughout; and the Guardian Safe withdrew the bulk of the only permissionless Ethereum exit venue in the same week. The apyUSD ratchet and absence of Morpho liquidations are observable onchain. Accountable now makes the reserve position independently inspectable and reports 92.24% asset-reserve coverage, consistent with redemption below par rather than a dollar-solvent stablecoin. apxUSD has not traded at par since, and at eight weeks the discount is a repricing rather than a dislocation.
 
-**Residual concerns underlying the ungated 3.84 score and the 5.0 GATED override:**
+**Residual concerns underlying the 3.80 score:**
 - **Sustained depeg.** apxUSD at $0.881 (−11.9%), below par continuously since early June, low of ~$0.75. Not recovering on its own without a deeper venue or an open redemption path.
 - **No meaningful Ethereum exit at par.** Curve is drained (~$11.9K); Uniswap V4 inventory is ~5.07M tokens against ~312M supply (~61×) and overstates executable depth. Whitelisted apxUSD redemption is manual and priced at redemption value, not $1; the 20-day cooldown applies only when exiting apyUSD.
 - **POL is withdrawable at the issuer's discretion, and was withdrawn under stress.** No admin gate, no timelock — a 3-of-6 Safe transaction. Any future venue Apyx seeds carries the same property.
 - **Collateral is a single volatile issuer.** Majority STRC, which reached $90.38 in June and ~$84 by July 1. Reserve marks move with an equity, not a cash instrument.
-- **Reserve reporting failed when it mattered**, and neither evidence path is currently retrievable: attestation PDFs return 404, Accountable returns 403.
+- **Reserve coverage is currently below par.** Accountable reports 92.24% asset-reserve coverage and a $0.9131 redemption value. Reserve reporting also failed during the June stress event; although the live feed is now retrievable, the formal attestation PDFs remain inaccessible.
 - **Rate Oracle has no timelock.** ADMIN_ROLE can upgrade the oracle and call `setRate()` with zero delay. Unmitigated since first flagged.
 - **Admin discretion over transfers and the exit.** The deny list is wired into apxUSD, apyUSD, and the redemption queue; apxUSD redemption is permissioned and uses redemption-value pricing.
-- **Cross-chain reconciliation remains incomplete.** Base and BNB Chain supplies depend on Ethereum CCIP escrow, while Accountable distribution data is inaccessible.
+- **Cross-chain reconciliation remains incomplete.** Base and BNB Chain supplies depend on Ethereum CCIP escrow, while Accountable's `supply_split` currently itemizes only Ethereum.
 - **Custodian is still not publicly named** and the overcollateralization ratio is still undisclosed.
 - **Upgrade cadence**: four apyUSD implementations in ~3.5 months on the contract holding the majority of circulating apxUSD.
 - **No bug bounty program** at >$300M Ethereum apxUSD supply.
@@ -786,7 +788,7 @@ What the June 2026 stress test showed is that the governance was never the bindi
 2. **Peg recovery.** apxUSD sustained above $0.99 for 30 days, without that recovery depending on Apyx seeding the venue it is quoted on.
 3. **Add a non-zero execution delay or target-admin-delay to the Rate Oracle** (`ApxUSDRateOracle`) so `setRate()` and `upgradeToAndCall` cannot execute instantly.
 4. **Make the attestation PDFs retrievable**, continue the monthly cadence, and publish the as-of date and scope of each opinion. Four listed-but-404 PDFs are not proof of reserves.
-5. **Re-verify the transparency stack post-incident**: publish the NAV pricing methodology (including how STRC/SATA are marked outside Nasdaq hours), restore external access to the Accountable dashboard, and split POL/inventory out of "Cash & Equivalents" as Apyx said it would.
+5. **Complete the transparency-stack remediation**: publish the NAV pricing methodology (including how STRC/SATA are marked outside Nasdaq hours), expose source-level freshness in the Accountable API, and keep POL/inventory separated from asset reserves.
 6. **Publicly name the custodian(s)** holding the preferred shares.
 7. **Disclose the overcollateralization ratio** with supporting evidence, ideally in the monthly attestation.
 8. **Disclose the cash/short-term Treasuries buffer composition** — custody location, account type, instrument type, maturity/WAM, and whether any portion is bank cash, brokerage sweep cash, money-market exposure, or Treasury bills/notes.
@@ -815,7 +817,7 @@ What the June 2026 stress test showed is that the governance was never the bindi
 - **Peg-based**: Reassess **upward** if apxUSD sustains above $0.99 for 30 days without Apyx-seeded liquidity being the venue of record. Reassess **downward** on any new leg below $0.75, or if the discount widens past 15% for a sustained period.
 - **Attestation cadence**: Reassess when the next PCAOB-registered attestation is published (July 2026 expected). Also reassess if attestations stop appearing, or if the listed PDFs become retrievable — being able to read even one opinion would materially change the Provability score.
 - **Redemption mechanics**: Reassess if the Apyx 2.0 redemption-value calculation is enforced onchain in an identifiable contract, if the deny list is used against a non-sanctions counterparty, if `setUnlockingFee` or `unlockingDelay` change, or if apxUSD redemption is opened beyond the whitelist. The first three would support raising Programmability from 3.5 to 4.0; the last would be a material improvement to Liquidity.
-- **Accountable verification**: Reassess downward if the dashboard becomes unavailable/stale, Accountable removes or downgrades the Apyx registry entry, connector count decreases, or verifiability level decreases.
+- **Accountable verification**: Reassess if the dashboard/API becomes unavailable or stale, the collateral ratio crosses a material threshold, Accountable removes or downgrades the Apyx registry entry, connector count decreases, or verifiability level decreases.
 - **Cross-chain / CCIP**: Reassess if Chainlink CCIP Ethereum/Base or Ethereum/BNB transfers are paused or impaired, token-pool/admin configuration changes materially, remote apxUSD/apyUSD supply diverges from Ethereum escrow accounting, or Apyx migrates to a different bridge provider.
 - **Governance-based**: Reassess on any ownership/threshold change to either multisig, any change to `targetAdminDelay` or `roleGrantDelay` on AccessManager, any rate-oracle change (upgrade or `setRate`), or any further apxUSD/apyUSD implementation upgrades.
 - **Time-based**: Reassess in 1 month (early September 2026).
@@ -834,4 +836,4 @@ What the June 2026 stress test showed is that the governance was never the bindi
 | [March 26, 2026](https://github.com/yearn/risk-score/pull/110) | 5.0 (Gated) | Initial assessment. Failed Critical Risk Gates (no audit, unverifiable reserves, total centralization). |
 | [April 19, 2026](https://github.com/yearn/risk-score/pull/140) | 3.5 | All critical gates cleared after governance restructure and attestation publication. Supply ~175M. |
 | [May 29, 2026](https://github.com/yearn/risk-score/pull/227) | 3.66 | Tier raised to Elevated Risk. POL concentration (99.96% Curve LP), supply growth outpacing attestation (524M vs 67M attested). |
-| [August 1, 2026](https://github.com/yearn/risk-score/pull/373) | 5.0 (GATED; ungated 3.84) | June 2026 depeg recorded: apxUSD below par since early June, low ~$0.75, $0.881 at eight weeks. Guardian Safe withdrew ~88% of Curve LP June 1–5 and the remainder by July 6 (~$29M → ~$11.9K). Ethereum supply contracted 524M → 312M via onchain burns; Base and BNB Chain routes are live through CCIP. The 20-day cooldown applies to apyUSD, not direct apxUSD redemption. The deny list controls apxUSD transfers, apyUSD, and the unlock queue. Four attestations are listed but all files return 404 and Accountable returns 403, triggering the unverifiable-reserves critical gate. Audits & Historical 3.5→4.0; Liquidity 4.0→4.5; Funds Management held at 3.875. |
+| [August 1, 2026](https://github.com/yearn/risk-score/pull/373) | 3.80 | June 2026 depeg recorded: apxUSD below par since early June, low ~$0.75, $0.881 at eight weeks. Guardian Safe withdrew ~88% of Curve LP June 1–5 and the remainder by July 6 (~$29M → ~$11.9K). Ethereum supply contracted 524M → 312M via onchain burns; Base and BNB Chain routes are live through CCIP. The 20-day cooldown applies to apyUSD, not direct apxUSD redemption. The deny list controls apxUSD transfers, apyUSD, and the unlock queue. Accountable's public API was retrieved through Playwright and reports 92.24% asset-reserve coverage, $0.9131 redemption value, 100% dashboard verifiability, and Nitro-enclave attestation material; the transparent feed clears the critical gate. Audits & Historical 3.5→4.0; Liquidity 4.0→4.5; Funds Management 3.875→3.75. |
