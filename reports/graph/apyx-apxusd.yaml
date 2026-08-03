@@ -18,7 +18,7 @@ nodes:
     label: apxUSD (Dividend-Backed USD)
     address: "0x98a878B1CD98131b271883b390F68d2c90674665"
     category: vault
-    note: ERC-20, UUPS Proxy
+    note: ERC-20, UUPS Proxy; AddressList can deny transfers
   - id: apyUSD
     label: apyUSD (Yield Vault)
     address: "0x38eeb52f0771140d10c4e9a9a72349a329fe8a6a"
@@ -102,11 +102,11 @@ nodes:
     label: Uniswap V4 PoolManager
     address: "0x000000000004444c5dc75cb358380d2e3de08a90"
     category: dependency
-    note: Sole remaining onchain exit venue; singleton inventory overstates executable depth
+    note: Primary remaining Ethereum spot venue; singleton inventory overstates executable depth
   - id: dep-ccip
-    label: Chainlink CCIP (Base)
+    label: Chainlink CCIP (Base + BNB)
     category: dependency
-    note: Cross-chain expansion to Base
+    note: Ethereum LockReleaseTokenPool escrows canonical apxUSD for Base and BNB Chain representations
 
 edges:
   # === Governance flow ===
@@ -172,6 +172,10 @@ edges:
     kind: routes-fees-to
     label: unlocking fee (0.1%)
   - from: address-list
+    to: apxUSD
+    kind: controls
+    label: deny list gate on ERC-20 transfers
+  - from: address-list
     to: apyUSD
     kind: controls
     label: deny list gate on redemption
@@ -204,7 +208,7 @@ edges:
   - from: apxUSD
     to: dep-uniswapv4
     kind: deposits-into
-    label: sole onchain exit
+    label: primary Ethereum spot exit
 
   # === Backing & external dependencies ===
   - from: apxUSD
@@ -218,4 +222,4 @@ edges:
   - from: apxUSD
     to: dep-ccip
     kind: routes-through
-    label: Base bridge
+    label: Base + BNB lock/release bridge
