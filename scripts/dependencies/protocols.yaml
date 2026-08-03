@@ -422,9 +422,9 @@ protocols:
     - asset: WBTC
       address: '0x2260fac5e5542a773aa44fbcfedf7c193bc2c599'
     - asset: wstETH
-      address: '0x7f39c581f595b53c5cb19bD0b3f8dA6c935E2Ca0'
+      address: '0x7f39c581f595b53c5cb19bd0b3f8da6c935e2ca0'
     - asset: ftUSD
-      address: '0xF7D85EC4E7710f71992752eac2111312e73E9C9C'
+      address: '0xf7d85ec4e7710f71992752eac2111312e73e9c9c'
     yield_sources:
     - protocol: aave_v3_core
       assets:

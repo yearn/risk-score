@@ -52,7 +52,7 @@ nodes:
     label: Lend CircuitBreaker
     address: "0x9676E697399581AB288844cDE5F73d0887eC18e0"
     category: infra
-    note: Guardian-controlled emergency flow halt
+    note: Emergency flow halt; owned by the admin Safe, guardian can trip it. Wrappers can unset it (setCircuitBreaker to address zero)
   - id: pm-wrapper
     label: PMWrapper
     address: "0xBDD80028c9e4b9A2D268D2cF62Fb54Ec8697C68B"
@@ -96,6 +96,16 @@ nodes:
     address: "0xc67D966f761e8cf13Faa0a1E774425290c8453d9"
     category: strategy
     note: No strategy configured at assessment block; idle ftUSD held in wrapper
+  - id: wsteth-wrapper
+    label: wstETH YieldWrapper
+    address: "0x01980BD1B58313bD3767f6adc75Af8b6464f3db7"
+    category: strategy
+    note: No strategy configured; zero balance at assessment block
+  - id: ft-wrapper
+    label: FT YieldWrapper
+    address: "0x7127BB9d9ad0f47B8dA9087e634D67F3946F840E"
+    category: strategy
+    note: No strategy configured; circuit breaker unset (address zero)
 
   # === Governance ===
   - id: admin-safe
@@ -113,6 +123,16 @@ nodes:
     address: "0x5cd6Abe67f8af1C0c699dF36d90a6469Eaf1958a"
     category: governance
     note: Receives reserves/fees and settles epochs
+  - id: wbtc-strategy-manager
+    label: WBTC Strategy Mgr Safe (3/5)
+    address: "0x5557729b169082f07d3131D560E2f2cb5e6c48f6"
+    category: governance
+    note: Third Safe with the same five signers as the admin Safe; strategyManager of the WBTC wrapper only
+  - id: yield-claimer
+    label: YieldClaimer
+    address: "0x88432bB6EA62e774cB6d87995CC5277568d01397"
+    category: governance
+    note: Holds wrapper execute() arbitrary-call and forceWithdrawToWrapper
 
   # === External dependencies ===
   - id: dep-aave
@@ -168,8 +188,60 @@ edges:
     label: disablePrice guardian
   - from: guardian-safe
     to: lend-circuit-breaker
-    kind: controls
+    kind: holds-role
     label: emergency pause
+  - from: admin-safe
+    to: lend-circuit-breaker
+    kind: controls
+    label: owner - can pause or reconfigure the breaker
+  - from: admin-safe
+    to: usdc-wrapper
+    kind: controls
+    label: owner + strategyManager - setStrategy, no delay
+  - from: admin-safe
+    to: weth-wrapper
+    kind: controls
+    label: owner + strategyManager - setStrategy, no delay
+  - from: admin-safe
+    to: usdt-wrapper
+    kind: controls
+    label: owner + strategyManager - setStrategy, no delay
+  - from: admin-safe
+    to: wbtc-wrapper
+    kind: controls
+    label: owner - upgrades wrapper proxy
+  - from: admin-safe
+    to: ftusd-wrapper
+    kind: controls
+    label: owner + strategyManager
+  - from: admin-safe
+    to: wsteth-wrapper
+    kind: controls
+    label: owner + strategyManager
+  - from: admin-safe
+    to: ft-wrapper
+    kind: controls
+    label: owner + strategyManager
+  - from: wbtc-strategy-manager
+    to: wbtc-wrapper
+    kind: controls
+    label: strategyManager - setStrategy, setCircuitBreaker
+  - from: yield-claimer
+    to: usdc-wrapper
+    kind: holds-role
+    label: yieldClaimer - execute() arbitrary call
+  - from: yield-claimer
+    to: usdt-wrapper
+    kind: holds-role
+    label: yieldClaimer - execute() arbitrary call
+  - from: yield-claimer
+    to: weth-wrapper
+    kind: holds-role
+    label: yieldClaimer - execute() arbitrary call
+  - from: yield-claimer
+    to: wbtc-wrapper
+    kind: holds-role
+    label: yieldClaimer - execute() arbitrary call
   - from: fee-collector
     to: positions-manager
     kind: holds-role
@@ -215,19 +287,19 @@ edges:
   - from: positions-manager
     to: usdc-wrapper
     kind: allocates-to
-    label: "~25.5% TVL"
+    label: "~25.9% TVL"
   - from: positions-manager
     to: weth-wrapper
     kind: allocates-to
-    label: "~11.7% TVL"
+    label: "~11.3% TVL"
   - from: positions-manager
     to: usdt-wrapper
     kind: allocates-to
-    label: "~11.4% TVL"
+    label: "~11.6% TVL"
   - from: positions-manager
     to: wbtc-wrapper
     kind: allocates-to
-    label: "~39.7% TVL"
+    label: "~39.5% TVL"
   - from: usdc-wrapper
     to: dep-spark
     kind: deposits-into
@@ -247,4 +319,12 @@ edges:
   - from: positions-manager
     to: ftusd-wrapper
     kind: allocates-to
-    label: "~11.6% TVL"
+    label: "~11.8% TVL"
+  - from: positions-manager
+    to: wsteth-wrapper
+    kind: allocates-to
+    label: enabled, 0 supplied
+  - from: positions-manager
+    to: ft-wrapper
+    kind: allocates-to
+    label: enabled, unpriced
