@@ -708,5 +708,5 @@ Centrifuge JAAA remains more concentrated than the NYSE ETF, but diversification
 
 | Date | Score | Change |
 |------|------:|--------|
-| May 28, 2026 | 2.60 | Initial assessment |
-| July 14, 2026 | 2.60 | Refreshed management, TVL/AUM, holdings, custody, mint authority, related contracts, and cross-chain configuration; score unchanged |
+| [May 28, 2026](https://github.com/yearn/risk-score/pull/173) | 2.60 | Initial assessment |
+| [July 14, 2026](https://github.com/yearn/risk-score/pull/320) | 2.60 | Refreshed management, TVL/AUM, holdings, custody, mint authority, related contracts, and cross-chain configuration; score unchanged |

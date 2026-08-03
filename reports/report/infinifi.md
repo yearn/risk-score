@@ -764,7 +764,7 @@ Treat current InfiniFi exposure as a credit exposure to **(a) a tokenized Fasana
 
 | Date | Score | Notes |
 | --- | --- | --- |
-| February 4, 2026 | 2.3 | Initial assessment |
-| May 18, 2026 | 3.2 | Reassessment — Liquidity 2.0→4.0: iUSD redemption queue-only pending maturity wave |
-| July 4, 2026 | 3.4 | Reassessment — offchain concentration up, TVL down |
-| July 29, 2026 | 3.2 | Reassessment — offchain exposure restated to 84.4% with a fourth RWA escrow; farm-bucket semantics corrected (`FarmTypes.LIQUID` = bucket 1): instant-exit capacity is $5.45M and the redemption queue has never been used (Liquidity 4.0→3.0) |
+| [February 4, 2026](https://github.com/yearn/risk-score/pull/22) | 2.3 | Initial assessment |
+| [May 18, 2026](https://github.com/yearn/risk-score/pull/192) | 3.2 | Reassessment — Liquidity 2.0→4.0: iUSD redemption queue-only pending maturity wave |
+| [July 4, 2026](https://github.com/yearn/risk-score/pull/288) | 3.4 | Reassessment — offchain concentration up, TVL down |
+| [July 29, 2026](https://github.com/yearn/risk-score/pull/357) | 3.2 | Reassessment — offchain exposure restated to 84.4% with a fourth RWA escrow; farm-bucket semantics corrected (`FarmTypes.LIQUID` = bucket 1): instant-exit capacity is $5.45M and the redemption queue has never been used (Liquidity 4.0→3.0) |
