@@ -545,9 +545,11 @@ const totalDeps = bridges.reduce((n, b) => n + b.dependencies.length, 0);
     border-radius: 50%;
     background: var(--bg-secondary);
   }
-  .col-name { width: 92px; }
+  .col-name { width: 84px; }
   .name-cell { font-weight: 500; white-space: normal; word-break: break-word; }
-  .name-cell a { color: var(--text-primary); text-decoration: none; }
+  /* Cap the name so multi-word names (e.g. 'KernelDAO hgETH') wrap to two
+     lines instead of expanding the column when the table has spare width. */
+  .name-cell a { color: var(--text-primary); text-decoration: none; display: inline-block; max-width: 84px; }
   .name-cell a:hover { color: var(--brand-blue); text-decoration: underline; }
   .integration-cell { color: var(--text-secondary); min-width: 112px; word-break: break-word; }
   .detail-cell {
