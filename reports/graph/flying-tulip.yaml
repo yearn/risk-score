@@ -68,6 +68,21 @@ nodes:
     address: "0xAa48EcBC843cF7E9A29155D112b8Cb27902bD23C"
     category: infra
     note: User collateral in, ftUSD out
+  - id: ftusd-usdc-wrapper
+    label: ftUSD USDC YieldWrapper
+    address: "0x6aaf84563Cdb03a22Cd92EE2553698beE87E837D"
+    category: strategy
+    note: Holds ftUSD USDC backing (2.77M); separate from the FT Lend USDC wrapper
+  - id: ftusd-usdt-wrapper
+    label: ftUSD USDT YieldWrapper
+    address: "0x28CCa8eEA2cD0498cE91A9da15772A1ce42347D6"
+    category: strategy
+    note: Holds ftUSD USDT backing (1.42M)
+  - id: delta-neutral
+    label: Delta Neutral Strategy
+    address: "0xe0E445967256EE60111e243e0F0F94DD1D351A59"
+    category: strategy
+    note: MultiCollateralDeltaNeutralStakingStrategy - deploys ftUSD backing INTO FT Lend (34.5% of TVL). Holds no stETH/WETH; hedge leg not running
   - id: relayer-session
     label: Relayer / Sessions
     address: "0x823a97a2c32985e0f5457fc8103F36698D1F53F4"
@@ -143,10 +158,25 @@ nodes:
     label: Spark
     category: dependency
     note: Idle supply venue for yield wrappers
+  - id: oracle-wrapper-wbtc
+    label: WBTC Oracle Wrapper
+    address: "0x183dB475d8184aA7a018ed2164e11A887afBDA55"
+    category: infra
+    note: ChainlinkLatestAnswerProxy - immutable base feed (CL BTC/USD) + Aave peg adapter; owner can pause but not repoint
+  - id: oracle-wrapper-wsteth
+    label: wstETH Oracle Wrapper
+    address: "0x000bb128a8aBCFa05B871C97CC9C5f88e7Dcf35a"
+    category: infra
+    note: ChainlinkLatestAnswerProxy - immutable base feed (CL ETH/USD) + Aave WstETHPriceCapAdapter
+  - id: oracle-wrapper-ftusd
+    label: ftUSD Oracle Wrapper
+    address: "0xA69f7a38B6c91a4bc2477f097DC8a1F16DAADFf8"
+    category: infra
+    note: FtUsdMintRedeemOracleProxy - prices ftUSD off the MintAndRedeem redeem factor (circular); 0 bps deviation tolerance
   - id: dep-chainlink
     label: Chainlink Feeds
     category: dependency
-    note: USDC, USDT, ETH, BTC, wstETH, ftUSD pricing
+    note: Canonical EACAggregatorProxy feeds for USDC, USDT and ETH
   - id: dep-spot-clob
     label: FT Spot AMM / CLOB
     category: dependency
@@ -260,6 +290,58 @@ edges:
     to: ftusd
     kind: mints
     label: masterMinter can configure arbitrary minter
+
+  # === ftUSD collateral custody and the reflexivity loop ===
+  - from: mint-and-redeem
+    to: ftusd-usdc-wrapper
+    kind: allocates-to
+    label: deposits USDC collateral on mint
+  - from: mint-and-redeem
+    to: ftusd-usdt-wrapper
+    kind: allocates-to
+    label: deposits USDT collateral on mint
+  - from: ftusd-usdc-wrapper
+    to: delta-neutral
+    kind: deposits-into
+    label: "2.77M USDC"
+  - from: ftusd-usdt-wrapper
+    to: delta-neutral
+    kind: deposits-into
+    label: "1.42M USDT"
+  - from: delta-neutral
+    to: positions-manager
+    kind: deposits-into
+    label: REFLEXIVE - ftUSD backing supplied into FT Lend (34.5% of TVL)
+  - from: admin-safe
+    to: delta-neutral
+    kind: controls
+    label: strategyManager of the ftUSD wrappers
+
+  # === Oracle wiring ===
+  - from: oracle-router
+    to: oracle-wrapper-wbtc
+    kind: routes-through
+    label: WBTC price
+  - from: oracle-router
+    to: oracle-wrapper-wsteth
+    kind: routes-through
+    label: wstETH price
+  - from: oracle-router
+    to: oracle-wrapper-ftusd
+    kind: routes-through
+    label: ftUSD price
+  - from: oracle-wrapper-wbtc
+    to: dep-chainlink
+    kind: routes-through
+    label: immutable base feed BTC/USD
+  - from: oracle-wrapper-wsteth
+    to: dep-chainlink
+    kind: routes-through
+    label: immutable base feed ETH/USD
+  - from: oracle-wrapper-ftusd
+    to: mint-and-redeem
+    kind: routes-through
+    label: CIRCULAR - reads redeem factor of collateral held in FT Lend
 
   # === Lending engine wiring ===
   - from: oracle-router
