@@ -189,7 +189,7 @@ const totalDeps = bridges.reduce((n, b) => n + b.dependencies.length, 0);
           <thead>
             <tr>
               <th class="col-icon"></th>
-              <th>Protocol / Token</th>
+              <th class="col-name">Protocol<br />Token</th>
               <th class="col-kind">Type</th>
               <th class="col-model">Model</th>
               {bridge.hasSecurity && (
@@ -475,6 +475,7 @@ const totalDeps = bridges.reduce((n, b) => n + b.dependencies.length, 0);
     font-size: 0.78rem;
     color: var(--text-secondary);
     opacity: 0.85;
+    overflow-wrap: anywhere;
   }
   .owner-line :global(a) { color: var(--brand-blue); }
 
@@ -500,13 +501,13 @@ const totalDeps = bridges.reduce((n, b) => n + b.dependencies.length, 0);
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.08em;
-    padding: 0.7rem 0.85rem;
+    padding: 0.7rem 0.6rem;
     text-align: center;
     border-bottom: 1px solid var(--border);
     white-space: nowrap;
   }
   .table-card tbody td {
-    padding: 0.6rem 0.85rem;
+    padding: 0.6rem 0.6rem;
     border-bottom: 1px solid color-mix(in srgb, var(--border) 50%, transparent);
     vertical-align: middle;
   }
@@ -515,11 +516,11 @@ const totalDeps = bridges.reduce((n, b) => n + b.dependencies.length, 0);
   .table-card tbody tr:hover { background: color-mix(in srgb, var(--brand-blue) 6%, transparent); }
   .row-indirect { background: color-mix(in srgb, #F59E0B 6%, transparent); }
   .row-indirect:hover { background: color-mix(in srgb, #F59E0B 11%, transparent); }
-  .col-icon { width: 44px; padding-right: 0; }
-  .col-kind { width: 96px; text-align: center; }
-  .col-model { width: 132px; }
-  .col-sec { width: 160px; min-width: 160px; }
-  .col-integration { min-width: 150px; }
+  .col-icon { width: 38px; padding-right: 0; }
+  .col-kind { width: 76px; text-align: center; }
+  .col-model { width: 108px; }
+  .col-sec { width: 100px; min-width: 100px; }
+  .col-integration { min-width: 112px; }
 
   /* === Icons (reused from Reports page) === */
   .icon-stack {
@@ -544,15 +545,19 @@ const totalDeps = bridges.reduce((n, b) => n + b.dependencies.length, 0);
     border-radius: 50%;
     background: var(--bg-secondary);
   }
-  .name-cell { font-weight: 500; white-space: nowrap; }
-  .name-cell a { color: var(--text-primary); text-decoration: none; }
+  .col-name { width: 124px; }
+  .name-cell { font-weight: 500; white-space: normal; overflow-wrap: normal; word-break: normal; }
+  /* Cap the name so multi-word names (e.g. 'KernelDAO hgETH') wrap to two
+     lines instead of expanding the column when the table has spare width. */
+  .name-cell a { color: var(--text-primary); text-decoration: none; display: inline-block; max-width: 124px; }
   .name-cell a:hover { color: var(--brand-blue); text-decoration: underline; }
-  .integration-cell { color: var(--text-secondary); min-width: 150px; }
+  .integration-cell { color: var(--text-secondary); min-width: 112px; word-break: break-word; }
   .detail-cell {
     color: var(--text-secondary);
     font-size: 0.85rem;
-    min-width: 300px;
+    min-width: 220px;
     line-height: 1.45;
+    overflow-wrap: anywhere;
   }
 
   /* === Kind badges === */
@@ -582,10 +587,10 @@ const totalDeps = bridges.reduce((n, b) => n + b.dependencies.length, 0);
   .model-badge {
     display: inline-block;
     box-sizing: border-box;
-    min-width: 6.5rem;
+    min-width: 5.6rem;
     text-align: center;
     font-size: 0.72rem;
-    padding: 0.2rem 0.55rem;
+    padding: 0.2rem 0.4rem;
     border-radius: 6px;
     font-weight: 600;
     white-space: nowrap;
@@ -652,6 +657,7 @@ const totalDeps = bridges.reduce((n, b) => n + b.dependencies.length, 0);
   .sec-route {
     display: block;
     margin-top: 0.3rem;
+    overflow-wrap: anywhere;
     color: var(--text-secondary);
     font-size: 0.68rem;
     font-weight: 400;
