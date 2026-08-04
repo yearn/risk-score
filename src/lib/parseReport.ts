@@ -67,6 +67,10 @@ export interface HistoryEntry {
   date: string;
   score: string;
   notes: string;
+  /** `date` rendered as inline markdown (dates may link to their source PR). */
+  dateHtml: string;
+  /** `notes` rendered as inline markdown (may contain links or `code` spans). */
+  notesHtml: string;
 }
 
 export interface ReportData extends ReportMeta {
@@ -317,6 +321,11 @@ function extractFullBody(content: string): string {
  * structured rows. When a report has no such table yet, synthesizes a single
  * current-state row from the header so every report shows a seed to grow from.
  */
+function historyEntry(date: string, score: string, notes: string): HistoryEntry {
+  const inline = (s: string) => marked.parseInline(s, { async: false }) as string;
+  return { date, score, notes, dateHtml: inline(date), notesHtml: inline(notes) };
+}
+
 function parseHistory(content: string, meta: ReportMeta): HistoryEntry[] {
   const section = extractSection(content, "Assessment History");
   const rows = section
@@ -326,7 +335,7 @@ function parseHistory(content: string, meta: ReportMeta): HistoryEntry[] {
     .map((row): HistoryEntry | null => {
       const cells = row.split("|").slice(1, -1).map((c) => c.trim());
       if (!cells[0]) return null;
-      return { date: cells[0], score: cells[1] ?? "", notes: cells[2] ?? "" };
+      return historyEntry(cells[0], cells[1] ?? "", cells[2] ?? "");
     })
     .filter((r): r is HistoryEntry => r !== null);
 
@@ -336,11 +345,11 @@ function parseHistory(content: string, meta: ReportMeta): HistoryEntry[] {
   const score =
     meta.finalScore != null ? meta.finalScore.toFixed(1) : (meta.status ?? "N/A");
   return [
-    {
-      date: meta.latestDate,
+    historyEntry(
+      meta.latestDate,
       score,
-      notes: meta.isUpdated ? "Reassessment" : "Initial assessment",
-    },
+      meta.isUpdated ? "Reassessment" : "Initial assessment",
+    ),
   ];
 }
 

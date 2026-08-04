@@ -25,7 +25,7 @@ STALE_DAYS = 60
 LABEL = "reassessment"
 TITLE_PREFIX = "Reassessment: "
 DEFAULT_REPO = "yearn/risk-score"
-PUBLIC_REPORT_BASE_URL = "https://risk.yearn.farm/report"
+PUBLIC_REPORT_BASE_URL = "https://curation.yearn.fi/report"
 
 ASSESSMENT_LINE_RE = re.compile(r"\*\*Assessment Date:\*\*\s*([^\n]+)", re.IGNORECASE)
 STATUS_LINE_RE = re.compile(r"\*\*Status:\*\*\s*([^\n]+)", re.IGNORECASE)

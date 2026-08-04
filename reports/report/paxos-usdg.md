@@ -1,6 +1,6 @@
 # Protocol Risk Assessment: Paxos USDG (Global Dollar)
 
-- **Assessment Date:** March 20, 2026 (reassessed June 26, 2026)
+- **Assessment Date:** March 20, 2026 (reassessed July 30, 2026)
 - **Token:** USDG (Global Dollar)
 - **Chain:** Ethereum
 - **Token Address:** [`0xe343167631d89B6Ffc58B88d6b7fB0228795491D`](https://etherscan.io/address/0xe343167631d89B6Ffc58B88d6b7fB0228795491D)
@@ -14,15 +14,15 @@ USDG's differentiating feature is its **distribution partner model** — ecosyst
 
 Reserves consist of **cash and cash equivalents** (primarily short-duration U.S. Treasury Bills) held in **segregated accounts** at regulated custodians, with **monthly attestation reports** from independent accounting firms published on the Paxos transparency portal.
 
-USDG is deployed on **4 chains**: Ethereum, Solana (52.3% of supply), X Layer (19.5%), and Ink (6.2%). Cross-chain bridging between Ethereum and Solana is handled via **LayerZero V2 OFT**.
+USDG has material supply on **6 chains**: X Layer (57.3% of supply), Solana (19.3%), Ethereum (12.6%), Robinhood Chain (9.5%), Ink (1.2%), and Hyperliquid L1 (<0.1%). A seventh deployment on **Arbitrum** is live but negligible (~601,207 USDG). Cross-chain bridging is handled via **LayerZero V2 OFT** — the mainnet `OFTWrapper` has configured peers for Solana, X Layer, Ink, Arbitrum, and Robinhood Chain (verified onchain, see [Multi-Chain Deployments](#multi-chain-deployments)). The Hyperliquid L1 balance is a separate `USDG0` HIP-1 spot token that is **not** a peer of the Paxos wrapper.
 
-**Key metrics (June 26, 2026):**
+**Key metrics (July 30, 2026):**
 
-- **Total Supply (Ethereum):** ~494,698,323 USDG (~$495M) [onchain](https://etherscan.io/token/0xe343167631d89B6Ffc58B88d6b7fB0228795491D)
-- **Total Supply (All Chains):** ~$2.89B [DeFiLlama](https://stablecoins.llama.fi/stablecoin/286)
-- **Market Cap:** ~$2.89B
-- **30-Day Supply Change:** +$259M (+9.9%)
-- **DEX Liquidity (Ethereum):** TODO — refresh liquidity snapshot
+- **Total Supply (Ethereum):** ~452,279,600 USDG (~$452M) [onchain](https://etherscan.io/token/0xe343167631d89B6Ffc58B88d6b7fB0228795491D). In its same-day snapshot, DeFiLlama reports 456.4M USDG *minted* and 415.2M *circulating on Ethereum*; the ~41.2M reduction is supply bridged out to Ink and Hyperliquid
+- **Total Supply (All Chains):** ~$3.29B [DeFiLlama](https://stablecoins.llama.fi/stablecoin/286)
+- **Market Cap:** ~$3.29B
+- **30-Day Supply Change:** +433.7M USDG (+15.2%) — from 2,851.6M USDG (June 30) to 3,285.3M USDG (July 30), using DeFiLlama's `totalCirculating.peggedUSD` series [DeFiLlama](https://stablecoins.llama.fi/stablecoincharts/all?stablecoin=286)
+- **DEX Liquidity (Ethereum):** ~$24.2M across 9 pools, ~$20.5M of it the Curve USDG/USDC pool [DeFiLlama](https://yields.llama.fi/pools)
 - **CEX Listings:** OKX, Kraken, Bullish, KuCoin, Gate.io
 - **Price:** $0.99995 (at peg) [DeFiLlama](https://stablecoins.llama.fi/stablecoin/286)
 
@@ -68,14 +68,27 @@ USDG is deployed on **4 chains**: Ethereum, Solana (52.3% of supply), X Layer (1
 
 ### Multi-Chain Deployments
 
-| Chain | Token Address | Supply (DeFiLlama) | Share |
-|-------|---------------|-------------------:|------:|
-| X Layer | [`0x4ae46a509F6b1D9056937BA4500cb143933D2dc8`](https://etherscan.io/address/0x4ae46a509F6b1D9056937BA4500cb143933D2dc8) | $1,702.3M | 58.8% |
-| Solana | `2u1tszSeqZ3qBWF3uNGPFc8TzMk2tdiwknnRMWGWjGWH` | $697.2M | 24.1% |
-| Ethereum | [`0xe343167631d89B6Ffc58B88d6b7fB0228795491D`](https://etherscan.io/address/0xe343167631d89B6Ffc58B88d6b7fB0228795491D) | $455.4M | 15.7% |
-| Ink | [`0xe343167631d89B6Ffc58B88d6b7fB0228795491D`](https://etherscan.io/address/0xe343167631d89B6Ffc58B88d6b7fB0228795491D) | $37.7M | 1.3% |
-| Hyperliquid L1 | N/A | $1.6M | 0.1% |
-| **Total** | | **$2,894.2M** | 100% |
+Supply figures are the DeFiLlama snapshot of July 30, 2026. Onchain `totalSupply()` was read the same day and runs higher on every chain, since DeFiLlama's chart is a once-daily snapshot of a fast-growing supply — the gap is widest on Robinhood Chain (~$313M snapshot vs ~340M USDG onchain).
+
+| Chain | Token Address | Supply (DeFiLlama) | Share | LayerZero peer (eid) |
+|-------|---------------|-------------------:|------:|----------------------|
+| X Layer | [`0x4ae46a509F6b1D9056937BA4500cb143933D2dc8`](https://www.oklink.com/x-layer/evm/address/0x4ae46a509F6b1D9056937BA4500cb143933D2dc8) | $1,882.8M | 57.3% | [`0x9a71…3bbf`](https://www.oklink.com/x-layer/evm/address/0x9a7164112029b81c07636ab7b59fa813e0883bbf) (30274) |
+| Solana | [`2u1tszSeqZ3qBWF3uNGPFc8TzMk2tdiwknnRMWGWjGWH`](https://solscan.io/token/2u1tszSeqZ3qBWF3uNGPFc8TzMk2tdiwknnRMWGWjGWH) | $632.9M | 19.3% | OFT store PDA (30168) |
+| Ethereum | [`0xe343167631d89B6Ffc58B88d6b7fB0228795491D`](https://etherscan.io/address/0xe343167631d89B6Ffc58B88d6b7fB0228795491D) | $415.2M | 12.6% | — (origin chain) |
+| Robinhood Chain | [`0x5fc5360D0400a0Fd4f2af552ADD042D716F1d168`](https://robinhoodchain.blockscout.com/address/0x5fc5360D0400a0Fd4f2af552ADD042D716F1d168) | $313.2M | 9.5% | [`0x0d54…28d1`](https://robinhoodchain.blockscout.com/address/0x0d54755f5106BfdB43f7a35f5D49a23F940628d1) (30416) |
+| Ink | [`0xe343167631d89B6Ffc58B88d6b7fB0228795491D`](https://explorer.inkonchain.com/address/0xe343167631d89B6Ffc58B88d6b7fB0228795491D) | $39.5M | 1.2% | [`0x9e12…8971`](https://explorer.inkonchain.com/address/0x9e12c058a20c5b0eebaa00e44a712ec54b838971) (30339) |
+| Hyperliquid L1 | [`USDG0` HIP-1 spot token](https://hyperliquid.gitbook.io/hyperliquid-docs/for-developers/api/info-endpoint/spot) (index 352) | $1.8M | <0.1% | none — not a wrapper peer |
+| Arbitrum | [`0x004b506865409877c9fa29bfb1eba929984b9bbc`](https://arbiscan.io/address/0x004b506865409877c9fa29bfb1eba929984b9bbc) | not tracked (~$0.6M onchain) | <0.1% | [`0xc327…b6b6`](https://arbiscan.io/address/0xc3274ec3f772d8534575eaad5231cf250a48b6b6) (30110) |
+| **Total** | | **$3,285.3M** | 100% | |
+
+**Notes on the table:**
+
+- **Ethereum row is DeFiLlama's *circulating* figure.** Onchain `totalSupply()` is 452,279,600.38 USDG; DeFiLlama reports 456.4M minted and 415.2M circulating, subtracting the supply bridged out to Ink and Hyperliquid.
+- **Arbitrum is not tracked by DeFiLlama** but the deployment is live: `symbol()` returns `USDG`, `totalSupply()` is 601,207.02 USDG, and the mainnet wrapper holds a peer for eid `30110`. Supply is negligible today, but the route is an active inbound mint path into SC3's 45M capacity.
+- **Peers were enumerated onchain**, not taken from documentation: all `PeerSet` events on the wrapper since deployment plus current `peers(uint32)` reads. The wrapper returns `bytes32(0)` for the Hyperliquid eid (`30367`).
+- **`totalSupply()` read directly on each chain** (July 30, 2026, all 6 decimals): Ethereum 452,279,600.38 · X Layer 1,889,792,628.86 · Solana 635,205,494.89 (`getTokenSupply` on the mint) · Robinhood Chain 340,571,048.70 · Ink 40,021,748.03 · Arbitrum 601,207.02. The Robinhood Chain token address is confirmed from the wrapper itself — `token()` on [`0x0d54…28d1`](https://robinhoodchain.blockscout.com/address/0x0d54755f5106BfdB43f7a35f5D49a23F940628d1) returns `0x5fc5…d168` (`rpc.mainnet.chain.robinhood.com`, chain id 4663).
+- **Every configured inbound route requires the same 3-of-3 DVN quorum.** Read from `EndpointV2.getConfig(wrapper, receiveLib, srcEid, 2)`: required DVNs are LayerZero Labs [`0x0058…236b`](https://etherscan.io/address/0x00589dEDbd617E0cbcB916A9223F4D1300c294236b), Canary [`0xa4fe…c2cd`](https://etherscan.io/address/0xa4fe5a5b9a846458a70cd0748228aed3bf65c2cd), and Paxos [`0xb0b2…2daf`](https://etherscan.io/address/0xb0b2ef168f52f6d1e42f461e11117295ef992daf), with `optionalDVNCount = 0`. Confirmation requirements are Robinhood Chain and Arbitrum (40), X Layer and Ink (168), and Solana (32). Adding Robinhood Chain did not introduce a weaker quorum — but Paxos itself operates one of the three required DVNs, so only two verifiers are independent of the issuer.
+- **Hyperliquid L1 is not reachable from the Paxos wrapper.** The balance [DeFiLlama](https://stablecoins.llama.fi/stablecoin/286) attributes to LayerZero is a HIP-1 spot token named `USDG` with `fullName: USDG0`, `tokenId: 0xae87b5246dd9f377b14bbadcf3c72131`, `isCanonical: false`, and no linked EVM contract ([Hyperliquid `spotMeta` API](https://hyperliquid.gitbook.io/hyperliquid-docs/for-developers/api/info-endpoint/spot)). The mainnet [`OFTWrapper`](https://etherscan.io/address/0x147BdE4F997f0d4C7544ED0C55eAcf1E5E6bf9c4#readContract) returns `bytes32(0)` for the Hyperliquid eid (`30367`), and its full `PeerSet` history contains no Hyperliquid peer. The operator and control model of the USDG0 route remain **unverified**: this evidence establishes only that it is not a configured peer of this Paxos wrapper, not whether Paxos or a third party controls a separate adapter or custody route. Additional checks found no code at the canonical USDG address on [HyperEVM](https://hypurrscan.io/evm/address/0xe343167631d89B6Ffc58B88d6b7fB0228795491D) and no USDG entry in LayerZero's [public OFT registry](https://metadata.layerzero-api.com/v1/metadata/experiment/ofts/list). Identifying the controller requires tracing Ethereum USDG holders and `Transfer` events for the corresponding ~1.8M-balance escrow or recovering HyperCore deployment metadata.
 
 ## Audits and Due Diligence Disclosures
 
@@ -123,15 +136,15 @@ The USDG system is **moderate complexity**:
 - **Sherlock/Cantina:** No audit contests found
 - **Safe Harbor:** Not listed on the SEAL Safe Harbor registry
 
-The absence of a formal public bug bounty with monetary rewards is a weakness for a $1.67B stablecoin.
+The absence of a formal public bug bounty with monetary rewards is a weakness for a $3.29B stablecoin.
 
 ## Historical Track Record
 
 - **Contract deployed:** October 7, 2024 (block 20,915,336) — **~21 months** in production
 - **Official launch:** November 1, 2024
-- **Total supply:** ~$2.89B across 5 chains ($495M on Ethereum)
-- **Growth trajectory:** From ~$352M (mid-2025) to ~$2.89B (June 2026) — approximately 721% growth
-- **30-day change:** +$259M (+9.9%)
+- **Total supply:** ~$3.29B across 6 chains with material supply (~$452M on Ethereum)
+- **Growth trajectory:** From ~$352M (mid-2025) to ~$3.29B (July 2026) — approximately 834% growth
+- **30-day change:** +433.7M USDG (+15.2%)
 - **Security incidents:** None. No exploits, hacks, or depegging events reported
 - **Peg stability:** Price consistently at $0.999-$1.000 across all venues
 - **Paxos track record:** Paxos has operated USDP (Pax Dollar, formerly PAX) since 2018 and operates PYUSD (PayPal USD) on behalf of PayPal. No Paxos-issued stablecoin has suffered a security incident or depeg
@@ -169,37 +182,46 @@ The absence of a formal public bug bounty with monetary rewards is a weakness fo
 
 ### DEX Liquidity (Ethereum)
 
-| Pool | DEX | Liquidity | 24h Volume |
-|------|-----|----------:|------------|
-| USDG/USDC | Curve | $7.88M | $3.39M |
-| USDC/USDG | Uniswap V4 | $1.82M | $1.43M |
-| USDG/USDT | Uniswap V4 | $97.4K | $165K |
-| USDC/USDG | Uniswap V3 | $1.8K | $71K |
-| **Ethereum Total** | | **~$9.8M** | **~$5.1M** |
+Pool data below is the [DeFiLlama yields API](https://yields.llama.fi/pools) snapshot of July 30, 2026. `n/r` means DeFiLlama does not report a volume figure for that pool — it is not a claim of zero volume.
+
+| Pool | DEX | Liquidity | 7d Volume |
+|------|-----|----------:|-----------|
+| USDG/USDC | Curve | $20.50M | $46.15M |
+| USDC/USDG | Uniswap V4 | $0.99M | n/r |
+| syrupUSDG/USDG | Uniswap V4 | $0.99M | n/r |
+| USDC/USDG | Ekubo | $0.89M | n/r |
+| USDT/USDG | Uniswap V4 | $0.55M | n/r |
+| USDT/USDG | Ekubo (3 pools) | $0.32M | n/r |
+| **Ethereum Total** | 9 pools | **~$24.2M** | |
 
 ### DEX Liquidity (Solana)
 
-| Pool | DEX | Liquidity | 24h Volume |
-|------|-----|----------:|------------|
-| USDG/USDC | Meteora | $37.8M | ~$0 |
-| USDG/USDC | Orca | $16.2M | $1.35M |
-| USDG/SOL | Orca | $4.76M | $2.49M |
-| Various pairs | Multiple | ~$8.7M | ~$1.8M |
-| **Solana Total** | | **~$66.5M** | **~$5.6M** |
+| Pool | DEX | Liquidity | 7d Volume |
+|------|-----|----------:|-----------|
+| USDG/USDC | Orca | $18.82M | $2.73M |
+| USDG/USDC | Kamino Liquidity | $14.64M | $0.11M |
+| SOL/USDG | Orca | $3.48M | $5.18M |
+| USDG/ONYC | Raydium | $3.04M | $0.77M |
+| USDG/USX | Orca | $2.99M | $0.71M |
+| Other pairs | Multiple (12 pools) | ~$17.51M | ~$10.24M |
+| **Solana Total** | 17 pools | **~$60.5M** | |
+
+The Meteora USDG/USDC pool that held $37.8M at the June 2026 snapshot no longer appears in the DeFiLlama pool set; Solana depth has shifted to Orca and Kamino.
 
 ### Aggregate Liquidity
 
 | Source | Available | Notes |
 |--------|----------|-------|
-| DEX (all chains) | ~$78.7M | Active liquidity ~$40.9M (excluding zero-volume pools) |
+| DEX (all chains) | ~$84.7M | 26 pools; the 13 that report volume hold $75.7M and traded $65.9M over the last 7 days |
 | CEX | OKX, Kraken, Bullish, KuCoin, Gate.io | ~$24M total 24h volume |
 | Direct redemption | Unlimited (via Paxos) | Requires KYC account, processed during business hours |
 
-- **Primary exit (permissionless):** DEX swap or CEX trade — reasonable liquidity with ~$9.8M on Ethereum DEXes. A $1M swap on Curve USDG/USDC pool would incur <0.5% slippage
+- **Primary exit (permissionless):** DEX swap or CEX trade — reasonable liquidity with ~$24.2M on Ethereum DEXes, ~85% of it in the Curve USDG/USDC pool. A $1M swap on that pool would incur <0.5% slippage
+- **Lending-market depth is not exit liquidity:** a further ~$272M USDG sits in Ethereum lending/yield venues (Maple $226.0M, Aave v4 $30.8M, Aave v3 $7.0M, Pendle ~$4.0M). This is integration depth — withdrawing depends on each market's utilization and does not add sell-side liquidity
 - **Primary exit (KYC):** Direct 1:1 redemption from Paxos — most capital-efficient but requires account setup
 - **Same-value asset:** USD stablecoin — no price divergence risk from the underlying
 - **No withdrawal queue:** DEX/CEX exits are instant. Direct Paxos redemption follows standard processing times
-- **Ethereum-only concern:** The Ethereum DEX liquidity (~$9.8M) is modest relative to the onchain supply ($472M). Large exits exceeding $5M+ would require CEX routing or direct Paxos redemption
+- **Ethereum-only concern:** The Ethereum DEX liquidity (~$24.2M) is still modest relative to the onchain supply (~$452M), and it is concentrated in a single Curve pool. Exits beyond ~$5M would benefit from CEX routing or direct Paxos redemption
 
 ## Centralization & Control Risks
 
@@ -264,7 +286,7 @@ The absence of a formal public bug bounty with monetary rewards is a weakness fo
 
 - **No DeFi protocol dependencies** — USDG is a standalone stablecoin, not dependent on any external DeFi protocols
 - **Banking infrastructure** — reserves held at regulated custodians (inherent to fiat-backed stablecoins)
-- **LayerZero V2** — cross-chain bridging to Solana via OFTWrapper. Non-critical for Ethereum-only usage. 45M USDG capacity
+- **LayerZero V2** — cross-chain bridging via OFTWrapper to Solana, X Layer, Ink, Arbitrum, and Robinhood Chain. Non-critical for Ethereum-only usage, but ~87% of total supply now sits on chains reachable through this wrapper, and its inbound receive path can mint canonical USDG on Ethereum up to the 45M USDG SC3 capacity
 - **Curve/Uniswap** — DEX liquidity for secondary market exits (not a protocol dependency, but relevant for exit liquidity)
 
 ## Operational Risk
@@ -284,7 +306,7 @@ The absence of a formal public bug bounty with monetary rewards is a weakness fo
 |----------|---------|---------|
 | USDG Token | [`0xe343167631d89B6Ffc58B88d6b7fB0228795491D`](https://etherscan.io/address/0xe343167631d89B6Ffc58B88d6b7fB0228795491D) | `totalSupply()`, `paused()`, Transfer events, Mint/Burn events |
 | SupplyControl | [`0x9a7164112029b81c07636AB7b59fA813E0883BBF`](https://etherscan.io/address/0x9a7164112029b81c07636AB7b59fA813E0883BBF) | Supply controller additions/removals, rate limit changes |
-| TimelockController | [`0x9036566eAa5F83E0b9E1161C6c602b0Adf997654`](https://etherscan.io/address/0x9036566eAa5F83E0b9E1161C6c602b0Adf997654) | `CallScheduled`, `CallExecuted` events (3h delay — gives monitoring window) |
+| TimelockController | [`0x9036566eAa5F83E0b9E1161C6c602b0Adf997654`](https://etherscan.io/address/0x9036566eAa5F83E0b9E1161C6c602b0Adf997654) | `CallScheduled`, `CallExecuted` events (24h delay — gives monitoring window) |
 | Operational Multisig | [`0x0644Bd0248d5F89e4F6E845a91D15c23591e5D33`](https://etherscan.io/address/0x0644Bd0248d5F89e4F6E845a91D15c23591e5D33) | Submitted/executed transactions (pause, freeze, supply management) |
 | Operations MPC Wallet (all governance) | [`0x3Af3e85f4f97De7AD0f000B724Fb77fE5ffc024B`](https://etherscan.io/address/0x3Af3e85f4f97De7AD0f000B724Fb77fE5ffc024B) | Any transactions — controls pause, freeze, timelock scheduling, supply controllers. MPC wallet (likely Fordefi) — key sharded across multiple parties. Monitor for unexpected transactions |
 | Gas Station | [`0x264bd8291fae1d75db2c5f573b07faa6715997b5`](https://etherscan.io/address/0x264bd8291fae1d75db2c5f573b07faa6715997b5) | Funds MPC wallet before transactions — unusual ETH outflows could indicate MPC key migration or provider change |
@@ -321,7 +343,7 @@ The absence of a formal public bug bounty with monetary rewards is a weakness fo
 - **Solid audit coverage:** 6 audits from 3 reputable firms including Trail of Bits and Zellic. Source code is open (MIT license)
 - **24-hour timelock on critical changes:** Contract upgrades and admin changes now have a 24-hour delay (improved from 3h), providing meaningful monitoring window for integrators
 - **Rate-limited minting:** Supply controllers have capacity limits and refill rates, preventing instantaneous unlimited minting
-- **Significant market adoption:** $2.89B total supply with major partners (Kraken, Robinhood, Galaxy Digital, BitGo). Strong growth trajectory
+- **Significant market adoption:** $3.29B total supply with major partners (Kraken, Robinhood, Galaxy Digital, BitGo). Strong growth trajectory
 
 ### Key Risks
 
@@ -363,10 +385,10 @@ The absence of a formal public bug bounty with monetary rewards is a weakness fo
 | Audits | 6 audits from 3 reputable firms: Zellic (3), Trail of Bits (1), Halborn (2). Covers core contracts, cross-chain, rewards, and signatures |
 | Bug bounty | No confirmed public bug bounty. Possible private HackerOne program |
 | Production history | **~21 months** (Oct 2024). Paxos has 7+ years stablecoin experience (USDP since 2018) |
-| TVL | **~$2.89B** total supply, $495M on Ethereum |
+| TVL | **~$3.29B** total supply, ~$452M on Ethereum |
 | Security incidents | None. Zero incidents across all Paxos stablecoins (USDP, PYUSD, USDG) |
 
-**Score: 2.0/5** — Solid audit coverage from 3 reputable firms including Trail of Bits (industry gold standard). 21 months of production with $2.89B supply and zero incidents, plus Paxos's 7+ year stablecoin track record lends additional confidence. However, the lack of a formal public bug bounty prevents a score of 1.5. Between score 1 (3+ audits, >2 years, >$100M) and score 2 (2+ audits, 1-2 years, >$50M) — the strong firm quality and massive TVL push toward 1.5, while the production history and no bug bounty push toward 2.
+**Score: 2.0/5** — Solid audit coverage from 3 reputable firms including Trail of Bits (industry gold standard). 21 months of production with $3.29B supply and zero incidents, plus Paxos's 7+ year stablecoin track record lends additional confidence. However, the lack of a formal public bug bounty prevents a score of 1.5. Between score 1 (3+ audits, >2 years, >$100M) and score 2 (2+ audits, 1-2 years, >$50M) — the strong firm quality and massive TVL push toward 1.5, while the production history and no bug bounty push toward 2.
 
 #### Category 2: Centralization & Control Risks (Weight: 30%)
 
@@ -404,7 +426,7 @@ The absence of a formal public bug bounty with monetary rewards is a weakness fo
 | Infrastructure | Banking/custodian (inherent to fiat-backed), LayerZero (bridging) |
 | Criticality | Banking dependency is fundamental but not a DeFi protocol risk |
 
-**Dependencies Score: 1.5/5** — Minimal external protocol dependencies. Banking infrastructure dependency is inherent to all fiat-backed stablecoins (USDC, USDT). LayerZero bridge is non-critical for Ethereum-only usage. Between score 1 (no external dependencies) and score 2 (1-2 blue-chip dependencies).
+**Dependencies Score: 1.5/5** — Minimal external protocol dependencies. Banking infrastructure dependency is inherent to all fiat-backed stablecoins (USDC, USDT). The LayerZero bridge is non-critical for Ethereum-only usage — an Ethereum holder's balance does not depend on it — though the wrapper's inbound path can mint canonical USDG on Ethereum, bounded by the 45M SC3 capacity and a 3-of-3 DVN quorum on every configured route. Between score 1 (no external dependencies) and score 2 (1-2 blue-chip dependencies).
 
 **Centralization Score = (3.5 + 3.5 + 1.5) / 3 = 2.83**
 
@@ -445,13 +467,13 @@ The absence of a formal public bug bounty with monetary rewards is a weakness fo
 | Factor | Assessment |
 |--------|-----------|
 | Exit mechanism | DEX swap (permissionless), CEX trade, or direct Paxos redemption (KYC) |
-| DEX liquidity (ETH) | ~$9.8M across Curve and Uniswap ($7.88M in Curve USDG/USDC) |
+| DEX liquidity (ETH) | ~$24.2M across Curve, Uniswap V4 and Ekubo ($20.5M in Curve USDG/USDC) |
 | CEX liquidity | OKX, Kraken, Bullish, KuCoin, Gate.io — total ~$24M 24h volume |
 | Direct redemption | 1:1 from Paxos (unlimited, KYC required) |
 | Same-value asset | USD stablecoin — no price divergence risk |
 | Slippage | <0.5% for $1M swap on Curve USDG/USDC |
 
-**Score: 2.0/5** — Multiple exit paths: DEX (permissionless, ~$9.8M ETH liquidity), CEX (major exchanges), and direct Paxos redemption (1:1, KYC). Same-value asset eliminates price risk. The $9.8M Ethereum DEX liquidity is modest relative to $472M onchain supply — exits >$5M require CEX routing or Paxos redemption. Direct redemption provides a strong backstop but requires KYC friction. Per rubric: "Direct redemption with minor delays" + ">$5M, <1% slippage" + same-value asset adjustment → score 2.
+**Score: 2.0/5** — Multiple exit paths: DEX (permissionless, ~$24.2M ETH liquidity), CEX (major exchanges), and direct Paxos redemption (1:1, KYC). Same-value asset eliminates price risk. The ~$24.2M Ethereum DEX liquidity is modest relative to ~$452M onchain supply and concentrated in one Curve pool — exits well above $5M benefit from CEX routing or Paxos redemption. Direct redemption provides a strong backstop but requires KYC friction. Per rubric: "Direct redemption with minor delays" + ">$5M, <1% slippage" + same-value asset adjustment → score 2.
 
 #### Category 5: Operational Risk (Weight: 5%)
 
@@ -504,7 +526,7 @@ USDG benefits from Paxos's established stablecoin track record, highest-quality 
 ## Reassessment Triggers
 
 - **Time-based:** Reassess in 6 months (December 2026)
-- **TVL-based:** Reassess if total supply changes by more than ±50% from current $2.89B
+- **TVL-based:** Reassess if total supply changes by more than ±50% from current $3.29B
 - **Incident-based:** Reassess after any exploit, freeze affecting DeFi protocols, depegging event, or adverse regulatory action
 - **Governance-based (IMPORTANT):** Reassess if governance transitions from MPC wallet back to multisig (score improvement), or if MPC wallet shows signs of compromise. Any change in role holders, timelock delay, or MPC provider/gas station infrastructure warrants reassessment
 - **MPC transparency:** Reassess if Paxos discloses MPC provider, quorum, and policy configuration (potential score improvement from reduced uncertainty)
@@ -512,6 +534,16 @@ USDG benefits from Paxos's established stablecoin track record, highest-quality 
 - **Regulatory-based:** Reassess if MAS takes enforcement action, if Paxos loses its MPI license, or if regulatory status changes
 - **Bug bounty:** Reassess if Paxos launches a public bug bounty (score improvement)
 - **Proof of Reserves:** Reassess if onchain reserve verification (e.g., Chainlink PoR) is deployed (score improvement)
+
+---
+
+## Assessment History
+
+| Date | Score | Notes |
+| --- | --- | --- |
+| [March 20, 2026](https://github.com/yearn/risk-score/pull/102) | 2.4 | Initial assessment |
+| [June 26, 2026](https://github.com/yearn/risk-score/pull/270) | 2.4 | Reassessment: governance restructured to a single MPC wallet, timelock 3h → 24h; score unchanged |
+| [July 30, 2026](https://github.com/yearn/risk-score/pull/366) | 2.4 | Reassessment: supply/chain refresh (Robinhood Chain added, 6 chains with material supply), LayerZero peer set and DVN quorum enumerated onchain; score unchanged |
 
 ---
 
@@ -540,7 +572,7 @@ USDG benefits from Paxos's established stablecoin track record, highest-quality 
 - **Mitigation:** Ensure the vault/strategy addresses are known to Paxos and not on any sanctions list
 
 **Liquidity Risk for yvUSD: LOW-MEDIUM**
-- Ethereum DEX liquidity (~$9.8M) supports moderate position sizes
+- Ethereum DEX liquidity (~$24.2M) supports moderate position sizes
 - A yvUSD strategy holding <$2M in USDG-related positions could exit via DEX with <0.5% slippage
 - Larger positions would require CEX routing or Paxos redemption
 - Given yvUSD's current TVL (~$3M), USDG liquidity is adequate for current scale
@@ -550,9 +582,9 @@ USDG benefits from Paxos's established stablecoin track record, highest-quality 
 | Risk Factor | Level | Notes |
 |------------|-------|-------|
 | Depeg | Low | Regulated, T-Bill backed, 7+ year Paxos track record |
-| Smart Contract | Low-Medium | 6 audits, but upgradeable with 3h timelock |
+| Smart Contract | Low-Medium | 6 audits, but upgradeable with 24h timelock |
 | Freeze | Medium | Standard for regulated stablecoins, never used vs DeFi |
-| Liquidity | Low-Medium | $9.8M DEX adequate for current yvUSD scale |
+| Liquidity | Low-Medium | ~$24.2M DEX adequate for current yvUSD scale |
 | **Overall** | **Low-Medium** | Suitable with position size limits |
 
 ## Appendix B — USDG Risk as Collateral for yvUSDC-1 Lending
@@ -568,8 +600,8 @@ USDG benefits from Paxos's established stablecoin track record, highest-quality 
 - Appropriate for same-value lending (USDG collateral for USDC borrows)
 
 **Liquidation Risk: MEDIUM**
-- **DEX liquidation path:** Curve USDG/USDC pool ($7.88M liquidity) is the primary liquidation venue on Ethereum. A $1M liquidation would execute with <0.5% slippage. However, a $5M+ simultaneous liquidation could move the market
-- **Liquidation depth vs exposure:** Current Ethereum DEX liquidity (~$9.8M) supports liquidation of positions up to ~$3-5M without excessive slippage. Larger positions require multi-block liquidation or CEX routing
+- **DEX liquidation path:** Curve USDG/USDC pool ($20.5M liquidity) is the primary liquidation venue on Ethereum. A $1M liquidation would execute with <0.5% slippage. However, a $5M+ simultaneous liquidation could move the market
+- **Liquidation depth vs exposure:** Current Ethereum DEX liquidity (~$24.2M, ~85% in one Curve pool) supports liquidation of positions up to ~$5M without excessive slippage. Larger positions require multi-block liquidation or CEX routing
 - **Same-value asset:** Since USDG and USDC are both USD stablecoins, liquidation is essentially a stablecoin-to-stablecoin swap — much lower risk than volatile collateral liquidations
 
 **Freeze Risk for Lending: MEDIUM-HIGH**
@@ -588,7 +620,7 @@ USDG benefits from Paxos's established stablecoin track record, highest-quality 
 | Risk Factor | Level | Notes |
 |------------|-------|-------|
 | Collateral Quality | High | T-Bill backed, MAS-supervised, 1:1 with USD |
-| Liquidation | Medium | $9.8M DEX liquidity, <0.5% slippage up to $1M |
+| Liquidation | Medium | ~$24.2M DEX liquidity, <0.5% slippage up to $1M |
 | Freeze (Collateral) | Medium-High | Frozen collateral = unliquidatable = bad debt risk |
 | Counterparty | Low | Paxos well-regulated, zero incident history |
 | **Overall** | **Medium** | Acceptable with conservative LTV and position limits |
