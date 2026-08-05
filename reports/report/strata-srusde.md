@@ -4,7 +4,7 @@
 - **Token:** srUSDe (Senior Tranche USDe)
 - **Chain:** Ethereum
 - **Token Address:** [`0x3d7d6fdf07EE548B939A80edbc9B2256d0cdc003`](https://etherscan.io/address/0x3d7d6fdf07EE548B939A80edbc9B2256d0cdc003)
-- **Final Score: 2.6/5.0**
+- **Final Score: 2.4/5.0**
 
 ## Overview + Links
 
@@ -97,19 +97,19 @@ All proxy admins are owned by the 48h Timelock ([`0xb2A3CF69C97AFD4dE7882E5fEE12
 
 All core contracts are **verified on Etherscan**:
 
-| Contract | Etherscan Name | Verified | Proxy |
-|----------|---------------|----------|-------|
-| srUSDe | TransparentUpgradeableProxy → Tranche (impl [`0xe894055ca1c73648927e225f3ca38ed48e30210b`](https://etherscan.io/address/0xe894055ca1c73648927e225f3ca38ed48e30210b)) | Yes | Yes |
-| jrUSDe | TransparentUpgradeableProxy → Tranche (impl [`0xe91869f96806b480dd61d57e17919068d35ac09c`](https://etherscan.io/address/0xe91869f96806b480dd61d57e17919068d35ac09c)) | Yes | Yes |
-| StrataCDO | TransparentUpgradeableProxy → StrataCDO (impl [`0xb3d4f2c2123f8c3ca85ae7a6d48aa2ef049c79ba`](https://etherscan.io/address/0xb3d4f2c2123f8c3ca85ae7a6d48aa2ef049c79ba)) | Yes | Yes |
-| sUSDeStrategy | TransparentUpgradeableProxy → sUSDeStrategy (impl [`0x2b9796606c8480312a572742c00f606ef4adb107`](https://etherscan.io/address/0x2b9796606c8480312a572742c00f606ef4adb107)) | Yes | Yes |
-| Accounting | TransparentUpgradeableProxy → Accounting (impl [`0x5a8d34d785b5008cce9b9f4aaa0e445f6959cbff`](https://etherscan.io/address/0x5a8d34d785b5008cce9b9f4aaa0e445f6959cbff)) | Yes | Yes |
-| AccessControlManager | AccessControlManager | Yes | No |
-| Admin Multisig | GnosisSafeProxy | Yes | Yes |
-| Operational Multisig | SafeProxy | Yes | Yes |
-| 48h Timelock | StrataMasterChef (OZ TimelockController) | Yes | No |
-| 24h Timelock | StrataMasterChef (OZ TimelockController) | Yes | No |
-| Guardian | EOA (not a contract) | N/A | N/A |
+| Contract | Etherscan Name | Proxy |
+|----------|---------------|-------|
+| srUSDe | TransparentUpgradeableProxy → Tranche (impl [`0xe894055ca1c73648927e225f3ca38ed48e30210b`](https://etherscan.io/address/0xe894055ca1c73648927e225f3ca38ed48e30210b)) | Yes |
+| jrUSDe | TransparentUpgradeableProxy → Tranche (impl [`0xe91869f96806b480dd61d57e17919068d35ac09c`](https://etherscan.io/address/0xe91869f96806b480dd61d57e17919068d35ac09c)) | Yes |
+| StrataCDO | TransparentUpgradeableProxy → StrataCDO (impl [`0xb3d4f2c2123f8c3ca85ae7a6d48aa2ef049c79ba`](https://etherscan.io/address/0xb3d4f2c2123f8c3ca85ae7a6d48aa2ef049c79ba)) | Yes |
+| sUSDeStrategy | TransparentUpgradeableProxy → sUSDeStrategy (impl [`0x2b9796606c8480312a572742c00f606ef4adb107`](https://etherscan.io/address/0x2b9796606c8480312a572742c00f606ef4adb107)) | Yes |
+| Accounting | TransparentUpgradeableProxy → Accounting (impl [`0x5a8d34d785b5008cce9b9f4aaa0e445f6959cbff`](https://etherscan.io/address/0x5a8d34d785b5008cce9b9f4aaa0e445f6959cbff)) | Yes |
+| AccessControlManager | AccessControlManager | No |
+| Admin Multisig | GnosisSafeProxy | Yes |
+| Operational Multisig | SafeProxy | Yes |
+| 48h Timelock | StrataMasterChef (OZ TimelockController) | No |
+| 24h Timelock | StrataMasterChef (OZ TimelockController) | No |
+| Guardian | EOA (not a contract) | N/A |
 
 **Note**: Both timelocks are registered on Etherscan as `StrataMasterChef` but contain standard OpenZeppelin TimelockController functions (`schedule`, `execute`, `cancel`, `getMinDelay`). Delays are 172,800 seconds (48h) and 86,400 seconds (24h). Each proxy contract has its own dedicated ProxyAdmin, all owned by the 48h Timelock.
 
@@ -254,7 +254,8 @@ The senior tranche's zero cooldown is a **governance-mutable parameter**, not a 
 ### Withdrawal Restrictions
 
 - **Cooldown period**: None for sUSDe redemptions; ~1 day for USDe redemptions. Both are governance-mutable — `setCooldowns` can reimpose up to 7 days on the Strata side, and Ethena independently controls its own `cooldownDuration`
-- **Coverage protection**: Senior deposits gate at a 6% junior/senior ratio and the hard floor sits at 5% (105% coverage). This protects the senior tranche but could restrict activity in stressed conditions
+- **Coverage protection binds junior, not senior**: `Accounting.maxWithdraw` caps *junior* redemptions so junior NAV cannot fall below 5% of senior, and the 6% buffer gates new *senior deposits*. Neither restricts senior redemptions — `maxWithdraw(srUSDe)` returns the full `srtNav`
+- **Pause is the real restriction**: `StrataCDO.maxWithdraw` returns 0 whenever `actionsSrt.isWithdrawEnabled` is false, and `setActionStates` is callable instantly by the 2-of-3 Operational Multisig with no timelock
 - **Self-balancing**: The coverage mechanism is designed to be self-balancing -- thinner junior coverage attracts more liquidity via higher junior yields
 
 ### Liquidity Assessment
@@ -314,13 +315,13 @@ Strata uses a layered Role-Based Access Control (RBAC) system in the **AccessCon
 |------------|------|-------------|-------------------|
 | **Ethena (sUSDe/USDe)** | Yield source & collateral | **Critical** | All deposited assets staked in Ethena's sUSDe vault. Ethena insolvency, USDe depegging, or sUSDe exploit would directly impact srUSDe. Senior tranche principal at risk if junior tranche is depleted |
 | **Aave v3 Core** | Benchmark rate oracle | **High** | Supply-weighted average of USDC/USDT lending rates used for benchmark. The feed can use a fresh pushed round, but a provider failure could block fresh fallback calculations until governance replaces the provider |
-| **Gnosis Safe** | Multisig infrastructure | **High** | All governance actions flow through Safe multisigs |
 | **Monitoring stack** | Internal and third-party monitoring | **Medium** | [Security documentation](https://docs.strata.markets/technical-documentation/security) describes continuous anomaly detection and protective responses, but does not identify every current vendor or publish service-level guarantees |
-| **Ethereum L1** | Settlement layer | **High** | All contracts deployed on Ethereum mainnet only |
 
-**Key dependency risk**: For srUSDe specifically, Strata has a **single critical yield source dependency** on Ethena/sUSDe. This coupling is intentional to the product but remains a direct loss path if Ethena fails. The benchmark provider reads Aave v3 Core; [`AprPairFeed`](https://github.com/Strata-Markets/contracts/blob/tranches/contracts/tranches/oracles/AprPairFeed.sol) can use a fresh pushed round and governance can replace the provider, but there is no automatic alternate provider if the [`AaveAprPairProvider`](https://github.com/Strata-Markets/contracts/blob/tranches/contracts/tranches/strategies/ethena/AaveAprPairProvider.sol) fails.
+**Key dependency risk**: srUSDe has a **single critical dependency** on Ethena/sUSDe. All senior assets sit in sUSDe, so an Ethena insolvency, USDe depeg, or sUSDe exploit is a direct loss path once the junior tranche is exhausted. The coupling is intentional to a product whose purpose is tranching sUSDe yield, but intent does not reduce the exposure for a holder.
 
-**Note on protocol-wide surface area**: Strata now runs **six live markets** — Ethena USDe (srUSDe), Neutrl NUSD, Midas mHYPER, Midas mM1-USD, Saturn USDat (senior tranche deployed April 24, 2026), and Hastra PRIME (senior tranche deployed May 17, 2026). Each has its own CDO/Strategy/Accounting/AprPairFeed/AccessControlManager stack but shares the same multisig and timelock governance. This diversifies the protocol's yield mix away from sole reliance on Ethena, but materially increases overall protocol surface area — none of the newer markets have public audit coverage, and operational mistakes on any of them could consume incident-response bandwidth that srUSDe depends on. The shared 48h Timelock is the concrete coupling: its July 30, 2026 execution targeted the **Saturn** market's Accounting contract, showing sister-market changes use the same governance path that controls srUSDe.
+**Benchmark rate path**: [`AprPairFeed`](https://github.com/Strata-Markets/contracts/blob/tranches/contracts/tranches/oracles/AprPairFeed.sol) prefers a pushed round (`sourcePref = Feed`) but falls back to reading the provider live once a round is older than `roundStaleAfter()` = 14,400s (4h). The last pushed round dates to **May 7, 2026**, roughly 90 days stale, so the operative path today is a **live read of [`AaveAprPairProvider`](https://github.com/Strata-Markets/contracts/blob/tranches/contracts/tranches/strategies/ethena/AaveAprPairProvider.sol)**, which returns a current timestamp on every call. There is no automatic alternate provider if that read fails, and governance would have to replace it. A failure distorts the senior/junior yield split rather than the principal.
+
+**Shared governance with sister markets**: Strata runs six live markets, each with its own CDO/Strategy/Accounting stack but sharing srUSDe's multisigs and timelocks. Only one aspect of this is an srUSDe risk — the shared 48h Timelock queue. Its July 30, 2026 execution targeted the **Saturn** market's Accounting contract, so sister-market changes flow through the same governance path that can upgrade srUSDe, and reviewers monitoring that timelock must triage operations that have nothing to do with this token. The sister markets are not srUSDe dependencies and their yield sources create no exposure for srUSDe holders.
 
 ## Operational Risk
 
@@ -455,9 +456,9 @@ Strata uses a layered Role-Based Access Control (RBAC) system in the **AccessCon
 - **TVL**: ~$75.8M current; peaked at ~$326.4M. Four distinct sharp drawdown events on record (Jan, early Apr, late Apr, Jun-Jul 2026), giving a peak-to-current decline of ~77%.
 - **Incidents**: None reported.
 
-**Audit & Security Reviews Score: 2.0** -- Three reputable firms completed eight engagements, and the $250,000 Immunefi maximum exceeds the rubric's $200,000 threshold.
+**Audit & Security Reviews Score: 2.0** -- Three reputable firms completed eight engagements, alongside a live Immunefi program with a $250,000 maximum reward.
 
-**Historical Track Record Score: 2.5** -- The rubric's two columns disagree: ~10 months in production sits in the 6–12 month band (score 3), while $75.8M TVL sits in the >$50M band (score 2). Averaging them gives 2.5. Scale is genuine but not durable — TVL has been above $50M for most of 2026 yet swung between $50.5M and $99.7M within the last ten weeks alone, so the sustained-scale reading that would justify a 2 is not supported.
+**Historical Track Record Score: 2.5** -- ~10 months in production scores 3 and $75.8M TVL scores 2, averaging to 2.5. TVL is large but not steady, swinging between $50.5M and $99.7M in the last ten weeks.
 
 **Score: 2.25/5** -- `(2.0 + 2.5) / 2 = 2.25`. The live bounty and eight engagements across three reputable firms carry the audit subcategory, while a young and volatile production history and unaudited market-specific code hold the track-record side back.
 
@@ -475,32 +476,30 @@ Strata uses a layered Role-Based Access Control (RBAC) system in the **AccessCon
 - Redemption speed (`setCooldowns`) is governance-mutable up to 7 days via either timelock
 - No external/independent signers on either multisig
 
-**Governance Score: 3.0** -- Governance is layered and demonstrably active on the 48h path, with an independent Guardian able to cancel. Against that: both multisigs are low-threshold, internal-only, and overlapping; pause needs only 2 internal keys; the 24h timelock is misconfigured; and the parameter that makes srUSDe instantly redeemable is itself timelock-mutable. Held at 3.0.
+**Governance Score: 3.0** -- Mapping to the rubric's three columns: *Upgradeability* sits at 4 — every proxy is upgradeable behind a 3-of-4 Safe, which is the "low threshold" band, not the 5/9 band. *Timelock* sits at 2-3 — 48h clears the "24+ hours" requirement but falls well short of the 7-day band that scores 1, and it covers all upgrades and Ownable config. *Privileged roles* sits at 3-4 — upgrades and strategy config are timelock-constrained and no role can withdraw user deposits, but pause is exercisable instantly by a 2-of-3 internal Safe and zeroes redemption capacity. The 48h timelock and the independent Cyfrin Guardian holding CANCELLER are what hold this at 3.0 rather than 4.0; they do not pull it below 3.0, because the rubric penalises the low multisig thresholds and the unconstrained pause role in the other two columns.
 
 **Subcategory B: Programmability**
 
 - srUSDe exchange rate: fully onchain ERC-4626 (`convertToAssets(1e18) = 1.028479`)
-- Yield distribution (DYS): mostly programmatic using AprPairFeed from Aave, with `roundStaleAfter()` = 14,400s (4h) staleness bound
-- Risk-premium parameters (x, y, k): set by team initially, planned transition to independent risk managers (not yet implemented)
-- APR updates: triggered manually by Operational Multisig (but computation is onchain)
+- Yield distribution (DYS): computed onchain. The benchmark rate resolves through a **live `AaveAprPairProvider` read**, not a manual push — the last pushed round is from May 7, 2026 and is ~90 days past the 4h `roundStaleAfter()` bound, so `latestRoundData()` takes the provider fallback branch on every call
+- Manual override: the Operational Multisig (2/3) can call `updateRoundData` to push a round that takes precedence over the live Aave read for 4 hours. This shifts yield between the senior and junior tranches; it does not move principal
+- Risk-premium parameters (x, y, k): admin-set, last changed February 23, 2026. A planned transition to independent risk managers is not implemented
 - Accounting: fully onchain
 - No srUSDe-market implementation upgraded since February 2026
 
-**Programmability Score: 2.5** -- Unchanged. Most critical functions are onchain and programmatic; manual APR triggers and team-controlled risk parameters keep this above 2.0.
+**Programmability Score: 2.0** -- Price per share is pure ERC-4626 and the benchmark rate resolves programmatically from Aave with an automatic staleness fallback, which is the rubric's "mostly programmatic with minor admin input / onchain with some parameters" profile. The admin-set risk premium and the 4-hour benchmark override keep it off 1.0.
 
 **Subcategory C: External Dependencies**
 
-- **Critical**: Ethena sUSDe (single yield source for the srUSDe market, all funds deposited there)
-- **High**: Aave v3 Core (single benchmark rate source)
-- **High**: Gnosis Safe (multisig infrastructure)
-- Protocol-wide exposure to **Neutrl, Midas, Saturn, and Hastra** as yield sources for sister markets — these don't affect srUSDe collateral directly but share the 48h Timelock and stretch team operational bandwidth
-- AprPairFeed accepts fresh pushed rounds and its provider is governance-replaceable, but it has no automatic alternate provider; Ethena has no compatible substitute within this product
+- **Critical**: Ethena sUSDe — 100% of senior assets, and the redemption path's speed also depends on Ethena's own `cooldownDuration()` setting
+- **Non-critical**: Aave v3 Core — benchmark rate only. A failure distorts the senior/junior yield split, not principal
+- No automatic alternate provider for the benchmark, and no compatible substitute for Ethena within this product's design
 
-**Dependencies Score: 4.0** -- Unchanged. For srUSDe specifically, Ethena remains the single critical dependency with no fallback, and the redemption path's speed now also depends on Ethena's own cooldown setting.
+**Dependencies Score: 4.0** -- srUSDe has only two external dependencies, both established, which on the rubric's first column alone would read as 3. The criticality column governs instead: Ethena is not one of several dependencies carrying "some critical functions," it is a single point of failure holding every senior dollar, and its failure breaks the product outright. That is the rubric's 4-5 territory, and 4.0 reflects the one genuine mitigant — the junior tranche absorbs losses first.
 
-**Centralization Score = (3.0 + 2.5 + 4.0) / 3 = 3.17**
+**Centralization Score = (3.0 + 2.0 + 4.0) / 3 = 3.0**
 
-**Score: 3.2/5** -- The low pause threshold, overlapping internal multisigs, 24h-timelock misconfiguration, and governance's ability to reimpose redemption cooldowns remain material. The 48h Timelock can recover reserve-role functionality through its AccessControlManager super-admin authority, but this does not materially reduce the broader governance risk under the rubric.
+**Score: 3.0/5** -- Governance and the single critical Ethena dependency dominate this category; the operational machinery underneath them is largely programmatic. The low pause threshold, overlapping internal multisigs, 24h-timelock misconfiguration, and governance's ability to reimpose redemption cooldowns remain material. The 48h Timelock can recover reserve-role functionality through its AccessControlManager super-admin authority, which does not reduce governance risk under the rubric.
 
 #### Category 3: Funds Management (Weight: 30%)
 
@@ -523,23 +522,23 @@ Strata uses a layered Role-Based Access Control (RBAC) system in the **AccessCon
 - Underlying USDe collateral: relies on Ethena's proof of reserves (third-party verified)
 - Risk-premium parameters: set by team, visible onchain once set
 
-**Provability Score: 2.0** -- Unchanged.
+**Provability Score: 2.0** -- Reserves are fully onchain and anyone can reproduce the exchange rate, strategy holdings, and tranche NAVs from public getters. The USDe layer beneath depends on Ethena's own proof-of-reserve reporting rather than direct onchain verification, which keeps this off 1.0.
 
 **Funds Management Score = (2.5 + 2.0) / 2 = 2.25**
 
-**Score: 2.25/5** -- Unchanged. Onchain provability remains strong; the Ethena dependency continues to dominate funds-management risk.
+**Score: 2.25/5** -- `(2.5 + 2.0) / 2 = 2.25`. Backing is verifiable and reconciles exactly against onchain balances; the Ethena synthetic-dollar layer and the shrinking junior buffer dominate the residual risk.
 
 #### Category 4: Liquidity Risk (Weight: 15%)
 
-- **Exit mechanism**: Atomic redemption into sUSDe (no cooldown, `cooldownDisabled(sUSDe) = true`), or ~1 day into USDe via Ethena's 86,400s cooldown. Redemption capacity is the full senior position, not a rationed queue.
-- **Demonstrated at scale**: ~$49M of protocol TVL exited between June 1 and July 15, 2026 with no queue backlog and no depeg.
-- **DEX liquidity**: Negligible — ~$80.3K across 40 pools, ~$3.2K of 24h volume.
-- **Pendle markets**: One active PT-srUSDe-22OCT2026 market with $4.60M LP liquidity, ~7.8% of senior TVL.
-- **Morpho markets**: Effectively dead — srUSDe/USDe at $0 supply/$0 borrow, and no srUSDe/USDC market exists at all.
-- **Withdrawal restrictions**: 6% deposit gate and 5% hard coverage floor can restrict activity under stress; `setCooldowns` can reimpose up to a 7-day senior cooldown by governance action.
-- **Same-value redemption**: srUSDe redeems for USDe or sUSDe (stablecoin-denominated), minimal price-impact risk.
+- **Exit mechanism**: Atomic redemption into sUSDe (`cooldownDisabled(sUSDe) = true`), or ~1 day into USDe via Ethena's 86,400s cooldown.
+- **Redemption capacity is the entire position**: `StrataCDO.maxWithdraw(srUSDe)` returns **59,081,896 USDe**, exactly `srtNav` — the full senior tranche. The coverage floor throttles the *junior* tranche only (`maxWithdraw(jrUSDe)` = 3,681,536, capped so junior NAV cannot fall below 5% of senior). There is no queue and no rationing on senior exits.
+- **Redemption slippage is structurally zero**: exits settle at NAV less a 0.025% `exitFeeSrt`, against 53,023,275 sUSDe held by the strategy.
+- **Demonstrated at scale**: ~$49M of protocol TVL exited between June 1 and July 15, 2026 with no queue backlog and no depeg — the rubric's "maintained liquidity during major drawdowns" modifier.
+- **Secondary venues are immaterial by comparison**: Pendle PT at $4.60M (~7.8% of senior TVL), DEX ~$80.3K across 40 pools with ~$3.2K of 24h volume, Morpho srUSDe markets at $0 supply and $0 borrow.
+- **The exit is switchable**: `maxWithdraw` returns **0** when `actionsSrt.isWithdrawEnabled` is false, and `setActionStates` is callable instantly by the 2-of-3 Operational Multisig with no timelock. If redemption were paused, holders of a $59.1M tranche would face roughly $4.7M of combined secondary depth.
+- **The exit speed is revocable**: `setCooldowns` can reimpose up to a 7-day senior cooldown via either timelock.
 
-**Score: 2.5/5** — The primary exit path is fast rather than cooldown-gated: senior redemptions into sUSDe settle atomically, and the USDe path is ~1 day following Ethena's March 2026 cooldown reduction. For an asset whose dominant exit is redemption rather than secondary markets, that is the governing input, and the June-July outflows demonstrate it clears at scale. Secondary venues remain thin (Pendle $4.60M, DEX ~$80.3K, Morpho empty) and the intended Morpho collateral market does not exist, which keeps this from scoring better than 2.5, as does the fact that the instant-exit property is governance-revocable.
+**Score: 2.0/5** — On the rubric alone this scores lower: direct redemption at NAV, capacity equal to the full position, a demonstrated $49M exit without impact, and the −0.5 drawdown modifier applying while the +0.5 throttle modifier does not (the coverage gate binds junior, not senior). Read literally that is a 1.0-1.5. It is held at 2.0 because two conditions sit outside the rubric's frame: redemption can be switched off instantly by two internal keys with no timelock and no meaningful secondary fallback, and the atomic-exit property is a governance-set parameter rather than a structural one.
 
 #### Category 5: Operational Risk (Weight: 5%)
 
@@ -560,30 +559,36 @@ Final Score = (Centralization × 0.30) + (Funds Mgmt × 0.30) + (Audits × 0.20)
 | Category | Score | Weight | Weighted |
 |----------|-------|--------|----------|
 | Audits & Historical | 2.25 | 20% | 0.45 |
-| Centralization & Control | 3.2 | 30% | 0.96 |
+| Centralization & Control | 3.0 | 30% | 0.90 |
 | Funds Management | 2.25 | 30% | 0.675 |
-| Liquidity Risk | 2.5 | 15% | 0.375 |
+| Liquidity Risk | 2.0 | 15% | 0.30 |
 | Operational Risk | 2.0 | 5% | 0.10 |
-| **Final Score** | | | **2.56** |
+| **Final Score** | | | **2.43** |
 
-**Final Score: 2.6**
+**Final Score: 2.4**
 
 ### Risk Tier
 
 | Final Score | Risk Tier | Recommendation |
 |------------|-----------|----------------|
-| **2.5-3.5** | **Medium Risk** | Approved with enhanced monitoring |
+| 1.0-1.5 | Minimal Risk | Approved, high confidence |
+| **1.5-2.5** | **Low Risk** | **Approved with standard monitoring** |
+| 2.5-3.5 | Medium Risk | Approved with enhanced monitoring |
+| 3.5-4.5 | Elevated Risk | Limited approval, strict limits |
+| 4.5-5.0 | High Risk | Not recommended |
 
-**Final Risk Tier: Medium Risk**
+**Final Risk Tier: Low Risk**
+
+At 2.43 the score sits just inside the Low Risk band. The margin is thin: a reimposed redemption cooldown, a sustained drop in the junior buffer, or an Ethena cooldown increase would each push it back above 2.5.
 
 ---
 
 Strata's srUSDe is a well-designed risk-tranching product with good audit coverage from reputable firms, multi-layered governance with independent Guardian oversight, and fully onchain accounting and exchange rate computation. The junior tranche first-loss protection adds meaningful risk mitigation beyond the underlying yield source.
 
-The protocol is ~10 months in production with no incidents, but TVL volatility continues: a fourth drawdown took TVL from $99.7M on June 1 to $50.5M on July 15, and current TVL ($75.8M) sits ~77% below the October 2025 peak. Coverage stands at ~111.2% against a 105% floor, with the junior tranche providing a little over half its gating buffer. The most consequential fact for Yearn is that the redemption path is fast — senior redemptions into sUSDe are atomic and the USDe path is ~1 day — and the June-July outflows confirm it absorbs large exits without a queue. Against that, secondary liquidity is only $4.60M on Pendle and effectively nothing elsewhere, so the redemption path is close to the only exit that matters. Critical dependencies (Ethena, Aave) are unchanged.
+The protocol is ~10 months in production with no incidents, but TVL volatility continues: a fourth drawdown took TVL from $99.7M on June 1 to $50.5M on July 15, and current TVL ($75.8M) sits ~77% below the October 2025 peak. Coverage stands at ~111.2% against a 105% floor, with the junior tranche providing a little over half its gating buffer. The most consequential fact for Yearn is that the redemption path is fast — senior redemptions into sUSDe are atomic and the USDe path is ~1 day — and the June-July outflows confirm it absorbs large exits without a queue. Against that, secondary liquidity is only $4.60M on Pendle and effectively nothing elsewhere, so the redemption path is close to the only exit that matters — and a 2-of-3 multisig can switch it off without a timelock.
 
 **For the intended Yearn use cases:**
-1. **Direct srUSDe deposit**: Medium risk. Exit is fast, so the primary concerns are the Ethena dependency, the structurally shrinking junior buffer, and governance's ability to reimpose a 7-day cooldown. The repeated TVL boom-bust pattern is worth watching as a signal even though no exploits have been observed.
+1. **Direct srUSDe deposit**: Low risk, at the top of that band. Exit is fast and unrationed, so the primary concerns are the Ethena dependency, the structurally shrinking junior buffer, and the fact that both the pause switch and the 7-day cooldown are governance-reachable. The repeated TVL boom-bust pattern is worth watching as a signal even though no exploits have been observed.
 2. **srUSDe as Morpho collateral (srUSDe/USDC)**: Not currently actionable — no srUSDe/USDC market exists on Morpho Blue, and the only raw srUSDe market (srUSDe/USDe, 92% LLTV) has zero supply and zero borrow. If a market were created, srUSDe's stablecoin denomination and atomic sUSDe redemption would make liquidations cleaner than the previous cooldown-based assumption implied, but a new market would need to be seeded and its oracle reviewed.
 
 **Key conditions for exposure:**
@@ -615,8 +620,8 @@ The protocol is ~10 months in production with no incidents, but TVL volatility c
 
 ## Assessment History
 
-| Date | Score | Notes |
-|------|-------|-------|
-| May 19, 2026 | 2.8 | Original assessment. TVL ~$86.8M, ~73% below ATH. Three sharp drawdowns on record. 24h Timelock executor misconfiguration identified. |
-| Jul 27, 2026 | 2.7 | Reassessment. TVL ~$78.1M, ~76% below ATH (fourth drawdown to $50.5M on Jul 15). Coverage 110.8%, junior/senior ratio 10.76%. Senior redemption confirmed atomic in sUSDe (`sUSDeCooldownSrt` = 0) and ~1 day in USDe after Ethena cut its cooldown to 1 day in Mar 2026 — Liquidity 3.0→2.5. Pendle liquidity $4.67M; no srUSDe/USDC Morpho market exists. Sixth market (Hastra PRIME) live. Development active at `Strata-Markets/contracts`. Roles, thresholds, timelock configs, and implementations unchanged. |
-| August 5, 2026 | 2.6 | Issue #379 follow-up. Active $250K Immunefi bounty and public Frontera Labs contributors verified; Audits & Historical 3.0→2.25 (rescored against the template's two subcategories) and Operational 2.5→2.0. TVL ~$75.8M, coverage 111.2%, junior/senior ratio 11.23%, Pendle liquidity $4.60M, DEX ~$80.3K. Reserve path: 24h Timelock inoperative, but the 48h Timelock can reassign AccessControlManager roles. |
+| Date | Score | PR | Notes |
+|------|-------|----|-------|
+| May 19, 2026 | 2.8 | [#196](https://github.com/yearn/risk-score/pull/196) | TVL ~$86.8M, ~73% below ATH. Three sharp drawdowns on record. 24h Timelock executor misconfiguration identified. |
+| Jul 27, 2026 | 2.7 | [#351](https://github.com/yearn/risk-score/pull/351) | TVL ~$78.1M, ~76% below ATH (fourth drawdown to $50.5M on Jul 15). Coverage 110.8%, junior/senior ratio 10.76%. Senior redemption confirmed atomic in sUSDe (`sUSDeCooldownSrt` = 0) and ~1 day in USDe after Ethena cut its cooldown to 1 day in Mar 2026 — Liquidity 3.0→2.5. Pendle liquidity $4.67M; no srUSDe/USDC Morpho market exists. Sixth market (Hastra PRIME) live. Development active at `Strata-Markets/contracts`. |
+| August 5, 2026 | 2.4 | [#351](https://github.com/yearn/risk-score/pull/351) | Issue [#379](https://github.com/yearn/risk-score/issues/379) follow-up. Active $250K Immunefi bounty and public Frontera Labs contributors verified: Audits & Historical 3.0→2.25, Operational 2.5→2.0. Benchmark rate found to resolve through a live Aave read rather than manual pushes: Programmability 2.5→2.0, Centralization 3.2→3.0. Senior `maxWithdraw` equals full `srtNav` with the coverage gate binding junior only: Liquidity 2.5→2.0. Tier moves Medium → Low. TVL ~$75.8M, coverage 111.2%, junior/senior ratio 11.23%, Pendle $4.60M, DEX ~$80.3K. |
