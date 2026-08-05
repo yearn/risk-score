@@ -25,7 +25,7 @@ nodes:
     label: jrUSDe (Junior Tranche)
     address: "0xC58D044404d8B14e953C115E67823784dEA53d8F"
     category: vault
-    note: ERC-4626 first-loss capital; ~$6.55M backing (10.76% of senior)
+    note: ERC-4626 first-loss capital; ~$6.64M backing (11.23% of senior)
   - id: tranche-depositor
     label: TrancheDepositor
     address: "0x50E850641F43F65BF8fB3a7d0CF082a1D252F47e"
@@ -149,7 +149,7 @@ nodes:
     label: Pendle PT-srUSDe-22OCT2026
     address: "0x66ec657c59cdcaf171ab43b83da3942758bf8a97"
     category: dependency
-    note: Secondary liquidity venue ($4.67M LP, ~7.7% of senior TVL)
+    note: Secondary liquidity venue ($4.60M LP, ~7.8% of senior TVL)
 
 edges:
   # === Governance ===
