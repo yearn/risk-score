@@ -22,9 +22,10 @@ nodes:
     category: vault
     note: EIP-1967 proxy; ERC-4626 LP token
   - id: arm-impl
-    label: ARM Implementation (LidoARM)
-    address: "0xC0297a0E39031F09406F0987C9D9D41c5dfbc3df"
+    label: ARM Implementation (LidoARM v2)
+    address: "0x850da2e21f1f71479e2a307edab114777d9f6217"
     category: vault
+    note: New impl with pause mechanism (audited May 2026)
   - id: fee-collector
     label: Fee Collector (Safe 1/3)
     address: "0xBB077E716A5f1F1B63ed5244eBFf5214E50fec8c"
@@ -53,15 +54,15 @@ nodes:
 
   # === Protocol infra ===
   - id: operator
-    label: Operator EOA (price setter)
-    address: "0x39878253374355DBcc15C86458F084fb6f2d6DE7"
+    label: Operator EOA (price setter + pause)
+    address: "0x739212d5bAfE6AAC8Be49a60B7d003bD41DBf38b"
     category: infra
-    note: No timelock; sets traderate0/1, bounded by crossPrice
+    note: No timelock; sets traderate0/1, bounded by crossPrice; can pause vault
   - id: morpho-wrapper
     label: MorphoMarket Wrapper
     address: "0xB7CeFE4CB483Be80C2963D3D9Edb991e69ff39cf"
     category: infra
-    note: Abstract4626MarketWrapper; owner = Timelock
+    note: Proxy; impl 0xa52c...| owner=Timelock; MORPHO merkle rewards
   - id: harvester
     label: Harvester Safe (MORPHO rewards)
     address: "0x4FF1b9D9ba8558F5EAfCec096318eA0d8b541971"
@@ -74,10 +75,10 @@ nodes:
     category: dependency
     note: Core yield mechanism — stETH 1:1 redemption
   - id: morpho-vault
-    label: WETH ARM Morpho Vault (Yearn-curated)
+    label: WETH ARM Morpho Vault (3-sig Safe curator)
     address: "0x3Dfe70B05657949A5dB340754aD664810ac63b21"
     category: dependency
-    note: MetaMorpho v1.1; idle WETH lending
+    note: MetaMorpho v1.1; idle WETH lending; curator 0x90D0... (3/3 Safe); owner 7-sig Safe with 72h timelock
 
   # === Secondary liquidity ===
   - id: curve-pool
@@ -103,7 +104,7 @@ edges:
   - from: timelock
     to: arm
     kind: controls
-    label: owner (upgrade, setCrossPrice, setFee, setOperator)
+    label: owner (upgrade, setCrossPrice, setFee, setOperator, unpause)
   - from: timelock
     to: morpho-wrapper
     kind: controls
@@ -113,7 +114,7 @@ edges:
   - from: operator
     to: arm
     kind: holds-role
-    label: operator (setPrices, requestLidoWithdrawals, setActiveMarket)
+    label: operator (setPrices, requestLidoWithdrawals, setActiveMarket, pause)
 
   # === Vault internal wiring ===
   - from: arm-impl
