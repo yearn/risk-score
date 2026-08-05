@@ -189,7 +189,7 @@ Strata has an active [Immunefi bug bounty](https://immunefi.com/bug-bounty/strat
 | Jun 26 – Jul 15, 2026 | $67.6M → $50.5M | Continued outflows to the cycle low |
 | Jul 16-17, 2026 | $50.5M → $71.5M | Rapid bounce (+42% in 2 days) |
 | Jul 22, 2026 | $66.9M → $77.3M | Second inflow step (+16% in a day) |
-| **Jul 27, 2026** | **~$78.1M** | Reassessment snapshot (~76% below ATH) |
+| Jul 27, 2026 | ~$78.1M | ~76% below ATH |
 | **Aug 5, 2026** | **~$75.8M** | **Current** (~77% below ATH) |
 
 - **TVL Volatility**: The protocol has experienced **four distinct large drawdown events** (Jan, early Apr, late Apr, and Jun-Jul 2026), each shedding 19-55% of TVL within days. Peak-to-current decline is ~77%, and the trough-to-current recovery since July 15 is +50%. The repeated boom-bust pattern is consistent with **large depositor concentration** and is likely driven in part by points-program farming behavior — the single-day ±16-19% steps in June and July are the signature of individual whale entries and exits rather than broad retail flow.
@@ -212,7 +212,7 @@ Strata has an active [Immunefi bug bounty](https://immunefi.com/bug-bounty/strat
 
 **Withdrawal**: The redemption path depends on the token the user exits into. `sUSDeStrategy.getSupportedTokens()` returns sUSDe and USDe.
 
-1. **Exit in sUSDe — atomic, no cooldown.** `sUSDeStrategy.withdraw` routes to `ERC20Cooldown.transfer(..., cooldownSeconds)` where `cooldownSeconds` is `sUSDeCooldownSrt` for the senior tranche. Both `sUSDeCooldownSrt()` and `sUSDeCooldownJrt()` read **0**, and `ERC20Cooldown.cooldownDisabled(sUSDe)` reads **true**. In the contract, `cooldownSeconds == 0` takes an early-return branch that performs an immediate `safeTransferFrom` and emits `Finalized` in the same transaction. The senior tranche has been configured this way since deployment (October 2, 2025); the junior tranche's 7-day cooldown was zeroed on December 11, 2025 (tx [`0xb887bdbf…`](https://etherscan.io/tx/0xb887bdbfaeaf4090622c3ea0b4cd9708bfda2357106102407e0e7b2902fe6643)). 122 `Finalized` events since block 25,500,000 confirm redemptions settling in one transaction in practice.
+1. **Exit in sUSDe — atomic, no cooldown.** `sUSDeStrategy.withdraw` routes to `ERC20Cooldown.transfer(..., cooldownSeconds)` where `cooldownSeconds` is `sUSDeCooldownSrt` for the senior tranche. Both `sUSDeCooldownSrt()` and `sUSDeCooldownJrt()` read **0**, and `ERC20Cooldown.cooldownDisabled(sUSDe)` reads **true**. In the contract, `cooldownSeconds == 0` takes an early-return branch that performs an immediate `safeTransferFrom` and emits `Finalized` in the same transaction. The senior tranche has been configured this way since deployment (October 2, 2025); the junior tranche's 7-day cooldown was zeroed on December 11, 2025 (tx [`0xb887bdbf…`](https://etherscan.io/tx/0xb887bdbfaeaf4090622c3ea0b4cd9708bfda2357106102407e0e7b2902fe6643)). 173 `Finalized` events since block 25,500,000 confirm redemptions settling in one transaction in practice.
 2. **Exit in USDe — ~1 day.** Routes through `UnstakeCooldown`, which triggers Ethena's own sUSDe cooldown. Ethena reduced `sUSDe.cooldownDuration()` from 604,800 seconds (7 days) to **86,400 seconds (1 day)** on March 16, 2026 (tx [`0x05856199…`](https://etherscan.io/tx/0x05856199ceddbfb1b8231c8bfa3bf4c967e5156122b2f1eb11a473fdf5f2d9f9)).
 3. Each withdrawal request is handled independently per user; new requests do not extend or affect earlier requests.
 
@@ -247,7 +247,7 @@ The senior tranche's zero cooldown is a **governance-mutable parameter**, not a 
 
 1. **Redeem from srUSDe vault into sUSDe**: **Atomic** — no Strata cooldown and no Ethena unstaking, settled in a single transaction. This is the deepest and fastest exit, and it inherits sUSDe's own liquidity
 2. **Redeem from srUSDe vault into USDe**: ~**1 day**, gated by Ethena's `cooldownDuration()` of 86,400 seconds
-3. **DEX swap**: Negligible onchain DEX liquidity — **~$99K across 40 pools** with **~$768 of 24h volume** protocol-wide ([GeckoTerminal](https://www.geckoterminal.com/eth/tokens/0x3d7d6fdf07EE548B939A80edbc9B2256d0cdc003)). Largest is a Uniswap V4 srUSDe/USDe 1.01% pool at ~$45.5K. **No Curve or Balancer pools exist.** CoinGecko does not list srUSDe
+3. **DEX swap**: Negligible onchain DEX liquidity — **~$80.3K across 40 pools** with **~$3.2K of 24h volume** ([GeckoTerminal](https://www.geckoterminal.com/eth/tokens/0x3d7d6fdf07EE548B939A80edbc9B2256d0cdc003)). Largest is a Uniswap V4 srUSDe/USDe 1.01% pool at ~$45.5K. **No Curve or Balancer pools exist.** CoinGecko does not list srUSDe
 4. **Pendle markets**: The PT-srUSDe-25JUN2026 market **expired June 25, 2026**. One active srUSDe market remains: PT-srUSDe-22OCT2026 ([market `0x66ec657c…`](https://etherscan.io/address/0x66ec657c59cdcaf171ab43b83da3942758bf8a97), [PT `0x59bc9fae…`](https://etherscan.io/address/0x59bc9fae5d62b19d4f8d07d758047acb9ee19d34)), **$4.60M LP liquidity** at a 3.97% implied APY ([Pendle API](https://api-v2.pendle.finance/core/v1/1/markets/0x66ec657c59cdcaf171ab43b83da3942758bf8a97)). A parallel jrUSDe market ([`0x78f6927a…`](https://etherscan.io/address/0x78f6927ab0600c445178645f3c64afec85f6dd8a)) holds $0.57M. These trade the fixed-yield PT, not raw srUSDe
 5. **Morpho markets**: The raw srUSDe/USDe market ([`0xc184c2aa…`](https://app.morpho.org/ethereum/market/0xc184c2aafb37a571454213746023b2f9fc16d37ce017729a96f19feea60677d1)) has **$0 supply and $0 borrow**. All PT-srUSDe markets are dust (largest is PT-srUSDe-15JAN2026/USDC at ~$37.5K on an expired PT). **No srUSDe/USDC market exists on Morpho** — see the note on Yearn use case #2 below
 
@@ -260,7 +260,7 @@ The senior tranche's zero cooldown is a **governance-mutable parameter**, not a 
 ### Liquidity Assessment
 
 - **Primary liquidity**: The redemption path is the main exit and it is fast — atomic in sUSDe, ~1 day in USDe. For a $59.1M senior tranche sitting on $65.9M of strategy assets, redemption capacity is effectively the full position rather than a rationed queue
-- **Secondary market**: Secondary venues are thin. Pendle at $4.60M covers ~7.8% of senior TVL; DEX pools at ~$99K are immaterial; Morpho srUSDe markets are empty
+- **Secondary market**: Secondary venues are thin. Pendle at $4.60M covers ~7.8% of senior TVL; DEX pools at ~$80.3K are immaterial; Morpho srUSDe markets are empty
 - **Large holder impact**: Large holders can exit at scale through redemption, which is what the June-July outflows demonstrate — the protocol shed ~$49M of TVL between June 1 and July 15 without a queue backlog or a depeg
 - **Same-value redemption**: srUSDe redeems for USDe or sUSDe (both stablecoin-denominated), so price-impact risk on exit is minimal
 - **Note on Yearn use case #2**: the intended "srUSDe as collateral on Morpho for srUSDe/USDC markets" does not currently exist onchain. The only raw srUSDe market on Morpho Blue is srUSDe/USDe at 92% LLTV with zero supply and zero borrow. Using srUSDe as Morpho collateral would require a new market to be created and seeded
@@ -324,7 +324,7 @@ Strata uses a layered Role-Based Access Control (RBAC) system in the **AccessCon
 
 ## Operational Risk
 
-- **Team Transparency**: Public contributors include [Vishvendra Singh Dhayal](https://www.linkedin.com/in/vishu0909/), publicly introduced as co-founder and CEO of Frontera Labs, the developer behind Strata, in a [May 24, 2026 podcast](https://podcasts.apple.com/gb/podcast/strata-why-defi-is-finally-ready-for-risk-tranching/id1671489227?i=1000769353134), and [Ramiro Gamen](https://www.linkedin.com/in/ramirogamen/), whom [Frontera Labs' company page](https://www.linkedin.com/company/frontera-labs-inc) lists among its employees. Patrick Collins (Cyfrin CEO) is separately identified as Guardian. Protocol documentation does not map these individuals to multisig keys or day-to-day control responsibilities
+- **Team Transparency**: **Vishvendra Singh Dhayal** was introduced as co-founder and CEO of Frontera Labs, the developer behind Strata, in a [May 24, 2026 podcast](https://podcasts.apple.com/gb/podcast/strata-why-defi-is-finally-ready-for-risk-tranching/id1671489227?i=1000769353134) ([LinkedIn](https://www.linkedin.com/in/vishu0909/)). **Ramiro Gamen** ([LinkedIn](https://www.linkedin.com/in/ramirogamen/)) appears among the employees listed on [Frontera Labs' company page](https://www.linkedin.com/company/frontera-labs-inc) — a self-published source, so weaker evidence than the podcast. Patrick Collins (Cyfrin CEO) is separately identified as Guardian. Protocol documentation does not map any of these individuals to multisig keys or day-to-day control responsibilities
 - **Documentation**: Comprehensive docs at docs.strata.markets covering mechanism, technical architecture, contracts, roles, and risks, with contract tables for all six markets. However, the [roles page](https://docs.strata.markets/technical-documentation/roles-and-permissions) remains **out-of-date with onchain state** — it claims `PAUSER_ROLE` is held by the Admin Multisig and that `UPDATER_STRAT_CONFIG_ROLE` sits only on the 24h Timelock; onchain, `PAUSER_ROLE` is held by the Operational Multisig and `UPDATER_STRAT_CONFIG_ROLE` is held by both timelocks. Yearn should treat onchain `hasRole` results as authoritative
 - **Legal Structure**: **Frontera Labs, Inc.**, a Delaware (USA) corporation, operates the Interface (front-end) only. The company explicitly disclaims ownership or control of the protocol smart contracts. Protocol contracts are licensed under BUSL-1.1. A planned transition to a **Cayman Islands foundation** is referenced in the [Terms of Service](https://docs.strata.markets/resources/terms-of-service) (last updated Nov 28, 2025). US users are geo-blocked. Contact: legal@strata.markets
 - **Incident Response**: Not formally documented, but the protocol has multiple layers of defense:
@@ -418,14 +418,14 @@ Strata uses a layered Role-Based Access Control (RBAC) system in the **AccessCon
 - **Pause is callable by a 2/3 internal-team multisig** (Operational), with no timelock
 - **Redemption speed is revocable by governance**: `setCooldowns` can reimpose up to a 7-day senior cooldown via either timelock, so today's instant exit is not a durable property of the asset
 - **Rapid multi-market expansion**: protocol grew from 1 market to 6 (Neutrl, Midas mHYPER, Midas mM1-USD, Saturn USDat, Hastra PRIME) between February and May 2026, with no public audits covering the new markets. Operational and governance bandwidth is now stretched across six integrations sharing one timelock
-- **Thin secondary liquidity**: Pendle at $4.60M is ~7.8% of senior TVL, DEX pools total ~$99K, and Morpho srUSDe markets are empty. Exit depends almost entirely on the redemption path continuing to function
+- **Thin secondary liquidity**: Pendle at $4.60M is ~7.8% of senior TVL, DEX pools total ~$80.3K, and Morpho srUSDe markets are empty. Exit depends almost entirely on the redemption path continuing to function
 - **Intended Morpho use case has no venue**: no srUSDe/USDC market exists on Morpho Blue; the only raw srUSDe market (srUSDe/USDe) has zero supply and zero borrow
 
 ### Critical Risks
 
 - **Junior tranche depletion**: If the junior tranche is fully depleted, the senior tranche **may incur principal losses**. jrUSDe `totalAssets` is ~$6.64M against ~$59.1M senior assets — a junior/senior ratio of 11.23% against a 5% hard floor. The junior tranche absorbs Ethena yield volatility, so a sustained period of sUSDe yield below the Aave benchmark rate drains it structurally, not just through redemptions
 - **Shortfall auto-pause is largely decorative**: `jrtShortfallPausePrice` = 0.01 USDe against a junior price per share of 1.0669. The automatic deposit pause only fires after a ~99% junior collapse, so it provides no early protection
-- **24h Timelock has no executor and has never executed a single call** since deployment in October 2025 — confirmed by `hasRole` queries against every known principal (including the zero-address sentinel), by the deployment-tx constructor calldata showing an empty `executors[]` array, and by zero `CallScheduled`/`CallExecuted` events. Roles that the protocol documentation routes through the 24h Timelock (RESERVE_MANAGER, UPDATER_STRAT_CONFIG, COOLDOWN_WORKER) cannot fire on that path. For srUSDe most of these functions are reachable via the 48h Timelock or other principals, but it is an unexplained governance misconfiguration that the team should address
+- **24h Timelock has no executor and has never executed a single call** since deployment in October 2025 — confirmed by `hasRole` queries against every known principal (including the zero-address sentinel), by the deployment-tx constructor calldata showing an empty `executors[]` array, and by zero `CallScheduled`/`CallExecuted` events. Roles that the protocol documentation routes through the 24h Timelock (RESERVE_MANAGER, UPDATER_STRAT_CONFIG, COOLDOWN_WORKER) cannot fire on that path. The team's position is that no calls were needed because reserve and cooldown configuration has not changed since final deployment, and that the 48h Timelock serves as the protocol's root admin. That accounts for the absence of *usage*, but not for the absence of the `EXECUTOR_ROLE` grant itself — the 24h path would be unusable even if a call were needed today, and restoring it requires a 48h-timelocked role action rather than a 24h one. For srUSDe most of these functions are reachable via the 48h Timelock or other principals, so the practical impact is that a documented governance path does not exist as described
 - **Proxy upgrade risk**: Core contracts are upgradeable with 48h timelock. While the Guardian can cancel, this requires active monitoring
 
 ---
@@ -457,9 +457,9 @@ Strata uses a layered Role-Based Access Control (RBAC) system in the **AccessCon
 
 **Audit & Security Reviews Score: 2.0** -- Three reputable firms completed eight engagements, and the $250,000 Immunefi maximum exceeds the rubric's $200,000 threshold.
 
-**Historical Track Record Score: 3.0** -- Approximately 10 months in production with more than $10M TVL and no reported incidents. The ~77% peak-to-current TVL decline and four sharp drawdowns prevent a stronger track-record assessment.
+**Historical Track Record Score: 2.5** -- The rubric's two columns disagree: ~10 months in production sits in the 6–12 month band (score 3), while $75.8M TVL sits in the >$50M band (score 2). Averaging them gives 2.5. Scale is genuine but not durable — TVL has been above $50M for most of 2026 yet swung between $50.5M and $99.7M within the last ten weeks alone, so the sustained-scale reading that would justify a 2 is not supported.
 
-**Score: 2.5/5** -- `(2.0 + 3.0) / 2 = 2.5`. The live bounty improves the audit subcategory, while the young and volatile production history and unaudited market-specific code keep the combined category at 2.5.
+**Score: 2.25/5** -- `(2.0 + 2.5) / 2 = 2.25`. The live bounty and eight engagements across three reputable firms carry the audit subcategory, while a young and volatile production history and unaudited market-specific code hold the track-record side back.
 
 #### Category 2: Centralization & Control Risks (Weight: 30%)
 
@@ -479,7 +479,7 @@ Strata uses a layered Role-Based Access Control (RBAC) system in the **AccessCon
 
 **Subcategory B: Programmability**
 
-- srUSDe exchange rate: fully onchain ERC-4626 (`convertToAssets(1e18) = 1.028479…`)
+- srUSDe exchange rate: fully onchain ERC-4626 (`convertToAssets(1e18) = 1.028479`)
 - Yield distribution (DYS): mostly programmatic using AprPairFeed from Aave, with `roundStaleAfter()` = 14,400s (4h) staleness bound
 - Risk-premium parameters (x, y, k): set by team initially, planned transition to independent risk managers (not yet implemented)
 - APR updates: triggered manually by Operational Multisig (but computation is onchain)
@@ -533,13 +533,13 @@ Strata uses a layered Role-Based Access Control (RBAC) system in the **AccessCon
 
 - **Exit mechanism**: Atomic redemption into sUSDe (no cooldown, `cooldownDisabled(sUSDe) = true`), or ~1 day into USDe via Ethena's 86,400s cooldown. Redemption capacity is the full senior position, not a rationed queue.
 - **Demonstrated at scale**: ~$49M of protocol TVL exited between June 1 and July 15, 2026 with no queue backlog and no depeg.
-- **DEX liquidity**: Negligible — ~$99K across 40 pools, ~$768 of 24h volume.
+- **DEX liquidity**: Negligible — ~$80.3K across 40 pools, ~$3.2K of 24h volume.
 - **Pendle markets**: One active PT-srUSDe-22OCT2026 market with $4.60M LP liquidity, ~7.8% of senior TVL.
 - **Morpho markets**: Effectively dead — srUSDe/USDe at $0 supply/$0 borrow, and no srUSDe/USDC market exists at all.
 - **Withdrawal restrictions**: 6% deposit gate and 5% hard coverage floor can restrict activity under stress; `setCooldowns` can reimpose up to a 7-day senior cooldown by governance action.
 - **Same-value redemption**: srUSDe redeems for USDe or sUSDe (stablecoin-denominated), minimal price-impact risk.
 
-**Score: 2.5/5** — The primary exit path is fast rather than cooldown-gated: senior redemptions into sUSDe settle atomically, and the USDe path is ~1 day following Ethena's March 2026 cooldown reduction. For an asset whose dominant exit is redemption rather than secondary markets, that is the governing input, and the June-July outflows demonstrate it clears at scale. Secondary venues remain thin (Pendle $4.60M, DEX ~$99K, Morpho empty) and the intended Morpho collateral market does not exist, which keeps this from scoring better than 2.5, as does the fact that the instant-exit property is governance-revocable.
+**Score: 2.5/5** — The primary exit path is fast rather than cooldown-gated: senior redemptions into sUSDe settle atomically, and the USDe path is ~1 day following Ethena's March 2026 cooldown reduction. For an asset whose dominant exit is redemption rather than secondary markets, that is the governing input, and the June-July outflows demonstrate it clears at scale. Secondary venues remain thin (Pendle $4.60M, DEX ~$80.3K, Morpho empty) and the intended Morpho collateral market does not exist, which keeps this from scoring better than 2.5, as does the fact that the instant-exit property is governance-revocable.
 
 #### Category 5: Operational Risk (Weight: 5%)
 
@@ -559,12 +559,12 @@ Final Score = (Centralization × 0.30) + (Funds Mgmt × 0.30) + (Audits × 0.20)
 
 | Category | Score | Weight | Weighted |
 |----------|-------|--------|----------|
-| Audits & Historical | 2.5 | 20% | 0.50 |
+| Audits & Historical | 2.25 | 20% | 0.45 |
 | Centralization & Control | 3.2 | 30% | 0.96 |
 | Funds Management | 2.25 | 30% | 0.675 |
 | Liquidity Risk | 2.5 | 15% | 0.375 |
 | Operational Risk | 2.0 | 5% | 0.10 |
-| **Final Score** | | | **2.61** |
+| **Final Score** | | | **2.56** |
 
 **Final Score: 2.6**
 
@@ -619,4 +619,4 @@ The protocol is ~10 months in production with no incidents, but TVL volatility c
 |------|-------|-------|
 | May 19, 2026 | 2.8 | Original assessment. TVL ~$86.8M, ~73% below ATH. Three sharp drawdowns on record. 24h Timelock executor misconfiguration identified. |
 | Jul 27, 2026 | 2.7 | Reassessment. TVL ~$78.1M, ~76% below ATH (fourth drawdown to $50.5M on Jul 15). Coverage 110.8%, junior/senior ratio 10.76%. Senior redemption confirmed atomic in sUSDe (`sUSDeCooldownSrt` = 0) and ~1 day in USDe after Ethena cut its cooldown to 1 day in Mar 2026 — Liquidity 3.0→2.5. Pendle liquidity $4.67M; no srUSDe/USDC Morpho market exists. Sixth market (Hastra PRIME) live. Development active at `Strata-Markets/contracts`. Roles, thresholds, timelock configs, and implementations unchanged. |
-| August 5, 2026 | 2.6 | Issue #379 follow-up. Active $250K Immunefi bounty and public Frontera Labs contributors verified; Audits & Historical 3.0→2.5 and Operational 2.5→2.0. TVL ~$75.8M, coverage 111.2%, junior/senior ratio 11.23%, and Pendle liquidity $4.60M. Clarified that the 24h reserve path is inoperative but the 48h Timelock can reassign AccessControlManager roles. |
+| August 5, 2026 | 2.6 | Issue #379 follow-up. Active $250K Immunefi bounty and public Frontera Labs contributors verified; Audits & Historical 3.0→2.25 (rescored against the template's two subcategories) and Operational 2.5→2.0. TVL ~$75.8M, coverage 111.2%, junior/senior ratio 11.23%, Pendle liquidity $4.60M, DEX ~$80.3K. Reserve path: 24h Timelock inoperative, but the 48h Timelock can reassign AccessControlManager roles. |

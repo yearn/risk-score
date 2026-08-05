@@ -308,8 +308,14 @@ edges:
     to: strata-cdo
     kind: manages
     label: exit-fee config
+
   # === Secondary liquidity ===
+  # `routes-through` is deliberate but imprecise: Pendle is a holder-level exit
+  # venue, not a path protocol capital allocates through. It is a flow kind, so
+  # Pendle joins the hover chain and cross-graph downstream expansion — useful
+  # for showing the exit route, but do not read it as vault funds flowing to
+  # Pendle. No edge kind currently models "secondary market" directly.
   - from: srUSDe
     to: pendle-srusde
     kind: routes-through
-    label: PT market (secondary exit)
+    label: PT market (secondary exit, holder-level)
