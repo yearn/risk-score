@@ -188,8 +188,8 @@ The contract code (`Strategy.sol` / `BaseLSTAccumulator.sol`, verified on Ethers
 | `manualClaimWithdrawals()` | Claims finalized Lido withdrawals back to ETH | Immediate after finalization |
 
 **Strategy parameters:**
-- Activated: April 14, 2026 (`activation = 1776351539`)
-- Last reported: July 9, 2026 (`last_report = 1783748183`)
+- Activated: April 16, 2026 (`activation = 1776351539`)
+- Last reported: July 11, 2026 (`last_report = 1783748183`)
 - max_debt: 15,000 WETH
 - Management: Brain multisig (3-of-8) and Debt Allocator
 - Keeper: yHaaSRelayer ([`0x604e586F17cE106B64185A7a0d2c1Da5bAce711E`](https://etherscan.io/address/0x604e586F17cE106B64185A7a0d2c1Da5bAce711E))
@@ -593,9 +593,9 @@ Yearn maintains the [`monitoring`](https://github.com/yearn/monitoring) reposito
 
 | Date | Score | Notes |
 |------|------:|-------|
-| May 11, 2026 | 1.5 | Initial assessment. 3 funded strategies (Morpho ~71%, stETH ~25%, Spark ~4%). 6-of-9 ySafe, 7-day timelock, immutable vault. Minimal Risk tier. |
-| July 20, 2026 | 1.5 | Reassessment. Strategy mix: stETH Accumulator (59%), Spark WETH Lender (31%), Yearn OG WETH (Morpho MetaMorpho, 2%/~9% effective). All strategies mapped to verified blue-chip protocols. Governance unchanged. Score returned to 1.5 (Minimal Risk). |
-| July 22, 2026 | 1.5 | Reassessment. Discovered 4th strategy: wstETH/WETH Spark Looper (~11% of totalDebt; not in default queue). This is an LSTAaveLooper that leverages wstETH as collateral to borrow WETH on Spark Lend — the first leveraged strategy in this vault. Strategy debt now fully reconciles to 100% of totalDebt (~8,927 WETH). Score unchanged at 1.5 (Minimal Risk). |
+| [May 11, 2026](https://github.com/yearn/risk-score/pull/148) | 1.5 | Initial assessment. 3 funded strategies (Morpho ~71%, stETH ~25%, Spark ~4%). 6-of-9 ySafe, 7-day timelock, immutable vault. Minimal Risk tier. |
+| [July 20, 2026](https://github.com/yearn/risk-score/pull/335) | 1.5 | Reassessment. Strategy mix: stETH Accumulator (59%), Spark WETH Lender (31%), Yearn OG WETH (Morpho MetaMorpho, 2%/~9% effective). All strategies mapped to verified blue-chip protocols. Governance unchanged. Score returned to 1.5 (Minimal Risk). |
+| [July 22, 2026](https://github.com/yearn/risk-score/pull/335) | 1.5 | Reassessment. Discovered 4th strategy: wstETH/WETH Spark Looper (~11% of totalDebt; not in default queue). This is an LSTAaveLooper that leverages wstETH as collateral to borrow WETH on Spark Lend — the first leveraged strategy in this vault. Strategy debt now fully reconciles to 100% of totalDebt (~8,927 WETH). Score unchanged at 1.5 (Minimal Risk). |
 
 ---
 

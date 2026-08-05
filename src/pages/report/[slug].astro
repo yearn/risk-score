@@ -23,7 +23,7 @@ const reportIssueUrl = (() => {
   const title = `Report Inaccuracy: ${report.name}`;
   const body = [
     `**Report:** ${report.name}`,
-    `**Link:** [${report.slug}](https://risk.yearn.farm/report/${report.slug})`,
+    `**Link:** [${report.slug}](https://curation.yearn.fi/report/${report.slug})`,
     `**GitHub:** [${report.slug}.md](https://github.com/yearn/risk-score/blob/master/reports/report/${report.slug}.md)`,
     "",
     "## Issue Description",
@@ -174,9 +174,9 @@ const reportIssueUrl = (() => {
           <tbody>
             {report.history.map((h) => (
               <tr>
-                <td class="history-date">{h.date}</td>
+                <td class="history-date" set:html={h.dateHtml} />
                 <td class="history-score">{h.score}</td>
-                <td>{h.notes}</td>
+                <td set:html={h.notesHtml} />
               </tr>
             ))}
           </tbody>

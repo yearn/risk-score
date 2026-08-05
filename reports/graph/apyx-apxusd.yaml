@@ -18,17 +18,17 @@ nodes:
     label: apxUSD (Dividend-Backed USD)
     address: "0x98a878B1CD98131b271883b390F68d2c90674665"
     category: vault
-    note: ERC-20, UUPS Proxy
+    note: ERC-20, UUPS Proxy; AddressList can deny transfers
   - id: apyUSD
     label: apyUSD (Yield Vault)
     address: "0x38eeb52f0771140d10c4e9a9a72349a329fe8a6a"
     category: vault
     note: ERC-4626 yield vault, UUPS Proxy
   - id: unlock-token
-    label: UnlockToken (30-day cooldown)
+    label: UnlockToken (20-day cooldown)
     address: "0x93775e2dfa4e716c361a1f53f212c7ae031bf4e6"
     category: vault
-    note: apyUSD redemption queue
+    note: apyUSD redemption queue; unlockingDelay 1,728,000s; reads the deny list
 
   # === Protocol infra ===
   - id: access-manager
@@ -61,6 +61,11 @@ nodes:
     label: OrderDelegate
     address: "0x5c697433e214b1a6d7a2ddd4cdca1505c98f75f1"
     category: infra
+  - id: fee-wallet
+    label: Fee Wallet
+    address: "0x6F93635F2A1C19b4F7f1BD9BA655F6A073C629Dc"
+    category: infra
+    note: Recipient of the apyUSD unlocking fee; admin-settable via setFeeWallet
 
   # === Governance ===
   - id: admin-safe
@@ -74,10 +79,10 @@ nodes:
     category: governance
     note: UPGRADER (3d), PAUSER (0), UNPAUSER (4h), YIELD_OPERATOR (0)
   - id: ops-safe
-    label: Operations Safe (3-of-5)
+    label: Operations Safe (3-of-6)
     address: "0x37b0779a66edc491df83e59a56d485835323a555"
     category: governance
-    note: No AccessManager roles
+    note: No AccessManager roles; holds the STRCX position that is the only onchain-verifiable backing
 
   # === External dependencies ===
   - id: dep-preferred-shares
@@ -89,14 +94,19 @@ nodes:
     category: dependency
     note: Third-party prime brokerage accounts; custodians not publicly named
   - id: dep-curve
-    label: Curve apxUSD/USDC StableSwap-NG
+    label: Curve apxUSD/USDC
     address: "0xe1b96555bbeca40e583bbb41a11c68ca4706a414"
     category: dependency
-    note: Primary exit; ~$29M TVL
-  - id: dep-ccip
-    label: Chainlink CCIP (Base)
+    note: Former primary exit; drained by the Guardian Safe's POL withdrawal (June-July 2026)
+  - id: dep-uniswapv4
+    label: Uniswap V4 PoolManager
+    address: "0x000000000004444c5dc75cb358380d2e3de08a90"
     category: dependency
-    note: Cross-chain expansion to Base
+    note: Primary remaining Ethereum spot venue; singleton inventory overstates executable depth
+  - id: dep-ccip
+    label: Chainlink CCIP (Base + BNB)
+    category: dependency
+    note: Ethereum LockReleaseTokenPool escrows canonical apxUSD for Base and BNB Chain representations
 
 edges:
   # === Governance flow ===
@@ -154,7 +164,25 @@ edges:
   - from: apyUSD
     to: unlock-token
     kind: routes-through
-    label: "30-day cooldown"
+    label: "20-day cooldown"
+
+  # === Fees & exit gating ===
+  - from: apyUSD
+    to: fee-wallet
+    kind: routes-fees-to
+    label: unlocking fee (0.1%)
+  - from: address-list
+    to: apxUSD
+    kind: controls
+    label: deny list gate on ERC-20 transfers
+  - from: address-list
+    to: apyUSD
+    kind: controls
+    label: deny list gate on redemption
+  - from: address-list
+    to: unlock-token
+    kind: controls
+    label: deny list gate on the unlock queue
 
   # === Yield distribution ===
   - from: yield-distributor
@@ -172,6 +200,16 @@ edges:
     kind: routes-through
     label: pool pricing
 
+  # === Liquidity exits ===
+  - from: apxUSD
+    to: dep-curve
+    kind: deposits-into
+    label: exit (drained)
+  - from: apxUSD
+    to: dep-uniswapv4
+    kind: deposits-into
+    label: primary Ethereum spot exit
+
   # === Backing & external dependencies ===
   - from: apxUSD
     to: dep-preferred-shares
@@ -184,4 +222,4 @@ edges:
   - from: apxUSD
     to: dep-ccip
     kind: routes-through
-    label: Base bridge
+    label: Base + BNB lock/release bridge

@@ -574,5 +574,5 @@ To shorten the delay, Daddy 6/9 must propose `updateDelay()`, wait 7 days during
 
 | Date | Score | Notes |
 |------|-------|-------|
-| May 11, 2026 | 1.3 | Initial assessment; ~46/54 Spark/Morpho Gauntlet split |
-| July 13, 2026 | 1.3 | Strategy-queue replacement: MetaMorpho vault + new Spark USDT Lender; ~44/56 split; Sky dependency increased to ~56% |
+| [May 11, 2026](https://github.com/yearn/risk-score/pull/148) | 1.3 | Initial assessment; ~46/54 Spark/Morpho Gauntlet split |
+| [July 13, 2026](https://github.com/yearn/risk-score/pull/315) | 1.3 | Strategy-queue replacement: MetaMorpho vault + new Spark USDT Lender; ~44/56 split; Sky dependency increased to ~56% |

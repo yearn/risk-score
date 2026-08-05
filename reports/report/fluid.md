@@ -264,7 +264,7 @@ Decoded from `FluidLiquidityResolver.getTokenRateData(token)` for each token (`(
 **Stablecoins and ETH — current curves:**
 
 | Token | Version | Kink 1 | Rate@K1 | Kink 2 | Rate@K2 | Max Rate |
-|-------|---------|--------|---------|--------|---------|----------|------------|
+|-------|---------|--------|---------|--------|---------|----------|
 | USDC | V2 | 85% | **5.40%** | 93% | **7.50%** | 40.00% |
 | USDT | V2 | 85% | **5.40%** | 93% | **7.50%** | 40.00% |
 | GHO  | V2 | 85% | **6.50%** | 93% | **9.50%** | 40.00% |
@@ -764,7 +764,7 @@ Final Score = (Centralization × 0.30) + (Funds Mgmt × 0.30) + (Audits × 0.20)
 
 | Date | Score | Notes |
 | --- | --- | --- |
-| February 12, 2026 | 1.1 | Initial assessment |
-| April 27, 2026 | 1.4 | Reassessment: TVL recovery; sUSDai concentration flagged (19.9%) as structurally identical to pre-incident wstUSR |
-| May 24, 2026 | 1.4 | Reassessment: sUSDai grew to 28.3%; explicit 30% concentration trigger set; Collateralization 2.5 → 2.75 |
-| July 22, 2026 | 2.6 | Reassessment (TVL/on-chain snapshot Jul 14, block `25529610`; sUSDai bridge & oracle layer verified Jul 22): lending TVL $639.0M (−26.8% off May peak, stabilizing); sUSDai above 30% trigger at 31.2%; issuer and Arbitrum source chain identified as USD.AI (Fluid holds ~2/3 of supply, extreme illiquidity); LayerZero burn/mint path verified on canonical Arbitrum and Ethereum, with a 3-of-3 DVN / 15-confirmation canonical mint route, 3-of-3 Safe owner, and a 10M/hour outbound-only rate limiter that does not cap inbound mint; separate USDai T1 hard-peg oracle finding scoped to its own currently tiny debt; reUSD cross-referenced to its 3.51 Elevated-Risk report; ~37% of lending supply TVL depends on offchain/admin-side value inputs. Collateralization 2.75 → 4.0, Provability 1.0 → 2.5, Dependencies 2.5 → 4.0, Liquidity 2.0 → 2.5; Minimal → Medium Risk |
+| [February 12, 2026](https://github.com/yearn/risk-score/pull/33) | 1.1 | Initial assessment |
+| [April 27, 2026](https://github.com/yearn/risk-score/pull/144) | 1.4 | Reassessment: TVL recovery; sUSDai concentration flagged (19.9%) as structurally identical to pre-incident wstUSR |
+| [May 24, 2026](https://github.com/yearn/risk-score/pull/215) | 1.4 | Reassessment: sUSDai grew to 28.3%; explicit 30% concentration trigger set; Collateralization 2.5 → 2.75 |
+| [July 22, 2026](https://github.com/yearn/risk-score/pull/293) | 2.6 | Reassessment (TVL/on-chain snapshot Jul 14, block `25529610`; sUSDai bridge & oracle layer verified Jul 22): lending TVL $639.0M (−26.8% off May peak, stabilizing); sUSDai above 30% trigger at 31.2%; issuer and Arbitrum source chain identified as USD.AI (Fluid holds ~2/3 of supply, extreme illiquidity); LayerZero burn/mint path verified on canonical Arbitrum and Ethereum, with a 3-of-3 DVN / 15-confirmation canonical mint route, 3-of-3 Safe owner, and a 10M/hour outbound-only rate limiter that does not cap inbound mint; separate USDai T1 hard-peg oracle finding scoped to its own currently tiny debt; reUSD cross-referenced to its 3.51 Elevated-Risk report; ~37% of lending supply TVL depends on offchain/admin-side value inputs. Collateralization 2.75 → 4.0, Provability 1.0 → 2.5, Dependencies 2.5 → 4.0, Liquidity 2.0 → 2.5; Minimal → Medium Risk |
