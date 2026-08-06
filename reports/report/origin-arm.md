@@ -290,7 +290,7 @@ Final Score = (Audits × 0.20) + (Centralization × 0.30) + (Funds Mgmt × 0.30)
 | Date | Score | Notes |
 |------|-------|-------|
 | May 18, 2026 | 1.50 | Initial assessment |
-| Aug 6, 2026 | 1.50 | Implementation upgraded to `0x850d…6217`; TVL ~$8.8M |
+| Aug 6, 2026 | 1.50 | Implementation upgraded to [`0x850d…6217`](https://etherscan.io/address/0x850da2e21f1f71479e2a307edab114777d9f6217) — [changes](https://gist.github.com/spalen0/54b015bb1c98089f0abb963459a57219); TVL ~$8.8M |
 
 ---
 
