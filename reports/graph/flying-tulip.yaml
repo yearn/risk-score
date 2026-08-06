@@ -177,6 +177,16 @@ nodes:
     label: Chainlink Feeds
     category: dependency
     note: Canonical EACAggregatorProxy feeds for USDC, USDT and ETH
+  - id: dep-curve
+    label: Curve ftUSD/USDC
+    address: "0xafec61e7a604f8f81f7cab64ec75bfa07c542630"
+    category: dependency
+    note: StableSwap-NG, ~1.87M TVL. Only external ftUSD exit and the only external ftUSD price reference
+  - id: dep-morpho
+    label: Morpho
+    address: "0xBBBBBbbBBb9cC5e90e3b3Af64bdAF62C37EEFFCb"
+    category: dependency
+    note: Holds 629,675 ftUSD as collateral. Third-party acceptance and an outward propagation channel
   - id: dep-spot-clob
     label: FT Spot AMM / CLOB
     category: dependency
@@ -364,6 +374,15 @@ edges:
     to: dep-permit2
     kind: routes-through
     label: token approvals
+
+  - from: ftusd
+    to: dep-curve
+    kind: routes-through
+    label: external exit + peg reference (0.30% at 500K)
+  - from: ftusd
+    to: dep-morpho
+    kind: routes-through
+    label: accepted as Morpho collateral
 
   # === Asset supply routing ===
   - from: positions-manager
