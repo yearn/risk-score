@@ -4,7 +4,7 @@
 - **Token:** sGho (GHO Savings Vault)
 - **Chain:** Ethereum
 - **Token Address:** [`0xE1753F2e00940cC31213dd92013cF019DFE4ca1d`](https://etherscan.io/address/0xE1753F2e00940cC31213dd92013cF019DFE4ca1d)
-- **Final Score: 2.6/5.0**
+- **Final Score: 2.5/5.0**
 
 > **STATUS (July 27, 2026, block 25,622,129):** sGho is live on Ethereum mainnet with **72 days of production history** and `totalAssets() = 136,466,586 GHO` (~$136.3M). The vault is operating to the [AIP 484](https://app.aave.com/governance/v3/proposal/?proposalId=484) spec — `targetRate() = 425` bps, `supplyCap() = 4e26` (400M GHO), `paused() = false`, implementation and ProxyAdmin unchanged, no `TargetRateUpdated`, `SupplyCapUpdated`, `Paused`, `Upgraded`, or `RoleGranted`/`RoleRevoked` events since launch. **Two live conditions dominate this assessment:**
 >
@@ -56,6 +56,7 @@ sGHO is an **ERC-4626 compliant yield-bearing savings vault** for GHO, Aave's na
 - [TokenLogic Audit Repo Snapshot](https://github.com/TokenLogic-com-au/gho-origin/tree/b30f973f99fd6eb7a9f343b4681dae88f58007ef)
 - [GHO Core Contracts](https://github.com/aave/gho-core)
 - [Aave GHO Documentation](https://aave.com/docs/developers/gho)
+- [TokenLogic: GHO On-Chain Analytics](https://aave.tokenlogic.xyz/gho) — live GHO, sGHO, GSM, and market analytics; supplementary to direct contract reads
 - [DeFiLlama: Aave](https://defillama.com/protocol/aave)
 - [LlamaRisk: sGHO Analysis](https://llamarisk.com/research/2025-04-11t20-52-28-000z)
 
@@ -726,13 +727,13 @@ Counterweight: the Council has not touched sGho at all in 72 days (no `RateConfi
 | Reserve transparency | sGHO: on-chain (ERC-4626). GSM: on-chain (`getAvailableLiquidity()`, `getUsed()`, `getLimit()`). GHO Reserve: on-chain |
 | Exchange rate | sGHO: on-chain via yieldIndex. GSM: fixed 1:1 |
 | Funding gap | Detectable: compare `balanceOf(GHO, sGHO)` vs `totalAssets()`; funding history reconstructible by differencing `Transfer` against `Deposit` logs |
-| Third-party | Chainlink oracle for GSM freeze. All data independently verifiable |
+| Third-party | Chainlink oracle for GSM freeze. [TokenLogic's GHO dashboard](https://aave.tokenlogic.xyz/gho) provides live sGHO supply, rate, mint/burn, holder, user-activity, GHO, and Stability Module analytics. All data remains independently verifiable on-chain |
 
-**Provability Score: 1.5/5** — Excellent on-chain transparency; every claim in this report was reproduced from primary on-chain data. The funding gap, the six AFC top-ups, and the GSM's exit inventory were all recoverable without any protocol dashboard or API. Score is held slightly above 1.0 because none of this is surfaced by the protocol itself: `totalAssets()` reports the obligation with no reference to backing, no event fires when the gap opens, and no event fires when GSM inventory drains — an integrator who monitors only events sees nothing.
+**Provability Score: 1.25/5** — Excellent on-chain transparency, strengthened by [TokenLogic's GHO dashboard](https://aave.tokenlogic.xyz/gho), which presents live sGHO, GHO, and Stability Module analytics without requiring an integrator to reconstruct basic activity and market data from logs. Every claim in this report remains reproducible from primary on-chain data. The score stays above 1.0 because the most safety-critical reconciliation — `totalAssets() − balanceOf(GHO, sGho)` and attribution of the shortfall to AFC funding — is still not surfaced as a first-class protocol or dashboard health metric, and neither a funding-gap opening nor GSM inventory drain emits an event.
 
-**Funds Management Score = (3.0 + 1.5) / 2 = 2.25**
+**Funds Management Score = (3.0 + 1.25) / 2 = 2.125**
 
-**Score: 2.25/5** — Provability remains a genuine strength, and the vault still holds more GHO than aggregate net deposits before withdrawals. The increase reflects Collateralization moving 2.5 → 3.0: the unfunded-yield scenario the prior assessment described as an edge case is now live, and the withdrawal ordering can already turn that deficit into principal loss for late users.
+**Score: 2.13/5** — Provability remains a genuine strength, now supported by a dedicated independent analytics surface, and the vault still holds more GHO than aggregate net deposits before withdrawals. The increase reflects Collateralization moving 2.5 → 3.0: the unfunded-yield scenario the prior assessment described as an edge case is now live, and the withdrawal ordering can already turn that deficit into principal loss for late users.
 
 #### Category 4: Liquidity Risk (Weight: 15%)
 
@@ -768,19 +769,19 @@ Counterweight: the Council has not touched sGho at all in 72 days (no `RateConfi
 
 ```
 Final Score = (Centralization × 0.30) + (Funds Mgmt × 0.30) + (Audits × 0.20) + (Liquidity × 0.15) + (Operational × 0.05)
-            = (2.75 × 0.30) + (2.25 × 0.30) + (2.25 × 0.20) + (3.5 × 0.15) + (2.0 × 0.05)
-            = 0.825 + 0.675 + 0.45 + 0.525 + 0.10
-            = 2.575
+            = (2.75 × 0.30) + (2.125 × 0.30) + (2.25 × 0.20) + (3.5 × 0.15) + (2.0 × 0.05)
+            = 0.825 + 0.6375 + 0.45 + 0.525 + 0.10
+            = 2.5375
 ```
 
 | Category | Score | Weight | Weighted |
 |----------|-------|--------|----------|
 | Audits & Historical | 2.25 | 20% | 0.45 |
 | Centralization & Control | 2.75 | 30% | 0.825 |
-| Funds Management | 2.25 | 30% | 0.675 |
+| Funds Management | 2.125 | 30% | 0.6375 |
 | Liquidity Risk | 3.5 | 15% | 0.525 |
 | Operational Risk | 2.0 | 5% | 0.10 |
-| **Final Score** | | | **2.6/5.0** |
+| **Final Score** | | | **2.5/5.0** (2.5375 unrounded) |
 
 ### Risk Tier
 
@@ -792,7 +793,7 @@ Final Score = (Centralization × 0.30) + (Funds Mgmt × 0.30) + (Audits × 0.20)
 | 3.5-4.5 | Elevated Risk | Limited approval, strict limits |
 | 4.5-5.0 | High Risk | Not recommended |
 
-**Risk Tier: Medium Risk (2.6/5.0) — Approved with enhanced monitoring**
+**Risk Tier: Medium Risk (2.5/5.0; 2.5375 unrounded) — Approved with enhanced monitoring**
 
 > The sGho contract itself has been exemplary: 72 days, 2,818 user operations, 3.7x TVL growth, and not one parameter, role, or implementation change. The downgrade is entirely about the system around it. Two conditions the prior assessment listed as risks to watch have both materialised — the vault is running an unfunded yield obligation, and the GSM USDC exit route is empty — and neither emits an event, so both are invisible to event-driven monitoring.
 >
@@ -871,4 +872,4 @@ Step-by-step view of the Yearn USDC strategy's two flows, with explicit fees at 
 | --- | --- | --- |
 | April 2, 2026 | 2.1 | Pre-deployment assessment from ARFC/audit material; rechecked April 22, 2026 |
 | May 19, 2026 | 2.3 | Post-deployment refresh after AIP 484. On-chain roles, ProxyAdmin, rate, and supply cap verified. Centralization 2.0 → 2.5 (Risk Council holds unrate-limited sGhoSteward roles); Collateralization 2.0 → 2.5 (late-withdrawer impairment path) |
-| July 27, 2026 | 2.6 | 72-day reassessment. sGho contract itself unchanged and clean; TVL 37.3M → 136.5M GHO. Live 205,146 GHO unfunded-yield gap (AFC Safe funding lapsed 28 days); GSM USDC exit inventory exhausted (111.25M → 9.95 waEthUSDC); GSM buy fee 7 → 10 bps. Liquidity 2.5 → 3.5, Centralization 2.5 → 2.75, Funds Mgmt 2.0 → 2.25, Operational 1.5 → 2.0, Audits 2.5 → 2.25 |
+| July 27, 2026 (updated Aug 6) | 2.5 | 72-day reassessment. sGho contract itself unchanged and clean; TVL 37.3M → 136.5M GHO. Live 205,146 GHO unfunded-yield gap (AFC Safe funding lapsed 28 days); GSM USDC exit inventory exhausted (111.25M → 9.95 waEthUSDC); GSM buy fee 7 → 10 bps. Liquidity 2.5 → 3.5, Centralization 2.5 → 2.75, Funds Mgmt 2.0 → 2.125 after the TokenLogic dashboard improved the Provability subscore 1.5 → 1.25, Operational 1.5 → 2.0, Audits 2.5 → 2.25 |
