@@ -45,7 +45,7 @@ The senior tranche always earns at minimum the benchmark rate (floored), with up
 - [Audits](https://docs.strata.markets/technical-documentation/audits)
 - [Risks & Mitigations](https://docs.strata.markets/protocol-mechanism/risks-and-mitigations)
 - [DeFiLlama](https://defillama.com/protocol/strata)
-- [GitHub](https://github.com/Strata-Money/contracts-tranches)
+- [GitHub](https://github.com/Strata-Markets)
 - [Twitter/X](https://twitter.com/strata_markets)
 
 ## Contract Addresses
@@ -149,7 +149,7 @@ The architecture is moderately complex:
 
 ### Bug Bounty
 
-**No active bug bounty program found.** Exhaustive search across Immunefi, Code4rena, Sherlock, HackerOne, Safe Harbor, and the protocol's own documentation and GitHub yielded no bug bounty listing, responsible disclosure policy, or security contact for vulnerability reporting. The [security documentation](https://docs.strata.markets/technical-documentation/security) covers audits, multisigs, and monitoring but does not mention a bug bounty. This is a notable gap for a protocol with tens of millions in TVL (~$86.8M as of May 19, 2026).
+**Active Immunefi bug bounty program found** with up to **$250k in rewards** under [https://immunefi.com/bug-bounty/strata](https://immunefi.com/bug-bounty/strata). *Correction applied per issue #379: the previous assessment reported no bounty; the program is active.*
 
 ## Historical Track Record
 
@@ -293,23 +293,24 @@ Strata uses a layered Role-Based Access Control (RBAC) system in the **AccessCon
 | **Ethena (sUSDe/USDe)** | Yield source & collateral | **Critical** | All deposited assets staked in Ethena's sUSDe vault. Ethena insolvency, USDe depegging, or sUSDe exploit would directly impact srUSDe. Senior tranche principal at risk if junior tranche is depleted |
 | **Aave v3 Core** | Benchmark rate oracle | **High** | Supply-weighted average of USDC/USDT lending rates used for benchmark. Failure could distort yield calculations and tranche distributions |
 | **Gnosis Safe** | Multisig infrastructure | **High** | All governance actions flow through Safe multisigs |
-| **Hypernative** | Monitoring & alerting | **Medium** | 24/7 contract monitoring. Not critical for operations but important for security |
+| **Blockaid / Cygent / Hypernative** | Monitoring, threat intelligence & audits | **Medium** | Since July 2026: 24/7 threat intelligence via Blockaid, rolling pre-deployment audits via Cygent, with Guardian oversight. Not critical for operations but important for security |
 | **Ethereum L1** | Settlement layer | **High** | All contracts deployed on Ethereum mainnet only |
 
-**Key dependency risk**: For srUSDe specifically, Strata has a **single critical yield source dependency** on Ethena/sUSDe. The benchmark rate relies on a **single data source** (Aave v3 Core). No documented fallback mechanisms if Ethena or Aave dependencies fail. The AprPairFeed has a `setRoundStaleAfter` parameter suggesting some staleness detection.
+**Key dependency risk**: For srUSDe specifically, Strata has a **single critical yield source dependency** on Ethena/sUSDe. The benchmark rate relies on a **single data source** (Aave v3 Core). The AprPairFeed has a `setRoundStaleAfter` parameter suggesting some staleness detection. *Per project response (issue #379): the single yield source is an intentional product design — an alternative yield source would not be compatible with tranching sUSDe; for the benchmark there is no practical scenario in which Aave fails to provide rate data.*
 
 **Note on protocol-wide surface area** (new since previous assessment): Strata expanded from a single market to **five live markets** between Feb and May 2026: Ethena USDe (srUSDe — unchanged), Neutrl NUSD, Midas mHYPER, Midas mM1-USD, and Saturn USDat. Each market has its own CDO/Strategy/Accounting/AprPairFeed/AccessControlManager stack but shares the same multisig and timelock governance. This diversifies the protocol's yield mix away from sole reliance on Ethena, but materially increases overall protocol surface area — none of the new markets have undergone the same depth of audit coverage as the original srUSDe codebase, and operational mistakes on any market (e.g. an oracle mis-configuration on the Midas markets) could indirectly affect team focus / incident-response bandwidth for srUSDe. The srUSDe contracts themselves are unchanged.
 
 ## Operational Risk
 
-- **Team Transparency**: Founding team is **not publicly named** in documentation. Operational team members are not publicly identified. The only publicly named individual is **Patrick Collins** (Cyfrin CEO), who serves as Guardian (security oversight role, not management). Team is classified as **partially anonymous** -- known anons at best
+- **Team Transparency**: Founding team is **partially publicly identified**. Per project response (issue #379), founding members include [Vishu](https://www.linkedin.com/in/vishu0909/) and [Ramiro Gamen](https://www.linkedin.com/in/ramirogamen/), and **Frontera Labs** is the operating company (OpCo). Patrick Collins (Cyfrin CEO) serves as Guardian (security oversight role, not management). Team is classified as **partially anonymous**
 - **Documentation**: Comprehensive docs at docs.strata.markets covering mechanism, technical architecture, contracts, roles, and risks; updated to cover the four new markets (Neutrl/Midas/Saturn). However, parts of the docs are now **out-of-date with onchain state** — notably, the docs claim `PAUSER_ROLE` is held by the Admin Multisig, but onchain it is held by the Operational Multisig. Yearn should treat onchain `hasRole` results as authoritative
 - **Legal Structure**: **Frontera Labs, Inc.**, a Delaware (USA) corporation, operates the Interface (front-end) only. The company explicitly disclaims ownership or control of the protocol smart contracts. Protocol contracts are licensed under BUSL-1.1. A planned transition to a **Cayman Islands foundation** is referenced in the [Terms of Service](https://docs.strata.markets/resources/terms-of-service) (last updated Nov 28, 2025). US users are geo-blocked. Contact: legal@strata.markets
 - **Incident Response**: Not formally documented, but the protocol has multiple layers of defense:
-  - 24/7 monitoring via Hypernative
+  - 24/7 threat intelligence via Blockaid (since July 2026) + Hypernative monitoring
+  - Rolling pre-deployment audits via Cygent (since July 2026)
   - Guardian (Patrick Collins) can cancel timelock transactions on the 48h Timelock
   - Operational Multisig (2/3) can pause the protocol immediately (no timelock)
-- **Open Source**: Contracts are public on [GitHub](https://github.com/Strata-Money/contracts-tranches). Public branch last pushed Feb 25, 2026; active development is on unmerged feature branches (`strat/morpho`, `strat/neutrl`, `strat/superstate`, `release/performance-fee`)
+- **Open Source**: Contracts are public on [GitHub](https://github.com/Strata-Markets). *Correction applied per issue #379: the active-development repository is `Strata-Markets`; the previously referenced `Strata-Money/contracts-tranches` repo is deprecated and no longer used for active development.*
 - **Points Program**: Strata runs a "Strata Points Program" (incentive/airdrop mechanism). Repeated TVL boom-bust cycles in Jan/Apr 2026 are consistent with points-program farming behavior
 
 ## Monitoring
@@ -377,7 +378,7 @@ Strata uses a layered Role-Based Access Control (RBAC) system in the **AccessCon
 - **Multi-layered governance**: 48h timelock for owner changes (verified active with 53 executions), two-step exit-fee changes, independent Guardian (Patrick Collins/Cyfrin) with CANCELLER role on the 48h timelock
 - **Onchain transparency**: Exchange rate is programmatic (ERC-4626), accounting is fully onchain, and the codebase is open-source. Implementation contracts unchanged since November 2025 (no recent upgrades)
 - **Multiple reputable audits**: 8 audit engagements across Cyfrin, Quantstamp, and Guardian Audits (one new Quantstamp engagement on the discrete-accounting mechanism since the previous assessment)
-- **Active monitoring**: 24/7 monitoring via Hypernative with Guardian oversight
+- **Active monitoring**: 24/7 threat intelligence via Blockaid with rolling pre-deployment audits via Cygent and Guardian oversight (since July 2026)
 - **Reserve extraction is timelocked** (corrected from prior assessment): `RESERVE_MANAGER_ROLE` is held by the 24h Timelock, not the Admin Multisig — and the 24h Timelock currently has no executor, so reserve withdrawal to treasury is presently blocked outright
 
 ### Key Risks
@@ -386,16 +387,16 @@ Strata uses a layered Role-Based Access Control (RBAC) system in the **AccessCon
 - **Single critical dependency on Ethena (for srUSDe)**: All srUSDe-market funds flow into Ethena's sUSDe. An Ethena exploit or USDe depeg would directly impact srUSDe holders
 - **Low multisig thresholds with overlapping signers**: Admin Multisig is 3-of-4, Operational Multisig is 2-of-3, and two of the three Operational signers also sit on the Admin Safe. All keys are internal-team-only
 - **Pause is callable by a 2/3 internal-team multisig** (Operational), correcting the previous report's claim that pause was an Admin Multisig (3/4) function
-- **No bug bounty program found**: Notable absence for a protocol managing tens of millions in TVL
-- **Withdrawal delays**: Redemptions subject to cooldown periods tied to Ethena's sUSDe unstaking (~7 days)
-- **Anonymous team**: Founding team not publicly identified. Patrick Collins (Guardian) is the only doxxed individual, in a security oversight role
+- **Bug bounty**: Active Immunefi program with up to $250k rewards (per issue #379); reduces the previous assessment's "no bounty" concern
+- **Withdrawal delays**: USDe redemptions subject to cooldown periods tied to Ethena's sUSDe unstaking (~7 days); users may alternatively redeem directly in sUSDe, which is instant and does not require unstaking (per issue #379)
+- **Partially anonymous team**: Founding team members identified per issue #379 (LinkedIn profiles + Frontera Labs as OpCo); Patrick Collins (Guardian) is publicly named in a security oversight role
 - **Rapid multi-market expansion**: protocol grew from 1 market to 5 markets (Neutrl, Midas mHYPER, Midas mM1-USD, Saturn USDat) between Feb and May 2026, with no audits found covering the new markets. While srUSDe contracts are unchanged, broader operational and governance bandwidth is now stretched across five integrations
-- **Stalled public repo**: Public GitHub last pushed Feb 25, 2026 — active development is happening on unmerged branches (`strat/morpho`, `strat/neutrl`, `strat/superstate`, `release/performance-fee`)
+- **Stalled public repo**: The previously referenced public repo (`Strata-Money/contracts-tranches`) last pushed Feb 25, 2026 — per issue #379, the active-development repository is [Strata-Markets](https://github.com/Strata-Markets), and the old repo is deprecated. Development history should be re-verified against the active repo
 
 ### Critical Risks
 
 - **Junior tranche depletion**: If the junior tranche is fully depleted (e.g., prolonged negative yield or extreme outflows), senior tranche **may incur principal losses**. The 105% coverage circuit breaker provides some protection but is not a guarantee. Current jrUSDe `totalAssets` is ~$10M against ~$51.9M senior assets — adequate but the buffer has shrunk in absolute terms vs. the previous assessment
-- **24h Timelock has no executor and has never executed a single call** since deployment in October 2025 — verified by `hasRole` queries against every known principal (including the zero-address sentinel) and by inspection of the deployment-tx constructor calldata which shows an empty `executors[]` array. Several roles that the protocol documentation routes through the 24h Timelock (RESERVE_MANAGER, UPDATER_STRAT_CONFIG, COOLDOWN_WORKER) cannot fire on that path. For srUSDe most of these functions are reachable via the 48h Timelock or other principals, but it is an unexplained governance misconfiguration that the team should address
+- **24h Timelock has no executor and has never executed a single call** since deployment in October 2025 — verified by `hasRole` queries against every known principal (including the zero-address sentinel) and by inspection of the deployment-tx constructor calldata which shows an empty `executors[]` array. Several roles that the protocol documentation routes through the 24h Timelock (RESERVE_MANAGER, UPDATER_STRAT_CONFIG, COOLDOWN_WORKER) cannot fire on that path. For srUSDe most of these functions are reachable via the 48h Timelock or other principals. *Per project response (issue #379): the 24h Timelock holds RESERVE_MANAGER, UPDATER_STRAT_CONFIG, and COOLDOWN_WORKER; no calls have been needed since final deployment configuration. The 48h Admin Timelock is the root admin and provides an alternative governance path for these operations.* Residual concern: the 24h path itself remains unconfigured, so the team should confirm this is intentional and documented
 - **Proxy upgrade risk**: Core contracts are upgradeable with 48h timelock. While the Guardian can cancel, this requires active monitoring
 
 ---
@@ -420,7 +421,7 @@ Strata uses a layered Role-Based Access Control (RBAC) system in the **AccessCon
 #### Category 1: Audits & Historical Track Record (Weight: 20%)
 
 - **Audits**: 3 audit firms (Cyfrin, Quantstamp, Guardian) across **8 engagements** (one new Quantstamp on the discrete-accounting mechanism since Feb). Good coverage of the srUSDe codebase; new Neutrl/Midas/Saturn markets are **not separately audited** in publicly available reports.
-- **Bug Bounty**: Still no active bug bounty program found. Unchanged gap.
+- **Bug Bounty**: Active Immunefi program with up to $250k rewards found per issue #379 (previously reported as no bounty). If confirmed by the reviewer, this should improve the score in a future reassessment.
 - **Time in Production**: **~7.5 months** since official launch (October 2025). Still young but maturing.
 - **TVL**: ~$86.8M current (down from $153M at the previous assessment); peaked at ~$326M. Three distinct sharp drawdown events now on record (Jan, early Apr, late Apr 2026), giving a peak-to-current decline of ~73%.
 - **Incidents**: None reported in the Feb–May 2026 window.
@@ -509,7 +510,7 @@ Strata uses a layered Role-Based Access Control (RBAC) system in the **AccessCon
 - **Documentation**: Comprehensive at docs.strata.markets; the public docs page now also covers the four new markets (Neutrl, Midas mHYPER, Midas mM1-USD, Saturn USDat). However, parts of the docs are out-of-date with respect to onchain state (e.g. PAUSER_ROLE is documented as Admin Multisig but is in fact held by the Operational Multisig)
 - **Public GitHub activity**: Last push Feb 25, 2026 (~3 months stale); active development is on unmerged branches that are not visible from the master view
 - **Legal Structure**: Frontera Labs, Inc. (Delaware) operates the front-end. Protocol contracts are autonomous and licensed under BUSL-1.1. Planned transition to Cayman Islands foundation. US users geo-blocked
-- **Incident Response**: Not formally documented. 24/7 Hypernative monitoring + Guardian veto capability provide de facto incident response
+- **Incident Response**: Not formally documented. 24/7 Blockaid threat intelligence + Hypernative monitoring + rolling Cygent pre-deployment audits + Guardian veto capability provide de facto incident response
 
 **Score: 2.5/5** -- Held at 2.5. Strengths (legal clarity, monitoring) and weaknesses (anonymous team, doc drift, stalled public repo) roughly balance.
 
