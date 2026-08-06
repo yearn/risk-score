@@ -23,7 +23,7 @@ nodes:
     note: EIP-1967 proxy; ERC-4626 LP token
   - id: arm-impl
     label: ARM Implementation (LidoARM)
-    address: "0xC0297a0E39031F09406F0987C9D9D41c5dfbc3df"
+    address: "0x850da2e21f1f71479e2a307edab114777d9f6217"
     category: vault
   - id: fee-collector
     label: Fee Collector (Safe 1/3)

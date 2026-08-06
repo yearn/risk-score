@@ -1,6 +1,6 @@
 # Protocol Risk Assessment: Origin ARM
 
-- **Assessment Date:** May 18, 2026
+- **Assessment Date:** May 18, 2026 (Updated: August 6, 2026)
 - **Token:** ARM-WETH-stETH
 - **Chain:** Ethereum Mainnet
 - **Token Address:** [`0x85B78AcA6Deae198fBF201c82DAF6Ca21942acc6`](https://etherscan.io/address/0x85B78AcA6Deae198fBF201c82DAF6Ca21942acc6)
@@ -28,7 +28,7 @@ Origin's stETH ARM (Automated Redemption Manager) is a yield-generating ETH vaul
 | Contract | Address |
 |----------|---------|
 | ARM Proxy | [`0x85B78AcA6Deae198fBF201c82DAF6Ca21942acc6`](https://etherscan.io/address/0x85B78AcA6Deae198fBF201c82DAF6Ca21942acc6) |
-| ARM Implementation | [`0xC0297a0E39031F09406F0987C9D9D41c5dfbc3df`](https://etherscan.io/address/0xC0297a0E39031F09406F0987C9D9D41c5dfbc3df) |
+| ARM Implementation | [`0x850da2e21f1f71479e2a307edab114777d9f6217`](https://etherscan.io/address/0x850da2e21f1f71479e2a307edab114777d9f6217) |
 | Timelock Controller | [`0x35918cDE7233F2dD33fA41ae3Cb6aE0e42E0e69F`](https://etherscan.io/address/0x35918cDE7233F2dD33fA41ae3Cb6aE0e42E0e69F) |
 | Origin DeFi Governance | [`0x1D3fBD4d129Ddd2372EA85c5Fa00b2682081c9EC`](https://etherscan.io/address/0x1D3fBD4d129Ddd2372EA85c5Fa00b2682081c9EC) |
 | GOV Multisig (5/8, cancel-only) | [`0xbe2AB3d3d8F6a32b96414ebbd865dBD276d3d899`](https://etherscan.io/address/0xbe2AB3d3d8F6a32b96414ebbd865dBD276d3d899) |
@@ -68,7 +68,7 @@ Origin Protocol has 30+ audit reports across all products (OpenZeppelin, Trail o
 - **Launched:** October 25, 2024 (~19 months in production)
 - **ARM-specific incidents:** None ✓
 - **Origin Protocol incident:** November 17, 2020 - OUSD Flash Loan Reentrancy Attack ($8M loss). Different product (OUSD) with different contracts. ARM codebase built later with lessons learned. Source: [DeFiLlama Hacks DB](https://defillama.com/hacks), [rekt.news](https://rekt.news/origin-rekt/)
-- **TVL volatility:** Extreme range from $782K to $28M peak, suggesting whale concentration risk
+- **TVL volatility:** Extreme range from $782K to $28M peak ($2.4M–$9.2M in the last 30 days), suggesting whale concentration risk
 - **Team:** Origin Protocol since 2017. Founded by Josh Fraser & Matthew Liu. CEO: Rafael Ugolini. Backed by Pantera Capital, Founders Fund. Previously launched OETH and OUSD. Active development - expanding to EtherFi, Ethena ARM variants.
 
 ## Funds Management
@@ -203,7 +203,7 @@ No cross-chain dependencies.
 | Audits | 2x OpenZeppelin + yAudit |
 | Bug Bounty | $1M on Immunefi, ARM in scope |
 | Time in Production | ~19 months, no ARM incidents |
-| TVL | ~$7.7M ([DeFiLlama](https://defillama.com/protocol/origin-arm)) |
+| TVL | ~$8.8M ([DeFiLlama](https://defillama.com/protocol/origin-arm)) |
 
 #### Category 2: Centralization & Control Risks (Weight: 30%) — **1.33**
 
@@ -285,6 +285,15 @@ Final Score = (Audits × 0.20) + (Centralization × 0.30) + (Funds Mgmt × 0.30)
 
 ---
 
+## Assessment History
+
+| Date | Score | Notes |
+|------|-------|-------|
+| May 18, 2026 | 1.50 | Initial assessment |
+| Aug 6, 2026 | 1.50 | Implementation upgraded to `0x850d…6217`; TVL ~$8.8M |
+
+---
+
 ## Appendix: Contract Architecture
 
 ```
@@ -307,7 +316,7 @@ Final Score = (Audits × 0.20) + (Centralization × 0.30) + (Funds Mgmt × 0.30)
 │         ├──────────────────────────────────────┐                    │
 │         ▼                                      ▼                    │
 │  ARM Proxy (0x85B7...)              MorphoMarket Wrapper (0xB7Ce..)│
-│  [EIP-1967, impl: 0xC029...]       [EIP-1967, also owned by TL]   │
+│  [EIP-1967, impl: 0x850d...]       [EIP-1967, also owned by TL]   │
 │                                                                     │
 │  ⚠ Proxy upgrade = single-step setOwner (no 2-step transfer)      │
 │                                                                     │
