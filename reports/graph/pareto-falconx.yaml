@@ -20,7 +20,7 @@ nodes:
     label: Credit Vault (IdleCDOEpochVariant)
     address: "0x433D5B175148dA32Ffe1e1A37a939E1b7e79be4d"
     category: vault
-    note: Proxy; NAV $167.6M; holds $0 USDC while an epoch runs
+    note: Proxy; recorded NAV $167.6M; owner can enable cashless minted-interest accounting
   - id: aa-tranche
     label: AA_FalconXUSDC (senior)
     address: "0xC26A6Fa2C37b38E549a4a1807543801Db684f99C"
@@ -37,17 +37,17 @@ nodes:
     label: IdleCreditVault (receipt token)
     address: "0x17E9Ab2992dfecBe779a06A92a6cDB9fE6aEeEf3"
     category: infra
-    note: Claim on borrower $182.85M; pendingWithdraws $15.24M; USDC balance $0
+    note: Proxy; owner can replace authorized CDO, enabling unbacked receipt/NAV or withdrawal-claim minting
   - id: queue
     label: EpochQueue (deposits / withdrawals)
     address: "0x5cC24f44cCAa80DD2c079156753fc1e908F495DC"
     category: infra
-    note: KYC-gated, processed by the operator between epochs
+    note: Proxy; currently KYC-gated, processed by the operator between epochs
   - id: orchestrator
     label: ManagerOrchestrator (manager)
     address: "0x052e51568351eFfa9EA90DF6FE648446f006323b"
     category: infra
-    note: startEpoch / stopEpochWithDuration; sets APR, interest, loss
+    note: Proxy; startEpoch / stopEpochWithDuration; sets APR, interest, loss
   - id: operator
     label: Operator keeper (EOA)
     address: "0x1fb0f3602F52e2420aCff5CF04DBfDE96378Df58"
@@ -57,7 +57,7 @@ nodes:
     label: KeyringIdleWhitelist (policy 18)
     address: "0x6a6A91c7c7C05f9f6B8bC9F6e5eA231e460450e3"
     category: infra
-    note: Gates deposits and withdraw requests; bypass allowlist admin is one EOA
+    note: Current deposit/withdraw gate; Treasury Safe can replace or zero the Keyring pointer
   - id: lz-adapter
     label: LayerZero OFT Adapter → Monad
     address: "0x8FEd610aEfD81F6bEC517854b1a245DEca83667e"
@@ -90,7 +90,7 @@ nodes:
     label: ProxyAdmin
     address: "0x9438904abC7d8944A6E2A89671fEf51C629af351"
     category: governance
-    note: 5 implementation upgrades in 13 months
+    note: Upgrades CDO, strategy, queue and orchestrator; 5 upgrades in 13 months
 
   # === External dependencies ===
   - id: dep-falconx
@@ -140,14 +140,22 @@ edges:
     to: strategy
     kind: manages
     label: upgrade rights
+  - from: proxy-admin
+    to: queue
+    kind: manages
+    label: upgrade rights
+  - from: proxy-admin
+    to: orchestrator
+    kind: manages
+    label: upgrade rights
   - from: treasury-safe
     to: strategy
     kind: holds-role
-    label: owner — transferToken(any dest) / setBorrower, NO timelock
+    label: owner — transferToken / setBorrower / setWhitelistedCDO, NO timelock
   - from: treasury-safe
     to: cdo
     kind: holds-role
-    label: owner — fee params, limits, restoreOperations
+    label: owner — minted interest / Keyring pointer / fee params, NO timelock
   - from: orchestrator
     to: cdo
     kind: manages
@@ -166,6 +174,14 @@ edges:
     to: aa-tranche
     kind: mints
     label: minter (immutable, sole minter)
+  - from: treasury-safe
+    to: aa-tranche
+    kind: mints
+    label: indirect — can enable minted interest and trigger uncapped AA fee-share mint
+  - from: orchestrator
+    to: aa-tranche
+    kind: mints
+    label: conditional — operator can trigger minted-interest fee shares after owner enables mode
   - from: cdo
     to: bb-tranche
     kind: mints
