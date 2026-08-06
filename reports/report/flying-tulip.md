@@ -1,13 +1,14 @@
 # Protocol Risk Assessment: Flying Tulip — FT Lend (ftDNMM)
 
-- **Assessment Date:** June 7, 2026 (Updated: July 27, 2026; Updated: August 3, 2026)
-- **Token:** FT Lend market (supply / borrow); system tokens ftUSD and FT
+- **Assessment Date:** June 7, 2026 (Updated: July 27, 2026; Updated: August 6, 2026)
+- **Token:** FT Lend market — supply / borrow positions (internal balances, not tokenised)
 - **Chain:** Ethereum Mainnet
 - **Core Contract:** PositionsManager [`0xbe4050a73a7Fb384c65E885a15C33461A4B20055`](https://etherscan.io/address/0xbe4050a73a7Fb384c65E885a15C33461A4B20055)
 - **Final Score: 3.6/5.0**
-- **Elevated Risk** — limited approval, strict limits. A 3-of-5 Safe with no timelock can upgrade every contract, override every price, and mint or seize ftUSD. **34.5% of the market's TVL is the protocol's own ftUSD backing collateral lent back into itself**, and only three genuinely third-party addresses hold 96% of the remainder. Audit coverage is asserted but sits behind an access-code wall and cannot be verified. See [Risk Score Assessment](#risk-score-assessment). (Also deployed on Sonic; this report covers Ethereum.)
+- **Elevated Risk** — limited approval, strict limits. A 3-of-5 Safe with no timelock can upgrade every contract and override every price. **35.1% of the market's TVL is the protocol's own ftUSD backing collateral supplied back into itself**, and only three genuinely third-party addresses hold 96% of the remainder. Audit coverage is asserted but sits behind an access-code wall and cannot be verified. See [Risk Score Assessment](#risk-score-assessment). (Also deployed on Sonic; this report covers Ethereum.)
+- **Companion report:** ftUSD and staked ftUSD are assessed separately in **[Flying Tulip — ftUSD & Staked ftUSD](./flying-tulip-ftusd.md)**.
 
-> **Scope.** Yearn's interest (issue [yearn/risk-score#234](https://github.com/yearn/risk-score/issues/234)) is the risk of supplying ("just lend") and/or borrowing in the **FT Lend** market. This report covers the lending engine, the assets it touches, and — because they are structurally entangled with it (see [Reflexivity](#the-reflexivity-loop-ftusd-backing-is-lent-into-ft-lend)) — the ftUSD mint/redeem and collateral-custody contracts. **Staked ftUSD is out of scope.** A staking vault exists — `sftUSD` ([`0xeb48218a…7625`](https://etherscan.io/address/0xeb48218a4c35C814C7678cBcae88C6Ee037F7625), 1,324,455 ftUSD staked, 107 holders) over a second wrapper `ftftUSD` ([`0xB44a9C40…B87f`](https://etherscan.io/address/0xb44a9c40efc05eb014effeac3cbed6a31f8cb87f)) — with its own circuit breaker, epoch settler, and a rate-limited exit (10% of TVL per window, 6h settlement delay, admin-settable to 7 days). Holding or staking ftUSD is a **materially different risk** from supplying to FT Lend and requires its own report; nothing here should be used to size an sftUSD position. The unrelated `tulip.garden` protocol on Solana is **not** Flying Tulip and is excluded. Original values were verified **June 7, 2026 at block `25264957`**; this revision re-verified everything on **August 3, 2026 at block `25675412`** via `cast` and Etherscan against an Ethereum mainnet RPC.
+> **Scope.** Yearn's interest (issue [yearn/risk-score#234](https://github.com/yearn/risk-score/issues/234)) is the risk of supplying ("just lend") and/or borrowing in the **FT Lend** market. This report covers the lending engine and the assets it touches. **Holding ftUSD and staking ftUSD are out of scope** and are assessed in the companion report [Flying Tulip — ftUSD & Staked ftUSD](./flying-tulip-ftusd.md). ftUSD appears here only as an accepted collateral asset and because the contract holding its backing is this market's largest supplier. Nothing in this report should be used to size an ftUSD or sftUSD position. The unrelated `tulip.garden` protocol on Solana is **not** Flying Tulip and is excluded. Original values were verified **June 7, 2026 at block `25264957`**; this revision re-verified everything on **August 6, 2026 at block `25697429`** via `cast` and Etherscan against an Ethereum mainnet RPC.
 
 ## Overview + Links
 
@@ -51,17 +52,16 @@ All addresses verified onchain at block `25675412` (August 3, 2026). Every contr
 | Major IRM | [`0x07eC8583B1bC7D97646409a2b51DdBed6725D12F`](https://etherscan.io/address/0x07eC8583B1bC7D97646409a2b51DdBed6725D12F) | `pure` rate model | — |
 | LongTail IRM | [`0x09cd852f47aCa224eE6B4AccC29BD2694F29Ef69`](https://etherscan.io/address/0x09cd852f47aCa224eE6B4AccC29BD2694F29Ef69) | `pure` rate model | — |
 
-### ftUSD System Contracts
+### ftUSD Contracts (summary — see the dedicated report)
 
-| Contract | Address | Role | Implementation |
-|---|---|---|---|
-| ftUSD (`FlyingTulipUSD`) | [`0xF7D85EC4E7710f71992752eac2111312e73E9C9C`](https://etherscan.io/address/0xF7D85EC4E7710f71992752eac2111312e73E9C9C) | FiatToken-style stablecoin, 6 dec | [`0xf47bb65f…1885`](https://etherscan.io/address/0xf47bb65fb0886be183db541afce555345e3e1885) |
-| ftUSD Core | [`0x56c5892B0cF41B792217CCDD208f0FA85B178ca9`](https://etherscan.io/address/0x56c5892B0cF41B792217CCDD208f0FA85B178ca9) | sole `minter()`; debt-ceiling module gate | [`0x986841b7…5440`](https://etherscan.io/address/0x986841b77f3aa934d315d48121842e3c622e5440) |
-| MintAndRedeem | [`0xAa48EcBC843cF7E9A29155D112b8Cb27902bD23C`](https://etherscan.io/address/0xAa48EcBC843cF7E9A29155D112b8Cb27902bD23C) | only enabled mint module | [`0x8852b132…c3c6`](https://etherscan.io/address/0x8852b132b72613a16f1e3960978a3d45c0a7c3c6) |
-| ftUSD USDC wrapper | [`0x6aaf84563Cdb03a22Cd92EE2553698beE87E837D`](https://etherscan.io/address/0x6aaf84563Cdb03a22Cd92EE2553698beE87E837D) | holds USDC backing | `ftYieldWrapper` |
-| ftUSD USDT wrapper | [`0x28CCa8eEA2cD0498cE91A9da15772A1ce42347D6`](https://etherscan.io/address/0x28CCa8eEA2cD0498cE91A9da15772A1ce42347D6) | holds USDT backing | `ftYieldWrapper` |
-| **Delta-Neutral strategy** | [`0xe0E445967256EE60111e243e0F0F94DD1D351A59`](https://etherscan.io/address/0xe0E445967256EE60111e243e0F0F94DD1D351A59) | `MultiCollateralDeltaNeutralStakingStrategy` — **deploys ftUSD backing into FT Lend** | — |
-| FT token | [`0x5DD1A7A369e8273371d2DBf9d83356057088082c`](https://etherscan.io/address/0x5DD1A7A369e8273371d2DBf9d83356057088082c) | governance/reward token (OFT) | — |
+ftUSD is an accepted collateral and borrowable asset here, and the contract that holds its backing is this market's largest single supplier. Full enumeration, mint authority, and the staking product are covered in **[Flying Tulip — ftUSD & Staked ftUSD](./flying-tulip-ftusd.md)**.
+
+| Contract | Address | Relevance to FT Lend |
+|---|---|---|
+| ftUSD | [`0xF7D85EC4E7710f71992752eac2111312e73E9C9C`](https://etherscan.io/address/0xF7D85EC4E7710f71992752eac2111312e73E9C9C) | Collateral + borrowable asset, 11.4% of TVL |
+| **Delta-Neutral strategy** | [`0xe0E445967256EE60111e243e0F0F94DD1D351A59`](https://etherscan.io/address/0xe0E445967256EE60111e243e0F0F94DD1D351A59) | **Largest supplier in this market — 35.1% of TVL.** Holds ftUSD's backing |
+| MintAndRedeem | [`0xAa48EcBC843cF7E9A29155D112b8Cb27902bD23C`](https://etherscan.io/address/0xAa48EcBC843cF7E9A29155D112b8Cb27902bD23C) | Source of the ftUSD price used for liquidations here |
+| FT token | [`0x5DD1A7A369e8273371d2DBf9d83356057088082c`](https://etherscan.io/address/0x5DD1A7A369e8273371d2DBf9d83356057088082c) | Reward token paid to suppliers; enabled but unpriced asset |
 
 ### Governance & Multisig
 
@@ -156,8 +156,8 @@ An investor-relations portal does host a structured **Audits** registry — its 
 
 - **Production history.** TGE / mainnet ~**Feb 23, 2026**; ftUSD [deployed Feb 21, 2026](https://etherscan.io/tx/0x52e7d46b7e166b8e30c5d38a09d93c44537bcb77b439e5b125d8b51d5670ea21). The assessed lending engine is newer: `ConfigRegistry` and `PositionsManager` were [deployed April 27, 2026](https://etherscan.io/tx/0x8838947473f9a3b6ba3f46bd89ecd5b28d7bd470e8c0b969cb38ceb5c4ebcdef) (block `24974967`) and the **first `Deposit` event is April 29, 2026** (block [`24986969`](https://etherscan.io/block/24986969)). Protocol ~5.4 months old; **FT Lend in its current deployment ~3.2 months.**
 - **TVL (DeFiLlama, whole protocol):** **~$12.56M** on August 3, 2026 — Ethereum $12.14M, Sonic $0.42M ([API](https://api.llama.fi/protocol/flying-tulip)). Peak **~$12.58M on July 31, 2026**; tracked since ~May 12, 2026 (85 data points). The marketed "$126M+ TVL" figure is **raise capital parked in Aave**, not protocol usage.
-- **FT Lend onchain TVL:** **$12.13M supplied / $0.78M borrowed** (6.43% utilization) — reconciles with DeFiLlama's $12.14M Ethereum figure.
-- **Genuine third-party TVL is $7.95M, not $12.13M.** $4.18M (34.5%) is the protocol's own ftUSD backing collateral supplied back into the market by its own strategy contract — see [Reflexivity](#the-reflexivity-loop-ftusd-backing-is-lent-into-ft-lend).
+- **FT Lend onchain TVL:** **$12.48M supplied / $0.97M borrowed** (6.43% utilization) — reconciles with DeFiLlama's $12.14M Ethereum figure.
+- **Genuine third-party TVL is $8.11M, not $12.48M.** $4.38M (35.1%) is the protocol's own ftUSD backing collateral supplied back into the market by its own strategy contract — see [Reflexivity](#the-reflexivity-loop-ftusd-backing-is-lent-into-ft-lend).
 - **Incidents / exploits / depegs:** **NONE FOUND** for Flying Tulip itself through August 2026. (An April 23, 2026 news item concerns Flying Tulip *adding* a withdrawal circuit breaker after *other* protocols' April exploits — preventive, not a breach.)
 - **ftUSD:** supply 4,142,539; oracle price ~$0.9988; `maxSupply` cap 100M (raised from 5M); thinly traded.
 
@@ -176,22 +176,24 @@ Growth has been monotonic apart from one drawdown: **−20.7% from the running p
 
 Two caveats on reading this series: (1) it starts only ~2 weeks after FT Lend opened, so there is no pre-launch baseline; (2) ~34.5% of the Ethereum figure is the protocol's own recycled ftUSD collateral (see [Reflexivity](#the-reflexivity-loop-ftusd-backing-is-lent-into-ft-lend)), so the growth curve overstates third-party adoption.
 
-### FT Lend market state — onchain, block `25675412` (August 3, 2026)
+### FT Lend market state — onchain, block `25697429` (August 6, 2026)
 
 | Asset | IRM | Maint. margin | Borrowable | Collateral | Supplied | Borrowed | Util | Supply cap | Cap used |
 |-------|-----|:---:|:---:|:---:|---|---|:---:|---|:---:|
-| [USDC](https://etherscan.io/address/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48) | Stable | 1.50% | ✓ | ✓ | 3,140,190 ($3.14M) | 237,621 | 7.6% | 10M | 31% |
-| [USDT](https://etherscan.io/address/0xdAC17F958D2ee523a2206206994597C13D831ec7) | Stable | 1.50% | ✓ | ✓ | 1,404,423 ($1.40M) | 223,477 | 15.9% | 10M | 14% |
-| [WETH](https://etherscan.io/address/0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2) | Major | 19.0% | ✓ | ✓ | 736.92 ($1.37M) | 0.35 | 0.05% | 1,000 | 74% |
-| [WBTC](https://etherscan.io/address/0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599) | Major | 22.0% | ✓ | ✓ | 75.18 ($4.79M) | 0 | 0% | 100 | 75% |
-| [wstETH](https://etherscan.io/address/0x7f39C581F595B53c5cb19bD0b3f8dA6c935E2Ca0) | Major | 21.0% | — | ✓ | 0 | 0 | — | 300 | 0% |
-| [ftUSD](https://etherscan.io/address/0xF7D85EC4E7710f71992752eac2111312e73E9C9C) | Stable | 1.50% | ✓ | ✓ | 1,428,403 ($1.43M) | 319,073 | 22.3% | **1.5M** | **95%** |
+| [USDC](https://etherscan.io/address/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48) | Stable | 1.50% | ✓ | ✓ | 3,175,623 ($3.17M) | 241,018 | 7.6% | 10M | 32% |
+| [USDT](https://etherscan.io/address/0xdAC17F958D2ee523a2206206994597C13D831ec7) | Stable | 1.50% | ✓ | ✓ | 1,429,877 ($1.43M) | 223,541 | 15.6% | 10M | 14% |
+| [WETH](https://etherscan.io/address/0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2) | Major | 19.0% | ✓ | ✓ | 736.92 ($1.41M) | **95.35** | **12.9%** | 1,000 | 74% |
+| [WBTC](https://etherscan.io/address/0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599) | Major | 22.0% | ✓ | ✓ | 75.18 ($4.86M) | 0 | 0% | 100 | 75% |
+| [wstETH](https://etherscan.io/address/0x7f39C581F595B53c5cb19bD0b3f8dA6c935E2Ca0) | Major | 21.0% | — | ✓ | **76.54** ($0.18M) | 0 | — | 300 | 26% |
+| [ftUSD](https://etherscan.io/address/0xF7D85EC4E7710f71992752eac2111312e73E9C9C) | Stable | 1.50% | ✓ | ✓ | 1,428,403 ($1.43M) | 322,186 | 22.6% | **1.5M** | **95%** |
 | [FT](https://etherscan.io/address/0x5DD1A7A369e8273371d2DBf9d83356057088082c) | LongTail | 0% | — | — | 763.25 (unpriced) | — | — | 0 | — |
-| **Total** | | | | | **$12.13M** | **$0.78M** | **6.4%** | | |
+| **Total** | | | | | **$12.48M** | **$0.97M** | **7.8%** | | |
 
-USD values use the protocol's own oracle prices at block `25675412` (USDC $0.9998, USDT $0.9989, WETH $1,861.78, WBTC $63,659.67, wstETH $2,308.80, ftUSD $0.9988). FT has **no configured price feed** — `priceUSD(FT)` reverts — consistent with it being neither collateral nor borrowable.
+Prices at block `25697429`: USDC $0.9998, USDT $0.9991, WETH $1,911.99, WBTC $64,680.05, wstETH $2,372.33, ftUSD $0.9988. FT has **no configured price feed** — `priceUSD(FT)` reverts.
 
-**Cap headroom is a live constraint.** ftUSD is at **95% of its 1.5M supply cap**; WBTC and WETH at ~75%. Caps are raised by the admin Safe in one transaction via `PMWrapper.setCaps` with no delay, so current conservative sizing is a policy choice, not a durable limit on blast radius.
+**The market changed materially between August 3 and August 6.** wstETH went from 0 supplied to 76.54, and WETH borrows from 0.35 to 95.35 — both driven by the Delta-Neutral strategy activating its hedge leg (see below). WETH utilization went from 0.05% to 12.9% in three days. A market that moves this fast on one actor's decision warrants a shorter reassessment interval than its size alone would suggest.
+
+**Cap headroom is a live constraint.** ftUSD is at **95% of its 1.5M supply cap**; WBTC and WETH at ~75%. Caps are raised by the admin Safe in one transaction via `PMWrapper.setCaps` with no delay.
 
 ### Interest rate models
 
@@ -231,15 +233,10 @@ A lender calls `deposit(asset, amount)` on the `PositionsManager`. Un-borrowed l
 
 | Flow | Parameter | Value | Set by |
 |---|---|---|---|
-| ftUSD mint | `mintFeeBps` (USDC, USDT) | **7 bps** | Admin Safe (`setMintFee`) |
-| ftUSD redeem | `redeemFeeBps` (USDC, USDT) | **7 bps** | Admin Safe (`setRedeemFee`) |
-| ftUSD mint price ceiling | `mintPriceHardcapWad` | 1.0 (collateral never valued above $1) | Admin Safe |
-| ftUSD mint floor | `minTVLForMint` | 5,000,000 | Admin Safe |
-| Accrued ftUSD fees held | `claimableFeeAmount` | 6,565.59 ftUSD | swept by `sweepFees` |
 | Lending protocol reserves | `astate.reserves` | 7.72 USDC · 13.16 USDT · 303.01 ftUSD · 0.0000257 WETH · **0 WBTC** | accrued from interest |
 | Reserve withdrawal | `PMWrapper.withdrawReserves` | unrestricted | Admin Safe |
 
-**Protocol reserves are negligible** — under $325 in total against a $12.13M book. There is no meaningful buffer between a bad-debt event and supplier principal. The `MintAndRedeem` contract additionally exposes `sweepExcess` and `recoverERC20` to the owner, both of which can move tokens out of the collateral contract.
+**Protocol reserves are negligible** — a few hundred dollars in total against a $12.48M book. There is no meaningful buffer between a bad-debt event and supplier principal; bad debt is socialized to suppliers of the affected asset. ftUSD mint/redeem fees are covered in the ftUSD report.
 
 ### Supplier rewards are discretionary FT emissions
 
@@ -256,7 +253,7 @@ Settlement history by asset (latest settled epoch, read from `astate` and `epoch
 | ftUSD | **0** | never | **none** |
 | wstETH | 0 | never (no supply) | none |
 
-**WBTC and ftUSD suppliers have never received a single FT emission** — that is 39.5% and 11.8% of TVL respectively earning only base interest, while USDC/USDT/WETH suppliers receive FT on top. Total emitted to date is the FT wrapper's balance: **43,792.78 FT** (~$4,353 at $0.0994). Any yield figure quoted for this market must be checked against which asset it applies to, and treated as revocable.
+**WBTC and ftUSD suppliers have never received a single FT emission** — that is 39.5% and 11.4% of TVL respectively earning only base interest, while USDC/USDT/WETH suppliers receive FT on top. Total emitted to date is the FT wrapper's balance: **43,792.78 FT** (~$4,353 at $0.0994). Any yield figure quoted for this market must be checked against which asset it applies to, and treated as revocable.
 
 ### Liquidation mechanics
 
@@ -275,49 +272,26 @@ Two structural observations:
 
 Because the liquidation module is swappable by the admin (`setLiquidationModule`), the economics of liquidation are a governance parameter, not a code invariant. To date the module has never been changed since deployment.
 
-### The reflexivity loop: ftUSD backing is lent into FT Lend
+### Reflexive supply: 35.1% of this market is ftUSD's own backing
 
-This is the most consequential structural finding of this assessment and is not described in the protocol's public documentation.
+The single largest supplier to FT Lend is not a third party. It is [`0xe0E44596…1A59`](https://etherscan.io/address/0xe0E445967256EE60111e243e0F0F94DD1D351A59), the `MultiCollateralDeltaNeutralStakingStrategy` that holds ftUSD's collateral, which deposits that collateral into this market:
 
-Tracing ftUSD's collateral end-to-end (Pass 1.5 reconciliation):
+| Position | Amount | USD |
+|---|---|---|
+| USDC supplied | 2,780,139.26 | $2.78M |
+| USDT supplied | 1,417,609.56 | $1.42M |
+| wstETH supplied (collateral for its hedge) | 76.54 | $0.18M |
+| **Total** | | **$4.38M = 35.1% of TVL** |
+| WETH borrowed (hedge leg) | 95.01 | 99.6% of all WETH debt |
 
-```
-User mints ftUSD with USDC/USDT
-   └─► MintAndRedeem  0xAa48EcBC…D23C     (holds 0.0002 USDC, 0 USDT — custody is NOT here)
-         └─► wrapper.deposit()  ──────────────────────────────────┐
-               ftUSD-USDC wrapper 0x6aaf8456…837D  capital 2,767,516.43 USDC
-               ftUSD-USDT wrapper 0x28CCa8eE…47D6  capital 1,417,609.56 USDT
-                     └─► strategy: "Flying Tulip Delta Neutral"
-                           MultiCollateralDeltaNeutralStakingStrategy
-                           0xe0E44596…1A59
-                                 └─► PositionsManager.deposit()
-                                       2,766,289.53 USDC + 1,417,609.56 USDT
-                                       = 34.5% of FT Lend TVL
-```
+**What a lender needs to take from this:**
 
-Every step reconciles exactly:
+1. **Headline TVL overstates third-party capital.** Genuine third-party TVL is **$8.11M**, not $12.48M.
+2. **ftUSD and FT Lend cannot fail independently.** ftUSD's backing is a claim on this market; ftUSD is 11.4% of this market's collateral; and ftUSD's price feed here is derived from that same backing. A loss event propagates in a circle.
+3. **The largest supplier is also a leveraged borrower.** It is now 99.6% of all WETH debt, so its health factor is a solvency variable for this market — and it is operated by a key set that includes a plain EOA.
+4. **It can leave.** A 35.1% supplier unwinding would be the largest liquidity event this market has seen.
 
-| Check | Value |
-|---|---|
-| ftUSD `totalSupply()` | 4,142,539.28 |
-| ftUSD Core `totalDebt()` (= minted 5,607,621.80 − burned 1,424,772.22) | 4,182,849.58 |
-| `MintAndRedeem.accountedCollateralTvl()` | 4,185,125.99 |
-| — of which USDC / USDT | 2,767,516.43 / 1,417,609.56 |
-| ftUSD-USDC wrapper `capital()` | 2,767,516.43 ✓ |
-| ftUSD-USDT wrapper `capital()` | 1,417,609.56 ✓ |
-| Delta-Neutral strategy position in FT Lend (USDC / USDT) | 2,766,289.53 / 1,417,609.56 ✓ |
-| Residual in Aave (USDC) | 1,226.89 ✓ |
-| **Nominal collateral ratio** | **101.03%** |
-
-**What this means:**
-
-1. **ftUSD is not backed by idle stablecoins.** Its backing is a *lender position inside Flying Tulip's own money market*. If FT Lend takes bad debt, is paused, or is drained via the admin paths below, ftUSD's collateral is impaired at the same moment ftUSD holders would want to redeem.
-2. **The loop closes.** ftUSD is itself collateral-enabled *and* borrowable in FT Lend (1,428,403 supplied / 319,073 borrowed). So FT Lend accepts as collateral a token whose own backing is a claim on FT Lend.
-3. **The ftUSD price feed is part of the loop.** ftUSD is priced by `FtUsdMintRedeemOracleProxy` [`0xA69f7a38…DFf8`](https://etherscan.io/address/0xA69f7a38B6c91a4bc2477f097DC8a1F16DAADFf8), which derives price from `MintAndRedeem`'s redemption factor — i.e. from the accounted value of collateral that is itself deployed into FT Lend. It is a redemption-value oracle, not a market price, so a real ftUSD market discount would not appear in liquidation pricing.
-4. **Reported TVL is inflated by the loop.** $12.13M of "supplied" includes $4.18M the protocol supplied to itself. Genuine third-party TVL is **$7.95M**.
-5. **The "delta-neutral" strategy is not currently delta-neutral.** The contract is designed to hedge (it borrows WETH and integrates Lido/stETH — the source references `Lido`, `stETH` and `Uniswap`), but onchain it holds **0 stETH, 0 wstETH, 0 WETH and 0 ETH**, and its WETH debt is **0.3439 WETH (~$640)**. Its entire `valueOfCapital()` is the FT Lend supply position. Today ftUSD is a stablecoin backed by a lending position, and the marketed yield source is not running.
-
-This is not necessarily a solvency problem at current size — the collateral genuinely exists and is over-collateralized 101% — but it is a **correlation** problem: ftUSD and FT Lend cannot fail independently, and a Yearn deposit into FT Lend is exposed to both legs at once.
+Full derivation of the backing chain, the collateral reconciliation, the strategy's operator model, and the risks to ftUSD holders themselves are in **[Flying Tulip — ftUSD & Staked ftUSD](./flying-tulip-ftusd.md)**.
 
 ### Accessibility
 
@@ -326,36 +300,20 @@ This is not necessarily a solvency problem at current size — the collateral ge
 | Supply to FT Lend | permissionless | yes, same tx | none | per-asset `supplyCap` |
 | Withdraw from FT Lend | permissionless | yes, if wrapper liquidity available | none | `withdrawPaused`, CircuitBreaker, available liquidity |
 | Borrow | permissionless, over-collateralized | yes | interest per IRM | `borrowCap`, `mmBps`, HF ≥ 1.25, $250 min equity |
-| Mint ftUSD | permissionless via `MintAndRedeem` | yes — collateral in, ftUSD out, one tx | 7 bps | per-collateral cap 100M; `minTVLForMint` 5M; global ceiling 100M |
-| Redeem ftUSD | permissionless via `MintAndRedeem` | yes | 7 bps | subject to collateral availability inside FT Lend |
 | Liquidate | **whitelisted modules only** (`RfqEngine`) | yes | module-defined | HF < 1.25 |
 
-There are **no withdrawal queues, cooldowns, or lockups** in normal operation — a genuine strength. All gating is either liquidity-based or admin-flippable. Note that ftUSD redemption is only nominally atomic: the collateral backing it sits inside FT Lend, so a redemption at size requires FT Lend to have withdrawable liquidity at that moment.
+There are **no withdrawal queues, cooldowns, or lockups** on the lending path in normal operation — a genuine strength, and a real difference from the staked-ftUSD product, which is rate-limited. All gating here is either liquidity-based or admin-flippable.
 
-### Token Mint Authority (ftUSD)
+### Token Mint Authority
 
-ftUSD is both borrowable and collateral-enabled in FT Lend, so its mint authority is directly part of the lender/borrower trust surface. **ftUSD is a Circle FiatToken-style stablecoin** ([`FlyingTulipUSD`](https://etherscan.io/address/0xF7D85EC4E7710f71992752eac2111312e73E9C9C), 6 decimals, UUPS upgradeable, implementation [`0xf47bb65f…1885`](https://etherscan.io/address/0xf47bb65fb0886be183db541afce555345e3e1885)).
+**Not applicable to the assessed position.** An FT Lend supply position is an internal balance on the `PositionsManager`, not a transferable or mintable token — there are no supply receipts and no mint authority to enumerate.
 
-**Mint mechanism:** single role-gated `minter()`, fronted by a **debt-ceiling module system**. `ftUSD Core` [`0x56c5892B…8ca9`](https://etherscan.io/address/0x56c5892B0cF41B792217CCDD208f0FA85B178ca9) is the sole registered minter; it mints only on behalf of *enabled modules*, each with its own ceiling.
-
-**Mint requires backing:** Yes for the one enabled module — `MintAndRedeem` transfers collateral in and deposits it to the wrapper in the same transaction before calling `core.mint`.
-
-**Per-address mint authority** (verified onchain August 3, 2026):
-
-| Address | Can Mint | Can Burn | Role / Mechanism | Notes |
-|---------|:--------:|:--------:|------------------|-------|
-| [`0x56c5892B…8ca9`](https://etherscan.io/address/0x56c5892B0cF41B792217CCDD208f0FA85B178ca9) | ✓ | ✓ | sole `minter()`, allowance ≈ 2²⁵⁶−1 | **ftUSD Core** — mints only for enabled modules within their ceilings |
-| [`0xAa48EcBC…D23C`](https://etherscan.io/address/0xAa48EcBC843cF7E9A29155D112b8Cb27902bD23C) | ✓ (via Core) | ✓ | enabled module, ceiling **100M**, `moduleDebt` 4,182,849.58 | **MintAndRedeem** — the only enabled module; collateralized mint/redeem |
-| [`0x1118e1c0…70Cb`](https://etherscan.io/address/0x1118e1c057211306a40A4d7006C040dbfE1370Cb) | **indirectly, unbacked** | ✓ | `owner` + `masterMinter` + `pauser` + `blacklister` | **3/5 Safe** — can `configureMinter` / `removeMinter` / `updateMasterMinter`, enable a new Core module with an arbitrary ceiling, `setMaxSupply`, `pause`, **`blacklist` / `wipeBlacklistedAddress` (freeze & burn user balances)**, and `upgradeToAndCall` |
-
-- **Rate limits / caps:** ftUSD `maxSupply` 100M; ftUSD Core `globalDebtCeiling` 100M; `MintAndRedeem` per-collateral cap 100M each; mint/redeem fee 7 bps each way; mint price hard-capped at $1.00 (`mintPriceHardcapWad` = 1e18); `minTVLForMint` 5,000,000.
-- **Backing check at mint time:** atomic. **But** the masterMinter (3/5 Safe) can register an arbitrary new module or replace the minter outright, which issues ftUSD with no backing. This is a direct unbacked-mint path gated only by a 3-of-5 multisig with no timelock.
-- **Accounting drift — flagged, not explained.** `totalDebt` (4,182,849.58) exceeds `totalSupply` (4,142,539.28) by **40,310.30 ftUSD**. Only 6,565.59 of that is fee ftUSD held on `MintAndRedeem`. The residual ~33,745 ftUSD appears to have been burned through a path that did not decrement module debt. This is not a solvency issue (debt overstates supply, i.e. it is conservative) but it does mean the ceiling accounting drifts, permanently consuming mint capacity. **Cause unverified — worth a question to the team.**
+The relevant mint authority is ftUSD's, because ftUSD is 11.4% of this market's collateral and an unbacked mint would dilute that collateral. In short: the 3/5 admin Safe is ftUSD `owner` + `masterMinter` and can register an arbitrary new mint module or replace the minter outright, issuing ftUSD with no backing. Full enumeration in **[Flying Tulip — ftUSD & Staked ftUSD](./flying-tulip-ftusd.md)**.
 
 ### Collateralization
 
 - **Backing.** Borrowing is over-collateralized and enforced onchain via per-asset maintenance margins (`ConfigRegistry.assetCfg`) and account health: `marginHfSafeBps = 15000` (1.50), `marginHfTargetBps = 12500` (1.25), `marginMinEquityUSDWad = 250e18` ($250 minimum position equity).
-- **Collateral quality.** Blue-chip (WETH, WBTC, wstETH, USDC, USDT) plus ftUSD. The blue-chip leg is genuinely high quality; ftUSD (11.8% of TVL) carries the reflexivity above.
+- **Collateral quality.** Blue-chip (WETH, WBTC, wstETH, USDC, USDT) plus ftUSD. The blue-chip leg is genuinely high quality; ftUSD (11.4% of TVL) carries the reflexivity above.
 - **Maintenance margins are thin on stables.** `mmBps = 150` implies a 1.5% maintenance floor — ~66× theoretical leverage before the dynamic-LTV haircut. The protocol states effective LTV is reduced from this floor by AMM depth and volatility and snapshotted at position open, but that reduction is computed off the Spot AMM/CLOB and is **not independently verifiable onchain**. The floor is what the contract enforces.
 - **Liquidations.** Onchain, keeper-driven, time-sliced and RFQ-routed. The sole registered liquidation module is `RfqEngine` [`0xEB00B335…Dc32`](https://etherscan.io/address/0xEB00B335Ca52216Fb60fdFFA361397367C39Dc32) (set at deployment, never changed). Novel and untested at scale. Per the team's own accepted-risk list there is **no protocol-level loss backstop / insurance fund** for bad debt.
 - **Reserves are negligible.** `astate.reserves` across all assets: 7.72 USDC, 13.16 USDT, 0.0000257 WETH, 303.01 ftUSD, 0 WBTC. There is effectively no protocol-side buffer to absorb a shortfall.
@@ -383,7 +341,7 @@ ftUSD is both borrowable and collateral-enabled in FT Lend, so its mint authorit
 
 - **Exit mechanism.** Suppliers withdraw against available wrapper liquidity: 2.903M USDC of 3.140M supplied (7.6% utilized), 1.181M USDT of 1.404M (15.9%), 736.58 of 736.92 WETH (0.05%), all 75.18 WBTC (0%), 1.110M of 1.428M ftUSD (22.3%). Exit is instant today; borrowed funds are unavailable until repaid or liquidated.
 - **Depth.** Thin absolutely: largest pool is WBTC at $4.79M, then USDC at $3.14M. The supply receipts are internal balances with no secondary market; ftUSD itself does have an external venue (below).
-- **Concentration is the dominant liquidity risk.** Only **25 addresses** hold the entire $12.13M. Excluding the protocol's own Delta-Neutral strategy, **three genuinely third-party addresses hold 96.1% of the $7.95M third-party TVL**:
+- **Concentration is the dominant liquidity risk.** Only **25 addresses** hold the entire $12.13M. Excluding the protocol's own Delta-Neutral strategy, **three genuinely third-party addresses hold 96.1% of the $8.11M third-party TVL**:
 
 | Supplier | Type | USD | % of total TVL | % of third-party TVL | Holdings |
 |---|---|---:|---:|---:|---|
@@ -527,12 +485,12 @@ Recommended frequency: **hourly** for pause/circuit-breaker, oracle overrides, a
 - Poll `priceUSD(asset)` against the corresponding Chainlink feed; alert on >0.5% divergence (detects a router override even without catching the event).
 - Watch the ftUSD feed specially: a **0 bps** deviation tolerance and a circular derivation mean it will not register a genuine ftUSD discount. **Compare `priceUSD(ftUSD)` against the Curve pool's spot price** ([`0xafec61e7…2630`](https://etherscan.io/address/0xafec61e7a604f8f81f7cab64ec75bfa07c542630), `get_dy(0,1,1e6)`) — this is the only external reference for ftUSD and the only way to detect the circular feed drifting from reality. Alert on >0.5% divergence, and on the Curve pool becoming materially imbalanced (>70/30) or losing >50% of its TVL.
 
-### Reflexivity monitoring (specific to this protocol)
+### Reflexive-supplier monitoring
 
 - Poll the Delta-Neutral strategy's [`0xe0E44596…1A59`](https://etherscan.io/address/0xe0E445967256EE60111e243e0F0F94DD1D351A59) `getBalance` on the PositionsManager for USDC and USDT. Alert if its share of total TVL crosses **40%** upward or **10%** downward.
-- Alert if `MintAndRedeem.collateralInfo(token).yieldWrapper` changes, or if either ftUSD wrapper's `strategies()` set changes — that would move ftUSD's backing to a new venue.
-- Alert if the strategy begins holding stETH/wstETH/WETH at size, i.e. the hedge leg is actually switched on. That changes ftUSD's risk profile materially and would warrant immediate reassessment.
-- Reconcile weekly: `ftUSD.totalSupply()` vs `MintAndRedeem.accountedCollateralTvl()` vs the sum of the two wrappers' `capital()`. Alert on >0.5% divergence or on any widening of the `totalDebt` − `totalSupply` drift beyond its current 40,310.
+- Alert on any change to the strategy's operator set (`OperatorSet`) — it currently includes a plain EOA.
+- Track its WETH debt and account health factor: it is 99.6% of all WETH borrows, so its liquidation would be this market's first at size.
+- Deeper ftUSD-side monitoring (backing reconciliation, mint modules, redemption capacity) is specified in the ftUSD report.
 
 ### Liquidity and exit-capacity monitoring
 
@@ -567,17 +525,15 @@ Every venue, contract, and counterparty that FT Lend supplier principal passes t
 | Dependency | Type | Exposure | Failure mode | Individual Risk |
 |---|---|---:|---|---:|
 | **Admin Safe (3/5, no timelock)** | governance | **100%** | Upgrade, price override, capital redirection, unbacked mint | **5.0/5** |
-| **Delta-Neutral strategy / ftUSD loop** | reflexive | **34.5%** | Correlated failure of stablecoin and market | **4.5/5** |
+| **Delta-Neutral strategy** (reflexive supplier) | reflexive | **35.1%** | Correlated failure of stablecoin and market; discretionary unwind | **4.5/5** |
 | **Spark** | external protocol | 46.9% | Freeze / shortfall blocks all USDC, USDT, WETH exits | **2.5/5** |
 | **Aave** | external protocol | 39.5% | Freeze / shortfall blocks all WBTC exits | **2.5/5** |
 | **RfqEngine (liquidation)** | internal, novel | 100% of debt | Untested engine; sets liquidation economics off-book | **4.0/5** |
 | **Chainlink** | oracle | 100% | Stale/wrong price mis-liquidates; single feed per asset | **2.0/5** |
 | **Aave price adapters** | oracle | 39.5% | Adapter bug misprices WBTC/wstETH | **2.0/5** |
-| **ftUSD internal oracle** | oracle | 11.8% | Circular; ignores the market price that does exist | **3.5/5** |
+| **ftUSD as collateral** | asset | 11.4% | Circular price feed; reflexive backing | **3.5/5** |
 | **Spot AMM / CLOB** | internal, unverified | 100% | Dynamic-LTV inputs and liquidation venue — **not verified in this assessment** | **4.0/5 (TODO)** |
 | **YieldClaimer** | privileged contract | 89.4% | Arbitrary call through any strategy | **4.0/5** |
-| **Curve ftUSD/USDC pool** | external venue | exit route for 11.8% | LP flight collapses the only ftUSD market price | **3.0/5 (TODO)** |
-| **Morpho** | external venue | 629,675 ftUSD | Outward propagation channel for an ftUSD impairment | **2.5/5** |
 
 ---
 
@@ -602,25 +558,21 @@ Every venue, contract, and counterparty that FT Lend supplier principal passes t
 
 ---
 
-### 2. Delta-Neutral strategy and the ftUSD reflexivity loop
+### 2. Delta-Neutral strategy — the reflexive supplier
 
 **Risk Score: 4.5/5**
 
-[`0xe0E445967256EE60111e243e0F0F94DD1D351A59`](https://etherscan.io/address/0xe0E445967256EE60111e243e0F0F94DD1D351A59) (`MultiCollateralDeltaNeutralStakingStrategy`) holds ftUSD's entire collateral base and deploys it into FT Lend as a supplier: 2,766,289.53 USDC + 1,417,609.56 USDT = **34.5% of the market's TVL**.
+[`0xe0E445967256EE60111e243e0F0F94DD1D351A59`](https://etherscan.io/address/0xe0E445967256EE60111e243e0F0F94DD1D351A59) holds ftUSD's collateral and supplies it here: $4.38M = **35.1% of TVL**, plus 99.6% of all WETH debt on its hedge leg.
 
 | Risk factor | Assessment | Detail |
 |---|---|---|
-| Correlation | **Very High** | ftUSD and FT Lend cannot fail independently — a loss in either impairs the other |
-| Circular pricing | **Very High** | ftUSD is priced by a feed reading the redeem factor of collateral held inside the market that feed prices, at 0 bps deviation tolerance |
-| Disclosure | **High** | Not described anywhere in public documentation |
-| TVL inflation | **High** | Headline $12.13M overstates third-party capital by $4.18M |
-| Strategy discretion | High | `strategyManager` is the admin Safe; `strategyDelayConfig = 0`, so backing can be redirected in one block |
-| Mandate drift | **High** | Named and marketed as delta-neutral; holds **0 stETH, 0 wstETH, 0 WETH, 0 ETH** and carries 0.34 WETH (~$640) of debt. The hedge leg is not running |
-| Collateralization | Moderate | 101.03% nominal, reconciles exactly — the collateral genuinely exists |
+| Correlation | **Very High** | ftUSD and FT Lend cannot fail independently; ftUSD is also 11.4% of this market's collateral |
+| Concentration | **Very High** | Largest supplier *and* dominant WETH borrower. Its unwind would be the largest liquidity event this market has seen |
+| Operator model | **High** | Configured by the 3/5 Safe, but operated by a key set that includes a **plain EOA**, and its order validation carries no price bound |
+| Circular pricing | **High** | ftUSD's feed here reads the redeem factor of collateral this strategy deposits |
+| Disclosure | High | Not described in public documentation |
 
-**Why this matters:** a Yearn deposit into FT Lend is not diversified away from ftUSD, and an ftUSD position is not diversified away from FT Lend. A bad-debt event in the market impairs the collateral behind ftUSD, which is 11.8% of the market's own collateral, priced by an oracle that reads the impaired backing. There is no circuit-breaker for this path and no insurance fund behind it. Separately, the gap between the marketed strategy and the deployed one is a documentation-integrity concern in its own right.
-
----
+**Why this matters to a lender:** a third of this market's depth belongs to the protocol itself and is managed at discretion. Full analysis — backing reconciliation, operator enumeration, order-validation gap — in **[Flying Tulip — ftUSD & Staked ftUSD](./flying-tulip-ftusd.md)**.
 
 ### 3. Spark — 46.9% of TVL
 
@@ -672,17 +624,16 @@ This is a well-constructed stack and better than a naive single-feed design: the
 
 ---
 
-### 7. ftUSD internal oracle
+### 7. ftUSD as collateral (price + backing)
 
 **Risk Score: 3.5/5**
 
-`FtUsdMintRedeemOracleProxy` [`0xA69f7a38…DFf8`](https://etherscan.io/address/0xA69f7a38B6c91a4bc2477f097DC8a1F16DAADFf8) prices ftUSD as Chainlink USDC/USD × the `MintAndRedeem` redeem factor. Exposure: 11.8% of TVL as collateral, plus 319,073 ftUSD of borrows.
+ftUSD is 11.4% of this market's collateral and 322,186 of its borrows. Two lender-relevant properties:
 
-Scored separately from the rest of the oracle stack because it is structurally different: it is not a market price. Its value is derived from the accounted worth of collateral deployed inside FT Lend, and with a **0 bps deviation tolerance** a genuine loss of confidence in ftUSD would not surface in the price the liquidation engine uses. Positions collateralized by ftUSD would keep pricing at ~$1.00 while the backing deteriorated.
+- **Its price here is circular.** `FtUsdMintRedeemOracleProxy` [`0xA69f7a38…DFf8`](https://etherscan.io/address/0xA69f7a38B6c91a4bc2477f097DC8a1F16DAADFf8) derives ftUSD's price from the `MintAndRedeem` redeem factor — i.e. from collateral deposited into this market — at a **0 bps deviation tolerance**. A genuine ftUSD discount would not surface in the price the liquidation engine uses.
+- **It is monitorable from outside.** A ~$1.87M Curve StableSwap-NG pool ([`0xafec61e7…2630`](https://etherscan.io/address/0xafec61e7a604f8f81f7cab64ec75bfa07c542630)) clears $500K at 0.30% slippage and is near-balanced, so a real market price exists to compare against even though the protocol does not consume it. ftUSD is separately accepted as [Morpho](https://etherscan.io/address/0xbbbbbbbbbb9cc5e90e3b3af64bdaf62c37eeffcb) collateral.
 
-**Mitigated by the Curve venue.** Because a ~$1.87M ftUSD/USDC pool exists, a real market price *is* observable even though the protocol does not use it. Divergence between the Curve spot price and the router's `priceUSD(ftUSD)` is therefore detectable by an outside monitor — see [Oracle monitoring](#oracle-monitoring). That converts this from an undetectable risk into a monitorable one, which is why it scores 3.5 rather than 4.5. The protocol still consumes the circular feed regardless of what the market says.
-
----
+Scored 3.5 rather than higher because the divergence is detectable — see [Oracle monitoring](#oracle-monitoring). ftUSD's own solvency, mint authority, redemption capacity and staking product are assessed in **[Flying Tulip — ftUSD & Staked ftUSD](./flying-tulip-ftusd.md)**.
 
 ### 8. Spot AMM / CLOB — **not verified**
 
@@ -837,7 +788,7 @@ All contracts in the trust surface were checked via Etherscan `getsourcecode` on
 
 **Subcategory B: Historical Track Record — 4.0**
 - Time in production: the assessed `PositionsManager` was deployed **April 27, 2026** with first deposit **April 29, 2026** — **3.2 months**. The wider protocol is 5.4 months. Rubric band "3–6 months" = 4.
-- Scale: headline TVL $12.13M would sit in the ">$10M" band (3), but **$4.18M of it is the protocol's own recycled ftUSD collateral**. Genuine third-party TVL is **$7.95M**, which is the "<$10M" band (4).
+- Scale: headline TVL $12.13M would sit in the ">$10M" band (3), but **$4.18M of it is the protocol's own recycled ftUSD collateral**. Genuine third-party TVL is **$8.11M**, which is the "<$10M" band (4).
 - No incidents, exploits, or depegs — but also no stress event of any kind, no drawdown, and no liquidation cascade. The clean record carries little information at this age and size.
 - Both columns land on 4. **4.0.**
 
@@ -872,7 +823,7 @@ All contracts in the trust surface were checked via Etherscan `getsourcecode` on
 
 **Subcategory A: Collateralization — 3.5**
 - The direct lending book is strong: 100% onchain, over-collateralized, blue-chip collateral, health factors enforced in-contract (`marginHfSafeBps` 1.50 / `marginHfTargetBps` 1.25 / $250 min equity). On its own this is rubric row 1–2 territory.
-- Dragging it down: **ftUSD (11.8% of TVL) is collateral whose own backing is a claim on this same market**, at a nominal 101.03% CR with no independent buffer.
+- Dragging it down: **ftUSD (11.4% of TVL) is collateral whose own backing is a claim on this same market**, at a nominal 101.03% CR with no independent buffer.
 - **Maintenance margins on stables are 1.5%** — a ~66× leverage floor. The dynamic-LTV haircut that is supposed to reduce this is computed off the Spot AMM/CLOB and is not verifiable onchain; the 1.5% floor is what the contract enforces.
 - **No loss backstop.** Protocol reserves are 7.72 USDC / 13.16 USDT / 303.01 ftUSD / ~0 WETH / 0 WBTC — negligible against $12.13M. Bad debt would be socialized to suppliers.
 - Liquidation engine is novel, keeper- and RFQ-dependent, and has never run at scale. **The `PositionsManager` defines no liquidation bonus and no close factor** — the seize/repay split is set by the swappable `RfqEngine`, and the insolvency exception explicitly permits leaving bad debt.
@@ -894,7 +845,7 @@ All contracts in the trust surface were checked via Etherscan `getsourcecode` on
 #### Category 4: Liquidity Risk (Weight: 15%)
 
 - **Exit works today.** Utilization is 6.4%; every asset has ample un-borrowed liquidity (USDC 92.4% available, WBTC 100%, WETH 99.95%). A supplier can leave same-block.
-- **A real external venue exists for the ftUSD leg.** A Curve StableSwap-NG pool holds ~$1.87M (971,101 ftUSD / 903,390 USDC) and clears **$500K at 0.30% slippage** — inside the rubric's `<1% slippage` band. It is near-balanced with `get_virtual_price()` = 1.000464, which externally corroborates the peg, and ftUSD is independently accepted as Morpho collateral. This applies to 11.8% of TVL plus anyone holding ftUSD.
+- **A real external venue exists for the ftUSD leg.** A Curve StableSwap-NG pool holds ~$1.87M (971,101 ftUSD / 903,390 USDC) and clears **$500K at 0.30% slippage** — inside the rubric's `<1% slippage` band. It is near-balanced with `get_virtual_price()` = 1.000464, which externally corroborates the peg, and ftUSD is independently accepted as Morpho collateral. This applies to 11.4% of TVL plus anyone holding ftUSD.
 - **But the buffer is zero for everything else.** `deployed() == capital()` on all four funded wrappers, so every USDC/USDT/WETH/WBTC exit is a Spark or Aave withdrawal. Exit capacity for 88% of the market is not a protocol property; it is Spark's and Aave's.
 - **The supply receipts are non-transferable internal balances**, so there is no market-based exit for a lending position itself at any size — only redemption.
 - **Concentration remains the binding constraint.** 25 suppliers hold the whole market. Excluding the protocol's own strategy, **three addresses hold 96.1% of third-party TVL** (58.1% / 23.5% / 14.5%), and one of them is simultaneously 73% of all borrowing. No diversified lender base exists to absorb a large exit.
