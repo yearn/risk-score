@@ -115,10 +115,15 @@ nodes:
     category: dependency
     note: StableSwap-NG ~1.87M. Only external exit and only external price reference. 500K clears at 0.30%
   - id: dep-morpho
-    label: Morpho
+    label: Morpho (2 ftUSD markets)
     address: "0xBBBBBbbBBb9cC5e90e3b3Af64bdAF62C37EEFFCb"
     category: dependency
-    note: Holds 629,675 ftUSD as collateral
+    note: USDC/ftUSD Blue markets at 86% and 91.5% LLTV. Holds 629,675 ftUSD (15% of supply). Live market 90.1% utilized
+  - id: morpho-oracle
+    label: Morpho ftUSD Oracle
+    address: "0x7887afbe7581eb01b3d91d80c198b0275feab779"
+    category: dependency
+    note: MorphoChainlinkOracleV2. BASE_FEED_1 is Flying Tulip's OWN ftUSD feed - Morpho does not price ftUSD independently
   - id: dep-lido
     label: Lido / wstETH
     address: "0x7f39C581F595B53c5cb19bD0b3f8dA6c935E2Ca0"
@@ -257,7 +262,19 @@ edges:
   - from: ftusd
     to: dep-morpho
     kind: routes-through
-    label: accepted as collateral
+    label: 629,675 posted as collateral (15% of supply)
+  - from: dep-morpho
+    to: morpho-oracle
+    kind: routes-through
+    label: prices ftUSD collateral
+  - from: morpho-oracle
+    to: ftusd-oracle
+    kind: routes-through
+    label: BASE_FEED_1 - circularity propagates to Morpho
+  - from: morpho-oracle
+    to: dep-chainlink
+    kind: routes-through
+    label: QUOTE_FEED_1 USDC/USD
   - from: leverage-engine
     to: dep-cow
     kind: routes-through

@@ -107,7 +107,7 @@ The only publicly confirmable reviews cover the token-sale `Escrow` and the sepa
 - **Supply:** 4,196,697 ftUSD against a `maxSupply` cap of 100M (raised from 5M). Of that, **1,324,455 (31.6%) is staked** as sftUSD and 1,428,403 is supplied into FT Lend.
 - **Peg:** the protocol's oracle reads $0.9988. Independently, the Curve pool is near-balanced at 971,101 ftUSD / 903,390 USDC with `get_virtual_price()` = 1.000464 — so the peg is **externally corroborated**, not merely self-reported.
 - **Incidents / depegs:** **NONE FOUND** through August 2026.
-- **Third-party acceptance:** [Morpho](https://etherscan.io/address/0xbbbbbbbbbb9cc5e90e3b3af64bdaf62c37eeffcb) holds 629,675 ftUSD as collateral — meaningful external validation for an asset this young.
+- **Third-party acceptance, with a caveat:** [Morpho](https://etherscan.io/address/0xBBBBBbbBBb9cC5e90e3b3Af64bdAF62C37EEFFCb) holds **629,675 ftUSD (15.0% of supply)** as collateral across two USDC markets. That is genuine external adoption for an asset this young — but Morpho does **not** independently price ftUSD; its oracle consumes Flying Tulip's own feed. See [The Morpho ftUSD markets](#the-morpho-ftusd-markets).
 - **Accounting drift resolved.** An earlier check (August 3) found `Core.totalDebt` exceeding `totalSupply` by 40,310 ftUSD. At this block the two are **exactly equal** (4,196,696.769396 both). The drift was transient.
 
 ## Funds Management
@@ -216,6 +216,71 @@ Operators call `approveOpenOrder` / `approveCloseOrder` / `approveSwapCollateral
 
 The reward token itself is close to unsellable at size: aggregate FT quote-side DEX liquidity is roughly **$28K**.
 
+### How ftUSD is priced
+
+Every venue that prices ftUSD — FT Lend's liquidation engine and both Morpho markets — reads the same contract: `FtUsdMintRedeemOracleProxy` [`0xA69f7a38B6c91a4bc2477f097DC8a1F16DAADFf8`](https://etherscan.io/address/0xA69f7a38B6c91a4bc2477f097DC8a1F16DAADFf8). It is a Chainlink-shaped `AggregatorV3Interface` wrapper, 8 decimals, **owned by the 3/5 admin Safe**, with `baseFeed`, `mintRedeem` and `usdc` set `immutable` at construction.
+
+**Step 1 — read Chainlink USDC/USD and validate it.** `baseFeed` is canonical Chainlink USDC/USD. The wrapper reverts if `paused`, if the round is incomplete (`answeredInRound < roundId`, `updatedAt == 0`, or a future timestamp), if the round is older than `maxStaleness` (currently **86,400s / 24h**), or if the answer is non-positive.
+
+**Step 2 — derive ftUSD from the mint/redeem engine.** `_quoteAnswer` queries `MintAndRedeem` twice and takes the **lower** of two independent estimates:
+
+```
+mintOut   = previewMint(USDC, 1e6)      // ftUSD received for 1.000000 USDC
+redeemOut = previewRedeem(USDC, 1e6)    // USDC received for 1.000000 ftUSD
+
+mintImplied    = usdcUsd × 1e6 / mintOut      // what it costs to create 1 ftUSD
+redeemValue    = redeemOut × usdcUsd / 1e6    // what 1 ftUSD returns on exit
+
+answer = min(mintImplied, redeemValue)
+```
+
+Live at block `25697429`: `mintOut` = 999,067 and `redeemOut` = 999,050, with USDC/USD at $0.99989 →
+
+| Leg | Value |
+|---|---|
+| mint-implied price | $1.000827 |
+| redeem value | $0.998944 |
+| **`answer` = min(...)** | **$0.998944** |
+
+**Step 3 — optional clamps.** `requirePositiveAnswer` is on; `boundsEnabled` is currently **false**, so `minAnswer`/`maxAnswer` are not applied. If enabled, an answer below `minAnswer` reverts and one above `maxAnswer` is silently capped.
+
+**Assessment of the design.** Taking `min(mint, redeem)` is a deliberately conservative choice — it prevents the protocol from ever valuing ftUSD above what it would actually pay out, which is the right direction for a collateral oracle. The Chainlink validation is thorough. And because `baseFeed` and `mintRedeem` are immutable, the owner cannot repoint the feed at a different source.
+
+**But it is not a market price, and that is the core issue.** The output is a function of `MintAndRedeem`'s own accounting — which values collateral that is itself deployed into FT Lend. If that backing were impaired, `previewRedeem` would fall only once the protocol's own books recognised the impairment. The feed cannot register a loss of market confidence, only a loss the protocol has already booked. Combined with a **0 bps deviation tolerance** in FT Lend's router (no divergence check is even attempted), the [Curve pool](https://etherscan.io/address/0xafec61e7a604f8f81f7cab64ec75bfa07c542630) is the only place a real ftUSD price exists.
+
+**The redemption factor is asymmetric.** `redeemPriceBreakdown(USDC)` returns three values; live: `spotFactorWad` 0.99976752, `avgMintFactorWad` 0.99975037, `effectiveRedeemFactorWad` 0.99975037 — i.e. **`effective = min(spot, avgMint)`**. Redemptions are priced at the lower of the current spot factor and the historical average mint factor. Collateral appreciation is retained by the protocol; depreciation passes through to redeemers. This is the mechanism the unverified portal-gated audit finding ("Historical Mint Ratio in Redemption Can Cause Insolvency") reportedly concerns. The direction observed here is conservative for solvency, but the finding remains **unverified** and the behaviour under a stressed or rapidly-changing mint factor was not modelled in this assessment — **TODO**.
+
+**A pause here is a cross-protocol denial-of-service.** `setPaused(true)` on this proxy makes `latestRoundData` revert. That does not just stop FT Lend pricing ftUSD — it also breaks the Morpho oracle that consumes it (below), freezing borrows and liquidations in a third-party protocol. The 3/5 admin Safe holds that lever.
+
+### The Morpho ftUSD markets
+
+ftUSD is live collateral in **two Morpho Blue markets**, both lending USDC, both created in June 2026:
+
+| Market ID | Loan | Collateral | LLTV | Supplied | Borrowed | Util |
+|---|---|---|---|---:|---:|---:|
+| [`0x88ab06d4…8acf`](https://etherscan.io/address/0xBBBBBbbBBb9cC5e90e3b3Af64bdAF62C37EEFFCb) | USDC | ftUSD | **86.0%** | 450,213 USDC | 405,868 USDC | **90.1%** |
+| [`0x5497d843…d2ac`](https://etherscan.io/address/0xBBBBBbbBBb9cC5e90e3b3Af64bdAF62C37EEFFCb) | USDC | ftUSD | 91.5% | 1.00 USDC | 0 | — |
+
+Both use `AdaptiveCurveIrm` [`0x870ac11d…00bc`](https://etherscan.io/address/0x870ac11d48b15db9a138cf899d20f13f79ba00bc), Morpho's standard rate model. Morpho holds **629,675 ftUSD** of posted collateral in total, against 405,868 USDC of debt — a blended LTV of roughly **64.5%** against an 86% liquidation threshold, so the live market is currently healthy with meaningful headroom.
+
+**The oracle is the important part.** The markets price ftUSD through `MorphoChainlinkOracleV2` [`0x7887afbe7581eb01b3d91d80c198b0275feab779`](https://etherscan.io/address/0x7887afbe7581eb01b3d91d80c198b0275feab779), configured as:
+
+| Parameter | Value |
+|---|---|
+| `BASE_FEED_1` | [`0xA69f7a38…DFf8`](https://etherscan.io/address/0xA69f7a38B6c91a4bc2477f097DC8a1F16DAADFf8) — **Flying Tulip's own `FtUsdMintRedeemOracleProxy`** |
+| `QUOTE_FEED_1` | [`0x37be050e…8cAa`](https://etherscan.io/address/0x37be050e75C7F0a80F0E8abBFC2c4Ff826728cAa) — canonical Chainlink USDC/USD |
+| `BASE_VAULT` / `QUOTE_VAULT` | none |
+| `SCALE_FACTOR` | 1e36 |
+| `price()` | 998,924,165,380,579,646,955,586,648,201,499,387 → **0.998924 USDC per ftUSD** |
+
+**This materially qualifies the "third-party validation" reading.** Morpho *accepts* ftUSD as collateral, which is genuine external adoption. But Morpho does **not independently price it** — it consumes Flying Tulip's redemption-factor feed. Three consequences:
+
+1. **The circularity propagates outward.** ftUSD's price in Morpho is derived from collateral held inside FT Lend. A Flying Tulip impairment that its own books have not yet recognised is equally invisible to Morpho's liquidation engine, so Morpho lenders could be under-collateralized without the protocol detecting it.
+2. **The Flying Tulip admin Safe holds a DoS lever over a third-party protocol.** Pausing the ftUSD oracle proxy makes `price()` revert, freezing borrows and liquidations in these Morpho markets.
+3. **The 86% LLTV market is 90.1% utilized.** Exit liquidity for Morpho lenders is thin in the same conditions that would stress ftUSD, and ftUSD collateral posted there is not available to support the ftUSD peg.
+
+For an ftUSD holder this is a second-order but real exposure: 629,675 ftUSD (15.0% of supply) is locked as Morpho collateral and would need to be unwound through the same Curve pool or redemption path that everyone else uses.
+
 ### Provability
 
 - **Reserves reconcile exactly** (table above) and every hop is readable onchain by anyone. Genuine strength.
@@ -309,7 +374,7 @@ Mint/redeem accounting, the collateral reconciliation and the sftUSD share math 
 - **Lido / wstETH** — now a live component of the hedge (76.54 wstETH).
 - **Chainlink** — USDC/USD feeds the ftUSD oracle's base leg.
 - **Curve** — the only external ftUSD exit and the only external price reference. Its own risk (LP concentration, admin, A-ramp authority) **not assessed — TODO**.
-- **Morpho** — 629,675 ftUSD of external acceptance; also an outward propagation channel.
+- **Morpho** — two USDC/ftUSD Blue markets holding 629,675 ftUSD (15.0% of supply); the live one is at 86% LLTV and 90.1% utilization. Its oracle reads Flying Tulip's own ftUSD feed, so this is an outward **propagation** channel rather than an independent price check, and pausing the FT oracle proxy would freeze these markets.
 - **CoW Protocol** — hedge orders are pre-signed and settled through it (`GPv2Settlement` and a `CowSwapBurner` appear in ftUSD transfer history). Settlement-layer risk **not assessed — TODO**.
 
 ## Operational Risk
@@ -336,6 +401,15 @@ Recommended frequency: **hourly** for peg, oracle divergence and governance; **d
 - **Compare the Curve spot price against `priceUSD(ftUSD)` from the router.** This is the only external check on the circular feed. Alert on >0.5% divergence.
 - Alert on `PausedSet` / `AnswerBoundsSet` / `MaxStalenessSet` on the ftUSD oracle proxy, and on any `setLastGoodPrice(ftUSD, …)` at the router.
 - Alert if the Curve pool becomes >70/30 imbalanced or loses >50% of its TVL — that removes the only independent price reference.
+- Poll `previewMint(USDC, 1e6)` and `previewRedeem(USDC, 1e6)` directly. These are the oracle's two inputs; a move in either propagates to FT Lend *and* Morpho before any market price reacts.
+- Alert on `redeemPriceBreakdown(USDC)` — specifically when `spotFactorWad` falls below `avgMintFactorWad`, which is the point at which redeemers start absorbing collateral depreciation.
+- **Alert on `setPaused` on the ftUSD oracle proxy.** It halts pricing in FT Lend and simultaneously freezes both Morpho markets.
+
+### Morpho exposure
+
+- Track market [`0x88ab06d4…8acf`](https://etherscan.io/address/0xBBBBBbbBBb9cC5e90e3b3Af64bdAF62C37EEFFCb) (86% LLTV): `totalSupplyAssets`, `totalBorrowAssets` and posted ftUSD collateral. It is currently 90.1% utilized, so Morpho lenders have thin exit capacity in exactly the conditions that would stress ftUSD.
+- Alert if the blended LTV there rises above ~75% (currently ~64.5% against an 86% threshold), or if `MorphoChainlinkOracleV2.price()` starts reverting — the latter means the FT oracle proxy has been paused or has gone stale.
+- Alert on any new Morpho market created with ftUSD as loan or collateral asset, and on `BASE_FEED_1` remaining pointed at Flying Tulip's own feed if a curated alternative appears.
 
 ### Mint authority — immediate alert
 
@@ -406,7 +480,7 @@ Recommended frequency: **hourly** for peg, oracle divergence and governance; **d
 - **Backing fully exists and reconciles to the wei** — 100.054% collateral ratio, verified across four hops, reproducible by anyone with `cast`.
 - **Mint is genuinely atomic and collateralized** through the only enabled module, with a per-collateral cap and a $1.00 mint price hardcap.
 - **A real external market exists**: ~$1.87M Curve pool clearing $500K at 0.30%, near-balanced, which both provides an exit and independently corroborates the peg.
-- **External acceptance** — 629,675 ftUSD held as Morpho collateral.
+- **External acceptance** — 629,675 ftUSD (15.0% of supply) held as collateral in two Morpho Blue markets, the live one comfortably collateralized at ~64.5% LTV against an 86% threshold.
 - **sftUSD holder distribution is healthy** — 107 holders, largest 12.1%.
 - **Currently fully liquid**: sftUSD `availableToWithdraw` is 100% of TVL and no withdrawals are queued.
 - All contracts source-verified; the transient `totalDebt` drift has resolved.
@@ -419,6 +493,7 @@ Recommended frequency: **hourly** for peg, oracle divergence and governance; **d
 - **sftUSD pays zero yield in ftUSD terms** — the rate is fixed at 1.0 and all return is discretionary FT emissions in a token with ~$28K of DEX liquidity.
 - **sftUSD's exit is rate-limited** at 10% of TVL per window with a 6h delay that the admin can extend to 7 days.
 - **Audit status is unverifiable** for every contract here, with an unconfirmed report of an open medium finding on the redemption path specifically.
+- **The circular price feed propagates outside the protocol.** Morpho's ftUSD markets consume Flying Tulip's own oracle rather than pricing ftUSD independently, so a mispricing reaches third-party lenders — and the FT admin Safe can freeze those markets by pausing the feed.
 
 ### Critical Risks
 
