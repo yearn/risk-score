@@ -32,12 +32,17 @@ nodes:
     label: GSM USDC (Gsm4626)
     address: "0x3A3868898305f04beC7FEa77BecFf04C13444112"
     category: strategy
-    note: waEthUSDC ↔ GHO at 1:1
+    note: waEthUSDC ↔ GHO at 1:1; exit inventory exhausted (9.95 waEthUSDC)
+  - id: gsm-usdt
+    label: GSM USDT (Gsm4626)
+    address: "0x882285E62656b9623AF136Ce3078c6BdCc33F5E3"
+    category: strategy
+    note: Fallback GHO exit — 43.42M waEthUSDT available, exits to USDT
   - id: gho-reserve
     label: GHO Reserve (GSM Facilitator)
     address: "0x54C58157DeF387A880AE62332D1445f03adbE7E9"
     category: strategy
-    note: Pre-minted GHO pool drawn by GSMs
+    note: Pre-minted GHO pool drawn by GSMs (259.21M GHO)
 
   # === Infra ===
   - id: sgho-proxy-admin
@@ -74,7 +79,12 @@ nodes:
     label: GHO GSM Steward
     address: "0xD1E856a947CdF56b4f000ee29d34F5808E0A6848"
     category: governance
-    note: CONFIGURATOR on GSMs (rate-limited)
+    note: CONFIGURATOR on GSMs (rate-limited); buy fee raised 7→10 bps 2026-05-23
+  - id: afc-safe
+    label: Aave Finance Committee Safe (2-of-3)
+    address: "0x22740deBa78d5a0c24C58C740e3715ec29de1bFa"
+    category: governance
+    note: Sole funder of sGho yield backing — 840k GHO in 6 discretionary transfers
 
   # === External dependencies ===
   - id: dep-waEthUSDC
@@ -125,6 +135,10 @@ edges:
     to: gsm-usdc
     kind: holds-role
     label: CONFIGURATOR (rate-limited)
+  - from: gho-gsm-steward
+    to: gsm-usdt
+    kind: holds-role
+    label: CONFIGURATOR (rate-limited)
   - from: oracle-swap-freezer
     to: gsm-usdc
     kind: holds-role
@@ -136,12 +150,26 @@ edges:
     kind: mints
     label: GSM facilitator (pre-minted pool)
 
+  # === Yield funding: AFC Safe tops up the vault's GHO backing ===
+  - from: afc-safe
+    to: sGho
+    kind: deposits-into
+    label: "GHO yield top-ups (discretionary)"
+
   # === Money flow: USDC pipeline → sGho ===
   - from: sGho
     to: gsm-usdc
     kind: routes-through
     label: "waEthUSDC → GHO"
+  - from: sGho
+    to: gsm-usdt
+    kind: routes-through
+    label: "GHO → waEthUSDT (fallback exit)"
   - from: gsm-usdc
+    to: gho-reserve
+    kind: routes-through
+    label: draws GHO
+  - from: gsm-usdt
     to: gho-reserve
     kind: routes-through
     label: draws GHO
