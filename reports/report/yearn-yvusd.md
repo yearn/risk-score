@@ -165,7 +165,7 @@ All 12 scores are summed and mapped to risk levels (Level 1-4). ySec can make ex
 
 | Protocol | Audit Coverage | Notes |
 |----------|---------------|-------|
-| Morpho (V1) | 25+ audits (Trail of Bits, Spearbit, OpenZeppelin, ChainSecurity, Certora) | Formal verification by Certora. The Yearn OG USDC vault carries an internal score of 2.7 (low-mid risk). ~77% of TVL |
+| Morpho (V1) | 25+ audits (Trail of Bits, Spearbit, OpenZeppelin, ChainSecurity, Certora) | Formal verification by Certora. The Yearn OG USDC vault is rated low-mid risk. ~77% of TVL |
 | Pendle | 6+ audits (Ackee, Dedaub, ChainSecurity, Spearbit, Code4rena) | Well-established (idle/dust) |
 | Circle CCTP | ChainSecurity (V1 2023, V2 March 2025, V2 update April 2025, Gateway July 2025) | Trust-minimized bridge (Arbitrum/Base — CCTP strategies idle at 0 debt) |
 | Polygon AggLayer (LxLy) + VaultBridgeToken | AggLayer/zkEVM bridge audited; VaultBridgeToken wrapper is **newer infrastructure** | ~10% Katana exposure. Katana is a young (2025) L2; bridge + wrapper not yet covered by an existing repo report — flagged as novel |
@@ -209,9 +209,9 @@ yvUSD deploys deposited USDC across 16 active strategies (2 funded) with 100% ca
 
 **1. Morpho V1 Lending — mainnet (77.1% of TVL)**
 
-- Morpho Yearn OG USDC Compounder (77.1%) — deposits USDC into the Yearn-curated **Morpho V1** "Yearn OG USDC" vault ([`0xF9bdDd4A9b3A45f980e11fDDE96e16364dDBEc49`](https://etherscan.io/address/0xF9bdDd4A9b3A45f980e11fDDE96e16364dDBEc49)). Unleveraged lending compounder. 25+ audits with formal verification by Certora. The Yearn OG USDC vault carries an internal risk score of 2.7 (low-mid risk).
+- Morpho Yearn OG USDC Compounder (77.1%) — deposits USDC into the Yearn-curated **Morpho V1** "Yearn OG USDC" vault ([`0xF9bdDd4A9b3A45f980e11fDDE96e16364dDBEc49`](https://etherscan.io/address/0xF9bdDd4A9b3A45f980e11fDDE96e16364dDBEc49)). Unleveraged lending compounder. 25+ audits with formal verification by Certora. The Yearn OG USDC vault is rated low-mid risk.
 
-**Lending risk:** Morpho V1 has 25+ audits and formal verification, but the Yearn OG USDC vault is rated internally at 2.7 — low-mid risk, not blue-chip. The vault is unleveraged and curated. No convertor or auction complexity.
+**Lending risk:** Morpho V1 has 25+ audits and formal verification, but the Yearn OG USDC vault is rated low-mid risk, not blue-chip. The vault is unleveraged and curated. No convertor or auction complexity.
 
 **2. Cross-Chain Compounder — Katana (10.1% of TVL)**
 
@@ -244,12 +244,12 @@ yvUSD deploys deposited USDC across 16 active strategies (2 funded) with 100% ca
 
 - **100% USDC-backed** — all deposits are USDC, all strategy positions ultimately track back to USDC value
 - **Collateral quality by strategy:**
-  - Low-mid risk (Morpho V1 OG 77.1%, internal score 2.7): dominant position
+  - Low-mid risk (Morpho V1 OG 77.1%): dominant position
   - Blue-chip (Sky sUSDS 7.3%): extensively audited, deep liquidity
   - Cross-chain (Katana yvUSDC via AggLayer): ~10.1% of TVL, novel stack
 - **Leverage: 0%** — no funded looper strategies
 - **No convertor or auction exposure** — the Morpho V2 Sentora PYUSD/RLUSD convertors were fully exited, eliminating stablecoin-depeg and auction-slippage risk
-- **Concentration risk:** The portfolio is dominated by a single Morpho V1 OG USDC position (77.1%, internal score 2.7). Only 7.3% is in blue-chip venues (Sky). The Katana cross-chain position (10.1%) adds novel infrastructure risk.
+- **Concentration risk:** The portfolio is dominated by a single Morpho V1 OG USDC position (77.1%). Only 7.3% is in blue-chip venues (Sky). The Katana cross-chain position (10.1%) adds novel infrastructure risk.
 
 ### Provability
 
@@ -264,7 +264,7 @@ yvUSD deploys deposited USDC across 16 active strategies (2 funded) with 100% ca
 - **Primary exit:** Redeem yvUSD for USDC via ERC-4626 `withdraw()`/`redeem()`. Subject to strategy liquidity
 - **Zero idle funds:** Currently 100% of vault assets are deployed to strategies. Withdrawals require unwinding positions
 - **Strategy withdrawal constraints (by current allocation):**
-  - **Morpho V1 OG (77.1%):** Generally available for prompt withdrawal — unleveraged lending, no auction or bridge delay. However, the underlying Yearn OG USDC vault carries an internal score of 2.7 (low-mid risk), implying exit confidence is not at blue-chip levels
+  - **Morpho V1 OG (77.1%):** Generally available for prompt withdrawal — unleveraged lending, no auction or bridge delay. However, the underlying Yearn OG USDC vault is rated low-mid risk, implying exit confidence is not at blue-chip levels
   - **Sky sUSDS (7.3%):** Blue-chip venue, generally available for prompt withdrawal
   - **Cross-chain (~10%):** Katana requires an AggLayer/LxLy bridge round-trip and claim
   - **No convertor exit friction** — all convertors fully exited
@@ -273,7 +273,7 @@ yvUSD deploys deposited USDC across 16 active strategies (2 funded) with 100% ca
 - **LockedyvUSD:** 14-day cooldown + 5-day withdrawal window. Shares in cooldown cannot be transferred. **~32.3% of yvUSD supply** is locked here (2.88M LockedyvUSD shares out of 8.91M total) — a committed-duration buffer reducing immediate redemption pressure
 - **Same-value asset:** USDC-denominated vault token — no price divergence risk from the underlying
 - **Deposit limit:** $15M cap (~60.8% utilized)
-- **Net:** ~84% of TVL is withdrawable without auction or bridge delay, though 77.1% sits in a low-mid risk Morpho V1 vault (internal 2.7) rather than a blue-chip venue. Only ~10% faces cross-chain bridge latency. No convertor auction friction, no looper deleverage. The ~32.3% locked-supply buffer provides meaningful duration protection.
+- **Net:** ~84% of TVL is withdrawable without auction or bridge delay, though 77.1% sits in a low-mid risk Morpho V1 vault rather than a blue-chip venue. Only ~10% faces cross-chain bridge latency. No convertor auction friction, no looper deleverage. The ~32.3% locked-supply buffer provides meaningful duration protection.
 
 ## Centralization & Control Risks
 
@@ -322,7 +322,7 @@ The yvUSD vault uses the **standard Yearn V3 governance pattern** via the Yearn 
 
 | Dependency | Criticality | Allocation | Notes |
 |-----------|-------------|-----------|-------|
-| **Morpho (V1)** | Critical | ~77% | 25+ audits, formal verification by Certora. The Yearn OG USDC vault carries an internal score of 2.7 (low-mid risk). Unleveraged. 77.1% concentration — critical single point of failure |
+| **Morpho (V1)** | Critical | ~77% | 25+ audits, formal verification by Certora. The Yearn OG USDC vault is rated low-mid risk. Unleveraged. 77.1% concentration — critical single point of failure |
 | **Katana L2 + AggLayer (LxLy) + VaultBridgeToken** | Critical | ~10% | Newer stack — young (2025) L2, AggLayer bridge, no existing repo report |
 | **Sky/MakerDAO** | High | 7.3% | Blue-chip, extensively audited |
 | **Pendle** | Low | 0% (idle) | $2B+ TVL, 6+ audits. PT infrastructure for fixed-rate yield |
@@ -330,7 +330,7 @@ The yvUSD vault uses the **standard Yearn V3 governance pattern** via the Yearn 
 | **Fluid** | Low | 0% (idle) | Report score 1.1/5, minimal risk |
 | **InfiniFi / Cap / Spark / Maple** | Low | 0% (idle) | Endorsed but unfunded |
 
-**Dependency concentration:** ~77.1% in Morpho V1 (internal score 2.7, low-mid risk), ~7.3% in blue-chip Sky, and ~10.1% in the novel Katana/AggLayer stack. The Morpho V2/Sentora convertors, PYUSD/RLUSD exposure, Arbitrum looper, and active CCTP cross-chain lanes have all been exited or sit at 0 debt. Dust-level Pendle PT ($509) and Fluid ($96) strategies are treated as idle. Single-protocol concentration on Morpho V1 (77.1%) is the primary dependency concern — a Morpho V1 exploit or Yearn OG curator compromise would impact over three-quarters of the vault's value, and the underlying vault itself is rated low-mid risk (2.7), not blue-chip.
+**Dependency concentration:** ~77.1% in Morpho V1 (low-mid risk), ~7.3% in blue-chip Sky, and ~10.1% in the novel Katana/AggLayer stack. The Morpho V2/Sentora convertors, PYUSD/RLUSD exposure, Arbitrum looper, and active CCTP cross-chain lanes have all been exited or sit at 0 debt. Dust-level Pendle PT ($509) and Fluid ($96) strategies are treated as idle. Single-protocol concentration on Morpho V1 (77.1%) is the primary dependency concern — a Morpho V1 exploit or Yearn OG curator compromise would impact over three-quarters of the vault's value, and the underlying vault itself is rated low-mid risk, not blue-chip.
 
 ## Operational Risk
 
@@ -408,17 +408,12 @@ Additionally, Yearn provides a dedicated **yvUSD APR API** ([yvusd-api.yearn.fi]
 
 ### Key Risks
 
-- **Morpho V1 OG concentration (77.1%, internal score 2.7):** Over three-quarters of vault TVL is deployed in a single Morpho V1 curated vault rated low-mid risk (2.7), not blue-chip. A Morpho V1 exploit or Yearn OG curator compromise would be catastrophic
+- **Morpho V1 OG concentration (77.1%):** Over three-quarters of vault TVL is deployed in a single Morpho V1 curated vault rated low-mid risk, not blue-chip. High conectration in 3jane assets is main concern. Yearn is actively monitoring 3jane protocol health and other assets in the Morpho V1 OG vault.
 - **Katana/AggLayer bridge risk (~10%):** The second-largest position depends on a young (2025) L2, the AggLayer/LxLy unified bridge, a VaultBridgeToken wrapper, and a remote Yearn vault — value that reads 0 locally and is known only from the last bridged report. No existing repository report covers this stack
 - **CCTP infrastructure idle but available:** The Arbitrum and Base CCTP strategies sit at 0 debt but are endorsed and can be re-funded by the Debt Allocator without a new timelock proposal, potentially reintroducing cross-chain exposure
 - **No external product-specific audit:** Individual strategies (KatanaStrategy, CCTPStrategy) have undergone ySec internal review but lack dedicated external third-party audits
 - **No DEX liquidity:** yvUSD has no secondary market — exit is exclusively through the ERC-4626 vault
-- **Only 7.3% in blue-chip venues:** Sky sUSDS is the only blue-chip dependency. The dominant Morpho V1 OG position (77.1%) is low-mid risk (internal 2.7)
-
-### Critical Risks
-
-- **Morpho V1 OG concentration (77.1%, internal score 2.7):** The vault's single largest critical risk. ~77% of TVL is deployed into one curated Morpho V1 vault (Yearn OG USDC). A Morpho V1 exploit, the Yearn OG curator being compromised, or a Morpho market failure would impair over three-quarters of yvUSD's value. The underlying vault is rated low-mid risk (2.7), not blue-chip, making this concentration particularly concerning
-- **Katana bridge fault (~10%):** A bridge fault, remote-vault loss, or stuck AggLayer claim on the Katana L2 path would trap ~10% of TVL and delay redemptions. The AggLayer/LxLy bridge and VaultBridgeToken wrapper are newer, less-proven infrastructure
+- **Only 7.3% in blue-chip venues:** Sky sUSDS is the only blue-chip dependency. The dominant Morpho V1 OG position (77.1%) is low-mid risk.
 
 ---
 
@@ -484,15 +479,15 @@ Additionally, Yearn provides a dedicated **yvUSD APR API** ([yvusd-api.yearn.fi]
 | Factor | Assessment |
 |--------|-----------|
 | Protocol count | Morpho V1, Sky, Katana/AggLayer. Pendle/3Jane/Fluid at dust/idle. CCTP idle; idle endorsements for InfiniFi, Cap, Spark, Maple |
-| Criticality | Morpho V1 (critical, ~77%, internal score 2.7); Katana/AggLayer (critical, ~10%); Sky (high, 7.3%) |
-| Dependency quality | ~7.3% blue-chip (Sky); ~77.1% low-mid risk Morpho V1 OG (internal score 2.7); ~10% novel Katana/AggLayer stack. Pendle/3Jane/Fluid at dust/idle |
+| Criticality | Morpho V1 (critical, ~77%); Katana/AggLayer (critical, ~10%); Sky (high, 7.3%) |
+| Dependency quality | ~7.3% blue-chip (Sky); ~77.1% low-mid risk Morpho V1 OG; ~10% novel Katana/AggLayer stack. Pendle/3Jane/Fluid at dust/idle |
 | Cross-chain | One active bridge — Polygon AggLayer LxLy + VaultBridgeToken (Katana, ~10%); CCTP idle |
 
-**Dependencies Score: 3.0/5** — The dependency surface has been reduced to three material protocols, but the dominant position (77.1%) is in a Morpho V1 vault rated low-mid risk (internal score 2.7), not blue-chip. Only 7.3% is in a genuinely blue-chip venue (Sky). The novel Katana/AggLayer stack (~10%) adds further uncertainty. Single-protocol concentration on a non-blue-chip venue at 77.1% is the primary driver of this score.
+**Dependencies Score: 3.0/5** — The dependency surface has been reduced to three material protocols, but the dominant position (77.1%) is in a Morpho V1 vault rated low-mid risk, not blue-chip. Only 7.3% is in a genuinely blue-chip venue (Sky). The novel Katana/AggLayer stack (~10%) adds further uncertainty. Single-protocol concentration on a non-blue-chip venue at 77.1% is the primary driver of this score.
 
 **Centralization Score = (1.0 + 1.5 + 3.0) / 3 = 1.83 → 2.0/5**
 
-**Score: 2.0/5** — Governance confirmed onchain (standard RoleManager, 7-day timelock, Daddy 6/9 sole proposer, no EOA vault roles, immutable vault). All funds remain onchain and programmatic. Dependency quality is mixed: ~7.3% blue-chip (Sky), ~77.1% low-mid risk Morpho V1 OG (internal 2.7), ~10% novel Katana/AggLayer. The primary concern is single-protocol concentration at 77.1% in a non-blue-chip venue.
+**Score: 2.0/5** — Governance confirmed onchain (standard RoleManager, 7-day timelock, Daddy 6/9 sole proposer, no EOA vault roles, immutable vault). All funds remain onchain and programmatic. Dependency quality is mixed: ~7.3% blue-chip (Sky), ~77.1% low-mid risk Morpho V1 OG, ~10% novel Katana/AggLayer. The primary concern is single-protocol concentration at 77.1% in a non-blue-chip venue.
 
 #### Category 3: Funds Management (Weight: 30%)
 
@@ -501,11 +496,11 @@ Additionally, Yearn provides a dedicated **yvUSD APR API** ([yvusd-api.yearn.fi]
 | Factor | Assessment |
 |--------|-----------|
 | Backing | 100% USDC-backed, deployed into DeFi yield strategies |
-| Collateral quality | ~77.1% low-mid risk Morpho V1 OG (internal score 2.7); ~7.3% blue-chip Sky; ~10.1% cross-chain Katana (novel); sub-0.5% dust idle |
+| Collateral quality | ~77.1% low-mid risk Morpho V1 OG; ~7.3% blue-chip Sky; ~10.1% cross-chain Katana (novel); sub-0.5% dust idle |
 | Leverage | **0% — all looper strategies fully exited** |
 | Verifiability | ERC-4626; mainnet positions direct; ~10% on Katana via bridged reports |
 
-**Collateralization Score: 2.5/5** — Onchain USDC backing is fully verifiable and leverage is zero. However, the dominant position (77.1%) is in a low-mid risk Morpho V1 vault (internal 2.7), not blue-chip. Only 7.3% is in a blue-chip venue (Sky). The ~10% cross-chain Katana exposure adds novel infrastructure risk. The portfolio is concentrated in a single non-blue-chip venue.
+**Collateralization Score: 2.5/5** — Onchain USDC backing is fully verifiable and leverage is zero. However, the dominant position (77.1%) is in a low-mid risk Morpho V1 vault not blue-chip. Only 7.3% is in a blue-chip venue (Sky). The ~10% cross-chain Katana exposure adds novel infrastructure risk. The portfolio is concentrated in a single non-blue-chip venue.
 
 **Subcategory B: Provability**
 
@@ -521,14 +516,14 @@ Additionally, Yearn provides a dedicated **yvUSD APR API** ([yvusd-api.yearn.fi]
 
 **Funds Management Score = (2.5 + 1.5) / 2 = 2.0**
 
-**Score: 2.0/5** — Collateral quality is mixed: 77.1% is in a low-mid risk vault (internal 2.7), only 7.3% is blue-chip, and 10.1% is in novel cross-chain infrastructure. Provability is solid with no oracle-valued positions and limited cross-chain lag.
+**Score: 2.0/5** — Collateral quality is mixed: 77.1% is in a low-mid risk vault not blue-chip, only 7.3% is blue-chip, and 10.1% is in novel cross-chain infrastructure. Provability is solid with no oracle-valued positions and limited cross-chain lag.
 
 #### Category 4: Liquidity Risk (Weight: 15%)
 
 | Factor | Assessment |
 |--------|-----------|
 | Exit mechanism | ERC-4626 redemption for USDC |
-| Liquidity depth | 0 idle — 100% deployed. ~84% withdrawable without auction or bridge delay (77.1% Morpho V1 OG, 7.3% Sky sUSDS). However, the 77.1% Morpho V1 position is in a low-mid risk venue (internal 2.7), not blue-chip |
+| Liquidity depth | 0 idle — 100% deployed. ~84% withdrawable without auction or bridge delay (77.1% Morpho V1 OG, 7.3% Sky sUSDS). However, the 77.1% Morpho V1 position is in a low-mid risk venue not blue-chip |
 | Convertor exit | None — all convertors fully exited |
 | Cross-chain | ~10% needs an AggLayer bridge round-trip (Katana) |
 | Looper / PT | No looper deleverage (0%); Pendle PT/Fluid at dust/idle (0%) |
@@ -536,7 +531,7 @@ Additionally, Yearn provides a dedicated **yvUSD APR API** ([yvusd-api.yearn.fi]
 | Deposit limit | $15M cap (~60.8% utilized) |
 | Locked supply | ~32.3% of yvUSD locked in LockedyvUSD — committed-duration buffer |
 
-**Score: 3.0/5** — USDC-denominated vault eliminates price divergence risk. ~84% is withdrawable without auction or bridge delay, but 77.1% sits in a low-mid risk venue (internal 2.7), not blue-chip, so exit confidence is not at the highest level. Only ~10% requires a cross-chain bridge round-trip. No convertor auction friction, no looper deleverage. The ~32.3% locked-supply buffer provides duration protection. No DEX liquidity but the ERC-4626 mechanism obviates it. Same-value asset adjustment applied.
+**Score: 3.0/5** — USDC-denominated vault eliminates price divergence risk. ~84% is withdrawable without auction or bridge delay, but 77.1% sits in a low-mid risk venue, not blue-chip, so exit confidence is not at the highest level. Only ~10% requires a cross-chain bridge round-trip. No convertor auction friction, no looper deleverage. The ~32.3% locked-supply buffer provides duration protection. No DEX liquidity but the ERC-4626 mechanism obviates it. Same-value asset adjustment applied.
 
 #### Category 5: Operational Risk (Weight: 5%)
 
@@ -574,7 +569,7 @@ Additionally, Yearn provides a dedicated **yvUSD APR API** ([yvusd-api.yearn.fi]
 
 **Final Risk Tier: Low Risk (2.2/5.0) — Approved with standard monitoring**
 
-**Score rationale:** The vault benefits from battle-tested Yearn V3 infrastructure (~27 months, no exploits), an immutable design, and strong governance with a 7-day timelock. All convertor and looper exposure has been eliminated, cross-chain risk is limited to ~10%, and provability is solid with no oracle-valued positions. These strengths are tempered by the dominant Morpho V1 OG position at 77.1% in a vault rated low-mid risk (internal 2.7, not blue-chip), limited blue-chip exposure at only 7.3% (Sky), and the novel Katana/AggLayer cross-chain stack. The Morpho V1 concentration on a non-blue-chip venue is the primary driver keeping the score in the upper part of the Low Risk tier.
+**Score rationale:** The vault benefits from battle-tested Yearn V3 infrastructure (~27 months, no exploits), an immutable design, and strong governance with a 7-day timelock. All convertor and looper exposure has been eliminated, cross-chain risk is limited to ~10%, and provability is solid with no oracle-valued positions. These strengths are tempered by the dominant Morpho V1 OG position at 77.1% in a vault rated low-mid risk, not blue-chip, limited blue-chip exposure at only 7.3% (Sky), and the novel Katana/AggLayer cross-chain stack. The Morpho V1 concentration on a non-blue-chip venue is the primary driver keeping the score in the upper part of the Low Risk tier as Yearn is actively monitoring protocols and assets in the Morpho V1 OG vault.
 
 ---
 
@@ -613,7 +608,7 @@ Additionally, Yearn provides a dedicated **yvUSD APR API** ([yvusd-api.yearn.fi]
 │  │  ┌─────────────────────────────────────────────────────────┐    ││
 │  │  │ MORPHO V1 LENDING (77.1% of TVL)                        │    ││
 │  │  │  Morpho Yearn OG USDC Compounder    77.1%  (Morpho V1) │    ││
-│  │  │  Internal score 2.7 (low-mid risk)                      │    ││
+│  │  │  low-mid risk vault                      │    ││
 │  │  └─────────────────────────────────────────────────────────┘    ││
 │  │  ┌──────────────────────────┐  ┌────────────────────────────┐  ││
 │  │  │ CROSS-CHAIN (~10%)       │  │ LENDING                    │  ││
@@ -634,7 +629,7 @@ Additionally, Yearn provides a dedicated **yvUSD APR API** ([yvusd-api.yearn.fi]
 │  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐               │
 │  │  Morpho V1   │  │  Katana L2 + │  │  Sky/MakerDAO│               │
 │  │  OG USDC     │  │  AggLayer    │  │  sUSDS       │               │
-│  │  Internal 2.7│  │  LxLy Bridge │  │  Blue-chip   │               │
+│  │  low-mid risk vault│  │  LxLy Bridge │  │  Blue-chip   │               │
 │  │  77.1% alloc │  │  10.1% (new) │  │  7.3% alloc  │               │
 │  └──────────────┘  └──────────────┘  └──────────────┘               │
 │                                                                       │
@@ -642,7 +637,7 @@ Additionally, Yearn provides a dedicated **yvUSD APR API** ([yvusd-api.yearn.fi]
 └───────────────────────────────────────────────────────────────────────┘
 
 Data flow: User deposits USDC → yvUSD vault → strategies deploy to
-Morpho V1 (internal 2.7, 77.1%), Sky (blue-chip, 7.3%), and Katana L2
+Morpho V1 (low-mid risk vault, 77.1%), Sky (blue-chip, 7.3%), and Katana L2
 (via AggLayer LxLy + VaultBridgeToken, 10.1%). Pendle PT and Fluid
 lending at dust/idle (<0.5%). CCTP strategies (Arbitrum, Base) idle
 at 0 debt. Profits reported by Keeper, locked for 5 days. Optional:
