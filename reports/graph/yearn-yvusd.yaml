@@ -24,7 +24,7 @@ nodes:
     label: LockedyvUSD (Cooldown + Accountant)
     address: "0xAaaFEa48472f77563961Cdb53291DEDfB46F9040"
     category: vault
-    note: 14d cooldown + 5d withdraw window; also serves as accountant
+    note: 14d cooldown + 5d withdraw window; ~32.3% of yvUSD supply locked; also serves as accountant
   - id: fee-splitter
     label: Fee Splitter
     address: "0xd744B7D6bE69b334766802245Db2895e861cb470"
@@ -99,7 +99,7 @@ nodes:
     label: Morpho V1 Yearn OG USDC Vault
     address: "0xF9bdDd4A9b3A45f980e11fDDE96e16364dDBEc49"
     category: dependency
-    note: Yearn-curated MetaMorpho vault; blue-chip
+    note: Yearn-curated Morpho V1 vault; blue-chip. 77.1% concentration — critical dependency
   - id: morpho-protocol
     label: Morpho Protocol (lending base)
     category: dependency
