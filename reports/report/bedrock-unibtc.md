@@ -1,6 +1,6 @@
 # Protocol Risk Assessment: Bedrock uniBTC
 
-- **Assessment Date:** July 10, 2026
+- **Assessment Date:** July 10, 2026 (reserve-composition refresh: August 8, 2026)
 - **Token:** uniBTC
 - **Chain:** Ethereum
 - **Token Address:** [`0x004E9C3EF86bc1ca1f0bB5C7662861Ee93350568`](https://etherscan.io/address/0x004E9C3EF86bc1ca1f0bB5C7662861Ee93350568)
@@ -26,6 +26,9 @@ This report is scoped to **uniBTC only**. Bedrock brBTC is a separate codebase a
 - [QuillAudits - Sept 2024 exploit analysis](https://www.quillaudits.com/blog/hack-analysis/bedrock-2million-exploit)
 - [BlockApex - uniBTC hack analysis](https://blockapex.medium.com/unibtc-hack-analysis-bffd6cebd4a8)
 - [Babylon Labs](https://babylonlabs.io/)
+- [Merlin Chain M-BTC documentation](https://docs.merlinchain.io/merlin-docs/user-quick-start/how-to/m-token/what-is-m-token)
+- [Merlin Chain official bridge](https://docs.merlinchain.io/merlin-docs/user-quick-start/how-to/bridge/official-bridge)
+- [M-BTC token and holders](https://scan.merlinchain.io/token/0xB880fd278198bd590252621d4CD071b1842E9Bcd)
 
 ## Contract Addresses
 
@@ -81,7 +84,7 @@ Fresh onchain verification on July 10, 2026 read Safe thresholds/owners via `get
 | uniBTC | PeckShield | Oct 1, 2024 | [PDF](https://github.com/Bedrock-Technology/uniBTC/blob/main/PeckShield-Audit-Report-uniBTC-v1.0.pdf) |
 | uniBTC | BlockSec | Oct 30, 2024 | [PDF](https://github.com/Bedrock-Technology/uniBTC/blob/main/blocksec_bedrock_unibtc_v1.0-signed.pdf) |
 
-The October 2024 audits are post-exploit re-engagements covering the patched uniBTC vault. No top-tier audit engagement (Trail of Bits, OpenZeppelin, ChainSecurity, Spearbit, Cantina) was found for uniBTC.
+The October 2024 audits are post-exploit re-engagements covering the patched uniBTC vault. All three published uniBTC audits are from 2024; no later independent review was found for subsequent production changes, dependency evolution, or the current cross-chain deployment. No top-tier audit engagement (Trail of Bits, OpenZeppelin, ChainSecurity, Spearbit, Cantina) was found for uniBTC. The age and clustering of the reviews, rather than a claim that 2024 auditors were categorically weaker, is the material coverage gap.
 
 ### Bug Bounty
 
@@ -123,14 +126,23 @@ The exploit occurred on the same vault proxy that remains in production. Post-ex
 - Chainlink PoR reported backing above circulating supply in the July 10, 2026 verification pass, but the mint gate permits up to 10% under-collateralization via `adequacyRatio = 900`.
 - Only a small amount of WBTC was held directly in the Ethereum Vault in the July 10, 2026 verification pass (1.90156049 WBTC, plus 0.01 WBTC in the ops Safe). The majority of backing sits outside the Ethereum vault contract, including native BTC/restaking/custody arrangements monitored through PoR.
 
+#### M-BTC / Merlin concentration
+
+The Bedrock statistics dashboard reported **990.88378325 M-BTC** within uniBTC reserves on August 8, 2026, equal to approximately **21.3%** of total reported reserves (4,643.29 BTC). The linked Merlin explorer independently showed Bedrock's reserve address [`0xF977...AB18`](https://scan.merlinchain.io/address/0xF9775085d726E782E83585033B58606f7731AB18) as the **second-largest M-BTC holder**, holding **17.38%** of M-BTC supply.
+
+M-BTC is not native BTC; Merlin documents it as a receipt minted against Bitcoin Layer 1 assets deposited through Merlin's bridge. This adds Merlin bridge custody, relayer, chain-liveness, and redemption risk beneath uniBTC. Merlin launched mainnet in February 2024 and M-BTC claims opened in March 2024, so the product is no longer brand new but remains materially younger and less trust-minimized than established wrapped-BTC rails. Merlin's official bridge documentation states that the bridge is upgradeable, multisig-managed, and has **no timelock**. Merlin's data-availability documentation also describes public DA as a "coming" solution, while the current design relies on its oracle/DAC layer and offchain proof-verification machinery rather than Bitcoin enforcing the full L2 state transition.
+
+The M-BTC token source restricts mint and burn to its configured bridge, and the current main bridge exposes multiple authorized `unlockTokenAdmin` relayers. That is better than an unrestricted public mint, but correctness still depends on offchain Bitcoin-deposit observation, bridge administration, and custody/signing. No public user-controlled unilateral Bitcoin exit path was identified.
+
 ### Provability
 
-uniBTC has materially better reserve provability than brBTC because a Chainlink PoR feed is wired directly into the uniBTC Vault mint path. However:
+uniBTC has materially better reserve provability than brBTC because a Chainlink PoR feed is wired directly into the uniBTC Vault mint path. The Bedrock dashboard also exposes the constituent native-BTC addresses and wrapped-token reserve addresses; it is more than an unlinked aggregate chart. However, address visibility does not prove the full operational state:
 
 - The feed depends on a Bedrock-supplied address set.
-- PoR validates balances, not legal ownership or private-key control.
+- PoR validates balances, not legal ownership, private-key control, liabilities, encumbrances, or the ability to redeem those assets promptly.
 - The Vault allows minting if reserves are at least 90% of supply.
-- The named custodian/signing setup remains undisclosed.
+- The named custodian/signing setup remains undisclosed, and the dashboard does not map native-BTC UTXOs to Babylon staking state, finality providers, slashing exposure, or unbonding status.
+- Approximately 21.3% of reserves are M-BTC, so proving that Bedrock holds the token does not independently prove the corresponding Bitcoin remains available behind Merlin's bridge.
 
 ## Liquidity Risk
 
@@ -159,7 +171,8 @@ Minting is programmatic and PoR-gated, which is a major strength relative to opa
 |-----------|----------------|-------------|
 | Chainlink PoR feed | Mint reserve gate | High - stale/wrong data can halt or weaken mint safety |
 | Chainlink CCIP | Cross-chain routing | High - bridge security affects multi-chain supply/peg |
-| WBTC / FBTC / cbBTC / M-BTC | Accepted deposit assets | High - issuer/custody risk |
+| WBTC / FBTC / cbBTC | Accepted deposit assets | High - issuer/custody risk |
+| M-BTC / Merlin bridge | ~21.3% of reported reserves on Aug. 8, 2026 | High - bridge custody, relayer, upgrade, no-timelock, chain-liveness and redemption risk |
 | Bitcoin network / native BTC custody | Backing assets | Critical |
 | Babylon Labs / BTC restaking venues | Yield / restaking exposure | High |
 | Undisclosed custody/signing setup | BTC backing control | Critical unknown |
@@ -192,6 +205,9 @@ Minting is programmatic and PoR-gated, which is a major strength relative to opa
    - uniBTC/WBTC ratio on Ethereum and major cross-chain venues.
    - DEX depth and 24h volume.
    - Redemption queue throughput versus the 2 WBTC/day Ethereum cap.
+6. **M-BTC / Merlin dependency:**
+   - Bedrock reserve address `0xF977...AB18` balance as a percentage of uniBTC reserves and total M-BTC supply.
+   - M-BTC bridge mint/burn events, authorized `unlockTokenAdmin` changes, bridge upgrades, pauses, and Bitcoin redemption performance.
 
 ### Recommended Frequency
 
@@ -225,6 +241,7 @@ Backing / External Layer
 Wrapped BTC issuers
 Native BTC custody / restaking
 Babylon and BTC restaking venues
+M-BTC / Merlin bridge and custody stack
 Chainlink PoR + CCIP
 
 Critical Unknowns
@@ -249,16 +266,17 @@ Public restitution txs for Sept 2024 exploit
 ### Key Risks
 
 1. **Prior exploit on the same vault proxy.** The Sept 2024 mint-validation exploit occurred on the uniBTC Vault still in use.
-2. **PoR is not a strict 1:1 mint gate.** `adequacyRatio = 900` permits minting while reserves are at least 90% of supply.
-3. **No timelock.** The 3-of-5 Safe can upgrade token/vault implementations without onchain delay.
-4. **Custody opacity.** The PoR address set is public through Chainlink, but Bedrock does not publicly name the BTC custodian/signers or prove unencumbered control.
-5. **Thin secondary liquidity and capped redemption.** The 2 WBTC/day Ethereum cap and thin DEX liquidity are binding for large exits.
-6. **Accepted-asset risk.** uniBTC accepts multiple BTC wrappers with different issuer/custody risk profiles.
-7. **No public bug bounty / no SEAL Safe Harbor registration found.**
+2. **Audit coverage is dated.** All published uniBTC audits were completed in 2024, two reactively after the exploit; no current independent review or public bug bounty was found.
+3. **Material M-BTC concentration.** About 21.3% of reported reserves are M-BTC, adding Merlin bridge/custody and chain-liveness risk beneath uniBTC.
+4. **PoR is not a strict 1:1 mint gate.** `adequacyRatio = 900` permits minting while reserves are at least 90% of supply.
+5. **No timelock.** The 3-of-5 Safe can upgrade token/vault implementations without onchain delay.
+6. **Custody opacity.** Reserve addresses are visible, but Bedrock does not publicly name the BTC custodian/signers or prove unencumbered control and Babylon state.
+7. **Thin secondary liquidity and capped redemption.** The 2 WBTC/day Ethereum cap and thin DEX liquidity are binding for large exits.
+8. **No public bug bounty / no SEAL Safe Harbor registration found.**
 
 ### Critical Risks
 
-- The prior exploit on the same proxy plus instant-upgrade governance is the main critical path. PoR hardening materially reduces recurrence risk, but it does not remove upgrade, custody, bridge, or PoR-address-set risk.
+- **No standalone Critical Risk Gate is triggered.** The prior exploit and instant-upgrade governance are material but do not by themselves constitute a current critical condition after the patched mint path and PoR integration. The strongest current concerns are High: dated audit coverage, M-BTC/Merlin concentration, custody opacity, and constrained exits.
 
 ---
 
@@ -279,8 +297,9 @@ Public restitution txs for Sept 2024 exploit
 **Subcategory A: Audits & Security Reviews**
 - Three uniBTC-specific audits by BlockSec and PeckShield.
 - Two post-exploit re-audits.
+- All reviews are from 2024; no current review covering later production changes and cross-chain/dependency evolution was found.
 - No top-tier audit and no public bug bounty.
-- **Score: 2.75**
+- **Score: 3.5**
 
 **Subcategory B: Historical Track Record**
 - uniBTC has been live since 2024 and has sustained material TVL.
@@ -288,9 +307,9 @@ Public restitution txs for Sept 2024 exploit
 - No recurrence identified after the post-exploit implementation and PoR hardening.
 - **Score: 3.25**
 
-**Audits & Historical Score = (2.75 + 3.25) / 2 = 3.0**
+**Audits & Historical Score = (3.5 + 3.25) / 2 = 3.375**
 
-**Score: 3.0/5**
+**Score: 3.4/5**
 
 #### Category 2: Centralization & Control Risks (Weight: 30%)
 
@@ -316,18 +335,20 @@ Public restitution txs for Sept 2024 exploit
 
 **Subcategory A: Collateralization**
 - PoR showed backing above supply in the July 10, 2026 verification pass.
+- Approximately 21.3% of the August 8 reserve snapshot was M-BTC, creating material Merlin bridge/custody concentration.
 - Mixed collateral issuer quality and offchain/native BTC custody opacity.
 - Explicit 90% adequacy threshold weakens the mint gate.
-- **Score: 3.5**
+- **Score: 4.0**
 
 **Subcategory B: Provability**
 - Chainlink PoR is a real positive.
-- Self-declared address set, opaque custody/signing, and 90% threshold limit confidence.
-- **Score: 3.0**
+- Reserve addresses are inspectable, but ownership, liabilities, Babylon position state, M-BTC's underlying Bitcoin, custody/signing, and redemption capacity are not independently reconciled.
+- Self-declared address set and the 90% threshold further limit confidence.
+- **Score: 3.5**
 
-**Funds Management Score = (3.5 + 3.0) / 2 = 3.25**
+**Funds Management Score = (4.0 + 3.5) / 2 = 3.75**
 
-**Score: 3.25/5**
+**Score: 3.75/5**
 
 #### Category 4: Liquidity Risk (Weight: 15%)
 
@@ -350,18 +371,17 @@ Public restitution txs for Sept 2024 exploit
 
 | Category | Score | Weight | Weighted |
 |----------|-------|--------|----------|
-| Audits & Historical | 3.0 | 20% | 0.600 |
+| Audits & Historical | 3.4 | 20% | 0.680 |
 | Centralization & Control | 3.6 | 30% | 1.080 |
-| Funds Management | 3.25 | 30% | 0.975 |
+| Funds Management | 3.75 | 30% | 1.125 |
 | Liquidity Risk | 4.0 | 15% | 0.600 |
 | Operational Risk | 2.25 | 5% | 0.113 |
-| **Subtotal** | | | **3.368** |
+| **Subtotal** | | | **3.598** |
 
 **Modifiers:**
-- Prior exploit on same vault proxy: **+0.25**. The incident is already reflected in historical scoring, but the same proxy and no-timelock upgrade path justify a small residual modifier.
-- No additional custody-opacity modifier; this is already captured in Funds Management.
+- **None.** The prior exploit is captured in Historical Track Record; M-BTC concentration and custody opacity are captured in Funds Management and External Dependencies. Applying an additional modifier would double count them.
 
-**Adjusted Final Score: ~3.6 / 5.0**
+**Final Score: ~3.6 / 5.0**
 
 ### Risk Tier
 
@@ -375,7 +395,7 @@ Public restitution txs for Sept 2024 exploit
 
 **Final Risk Tier: Elevated Risk**
 
-uniBTC is stronger than brBTC on reserve provability because Chainlink PoR is wired into the mint path. It remains Elevated Risk because the same vault proxy was exploited, minting is allowed down to 90% reserve adequacy, governance has no onchain timelock, custody/signing details are opaque, and large exits are constrained by both redemption caps and thin DEX liquidity.
+uniBTC is stronger than brBTC on reserve provability because Chainlink PoR is wired into the mint path. It remains Elevated Risk because all audits are from 2024, approximately 21.3% of reported reserves are M-BTC, minting is allowed down to 90% reserve adequacy, governance has no onchain timelock, backing control and Babylon position state are incompletely disclosed, and large exits are constrained by both redemption caps and thin DEX liquidity.
 
 ---
 
@@ -394,10 +414,13 @@ uniBTC is stronger than brBTC on reserve provability because Chainlink PoR is wi
   7. Disclosure of BTC custodian/signers.
   8. Introduction of an onchain timelock / Safe Delay module.
   9. New top-tier audit or bug bounty publication.
+  10. M-BTC exceeds 25% of uniBTC reserves, depegs, pauses redemption, changes bridge administrators, or changes its mint/burn implementation.
 
 ## Open TODOs (Items Not Verifiable This Session)
 
 - **Custodian identity / signing setup** for BTC backing uniBTC.
+- **Native-BTC/Babylon position reconciliation:** mapping each published reserve address to custodian ownership, Babylon staking transaction, finality provider, slashing status and unbonding state.
+- **M-BTC bridge assurance:** independently verified Bitcoin backing, custody/MPC quorum, complete mint-relayer set, upgrade authority, and a documented unilateral or emergency exit path.
 - **Complete current cross-chain mint/burn authority enumeration** for every non-Ethereum uniBTC deployment.
 - **September 2024 restitution transactions** - onchain Fuzzland-to-Bedrock reimbursement tx hashes are not published.
 
@@ -415,4 +438,12 @@ uniBTC is stronger than brBTC on reserve provability because Chainlink PoR is wi
 - QuillAudits hack analysis: https://www.quillaudits.com/blog/hack-analysis/bedrock-2million-exploit
 - BlockApex hack analysis: https://blockapex.medium.com/unibtc-hack-analysis-bffd6cebd4a8
 - Babylon Labs: https://babylonlabs.io/
+- Bedrock live reserve composition and linked addresses: https://app.bedrock.technology/statistics
+- Merlin M-BTC model and contract: https://docs.merlinchain.io/merlin-docs/user-quick-start/how-to/m-token/what-is-m-token and https://docs.merlinchain.io/merlin-docs/user-quick-start/how-to/m-token/m-token-contract-address
+- Merlin bridge security disclosures: https://docs.merlinchain.io/merlin-docs/user-quick-start/how-to/bridge/official-bridge
+- Merlin data-availability status: https://docs.merlinchain.io/merlin-docs/about-merlin/key-modules/data-availability
+- Merlin bridge source: https://github.com/MerlinLayer2/BTCLayer2BridgeContract
+- M-BTC holder distribution: https://scan.merlinchain.io/token/0xB880fd278198bd590252621d4CD071b1842E9Bcd
+- Independent Merlin trust-model analysis: https://www.spark.money/research/merlin-chain-bitcoin-l2-analysis
 - Onchain verification on July 10, 2026: `totalSupply()`, `name()`, `symbol()`, `decimals()`, EIP-1967 implementation/admin slots, `owner()` on ProxyAdmin, `getThreshold()` / `getOwners()` / `getModulesPaginated()` and guard storage on the Safe, `hasRole(bytes32,address)` on Vault/token, `chainlinkReserveFeeder()`, `uniBTCSupplyFeeder()`, `feederHeartbeat()`, `outOfService()`, `paused()`, `adequacyRatio()`, WBTC `balanceOf(address)`, and Chainlink feed `latestAnswer()`, `latestRoundData()`, `description()`, `decimals()`.
+- Reserve/Merlin verification on August 8, 2026: Bedrock dashboard reserve composition and linked addresses; M-BTC `totalSupply()`, `bridgeAddress()`, Bedrock reserve balance and holder rank; main bridge `version()`, admin and mint-relayer reads; EIP-1967 implementation slots; and bytecode-presence checks via Merlin RPC.

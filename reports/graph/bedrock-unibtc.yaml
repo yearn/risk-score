@@ -71,8 +71,9 @@ nodes:
     note: Accepted wrapped BTC asset
   - id: dep-mbtc
     label: M-BTC
+    address: "0xB880fd278198bd590252621d4CD071b1842E9Bcd"
     category: dependency
-    note: Accepted wrapped BTC asset; newer issuer dependency
+    note: ~21.3% of reported uniBTC reserves on 2026-08-08; Bedrock reserve wallet is second-largest holder
 
   # === External dependencies ===
   - id: dep-bitcoin
@@ -83,6 +84,15 @@ nodes:
     label: Babylon Labs
     category: dependency
     note: BTC restaking dependency
+  - id: dep-merlin-bridge
+    label: Merlin M-BTC Bridge
+    address: "0x28AD6b7dfD79153659cb44C2155cf7C0e1CeEccC"
+    category: dependency
+    note: Mints/burns M-BTC through authorized relayers; official docs disclose upgradeability, multisig control, and no timelock
+  - id: dep-merlin-chain
+    label: Merlin Chain
+    category: dependency
+    note: Bitcoin L2 launched Feb 2024; oracle/DAC and bridge liveness are part of the M-BTC trust boundary
   - id: dep-chainlink
     label: Chainlink PoR + CCIP
     category: dependency
@@ -112,6 +122,9 @@ edges:
   - { from: uniBTC-vault, to: dep-mbtc, kind: routes-through, label: accepted input asset }
   - { from: btc-custody-restaking, to: dep-bitcoin, kind: deposits-into, label: native BTC custody }
   - { from: btc-custody-restaking, to: dep-babylon, kind: deposits-into, label: BTC restaking }
+  - { from: btc-custody-restaking, to: dep-mbtc, kind: allocates-to, label: ~21.3% of reserves on 2026-08-08 }
+  - { from: dep-mbtc, to: dep-merlin-bridge, kind: routes-through, label: mint / burn and BTC redemption }
+  - { from: dep-merlin-bridge, to: dep-merlin-chain, kind: routes-through, label: relayers / chain liveness / data availability }
 
   # === Oracle / bridge wiring ===
   - { from: uniBTC-vault, to: chainlink-por, kind: routes-through, label: reserve check }
