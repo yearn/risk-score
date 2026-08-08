@@ -1,6 +1,6 @@
 # Protocol Risk Assessment: Re Protocol reUSD
 
-- **Assessment Date:** June 21, 2026 (reassessed; previous: April 17, 2026)
+- **Assessment Date:** June 21, 2026
 - **Token:** reUSD (Re Protocol Deposit Token)
 - **Chain:** Ethereum (primary), multi-chain (Avalanche, Arbitrum, Base, Katana, BNB Chain, Ink)
 - **Token Address:** [`0x5086bf358635B81D8C47C66d1C8b9E567Db70c72`](https://etherscan.io/address/0x5086bf358635B81D8C47C66d1C8b9E567Db70c72)

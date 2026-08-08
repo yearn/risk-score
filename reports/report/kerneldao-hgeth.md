@@ -1,6 +1,6 @@
 # Protocol Risk Assessment: KernelDAO (Kelp Gain)
 
-- **Assessment Date:** June 29, 2026 (reassessment; vault unpaused since last assessment)
+- **Assessment Date:** June 29, 2026
 - **Token:** hgETH (High Growth ETH)
 - **Chain:** Ethereum
 - **Token Address:** [`0xc824A08dB624942c5E5F330d56530cD1598859fD`](https://etherscan.io/address/0xc824A08dB624942c5E5F330d56530cD1598859fD)
