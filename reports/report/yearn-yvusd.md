@@ -1,6 +1,6 @@
 # Protocol Risk Assessment: Yearn — yvUSD
 
-- **Assessment Date:** August 8, 2026
+- **Assessment Date:** March 13, 2026 (Updated: August 8, 2026)
 - **Token:** yvUSD (USD yVault)
 - **Chain:** Ethereum (with cross-chain strategies on Arbitrum, Katana, and Base)
 - **Token Address:** [`0x696d02Db93291651ED510704c9b286841d506987`](https://etherscan.io/address/0x696d02Db93291651ED510704c9b286841d506987)
@@ -140,13 +140,15 @@ Revoked strategies require a fresh **7-day timelock** proposal to be re-added. N
 
 `get_default_queue()` returns **5 strategies**, only **2 of which are funded**:
 
-1. `0xdA2f1B3C…` USDC To sUSDS Depositor — 7.3% funded
-2. `0x9e0A5943…` USDC To Spark USDS Depositor — 0 debt
-3. `0x0e297dE4…` Morpho Yearn OG USDC Compounder — 62.4% funded
-4. `0x908244B6…` Base Yearn Morpho OG USDC — 0 debt
-5. `0xF0FEC260…` sIUSD/USDC Morpho Looper — 0 debt
+1. [`0xdA2f1B3C…`](https://etherscan.io/address/0xdA2f1B3CBa732d779cfF56f0cF9d3Bc8AEA6Cd8D) USDC To sUSDS Depositor — 7.3% funded
+2. [`0x9e0A5943…`](https://etherscan.io/address/0x9e0A5943dFc1A85B48C191aa7c10487297aA675b) USDC To Spark USDS Depositor — 0 debt
+3. [`0x0e297dE4…`](https://etherscan.io/address/0x0e297dE4005883C757c9F09fdF7cF1363C20e626) Morpho Yearn OG USDC Compounder — 62.4% funded
+4. [`0x908244B6…`](https://etherscan.io/address/0x908244B6ef0e52911a380a5454aEC0743598Fb20) Base Yearn Morpho OG USDC — 0 debt
+5. [`0xF0FEC260…`](https://etherscan.io/address/0xF0FEC2602Dff25497D6a14b3113D0687b4c56741) sIUSD/USDC Morpho Looper — 0 debt
 
-**Consequence:** only **69.7% of TVL** (Morpho OG 62.4% + sUSDS 7.3%) is reachable by a standard `withdraw()`/`redeem()` call. The remaining **30.3%** — Katana (10.1%), Pawn Broker Looper (9.5%), and the two Pendle PT strategies (10.7%) — sits outside the default queue and requires either a targeted `redeem(uint256,address,address,uint256)` with an explicit strategy list, a bridge round-trip, or (for the PT positions) governance action. See [Liquidity Risk](#liquidity-risk).
+**Consequence:** only **69.7% of TVL** (Morpho OG 62.4% + sUSDS 7.3%) is reachable by a standard `withdraw()`/`redeem()` call. The remaining **30.3%** — Katana (10.1%), Pawn Broker Looper (9.5%), and the two Pendle PT strategies (10.7%) — sits outside the default queue and requires either a targeted `redeem(uint256,address,address,uint256)` with an explicit strategy list, a bridge round-trip, or (for the PT positions) governance action.
+
+**This gap is more than covered by the locked supply.** ~33.8% of yvUSD sits in LockedyvUSD behind a 14-day cooldown, which exceeds the 30.3% held outside the default queue. Redemptions from unlocked holders draw against the 69.7% liquid tranche, and the locked cohort cannot exit without at least 14 days' notice — enough time to unwind the bridged, levered, or PT positions in an orderly way. The queue composition is therefore a monitoring item rather than a live redemption risk at current lock levels. See [Liquidity Risk](#liquidity-risk).
 
 ### Strategy Protocol Dependencies with Existing Reports
 
@@ -495,7 +497,6 @@ Additionally, Yearn provides a dedicated **yvUSD APR API** ([yvusd-api.yearn.fi]
 - **Standard Yearn governance with 7-day timelock:** Standard RoleManager, 7-day TimelockController (`getMinDelay()` = 604,800 s) for critical operations. Daddy/ySafe (6-of-9, publicly known signers) is the sole proposer; the timelock is self-governed (holds TIMELOCK_ADMIN_ROLE). No pending `future_role_manager`
 - **Multi-layer security:** Daddy (governance), Brain (operations), Security (emergency), and automated bots (Keeper, Debt Allocator) with differentiated responsibilities. No single point of failure in governance
 - **USDC-denominated:** Stablecoin backing eliminates price volatility risk on the underlying asset
-- **Reduced single-venue concentration:** Morpho V1 OG is down from ~77% to 62.4% of TVL
 - **Excellent onchain verifiability:** every funded position — including the levered one — exposes collateral, debt, LTV, and leverage directly onchain, and the six `current_debt` values reconcile exactly with `totalDebt()`. The APR API independently reproduces all six weights
 - **~201 days production, monotonically increasing PPS:** PPS up to 1.023168 (~2.32% appreciation, ~4.2% annualized); no decrease observed
 - **~33.8% of supply in a 14-day cooldown wrapper:** a committed-duration buffer that covers most of the vault's illiquid tail
@@ -512,10 +513,6 @@ Additionally, Yearn provides a dedicated **yvUSD APR API** ([yvusd-api.yearn.fi]
 - **Re-introduced oracle and parameter surface:** PT positions are marked via a Pendle oracle; the looper exposes `reportBuffer` and leverage/slippage parameters. Brain (3-of-8) holds `management` on all funded strategies
 - **Correlated counterparty with yvUSDC-1:** the looper's $6.0M borrow is ~97% of the Pawn Broker Market's book, and that Market is a 14.9% strategy of yvUSDC-1 — stress in one vault propagates to the other
 - **Nine dormant strategies re-fundable without timelock:** the Morpho V2 Sentora convertors, both CCTP lanes, and three further loopers remain active at 0 debt and can be re-funded by the Debt Allocator at any time
-- **No external product-specific audit:** the three June 26 strategies (looper + two PT Maxis), the KatanaStrategy, and the CCTPStrategy have ySec internal review but no dedicated external audit
-- **No DEX liquidity:** yvUSD has no secondary market — exit is exclusively through the ERC-4626 vault
-- **Only 13.6% in blue-chip venues:** Sky is the only blue-chip dependency
-- **Structural liquidity mismatch:** sustained redemptions drain the liquid 69.7% first, progressively concentrating remaining holders into the levered, bridged, and duration-locked positions
 
 ---
 
@@ -696,6 +693,17 @@ The score nonetheless rises from the prior 2.2 because the June 26, 2026 realloc
 - **Audit-based:** Reassess if the Pawn Broker Looper, PT Maxi strategies, KatanaStrategy, or CCTPStrategy receive dedicated external audits (should improve the Audits score)
 - **Strategy-based:** Reassess if Morpho V1 concentration exceeds ~75% of TVL, if any of the 9 active-but-unfunded strategies (convertors, CCTP lanes, additional loopers) is re-funded, or if a further leveraged strategy is added
 - **Counterparty-based:** Reassess if the Pawn Broker Market's composition changes materially, or if the [yvUSDC-1 report](./yearn-yvusdc.md) score changes
+
+---
+
+## Assessment History
+
+| Date | Score | Notes |
+| --- | --- | --- |
+| [March 13, 2026](https://github.com/yearn/risk-score/pull/89) | 2.6 | Initial assessment |
+| [April 3, 2026](https://github.com/yearn/risk-score/pull/126) | 2.3 | Reassessment: governance maturation — 7-day TimelockController confirmed, deployer EOA at 0 vault roles |
+| [June 8, 2026](https://github.com/yearn/risk-score/pull/241) | 2.4 | Reassessment: TVL +187% to ~$11.56M; Morpho V2 Sentora PYUSD/RLUSD convertors and Katana cross-chain leg funded |
+| [August 8, 2026](https://github.com/yearn/risk-score/pull/390) | 2.5 | Reassessment: convertors and Arbitrum looper de-funded; Morpho V1 OG to 62.4%; three June 26 strategies funded at 20.2% — 7.90x leveraged Cap stcUSD looper (9.5%) and two Pendle PT positions (10.7%) that are currently non-withdrawable. Collateralization, Provability, Programmability and Liquidity subscores all raised |
 
 ---
 
