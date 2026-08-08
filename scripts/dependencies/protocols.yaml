@@ -406,6 +406,36 @@ protocols:
       label: Tokemak autoUSD
     infrastructure:
     - Chainlink
+  flying_tulip:
+    name: Flying Tulip FT Lend
+    chain: ethereum
+    type: lending_market
+    address: '0xbe4050a73a7Fb384c65E885a15C33461A4B20055'
+    report: reports/report/flying-tulip.md
+    collateral:
+    - asset: USDC
+      address: '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48'
+    - asset: USDT
+      address: '0xdac17f958d2ee523a2206206994597c13d831ec7'
+    - asset: WETH
+      address: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2'
+    - asset: WBTC
+      address: '0x2260fac5e5542a773aa44fbcfedf7c193bc2c599'
+    - asset: wstETH
+      address: '0x7f39c581f595b53c5cb19bd0b3f8da6c935e2ca0'
+    - asset: ftUSD
+      address: '0xf7d85ec4e7710f71992752eac2111312e73e9c9c'
+    yield_sources:
+    - protocol: aave_v3_core
+      assets:
+      - WBTC
+    - protocol: spark
+      assets:
+      - USDC
+      - USDT
+      - WETH
+    infrastructure:
+    - Chainlink
   strata:
     name: Strata (srUSDe)
     chain: ethereum
