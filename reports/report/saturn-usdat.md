@@ -1,6 +1,6 @@
 # Protocol Risk Assessment: Saturn (USDat)
 
-- **Assessment Date:** May 27, 2026 (updated June 17, 2026)
+- **Assessment Date:** May 27, 2026 (Updated: June 17, 2026)
 - **Token:** USDat (Saturn USD)
 - **Chain:** Ethereum
 - **Token Address:** [`0x23238f20b894f29041f48D88eE91131C395Aaa71`](https://etherscan.io/address/0x23238f20b894f29041f48D88eE91131C395Aaa71)
