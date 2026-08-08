@@ -91,7 +91,7 @@ nodes:
     label: Morpho V1 Yearn OG USDC Vault
     address: "0xF9bdDd4A9b3A45f980e11fDDE96e16364dDBEc49"
     category: dependency
-    note: Yearn-curated Morpho V1 vault; blue-chip. 77.1% concentration — critical dependency
+    note: Yearn-curated Morpho V1 vault; low-mid risk (internal score 2.7). 77.1% concentration — critical dependency
   - id: morpho-protocol
     label: Morpho Protocol (lending base)
     category: dependency
