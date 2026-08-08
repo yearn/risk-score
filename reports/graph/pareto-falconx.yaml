@@ -1,0 +1,228 @@
+slug: pareto-falconx
+title: Pareto FalconX Credit Vault (AA_FalconXUSDC) — Contract Dependency Graph
+chain: ethereum
+
+categories:
+  - id: vault
+    label: Vault / Token
+  - id: strategy
+    label: Strategy / Borrower
+  - id: governance
+    label: Governance
+  - id: infra
+    label: Protocol Infra
+  - id: dependency
+    label: External Dependency
+
+nodes:
+  # === Vault / token layer ===
+  - id: cdo
+    label: Credit Vault (IdleCDOEpochVariant)
+    address: "0x433D5B175148dA32Ffe1e1A37a939E1b7e79be4d"
+    category: vault
+    note: Proxy; recorded NAV $167.6M; owner can enable cashless minted-interest accounting
+  - id: aa-tranche
+    label: AA_FalconXUSDC (senior)
+    address: "0xC26A6Fa2C37b38E549a4a1807543801Db684f99C"
+    category: vault
+    note: Immutable ERC-20; minter is the CDO and cannot be changed
+  - id: bb-tranche
+    label: BB tranche — NEVER USED (supply 0)
+    address: "0xacbb25b7DD30B6B2F7131865Dc1023622de3b3D6"
+    category: vault
+    note: No junior loss buffer exists; senior absorbs the first dollar of loss
+
+  # === Protocol infra ===
+  - id: strategy
+    label: IdleCreditVault (receipt token)
+    address: "0x17E9Ab2992dfecBe779a06A92a6cDB9fE6aEeEf3"
+    category: infra
+    note: Proxy; owner can replace authorized CDO, enabling unbacked receipt/NAV or withdrawal-claim minting
+  - id: queue
+    label: EpochQueue (deposits / withdrawals)
+    address: "0x5cC24f44cCAa80DD2c079156753fc1e908F495DC"
+    category: infra
+    note: Proxy; currently KYC-gated, processed by the operator between epochs
+  - id: orchestrator
+    label: ManagerOrchestrator (manager)
+    address: "0x052e51568351eFfa9EA90DF6FE648446f006323b"
+    category: infra
+    note: Proxy; startEpoch / stopEpochWithDuration; sets APR, interest, loss
+  - id: operator
+    label: Operator keeper (EOA)
+    address: "0x1fb0f3602F52e2420aCff5CF04DBfDE96378Df58"
+    category: infra
+    note: Single key driving every epoch boundary
+  - id: keyring
+    label: KeyringIdleWhitelist (policy 18)
+    address: "0x6a6A91c7c7C05f9f6B8bC9F6e5eA231e460450e3"
+    category: infra
+    note: Current deposit/withdraw gate; Treasury Safe can replace or zero the Keyring pointer
+  - id: lz-adapter
+    label: LayerZero OFT Adapter → Monad
+    address: "0x8FEd610aEfD81F6bEC517854b1a245DEca83667e"
+    category: infra
+    note: Lock model; escrow ~18.34 AA (~$20); cannot mint canonical supply
+
+  # === Strategy / borrower ===
+  - id: borrower
+    label: FalconX borrower wallet (EOA)
+    address: "0xc08f538b079BE6EdFb6594985e8b93784f41A2C6"
+    category: strategy
+    note: Receives 100% of principal each epoch; uncollateralized, off-chain
+
+  # === Governance ===
+  - id: treasury-safe
+    label: Pareto Treasury Safe (3-of-8)
+    address: "0xFb3bD022D5DAcF95eE28a6B07825D4Ff9C5b3814"
+    category: governance
+    note: owner + feeReceiver; un-timelocked transferToken / setBorrower
+  - id: pauser-safe
+    label: Pauser Safe (2-of-4)
+    address: "0xBaeCba470C229984b75BC860EFe8e97AE082Bb9f"
+    category: governance
+    note: guardian — pause, emergencyShutdown, updateAccounting
+  - id: timelock
+    label: Timelock (24h)
+    address: "0xDa86e15d0Cda3A05Db930b248d7a2f775e575A44"
+    category: governance
+  - id: proxy-admin
+    label: ProxyAdmin
+    address: "0x9438904abC7d8944A6E2A89671fEf51C629af351"
+    category: governance
+    note: Upgrades CDO, strategy, queue and orchestrator; 5 upgrades in 13 months
+
+  # === External dependencies ===
+  - id: dep-falconx
+    label: FalconX (off-chain prime broker)
+    category: dependency
+    note: Unsecured obligor — no collateral, no attestation, no public financials
+  - id: dep-morpho
+    label: Morpho Blue market (77% LLTV)
+    address: "0xBBBBBbbBBb9cC5e90e3b3Af64bdAF62C37EEFFCb"
+    category: dependency
+    note: Holds 38.7% of AA supply as collateral; $44.3M borrowed
+  - id: dep-morpho-oracle
+    label: Morpho oracle = cdo.virtualPrice()
+    address: "0x52eA2C12734B5bB61e1edf52Bb0f01D9206493Fc"
+    category: dependency
+    note: Accounting price, no market input; markdown only by Pareto admins
+  - id: dep-keyring-core
+    label: Keyring Network (credential registry)
+    address: "0xb0B5E2176E10B12d70e60E3a68738298A7DFe666"
+    category: dependency
+  - id: dep-monad-oft
+    label: AA_FalconXUSDC on Monad (OFT)
+    category: dependency
+    note: >-
+      Monad 0x91D93DBd823221ea9E54fb3e447BD917CE41f2e8 — native LayerZero OFT;
+      1 required + 3-of-4 optional DVNs; supply 18.33 tokens (~$20)
+
+edges:
+  # === Governance flow ===
+  - from: treasury-safe
+    to: timelock
+    kind: proposes-on
+    label: PROPOSER (sole proposer)
+  - from: pauser-safe
+    to: cdo
+    kind: holds-role
+    label: guardian — pause / emergencyShutdown
+  - from: timelock
+    to: proxy-admin
+    kind: controls
+    label: owner (24h min delay)
+  - from: proxy-admin
+    to: cdo
+    kind: manages
+    label: upgrade rights
+  - from: proxy-admin
+    to: strategy
+    kind: manages
+    label: upgrade rights
+  - from: proxy-admin
+    to: queue
+    kind: manages
+    label: upgrade rights
+  - from: proxy-admin
+    to: orchestrator
+    kind: manages
+    label: upgrade rights
+  - from: treasury-safe
+    to: strategy
+    kind: holds-role
+    label: owner — transferToken / setBorrower / setWhitelistedCDO, NO timelock
+  - from: treasury-safe
+    to: cdo
+    kind: holds-role
+    label: owner — minted interest / Keyring pointer / fee params, NO timelock
+  - from: orchestrator
+    to: cdo
+    kind: manages
+    label: startEpoch / stopEpochWithDuration
+  - from: operator
+    to: orchestrator
+    kind: holds-role
+    label: operator
+
+  # === Internal vault flow ===
+  - from: queue
+    to: cdo
+    kind: routes-through
+    label: queued deposits / withdraw requests
+  - from: cdo
+    to: aa-tranche
+    kind: mints
+    label: minter (immutable, sole minter)
+  - from: treasury-safe
+    to: aa-tranche
+    kind: mints
+    label: indirect — can enable minted interest and trigger uncapped AA fee-share mint
+  - from: orchestrator
+    to: aa-tranche
+    kind: mints
+    label: conditional — operator can trigger minted-interest fee shares after owner enables mode
+  - from: cdo
+    to: bb-tranche
+    kind: mints
+    label: minter (immutable) — never exercised
+  - from: keyring
+    to: cdo
+    kind: manages
+    label: isWalletAllowed gate
+  - from: keyring
+    to: dep-keyring-core
+    kind: routes-through
+    label: checkCredential(policy 18)
+  - from: cdo
+    to: strategy
+    kind: allocates-to
+    label: "100%"
+
+  # === Loan flow to the borrower ===
+  - from: strategy
+    to: borrower
+    kind: deposits-into
+    label: 100% of principal at startEpoch
+  - from: borrower
+    to: dep-falconx
+    kind: deposits-into
+    label: unsecured, off-chain deployment
+
+  # === Downstream / cross-chain ===
+  - from: aa-tranche
+    to: dep-morpho
+    kind: routes-through
+    label: 38.7% of supply posted as collateral
+  - from: dep-morpho
+    to: dep-morpho-oracle
+    kind: routes-through
+    label: collateral pricing
+  - from: aa-tranche
+    to: lz-adapter
+    kind: routes-through
+    label: escrow (lock model)
+  - from: lz-adapter
+    to: dep-monad-oft
+    kind: routes-through
+    label: LayerZero → Monad
