@@ -1,6 +1,6 @@
 # Protocol Risk Assessment: InfiniFi
 
-- **Assessment Date:** February 4, 2026 (Updated: July 4, 2026; July 29, 2026)
+- **Assessment Date:** February 4, 2026 (Updated: July 29, 2026)
 - **Token:** siUSD (Staked iUSD)
 - **Chain:** Ethereum Mainnet
 - **Token Address:** [`0xDBDC1Ef57537E34680B898E1FEBD3D68c7389bCB`](https://etherscan.io/address/0xDBDC1Ef57537E34680B898E1FEBD3D68c7389bCB)

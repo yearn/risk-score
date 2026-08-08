@@ -1,6 +1,6 @@
 # Protocol Risk Assessment: Aave — sGHO
 
-- **Assessment Date:** April 2, 2026 (rechecked April 22, 2026; refreshed post-deployment May 19, 2026; external-review corrections May 19, 2026; reassessed July 27, 2026)
+- **Assessment Date:** April 2, 2026 (Updated: July 27, 2026)
 - **Token:** sGho (GHO Savings Vault)
 - **Chain:** Ethereum
 - **Token Address:** [`0xE1753F2e00940cC31213dd92013cF019DFE4ca1d`](https://etherscan.io/address/0xE1753F2e00940cC31213dd92013cF019DFE4ca1d)
