@@ -20,24 +20,24 @@ nodes:
     label: fxUSD (Stablecoin)
     address: "0x085780639CC2cACd35E474e71f4d000e2405d8f6"
     category: vault
-    note: TransparentUpgradeableProxy; ~$53.9M supply; 156% CR
+    note: TransparentUpgradeableProxy; ~$64.2M supply; ~142.6% CR
   - id: fxSAVE
     label: fxSAVE (Auto-Compounding Vault)
     address: "0x7743e50F534a7f9F1791DdE7dCD89F7783Eefc39"
     category: vault
-    note: ~$30M; wraps fxSP for stability-pool yield
+    note: ~$56.3M; holds 96.6% of fxSP
   - id: fxSP
     label: fxSP (Stability Pool)
     address: "0x65C9A641afCEB9C0E6034e558A319488FA0FA3be"
     category: vault
-    note: Holds fxUSD + USDC for peg defense
+    note: 58.2M fxUSD + 94K USDC (0.16% stable buffer); 90.65% of fxUSD supply
 
   # === Protocol infra ===
   - id: pool-manager
     label: PoolManager (Long, Primary Custody)
     address: "0x250893CA4Ba5d05626C785e8da758026928FCD24"
     category: infra
-    note: Custodies ALL V2 collateral (~$84M)
+    note: Custodies ALL V2 collateral (~$91.5M)
   - id: short-pool-manager
     label: ShortPoolManager (sPOSITION)
     address: "0xaCDc0AB51178d0Ae8F70c1EAd7d3cF5421FDd66D"
@@ -66,7 +66,27 @@ nodes:
     label: Reserve Pool
     address: "0xE93F5DD55eC9bdAbbba5eA88E4b4f3C253ee45Ed"
     category: infra
-    note: 17.43 wstETH + 0.38 WBTC + 1,229 fxUSD
+    note: 17.73 wstETH + 0.43 WBTC + 1,302 fxUSD (~$71K)
+  - id: steth-oracle
+    label: StETHPriceOracle
+    address: "0x0C5C61025f047cB7e3e85852dC8eAFd7b9a4Abfb"
+    category: infra
+    note: Live xstETH oracle; 1% max deviation; owner = 6/9 multisig, NOT the timelock
+  - id: wbtc-oracle
+    label: WBTCPriceOracle
+    address: "0xb3c90e64EB6f456A5F5C17Aa99b6aecA6f4a6390"
+    category: infra
+    note: Live xWBTC oracle; 2% max deviation; owner = 6/9 multisig, NOT the timelock
+  - id: aave-wsteth-strategy
+    label: AaveV3Strategy (wstETH)
+    address: "0xFd3A6540e21D0E285f88FBFd904883B23e08F5C8"
+    category: infra
+    note: Configured PoolManager strategy, 100,000 wstETH capacity; holds 0 today
+  - id: aave-usdc-strategy
+    label: AaveV3CompoundStrategy (USDC)
+    address: "0xd023Aac0e2D46c93d4c6e8e2A449bF2d4687804f"
+    category: infra
+    note: Configured fxSP strategy, 100M USDC capacity; holds ~19 USDC
 
   # === Governance ===
   - id: operational-multisig
@@ -99,22 +119,32 @@ nodes:
     label: xstETH Pool (wstETH collateral)
     address: "0x6ecfa38fee8a5277b91efda204c235814f0122e8"
     category: strategy
-    note: ~4,452 wstETH (~$12.4M) custody in PoolManager
+    note: ~4,657 wstETH (~$11.2M) custody in PoolManager; ~174% CR
   - id: xwbtc-pool
     label: xWBTC Pool (WBTC collateral)
     address: "0xab709e26fa6b0a30c119d8c55b887ded24952473"
     category: strategy
-    note: ~902 WBTC (~$71.8M) custody in PoolManager
+    note: ~1,243 WBTC (~$80.3M) custody in PoolManager; ~139% CR
+  - id: steth-short-pool
+    label: f(x) stETH Short (sPOSITION)
+    address: "0x25707b9e6690b52c60ae6744d711cf9c1dfc1876"
+    category: strategy
+    note: 75,206 fxUSD collateral, 21.05 wstETH borrowed from PoolManager
+  - id: wbtc-short-pool
+    label: f(x) WBTC Short (sPOSITION)
+    address: "0xa0cc8162c523998856d59065faa254f87d20a5b0"
+    category: strategy
+    note: 215,796 fxUSD collateral, 1.91 WBTC borrowed from PoolManager
 
   # === External dependencies ===
   - id: dep-wsteth
     label: wstETH (Lido)
     category: dependency
-    note: Primary ETH collateral
+    note: ETH collateral leg (~12% of collateral)
   - id: dep-wbtc
     label: WBTC
     category: dependency
-    note: BTC collateral
+    note: BTC collateral leg (~88% of collateral)
   - id: dep-chainlink
     label: Chainlink (ETH/USD, BTC/USD)
     category: dependency
@@ -123,11 +153,11 @@ nodes:
     label: Curve (EMA + USDC/fxUSD)
     address: "0x5018BE882DccE5E3F2f3B0913AE2096B9b3fB61f"
     category: dependency
-    note: Peg-monitoring EMA + $7.7M DEX pool
+    note: EMA gates mint/redeem/funding; ~$7.17M DEX pool
   - id: dep-aave
     label: Aave (USDC + wstETH yield)
     category: dependency
-    note: Stability Pool deploys ≤80% USDC to Aave Core
+    note: Configured strategies only; ~19 USDC and 0 wstETH deployed
   - id: dep-uniswap
     label: Uniswap V3 (TWAP Oracle)
     category: dependency
@@ -161,6 +191,38 @@ edges:
     to: short-pool-manager
     kind: holds-role
     label: pause (no timelock)
+  - from: operational-multisig
+    to: steth-oracle
+    kind: controls
+    label: owner() — outside the timelock; pendingOwner is the timelock
+  - from: operational-multisig
+    to: wbtc-oracle
+    kind: controls
+    label: owner() — outside the timelock; pendingOwner is the timelock
+  - from: operational-multisig
+    to: pool-manager
+    kind: holds-role
+    label: EMERGENCY_ROLE + ASSET_MANAGER_ROLE (no timelock)
+  - from: emergency-multisig
+    to: fxSP
+    kind: holds-role
+    label: ASSET_MANAGER_ROLE (no timelock)
+  - from: timelock
+    to: pool-manager
+    kind: controls
+    label: DEFAULT_ADMIN_ROLE
+  - from: timelock
+    to: configuration
+    kind: controls
+    label: DEFAULT_ADMIN_ROLE
+  - from: timelock
+    to: fxSP
+    kind: controls
+    label: DEFAULT_ADMIN_ROLE
+  - from: timelock
+    to: fxUSD
+    kind: controls
+    label: DEFAULT_ADMIN_ROLE
   - from: fxn-token
     to: vefxn
     kind: routes-through
@@ -216,11 +278,11 @@ edges:
   - from: pool-manager
     to: xsteth-pool
     kind: allocates-to
-    label: "wstETH ~$12.4M"
+    label: "wstETH ~$11.2M"
   - from: pool-manager
     to: xwbtc-pool
     kind: allocates-to
-    label: "WBTC ~$71.8M"
+    label: "WBTC ~$80.3M"
 
   # === Strategy → external dependencies ===
   - from: xsteth-pool
@@ -231,10 +293,6 @@ edges:
     to: dep-wbtc
     kind: deposits-into
     label: WBTC collateral
-  - from: fxSP
-    to: dep-aave
-    kind: deposits-into
-    label: USDC ≤80% to Aave Core
   - from: pool-manager
     to: dep-chainlink
     kind: routes-through
@@ -247,3 +305,51 @@ edges:
     to: dep-curve
     kind: routes-through
     label: EMA price + USDC/fxUSD pool
+  - from: steth-oracle
+    to: xsteth-pool
+    kind: manages
+    label: priceOracle() — exchange/liquidate price
+  - from: wbtc-oracle
+    to: xwbtc-pool
+    kind: manages
+    label: priceOracle() — exchange/liquidate price
+  - from: steth-oracle
+    to: dep-chainlink
+    kind: routes-through
+    label: ETH/USD anchor
+  - from: wbtc-oracle
+    to: dep-chainlink
+    kind: routes-through
+    label: BTC/USD + WBTC/BTC anchor
+  - from: short-pool-manager
+    to: steth-short-pool
+    kind: allocates-to
+    label: "75,206 fxUSD"
+  - from: short-pool-manager
+    to: wbtc-short-pool
+    kind: allocates-to
+    label: "215,796 fxUSD"
+  - from: steth-short-pool
+    to: pool-manager
+    kind: routes-through
+    label: borrows 21.05 wstETH
+  - from: wbtc-short-pool
+    to: pool-manager
+    kind: routes-through
+    label: borrows 1.91 WBTC
+  - from: pool-manager
+    to: aave-wsteth-strategy
+    kind: allocates-to
+    label: "0% (100,000 wstETH capacity)"
+  - from: fxSP
+    to: aave-usdc-strategy
+    kind: allocates-to
+    label: "~0% (100M USDC capacity)"
+  - from: aave-wsteth-strategy
+    to: dep-aave
+    kind: deposits-into
+    label: wstETH → Aave Prime
+  - from: aave-usdc-strategy
+    to: dep-aave
+    kind: deposits-into
+    label: USDC → Aave Core
