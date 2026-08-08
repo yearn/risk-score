@@ -84,7 +84,11 @@ Fresh onchain verification on July 10, 2026 read Safe thresholds/owners via `get
 | uniBTC | PeckShield | Oct 1, 2024 | [PDF](https://github.com/Bedrock-Technology/uniBTC/blob/main/PeckShield-Audit-Report-uniBTC-v1.0.pdf) |
 | uniBTC | BlockSec | Oct 30, 2024 | [PDF](https://github.com/Bedrock-Technology/uniBTC/blob/main/blocksec_bedrock_unibtc_v1.0-signed.pdf) |
 
-The October 2024 audits are post-exploit re-engagements covering the patched uniBTC vault. All three published uniBTC audits are from 2024; no later independent review was found for subsequent production changes, dependency evolution, or the current cross-chain deployment. No top-tier audit engagement (Trail of Bits, OpenZeppelin, ChainSecurity, Spearbit, Cantina) was found for uniBTC. The age and clustering of the reviews, rather than a claim that 2024 auditors were categorically weaker, is the material coverage gap.
+The October 2024 audits are post-exploit re-engagements covering the patched uniBTC vault. All three published uniBTC audits are from 2024; no later independent review was found for subsequent production changes, dependency evolution, or the current cross-chain deployment. No top-tier audit engagement (Trail of Bits, OpenZeppelin, ChainSecurity, Spearbit, Cantina) was found for uniBTC.
+
+The age of the reviews matters for two reasons. First, an audit is point-in-time evidence: it only supports the code, configuration, assumptions, and dependencies that were in scope when the work was performed. Even if the core vault bytecode remains unchanged, uniBTC's current security depends on live governance configuration, PoR inputs, cross-chain deployments, custody and Babylon operations, and the material M-BTC/Merlin exposure described below. The 2024 reports do not establish that this present system has been reviewed as one end-to-end trust boundary.
+
+Second, the security-review capability available in 2026 is materially different. Modern engagements can supplement expert manual review with repository-wide AI agents, automated exploit construction, invariant testing, and repeated independent passes. The 2026 EVMbench research demonstrates that frontier agents can detect, patch, and execute high-severity smart-contract exploits end to end, while also showing that detection remains incomplete. This does not make the 2024 audits invalid or make AI a substitute for experienced human auditors; it means those reports did not benefit from today's additional review and adversarial-testing capabilities. A current re-audit should therefore be treated as materially stronger assurance than relying solely on the 2024 reports.
 
 ### Bug Bounty
 
@@ -266,7 +270,7 @@ Public restitution txs for Sept 2024 exploit
 ### Key Risks
 
 1. **Prior exploit on the same vault proxy.** The Sept 2024 mint-validation exploit occurred on the uniBTC Vault still in use.
-2. **Audit coverage is dated.** All published uniBTC audits were completed in 2024, two reactively after the exploit; no current independent review or public bug bounty was found.
+2. **Audit coverage is dated.** All published uniBTC audits were completed in 2024, two reactively after the exploit. They do not establish coverage of today's full dependency and operational trust boundary, and they predate current AI-assisted and automated exploit-validation capabilities; no current independent review or public bug bounty was found.
 3. **Material M-BTC concentration.** About 21.3% of reported reserves are M-BTC, adding Merlin bridge/custody and chain-liveness risk beneath uniBTC.
 4. **PoR is not a strict 1:1 mint gate.** `adequacyRatio = 900` permits minting while reserves are at least 90% of supply.
 5. **No timelock.** The 3-of-5 Safe can upgrade token/vault implementations without onchain delay.
@@ -297,7 +301,8 @@ Public restitution txs for Sept 2024 exploit
 **Subcategory A: Audits & Security Reviews**
 - Three uniBTC-specific audits by BlockSec and PeckShield.
 - Two post-exploit re-audits.
-- All reviews are from 2024; no current review covering later production changes and cross-chain/dependency evolution was found.
+- All reviews are from 2024; no current review covering later production changes, live configuration, cross-chain/dependency evolution, or the combined Babylon and M-BTC trust boundary was found.
+- The reports predate today's materially stronger AI-assisted review and executable exploit-validation capabilities. This is an assurance gap, not a claim that AI replaces expert human review.
 - No top-tier audit and no public bug bounty.
 - **Score: 3.5**
 
@@ -445,5 +450,6 @@ uniBTC is stronger than brBTC on reserve provability because Chainlink PoR is wi
 - Merlin bridge source: https://github.com/MerlinLayer2/BTCLayer2BridgeContract
 - M-BTC holder distribution: https://scan.merlinchain.io/token/0xB880fd278198bd590252621d4CD071b1842E9Bcd
 - Independent Merlin trust-model analysis: https://www.spark.money/research/merlin-chain-bitcoin-l2-analysis
+- EVMbench smart-contract security agent research (2026): https://openai.com/index/introducing-evmbench/
 - Onchain verification on July 10, 2026: `totalSupply()`, `name()`, `symbol()`, `decimals()`, EIP-1967 implementation/admin slots, `owner()` on ProxyAdmin, `getThreshold()` / `getOwners()` / `getModulesPaginated()` and guard storage on the Safe, `hasRole(bytes32,address)` on Vault/token, `chainlinkReserveFeeder()`, `uniBTCSupplyFeeder()`, `feederHeartbeat()`, `outOfService()`, `paused()`, `adequacyRatio()`, WBTC `balanceOf(address)`, and Chainlink feed `latestAnswer()`, `latestRoundData()`, `description()`, `decimals()`.
 - Reserve/Merlin verification on August 8, 2026: Bedrock dashboard reserve composition and linked addresses; M-BTC `totalSupply()`, `bridgeAddress()`, Bedrock reserve balance and holder rank; main bridge `version()`, admin and mint-relayer reads; EIP-1967 implementation slots; and bytecode-presence checks via Merlin RPC.
