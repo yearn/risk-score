@@ -1,6 +1,6 @@
 # Protocol Risk Assessment: Cap — stcUSD
 
-- **Assessment Date:** March 20, 2026 (Updated: July 31, 2026; prior reassessment May 23, 2026)
+- **Assessment Date:** March 20, 2026 (Updated: July 31, 2026)
 - **Token:** stcUSD (Staked cap USD)
 - **Chain:** Ethereum
 - **Token Address:** [`0x88887bE419578051FF9F4eb6C858A951921D8888`](https://etherscan.io/address/0x88887bE419578051FF9F4eb6C858A951921D8888)
