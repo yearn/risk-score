@@ -207,7 +207,7 @@ Operational gaps remain:
 - The current HYPE++ vault owner is an EOA, not the documented Vault MS; no D2 documentation reviewed explains this vault-specific ownership choice or states whether ownership will be transferred.
 - The EOA with trader admin/executor/fee-receiver roles is not identified in the docs reviewed.
 - No public bug bounty with payout terms was found.
-- Nested dgnHYPE backing is only partially transparent from ERC-20 balances: the dgnHYPE Safe directly held ~1.0M real USDC against ~6.90M reported `totalAssets()`.
+- Nested dgnHYPE backing is only partially transparent from ERC-20 balances: the dgnHYPE Safe directly held ~2.10M real USDC against ~7.50M reported `totalAssets()`.
 
 ## Monitoring
 
@@ -280,8 +280,8 @@ User USDC
           |
           v
         [dgnHYPE Trader / 3-of-5 Safe]
-          - reports ~6.90M USDC totalAssets (custodiedAmount)
-          - ~1.0M real USDC directly observed; remainder in active positions
+          - reports ~7.50M USDC totalAssets (custodiedAmount)
+          - ~2.10M real USDC directly observed; remainder in active positions
 
 Governance / control:
 
@@ -310,7 +310,7 @@ Governance / control:
 - Trader admin/executor authority includes an EOA with no timelock.
 - The trader's allowed token list includes volatile assets (WETH, WBTC, ARB, GMX, GRAIL, PENDLE, LINK, wstETH) and old bridged USDC.e, expanding the strategy risk surface.
 - Funds are actively custodied by the trader during epochs; users cannot withdraw while custodied. The current epoch (epoch 21) runs July 6–September 18, 2026 — approximately 74 days total, triggering the 30-day reassessment threshold.
-- HYPE++ currently has large nested exposure to dgnHYPE (~55.6% of assets), another D2 active strategy controlled by the same EOA owner. The dgnHYPE custody Safe has no on-chain guardrails (standard Gnosis Safe, not a constrained OMS) — a separate trust surface for the majority of HYPE++ capital.
+- HYPE++ currently has large nested exposure to dgnHYPE (~64.2% of assets), another D2 active strategy controlled by the same EOA owner. The dgnHYPE custody Safe has no on-chain guardrails (standard Gnosis Safe, not a constrained OMS) — a separate trust surface for the majority of HYPE++ capital.
 - End-to-end backing is not a simple live reserve balance; it depends on D2 trader execution and return of funds.
 
 ### Critical Risks
@@ -346,105 +346,25 @@ The total-centralization gate is not marked because the D2 Vault MS also holds t
 
 **Subcategory A: Audits & Security Reviews**
 
-| Score | Audit coverage | Bug bounty |
-|-------|-----------------|------------|
-| **1** | 3+ audits by top firms | Active, max payout >$1M |
-| **2** | 2+ audits by reputable firms | Max payout >$200K |
-| **3** | 1 audit by reputable firm | Bounty program present |
-| **4** | 1 audit by lesser-known firm or dated | Minimal or no bounty |
-| **5** | No audit (CRITICAL GATE) | - |
-
-**Subcategory B: Historical Track Record**
-
-| Score | Time in production | Scale (TVL) |
-|-------|-------------------|-------------|
-| **1** | >2 years | Sustained >$100M |
-| **2** | 1-2 years | >$50M |
-| **3** | 6-12 months | >$10M |
-| **4** | 3-6 months | <$10M |
-| **5** | <3 months | No meaningful TVL |
-
 **Audits & Historical Score = (2.0 + 2.5) / 2 = 2.25/5** - Multiple audits exist, and HYPE++ has more than one year of history, but scoped TVL is much lower than $50M and no public bug bounty was verified.
 
 #### Category 2: Centralization & Control Risks (Weight: 30%)
 
 **Subcategory A: Governance**
 
-| Score | Contract Upgradeability | Timelock | Privileged Roles |
-|-------|------------------------|----------|-----------------|
-| **1** | Immutable or fully decentralized DAO | 7+ days timelock on critical operations | Multisig above 3/5 threshold, no EOA roles. Multi-party approval required |
-| **2** | Multisig 7/11+ with timelock | 24+ hours | Limited roles, cannot seize funds |
-| **3** | Multisig 5/9 with timelock | 24+ hours | Some powerful roles, constrained by timelock |
-| **4** | Multisig 3/5 or low threshold | <12 hours | Powerful admin roles with limited constraints |
-| **5** | EOA or <3 signers (CRITICAL GATE) | No timelock | Unlimited admin powers |
-
-**Subcategory B: Programmability**
-
-| Score | System Operations | PPS/Rate Definition |
-|-------|------------------|---------------------|
-| **1** | Fully programmatic | Calculated onchain algorithmically |
-| **2** | Mostly programmatic with minor admin input | onchain with some parameters |
-| **3** | Hybrid onchain/offchain operations | onchain but reliant on admin updates |
-| **4** | Significant manual intervention required | Offchain accounting with periodic reporting |
-| **5** | Fully custodial/centralized operations | Admin-controlled rate, no transparency |
-
-**Subcategory C: External Dependencies**
-
-| Score | Protocol Dependencies | Criticality |
-|-------|----------------------|-------------|
-| **1** | No external dependencies | N/A |
-| **2** | 1-2 blue-chip dependencies | Non-critical |
-| **3** | 2-3 established protocol dependencies | Some critical functions depend on them |
-| **4** | Many or newer protocol dependencies | Critical functionality depends on them |
-| **5** | Single point of failure dependency | Failure breaks entire protocol |
-
-**Centralization Score = (5.0 + 4.0 + 4.0) / 3 = 4.33/5** - Governance raised to 5.0: EOA owner can block all withdrawals via `setWhitelistBalance(uint256.max)` in one transaction with no recovery path; dgnHYPE Safe (unrestricted Gnosis Safe) is a separate custody trust surface for 55.6% of assets with no on-chain guardrails. No timelock, broad manual trading, and many allowed external venues.
+**Centralization Score = (5.0 + 4.0 + 4.0) / 3 = 4.33/5** - Governance raised to 5.0: EOA owner can block all withdrawals via `setWhitelistBalance(uint256.max)` in one transaction with no recovery path; dgnHYPE Safe (unrestricted Gnosis Safe) is a separate custody trust surface for 64.2% of assets with no on-chain guardrails. No timelock, broad manual trading, and many allowed external venues.
 
 #### Category 3: Funds Management (Weight: 30%)
 
 **Subcategory A: Collateralization**
 
-| Score | Backing | Collateral Quality | Verifiability |
-|-------|---------|-------------------|---------------|
-| **1** | 100%+ onchain, over-collateralized | Blue-chip assets (ETH, WBTC, stablecoins) | Real-time onchain verification |
-| **2** | 100% onchain collateral | High-quality DeFi assets (LSTs, major LPs) | onchain with some complexity |
-| **3** | 100% collateral, some offchain | Mixed quality or newer protocols | Periodic custodian attestation |
-| **4** | Partially collateralized or custodial | Lower-quality or illiquid assets | Opaque or infrequent reporting |
-| **5** | Uncollateralized or unverifiable (CRITICAL GATE) | Unknown or very high-risk assets | No verification possible |
-
-**Subcategory B: Provability**
-
-| Score | Reserve Transparency | Reporting Mechanism | Third-Party Verification |
-|-------|---------------------|--------------------|-----------------------|
-| **1** | Fully onchain, anyone can verify | Programmatic, real-time | Multiple verification sources |
-| **2** | Mostly onchain, some offchain | onchain with periodic updates | Single reliable source |
-| **3** | Hybrid onchain/offchain | Manual reporting by admins | Known custodian attestation |
-| **4** | Primarily offchain | Infrequent reporting | Self-reported only |
-| **5** | Opaque, cannot verify | No reporting | No verification |
-
-**Funds Management Score = (4.5 + 4.5) / 2 = 4.50/5** - Collateralization raised to 4.5: dgnHYPE Safe (55.6% of assets) is a standard Gnosis Safe with unrestricted custody — signers can transfer funds to any address with no on-chain guardrails. Top-level balances reconcile, but `totalAssets()` is not a live full-position valuation while custodied, and nested dgnHYPE backing is only partially visible from ERC-20 balances.
+**Funds Management Score = (4.5 + 4.5) / 2 = 4.50/5** - Collateralization raised to 4.5: dgnHYPE Safe (64.2% of assets) is a standard Gnosis Safe with unrestricted custody — signers can transfer funds to any address with no on-chain guardrails. Top-level balances reconcile, but `totalAssets()` is not a live full-position valuation while custodied, and nested dgnHYPE backing is only partially visible from ERC-20 balances.
 
 #### Category 4: Liquidity Risk (Weight: 15%)
-
-| Score | Exit Mechanism | Liquidity Depth | Large Holder Impact |
-|-------|---------------|----------------|---------------------|
-| **1** | Direct 1:1 redemption, instant | >$10M, <0.5% slippage | Full exit with <0.5% impact |
-| **2** | Direct redemption with minor delays | >$5M, <1% slippage | Exit with <1% impact over 1-3 days |
-| **3** | Market-based or short queues | >$1M, 1-3% slippage | 3-7 days for full exit |
-| **4** | Withdrawal queues or restrictions | <$1M, >3% slippage | >1 week or >10% impact |
-| **5** | No clear exit mechanism | No liquidity | Cannot exit without massive losses |
 
 **Score: 4.0/5** - Exit path is clear but restricted by epoch/custody state; no meaningful secondary liquidity was verified.
 
 #### Category 5: Operational Risk (Weight: 5%)
-
-| Score | Team Transparency | Documentation | Legal/Compliance |
-|-------|------------------|---------------|-----------------|
-| **1** | Fully doxxed or well-known, established reputation | Excellent, comprehensive | Clear legal structure |
-| **2** | Mostly public or known anons | Good, mostly complete | Established entity |
-| **3** | Mixed unknown and known anons | Adequate, some gaps | Uncertain structure |
-| **4** | Mostly unknown, limited info | Poor or outdated | No clear legal entity |
-| **5** | Fully unknown, no reputation | No documentation | No legal structure |
 
 **Score: 3.0/5** - Documentation and audit disclosures are adequate, but operational role-holder identity, bug bounty status, and vault-owner mismatch remain gaps.
 
