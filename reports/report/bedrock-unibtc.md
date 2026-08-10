@@ -1,6 +1,6 @@
 # Protocol Risk Assessment: Bedrock uniBTC
 
-- **Assessment Date:** July 10, 2026 (reserve-composition refresh: August 8, 2026)
+- **Assessment Date:** August 10, 2026
 - **Token:** uniBTC
 - **Chain:** Ethereum
 - **Token Address:** [`0x004E9C3EF86bc1ca1f0bB5C7662861Ee93350568`](https://etherscan.io/address/0x004E9C3EF86bc1ca1f0bB5C7662861Ee93350568)
@@ -38,7 +38,15 @@ This report is scoped to **uniBTC only**. Bedrock brBTC is a separate codebase a
 |----------|---------|------|
 | uniBTC token proxy | [`0x004E9C3EF86bc1ca1f0bB5C7662861Ee93350568`](https://etherscan.io/address/0x004E9C3EF86bc1ca1f0bB5C7662861Ee93350568) | User-facing uniBTC token, EIP-1967 transparent proxy |
 | uniBTC token implementation | [`0xe0E6a124d500BE28BBdC47e6123E68B23b039cAD`](https://etherscan.io/address/0xe0E6a124d500BE28BBdC47e6123E68B23b039cAD) | Token implementation |
-| uniBTC ProxyAdmin | [`0x029e4fbdaa31de075dd74b2238222a08233978f6`](https://etherscan.io/address/0x029e4fbdaa31de075dd74b2238222a08233978f6) | Upgrade authority for uniBTC token and uniBTC Vault |
+| uniBTC ProxyAdmin | [`0x029E4FbDAa31DE075dD74B2238222A08233978f6`](https://etherscan.io/address/0x029E4FbDAa31DE075dD74B2238222A08233978f6) | Upgrade authority for uniBTC token, uniBTC Vault, and CCIPPeer |
+
+### Bridge / Cross-Chain Mint Layer
+
+| Contract | Address | Role |
+|----------|---------|------|
+| Chainlink CCIP BurnMintTokenPool 1.5.1 | [`0x1689C22eD5435e49071CFc208D1Ac6F2A2274490`](https://etherscan.io/address/0x1689C22eD5435e49071CFc208D1Ac6F2A2274490) | Registered uniBTC pool in the CCIP TokenAdminRegistry; holds `MINTER_ROLE`; `owner()` = Bedrock admin Safe [`0xAeE01705…`](https://etherscan.io/address/0xAeE017052DF6Ac002647229D58B786E380B9721A) (3/5) |
+| Bedrock CCIPPeer | [`0x55a67cf07b8a9A09FB6D565279287cfE4Ab60eDc`](https://etherscan.io/address/0x55a67cf07b8a9A09FB6D565279287cfE4Ab60eDc) | Bedrock-custom CCIP messaging contract; holds `MINTER_ROLE`; upgradeable proxy under the uniBTC ProxyAdmin |
+| Free Tunnel bridge proxy | [`0x70aF4743F85E5E74E3b6dDFa38926c0a762Ad21C`](https://etherscan.io/address/0x70aF4743F85E5E74E3b6dDFa38926c0a762Ad21C) | Third-party Free Tunnel (Free Protocol) bridge; holds `MINTER_ROLE`; not mentioned in Bedrock's uniBTC bridge docs |
 
 ### uniBTC Protocol Layer
 
@@ -55,7 +63,7 @@ This report is scoped to **uniBTC only**. Bedrock brBTC is a separate codebase a
 |------|---------|-----------|----------|
 | uniBTC ops Safe | [`0xC9dA980fFABbE2bbe15d4734FDae5761B86b5Fc3`](https://etherscan.io/address/0xC9dA980fFABbE2bbe15d4734FDae5761B86b5Fc3) | 3/5 | Owns uniBTC ProxyAdmin; holds `DEFAULT_ADMIN_ROLE` on uniBTC Vault |
 
-Fresh onchain verification on July 10, 2026 read Safe thresholds/owners via `getThreshold()` / `getOwners()`, ProxyAdmin ownership via `owner()`, Vault roles via `hasRole(bytes32,address)`, and EIP-1967 implementation/admin slots. The uniBTC ops Safe currently has no modules and no guard configured.
+Onchain verification on August 10, 2026 read Safe thresholds/owners via `getThreshold()` / `getOwners()`, ProxyAdmin ownership via `owner()`, Vault/token roles via `hasRole(bytes32,address)`, and EIP-1967 implementation/admin slots. The uniBTC ops Safe has no modules and no guard configured (`getModulesPaginated` empty, guard storage slot zero).
 
 **Signer overlap:** signer [`0x09610d4239c8f3413509202DCcC7e27C6B0a47A3`](https://etherscan.io/address/0x09610d4239c8f3413509202DCcC7e27C6B0a47A3) appears in multiple Bedrock governance Safes, and signer [`0x1fc76b7C6F092e0566Ce9Bbb9c6803Ba5e45Ba32`](https://etherscan.io/address/0x1fc76b7C6F092e0566Ce9Bbb9c6803Ba5e45Ba32) appears in both the uniBTC and brBTC Safe set. This reduces effective independence across Bedrock product lines.
 
@@ -63,18 +71,35 @@ Fresh onchain verification on July 10, 2026 read Safe thresholds/owners via `get
 
 - **Deposit assets accepted:** WBTC, FBTC, cbBTC, M-BTC, and uniBTC itself for cross-chain routing.
 - **Mint flow:** User deposits a permitted wrapped BTC asset into the Vault `mint` function and atomically receives uniBTC 1:1 in 8-decimal BTC units.
-- **PoR gate:** Minting checks Chainlink PoR reserves against circulating supply reported by the uniBTC supply feeder. Fresh onchain verification on July 10, 2026 read `chainlinkReserveFeeder = 0xc590D9fb...`, `uniBTCSupplyFeeder = 0xE542919E...`, `feederHeartbeat = 86,400s`, `outOfService = false`, and `paused = false`.
-- **Adequacy ratio:** The Vault explicitly permits minting while PoR-reported reserves are at least 90% of supply. Fresh onchain verification read `adequacyRatio = 900`, and source review found `checkReserve` requiring `supply * adequacyRatio / 1000 <= reserves`. This is not a strict 1:1 mint gate.
+- **PoR gate:** Minting checks Chainlink PoR reserves against circulating supply reported by the uniBTC supply feeder. Onchain verification on August 10, 2026 read `chainlinkReserveFeeder = 0xc590D9fb...`, `uniBTCSupplyFeeder = 0xE542919E...`, `feederHeartbeat = 86,400s`, `outOfService = false`, and `paused = false`.
+- **Adequacy ratio:** The Vault explicitly permits minting while PoR-reported reserves are at least 90% of supply. Onchain verification read `adequacyRatio = 900`, and source review found `checkReserve` requiring `supply * adequacyRatio / 1000 <= reserves`. This is not a strict 1:1 mint gate.
 - **Redeem flow:** Bedrock docs describe claim-based unstaking with an **8-day delay**, **0.5% redemption fee**, and **2 WBTC/day Ethereum cap**.
 - **Custody:** TODO - Bedrock docs do not name the BTC custodian(s), signers, or full address-control model for the backing wallets monitored by Chainlink PoR.
-- **Cross-chain:** Chainlink CCIP is the documented canonical bridge path. uniBTC is deployed across many chains; Ethereum is one slice of total supply.
+- **Cross-chain:** Chainlink CCIP is the documented canonical bridge path (BurnMintTokenPool with 14 configured lanes). Onchain enumeration also found two additional live Ethereum mint paths: a Bedrock-custom `CCIPPeer` contract and a third-party **Free Tunnel** bridge that Bedrock's uniBTC bridge documentation does not mention. uniBTC is deployed across many chains; Ethereum is one slice of total supply.
+- **Freeze authority:** The uniBTC token implements `FREEZER_ROLE` with a `frozenUsers` mapping and a `freezeToRecipient` address. The ops Safe holds `FREEZER_ROLE`, and `freezeToRecipient` is currently the deployer EOA [`0x899c284A…`](https://etherscan.io/address/0x899c284A89E113056a72dC9ade5b60E80DD3c94f) (verified August 10, 2026). Token-level freezing of user balances is a governance-controlled loss/censorship path.
 
 ## Token Mint Authority
+
+**Mint mechanism:** Role-gated AccessControl. `mint(address,uint256)` on the uniBTC token is `onlyRole(MINTER_ROLE)`; `burn`/`burnFrom` are standard permissionless holder burns. The role is not enumerable onchain, so holders were reconstructed from a full `RoleGranted`/`RoleRevoked` event scan on the token (from deployment to August 10, 2026) and each current holder confirmed via `hasRole`.
+
+**Mint requires backing:** No — at the token level any `MINTER_ROLE` holder can issue unbacked uniBTC. Backing checks live in the callers: the Vault path is PoR-gated (to 90% adequacy); the bridge paths rely on burn/lock on the source chain.
+
+**Current Ethereum `MINTER_ROLE` holders (verified August 10, 2026):**
 
 | Minter / Role Holder | Address | Notes |
 |----------------------|---------|-------|
 | uniBTC Vault | [`0x047D41F2544B7F63A8e991aF2068a363d210d6Da`](https://etherscan.io/address/0x047D41F2544B7F63A8e991aF2068a363d210d6Da) | Collateralized mint path for supported wrapped BTC deposits. Mint is PoR-gated but allows a 10% reserve shortfall via `adequacyRatio = 900`. |
-| Cross-chain bridge / routing contracts | TODO | uniBTC is deployed cross-chain and docs identify Chainlink CCIP as canonical; complete current bridge mint/burn authority enumeration across every non-Ethereum deployment remains TODO. |
+| Chainlink CCIP BurnMintTokenPool 1.5.1 | [`0x1689C22eD5435e49071CFc208D1Ac6F2A2274490`](https://etherscan.io/address/0x1689C22eD5435e49071CFc208D1Ac6F2A2274490) | Registered in the CCIP `TokenAdminRegistry` (`getPool(uniBTC)` verified). Burn/mint model — the CCIP message path can mint native uniBTC supply. `owner()` = Bedrock admin Safe (3/5). Outbound rate limits enabled on all 14 configured lanes. |
+| Bedrock CCIPPeer | [`0x55a67cf07b8a9A09FB6D565279287cfE4Ab60eDc`](https://etherscan.io/address/0x55a67cf07b8a9A09FB6D565279287cfE4Ab60eDc) | Bedrock-custom CCIP messaging contract predating the token pool. Upgradeable `TransparentUpgradeableProxy` administered by the uniBTC ProxyAdmin (i.e. the 3/5 ops Safe). Its message-authentication configuration is a distinct mint trust path. |
+| Free Tunnel bridge | [`0x70aF4743F85E5E74E3b6dDFa38926c0a762Ad21C`](https://etherscan.io/address/0x70aF4743F85E5E74E3b6dDFa38926c0a762Ad21C) | Third-party Free Protocol bridge (`TunnelContract` behind `DelayedERC1967Proxy`). Mints require 3-of-4 executor signatures; admin is EOA [`0x0014Eb4A…`](https://etherscan.io/address/0x0014Eb4Ac6Dd1473b258d088E6EF214b2BCdc53C); executor rotation has a built-in 36h–5d delay. **Not mentioned in Bedrock's uniBTC bridge docs.** The same contract also holds `MINTER_ROLE` on Bedrock's brBTC. |
+
+**Token admin / freeze authority:** the ops Safe [`0xC9dA980f…`](https://etherscan.io/address/0xC9dA980fFABbE2bbe15d4734FDae5761B86b5Fc3) (3/5) holds `DEFAULT_ADMIN_ROLE` (can grant `MINTER_ROLE` to any address with no timelock — an unbacked-mint escalation path) and `FREEZER_ROLE` (token-level user freezing; `freezeToRecipient` is the deployer EOA `0x899c284A…`).
+
+**Historical grants (from the event scan):** several temporary `MINTER_ROLE` grants have been made and revoked over the token's life, including grant-mint-revoke same-block patterns by the ops Safe and two temporary grants to the operational EOA [`0x9251Fd3D…`](https://etherscan.io/address/0x9251fd3d79522bb2243a58fff1db43e25a495aab) (revoked). This is evidence of manual, admin-driven supply operations outside the vault path.
+
+**Rate limits / supply caps:** none at the token level; the CCIP pool enforces per-lane rate limits (bucket capacity 2 uniBTC, ≈200 uniBTC/day refill on the sampled lane). Free Tunnel and CCIPPeer limits: TODO.
+
+**Non-Ethereum deployments:** complete mint/burn authority enumeration for every non-Ethereum uniBTC deployment (30+ chains) remains TODO.
 
 ## Audits and Due Diligence Disclosures
 
@@ -93,16 +118,16 @@ Second, the security-review capability available in 2026 is materially different
 ### Bug Bounty
 
 - **No public Immunefi / Cantina / Sherlock / Code4rena bug bounty program found.** Direct URL [immunefi.com/bug-bounty/bedrock/](https://immunefi.com/bug-bounty/bedrock/) returns 404. The Bedrock docs site has no dedicated bug-bounty page.
-- **SEAL Safe Harbor: NOT registered.** The original verification checked the onchain SafeHarborRegistry [`0x8f72fcf695523a6fc7dd97eafdd7a083c386b7b6`](https://etherscan.io/address/0x8f72fcf695523a6fc7dd97eafdd7a083c386b7b6) and found no Bedrock-related adoption logs.
+- **SEAL Safe Harbor: NOT registered.** A check of the onchain SafeHarborRegistry [`0x8f72fcf695523A6FC7DD97EafDd7A083c386b7b6`](https://etherscan.io/address/0x8f72fcf695523A6FC7DD97EafDd7A083c386b7b6) adoption logs found no Bedrock-related entries.
 
 ## Historical Track Record
 
 - **Time in production:** uniBTC launched in 2024; DeFiLlama first records Bedrock uniBTC on Oct 29, 2024.
-- **TVL (DeFiLlama, July 10, 2026):** Bedrock uniBTC reported **$291.37M** across 18 chains. Major slices: Bitcoin $107.6M, Ethereum $81.2M, Merlin $61.0M, BOB $25.3M, BSC $15.6M.
+- **TVL (DeFiLlama, August 10, 2026):** Bedrock uniBTC reported **$294.4M**. Major slices: Bitcoin $111.4M, Ethereum $83.7M, Merlin $56.4M, BOB $26.1M, BNB Chain $16.1M.
 - **Peak TVL:** Bedrock uniBTC peaked at **$638.3M** on July 15, 2025.
 - **Minimum after launch:** $109.4M on Nov 2, 2024, shortly after the Sept 2024 exploit.
-- **Ethereum total supply:** Fresh onchain verification on July 10, 2026 read **2,985.80444007 uniBTC** (`298,580,444,007` sats).
-- **PoR reserves:** Fresh onchain verification read Chainlink PoR `latestAnswer = 4,614.724024573852871295 BTC` (18 decimals), updated at `2026-07-09T19:35:35Z`, which exceeded circulating supply at that snapshot.
+- **Ethereum total supply:** Onchain verification on August 10, 2026 read **2,984.38211771 uniBTC** (`298,438,211,771` sats).
+- **Global supply vs PoR reserves (August 10, 2026):** the uniBTC supply feeder reported a global supply of **4,551.54515183 uniBTC**, and the Chainlink PoR feed reported reserves of **4,642.877154987678460714 BTC** (18 decimals, updated 2026-08-09T21:48Z) — reserves ≈ **102.0%** of reported global supply at the snapshot.
 
 ### Security Incident: September 27, 2024 - uniBTC Mint Exploit
 
@@ -127,8 +152,8 @@ The exploit occurred on the same vault proxy that remains in production. Post-ex
 
 - uniBTC is intended to be backed 1:1 by wrapped BTC assets and native/restaked BTC positions.
 - Accepted deposit assets include WBTC, FBTC, cbBTC, and M-BTC. Counterparty quality is mixed: WBTC and cbBTC are more established; FBTC and M-BTC are newer issuer/custody dependencies.
-- Chainlink PoR reported backing above circulating supply in the July 10, 2026 verification pass, but the mint gate permits up to 10% under-collateralization via `adequacyRatio = 900`.
-- Only a small amount of WBTC was held directly in the Ethereum Vault in the July 10, 2026 verification pass (1.90156049 WBTC, plus 0.01 WBTC in the ops Safe). The majority of backing sits outside the Ethereum vault contract, including native BTC/restaking/custody arrangements monitored through PoR.
+- Chainlink PoR reported backing at ≈102.0% of global supply in the August 10, 2026 verification pass, but the mint gate permits up to 10% under-collateralization via `adequacyRatio = 900`.
+- Only a small amount of WBTC is held directly in the Ethereum Vault (0.74418586 WBTC on August 10, 2026, plus 0.01 WBTC in the ops Safe). The majority of backing sits outside the Ethereum vault contract, including native BTC/restaking/custody arrangements monitored through PoR.
 
 #### M-BTC / Merlin concentration
 
@@ -151,8 +176,8 @@ uniBTC has materially better reserve provability than brBTC because a Chainlink 
 ## Liquidity Risk
 
 - **Primary exit:** Bedrock redemption queue. The documented 8-day delay, 0.5% fee, and 2 WBTC/day Ethereum cap materially limit large same-chain exits.
-- **Secondary exit:** Original CoinGecko review found uniBTC 24h DEX volume around **$19,774** across all DEXes, thin for a multi-hundred-million dollar asset.
-- **Slippage:** Original CoW Protocol quote checks showed approximately **2.4%** slippage for a ~$1M uniBTC -> WBTC exit and approximately **77%** slippage for a ~$5M exit on Ethereum mainnet, indicating a hard liquidity cliff.
+- **Secondary exit:** CoinGecko reported uniBTC 24h volume of only **$7,243** across all listed venues on August 10, 2026 — effectively no secondary market for a ~$294M asset.
+- **Slippage (CoW Protocol quotes, August 10, 2026):** a **15.46 uniBTC (~$1M) → WBTC** quote returned 10.50 WBTC, ≈**32% slippage**; a **77.3 uniBTC (~$5M)** quote returned 10.51 WBTC, ≈**86% slippage**. Onchain secondary exit is effectively unusable beyond trivial size; the capped, delayed redemption queue is the only real exit.
 - **Downstream integration:** brBTC accepts uniBTC as an input asset. Stress in brBTC may create uniBTC flow pressure, and stress in uniBTC directly affects brBTC when uniBTC is used as backing.
 
 ## Centralization & Control Risks
@@ -162,7 +187,9 @@ uniBTC has materially better reserve provability than brBTC because a Chainlink 
 - uniBTC token and uniBTC Vault are upgradeable transparent proxies.
 - The uniBTC ops Safe is 3-of-5 and owns the ProxyAdmin.
 - The same Safe holds `DEFAULT_ADMIN_ROLE` on the uniBTC Vault.
-- No Safe Guard or Delay module was configured on the uniBTC ops Safe in the July 10, 2026 verification pass. A 3-of-5 signature can therefore upgrade implementations or execute privileged actions without an onchain delay.
+- No Safe Guard or Delay module is configured on the uniBTC ops Safe (verified August 10, 2026). A 3-of-5 signature can therefore upgrade implementations, grant `MINTER_ROLE`, or freeze user balances without an onchain delay.
+- The ops Safe additionally holds `DEFAULT_ADMIN_ROLE` and `FREEZER_ROLE` on the uniBTC token itself: it can grant mint authority to any address and freeze arbitrary user balances, with `freezeToRecipient` currently set to a deployer EOA.
+- Two bridge contracts and one Bedrock messaging contract hold live `MINTER_ROLE` (CCIP token pool, CCIPPeer, Free Tunnel); the Free Tunnel path is absent from Bedrock's public documentation.
 - Signer overlap across Bedrock Safes weakens practical separation between product lines.
 
 ### Programmability
@@ -174,7 +201,8 @@ Minting is programmatic and PoR-gated, which is a major strength relative to opa
 | Dependency | Used by uniBTC | Criticality |
 |-----------|----------------|-------------|
 | Chainlink PoR feed | Mint reserve gate | High - stale/wrong data can halt or weaken mint safety |
-| Chainlink CCIP | Cross-chain routing | High - bridge security affects multi-chain supply/peg |
+| Chainlink CCIP | Cross-chain routing - BurnMintTokenPool + CCIPPeer both hold `MINTER_ROLE`; 14 lanes, per-lane rate limits enabled | High - bridge security affects multi-chain supply/peg, partially mitigated by rate limits |
+| Free Tunnel (Free Protocol) | Cross-chain routing - bridge contract holds `MINTER_ROLE`, undocumented in Bedrock docs | High - third-party bridge with mint rights; 3-of-4 executor signatures, EOA admin |
 | WBTC / FBTC / cbBTC | Accepted deposit assets | High - issuer/custody risk |
 | M-BTC / Merlin bridge | ~21.3% of reported reserves on Aug. 8, 2026 | High - bridge custody, relayer, upgrade, no-timelock, chain-liveness and redemption risk |
 | Bitcoin network / native BTC custody | Backing assets | Critical |
@@ -203,13 +231,20 @@ Minting is programmatic and PoR-gated, which is a major strength relative to opa
 3. **uniBTC token** [`0x004E9C3EF86bc1ca1f0bB5C7662861Ee93350568`](https://etherscan.io/address/0x004E9C3EF86bc1ca1f0bB5C7662861Ee93350568):
    - `totalSupply()` changes.
    - Implementation upgrades.
-4. **uniBTC ops Safe** [`0xC9dA980fFABbE2bbe15d4734FDae5761B86b5Fc3`](https://etherscan.io/address/0xC9dA980fFABbE2bbe15d4734FDae5761B86b5Fc3):
+   - `RoleGranted` / `RoleRevoked` for `MINTER_ROLE`, `DEFAULT_ADMIN_ROLE`, and `FREEZER_ROLE` — any new minter is a potential unbacked-mint path and should page immediately.
+   - Freeze events / `frozenUsers` additions and `freezeToRecipient` changes.
+   - Mints not originating from the Vault, CCIP token pool, CCIPPeer, or Free Tunnel bridge.
+4. **Bridge minters:**
+   - CCIP token pool [`0x1689C22e…`](https://etherscan.io/address/0x1689C22eD5435e49071CFc208D1Ac6F2A2274490): rate-limit config changes, lane additions/removals, ownership transfer.
+   - CCIPPeer [`0x55a67cf0…`](https://etherscan.io/address/0x55a67cf07b8a9A09FB6D565279287cfE4Ab60eDc): implementation upgrades, peer/sender configuration changes.
+   - Free Tunnel [`0x70aF4743…`](https://etherscan.io/address/0x70aF4743F85E5E74E3b6dDFa38926c0a762Ad21C): executor-set updates, admin transfer, abnormal mint volume.
+5. **uniBTC ops Safe** [`0xC9dA980fFABbE2bbe15d4734FDae5761B86b5Fc3`](https://etherscan.io/address/0xC9dA980fFABbE2bbe15d4734FDae5761B86b5Fc3):
    - owner additions/removals and threshold changes.
-5. **Liquidity / peg:**
+6. **Liquidity / peg:**
    - uniBTC/WBTC ratio on Ethereum and major cross-chain venues.
    - DEX depth and 24h volume.
    - Redemption queue throughput versus the 2 WBTC/day Ethereum cap.
-6. **M-BTC / Merlin dependency:**
+7. **M-BTC / Merlin dependency:**
    - Bedrock reserve address `0xF977...AB18` balance as a percentage of uniBTC reserves and total M-BTC supply.
    - M-BTC bridge mint/burn events, authorized `unlockTokenAdmin` changes, bridge upgrades, pauses, and Bitcoin redemption performance.
 
@@ -235,10 +270,14 @@ uniBTC Ops Safe 0xC9dA980f... (3/5)
 Token / Vault Layer
 ===================
 uniBTC token 0x004E9C...0568
-  `-- minted by uniBTC Vault 0x047D41...D6Da
-        |-- accepts WBTC / FBTC / cbBTC / M-BTC
-        |-- checks Chainlink PoR 0xc590D9fb...
-        `-- checks global supply feeder 0xE542919E...
+  |-- MINTER_ROLE: uniBTC Vault 0x047D41...D6Da
+  |     |-- accepts WBTC / FBTC / cbBTC / M-BTC
+  |     |-- checks Chainlink PoR 0xc590D9fb...
+  |     `-- checks global supply feeder 0xE542919E...
+  |-- MINTER_ROLE: CCIP BurnMintTokenPool 0x1689C2... (owner: Bedrock admin Safe; 14 rate-limited lanes)
+  |-- MINTER_ROLE: Bedrock CCIPPeer 0x55a67c... (proxy under ops-Safe ProxyAdmin)
+  |-- MINTER_ROLE: Free Tunnel bridge 0x70aF47... (3/4 executors, EOA admin, undocumented)
+  `-- FREEZER_ROLE + DEFAULT_ADMIN_ROLE: ops Safe 0xC9dA98... (freeze users; grant minters; no timelock)
 
 Backing / External Layer
 ========================
@@ -251,7 +290,7 @@ Chainlink PoR + CCIP
 Critical Unknowns
 =================
 Named BTC custodian/signers
-Complete current cross-chain mint/burn authority map
+Mint/burn authority map for non-Ethereum deployments
 Public restitution txs for Sept 2024 exploit
 ```
 
@@ -263,9 +302,10 @@ Public restitution txs for Sept 2024 exploit
 
 1. **Chainlink PoR is wired into the Vault mint path.** Minting is not purely admin-attested; the Vault checks public reserve data before issuing new uniBTC.
 2. **Three uniBTC-specific audits** including two post-exploit re-audits.
-3. **Verified source and multisig governance** in the July 10, 2026 review.
-4. **Large ecosystem scale** with $291.37M DeFiLlama uniBTC TVL on July 10, 2026.
-5. **Public team and known legal entity** via Bedrock/RockX leadership and Bedrock Terms of Use.
+3. **Verified source and multisig governance** (verified onchain August 10, 2026).
+4. **Large ecosystem scale** with $294.4M DeFiLlama uniBTC TVL on August 10, 2026, and PoR reserves at ≈102% of reported global supply.
+5. **CCIP mint path is rate-limited** on all 14 configured lanes, bounding the blast radius of a CCIP-lane compromise.
+6. **Public team and known legal entity** via Bedrock/RockX leadership and Bedrock Terms of Use.
 
 ### Key Risks
 
@@ -273,10 +313,12 @@ Public restitution txs for Sept 2024 exploit
 2. **Audit coverage is dated.** All published uniBTC audits were completed in 2024, two reactively after the exploit. They do not establish coverage of today's full dependency and operational trust boundary, and they predate current AI-assisted and automated exploit-validation capabilities; no current independent review or public bug bounty was found.
 3. **Material M-BTC concentration.** About 21.3% of reported reserves are M-BTC, adding Merlin bridge/custody and chain-liveness risk beneath uniBTC.
 4. **PoR is not a strict 1:1 mint gate.** `adequacyRatio = 900` permits minting while reserves are at least 90% of supply.
-5. **No timelock.** The 3-of-5 Safe can upgrade token/vault implementations without onchain delay.
-6. **Custody opacity.** Reserve addresses are visible, but Bedrock does not publicly name the BTC custodian/signers or prove unencumbered control and Babylon state.
-7. **Thin secondary liquidity and capped redemption.** The 2 WBTC/day Ethereum cap and thin DEX liquidity are binding for large exits.
-8. **No public bug bounty / no SEAL Safe Harbor registration found.**
+5. **No timelock.** The 3-of-5 Safe can upgrade token/vault implementations, grant `MINTER_ROLE`, or freeze user balances without onchain delay.
+6. **Undocumented third-party bridge holds mint authority.** The Free Tunnel contract can mint uniBTC (3-of-4 executor signatures, EOA admin) and appears nowhere in Bedrock's uniBTC documentation; the Bedrock-custom CCIPPeer is a second non-pool mint path.
+7. **Token-level freeze authority.** `FREEZER_ROLE` (held by the ops Safe) with `freezeToRecipient` set to a deployer EOA is a governance-controlled censorship/seizure path.
+8. **Custody opacity.** Reserve addresses are visible, but Bedrock does not publicly name the BTC custodian/signers or prove unencumbered control and Babylon state.
+9. **Secondary liquidity has effectively collapsed.** $7.2K daily volume and ≈32% slippage on a ~$1M exit leave the capped (2 WBTC/day), delayed redemption queue as the only real exit.
+10. **No public bug bounty / no SEAL Safe Harbor registration found.**
 
 ### Critical Risks
 
@@ -288,11 +330,12 @@ Public restitution txs for Sept 2024 exploit
 
 ### Critical Risk Gates
 
-- [x] **No audit** - PASS. uniBTC has three public audits, including post-exploit audits.
-- [x] **Unverifiable reserves** - PASS, with caveats. Chainlink PoR is wired into the Vault, but it depends on a self-declared address set and allows 90% adequacy.
-- [x] **Total centralization** - PASS. Governance uses a 3-of-5 Safe, not a single EOA.
+- [ ] **Unverified contract source** - PASS. uniBTC token, Vault proxies, and both implementations are source-verified on Etherscan.
+- [ ] **No audit** - PASS. uniBTC has three public audits, including post-exploit audits.
+- [ ] **Unverifiable reserves** - PASS, with caveats. Chainlink PoR is wired into the Vault, but it depends on a self-declared address set and allows 90% adequacy.
+- [ ] **Total centralization** - PASS. Governance uses a 3-of-5 Safe, not a single EOA.
 
-**All gates pass.** Proceed to category scoring.
+**No gate triggered.** Proceed to category scoring.
 
 ### Category Scores
 
@@ -319,8 +362,8 @@ Public restitution txs for Sept 2024 exploit
 #### Category 2: Centralization & Control Risks (Weight: 30%)
 
 **Subcategory A: Governance**
-- 3-of-5 Safe controls ProxyAdmin and Vault admin role.
-- No onchain timelock or Safe Delay module in the July 10, 2026 verification.
+- 3-of-5 Safe controls ProxyAdmin, Vault admin role, and token `DEFAULT_ADMIN_ROLE` / `FREEZER_ROLE` (can grant minters and freeze balances).
+- No onchain timelock or Safe Delay module (verified August 10, 2026).
 - **Score: 4.0**
 
 **Subcategory B: Programmability**
@@ -329,7 +372,7 @@ Public restitution txs for Sept 2024 exploit
 - **Score: 2.75**
 
 **Subcategory C: External Dependencies**
-- Chainlink PoR/CCIP, wrapped BTC issuers, BTC custody/signers, Babylon/restaking venues.
+- Chainlink PoR/CCIP, the undocumented Free Tunnel bridge minter, wrapped BTC issuers (including the M-BTC/Merlin stack), BTC custody/signers, Babylon/restaking venues.
 - **Score: 4.0**
 
 **Centralization Score = (4.0 + 2.75 + 4.0) / 3 = 3.58**
@@ -339,7 +382,7 @@ Public restitution txs for Sept 2024 exploit
 #### Category 3: Funds Management (Weight: 30%)
 
 **Subcategory A: Collateralization**
-- PoR showed backing above supply in the July 10, 2026 verification pass.
+- PoR showed backing at ≈102.0% of reported global supply in the August 10, 2026 verification pass.
 - Approximately 21.3% of the August 8 reserve snapshot was M-BTC, creating material Merlin bridge/custody concentration.
 - Mixed collateral issuer quality and offchain/native BTC custody opacity.
 - Explicit 90% adequacy threshold weakens the mint gate.
@@ -358,10 +401,11 @@ Public restitution txs for Sept 2024 exploit
 #### Category 4: Liquidity Risk (Weight: 15%)
 
 - Redemption is delayed, fee-bearing, and capped at 2 WBTC/day on Ethereum.
-- Secondary DEX liquidity is thin for the asset size.
-- **Score: 4.0**
+- Secondary liquidity is effectively unusable: $7.2K daily volume, ≈32% slippage at ~$1M, ≈86% at ~$5M (CoW quotes, August 10, 2026).
+- Between rubric rows 4 and 5: an exit mechanism exists, but it is capped, delayed, fee-bearing, and the market alternative is near-zero.
+- **Score: 4.25**
 
-**Score: 4.0/5**
+**Score: 4.25/5**
 
 #### Category 5: Operational Risk (Weight: 5%)
 
@@ -376,12 +420,12 @@ Public restitution txs for Sept 2024 exploit
 
 | Category | Score | Weight | Weighted |
 |----------|-------|--------|----------|
-| Audits & Historical | 3.4 | 20% | 0.680 |
-| Centralization & Control | 3.6 | 30% | 1.080 |
+| Audits & Historical | 3.375 | 20% | 0.675 |
+| Centralization & Control | 3.58 | 30% | 1.075 |
 | Funds Management | 3.75 | 30% | 1.125 |
-| Liquidity Risk | 4.0 | 15% | 0.600 |
+| Liquidity Risk | 4.25 | 15% | 0.638 |
 | Operational Risk | 2.25 | 5% | 0.113 |
-| **Subtotal** | | | **3.598** |
+| **Subtotal** | | | **3.626** |
 
 **Modifiers:**
 - **None.** The prior exploit is captured in Historical Track Record; M-BTC concentration and custody opacity are captured in Funds Management and External Dependencies. Applying an additional modifier would double count them.
@@ -400,14 +444,14 @@ Public restitution txs for Sept 2024 exploit
 
 **Final Risk Tier: Elevated Risk**
 
-uniBTC is stronger than brBTC on reserve provability because Chainlink PoR is wired into the mint path. It remains Elevated Risk because all audits are from 2024, approximately 21.3% of reported reserves are M-BTC, minting is allowed down to 90% reserve adequacy, governance has no onchain timelock, backing control and Babylon position state are incompletely disclosed, and large exits are constrained by both redemption caps and thin DEX liquidity.
+uniBTC is stronger than a purely admin-attested wrapper on reserve provability because Chainlink PoR is wired into the mint path. It remains Elevated Risk because all audits are from 2024, approximately 21.3% of reported reserves are M-BTC, minting is allowed down to 90% reserve adequacy, governance has no onchain timelock and holds token-level mint-grant and freeze authority, an undocumented third-party bridge holds live mint rights, backing control and Babylon position state are incompletely disclosed, and large exits are constrained by both redemption caps and near-zero secondary liquidity.
 
 ---
 
 ## Reassessment Triggers
 
 - **Time-based:** Reassess in 3 months, or sooner on any event below.
-- **TVL / supply-based:** Reassess if uniBTC TVL or supply changes by more than +/-40% from the July 10, 2026 baseline.
+- **TVL / supply-based:** Reassess if uniBTC TVL or supply changes by more than +/-40% from the August 10, 2026 baseline.
 - **Incident-based:** Any exploit, depeg >2% sustained >1h, PoR reserve shortfall, redemption queue freeze, bridge failure, or governance compromise.
 - **Specific triggers:**
   1. Chainlink uniBTC PoR feed reports backing below circulating supply.
@@ -420,13 +464,16 @@ uniBTC is stronger than brBTC on reserve provability because Chainlink PoR is wi
   8. Introduction of an onchain timelock / Safe Delay module.
   9. New top-tier audit or bug bounty publication.
   10. M-BTC exceeds 25% of uniBTC reserves, depegs, pauses redemption, changes bridge administrators, or changes its mint/burn implementation.
+  11. Any `RoleGranted` for `MINTER_ROLE`, `DEFAULT_ADMIN_ROLE`, or `FREEZER_ROLE` on the uniBTC token, any freeze event, or any change to `freezeToRecipient`.
+  12. Change of CCIP token pool, CCIPPeer upgrade, Free Tunnel executor/admin change, or a mint from an address outside the four known minters.
 
 ## Open TODOs (Items Not Verifiable This Session)
 
 - **Custodian identity / signing setup** for BTC backing uniBTC.
 - **Native-BTC/Babylon position reconciliation:** mapping each published reserve address to custodian ownership, Babylon staking transaction, finality provider, slashing status and unbonding state.
 - **M-BTC bridge assurance:** independently verified Bitcoin backing, custody/MPC quorum, complete mint-relayer set, upgrade authority, and a documented unilateral or emergency exit path.
-- **Complete current cross-chain mint/burn authority enumeration** for every non-Ethereum uniBTC deployment.
+- **Mint/burn authority enumeration for non-Ethereum deployments** - Ethereum mint authority is fully enumerated in this report (four minters plus token admin/freezer); the 30+ non-Ethereum deployments each have their own minter/bridge configuration that has not been individually verified.
+- **CCIPPeer message-authentication configuration and Free Tunnel per-lane limits** - both hold `MINTER_ROLE`; their complete sender/limit configuration was not fully traced.
 - **September 2024 restitution transactions** - onchain Fuzzland-to-Bedrock reimbursement tx hashes are not published.
 
 ## Sources
@@ -451,5 +498,6 @@ uniBTC is stronger than brBTC on reserve provability because Chainlink PoR is wi
 - M-BTC holder distribution: https://scan.merlinchain.io/token/0xB880fd278198bd590252621d4CD071b1842E9Bcd
 - Independent Merlin trust-model analysis: https://www.spark.money/research/merlin-chain-bitcoin-l2-analysis
 - EVMbench smart-contract security agent research (2026): https://openai.com/index/introducing-evmbench/
-- Onchain verification on July 10, 2026: `totalSupply()`, `name()`, `symbol()`, `decimals()`, EIP-1967 implementation/admin slots, `owner()` on ProxyAdmin, `getThreshold()` / `getOwners()` / `getModulesPaginated()` and guard storage on the Safe, `hasRole(bytes32,address)` on Vault/token, `chainlinkReserveFeeder()`, `uniBTCSupplyFeeder()`, `feederHeartbeat()`, `outOfService()`, `paused()`, `adequacyRatio()`, WBTC `balanceOf(address)`, and Chainlink feed `latestAnswer()`, `latestRoundData()`, `description()`, `decimals()`.
+- Onchain verification on August 10, 2026: `totalSupply()`, EIP-1967 implementation/admin slots, `owner()` on ProxyAdmin, `getThreshold()` / `getOwners()` / `getModulesPaginated()` and guard storage on the Safe, `hasRole(bytes32,address)` on Vault/token (including `FREEZER_ROLE` and `freezeToRecipient()`), full `RoleGranted`/`RoleRevoked` event scan on the token, `chainlinkReserveFeeder()`, `uniBTCSupplyFeeder()` + supply feeder `totalSupply()`, `feederHeartbeat()`, `outOfService()`, `paused()`, `adequacyRatio()`, WBTC `balanceOf(address)` on Vault and Safe, Chainlink PoR `latestRoundData()`, CCIP `TokenAdminRegistry.getPool(uniBTC)` + pool `typeAndVersion()` / `owner()` / `getSupportedChains()` / per-lane rate-limiter states, and Free Tunnel `getAdmin()` / `getActiveExecutors()`.
+- Market data on August 10, 2026: DeFiLlama protocol TVL and per-chain split; CoinGecko 24h volume; CoW Protocol swap quotes for ~$1M and ~$5M uniBTC → WBTC exits.
 - Reserve/Merlin verification on August 8, 2026: Bedrock dashboard reserve composition and linked addresses; M-BTC `totalSupply()`, `bridgeAddress()`, Bedrock reserve balance and holder rank; main bridge `version()`, admin and mint-relayer reads; EIP-1967 implementation slots; and bytecode-presence checks via Merlin RPC.
