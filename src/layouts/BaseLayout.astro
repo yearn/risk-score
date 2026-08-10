@@ -16,16 +16,22 @@ const {
   bare = false,
   jsonLd,
 } = Astro.props;
-const origin = (Astro.site ?? Astro.url.origin).href;
+// Astro.url.origin is a plain string, so it has to be wrapped before .href.
+const origin = (Astro.site ?? new URL(Astro.url.origin)).href;
 const canonicalUrl = ogUrl ? new URL(ogUrl, origin).href : origin;
 const ogImageUrl = new URL(ogImage, origin).href;
 
 // Site-wide structured data. Identifies the publisher (Yearn Curation) and the
 // website so search engines can attach a knowledge-graph entity. Page-specific
-// schema (e.g. Article on report pages) is passed via the `jsonLd` prop and
-// references these nodes by @id across blocks on the same page.
+// schema (e.g. Article on report pages) arrives via the `jsonLd` prop and joins
+// the *same* @graph: consumers only resolve @id references reliably within one
+// block, so splitting them across blocks would leave author/publisher dangling.
 const orgId = `${origin}#organization`;
-const siteSchema = {
+const pageSchemas = (jsonLd ? (Array.isArray(jsonLd) ? jsonLd : [jsonLd]) : []).map(
+  // A node inside a @graph inherits the top-level @context.
+  ({ "@context": _ctx, ...node }: Record<string, unknown>) => node,
+);
+const schema = {
   "@context": "https://schema.org",
   "@graph": [
     {
@@ -43,9 +49,15 @@ const siteSchema = {
       "description": "Risk evaluations for DeFi protocols and assets",
       "publisher": { "@id": orgId },
     },
+    ...pageSchemas,
   ],
 };
-const pageSchemas = jsonLd ? (Array.isArray(jsonLd) ? jsonLd : [jsonLd]) : [];
+// <script> is raw-text: a "</script>" inside any report-authored string would
+// close the element early, so escape "<" (and the JS-only line separators).
+const schemaJson = JSON.stringify(schema)
+  .replace(/</g, "\\u003c")
+  .replace(/\u2028/g, "\\u2028")
+  .replace(/\u2029/g, "\\u2029");
 ---
 
 <!doctype html>
@@ -110,10 +122,7 @@ const pageSchemas = jsonLd ? (Array.isArray(jsonLd) ? jsonLd : [jsonLd]) : [];
       import "../scripts/plausible";
     </script>
     <!-- Structured data: site-wide graph + any page-specific schema -->
-    <script type="application/ld+json" is:inline set:html={JSON.stringify(siteSchema)} />
-    {pageSchemas.map((schema) => (
-      <script type="application/ld+json" is:inline set:html={JSON.stringify(schema)} />
-    ))}
+    <script type="application/ld+json" is:inline set:html={schemaJson} />
   </head>
   <body class={bare ? "is-bare" : "has-bg"}>
     {!bare && (
