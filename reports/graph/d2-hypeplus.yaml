@@ -34,7 +34,31 @@ nodes:
     label: dgnHYPE Custody Safe
     address: "0x155d0B27B754ebC664aeD565945C1AaEa91966fb"
     category: strategy
-    note: Nested 3-of-5 Safe; only part of reported backing observed as real USDC
+    note: Nested 3-of-5 unrestricted custody Safe; routes capital through operational EOAs
+  - id: hyperliquid-operator-1
+    label: Hyperliquid Operator EOA 1
+    address: "0x0C684f333A7e120bce61383DA670bbB0157e82d0"
+    category: strategy
+    note: Received 5.0M USDC from dgnHYPE Safe in July 2026 before Bridge2 deposits
+  - id: hyperliquid-operator-2
+    label: Hyperliquid Operator EOA 2
+    address: "0x11A691612BD108e57cC04ea42B006C9CB1ff006A"
+    category: strategy
+    note: Received 400k USDC from dgnHYPE Safe in August 2026; uses Bridge2 and Circle CCTP
+  - id: hyperliquid-bridge
+    label: Hyperliquid Bridge2
+    address: "0x2Df1c51E09aECF9cacB7bc98cB1742757f163dF7"
+    category: dependency
+    note: Verified Arbitrum bridge contract; final bridge is not an EOA
+  - id: hypercore-cctp
+    label: Circle HyperCore CCTP
+    address: "0xA95d9c1F655341597C94393fDdc30cf3c08E4fcE"
+    category: dependency
+    note: Circle-documented Arbitrum extension for USDC transfers to HyperCore
+  - id: hypercore
+    label: HyperCore Trading
+    category: dependency
+    note: Hyperliquid spot and derivatives execution destination
   - id: usdc
     label: Arbitrum USDC
     address: "0xaf88d065e77c8cC2239327C5EDb3A432268e5831"
@@ -52,7 +76,7 @@ nodes:
     label: Vault Owner EOA
     address: "0x0E8c0470773c65498F438cac380648B314399A46"
     category: governance
-    note: EOA; owns BOTH vaults; can blacklist users or set infinite whitelistBalance to block all withdraw+deposit on both HYPE++ and dgnHYPE
+    note: EOA owns both vaults; HYPE++ has blacklist and balance-gate paths, while dgnHYPE VaultV0 has the blacklist path only
   - id: trader-role-eoa
     label: Trader Role EOA
     address: "0x7ab129978091DEE65A319c5FC728818D73221999"
@@ -123,6 +147,34 @@ edges:
     to: usdc
     kind: deposits-into
     label: direct USDC
+  - from: dgnhype-trader
+    to: hyperliquid-operator-1
+    kind: deposits-into
+    label: 5.0M USDC (Jul 2026)
+  - from: dgnhype-trader
+    to: hyperliquid-operator-2
+    kind: deposits-into
+    label: 400k USDC (Aug 2026)
+  - from: hyperliquid-operator-1
+    to: hyperliquid-bridge
+    kind: deposits-into
+    label: USDC bridge deposits
+  - from: hyperliquid-operator-2
+    to: hyperliquid-bridge
+    kind: deposits-into
+    label: USDC bridge deposits
+  - from: hyperliquid-operator-2
+    to: hypercore-cctp
+    kind: deposits-into
+    label: USDC via CCTP
+  - from: hyperliquid-bridge
+    to: hypercore
+    kind: routes-through
+    label: HyperCore credit
+  - from: hypercore-cctp
+    to: hypercore
+    kind: routes-through
+    label: HyperCore credit
   - from: hypeplus-trader
     to: allowed-defi
     kind: deposits-into
