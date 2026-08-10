@@ -73,10 +73,9 @@ const articleSchema = {
   ...(report.finalScore != null ? { mainEntity: { "@id": `${reportUrl}#review` } } : {}),
 };
 
-// The rating reviews the *asset*, not this article, so it is its own node with
-// an explicit itemReviewed rather than an Article.review property. Note the
-// inverted scale: this is a risk score, where 1.0 (Minimal Risk) is the best
-// achievable value and 5.0 (High Risk) the worst.
+// The review covers the asset, not this article, so it is its own node with an
+// explicit itemReviewed. The lower-is-better risk score is a product property,
+// not a schema.org Rating, whose bestRating must be the highest scale value.
 const reviewSchema =
   report.finalScore != null
     ? {
@@ -86,16 +85,18 @@ const reviewSchema =
         "url": reportUrl,
         "author": { "@id": orgId },
         "itemReviewed": {
-          "@type": "FinancialProduct",
+          "@type": ["FinancialProduct", "Product"],
           "name": report.name,
           "description": `${report.token} on ${report.chain}`,
-        },
-        "reviewRating": {
-          "@type": "Rating",
-          "ratingValue": report.finalScore.toFixed(1),
-          "bestRating": "1",
-          "worstRating": "5",
-          "alternateName": scoreTier(report.finalScore),
+          "additionalProperty": {
+            "@type": "PropertyValue",
+            "name": "Yearn Curation risk score",
+            "value": report.finalScore.toFixed(1),
+            "minValue": 1,
+            "maxValue": 5,
+            "description": "Lower values indicate lower risk.",
+            "alternateName": scoreTier(report.finalScore),
+          },
         },
       }
     : null;
