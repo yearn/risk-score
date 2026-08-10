@@ -1,5 +1,5 @@
 import { marked } from "marked";
-import { protocolIconUrl, chainIconUrl } from "./icons";
+import { protocolIconUrl, chainIconUrl, defillamaIconUrl } from "./icons";
 
 // Override the default GFM del (strikethrough) tokenizer to only match
 // ~~double tildes~~, not ~single tildes~. Reports use ~$value frequently
@@ -67,6 +67,10 @@ export interface HistoryEntry {
   date: string;
   score: string;
   notes: string;
+  /** `date` rendered as inline markdown (dates may link to their source PR). */
+  dateHtml: string;
+  /** `notes` rendered as inline markdown (may contain links or `code` spans). */
+  notesHtml: string;
 }
 
 export interface ReportData extends ReportMeta {
@@ -82,16 +86,25 @@ const TYPE_OVERRIDES: Record<string, "Protocol" | "Asset"> = {
   "unit-ubtc": "Asset",
 };
 
-const DEFILLAMA_SLUG_OVERRIDES: Record<string, string> = {
-  "midas-mhyper": "midas-rwa",
-  "infinifi": "infinifi",
-  "reserve-ethplus": "reserve-protocol",
+// Typed DefiLlama icon references for reports whose markdown has no
+// `defillama.com/protocol/<slug>` link (or where that protocol icon isn't the
+// right one). Forms: "protocol:<slug>", "stablecoin:<slug>", "token:<address>".
+// Resolved via defillamaIconUrl() — same mechanism the Bridges page uses.
+const DEFILLAMA_ICON_OVERRIDES: Record<string, string> = {
+  "midas-mhyper": "protocol:midas-rwa",
+  "infinifi": "protocol:infinifi",
+  "reserve-ethplus": "protocol:reserve-protocol",
+  "apyx-apxusd": "protocol:apyx-protocol",
+  "paxos-usdg": "stablecoin:global-dollar",
+  "superstate-ustb": "protocol:superstate",
 };
 
-function parseDefillamaSlug(slug: string, content: string): string {
-  if (DEFILLAMA_SLUG_OVERRIDES[slug]) return DEFILLAMA_SLUG_OVERRIDES[slug];
+function parseIconUrl(slug: string, content: string): string {
+  const override = DEFILLAMA_ICON_OVERRIDES[slug];
+  if (override) return defillamaIconUrl(override);
+  // Otherwise scrape a DefiLlama protocol link from the report body.
   const match = content.match(/defillama\.com\/protocol\/([a-z0-9-]+)/i);
-  return match?.[1] ?? "";
+  return match?.[1] ? protocolIconUrl(match[1]) : "";
 }
 
 /** Statuses that pull a report off the numeric scale (score → null, listed under "Not Rated"). */
@@ -197,7 +210,7 @@ function parseMeta(slug: string, content: string): ReportMeta {
         ? parseFloat(scoreMatch[1])
         : null;
 
-  const defillamaSlug = parseDefillamaSlug(slug, content);
+  const iconUrl = parseIconUrl(slug, content);
   const chainStr = chainMatch?.[1]?.trim() ?? "";
 
   const dateRaw = dateMatch?.[1]?.trim() ?? "";
@@ -214,7 +227,7 @@ function parseMeta(slug: string, content: string): ReportMeta {
     chain: chainStr,
     finalScore,
     type,
-    iconUrl: protocolIconUrl(defillamaSlug),
+    iconUrl,
     chainIconUrl: chainIconUrl(chainStr),
     status,
     statusKind,
@@ -308,6 +321,11 @@ function extractFullBody(content: string): string {
  * structured rows. When a report has no such table yet, synthesizes a single
  * current-state row from the header so every report shows a seed to grow from.
  */
+function historyEntry(date: string, score: string, notes: string): HistoryEntry {
+  const inline = (s: string) => marked.parseInline(s, { async: false }) as string;
+  return { date, score, notes, dateHtml: inline(date), notesHtml: inline(notes) };
+}
+
 function parseHistory(content: string, meta: ReportMeta): HistoryEntry[] {
   const section = extractSection(content, "Assessment History");
   const rows = section
@@ -317,7 +335,7 @@ function parseHistory(content: string, meta: ReportMeta): HistoryEntry[] {
     .map((row): HistoryEntry | null => {
       const cells = row.split("|").slice(1, -1).map((c) => c.trim());
       if (!cells[0]) return null;
-      return { date: cells[0], score: cells[1] ?? "", notes: cells[2] ?? "" };
+      return historyEntry(cells[0], cells[1] ?? "", cells[2] ?? "");
     })
     .filter((r): r is HistoryEntry => r !== null);
 
@@ -327,11 +345,11 @@ function parseHistory(content: string, meta: ReportMeta): HistoryEntry[] {
   const score =
     meta.finalScore != null ? meta.finalScore.toFixed(1) : (meta.status ?? "N/A");
   return [
-    {
-      date: meta.latestDate,
+    historyEntry(
+      meta.latestDate,
       score,
-      notes: meta.isUpdated ? "Reassessment" : "Initial assessment",
-    },
+      meta.isUpdated ? "Reassessment" : "Initial assessment",
+    ),
   ];
 }
 

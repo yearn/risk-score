@@ -22,7 +22,7 @@ body:
     attributes:
       label: Report Link
       description: Link to the report on the site or GitHub.
-      placeholder: https://risk.yearn.farm/report/lido-wsteth
+      placeholder: https://curation.yearn.fi/report/lido-wsteth
     validations:
       required: false
 
