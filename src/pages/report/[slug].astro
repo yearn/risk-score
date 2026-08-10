@@ -34,6 +34,46 @@ const reportIssueUrl = (() => {
   const params = new URLSearchParams({ title, body, labels: "report-issue" });
   return `https://github.com/yearn/risk-score/issues/new?${params}`;
 })();
+
+// Structured data: an Article carrying the editorial risk rating, so report
+// pages are eligible for rich results. author/publisher reference the
+// Organization node BaseLayout emits site-wide via @id.
+const origin = (Astro.site ?? Astro.url.origin).href;
+const orgId = `${origin}#organization`;
+const toIsoDate = (human: string): string | undefined => {
+  const t = Date.parse(human);
+  return Number.isNaN(t) ? undefined : new Date(t).toISOString().slice(0, 10);
+};
+const published = toIsoDate(report.originalDate);
+const modified = toIsoDate(report.latestDate);
+const reportUrl = new URL(`/report/${report.slug}/`, origin).href;
+const articleSchema = {
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": report.name,
+  "description": ogDescription,
+  "url": reportUrl,
+  "mainEntityOfPage": reportUrl,
+  "image": new URL(`/og/${report.slug}.png`, origin).href,
+  ...(published ? { datePublished: published } : {}),
+  ...(modified ? { dateModified: modified } : {}),
+  "author": { "@id": orgId },
+  "publisher": { "@id": orgId },
+  ...(report.finalScore != null
+    ? {
+        review: {
+          "@type": "Review",
+          "author": { "@id": orgId },
+          "reviewRating": {
+            "@type": "Rating",
+            "ratingValue": report.finalScore.toFixed(1),
+            "bestRating": "5",
+            "worstRating": "1",
+          },
+        },
+      }
+    : {}),
+};
 ---
 
 <BaseLayout
@@ -42,6 +82,7 @@ const reportIssueUrl = (() => {
   ogImage={`/og/${report.slug}.png`}
   ogUrl={`/report/${report.slug}/`}
   bare
+  jsonLd={articleSchema}
 >
   <a href="/reports/" class="back-link">&larr; All Reports</a>
 
