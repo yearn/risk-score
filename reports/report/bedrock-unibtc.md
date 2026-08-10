@@ -117,7 +117,7 @@ Second, the security-review capability available in 2026 is materially different
 
 ### Bug Bounty
 
-- **No public Immunefi / Cantina / Sherlock / Code4rena bug bounty program found.** Direct URL [immunefi.com/bug-bounty/bedrock/](https://immunefi.com/bug-bounty/bedrock/) returns 404. The Bedrock docs site has no dedicated bug-bounty page.
+- **No public Immunefi / Cantina / Sherlock / Code4rena bug bounty program found.**
 - **SEAL Safe Harbor: NOT registered.** A check of the onchain SafeHarborRegistry [`0x8f72fcf695523A6FC7DD97EafDd7A083c386b7b6`](https://etherscan.io/address/0x8f72fcf695523A6FC7DD97EafDd7A083c386b7b6) adoption logs found no Bedrock-related entries.
 
 ## Historical Track Record
