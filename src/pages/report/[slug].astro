@@ -34,6 +34,73 @@ const reportIssueUrl = (() => {
   const params = new URLSearchParams({ title, body, labels: "report-issue" });
   return `https://github.com/yearn/risk-score/issues/new?${params}`;
 })();
+
+// Structured data: an Article carrying the editorial risk rating, so report
+// pages are eligible for rich results. author/publisher reference the
+// Organization node BaseLayout emits site-wide via @id; BaseLayout merges what
+// we return here into that same @graph so those references resolve.
+// Astro.url.origin is a plain string, so it has to be wrapped before .href.
+const origin = (Astro.site ?? new URL(Astro.url.origin)).href;
+const orgId = `${origin}#organization`;
+const toIsoDate = (human: string): string | undefined => {
+  // Assessment dates are human strings ("April 2, 2026") that Date.parse reads
+  // as *local* midnight, so going back out through toISOString() (UTC) would
+  // shift the date a day earlier on any build machine ahead of UTC. Read the
+  // components back in the same frame they were parsed in.
+  const iso = human.trim().match(/^\d{4}-\d{2}-\d{2}/);
+  if (iso) return iso[0];
+  const t = Date.parse(human);
+  if (Number.isNaN(t)) return undefined;
+  const d = new Date(t);
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+};
+const published = toIsoDate(report.originalDate);
+const modified = toIsoDate(report.latestDate);
+const reportUrl = new URL(`/report/${report.slug}/`, origin).href;
+const articleSchema = {
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": report.name,
+  "description": ogDescription,
+  "url": reportUrl,
+  "mainEntityOfPage": reportUrl,
+  "image": new URL(`/og/${report.slug}.png`, origin).href,
+  ...(published ? { datePublished: published } : {}),
+  ...(modified ? { dateModified: modified } : {}),
+  "author": { "@id": orgId },
+  "publisher": { "@id": orgId },
+  ...(report.finalScore != null ? { mainEntity: { "@id": `${reportUrl}#review` } } : {}),
+};
+
+// The review covers the asset, not this article, so it is its own node with an
+// explicit itemReviewed. The lower-is-better risk score is a product property,
+// not a schema.org Rating, whose bestRating must be the highest scale value.
+const reviewSchema =
+  report.finalScore != null
+    ? {
+        "@context": "https://schema.org",
+        "@type": "Review",
+        "@id": `${reportUrl}#review`,
+        "url": reportUrl,
+        "author": { "@id": orgId },
+        "itemReviewed": {
+          "@type": ["FinancialProduct", "Product"],
+          "name": report.name,
+          "description": `${report.token} on ${report.chain}`,
+          "additionalProperty": {
+            "@type": "PropertyValue",
+            "name": "Yearn Curation risk score",
+            "value": report.finalScore.toFixed(1),
+            "minValue": 1,
+            "maxValue": 5,
+            "description": "Lower values indicate lower risk.",
+            "alternateName": scoreTier(report.finalScore),
+          },
+        },
+      }
+    : null;
+const jsonLd = reviewSchema ? [articleSchema, reviewSchema] : [articleSchema];
 ---
 
 <BaseLayout
@@ -42,6 +109,7 @@ const reportIssueUrl = (() => {
   ogImage={`/og/${report.slug}.png`}
   ogUrl={`/report/${report.slug}/`}
   bare
+  jsonLd={jsonLd}
 >
   <a href="/reports/" class="back-link">&larr; All Reports</a>
 
