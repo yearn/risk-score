@@ -444,7 +444,7 @@ Public restitution txs for Sept 2024 exploit
 
 **Final Risk Tier: Elevated Risk**
 
-uniBTC is stronger than a purely admin-attested wrapper on reserve provability because Chainlink PoR is wired into the mint path. It remains Elevated Risk because all audits are from 2024, approximately 21.3% of reported reserves are M-BTC, minting is allowed down to 90% reserve adequacy, governance has no onchain timelock and holds token-level mint-grant and freeze authority, an undocumented third-party bridge holds live mint rights, backing control and Babylon position state are incompletely disclosed, and large exits are constrained by both redemption caps and near-zero secondary liquidity.
+uniBTC is stronger than a purely admin-attested wrapper on reserve provability because Chainlink PoR is wired into the mint path. It remains Elevated Risk because approximately 21.3% of reported reserves are M-BTC, minting is allowed down to 90% reserve adequacy, governance has no onchain timelock and holds token-level mint-grant and freeze authority, an undocumented third-party bridge holds live mint rights, backing control and Babylon position state are incompletely disclosed, and large exits are constrained by both redemption caps and near-zero secondary liquidity.
 
 ---
 
