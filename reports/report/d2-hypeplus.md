@@ -8,8 +8,6 @@
 
 ## Overview + Links
 
-> **Note:** The current epoch (epoch 21) runs from July 6, 2026 through September 18, 2026 — approximately 74 days. Epochs exceeding 30 days trigger reassessment under the Governance-based trigger below. The vault `owner()` remains a single EOA, and `onlyWhitelisted()` gates both `deposit`/`mint` and `withdraw`/`redeem`. An owner-compromise or one-transaction `setWhitelistBalance(type(uint256).max)` attack continues to be the dominant tail risk. **Score capped at 3.85 pending these concerns.**
-
 D2 Finance offers actively managed ERC-4626 strategy vaults. The scoped asset is the HYPE++ vault on Arbitrum, a USDC-denominated strategy vault whose funds are moved from the vault into a D2 trader/OMS contract during trading epochs. D2 docs describe each strategy as a standalone vault + trader contract + trader OMS; users deposit during a funding phase, funds are custodied by the trader during the trading phase, and funds are returned to the vault at the end of an epoch for withdrawal or rollover.
 
 The HYPE++ vault is currently in epoch 21. Onchain state verified on August 10, 2026:
@@ -20,6 +18,8 @@ The HYPE++ vault is currently in epoch 21. Onchain state verified on August 10, 
 - `custodied() = true`; direct user withdrawals are disabled while custodied.
 - `totalAssets() = 11,691,129.813660 USDC`; `totalSupply() = 7,885,149.965220 HYPE++`.
 - HYPE++ trader holds ~4.19M USDC directly and all outstanding dgnHYPE shares; dgnHYPE reports ~7.50M USDC `totalAssets()`. This reconciles to HYPE++ `totalAssets()`, but deeper dgnHYPE positions remain a nested D2 strategy dependency.
+
+**August 10, 2026 tracing update:** The previously unresolved dgnHYPE balance gap was traced further. The dgnHYPE custody Safe sends substantial USDC to two operational EOAs, which then route funds into Hyperliquid through the verified `Bridge2` contract and Circle's HyperCore CCTP extension. This makes the trading destination clearer, but introduces an EOA custody hop between the 3-of-5 Safe and Hyperliquid; see Funds Management.
 
 **Links:**
 
@@ -34,6 +34,8 @@ The HYPE++ vault is currently in epoch 21. Onchain state verified on August 10, 
 - [Cyfrin D2 v2.1 Audit PDF](https://github.com/Cyfrin/cyfrin-audit-reports/blob/main/reports/2025-02-24-cyfrin-d2-v2.1.pdf)
 - [Cyfrin D2 HYPE CoreWriter v2.0 Audit PDF](https://github.com/Cyfrin/cyfrin-audit-reports/blob/main/reports/2025-10-16-cyfrin-d2-hype-corewriter-v2.0.pdf)
 - [Arbitrum L2BEAT Risk Page](https://l2beat.com/scaling/projects/arbitrum)
+- [Hyperliquid Bridge2 on Arbitrum](https://arbiscan.io/address/0x2Df1c51E09aECF9cacB7bc98cB1742757f163dF7)
+- [Circle HyperCore CCTP Contract Addresses](https://developers.circle.com/cctp/references/hypercore-contract-addresses)
 
 ## Contract Addresses
 
@@ -47,6 +49,10 @@ The HYPE++ vault is currently in epoch 21. Onchain state verified on August 10, 
 | D2 Vault Multisig | [`0xB2fEDed045F3fd9FcCCF8E7e95729c4182916CE0`](https://arbiscan.io/address/0xB2fEDed045F3fd9FcCCF8E7e95729c4182916CE0) | Safe, 4-of-7; also trader admin/executor |
 | dgnHYPE Vault | [`0x64167cd42859F64cfF2Aa4B63c3175cceF9659dd`](https://arbiscan.io/address/0x64167cd42859F64cfF2Aa4B63c3175cceF9659dd) | Nested D2 ERC-4626 vault held by HYPE++ trader |
 | dgnHYPE Trader / Custody Safe | [`0x155d0B27B754ebC664aeD565945C1AaEa91966fb`](https://arbiscan.io/address/0x155d0B27B754ebC664aeD565945C1AaEa91966fb) | Nested D2 custody Safe, 3-of-5 |
+| Hyperliquid Operational EOA 1 | [`0x0C684f333A7e120bce61383DA670bbB0157e82d0`](https://arbiscan.io/address/0x0C684f333A7e120bce61383DA670bbB0157e82d0) | EOA receiving USDC from the dgnHYPE Safe before depositing into Hyperliquid Bridge2 |
+| Hyperliquid Operational EOA 2 | [`0x11A691612BD108e57cC04ea42B006C9CB1ff006A`](https://arbiscan.io/address/0x11A691612BD108e57cC04ea42B006C9CB1ff006A) | EOA receiving USDC from the dgnHYPE Safe; routes through Bridge2 and Circle HyperCore CCTP |
+| Hyperliquid Bridge2 | [`0x2Df1c51E09aECF9cacB7bc98cB1742757f163dF7`](https://arbiscan.io/address/0x2Df1c51E09aECF9cacB7bc98cB1742757f163dF7) | Verified Hyperliquid Arbitrum bridge contract; not an EOA |
+| Circle HyperCore CCTP Extension | [`0xA95d9c1F655341597C94393fDdc30cf3c08E4fcE`](https://arbiscan.io/address/0xA95d9c1F655341597C94393fDdc30cf3c08E4fcE) | Circle-documented Arbitrum contract for USDC transfers to HyperCore |
 | USDC | [`0xaf88d065e77c8cC2239327C5EDb3A432268e5831`](https://arbiscan.io/address/0xaf88d065e77c8cC2239327C5EDb3A432268e5831) | Underlying asset |
 | Vault Factory | [`0xb5B272EF918835651375f84D463b1Ba7B61eF028`](https://arbiscan.io/address/0xb5B272EF918835651375f84D463b1Ba7B61eF028) | Deployed HYPE++ vault |
 | Strategy Factory | [`0x2AA01FdE174aB160b4e4F49F152C20d6Ec029d67`](https://arbiscan.io/address/0x2AA01FdE174aB160b4e4F49F152C20d6Ec029d67) | Deployed HYPE++ trader |
@@ -103,6 +109,16 @@ Current reserve reconciliation, verified August 10, 2026:
 
 The HYPE++ top-level arithmetic reconciles: direct USDC (~4.19M) plus dgnHYPE reported assets (~7.50M) equals HYPE++ `totalAssets()` (~11.69M). However, dgnHYPE itself is a nested active D2 strategy with custodied funds. Its `trader()` is a 3-of-5 Safe, and dgnHYPE uses the same custodied accounting pattern: while custodied, `totalAssets()` returns the stored `custodiedAmount` rather than live token balances. Only ~2.10M real Arbitrum USDC was found at the dgnHYPE Safe during this pass; the remaining dgnHYPE reported assets are therefore not fully verifiable from simple ERC-20 balances.
 
+### Post-assessment Hyperliquid trace (August 10, 2026)
+
+The later epoch provides a clearer end-to-end route for the dgnHYPE capital:
+
+- On July 27, 2026, the dgnHYPE vault transferred **7,500,500.905511 USDC** to its 3-of-5 custody Safe ([transaction](https://arbiscan.io/tx/0x97cb497f929e953743bed88489168d1d185e7f4070ca8d88781b06b514f21a0b)).
+- The Safe subsequently transferred exactly **5.0M USDC** in several transactions to EOA [`0x0C684f...82d0`](https://arbiscan.io/address/0x0C684f333A7e120bce61383DA670bbB0157e82d0), including this representative [900,000 USDC Safe transaction](https://arbiscan.io/tx/0x6d3e7171405c82605f894baa6587af9ce5a542313438f0fc3b5dab886ac4107c). The EOA then deposited the same 5.0M USDC into the verified Hyperliquid `Bridge2` contract in corresponding tranches, including this [900,000 USDC bridge deposit](https://arbiscan.io/tx/0x1c8ac299aba7018fcea3a5ba7dd090d12df0c6b50647af19d4ec4db271437e6d).
+- On August 1, 2026, the Safe transferred exactly **400,000 USDC** in five transactions to a second EOA, [`0x11A691...006A`](https://arbiscan.io/address/0x11A691612BD108e57cC04ea42B006C9CB1ff006A), including this [150,000 USDC Safe transaction](https://arbiscan.io/tx/0x939b4ce096204c516c9e25e6b626bf06edfc7ff0a0a534622cc2e3c8487de7ed). That EOA used both Hyperliquid `Bridge2` ([example deposit](https://arbiscan.io/tx/0xbf2a7e1a935c7888411137e3a485d61112460628d7c8257d7f0d641b22b1e217)) and Circle's documented HyperCore CCTP extension ([30,000 USDC transaction](https://arbiscan.io/tx/0xa16131d106d5b550a2db239b77dd1b5743dab406b6498ddcad4258c9efa8316d)).
+- Both intermediate addresses are EOAs (`is_contract = false`). The actual Hyperliquid `Bridge2` destination is a verified contract, not an EOA. The material trust issue is therefore the **Safe -> EOA -> bridge** path: once the Safe releases funds, its 3-of-5 approval protection no longer governs the assets held or operated by either EOA. Loss or compromise of an operational key could affect funds before bridging and the Hyperliquid account controlled by that key.
+- This trace identifies a major deployment destination and corroborates active Hyperliquid trading. It does not provide complete live NAV or a full strategy exposure map because positions may span multiple Hyperliquid accounts, spot and derivatives, other venues, and offchain counterparties.
+
 **Control concentration:** The dgnHYPE vault's `owner()` is the same EOA ([`0x0E8c0470773c65498F438cac380648B314399A46`](https://arbiscan.io/address/0x0E8c0470773c65498F438cac380648B314399A46)) that owns the HYPE++ vault, concentrating control of both vaults in a single EOA. dgnHYPE is a different contract — its verified source is `VaultV0` (distinct bytecode/codehash from the HYPE++ `VaultV1Whitelisted` vault), and its `whitelistBalance()`/`whitelistAsset()` do not exist (they revert). Its `withdraw`/`redeem` are still gated by `onlyWhitelisted`, but VaultV0's modifier is a pure `require(whitelisted[msg.sender])` with no holder-balance branch. So the **blacklist path applies to dgnHYPE** (the owner can remove its sole holder, the HYPE++ trader), but the `setWhitelistBalance(uint256.max)` balance-gate path does **not** exist there. The HYPE++ trader holds 100% of dgnHYPE supply, so blocking dgnHYPE redemptions would trap ~64.2% of HYPE++ assets (~$7.50M) inside the nested strategy.
 
 ### Accessibility
@@ -140,6 +156,7 @@ HYPE++ is not overcollateralized. It is a share token over an actively managed U
 - HYPE++ currently depends on dgnHYPE for ~64.2% of reported assets by value, creating recursive D2 strategy exposure.
 - The trader's allowed token list contains 32 tokens (including volatile assets: WETH [`0x82aF49447D8a07e3bd95BD0d56f35241523fBab1`](https://arbiscan.io/address/0x82aF49447D8a07e3bd95BD0d56f35241523fBab1), WBTC [`0x2f2a2543B76A4166549F7aaB2e75Bef0aefC5B0f`](https://arbiscan.io/address/0x2f2a2543B76A4166549F7aaB2e75Bef0aefC5B0f), ARB, GMX, GRAIL, PENDLE, LINK, wstETH, and old bridged USDC.e [`0xFF970A61A04b1cA14834A43f5dE4533eDBBD5CC8`](https://arbiscan.io/address/0xFF970A61A04b1cA14834A43f5dE4533eDBBD5CC8)) and the allowed spender list contains 30 addresses, including major Arbitrum DeFi venues and D2 strategy vaults.
 - dgnHYPE's `trader()` is a 3-of-5 Safe; only ~2.10M real USDC was directly observed there versus ~7.50M reported `totalAssets()`. **The Safe is a standard Gnosis Safe with no on-chain guardrails** — 3-of-5 signers can call `execTransaction` to send assets to any address. Unlike the HYPE++ trader OMS (constrained to 32 pre-approved tokens and 30 venues), the dgnHYPE Safe has unrestricted custody over 64.2% of HYPE++ assets.
+- The August follow-up trace shows that this unrestricted Safe custody is followed by an additional EOA layer: 5.0M USDC and 400,000 USDC were routed to two operational EOAs before Hyperliquid/HyperCore entry. The tracing reduces uncertainty about where a large portion of the balance went, but it does not restore multisig protection after the Safe-to-EOA transfers.
 
 ### Provability
 
@@ -148,6 +165,7 @@ Top-level HYPE++ accounting is partially provable:
 - `totalAssets()`, `custodiedAmount()`, direct USDC balances, dgnHYPE balances, and dgnHYPE `totalAssets()` are onchain.
 - HYPE++ does not need an offchain price oracle for the top-level USDC + dgnHYPE share accounting observed in this pass.
 - End-to-end position risk is not fully transparent from a single call because nested dgnHYPE is itself custodied by a Safe and reports stored custodied accounting while active.
+- Arbitrum transfers now expose the path from dgnHYPE to its Safe, onward through operational EOAs, and into Hyperliquid Bridge2/Circle CCTP. Live position valuation and complete cross-venue reconciliation remain outside the ERC-4626 accounting path.
 - D2 docs state positions are generally onchain-verifiable but disclose exceptions for Flowdesk OTC trades and partial verifiability of Flowdesk collateral. No Flowdesk exposure was proven for HYPE++ in this pass, but the disclosure is relevant to D2's strategy model.
 
 ## Liquidity Risk
@@ -195,6 +213,8 @@ Dependencies include:
 - Arbitrum One as the execution chain. L2BEAT lists Arbitrum One as a Stage 1 optimistic rollup and notes upgrade/security-council and sequencer-related trust assumptions.
 - Circle/Arbitrum USDC as the base asset.
 - D2's nested dgnHYPE strategy.
+- Hyperliquid/HyperCore for spot and derivatives execution, reached from the dgnHYPE Safe through two operational EOAs and then Hyperliquid Bridge2 or Circle CCTP.
+- Circle CCTP as an additional USDC route from Arbitrum to HyperCore.
 - Broad Arbitrum DeFi venues approved in the trader's allowed spender list, including Aave, 1inch, GMX/Camelot-style modules, and D2 strategy contracts.
 - Offchain operator process for strategy decisions.
 
@@ -208,6 +228,7 @@ Operational gaps remain:
 - The EOA with trader admin/executor/fee-receiver roles is not identified in the docs reviewed.
 - No public bug bounty with payout terms was found.
 - Nested dgnHYPE backing is only partially transparent from ERC-20 balances: the dgnHYPE Safe directly held ~2.10M real USDC against ~7.50M reported `totalAssets()`.
+- Subsequent tracing identifies Hyperliquid as a major destination, but operational EOAs sit between the dgnHYPE Safe and the bridge. No public documentation reviewed identifies those EOAs, their key-management policy, recovery process, or whether institutional custody controls protect them.
 
 ## Monitoring
 
@@ -236,6 +257,10 @@ Monitor these contracts and values:
   - `totalAssets()`, `totalSupply()`, `custodied()`, `trader()`, `owner()`
 - dgnHYPE Safe [`0x155d...66fb`](https://arbiscan.io/address/0x155d0B27B754ebC664aeD565945C1AaEa91966fb)
   - `getThreshold()`, `getOwners()`; monitor threshold/owner changes and direct USDC balance against reported `custodiedAmount`.
+- Hyperliquid operational EOAs [`0x0C68...82d0`](https://arbiscan.io/address/0x0C684f333A7e120bce61383DA670bbB0157e82d0) and [`0x11A6...006A`](https://arbiscan.io/address/0x11A691612BD108e57cC04ea42B006C9CB1ff006A)
+  - Monitor every inbound transfer from the dgnHYPE Safe, subsequent Bridge2/CCTP deposits, unexpected destinations, and whether funds return before epoch settlement.
+- Hyperliquid [`Bridge2`](https://arbiscan.io/address/0x2Df1c51E09aECF9cacB7bc98cB1742757f163dF7) and Circle [`HyperCore CCTP extension`](https://arbiscan.io/address/0xA95d9c1F655341597C94393fDdc30cf3c08E4fcE)
+  - Monitor deposits attributable to the operational EOAs and bridge/validator/CCTP incidents.
 
 Suggested alert thresholds:
 
@@ -246,6 +271,7 @@ Suggested alert thresholds:
 - Any new epoch with an end timestamp materially longer than 30 days.
 - Any mismatch where direct HYPE++ trader assets plus dgnHYPE-derived assets fail to reconcile to HYPE++ `totalAssets()` by more than 1%.
 - Any dgnHYPE `totalAssets()` drop greater than 2% between checks.
+- Any dgnHYPE Safe transfer to a new EOA or any operational-EOA transfer to a destination other than the identified Hyperliquid/CCTP routes.
 
 ## Appendix: Contract Architecture
 
@@ -281,7 +307,15 @@ User USDC
           v
         [dgnHYPE Trader / 3-of-5 Safe]
           - reports ~7.50M USDC totalAssets (custodiedAmount)
+          - unrestricted Safe execution
           - ~2.10M real USDC directly observed; remainder in active positions
+          |
+          +--> [Operational EOA 0x0C68...] --USDC--> [Hyperliquid Bridge2]
+          |
+          +--> [Operational EOA 0x11A6...] --USDC--> [Hyperliquid Bridge2 / Circle CCTP]
+                                                     |
+                                                     v
+                                               [HyperCore trading accounts]
 
 Governance / control:
 
@@ -311,6 +345,7 @@ Governance / control:
 - The trader's allowed token list includes volatile assets (WETH, WBTC, ARB, GMX, GRAIL, PENDLE, LINK, wstETH) and old bridged USDC.e, expanding the strategy risk surface.
 - Funds are actively custodied by the trader during epochs; users cannot withdraw while custodied. The current epoch (epoch 21) runs July 6–September 18, 2026 — approximately 74 days total, triggering the 30-day reassessment threshold.
 - HYPE++ currently has large nested exposure to dgnHYPE (~64.2% of assets), another D2 active strategy controlled by the same EOA owner. The dgnHYPE custody Safe has no on-chain guardrails (standard Gnosis Safe, not a constrained OMS) — a separate trust surface for the majority of HYPE++ capital.
+- dgnHYPE capital is routed from its 3-of-5 Safe through operational EOAs before entering Hyperliquid/HyperCore. This creates single-key custody and execution exposure after the multisig-approved transfer, even though the final Hyperliquid Bridge2 destination is a verified contract.
 - End-to-end backing is not a simple live reserve balance; it depends on D2 trader execution and return of funds.
 
 ### Critical Risks
@@ -320,7 +355,7 @@ Governance / control:
   2. **Balance gate:** `setWhitelistBalance(type(uint256).max)` — no user can satisfy `whitelistAsset.balanceOf(user) > uint256.max`, so the holder branch can never pass and every non-whitelisted `withdraw()` and `redeem()` reverts. One transaction, no enumeration needed, blocks every shareholder indiscriminately. This is the reliable single-transaction block on HYPE++.
   Both paths work because the `onlyWhitelisted()` modifier gates `withdraw()` and `redeem()` — not just `deposit()` and `mint()` — verified against the verified `VaultV1Whitelisted` source on August 10, 2026. There is no onchain bypass. The blacklist path also applies to dgnHYPE, a separate `VaultV0` contract (distinct bytecode; `whitelistBalance`/`whitelistAsset` do not exist there), where the HYPE++ trader is the sole dgnHYPE holder — blacklisting it traps $7.50M (64.2% of HYPE++ assets). The vault holds zero USDC while custodied, so the trader must return funds before blocked users could even attempt an exit, but even after `returnFunds()` the gated `withdraw`/`redeem` would revert. Combined with `transferOwnership()`, a hacked EOA can transfer this power to a new attacker address, making the block permanent.
 - A compromised or malicious trader executor can interact with a broad allowed DeFi surface (32 tokens, 30 spenders) and cause trading losses before funds are returned.
-- **The dgnHYPE Safe (3-of-5) can steal $7.50M with no guardrails.** Unlike the HYPE++ trader OMS, which is constrained to pre-approved tokens and venues, the dgnHYPE custody Safe is a standard Gnosis Safe. 3-of-5 signers can call `execTransaction` to execute `USDC.transfer(attacker, amount)` — or any other arbitrary call — with no on-chain restriction. The Safe currently holds $2.10M in direct USDC and controls deployed positions worth ~$5.40M. Neither the dgnHYPE vault, the HYPE++ vault, nor the HYPE++ trader has any mechanism to constrain or override the Safe signers. This is a fundamentally different custody model from the HYPE++ OMS: restricted smart-contract execution vs unrestricted multisig custody. The Safe signers (5 addresses distinct from the HYPE++ trader roles) represent a separate trust surface for 64.2% of HYPE++ assets.
+- **The dgnHYPE Safe (3-of-5) and its downstream operational EOAs form an unrestricted custody path for $7.50M.** Unlike the HYPE++ trader OMS, which is constrained to pre-approved tokens and venues, the dgnHYPE custody Safe is a standard Gnosis Safe. 3-of-5 signers can call `execTransaction` to execute `USDC.transfer(attacker, amount)` — or any other arbitrary call — with no on-chain restriction. The later trace confirms this authority is used to send millions of USDC to EOAs before Hyperliquid bridging. Once transferred, the Safe's threshold no longer protects those funds; control follows the relevant EOA/Hyperliquid account key. Neither the dgnHYPE vault, the HYPE++ vault, nor the HYPE++ trader has a mechanism to constrain or override the Safe signers or the downstream EOA keys. This is a fundamentally different custody model from the HYPE++ OMS: restricted smart-contract execution versus unrestricted multisig custody followed by single-address operation.
 - A compromised or malicious vault owner can manipulate epoch timing, transfer ownership, and change access controls for BOTH vaults, delaying exits or changing who can deposit/redeem.
 
 ---
@@ -358,7 +393,7 @@ The total-centralization gate is not marked because the D2 Vault MS also holds t
 
 **Subcategory A: Collateralization**
 
-**Funds Management Score = (4.5 + 4.5) / 2 = 4.50/5** - Collateralization raised to 4.5: dgnHYPE Safe (64.2% of assets) is a standard Gnosis Safe with unrestricted custody — signers can transfer funds to any address with no on-chain guardrails. Top-level balances reconcile, but `totalAssets()` is not a live full-position valuation while custodied, and nested dgnHYPE backing is only partially visible from ERC-20 balances.
+**Funds Management Score = (4.5 + 4.5) / 2 = 4.50/5** - Collateralization remains 4.5: dgnHYPE Safe (64.2% of assets) is a standard Gnosis Safe with unrestricted custody, and observed operations route millions through EOAs before Hyperliquid/HyperCore entry. Top-level balances reconcile, but `totalAssets()` is not a live full-position valuation while custodied; tracing identifies a major venue without making complete cross-venue NAV independently provable.
 
 #### Category 4: Liquidity Risk (Weight: 15%)
 
@@ -398,5 +433,5 @@ The total-centralization gate is not marked because the D2 Vault MS also holds t
 - **Governance-based:** Reassess immediately if vault ownership transfers, trader roles change, Safe threshold/signers change, or a timelock is added.
 - **Epoch-based:** Reassess if funds are not returned within 72 hours after the published epoch end or if a new epoch exceeds 30 days.
 - **Funds-based:** Reassess if HYPE++ `totalAssets()` falls by more than 2% outside expected fee/PnL reporting, or if reconciliation between HYPE++ direct assets plus dgnHYPE-derived assets fails by more than 1%.
-- **Dependency-based:** Reassess if dgnHYPE strategy composition changes, if dgnHYPE experiences losses, or if Flowdesk/OTC exposure is introduced.
+- **Dependency-based:** Reassess if dgnHYPE strategy composition changes, if dgnHYPE experiences losses, if either Hyperliquid operational EOA changes, if funds route to a new bridge/custodian, or if Flowdesk/OTC exposure is introduced.
 - **Incident-based:** Reassess after any D2, Arbitrum, GMX, Aave, 1inch, Camelot, Circle USDC, or nested D2 strategy incident.
