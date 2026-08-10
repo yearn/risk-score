@@ -29,12 +29,12 @@ nodes:
     label: dgnHYPE Vault
     address: "0x64167cd42859F64cfF2Aa4B63c3175cceF9659dd"
     category: strategy
-    note: Nested D2 strategy held by HYPE++ trader
+    note: Nested D2 strategy held by HYPE++ trader; ~64.2% of HYPE++ assets
   - id: dgnhype-trader
     label: dgnHYPE Custody Safe
     address: "0x155d0B27B754ebC664aeD565945C1AaEa91966fb"
     category: strategy
-    note: Nested 3-of-5 Safe; only part of reported backing observed as real USDC
+    note: Nested 3-of-5 Safe; ~$2.10M direct USDC vs ~$7.50M reported totalAssets
   - id: usdc
     label: Arbitrum USDC
     address: "0xaf88d065e77c8cC2239327C5EDb3A432268e5831"
