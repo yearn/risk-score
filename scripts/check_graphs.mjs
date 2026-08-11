@@ -62,6 +62,33 @@ export function findGraphIssues(graphs, reportSlugs) {
   const issues = [];
   const add = (level, slug, message) => issues.push({ level, slug, message });
 
+  // Every addressed `vault` node anchors its graph in getGraphIndex(), so two
+  // graphs claiming the same address makes the drill-down target arbitrary
+  // (first file wins). Usually it means a node is mis-categorised: shared
+  // machinery like an accountant or fee recipient belongs in `infra`.
+  const vaultClaims = new Map();
+  for (const { slug, graph } of graphs) {
+    for (const n of graph.nodes ?? []) {
+      if (n.category !== "vault" || !n.address) continue;
+      const key = `${(n.chain ?? graph.chain ?? "ethereum").toLowerCase()}:${n.address.toLowerCase()}`;
+      if (!vaultClaims.has(key)) vaultClaims.set(key, []);
+      vaultClaims.get(key).push({ slug, id: n.id });
+    }
+  }
+  for (const [key, claims] of vaultClaims) {
+    const owners = [...new Set(claims.map((c) => c.slug))];
+    if (owners.length < 2) continue;
+    const address = key.split(":")[1];
+    for (const owner of owners) {
+      const ids = claims.filter((c) => c.slug === owner).map((c) => c.id);
+      add(
+        "warn",
+        owner,
+        `vault node(s) ${ids.map((i) => `'${i}'`).join(", ")} claim ${address}, also claimed by ${owners.filter((o) => o !== owner).join(", ")} — cross-links to this address resolve arbitrarily`,
+      );
+    }
+  }
+
   for (const { slug, graph } of graphs) {
     const nodes = graph.nodes ?? [];
     const edges = graph.edges ?? [];

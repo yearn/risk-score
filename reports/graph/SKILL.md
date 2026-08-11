@@ -227,7 +227,9 @@ When two contracts function as a single dependency, represent them as one node w
 
 ## Cross-graph linking
 
-When a `dependency` node's `address` matches the **primary `vault` node** of another graph, three things happen automatically at build time. Only `vault`-category nodes anchor a graph — `getGraphIndex()` indexes the *first* node with `category: vault` and an address, so node ordering in the YAML is load-bearing (see the comment at the top of `sky-usds.yaml`, which lists sUSDS before USDS so sUSDS becomes the anchor). No new YAML fields are needed — matching is purely address-based.
+When a `dependency` node's `address` matches **any addressed `vault` node** of another graph, three things happen automatically at build time. Only `vault`-category nodes anchor a graph, but *every* one of them does, so a protocol with several user-facing tokens (sky-usds declares both sUSDS and USDS) can be entered through any of them. No new YAML fields are needed — matching is purely address-based.
+
+The corollary: `vault` is for **user-facing tokens only**. Shared internal machinery — accountants, fee recipients, dumpers — belongs in `infra`. Marking it `vault` makes it an anchor, and if two graphs do that with the same contract the drill-down target becomes arbitrary. `check_graphs.mjs` warns when it happens.
 
 ### What you get for free
 
@@ -269,6 +271,8 @@ Example on InfiniFi: hovering the inlined `cUSD (Cap Stablecoin)` lights its ups
 in blue. Mint/Redeem controllers connect to iUSD via `manages` edges, so they stay un-highlighted; that's correct — the chain is for capital movement.
 
 Clicking a card **pins** the chain and opens the details panel, so it can be read without holding the cursor still. Escape or the ✕ releases it.
+
+Keyboard: the graph is a single tab stop with a roving tabindex — arrow keys move between contracts in YAML order (roughly the dagre rank order, so it reads governance → vault → strategies → dependencies), Home/End jump to the ends, Enter opens the panel and moves focus into it, Escape closes it and hands focus back to the card. Node order in the YAML is therefore the order a keyboard user meets them in; keep related nodes adjacent.
 
 ### Implications for authors
 

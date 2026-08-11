@@ -23,11 +23,11 @@ nodes:
   - id: accountant
     label: Accountant (0% mgmt, 10% perf)
     address: "0x5A74Cb32D36f2f517DB6f7b0A0591e09b22cDE69"
-    category: vault
+    category: infra
   - id: dumper
     label: Fee Recipient (Dumper)
     address: "0x590Dd9399bB53f1085097399C3265C7137c1C4Cf"
-    category: vault
+    category: infra
 
   # Governance
   - id: daddy

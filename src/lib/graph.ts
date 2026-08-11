@@ -151,13 +151,20 @@ export interface CrossLinkEntry {
 
 /**
  * Build an address → owning-graph index across every YAML in reports/graph/.
- * "Owning" graph means the graph's primary vault / token node, not every
- * addressed contract in that graph. Used at build time to detect cross-graph
- * references - when a dependency node's address matches the primary vault node
- * in another report-backed graph, the dependency card becomes a drill-down link.
+ * "Owning" graph means one of the graph's user-facing `vault` tokens, not every
+ * addressed contract in it. Used at build time to detect cross-graph
+ * references — when a dependency node's address matches a vault node in another
+ * report-backed graph, the dependency card becomes a drill-down link.
  *
- * Key is `<chain>:<address-lowercased>`. First write wins (a contract is
- * normally only "owned" by one graph).
+ * **Every** addressed `vault` node is indexed, not just the first. A protocol
+ * routinely exposes more than one user-facing token (sky-usds declares both
+ * sUSDS and USDS), and indexing only the first meant a graph that referenced
+ * the second one silently got no cross-link — which is what happened to
+ * sky-stusds' USDS node.
+ *
+ * Key is `<chain>:<address-lowercased>`. First write wins across graphs (a
+ * token is normally only "owned" by one), and `check_graphs.mjs` warns when two
+ * graphs claim the same address so the ambiguity can't go unnoticed.
  */
 let graphIndexCache: Map<string, CrossLinkEntry> | undefined;
 
@@ -172,11 +179,12 @@ export function getGraphIndex(): Map<string, CrossLinkEntry> {
     if (!getReportBySlug(slug)) continue;
     const g = getGraphBySlug(slug);
     if (!g) continue;
-    const owner = g.nodes.find((n) => n.category === "vault" && n.address);
-    if (!owner?.address) continue;
-    const key = `${(owner.chain ?? g.chain).toLowerCase()}:${owner.address.toLowerCase()}`;
-    if (!index.has(key)) {
-      index.set(key, { slug, label: owner.label });
+    for (const owner of g.nodes) {
+      if (owner.category !== "vault" || !owner.address) continue;
+      const key = `${(owner.chain ?? g.chain).toLowerCase()}:${owner.address.toLowerCase()}`;
+      if (!index.has(key)) {
+        index.set(key, { slug, label: owner.label });
+      }
     }
   }
   graphIndexCache = index;

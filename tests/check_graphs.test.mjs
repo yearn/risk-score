@@ -109,6 +109,50 @@ test("an unconnected node warns", () => {
   assert.ok(issues.some((i) => i.level === "warn" && /'orphan'.*has no edges/.test(i.message)));
 });
 
+test("two graphs claiming the same vault address warns on both", () => {
+  const a = baseGraph();
+  const b = baseGraph();
+  const issues = findGraphIssues(
+    [
+      { slug: "demo", graph: a },
+      { slug: "other", graph: b },
+    ],
+    new Set(["demo", "other"]),
+  );
+  const claims = issues.filter((i) => /resolve arbitrarily/.test(i.message));
+  // Both vault nodes are shared, so each graph is warned about each address.
+  assert.equal(claims.length, 4);
+  assert.deepEqual([...new Set(claims.map((c) => c.slug))].sort(), ["demo", "other"]);
+});
+
+test("a vault address claimed by only one graph does not warn", () => {
+  const b = baseGraph();
+  b.nodes = b.nodes.map((n) => ({ ...n, address: n.address + "f" }));
+  const issues = findGraphIssues(
+    [
+      { slug: "demo", graph: baseGraph() },
+      { slug: "other", graph: b },
+    ],
+    new Set(["demo", "other"]),
+  );
+  assert.equal(issues.filter((i) => /resolve arbitrarily/.test(i.message)).length, 0);
+});
+
+test("a shared address is fine when only one graph calls it a vault", () => {
+  const b = baseGraph();
+  b.nodes = b.nodes.map((n) => ({ ...n, category: n.id === "vault" ? "vault" : "infra" }));
+  b.nodes[0].address = "0xZZZ";
+  b.categories = [...b.categories, { id: "infra", label: "Infra" }];
+  const issues = findGraphIssues(
+    [
+      { slug: "demo", graph: baseGraph() },
+      { slug: "other", graph: b },
+    ],
+    new Set(["demo", "other"]),
+  );
+  assert.equal(issues.filter((i) => /resolve arbitrarily/.test(i.message)).length, 0);
+});
+
 test("issues from several graphs are reported together", () => {
   const issues = findGraphIssues(
     [

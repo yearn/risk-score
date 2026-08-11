@@ -191,7 +191,11 @@ const heading = graphHeading(title, slug!);
     </div>
 
     <div class="graph-canvas">
-      <div id="cy" aria-label="Contract dependency graph"></div>
+      <div
+        id="cy"
+        role="group"
+        aria-label="Contract dependency graph. Use the arrow keys to move between contracts and Enter to open details."
+      ></div>
       <div id="cy-callouts" class="graph-callouts" aria-hidden="true"></div>
 
       <div class="graph-zoom">
@@ -200,7 +204,14 @@ const heading = graphHeading(title, slug!);
         <button id="cy-fit" type="button" aria-label="Fit to view" title="Fit to view">&#10530;</button>
       </div>
 
-      <aside id="graph-panel" class="graph-panel" hidden>
+      <aside
+        id="graph-panel"
+        class="graph-panel"
+        role="dialog"
+        aria-label="Contract details"
+        tabindex="-1"
+        hidden
+      >
         <button id="panel-close" class="panel-close" type="button" aria-label="Close details">&#10005;</button>
         <div id="panel-content" class="panel-scroll"></div>
       </aside>
@@ -324,10 +335,12 @@ const heading = graphHeading(title, slug!);
       if (isInlined) classes.push("is-inlined");
       wrap.className = classes.join(" ");
       wrap.dataset.nodeId = n.id;
-      // Cards are the primary control on this page, so they need to behave
-      // like buttons: reachable by Tab, activatable by Enter/Space. This is
-      // also what makes the highlight chain available without a mouse.
-      wrap.tabIndex = 0;
+      // Cards are the primary control on this page, so they behave like
+      // buttons. They use a roving tabindex — the graph is a single tab stop
+      // and the arrow keys move between contracts — because putting 48 cards
+      // in the tab order would make everything after the graph unreachable in
+      // practice.
+      wrap.tabIndex = -1;
       wrap.setAttribute("role", "button");
       wrap.setAttribute(
         "aria-label",
@@ -591,12 +604,16 @@ const heading = graphHeading(title, slug!);
       hoverId = null;
       renderHighlights();
     });
-    // Keyboard focus gets the same treatment as hover.
+    // Keyboard focus gets the same treatment as hover, and also becomes the
+    // roving tab stop so Tab returns the user to where they left off.
     cyContainer.addEventListener("focusin", (e) => {
       const card = (e.target as HTMLElement).closest(".graph-card") as HTMLElement | null;
-      if (!card?.dataset.nodeId) return;
-      hoverId = card.dataset.nodeId;
+      const id = card?.dataset.nodeId;
+      if (!id) return;
+      hoverId = id;
       renderHighlights();
+      const i = orderedIds.indexOf(id);
+      if (i >= 0 && i !== rovingIndex) setRoving(i, false);
     });
 
     /* ------------------------------------------------------- details panel */
@@ -680,14 +697,28 @@ const heading = graphHeading(title, slug!);
         ${connectionRows(inboundByNode.get(id) ?? [], "in")}
         ${connectionRows(outboundByNode.get(id) ?? [], "out")}
       `;
+      // The label changes with the selection, so a screen reader announces
+      // which contract the dialog is describing.
+      panel.setAttribute("aria-label", `${n.categoryLabel}: ${n.label}`);
       panel.hidden = false;
       panel.classList.add("is-open");
     }
 
-    function selectNode(id: string) {
+    /** Where focus was before the panel opened, so Escape can hand it back. */
+    let focusReturn: HTMLElement | null = null;
+
+    function selectNode(id: string, moveFocus = false) {
+      const wasOpen = !panel.hidden;
       pinnedId = id;
       renderPanel(id);
       renderHighlights();
+      if (!wasOpen) {
+        const active = document.activeElement;
+        focusReturn = active instanceof HTMLElement ? active : null;
+      }
+      // Only pull focus when the panel was opened from the keyboard; a mouse
+      // user who clicks a card should keep their place on the canvas.
+      if (moveFocus) panel.focus();
     }
 
     function closePanel() {
@@ -695,6 +726,8 @@ const heading = graphHeading(title, slug!);
       panel.classList.remove("is-open");
       panel.hidden = true;
       renderHighlights();
+      if (focusReturn?.isConnected) focusReturn.focus();
+      focusReturn = null;
     }
 
     // Click no longer navigates. Drill-down and the explorer are explicit
@@ -728,13 +761,62 @@ const heading = graphHeading(title, slug!);
       selectNode(start.id);
     });
 
+    /* ------------------------------------------------- roving tabindex nav */
+
+    // Order follows the YAML, which is also roughly the dagre rank order, so
+    // arrowing through the graph reads governance → vault → strategies →
+    // dependencies rather than jumping around the canvas.
+    const orderedIds = data.nodes.map((n) => n.id);
+    let rovingIndex = 0;
+
+    function setRoving(index: number, moveFocus: boolean) {
+      const clamped = Math.max(0, Math.min(orderedIds.length - 1, index));
+      rovingIndex = clamped;
+      orderedIds.forEach((id, i) => {
+        const card = cardFor(id);
+        if (card) card.tabIndex = i === clamped ? 0 : -1;
+      });
+      if (!moveFocus) return;
+      const card = cardFor(orderedIds[clamped]);
+      card?.focus();
+      // Keep the focused card on screen — arrowing to an off-canvas node with
+      // no visible result would be worse than no keyboard support at all.
+      const ele = cy.getElementById(orderedIds[clamped]);
+      if (ele.length) cy.animate({ center: { eles: ele } }, { duration: 160 });
+    }
+
+    setRoving(0, false);
+
     cyContainer.addEventListener("keydown", (e) => {
-      if (e.key !== "Enter" && e.key !== " ") return;
       const card = (e.target as HTMLElement).closest(".graph-card") as HTMLElement | null;
       if (!card?.dataset.nodeId) return;
-      e.preventDefault();
-      selectNode(card.dataset.nodeId);
+      switch (e.key) {
+        case "Enter":
+        case " ":
+          e.preventDefault();
+          selectNode(card.dataset.nodeId, true);
+          break;
+        case "ArrowRight":
+        case "ArrowDown":
+          e.preventDefault();
+          setRoving(rovingIndex + 1, true);
+          break;
+        case "ArrowLeft":
+        case "ArrowUp":
+          e.preventDefault();
+          setRoving(rovingIndex - 1, true);
+          break;
+        case "Home":
+          e.preventDefault();
+          setRoving(0, true);
+          break;
+        case "End":
+          e.preventDefault();
+          setRoving(orderedIds.length - 1, true);
+          break;
+      }
     });
+
 
     panelContent.addEventListener("click", (e) => {
       const target = e.target as HTMLElement;
@@ -1525,6 +1607,11 @@ const heading = graphHeading(title, slug!);
      so the hidden state has to be spelled out. */
   .graph-panel[hidden] {
     display: none;
+  }
+  /* The panel takes focus when opened from the keyboard; say so visibly. */
+  .graph-panel:focus-visible {
+    outline: 2px solid rgba(110, 167, 255, 0.9);
+    outline-offset: -2px;
   }
   html.light .graph-panel {
     background: rgba(255, 255, 255, 0.98);
