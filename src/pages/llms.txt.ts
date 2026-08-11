@@ -1,5 +1,6 @@
 import type { APIRoute } from "astro";
 import { getAllReports } from "../lib/reports";
+import { getGraphSummaries } from "../lib/graph";
 import { scoreTier } from "../lib/colors";
 
 // llms.txt — a markdown briefing for LLMs and AI search engines, served at the
@@ -58,10 +59,41 @@ export const GET: APIRoute = async () => {
     lines.push(`- [${label}](${SITE}/report/${r.slug}/): ${r.token} on ${r.chain}`);
   }
 
+  // Dependency graphs: the machine-readable map of which assessment sits on
+  // top of which. Listed most-depended-upon first, since that ordering is the
+  // useful signal (a protocol many graphs reference is systemic to the book).
+  const graphs = getGraphSummaries()
+    .filter((g) => g.nodeCount > 0)
+    .sort(
+      (a, b) =>
+        b.referencedBy.length - a.referencedBy.length ||
+        a.slug.localeCompare(b.slug),
+    );
+  if (graphs.length > 0) {
+    lines.push(
+      "",
+      "## Contract dependency graphs",
+      "",
+      `Each assessed asset with a mapped contract graph is at \`${SITE}/graph/{slug}/\` — an interactive map of its vault, strategies, governance, and external dependencies, with the money-flow chain traceable in both directions. Index: ${SITE}/graph/`,
+      "",
+    );
+    for (const g of graphs) {
+      const deps = g.dependsOn.length > 0 ? `; depends on ${g.dependsOn.join(", ")}` : "";
+      const ref =
+        g.referencedBy.length > 0
+          ? `; referenced by ${g.referencedBy.join(", ")}`
+          : "";
+      lines.push(
+        `- [${g.title}](${SITE}/graph/${g.slug}/): ${g.nodeCount} contracts, ${g.edgeCount} relationships on ${g.chain}${deps}${ref}`,
+      );
+    }
+  }
+
   lines.push(
     "",
     "## Other resources",
     "",
+    `- [Dependency graphs](${SITE}/graph/): contract-level maps and cross-protocol exposure`,
     `- [Token exposures](${SITE}/tokens/): shared-asset overlap across curated protocols`,
     `- [Bridge dependencies](${SITE}/bridges/): cross-chain bridge risk`,
     `- [Live monitoring](${SITE}/monitoring/): real-time protocol alerts (governance, oracle, owner changes)`,

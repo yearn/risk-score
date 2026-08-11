@@ -1,0 +1,230 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import { getGraphSummaries } from "../../lib/graph";
+import { getReportBySlug } from "../../lib/reports";
+import { scoreColor, scoreTier, scoreTextColor } from "../../lib/colors";
+import { chainLabel } from "../../lib/graphStyle";
+
+const summaries = getGraphSummaries();
+
+const rows = summaries
+  .map((s) => {
+    const report = getReportBySlug(s.slug);
+    const score = report?.finalScore ?? null;
+    return {
+      ...s,
+      score,
+      tier: score != null ? scoreTier(score) : null,
+      color: score != null ? scoreColor(score) : null,
+      textColor: score != null ? scoreTextColor(score) : null,
+      // How many other assessments lean on this one — the number that makes a
+      // dependency systemic rather than isolated.
+      reach: s.referencedBy.length,
+    };
+  })
+  .sort((a, b) => b.reach - a.reach || a.title.localeCompare(b.title));
+
+const totalNodes = summaries.reduce((n, s) => n + s.nodeCount, 0);
+const totalEdges = summaries.reduce((n, s) => n + s.edgeCount, 0);
+const linked = summaries.filter((s) => s.dependsOn.length > 0).length;
+const mostReferenced = rows[0];
+---
+
+<BaseLayout
+  title="Dependency Graphs — Yearn Curation"
+  description="Contract dependency graphs for every risk assessment, and how they depend on each other."
+  ogUrl="/graph/"
+  ogImage="/og/default.png"
+>
+  <section class="gi-hero">
+    <h1>Dependency Graphs</h1>
+    <p class="gi-sub">
+      Every risk assessment with a mapped contract graph. Cards show how many other
+      assessments sit on top of each protocol — the higher that number, the more of
+      the book a failure there would touch.
+    </p>
+  </section>
+
+  <div class="gi-stats">
+    <div class="gi-stat"><b>{summaries.length}</b><span>graphs</span></div>
+    <div class="gi-stat"><b>{totalNodes}</b><span>contracts mapped</span></div>
+    <div class="gi-stat"><b>{totalEdges}</b><span>relationships</span></div>
+    <div class="gi-stat"><b>{linked}</b><span>with assessed dependencies</span></div>
+    {mostReferenced && mostReferenced.reach > 0 && (
+      <div class="gi-stat">
+        <b>{mostReferenced.reach}</b><span>graphs depend on {mostReferenced.title}</span>
+      </div>
+    )}
+  </div>
+
+  <div class="gi-tools">
+    <input type="text" id="gi-search" placeholder="Filter by protocol or slug…" autocomplete="off" />
+  </div>
+
+  <ul class="gi-list" id="gi-list">
+    {rows.map((r) => (
+      <li class="gi-row" data-search={`${r.title} ${r.slug} ${r.chain}`.toLowerCase()}>
+        <a class="gi-main" href={`/graph/${r.slug}/`}>
+          <span class="gi-title">{r.title}</span>
+          <span class="gi-meta">
+            {r.nodeCount} contracts · {r.edgeCount} links · {chainLabel(r.chain)}
+          </span>
+        </a>
+        <div class="gi-side">
+          {r.reach > 0 && (
+            <span class="gi-reach" title={`Referenced by: ${r.referencedBy.join(", ")}`}>
+              ← {r.reach} {r.reach === 1 ? "graph depends" : "graphs depend"} on this
+            </span>
+          )}
+          {r.dependsOn.length > 0 && (
+            <span class="gi-deps">
+              depends on {r.dependsOn.map((d, i) => (
+                <>{i > 0 && ", "}<a href={`/graph/${d}/`}>{d}</a></>
+              ))}
+            </span>
+          )}
+          {r.score != null && (
+            <span
+              class="gi-score"
+              style={`background:${r.color};color:${r.textColor}`}
+              title={r.tier ?? ""}
+              >{r.score.toFixed(1)}</span
+            >
+          )}
+        </div>
+      </li>
+    ))}
+  </ul>
+  <p class="gi-empty" id="gi-empty" hidden>No graphs match that filter.</p>
+
+  <script>
+    const input = document.getElementById("gi-search") as HTMLInputElement | null;
+    const list = document.getElementById("gi-list");
+    const empty = document.getElementById("gi-empty");
+    input?.addEventListener("input", () => {
+      const q = input.value.trim().toLowerCase();
+      let shown = 0;
+      list?.querySelectorAll<HTMLElement>(".gi-row").forEach((row) => {
+        const hit = !q || (row.dataset.search ?? "").includes(q);
+        row.hidden = !hit;
+        if (hit) shown++;
+      });
+      if (empty) empty.hidden = shown > 0;
+    });
+  </script>
+</BaseLayout>
+
+<style>
+  .gi-hero {
+    padding: 2rem 0 0.5rem;
+  }
+  .gi-hero h1 {
+    margin: 0 0 0.4rem;
+  }
+  .gi-sub {
+    color: var(--text-secondary);
+    max-width: 62ch;
+    margin: 0;
+  }
+  .gi-stats {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+    padding: 1.2rem 0 0.6rem;
+    border-bottom: 1px solid var(--border-color, rgba(127, 127, 127, 0.2));
+  }
+  .gi-stat {
+    display: flex;
+    flex-direction: column;
+  }
+  .gi-stat b {
+    font-size: 1.35rem;
+    line-height: 1.1;
+  }
+  .gi-stat span {
+    font-size: 0.72rem;
+    color: var(--text-secondary);
+  }
+  .gi-tools {
+    padding: 1rem 0 0.6rem;
+  }
+  .gi-tools input {
+    width: 100%;
+    max-width: 420px;
+    padding: 0.5rem 0.7rem;
+    font-size: 0.85rem;
+    color: var(--text-primary);
+    background: transparent;
+    border: 1px solid var(--border-color, rgba(127, 127, 127, 0.25));
+    border-radius: 7px;
+  }
+  .gi-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  .gi-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+    padding: 0.7rem 0.2rem;
+    border-bottom: 1px solid var(--border-color, rgba(127, 127, 127, 0.14));
+  }
+  /* `display: flex` outranks the UA `[hidden] { display: none }` rule. */
+  .gi-row[hidden] {
+    display: none;
+  }
+  .gi-main {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    min-width: 0;
+    flex: 1 1 260px;
+    text-decoration: none;
+  }
+  .gi-main:hover .gi-title {
+    text-decoration: underline;
+  }
+  .gi-title {
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+  .gi-meta {
+    font-size: 0.73rem;
+    color: var(--text-secondary);
+  }
+  .gi-side {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+  }
+  .gi-reach {
+    font-size: 0.72rem;
+    padding: 2px 8px;
+    border-radius: 999px;
+    color: var(--text-primary);
+    border: 1px solid rgba(110, 167, 255, 0.45);
+    cursor: help;
+    white-space: nowrap;
+  }
+  .gi-deps {
+    font-size: 0.72rem;
+    color: var(--text-secondary);
+  }
+  .gi-score {
+    font-size: 0.74rem;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 4px;
+    min-width: 34px;
+    text-align: center;
+  }
+  .gi-empty {
+    color: var(--text-secondary);
+    padding: 1rem 0;
+  }
+</style>

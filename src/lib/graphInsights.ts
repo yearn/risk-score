@@ -39,38 +39,74 @@ export interface CrossLinkInfo {
 }
 
 /**
- * Pull a percentage out of an `allocates-to` label. SKILL.md requires that kind
- * to always carry the share, but the exact spelling varies ("97.15%", "~12%",
- * "≈8.4 %"), so match loosely and let non-matching labels drop out.
+ * Pull a share out of an `allocates-to` label.
+ *
+ * Two shapes occur in the corpus, because not every report expresses
+ * allocation the same way:
+ *   - a percentage — "97.15%", "~12%", "7.3% (instant)"
+ *   - an absolute amount — "~$48.9M USDC", "WBTC ~$71.8M"
+ * A third group is purely qualitative ("Deribit margin", "lending", "curator
+ * allocation") for protocols whose reports give no split at all. Those return
+ * null and simply drop out of the metric — the alternative would be inventing
+ * a number.
  */
-function parsePercent(label: string | undefined): number | null {
+type Share =
+  | { unit: "pct"; value: number }
+  | { unit: "usd"; value: number };
+
+const USD_SCALE: Record<string, number> = { k: 1e3, m: 1e6, b: 1e9 };
+
+function parseShare(label: string | undefined): Share | null {
   if (!label) return null;
-  const m = label.match(/(\d+(?:[.,]\d+)?)\s*%/);
-  if (!m) return null;
-  const n = Number.parseFloat(m[1].replace(",", "."));
-  return Number.isFinite(n) ? n : null;
+  const pct = label.match(/(\d+(?:[.,]\d+)?)\s*%/);
+  if (pct) {
+    const n = Number.parseFloat(pct[1].replace(",", "."));
+    if (Number.isFinite(n)) return { unit: "pct", value: n };
+  }
+  const usd = label.match(/\$\s*(\d+(?:[.,]\d+)?)\s*([kmb])?/i);
+  if (usd) {
+    const n = Number.parseFloat(usd[1].replace(",", "."));
+    const scale = usd[2] ? (USD_SCALE[usd[2].toLowerCase()] ?? 1) : 1;
+    if (Number.isFinite(n)) return { unit: "usd", value: n * scale };
+  }
+  return null;
 }
 
-const fmtPct = (n: number): string =>
-  `${Number.parseFloat(n.toFixed(2))}%`;
+const fmtPct = (n: number): string => `${Number.parseFloat(n.toFixed(2))}%`;
+
+function fmtUsd(n: number): string {
+  if (n >= 1e9) return `$${Number.parseFloat((n / 1e9).toFixed(2))}B`;
+  if (n >= 1e6) return `$${Number.parseFloat((n / 1e6).toFixed(2))}M`;
+  if (n >= 1e3) return `$${Number.parseFloat((n / 1e3).toFixed(1))}K`;
+  return `$${Math.round(n)}`;
+}
+
+const fmtShare = (s: Share): string =>
+  s.unit === "pct" ? fmtPct(s.value) : fmtUsd(s.value);
 
 interface Allocation {
-  pct: number;
+  share: Share;
   targetId: string;
   targetLabel: string;
 }
 
+/**
+ * Sorted largest-first. Mixed units are not comparable, so when a graph uses
+ * both we rank within the dominant unit rather than pretending 48.9M > 77.9.
+ */
 function allocations(graph: Graph): Allocation[] {
   const byId = new Map(graph.nodes.map((n) => [n.id, n]));
   const out: Allocation[] = [];
   for (const e of graph.edges) {
     if (e.kind !== "allocates-to") continue;
-    const pct = parsePercent(e.label);
+    const share = parseShare(e.label);
     const target = byId.get(e.to);
-    if (pct == null || !target) continue;
-    out.push({ pct, targetId: target.id, targetLabel: target.label });
+    if (!share || !target) continue;
+    out.push({ share, targetId: target.id, targetLabel: target.label });
   }
-  return out.sort((a, b) => b.pct - a.pct);
+  const pcts = out.filter((a) => a.share.unit === "pct");
+  const scoped = pcts.length >= out.length - pcts.length ? pcts : out.filter((a) => a.share.unit === "usd");
+  return scoped.sort((a, b) => b.share.value - a.share.value);
 }
 
 /** The node a graph is "about" — same anchor rule `getGraphIndex()` uses. */
@@ -106,7 +142,7 @@ export function buildMetrics(
     const top = allocs[0];
     metrics.push({
       label: "Largest allocation",
-      value: fmtPct(top.pct),
+      value: fmtShare(top.share),
       sub: top.targetLabel,
     });
   }
@@ -166,7 +202,7 @@ export function buildCallouts(
   const allocs = allocations(graph);
   if (allocs.length > 0) {
     const top = allocs[0];
-    const share = fmtPct(top.pct);
+    const share = fmtShare(top.share);
     out.push({
       nodeId: top.targetId,
       title: "The concentration to watch",

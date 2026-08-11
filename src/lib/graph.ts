@@ -2,7 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import yaml from "js-yaml";
 import { getReportBySlug } from "./reports";
-import { FLOW_KINDS } from "./graphStyle";
+import { FLOW_KINDS, graphHeading } from "./graphStyle";
 
 const GRAPH_DIR = path.resolve("reports/graph");
 
@@ -159,7 +159,14 @@ export interface CrossLinkEntry {
  * Key is `<chain>:<address-lowercased>`. First write wins (a contract is
  * normally only "owned" by one graph).
  */
+let graphIndexCache: Map<string, CrossLinkEntry> | undefined;
+
 export function getGraphIndex(): Map<string, CrossLinkEntry> {
+  // Memoized: this reads and parses every YAML in the corpus, and it is called
+  // once per graph page *and* again inside expandCrossLinks() — without the
+  // cache that is O(pages × graphs) parses for a static, build-time-constant
+  // result.
+  if (graphIndexCache) return graphIndexCache;
   const index = new Map<string, CrossLinkEntry>();
   for (const slug of getGraphSlugs()) {
     if (!getReportBySlug(slug)) continue;
@@ -172,7 +179,76 @@ export function getGraphIndex(): Map<string, CrossLinkEntry> {
       index.set(key, { slug, label: owner.label });
     }
   }
+  graphIndexCache = index;
   return index;
+}
+
+/**
+ * Inverse of `getGraphIndex()`: for each graph slug, which *other* graphs name
+ * it as a dependency. The forward index answers "what does this graph sit on
+ * top of"; this answers "how much of the book is exposed to this protocol",
+ * which is the more interesting question for a curator.
+ */
+let reverseIndexCache: Map<string, CrossLinkEntry[]> | undefined;
+
+export function getReverseGraphIndex(): Map<string, CrossLinkEntry[]> {
+  if (reverseIndexCache) return reverseIndexCache;
+  const forward = getGraphIndex();
+  const reverse = new Map<string, CrossLinkEntry[]>();
+  for (const slug of getGraphSlugs()) {
+    const g = getGraphBySlug(slug);
+    if (!g) continue;
+    const seen = new Set<string>();
+    for (const n of g.nodes) {
+      const entry = resolveCrossLink(n, g.chain, slug, forward);
+      if (!entry || seen.has(entry.slug)) continue;
+      seen.add(entry.slug);
+      const list = reverse.get(entry.slug) ?? [];
+      list.push({ slug, label: graphHeading(g.title, slug) });
+      reverse.set(entry.slug, list);
+    }
+  }
+  for (const list of reverse.values()) list.sort((a, b) => a.slug.localeCompare(b.slug));
+  reverseIndexCache = reverse;
+  return reverse;
+}
+
+/** One row of the `/graph/` index. */
+export interface GraphSummary {
+  slug: string;
+  title: string;
+  chain: string;
+  nodeCount: number;
+  edgeCount: number;
+  /** Graphs this one depends on (outbound cross-links). */
+  dependsOn: string[];
+  /** Graphs that depend on this one (inbound cross-links). */
+  referencedBy: string[];
+}
+
+export function getGraphSummaries(): GraphSummary[] {
+  const forward = getGraphIndex();
+  const reverse = getReverseGraphIndex();
+  return getGraphSlugs()
+    .map((slug) => {
+      const g = getGraphBySlug(slug);
+      if (!g) return undefined;
+      const dependsOn = new Set<string>();
+      for (const n of g.nodes) {
+        const entry = resolveCrossLink(n, g.chain, slug, forward);
+        if (entry) dependsOn.add(entry.slug);
+      }
+      return {
+        slug,
+        title: graphHeading(g.title, slug),
+        chain: g.chain,
+        nodeCount: g.nodes.length,
+        edgeCount: g.edges.length,
+        dependsOn: [...dependsOn].sort(),
+        referencedBy: (reverse.get(slug) ?? []).map((e) => e.slug),
+      };
+    })
+    .filter((s): s is GraphSummary => s !== undefined);
 }
 
 /** Resolve a cross-link target for a single node, or `undefined` when none applies. */

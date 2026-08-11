@@ -4,6 +4,7 @@ import {
   getGraphSlugs,
   getGraphBySlug,
   getGraphIndex,
+  getReverseGraphIndex,
   resolveCrossLink,
   expandCrossLinks,
   explorerUrl,
@@ -13,7 +14,7 @@ import {
 } from "../../lib/graph";
 import { getReportBySlug } from "../../lib/reports";
 import { scoreColor, scoreTier, scoreTextColor } from "../../lib/colors";
-import { kindLabel, chainLabel } from "../../lib/graphStyle";
+import { kindLabel, chainLabel, graphHeading, EDGE_GROUPS } from "../../lib/graphStyle";
 import {
   buildMetrics,
   buildCallouts,
@@ -91,13 +92,20 @@ const cyData = {
 const metrics = buildMetrics(baseGraph, currentReport?.finalScore, crossLinks);
 const callouts = buildCallouts(baseGraph, crossLinks);
 
+// Which other assessments name this one as a dependency. The forward index
+// answers "what does this sit on"; this answers "who is exposed to it".
+const referencedBy = getReverseGraphIndex().get(slug!) ?? [];
+
 const usedKinds = Array.from(new Set(graph.edges.map((e) => e.kind)));
 const usedCategories: GraphCategory[] = graph.categories.filter((c) =>
   graph.nodes.some((n) => n.category === c.id),
 );
 
+// Only offer a filter for groups this graph actually uses.
+const usedGroups = EDGE_GROUPS.filter((g) => g.kinds.some((k) => usedKinds.includes(k)));
+
 const title = graph.title ?? `${slug} — Contract Dependency Graph`;
-const heading = title.replace(" — Contract Dependency Graph", "");
+const heading = graphHeading(title, slug!);
 ---
 
 <BaseLayout
@@ -108,7 +116,10 @@ const heading = title.replace(" — Contract Dependency Graph", "");
 >
   <div class="graph-shell">
     <div class="graph-header">
-      <a href={`/report/${slug}/`} class="graph-back">&larr; Risk report</a>
+      <div class="graph-back-group">
+        <a href={`/report/${slug}/`} class="graph-back">&larr; Risk report</a>
+        <a href="/graph/" class="graph-back">All graphs</a>
+      </div>
       <div class="graph-title">
         <span class="graph-title-eyebrow">Dependency graph</span>
         <h1>{heading}</h1>
@@ -143,6 +154,41 @@ const heading = title.replace(" — Contract Dependency Graph", "");
         ))}
       </div>
     )}
+
+    <div class="graph-toolbar">
+      <input
+        type="search"
+        id="cy-search"
+        class="graph-search"
+        placeholder="Find a contract by name or address…"
+        autocomplete="off"
+        aria-label="Find a contract"
+      />
+      {usedGroups.length > 1 && (
+        <div class="graph-filters" role="group" aria-label="Edge filters">
+          {usedGroups.map((g) => (
+            <button
+              type="button"
+              class="filter-chip is-on"
+              data-group={g.id}
+              data-kinds={g.kinds.join(",")}
+              aria-pressed="true">{g.label}</button
+            >
+          ))}
+        </div>
+      )}
+      {referencedBy.length > 0 && (
+        <div class="graph-refs">
+          <span class="graph-refs-label">Referenced by</span>
+          {referencedBy.map((r, i) => (
+            <>
+              {i > 0 && <span class="graph-refs-sep">·</span>}
+              <a href={`/graph/${r.slug}/`}>{r.label}</a>
+            </>
+          ))}
+        </div>
+      )}
+    </div>
 
     <div class="graph-canvas">
       <div id="cy" aria-label="Contract dependency graph"></div>
@@ -411,6 +457,8 @@ const heading = title.replace(" — Contract Dependency Graph", "");
         },
         // Without dimming, a highlighted chain is invisible in a 40-node graph.
         { selector: "edge.dim", style: { opacity: 0.12 } },
+        // Filter groups win over every highlight state.
+        { selector: "edge.filtered", style: { display: "none" } },
       ] as unknown as cytoscape.StylesheetJson;
     }
 
@@ -477,13 +525,14 @@ const heading = title.replace(" — Contract Dependency Graph", "");
 
     let hoverId: string | null = null;
     let pinnedId: string | null = null;
+    let searchMatches: Set<string> | null = null;
 
     function clearHighlights() {
       cy.elements().removeClass("hl-up hl-down dim");
       document
         .querySelectorAll(".graph-card")
         .forEach((c) =>
-          c.classList.remove("is-focus", "is-hl-up", "is-hl-down", "is-dim"),
+          c.classList.remove("is-focus", "is-hl-up", "is-hl-down", "is-dim", "is-match"),
         );
       shell.classList.remove("is-focused");
     }
@@ -491,7 +540,20 @@ const heading = title.replace(" — Contract Dependency Graph", "");
     function renderHighlights() {
       clearHighlights();
       const id = pinnedId ?? hoverId;
-      if (!id || cy.getElementById(id).length === 0) return;
+      if (!id || cy.getElementById(id).length === 0) {
+        // No chain in play — fall back to the search result as the focus state,
+        // so a query reads the same way a hover does.
+        if (searchMatches) {
+          for (const n of data.nodes) {
+            const card = cardFor(n.id);
+            if (!card) continue;
+            card.classList.add(searchMatches.has(n.id) ? "is-match" : "is-dim");
+          }
+          cy.edges().addClass("dim");
+          shell.classList.add("is-focused");
+        }
+        return;
+      }
 
       const up = walk(id, "up");
       const down = walk(id, "down");
@@ -700,6 +762,63 @@ const heading = title.replace(" — Contract Dependency Graph", "");
       if (evt.target === cy && pinnedId) closePanel();
     });
 
+    /* --------------------------------------------------- search & filters */
+
+    const searchInput = document.getElementById("cy-search") as HTMLInputElement | null;
+    searchInput?.addEventListener("input", () => {
+      const q = searchInput.value.trim().toLowerCase();
+      if (!q) {
+        searchMatches = null;
+        renderHighlights();
+        return;
+      }
+      searchMatches = new Set(
+        data.nodes
+          .filter(
+            (n) =>
+              n.label.toLowerCase().includes(q) ||
+              n.address.toLowerCase().includes(q) ||
+              n.categoryLabel.toLowerCase().includes(q),
+          )
+          .map((n) => n.id),
+      );
+      renderHighlights();
+      // Pull the matches into view so a search on a 40-node graph doesn't
+      // leave the answer off-screen.
+      if (searchMatches.size > 0) {
+        const eles = cy.collection();
+        searchMatches.forEach((id) => eles.merge(cy.getElementById(id)));
+        cy.animate({ fit: { eles, padding: 120 } }, { duration: 260 });
+      }
+    });
+    searchInput?.addEventListener("keydown", (e) => {
+      if (e.key !== "Escape") return;
+      searchInput.value = "";
+      searchMatches = null;
+      renderHighlights();
+    });
+
+    // Hiding an edge group is reversible and non-destructive — the YAML keeps
+    // the full picture, the reader chooses how much of it to look at.
+    const hiddenKinds = new Set<string>();
+    function applyFilters() {
+      cy.edges().forEach((ed: cytoscape.EdgeSingular) => {
+        const hide = hiddenKinds.has(ed.data("kind") as string);
+        if (hide) ed.addClass("filtered");
+        else ed.removeClass("filtered");
+      });
+    }
+    document.querySelectorAll<HTMLElement>(".filter-chip").forEach((chip) => {
+      chip.addEventListener("click", () => {
+        const kinds = (chip.dataset.kinds ?? "").split(",").filter(Boolean);
+        const turningOff = chip.classList.contains("is-on");
+        kinds.forEach((k) => (turningOff ? hiddenKinds.add(k) : hiddenKinds.delete(k)));
+        chip.classList.toggle("is-on", !turningOff);
+        chip.setAttribute("aria-pressed", String(!turningOff));
+        applyFilters();
+      });
+    });
+
     /* ------------------------------------------------------ guide callouts */
 
     const calloutLayer = document.getElementById("cy-callouts") as HTMLElement;
@@ -891,6 +1010,10 @@ const heading = title.replace(" — Contract Dependency Graph", "");
     padding: 0.75rem 1rem;
     border-bottom: 1px solid var(--graph-border);
   }
+  .graph-back-group {
+    display: flex;
+    gap: 0.35rem;
+  }
   .graph-back {
     display: inline-flex;
     align-items: center;
@@ -998,6 +1121,74 @@ const heading = title.replace(" — Contract Dependency Graph", "");
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+  }
+
+  /* -------------------------------------------------------------- toolbar */
+
+  .graph-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    flex-wrap: wrap;
+    padding: 0.5rem 1rem;
+    border-bottom: 1px solid var(--graph-border);
+  }
+  .graph-search {
+    flex: 0 1 280px;
+    min-width: 0;
+    padding: 0.35rem 0.6rem;
+    font-size: 0.76rem;
+    color: var(--text-primary);
+    background: var(--graph-surface);
+    border: 1px solid var(--graph-border);
+    border-radius: 6px;
+  }
+  .graph-search:focus {
+    outline: none;
+    border-color: rgba(110, 167, 255, 0.7);
+  }
+  .graph-filters {
+    display: flex;
+    gap: 0.3rem;
+    flex-wrap: wrap;
+  }
+  .filter-chip {
+    padding: 0.25rem 0.6rem;
+    font-size: 0.7rem;
+    color: var(--text-tertiary, var(--text-secondary));
+    background: none;
+    border: 1px solid var(--graph-border);
+    border-radius: 999px;
+    cursor: pointer;
+    opacity: 0.55;
+    transition: opacity 0.15s, border-color 0.15s, color 0.15s;
+  }
+  .filter-chip.is-on {
+    opacity: 1;
+    color: var(--text-primary);
+    border-color: rgba(110, 167, 255, 0.5);
+  }
+  .filter-chip:hover {
+    opacity: 1;
+  }
+  .graph-refs {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    flex-wrap: wrap;
+    font-size: 0.72rem;
+    color: var(--text-secondary);
+    max-width: 46%;
+  }
+  .graph-refs-label {
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-size: 0.6rem;
+    opacity: 0.8;
+  }
+  .graph-refs-sep {
+    opacity: 0.5;
   }
 
   /* --------------------------------------------------------- zoom controls */
@@ -1196,6 +1387,12 @@ const heading = title.replace(" — Contract Dependency Graph", "");
   }
   .graph-card.is-dim {
     opacity: 0.25;
+  }
+  .graph-card.is-match {
+    border-color: rgba(250, 204, 21, 0.95);
+    box-shadow:
+      0 0 0 1px rgba(250, 204, 21, 0.5) inset,
+      0 8px 22px rgba(0, 0, 0, 0.55);
   }
   .graph-card.is-inlined.is-dim {
     opacity: 0.18;
@@ -1563,6 +1760,9 @@ const heading = title.replace(" — Contract Dependency Graph", "");
     .graph-title { order: -1; flex-basis: 100%; text-align: left; }
     .graph-title h1 { font-size: 0.85rem; }
     .graph-metrics { padding: 0.5rem 0.75rem; }
+    .graph-toolbar { padding: 0.45rem 0.75rem; gap: 0.45rem; }
+    .graph-search { flex: 1 1 100%; }
+    .graph-refs { margin-left: 0; max-width: 100%; }
     .metric { min-width: 128px; }
     .legend-hint-wide { display: none; }
     .legend-hint-narrow { display: inline; }

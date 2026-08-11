@@ -67,7 +67,7 @@ The schema is enforced at build time by the validator in `src/lib/graph.ts`. Aut
 | `from` | yes | string | Must match a node `id`. |
 | `to` | yes | string | Must match a node `id`. |
 | `kind` | yes | enum | One of the 10 below — drives edge color/style and legend grouping. |
-| `label` | no | string | Optional. Only `allocates-to` always carries one (the % share); other kinds carry labels only when the value adds information. Every label is shown in the details panel; only flow-kind labels are drawn on the canvas. |
+| `label` | no | string | Optional. `allocates-to` should always carry the share (see its row below); other kinds carry labels only when the value adds information. Every label is shown in the details panel; only `allocates-to` / `deposits-into` labels are drawn on the canvas. |
 
 Minimal example (from `reports/graph/yearn-yvusdc.yaml`):
 
@@ -119,7 +119,7 @@ Grouped by the visual style they get (this matches the legend on the rendered pa
 
 | `kind` | Meaning | Label shown where? |
 |--------|---------|--------------------|
-| `allocates-to` | Vault → strategy. The vault holds debt in this strategy. | **Canvas + panel** — always set it to the `%` share. |
+| `allocates-to` | Vault → strategy. The vault holds debt in this strategy. | **Canvas + panel** — carry the share the report states: a `%` (`"77.9%"`) when it gives one, otherwise an amount (`"~$48.9M USDC"`). Both feed the "Largest allocation" metric. When the report gives neither, a qualitative label (`"Deribit margin"`) is fine — the metric is then omitted rather than invented. |
 | `deposits-into` | Strategy → underlying protocol. The strategy parks USDC into this venue. | **Canvas + panel** — optional but useful (e.g. `"USDC → aUSDC"`). |
 
 **Mint authority** — red dashed lines, highest-trust signal:
@@ -178,7 +178,7 @@ Most reports have 20–40 contracts; a readable graph has 15–30 nodes. The rul
 
 - **Helper / hook contracts** that don't shape the dependency structure: accountants, fee dumpers, oracle factories, profit smoothers, after-mint / before-redeem hooks, matured-farm cleaners. They clutter the graph without adding information.
 - **Dust farms** (<1% of TVL) and matured/inactive farms (`activation = 0`). Mention them in the report; don't draw them.
-- **Internal role-spaghetti.** When an access-control root contract grants roles to 10+ contracts, don't draw 10 edges from it. Pick **one symbolic edge** to a key managed contract (typically the vault or main entry proxy) and rely on the report's role table for the full picture.
+- **Internal role-spaghetti.** When an access-control root contract grants roles to 10+ contracts, don't draw 10 edges from it. Pick **one symbolic edge** to a key managed contract (typically the vault or main entry proxy) and rely on the report's role table for the full picture. (Readers can now mute the whole Control group from the toolbar, so a few extra role edges are survivable — but the layout still ranks nodes using every edge kind, so a large role fan stretches the graph horizontally.)
 - **Yearn V3 infrastructure that's identical across all V3 vaults** (Vault Factory, Tokenized Strategy implementation) — include only if the report singles them out for risk reasons.
 
 ### Group
@@ -217,7 +217,8 @@ When two contracts function as a single dependency, represent them as one node w
    - The metric strip reads sensibly (largest allocation is parsed from your `allocates-to` labels — if it says nothing, your labels are missing the `%`).
    - The guide pins (1–4) anchor to the vault, the largest allocation, the riskiest cross-linked dependency, and a mint edge.
 3. Open `http://localhost:4321/report/<slug>/`. Confirm the "View dependency graph →" link appears next to the GitHub link.
-4. `npm run build` — confirms the validator (`getGraphBySlug` in `src/lib/graph.ts`) accepts the file. The build will fail with a clear error if any edge endpoint doesn't match a node id or any node uses an unknown category.
+4. `npm run build` — runs `scripts/check_graphs.mjs` and then the validator (`getGraphBySlug` in `src/lib/graph.ts`). The build fails on a bad edge endpoint, an unknown category, an unknown chain, a missing report, or a graph with no addressed `vault` anchor.
+5. `node scripts/check_graphs.mjs` on its own prints the softer warnings too — unlabelled `mints` / `holds-role` / `proposes-on` / `cancels-on` edges, duplicate addresses, and nodes with no edges. Warnings don't fail the build; `npm run check-graphs` (`--strict`) makes them fail, and `npm test` covers the linter itself.
 
 ## Worked examples
 
@@ -273,6 +274,17 @@ Clicking a card **pins** the chain and opens the details panel, so it can be rea
 
 - **Edge kind affects traceability.** If you want a relationship to participate in the chain (and in cross-graph expansion), use a flow kind. If the relationship is structural but not capital movement (a role grant, a registry pointer), use a non-flow kind so it doesn't pollute the chain.
 - **Make every node reachable through flow edges from a source node.** Otherwise hovering it produces an empty chain in both directions. This is rarely a problem for vaults/strategies/dependencies — they live on the flow path by construction — but worth checking for any infra node you decide to include.
+
+## What the reader gets
+
+Worth knowing while authoring, because it decides how much care a field deserves:
+
+- **`/graph/` index** lists every graph sorted by how many other assessments depend on it, so a widely-referenced protocol is visible at a glance. Reached from the site nav ("Graphs") and linked from `/reports/`.
+- **Referenced by** appears in the toolbar of any graph another graph depends on — the inverse of the cross-link, built from `getReverseGraphIndex()`.
+- **Metric strip** (build-time, from this YAML plus the report frontmatter): final score, graph size, largest allocation, external dependency count with the worst assessed tier, and the mint-role count.
+- **Search** matches node label, address, and category label, then fits the view to the hits.
+- **Edge filters** let a reader mute whole groups (Money flow / Mint authority / Control / Governance / Wiring). This is the answer to role-spaghetti — prefer a complete YAML the reader can filter over an incomplete one.
+- **Guide callouts** are derived automatically; nothing to author.
 
 ## Common pitfalls
 

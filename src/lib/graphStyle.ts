@@ -85,6 +85,20 @@ export const DAGRE_OPTIONS = {
   ranker: "network-simplex",
 } as const;
 
+/**
+ * Filter groups for the toolbar. `manages` + `holds-role` + `controls` are the
+ * bulk of the corpus's edges, so being able to mute the control plane and read
+ * pure capital movement (or the reverse) is the difference between a readable
+ * graph and spaghetti.
+ */
+export const EDGE_GROUPS: { id: string; label: string; kinds: string[] }[] = [
+  { id: "flow", label: "Money flow", kinds: ["allocates-to", "deposits-into", "routes-through"] },
+  { id: "mint", label: "Mint authority", kinds: ["mints"] },
+  { id: "control", label: "Control", kinds: ["holds-role", "controls", "manages"] },
+  { id: "gov", label: "Governance", kinds: ["proposes-on", "cancels-on"] },
+  { id: "wiring", label: "Wiring", kinds: ["routes-fees-to", "deploys"] },
+];
+
 /** The 5 node categories, in the order the legend should list them. */
 export const CATEGORY_ORDER = ["vault", "strategy", "governance", "infra", "dependency"];
 
@@ -105,3 +119,11 @@ export const CHAIN_LABELS: Record<string, string> = {
 
 export const chainLabel = (chain: string): string =>
   CHAIN_LABELS[chain.toLowerCase()] ?? chain;
+
+/**
+ * Strip the "— Contract Dependency Graph" suffix most `title:` fields carry.
+ * Two of the 42 use a plain hyphen rather than an em dash, so match both
+ * instead of leaving those titles with a stray fragment.
+ */
+export const graphHeading = (title: string | undefined, slug: string): string =>
+  (title ?? slug).replace(/\s*[—–-]\s*Contract Dependency Graph\s*$/i, "");
