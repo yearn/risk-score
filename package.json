@@ -10,6 +10,7 @@
     "check-bridges": "node scripts/check_bridges.mjs --strict"
   },
   "dependencies": {
+    "@astrojs/sitemap": "3.7.3",
     "@astrojs/vercel": "11.0.3",
     "@plausible-analytics/tracker": "0.4.5",
     "@resvg/resvg-js": "2.6.2",

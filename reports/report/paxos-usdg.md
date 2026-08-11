@@ -1,6 +1,6 @@
 # Protocol Risk Assessment: Paxos USDG (Global Dollar)
 
-- **Assessment Date:** March 20, 2026 (reassessed July 30, 2026)
+- **Assessment Date:** March 20, 2026 (Updated: July 30, 2026)
 - **Token:** USDG (Global Dollar)
 - **Chain:** Ethereum
 - **Token Address:** [`0xe343167631d89B6Ffc58B88d6b7fB0228795491D`](https://etherscan.io/address/0xe343167631d89B6Ffc58B88d6b7fB0228795491D)

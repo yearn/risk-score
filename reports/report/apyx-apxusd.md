@@ -1,6 +1,6 @@
 # Protocol Risk Assessment: Apyx
 
-- **Assessment Date:** April 19, 2026 (Updated May 29, 2026; August 1, 2026; corrected August 3, 2026)
+- **Assessment Date:** April 19, 2026 (Updated: August 3, 2026)
 - **Token:** apxUSD
 - **Chain:** Ethereum + Base + BNB Chain
 - **Token Address:** [`0x98a878B1CD98131b271883b390F68d2c90674665`](https://etherscan.io/address/0x98a878B1CD98131b271883b390F68d2c90674665)

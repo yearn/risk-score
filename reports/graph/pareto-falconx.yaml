@@ -76,7 +76,7 @@ nodes:
     label: Pareto Treasury Safe (3-of-8)
     address: "0xFb3bD022D5DAcF95eE28a6B07825D4Ff9C5b3814"
     category: governance
-    note: owner + feeReceiver; un-timelocked transferToken / setBorrower
+    note: owner + feeReceiver; un-timelocked transferToken / setBorrower / setWhitelistedCDO / setIsInterestMinted / setKeyringParams
   - id: pauser-safe
     label: Pauser Safe (2-of-4)
     address: "0xBaeCba470C229984b75BC860EFe8e97AE082Bb9f"
@@ -106,7 +106,7 @@ nodes:
     label: Morpho oracle = cdo.virtualPrice()
     address: "0x52eA2C12734B5bB61e1edf52Bb0f01D9206493Fc"
     category: dependency
-    note: Accounting price, no market input; markdown only by Pareto admins
+    note: Accounting price, no market input; only Pareto admins can mark it down — and the unbacked-mint paths can push it up
   - id: dep-keyring-core
     label: Keyring Network (credential registry)
     address: "0xb0B5E2176E10B12d70e60E3a68738298A7DFe666"
@@ -173,7 +173,7 @@ edges:
   - from: cdo
     to: aa-tranche
     kind: mints
-    label: minter (immutable, sole minter)
+    label: minter (immutable) — only direct caller of mint/burn
   - from: treasury-safe
     to: aa-tranche
     kind: mints

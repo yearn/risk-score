@@ -890,3 +890,50 @@ protocols:
     - asset: yvUSD
       address: '0x696d02Db93291651ED510704c9b286841d506987'
     infrastructure: []
+
+  bedrock_unibtc:
+    name: Bedrock (uniBTC)
+    chain: ethereum
+    type: liquid_staking
+    address: "0x004E9C3EF86bc1ca1f0bB5C7662861Ee93350568"
+    report: reports/report/bedrock-unibtc.md
+    collateral:
+      - asset: WBTC
+        address: "0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599"
+      - asset: FBTC
+        address: "0xC96dE26018A54D51c097160568752c4E3BD6C364"
+      - asset: cbBTC
+        address: "0xcbB7C0000aB88B473b1f5aFd9ef808440eed33Bf"
+      - asset: M-BTC
+      - asset: BTC
+    yield_sources:
+      - protocol: babylon
+        assets:
+          - BTC
+        label: BTC restaking via custody (proxy staking)
+    infrastructure:
+      - Chainlink PoR
+      - Chainlink CCIP
+      - Free Tunnel
+      - Merlin Bridge
+
+  pareto_falconx:
+    name: Pareto FalconX Credit Vault (AA_FalconXUSDC)
+    chain: ethereum
+    type: private_credit
+    address: "0xC26A6Fa2C37b38E549a4a1807543801Db684f99C"
+    base_asset: USDC
+    report: reports/report/pareto-falconx.md
+    collateral:
+      # Uncollateralized: the only backing is an unsecured receivable from the
+      # borrower. No junior tranche exists (BB supply is 0), so the senior
+      # class absorbs the first dollar of loss.
+      - asset: FalconX unsecured receivable
+    yield_sources:
+      - protocol: falconx
+        assets:
+          - USDC
+        label: fixed-rate unsecured loan to a FalconX-controlled EOA (offchain deployment)
+    infrastructure:
+      - Keyring
+      - LayerZero
