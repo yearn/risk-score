@@ -1,0 +1,440 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import { getSharedContracts, explorerUrl, type SharedContract } from "../../lib/graph";
+import { getReportBySlug } from "../../lib/reports";
+import { scoreColor, scoreTier, scoreTextColor } from "../../lib/colors";
+import { chainLabel } from "../../lib/graphStyle";
+
+const shared = getSharedContracts();
+
+const breadth = (c: SharedContract) => new Set(c.occurrences.map((o) => o.slug)).size;
+
+const rows = shared.map((c) => ({
+  ...c,
+  breadth: breadth(c),
+  slugs: [...new Set(c.occurrences.map((o) => o.slug))].sort(),
+  report: c.assessedBy ? getReportBySlug(c.assessedBy) : undefined,
+}));
+
+// Two different findings live in this dataset. An external dependency shared
+// by several assessments and carrying no report of its own is a coverage gap.
+// Shared internal machinery — one multisig holding roles across seven vaults —
+// is concentration, and expecting it to have its own report would be wrong.
+const gaps = rows.filter((r) => r.kind === "external" && !r.ownedBy);
+const control = rows.filter((r) => r.kind === "internal");
+// External, already covered by some assessment, but not at that assessment's
+// anchor address — so the cross-link silently doesn't fire.
+const partial = rows.filter((r) => r.kind === "external" && !r.assessedBy && r.ownedBy);
+const widestGap = gaps[0];
+const widestControl = control[0];
+
+const CATEGORY_LABELS: Record<string, string> = {
+  vault: "Vault",
+  strategy: "Strategy",
+  governance: "Governance",
+  infra: "Infra",
+  dependency: "Dependency",
+};
+---
+
+<BaseLayout
+  title="Shared Contracts — Yearn Curation"
+  description="Contracts that appear in more than one risk assessment: shared dependencies, shared governance, and coverage gaps."
+  ogUrl="/graph/shared/"
+  ogImage="/og/default.png"
+>
+  <section class="sc-hero">
+    <h1>Shared Contracts</h1>
+    <p class="sc-sub">
+      Contracts that appear in more than one assessment's dependency graph. Reading
+      graphs one at a time hides this: the same lending market or the same multisig
+      can sit under a large share of the book without any single report saying so.
+      Derived at build time from the <a href="/graph/">graph corpus</a> by address.
+    </p>
+  </section>
+
+  <div class="sc-stats">
+    <div class="sc-stat"><b>{rows.length}</b><span>contracts in 2+ assessments</span></div>
+    <div class="sc-stat"><b>{gaps.length}</b><span>external dependencies with no report</span></div>
+    {widestGap && (
+      <div class="sc-stat sc-stat-wide">
+        <b>{widestGap.breadth}&times;</b><span>{widestGap.label} — widest coverage gap</span>
+      </div>
+    )}
+    {widestControl && (
+      <div class="sc-stat sc-stat-wide">
+        <b>{widestControl.breadth}&times;</b><span>{widestControl.label} — widest shared control</span>
+      </div>
+    )}
+  </div>
+
+  <div class="sc-tools">
+    <input type="text" id="sc-search" placeholder="Filter by contract, address or assessment…" autocomplete="off" />
+    <div class="sc-seg" role="group" aria-label="Filter by kind">
+      <button type="button" class="sc-seg-btn is-on" data-filter="all" aria-pressed="true">All</button>
+      <button type="button" class="sc-seg-btn" data-filter="gap" aria-pressed="false"
+        >Coverage gaps <span class="sc-seg-n">{gaps.length}</span></button
+      >
+      <button type="button" class="sc-seg-btn" data-filter="control" aria-pressed="false"
+        >Shared control <span class="sc-seg-n">{control.length}</span></button
+      >
+      {partial.length > 0 && (
+        <button type="button" class="sc-seg-btn" data-filter="partial" aria-pressed="false"
+          >Missed links <span class="sc-seg-n">{partial.length}</span></button
+        >
+      )}
+    </div>
+  </div>
+
+  <p class="sc-note" id="sc-note" data-mode="all">
+    Everything shared across assessments, widest reach first.
+  </p>
+
+  <ul class="sc-list" id="sc-list">
+    {rows.map((r) => (
+      <li
+        class="sc-row"
+        data-search={`${r.label} ${r.aliases.join(" ")} ${r.address} ${r.slugs.join(" ")}`.toLowerCase()}
+        data-kind={
+          r.kind === "internal"
+            ? "control"
+            : r.assessedBy
+              ? "assessed"
+              : r.ownedBy
+                ? "partial"
+                : "gap"
+        }
+      >
+        <div class="sc-head">
+          <span class="sc-count" title={`Appears in ${r.breadth} assessments`}>{r.breadth}&times;</span>
+          <div class="sc-id">
+            <span class="sc-label">{r.label}</span>
+            <span class="sc-meta">
+              <a href={explorerUrl(r.address, r.chain)} target="_blank" rel="noopener noreferrer"
+                >{r.address.slice(0, 10)}…{r.address.slice(-6)} &#8599;</a
+              >
+              <span class="sc-chain">{chainLabel(r.chain)}</span>
+              {r.categories.map((c) => (
+                <span class={`sc-cat cat-${c}`}>{CATEGORY_LABELS[c] ?? c}</span>
+              ))}
+            </span>
+          </div>
+          {r.assessedBy && r.report?.finalScore != null ? (
+            <a
+              class="sc-assessed"
+              href={`/graph/${r.assessedBy}/`}
+              style={`--c:${scoreColor(r.report.finalScore)}`}
+            >
+              <span
+                class="sc-score"
+                style={`background:${scoreColor(r.report.finalScore)};color:${scoreTextColor(r.report.finalScore)}`}
+                >{r.report.finalScore.toFixed(1)}</span
+              >
+              <span>{scoreTier(r.report.finalScore)}</span>
+            </a>
+          ) : r.kind === "internal" ? (
+            <span class="sc-internal" title="One protocol's own machinery, reused across its vaults — shared control rather than a coverage gap">
+              Shared control
+            </span>
+          ) : r.ownedBy ? (
+            <a
+              class="sc-partial"
+              href={`/graph/${r.ownedBy}/`}
+              title="Covered by this assessment, but not as its cross-link anchor — dependency cards pointing here get no drill-down"
+              >Covered by {r.ownedBy}</a
+            >
+          ) : (
+            <span class="sc-gap" title="An external dependency several assessments rely on, with no risk report of its own">
+              No report of its own
+            </span>
+          )}
+        </div>
+        <div class="sc-in">
+          <span class="sc-in-label">In</span>
+          {r.slugs.map((s, i) => (
+            <>
+              {i > 0 && <span class="sc-sep">·</span>}
+              <a href={`/graph/${s}/`}>{s}</a>
+            </>
+          ))}
+        </div>
+        {r.aliases.length > 1 && (
+          <div class="sc-aliases">
+            <span class="sc-in-label">Named</span>{r.aliases.join(" · ")}
+          </div>
+        )}
+      </li>
+    ))}
+  </ul>
+  <p class="sc-empty" id="sc-empty" hidden>No contracts match that filter.</p>
+
+  <script>
+    const search = document.getElementById("sc-search") as HTMLInputElement | null;
+    const list = document.getElementById("sc-list");
+    const empty = document.getElementById("sc-empty");
+    const note = document.getElementById("sc-note");
+    let mode = "all";
+
+    const NOTES: Record<string, string> = {
+      all: "Everything shared across assessments, widest reach first.",
+      partial: "Contracts an assessment already covers, but not at its anchor address, so dependency cards pointing here get no drill-down. Usually the referencing graph should point at the covering graph's vault address instead.",
+      gap: "External dependencies several assessments rely on that carry no risk report of their own. Each one is exposure the book takes without a dedicated assessment behind it.",
+      control:
+        "One protocol's own machinery — multisigs, timelocks, keepers, accountants — reused across its vaults. Not a coverage gap: a concentration signal, since a single key holder reaches every assessment listed.",
+    };
+
+    function apply() {
+      const q = (search?.value ?? "").trim().toLowerCase();
+      let shown = 0;
+      list?.querySelectorAll<HTMLElement>(".sc-row").forEach((row) => {
+        const matchesText = !q || (row.dataset.search ?? "").includes(q);
+        const matchesMode = mode === "all" || row.dataset.kind === mode;
+        const hit = matchesText && matchesMode;
+        row.hidden = !hit;
+        if (hit) shown++;
+      });
+      if (empty) empty.hidden = shown > 0;
+      if (note) note.textContent = NOTES[mode] ?? NOTES.all;
+    }
+
+    search?.addEventListener("input", apply);
+    document.querySelectorAll<HTMLElement>(".sc-seg-btn").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        mode = btn.dataset.filter ?? "all";
+        document.querySelectorAll<HTMLElement>(".sc-seg-btn").forEach((b) => {
+          const on = b === btn;
+          b.classList.toggle("is-on", on);
+          b.setAttribute("aria-pressed", String(on));
+        });
+        apply();
+      });
+    });
+  </script>
+</BaseLayout>
+
+<style>
+  .sc-hero {
+    padding: 2rem 0 0.5rem;
+  }
+  .sc-hero h1 {
+    margin: 0 0 0.4rem;
+  }
+  .sc-sub {
+    color: var(--text-secondary);
+    max-width: 68ch;
+    margin: 0;
+  }
+  .sc-stats {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+    padding: 1.2rem 0 0.6rem;
+    border-bottom: 1px solid var(--border-color, rgba(127, 127, 127, 0.2));
+  }
+  .sc-stat {
+    display: flex;
+    flex-direction: column;
+  }
+  .sc-stat b {
+    font-size: 1.35rem;
+    line-height: 1.1;
+  }
+  .sc-stat span {
+    font-size: 0.72rem;
+    color: var(--text-secondary);
+  }
+  .sc-stat-wide span {
+    max-width: 30ch;
+  }
+  .sc-tools {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+    padding: 1rem 0 0.6rem;
+  }
+  .sc-tools input[type="text"] {
+    flex: 1 1 320px;
+    max-width: 420px;
+    padding: 0.5rem 0.7rem;
+    font-size: 0.85rem;
+    color: var(--text-primary);
+    background: transparent;
+    border: 1px solid var(--border-color, rgba(127, 127, 127, 0.25));
+    border-radius: 7px;
+  }
+  .sc-seg {
+    display: inline-flex;
+    gap: 0.3rem;
+  }
+  .sc-seg-btn {
+    padding: 0.35rem 0.7rem;
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    background: transparent;
+    border: 1px solid var(--border-color, rgba(127, 127, 127, 0.25));
+    border-radius: 999px;
+    cursor: pointer;
+  }
+  .sc-seg-btn.is-on {
+    color: var(--text-primary);
+    border-color: rgba(110, 167, 255, 0.6);
+  }
+  .sc-seg-n {
+    opacity: 0.65;
+    font-variant-numeric: tabular-nums;
+  }
+  .sc-note {
+    margin: 0 0 0.6rem;
+    font-size: 0.76rem;
+    line-height: 1.5;
+    color: var(--text-secondary);
+    max-width: 76ch;
+  }
+  .sc-partial {
+    flex-shrink: 0;
+    font-size: 0.7rem;
+    padding: 2px 8px;
+    border-radius: 999px;
+    color: #6ea7ff;
+    border: 1px solid rgba(110, 167, 255, 0.45);
+    text-decoration: none;
+    white-space: nowrap;
+  }
+  .sc-partial:hover {
+    border-color: rgba(110, 167, 255, 0.9);
+  }
+  .sc-internal {
+    flex-shrink: 0;
+    font-size: 0.7rem;
+    padding: 2px 8px;
+    border-radius: 999px;
+    color: var(--text-secondary);
+    border: 1px solid var(--border-color, rgba(127, 127, 127, 0.3));
+    cursor: help;
+    white-space: nowrap;
+  }
+  .sc-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  .sc-row {
+    padding: 0.8rem 0.2rem;
+    border-bottom: 1px solid var(--border-color, rgba(127, 127, 127, 0.14));
+  }
+  .sc-row[hidden] {
+    display: none;
+  }
+  .sc-head {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.8rem;
+  }
+  .sc-count {
+    flex-shrink: 0;
+    min-width: 2.4rem;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    padding-top: 0.05rem;
+  }
+  .sc-id {
+    flex: 1;
+    min-width: 0;
+  }
+  .sc-label {
+    display: block;
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+  .sc-meta {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    font-size: 0.72rem;
+    color: var(--text-secondary);
+    margin-top: 0.12rem;
+  }
+  .sc-meta a {
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  }
+  .sc-cat {
+    padding: 1px 6px;
+    border-radius: 3px;
+    border: 1px solid currentColor;
+    font-size: 0.64rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    opacity: 0.85;
+  }
+  .cat-vault { color: #6ea7ff; }
+  .cat-strategy { color: #fbbf24; }
+  .cat-governance { color: #f87171; }
+  .cat-infra { color: #94a3b8; }
+  .cat-dependency { color: #c4b5fd; }
+
+  .sc-assessed {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    flex-shrink: 0;
+    font-size: 0.72rem;
+    color: var(--text-secondary);
+    text-decoration: none;
+  }
+  .sc-assessed:hover {
+    color: var(--text-primary);
+  }
+  .sc-score {
+    font-size: 0.72rem;
+    font-weight: 700;
+    padding: 2px 7px;
+    border-radius: 4px;
+  }
+  .sc-gap {
+    flex-shrink: 0;
+    font-size: 0.7rem;
+    padding: 2px 8px;
+    border-radius: 999px;
+    color: #fbbf24;
+    border: 1px solid rgba(251, 191, 36, 0.45);
+    cursor: help;
+    white-space: nowrap;
+  }
+  .sc-in,
+  .sc-aliases {
+    margin-top: 0.35rem;
+    padding-left: 3.2rem;
+    font-size: 0.73rem;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: baseline;
+    gap: 0.3rem;
+    flex-wrap: wrap;
+  }
+  .sc-in-label {
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-size: 0.6rem;
+    opacity: 0.75;
+  }
+  .sc-sep {
+    opacity: 0.5;
+  }
+  .sc-empty {
+    color: var(--text-secondary);
+    padding: 1rem 0;
+  }
+
+  @media (max-width: 620px) {
+    .sc-head {
+      flex-wrap: wrap;
+    }
+    .sc-in,
+    .sc-aliases {
+      padding-left: 0;
+    }
+  }
+</style>

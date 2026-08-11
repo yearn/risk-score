@@ -234,6 +234,130 @@ export interface GraphSummary {
   referencedBy: string[];
 }
 
+/** A contract that appears in more than one assessment's graph. */
+export interface SharedContract {
+  /** `<chain>:<address-lowercased>` — the identity used for matching. */
+  key: string;
+  address: string;
+  chain: string;
+  /** The most common label across the graphs that name it. */
+  label: string;
+  /** Every distinct label used, when graphs disagree on naming. */
+  aliases: string[];
+  /** Categories the contract is filed under, across graphs. */
+  categories: string[];
+  /** Assessments that include it, with the local node label. */
+  occurrences: { slug: string; nodeId: string; label: string; category: string }[];
+  /**
+   * The slug that *owns* this contract, when one of the graphs anchors it as a
+   * vault. Null means no assessment covers it in its own right.
+   */
+  assessedBy: string | null;
+  /**
+   * A graph that lists this contract as one of its *own* (any category other
+   * than `dependency`) and has a report behind it. Weaker than `assessedBy`:
+   * the assessment covers the contract, but not as its cross-link anchor, so
+   * dependency cards pointing here get no drill-down. Usually means the
+   * referencing graph should point at that graph's vault address instead.
+   */
+  ownedBy: string | null;
+  /**
+   * How to read the sharing. A contract filed as an external `dependency` by
+   * any graph is third-party surface several assessments sit on; anything else
+   * shared (multisigs, timelocks, keepers, accountants) is one protocol's own
+   * machinery reused across its vaults. Both matter, but they are different
+   * findings: the first is a coverage gap, the second is concentration.
+   */
+  kind: "external" | "internal";
+}
+
+let sharedCache: SharedContract[] | undefined;
+
+/**
+ * Contracts appearing in more than one graph.
+ *
+ * Cross-linking only fires when a dependency has its *own* report, which hides
+ * the plainest form of shared exposure: seven vault graphs all pointing at the
+ * same Morpho Blue deployment, or the same 6-of-9 multisig holding roles across
+ * seven vaults. Neither is visible when the graphs are read one at a time.
+ *
+ * Sorted by breadth (how many assessments touch the contract) so the systemic
+ * ones surface first.
+ */
+export function getSharedContracts(): SharedContract[] {
+  if (sharedCache) return sharedCache;
+  const index = getGraphIndex();
+  const byKey = new Map<string, SharedContract>();
+
+  for (const slug of getGraphSlugs()) {
+    const g = getGraphBySlug(slug);
+    if (!g) continue;
+    for (const n of g.nodes) {
+      if (!n.address) continue;
+      const chain = (n.chain ?? g.chain).toLowerCase();
+      const key = `${chain}:${n.address.toLowerCase()}`;
+      let entry = byKey.get(key);
+      if (!entry) {
+        entry = {
+          key,
+          address: n.address,
+          chain,
+          label: n.label,
+          aliases: [],
+          categories: [],
+          occurrences: [],
+          assessedBy: index.get(key)?.slug ?? null,
+          ownedBy: null,
+          kind: "internal",
+        };
+        byKey.set(key, entry);
+      }
+      entry.occurrences.push({
+        slug,
+        nodeId: n.id,
+        label: n.label,
+        category: n.category,
+      });
+      if (!entry.aliases.includes(n.label)) entry.aliases.push(n.label);
+      if (!entry.categories.includes(n.category)) entry.categories.push(n.category);
+    }
+  }
+
+  const shared = [...byKey.values()].filter((c) => {
+    const slugs = new Set(c.occurrences.map((o) => o.slug));
+    return slugs.size > 1;
+  });
+
+  for (const c of shared) {
+    c.kind = c.categories.includes("dependency") ? "external" : "internal";
+    c.ownedBy =
+      c.assessedBy ??
+      c.occurrences.find((o) => o.category !== "dependency" && getReportBySlug(o.slug))?.slug ??
+      null;
+    // Prefer the label the owning assessment uses; otherwise the most common
+    // one, so a contract named six ways still reads sensibly.
+    const owned = c.assessedBy && c.occurrences.find((o) => o.slug === c.assessedBy);
+    if (owned) {
+      c.label = owned.label;
+    } else {
+      const counts = new Map<string, number>();
+      for (const o of c.occurrences) counts.set(o.label, (counts.get(o.label) ?? 0) + 1);
+      c.label = [...counts.entries()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))[0][0];
+    }
+    c.occurrences.sort((a, b) => a.slug.localeCompare(b.slug));
+    c.aliases.sort();
+  }
+
+  shared.sort((a, b) => {
+    const an = new Set(a.occurrences.map((o) => o.slug)).size;
+    const bn = new Set(b.occurrences.map((o) => o.slug)).size;
+    return bn - an || a.label.localeCompare(b.label);
+  });
+
+  sharedCache = shared;
+  return shared;
+}
+
 export function getGraphSummaries(): GraphSummary[] {
   const forward = getGraphIndex();
   const reverse = getReverseGraphIndex();

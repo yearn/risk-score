@@ -1,6 +1,6 @@
 import type { APIRoute } from "astro";
 import { getAllReports } from "../lib/reports";
-import { getGraphSummaries } from "../lib/graph";
+import { getGraphSummaries, getSharedContracts } from "../lib/graph";
 import { scoreTier } from "../lib/colors";
 
 // llms.txt — a markdown briefing for LLMs and AI search engines, served at the
@@ -89,11 +89,32 @@ export const GET: APIRoute = async () => {
     }
   }
 
+  // Contracts several assessments share. The unassessed ones are the useful
+  // signal: a contract many graphs depend on that no report covers directly.
+  const shared = getSharedContracts();
+  const gaps = shared.filter((c) => c.kind === "external" && !c.assessedBy).slice(0, 15);
+  if (gaps.length > 0) {
+    lines.push(
+      "",
+      "## Shared external dependencies without their own assessment",
+      "",
+      `${shared.length} contracts appear in more than one dependency graph. The external dependencies below carry no risk report of their own, so the exposure is only visible in aggregate. Shared internal machinery (multisigs, keepers, accountants reused across one protocol's vaults) is listed separately. Full list: ${SITE}/graph/shared/`,
+      "",
+    );
+    for (const c of gaps) {
+      const slugs = [...new Set(c.occurrences.map((o) => o.slug))].sort();
+      lines.push(
+        `- ${c.label} (${c.address} on ${c.chain}): in ${slugs.length} assessments — ${slugs.join(", ")}`,
+      );
+    }
+  }
+
   lines.push(
     "",
     "## Other resources",
     "",
     `- [Dependency graphs](${SITE}/graph/): contract-level maps and cross-protocol exposure`,
+    `- [Shared contracts](${SITE}/graph/shared/): contracts appearing in more than one assessment`,
     `- [Token exposures](${SITE}/tokens/): shared-asset overlap across curated protocols`,
     `- [Bridge dependencies](${SITE}/bridges/): cross-chain bridge risk`,
     `- [Live monitoring](${SITE}/monitoring/): real-time protocol alerts (governance, oracle, owner changes)`,

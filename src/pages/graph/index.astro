@@ -1,6 +1,6 @@
 ---
 import BaseLayout from "../../layouts/BaseLayout.astro";
-import { getGraphSummaries } from "../../lib/graph";
+import { getGraphSummaries, getSharedContracts } from "../../lib/graph";
 import { getReportBySlug } from "../../lib/reports";
 import { scoreColor, scoreTier, scoreTextColor } from "../../lib/colors";
 import { chainLabel } from "../../lib/graphStyle";
@@ -28,6 +28,14 @@ const totalNodes = summaries.reduce((n, s) => n + s.nodeCount, 0);
 const totalEdges = summaries.reduce((n, s) => n + s.edgeCount, 0);
 const linked = summaries.filter((s) => s.dependsOn.length > 0).length;
 const mostReferenced = rows[0];
+
+const sharedContracts = getSharedContracts();
+// The headline is the widest *external* dependency with no report — a coverage
+// gap. Shared internal machinery is a separate finding, covered on that page.
+const widestGap = sharedContracts.find((c) => c.kind === "external" && !c.assessedBy);
+const widestGapReach = widestGap
+  ? new Set(widestGap.occurrences.map((o) => o.slug)).size
+  : 0;
 ---
 
 <BaseLayout
@@ -56,6 +64,20 @@ const mostReferenced = rows[0];
       </div>
     )}
   </div>
+
+  {sharedContracts.length > 0 && (
+    <a class="gi-banner" href="/graph/shared/">
+      <span class="gi-banner-title">Shared contracts &rarr;</span>
+      <span class="gi-banner-body">
+        {sharedContracts.length} contracts appear in more than one assessment
+        {widestGap && widestGapReach > 1 && (
+          <>
+            {" — "}<b>{widestGap.label}</b> underlies {widestGapReach} assessments with no report of its own
+          </>
+        )}.
+      </span>
+    </a>
+  )}
 
   <div class="gi-tools">
     <input type="text" id="gi-search" placeholder="Filter by protocol or slug…" autocomplete="off" />
@@ -145,6 +167,30 @@ const mostReferenced = rows[0];
     font-size: 0.72rem;
     color: var(--text-secondary);
   }
+  .gi-banner {
+    display: block;
+    margin-top: 1rem;
+    padding: 0.7rem 0.9rem;
+    border: 1px solid rgba(110, 167, 255, 0.35);
+    border-radius: 8px;
+    text-decoration: none;
+  }
+  .gi-banner:hover {
+    border-color: rgba(110, 167, 255, 0.7);
+  }
+  .gi-banner-title {
+    display: block;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+  .gi-banner-body {
+    display: block;
+    margin-top: 0.15rem;
+    font-size: 0.76rem;
+    color: var(--text-secondary);
+  }
+
   .gi-tools {
     padding: 1rem 0 0.6rem;
   }
