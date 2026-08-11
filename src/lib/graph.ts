@@ -2,6 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import yaml from "js-yaml";
 import { getReportBySlug } from "./reports";
+import { FLOW_KINDS } from "./graphStyle";
 
 const GRAPH_DIR = path.resolve("reports/graph");
 
@@ -189,8 +190,6 @@ export function resolveCrossLink(
   return entry;
 }
 
-const FLOW_KINDS = new Set(["allocates-to", "deposits-into", "routes-through"]);
-
 /**
  * For every cross-linked node in `graph`, inline the downstream subgraph from
  * the linked graph (flow edges only — `allocates-to`, `deposits-into`,
@@ -262,6 +261,10 @@ export function expandCrossLinks(graph: Graph, currentSlug: string): Graph {
             mergedNodes.push({
               ...targetNode,
               id: mergedId,
+              // Pin the chain explicitly: the renderer falls back to the *host*
+              // graph's chain, which would point a cross-chain inlined node at
+              // the wrong block explorer.
+              chain: targetNode.chain ?? linked.chain,
               _inlinedFromSlug: entry.slug,
             });
             seenIds.add(mergedId);
