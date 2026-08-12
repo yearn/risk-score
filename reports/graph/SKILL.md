@@ -56,7 +56,7 @@ The schema is enforced at build time by the validator in `src/lib/graph.ts`. Aut
 | `id` | yes | string | Unique within the file. Slug-style, e.g. `susds-lender`. |
 | `label` | yes | string | Card title. Keep ≤ ~40 chars; it wraps to 2 lines. |
 | `category` | yes | enum | One of the 5 below. |
-| `address` | no | string | EVM address. Used to build the Etherscan link on click. |
+| `address` | no | string | EVM address. Shown in full in the details panel, drives the `↗` block-explorer link, and is what cross-graph linking matches on. |
 | `chain` | no | string | Per-node chain override; falls back to top-level `chain`. |
 | `note` | no | string | Free-form context. **Rendered as prose in the details panel** when the card is clicked — write it for a human reader, not as a shorthand memo. |
 
@@ -66,7 +66,7 @@ The schema is enforced at build time by the validator in `src/lib/graph.ts`. Aut
 |-------|----------|------|-------|
 | `from` | yes | string | Must match a node `id`. |
 | `to` | yes | string | Must match a node `id`. |
-| `kind` | yes | enum | One of the 10 below — drives edge color/style and legend grouping. |
+| `kind` | yes | enum | One of the 11 below — drives edge color/style, chain traversal, and legend grouping. |
 | `label` | no | string | Optional. `allocates-to` should always carry the share (see its row below); other kinds carry labels only when the value adds information. Every label is shown in the details panel; only `allocates-to` / `deposits-into` labels are drawn on the canvas. |
 
 Minimal example (from `reports/graph/yearn-yvusdc.yaml`):
@@ -99,7 +99,7 @@ edges:
 
 ## Vocabulary
 
-These enums are fixed — extending them requires coordinated changes in `src/lib/graphStyle.ts` (edge color/style/width, kind labels, flow sets) and the `.cat-*` / `--cat-*` CSS rules in `src/pages/graph/[slug].astro`. Don't invent new values ad-hoc.
+These enums are fixed — extending them requires coordinated changes in `src/lib/graphStyle.ts` (edge colour/style/width, kind labels, `FLOW_KINDS`, `AUTHORITY_KINDS`, and the `EDGE_GROUPS` filter chips) and the `.cat-*` / `--cat-*` CSS rules in `src/pages/graph/[slug].astro`. Don't invent new values ad-hoc.
 
 ### Categories (5)
 
@@ -157,7 +157,7 @@ Grouped by the visual style they get (this matches the legend on the rendered pa
 
 `allocates-to`, `deposits-into`, and `routes-through` form the **flow set**. Three behaviors depend on it:
 
-1. **Hover-chain highlight** — hovering a card walks the *backward* chain via flow edges only. So if you want a contract A to appear when a reader hovers contract B downstream of it, connect them via a flow kind. Governance/role edges never participate in the chain.
+1. **Money-flow chain** — selecting a card walks flow edges in *both* directions and recolours them by direction (upstream blue, downstream teal). So if you want contract A to appear when a reader selects contract B downstream of it, connect them via a flow kind. Authority kinds get their own chain (see "Selection & chain highlight"); `deploys` and `routes-fees-to` get neither.
 2. **Cross-graph downstream expansion** — when another graph cross-links to a node in yours, the inlined subgraph in their page traces forward through your flow edges only. Use flow kinds for everything that represents capital movement so the downstream view is complete.
 3. **Visual styling** — flow edges render solid and slightly thicker/greener than other kinds.
 
@@ -207,17 +207,18 @@ When two contracts function as a single dependency, represent them as one node w
    ```bash
    npm run dev
    ```
-   (Astro 6 needs Node ≥ 22.12. If `nvm` defaults to an older version, prefix the command with the right `PATH`.)
+   (Astro 7 needs Node ≥ 22.12. If `nvm` defaults to an older version, prefix the command with the right `PATH`.)
 2. Open `http://localhost:4321/graph/<slug>/`. Confirm:
    - Every node from the YAML appears as a card.
    - No console errors.
    - The graph reads left-to-right: governance on the left, vault / strategies in the middle, external dependencies on the right.
    - Allocation `%` labels are visible on the vault → strategy edges.
    - Clicking a node opens the details panel: category, chain, full address, the `note`, and every inbound/outbound edge with its kind and label.
-   - The metric strip reads sensibly (largest allocation is parsed from your `allocates-to` labels — if it says nothing, your labels are missing the `%`).
+   - The metric strip reads sensibly. Largest allocation is parsed from your `allocates-to` labels and understands both `%` and `$` amounts — if the stat is missing entirely, none of your labels carry either.
+   - Selecting a governed node lights its control chain, not just its money flow. Clicking the Mint authority / External dependencies / Largest allocation cards highlights that set.
 3. Open `http://localhost:4321/report/<slug>/`. Confirm the "View dependency graph →" link appears next to the GitHub link.
 4. `npm run build` — runs `scripts/check_graphs.mjs` and then the validator (`getGraphBySlug` in `src/lib/graph.ts`). The build fails on a bad edge endpoint, an unknown category, an unknown chain, a missing report, or a graph with no addressed `vault` anchor.
-5. `node scripts/check_graphs.mjs` on its own prints the softer warnings too — unlabelled `mints` / `holds-role` / `proposes-on` / `cancels-on` edges, duplicate addresses, and nodes with no edges. Warnings don't fail the build; `npm run check-graphs` (`--strict`) makes them fail, and `npm test` covers the linter itself.
+5. `node scripts/check_graphs.mjs` on its own prints the softer warnings too — unlabelled `mints` / `holds-role` / `proposes-on` / `cancels-on` edges, an address used twice inside one graph, two graphs claiming the same `vault` address, and nodes with no edges. Warnings don't fail the build; `npm run check-graphs` (`--strict`) makes them fail, and `npm test` covers the linter itself.
 
 ## Worked examples
 
@@ -256,9 +257,9 @@ If your graph references protocol X, and protocol X's graph references protocol 
 
 Omit `address` from the node. Without an address the matcher can't fire — no risk tint, no drill-down link, no inlined downstream. Rare; it also costs the reader the explorer link, so prefer keeping the address.
 
-## Hover & chain highlight
+## Selection & chain highlight
 
-Hovering (or keyboard-focusing) any card lights three things and fades everything else, so the picture stays readable in a 40-node graph:
+Hovering, keyboard-focusing or clicking any card lights three things and fades everything else, so the picture stays readable in a 40-node graph:
 
 - **Money flow upstream, in blue** — who is exposed to this contract. Transitive over `allocates-to`, `deposits-into`, `routes-through`.
 - **Money flow downstream, in teal** — what this contract is exposed to. Same kinds, other direction.
@@ -268,9 +269,9 @@ Flow edges are recoloured by direction — that distinction is the whole point o
 
 Anything else touching the selected node — `deploys`, `routes-fees-to` — stays visible at one hop as context, without being followed further.
 
-Example on InfiniFi: hovering the inlined `cUSD (Cap Stablecoin)` lights its upstream
+Example on InfiniFi: selecting the inlined `cUSD (Cap Stablecoin)` lights its upstream
 `cUSD ← stcUSD ← (CapFarm + SwapFarm) ← iUSD ← (siUSD + LockingController)`
-in blue. Mint/Redeem controllers connect to iUSD via `manages` edges, so they stay un-highlighted; that's correct — the chain is for capital movement.
+in blue — the capital path. Select `iUSD` itself and the Mint, Migration and Redeem controllers light too, each in its own colour: the first two red through `mints`, the third amber through `manages`. None of them moves capital, but all three can change the token, which is exactly what the authority chain is for.
 
 Clicking a card **pins** the chain and opens the details panel, so it can be read without holding the cursor still. Escape or the ✕ releases it.
 
@@ -285,8 +286,8 @@ Keyboard: the graph is a single tab stop with a roving tabindex — arrow keys m
 
 Worth knowing while authoring, because it decides how much care a field deserves:
 
-- **`/graph/` index** lists every graph sorted by how many other assessments depend on it, so a widely-referenced protocol is visible at a glance. Reached from the site nav ("Graphs") and linked from `/reports/`.
-- **Referenced by** appears in the toolbar of any graph another graph depends on — the inverse of the cross-link, built from `getReverseGraphIndex()`.
+- **Entry point** is the "View dependency graph →" pill on `/report/<slug>/`. There is no global index of graphs; a graph belongs to the assessment that documents it.
+- **Referenced by** appears in the toolbar of any graph another graph depends on — the inverse of the cross-link, built from `getReverseGraphIndex()`. This is the only graph-to-graph entry point besides a cross-linked dependency card.
 - **Metric strip** (build-time, from this YAML plus the report frontmatter): final score, graph size, largest allocation, external dependency count with the worst assessed tier, and the mint-role count. Largest allocation, external dependencies and mint authority are **clickable** — they project that set onto the canvas and fade the rest, so "4 mint roles" becomes "show me which four".
 - **Search** matches node label, address, and category label, then fits the view to the hits.
 - **Edge filters** let a reader mute whole groups (Money flow / Mint authority / Control / Governance / Wiring). This is the answer to role-spaghetti — prefer a complete YAML the reader can filter over an incomplete one.
@@ -296,7 +297,7 @@ Worth knowing while authoring, because it decides how much care a field deserves
 - **Duplicate node `id`** — build fails with `[graph:<slug>] duplicate node id '...'`.
 - **Edge endpoint doesn't match any node** — build fails with `[graph:<slug>] edge.from '...' does not match any node` (or `.to`). Most common cause: typo in an `id` or an edge to a contract you decided to skip.
 - **Unknown category** — build fails with `[graph:<slug>] node '...' has unknown category '...'`. Stick to the 5-category enum.
-- **Unknown / typo'd edge kind** — build fails with `[graph:<slug>] edge '<from>' → '<to>' has unknown kind '<kind>'`. The error lists all allowed kinds. Validated against `ALLOWED_EDGE_KINDS` in `src/lib/graph.ts`, which is the canonical source of truth for the 10-key enum in the Edge kinds table above.
+- **Unknown / typo'd edge kind** — build fails with `[graph:<slug>] edge '<from>' → '<to>' has unknown kind '<kind>'`. The error lists all allowed kinds. Validated against `ALLOWED_EDGE_KINDS` in `src/lib/graph.ts`, which is the canonical source of truth for the 11-key enum in the Edge kinds table above.
 - **Address mismatch breaks cross-linking silently.** If your dependency node's `address` doesn't match the linked graph's vault address exactly (case-insensitive, but every digit must be right), the cross-link and downstream expansion just don't happen — no build error, no warning. When in doubt, copy the address from the source graph or the report's contract-addresses table verbatim.
 - **Wrong edge kind hides a relationship from chains/expansion.** A `manages` or `holds-role` edge that should have been `allocates-to` will still render, but it won't participate in the hover chain or in cross-graph downstream expansion. Use flow kinds for anything that represents capital movement.
 - **Under-labeling.** Only `allocates-to` and `deposits-into` labels are drawn on the canvas, but *every* kind's label is shown in the details panel's connections list. An unlabelled `mints` or `holds-role` edge leaves the reader with no idea which role is involved — label them.
