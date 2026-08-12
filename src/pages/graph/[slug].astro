@@ -4,6 +4,7 @@ import {
   getGraphSlugs,
   getGraphBySlug,
   getGraphIndex,
+  getReverseGraphIndex,
   resolveCrossLink,
   expandCrossLinks,
   explorerUrl,
@@ -12,7 +13,9 @@ import {
   type GraphNode,
 } from "../../lib/graph";
 import { getReportBySlug } from "../../lib/reports";
-import { scoreColor, scoreTier } from "../../lib/colors";
+import { scoreColor, scoreTier, scoreTextColor } from "../../lib/colors";
+import { kindLabel, chainLabel, graphHeading, EDGE_GROUPS } from "../../lib/graphStyle";
+import { buildMetrics, type CrossLinkInfo } from "../../lib/graphInsights";
 
 export function getStaticPaths() {
   return getGraphSlugs().map((slug) => ({ params: { slug } }));
@@ -27,37 +30,45 @@ const graphIndex = getGraphIndex();
 // sees the strategies/dependencies behind external protocols on the same page.
 const graph = expandCrossLinks(baseGraph, slug!);
 const currentReport = getReportBySlug(slug!);
-const reportDate = currentReport?.date ?? "";
+
+// Resolve cross-links once, keyed by node id, so the card payload, the metric
+// strip all read the same facts.
+const crossLinks = new Map<string, CrossLinkInfo>();
+for (const n of graph.nodes) {
+  // Suppress cross-link affordance on nodes that were themselves inlined
+  // from another graph — keeps drill-down strictly one level deep.
+  if (n._inlinedFromSlug) continue;
+  const entry = resolveCrossLink(n, graph.chain, slug!, graphIndex);
+  if (!entry) continue;
+  const report = getReportBySlug(entry.slug);
+  if (!report || report.finalScore == null || report.finalScore <= 0) continue;
+  crossLinks.set(n.id, {
+    slug: entry.slug,
+    score: report.finalScore,
+    tier: scoreTier(report.finalScore),
+    color: scoreColor(report.finalScore),
+    textColor: scoreTextColor(report.finalScore),
+  });
+}
+
+const categoryLabels: Record<string, string> = Object.fromEntries(
+  graph.categories.map((c) => [c.id, c.label]),
+);
 
 const cyData = {
   nodes: graph.nodes.map((n: GraphNode) => {
-    // Suppress cross-link affordance on nodes that were themselves inlined
-    // from another graph — keeps drill-down strictly one level deep.
-    const crossLinkEntry = n._inlinedFromSlug
-      ? undefined
-      : resolveCrossLink(n, graph.chain, slug!, graphIndex);
-    let crossLink:
-      | { slug: string; score: number; tier: string; color: string }
-      | null = null;
-    if (crossLinkEntry) {
-      const report = getReportBySlug(crossLinkEntry.slug);
-      if (report && report.finalScore != null && report.finalScore > 0) {
-        crossLink = {
-          slug: crossLinkEntry.slug,
-          score: report.finalScore,
-          tier: scoreTier(report.finalScore),
-          color: scoreColor(report.finalScore),
-        };
-      }
-    }
+    const chain = n.chain ?? graph.chain;
     return {
       id: n.id,
       label: n.label,
       category: n.category,
+      categoryLabel: categoryLabels[n.category] ?? n.category,
       address: n.address ?? "",
-      link: n.address ? explorerUrl(n.address, n.chain ?? graph.chain) : "",
+      chain,
+      chainLabel: chainLabel(chain),
+      link: n.address ? explorerUrl(n.address, chain) : "",
       note: n.note ?? "",
-      crossLink,
+      crossLink: crossLinks.get(n.id) ?? null,
       inlinedFromSlug: n._inlinedFromSlug ?? null,
     };
   }),
@@ -66,35 +77,29 @@ const cyData = {
     source: e.from,
     target: e.to,
     kind: e.kind,
+    kindLabel: kindLabel(e.kind),
     label: e.label ?? "",
   })),
 };
 
-const categoryLabels: Record<string, string> = Object.fromEntries(
-  graph.categories.map((c) => [c.id, c.label]),
-);
+// Metrics describe *this* report's graph, so they read the pre-expansion
+// node/edge set — inlined cards belong to another assessment.
+const metrics = buildMetrics(baseGraph, currentReport?.finalScore, crossLinks);
+
+// Which other assessments name this one as a dependency. The forward index
+// answers "what does this sit on"; this answers "who is exposed to it".
+const referencedBy = getReverseGraphIndex().get(slug!) ?? [];
 
 const usedKinds = Array.from(new Set(graph.edges.map((e) => e.kind)));
 const usedCategories: GraphCategory[] = graph.categories.filter((c) =>
   graph.nodes.some((n) => n.category === c.id),
 );
 
-const KIND_LABELS: Record<string, string> = {
-  "allocates-to": "Allocation",
-  "deposits-into": "Deposits into",
-  mints: "Mint authority",
-  "routes-through": "Routes through",
-  "routes-fees-to": "Fees routed",
-  "holds-role": "Holds role",
-  controls: "Controls",
-  manages: "Manages",
-  "proposes-on": "Proposes on",
-  "cancels-on": "Cancels on",
-  deploys: "Deploys",
-};
-const kindLabel = (k: string) => KIND_LABELS[k] ?? k;
+// Only offer a filter for groups this graph actually uses.
+const usedGroups = EDGE_GROUPS.filter((g) => g.kinds.some((k) => usedKinds.includes(k)));
 
 const title = graph.title ?? `${slug} — Contract Dependency Graph`;
+const heading = graphHeading(title, slug!);
 ---
 
 <BaseLayout
@@ -104,58 +109,133 @@ const title = graph.title ?? `${slug} — Contract Dependency Graph`;
   bare
 >
   <div class="graph-shell">
-    <div class="graph-topbar">
+    <div class="graph-header">
       <a href={`/report/${slug}/`} class="graph-back">&larr; Risk report</a>
       <div class="graph-title">
-        <span class="graph-title-eyebrow">Dependency graph</span>
-        <h1>{title.replace(" — Contract Dependency Graph", "")}</h1>
-        {reportDate && <div class="graph-report-date">Report date: {reportDate}</div>}
+        <h1>{heading}</h1>
       </div>
       <div class="graph-controls">
-        <button id="cy-fit" type="button" title="Fit to view">Fit</button>
         <button id="cy-reset" type="button" title="Re-run layout">Re-layout</button>
       </div>
     </div>
 
-    <div id="cy" aria-label="Contract dependency graph"></div>
+    {metrics.length > 0 && (
+      <div class="graph-metrics">
+        {metrics.map((m) => (
+          <div
+            class:list={["metric", { "is-lens": m.lens }]}
+            data-lens={m.lens ? JSON.stringify(m.lens) : undefined}
+            role={m.lens ? "button" : undefined}
+            tabindex={m.lens ? 0 : undefined}
+            aria-pressed={m.lens ? "false" : undefined}
+            title={m.lens ? `Highlight ${m.label.toLowerCase()} on the graph` : undefined}
+          >
+            <div class="metric-label">{m.label}</div>
+            <div class="metric-value">
+              {m.chipColor ? (
+                <span
+                  class="metric-chip"
+                  style={`background:${m.chipColor};color:${m.chipTextColor ?? "#0C0C0C"}`}
+                  >{m.value}</span
+                >
+              ) : (
+                m.value
+              )}
+            </div>
+            {m.sub && <div class="metric-sub">{m.sub}</div>}
+          </div>
+        ))}
+      </div>
+    )}
+
+    <div class="graph-toolbar">
+      <input
+        type="search"
+        id="cy-search"
+        class="graph-search"
+        placeholder="Find a contract by name or address…"
+        autocomplete="off"
+        aria-label="Find a contract"
+      />
+      {usedGroups.length > 1 && (
+        <div class="graph-filters" role="group" aria-label="Edge filters">
+          {usedGroups.map((g) => (
+            <button
+              type="button"
+              class="filter-chip is-on"
+              data-group={g.id}
+              data-kinds={g.kinds.join(",")}
+              aria-pressed="true">{g.label}</button
+            >
+          ))}
+        </div>
+      )}
+      {referencedBy.length > 0 && (
+        <div class="graph-refs">
+          <span class="graph-refs-label">Referenced by</span>
+          {referencedBy.map((r, i) => (
+            <>
+              {i > 0 && <span class="graph-refs-sep">·</span>}
+              <a href={`/graph/${r.slug}/`}>{r.label}</a>
+            </>
+          ))}
+        </div>
+      )}
+    </div>
+
+    <div class="graph-canvas">
+      <div
+        id="cy"
+        role="group"
+        aria-label="Contract dependency graph. Use the arrow keys to move between contracts and Enter to open details."
+      ></div>
+
+      <div class="graph-zoom">
+        <button id="cy-zoom-in" type="button" aria-label="Zoom in" title="Zoom in">+</button>
+        <button id="cy-zoom-out" type="button" aria-label="Zoom out" title="Zoom out">&minus;</button>
+        <button id="cy-fit" type="button" aria-label="Fit to view" title="Fit to view">&#10530;</button>
+      </div>
+
+      <aside
+        id="graph-panel"
+        class="graph-panel"
+        role="dialog"
+        aria-label="Contract details"
+        tabindex="-1"
+        hidden
+      >
+        <button id="panel-close" class="panel-close" type="button" aria-label="Close details">&#10005;</button>
+        <div id="panel-content" class="panel-scroll"></div>
+      </aside>
+    </div>
 
     <div class="graph-legend">
-      <details>
-        <summary>
-          <span class="legend-summary-inner">
-            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <circle cx="12" cy="12" r="3"/>
-              <circle cx="12" cy="12" r="9"/>
-            </svg>
-            Legend
+      <div class="legend-group">
+        <span class="legend-h">Nodes</span>
+        {usedCategories.map((c) => (
+          <span class="legend-row">
+            <span class={`legend-swatch swatch-${c.id}`}></span>
+            <span>{c.label}</span>
           </span>
-        </summary>
-        <div class="legend-grid">
-          <div class="legend-col">
-            <div class="legend-h">Nodes</div>
-            {usedCategories.map((c) => (
-              <div class="legend-row">
-                <span class={`legend-swatch swatch-${c.id}`}></span>
-                <span>{c.label}</span>
-              </div>
-            ))}
-          </div>
-          <div class="legend-col">
-            <div class="legend-h">Edges</div>
-            {usedKinds.map((k) => (
-              <div class="legend-row">
-                <span class={`legend-line line-${k}`}></span>
-                <span>{kindLabel(k)}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      </details>
+        ))}
+      </div>
+      <div class="legend-group">
+        <span class="legend-h">Edges</span>
+        {usedKinds.map((k) => (
+          <span class="legend-row">
+            <span class={`legend-line line-${k}`}></span>
+            <span>{kindLabel(k)}</span>
+          </span>
+        ))}
+      </div>
+      <span class="legend-hint legend-hint-wide"
+        >Hover: flow &amp; control chains &middot; Click: details &middot; Drag / scroll: pan &amp; zoom</span
+      >
+      <span class="legend-hint legend-hint-narrow">Tap a card for details</span>
     </div>
   </div>
 
   <script type="application/json" id="cy-data" set:html={JSON.stringify(cyData)}></script>
-  <script type="application/json" id="cy-cat-labels" set:html={JSON.stringify(categoryLabels)}></script>
 
   <script>
     import cytoscape from "cytoscape";
@@ -163,23 +243,38 @@ const title = graph.title ?? `${slug} — Contract Dependency Graph`;
     import dagre from "cytoscape-dagre";
     // @ts-expect-error - no types
     import domNode from "cytoscape-dom-node";
+    import {
+      FLOW_KINDS,
+      AUTHORITY_KINDS,
+      CANVAS_LABEL_KINDS,
+      edgeColor,
+      edgeColorStrong,
+      edgeStyle,
+      edgeWidth,
+      DAGRE_OPTIONS,
+    } from "../../lib/graphStyle";
 
     cytoscape.use(dagre);
     cytoscape.use(domNode);
 
+    type CrossLink = {
+      slug: string;
+      score: number;
+      tier: string;
+      color: string;
+      textColor: string;
+    };
     type CyNode = {
       id: string;
       label: string;
       category: string;
+      categoryLabel: string;
       address: string;
+      chain: string;
+      chainLabel: string;
       link: string;
       note: string;
-      crossLink: {
-        slug: string;
-        score: number;
-        tier: string;
-        color: string;
-      } | null;
+      crossLink: CrossLink | null;
       inlinedFromSlug: string | null;
     };
     type CyEdge = {
@@ -187,30 +282,60 @@ const title = graph.title ?? `${slug} — Contract Dependency Graph`;
       source: string;
       target: string;
       kind: string;
+      kindLabel: string;
       label: string;
     };
 
     const dataEl = document.getElementById("cy-data");
-    const catEl = document.getElementById("cy-cat-labels");
-    if (!dataEl || !catEl) throw new Error("graph: missing data scripts");
+    if (!dataEl) throw new Error("graph: missing data script");
     const data = JSON.parse(dataEl.textContent ?? "{}") as {
       nodes: CyNode[];
       edges: CyEdge[];
     };
-    const catLabels = JSON.parse(catEl.textContent ?? "{}") as Record<string, string>;
+
+    const nodeById = new Map(data.nodes.map((n) => [n.id, n]));
+    const inboundByNode = new Map<string, CyEdge[]>();
+    const outboundByNode = new Map<string, CyEdge[]>();
+    for (const e of data.edges) {
+      if (!outboundByNode.has(e.source)) outboundByNode.set(e.source, []);
+      if (!inboundByNode.has(e.target)) inboundByNode.set(e.target, []);
+      outboundByNode.get(e.source)!.push(e);
+      inboundByNode.get(e.target)!.push(e);
+    }
 
     const truncAddr = (a: string) =>
       a && a.length > 10 ? `${a.slice(0, 6)}…${a.slice(-4)}` : a;
+
+    function escapeHtml(s: string): string {
+      return s
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
+    }
+
+    /* ---------------------------------------------------------------- cards */
 
     function buildCard(n: CyNode): HTMLElement {
       const wrap = document.createElement("div");
       const hasCrossLink = n.crossLink !== null;
       const isInlined = n.inlinedFromSlug !== null;
-      const classes = [`graph-card`, `cat-${n.category}`];
+      const classes = ["graph-card", `cat-${n.category}`];
       if (hasCrossLink) classes.push("has-crosslink");
       if (isInlined) classes.push("is-inlined");
       wrap.className = classes.join(" ");
       wrap.dataset.nodeId = n.id;
+      // Cards are the primary control on this page, so they behave like
+      // buttons. They use a roving tabindex — the graph is a single tab stop
+      // and the arrow keys move between contracts — because putting 48 cards
+      // in the tab order would make everything after the graph unreachable in
+      // practice.
+      wrap.tabIndex = -1;
+      wrap.setAttribute("role", "button");
+      wrap.setAttribute(
+        "aria-label",
+        `${n.categoryLabel}: ${n.label}. Open details.`,
+      );
 
       if (hasCrossLink && n.crossLink) {
         // CSS variable picks up the risk-tier color and drives the border +
@@ -223,47 +348,27 @@ const title = graph.title ?? `${slug} — Contract Dependency Graph`;
         ? `<span class="card-addr">${truncAddr(n.address)}</span>`
         : "";
       const riskFragment = hasCrossLink
-        ? `<span class="card-risk" style="background:${n.crossLink!.color}">${n.crossLink!.score.toFixed(1)} · ${n.crossLink!.tier.replace(" Risk", "")}</span>`
+        ? `<span class="card-risk" style="background:${n.crossLink!.color};color:${n.crossLink!.textColor}">${n.crossLink!.score.toFixed(1)} · ${n.crossLink!.tier.replace(" Risk", "")}</span>`
         : "";
-      const extLinkFragment = hasCrossLink && n.link
-        ? `<a class="card-extlink" href="${n.link}" target="_blank" rel="noopener noreferrer" title="Open on block explorer">↗</a>`
+      // Extended to every addressed card: the explorer used to be reachable
+      // only from cross-linked cards, because plain cards hijacked the click.
+      const extLinkFragment = n.link
+        ? `<a class="card-extlink" href="${n.link}" target="_blank" rel="noopener noreferrer" title="Open on block explorer" tabindex="-1">↗</a>`
         : "";
-      const eyebrowText = catLabels[n.category] ?? n.category;
+      const eyebrowText = n.inlinedFromSlug
+        ? `${n.categoryLabel} · via ${n.inlinedFromSlug}`
+        : n.categoryLabel;
 
       wrap.innerHTML = `
         <div class="card-accent"></div>
         <div class="card-body">
-          <div class="card-eyebrow">${eyebrowText}</div>
+          <div class="card-eyebrow">${escapeHtml(eyebrowText)}</div>
           <div class="card-title">${escapeHtml(n.label)}</div>
           ${addrFragment || riskFragment ? `<div class="card-meta">${addrFragment}${riskFragment}</div>` : ""}
         </div>
         ${extLinkFragment}
       `;
-
-      if (hasCrossLink) {
-        wrap.style.cursor = "pointer";
-        wrap.addEventListener("click", (e) => {
-          const target = e.target as HTMLElement;
-          if (target.closest(".card-extlink")) return; // let the ↗ link follow its href
-          e.stopPropagation();
-          window.location.href = `/graph/${n.crossLink!.slug}/`;
-        });
-      } else if (n.link) {
-        wrap.style.cursor = "pointer";
-        wrap.addEventListener("click", (e) => {
-          e.stopPropagation();
-          window.open(n.link, "_blank", "noopener,noreferrer");
-        });
-      }
       return wrap;
-    }
-
-    function escapeHtml(s: string): string {
-      return s
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;");
     }
 
     const NODE_W = 188;
@@ -272,7 +377,7 @@ const title = graph.title ?? `${slug} — Contract Dependency Graph`;
     const elements: cytoscape.ElementDefinition[] = [
       ...data.nodes.map((n) => ({
         group: "nodes" as const,
-        data: { id: n.id, dom: buildCard(n), category: n.category, link: n.link },
+        data: { id: n.id, dom: buildCard(n), category: n.category },
       })),
       ...data.edges.map((e) => ({
         group: "edges" as const,
@@ -280,46 +385,22 @@ const title = graph.title ?? `${slug} — Contract Dependency Graph`;
       })),
     ];
 
-    const flow = new Set(["allocates-to", "deposits-into"]);
-    const role = new Set(["holds-role", "controls", "manages"]);
-    const gov = new Set(["proposes-on", "cancels-on"]);
+    /* ------------------------------------------------------ cytoscape style */
 
-    const edgeColor = (k: string) => {
-      if (flow.has(k)) return "rgba(110, 231, 183, 0.55)";
-      // mints: high-trust authority (privileged supply creation) — red is
-      // the strongest signal in the palette, intentional to draw the
-      // reviewer's eye to mint-role holders.
-      if (k === "mints") return "rgba(239, 68, 68, 0.85)";
-      if (role.has(k)) return "rgba(251, 191, 36, 0.5)";
-      if (gov.has(k)) return "rgba(167, 139, 250, 0.55)";
-      // routes-through participates in flow but renders as a thin hop —
-      // muted khaki keeps it visible without competing with the bright
-      // money-flow edges or the amber role edges.
-      if (k === "routes-through") return "rgba(202, 184, 110, 0.75)";
-      // routes-fees-to + deploys: background plumbing (deployment lineage,
-      // fee routing) — mid-gray reads on both dark and light themes;
-      // pure white at low opacity vanishes on light mode.
-      return "rgba(140, 140, 140, 0.6)";
-    };
-    const edgeStyle = (k: string): cytoscape.LineStyle => {
-      if (k === "mints") return "dashed";
-      if (role.has(k)) return "dashed";
-      if (gov.has(k)) return "dotted";
-      return "solid";
-    };
-    const edgeWidth = (k: string) => {
-      if (flow.has(k)) return 2;
-      if (k === "mints") return 2.25; // slightly heavier than role edges
-      return 1.5;
-    };
+    const HL_UP = "rgba(110, 167, 255, 0.95)";
+    const HL_DOWN = "rgba(45, 212, 191, 0.95)";
 
-    const cy = cytoscape({
-      container: document.getElementById("cy")!,
-      elements,
-      wheelSensitivity: 0.2,
-      minZoom: 0.3,
-      maxZoom: 2.5,
-      style: [
+    /** Edge-label chips used to be hard-coded dark, i.e. unreadable in light mode. */
+    function themeChip(): { bg: string; fg: string } {
+      const light = document.documentElement.classList.contains("light");
+      return light
+        ? { bg: "#ffffff", fg: "rgba(12,12,12,0.78)" }
+        : { bg: "#0a0b0e", fg: "rgba(255,255,255,0.7)" };
+    }
+
+    function buildStyle(): cytoscape.StylesheetJson {
+      const chip = themeChip();
+      return [
         {
           selector: "node",
           style: {
@@ -345,13 +426,12 @@ const title = graph.title ?? `${slug} — Contract Dependency Graph`;
             "arrow-scale": 0.85,
             label: (ele: cytoscape.EdgeSingular) => {
               const k = ele.data("kind") as string;
-              const lbl = ele.data("label") as string;
-              return flow.has(k) ? lbl : "";
+              return CANVAS_LABEL_KINDS.has(k) ? (ele.data("label") as string) : "";
             },
             "font-size": 10,
             "font-weight": 500,
-            color: "rgba(255,255,255,0.7)",
-            "text-background-color": "#0a0b0e",
+            color: chip.fg,
+            "text-background-color": chip.bg,
             "text-background-opacity": 0.95,
             "text-background-padding": "3px",
             "text-background-shape": "round-rectangle",
@@ -359,111 +439,609 @@ const title = graph.title ?? `${slug} — Contract Dependency Graph`;
           },
         },
         {
-          selector: "edge.hl",
+          selector: "edge.hl-up",
           style: {
-            "line-color": "rgba(110, 167, 255, 0.95)",
-            "target-arrow-color": "rgba(110, 167, 255, 0.95)",
+            "line-color": HL_UP,
+            "target-arrow-color": HL_UP,
             width: 2.5,
             "z-index": 10,
+            opacity: 1,
           },
         },
-      ],
-      layout: {
-        name: "dagre",
-        // @ts-expect-error - dagre options
-        rankDir: "LR",
-        nodeSep: 28,
-        rankSep: 110,
-        edgeSep: 12,
-        ranker: "network-simplex",
-      },
+        {
+          selector: "edge.hl-down",
+          style: {
+            "line-color": HL_DOWN,
+            "target-arrow-color": HL_DOWN,
+            width: 2.5,
+            "z-index": 10,
+            opacity: 1,
+          },
+        },
+        // Connected to the selection but not part of the flow chain: mint
+        // authority, roles, governance, wiring. Kept in their own colour so the
+        // legend still reads, just at full strength and a touch heavier.
+        {
+          selector: "edge.hl-strong",
+          style: {
+            "line-color": (ele: cytoscape.EdgeSingular) =>
+              edgeColorStrong(ele.data("kind") as string),
+            "target-arrow-color": (ele: cytoscape.EdgeSingular) =>
+              edgeColorStrong(ele.data("kind") as string),
+            width: (ele: cytoscape.EdgeSingular) => edgeWidth(ele.data("kind") as string) + 1,
+            "z-index": 9,
+            opacity: 1,
+          },
+        },
+        // Without dimming, a highlighted chain is invisible in a 40-node graph.
+        { selector: "edge.dim", style: { opacity: 0.12 } },
+        // Filter groups win over every highlight state.
+        { selector: "edge.filtered", style: { display: "none" } },
+      ] as unknown as cytoscape.StylesheetJson;
+    }
+
+    const cy = cytoscape({
+      container: document.getElementById("cy")!,
+      elements,
+      wheelSensitivity: 0.2,
+      minZoom: 0.3,
+      maxZoom: 2.5,
+      style: buildStyle(),
+      layout: { ...DAGRE_OPTIONS } as cytoscape.LayoutOptions,
     });
 
     // Initialize DOM-node extension AFTER cy is created
     // @ts-expect-error - added by cytoscape-dom-node
     cy.domNode();
 
-    // Re-run layout once DOM nodes are sized (dom-node sometimes
-    // measures lazily; one extra fit settles labels & arrows).
-    requestAnimationFrame(() => {
-      cy.fit(undefined, 80);
-    });
+    // Re-run fit once DOM nodes are sized (dom-node sometimes measures
+    // lazily; one extra fit settles labels & arrows).
+    requestAnimationFrame(() => cy.fit(undefined, 80));
 
-    // The DOM cards intercept pointer events, so cytoscape's own node hover
-    // never fires. Wire it from the card overlay instead.
-    //
-    // Hover behavior: walk the *backward* money-flow chain from the hovered
-    // node (incoming edges of kind allocates-to / deposits-into / routes-through,
-    // recursively) and highlight every edge and ancestor card on that path.
-    // Skips role/governance edges so the chain stays focused on capital flow.
-    const HL_FLOW_KINDS = new Set([
-      "allocates-to",
-      "deposits-into",
-      "routes-through",
-    ]);
+    const shell = document.querySelector(".graph-shell") as HTMLElement;
+    const cyContainer = document.getElementById("cy")!;
 
-    function clearAllHighlights() {
-      cy.edges(".hl").removeClass("hl");
-      document
-        .querySelectorAll(".graph-card.is-hl")
-        .forEach((c) => c.classList.remove("is-hl"));
-    }
+    const cardFor = (id: string) =>
+      document.querySelector(
+        `.graph-card[data-node-id="${CSS.escape(id)}"]`,
+      ) as HTMLElement | null;
 
-    function highlightAncestors(startId: string) {
+    /* ----------------------------------------------------- highlight engine */
+
+    /**
+     * Transitive walk from a node over one set of edge kinds, in one direction.
+     * Returns the ids of every edge and node reached.
+     */
+    function walk(
+      startId: string,
+      dir: "up" | "down",
+      kinds: Set<string>,
+    ): Set<string> {
+      const seen = new Set<string>();
       const start = cy.getElementById(startId);
-      if (start.length === 0) return;
-      const visited = new Set<string>([startId]);
+      if (start.length === 0) return seen;
       const queue: cytoscape.NodeSingular[] = [start as cytoscape.NodeSingular];
+      const visited = new Set<string>([startId]);
       while (queue.length) {
         const cur = queue.shift()!;
-        const inFlowEdges = cur
-          .incomers("edge")
-          .filter((ed: cytoscape.EdgeSingular) =>
-            HL_FLOW_KINDS.has(ed.data("kind") as string),
-          );
-        inFlowEdges.forEach((ed: cytoscape.EdgeSingular) => {
-          ed.addClass("hl");
-          const src = ed.source() as cytoscape.NodeSingular;
-          if (!visited.has(src.id())) {
-            visited.add(src.id());
-            const card = document.querySelector(
-              `.graph-card[data-node-id="${CSS.escape(src.id())}"]`,
-            );
-            if (card) card.classList.add("is-hl");
-            queue.push(src);
+        const edges = (dir === "up" ? cur.incomers("edge") : cur.outgoers("edge")).filter(
+          (ed: cytoscape.EdgeSingular) => kinds.has(ed.data("kind") as string),
+        );
+        edges.forEach((ed: cytoscape.EdgeSingular) => {
+          seen.add(ed.id());
+          const next = (dir === "up" ? ed.source() : ed.target()) as cytoscape.NodeSingular;
+          if (!visited.has(next.id())) {
+            visited.add(next.id());
+            seen.add(next.id());
+            queue.push(next);
           }
         });
       }
+      return seen;
     }
 
-    const cyContainer = document.getElementById("cy")!;
+    /**
+     * Everything attached to a node that the flow and authority walks don't
+     * already cover — `deploys`, `routes-fees-to`, and any flow edge pointing
+     * the "wrong" way. One hop only: these are context for the selection, not
+     * a chain worth following.
+     */
+    function incidentEdges(startId: string, covered: Set<string>): Set<string> {
+      const seen = new Set<string>();
+      const start = cy.getElementById(startId);
+      if (start.length === 0) return seen;
+      (start as cytoscape.NodeSingular)
+        .connectedEdges()
+        .forEach((ed: cytoscape.EdgeSingular) => {
+          if (covered.has(ed.id())) return;
+          seen.add(ed.id());
+          seen.add(ed.source().id());
+          seen.add(ed.target().id());
+        });
+      seen.delete(startId);
+      return seen;
+    }
+
+    let hoverId: string | null = null;
+    let pinnedId: string | null = null;
+    /**
+     * A standing selection projected onto the canvas when nothing is hovered or
+     * pinned — set by the search box or by a metric card. Carries edges as well
+     * as nodes so "Mint authority: 4" can light the four edges themselves.
+     */
+    type Lens = { nodes: Set<string>; edges: Set<string> };
+    let lens: Lens | null = null;
+
+    function clearHighlights() {
+      cy.elements().removeClass("hl-up hl-down hl-strong dim");
+      document
+        .querySelectorAll(".graph-card")
+        .forEach((c) =>
+          c.classList.remove(
+            "is-focus",
+            "is-hl-up",
+            "is-hl-down",
+            "is-hl-strong",
+            "is-dim",
+            "is-match",
+          ),
+        );
+      shell.classList.remove("is-focused");
+    }
+
+    function renderHighlights() {
+      clearHighlights();
+      const id = pinnedId ?? hoverId;
+      if (!id || cy.getElementById(id).length === 0) {
+        // No chain in play — fall back to the standing lens, so a search or a
+        // metric card reads the same way a hover does.
+        if (lens) {
+          for (const n of data.nodes) {
+            const card = cardFor(n.id);
+            if (!card) continue;
+            card.classList.add(lens.nodes.has(n.id) ? "is-match" : "is-dim");
+          }
+          cy.edges().forEach((ed: cytoscape.EdgeSingular) => {
+            ed.addClass(lens!.edges.has(ed.id()) ? "hl-strong" : "dim");
+          });
+          shell.classList.add("is-focused");
+        }
+        return;
+      }
+
+      // Money flow, recoloured by direction — that distinction is the point of
+      // the chain, and flow edges are all one colour at rest so nothing is lost.
+      const up = walk(id, "up", FLOW_KINDS);
+      const down = walk(id, "down", FLOW_KINDS);
+      // Who can change this, transitively. Mint authority, roles, control and
+      // governance signalling all point toward the thing they act on.
+      const auth = walk(id, "up", AUTHORITY_KINDS);
+      const covered = new Set<string>([...up, ...down, ...auth]);
+      const incident = incidentEdges(id, covered);
+      const strong = new Set<string>([...auth, ...incident]);
+      const active = new Set<string>([id, ...up, ...down, ...strong]);
+
+      cy.edges().forEach((ed: cytoscape.EdgeSingular) => {
+        if (up.has(ed.id())) ed.addClass("hl-up");
+        else if (down.has(ed.id())) ed.addClass("hl-down");
+        else if (strong.has(ed.id())) ed.addClass("hl-strong");
+        else ed.addClass("dim");
+      });
+      for (const n of data.nodes) {
+        const card = cardFor(n.id);
+        if (!card) continue;
+        if (n.id === id) card.classList.add("is-focus");
+        else if (up.has(n.id)) card.classList.add("is-hl-up");
+        else if (down.has(n.id)) card.classList.add("is-hl-down");
+        else if (strong.has(n.id)) card.classList.add("is-hl-strong");
+        else if (!active.has(n.id)) card.classList.add("is-dim");
+      }
+      shell.classList.add("is-focused");
+    }
+
     cyContainer.addEventListener("mouseover", (e) => {
       const card = (e.target as HTMLElement).closest(".graph-card") as HTMLElement | null;
-      if (!card?.dataset.nodeId) return;
-      clearAllHighlights();
-      card.classList.add("is-hl");
-      highlightAncestors(card.dataset.nodeId);
+      if (!card?.dataset.nodeId || card.dataset.nodeId === hoverId) return;
+      hoverId = card.dataset.nodeId;
+      renderHighlights();
     });
     cyContainer.addEventListener("mouseout", (e) => {
       const card = (e.target as HTMLElement).closest(".graph-card") as HTMLElement | null;
       if (!card?.dataset.nodeId) return;
-      clearAllHighlights();
+      // Moving between a card's own children (accent → body → title) fires
+      // mouseout/mouseover pairs; ignore those or the chain thrashes.
+      const to = e.relatedTarget as HTMLElement | null;
+      if (to && card.contains(to)) return;
+      hoverId = null;
+      renderHighlights();
+    });
+    // Keyboard focus gets the same treatment as hover, and also becomes the
+    // roving tab stop so Tab returns the user to where they left off.
+    cyContainer.addEventListener("focusin", (e) => {
+      const card = (e.target as HTMLElement).closest(".graph-card") as HTMLElement | null;
+      const id = card?.dataset.nodeId;
+      if (!id) return;
+      hoverId = id;
+      renderHighlights();
+      const i = orderedIds.indexOf(id);
+      if (i >= 0 && i !== rovingIndex) setRoving(i, false);
     });
 
-    document.getElementById("cy-fit")?.addEventListener("click", () => {
-      cy.fit(undefined, 60);
+    /* ------------------------------------------------------- details panel */
+
+    const panel = document.getElementById("graph-panel") as HTMLElement;
+    const panelContent = document.getElementById("panel-content") as HTMLElement;
+
+    function connectionRows(edges: CyEdge[], dir: "in" | "out"): string {
+      if (edges.length === 0) return "";
+      const rows = edges
+        .map((e) => {
+          const otherId = dir === "in" ? e.source : e.target;
+          const other = nodeById.get(otherId);
+          const arrow = dir === "in" ? "←" : "→";
+          // The edge label is the payload here: for `mints` / `holds-role` /
+          // `proposes-on` it carries the role name, which the canvas never draws.
+          const detail = e.label
+            ? `<span class="conn-detail">${escapeHtml(e.label)}</span>`
+            : "";
+          return `
+            <button class="conn-row" data-goto="${escapeHtml(otherId)}" type="button">
+              <span class="legend-line line-${e.kind}"></span>
+              <span class="conn-kind">${escapeHtml(e.kindLabel)}</span>
+              <span class="conn-arrow">${arrow}</span>
+              <span class="conn-node">${escapeHtml(other?.label ?? otherId)}</span>
+              ${detail}
+            </button>`;
+        })
+        .join("");
+      return `
+        <div class="panel-section">
+          <div class="panel-h">${dir === "in" ? "Inbound" : "Outbound"} · ${edges.length}</div>
+          <div class="conn-list">${rows}</div>
+        </div>`;
+    }
+
+    function renderPanel(id: string) {
+      const n = nodeById.get(id);
+      if (!n) return;
+      const eyebrow = [n.categoryLabel, n.chainLabel]
+        .concat(n.inlinedFromSlug ? [`via ${n.inlinedFromSlug}`] : [])
+        .map(escapeHtml)
+        .join(" · ");
+
+      const addressBlock = n.address
+        ? `
+          <div class="panel-section">
+            <div class="panel-h">Address</div>
+            <div class="panel-addr">
+              <code>${escapeHtml(n.address)}</code>
+              <button class="panel-copy" type="button" data-copy="${escapeHtml(n.address)}">Copy</button>
+            </div>
+            <a class="panel-link" href="${escapeHtml(n.link)}" target="_blank" rel="noopener noreferrer">Open on block explorer ↗</a>
+          </div>`
+        : `<div class="panel-section"><div class="panel-note-empty">No onchain address recorded for this node.</div></div>`;
+
+      // `note` is authored on a third of all nodes and was previously parsed,
+      // shipped to the browser, and then never rendered anywhere.
+      const noteBlock = n.note
+        ? `<div class="panel-section"><div class="panel-h">Note</div><p class="panel-note">${escapeHtml(n.note)}</p></div>`
+        : "";
+
+      const crossBlock = n.crossLink
+        ? `
+          <div class="panel-section panel-cross" style="--cl-color:${n.crossLink.color}">
+            <div class="panel-h">Separately assessed</div>
+            <div class="panel-cross-row">
+              <span class="card-risk" style="background:${n.crossLink.color};color:${n.crossLink.textColor}">${n.crossLink.score.toFixed(1)} · ${escapeHtml(n.crossLink.tier)}</span>
+            </div>
+            <a class="panel-link" href="/graph/${escapeHtml(n.crossLink.slug)}/">Open ${escapeHtml(n.crossLink.slug)} graph →</a>
+            <a class="panel-link" href="/report/${escapeHtml(n.crossLink.slug)}/">Read risk report →</a>
+          </div>`
+        : "";
+
+      panelContent.innerHTML = `
+        <div class="panel-eyebrow">${eyebrow}</div>
+        <h2 class="panel-title">${escapeHtml(n.label)}</h2>
+        ${addressBlock}
+        ${noteBlock}
+        ${crossBlock}
+        ${connectionRows(inboundByNode.get(id) ?? [], "in")}
+        ${connectionRows(outboundByNode.get(id) ?? [], "out")}
+      `;
+      // The label changes with the selection, so a screen reader announces
+      // which contract the dialog is describing.
+      panel.setAttribute("aria-label", `${n.categoryLabel}: ${n.label}`);
+      panel.hidden = false;
+      panel.classList.add("is-open");
+    }
+
+    /** Where focus was before the panel opened, so Escape can hand it back. */
+    let focusReturn: HTMLElement | null = null;
+
+    function selectNode(id: string, moveFocus = false) {
+      const wasOpen = !panel.hidden;
+      pinnedId = id;
+      renderPanel(id);
+      renderHighlights();
+      if (!wasOpen) {
+        const active = document.activeElement;
+        focusReturn = active instanceof HTMLElement ? active : null;
+      }
+      // Only pull focus when the panel was opened from the keyboard; a mouse
+      // user who clicks a card should keep their place on the canvas.
+      if (moveFocus) panel.focus();
+    }
+
+    function closePanel() {
+      pinnedId = null;
+      panel.classList.remove("is-open");
+      panel.hidden = true;
+      renderHighlights();
+      if (focusReturn?.isConnected) focusReturn.focus();
+      focusReturn = null;
+    }
+
+    // Click no longer navigates. Drill-down and the explorer are explicit
+    // links inside the panel, so a click can mean "inspect" instead.
+    cyContainer.addEventListener("click", (e) => {
+      const target = e.target as HTMLElement;
+      if (target.closest(".card-extlink")) return; // let the ↗ link follow its href
+      const card = target.closest(".graph-card") as HTMLElement | null;
+      if (!card?.dataset.nodeId) return;
+      e.stopPropagation();
+      selectNode(card.dataset.nodeId);
     });
+    // Cytoscape swallows touch gestures for pan/zoom, so a tap never produces
+    // a synthesized `click` on the card — without this, the panel (and with it
+    // the whole chain feature) is unreachable on a phone. Treat a touch that
+    // lands and lifts on the same card without travelling as a select.
+    let touchStart: { id: string; x: number; y: number } | null = null;
+    cyContainer.addEventListener("pointerdown", (e) => {
+      if (e.pointerType !== "touch") return;
+      const card = (e.target as HTMLElement).closest(".graph-card") as HTMLElement | null;
+      touchStart = card?.dataset.nodeId
+        ? { id: card.dataset.nodeId, x: e.clientX, y: e.clientY }
+        : null;
+    });
+    cyContainer.addEventListener("pointerup", (e) => {
+      if (e.pointerType !== "touch" || !touchStart) return;
+      const start = touchStart;
+      touchStart = null;
+      if (Math.hypot(e.clientX - start.x, e.clientY - start.y) > 10) return; // panning
+      if ((e.target as HTMLElement).closest(".card-extlink")) return;
+      selectNode(start.id);
+    });
+
+    /* ------------------------------------------------- roving tabindex nav */
+
+    // Order follows the YAML, which is also roughly the dagre rank order, so
+    // arrowing through the graph reads governance → vault → strategies →
+    // dependencies rather than jumping around the canvas.
+    const orderedIds = data.nodes.map((n) => n.id);
+    let rovingIndex = 0;
+
+    function setRoving(index: number, moveFocus: boolean) {
+      const clamped = Math.max(0, Math.min(orderedIds.length - 1, index));
+      rovingIndex = clamped;
+      orderedIds.forEach((id, i) => {
+        const card = cardFor(id);
+        if (card) card.tabIndex = i === clamped ? 0 : -1;
+      });
+      if (!moveFocus) return;
+      const card = cardFor(orderedIds[clamped]);
+      card?.focus();
+      // Keep the focused card on screen — arrowing to an off-canvas node with
+      // no visible result would be worse than no keyboard support at all.
+      const ele = cy.getElementById(orderedIds[clamped]);
+      if (ele.length) cy.animate({ center: { eles: ele } }, { duration: 160 });
+    }
+
+    setRoving(0, false);
+
+    cyContainer.addEventListener("keydown", (e) => {
+      const card = (e.target as HTMLElement).closest(".graph-card") as HTMLElement | null;
+      if (!card?.dataset.nodeId) return;
+      switch (e.key) {
+        case "Enter":
+        case " ":
+          e.preventDefault();
+          selectNode(card.dataset.nodeId, true);
+          break;
+        case "ArrowRight":
+        case "ArrowDown":
+          e.preventDefault();
+          setRoving(rovingIndex + 1, true);
+          break;
+        case "ArrowLeft":
+        case "ArrowUp":
+          e.preventDefault();
+          setRoving(rovingIndex - 1, true);
+          break;
+        case "Home":
+          e.preventDefault();
+          setRoving(0, true);
+          break;
+        case "End":
+          e.preventDefault();
+          setRoving(orderedIds.length - 1, true);
+          break;
+      }
+    });
+
+
+    panelContent.addEventListener("click", (e) => {
+      const target = e.target as HTMLElement;
+      const copyBtn = target.closest(".panel-copy") as HTMLElement | null;
+      if (copyBtn?.dataset.copy) {
+        navigator.clipboard?.writeText(copyBtn.dataset.copy).then(() => {
+          copyBtn.textContent = "Copied";
+          setTimeout(() => (copyBtn.textContent = "Copy"), 1400);
+        });
+        return;
+      }
+      const goto = target.closest(".conn-row") as HTMLElement | null;
+      if (goto?.dataset.goto) {
+        selectNode(goto.dataset.goto);
+        const el = cy.getElementById(goto.dataset.goto);
+        if (el.length) cy.animate({ center: { eles: el } }, { duration: 220 });
+      }
+    });
+
+    document.getElementById("panel-close")?.addEventListener("click", closePanel);
+    document.addEventListener("keydown", (e) => {
+      if (e.key !== "Escape") return;
+      if (pinnedId) closePanel();
+      else if (lens) clearLens();
+    });
+    cy.on("tap", (evt) => {
+      if (evt.target === cy && pinnedId) closePanel();
+    });
+
+    /* --------------------------------------------------- search & filters */
+
+    const searchInput = document.getElementById("cy-search") as HTMLInputElement | null;
+    searchInput?.addEventListener("input", () => {
+      const q = searchInput.value.trim().toLowerCase();
+      if (!q) {
+        clearLens();
+        return;
+      }
+      const nodes = new Set(
+        data.nodes
+          .filter(
+            (n) =>
+              n.label.toLowerCase().includes(q) ||
+              n.address.toLowerCase().includes(q) ||
+              n.categoryLabel.toLowerCase().includes(q),
+          )
+          .map((n) => n.id),
+      );
+      setLens({ nodes, edges: new Set() }, null);
+    });
+    searchInput?.addEventListener("keydown", (e) => {
+      if (e.key !== "Escape") return;
+      searchInput.value = "";
+      clearLens();
+    });
+
+    const metricCards = Array.from(
+      document.querySelectorAll<HTMLElement>(".metric.is-lens"),
+    );
+    let activeMetric: HTMLElement | null = null;
+
+    function setLens(next: Lens, source: HTMLElement | null) {
+      lens = next.nodes.size > 0 || next.edges.size > 0 ? next : null;
+      activeMetric = source;
+      metricCards.forEach((c) =>
+        c.setAttribute("aria-pressed", String(c === source)),
+      );
+      renderHighlights();
+      // Pull the selection into view; a lens on a 40-node graph is useless if
+      // the matches are off-screen.
+      if (!lens) return;
+      const eles = cy.collection();
+      lens.nodes.forEach((id) => eles.merge(cy.getElementById(id)));
+      lens.edges.forEach((id) => eles.merge(cy.getElementById(id)));
+      if (eles.length > 0) cy.animate({ fit: { eles, padding: 120 } }, { duration: 260 });
+    }
+
+    function clearLens() {
+      lens = null;
+      activeMetric = null;
+      metricCards.forEach((c) => c.setAttribute("aria-pressed", "false"));
+      renderHighlights();
+    }
+
+    /** Resolve a metric's lens descriptor against what is actually on canvas. */
+    function resolveLens(spec: Record<string, string>): Lens {
+      const nodes = new Set<string>();
+      const edges = new Set<string>();
+      if (spec.type === "nodeCategory") {
+        for (const n of data.nodes) if (n.category === spec.category) nodes.add(n.id);
+      } else {
+        for (const e of data.edges) {
+          const hit =
+            spec.type === "edgeKind"
+              ? e.kind === spec.kind
+              : e.kind === spec.kind && e.target === spec.nodeId;
+          if (!hit) continue;
+          edges.add(e.id);
+          nodes.add(e.source);
+          nodes.add(e.target);
+        }
+      }
+      return { nodes, edges };
+    }
+
+    function toggleMetric(card: HTMLElement) {
+      if (activeMetric === card) {
+        clearLens();
+        return;
+      }
+      if (searchInput) searchInput.value = "";
+      let spec: Record<string, string>;
+      try {
+        spec = JSON.parse(card.dataset.lens ?? "{}");
+      } catch {
+        return;
+      }
+      setLens(resolveLens(spec), card);
+    }
+
+    metricCards.forEach((card) => {
+      card.addEventListener("click", () => toggleMetric(card));
+      card.addEventListener("keydown", (e) => {
+        if (e.key !== "Enter" && e.key !== " ") return;
+        e.preventDefault();
+        toggleMetric(card);
+      });
+    });
+
+    // Hiding an edge group is reversible and non-destructive — the YAML keeps
+    // the full picture, the reader chooses how much of it to look at.
+    const hiddenKinds = new Set<string>();
+    function applyFilters() {
+      cy.edges().forEach((ed: cytoscape.EdgeSingular) => {
+        const hide = hiddenKinds.has(ed.data("kind") as string);
+        if (hide) ed.addClass("filtered");
+        else ed.removeClass("filtered");
+      });
+    }
+    document.querySelectorAll<HTMLElement>(".filter-chip").forEach((chip) => {
+      chip.addEventListener("click", () => {
+        const kinds = (chip.dataset.kinds ?? "").split(",").filter(Boolean);
+        const turningOff = chip.classList.contains("is-on");
+        kinds.forEach((k) => (turningOff ? hiddenKinds.add(k) : hiddenKinds.delete(k)));
+        chip.classList.toggle("is-on", !turningOff);
+        chip.setAttribute("aria-pressed", String(!turningOff));
+        applyFilters();
+      });
+    });
+
+    /* ------------------------------------------------------------ controls */
+
+    const zoomBy = (factor: number) => {
+      cy.zoom({
+        level: cy.zoom() * factor,
+        renderedPosition: { x: cy.width() / 2, y: cy.height() / 2 },
+      });
+    };
+
+    document.getElementById("cy-zoom-in")?.addEventListener("click", () => zoomBy(1.25));
+    document.getElementById("cy-zoom-out")?.addEventListener("click", () => zoomBy(0.8));
+    document.getElementById("cy-fit")?.addEventListener("click", () => cy.fit(undefined, 60));
     document.getElementById("cy-reset")?.addEventListener("click", () => {
-      cy.layout({
-        name: "dagre",
-        // @ts-expect-error - dagre options
-        rankDir: "LR",
-        nodeSep: 28,
-        rankSep: 110,
-        edgeSep: 12,
-        ranker: "network-simplex",
-      }).run();
+      cy.layout({ ...DAGRE_OPTIONS } as cytoscape.LayoutOptions).run();
       requestAnimationFrame(() => cy.fit(undefined, 80));
+    });
+
+    // Edge-label chips are the one piece of cytoscape styling that must track
+    // the site theme; re-apply the stylesheet when the toggle flips.
+    new MutationObserver(() => {
+      cy.style().fromJson(buildStyle()).update();
+    }).observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ["class"],
     });
   </script>
 </BaseLayout>
@@ -476,15 +1054,27 @@ const title = graph.title ?? `${slug} — Contract Dependency Graph`;
   }
 
   .graph-shell {
+    /* Category colors live here once; cards, legend swatches and eyebrows all
+       read them, so a restyle is a single edit. */
+    --cat-vault: #2b7fff;
+    --cat-strategy: #f59e0b;
+    --cat-governance: #ef4444;
+    --cat-infra: #94a3b8;
+    --cat-dependency: #a78bfa;
+    --cat-vault-text: #6ea7ff;
+    --cat-strategy-text: #fbbf24;
+    --cat-governance-text: #f87171;
+    --cat-infra-text: #cbd5e1;
+    --cat-dependency-text: #c4b5fd;
+    --graph-surface: rgba(20, 22, 28, 0.85);
+    --graph-border: rgba(255, 255, 255, 0.08);
+
     position: relative;
+    display: flex;
+    flex-direction: column;
     width: 100vw;
     margin-left: calc(50% - 50vw);
     margin-right: calc(50% - 50vw);
-    background: #0a0b0e;
-    background-image:
-      radial-gradient(rgba(255, 255, 255, 0.045) 1px, transparent 1px);
-    background-size: 24px 24px;
-    background-position: 0 0;
     border-top: 1px solid rgba(255, 255, 255, 0.06);
     border-bottom: 1px solid rgba(255, 255, 255, 0.06);
     height: calc(100vh - 60px); /* fill below site header */
@@ -492,9 +1082,21 @@ const title = graph.title ?? `${slug} — Contract Dependency Graph`;
     overflow: hidden;
   }
   html.light .graph-shell {
+    --graph-surface: rgba(255, 255, 255, 0.9);
+    --graph-border: rgba(0, 0, 0, 0.1);
+  }
+
+  .graph-canvas {
+    position: relative;
+    flex: 1;
+    min-height: 0;
+    background: #0a0b0e;
+    background-image: radial-gradient(rgba(255, 255, 255, 0.045) 1px, transparent 1px);
+    background-size: 24px 24px;
+  }
+  html.light .graph-canvas {
     background: #f4f5f8;
-    background-image:
-      radial-gradient(rgba(0, 0, 0, 0.06) 1px, transparent 1px);
+    background-image: radial-gradient(rgba(0, 0, 0, 0.06) 1px, transparent 1px);
   }
 
   #cy {
@@ -504,20 +1106,15 @@ const title = graph.title ?? `${slug} — Contract Dependency Graph`;
     height: 100%;
   }
 
-  .graph-topbar {
-    position: absolute;
-    top: 16px;
-    left: 16px;
-    right: 16px;
+  /* ------------------------------------------------------------ top chrome */
+
+  .graph-header {
     display: flex;
     justify-content: space-between;
-    align-items: flex-start;
+    align-items: center;
     gap: 1rem;
-    z-index: 5;
-    pointer-events: none;
-  }
-  .graph-topbar > * {
-    pointer-events: auto;
+    padding: 0.45rem 1rem;
+    border-bottom: 1px solid var(--graph-border);
   }
   .graph-back {
     display: inline-flex;
@@ -525,15 +1122,10 @@ const title = graph.title ?? `${slug} — Contract Dependency Graph`;
     padding: 0.4rem 0.7rem;
     font-size: 0.78rem;
     color: var(--text-secondary);
-    background: rgba(20, 22, 28, 0.7);
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: var(--graph-surface);
+    border: 1px solid var(--graph-border);
     border-radius: 6px;
-    backdrop-filter: blur(6px);
-    -webkit-backdrop-filter: blur(6px);
-  }
-  html.light .graph-back {
-    background: rgba(255, 255, 255, 0.7);
-    border-color: rgba(0, 0, 0, 0.1);
+    white-space: nowrap;
   }
   .graph-back:hover {
     color: var(--text-primary);
@@ -542,24 +1134,12 @@ const title = graph.title ?? `${slug} — Contract Dependency Graph`;
   .graph-title {
     text-align: center;
     flex: 1;
-  }
-  .graph-title-eyebrow {
-    font-size: 0.65rem;
-    text-transform: uppercase;
-    letter-spacing: 0.12em;
-    color: var(--text-secondary);
-    display: block;
-    margin-bottom: 0.15rem;
+    min-width: 0;
   }
   .graph-title h1 {
-    font-size: 1rem;
+    font-size: 0.95rem;
     font-weight: 600;
     margin: 0;
-  }
-  .graph-report-date {
-    margin-top: 0.2rem;
-    font-size: 0.72rem;
-    color: var(--text-secondary);
   }
   .graph-controls {
     display: flex;
@@ -568,126 +1148,249 @@ const title = graph.title ?? `${slug} — Contract Dependency Graph`;
   .graph-controls button {
     padding: 0.4rem 0.75rem;
     font-size: 0.75rem;
-    background: rgba(20, 22, 28, 0.7);
+    background: var(--graph-surface);
     color: var(--text-secondary);
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    border: 1px solid var(--graph-border);
     border-radius: 6px;
     cursor: pointer;
-    backdrop-filter: blur(6px);
-    -webkit-backdrop-filter: blur(6px);
+    white-space: nowrap;
     transition: color 0.15s, border-color 0.15s;
-  }
-  html.light .graph-controls button {
-    background: rgba(255, 255, 255, 0.7);
-    border-color: rgba(0, 0, 0, 0.1);
   }
   .graph-controls button:hover {
     color: var(--text-primary);
-    border-color: rgba(255, 255, 255, 0.2);
+    border-color: rgba(110, 167, 255, 0.5);
   }
 
-  /* Floating legend */
-  .graph-legend {
-    position: absolute;
-    bottom: 16px;
-    right: 16px;
-    z-index: 5;
-    background: rgba(20, 22, 28, 0.85);
-    border: 1px solid rgba(255, 255, 255, 0.08);
+  /* Metric strip — everything here is derived at build time from the YAML
+     plus the report frontmatter. */
+  .graph-metrics {
+    display: flex;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    border-bottom: 1px solid var(--graph-border);
+    overflow-x: auto;
+    scrollbar-width: thin;
+  }
+  .metric {
+    flex: 1 1 0;
+    min-width: 140px;
+    padding: 0.5rem 0.7rem;
+    background: var(--graph-surface);
+    border: 1px solid var(--graph-border);
     border-radius: 8px;
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-    font-size: 0.78rem;
-    max-width: 360px;
+    transition: border-color 0.15s;
   }
-  html.light .graph-legend {
-    background: rgba(255, 255, 255, 0.9);
-    border-color: rgba(0, 0, 0, 0.08);
-  }
-  /* Keep <summary> at its default display: list-item — setting it to flex
-     or inline-flex breaks the native <details> toggle on iOS Safari (open
-     fires once, subsequent taps no longer close). Lay the icon + label
-     out with a child flex container instead. */
-  .graph-legend summary {
+  .metric.is-lens {
     cursor: pointer;
-    padding: 0.5rem 0.9rem;
-    list-style: none;
-    color: var(--text-secondary);
+  }
+  .metric.is-lens:hover,
+  .metric.is-lens:focus-visible {
+    border-color: rgba(110, 167, 255, 0.6);
+    outline: none;
+  }
+  .metric.is-lens[aria-pressed="true"] {
+    border-color: rgba(250, 204, 21, 0.85);
+  }
+  .metric-label {
+    font-size: 0.6rem;
     text-transform: uppercase;
-    letter-spacing: 0.08em;
-    font-size: 0.66rem;
-    font-weight: 600;
-    user-select: none;
+    letter-spacing: 0.1em;
+    color: var(--text-secondary);
   }
-  .graph-legend .legend-summary-inner {
-    display: inline-flex;
+  .metric-value {
+    margin-top: 0.15rem;
+    font-size: 1.05rem;
+    font-weight: 650;
+    color: var(--text-primary);
+    line-height: 1.2;
+  }
+  .metric-chip {
+    display: inline-block;
+    padding: 1px 8px;
+    border-radius: 4px;
+    font-size: 0.95rem;
+    font-weight: 700;
+  }
+  .metric-sub {
+    margin-top: 0.1rem;
+    font-size: 0.68rem;
+    color: var(--text-secondary);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  /* -------------------------------------------------------------- toolbar */
+
+  .graph-toolbar {
+    display: flex;
     align-items: center;
-    gap: 0.4rem;
+    gap: 0.6rem;
+    flex-wrap: wrap;
+    padding: 0.5rem 1rem;
+    border-bottom: 1px solid var(--graph-border);
   }
-  .graph-legend summary:hover {
+  .graph-search {
+    flex: 0 1 280px;
+    min-width: 0;
+    padding: 0.35rem 0.6rem;
+    font-size: 0.76rem;
+    color: var(--text-primary);
+    background: var(--graph-surface);
+    border: 1px solid var(--graph-border);
+    border-radius: 6px;
+  }
+  .graph-search:focus {
+    outline: none;
+    border-color: rgba(110, 167, 255, 0.7);
+  }
+  .graph-filters {
+    display: flex;
+    gap: 0.3rem;
+    flex-wrap: wrap;
+  }
+  .filter-chip {
+    padding: 0.25rem 0.6rem;
+    font-size: 0.7rem;
+    color: var(--text-tertiary, var(--text-secondary));
+    background: none;
+    border: 1px solid var(--graph-border);
+    border-radius: 999px;
+    cursor: pointer;
+    opacity: 0.55;
+    transition: opacity 0.15s, border-color 0.15s, color 0.15s;
+  }
+  .filter-chip.is-on {
+    opacity: 1;
+    color: var(--text-primary);
+    border-color: rgba(110, 167, 255, 0.5);
+  }
+  .filter-chip:hover {
+    opacity: 1;
+  }
+  .graph-refs {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    flex-wrap: wrap;
+    font-size: 0.72rem;
+    color: var(--text-secondary);
+    max-width: 46%;
+  }
+  .graph-refs-label {
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-size: 0.6rem;
+    opacity: 0.8;
+  }
+  .graph-refs-sep {
+    opacity: 0.5;
+  }
+
+  /* --------------------------------------------------------- zoom controls */
+
+  .graph-zoom {
+    position: absolute;
+    bottom: 12px;
+    left: 12px;
+    z-index: 6;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    border: 1px solid var(--graph-border);
+    border-radius: 6px;
+    background: var(--graph-surface);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+  }
+  .graph-zoom button {
+    width: 30px;
+    height: 28px;
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    font-size: 14px;
+    cursor: pointer;
+  }
+  .graph-zoom button + button {
+    border-top: 1px solid var(--graph-border);
+  }
+  .graph-zoom button:hover {
     color: var(--text-primary);
   }
-  .graph-legend summary::-webkit-details-marker,
-  .graph-legend summary::marker {
-    display: none;
-    content: "";
+
+  /* ---------------------------------------------------------- legend bar */
+
+  .graph-legend {
+    display: flex;
+    align-items: center;
+    gap: 1.1rem;
+    flex-wrap: wrap;
+    padding: 0.5rem 1rem;
+    font-size: 0.72rem;
+    color: var(--text-secondary);
+    border-top: 1px solid var(--graph-border);
   }
-  .graph-legend[open] summary {
-    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-  }
-  .legend-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 0 1.2rem;
-    padding: 0.7rem 0.9rem;
+  .legend-group {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    flex-wrap: wrap;
   }
   .legend-h {
     font-size: 0.6rem;
     text-transform: uppercase;
     letter-spacing: 0.1em;
     color: var(--text-secondary);
-    margin-bottom: 0.4rem;
+    opacity: 0.75;
   }
   .legend-row {
-    display: flex;
+    display: inline-flex;
     align-items: center;
-    gap: 0.5rem;
-    padding: 0.18rem 0;
+    gap: 0.35rem;
     color: var(--text-primary);
-    font-size: 0.78rem;
+  }
+  .legend-hint {
+    margin-left: auto;
+    color: var(--text-secondary);
+  }
+  .legend-hint-narrow {
+    display: none;
   }
   .legend-swatch {
-    width: 12px;
-    height: 12px;
+    width: 10px;
+    height: 10px;
     border-radius: 3px;
     flex-shrink: 0;
     border: 1px solid rgba(255, 255, 255, 0.12);
   }
-  .swatch-vault       { background: #2b7fff; }
-  .swatch-strategy    { background: #f59e0b; }
-  .swatch-governance  { background: #ef4444; }
-  .swatch-infra       { background: #94a3b8; }
-  .swatch-dependency  { background: #a78bfa; }
+  .swatch-vault { background: var(--cat-vault); }
+  .swatch-strategy { background: var(--cat-strategy); }
+  .swatch-governance { background: var(--cat-governance); }
+  .swatch-infra { background: var(--cat-infra); }
+  .swatch-dependency { background: var(--cat-dependency); }
 
   .legend-line {
-    width: 22px;
+    width: 20px;
     height: 0;
     border-top: 1.5px solid rgba(255, 255, 255, 0.4);
     flex-shrink: 0;
   }
   .line-allocates-to,
   .line-deposits-into { border-top: 2px solid rgba(110, 231, 183, 0.85); }
-  .line-mints         { border-top: 2.25px dashed rgba(239, 68, 68, 0.95); }
+  .line-mints { border-top: 2.25px dashed rgba(239, 68, 68, 0.95); }
   .line-holds-role,
   .line-controls,
-  .line-manages       { border-top: 1.5px dashed rgba(251, 191, 36, 0.85); }
+  .line-manages { border-top: 1.5px dashed rgba(251, 191, 36, 0.85); }
   .line-proposes-on,
-  .line-cancels-on    { border-top: 1.5px dotted rgba(167, 139, 250, 0.85); }
+  .line-cancels-on { border-top: 1.5px dotted rgba(167, 139, 250, 0.85); }
   .line-routes-through { border-top: 1.5px solid rgba(202, 184, 110, 0.85); }
   .line-routes-fees-to,
-  .line-deploys       { border-top: 1.5px solid rgba(140, 140, 140, 0.85); }
+  .line-deploys { border-top: 1.5px solid rgba(140, 140, 140, 0.85); }
 
-  /* === DOM node cards (rendered by cytoscape-dom-node) === */
+  /* ================= DOM node cards (rendered by cytoscape-dom-node) ======= */
+
   .graph-card {
     position: relative;
     width: 188px;
@@ -697,11 +1400,16 @@ const title = graph.title ?? `${slug} — Contract Dependency Graph`;
     border-radius: 8px;
     display: flex;
     overflow: hidden;
+    cursor: pointer;
     box-shadow:
       0 1px 0 rgba(255, 255, 255, 0.03) inset,
       0 4px 12px rgba(0, 0, 0, 0.4);
     font-family: system-ui, -apple-system, sans-serif;
-    transition: border-color 0.15s, transform 0.15s, box-shadow 0.15s;
+    transition: border-color 0.15s, transform 0.15s, box-shadow 0.15s, opacity 0.15s;
+  }
+  .graph-card:focus-visible {
+    outline: 2px solid rgba(110, 167, 255, 0.9);
+    outline-offset: 2px;
   }
   .graph-card.has-crosslink {
     border-color: color-mix(in srgb, var(--cl-color, #6ee7b7) 65%, transparent);
@@ -735,10 +1443,6 @@ const title = graph.title ?? `${slug} — Contract Dependency Graph`;
   .graph-card.is-inlined:hover {
     opacity: 1;
   }
-  .graph-card.is-inlined .card-eyebrow {
-    /* "STRATEGY · via cap-stcusd" — slightly de-emphasize the via suffix */
-    font-style: normal;
-  }
   html.light .graph-card {
     background: #ffffff;
     border-color: rgba(0, 0, 0, 0.1);
@@ -754,13 +1458,6 @@ const title = graph.title ?? `${slug} — Contract Dependency Graph`;
       0 0 0 1px rgba(110, 167, 255, 0.35) inset,
       0 6px 18px rgba(0, 0, 0, 0.55);
   }
-  .graph-card.is-hl {
-    border-color: rgba(110, 167, 255, 0.65);
-    transform: translateY(-1px);
-    box-shadow:
-      0 1px 0 rgba(255, 255, 255, 0.05) inset,
-      0 6px 18px rgba(0, 0, 0, 0.55);
-  }
   html.light .graph-card:hover {
     border-color: rgba(6, 117, 249, 0.85);
     box-shadow:
@@ -768,19 +1465,51 @@ const title = graph.title ?? `${slug} — Contract Dependency Graph`;
       0 0 0 1px rgba(6, 117, 249, 0.3) inset,
       0 2px 8px rgba(6, 117, 249, 0.15);
   }
-  html.light .graph-card.is-hl {
-    border-color: rgba(6, 117, 249, 0.55);
+
+  /* Focus / chain states. Upstream (blue) = who is exposed to this node.
+     Downstream (teal) = what this node is exposed to. */
+  .graph-card.is-focus {
+    border-color: rgba(110, 167, 255, 0.95);
+    box-shadow:
+      0 0 0 1px rgba(110, 167, 255, 0.5) inset,
+      0 8px 22px rgba(0, 0, 0, 0.55);
   }
+  .graph-card.is-hl-up {
+    border-color: rgba(110, 167, 255, 0.6);
+    transform: translateY(-1px);
+  }
+  .graph-card.is-hl-down {
+    border-color: rgba(45, 212, 191, 0.6);
+    transform: translateY(-1px);
+  }
+  /* Reached by a control/authority edge rather than the money-flow chain. */
+  .graph-card.is-hl-strong {
+    border-color: rgba(251, 191, 36, 0.55);
+    transform: translateY(-1px);
+  }
+  .graph-card.is-dim {
+    opacity: 0.25;
+  }
+  .graph-card.is-match {
+    border-color: rgba(250, 204, 21, 0.95);
+    box-shadow:
+      0 0 0 1px rgba(250, 204, 21, 0.5) inset,
+      0 8px 22px rgba(0, 0, 0, 0.55);
+  }
+  .graph-card.is-inlined.is-dim {
+    opacity: 0.18;
+  }
+
   .card-accent {
     width: 3px;
     flex-shrink: 0;
     background: rgba(255, 255, 255, 0.2);
   }
-  .cat-vault       .card-accent { background: #2b7fff; }
-  .cat-strategy    .card-accent { background: #f59e0b; }
-  .cat-governance  .card-accent { background: #ef4444; }
-  .cat-infra       .card-accent { background: #94a3b8; }
-  .cat-dependency  .card-accent { background: #a78bfa; }
+  .cat-vault .card-accent { background: var(--cat-vault, #2b7fff); }
+  .cat-strategy .card-accent { background: var(--cat-strategy, #f59e0b); }
+  .cat-governance .card-accent { background: var(--cat-governance, #ef4444); }
+  .cat-infra .card-accent { background: var(--cat-infra, #94a3b8); }
+  .cat-dependency .card-accent { background: var(--cat-dependency, #a78bfa); }
 
   .card-body {
     flex: 1;
@@ -798,12 +1527,15 @@ const title = graph.title ?? `${slug} — Contract Dependency Graph`;
     color: var(--text-secondary);
     margin-bottom: 2px;
     line-height: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
-  .cat-vault       .card-eyebrow { color: #6ea7ff; }
-  .cat-strategy    .card-eyebrow { color: #fbbf24; }
-  .cat-governance  .card-eyebrow { color: #f87171; }
-  .cat-infra       .card-eyebrow { color: #cbd5e1; }
-  .cat-dependency  .card-eyebrow { color: #c4b5fd; }
+  .cat-vault .card-eyebrow { color: var(--cat-vault-text, #6ea7ff); }
+  .cat-strategy .card-eyebrow { color: var(--cat-strategy-text, #fbbf24); }
+  .cat-governance .card-eyebrow { color: var(--cat-governance-text, #f87171); }
+  .cat-infra .card-eyebrow { color: var(--cat-infra-text, #cbd5e1); }
+  .cat-dependency .card-eyebrow { color: var(--cat-dependency-text, #c4b5fd); }
 
   .card-title {
     font-size: 12.5px;
@@ -837,7 +1569,6 @@ const title = graph.title ?? `${slug} — Contract Dependency Graph`;
   .card-risk {
     font-size: 9px;
     font-weight: 700;
-    color: #0c0c0c;
     padding: 2px 6px;
     border-radius: 3px;
     letter-spacing: 0.02em;
@@ -874,12 +1605,224 @@ const title = graph.title ?? `${slug} — Contract Dependency Graph`;
     background: rgba(0, 0, 0, 0.06);
   }
 
+  /* ------------------------------------------------------- details panel */
+
+  .graph-panel {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 330px;
+    max-width: 100%;
+    z-index: 8;
+    display: flex;
+    flex-direction: column;
+    background: rgba(14, 16, 21, 0.97);
+    border-left: 1px solid var(--graph-border);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    box-shadow: -12px 0 28px -16px rgba(0, 0, 0, 0.6);
+  }
+  /* `display: flex` above outranks the UA `[hidden] { display: none }` rule,
+     so the hidden state has to be spelled out. */
+  .graph-panel[hidden] {
+    display: none;
+  }
+  /* The panel takes focus when opened from the keyboard; say so visibly. */
+  .graph-panel:focus-visible {
+    outline: 2px solid rgba(110, 167, 255, 0.9);
+    outline-offset: -2px;
+  }
+  html.light .graph-panel {
+    background: rgba(255, 255, 255, 0.98);
+  }
+  .panel-close {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 24px;
+    height: 24px;
+    border: none;
+    border-radius: 5px;
+    background: none;
+    color: var(--text-secondary);
+    font-size: 12px;
+    cursor: pointer;
+  }
+  .panel-close:hover {
+    color: var(--text-primary);
+    background: rgba(127, 127, 127, 0.15);
+  }
+  .panel-scroll {
+    overflow-y: auto;
+    padding: 0.9rem 1rem 1.5rem;
+  }
+  .panel-eyebrow {
+    font-size: 0.62rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-secondary);
+    padding-right: 1.5rem;
+  }
+  .panel-title {
+    margin: 0.25rem 0 0.9rem;
+    font-size: 1rem;
+    font-weight: 650;
+    line-height: 1.3;
+    color: var(--text-primary);
+  }
+  .panel-section {
+    padding: 0.7rem 0;
+    border-top: 1px solid var(--graph-border);
+  }
+  .panel-h {
+    font-size: 0.6rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-secondary);
+    margin-bottom: 0.4rem;
+  }
+  .panel-addr {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 0.4rem;
+  }
+  .panel-addr code {
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-size: 0.66rem;
+    color: var(--text-primary);
+    overflow-wrap: anywhere;
+    background: none;
+    padding: 0;
+  }
+  .panel-copy {
+    flex-shrink: 0;
+    padding: 2px 7px;
+    font-size: 0.62rem;
+    color: var(--text-secondary);
+    background: none;
+    border: 1px solid var(--graph-border);
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  .panel-copy:hover {
+    color: var(--text-primary);
+  }
+  .panel-link {
+    display: block;
+    margin-top: 0.4rem;
+    font-size: 0.75rem;
+    color: #6ea7ff;
+  }
+  html.light .panel-link {
+    color: #0675f9;
+  }
+  .panel-note {
+    margin: 0;
+    font-size: 0.78rem;
+    line-height: 1.5;
+    color: var(--text-primary);
+  }
+  .panel-note-empty {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+  }
+  .panel-cross {
+    border-left: 2px solid var(--cl-color, #6ee7b7);
+    padding-left: 0.6rem;
+  }
+  .panel-cross-row {
+    margin-bottom: 0.35rem;
+  }
+  .conn-list {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .conn-row {
+    display: grid;
+    grid-template-columns: 20px minmax(0, auto) 12px minmax(0, 1fr);
+    align-items: center;
+    gap: 0.4rem;
+    width: 100%;
+    padding: 0.35rem 0.4rem;
+    text-align: left;
+    background: none;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 0.72rem;
+    color: var(--text-primary);
+  }
+  .conn-row:hover {
+    background: rgba(127, 127, 127, 0.14);
+  }
+  .conn-kind {
+    font-size: 0.62rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-secondary);
+    white-space: nowrap;
+  }
+  .conn-arrow {
+    color: var(--text-secondary);
+  }
+  .conn-node {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .conn-detail {
+    grid-column: 2 / -1;
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-size: 0.64rem;
+    color: var(--text-secondary);
+    overflow-wrap: anywhere;
+  }
+
   @media (max-width: 720px) {
     .graph-shell {
       height: calc(100vh - 56px);
       min-height: 520px;
     }
+    .graph-header {
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      padding: 0.5rem 0.75rem;
+    }
+    .graph-title { order: -1; flex-basis: 100%; text-align: left; }
     .graph-title h1 { font-size: 0.85rem; }
-    .graph-legend { max-width: calc(100vw - 32px); }
+    .graph-metrics { padding: 0.5rem 0.75rem; }
+    .graph-toolbar { padding: 0.45rem 0.75rem; gap: 0.45rem; }
+    .graph-search { flex: 1 1 100%; }
+    .graph-refs { margin-left: 0; max-width: 100%; }
+    .metric { min-width: 128px; }
+    .legend-hint-wide { display: none; }
+    .legend-hint-narrow { display: inline; }
+    /* Wrapping the full legend costs ~130px of a 780px-tall phone screen,
+       which is most of the canvas. Scroll it sideways in one row instead. */
+    .graph-legend {
+      padding: 0.45rem 0.75rem;
+      gap: 0.8rem;
+      flex-wrap: nowrap;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+    .graph-legend::-webkit-scrollbar { display: none; }
+    .legend-group { flex-wrap: nowrap; }
+    .legend-row, .legend-h, .legend-hint { white-space: nowrap; }
+    .legend-hint { padding-left: 0.5rem; }
+    /* Panel becomes a bottom sheet so the graph stays visible above it. */
+    .graph-panel {
+      top: auto;
+      left: 0;
+      width: auto;
+      max-height: 60%;
+      border-left: none;
+      border-top: 1px solid var(--graph-border);
+      box-shadow: 0 -12px 28px -16px rgba(0, 0, 0, 0.6);
+    }
   }
 </style>

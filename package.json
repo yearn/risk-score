@@ -3,11 +3,13 @@
   "license": "AGPL-3.0-only",
   "type": "module",
   "scripts": {
-    "dev": "node scripts/update_stats.mjs && node scripts/check_bridges.mjs && astro dev",
-    "build": "node scripts/update_stats.mjs && node scripts/check_bridges.mjs && astro build",
+    "dev": "node scripts/update_stats.mjs && node scripts/check_bridges.mjs && node scripts/check_graphs.mjs && astro dev",
+    "build": "node scripts/update_stats.mjs && node scripts/check_bridges.mjs && node scripts/check_graphs.mjs && astro build",
     "preview": "astro preview",
+    "test": "node --test tests/*.test.mjs",
     "update-stats": "node scripts/update_stats.mjs",
-    "check-bridges": "node scripts/check_bridges.mjs --strict"
+    "check-bridges": "node scripts/check_bridges.mjs --strict",
+    "check-graphs": "node scripts/check_graphs.mjs --strict"
   },
   "dependencies": {
     "@astrojs/sitemap": "3.7.3",

@@ -297,7 +297,7 @@ edges:
   - from: iUSD
     to: farm-cap
     kind: allocates-to
-    label: "7.3% (instant)"
+    label: "7.3%"
   - from: iUSD
     to: farm-rwa-escrow-2
     kind: allocates-to
@@ -317,7 +317,7 @@ edges:
   - from: iUSD
     to: farm-spark
     kind: allocates-to
-    label: "1.7% (instant)"
+    label: "1.7%"
   - from: iUSD
     to: farm-swap-pyusd
     kind: allocates-to

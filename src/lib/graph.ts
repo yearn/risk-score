@@ -2,6 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import yaml from "js-yaml";
 import { getReportBySlug } from "./reports";
+import { FLOW_KINDS, graphHeading } from "./graphStyle";
 
 const GRAPH_DIR = path.resolve("reports/graph");
 
@@ -150,28 +151,112 @@ export interface CrossLinkEntry {
 
 /**
  * Build an address → owning-graph index across every YAML in reports/graph/.
- * "Owning" graph means the graph's primary vault / token node, not every
- * addressed contract in that graph. Used at build time to detect cross-graph
- * references - when a dependency node's address matches the primary vault node
- * in another report-backed graph, the dependency card becomes a drill-down link.
+ * "Owning" graph means one of the graph's user-facing `vault` tokens, not every
+ * addressed contract in it. Used at build time to detect cross-graph
+ * references — when a dependency node's address matches a vault node in another
+ * report-backed graph, the dependency card becomes a drill-down link.
  *
- * Key is `<chain>:<address-lowercased>`. First write wins (a contract is
- * normally only "owned" by one graph).
+ * **Every** addressed `vault` node is indexed, not just the first. A protocol
+ * routinely exposes more than one user-facing token (sky-usds declares both
+ * sUSDS and USDS), and indexing only the first meant a graph that referenced
+ * the second one silently got no cross-link — which is what happened to
+ * sky-stusds' USDS node.
+ *
+ * Key is `<chain>:<address-lowercased>`. First write wins across graphs (a
+ * token is normally only "owned" by one), and `check_graphs.mjs` warns when two
+ * graphs claim the same address so the ambiguity can't go unnoticed.
  */
+let graphIndexCache: Map<string, CrossLinkEntry> | undefined;
+
 export function getGraphIndex(): Map<string, CrossLinkEntry> {
+  // Memoized: this reads and parses every YAML in the corpus, and it is called
+  // once per graph page *and* again inside expandCrossLinks() — without the
+  // cache that is O(pages × graphs) parses for a static, build-time-constant
+  // result.
+  if (graphIndexCache) return graphIndexCache;
   const index = new Map<string, CrossLinkEntry>();
   for (const slug of getGraphSlugs()) {
     if (!getReportBySlug(slug)) continue;
     const g = getGraphBySlug(slug);
     if (!g) continue;
-    const owner = g.nodes.find((n) => n.category === "vault" && n.address);
-    if (!owner?.address) continue;
-    const key = `${(owner.chain ?? g.chain).toLowerCase()}:${owner.address.toLowerCase()}`;
-    if (!index.has(key)) {
-      index.set(key, { slug, label: owner.label });
+    for (const owner of g.nodes) {
+      if (owner.category !== "vault" || !owner.address) continue;
+      const key = `${(owner.chain ?? g.chain).toLowerCase()}:${owner.address.toLowerCase()}`;
+      if (!index.has(key)) {
+        index.set(key, { slug, label: owner.label });
+      }
     }
   }
+  graphIndexCache = index;
   return index;
+}
+
+/**
+ * Inverse of `getGraphIndex()`: for each graph slug, which *other* graphs name
+ * it as a dependency. The forward index answers "what does this graph sit on
+ * top of"; this answers "how much of the book is exposed to this protocol",
+ * which is the more interesting question for a curator.
+ */
+let reverseIndexCache: Map<string, CrossLinkEntry[]> | undefined;
+
+export function getReverseGraphIndex(): Map<string, CrossLinkEntry[]> {
+  if (reverseIndexCache) return reverseIndexCache;
+  const forward = getGraphIndex();
+  const reverse = new Map<string, CrossLinkEntry[]>();
+  for (const slug of getGraphSlugs()) {
+    const g = getGraphBySlug(slug);
+    if (!g) continue;
+    const seen = new Set<string>();
+    for (const n of g.nodes) {
+      const entry = resolveCrossLink(n, g.chain, slug, forward);
+      if (!entry || seen.has(entry.slug)) continue;
+      seen.add(entry.slug);
+      const list = reverse.get(entry.slug) ?? [];
+      list.push({ slug, label: graphHeading(g.title, slug) });
+      reverse.set(entry.slug, list);
+    }
+  }
+  for (const list of reverse.values()) list.sort((a, b) => a.slug.localeCompare(b.slug));
+  reverseIndexCache = reverse;
+  return reverse;
+}
+
+/** One row of the `/graph/` index. */
+export interface GraphSummary {
+  slug: string;
+  title: string;
+  chain: string;
+  nodeCount: number;
+  edgeCount: number;
+  /** Graphs this one depends on (outbound cross-links). */
+  dependsOn: string[];
+  /** Graphs that depend on this one (inbound cross-links). */
+  referencedBy: string[];
+}
+
+export function getGraphSummaries(): GraphSummary[] {
+  const forward = getGraphIndex();
+  const reverse = getReverseGraphIndex();
+  return getGraphSlugs()
+    .map((slug) => {
+      const g = getGraphBySlug(slug);
+      if (!g) return undefined;
+      const dependsOn = new Set<string>();
+      for (const n of g.nodes) {
+        const entry = resolveCrossLink(n, g.chain, slug, forward);
+        if (entry) dependsOn.add(entry.slug);
+      }
+      return {
+        slug,
+        title: graphHeading(g.title, slug),
+        chain: g.chain,
+        nodeCount: g.nodes.length,
+        edgeCount: g.edges.length,
+        dependsOn: [...dependsOn].sort(),
+        referencedBy: (reverse.get(slug) ?? []).map((e) => e.slug),
+      };
+    })
+    .filter((s): s is GraphSummary => s !== undefined);
 }
 
 /** Resolve a cross-link target for a single node, or `undefined` when none applies. */
@@ -188,8 +273,6 @@ export function resolveCrossLink(
   if (!entry || entry.slug === currentSlug) return undefined;
   return entry;
 }
-
-const FLOW_KINDS = new Set(["allocates-to", "deposits-into", "routes-through"]);
 
 /**
  * For every cross-linked node in `graph`, inline the downstream subgraph from
@@ -262,6 +345,10 @@ export function expandCrossLinks(graph: Graph, currentSlug: string): Graph {
             mergedNodes.push({
               ...targetNode,
               id: mergedId,
+              // Pin the chain explicitly: the renderer falls back to the *host*
+              // graph's chain, which would point a cross-chain inlined node at
+              // the wrong block explorer.
+              chain: targetNode.chain ?? linked.chain,
               _inlinedFromSlug: entry.slug,
             });
             seenIds.add(mergedId);

@@ -9,6 +9,14 @@ inputs:
     description: 'Whether lychee should fail the job on broken links'
     required: false
     default: 'false'
+  fail_if_empty:
+    description: >-
+      Whether lychee should fail when it finds no links at all. Defaults to true
+      so a run over the whole corpus still catches a genuine misconfiguration.
+      Callers that lint an arbitrary subset of files (e.g. only what a PR
+      changed) should pass 'false' — a subset can legitimately be link-free.
+    required: false
+    default: 'true'
   output:
     description: 'Optional path to write lychee output markdown'
     required: false
@@ -35,6 +43,7 @@ runs:
       with:
         args: ${{ inputs.files }}
         fail: ${{ inputs.fail }}
+        failIfEmpty: ${{ inputs.fail_if_empty }}
         output: ${{ inputs.output }}
       env:
         GITHUB_TOKEN: ${{ github.token }}
