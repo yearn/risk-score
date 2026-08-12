@@ -65,13 +65,12 @@ Do not spend time redoing static background unless a mutable fact changed. Do no
    - Risk Summary
    - Risk Score Assessment
    - Reassessment Triggers
-   - Assessment History — append one new row (`| Date | Score | Notes |`) for
-     this reassessment; never edit prior rows. If the most recent row already
-     points to the same PR (same pull-request URL), update it in place instead of
-     appending a duplicate row. Use the same date as the header and the new Final
-     Score (or status tag for Not Rated). If the report has no "## Assessment
-     History" section yet, add one (see `reports/TEMPLATE.md`), seeding a row
-     for the original assessment before the new one.
+   - Assessment History — one row per PR. If a row for this PR already exists,
+     update it in place with the latest date and score. Otherwise append a new
+     row (`| Date | Score | Notes |`). Use the same date as the header and the
+     new Final Score (or status tag for Not Rated). If the report has no
+     "## Assessment History" section yet, add one (see `reports/TEMPLATE.md`),
+     seeding a row for the original assessment before the new one.
    - appendices with allocation tables or role tables
 7. If a value cannot be verified, mark it `TODO` and say what source/function is missing.
 8. Summarize:
