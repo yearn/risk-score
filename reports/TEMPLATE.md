@@ -412,6 +412,10 @@ Not Rated: for terminal reports (Status: HACKED / DEAD), set Final Score to
   report so score changes are traceable over time. Keep the date format
   consistent with the header "Assessment Date". Score is the Final Score at that
   point in time (or the status tag, e.g. HACKED, for Not Rated reports).
+
+  Use exactly three columns: | Date | Score | Notes |. The Date cell is a
+  hyperlink to the PR (e.g. `[July 13, 2026](https://github.com/.../pull/313)`).
+  Do not add a separate PR column.
 -->
 
 | Date | Score | Notes |
