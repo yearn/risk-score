@@ -116,10 +116,7 @@ const heading = graphHeading(title, slug!);
 >
   <div class="graph-shell">
     <div class="graph-header">
-      <div class="graph-back-group">
-        <a href={`/report/${slug}/`} class="graph-back">&larr; Risk report</a>
-        <a href="/graph/" class="graph-back">All graphs</a>
-      </div>
+      <a href={`/report/${slug}/`} class="graph-back">&larr; Risk report</a>
       <div class="graph-title">
         <span class="graph-title-eyebrow">Dependency graph</span>
         <h1>{heading}</h1>
@@ -1091,10 +1088,6 @@ const heading = graphHeading(title, slug!);
     gap: 1rem;
     padding: 0.75rem 1rem;
     border-bottom: 1px solid var(--graph-border);
-  }
-  .graph-back-group {
-    display: flex;
-    gap: 0.35rem;
   }
   .graph-back {
     display: inline-flex;

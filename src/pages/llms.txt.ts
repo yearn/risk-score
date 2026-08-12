@@ -74,7 +74,7 @@ export const GET: APIRoute = async () => {
       "",
       "## Contract dependency graphs",
       "",
-      `Each assessed asset with a mapped contract graph is at \`${SITE}/graph/{slug}/\` — an interactive map of its vault, strategies, governance, and external dependencies, with the money-flow chain traceable in both directions. Index: ${SITE}/graph/`,
+      `Each assessed asset with a mapped contract graph is at \`${SITE}/graph/{slug}/\` — an interactive map of its vault, strategies, governance, and external dependencies, with the money-flow chain traceable in both directions. Each is linked from its report page.`,
       "",
     );
     for (const g of graphs) {
@@ -93,7 +93,6 @@ export const GET: APIRoute = async () => {
     "",
     "## Other resources",
     "",
-    `- [Dependency graphs](${SITE}/graph/): contract-level maps and cross-protocol exposure`,
     `- [Token exposures](${SITE}/tokens/): shared-asset overlap across curated protocols`,
     `- [Bridge dependencies](${SITE}/bridges/): cross-chain bridge risk`,
     `- [Live monitoring](${SITE}/monitoring/): real-time protocol alerts (governance, oracle, owner changes)`,
