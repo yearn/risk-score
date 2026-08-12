@@ -246,7 +246,7 @@ edges:
   - from: morpho-steakhouse-prime
     to: morpho-market-64d65c9a2d91
     kind: deposits-into
-    label: "91.2%"
+    label: "91.1%"
   - from: morpho-steakhouse-prime
     to: morpho-market-34377fc4f617
     kind: deposits-into

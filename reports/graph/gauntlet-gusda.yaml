@@ -84,6 +84,74 @@ nodes:
     label: Morpho Lending Markets
     category: dependency
     note: Multi-chain USDC lending markets (Ethereum, Base, Arbitrum, Optimism)
+  - id: gauntlet-frontier
+    label: Gauntlet USDC Frontier (MetaMorpho V2)
+    address: "0x9a1D6bd5b8642C41F25e0958129B85f8E1176F3e"
+    category: dependency
+    morphoVault: v2
+    note: Ethereum-mainnet same-chain allocation; riskier assets (sUSDD, PRIME)
+  - id: gauntlet-vault-owner
+    label: Gauntlet Vault Owner (4-of-7)
+    address: "0xC684c6587712e5E7BDf9fD64415F23Bd2b05fAec"
+    category: governance
+  - id: gauntlet-vault-curator
+    label: Gauntlet Vault Curator (3-of-7)
+    address: "0x9E33faAE38ff641094fa68c65c2cE600b3410585"
+    category: governance
+
+# BEGIN GENERATED MORPHO MARKET NODES
+# Managed by scripts/update_morpho_graph_markets.mjs — do not edit.
+  - id: morpho-market-e83d72fa5b00
+    label: "AA_FalconXUSDC/USDC · 77% LLTV"
+    category: dependency
+    link: "https://app.morpho.org/ethereum/market/0xe83d72fa5b00dcd46d9e0e860d95aa540d5ec106da5833108a9f826f21f36f52/"
+    note: "Morpho market 0xe83d72fa5b00dcd46d9e0e860d95aa540d5ec106da5833108a9f826f21f36f52 used by Gauntlet USDC Frontier"
+  - id: morpho-market-f02d2e8f427a
+    label: "PT-sUSDD-27AUG2026/USDC · 91.5% LLTV"
+    category: dependency
+    link: "https://app.morpho.org/ethereum/market/0xf02d2e8f427a2b91785b3d09690ef9d3811bf674ba97b00bafc7665004a6dd97/"
+    note: "Morpho market 0xf02d2e8f427a2b91785b3d09690ef9d3811bf674ba97b00bafc7665004a6dd97 used by Gauntlet USDC Frontier"
+  - id: morpho-market-755f954513d3
+    label: "PRIME/USDC · 86% LLTV"
+    category: dependency
+    link: "https://app.morpho.org/ethereum/market/0x755f954513d31d5f24aaf3d0cdc5e913a28383f8ea8ff85be9ffffa7371fb64d/"
+    note: "Morpho market 0x755f954513d31d5f24aaf3d0cdc5e913a28383f8ea8ff85be9ffffa7371fb64d used by Gauntlet USDC Frontier"
+  - id: morpho-market-bf02d6c6852f
+    label: "LBTC/USDC · 86% LLTV"
+    category: dependency
+    link: "https://app.morpho.org/ethereum/market/0xbf02d6c6852fa0b8247d5514d0c91e6c1fbde9a168ac3fd2033028b5ee5ce6d0/"
+    note: "Morpho market 0xbf02d6c6852fa0b8247d5514d0c91e6c1fbde9a168ac3fd2033028b5ee5ce6d0 used by Gauntlet USDC Frontier"
+  - id: morpho-market-5cebfae10f5e
+    label: "PT-USDG-28MAY2026/USDC · 94.5% LLTV"
+    category: dependency
+    link: "https://app.morpho.org/ethereum/market/0x5cebfae10f5e88d33df2421923f3d9f32359429fda2f78edacc9b4fdb09b0553/"
+    note: "Morpho market 0x5cebfae10f5e88d33df2421923f3d9f32359429fda2f78edacc9b4fdb09b0553 used by Gauntlet USDC Frontier"
+  - id: morpho-market-64d65c9a2d91
+    label: "cbBTC/USDC · 86% LLTV"
+    category: dependency
+    link: "https://app.morpho.org/ethereum/market/0x64d65c9a2d91c36d56fbc42d69e979335320169b3df63bf92789e2c8883fcc64/"
+    note: "Morpho market 0x64d65c9a2d91c36d56fbc42d69e979335320169b3df63bf92789e2c8883fcc64 used by Gauntlet USDC Frontier"
+  - id: morpho-market-61765602144e
+    label: "weETH/USDC · 86% LLTV"
+    category: dependency
+    link: "https://app.morpho.org/ethereum/market/0x61765602144e91e5ac9f9e98b8584eae308f9951596fd7f5e0f59f21cd2bf664/"
+    note: "Morpho market 0x61765602144e91e5ac9f9e98b8584eae308f9951596fd7f5e0f59f21cd2bf664 used by Gauntlet USDC Frontier"
+  - id: morpho-market-ad73d5e139a9
+    label: "sUSDD/USDC · 91.5% LLTV"
+    category: dependency
+    link: "https://app.morpho.org/ethereum/market/0xad73d5e139a939a0c7dc7b821e5a103a3a9cf45c4352b373b1dabc421c7f3d59/"
+    note: "Morpho market 0xad73d5e139a939a0c7dc7b821e5a103a3a9cf45c4352b373b1dabc421c7f3d59 used by Gauntlet USDC Frontier"
+  - id: morpho-market-729badf297ee
+    label: "syrupUSDC/USDC · 91.5% LLTV"
+    category: dependency
+    link: "https://app.morpho.org/ethereum/market/0x729badf297ee9f2f6b3f717b96fd355fc6ec00422284ce1968e76647b258cf44/"
+    note: "Morpho market 0x729badf297ee9f2f6b3f717b96fd355fc6ec00422284ce1968e76647b258cf44 used by Gauntlet USDC Frontier"
+  - id: morpho-market-bbf7ce1b40d3
+    label: "siUSD/USDC · 91.5% LLTV"
+    category: dependency
+    link: "https://app.morpho.org/ethereum/market/0xbbf7ce1b40d32d3e3048f5cf27eeaa6de8cb27b80194690aab191a63381d8c99/"
+    note: "Morpho market 0xbbf7ce1b40d32d3e3048f5cf27eeaa6de8cb27b80194690aab191a63381d8c99 used by Gauntlet USDC Frontier"
+# END GENERATED MORPHO MARKET NODES
 
 edges:
   # === Governance: multisig → timelock ===
@@ -150,9 +218,67 @@ edges:
     to: morpho
     kind: deposits-into
     label: USDC
+  - from: gtusda-vault
+    to: gauntlet-frontier
+    kind: deposits-into
+    label: "USDC (same-chain Frontier)"
+
+  # === MetaMorpho vault governance ===
+  - from: gauntlet-vault-owner
+    to: gauntlet-frontier
+    kind: holds-role
+    label: "owner"
+  - from: gauntlet-vault-curator
+    to: gauntlet-frontier
+    kind: holds-role
+    label: "curator"
 
   # === Fee flow ===
   - from: gtusda-vault
     to: gauntlet-multisig
     kind: routes-fees-to
     label: feeRecipient
+
+# BEGIN GENERATED MORPHO MARKET EDGES
+# Managed by scripts/update_morpho_graph_markets.mjs — do not edit.
+  - from: gauntlet-frontier
+    to: morpho-market-e83d72fa5b00
+    kind: deposits-into
+    label: "71.5%"
+  - from: gauntlet-frontier
+    to: morpho-market-f02d2e8f427a
+    kind: deposits-into
+    label: "27.9%"
+  - from: gauntlet-frontier
+    to: morpho-market-755f954513d3
+    kind: deposits-into
+    label: "0.2%"
+  - from: gauntlet-frontier
+    to: morpho-market-bf02d6c6852f
+    kind: deposits-into
+    label: "0.1%"
+  - from: gauntlet-frontier
+    to: morpho-market-5cebfae10f5e
+    kind: deposits-into
+    label: "<0.1%"
+  - from: gauntlet-frontier
+    to: morpho-market-64d65c9a2d91
+    kind: deposits-into
+    label: "<0.1%"
+  - from: gauntlet-frontier
+    to: morpho-market-61765602144e
+    kind: deposits-into
+    label: "<0.1%"
+  - from: gauntlet-frontier
+    to: morpho-market-ad73d5e139a9
+    kind: deposits-into
+    label: "<0.1%"
+  - from: gauntlet-frontier
+    to: morpho-market-729badf297ee
+    kind: deposits-into
+    label: "<0.1%"
+  - from: gauntlet-frontier
+    to: morpho-market-bbf7ce1b40d3
+    kind: deposits-into
+    label: "<0.1%"
+# END GENERATED MORPHO MARKET EDGES
