@@ -5,7 +5,7 @@
 - **Chain:** Ethereum Mainnet
 - **Token Address:** [`0xC26A6Fa2C37b38E549a4a1807543801Db684f99C`](https://etherscan.io/address/0xC26A6Fa2C37b38E549a4a1807543801Db684f99C)
 - **Final Score: 5.0/5.0**
-- **Status:** GATED — score capped by the "uncollateralized / unverifiable reserves" critical gate (Category 3A rubric). Ungated weighted score is **4.10 (Elevated Risk)**. No realized loss event; the vault is live and current on all 13 epochs to date.
+- **Status:** GATED — score capped by the "uncollateralized / unverifiable reserves" critical gate (Category 3A rubric). Ungated weighted score is **4.07 (Elevated Risk)**. No realized loss event; the vault is live and current on all 13 epochs to date.
 
 ## Overview + Links
 
@@ -121,27 +121,6 @@ All Credit Vault audits are listed on [Pareto's audits page](https://docs.pareto
 
 **Source verification (gate check).** All assessed contracts are source-verified on Etherscan, and the deployed implementations are byte-for-byte reproducible from the public repository. `contracts/IdleCDOEpochVariant.sol`, `contracts/IdleCDOCreditVault.sol`, and `contracts/strategies/idle/IdleCreditVault.sol` fetched from Etherscan's `getsourcecode` are **identical** (verified with `diff`) to the same files on [`Idle-Labs/idle-tranches@master`](https://github.com/Idle-Labs/idle-tranches).
 
-### Findings and their resolution status
-
-All eleven PDFs were retrieved and read for this assessment. Every report carries an explicit disposition; the aggregate is **3 High, 24 Medium, 14 Low/Info across the credit-vault line, with exactly one item left unfixed — an acknowledged Low.**
-
-| Report | H | M | L/Info | Not fixed & not acknowledged | Notes |
-|---|--:|--:|--:|---|---|
-| Aug 2024 (Hans) — 30 Jul–2 Aug 2024 | 0 | 3 | 4 | 0 | Blacklisted-borrower `startEpoch` revert; claims blocked when `defaulted && isEpochRunning`; claim reverts after receipt transfer |
-| Oct 2024 (Hans, CV) — 2–4 Oct 2024 | 0 | 4 | 1 | 0 | BB withdraw interest miscalculation; unclaimable old requests; `stopEpoch` dust DoS |
-| Oct 2024 (Hans, deposit queue) — 15–16 Oct 2024 | 0 | 2 | 0 | 0 | Loss if `processDeposits` called at the wrong epoch; `deleteRequest` DoS |
-| Nov 2024 (Hans, withdraw queue) — 4–6 Nov 2024 | 0 | 4 | 1 | 0 | Incorrect instant status in queue processing; zero `epochWithdrawPrice` |
-| Jan 2025 (Sherlock **contest**) — 13–21 Dec 2024 | **2** | 3 | — | **0** | H-1 first-epoch liquidity griefing; H-2 **inflation attack on IdleCDO deposits** |
-| Aug 2025 (Sherlock/0x52) — 19–20 Aug 2025 | **1** | 1 | 0 | **0** | H-1 `WriteOffEscrow.fullfillWriteOffRequest` front-runnable → unconstrained borrower loss |
-| Jan 2026 (Sherlock/0x52) | 0 | 2 | 0 | 0 | Mid-epoch depositors over-credited; AYS + mid-epoch deposits interaction — both **RESOLVED** |
-| Feb 2026 (Sherlock/0x52) — 21–22 Feb 2026 | 0 | 0 | 0 | 0 | Clean review |
-| Mar 2026 (Sherlock/0x52) — 11–12 Mar 2026 | 0 | 0 | 1 | 0 | L-1 dust prefunded deposits can revert epoch — **RESOLVED** |
-| May/Jun 2026 (Sherlock/0x52) — 25–28 May 2026 | 0 | 5 | 7 | 0 | 11 **RESOLVED**, 1 **ACKNOWLEDGED** (see below) |
-
-**The one open item** is `L-6: Base Credit Vault Emergency And Restore Are No-Ops` (May 2026), acknowledged and won't-fix. `IdleCDOCreditVault` exposes `emergencyShutdown()` and `restoreOperations()` that do nothing unless a child overrides them; the auditor recommended making the base abstract or reverting. Pareto's response: the base is "tightly coupled with `IdleCDOEpochVariant`… we won't use this implementation standalone." **This does not affect the deployed vault** — `IdleCDOEpochVariant` overrides both, as verified in the deployed source. It is a defensive-coding nit, not a live exposure.
-
-**What the findings say about the design.** The severity profile is reassuring in one respect and instructive in another. Reassuring: the last four engagements produced zero Highs, and no finding in any report was left both unfixed and unacknowledged. Instructive: the recurring theme across two years of reviews is **epoch-boundary and fee/NAV accounting edge cases** — mid-epoch deposit pricing, withdrawal-request fee timing, queue instant-status flags, `stopEpoch` reverting on dust or on management fees exceeding gross interest. These are exactly the paths a large integrator would touch, and five of them were still being found and fixed as recently as May 2026. The one High in the Aug 2025 review (`fullfillWriteOffRequest` front-running, unconstrained loss to the borrower) sits in the write-off escrow, which is **not deployed for this vault**.
-
 ### Bug Bounty
 
 - Platform: **Immunefi** — [Pareto Credit program](https://immunefi.com/bug-bounty/pareto/information/)
@@ -198,12 +177,12 @@ The **same borrower** previously ran a FalconX credit vault on Optimism, now mar
 - The last transaction of any kind on the Optimism CDO is `startEpoch` on **2025-06-30 20:21 UTC**. `stopEpoch` was **never** called.
 - `epochEndDate()` = `1753939739` = **2025-07-31 10:48 UTC** — expired **370 days ago**. `isEpochRunning()` still returns `true`, `paused()` = `true`, `allowAAWithdrawRequest()` = `false`, and `defaulted()` = **`false`** (the default flag only trips when the curator calls `stopEpoch` and the repayment pull reverts — here it was simply never called).
 - Still recorded on-chain: **$17,572,567.49** of AA NAV (16.64M AA tokens, essentially all held by a single address [`0x169D…Fe9b`](https://optimistic.etherscan.io/address/0x169D4D692Dc185D2934892db5BbaCC412FE1fE9b)) plus **$10,596,286.89** of processed withdrawal receipts sitting in the withdraw-queue contract. The strategy, CDO and queue hold **$0 USDC**.
-- **The $10.6M redemption was settled bilaterally off-chain, not through the vault.** On 2025-07-10 the Optimism borrower wallet transferred **10,507,719.75 USDC directly** to the redeeming lender [`0x9364…9c4`](https://optimistic.etherscan.io/address/0x93647309137E6196a747D6c4d0770214D99Ac9c4) — the same address that had queued the withdrawal on 2025-06-27 ([token-transfer record](https://optimistic.etherscan.io/address/0x653F71339144e8641A645758F4df4e317Fe998A3#tokentxns)). The borrower had approved the CDO for $10.77M on 2025-07-30 (the allowance is still outstanding) but the on-chain settlement path was never executed, and the wallet later moved its remaining USDC out; it holds $0.51 today.
+- **The $10.6M redemption was settled bilaterally outside the vault.** On 2025-07-10 the Optimism borrower wallet transferred **10,507,719.75 USDC onchain directly** to the redeeming lender [`0x9364…9c4`](https://optimistic.etherscan.io/address/0x93647309137E6196a747D6c4d0770214D99Ac9c4) — the same address that had queued the withdrawal on 2025-06-27 ([token-transfer record](https://optimistic.etherscan.io/address/0x653F71339144e8641A645758F4df4e317Fe998A3#tokentxns)). The borrower had approved the CDO for $10.77M on 2025-07-30 (the allowance is still outstanding) but the vault's on-chain settlement path was never executed, and the wallet later moved its remaining USDC out; it holds $0.51 today.
 - DeFiLlama zeroed Pareto's Optimism TVL on 2025-09-04 — an adapter change, not an on-chain repayment.
 
 - **The residual $17.57M position was itself funded by FalconX.** Tracing the holder [`0x169D…Fe9b`](https://optimistic.etherscan.io/address/0x169D4D692Dc185D2934892db5BbaCC412FE1fE9b) back: on **2025-02-28 at 17:28 UTC** it received **$15,000,000 USDC** from [`0x1157…4101`](https://optimistic.etherscan.io/address/0x1157A2076b9bB22a85CC2C162f20fAB3898F4101), a FalconX-side settlement wallet; at 17:47 and 17:54 it deposited $250,000 + $14,750,000 into the vault; at 19:14 the vault's `startEpoch` sent $17,126,750.38 to the borrower wallet; and at 19:37 the borrower forwarded **the same $17,126,750.38 back to `0x1157…4101`**. The capital left FalconX's settlement wallet and returned to it within roughly two hours.
 
-**Interpretation.** There is no evidence of a loss: the third-party lender was paid in full and slightly early, and the residual position traces back to FalconX's own settlement wallet — which explains why no one unwound it on-chain and why no complaint or disclosure exists. Two things still follow for an integrator. First, **when this product winds down, settlement moves off-chain and on-chain state is abandoned in a stale, misleading configuration** — `defaulted()` reads `false`, receipts stay permanently unclaimable, and the balances are meaningless. Anyone relying on contract mechanics rather than a direct relationship with the curator would have been stranded. Second, it is the clearest instance of the **lender-independence problem** described below. No public disclosure of the Optimism wind-down was found in Pareto's docs (all 41 pages fetched), governance forum (Discourse search returns zero results for "falconx"), blog, or web search.
+**Interpretation.** There is no evidence of a loss: the third-party lender was paid in full and slightly early, and the residual position traces back to FalconX's own settlement wallet — which explains why no one unwound it through the vault and why no complaint or disclosure exists. Two things still follow for an integrator. First, **when this product winds down, the vault can be bypassed and on-chain vault state can be abandoned in a stale, misleading configuration** — `defaulted()` reads `false`, receipts stay permanently unclaimable, and the balances are meaningless. Anyone relying on contract mechanics rather than a direct relationship with the curator would have been stranded. Second, it is the clearest instance of the **lender-independence problem** described below. No public disclosure of the Optimism wind-down was found in Pareto's docs (all 41 pages fetched), governance forum (Discourse search returns zero results for "falconx"), blog, or web search.
 
 ### Lender-base independence
 
@@ -387,7 +366,7 @@ PPS is computed on-chain (`virtualPrice`), which is a genuine strength relative 
 - **Legal structure:** the vault operates under a Master Loan Agreement between the borrower and lenders, referenced in the docs (the curator may amend vault parameters "with the express consent of lenders and the borrower... to ensure alignment with the terms and conditions outlined in the MLA") but **not published**. Governing law, jurisdiction, enforcement mechanism, and the identity of the contracting lender entity are all undisclosed. For an unsecured loan, the enforceability of the paper *is* the recovery value. The MLA is not published in the docs, the governance forum, or any filing (SEC EDGAR holds no FalconX financial or contractual disclosure — see *Counterparty track record*); **it can only be obtained directly from M11 Credit / Pareto, and should be a condition of any material allocation.**
 - **Documentation quality:** good and unusually complete for the integrator surface (a dedicated [smart-contract integrator guide](https://docs.pareto.credit/developers/integrators/smart-contract) with epoch lifecycle, flows, and method-by-method notes). Weaknesses: the live-vaults page is stale (it still lists the FalconX vault as an **Optimism** deployment while the Optimism vault is separately marked deprecated), three doc-vs-code discrepancies were found, and the audit reports live in Google Drive.
 - **Governance transparency:** this vault's terms have never been discussed on Pareto's governance forum (`gov.pareto.credit` search returns zero results for "falconx"). Rate, size, and term are bilateral decisions by the curator. There is no lender vote, no risk-committee minutes, and no published underwriting memo.
-- **Incident response:** Hypernative monitoring with a 2-of-4 pauser is a credible technical setup. But the only observed *credit-lifecycle* wind-down (Optimism) was handled by off-chain settlement with no public communication and no on-chain cleanup — which is the opposite of a documented, tested incident process.
+- **Incident response:** Hypernative monitoring with a 2-of-4 pauser is a credible technical setup. But the only observed *credit-lifecycle* wind-down (Optimism) bypassed the vault's settlement path, with no public communication and no on-chain cleanup — which is the opposite of a documented, tested incident process.
 
 ## Integration Paths for Yearn
 
@@ -431,7 +410,7 @@ The issue proposes two distinct integrations. They carry materially different ri
 | Off-chain counterparty | SEC EDGAR CIK [0002108351](https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0002108351&type=&dateb=&owner=include&count=40) | Watch for a **public S-1** (would be the first FalconX financial disclosure), plus credit/funding/regulatory news | Any adverse credit headline → immediate reassessment; a public S-1 → reassess Provability upward | Continuous |
 | Lender-base independence | AA token + USDC | New large mints, then trace the depositor's USDC funding against [`0x1157…4101`](https://etherscan.io/address/0x1157A2076b9bB22a85CC2C162f20fAB3898F4101) and the borrower wallets | Any new mint >$5M funded from a FalconX-side wallet → warning (TVL growth is not arm's-length) | Per epoch |
 
-**Data that cannot be fetched on-chain:** FalconX's solvency, leverage, and liquidity; the MLA's covenants and enforcement status; whether an off-chain settlement (as on Optimism) is in progress. These require a direct reporting relationship with Pareto/M11 Credit. Yearn should negotiate a monthly borrower-reporting obligation as a condition of any material allocation.
+**Data that cannot be fetched on-chain:** FalconX's solvency, leverage, and liquidity; the MLA's covenants and enforcement status; whether an out-of-vault settlement is in progress. These require a direct reporting relationship with Pareto/M11 Credit. Yearn should negotiate a monthly borrower-reporting obligation as a condition of any material allocation.
 
 ## Appendix: Contract Architecture
 
@@ -518,7 +497,7 @@ VAULT / TOKEN LAYER                                                             
 ### Critical Risks
 
 - **Total-loss exposure to a single off-chain counterparty.** If FalconX cannot or will not repay, the recovery path is an unpublished, unsecured loan agreement enforced in an undisclosed jurisdiction. There is nothing on-chain to liquidate. The curator's own history — M11 Credit's M11 USDC pool absorbing ~$31M of the Orthogonal Trading default in 2022, after the borrower misrepresented its FTX exposure — is a direct precedent for this failure mode.
-- **"No default" is partly an artifact of the mechanism.** `defaulted` is only set when a curator-initiated repayment pull reverts. On the **superseded Optimism vault, the same borrower's epoch expired on 2025-07-31 and `stopEpoch` was never called** — leaving `defaulted() == false`, $17.57M of AA NAV and $10.60M of withdrawal receipts stranded on-chain for 370+ days, with the $10.6M redemption settled by a **direct off-chain USDC transfer** from the borrower to the lender on 2025-07-10. No loss occurred, and the residual position traces back to FalconX's own settlement wallet — but a missed payment would present the same way: as silence, not as an on-chain default.
+- **"No default" is partly an artifact of the mechanism.** `defaulted` is only set when a curator-initiated repayment pull reverts. On the **superseded Optimism vault, the same borrower's epoch expired on 2025-07-31 and `stopEpoch` was never called** — leaving `defaulted() == false`, $17.57M of AA NAV and $10.60M of withdrawal receipts stranded on-chain for 370+ days, with the $10.6M redemption settled by a **direct on-chain USDC transfer outside the vault** from the borrower to the lender on 2025-07-10. No loss occurred, and the residual position traces back to FalconX's own settlement wallet — but a missed payment would present the same way: as silence, not as an on-chain default.
 - **Neither the borrower's solvency nor the independence of the lender base can be verified.** FalconX has no financial statements on public file anywhere (SEC EDGAR holds only Form D notices marked "Decline to Disclose"), while ~16% of all AA ever minted traces to a FalconX-side settlement wallet. The two signals a lender would normally rely on — audited financials and arm's-length demand — are both unavailable.
 - **The deployed owner can create unbacked accounting value.** `setIsInterestMinted(true)` makes `stopEpoch` mint strategy tokens for declared interest instead of collecting interest cash; `maxApr() = 0` leaves the amount uncapped. `setWhitelistedCDO` can authorize an arbitrary replacement to mint strategy tokens or zero-principal withdrawal receipts. Both are direct 3-of-8 Safe calls with no timelock. Because these balances feed `virtualPrice`, the path can also inflate AA collateral value and borrowing capacity on Morpho.
 - **The Morpho oracle is Pareto's own accounting price** (`TranchesChainlinkOracle` → `cdo.virtualPrice()`), so collateral cannot be marked down by the market — only by the vault's administrators — and it can be marked upward through the unbacked receipt paths above. With two borrowers at HF ~1.11–1.13 holding 97% of $44.3M of debt, a single ~10–12% administrative markdown makes nearly the whole market liquidatable at once, into an asset that **non-KYC liquidators cannot redeem and cannot sell** under the current gate. Bad debt for USDC suppliers is the plausible outcome, not liquidation.
@@ -540,11 +519,11 @@ VAULT / TOKEN LAYER                                                             
 
 #### Category 1: Audits & Historical Track Record (Weight: 20%)
 
-**Subcategory A — Audits & Security Reviews: 3.0.** All eleven published PDFs were read for this assessment. On the positive side: **10 distinct engagements** covering every material release, one of them a genuine competitive contest (Sherlock, Dec 2024, 11 experts credited with valid findings), the latest engagement matching the deployed implementation, and — verified report by report — **zero findings left both unfixed and unacknowledged**, with the single open item an acknowledged Low that does not affect the deployed contracts. On the negative side: every review since Aug 2025 is by **one individual** (0x52), there is no multi-firm review and no formal verification, the published table **double-counts one engagement** (May/Jun 2026 are the same audit), the Sherlock finding repos are private so nothing is independently diffable, and the bug bounty maxes at **$50K against $182.9M at risk (0.027%)** — the rubric's "minimal bounty" band. The recurring finding theme is epoch-boundary and fee/NAV accounting edge cases, with five still being fixed as recently as May 2026 on a 939-line state machine. Blending strong coverage (~2) with a minimal bounty and single-reviewer concentration (~4) gives 3.0.
+**Subcategory A — Audits & Security Reviews: 2.7.** All eleven published PDFs were read for this assessment. On the positive side: **10 distinct engagements** covering every material release, one of them a genuine competitive contest (Sherlock, Dec 2024, 11 experts credited with valid findings), the latest engagement matching the deployed implementation, and — verified report by report — **zero findings left both unfixed and unacknowledged**, with the single open item an acknowledged Low that does not affect the deployed contracts. Every review since Aug 2025 is by **one individual** (0x52), a highly regarded, high-calibre auditor; this is a reviewer-diversity concern, not a concern about that auditor's quality. Offsetting factors remain: no multi-firm review or formal verification, the published table **double-counts one engagement** (May/Jun 2026 are the same audit), the Sherlock finding repos are private so nothing is independently diffable, and the bug bounty maxes at **$50K against $182.9M at risk (0.027%)** — the rubric's "minimal bounty" band. The recurring finding theme is epoch-boundary and fee/NAV accounting edge cases, with five still being fixed as recently as May 2026 on a 939-line state machine. Strong coverage and auditor quality justify 2.7, while the minimal bounty and limited independent reviewer diversity prevent a lower score.
 
 **Subcategory B — Historical Track Record: 2.0.** ~13.5 months in production (June 18, 2025), TVL sustained above $100M since roughly March 2026 and now $167.6M, thirteen clean epochs. The counterparty relationship predates this vault (Optimism, 2024–2025). Held back from 1.0 by the vault's age, by the abandoned on-chain state of the predecessor deployment, and because the TVL curve is a weaker signal than it appears — ~16% of all AA ever minted was funded out of a FalconX-side settlement wallet, so growth is not purely arm's-length demand.
 
-**Audits & Historical Score = (3.0 + 2.0) / 2 = 2.5/5**
+**Audits & Historical Score = (2.7 + 2.0) / 2 = 2.35/5**
 
 #### Category 2: Centralization & Control Risks (Weight: 30%)
 
@@ -576,12 +555,12 @@ VAULT / TOKEN LAYER                                                             
 
 | Category | Score | Weight | Weighted |
 |----------|-------|--------|----------|
-| Audits & Historical | 2.5 | 20% | 0.50 |
+| Audits & Historical | 2.35 | 20% | 0.47 |
 | Centralization & Control | 4.50 | 30% | 1.35 |
 | Funds Management | 4.75 | 30% | 1.425 |
 | Liquidity Risk | 4.5 | 15% | 0.675 |
 | Operational Risk | 3.0 | 5% | 0.15 |
-| **Ungated weighted score** | | | **4.10/5.0 (Elevated Risk)** |
+| **Ungated weighted score** | | | **4.07/5.0 (Elevated Risk)** |
 | **Final Score (gate-capped)** | | | **5.0/5.0** |
 
 **Optional Modifiers:** none applied. The vault has been live 13.5 months (< 2 years) and has not sustained >$500M TVL.
@@ -597,7 +576,7 @@ VAULT / TOKEN LAYER                                                             
 | **4.5-5.0** | **High Risk** | Not recommended |
 | **N/A** | **Not Rated** | Terminal — do not use (exploited or wound down) |
 
-**Final Risk Tier: High Risk (5.0/5.0, GATED) — direct exposure to AA_FalconXUSDC is not recommended.** On the ungated scale the asset sits at **4.10 (Elevated Risk)**, i.e. it is distinguishable from a failed protocol and is currently performing; the gate reflects that the asset is, structurally, an unsecured loan to a single off-chain counterparty with no collateral, no junior buffer and no verifiable reserves.
+**Final Risk Tier: High Risk (5.0/5.0, GATED) — direct exposure to AA_FalconXUSDC is not recommended.** On the ungated scale the asset sits at **4.07 (Elevated Risk)**, i.e. it is distinguishable from a failed protocol and is currently performing; the gate reflects that the asset is, structurally, an unsecured loan to a single off-chain counterparty with no collateral, no junior buffer and no verifiable reserves.
 
 **Practical reading for Yearn.** Path B (holding the token) is not recommended at any material size. Path A (supplying USDC to the 77% LLTV Morpho market) is a meaningfully different and safer risk — a senior claim behind a nominal 23% buffer — but it is not independent of this score: its oracle is this vault's administratively influenceable accounting price, privileged paths can inflate that price without cash backing, its liquidations are impaired by the current KYC gate, and its two borrowers sit at HF ~1.11. If pursued, it warrants a hard cap sized to what Yearn is willing to lose outright, the full monitoring set above, and a direct reporting relationship with M11 Credit / Pareto covering the MLA and borrower financials.
 
@@ -616,4 +595,4 @@ VAULT / TOKEN LAYER                                                             
 
 | Date | Score | Notes |
 | --- | --- | --- |
-| August 5, 2026 | 5.0 (GATED) | Initial assessment. Gate: uncollateralized / unverifiable reserves. Ungated weighted score 4.10 (Elevated). 13/13 epochs repaid; $167.6M recorded senior NAV; no junior tranche; privileged unbacked NAV/receipt paths. |
+| August 5, 2026 | 5.0 (GATED) | Initial assessment. Gate: uncollateralized / unverifiable reserves. Ungated weighted score 4.07 (Elevated). 13/13 epochs repaid; $167.6M recorded senior NAV; no junior tranche; privileged unbacked NAV/receipt paths. |
