@@ -15,11 +15,7 @@ import {
 import { getReportBySlug } from "../../lib/reports";
 import { scoreColor, scoreTier, scoreTextColor } from "../../lib/colors";
 import { kindLabel, chainLabel, graphHeading, EDGE_GROUPS } from "../../lib/graphStyle";
-import {
-  buildMetrics,
-  buildCallouts,
-  type CrossLinkInfo,
-} from "../../lib/graphInsights";
+import { buildMetrics, type CrossLinkInfo } from "../../lib/graphInsights";
 
 export function getStaticPaths() {
   return getGraphSlugs().map((slug) => ({ params: { slug } }));
@@ -36,7 +32,7 @@ const graph = expandCrossLinks(baseGraph, slug!);
 const currentReport = getReportBySlug(slug!);
 
 // Resolve cross-links once, keyed by node id, so the card payload, the metric
-// strip and the guide callouts all read the same facts.
+// strip all read the same facts.
 const crossLinks = new Map<string, CrossLinkInfo>();
 for (const n of graph.nodes) {
   // Suppress cross-link affordance on nodes that were themselves inlined
@@ -86,10 +82,9 @@ const cyData = {
   })),
 };
 
-// Metrics and callouts describe *this* report's graph, so they read the
-// pre-expansion node/edge set — inlined cards belong to another assessment.
+// Metrics describe *this* report's graph, so they read the pre-expansion
+// node/edge set — inlined cards belong to another assessment.
 const metrics = buildMetrics(baseGraph, currentReport?.finalScore, crossLinks);
-const callouts = buildCallouts(baseGraph, crossLinks);
 
 // Which other assessments name this one as a dependency. The forward index
 // answers "what does this sit on"; this answers "who is exposed to it".
@@ -120,9 +115,6 @@ const heading = graphHeading(title, slug!);
         <h1>{heading}</h1>
       </div>
       <div class="graph-controls">
-        {callouts.length > 0 && (
-          <button id="cy-guide" type="button" title="Toggle the guided tour" aria-pressed="true">? Guide</button>
-        )}
         <button id="cy-reset" type="button" title="Re-run layout">Re-layout</button>
       </div>
     </div>
@@ -197,7 +189,6 @@ const heading = graphHeading(title, slug!);
         role="group"
         aria-label="Contract dependency graph. Use the arrow keys to move between contracts and Enter to open details."
       ></div>
-      <div id="cy-callouts" class="graph-callouts" aria-hidden="true"></div>
 
       <div class="graph-zoom">
         <button id="cy-zoom-in" type="button" aria-label="Zoom in" title="Zoom in">+</button>
@@ -245,7 +236,6 @@ const heading = graphHeading(title, slug!);
   </div>
 
   <script type="application/json" id="cy-data" set:html={JSON.stringify(cyData)}></script>
-  <script type="application/json" id="cy-callout-data" set:html={JSON.stringify(callouts)}></script>
 
   <script>
     import cytoscape from "cytoscape";
@@ -295,16 +285,13 @@ const heading = graphHeading(title, slug!);
       kindLabel: string;
       label: string;
     };
-    type Callout = { n: number; nodeId: string; title: string; body: string };
 
     const dataEl = document.getElementById("cy-data");
-    const calloutEl = document.getElementById("cy-callout-data");
     if (!dataEl) throw new Error("graph: missing data script");
     const data = JSON.parse(dataEl.textContent ?? "{}") as {
       nodes: CyNode[];
       edges: CyEdge[];
     };
-    const callouts = JSON.parse(calloutEl?.textContent ?? "[]") as Callout[];
 
     const nodeById = new Map(data.nodes.map((n) => [n.id, n]));
     const inboundByNode = new Map<string, CyEdge[]>();
@@ -509,10 +496,7 @@ const heading = graphHeading(title, slug!);
 
     // Re-run fit once DOM nodes are sized (dom-node sometimes measures
     // lazily; one extra fit settles labels & arrows).
-    requestAnimationFrame(() => {
-      cy.fit(undefined, 80);
-      positionCallouts();
-    });
+    requestAnimationFrame(() => cy.fit(undefined, 80));
 
     const shell = document.querySelector(".graph-shell") as HTMLElement;
     const cyContainer = document.getElementById("cy")!;
@@ -1034,92 +1018,6 @@ const heading = graphHeading(title, slug!);
       });
     });
 
-    /* ------------------------------------------------------ guide callouts */
-
-    const calloutLayer = document.getElementById("cy-callouts") as HTMLElement;
-    const GUIDE_KEY = "graph-guide";
-    let guideOn = localStorage.getItem(GUIDE_KEY) !== "0";
-    let openCallout: number | null = null;
-
-    function renderCalloutPins() {
-      if (callouts.length === 0) return;
-      calloutLayer.innerHTML = callouts
-        .map(
-          (c) => `
-          <div class="callout" data-n="${c.n}" data-node-id="${escapeHtml(c.nodeId)}">
-            <button class="callout-pin" type="button" aria-label="Guide step ${c.n}: ${escapeHtml(c.title)}">${c.n}</button>
-            <div class="callout-card">
-              <div class="callout-title">${escapeHtml(c.title)}</div>
-              <p class="callout-body">${escapeHtml(c.body)}</p>
-            </div>
-          </div>`,
-        )
-        .join("");
-      calloutLayer.querySelectorAll(".callout-pin").forEach((btn) => {
-        btn.addEventListener("click", (e) => {
-          e.stopPropagation();
-          const host = (btn as HTMLElement).closest(".callout") as HTMLElement;
-          const n = Number(host.dataset.n);
-          openCallout = openCallout === n ? null : n;
-          syncCallouts();
-        });
-      });
-    }
-
-    function syncCallouts() {
-      calloutLayer.querySelectorAll(".callout").forEach((el) => {
-        el.classList.toggle("is-open", Number((el as HTMLElement).dataset.n) === openCallout);
-      });
-    }
-
-    let calloutFrame = 0;
-    function positionCallouts() {
-      if (calloutFrame) return;
-      calloutFrame = requestAnimationFrame(() => {
-        calloutFrame = 0;
-        if (!guideOn) return;
-        const z = cy.zoom();
-        const w = calloutLayer.clientWidth;
-        calloutLayer.querySelectorAll(".callout").forEach((el) => {
-          const host = el as HTMLElement;
-          const node = cy.getElementById(host.dataset.nodeId ?? "");
-          if (node.length === 0) {
-            host.style.display = "none";
-            return;
-          }
-          const p = node.renderedPosition();
-          const x = p.x + (NODE_W / 2) * z - 11;
-          const y = p.y - (NODE_H / 2) * z - 11;
-          host.style.display = "";
-          host.style.transform = `translate(${x}px, ${y}px)`;
-          // Flip the card to the left near the right edge so it stays on screen.
-          host.classList.toggle("flip-left", x > w - 300);
-        });
-      });
-    }
-
-    function syncGuide() {
-      calloutLayer.style.display = guideOn && callouts.length > 0 ? "" : "none";
-      calloutLayer.setAttribute("aria-hidden", guideOn ? "false" : "true");
-      document.getElementById("cy-guide")?.setAttribute("aria-pressed", String(guideOn));
-      document.getElementById("cy-guide")?.classList.toggle("is-active", guideOn);
-      if (guideOn) positionCallouts();
-    }
-
-    renderCalloutPins();
-    syncGuide();
-    // Not "render" — that fires every frame and would keep the rAF alive.
-    cy.on("pan zoom position layoutstop", positionCallouts);
-    window.addEventListener("resize", positionCallouts);
-
-    document.getElementById("cy-guide")?.addEventListener("click", () => {
-      guideOn = !guideOn;
-      openCallout = null;
-      localStorage.setItem(GUIDE_KEY, guideOn ? "1" : "0");
-      syncCallouts();
-      syncGuide();
-    });
-
     /* ------------------------------------------------------------ controls */
 
     const zoomBy = (factor: number) => {
@@ -1127,21 +1025,14 @@ const heading = graphHeading(title, slug!);
         level: cy.zoom() * factor,
         renderedPosition: { x: cy.width() / 2, y: cy.height() / 2 },
       });
-      positionCallouts();
     };
 
     document.getElementById("cy-zoom-in")?.addEventListener("click", () => zoomBy(1.25));
     document.getElementById("cy-zoom-out")?.addEventListener("click", () => zoomBy(0.8));
-    document.getElementById("cy-fit")?.addEventListener("click", () => {
-      cy.fit(undefined, 60);
-      positionCallouts();
-    });
+    document.getElementById("cy-fit")?.addEventListener("click", () => cy.fit(undefined, 60));
     document.getElementById("cy-reset")?.addEventListener("click", () => {
       cy.layout({ ...DAGRE_OPTIONS } as cytoscape.LayoutOptions).run();
-      requestAnimationFrame(() => {
-        cy.fit(undefined, 80);
-        positionCallouts();
-      });
+      requestAnimationFrame(() => cy.fit(undefined, 80));
     });
 
     // Edge-label chips are the one piece of cytoscape styling that must track
@@ -1268,10 +1159,6 @@ const heading = graphHeading(title, slug!);
   .graph-controls button:hover {
     color: var(--text-primary);
     border-color: rgba(110, 167, 255, 0.5);
-  }
-  .graph-controls button.is-active {
-    color: var(--text-primary);
-    border-color: rgba(110, 167, 255, 0.65);
   }
 
   /* Metric strip — everything here is derived at build time from the YAML
@@ -1895,78 +1782,6 @@ const heading = graphHeading(title, slug!);
     overflow-wrap: anywhere;
   }
 
-  /* ------------------------------------------------------ guide callouts */
-
-  .graph-callouts {
-    position: absolute;
-    inset: 0;
-    z-index: 7;
-    pointer-events: none;
-    overflow: hidden;
-  }
-  .callout {
-    position: absolute;
-    top: 0;
-    left: 0;
-    pointer-events: none;
-  }
-  .callout-pin {
-    pointer-events: auto;
-    width: 22px;
-    height: 22px;
-    border-radius: 50%;
-    border: 1px solid rgba(110, 167, 255, 0.9);
-    background: #0a0b0e;
-    color: #6ea7ff;
-    font-size: 11px;
-    font-weight: 700;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-  html.light .callout-pin {
-    background: #ffffff;
-    color: #0675f9;
-  }
-  .callout-pin:hover {
-    background: rgba(110, 167, 255, 0.9);
-    color: #0a0b0e;
-  }
-  .callout-card {
-    display: none;
-    position: absolute;
-    top: 26px;
-    left: 0;
-    width: 260px;
-    padding: 0.6rem 0.7rem;
-    background: var(--graph-surface);
-    border: 1px solid rgba(110, 167, 255, 0.35);
-    border-radius: 8px;
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    pointer-events: auto;
-  }
-  .callout.is-open .callout-card {
-    display: block;
-  }
-  .callout.flip-left .callout-card {
-    left: auto;
-    right: -22px;
-  }
-  .callout-title {
-    font-size: 0.72rem;
-    font-weight: 700;
-    color: var(--text-primary);
-    margin-bottom: 0.25rem;
-  }
-  .callout-body {
-    margin: 0;
-    font-size: 0.72rem;
-    line-height: 1.45;
-    color: var(--text-secondary);
-  }
-
   @media (max-width: 720px) {
     .graph-shell {
       height: calc(100vh - 56px);
@@ -2009,6 +1824,5 @@ const heading = graphHeading(title, slug!);
       border-top: 1px solid var(--graph-border);
       box-shadow: 0 -12px 28px -16px rgba(0, 0, 0, 0.6);
     }
-    .callout-card { width: 220px; }
   }
 </style>

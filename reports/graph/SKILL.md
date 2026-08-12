@@ -215,7 +215,6 @@ When two contracts function as a single dependency, represent them as one node w
    - Allocation `%` labels are visible on the vault → strategy edges.
    - Clicking a node opens the details panel: category, chain, full address, the `note`, and every inbound/outbound edge with its kind and label.
    - The metric strip reads sensibly (largest allocation is parsed from your `allocates-to` labels — if it says nothing, your labels are missing the `%`).
-   - The guide pins (1–4) anchor to the vault, the largest allocation, the riskiest cross-linked dependency, and a mint edge.
 3. Open `http://localhost:4321/report/<slug>/`. Confirm the "View dependency graph →" link appears next to the GitHub link.
 4. `npm run build` — runs `scripts/check_graphs.mjs` and then the validator (`getGraphBySlug` in `src/lib/graph.ts`). The build fails on a bad edge endpoint, an unknown category, an unknown chain, a missing report, or a graph with no addressed `vault` anchor.
 5. `node scripts/check_graphs.mjs` on its own prints the softer warnings too — unlabelled `mints` / `holds-role` / `proposes-on` / `cancels-on` edges, duplicate addresses, and nodes with no edges. Warnings don't fail the build; `npm run check-graphs` (`--strict`) makes them fail, and `npm test` covers the linter itself.
@@ -291,7 +290,6 @@ Worth knowing while authoring, because it decides how much care a field deserves
 - **Metric strip** (build-time, from this YAML plus the report frontmatter): final score, graph size, largest allocation, external dependency count with the worst assessed tier, and the mint-role count. Largest allocation, external dependencies and mint authority are **clickable** — they project that set onto the canvas and fade the rest, so "4 mint roles" becomes "show me which four".
 - **Search** matches node label, address, and category label, then fits the view to the hits.
 - **Edge filters** let a reader mute whole groups (Money flow / Mint authority / Control / Governance / Wiring). This is the answer to role-spaghetti — prefer a complete YAML the reader can filter over an incomplete one.
-- **Guide callouts** are derived automatically; nothing to author.
 
 ## Common pitfalls
 

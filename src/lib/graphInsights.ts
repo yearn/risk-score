@@ -7,7 +7,7 @@
  * instead of showing blanks.
  */
 
-import type { Graph, GraphNode } from "./graph";
+import type { Graph } from "./graph";
 import { scoreColor, scoreTier, scoreTextColor } from "./colors";
 
 /**
@@ -31,14 +31,6 @@ export interface GraphMetric {
   chipTextColor?: string;
   /** When set, the card becomes a toggle that highlights the matching elements. */
   lens?: MetricLens;
-}
-
-export interface GraphCallout {
-  n: number;
-  /** Node the pin anchors to. Always an id present in the expanded graph. */
-  nodeId: string;
-  title: string;
-  body: string;
 }
 
 /** Cross-link facts the page has already resolved, keyed by node id. */
@@ -122,11 +114,6 @@ function allocations(graph: Graph): Allocation[] {
   return scoped.sort((a, b) => b.share.value - a.share.value);
 }
 
-/** The node a graph is "about" — same anchor rule `getGraphIndex()` uses. */
-function primaryVault(graph: Graph): GraphNode | undefined {
-  return graph.nodes.find((n) => n.category === "vault");
-}
-
 export function buildMetrics(
   graph: Graph,
   finalScore: number | null | undefined,
@@ -193,83 +180,4 @@ export function buildMetrics(
   });
 
   return metrics;
-}
-
-/**
- * Four at most, in reading order. Each one is anchored to a real node and
- * phrased from this graph's own numbers — a generic tour would not be worth
- * the pixels.
- */
-export function buildCallouts(
-  graph: Graph,
-  crossLinks: Map<string, CrossLinkInfo>,
-): GraphCallout[] {
-  const out: Omit<GraphCallout, "n">[] = [];
-  const byId = new Map(graph.nodes.map((n) => [n.id, n]));
-
-  const vault = primaryVault(graph);
-  if (vault) {
-    out.push({
-      nodeId: vault.id,
-      title: "Start here",
-      body: `${vault.label} is what a depositor holds. Everything to the right is where that money goes; everything to the left is who can change it.`,
-    });
-  }
-
-  const allocs = allocations(graph);
-  if (allocs.length > 0) {
-    const top = allocs[0];
-    const share = fmtShare(top.share);
-    out.push({
-      nodeId: top.targetId,
-      title: "The concentration to watch",
-      body:
-        allocs.length > 1
-          ? `${top.targetLabel} carries ${share} of vault debt — the largest of ${allocs.length} funded legs. Hover it to trace what sits underneath.`
-          : `${top.targetLabel} carries ${share} of vault debt. It is the only funded leg, so its underlying protocol is a single point of failure.`,
-    });
-  }
-
-  let riskiest: { node: GraphNode; cl: CrossLinkInfo } | undefined;
-  for (const n of graph.nodes) {
-    if (n.category !== "dependency") continue;
-    const cl = crossLinks.get(n.id);
-    if (cl && (!riskiest || cl.score > riskiest.cl.score)) riskiest = { node: n, cl };
-  }
-  if (riskiest) {
-    out.push({
-      nodeId: riskiest.node.id,
-      title: "Separately assessed dependency",
-      body: `${riskiest.node.label} has its own risk report, scored ${riskiest.cl.score.toFixed(1)} (${riskiest.cl.tier}). Its downstream strategies are inlined here at reduced opacity — open the card for the full graph.`,
-    });
-  }
-
-  const mint = graph.edges.find((e) => e.kind === "mints");
-  if (mint) {
-    const holder = byId.get(mint.from);
-    const token = byId.get(mint.to);
-    const role = mint.label ? ` (${mint.label})` : "";
-    out.push({
-      nodeId: mint.to,
-      title: "Mint authority",
-      body: `${holder?.label ?? mint.from} can create new ${token?.label ?? mint.to} supply${role}. Privileged minting is a fund-loss path that does not require a hack — check the report's governance section for who controls it.`,
-    });
-  } else if (vault) {
-    out.push({
-      nodeId: vault.id,
-      title: "No mint authority",
-      body: "This graph draws no mint edges: supply here is permissionless or gated only by collateral deposit. The absence is itself a signal — nobody holds a privileged mint role over these tokens.",
-    });
-  }
-
-  // Dedupe by anchor so two pins never stack on one card, then number.
-  const seen = new Set<string>();
-  return out
-    .filter((c) => {
-      if (seen.has(c.nodeId)) return false;
-      seen.add(c.nodeId);
-      return true;
-    })
-    .slice(0, 4)
-    .map((c, i) => ({ ...c, n: i + 1 }));
 }
