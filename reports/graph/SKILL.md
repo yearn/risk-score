@@ -6,6 +6,23 @@ allowed-tools: Read Write Edit Grep Glob Bash(npm:*) Bash(git:*)
 
 # Generating contract dependency graphs
 
+## Contents
+
+- [When to invoke](#when-to-invoke)
+- [Inputs](#inputs)
+- [File layout](#file-layout)
+- [Schema](#schema)
+- [Vocabulary](#vocabulary)
+- [Selection rules](#selection-rules)
+- [Authoring procedure](#authoring-procedure)
+- [Verification](#verification)
+- [Worked examples](#worked-examples)
+- [Cross-graph linking](#cross-graph-linking)
+- [Selection & chain highlight](#selection--chain-highlight)
+- [What the reader gets](#what-the-reader-gets)
+- [Morpho market expansion](#morpho-market-expansion)
+- [Common pitfalls](#common-pitfalls)
+
 Each risk report in `reports/report/` documents a protocol's contracts and their relationships in prose. A dependency-graph YAML in `reports/graph/` makes those relationships visual at `/graph/<slug>/` on the website (linked from `/report/<slug>/` automatically when a YAML exists).
 
 This skill turns a finished risk report into the corresponding YAML.

@@ -357,8 +357,11 @@ const heading = graphHeading(title, slug!);
       // Addressless linked nodes (Morpho markets) open a generic external
       // link, not a block explorer.
       const extLinkTitle = n.address ? "Open on block explorer" : "Open external link";
+      // `n.link` is authored YAML data (validated only for an https:// prefix),
+      // so escape it here too — the details panel already escapes it, but this
+      // card fragment interpolates it into innerHTML the same way.
       const extLinkFragment = n.link
-        ? `<a class="card-extlink" href="${n.link}" target="_blank" rel="noopener noreferrer" title="${extLinkTitle}" tabindex="-1">↗</a>`
+        ? `<a class="card-extlink" href="${escapeHtml(n.link)}" target="_blank" rel="noopener noreferrer" title="${extLinkTitle}" tabindex="-1">↗</a>`
         : "";
       const eyebrowText = n.inlinedFromSlug
         ? `${n.categoryLabel} · via ${n.inlinedFromSlug}`
