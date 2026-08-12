@@ -22,6 +22,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import yaml from "js-yaml";
+import { MORPHO_CHAINS, GENERATED_NODE_PREFIX } from "./update_morpho_graph_markets.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const GRAPH_DIR = path.join(ROOT, "reports", "graph");
@@ -130,6 +131,29 @@ export function findGraphIssues(graphs, reportSlugs) {
         add("warn", slug, `nodes '${seenAddr.get(key)}' and '${n.id}' share address ${n.address}`);
       } else {
         seenAddr.set(key, n.id);
+      }
+    }
+
+    // Morpho vault tagging: the tag is the only signal the updater expands on,
+    // so its invariants are linted here (mirrors src/lib/graph.ts validation).
+    for (const n of nodes) {
+      if (n.morphoVault !== undefined && n.morphoVault !== "v1" && n.morphoVault !== "v2") {
+        add("error", slug, `node '${n.id}' has invalid morphoVault '${n.morphoVault}' (expected "v1" or "v2")`);
+      }
+      if (n.morphoVault !== undefined && !n.address) {
+        add("error", slug, `node '${n.id}' is tagged morphoVault but has no address`);
+      }
+      if (n.morphoVault !== undefined && String(n.id).startsWith(GENERATED_NODE_PREFIX)) {
+        add("error", slug, `generated Morpho market node '${n.id}' must not carry morphoVault`);
+      }
+      if (n.morphoVault !== undefined) {
+        const chain = String(n.chain ?? graph.chain ?? "ethereum").toLowerCase();
+        if (!MORPHO_CHAINS.has(chain)) {
+          add("error", slug, `node '${n.id}' is tagged morphoVault on unsupported chain '${chain}'`);
+        }
+      }
+      if (n.link !== undefined && !/^https:\/\//.test(n.link)) {
+        add("error", slug, `node '${n.id}' has a non-https link '${n.link}'`);
       }
     }
 

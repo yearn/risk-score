@@ -74,6 +74,7 @@ nodes:
     label: MetaMorpho Vault (ymv-USDT) (43.94%)
     address: "0x0963232eB842BAF53E8e517691f81745C1F228a0"
     category: strategy
+    morphoVault: v1
 
   # External dependencies
   - id: spark-lend-usdt
@@ -81,10 +82,30 @@ nodes:
     address: "0xC13e21B648A5Ee794902342038FF3aDAB66BE987"
     category: dependency
     note: Sky sub-DAO; admin keys live under Sky governance
-  - id: morpho
-    label: Morpho Protocol
-    address: "0xBBBBBbbBBb9cC5e90e3b3Af64bdAF62C37EEFFCb"
+
+# BEGIN GENERATED MORPHO MARKET NODES
+# Managed by scripts/update_morpho_graph_markets.mjs — do not edit.
+  - id: morpho-market-a921ef34e2fc
+    label: "WBTC/USDT · 86% LLTV"
     category: dependency
+    link: "https://app.morpho.org/ethereum/market/0xa921ef34e2fc7a27ccc50ae7e4b154e16c9799d3387076c421423ef52ac4df99/"
+    note: "Morpho market 0xa921ef34e2fc7a27ccc50ae7e4b154e16c9799d3387076c421423ef52ac4df99 used by Yearn USDT"
+  - id: morpho-market-e7e9694b754c
+    label: "wstETH/USDT · 86% LLTV"
+    category: dependency
+    link: "https://app.morpho.org/ethereum/market/0xe7e9694b754c4d4f7e21faf7223f6fa71abaeb10296a4c43a54a7977149687d2/"
+    note: "Morpho market 0xe7e9694b754c4d4f7e21faf7223f6fa71abaeb10296a4c43a54a7977149687d2 used by Yearn USDT"
+  - id: morpho-market-3274643db77a
+    label: "sUSDS/USDT · 96.5% LLTV"
+    category: dependency
+    link: "https://app.morpho.org/ethereum/market/0x3274643db77a064abd3bc851de77556a4ad2e2f502f4f0c80845fa8f909ecf0b/"
+    note: "Morpho market 0x3274643db77a064abd3bc851de77556a4ad2e2f502f4f0c80845fa8f909ecf0b used by Yearn USDT"
+  - id: morpho-market-b7843fe78e7e
+    label: "XAUt/USDT · 77% LLTV"
+    category: dependency
+    link: "https://app.morpho.org/ethereum/market/0xb7843fe78e7e7fd3106a1b939645367967d1f986c2e45edb8932ad1896450877/"
+    note: "Morpho market 0xb7843fe78e7e7fd3106a1b939645367967d1f986c2e45edb8932ad1896450877 used by Yearn USDT"
+# END GENERATED MORPHO MARKET NODES
 
 edges:
   # Deployment / vault infrastructure
@@ -167,7 +188,23 @@ edges:
     to: spark-lend-usdt
     kind: deposits-into
     label: "USDT supply"
+
+# BEGIN GENERATED MORPHO MARKET EDGES
+# Managed by scripts/update_morpho_graph_markets.mjs — do not edit.
   - from: metamorpo-usdt
-    to: morpho
+    to: morpho-market-a921ef34e2fc
     kind: deposits-into
-    label: "USDT deposit"
+    label: "67.2%"
+  - from: metamorpo-usdt
+    to: morpho-market-e7e9694b754c
+    kind: deposits-into
+    label: "23.5%"
+  - from: metamorpo-usdt
+    to: morpho-market-3274643db77a
+    kind: deposits-into
+    label: "5.8%"
+  - from: metamorpo-usdt
+    to: morpho-market-b7843fe78e7e
+    kind: deposits-into
+    label: "3.3%"
+# END GENERATED MORPHO MARKET EDGES

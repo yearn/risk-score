@@ -66,7 +66,9 @@ const cyData = {
       address: n.address ?? "",
       chain,
       chainLabel: chainLabel(chain),
-      link: n.address ? explorerUrl(n.address, chain) : "",
+      // Prefer an authored `link` (e.g. a Morpho market URL on an addressless
+      // node); fall back to the chain explorer for addressed nodes.
+      link: n.link ?? (n.address ? explorerUrl(n.address, chain) : ""),
       note: n.note ?? "",
       crossLink: crossLinks.get(n.id) ?? null,
       inlinedFromSlug: n._inlinedFromSlug ?? null,
@@ -352,8 +354,11 @@ const heading = graphHeading(title, slug!);
         : "";
       // Extended to every addressed card: the explorer used to be reachable
       // only from cross-linked cards, because plain cards hijacked the click.
+      // Addressless linked nodes (Morpho markets) open a generic external
+      // link, not a block explorer.
+      const extLinkTitle = n.address ? "Open on block explorer" : "Open external link";
       const extLinkFragment = n.link
-        ? `<a class="card-extlink" href="${n.link}" target="_blank" rel="noopener noreferrer" title="Open on block explorer" tabindex="-1">↗</a>`
+        ? `<a class="card-extlink" href="${n.link}" target="_blank" rel="noopener noreferrer" title="${extLinkTitle}" tabindex="-1">↗</a>`
         : "";
       const eyebrowText = n.inlinedFromSlug
         ? `${n.categoryLabel} · via ${n.inlinedFromSlug}`
@@ -719,7 +724,13 @@ const heading = graphHeading(title, slug!);
             </div>
             <a class="panel-link" href="${escapeHtml(n.link)}" target="_blank" rel="noopener noreferrer">Open on block explorer ↗</a>
           </div>`
-        : `<div class="panel-section"><div class="panel-note-empty">No onchain address recorded for this node.</div></div>`;
+        : n.link
+          ? `
+          <div class="panel-section">
+            <div class="panel-h">External link</div>
+            <a class="panel-link" href="${escapeHtml(n.link)}" target="_blank" rel="noopener noreferrer">Open external link ↗</a>
+          </div>`
+          : `<div class="panel-section"><div class="panel-note-empty">No onchain address recorded for this node.</div></div>`;
 
       // `note` is authored on a third of all nodes and was previously parsed,
       // shipped to the browser, and then never rendered anywhere.

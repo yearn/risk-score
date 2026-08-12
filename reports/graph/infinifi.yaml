@@ -213,6 +213,26 @@ nodes:
     label: Steakhouse infiniFi USDC (MetaMorpho)
     address: "0xBEEF1f5bD88285E5b239B6AACB991D38CCa23aC9"
     category: dependency
+    morphoVault: v1
+
+# BEGIN GENERATED MORPHO MARKET NODES
+# Managed by scripts/update_morpho_graph_markets.mjs — do not edit.
+  - id: morpho-market-bbf7ce1b40d3
+    label: "siUSD/USDC · 91.5% LLTV"
+    category: dependency
+    link: "https://app.morpho.org/ethereum/market/0xbbf7ce1b40d32d3e3048f5cf27eeaa6de8cb27b80194690aab191a63381d8c99/"
+    note: "Morpho market 0xbbf7ce1b40d32d3e3048f5cf27eeaa6de8cb27b80194690aab191a63381d8c99 used by Waterline infiniFi USDC"
+  - id: morpho-market-6df56abb95e9
+    label: "iUSD/USDC · 91.5% LLTV"
+    category: dependency
+    link: "https://app.morpho.org/ethereum/market/0x6df56abb95e9f3f96049448e1c98d208deb1add8a3d0c7a23e5e5466dba4edbd/"
+    note: "Morpho market 0x6df56abb95e9f3f96049448e1c98d208deb1add8a3d0c7a23e5e5466dba4edbd used by Waterline infiniFi USDC"
+  - id: morpho-market-a94d7d784ecd
+    label: "PT-siUSD-20AUG2026/USDC · 91.5% LLTV"
+    category: dependency
+    link: "https://app.morpho.org/ethereum/market/0xa94d7d784ecd1194f23f82f6b1c1acbf1d5982bab63362d094710638d2b770dc/"
+    note: "Morpho market 0xa94d7d784ecd1194f23f82f6b1c1acbf1d5982bab63362d094710638d2b770dc used by Waterline infiniFi USDC"
+# END GENERATED MORPHO MARKET NODES
 
 edges:
   # === Governance ===
@@ -372,3 +392,19 @@ edges:
   - from: farm-steakhouse
     to: dep-steakhouse-vault
     kind: deposits-into
+
+# BEGIN GENERATED MORPHO MARKET EDGES
+# Managed by scripts/update_morpho_graph_markets.mjs — do not edit.
+  - from: dep-steakhouse-vault
+    to: morpho-market-bbf7ce1b40d3
+    kind: deposits-into
+    label: "99.4%"
+  - from: dep-steakhouse-vault
+    to: morpho-market-6df56abb95e9
+    kind: deposits-into
+    label: "0.5%"
+  - from: dep-steakhouse-vault
+    to: morpho-market-a94d7d784ecd
+    kind: deposits-into
+    label: "<0.1%"
+# END GENERATED MORPHO MARKET EDGES

@@ -58,7 +58,9 @@ The schema is enforced at build time by the validator in `src/lib/graph.ts`. Aut
 | `category` | yes | enum | One of the 5 below. |
 | `address` | no | string | EVM address. Shown in full in the details panel, drives the `↗` block-explorer link, and is what cross-graph linking matches on. |
 | `chain` | no | string | Per-node chain override; falls back to top-level `chain`. |
+| `link` | no | string | External URL for the card's `↗` affordance and the details panel. **Must use `https://`.** Prefer it to the block-explorer link for addressless nodes (e.g. Morpho market IDs, which are 32-byte identifiers — never put a market ID in `address`). |
 | `note` | no | string | Free-form context. **Rendered as prose in the details panel** when the card is clicked — write it for a human reader, not as a shorthand memo. |
+| `morphoVault` | no | enum `"v1" \| "v2"` | Tags this node as a Morpho vault whose per-market allocations are expanded by `scripts/update_morpho_graph_markets.mjs`. Records the vault contract's immutable generation. Requires `address`. **Only explicitly tagged nodes are probed** — never detected from labels, IDs, notes, or address probing. Do not tag generic Morpho protocol/market nodes, Morpho strategies that merely use flashloans, or wrapper/farm contracts that deposit into a separate vault node. |
 
 **Edge fields:**
 
@@ -291,6 +293,31 @@ Worth knowing while authoring, because it decides how much care a field deserves
 - **Metric strip** (build-time, from this YAML plus the report frontmatter): final score, graph size, largest allocation, external dependency count with the worst assessed tier, and the mint-role count. Largest allocation, external dependencies and mint authority are **clickable** — they project that set onto the canvas and fade the rest, so "4 mint roles" becomes "show me which four".
 - **Search** matches node label, address, and category label, then fits the view to the hits.
 - **Edge filters** let a reader mute whole groups (Money flow / Mint authority / Control / Governance / Wiring). This is the answer to role-spaghetti — prefer a complete YAML the reader can filter over an incomplete one.
+
+## Morpho market expansion
+
+A node tagged `morphoVault: v1` (or `v2`) is expanded by `scripts/update_morpho_graph_markets.mjs` into its current underlying market allocations. The tag records the vault contract's immutable generation, so the updater queries only the declared API collection (`vaults` for v1, `vaultV2s` for v2) rather than probing both.
+
+What the generator does:
+
+- Scans every `reports/graph/*.yaml`, finds tagged nodes, and fetches their allocations from the Morpho GraphQL API (`https://api.morpho.org/graphql`).
+- Emits a `dependency` node per non-zero market (label `cbBTC/USDC · 86% LLTV`, `link` to the Morpho market page, full 32-byte `marketId` in the `note`) and a `deposits-into` edge from the vault node to each market carrying its percentage label.
+- Represents idle assets (`collateralAsset` is null) as a synthetic `Idle <asset>` node with no Morpho link, so displayed allocations reconcile to 100%. Tiny positive shares are labelled `<0.1%`, never rounded to 0.
+- Writes into two marker-delimited sections — `# BEGIN/END GENERATED MORPHO MARKET NODES` (before `edges:`) and `# BEGIN/END GENERATED MORPHO MARKET EDGES` (inside the edge list) — preserving every byte outside those regions. V2 vaults are supported for direct `MorphoMarketV1Adapter` positions; nested/unsupported adapters fail closed.
+
+Commands:
+
+```bash
+node scripts/update_morpho_graph_markets.mjs            # check: exits 1 if any managed section is stale
+node scripts/update_morpho_graph_markets.mjs --write    # apply
+node scripts/update_morpho_graph_markets.mjs --graph <slug> --write   # one graph
+```
+
+Authoring rules:
+
+- Tag only actual Morpho vault contracts. Skip generic Morpho protocol/market nodes, strategies that only use flashloans, and wrappers/farms that deposit into a separate vault node.
+- A tag/version mismatch fails closed with an actionable error — do not guess the version; verify the contract onchain or via the API first.
+- The generated market IDs are 32-byte identifiers, not EVM addresses — they live in `link`, never in `address`.
 
 ## Common pitfalls
 

@@ -77,6 +77,7 @@ nodes:
     label: WETH ARM Morpho Vault (Yearn-curated)
     address: "0x3Dfe70B05657949A5dB340754aD664810ac63b21"
     category: dependency
+    morphoVault: v1
     note: MetaMorpho v1.1; idle WETH lending
 
   # === Secondary liquidity ===
@@ -85,6 +86,25 @@ nodes:
     address: "0x95753095f15870acc0cb0ed224478ea61aeb0b8e"
     category: dependency
     note: ~$222K TVL secondary exit venue
+
+# BEGIN GENERATED MORPHO MARKET NODES
+# Managed by scripts/update_morpho_graph_markets.mjs — do not edit.
+  - id: morpho-market-37e7484d642d
+    label: "weETH/WETH · 94.5% LLTV"
+    category: dependency
+    link: "https://app.morpho.org/ethereum/market/0x37e7484d642d90f14451f1910ba4b7b8e4c3ccdd0ec28f8b2bdb35479e472ba7/"
+    note: "Morpho market 0x37e7484d642d90f14451f1910ba4b7b8e4c3ccdd0ec28f8b2bdb35479e472ba7 used by WETH ARM Vault"
+  - id: morpho-market-b8fc70e82bc5
+    label: "wstETH/WETH · 96.5% LLTV"
+    category: dependency
+    link: "https://app.morpho.org/ethereum/market/0xb8fc70e82bc5bb53e773626fcc6a23f7eefa036918d7ef216ecfb1950a94a85e/"
+    note: "Morpho market 0xb8fc70e82bc5bb53e773626fcc6a23f7eefa036918d7ef216ecfb1950a94a85e used by WETH ARM Vault"
+  - id: morpho-market-d0e50cdac92f
+    label: "wstETH/WETH · 94.5% LLTV"
+    category: dependency
+    link: "https://app.morpho.org/ethereum/market/0xd0e50cdac92fe2172043f5e0c36532c6369d24947e40968f34a5e8819ca9ec5d/"
+    note: "Morpho market 0xd0e50cdac92fe2172043f5e0c36532c6369d24947e40968f34a5e8819ca9ec5d used by WETH ARM Vault"
+# END GENERATED MORPHO MARKET NODES
 
 edges:
   # === Governance flow: xOGN → Origin Gov → Timelock → ARM ===
@@ -148,3 +168,19 @@ edges:
     to: curve-pool
     kind: routes-through
     label: secondary DEX exit
+
+# BEGIN GENERATED MORPHO MARKET EDGES
+# Managed by scripts/update_morpho_graph_markets.mjs — do not edit.
+  - from: morpho-vault
+    to: morpho-market-37e7484d642d
+    kind: deposits-into
+    label: "42.1%"
+  - from: morpho-vault
+    to: morpho-market-b8fc70e82bc5
+    kind: deposits-into
+    label: "41.5%"
+  - from: morpho-vault
+    to: morpho-market-d0e50cdac92f
+    kind: deposits-into
+    label: "16.3%"
+# END GENERATED MORPHO MARKET EDGES
