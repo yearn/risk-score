@@ -10,6 +10,17 @@
 import type { Graph, GraphNode } from "./graph";
 import { scoreColor, scoreTier, scoreTextColor } from "./colors";
 
+/**
+ * A selection the metric strip can project onto the canvas. Expressed as a
+ * predicate rather than concrete ids: the strip is built from the pre-expansion
+ * graph, while the canvas also holds inlined cross-graph nodes, so ids don't
+ * line up. The client resolves these against what it actually rendered.
+ */
+export type MetricLens =
+  | { type: "edgeKind"; kind: string }
+  | { type: "nodeCategory"; category: string }
+  | { type: "edgeTo"; kind: string; nodeId: string };
+
 export interface GraphMetric {
   label: string;
   value: string;
@@ -18,6 +29,8 @@ export interface GraphMetric {
   /** When set, the value renders as a filled chip in this color. */
   chipColor?: string;
   chipTextColor?: string;
+  /** When set, the card becomes a toggle that highlights the matching elements. */
+  lens?: MetricLens;
 }
 
 export interface GraphCallout {
@@ -144,6 +157,7 @@ export function buildMetrics(
       label: "Largest allocation",
       value: fmtShare(top.share),
       sub: top.targetLabel,
+      lens: { type: "edgeTo", kind: "allocates-to", nodeId: top.targetId },
     });
   }
 
@@ -162,6 +176,7 @@ export function buildMetrics(
       sub: worst
         ? `${assessed} assessed · worst ${worst.score.toFixed(1)} ${worst.tier.replace(" Risk", "")}`
         : "none separately assessed",
+      lens: { type: "nodeCategory", category: "dependency" },
     });
   }
 
@@ -173,6 +188,8 @@ export function buildMetrics(
       mintEdges.length > 0
         ? `privileged mint ${mintEdges.length === 1 ? "role" : "roles"}`
         : "permissionless or collateral-gated",
+    // Nothing to project when there are none.
+    lens: mintEdges.length > 0 ? { type: "edgeKind", kind: "mints" } : undefined,
   });
 
   return metrics;

@@ -28,6 +28,25 @@ export const ROLE_KINDS = new Set(["holds-role", "controls", "manages"]);
 /** Multisig → timelock signalling. */
 export const GOV_KINDS = new Set(["proposes-on", "cancels-on"]);
 
+/**
+ * Kinds that point *from* an authority *to* the thing it can change. Walking
+ * these backwards from a node answers "who can alter this", which is usually a
+ * 2–3 hop chain (multisig → timelock → role manager → vault) rather than a
+ * single edge — showing only the nearest hop would name the role manager and
+ * hide the multisig that actually holds the keys.
+ *
+ * `deploys` is excluded on purpose: a factory that deployed a proxy is
+ * provenance, not ongoing authority, so it renders as a plain incident edge.
+ */
+export const AUTHORITY_KINDS = new Set([
+  "mints",
+  "holds-role",
+  "controls",
+  "manages",
+  "proposes-on",
+  "cancels-on",
+]);
+
 export const KIND_LABELS: Record<string, string> = {
   "allocates-to": "Allocation",
   "deposits-into": "Deposits into",
@@ -60,6 +79,23 @@ export function edgeColor(kind: string): string {
   // routing) — mid-gray reads on both dark and light themes; pure white at low
   // opacity vanishes on light mode.
   return "rgba(140, 140, 140, 0.6)";
+}
+
+/**
+ * The same hue at legend strength, for edges connected to the selected node.
+ *
+ * Emphasised edges keep their own colour rather than being recoloured: the
+ * legend teaches red = mint authority, amber = role, violet = governance, and
+ * flattening them all to one highlight colour would throw that away exactly
+ * when the reader is looking closest.
+ */
+export function edgeColorStrong(kind: string): string {
+  if (CANVAS_LABEL_KINDS.has(kind)) return "rgba(110, 231, 183, 0.95)";
+  if (kind === "mints") return "rgba(239, 68, 68, 1)";
+  if (ROLE_KINDS.has(kind)) return "rgba(251, 191, 36, 0.95)";
+  if (GOV_KINDS.has(kind)) return "rgba(167, 139, 250, 0.95)";
+  if (kind === "routes-through") return "rgba(202, 184, 110, 0.95)";
+  return "rgba(160, 160, 160, 0.95)";
 }
 
 export function edgeStyle(kind: string): "solid" | "dashed" | "dotted" {

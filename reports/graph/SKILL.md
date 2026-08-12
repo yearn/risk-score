@@ -259,12 +259,15 @@ Omit `address` from the node. Without an address the matcher can't fire — no r
 
 ## Hover & chain highlight
 
-Hovering (or keyboard-focusing) any card walks the money-flow chain in **both directions**, recursively, following only flow kinds (`allocates-to`, `deposits-into`, `routes-through`):
+Hovering (or keyboard-focusing) any card lights three things and fades everything else, so the picture stays readable in a 40-node graph:
 
-- **Upstream, in blue** — who is exposed to this contract.
-- **Downstream, in teal** — what this contract is exposed to.
+- **Money flow upstream, in blue** — who is exposed to this contract. Transitive over `allocates-to`, `deposits-into`, `routes-through`.
+- **Money flow downstream, in teal** — what this contract is exposed to. Same kinds, other direction.
+- **Authority, in each kind's own colour** — who can change this contract. Transitive *backwards* over `mints`, `holds-role`, `controls`, `manages`, `proposes-on`, `cancels-on`, because those all point from an authority toward the thing it acts on. Governance chains run 2–3 hops (multisig → timelock → role manager → vault), so showing only the nearest hop would name the role manager and hide the multisig that actually holds the keys.
 
-Everything off the chain fades out, so the path stays readable in a 40-node graph. Governance edges (`holds-role`, `controls`, `manages`, `proposes-on`, `cancels-on`) and incidental edges (`routes-fees-to`, `deploys`) are never traversed.
+Flow edges are recoloured by direction — that distinction is the whole point of the chain, and flow edges are all one colour at rest so nothing is lost. Authority edges keep their own colour at full strength: the legend teaches red = mint authority, amber = role, violet = governance, and flattening those to a single highlight colour would throw it away exactly when the reader is looking closest.
+
+Anything else touching the selected node — `deploys`, `routes-fees-to` — stays visible at one hop as context, without being followed further.
 
 Example on InfiniFi: hovering the inlined `cUSD (Cap Stablecoin)` lights its upstream
 `cUSD ← stcUSD ← (CapFarm + SwapFarm) ← iUSD ← (siUSD + LockingController)`
@@ -276,7 +279,7 @@ Keyboard: the graph is a single tab stop with a roving tabindex — arrow keys m
 
 ### Implications for authors
 
-- **Edge kind affects traceability.** If you want a relationship to participate in the chain (and in cross-graph expansion), use a flow kind. If the relationship is structural but not capital movement (a role grant, a registry pointer), use a non-flow kind so it doesn't pollute the chain.
+- **Edge kind affects traceability.** A flow kind puts the edge in the money chain (and in cross-graph expansion). An authority kind puts it in the control chain. `deploys` and `routes-fees-to` are followed by neither — they show only as one-hop context, which is the right weight for deployment lineage and fee plumbing.
 - **Make every node reachable through flow edges from a source node.** Otherwise hovering it produces an empty chain in both directions. This is rarely a problem for vaults/strategies/dependencies — they live on the flow path by construction — but worth checking for any infra node you decide to include.
 
 ## What the reader gets
@@ -285,7 +288,7 @@ Worth knowing while authoring, because it decides how much care a field deserves
 
 - **`/graph/` index** lists every graph sorted by how many other assessments depend on it, so a widely-referenced protocol is visible at a glance. Reached from the site nav ("Graphs") and linked from `/reports/`.
 - **Referenced by** appears in the toolbar of any graph another graph depends on — the inverse of the cross-link, built from `getReverseGraphIndex()`.
-- **Metric strip** (build-time, from this YAML plus the report frontmatter): final score, graph size, largest allocation, external dependency count with the worst assessed tier, and the mint-role count.
+- **Metric strip** (build-time, from this YAML plus the report frontmatter): final score, graph size, largest allocation, external dependency count with the worst assessed tier, and the mint-role count. Largest allocation, external dependencies and mint authority are **clickable** — they project that set onto the canvas and fade the rest, so "4 mint roles" becomes "show me which four".
 - **Search** matches node label, address, and category label, then fits the view to the hits.
 - **Edge filters** let a reader mute whole groups (Money flow / Mint authority / Control / Governance / Wiring). This is the answer to role-spaghetti — prefer a complete YAML the reader can filter over an incomplete one.
 - **Guide callouts** are derived automatically; nothing to author.

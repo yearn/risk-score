@@ -34,7 +34,6 @@ const graphIndex = getGraphIndex();
 // sees the strategies/dependencies behind external protocols on the same page.
 const graph = expandCrossLinks(baseGraph, slug!);
 const currentReport = getReportBySlug(slug!);
-const reportDate = currentReport?.date ?? "";
 
 // Resolve cross-links once, keyed by node id, so the card payload, the metric
 // strip and the guide callouts all read the same facts.
@@ -118,9 +117,7 @@ const heading = graphHeading(title, slug!);
     <div class="graph-header">
       <a href={`/report/${slug}/`} class="graph-back">&larr; Risk report</a>
       <div class="graph-title">
-        <span class="graph-title-eyebrow">Dependency graph</span>
         <h1>{heading}</h1>
-        {reportDate && <div class="graph-report-date">Report date: {reportDate}</div>}
       </div>
       <div class="graph-controls">
         {callouts.length > 0 && (
@@ -133,7 +130,14 @@ const heading = graphHeading(title, slug!);
     {metrics.length > 0 && (
       <div class="graph-metrics">
         {metrics.map((m) => (
-          <div class="metric">
+          <div
+            class:list={["metric", { "is-lens": m.lens }]}
+            data-lens={m.lens ? JSON.stringify(m.lens) : undefined}
+            role={m.lens ? "button" : undefined}
+            tabindex={m.lens ? 0 : undefined}
+            aria-pressed={m.lens ? "false" : undefined}
+            title={m.lens ? `Highlight ${m.label.toLowerCase()} on the graph` : undefined}
+          >
             <div class="metric-label">{m.label}</div>
             <div class="metric-value">
               {m.chipColor ? (
@@ -234,7 +238,7 @@ const heading = graphHeading(title, slug!);
         ))}
       </div>
       <span class="legend-hint legend-hint-wide"
-        >Hover: exposure chain &middot; Click: details &middot; Drag / scroll: pan &amp; zoom</span
+        >Hover: flow &amp; control chains &middot; Click: details &middot; Drag / scroll: pan &amp; zoom</span
       >
       <span class="legend-hint legend-hint-narrow">Tap a card for details</span>
     </div>
@@ -251,8 +255,10 @@ const heading = graphHeading(title, slug!);
     import domNode from "cytoscape-dom-node";
     import {
       FLOW_KINDS,
+      AUTHORITY_KINDS,
       CANVAS_LABEL_KINDS,
       edgeColor,
+      edgeColorStrong,
       edgeStyle,
       edgeWidth,
       DAGRE_OPTIONS,
@@ -465,6 +471,21 @@ const heading = graphHeading(title, slug!);
             opacity: 1,
           },
         },
+        // Connected to the selection but not part of the flow chain: mint
+        // authority, roles, governance, wiring. Kept in their own colour so the
+        // legend still reads, just at full strength and a touch heavier.
+        {
+          selector: "edge.hl-strong",
+          style: {
+            "line-color": (ele: cytoscape.EdgeSingular) =>
+              edgeColorStrong(ele.data("kind") as string),
+            "target-arrow-color": (ele: cytoscape.EdgeSingular) =>
+              edgeColorStrong(ele.data("kind") as string),
+            width: (ele: cytoscape.EdgeSingular) => edgeWidth(ele.data("kind") as string) + 1,
+            "z-index": 9,
+            opacity: 1,
+          },
+        },
         // Without dimming, a highlighted chain is invisible in a 40-node graph.
         { selector: "edge.dim", style: { opacity: 0.12 } },
         // Filter groups win over every highlight state.
@@ -504,12 +525,14 @@ const heading = graphHeading(title, slug!);
     /* ----------------------------------------------------- highlight engine */
 
     /**
-     * Hovering walks the money-flow chain in both directions: upstream answers
-     * "who is exposed to this contract", downstream answers "what is this
-     * contract exposed to". Role and governance edges are never traversed —
-     * the chain is about capital movement.
+     * Transitive walk from a node over one set of edge kinds, in one direction.
+     * Returns the ids of every edge and node reached.
      */
-    function walk(startId: string, dir: "up" | "down"): Set<string> {
+    function walk(
+      startId: string,
+      dir: "up" | "down",
+      kinds: Set<string>,
+    ): Set<string> {
       const seen = new Set<string>();
       const start = cy.getElementById(startId);
       if (start.length === 0) return seen;
@@ -518,7 +541,7 @@ const heading = graphHeading(title, slug!);
       while (queue.length) {
         const cur = queue.shift()!;
         const edges = (dir === "up" ? cur.incomers("edge") : cur.outgoers("edge")).filter(
-          (ed: cytoscape.EdgeSingular) => FLOW_KINDS.has(ed.data("kind") as string),
+          (ed: cytoscape.EdgeSingular) => kinds.has(ed.data("kind") as string),
         );
         edges.forEach((ed: cytoscape.EdgeSingular) => {
           seen.add(ed.id());
@@ -533,16 +556,51 @@ const heading = graphHeading(title, slug!);
       return seen;
     }
 
+    /**
+     * Everything attached to a node that the flow and authority walks don't
+     * already cover — `deploys`, `routes-fees-to`, and any flow edge pointing
+     * the "wrong" way. One hop only: these are context for the selection, not
+     * a chain worth following.
+     */
+    function incidentEdges(startId: string, covered: Set<string>): Set<string> {
+      const seen = new Set<string>();
+      const start = cy.getElementById(startId);
+      if (start.length === 0) return seen;
+      (start as cytoscape.NodeSingular)
+        .connectedEdges()
+        .forEach((ed: cytoscape.EdgeSingular) => {
+          if (covered.has(ed.id())) return;
+          seen.add(ed.id());
+          seen.add(ed.source().id());
+          seen.add(ed.target().id());
+        });
+      seen.delete(startId);
+      return seen;
+    }
+
     let hoverId: string | null = null;
     let pinnedId: string | null = null;
-    let searchMatches: Set<string> | null = null;
+    /**
+     * A standing selection projected onto the canvas when nothing is hovered or
+     * pinned — set by the search box or by a metric card. Carries edges as well
+     * as nodes so "Mint authority: 4" can light the four edges themselves.
+     */
+    type Lens = { nodes: Set<string>; edges: Set<string> };
+    let lens: Lens | null = null;
 
     function clearHighlights() {
-      cy.elements().removeClass("hl-up hl-down dim");
+      cy.elements().removeClass("hl-up hl-down hl-strong dim");
       document
         .querySelectorAll(".graph-card")
         .forEach((c) =>
-          c.classList.remove("is-focus", "is-hl-up", "is-hl-down", "is-dim", "is-match"),
+          c.classList.remove(
+            "is-focus",
+            "is-hl-up",
+            "is-hl-down",
+            "is-hl-strong",
+            "is-dim",
+            "is-match",
+          ),
         );
       shell.classList.remove("is-focused");
     }
@@ -551,27 +609,38 @@ const heading = graphHeading(title, slug!);
       clearHighlights();
       const id = pinnedId ?? hoverId;
       if (!id || cy.getElementById(id).length === 0) {
-        // No chain in play — fall back to the search result as the focus state,
-        // so a query reads the same way a hover does.
-        if (searchMatches) {
+        // No chain in play — fall back to the standing lens, so a search or a
+        // metric card reads the same way a hover does.
+        if (lens) {
           for (const n of data.nodes) {
             const card = cardFor(n.id);
             if (!card) continue;
-            card.classList.add(searchMatches.has(n.id) ? "is-match" : "is-dim");
+            card.classList.add(lens.nodes.has(n.id) ? "is-match" : "is-dim");
           }
-          cy.edges().addClass("dim");
+          cy.edges().forEach((ed: cytoscape.EdgeSingular) => {
+            ed.addClass(lens!.edges.has(ed.id()) ? "hl-strong" : "dim");
+          });
           shell.classList.add("is-focused");
         }
         return;
       }
 
-      const up = walk(id, "up");
-      const down = walk(id, "down");
-      const active = new Set<string>([id, ...up, ...down]);
+      // Money flow, recoloured by direction — that distinction is the point of
+      // the chain, and flow edges are all one colour at rest so nothing is lost.
+      const up = walk(id, "up", FLOW_KINDS);
+      const down = walk(id, "down", FLOW_KINDS);
+      // Who can change this, transitively. Mint authority, roles, control and
+      // governance signalling all point toward the thing they act on.
+      const auth = walk(id, "up", AUTHORITY_KINDS);
+      const covered = new Set<string>([...up, ...down, ...auth]);
+      const incident = incidentEdges(id, covered);
+      const strong = new Set<string>([...auth, ...incident]);
+      const active = new Set<string>([id, ...up, ...down, ...strong]);
 
       cy.edges().forEach((ed: cytoscape.EdgeSingular) => {
         if (up.has(ed.id())) ed.addClass("hl-up");
         else if (down.has(ed.id())) ed.addClass("hl-down");
+        else if (strong.has(ed.id())) ed.addClass("hl-strong");
         else ed.addClass("dim");
       });
       for (const n of data.nodes) {
@@ -580,6 +649,7 @@ const heading = graphHeading(title, slug!);
         if (n.id === id) card.classList.add("is-focus");
         else if (up.has(n.id)) card.classList.add("is-hl-up");
         else if (down.has(n.id)) card.classList.add("is-hl-down");
+        else if (strong.has(n.id)) card.classList.add("is-hl-strong");
         else if (!active.has(n.id)) card.classList.add("is-dim");
       }
       shell.classList.add("is-focused");
@@ -835,7 +905,9 @@ const heading = graphHeading(title, slug!);
 
     document.getElementById("panel-close")?.addEventListener("click", closePanel);
     document.addEventListener("keydown", (e) => {
-      if (e.key === "Escape" && pinnedId) closePanel();
+      if (e.key !== "Escape") return;
+      if (pinnedId) closePanel();
+      else if (lens) clearLens();
     });
     cy.on("tap", (evt) => {
       if (evt.target === cy && pinnedId) closePanel();
@@ -847,11 +919,10 @@ const heading = graphHeading(title, slug!);
     searchInput?.addEventListener("input", () => {
       const q = searchInput.value.trim().toLowerCase();
       if (!q) {
-        searchMatches = null;
-        renderHighlights();
+        clearLens();
         return;
       }
-      searchMatches = new Set(
+      const nodes = new Set(
         data.nodes
           .filter(
             (n) =>
@@ -861,20 +932,85 @@ const heading = graphHeading(title, slug!);
           )
           .map((n) => n.id),
       );
-      renderHighlights();
-      // Pull the matches into view so a search on a 40-node graph doesn't
-      // leave the answer off-screen.
-      if (searchMatches.size > 0) {
-        const eles = cy.collection();
-        searchMatches.forEach((id) => eles.merge(cy.getElementById(id)));
-        cy.animate({ fit: { eles, padding: 120 } }, { duration: 260 });
-      }
+      setLens({ nodes, edges: new Set() }, null);
     });
     searchInput?.addEventListener("keydown", (e) => {
       if (e.key !== "Escape") return;
       searchInput.value = "";
-      searchMatches = null;
+      clearLens();
+    });
+
+    const metricCards = Array.from(
+      document.querySelectorAll<HTMLElement>(".metric.is-lens"),
+    );
+    let activeMetric: HTMLElement | null = null;
+
+    function setLens(next: Lens, source: HTMLElement | null) {
+      lens = next.nodes.size > 0 || next.edges.size > 0 ? next : null;
+      activeMetric = source;
+      metricCards.forEach((c) =>
+        c.setAttribute("aria-pressed", String(c === source)),
+      );
       renderHighlights();
+      // Pull the selection into view; a lens on a 40-node graph is useless if
+      // the matches are off-screen.
+      if (!lens) return;
+      const eles = cy.collection();
+      lens.nodes.forEach((id) => eles.merge(cy.getElementById(id)));
+      lens.edges.forEach((id) => eles.merge(cy.getElementById(id)));
+      if (eles.length > 0) cy.animate({ fit: { eles, padding: 120 } }, { duration: 260 });
+    }
+
+    function clearLens() {
+      lens = null;
+      activeMetric = null;
+      metricCards.forEach((c) => c.setAttribute("aria-pressed", "false"));
+      renderHighlights();
+    }
+
+    /** Resolve a metric's lens descriptor against what is actually on canvas. */
+    function resolveLens(spec: Record<string, string>): Lens {
+      const nodes = new Set<string>();
+      const edges = new Set<string>();
+      if (spec.type === "nodeCategory") {
+        for (const n of data.nodes) if (n.category === spec.category) nodes.add(n.id);
+      } else {
+        for (const e of data.edges) {
+          const hit =
+            spec.type === "edgeKind"
+              ? e.kind === spec.kind
+              : e.kind === spec.kind && e.target === spec.nodeId;
+          if (!hit) continue;
+          edges.add(e.id);
+          nodes.add(e.source);
+          nodes.add(e.target);
+        }
+      }
+      return { nodes, edges };
+    }
+
+    function toggleMetric(card: HTMLElement) {
+      if (activeMetric === card) {
+        clearLens();
+        return;
+      }
+      if (searchInput) searchInput.value = "";
+      let spec: Record<string, string>;
+      try {
+        spec = JSON.parse(card.dataset.lens ?? "{}");
+      } catch {
+        return;
+      }
+      setLens(resolveLens(spec), card);
+    }
+
+    metricCards.forEach((card) => {
+      card.addEventListener("click", () => toggleMetric(card));
+      card.addEventListener("keydown", (e) => {
+        if (e.key !== "Enter" && e.key !== " ") return;
+        e.preventDefault();
+        toggleMetric(card);
+      });
     });
 
     // Hiding an edge group is reversible and non-destructive — the YAML keeps
@@ -1084,9 +1220,9 @@ const heading = graphHeading(title, slug!);
   .graph-header {
     display: flex;
     justify-content: space-between;
-    align-items: flex-start;
+    align-items: center;
     gap: 1rem;
-    padding: 0.75rem 1rem;
+    padding: 0.45rem 1rem;
     border-bottom: 1px solid var(--graph-border);
   }
   .graph-back {
@@ -1109,23 +1245,10 @@ const heading = graphHeading(title, slug!);
     flex: 1;
     min-width: 0;
   }
-  .graph-title-eyebrow {
-    font-size: 0.65rem;
-    text-transform: uppercase;
-    letter-spacing: 0.12em;
-    color: var(--text-secondary);
-    display: block;
-    margin-bottom: 0.15rem;
-  }
   .graph-title h1 {
-    font-size: 1rem;
+    font-size: 0.95rem;
     font-weight: 600;
     margin: 0;
-  }
-  .graph-report-date {
-    margin-top: 0.2rem;
-    font-size: 0.72rem;
-    color: var(--text-secondary);
   }
   .graph-controls {
     display: flex;
@@ -1156,7 +1279,7 @@ const heading = graphHeading(title, slug!);
   .graph-metrics {
     display: flex;
     gap: 0.5rem;
-    padding: 0.6rem 1rem;
+    padding: 0.5rem 1rem;
     border-bottom: 1px solid var(--graph-border);
     overflow-x: auto;
     scrollbar-width: thin;
@@ -1168,6 +1291,18 @@ const heading = graphHeading(title, slug!);
     background: var(--graph-surface);
     border: 1px solid var(--graph-border);
     border-radius: 8px;
+    transition: border-color 0.15s;
+  }
+  .metric.is-lens {
+    cursor: pointer;
+  }
+  .metric.is-lens:hover,
+  .metric.is-lens:focus-visible {
+    border-color: rgba(110, 167, 255, 0.6);
+    outline: none;
+  }
+  .metric.is-lens[aria-pressed="true"] {
+    border-color: rgba(250, 204, 21, 0.85);
   }
   .metric-label {
     font-size: 0.6rem;
@@ -1458,6 +1593,11 @@ const heading = graphHeading(title, slug!);
   }
   .graph-card.is-hl-down {
     border-color: rgba(45, 212, 191, 0.6);
+    transform: translateY(-1px);
+  }
+  /* Reached by a control/authority edge rather than the money-flow chain. */
+  .graph-card.is-hl-strong {
+    border-color: rgba(251, 191, 36, 0.55);
     transform: translateY(-1px);
   }
   .graph-card.is-dim {
@@ -1835,7 +1975,7 @@ const heading = graphHeading(title, slug!);
     .graph-header {
       flex-wrap: wrap;
       gap: 0.5rem;
-      padding: 0.6rem 0.75rem;
+      padding: 0.5rem 0.75rem;
     }
     .graph-title { order: -1; flex-basis: 100%; text-align: left; }
     .graph-title h1 { font-size: 0.85rem; }
