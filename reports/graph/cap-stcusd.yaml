@@ -74,6 +74,25 @@ nodes:
     category: dependency
     morphoVault: v2
     note: ~$19.73M (40% of USDC FRV)
+
+  # MetaMorpho Prime governance (V2)
+  - id: steakhouse-prime-owner
+    label: Steakhouse Prime Owner
+    address: "0x4D7bd498Bb24098Ca281C05519629c605407f71d"
+    category: governance
+    note: Governance contract (not a Safe)
+  - id: steakhouse-prime-curator
+    label: Steakhouse Prime Curator (2-of-7)
+    address: "0x827e86072B06674a077f592A531dcE4590aDeCdB"
+    category: governance
+  - id: gauntlet-prime-owner
+    label: Gauntlet Prime Owner (4-of-7)
+    address: "0xC684c6587712e5E7BDf9fD64415F23Bd2b05fAec"
+    category: governance
+  - id: gauntlet-prime-curator
+    label: Gauntlet Prime Curator (3-of-7)
+    address: "0x9E33faAE38ff641094fa68c65c2cE600b3410585"
+    category: governance
   - id: aave-v3-usdc
     label: Aave V3 USDC Core
     category: dependency
@@ -203,6 +222,24 @@ edges:
     to: symbiotic
     kind: routes-through
     label: slashing collateral
+
+  # MetaMorpho Prime governance
+  - from: steakhouse-prime-owner
+    to: morpho-steakhouse-prime
+    kind: holds-role
+    label: "owner"
+  - from: steakhouse-prime-curator
+    to: morpho-steakhouse-prime
+    kind: holds-role
+    label: "curator"
+  - from: gauntlet-prime-owner
+    to: morpho-usdc-prime
+    kind: holds-role
+    label: "owner"
+  - from: gauntlet-prime-curator
+    to: morpho-usdc-prime
+    kind: holds-role
+    label: "curator"
 
 # BEGIN GENERATED MORPHO MARKET EDGES
 # Managed by scripts/update_morpho_graph_markets.mjs — do not edit.

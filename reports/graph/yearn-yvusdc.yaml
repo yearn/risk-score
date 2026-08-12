@@ -117,7 +117,7 @@ nodes:
     category: dependency
     note: Sky sub-DAO; admin keys live under Sky governance
   - id: morpho-curator
-    label: Morpho Curator (Yearn Ops)
+    label: Curator (2-of-3)
     address: "0x90D0f26025571295D18a6c041E47450B81886B51"
     category: governance
 

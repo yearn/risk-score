@@ -42,6 +42,10 @@ nodes:
     label: Security (4-of-7)
     address: "0xe5e2Baf96198c56380dDD5E992D7d1ADa0e989c0"
     category: governance
+  - id: curator
+    label: Curator (2-of-3)
+    address: "0x90D0f26025571295D18a6c041E47450B81886B51"
+    category: governance
   - id: timelock
     label: Strategy Manager (7-day Timelock)
     address: "0x88Ba032be87d5EF1fbE87336b7090767F367BF73"
@@ -225,6 +229,10 @@ edges:
     to: yearn-og-weth
     kind: controls
     label: "owner()"
+  - from: curator
+    to: yearn-og-weth
+    kind: holds-role
+    label: "curator"
 
 # BEGIN GENERATED MORPHO MARKET EDGES
 # Managed by scripts/update_morpho_graph_markets.mjs — do not edit.

@@ -215,6 +215,16 @@ nodes:
     category: dependency
     morphoVault: v1
 
+  # MetaMorpho vault governance (Waterline owner / Steakhouse curator)
+  - id: dep-steakhouse-owner
+    label: MetaMorpho Owner (5-of-8)
+    address: "0xd6086925EABDA100409Da2adaDFDea08EAB1081A"
+    category: governance
+  - id: dep-steakhouse-curator
+    label: MetaMorpho Curator (2-of-7)
+    address: "0xC5fA35a7DA6798211d4AcD6b1D36F2f3E8c6dBdB"
+    category: governance
+
 # BEGIN GENERATED MORPHO MARKET NODES
 # Managed by scripts/update_morpho_graph_markets.mjs — do not edit.
   - id: morpho-market-bbf7ce1b40d3
@@ -392,6 +402,16 @@ edges:
   - from: farm-steakhouse
     to: dep-steakhouse-vault
     kind: deposits-into
+
+  # MetaMorpho vault governance
+  - from: dep-steakhouse-owner
+    to: dep-steakhouse-vault
+    kind: holds-role
+    label: "owner"
+  - from: dep-steakhouse-curator
+    to: dep-steakhouse-vault
+    kind: holds-role
+    label: "curator"
 
 # BEGIN GENERATED MORPHO MARKET EDGES
 # Managed by scripts/update_morpho_graph_markets.mjs — do not edit.

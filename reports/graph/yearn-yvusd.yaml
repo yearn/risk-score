@@ -46,6 +46,10 @@ nodes:
     label: Security (4-of-7)
     address: "0xe5e2BAf96198c56380DDd5e992D7d1adA0E989C0"
     category: governance
+  - id: curator
+    label: Curator (2-of-3)
+    address: "0x90D0f26025571295D18a6c041E47450B81886B51"
+    category: governance
   - id: timelock
     label: Strategy Manager (7-day Timelock)
     address: "0x88ba032be87d5eF1FbE87336b7090767f367bF73"
@@ -319,6 +323,16 @@ edges:
   - from: morpho-v1-og-vault
     to: morpho-protocol
     kind: routes-through
+
+  # MetaMorpho vault governance — owner (Security) + curator
+  - from: security
+    to: morpho-v1-og-vault
+    kind: holds-role
+    label: "owner"
+  - from: curator
+    to: morpho-v1-og-vault
+    kind: holds-role
+    label: "curator"
 
   - from: katana-yvusdc
     to: vault-bridge-token
