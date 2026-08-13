@@ -102,6 +102,14 @@ th {
 .prose li {
   margin-bottom: 0.25rem;
 }
+/* GFM task lists (the critical-gate checklists) draw their own checkbox —
+   drop the bullet so the item carries one marker, not two. */
+.prose li:has(> input[type="checkbox"]) {
+  list-style: none;
+}
+.prose li > input[type="checkbox"] {
+  margin-right: 0.4rem;
+}
 .prose a {
   color: var(--brand-blue);
 }

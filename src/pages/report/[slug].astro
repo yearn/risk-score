@@ -194,7 +194,11 @@ const jsonLd = reviewSchema ? [articleSchema, reviewSchema] : [articleSchema];
   {report.finalScore != null ? (
     <section class="section">
       <h2>Score Breakdown</h2>
-      <ScoreTable scores={report.scoreTable} finalScore={report.finalScore} />
+      <ScoreTable
+        scores={report.scoreTable}
+        finalScore={report.finalScore}
+        detailsId={report.scoreDetails ? "score-details" : undefined}
+      />
     </section>
   ) : (
     <section class="section">
@@ -229,7 +233,7 @@ const jsonLd = reviewSchema ? [articleSchema, reviewSchema] : [articleSchema];
   </details>
 
   {report.scoreDetails && (
-    <details class="disclosure">
+    <details class="disclosure" id="score-details">
       <summary class="disclosure-toggle">
         <span>Score Details</span>
         <svg class="chevron" width="20" height="20" viewBox="0 0 20 20" fill="none">
@@ -355,6 +359,8 @@ const jsonLd = reviewSchema ? [articleSchema, reviewSchema] : [articleSchema];
   .back-link {
     display: inline-block;
     margin-bottom: 1.5rem;
+    /* Separates it from the new/updated badge that follows on the same line. */
+    margin-right: 1rem;
     color: var(--text-secondary);
     font-size: 0.9rem;
   }
@@ -449,6 +455,8 @@ const jsonLd = reviewSchema ? [articleSchema, reviewSchema] : [articleSchema];
     margin-bottom: 2.5rem;
     border: 1px solid var(--border);
     border-radius: 8px;
+    /* Breathing room when the tier badge scrolls this panel into view. */
+    scroll-margin-top: 1rem;
   }
   .disclosure-toggle {
     display: flex;
