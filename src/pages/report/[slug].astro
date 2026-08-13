@@ -2,6 +2,7 @@
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import ScoreBadge from "../../components/ScoreBadge.astro";
 import ScoreTable from "../../components/ScoreTable.astro";
+import ScoreDetails from "../../components/ScoreDetails.astro";
 import { getAllSlugs, getReportBySlug } from "../../lib/reports";
 import { hasGraph } from "../../lib/graph";
 import { scoreTier } from "../../lib/colors";
@@ -217,8 +218,8 @@ const jsonLd = reviewSchema ? [articleSchema, reviewSchema] : [articleSchema];
     <div class="prose" set:html={report.riskSummaryHtml} />
   </section>
 
-  <details class="full-report">
-    <summary class="full-report-toggle">
+  <details class="disclosure">
+    <summary class="disclosure-toggle">
       <span>Full Report</span>
       <svg class="chevron" width="20" height="20" viewBox="0 0 20 20" fill="none">
         <path d="M6 8l4 4 4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -226,6 +227,20 @@ const jsonLd = reviewSchema ? [articleSchema, reviewSchema] : [articleSchema];
     </summary>
     <div class="prose" set:html={report.fullReportHtml} />
   </details>
+
+  {report.scoreDetails && (
+    <details class="disclosure">
+      <summary class="disclosure-toggle">
+        <span>Score Details</span>
+        <svg class="chevron" width="20" height="20" viewBox="0 0 20 20" fill="none">
+          <path d="M6 8l4 4 4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </summary>
+      <div class="disclosure-body">
+        <ScoreDetails details={report.scoreDetails} />
+      </div>
+    </details>
+  )}
 
   {report.history.length > 0 && (
     <section class="section">
@@ -429,12 +444,13 @@ const jsonLd = reviewSchema ? [articleSchema, reviewSchema] : [articleSchema];
     padding-bottom: 0.5rem;
     border-bottom: 1px solid var(--border);
   }
-  .full-report {
+  /* Shared by the "Full Report" and "Score Details" panels. */
+  .disclosure {
     margin-bottom: 2.5rem;
     border: 1px solid var(--border);
     border-radius: 8px;
   }
-  .full-report-toggle {
+  .disclosure-toggle {
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -448,83 +464,25 @@ const jsonLd = reviewSchema ? [articleSchema, reviewSchema] : [articleSchema];
     background: var(--bg-secondary);
     border-radius: 8px;
   }
-  .full-report[open] .full-report-toggle {
+  .disclosure[open] .disclosure-toggle {
     border-radius: 8px 8px 0 0;
     border-bottom: 1px solid var(--border);
   }
-  .full-report-toggle::-webkit-details-marker {
+  .disclosure-toggle::-webkit-details-marker {
     display: none;
   }
-  .full-report-toggle .chevron {
+  .disclosure-toggle .chevron {
     transition: transform 0.2s ease;
     flex-shrink: 0;
   }
-  .full-report[open] .full-report-toggle .chevron {
+  .disclosure[open] .disclosure-toggle .chevron {
     transform: rotate(180deg);
   }
-  .full-report > .prose {
+  .disclosure > .prose,
+  .disclosure-body {
     padding: 1.25rem;
   }
-  .prose :global(p) {
-    margin-bottom: 0.75rem;
-  }
-  .prose :global(ul),
-  .prose :global(ol) {
-    margin-bottom: 0.75rem;
-    padding-left: 1.5rem;
-  }
-  .prose :global(li) {
-    margin-bottom: 0.25rem;
-  }
-  .prose :global(a) {
-    color: var(--brand-blue);
-  }
-  .prose :global(strong) {
-    color: var(--text-primary);
-  }
-  .prose :global(code) {
-    background: var(--bg-secondary);
-    padding: 0.15rem 0.35rem;
-    border-radius: 3px;
-    font-size: 0.85em;
-  }
-  .prose :global(pre) {
-    background: var(--bg-secondary);
-    padding: 1rem;
-    border-radius: 6px;
-    overflow-x: auto;
-    margin-bottom: 0.75rem;
-  }
-  .prose :global(pre code) {
-    background: none;
-    padding: 0;
-  }
-  .prose :global(h3) {
-    margin-top: 1.5rem;
-    margin-bottom: 0.5rem;
-    font-size: 1.05rem;
-  }
-  .prose :global(table) {
-    width: 100%;
-    border-collapse: collapse;
-    margin-bottom: 0.75rem;
-    font-size: 0.85rem;
-    display: block;
-    overflow-x: auto;
-  }
-  .prose :global(th),
-  .prose :global(td) {
-    padding: 0.4rem 0.6rem;
-    border-bottom: 1px solid var(--border);
-    text-align: left;
-  }
-  .prose :global(th) {
-    background: var(--bg-secondary);
-    color: var(--text-secondary);
-    font-weight: 600;
-    font-size: 0.75rem;
-    text-transform: uppercase;
-  }
+  /* .prose rules live in global.css — shared with ScoreDetails.astro. */
   .history-wrap {
     overflow-x: auto;
   }
