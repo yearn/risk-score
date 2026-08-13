@@ -376,6 +376,14 @@ export function expandCrossLinks(graph: Graph, currentSlug: string): Graph {
   const mergedCategories: GraphCategory[] = [...graph.categories];
   const seenIds = new Set(mergedNodes.map((n) => n.id));
   const seenCategoryIds = new Set(graph.categories.map((c) => c.id));
+  // A Morpho market is shared across vaults/graphs, so cross-graph expansion
+  // must merge the same market into one node rather than duplicating it (one
+  // native copy + one inlined copy would show the same market twice). Key on
+  // the full marketId; native nodes are seeded first.
+  const marketIdToNode = new Map<string, string>();
+  for (const n of mergedNodes) {
+    if (n.morphoMarket) marketIdToNode.set(n.morphoMarket.toLowerCase(), n.id);
+  }
 
   for (const hostNode of graph.nodes) {
     if (!hostNode.address) continue;
@@ -420,9 +428,17 @@ export function expandCrossLinks(graph: Graph, currentSlug: string): Graph {
         if (!idMap.has(targetLinkedId)) {
           const targetNode = linked.nodes.find((n) => n.id === targetLinkedId);
           if (!targetNode) continue;
-          const mergedId = `${entry.slug}::${targetLinkedId}`;
+          // If this is a Morpho market that already exists (native or inlined
+          // from another graph), reuse that node instead of creating a
+          // duplicate — the same market should appear once with multiple
+          // inbound `deposits-into` edges.
+          const marketKey = targetNode.morphoMarket?.toLowerCase();
+          const existingMarketNode = marketKey
+            ? marketIdToNode.get(marketKey)
+            : undefined;
+          const mergedId = existingMarketNode ?? `${entry.slug}::${targetLinkedId}`;
           idMap.set(targetLinkedId, mergedId);
-          if (!seenIds.has(mergedId)) {
+          if (!existingMarketNode && !seenIds.has(mergedId)) {
             mergedNodes.push({
               ...targetNode,
               id: mergedId,
@@ -433,6 +449,7 @@ export function expandCrossLinks(graph: Graph, currentSlug: string): Graph {
               _inlinedFromSlug: entry.slug,
             });
             seenIds.add(mergedId);
+            if (marketKey) marketIdToNode.set(marketKey, mergedId);
           }
         }
         if (!visited.has(targetLinkedId)) {
