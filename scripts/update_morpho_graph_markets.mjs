@@ -261,13 +261,17 @@ export function buildGraphSections(graph, occurrences, allocByKey) {
       if (!nodeId) {
         nodeId = item.id;
         seenMarket.set(nodeKey, nodeId);
-        marketNodes.push({
+        const node = {
           id: item.id,
           label: item.label,
           category: "dependency",
           link: item.link,
           note: item.note,
-        });
+        };
+        // Record the full 32-byte market id so cross-graph linking can key on
+        // it (same market appears across many vaults/graphs).
+        if (item.marketId) node.morphoMarket = item.marketId;
+        marketNodes.push(node);
       }
       edges.push({ from: occ.nodeId, to: nodeId, kind: "deposits-into", label: item.pct });
     }
@@ -288,6 +292,7 @@ function renderNode(node) {
   const lines = [`  - id: ${node.id}`];
   lines.push(`    label: ${yamlScalar(node.label)}`);
   lines.push(`    category: ${node.category}`);
+  if (node.morphoMarket) lines.push(`    morphoMarket: ${yamlScalar(node.morphoMarket)}`);
   if (node.link) lines.push(`    link: ${yamlScalar(node.link)}`);
   if (node.note) lines.push(`    note: ${yamlScalar(node.note)}`);
   return lines;

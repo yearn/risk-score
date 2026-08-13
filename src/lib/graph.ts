@@ -27,6 +27,12 @@ export interface GraphNode {
    * explicitly tagged nodes are probed — never detected from labels or IDs.
    */
   morphoVault?: "v1" | "v2";
+  /**
+   * The full 32-byte Morpho market id for a generated market node. Present on
+   * generated nodes only; used by cross-graph linking to find the same market
+   * across graphs (a market is shared by many vaults, unlike an EVM address).
+   */
+  morphoMarket?: string;
   /** Set at build time by expandCrossLinks; never present in YAML. */
   _inlinedFromSlug?: string;
 }
@@ -247,6 +253,53 @@ export function getReverseGraphIndex(): Map<string, CrossLinkEntry[]> {
   for (const list of reverse.values()) list.sort((a, b) => a.slug.localeCompare(b.slug));
   reverseIndexCache = reverse;
   return reverse;
+}
+
+/**
+ * A reference to a Morpho market from one graph: which vault(s) in that graph
+ * deposit into the market.
+ */
+export interface MorphoMarketRef {
+  slug: string;
+  title: string;
+  vaultLabels: string[];
+}
+
+/**
+ * Build a Morpho market-id → referencing-graphs index across the corpus.
+ * Unlike `getGraphIndex()` (keyed on EVM address, one owner per address), a
+ * Morpho market is *shared*: the same 32-byte `marketId` is supplied by many
+ * vaults in many graphs. This index answers "which other reports are exposed
+ * to this market", which is a systemic-concentration view a curator wants.
+ *
+ * Keyed on the lowercased full `morphoMarket` id.
+ */
+let morphoMarketIndexCache: Map<string, MorphoMarketRef[]> | undefined;
+
+export function getMorphoMarketIndex(): Map<string, MorphoMarketRef[]> {
+  if (morphoMarketIndexCache) return morphoMarketIndexCache;
+  const index = new Map<string, MorphoMarketRef[]>();
+  for (const slug of getGraphSlugs()) {
+    const g = getGraphBySlug(slug);
+    if (!g) continue;
+    for (const n of g.nodes) {
+      if (!n.morphoMarket) continue;
+      const depositors = g.edges
+        .filter((e) => e.to === n.id && e.kind === "deposits-into")
+        .map((e) => g.nodes.find((x) => x.id === e.from)?.label ?? e.from);
+      const key = n.morphoMarket.toLowerCase();
+      const refs = index.get(key) ?? [];
+      refs.push({
+        slug,
+        title: graphHeading(g.title, slug),
+        vaultLabels: [...new Set(depositors)],
+      });
+      index.set(key, refs);
+    }
+  }
+  for (const refs of index.values()) refs.sort((a, b) => a.slug.localeCompare(b.slug));
+  morphoMarketIndexCache = index;
+  return index;
 }
 
 /** One row of the `/graph/` index. */

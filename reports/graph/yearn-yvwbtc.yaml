@@ -94,11 +94,13 @@ nodes:
   - id: morpho-market-f6a056627a51
     label: "LBTC/WBTC · 94.5% LLTV"
     category: dependency
+    morphoMarket: "0xf6a056627a51e511ec7f48332421432ea6971fc148d8f3c451e14ea108026549"
     link: "https://app.morpho.org/ethereum/market/0xf6a056627a51e511ec7f48332421432ea6971fc148d8f3c451e14ea108026549/"
     note: "Morpho market 0xf6a056627a51e511ec7f48332421432ea6971fc148d8f3c451e14ea108026549 used by Yearn WBTC"
   - id: morpho-market-39d6cc9211d0
     label: "cbBTC/WBTC · 94.5% LLTV"
     category: dependency
+    morphoMarket: "0x39d6cc9211d023cc16708a2378d821d394d8cfaa3640e3a4d4638d292e10035d"
     link: "https://app.morpho.org/ethereum/market/0x39d6cc9211d023cc16708a2378d821d394d8cfaa3640e3a4d4638d292e10035d/"
     note: "Morpho market 0x39d6cc9211d023cc16708a2378d821d394d8cfaa3640e3a4d4638d292e10035d used by Yearn WBTC"
 # END GENERATED MORPHO MARKET NODES

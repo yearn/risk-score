@@ -78,6 +78,7 @@ The schema is enforced at build time by the validator in `src/lib/graph.ts`. Aut
 | `link` | no | string | External URL for the card's `↗` affordance and the details panel. **Must use `https://`.** Prefer it to the block-explorer link for addressless nodes (e.g. Morpho market IDs, which are 32-byte identifiers — never put a market ID in `address`). |
 | `note` | no | string | Free-form context. **Rendered as prose in the details panel** when the card is clicked — write it for a human reader, not as a shorthand memo. |
 | `morphoVault` | no | enum `"v1" \| "v2"` | Tags this node as a Morpho vault whose per-market allocations are expanded by `scripts/update_morpho_graph_markets.mjs`. Records the vault contract's immutable generation. Requires `address`. **Only explicitly tagged nodes are probed** — never detected from labels, IDs, notes, or address probing. Do not tag generic Morpho protocol/market nodes, Morpho strategies that merely use flashloans, or wrapper/farm contracts that deposit into a separate vault node. |
+| `morphoMarket` | no | string (32-byte id) | Set by the generator on generated Morpho market nodes. The full `marketId`, used to cross-link the same market across graphs (a market is shared by many vaults). Generated only; do not author by hand. |
 
 **Edge fields:**
 
@@ -319,6 +320,7 @@ What the generator does:
 
 - Scans every `reports/graph/*.yaml`, finds tagged nodes, and fetches their allocations from the Morpho GraphQL API (`https://api.morpho.org/graphql`).
 - Emits a `dependency` node per non-zero market (label `cbBTC/USDC · 86% LLTV`, `link` to the Morpho market page, full 32-byte `marketId` in the `note`) and a `deposits-into` edge from the vault node to each market carrying its percentage label.
+- Writes the full `marketId` in a `morphoMarket` field on each market node. The graph renderer cross-references this field across the whole corpus, so a market card lists every other graph whose vaults supply the same market ("Also supplied by").
 - Represents idle assets (`collateralAsset` is null) as a synthetic `Idle <asset>` node with no Morpho link, so displayed allocations reconcile to 100%. Tiny positive shares are labelled `<0.1%`, never rounded to 0.
 - Writes into two marker-delimited sections — `# BEGIN/END GENERATED MORPHO MARKET NODES` (before `edges:`) and `# BEGIN/END GENERATED MORPHO MARKET EDGES` (inside the edge list) — preserving every byte outside those regions. V2 vaults are supported for direct `MorphoMarketV1Adapter` positions; nested/unsupported adapters fail closed.
 

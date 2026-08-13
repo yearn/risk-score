@@ -5,6 +5,7 @@ import {
   getGraphBySlug,
   getGraphIndex,
   getReverseGraphIndex,
+  getMorphoMarketIndex,
   resolveCrossLink,
   expandCrossLinks,
   explorerUrl,
@@ -26,6 +27,7 @@ const baseGraph = getGraphBySlug(slug!);
 if (!baseGraph) return Astro.redirect("/reports/");
 
 const graphIndex = getGraphIndex();
+const morphoMarketIndex = getMorphoMarketIndex();
 // Inline the downstream subgraph of each cross-linked node so a reviewer
 // sees the strategies/dependencies behind external protocols on the same page.
 const graph = expandCrossLinks(baseGraph, slug!);
@@ -75,6 +77,12 @@ const cyData = {
       note: n.note ?? "",
       crossLink: crossLinks.get(n.id) ?? null,
       inlinedFromSlug: n._inlinedFromSlug ?? null,
+      // Other graphs whose vaults supply the same Morpho market.
+      morphoMarketRefs: n.morphoMarket
+        ? (morphoMarketIndex.get(n.morphoMarket.toLowerCase()) ?? []).filter(
+            (r) => r.slug !== slug,
+          )
+        : [],
     };
   }),
   edges: graph.edges.map((e: GraphEdge, i: number) => ({
@@ -282,6 +290,7 @@ const heading = graphHeading(title, slug!);
       note: string;
       crossLink: CrossLink | null;
       inlinedFromSlug: string | null;
+      morphoMarketRefs: { slug: string; title: string; vaultLabels: string[] }[];
     };
     type CyEdge = {
       id: string;
@@ -771,12 +780,33 @@ const heading = graphHeading(title, slug!);
           </div>`
         : "";
 
+      // A Morpho market is shared: other graphs' vaults supply the same market.
+      // List them so a reviewer sees the systemic concentration behind a market.
+      const marketRefsBlock = n.morphoMarketRefs?.length
+        ? `
+          <div class="panel-section">
+            <div class="panel-h">Also supplied by</div>
+            <div class="panel-ref-list">
+              ${n.morphoMarketRefs
+                .map(
+                  (r) => `
+                <a class="panel-ref" href="/graph/${escapeHtml(r.slug)}/">
+                  <span class="panel-ref-title">${escapeHtml(r.title)}</span>
+                  <span class="panel-ref-detail">${escapeHtml(r.vaultLabels.join(" · "))}</span>
+                </a>`,
+                )
+                .join("")}
+            </div>
+          </div>`
+        : "";
+
       panelContent.innerHTML = `
         <div class="panel-eyebrow">${eyebrow}</div>
         <h2 class="panel-title">${escapeHtml(n.label)}</h2>
         ${addressBlock}
         ${noteBlock}
         ${crossBlock}
+        ${marketRefsBlock}
         ${connectionRows(inboundByNode.get(id) ?? [], "in")}
         ${connectionRows(outboundByNode.get(id) ?? [], "out")}
       `;
@@ -1766,6 +1796,37 @@ const heading = graphHeading(title, slug!);
   }
   .panel-cross-row {
     margin-bottom: 0.35rem;
+  }
+  /* Shared Morpho-market cross-references in the details panel. */
+  .panel-ref-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  .panel-ref {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    padding: 0.4rem 0.5rem;
+    border: 1px solid var(--graph-border);
+    border-radius: 5px;
+    text-decoration: none;
+    transition: border-color 0.15s;
+  }
+  .panel-ref:hover {
+    border-color: rgba(110, 167, 255, 0.6);
+    text-decoration: none;
+  }
+  .panel-ref-title {
+    font-size: 0.75rem;
+    color: #6ea7ff;
+  }
+  html.light .panel-ref-title {
+    color: #0675f9;
+  }
+  .panel-ref-detail {
+    font-size: 0.68rem;
+    color: var(--text-secondary);
   }
   .conn-list {
     display: flex;

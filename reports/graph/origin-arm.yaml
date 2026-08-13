@@ -103,11 +103,13 @@ nodes:
   - id: morpho-market-b8fc70e82bc5
     label: "wstETH/WETH · 96.5% LLTV"
     category: dependency
+    morphoMarket: "0xb8fc70e82bc5bb53e773626fcc6a23f7eefa036918d7ef216ecfb1950a94a85e"
     link: "https://app.morpho.org/ethereum/market/0xb8fc70e82bc5bb53e773626fcc6a23f7eefa036918d7ef216ecfb1950a94a85e/"
     note: "Morpho market 0xb8fc70e82bc5bb53e773626fcc6a23f7eefa036918d7ef216ecfb1950a94a85e used by WETH ARM Vault"
   - id: morpho-market-d0e50cdac92f
     label: "wstETH/WETH · 94.5% LLTV"
     category: dependency
+    morphoMarket: "0xd0e50cdac92fe2172043f5e0c36532c6369d24947e40968f34a5e8819ca9ec5d"
     link: "https://app.morpho.org/ethereum/market/0xd0e50cdac92fe2172043f5e0c36532c6369d24947e40968f34a5e8819ca9ec5d/"
     note: "Morpho market 0xd0e50cdac92fe2172043f5e0c36532c6369d24947e40968f34a5e8819ca9ec5d used by WETH ARM Vault"
 # END GENERATED MORPHO MARKET NODES

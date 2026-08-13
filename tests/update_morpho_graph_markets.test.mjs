@@ -16,6 +16,7 @@ import {
   parseV1Items,
   parseV2Items,
   postGraphql,
+  renderNodesBlock,
 } from "../scripts/update_morpho_graph_markets.mjs";
 
 const REPORTS = new Set(["demo", "infinifi"]);
@@ -498,4 +499,32 @@ test("buildGraphSections ignores previous generated nodes when deriving ids", ()
   const { marketNodes } = buildGraphSections(g, occ, allocByKey);
   // Stable, not shifted by the stale generated node.
   assert.equal(marketNodes[0].id, "morpho-market-64d65c9a2d91");
+});
+
+test("generated market nodes carry morphoMarket; idle nodes do not", () => {
+  const g = graph();
+  const occ = [{ slug: "demo", nodeId: "morpho-vault", version: "v1", chain: "ethereum", address: "0x68Aea7b82Df6CcdF76235D46445Ed83f85F845A3", nodeLabel: "Yearn USDC" }];
+  const allocByKey = new Map([
+    [
+      "v1:ethereum:0x68aea7b82df6ccdf76235d46445ed83f85f845a3",
+      vaultData({
+        totalAssets: 1000n,
+        allocations: [
+          alloc(820, null, null, null, null), // idle
+          alloc(180, "0x64d65c9a2d91c36d56fbc42d69e979335320169b3df63bf92789e2c8883fcc64", "860000000000000000", "cbBTC", "USDC"),
+        ],
+      }),
+    ],
+  ]);
+  const { marketNodes } = buildGraphSections(g, occ, allocByKey);
+  const market = marketNodes.find((n) => n.id.startsWith("morpho-market-"));
+  const idle = marketNodes.find((n) => n.id.startsWith("morpho-idle-"));
+  assert.equal(market.morphoMarket, "0x64d65c9a2d91c36d56fbc42d69e979335320169b3df63bf92789e2c8883fcc64");
+  assert.equal(idle.morphoMarket, undefined);
+
+  // The serialized YAML emits morphoMarket exactly once (the market node only).
+  const block = renderNodesBlock(marketNodes).join("\n");
+  const occurrences = block.split("\n").filter((l) => l.trim().startsWith("morphoMarket:")).length;
+  assert.equal(occurrences, 1);
+  assert.ok(block.includes('morphoMarket: "0x64d65c9a2d91c36d56fbc42d69e979335320169b3df63bf92789e2c8883fcc64"'));
 });
