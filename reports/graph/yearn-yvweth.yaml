@@ -240,9 +240,9 @@ edges:
   - from: yearn-og-weth
     to: morpho-market-b8fc70e82bc5
     kind: deposits-into
-    label: "94.8%"
+    label: "94.6%"
   - from: yearn-og-weth
     to: morpho-market-d0e50cdac92f
     kind: deposits-into
-    label: "5.1%"
+    label: "5.3%"
 # END GENERATED MORPHO MARKET EDGES

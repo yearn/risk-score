@@ -222,7 +222,7 @@ test("same pair with different LLTVs produces distinct labels", () => {
   assert.equal(items[1].label, "wstETH/WETH · 96.5% LLTV");
 });
 
-test("same pair and LLTV keeps a simple label (no market-id suffix)", () => {
+test("same pair and LLTV appends a shortened market id", () => {
   const v = vaultData({
     totalAssets: 1000n,
     allocations: [
@@ -232,9 +232,9 @@ test("same pair and LLTV keeps a simple label (no market-id suffix)", () => {
   });
   const items = buildAllocations(v, new Set());
   assert.equal(items.length, 2);
-  // Labels stay name + LLTV only; the full market id remains in `note`/`link`.
+  // First occurrence keeps the plain name + LLTV; the collision gets a suffix.
   assert.equal(items[0].label, "cbBTC/USDC · 86% LLTV");
-  assert.equal(items[1].label, "cbBTC/USDC · 86% LLTV");
+  assert.equal(items[1].label, "cbBTC/USDC · 86% LLTV · 0xbc99de6a8890");
   assert.ok(items[0].note.includes("0x64d65c9a2d91c36d56fbc42d69e979335320169b3df63bf92789e2c8883fcc64"));
   assert.ok(items[1].note.includes("0xbc99de6a88904cd0e69042ad6f266e63182801f030c636507c3caf590ffd84fe"));
 });
@@ -382,6 +382,40 @@ test("parseV2Items fails with an actionable message on missing address", () => {
   assert.throws(
     () => parseV2Items([], [{ version: "v2", chain: "ethereum", address: "0xAAA" }], "ethereum"),
     /not a Morpho Vault V2.*Check the tag/s,
+  );
+});
+
+test("parseV1Items rejects a vault returned on the wrong chain", () => {
+  const items = [
+    {
+      address: "0xAAA",
+      name: "Vault",
+      chain: { id: 8453 }, // base — but we filtered for ethereum
+      asset: { symbol: "USDC" },
+      state: { totalAssets: 1000, allocation: [] },
+    },
+  ];
+  assert.throws(
+    () => parseV1Items(items, [{ version: "v1", chain: "ethereum", address: "0xAAA" }], "ethereum"),
+    /returned chain id 8453, expected 1/,
+  );
+});
+
+test("parseV2Items rejects a vault returned on the wrong chain", () => {
+  const items = [
+    {
+      address: "0xAAA",
+      name: "Vault",
+      chain: { id: 1 }, // ethereum — but we filtered for base
+      asset: { symbol: "USDC" },
+      totalAssets: 1000,
+      idleAssets: 0,
+      adapters: { items: [], pageInfo: { countTotal: 0, count: 0, limit: 3, skip: 0 } },
+    },
+  ];
+  assert.throws(
+    () => parseV2Items(items, [{ version: "v2", chain: "base", address: "0xAAA" }], "base"),
+    /returned chain id 1, expected 8453/,
   );
 });
 

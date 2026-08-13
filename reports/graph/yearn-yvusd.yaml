@@ -181,11 +181,6 @@ nodes:
     category: dependency
     link: "https://app.morpho.org/ethereum/market/0xf8c5aa31ea6b2a068a9eddb46dd110cae57bf0f12be9583a3f9a818effecba89/"
     note: "Morpho market 0xf8c5aa31ea6b2a068a9eddb46dd110cae57bf0f12be9583a3f9a818effecba89 used by Yearn OG USDC"
-  - id: morpho-market-64d65c9a2d91
-    label: "cbBTC/USDC · 86% LLTV"
-    category: dependency
-    link: "https://app.morpho.org/ethereum/market/0x64d65c9a2d91c36d56fbc42d69e979335320169b3df63bf92789e2c8883fcc64/"
-    note: "Morpho market 0x64d65c9a2d91c36d56fbc42d69e979335320169b3df63bf92789e2c8883fcc64 used by Yearn OG USDC"
   - id: morpho-market-bbf7ce1b40d3
     label: "siUSD/USDC · 91.5% LLTV"
     category: dependency
@@ -201,16 +196,16 @@ nodes:
     category: dependency
     link: "https://app.morpho.org/ethereum/market/0x973e9dd45799efe8775417bcc420a3ab84a583587b2108985746e2fe201d0c83/"
     note: "Morpho market 0x973e9dd45799efe8775417bcc420a3ab84a583587b2108985746e2fe201d0c83 used by Yearn OG USDC"
-  - id: morpho-market-61765602144e
-    label: "weETH/USDC · 86% LLTV"
-    category: dependency
-    link: "https://app.morpho.org/ethereum/market/0x61765602144e91e5ac9f9e98b8584eae308f9951596fd7f5e0f59f21cd2bf664/"
-    note: "Morpho market 0x61765602144e91e5ac9f9e98b8584eae308f9951596fd7f5e0f59f21cd2bf664 used by Yearn OG USDC"
   - id: morpho-market-ad656d430bb3
     label: "WOUSD/USDC · 91.5% LLTV"
     category: dependency
     link: "https://app.morpho.org/ethereum/market/0xad656d430bb3d8c1469bf45c8ad4ebae1b04be04757c69fa424eec78d7b3f4dc/"
     note: "Morpho market 0xad656d430bb3d8c1469bf45c8ad4ebae1b04be04757c69fa424eec78d7b3f4dc used by Yearn OG USDC"
+  - id: morpho-market-61765602144e
+    label: "weETH/USDC · 86% LLTV"
+    category: dependency
+    link: "https://app.morpho.org/ethereum/market/0x61765602144e91e5ac9f9e98b8584eae308f9951596fd7f5e0f59f21cd2bf664/"
+    note: "Morpho market 0x61765602144e91e5ac9f9e98b8584eae308f9951596fd7f5e0f59f21cd2bf664 used by Yearn OG USDC"
 # END GENERATED MORPHO MARKET NODES
 
 edges:
@@ -393,33 +388,29 @@ edges:
   - from: morpho-v1-og-vault
     to: morpho-market-e3df58f9d301
     kind: deposits-into
-    label: "17.2%"
+    label: "35.3%"
   - from: morpho-v1-og-vault
     to: morpho-market-f8c5aa31ea6b
     kind: deposits-into
-    label: "16.9%"
-  - from: morpho-v1-og-vault
-    to: morpho-market-64d65c9a2d91
-    kind: deposits-into
-    label: "13.6%"
+    label: "15.9%"
   - from: morpho-v1-og-vault
     to: morpho-market-bbf7ce1b40d3
     kind: deposits-into
-    label: "9.4%"
+    label: "7.9%"
   - from: morpho-v1-og-vault
     to: morpho-market-bf02d6c6852f
     kind: deposits-into
-    label: "2.2%"
+    label: "1.0%"
   - from: morpho-v1-og-vault
     to: morpho-market-973e9dd45799
     kind: deposits-into
-    label: "1.1%"
-  - from: morpho-v1-og-vault
-    to: morpho-market-61765602144e
-    kind: deposits-into
-    label: "0.4%"
+    label: "0.7%"
   - from: morpho-v1-og-vault
     to: morpho-market-ad656d430bb3
+    kind: deposits-into
+    label: "0.1%"
+  - from: morpho-v1-og-vault
+    to: morpho-market-61765602144e
     kind: deposits-into
     label: "0.1%"
 # END GENERATED MORPHO MARKET EDGES

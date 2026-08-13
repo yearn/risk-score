@@ -40,6 +40,9 @@ const USER_AGENT = "yearn-risk-score-graph-updater/1.0 (+https://github.com/year
 export const MORPHO_CHAIN_SEGMENTS = { ethereum: "ethereum", base: "base" };
 export const MORPHO_CHAINS = new Set(Object.keys(MORPHO_CHAIN_SEGMENTS));
 
+/** Chain id used by the Morpho GraphQL `chainId_in` filter. */
+export const MORPHO_CHAIN_IDS = { ethereum: 1, base: 8453 };
+
 export const NODES_START = "# BEGIN GENERATED MORPHO MARKET NODES";
 export const NODES_END = "# END GENERATED MORPHO MARKET NODES";
 export const EDGES_START = "# BEGIN GENERATED MORPHO MARKET EDGES";
@@ -162,6 +165,9 @@ export function marketNodeId(marketId, usedIds) {
 export function buildAllocations(vault, usedIds) {
   const { totalAssets, assetSymbol, name } = vault;
   const items = [];
+  // Markets that share a collateral/loan pair and LLTV would render identical
+  // cards; track the base label and append a shortened market id on collision.
+  const usedLabels = new Set();
 
   for (const alloc of vault.allocations ?? []) {
     // Include every allocation with positive supplied assets — even when the
@@ -190,7 +196,13 @@ export function buildAllocations(vault, usedIds) {
 
     const pair = `${alloc.collateralSymbol}/${alloc.loanSymbol}`;
     const lltv = formatLltv(alloc.lltv);
-    const display = `${pair} · ${lltv} LLTV`;
+    const base = `${pair} · ${lltv} LLTV`;
+    let display = base;
+    if (usedLabels.has(base)) {
+      const short = String(alloc.marketId).replace(/^0x/, "").slice(0, 12);
+      display = `${base} · 0x${short}`;
+    }
+    usedLabels.add(base);
 
     items.push({
       id: marketNodeId(alloc.marketId, usedIds),
@@ -414,8 +426,8 @@ function truncate(text) {
 }
 
 const V1_QUERY = `
-query MorphoV1Allocations($addresses: [String!]!) {
-  vaults(first: 50, where: { address_in: $addresses }) {
+query MorphoV1Allocations($addresses: [String!]!, $chainIds: [Int!]!) {
+  vaults(first: 50, where: { address_in: $addresses, chainId_in: $chainIds }) {
     items {
       address
       name
@@ -439,8 +451,8 @@ query MorphoV1Allocations($addresses: [String!]!) {
 `;
 
 const V2_QUERY = `
-query MorphoV2Allocations($addresses: [String!]!) {
-  vaultV2s(first: 10, where: { address_in: $addresses }) {
+query MorphoV2Allocations($addresses: [String!]!, $chainIds: [Int!]!) {
+  vaultV2s(first: 10, where: { address_in: $addresses, chainId_in: $chainIds }) {
     items {
       address
       name
@@ -483,8 +495,18 @@ function missingVaultError(version, chain, address) {
 }
 
 export function parseV1Items(items, queries, chain) {
+  const expectedChainId = MORPHO_CHAIN_IDS[String(chain).toLowerCase()];
   const byAddress = new Map();
   for (const item of items ?? []) {
+    const returnedChainId = item.chain?.id;
+    if (
+      expectedChainId !== undefined &&
+      returnedChainId !== undefined &&
+      Number(returnedChainId) !== expectedChainId
+    )
+      throw new Error(
+        `Vault ${item.address} returned chain id ${returnedChainId}, expected ${expectedChainId} (${chain})`,
+      );
     const addr = String(item.address).toLowerCase();
     const totalAssets = toBigInt(item.state?.totalAssets, `${addr} totalAssets`);
     const allocations = (item.state?.allocation ?? []).map((a) => ({
@@ -512,8 +534,18 @@ export function parseV1Items(items, queries, chain) {
 }
 
 export function parseV2Items(items, queries, chain) {
+  const expectedChainId = MORPHO_CHAIN_IDS[String(chain).toLowerCase()];
   const byAddress = new Map();
   for (const item of items ?? []) {
+    const returnedChainId = item.chain?.id;
+    if (
+      expectedChainId !== undefined &&
+      returnedChainId !== undefined &&
+      Number(returnedChainId) !== expectedChainId
+    )
+      throw new Error(
+        `Vault V2 ${item.address} returned chain id ${returnedChainId}, expected ${expectedChainId} (${chain})`,
+      );
     const addr = String(item.address).toLowerCase();
     const totalAssets = toBigInt(item.totalAssets, `${addr} totalAssets`);
     const idleAssets = toBigInt(item.idleAssets, `${addr} idleAssets`);
@@ -593,9 +625,10 @@ function batch(addresses, size) {
 export async function fetchV1(queries, fetchFn) {
   const result = new Map();
   for (const [chain, qs] of groupByChain(queries)) {
+    const chainIds = [MORPHO_CHAIN_IDS[chain]];
     for (const chunk of batch(qs, 5)) {
       const addresses = chunk.map((q) => q.address.toLowerCase());
-      const data = await postGraphql(V1_QUERY, { addresses }, fetchFn);
+      const data = await postGraphql(V1_QUERY, { addresses, chainIds }, fetchFn);
       const parsed = parseV1Items(data.vaults?.items, chunk, chain);
       for (const [addr, vault] of parsed) result.set(`v1:${chain}:${addr}`, vault);
     }
@@ -606,9 +639,10 @@ export async function fetchV1(queries, fetchFn) {
 export async function fetchV2(queries, fetchFn) {
   const result = new Map();
   for (const [chain, qs] of groupByChain(queries)) {
+    const chainIds = [MORPHO_CHAIN_IDS[chain]];
     for (const chunk of batch(qs, 1)) {
       const addresses = chunk.map((q) => q.address.toLowerCase());
-      const data = await postGraphql(V2_QUERY, { addresses }, fetchFn);
+      const data = await postGraphql(V2_QUERY, { addresses, chainIds }, fetchFn);
       const parsed = parseV2Items(data.vaultV2s?.items, chunk, chain);
       for (const [addr, vault] of parsed) result.set(`v2:${chain}:${addr}`, vault);
     }
@@ -698,8 +732,9 @@ async function main() {
     bySlug.get(occ.slug).push(occ);
   }
 
-  let changed = 0;
-  let unchanged = 0;
+  // Phase 1: compute every resulting graph in memory. Any failure here throws
+  // before a single file is touched, so `--write` is all-or-nothing.
+  const results = [];
   for (const { slug, text } of graphs) {
     const occ = bySlug.get(slug);
     if (!occ) continue;
@@ -709,18 +744,28 @@ async function main() {
       allocByKey,
     );
     const next = applySections(text, marketNodes, edges);
-    if (next === text) {
+    results.push({ slug, next, dirty: next !== text, marketNodes, edges });
+  }
+
+  // Phase 2: report, and only after every graph has been computed, write.
+  let changed = 0;
+  let unchanged = 0;
+  for (const r of results) {
+    if (!r.dirty) {
       unchanged++;
-      console.log(`  [unchanged] ${slug} (${marketNodes.length} market nodes, ${edges.length} edges)`);
-      continue;
-    }
-    changed++;
-    if (write) {
-      const file = path.join(GRAPH_DIR, `${slug}.yaml`);
-      fs.writeFileSync(file, next);
-      console.log(`  [written  ] ${slug} (${marketNodes.length} market nodes, ${edges.length} edges)`);
+      console.log(`  [unchanged] ${r.slug} (${r.marketNodes.length} market nodes, ${r.edges.length} edges)`);
+    } else if (write) {
+      changed++;
+      console.log(`  [written  ] ${r.slug} (${r.marketNodes.length} market nodes, ${r.edges.length} edges)`);
     } else {
-      console.log(`  [stale    ] ${slug} (${marketNodes.length} market nodes, ${edges.length} edges)`);
+      changed++;
+      console.log(`  [stale    ] ${r.slug} (${r.marketNodes.length} market nodes, ${r.edges.length} edges)`);
+    }
+  }
+
+  if (write) {
+    for (const r of results) {
+      if (r.dirty) fs.writeFileSync(path.join(GRAPH_DIR, `${r.slug}.yaml`), r.next);
     }
   }
 
