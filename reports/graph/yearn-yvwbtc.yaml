@@ -34,6 +34,8 @@ nodes:
     label: ymv-WBTC (MetaMorpho)
     address: "0x2bB005127069A0F0325Fb7370967E8A2b64FB77E"
     category: strategy
+    morphoVault: v1
+    link: "https://app.morpho.org/ethereum/vault/0x2bB005127069A0F0325Fb7370967E8A2b64FB77E/"
     note: "Immutable MetaMorpho V1_1 ERC-4626 vault. Owner: Security 4-of-7 / Guardian: ySafe 6-of-9 / Curator: 2-of-3 Safe. Fee: 0%, 3-day curator timelock."
 
   # Governance
@@ -81,22 +83,25 @@ nodes:
     label: WBTC (BitGo-custodied)
     address: "0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599"
     category: dependency
-    note: Underlying asset for vault and Morpho Blue loan token
-  - id: morpho-blue
-    label: Morpho Blue
-    address: "0xBBBBBbbBBb9cC5e90e3b3Af64bdAF62C37EEFFCb"
+    note: Underlying asset for vault and Morpho market loan token
+
+# BEGIN GENERATED MORPHO MARKET NODES
+# Managed by scripts/update_morpho_graph_markets.mjs — do not edit.
+  - id: morpho-idle-wbtc
+    label: "Idle WBTC"
     category: dependency
-    note: Immutable lending primitive (v1). Holds 100% of strategy TVL (82% idle market, 18% WBTC/LBTC market).
-  - id: lbtc
-    label: LBTC (Lombard BTC)
-    address: "0x8236a87084f8B84306f72007F36F2618A5634494"
+    note: "Idle WBTC held in Yearn WBTC"
+  - id: morpho-market-f6a056627a51
+    label: "LBTC/WBTC · 94.5% LLTV"
     category: dependency
-    note: Collateral token in active WBTC/LBTC market (94.5% LLTV)
-  - id: cbbtc
-    label: cbBTC (Coinbase BTC)
-    address: "0xcbB7C0000aB88B473b1f5aFd9ef808440eed33Bf"
+    link: "https://app.morpho.org/ethereum/market/0xf6a056627a51e511ec7f48332421432ea6971fc148d8f3c451e14ea108026549/"
+    note: "Morpho market 0xf6a056627a51e511ec7f48332421432ea6971fc148d8f3c451e14ea108026549"
+  - id: morpho-market-39d6cc9211d0
+    label: "cbBTC/WBTC · 94.5% LLTV"
     category: dependency
-    note: Collateral token in queued WBTC/cbBTC market (no current position)
+    link: "https://app.morpho.org/ethereum/market/0x39d6cc9211d023cc16708a2378d821d394d8cfaa3640e3a4d4638d292e10035d/"
+    note: "Morpho market 0x39d6cc9211d023cc16708a2378d821d394d8cfaa3640e3a4d4638d292e10035d"
+# END GENERATED MORPHO MARKET NODES
 
 edges:
   # Deployment / vault infrastructure
@@ -111,25 +116,11 @@ edges:
     to: dumper
     kind: routes-fees-to
 
-  # Capital flow: vault → strategy → Morpho Blue
+  # Capital flow: vault → strategy → Morpho markets
   - from: yvWBTC
     to: ymv-wbtc
     kind: allocates-to
     label: "100%"
-  - from: ymv-wbtc
-    to: morpho-blue
-    kind: deposits-into
-    label: "82% idle / 18% WBTC-LBTC"
-
-  # Morpho Blue dependency chain
-  - from: morpho-blue
-    to: lbtc
-    kind: routes-through
-    label: "collateral (active)"
-  - from: morpho-blue
-    to: cbbtc
-    kind: routes-through
-    label: "collateral (queued)"
 
   # Governance roles on vault
   - from: daddy
@@ -191,3 +182,19 @@ edges:
     to: ymv-wbtc
     kind: holds-role
     label: "curator"
+
+# BEGIN GENERATED MORPHO MARKET EDGES
+# Managed by scripts/update_morpho_graph_markets.mjs — do not edit.
+  - from: ymv-wbtc
+    to: morpho-idle-wbtc
+    kind: deposits-into
+    label: "81.9%"
+  - from: ymv-wbtc
+    to: morpho-market-f6a056627a51
+    kind: deposits-into
+    label: "18.0%"
+  - from: ymv-wbtc
+    to: morpho-market-39d6cc9211d0
+    kind: deposits-into
+    label: "<0.1%"
+# END GENERATED MORPHO MARKET EDGES

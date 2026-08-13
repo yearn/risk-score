@@ -213,6 +213,37 @@ nodes:
     label: Steakhouse infiniFi USDC (MetaMorpho)
     address: "0xBEEF1f5bD88285E5b239B6AACB991D38CCa23aC9"
     category: dependency
+    morphoVault: v1
+    link: "https://app.morpho.org/ethereum/vault/0xBEEF1f5bD88285E5b239B6AACB991D38CCa23aC9/"
+
+  # MetaMorpho vault governance (Waterline owner / Steakhouse curator)
+  - id: dep-steakhouse-owner
+    label: MetaMorpho Owner (5-of-8)
+    address: "0xd6086925EABDA100409Da2adaDFDea08EAB1081A"
+    category: governance
+  - id: dep-steakhouse-curator
+    label: MetaMorpho Curator (2-of-7)
+    address: "0xC5fA35a7DA6798211d4AcD6b1D36F2f3E8c6dBdB"
+    category: governance
+
+# BEGIN GENERATED MORPHO MARKET NODES
+# Managed by scripts/update_morpho_graph_markets.mjs — do not edit.
+  - id: morpho-market-bbf7ce1b40d3
+    label: "siUSD/USDC · 91.5% LLTV"
+    category: dependency
+    link: "https://app.morpho.org/ethereum/market/0xbbf7ce1b40d32d3e3048f5cf27eeaa6de8cb27b80194690aab191a63381d8c99/"
+    note: "Morpho market 0xbbf7ce1b40d32d3e3048f5cf27eeaa6de8cb27b80194690aab191a63381d8c99"
+  - id: morpho-market-6df56abb95e9
+    label: "iUSD/USDC · 91.5% LLTV"
+    category: dependency
+    link: "https://app.morpho.org/ethereum/market/0x6df56abb95e9f3f96049448e1c98d208deb1add8a3d0c7a23e5e5466dba4edbd/"
+    note: "Morpho market 0x6df56abb95e9f3f96049448e1c98d208deb1add8a3d0c7a23e5e5466dba4edbd"
+  - id: morpho-market-a94d7d784ecd
+    label: "PT-siUSD-20AUG2026/USDC · 91.5% LLTV"
+    category: dependency
+    link: "https://app.morpho.org/ethereum/market/0xa94d7d784ecd1194f23f82f6b1c1acbf1d5982bab63362d094710638d2b770dc/"
+    note: "Morpho market 0xa94d7d784ecd1194f23f82f6b1c1acbf1d5982bab63362d094710638d2b770dc"
+# END GENERATED MORPHO MARKET NODES
 
 edges:
   # === Governance ===
@@ -372,3 +403,29 @@ edges:
   - from: farm-steakhouse
     to: dep-steakhouse-vault
     kind: deposits-into
+
+  # MetaMorpho vault governance
+  - from: dep-steakhouse-owner
+    to: dep-steakhouse-vault
+    kind: holds-role
+    label: "owner"
+  - from: dep-steakhouse-curator
+    to: dep-steakhouse-vault
+    kind: holds-role
+    label: "curator"
+
+# BEGIN GENERATED MORPHO MARKET EDGES
+# Managed by scripts/update_morpho_graph_markets.mjs — do not edit.
+  - from: dep-steakhouse-vault
+    to: morpho-market-bbf7ce1b40d3
+    kind: deposits-into
+    label: "99.4%"
+  - from: dep-steakhouse-vault
+    to: morpho-market-6df56abb95e9
+    kind: deposits-into
+    label: "0.5%"
+  - from: dep-steakhouse-vault
+    to: morpho-market-a94d7d784ecd
+    kind: deposits-into
+    label: "<0.1%"
+# END GENERATED MORPHO MARKET EDGES

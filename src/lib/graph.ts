@@ -19,6 +19,14 @@ export interface GraphNode {
   category: string;
   link?: string;
   note?: string;
+  /**
+   * Marks this node as a Morpho vault whose per-market allocations are
+   * expanded by `scripts/update_morpho_graph_markets.mjs`. The value records
+   * the vault contract's generation (`v1` = Morpho Vault / MetaMorpho,
+   * `v2` = Morpho Vault V2), which is immutable at a given address. Only
+   * explicitly tagged nodes are probed — never detected from labels or IDs.
+   */
+  morphoVault?: "v1" | "v2";
   /** Set at build time by expandCrossLinks; never present in YAML. */
   _inlinedFromSlug?: string;
 }
@@ -101,6 +109,26 @@ function validate(slug: string, raw: unknown): Graph {
     if (!catIds.has(n.category))
       throw new Error(
         `[graph:${slug}] node '${n.id}' has unknown category '${n.category}'`,
+      );
+    if (
+      n.morphoVault !== undefined &&
+      n.morphoVault !== "v1" &&
+      n.morphoVault !== "v2"
+    )
+      throw new Error(
+        `[graph:${slug}] node '${n.id}' has invalid morphoVault '${n.morphoVault}' (expected "v1" or "v2")`,
+      );
+    if (n.morphoVault !== undefined && !n.address)
+      throw new Error(
+        `[graph:${slug}] node '${n.id}' is tagged morphoVault but has no address`,
+      );
+    if (n.morphoVault !== undefined && n.id.startsWith("morpho-market-"))
+      throw new Error(
+        `[graph:${slug}] generated Morpho market node '${n.id}' must not carry morphoVault`,
+      );
+    if (n.link !== undefined && !/^https:\/\//.test(n.link))
+      throw new Error(
+        `[graph:${slug}] node '${n.id}' has a non-https link '${n.link}'`,
       );
   }
   for (const e of g.edges) {
