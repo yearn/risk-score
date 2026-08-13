@@ -95,6 +95,7 @@ nodes:
     address: "0x68Aea7b82Df6CcdF76235D46445Ed83f85F845A3"
     category: dependency
     morphoVault: v1
+    link: "https://app.morpho.org/ethereum/vault/0x68Aea7b82Df6CcdF76235D46445Ed83f85F845A3/"
 
   # External dependencies (Sky conversion infrastructure)
   - id: psm-lite

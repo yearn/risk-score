@@ -35,6 +35,7 @@ nodes:
     address: "0x2bB005127069A0F0325Fb7370967E8A2b64FB77E"
     category: strategy
     morphoVault: v1
+    link: "https://app.morpho.org/ethereum/vault/0x2bB005127069A0F0325Fb7370967E8A2b64FB77E/"
     note: "Immutable MetaMorpho V1_1 ERC-4626 vault. Owner: Security 4-of-7 / Guardian: ySafe 6-of-9 / Curator: 2-of-3 Safe. Fee: 0%, 3-day curator timelock."
 
   # Governance

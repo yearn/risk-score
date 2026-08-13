@@ -79,6 +79,7 @@ nodes:
     address: "0x0963232eB842BAF53E8e517691f81745C1F228a0"
     category: strategy
     morphoVault: v1
+    link: "https://app.morpho.org/ethereum/vault/0x0963232eB842BAF53E8e517691f81745C1F228a0/"
 
   # External dependencies
   - id: spark-lend-usdt

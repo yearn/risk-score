@@ -88,6 +88,7 @@ nodes:
     address: "0xE89371eAaAC6D46d4C3ED23453241987916224FC"
     category: strategy
     morphoVault: v1
+    link: "https://app.morpho.org/ethereum/vault/0xE89371eAaAC6D46d4C3ED23453241987916224FC/"
     note: Morpho MetaMorpho vault — confirmed via MORPHO() returning 0xBBBBBbbBBb9cC5e90e3b3Af64bdAF62C37EEFFCb
 
   # External dependencies

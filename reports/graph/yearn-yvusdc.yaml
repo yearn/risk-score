@@ -75,6 +75,7 @@ nodes:
     address: "0x68Aea7b82Df6CcdF76235D46445Ed83f85F845A3"
     category: strategy
     morphoVault: v1
+    link: "https://app.morpho.org/ethereum/vault/0x68Aea7b82Df6CcdF76235D46445Ed83f85F845A3/"
   - id: pawn-broker
     label: stcUSD/USDC Pawn Broker (14.9%, not in queue, self-contained)
     address: "0xe63a2abc24cd9538398d825a4bfe5778d25687df"

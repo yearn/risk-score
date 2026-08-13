@@ -89,6 +89,7 @@ nodes:
     address: "0x9a1D6bd5b8642C41F25e0958129B85f8E1176F3e"
     category: dependency
     morphoVault: v2
+    link: "https://app.morpho.org/ethereum/vault/0x9a1D6bd5b8642C41F25e0958129B85f8E1176F3e/"
     note: Ethereum-mainnet same-chain allocation; riskier assets (sUSDD, PRIME)
   - id: gauntlet-vault-owner
     label: Gauntlet Vault Owner (4-of-7)
@@ -244,11 +245,11 @@ edges:
   - from: gauntlet-frontier
     to: morpho-market-e83d72fa5b00
     kind: deposits-into
-    label: "71.5%"
+    label: "72.0%"
   - from: gauntlet-frontier
     to: morpho-market-f02d2e8f427a
     kind: deposits-into
-    label: "27.9%"
+    label: "27.5%"
   - from: gauntlet-frontier
     to: morpho-market-755f954513d3
     kind: deposits-into

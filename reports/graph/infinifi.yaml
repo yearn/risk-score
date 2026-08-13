@@ -214,6 +214,7 @@ nodes:
     address: "0xBEEF1f5bD88285E5b239B6AACB991D38CCa23aC9"
     category: dependency
     morphoVault: v1
+    link: "https://app.morpho.org/ethereum/vault/0xBEEF1f5bD88285E5b239B6AACB991D38CCa23aC9/"
 
   # MetaMorpho vault governance (Waterline owner / Steakhouse curator)
   - id: dep-steakhouse-owner

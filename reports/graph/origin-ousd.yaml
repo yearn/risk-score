@@ -108,6 +108,7 @@ nodes:
     label: MetaMorpho Vault mOUSD-V2
     address: "0xFB154c729A16802c4ad1E8f7FF539a8b9f49c960"
     category: dependency
+    link: "https://app.morpho.org/ethereum/vault/0xFB154c729A16802c4ad1E8f7FF539a8b9f49c960/"
     note: Largest single dependency; nested MetaMorpho adapter (not expandable)
   - id: security
     label: Security (4-of-7)

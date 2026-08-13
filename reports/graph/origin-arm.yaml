@@ -78,6 +78,7 @@ nodes:
     address: "0x3Dfe70B05657949A5dB340754aD664810ac63b21"
     category: dependency
     morphoVault: v1
+    link: "https://app.morpho.org/ethereum/vault/0x3Dfe70B05657949A5dB340754aD664810ac63b21/"
     note: MetaMorpho v1.1; idle WETH lending
 
   # MetaMorpho vault governance — Yearn Security + Curator
@@ -99,11 +100,6 @@ nodes:
 
 # BEGIN GENERATED MORPHO MARKET NODES
 # Managed by scripts/update_morpho_graph_markets.mjs — do not edit.
-  - id: morpho-market-37e7484d642d
-    label: "weETH/WETH · 94.5% LLTV"
-    category: dependency
-    link: "https://app.morpho.org/ethereum/market/0x37e7484d642d90f14451f1910ba4b7b8e4c3ccdd0ec28f8b2bdb35479e472ba7/"
-    note: "Morpho market 0x37e7484d642d90f14451f1910ba4b7b8e4c3ccdd0ec28f8b2bdb35479e472ba7 used by WETH ARM Vault"
   - id: morpho-market-b8fc70e82bc5
     label: "wstETH/WETH · 96.5% LLTV"
     category: dependency
@@ -192,15 +188,11 @@ edges:
 # BEGIN GENERATED MORPHO MARKET EDGES
 # Managed by scripts/update_morpho_graph_markets.mjs — do not edit.
   - from: morpho-vault
-    to: morpho-market-37e7484d642d
-    kind: deposits-into
-    label: "42.1%"
-  - from: morpho-vault
     to: morpho-market-b8fc70e82bc5
     kind: deposits-into
-    label: "41.5%"
+    label: "60.5%"
   - from: morpho-vault
     to: morpho-market-d0e50cdac92f
     kind: deposits-into
-    label: "16.3%"
+    label: "39.4%"
 # END GENERATED MORPHO MARKET EDGES
