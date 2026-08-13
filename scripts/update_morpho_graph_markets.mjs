@@ -165,9 +165,6 @@ export function marketNodeId(marketId, usedIds) {
 export function buildAllocations(vault, usedIds) {
   const { totalAssets, assetSymbol, name } = vault;
   const items = [];
-  // Markets that share a collateral/loan pair and LLTV would render identical
-  // cards; track the base label and append a shortened market id on collision.
-  const usedLabels = new Set();
 
   for (const alloc of vault.allocations ?? []) {
     // Include every allocation with positive supplied assets — even when the
@@ -196,19 +193,13 @@ export function buildAllocations(vault, usedIds) {
 
     const pair = `${alloc.collateralSymbol}/${alloc.loanSymbol}`;
     const lltv = formatLltv(alloc.lltv);
-    const base = `${pair} · ${lltv} LLTV`;
-    let display = base;
-    if (usedLabels.has(base)) {
-      const short = String(alloc.marketId).replace(/^0x/, "").slice(0, 12);
-      display = `${base} · 0x${short}`;
-    }
-    usedLabels.add(base);
+    const display = `${pair} · ${lltv} LLTV`;
 
     items.push({
       id: marketNodeId(alloc.marketId, usedIds),
       marketId: alloc.marketId,
       label: display,
-      note: `Morpho market ${alloc.marketId} used by ${name}`,
+      note: `Morpho market ${alloc.marketId}`,
       link: morphoMarketUrl(vault.chain, alloc.marketId),
       pct: label,
       supplyAssets: alloc.supplyAssets,

@@ -232,17 +232,17 @@ nodes:
     label: "siUSD/USDC · 91.5% LLTV"
     category: dependency
     link: "https://app.morpho.org/ethereum/market/0xbbf7ce1b40d32d3e3048f5cf27eeaa6de8cb27b80194690aab191a63381d8c99/"
-    note: "Morpho market 0xbbf7ce1b40d32d3e3048f5cf27eeaa6de8cb27b80194690aab191a63381d8c99 used by Waterline infiniFi USDC"
+    note: "Morpho market 0xbbf7ce1b40d32d3e3048f5cf27eeaa6de8cb27b80194690aab191a63381d8c99"
   - id: morpho-market-6df56abb95e9
     label: "iUSD/USDC · 91.5% LLTV"
     category: dependency
     link: "https://app.morpho.org/ethereum/market/0x6df56abb95e9f3f96049448e1c98d208deb1add8a3d0c7a23e5e5466dba4edbd/"
-    note: "Morpho market 0x6df56abb95e9f3f96049448e1c98d208deb1add8a3d0c7a23e5e5466dba4edbd used by Waterline infiniFi USDC"
+    note: "Morpho market 0x6df56abb95e9f3f96049448e1c98d208deb1add8a3d0c7a23e5e5466dba4edbd"
   - id: morpho-market-a94d7d784ecd
     label: "PT-siUSD-20AUG2026/USDC · 91.5% LLTV"
     category: dependency
     link: "https://app.morpho.org/ethereum/market/0xa94d7d784ecd1194f23f82f6b1c1acbf1d5982bab63362d094710638d2b770dc/"
-    note: "Morpho market 0xa94d7d784ecd1194f23f82f6b1c1acbf1d5982bab63362d094710638d2b770dc used by Waterline infiniFi USDC"
+    note: "Morpho market 0xa94d7d784ecd1194f23f82f6b1c1acbf1d5982bab63362d094710638d2b770dc"
 # END GENERATED MORPHO MARKET NODES
 
 edges:

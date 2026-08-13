@@ -118,42 +118,42 @@ nodes:
     label: "cbBTC/USDC · 86% LLTV"
     category: dependency
     link: "https://app.morpho.org/ethereum/market/0x64d65c9a2d91c36d56fbc42d69e979335320169b3df63bf92789e2c8883fcc64/"
-    note: "Morpho market 0x64d65c9a2d91c36d56fbc42d69e979335320169b3df63bf92789e2c8883fcc64 used by Steakhouse Prime USDC"
+    note: "Morpho market 0x64d65c9a2d91c36d56fbc42d69e979335320169b3df63bf92789e2c8883fcc64"
   - id: morpho-market-34377fc4f617
     label: "weETH/USDC · 77% LLTV"
     category: dependency
     link: "https://app.morpho.org/ethereum/market/0x34377fc4f617c51818e92c79df31ff270c6a91bc94ad32e367fdf59b9f4ac5dd/"
-    note: "Morpho market 0x34377fc4f617c51818e92c79df31ff270c6a91bc94ad32e367fdf59b9f4ac5dd used by Steakhouse Prime USDC"
+    note: "Morpho market 0x34377fc4f617c51818e92c79df31ff270c6a91bc94ad32e367fdf59b9f4ac5dd"
   - id: morpho-market-3a85e6197511
-    label: "WBTC/USDC · 86% LLTV · 0x3a85e6197511"
+    label: "WBTC/USDC · 86% LLTV"
     category: dependency
     link: "https://app.morpho.org/ethereum/market/0x3a85e619751152991742810df6ec69ce473daef99e28a64ab2340d7b7ccfee49/"
-    note: "Morpho market 0x3a85e619751152991742810df6ec69ce473daef99e28a64ab2340d7b7ccfee49 used by Steakhouse Prime USDC"
+    note: "Morpho market 0x3a85e619751152991742810df6ec69ce473daef99e28a64ab2340d7b7ccfee49"
   - id: morpho-market-94b823e6bd8e
     label: "WETH/USDC · 86% LLTV"
     category: dependency
     link: "https://app.morpho.org/ethereum/market/0x94b823e6bd8ea533b4e33fbc307faea0b307301bc48763acc4d4aa4def7636cd/"
-    note: "Morpho market 0x94b823e6bd8ea533b4e33fbc307faea0b307301bc48763acc4d4aa4def7636cd used by Steakhouse Prime USDC"
+    note: "Morpho market 0x94b823e6bd8ea533b4e33fbc307faea0b307301bc48763acc4d4aa4def7636cd"
   - id: morpho-market-7e585a933ffe
-    label: "wstETH/USDC · 86% LLTV · 0x7e585a933ffe"
+    label: "wstETH/USDC · 86% LLTV"
     category: dependency
     link: "https://app.morpho.org/ethereum/market/0x7e585a933ffe8443c371b4f8cfeb4430f5f6a14c2f32a898c26662c67a1cb8b8/"
-    note: "Morpho market 0x7e585a933ffe8443c371b4f8cfeb4430f5f6a14c2f32a898c26662c67a1cb8b8 used by Steakhouse Prime USDC"
+    note: "Morpho market 0x7e585a933ffe8443c371b4f8cfeb4430f5f6a14c2f32a898c26662c67a1cb8b8"
   - id: morpho-market-b323495f7e41
     label: "wstETH/USDC · 86% LLTV"
     category: dependency
     link: "https://app.morpho.org/ethereum/market/0xb323495f7e4148be5643a4ea4a8221eef163e4bccfdedc2a6f4696baacbc86cc/"
-    note: "Morpho market 0xb323495f7e4148be5643a4ea4a8221eef163e4bccfdedc2a6f4696baacbc86cc used by Steakhouse Prime USDC"
+    note: "Morpho market 0xb323495f7e4148be5643a4ea4a8221eef163e4bccfdedc2a6f4696baacbc86cc"
   - id: morpho-market-bc99de6a8890
-    label: "cbBTC/USDC · 86% LLTV · 0xbc99de6a8890"
+    label: "cbBTC/USDC · 86% LLTV"
     category: dependency
     link: "https://app.morpho.org/ethereum/market/0xbc99de6a88904cd0e69042ad6f266e63182801f030c636507c3caf590ffd84fe/"
-    note: "Morpho market 0xbc99de6a88904cd0e69042ad6f266e63182801f030c636507c3caf590ffd84fe used by Steakhouse Prime USDC"
+    note: "Morpho market 0xbc99de6a88904cd0e69042ad6f266e63182801f030c636507c3caf590ffd84fe"
   - id: morpho-market-09dc9e7eb5d8
     label: "WBTC/USDC · 86% LLTV"
     category: dependency
     link: "https://app.morpho.org/ethereum/market/0x09dc9e7eb5d8fc54b2bc41d1135fd4e99057a580f680321faeb90c7a21e631c1/"
-    note: "Morpho market 0x09dc9e7eb5d8fc54b2bc41d1135fd4e99057a580f680321faeb90c7a21e631c1 used by Steakhouse Prime USDC"
+    note: "Morpho market 0x09dc9e7eb5d8fc54b2bc41d1135fd4e99057a580f680321faeb90c7a21e631c1"
 # END GENERATED MORPHO MARKET NODES
 
 edges:

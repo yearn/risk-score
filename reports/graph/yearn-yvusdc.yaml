@@ -128,17 +128,17 @@ nodes:
     label: "cbBTC/USDC · 86% LLTV"
     category: dependency
     link: "https://app.morpho.org/ethereum/market/0x64d65c9a2d91c36d56fbc42d69e979335320169b3df63bf92789e2c8883fcc64/"
-    note: "Morpho market 0x64d65c9a2d91c36d56fbc42d69e979335320169b3df63bf92789e2c8883fcc64 used by Yearn USDC"
+    note: "Morpho market 0x64d65c9a2d91c36d56fbc42d69e979335320169b3df63bf92789e2c8883fcc64"
   - id: morpho-market-3a85e6197511
     label: "WBTC/USDC · 86% LLTV"
     category: dependency
     link: "https://app.morpho.org/ethereum/market/0x3a85e619751152991742810df6ec69ce473daef99e28a64ab2340d7b7ccfee49/"
-    note: "Morpho market 0x3a85e619751152991742810df6ec69ce473daef99e28a64ab2340d7b7ccfee49 used by Yearn USDC"
+    note: "Morpho market 0x3a85e619751152991742810df6ec69ce473daef99e28a64ab2340d7b7ccfee49"
   - id: morpho-market-b323495f7e41
     label: "wstETH/USDC · 86% LLTV"
     category: dependency
     link: "https://app.morpho.org/ethereum/market/0xb323495f7e4148be5643a4ea4a8221eef163e4bccfdedc2a6f4696baacbc86cc/"
-    note: "Morpho market 0xb323495f7e4148be5643a4ea4a8221eef163e4bccfdedc2a6f4696baacbc86cc used by Yearn USDC"
+    note: "Morpho market 0xb323495f7e4148be5643a4ea4a8221eef163e4bccfdedc2a6f4696baacbc86cc"
 # END GENERATED MORPHO MARKET NODES
 
 edges:
