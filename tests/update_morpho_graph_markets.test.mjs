@@ -222,7 +222,7 @@ test("same pair with different LLTVs produces distinct labels", () => {
   assert.equal(items[1].label, "wstETH/WETH · 96.5% LLTV");
 });
 
-test("same pair and LLTV appends a shortened market id", () => {
+test("same pair and LLTV keeps a simple label (no market-id suffix)", () => {
   const v = vaultData({
     totalAssets: 1000n,
     allocations: [
@@ -232,8 +232,11 @@ test("same pair and LLTV appends a shortened market id", () => {
   });
   const items = buildAllocations(v, new Set());
   assert.equal(items.length, 2);
+  // Labels stay name + LLTV only; the full market id remains in `note`/`link`.
   assert.equal(items[0].label, "cbBTC/USDC · 86% LLTV");
-  assert.equal(items[1].label, "cbBTC/USDC · 86% LLTV · 0xbc99de6a8890");
+  assert.equal(items[1].label, "cbBTC/USDC · 86% LLTV");
+  assert.ok(items[0].note.includes("0x64d65c9a2d91c36d56fbc42d69e979335320169b3df63bf92789e2c8883fcc64"));
+  assert.ok(items[1].note.includes("0xbc99de6a88904cd0e69042ad6f266e63182801f030c636507c3caf590ffd84fe"));
 });
 
 test("positive idle assets become a synthetic Idle node", () => {

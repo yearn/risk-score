@@ -162,7 +162,6 @@ export function marketNodeId(marketId, usedIds) {
 export function buildAllocations(vault, usedIds) {
   const { totalAssets, assetSymbol, name } = vault;
   const items = [];
-  const usedLabels = new Set();
 
   for (const alloc of vault.allocations ?? []) {
     // Include every allocation with positive supplied assets — even when the
@@ -191,13 +190,7 @@ export function buildAllocations(vault, usedIds) {
 
     const pair = `${alloc.collateralSymbol}/${alloc.loanSymbol}`;
     const lltv = formatLltv(alloc.lltv);
-    const base = `${pair} · ${lltv} LLTV`;
-    let display = base;
-    if (usedLabels.has(base)) {
-      const short = String(alloc.marketId).replace(/^0x/, "").slice(0, 12);
-      display = `${base} · 0x${short}`;
-    }
-    usedLabels.add(base);
+    const display = `${pair} · ${lltv} LLTV`;
 
     items.push({
       id: marketNodeId(alloc.marketId, usedIds),
