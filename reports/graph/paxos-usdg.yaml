@@ -27,20 +27,44 @@ nodes:
     category: infra
     note: UUPS Proxy; rate-limited mint controller registry
   - id: sc1
-    label: Supply Controller 1 (500M cap)
+    label: Supply Controller 1 (500M/hr cap)
     address: "0xf845a0A05Cbd91Ac15C3E59D126DE5dFbC2aAbb7"
     category: infra
-    note: EOA; ~138,888 USDG/sec refill
+    note: >-
+      EOA; 500M cap refilling over 1h. allowAnyMintAndBurnAddress = false —
+      can only mint to the issuance treasury 0x264b…97B5 and can only burn
+      its own balance.
   - id: sc2
-    label: Supply Controller 2 (1B cap)
+    label: Supply Controller 2 (1B/hr cap)
     address: "0x2fb074FA59c9294c71246825C1c9A0c7782d41a4"
     category: infra
-    note: EOA; ~277,778 USDG/sec refill
+    note: >-
+      EOA; 1B cap refilling over 1h. allowAnyMintAndBurnAddress = false —
+      can only mint to itself and can only burn its own balance.
   - id: oft-wrapper
     label: OFTWrapper (LayerZero V2)
     address: "0x147BdE4F997f0d4C7544ED0C55eAcf1E5E6bf9c4"
     category: infra
-    note: SC3; 45M cap; whitelist only
+    note: >-
+      SC3; 200M USDG per 24h (raised from 45M between Mar and Jun 2026);
+      allowAnyMintAndBurnAddress = true. owner() and LayerZero delegate are
+      the Operations MPC wallet, with no timelock.
+  - id: facets
+    label: Token Facets (5 contracts, 118 selectors)
+    address: "0x77fe0365db15a1ec05833b7c1802d68356a363df"
+    category: infra
+    note: >-
+      PayoutGroup / MultiplierMgmt / TokenExtensions / TokenAdmin /
+      ClaimableRewards. Live since Feb 28 2026; routed via setFacet under
+      DEFAULT_ADMIN (24h timelock). Address shown is PayoutGroupFacet.
+  - id: rewards-eoas
+    label: Rewards Hot Wallets (3 EOAs)
+    address: "0x55f78e37adb9d1f6931c1da7314b374558ae9684"
+    category: governance
+    note: >-
+      MULT_RATE, PAYOUT_GROUP_REGISTRAR, CLAIM_OPERATOR. Single keys, no
+      timelock. Cannot mint or seize principal. Address shown is the
+      registrar; others are 0x4e43…eef8 and 0x5fd9…2e38.
 
   # === Governance ===
   - id: token-timelock
@@ -64,10 +88,12 @@ nodes:
     category: governance
     note: MPC wallet (key sharded); PAUSE + ASSET_PROTECTION on token; PROPOSER+EXECUTOR+CANCELLER on Timelock; SUPPLY_CONTROLLER_MANAGER on SupplyControl
   - id: gas-station
-    label: MPC Gas Station
+    label: Issuance Treasury / MPC Gas Station
     address: "0x264bd8291fae1d75db2c5f573b07faa6715997b5"
     category: infra
-    note: Nonce 5.6M+; funds MPC wallet just-in-time; services 62+ EOAs
+    note: >-
+      SC1's only permitted mint destination (11.6M USDG held). Also the MPC
+      gas funder — nonce 5.6M+, just-in-time ETH, services 62+ EOAs.
 
   # === External dependencies ===
   - id: dep-paxos-custody
@@ -77,7 +103,11 @@ nodes:
   - id: dep-layerzero
     label: LayerZero V2 OFT
     category: dependency
-    note: OFTWrapper peers (onchain) — Solana / X Layer / Ink / Arbitrum / Robinhood Chain; 3-of-3 DVN quorum
+    note: >-
+      OFTWrapper peers (onchain) — Solana / X Layer / Ink / Arbitrum /
+      Robinhood Chain; 3-of-3 DVN quorum (LayerZero Labs, Canary, Paxos —
+      only two independent of the issuer). Quorum is mutable by the wrapper
+      owner with no timelock.
 
 edges:
   # === Governance flow ===
@@ -105,20 +135,40 @@ edges:
     to: ops-mpc
     kind: routes-through
     label: funds MPC wallet (just-in-time gas)
+  - from: ops-mpc
+    to: oft-wrapper
+    kind: controls
+    label: owner + LZ delegate (NO timelock)
+  - from: token-timelock
+    to: facets
+    kind: controls
+    label: setFacet via DEFAULT_ADMIN (24h delay)
+  - from: facets
+    to: usdg
+    kind: routes-through
+    label: 118 selectors (rewards + admin + permits)
+  - from: ops-mpc
+    to: usdg
+    kind: holds-role
+    label: MULT_ADMIN + PAYOUT_GROUP_ADMIN + CLAIM_ADMIN (rewards)
+  - from: rewards-eoas
+    to: usdg
+    kind: holds-role
+    label: MULT_RATE + REGISTRAR + CLAIM_OPERATOR (EOAs, no timelock)
 
   # === Mint authority on USDG ===
   - from: sc1
     to: usdg
     kind: mints
-    label: SUPPLY_CONTROLLER (500M cap)
+    label: SUPPLY_CONTROLLER (500M/hr, whitelisted dest)
   - from: sc2
     to: usdg
     kind: mints
-    label: SUPPLY_CONTROLLER (1B cap)
+    label: SUPPLY_CONTROLLER (1B/hr, whitelisted dest)
   - from: oft-wrapper
     to: usdg
     kind: mints
-    label: SUPPLY_CONTROLLER (45M; bridge)
+    label: SUPPLY_CONTROLLER (200M/24h; bridge; any dest)
 
   # === Supply controller registry ===
   - from: supply-control

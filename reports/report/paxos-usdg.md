@@ -1,10 +1,10 @@
 # Protocol Risk Assessment: Paxos USDG (Global Dollar)
 
-- **Assessment Date:** March 20, 2026 (Updated: July 30, 2026)
+- **Assessment Date:** March 20, 2026 (Updated: August 15, 2026)
 - **Token:** USDG (Global Dollar)
 - **Chain:** Ethereum
 - **Token Address:** [`0xe343167631d89B6Ffc58B88d6b7fB0228795491D`](https://etherscan.io/address/0xe343167631d89B6Ffc58B88d6b7fB0228795491D)
-- **Final Score: 2.4/5.0**
+- **Final Score: 2.2/5.0**
 
 ## Overview + Links
 
@@ -14,17 +14,20 @@ USDG's differentiating feature is its **distribution partner model** — ecosyst
 
 Reserves consist of **cash and cash equivalents** (primarily short-duration U.S. Treasury Bills) held in **segregated accounts** at regulated custodians, with **monthly attestation reports** from independent accounting firms published on the Paxos transparency portal.
 
-USDG has material supply on **6 chains**: X Layer (57.3% of supply), Solana (19.3%), Ethereum (12.6%), Robinhood Chain (9.5%), Ink (1.2%), and Hyperliquid L1 (<0.1%). A seventh deployment on **Arbitrum** is live but negligible (~601,207 USDG). Cross-chain bridging is handled via **LayerZero V2 OFT** — the mainnet `OFTWrapper` has configured peers for Solana, X Layer, Ink, Arbitrum, and Robinhood Chain (verified onchain, see [Multi-Chain Deployments](#multi-chain-deployments)). The Hyperliquid L1 balance is a separate `USDG0` HIP-1 spot token that is **not** a peer of the Paxos wrapper.
+USDG has material supply on **6 chains**: X Layer (56.6% of supply), Solana (18.3%), Ethereum (12.9%), Robinhood Chain (10.3%), Ink (1.8%), and Hyperliquid L1 (<0.1%). A seventh deployment on **Arbitrum** is live but negligible (~601,207 USDG). Cross-chain bridging is handled via **LayerZero V2 OFT** — the mainnet `OFTWrapper` has configured peers for Solana, X Layer, Ink, Arbitrum, and Robinhood Chain (verified onchain, see [Multi-Chain Deployments](#multi-chain-deployments)). The Hyperliquid L1 balance is a separate `USDG0` HIP-1 spot token that is **not** a peer of the Paxos wrapper.
 
-**Key metrics (July 30, 2026):**
+In February 2026 Paxos shipped a **V3 upgrade** that added an onchain claimable-rewards system to the token via five diamond-style facets. This is live and material: **28 payout groups** with ~358.5M USDG of registered balance (~80% of Ethereum supply) are configured today. See [Claimable Rewards System (V3)](#claimable-rewards-system-v3).
 
-- **Total Supply (Ethereum):** ~452,279,600 USDG (~$452M) [onchain](https://etherscan.io/token/0xe343167631d89B6Ffc58B88d6b7fB0228795491D). In its same-day snapshot, DeFiLlama reports 456.4M USDG *minted* and 415.2M *circulating on Ethereum*; the ~41.2M reduction is supply bridged out to Ink and Hyperliquid
-- **Total Supply (All Chains):** ~$3.29B [DeFiLlama](https://stablecoins.llama.fi/stablecoin/286)
-- **Market Cap:** ~$3.29B
-- **30-Day Supply Change:** +433.7M USDG (+15.2%) — from 2,851.6M USDG (June 30) to 3,285.3M USDG (July 30), using DeFiLlama's `totalCirculating.peggedUSD` series [DeFiLlama](https://stablecoins.llama.fi/stablecoincharts/all?stablecoin=286)
-- **DEX Liquidity (Ethereum):** ~$24.2M across 9 pools, ~$20.5M of it the Curve USDG/USDC pool [DeFiLlama](https://yields.llama.fi/pools)
-- **CEX Listings:** OKX, Kraken, Bullish, KuCoin, Gate.io
-- **Price:** $0.99995 (at peg) [DeFiLlama](https://stablecoins.llama.fi/stablecoin/286)
+**Key metrics (August 15, 2026):**
+
+- **Total Supply (Ethereum):** 448,595,698.67 USDG [onchain](https://etherscan.io/token/0xe343167631d89B6Ffc58B88d6b7fB0228795491D). DeFiLlama's same-day snapshot reports 451.8M *minted* and 387.3M *circulating on Ethereum*; the ~64.5M reduction is DeFiLlama subtracting the Ink (62.7M) and Hyperliquid (1.8M) balances as "bridged from Ethereum"
+- **Total Supply (All Chains):** **$3.468B** — sum of `totalSupply()` read directly on all six EVM/Solana deployments (see [Multi-Chain Deployments](#multi-chain-deployments)). This matches [CoinGecko](https://www.coingecko.com/en/coins/global-dollar) market cap ($3,467,403,004) to within 0.01%. [DeFiLlama](https://stablecoins.llama.fi/stablecoin/286) reports $3.405B because of the bridged-supply subtraction described above
+- **Market Cap:** ~$3.47B
+- **30-Day Supply Change:** +521.3M USDG (+18.1%) — from 2,883.3M USDG (July 16) to 3,404.5M USDG (August 15) on DeFiLlama's `totalCirculating.peggedUSD` series [DeFiLlama](https://stablecoins.llama.fi/stablecoincharts/all?stablecoin=286). The series is not monotonic: it peaked at 3,228.0M on May 15, fell to 2,889.7M by July 15, then recovered
+- **DEX Liquidity (Ethereum):** ~$34.3M across 8 pools, $30.5M of it the Curve USDG/USDC pool [DeFiLlama](https://yields.llama.fi/pools)
+- **24h Volume (all venues):** $194.6M [CoinGecko](https://www.coingecko.com/en/coins/global-dollar) — dominated by Robinhood Chain DEXes ($130.7M); CEX venues account for ~$11.3M
+- **CEX Listings:** OKX, Bullish, Biconomy, Kraken, Gate (KuCoin no longer shows a USDG ticker on CoinGecko)
+- **Price:** $0.999877. Over the trailing 365 days the daily close never went below **$0.99943** and never traded under $0.995 [CoinGecko](https://www.coingecko.com/en/coins/global-dollar)
 
 **Links:**
 
@@ -49,6 +52,20 @@ USDG has material supply on **6 chains**: X Layer (57.3% of supply), Solana (19.
 | Supply Control (Proxy) | [`0x9a7164112029b81c07636AB7b59fA813E0883BBF`](https://etherscan.io/address/0x9a7164112029b81c07636AB7b59fA813E0883BBF) | ERC1967 / UUPS Proxy |
 | Supply Control Implementation | [`0x9e12c058a20c5b0eebaa00e44a712ec54b838971`](https://etherscan.io/address/0x9e12c058a20c5b0eebaa00e44a712ec54b838971) | SupplyControl (Solidity 0.8.17) |
 
+All four are **source-verified on Etherscan** (checked via `getsourcecode`), so the unverified-source critical gate does not trigger.
+
+### Token Facets (live since February 28, 2026)
+
+The USDG proxy routes 118 function selectors to five external facet contracts via `setFacet` / `getFacet`. Facet addresses were enumerated from the complete `FacetUpdate(bytes4,address)` log history on the token (476 events, two deployment batches). All five are source-verified, Solidity 0.8.28.
+
+| Facet | Address | Purpose |
+|-------|---------|---------|
+| PayoutGroupFacet | [`0x77fe0365db15a1ec05833b7c1802d68356a363df`](https://etherscan.io/address/0x77fe0365db15a1ec05833b7c1802d68356a363df) | Payout-group lifecycle, address registration, group config |
+| MultiplierMgmtFacet | [`0x018a090fb8d50376bf8464922ffda935a1fe2859`](https://etherscan.io/address/0x018a090fb8d50376bf8464922ffda935a1fe2859) | Reward multiplier (APR) creation and scheduled rate changes |
+| TokenExtensionsFacet | [`0x7569ae2be6ac51ed7f92f8167090b52615f86497`](https://etherscan.io/address/0x7569ae2be6ac51ed7f92f8167090b52615f86497) | EIP-2612/3009/1271 permit handling, `cancelPermits` |
+| TokenAdminFacet | [`0xe90c0e2fecd06c5875b50f6b13f3b8dbdb4ce946`](https://etherscan.io/address/0xe90c0e2fecd06c5875b50f6b13f3b8dbdb4ce946) | Admin surface (claim source, rate bounds, role plumbing) |
+| ClaimableRewardsFacet | [`0x2fe2faef627a56e811e09b4e1b810b59f38f3a81`](https://etherscan.io/address/0x2fe2faef627a56e811e09b4e1b810b59f38f3a81) | `claimAll`, `claimForAddresses`, and the `…To(destination)` admin variants |
+
 ### Governance Contracts
 
 | Contract | Address | Type |
@@ -60,34 +77,46 @@ USDG has material supply on **6 chains**: X Layer (57.3% of supply), Solana (19.
 
 ### Supply Controllers
 
-| # | Address | Type | Mint Limit Capacity | Refill Rate | Allow Any Address |
-|---|---------|------|--------------------:|-------------|-------------------|
-| SC1 | [`0xf845a0A05Cbd91Ac15C3E59D126DE5dFbC2aAbb7`](https://etherscan.io/address/0xf845a0A05Cbd91Ac15C3E59D126DE5dFbC2aAbb7) | EOA | 500,000,000 USDG | ~138,888 USDG/sec | Yes |
-| SC2 | [`0x2fb074FA59c9294c71246825C1c9A0c7782d41a4`](https://etherscan.io/address/0x2fb074FA59c9294c71246825C1c9A0c7782d41a4) | EOA | 1,000,000,000 USDG | ~277,778 USDG/sec | Yes |
-| SC3 | [`0x147BdE4F997f0d4C7544ED0C55eAcf1E5E6bf9c4`](https://etherscan.io/address/0x147BdE4F997f0d4C7544ED0C55eAcf1E5E6bf9c4) | OFTWrapper (LayerZero bridge) | 45,000,000 USDG | ~521 USDG/sec | No (whitelist) |
+Read from `SupplyControl.getAllSupplyControllerAddresses()` and `getSupplyControllerConfig(address)` on [`0x9a71…3BBF`](https://etherscan.io/address/0x9a7164112029b81c07636AB7b59fA813E0883BBF) (August 15, 2026). Exactly three controllers are registered.
+
+| # | Address | Type | Mint Limit Capacity | Refill Rate | Refill Window | Allow Any Address | Mint Destination Whitelist |
+|---|---------|------|--------------------:|-------------|---------------|-------------------|----------------------------|
+| SC1 | [`0xf845a0A05Cbd91Ac15C3E59D126DE5dFbC2aAbb7`](https://etherscan.io/address/0xf845a0A05Cbd91Ac15C3E59D126DE5dFbC2aAbb7) | EOA | 500,000,000 USDG | 138,888 USDG/sec | 1 hour | **No** | [`0x264b…97B5`](https://etherscan.io/address/0x264bd8291fAE1D75DB2c5F573b07faA6715997B5) only |
+| SC2 | [`0x2fb074FA59c9294c71246825C1c9A0c7782d41a4`](https://etherscan.io/address/0x2fb074FA59c9294c71246825C1c9A0c7782d41a4) | EOA | 1,000,000,000 USDG | 277,777.78 USDG/sec | 1 hour | **No** | itself only |
+| SC3 | [`0x147BdE4F997f0d4C7544ED0C55eAcf1E5E6bf9c4`](https://etherscan.io/address/0x147BdE4F997f0d4C7544ED0C55eAcf1E5E6bf9c4) | OFTWrapper (LayerZero bridge) | **200,000,000 USDG** | 2,315 USDG/sec | 24 hours | **Yes** | n/a (unrestricted) |
+
+**Two corrections to earlier versions of this report:**
+
+1. **The `Allow Any Address` column was inverted.** `allowAnyMintAndBurnAddress` is `false` for SC1 and SC2 and `true` for SC3 — the opposite of what previous versions stated. This materially *reduces* the assessed risk of the two EOA controllers. Per [`SupplyControl.sol`](https://github.com/paxosglobal/paxos-token-contracts/blob/master/contracts/SupplyControl.sol), `canMintToAddress` reverts unless the destination is in the controller's whitelist, and `canBurnFromAddress` reverts unless `sender == burnFromAddress`. So a compromise of the SC1 or SC2 key **cannot mint to an attacker-controlled address and cannot burn any third party's balance** — it can only inflate one specific Paxos-operated address and burn its own holdings. Both values were set at `addSupplyController` time and have never been changed (zero `AllowAnyMintAndBurnAddressUpdated`, `MintAddressAddedToWhitelist`, and `MintAddressRemovedFromWhitelist` events over the contract's lifetime).
+2. **SC3's capacity is 200M USDG/24h, not 45M.** The 45M figure was set on December 5, 2025 and has been raised four times since. Full `LimitConfigUpdated` history for the bridge controller: 10M (April 2025 launch) → 20M (Apr 22, 2025) → 30M (Sep 22, 2025) → 45M (Dec 5, 2025) → 70M ([Mar 24, 2026](https://etherscan.io/tx/0xd39b97433509f41da5dafd1459805f87ed8ef6081f2db91cd419b79471e42e31)) → 100M ([May 18, 2026](https://etherscan.io/tx/0x388aac427db91eb6d673e84b5e55b25c9169a9f098adc19cf147f0f20cb04fb8)) → 125M ([Jun 4, 2026](https://etherscan.io/tx/0xb5f1db83d623fd9a7af00d131b65a1b46a0988ae96665edfd358e9cd275cc022)) → **200M** ([Jun 30, 2026](https://etherscan.io/tx/0xa6dbb7a8724c876c962e427a78f3d19663fdcb188b7dd7343a8505bd725ec62f)). The July 30, 2026 revision of this report was already stale on this point.
+
+**Note on the rate limits.** Expressed as a refill window rather than a per-second rate, SC1 can mint 500M USDG per hour and SC2 1B USDG per hour. These are not meaningful constraints on Paxos itself — they are anti-fat-finger guards. The binding constraint on both EOA controllers is the destination whitelist, not the rate limit. Only SC3 has a genuinely restrictive limit (200M per 24h) relative to its unrestricted destination set.
+
+Current balances: SC1 holds 4,493,836.57 USDG, SC2 holds 15,000,000.00 USDG, SC3 (the wrapper) holds **0** — confirming the burn-and-mint bridge model rather than lock-and-release. SC1's sole permitted mint destination [`0x264b…97B5`](https://etherscan.io/address/0x264bd8291fAE1D75DB2c5F573b07faA6715997B5) is an EOA holding 11,622,266.31 USDG and ~5,173 ETH; it is the same address this report identifies as the MPC gas station, so it serves as both Paxos's issuance treasury and its gas-funding account.
 
 ### Multi-Chain Deployments
 
-Supply figures are the DeFiLlama snapshot of July 30, 2026. Onchain `totalSupply()` was read the same day and runs higher on every chain, since DeFiLlama's chart is a once-daily snapshot of a fast-growing supply — the gap is widest on Robinhood Chain (~$313M snapshot vs ~340M USDG onchain).
+Supply figures below are **`totalSupply()` read directly on each chain on August 15, 2026** (all 6 decimals), not a DeFiLlama snapshot. The onchain sum ($3.468B) agrees with CoinGecko's market cap to within 0.01%; DeFiLlama's headline ($3.405B) is lower only because it treats the Ink and Hyperliquid balances as bridged-out Ethereum supply and subtracts them from the Ethereum row.
 
-| Chain | Token Address | Supply (DeFiLlama) | Share | LayerZero peer (eid) |
-|-------|---------------|-------------------:|------:|----------------------|
-| X Layer | [`0x4ae46a509F6b1D9056937BA4500cb143933D2dc8`](https://www.oklink.com/x-layer/evm/address/0x4ae46a509F6b1D9056937BA4500cb143933D2dc8) | $1,882.8M | 57.3% | [`0x9a71…3bbf`](https://www.oklink.com/x-layer/evm/address/0x9a7164112029b81c07636ab7b59fa813e0883bbf) (30274) |
-| Solana | [`2u1tszSeqZ3qBWF3uNGPFc8TzMk2tdiwknnRMWGWjGWH`](https://solscan.io/token/2u1tszSeqZ3qBWF3uNGPFc8TzMk2tdiwknnRMWGWjGWH) | $632.9M | 19.3% | OFT store PDA (30168) |
-| Ethereum | [`0xe343167631d89B6Ffc58B88d6b7fB0228795491D`](https://etherscan.io/address/0xe343167631d89B6Ffc58B88d6b7fB0228795491D) | $415.2M | 12.6% | — (origin chain) |
-| Robinhood Chain | [`0x5fc5360D0400a0Fd4f2af552ADD042D716F1d168`](https://robinhoodchain.blockscout.com/address/0x5fc5360D0400a0Fd4f2af552ADD042D716F1d168) | $313.2M | 9.5% | [`0x0d54…28d1`](https://robinhoodchain.blockscout.com/address/0x0d54755f5106BfdB43f7a35f5D49a23F940628d1) (30416) |
-| Ink | [`0xe343167631d89B6Ffc58B88d6b7fB0228795491D`](https://explorer.inkonchain.com/address/0xe343167631d89B6Ffc58B88d6b7fB0228795491D) | $39.5M | 1.2% | [`0x9e12…8971`](https://explorer.inkonchain.com/address/0x9e12c058a20c5b0eebaa00e44a712ec54b838971) (30339) |
-| Hyperliquid L1 | [`USDG0` HIP-1 spot token](https://hyperliquid.gitbook.io/hyperliquid-docs/for-developers/api/info-endpoint/spot) (index 352) | $1.8M | <0.1% | none — not a wrapper peer |
-| Arbitrum | [`0x004b506865409877c9fa29bfb1eba929984b9bbc`](https://arbiscan.io/address/0x004b506865409877c9fa29bfb1eba929984b9bbc) | not tracked (~$0.6M onchain) | <0.1% | [`0xc327…b6b6`](https://arbiscan.io/address/0xc3274ec3f772d8534575eaad5231cf250a48b6b6) (30110) |
-| **Total** | | **$3,285.3M** | 100% | |
+| Chain | Token Address | `totalSupply()` | Share | LayerZero peer (eid) |
+|-------|---------------|----------------:|------:|----------------------|
+| X Layer | [`0x4ae46a509F6b1D9056937BA4500cb143933D2dc8`](https://www.oklink.com/x-layer/evm/address/0x4ae46a509F6b1D9056937BA4500cb143933D2dc8) | 1,963,763,308.96 | 56.6% | [`0x9a71…3bbf`](https://www.oklink.com/x-layer/evm/address/0x9a7164112029b81c07636ab7b59fa813e0883bbf) (30274) |
+| Solana | [`2u1tszSeqZ3qBWF3uNGPFc8TzMk2tdiwknnRMWGWjGWH`](https://solscan.io/token/2u1tszSeqZ3qBWF3uNGPFc8TzMk2tdiwknnRMWGWjGWH) | 635,627,250.19 | 18.3% | OFT store PDA (30168) |
+| Ethereum | [`0xe343167631d89B6Ffc58B88d6b7fB0228795491D`](https://etherscan.io/address/0xe343167631d89B6Ffc58B88d6b7fB0228795491D) | 448,595,698.67 | 12.9% | — (origin chain) |
+| Robinhood Chain | [`0x5fc5360D0400a0Fd4f2af552ADD042D716F1d168`](https://robinhoodchain.blockscout.com/address/0x5fc5360D0400a0Fd4f2af552ADD042D716F1d168) | 356,518,732.97 | 10.3% | [`0x0d54…28d1`](https://robinhoodchain.blockscout.com/address/0x0d54755f5106BfdB43f7a35f5D49a23F940628d1) (30416) |
+| Ink | [`0xe343167631d89B6Ffc58B88d6b7fB0228795491D`](https://explorer.inkonchain.com/address/0xe343167631d89B6Ffc58B88d6b7fB0228795491D) | 62,747,404.93 | 1.8% | [`0x9e12…8971`](https://explorer.inkonchain.com/address/0x9e12c058a20c5b0eebaa00e44a712ec54b838971) (30339) |
+| Hyperliquid L1 | [`USDG0` HIP-1 spot token](https://hyperliquid.gitbook.io/hyperliquid-docs/for-developers/api/info-endpoint/spot) (index 352) | ~1,781,131 (DeFiLlama) | <0.1% | none — not a wrapper peer |
+| Arbitrum | [`0x004b506865409877c9fa29bfb1eba929984b9bbc`](https://arbiscan.io/address/0x004b506865409877c9fa29bfb1eba929984b9bbc) | 601,207.02 | <0.1% | [`0xc327…b6b6`](https://arbiscan.io/address/0xc3274ec3f772d8534575eaad5231cf250a48b6b6) (30110) |
+| **Total** | | **~3,467,853,603** | 100% | |
 
 **Notes on the table:**
 
-- **Ethereum row is DeFiLlama's *circulating* figure.** Onchain `totalSupply()` is 452,279,600.38 USDG; DeFiLlama reports 456.4M minted and 415.2M circulating, subtracting the supply bridged out to Ink and Hyperliquid.
-- **Arbitrum is not tracked by DeFiLlama** but the deployment is live: `symbol()` returns `USDG`, `totalSupply()` is 601,207.02 USDG, and the mainnet wrapper holds a peer for eid `30110`. Supply is negligible today, but the route is an active inbound mint path into SC3's 45M capacity.
-- **Peers were enumerated onchain**, not taken from documentation: all `PeerSet` events on the wrapper since deployment plus current `peers(uint32)` reads. The wrapper returns `bytes32(0)` for the Hyperliquid eid (`30367`).
-- **`totalSupply()` read directly on each chain** (July 30, 2026, all 6 decimals): Ethereum 452,279,600.38 · X Layer 1,889,792,628.86 · Solana 635,205,494.89 (`getTokenSupply` on the mint) · Robinhood Chain 340,571,048.70 · Ink 40,021,748.03 · Arbitrum 601,207.02. The Robinhood Chain token address is confirmed from the wrapper itself — `token()` on [`0x0d54…28d1`](https://robinhoodchain.blockscout.com/address/0x0d54755f5106BfdB43f7a35f5D49a23F940628d1) returns `0x5fc5…d168` (`rpc.mainnet.chain.robinhood.com`, chain id 4663).
-- **Every configured inbound route requires the same 3-of-3 DVN quorum.** Read from `EndpointV2.getConfig(wrapper, receiveLib, srcEid, 2)`: required DVNs are LayerZero Labs [`0x0058…236b`](https://etherscan.io/address/0x00589dEDbd617E0cbcB916A9223F4D1300c294236b), Canary [`0xa4fe…c2cd`](https://etherscan.io/address/0xa4fe5a5b9a846458a70cd0748228aed3bf65c2cd), and Paxos [`0xb0b2…2daf`](https://etherscan.io/address/0xb0b2ef168f52f6d1e42f461e11117295ef992daf), with `optionalDVNCount = 0`. Confirmation requirements are Robinhood Chain and Arbitrum (40), X Layer and Ink (168), and Solana (32). Adding Robinhood Chain did not introduce a weaker quorum — but Paxos itself operates one of the three required DVNs, so only two verifiers are independent of the issuer.
+- **Ink grew fastest over the last two weeks** — 40.0M → 62.7M USDG (+57%) since the July 30 reading, while Ethereum was roughly flat (452.3M → 448.6M).
+- **Arbitrum is not tracked by DeFiLlama** but the deployment is live: `symbol()` returns `USDG`, `totalSupply()` is 601,207.02 USDG, and the mainnet wrapper holds a peer for eid `30110`. Supply is negligible today, but the route is an active inbound mint path into SC3's 200M capacity.
+- **Peers were enumerated onchain**, not taken from documentation: all `PeerSet` events on the wrapper since deployment plus current `peers(uint32)` reads. Re-verified August 15, 2026 — still exactly five peers, no new chains added. The wrapper returns `bytes32(0)` for the Hyperliquid eid (`30367`).
+- The Robinhood Chain token address is confirmed from the wrapper itself — `token()` on [`0x0d54…28d1`](https://robinhoodchain.blockscout.com/address/0x0d54755f5106BfdB43f7a35f5D49a23F940628d1) returns `0x5fc5…d168` (`rpc.mainnet.chain.robinhood.com`, chain id 4663).
+- **Every configured inbound route requires the same 3-of-3 DVN quorum**, re-verified August 15, 2026 and unchanged. Read from `EndpointV2.getConfig(wrapper, receiveLib, srcEid, 2)` with `receiveLib = 0xc02Ab410f0734EFa3F14628780e6e695156024C2` for all five routes: required DVNs are LayerZero Labs [`0x589d…236b`](https://etherscan.io/address/0x589dEDbd617E0cbcB916A9223F4D1300c294236b), Canary [`0xa4fe…c2cd`](https://etherscan.io/address/0xa4fe5a5b9a846458a70cd0748228aed3bf65c2cd), and Paxos [`0xb0b2…2daf`](https://etherscan.io/address/0xb0b2ef168f52f6d1e42f461e11117295ef992daf), with `optionalDVNCount = 0`. Confirmation requirements are Robinhood Chain and Arbitrum (40), X Layer and Ink (168), and Solana (32). Paxos itself operates one of the three required DVNs, so only two verifiers are independent of the issuer. *(Earlier revisions of this report printed the LayerZero Labs DVN as a malformed 21-byte address; the correct address is linked above.)*
+- **The wrapper's `owner()` and its LayerZero `delegate` are both the Operations MPC wallet** [`0x3Af3…024B`](https://etherscan.io/address/0x3Af3e85f4f97De7AD0f000B724Fb77fE5ffc024B), with **no timelock**. That address can therefore add a new peer chain or rewrite the DVN configuration unilaterally and immediately. See [Governance](#governance).
 - **Hyperliquid L1 is not reachable from the Paxos wrapper.** The balance [DeFiLlama](https://stablecoins.llama.fi/stablecoin/286) attributes to LayerZero is a HIP-1 spot token named `USDG` with `fullName: USDG0`, `tokenId: 0xae87b5246dd9f377b14bbadcf3c72131`, `isCanonical: false`, and no linked EVM contract ([Hyperliquid `spotMeta` API](https://hyperliquid.gitbook.io/hyperliquid-docs/for-developers/api/info-endpoint/spot)). The mainnet [`OFTWrapper`](https://etherscan.io/address/0x147BdE4F997f0d4C7544ED0C55eAcf1E5E6bf9c4#readContract) returns `bytes32(0)` for the Hyperliquid eid (`30367`), and its full `PeerSet` history contains no Hyperliquid peer. The operator and control model of the USDG0 route remain **unverified**: this evidence establishes only that it is not a configured peer of this Paxos wrapper, not whether Paxos or a third party controls a separate adapter or custody route. Additional checks found no code at the canonical USDG address on [HyperEVM](https://hypurrscan.io/evm/address/0xe343167631d89B6Ffc58B88d6b7fB0228795491D) and no USDG entry in LayerZero's [public OFT registry](https://metadata.layerzero-api.com/v1/metadata/experiment/ofts/list). Identifying the controller requires tracing Ethereum USDG holders and `Transfer` events for the corresponding ~1.8M-balance escrow or recovering HyperCore deployment metadata.
 
 ## Audits and Due Diligence Disclosures
@@ -103,21 +132,70 @@ Paxos has conducted **6 security audits** from **3 reputable firms** (Zellic, Tr
 | **Halborn** | Token contracts | [PDF](https://github.com/paxosglobal/paxos-token-contracts/blob/master/audits/Paxos%20Token%20Contracts%20Halborn%20Audit%20Report.pdf) |
 | **Halborn** | Domain separator functionality | [PDF](https://github.com/paxosglobal/paxos-token-contracts/blob/master/audits/Domain%20Separator%20-%20Halborn.pdf) |
 | **Zellic** | EIP-1271 signature validation | [PDF](https://github.com/paxosglobal/paxos-token-contracts/blob/master/audits/Enhance%20Signature%20Validation%20-%20Zellic%20Audit%20Report.pdf) |
-| **Zellic** | USDG rewards system | [PDF](https://github.com/paxosglobal/paxos-token-contracts/blob/master/audits/Paxos%20USDG%20Rewards%20-%20Zellic%20Audit%20Report.pdf) |
+| **Zellic** | USDG rewards system (V3), Feb 24, 2026 | [PDF](https://github.com/paxosglobal/paxos-token-contracts/blob/master/audits/Paxos%20USDG%20Rewards%20-%20Zellic%20Audit%20Report.pdf) |
+
+*(A seventh report, `PAXG V2 - Zellic`, is in the same directory but scopes Pax Gold, not USDG.)*
 
 **Audit firms:** Zellic (3 audits) is a top-tier smart contract auditor. Trail of Bits (1 audit) is one of the most reputable security firms in the industry. Halborn (2 audits) is a well-known blockchain security firm.
+
+**The V3 rewards audit deserves a closer look**, since it covers the largest change to the token since launch:
+
+- **Scope:** the diff `3ce0a75…9f9618f` of the *private* `paxos-token-contract-internal` repo, covering `PaxosTokenClaimableRewards.sol`, `ClaimableRewardsBase.sol`, and all five facets. Because the audited repo is private, the deployed bytecode cannot be matched to the audited commit by a third party.
+- **Effort:** 1.2 person-weeks — two consultants over four calendar days (primary review Feb 9–12, 2026). That is a light engagement relative to the 118 selectors and ~$3.4B of supply now sitting behind this code.
+- **Findings:** 7 total — 0 critical, **2 high**, 0 medium, 3 low, 2 informational. Both highs were reward double-claim bugs (`adminSetPayoutGroupMultiplier` failing to recalculate group shares; stale period numbers after a maturity-period change). All seven were fixed before deployment, with a remediation commit cited per finding.
+- **Timeline:** review ended Feb 12 → report Feb 24 → mainnet deployment Feb 26 → **a second full redeployment on Feb 28**. The Feb 28 batch was a benign fix — diffing the two verified `PayoutGroupFacet` sources on Etherscan shows the only change is an added `name()` override returning `"Global Dollar"` for the EIP-712 domain — but it means a routing defect in the facet layer did reach mainnet and required a same-week corrective upgrade.
+
+### Bug Bounty
+
+**Paxos launched a $1M bug bounty on [Cantina](https://cantina.xyz/bounties) on March 27, 2026**, explicitly covering the USDG smart contracts and cross-chain infrastructure alongside PYUSD and PAXG, plus Web2 products, APIs, and domains. ([Paxos announcement](https://www.paxos.com/blog/paxos-launches-1m-bug-bounty-on-cantina); the program is listed on the [Cantina bounties page](https://cantina.xyz/bounties), where the max reward, live status, and March 27, 2026 start date were confirmed directly.)
+
+| Attribute | Value |
+|-----------|-------|
+| Platform | Cantina (Cantina-triaged) |
+| Max payout | $1,000,000, paid in USDG |
+| Status | Live |
+| Access | **Private / invite-only** — restricted to researchers already active in the Cantina network; others must request access |
+| Scope | USDG, PYUSD, PAXG contracts and cross-chain infrastructure; public products, APIs, domains |
+
+This supersedes the "no confirmed public bug bounty" finding in earlier revisions of this report, which was accurate when written (March 2026 assessment) but stale by the July 30 revision. The program's invite-only gating means it is not fully equivalent to an open Immunefi listing, but a live, triaged, $1M-max program covering the assessed contracts is a substantive change. Paxos still does not appear on the [SEAL Safe Harbor](https://securityalliance.org/) registry.
+
+### Claimable Rewards System (V3)
+
+The February 2026 V3 upgrade moved Global Dollar Network partner rewards onchain. Per the description Paxos gave Zellic, it "replaces 30-day delayed reconciliation with on-chain reward calculation" using a shares-based model with O(1) claim gas. Verified onchain state as of August 15, 2026:
+
+- **28 live payout groups** (ids 1–30, with 20 and 29 deleted), holding a combined **358,462,181.85 USDG** of registered balance — roughly 80% of Ethereum USDG supply. The largest single group (id 18) has 198,460,907.10 USDG registered.
+- **Five distinct multiplier (APR) curves** are in use across those groups.
+- **Rewards are not minted.** `ClaimableRewardsBase._claimRewards` debits a pre-funded `claimSource` address and credits the destination, reverting with `InsufficientClaimSourceBalance` if the source is short. The rewards system therefore adds **no new mint authority** — the mint-authority set remains SC1, SC2, SC3.
+- **Registration does not require holder consent.** `registrarRegisterRewardAddress` / `…Batch` are callable by `PAYOUT_GROUP_REGISTRAR_ROLE` alone. Partner-signed registration (`proposeRegisterRewardAddress` / `acceptRegisterRewardAddress`) exists but `isPartnerSignedRegistrationsEnabled()` currently returns `false`. Enrolling an address does not move its principal, but it does route the reward accrual on that balance to the group's configured destination — which may be a third party.
+- **Two of the six new roles can redirect funds**, per the inline documentation in [`Roles.sol`](https://github.com/paxosglobal/paxos-token-contracts/blob/master/contracts/lib/Roles.sol): `PAYOUT_GROUP_ADMIN_ROLE` ("CAN redirect funds by changing payout destinations to arbitrary addresses") and `CLAIM_ADMIN_ROLE` ("CAN redirect funds by specifying arbitrary claim destinations"). Both are held by the MPC wallet. The blast radius is bounded by the `claimSource` balance — Paxos's own reward pool — not by user balances.
+
+Role holders were enumerated from the token's complete `RoleGranted` / `RoleRevoked` log history and confirmed with live `hasRole` reads:
+
+| Role | Holder | Type | Can redirect funds? |
+|------|--------|------|---------------------|
+| `MULT_ADMIN_ROLE` | [`0x3Af3…024B`](https://etherscan.io/address/0x3Af3e85f4f97De7AD0f000B724Fb77fE5ffc024B) (MPC wallet) | MPC | No |
+| `MULT_RATE_ROLE` | [`0x3Af3…024B`](https://etherscan.io/address/0x3Af3e85f4f97De7AD0f000B724Fb77fE5ffc024B) (MPC wallet) and [`0x4e43…eef8`](https://etherscan.io/address/0x4e4336d068df68000d6d6ab326feef9ad4faeef8) | MPC + **EOA** | No |
+| `PAYOUT_GROUP_REGISTRAR_ROLE` | [`0x55f7…9684`](https://etherscan.io/address/0x55f78e37adb9d1f6931c1da7314b374558ae9684) | **EOA** | No (but can enroll/unenroll any address) |
+| `PAYOUT_GROUP_ADMIN_ROLE` | [`0x3Af3…024B`](https://etherscan.io/address/0x3Af3e85f4f97De7AD0f000B724Fb77fE5ffc024B) (MPC wallet) | MPC | **Yes** |
+| `CLAIM_OPERATOR_ROLE` | [`0x5fd9…2e38`](https://etherscan.io/address/0x5fd949b0fd3a994a6d7e364c82e43be23de22e38) | **EOA** | No (destination is group-configured) |
+| `CLAIM_ADMIN_ROLE` | [`0x3Af3…024B`](https://etherscan.io/address/0x3Af3e85f4f97De7AD0f000B724Fb77fE5ffc024B) (MPC wallet) | MPC | **Yes** |
+
+The three EOA holders are plain externally-owned accounts (`cast code` returns `0x`). `Roles.sol` labels these role tiers "hot wallet" by design, and none of them can redirect funds or touch user principal — but they are single keys with no timelock, and this is a governance surface that did not exist at the previous assessment.
 
 ### Contract Complexity
 
 The USDG system is **moderate complexity**:
 
 - **UUPS upgradeable proxy** for both the token and SupplyControl contracts
-- **AccessControl** role-based permissions (DEFAULT_ADMIN, PAUSE, ASSET_PROTECTION, SUPPLY_CONTROLLER_MANAGER)
-- **Diamond-like facet pattern** — the USDG contract uses `setFacet`/`batchSetFacet` to delegate function calls to external contracts (`TokenAdminFacet`, `ClaimableRewardsFacet`), adding upgradeability surface area beyond the proxy
-- **Rate-limited minting** via the SupplyControl contract with per-controller capacity and refill rates
-- **EIP-2612/EIP-3009** gasless transfer support
+- **AccessControl** role-based permissions — now **ten** distinct roles on the token (DEFAULT_ADMIN, PAUSE, ASSET_PROTECTION, SUPPLY_CONTROLLER_MANAGER, plus the six V3 rewards roles)
+- **Diamond-like facet pattern** — the USDG contract uses `setFacet`/`batchSetFacet` to route **118 selectors** across five external facet contracts, adding upgradeability surface area beyond the proxy. Facet changes are made by `DEFAULT_ADMIN_ROLE`, i.e. through the 24h timelock
+- **Onchain claimable-rewards accounting** (V3) — shares/multiplier model with 28 live payout groups; every transfer involving a registered address updates share accounting
+- **Rate-limited minting** via the SupplyControl contract with per-controller capacity, refill rates, and destination whitelists
+- **EIP-2612/EIP-3009/EIP-1271** gasless and smart-wallet signature support
 - **LayerZero V2 OFT** bridge wrapper for cross-chain transfers
 - **Freeze/wipe** capability for regulatory compliance
+
+The complexity has increased materially since the original March 2026 assessment. A reader who last looked at USDG as "a standard ERC-20 with a pause and a freeze" would be understating it: the transfer path now runs through shares math for ~80% of Ethereum supply by balance.
 
 ### Version History
 
@@ -127,26 +205,21 @@ The USDG system is **moderate complexity**:
 | v2.0.1 | Nov 12, 2024 | Bugfix: prevent frozen addresses from cross-chain transfers |
 | v2.0.2 | Aug 8, 2025 | Patch: domain separator initialization fix |
 | v2.1.0 | Jan 6, 2025 | EIP-1271 smart contract wallet support, dynamic DOMAIN_SEPARATOR for chain fork handling |
-| **Governance restructure** | ~Mar–Jun 2026 | Timelock delay increased 3h→24h; governance consolidated from multisigs to MPC wallet (Fordefi); SupplyControl admin moved from EOA to timelock; both multisigs expanded to 20 owners |
+| **Governance restructure** | ~Aug 2025–Feb 2026 | Timelock deployed Jan 2026 with 24h delay; governance consolidated from multisigs to MPC wallet (Fordefi); SupplyControl admin moved from EOA to timelock; both multisigs expanded to 20 owners |
+| **v3.0 — Claimable Rewards** | Feb 26, 2026 | Onchain rewards system: 5 facets, 118 selectors, 6 new roles. Implementation → [`0x8b73…1897`](https://etherscan.io/address/0x8b734d401841be8d8024dd32e4a530abed671897) ([tx](https://etherscan.io/tx/0xbd989e891c0e0db2e95501331e5a9a71b37a7a17859bebcd86df767e83a78fe7)), executed via the timelock |
+| **v3.0.1** | Feb 28, 2026 | All five facets redeployed and implementation → [`0xFACd…A65f`](https://etherscan.io/address/0xFACd5ff359adf87822374275699DD518Aaf9A65f) ([tx](https://etherscan.io/tx/0x9eacde0643ef862f7691ba7f19b4e54f98f4628ba98b3b8ade611d7d5cc514c0)). Sole source diff: added `name()` override on `PayoutGroupFacet` |
 
-### Bug Bounty
-
-- **Immunefi:** No public Paxos USDG bug bounty program found
-- **HackerOne:** Access denied (403) — a private program may exist but could not be confirmed
-- **Sherlock/Cantina:** No audit contests found
-- **Safe Harbor:** Not listed on the SEAL Safe Harbor registry
-
-The absence of a formal public bug bounty with monetary rewards is a weakness for a $3.29B stablecoin.
+**Upgrade history is short and fully timelocked.** The token proxy has six `Upgraded` events in its lifetime (Oct 2024 ×1, Oct–Nov 2024 ×2, Dec 2025 ×1, Feb 2026 ×2). Both 2026 upgrades were submitted by the MPC wallet **to the TimelockController** (`execute`, selector `0x134008d3`) rather than directly — confirming the 24h delay was actually exercised, not bypassed. No upgrade has occurred since February 28, 2026. SupplyControl has been on the same implementation since October 31, 2024.
 
 ## Historical Track Record
 
-- **Contract deployed:** October 7, 2024 (block 20,915,336) — **~21 months** in production
+- **Contract deployed:** October 7, 2024 (block 20,915,336) — **~22 months** in production
 - **Official launch:** November 1, 2024
-- **Total supply:** ~$3.29B across 6 chains with material supply (~$452M on Ethereum)
-- **Growth trajectory:** From ~$352M (mid-2025) to ~$3.29B (July 2026) — approximately 834% growth
-- **30-day change:** +433.7M USDG (+15.2%)
+- **Total supply:** ~$3.47B across 6 chains with material supply (~$449M on Ethereum)
+- **Growth trajectory:** From ~$352M (mid-2025) to ~$3.47B (August 2026) — approximately 885% growth
+- **30-day change:** +521.3M USDG (+18.1%)
 - **Security incidents:** None. No exploits, hacks, or depegging events reported
-- **Peg stability:** Price consistently at $0.999-$1.000 across all venues
+- **Peg stability:** Over the trailing 365 days the daily close ranged $0.99943–$1.0351 and **never traded below $0.995**; the high print is a thin-liquidity artifact, not a premium regime [CoinGecko](https://www.coingecko.com/en/coins/global-dollar)
 - **Paxos track record:** Paxos has operated USDP (Pax Dollar, formerly PAX) since 2018 and operates PYUSD (PayPal USD) on behalf of PayPal. No Paxos-issued stablecoin has suffered a security incident or depeg
 
 **Distribution partners:** Kraken, Robinhood, Anchorage Digital, Galaxy Digital, Bullish, Nuvei, BitGo, Paysafe, GSR, KuCoin, Virtual Assets Group, Tokenize
@@ -171,7 +244,7 @@ The absence of a formal public bug bounty with monetary rewards is a weakness fo
 
 ### Provability
 
-- **Monthly attestation:** Paxos publishes monthly reserve composition reports verified by independent accounting firms. Reports are available on the [USDG Transparency page](https://www.paxos.com/usdg-transparency)
+- **Monthly attestation by KPMG:** Paxos publishes monthly reserve composition reports verified by an independent accounting firm. Per the [USDG Transparency page](https://www.paxos.com/usdg-transparency), **all reports posted on or after February 27, 2026 are issued by KPMG LLP**, whose examination is conducted under standards established by the Institute of Singapore Chartered Accountants (ISCA). A Big Four attestor examining monthly under a named professional standard is a meaningfully stronger verification layer than "an independent accounting firm," and is the main reason the Provability score is lowered in this revision
 - **Onchain supply:** Total USDG supply is verifiable onchain via `totalSupply()` on each chain
 - **No Chainlink Proof of Reserves:** No onchain oracle feed independently verifying reserves
 - **Offchain verification:** Reserves cannot be independently verified onchain by token holders. Must rely on the attestation reports, MAS regulatory oversight, and Paxos's institutional framework
@@ -182,46 +255,68 @@ The absence of a formal public bug bounty with monetary rewards is a weakness fo
 
 ### DEX Liquidity (Ethereum)
 
-Pool data below is the [DeFiLlama yields API](https://yields.llama.fi/pools) snapshot of July 30, 2026. `n/r` means DeFiLlama does not report a volume figure for that pool — it is not a claim of zero volume.
+Pool data below is the [DeFiLlama yields API](https://yields.llama.fi/pools) snapshot of August 15, 2026, filtered to genuine DEX pools (lending and yield venues are broken out separately below). `n/r` means DeFiLlama does not report a volume figure for that pool — it is not a claim of zero volume.
 
 | Pool | DEX | Liquidity | 7d Volume |
 |------|-----|----------:|-----------|
-| USDG/USDC | Curve | $20.50M | $46.15M |
-| USDC/USDG | Uniswap V4 | $0.99M | n/r |
+| USDG/USDC | Curve | $30.48M | $25.06M |
+| USDC/USDG | Ekubo | $1.11M | n/r |
 | syrupUSDG/USDG | Uniswap V4 | $0.99M | n/r |
-| USDC/USDG | Ekubo | $0.89M | n/r |
-| USDT/USDG | Uniswap V4 | $0.55M | n/r |
-| USDT/USDG | Ekubo (3 pools) | $0.32M | n/r |
-| **Ethereum Total** | 9 pools | **~$24.2M** | |
+| USDC/USDG | Uniswap V4 (2 pools) | $1.17M | n/r |
+| USDC/USDG | Maverick V2 | $0.20M | $8.38M |
+| USDT/USDG, USDC/USDG | Ekubo (2 pools) | $0.37M | n/r |
+| **Ethereum Total** | 8 pools | **~$34.3M** | |
+
+Ethereum DEX depth grew ~42% since the July 30 reading (~$24.2M → ~$34.3M), essentially all of it in the Curve pool ($20.5M → $30.5M).
+
+**Measured slippage on the Curve USDG/USDC pool** [`0xc061…1622`](https://etherscan.io/address/0xc061caa073f3d95F80f8e5428d32D2d76F5e1622). These are live `get_dy` quotes read onchain on August 15, 2026, not estimates. Pool balances are 12,362,223.19 USDG / 18,112,954.31 USDC, with `A = 3000` and `fee = 0.01%`:
+
+| Sell size (USDG → USDC) | Output | Slippage |
+|------------------------:|-------:|---------:|
+| $1,000,000 | 1,000,007.14 | −0.001% |
+| $5,000,000 | 4,999,586.52 | 0.008% |
+| $10,000,000 | 9,997,749.77 | **0.023%** |
+| $15,000,000 | 14,989,824.96 | 0.068% |
+| $17,000,000 | 16,968,189.65 | 0.187% |
+| $20,000,000 | 18,091,732.58 | 9.541% |
+
+The high amplification coefficient keeps execution nearly flat up to ~$15M, then the curve breaks hard once the USDC side of the pool (~$18.1M) is exhausted. **The practical single-pool ceiling is ~$17M.** The reverse direction is comparably deep ($10M USDC → USDG at 0.137%). This is a large revision to earlier versions of this report, which stated "<0.5% for $1M" and suggested routing away from Curve above ~$5M — that was roughly two orders of magnitude too conservative for the pool as it stands today.
 
 ### DEX Liquidity (Solana)
 
 | Pool | DEX | Liquidity | 7d Volume |
 |------|-----|----------:|-----------|
-| USDG/USDC | Orca | $18.82M | $2.73M |
-| USDG/USDC | Kamino Liquidity | $14.64M | $0.11M |
-| SOL/USDG | Orca | $3.48M | $5.18M |
-| USDG/ONYC | Raydium | $3.04M | $0.77M |
-| USDG/USX | Orca | $2.99M | $0.71M |
-| Other pairs | Multiple (12 pools) | ~$17.51M | ~$10.24M |
-| **Solana Total** | 17 pools | **~$60.5M** | |
+| USDG/USDC | Orca | $25.69M | $3.41M |
+| USDG/USDC | Kamino Liquidity | $16.01M | $0.22M |
+| SOL/USDG | Orca | $3.51M | $3.33M |
+| USDG/ONYC | Raydium | $3.19M | $1.47M |
+| USDG/USX | Orca | $2.99M | $0.67M |
+| Other pairs | Orca / Kamino / others | ~$14.6M | ~$11.1M |
+| **Solana DEX Total** | | **~$66.0M** | |
 
-The Meteora USDG/USDC pool that held $37.8M at the June 2026 snapshot no longer appears in the DeFiLlama pool set; Solana depth has shifted to Orca and Kamino.
+A further ~$25.7M of Solana USDG sits in lending venues (Kamino Lend, Jupiter Lend, Loopscale, Sentora), which is integration depth rather than exit liquidity.
+
+### Other Chains
+
+Robinhood Chain has become the largest DeFi venue for USDG by a wide margin — Morpho steakUSDG ($313.5M), Morpho syrupUSDG ($85.2M), Spark Savings ($35.4M), Morpho spUSDG ($35.3M) — and carries $130.7M of the token's $194.6M daily volume across Uniswap V3/V4, Ramses, and Ekubo. This depth is real but is *not* reachable by an Ethereum holder without crossing the LayerZero wrapper.
 
 ### Aggregate Liquidity
 
 | Source | Available | Notes |
 |--------|----------|-------|
-| DEX (all chains) | ~$84.7M | 26 pools; the 13 that report volume hold $75.7M and traded $65.9M over the last 7 days |
-| CEX | OKX, Kraken, Bullish, KuCoin, Gate.io | ~$24M total 24h volume |
+| DEX (Ethereum) | ~$34.3M | 8 pools; $10M exits at 0.023% slippage on Curve alone (measured onchain) |
+| DEX (Solana) | ~$66.0M | Orca and Kamino carry the depth |
+| DEX (Robinhood Chain) | high volume | $130.7M/24h, but behind the bridge from an Ethereum holder's perspective |
+| CEX | OKX ($4.55M), Bullish ($4.78M), Biconomy ($1.07M), Kraken ($0.71M), Gate ($0.14M) | **~$11.3M** total 24h volume |
 | Direct redemption | Unlimited (via Paxos) | Requires KYC account, processed during business hours |
+| **Total 24h volume, all venues** | **$194.6M** | [CoinGecko](https://www.coingecko.com/en/coins/global-dollar) |
 
-- **Primary exit (permissionless):** DEX swap or CEX trade — reasonable liquidity with ~$24.2M on Ethereum DEXes, ~85% of it in the Curve USDG/USDC pool. A $1M swap on that pool would incur <0.5% slippage
-- **Lending-market depth is not exit liquidity:** a further ~$272M USDG sits in Ethereum lending/yield venues (Maple $226.0M, Aave v4 $30.8M, Aave v3 $7.0M, Pendle ~$4.0M). This is integration depth — withdrawing depends on each market's utilization and does not add sell-side liquidity
-- **Primary exit (KYC):** Direct 1:1 redemption from Paxos — most capital-efficient but requires account setup
+- **Primary exit (permissionless):** DEX swap — ~$34.3M on Ethereum, 89% of it in the Curve USDG/USDC pool. A $10M exit costs 0.023%; the single-pool ceiling is ~$17M
+- **CEX depth is thinner than previously reported.** Earlier revisions cited "~$24M total 24h volume" across OKX, Kraken, Bullish, KuCoin, and Gate.io. Today CoinGecko shows ~$11.3M across named CEX venues, and **KuCoin no longer lists a USDG ticker**. The headline $194.6M daily figure is overwhelmingly DEX volume on Robinhood Chain, not centralized order-book depth. For an Ethereum-based integrator, CEX routing is a weaker backstop than it appears
+- **Lending-market depth is not exit liquidity:** a further ~$296M USDG sits in Ethereum lending/yield venues (Maple $262.0M, Aave v4 $64.7M supplied / $19.7M borrowed, Aave v3 $4.1M, Pendle ~$3.8M, Morpho PT-USDG $1.6M). Withdrawing depends on each market's utilization and does not add sell-side liquidity
+- **Primary exit (KYC):** Direct 1:1 redemption from Paxos — unlimited and most capital-efficient, but requires account setup and business-hours processing
 - **Same-value asset:** USD stablecoin — no price divergence risk from the underlying
 - **No withdrawal queue:** DEX/CEX exits are instant. Direct Paxos redemption follows standard processing times
-- **Ethereum-only concern:** The Ethereum DEX liquidity (~$24.2M) is still modest relative to the onchain supply (~$452M), and it is concentrated in a single Curve pool. Exits beyond ~$5M would benefit from CEX routing or direct Paxos redemption
 
 ## Centralization & Control Risks
 
@@ -229,7 +324,7 @@ The Meteora USDG/USDC pool that held $37.8M at the June 2026 snapshot no longer 
 
 **Token governance has been restructured from a two-tier multisig model to a model consolidated under an MPC wallet with a 24-hour timelock.**
 
-**⚠️ Governance restructured since last assessment (March 2026).** The 7-owner DEFAULT_ADMIN multisig and 3-of-7 operational multisig have been removed from all onchain roles. All governance power is now concentrated in an MPC wallet (likely Fordefi) with a 24-hour timelock on critical changes.
+**⚠️ Governance was restructured in August 2025–February 2026**, after the initial March 2026 assessment was drafted against the older model. The 7-owner DEFAULT_ADMIN multisig and 3-of-7 operational multisig described in that version have been removed from all onchain roles. Governance is now concentrated in an MPC wallet (likely Fordefi), with a 24-hour timelock on upgrades and role changes — but not on pause, freeze, or bridge configuration.
 
 **MPC wallet evidence:** The operations address [`0x3Af3e85f4f97De7AD0f000B724Fb77fE5ffc024B`](https://etherscan.io/address/0x3Af3e85f4f97De7AD0f000B724Fb77fE5ffc024B) exhibits a classic MPC custody wallet pattern:
 - **Gas station funding:** A dedicated gas station ([`0x264bd8291fae1d75db2c5f573b07faa6715997b5`](https://etherscan.io/address/0x264bd8291fae1d75db2c5f573b07faa6715997b5), nonce 5.6M+, balance ~4,986 ETH, funding 62+ distinct EOAs) sends just-in-time ETH (~0.02–0.05 ETH) before each batch of operations. The account never holds large ETH balances independently.
@@ -239,7 +334,9 @@ The Meteora USDG/USDC pool that held $37.8M at the June 2026 snapshot no longer 
 
 **Important caveat:** The internal MPC quorum/threshold and policy configuration are not publicly verifiable onchain. The security depends on the provider's implementation and Paxos's internal policy controls (e.g., requiring multiple workspace members to approve transactions). While this is significantly stronger than a single-EOA held by one person, the exact risk profile depends on the unknown internal parameters.
 
-**Documentation is stale:** The [USDG GitHub README](https://github.com/paxosglobal/usdg-contract) still lists the old multisig addresses as role holders and states "the addresses above utilize multisignature contracts." The [live docs site](https://docs.paxos.com/guides/stablecoin/usdg/mainnet) (checked via Playwright rendering) does not document governance structure at all — neither the old multisig model nor the new MPC wallet. No public disclosure of the governance restructure exists.
+**Documentation is stale:** The [USDG GitHub README](https://github.com/paxosglobal/usdg-contract) still lists the old multisig addresses as role holders and states "the addresses above utilize multisignature contracts." The [live docs site](https://docs.paxos.com/guides/stablecoin/usdg) does not document governance structure at all — neither the old multisig model nor the new MPC wallet, and it does not mention the V3 rewards system or payout groups either. No public disclosure of the governance restructure exists.
+
+**All roles were re-verified onchain on August 15, 2026** via `hasRole` reads on the token, SupplyControl, and TimelockController, cross-checked against the complete `RoleGranted`/`RoleRevoked` log history of all three contracts. Every role assignment described below is current. No unexpected holder was found.
 
 **Tier 1 — Critical operations (upgrades, role management):**
 - **TimelockController** ([`0x9036566eAa5F83E0b9E1161C6c602b0Adf997654`](https://etherscan.io/address/0x9036566eAa5F83E0b9E1161C6c602b0Adf997654)) with **24-hour minimum delay** [onchain](https://etherscan.io/address/0x9036566eAa5F83E0b9E1161C6c602b0Adf997654#readContract#F5)
@@ -249,11 +346,17 @@ The Meteora USDG/USDC pool that held $37.8M at the June 2026 snapshot no longer 
 - **PROPOSER_ROLE, EXECUTOR_ROLE, and CANCELLER_ROLE on the timelock are all held by the MPC wallet** ([`0x3Af3e85f4f97De7AD0f000B724Fb77fE5ffc024B`](https://etherscan.io/address/0x3Af3e85f4f97De7AD0f000B724Fb77fE5ffc024B)) — any action scheduled through the timelock can be proposed, executed, and cancelled by this same address. However, MPC policy controls mean multiple internal approvals are typically required to initiate transactions
 - The DEFAULT_ADMIN_ROLE on the timelock is held by the timelock itself (self-administered) — the timelock can grant/revoke roles on itself
 
-**Tier 2 — Operational / emergency (pause, freeze, supply management):**
+**Tier 2 — Operational / emergency (pause, freeze, supply management, bridge config):**
 - **MPC wallet** ([`0x3Af3e85f4f97De7AD0f000B724Fb77fE5ffc024B`](https://etherscan.io/address/0x3Af3e85f4f97De7AD0f000B724Fb77fE5ffc024B)) holds `PAUSE_ROLE` and `ASSET_PROTECTION_ROLE` directly on the token (no onchain timelock — but internal MPC policy likely requires multiple approvals) [verified onchain](https://etherscan.io/address/0xe343167631d89B6Ffc58B88d6b7fB0228795491D#readContract)
 - The MPC wallet also holds `SUPPLY_CONTROLLER_MANAGER_ROLE` on the SupplyControl contract
+- **The MPC wallet is the `owner()` of the LayerZero `OFTWrapper`** ([`0x147BdE4F997f0d4C7544ED0C55eAcf1E5E6bf9c4`](https://etherscan.io/address/0x147BdE4F997f0d4C7544ED0C55eAcf1E5E6bf9c4)) **and its LayerZero `delegate`** on `EndpointV2`. Both were newly identified in this revision. There is **no timelock** on either. This is the single most consequential unmitigated power in the system: the wrapper is Supply Controller SC3 with `allowAnyMintAndBurnAddress = true` and 200M USDG/24h of capacity, so the same key that can call `setPeer` (adding a chain, or repointing an existing one) and rewrite the receive-side DVN configuration also controls a mint path to arbitrary Ethereum addresses. A compromise of this key does not require defeating the 3-of-3 DVN quorum — it can replace it
 - The former operational multisig ([`0x0644Bd0248d5F89e4F6E845a91D15c23591e5D33`](https://etherscan.io/address/0x0644Bd0248d5F89e4F6E845a91D15c23591e5D33)) **no longer holds any roles** on the token, timelock, or SupplyControl
-- The `SUPPLY_CONTROLLER_MANAGER_ROLE` on the token appears unassigned — no holder found among known governance addresses
+- The `SUPPLY_CONTROLLER_MANAGER_ROLE` on the *token* is unassigned — confirmed both by `hasRole` reads against every known governance address and by the absence of any `RoleGranted` event for that role hash in the token's full log history
+
+**Tier 3 — Rewards operations (V3, new since February 2026):**
+- Six additional roles govern the claimable-rewards system. The MPC wallet holds the four privileged ones (`MULT_ADMIN`, `MULT_RATE`, `PAYOUT_GROUP_ADMIN`, `CLAIM_ADMIN`); three **hot-wallet EOAs** hold `MULT_RATE`, `PAYOUT_GROUP_REGISTRAR`, and `CLAIM_OPERATOR`. Full table and analysis in [Claimable Rewards System (V3)](#claimable-rewards-system-v3)
+- None of these roles can mint, and none can touch a holder's principal. `PAYOUT_GROUP_ADMIN_ROLE` and `CLAIM_ADMIN_ROLE` can redirect reward payouts to arbitrary destinations, bounded by the `claimSource` balance — a loss to Paxos and its partners, not to USDG holders
+- The registrar EOA can enrol or remove **any** address from a payout group without that address's consent. For a Yearn vault or strategy holding USDG this is not a fund-loss path, but it does determine who receives the reward accrual on that balance
 
 **Multisig status (neither holds active governance roles):**
 - **DEFAULT_ADMIN Multisig** ([`0x137Dcd97872dE27a4d3bf36A4643c5e18FA40713`](https://etherscan.io/address/0x137Dcd97872dE27a4d3bf36A4643c5e18FA40713)): 20 owners, threshold 3, 43 transactions — no governance roles
@@ -262,7 +365,8 @@ The Meteora USDG/USDC pool that held $37.8M at the June 2026 snapshot no longer 
 **SupplyControl governance:**
 - `DEFAULT_ADMIN_ROLE` on SupplyControl is now held by the **Token Admin Timelock** (24h delay) — this is an improvement from the previous EOA admin
 - `SUPPLY_CONTROLLER_MANAGER_ROLE` on SupplyControl is held by the MPC wallet [`0x3Af3e85f4f97De7AD0f000B724Fb77fE5ffc024B`](https://etherscan.io/address/0x3Af3e85f4f97De7AD0f000B724Fb77fE5ffc024B)
-- Two EOA supply controllers (SC1, SC2) have very large mint capacities ($500M and $1B respectively)
+- Two EOA supply controllers (SC1, SC2) have very large mint capacities ($500M/hour and $1B/hour respectively) — **but both are restricted to a single whitelisted mint destination and can only burn their own balance.** See the correction note under [Supply Controllers](#supply-controllers). Their practical blast radius on key compromise is inflation of one Paxos-operated address, not theft from holders
+- The bridge controller SC3 is the opposite shape: unrestricted destinations, but a hard 200M USDG/24h ceiling and contract-mediated (not key-mediated) minting. Its risk is concentrated in whoever controls `setPeer` and the DVN config — the MPC wallet, untimelocked
 
 **Key governance concerns:**
 
@@ -272,6 +376,9 @@ The Meteora USDG/USDC pool that held $37.8M at the June 2026 snapshot no longer 
 4. **SupplyControl admin improvement** — moving DEFAULT_ADMIN on SupplyControl from an EOA to the 24h timelock prevents unilateral addition of supply controllers
 5. **Freeze/wipe capability** — `ASSET_PROTECTION_ROLE` can freeze individual addresses and wipe frozen balances. This is standard for regulated stablecoins (USDC, USDT have equivalent capabilities). The MPC wallet structure provides internal governance but the onchain capability remains unilateral from the contract's perspective
 6. **Internal MPC quorum unknown** — while MPC is inherently multi-party, the exact number of key shards, approval threshold, and policy rules are not publicly verifiable. This is a transparency gap
+7. **Bridge configuration is untimelocked** *(new in this revision)* — the MPC wallet owns the OFTWrapper and is its LayerZero delegate, so peer set and DVN quorum can both be changed with immediate effect, upstream of a 200M/24h mint path. Contract upgrades get 24 hours of warning; adding a new mint route does not
+8. **Rewards system introduces hot-wallet EOAs** *(new in this revision)* — three single-key EOAs hold operational rewards roles. They cannot mint or seize funds, so this is a bounded concern, but it reverses part of the 2026 consolidation away from EOA-held roles
+9. **Supply controller destination whitelisting is a genuine mitigant** *(correction in this revision)* — previously assessed as unrestricted, SC1 and SC2 are in fact whitelist-bound. This is the main reason governance is not scored higher despite items 7 and 8
 
 ### Programmability
 
@@ -279,24 +386,26 @@ The Meteora USDG/USDC pool that held $37.8M at the June 2026 snapshot no longer 
 - **Minting/burning:** Through SupplyControl contract with rate-limited supply controllers. Onchain but Paxos-controlled (not permissionless)
 - **Exchange rate:** Fixed 1:1 USD peg — no oracle needed for the token itself
 - **Reserves:** Entirely offchain. Reserve management, yield generation, and reporting are handled by Paxos and its custodians with no onchain visibility into specific holdings
+- **Partner reward accounting is now onchain** — the V3 rewards system replaced a 30-day offchain reconciliation process with onchain share/multiplier accounting settled from a funded claim source. This is a genuine programmability improvement over the model assessed in March 2026, though the reward *rates* (multipliers) are still set by admins rather than derived
 - **Pause mechanism:** `PAUSE_ROLE` can freeze all transfers/approvals; minting/burning remain operational during pause
-- **Operations split:** Token operations (transfers, approvals) are onchain and programmatic. Reserve operations (investment, custody, yield distribution) are entirely offchain and centralized
+- **Operations split:** Token operations (transfers, approvals, reward accrual and claims) are onchain and programmatic. Reserve operations (investment, custody, yield generation) are entirely offchain and centralized
 
 ### External Dependencies
 
 - **No DeFi protocol dependencies** — USDG is a standalone stablecoin, not dependent on any external DeFi protocols
 - **Banking infrastructure** — reserves held at regulated custodians (inherent to fiat-backed stablecoins)
-- **LayerZero V2** — cross-chain bridging via OFTWrapper to Solana, X Layer, Ink, Arbitrum, and Robinhood Chain. Non-critical for Ethereum-only usage, but ~87% of total supply now sits on chains reachable through this wrapper, and its inbound receive path can mint canonical USDG on Ethereum up to the 45M USDG SC3 capacity
+- **LayerZero V2** — cross-chain bridging via OFTWrapper to Solana, X Layer, Ink, Arbitrum, and Robinhood Chain. Still non-critical for Ethereum-only usage — an Ethereum holder's balance does not depend on the bridge — but the exposure has grown on two axes since the last assessment: **~87% of total supply now sits on chains reachable through this wrapper**, and the inbound receive path can mint canonical USDG on Ethereum up to **200M USDG/24h** (raised from 45M in four steps between March and June 2026). The wrapper's owner/delegate is the MPC wallet with no timelock
 - **Curve/Uniswap** — DEX liquidity for secondary market exits (not a protocol dependency, but relevant for exit liquidity)
 
 ## Operational Risk
 
 - **Team:** Paxos was founded in 2012 by Charles Cascarilla (CEO) and Rich Teo (co-founder). Paxos is a well-established, regulated fintech company with 200+ employees
 - **Track record:** Operates multiple stablecoins: USDP (since 2018), PYUSD (PayPal USD, since 2023), USDG (since 2024). No security incidents across any Paxos stablecoin
-- **Regulation:** Paxos Digital Singapore is a Major Payments Institution supervised by MAS. Paxos Trust Company (US entity) is a New York State-chartered limited purpose trust company regulated by NYDFS. USDG also claims MiCA compliance
-- **Documentation:** Comprehensive documentation at [docs.paxos.com](https://docs.paxos.com/guides/stablecoin/usdg) covering integration guides, API reference, and contract addresses. Source code is MIT-licensed and publicly available on GitHub
-- **Legal structure:** Paxos Digital Singapore Pte. Ltd. (Singapore entity for USDG), with Paxos Trust Company LLC (US entity for USDP) and Paxos Issuance SARL (EU entity) as sister companies
-- **Incident response:** No public incident response playbook, but regulatory oversight provides accountability. Emergency pause capability via 3-of-7 multisig
+- **Regulation:** Paxos Digital Singapore Pte. Ltd. (PDS) — the **issuer of USDG** — is a Major Payments Institution supervised by the Monetary Authority of Singapore. USDG also claims MiCA compliance via the EU entity
+- **US entity is now OCC-supervised, not NYDFS** *(corrected — resolves [issue #388](https://github.com/yearn/risk-score/issues/388))*. On **December 12, 2025** the Office of the Comptroller of the Currency conditionally approved the application of **Paxos Trust Company, LLC** (a New York state trust company) to convert to an uninsured national trust bank, operating as **Paxos Trust Company, National Association** under **OCC Charter Number 25379** ([OCC conditional approval letter](https://www.occ.gov/news-issuances/news-releases/2025/nr-occ-2025-125e.pdf), [OCC decision document](https://www.occ.gov/topics/charters-and-licensing/interpretations-and-decisions/2026/ca1358.pdf), [Paxos announcement](https://www.paxos.com/newsroom/occ-approves-paxos-application-to-convert-to-occ-trust-paxos-to-complete-conversion-imminently-to-become-a-federally-regulated-blockchain-infrastructure-provider)). All of Paxos Trust Company's US-based activity is now subject to OCC supervision rather than NYDFS. Two qualifications matter for risk purposes: **(a)** the bank does not take deposits and is **not FDIC-insured**; **(b)** the conversion covers the US entity behind PYUSD and PAXG — **USDG's issuer remains PDS in Singapore under MAS**, so USDG's direct regulator is unchanged. The correct framing is that the Paxos *group's* US supervision moved from state to federal, which strengthens the group-level regulatory picture without altering USDG's own licensing
+- **Documentation:** Comprehensive documentation at [docs.paxos.com](https://docs.paxos.com/guides/stablecoin/usdg) covering integration guides, API reference, and contract addresses. Source code is MIT-licensed and publicly available on GitHub. **Gaps:** the GitHub README's role-holder list is stale by more than a year, and neither the docs site nor any public post documents the 2026 governance restructure or the V3 rewards system
+- **Legal structure:** Paxos Digital Singapore Pte. Ltd. (Singapore entity, issuer of USDG), with Paxos Trust Company, N.A. (US federal trust bank, issuer of USDP/PYUSD/PAXG) and Paxos Issuance SARL (EU entity) as sister companies
+- **Incident response:** No public incident response playbook, but regulatory oversight provides accountability. Emergency pause capability sits with the Operations MPC wallet (the "3-of-7 multisig" described in earlier revisions has held no roles since August 2025)
 
 ## Monitoring
 
@@ -307,9 +416,10 @@ The Meteora USDG/USDC pool that held $37.8M at the June 2026 snapshot no longer 
 | USDG Token | [`0xe343167631d89B6Ffc58B88d6b7fB0228795491D`](https://etherscan.io/address/0xe343167631d89B6Ffc58B88d6b7fB0228795491D) | `totalSupply()`, `paused()`, Transfer events, Mint/Burn events |
 | SupplyControl | [`0x9a7164112029b81c07636AB7b59fA813E0883BBF`](https://etherscan.io/address/0x9a7164112029b81c07636AB7b59fA813E0883BBF) | Supply controller additions/removals, rate limit changes |
 | TimelockController | [`0x9036566eAa5F83E0b9E1161C6c602b0Adf997654`](https://etherscan.io/address/0x9036566eAa5F83E0b9E1161C6c602b0Adf997654) | `CallScheduled`, `CallExecuted` events (24h delay — gives monitoring window) |
-| Operational Multisig | [`0x0644Bd0248d5F89e4F6E845a91D15c23591e5D33`](https://etherscan.io/address/0x0644Bd0248d5F89e4F6E845a91D15c23591e5D33) | Submitted/executed transactions (pause, freeze, supply management) |
-| Operations MPC Wallet (all governance) | [`0x3Af3e85f4f97De7AD0f000B724Fb77fE5ffc024B`](https://etherscan.io/address/0x3Af3e85f4f97De7AD0f000B724Fb77fE5ffc024B) | Any transactions — controls pause, freeze, timelock scheduling, supply controllers. MPC wallet (likely Fordefi) — key sharded across multiple parties. Monitor for unexpected transactions |
-| Gas Station | [`0x264bd8291fae1d75db2c5f573b07faa6715997b5`](https://etherscan.io/address/0x264bd8291fae1d75db2c5f573b07faa6715997b5) | Funds MPC wallet before transactions — unusual ETH outflows could indicate MPC key migration or provider change |
+| Operational Multisig | [`0x0644Bd0248d5F89e4F6E845a91D15c23591e5D33`](https://etherscan.io/address/0x0644Bd0248d5F89e4F6E845a91D15c23591e5D33) | Submitted/executed transactions (currently role-less; any re-grant is notable) |
+| Operations MPC Wallet (all governance) | [`0x3Af3e85f4f97De7AD0f000B724Fb77fE5ffc024B`](https://etherscan.io/address/0x3Af3e85f4f97De7AD0f000B724Fb77fE5ffc024B) | Any transactions — controls pause, freeze, timelock scheduling, supply controllers, **and the OFT wrapper's peers + DVN config**. MPC wallet (likely Fordefi) — key sharded across multiple parties. Monitor for unexpected transactions |
+| **OFTWrapper (SC3)** | [`0x147BdE4F997f0d4C7544ED0C55eAcf1E5E6bf9c4`](https://etherscan.io/address/0x147BdE4F997f0d4C7544ED0C55eAcf1E5E6bf9c4) | **`PeerSet` events (new/changed chains), `OwnershipTransferred`, `DelegateSet` on EndpointV2, and receive-library/DVN config changes.** Highest-leverage untimelocked surface in the system |
+| Issuance Treasury / Gas Station | [`0x264bd8291fae1d75db2c5f573b07faa6715997b5`](https://etherscan.io/address/0x264bd8291fae1d75db2c5f573b07faa6715997b5) | SC1's only permitted mint destination *and* the MPC gas funder. Monitor large USDG inflows (new issuance) and unusual ETH outflows (possible MPC key migration or provider change) |
 
 ### Critical Events to Monitor
 
@@ -317,11 +427,15 @@ The Meteora USDG/USDC pool that held $37.8M at the June 2026 snapshot no longer 
 - **Freeze events** — individual address freezes via `ASSET_PROTECTION_ROLE` — could affect DeFi integrations (MPC wallet, no onchain timelock)
 - **Supply changes** — large mints/burns (>5% of supply in 24h) could indicate operational issues
 - **Contract upgrades** — `Upgraded` events via UUPS proxy — 24h timelock provides advance notice via `CallScheduled`
-- **Supply controller changes** — additions/removals via SupplyControl — SCM role held by MPC wallet, admin role under 24h timelock
-- **Rate limit changes** — modifications to per-controller mint capacities
+- **Supply controller changes** — `SupplyControllerAdded`/`Removed` via SupplyControl — SCM role held by MPC wallet, admin role under 24h timelock
+- **Rate limit changes** — `LimitConfigUpdated`. SC3's capacity has been raised seven times since launch (10M → 200M); each raise widens the bridge's inbound mint blast radius
+- **Mint destination whitelist changes** — `MintAddressAddedToWhitelist` / `RemovedFromWhitelist` and `AllowAnyMintAndBurnAddressUpdated`. **Zero of these have ever fired.** Any first occurrence — especially flipping `allowAnyMintAndBurnAddress` to `true` on SC1 or SC2 — would remove the principal mitigant on the EOA supply controllers and should be treated as a high-priority alert
+- **OFT peer and DVN changes** — `PeerSet` on the wrapper and receive-config changes on `EndpointV2`. Untimelocked, upstream of a 200M/24h mint path
 - **Timelock events** — `CallScheduled` gives 24h advance notice of all critical admin changes
-- **Facet changes** — `setFacet`/`batchSetFacet` events indicate functional changes to the token contract
+- **Facet changes** — `FacetUpdate(bytes4,address)` events indicate functional changes to the token contract without a proxy upgrade
+- **Rewards system events** — `PayoutGroupCreated`/`Deleted`, `PayoutGroupDestinationSet`, `AccountRegistered`/`Deregistered`, `ClaimSourceSet`, `MultiplierRateScheduled`. Integrators holding USDG should watch `AccountRegistered` for their own vault/strategy addresses, since registration is registrar-initiated and does not require consent
 - **MPC wallet transactions** — any transaction from [`0x3Af3e85f4f97De7AD0f000B724Fb77fE5ffc024B`](https://etherscan.io/address/0x3Af3e85f4f97De7AD0f000B724Fb77fE5ffc024B) — controls all governance actions. MPC structure provides multi-party security, but the address remains the single onchain governance point
+- **Rewards hot-wallet EOAs** — transactions from [`0x4e43…eef8`](https://etherscan.io/address/0x4e4336d068df68000d6d6ab326feef9ad4faeef8), [`0x55f7…9684`](https://etherscan.io/address/0x55f78e37adb9d1f6931c1da7314b374558ae9684), [`0x5fd9…2e38`](https://etherscan.io/address/0x5fd949b0fd3a994a6d7e364c82e43be23de22e38)
 
 ### Monitoring Functions
 
@@ -330,34 +444,42 @@ The Meteora USDG/USDC pool that held $37.8M at the June 2026 snapshot no longer 
 | `totalSupply()` | Token | Supply tracking | Every 6 hours |
 | `paused()` | Token | Operational status | Hourly |
 | `isFrozen(address)` | Token | Address freeze status | On integration |
-| `getSupplyController(address)` | SupplyControl | Controller status/limits | Daily |
+| `getSupplyControllerConfig(address)` | SupplyControl | Capacity, refill rate, whitelist, `allowAnyMintAndBurnAddress` | Daily |
+| `getAllSupplyControllerAddresses()` | SupplyControl | Detect a fourth controller being registered | Daily |
 | `getMinDelay()` | TimelockController | Timelock delay changes (currently 24h) | Weekly |
-| Role events | TimelockController | Monitor `RoleGranted`/`RoleRevoked` events — contract uses plain AccessControl, cannot enumerate | On change |
+| `owner()` | OFTWrapper | Bridge admin key rotation | Daily |
+| `peers(uint32)` | OFTWrapper | New/changed bridge routes | Daily |
+| `getFacet(bytes4)` | Token | Facet routing changes | On `FacetUpdate` |
+| `payoutGroupIdOf(address)` | Token | Whether your own vault/strategy has been enrolled in a payout group | On integration, then weekly |
+| Role events | Token / SupplyControl / TimelockController | Monitor `RoleGranted`/`RoleRevoked` — contracts use plain AccessControl, so holders cannot be enumerated and must be reconstructed from logs | On change |
 
 ## Risk Summary
 
 ### Key Strengths
 
-- **Regulated issuer with stablecoin track record:** Paxos is supervised by MAS (Singapore) and NYDFS (US). Has operated USDP since 2018 and PYUSD since 2023 with zero incidents across all stablecoins
-- **Highest-quality reserves:** Cash and cash equivalents (primarily U.S. Treasury Bills) in segregated accounts — equivalent to USDC's reserve quality
-- **Solid audit coverage:** 6 audits from 3 reputable firms including Trail of Bits and Zellic. Source code is open (MIT license)
-- **24-hour timelock on critical changes:** Contract upgrades and admin changes now have a 24-hour delay (improved from 3h), providing meaningful monitoring window for integrators
-- **Rate-limited minting:** Supply controllers have capacity limits and refill rates, preventing instantaneous unlimited minting
-- **Significant market adoption:** $3.29B total supply with major partners (Kraken, Robinhood, Galaxy Digital, BitGo). Strong growth trajectory
+- **Regulated issuer with stablecoin track record:** USDG is issued by Paxos Digital Singapore under MAS supervision; the group's US entity converted to an **OCC-supervised national trust bank** in December 2025. Paxos has operated USDP since 2018 and PYUSD since 2023 with zero incidents across all stablecoins
+- **Highest-quality reserves, now attested by KPMG:** Cash and cash equivalents (primarily U.S. Treasury Bills) in segregated accounts, with monthly examinations by **KPMG LLP** under ISCA standards since February 2026
+- **Solid audit coverage plus a live $1M bug bounty:** 6 USDG-relevant audits from 3 reputable firms including Trail of Bits and Zellic, and a **$1M Cantina bug bounty live since March 2026** covering the USDG contracts and cross-chain infrastructure. Source code is open (MIT license)
+- **24-hour timelock, actually exercised:** Both February 2026 upgrades were routed through the TimelockController rather than executed directly — the delay is real, not nominal
+- **Supply controller destination whitelisting:** The two EOA supply controllers can only mint to one whitelisted Paxos address each and can only burn their own balance. A key compromise cannot mint to an attacker or seize a holder's tokens
+- **Deep, verified exit liquidity:** A $10M USDG→USDC swap on Curve executes at 0.023% slippage (measured onchain); depth holds to ~$15M
+- **Significant market adoption:** $3.47B total supply with major partners (Kraken, Robinhood, Galaxy Digital, BitGo). Strong growth trajectory
 
 ### Key Risks
 
-- **Governance consolidated into an MPC wallet** — the MPC wallet ([`0x3Af3e85f4f97De7AD0f000B724Fb77fE5ffc024B`](https://etherscan.io/address/0x3Af3e85f4f97De7AD0f000B724Fb77fE5ffc024B)) holds PAUSE_ROLE, ASSET_PROTECTION_ROLE, timelock PROPOSER/EXECUTOR/CANCELLER, and SupplyControl SCM. The MPC structure (likely Fordefi) means the key is sharded across multiple parties, but the internal quorum and policy configuration are not publicly verifiable
-- **Multisigs removed from governance** — the 3-of-7 operational multisig (now 20 owners) and the 7-owner DEFAULT_ADMIN multisig (now 20 owners) no longer hold any onchain roles
-- **Emergency actions have no onchain multisig** — PAUSE and ASSET_PROTECTION are controlled by the MPC wallet with no onchain timelock. Internal MPC policy controls are the sole protection (previous model used a 3-of-7 multisig)
-- **No formal public bug bounty** — no confirmed Immunefi or equivalent program with monetary rewards. A private HackerOne program may exist but could not be verified
+- **Governance consolidated into an MPC wallet** — the MPC wallet ([`0x3Af3e85f4f97De7AD0f000B724Fb77fE5ffc024B`](https://etherscan.io/address/0x3Af3e85f4f97De7AD0f000B724Fb77fE5ffc024B)) holds PAUSE_ROLE, ASSET_PROTECTION_ROLE, timelock PROPOSER/EXECUTOR/CANCELLER, SupplyControl SCM, four rewards roles, and OFT wrapper ownership. The MPC structure (likely Fordefi) means the key is sharded across multiple parties, but the internal quorum and policy configuration are not publicly verifiable
+- **Bridge mint capacity raised 4.4× and its config is untimelocked** — SC3's ceiling went from 45M to **200M USDG/24h** between March and June 2026, and the same MPC wallet that owns the wrapper can add peers and rewrite the DVN quorum with immediate effect. This is the widest untimelocked path in the system
+- **Emergency actions have no onchain timelock** — PAUSE and ASSET_PROTECTION are controlled by the MPC wallet. Internal MPC policy controls are the sole protection
+- **New rewards subsystem with hot-wallet EOAs** — the V3 upgrade added 118 routed selectors, 6 roles, and three single-key EOA role-holders. It was audited by Zellic, but on a 1.2 person-week engagement, against a private repo (so deployed bytecode cannot be matched to the audited commit), and a corrective redeployment was needed two days after launch
 - **Offchain reserves** — reserves are entirely offchain with monthly attestation. No onchain Proof of Reserves mechanism for real-time verification
-- **Relatively new (21 months)** — younger than USDC (2018) or USDT (2014), though longer than many DeFi stablecoins
+- **CEX depth is thinner than headline volume suggests** — ~$11.3M across named CEX venues, with KuCoin no longer listing USDG. The $194.6M daily figure is mostly Robinhood Chain DEX volume, behind the bridge from an Ethereum holder's view
+- **Relatively new (22 months)** — younger than USDC (2018) or USDT (2014), though longer than many DeFi stablecoins
+- **Undisclosed material changes** — neither the governance restructure nor the V3 rewards system has any public announcement or documentation; the GitHub README's role list has been wrong for over a year
 
 ### Critical Risks
 
 - **Freeze/wipe capability** — `ASSET_PROTECTION_ROLE` (held by MPC wallet) can freeze any address and wipe frozen balances. This is standard for regulated stablecoins. The MPC structure provides internal governance, but from the contract's perspective this is a unilateral capability. For DeFi integrations, a frozen vault/strategy contract would lock all USDG held by that contract
-- **Upgradeable proxy with facet pattern** — the USDG contract can be upgraded via UUPS proxy AND can have functional behavior changed via the facet pattern (`setFacet`). Both controlled through the 24h timelock (MPC wallet as proposer/executor)
+- **Upgradeable proxy with facet pattern** — the USDG contract can be upgraded via UUPS proxy AND can have functional behavior changed across 118 selectors via `setFacet`. Both are `DEFAULT_ADMIN_ROLE` operations and therefore go through the 24h timelock (MPC wallet as proposer/executor)
 
 ---
 
@@ -370,9 +492,10 @@ The Meteora USDG/USDC pool that held $37.8M at the June 2026 snapshot no longer 
 
 ### Critical Risk Gates
 
-- [x] **No audit** — 6 audits by 3 reputable firms (Zellic, Trail of Bits, Halborn). ✅ PASS
-- [x] **Unverifiable reserves** — Offchain reserves, but monthly attestation by independent accounting firm, MAS regulatory oversight, segregated accounts. Multiple independent verification layers. ✅ PASS (same structure as USDC)
-- [x] **Total centralization** — Token admin is a TimelockController (24h). Operational roles (PAUSE, ASSET_PROTECTION) held by an MPC wallet (key sharded across multiple parties). Critical upgrades go through 24h timelock. SupplyControl admin under timelock. Not fully decentralized but not a single-key EOA — MPC structure provides multi-party security. ✅ PASS
+- [x] **Unverified contract source** — token proxy, token implementation, SupplyControl proxy/implementation, all five live facets, and the OFTWrapper are source-verified on Etherscan (confirmed via `getsourcecode`, August 15, 2026). ✅ PASS
+- [x] **No audit** — 6 USDG-relevant audits by 3 reputable firms (Zellic, Trail of Bits, Halborn), including one covering the V3 rewards system. ✅ PASS
+- [x] **Unverifiable reserves** — Offchain reserves, but monthly attestation by KPMG LLP under ISCA standards, MAS regulatory oversight, segregated accounts. Multiple independent verification layers. ✅ PASS (same structure as USDC)
+- [x] **Total centralization** — Token admin is a TimelockController (24h), and both 2026 upgrades were demonstrably routed through it. Operational roles (PAUSE, ASSET_PROTECTION) held by an MPC wallet (key sharded across multiple parties). SupplyControl admin under timelock. Not fully decentralized but not a single-key EOA. ✅ PASS
 
 **All gates pass.** Proceed to category scoring.
 
@@ -380,15 +503,31 @@ The Meteora USDG/USDC pool that held $37.8M at the June 2026 snapshot no longer 
 
 #### Category 1: Audits & Historical Track Record (Weight: 20%)
 
+**Subcategory A: Audits & Security Reviews**
+
 | Factor | Assessment |
 |--------|-----------|
-| Audits | 6 audits from 3 reputable firms: Zellic (3), Trail of Bits (1), Halborn (2). Covers core contracts, cross-chain, rewards, and signatures |
-| Bug bounty | No confirmed public bug bounty. Possible private HackerOne program |
-| Production history | **~21 months** (Oct 2024). Paxos has 7+ years stablecoin experience (USDP since 2018) |
-| TVL | **~$3.29B** total supply, ~$452M on Ethereum |
-| Security incidents | None. Zero incidents across all Paxos stablecoins (USDP, PYUSD, USDG) |
+| Audits | 6 USDG-relevant audits from 3 reputable firms: Zellic (3), Trail of Bits (1), Halborn (2). Covers core contracts, cross-chain, rewards, and signatures |
+| Bug bounty | **$1M max payout, live on Cantina since March 27, 2026**, Cantina-triaged, USDG contracts and cross-chain infrastructure explicitly in scope. Invite-only rather than open |
+| Contract surface | Increased materially — UUPS proxy + 118 facet-routed selectors + 10 roles + rewards share accounting on the transfer path |
+| V3 audit depth | 1.2 person-weeks over 4 calendar days for the largest change since launch; private repo, so deployed bytecode is not third-party matchable to the audited commit |
 
-**Score: 2.0/5** — Solid audit coverage from 3 reputable firms including Trail of Bits (industry gold standard). 21 months of production with $3.29B supply and zero incidents, plus Paxos's 7+ year stablecoin track record lends additional confidence. However, the lack of a formal public bug bounty prevents a score of 1.5. Between score 1 (3+ audits, >2 years, >$100M) and score 2 (2+ audits, 1-2 years, >$50M) — the strong firm quality and massive TVL push toward 1.5, while the production history and no bug bounty push toward 2.
+**Audits Score: 1.5/5** — Rubric row 1 requires "3+ audits by top firms" (satisfied: Zellic ×3, Trail of Bits, Halborn ×2) and "Active, max payout >$1M" (nearly satisfied: exactly $1M, live and triaged, but invite-only). Two factors hold this off a clean 1: the bounty is gated rather than open, and the rubric's note that "simple contract surface scores better than highly complex ones" now cuts against USDG — the diamond-facet rewards system is a substantial new surface reviewed on a light engagement. → **1.5**.
+
+**Subcategory B: Historical Track Record**
+
+| Factor | Assessment |
+|--------|-----------|
+| Production history | **~22 months** (Oct 7, 2024 deployment). Paxos has 7+ years stablecoin experience (USDP since 2018) |
+| TVL | **~$3.47B** total supply, ~$449M on Ethereum — sustained well above $100M for over a year |
+| Security incidents | None. Zero incidents across all Paxos stablecoins (USDP, PYUSD, USDG) |
+| Peg record | Never below $0.995 over the trailing 365 days |
+
+**Historical Score: 1.5/5** — Scale is unambiguously row 1 (sustained >$100M, by a factor of 30). Time in production is 22 months, just short of the ">2 years" row-1 threshold and at the top of the 1–2 year row-2 band. Splitting these gives **1.5**. This will mechanically improve to 1.0 in October 2026 absent any incident.
+
+**Audits & Historical Score = (1.5 + 1.5) / 2 = 1.5**
+
+**Score: 1.5/5** *(was 2.0)* — The reduction is driven by two verifiable changes rather than a softer reading of the same facts: **(a)** the "no formal public bug bounty" finding, which was the explicit blocker on a 1.5 in the previous revision, no longer holds — Paxos has run a live $1M Cantina program covering USDG since March 2026; and **(b)** production history crossed 21→22 months while supply grew to $3.47B with zero incidents. The offsetting negative — a much larger and more complex contract surface after V3, reviewed on a 1.2 person-week engagement — is what keeps this at 1.5 rather than 1.0.
 
 #### Category 2: Centralization & Control Risks (Weight: 30%)
 
@@ -396,41 +535,45 @@ The Meteora USDG/USDC pool that held $37.8M at the June 2026 snapshot no longer 
 
 | Factor | Assessment |
 |--------|-----------|
-| Upgradeability | UUPS proxy — upgradeable via TimelockController (24h delay) |
+| Upgradeability | UUPS proxy — upgradeable via TimelockController (24h delay). Both 2026 upgrades verifiably routed through the timelock |
 | Token admin | TimelockController (24h) — PROPOSER/EXECUTOR/CANCELLER all held by MPC wallet |
 | Operational roles | **MPC wallet** holds PAUSE, ASSET_PROTECTION directly (no onchain timelock, but MPC provides multi-party internal approvals) |
-| SupplyControl admin | DEFAULT_ADMIN under 24h timelock (improvement); SCM held by same MPC wallet |
-| Privileged roles | Can pause all transfers, freeze/wipe individual addresses, upgrade contracts, change facets — all through MPC wallet with 24h timelock on critical changes |
+| SupplyControl admin | DEFAULT_ADMIN under 24h timelock; SCM held by same MPC wallet |
+| Supply controller scope | **Mitigant:** SC1/SC2 restricted to one whitelisted mint destination each and can only burn their own balance — verified onchain, never changed since registration |
+| Bridge configuration | **Aggravator:** MPC wallet is `owner()` of the OFT wrapper and its LayerZero delegate, with no timelock, upstream of a 200M USDG/24h mint path |
+| Rewards roles | **Aggravator:** 6 new roles since Feb 2026; three held by single-key hot-wallet EOAs; two MPC-held roles can redirect reward payouts |
 | MPC transparency | Internal quorum/threshold and policy configuration not publicly verifiable — security depends on Paxos's internal controls |
-| Regulatory | MAS-supervised — provides offchain governance and accountability |
+| Regulatory | MAS-supervised issuer; OCC-supervised US group entity — provides offchain governance and accountability |
 
-**Governance Score: 3.5/5** — The 24h timelock and SupplyControl DEFAULT_ADMIN under timelock are genuine security improvements. All governance power is held by an **MPC wallet** (likely Fordefi) where the private key is sharded across multiple parties — fundamentally different from a standard single-key EOA. The gas station funding pattern (5.6M+ nonce gas station funding 62+ EOAs, just-in-time ETH top-ups) is definitive evidence of institutional MPC custody infrastructure. However, the internal MPC quorum and policy configuration are not publicly verifiable. The emergency actions (pause/freeze) have no onchain timelock but benefit from MPC multi-party controls. Between score 3 (multisig with timelock, 24+ hours, moderate admin powers) and score 4 (low threshold, <12h timelock, powerful admin roles) — the MPC structure and 24h timelock support score 3, while the unknown internal quorum and powerful emergency capabilities (no onchain timelock) push toward 3.5.
+**Governance Score: 3.5/5** *(unchanged)* — This category was re-examined closely for a possible reduction and the conclusion is that it should hold. The case for lowering is real: the 24h timelock is demonstrably exercised rather than nominal, and the newly-verified destination whitelisting on SC1/SC2 removes the "two EOAs can mint anywhere" concern that previous revisions implied. But three findings new to this revision push the other way and roughly cancel it out: **(1)** the MPC wallet owns the OFT wrapper and is its LayerZero delegate with no timelock, so it can add a mint route or replace the DVN quorum instantly — the 24h warning window that protects upgrades does not protect the bridge; **(2)** SC3's untimelocked-adjacent mint ceiling rose from 45M to 200M/24h; **(3)** the V3 rewards system reintroduced three single-key EOA role-holders. Against the rubric, score 3 ("some powerful roles, constrained by timelock") understates the untimelocked surface and score 4 ("powerful admin roles with limited constraints") overstates it given the MPC structure and real 24h delay on upgrades. **3.5** remains correct.
 
 **Subcategory B: Programmability**
 
 | Factor | Assessment |
 |--------|-----------|
 | Token operations | Standard ERC-20, fully onchain and programmatic |
-| Exchange rate | Fixed 1:1 USD peg — no oracle dependency |
-| Minting/burning | Onchain via SupplyControl, but Paxos-controlled (not permissionless) |
+| Exchange rate | Fixed 1:1 USD peg — no PPS to compute, no oracle dependency, no admin-updatable rate |
+| Minting/burning | Onchain via SupplyControl with onchain rate limits and destination whitelists, but Paxos-controlled (not permissionless) |
+| Partner rewards | **Now onchain** (V3, Feb 2026) — shares/multiplier accrual settled from a funded claim source, replacing 30-day offchain reconciliation |
 | Reserves | Entirely offchain — managed by Paxos and custodians |
 | Reporting | Monthly attestation (offchain), no real-time onchain reporting |
 
-**Programmability Score: 3.5/5** — Token operations are fully onchain and programmatic. However, reserves are entirely offchain with no onchain visibility into specific holdings. Minting/burning is controlled by Paxos (not permissionless). The lack of permissionless minting/redemption and entirely offchain reserve management push beyond a pure hybrid model. Per rubric: between "Hybrid onchain/offchain operations" (3) and "Significant manual intervention required" (4).
+**Programmability Score: 3.0/5** *(was 3.5)* — The previous 3.5 leaned on "the lack of permissionless minting/redemption and entirely offchain reserve management push beyond a pure hybrid model." On a closer reading of the rubric, that reasoning double-counts. The rubric's second column is *PPS/Rate Definition*, and USDG has no exchange rate for an admin to set — the peg is a hard 1:1 constant, which is strictly better than row 3's "onchain but reliant on admin updates," not worse. Reserve custody is offchain, but that is a **collateralization/provability** property already scored in Category 3 rather than a programmability one. On operations alone USDG is a clean row 3: transfers, approvals, mint/burn authorization, rate limiting, and now reward accrual all execute onchain, with offchain reserve management behind them. The V3 change moved a genuinely offchain monthly reconciliation process onchain, which is directional evidence for the lower score. Row 4 ("significant manual intervention required," "offchain accounting with periodic reporting") does not describe the token's operations. → **3.0**.
 
 **Subcategory C: External Dependencies**
 
 | Factor | Assessment |
 |--------|-----------|
 | DeFi protocols | None — standalone stablecoin |
-| Infrastructure | Banking/custodian (inherent to fiat-backed), LayerZero (bridging) |
-| Criticality | Banking dependency is fundamental but not a DeFi protocol risk |
+| Infrastructure | Banking/custodian (inherent to fiat-backed), LayerZero V2 (bridging) |
+| Criticality | Banking dependency is fundamental but not a DeFi protocol risk. LayerZero is non-critical to an Ethereum holder's balance but is now an inbound mint path of up to 200M USDG/24h |
+| Exposure trend | ~87% of total supply sits on chains reachable only through the wrapper; SC3 capacity 45M → 200M since the last assessment |
 
-**Dependencies Score: 1.5/5** — Minimal external protocol dependencies. Banking infrastructure dependency is inherent to all fiat-backed stablecoins (USDC, USDT). The LayerZero bridge is non-critical for Ethereum-only usage — an Ethereum holder's balance does not depend on it — though the wrapper's inbound path can mint canonical USDG on Ethereum, bounded by the 45M SC3 capacity and a 3-of-3 DVN quorum on every configured route. Between score 1 (no external dependencies) and score 2 (1-2 blue-chip dependencies).
+**Dependencies Score: 2.0/5** *(was 1.5)* — Still only two dependencies, both blue-chip, and neither is required for an Ethereum holder to hold or transfer USDG. But the LayerZero exposure is no longer marginal enough to justify rounding toward "no external dependencies": the wrapper is a registered supply controller with unrestricted mint destinations and a ceiling that quadrupled to 200M USDG/24h over four months, and its peer set and DVN configuration are controlled by an untimelocked key. The 3-of-3 DVN quorum on every configured route is a real protection, but only two of the three verifiers are independent of Paxos, and the quorum itself is mutable by the wrapper's owner. Rubric row 2 ("1-2 blue-chip dependencies / non-critical") now describes this squarely. → **2.0**.
 
-**Centralization Score = (3.5 + 3.5 + 1.5) / 3 = 2.83**
+**Centralization Score = (3.5 + 3.0 + 2.0) / 3 = 2.83**
 
-**Score: 2.8/5** — Governance was previously split across two multisigs (a 7-owner DEFAULT_ADMIN multisig and a 3-of-7 operational multisig) but has since been consolidated into a single MPC wallet (likely Fordefi) with key sharding across multiple parties. The 24h timelock on critical changes and MPC multi-party structure provide reasonable governance security. Reserves are entirely offchain and Paxos controls minting. The unknown internal MPC quorum is a transparency gap.
+**Score: 2.8/5** *(unchanged)* — The subcategory movements offset. Programmability improves (3.5 → 3.0) on a corrected reading of the rubric plus the V3 move of reward accounting onchain; dependencies worsen (1.5 → 2.0) on the bridge's expanded mint capacity and untimelocked configuration; governance holds at 3.5 because the newly-verified supply-controller whitelisting is roughly cancelled by the newly-identified untimelocked ownership of the bridge and the reintroduction of hot-wallet EOAs. The category total is materially better-evidenced than in the previous revision even though the number is the same.
 
 #### Category 3: Funds Management (Weight: 30%)
 
@@ -450,30 +593,37 @@ The Meteora USDG/USDC pool that held $37.8M at the June 2026 snapshot no longer 
 
 | Factor | Assessment |
 |--------|-----------|
-| Reserve transparency | Monthly attestation by independent accounting firm |
-| Onchain verification | Supply verifiable onchain; reserves are not |
+| Reserve transparency | Monthly attestation by **KPMG LLP** (Big Four) under ISCA standards, for all reports since February 27, 2026 |
+| Onchain verification | Supply verifiable onchain on every chain; reserves are not |
 | Chainlink PoR | Not available |
-| Reporting | Monthly reports published on transparency portal |
-| Regulatory oversight | MAS supervision with regulatory reporting requirements |
+| Reporting | Monthly reports published on the [transparency portal](https://www.paxos.com/usdg-transparency) |
+| Regulatory oversight | MAS supervision of the issuer with regulatory reporting requirements; OCC supervision of the US group entity |
 
-**Provability Score: 3.5/5** — Monthly attestation provides periodic verification, but reserves are entirely offchain with no real-time onchain verification mechanism and no Chainlink Proof of Reserves. MAS regulatory oversight adds an independent layer, but token holders cannot independently verify reserves between attestation periods. Per rubric: between "Manual reporting by admins, known custodian attestation" (3) and "Infrequent reporting, self-reported only" (4).
+**Provability Score: 3.0/5** *(was 3.5)* — The previous 3.5 placed USDG between rubric rows 3 and 4, with row 4 partly justified by "self-reported only." That is no longer accurate, and arguably was not accurate before: attestations are performed monthly by a named third party, and since February 2026 that party is **KPMG LLP** examining under Institute of Singapore Chartered Accountants standards. Row 3 reads "Hybrid onchain/offchain | Manual reporting by admins | **Known custodian attestation**" — which is a precise description of the current arrangement, on all three columns. Row 4's "infrequent reporting" and "self-reported only" do not apply to monthly Big Four examination. Real-time onchain verification is still absent and no Chainlink PoR exists, which is what keeps this at 3 rather than 2. → **3.0**. This is also consistent with the corpus: `superstate-ustb`, whose Treasury holdings are behind a gated investor portal, is scored 3.0 on provability.
 
-**Funds Management Score = (2.0 + 3.5) / 2 = 2.75**
+**Funds Management Score = (2.0 + 3.0) / 2 = 2.5**
 
-**Score: 2.75/5** — Highest-quality collateral (U.S. Treasuries) with regulatory requirements for 1:1 backing and segregated custody. The offchain nature of reserves and reliance on monthly attestation (rather than real-time onchain proof) is the primary weakness — standard for fiat-backed stablecoins.
+**Score: 2.5/5** *(was 2.75)* — Highest-quality collateral (U.S. Treasuries) with regulatory requirements for 1:1 backing and segregated custody. The offchain nature of reserves remains the primary weakness, but the verification layer around them is stronger than previously credited: monthly KPMG examination under a named professional standard, plus MAS supervision of the issuer.
 
 #### Category 4: Liquidity Risk (Weight: 15%)
 
 | Factor | Assessment |
 |--------|-----------|
-| Exit mechanism | DEX swap (permissionless), CEX trade, or direct Paxos redemption (KYC) |
-| DEX liquidity (ETH) | ~$24.2M across Curve, Uniswap V4 and Ekubo ($20.5M in Curve USDG/USDC) |
-| CEX liquidity | OKX, Kraken, Bullish, KuCoin, Gate.io — total ~$24M 24h volume |
+| Exit mechanism | DEX swap (permissionless), CEX trade, or direct Paxos redemption (KYC, business hours) |
+| DEX liquidity (ETH) | ~$34.3M across 8 pools ($30.5M in Curve USDG/USDC) |
+| CEX liquidity | OKX, Bullish, Biconomy, Kraken, Gate — ~$11.3M 24h volume (thinner than previously reported; KuCoin delisted) |
 | Direct redemption | 1:1 from Paxos (unlimited, KYC required) |
-| Same-value asset | USD stablecoin — no price divergence risk |
-| Slippage | <0.5% for $1M swap on Curve USDG/USDC |
+| Same-value asset | USD stablecoin — no price divergence risk; never traded below $0.995 in 365 days |
+| Slippage (measured onchain) | $10M at **0.023%**; $15M at 0.068%; single-pool ceiling ~$17M |
 
-**Score: 2.0/5** — Multiple exit paths: DEX (permissionless, ~$24.2M ETH liquidity), CEX (major exchanges), and direct Paxos redemption (1:1, KYC). Same-value asset eliminates price risk. The ~$24.2M Ethereum DEX liquidity is modest relative to ~$452M onchain supply and concentrated in one Curve pool — exits well above $5M benefit from CEX routing or Paxos redemption. Direct redemption provides a strong backstop but requires KYC friction. Per rubric: "Direct redemption with minor delays" + ">$5M, <1% slippage" + same-value asset adjustment → score 2.
+**Score: 1.5/5** *(was 2.0)* — The previous 2.0 rested on an estimate ("<0.5% for a $1M swap") that live `get_dy` quotes show to be roughly two orders of magnitude too conservative. Scoring the rubric column by column:
+
+- **Liquidity depth** — row 1 requires ">$10M, <0.5% slippage." Measured: $10M executes at 0.023% and $15M at 0.068% in a *single* Curve pool, before any routing across the other seven Ethereum pools or CEX venues. Comfortably row 1.
+- **Large holder impact** — row 1 requires "full exit with <0.5% impact." Any position up to ~$15M clears that on Curve alone. Row 1.
+- **Exit mechanism** — direct 1:1 redemption exists and is unlimited, but requires a KYC account and business-hours processing, so it is row 2 ("direct redemption with minor delays") rather than row 1 ("instant").
+- **Adjustment** — USDG is a same-value asset, which the rubric notes "can accept higher exit times."
+
+Two of three columns are row 1, one is row 2, with a favourable adjustment → **1.5**. The residual concerns are real but do not support a 2.0: depth is concentrated (89% of Ethereum DEX liquidity in one Curve pool, with a hard cliff past ~$17M once the USDC side is drawn down), and the CEX backstop is thinner than earlier revisions claimed. Both argue against going to 1.0, not against 1.5.
 
 #### Category 5: Operational Risk (Weight: 5%)
 
@@ -481,31 +631,41 @@ The Meteora USDG/USDC pool that held $37.8M at the June 2026 snapshot no longer 
 |--------|-----------|
 | Team | Paxos: founded 2012, 200+ employees. Charles Cascarilla (CEO), Rich Teo (co-founder) |
 | Stablecoin experience | 7+ years: USDP (2018), PYUSD (2023), USDG (2024). Zero incidents |
-| Regulation | MAS-supervised (Singapore), NYDFS-regulated (US entity), MiCA compliant |
-| Documentation | Comprehensive docs, open-source MIT code, API reference |
-| Legal structure | Singapore Major Payments Institution with US and EU sister entities |
+| Regulation | MAS-supervised issuer (Singapore); US group entity **OCC-supervised** since Dec 12, 2025 (Charter 25379, converted from NYDFS); MiCA compliant |
+| Documentation | Comprehensive integration docs and open-source MIT code — but governance and the V3 rewards system are undocumented, and the GitHub README's role list is over a year stale |
+| Legal structure | Singapore Major Payments Institution, with a US federal trust bank and EU sister entity |
 | Partners | Kraken, Robinhood, Galaxy Digital, BitGo, Anchorage Digital |
 
-**Score: 1.5/5** — Paxos is one of the most established and well-regulated companies in the stablecoin space. 7+ year track record with zero incidents, comprehensive regulatory framework spanning Singapore (MAS), US (NYDFS), and EU (MiCA). Strong institutional partners. Open-source code with comprehensive documentation.
+**Score: 1.5/5** *(unchanged)* — Paxos is one of the most established and well-regulated companies in the stablecoin space, and the legal/compliance column strengthened this period: the US entity moved from state (NYDFS) to federal (OCC) supervision, which is row 1 on "clear legal structure" by any reading. What holds this at 1.5 rather than 1.0 is the documentation column. Row 1 requires "excellent, comprehensive" documentation, and the public record materially misdescribes the system: the GitHub README still names multisigs that have held no roles since August 2025, and neither the governance restructure nor a rewards subsystem now covering ~80% of Ethereum supply has any public announcement. Integration docs are strong; governance and protocol-change disclosure is not.
 
 ### Final Score Calculation
 
 ```
 Final Score = (Centralization × 0.30) + (Funds Mgmt × 0.30) + (Audits × 0.20) + (Liquidity × 0.15) + (Operational × 0.05)
-            = (2.8 × 0.30) + (2.75 × 0.30) + (2.0 × 0.20) + (2.0 × 0.15) + (1.5 × 0.05)
-            = 0.84 + 0.825 + 0.40 + 0.30 + 0.075
-            = 2.44
-            ≈ 2.4
+            = (2.8 × 0.30) + (2.5 × 0.30) + (1.5 × 0.20) + (1.5 × 0.15) + (1.5 × 0.05)
+            = 0.84 + 0.75 + 0.30 + 0.225 + 0.075
+            = 2.19
+            ≈ 2.2
 ```
 
-| Category | Score | Weight | Weighted |
-|----------|-------|--------|----------|
-| Audits & Historical | 2.0 | 20% | 0.40 |
-| Centralization & Control | 2.8 | 30% | 0.84 |
-| Funds Management | 2.75 | 30% | 0.825 |
-| Liquidity Risk | 2.0 | 15% | 0.30 |
-| Operational Risk | 1.5 | 5% | 0.075 |
-| **Final Score** | | | **2.4/5.0** |
+| Category | Score | Weight | Weighted | Change |
+|----------|-------|--------|----------|--------|
+| Audits & Historical | 1.5 | 20% | 0.30 | ▼ from 2.0 |
+| Centralization & Control | 2.8 | 30% | 0.84 | — |
+| Funds Management | 2.5 | 30% | 0.75 | ▼ from 2.75 |
+| Liquidity Risk | 1.5 | 15% | 0.225 | ▼ from 2.0 |
+| Operational Risk | 1.5 | 5% | 0.075 | — |
+| **Final Score** | | | **2.2/5.0** | ▼ from 2.4 |
+
+**Why the score moved down.** Three reductions, each traceable to a specific verifiable fact rather than a re-reading of the same evidence:
+
+| Change | Driver | Evidence |
+|--------|--------|----------|
+| Audits 2.0 → 1.5 | The "no public bug bounty" blocker no longer holds | $1M Cantina program live since Mar 27, 2026, USDG explicitly in scope |
+| Funds Mgmt 2.75 → 2.5 | Provability 3.5 → 3.0 | Monthly attestation by KPMG LLP under ISCA standards since Feb 27, 2026 |
+| Liquidity 2.0 → 1.5 | Depth measured rather than estimated | Onchain `get_dy`: $10M at 0.023%, $15M at 0.068% |
+
+**What did not move, and why.** Centralization stayed at 2.8 despite a genuine mitigant coming to light (SC1/SC2 mint-destination whitelisting), because three offsetting findings surfaced in the same review: the MPC wallet owns the OFT wrapper and its DVN configuration with no timelock, SC3's mint ceiling rose from 45M to 200M/24h, and the V3 rewards system reintroduced three hot-wallet EOA role-holders. Operational stayed at 1.5 because the OCC upgrade on the compliance axis is offset by a documentation record that misdescribes governance and omits the rewards system entirely.
 
 ### Risk Tier
 
@@ -517,23 +677,29 @@ Final Score = (Centralization × 0.30) + (Funds Mgmt × 0.30) + (Audits × 0.20)
 | 3.5-4.5 | Elevated Risk | Limited approval, strict limits |
 | 4.5-5.0 | High Risk | Not recommended |
 
-**Final Risk Tier: Low Risk (2.4/5.0) — Approved with standard monitoring**
+**Final Risk Tier: Low Risk (2.2/5.0) — Approved with standard monitoring**
 
-USDG benefits from Paxos's established stablecoin track record, highest-quality collateral (U.S. Treasuries), strong regulatory framework (MAS + MiCA), and solid audit coverage. The governance restructuring consolidated onchain control into a single MPC wallet (likely Fordefi) with key sharding across multiple parties — onchain investigation confirms this is institutional-grade MPC infrastructure, not a standard single-key EOA. The 24h timelock on critical changes provides a meaningful monitoring window. While the internal MPC quorum is not publicly verifiable, the overall risk profile remains comparable to other regulated fiat-backed stablecoins.
+USDG benefits from Paxos's established stablecoin track record, highest-quality collateral (U.S. Treasuries), a strengthened regulatory framework (MAS for the issuer, OCC federal supervision for the US group entity, MiCA in the EU), solid audit coverage now backed by a live $1M bug bounty, and materially deeper exit liquidity than previously credited — a $10M Ethereum exit clears at 0.023% slippage. The governance restructuring consolidated onchain control into a single MPC wallet with key sharding across multiple parties, and the 24h timelock on upgrades is demonstrably exercised rather than nominal.
+
+The tier is unchanged; the score moves from 2.4 to 2.2 on three specific, evidenced improvements. The concerns that keep it from going lower are concentrated in one place: the powers that sit **outside** the timelock. Pause, freeze, and — newly identified in this revision — the OFT wrapper's peer set and DVN configuration can all be exercised immediately by one MPC-controlled address, with the bridge path now able to mint up to 200M USDG per day into arbitrary Ethereum addresses. For an integrator, the practical implications are to monitor `PeerSet` and DVN-config changes on the wrapper as closely as timelock events, and to treat any first-ever flip of `allowAnyMintAndBurnAddress` on SC1 or SC2 as a high-priority alert.
 
 ---
 
 ## Reassessment Triggers
 
-- **Time-based:** Reassess in 6 months (December 2026)
-- **TVL-based:** Reassess if total supply changes by more than ±50% from current $3.29B
+- **Time-based:** Reassess in 6 months (February 2027)
+- **TVL-based:** Reassess if total supply changes by more than ±50% from current $3.47B
 - **Incident-based:** Reassess after any exploit, freeze affecting DeFi protocols, depegging event, or adverse regulatory action
 - **Governance-based (IMPORTANT):** Reassess if governance transitions from MPC wallet back to multisig (score improvement), or if MPC wallet shows signs of compromise. Any change in role holders, timelock delay, or MPC provider/gas station infrastructure warrants reassessment
 - **MPC transparency:** Reassess if Paxos discloses MPC provider, quorum, and policy configuration (potential score improvement from reduced uncertainty)
 - **Governance-based:** Reassess if SupplyControl admin or SCM transitions, or if multisig composition/threshold changes
-- **Regulatory-based:** Reassess if MAS takes enforcement action, if Paxos loses its MPI license, or if regulatory status changes
-- **Bug bounty:** Reassess if Paxos launches a public bug bounty (score improvement)
+- **Bridge-based (IMPORTANT):** Reassess on any `PeerSet` event adding or repointing a chain on the OFT wrapper, any change to its `owner()` or LayerZero delegate, any receive-library/DVN configuration change, or any further increase to SC3's mint capacity beyond 200M USDG/24h
+- **Supply-controller scope:** Reassess immediately if `AllowAnyMintAndBurnAddressUpdated` fires for SC1 or SC2, or if a mint-destination whitelist changes. None of these events has ever occurred; the first would remove the principal mitigant on the EOA supply controllers
+- **Rewards system:** Reassess if the `claimSource` changes, if rewards roles move to or from EOAs, if partner-signed registrations are enabled, or if a Yearn-controlled address is registered into a payout group
+- **Regulatory-based:** Reassess if MAS takes enforcement action, if Paxos loses its MPI license, if the OCC modifies or rescinds the conditional approval of Charter 25379, or if USDG issuance moves between legal entities
+- **Bug bounty:** Reassess if the Cantina program opens to the public (further improvement) or is discontinued (deterioration)
 - **Proof of Reserves:** Reassess if onchain reserve verification (e.g., Chainlink PoR) is deployed (score improvement)
+- **Attestation:** Reassess if the attestor changes from KPMG LLP or the monthly cadence lapses
 
 ---
 
@@ -544,6 +710,7 @@ USDG benefits from Paxos's established stablecoin track record, highest-quality 
 | [March 20, 2026](https://github.com/yearn/risk-score/pull/102) | 2.4 | Initial assessment |
 | [June 26, 2026](https://github.com/yearn/risk-score/pull/270) | 2.4 | Reassessment: governance restructured to a single MPC wallet, timelock 3h → 24h; score unchanged |
 | [July 30, 2026](https://github.com/yearn/risk-score/pull/366) | 2.4 | Reassessment: supply/chain refresh (Robinhood Chain added, 6 chains with material supply), LayerZero peer set and DVN quorum enumerated onchain; score unchanged |
+| August 15, 2026 | 2.2 | Full review. Corrected US regulator NYDFS → OCC ([#388](https://github.com/yearn/risk-score/issues/388)); found the live $1M Cantina bug bounty and the KPMG attestation upgrade; documented the previously-unreported V3 rewards system (5 facets, 118 selectors, 6 roles, 28 payout groups); corrected the inverted supply-controller `Allow Any Address` column and the stale 45M → 200M SC3 capacity; identified untimelocked MPC ownership of the OFT wrapper and its DVN config; replaced estimated slippage with onchain `get_dy` measurements; added Aave v3/v4 collateral-factor data to the lending appendix. Audits 2.0→1.5, Funds Mgmt 2.75→2.5, Liquidity 2.0→1.5 |
 
 ---
 
@@ -571,21 +738,23 @@ USDG benefits from Paxos's established stablecoin track record, highest-quality 
 - This is the same risk profile as USDC (Circle can freeze addresses) — it has never been used against DeFi protocols but the capability exists
 - **Mitigation:** Ensure the vault/strategy addresses are known to Paxos and not on any sanctions list
 
-**Liquidity Risk for yvUSD: LOW-MEDIUM**
-- Ethereum DEX liquidity (~$24.2M) supports moderate position sizes
-- A yvUSD strategy holding <$2M in USDG-related positions could exit via DEX with <0.5% slippage
-- Larger positions would require CEX routing or Paxos redemption
-- Given yvUSD's current TVL (~$3M), USDG liquidity is adequate for current scale
+**Liquidity Risk for yvUSD: LOW**
+- Ethereum DEX liquidity (~$34.3M) with **measured** execution: $10M exits at 0.023% slippage, $15M at 0.068% on the Curve USDG/USDC pool alone
+- The practical single-pool ceiling is ~$17M; beyond that, route across the other seven Ethereum pools or use Paxos redemption
+- Given yvUSD's scale, USDG liquidity is comfortably adequate — liquidity is not the binding constraint on this integration
 
-**Overall Assessment for yvUSD:** USDG is a **suitable stablecoin asset** for yvUSD strategies at current scale. Risk is comparable to other regulated stablecoins. Recommend limiting USDG exposure to <20% of vault TVL until DEX liquidity deepens further.
+**Rewards-enrolment note (new):** a yvUSD strategy address holding USDG can be registered into a Paxos payout group by the `PAYOUT_GROUP_REGISTRAR_ROLE` EOA **without consent**. This does not move or encumber the strategy's principal, but it routes the reward accrual on that balance to the group's configured destination — potentially a third party. Check `payoutGroupIdOf(<strategy>)` on the token at integration time and monitor `AccountRegistered` events for Yearn-controlled addresses.
+
+**Overall Assessment for yvUSD:** USDG is a **suitable stablecoin asset** for yvUSD strategies. Risk is comparable to other regulated stablecoins. The earlier "<20% of vault TVL until DEX liquidity deepens" caveat can be relaxed — DEX liquidity has deepened and is now measured rather than estimated. The remaining position-size logic should be driven by freeze risk and issuer concentration, not by exit depth.
 
 | Risk Factor | Level | Notes |
 |------------|-------|-------|
-| Depeg | Low | Regulated, T-Bill backed, 7+ year Paxos track record |
-| Smart Contract | Low-Medium | 6 audits, but upgradeable with 24h timelock |
+| Depeg | Low | Regulated, T-Bill backed, KPMG-attested; never below $0.995 in 365 days |
+| Smart Contract | Low-Medium | 6 audits + $1M bounty, but upgradeable, and V3 added 118 facet-routed selectors on a light audit engagement |
 | Freeze | Medium | Standard for regulated stablecoins, never used vs DeFi |
-| Liquidity | Low-Medium | ~$24.2M DEX adequate for current yvUSD scale |
-| **Overall** | **Low-Medium** | Suitable with position size limits |
+| Liquidity | Low | ~$34.3M DEX; $10M exits at 0.023% measured onchain |
+| Rewards enrolment | Low | Non-custodial, but a registrar EOA can redirect reward accrual on a held balance |
+| **Overall** | **Low-Medium** | Suitable; freeze risk, not liquidity, is the binding constraint |
 
 ## Appendix B — USDG Risk as Collateral for yvUSDC-1 Lending
 
@@ -599,9 +768,22 @@ USDG benefits from Paxos's established stablecoin track record, highest-quality 
 - No history of depegging or reserve shortfalls
 - Appropriate for same-value lending (USDG collateral for USDC borrows)
 
+### What the major lending markets actually do with USDG
+
+This is the most important correction in this appendix. Earlier revisions recommended a 90% max LTV without checking what live venues assign. **Every major Ethereum lending market currently assigns USDG a collateral factor of zero** — it is listed as a borrowable/supply asset, not as collateral. Read onchain August 15, 2026:
+
+| Venue | USDG role | LTV / Collateral Factor | Liquidation threshold | Notes |
+|-------|-----------|------------------------:|----------------------:|-------|
+| **Aave v3** (Ethereum) | Borrow-only | **0** | 0 | `usageAsCollateralEnabled = false`, `borrowingEnabled = true`, active, not frozen. Borrow cap 100M, supply cap 120M, reserve factor 20%. Read via `AaveProtocolDataProvider.getReserveConfigurationData` on [`0x0a16…bECD`](https://etherscan.io/address/0x0a16f2FCC0D44FaE41cc54e079281D84A363bECD) |
+| **Aave v4** (Core spoke [`0x94e7…c485`](https://etherscan.io/address/0x94e7A5dCbE816e498b89aB752661904E2F56c485)) | Borrow-only | **collateralFactor = 0** | maxLiquidationBonus 10000 (= 1.0×), liquidationFee 0 | Reserve id 11. 64,683,806.35 USDG supplied, 19,662,983.50 borrowed. Same treatment as EURC, RLUSD, frxUSD, GHO in that spoke — while USDC and USDT both carry CF 7800 |
+| **Morpho Blue** (Ethereum) | Loan asset only | n/a | n/a | **Zero markets use USDG as collateral.** Three dust-sized markets (WBTC, wstETH, cbBTC collateral) borrow USDG at 86% LLTV |
+| **Maple** | Lending pool asset | n/a | n/a | $262.0M syrupUSDG — the largest single USDG venue on Ethereum |
+
+The pattern is unambiguous and consistent across independent risk managers: USDG is treated as a good asset to *lend* and a poor asset to *collateralize*, most plausibly because of the freeze/wipe capability discussed below rather than because of any depeg concern. Aave's own risk process assigns USDC and USDT an 78% collateral factor in the same spoke where USDG gets zero.
+
 **Liquidation Risk: MEDIUM**
-- **DEX liquidation path:** Curve USDG/USDC pool ($20.5M liquidity) is the primary liquidation venue on Ethereum. A $1M liquidation would execute with <0.5% slippage. However, a $5M+ simultaneous liquidation could move the market
-- **Liquidation depth vs exposure:** Current Ethereum DEX liquidity (~$24.2M, ~85% in one Curve pool) supports liquidation of positions up to ~$5M without excessive slippage. Larger positions require multi-block liquidation or CEX routing
+- **DEX liquidation path:** the Curve USDG/USDC pool ($30.5M liquidity) is the primary liquidation venue on Ethereum. Measured onchain: a $10M liquidation executes at 0.023% slippage and a $15M liquidation at 0.068%. The prior estimate of "<0.5% for $1M, and $5M+ could move the market" was far too conservative
+- **Liquidation depth vs exposure:** the hard constraint is the ~$18.1M USDC side of the pool. A $20M single-block liquidation would incur ~9.5% slippage; positions above ~$15M need multi-block execution or routing across the other seven Ethereum pools
 - **Same-value asset:** Since USDG and USDC are both USD stablecoins, liquidation is essentially a stablecoin-to-stablecoin swap — much lower risk than volatile collateral liquidations
 
 **Freeze Risk for Lending: MEDIUM-HIGH**
@@ -615,18 +797,21 @@ USDG benefits from Paxos's established stablecoin track record, highest-quality 
 - Involuntary freezes (law enforcement, sanctions) would target specific addresses, not the broad DeFi ecosystem
 - Regulatory clarity is improving, reducing the probability of blanket DeFi restrictions
 
-**Overall Assessment for yvUSDC-1:** USDG is **acceptable as lending collateral** with appropriate risk parameters. The primary concern is the theoretical freeze risk on collateral, which is standard for all regulated stablecoins. Recommend conservative LTV ratios and position limits.
+**Overall Assessment for yvUSDC-1:** USDG remains **acceptable as lending collateral** on its own merits — T-Bill backing, a clean 22-month peg record, and deep same-value liquidation liquidity. But the recommendation below is revised down substantially, because the earlier 90% max LTV was set without reference to what the market does, and the market's answer is zero. Where USDG *is* used in production, it is as the loan asset, not the collateral.
 
 | Risk Factor | Level | Notes |
 |------------|-------|-------|
-| Collateral Quality | High | T-Bill backed, MAS-supervised, 1:1 with USD |
-| Liquidation | Medium | ~$24.2M DEX liquidity, <0.5% slippage up to $1M |
+| Collateral Quality | High | T-Bill backed, MAS-supervised issuer, KPMG-attested, 1:1 with USD |
+| Liquidation | Low-Medium | ~$30.5M Curve depth; $10M liquidates at 0.023%, but a hard cliff past ~$17M |
 | Freeze (Collateral) | Medium-High | Frozen collateral = unliquidatable = bad debt risk |
+| Market acceptance | **Notable** | Aave v3, Aave v4, and Morpho all assign USDG **zero** collateral factor on Ethereum |
 | Counterparty | Low | Paxos well-regulated, zero incident history |
-| **Overall** | **Medium** | Acceptable with conservative LTV and position limits |
+| **Overall** | **Medium** | Acceptable at conservative parameters; note that no major venue currently agrees |
 
-**Recommended parameters for lending against USDG:**
-- Max LTV: 90% (same-value stablecoin, but freeze risk warrants buffer below 95%)
-- Liquidation threshold: 95%
-- Max exposure: min($5M, 50% of Ethereum USDG DEX liquidity, 10% of total vault TVL)
-- Monitor: Paxos freeze events, DEX liquidity depth, USDG peg
+**Recommended parameters for lending against USDG** *(revised)*:
+
+- **Max LTV: 80%** — down from the previous 90%. The freeze/wipe capability is the binding consideration: if Paxos freezes a borrower's collateral, the position becomes unliquidatable at any LTV, so the buffer is protecting against an event that LTV cannot actually mitigate. An 80% ceiling keeps the position economically sensible for a same-value pair while acknowledging that every major independent risk manager has declined to lend against USDG at all
+- **Liquidation threshold: 85%**
+- **Max exposure: min($5M, 25% of Ethereum USDG DEX liquidity, 10% of total vault TVL)** — the DEX-liquidity fraction is tightened from 50% to 25% because the Curve pool's usable depth is bounded by its ~$18.1M USDC side, not by its ~$30.5M headline TVL
+- **Prefer the market-standard shape:** if the objective is USDG exposure rather than USDG collateral, supplying USDG as a loan asset (Aave v3/v4, Maple, Morpho) matches how every major venue has chosen to underwrite it
+- **Monitor:** Paxos freeze events (`ASSET_PROTECTION_ROLE`), Curve pool USDC-side balance rather than headline TVL, USDG peg, and any change in Aave/Morpho collateral-factor configuration — a venue enabling USDG as collateral would be a meaningful signal to revisit these parameters upward

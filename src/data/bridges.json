@@ -261,7 +261,7 @@
           "kind": "direct",
           "model": "mint",
           "integration": "LayerZero V2 OFT (OFTWrapper)",
-          "detail": "OFTWrapper is Supply Controller SC3 with 45M USDG mint capacity (~521 USDG/sec refill) — the bridge can mint native USDG. Configured peers: Solana, X Layer, Ink, Arbitrum, and Robinhood Chain (added ~July 2026, now 9.5% of supply)",
+          "detail": "OFTWrapper is Supply Controller SC3 with **200M USDG / 24h** mint capacity (2,315 USDG/sec refill), raised from 45M in four steps between March and June 2026 — the bridge can mint native USDG to any address (`allowAnyMintAndBurnAddress = true`). Configured peers: Solana, X Layer, Ink, Arbitrum, and Robinhood Chain. The wrapper's `owner()` and LayerZero delegate are both the Paxos Operations MPC wallet with **no timelock**, so the peer set and DVN quorum can be changed with immediate effect.",
           "icon": "stablecoin:global-dollar",
           "security": {
             "label": "3-of-3",
@@ -272,9 +272,9 @@
               "Paxos"
             ],
             "route": "Solana→Ethereum (inbound mint path)",
-            "note": "All five configured inbound peers were separately verified with the same 3-of-3 quorum; confirmations vary by route (Solana 32, X Layer/Ink 168, Arbitrum/Robinhood 40). Paxos operates one required DVN, so only two verifiers are independent of the issuer",
+            "note": "All five configured inbound peers re-verified with the same 3-of-3 quorum on 2026-08-15; confirmations vary by route (Solana 32, X Layer/Ink 168, Arbitrum/Robinhood 40). Paxos operates one required DVN, so only two verifiers are independent of the issuer — and the quorum itself is mutable by the wrapper owner without a timelock",
             "weak": false,
-            "verifiedAt": "2026-07-30",
+            "verifiedAt": "2026-08-15",
             "link": "https://etherscan.io/address/0x147BdE4F997f0d4C7544ED0C55eAcf1E5E6bf9c4"
           },
           "owner": "Adapter owner: Paxos Operations MPC wallet [`0x3Af3…024B`](https://etherscan.io/address/0x3Af3e85f4f97De7AD0f000B724Fb77fE5ffc024B)."
