@@ -71,7 +71,11 @@ nodes:
     label: Token Admin Timelock (24h)
     address: "0x9036566eAa5F83E0b9E1161C6c602b0Adf997654"
     category: governance
-    note: OpenZeppelin TimelockController; also DEFAULT_ADMIN on SupplyControl
+    note: >-
+      OpenZeppelin TimelockController; also DEFAULT_ADMIN on SupplyControl.
+      Four role grants ever (Jan 22 2026), zero revocations. The MPC wallet
+      is the sole proposer, executor AND canceller — the delay is a
+      monitoring/exit window, not a circuit breaker.
   - id: default-admin-multisig
     label: DEFAULT_ADMIN Multisig (20 owners, thresh 3)
     address: "0x137Dcd97872dE27a4d3bf36A4643c5e18FA40713"
@@ -114,7 +118,7 @@ edges:
   - from: ops-mpc
     to: token-timelock
     kind: holds-role
-    label: PROPOSER + EXECUTOR + CANCELLER
+    label: PROPOSER + EXECUTOR + CANCELLER (sole holder — no independent canceller)
   - from: token-timelock
     to: usdg
     kind: controls

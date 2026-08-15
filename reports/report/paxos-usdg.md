@@ -343,7 +343,8 @@ Robinhood Chain has become the largest DeFi venue for USDG by a wide margin — 
 - Holds `DEFAULT_ADMIN_ROLE` and `owner()` on the USDG token
 - Also holds `DEFAULT_ADMIN_ROLE` on the SupplyControl contract (SupplyControl admin no longer an EOA)
 - Controls contract upgrades (UUPS `upgradeTo`), role granting/revoking, and facet changes
-- **PROPOSER_ROLE, EXECUTOR_ROLE, and CANCELLER_ROLE on the timelock are all held by the MPC wallet** ([`0x3Af3e85f4f97De7AD0f000B724Fb77fE5ffc024B`](https://etherscan.io/address/0x3Af3e85f4f97De7AD0f000B724Fb77fE5ffc024B)) — any action scheduled through the timelock can be proposed, executed, and cancelled by this same address. However, MPC policy controls mean multiple internal approvals are typically required to initiate transactions
+- **PROPOSER_ROLE, EXECUTOR_ROLE, and CANCELLER_ROLE on the timelock are all held by the MPC wallet, and by nobody else** ([`0x3Af3e85f4f97De7AD0f000B724Fb77fE5ffc024B`](https://etherscan.io/address/0x3Af3e85f4f97De7AD0f000B724Fb77fE5ffc024B)). The timelock's entire role history is four grants on January 22, 2026 — `DEFAULT_ADMIN` to itself, and proposer/executor/canceller to the MPC wallet — with **zero revocations since**. `hasRole(CANCELLER_ROLE, …)` returns `false` for both multisigs, the token, the issuance treasury, and the timelock itself.
+- **There is therefore no independent canceller, which changes what the 24-hour delay actually buys.** A timelock protects against a compromised admin only if some *other* party can cancel a malicious proposal during the delay. Here the sole party who can cancel is the same party who can propose. If the MPC key is compromised, the attacker schedules a malicious upgrade and is also the only address able to stop it; Paxos's recourse would be to act with the same key it has lost. The 24h window is best understood as a **monitoring and exit window for integrators**, not as a circuit breaker. That is a genuine protection — and it is worth materially more now that a $10M Ethereum exit clears at 0.023% slippage than it was when this report estimated exits above $5M needed CEX routing — but it is weaker than the rubric's "constrained by timelock" language implies. MPC policy controls mean multiple internal approvals are typically required to initiate transactions, which is the real mitigant here
 - The DEFAULT_ADMIN_ROLE on the timelock is held by the timelock itself (self-administered) — the timelock can grant/revoke roles on itself
 
 **Tier 2 — Operational / emergency (pause, freeze, supply management, bridge config):**
@@ -367,6 +368,22 @@ Robinhood Chain has become the largest DeFi venue for USDG by a wide margin — 
 - `SUPPLY_CONTROLLER_MANAGER_ROLE` on SupplyControl is held by the MPC wallet [`0x3Af3e85f4f97De7AD0f000B724Fb77fE5ffc024B`](https://etherscan.io/address/0x3Af3e85f4f97De7AD0f000B724Fb77fE5ffc024B)
 - Two EOA supply controllers (SC1, SC2) have very large mint capacities ($500M/hour and $1B/hour respectively) — **but both are restricted to a single whitelisted mint destination and can only burn their own balance.** See the correction note under [Supply Controllers](#supply-controllers). Their practical blast radius on key compromise is inflation of one Paxos-operated address, not theft from holders
 - The bridge controller SC3 is the opposite shape: unrestricted destinations, but a hard 200M USDG/24h ceiling and contract-mediated (not key-mediated) minting. Its risk is concentrated in whoever controls `setPeer` and the DVN config — the MPC wallet, untimelocked
+
+**Separating mandated powers from architectural ones.** A regulated fiat-backed stablecoin is *required* to hold powers that would be red flags in a permissionless protocol, and scoring USDG down for them would double-count a trait shared by every asset in its class. It is worth stating explicitly which of USDG's admin powers fall on each side of that line, because only one side is actually informative about USDG specifically:
+
+| Power | Mandated by USDG's regulatory posture? | Comparable to USDC/USDT? |
+|-------|----------------------------------------|--------------------------|
+| `ASSET_PROTECTION_ROLE` — freeze and wipe balances | **Yes** — sanctions and law-enforcement compliance | Yes, equivalent capability |
+| `PAUSE_ROLE` — halt all transfers | **Yes** — standard regulatory emergency control | Yes |
+| Permissioned mint/burn via SupplyControl | **Yes** — inherent to 1:1 fiat backing with KYC issuance | Yes |
+| Upgradeable proxy | Effectively yes — compliance requirements evolve | Yes |
+| **Untimelocked ownership of the OFT wrapper** (peers + DVN quorum) | **No** — an architecture choice | No; peers of comparable size place bridge config behind delays or multi-party control |
+| **Sole holder of proposer + executor + canceller** | **No** — an independent canceller costs nothing to add | No |
+| **`allowAnyMintAndBurnAddress = true` on SC3 at 200M/24h** | **No** — the ceiling is a business decision | Partly |
+| **Three hot-wallet EOAs on rewards roles** | **No** | No |
+| Undisclosed MPC quorum and policy | **No** — disclosure is voluntary | USDC's governance is more publicly documented |
+
+The top four rows are why USDG cannot score near the top of the governance rubric, and they are also why it should not be penalised relative to USDC — they are the price of the regulatory wrapper that makes the reserves trustworthy in the first place. **The bottom five rows are the part that is specific to USDG**, are not required by any regulator, and are what keep the governance score at 3.5 rather than 3.0.
 
 **Key governance concerns:**
 
@@ -451,6 +468,7 @@ Robinhood Chain has become the largest DeFi venue for USDG by a wide margin — 
 | `peers(uint32)` | OFTWrapper | New/changed bridge routes | Daily |
 | `getFacet(bytes4)` | Token | Facet routing changes | On `FacetUpdate` |
 | `payoutGroupIdOf(address)` | Token | Whether your own vault/strategy has been enrolled in a payout group | On integration, then weekly |
+| `hasRole(CANCELLER_ROLE, …)` | TimelockController | Whether an independent canceller has been added (improvement) or the sole-holder setup persists | Weekly |
 | Role events | Token / SupplyControl / TimelockController | Monitor `RoleGranted`/`RoleRevoked` — contracts use plain AccessControl, so holders cannot be enumerated and must be reconstructed from logs | On change |
 
 ## Risk Summary
@@ -468,7 +486,8 @@ Robinhood Chain has become the largest DeFi venue for USDG by a wide margin — 
 ### Key Risks
 
 - **Governance consolidated into an MPC wallet** — the MPC wallet ([`0x3Af3e85f4f97De7AD0f000B724Fb77fE5ffc024B`](https://etherscan.io/address/0x3Af3e85f4f97De7AD0f000B724Fb77fE5ffc024B)) holds PAUSE_ROLE, ASSET_PROTECTION_ROLE, timelock PROPOSER/EXECUTOR/CANCELLER, SupplyControl SCM, four rewards roles, and OFT wrapper ownership. The MPC structure (likely Fordefi) means the key is sharded across multiple parties, but the internal quorum and policy configuration are not publicly verifiable
-- **Bridge mint capacity raised 4.4× and its config is untimelocked** — SC3's ceiling went from 45M to **200M USDG/24h** between March and June 2026, and the same MPC wallet that owns the wrapper can add peers and rewrite the DVN quorum with immediate effect. This is the widest untimelocked path in the system
+- **Bridge mint capacity raised 4.4× and its config is untimelocked** — SC3's ceiling went from 45M to **200M USDG/24h** between March and June 2026, and the same MPC wallet that owns the wrapper can add peers and rewrite the DVN quorum with immediate effect. **This is the single largest residual risk in the system**: it is the only path where one key compromise produces unbacked canonical supply with no delay and no independent circuit breaker, and unlike freeze or pause it is not required by any regulator
+- **The timelock has no independent canceller** — the MPC wallet is the sole holder of PROPOSER, EXECUTOR, and CANCELLER (four grants, zero revocations since January 2026). The 24h delay is a monitoring and exit window, not a circuit breaker: a compromised key can schedule a malicious upgrade and is also the only address able to cancel it
 - **Emergency actions have no onchain timelock** — PAUSE and ASSET_PROTECTION are controlled by the MPC wallet. Internal MPC policy controls are the sole protection
 - **New rewards subsystem with hot-wallet EOAs** — the V3 upgrade added 118 routed selectors, 6 roles, and three single-key EOA role-holders. It was audited by Zellic, but on a 1.2 person-week engagement, against a private repo (so deployed bytecode cannot be matched to the audited commit), and a corrective redeployment was needed two days after launch
 - **Offchain reserves** — reserves are entirely offchain with monthly attestation. No onchain Proof of Reserves mechanism for real-time verification
@@ -545,7 +564,16 @@ Robinhood Chain has become the largest DeFi venue for USDG by a wide margin — 
 | MPC transparency | Internal quorum/threshold and policy configuration not publicly verifiable — security depends on Paxos's internal controls |
 | Regulatory | MAS-supervised issuer; OCC-supervised US group entity — provides offchain governance and accountability |
 
-**Governance Score: 3.5/5** *(unchanged)* — This category was re-examined closely for a possible reduction and the conclusion is that it should hold. The case for lowering is real: the 24h timelock is demonstrably exercised rather than nominal, and the newly-verified destination whitelisting on SC1/SC2 removes the "two EOAs can mint anywhere" concern that previous revisions implied. But three findings new to this revision push the other way and roughly cancel it out: **(1)** the MPC wallet owns the OFT wrapper and is its LayerZero delegate with no timelock, so it can add a mint route or replace the DVN quorum instantly — the 24h warning window that protects upgrades does not protect the bridge; **(2)** SC3's untimelocked-adjacent mint ceiling rose from 45M to 200M/24h; **(3)** the V3 rewards system reintroduced three single-key EOA role-holders. Against the rubric, score 3 ("some powerful roles, constrained by timelock") understates the untimelocked surface and score 4 ("powerful admin roles with limited constraints") overstates it given the MPC structure and real 24h delay on upgrades. **3.5** remains correct.
+**Governance Score: 3.5/5** *(unchanged)* — This category was re-examined closely for a possible reduction, including on the argument that USDG's admin powers are largely compelled by its regulatory status. That argument is correct as far as it goes, and it is why USDG is not marked down relative to USDC: freeze, pause, permissioned mint, and upgradeability are the price of the regulated wrapper, not evidence of a badly-designed protocol. But it does not reach the powers that are actually driving this score, which are architectural rather than mandated (see the table above).
+
+The case for lowering to 3.0 is real: the 24h timelock is demonstrably exercised rather than nominal, and the newly-verified destination whitelisting on SC1/SC2 removes the "two EOAs can mint anywhere" concern that previous revisions implied. Four findings hold it at 3.5:
+
+1. **No independent canceller.** The MPC wallet is the sole holder of proposer, executor, *and* canceller, verified against the timelock's complete role history (four grants, zero revocations). Rubric row 1 asks for "multi-party approval required" and row 3 for roles "constrained by timelock" — a timelock whose only canceller is its only proposer is a weaker constraint than either implies. It delays a compromised admin; it cannot stop one.
+2. **Untimelocked bridge configuration.** The MPC wallet owns the OFT wrapper and is its LayerZero delegate, so it can add a mint route or replace the DVN quorum instantly. The 24h warning that protects upgrades does not protect the bridge.
+3. **SC3's mint ceiling rose from 45M to 200M/24h** with unrestricted destinations.
+4. **Three single-key EOA role-holders** reintroduced by the V3 rewards system.
+
+Score 3 ("some powerful roles, constrained by timelock") understates the untimelocked surface; score 4 ("powerful admin roles with limited constraints") overstates it given the MPC structure, the real 24h delay on upgrades, and the SC1/SC2 whitelisting. **3.5** remains correct.
 
 **Subcategory B: Programmability**
 
@@ -681,7 +709,16 @@ Final Score = (Centralization × 0.30) + (Funds Mgmt × 0.30) + (Audits × 0.20)
 
 USDG benefits from Paxos's established stablecoin track record, highest-quality collateral (U.S. Treasuries), a strengthened regulatory framework (MAS for the issuer, OCC federal supervision for the US group entity, MiCA in the EU), solid audit coverage now backed by a live $1M bug bounty, and materially deeper exit liquidity than previously credited — a $10M Ethereum exit clears at 0.023% slippage. The governance restructuring consolidated onchain control into a single MPC wallet with key sharding across multiple parties, and the 24h timelock on upgrades is demonstrably exercised rather than nominal.
 
-The tier is unchanged; the score moves from 2.4 to 2.2 on three specific, evidenced improvements. The concerns that keep it from going lower are concentrated in one place: the powers that sit **outside** the timelock. Pause, freeze, and — newly identified in this revision — the OFT wrapper's peer set and DVN configuration can all be exercised immediately by one MPC-controlled address, with the bridge path now able to mint up to 200M USDG per day into arbitrary Ethereum addresses. For an integrator, the practical implications are to monitor `PeerSet` and DVN-config changes on the wrapper as closely as timelock events, and to treat any first-ever flip of `allowAnyMintAndBurnAddress` on SC1 or SC2 as a high-priority alert.
+The tier is unchanged; the score moves from 2.4 to 2.2 on three specific, evidenced improvements.
+
+**What the main risk is now.** Liquidity was the binding constraint in earlier revisions and no longer is — a $10M Ethereum exit clears at 0.023%. Reserve quality and issuer standing are strong and independently attested. The residual risk has therefore concentrated almost entirely in the powers that sit **outside** the timelock, and it is worth being precise about which of those are informative:
+
+- **Freeze and pause** are the largest risks by expected loss for any single integrator — a frozen vault or strategy loses access to its entire USDG position with no onchain recourse. But they are mandated by USDG's regulatory posture and identical in kind to USDC's. They are a reason to size positions, not a reason to prefer another regulated fiat stablecoin.
+- **The untimelocked bridge configuration is the risk that is specific to USDG.** One MPC-controlled address can add a peer chain and rewrite the DVN quorum with immediate effect, upstream of a supply controller that can mint 200M USDG per day to arbitrary addresses. No regulator requires this, no peer of comparable size is configured this way, and — because the same address is the timelock's only canceller — there is no independent party who could interrupt it. It is the only path in the system that produces **unbacked** canonical supply, which harms every holder and the peg rather than one address.
+
+Note the interaction between the two headline changes in this revision: deeper exit liquidity makes the 24h timelock genuinely useful, because integrators can now act on the warning it provides. It also, marginally, raises how much an attacker could extract per unit time in a mint scenario — though at ~$17M of usable Curve depth against a 200M/24h mint ceiling, exit liquidity remains the binding constraint by roughly an order of magnitude, so the net effect is clearly favourable.
+
+For an integrator, the practical implications are to monitor `PeerSet`, `OwnershipTransferred`, and DVN-config changes on the wrapper at least as closely as timelock events; to treat any first-ever flip of `allowAnyMintAndBurnAddress` on SC1 or SC2 as a high-priority alert; and to treat the grant of `CANCELLER_ROLE` to an independent party as the single highest-value governance improvement Paxos could make.
 
 ---
 
@@ -691,6 +728,7 @@ The tier is unchanged; the score moves from 2.4 to 2.2 on three specific, eviden
 - **TVL-based:** Reassess if total supply changes by more than ±50% from current $3.47B
 - **Incident-based:** Reassess after any exploit, freeze affecting DeFi protocols, depegging event, or adverse regulatory action
 - **Governance-based (IMPORTANT):** Reassess if governance transitions from MPC wallet back to multisig (score improvement), or if MPC wallet shows signs of compromise. Any change in role holders, timelock delay, or MPC provider/gas station infrastructure warrants reassessment
+- **Independent canceller (score improvement):** Reassess if `CANCELLER_ROLE` on the timelock is granted to any party other than the MPC wallet. This is the cheapest change Paxos could make that would meaningfully improve the governance score — it would convert the 24h delay from a monitoring window into an actual circuit breaker. Conversely, reassess if the sole-holder configuration is extended to any newly-deployed governance contract
 - **MPC transparency:** Reassess if Paxos discloses MPC provider, quorum, and policy configuration (potential score improvement from reduced uncertainty)
 - **Governance-based:** Reassess if SupplyControl admin or SCM transitions, or if multisig composition/threshold changes
 - **Bridge-based (IMPORTANT):** Reassess on any `PeerSet` event adding or repointing a chain on the OFT wrapper, any change to its `owner()` or LayerZero delegate, any receive-library/DVN configuration change, or any further increase to SC3's mint capacity beyond 200M USDG/24h
