@@ -20,24 +20,30 @@ nodes:
     label: fxUSD (Stablecoin)
     address: "0x085780639CC2cACd35E474e71f4d000e2405d8f6"
     category: vault
-    note: TransparentUpgradeableProxy; ~$64.2M supply; ~142.6% CR
+    note: TransparentUpgradeableProxy; ~$64.31M supply; ~135.6% V2 CR
+  - id: fxusd-base
+    label: fxUSD OFT (Base)
+    address: "0x55380fe7A1910dFf29A47B622057ab4139DA42C5"
+    chain: base
+    category: vault
+    note: Bridged representation; ~308,981 supply exactly matched by Ethereum adapter escrow
   - id: fxSAVE
     label: fxSAVE (Auto-Compounding Vault)
     address: "0x7743e50F534a7f9F1791DdE7dCD89F7783Eefc39"
     category: vault
-    note: ~$56.3M; holds 96.6% of fxSP
+    note: ~61.67M fxSP (~$62.3M); 96.9% of fxSP shares
   - id: fxSP
     label: fxSP (Stability Pool)
     address: "0x65C9A641afCEB9C0E6034e558A319488FA0FA3be"
     category: vault
-    note: 58.2M fxUSD + 94K USDC (0.16% stable buffer); 90.65% of fxUSD supply
+    note: 57.46M fxUSD + 6.84M USDC (10.65% stable buffer); holds 89.35% of fxUSD supply
 
   # === Protocol infra ===
   - id: pool-manager
     label: PoolManager (Long, Primary Custody)
     address: "0x250893CA4Ba5d05626C785e8da758026928FCD24"
     category: infra
-    note: Custodies ALL V2 collateral (~$91.5M)
+    note: Accounts for all V2 collateral (~$87.04M); some is borrowed by sPOSITIONs
   - id: short-pool-manager
     label: ShortPoolManager (sPOSITION)
     address: "0xaCDc0AB51178d0Ae8F70c1EAd7d3cF5421FDd66D"
@@ -87,6 +93,11 @@ nodes:
     address: "0xd023Aac0e2D46c93d4c6e8e2A449bF2d4687804f"
     category: infra
     note: Configured fxSP strategy, 100M USDC capacity; holds ~19 USDC
+  - id: fxusd-oft-adapter
+    label: FxUSDOFTAdaptor (Ethereum)
+    address: "0xA07d8cc424421cC2bce0544a65481376f010A438"
+    category: infra
+    note: Locks ~308,981 canonical fxUSD for Base; cannot mint Ethereum fxUSD
 
   # === Governance ===
   - id: operational-multisig
@@ -99,6 +110,12 @@ nodes:
     address: "0x28c921adAC4c1072658eB01a28DA06b5F651eF62"
     category: governance
     note: Direct pause on xPOSITION/sPOSITION (no timelock)
+  - id: base-bridge-owner
+    label: Base Bridge Owner (3-of-4)
+    address: "0x44E4158d93ACCf19F7B97a28B88A26DfF3c3D6d2"
+    chain: base
+    category: governance
+    note: Owns the Base fxUSD OFT
   - id: timelock
     label: TimelockController (3-day)
     address: "0x68863fb8855b04509a835082478D6E3D0bE4E61a"
@@ -119,17 +136,17 @@ nodes:
     label: xstETH Pool (wstETH collateral)
     address: "0x6ecfa38fee8a5277b91efda204c235814f0122e8"
     category: strategy
-    note: ~4,657 wstETH (~$11.2M) custody in PoolManager; ~174% CR
+    note: ~4,635 wstETH (~$8.71M) accounted in PoolManager; ~136.7% CR
   - id: xwbtc-pool
     label: xWBTC Pool (WBTC collateral)
     address: "0xab709e26fa6b0a30c119d8c55b887ded24952473"
     category: strategy
-    note: ~1,243 WBTC (~$80.3M) custody in PoolManager; ~139% CR
+    note: ~1,243 WBTC (~$78.33M) accounted in PoolManager; ~135.5% CR
   - id: steth-short-pool
     label: f(x) stETH Short (sPOSITION)
     address: "0x25707b9e6690b52c60ae6744d711cf9c1dfc1876"
     category: strategy
-    note: 75,206 fxUSD collateral, 21.05 wstETH borrowed from PoolManager
+    note: 56,885 fxUSD collateral, 14.72 wstETH borrowed from PoolManager
   - id: wbtc-short-pool
     label: f(x) WBTC Short (sPOSITION)
     address: "0xa0cc8162c523998856d59065faa254f87d20a5b0"
@@ -140,11 +157,11 @@ nodes:
   - id: dep-wsteth
     label: wstETH (Lido)
     category: dependency
-    note: ETH collateral leg (~12% of collateral)
+    note: ETH collateral leg (~10% of collateral)
   - id: dep-wbtc
     label: WBTC
     category: dependency
-    note: BTC collateral leg (~88% of collateral)
+    note: BTC collateral leg (~90% of collateral)
   - id: dep-chainlink
     label: Chainlink (ETH/USD, BTC/USD)
     category: dependency
@@ -153,7 +170,7 @@ nodes:
     label: Curve (EMA + USDC/fxUSD)
     address: "0x5018BE882DccE5E3F2f3B0913AE2096B9b3fB61f"
     category: dependency
-    note: EMA gates mint/redeem/funding; ~$7.17M DEX pool
+    note: EMA gates mint/redeem/funding; ~$7.52M DEX pool
   - id: dep-aave
     label: Aave (USDC + wstETH yield)
     category: dependency
@@ -162,6 +179,11 @@ nodes:
     label: Uniswap V3 (TWAP Oracle)
     category: dependency
     note: Validation price source
+  - id: dep-layerzero
+    label: LayerZero V2 Endpoint
+    address: "0x1a44076050125825900e736c501f859c50fE728c"
+    category: dependency
+    note: Base→Ethereum escrow release requires 3 required DVNs + 1-of-3 optional, 20 confirmations
 
 edges:
   # === Governance flow ===
@@ -203,6 +225,14 @@ edges:
     to: pool-manager
     kind: holds-role
     label: EMERGENCY_ROLE + ASSET_MANAGER_ROLE (no timelock)
+  - from: operational-multisig
+    to: fxusd-oft-adapter
+    kind: controls
+    label: owner (no timelock)
+  - from: base-bridge-owner
+    to: fxusd-base
+    kind: controls
+    label: owner (3-of-4 Safe)
   - from: emergency-multisig
     to: fxSP
     kind: holds-role
@@ -264,6 +294,24 @@ edges:
     kind: mints
     label: sPOSITION mint
 
+  # === Ethereum ↔ Base lock bridge ===
+  - from: fxUSD
+    to: fxusd-oft-adapter
+    kind: routes-through
+    label: locks canonical fxUSD
+  - from: fxusd-oft-adapter
+    to: fxusd-base
+    kind: routes-through
+    label: LayerZero V2 lock-and-mint representation
+  - from: fxusd-oft-adapter
+    to: dep-layerzero
+    kind: routes-through
+    label: authenticated OFT messages
+  - from: dep-layerzero
+    to: fxusd-base
+    kind: mints
+    label: authenticated receive path mints Base representation only
+
   # === Configuration / reserve wiring ===
   - from: configuration
     to: pool-manager
@@ -278,11 +326,11 @@ edges:
   - from: pool-manager
     to: xsteth-pool
     kind: allocates-to
-    label: "wstETH ~$11.2M"
+    label: "wstETH ~$8.71M"
   - from: pool-manager
     to: xwbtc-pool
     kind: allocates-to
-    label: "WBTC ~$80.3M"
+    label: "WBTC ~$78.33M"
 
   # === Strategy → external dependencies ===
   - from: xsteth-pool
@@ -324,7 +372,7 @@ edges:
   - from: short-pool-manager
     to: steth-short-pool
     kind: allocates-to
-    label: "75,206 fxUSD"
+    label: "56,885 fxUSD"
   - from: short-pool-manager
     to: wbtc-short-pool
     kind: allocates-to
@@ -332,7 +380,7 @@ edges:
   - from: steth-short-pool
     to: pool-manager
     kind: routes-through
-    label: borrows 21.05 wstETH
+    label: borrows 14.72 wstETH
   - from: wbtc-short-pool
     to: pool-manager
     kind: routes-through

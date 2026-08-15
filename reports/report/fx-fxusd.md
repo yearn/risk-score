@@ -1,32 +1,32 @@
 # Protocol Risk Assessment: f(x) Protocol — fxUSD
 
-- **Assessment Date:** May 13, 2026 (Updated: July 27, 2026)
+- **Assessment Date:** May 13, 2026 (Updated: August 15, 2026)
 - **Token:** fxUSD (f(x) USD)
 - **Chain:** Ethereum
 - **Token Address:** [`0x085780639CC2cACd35E474e71f4d000e2405d8f6`](https://etherscan.io/address/0x085780639CC2cACd35E474e71f4d000e2405d8f6)
-- **Final Score: 2.3/5.0**
+- **Final Score: 2.2/5.0**
 
 ## Overview + Links
 
-fxUSD is a **decentralized stablecoin** issued by the f(x) Protocol (built by AladdinDAO) that maintains its USD peg through a dual-token system splitting yield-bearing collateral into a stable component (fxUSD) and leveraged components (xPOSITION/sPOSITION). The protocol accepts ETH LSTs (wstETH, sfrxETH, weETH, ezETH) and WBTC as collateral, enabling users to mint fxUSD at 0% ongoing interest through the fxMINT product, or to take leveraged long/short positions.
+fxUSD is a **decentralized stablecoin** issued by the f(x) Protocol (built by AladdinDAO) that maintains its USD peg through a dual-token system splitting yield-bearing collateral into a stable component (fxUSD) and leveraged components (xPOSITION/sPOSITION). The active V2 system accepts **wstETH and WBTC** as collateral, enabling users to mint fxUSD at 0% ongoing interest through the fxMINT product, or to take leveraged long/short positions. Older sfrxETH and other ETH-LST contracts belong to legacy V1 or separate f(x) markets and are not current V2 fxUSD mint collateral.
 
 **Key mechanism — the f(x) Invariant:**
-The current V2 invariant balances all position types: `Collateral - Borrowed Collateral = fxUSD (Long) + fxUSD (Short) + xPOSITION + sPOSITION`. Collateral (ETH LSTs, WBTC) is split into a stable component (fxUSD) and leveraged components — xPOSITIONs (leveraged longs) absorb upward volatility while sPOSITIONs (leveraged shorts) borrow collateral against fxUSD. When prices fluctuate, the leveraged positions absorb volatility, keeping fxUSD stable. The system supports up to ~7x leverage on ETH/BTC.
+The current V2 invariant balances all position types: `Collateral - Borrowed Collateral = fxUSD (Long) + fxUSD (Short) + xPOSITION + sPOSITION`. Collateral (wstETH and WBTC) is split into a stable component (fxUSD) and leveraged components — xPOSITIONs (leveraged longs) absorb upward volatility while sPOSITIONs (leveraged shorts) borrow collateral against fxUSD. When prices fluctuate, the leveraged positions absorb volatility, keeping fxUSD stable. The system supports up to ~7x leverage on ETH/BTC.
 
 **Yearn use cases (from issue #116):**
 1. **yvBTC vault strategies** — deposit BTC collateral and borrow fxUSD via fxMINT at 0% annual interest (one-time ~0.5% fee)
 2. **fxUSD vault** — similar to existing crvUSD and BOLD vaults, enabling treasury diversification into DeFi-native stablecoins
 
-**Key metrics (July 27, 2026, block 25,625,134):**
+**Key metrics (August 15, 2026, Ethereum block 25,759,914):**
 
-- **fxUSD Total Supply:** ~64,232,612 fxUSD
-- **fxUSD NAV:** ~$0.9982 (Curve EMA ~$1.0000)
-- **Protocol TVL (DeFi Llama):** ~$94.9M (peak last 60 days: $96.9M on July 22, 2026; all-time peak $271M on August 24, 2025)
-- **System collateralization:** ~142.6% (~$91.45M collateral vs ~$64.12M fxUSD debt)
-- **fxUSD DEX Liquidity:** ~$7.17M in primary Curve USDC/fxUSD pool (~$2.8M across six secondary Curve pools)
-- **fxSAVE Total Assets:** ~55.76M fxSP (~$56.3M), 96.6% of the Stability Pool
+- **fxUSD Total Supply:** ~64,309,766 fxUSD
+- **fxUSD NAV:** ~$0.9980 (Curve EMA ~$1.00034)
+- **Protocol TVL (DeFi Llama):** ~$96.8M (last-90-day peak: $96.9M on July 22, 2026; all-time peak $271M on August 24, 2025)
+- **System collateralization:** ~135.6% (~$87.04M V2 collateral vs ~64.31M fxUSD pool debt, worth ~$64.18M at NAV)
+- **fxUSD DEX Liquidity:** ~$7.52M in the primary Curve USDC/fxUSD pool (~$1.94M across six secondary Curve pools)
+- **fxSAVE Total Assets:** ~61.67M fxSP (~$62.3M), 96.9% of the Stability Pool
 - **fxMINT Opening Fee:** 0.5% (ETH/BTC) | Closing Fee: 0.2%
-- **Launch Date:** February 23, 2024 (~2.4 years in production)
+- **Launch Date:** February 23, 2024 (~2.5 years in production)
 
 **Links:**
 
@@ -53,41 +53,41 @@ The current V2 invariant balances all position types: `Collateral - Borrowed Col
 
 ### V2 Collateral (PoolManager — Primary Custodian)
 
-In V2, **all position collateral is custodied by the PoolManager contract** — individual pool contracts (xstETH, xWBTC) are accounting/NFT contracts only and hold zero tokens.
+In V2, **all position collateral is accounted for by the PoolManager contract** — individual pool contracts (xstETH, xWBTC) are accounting/NFT contracts only and hold zero tokens. The manager normally custodies the tokens directly, except collateral borrowed by registered sPOSITION pools or deliberately deployed through a configured strategy.
 
 | Contract | Address | Role |
 |----------|---------|------|
 | PoolManager (Long) | [`0x250893CA4Ba5d05626C785e8da758026928FCD24`](https://etherscan.io/address/0x250893CA4Ba5d05626C785e8da758026928FCD24) | Custodies all V2 collateral, manages xPOSITION/fxMINT |
 | ShortPoolManager | [`0xaCDc0AB51178d0Ae8F70c1EAd7d3cF5421FDd66D`](https://etherscan.io/address/0xaCDc0AB51178d0Ae8F70c1EAd7d3cF5421FDd66D) | Manages sPOSITION positions (borrows collateral from PoolManager) |
 
-**Collateral held in PoolManager (July 27, 2026):**
+**Collateral held in PoolManager (August 15, 2026):**
 
 | Asset | Amount | USD Value | Pool debt | Pool CR |
 |-------|--------|-----------|-----------|---------|
-| wstETH (xstETH pool [`0x6ecfa38fee8a5277b91efda204c235814f0122e8`](https://etherscan.io/address/0x6ecfa38fee8a5277b91efda204c235814f0122e8)) | ~4,656.51 wstETH | ~$11.16M | ~6,456,822 fxUSD | ~174% |
-| WBTC (xWBTC pool [`0xab709e26fa6b0a30c119d8c55b887ded24952473`](https://etherscan.io/address/0xab709e26fa6b0a30c119d8c55b887ded24952473)) | ~1,242.66 WBTC | ~$80.29M | ~57,775,526 fxUSD | ~139% |
-| **Total** | | **~$91.45M** | **~64,232,348 fxUSD** | |
+| wstETH (xstETH pool [`0x6ecfa38fee8a5277b91efda204c235814f0122e8`](https://etherscan.io/address/0x6ecfa38fee8a5277b91efda204c235814f0122e8)) | ~4,635.20 wstETH | ~$8.71M | ~6,383,507 fxUSD | ~136.7% |
+| WBTC (xWBTC pool [`0xab709e26fa6b0a30c119d8c55b887ded24952473`](https://etherscan.io/address/0xab709e26fa6b0a30c119d8c55b887ded24952473)) | ~1,243.47 WBTC | ~$78.33M | ~57,925,995 fxUSD | ~135.5% |
+| **Total** | | **~$87.04M** | **~64,309,502 fxUSD** | |
 
-**Overall V2 collateralization ratio: ~142.6%** (~$91.45M collateral / ~$64.12M fxUSD debt at NAV $0.9982). Prices from Chainlink: BTC $64,610.09; ETH $1,932.90; wstETH/stETH ratio 1.240322. The WBTC pool carries ~90% of system debt, so its ~139% CR effectively sets the system's headroom above the 130% Stability Mode trigger.
+**Overall V2 collateralization ratio: ~135.6%** (~$87.04M collateral / ~$64.18M debt at NAV $0.9980). The live pool-oracle anchor prices were $1,878.45 per wstETH and $62,992.68 per WBTC at the snapshot block. The WBTC pool carries ~90% of system debt and ~90% of collateral value; both active pools are only about 4–5% of collateral-price downside from the 130% Stability Mode trigger if positions do not deleverage.
 
-**Supply reconciliation:** total supply 64,232,611.87 fxUSD less V2 pool debt 64,232,347.81 leaves 264.06 fxUSD of legacy V1 issuance — the two figures reconcile exactly, confirming that no fxUSD exists outside the V2 pools and the residual V1 markets.
+**Supply reconciliation:** total supply 64,309,766.03 fxUSD less V2 pool debt 64,309,501.97 leaves 264.06 fxUSD of legacy V1 issuance — the two figures reconcile exactly, confirming that issuance is accounted for by the V2 pools and residual V1 markets.
 
-**Short leg:** sPOSITIONs post fxUSD as collateral in the ShortPoolManager and borrow collateral out of the PoolManager. Two short pools are registered — f(x) stETH Short [`0x25707b9e6690b52c60ae6744d711cf9c1dfc1876`](https://etherscan.io/address/0x25707b9e6690b52c60ae6744d711cf9c1dfc1876) (75,206 fxUSD collateral, 21.05 wstETH borrowed) and f(x) WBTC Short [`0xa0cc8162c523998856d59065faa254f87d20a5b0`](https://etherscan.io/address/0xa0cc8162c523998856d59065faa254f87d20a5b0) (215,796 fxUSD collateral, 1.91 WBTC borrowed). Borrowed collateral is capped at 50% of each long pool's balance (`shortBorrowCapacityRatio` = 5e17) and accounts for the small gap between the PoolManager's token balance and its internal `collateralBalance`.
+**Short leg:** sPOSITIONs post fxUSD as collateral in the ShortPoolManager and borrow collateral out of the PoolManager. Two short pools are registered — f(x) stETH Short [`0x25707b9e6690b52c60ae6744d711cf9c1dfc1876`](https://etherscan.io/address/0x25707b9e6690b52c60ae6744d711cf9c1dfc1876) (56,885 fxUSD collateral, 14.72 wstETH borrowed) and f(x) WBTC Short [`0xa0cc8162c523998856d59065faa254f87d20a5b0`](https://etherscan.io/address/0xa0cc8162c523998856d59065faa254f87d20a5b0) (215,796 fxUSD collateral, 1.91 WBTC borrowed). Borrowed collateral is capped at 50% of each long pool's balance (`shortBorrowCapacityRatio` = 5e17) and accounts for most of the gap between the PoolManager's token balance and its internal `collateralBalance`.
 
-**Note:** `fxUSD.isUnderCollateral()` returns `true` — this flag reflects legacy V1 market status (wstETH treasury at 78.6% CR with only ~$8.3K remaining). The V2 system via PoolManager maintains ~142.6% collateralization.
+**Note:** `fxUSD.isUnderCollateral()` returns `true` — this flag reflects legacy V1 market status (wstETH treasury at 79.3% CR with only ~$8.1K remaining). The active V2 system via PoolManager maintains ~135.6% collateralization.
 
 ### Legacy V1 Treasury Contracts (Minimal Remaining Value)
 
 | Treasury | Address | Base Token | Remaining Value |
 |----------|---------|------------|----------------|
-| stETH Treasury | [`0xED803540037B0ae069c93420F89Cd653B6e3Df1f`](https://etherscan.io/address/0xED803540037B0ae069c93420F89Cd653B6e3Df1f) | wstETH | ~$8.3K (3.47 wstETH, 78.6% CR, ~264 legacy fxUSD) |
-| sfrxETH Treasury | [`0xcfEEfF214b256063110d3236ea12Db49d2dF2359`](https://etherscan.io/address/0xcfEEfF214b256063110d3236ea12Db49d2dF2359) | sfrxETH | ~$133K (59.24 sfrxETH, ~11,132% CR) |
+| stETH Treasury | [`0xED803540037B0ae069c93420F89Cd653B6e3Df1f`](https://etherscan.io/address/0xED803540037B0ae069c93420F89Cd653B6e3Df1f) | wstETH | ~$8.1K (4.30 wstETH, 79.3% CR, ~264 legacy fxUSD) |
+| sfrxETH Treasury | [`0xcfEEfF214b256063110d3236ea12Db49d2dF2359`](https://etherscan.io/address/0xcfEEfF214b256063110d3236ea12Db49d2dF2359) | sfrxETH | ~$129K (69.02 sfrxETH, ~10,829% CR) |
 
 ### Reserve Pool
 
 | Contract | Address | Holdings |
 |----------|---------|----------|
-| Reserve Pool | [`0xE93F5DD55eC9bdAbbba5eA88E4b4f3C253ee45Ed`](https://etherscan.io/address/0xE93F5DD55eC9bdAbbba5eA88E4b4f3C253ee45Ed) | 17.73 wstETH (~$43K) + 0.43 WBTC (~$27K) + 1,302 fxUSD — ~$71K total, ~0.1% of debt |
+| Reserve Pool | [`0xE93F5DD55eC9bdAbbba5eA88E4b4f3C253ee45Ed`](https://etherscan.io/address/0xE93F5DD55eC9bdAbbba5eA88E4b4f3C253ee45Ed) | 17.78 wstETH + 0.43 WBTC + 1,302 fxUSD — ~$61K total, ~0.1% of debt |
 
 ### Market & Infrastructure Contracts
 
@@ -108,8 +108,19 @@ In V2, **all position collateral is custodied by the PoolManager contract** — 
 
 | Contract | Address | Purpose |
 |----------|---------|---------|
-| fxSP (Stability Pool) | [`0x65C9A641afCEB9C0E6034e558A319488FA0FA3be`](https://etherscan.io/address/0x65C9A641afCEB9C0E6034e558A319488FA0FA3be) | Holds fxUSD + USDC for peg maintenance; 58,225,808 fxUSD + 94,254 USDC (~$58.2M) |
-| fxSAVE | [`0x7743e50F534a7f9F1791DdE7dCD89F7783Eefc39`](https://etherscan.io/address/0x7743e50F534a7f9F1791DdE7dCD89F7783Eefc39) | Auto-compounding fxSP vault; 55.76M fxSP (~$56.3M), 96.6% of fxSP |
+| fxSP (Stability Pool) | [`0x65C9A641afCEB9C0E6034e558A319488FA0FA3be`](https://etherscan.io/address/0x65C9A641afCEB9C0E6034e558A319488FA0FA3be) | Holds fxUSD + USDC for peg maintenance; 57,460,692 fxUSD + 6,836,417 USDC (~$64.2M) |
+| fxSAVE | [`0x7743e50F534a7f9F1791DdE7dCD89F7783Eefc39`](https://etherscan.io/address/0x7743e50F534a7f9F1791DdE7dCD89F7783Eefc39) | Auto-compounding fxSP vault; 61.67M fxSP (~$62.3M), 96.9% of fxSP |
+
+### Ethereum ↔ Base Bridge
+
+fxUSD uses the standard LayerZero V2 **lock-and-mint representation** model documented in the [official SDK](https://github.com/AladdinDAO/fx-sdk/blob/main/README.md#bridge-base---ethereum) and [route configuration](https://github.com/AladdinDAO/fx-sdk/blob/main/src/configs/layerzero.ts). Canonical Ethereum fxUSD is locked in the adapter; the Base OFT burns and mints only the remote representation. The adapter has no authority to mint canonical Ethereum fxUSD.
+
+| Contract | Chain | Address | Role |
+|----------|-------|---------|------|
+| FxUSDOFTAdaptor | Ethereum | [`0xA07d8cc424421cC2bce0544a65481376f010A438`](https://etherscan.io/address/0xA07d8cc424421cC2bce0544a65481376f010A438) | Escrows canonical fxUSD; held 308,980.654349 fxUSD (0.48% of supply) at the snapshot block |
+| fxUSD OFT | Base | [`0x55380fe7A1910dFf29A47B622057ab4139DA42C5`](https://basescan.org/address/0x55380fe7A1910dFf29A47B622057ab4139DA42C5) | Bridged Base representation; total supply exactly matched Ethereum escrow |
+| LayerZero EndpointV2 | Ethereum / Base | [`0x1a44076050125825900e736c501f859c50fE728c`](https://etherscan.io/address/0x1a44076050125825900e736c501f859c50fE728c) | Authenticates and delivers OFT messages |
+| Base bridge-owner Safe | Base | [`0x44E4158d93ACCf19F7B97a28B88A26DfF3c3D6d2`](https://basescan.org/address/0x44E4158d93ACCf19F7B97a28B88A26DfF3c3D6d2) | 3-of-4 Safe owning the Base OFT; Ethereum adapter is owned by the operational 6-of-9 Safe |
 
 ### Governance
 
@@ -122,14 +133,14 @@ In V2, **all position collateral is custodied by the PoolManager contract** — 
 
 | Pool | Address | Composition |
 |------|---------|-------------|
-| Curve USDC/fxUSD | [`0x5018BE882DccE5E3F2f3B0913AE2096B9b3fB61f`](https://etherscan.io/address/0x5018BE882DccE5E3F2f3B0913AE2096B9b3fB61f) | ~$7.17M (3.63M USDC + 3.54M fxUSD, 50.7/49.3) — also the EMA source that gates minting and redemption |
-| Curve msUSD/fxUSD | [`0x138Bb0f3208bd729a561F3786DDb97BBc69e6628`](https://etherscan.io/address/0x138Bb0f3208bd729a561F3786DDb97BBc69e6628) | ~$1.13M (937K msUSD + 197K fxUSD) |
-| Curve USDnr/fxUSD | [`0x3204d754a3003cEc155e2D8F44b3b48eD60b7Cc6`](https://etherscan.io/address/0x3204d754a3003cEc155e2D8F44b3b48eD60b7Cc6) | ~$0.54M (195K USDnr + 340K fxUSD) |
-| Curve reUSD/fxUSD | [`0xb0ef04ACE97d350E24Efa5139d2590D26a61A8Dc`](https://etherscan.io/address/0xb0ef04ACE97d350E24Efa5139d2590D26a61A8Dc) | ~$0.53M (374K reUSD + 152K fxUSD) |
-| Curve fxUSD/frxUSD | [`0x851907CAC684797eee43669798D78004e269Cb5E`](https://etherscan.io/address/0x851907CAC684797eee43669798D78004e269Cb5E) | ~$0.25M (120K fxUSD + 126K frxUSD) |
-| Curve alUSD/fxUSD | [`0x27cB9629aE3Ee05cb266B99cA4124EC999303c9D`](https://etherscan.io/address/0x27cB9629aE3Ee05cb266B99cA4124EC999303c9D) | ~$0.22M (185K alUSD + 30K fxUSD) |
-| Curve GHO/fxUSD | [`0x74345504Eaea3D9408fC69Ae7EB2d14095643c5b`](https://etherscan.io/address/0x74345504Eaea3D9408fC69Ae7EB2d14095643c5b) | ~$0.13M (97K GHO + 32K fxUSD) |
-| Curve DeFi Stable Avengers | [`0x8B878AFE454e31CF0A79c6D7cf2f077DD286C12f`](https://etherscan.io/address/0x8B878AFE454e31CF0A79c6D7cf2f077DD286C12f) | ~$6.2K of fxUSD — effectively drained |
+| Curve USDC/fxUSD | [`0x5018BE882DccE5E3F2f3B0913AE2096B9b3fB61f`](https://etherscan.io/address/0x5018BE882DccE5E3F2f3B0913AE2096B9b3fB61f) | ~$7.52M (4.47M USDC + 3.05M fxUSD, 59.4/40.6) — also the EMA source that gates minting and redemption |
+| Curve msUSD/fxUSD | [`0x138Bb0f3208bd729a561F3786DDb97BBc69e6628`](https://etherscan.io/address/0x138Bb0f3208bd729a561F3786DDb97BBc69e6628) | ~$0.59M; msUSD was priced near $0.70 by the Curve API at the snapshot |
+| Curve reUSD/fxUSD | [`0xb0ef04ACE97d350E24Efa5139d2590D26a61A8Dc`](https://etherscan.io/address/0xb0ef04ACE97d350E24Efa5139d2590D26a61A8Dc) | ~$0.55M |
+| Curve USDnr/fxUSD | [`0x3204d754a3003cEc155e2D8F44b3b48eD60b7Cc6`](https://etherscan.io/address/0x3204d754a3003cEc155e2D8F44b3b48eD60b7Cc6) | ~$0.44M |
+| Curve fxUSD/frxUSD | [`0x851907CAC684797eee43669798D78004e269Cb5E`](https://etherscan.io/address/0x851907CAC684797eee43669798D78004e269Cb5E) | ~$0.15M |
+| Curve alUSD/fxUSD | [`0x27cB9629aE3Ee05cb266B99cA4124EC999303c9D`](https://etherscan.io/address/0x27cB9629aE3Ee05cb266B99cA4124EC999303c9D) | ~$0.14M |
+| Curve GHO/fxUSD | [`0x74345504Eaea3D9408fC69Ae7EB2d14095643c5b`](https://etherscan.io/address/0x74345504Eaea3D9408fC69Ae7EB2d14095643c5b) | ~$0.06M |
+| Curve DeFi Stable Avengers | [`0x8B878AFE454e31CF0A79c6D7cf2f077DD286C12f`](https://etherscan.io/address/0x8B878AFE454e31CF0A79c6D7cf2f077DD286C12f) | ~$0.03M total across fxUSD, USDC, USDaf and BOLD |
 
 ## Audits and Due Diligence Disclosures
 
@@ -163,40 +174,40 @@ The protocol has a complex smart contract architecture spanning multiple treasur
 
 ### Bug Bounty
 
-No bug bounty program was found on Immunefi, Code4rena, Sherlock, or other major platforms. The protocol is **not** registered with SEAL Safe Harbor. Despite the extensive audit history, the absence of a bug bounty program is a notable gap.
+AladdinDAO operates a self-hosted [security bounty program](https://docs.aladdin.club/security-bounty) covering all contracts in its f(x) repositories, with a maximum **$500,000** payout for critical vulnerabilities. It is not an Immunefi-managed program and disclosures are submitted directly to the team. The payout exceeds the framework's $200K score-2 threshold but remains below the >$1M score-1 threshold.
 
-**Notable vulnerability:** In April 2025, ChainSecurity responsibly disclosed a double flash loan vulnerability that could have resulted in >$2M in losses. The f(x) team promptly fixed it by removing the Balancer V2 flash loan integration. This was caught through external research, not through a bug bounty program.
+**Notable vulnerability:** In April 2025, [ChainSecurity responsibly disclosed](https://www.chainsecurity.com/blog/f-x-protocol-circumventing-access-control-with-a-double-flash-loan-attack) a double flash loan vulnerability that could have resulted in >$2M in losses. The f(x) team promptly fixed it by removing the Balancer V2 flash loan integration. ChainSecurity describes this as internal research followed by responsible disclosure; no evidence was found that it was submitted through or paid by the bounty program.
 
 ## Historical Track Record
 
-- **In production since:** February 23, 2024 (~29 months as of July 2026)
-- **Current TVL:** ~$94.9M (DeFi Llama); ~$91.45M collateral backing ~$64.12M fxUSD debt in PoolManager
-- **TVL history:** Spent 182 days above $100M between May–November 2025; all-time peak $271M on August 24, 2025. Last 90 days ranged $66.9M (May 2, 2026) to $96.9M (July 22, 2026), with a shallow drawdown to $71.6M on July 1, 2026 before recovering.
-- **fxUSD supply:** ~64.2M, up from ~18.1M in March 2026 — the growth has come almost entirely from the WBTC leg, which now carries ~90% of system debt
-- **Peg stability:** fxUSD has generally maintained its peg, with an ATL of $0.953 on December 5, 2024. Current NAV ~$0.9982; Curve EMA ~$1.0000
+- **In production since:** February 23, 2024 (~30 months as of August 2026)
+- **Current TVL:** ~$96.8M ([DeFi Llama](https://defillama.com/protocol/fx-protocol)); ~$87.04M active V2 collateral backing ~64.31M fxUSD pool debt in PoolManager
+- **TVL history:** Spent 182 days above $100M between May–November 2025; all-time peak $271M on August 24, 2025. Over the last 90 days TVL ranged from $71.6M on July 1, 2026 to $96.9M on July 22, 2026, and stood at $96.8M on August 15.
+- **fxUSD supply:** ~64.31M, up from ~18.1M in March 2026 — the growth has come almost entirely from the WBTC leg, which now carries ~90% of system debt
+- **Peg stability:** fxUSD has generally maintained its peg. CoinGecko publishes a $0.9531 ATL for December 5, 2024, but this could not be corroborated: [DeFiLlama's daily series](https://coins.llama.fi/chart/ethereum:0x085780639CC2cACd35E474e71f4d000e2405d8f6?start=1731628800&span=47&period=1d&searchWidth=6h) records $0.99768 that day and the [checked crvUSD/fxUSD Curve pool's recorded swaps](https://prices.curve.finance/v1/trades/ethereum/0x8fFC7b89412eFD0D17EDEa2018F6634eA4C2FCb2?main_token=0x085780639CC2cACd35E474e71f4d000e2405d8f6&reference_token=0xf939E0A03FB07F59A73314E73794Be0E57ac1b4E&page=23&per_page=100) were approximately $0.9948–$0.9970. The unverified aggregator ATL is not treated as an onchain depeg or stress event. Current NAV is ~$0.9980 and Curve EMA ~$1.00034.
 - **Security incidents:** One responsibly disclosed vulnerability (ChainSecurity, April 2025) — no exploits or fund losses
 - **Governance events:** ProxyAdmin ownership moved to a 3-day TimelockController on April 20, 2026 (block 24,920,358, tx [`0xeb7c71fc…8b9fd8`](https://etherscan.io/tx/0xeb7c71fc855cd928bb4b300eaf7cc5e8b0ad86b625a109f3308b0552068b9fd8)). The last proxy upgrade of any core contract was on April 20, 2026, immediately *before* that transfer; no proxy has been upgraded since the timelock took control.
-- **Holder concentration:** 916 holders. The Stability Pool holds 58,225,808 fxUSD — **90.65% of total supply** — of which fxSAVE owns 96.6%. The Curve USDC/fxUSD pool holds a further 5.5%. Fewer than 4% of fxUSD is held outside protocol-owned or DEX contracts ([Blockscout holders](https://eth.blockscout.com/token/0x085780639CC2cACd35E474e71f4d000e2405d8f6?tab=holders)).
+- **Holder concentration:** The Stability Pool holds 57,460,692 fxUSD — **89.35% of total supply** — and fxSAVE's assets equal 96.9% of all fxSP shares. The Curve USDC/fxUSD pool holds a further 4.7% of supply. Holder distribution remains independently visible through [Blockscout](https://eth.blockscout.com/token/0x085780639CC2cACd35E474e71f4d000e2405d8f6?tab=holders).
 
-The protocol has operated for over 2 years with no exploits or fund losses. The December 2024 ATL of $0.953 (~4.7% deviation) is notable but represents a relatively mild depeg for a DeFi stablecoin. TVL scaled from launch to a sustained $100M+ band in mid-2025 and sits in the $90–$95M range.
+The protocol has operated for over 2 years with no exploits or fund losses. The published December 2024 $0.953 ATL is not supported by the checked DeFiLlama and onchain Curve history and is therefore excluded from risk scoring. TVL scaled from launch to a sustained $100M+ band in mid-2025 and is currently about $96.8M.
 
 ## Funds Management
 
-In V2, all fxUSD position collateral is custodied by the PoolManager contract ([`0x250893CA4Ba5d05626C785e8da758026928FCD24`](https://etherscan.io/address/0x250893CA4Ba5d05626C785e8da758026928FCD24)), which currently holds ~4,656.51 wstETH (~$11.16M) and ~1,242.66 WBTC (~$80.29M) — totaling ~$91.45M backing ~$64.12M fxUSD debt (**~142.6% CR**). No collateral is deployed to external protocols today, but that is a discretionary state rather than an architectural guarantee: the PoolManager has a live `allocations` entry pointing wstETH at an AaveV3Strategy ([`0xFd3A6540e21D0E285f88FBFd904883B23e08F5C8`](https://etherscan.io/address/0xFd3A6540e21D0E285f88FBFd904883B23e08F5C8)) with a 100,000 wstETH capacity — roughly 21x the current wstETH balance — and any ASSET_MANAGER_ROLE holder can push collateral into it without a timelock (see *Centralization & Control Risks*). The strategy currently holds 0 wstETH. The Stability Pool has an equivalent USDC path into an AaveV3CompoundStrategy ([`0xd023Aac0e2D46c93d4c6e8e2A449bF2d4687804f`](https://etherscan.io/address/0xd023Aac0e2D46c93d4c6e8e2A449bF2d4687804f), 100M USDC capacity) which holds ~19 USDC — actual Aave exposure across the protocol is negligible.
+In V2, all fxUSD position collateral is accounted for by the PoolManager contract ([`0x250893CA4Ba5d05626C785e8da758026928FCD24`](https://etherscan.io/address/0x250893CA4Ba5d05626C785e8da758026928FCD24)), which records ~4,635.20 wstETH (~$8.71M) and ~1,243.47 WBTC (~$78.33M) — totaling ~$87.04M backing ~64.31M fxUSD pool debt (**~135.6% CR** at NAV). Some collateral is temporarily borrowed by sPOSITIONs, explaining the difference between the manager's accounting balance and direct ERC-20 balance. No collateral is deployed to external protocols today, but that is a discretionary state rather than an architectural guarantee: the PoolManager has a live `allocations` entry pointing wstETH at an AaveV3Strategy ([`0xFd3A6540e21D0E285f88FBFd904883B23e08F5C8`](https://etherscan.io/address/0xFd3A6540e21D0E285f88FBFd904883B23e08F5C8)) with a 100,000 wstETH capacity — roughly 22x the current wstETH balance — and any ASSET_MANAGER_ROLE holder can push collateral into it without a timelock (see *Centralization & Control Risks*). The strategy currently holds 0 wstETH. The Stability Pool has an equivalent USDC path into an AaveV3CompoundStrategy ([`0xd023Aac0e2D46c93d4c6e8e2A449bF2d4687804f`](https://etherscan.io/address/0xd023Aac0e2D46c93d4c6e8e2A449bF2d4687804f), 100M USDC capacity) which holds ~19 USDC — actual Aave exposure across the protocol is negligible.
 
 ### Accessibility
 
 - **Who can mint:** Anyone can mint fxUSD by depositing collateral (wstETH, WBTC in V2) through fxMINT or by opening xPOSITION/sPOSITION positions. No whitelist required.
 - **Minting mechanism:** Atomic in a single transaction via flash loans. Users deposit collateral, fxUSD is minted proportional to their leverage/debt position.
-- **Redemption is conditional, not always-on.** `PegKeeper.isRedeemAllowed()` returns `true` only while the Curve USDC/fxUSD EMA is **below** the `priceThreshold` of $0.998 ([PegKeeper implementation](https://etherscan.io/address/0x17e2e8ca0b35aa750771e000d1e926417b97f29d#code)). The EMA is currently ~$1.0000, so redemption is **disabled** and `isBorrowAllowed()` is `true`. The mechanism is a depeg backstop that establishes a floor near $0.995 (redeeming $1 of collateral less a 0.5% fee, `getRedeemFeeRatio()` = 5e6/1e9); it is not an exit route available at par.
+- **Redemption is conditional, not always-on.** `PegKeeper.isRedeemAllowed()` returns `true` only while the Curve USDC/fxUSD EMA is **below** the `priceThreshold` of $0.998 ([PegKeeper implementation](https://etherscan.io/address/0x17e2e8ca0b35aa750771e000d1e926417b97f29d#code)). The EMA is currently ~$1.00034, so redemption is **disabled** and `isBorrowAllowed()` is `true`. The mechanism is a depeg backstop that establishes a floor near $0.995 (redeeming $1 of collateral less a 0.5% fee, `getRedeemFeeRatio()` = 5e6/1e9); it is not an exit route available at par.
 - **Fees:** Opening fee: 0.5% of minted debt (fxMINT), 0.3% (xPOSITION/sPOSITION). Closing fee: 0.2% (fxMINT), 0.1% (xPOSITION/sPOSITION). 0% ongoing annual interest for fxMINT. Onchain: redeem fee 0.5%, flash-loan fee 0.01%, liquidation expense ratio 10%, harvester ratio 0.1%.
-- **Rate limits:** Maximum concurrent redemption is 20% of xPOSITION per tick (`getMaxRedeemRatioPerTick()` = 2e8/1e9), highest leverage first.
+- **Rate limits:** Each redemption call walks from the highest- to lower-leverage ticks and can consume at most **20% of aggregate debt in each tick** (`getMaxRedeemRatioPerTick()` = 2e8/1e9). A single call may redeem from multiple ticks, but it does not restart at the top; any requested remainder needs another call. This is a per-tick limit, not a 20% cap per individual xPOSITION ([`BasePool._redeem`](https://github.com/AladdinDAO/fx-protocol-contracts/blob/main/contracts/core/pool/BasePool.sol)).
 
 ### Collateralization
 
-- **Fully collateralized onchain** by crypto-native assets held in the PoolManager: wstETH (~$11.16M) and WBTC (~$80.29M)
-- **Over-collateralization:** The V2 system maintains ~142.6% CR (~$91.45M collateral backing ~$64.12M fxUSD debt), equivalent to ~70% aggregate LTV against a per-position rebalance trigger at 88% LTV. The system requires >100% CR; Stability Mode triggers protective measures at CR <130%. The buffer is thinner than the design's headline figures suggest: the xWBTC pool carries ~90% of debt at ~139% CR, so a further ~9% BTC drawdown with no deleveraging would put the dominant pool at the Stability Mode threshold. Note: `fxUSD.isUnderCollateral()` currently returns `true` due to the legacy V1 wstETH market (78.6% CR with only ~$8.3K remaining) — the V2 PoolManager system is healthy at ~142.6%.
-- **Collateral quality:** wstETH (Lido) and WBTC — blue-chip DeFi assets with deep liquidity. V2 concentrates collateral in two high-quality assets rather than the V1 approach of 6+ collateral types, but the mix is now heavily skewed: WBTC is ~88% of collateral value and backs ~90% of debt, so system solvency tracks BTC far more than ETH.
+- **Fully collateralized onchain** by crypto-native assets accounted for in the PoolManager: wstETH (~$8.71M) and WBTC (~$78.33M)
+- **Over-collateralization:** The V2 system maintains ~135.6% CR (~$87.04M collateral backing ~$64.18M debt at NAV), equivalent to ~74% aggregate LTV against a per-position rebalance trigger at 88% LTV. The system requires >100% CR; Stability Mode triggers protective measures at CR <130%. Both active pools are close to that system threshold: xstETH is ~136.7% CR and xWBTC ~135.5%, equivalent to only about 4–5% additional collateral-price downside with no deleveraging. Note: `fxUSD.isUnderCollateral()` currently returns `true` due to the legacy V1 wstETH market (79.3% CR with only ~$8.1K remaining), not the active V2 system.
+- **Collateral quality:** wstETH (Lido) and WBTC — blue-chip DeFi assets with deep liquidity. V2 concentrates collateral in two high-quality assets rather than the V1 approach of 6+ collateral types, but the mix is heavily skewed: WBTC is ~90% of collateral value and backs ~90% of debt, so system solvency tracks BTC far more than ETH.
 - **Liquidations are on-chain** via two mechanisms:
   - **Rebalancing (Liquidation Brake):** Triggered at 88% LTV — partial position reduction, 2.5% bounty
   - **Hard Liquidation:** Triggered at 95% LTV — full position closure, 4% bounty
@@ -207,29 +218,29 @@ In V2, all fxUSD position collateral is custodied by the PoolManager contract ([
   3. Funding Level I: triggered when Stability Pool USDC <5%, cost = Aave USDC borrow rate
   4. Enhanced protection: Curve EMA < $0.998 triggers mint pause + Funding Level II (10x Aave rate)
   5. Redemption: hard floor at $0.995 via 1:1 collateral redemption with 0.5% fee
-- **Stable buffer is effectively empty.** The Stability Pool holds 58,225,808 fxUSD against 94,254 USDC — the stable leg is **0.16%** of pool value, far below the 5% Funding Level I threshold. Layer 2 (the peg keeper buying fxUSD with USDC) therefore has almost no ammunition; the practical defenses today are the funding-cost levies on xPOSITIONs and, if the EMA breaks $0.998, redemption.
+- **Stable buffer has recovered above its trigger.** The Stability Pool holds 57,460,692 fxUSD and 6,836,417 USDC, making USDC about **10.65%** of pool value — above the 5% Funding Level I threshold. `isFundingEnabled()` is currently `false`, while the PegKeeper has meaningful USDC ammunition to buy fxUSD below peg. This is a favorable change from the 0.16% buffer observed on July 27, but depositors can withdraw and the ratio remains dynamic.
 - **Risk curation:** Governance-adjustable parameters include LTV thresholds, fees, oracle deviations, and collateral caps
 
 ### Provability
 
-- **Reserves fully verifiable on-chain** — all collateral sits in treasury contracts readable by anyone
+- **Reserves fully verifiable on-chain** — PoolManager accounting, direct token custody, registered short-pool borrowing and any configured-strategy balances are readable by anyone
 - **Exchange rate / NAV:** Computed on-chain algorithmically via the f(x) invariant formula. No off-chain inputs for NAV calculation.
 - **Oracle system:** Multi-source design:
   - **stETH/USD:** Chainlink ETH/USD + Uniswap V3 USDC/ETH (0.05% and 0.3% pools) + Curve stETH/ETH EMA + Uniswap V3 stETH/ETH. 1% deviation threshold.
   - **WBTC/USD:** Chainlink BTC/USD + Chainlink WBTC/BTC + Uniswap V3 pools (WBTC/USDC, WBTC/ETH, USDC/ETH). 2% deviation threshold.
 - **Admin minting:** The fxUSD contract is upgradeable (TransparentUpgradeableProxy, implementation `FxUSDRegeneracy` [`0xf729422D68c2cf00574fb5712972454cf402A9b1`](https://etherscan.io/address/0xf729422d68c2cf00574fb5712972454cf402a9b1), last upgraded February 17, 2026). ProxyAdmin is owned by the TimelockController, so any upgrade that introduced unbacked minting would be visible for 3 days before it could execute. Under the current implementation, fxUSD can only be minted against collateral through the PoolManager and ShortPoolManager.
-- **`isUnderCollateral` flag:** The fxUSD contract currently reports `isUnderCollateral() = true` due to a legacy V1 wstETH market with 78.6% CR (~$8.3K remaining, negligible). The active V2 system holds ~$91.45M collateral against ~$64.12M fxUSD debt (~142.6% CR).
+- **`isUnderCollateral` flag:** The fxUSD contract currently reports `isUnderCollateral() = true` due to a legacy V1 wstETH market with 79.3% CR (~$8.1K remaining, negligible). The active V2 system holds ~$87.04M collateral against ~64.31M fxUSD pool debt (~135.6% CR at NAV).
 - **No third-party verification** (no Chainlink PoR or custodian attestation needed — all on-chain)
 
 ## Liquidity Risk
 
-- **Primary liquidity:** Curve USDC/fxUSD pool at ~$7.17M with balanced composition (~50.7% USDC, ~49.3% fxUSD). This single pool is doing double duty — it is both the main exit venue and the EMA price source that the PegKeeper uses to gate minting, redemption and funding costs.
-- **Secondary pools:** Six smaller Curve pools totalling ~$2.8M (msUSD ~$1.13M, USDnr ~$0.54M, reUSD ~$0.53M, frxUSD ~$0.25M, alUSD ~$0.22M, GHO ~$0.13M), plus a DeFi Stable Avengers pool now down to ~$6.2K of fxUSD. Every one of these pairs fxUSD against another non-USDC stablecoin, so exiting to a liquid asset requires a second hop.
-- **Redemption mechanism:** Direct 1:1 redemption for underlying collateral (wstETH/WBTC) with 0.5% fee, capped at 20% of xPOSITION per tick — **but only enabled while the Curve EMA is below $0.998**. It is currently disabled and cannot be relied on as an exit at par.
-- **Stability Pool exits:** 1% instant-redeem fee (`instantRedeemFeeRatio` = 1e16), or fee-free after a 60-minute cooldown (`redeemCoolDownPeriod` = 3600s). Redemptions pay out pro-rata in the pool's assets, which are 99.84% fxUSD — so fxSAVE/fxSP holders exit *into* fxUSD and must then sell it, converging on the same Curve pool.
-- **Slippage analysis:** With ~$7.17M in the primary Curve pool, a $500K swap experiences moderate slippage and a $1M+ exit is materially impactful. Because redemption is gated on a depeg, there is no guaranteed alternative route for a large holder wanting out while fxUSD is trading at par.
-- **Historical liquidity during stress:** The December 2024 depeg to $0.953 suggests that liquidity was somewhat thin during that period, though the peg recovered.
-- **Structural concentration:** 90.65% of fxUSD supply sits in the Stability Pool, 96.6% of which is owned by fxSAVE. Demand for fxUSD is therefore overwhelmingly protocol-internal yield-seeking rather than external usage, and a coordinated fxSAVE exit would funnel through the ~$7.17M Curve pool. Primary DEX depth is only ~11.2% of supply, and it has not kept pace with issuance — supply is ~3.5x its March 2026 level while the primary pool is roughly flat.
+- **Primary liquidity:** Curve USDC/fxUSD pool at ~$7.52M with ~59.4% USDC and ~40.6% fxUSD. This single pool is doing double duty — it is both the main exit venue and the EMA price source that the PegKeeper uses to gate minting, redemption and funding costs.
+- **Secondary pools:** Six smaller Curve pools total only ~$1.94M at current component prices (msUSD ~$0.59M, reUSD ~$0.55M, USDnr ~$0.44M, frxUSD ~$0.15M, alUSD ~$0.14M, GHO ~$0.06M), plus ~$0.03M in the four-asset DeFi Stable Avengers pool ([Curve API snapshot](https://api.curve.finance/v1/getPools/ethereum/factory-stable-ng)). These venues introduce other stablecoin risk and generally require a second hop to reach USDC; msUSD was itself priced near $0.70 in that snapshot.
+- **Redemption mechanism:** Direct redemption for underlying collateral (wstETH/WBTC) with a 0.5% fee — **but only enabled while the Curve EMA is below $0.998**. Each call walks the leverage ticks once and can redeem up to 20% of aggregate debt per tick; it is not capped at 20% of one position or 20% total. Redemption is currently disabled and cannot be relied on as an exit at par.
+- **Stability Pool exits:** 1% instant-redeem fee (`instantRedeemFeeRatio` = 1e16), or fee-free after a 60-minute cooldown (`redeemCoolDownPeriod` = 3600s). Redemptions pay out pro-rata in the pool's assets, currently about 89.35% fxUSD and 10.65% USDC by value. This buffer improves exit quality, but most of a large fxSAVE/fxSP redemption would still return fxUSD that must be sold or held.
+- **Slippage analysis:** Snapshot-block `get_dy` quotes were materially better than the prior report assumed: 500K fxUSD returned ~500,056 USDC, 1M returned ~999,997 USDC, and 4M returned ~3,989,756 USDC (about 0.26% below par). The pool can therefore absorb ordinary and moderately large exits efficiently in its current state. Impact becomes nonlinear as an exit approaches the pool's ~4.47M USDC side, and direct collateral redemption remains unavailable while fxUSD trades at par.
+- **Historical market data caveat:** The published $0.953 December 2024 ATL could not be corroborated in checked DeFiLlama or primary Curve trade history and is not used as evidence of stressed liquidity.
+- **Structural concentration:** 89.35% of fxUSD supply sits in the Stability Pool, and fxSAVE's assets equal 96.9% of all fxSP shares. Demand for fxUSD is therefore overwhelmingly protocol-internal yield-seeking rather than external usage, and a coordinated fxSAVE exit would still put most proceeds through the ~$7.52M Curve pool. Primary DEX depth is only ~11.7% of supply; all checked Curve liquidity totals about 14.7% of supply.
 
 ## Centralization & Control Risks
 
@@ -247,7 +258,7 @@ In V2, all fxUSD position collateral is custodied by the PoolManager contract ([
 
 Used together — widen the deviation bound, then point the oracle at a controlled pool — these produce an arbitrary `getExchangePrice()` / `getLiquidatePrice()`, which is a direct, non-timelocked path to force liquidations and capture collateral. Because the remediation is already scheduled and permissionlessly executable, this is a gap in follow-through rather than an intentional design, but it is live today and is the single largest centralization risk in the system.
 
-**Non-timelocked asset-management path.** `ASSET_MANAGER_ROLE` on both the PoolManager and the Stability Pool is held by the 6/9 multisig, the 3/4 emergency multisig and the timelock. That role's `manage(asset, amount)` moves funds into the already-configured strategy up to its capacity. Choosing the strategy (`alloc`) is `DEFAULT_ADMIN_ROLE` and therefore timelocked, which bounds the destination — but the configured wstETH capacity (100,000 wstETH) exceeds the entire wstETH collateral balance by ~21x, so either multisig could move the whole ETH collateral leg into Aave Prime without delay.
+**Non-timelocked asset-management path.** `ASSET_MANAGER_ROLE` on both the PoolManager and the Stability Pool is held by the 6/9 multisig, the 3/4 emergency multisig and the timelock. That role's `manage(asset, amount)` moves funds into the already-configured strategy up to its capacity. Choosing the strategy (`alloc`) is `DEFAULT_ADMIN_ROLE` and therefore timelocked, which bounds the destination — but the configured wstETH capacity (100,000 wstETH) exceeds the entire wstETH collateral balance by ~22x, so either multisig could move the whole ETH collateral leg into Aave Prime without delay.
 
 - **Operational multisig:** 6-of-9 Gnosis Safe [`0x26B2ec4E02ebe2F54583af25b647b1D619e67BbF`](https://etherscan.io/address/0x26B2ec4E02ebe2F54583af25b647b1D619e67BbF)
   - Known signers: Diligent Deer, Paul, chiaki644, Gordon, Guo Yu, Jamie, Martin Krung, Sharlyn Wu, vfat
@@ -273,19 +284,19 @@ Used together — widen the deviation bound, then point the oracle at a controll
 
 - **Chainlink:** ETH/USD and BTC/USD price feeds — critical for all position operations and liquidations
 - **Uniswap V3:** TWAP oracle data used as secondary/validation price source
-- **Curve:** stETH/ETH EMA oracle, plus the USDC/fxUSD pool [`0x5018BE88…FB61f`](https://etherscan.io/address/0x5018BE882DccE5E3F2f3B0913AE2096B9b3fB61f) whose `price_oracle(0)` EMA is a **hard control input**, not just monitoring: it decides whether minting is allowed, whether redemption is allowed, and whether funding costs are levied. A single ~$7.17M pool therefore gates the protocol's core user operations.
+- **Curve:** stETH/ETH EMA oracle, plus the USDC/fxUSD pool [`0x5018BE88…FB61f`](https://etherscan.io/address/0x5018BE882DccE5E3F2f3B0913AE2096B9b3fB61f) whose `price_oracle(0)` EMA is a **hard control input**, not just monitoring: it decides whether minting is allowed, whether redemption is allowed, and whether funding costs are levied. A single ~$7.52M pool therefore gates the protocol's core user operations.
 - **Aave:** allocation paths are configured for Stability Pool USDC (100M capacity) and PoolManager wstETH (100,000 wstETH capacity), but ~19 USDC and 0 wstETH are actually deployed — current Aave exposure is negligible while the capacity to create it without a timelock remains.
-- **Lido:** wstETH is the ETH collateral leg in V2 (~$11.16M, ~12% of collateral)
-- **LayerZero:** **Not a fxUSD dependency** (re-verified July 27, 2026). f(x) uses LayerZero `ProxyOFT` for *other* tokens (fETH, xETH, FXN, arUSD), but **fxUSD itself is not bridged**: the docs list fxUSD with a single Ethereum address and no bridging entry, [DeFiLlama](https://api.llama.fi/protocol/fx-protocol) reports f(x) Protocol on Ethereum only, fxUSD is not a native OFT (`endpoint()` and `oftVersion()` revert on [`0x0857…d8f6`](https://etherscan.io/address/0x085780639CC2cACd35E474e71f4d000e2405d8f6)), it is absent from [LayerZero's OFT registry](https://metadata.layerzero-api.com/v1/metadata/experiment/ofts/list), it has no Chainlink CCIP token pool (`TokenAdminRegistry.getPool` returns the zero address), and no contract exists at the same address on Base.
+- **Lido:** wstETH is the ETH collateral leg in V2 (~$8.71M, ~10% of collateral)
+- **LayerZero:** fxUSD has a live Ethereum↔Base LayerZero V2 route. The Ethereum [`FxUSDOFTAdaptor`](https://etherscan.io/address/0xA07d8cc424421cC2bce0544a65481376f010A438) locks canonical fxUSD and peers with the Base [`fxUSD OFT`](https://basescan.org/address/0x55380fe7A1910dFf29A47B622057ab4139DA42C5); both point to the canonical EndpointV2 and had exactly 308,980.654349 fxUSD escrow/supply at the snapshot. This is a **lock** model: the adapter cannot mint canonical Ethereum fxUSD, so bridge risk is bounded to the Base representation and escrow (0.48% of Ethereum supply), although a forged Base→Ethereum release could steal that escrow. The receive-side Ethereum route requires all three required DVNs (LayerZero Labs, Nethermind, Google) plus 1-of-3 optional DVNs (Horizen, Polyhedra zkBridge, Canary), with 20 confirmations — an effective **3 required + 1-of-3 optional** quorum. The operational 6-of-9 Safe owns the Ethereum adapter; a separate 3-of-4 Safe owns the Base OFT.
 
 - **Katana deployments are locally issued, not identified bridge representations.** Two `fxUSD` / "f(x) USD" ERC-20s exist on Katana ([`0x4c03…FDF9`](https://explorer.katanarpc.com/address/0x4c03ff0f44A55e7098a09016E02a01d3cdC2FDF9), supply ~12,024; [`0x1364…9f86`](https://explorer.katanarpc.com/address/0x1364b238C668A2dec1294174e4798E8c09979f86), supply ~1,000,018). Each token exposes a local `poolManager()` (`0x27b3…f96a` and `0xFae3…3C68`, respectively), and each PoolManager's `fxUSD()` points back to its corresponding token. The verified `0x1364…9f86` implementation restricts minting to its PoolManager; local mint events, including a 10,000-token genesis mint for `0x4c03…FDF9`, corroborate local issuance. Neither token is a LayerZero OFT (`endpoint()` reverts), and neither is the canonical AggLayer/LxLy wrapper of mainnet fxUSD (`PolygonZkEVMBridgeV2.getTokenWrappedAddress(0, fxUSD)` returns the zero address on Katana). Both supplies are essentially static since the May 2026 check. This positive architecture evidence does not reveal a bridge path from Ethereum fxUSD to either Katana deployment. Because the `0x4c03…FDF9` implementation is not source-verified, a separate custom conversion path cannot be ruled out absolutely; reassess if one is identified rather than inferring a bridge from the shared name and symbol.
 
-The protocol depends on multiple well-established DeFi protocols. Chainlink is the most critical dependency — oracle failure would impair pricing and liquidations. Aave exposure is capped and non-critical to core fxUSD backing.
+The protocol depends on multiple well-established DeFi protocols. Chainlink is the most critical dependency — oracle failure would impair pricing and liquidations. Aave exposure is capped and currently negligible. LayerZero is an optional, bounded bridge route rather than a dependency of Ethereum minting or collateral solvency.
 
 ## Operational Risk
 
-- **Team transparency:** AladdinDAO was launched by 14 founding contributors including well-known figures: Sharlyn Wu (former CIO of Huobi), Robert Leshner (Compound founder), Kain Warwick (Synthetix founder), Hart Lambur (UMA co-founder). Core development team (~12) and boule members (~30) are partially doxxed.
-- **Institutional backers:** Polychain Capital, Digital Currency Group, 1kx, Multicoin Capital, CMS, Nascent, Alameda Research, DeFi Alliance
+- **Team transparency:** [AladdinDAO was launched](https://medium.com/aladdindao/aladdindao-4e181ac5baa) by a consortium of 14 contributors and investors including Sharlyn Wu, Robert Leshner, Kain Warwick and Hart Lambur. AladdinDAO later built/incubated f(x); the launch contributors should not be described as direct f(x) core developers. The current core development team and boule members remain only partially doxxed.
+- **AladdinDAO launch backers:** Polychain Capital, Digital Currency Group, 1kx, Multicoin Capital, CMS, Nascent, Alameda Research and DeFi Alliance participated at the AladdinDAO level. Public evidence does not establish each as a direct investor in the f(x) product.
 - **Documentation quality:** Good — comprehensive GitBook documentation covering mechanisms, risk framework, fees, and deployments. Active GitHub with open-source contracts.
 - **Legal structure:** AladdinDAO is structured as a DAO. No clear traditional legal entity disclosed.
 - **Incident response:** The ChainSecurity flash loan vulnerability was handled promptly (April 2025). The protocol has a defined 5-layer risk framework with recapitalization as the final safety mechanism.
@@ -304,10 +315,12 @@ The protocol depends on multiple well-established DeFi protocols. Chainlink is t
 | Operational Multisig | [`0x26B2ec4E02ebe2F54583af25b647b1D619e67BbF`](https://etherscan.io/address/0x26B2ec4E02ebe2F54583af25b647b1D619e67BbF) | Governance parameter changes, new transactions |
 | Emergency Multisig | [`0x28c921adAC4c1072658eB01a28DA06b5F651eF62`](https://etherscan.io/address/0x28c921adAC4c1072658eB01a28DA06b5F651eF62) | Pause events on PoolManager/ShortPoolManager |
 | PoolManager | [`0x250893CA4Ba5d05626C785e8da758026928FCD24`](https://etherscan.io/address/0x250893CA4Ba5d05626C785e8da758026928FCD24) | Rebalance/Liquidation events, wstETH/WBTC balances, collateral ratio, `manage()` calls moving collateral into the Aave strategy |
-| Stability Pool (fxSP) | [`0x65C9A641afCEB9C0E6034e558A319488FA0FA3be`](https://etherscan.io/address/0x65C9A641afCEB9C0E6034e558A319488FA0FA3be) | USDC balance (currently 0.16% of pool, already below the 5% threshold), deposit/withdrawal flows, `alloc`/`manage` calls |
+| Stability Pool (fxSP) | [`0x65C9A641afCEB9C0E6034e558A319488FA0FA3be`](https://etherscan.io/address/0x65C9A641afCEB9C0E6034e558A319488FA0FA3be) | USDC ratio (currently ~10.65%, above the 5% threshold), deposit/withdrawal flows, `alloc`/`manage` calls |
 | fxSAVE | [`0x7743e50F534a7f9F1791DdE7dCD89F7783Eefc39`](https://etherscan.io/address/0x7743e50F534a7f9F1791DdE7dCD89F7783Eefc39) | Total assets, exchange rate changes |
 | PegKeeper | [`0x50562fe7e870420F5AAe480B7F94EB4ace2fcd70`](https://etherscan.io/address/0x50562fe7e870420F5AAe480B7F94EB4ace2fcd70) | Peg maintenance events, funding level triggers |
 | Curve USDC/fxUSD | [`0x5018BE882DccE5E3F2f3B0913AE2096B9b3fB61f`](https://etherscan.io/address/0x5018BE882DccE5E3F2f3B0913AE2096B9b3fB61f) | Pool balance ratio, large swaps |
+| FxUSDOFTAdaptor | [`0xA07d8cc424421cC2bce0544a65481376f010A438`](https://etherscan.io/address/0xA07d8cc424421cC2bce0544a65481376f010A438) | Escrow balance, `SetPeer`, `SetReceiveLibrary`, `SetConfig`, ownership/delegate changes and unexpected releases |
+| Base fxUSD OFT | [`0x55380fe7A1910dFf29A47B622057ab4139DA42C5`](https://basescan.org/address/0x55380fe7A1910dFf29A47B622057ab4139DA42C5) | Supply versus Ethereum escrow, peer/config changes and 3-of-4 owner Safe changes |
 
 ### Critical Events & Thresholds
 
@@ -315,8 +328,8 @@ The protocol depends on multiple well-established DeFi protocols. Chainlink is t
 |-------|-----------|--------|
 | fxUSD NAV deviation | >2% from $1.00 | Immediate alert |
 | Curve EMA price | <$0.998 | Enhanced protection mode: minting disabled, redemption enabled, funding costs levied |
-| Stability Pool USDC ratio | <5% of pool | Funding Level I activates — **currently triggered at 0.16%** |
-| Collateral Ratio (xWBTC pool) | <130% | Stability Mode — enhanced monitoring (currently ~139%) |
+| Stability Pool USDC ratio | <5% of pool | Funding Level I activates — currently not triggered at ~10.65% |
+| Collateral Ratio (either V2 pool) | <130% | Stability Mode — enhanced monitoring (currently ~136.7% xstETH / ~135.5% xWBTC) |
 | Collateral Ratio (any market) | <100% | Critical — recapitalization mode |
 | Oracle `owner()` change | Any | Confirm ownership moved to the timelock, not to a new EOA/multisig |
 | `UpdateMaxPriceDeviation` / spot-encoding change on either oracle | Any | Immediate investigation — non-timelocked path to reprice collateral |
@@ -327,6 +340,8 @@ The protocol depends on multiple well-established DeFi protocols. Chainlink is t
 | Emergency pause | Any | Immediate alert and assessment |
 | fxUSD totalSupply | >50% change in 24h | Investigate unusual minting/burning |
 | fxSP share of fxUSD supply | >95% | Rising protocol-internal concentration; DEX exit capacity shrinking relative to redeemable balance |
+| LayerZero escrow / Base supply mismatch | Any | Halt bridge use and investigate stuck, forged or incorrectly accounted cross-chain messages |
+| LayerZero DVN quorum change | Any | Re-evaluate Base→Ethereum escrow-release security before continued bridge use |
 
 ### Key View Functions
 
@@ -407,9 +422,9 @@ The protocol depends on multiple well-established DeFi protocols. Chainlink is t
 │         │ custodies ALL V2 collateral                           │
 │  ┌──────▼───────────────────────────────────────────────┐       │
 │  │ COLLATERAL (held in PoolManager)                      │       │
-│  │ wstETH: 4,656.51 (~$11.16M) via xstETH pool          │       │
-│  │ WBTC:   1,242.66 (~$80.29M) via xWBTC pool            │       │
-│  │ Total: ~$91.45M backing ~$64.12M fxUSD (~142.6% CR)  │       │
+│  │ wstETH: 4,635.20 (~$8.71M) via xstETH pool           │       │
+│  │ WBTC:   1,243.47 (~$78.33M) via xWBTC pool           │       │
+│  │ Total: ~$87.04M backing ~64.31M fxUSD (~135.6% CR)   │       │
 │  └──────────────────────────────────────────────────────┘       │
 └─────────────────────────────────────────────────────────────────┘
           │
@@ -420,10 +435,10 @@ The protocol depends on multiple well-established DeFi protocols. Chainlink is t
 │  │ Chainlink  │  │ Uniswap   │  │ Curve     │  │ Aave      │    │
 │  │ (oracles)  │  │ V3 (TWAP) │  │ (EMA,DEX) │  │ (yield)   │    │
 │  └───────────┘  └───────────┘  └───────────┘  └───────────┘    │
-│  ┌───────────┐                                                  │
-│  │ Lido      │                                                  │
-│  │ (wstETH)  │                                                  │
-│  └───────────┘                                                  │
+│  ┌───────────┐  ┌──────────────────────────────────────────┐    │
+│  │ Lido      │  │ LayerZero V2: Ethereum OFTAdapter        │    │
+│  │ (wstETH)  │  │ locks fxUSD ↔ Base OFT (0.48% of supply) │    │
+│  └───────────┘  └──────────────────────────────────────────┘    │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
@@ -434,6 +449,7 @@ The protocol depends on multiple well-established DeFi protocols. Chainlink is t
 - Timelock execution is permissionless (`EXECUTOR_ROLE` granted to `address(0)`); only proposing and cancelling are multisig-gated
 - Keepers are permissionless (anyone can trigger rebalancing/liquidation for bounties)
 - Oracle data flows from Chainlink + Uniswap/Curve and is validated with deviation thresholds — but the thresholds themselves are owner-settable outside the timelock
+- The optional Base representation depends on LayerZero's route configuration and the two bridge-owner Safes. The Ethereum adapter uses a lock model and cannot mint canonical fxUSD, bounding current bridge exposure to its ~309K fxUSD escrow.
 
 ---
 
@@ -442,22 +458,22 @@ The protocol depends on multiple well-established DeFi protocols. Chainlink is t
 ### Key Strengths
 
 - **Extensive audit history:** 21 audits from 3 firms (Secbit, Trail of Bits, OpenZeppelin) with continuous coverage since 2023
+- **Active security bounty:** AladdinDAO's self-hosted program explicitly covers f(x), with a $500,000 maximum critical payout
 - **3-day timelock covers upgrades *and* core parameters** (since April 20, 2026), verified honored in practice on the May 27–30, 2026 `updatePoolCapacity` operation; timelock execution is permissionless
 - **Reserves reconcile exactly:** total supply less V2 pool debt leaves 264 fxUSD of legacy issuance, confirming no unaccounted fxUSD
 - **Innovative peg mechanism:** 5-layer peg protection with onchain redemption as a floor near $0.995 during a depeg
 - **Fully onchain collateral:** All reserves verifiable in the PoolManager, NAV calculated algorithmically
-- **Strong team backing:** Well-known DeFi founders (Leshner, Warwick, Lambur) as founding contributors, institutional backing from Polychain, DCG, 1kx
+- **Established builder provenance:** AladdinDAO, the builder/incubator of f(x), launched with contributors and investors including Leshner, Warwick, Lambur, Polychain, DCG and 1kx; these are AladdinDAO-level relationships, not evidence that each is a direct f(x) contributor or investor
 - **2+ years in production** with no exploits or fund losses; TVL has scaled from launch to a sustained $100M+ band in mid-2025
 
 ### Key Risks
 
 - **Price oracles are outside the timelock.** The 6/9 multisig still owns both live oracles and can widen the deviation bound and repoint spot sources in a single transaction, producing an arbitrary liquidation price. The transfer to the timelock has been scheduled and executable since April 23, 2026 but remains unexecuted.
-- **Collateral is concentrated in BTC and the buffer has narrowed.** WBTC is ~88% of collateral and backs ~90% of debt at ~139% CR; system CR is ~142.6% against a 130% Stability Mode trigger.
+- **Collateral is concentrated in BTC and close to Stability Mode.** WBTC is ~90% of collateral and debt; xWBTC is ~135.5% CR, xstETH ~136.7%, and system CR ~135.6% against a 130% Stability Mode trigger.
 - **Redemption is not an always-available exit.** It unlocks only when the Curve EMA falls below $0.998, so a large holder cannot rely on it while fxUSD trades at par.
-- **Peg-defense stable buffer is depleted:** the Stability Pool holds 0.16% USDC against a 5% Funding Level I threshold.
-- **Extreme structural concentration:** 90.65% of fxUSD sits in the Stability Pool (96.6% of that owned by fxSAVE), with only ~$7.17M of primary DEX depth (~11.2% of supply) as the shared exit
-- **Non-timelocked asset-management and pause authority:** both multisigs hold `ASSET_MANAGER_ROLE` (100,000 wstETH Aave capacity vs ~4,657 wstETH held) and `EMERGENCY_ROLE`.
-- **No bug bounty program** despite complex contract architecture and a previously discovered vulnerability
+- **Structural concentration remains high:** 89.35% of fxUSD sits in the Stability Pool and fxSAVE's assets equal 96.9% of fxSP shares, with only ~$7.52M of primary DEX depth (~11.7% of supply) as the main market exit. The improved 10.65% USDC Stability Pool buffer mitigates, but does not remove, this risk.
+- **Non-timelocked asset-management and pause authority:** both multisigs hold `ASSET_MANAGER_ROLE` (100,000 wstETH Aave capacity vs ~4,635 wstETH accounted for) and `EMERGENCY_ROLE`.
+- **Optional bridge dependency:** Base fxUSD relies on a LayerZero lock-and-mint route and two owner Safes. Current exposure is bounded to ~309K escrowed fxUSD (0.48% of supply), but a forged release or hostile configuration could impair that amount.
 - **Dormant governance:** no Snapshot proposal since February 4, 2026; participation historically 4–16 voters
 - **Keeper dependency:** Rebalancing and liquidation rely on external keepers; failure to act in time could lead to under-collateralization
 
@@ -492,7 +508,7 @@ The protocol depends on multiple well-established DeFi protocols. Chainlink is t
 | **4** | 1 audit by lesser-known firm or dated | Minimal or no bounty |
 | **5** | No audit (CRITICAL GATE) | — |
 
-**Score: 1.5/5** — 21 audits from Secbit, Trail of Bits, and OpenZeppelin (top firms) is exceptional audit coverage. However, the lack of any bug bounty program despite complex architecture prevents a perfect score. The contract surface is complex (multiple markets, treasuries, position managers, oracle systems).
+**Score: 1.5/5** — 21 audits from Secbit, Trail of Bits, and OpenZeppelin provide exceptional coverage, and the active AladdinDAO bounty explicitly covers f(x) with a $500K maximum payout. That bounty clears the score-2 threshold but not the >$1M score-1 threshold; the complex surface (multiple markets, managers, bridge, oracle and stability systems) also supports retaining an intermediate 1.5 rather than a perfect score.
 
 **Subcategory B: Historical Track Record**
 
@@ -504,11 +520,11 @@ The protocol depends on multiple well-established DeFi protocols. Chainlink is t
 | **4** | 3–6 months | <$10M |
 | **5** | <3 months | No meaningful TVL |
 
-**Score: 2.0/5** — In production >2 years (since Feb 2024) which is excellent. Current TVL ~$94.9M is between the >$50M (score 2) and sustained >$100M (score 1) thresholds; the protocol did spend 182 days above $100M between May–November 2025 (all-time peak $271M on August 24, 2025) but is not currently sustained above $100M. No exploits or fund losses. One responsibly disclosed vulnerability handled well. December 2024 depeg to $0.953 was mild.
+**Score: 2.0/5** — In production >2 years (since Feb 2024) which is excellent. Current TVL ~$96.8M is between the >$50M (score 2) and sustained >$100M (score 1) thresholds; the protocol did spend 182 days above $100M between May–November 2025 (all-time peak $271M on August 24, 2025) but is not currently sustained above $100M. No exploits or fund losses, and one responsibly disclosed vulnerability was handled well. The uncorroborated aggregator $0.953 ATL is excluded from the assessment.
 
 **Audits & Historical Score = (1.5 + 2.0) / 2 = 1.75**
 
-**Score: 1.75/5** — Strong audit coverage and solid track record with substantial TVL growth, held back by lack of bug bounty.
+**Score: 1.75/5** — Strong audit coverage, an active $500K bounty and a solid track record with substantial TVL, tempered by contract complexity and TVL not yet sustained above $100M.
 
 #### Category 2: Centralization & Control Risks (Weight: 30%)
 
@@ -548,7 +564,7 @@ What holds the subcategory at 3.0 rather than better is that the timelock does n
 | **4** | Many or newer protocol dependencies | Critical functionality depends on them |
 | **5** | Single point of failure dependency | Failure breaks entire protocol |
 
-**Score: 3.0/5** — Multiple dependencies: Chainlink (critical for pricing), Curve (both the stETH/ETH EMA oracle and the USDC/fxUSD pool whose EMA *gates* minting, redemption and funding costs), Uniswap V3 (TWAP validation), Lido (wstETH), and configured-but-unused Aave allocation paths. All are established blue-chip protocols, and actual Aave exposure is negligible, but the criticality is real: Chainlink drives every liquidation and a single ~$7.17M Curve pool decides whether users can mint or redeem at all. Score 3 holds.
+**Score: 3.0/5** — Multiple dependencies: Chainlink (critical for pricing), Curve (both the stETH/ETH EMA oracle and the USDC/fxUSD pool whose EMA *gates* minting, redemption and funding costs), Uniswap V3 (TWAP validation), Lido (wstETH), configured-but-unused Aave allocation paths, and an optional LayerZero route for Base fxUSD. These are established protocols and actual Aave exposure is negligible. The bridge is a lock model with only 0.48% of supply escrowed and a 3-required-plus-1-of-3-optional DVN receive quorum, so it adds bounded rather than system-wide risk. Chainlink still drives every liquidation and one ~$7.52M Curve pool decides whether users can mint or redeem. Score 3 holds.
 
 **Centralization Score = (3.0 + 1.5 + 3.0) / 3 = 2.5**
 
@@ -566,7 +582,7 @@ What holds the subcategory at 3.0 rather than better is that the timelock does n
 | **4** | Partially collateralized or custodial | Lower-quality or illiquid assets | Opaque or infrequent reporting |
 | **5** | Uncollateralized or unverifiable (CRITICAL GATE) | Unknown or very high-risk assets | No verification possible |
 
-**Score: 2.0/5** — Over-collateralized onchain at ~142.6% CR with verifiable reserves in a single PoolManager contract, and supply reconciles exactly against pool debt. Collateral is two high-quality assets, wstETH (~$11.16M) and WBTC (~$80.29M), which keeps it in the blue-chip band. Three factors keep it at 2.0 rather than better: the mix is now ~88% WBTC so solvency is effectively a single-asset bet; the dominant xWBTC pool sits at ~139% CR, roughly a 9% BTC drawdown from the 130% Stability Mode trigger; and a non-timelocked `ASSET_MANAGER_ROLE` path could relocate the wstETH leg into Aave Prime, making "all collateral is in one verifiable contract" a current state rather than a guarantee. The `isUnderCollateral` flag on the fxUSD contract is triggered by a legacy V1 market with negligible remaining value (~$8.3K, 78.6% CR), not the active V2 system.
+**Score: 2.0/5** — Over-collateralized onchain at ~135.6% CR with verifiable PoolManager accounting, and supply reconciles exactly against pool debt. Collateral is two high-quality assets, wstETH (~$8.71M) and WBTC (~$78.33M), which keeps it in the blue-chip band. Three factors prevent a better score: the mix is ~90% WBTC so solvency is effectively a single-asset bet; both active pools are only about 4–5% of collateral-price downside from the 130% Stability Mode trigger absent deleveraging; and a non-timelocked `ASSET_MANAGER_ROLE` path could relocate the wstETH leg into Aave Prime. The `isUnderCollateral` flag is triggered by a legacy V1 market with negligible remaining value (~$8.1K, 79.3% CR), not the active V2 system.
 
 **Subcategory B: Provability**
 
@@ -578,7 +594,7 @@ What holds the subcategory at 3.0 rather than better is that the timelock does n
 | **4** | Primarily off-chain | Infrequent reporting | Self-reported only |
 | **5** | Opaque, cannot verify | No reporting | No verification |
 
-**Score: 1.5/5** — Fully on-chain reserves with programmatic real-time NAV calculation. Multiple oracle sources (Chainlink + Uniswap + Curve) for price verification. Anyone can query treasury balances and verify backing, and the supply-versus-pool-debt reconciliation closes to 264 fxUSD of known legacy issuance. Holder distribution is now independently verifiable (916 holders, top holder identified). No off-chain components for core backing.
+**Score: 1.5/5** — Fully on-chain reserves with programmatic real-time NAV calculation. Multiple oracle sources (Chainlink + Uniswap + Curve) support price verification. Anyone can query PoolManager accounting and token balances, and the supply-versus-pool-debt reconciliation closes to 264 fxUSD of known legacy issuance. Holder distribution is independently verifiable. No off-chain components back canonical Ethereum fxUSD; the Base representation is exactly matched by adapter escrow.
 
 **Funds Management Score = (2.0 + 1.5) / 2 = 1.75**
 
@@ -594,9 +610,9 @@ What holds the subcategory at 3.0 rather than better is that the timelock does n
 | **4** | Withdrawal queues or restrictions | <$1M, >3% slippage | >1 week or >10% impact |
 | **5** | No clear exit mechanism | No liquidity | Cannot exit without massive losses |
 
-**Score: 3.5/5** — The primary Curve pool holds ~$7.17M (>$5M but below $10M), so a $500K exit is feasible at low-single-digit slippage and moderate positions clear within 1–3 days. Three findings push this past the score-3 band. First, the direct redemption mechanism is **not available at par** — `PegKeeper.isRedeemAllowed()` requires the Curve EMA to be below $0.998, and it is currently `false`. Redemption is a depeg backstop, not an exit route, so the "reliable floor" that would otherwise offset thin DEX depth does not exist in normal conditions. Second, 90.65% of supply sits in the Stability Pool behind a 1% instant-redeem fee (or a 60-minute cooldown), and pool redemptions pay out in fxUSD, so that entire balance would exit through the same ~$7.17M pool. Third, primary DEX depth is only ~11.2% of supply and has not scaled with issuance; the six secondary pools (~$2.8M combined) all pair fxUSD against other non-USDC stablecoins and require a second hop. The December 2024 depeg to $0.953 is direct evidence that liquidity thins under stress.
+**Score: 3.0/5** — The primary Curve pool holds ~$7.52M and current onchain quotes show strong execution: ~0% impact at 500K–1M size and about 0.26% at 4M. The recovered 10.65% Stability Pool USDC buffer also gives fxSP exits a meaningful liquid component. A score better than 3 is not justified because direct collateral redemption remains disabled at par, 89.35% of supply is concentrated in the Stability Pool, and most of a mass fxSAVE exit would still return fxUSD to a market whose USDC side is only ~$4.47M. Secondary pools add ~$1.94M but introduce other stablecoin risk and a second hop. The unverified $0.953 aggregator ATL is excluded.
 
-**Score: 3.5/5** — Adequate depth for ordinary size, but the redemption backstop is depeg-gated rather than always-on, and near all of supply shares one modest exit venue.
+**Score: 3.0/5** — Strong current Curve execution and a recovered USDC buffer, offset by depeg-gated redemption and high supply concentration relative to external exit capacity.
 
 #### Category 5: Operational Risk (Weight: 5%)
 
@@ -608,7 +624,7 @@ What holds the subcategory at 3.0 rather than better is that the timelock does n
 | **4** | Mostly unknown, limited info | Poor or outdated | No clear legal entity |
 | **5** | Fully unknown, no reputation | No documentation | No legal structure |
 
-**Score: 2.5/5** — Team is partially doxxed with well-known DeFi founding contributors (Leshner, Warwick, Sharlyn Wu) and institutional backers. Core dev team is mostly semi-anonymous. Documentation is good and comprehensive, and the fee schedule published in the docs matches onchain values. Legal structure is DAO-based with uncertain formal entity status. Onchain governance is effectively dormant — the last Snapshot proposal was FIP-30 on February 4, 2026 — so day-to-day authority rests with the multisig rather than token holders.
+**Score: 2.5/5** — The current core team is partially doxxed and mostly semi-anonymous. AladdinDAO has established contributors and institutional backing, but those AladdinDAO-level relationships are not treated as direct f(x) team membership. Documentation is good and comprehensive, and the published fee schedule matches onchain values. Legal structure is DAO-based with uncertain formal entity status. Onchain governance is effectively dormant — the last Snapshot proposal was FIP-30 on February 4, 2026 — so day-to-day authority rests with the multisig rather than token holders.
 
 **Score: 2.5/5** — Good team reputation and documentation, but DAO structure with uncertain legal entity and dormant voting.
 
@@ -619,15 +635,15 @@ What holds the subcategory at 3.0 rather than better is that the timelock does n
 | Audits & Historical | 1.75 | 20% | 0.35 |
 | Centralization & Control | 2.5 | 30% | 0.75 |
 | Funds Management | 1.75 | 30% | 0.525 |
-| Liquidity Risk | 3.5 | 15% | 0.525 |
+| Liquidity Risk | 3.0 | 15% | 0.45 |
 | Operational Risk | 2.5 | 5% | 0.125 |
-| **Final Score** | | | **2.275** |
+| **Final Score** | | | **2.20** |
 
 **Optional Modifiers:**
 - Protocol live >2 years with no incidents: **-0.5** → Does not fully apply due to ChainSecurity vulnerability disclosure (though no exploitation occurred). Not applied.
 - TVL maintained >$500M for >1 year: Not applicable
 
-**Final Score: 2.3/5.0** — Rounded up from 2.275 per conservative scoring guidelines. The score sits near the middle of the Low Risk band: a functioning 3-day timelock over upgrades and core parameters, fully verifiable collateral, and an exact supply reconciliation, weighed against oracle ownership that still sits outside the timelock, depeg-gated redemption, and 90.65% of supply concentrated in one contract that exits through one ~$7.17M pool.
+**Final Score: 2.2/5.0** — The active $500K bounty, recovered 10.65% Stability Pool USDC buffer and strong current Curve execution support reducing Liquidity from 3.5 to 3.0. V2 CR has meanwhile fallen to ~135.6%, oracle ownership remains outside the timelock, redemption is depeg-gated, 89.35% of supply is concentrated in the Stability Pool, and Base fxUSD adds a bounded LayerZero route. The unsupported $0.953 print is not used in the score.
 
 ### Risk Tier
 
@@ -649,11 +665,12 @@ What holds the subcategory at 3.0 rather than better is that the timelock does n
 - **TVL-based**: Reassess if TVL changes by more than 50%, or sustains above $150M for >1 month
 - **Incident-based**: Reassess after any exploit, governance change, or collateral modification
 - **Oracle ownership (highest priority)**: Reassess when the pending `acceptOwnership()` batch `0x0ac451c6…86dd0` executes and both price oracles come under the TimelockController — this would justify revisiting the Governance subcategory (3.0 → ~2.5). Reassess immediately if either oracle's `owner()` changes to anything other than the timelock, or if `maxPriceDeviation` / `onchainSpotEncodings` are modified.
-- **Governance**: Reassess if the timelock delay is reduced, ProxyAdmin ownership or any core `DEFAULT_ADMIN_ROLE` moves away from the TimelockController, or if multisig threshold is lowered (all negative); reassess if a bug bounty program is launched (positive)
+- **Governance**: Reassess if the timelock delay is reduced, ProxyAdmin ownership or any core `DEFAULT_ADMIN_ROLE` moves away from the TimelockController, or if multisig threshold is lowered
 - **Collateralization**: Reassess if system CR falls below 135%, or if the xWBTC pool CR falls below 132%
 - **Collateral custody**: Reassess if `manage()` is called on the PoolManager or Stability Pool and material balances move into the Aave strategies
 - **Liquidity**: Reassess if the primary Curve USDC/fxUSD pool falls below $5M, or if fxSP's share of fxUSD supply exceeds 95%
 - **Peg deviation**: Reassess if fxUSD trades below $0.95 for more than 24 hours, or if `PegKeeper.isRedeemAllowed()` turns `true` (indicating the Curve EMA has broken $0.998)
+- **Bridge**: Reassess if LayerZero peers, receive libraries or DVN quorum change; if Base supply differs from Ethereum adapter escrow; or if either bridge-owner Safe changes threshold/ownership
 
 ## Assessment History
 
@@ -662,3 +679,4 @@ What holds the subcategory at 3.0 rather than better is that the timelock does n
 | March 29, 2026 | 2.5 | Initial assessment |
 | May 13, 2026 | 2.2 | Reassessment: 3-day TimelockController took ownership of ProxyAdmin (April 20, 2026); supply ~18.1M → ~53.9M, TVL ~$29M → ~$89M. Governance 4.0 → 2.5, Historical Track Record 2.5 → 2.0; Medium → Low Risk |
 | July 27, 2026 | 2.3 | Reassessment (onchain snapshot block 25,625,134): supply ~64.2M, TVL ~$94.9M, system CR 156% → 142.6% on a BTC/ETH drawdown with WBTC now ~88% of collateral. Verified the timelock also holds `DEFAULT_ADMIN_ROLE` on all core contracts and was honored on the May 27–30 `updatePoolCapacity` operation. New findings: both price oracles are still owned by the 6/9 multisig with an `acceptOwnership()` batch scheduled and executable since April 23, 2026 but unexecuted — a non-timelocked path to arbitrary collateral repricing; redemption is gated on the Curve EMA falling below $0.998 and is currently disabled; Stability Pool stable buffer at 0.16% vs a 5% threshold; 90.65% of supply held by fxSP. Governance 2.5 → 3.0, Liquidity 3.0 → 3.5; remains Low Risk |
+| August 15, 2026 | 2.2 | Corrections and current snapshot (block 25,759,914): active V2 collateral is wstETH/WBTC only; removed the uncorroborated $0.953 depeg; documented the $500K AladdinDAO bounty and corrected AladdinDAO-level contributor/backer attribution; clarified redemption's 20%-per-tick-per-call behavior; added the LayerZero Ethereum↔Base lock route and route-specific DVN quorum. TVL ~$96.8M, supply ~64.31M, V2 CR ~135.6%, primary Curve liquidity ~$7.52M. Stability Pool USDC buffer recovered from 0.16% to ~10.65%, while snapshot-block Curve quotes show ~0.26% impact for a 4M fxUSD exit. Liquidity 3.5 → 3.0; remains Low Risk. |
