@@ -890,3 +890,29 @@ protocols:
     - asset: yvUSD
       address: '0x696d02Db93291651ED510704c9b286841d506987'
     infrastructure: []
+
+  bedrock_unibtc:
+    name: Bedrock (uniBTC)
+    chain: ethereum
+    type: liquid_staking
+    address: "0x004E9C3EF86bc1ca1f0bB5C7662861Ee93350568"
+    report: reports/report/bedrock-unibtc.md
+    collateral:
+      - asset: WBTC
+        address: "0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599"
+      - asset: FBTC
+        address: "0xC96dE26018A54D51c097160568752c4E3BD6C364"
+      - asset: cbBTC
+        address: "0xcbB7C0000aB88B473b1f5aFd9ef808440eed33Bf"
+      - asset: M-BTC
+      - asset: BTC
+    yield_sources:
+      - protocol: babylon
+        assets:
+          - BTC
+        label: BTC restaking via custody (proxy staking)
+    infrastructure:
+      - Chainlink PoR
+      - Chainlink CCIP
+      - Free Tunnel
+      - Merlin Bridge

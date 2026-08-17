@@ -1,10 +1,10 @@
 # Protocol Risk Assessment: Saturn (USDat)
 
-- **Assessment Date:** May 27, 2026 (updated June 17, 2026)
+- **Assessment Date:** May 27, 2026 (Updated: June 17, 2026)
 - **Token:** USDat (Saturn USD)
 - **Chain:** Ethereum
 - **Token Address:** [`0x23238f20b894f29041f48D88eE91131C395Aaa71`](https://etherscan.io/address/0x23238f20b894f29041f48D88eE91131C395Aaa71)
-- **Final Score: 2.875/5.0**
+- **Final Score: 2.825/5.0**
 
 > Assessment requested in [yearn/risk-score#135](https://github.com/yearn/risk-score/issues/135) — *"USDat as collateral"*. This report assesses **USDat**, the non-yielding stablecoin. The staked, yield-bearing **sUSDat** ([`0xD166337499E176bbC38a1FBd113Ab144e5bd2Df7`](https://etherscan.io/address/0xD166337499E176bbC38a1FBd113Ab144e5bd2Df7)) carries materially different (STRC credit) risk and is discussed only as context.
 
@@ -331,7 +331,7 @@ YIELD LAYER (context only — not USDat backing)
 | Funds Management | 2.5 | 30% | 0.75 |
 | Liquidity Risk | 3.0 | 15% | 0.45 |
 | Operational Risk | 2.5 | 5% | 0.125 |
-| **Final Score** | | | **2.875 ≈ 2.9 / 5.0** |
+| **Final Score** | | | **2.825 ≈ 2.8 / 5.0** |
 
 **Optional Modifiers:** none apply (protocol <2 years, TVL history <1 year).
 
@@ -345,7 +345,7 @@ YIELD LAYER (context only — not USDat backing)
 | 3.5-4.5 | Elevated Risk | Limited approval, strict limits |
 | 4.5-5.0 | High Risk | Not recommended |
 
-**Final Risk Tier: MEDIUM RISK (2.9/5.0) — Approved with enhanced monitoring**
+**Final Risk Tier: MEDIUM RISK (2.8/5.0) — Approved with enhanced monitoring**
 
 ---
 

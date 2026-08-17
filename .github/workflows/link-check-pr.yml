@@ -35,6 +35,14 @@ jobs:
         with:
           files: ${{ steps.changed.outputs.all_changed_files }}
           fail: 'true'
+          # A PR can legitimately touch only link-free markdown under reports/ —
+          # the authoring guides (reports/**/SKILL.md, reports/skill.md),
+          # reports/README.md, or reports/TEMPLATE.md, which lychee.toml already
+          # excludes by path. lychee then finds zero links and, with the action's
+          # default failIfEmpty, reports "no links found" as a failure. The daily
+          # run over the whole corpus keeps the default, where an empty result
+          # really would mean the config is broken.
+          fail_if_empty: 'false'
 
       - name: Verify defillama slugs in changed reports
         if: steps.changed.outputs.any_changed == 'true'

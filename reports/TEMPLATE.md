@@ -3,8 +3,9 @@
 - **Assessment Date:** [Month Day, Year]
 <!--
   Keep the ORIGINAL assessment date here. When a report is reassessed/updated,
-  do NOT overwrite it — append the new date in parentheses, e.g.:
-    - **Assessment Date:** May 27, 2026 (Updated: June 17, 2026)
+  do NOT overwrite it — append the latest date in parentheses using the
+  "Updated:" prefix, showing ONLY the single most recent date:
+    - **Assessment Date:** March 20, 2026 (Updated: July 31, 2026)
   The website reads both: the earliest date becomes "Original", the latest
   becomes "Latest", and the page is tagged "Updated report". Overwriting the
   single date loses that history and the report shows as brand new.
@@ -31,11 +32,11 @@ Status field (optional — omit for active reports):
 
 Assessment Date format:
   - Use full English month name and four-digit year, e.g. "March 4, 2026".
-  - When a report is reassessed, append the new date in parentheses on the
-    same line, e.g.
+  - When a report is reassessed, append the latest update date in parentheses
+    with the "Updated:" prefix, showing ONLY the single most recent date:
         **Assessment Date:** February 8, 2026 (Updated: March 22, 2026)
-    or, when reassessing in response to an event:
-        **Assessment Date:** April 27, 2026 (reassessment after April 18, 2026 exploit)
+    Do NOT stack multiple dates or add prose like "rechecked," "reassessed,"
+    or "corrected" — collapse all prior updates into the single latest date.
   - The reassessment-scan workflow parses every "Month Day, Year" date on this
     line and uses the latest one to decide whether the report is stale, so the
     appended date keeps the staleness clock honest.
@@ -405,11 +406,16 @@ Not Rated: for terminal reports (Status: HACKED / DEAD), set Final Score to
 ## Assessment History
 
 <!--
-  One row per assessment, oldest first. Add a new row on every reassessment —
-  never edit past rows. The website renders this table at the bottom of the
+  One row per PR, oldest first. Add a row for each reassessment PR. If you
+  correct the report within the same PR, update that PR's row in place — do
+  not append a new row. The website renders this table at the bottom of the
   report so score changes are traceable over time. Keep the date format
   consistent with the header "Assessment Date". Score is the Final Score at that
   point in time (or the status tag, e.g. HACKED, for Not Rated reports).
+
+  Use exactly three columns: | Date | Score | Notes |. The Date cell is a
+  hyperlink to the PR (e.g. `[July 13, 2026](https://github.com/.../pull/313)`).
+  Do not add a separate PR column.
 -->
 
 | Date | Score | Notes |

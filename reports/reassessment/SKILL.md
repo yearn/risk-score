@@ -51,8 +51,10 @@ Do not spend time redoing static background unless a mutable fact changed. Do no
    - cross-chain bridge / messaging dependencies (LayerZero/OFT, Chainlink CCIP, CCTP, Wormhole, Axelar, Stargate, etc.)
    If any changed, update `reports/graph/<slug>.yaml` using `reports/graph/SKILL.md`. If no graph exists, create one when the report has enough data; otherwise mark the missing graph inputs as `TODO`. If a bridge dependency was added, removed, or changed, also update `src/data/bridges.json` so the `/bridges/` page stays in sync (see the "Bridge dependencies" bullet in `reports/skill.md`); `npm run build` runs `scripts/check_bridges.mjs` and will warn about any bridge the report mentions but that isn't listed.
 6. Patch only affected sections **in place**. Do not add a "Reassessment Notes", changelog, or "what changed" section to the report body. Common sections:
-   - header assessment date: keep the original date and append the new one in
-     parentheses, e.g. `- **Assessment Date:** May 27, 2026 (Updated: June 17, 2026)`.
+   - header assessment date: keep the original date and append the latest one in
+     parentheses with the "Updated:" prefix, showing ONLY the single most
+     recent update date — do NOT stack multiple dates or add prose like
+     "rechecked" or "corrected." E.g. `- **Assessment Date:** May 27, 2026 (Updated: June 17, 2026)`.
      Never overwrite the original date — the website derives "Original" vs
      "Latest" and the "Updated report" tag from both dates.
    - Overview + Links
@@ -63,11 +65,15 @@ Do not spend time redoing static background unless a mutable fact changed. Do no
    - Risk Summary
    - Risk Score Assessment
    - Reassessment Triggers
-   - Assessment History — append one new row (`| Date | Score | Notes |`) for
-     this reassessment; never edit prior rows. Use the same date as the header
-     and the new Final Score (or status tag for Not Rated). If the report has no
-     "## Assessment History" section yet, add one (see `reports/TEMPLATE.md`),
-     seeding a row for the original assessment before the new one.
+   - Assessment History — one row per PR. The Date cell is a hyperlink to the
+     PR (e.g. `[July 13, 2026](https://github.com/.../pull/313)`). If a row
+     for this PR already exists, update it in place with the latest date and
+     score. Otherwise append a new row. Use exactly three columns:
+     `| Date | Score | Notes |` — never add a separate PR column. Use the same
+     date as the header and the new Final Score (or status tag for Not Rated).
+     If the report has no "## Assessment History" section yet, add one (see
+     `reports/TEMPLATE.md`), seeding a row for the original assessment before
+     the new one.
    - appendices with allocation tables or role tables
 7. If a value cannot be verified, mark it `TODO` and say what source/function is missing.
 8. Summarize:

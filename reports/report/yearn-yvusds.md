@@ -658,6 +658,5 @@ To shorten the delay, an attacker would need to (1) control Daddy 6/9 to **propo
 
 | Date | Score | Notes |
 | --- | --- | --- |
-| May 11, 2026 | 1.3 | Initial assessment |
-| July 13, 2026 | 1.3 | Reassessment: TVL $6.23M (down 9.7% since May 11); allocations drifted to 84/16 sUSDS/Spark; all governance roles, multisig thresholds, and timelock parameters confirmed unchanged; strategies identified as EIP-1967 proxy-upgradeable under Brain (3-of-8) — standard Yearn V3 Tokenized Strategy pattern, no score impact |
-| July 13, 2026 (PM) | 1.3 | Second same-day reassessment: TVL $6.23M unchanged; debt allocations 84.08/15.92 unchanged; strategy proxy admin slots confirmed 0x0 (upgrades via management() only); Spark Compounder last_report corrected to July 10; sUSDS TVL drifted to ~$5.28B; USDS Staking Rewards ~$556M staked. No score or tier change |
+| [May 11, 2026](https://github.com/yearn/risk-score/pull/148) | 1.3 | Initial assessment |
+| [July 13, 2026](https://github.com/yearn/risk-score/pull/314) | 1.3 | Reassessment: TVL $6.23M (down 9.7% since May 11); allocations drifted to 84/16 sUSDS/Spark; all governance roles, multisig thresholds, and timelock parameters confirmed unchanged; strategies identified as EIP-1967 proxy-upgradeable under Brain (3-of-8) — standard Yearn V3 Tokenized Strategy pattern; strategy proxy admin slots confirmed 0x0 (upgrades via management() only); Spark Compounder last_report corrected; sUSDS TVL drifted to ~$5.28B; USDS Staking Rewards ~$556M staked. No score or tier change |

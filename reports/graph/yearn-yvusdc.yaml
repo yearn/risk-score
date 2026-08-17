@@ -23,11 +23,11 @@ nodes:
   - id: accountant
     label: Accountant (0% mgmt, 10% perf)
     address: "0x5A74Cb32D36f2f517DB6f7b0A0591e09b22cDE69"
-    category: vault
+    category: infra
   - id: dumper
     label: Fee Recipient (Dumper)
     address: "0x590Dd9399bB53f1085097399C3265C7137c1C4Cf"
-    category: vault
+    category: infra
 
   # Governance
   - id: daddy
@@ -74,6 +74,8 @@ nodes:
     label: Yearn USDC — Morpho (7.2%)
     address: "0x68Aea7b82Df6CcdF76235D46445Ed83f85F845A3"
     category: strategy
+    morphoVault: v1
+    link: "https://app.morpho.org/ethereum/vault/0x68Aea7b82Df6CcdF76235D46445Ed83f85F845A3/"
   - id: pawn-broker
     label: stcUSD/USDC Pawn Broker (14.9%, not in queue, self-contained)
     address: "0xe63a2abc24cd9538398d825a4bfe5778d25687df"
@@ -101,10 +103,6 @@ nodes:
     label: Sky DAI ↔ USDS Exchanger
     address: "0x3225737a9Bbb6473CB4a45b7244ACa2BeFdB276A"
     category: dependency
-  - id: morpho-blue
-    label: Morpho Blue
-    address: "0xBBBBBbbBBb9cC5e90e3b3Af64bdAF62C37EEFFCb"
-    category: dependency
   - id: stcUSD
     label: stcUSD — Cap (ERC-4626)
     address: "0x88887bE419578051FF9F4eb6C858A951921D8888"
@@ -120,9 +118,28 @@ nodes:
     category: dependency
     note: Sky sub-DAO; admin keys live under Sky governance
   - id: morpho-curator
-    label: Morpho Curator (Yearn Ops)
+    label: Curator (2-of-3)
     address: "0x90D0f26025571295D18a6c041E47450B81886B51"
     category: governance
+
+# BEGIN GENERATED MORPHO MARKET NODES
+# Managed by scripts/update_morpho_graph_markets.mjs — do not edit.
+  - id: morpho-market-64d65c9a2d91
+    label: "cbBTC/USDC · 86% LLTV"
+    category: dependency
+    link: "https://app.morpho.org/ethereum/market/0x64d65c9a2d91c36d56fbc42d69e979335320169b3df63bf92789e2c8883fcc64/"
+    note: "Morpho market 0x64d65c9a2d91c36d56fbc42d69e979335320169b3df63bf92789e2c8883fcc64"
+  - id: morpho-market-3a85e6197511
+    label: "WBTC/USDC · 86% LLTV"
+    category: dependency
+    link: "https://app.morpho.org/ethereum/market/0x3a85e619751152991742810df6ec69ce473daef99e28a64ab2340d7b7ccfee49/"
+    note: "Morpho market 0x3a85e619751152991742810df6ec69ce473daef99e28a64ab2340d7b7ccfee49"
+  - id: morpho-market-b323495f7e41
+    label: "wstETH/USDC · 86% LLTV"
+    category: dependency
+    link: "https://app.morpho.org/ethereum/market/0xb323495f7e4148be5643a4ea4a8221eef163e4bccfdedc2a6f4696baacbc86cc/"
+    note: "Morpho market 0xb323495f7e4148be5643a4ea4a8221eef163e4bccfdedc2a6f4696baacbc86cc"
+# END GENERATED MORPHO MARKET NODES
 
 edges:
   # Deployment / vault infrastructure
@@ -221,10 +238,6 @@ edges:
   - from: usds-depositor
     to: dai-usds-exchanger
     kind: routes-through
-  - from: yearn-usdc
-    to: morpho-blue
-    kind: deposits-into
-    label: "USDC supply (MetaMorpho)"
   - from: pawn-broker
     to: stcUSD
     kind: deposits-into
@@ -251,3 +264,19 @@ edges:
     to: yearn-usdc
     kind: holds-role
     label: "Curator"
+
+# BEGIN GENERATED MORPHO MARKET EDGES
+# Managed by scripts/update_morpho_graph_markets.mjs — do not edit.
+  - from: yearn-usdc
+    to: morpho-market-64d65c9a2d91
+    kind: deposits-into
+    label: "56.3%"
+  - from: yearn-usdc
+    to: morpho-market-3a85e6197511
+    kind: deposits-into
+    label: "36.8%"
+  - from: yearn-usdc
+    to: morpho-market-b323495f7e41
+    kind: deposits-into
+    label: "6.7%"
+# END GENERATED MORPHO MARKET EDGES
