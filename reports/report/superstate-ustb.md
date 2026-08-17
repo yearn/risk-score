@@ -16,11 +16,11 @@ Investors undergo KYC/AML onboarding, get their wallet addresses whitelisted on 
 
 The fund is structured as a series of **Superstate Asset Trust**, a **Delaware Statutory Trust**, providing bankruptcy remoteness from Superstate Inc. The investment manager is **Invesco Advisers, Inc.** (replacing Federated Hermes as of the March 2026 partnership), the custodian is **The Bank of New York Mellon** (replacing UMB Bank), and the auditor is **PricewaterhouseCoopers LLP**. NAV calculation is performed by **NAV Fund Services**.
 
-- **Current NAV/Share:** $11.177748 (official daily NAV, [Superstate API](https://api.superstate.com/v1/funds/1/nav-daily), August 17, 2026). Onchain: $11.177748 (Chainlink feed, exact match), $11.181564 (SuperstateOracle, forward-interpolated) — both verified onchain August 17, 2026.
+- **Current NAV/Share:** $11.177748 (official daily NAV, [Superstate API](https://api.superstate.com/v1/funds/1/nav-daily), August 17, 2026). Onchain at **block 25,773,912** (2026-08-17T09:29:47Z): Chainlink feed $11.177748 — an exact match to the official NAV — and SuperstateOracle $11.181564, round 420. The SuperstateOracle figure is *not* reproducible without pinning the block: it extrapolates linearly and continuously, so it advances every second between checkpoints.
 - **Onchain Supply (Ethereum):** 69,310,953.05 USTB (~$775M) — `totalSupply()` verified onchain
-- **DeFiLlama TVL (USTB, all chains):** ~$781.7M (August 17, 2026) — [defillama.com/protocol/superstate-ustb](https://defillama.com/protocol/superstate-ustb). Peak was ~$923.8M on April 28, 2026.
+- **DeFiLlama TVL (USTB, all chains):** ~$781.7M (August 17, 2026) — [defillama.com/protocol/superstate-ustb](https://defillama.com/protocol/superstate-ustb). Peak was ~$923.8M on April 28, 2026. Note DeFiLlama now displays this protocol as **"Invesco USTB"** following the rebrand; the `superstate-ustb` slug and API path still resolve.
 - **Total AUM (all networks + book-entry):** $953,805,376 with 85,330,728 shares outstanding (per [Superstate NAV API](https://api.superstate.com/v1/funds/1/nav-daily), August 17, 2026). Ethereum holds ~81% of shares; book-entry ~18.5%; Solana and Plume ~0.5% combined.
-- **Onchain Holders (Ethereum):** 78 (per Ethplorer, August 2026)
+- **Onchain Holders (Ethereum):** 78 ([Ethplorer](https://ethplorer.io/address/0x43415eB6ff9DB7E26A15b704e7A3eDCe97d31C4e), `getTokenInfo` API, August 17, 2026)
 - **Current APY:** 3.50% (30-day yield), 3.50% (7-day yield), 3.52% (1-day yield) — [Superstate yield API](https://api.superstate.com/v1/funds/1/yield), as of August 13, 2026
 - **Management Fee:** 0.15% annually for all investors, with a monthly rebate of 0.10% on average daily holdings above $25M. No performance fee. ([superstate.com/assets/ustb](https://superstate.com/assets/ustb), footnote 2)
 
@@ -28,11 +28,11 @@ The fund is structured as a series of **Superstate Asset Trust**, a **Delaware S
 
 - [Protocol Documentation](https://docs.superstate.com/)
 - [USTB Fund Info](https://superstate.com/assets/ustb)
-- [Smart Contract Addresses](https://docs.superstate.com/investors/smart-contracts)
+- [Smart Contract Addresses](https://docs.superstate.com/investors/smart-contracts) — the Plume Mainnet entries list `0xe4fa682f…` (USTB) and `0x4c21b757…` (USCC), which collide with the Ethereum Superstate Oracle and RedemptionIdle addresses. This is **not** a documentation error: both are genuine Plume deployments (same deployer, same nonce, different chain), confirmed via Plume RPC — `0xe4fa682f…` returns `name() == "Invesco Short Duration US Government Securities Fund"`, `symbol() == "USTB"`, `VERSION() == "1.3.0"`, supply ~169,699 USTB.
 - [Security Documentation](https://docs.superstate.com/investors/security)
 - [Public Fund API — Daily NAV](https://api.superstate.com/v1/funds/1/nav-daily) · [Yield](https://api.superstate.com/v1/funds/1/yield) · [Portfolio Holdings](https://api.superstate.com/v2/funds/1/holdings)
 - [GitHub (legacy USTB contracts, last updated April 2025)](https://github.com/superstateinc/ustb/tree/main)
-- [LlamaRisk Assessment](https://www.llamarisk.com/research/2024-10-07t21-32-09-000z)
+- [LlamaRisk Assessment](https://www.llamarisk.com/research/2024-10-07t21-32-09-000z) — **October 2024, ~22 months old.** Predates the Invesco partnership, the BNY Mellon custodian change, the auditor change to PwC, and the entire `FundToken` migration. Treat its architecture and service-provider descriptions as historical.
 - [Aave Forum — USTB/BUIDL GSM](https://governance.aave.com/t/arfc-ustb-buidl-gsm/19299/3)
 - [DeFiLlama — USTB](https://defillama.com/protocol/superstate-ustb)
 - [CoinGecko](https://www.coingecko.com/en/coins/superstate-short-duration-us-government-securities-fund-ustb)
@@ -72,7 +72,7 @@ The system is controlled by **4 distinct EOAs** (all code size 0, no multisig, v
 
 ## Audits and Due Diligence Disclosures
 
-Superstate has undergone **15 security audits** from 4 firms (0xMacro, ChainSecurity, Offside Labs, Zellic) plus **formal verification by Certora**, making this one of the most extensively audited RWA tokenization protocols.
+Superstate has undergone **16 security audits** from 5 firms (0xMacro ×11, Zellic ×2, ChainSecurity, Offside Labs, Certora), making this one of the most extensively audited RWA tokenization protocols. **However, none of them scope the implementation currently deployed for USTB** — see "Audit coverage gap on the live implementation" below.
 
 ### Audit History
 
@@ -92,14 +92,32 @@ Superstate has undergone **15 security audits** from 4 firms (0xMacro, ChainSecu
 | -- | **Zellic** | Feb 17, 2026 | AllowlistV4_0, **FundToken**, SuperstateTokenCore + components, RedemptionV2 / RedemptionIdleV2 / RedemptionYieldV2, SuperstateOracle, Dip, EquityToken | 6 findings: 4 Low, 2 Informational. **No Critical / High / Medium** |
 | -- | **Zellic** | Jun 23, 2026 | AllowlistV4_2, **FundTokenV1_2_0**, EquityTokenV1_4_0, AccountingPausable / Bridgeable / Redeemable / Subscribable / Scalable / Dippable, ERC20MetadataSettable, Dip | 2 findings: 1 Medium (v5.1→v1.2.0 migration dropped the accounting-pause flag — fixed in commit `6216afed`), 1 Informational (fixed). **No Critical / High** |
 | -- | **ChainSecurity** | 2023 | Compound SUPTB (original token) | 2 Critical (fixed — encumbrance transferability, transferFrom permission bypass) |
-| -- | **Offside Labs** | May 2025 | Solana Allowlist | Separate program audit |
-| -- | **Certora** | -- | Formal verification | Mathematical verification of contract properties |
+| -- | **Offside Labs** | May 2025 | Solana Allowlist program | 6 findings — thaw-IX account-check bypass, PDA init failure, excessive rent, rent-refund logic, admin-authority DoS, permissionless-init frontrunning |
+| -- | **Certora** | Apr 21–28, 2025 | Solana Allowlist program (`program/src/*`, `api/src/*`), commit `cab1688` → fix `9d357c8` | 1 Critical + 1 High + 4 Informational, **all 6 fixed**. C-01: `process_thaw()` did not check allowlist accounts, letting anyone thaw any account. H-01: grief vector on `create_pda_account` |
 
-**Total findings across all audits: 2 Critical (Solana), 4 High, 8 Medium — all fixed or acknowledged with rationale.**
+**Total findings across all audits: 3 Critical, 5 High, 8 Medium — all fixed or acknowledged with rationale.** The Solana allowlist thaw bypass was independently found by three firms (0xMacro A-7, Offside Labs §4.1, Certora C-01) in the same May-2025 window, and fixed.
 
-**Audit coverage gap on the live implementation:** the deployed USTB implementation is `FundTokenV1_3_0` ([`0xb3ac55dd…`](https://etherscan.io/address/0xb3ac55dd09aa70e9bfbb12f45cd38a1f1597588c), deployed July 21, 2026). The published Zellic engagements cover `FundToken` (Feb 2026) and `FundTokenV1_2_0` (Jun 2026); no public audit report scopes v1.3.0 specifically. The v1.3.0 source is verified on Etherscan, but it is **not** published in a public repository — `superstateinc/ustb` was last pushed April 2025 and still contains the legacy `SuperstateToken` code, and the audited repository `superstateinc/superstate-evm-audit` is private. The onchain source therefore cannot be diffed against a public upstream; review depends on the Etherscan-verified source alone.
+> **Correction on Certora.** Prior versions of this report listed Certora as "formal verification — mathematical verification of contract properties" with no date or scope. The actual [Certora report](https://docs.superstate.com/investors/smart-contracts) is a **manual security assessment of the Solana Allowlist program**, not formal verification, and not of the EVM contracts. Its own methodology section states "The team performed a manual audit." **No formal verification of the USTB EVM contracts is evidenced by any published Superstate document.**
 
-**Smart Contract Complexity:** Moderate-to-high. The July 2026 upgrade replaced the monolithic `SuperstateTokenV5_1` with a modular `FundToken` built from ERC-7201 namespaced components (`AccountingPausable`, `Allowlistable`, `Bridgeable`, `Permittable`, `Redeemable`, `Subscribable`, `ERC20MetadataSettable`) shared with Superstate's `EquityToken`. Migration reads legacy state directly from v5.1 continuous storage slots (754–759) inside `initializeV1_2_0`, a storage-layout-sensitive pattern; Zellic's one Medium finding was in exactly this migration path. V5.1-compatible getters (`accountingPaused()`, `allowlistV2()`, `redemptionContract()`, `supportedChainIds()`, `SUPERSTATE_TOKEN_PRECISION`) are retained so existing integrations and monitoring keep working.
+**Audit coverage gap on the live implementation:** the deployed USTB implementation is `FundTokenV1_3_0` ([`0xb3ac55dd…`](https://etherscan.io/address/0xb3ac55dd09aa70e9bfbb12f45cd38a1f1597588c), `VERSION() == "1.3.0"`, deployed July 21, 2026).
+
+- **v1.3.0 is not covered by any published audit.** Zellic's February 2026 engagement scoped `token/src/fund/FundToken.sol`; its June 2026 engagement scoped `token/src/fund/v1.2.0/FundTokenV1_2_0.sol` at commit `1b6d2c63`. The deployed contract is a *different, later* version, shipped one day after v1.2.0 went live. The v1.2.0 → v1.3.0 delta has **no public audit coverage and cannot be independently reviewed**.
+- **The delta cannot be diffed.** The v1.3.0 source is verified on Etherscan, but it is not published in a public repository — `superstateinc/ustb` was last pushed April 2025 and still contains the legacy `SuperstateToken` code, and the audited repository `superstateinc/superstate-evm-audit` returns 404 (private). There is no public v1.2.0 source to diff the deployed v1.3.0 against.
+- **What this does and does not mean.** Zellic's reviews cover the architecture, component model, and migration path that v1.3.0 inherits, and the one Medium finding (accounting-pause state dropped during migration) is demonstrably fixed in the deployed bytecode — the remediation comment appears verbatim in the Etherscan-verified source. So the deployed code is not unreviewed *in substance*. But no auditor has attested to the exact bytecode holding ~$775M, and the size of the v1.2.0→v1.3.0 change is unknown to any outside party. `TODO`: obtain the v1.3.0 changelog or an audit scoped to the deployed version.
+
+**Smart Contract Complexity:** Moderate-to-high. The July 2026 upgrade replaced the monolithic `SuperstateTokenV5_1` with a modular `FundToken` built from ERC-7201 namespaced components (`AccountingPausable`, `Allowlistable`, `Bridgeable`, `Permittable`, `Redeemable`, `Subscribable`, `ERC20MetadataSettable`) shared with Superstate's `EquityToken`. V5.1-compatible getters (`accountingPaused()`, `allowlistV2()`, `redemptionContract()`, `supportedChainIds()`, `SUPERSTATE_TOKEN_PRECISION`) are retained so existing integrations and monitoring keep working.
+
+**Storage migration (verified onchain).** `initializeV1_2_0` does not read the new ERC-7201 namespaces — it reads the *legacy v5.1 contiguous* slots directly via `sload` and replays them into the new namespaced layout. This is the storage-layout-sensitive pattern that produced Zellic's one Medium finding. The slot map is stated in the deployed source's own comments and confirmed by reading the proxy's storage at block 25,773,912:
+
+| Slot | Field | `cast storage` value | Matches getter |
+|------|-------|----------------------|----------------|
+| 754 | `accountingPaused` | `0x…0000` | `accountingPaused() == false` ✓ |
+| 755 | `maximumOracleDelay` | `0x…0e10` (3600) | `maximumOracleDelay() == 3600` ✓ |
+| 756 | `superstateOracle` | `0x…e4fa682f94610ccd170680cc3b045d77d9e528a8` | `superstateOracle()` ✓ |
+| 758 | `allowlistV2` | `0x…02f1fa8b196d21c7b733eb2700b825611d8a38e5` | `allowlist()` ✓ |
+| 759 | `redemptionContract` | `0x…4c21b7577c8fe8b0b0669165ee7c8f67fa1454cf` | `getRedemptionContract()` ✓ |
+
+Reproduce with `cast storage 0x43415eB6ff9DB7E26A15b704e7A3eDCe97d31C4e <slot> --block 25773912`. Note that slot 757 is unused by the migration, and that these legacy slots are *not* zeroed after migration — they retain stale copies while the live values sit in the ERC-7201 namespaces.
 
 ### Bug Bounty
 
@@ -124,14 +142,14 @@ Superstate is **not** listed on the SEAL Safe Harbor registry. This is typical f
 - **AllowList Revocation Precedent:** On [September 5, 2025](https://etherscan.io/tx/0xb669e1bf0ef2d5f1deec7aa5a91574c2a83cd22d336c3412dddd6d7f6b44eadf) Superstate revoked Morpho Blue's (`0xbbbbbbbb…`) protocol permission for **USCC**, alongside `0x4095f064…`. USTB protocol permissions have not been revoked, but this confirms the revocation power is used in practice against integrated DeFi protocols.
 - **AUM Growth:**
   - Feb 2024: Launch
-  - Oct 2024: ~$114M (per LlamaRisk report)
+  - Oct 2024: ~$114M ([LlamaRisk assessment](https://www.llamarisk.com/research/2024-10-07t21-32-09-000z), October 2024)
   - Mar 2025: ~$300M allocated by Spark alone
   - Mar 2026: Invesco partnership announced — Invesco Advisers becomes external investment manager, BNY Mellon replaces UMB Bank as custodian. ~$650M+ total AUM, ~$572M onchain TVL (DeFiLlama)
   - Apr 2026: onchain USTB TVL peaks at ~$923.8M (April 28, DeFiLlama)
   - Jun 2026: $948.1M total AUM, 85.32M shares outstanding, NAV $11.112749 (Superstate NAV API, June 13)
   - Jul 2026: Token migrated from `SuperstateTokenV5_1` to the `FundToken` architecture over two consecutive upgrades
   - Aug 2026: $953.8M total AUM, 85.33M shares, NAV $11.177748. Ethereum onchain 69.31M USTB (~$775M); DeFiLlama USTB TVL ~$781.7M. DeFi integrations verified onchain: Aave Horizon aToken ~6.08M USTB (~$68.0M), Midas RedemptionVault ~5.68M USTB (~$63.5M), Frax FrxUSDCustodian ~2.94M USTB (~$32.9M)
-- **Holder Distribution:** 78 onchain holders on Ethereum (per Ethplorer, August 2026). Top 10 holders hold ~86.5% of supply, with the single largest holder — an EOA (`0x0a4956a9…`, entity ID 2406) — at 31.95%. This concentration is expected for an institutional-grade permissioned fund. Top holders include EOAs (institutional investors, custodial wallets) and smart contracts (Aave Horizon, Midas, Frax).
+- **Holder Distribution:** 78 onchain holders on Ethereum ([Ethplorer](https://ethplorer.io/address/0x43415eB6ff9DB7E26A15b704e7A3eDCe97d31C4e), August 17, 2026). Top 10 holders hold ~86.5% of supply, with the single largest holder — an EOA (`0x0a4956a9…`, entity ID 2406) — at 31.95%. This concentration is expected for an institutional-grade permissioned fund. Top holders include EOAs (institutional investors, custodial wallets) and smart contracts (Aave Horizon, Midas, Frax).
 - **Incidents:** None. No hacks, exploits, or adverse events involving Superstate or USTB.
 
 ## Funds Management
@@ -178,7 +196,7 @@ The fund uses a **laddered approach** with holdings spread across various near-t
   - Annual audit by PricewaterhouseCoopers LLP
   - Public line-item holdings, daily NAV, AUM, share count, and yield via the Superstate fund API (no login required)
   - Redundant record-keeping across fund calculation agent, internal records, and onchain records
-  - Chainlink Proof of Reserves was in development (per LlamaRisk, Oct 2024) and is still not live for USTB — reserve attestation remains issuer-published rather than onchain
+  - Chainlink Proof of Reserves was described as in development by [LlamaRisk in October 2024](https://www.llamarisk.com/research/2024-10-07t21-32-09-000z) and is still not live for USTB nearly two years later — reserve attestation remains issuer-published rather than onchain
 - **Reserve Transparency:** Superstate publishes NAV, AUM, share count, yield, **and full line-item portfolio holdings** publicly, both on [superstate.com/assets/ustb](https://superstate.com/assets/ustb) and through an open API — [daily NAV](https://api.superstate.com/v1/funds/1/nav-daily), [yield](https://api.superstate.com/v1/funds/1/yield), and [holdings](https://api.superstate.com/v2/funds/1/holdings). Each holding row carries security name, base value/cost, maturity date, current yield, and percent of fund. This closes the prior gap where granular holdings were only visible inside the authenticated investor portal. Two caveats remain: holdings are published as a **dated snapshot** (July 24, 2026 as of this assessment — roughly a 3-week lag) and are marked unaudited, and the data is self-reported by the issuer with no independent attestation between the annual PwC audits. The fund is structured under SEC exemptions with regulatory reporting requirements.
 
 ## Liquidity Risk
@@ -273,9 +291,10 @@ The fund uses a **laddered approach** with holdings spread across various near-t
 
 - **Team:** Robert Leshner (Co-Founder & CEO, previously co-founded Compound Finance, CFA, UPenn Economics), Reid Cuming (Co-Founder & COO, ex-Square, Stripe, Chime), Jim Hiltner (Co-Founder & Head of BD, ex-Compound Sales), Dean Swennumson (Co-Founder & Head of Ops, ex-Compound Operations). Team also includes alumni from Goldman Sachs, Coinbase, SEC, Frax Finance. ~23 employees.
 - **Funding:** ~$100.5M raised across 3 rounds:
-  - Seed: $4M (June 2023) — ParaFi, Cumberland, 1kx
-  - Series A: $14M (November 2023) — Distributed Global, CoinFund, Breyer Capital, Galaxy, Hack VC
-  - Series B: $82.5M (January 2026) — Bain Capital Crypto, Distributed Global, Brevan Howard Digital, Galaxy Digital, Haun Ventures
+  - Seed: $4M (June 2023) — ParaFi, Cumberland, 1kx. `TODO`: no first-party Superstate announcement located for this round; figure carried from secondary coverage.
+  - Series A: $14M (November 2023) — Distributed Global, CoinFund, Breyer Capital, Galaxy, Hack VC. `TODO`: same — secondary sourcing only.
+  - Series B: $82.5M (announced January 22, 2026) — led by Bain Capital Crypto with Distributed Global; Haun Ventures, Brevan Howard Digital, Galaxy Digital, Sentinel Global participating. Sources: [Superstate newsroom](https://superstate.com/newsroom/superstate-raises-82.5m-series-b-financing), [CoinDesk](https://www.coindesk.com/business/2026/01/22/tokenization-firm-superstate-raises-usd82-5-million-to-bring-wall-street-onchain), [Orrick (deal counsel)](https://www.orrick.com/en/News/2026/02/Superstate-Raises-82-5-Million-Series-B-to-Advance-Tokenized-Investment-Products)
+  - The $100.5M total is the sum of the three rounds; press coverage of the Series B independently describes total funding as "over $100 million."
 - **Documentation:** Comprehensive docs at [docs.superstate.com](https://docs.superstate.com/) covering fund mechanics, legal structure, smart contracts, security. Actively maintained.
 - **Legal Structure:**
   - **Superstate Inc.** (Delaware corporation) — parent company; its own adviser registration (SEC #802-129496) is now INACTIVE, having been superseded by Superstate Advisers LLC
@@ -318,7 +337,11 @@ The fund uses a **laddered approach** with holdings spread across various near-t
 - **Admin Burns:** Monitor `AdminBurn` events — forced burns from holder addresses are a critical event. Two have occurred to date.
 - **Pause Events:** Monitor `Paused`/`Unpaused` and `AccountingPaused`/`AccountingUnpaused` on USTB Token AND RedemptionIdle.
 - **Contract Upgrades:** Monitor **all 3 ProxyAdmins** for `Upgraded` events — USTB ProxyAdmin (`0xb9d285dcad879513dc9c1a3b2e0cccb21c3c2146`), AllowList ProxyAdmin (`0xb819692a58db9dd4d3b403a875439b6ca155c610`), and RedemptionIdle ProxyAdmin (`0xcaba8c12873fffed13431d98bf6b836dff08e869`). Any proxy upgrade executes immediately with no timelock.
-- **Token Configuration:** Monitor the v1.3.0 setters — `AllowlistUpdated` (compliance gate swapped), `IsPublicInstrumentUpdated`, `NameSet`, `SymbolSet`. Current state: allowlist `0x02f1fa8b…`, `isPublicInstrument() == false`, `maximumOracleDelay() == 3600s`.
+- **Token Configuration (v1.3.0 setters):**
+  - **`AllowlistUpdated` — CRITICAL, page immediately.** `setAllowlist()` swaps the entire compliance gate in one owner transaction with no timelock. A malicious or erroneous allowlist address can freeze every holder at once (if it denies all) or void KYC gating entirely (if it permits all). **Alert condition:** any `AllowlistUpdated` event, OR `allowlist()` returning anything other than `0x02f1fa8b196d21c7b733eb2700b825611d8a38e5`. Poll `allowlist()` hourly as a belt-and-braces check against a missed event; on trigger, treat the USTB position as frozen-risk until the new allowlist is reviewed and confirm `isAddressAllowedForFund(<our address>)` still returns true.
+  - **`IsPublicInstrumentUpdated` — high.** Changes which allowlist permission model applies to every transfer. Alert on any event or on `isPublicInstrument()` returning anything other than `false`.
+  - **`NameSet` / `SymbolSet` — informational.** Cosmetic, but a symbol change breaks the `Allowlistable` private-instrument lookup keyed on ticker, so alert and re-verify allowlist resolution.
+  - Current state: `allowlist() == 0x02f1fa8b…`, `isPublicInstrument() == false`, `maximumOracleDelay() == 3600s`.
 - **Oracle Changes:** Monitor `SetOracle` events on USTB Token (2 to date) and `NewCheckpoint` events on the Oracle. Monitor `SetMaximumAcceptablePriceDelta` on Oracle (current: $1.00).
 - **AllowList Changes:** Monitor `ProtocolAddressPermissionSet` and `EntityIdSet` events, especially protocol address permissions (DeFi integrations). Five `ProtocolAddressPermissionSet` events to date, two of them revocations.
 - **Redemption Capacity:** Monitor USDC `balanceOf()` on RedemptionIdle — current 8,738,475 USDC. Also monitor `Withdraw` events (owner can extract USDC) and `SetRedemptionFee` (currently 0).
@@ -332,7 +355,7 @@ The fund uses a **laddered approach** with holdings spread across various near-t
 ### Key Strengths
 
 1. **Safest underlying asset class** — 99.93% of the disclosed portfolio is U.S. Treasury Bills, the lowest-risk financial instrument globally, backed by the full faith and credit of the U.S. government
-2. **Great audit coverage** — 15 audits from 4 firms (0xMacro ×11, Zellic ×2, ChainSecurity, Offside Labs) plus Certora formal verification, with an ongoing audit relationship as code evolves; the `FundToken` rewrite was reviewed by Zellic twice before deployment
+2. **Great audit coverage** — 16 audits from 5 firms (0xMacro ×11, Zellic ×2, ChainSecurity, Offside Labs, Certora), with an ongoing audit relationship as code evolves; the `FundToken` *architecture* was reviewed by Zellic twice in 2026, though not the exact deployed version (see Key Risks #7)
 3. **Public, reconcilable reserve disclosure** — line-item T-Bill holdings, daily NAV, AUM, share count, and yield are published through an open API and reconcile to within 0.05% of reported AUM and to onchain `totalSupply()`
 4. **Institutional-grade service providers** — BNY Mellon (custodian, ~$50T+ AUC), Invesco Advisers (investment manager, $1.7T+ AUM), PricewaterhouseCoopers LLP (auditor), NAV Fund Services (independent NAV)
 5. **Strong team and backing** — Compound Finance founders, $100.5M raised from Bain Capital Crypto, Distributed Global, Brevan Howard, Galaxy Digital, Haun Ventures
@@ -347,7 +370,7 @@ The fund uses a **laddered approach** with holdings spread across various near-t
 4. **No formal bug bounty rewards** — Researchers explicitly told not to expect compensation for vulnerability discoveries.
 5. **Permissioned access** — Only Qualified Purchasers ($5M+) who pass KYC can hold or transfer USTB. Limits DeFi composability.
 6. **Holder concentration** — top 10 addresses hold ~86.5% of supply, the largest single EOA 31.95%.
-7. **Live implementation is a step ahead of the published audits, and its source is not in a public repo** — Zellic reviewed `FundToken` / `FundTokenV1_2_0`; the deployed contract is `FundTokenV1_3_0`. The audited repository is private and the public `superstateinc/ustb` repo has not been updated since April 2025, so the Etherscan-verified source is the only reviewable artifact for the live code.
+7. **The deployed implementation has no audit coverage** — Zellic scoped `FundToken` (Feb 2026) and `FundTokenV1_2_0` (Jun 2026); the live contract is `FundTokenV1_3_0`, shipped a day after v1.2.0. No published report covers it, the audited repo is private, and the public `superstateinc/ustb` repo has not been updated since April 2025 — so the v1.2.0→v1.3.0 delta cannot be diffed or independently reviewed by anyone outside Superstate. The inherited architecture was reviewed and the one Medium finding is fixed in the deployed bytecode, but the exact code holding ~$775M is unattested.
 
 ### Critical Risks
 
@@ -363,7 +386,7 @@ The fund uses a **laddered approach** with holdings spread across various near-t
 ### Critical Risk Gates
 
 - [x] **Unverified contract source** → **PASS** — The live implementation `FundTokenV1_3_0` ([`0xb3ac55dd…`](https://etherscan.io/address/0xb3ac55dd09aa70e9bfbb12f45cd38a1f1597588c)) is source-verified on Etherscan (Solidity 0.8.28), as are the AllowList and RedemptionIdle implementations.
-- [x] **No audit** → **PASS** — 15 audits by 4 firms + Certora formal verification. Great coverage.
+- [x] **No audit** → **PASS** — 16 audits by 5 firms. Great coverage of the codebase and architecture. Note the gate is assessed on the protocol's audit posture, not on version-exact scoping; the deployed v1.3.0 lacking its own report is scored down in Category 1 rather than treated as "no audit."
 - [x] **Unverifiable reserves** → **PASS** — Offchain reserves, but line-item holdings are now publicly published and reconcile to reported AUM within 0.05% and to onchain supply; further verified by an independent NAV agent (NAV Fund Services), annual PwC audit, SEC regulatory framework, and a bankruptcy-remote trust structure. Chainlink NAV feed provides onchain pricing matching official NAV exactly.
 - [x] **Total centralization** → **BORDERLINE PASS** — 4 distinct EOAs control admin functions (token, allowlist, redemption, oracle) with no multisig or timelock on any. However, Superstate is a U.S. corporation under SEC regulation, with registered transfer agent status, institutional custodian, and institutional-grade key management via Turnkey secure enclaves. The separation across 4 keys and the regulatory accountability partially compensate for the lack of onchain governance.
 
@@ -375,13 +398,13 @@ The fund uses a **laddered approach** with holdings spread across various near-t
 
 | Aspect | Assessment |
 |--------|-----------|
-| Audits | 15 audits by 4 firms (0xMacro ×11, Zellic ×2, ChainSecurity, Offside Labs) + Certora formal verification. Continuous audit relationship — the `FundToken` rewrite was reviewed by Zellic in Feb 2026 and again in Jun 2026 before the July deployment. |
+| Audits | 16 audits by 5 firms (0xMacro ×11, Zellic ×2, ChainSecurity, Offside Labs, Certora). Continuous audit relationship — Zellic reviewed the `FundToken` architecture in Feb 2026 and `FundTokenV1_2_0` in Jun 2026. The deployed `FundTokenV1_3_0` is **not** covered by any published report. |
 | Bug Bounty | Self-hosted, no formal monetary rewards. Weaker than Immunefi-style programs. |
 | Time in Production | ~30 months with TVL >$1M (since Feb 2024 — DeFiLlama first data point Mar 8, 2024 already at ~$38M). Contracts deployed Dec 2023. 10 implementation upgrades. |
 | TVL | $953.8M total AUM across all networks, ~$781.7M onchain USTB TVL (DeFiLlama), ~$775M Ethereum onchain (69.31M USTB × $11.1777 NAV) |
 | Historical Incidents | None. No security incidents, exploits, or adverse events. |
 
-**Subcategory A: Audits — 1.5** Great audit coverage (15 audits + formal verification, now spanning four firms) is among the strongest in the RWA space, and the two Zellic engagements specifically de-risked the July 2026 architecture migration — the Medium-severity migration bug Zellic found was fixed before deployment. Two factors hold this at 1.5 rather than 1.0: the bug bounty still offers no monetary rewards, and the deployed `FundTokenV1_3_0` is one version past the audited `FundTokenV1_2_0` with no public repository to diff the delta against.
+**Subcategory A: Audits — 1.5** Sixteen audits across five firms is among the strongest coverage in the RWA space, and the two Zellic engagements de-risked the July 2026 architecture migration — the Medium-severity migration bug Zellic found is fixed in the deployed bytecode. Two factors hold this at 1.5 rather than 1.0: the bug bounty still offers no monetary rewards (rubric row 4 territory on its own), and **the deployed `FundTokenV1_3_0` has no audit report of its own**, with no public repository against which the v1.2.0→v1.3.0 delta could be diffed. The rubric's audit-coverage column is comfortably a 1; the bounty column and the version gap pull the subcategory up to 1.5.
 
 **Subcategory B: Historical — 1.0** Two and a half years in production with zero incidents and sustained TVL well above $100M. Clean operational history across ten implementation upgrades, including a full architecture migration executed without disruption. Already at the rubric floor.
 
@@ -389,7 +412,9 @@ The fund uses a **laddered approach** with holdings spread across various near-t
 
 #### Category 2: Centralization & Control Risks (Weight: 30%) — **3.0**
 
-**Subcategory A: Governance — 4.0**
+**Subcategory A: Governance — 4.0** *(documented deviation from the rubric — see note below)*
+
+> **Rubric deviation, stated explicitly.** USTB matches all three columns of the rubric's **score-5** Governance row: EOA control (not <3 signers — *zero* signers, four plain EOAs), no timelock, and effectively unlimited admin powers (mint, forced burn, freeze, upgrade). A strict rubric read scores this **5.0**, which is also the first critical gate. This report scores it **4.0**, consistent with the prior assessment, on three mitigations: (a) control is split across four independent keys, so no single compromise takes the whole system; (b) keys are held in Turnkey hardware TEEs rather than hot wallets; (c) Superstate operates as an SEC-registered investment adviser and registered transfer agent, so admin abuse carries direct securities-law consequences rather than being purely self-policed. The gate is recorded as **BORDERLINE PASS** rather than a clean pass for the same reason. Reviewers who weight onchain controls over legal accountability should read this subcategory as 5.0, which would move Centralization to (5.0+2.0+2.0)/3 = 3.0 — the same 3.0 this report already assigns after rounding, so **the final score is unchanged either way**.
 
 - **4 distinct EOAs** control the system with no multisig on any:
   - `0xad309bb6f13074128b4f23ef9ea2fe8552afca83` — USTB Token owner + USTB ProxyAdmin owner (mint, adminBurn, pause, oracle, stablecoin config, proxy upgrades)
@@ -447,8 +472,8 @@ The fund uses a **laddered approach** with holdings spread across various near-t
 - Superstate Continuous Price Oracle provides real-time extrapolation
 - SEC regulatory reporting requirements; Superstate Advisers LLC now a fully registered investment adviser
 - Redundant record-keeping: fund agent records + internal records + onchain records
-- **Remaining gaps:** holdings are an issuer-published, unaudited snapshot with a ~3-week lag rather than a continuous or independently attested feed, the assets themselves sit offchain and cannot be proven onchain, and Chainlink Proof of Reserves — in development since Oct 2024 per LlamaRisk — is still not live for USTB
-- The rubric's row 2 ("mostly onchain, some offchain / periodic updates / single reliable source") is now closer to reality than row 3 ("manual reporting by admins / known custodian attestation"), but the snapshot lag and absence of independent attestation between annual audits keep it short of a clean 2.0
+- **Remaining gaps:** holdings are an issuer-published, unaudited snapshot with a ~3-week lag rather than a continuous or independently attested feed, the assets themselves sit offchain and cannot be proven onchain, and Chainlink Proof of Reserves — described as in development by [LlamaRisk in October 2024](https://www.llamarisk.com/research/2024-10-07t21-32-09-000z) — is still not live for USTB
+- **Why 2.5 and not 2.0.** The rubric's row 2 requires "mostly onchain" reserves, "onchain with periodic updates" reporting, and a "single reliable source" of third-party verification. USTB clears the third condition (NAV Fund Services + PwC + Chainlink) but fails the first two on their literal terms: the reserves are entirely *offchain*, and the reporting mechanism is an *offchain* issuer-run API, not an onchain feed. Four specific gaps keep it above a clean 2.0 — (i) the holdings snapshot is issuer-published with no independent attestation between annual audits, so it is self-reported data; (ii) it carries a ~3-week lag (July 24 data read on August 17) rather than being periodic-and-current; (iii) nothing about the reserves is provable onchain — a reader must trust the API; (iv) Chainlink Proof of Reserves remains unshipped after ~22 months. Equally, it is clearly better than row 3's "manual reporting by admins," because the data is machine-readable, complete to line-item level, and arithmetically reconcilable against both AUM and onchain supply. 2.5 is the honest midpoint.
 
 **Score: (1.5 + 2.5) / 2 = 2.0/5** — improved from 2.25. The safest possible underlying asset with institutional-grade custody, and reserve transparency has materially improved: the full T-Bill portfolio is now public, machine-readable, and reconcilable against both reported AUM and onchain supply. What still holds the category back is that verification remains an offchain, issuer-published exercise — there is no onchain proof of reserves, and the holdings snapshot is dated and unaudited.
 
