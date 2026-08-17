@@ -151,6 +151,7 @@ export const CHAIN_LABELS: Record<string, string> = {
   sonic: "Sonic",
   katana: "Katana",
   hyperevm: "HyperEVM",
+  monad: "Monad",
 };
 
 export const chainLabel = (chain: string): string =>

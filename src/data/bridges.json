@@ -112,6 +112,16 @@
           "model": "mint",
           "integration": "PST collateral (Chainlink CCIP BurnMintTokenPool)",
           "detail": "Fluid accepts Huma PST as collateral. Ethereum PST [`0x22ae…d4c7`](https://etherscan.io/address/0x22ae3d9a738471f405169af055d31c687087d4c7) is minted by CCIP pool [`0xBE77…0D3d`](https://etherscan.io/address/0xBE776C85FE1f35BE8341167A6305230075F30D3d), whose only configured remote chain is Solana; a CCIP compromise could mint unbacked PST against Fluid positions"
+        },
+        {
+          "slug": "curvance-hyausd",
+          "name": "Curvance hyAUSD",
+          "kind": "indirect",
+          "model": "mint",
+          "integration": "savUSD collateral (Chainlink CCIP BurnMintTokenPool; Monad)",
+          "detail": "hyAUSD lends AUSD into a Curvance market that accepts Avant savUSD as collateral at 92% LTV. Monad savUSD [`0x9648…06c6`](https://monadscan.com/address/0x9648dB94F1e6B19e7D755585542981F97dc806c6) is a `FactoryBurnMintERC20 1.6.2` whose sole minter/burner is CCIP pool [`0xc5cA…8D3E`](https://monadscan.com/address/0xc5cAAC64Dd93b6E2B369d52610Fdae069e568D3E) (`BurnMintTokenPool 1.5.1`), owned by [`0xd4d2…57cb`](https://monadscan.com/address/0xd4d23209aaE8630bf386b7393763a5b7865e57cb) — which is also the token's `owner()` and `getCCIPAdmin()`. Seven remote lanes are configured; the Avalanche lane's inbound bucket holds 44,881,724 savUSD of capacity refilling at ~519 savUSD/s, roughly 3× the 15,364,191 savUSD actually posted as collateral, so the rate limiter is not a meaningful throttle. A CCIP-path or pool-owner compromise could mint unbacked savUSD, post it as collateral and borrow out the market's AUSD; the resulting bad debt is socialised into the cAUSD exchange rate and lands on hyAUSD holders. Verified onchain August 17, 2026.",
+          "icon": "protocol:curvance",
+          "owner": "Token owner + CCIP admin + pool owner: [`0xd4d2…57cb`](https://monadscan.com/address/0xd4d23209aaE8630bf386b7393763a5b7865e57cb) (Avant). Rate-limit admin is unset (`getRateLimitAdmin()` = zero address), so limits are owner-only."
         }
       ]
     },
