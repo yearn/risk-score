@@ -520,11 +520,11 @@ The protocol depends on multiple well-established DeFi protocols. Chainlink is t
 | **4** | 3–6 months | <$10M |
 | **5** | <3 months | No meaningful TVL |
 
-**Score: 2.0/5** — In production >2 years (since Feb 2024) which is excellent. Current TVL ~$96.8M is between the >$50M (score 2) and sustained >$100M (score 1) thresholds; the protocol did spend 182 days above $100M between May–November 2025 (all-time peak $271M on August 24, 2025) but is not currently sustained above $100M. No exploits or fund losses, and one responsibly disclosed vulnerability was handled well. The uncorroborated aggregator $0.953 ATL is excluded from the assessment.
+**Score: 1.5/5** — In production >2 years (since Feb 2024), with 182 days sustained above $100M between May–November 2025 and an all-time peak of $271M on August 24, 2025. Current TVL of ~$96.8M sits just below the score-1 scale threshold but well above score 2. There have been no exploits or fund losses, and the one responsibly disclosed vulnerability was handled promptly. Removing the uncorroborated $0.953 aggregator ATL also removes the report's prior basis for treating December 2024 as a stress event. The longevity and demonstrated six-month period above $100M therefore justify the midpoint between scores 1 and 2.
 
-**Audits & Historical Score = (1.5 + 2.0) / 2 = 1.75**
+**Audits & Historical Score = (1.5 + 1.5) / 2 = 1.5**
 
-**Score: 1.75/5** — Strong audit coverage, an active $500K bounty and a solid track record with substantial TVL, tempered by contract complexity and TVL not yet sustained above $100M.
+**Score: 1.5/5** — Strong audit coverage, an active $500K bounty, more than two years without a loss event, and a demonstrated six-month period above $100M TVL, tempered by contract complexity and current TVL sitting slightly below $100M.
 
 #### Category 2: Centralization & Control Risks (Weight: 30%)
 
@@ -632,18 +632,18 @@ What holds the subcategory at 3.0 rather than better is that the timelock does n
 
 | Category | Score | Weight | Weighted |
 |----------|-------|--------|----------|
-| Audits & Historical | 1.75 | 20% | 0.35 |
+| Audits & Historical | 1.5 | 20% | 0.30 |
 | Centralization & Control | 2.5 | 30% | 0.75 |
 | Funds Management | 1.75 | 30% | 0.525 |
 | Liquidity Risk | 3.0 | 15% | 0.45 |
 | Operational Risk | 2.5 | 5% | 0.125 |
-| **Final Score** | | | **2.20** |
+| **Final Score** | | | **2.15** |
 
 **Optional Modifiers:**
 - Protocol live >2 years with no incidents: **-0.5** → Does not fully apply due to ChainSecurity vulnerability disclosure (though no exploitation occurred). Not applied.
 - TVL maintained >$500M for >1 year: Not applicable
 
-**Final Score: 2.2/5.0** — The active $500K bounty, recovered 10.65% Stability Pool USDC buffer and strong current Curve execution support reducing Liquidity from 3.5 to 3.0. V2 CR has meanwhile fallen to ~135.6%, oracle ownership remains outside the timelock, redemption is depeg-gated, 89.35% of supply is concentrated in the Stability Pool, and Base fxUSD adds a bounded LayerZero route. The unsupported $0.953 print is not used in the score.
+**Final Score: 2.2/5.0** — Raw weighted score **2.15**, conservatively rounded to one decimal. Relative to the May assessment, the verified $500K bounty and removal of the unsupported $0.953 depeg support lowering Historical Track Record from 2.0 to 1.5. The other issue #387 corrections improve factual accuracy without crossing a scoring threshold: the corrected AladdinDAO attribution does not justify Operational Risk 2.0, and Chainlink plus Curve remain critical dependencies even though Aave exposure is negligible and the LayerZero route is optional and bounded. These improvements are offset by the newly verified non-timelocked oracle-control path, which raises Governance from 2.5 to 3.0. Liquidity remains 3.0 because the recovered 10.65% Stability Pool USDC buffer and strong current Curve execution are balanced by depeg-gated redemption and 89.35% supply concentration.
 
 ### Risk Tier
 
@@ -678,4 +678,4 @@ What holds the subcategory at 3.0 rather than better is that the timelock does n
 | --- | --- | --- |
 | March 29, 2026 | 2.5 | Initial assessment |
 | May 13, 2026 | 2.2 | Reassessment: 3-day TimelockController took ownership of ProxyAdmin (April 20, 2026); supply ~18.1M → ~53.9M, TVL ~$29M → ~$89M. Governance 4.0 → 2.5, Historical Track Record 2.5 → 2.0; Medium → Low Risk |
-| [August 15, 2026](https://github.com/yearn/risk-score/pull/352) | 2.2 | Reassessment and [issue #387](https://github.com/yearn/risk-score/issues/387) corrections (latest snapshot block 25,759,914): supply ~64.31M, TVL ~$96.8M, V2 CR ~135.6%, and primary Curve liquidity ~$7.52M. Verified the timelock holds `DEFAULT_ADMIN_ROLE` on all core contracts and was honored by the May 27–30 `updatePoolCapacity` operation, but both live price oracles remain owned by the operational 6-of-9 Safe; their scheduled ownership-transfer batch has been executable since April 23, 2026 but remains unexecuted, leaving a non-timelocked collateral-repricing path. Redemption remains Curve-EMA-gated and disabled, with its 20%-per-tick-per-call behavior clarified. Corrected active V2 collateral to wstETH/WBTC only, removed the uncorroborated $0.953 depeg, documented the $500K AladdinDAO bounty, corrected AladdinDAO-level contributor/backer attribution, and added the LayerZero Ethereum↔Base lock route with its route-specific DVN quorum. The Stability Pool USDC buffer recovered from 0.16% to ~10.65%, and snapshot-block Curve quotes show ~0.26% impact for a 4M fxUSD exit. Governance 2.5 → 3.0; Liquidity ultimately remains 3.0; final score remains Low Risk. |
+| [August 15, 2026](https://github.com/yearn/risk-score/pull/352) | 2.2 | Reassessment and [issue #387](https://github.com/yearn/risk-score/issues/387) corrections (latest snapshot block 25,759,914): supply ~64.31M, TVL ~$96.8M, V2 CR ~135.6%, and primary Curve liquidity ~$7.52M. Verified the timelock holds `DEFAULT_ADMIN_ROLE` on all core contracts and was honored by the May 27–30 `updatePoolCapacity` operation, but both live price oracles remain owned by the operational 6-of-9 Safe; their scheduled ownership-transfer batch has been executable since April 23, 2026 but remains unexecuted, leaving a non-timelocked collateral-repricing path. Redemption remains Curve-EMA-gated and disabled, with its 20%-per-tick-per-call behavior clarified. Corrected active V2 collateral to wstETH/WBTC only, removed the uncorroborated $0.953 depeg, documented the $500K AladdinDAO bounty, corrected AladdinDAO-level contributor/backer attribution, and added the LayerZero Ethereum↔Base lock route with its route-specific DVN quorum. The Stability Pool USDC buffer recovered from 0.16% to ~10.65%, and snapshot-block Curve quotes show ~0.26% impact for a 4M fxUSD exit. Historical Track Record 2.0 → 1.5 and Governance 2.5 → 3.0 offset one another at the final-score level; Liquidity remains 3.0. The raw weighted score is 2.15, conservatively displayed as 2.2 (Low Risk). |
