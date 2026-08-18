@@ -198,8 +198,10 @@ nodes:
     chain: avalanche
     category: governance
     note: >-
-      A plain externally-owned account — no code and nonce 270 on Avalanche, no code
-      on Monad. Not a multisig. It is simultaneously owner() of avUSD, owner() and
+      An address with no code on Avalanche (nonce 270) or Monad — plausibly an MPC
+      wallet rather than a hot EOA, since MPC is indistinguishable from an EOA
+      onchain and Avant documents MPC custody plus an ongoing Trail of Bits OPSEC
+      engagement. What is verifiable either way: no onchain quorum, no timelock. It is simultaneously owner() of avUSD, owner() and
       DEFAULT_ADMIN_ROLE of savUSD, owner() + DEFAULT_ADMIN_ROLE +
       COLLATERAL_MANAGER_ROLE of AvantMintingV2, and owner() + getCCIPAdmin() of the
       Monad savUSD token and its CCIP pool. avUSD is Ownable2Step with
