@@ -81,6 +81,40 @@ Curvance has six published reports. Firm names, dates and scope were read direct
 
 ## Funds Management
 
+> ### 🔴 CRITICAL ISSUE — savUSD collateral (40% of the vault)
+>
+> **The single most serious finding in this assessment.** 40% of hyAUSD's assets fund
+> loans made at **92% LTV** against Avant savUSD, and **~99.4% of what backs that
+> collateral cannot be verified by anyone outside Avant**: $0.01 sits in
+> `AvantMintingV2` and $741,565 at the sole registered custodian, against
+> **127,269,028 avUSD** outstanding. Collateral is routed straight from depositor to
+> custodian at mint time and never touches a protocol contract. No reserve
+> attestation was located.
+>
+> Compounding it, the Curvance oracle prices savUSD as `USDC/USD × savUSD/avUSD`
+> with **no avUSD/USD feed anywhere in the route** — so avUSD is *assumed* to be
+> worth $1. If avUSD breaks, the 92%-LTV book does not liquidate, and the resulting
+> bad debt is socialised directly into hyAUSD's exchange rate. **Opaque backing and
+> an oracle that cannot price it is the combination that makes this critical rather
+> than merely custodial.**
+>
+> Every admin power over avUSD, savUSD, the minting contract and the Monad CCIP pool
+> sits on **one address with no onchain quorum and no timelock**, able to appoint
+> itself an avUSD minter via `setMinter`.
+>
+> **This does not trigger the "Unverifiable reserves" critical gate**, and the
+> distinction matters: hyAUSD's *own* reserves are fully onchain and reconcile
+> exactly (see below). What is unverifiable is the collateral two layers down, which
+> is a collateral-quality problem scored in Category 3, not a reserve-provability
+> problem for the assessed token.
+>
+> Mitigations are real and were verified rather than assumed — a **10.51% first-loss
+> buffer**, no seizure path to the Monad collateral, and a protected savUSD/avUSD
+> rate. They bound the loss; they do not make the backing observable.
+>
+> **Full inventory: [Appendix B — savUSD Risk Inventory](#appendix-b-savusd-risk-inventory).**
+
+
 **Yes — the vault delegates 100% of deposits to other contracts.** It holds zero idle AUSD (`AUSD.balanceOf(vault)` = 0) and its entire NAV is two cToken positions:
 
 | Position | Shares held | Asset value | Underlying market state |
@@ -343,7 +377,7 @@ Net: the savUSD/avUSD *ratio* is sound and onchain-verifiable; what is neither s
 - **Pendle PT maturity**: PT-AUSD expires **October 8, 2026**. Market A must be rolled or wound down; reassess before that date. There is no automatic handling in the optimizer.
 - **DefiLlama** [`api.llama.fi/protocol/curvance`](https://api.llama.fi/protocol/curvance) as an independent TVL cross-check. Daily.
 
-## Appendix: Contract Architecture
+## Appendix A: Contract Architecture
 
 ```
 GOVERNANCE
@@ -419,6 +453,146 @@ ORACLE LAYER
                                0x253c9599…51Af (Chainlink OCR2, owner Safe 0x73877Fe3…c4F1)
 ```
 
+## Appendix B: savUSD Risk Inventory
+
+Everything found wrong with the savUSD collateral leg, in one place. Every row was
+verified onchain on Avalanche (chain 43114) and Monad (chain 143) on **August 17, 2026**,
+or read from Avant's published source. This is the evidence behind
+[Critical Risk #1](#critical-risks) and the callout in [Funds Management](#funds-management).
+
+**Why this leg matters:** it is **40% of hyAUSD's assets** (7,332,183 AUSD), lent at
+**92% LTV** into a market at 89.66% utilisation, where bad debt socialises directly into
+the cAUSD exchange rate and therefore into hyAUSD's NAV. The allocation cap was raised
+**20% → 30% (July 4, 2026) → 40% (August 13, 2026)**, both times through the Emergency
+Council with no timelock, and the vault currently sits **at** that cap.
+
+### B.1 The backing is almost entirely unverifiable
+
+| Measure | Value |
+|---|---|
+| avUSD total supply | **127,269,028** |
+| USDC + USDT held by `AvantMintingV2` [`0xcb43139E…A49c`](https://snowtrace.io/address/0xcb43139E90f019624e3B76C56FB05394B162A49c) | **$0.01** |
+| Held by the sole registered custodian [`0x3bbcb84f…e0ec`](https://snowtrace.io/address/0x3bbcb84fcde71063d8c396e6c54f5dc3d19ee0ec) | **$741,565 USDC** |
+| Share of backing observable onchain | **≈0.58%** |
+| `CustodyTransfer` events ever emitted | **0** |
+| Registered custodians (from `CustodianAddressAdded`, none removed) | **1**, and it has **no code** (nonce 3698) |
+
+`AvantMintingV2._transferCollateral()` runs `token.safeTransferFrom(benefactor, addresses[i], …)`,
+so depositor USDC/USDT goes **straight to custodian addresses at mint time and never enters a
+protocol contract**. That is why the escrow-then-sweep path has never once been used. **No reserve
+attestation was located** — Avant's OPSEC audit findings are explicitly stated as not public. This
+is the sharpest contrast with Ethena, the protocol Avant is forked from essentially line-for-line,
+which publishes per-custodian reserve breakdowns.
+
+### B.2 The oracle cannot see a depeg
+
+Curvance prices savUSD through `CombinedAggregator` [`0x7CB9a321…4999`](https://monadscan.com/address/0x7CB9a321c30c753c3F7C6af7Ae8776E5C1524999) as:
+
+```
+savUSD/USD  =  USDC/USD  ×  (savUSD/avUSD exchange rate)
+```
+
+**There is no avUSD/USD feed anywhere in the route** — avUSD is assumed to be worth exactly one
+USDC. The `savUSD/avUSD` leg is a genuine Chainlink OCR2 feed and the rate it reports is sound, but
+it only measures staking accrual, not solvency. Curvance's own contract comments name this exact
+limitation: *"if AUSD depegs and loses value, this may remain hidden from the guard due to an
+increase in the [secondary] rate… the primary price [is left] without an effective guard."*
+
+Consequence: **an avUSD depeg does not move the collateral price, so 92%-LTV loans do not become
+liquidatable.** The book silently goes underwater and the loss reaches hyAUSD only when the cToken
+recognises it. All three assets also resolve through a **single** `ChainlinkAdaptor`
+[`0x42B318ab…22e1`](https://monadscan.com/address/0x42B318abFDE82a43B3685eB65a5863B9367B22e1) —
+no redundant pricing route.
+
+### B.3 One key holds every admin power
+
+[`0xd4d23209…57cb`](https://snowtrace.io/address/0xd4d23209aaE8630bf386b7393763a5b7865e57cb) — no code on Avalanche (nonce 270) or Monad:
+
+| Contract | Chain | Powers held |
+|---|---|---|
+| avUSD [`0x24dE8771…E346`](https://snowtrace.io/address/0x24dE8771bC5DdB3362Db529Fc3358F2df3A0E346) | Avalanche | `owner()` → `setMinter(address,bool)` is `onlyOwner` |
+| savUSD [`0x06d47F3f…219E`](https://snowtrace.io/address/0x06d47F3fb376649c3A9Dafe069B3D6E35572219E) | Avalanche | `owner()` + `DEFAULT_ADMIN_ROLE` |
+| `AvantMintingV2` [`0xcb43139E…A49c`](https://snowtrace.io/address/0xcb43139E90f019624e3B76C56FB05394B162A49c) | Avalanche | `owner()` + `DEFAULT_ADMIN_ROLE` + `COLLATERAL_MANAGER_ROLE` |
+| savUSD (bridged) [`0x9648dB94…06c6`](https://monadscan.com/address/0x9648dB94F1e6B19e7D755585542981F97dc806c6) | Monad | `owner()` + `getCCIPAdmin()` |
+| CCIP pool [`0xc5cAAC64…8D3E`](https://monadscan.com/address/0xc5cAAC64Dd93b6E2B369d52610Fdae069e568D3E) | Monad | `owner()`; `getRateLimitAdmin()` is unset, so limits are owner-only |
+
+`avUSD` is `Ownable2Step` and `setMinter` is `onlyOwner`, so **this key can appoint itself a minter
+and issue unbacked avUSD**. `maxMintPerBlock` is 25,000,000 avUSD and the same admin sets it.
+
+**Stated precisely, because the distinction is easy to get wrong:** an MPC wallet is
+indistinguishable from an EOA onchain, and Avant documents MPC custody for its Reserve Fund wallets
+plus a continuous Trail of Bits OPSEC engagement covering treasury and access controls. So "no code"
+does **not** establish a hot key on a laptop. What *is* established: **no onchain quorum and no
+timelock** on any of the powers above. The offchain signing policy is undisclosed and should be
+treated as unverified.
+
+### B.4 Blacklist-and-seize retained from Ethena
+
+`StakedAvUSD` keeps `SOFT_RESTRICTED_STAKER_ROLE`, `FULL_RESTRICTED_STAKER_ROLE` and
+`redistributeLockedAmount(from, to)` — `DEFAULT_ADMIN_ROLE` can blacklist a holder, burn their
+entire savUSD balance and reassign it. This acts on the **Avalanche** token, so it does not reach
+the bridged Monad collateral directly, but it applies to anyone bridging back and to the canonical
+pool the Monad token redeems against.
+
+### B.5 The bridge can mint the collateral
+
+Monad savUSD is not the canonical token: `typeAndVersion()` reports `FactoryBurnMintERC20 1.6.2`,
+and its **sole minter/burner** is the CCIP `BurnMintTokenPool 1.5.1`. Seven remote lanes are
+configured; the Avalanche lane's inbound bucket holds **44,881,724 savUSD of capacity refilling at
+~519 savUSD/s — roughly 3× the 15,364,191 savUSD actually posted as collateral**, so the rate
+limiter is not a meaningful throttle at this size. A CCIP-path or pool-owner compromise can mint
+unbacked savUSD on Monad, post it, and borrow out market B's AUSD.
+
+### B.6 The first-loss buffer is real but thin, and partly circular
+
+| Layer | Size | Status |
+|---|---|---|
+| USD Reserve Fund [`0xd98e1faf…f43a`](https://snowtrace.io/address/0xd98e1faf532b9c481c56741ab3ac47ec18d8f43a) | 751,078 savUSD | Live — but **denominated in savUSD**, i.e. a claim on the very pool it protects |
+| Junior tranche `avUSDx` / "avUSD MAX" [`0xDd1cDFA5…B3B9`](https://snowtrace.io/address/0xDd1cDFA52E7D8474d434cd016fd346701db6B3B9) | 12,619,965 | Live, and genuinely independent |
+| Governance backstop | — | **Not live**; docs describe it as a "planned future backstop" |
+| **Total absorbed before savUSD** | **13,371,043 = 10.51% of the 127,247,274 senior supply** | Independent portion ≈**9.9%** |
+
+A ~10% cushion is meaningful and better than nothing comparable at Curvance's own layer (there is no
+first-loss buffer between a Curvance market's bad debt and hyAUSD at all). It is still thin against a
+delta-neutral book whose positions are not externally observable.
+
+### B.7 What Avant does have
+
+Stated for balance, because these are real and were checked:
+
+- **Eight** published smart-contract audit files, with a claim of no critical or high-severity
+  findings. Firm names and dates are served as GitBook file blobs and **could not be extracted from
+  the page text — marked TODO**.
+- A continuous **Trail of Bits OPSEC** engagement (internal policy, treasury controls, infrastructure
+  access, incident response); findings deliberately not public.
+- **Hypernative** real-time threat monitoring.
+- A senior/junior tranche design where savUSD is explicitly the senior, most-protected layer.
+- $6.5M seed funding and an established Avalanche-ecosystem presence.
+
+### B.8 Structural protections that hold (verified, not assumed)
+
+- **The Curvance market's savUSD cannot be seized.** `FactoryBurnMintERC20.burnFrom()` routes through
+  OpenZeppelin `_spendAllowance(account, msg.sender, amount)`, so the burner — even under the same
+  key — cannot burn savUSD out of the market without an allowance the market never grants.
+- **The savUSD/avUSD rate cannot be drained.** `StakedAvUSD.rescueTokens()` reverts when
+  `token == asset()`, so staked avUSD cannot be pulled out. 108,231,057 avUSD backs 90,626,971 savUSD
+  shares, and both figures are onchain.
+- **The staking vault reconciles.** `totalAssets()` 108,210,389 against an actual avUSD balance of
+  108,231,057.
+
+### B.9 What would resolve this
+
+1. **Onchain multisig + timelock** on the Avant admin key — removes the single-key mint and role powers.
+2. **Published reserve attestation** with named custodians and per-custodian balances, at a committed
+   cadence — the Ethena standard Avant is currently below.
+3. **An avUSD/USD oracle feed** in the Curvance route — this one is Curvance's to fix, not Avant's, and
+   is the single highest-leverage change, because it converts a silent solvency failure into a normal
+   liquidation event.
+4. **A hard, agreed ceiling on the market-B allocation cap**, given it has moved 20% → 30% → 40% in six
+   weeks with no timelock and is currently at cap.
+
+---
+
 ---
 
 ## Risk Summary
@@ -442,11 +616,13 @@ ORACLE LAYER
 
 ### Critical Risks
 
-1. **Unaudited, out-of-bounty custody contract.** If Yearn's standard is that the contract directly holding strategy funds must have third-party review, this is a blocking issue today, independent of everything else. Mitigation would be a published audit of `LendingOptimizer` (and `LendingOptimizerShareCToken`), plus adding `0xaD663aC8…00Bf` and both markets to the Monad Contract Addresses page so they fall inside the $250K bounty scope.
-2. **Instant, no-delay drain path via elevated permissions** (`addMarketManager` + `addApprovedAsset` + `rebalance`), exercisable by a 4-of-5 Safe whose signer set is the same five people who also operate a 1-of-5 pause key. Requires block-level monitoring of `PermissionsUpdated` and `MarketAdded` with an automated exit trigger.
-3. **Single-signer withdrawal freeze**, recoverable only by a different key. Any position must be sized assuming exits can be blocked without warning.
-4. **A single non-multisig, non-timelocked key is the whole onchain trust surface behind 40% of the vault's collateral.** [`0xd4d23209…57cb`](https://snowtrace.io/address/0xd4d23209aaE8630bf386b7393763a5b7865e57cb) has no code on either Avalanche or Monad — plausibly MPC rather than a hot EOA, but with no onchain quorum or delay either way — and is simultaneously `owner()` of avUSD, `owner()`/`DEFAULT_ADMIN_ROLE` of savUSD, `owner()`/`DEFAULT_ADMIN_ROLE`/`COLLATERAL_MANAGER_ROLE` of `AvantMintingV2`, and `owner()`/`getCCIPAdmin()` of the Monad savUSD token and its CCIP pool. avUSD's `setMinter(address,bool)` is `onlyOwner`, so that one key can mint unbacked avUSD without limit. Separately, a CCIP-path compromise can mint unbacked savUSD directly on Monad (inbound lane capacity 44.88M vs 15.36M posted) and borrow out market B. Both land on hyAUSD holders through bad-debt socialisation. *Bounded, and verified as such:* `burnFrom` still spends allowance so the market's savUSD cannot be seized, `rescueTokens` blocks draining the staking vault so the savUSD/avUSD rate is safe, and a **10.51% first-loss buffer** (12.62M junior tranche + 0.75M Reserve Fund) absorbs losses before savUSD.
-5. **First-mover exit advantage on unrecognised impairment.** Curvance documents that pooled liquidity can fund an exit before an impaired cToken recognises its loss, concentrating the loss on whoever is still in. A large, procedurally-slow holder such as a Yearn vault is structurally the last one out.
+1. **Unverifiable, single-key collateral behind 40% of the vault — see [Appendix B](#appendix-b-savusd-risk-inventory).** hyAUSD lends into a market that accepts Avant savUSD at 92% LTV, where ~99.4% of the backing is offchain and unattested ($0.01 in `AvantMintingV2`, $741,565 at the sole custodian, against 127,269,028 avUSD), every admin power sits on one non-timelocked key that can mint unbacked avUSD via `setMinter`, and the Curvance oracle has **no avUSD/USD feed** — so a depeg would not trigger liquidations and would socialise into hyAUSD's NAV. Bounded by a verified 10.51% first-loss buffer, no seizure path, and a protected savUSD/avUSD rate; not bounded in the case that actually matters, which is avUSD itself being worth less than $1. Remediation: an onchain multisig + timelock on the Avant admin key, a published reserve attestation with named custodians, and an avUSD/USD oracle feed.
+
+2. **Unaudited, out-of-bounty custody contract.** If Yearn's standard is that the contract directly holding strategy funds must have third-party review, this is a blocking issue today, independent of everything else. Mitigation would be a published audit of `LendingOptimizer` (and `LendingOptimizerShareCToken`), plus adding `0xaD663aC8…00Bf` and both markets to the Monad Contract Addresses page so they fall inside the $250K bounty scope.
+3. **Instant, no-delay drain path via elevated permissions** (`addMarketManager` + `addApprovedAsset` + `rebalance`), exercisable by a 4-of-5 Safe whose signer set is the same five people who also operate a 1-of-5 pause key. Requires block-level monitoring of `PermissionsUpdated` and `MarketAdded` with an automated exit trigger.
+4. **Single-signer withdrawal freeze**, recoverable only by a different key. Any position must be sized assuming exits can be blocked without warning.
+5. **CCIP mint path on the Monad collateral.** Independently of Avant's custody, a compromise of the CCIP path or the pool owner can mint unbacked savUSD directly on Monad — the Avalanche lane's inbound capacity is 44.88M savUSD against 15.36M actually posted — post it as collateral and borrow out market B's AUSD.
+6. **First-mover exit advantage on unrecognised impairment.** Curvance documents that pooled liquidity can fund an exit before an impaired cToken recognises its loss, concentrating the loss on whoever is still in. A large, procedurally-slow holder such as a Yearn vault is structurally the last one out.
 
 ---
 
@@ -511,7 +687,7 @@ hyAUSD's *own* backing is 100% onchain and reconciles exactly, and it takes no l
 The two legs are very different and the blend is what matters:
 
 - **60% — PT-AUSD (≈2.5).** Priced by a fixed model discount rather than by market, which removes AMM manipulation but means the oracle can overstate a distressed PT. Bounded, though: it redeems at par into AUSD on October 8, 2026, and the collateral is fully onchain and countable. The live risk is liquidation execution on a thin Monad Pendle market, not permanent credit loss.
-- **40% — savUSD (≈4).** Tracing the canonical stack on Avalanche (see Collateralization above) shows **$0.01 of collateral in `AvantMintingV2` and $741,565 at the sole registered custodian against 127,269,028 avUSD outstanding, so ~99.4% of the backing is offchain and unverifiable**, with no reserve attestation located. Every admin key across avUSD, savUSD, the minting contract and the Monad CCIP pool sits on **one address with no onchain quorum and no timelock**, able to appoint itself an avUSD minter via `setMinter`. And the Curvance oracle has **no avUSD/USD feed**, so neither the backing nor a depeg is observable from Monad. That is "partially collateralized or custodial / opaque reporting" (4). It does not go past 4, because three mitigations are real and were verified rather than taken on trust: a **10.51% first-loss buffer** (12.62M junior tranche + 0.75M Reserve Fund) sits below savUSD, the key is plausibly MPC rather than a hot EOA and is covered by an ongoing Trail of Bits OPSEC engagement, and neither seizure of the Monad collateral nor draining of the savUSD/avUSD rate is possible.
+- **40% — savUSD (≈4). Flagged as [Critical Risk #1](#critical-risks); full inventory in [Appendix B](#appendix-b-savusd-risk-inventory).** Tracing the canonical stack on Avalanche (see Collateralization above) shows **$0.01 of collateral in `AvantMintingV2` and $741,565 at the sole registered custodian against 127,269,028 avUSD outstanding, so ~99.4% of the backing is offchain and unverifiable**, with no reserve attestation located. Every admin key across avUSD, savUSD, the minting contract and the Monad CCIP pool sits on **one address with no onchain quorum and no timelock**, able to appoint itself an avUSD minter via `setMinter`. And the Curvance oracle has **no avUSD/USD feed**, so neither the backing nor a depeg is observable from Monad. That is "partially collateralized or custodial / opaque reporting" (4). It does not go past 4, because three mitigations are real and were verified rather than taken on trust: a **10.51% first-loss buffer** (12.62M junior tranche + 0.75M Reserve Fund) sits below savUSD, the key is plausibly MPC rather than a hot EOA and is covered by an ongoing Trail of Bits OPSEC engagement, and neither seizure of the Monad collateral nor draining of the savUSD/avUSD rate is possible.
 
 Blending 60/40 gives ≈3.1; taken conservatively for the compounding of unverifiable backing *with* an oracle that cannot price it: **3.5**.
 
