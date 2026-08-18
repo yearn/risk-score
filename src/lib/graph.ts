@@ -82,6 +82,7 @@ const CHAIN_EXPLORERS: Record<string, string> = {
   katana: "https://explorer.katanarpc.com/address/",
   hyperevm: "https://hyperevmscan.io/address/",
   monad: "https://monadscan.com/address/",
+  avalanche: "https://snowtrace.io/address/",
 };
 
 export function explorerUrl(address: string, chain = "ethereum"): string {

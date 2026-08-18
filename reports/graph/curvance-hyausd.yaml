@@ -182,10 +182,31 @@ nodes:
     note: >-
       Not the canonical Avant token — `typeAndVersion()` reports
       "FactoryBurnMintERC20 1.6.2". Its sole minter and burner is a Chainlink CCIP
-      BurnMintTokenPool. Underneath, avUSD is a delta-neutral synthetic dollar with
-      offchain-managed strategies on Avalanche and a senior/junior tranche
-      structure, so this collateral carries offchain strategy risk in addition to
-      bridge risk.
+      BurnMintTokenPool. Tracing the canonical stack on Avalanche shows the backing
+      is ~99.4% offchain: $0.01 of collateral sits in AvantMintingV2 and $741,565 at
+      the sole registered custodian (itself an EOA) against 127,269,028 avUSD
+      outstanding, because collateral is routed straight from depositor to custodian
+      at mint time. One plain EOA (0xd4d23209…57cb, no code on either chain) is
+      owner/admin of avUSD, savUSD, the minting contract and this token's CCIP pool,
+      and avUSD's setMinter is onlyOwner. Bounded on two counts, both verified:
+      burnFrom still spends allowance so the market's savUSD cannot be seized, and
+      rescueTokens blocks draining the staking vault so the savUSD/avUSD rate holds.
+
+  - id: avant-admin
+    label: Avant admin EOA (single key)
+    address: "0xd4d23209aaE8630bf386b7393763a5b7865e57cb"
+    chain: avalanche
+    category: governance
+    note: >-
+      A plain externally-owned account — no code and nonce 270 on Avalanche, no code
+      on Monad. Not a multisig. It is simultaneously owner() of avUSD, owner() and
+      DEFAULT_ADMIN_ROLE of savUSD, owner() + DEFAULT_ADMIN_ROLE +
+      COLLATERAL_MANAGER_ROLE of AvantMintingV2, and owner() + getCCIPAdmin() of the
+      Monad savUSD token and its CCIP pool. avUSD is Ownable2Step with
+      setMinter(address,bool) gated only by onlyOwner, so this one key can appoint
+      itself a minter and issue unbacked avUSD; maxMintPerBlock (25,000,000 avUSD) is
+      also set by it. This is the single largest counterparty concentration behind
+      40% of the vault.
 
   - id: ccip-pool
     label: CCIP BurnMintTokenPool (savUSD)
@@ -293,6 +314,8 @@ edges:
 
   # Mint authority on the bridged collateral
   - { from: ccip-pool, to: savusd, kind: mints, label: "sole minter/burner — CCIP burn-and-mint" }
+  - { from: avant-admin, to: ccip-pool, kind: controls, label: "owner() of the pool and getCCIPAdmin() of the token" }
+  - { from: avant-admin, to: savusd, kind: mints, label: "owner() — avUSD setMinter is onlyOwner, so unbacked avUSD is one call away" }
 
   # Oracles
   - { from: oracle-manager,    to: cpt-collateral,     kind: routes-through, label: "single ChainlinkAdaptor, no redundant route" }

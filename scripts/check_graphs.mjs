@@ -38,6 +38,7 @@ export const KNOWN_CHAINS = new Set([
   "katana",
   "hyperevm",
   "monad",
+  "avalanche",
 ]);
 
 /**
