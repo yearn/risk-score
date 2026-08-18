@@ -63,17 +63,27 @@ nodes:
       `canUnpause` is false, so it is a one-way emergency brake. A second instance
       (0xbb82aee1…ad73), owned by the Emergency Council, can unpause.
 
-  - id: harvester
-    label: Harvest keeper EOAs (×2)
+  - id: harvester-keeper
+    label: Harvest keeper EOA (active)
     address: "0xd21dc65f42fb039a1c403a38c18c2731211ecbc7"
     category: infra
     note: >-
-      Two plain EOAs hold `hasHarvestPermissions` — this one (the active keeper,
-      64 rebalances since June 24, 2026 at a 3-hour median cadence) and
-      0x97f6886d…4521. They can call `rebalance()`, moving AUSD between already-
-      approved markets up to the configured caps. They cannot move assets out of
-      the vault, and rebalance conserves total assets onchain, but the bounds
-      argument is caller-supplied so it protects the caller, not depositors.
+      Plain EOA holding `hasHarvestPermissions`, and the address that has executed
+      every rebalance to date — 64 of them since June 24, 2026 at a 3-hour median
+      cadence. It can call `rebalance()`, moving AUSD between already-approved
+      markets up to the configured caps. It cannot move assets out of the vault, and
+      rebalance conserves total assets onchain, but the bounds argument is
+      caller-supplied so it protects the caller, not depositors.
+
+  - id: harvester-deployer
+    label: Harvest keeper EOA (dormant)
+    address: "0x97f6886d04c804a278caf904e1adf5864b384521"
+    category: infra
+    note: >-
+      Second plain EOA with `hasHarvestPermissions` — the original protocol deployer,
+      which also deployed the CentralRegistry. It has not executed a rebalance, but
+      the permission is live and carries the same powers as the active keeper. Held
+      market permissions at launch; those were revoked in November 2025.
 
   - id: central-registry
     label: CentralRegistry
@@ -297,7 +307,8 @@ edges:
   - { from: pause-safe,        to: mass-pause,       kind: controls,   label: "owner (1-of-5) — pause-only, cannot unpause" }
   - { from: mass-pause,        to: mm-pt,            kind: holds-role, label: "market permissions — can redeem-pause" }
   - { from: mass-pause,        to: mm-savusd,        kind: holds-role, label: "market permissions — can redeem-pause" }
-  - { from: harvester,         to: hyausd,           kind: holds-role, label: "harvest permissions — rebalance()" }
+  - { from: harvester-keeper,   to: hyausd,           kind: holds-role, label: "harvest permissions — rebalance(); 64 executions to date" }
+  - { from: harvester-deployer, to: hyausd,           kind: holds-role, label: "harvest permissions — rebalance(); dormant but live" }
   - { from: central-registry,  to: mm-pt,            kind: manages,    label: "registered market manager" }
   - { from: central-registry,  to: mm-savusd,        kind: manages,    label: "registered market manager" }
   - { from: mm-pt,             to: causd-pt,         kind: manages,    label: "listing, pauses, caps, LTV 95%" }
@@ -316,8 +327,8 @@ edges:
 
   # Mint authority on the bridged collateral
   - { from: ccip-pool, to: savusd, kind: mints, label: "sole minter/burner — CCIP burn-and-mint" }
-  - { from: avant-admin, to: ccip-pool, kind: controls, label: "owner() of the pool and getCCIPAdmin() of the token" }
-  - { from: avant-admin, to: savusd, kind: mints, label: "owner() — avUSD setMinter is onlyOwner, so unbacked avUSD is one call away" }
+  - { from: avant-admin, to: ccip-pool, kind: controls, label: "owner() of the pool and getCCIPAdmin() of the token — can repoint the minter" }
+  - { from: avant-admin, to: savusd, kind: mints, label: "grantMintRole is onlyOwner — admin can grant itself minter in one call (simulated: succeeds from owner, reverts OnlyCallableByOwner otherwise)" }
 
   # Oracles
   - { from: oracle-manager,    to: cpt-collateral,     kind: routes-through, label: "single ChainlinkAdaptor, no redundant route" }
