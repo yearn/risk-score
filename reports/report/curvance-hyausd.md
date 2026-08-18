@@ -504,6 +504,14 @@ recognises it. All three assets also resolve through a **single** `ChainlinkAdap
 [`0x42B318ab…22e1`](https://monadscan.com/address/0x42B318abFDE82a43B3685eB65a5863B9367B22e1) —
 no redundant pricing route.
 
+**Re-derived independently rather than restated** (August 18, 2026): walking
+`OracleManager.getPricingAdaptors(savUSD)` returns exactly **one** adaptor; its `assetConfig` resolves
+to the CombinedAggregator; and that aggregator's two legs report `description()` of **`"USDC / USD"`**
+and **`"SAVUSD / AVUSD Exchange Rate"`** — neither is avUSD/USD. Stronger still:
+`getPricingAdaptors()` for the **bridged avUSD on Monad**
+[`0x0d9d741f…3ba4`](https://monadscan.com/address/0x0d9d741fe423cd5419e4bcb6cb2ffa87afa93ba4) returns
+an **empty array** — Curvance has no avUSD price source registered at all, on any route.
+
 ### B.3 One key holds every admin power
 
 [`0xd4d23209…57cb`](https://snowtrace.io/address/0xd4d23209aaE8630bf386b7393763a5b7865e57cb) — no code on Avalanche (nonce 270) or Monad:
@@ -571,9 +579,14 @@ Stated for balance, because these are real and were checked:
 
 ### B.8 Structural protections that hold (verified, not assumed)
 
-- **The Curvance market's savUSD cannot be seized.** `FactoryBurnMintERC20.burnFrom()` routes through
-  OpenZeppelin `_spendAllowance(account, msg.sender, amount)`, so the burner — even under the same
-  key — cannot burn savUSD out of the market without an allowance the market never grants.
+- **The Curvance market's savUSD cannot be seized — confirmed by simulation, not just source review.**
+  `FactoryBurnMintERC20.burnFrom()` routes through OpenZeppelin
+  `_spendAllowance(account, msg.sender, amount)`. Simulating the attack with `eth_call` from the CCIP
+  pool against the csavUSD market (`allowance` = 0) reverts on **both** entry points —
+  `burnFrom(market, 1e18)` and the `burn(address,uint256)` alias — with
+  **`ERC20: insufficient allowance`**. For contrast, the same simulation of `mint(pool, 1e18)` from the
+  pool **succeeds**, which is exactly the asymmetry claimed in B.5: the bridge key can create supply
+  but cannot confiscate it.
 - **The savUSD/avUSD rate cannot be drained.** `StakedAvUSD.rescueTokens()` reverts when
   `token == asset()`, so staked avUSD cannot be pulled out. 108,231,057 avUSD backs 90,626,971 savUSD
   shares, and both figures are onchain.
