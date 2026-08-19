@@ -19,7 +19,7 @@ nodes:
     label: mHYPER
     address: "0x9b5528528656DBC094765E2abB79F293c21191B9"
     category: vault
-    note: "Qualified subordinated debt token. Ethereum supply was 34.60M on August 19, 2026; current implementation is 0x3f0ec5b26ec6e50907abea87a798bf395189bcd5."
+    note: "Qualified subordinated debt token. Ethereum supply was 34.55M at block 25,788,517 on August 19, 2026; current implementation is 0x3f0ec5b26ec6e50907abea87a798bf395189bcd5."
   - id: deposit-vault
     label: DepositVault
     address: "0xbA9FD2850965053Ffab368Df8AA7eD2486f11024"

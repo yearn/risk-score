@@ -14,8 +14,8 @@ The strategy is materially onchain but not contractually tied to the token. Hype
 
 **Current statistics (August 19, 2026):**
 
-- **NAV:** $39.41M ([NAV endpoint](https://api-midas.deltay.xyz/vaults/mHYPER/nav)); **price:** $1.121519 ([price endpoint](https://api-midas.deltay.xyz/prices)); **APY:** 5.73% ([APY endpoint](https://api-midas.deltay.xyz/apy))
-- **Ethereum supply:** 34.60M mHYPER, verified through the token's [`totalSupply()`](https://etherscan.io/token/0x9b5528528656dbc094765e2abb79f293c21191b9)
+- **NAV:** $39.41M ([NAV endpoint](https://api-midas.deltay.xyz/vaults/mHYPER/nav)); **price:** $1.121519 ([price endpoint](https://api-midas.deltay.xyz/vaults/mHYPER/prices)); **APY:** 5.73% ([APY endpoint](https://api-midas.deltay.xyz/vaults/mHYPER/apy))
+- **Ethereum supply:** 34.55M mHYPER, verified through the token's [`totalSupply()`](https://etherscan.io/token/0x9b5528528656dbc094765e2abb79f293c21191b9) at [block 25,788,517](https://etherscan.io/block/25788517)
 - **Tracked holders:** 954 across the dashboard's indexed chains ([Delta Y](https://midas.deltay.xyz/mhyper))
 - **Midas platform TVL:** $128.82M ([DeFiLlama](https://defillama.com/protocol/midas-rwa))
 - **KYC:** required; transfers are subject to Midas greenlist/blacklist controls
@@ -221,6 +221,17 @@ Both teams are public and established, documentation is substantial, and Hyperit
 | Operational Risk | 1.8 | 5% | 0.09 |
 | **Final Score** | | | **2.82 ≈ 2.8/5.0** |
 
+### Risk Tier
+
+| Final Score | Risk Tier | Recommendation |
+| --- | --- | --- |
+| **1.0-1.5** | **Minimal Risk** | Approved, high confidence |
+| **1.5-2.5** | **Low Risk** | Approved with standard monitoring |
+| **2.5-3.5** | **Medium Risk** | Approved with enhanced monitoring |
+| **3.5-4.5** | **Elevated Risk** | Limited approval, strict limits |
+| **4.5-5.0** | **High Risk** | Not recommended |
+| **N/A** | **Not Rated** | Terminal — do not use (exploited or wound down) |
+
 **Final Risk Tier: Medium Risk (2.8/5.0).** Approved with enhanced monitoring and conservative exposure limits.
 
 ## Reassessment Triggers
@@ -235,13 +246,13 @@ Both teams are public and established, documentation is substantial, and Hyperit
 
 ## Assessment History
 
-| Date | Score | Report |
+| Date | Score | Notes |
 | --- | ---: | --- |
-| February 7, 2026 | 3.3 | [PR #31](https://github.com/yearn/risk-score/pull/31) |
-| March 20, 2026 | 3.2 | [PR #103](https://github.com/yearn/risk-score/pull/103) |
-| April 13, 2026 | 2.9 | [PR #133](https://github.com/yearn/risk-score/pull/133) |
-| June 13, 2026 | 2.9 | [PR #248](https://github.com/yearn/risk-score/pull/248) |
-| August 19, 2026 | 2.8 | [PR #417](https://github.com/yearn/risk-score/pull/417) |
+| [February 7, 2026](https://github.com/yearn/risk-score/pull/31) | 3.3 | Initial assessment |
+| [March 20, 2026](https://github.com/yearn/risk-score/pull/103) | 3.2 | Attestation Engine reassessment |
+| [April 13, 2026](https://github.com/yearn/risk-score/pull/133) | 2.9 | Controls and provability reassessment |
+| [June 13, 2026](https://github.com/yearn/risk-score/pull/248) | 2.9 | Allocation and role reassessment |
+| [August 19, 2026](https://github.com/yearn/risk-score/pull/417) | 2.8 | Custody, allocation, and control reassessment |
 
 ## Appendix: Current Control Summary
 
