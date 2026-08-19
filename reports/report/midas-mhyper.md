@@ -10,6 +10,8 @@
 
 mHYPER is a yield-bearing tokenized certificate issued by Midas Software GmbH. Its price references a stablecoin-focused, market-neutral portfolio managed by [Hyperithm](https://www.hyperithm.com/). Yield accrues through the token price rather than rebasing. mHYPER is legally a qualified subordinated debt claim against the German issuer, not a direct ownership interest in strategy assets or a bankruptcy-remote vehicle.
 
+**mHYPER is not principal-protected.** Negative strategy performance—including losses caused by poor allocation, hedging, leverage, liquidation, or counterparty decisions—can reduce portfolio NAV and the token's redemption value without any hack or smart-contract incident. Market-neutral positioning is a risk-management objective, not a guarantee against loss.
+
 The strategy is materially onchain but not contractually tied to the token. Hyperithm deploys capital through Midas/Fordefi-controlled allocator wallets, Midas publishes an admin-set NAV price, and minting is not limited by an onchain proof-of-reserves check. The [Delta Y transparency dashboard](https://midas.deltay.xyz/mhyper) and [Midas Attestation Engine](https://docs.midas.app/transparency/the-midas-attestation-engine) provide meaningful visibility and independent checks, but wallet attribution and source data remain offchain assertions.
 
 **Current statistics (August 19, 2026):**
@@ -97,6 +99,8 @@ The three dashboard-labeled Safe wallets do not establish a blanket multisig ove
 
 Delta Y does not currently attribute material strategy NAV to Safe1, Safe2, or Safe3. Most visible NAV is instead attributed directly to Fordefi2, Fordefi3, and Fordefi4. The appropriate positive control is therefore Fordefi's MPC and policy-based governance, plus the isolated 2-of-2 Safe—not a claim that the current portfolio as a whole is protected by an onchain multisig quorum.
 
+These custody controls address transaction authorization, not investment quality. A trade can comply with Fordefi policy or receive every required signature and still lose money because of poor strategy selection, hedge execution, leverage, liquidation, market liquidity, or counterparty performance. Multisig and MPC controls therefore do not protect mHYPER holders from ordinary fund-management losses.
+
 ### Collateralization and legal claim
 
 - mHYPER is a qualified subordinated debt obligation of Midas Software GmbH. Holders have no direct title to allocator-wallet assets, statutory segregation, or bankruptcy remoteness under this German GmbH structure ([legal structure](https://docs.midas.app/legal/legal-structure)).
@@ -166,6 +170,7 @@ The current public legal-document page still exposes the July 17, 2025 base pros
 
 ### Key risks
 
+- mHYPER is not principal-protected: ordinary management losses can reduce NAV and redemption value without a hack, including through poor allocation, hedging, leverage, liquidation, or counterparty decisions.
 - mHYPER is an unsecured, qualified subordinated issuer claim with no statutory asset segregation.
 - Morpho and Hypercore account for 74.9% of NAV; the portfolio is leveraged and Fluid is highly levered on a net-equity basis.
 - The major current positions are in direct Fordefi allocator wallets, not behind a publicly verifiable onchain multisig quorum.
