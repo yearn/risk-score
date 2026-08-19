@@ -241,6 +241,7 @@ Both teams are public and established, documentation is substantial, and Hyperit
 | March 20, 2026 | 3.2 | [PR #103](https://github.com/yearn/risk-score/pull/103) |
 | April 13, 2026 | 2.9 | [PR #133](https://github.com/yearn/risk-score/pull/133) |
 | June 13, 2026 | 2.9 | [PR #248](https://github.com/yearn/risk-score/pull/248) |
+| August 19, 2026 | 2.8 | [PR #417](https://github.com/yearn/risk-score/pull/417) |
 
 ## Appendix: Current Control Summary
 
