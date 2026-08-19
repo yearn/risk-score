@@ -6,6 +6,23 @@ allowed-tools: Read Write Edit Grep Glob Bash(npm:*) Bash(git:*)
 
 # Generating contract dependency graphs
 
+## Contents
+
+- [When to invoke](#when-to-invoke)
+- [Inputs](#inputs)
+- [File layout](#file-layout)
+- [Schema](#schema)
+- [Vocabulary](#vocabulary)
+- [Selection rules](#selection-rules)
+- [Authoring procedure](#authoring-procedure)
+- [Verification](#verification)
+- [Worked examples](#worked-examples)
+- [Cross-graph linking](#cross-graph-linking)
+- [Selection & chain highlight](#selection--chain-highlight)
+- [What the reader gets](#what-the-reader-gets)
+- [Morpho market expansion](#morpho-market-expansion)
+- [Common pitfalls](#common-pitfalls)
+
 Each risk report in `reports/report/` documents a protocol's contracts and their relationships in prose. A dependency-graph YAML in `reports/graph/` makes those relationships visual at `/graph/<slug>/` on the website (linked from `/report/<slug>/` automatically when a YAML exists).
 
 This skill turns a finished risk report into the corresponding YAML.
@@ -56,9 +73,11 @@ The schema is enforced at build time by the validator in `src/lib/graph.ts`. Aut
 | `id` | yes | string | Unique within the file. Slug-style, e.g. `susds-lender`. |
 | `label` | yes | string | Card title. Keep ≤ ~40 chars; it wraps to 2 lines. |
 | `category` | yes | enum | One of the 5 below. |
-| `address` | no | string | EVM address. Used to build the Etherscan link on click. |
+| `address` | no | string | EVM address. Shown in full in the details panel, drives the `↗` block-explorer link, and is what cross-graph linking matches on. |
 | `chain` | no | string | Per-node chain override; falls back to top-level `chain`. |
-| `note` | no | string | Free-form context shown in tooltips (future use); useful when address is absent. |
+| `link` | no | string | External URL for the card's `↗` affordance and the details panel. **Must use `https://`.** Prefer it to the block-explorer link for addressless nodes (e.g. Morpho market IDs, which are 32-byte identifiers — never put a market ID in `address`). |
+| `note` | no | string | Free-form context. **Rendered as prose in the details panel** when the card is clicked — write it for a human reader, not as a shorthand memo. |
+| `morphoVault` | no | enum `"v1" \| "v2"` | Tags this node as a Morpho vault whose per-market allocations are expanded by `scripts/update_morpho_graph_markets.mjs`. Records the vault contract's immutable generation. Requires `address`. **Only explicitly tagged nodes are probed** — never detected from labels, IDs, notes, or address probing. Do not tag generic Morpho protocol/market nodes, Morpho strategies that merely use flashloans, or wrapper/farm contracts that deposit into a separate vault node. |
 
 **Edge fields:**
 
@@ -66,8 +85,8 @@ The schema is enforced at build time by the validator in `src/lib/graph.ts`. Aut
 |-------|----------|------|-------|
 | `from` | yes | string | Must match a node `id`. |
 | `to` | yes | string | Must match a node `id`. |
-| `kind` | yes | enum | One of the 10 below — drives edge color/style and legend grouping. |
-| `label` | no | string | Optional inline label. Only `allocates-to` always carries one (the % share); other kinds carry labels only when the value adds information. |
+| `kind` | yes | enum | One of the 11 below — drives edge color/style, chain traversal, and legend grouping. |
+| `label` | no | string | Optional. `allocates-to` should always carry the share (see its row below); other kinds carry labels only when the value adds information. Every label is shown in the details panel; only `allocates-to` / `deposits-into` labels are drawn on the canvas. |
 
 Minimal example (from `reports/graph/yearn-yvusdc.yaml`):
 
@@ -99,7 +118,7 @@ edges:
 
 ## Vocabulary
 
-These enums are fixed — extending them requires coordinated styling changes in `src/pages/graph/[slug].astro` (the `.cat-*` CSS rules and the `flow`/`role`/`gov` sets in the client script). Don't invent new values ad-hoc.
+These enums are fixed — extending them requires coordinated changes in `src/lib/graphStyle.ts` (edge colour/style/width, kind labels, `FLOW_KINDS`, `AUTHORITY_KINDS`, and the `EDGE_GROUPS` filter chips) and the `.cat-*` / `--cat-*` CSS rules in `src/pages/graph/[slug].astro`. Don't invent new values ad-hoc.
 
 ### Categories (5)
 
@@ -117,47 +136,47 @@ Grouped by the visual style they get (this matches the legend on the rendered pa
 
 **Money flow** — solid teal lines, prominent:
 
-| `kind` | Meaning | Label renders on page? |
-|--------|---------|------------------------|
-| `allocates-to` | Vault → strategy. The vault holds debt in this strategy. | **Yes** — always set it to the `%` share. |
-| `deposits-into` | Strategy → underlying protocol. The strategy parks USDC into this venue. | **Yes** — optional but useful (e.g. `"USDC → aUSDC"`). |
+| `kind` | Meaning | Label shown where? |
+|--------|---------|--------------------|
+| `allocates-to` | Vault → strategy. The vault holds debt in this strategy. | **Canvas + panel** — carry the share the report states: a `%` (`"77.9%"`) when it gives one, otherwise an amount (`"~$48.9M USDC"`). Both feed the "Largest allocation" metric. When the report gives neither, a qualitative label (`"Deribit margin"`) is fine — the metric is then omitted rather than invented. |
+| `deposits-into` | Strategy → underlying protocol. The strategy parks USDC into this venue. | **Canvas + panel** — optional but useful (e.g. `"USDC → aUSDC"`). |
 
 **Mint authority** — red dashed lines, highest-trust signal:
 
-| `kind` | Meaning | Label renders on page? |
-|--------|---------|------------------------|
-| `mints` | Account/contract holds privileged authority to create new supply of the target token. Direction: `minter → token`. Pair the minter with a node (typically `infra` for protocol contracts, `governance` if a multisig holds the mint role directly). One `mints` edge per role-holder per token. The absence of `mints` edges in a graph is itself meaningful — it means mint is permissionless (e.g. open ERC-4626) or gated only by collateral deposit. | No (documentation-only). Use the label to record the role name (e.g. `RECEIPT_TOKEN_MINTER`, `MINTER_ROLE`). |
+| `kind` | Meaning | Label shown where? |
+|--------|---------|--------------------|
+| `mints` | Account/contract holds privileged authority to create new supply of the target token. Direction: `minter → token`. Pair the minter with a node (typically `infra` for protocol contracts, `governance` if a multisig holds the mint role directly). One `mints` edge per role-holder per token. The absence of `mints` edges in a graph is itself meaningful — it means mint is permissionless (e.g. open ERC-4626) or gated only by collateral deposit. | **Panel** — use the label to record the role name (e.g. `RECEIPT_TOKEN_MINTER`, `MINTER_ROLE`). |
 
 **Role / control** — amber dashed lines:
 
-| `kind` | Meaning | Label renders on page? |
-|--------|---------|------------------------|
-| `holds-role` | An account holds a specific privileged role on the target. | No (documentation-only). Still write the role name in YAML — it helps reviewers reading the file. |
-| `controls` | One contract administers another (e.g. timelock → access-control root). | No (documentation-only). |
-| `manages` | A registry/factory manages the target contract. | No (documentation-only). |
+| `kind` | Meaning | Label shown where? |
+|--------|---------|--------------------|
+| `holds-role` | An account holds a specific privileged role on the target. | **Panel** — write the role name; it is shown on the node's connections list. |
+| `controls` | One contract administers another (e.g. timelock → access-control root). | **Panel** |
+| `manages` | A registry/factory manages the target contract. | **Panel** |
 
 **Governance signaling** — violet dotted lines:
 
-| `kind` | Meaning | Label renders on page? |
-|--------|---------|------------------------|
-| `proposes-on` | Multisig → timelock (PROPOSER role). | No (documentation-only). |
-| `cancels-on` | Multisig → timelock (CANCELLER only, no proposer). | No (documentation-only). |
+| `kind` | Meaning | Label shown where? |
+|--------|---------|--------------------|
+| `proposes-on` | Multisig → timelock (PROPOSER role). | **Panel** |
+| `cancels-on` | Multisig → timelock (CANCELLER only, no proposer). | **Panel** |
 
 **Incidental wiring** — thin gray lines:
 
-| `kind` | Meaning | Label renders on page? |
-|--------|---------|------------------------|
-| `routes-through` | A → B, where B is a hop in the flow (PSM, exchanger, hook). | No (documentation-only). |
-| `routes-fees-to` | Vault → accountant → fee recipient. | No (documentation-only). |
-| `deploys` | Factory → deployed contract. | No (documentation-only). |
+| `kind` | Meaning | Label shown where? |
+|--------|---------|--------------------|
+| `routes-through` | A → B, where B is a hop in the flow (PSM, exchanger, hook). | **Panel** |
+| `routes-fees-to` | Vault → accountant → fee recipient. | **Panel** |
+| `deploys` | Factory → deployed contract. | **Panel** |
 
-> **Heads-up on labels**: only `allocates-to` and `deposits-into` render their `label` on the canvas. For every other kind, the label is captured in the YAML for the reviewer who reads the file — but it won't appear on the rendered graph. Use labels generously in YAML (they document intent), but don't expect them on screen for non-flow kinds.
+> **Heads-up on labels**: only `allocates-to` and `deposits-into` draw their `label` on the canvas — labelling every kind there would bury the allocation percentages. Every other kind's label **is** shown to the reader, in the connections list of the details panel that opens when a card is clicked. So use labels generously: a `mints` edge labelled `RECEIPT_TOKEN_MINTER` or a `holds-role` edge labelled `12 of 14 roles` is read by users, not just by reviewers of the YAML. Write them as short, self-explanatory phrases.
 
 ### Flow kinds
 
 `allocates-to`, `deposits-into`, and `routes-through` form the **flow set**. Three behaviors depend on it:
 
-1. **Hover-chain highlight** — hovering a card walks the *backward* chain via flow edges only. So if you want a contract A to appear when a reader hovers contract B downstream of it, connect them via a flow kind. Governance/role edges never participate in the chain.
+1. **Money-flow chain** — selecting a card walks flow edges in *both* directions and recolours them by direction (upstream blue, downstream teal). So if you want contract A to appear when a reader selects contract B downstream of it, connect them via a flow kind. Authority kinds get their own chain (see "Selection & chain highlight"); `deploys` and `routes-fees-to` get neither.
 2. **Cross-graph downstream expansion** — when another graph cross-links to a node in yours, the inlined subgraph in their page traces forward through your flow edges only. Use flow kinds for everything that represents capital movement so the downstream view is complete.
 3. **Visual styling** — flow edges render solid and slightly thicker/greener than other kinds.
 
@@ -178,7 +197,7 @@ Most reports have 20–40 contracts; a readable graph has 15–30 nodes. The rul
 
 - **Helper / hook contracts** that don't shape the dependency structure: accountants, fee dumpers, oracle factories, profit smoothers, after-mint / before-redeem hooks, matured-farm cleaners. They clutter the graph without adding information.
 - **Dust farms** (<1% of TVL) and matured/inactive farms (`activation = 0`). Mention them in the report; don't draw them.
-- **Internal role-spaghetti.** When an access-control root contract grants roles to 10+ contracts, don't draw 10 edges from it. Pick **one symbolic edge** to a key managed contract (typically the vault or main entry proxy) and rely on the report's role table for the full picture.
+- **Internal role-spaghetti.** When an access-control root contract grants roles to 10+ contracts, don't draw 10 edges from it. Pick **one symbolic edge** to a key managed contract (typically the vault or main entry proxy) and rely on the report's role table for the full picture. (Readers can now mute the whole Control group from the toolbar, so a few extra role edges are survivable — but the layout still ranks nodes using every edge kind, so a large role fan stretches the graph horizontally.)
 - **Yearn V3 infrastructure that's identical across all V3 vaults** (Vault Factory, Tokenized Strategy implementation) — include only if the report singles them out for risk reasons.
 
 ### Group
@@ -207,15 +226,18 @@ When two contracts function as a single dependency, represent them as one node w
    ```bash
    npm run dev
    ```
-   (Astro 6 needs Node ≥ 22.12. If `nvm` defaults to an older version, prefix the command with the right `PATH`.)
+   (Astro 7 needs Node ≥ 22.12. If `nvm` defaults to an older version, prefix the command with the right `PATH`.)
 2. Open `http://localhost:4321/graph/<slug>/`. Confirm:
    - Every node from the YAML appears as a card.
    - No console errors.
    - The graph reads left-to-right: governance on the left, vault / strategies in the middle, external dependencies on the right.
    - Allocation `%` labels are visible on the vault → strategy edges.
-   - Clicking a node opens the explorer in a new tab.
+   - Clicking a node opens the details panel: category, chain, full address, the `note`, and every inbound/outbound edge with its kind and label.
+   - The metric strip reads sensibly. Largest allocation is parsed from your `allocates-to` labels and understands both `%` and `$` amounts — if the stat is missing entirely, none of your labels carry either.
+   - Selecting a governed node lights its control chain, not just its money flow. Clicking the Mint authority / External dependencies / Largest allocation cards highlights that set.
 3. Open `http://localhost:4321/report/<slug>/`. Confirm the "View dependency graph →" link appears next to the GitHub link.
-4. `npm run build` — confirms the validator (`getGraphBySlug` in `src/lib/graph.ts`) accepts the file. The build will fail with a clear error if any edge endpoint doesn't match a node id or any node uses an unknown category.
+4. `npm run build` — runs `scripts/check_graphs.mjs` and then the validator (`getGraphBySlug` in `src/lib/graph.ts`). The build fails on a bad edge endpoint, an unknown category, an unknown chain, a missing report, or a graph with no addressed `vault` anchor.
+5. `node scripts/check_graphs.mjs` on its own prints the softer warnings too — unlabelled `mints` / `holds-role` / `proposes-on` / `cancels-on` edges, an address used twice inside one graph, two graphs claiming the same `vault` address, and nodes with no edges. Warnings don't fail the build; `npm run check-graphs` (`--strict`) makes them fail, and `npm test` covers the linter itself.
 
 ## Worked examples
 
@@ -224,13 +246,15 @@ When two contracts function as a single dependency, represent them as one node w
 
 ## Cross-graph linking
 
-When a node's `address` matches a **non-dependency** node in another graph (i.e. that contract is the *vault* / *strategy* / *governance* / *infra* of another graph), three things happen automatically at build time. No new YAML fields are needed — matching is purely address-based, computed in `getGraphIndex()` in `src/lib/graph.ts`.
+When a `dependency` node's `address` matches **any addressed `vault` node** of another graph, three things happen automatically at build time. Only `vault`-category nodes anchor a graph, but *every* one of them does, so a protocol with several user-facing tokens (sky-usds declares both sUSDS and USDS) can be entered through any of them. No new YAML fields are needed — matching is purely address-based.
+
+The corollary: `vault` is for **user-facing tokens only**. Shared internal machinery — accountants, fee recipients, dumpers — belongs in `infra`. Marking it `vault` makes it an anchor, and if two graphs do that with the same contract the drill-down target becomes arbitrary. `check_graphs.mjs` warns when it happens.
 
 ### What you get for free
 
 1. **Score-color tinted card.** The cross-linked card gets a background gradient and border in the linked report's risk-tier color (`scoreColor()` from `src/lib/colors.ts`). Low-risk dependencies show light green; high-risk would show orange/red. A reviewer reading the host graph sees risk at a glance without leaving the page.
 2. **Risk pill on the card.** A small badge with the linked report's `Final Score` and tier ("2.4 · Low") sits next to the truncated address.
-3. **Whole card click navigates** to `/graph/<linked-slug>/` instead of opening the block explorer. A tiny `↗` icon in the corner keeps the explorer reachable for that specific case.
+3. **Drill-down link in the details panel.** Clicking the card opens the panel, which offers "Open <slug> graph →" and "Read risk report →". The `↗` icon in the card corner still jumps straight to the block explorer.
 4. **Downstream subgraph is inlined.** The linked graph's nodes reachable from the matching node via **flow edges only** (`allocates-to` → `deposits-into` → `routes-through`) are pulled into the host graph at build time. They appear at ~78 % opacity to mark the boundary, and they keep their original categories. Their IDs are namespaced (`<linked-slug>::<original-id>`) so they never collide with native IDs.
 
 **Example.** InfiniFi's `dep-stcusd` node and Cap's `stcUSD` node both carry `0x88887bE…D8888`. On the InfiniFi page:
@@ -250,28 +274,75 @@ If your graph references protocol X, and protocol X's graph references protocol 
 
 ### Suppressing a cross-link
 
-Omit `address` from the node. Without an address the matcher can't fire — the card behaves as a plain leaf. Useful when you want a dependency to open Etherscan instead of navigating away (rare).
+Omit `address` from the node. Without an address the matcher can't fire — no risk tint, no drill-down link, no inlined downstream. Rare; it also costs the reader the explorer link, so prefer keeping the address.
 
-## Hover & chain highlight
+## Selection & chain highlight
 
-Hovering any card walks the **backward money-flow chain** from that node — recursively, following only flow kinds (`allocates-to`, `deposits-into`, `routes-through`) — and highlights every edge and ancestor card in blue. Governance edges (`holds-role`, `controls`, `manages`, `proposes-on`, `cancels-on`) and incidental edges (`routes-fees-to`, `deploys`) are not traversed.
+Hovering, keyboard-focusing or clicking any card lights three things and fades everything else, so the picture stays readable in a 40-node graph:
 
-Example on InfiniFi: hovering the inlined `cUSD (Cap Stablecoin)` lights up:
+- **Money flow upstream, in blue** — who is exposed to this contract. Transitive over `allocates-to`, `deposits-into`, `routes-through`.
+- **Money flow downstream, in teal** — what this contract is exposed to. Same kinds, other direction.
+- **Authority, in each kind's own colour** — who can change this contract. Transitive *backwards* over `mints`, `holds-role`, `controls`, `manages`, `proposes-on`, `cancels-on`, because those all point from an authority toward the thing it acts on. Governance chains run 2–3 hops (multisig → timelock → role manager → vault), so showing only the nearest hop would name the role manager and hide the multisig that actually holds the keys.
+
+Flow edges are recoloured by direction — that distinction is the whole point of the chain, and flow edges are all one colour at rest so nothing is lost. Authority edges keep their own colour at full strength: the legend teaches red = mint authority, amber = role, violet = governance, and flattening those to a single highlight colour would throw it away exactly when the reader is looking closest.
+
+Anything else touching the selected node — `deploys`, `routes-fees-to` — stays visible at one hop as context, without being followed further.
+
+Example on InfiniFi: selecting the inlined `cUSD (Cap Stablecoin)` lights its upstream
 `cUSD ← stcUSD ← (CapFarm + SwapFarm) ← iUSD ← (siUSD + LockingController)`
-— the full backward chain. Mint/Redeem controllers connect to iUSD via `manages` edges, so they stay un-highlighted; that's correct — the chain is for capital movement.
+in blue — the capital path. Select `iUSD` itself and the Mint, Migration and Redeem controllers light too, each in its own colour: the first two red through `mints`, the third amber through `manages`. None of them moves capital, but all three can change the token, which is exactly what the authority chain is for.
+
+Clicking a card **pins** the chain and opens the details panel, so it can be read without holding the cursor still. Escape or the ✕ releases it.
+
+Keyboard: the graph is a single tab stop with a roving tabindex — arrow keys move between contracts in YAML order (roughly the dagre rank order, so it reads governance → vault → strategies → dependencies), Home/End jump to the ends, Enter opens the panel and moves focus into it, Escape closes it and hands focus back to the card. Node order in the YAML is therefore the order a keyboard user meets them in; keep related nodes adjacent.
 
 ### Implications for authors
 
-- **Edge kind affects traceability.** If you want a relationship to participate in the chain (and in cross-graph expansion), use a flow kind. If the relationship is structural but not capital movement (a role grant, a registry pointer), use a non-flow kind so it doesn't pollute the chain.
-- **Make every node reachable through flow edges from a source node.** Otherwise hovering it produces an empty chain. This is rarely a problem for vaults/strategies/dependencies — they live on the flow path by construction — but worth checking for any infra node you decide to include.
+- **Edge kind affects traceability.** A flow kind puts the edge in the money chain (and in cross-graph expansion). An authority kind puts it in the control chain. `deploys` and `routes-fees-to` are followed by neither — they show only as one-hop context, which is the right weight for deployment lineage and fee plumbing.
+- **Make every node reachable through flow edges from a source node.** Otherwise hovering it produces an empty chain in both directions. This is rarely a problem for vaults/strategies/dependencies — they live on the flow path by construction — but worth checking for any infra node you decide to include.
+
+## What the reader gets
+
+Worth knowing while authoring, because it decides how much care a field deserves:
+
+- **Entry point** is the "View dependency graph →" pill on `/report/<slug>/`. There is no global index of graphs; a graph belongs to the assessment that documents it.
+- **Referenced by** appears in the toolbar of any graph another graph depends on — the inverse of the cross-link, built from `getReverseGraphIndex()`. This is the only graph-to-graph entry point besides a cross-linked dependency card.
+- **Metric strip** (build-time, from this YAML plus the report frontmatter): final score, graph size, largest allocation, external dependency count with the worst assessed tier, and the mint-role count. Largest allocation, external dependencies and mint authority are **clickable** — they project that set onto the canvas and fade the rest, so "4 mint roles" becomes "show me which four".
+- **Search** matches node label, address, and category label, then fits the view to the hits.
+- **Edge filters** let a reader mute whole groups (Money flow / Mint authority / Control / Governance / Wiring). This is the answer to role-spaghetti — prefer a complete YAML the reader can filter over an incomplete one.
+
+## Morpho market expansion
+
+A node tagged `morphoVault: v1` (or `v2`) is expanded by `scripts/update_morpho_graph_markets.mjs` into its current underlying market allocations. The tag records the vault contract's immutable generation, so the updater queries only the declared API collection (`vaults` for v1, `vaultV2s` for v2) rather than probing both.
+
+What the generator does:
+
+- Scans every `reports/graph/*.yaml`, finds tagged nodes, and fetches their allocations from the Morpho GraphQL API (`https://api.morpho.org/graphql`).
+- Emits a `dependency` node per non-zero market (label `cbBTC/USDC · 86% LLTV`, `link` to the Morpho market page, full 32-byte `marketId` in the `note`) and a `deposits-into` edge from the vault node to each market carrying its percentage label.
+- Represents idle assets (`collateralAsset` is null) as a synthetic `Idle <asset>` node with no Morpho link, so displayed allocations reconcile to 100%. Tiny positive shares are labelled `<0.1%`, never rounded to 0.
+- Writes into two marker-delimited sections — `# BEGIN/END GENERATED MORPHO MARKET NODES` (before `edges:`) and `# BEGIN/END GENERATED MORPHO MARKET EDGES` (inside the edge list) — preserving every byte outside those regions. V2 vaults are supported for direct `MorphoMarketV1Adapter` positions; nested/unsupported adapters fail closed.
+
+Commands:
+
+```bash
+node scripts/update_morpho_graph_markets.mjs            # check: exits 1 if any managed section is stale
+node scripts/update_morpho_graph_markets.mjs --write    # apply
+node scripts/update_morpho_graph_markets.mjs --graph <slug> --write   # one graph
+```
+
+Authoring rules:
+
+- Tag only actual Morpho vault contracts. Skip generic Morpho protocol/market nodes, strategies that only use flashloans, and wrappers/farms that deposit into a separate vault node.
+- A tag/version mismatch fails closed with an actionable error — do not guess the version; verify the contract onchain or via the API first.
+- The generated market IDs are 32-byte identifiers, not EVM addresses — they live in `link`, never in `address`.
 
 ## Common pitfalls
 
 - **Duplicate node `id`** — build fails with `[graph:<slug>] duplicate node id '...'`.
 - **Edge endpoint doesn't match any node** — build fails with `[graph:<slug>] edge.from '...' does not match any node` (or `.to`). Most common cause: typo in an `id` or an edge to a contract you decided to skip.
 - **Unknown category** — build fails with `[graph:<slug>] node '...' has unknown category '...'`. Stick to the 5-category enum.
-- **Unknown / typo'd edge kind** — build fails with `[graph:<slug>] edge '<from>' → '<to>' has unknown kind '<kind>'`. The error lists all allowed kinds. Validated against `ALLOWED_EDGE_KINDS` in `src/lib/graph.ts`, which is the canonical source of truth for the 10-key enum in the Edge kinds table above.
+- **Unknown / typo'd edge kind** — build fails with `[graph:<slug>] edge '<from>' → '<to>' has unknown kind '<kind>'`. The error lists all allowed kinds. Validated against `ALLOWED_EDGE_KINDS` in `src/lib/graph.ts`, which is the canonical source of truth for the 11-key enum in the Edge kinds table above.
 - **Address mismatch breaks cross-linking silently.** If your dependency node's `address` doesn't match the linked graph's vault address exactly (case-insensitive, but every digit must be right), the cross-link and downstream expansion just don't happen — no build error, no warning. When in doubt, copy the address from the source graph or the report's contract-addresses table verbatim.
 - **Wrong edge kind hides a relationship from chains/expansion.** A `manages` or `holds-role` edge that should have been `allocates-to` will still render, but it won't participate in the hover chain or in cross-graph downstream expansion. Use flow kinds for anything that represents capital movement.
-- **Visual noise from over-labeling.** Labels render only for `allocates-to` and `deposits-into`. Labels on other kinds are documentation-only (visible in YAML, not on canvas) — fine to include for reviewer context, but don't expect them on screen.
+- **Under-labeling.** Only `allocates-to` and `deposits-into` labels are drawn on the canvas, but *every* kind's label is shown in the details panel's connections list. An unlabelled `mints` or `holds-role` edge leaves the reader with no idea which role is involved — label them.
 - **Invented bright colors / new categories** — if a contract doesn't fit one of the 5, it's almost always `infra` (internal machinery) or `dependency` (external). Don't add a new category without updating `src/pages/graph/[slug].astro` too.

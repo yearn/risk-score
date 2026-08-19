@@ -65,12 +65,17 @@ nodes:
     label: BalanceSheet
     address: "0x12a110cE5f0FC871cC72Bc7ECaF35cf39DD0f43e"
     category: infra
-    note: Double-entry onchain accounting layer (V3.1+)
+    note: Double-entry accounting; direct JAAA ward with pool-scoped issue/revoke delegated to four managers
   - id: message-dispatcher
     label: MessageDispatcher
     address: "0xf837a22883e004f705E0D7e1deE08e295Df30B27"
     category: infra
     note: Outgoing cross-chain dispatcher; same-chain calls Spoke synchronously
+  - id: multi-adapter
+    label: MultiAdapter (2-of-2)
+    address: "0x35C837F0A54B715a23D193E1476BFC9BC30073BE"
+    category: infra
+    note: JAAA destination configs require LayerZero V2 and Chainlink CCIP attestations
   - id: root
     label: Root (48h timelock)
     address: "0x7Ed48C31f2fdC40d37407cBaBf0870B2b688368f"
@@ -97,31 +102,34 @@ nodes:
     label: OpsSafe
     address: "0xd21413291444C5c104F1b5918cA0D2f6EC91Ad16"
     category: governance
-  - id: pool-manager-safe
-    label: Pool Manager Safe (3-of-8)
-    address: "0x742d100011ffbc6e509e39dbcb0334159e86be1e"
-    category: governance
-    note: JAAA pool manager — set NAV, approve/issue/revoke, allowlist
   - id: pool-manager-eoa
-    label: Pool Manager MPC (Fordefi multiuser)
+    label: Sole Pool Manager MPC (Fordefi)
     address: "0x7bf090b97f896fb77e852cc98aa52a8cb7dc02ec"
     category: governance
-    note: Multi-party threshold per Centrifuge's Fordefi attestation — identical privileges to the 3-of-8 Safe; unbounded NAV-push + can replace co-managers via Hub.updateHubManager
+    note: Sole JAAA Hub manager since 2026-06-19; offchain-attested threshold; unbounded NAV push and manager delegation
+  - id: balance-sheet-managers
+    label: JAAA BalanceSheet Managers
+    category: governance
+    note: Two Safes (2-of-7 and 3-of-4), one EOA, and one trusted-call gateway can invoke pool-scoped issue/revoke
 
   # === External dependencies ===
   - id: dep-anemoy
-    label: Anemoy / JH / StoneX / Trident (Offchain)
+    label: Anemoy / JH / J.P. Morgan / Trident (Offchain)
     category: dependency
-    note: BVI Professional Fund issuer, Janus Henderson sub-advisor, StoneX custody, Trident Trust admin, MHA Cayman audit — holds the AAA CLO portfolio
+    note: BVI fund issuer, Janus Henderson sub-advisor, J.P. Morgan custody/brokerage, Trident admin, MHA audit
   - id: dep-usdc
     label: USDC (Circle)
     address: "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"
     category: dependency
     note: Subscription / redemption settlement asset
-  - id: dep-wormhole
-    label: Wormhole (cross-chain adapter)
+  - id: dep-layerzero
+    label: LayerZero V2
     category: dependency
-    note: MultiAdapter routes Hub messages to non-Ethereum chains
+    note: One leg of JAAA's 2-of-2 cross-chain adapter quorum
+  - id: dep-ccip
+    label: Chainlink CCIP
+    category: dependency
+    note: One leg of JAAA's 2-of-2 cross-chain adapter quorum
 
 edges:
   # === Governance flow → Root (master ward) ===
@@ -138,22 +146,14 @@ edges:
     kind: controls
   - from: ops-guardian
     to: root
-    kind: holds-role
-    label: pause / unpause (Root.paused())
+    kind: controls
+    label: operational guardian route; Root.wards() = 0
 
   # === Pool manager → registry → Hub (the privileged daily path) ===
-  - from: pool-manager-safe
-    to: hub-registry
-    kind: holds-role
-    label: manager(poolId, addr) = true
   - from: pool-manager-eoa
     to: hub-registry
     kind: holds-role
-    label: manager(poolId, addr) = true — Fordefi MPC
-  - from: pool-manager-safe
-    to: hub
-    kind: holds-role
-    label: _isManager gate — updateSharePrice / issueShares / etc
+    label: sole manager(poolId, addr) = true
   - from: pool-manager-eoa
     to: hub
     kind: holds-role
@@ -162,10 +162,10 @@ edges:
     to: hub-registry
     kind: manages
     label: updateHubManager → registry.updateManager
-  - from: pool-manager-safe
-    to: full-restrictions
-    kind: manages
-    label: updateMember (KYC allowlist)
+  - from: balance-sheet-managers
+    to: balance-sheet
+    kind: holds-role
+    label: manager(poolId, addr) = true — issue/revoke path
   - from: pool-manager-eoa
     to: full-restrictions
     kind: manages
@@ -181,9 +181,17 @@ edges:
     kind: routes-through
     label: same-chain → Spoke.updatePricePoolPerShare
   - from: message-dispatcher
-    to: dep-wormhole
+    to: multi-adapter
     kind: routes-through
-    label: cross-chain
+    label: non-Ethereum messages
+  - from: multi-adapter
+    to: dep-layerzero
+    kind: routes-through
+    label: quorum leg 1/2
+  - from: multi-adapter
+    to: dep-ccip
+    kind: routes-through
+    label: quorum leg 2/2
   - from: spoke
     to: jaaa
     kind: mints
@@ -192,6 +200,10 @@ edges:
     to: jaaa
     kind: mints
     label: wards = 1 (master ward)
+  - from: balance-sheet
+    to: jaaa
+    kind: mints
+    label: wards = 1; issue/revoke via pool-scoped managers
   - from: full-restrictions
     to: jaaa
     kind: manages

@@ -1,5 +1,5 @@
 import { marked } from "marked";
-import { protocolIconUrl, chainIconUrl } from "./icons";
+import { protocolIconUrl, chainIconUrl, defillamaIconUrl } from "./icons";
 
 // Override the default GFM del (strikethrough) tokenizer to only match
 // ~~double tildes~~, not ~single tildes~. Reports use ~$value frequently
@@ -36,6 +36,12 @@ export interface ReportMeta {
   date: string;
   /** Effective date for sorting (uses (Updated: ...) when present). 0 if unparseable. */
   dateSortable: number;
+  /** Earliest (original) assessment date, human-readable. Falls back to `date`. */
+  originalDate: string;
+  /** Most recent assessment/reassessment date, human-readable. Falls back to `date`. */
+  latestDate: string;
+  /** True when the report has been reassessed/updated at least once. */
+  isUpdated: boolean;
   token: string;
   chain: string;
   /** null when Not Rated: a terminal status (HACKED/DEAD) or an explicit "Final Score: N/A". */
@@ -56,27 +62,49 @@ export interface CategoryScore {
   weighted: number;
 }
 
+/** One row of the "Assessment History" table — a point-in-time score snapshot. */
+export interface HistoryEntry {
+  date: string;
+  score: string;
+  notes: string;
+  /** `date` rendered as inline markdown (dates may link to their source PR). */
+  dateHtml: string;
+  /** `notes` rendered as inline markdown (may contain links or `code` spans). */
+  notesHtml: string;
+}
+
 export interface ReportData extends ReportMeta {
   overviewHtml: string;
   scoreTable: CategoryScore[];
   riskSummaryHtml: string;
   fullReportHtml: string;
+  /** Chronological score history (oldest first). Synthesized from meta when the report has no table yet. */
+  history: HistoryEntry[];
 }
 
 const TYPE_OVERRIDES: Record<string, "Protocol" | "Asset"> = {
   "unit-ubtc": "Asset",
 };
 
-const DEFILLAMA_SLUG_OVERRIDES: Record<string, string> = {
-  "midas-mhyper": "midas-rwa",
-  "infinifi": "infinifi",
-  "reserve-ethplus": "reserve-protocol",
+// Typed DefiLlama icon references for reports whose markdown has no
+// `defillama.com/protocol/<slug>` link (or where that protocol icon isn't the
+// right one). Forms: "protocol:<slug>", "stablecoin:<slug>", "token:<address>".
+// Resolved via defillamaIconUrl() — same mechanism the Bridges page uses.
+const DEFILLAMA_ICON_OVERRIDES: Record<string, string> = {
+  "midas-mhyper": "protocol:midas-rwa",
+  "infinifi": "protocol:infinifi",
+  "reserve-ethplus": "protocol:reserve-protocol",
+  "apyx-apxusd": "protocol:apyx-protocol",
+  "paxos-usdg": "stablecoin:global-dollar",
+  "superstate-ustb": "protocol:superstate",
 };
 
-function parseDefillamaSlug(slug: string, content: string): string {
-  if (DEFILLAMA_SLUG_OVERRIDES[slug]) return DEFILLAMA_SLUG_OVERRIDES[slug];
+function parseIconUrl(slug: string, content: string): string {
+  const override = DEFILLAMA_ICON_OVERRIDES[slug];
+  if (override) return defillamaIconUrl(override);
+  // Otherwise scrape a DefiLlama protocol link from the report body.
   const match = content.match(/defillama\.com\/protocol\/([a-z0-9-]+)/i);
-  return match?.[1] ?? "";
+  return match?.[1] ? protocolIconUrl(match[1]) : "";
 }
 
 /** Statuses that pull a report off the numeric scale (score → null, listed under "Not Rated"). */
@@ -110,6 +138,41 @@ function parseDateSortable(raw: string): number {
   const candidate = (updated?.[1] ?? raw.split("(")[0]).replace(/^-\s*/, "").trim();
   const t = Date.parse(candidate);
   return Number.isNaN(t) ? 0 : t;
+}
+
+// Keywords that flag a report as reassessed/updated even when the parenthetical
+// carries no explicit second date (e.g. "(reassessment; vault unpaused ...)").
+const REASSESS_KEYWORDS = /updated|reassess|recheck|refresh|prior assessment|previous/i;
+// Matches month-name dates like "July 3, 2026", "Feb 12, 2026", "April 22, 2026".
+const HUMAN_DATE = /[A-Z][a-z]+\.?\s+\d{1,2},?\s+\d{4}/g;
+
+/**
+ * Splits an "Assessment Date" value into its original and most-recent dates and
+ * decides whether the report is an update of an earlier assessment. Handles the
+ * varied conventions in the reports: "(Updated: X)", "(reassessed X)",
+ * "(reassessment; prior assessments A; B)", "(rechecked A; refreshed B)", etc.
+ * Uses the earliest date found as the original and the latest as the current one,
+ * which is correct whether the new date sits before or inside the parenthetical.
+ */
+function parseAssessmentDates(raw: string): {
+  originalDate: string;
+  latestDate: string;
+  isUpdated: boolean;
+} {
+  const fallback = raw.trim();
+  const hasKeyword = REASSESS_KEYWORDS.test(raw);
+  const dated = (raw.match(HUMAN_DATE) ?? [])
+    .map((s) => ({ s, t: Date.parse(s) }))
+    .filter((d) => !Number.isNaN(d.t))
+    .sort((a, b) => a.t - b.t);
+
+  if (dated.length === 0) {
+    return { originalDate: fallback, latestDate: fallback, isUpdated: hasKeyword };
+  }
+  const originalDate = dated[0].s;
+  const latestDate = dated[dated.length - 1].s;
+  const isUpdated = hasKeyword || dated[0].t !== dated[dated.length - 1].t;
+  return { originalDate, latestDate, isUpdated };
 }
 
 
@@ -147,20 +210,24 @@ function parseMeta(slug: string, content: string): ReportMeta {
         ? parseFloat(scoreMatch[1])
         : null;
 
-  const defillamaSlug = parseDefillamaSlug(slug, content);
+  const iconUrl = parseIconUrl(slug, content);
   const chainStr = chainMatch?.[1]?.trim() ?? "";
 
   const dateRaw = dateMatch?.[1]?.trim() ?? "";
+  const { originalDate, latestDate, isUpdated } = parseAssessmentDates(dateRaw);
   return {
     slug,
     name,
     date: dateRaw,
     dateSortable: parseDateSortable(dateRaw),
+    originalDate,
+    latestDate,
+    isUpdated,
     token: tokenMatch?.[1]?.trim() ?? "",
     chain: chainStr,
     finalScore,
     type,
-    iconUrl: protocolIconUrl(defillamaSlug),
+    iconUrl,
     chainIconUrl: chainIconUrl(chainStr),
     status,
     statusKind,
@@ -241,11 +308,49 @@ function extractFullBody(content: string): string {
     "Overview + Links",
     "Risk Summary",
     "Risk Score Assessment",
+    "Assessment History",
   ];
   const bodySections = sections
     .slice(1) // skip title/metadata block
     .filter((s) => !skipHeadings.some((h) => s.startsWith(`## ${h}`)));
   return bodySections.join("\n").trim();
+}
+
+/**
+ * Parses the optional "## Assessment History" table (Date | Score | Notes) into
+ * structured rows. When a report has no such table yet, synthesizes a single
+ * current-state row from the header so every report shows a seed to grow from.
+ */
+function historyEntry(date: string, score: string, notes: string): HistoryEntry {
+  const inline = (s: string) => marked.parseInline(s, { async: false }) as string;
+  return { date, score, notes, dateHtml: inline(date), notesHtml: inline(notes) };
+}
+
+function parseHistory(content: string, meta: ReportMeta): HistoryEntry[] {
+  const section = extractSection(content, "Assessment History");
+  const rows = section
+    .split("\n")
+    .filter((r) => r.trim().startsWith("|"))
+    .slice(2) // skip header + separator
+    .map((row): HistoryEntry | null => {
+      const cells = row.split("|").slice(1, -1).map((c) => c.trim());
+      if (!cells[0]) return null;
+      return historyEntry(cells[0], cells[1] ?? "", cells[2] ?? "");
+    })
+    .filter((r): r is HistoryEntry => r !== null);
+
+  if (rows.length > 0) return rows;
+
+  // Fallback: seed a single row from the current header.
+  const score =
+    meta.finalScore != null ? meta.finalScore.toFixed(1) : (meta.status ?? "N/A");
+  return [
+    historyEntry(
+      meta.latestDate,
+      score,
+      meta.isUpdated ? "Reassessment" : "Initial assessment",
+    ),
+  ];
 }
 
 export function parseReport(slug: string, content: string): ReportData {
@@ -255,6 +360,7 @@ export function parseReport(slug: string, content: string): ReportData {
   const riskSummaryMd = extractSection(content, "Risk Summary");
   const scoreTable = parseScoreTable(content);
   const fullBodyMd = extractFullBody(content);
+  const history = parseHistory(content, meta);
 
   return {
     ...meta,
@@ -262,5 +368,6 @@ export function parseReport(slug: string, content: string): ReportData {
     scoreTable,
     riskSummaryHtml: marked.parse(riskSummaryMd, { async: false }) as string,
     fullReportHtml: marked.parse(fullBodyMd, { async: false }) as string,
+    history,
   };
 }

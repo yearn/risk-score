@@ -23,7 +23,7 @@ const reportIssueUrl = (() => {
   const title = `Report Inaccuracy: ${report.name}`;
   const body = [
     `**Report:** ${report.name}`,
-    `**Link:** [${report.slug}](https://risk.yearn.farm/report/${report.slug})`,
+    `**Link:** [${report.slug}](https://curation.yearn.fi/report/${report.slug})`,
     `**GitHub:** [${report.slug}.md](https://github.com/yearn/risk-score/blob/master/reports/report/${report.slug}.md)`,
     "",
     "## Issue Description",
@@ -34,6 +34,73 @@ const reportIssueUrl = (() => {
   const params = new URLSearchParams({ title, body, labels: "report-issue" });
   return `https://github.com/yearn/risk-score/issues/new?${params}`;
 })();
+
+// Structured data: an Article carrying the editorial risk rating, so report
+// pages are eligible for rich results. author/publisher reference the
+// Organization node BaseLayout emits site-wide via @id; BaseLayout merges what
+// we return here into that same @graph so those references resolve.
+// Astro.url.origin is a plain string, so it has to be wrapped before .href.
+const origin = (Astro.site ?? new URL(Astro.url.origin)).href;
+const orgId = `${origin}#organization`;
+const toIsoDate = (human: string): string | undefined => {
+  // Assessment dates are human strings ("April 2, 2026") that Date.parse reads
+  // as *local* midnight, so going back out through toISOString() (UTC) would
+  // shift the date a day earlier on any build machine ahead of UTC. Read the
+  // components back in the same frame they were parsed in.
+  const iso = human.trim().match(/^\d{4}-\d{2}-\d{2}/);
+  if (iso) return iso[0];
+  const t = Date.parse(human);
+  if (Number.isNaN(t)) return undefined;
+  const d = new Date(t);
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+};
+const published = toIsoDate(report.originalDate);
+const modified = toIsoDate(report.latestDate);
+const reportUrl = new URL(`/report/${report.slug}/`, origin).href;
+const articleSchema = {
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": report.name,
+  "description": ogDescription,
+  "url": reportUrl,
+  "mainEntityOfPage": reportUrl,
+  "image": new URL(`/og/${report.slug}.png`, origin).href,
+  ...(published ? { datePublished: published } : {}),
+  ...(modified ? { dateModified: modified } : {}),
+  "author": { "@id": orgId },
+  "publisher": { "@id": orgId },
+  ...(report.finalScore != null ? { mainEntity: { "@id": `${reportUrl}#review` } } : {}),
+};
+
+// The review covers the asset, not this article, so it is its own node with an
+// explicit itemReviewed. The lower-is-better risk score is a product property,
+// not a schema.org Rating, whose bestRating must be the highest scale value.
+const reviewSchema =
+  report.finalScore != null
+    ? {
+        "@context": "https://schema.org",
+        "@type": "Review",
+        "@id": `${reportUrl}#review`,
+        "url": reportUrl,
+        "author": { "@id": orgId },
+        "itemReviewed": {
+          "@type": ["FinancialProduct", "Product"],
+          "name": report.name,
+          "description": `${report.token} on ${report.chain}`,
+          "additionalProperty": {
+            "@type": "PropertyValue",
+            "name": "Yearn Curation risk score",
+            "value": report.finalScore.toFixed(1),
+            "minValue": 1,
+            "maxValue": 5,
+            "description": "Lower values indicate lower risk.",
+            "alternateName": scoreTier(report.finalScore),
+          },
+        },
+      }
+    : null;
+const jsonLd = reviewSchema ? [articleSchema, reviewSchema] : [articleSchema];
 ---
 
 <BaseLayout
@@ -42,8 +109,14 @@ const reportIssueUrl = (() => {
   ogImage={`/og/${report.slug}.png`}
   ogUrl={`/report/${report.slug}/`}
   bare
+  jsonLd={jsonLd}
 >
   <a href="/reports/" class="back-link">&larr; All Reports</a>
+
+  <div class:list={["assessment-badge", report.isUpdated ? "updated" : "new"]}>
+    <span class="dot" aria-hidden="true"></span>
+    <strong>{report.isUpdated ? "Updated report" : "New report"}</strong>
+  </div>
 
   {report.status && (
     <div class:list={["status-banner", report.statusKind]}>
@@ -77,7 +150,19 @@ const reportIssueUrl = (() => {
       <span class="sep">/</span>
       <span>{report.chain}</span>
       <span class="sep">/</span>
-      <span>{report.date}</span>
+      {report.isUpdated ? (
+        <>
+          <span>Latest: {report.latestDate}</span>
+          {report.originalDate !== report.latestDate && (
+            <>
+              <span class="sep">/</span>
+              <span>Original: {report.originalDate}</span>
+            </>
+          )}
+        </>
+      ) : (
+        <span>{report.latestDate}</span>
+      )}
     </div>
     <div class="header-links">
       <a
@@ -142,6 +227,32 @@ const reportIssueUrl = (() => {
     <div class="prose" set:html={report.fullReportHtml} />
   </details>
 
+  {report.history.length > 0 && (
+    <section class="section">
+      <h2>Assessment History</h2>
+      <div class="history-wrap">
+        <table class="history-table">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Score</th>
+              <th>Notes</th>
+            </tr>
+          </thead>
+          <tbody>
+            {report.history.map((h) => (
+              <tr>
+                <td class="history-date" set:html={h.dateHtml} />
+                <td class="history-score">{h.score}</td>
+                <td set:html={h.notesHtml} />
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </section>
+  )}
+
   <div class="report-footer">
     <a href={reportIssueUrl} class="report-issue-btn" target="_blank" rel="noopener noreferrer">
       <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
@@ -154,6 +265,43 @@ const reportIssueUrl = (() => {
 </BaseLayout>
 
 <style>
+  .assessment-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+    padding: 0.4rem 0.85rem;
+    border-radius: 999px;
+    font-size: 0.85rem;
+    line-height: 1.3;
+    border: 1px solid var(--border);
+    background: var(--bg-secondary);
+    color: var(--text-secondary);
+  }
+  .assessment-badge strong {
+    color: var(--text-primary);
+  }
+  .assessment-badge .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    background: var(--text-secondary);
+  }
+  .assessment-badge.updated {
+    border-color: color-mix(in srgb, var(--brand-blue) 40%, transparent);
+    background: color-mix(in srgb, var(--brand-blue) 10%, transparent);
+  }
+  .assessment-badge.updated .dot {
+    background: var(--brand-blue);
+  }
+  .assessment-badge.new {
+    border-color: color-mix(in srgb, #16a34a 40%, transparent);
+    background: color-mix(in srgb, #16a34a 10%, transparent);
+  }
+  .assessment-badge.new .dot {
+    background: #16a34a;
+  }
   .status-banner {
     background: #dc2626;
     color: #fff;
@@ -376,6 +524,42 @@ const reportIssueUrl = (() => {
     font-weight: 600;
     font-size: 0.75rem;
     text-transform: uppercase;
+  }
+  .history-wrap {
+    overflow-x: auto;
+  }
+  .history-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+  }
+  .history-table th,
+  .history-table td {
+    padding: 0.6rem 0.75rem;
+    border-bottom: 1px solid var(--border);
+    text-align: left;
+    vertical-align: top;
+  }
+  .history-table th {
+    background: var(--bg-secondary);
+    color: var(--text-secondary);
+    font-weight: 600;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+  }
+  .history-date {
+    white-space: nowrap;
+    color: var(--text-secondary);
+  }
+  .history-score {
+    white-space: nowrap;
+    font-weight: 700;
+    color: var(--text-primary);
+    font-variant-numeric: tabular-nums;
+  }
+  .history-table tbody tr:last-child td {
+    border-bottom: none;
   }
   .report-footer {
     margin-top: 1rem;

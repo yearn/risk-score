@@ -17,6 +17,7 @@ protocol_tokens:
   USDe: Ethena
   USDS: Sky
   sUSDS: Sky
+  stUSDS: Sky
   sDAI: MakerDAO
   DAI: MakerDAO
   GHO: Aave
@@ -334,6 +335,22 @@ protocols:
     - Chronicle
     - SkyLink
     - LayerZero
+  sky_stusds:
+    name: Sky stUSDS
+    chain: ethereum
+    type: yield_vault
+    address: '0x99CD4Ec3f88A45940936F469E4bB72A2A701EEB9'
+    report: reports/report/sky-stusds.md
+    collateral:
+    - asset: USDS
+      address: '0xdC035D45d973E3EC169d2276DDab16f1e407384F'
+    yield_sources:
+    - protocol: sky
+      assets:
+      - USDS
+      label: LockStake Engine V2 (SKY-backed)
+    infrastructure:
+    - Sky OSM
   infinifi:
     name: InfiniFi (siUSD)
     chain: ethereum
@@ -837,6 +854,19 @@ protocols:
     - asset: USDC
     infrastructure:
     - Chainlink
+  superstate_uscc:
+    name: Superstate (USCC)
+    chain: ethereum
+    type: tokenized_fund
+    address: '0x14d60E7FDC0D71d8611742720E4C50E7a974020c'
+    report: reports/report/superstate-uscc.md
+    collateral:
+    - asset: BTC
+    - asset: ETH
+    - asset: T-Bills
+    - asset: USDC
+    infrastructure:
+    - Chainlink
   saturn:
     name: Saturn (USDat)
     chain: ethereum
@@ -860,3 +890,29 @@ protocols:
     - asset: yvUSD
       address: '0x696d02Db93291651ED510704c9b286841d506987'
     infrastructure: []
+
+  bedrock_unibtc:
+    name: Bedrock (uniBTC)
+    chain: ethereum
+    type: liquid_staking
+    address: "0x004E9C3EF86bc1ca1f0bB5C7662861Ee93350568"
+    report: reports/report/bedrock-unibtc.md
+    collateral:
+      - asset: WBTC
+        address: "0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599"
+      - asset: FBTC
+        address: "0xC96dE26018A54D51c097160568752c4E3BD6C364"
+      - asset: cbBTC
+        address: "0xcbB7C0000aB88B473b1f5aFd9ef808440eed33Bf"
+      - asset: M-BTC
+      - asset: BTC
+    yield_sources:
+      - protocol: babylon
+        assets:
+          - BTC
+        label: BTC restaking via custody (proxy staking)
+    infrastructure:
+      - Chainlink PoR
+      - Chainlink CCIP
+      - Free Tunnel
+      - Merlin Bridge

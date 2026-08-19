@@ -66,12 +66,35 @@ nodes:
     label: Morpho Steakhouse Prime USDC
     address: "0xbeef088055857739C12CD3765F20b7679Def0f51"
     category: dependency
+    morphoVault: v2
+    link: "https://app.morpho.org/ethereum/vault/0xbeef088055857739C12CD3765F20b7679Def0f51/"
     note: ~$29.13M (60% of USDC FRV)
   - id: morpho-usdc-prime
     label: Morpho Gauntlet USDC Prime
     address: "0x8c106EEDAd96553e64287A5A6839c3Cc78afA3D0"
     category: dependency
+    morphoVault: v2
+    link: "https://app.morpho.org/ethereum/vault/0x8c106EEDAd96553e64287A5A6839c3Cc78afA3D0/"
     note: ~$19.73M (40% of USDC FRV)
+
+  # MetaMorpho Prime governance (V2)
+  - id: steakhouse-prime-owner
+    label: Steakhouse Prime Owner
+    address: "0x4D7bd498Bb24098Ca281C05519629c605407f71d"
+    category: governance
+    note: Governance contract (not a Safe)
+  - id: steakhouse-prime-curator
+    label: Steakhouse Prime Curator (2-of-7)
+    address: "0x827e86072B06674a077f592A531dcE4590aDeCdB"
+    category: governance
+  - id: gauntlet-prime-owner
+    label: Gauntlet Prime Owner (4-of-7)
+    address: "0xC684c6587712e5E7BDf9fD64415F23Bd2b05fAec"
+    category: governance
+  - id: gauntlet-prime-curator
+    label: Gauntlet Prime Curator (3-of-7)
+    address: "0x9E33faAE38ff641094fa68c65c2cE600b3410585"
+    category: governance
   - id: aave-v3-usdc
     label: Aave V3 USDC Core
     category: dependency
@@ -88,6 +111,50 @@ nodes:
     label: Symbiotic Restaking
     category: dependency
     note: Per-operator vaults; instant slashing on default
+
+# BEGIN GENERATED MORPHO MARKET NODES
+# Managed by scripts/update_morpho_graph_markets.mjs — do not edit.
+  - id: morpho-market-64d65c9a2d91
+    label: "cbBTC/USDC · 86% LLTV"
+    category: dependency
+    link: "https://app.morpho.org/ethereum/market/0x64d65c9a2d91c36d56fbc42d69e979335320169b3df63bf92789e2c8883fcc64/"
+    note: "Morpho market 0x64d65c9a2d91c36d56fbc42d69e979335320169b3df63bf92789e2c8883fcc64"
+  - id: morpho-market-34377fc4f617
+    label: "weETH/USDC · 77% LLTV"
+    category: dependency
+    link: "https://app.morpho.org/ethereum/market/0x34377fc4f617c51818e92c79df31ff270c6a91bc94ad32e367fdf59b9f4ac5dd/"
+    note: "Morpho market 0x34377fc4f617c51818e92c79df31ff270c6a91bc94ad32e367fdf59b9f4ac5dd"
+  - id: morpho-market-3a85e6197511
+    label: "WBTC/USDC · 86% LLTV"
+    category: dependency
+    link: "https://app.morpho.org/ethereum/market/0x3a85e619751152991742810df6ec69ce473daef99e28a64ab2340d7b7ccfee49/"
+    note: "Morpho market 0x3a85e619751152991742810df6ec69ce473daef99e28a64ab2340d7b7ccfee49"
+  - id: morpho-market-94b823e6bd8e
+    label: "WETH/USDC · 86% LLTV"
+    category: dependency
+    link: "https://app.morpho.org/ethereum/market/0x94b823e6bd8ea533b4e33fbc307faea0b307301bc48763acc4d4aa4def7636cd/"
+    note: "Morpho market 0x94b823e6bd8ea533b4e33fbc307faea0b307301bc48763acc4d4aa4def7636cd"
+  - id: morpho-market-7e585a933ffe
+    label: "wstETH/USDC · 86% LLTV"
+    category: dependency
+    link: "https://app.morpho.org/ethereum/market/0x7e585a933ffe8443c371b4f8cfeb4430f5f6a14c2f32a898c26662c67a1cb8b8/"
+    note: "Morpho market 0x7e585a933ffe8443c371b4f8cfeb4430f5f6a14c2f32a898c26662c67a1cb8b8"
+  - id: morpho-market-b323495f7e41
+    label: "wstETH/USDC · 86% LLTV"
+    category: dependency
+    link: "https://app.morpho.org/ethereum/market/0xb323495f7e4148be5643a4ea4a8221eef163e4bccfdedc2a6f4696baacbc86cc/"
+    note: "Morpho market 0xb323495f7e4148be5643a4ea4a8221eef163e4bccfdedc2a6f4696baacbc86cc"
+  - id: morpho-market-bc99de6a8890
+    label: "cbBTC/USDC · 86% LLTV"
+    category: dependency
+    link: "https://app.morpho.org/ethereum/market/0xbc99de6a88904cd0e69042ad6f266e63182801f030c636507c3caf590ffd84fe/"
+    note: "Morpho market 0xbc99de6a88904cd0e69042ad6f266e63182801f030c636507c3caf590ffd84fe"
+  - id: morpho-market-09dc9e7eb5d8
+    label: "WBTC/USDC · 86% LLTV"
+    category: dependency
+    link: "https://app.morpho.org/ethereum/market/0x09dc9e7eb5d8fc54b2bc41d1135fd4e99057a580f680321faeb90c7a21e631c1/"
+    note: "Morpho market 0x09dc9e7eb5d8fc54b2bc41d1135fd4e99057a580f680321faeb90c7a21e631c1"
+# END GENERATED MORPHO MARKET NODES
 
 edges:
   # === Governance flow ===
@@ -157,3 +224,85 @@ edges:
     to: symbiotic
     kind: routes-through
     label: slashing collateral
+
+  # MetaMorpho Prime governance
+  - from: steakhouse-prime-owner
+    to: morpho-steakhouse-prime
+    kind: holds-role
+    label: "owner"
+  - from: steakhouse-prime-curator
+    to: morpho-steakhouse-prime
+    kind: holds-role
+    label: "curator"
+  - from: gauntlet-prime-owner
+    to: morpho-usdc-prime
+    kind: holds-role
+    label: "owner"
+  - from: gauntlet-prime-curator
+    to: morpho-usdc-prime
+    kind: holds-role
+    label: "curator"
+
+# BEGIN GENERATED MORPHO MARKET EDGES
+# Managed by scripts/update_morpho_graph_markets.mjs — do not edit.
+  - from: morpho-steakhouse-prime
+    to: morpho-market-64d65c9a2d91
+    kind: deposits-into
+    label: "91.9%"
+  - from: morpho-steakhouse-prime
+    to: morpho-market-34377fc4f617
+    kind: deposits-into
+    label: "3.8%"
+  - from: morpho-steakhouse-prime
+    to: morpho-market-3a85e6197511
+    kind: deposits-into
+    label: "2.0%"
+  - from: morpho-steakhouse-prime
+    to: morpho-market-94b823e6bd8e
+    kind: deposits-into
+    label: "1.1%"
+  - from: morpho-steakhouse-prime
+    to: morpho-market-7e585a933ffe
+    kind: deposits-into
+    label: "0.9%"
+  - from: morpho-steakhouse-prime
+    to: morpho-market-b323495f7e41
+    kind: deposits-into
+    label: "<0.1%"
+  - from: morpho-steakhouse-prime
+    to: morpho-market-bc99de6a8890
+    kind: deposits-into
+    label: "<0.1%"
+  - from: morpho-steakhouse-prime
+    to: morpho-market-09dc9e7eb5d8
+    kind: deposits-into
+    label: "<0.1%"
+  - from: morpho-usdc-prime
+    to: morpho-market-64d65c9a2d91
+    kind: deposits-into
+    label: "47.0%"
+  - from: morpho-usdc-prime
+    to: morpho-market-3a85e6197511
+    kind: deposits-into
+    label: "45.7%"
+  - from: morpho-usdc-prime
+    to: morpho-market-b323495f7e41
+    kind: deposits-into
+    label: "3.6%"
+  - from: morpho-usdc-prime
+    to: morpho-market-7e585a933ffe
+    kind: deposits-into
+    label: "1.8%"
+  - from: morpho-usdc-prime
+    to: morpho-market-94b823e6bd8e
+    kind: deposits-into
+    label: "1.4%"
+  - from: morpho-usdc-prime
+    to: morpho-market-09dc9e7eb5d8
+    kind: deposits-into
+    label: "0.1%"
+  - from: morpho-usdc-prime
+    to: morpho-market-bc99de6a8890
+    kind: deposits-into
+    label: "<0.1%"
+# END GENERATED MORPHO MARKET EDGES

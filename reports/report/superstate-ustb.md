@@ -1,6 +1,6 @@
 # Protocol Risk Assessment: Superstate USTB
 
-- **Assessment Date:** August 17, 2026
+- **Assessment Date:** March 5, 2026 (Updated: August 17, 2026)
 - **Token:** USTB
 - **Chain:** Ethereum
 - **Token Address:** [`0x43415eB6ff9DB7E26A15b704e7A3eDCe97d31C4e`](https://etherscan.io/address/0x43415eB6ff9DB7E26A15b704e7A3eDCe97d31C4e)
@@ -232,7 +232,7 @@ The fund uses a **laddered approach** with holdings spread across various near-t
 
 **Onchain verification (August 17, 2026):** Confirmed that DeFi protocols integrating USTB are individually whitelisted on the AllowList with assigned entity IDs — Aave Horizon aToken [`0x4e58a2e4…`](https://etherscan.io/address/0x4e58a2e433a739726134c83d2f07b2562e8dfdb3) (entity 734), Midas RedemptionVault [`0x569d7dcc…`](https://etherscan.io/address/0x569d7dccbf6923350521ecbc28a555a500c4f0ec) (entity 114), Frax FrxUSDCustodian [`0x5fbaa3a3…`](https://etherscan.io/address/0x5fbaa3a3b489199338fbd85f7e3d444dc0504f33) (entity 48). Maple Finance's protocol contracts are NOT whitelisted — Maple's USTB collateral is held by borrowers in their own wallets as offchain collateral arrangements, not locked in Maple smart contracts.
 
-**The freeze power is not hypothetical.** On [September 5, 2025](https://etherscan.io/tx/0xb669e1bf0ef2d5f1deec7aa5a91574c2a83cd22d336c3412dddd6d7f6b44eadf) Superstate called `setProtocolAddressPermission(0xbbbbbbbb…, "USCC", false)`, revoking Morpho Blue's protocol permission for its sister fund USCC (a second address, [`0x4095f064…`](https://etherscan.io/address/0x4095f064b8d3c3548a3bebfd0bbfd04750e30077), was revoked in the same window). No USTB protocol permission has been revoked to date, but a live precedent exists for a whitelisted DeFi protocol's permission being withdrawn by unilateral admin action.
+**The freeze power is not hypothetical.** On [September 5, 2025](https://etherscan.io/tx/0xb669e1bf0ef2d5f1deec7aa5a91574c2a83cd22d336c3412dddd6d7f6b44eadf) Superstate called `setProtocolAddressPermission(0xbbbbbbbb…, "USCC", false)`, revoking Morpho Blue's protocol permission for its sister fund USCC (a second address, [`0x4095f064…`](https://etherscan.io/address/0x4095f064b8d3c3548a3bebfd0bbfd04750e30077), was revoked in the same window). USCC runs on the same AllowList contract and the same admin EOA — see the separate [Superstate USCC assessment](https://curation.yearn.fi/report/superstate-uscc/). No USTB protocol permission has been revoked to date, but a live precedent exists for a whitelisted DeFi protocol's permission being withdrawn by unilateral admin action.
 
 ## Centralization & Control Risks
 
@@ -286,6 +286,8 @@ The fund uses a **laddered approach** with holdings spread across various near-t
 6. **Turnkey (Medium)** — Non-custodial key management via secure enclaves. Failure could delay admin operations.
 7. **PricewaterhouseCoopers LLP (Low)** — Annual audit of the fund. Provides independent verification.
 8. **NAV Fund Services (Low)** — Independent NAV calculation agent.
+
+**Cross-chain distribution — no third-party bridge.** USTB is issued on Ethereum, Solana and Plume, but Superstate does **not** use LayerZero, CCIP, Wormhole, Axelar or any other third-party messaging protocol. The token's `bridge(amount, dest, chainId)` function burns on the source chain and emits a `Bridge` event; Superstate then mints the corresponding shares on the destination chain as an operational step, with supported destinations gated by the owner via `setChainIdSupport`. There is therefore no external bridge contract to audit or exploit, and no wrapped/escrowed representation — but the cross-chain leg is **admin-mediated and trust-based**: a user who burns on Ethereum relies entirely on Superstate to mint on the destination, with no onchain proof, no timeout, and no self-service recovery. Exposure is small in absolute terms — Solana holds 224,119.50 USTB (~$2.5M, 0.26% of shares) and Plume 170,503.72 USTB (~$1.9M, 0.20%), against 69.31M on Ethereum — and Yearn exposure would be Ethereum-only, so this is context rather than a scored risk. Because no third-party bridge is involved, USTB is intentionally absent from `src/data/bridges.json`; `scripts/check_bridges.mjs` reports 0 warnings.
 
 ## Operational Risk
 
@@ -558,21 +560,6 @@ The dominant residual risk is unchanged and unimproved: the entire system is con
 7. Reconcile the public holdings/NAV API against onchain supply weekly; alert if the holdings snapshot goes stale
 8. Verify Superstate's regulatory standing periodically (SEC adviser registration 801-132908, transfer agent status)
 
-**What would lower the final score (2.10), by leverage:**
-
-Weights are Audits 20% / Centralization 30% / Funds Management 30% / Liquidity 15% / Operational 5%, so a 1-point move is worth 0.20, 0.30, 0.30, 0.15 and 0.05 respectively. Operational and Historical are already at the rubric floor and cannot contribute.
-
-| Change | Category effect | Final |
-|---|---|---|
-| Multisig **and** timelock on all four owner roles | Governance 4.0 → 2.0; Centralization 3.0 → 2.0 | **1.80** |
-| Multisig only (no timelock), e.g. 5/9 Safe | Governance 4.0 → 3.0; Centralization 3.0 → 2.33 | **1.90** |
-| Chainlink Proof of Reserves live + attested holdings | Provability 2.5 → 1.5; Funds Mgmt 2.0 → 1.5 | **1.95** |
-| Funded bug bounty (>$1M) **and** an audit scoped to the deployed version | Audits 1.5 → 1.0; Cat 1 1.25 → 1.0 | **2.05** |
-| Instant redemption facility raised to >$50M, or a contractual redemption guarantee | Liquidity 2.0 → 1.5 | **2.03** |
-| All of the above | — | **1.53** |
-
-The single highest-leverage change is governance. Centralization carries 30% weight and is the only category still scoring 3.0; moving admin control to a multisig with a timelock is worth ~0.30 on its own — more than every transparency and audit improvement combined. Nothing in Funds Management, Liquidity or Operational can compensate for it, because those categories are already at or near their practical floors for an offchain-backed RWA.
-
 **Score-improving triggers:**
 
 - **Multisig adoption:** If Superstate transitions admin control from EOA to a multisig (even a team-internal multisig), the Centralization score would improve significantly
@@ -743,3 +730,12 @@ Each proxy can be upgraded immediately (no timelock) by its ProxyAdmin owner:
 | RedemptionIdle [`0x4c21b7577c8fe8b0b0669165ee7c8f67fa1454cf`](https://etherscan.io/address/0x4c21b7577c8fe8b0b0669165ee7c8f67fa1454cf) | [`0xcaba8c12873fffed13431d98bf6b836dff08e869`](https://etherscan.io/address/0xcaba8c12873fffed13431d98bf6b836dff08e869) | [`0x8cf40e96e7d7fd8A7A9bEf70d3882fbBC4D40765`](https://etherscan.io/address/0x8cf40e96e7d7fd8A7A9bEf70d3882fbBC4D40765) | `upgrade()`, `upgradeAndCall()`, `changeProxyAdmin()` |
 
 The Oracle ([`0xe4fa682f94610ccd170680cc3b045d77d9e528a8`](https://etherscan.io/address/0xe4fa682f94610ccd170680cc3b045d77d9e528a8)) is **not a proxy** and cannot be upgraded. However, the USTB Token owner can replace it entirely via `setOracle(newAddress)`.
+
+## Assessment History
+
+| Date | Score | Notes |
+| --- | --- | --- |
+| [March 5, 2026](https://github.com/yearn/risk-score/pull/81) | 2.38 | Initial assessment |
+| [April 7, 2026](https://github.com/yearn/risk-score/pull/130) | 2.33 | Reassessment: Historical subscore improved (>2 years in production); onchain verification confirmed 4 separate admin EOAs rather than one |
+| [June 13, 2026](https://github.com/yearn/risk-score/pull/249) | 2.33 | Reassessment: Invesco Advisers replaces Federated Hermes as investment manager, BNY Mellon replaces UMB Bank as custodian; APY, holders and AUM refreshed |
+| [August 17, 2026](https://github.com/yearn/risk-score/pull/409) | 2.10 | Reassessment: token migrated to FundToken v1.3.0 over two July upgrades; public holdings/NAV API closes the reserve-transparency gap (Provability 3.0 → 2.5); Liquidity 3.0 → 2.0 on ~567M USTB of demonstrated redemptions incl. a single ~$302M exit; Certora corrected from "formal verification" to a Solana allowlist audit; auditor now PwC |

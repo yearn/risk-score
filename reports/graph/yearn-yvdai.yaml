@@ -23,11 +23,11 @@ nodes:
   - id: accountant
     label: Accountant (0% mgmt, 10% perf)
     address: "0x5A74Cb32D36f2f517DB6f7b0A0591e09b22cDE69"
-    category: vault
+    category: infra
   - id: dumper
     label: Fee Recipient (Dumper)
     address: "0x590Dd9399bB53f1085097399C3265C7137c1C4Cf"
-    category: vault
+    category: infra
 
   # Governance
   - id: daddy
@@ -41,6 +41,10 @@ nodes:
   - id: security
     label: Security (4-of-7)
     address: "0xe5e2Baf96198c56380dDD5E992D7d1ADa0e989c0"
+    category: governance
+  - id: curator
+    label: Curator (2-of-3)
+    address: "0x90D0f26025571295D18a6c041E47450B81886B51"
     category: governance
   - id: timelock
     label: Strategy Manager (7-day Timelock)
@@ -67,11 +71,11 @@ nodes:
 
   # Strategies
   - id: dai-to-usdc-depositor
-    label: DAI → yvUSDC-1 Depositor (72.97%)
+    label: DAI → yvUSDC-1 Depositor (73.19%)
     address: "0xfF03Dce6d95aa7a30B75EFbaFD11384221B9f9B5"
     category: strategy
   - id: dai-to-usds-depositor
-    label: DAI → yvUSDS-1 Depositor (27.03%)
+    label: DAI → yvUSDS-1 Depositor (26.81%)
     address: "0xAeDF7d5F3112552E110e5f9D08c9997Adce0b78d"
     category: strategy
 
@@ -85,6 +89,14 @@ nodes:
     address: "0x182863131F9a4630fF9E27830d945B1413e347E8"
     category: dependency
 
+  # External dependencies (Morpho MetaMorpho, downstream of yvUSDC-1)
+  - id: yearn-usdc-metamorpho
+    label: Yearn USDC (Morpho MetaMorpho)
+    address: "0x68Aea7b82Df6CcdF76235D46445Ed83f85F845A3"
+    category: dependency
+    morphoVault: v1
+    link: "https://app.morpho.org/ethereum/vault/0x68Aea7b82Df6CcdF76235D46445Ed83f85F845A3/"
+
   # External dependencies (Sky conversion infrastructure)
   - id: psm-lite
     label: MakerDAO PSM Lite (DAI ↔ USDC)
@@ -94,6 +106,25 @@ nodes:
     label: Sky DAI ↔ USDS Exchanger
     address: "0x3225737a9Bbb6473CB4a45b7244ACa2BeFdB276A"
     category: dependency
+
+# BEGIN GENERATED MORPHO MARKET NODES
+# Managed by scripts/update_morpho_graph_markets.mjs — do not edit.
+  - id: morpho-market-64d65c9a2d91
+    label: "cbBTC/USDC · 86% LLTV"
+    category: dependency
+    link: "https://app.morpho.org/ethereum/market/0x64d65c9a2d91c36d56fbc42d69e979335320169b3df63bf92789e2c8883fcc64/"
+    note: "Morpho market 0x64d65c9a2d91c36d56fbc42d69e979335320169b3df63bf92789e2c8883fcc64"
+  - id: morpho-market-3a85e6197511
+    label: "WBTC/USDC · 86% LLTV"
+    category: dependency
+    link: "https://app.morpho.org/ethereum/market/0x3a85e619751152991742810df6ec69ce473daef99e28a64ab2340d7b7ccfee49/"
+    note: "Morpho market 0x3a85e619751152991742810df6ec69ce473daef99e28a64ab2340d7b7ccfee49"
+  - id: morpho-market-b323495f7e41
+    label: "wstETH/USDC · 86% LLTV"
+    category: dependency
+    link: "https://app.morpho.org/ethereum/market/0xb323495f7e4148be5643a4ea4a8221eef163e4bccfdedc2a6f4696baacbc86cc/"
+    note: "Morpho market 0xb323495f7e4148be5643a4ea4a8221eef163e4bccfdedc2a6f4696baacbc86cc"
+# END GENERATED MORPHO MARKET NODES
 
 edges:
   # Deployment / vault infrastructure
@@ -112,17 +143,17 @@ edges:
   - from: yvDAI
     to: dai-to-usdc-depositor
     kind: allocates-to
-    label: "72.97%"
+    label: "73.19%"
   - from: yvDAI
     to: dai-to-usds-depositor
     kind: allocates-to
-    label: "27.03%"
+    label: "26.81%"
 
   # Governance roles on vault
   - from: daddy
     to: yvDAI
     kind: holds-role
-    label: "all 14 roles"
+    label: "12 of 14 roles"
   - from: brain
     to: yvDAI
     kind: holds-role
@@ -182,3 +213,35 @@ edges:
     to: yvUSDS
     kind: deposits-into
     label: "USDS → yvUSDS-1"
+
+  # yvUSDC-1 downstream: sUSDS Lender (~91.59%) and Yearn USDC MetaMorpho (~8.41%)
+  - from: yvUSDC
+    to: yearn-usdc-metamorpho
+    kind: deposits-into
+    label: "~8.41% via Yearn USDC"
+
+  # MetaMorpho vault governance — owner (Security) + curator
+  - from: security
+    to: yearn-usdc-metamorpho
+    kind: holds-role
+    label: "owner"
+  - from: curator
+    to: yearn-usdc-metamorpho
+    kind: holds-role
+    label: "curator"
+
+# BEGIN GENERATED MORPHO MARKET EDGES
+# Managed by scripts/update_morpho_graph_markets.mjs — do not edit.
+  - from: yearn-usdc-metamorpho
+    to: morpho-market-64d65c9a2d91
+    kind: deposits-into
+    label: "56.3%"
+  - from: yearn-usdc-metamorpho
+    to: morpho-market-3a85e6197511
+    kind: deposits-into
+    label: "36.8%"
+  - from: yearn-usdc-metamorpho
+    to: morpho-market-b323495f7e41
+    kind: deposits-into
+    label: "6.7%"
+# END GENERATED MORPHO MARKET EDGES

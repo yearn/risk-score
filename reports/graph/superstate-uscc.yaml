@@ -1,0 +1,212 @@
+slug: superstate-uscc
+title: Superstate / Bitwise (USCC) — Contract Dependency Graph
+chain: ethereum
+
+categories:
+  - id: vault
+    label: Token
+  - id: governance
+    label: Governance / Owners
+  - id: infra
+    label: Protocol Infra
+  - id: dependency
+    label: External Dependency
+
+nodes:
+  # === Token layer ===
+  - id: uscc
+    label: USCC (Bitwise Crypto Carry Fund)
+    address: "0x14d60E7FDC0D71d8611742720E4C50E7a974020c"
+    category: vault
+    note: EIP-1967 Proxy → SuperstateTokenV5; price-appreciation; mark-to-market NAV
+
+  # === Protocol infra ===
+  - id: uscc-proxy-admin
+    label: USCC ProxyAdmin
+    address: "0x2Bb7B8B4dF7fD96baF7CB9a2Ce9e292eCd5BAF3D"
+    category: infra
+  - id: allowlist
+    label: AllowList V3.1
+    address: "0x02f1fA8B196d21c7b733EB2700B825611d8A38E5"
+    category: infra
+    note: KYC-gated transfer allowlist (shared with USTB)
+  - id: allowlist-proxy-admin
+    label: AllowList ProxyAdmin
+    address: "0xb819692a58db9dd4d3b403a875439b6ca155c610"
+    category: infra
+
+  # === Governance (EOA owners — no multisig, no timelock) ===
+  - id: uscc-owner
+    label: USCC Owner (EOA)
+    address: "0x8abC89D9b56dFD90dA18e8E18CFaC9111100bDd1"
+    category: governance
+    note: Single EOA controls token + ProxyAdmin; mint, adminBurn, pause, upgrade
+  - id: allowlist-owner
+    label: AllowList Owner (EOA)
+    address: "0x7747940aDBc7191f877a9B90596E0DA4f8deb2Fe"
+    category: governance
+    note: Whitelist + upgrade AllowList (shared with USTB)
+
+  # === External dependencies ===
+  - id: dep-treasuries
+    label: Offchain Fund Portfolio
+    category: dependency
+    note: USD collateral + USTB/T-Bills + spot/staked crypto + futures margin
+  - id: dep-usd-collateral
+    label: USD Collateral
+    category: dependency
+    note: 19.45% of portfolio; Bitwise holdings as of Jun 28 2026
+  - id: dep-ustb
+    label: USTB
+    category: dependency
+    note: 18.76% of portfolio; tokenized T-Bill exposure
+  - id: dep-staked-sol
+    label: Staked SOL
+    category: dependency
+    note: 20.08% of portfolio; staking / validator risk
+  - id: dep-weeth
+    label: weETH
+    category: dependency
+    note: 19.12% of portfolio; liquid-staking-token risk
+  - id: dep-xrp
+    label: XRP Custody
+    category: dependency
+    note: 18.52% of portfolio; spot crypto custody and market risk
+  - id: dep-eth
+    label: ETH Custody
+    category: dependency
+    note: 2.30% of portfolio; spot crypto custody and market risk
+  - id: dep-btc
+    label: BTC Custody
+    category: dependency
+    note: 1.43% of portfolio; spot crypto custody and market risk
+  - id: dep-futures-cme
+    label: CME Futures
+    category: dependency
+    note: Short BTC/ETH/SOL/XRP futures plus SOL call; negative notional hedges spot/staked legs
+  - id: dep-futures-coinbase
+    label: Coinbase Futures
+    category: dependency
+    note: Small short XRP futures leg; -0.37% of portfolio
+  - id: dep-anchorage
+    label: Anchorage Digital (Custodian)
+    category: dependency
+    note: OCC-regulated; spot/staked crypto + cash custody
+  - id: dep-futures-venues
+    label: Futures Trading Venues
+    category: dependency
+    note: Current public holdings identify CME and Coinbase; margin policy not fully public
+  - id: dep-bitwise
+    label: Bitwise Investment Manager
+    category: dependency
+    note: Investment manager effective Jun 1 2026
+  - id: dep-chainlink-nav
+    label: Chainlink USCC NAV Feed
+    address: "0xAfFd8F5578E8590665de561bdE9E7BAdb99300d9"
+    category: dependency
+    note: Sole onchain NAV oracle; 16 OCR transmitters; no SuperstateOracle fallback
+  - id: dep-circle
+    label: Circle / USDC
+    category: dependency
+    note: Redemption rail
+
+edges:
+  # === Ownership (EOAs control proxies + tokens) ===
+  - from: uscc-owner
+    to: uscc-proxy-admin
+    kind: controls
+    label: owner (no timelock)
+  - from: uscc-proxy-admin
+    to: uscc
+    kind: manages
+    label: upgradeable proxy
+  - from: uscc-owner
+    to: uscc
+    kind: holds-role
+    label: owner (mint / adminBurn / pause)
+  - from: allowlist-owner
+    to: allowlist-proxy-admin
+    kind: controls
+    label: owner (no timelock)
+  - from: allowlist-proxy-admin
+    to: allowlist
+    kind: manages
+    label: upgradeable proxy
+  - from: allowlist-owner
+    to: allowlist
+    kind: holds-role
+    label: owner (whitelist)
+
+  # === Mint authority on USCC ===
+  - from: uscc-owner
+    to: uscc
+    kind: mints
+    label: mint / bulkMint / adminBurn
+
+  # === Internal wiring ===
+  - from: allowlist
+    to: uscc
+    kind: manages
+    label: transfer gate
+
+  # === Backing & external dependencies ===
+  - from: uscc
+    to: dep-treasuries
+    kind: deposits-into
+    label: offchain fund
+  - from: dep-treasuries
+    to: dep-anchorage
+    kind: routes-through
+    label: spot/staked crypto custody
+  - from: dep-treasuries
+    to: dep-usd-collateral
+    kind: deposits-into
+    label: 19.45%
+  - from: dep-treasuries
+    to: dep-ustb
+    kind: deposits-into
+    label: 18.76%
+  - from: dep-treasuries
+    to: dep-staked-sol
+    kind: deposits-into
+    label: 20.08%
+  - from: dep-treasuries
+    to: dep-weeth
+    kind: deposits-into
+    label: 19.12%
+  - from: dep-treasuries
+    to: dep-xrp
+    kind: deposits-into
+    label: 18.52%
+  - from: dep-treasuries
+    to: dep-eth
+    kind: deposits-into
+    label: 2.30%
+  - from: dep-treasuries
+    to: dep-btc
+    kind: deposits-into
+    label: 1.43%
+  - from: dep-treasuries
+    to: dep-futures-venues
+    kind: routes-through
+    label: futures trading
+  - from: dep-futures-venues
+    to: dep-futures-cme
+    kind: routes-through
+    label: CME futures
+  - from: dep-futures-venues
+    to: dep-futures-coinbase
+    kind: routes-through
+    label: Coinbase futures
+  - from: dep-treasuries
+    to: dep-bitwise
+    kind: routes-through
+    label: investment manager
+  - from: uscc
+    to: dep-chainlink-nav
+    kind: routes-through
+    label: sole NAV feed
+  - from: uscc
+    to: dep-circle
+    kind: routes-through
+    label: USDC redemption rail

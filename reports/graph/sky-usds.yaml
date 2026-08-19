@@ -7,10 +7,10 @@ categories:
   - { id: infra, label: Protocol Infrastructure }
   - { id: dependency, label: External Dependency }
 nodes:
-  # sUSDS is listed before USDS on purpose: getGraphIndex() registers the
-  # FIRST `vault` node as this graph's cross-link anchor. Integrating graphs
-  # (yvUSDS / yvUSDC / yvUSD) depend on the sUSDS address, not USDS directly,
-  # so sUSDS must be the anchor for their dependency cards to drill in here.
+  # Both sUSDS and USDS anchor this graph — getGraphIndex() registers every
+  # addressed `vault` node, so integrating graphs drill in here whether they
+  # reference sUSDS (yvUSDS / yvUSDC / yvUSD) or USDS directly (stUSDS).
+  # Node order no longer affects which one wins.
   - id: susds
     label: sUSDS
     address: "0xa3931d71877C0E7a3148CB7Eb4463524FEc27fbD"
