@@ -4,7 +4,7 @@
 - **Token:** USTB
 - **Chain:** Ethereum
 - **Token Address:** [`0x43415eB6ff9DB7E26A15b704e7A3eDCe97d31C4e`](https://etherscan.io/address/0x43415eB6ff9DB7E26A15b704e7A3eDCe97d31C4e)
-- **Final Score: 2.25/5.0**
+- **Final Score: 2.10/5.0**
 
 ## Overview + Links
 
@@ -28,7 +28,7 @@ The fund is structured as a series of **Superstate Asset Trust**, a **Delaware S
 
 - [Protocol Documentation](https://docs.superstate.com/)
 - [USTB Fund Info](https://superstate.com/assets/ustb)
-- [Smart Contract Addresses](https://docs.superstate.com/investors/smart-contracts) — the Plume Mainnet entries list `0xe4fa682f…` (USTB) and `0x4c21b757…` (USCC), which collide with the Ethereum Superstate Oracle and RedemptionIdle addresses. This is **not** a documentation error: both are genuine Plume deployments (same deployer, same nonce, different chain), confirmed via Plume RPC — `0xe4fa682f…` returns `name() == "Invesco Short Duration US Government Securities Fund"`, `symbol() == "USTB"`, `VERSION() == "1.3.0"`, supply ~169,699 USTB.
+- [Smart Contract Addresses](https://docs.superstate.com/investors/smart-contracts) — the Plume Mainnet entries list [`0xe4fa682f…`](https://etherscan.io/address/0xe4fa682f94610ccd170680cc3b045d77d9e528a8) (USTB) and [`0x4c21b757…`](https://etherscan.io/address/0x4c21b7577c8fe8b0b0669165ee7c8f67fa1454cf) (USCC), which collide with the Ethereum Superstate Oracle and RedemptionIdle addresses. This is **not** a documentation error: both are genuine Plume deployments (same deployer, same nonce, different chain), confirmed via Plume RPC — [`0xe4fa682f…`](https://etherscan.io/address/0xe4fa682f94610ccd170680cc3b045d77d9e528a8) returns `name() == "Invesco Short Duration US Government Securities Fund"`, `symbol() == "USTB"`, `VERSION() == "1.3.0"`, supply ~169,699 USTB.
 - [Security Documentation](https://docs.superstate.com/investors/security)
 - [Public Fund API — Daily NAV](https://api.superstate.com/v1/funds/1/nav-daily) · [Yield](https://api.superstate.com/v1/funds/1/yield) · [Portfolio Holdings](https://api.superstate.com/v2/funds/1/holdings)
 - [GitHub (legacy USTB contracts, last updated April 2025)](https://github.com/superstateinc/ustb/tree/main)
@@ -134,12 +134,12 @@ Superstate is **not** listed on the SEAL Safe Harbor registry. This is typical f
 
 - **Fund Launch:** February 2024 on Ethereum (~30 months in production)
 - **Contract Deployment:** December 6, 2023 (block 18,725,909)
-- **Contract Upgrades:** The USTB proxy has taken **10 implementation upgrades** since deployment (`Upgraded` events on the proxy). The most recent two came a day apart in July 2026 and replaced the legacy `SuperstateToken` line entirely: `FundTokenV1_2_0` on [July 20, 2026](https://etherscan.io/tx/0x57acccedf2e7672e3e22a36376f39314a06b7710206b289554bd85ba505a158d) and `FundTokenV1_3_0` on [July 21, 2026](https://etherscan.io/tx/0x910c0875998ca08f76ad59751906eb23cfc69392092bf6c6754a0b5598f34ae2). The AllowList remains on V3.1 (`0x2f67d98b…`) and RedemptionIdle on its original implementation (`0x8efba8af…`) — neither has been upgraded, despite AllowlistV4_x and RedemptionV2 having been audited.
+- **Contract Upgrades:** The USTB proxy has taken **10 implementation upgrades** since deployment (`Upgraded` events on the proxy). The most recent two came a day apart in July 2026 and replaced the legacy `SuperstateToken` line entirely: `FundTokenV1_2_0` on [July 20, 2026](https://etherscan.io/tx/0x57acccedf2e7672e3e22a36376f39314a06b7710206b289554bd85ba505a158d) and `FundTokenV1_3_0` on [July 21, 2026](https://etherscan.io/tx/0x910c0875998ca08f76ad59751906eb23cfc69392092bf6c6754a0b5598f34ae2). The AllowList remains on V3.1 ([`0x2f67d98b…`](https://etherscan.io/address/0x2f67d98bd20d9580f52efa5ff70edaed9f2f316d)) and RedemptionIdle on its original implementation ([`0x8efba8af…`](https://etherscan.io/address/0x8efba8af37af48d2e0a04b0aae60f0e9bc8de007)) — neither has been upgraded, despite AllowlistV4_x and RedemptionV2 having been audited.
 - **Smart Contract Exploits:** None. No security incidents, hacks, or exploits reported.
 - **Price History:** NAV/Share has increased monotonically from ~$10.00 (inception) to $11.177748 (August 17, 2026), consistent with steady Treasury yield accrual. ATL: $10.29 (Feb 2025), ATH: $11.177748 (current).
 - **Pause History:** The token was paused on [December 7, 2023](https://etherscan.io/tx/0x5c7b9b2e662f99523d41f975d415cff6c085e99e41a02dff8e6ca2a723e06712) and unpaused on [May 14, 2024](https://etherscan.io/tx/0xb74bef08ee01fd1a4c5b8df2eb6d200c0e8af63bd79a72c3084022c8f0a94e7c) — the pre-launch/early-operations window. No pause events since. Accounting pause has never been engaged.
-- **Admin Burn History:** `adminBurn()` has been exercised twice: [September 5, 2025](https://etherscan.io/tx/0x72d12d9913affb20ac82c927ce29d3f41fe3b84a068d38eb92f8e6beb409bf51) for 611,410.45 USTB (~$6.6M at then-NAV) from `0xcfc50541…`, and [June 4, 2026](https://etherscan.io/tx/0x06308c94a3b806ee5f9c6d8109fad0c46fb95acf19db77e088aab78984f3d315) for 167.41 USTB from `0xc95e7dfc…`. The forced-burn capability is therefore operationally live, not dormant.
-- **AllowList Revocation Precedent:** On [September 5, 2025](https://etherscan.io/tx/0xb669e1bf0ef2d5f1deec7aa5a91574c2a83cd22d336c3412dddd6d7f6b44eadf) Superstate revoked Morpho Blue's (`0xbbbbbbbb…`) protocol permission for **USCC**, alongside `0x4095f064…`. USTB protocol permissions have not been revoked, but this confirms the revocation power is used in practice against integrated DeFi protocols.
+- **Admin Burn History:** `adminBurn()` has been exercised twice: [September 5, 2025](https://etherscan.io/tx/0x72d12d9913affb20ac82c927ce29d3f41fe3b84a068d38eb92f8e6beb409bf51) for 611,410.45 USTB (~$6.6M at then-NAV) from [`0xcfc50541…`](https://etherscan.io/address/0xcfc50541c3deaf725ce738ef87ace2ad778ba0c5), and [June 4, 2026](https://etherscan.io/tx/0x06308c94a3b806ee5f9c6d8109fad0c46fb95acf19db77e088aab78984f3d315) for 167.41 USTB from [`0xc95e7dfc…`](https://etherscan.io/address/0xc95e7dfc299f162c684db2c9d21488efc9638076). The forced-burn capability is therefore operationally live, not dormant.
+- **AllowList Revocation Precedent:** On [September 5, 2025](https://etherscan.io/tx/0xb669e1bf0ef2d5f1deec7aa5a91574c2a83cd22d336c3412dddd6d7f6b44eadf) Superstate revoked Morpho Blue's ([`0xbbbbbbbb…`](https://etherscan.io/address/0xbbbbbbbbbb9cc5e90e3b3af64bdaf62c37eeffcb)) protocol permission for **USCC**, alongside [`0x4095f064…`](https://etherscan.io/address/0x4095f064b8d3c3548a3bebfd0bbfd04750e30077). USTB protocol permissions have not been revoked, but this confirms the revocation power is used in practice against integrated DeFi protocols.
 - **AUM Growth:**
   - Feb 2024: Launch
   - Oct 2024: ~$114M ([LlamaRisk assessment](https://www.llamarisk.com/research/2024-10-07t21-32-09-000z), October 2024)
@@ -149,7 +149,7 @@ Superstate is **not** listed on the SEAL Safe Harbor registry. This is typical f
   - Jun 2026: $948.1M total AUM, 85.32M shares outstanding, NAV $11.112749 (Superstate NAV API, June 13)
   - Jul 2026: Token migrated from `SuperstateTokenV5_1` to the `FundToken` architecture over two consecutive upgrades
   - Aug 2026: $953.8M total AUM, 85.33M shares, NAV $11.177748. Ethereum onchain 69.31M USTB (~$775M); DeFiLlama USTB TVL ~$781.7M. DeFi integrations verified onchain: Aave Horizon aToken ~6.08M USTB (~$68.0M), Midas RedemptionVault ~5.68M USTB (~$63.5M), Frax FrxUSDCustodian ~2.94M USTB (~$32.9M)
-- **Holder Distribution:** 78 onchain holders on Ethereum ([Ethplorer](https://ethplorer.io/address/0x43415eB6ff9DB7E26A15b704e7A3eDCe97d31C4e), August 17, 2026). Top 10 holders hold ~86.5% of supply, with the single largest holder — an EOA (`0x0a4956a9…`, entity ID 2406) — at 31.95%. This concentration is expected for an institutional-grade permissioned fund. Top holders include EOAs (institutional investors, custodial wallets) and smart contracts (Aave Horizon, Midas, Frax).
+- **Holder Distribution:** 78 onchain holders on Ethereum ([Ethplorer](https://ethplorer.io/address/0x43415eB6ff9DB7E26A15b704e7A3eDCe97d31C4e), August 17, 2026). Top 10 holders hold ~86.5% of supply, with the single largest holder — an EOA ([`0x0a4956a9…`](https://etherscan.io/address/0x0a4956a93fa13c34b84f5720b5499da9193fcf0d), entity ID 2406) — at 31.95%. This concentration is expected for an institutional-grade permissioned fund. Top holders include EOAs (institutional investors, custodial wallets) and smart contracts (Aave Horizon, Midas, Frax).
 - **Incidents:** None. No hacks, exploits, or adverse events involving Superstate or USTB.
 
 ## Funds Management
@@ -207,7 +207,7 @@ The fund uses a **laddered approach** with holdings spread across various near-t
 - **DEX Liquidity:** None. USTB has $0 24h trading volume on DEXs. Not listed on any exchanges. This is by design — the token is a regulated fund product, not a freely tradeable token. Superstate's own risk disclosures state Tokenized Shares "are not listed on any exchange or trading system and may only be transferred through limited peer-to-peer transactions," that the buyer pool is narrow, and that holders "may be unable to sell their Shares in a timely manner or at all."
 - **Transfer Restrictions:** All transfers require both sender and receiver to be on the AllowList. Removing an address from the AllowList effectively freezes their tokens.
 - **DeFi Integrations (Liquidity Venues), verified onchain August 17, 2026:**
-  - **Aave Horizon:** USTB accepted as collateral to borrow USDC, GHO, RLUSD. The `aHorRwaUSTB` aToken ([`0x4e58a2e4…`](https://etherscan.io/address/0x4e58a2e433a739726134c83d2f07b2562e8dfdb3), pool `0xAe05Cd22…`) holds 6,080,210.17 USTB (~$68.0M) — the largest contract holder and 8.77% of supply. Uses LlamaGuard NAV Oracle (risk-adjusted, built with Chainlink).
+  - **Aave Horizon:** USTB accepted as collateral to borrow USDC, GHO, RLUSD. The `aHorRwaUSTB` aToken ([`0x4e58a2e4…`](https://etherscan.io/address/0x4e58a2e433a739726134c83d2f07b2562e8dfdb3), pool [`0xAe05Cd22…`](https://etherscan.io/address/0xAe05Cd22df81871bc7cC2a04BeCfb516bFe332C8)) holds 6,080,210.17 USTB (~$68.0M) — the largest contract holder and 8.77% of supply. Uses LlamaGuard NAV Oracle (risk-adjusted, built with Chainlink).
   - **Midas RedemptionVault** ([`0x569d7dcc…`](https://etherscan.io/address/0x569d7dccbf6923350521ecbc28a555a500c4f0ec)): 5,675,392.49 USTB (~$63.5M), 8.19% of supply
   - **Frax FrxUSDCustodian** ([`0x5fbaa3a3…`](https://etherscan.io/address/0x5fbaa3a3b489199338fbd85f7e3d444dc0504f33)): 2,941,516.81 USTB (~$32.9M), 4.24% of supply
   - **BitGo:** a `WalletSimple` multisig ([`0xbd02c511…`](https://etherscan.io/address/0xbd02c51150a4ab6ce97b9de2025644594f3e75b8)) holds 4,483,832.09 USTB (~$50.1M), consistent with the documented tri-party derivative collateral role
@@ -232,7 +232,7 @@ The fund uses a **laddered approach** with holdings spread across various near-t
 
 **Onchain verification (August 17, 2026):** Confirmed that DeFi protocols integrating USTB are individually whitelisted on the AllowList with assigned entity IDs — Aave Horizon aToken [`0x4e58a2e4…`](https://etherscan.io/address/0x4e58a2e433a739726134c83d2f07b2562e8dfdb3) (entity 734), Midas RedemptionVault [`0x569d7dcc…`](https://etherscan.io/address/0x569d7dccbf6923350521ecbc28a555a500c4f0ec) (entity 114), Frax FrxUSDCustodian [`0x5fbaa3a3…`](https://etherscan.io/address/0x5fbaa3a3b489199338fbd85f7e3d444dc0504f33) (entity 48). Maple Finance's protocol contracts are NOT whitelisted — Maple's USTB collateral is held by borrowers in their own wallets as offchain collateral arrangements, not locked in Maple smart contracts.
 
-**The freeze power is not hypothetical.** On [September 5, 2025](https://etherscan.io/tx/0xb669e1bf0ef2d5f1deec7aa5a91574c2a83cd22d336c3412dddd6d7f6b44eadf) Superstate called `setProtocolAddressPermission(0xbbbbbbbb…, "USCC", false)`, revoking Morpho Blue's protocol permission for its sister fund USCC (a second address, `0x4095f064…`, was revoked in the same window). No USTB protocol permission has been revoked to date, but a live precedent exists for a whitelisted DeFi protocol's permission being withdrawn by unilateral admin action.
+**The freeze power is not hypothetical.** On [September 5, 2025](https://etherscan.io/tx/0xb669e1bf0ef2d5f1deec7aa5a91574c2a83cd22d336c3412dddd6d7f6b44eadf) Superstate called `setProtocolAddressPermission(0xbbbbbbbb…, "USCC", false)`, revoking Morpho Blue's protocol permission for its sister fund USCC (a second address, [`0x4095f064…`](https://etherscan.io/address/0x4095f064b8d3c3548a3bebfd0bbfd04750e30077), was revoked in the same window). No USTB protocol permission has been revoked to date, but a live precedent exists for a whitelisted DeFi protocol's permission being withdrawn by unilateral admin action.
 
 ## Centralization & Control Risks
 
@@ -251,16 +251,16 @@ The fund uses a **laddered approach** with holdings spread across various near-t
 
 **Critical centralization concerns:**
 
-1. **EOA-controlled administration** — The system is controlled by **4 distinct EOAs**, each with no multisig, no timelock, and no governance delay. The USTB Token Owner (`0xad309bb6f13074128b4f23ef9ea2fe8552afca83`) controls minting, burning from any address, pausing all operations, changing the oracle, and upgrading the USTB contract implementation. Separate EOAs control the AllowList, RedemptionIdle, and Oracle — splitting control across more keys reduces single-key blast radius but none have multisig protection.
+1. **EOA-controlled administration** — The system is controlled by **4 distinct EOAs**, each with no multisig, no timelock, and no governance delay. The USTB Token Owner ([`0xad309bb6f13074128b4f23ef9ea2fe8552afca83`](https://etherscan.io/address/0xad309bb6f13074128b4f23ef9ea2fe8552afca83)) controls minting, burning from any address, pausing all operations, changing the oracle, and upgrading the USTB contract implementation. Separate EOAs control the AllowList, RedemptionIdle, and Oracle — splitting control across more keys reduces single-key blast radius but none have multisig protection.
 2. **Admin burn capability** — The owner can call `adminBurn(address, uint256)` to forcibly burn tokens from any holder's address. This is documented as being for "exogenous legal circumstances" (regulatory compliance) and has been exercised twice (September 2025, June 2026).
 3. **No timelock on any operation** — Contract upgrades, parameter changes, and critical admin functions execute immediately with no delay period for users to react. The July 2026 migration demonstrated this end to end: the entire token implementation was replaced twice in two days, each time in a single owner transaction with no announcement window, while ~$750M+ of user shares sat behind the proxy.
 4. **AllowList control** — Removing an address from the AllowList effectively freezes their tokens (they cannot transfer or redeem). This is a compliance feature but also a centralization vector, and it has been used against an integrated DeFi protocol (Morpho Blue / USCC, September 2025).
-5. **Oracle pricing control** — The Oracle Owner (`0x4B1df64357a5D484563c9b7c16a80eD8B8fB1395`) controls NAV checkpoints via `addCheckpoint()`. While the oracle uses programmatic linear interpolation between checkpoints, the checkpoint values themselves are set by this EOA. A malicious or compromised oracle owner could post incorrect NAV values affecting subscription/redemption pricing.
+5. **Oracle pricing control** — The Oracle Owner ([`0x4B1df64357a5D484563c9b7c16a80eD8B8fB1395`](https://etherscan.io/address/0x4B1df64357a5D484563c9b7c16a80eD8B8fB1395)) controls NAV checkpoints via `addCheckpoint()`. While the oracle uses programmatic linear interpolation between checkpoints, the checkpoint values themselves are set by this EOA. A malicious or compromised oracle owner could post incorrect NAV values affecting subscription/redemption pricing.
 6. **Expanded owner surface in v1.3.0** — The `FundToken` rewrite added four owner-only setters that the prior V5.1 implementation did not expose: `setAllowlist()` (swap the entire compliance gate for another contract), `setIsPublicInstrument()` (change which allowlist permission model applies), and `setName()` / `setSymbol()` (rename the token in place — used in this cycle to rebrand from "Superstate Short Duration US Government Securities Fund" to "Invesco Short Duration US Government Securities Fund"). These are convenience/compliance controls rather than direct fund-loss paths, but each widens what a single compromised key can do without an upgrade.
 
 **Mitigations:**
 
-- **Turnkey secure enclaves** — Private key operations are performed inside hardware-enforced Trusted Execution Environments (TEEs). Keys are never exposed to Superstate or the application.
+- **Turnkey secure enclaves (TEE, not MPC)** — Private key operations are performed inside hardware-enforced Trusted Execution Environments. Per [Turnkey's own security documentation](https://docs.turnkey.com/security/non-custodial-key-mgmt), "private key material is only decrypted within these enclaves" and Turnkey "only stores encrypted private keys." This is **materially weaker than MPC/threshold signing**: a complete private key exists and is reconstituted in enclave memory on every signature, so the trust model rests on enclave integrity, Turnkey's policy engine, and the secrecy of the API credentials that authorise signing — rather than on a key that is never assembled anywhere. Onchain the distinction is invisible: all four owners produce ordinary ECDSA signatures, carry no contract code, and have no EIP-7702 delegation (`cast code` returns `0x` for each), so an outside observer cannot verify the signing arrangement at all. `TODO`: Turnkey supports N-of-M policy quorums that would function as an offchain multisig, but Superstate's policy configuration is not published — the effective signing quorum behind each EOA is unknown and unverifiable.
 - **Two-step ownership transfer** — `Ownable2StepUpgradeable` requires propose + accept for ownership changes, preventing accidental transfer.
 - **`renounceOwnership` disabled** — Cannot accidentally or maliciously renounce ownership.
 - **Regulatory accountability** — Superstate Advisers LLC is a **fully SEC-registered investment adviser** ([CRD 336188, SEC #801-132908](https://adviserinfo.sec.gov/firm/summary/336188), status ACTIVE), and Superstate Services LLC is an SEC-registered transfer agent. Malicious admin actions would have direct legal consequences.
@@ -336,9 +336,9 @@ The fund uses a **laddered approach** with holdings spread across various near-t
 - **Implementation Drift:** Read EIP-1967 implementation slot on the USTB proxy and alert on any change from [`0xb3ac55dd09aa70e9bfbb12f45cd38a1f1597588c`](https://etherscan.io/address/0xb3ac55dd09aa70e9bfbb12f45cd38a1f1597588c) (FundToken v1.3.0). Also alert if `VERSION()` changes from `"1.3.0"`.
 - **Admin Burns:** Monitor `AdminBurn` events — forced burns from holder addresses are a critical event. Two have occurred to date.
 - **Pause Events:** Monitor `Paused`/`Unpaused` and `AccountingPaused`/`AccountingUnpaused` on USTB Token AND RedemptionIdle.
-- **Contract Upgrades:** Monitor **all 3 ProxyAdmins** for `Upgraded` events — USTB ProxyAdmin (`0xb9d285dcad879513dc9c1a3b2e0cccb21c3c2146`), AllowList ProxyAdmin (`0xb819692a58db9dd4d3b403a875439b6ca155c610`), and RedemptionIdle ProxyAdmin (`0xcaba8c12873fffed13431d98bf6b836dff08e869`). Any proxy upgrade executes immediately with no timelock.
+- **Contract Upgrades:** Monitor **all 3 ProxyAdmins** for `Upgraded` events — USTB ProxyAdmin ([`0xb9d285dcad879513dc9c1a3b2e0cccb21c3c2146`](https://etherscan.io/address/0xb9d285dcad879513dc9c1a3b2e0cccb21c3c2146)), AllowList ProxyAdmin ([`0xb819692a58db9dd4d3b403a875439b6ca155c610`](https://etherscan.io/address/0xb819692a58db9dd4d3b403a875439b6ca155c610)), and RedemptionIdle ProxyAdmin ([`0xcaba8c12873fffed13431d98bf6b836dff08e869`](https://etherscan.io/address/0xcaba8c12873fffed13431d98bf6b836dff08e869)). Any proxy upgrade executes immediately with no timelock.
 - **Token Configuration (v1.3.0 setters):**
-  - **`AllowlistUpdated` — CRITICAL, page immediately.** `setAllowlist()` swaps the entire compliance gate in one owner transaction with no timelock. A malicious or erroneous allowlist address can freeze every holder at once (if it denies all) or void KYC gating entirely (if it permits all). **Alert condition:** any `AllowlistUpdated` event, OR `allowlist()` returning anything other than `0x02f1fa8b196d21c7b733eb2700b825611d8a38e5`. Poll `allowlist()` hourly as a belt-and-braces check against a missed event; on trigger, treat the USTB position as frozen-risk until the new allowlist is reviewed and confirm `isAddressAllowedForFund(<our address>)` still returns true.
+  - **`AllowlistUpdated` — CRITICAL, page immediately.** `setAllowlist()` swaps the entire compliance gate in one owner transaction with no timelock. A malicious or erroneous allowlist address can freeze every holder at once (if it denies all) or void KYC gating entirely (if it permits all). **Alert condition:** any `AllowlistUpdated` event, OR `allowlist()` returning anything other than [`0x02f1fa8b196d21c7b733eb2700b825611d8a38e5`](https://etherscan.io/address/0x02f1fa8b196d21c7b733eb2700b825611d8a38e5). Poll `allowlist()` hourly as a belt-and-braces check against a missed event; on trigger, treat the USTB position as frozen-risk until the new allowlist is reviewed and confirm `isAddressAllowedForFund(<our address>)` still returns true.
   - **`IsPublicInstrumentUpdated` — high.** Changes which allowlist permission model applies to every transfer. Alert on any event or on `isPublicInstrument()` returning anything other than `false`.
   - **`NameSet` / `SymbolSet` — informational.** Cosmetic, but a symbol change breaks the `Allowlistable` private-instrument lookup keyed on ticker, so alert and re-verify allowlist resolution.
   - Current state: `allowlist() == 0x02f1fa8b…`, `isPublicInstrument() == false`, `maximumOracleDelay() == 3600s`.
@@ -366,7 +366,7 @@ The fund uses a **laddered approach** with holdings spread across various near-t
 
 1. **EOA-controlled admin** — 4 distinct EOAs control token minting, forced burning, pausing, oracle changes, and proxy upgrades. No multisig, no timelock on any. The separation across 4 keys reduces single-key blast radius but none have multisig protection.
 2. **Offchain assets** — Underlying Treasury portfolio held offchain at BNY Mellon. Holdings are disclosed publicly but as a dated, unaudited, issuer-published snapshot; nothing is attested onchain and Chainlink Proof of Reserves is still not live.
-3. **No DEX liquidity** — Exit exclusively through Superstate's mint/redeem system. No secondary market. Transfer restricted to allowlisted addresses only. The onchain instant facility covers only ~1.1% of Ethereum supply.
+3. **No DEX liquidity, single exit channel** — Exit is exclusively through Superstate's mint/redeem system. No secondary market. Transfers restricted to allowlisted addresses only, and the *instant* onchain facility covers only ~1.1% of Ethereum supply — larger exits depend on Superstate processing them same-day offchain rather than on any contract guarantee.
 4. **No formal bug bounty rewards** — Researchers explicitly told not to expect compensation for vulnerability discoveries.
 5. **Permissioned access** — Only Qualified Purchasers ($5M+) who pass KYC can hold or transfer USTB. Limits DeFi composability.
 6. **Holder concentration** — top 10 addresses hold ~86.5% of supply, the largest single EOA 31.95%.
@@ -375,7 +375,7 @@ The fund uses a **laddered approach** with holdings spread across various near-t
 ### Critical Risks
 
 - **AllowList freeze risk** — If Superstate removes an address from the AllowList, the holder's tokens are **completely frozen with zero exit paths**. No transfers, no redemption, no DEX fallback. For DeFi protocols integrating USTB, this means Superstate has unilateral power to freeze an entire protocol's USTB position — a power it has already exercised once against Morpho Blue for its sister fund USCC (September 2025).
-- **Private key compromise** — 4 separate EOAs control different parts of the system. Compromise of `0xad309bb6f13074128b4f23ef9ea2fe8552afca83` alone could upgrade the USTB token to malicious code, mint unlimited tokens, burn tokens from any address, or swap the AllowList contract, all with no delay. Other EOAs control AllowList (freeze addresses), RedemptionIdle (withdraw USDC, pause redemptions), and Oracle (manipulate pricing, bounded below by the $7.00 subscription floor). Mitigated by Turnkey secure enclaves but each remains a single point of failure.
+- **Private key compromise** — 4 separate EOAs control different parts of the system. Compromise of [`0xad309bb6f13074128b4f23ef9ea2fe8552afca83`](https://etherscan.io/address/0xad309bb6f13074128b4f23ef9ea2fe8552afca83) alone could upgrade the USTB token to malicious code, mint unlimited tokens, burn tokens from any address, or swap the AllowList contract, all with no delay. Other EOAs control AllowList (freeze addresses), RedemptionIdle (withdraw USDC, pause redemptions), and Oracle (manipulate pricing, bounded below by the $7.00 subscription floor). Mitigated by Turnkey secure enclaves but each remains a single point of failure.
 - **Admin burn capability** — The `adminBurn()` function can confiscate tokens from any holder. While documented as a regulatory compliance tool, this gives Superstate unilateral power over user funds, and it has been used twice.
 - **No upgrade delay** — All 3 proxy contracts (USTB Token, AllowList, RedemptionIdle) can be upgraded immediately with no timelock for users or protocols (like Aave, Morpho, Spark) to react. July 2026 showed this in practice: two full implementation replacements in two days, no notice period.
 
@@ -417,10 +417,10 @@ The fund uses a **laddered approach** with holdings spread across various near-t
 > **Rubric deviation, stated explicitly.** USTB matches all three columns of the rubric's **score-5** Governance row: EOA control (not <3 signers — *zero* signers, four plain EOAs), no timelock, and effectively unlimited admin powers (mint, forced burn, freeze, upgrade). A strict rubric read scores this **5.0**, which is also the first critical gate. This report scores it **4.0**, consistent with the prior assessment, on three mitigations: (a) control is split across four independent keys, so no single compromise takes the whole system; (b) keys are held in Turnkey hardware TEEs rather than hot wallets; (c) Superstate operates as an SEC-registered investment adviser and registered transfer agent, so admin abuse carries direct securities-law consequences rather than being purely self-policed. The gate is recorded as **BORDERLINE PASS** rather than a clean pass for the same reason. Reviewers who weight onchain controls over legal accountability should read this subcategory as 5.0, which would move Centralization to (5.0+2.0+2.0)/3 = 3.0 — the same 3.0 this report already assigns after rounding, so **the final score is unchanged either way**.
 
 - **4 distinct EOAs** control the system with no multisig on any:
-  - `0xad309bb6f13074128b4f23ef9ea2fe8552afca83` — USTB Token owner + USTB ProxyAdmin owner (mint, adminBurn, pause, oracle, stablecoin config, proxy upgrades)
-  - `0x7747940adbc7191f877a9b90596e0da4f8deb2fe` — AllowList owner + AllowList ProxyAdmin owner (permissions, proxy upgrades)
-  - `0x8cf40e96e7d7fd8A7A9bEf70d3882fbBC4D40765` — RedemptionIdle owner + RedemptionIdle ProxyAdmin owner (pause redemptions, withdraw USDC, set fees, proxy upgrades)
-  - `0x4B1df64357a5D484563c9b7c16a80eD8B8fB1395` — Oracle owner (NAV checkpoints, price delta)
+  - [`0xad309bb6f13074128b4f23ef9ea2fe8552afca83`](https://etherscan.io/address/0xad309bb6f13074128b4f23ef9ea2fe8552afca83) — USTB Token owner + USTB ProxyAdmin owner (mint, adminBurn, pause, oracle, stablecoin config, proxy upgrades)
+  - [`0x7747940adbc7191f877a9b90596e0da4f8deb2fe`](https://etherscan.io/address/0x7747940adbc7191f877a9b90596e0da4f8deb2fe) — AllowList owner + AllowList ProxyAdmin owner (permissions, proxy upgrades)
+  - [`0x8cf40e96e7d7fd8A7A9bEf70d3882fbBC4D40765`](https://etherscan.io/address/0x8cf40e96e7d7fd8A7A9bEf70d3882fbBC4D40765) — RedemptionIdle owner + RedemptionIdle ProxyAdmin owner (pause redemptions, withdraw USDC, set fees, proxy upgrades)
+  - [`0x4B1df64357a5D484563c9b7c16a80eD8B8fB1395`](https://etherscan.io/address/0x4B1df64357a5D484563c9b7c16a80eD8B8fB1395) — Oracle owner (NAV checkpoints, price delta)
 - **No timelock** on any operation — upgrades, parameter changes, and critical functions execute immediately. Demonstrated in July 2026: two consecutive full implementation replacements in two days, each a single owner transaction with no notice window.
 - No onchain governance, no DAO, no community voting
 - **Widened owner surface:** `FundToken` v1.3.0 adds `setAllowlist()`, `setIsPublicInstrument()`, `setName()`, and `setSymbol()` to the owner's existing mint/burn/pause/oracle powers
@@ -477,7 +477,7 @@ The fund uses a **laddered approach** with holdings spread across various near-t
 
 **Score: (1.5 + 2.5) / 2 = 2.0/5** — improved from 2.25. The safest possible underlying asset with institutional-grade custody, and reserve transparency has materially improved: the full T-Bill portfolio is now public, machine-readable, and reconcilable against both reported AUM and onchain supply. What still holds the category back is that verification remains an offchain, issuer-published exercise — there is no onchain proof of reserves, and the holdings snapshot is dated and unaudited.
 
-#### Category 4: Liquidity Risk (Weight: 15%) — **3.0**
+#### Category 4: Liquidity Risk (Weight: 15%) — **2.0**
 
 - Onchain atomic redemption at NAV/S price via RedemptionIdle, 0 fee (8,738,475 USDC instant capacity verified onchain August 17, 2026 — only ~1.1% of Ethereum USTB, varies as refilled)
 - Offchain redemption improved: USDC payouts delivered same-day **including non-business days**, subject to available liquidity; USD wires same-day if requested before 1:00 PM ET
@@ -490,7 +490,22 @@ The fund uses a **laddered approach** with holdings spread across various near-t
 - DeFi integrations provide institutional exit paths (Aave Horizon ~$68M, Midas ~$63.5M, Frax ~$32.9M), though each of those venues depends on the same AllowList permission
 - Holder concentration is high: top 10 hold ~86.5%, so a single large redeemer can exhaust the instant facility many times over
 
-**Score: 3.0/5** — unchanged. The redemption mechanism is functional and got somewhat better this cycle (same-day USDC including weekends, instant capacity up to ~$8.7M, an additional book-entry exit), and the same-value asset mitigates waiting risk. Those gains are offset by the demonstrated use of the permission-revocation power against an integrated DeFi protocol and by an instant facility that still covers only ~1.1% of onchain supply. The core structural problem is unchanged: with no secondary market, if Superstate removes a holder from the AllowList the tokens are irrecoverably frozen with no fallback exit. The extremely high liquidity of the underlying Treasuries is irrelevant if the onchain exit is blocked.
+**Demonstrated redemption throughput (onchain, Feb 2025 – Aug 2026).** The exit path is not theoretical — it is one of the most heavily exercised parts of the system. Aggregating all `OffchainRedeem` events on the token and `RedeemV2` events on RedemptionIdle:
+
+| Metric | Value |
+|---|---|
+| Offchain redemptions | 9,082 events, 473,795,735 USTB |
+| Onchain atomic redemptions | 8,186 events, 93,156,551 USTB |
+| Combined | 17,268 events, ~566.9M USTB |
+| Largest single redemption | **28,190,683 USTB (~$302M at then-NAV)**, [July 2025](https://etherscan.io/tx/0x49eefbb55bcae635426ff7994dbcbe4c853cb0f230f6856a27be64b0e1ead466), executed from a Gnosis Safe |
+| Other $150M+ single exits | [18,116,960 USTB](https://etherscan.io/tx/0xd70423b90fe9c92b3adb95167dabf63d8c214ebaf07d7098b093f81c92938f52) and [17,623,587 USTB](https://etherscan.io/tx/0xbfcee3207a23debd202e0785d0168b57851123064f85c74f2a9916755a73d501), both April 2026 |
+| Recent monthly redemption volume | 22.6M USTB (Jul 2026), 66.3M USTB (Jun 2026) — multiples of total AUM per year |
+
+A single holder has exited ~$302M in one transaction, and ~$200M exits have happened twice more since. Redemptions ran continuously through the Invesco manager transition and the July 2026 contract migration without interruption.
+
+**Score: 2.0/5** — lowered from 3.0. On the rubric's three columns this asset scores at or near row 1: the exit is a **direct 1:1 redemption at NAV with zero fee and zero slippage** (it is a fund redemption, not a market trade, so there is no price impact at any size), same-day including non-business days for USDC, and the onchain atomic path is instant 24/7 up to facility capacity. The "liquidity depth >$10M" and "full exit with <0.5% impact" conditions are met empirically, not just on paper — $302M has cleared in a single transaction. Two factors hold it at 2.0 rather than 1.0 or 1.5: the *instant* onchain facility is only ~$8.7M (~1.1% of Ethereum supply), so anything larger depends on Superstate's same-day offchain processing rather than a contract guarantee; and there is no secondary market at all, so the redemption channel is the *only* channel.
+
+**On the AllowList freeze risk and why it is no longer scored here.** Prior versions scored this category 3.0 principally because delisting an address strands its tokens with no DEX fallback. That risk is real, is unchanged, and is documented above and in Critical Risks — but it is a *governance/centralization* failure mode, not a liquidity-depth one, and it is already priced into Category 2 (Governance 4.0, with the critical gate marked BORDERLINE PASS). Scoring it twice double-counted a single root cause and understated a redemption mechanism that demonstrably clears $300M tickets. Readers who prefer to keep the conditional freeze risk inside the liquidity score should read this category as 3.0, which would raise the final score from 2.10 to **2.25** — still LOW RISK.
 
 #### Category 5: Operational Risk (Weight: 5%) — **1.0**
 
@@ -512,9 +527,9 @@ The fund uses a **laddered approach** with holdings spread across various near-t
 | Audits & Historical | 1.25 | 20% | 0.25 |
 | Centralization & Control | 3.0 | 30% | 0.90 |
 | Funds Management | 2.0 | 30% | 0.60 |
-| Liquidity Risk | 3.0 | 15% | 0.45 |
+| Liquidity Risk | 2.0 | 15% | 0.30 |
 | Operational Risk | 1.0 | 5% | 0.05 |
-| **Final Score** | | | **2.25 / 5.0** |
+| **Final Score** | | | **2.10 / 5.0** |
 
 ### Risk Tier
 
@@ -528,20 +543,35 @@ The fund uses a **laddered approach** with holdings spread across various near-t
 
 **Final Risk Tier: LOW RISK**
 
-USTB benefits from the safest possible underlying asset class (U.S. Treasury Bills), great audit coverage across four firms, institutional-grade service providers, a strong legal structure, and two and a half years of incident-free operation. Reserve transparency is now a genuine strength rather than a gap: the full line-item T-Bill portfolio, daily NAV, AUM, and share count are published through an open API and reconcile to within 0.05% of reported AUM and to onchain supply.
+USTB benefits from the safest possible underlying asset class (U.S. Treasury Bills), great audit coverage across five firms, institutional-grade service providers, a strong legal structure, and two and a half years of incident-free operation. Two things are now demonstrated rather than asserted. Reserve transparency: the full line-item T-Bill portfolio, daily NAV, AUM, and share count are published through an open API and reconcile to within 0.05% of reported AUM and to onchain supply. And redemption capacity: ~567M USTB has been redeemed across 17,268 events since February 2025, including a single ~$302M exit, at NAV with zero fee and zero slippage.
 
 The dominant residual risk is unchanged and unimproved: the entire system is controlled by four EOAs with no multisig and no timelock, and the July 2026 migration — two complete implementation replacements in two days, executed in single owner transactions — showed exactly how fast that path moves. The owner's callable surface widened rather than narrowed, the forced-burn power has been exercised twice, and the AllowList revocation power has been used against an integrated DeFi protocol on the sister fund. Offchain reserve verification, while much better disclosed, is still issuer-published with no onchain attestation. These are partially mitigated by key separation across 4 EOAs, upgraded regulatory standing, secure key management (Turnkey TEEs), and the institutional framework around the fund.
 
 **Key conditions for exposure:**
 
 1. Monitor all 4 admin EOAs for ownership transfer events
-2. Monitor all 3 ProxyAdmins for contract upgrades (`Upgraded` events) and the USTB proxy's EIP-1967 implementation slot for drift from `0xb3ac55dd…`
+2. Monitor all 3 ProxyAdmins for contract upgrades (`Upgraded` events) and the USTB proxy's EIP-1967 implementation slot for drift from [`0xb3ac55dd…`](https://etherscan.io/address/0xb3ac55dd09aa70e9bfbb12f45cd38a1f1597588c)
 3. Monitor Oracle for `NewCheckpoint` events and NAV/Share feed for anomalies; alert on checkpoint age > 4 days
 4. Monitor RedemptionIdle USDC balance for redemption capacity (currently 8,738,475 USDC, ~1.1% of Ethereum supply)
 5. Monitor AllowList for `ProtocolAddressPermissionSet` changes affecting DeFi integrations — especially any revocation touching USTB
 6. Monitor the new v1.3.0 config events (`AllowlistUpdated`, `IsPublicInstrumentUpdated`, `NameSet`, `SymbolSet`)
 7. Reconcile the public holdings/NAV API against onchain supply weekly; alert if the holdings snapshot goes stale
 8. Verify Superstate's regulatory standing periodically (SEC adviser registration 801-132908, transfer agent status)
+
+**What would lower the final score (2.10), by leverage:**
+
+Weights are Audits 20% / Centralization 30% / Funds Management 30% / Liquidity 15% / Operational 5%, so a 1-point move is worth 0.20, 0.30, 0.30, 0.15 and 0.05 respectively. Operational and Historical are already at the rubric floor and cannot contribute.
+
+| Change | Category effect | Final |
+|---|---|---|
+| Multisig **and** timelock on all four owner roles | Governance 4.0 → 2.0; Centralization 3.0 → 2.0 | **1.80** |
+| Multisig only (no timelock), e.g. 5/9 Safe | Governance 4.0 → 3.0; Centralization 3.0 → 2.33 | **1.90** |
+| Chainlink Proof of Reserves live + attested holdings | Provability 2.5 → 1.5; Funds Mgmt 2.0 → 1.5 | **1.95** |
+| Funded bug bounty (>$1M) **and** an audit scoped to the deployed version | Audits 1.5 → 1.0; Cat 1 1.25 → 1.0 | **2.05** |
+| Instant redemption facility raised to >$50M, or a contractual redemption guarantee | Liquidity 2.0 → 1.5 | **2.03** |
+| All of the above | — | **1.53** |
+
+The single highest-leverage change is governance. Centralization carries 30% weight and is the only category still scoring 3.0; moving admin control to a multisig with a timelock is worth ~0.30 on its own — more than every transparency and audit improvement combined. Nothing in Funds Management, Liquidity or Operational can compensate for it, because those categories are already at or near their practical floors for an offchain-backed RWA.
 
 **Score-improving triggers:**
 
