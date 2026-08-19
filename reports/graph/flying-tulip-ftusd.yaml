@@ -1,0 +1,273 @@
+slug: flying-tulip-ftusd
+title: Flying Tulip ftUSD and Staked ftUSD - Contract Dependency Graph
+chain: ethereum
+
+categories:
+  - id: vault
+    label: Token / Vault
+  - id: strategy
+    label: Backing Custody
+  - id: governance
+    label: Governance
+  - id: infra
+    label: Protocol Infra
+  - id: dependency
+    label: External Dependency
+
+nodes:
+  # === Token / vault layer ===
+  - id: ftusd
+    label: ftUSD
+    address: "0xF7D85EC4E7710f71992752eac2111312e73E9C9C"
+    category: vault
+    note: FiatToken-style stablecoin, 6 dec, UUPS. Supply 4,196,697. blacklist + wipeBlacklistedAddress
+  - id: sftusd
+    label: sftUSD (Staked ftUSD)
+    address: "0xeb48218a4c35C814C7678cBcae88C6Ee037F7625"
+    category: vault
+    note: ERC-4626-style vault, 1,324,455 staked, 107 holders. Rate fixed at 1.000000 - yield is FT emissions only. Has its own wipeBlacklistedAddress
+
+  # === Protocol infra ===
+  - id: ftusd-core
+    label: ftUSD Core
+    address: "0x56c5892B0cF41B792217CCDD208f0FA85B178ca9"
+    category: infra
+    note: Sole minter(). Debt-ceiling module gate, globalDebtCeiling 100M
+  - id: mint-and-redeem
+    label: MintAndRedeem
+    address: "0xAa48EcBC843cF7E9A29155D112b8Cb27902bD23C"
+    category: infra
+    note: Only enabled mint module. 7 bps in/out. Redeem capacity capped by FT Lend cash - USDT ~15% short. Rate-limited 10%/window, 6h delay
+  - id: ftusd-oracle
+    label: ftUSD Oracle Proxy
+    address: "0xA69f7a38B6c91a4bc2477f097DC8a1F16DAADFf8"
+    category: infra
+    note: FtUsdMintRedeemOracleProxy - price = f(USDC price, cumulative mint history). Structurally BLIND to ftUSD backing; 0 bps deviation tolerance
+  - id: staking-breaker
+    label: Staking CircuitBreaker
+    address: "0xCB210509F5AE2b3843B7Fb8Bb90bAFF9cE4f7355"
+    category: infra
+    note: 10% of TVL per window, 6h settlement delay, admin-settable up to 7 days
+  - id: leverage-engine
+    label: LeverageRfqEngine
+    address: "0x8263a07504d93cB95e0a74f3627bb15faaf140e2"
+    category: infra
+    note: Executes hedge orders. broadcastOrder has no oracle and no price bound
+
+  # === Backing custody ===
+  - id: ftusd-usdc-wrapper
+    label: ftUSD USDC Wrapper
+    address: "0x6aaf84563Cdb03a22Cd92EE2553698beE87E837D"
+    category: strategy
+    note: Holds 2,781,367 USDC of backing
+  - id: ftusd-usdt-wrapper
+    label: ftUSD USDT Wrapper
+    address: "0x28CCa8eEA2cD0498cE91A9da15772A1ce42347D6"
+    category: strategy
+    note: Holds 1,417,610 USDT of backing
+  - id: ftftusd-wrapper
+    label: ftftUSD Wrapper
+    address: "0xB44a9C40EFc05Eb014EfFEac3CBed6A31F8cB87f"
+    category: strategy
+    note: ftYieldWrapperV2 holding staked ftUSD. 0 strategies configured, deployed = 0
+  - id: delta-neutral
+    label: Delta Neutral Strategy
+    address: "0xe0E445967256EE60111e243e0F0F94DD1D351A59"
+    category: strategy
+    note: MultiCollateralDeltaNeutralStakingStrategy. Deploys 100% of backing into FT Lend. Order validation has NO price or slippage bound
+
+  # === Governance ===
+  - id: admin-safe
+    label: Admin Safe (3/5)
+    address: "0x1118e1c057211306a40A4d7006C040dbfE1370Cb"
+    category: governance
+    note: No timelock. ftUSD owner + masterMinter + pauser + blacklister; owner of every contract here
+  - id: strategy-operator-safe
+    label: Strategy Operator Safe (3/5)
+    address: "0x5557729b169082f07d3131D560E2f2cb5e6c48f6"
+    category: governance
+    note: Identical five signers to the admin Safe
+  - id: strategy-operator-eoa
+    label: Strategy Operator (EOA)
+    address: "0x8dc8f616af6c146906b218f2acbdc2d27c9ac221"
+    category: governance
+    note: PLAIN EOA, codesize 0. Granted operator August 3 2026. Can pre-sign trades of the backing at an arbitrary price
+  - id: epoch-settler
+    label: Epoch Settler
+    address: "0xBAE14f050Fb8cDa4D16ab47DBEC67793c7c0b566"
+    category: governance
+    note: Funds FT reward epochs. Discretionary - nothing obliges it
+  - id: yield-claimer
+    label: YieldClaimer
+    address: "0x88432bB6EA62e774cB6d87995CC5277568d01397"
+    category: governance
+    note: Holds wrapper execute() arbitrary-call and forceWithdrawToWrapper
+
+  # === External dependencies ===
+  - id: dep-ftlend
+    label: FT Lend (PositionsManager)
+    address: "0xbe4050a73a7Fb384c65E885a15C33461A4B20055"
+    category: dependency
+    note: Holds 100% of ftUSD backing. See the companion FT Lend report
+  - id: dep-curve
+    label: Curve ftUSD/USDC
+    address: "0xafec61e7a604f8f81f7cab64ec75bfa07c542630"
+    category: dependency
+    note: StableSwap-NG ~1.87M, 500K clears at 0.30%. NOT independent - 100% of LP is a Curve gauge, 99.998% of the gauge is ONE EOA, gauge manager is an admin Safe signer
+  - id: dep-morpho
+    label: Morpho (2 ftUSD markets)
+    address: "0xBBBBBbbBBb9cC5e90e3b3Af64bdAF62C37EEFFCb"
+    category: dependency
+    note: USDC/ftUSD Blue markets at 86% and 91.5% LLTV. Holds 629,675 ftUSD (15% of supply). Live market 90.1% utilized
+  - id: morpho-oracle
+    label: Morpho ftUSD Oracle
+    address: "0x7887afbe7581eb01b3d91d80c198b0275feab779"
+    category: dependency
+    note: MorphoChainlinkOracleV2. BASE_FEED_1 is Flying Tulip's OWN ftUSD feed - Morpho does not price ftUSD independently
+  - id: dep-lido
+    label: Lido / wstETH
+    address: "0x7f39C581F595B53c5cb19bD0b3f8dA6c935E2Ca0"
+    category: dependency
+    note: Hedge staking leg, 76.54 wstETH held as FT Lend collateral
+  - id: dep-chainlink
+    label: Chainlink USDC/USD
+    address: "0x8fFfFfd4AfB6115b954Bd326cbe7B4BA576818f6"
+    category: dependency
+    note: Base leg of the ftUSD oracle
+
+edges:
+  # === Governance ===
+  - from: admin-safe
+    to: ftusd
+    kind: mints
+    label: masterMinter can enable an arbitrary mint module
+  - from: admin-safe
+    to: ftusd-core
+    kind: controls
+    label: owner - module enablement and debt ceiling
+  - from: admin-safe
+    to: mint-and-redeem
+    kind: controls
+    label: owner - fees, caps, sweepExcess, recoverERC20
+  - from: admin-safe
+    to: sftusd
+    kind: controls
+    label: owner - upgrade, pause, wipeBlacklistedAddress
+  - from: admin-safe
+    to: staking-breaker
+    kind: controls
+    label: owner - settlementDelay up to 7 days
+  - from: admin-safe
+    to: delta-neutral
+    kind: controls
+    label: owner - setOperator, setLeverageEngine, execute()
+  - from: admin-safe
+    to: ftusd-oracle
+    kind: controls
+    label: owner - pause, bounds, staleness
+  - from: epoch-settler
+    to: sftusd
+    kind: holds-role
+    label: settleEpoch - discretionary FT rewards
+  - from: strategy-operator-safe
+    to: delta-neutral
+    kind: holds-role
+    label: operator - approves hedge orders
+  - from: strategy-operator-eoa
+    to: delta-neutral
+    kind: holds-role
+    label: operator - EOA, unbounded order price
+  - from: yield-claimer
+    to: ftusd-usdc-wrapper
+    kind: holds-role
+    label: execute() arbitrary call
+  - from: yield-claimer
+    to: ftusd-usdt-wrapper
+    kind: holds-role
+    label: execute() arbitrary call
+
+  # === Mint path ===
+  - from: mint-and-redeem
+    to: ftusd-core
+    kind: routes-through
+    label: collateralized mint/redeem entry
+  - from: ftusd-core
+    to: ftusd
+    kind: mints
+    label: sole minter, module-gated
+
+  # === Backing custody chain ===
+  - from: mint-and-redeem
+    to: ftusd-usdc-wrapper
+    kind: allocates-to
+    label: deposits USDC on mint
+  - from: mint-and-redeem
+    to: ftusd-usdt-wrapper
+    kind: allocates-to
+    label: deposits USDT on mint
+  - from: ftusd-usdc-wrapper
+    to: delta-neutral
+    kind: deposits-into
+    label: "2.78M USDC"
+  - from: ftusd-usdt-wrapper
+    to: delta-neutral
+    kind: deposits-into
+    label: "1.42M USDT"
+  - from: delta-neutral
+    to: dep-ftlend
+    kind: deposits-into
+    label: 100% of backing - 35.1% of FT Lend TVL
+  - from: delta-neutral
+    to: leverage-engine
+    kind: routes-through
+    label: hedge orders, no price bound
+  - from: delta-neutral
+    to: dep-lido
+    kind: routes-through
+    label: wstETH staking leg
+
+  # === Staking path ===
+  - from: sftusd
+    to: ftftusd-wrapper
+    kind: allocates-to
+    label: 1,324,455 ftUSD held idle
+  - from: ftftusd-wrapper
+    to: staking-breaker
+    kind: routes-through
+    label: 10%/window outflow limit
+  - from: sftusd
+    to: ftusd
+    kind: routes-through
+    label: underlying asset
+
+  # === Pricing ===
+  - from: ftusd-oracle
+    to: mint-and-redeem
+    kind: routes-through
+    label: reads redeem factors - USDC price + mint history, not collateral
+  - from: ftusd-oracle
+    to: dep-chainlink
+    kind: routes-through
+    label: USDC/USD base leg
+
+  # === External venues ===
+  - from: ftusd
+    to: dep-curve
+    kind: routes-through
+    label: only external exit and price reference
+  - from: ftusd
+    to: dep-morpho
+    kind: routes-through
+    label: 629,675 posted as collateral (15% of supply)
+  - from: dep-morpho
+    to: morpho-oracle
+    kind: routes-through
+    label: prices ftUSD collateral
+  - from: morpho-oracle
+    to: ftusd-oracle
+    kind: routes-through
+    label: BASE_FEED_1 - backing-blindness propagates to Morpho
+  - from: morpho-oracle
+    to: dep-chainlink
+    kind: routes-through
+    label: QUOTE_FEED_1 USDC/USD
