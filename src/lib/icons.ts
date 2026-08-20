@@ -6,6 +6,7 @@ const CHAIN_ID_MAP: Record<string, number> = {
   optimism: 10,
   bnb: 56,
   avalanche: 43114,
+  monad: 143,
 };
 
 export function protocolIconUrl(defillamaSlug: string): string {

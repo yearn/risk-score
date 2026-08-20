@@ -1,0 +1,342 @@
+slug: curvance-hyausd
+title: Curvance hyAUSD — Contract Dependency Graph
+chain: monad
+categories:
+  - { id: vault, label: Vault }
+  - { id: strategy, label: Lending Market }
+  - { id: governance, label: Governance }
+  - { id: infra, label: Protocol Infrastructure }
+  - { id: dependency, label: External Dependency }
+
+nodes:
+  # --- Governance ---
+  - id: dao-safe
+    label: Curvance DAO Safe (3/4)
+    address: "0x0Acb7eF4D8733C719d60e0992B489b629bc55C02"
+    category: governance
+    note: >-
+      Gnosis Safe v1.4.1, threshold 3 of 4. Holds only `hasDaoPermissions` in the
+      CentralRegistry — enough to call `skim()` on the vault (which can only sweep
+      idle underlying, always zero here) and to receive performance-fee shares when
+      a fee is enabled. It cannot pause, rebalance, change caps, or add markets.
+
+  - id: emergency-council
+    label: Emergency Council Safe (4/5)
+    address: "0x379D4a8FBc23A8Fd8c2b3738Dbf1fEBe9a64399c"
+    category: governance
+    note: >-
+      Gnosis Safe, threshold 4 of 5. Holds DAO + elevated + market permissions with
+      no timelock delay. This is the top of the trust chain: it can set the
+      performance fee (up to 50%), pause deposits, change allocation caps, remove
+      markets, grant any permission to any address, and — via `addMarketManager` +
+      `addApprovedAsset` — register a market it controls and have a harvester
+      rebalance the vault's AUSD into it. Both observed cap changes (Jul 4 and
+      Aug 13, 2026) were executed through this Safe rather than the timelock.
+
+  - id: dao-timelock
+    label: DAOTimelock (5 days)
+    address: "0x2677738657F27e1A3591E00AD7E5a78807688C08"
+    category: governance
+    note: >-
+      `getMinDelay()` = 432,000 seconds (5 days). Holds the same DAO + elevated +
+      market permissions as the Emergency Council. Because both routes exist in
+      parallel, the delay is optional in practice — it is an alternative path, not
+      a gate on privileged actions.
+
+  - id: pause-safe
+    label: Mass-Pause Safe (1/5)
+    address: "0x25D4134861b30Ba7215d2A280DD84C57c5780902"
+    category: governance
+    note: >-
+      Gnosis Safe with `getThreshold()` = 1 over the same five signers as the
+      Emergency Council. Owns the pause-only ProtocolManagerMassPause key, so any
+      single signer can redeem-pause every Curvance market. Because the optimizer
+      reverts all withdrawals when any approved market is redeem-paused, this is a
+      single-signer freeze of 100% of hyAUSD exits — and this key cannot unpause.
+
+  - id: mass-pause
+    label: ProtocolManagerMassPause (pause-only)
+    address: "0x89d2253b13c718d06b78fcce3d973a520bd07803"
+    category: infra
+    note: >-
+      Holds `hasMarketPermissions`. `pauseAll([])` pauses every registered market;
+      `canUnpause` is false, so it is a one-way emergency brake. A second instance
+      (0xbb82aee1…ad73), owned by the Emergency Council, can unpause.
+
+  - id: harvester-keeper
+    label: Harvest keeper EOA (active)
+    address: "0xd21dc65f42fb039a1c403a38c18c2731211ecbc7"
+    category: infra
+    note: >-
+      Plain EOA holding `hasHarvestPermissions`, and the address that has executed
+      every rebalance to date — 64 of them since June 24, 2026 at a 3-hour median
+      cadence. It can call `rebalance()`, moving AUSD between already-approved
+      markets up to the configured caps. It cannot move assets out of the vault, and
+      rebalance conserves total assets onchain, but the bounds argument is
+      caller-supplied so it protects the caller, not depositors.
+
+  - id: harvester-deployer
+    label: Harvest keeper EOA (dormant)
+    address: "0x97f6886d04c804a278caf904e1adf5864b384521"
+    category: infra
+    note: >-
+      Second plain EOA with `hasHarvestPermissions` — the original protocol deployer,
+      which also deployed the CentralRegistry. It has not executed a rebalance, but
+      the permission is live and carries the same powers as the active keeper. Held
+      market permissions at launch; those were revoked in November 2025.
+
+  - id: central-registry
+    label: CentralRegistry
+    address: "0x1310f352f1389969Ece6741671c4B919523912fF"
+    category: governance
+    note: >-
+      Non-proxy permission root for the whole protocol. Four boolean mappings —
+      hasDaoPermissions, hasElevatedPermissions, hasMarketPermissions,
+      hasHarvestPermissions — decide who may act on the optimizer. The optimizer
+      stores this address as `immutable`, so the vault's permission root can never
+      be re-pointed. Registers the 26 approved market managers.
+
+  # --- Vault ---
+  - id: hyausd
+    label: hyAUSD — High Yield AUSD Vault
+    address: "0xaD663aC84052b52BE4ed1b27BA416505e84a00Bf"
+    category: vault
+    note: >-
+      `LendingOptimizer`, non-proxy and source-verified, 6 decimals. At assessment
+      (block 96,882,186): totalAssets 18,351,894 AUSD, totalSupply 18,206,533
+      shares, exchange rate 1.007984, performance fee 0 BPS, deposits active.
+      Mint is permissionless and atomically collateral-backed; 77,777 dead shares
+      sit at address(0) as inflation protection. Only 21% of NAV (≈3.85M AUSD) is
+      instantly redeemable — withdrawals are capped by the underlying markets'
+      idle cash, and a redeem-pause on any single approved market blocks all exits.
+
+  # --- Lending markets ---
+  - id: causd-pt
+    label: cAUSD — PT market (60.0%)
+    address: "0xbDe2459A033f20442CE18483CDD48643D80C6c93"
+    category: strategy
+    note: >-
+      Curvance BorrowableCToken lending AUSD against Pendle PT-AUSD-8OCT2026.
+      Supply 23,366,343 AUSD, debt 21,257,356, idle 2,108,967 — utilisation 90.97%.
+      Allocation cap 90%. Borrower interest is taxed 10% (`interestFee` 1000 BPS)
+      before reaching suppliers. Bad debt here is socialised into the cAUSD
+      exchange rate and flows straight into hyAUSD NAV.
+
+  - id: causd-savusd
+    label: cAUSD — savUSD market (40.0%)
+    address: "0xD1BFEA1728ffe98F515f26082fACfcc3341691D4"
+    category: strategy
+    note: >-
+      Curvance BorrowableCToken lending AUSD against Avant savUSD. Supply
+      16,881,395 AUSD, debt 15,135,535, idle 1,745,841 — utilisation 89.66%. The
+      vault is at its 40% allocation cap, which was raised from 20% to 30% on
+      July 4, 2026 and to 40% on August 13, 2026, both times through the
+      Emergency Council rather than the timelock.
+
+  - id: mm-pt
+    label: MarketManagerIsolated — PT
+    address: "0xdDd5681fCBB040e3bD3c126AA6caf1677DFCEc2e"
+    category: infra
+    note: >-
+      Correlated-asset isolated market. PT collateral ratio 9500 BPS (95% LTV),
+      soft-liquidation requirement 10300 BPS, hard 10250 BPS; collateral cap 30M PT,
+      debt cap 30M AUSD. redeemPaused/transferPaused/liquidationPaused all = 1
+      (active). Holds the redeem-pause switch that can freeze hyAUSD withdrawals.
+
+  - id: mm-savusd
+    label: MarketManagerIsolated — savUSD
+    address: "0x4B0a39eCC3e5A5dA3ce6D492D4D255cD1F0209F7"
+    category: infra
+    note: >-
+      Correlated-asset isolated market. savUSD collateral ratio 9200 BPS (92% LTV),
+      soft-liquidation requirement 10450 BPS, hard 10350 BPS; collateral cap 20M
+      savUSD, debt cap 20M AUSD. redeemPaused/transferPaused/liquidationPaused all
+      = 1 (active).
+
+  - id: cpt-collateral
+    label: cPT-AUSD-8OCT2026 (collateral)
+    address: "0x6eD14BA7d1Ec30a97E21d0D8037867535BA43bF8"
+    category: infra
+    note: >-
+      Collateral cToken for the PT market. 23,089,873 PT posted ≈ $22.77M at the
+      oracle price of $0.98590, against 21,257,356 AUSD of debt — market-wide
+      collateral ratio ≈107.1% versus a 103% soft-liquidation requirement.
+
+  - id: csavusd-collateral
+    label: csavUSD (collateral)
+    address: "0x2552232caBd544b67eEa900A951346D3272c7c2f"
+    category: infra
+    note: >-
+      Collateral cToken for the savUSD market. 15,364,191 savUSD posted ≈ $18.34M
+      at the oracle price of $1.19363, against 15,135,535 AUSD of debt —
+      market-wide collateral ratio ≈121.2% versus a 104.5% soft-liquidation
+      requirement.
+
+  # --- External dependencies ---
+  - id: pendle-pt
+    label: Pendle PT-AUSD-8OCT2026
+    address: "0x9FC74f8Ed616B5BaF52a170caa97d6d3898602d1"
+    category: dependency
+    note: >-
+      Pendle principal token on Monad, `expiry()` = 1,791,417,600 (October 8, 2026).
+      Redeems 1:1 into AUSD at maturity through SY AUSD, whose yield token is AUSD
+      itself — so at maturity the collateral becomes the same asset the vault lends.
+      Before maturity the position carries duration and liquidation-execution risk
+      on a thin Monad Pendle market. Market A must be rolled or wound down by
+      October 8, 2026.
+
+  - id: savusd
+    label: savUSD (Monad, CCIP burn-mint)
+    address: "0x9648dB94F1e6B19e7D755585542981F97dc806c6"
+    category: dependency
+    note: >-
+      Not the canonical Avant token — `typeAndVersion()` reports
+      "FactoryBurnMintERC20 1.6.2". Its sole minter and burner is a Chainlink CCIP
+      BurnMintTokenPool. Tracing the canonical stack on Avalanche shows the backing
+      is ~99.4% offchain: $0.01 of collateral sits in AvantMintingV2 and $741,565 at
+      the sole registered custodian (itself an EOA) against 127,269,028 avUSD
+      outstanding, because collateral is routed straight from depositor to custodian
+      at mint time. One plain EOA (0xd4d23209…57cb, no code on either chain) is
+      owner/admin of avUSD, savUSD, the minting contract and this token's CCIP pool,
+      and avUSD's setMinter is onlyOwner. Bounded on two counts, both verified:
+      burnFrom still spends allowance so the market's savUSD cannot be seized, and
+      rescueTokens blocks draining the staking vault so the savUSD/avUSD rate holds.
+
+  - id: avant-admin
+    label: Avant admin EOA (single key)
+    address: "0xd4d23209aaE8630bf386b7393763a5b7865e57cb"
+    chain: avalanche
+    category: governance
+    note: >-
+      An address with no code on Avalanche (nonce 270) or Monad — plausibly an MPC
+      wallet rather than a hot EOA, since MPC is indistinguishable from an EOA
+      onchain and Avant documents MPC custody plus an ongoing Trail of Bits OPSEC
+      engagement. What is verifiable either way: no onchain quorum, no timelock. It is simultaneously owner() of avUSD, owner() and
+      DEFAULT_ADMIN_ROLE of savUSD, owner() + DEFAULT_ADMIN_ROLE +
+      COLLATERAL_MANAGER_ROLE of AvantMintingV2, and owner() + getCCIPAdmin() of the
+      Monad savUSD token and its CCIP pool. avUSD is Ownable2Step with
+      setMinter(address,bool) gated only by onlyOwner, so this one key can appoint
+      itself a minter and issue unbacked avUSD; maxMintPerBlock (25,000,000 avUSD) is
+      also set by it. This is the single largest counterparty concentration behind
+      40% of the vault.
+
+  - id: ccip-pool
+    label: CCIP BurnMintTokenPool (savUSD)
+    address: "0xc5cAAC64Dd93b6E2B369d52610Fdae069e568D3E"
+    category: dependency
+    note: >-
+      BurnMintTokenPool 1.5.1, owner 0xd4d23209…57cb (also the token's owner and
+      CCIP admin). Serves 7 remote lanes; the Avalanche lane's inbound bucket holds
+      44,881,724 savUSD of capacity refilling at ~519 savUSD/s — roughly 3× the
+      15.36M savUSD actually posted as collateral, so the rate limiter is not a
+      meaningful throttle at this size. A compromise of the CCIP path or of the pool
+      owner could mint unbacked savUSD, post it as collateral, and borrow out the
+      savUSD market's AUSD, leaving bad debt for hyAUSD holders.
+
+  - id: ausd
+    label: Agora AUSD (underlying)
+    address: "0x00000000eFE302BEAA2b3e6e1b18d08D69a9012a"
+    category: dependency
+    note: >-
+      The vault's underlying asset and the only thing it ever holds. Upgradeable
+      ERC-1967 proxy (implementation 0xc1e3c7d4…12da, proxy admin 0xB8fCC66d…dedee),
+      132,763,800 AUSD supply on Monad. On this chain the MINTER_ROLE, FREEZER_ROLE
+      and ACCESS_CONTROL_MANAGER_ROLE are each held by a plain EOA, and
+      `isFreezingPaused()` is false — so the freezer can freeze the vault's or the
+      markets' AUSD balances, and the access-control manager can regrant every role.
+
+  - id: oracle-manager
+    label: OracleManager + ChainlinkAdaptor
+    address: "0x65ADF8aE8420A58278De066593E6fF1713A137c5"
+    category: dependency
+    note: >-
+      All three relevant assets (PT-AUSD, savUSD, AUSD) resolve through a single
+      ChainlinkAdaptor at 0x42B318ab…22e1 — there is no redundant pricing route per
+      asset. Note that the OracleManager listed on the public Monad Contract
+      Addresses page (0x32faD39e…CDb6) is not this one; the docs page is stale.
+
+  - id: pt-aggregator
+    label: PendlePTAggregator (model discount)
+    address: "0x3ED78CA090d4B20aC043505A880A04B0f23B6134"
+    category: dependency
+    note: >-
+      Prices PT as AUSD/USD multiplied by a fixed linear discount to maturity,
+      returning exactly par once expired. Current output $0.98590 implies ≈9.8%
+      annualised. This removes AMM-manipulation risk, but it is not a market price:
+      if PT trades below the model, liquidations do not trigger and the market can
+      be economically under-collateralized while still reporting 107% CR.
+
+  - id: savusd-aggregator
+    label: CombinedAggregator (savUSD) — no avUSD feed
+    address: "0x7CB9a321c30c753c3F7C6af7Ae8776E5C1524999"
+    category: dependency
+    note: >-
+      Prices savUSD as USDC/USD × (savUSD/avUSD exchange rate). There is no
+      avUSD/USD feed anywhere in the route, so avUSD is assumed to be worth exactly
+      one USDC. Curvance's own contract comments name this limitation. An avUSD
+      depeg — the realistic failure mode for an offchain delta-neutral synthetic
+      dollar — would be invisible to the oracle while 92%-LTV loans stayed open.
+
+  - id: ausd-aggregator
+    label: Chainlink AUSD/USD (DualAggregator)
+    address: "0x253c95994246DE5A83AAFE82909681522DA051Af"
+    category: dependency
+    note: >-
+      Chainlink OCR2 DualAggregator 1.0.0 on Monad, reached through EACAggregatorProxy
+      0xEd21588e…eBf3. Owned by Chainlink's own 4-of-N Safe (0x73877Fe3…c4F1). Feeds
+      were fresh at assessment time. Feeds the PT aggregator as well as pricing AUSD
+      itself.
+
+  - id: share-collateral-markets
+    label: hyAUSD-as-collateral markets (×2)
+    address: "0xbaAD847D1Adcf143eE4Eb4DCFDd17dbB93d9cA30"
+    category: dependency
+    note: >-
+      Two LendingOptimizerShareCToken markets accept hyAUSD itself as collateral
+      (this one, plus 0xc3DfC3CD…7F28). This one already holds 494,923 hyAUSD, 2.72%
+      of supply. A liquidation cascade in these markets would force hyAUSD
+      redemptions into the same ~3.85M AUSD of idle liquidity that ordinary holders
+      depend on, so it competes with — rather than adds to — exit capacity.
+
+edges:
+  # Governance / control
+  - { from: emergency-council, to: central-registry, kind: holds-role, label: "DAO + elevated + market permissions, no delay" }
+  - { from: dao-timelock,      to: central-registry, kind: holds-role, label: "DAO + elevated + market permissions, 5-day delay" }
+  - { from: dao-safe,          to: central-registry, kind: holds-role, label: "DAO permissions only" }
+  - { from: central-registry,  to: hyausd,           kind: controls,   label: "immutable permission root — gates fee, pause, caps, market set, rebalance" }
+  - { from: pause-safe,        to: mass-pause,       kind: controls,   label: "owner (1-of-5) — pause-only, cannot unpause" }
+  - { from: mass-pause,        to: mm-pt,            kind: holds-role, label: "market permissions — can redeem-pause" }
+  - { from: mass-pause,        to: mm-savusd,        kind: holds-role, label: "market permissions — can redeem-pause" }
+  - { from: harvester-keeper,   to: hyausd,           kind: holds-role, label: "harvest permissions — rebalance(); 64 executions to date" }
+  - { from: harvester-deployer, to: hyausd,           kind: holds-role, label: "harvest permissions — rebalance(); dormant but live" }
+  - { from: central-registry,  to: mm-pt,            kind: manages,    label: "registered market manager" }
+  - { from: central-registry,  to: mm-savusd,        kind: manages,    label: "registered market manager" }
+  - { from: mm-pt,             to: causd-pt,         kind: manages,    label: "listing, pauses, caps, LTV 95%" }
+  - { from: mm-savusd,         to: causd-savusd,     kind: manages,    label: "listing, pauses, caps, LTV 92%" }
+  - { from: mm-pt,             to: cpt-collateral,   kind: manages,    label: "collateral config" }
+  - { from: mm-savusd,         to: csavusd-collateral, kind: manages,  label: "collateral config" }
+
+  # Money flow
+  - { from: hyausd,        to: causd-pt,           kind: allocates-to,   label: "60.0%" }
+  - { from: hyausd,        to: causd-savusd,       kind: allocates-to,   label: "40.0%" }
+  - { from: causd-pt,      to: ausd,               kind: deposits-into,  label: "lends AUSD, 90.97% utilised" }
+  - { from: causd-savusd,  to: ausd,               kind: deposits-into,  label: "lends AUSD, 89.66% utilised" }
+  - { from: cpt-collateral,     to: pendle-pt,     kind: routes-through, label: "23.09M PT posted as collateral" }
+  - { from: csavusd-collateral, to: savusd,        kind: routes-through, label: "15.36M savUSD posted as collateral" }
+  - { from: pendle-pt,     to: ausd,               kind: routes-through, label: "redeems 1:1 at maturity, Oct 8 2026" }
+
+  # Mint authority on the bridged collateral
+  - { from: ccip-pool, to: savusd, kind: mints, label: "sole minter/burner — CCIP burn-and-mint" }
+  - { from: avant-admin, to: ccip-pool, kind: controls, label: "owner() of the pool and getCCIPAdmin() of the token — can repoint the minter" }
+  - { from: avant-admin, to: savusd, kind: mints, label: "grantMintRole is onlyOwner — admin can grant itself minter in one call (simulated: succeeds from owner, reverts OnlyCallableByOwner otherwise)" }
+
+  # Oracles
+  - { from: oracle-manager,    to: cpt-collateral,     kind: routes-through, label: "single ChainlinkAdaptor, no redundant route" }
+  - { from: oracle-manager,    to: csavusd-collateral, kind: routes-through, label: "single ChainlinkAdaptor, no redundant route" }
+  - { from: pt-aggregator,     to: oracle-manager,     kind: routes-through, label: "PT = AUSD/USD × linear discount" }
+  - { from: savusd-aggregator, to: oracle-manager,     kind: routes-through, label: "savUSD = USDC/USD × savUSD/avUSD" }
+  - { from: ausd-aggregator,   to: pt-aggregator,      kind: routes-through, label: "AUSD/USD base feed" }
+  - { from: ausd-aggregator,   to: oracle-manager,     kind: routes-through, label: "AUSD/USD" }
+
+  # Reflexive leverage on the share token
+  - { from: share-collateral-markets, to: hyausd, kind: routes-through, label: "hyAUSD accepted as collateral — competes for exit liquidity" }

@@ -740,6 +740,37 @@ protocols:
     infrastructure:
     - Aera
     - Circle CCTP
+  curvance_hyausd:
+    name: Curvance (hyAUSD)
+    chain: monad
+    type: yield_vault
+    address: '0xaD663aC84052b52BE4ed1b27BA416505e84a00Bf'
+    report: reports/report/curvance-hyausd.md
+    collateral:
+    - asset: AUSD
+    yield_sources:
+    - protocol: curvance_markets_ausd
+      assets:
+      - AUSD
+      label: Curvance isolated AUSD lending markets (PT-AUSD 60%, savUSD 40%)
+    infrastructure:
+    - Chainlink
+    - Chainlink CCIP
+    - Pendle
+  curvance_markets_ausd:
+    name: Curvance isolated AUSD markets (Monad)
+    chain: monad
+    type: lending_market
+    address: '0xbDe2459A033f20442CE18483CDD48643D80C6c93'
+    collateral:
+    - asset: PT-AUSD-8OCT2026
+      allocation: 60.0
+    - asset: savUSD
+      allocation: 40.0
+    infrastructure:
+    - Chainlink
+    - Chainlink CCIP
+    - Pendle
   centrifuge_jaaa:
     name: Centrifuge (JAAA)
     chain: ethereum
