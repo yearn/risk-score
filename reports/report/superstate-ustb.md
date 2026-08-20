@@ -143,7 +143,7 @@ Superstate is **not** listed on the SEAL Safe Harbor registry. This is typical f
 - **AUM Growth:**
   - Feb 2024: Launch
   - Oct 2024: ~$114M ([LlamaRisk assessment](https://www.llamarisk.com/research/2024-10-07t21-32-09-000z), October 2024)
-  - Mar 2025: ~$300M allocated by Spark alone
+  - Apr 2025: Sky executive vote onboards USTB to the Spark Liquidity Layer (Spark Tokenization Grand Prix) with a **300M USDC deposit rate-limit ceiling**; Spark subscribes ~$300.1M over five tranches in April and fully exits in July 2025
   - Mar 2026: Invesco partnership announced — Invesco Advisers becomes external investment manager, BNY Mellon replaces UMB Bank as custodian. ~$650M+ total AUM, ~$572M onchain TVL (DeFiLlama)
   - Apr 2026: onchain USTB TVL peaks at ~$923.8M (April 28, DeFiLlama)
   - Jun 2026: $948.1M total AUM, 85.32M shares outstanding, NAV $11.112749 (Superstate NAV API, June 13)
@@ -211,7 +211,7 @@ The fund uses a **laddered approach** with holdings spread across various near-t
   - **Midas RedemptionVault** ([`0x569d7dcc…`](https://etherscan.io/address/0x569d7dccbf6923350521ecbc28a555a500c4f0ec)): 5,675,392.49 USTB (~$63.5M), 8.19% of supply
   - **Frax FrxUSDCustodian** ([`0x5fbaa3a3…`](https://etherscan.io/address/0x5fbaa3a3b489199338fbd85f7e3d444dc0504f33)): 2,941,516.81 USTB (~$32.9M), 4.24% of supply
   - **BitGo:** a `WalletSimple` multisig ([`0xbd02c511…`](https://etherscan.io/address/0xbd02c51150a4ab6ce97b9de2025644594f3e75b8)) holds 4,483,832.09 USTB (~$50.1M), consistent with the documented tri-party derivative collateral role
-  - **Spark Protocol:** the Spark ALM Proxy ([`0x1601843c…`](https://etherscan.io/address/0x1601843c5E9bC251A3272907010AFa41Fa18347E)) holds **0 USTB** today; the March 2025 $300M allocation is a historical fact, and Spark's more recent Superstate exposure (~$100M, October 2025) went to USCC rather than USTB. Any remaining Spark USTB exposure is not attributable onchain — `TODO`: confirm via Spark governance disclosures.
+  - **Spark Protocol / Sky:** the Spark ALM Proxy ([`0x1601843c…`](https://etherscan.io/address/0x1601843c5E9bC251A3272907010AFa41Fa18347E)) holds **0 USTB** and has done since July 2025 — see "Spark's entry and full exit" below. Spark's current Superstate exposure is to the sister fund **USCC**, not USTB, onboarded by the [October 16, 2025 Sky executive](https://github.com/sky-ecosystem/executive-votes/blob/main/2025/executive-vote-2025-10-16-allocator-4-launch.md) with a 100M USDC deposit ceiling. Grove, the other Sky allocator with a `SUPERSTATE_FACET` in its ALM module set, holds 0 USTB and is not on the USTB AllowList (entity ID 0).
   - **M^0 Protocol:** USTB designated as first eligible collateral for all M^0 network stablecoins (MetaMask mUSD, Noble USDN)
   - **FalconX:** USTB used as prime brokerage trading collateral
 - **Stress Scenario:** In a scenario requiring large-scale redemption, liquidity depends on Superstate's ability to sell the underlying Treasury portfolio (highly liquid) and process USDC conversions via Circle. T-Bills are among the most liquid financial instruments globally, mitigating this risk. The onchain instant facility covers only ~1.1% of Ethereum supply, so any exit above ~$8.7M falls back to the offchain same-day path and Superstate's operational discretion.
@@ -362,7 +362,7 @@ The fund uses a **laddered approach** with holdings spread across various near-t
 4. **Institutional-grade service providers** — BNY Mellon (custodian, ~$50T+ AUC), Invesco Advisers (investment manager, $1.7T+ AUM), PricewaterhouseCoopers LLP (auditor), NAV Fund Services (independent NAV)
 5. **Strong team and backing** — Compound Finance founders, $100.5M raised from Bain Capital Crypto, Distributed Global, Brevan Howard, Galaxy Digital, Haun Ventures
 6. **Bankruptcy-remote legal structure with upgraded regulatory standing** — Delaware Statutory Trust with inter-series liability protection; Superstate Advisers LLC is now a fully SEC-registered investment adviser rather than an exempt reporting adviser
-7. **Large AUM** — $953.8M total across all networks (~$781.7M onchain), with institutional adoption across Aave Horizon (~$68M), BitGo (~$50M), Midas (~$63.5M), Frax (~$32.9M), and M^0
+7. **Large AUM** — $953.8M total across all networks (~$781.7M onchain), with institutional adoption across Aave Horizon (~$68M), Midas (~$63.5M), BitGo (~$50M), Frax (~$32.9M), and M^0. Note Spark, previously the single largest holder at ~$300M, fully exited in July 2025 and its current Superstate exposure is to USCC rather than USTB
 
 ### Key Risks
 
@@ -499,11 +499,25 @@ The fund uses a **laddered approach** with holdings spread across various near-t
 | Offchain redemptions | 9,082 events, 473,795,735 USTB |
 | Onchain atomic redemptions | 8,186 events, 93,156,551 USTB |
 | Combined | 17,268 events, ~566.9M USTB |
-| Largest single redemption | **28,190,683 USTB (~$302M at then-NAV)**, [July 2025](https://etherscan.io/tx/0x49eefbb55bcae635426ff7994dbcbe4c853cb0f230f6856a27be64b0e1ead466), executed from a Gnosis Safe |
+| Largest single redemption | **28,190,683 USTB (~$303.1M)**, [July 17, 2025](https://etherscan.io/tx/0x49eefbb55bcae635426ff7994dbcbe4c853cb0f230f6856a27be64b0e1ead466) — Spark's full exit from the Spark Liquidity Layer position |
 | Other $150M+ single exits | [18,116,960 USTB](https://etherscan.io/tx/0xd70423b90fe9c92b3adb95167dabf63d8c214ebaf07d7098b093f81c92938f52) and [17,623,587 USTB](https://etherscan.io/tx/0xbfcee3207a23debd202e0785d0168b57851123064f85c74f2a9916755a73d501), both April 2026 |
 | Recent monthly redemption volume | 22.6M USTB (Jul 2026), 66.3M USTB (Jun 2026) — multiples of total AUM per year |
 
 A single holder has exited ~$302M in one transaction, and ~$200M exits have happened twice more since. Redemptions ran continuously through the Invesco manager transition and the July 2026 contract migration without interruption.
+
+**Spark's entry and full exit — the largest redemption in USTB's history.** The single biggest data point above is attributable to a named counterparty with a complete governance paper trail, which makes it unusually good evidence:
+
+| Date | Event |
+|---|---|
+| Mar 24, 2025 | Sky [Governance Poll 1213](https://vote.makerdao.com/polling/QmTE29em) proposes onboarding USTB to the Spark Liquidity Layer under the Spark Tokenization Grand Prix |
+| [Apr 3, 2025](https://github.com/sky-ecosystem/community/blob/master/governance/votes/Executive%20vote%20-%20April%203,%202025.md) | Executive vote passes: deposit rate limit **300M USDC** (slope 100M/day), **withdrawals unlimited**. Deposit path is `subscribe()` on the token; redeem path is RedemptionIdle |
+| Apr 7 – Apr 22, 2025 | Spark ALM Proxy subscribes in five tranches, reaching **28,190,693.11 USTB (~$300.1M** at the then-NAV of $10.645395) — effectively maxing the approved ceiling |
+| Jul 17, 2025 | **Full exit in a single transaction**: 28,190,683.11 USTB (~$303.1M at $10.752206) burned via [`0x49eefbb5…`](https://etherscan.io/tx/0x49eefbb55bcae635426ff7994dbcbe4c853cb0f230f6856a27be64b0e1ead466) |
+| Since | Spark ALM Proxy holds 0 USTB |
+
+Two things follow. First, the **~$300M ceiling that prior versions of this report described as "$300M allocated by Spark" was a rate limit, not a standing allocation** — Spark deployed roughly that amount, held it for about three months, and left. Second, a sophisticated institutional allocator moved ~$300M in and ~$303M out at NAV with no fee, no slippage, and no queue, exercising the exit exactly as designed. That is the strongest available evidence that the redemption channel functions at size.
+
+It cuts both ways: the largest single redemption in USTB's history is also a major DeFi allocator *withdrawing entirely*, and Spark's subsequent Superstate allocation went to USCC rather than back into USTB. Read as a liquidity proof it is strong; read as a demand signal it is not.
 
 **Score: 2.0/5** — lowered from 3.0. On the rubric's three columns this asset scores at or near row 1: the exit is a **direct 1:1 redemption at NAV with zero fee and zero slippage** (it is a fund redemption, not a market trade, so there is no price impact at any size), same-day including non-business days for USDC, and the onchain atomic path is instant 24/7 up to facility capacity. The "liquidity depth >$10M" and "full exit with <0.5% impact" conditions are met empirically, not just on paper — $302M has cleared in a single transaction. Two factors hold it at 2.0 rather than 1.0 or 1.5: the *instant* onchain facility is only ~$8.7M (~1.1% of Ethereum supply), so anything larger depends on Superstate's same-day offchain processing rather than a contract guarantee; and there is no secondary market at all, so the redemption channel is the *only* channel.
 
@@ -738,4 +752,4 @@ The Oracle ([`0xe4fa682f94610ccd170680cc3b045d77d9e528a8`](https://etherscan.io/
 | [March 5, 2026](https://github.com/yearn/risk-score/pull/81) | 2.38 | Initial assessment |
 | [April 7, 2026](https://github.com/yearn/risk-score/pull/130) | 2.33 | Reassessment: Historical subscore improved (>2 years in production); onchain verification confirmed 4 separate admin EOAs rather than one |
 | [June 13, 2026](https://github.com/yearn/risk-score/pull/249) | 2.33 | Reassessment: Invesco Advisers replaces Federated Hermes as investment manager, BNY Mellon replaces UMB Bank as custodian; APY, holders and AUM refreshed |
-| [August 17, 2026](https://github.com/yearn/risk-score/pull/409) | 2.10 | Reassessment: token migrated to FundToken v1.3.0 over two July upgrades; public holdings/NAV API closes the reserve-transparency gap (Provability 3.0 → 2.5); Liquidity 3.0 → 2.0 on ~567M USTB of demonstrated redemptions incl. a single ~$302M exit; Certora corrected from "formal verification" to a Solana allowlist audit; auditor now PwC |
+| [August 17, 2026](https://github.com/yearn/risk-score/pull/409) | 2.10 | Reassessment: token migrated to FundToken v1.3.0 over two July upgrades; public holdings/NAV API closes the reserve-transparency gap (Provability 3.0 → 2.5); Liquidity 3.0 → 2.0 on ~567M USTB of demonstrated redemptions incl. Spark's ~$303M single-transaction exit; Spark's "$300M allocation" corrected to a rate-limit ceiling, fully exited July 2025; Certora corrected from "formal verification" to a Solana allowlist audit; auditor now PwC |
