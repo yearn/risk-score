@@ -21,7 +21,7 @@ The current V2 invariant balances all position types: `Collateral - Borrowed Col
 
 - **fxUSD Total Supply:** ~64,309,766 fxUSD
 - **fxUSD NAV:** ~$0.9980 (Curve EMA ~$1.00034)
-- **Protocol TVL (DeFi Llama):** ~$96.8M (last-90-day peak: $96.9M on July 22, 2026; all-time peak $271M on August 24, 2025)
+- **Protocol TVL (DeFi Llama):** ~$95.9M (last-90-day peak: $96.9M on July 22, 2026; all-time peak $271M on August 24, 2025)
 - **System collateralization:** ~135.6% (~$87.04M V2 collateral vs ~64.31M fxUSD pool debt, worth ~$64.18M at NAV)
 - **fxUSD DEX Liquidity:** ~$7.52M in the primary Curve USDC/fxUSD pool (~$1.94M across six secondary Curve pools)
 - **fxSAVE Total Assets:** ~61.67M fxSP (~$62.3M), 96.9% of the Stability Pool
@@ -87,7 +87,7 @@ In V2, **all position collateral is accounted for by the PoolManager contract** 
 
 | Contract | Address | Holdings |
 |----------|---------|----------|
-| Reserve Pool | [`0xE93F5DD55eC9bdAbbba5eA88E4b4f3C253ee45Ed`](https://etherscan.io/address/0xE93F5DD55eC9bdAbbba5eA88E4b4f3C253ee45Ed) | 17.78 wstETH + 0.43 WBTC + 1,302 fxUSD — ~$61K total, ~0.1% of debt |
+| Reserve Pool | [`0xE93F5DD55eC9bdAbbba5eA88E4b4f3C253ee45Ed`](https://etherscan.io/address/0xE93F5DD55eC9bdAbbba5eA88E4b4f3C253ee45Ed) | 17.77 wstETH + 0.43 WBTC + 1,302 fxUSD — ~$61.5K total, ~0.1% of debt |
 
 ### Market & Infrastructure Contracts
 
@@ -181,15 +181,15 @@ AladdinDAO operates a self-hosted [security bounty program](https://docs.aladdin
 ## Historical Track Record
 
 - **In production since:** February 23, 2024 (~30 months as of August 2026)
-- **Current TVL:** ~$96.8M ([DeFi Llama](https://defillama.com/protocol/fx-protocol)); ~$87.04M active V2 collateral backing ~64.31M fxUSD pool debt in PoolManager
-- **TVL history:** Spent 182 days above $100M between May–November 2025; all-time peak $271M on August 24, 2025. Over the last 90 days TVL ranged from $71.6M on July 1, 2026 to $96.9M on July 22, 2026, and stood at $96.8M on August 15.
+- **Current TVL:** ~$95.9M ([DeFi Llama](https://defillama.com/protocol/fx-protocol)); ~$87.04M active V2 collateral backing ~64.31M fxUSD pool debt in PoolManager
+- **TVL history:** Spent 182 days above $100M between May–November 2025; all-time peak $271M on August 24, 2025. Over the last 90 days TVL ranged from $71.6M on July 1, 2026 to $96.9M on July 22, 2026, and stood at $95.9M on August 15.
 - **fxUSD supply:** ~64.31M, up from ~18.1M in March 2026 — the growth has come almost entirely from the WBTC leg, which now carries ~90% of system debt
 - **Peg stability:** fxUSD has generally maintained its peg. CoinGecko publishes a $0.9531 ATL for December 5, 2024, but this could not be corroborated: [DeFiLlama's daily series](https://coins.llama.fi/chart/ethereum:0x085780639CC2cACd35E474e71f4d000e2405d8f6?start=1731628800&span=47&period=1d&searchWidth=6h) records $0.99768 that day and the [checked crvUSD/fxUSD Curve pool's recorded swaps](https://prices.curve.finance/v1/trades/ethereum/0x8fFC7b89412eFD0D17EDEa2018F6634eA4C2FCb2?main_token=0x085780639CC2cACd35E474e71f4d000e2405d8f6&reference_token=0xf939E0A03FB07F59A73314E73794Be0E57ac1b4E&page=23&per_page=100) were approximately $0.9948–$0.9970. The unverified aggregator ATL is not treated as an onchain depeg or stress event. Current NAV is ~$0.9980 and Curve EMA ~$1.00034.
 - **Security incidents:** One responsibly disclosed vulnerability (ChainSecurity, April 2025) — no exploits or fund losses
 - **Governance events:** ProxyAdmin ownership moved to a 3-day TimelockController on April 20, 2026 (block 24,920,358, tx [`0xeb7c71fc…8b9fd8`](https://etherscan.io/tx/0xeb7c71fc855cd928bb4b300eaf7cc5e8b0ad86b625a109f3308b0552068b9fd8)). The last proxy upgrade of any core contract was on April 20, 2026, immediately *before* that transfer; no proxy has been upgraded since the timelock took control.
 - **Holder concentration:** The Stability Pool holds 57,460,692 fxUSD — **89.35% of total supply** — and fxSAVE's assets equal 96.9% of all fxSP shares. The Curve USDC/fxUSD pool holds a further 4.7% of supply. Holder distribution remains independently visible through [Blockscout](https://eth.blockscout.com/token/0x085780639CC2cACd35E474e71f4d000e2405d8f6?tab=holders).
 
-The protocol has operated for over 2 years with no exploits or fund losses. The published December 2024 $0.953 ATL is not supported by the checked DeFiLlama and onchain Curve history and is therefore excluded from risk scoring. TVL scaled from launch to a sustained $100M+ band in mid-2025 and is currently about $96.8M.
+The protocol has operated for over 2 years with no exploits or fund losses. The published December 2024 $0.953 ATL is not supported by the checked DeFiLlama and onchain Curve history and is therefore excluded from risk scoring. TVL scaled from launch to a sustained $100M+ band in mid-2025 and was about $95.9M at the August 15 snapshot.
 
 ## Funds Management
 
@@ -520,7 +520,7 @@ The protocol depends on multiple well-established DeFi protocols. Chainlink is t
 | **4** | 3–6 months | <$10M |
 | **5** | <3 months | No meaningful TVL |
 
-**Score: 1.5/5** — In production >2 years (since Feb 2024), with 182 days sustained above $100M between May–November 2025 and an all-time peak of $271M on August 24, 2025. Current TVL of ~$96.8M sits just below the score-1 scale threshold but well above score 2. There have been no exploits or fund losses, and the one responsibly disclosed vulnerability was handled promptly. Removing the uncorroborated $0.953 aggregator ATL also removes the report's prior basis for treating December 2024 as a stress event. The longevity and demonstrated six-month period above $100M therefore justify the midpoint between scores 1 and 2.
+**Score: 1.5/5** — In production >2 years (since Feb 2024), with 182 days sustained above $100M between May–November 2025 and an all-time peak of $271M on August 24, 2025. Snapshot TVL of ~$95.9M sits just below the score-1 scale threshold but well above score 2. There have been no exploits or fund losses, and the one responsibly disclosed vulnerability was handled promptly. Removing the uncorroborated $0.953 aggregator ATL also removes the report's prior basis for treating December 2024 as a stress event. The longevity and demonstrated six-month period above $100M therefore justify the midpoint between scores 1 and 2.
 
 **Audits & Historical Score = (1.5 + 1.5) / 2 = 1.5**
 
@@ -678,4 +678,4 @@ What holds the subcategory at 3.0 rather than better is that the timelock does n
 | --- | --- | --- |
 | March 29, 2026 | 2.5 | Initial assessment |
 | May 13, 2026 | 2.2 | Reassessment: 3-day TimelockController took ownership of ProxyAdmin (April 20, 2026); supply ~18.1M → ~53.9M, TVL ~$29M → ~$89M. Governance 4.0 → 2.5, Historical Track Record 2.5 → 2.0; Medium → Low Risk |
-| [August 15, 2026](https://github.com/yearn/risk-score/pull/352) | 2.2 | Reassessment and [issue #387](https://github.com/yearn/risk-score/issues/387) corrections (latest snapshot block 25,759,914): supply ~64.31M, TVL ~$96.8M, V2 CR ~135.6%, and primary Curve liquidity ~$7.52M. Verified the timelock holds `DEFAULT_ADMIN_ROLE` on all core contracts and was honored by the May 27–30 `updatePoolCapacity` operation, but both live price oracles remain owned by the operational 6-of-9 Safe; their scheduled ownership-transfer batch has been executable since April 23, 2026 but remains unexecuted, leaving a non-timelocked collateral-repricing path. Redemption remains Curve-EMA-gated and disabled, with its 20%-per-tick-per-call behavior clarified. Corrected active V2 collateral to wstETH/WBTC only, removed the uncorroborated $0.953 depeg, documented the $500K AladdinDAO bounty, corrected AladdinDAO-level contributor/backer attribution, and added the LayerZero Ethereum↔Base lock route with its route-specific DVN quorum. The Stability Pool USDC buffer recovered from 0.16% to ~10.65%, and snapshot-block Curve quotes show ~0.26% impact for a 4M fxUSD exit. Historical Track Record 2.0 → 1.5 and Governance 2.5 → 3.0 offset one another at the final-score level; Liquidity remains 3.0. The raw weighted score is 2.15, conservatively displayed as 2.2 (Low Risk). |
+| [August 15, 2026](https://github.com/yearn/risk-score/pull/352) | 2.2 | Reassessment and [issue #387](https://github.com/yearn/risk-score/issues/387) corrections (latest snapshot block 25,759,914): supply ~64.31M, TVL ~$95.9M, V2 CR ~135.6%, and primary Curve liquidity ~$7.52M. Verified the timelock holds `DEFAULT_ADMIN_ROLE` on all core contracts and was honored by the May 27–30 `updatePoolCapacity` operation, but both live price oracles remain owned by the operational 6-of-9 Safe; their scheduled ownership-transfer batch has been executable since April 23, 2026 but remains unexecuted, leaving a non-timelocked collateral-repricing path. Redemption remains Curve-EMA-gated and disabled, with its 20%-per-tick-per-call behavior clarified. Corrected active V2 collateral to wstETH/WBTC only, removed the uncorroborated $0.953 depeg, documented the $500K AladdinDAO bounty, corrected AladdinDAO-level contributor/backer attribution, and added the LayerZero Ethereum↔Base lock route with its route-specific DVN quorum. The Stability Pool USDC buffer recovered from 0.16% to ~10.65%, and snapshot-block Curve quotes show ~0.26% impact for a 4M fxUSD exit. Historical Track Record 2.0 → 1.5 and Governance 2.5 → 3.0 offset one another at the final-score level; Liquidity remains 3.0. The raw weighted score is 2.15, conservatively displayed as 2.2 (Low Risk). |

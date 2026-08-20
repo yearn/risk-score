@@ -72,7 +72,7 @@ nodes:
     label: Reserve Pool
     address: "0xE93F5DD55eC9bdAbbba5eA88E4b4f3C253ee45Ed"
     category: infra
-    note: 17.73 wstETH + 0.43 WBTC + 1,302 fxUSD (~$71K)
+    note: 17.77 wstETH + 0.43 WBTC + 1,302 fxUSD (~$61.5K)
   - id: steth-oracle
     label: StETHPriceOracle
     address: "0x0C5C61025f047cB7e3e85852dC8eAFd7b9a4Abfb"
