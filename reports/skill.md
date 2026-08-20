@@ -86,6 +86,17 @@ Before writing any claim that functionality is missing, unverifiable, or doesn't
 
 If any answer is "no," use **"unverified"** not **"doesn't exist."**
 
+**This applies to liquidity venues, and that is where it gets skipped.** Before writing "no secondary market", "illiquid", or "no exit exists", check **all** of:
+- [ ] Uniswap V3 factory `getPool(tokenA, tokenB, fee)` across **every** fee tier (100 / 500 / 3000 / 10000), and V2 `getPair`
+- [ ] **Curve** — StableSwap-NG and Twocrypto factories both
+- [ ] Balancer, and any chain-specific venue
+- [ ] **The token holder list as a catch-all** — enumerate `Transfer` events, compute balances, and identify every contract holding a material share. Any pool, lending market or vault holding the token surfaces here regardless of which venue it belongs to. This single query subsumes the ones above
+- [ ] Measure depth with `get_dy` / `quoteExactInputSingle` at several sizes rather than quoting pool TVL
+
+A real case: an earlier revision of `reports/report/flying-tulip.md` asserted ftUSD had "no secondary market at any size" after checking only the two Uniswap factories. It missed a Curve StableSwap-NG pool holding ~$1.87M that clears $500K at 0.30%, and the error propagated into a Liquidity subscore and a "the peg cannot be market-tested" claim. The holder-list check would have caught it in one query.
+
+**Then check who provides the liquidity you found.** In the same report the Curve pool turned out to be ~100% one EOA behind a gauge whose `manager` was a protocol admin signer — available, but not the independent third-party market the first pass implied. Depth is a fact about the pool; durability is a fact about its LPs, and the two need separate sentences.
+
 ## Risk
 
 - If you need to validate risk of layer 2 or bridge, check it out on: https://l2beat.com/scaling/risk
@@ -110,7 +121,22 @@ If any answer is "no," use **"unverified"** not **"doesn't exist."**
 
 ### Fetching JS-rendered / doc-host sources (Notion, Google Docs)
 
-Issue links often point to Google Docs and Notion. `WebFetch` only sees the static HTML shell of these (content is rendered client-side or behind a login), so it returns an empty/login page. Use the host's data endpoint instead — no browser needed. (Playwright is usually a dead end here: the sandbox lacks Chromium's system libraries and `apt`/`python3-venv` to install them.)
+Issue links often point to Google Docs and Notion. `WebFetch` only sees the static HTML shell of these (content is rendered client-side or behind a login), so it returns an empty/login page. Prefer the host's data endpoint below — no browser needed.
+
+**Playwright does work here, contrary to an earlier note in this file.** The plugin's MCP server defaults to Chrome and fails (`Chromium distribution 'chrome' is not found at /opt/google/chrome/chrome`), and `npx playwright install-deps` needs root. Neither is a blocker — the missing system libraries can be fetched and extracted **without root**, because `apt-get download` does not require privileges:
+
+```bash
+mkdir -p /tmp/pw && cd /tmp/pw && npm init -y >/dev/null && npm i playwright
+npx playwright install chromium                 # downloads to ~/.cache/ms-playwright
+mkdir -p debs libs && cd debs
+apt-get download libnspr4 libnss3 libasound2t64 libatk1.0-0t64 \
+  libatk-bridge2.0-0t64 libatspi2.0-0t64 libxdamage1 libxres1
+cd .. && for d in debs/*.deb; do dpkg-deb -x "$d" extracted/; done
+find extracted -name '*.so*' -exec cp -a {} libs/ ';'
+LD_LIBRARY_PATH=/tmp/pw/libs node yourscript.mjs
+```
+
+Find anything still missing with `ldd <chrome-headless-shell> | grep 'not found'` and `apt-get download` the matching package. Drive it from your own script rather than the MCP server — you avoid the channel config entirely. This is the only way to read a JS-rendered page with no data endpoint, e.g. to establish whether a docs or investor portal is behind an auth wall.
 
 **Google Docs** (works when the doc is link-shared "anyone with the link"):
 ```bash
