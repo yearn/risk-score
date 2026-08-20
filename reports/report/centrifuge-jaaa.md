@@ -1,6 +1,6 @@
 # Protocol Risk Assessment: Centrifuge JAAA
 
-- **Assessment Date:** May 28, 2026 (Updated: July 14, 2026)
+- **Assessment Date:** May 28, 2026 (Updated: August 20, 2026)
 - **Token:** JAAA (Janus Henderson Anemoy AAA CLO Fund Token)
 - **Chain:** Ethereum
 - **Token Address:** [`0x5a0F93D040De44e78F251b03c43be9CF317Dcf64`](https://etherscan.io/address/0x5a0F93D040De44e78F251b03c43be9CF317Dcf64)
@@ -252,12 +252,31 @@ The four live JAAA BalanceSheet managers are two Gnosis Safes ([`0x02eb…5bc7`]
 
 - **Share-price update:** Manager-pushed (offchain → onchain). Currently ~1× per ~24h based on `priceLastUpdated`. PPS is therefore **stale between pushes** and admin-controlled.
 - **Issuance:** Programmatic *given* a pool-manager approval — the manager must explicitly `approveDeposits` and `issueShares` for each batch.
-- **Cross-chain:** All multi-chain operations (issuing JAAA on Avalanche, Stellar, etc., recognizing redemptions, propagating prices) route through a **2-of-2** MultiAdapter quorum — both LayerZero V2 and Chainlink CCIP must sign each message. Failure or compromise of either single adapter does not unilaterally execute a message; failure of both temporarily breaks cross-chain settlement. Recovery flows exist via `initiateRecovery` / `disputeRecovery` on the Guardian.
+- **Cross-chain:** All multi-chain operations (issuing JAAA on Avalanche, Base, etc., recognizing redemptions, propagating prices) route through a **2-of-2** MultiAdapter quorum — two independent adapters must deliver a matching payload before a message executes. On every chain where JAAA holds supply today the pair is **LayerZero V2 + Axelar**; Chainlink CCIP is the second adapter only on the newer chains (Monad, Pharos). Failure or compromise of either single adapter does not unilaterally execute a message; failure of both temporarily breaks cross-chain settlement. Recovery flows exist via `initiateRecovery` / `disputeRecovery` on the Guardian. **One exception:** the JAAA pool's adapter set for X Layer is LayerZero alone at quorum 1 — see External Dependencies.
 - **Accounting:** V3.1 introduced full onchain double-entry accounting in `BalanceSheet` [`0x12a110cE5f0FC871cC72Bc7ECaF35cf39DD0f43e`](https://etherscan.io/address/0x12a110cE5f0FC871cC72Bc7ECaF35cf39DD0f43e). However, the *valuation* of the offchain CLO holdings still depends on the pool manager's price push.
 
 ### External Dependencies
 
-- **Cross-chain messaging — 2/2 threshold with LayerZero V2 + Chainlink CCIP.** The [`MultiAdapter`](https://etherscan.io/address/0x35C837F0A54B715a23D193E1476BFC9BC30073BE) configuration was rechecked for JAAA's destinations. Each uses quorum 2 / threshold 2 with [LayerZero V2 adapter `0xD517…0295`](https://etherscan.io/address/0xD517BC7ba17271A8D87bE7355B2523bf5c750295) plus a Chainlink CCIP adapter (`0x34e9…6484` on destination IDs 2/3/5/6; `0x39CF…D955` on 11/12). Both must attest to a non-Ethereum message. The six live LayerZero inbound routes use 15 confirmations and require Deutsche Telekom + Canary plus 2-of-3 P2P/Nansen/Nethermind DVNs (**4-of-5 effective DVN quorum**).
+- **Cross-chain messaging — 2/2 threshold, LayerZero V2 paired with Axelar or Chainlink CCIP.** The [`MultiAdapter`](https://etherscan.io/address/0x35C837F0A54B715a23D193E1476BFC9BC30073BE) (live: `Gateway 0x19a5…3172 .adapter()`) was re-read per destination for the **JAAA pool specifically** — `adapters(centrifugeId, 281474976710663, i)`, `quorum`, `threshold` — at block 25796082. Adapter identity was taken from verified source, not from the address alone: [`0xD517…0295`](https://etherscan.io/address/0xD517BC7ba17271a8D87BE7355B2523bF5c750295) is `LayerZeroAdapter`, [`0x34e9…6484`](https://etherscan.io/address/0x34e904237341C3de02D4447C3fF0ca8880ca6484) is **`AxelarAdapter`** (`axelarGateway()` / `axelarGasService()`), and [`0x39CF…D955`](https://etherscan.io/address/0x39CF679Eb0Ac9075CFb5f94930A367Ba1557D955) is `ChainlinkAdapter` (`ccipRouter()` / `ccipReceive()`). A prior version of this report misattributed `0x34e9…6484` to Chainlink CCIP.
+
+  | centrifugeId | Chain | JAAA-pool adapters | quorum / threshold | JAAA supply |
+  |---|---|---|---|---|
+  | 2 | Base | LayerZero V2 + **Axelar** | 2 / 2 | 48,207,417.68 |
+  | 3 | Arbitrum | LayerZero V2 + **Axelar** | 2 / 2 | 3,553.00 |
+  | 5 | Avalanche | LayerZero V2 + **Axelar** | 2 / 2 | 250,000,001.00 |
+  | 6 | BNB Chain | LayerZero V2 + **Axelar** | 2 / 2 | 497,554.41 |
+  | 11 | Monad | LayerZero V2 + Chainlink CCIP | 2 / 2 | 483,418.08 |
+  | 12 | Pharos | LayerZero V2 + Chainlink CCIP | 2 / 2 | TODO (no public RPC reached) |
+  | 13 | X Layer | **LayerZero V2 only** | **1 / 1** | 0 |
+  | 4 / 9 / 10 | Plume / HyperEVM / Optimism | *no JAAA-pool set* (global pool only) | 0 | not deployed for this share class |
+
+  Chain identification is onchain, not assumed: `AxelarAdapter.destinations(centrifugeId)` returns human-readable Axelar IDs (`"base"`, `"arbitrum"`, `"Avalanche"`, `"binance"`, `"hyperliquid"`, `"optimism"`, `"plume"`), and the LayerZero eids (30184/30110/30106/30102/30390/30407/30274) resolve via the [LayerZero metadata API](https://metadata.layerzero-api.com/v1/metadata) to Base/Arbitrum/Avalanche/BNB/Monad/Pharos/X Layer. Supply is `totalSupply()` on each chain's `Spoke.shareToken(281474976710663, 0x00010000000000070000000000000001)` (6 decimals; Ethereum itself holds 369,311,490.07).
+
+  **The 2-of-2 framing does not hold universally.** `MultiAdapter.handle()` contains an explicit fast path — `if (adapter.quorum == 1) { gateway.handle(centrifugeId, payload); return; }` — so on X Layer a single LayerZero delivery executes a JAAA-scoped message with no second attestation. JAAA supply on X Layer is 0 today, which bounds the impact, but the route is wired (`LayerZeroAdapter.isWired(13) = true`) and the share token is deployed ([`0xAD48…F797`](https://www.oklink.com/xlayer/address/0xAD48F183E586e92A591A610397ebf534609DF797)).
+
+  The LayerZero leg itself is uniform across **all ten** configured inbound routes: `EndpointV2.getConfig(0xD517…0295, 0xc02A…24C2, eid, 2)` decodes to 15 confirmations, 2 required DVNs and 2-of-3 optional DVNs — Deutsche Telekom [`0x373a…AfF4`](https://etherscan.io/address/0x373a6E5c0C4E89E24819f00AA37ea370917AAfF4) and Canary [`0xa4fE…c2cd`](https://etherscan.io/address/0xa4fE5A5B9A846458a70Cd0748228aED3bF65c2cd) required, plus 2-of-3 from P2P / Nansen / Nethermind (**4-of-5 effective DVN quorum**), DVN names resolved via the LayerZero metadata API.
+
+- **Axelar (new named dependency).** On JAAA's four highest-supply remote chains the second attestation comes from Axelar's proof-of-stake validator set, not from Chainlink. The Ethereum [`AxelarGateway 0x4F44…56A5`](https://etherscan.io/address/0x4F4495243837681061C4743b74B3eEdf548D56A5) is an upgradeable proxy (`implementation() = 0x99B5…4098`) whose `governance()` is [`0x7Acb…2525`](https://etherscan.io/address/0x7Acbae6CBa67d78AAf69e47000884aE00F9B2525) and whose message authentication is delegated to `authModule() = AxelarAuthWeighted` [`0xE3B8…8AD0`](https://etherscan.io/address/0xE3B83f79Fbf01B25659f8A814945aB82186A8AD0). Unlike LayerZero there is no per-integration verifier set to inspect — the trust anchor is Axelar's stake-weighted operator quorum ([Axelarscan](https://axelarscan.io/validators) listed 49 bonded validators of 151 registered at this check). Centrifuge's 2-of-2 quorum is what keeps an Axelar compromise alone from forging a JAAA mint.
 - **Stablecoin settlement (USDC, USDT, USDS)** — JAAA accepts multiple subscription / redemption assets per Centrifuge. USDC inherits Circle's freeze list and reserve risk; USDT inherits Tether's; USDS inherits Sky's. Multi-asset settlement reduces single-issuer concentration.
 - **Anemoy Capital SPC Limited (BVI)** — fund issuer of record. The legal wrapper that holds the underlying CLOs. BVI insolvency or regulatory action against Anemoy would constitute an existential risk for token holders.
 - **Janus Henderson** — sub-advisor; selects and manages the CLO portfolio.
@@ -529,7 +548,7 @@ Centrifuge JAAA remains more concentrated than the NYSE ETF, but diversification
 - **Heavy and ongoing audit cadence:** 20+ V3 audits in 14 months from Cantina/Spearbit, yAudit/Electisec, BurraSec, xmxanuel, Recon, plus a Sherlock public contest — far above the median for tokenized-RWA protocols. Active Cantina bug bounty with $250k Critical payout.
 - **Institutional-grade offchain stack:** Janus Henderson (subadvisor), Anemoy (BVI-regulated manager), J.P. Morgan (custodian/traditional broker), Trident Trust (administrator), MHA Cayman (auditor), and Circle (crypto custody).
 - **Best-in-class collateral class for tokenized RWA:** AAA-rated floating-rate CLO tranches — top of the credit stack, low historical loss rates, large institutional secondary market.
-- **Material onchain protection:** 48h Root timelock, Guardian pause (no delay), a single live 4-of-9 ProtocolAdminSafe (the legacy V3.0 4-of-8 path is `Deny`'d on Root at block 24376326), and a **2-of-2 MultiAdapter cross-chain quorum** (LayerZero V2 + Chainlink CCIP, verified onchain via `quorum() = 2`) with dispute window.
+- **Material onchain protection:** 48h Root timelock, Guardian pause (no delay), a single live 4-of-9 ProtocolAdminSafe (the legacy V3.0 4-of-8 path is `Deny`'d on Root at block 24376326), and a **2-of-2 MultiAdapter cross-chain quorum** (LayerZero V2 paired with Axelar on Base/Arbitrum/Avalanche/BNB and with Chainlink CCIP on Monad/Pharos, verified onchain via `quorum() = 2` for the JAAA pool) with dispute window. The one X Layer route at `quorum() = 1` is listed under Key Risks.
 - **Independent third-party attestation:** [Chronicle Labs publishes a Proof-of-Asset / Proof-of-Holdings dashboard for JAAA](https://chroniclelabs.org/dashboard/proofofasset/janus-henderson-anemoy-aaa-clo-fund), giving an out-of-band cryptographic attestation of NAV and underlying holdings — uncommon for tokenized RWA funds and meaningfully strengthens Provability.
 - **Significant institutional adoption:** Grove ($1B initial seed), Aave Horizon (~$100M in first week), Falcon Finance, 3F/Morpho — demonstrates real demand and provides secondary liquidity routes via the deJAAA wrapper.
 
@@ -542,6 +561,7 @@ Centrifuge JAAA remains more concentrated than the NYSE ETF, but diversification
 - **Multiple offchain trust principals — with a Trident dual-role concentration.** Failure or adversarial action by Anemoy, Janus Henderson, J.P. Morgan, Trident Trust, or the BVI regulatory environment is existential for holders. Trident remains both fund administrator and KYC/AML provider.
 - **V3.1 is recent (Feb 2026)** and the V3.2 Onchain Portfolio Manager only audited Mar–Apr 2026. New code paths continue to ship.
 - **Pool manager signer identities not publicly disclosed.** Standard for institutional-RWA, but reduces verifiability of "who can move my money."
+- **One destination is a single-adapter route.** The JAAA pool's MultiAdapter set for X Layer (centrifugeId 13) is LayerZero V2 alone at `quorum() = threshold() = 1`, and `handle()` short-circuits straight to `gateway.handle` when quorum is 1 — so a single LayerZero delivery executes a JAAA-scoped message from that chain with no second attestation. Impact is bounded today only because JAAA supply on X Layer is 0; the route is wired and the share token is deployed. Every other JAAA destination is 2-of-2. See Reassessment Triggers.
 
 ### Critical Risks `[If Any]`
 
@@ -610,7 +630,7 @@ Centrifuge JAAA remains more concentrated than the NYSE ETF, but diversification
 
 **Subcategory C: External Dependencies**
 
-- **Cross-chain:** **2-of-2 MultiAdapter quorum** — LayerZero V2 + Chainlink CCIP. Live destination configurations require both adapters. The LayerZero leg's six inbound routes use 15 confirmations and a 4-of-5 effective DVN quorum (Deutsche Telekom + Canary required, plus 2-of-3 P2P/Nansen/Nethermind), materially stronger than the prior single-Wormhole setup.
+- **Cross-chain:** **2-of-2 MultiAdapter quorum** — LayerZero V2 + **Axelar** on all four chains carrying JAAA supply (Base, Arbitrum, Avalanche, BNB); LayerZero V2 + Chainlink CCIP on Monad and Pharos. The LayerZero leg's ten configured inbound routes each use 15 confirmations and a 4-of-5 effective DVN quorum (Deutsche Telekom + Canary required, plus 2-of-3 P2P/Nansen/Nethermind), materially stronger than the prior single-Wormhole setup. The X Layer route (quorum 1, LayerZero only, zero supply) is the single exception and is the reason this subcategory is not scored lower.
 - **Stablecoin settlement:** USDC, USDT and USDS are all supported subscription / redemption assets (per Centrifuge team).
 - **Offchain stack:** Janus Henderson sub-advisor, Anemoy issuer, J.P. Morgan custody/brokerage, Trident Trust admin+KYC (dual role), and MHA Cayman audit.
 
@@ -700,7 +720,7 @@ Centrifuge JAAA remains more concentrated than the NYSE ETF, but diversification
 - **Governance:** Reassess on any new `Rely` on Root (new admin principal), any change to the current ProtocolAdminSafe threshold/signer set, or any `UpdateManager` event on the current HubRegistry [`0x19f46…ADE93`](https://etherscan.io/address/0x19f46D8130e610C6C0f0116EA40Fb781dEFaDE93) for poolId `281474976710663` (add/remove of a JAAA Pool Manager — Safe or MPC wallet).
 - **Pricing:** Reassess if the JAAA pool migrates to V3.2's onchain `NAVManager`/`PriceManager`, or conversely if the NAV stops being refreshed at least every 48 hours during business days.
 - **Onchain guardrails ship:** Reassess (Programmability) when Centrifuge's planned **pool-management timelock + price circuit breaker + volume-based mint/burn circuit breaker** go live and JAAA is migrated to them — material score-reducer.
-- **Cross-chain adapter set changes:** Reassess if the active MultiAdapter quorum changes (e.g., a Chainlink CCIP or LayerZero V2 adapter is added/removed for JAAA), or if `quorum()` is lowered.
+- **Cross-chain adapter set changes:** Reassess if the active MultiAdapter quorum changes (e.g., an Axelar, Chainlink CCIP or LayerZero V2 adapter is added/removed for the JAAA pool), if `quorum()` is lowered on any destination, or if **JAAA supply becomes non-zero on X Layer (centrifugeId 13) while its adapter set remains LayerZero-only at quorum 1** — that would turn a currently-bounded single-adapter route into a live one.
 - **Counterparty:** Reassess on any material change to Anemoy, Janus Henderson sub-advisory, J.P. Morgan custody/brokerage, Trident Trust administration (admin or KYC role), Chronicle Labs attestation availability, or MHA Cayman audit relationships.
 - **Incident-based:** Reassess after any Centrifuge protocol exploit, any pause event, any token recovery action via `TokenRecoverer`, or any depeg / NAV-discontinuity > 1%.
 

@@ -52,6 +52,36 @@
       ]
     },
     {
+      "id": "axelar",
+      "name": "Axelar",
+      "type": "Proof-of-stake interchain messaging (GMP)",
+      "url": "https://www.axelar.network/",
+      "finality": "~1–3 min on most EVM routes: source-chain finality, then validator voting and a gateway approval tx on the destination.",
+      "admin": "The Ethereum `AxelarGateway` [`0x4F44…56A5`](https://etherscan.io/address/0x4F4495243837681061C4743b74B3eEdf548D56A5) is an upgradeable proxy — `implementation()` is [`0x99B5…4098`](https://etherscan.io/address/0x99B5FA03a5ea4315725c43346e55a6A6fbd94098) and `governance()` is the Axelar InterchainGovernance address [`0x7Acb…2525`](https://etherscan.io/address/0x7Acbae6CBa67d78AAf69e47000884aE00F9B2525), driven by cross-chain proposals from the Axelar chain. `mintLimiter()` [`0xCC94…EC68`](https://etherscan.io/address/0xCC940AE49C78F20E3F13F3cF37e996b98Ac3EC68) can pause token flows. Message authentication is delegated to `authModule()` [`0xE3B8…8AD0`](https://etherscan.io/address/0xE3B83f79Fbf01B25659f8A814945aB82186A8AD0) (`AxelarAuthWeighted`).",
+      "description": "Axelar is a Cosmos-SDK proof-of-stake chain whose validators observe source chains and sign approvals for the destination-chain `AxelarGateway`. Security is the validator set itself: `AxelarAuthWeighted` accepts a message once a stake-weighted quorum of the current operator set has signed it, so a compromise of that quorum — or of the gateway's upgrade path — forges messages. There is no per-integration verifier configuration to inspect the way LayerZero exposes a DVN set, so an Axelar row's real protection comes from whatever quorum the consuming protocol layers on top (e.g. Centrifuge's 2-of-2 MultiAdapter). [Axelarscan](https://axelarscan.io/validators) listed 49 bonded validators out of 151 registered at the August 20, 2026 check.",
+      "keywords": [
+        "axelar",
+        "axelarscan",
+        "interchain token service",
+        "axelar gmp"
+      ],
+      "ignore": [
+        "midas-mglobal",
+        "midas-mhyper"
+      ],
+      "dependencies": [
+        {
+          "slug": "centrifuge-jaaa",
+          "name": "Centrifuge JAAA",
+          "kind": "direct",
+          "model": "mint",
+          "integration": "Axelar GMP (2-of-2 MultiAdapter)",
+          "detail": "Axelar is the **second leg on every chain where JAAA actually has supply today**. `MultiAdapter` [`0x35C8…73BE`](https://etherscan.io/address/0x35C837F0A54B715a23D193E1476BFC9BC30073BE) `adapters(centrifugeId, 281474976710663, i)` returns LayerZero V2 [`0xD517…0295`](https://etherscan.io/address/0xD517BC7ba17271a8D87BE7355B2523bF5c750295) plus the AxelarAdapter [`0x34e9…6484`](https://etherscan.io/address/0x34e904237341C3de02D4447C3fF0ca8880ca6484) at quorum 2 / threshold 2 for Base (centrifugeId 2), Arbitrum (3), Avalanche (5) and BNB (6). Both must deliver a matching payload before a JAAA mint message executes, so compromising Axelar alone is not enough — but MultiAdapter/admin or Spoke vulnerabilities could still bypass the quorum. Verified onchain August 20, 2026.",
+          "owner": "Mint authority: Spoke [`0xEC35…25aB`](https://etherscan.io/address/0xEC3582fcDc34078a4B7a8c75a5a3AE46f48525aB), governed by Centrifuge Root — 48h timelock [`0x7Ed4…368f`](https://etherscan.io/address/0x7Ed48C31f2fdC40d37407cBaBf0870B2b688368f)."
+        }
+      ]
+    },
+    {
       "id": "ccip",
       "name": "Chainlink CCIP",
       "type": "Cross-chain interoperability protocol",
@@ -92,8 +122,8 @@
           "name": "Centrifuge JAAA",
           "kind": "direct",
           "model": "mint",
-          "integration": "Chainlink CCIP (2-of-2 MultiAdapter)",
-          "detail": "MultiAdapter forwards a message only after matching delivery through both LayerZero V2 and Chainlink CCIP. Compromising either messaging path alone cannot forge a JAAA mint, although MultiAdapter/admin or Spoke vulnerabilities could bypass the quorum.",
+          "integration": "Chainlink CCIP (2-of-2 MultiAdapter, new chains only)",
+          "detail": "CCIP is the **second leg only on Centrifuge's newer chains**. Reading `MultiAdapter` [`0x35C8…73BE`](https://etherscan.io/address/0x35C837F0A54B715a23D193E1476BFC9BC30073BE) `adapters(centrifugeId, poolId, i)` for the JAAA pool (`281474976710663`), the ChainlinkAdapter [`0x39CF…D955`](https://etherscan.io/address/0x39CF679Eb0Ac9075CFb5f94930A367Ba1557D955) pairs with LayerZero V2 on Monad (centrifugeId 11) and Pharos (12) at quorum 2 / threshold 2. JAAA's high-value routes (Base, Arbitrum, Avalanche, BNB) use LayerZero + **Axelar**, not CCIP — see the Axelar row. X Layer (13) is configured with LayerZero alone (quorum 1). Verified onchain August 20, 2026.",
           "owner": "Mint authority: Spoke [`0xEC35…25aB`](https://etherscan.io/address/0xEC3582fcDc34078a4B7a8c75a5a3AE46f48525aB), governed by Centrifuge Root — 48h timelock [`0x7Ed4…368f`](https://etherscan.io/address/0x7Ed48C31f2fdC40d37407cBaBf0870B2b688368f)."
         },
         {
@@ -397,7 +427,7 @@
           "kind": "direct",
           "model": "mint",
           "integration": "LayerZero V2 (2-of-2 MultiAdapter)",
-          "detail": "Spoke [`0xEC35…25aB`](https://etherscan.io/address/0xEC3582fcDc34078a4B7a8c75a5a3AE46f48525aB) holds mint authority on JAAA; MultiAdapter requires both LayerZero and CCIP, while the LayerZero leg requires Deutsche Telekom + Canary and 2-of-3 P2P/Nansen/Nethermind",
+          "detail": "Spoke [`0xEC35…25aB`](https://etherscan.io/address/0xEC3582fcDc34078a4B7a8c75a5a3AE46f48525aB) holds mint authority on JAAA (`wards = 1`). LayerZero is one leg of a 2-of-2 MultiAdapter quorum; the **second leg is Axelar** on Base/Arbitrum/Avalanche/BNB and Chainlink CCIP on Monad/Pharos. The LayerZero leg itself requires Deutsche Telekom + Canary plus 2-of-3 P2P/Nansen/Nethermind. **Exception: X Layer (centrifugeId 13) is configured with LayerZero alone at quorum 1 / threshold 1**, so a single LayerZero delivery executes a JAAA-scoped message from that chain — JAAA supply there is 0 today.",
           "security": {
             "label": "4-of-5",
             "confirmations": 15,
@@ -408,10 +438,10 @@
               "Nansen",
               "Nethermind"
             ],
-            "route": "6 chains→Ethereum (native-mint side)",
-            "note": "2 required DVNs plus 2-of-3 optional DVNs; LayerZero is also one leg of a 2-of-2 quorum with CCIP",
+            "route": "10 chains→Ethereum (native-mint side)",
+            "note": "2 required DVNs plus 2-of-3 optional DVNs, identical across all 10 configured inbound routes. LayerZero is also one leg of Centrifuge's 2-of-2 MultiAdapter quorum — paired with Axelar on Base/Arbitrum/Avalanche/BNB and with Chainlink CCIP on Monad/Pharos. X Layer is the exception: LayerZero is the only adapter set for the JAAA pool there (quorum 1).",
             "weak": false,
-            "verifiedAt": "2026-07-16",
+            "verifiedAt": "2026-08-20",
             "link": "https://etherscan.io/address/0xD517BC7ba17271a8D87BE7355B2523bF5c750295"
           },
           "owner": "Mint authority: Spoke [`0xEC35…25aB`](https://etherscan.io/address/0xEC3582fcDc34078a4B7a8c75a5a3AE46f48525aB), governed by Centrifuge Root — 48h timelock [`0x7Ed4…368f`](https://etherscan.io/address/0x7Ed48C31f2fdC40d37407cBaBf0870B2b688368f)."
