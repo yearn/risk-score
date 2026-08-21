@@ -100,8 +100,8 @@ The FXRP/FAssets stack has an extensive, multi-firm audit history. The Ethereum 
 ### Bug Bounty
 
 - Flare maintains a live [Immunefi bug bounty](https://immunefi.com/bug-bounty/flarenetwork/information/) covering the Flare Network and its protocols (FAssets included).
-- Maximum payout: **TODO** — the Immunefi page is JS-rendered and the maximum critical payout could not be extracted from the static HTML; it should be confirmed before final sign-off.
-- Safe Harbor (SEAL): not verified — TODO.
+- Maximum payout: **$250,000** for critical-severity vulnerabilities, per Flare's [bug bounty launch announcement](https://flare.network/news/flare-immunefi-launch-a-comprehensive-bug-bounty-program) (July 16, 2024). Flare notes the maximum "may increase" as scope expands; the live [Immunefi program page](https://immunefi.com/bug-bounty/flarenetwork/information/) is JS-rendered, so the current displayed tier could not be independently re-read at snapshot time.
+- Safe Harbor (SEAL 911): not disclosed in Flare's public documentation or the Immunefi program page — could not be verified.
 
 ## Historical Track Record
 
@@ -172,7 +172,7 @@ This is a **strong multi-DVN configuration** — structurally the opposite of th
   - **Minting pool holdings required:** 50% of an agent's backed FAssets.
   - **Liquidations:** on-chain — liquidators burn FAssets for collateral when an agent's CR falls below liquidation CR (≈10% below minimal CR). Challengers can trigger full liquidation for illegal agent actions.
 - **Underlying XRP custody:** XRP is held **off-chain on XRPL** by agents (hot work + cold management addresses) and the governance-multisig **Core Vault**. The FDC provides trustless attestation of XRPL movements, and the over-collateralization backstops agent default — but the XRP itself is not inside a smart contract. This is the single most important custody fact for a collateral assessment.
-- **Risk curation:** governance sets collateral types, CR thresholds, the minting cap (170M XRP), and agent approval. `TODO` — the specific Flare governance body/process and its multisig threshold were not enumerated in this pass.
+- **Risk curation:** governance sets collateral types, CR thresholds, the minting cap (170M XRP), and agent approval. Changes are made through [Flare Improvement Proposals (FIPs)](https://proposals.flare.network/), which are initiated by the Flare Foundation and voted on by `WFLR`/staked-`FLR` holders (acceptance-based: a simple majority of cast votes, no quorum requirement); approved changes are executed by the Foundation or via governance contract calls. The exact on-chain governance multisig/threshold for the FAssets asset-manager contracts is not published in the [developer docs](https://dev.flare.network/network/governance).
 
 ### Provability
 
@@ -200,7 +200,7 @@ This is a **strong multi-DVN configuration** — structurally the opposite of th
 - **Multisig:** 6-of-11 Gnosis Safe v1.4.1 (11 owners, threshold 6). Signer identities: `TODO` — not enumerated (per policy, signers are checked against docs only, and Flare does not publish the signer set in the developer docs).
 - **No timelock** on upgrades or peer/config changes is the principal governance weakness. The 6-of-11 threshold is a meaningful barrier, but a compromised or malicious Safe majority could upgrade the FXRP implementation to introduce unbacked minting, repoint the peer table to a malicious OFT, or change the DVN configuration — all with immediate effect and no on-chain warning window.
 - **Privileged roles:** the owner can `setPeer` (reroute mint/burn), `setEnforcedOptions`, `setFeeBps`/`setDefaultFeeBps`/`withdrawFees` (fees), `setDelegate`, `setMsgInspector`, `setPreCrime`, `transferOwnership`. None can pause or freeze user FXRP balances (the token has no blacklist/pause), but they can disrupt bridging and mint/burn routing.
-- **Flare-side governance:** canonical FXRP and the FAssets parameters are governed by Flare governance (asset manager contracts, governance multisig, Core Vault multisig on XRPL). `TODO` — exact governance multisig/threshold not enumerated.
+- **Flare-side governance:** canonical FXRP and the FAssets parameters are governed by Flare governance (asset manager contracts, governance multisig, Core Vault multisig on XRPL). The [XRP Core Vault](https://dev.flare.network/fassets/core-vault) is a multisig account on the XRP Ledger whose signers are authorized by Flare governance under formal agreements; the exact signer count and threshold are not published in the developer docs.
 
 ### Programmability
 
@@ -223,7 +223,7 @@ This is a **strong multi-DVN configuration** — structurally the opposite of th
 
 - **Team:** Flare Foundation / Flare Network — publicly known, established since 2020, with a large developer ecosystem, public GitHub ([flare-foundation](https://github.com/flare-foundation)), and active governance (Flare Portal, proposals). Well-doxxed leadership.
 - **Documentation:** excellent and comprehensive — the [Flare Developer Hub](https://dev.flare.network/) covers FAssets, FXRP, the OFT bridge, parameters, and audits in depth.
-- **Legal structure:** Flare Foundation (established entity). Jurisdiction: `TODO` — not confirmed in this pass.
+- **Legal structure:** the Flare website and ecosystem are operated by **Flare Ecosystems Limited**, a corporation formed in the **British Virgin Islands** (registered office: Commerce House, Wickhams Cay 1, P.O. Box 3140, Road Town, Tortola, BVI VG 1110), per the [Terms of Service & Privacy Policy](https://flare.network/privacy-policy/) (§ 31 "Corporate Information"). Protocol development and governance are led by the Flare Foundation.
 - **Incident response:** no FAssets/FXRP loss event to evaluate; the system's design (over-collateralization, liquidators, challengers, Core Vault multisig) is itself a documented risk framework.
 
 ## Monitoring
@@ -239,7 +239,7 @@ This is a **strong multi-DVN configuration** — structurally the opposite of th
 | Flare OFT Adapter | [`0xd70659a6396285BF7214d7Ea9673184e7C72E07E`](https://flare-explorer.flare.network/address/0xd70659a6396285BF7214d7Ea9673184e7C72E07E) | escrow balance (`canonicalFXRP.balanceOf(adapter)`) vs. sum of remote supplies |
 | Canonical FXRP | [`0xAd552A648C74D49E10027AB8a618A3ad4901c5bE`](https://flare-explorer.flare.network/address/0xAd552A648C74D49E10027AB8a618A3ad4901c5bE) | total supply vs. minting cap (170M XRP) |
 | Morpho Blue | [`0xBBBBBbbBBb9cC5e90e3b3Af64bdAF62C37EEFFCb`](https://etherscan.io/address/0xBBBBBbbBBb9cC5e90e3b3Af64bdAF62C37EEFFCb) | FXRP balance; the FXRP/RLUSD market's borrow/supply and LLTV |
-| Uniswap V3 RLUSD-FXRP | `TODO` (pool address not resolved) | pool depth; large swaps indicating forced sells |
+| Uniswap V3 RLUSD-FXRP | [`0x42271FcA1FA435B176D46a5544B2698a1E261782`](https://etherscan.io/address/0x42271FcA1FA435B176D46a5544B2698a1E261782) | pool depth; large swaps indicating forced sells |
 
 ### Critical Events & Thresholds
 
@@ -386,7 +386,7 @@ This is a **strong multi-DVN configuration** — structurally the opposite of th
 
 #### Category 5: Operational Risk (Weight: 5%)
 
-- **Team:** Flare Foundation — public, established, doxxed. Documentation excellent. Legal structure TODO. → **1.5**
+- **Team:** Flare Foundation / Flare Ecosystems Limited (BVI) — public, established, doxxed. Documentation excellent. → **1.5**
 
 **Operational Score = 1.5**
 
