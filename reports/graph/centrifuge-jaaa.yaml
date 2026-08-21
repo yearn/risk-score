@@ -125,16 +125,16 @@ nodes:
   - id: dep-layerzero
     label: LayerZero V2
     category: dependency
-    note: First leg on every destination; sole adapter on X Layer (quorum 1)
+    note: First leg on every destination; SOLE adapter on X Layer (quorum 1) — that route can mint JAAA on Ethereum unilaterally
   - id: dep-axelar
     label: Axelar GMP
     address: "0x4F4495243837681061C4743b74B3eEdf548D56A5"
     category: dependency
-    note: Second quorum leg on Base/Arbitrum/Avalanche/BNB — every chain where JAAA holds supply
+    note: Second quorum leg on Base/Arbitrum/Avalanche/BNB — JAAA's four highest-supply remote chains
   - id: dep-ccip
     label: Chainlink CCIP
     category: dependency
-    note: Second quorum leg on Monad/Pharos only
+    note: Second quorum leg on Monad/Pharos; Monad holds live JAAA supply (~483,418)
 
 edges:
   # === Governance flow → Root (master ward) ===
