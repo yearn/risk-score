@@ -22,7 +22,8 @@ nodes:
       Bridged representation of Flare-native FXRP. TransparentUpgradeableProxy
       with a source-verified FXRPOFT implementation (native OFT: token() == self,
       oftVersion 1). ~10.3M supply; mint/burn only via the LayerZero EndpointV2
-      lzReceive path, authenticated by a 4-of-4 DVN quorum.
+      lzReceive path, authenticated by a 4-of-4 DVN quorum on all six inbound
+      routes. Peers six chains directly (mesh, not hub-and-spoke).
 
   # === Governance (Ethereum) ===
   - id: multisig
@@ -32,6 +33,8 @@ nodes:
     note: >-
       Gnosis Safe v1.4.1 (11 owners, threshold 6). Holds owner() on the FXRP OFT
       (peers, enforced options, fees) and owns the ProxyAdmin. No timelock.
+      The identical 11-owner set also governs the Flare adapter and the Katana,
+      HyperEVM and Monad OFTs - one signer set across six chains.
   - id: proxy-admin
     label: FXRP ProxyAdmin
     address: "0x93bfc1329d6d4d94825434b2c0b55f56b34695c7"
@@ -56,7 +59,8 @@ nodes:
     category: infra
     note: >-
       On Flare (chain ID 14), locks canonical FXRP (token() = 0xAd552A648C74D49E10027AB8a618A3ad4901c5bE)
-      when bridging out. Holds ~15.83M FXRP escrow backing all remote OFTs.
+      when bridging out. Holds 15,829,539.356684 FXRP escrow, matching the sum of
+      all six remote OFT supplies exactly at the snapshot block.
       Cannot mint canonical FXRP — this is the OFT lock model.
 
   # === Canonical side (Flare) ===
@@ -94,8 +98,30 @@ nodes:
     category: dependency
     note: >-
       Native OFT on Katana (chain ID 747474, LZ EID 30375); peers back to
-      Ethereum/Flare/Base/BNB. Supply ~145.8 FXRP (negligible today). Owner
-      0xb8bcdEb56Aa56ef2e89E01f9E4b2641C61CbD257.
+      Ethereum, Flare, Base, BNB, HyperEVM and Monad. Supply 145.834016 FXRP
+      (negligible today). Owner 0xb8bcdEb56Aa56ef2e89E01f9E4b2641C61CbD257 -
+      a 6-of-11 Safe with the same signer set as the Ethereum Safe.
+
+  # === Sibling remote OFTs (direct Ethereum peers) ===
+  - id: monad-fxrp
+    label: Monad FXRP OFT
+    link: "https://monadexplorer.com/address/0xCE6170EA245dC8D1f275A710a062b70f125F0110"
+    category: dependency
+    note: >-
+      Native OFT on Monad (LZ EID 30390), a direct peer of the Ethereum OFT.
+      Supply 3,797,974.851127 FXRP - the second-largest remote supply (~24%).
+      Owned by a 6-of-11 Safe with the same signer set as the Ethereum Safe.
+      A mint here can be bridged into Ethereum without touching the Flare escrow.
+  - id: hyperevm-fxrp
+    label: HyperEVM FXRP OFT
+    address: "0xd70659a6396285BF7214d7Ea9673184e7C72E07E"
+    chain: hyperevm
+    category: dependency
+    note: >-
+      Native OFT on HyperEVM (LZ EID 30367), a direct peer of the Ethereum OFT.
+      Supply 1,079,249.221440 FXRP, of which 1,052,056.598240 sits at the
+      HyperCore linkage address 0x2000...016f (a subset, not extra supply).
+      Owner 0x0144603c28313F30fa573448406721792E46cfd8 - 6-of-11, same signers.
 
 edges:
   # === Governance / control ===
@@ -143,3 +169,25 @@ edges:
     to: katana-fxrp
     kind: routes-through
     label: "LayerZero peer"
+
+  # === Sibling OFT peers that can originate an Ethereum mint ===
+  - from: monad-fxrp
+    to: fxrp
+    kind: routes-through
+    label: "peer: can mint Ethereum FXRP"
+  - from: hyperevm-fxrp
+    to: fxrp
+    kind: routes-through
+    label: "peer: can mint Ethereum FXRP"
+  - from: multisig
+    to: monad-fxrp
+    kind: controls
+    label: "same 11 signers"
+  - from: multisig
+    to: hyperevm-fxrp
+    kind: controls
+    label: "same 11 signers"
+  - from: multisig
+    to: katana-fxrp
+    kind: controls
+    label: "same 11 signers"

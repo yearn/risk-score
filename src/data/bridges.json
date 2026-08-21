@@ -423,7 +423,7 @@
           "kind": "direct",
           "model": "lock",
           "integration": "LayerZero V2 OFT (canonical FXRP locked on Flare)",
-          "detail": "Ethereum FXRP [`0xCE61…F0110`](https://etherscan.io/address/0xCE6170EA245dC8D1f275A710a062b70f125F0110) is a native OFT (token() == self, oftVersion 1) backed 1:1 by canonical FXRP locked in the Flare OFT Adapter [`0xd706…7E07E`](https://flare-explorer.flare.network/address/0xd70659a6396285BF7214d7Ea9673184e7C72E07E) (~15.83M escrow). The adapter holds token() = canonical FXRP and cannot mint it; a bridge compromise is bounded by remote supply + escrow. Ethereum OFT peers: Flare (30295), Base (30184), BNB (30102), Katana (30375).",
+          "detail": "Ethereum FXRP [`0xCE61…F0110`](https://etherscan.io/address/0xCE6170EA245dC8D1f275A710a062b70f125F0110) is a native OFT (token() == self, oftVersion 1) backed 1:1 by canonical FXRP locked in the Flare OFT Adapter [`0xd706…7E07E`](https://flare-explorer.flare.network/address/0xd70659a6396285BF7214d7Ea9673184e7C72E07E). The adapter holds token() = canonical FXRP and cannot mint it, so canonical supply and the XRP backing are out of reach. Escrow of 15,829,539.356684 FXRP matches the sum of all six remote OFT supplies exactly. **Mesh topology:** the Ethereum OFT peers six chains directly — Flare (30295), Monad (30390), HyperEVM (30367), Base (30184), BNB (30102), Katana (30375) — so a mint on any sibling chain can be bridged in as Ethereum FXRP without touching the Flare escrow. All six OFTs plus the adapter are owned by 6-of-11 Safes sharing one identical 11-signer set, with no timelock.",
           "security": {
             "label": "4-of-4",
             "confirmations": 20,
@@ -434,7 +434,7 @@
               "Horizen"
             ],
             "route": "Flare→Ethereum (bridged-FXRP mint side)",
-            "note": "0 optional DVNs. The Ethereum→Flare escrow-release path uses the same four providers with 15 confirmations.",
+            "note": "0 optional DVNs. All six inbound routes were verified individually and share the same 4-of-4 quorum; source-chain confirmations vary (Flare/BNB/Katana 20, Base 10, Monad 5, HyperEVM 3). The Ethereum→Flare escrow-release path uses the same four providers with 15 confirmations. The quorum is mutable by the 6-of-11 Safe as LayerZero delegate, with no timelock.",
             "weak": false,
             "verifiedAt": "2026-08-21",
             "link": "https://etherscan.io/address/0xCE6170EA245dC8D1f275A710a062b70f125F0110"
