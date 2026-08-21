@@ -43,7 +43,7 @@ The HYPE++ vault is currently in epoch 21. Onchain state verified on August 10, 
 |----------|---------|------|
 | HYPE++ Vault | [`0x75288264FDFEA8ce68e6D852696aB1cE2f3E5004`](https://arbiscan.io/address/0x75288264FDFEA8ce68e6D852696aB1cE2f3E5004) | `VaultV1Whitelisted`, ERC-4626-style vault |
 | HYPE++ Trader / OMS | [`0x8CaBD8b787e8c69C5f24091cFDA197fF570345B3`](https://arbiscan.io/address/0x8CaBD8b787e8c69C5f24091cFDA197fF570345B3) | Verified selector router (non-upgradeable; delegatecalls modules) |
-| Trader Module (legacy) | [`0xc8071ad5560904b3b721e7e5d29742f523a69111`](https://arbiscan.io/address/0xc8071ad5560904b3b721e7e5d29742f523a69111) | Standalone AccessControl contract; deployed earlier, not proxy-linked to trader |
+| D2 Module (D2 facet) | [`0xc8071aD5560904B3b721e7E5d29742F523a69111`](https://arbiscan.io/address/0xc8071aD5560904B3b721e7E5d29742F523a69111) | Delegatecall module; implements `d2_deposit`/`d2_withdraw` (`EXECUTOR_ROLE`-gated), hardcoded in Strategy Factory |
 | Vault Owner | [`0x0E8c0470773c65498F438cac380648B314399A46`](https://arbiscan.io/address/0x0E8c0470773c65498F438cac380648B314399A46) | EOA, owns BOTH HYPE++ vault and dgnHYPE vault |
 | Trader Admin / Executor / Fee Receiver | [`0x7ab129978091DEE65A319c5FC728818D73221999`](https://arbiscan.io/address/0x7ab129978091DEE65A319c5FC728818D73221999) | EOA with `DEFAULT_ADMIN_ROLE` and `EXECUTOR_ROLE` on trader |
 | D2 Vault Multisig | [`0xB2fEDed045F3fd9FcCCF8E7e95729c4182916CE0`](https://arbiscan.io/address/0xB2fEDed045F3fd9FcCCF8E7e95729c4182916CE0) | Safe, 4-of-7; also trader admin/executor |
@@ -62,7 +62,7 @@ Deployment metadata:
 - HYPE++ vault and trader were deployed in transaction [`0xf5642a6a...6265e`](https://arbiscan.io/tx/0xf5642a6afa068616ac286c0c26ef32f46bc43333edf79fe071ff3f60b346265e) at Arbitrum block `276124793` on November 19, 2024.
 - The vault is NOT behind a proxy (both EIP-1967 and OpenZeppelin transparent proxy slots are zero); it is a standalone `VaultV1Whitelisted` contract. Ownership is transferable via the standard Ownable `transferOwnership()`.
 - The trader is NOT a standard proxy (EIP-1967/beacon/transparent proxy slots are zero); it is a standalone selector router that delegatecalls to pre-configured modules.
-- The contract at [`0xc8071ad5560904b3b721e7e5d29742f523a69111`](https://arbiscan.io/address/0xc8071ad5560904b3b721e7e5d29742f523a69111) was deployed earlier (block `218684412`, tx [`0xe432dabc...8675`](https://arbiscan.io/tx/0xe432dabfc9572c103e858399f29530b458fdbb882b4ab0e94245eeae553a8675)) by a different EOA (`0x00Aa367B7692be05E47B9c461fF35410208158b0`) and is not referenced in the trader's bytecode; it does not serve as a proxy implementation for the HYPE++ trader.
+- The contract at [`0xc8071aD5560904B3b721e7E5d29742F523a69111`](https://arbiscan.io/address/0xc8071aD5560904B3b721e7E5d29742F523a69111) is the **D2 module** (verified source `D2_Module`): it was deployed earlier (block `218684412`, tx [`0xe432dabc...8675`](https://arbiscan.io/tx/0xe432dabfc9572c103e858399f29530b458fdbb882b4ab0e94245eeae553a8675)) by a different EOA (`0x00Aa367B7692be05E47B9c461fF35410208158b0`), and the Strategy Factory hardcodes it as the D2 facet. The HYPE++ trader wires it as `targets[28]` — the delegatecall target for the `d2_deposit(address,uint256)` and `d2_withdraw(address,uint256)` selectors (both `EXECUTOR_ROLE`-gated). It is not a proxy implementation, but it is an active delegatecall module in the trading path.
 
 ## Audits and Due Diligence Disclosures
 
@@ -143,7 +143,7 @@ The later epoch provides a clearer end-to-end route for the dgnHYPE capital:
 | [`0x0E8c0470773c65498F438cac380648B314399A46`](https://arbiscan.io/address/0x0E8c0470773c65498F438cac380648B314399A46) | No direct unbacked mint | No | Vault owner | EOA can set whitelist parameters, deposit caps, and epoch schedule |
 | [`0x8CaBD8b787e8c69C5f24091cFDA197fF570345B3`](https://arbiscan.io/address/0x8CaBD8b787e8c69C5f24091cFDA197fF570345B3) | No direct unbacked mint | No | Trader | Can custody and return funds; trading losses are borne by vault users |
 
-**Rate limits / supply caps:** Current `maxDeposits` is 12,500,000 USDC.
+**Rate limits / supply caps:** Current `maxDeposits` is 12,000,000 USDC.
 
 **Backing check at mint time:** Atomic at the HYPE++ vault level. Collateral must transfer into the vault on mint/deposit.
 
