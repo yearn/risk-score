@@ -131,15 +131,6 @@ The FXRP/FAssets stack has an extensive, multi-firm audit history. The Ethereum 
 
 - **The Immunefi program page is offline as of this assessment.** `https://immunefi.com/bug-bounty/flarenetwork/information/` returns **HTTP 404**, as does every other plausible Flare slug on Immunefi. This is not bot-blocking: the Flare audit-competition page on the same host still returns 200. Flare still points at the dead URL from the site-wide footer of the [Developer Hub](https://dev.flare.network/), and its [July 2024 launch announcement](https://flare.network/news/flare-immunefi-launch-a-comprehensive-bug-bounty-program) links to `/bug-bounty/flarenetwork/`, which redirects into the same 404 — so the discrepancy is on Immunefi's side and Flare's own references have not caught up.
 - **Last confirmed live: May 16, 2026** ([Wayback CDX index](http://web.archive.org/cdx/search/cdx?url=immunefi.com/bug-bounty/flarenetwork/*&output=text&fl=timestamp,statuscode&filter=statuscode:200)). Whether the program was delisted, migrated, or is temporarily unavailable could not be determined — treat the bounty as **unverified**, not as confirmed-live.
-- **Terms while it was live**, from the last full archived snapshot ([February 17, 2026](http://web.archive.org/web/20260217213522/https://immunefi.com/bug-bounty/flarenetwork/information/), page last updated February 10, 2026):
-
-  | Category | Critical | High | Medium | Low |
-  |----------|----------|------|--------|-----|
-  | Smart Contract | Max **$250,000** / Min $20,000 | Max $30,000 / Min $10,000 | $5,000 | $1,000 |
-  | Blockchain/DLT | Max **$100,000** / Min $30,000 | $25,000 | $10,000 | $2,500 |
-  | Websites & Applications | Max $30,000 / Min $6,000 | $5,000 | $2,000 | — |
-
-  The headline "$250,000" is the **Smart Contract** critical cap — the relevant category for FAssets and the OFT — and it is a cap on a formula, not a flat payout: *"reward amount is 10% of the funds directly affected up to a maximum of $250,000."* Live since July 16, 2024; rewards paid in FLR, denominated in USD; PoC always required; no KYC.
 - Safe Harbor (SEAL 911): not disclosed in Flare's public documentation, and the SEAL registry has no reachable machine-readable adopter list to check against — could not be verified.
 
 ## Historical Track Record
@@ -208,15 +199,15 @@ This is a **mesh topology, not a hub-and-spoke**: Ethereum accepts mint messages
 
 **DVN quorum (verified onchain, receive side).** LayerZero ULN config is per-route, so **every** inbound route that can mint Ethereum FXRP was read individually via `EndpointV2.getReceiveLibrary(FXRP, srcEid)` then `getConfig(FXRP, lib, srcEid, 2)`. All six use receive library [`0xc02A…24C2`](https://etherscan.io/address/0xc02Ab410f0734EFa3F14628780e6e695156024C2) and the same four required DVNs with **0 optional DVNs**:
 
-| Route | Quorum | Confirmations |
-|-------|--------|---------------|
-| Flare → Ethereum (mints Ethereum FXRP) | **4-of-4** required | 20 |
-| BNB Chain → Ethereum | **4-of-4** required | 20 |
-| Katana → Ethereum | **4-of-4** required | 20 |
-| Base → Ethereum | **4-of-4** required | 10 |
-| Monad → Ethereum | **4-of-4** required | 5 |
-| HyperEVM → Ethereum | **4-of-4** required | 3 |
-| Ethereum → Flare (releases canonical escrow) | **4-of-4** required | 15 |
+| Route | Quorum |
+|-------|--------|
+| Flare → Ethereum (mints Ethereum FXRP) | **4-of-4** required |
+| BNB Chain → Ethereum | **4-of-4** required |
+| Katana → Ethereum | **4-of-4** required |
+| Base → Ethereum | **4-of-4** required |
+| Monad → Ethereum | **4-of-4** required |
+| HyperEVM → Ethereum | **4-of-4** required |
+| Ethereum → Flare (releases canonical escrow) | **4-of-4** required |
 
 Required DVNs on the Ethereum receive side (names resolved via the [LayerZero metadata API](https://metadata.layerzero-api.com/v1/metadata)): LayerZero Labs [`0x589d…236b`](https://etherscan.io/address/0x589dedbd617e0cbcb916a9223f4d1300c294236b), Nethermind [`0xa59b…0ba5`](https://etherscan.io/address/0xa59ba433ac34d2927232918ef5b2eaafcf130ba5), Canary [`0xa4fe…c2cd`](https://etherscan.io/address/0xa4fe5a5b9a846458a70cd0748228aed3bf65c2cd), Horizen [`0x3802…f20d`](https://etherscan.io/address/0x380275805876ff19055ea900cdb2b46a94ecf20d). The Ethereum → Flare path uses the same four providers at their Flare-side addresses.
 
