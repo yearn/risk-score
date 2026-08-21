@@ -1,0 +1,193 @@
+slug: flare-fxrp
+title: Flare FXRP (Ethereum) — Contract Dependency Graph
+chain: ethereum
+
+categories:
+  - id: vault
+    label: Vault / Token
+  - id: governance
+    label: Governance
+  - id: infra
+    label: Bridge / Infra
+  - id: dependency
+    label: External Dependency
+
+nodes:
+  # === Assessed token (Ethereum) ===
+  - id: fxrp
+    label: FXRP (LayerZero OFT)
+    address: "0xCE6170EA245dC8D1f275A710a062b70f125F0110"
+    category: vault
+    note: >-
+      Bridged representation of Flare-native FXRP. TransparentUpgradeableProxy
+      with a source-verified FXRPOFT implementation (native OFT: token() == self,
+      oftVersion 1). ~10.3M supply; mint/burn only via the LayerZero EndpointV2
+      lzReceive path, authenticated by a 4-of-4 DVN quorum on all six inbound
+      routes. Peers six chains directly (mesh, not hub-and-spoke).
+
+  # === Governance (Ethereum) ===
+  - id: multisig
+    label: Flare 6-of-11 Safe
+    address: "0x42D660C6C871a9176cEb102E9ad9722459Aa67D3"
+    category: governance
+    note: >-
+      Gnosis Safe v1.4.1 (11 owners, threshold 6). Holds owner() on the FXRP OFT
+      (peers, enforced options, fees) and owns the ProxyAdmin. No timelock.
+      The identical 11-owner set also governs the Flare adapter and the Katana,
+      HyperEVM and Monad OFTs - one signer set across six chains.
+  - id: proxy-admin
+    label: FXRP ProxyAdmin
+    address: "0x93bfc1329d6d4d94825434b2c0b55f56b34695c7"
+    category: governance
+    note: >-
+      OpenZeppelin ProxyAdmin owned by the 6-of-11 Safe. Can swap the FXRP
+      implementation with no timelock — a malicious upgrade could add unbacked
+      minting or a blacklist.
+
+  # === Bridge / infrastructure ===
+  - id: layerzero-endpoint
+    label: LayerZero EndpointV2
+    address: "0x1a44076050125825900e736c501f859c50fE728c"
+    category: dependency
+    note: >-
+      Canonical LayerZero V2 endpoint. The only caller of FXRP's lzReceive; its
+      peer table and 4-of-4 DVN quorum (LayerZero Labs, Nethermind, Canary,
+      Horizen) gate every cross-chain mint/burn of Ethereum FXRP.
+  - id: flare-adapter
+    label: Flare FXRP OFT Adapter
+    link: "https://flare-explorer.flare.network/address/0xd70659a6396285BF7214d7Ea9673184e7C72E07E"
+    category: infra
+    note: >-
+      On Flare (chain ID 14), locks canonical FXRP (token() = 0xAd552A648C74D49E10027AB8a618A3ad4901c5bE)
+      when bridging out. Holds 15,829,539.356684 FXRP escrow, matching the sum of
+      all six remote OFT supplies exactly at the snapshot block.
+      Cannot mint canonical FXRP — this is the OFT lock model.
+
+  # === Canonical side (Flare) ===
+  - id: flare-fxrp
+    label: Canonical FXRP (Flare)
+    link: "https://flare-explorer.flare.network/address/0xAd552A648C74D49E10027AB8a618A3ad4901c5bE"
+    category: dependency
+    note: >-
+      The FAsset ERC-20 minted by Flare's FAssets system, over-collateralized
+      (USDT vault CR >= 1.2, FLR pool CR >= 1.5) and backed by XRP held on XRPL
+      by agents + the Core Vault multisig, FDC-attested. ~147.8M supply vs a
+      170M XRP minting cap.
+  - id: flare-safe
+    label: Flare 6-of-11 Safe (adapter owner)
+    link: "https://flare-explorer.flare.network/address/0xbe653C54DF337F13Fcb726101388F4a4803049F3"
+    category: governance
+    note: >-
+      Owns the Flare OFT Adapter; same 11-owner / 6-threshold signer set as the
+      Ethereum Safe (0x42D6...67D3).
+
+  # === Lending use case (Ethereum) ===
+  - id: morpho-blue
+    label: Morpho Blue
+    address: "0xBBBBBbbBBb9cC5e90e3b3Af64bdAF62C37EEFFCb"
+    category: dependency
+    note: >-
+      Holds ~9.94M FXRP (~96.5% of Ethereum supply) as collateral, primarily in
+      the FXRP/RLUSD market (LLTV 77%, ~95% utilization).
+
+  # === Katana (target chain) ===
+  - id: katana-fxrp
+    label: Katana FXRP OFT
+    address: "0x565f9415b9c285c03c008e73088148f28d218059"
+    chain: katana
+    category: dependency
+    note: >-
+      Native OFT on Katana (chain ID 747474, LZ EID 30375); peers back to
+      Ethereum, Flare, Base, BNB, HyperEVM and Monad. Supply 145.834016 FXRP
+      (negligible today). Owner 0xb8bcdEb56Aa56ef2e89E01f9E4b2641C61CbD257 -
+      a 6-of-11 Safe with the same signer set as the Ethereum Safe.
+
+  # === Sibling remote OFTs (direct Ethereum peers) ===
+  - id: monad-fxrp
+    label: Monad FXRP OFT
+    link: "https://monadexplorer.com/address/0xCE6170EA245dC8D1f275A710a062b70f125F0110"
+    category: dependency
+    note: >-
+      Native OFT on Monad (LZ EID 30390), a direct peer of the Ethereum OFT.
+      Supply 3,797,974.851127 FXRP - the second-largest remote supply (~24%).
+      Owned by a 6-of-11 Safe with the same signer set as the Ethereum Safe.
+      A mint here can be bridged into Ethereum without touching the Flare escrow.
+  - id: hyperevm-fxrp
+    label: HyperEVM FXRP OFT
+    address: "0xd70659a6396285BF7214d7Ea9673184e7C72E07E"
+    chain: hyperevm
+    category: dependency
+    note: >-
+      Native OFT on HyperEVM (LZ EID 30367), a direct peer of the Ethereum OFT.
+      Supply 1,079,249.221440 FXRP, of which 1,052,056.598240 sits at the
+      HyperCore linkage address 0x2000...016f (a subset, not extra supply).
+      Owner 0x0144603c28313F30fa573448406721792E46cfd8 - 6-of-11, same signers.
+
+edges:
+  # === Governance / control ===
+  - from: multisig
+    to: fxrp
+    kind: holds-role
+    label: "owner (peers, fees)"
+  - from: multisig
+    to: proxy-admin
+    kind: controls
+    label: "owns ProxyAdmin"
+  - from: proxy-admin
+    to: fxrp
+    kind: manages
+    label: "upgrade authority (no timelock)"
+
+  # === Mint authority ===
+  - from: layerzero-endpoint
+    to: fxrp
+    kind: mints
+    label: "lzReceive (4-of-4 DVN)"
+
+  # === Canonical backing flow ===
+  - from: flare-fxrp
+    to: flare-adapter
+    kind: deposits-into
+    label: "escrow (lock)"
+  - from: flare-safe
+    to: flare-adapter
+    kind: holds-role
+    label: "owner"
+  - from: flare-adapter
+    to: fxrp
+    kind: routes-through
+    label: "peer: lock → mint bridged FXRP"
+
+  # === Lending use case ===
+  - from: fxrp
+    to: morpho-blue
+    kind: deposits-into
+    label: "collateral (~96.5% of supply)"
+
+  # === Katana bridging ===
+  - from: fxrp
+    to: katana-fxrp
+    kind: routes-through
+    label: "LayerZero peer"
+
+  # === Sibling OFT peers that can originate an Ethereum mint ===
+  - from: monad-fxrp
+    to: fxrp
+    kind: routes-through
+    label: "peer: can mint Ethereum FXRP"
+  - from: hyperevm-fxrp
+    to: fxrp
+    kind: routes-through
+    label: "peer: can mint Ethereum FXRP"
+  - from: multisig
+    to: monad-fxrp
+    kind: controls
+    label: "same 11 signers"
+  - from: multisig
+    to: hyperevm-fxrp
+    kind: controls
+    label: "same 11 signers"
+  - from: multisig
+    to: katana-fxrp
+    kind: controls
+    label: "same 11 signers"
