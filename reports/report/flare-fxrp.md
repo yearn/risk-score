@@ -4,7 +4,7 @@
 - **Token:** FXRP (Flare FAsset of XRP)
 - **Chain:** Ethereum
 - **Token Address:** [`0xCE6170EA245dC8D1f275A710a062b70f125F0110`](https://etherscan.io/address/0xCE6170EA245dC8D1f275A710a062b70f125F0110)
-- **Final Score: 2.9/5.0**
+- **Final Score: 3.0/5.0**
 
 ## Overview + Links
 
@@ -38,7 +38,7 @@
 - [Flare Smart Accounts](https://dev.flare.network/smart-accounts/overview)
 - [GitHub — flare-foundation](https://github.com/flare-foundation)
 - [Audits](https://dev.flare.network/support/audits)
-- [Bug Bounty (Immunefi)](https://immunefi.com/bug-bounty/flarenetwork/information/)
+- [Immunefi FAssets Audit Competition (leaderboard)](https://immunefi.com/audit-competition/audit-comp-flare-fassets/leaderboard/)
 - [Morpho FXRP/RLUSD market](https://app.morpho.org/ethereum/market/0x4fa31e3f8ba345227d44e1cf48559eea53a90dd5311dc006984c060f2f311d96/fxrp-rlusd)
 
 ## Contract Addresses
@@ -127,9 +127,18 @@ The FXRP/FAssets stack has an extensive, multi-firm audit history. The Ethereum 
 
 ### Bug Bounty
 
-- Flare maintains a live [Immunefi bug bounty](https://immunefi.com/bug-bounty/flarenetwork/information/) covering the Flare Network and its protocols (FAssets included).
-- Maximum payout: **$250,000** for critical-severity vulnerabilities, per Flare's [bug bounty launch announcement](https://flare.network/news/flare-immunefi-launch-a-comprehensive-bug-bounty-program) (July 16, 2024). Flare notes the maximum "may increase" as scope expands; the live [Immunefi program page](https://immunefi.com/bug-bounty/flarenetwork/information/) is JS-rendered, so the current displayed tier could not be independently re-read at snapshot time.
-- Safe Harbor (SEAL 911): not disclosed in Flare's public documentation or the Immunefi program page — could not be verified.
+- **The Immunefi program page is offline as of this assessment.** `https://immunefi.com/bug-bounty/flarenetwork/information/` returns **HTTP 404**, as does every other plausible Flare slug on Immunefi. This is not bot-blocking: the Flare audit-competition page on the same host still returns 200. Flare still points at the dead URL from the site-wide footer of the [Developer Hub](https://dev.flare.network/), and its [July 2024 launch announcement](https://flare.network/news/flare-immunefi-launch-a-comprehensive-bug-bounty-program) links to `/bug-bounty/flarenetwork/`, which redirects into the same 404 — so the discrepancy is on Immunefi's side and Flare's own references have not caught up.
+- **Last confirmed live: May 16, 2026** ([Wayback CDX index](http://web.archive.org/cdx/search/cdx?url=immunefi.com/bug-bounty/flarenetwork/*&output=text&fl=timestamp,statuscode&filter=statuscode:200)). Whether the program was delisted, migrated, or is temporarily unavailable could not be determined — treat the bounty as **unverified**, not as confirmed-live.
+- **Terms while it was live**, from the last full archived snapshot ([February 17, 2026](http://web.archive.org/web/20260217213522/https://immunefi.com/bug-bounty/flarenetwork/information/), page last updated February 10, 2026):
+
+  | Category | Critical | High | Medium | Low |
+  |----------|----------|------|--------|-----|
+  | Smart Contract | Max **$250,000** / Min $20,000 | Max $30,000 / Min $10,000 | $5,000 | $1,000 |
+  | Blockchain/DLT | Max **$100,000** / Min $30,000 | $25,000 | $10,000 | $2,500 |
+  | Websites & Applications | Max $30,000 / Min $6,000 | $5,000 | $2,000 | — |
+
+  The headline "$250,000" is the **Smart Contract** critical cap — the relevant category for FAssets and the OFT — and it is a cap on a formula, not a flat payout: *"reward amount is 10% of the funds directly affected up to a maximum of $250,000."* Live since July 16, 2024; rewards paid in FLR, denominated in USD; PoC always required; no KYC.
+- Safe Harbor (SEAL 911): not disclosed in Flare's public documentation, and the SEAL registry has no reachable machine-readable adopter list to check against — could not be verified.
 
 ## Historical Track Record
 
@@ -380,7 +389,7 @@ This is a **strong and, importantly, uniform multi-DVN configuration** — struc
 
 - **Strong bridge security:** 4-of-4 required DVNs (LayerZero Labs, Nethermind, Canary, Horizen) on both the mint and escrow-release paths — structurally immune to the single-DVN forgery that caused the April 2026 rsETH incident.
 - **Over-collateralized backing:** canonical FXRP is over-collateralized (USDT vault CR ≥1.2, FLR pool CR ≥1.5) with on-chain liquidations and challengers, on top of a trustless FDC-attested bridge from XRPL.
-- **Extensive, current audits:** OpenZeppelin (Jan 2026), multiple Zellic and Coinspect reports, plus an Immunefi competition — continuous coverage of the FAssets and OFT stack.
+- **Extensive, current audits:** OpenZeppelin (Jan 2026), multiple Zellic and Coinspect reports, plus an Immunefi competition — continuous coverage of the FAssets and OFT stack. (The bug bounty is a separate matter — see *Bug Bounty*, where the program page is currently offline.)
 - **Canonical supply is insulated:** the OFT `lock` model means a LayerZero compromise cannot mint canonical FXRP on Flare or touch the XRP backing — damage is confined to the bridged representations.
 - **Escrow invariant verifiably holds:** the Flare escrow equals the sum of all six remote supplies exactly, to the unit, at the snapshot block — a cheap, continuous, fully on-chain integrity check.
 - **Minimal contract surface on Ethereum:** the assessed token is a thin, standard, source-verified LayerZero OFT with no AccessControl, no blacklist, and no privileged mint function.
@@ -419,10 +428,10 @@ This is a **strong and, importantly, uniform multi-DVN configuration** — struc
 
 #### Category 1: Audits & Historical Track Record (Weight: 20%)
 
-- **Audits:** 3+ top/reputable firms (OpenZeppelin, Zellic, Coinspect) with continuous 2022–2026 coverage plus an Immunefi competition. Bug bounty is live on Immunefi but the maximum payout is unverified. → **1.5**
+- **Audits:** the audit column is a clear **1** — 3+ top/reputable firms (OpenZeppelin, Zellic, Coinspect) with continuous 2022–2026 coverage plus an Immunefi audit competition, over a thin contract surface on the assessed chain. The bounty column is the problem: the rubric's score-2 row requires a max payout >$200K, and while the archived program met that ($250K smart-contract critical), **the program page is 404 today and cannot be confirmed live**. Scored between "bounty program present" (3) and "minimal or no bounty" (4) — the program was demonstrably live three months ago and Flare still advertises it, but an unreachable bounty cannot be credited as an active control. → bounty **3.5**, giving (1 + 3.5) / 2 = **2.25**
 - **Historical:** ~6.3 months on Ethereum (>$10M TVL), FAssets live on Flare for longer; no incidents. → **3**
 
-**Audits & Historical Score = (1.5 + 3) / 2 = 2.25**
+**Audits & Historical Score = (2.25 + 3) / 2 = 2.625 → 2.6**
 
 #### Category 2: Centralization & Control Risks (Weight: 30%)
 
@@ -455,12 +464,12 @@ This is a **strong and, importantly, uniform multi-DVN configuration** — struc
 
 | Category | Score | Weight | Weighted |
 |----------|-------|--------|----------|
-| Audits & Historical | 2.25 | 20% | 0.45 |
+| Audits & Historical | 2.6 | 20% | 0.525 |
 | Centralization & Control | 3.5 | 30% | 1.05 |
 | Funds Management | 2.5 | 30% | 0.75 |
 | Liquidity Risk | 4.0 | 15% | 0.60 |
 | Operational Risk | 1.5 | 5% | 0.075 |
-| **Final Score** | | | **2.925 → 2.9/5.0** |
+| **Final Score** | | | **3.0/5.0** |
 
 **Optional Modifiers:** none applied (protocol <2 years on Ethereum; TVL <$500M).
 
@@ -483,6 +492,7 @@ This is a **strong and, importantly, uniform multi-DVN configuration** — struc
 
 - **Time-based:** reassess in 6 months (the deployment is young; liquidity and holder concentration should be re-checked).
 - **Topology-based:** reassess if a new `peers` entry is added on any chain, if a timelock is introduced (which would materially improve the governance score), or if the remote OFT signer sets diverge from the Ethereum Safe.
+- **Bounty-based:** re-check whether the Immunefi program is restored or formally discontinued; a confirmed live bounty at the archived $250K tier would improve the Audits score.
 - **Incident-based:** reassess after any Flare/FAssets/LayerZero incident, any ProxyAdmin upgrade or peer/DVN config change, or any Morpho FXRP-market bad-debt event.
 - **Liquidity-based:** reassess if Ethereum FXRP DEX depth drops below ~$1M or Morpho concentration rises further.
 - **Supply-based:** reassess if canonical FXRP approaches the 170M XRP minting cap or the Flare adapter escrow diverges from remote supply.
@@ -491,4 +501,4 @@ This is a **strong and, importantly, uniform multi-DVN configuration** — struc
 
 | Date | Score | Notes |
 | --- | --- | --- |
-| [August 21, 2026](https://github.com/yearn/risk-score/pull/420) | 2.9 | Initial assessment |
+| [August 21, 2026](https://github.com/yearn/risk-score/pull/420) | 3.0 | Initial assessment |
