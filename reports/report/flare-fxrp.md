@@ -429,4 +429,4 @@ This is a **strong multi-DVN configuration** — structurally the opposite of th
 
 | Date | Score | Notes |
 | --- | --- | --- |
-| [August 21, 2026](https://github.com/yearn/risk-score/pull/TODO) | 2.7 | Initial assessment |
+| [August 21, 2026](https://github.com/yearn/risk-score/pull/420) | 2.7 | Initial assessment |
