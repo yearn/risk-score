@@ -63,9 +63,9 @@
 | FXRP OFT Adapter | [`0xd70659a6396285BF7214d7Ea9673184e7C72E07E`](https://flare-explorer.flare.network/address/0xd70659a6396285BF7214d7Ea9673184e7C72E07E) | Locks canonical FXRP when bridging out (`token()` = canonical FXRP); holds ~15.83M FXRP escrow |
 | Flare adapter owner | [`0xbe653C54DF337F13Fcb726101388F4a4803049F3`](https://flare-explorer.flare.network/address/0xbe653C54DF337F13Fcb726101388F4a4803049F3) | Gnosis Safe **6-of-11** (same signer set as the Ethereum Safe) |
 
-### Other remote OFT deployments (peered directly to the Ethereum OFT)
+### Remote OFT deployments (peered directly to the Ethereum OFT)
 
-Every contract below is a LayerZero peer of the Ethereum OFT, which means each one can originate a message that mints Ethereum FXRP. All are owned by 6-of-11 Safes with the **identical 11-signer set** as the Ethereum Safe (verified onchain). Three of the four — Base, BNB, and Monad — are owned by the **same Safe address** as Ethereum ([`0x42D6…67D3`](https://etherscan.io/address/0x42D660C6C871a9176cEb102E9ad9722459Aa67D3)); only HyperEVM uses a distinct Safe address (`0x0144…cfd8`) with the same 11 signers.
+Every contract below is a LayerZero peer of the Ethereum OFT, which means each one can originate a message that mints Ethereum FXRP. All five are owned by 6-of-11 Safes with the **identical 11-signer set** as the Ethereum Safe (verified onchain). Base, BNB, and Monad are owned by the **same Safe address** as Ethereum ([`0x42D6…67D3`](https://etherscan.io/address/0x42D660C6C871a9176cEb102E9ad9722459Aa67D3)); HyperEVM ([`0x0144…cfd8`](https://hyperevmscan.io/address/0x0144603c28313F30fa573448406721792E46cfd8)) and Katana ([`0xb8bc…D257`](https://explorer.katanarpc.com/address/0xb8bcdEb56Aa56ef2e89E01f9E4b2641C61CbD257)) use distinct Safe addresses with the same 11 signers.
 
 | Chain (EID) | FXRP OFT | Owner | Supply |
 |-------------|----------|-------|--------|
@@ -73,16 +73,18 @@ Every contract below is a LayerZero peer of the Ethereum OFT, which means each o
 | BNB Chain (30102) | [`0xCE6170EA245dC8D1f275A710a062b70f125F0110`](https://bscscan.com/address/0xce6170ea245dc8d1f275a710a062b70f125f0110) | 6-of-11 Safe [`0x42D6…67D3`](https://bscscan.com/address/0x42D660C6C871a9176cEb102E9ad9722459Aa67D3) (same address as Ethereum) | 130,268.790069 |
 | HyperEVM (30367) | [`0xd70659a6396285BF7214d7Ea9673184e7C72E07E`](https://hyperevmscan.io/address/0xd70659a6396285BF7214d7Ea9673184e7C72E07E) | 6-of-11 Safe [`0x0144…cfd8`](https://hyperevmscan.io/address/0x0144603c28313F30fa573448406721792E46cfd8) | 1,079,249.221440 |
 | Monad (30390) | [`0xCE6170EA245dC8D1f275A710a062b70f125F0110`](https://monadexplorer.com/address/0xCE6170EA245dC8D1f275A710a062b70f125F0110) | 6-of-11 Safe [`0x42D6…67D3`](https://monadexplorer.com/address/0x42D660C6C871a9176cEb102E9ad9722459Aa67D3) | 3,797,974.851127 |
+| Katana (30375) | [`0x565f9415b9c285c03c008e73088148f28d218059`](https://explorer.katanarpc.com/address/0x565f9415b9c285c03c008e73088148f28d218059) | 6-of-11 Safe [`0xb8bc…D257`](https://explorer.katanarpc.com/address/0xb8bcdEb56Aa56ef2e89E01f9E4b2641C61CbD257) | 145.834016 |
 
 Of HyperEVM's supply, **1,052,056.598240 FXRP** is held by the HyperCore linkage system address [`0x2000…016f`](https://hyperevmscan.io/address/0x200000000000000000000000000000000000016f) — HyperCore balances are a *subset* of the HyperEVM ERC-20 supply, not an additional remote supply.
 
 ### Katana (target chain for the lending use case)
 
+Katana is the chain on which FXRP would be used as Morpho collateral (issue #419). Its FXRP OFT and owner Safe are listed in the remote-OFT table above; the remaining Katana-specific contracts are:
+
 | Contract | Address | Role |
 |----------|---------|------|
-| FXRP OFT | [`0x565f9415b9c285c03c008e73088148f28d218059`](https://explorer.katanarpc.com/address/0x565f9415b9c285c03c008e73088148f28d218059) | Native OFT on Katana (chain ID 747474, LZ EID 30375); peers back to Ethereum, Flare, Base, BNB, HyperEVM, and Monad. Supply 145.834016 FXRP (negligible today) |
 | Katana LayerZero EndpointV2 | [`0x6F475642a6e85809B1c36Fa62763669b1b48DD5B`](https://explorer.katanarpc.com/address/0x6F475642a6e85809B1c36Fa62763669b1b48DD5B) | Katana's EndpointV2 (EID 30375) |
-| Katana FXRP owner | [`0xb8bcdEb56Aa56ef2e89E01f9E4b2641C61CbD257`](https://explorer.katanarpc.com/address/0xb8bcdEb56Aa56ef2e89E01f9E4b2641C61CbD257) | Gnosis Safe **6-of-11** (same signer set as the Ethereum and Flare Safes). Also owns the Katana ProxyAdmin [`0x6fbb…fdc3`](https://explorer.katanarpc.com/address/0x6fbb5888b05b6624f6c4c00d34e2ec0373adfdc3) |
+| Katana FXRP ProxyAdmin | [`0x6fbb…fdc3`](https://explorer.katanarpc.com/address/0x6fbb5888b05b6624f6c4c00d34e2ec0373adfdc3) | Owned by the Katana Safe [`0xb8bc…D257`](https://explorer.katanarpc.com/address/0xb8bcdEb56Aa56ef2e89E01f9E4b2641C61CbD257); can upgrade the Katana FXRP implementation with no timelock |
 
 **Supply reconciliation (Pass 1.5, August 21, 2026):** the lock invariant closes **exactly, to the unit**, across all six remote chains — every remote OFT supply was read directly onchain, so nothing is inferred:
 
