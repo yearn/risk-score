@@ -159,6 +159,14 @@
           "model": "transport",
           "integration": "Collateral is yvUSD",
           "detail": "yvUSD has strategy that bridges funds to Base. Protocol doesn't use bridges"
+        },
+        {
+          "slug": "d2-hypeplus",
+          "name": "D2 HYPE++",
+          "kind": "indirect",
+          "model": "transport",
+          "integration": "Nested dgnHYPE strategy routes USDC to HyperCore via CCTP",
+          "detail": "dgnHYPE operational EOA [`0x11A6…006A`](https://arbiscan.io/address/0x11A691612BD108e57cC04ea42B006C9CB1ff006A) deposits USDC into the Circle HyperCore CCTP extension [`0xA95d…4fcE`](https://arbiscan.io/address/0xA95d9c1F655341597C94393fDdc30cf3c08E4fcE) for Hyperliquid trading"
         }
       ]
     },
