@@ -19,6 +19,7 @@
       ],
       "ignore": [
         "cap-stcusd",
+        "flare-fxrp",
         "fx-fxusd",
         "infinifi",
         "midas-mhyper",
@@ -415,6 +416,30 @@
             "link": "https://etherscan.io/address/0xD517BC7ba17271a8D87BE7355B2523bF5c750295"
           },
           "owner": "Mint authority: Spoke [`0xEC35…25aB`](https://etherscan.io/address/0xEC3582fcDc34078a4B7a8c75a5a3AE46f48525aB), governed by Centrifuge Root — 48h timelock [`0x7Ed4…368f`](https://etherscan.io/address/0x7Ed48C31f2fdC40d37407cBaBf0870B2b688368f)."
+        },
+        {
+          "slug": "flare-fxrp",
+          "name": "Flare FXRP",
+          "kind": "direct",
+          "model": "lock",
+          "integration": "LayerZero V2 OFT (canonical FXRP locked on Flare)",
+          "detail": "Ethereum FXRP [`0xCE61…F0110`](https://etherscan.io/address/0xCE6170EA245dC8D1f275A710a062b70f125F0110) is a native OFT (token() == self, oftVersion 1) backed 1:1 by canonical FXRP locked in the Flare OFT Adapter [`0xd706…7E07E`](https://flare-explorer.flare.network/address/0xd70659a6396285BF7214d7Ea9673184e7C72E07E) (~15.83M escrow). The adapter holds token() = canonical FXRP and cannot mint it; a bridge compromise is bounded by remote supply + escrow. Ethereum OFT peers: Flare (30295), Base (30184), BNB (30102), Katana (30375).",
+          "security": {
+            "label": "4-of-4",
+            "confirmations": 20,
+            "providers": [
+              "LayerZero Labs",
+              "Nethermind",
+              "Canary",
+              "Horizen"
+            ],
+            "route": "Flare→Ethereum (bridged-FXRP mint side)",
+            "note": "0 optional DVNs. The Ethereum→Flare escrow-release path uses the same four providers with 15 confirmations.",
+            "weak": false,
+            "verifiedAt": "2026-08-21",
+            "link": "https://etherscan.io/address/0xCE6170EA245dC8D1f275A710a062b70f125F0110"
+          },
+          "owner": "Ethereum OFT owner: 6-of-11 Safe [`0x42D6…67D3`](https://etherscan.io/address/0x42D660C6C871a9176cEb102E9ad9722459Aa67D3). Flare adapter owner: 6-of-11 Safe [`0xbe65…49F3`](https://flare-explorer.flare.network/address/0xbe653C54DF337F13Fcb726101388F4a4803049F3)."
         },
         {
           "slug": "fluid",
