@@ -483,6 +483,31 @@
             "link": "https://etherscan.io/address/0x85d456B2DfF1fd8245387C0BfB64Dfb700e98Ef3"
           },
           "owner": "rsETH adapter owner: 3-of-6 Safe [`0xCbcd…29A1`](https://safe.yaudit.dev/1/0xCbcdd778AA25476F203814214dD3E9b9c46829A1/)."
+        },
+        {
+          "slug": "pareto-falconx",
+          "name": "Pareto FalconX (AA_FalconXUSDC)",
+          "kind": "direct",
+          "model": "lock",
+          "integration": "LayerZero OFT Adapter (FalconXAAAdapter) → Monad",
+          "detail": "Adapter [`0x8FEd…667e`](https://etherscan.io/address/0x8FEd610aEfD81F6bEC517854b1a245DEca83667e) escrows AA_FalconXUSDC and a native OFT on Monad [`0x91D9…f2e8`](https://monadscan.com/address/0x91D93DBd823221ea9E54fb3e447BD917CE41f2e8) mints the remote representation. The adapter cannot mint canonical supply — the tranche token's `minter` is the Credit Vault and is set immutably in the constructor. Route is currently dust: 18.34 AA escrowed (~$20) against a 152.09M supply",
+          "security": {
+            "label": "4-of-5",
+            "confirmations": 16,
+            "providers": [
+              "Canary",
+              "Deutsche Telekom",
+              "Horizen",
+              "LayerZero Labs",
+              "Nethermind"
+            ],
+            "route": "Monad→Ethereum (escrow-release side)",
+            "note": "Onchain ULN config is 1 required DVN (Canary, mandatory) plus a 3-of-4 optional threshold over Deutsche Telekom, Horizen, LayerZero Labs and Nethermind — four independent attestations out of five configured verifiers are needed to release Ethereum escrow",
+            "weak": false,
+            "verifiedAt": "2026-08-05",
+            "link": "https://etherscan.io/address/0x8FEd610aEfD81F6bEC517854b1a245DEca83667e"
+          },
+          "owner": "Adapter owner: Pareto Treasury Safe 3-of-8 [`0xFb3b…3814`](https://etherscan.io/address/0xFb3bD022D5DAcF95eE28a6B07825D4Ff9C5b3814)."
         }
       ]
     },
