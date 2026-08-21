@@ -221,14 +221,14 @@ This is a **strong and, importantly, uniform multi-DVN configuration** — struc
   - **Pool collateral:** FLR (native), minimal CR **1.5** (safety CR 1.6).
   - **Minting pool holdings required:** 50% of an agent's backed FAssets.
   - **Liquidations:** on-chain — liquidators burn FAssets for collateral when an agent's CR falls below liquidation CR (≈10% below minimal CR). Challengers can trigger full liquidation for illegal agent actions.
-- **Underlying XRP custody:** XRP is held **off-chain on XRPL** by agents (hot work + cold management addresses) and the governance-multisig **Core Vault**. The FDC provides trustless attestation of XRPL movements, and the over-collateralization backstops agent default — but the XRP itself is not inside a smart contract. This is the single most important custody fact for a collateral assessment.
+- **Underlying XRP custody:** XRP is held **on XRPL — a separate chain, outside any smart contract** by agents (hot work + cold management addresses) and the governance-multisig **Core Vault**. The FDC provides trustless attestation of XRPL movements, and the over-collateralization backstops agent default — but the XRP itself is not inside a smart contract. This is the single most important custody fact for a collateral assessment.
 - **Risk curation:** governance sets collateral types, CR thresholds, the minting cap (170M XRP), and agent approval. Changes are made through [Flare Improvement Proposals (FIPs)](https://proposals.flare.network/), which are initiated by the Flare Foundation and voted on by `WFLR`/staked-`FLR` holders (acceptance-based: a simple majority of cast votes, no quorum requirement); approved changes are executed by the Foundation or via governance contract calls. The exact on-chain governance multisig/threshold for the FAssets asset-manager contracts is not published in the [developer docs](https://dev.flare.network/network/governance).
 
 ### Provability
 
 - **Bridge escrow:** fully on-chain — `canonicalFXRP.balanceOf(flareAdapter)` and each remote OFT's `totalSupply()` are public and reconcile.
 - **FAssets collateral:** on-chain — agent vault balances, collateral pool CPTs, and CR values are readable; prices come from the [FTSO](https://dev.flare.network/ftso/overview) (Flare's enshrined oracle).
-- **XRP backing:** verifiable via FDC proofs of XRPL transactions (trustless, on-chain attestation), though the XRP itself is held off-chain. No periodic custodian attestation is required because FDC + over-collateralization is the design.
+- **XRP backing:** verifiable via FDC proofs of XRPL transactions (trustless, on-chain attestation), though the XRP itself is held on XRPL, outside any smart contract. No periodic custodian attestation is required because FDC + over-collateralization is the design.
 - **Exchange rate:** N/A — FXRP is 1:1 with XRP; no privileged rate or PPS.
 - **Third-party verification:** FDC (Flare's enshrined cross-chain data connector) is the verification layer for XRPL deposits/redemptions.
 
@@ -329,7 +329,7 @@ This is a **strong and, importantly, uniform multi-DVN configuration** — struc
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────┐
-│  XRPL (off-chain)                      Flare (canonical)                   │
+│  XRPL (own chain)                      Flare (canonical)                   │
 │  ┌──────────────┐   XRP deposit   ┌──────────────────┐                     │
 │  │ Agent wallets │ ──────────────▶ │ FAssets system   │  mints canonical    │
 │  │ + Core Vault │  (FDC-verified) │ (AssetManager)   │ ──────────▶ FXRP    │
@@ -391,7 +391,7 @@ This is a **strong and, importantly, uniform multi-DVN configuration** — struc
 
 - **No timelock on upgrades, and one signer set for the whole mesh:** the same 11 owners at threshold 6 control the Ethereum OFT, its ProxyAdmin, the Flare adapter, and the Katana/HyperEVM/Monad OFTs, on six chains, with no delay anywhere. Upgrade authority is arbitrary-code authority over the token.
 - **Mesh peer topology:** Ethereum accepts mint messages from five sibling OFTs, so a mint on any peered chain can be bridged in as genuine Ethereum FXRP without ever touching the Flare escrow.
-- **Off-chain XRP custody:** the underlying XRP is held by agents and a governance multisig on XRPL — outside any smart contract — backstopped by over-collateralization rather than programmatic custody.
+- **XRP custody sits on a separate chain:** the underlying XRP is held by agents and a governance multisig on XRPL — outside any smart contract — backstopped by over-collateralization rather than programmatic custody.
 - **Thin, concentrated liquidity:** ~96.5% of Ethereum FXRP sits in Morpho Blue; the only DEX pair is ~$3.05M. A liquidation cascade or large exit would cause >10% price impact.
 - **Young deployment:** ~6.3 months on Ethereum; the bridge and Morpho usage have not been tested through a full market cycle.
 - **Multi-hop exit:** there is no direct redemption on Ethereum — exit requires DEX sale or bridging back to Flare and redeeming through agents.
@@ -428,7 +428,7 @@ This is a **strong and, importantly, uniform multi-DVN configuration** — struc
 
 #### Category 2: Centralization & Control Risks (Weight: 30%)
 
-- **Governance:** the rubric's three columns disagree sharply here, and the conservative rule applies. *Threshold* is genuinely good — 6-of-11 sits between the score-2 (7/11) and score-3 (5/9) rows. But *Timelock* is **none**, which is the score-**5** cell, and *Privileged Roles* is upgrade authority over a collateral token — arbitrary-code power, functionally "unlimited admin powers," also the score-**5** cell. The mitigation the rubric expects at scores 2–3 ("constrained by timelock") simply does not exist. Aggravating rather than mitigating: the identical 11-signer set governs the Ethereum OFT, its ProxyAdmin, the Flare adapter, and the Katana/HyperEVM/Monad OFTs across six chains, so the threshold protects one key set, not six independent ones; and the signer identities are undisclosed (see TODO above), so signer independence cannot be assessed at all. Averaging the columns (≈2.5 / 5 / 4.5) → **4.0**
+- **Governance:** the rubric's three columns disagree sharply here, and the conservative rule applies. *Threshold* is genuinely good — 6-of-11 sits between the score-2 (7/11) and score-3 (5/9) rows. But *Timelock* is **none**, which is the score-**5** cell, and *Privileged Roles* is upgrade authority over a collateral token — arbitrary-code power, functionally "unlimited admin powers," also the score-**5** cell. The mitigation the rubric expects at scores 2–3 ("constrained by timelock") simply does not exist. Aggravating rather than mitigating: the identical 11-signer set governs the Ethereum OFT, its ProxyAdmin, the Flare adapter, and the Katana/HyperEVM/Monad OFTs across six chains, so the threshold protects one key set, not six independent ones; and the signer identities are undisclosed, so signer independence cannot be assessed at all. Averaging the columns (≈2.5 / 5 / 4.5) → **4.0**
 - **Programmability:** contract logic is fully programmatic and there is no manual rate or PPS — but the rubric explicitly asks about offchain dependencies for critical functions, and the mint path is gated on four offchain DVN networks plus LayerZero executors, while the underlying custody depends on offchain XRPL agent bots and FDC attestation providers. That is closer to "hybrid onchain/offchain operations" (3) than to "minor admin input" (2). → **2.5**
 - **External Dependencies:** LayerZero V2 (critical — the entire mint/burn path), Flare FAssets (critical — all backing), XRPL (critical — the underlying), FTSO, plus five sibling OFT deployments now inside the trust surface, plus Morpho for the assessed use case. This is the score-4 row verbatim — "many or newer protocol dependencies / critical functionality depends on them" — with several of them (Monad and HyperEVM deployments, FAssets itself) genuinely new. → **4**
 
@@ -436,8 +436,8 @@ This is a **strong and, importantly, uniform multi-DVN configuration** — struc
 
 #### Category 3: Funds Management (Weight: 30%)
 
-- **Collateralization:** the bridge layer is 100% on-chain and reconciles exactly. But the terminal asset is **XRP held off-chain on XRPL** by agents and a Core Vault multisig whose signer count and threshold are not published, and the FAssets collateral backing it is USDT plus **FLR** — a volatile, comparatively illiquid native token carrying a 1.5 CR. That matches the score-3 row ("100% collateral, some offchain" / "mixed quality or newer protocols") rather than score 2, which requires collateral that is both fully on-chain and high-quality DeFi assets. → **3**
-- **Provability:** genuinely strong. The escrow is fully on-chain and was reproduced here to the unit across six chains; FAssets collateral and CRs are readable on Flare; XRPL movements are FDC-attested, which is on-chain verification of an off-chain fact rather than a self-report. "Mostly onchain, some offchain / single reliable source." → **2**
+- **Collateralization:** the bridge layer is 100% on-chain and reconciles exactly. But the terminal asset is **XRP held on XRPL — a separate chain, outside any smart contract** by agents and a Core Vault multisig whose signer count and threshold are not published, and the FAssets collateral backing it is USDT plus **FLR** — a volatile, comparatively illiquid native token carrying a 1.5 CR. That matches the score-3 row ("100% collateral, some offchain" / "mixed quality or newer protocols") rather than score 2, which requires collateral that is both fully on-chain and high-quality DeFi assets. → **3**
+- **Provability:** genuinely strong. The escrow is fully on-chain and was reproduced here to the unit across six chains; FAssets collateral and CRs are readable on Flare; XRPL movements are FDC-attested, which is on-chain verification of a cross-chain (XRPL) fact rather than a self-report. "Mostly onchain, some offchain / single reliable source." → **2**
 
 **Funds Management Score = (3 + 2) / 2 = 2.5**
 
