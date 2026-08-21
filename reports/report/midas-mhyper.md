@@ -4,7 +4,7 @@
 - **Token:** mHYPER
 - **Chain:** Ethereum (also deployed on Monad, Plasma, and Katana)
 - **Token Address:** [`0x9b5528528656DBC094765E2abB79F293c21191B9`](https://etherscan.io/token/0x9b5528528656dbc094765e2abb79f293c21191b9)
-- **Final Score: 2.8/5.0**
+- **Final Score: 2.9/5.0**
 
 ## Overview + Links
 
@@ -131,7 +131,7 @@ Liquidity remains dependent on active Midas/Hyperithm unwinds and redemption ope
 - `DEFAULT_ADMIN_ROLE` has two direct holders: a [`1-of-3 Safe`](https://app.safe.global/home?safe=eth:0xB60842E9DaBCd1C52e354ac30E82a97661cB7E89) and Fordefi MPC address [`0xd419...1227`](https://etherscan.io/address/0xd4195cf4df289a4748c1a7b6ddbe770e27ba1227). Each can grant or revoke operational roles without the timelock.
 - The admin Safe's owners include a nested [`3-of-7 Safe`](https://app.safe.global/home?safe=eth:0x82B30194bEae06D991Bc71850F949ec8cB7E0CB7), but its outer threshold remains one.
 - Mint holders are the DepositVault, LayerZero adapter, and operator [`0x5683...4e25`](https://etherscan.io/address/0x5683de280d0c3967fba2f04d707fa1ef5a044e25). Burn holders are the RedemptionVault, LayerZero adapter, and the same operator.
-- The oracle updater [`0xd1e0...a99f`](https://etherscan.io/address/0xd1e01471f3e1002d4eec1b39b7dbd7aff952a99f) can publish NAV without a timelock. Per-update movement is bounded to 0.35%, with absolute bounds of $0.10 and $1,000.
+- The oracle updater [`0xd1e0...a99f`](https://etherscan.io/address/0xd1e01471f3e1002d4eec1b39b7dbd7aff952a99f) can publish NAV without a timelock. The current [implementation](https://etherscan.io/address/0xa19f5e16dc09641b17adf95bc950f71dbe5cb11b#code) exposes two paths: `setRoundDataSafe()` enforces a 0.35% deviation limit and a one-hour interval, but the same updater can call `setRoundData()` directly, bypassing both checks. The direct path enforces only the broad $0.10–$1,000 absolute bounds.
 
 ### Programmability
 
@@ -151,7 +151,7 @@ The current public legal-document page still exposes the July 17, 2025 base pros
 
 ## Monitoring
 
-1. Monitor oracle `AnswerUpdated` events, staleness beyond the expected twice-weekly cadence, and any price decrease or repeated maximum-deviation updates.
+1. Monitor oracle `AnswerUpdated` events and calls to both `setRoundData()` and `setRoundDataSafe()`. Alert on any use of the direct setter, unexpected price change, or staleness beyond the expected twice-weekly cadence.
 2. Alert on every `RoleGranted`, `RoleRevoked`, pause, blacklist, mint, burn, and proxy `Upgraded` event.
 3. Reconcile total cross-chain supply, oracle price, Delta Y NAV, classified wallet NAV, and SAVE timestamps at least weekly.
 4. Monitor the $1.02M redemption liquidity, standard-redemption completion times, and any change to fees or eligibility.
@@ -165,7 +165,7 @@ The current public legal-document page still exposes the July 17, 2025 base pros
 - 92.5% of NAV is classified in a detailed public dashboard, with continuing multi-party SAVE attestations.
 - Fordefi MPC custody includes policy limits and multi-party exception handling; Safe3 adds a genuine 2-of-2 control for its isolated flow.
 - Ten published audits/contests, active $1M bounty capacity, and no identified mHYPER contract loss.
-- A 48-hour timelock protects proxy upgrades, and the oracle limits per-update price movement.
+- A 48-hour timelock protects proxy upgrades.
 - Hyperithm has an eight-year history and a current Japanese SPBQII notification.
 
 ### Key risks
@@ -175,6 +175,7 @@ The current public legal-document page still exposes the July 17, 2025 base pros
 - Morpho and Hypercore account for 74.9% of NAV; the portfolio is leveraged and Fluid is highly levered on a net-equity basis.
 - The major current positions are in direct Fordefi allocator wallets, not behind a publicly verifiable onchain multisig quorum.
 - Admins can change roles and the oracle without the upgrade timelock; minting is not reserve-gated.
+- The oracle updater can bypass the optional 0.35% safe-setter check and move the published price anywhere within the $0.10–$1,000 absolute range in one transaction.
 - Direct DEX liquidity is negligible and primary redemptions depend on active offchain operations.
 - The exact August 2026 token implementation is not named in the published audit list, and the displayed base prospectus has passed its stated validity date.
 
@@ -192,13 +193,13 @@ The current public legal-document page still exposes the July 17, 2025 base pros
 
 Ten audits/contests, two active bounty programs, more than one year of mHYPER operation, and no identified loss are strong positives. The latest token implementation was deployed after the published audit set and is not explicitly covered, preventing a lower score.
 
-#### 2. Centralization & Control Risks (30%): 3.5/5
+#### 2. Centralization & Control Risks (30%): 3.8/5
 
-- **Governance: 3.0** — upgrades have a 48-hour timelock, but either direct default admin can change operational roles immediately; the admin Safe is 1-of-3.
+- **Governance: 4.0** — upgrades have a 48-hour timelock, but either direct default admin can change operational roles immediately, the admin Safe is 1-of-3, and a single oracle updater can bypass the optional deviation check to publish any price within the broad absolute bounds.
 - **Programmability: 4.0** — reserves, strategy, leverage, NAV, and standard redemptions are not enforced end-to-end onchain.
 - **External dependencies: 3.5** — Hyperithm, Midas, Fordefi, the issuer, price/attestation operators, stablecoins, and concentrated DeFi venues are critical.
 
-`(3.0 + 4.0 + 3.5) / 3 = 3.5`
+`(4.0 + 4.0 + 3.5) / 3 = 3.83`, rounded to **3.8**.
 
 #### 3. Funds Management (30%): 2.9/5
 
@@ -220,11 +221,11 @@ Both teams are public and established, documentation is substantial, and Hyperit
 | Category | Score | Weight | Weighted |
 | --- | ---: | ---: | ---: |
 | Audits & Historical | 1.8 | 20% | 0.36 |
-| Centralization & Control | 3.5 | 30% | 1.05 |
+| Centralization & Control | 3.8 | 30% | 1.14 |
 | Funds Management | 2.9 | 30% | 0.87 |
 | Liquidity Risk | 3.0 | 15% | 0.45 |
 | Operational Risk | 1.8 | 5% | 0.09 |
-| **Final Score** | | | **2.82 ≈ 2.8/5.0** |
+| **Final Score** | | | **2.91 ≈ 2.9/5.0** |
 
 ### Risk Tier
 
@@ -237,7 +238,7 @@ Both teams are public and established, documentation is substantial, and Hyperit
 | **4.5-5.0** | **High Risk** | Not recommended |
 | **N/A** | **Not Rated** | Terminal — do not use (exploited or wound down) |
 
-**Final Risk Tier: Medium Risk (2.8/5.0).** Approved with enhanced monitoring and conservative exposure limits.
+**Final Risk Tier: Medium Risk (2.9/5.0).** Approved with enhanced monitoring and conservative exposure limits.
 
 ## Reassessment Triggers
 
@@ -257,7 +258,7 @@ Both teams are public and established, documentation is substantial, and Hyperit
 | [March 20, 2026](https://github.com/yearn/risk-score/pull/103) | 3.2 | Attestation Engine reassessment |
 | [April 13, 2026](https://github.com/yearn/risk-score/pull/133) | 2.9 | Controls and provability reassessment |
 | [June 13, 2026](https://github.com/yearn/risk-score/pull/248) | 2.9 | Allocation and role reassessment |
-| [August 19, 2026](https://github.com/yearn/risk-score/pull/417) | 2.8 | Custody, allocation, and control reassessment |
+| [August 19, 2026](https://github.com/yearn/risk-score/pull/417) | 2.9 | Custody, allocation, and oracle-control reassessment |
 
 ## Appendix: Current Control Summary
 

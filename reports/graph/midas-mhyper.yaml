@@ -59,7 +59,7 @@ nodes:
     label: Oracle Updater
     address: "0xd1e01471f3e1002d4eec1b39b7dbd7aff952a99f"
     category: infra
-    note: Can publish NAV without a timelock; each update is bounded to 0.35% movement.
+    note: Can publish NAV without a timelock. The optional safe setter applies a 0.35% deviation limit, but the direct setter bypasses it and enforces only $0.10–$1,000 absolute bounds.
 
   - id: admin-safe
     label: Admin Safe (1/3)
