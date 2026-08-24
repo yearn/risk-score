@@ -266,11 +266,10 @@ The four live JAAA BalanceSheet managers are two Gnosis Safes ([`0x02eb…5bc7`]
   | 5 | Avalanche | LayerZero V2 + **Axelar** | 2 / 2 | 250,000,001.00 |
   | 6 | BNB Chain | LayerZero V2 + **Axelar** | 2 / 2 | 497,554.41 |
   | 11 | Monad | LayerZero V2 + Chainlink CCIP | 2 / 2 | 483,418.08 |
-  | 12 | Pharos | LayerZero V2 + Chainlink CCIP | 2 / 2 | TODO (no public RPC reached) |
-  | 13 | X Layer | **LayerZero V2 only** | **1 / 1** | 0 |
-  | 4 / 9 / 10 | Plume / HyperEVM / Optimism | *no JAAA-pool set* (global pool only) | 0 | not deployed for this share class |
 
-  Chain identification is onchain, not assumed: `AxelarAdapter.destinations(centrifugeId)` returns human-readable Axelar IDs (`"base"`, `"arbitrum"`, `"Avalanche"`, `"binance"`, `"hyperliquid"`, `"optimism"`, `"plume"`), and the LayerZero eids (30184/30110/30106/30102/30390/30407/30274) resolve via the [LayerZero metadata API](https://metadata.layerzero-api.com/v1/metadata) to Base/Arbitrum/Avalanche/BNB/Monad/Pharos/X Layer. Supply is `totalSupply()` on each chain's `Spoke.shareToken(281474976710663, 0x00010000000000070000000000000001)` (6 decimals; Ethereum itself holds 369,311,490.07).
+  **Configured but inactive routes:** Pharos (centrifugeId 12) uses LayerZero V2 + Chainlink CCIP at 2 / 2 and has **0 JAAA supply**; `totalSupply()` on Pharos JAAA `0xAD48F183E586e92A591A610397ebf534609DF797` returned 0 through the public Pharos RPC on August 24, 2026. X Layer (13) uses **LayerZero V2 only** at **1 / 1** and also has 0 supply. Plume / HyperEVM / Optimism (4 / 9 / 10) have no JAAA-pool adapter set and no deployment for this share class.
+
+  Chain identification is onchain, not assumed: `AxelarAdapter.destinations(centrifugeId)` returns human-readable Axelar IDs (`"base"`, `"arbitrum"`, `"Avalanche"`, `"binance"`, `"hyperliquid"`, `"optimism"`, `"plume"`), and the LayerZero eids (30184/30110/30106/30102/30390/30407/30274) resolve via the [LayerZero metadata API](https://metadata.layerzero-api.com/v1/metadata) to Base/Arbitrum/Avalanche/BNB/Monad/Pharos/X Layer. Supply is each deployed share token's `totalSupply()` (6 decimals; Ethereum itself holds 369,311,490.07).
 
   **The 2-of-2 framing does not hold universally, and X Layer's zero supply does not bound the exposure.** `MultiAdapter.handle()` contains an explicit fast path — `if (adapter.quorum == 1) { gateway.handle(centrifugeId, payload); return; }` — so on X Layer a single LayerZero delivery executes a JAAA-scoped message with no second attestation. The route is wired (`LayerZeroAdapter.isWired(13) = true`) and the share token is deployed ([`0xAD48…F797`](https://www.oklink.com/xlayer/address/0xAD48F183E586e92A591A610397ebf534609DF797)).
 
