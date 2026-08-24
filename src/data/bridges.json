@@ -38,8 +38,8 @@
           "name": "Flex",
           "kind": "indirect",
           "model": "transport",
-          "integration": "Collateral is yvUSD",
-          "detail": "yvUSD has strategy that bridges funds to Katana. Protocol doesn't use bridges"
+          "integration": "yvUSD collateral (54.0% of Yearn's Flex exposure)",
+          "detail": "Flex itself uses no bridge. Its largest market takes yvUSD as collateral, and yvUSD runs a Katana strategy that bridges USDC through the AggLayer LxLy unified bridge via a VaultBridgeToken — yvUSD's only active cross-chain position with material debt. A loss there propagates into Flex through the collateral's price per share, which is also that market's oracle input."
         },
         {
           "slug": "spectra-finance",
@@ -157,8 +157,8 @@
           "name": "Flex",
           "kind": "indirect",
           "model": "transport",
-          "integration": "Collateral is yvUSD",
-          "detail": "yvUSD has strategy that bridges funds to Base. Protocol doesn't use bridges"
+          "integration": "yvUSD collateral (54.0% of Yearn's Flex exposure)",
+          "detail": "Flex itself uses no bridge. Its largest market takes yvUSD as collateral, and yvUSD holds CCTP strategies for Arbitrum and Base. Both are active but currently carry 0 debt, so the CCTP lane is a dormant rather than live exposure for Flex."
         }
       ]
     },
