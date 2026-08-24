@@ -427,7 +427,7 @@
           "kind": "direct",
           "model": "mint",
           "integration": "LayerZero V2 (2-of-2 MultiAdapter)",
-          "detail": "Spoke [`0xEC35…25aB`](https://etherscan.io/address/0xEC3582fcDc34078a4B7a8c75a5a3AE46f48525aB) holds mint authority on JAAA (`wards = 1`). LayerZero is one leg of a 2-of-2 MultiAdapter quorum; the **second leg is Axelar** on Base/Arbitrum/Avalanche/BNB and Chainlink CCIP on Monad/Pharos. The LayerZero leg itself requires Deutsche Telekom + Canary plus 2-of-3 P2P/Nansen/Nethermind. **Exception — X Layer (centrifugeId 13) is configured with LayerZero alone at quorum 1 / threshold 1.** Because `MessageLib.messagePoolId` reads the poolId out of the message body, a forged `ExecuteTransferShares` naming JAAA's poolId routes under that single-adapter set and `Spoke.executeTransferShares` mints the stated amount on Ethereum with no remote-supply check, burn proof or cap. X Layer's supply of 0 does not bound this; the receiver allowlist and the route's own 4-of-5 DVN quorum are the only constraints.",
+          "detail": "Spoke [`0xEC35…25aB`](https://etherscan.io/address/0xEC3582fcDc34078a4B7a8c75a5a3AE46f48525aB) holds mint authority on JAAA (`wards = 1`). LayerZero is one leg of a 2-of-2 MultiAdapter quorum; the **second leg is Axelar** on Base/Arbitrum/Avalanche/BNB and Chainlink CCIP on Monad. The LayerZero leg itself requires Deutsche Telekom + Canary plus 2-of-3 P2P/Nansen/Nethermind. Pharos and X Layer are configured but inactive with zero JAAA supply; X Layer is the sole configuration exception at quorum 1 / threshold 1 and should be reassessed if it gains supply or economic activity.",
           "security": {
             "label": "4-of-5",
             "confirmations": 15,
@@ -439,7 +439,7 @@
               "Nethermind"
             ],
             "route": "10 chains→Ethereum (native-mint side)",
-            "note": "2 required DVNs plus 2-of-3 optional DVNs, identical across all 10 configured inbound routes. LayerZero is also one leg of Centrifuge's 2-of-2 MultiAdapter quorum — paired with Axelar on Base/Arbitrum/Avalanche/BNB and with Chainlink CCIP on Monad/Pharos. X Layer is the exception: LayerZero is the sole adapter for the JAAA pool there (quorum 1), and that route can mint JAAA on Ethereum without a second attestation.",
+            "note": "2 required DVNs plus 2-of-3 optional DVNs, identical across all 10 configured inbound routes. LayerZero is one leg of Centrifuge's 2-of-2 MultiAdapter quorum on every supply-carrying destination — paired with Axelar on Base/Arbitrum/Avalanche/BNB and with Chainlink CCIP on Monad. Pharos and X Layer are configured but inactive at zero supply; X Layer is the sole quorum-1 exception.",
             "weak": false,
             "verifiedAt": "2026-08-20",
             "link": "https://etherscan.io/address/0xD517BC7ba17271a8D87BE7355B2523bF5c750295"

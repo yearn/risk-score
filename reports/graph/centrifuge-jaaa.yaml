@@ -125,7 +125,7 @@ nodes:
   - id: dep-layerzero
     label: LayerZero V2
     category: dependency
-    note: First leg on every destination; SOLE adapter on X Layer (quorum 1) — that route can mint JAAA on Ethereum unilaterally
+    note: First leg on every destination; sole adapter on inactive X Layer route (quorum 1, zero JAAA supply)
   - id: dep-axelar
     label: Axelar GMP
     address: "0x4F4495243837681061C4743b74B3eEdf548D56A5"
@@ -192,7 +192,7 @@ edges:
   - from: multi-adapter
     to: dep-layerzero
     kind: routes-through
-    label: quorum leg 1/2 (all destinations)
+    label: required leg on active routes; sole leg on inactive X Layer
   - from: multi-adapter
     to: dep-axelar
     kind: routes-through
