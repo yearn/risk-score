@@ -61,7 +61,11 @@
 |----------|---------|------|
 | Canonical FXRP | [`0xAd552A648C74D49E10027AB8a618A3ad4901c5bE`](https://flare-explorer.flare.network/address/0xAd552A648C74D49E10027AB8a618A3ad4901c5bE) | FAsset ERC-20 minted by the FAssets system (proxy; not Ownable) |
 | FXRP OFT Adapter | [`0xd70659a6396285BF7214d7Ea9673184e7C72E07E`](https://flare-explorer.flare.network/address/0xd70659a6396285BF7214d7Ea9673184e7C72E07E) | Locks canonical FXRP when bridging out (`token()` = canonical FXRP); holds ~15.83M FXRP escrow |
-| Flare adapter owner | [`0xbe653C54DF337F13Fcb726101388F4a4803049F3`](https://flare-explorer.flare.network/address/0xbe653C54DF337F13Fcb726101388F4a4803049F3) | Gnosis Safe **6-of-11** (same signer set as the Ethereum Safe) |
+| Flare adapter owner | [`0xbe653C54DF337F13Fcb726101388F4a4803049F3`](https://flare-explorer.flare.network/address/0xbe653C54DF337F13Fcb726101388F4a4803049F3) | Gnosis Safe **6-of-11** (same signer set as the Ethereum Safe). Also `governance()` on all three FAssets contracts below |
+| FAssets AssetManager (FXRP) | [`0x2a3Fe068cD92178554cabcf7c95ADf49B4B0B6A8`](https://flare-explorer.flare.network/address/0x2a3Fe068cD92178554cabcf7c95ADf49B4B0B6A8) | Mints/redeems canonical FXRP against agent collateral (`FXRP.assetManager()`). `governance()` = the 6-of-11 Safe |
+| AssetManagerController | [`0x097B93eEBe9b76f2611e1E7D9665a9d7Ff5280B3`](https://flare-explorer.flare.network/address/0x097B93eEBe9b76f2611e1E7D9665a9d7Ff5280B3) | Sets FAssets parameters (CRs, minting cap, fees) across asset managers. `governance()` = the 6-of-11 Safe |
+| CoreVaultManager | [`0x6c8d96dEfE4cbEE05FA969Fc0Ac436d94Fc21784`](https://flare-explorer.flare.network/address/0x6c8d96dEfE4cbEE05FA969Fc0Ac436d94Fc21784) | Controls the XRPL Core Vault (destinations, pause). `governance()` = the 6-of-11 Safe; `paused() == false` |
+| GovernanceSettings | [`0x1000000000000000000000000000000000000007`](https://flare-explorer.flare.network/address/0x1000000000000000000000000000000000000007) | Flare system contract. `getTimelock()` = **3600 s (1 hour)**; `getGovernanceAddress()` = the 6-of-11 Safe |
 
 ### Remote OFT deployments (peered directly to the Ethereum OFT)
 
@@ -222,15 +226,18 @@ This is a **strong and, importantly, uniform multi-DVN configuration** — struc
   - **Minting pool holdings required:** 50% of an agent's backed FAssets.
   - **Liquidations:** on-chain — liquidators burn FAssets for collateral when an agent's CR falls below liquidation CR (≈10% below minimal CR). Challengers can trigger full liquidation for illegal agent actions.
 - **Underlying XRP custody:** XRP is held **on XRPL — a separate chain, outside any smart contract** by agents (hot work + cold management addresses) and the governance-multisig **Core Vault**. The FDC provides trustless attestation of XRPL movements, and the over-collateralization backstops agent default — but the XRP itself is not inside a smart contract. This is the single most important custody fact for a collateral assessment.
-- **Risk curation:** governance sets collateral types, CR thresholds, the minting cap (170M XRP), and agent approval. Changes are made through [Flare Improvement Proposals (FIPs)](https://proposals.flare.network/), which are initiated by the Flare Foundation and voted on by `WFLR`/staked-`FLR` holders (acceptance-based: a simple majority of cast votes, no quorum requirement); approved changes are executed by the Foundation or via governance contract calls. The exact on-chain governance multisig/threshold for the FAssets asset-manager contracts is not published in the [developer docs](https://dev.flare.network/network/governance).
+- **Core Vault custody parameters are verifiable on XRPL** (read at ledger 106,541,374). `CoreVaultManager.coreVaultAddress()` resolves to [`rfkXSaCZKTg1EZzec2rLDyrWHxRVJdtVXj`](https://xrpscan.com/account/rfkXSaCZKTg1EZzec2rLDyrWHxRVJdtVXj), whose XRPL `SignerList` is **4-of-6** (six signers, weight 1 each, quorum 4) with the **master key disabled** (`lsfDisableMaster`), so no single key can move funds. It held **7,146,607.56 XRP** at the snapshot — roughly 4–5% of the XRP backing the ~147.8M canonical FXRP; the remainder sits with individual agents. Withdrawals are further constrained to six pre-registered destination addresses via `getAllowedDestinationAddresses()`, and governance can pause the vault (`paused() == false` at snapshot).
+- **Risk curation:** governance sets collateral types, CR thresholds, the minting cap (170M XRP), and agent approval. Changes are made through [Flare Improvement Proposals (FIPs)](https://proposals.flare.network/), which are initiated by the Flare Foundation and voted on by `WFLR`/staked-`FLR` holders (acceptance-based: a simple majority of cast votes, no quorum requirement); approved changes are executed by the Foundation or via governance contract calls. The developer docs do not publish the governing multisig, but it is readable onchain and the answer is material: `governance()` on the [AssetManager](https://flare-explorer.flare.network/address/0x2a3Fe068cD92178554cabcf7c95ADf49B4B0B6A8), the [AssetManagerController](https://flare-explorer.flare.network/address/0x097B93eEBe9b76f2611e1E7D9665a9d7Ff5280B3), and the [CoreVaultManager](https://flare-explorer.flare.network/address/0x6c8d96dEfE4cbEE05FA969Fc0Ac436d94Fc21784) all return [`0xbe65…49F3`](https://flare-explorer.flare.network/address/0xbe653C54DF337F13Fcb726101388F4a4803049F3) — **the same 6-of-11 Safe, with the same 11 signers, that owns the Flare OFT Adapter and the Ethereum/Katana/HyperEVM/Monad OFTs**. `productionMode()` is `true` and the Flare [`GovernanceSettings`](https://flare-explorer.flare.network/address/0x1000000000000000000000000000000000000007) system contract imposes `getTimelock() = 3600` seconds, so Flare-side parameter changes carry a **1-hour delay** — short, but unlike the Ethereum OFT it is not zero.
 
 ### Provability
 
 - **Bridge escrow:** fully on-chain — `canonicalFXRP.balanceOf(flareAdapter)` and each remote OFT's `totalSupply()` are public and reconcile.
 - **FAssets collateral:** on-chain — agent vault balances, collateral pool CPTs, and CR values are readable; prices come from the [FTSO](https://dev.flare.network/ftso/overview) (Flare's enshrined oracle).
 - **XRP backing:** verifiable via FDC proofs of XRPL transactions (trustless, on-chain attestation), though the XRP itself is held on XRPL, outside any smart contract. No periodic custodian attestation is required because FDC + over-collateralization is the design.
+- **Core Vault custody:** independently verifiable without trusting Flare — the XRPL account, its 4-of-6 signer quorum, its disabled master key and its live XRP balance are all readable from any XRPL node, and the permitted withdrawal destinations are readable from `CoreVaultManager` on Flare. That is stronger than the usual offchain-custody story, where a reader has only an attestation PDF.
 - **Exchange rate:** N/A — FXRP is 1:1 with XRP; no privileged rate or PPS.
 - **Third-party verification:** FDC (Flare's enshrined cross-chain data connector) is the verification layer for XRPL deposits/redemptions.
+- **Not verifiable:** the split of XRP across individual agent addresses. Agent hot/cold addresses are not published as a set, so while the Core Vault's ~7.15M XRP is directly observable, the remaining ~95% of the backing can only be checked indirectly through onchain agent CRs rather than by summing XRPL balances.
 
 ## Liquidity Risk
 
@@ -251,7 +258,8 @@ This is a **strong and, importantly, uniform multi-DVN configuration** — struc
 - **Multisig:** 6-of-11 Gnosis Safe v1.4.1 (11 owners, threshold 6). Signer identities: `TODO` — not enumerated (per policy, signers are checked against docs only, and Flare does not publish the signer set in the developer docs).
 - **No timelock** on upgrades or peer/config changes is the principal governance weakness. The 6-of-11 threshold is a meaningful barrier, but a compromised or malicious Safe majority could upgrade the FXRP implementation to introduce unbacked minting, repoint the peer table to a malicious OFT, change the DVN configuration, or — via the sibling OFTs it also controls — mint on a peered chain and bridge the proceeds into Ethereum. All with immediate effect and no on-chain warning window. Upgrade authority is arbitrary-code authority: it is functionally unlimited power over the token, merely gated behind six signatures.
 - **Privileged roles:** the owner can `setPeer` (reroute mint/burn), `setEnforcedOptions`, `setFeeBps`/`setDefaultFeeBps`/`withdrawFees` (fees), `setDelegate`, `setMsgInspector`, `setPreCrime`, `transferOwnership`. None can pause or freeze user FXRP balances (the token has no blacklist/pause), but they can disrupt bridging and mint/burn routing.
-- **Flare-side governance:** canonical FXRP and the FAssets parameters are governed by Flare governance (asset manager contracts, governance multisig, Core Vault multisig on XRPL). The [XRP Core Vault](https://dev.flare.network/fassets/core-vault) is a multisig account on the XRP Ledger whose signers are authorized by Flare governance under formal agreements; the exact signer count and threshold are not published in the developer docs.
+- **Flare-side governance — the same Safe, plus a 1-hour timelock.** `governance()` on the FAssets [AssetManager](https://flare-explorer.flare.network/address/0x2a3Fe068cD92178554cabcf7c95ADf49B4B0B6A8), [AssetManagerController](https://flare-explorer.flare.network/address/0x097B93eEBe9b76f2611e1E7D9665a9d7Ff5280B3) and [CoreVaultManager](https://flare-explorer.flare.network/address/0x6c8d96dEfE4cbEE05FA969Fc0Ac436d94Fc21784) is [`0xbe65…49F3`](https://flare-explorer.flare.network/address/0xbe653C54DF337F13Fcb726101388F4a4803049F3) — the same 6-of-11 Safe and the same 11 signers as the entire OFT mesh. So that one signer set controls both the bridge topology **and** FAssets risk curation (collateral ratios, minting cap, agent approval, Core Vault destinations). Unlike the Ethereum side it is at least delayed: `GovernanceSettings.getTimelock()` = **3600 s**, with `productionMode() == true` and a published executor set of 8 addresses (7 of which are also Safe owners).
+- **XRP Core Vault:** the [Core Vault](https://dev.flare.network/fassets/core-vault) is an XRPL multisig, [`rfkXSaCZKTg1EZzec2rLDyrWHxRVJdtVXj`](https://xrpscan.com/account/rfkXSaCZKTg1EZzec2rLDyrWHxRVJdtVXj). Its signer count and threshold are not in the docs but are public on XRPL: **4-of-6**, master key disabled. See *Collateralization* above.
 
 ### Programmability
 
@@ -265,7 +273,7 @@ This is a **strong and, importantly, uniform multi-DVN configuration** — struc
 | Dependency | Criticality | Notes |
 |-----------|-------------|-------|
 | **LayerZero V2** (EndpointV2 + 4 DVNs) | **Critical** for the assessed token | The entire Ethereum FXRP mint/burn path and the bridge to Flare/Katana depend on it. The 4-of-4 DVN quorum is strong, but LayerZero is still a third-party messaging layer whose failure or compromise breaks the token's cross-chain function. |
-| **Flare FAssets system** (canonical FXRP) | **Critical** for backing | The ultimate backing of every Ethereum FXRP. A failure (agent default cascade, FDC failure, governance parameter error) impairs the 1:1 redeemability that underpins FXRP's value. |
+| **Flare FAssets system** (canonical FXRP) | **Critical** for backing | The ultimate backing of every Ethereum FXRP. A failure (agent default cascade, FDC failure, governance parameter error) impairs the 1:1 redeemability that underpins FXRP's value. Governed by the same 6-of-11 Safe as the bridge, behind a 1-hour timelock. |
 | **XRP / XRPL** | Critical for the underlying | FXRP value tracks XRP; XRP price collapse or XRPL outage affects FXRP's collateral value and redemption. |
 | **FTSO** (Flare oracle) | Indirect | Prices FAssets collateral (USDT/FLR) for CR and liquidations on Flare. |
 | **Morpho Blue** (for the assessed use case) | Situational | ~96.5% of Ethereum FXRP is locked there; a Morpho-level event (bad-debt spiral in the FXRP/RLUSD market) would stress FXRP exit liquidity. |
@@ -289,6 +297,9 @@ This is a **strong and, importantly, uniform multi-DVN configuration** — struc
 | LayerZero EndpointV2 | [`0x1a44076050125825900e736c501f859c50fE728c`](https://etherscan.io/address/0x1a44076050125825900e736c501f859c50fE728c) | `getReceiveLibrary` / ULN `getConfig` changes (DVN quorum) |
 | Flare OFT Adapter | [`0xd70659a6396285BF7214d7Ea9673184e7C72E07E`](https://flare-explorer.flare.network/address/0xd70659a6396285BF7214d7Ea9673184e7C72E07E) | escrow balance (`canonicalFXRP.balanceOf(adapter)`) vs. sum of remote supplies |
 | Canonical FXRP | [`0xAd552A648C74D49E10027AB8a618A3ad4901c5bE`](https://flare-explorer.flare.network/address/0xAd552A648C74D49E10027AB8a618A3ad4901c5bE) | total supply vs. minting cap (170M XRP) |
+| FAssets AssetManagerController | [`0x097B93eEBe9b76f2611e1E7D9665a9d7Ff5280B3`](https://flare-explorer.flare.network/address/0x097B93eEBe9b76f2611e1E7D9665a9d7Ff5280B3) | CR thresholds, minting cap and fee changes; `governance()` changes |
+| CoreVaultManager | [`0x6c8d96dEfE4cbEE05FA969Fc0Ac436d94Fc21784`](https://flare-explorer.flare.network/address/0x6c8d96dEfE4cbEE05FA969Fc0Ac436d94Fc21784) | `paused()`, `getAllowedDestinationAddresses()`, `coreVaultAddress()` — any new destination is a new exit for custodied XRP |
+| XRP Core Vault (XRPL) | [`rfkXSaCZ…dtVXj`](https://xrpscan.com/account/rfkXSaCZKTg1EZzec2rLDyrWHxRVJdtVXj) | XRP balance and any `SignerListSet` — a quorum or signer change alters custody of the largest single XRP pool |
 | Morpho Blue | [`0xBBBBBbbBBb9cC5e90e3b3Af64bdAF62C37EEFFCb`](https://etherscan.io/address/0xBBBBBbbBBb9cC5e90e3b3Af64bdAF62C37EEFFCb) | FXRP balance; the FXRP/RLUSD market's borrow/supply and LLTV |
 | Uniswap V3 RLUSD-FXRP | [`0x42271FcA1FA435B176D46a5544B2698a1E261782`](https://etherscan.io/address/0x42271FcA1FA435B176D46a5544B2698a1E261782) | pool depth; large swaps indicating forced sells |
 | Monad FXRP OFT | [`0xCE6170EA245dC8D1f275A710a062b70f125F0110`](https://monadexplorer.com/address/0xCE6170EA245dC8D1f275A710a062b70f125F0110) | `totalSupply()`, `Upgraded` events — second-largest remote supply and a direct Ethereum peer |
@@ -305,6 +316,8 @@ This is a **strong and, importantly, uniform multi-DVN configuration** — struc
 | `Upgraded` on any peered remote OFT (Monad, HyperEVM, Base, BNB, Katana) | any | Treat as an Ethereum mint-authority change: a peered OFT can mint and bridge in |
 | Flare adapter escrow vs. sum of **all six** remote supplies | any deviation | Halt bridge use; investigate forged/stuck messages. This is the single strongest detector of an unbacked mint anywhere in the mesh |
 | Canonical FXRP supply | approaching 170M XRP cap | Minting halts; monitor redemption demand |
+| Core Vault `SignerListSet` or new allowed destination | any | Custody-parameter change on the largest XRP pool — investigate before continued use |
+| Flare `governance()` change on any FAssets contract | any | Risk-curation authority moved; re-evaluate |
 | Morpho FXRP market utilization / bad debt | borrow > supply buffer; any bad debt | Liquidation-cascade risk to FXRP liquidity |
 | Uniswap RLUSD-FXRP depth | <$1M | Exit capacity dangerously thin |
 
@@ -313,6 +326,8 @@ This is a **strong and, importantly, uniform multi-DVN configuration** — struc
 - `FXRP.totalSupply()` — Ethereum supply (should track the Flare-side escrow minus other chains).
 - `FXRP.peers(uint32 eid)` — peer table. All six authorized EIDs must be watched, not just Flare: Flare 30295, Monad 30390, HyperEVM 30367, Base 30184, BNB 30102, Katana 30375. Also watch for a **new** non-zero peer appearing at any other EID — `setPeer` on a fresh chain silently adds a mint path.
 - `FXRP.owner()` — should remain the 6-of-11 Safe.
+- `AssetManager.governance()` / `AssetManagerController.governance()` / `CoreVaultManager.governance()` (on Flare) — all should remain `0xbe65…49F3`; `GovernanceSettings.getTimelock()` should remain 3600.
+- XRPL `account_objects(type=signer_list)` on the Core Vault — should remain `SignerQuorum 4` over 6 signers.
 - `EndpointV2.getReceiveLibrary(FXRP, srcEid)` + `EndpointV2.getConfig(FXRP, lib, srcEid, 2)` — decode `(confirmations, requiredDVNCount, optionalDVNCount, threshold, requiredDVNs, optionalDVNs)` to re-verify the 4-of-4 quorum.
 - `canonicalFXRP.balanceOf(flareAdapter)` (on Flare) — the escrow backing remote FXRP. Must equal the sum of `totalSupply()` across all six remote OFTs; at the snapshot block it matched to the unit.
 - `morphoBlue.balanceOf(FXRP)` and the market's `totalSupplyAssets`/`totalBorrowAssets` (market id [`0x4fa31e3f…11d96`](https://app.morpho.org/ethereum/market/0x4fa31e3f8ba345227d44e1cf48559eea53a90dd5311dc006984c060f2f311d96/fxrp-rlusd)).
@@ -324,6 +339,7 @@ This is a **strong and, importantly, uniform multi-DVN configuration** — struc
 - **DVN quorum config:** daily (or on any LayerZero config-change event).
 - **Morpho market utilization:** hourly.
 - **Canonical FXRP supply vs. cap:** daily.
+- **Core Vault signer list, allowed destinations and pause state:** daily.
 
 ## Appendix: Contract Architecture
 
@@ -436,7 +452,7 @@ This is a **strong and, importantly, uniform multi-DVN configuration** — struc
 
 #### Category 3: Funds Management (Weight: 30%)
 
-- **Collateralization:** the bridge layer is 100% on-chain and reconciles exactly. But the terminal asset is **XRP held on XRPL — a separate chain, outside any smart contract** by agents and a Core Vault multisig whose signer count and threshold are not published, and the FAssets collateral backing it is USDT plus **FLR** — a volatile, comparatively illiquid native token carrying a 1.5 CR. That matches the score-3 row ("100% collateral, some offchain" / "mixed quality or newer protocols") rather than score 2, which requires collateral that is both fully on-chain and high-quality DeFi assets. → **3**
+- **Collateralization:** the bridge layer is 100% on-chain and reconciles exactly, and the Core Vault's custody parameters are better than typical offchain custody — a verifiable 4-of-6 XRPL quorum with the master key disabled and withdrawals restricted to six pre-registered destinations. That is not enough to reach score 2, which requires collateral that is both fully onchain and high-quality: the terminal asset is **XRP held on XRPL — a separate chain, outside any smart contract** and ~95% of it sits with individual agents rather than in the observable vault, while the FAssets collateral backing it is USDT plus **FLR**, a volatile and comparatively illiquid native token carrying a 1.5 CR. That is the score-3 row: "100% collateral, some offchain" / "mixed quality or newer protocols". → **3**
 - **Provability:** genuinely strong. The escrow is fully on-chain and was reproduced here to the unit across six chains; FAssets collateral and CRs are readable on Flare; XRPL movements are FDC-attested, which is on-chain verification of a cross-chain (XRPL) fact rather than a self-report. "Mostly onchain, some offchain / single reliable source." → **2**
 
 **Funds Management Score = (3 + 2) / 2 = 2.5**

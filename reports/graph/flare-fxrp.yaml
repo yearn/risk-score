@@ -123,6 +123,24 @@ nodes:
       HyperCore linkage address 0x2000...016f (a subset, not extra supply).
       Owner 0x0144603c28313F30fa573448406721792E46cfd8 - 6-of-11, same signers.
 
+  - id: fassets-assetmanager
+    label: FAssets AssetManager (FXRP)
+    link: "https://flare-explorer.flare.network/address/0x2a3Fe068cD92178554cabcf7c95ADf49B4B0B6A8"
+    category: dependency
+    note: >-
+      Mints and redeems canonical FXRP against agent collateral on Flare
+      (FXRP.assetManager()). governance() is the same 6-of-11 Safe that owns the
+      OFT mesh; Flare GovernanceSettings imposes a 1-hour timelock.
+  - id: core-vault
+    label: XRP Core Vault (XRPL 4-of-6)
+    link: "https://xrpscan.com/account/rfkXSaCZKTg1EZzec2rLDyrWHxRVJdtVXj"
+    category: dependency
+    note: >-
+      XRPL multisig holding pooled XRP backing (7,146,607.56 XRP at snapshot,
+      roughly 4-5% of the total). SignerQuorum 4 of 6 signers, master key
+      disabled, withdrawals limited to six pre-registered destinations set by
+      CoreVaultManager 0x6c8d96dEfE4cbEE05FA969Fc0Ac436d94Fc21784 on Flare.
+
 edges:
   # === Governance / control ===
   - from: multisig
@@ -191,3 +209,15 @@ edges:
     to: katana-fxrp
     kind: controls
     label: "same 11 signers"
+  - from: fassets-assetmanager
+    to: flare-fxrp
+    kind: mints
+    label: "mints canonical FXRP against agent collateral"
+  - from: core-vault
+    to: fassets-assetmanager
+    kind: deposits-into
+    label: "pooled XRP backing (4-of-6 XRPL multisig)"
+  - from: flare-safe
+    to: fassets-assetmanager
+    kind: holds-role
+    label: "governance (1-hour timelock)"
