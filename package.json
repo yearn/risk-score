@@ -13,7 +13,7 @@
   },
   "dependencies": {
     "@astrojs/sitemap": "3.7.3",
-    "@astrojs/vercel": "11.0.5",
+    "@astrojs/vercel": "11.0.6",
     "@plausible-analytics/tracker": "0.4.6",
     "@resvg/resvg-js": "2.6.2",
     "astro": "7.2.0",
