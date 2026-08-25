@@ -23,9 +23,9 @@ Current onchain values:
 - **Management fee / expense ratio:** **0.50%** p.a. in the current onchain pool metadata and on [rwa.xyz](https://app.rwa.xyz/assets/JAAA). **Performance fee:** 0%. The April 2025 factsheet's 0.40% management-fee figure is treated as superseded.
 - **Settlement:** Daily subscriptions and redemptions, **usually T+3** per factsheet
 - **Holders (Ethereum + multichain):** 32 onchain holders per rwa.xyz — institutional only
-- **Holdings (offchain CLO portfolio):** **36 CLO positions, ~$673.61M total market value** per the current onchain [JAAA pool metadata IPFS](https://ipfs.io/ipfs/bafkreifdw6nqnafeerd4xgmuyhad7jhzu6prd77lr2fmxvll3ax6soym5m) pointer. No cash row is present in this snapshot. The ~2.1% gap to rwa.xyz's asset value is consistent with different reporting times and fund-level cash/liabilities. Top three positions are **Ares Loan Funding II (4.9%)**, **CTM CLO 2025-2 (4.8%)**, and **Madison Park Funding XXX (4.6%)**.
+- **Holdings (offchain CLO portfolio):** **36 CLO positions, ~$673.61M total market value** per the current onchain [JAAA pool metadata IPFS](https://bafkreifdw6nqnafeerd4xgmuyhad7jhzu6prd77lr2fmxvll3ax6soym5m.ipfs.dweb.link/) pointer. No cash row is present in this snapshot. The ~2.1% gap to rwa.xyz's asset value is consistent with different reporting times and fund-level cash/liabilities. Top three positions are **Ares Loan Funding II (4.9%)**, **CTM CLO 2025-2 (4.8%)**, and **Madison Park Funding XXX (4.6%)**.
 - **Target APY:** 4.26% (current metadata) | **7-day APY:** 3.53% | **30-day APY:** 3.93% ([rwa.xyz](https://app.rwa.xyz/assets/JAAA), 2026-07-14)
-- **Third-party rating:** **Particula AAA** ([per current onchain pool metadata](https://ipfs.io/ipfs/bafkreifdw6nqnafeerd4xgmuyhad7jhzu6prd77lr2fmxvll3ax6soym5m))
+- **Third-party rating:** **Particula AAA** ([per current onchain pool metadata](https://bafkreifdw6nqnafeerd4xgmuyhad7jhzu6prd77lr2fmxvll3ax6soym5m.ipfs.dweb.link/))
 - **Minimum initial investment:** $500,000 USDC (per on-chain pool metadata)
 
 A separate, **freely-transferable** wrapper of the same fund — **deJAAA** ([`0xAAA0008C8CF3A7Dca931adaF04336A5D808C82Cc`](https://etherscan.io/address/0xAAA0008C8CF3A7Dca931adaF04336A5D808C82Cc), poolId `281474976710659`) — exists for permissionless DeFi integrations. deJAAA has total supply ~5.65M tokens (18 decimals) and a live vault conversion rate of ~1.039397 USDC/deJAAA. This report focuses on the KYC-gated JAAA primary share class but documents deJAAA where relevant.
@@ -43,7 +43,7 @@ A separate, **freely-transferable** wrapper of the same fund — **deJAAA** ([`0
 - [Janus Henderson press release – Anemoy partnership](https://www.janushenderson.com/corporate/press-releases/janus-henderson-to-partner-with-anemoy-and-centrifuge-on-its-first-tokenized-fund/)
 - [DefiLlama – Centrifuge](https://defillama.com/protocol/centrifuge)
 - [JAAA factsheet (April 2025, IPFS-linked from on-chain pool metadata)](https://gateway.pinata.cloud/ipfs/QmcWwvqnoUkH1bMYktnMdEywmUkUeK3PPex2i763zVNUmm)
-- [JAAA pool metadata (IPFS, current HubRegistry pointer)](https://ipfs.io/ipfs/bafkreifdw6nqnafeerd4xgmuyhad7jhzu6prd77lr2fmxvll3ax6soym5m)
+- [JAAA pool metadata (IPFS, current HubRegistry pointer)](https://bafkreifdw6nqnafeerd4xgmuyhad7jhzu6prd77lr2fmxvll3ax6soym5m.ipfs.dweb.link/)
 
 ## Contract Addresses
 
@@ -187,16 +187,16 @@ The four live JAAA BalanceSheet managers are two Gnosis Safes ([`0x02eb…5bc7`]
 ### Collateralization
 
 - **Backing:** 1:1 by the **Janus Henderson Anemoy AAA CLO Fund** — a portfolio of AAA-rated, floating-rate CLO tranches. Cash and short-duration AAA CLO debt of multiple underlying CLO issuers.
-- **Specific CLO holdings (issuer mix):** **36 CLO positions totaling ~$673.61M** per the public [current onchain pool metadata](https://ipfs.io/ipfs/bafkreifdw6nqnafeerd4xgmuyhad7jhzu6prd77lr2fmxvll3ax6soym5m), with CUSIP/ISIN/ticker/market-value/% for each position. This snapshot has no cash row. Its value is ~2.1% below rwa.xyz's ~$688.24M total asset value, a reasonable timing and fund-level cash/liability difference. Independent per-tranche verification still requires an institutional pricing service. Top five:
+- **Specific CLO holdings (issuer mix):** **36 CLO positions totaling ~$673.61M** per the public [current onchain pool metadata](https://bafkreifdw6nqnafeerd4xgmuyhad7jhzu6prd77lr2fmxvll3ax6soym5m.ipfs.dweb.link/), with CUSIP/ISIN/ticker/market-value/% for each position. This snapshot has no cash row. Its value is ~2.1% below rwa.xyz's ~$688.24M total asset value, a reasonable timing and fund-level cash/liability difference. Independent per-tranche verification still requires an institutional pricing service. Top five:
   - ARES LOAN FUNDING II LTD (ARES 2022-ALF2A) — $33.00M / 4.9%
   - CTM CLO 2025-2 LTD — $32.02M / 4.8%
   - MADISON PARK FUNDING XXX LTD (MDPK 2018-30A) — $30.85M / 4.6%
   - AMMC CLO 27 LTD (AMMC 2022-27A) — $30.00M / 4.5%
   - CBAM 2017-1 LTD (CBAMR 2017-1A AR2) — $29.32M / 4.4%
-- **Asset quality:** 100% AAA tranches at the senior end of the CLO capital stack. The portfolio is diversified across 36 positions; no position exceeds 4.9% in the current metadata. Third-party rating: **Particula AAA** ([pool metadata](https://ipfs.io/ipfs/bafkreifdw6nqnafeerd4xgmuyhad7jhzu6prd77lr2fmxvll3ax6soym5m)).
+- **Asset quality:** 100% AAA tranches at the senior end of the CLO capital stack. The portfolio is diversified across 36 positions; no position exceeds 4.9% in the current metadata. Third-party rating: **Particula AAA** ([pool metadata](https://bafkreifdw6nqnafeerd4xgmuyhad7jhzu6prd77lr2fmxvll3ax6soym5m.ipfs.dweb.link/)).
 - **Custody / service providers (offchain):**
   - **Custodian / traditional broker:** J.P. Morgan per [rwa.xyz](https://app.rwa.xyz/assets/JAAA), replacing the earlier StoneX disclosure.
-  - **Fund administrator:** Trident Trust **Cayman** (per [factsheet](https://gateway.pinata.cloud/ipfs/QmcWwvqnoUkH1bMYktnMdEywmUkUeK3PPex2i763zVNUmm) and [current pool metadata](https://ipfs.io/ipfs/bafkreifdw6nqnafeerd4xgmuyhad7jhzu6prd77lr2fmxvll3ax6soym5m))
+  - **Fund administrator:** Trident Trust **Cayman** (per [factsheet](https://gateway.pinata.cloud/ipfs/QmcWwvqnoUkH1bMYktnMdEywmUkUeK3PPex2i763zVNUmm) and [current pool metadata](https://bafkreifdw6nqnafeerd4xgmuyhad7jhzu6prd77lr2fmxvll3ax6soym5m.ipfs.dweb.link/))
   - **Auditor:** MHA Cayman
   - **Crypto-asset custodian:** Circle (per rwa.xyz)
   - **Regulator:** BVI Financial Services Commission (FSC) — fund is an open-ended BVI Professional Fund
@@ -524,7 +524,7 @@ Fordefi multiuser MPC wallet `0x7bf090b9…02ec` is the **sole current Hub manag
 
 Citation for the Overview's "Centrifuge JAAA ≠ NYSE JAAA" note. They share a sub-advisor (Janus Henderson Global Securitized team) and an investment mandate (AAA-rated floating-rate CLO tranches) but hold **different specific tranches**.
 
-**Sources:** Centrifuge JAAA — full current holdings list from the onchain pool-metadata pointer [`bafkrei…soym5m`](https://ipfs.io/ipfs/bafkreifdw6nqnafeerd4xgmuyhad7jhzu6prd77lr2fmxvll3ax6soym5m). NYSE JAAA — top 25 visible at [stockanalysis.com/etf/jaaa/holdings](https://stockanalysis.com/etf/jaaa/holdings/) (data via Finnhub, snapshot 2026-05-29); positions 26–604 are subscriber-gated.
+**Sources:** Centrifuge JAAA — full current holdings list from the onchain pool-metadata pointer [`bafkrei…soym5m`](https://bafkreifdw6nqnafeerd4xgmuyhad7jhzu6prd77lr2fmxvll3ax6soym5m.ipfs.dweb.link/). NYSE JAAA — top 25 visible at [stockanalysis.com/etf/jaaa/holdings](https://stockanalysis.com/etf/jaaa/holdings/) (data via Finnhub, snapshot 2026-05-29); positions 26–604 are subscriber-gated.
 
 #### Aggregate profile
 
