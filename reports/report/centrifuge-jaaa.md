@@ -222,7 +222,7 @@ The four live JAAA BalanceSheet managers are two Gnosis Safes ([`0x02eb…5bc7`]
 - **DeFi integrations providing secondary liquidity:**
   - **Aave Horizon** (institutional market) — JAAA selected as launch collateral; reached ~$100M in first week. ([Centrifuge Q3 2025 recap](https://centrifuge.io/blog/centrifuge-q3-2025-recap))
   - **Resolv × Aave Horizon** — Up to $100M JAAA as actively-managed leveraged collateral (80% LTV). ([Centrifuge blog](https://centrifuge.io/blog/resolv-aave-centrifuge-partnership))
-  - **Falcon Finance** — JAAA accepted as collateral to mint USDf. ([Falcon Finance](https://falcon.finance/news/falcon-finance-adds-centrifuges-jaaa-as-collateral-unlocking-onchain-liquidity-for-institutional-grade-credit))
+  - **Falcon Finance** — JAAA accepted as collateral to mint USDf. ([Falcon Finance](https://www.linkedin.com/posts/falconstable_tokenized-jaaa-when-structured-credit-becomes-activity-7433023390728454145-DFRV))
   - **3F (Morpho)** — Leveraged exposure product on JAAA. ([The Block](https://www.theblock.co/post/398686/3f-morpho-funding-leveraged-exposure-tokenized-assets))
 - **Concentration risk:** **Holder count = 32** (rwa.xyz). This remains highly concentrated and institutional. A single large redemption could materially exceed onchain settlement float, in which case Anemoy may delay or partially fulfil rather than force-sell. Any underlying CLO liquidation happens offchain through the fund and its J.P. Morgan custody/brokerage arrangement.
 - **Withdrawal queue / throttle:** No explicit fixed-cap throttle on `requestRedeem`. Anemoy retains discretion to delay or partially fulfil redemptions if portfolio liquidity is insufficient (typical for open-end credit funds).
