@@ -133,9 +133,12 @@ The FXRP/FAssets stack has an extensive, multi-firm audit history. The Ethereum 
 
 ### Bug Bounty
 
-- **The Immunefi program page is offline as of this assessment.** `https://immunefi.com/bug-bounty/flarenetwork/information/` returns **HTTP 404**, as does every other plausible Flare slug on Immunefi. This is not bot-blocking: the Flare audit-competition page on the same host still returns 200. Flare still points at the dead URL from the site-wide footer of the [Developer Hub](https://dev.flare.network/), and its [July 2024 launch announcement](https://flare.network/news/flare-immunefi-launch-a-comprehensive-bug-bounty-program) links to `/bug-bounty/flarenetwork/`, which redirects into the same 404 — so the discrepancy is on Immunefi's side and Flare's own references have not caught up.
-- **Last confirmed live: May 16, 2026** ([Wayback CDX index](http://web.archive.org/cdx/search/cdx?url=immunefi.com/bug-bounty/flarenetwork/*&output=text&fl=timestamp,statuscode&filter=statuscode:200)). Whether the program was delisted, migrated, or is temporarily unavailable could not be determined — treat the bounty as **unverified**, not as confirmed-live.
-- **Archived terms:** the last full snapshot ([February 17, 2026](http://web.archive.org/web/20260217213522/https://immunefi.com/bug-bounty/flarenetwork/information/)) shows a smart-contract critical maximum of **$250,000** — a cap on a formula ("10% of the funds directly affected"), not a flat payout — live since July 16, 2024, paid in FLR.
+**Finding: FXRP has no active bug bounty.** This is a live gap in the security posture, not a documentation nit.
+
+- **The Immunefi program is gone.** `https://immunefi.com/bug-bounty/flarenetwork/information/` returns **HTTP 404**, as does every other plausible Flare slug on Immunefi. This is not bot-blocking: the Flare audit-competition page on the same host still returns 200. Last confirmed live **May 16, 2026** ([Wayback CDX index](http://web.archive.org/cdx/search/cdx?url=immunefi.com/bug-bounty/flarenetwork/*&output=text&fl=timestamp,statuscode&filter=statuscode:200)).
+- **No replacement is advertised anywhere.** Flare's [Developer Hub](https://dev.flare.network/) still links the dead URL from its site-wide footer, as does the [audits page](https://dev.flare.network/support/audits) and the [July 2024 launch announcement](https://flare.network/news/flare-immunefi-launch-a-comprehensive-bug-bounty-program); no other bounty platform is referenced in Flare's documentation. HackenProof returns a not-found page for a Flare program, and no Flare program was found on the other major platforms checked.
+- **Archived terms**, for reference on what lapsed: the last full snapshot ([February 17, 2026](http://web.archive.org/web/20260217213522/https://immunefi.com/bug-bounty/flarenetwork/information/)) shows a smart-contract critical maximum of **$250,000** — a cap on a formula ("10% of the funds directly affected"), not a flat payout — live since July 16, 2024, paid in FLR.
+- **Why it matters here:** the FAssets stack is large, recently modified (OpenZeppelin audit Jan 2026, Zellic diffs through Nov 2025) and holds custody of real XRP. A standing bounty is the main continuous-coverage control between scheduled audits, and Flare currently has none while still advertising one. Scored accordingly (see *Category 1*).
 - Safe Harbor (SEAL 911): not disclosed in Flare's public documentation, and the SEAL registry has no reachable machine-readable adopter list to check against — could not be verified.
 
 ## Historical Track Record
@@ -256,7 +259,7 @@ This is a **strong and, importantly, uniform multi-DVN configuration** — struc
 
 - **Upgradeability:** FXRP is a TransparentUpgradeableProxy. The ProxyAdmin [`0x93bf…95c7`](https://etherscan.io/address/0x93bfc1329d6d4d94825434b2c0b55f56b34695c7) is owned by the **6-of-11 Safe** [`0x42D6…67D3`](https://etherscan.io/address/0x42D660C6C871a9176cEb102E9ad9722459Aa67D3) — an upgrade can be executed **with no timelock**. The implementation has never been changed: the proxy has exactly one `Upgraded` event, emitted in the deployment transaction at block 24,426,330.
 - **One signer set governs the whole mesh.** The same 11 owner addresses at threshold 6 control, with no timelock anywhere: the Ethereum OFT `owner()` and its ProxyAdmin — the same Safe [`0x42D6…67D3`](https://etherscan.io/address/0x42D660C6C871a9176cEb102E9ad9722459Aa67D3) also owns the Base, BNB, and Monad OFTs; the Flare adapter via [`0xbe65…49F3`](https://flare-explorer.flare.network/address/0xbe653C54DF337F13Fcb726101388F4a4803049F3); the Katana OFT and its ProxyAdmin via [`0xb8bc…D257`](https://explorer.katanarpc.com/address/0xb8bcdEb56Aa56ef2e89E01f9E4b2641C61CbD257); and the HyperEVM OFT via [`0x0144…cfd8`](https://hyperevmscan.io/address/0x0144603c28313F30fa573448406721792E46cfd8). Each Safe's `getOwners()` returns the identical 11 addresses (verified onchain on each chain). Because Ethereum peers all of these, that one signer set is a single point of control over Ethereum FXRP's supply on six chains at once.
-- **Multisig:** 6-of-11 Gnosis Safe v1.4.1 (11 owners, threshold 6). Signer identities: `TODO` — not enumerated (per policy, signers are checked against docs only, and Flare does not publish the signer set in the developer docs).
+- **Multisig:** 6-of-11 Gnosis Safe v1.4.1 (11 owners, threshold 6). Current owner set and threshold are viewable in the Safe UI — Ethereum [`0x42D6…67D3`](https://safe.yaudit.dev/1/0x42D660C6C871a9176cEb102E9ad9722459Aa67D3/), Flare [`0xbe65…49F3`](https://safe.yaudit.dev/14/0xbe653C54DF337F13Fcb726101388F4a4803049F3/). Signer identities are not enumerated here (per policy, signers are checked against docs only, and Flare does not publish the set).
 - **No timelock** on upgrades or peer/config changes is the principal governance weakness. The 6-of-11 threshold is a meaningful barrier, but a compromised or malicious Safe majority could upgrade the FXRP implementation to introduce unbacked minting, repoint the peer table to a malicious OFT, change the DVN configuration, or — via the sibling OFTs it also controls — mint on a peered chain and bridge the proceeds into Ethereum. All with immediate effect and no on-chain warning window. Upgrade authority is arbitrary-code authority: it is functionally unlimited power over the token, merely gated behind six signatures.
 - **Privileged roles:** the owner can `setPeer` (reroute mint/burn), `setEnforcedOptions`, `setFeeBps`/`setDefaultFeeBps`/`withdrawFees` (fees), `setDelegate`, `setMsgInspector`, `setPreCrime`, `transferOwnership`. None can pause or freeze user FXRP balances (the token has no blacklist/pause), but they can disrupt bridging and mint/burn routing.
 - **Flare-side governance — the same Safe, plus a 1-hour timelock.** `governance()` on the FAssets [AssetManager](https://flare-explorer.flare.network/address/0x2a3Fe068cD92178554cabcf7c95ADf49B4B0B6A8), [AssetManagerController](https://flare-explorer.flare.network/address/0x097B93eEBe9b76f2611e1E7D9665a9d7Ff5280B3) and [CoreVaultManager](https://flare-explorer.flare.network/address/0x6c8d96dEfE4cbEE05FA969Fc0Ac436d94Fc21784) is [`0xbe65…49F3`](https://flare-explorer.flare.network/address/0xbe653C54DF337F13Fcb726101388F4a4803049F3) — the same 6-of-11 Safe and the same 11 signers as the entire OFT mesh. So that one signer set controls both the bridge topology **and** FAssets risk curation (collateral ratios, minting cap, agent approval, Core Vault destinations). Unlike the Ethereum side it is at least delayed: `GovernanceSettings.getTimelock()` = **3600 s**, with `productionMode() == true` and a published executor set of 8 addresses (7 of which are also Safe owners).
@@ -410,6 +413,7 @@ This is a **strong and, importantly, uniform multi-DVN configuration** — struc
 - **Mesh peer topology:** Ethereum accepts mint messages from five sibling OFTs, so a mint on any peered chain can be bridged in as genuine Ethereum FXRP without ever touching the Flare escrow.
 - **XRP custody sits on a separate chain:** the underlying XRP is held by agents and a governance multisig on XRPL — outside any smart contract — backstopped by over-collateralization rather than programmatic custody.
 - **Thin, concentrated liquidity:** ~96.5% of Ethereum FXRP sits in Morpho Blue; the only DEX pair is ~$3.05M. A liquidation cascade or large exit would cause >10% price impact.
+- **No active bug bounty:** the Immunefi program is offline with no replacement advertised, removing the main continuous-coverage control between scheduled audits — while Flare's own documentation still points users at the dead program.
 - **Young deployment:** ~6.3 months on Ethereum; the bridge and Morpho usage have not been tested through a full market cycle.
 - **Multi-hop exit:** there is no direct redemption on Ethereum — exit requires DEX sale or bridging back to Flare and redeeming through agents.
 
@@ -438,10 +442,10 @@ This is a **strong and, importantly, uniform multi-DVN configuration** — struc
 
 #### Category 1: Audits & Historical Track Record (Weight: 20%)
 
-- **Audits:** the audit column is a clear **1** — 3+ top/reputable firms (OpenZeppelin, Zellic, Coinspect) with continuous 2022–2026 coverage plus an Immunefi audit competition, over a thin contract surface on the assessed chain. The bounty column is the problem: the rubric's score-2 row requires a max payout >$200K, and while the archived program met that ($250K smart-contract critical), **the program page is 404 today and cannot be confirmed live**. Scored between "bounty program present" (3) and "minimal or no bounty" (4) — the program was demonstrably live three months ago and Flare still advertises it, but an unreachable bounty cannot be credited as an active control. → bounty **3.5**, giving (1 + 3.5) / 2 = **2.25**
+- **Audits:** the audit column is a clear **1** — 3+ top/reputable firms (OpenZeppelin, Zellic, Coinspect) with continuous 2022–2026 coverage plus an Immunefi audit competition, over a thin contract surface on the assessed chain. The bounty column is the score-**4** row, "minimal or no bounty": the Immunefi program is offline and no replacement is advertised on any platform Flare references, so there is no active bounty to credit. 4 is the worst available value here — score 5 in this column is reserved for the no-audit critical gate, which does not apply. → bounty **4**, giving (1 + 4) / 2 = **2.5**
 - **Historical:** ~6.3 months on Ethereum (>$10M TVL), FAssets live on Flare for longer; no incidents. → **3**
 
-**Audits & Historical Score = (2.25 + 3) / 2 = 2.625 → 2.6**
+**Audits & Historical Score = (2.5 + 3) / 2 = 2.75**
 
 #### Category 2: Centralization & Control Risks (Weight: 30%)
 
@@ -474,12 +478,12 @@ This is a **strong and, importantly, uniform multi-DVN configuration** — struc
 
 | Category | Score | Weight | Weighted |
 |----------|-------|--------|----------|
-| Audits & Historical | 2.6 | 20% | 0.525 |
+| Audits & Historical | 2.75 | 20% | 0.55 |
 | Centralization & Control | 3.5 | 30% | 1.05 |
 | Funds Management | 2.5 | 30% | 0.75 |
 | Liquidity Risk | 4.0 | 15% | 0.60 |
 | Operational Risk | 1.5 | 5% | 0.075 |
-| **Final Score** | | | **3.0/5.0** |
+| **Final Score** | | | **3.025 → 3.0/5.0** |
 
 **Optional Modifiers:** none applied (protocol <2 years on Ethereum; TVL <$500M).
 
@@ -502,7 +506,7 @@ This is a **strong and, importantly, uniform multi-DVN configuration** — struc
 
 - **Time-based:** reassess in 6 months (the deployment is young; liquidity and holder concentration should be re-checked).
 - **Topology-based:** reassess if a new `peers` entry is added on any chain, if a timelock is introduced (which would materially improve the governance score), or if the remote OFT signer sets diverge from the Ethereum Safe.
-- **Bounty-based:** re-check whether the Immunefi program is restored or formally discontinued; a confirmed live bounty at the archived $250K tier would improve the Audits score.
+- **Bounty-based:** re-check whether a bug bounty is restored. A live program at the archived $250K tier would move the bounty column from 4 to 2 and lower the Audits score.
 - **Incident-based:** reassess after any Flare/FAssets/LayerZero incident, any ProxyAdmin upgrade or peer/DVN config change, or any Morpho FXRP-market bad-debt event.
 - **Liquidity-based:** reassess if Ethereum FXRP DEX depth drops below ~$1M or Morpho concentration rises further.
 - **Supply-based:** reassess if canonical FXRP approaches the 170M XRP minting cap or the Flare adapter escrow diverges from remote supply.
