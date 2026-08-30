@@ -21,16 +21,17 @@ nodes:
     address: "0x863687e4E9751b57F38b4B0ebA04744C72d0f7B8"
     category: vault
     note: >-
-      Yearn V3 allocator vault holding $1,111,367 of USDC at the August 23, 2026 reassessment.
-      Role manager is the Yearn Strategist MultiSig, with a handover to Yearn's RoleManager pending.
-      90.9% of shares are held by the Yearn Treasury, so the depositor base is effectively a single party.
+      Yearn V3 allocator vault holding $1,111,699 of USDC, 81.0% of it in Flex. Role manager is the
+      Yearn Strategist MultiSig, with a handover to Yearn's RoleManager pending. 90.9% of shares are held
+      by the Yearn Treasury and the vault is absent from yDaemon's index, so this is Treasury-seeded
+      pilot capital rather than a listed retail vault. Only 19.7% is instantly withdrawable.
   - id: lender-yvusd
     label: Flex yvUSD/USDC Lender (ysUSDC)
     address: "0xD93Dade7Ac8b5d1687da5d074835cB4404Dee8bA"
     category: vault
     note: >-
-      The assessed token. ERC-4626 Yearn TokenizedStrategy holding $600,257 with a price per share of
-      1.000376 and zero idle USDC. Management and performance-fee recipient are both Daddy; the 10%
+      The assessed token. ERC-4626 Yearn TokenizedStrategy holding $600,662 with a price per share of
+      1.000880 and $7,203 of idle USDC. Management and performance-fee recipient are both Daddy; the 10%
       lender performance fee is live and profit unlocks over 4 days. Deposit limit is $2M. There is no
       privileged minter — shares are minted only by permissionless ERC-4626 deposit.
   - id: lender-ysybold
@@ -38,8 +39,15 @@ nodes:
     address: "0xf4996Ca4190A1a3e7CF19AbE2F6eb712abd4a03C"
     category: vault
     note: >-
-      Second Flex position Yearn holds, $200,005 with a price per share of 1.000019 and zero idle USDC.
+      Second Flex position Yearn holds, $200,037 with a price per share of 1.000118 and zero idle USDC.
       Same Lender code, same Daddy-controlled parameters and same bad-debt socialization as the yvUSD market.
+  - id: lender-yvcrvusd
+    label: Flex yvcrvUSD-2/USDC Lender (ysUSDC)
+    address: "0xc1f281A3643F219636F97F6E687A33704950eC84"
+    category: vault
+    note: >-
+      Third Flex position, funded a day after deployment: $100,003 with a price per share of 1.000021
+      and zero idle USDC. Same Lender code and Daddy-controlled parameters as the other two markets.
 
   # Allocator strategies
   - id: strat-yvusd
@@ -48,21 +56,26 @@ nodes:
     category: strategy
     note: >-
       Deposit-gated Yearn strategy; only the allow-listed yvFlexUSDC vault may deposit. Its
-      availableWithdrawLimit is idle USDC in the strategy plus idle USDC in the Lender, currently 0,
-      so freeing funds requires management forceFreeFunds or an ExitRouter exit. Reporting reverts while
-      a redemption auction is unsettled.
+      availableWithdrawLimit is idle USDC in the strategy plus idle USDC in the Lender, currently $7,203,
+      so freeing the rest requires management forceFreeFunds or an ExitRouter exit. Reporting reverts
+      while a redemption auction is unsettled.
   - id: strat-ysybold
     label: FlexLenderStrategy — ysyBOLD (18.0%)
     address: "0xDd58AeFE74585DA2C7Ad3D3dF0F3aeEAb05b5176"
     category: strategy
     note: Same strategy code and constraints as the yvUSD leg; availableWithdrawLimit is also 0.
+  - id: strat-yvcrvusd
+    label: FlexLenderStrategy — yvcrvUSD-2 (9.0%)
+    address: "0xC818A0Be1BB2cE820CfdefAD5f890667e885f39d"
+    category: strategy
+    note: Same strategy code and constraints as the other two Flex legs; availableWithdrawLimit is 0.
   - id: strat-sky
-    label: USDC → SKY USDS Depositor (28.0%)
+    label: USDC → SKY USDS Depositor (19.0%)
     address: "0xfb4F83c3923eab7B6254cD2399C206109970F95e"
     category: strategy
     note: >-
-      Not a Flex position. The only leg of the allocator vault that is instantly withdrawable today
-      ($311,246 available), which is why it matters to the vault's liquidity picture.
+      Not a Flex position. Nearly all of the allocator vault's instantly withdrawable liquidity
+      ($211,432 of $218,635), which is why it matters to the vault's liquidity picture.
 
   # Protocol machinery
   - id: tm-yvusd
@@ -70,16 +83,33 @@ nodes:
     address: "0x8ee72c388aA73096338EE18CD46a39D98b8983c9"
     category: infra
     note: >-
-      Immutable Vyper CDP engine deployed August 5, 2026 from Factory v1.1.0. Holds 652,146 yvUSD
-      ($668,836) against $600,421 of debt — a system CR of 111.4% versus a 110% MCR, across 11 Troves
-      that all sit between 110.20% and 112.66%. Protocol first-loss reserve is $50.78.
+      Deployed August 5, 2026 as an EIP-1167 clone of an immutable Vyper template. Holds 646,616 yvUSD
+      ($663,930) against $593,541 of debt — a system CR of 111.9% versus a 110% MCR, across 7 Troves
+      between 110.32% and 112.57%. The largest and thinnest of the three markets. First-loss reserve $81.48.
   - id: tm-ysybold
     label: TroveManager — ysyBOLD/USDC
     address: "0xADf4E0226d59aac20272023c04B4DcF5Ade7Fc6E"
     category: infra
     note: >-
-      Deployed August 12, 2026. Holds 203,390 ysyBOLD ($221,963) against $200,011 of debt — a system CR
-      of 111.0%, across 7 Troves between 110.16% and 111.88%. Protocol first-loss reserve is $2.29.
+      Deployed August 12, 2026. Holds 222,525 ysyBOLD ($243,076) against $200,075 of debt — a system CR
+      of 121.5%, across 7 Troves between 110.02% and 139.22%. First-loss reserve $23.06.
+  - id: tm-yvcrvusd
+    label: TroveManager — yvcrvUSD-2/USDC
+    address: "0x7582b47486F75F5D675f260d357972cD0DbEeA2E"
+    category: infra
+    note: >-
+      Deployed August 23, 2026 and endorsed the next day. Holds 100,772 yvcrvUSD-2 ($116,143) against
+      $100,011 of debt — a system CR of 116.1% across 5 Troves, three of which sit near the 110% MCR.
+      An EIP-1167 clone of the same immutable template as the other markets.
+  - id: oracle-yvcrvusd
+    label: Price Oracle — yvcrvUSD-2/USDC
+    address: "0x01821e20e102A9c9878298fde6b87B1885Baa8B2"
+    category: infra
+    note: >-
+      Converts yvcrvUSD-2 to crvUSD through the vault rate, then prices crvUSD/USDC off the Curve
+      pool's EMA oracle. Capped at 1.01 with no floor and no privileged switch — structurally the
+      soundest of the three market oracles. Its source has never been merged to flex-contracts master
+      (pull request #23) and was in no audit's scope.
   - id: oracle-yvusd
     label: Price Oracle — yvUSD/USDC
     address: "0xDB8DBB6c0548341Aea85ebAAFa681B4A8c077D2e"
@@ -94,24 +124,26 @@ nodes:
     category: infra
     note: >-
       Converts ysyBOLD to BOLD through the two vault exchange rates, then prices BOLD/USDC off the Curve
-      pool's EMA oracle. The BOLD leg is capped at 1.01 and floored at 0.99, and only Daddy can lift the
-      floor via set_depeg_mode (currently false). Below 0.99 the oracle knowingly over-values collateral
-      and delays liquidations until a 3-of-5 multisig intervenes.
+      pool's EMA oracle. The BOLD leg is capped at 1.01, and a 0.99 floor applies unless Daddy sets
+      set_depeg_mode — which it did on August 24, 2026, so the floor is currently lifted and a real BOLD
+      depeg registers. The same key can switch it back with no timelock. Its source has never been merged
+      to flex-contracts master (pull request #22) and was in no audit's scope.
   - id: registry
     label: Registry (endorsed markets)
     address: "0x9117440a7D03238905d1C8908157Bd7a547c77c8"
     category: infra
     note: >-
-      Enumerates the four endorsed markets: the two live ones above, an unfunded siUSD/USDC market, and
-      the retired v1 yvUSD/USDC market that still holds ~$24.9K of yvUSD in a zombie Trove. Only Daddy
-      can endorse or unendorse, with no timelock.
+      Enumerates five markets, of which three are endorsed (the live ones above) and two were unendorsed
+      on August 24, 2026 — the retired v1 yvUSD/USDC market, which still holds ~$24,960 of yvUSD in a
+      zombie Trove, and a never-funded siUSD/USDC market. Only Daddy can endorse or unendorse, with no
+      timelock.
   - id: exit-router
     label: FlexExitRouter
     address: "0xe8a511403B0C83e7b85513e00Ed39996B48c2aeD"
     category: infra
     note: >-
-      The working exit path while the Lenders hold no idle cash. Sets a proceeds receiver on the strategy
-      so the withdrawal goes straight to the exiting user — idle liquidity atomically, the rest
+      The working exit path while the Lenders hold almost no idle cash. Sets a proceeds receiver on the
+      strategy so the withdrawal goes straight to the exiting user — idle liquidity atomically, the rest
       asynchronously via a redemption auction — with the shortfall booked as a loss on that user's withdrawal.
 
   # Governance
@@ -122,8 +154,9 @@ nodes:
     note: >-
       Holds every privileged power in the protocol despite the risks page claiming there are no admin keys.
       It is each Lender's management, the Registry owner, the recipient of both the 10% lender performance
-      fee and the borrower upfront fees, and the only caller of set_depeg_mode on the ysyBOLD oracle.
-      It cannot seize borrower collateral or lender shares.
+      fee and the borrower upfront fees, and the only caller of set_depeg_mode on the ysyBOLD oracle. On
+      August 24, 2026 it unendorsed two markets, lifted the ysyBOLD price floor and endorsed a third market
+      in two transactions, all effective immediately. It cannot seize borrower collateral or lender shares.
   - id: daddy-safe
     label: Daddy owner Safe (3-of-5)
     address: "0x687b82dA9753C9db280d4D9aBD7BCAC022Ef3B67"
@@ -178,6 +211,21 @@ nodes:
       Single price source for the BOLD/USDC leg of the ysyBOLD oracle, read via its EMA price_oracle.
       The 0.99–1.01 band bounds manipulation impact and equally bounds the oracle's ability to recognize
       a genuine depeg.
+  - id: dep-yvcrvusd
+    label: yvcrvUSD-2 (Yearn V3 crvUSD vault)
+    address: "0xBF319dDC2Edc1Eb6FDf9910E39b37Be221C8805F"
+    category: dependency
+    note: >-
+      Collateral of the third market. A publicly-listed Yearn V3 vault holding ~$1.20M of crvUSD, of
+      which Flex's market holds roughly 9.7%. Neither this vault nor crvUSD has a report in this
+      repository.
+  - id: dep-curve-crvusd
+    label: Curve USDC/crvUSD pool (EMA oracle)
+    address: "0x4DEcE678ceceb27446b35C672dC7d61F30bAD69E"
+    category: dependency
+    note: >-
+      Single price source for the crvUSD/USDC leg of the yvcrvUSD-2 oracle, read via its EMA
+      price_oracle. Capped at 1.01 with no floor, so a genuine crvUSD depeg is reflected downward.
   - id: dep-sky-susds
     label: Sky / sUSDS (Savings Rate)
     address: "0xa3931d71877C0E7a3148CB7Eb4463524FEc27fbD"
@@ -194,33 +242,45 @@ edges:
   - { from: daddy-safe, to: daddy, kind: controls, label: "owner, 3-of-5, no timelock" }
   - { from: daddy, to: lender-yvusd, kind: holds-role, label: "management + performanceFeeRecipient" }
   - { from: daddy, to: lender-ysybold, kind: holds-role, label: "management + performanceFeeRecipient" }
+  - { from: daddy, to: lender-yvcrvusd, kind: holds-role, label: "management + performanceFeeRecipient" }
   - { from: daddy, to: registry, kind: holds-role, label: "endorse / unendorse markets" }
   - { from: daddy, to: oracle-ysybold, kind: holds-role, label: "set_depeg_mode — lifts the 0.99 BOLD floor" }
   - { from: yearn-sms, to: yvflexusdc, kind: holds-role, label: "role_manager, all 14 roles" }
   - { from: yearn-sms, to: strat-yvusd, kind: holds-role, label: "management — sole caller of forceFreeFunds" }
   - { from: yearn-sms, to: strat-ysybold, kind: holds-role, label: "management — sole caller of forceFreeFunds" }
+  - { from: yearn-sms, to: strat-yvcrvusd, kind: holds-role, label: "management — sole caller of forceFreeFunds" }
   - { from: registry, to: tm-yvusd, kind: manages, label: "endorsed market" }
   - { from: registry, to: tm-ysybold, kind: manages, label: "endorsed market" }
+  - { from: registry, to: tm-yvcrvusd, kind: manages, label: "endorsed market" }
 
   # Money flow
   - { from: yvflexusdc, to: strat-yvusd, kind: allocates-to, label: "54.0%" }
   - { from: yvflexusdc, to: strat-ysybold, kind: allocates-to, label: "18.0%" }
-  - { from: yvflexusdc, to: strat-sky, kind: allocates-to, label: "28.0%" }
+  - { from: yvflexusdc, to: strat-yvcrvusd, kind: allocates-to, label: "9.0%" }
+  - { from: yvflexusdc, to: strat-sky, kind: allocates-to, label: "19.0%" }
   - { from: strat-yvusd, to: lender-yvusd, kind: deposits-into, label: "USDC → ysUSDC" }
   - { from: strat-ysybold, to: lender-ysybold, kind: deposits-into, label: "USDC → ysUSDC" }
+  - { from: strat-yvcrvusd, to: lender-yvcrvusd, kind: deposits-into, label: "USDC → ysUSDC" }
   - { from: strat-sky, to: dep-sky-susds, kind: deposits-into, label: "USDC → sUSDS" }
   - { from: lender-yvusd, to: tm-yvusd, kind: deposits-into, label: "lends USDC to Troves" }
   - { from: lender-ysybold, to: tm-ysybold, kind: deposits-into, label: "lends USDC to Troves" }
-  - { from: tm-yvusd, to: dep-yvusd, kind: deposits-into, label: "yvUSD collateral, 111.4% CR" }
-  - { from: tm-ysybold, to: dep-ysybold, kind: deposits-into, label: "ysyBOLD collateral, 111.0% CR" }
+  - { from: lender-yvcrvusd, to: tm-yvcrvusd, kind: deposits-into, label: "lends USDC to Troves" }
+  - { from: tm-yvusd, to: dep-yvusd, kind: deposits-into, label: "yvUSD collateral, 111.9% CR" }
+  - { from: tm-ysybold, to: dep-ysybold, kind: deposits-into, label: "ysyBOLD collateral, 121.5% CR" }
+  - { from: tm-yvcrvusd, to: dep-yvcrvusd, kind: deposits-into, label: "yvcrvUSD-2 collateral, 116.1% CR" }
+  - { from: dep-yvcrvusd, to: dep-curve-crvusd, kind: routes-through, label: "crvUSD" }
   - { from: dep-ysybold, to: dep-liquity-bold, kind: deposits-into, label: "ysyBOLD → yBOLD → BOLD" }
   - { from: lender-yvusd, to: dep-usdc, kind: routes-through, label: "borrow token" }
   - { from: lender-ysybold, to: dep-usdc, kind: routes-through, label: "borrow token" }
+  - { from: lender-yvcrvusd, to: dep-usdc, kind: routes-through, label: "borrow token" }
 
   # Oracles and exit path
   - { from: tm-yvusd, to: oracle-yvusd, kind: routes-through, label: "liquidation / redemption oracle" }
   - { from: tm-ysybold, to: oracle-ysybold, kind: routes-through, label: "liquidation / redemption oracle" }
+  - { from: tm-yvcrvusd, to: oracle-yvcrvusd, kind: routes-through, label: "liquidation / redemption oracle" }
+  - { from: oracle-yvcrvusd, to: dep-curve-crvusd, kind: routes-through, label: "crvUSD/USDC EMA, capped at 1.01" }
   - { from: oracle-yvusd, to: dep-morpho-oracle, kind: routes-through, label: "price() passthrough" }
   - { from: oracle-ysybold, to: dep-curve-bold-usdc, kind: routes-through, label: "BOLD/USDC EMA, floored at 0.99" }
   - { from: exit-router, to: strat-yvusd, kind: routes-through, label: "setProceedsReceiver — async, loss-bearing exit" }
   - { from: exit-router, to: strat-ysybold, kind: routes-through, label: "setProceedsReceiver — async, loss-bearing exit" }
+  - { from: exit-router, to: strat-yvcrvusd, kind: routes-through, label: "setProceedsReceiver — async, loss-bearing exit" }

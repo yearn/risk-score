@@ -891,6 +891,8 @@ protocols:
       address: '0x696d02Db93291651ED510704c9b286841d506987'
     - asset: ysyBOLD
       address: '0x23346B04a7f55b8760E5860AA5A77383D63491cD'
+    - asset: yvcrvUSD-2
+      address: '0xBF319dDC2Edc1Eb6FDf9910E39b37Be221C8805F'
     infrastructure: []
 
   bedrock_unibtc:
