@@ -4,7 +4,7 @@
 - **Token:** OUSD (Origin Dollar)
 - **Chain:** Ethereum Mainnet
 - **Token Address:** [`0x2A8e1E676Ec238d8A992307B495b45B3fEAa5e86`](https://etherscan.io/address/0x2A8e1E676Ec238d8A992307B495b45B3fEAa5e86)
-- **Final Score: 2.17/5.0**
+- **Final Score: 2.05/5.0**
 
 ## Overview + Links
 
@@ -82,9 +82,9 @@ Collateral was simplified from multi-stablecoin (USDT, DAI, USDC) to **USDC-only
 | Contract | Address | Role / Key facts |
 |----------|---------|------------------|
 | Cross-Chain Remote Strategy | [`0xE0228DB13F8C4Eb00fD1e08e076b09eF5cD0EA1e`](https://hyperevmscan.io/address/0xE0228DB13F8C4Eb00fD1e08e076b09eF5cD0EA1e) | Same address as the mainnet master; `governor()` = [`0x7712…1364`](https://hyperevmscan.io/address/0x77121911A387c9e4Eae46345E0f831A6da8a1364) |
-| OUSD Vault V2 (Morpho Vault V2) | [`0xE90959cbE7E56b5eBFF9AD12de611A4976F2d2B1`](https://hyperevmscan.io/address/0xE90959cbE7E56b5eBFF9AD12de611A4976F2d2B1) | `OUSDh-V2`; **owner = curator = a single EOA** [`0xFc5F…C12B`](https://hyperevmscan.io/address/0xFc5F89d29CCaa86e5410a7ad9D9d280d4455C12B) |
+| OUSD Vault V2 (Morpho Vault V2) | [`0xE90959cbE7E56b5eBFF9AD12de611A4976F2d2B1`](https://hyperevmscan.io/address/0xE90959cbE7E56b5eBFF9AD12de611A4976F2d2B1) | `OUSDh-V2`; owner = curator = Yearn deployer key [`0xFc5F…C12B`](https://hyperevmscan.io/address/0xFc5F89d29CCaa86e5410a7ad9D9d280d4455C12B); `setReceiveAssetsGate` and `setAdapterRegistry` permanently abdicated |
 | Morpho Vault V1 Adapter | [`0xF912d9489DEc1593D888eb680a4074f84c44413c`](https://hyperevmscan.io/address/0xF912d9489DEc1593D888eb680a4074f84c44413c) | Sole adapter; forwards 100% into `OUSDh-V1` |
-| OUSD Vault V1 (MetaMorpho v1.1) | [`0x0fb7e41A0A85Eb0BcA55172b73942cc6685e2B2E`](https://hyperevmscan.io/address/0x0fb7e41A0A85Eb0BcA55172b73942cc6685e2B2E) | `OUSDh-V1`; **owner = the same EOA, `curator()` = 0x0, `guardian()` = 0x0, `timelock()` = 0** |
+| OUSD Vault V1 (MetaMorpho v1.1) | [`0x0fb7e41A0A85Eb0BcA55172b73942cc6685e2B2E`](https://hyperevmscan.io/address/0x0fb7e41A0A85Eb0BcA55172b73942cc6685e2B2E) | `OUSDh-V1`; owner = the same key, `curator()` = 0x0, `guardian()` = 0x0, `timelock()` = 0; `feeRecipient()` = the Yearn curator Safe |
 | Morpho Blue (HyperEVM) | [`0x68e37dE8d93d3496ae143F2E900490f6280C57cD`](https://hyperevmscan.io/address/0x68e37dE8d93d3496ae143F2E900490f6280C57cD) | Lending primitive |
 | USDC (HyperEVM) | [`0xb88339CB7199b77E23DB6E890353E22632Ba630f`](https://hyperevmscan.io/address/0xb88339CB7199b77E23DB6E890353E22632Ba630f) | CCTP destination asset |
 
@@ -112,11 +112,12 @@ Origin Protocol maintains 30+ audit reports across all products in their [securi
 
 ### Bug Bounty
 
-- **Platform:** Immunefi
-- **Maximum Payout:** $1,000,000 (critical smart contract, capped at 10% of economic damage, min $50,000)
-- **Scope:** OUSD token contract explicitly in-scope (34 assets total)
-- **Safe Harbor:** Enabled via SEAL team
-- **Link:** https://immunefi.com/bug-bounty/originprotocol/scope/
+- **Platform:** Immunefi — live since November 22, 2021, program last updated August 4, 2026
+- **Maximum Payout:** $1,000,000 for a critical smart-contract report, capped at 10% of economic damage with a $50,000 floor. High severity is a flat $15,000. Payouts are made directly by Origin, denominated in USD and settled in OUSD.
+- **Scope:** OUSD token contract explicitly in-scope (28 assets total)
+- **Track record:** 40 paid reports totalling $139.2K; median resolution time 7 hours
+- **Safe Harbor:** Enabled via SEAL team; PoC always required, no KYC for payout
+- **Link:** https://immunefi.com/bug-bounty/originprotocol/information/
 
 ## Historical Track Record
 
@@ -250,11 +251,10 @@ Two consequences follow directly from this table.
 
 **Key Risks:**
 
-1. **A single EOA governs the HyperEVM Morpho stack.** `OUSDh-V1` ([`0x0fb7e41A…2B2E`](https://hyperevmscan.io/address/0x0fb7e41A0A85Eb0BcA55172b73942cc6685e2B2E)), the MetaMorpho v1.1 vault holding the whole ~$1.04M HyperEVM leg (~16.7% of OUSD TVL), has `owner()` = [`0xFc5F89d2…C12B`](https://hyperevmscan.io/address/0xFc5F89d29CCaa86e5410a7ad9D9d280d4455C12B) — an address with no code — together with `curator()` = `0x0`, `guardian()` = `0x0`, and `timelock()` = **0**. In MetaMorpho the owner is implicitly an allocator, and with a zero timelock `submitCap` takes effect immediately, so that one key can raise a cap on an arbitrary market, reorder the supply queue, and `reallocate` the entire position into a market of its own construction in a single block, with no guardian able to revoke and no delay in which Origin could react. The `OUSDh-V2` wrapper above it is governed by the same EOA. This is the largest single un-timelocked fund-loss path in the system and it sits outside Origin's governance entirely.
-2. **AMO minting without timelock:** The Strategist can trigger AMO mint/burn operations, constrained by the strategy-level 99.8% solvency check. The vault-level AMO minting cap (`netOusdMintForStrategyThreshold`) is deprecated (function reverts on-chain).
-3. **Yield delegation without timelock:** `delegateYield` / `undelegateYield` on the OUSD token are `onlyGovernorOrStrategist` — the strategist can redirect the rebase yield of any account (including smart contracts holding OUSD) to an arbitrary recipient. This is a non-trivial power over holder yield.
-4. **Strategy reallocation without timelock:** The strategist can move all vault funds to/from any approved strategy (`withdrawAllFromStrategies`, `setDefaultStrategy`, `depositToStrategy`). Bounded by what's already on the governor-approved strategy list.
-5. **Rebase rate cap without timelock:** `setRebaseRateMax` lets the strategist cap the rebase APR — misconfiguration could strand yield. `rebasePerSecondMax` is currently 2,496,362,574 (≈7.87% APR).
+1. **AMO minting without timelock:** The Strategist can trigger AMO mint/burn operations, constrained by the strategy-level 99.8% solvency check. The vault-level AMO minting cap (`netOusdMintForStrategyThreshold`) is deprecated (function reverts on-chain).
+2. **Yield delegation without timelock:** `delegateYield` / `undelegateYield` on the OUSD token are `onlyGovernorOrStrategist` — the strategist can redirect the rebase yield of any account (including smart contracts holding OUSD) to an arbitrary recipient. This is a non-trivial power over holder yield.
+3. **Strategy reallocation without timelock:** The strategist can move all vault funds to/from any approved strategy (`withdrawAllFromStrategies`, `setDefaultStrategy`, `depositToStrategy`). Bounded by what's already on the governor-approved strategy list.
+4. **Rebase rate cap without timelock:** `setRebaseRateMax` lets the strategist cap the rebase APR — misconfiguration could strand yield. `rebasePerSecondMax` is currently 2,496,362,574 (≈7.87% APR).
 
 ### Programmability
 
@@ -269,10 +269,12 @@ Two consequences follow directly from this table.
 
 1. **USDC / Circle (Critical)** — Sole collateral asset on all three chains. Circle can freeze/blacklist addresses holding USDC, which would impact the vault, the strategies, or the remote legs.
 2. **Morpho (Critical)** — ~80% of TVL ultimately sits in Morpho Blue markets, reached through six intermediating vault contracts across three chains. Morpho Blue itself is immutable; the risk is concentrated in the curation layer above it.
-3. **Morpho curation counterparties (Critical)** — three separate governance sets sit between OUSD and the markets:
-   - **Ethereum:** `OUSD-V2` and `OUSD-V1` are owned by the **Yearn Security multisig** ([`0xe5e2Baf9…89c0`](https://etherscan.io/address/0xe5e2Baf96198c56380dDD5E992D7d1ADa0e989c0), 4-of-7), curated by [`0x90D0…6B51`](https://etherscan.io/address/0x90D0f26025571295D18a6c041E47450B81886B51) (2-of-3), with a guardian and a 3-day timelock. Note that this is the same Yearn multisig that curates Yearn's own Morpho vaults — a related-party relationship from Yearn's perspective, though a well-governed one.
-   - **Base:** `OUSDb-V2` / `OUSDb-V1` owned by [`0xFEaE2F85…E36F`](https://basescan.org/address/0xFEaE2F855250c36A77b8C68dB07C4dD9711fE36F) (4-of-8), same curator Safe, guardian set, 3-day timelock.
-   - **HyperEVM:** `OUSDh-V2` / `OUSDh-V1` owned and curated by a **single EOA** with **no guardian and a zero timelock**. See Key Risk 1 above.
+3. **Morpho curation — Yearn (not an external counterparty)** — every OUSD Morpho vault on all three chains is curated by Yearn:
+   - **Ethereum:** `OUSD-V2` and `OUSD-V1` are owned by the **Yearn Security multisig** ([`0xe5e2Baf9…89c0`](https://etherscan.io/address/0xe5e2Baf96198c56380dDD5E992D7d1ADa0e989c0), 4-of-7); `OUSD-V1` is curated by [`0x90D0…6B51`](https://etherscan.io/address/0x90D0f26025571295D18a6c041E47450B81886B51) (2-of-3) with a guardian and a 3-day timelock.
+   - **Base:** `OUSDb-V2` / `OUSDb-V1` owned by [`0xFEaE2F85…E36F`](https://basescan.org/address/0xFEaE2F855250c36A77b8C68dB07C4dD9711fE36F) (4-of-8, signer set overlapping Yearn Security), same curator Safe, guardian set, 3-day timelock.
+   - **HyperEVM:** `OUSDh-V2` / `OUSDh-V1` deployed and operated by the Yearn key [`0xFc5F89d2…C12B`](https://hyperevmscan.io/address/0xFc5F89d29CCaa86e5410a7ad9D9d280d4455C12B), which created both vaults and set `feeRecipient()` to the same Yearn curator Safe. This leg is configured more loosely than the other two — the key is an EOA rather than a Safe, `curator()` and `guardian()` are unset, and `timelock()` is 0, so cap and supply-queue changes take effect immediately. Withdrawals cannot be blocked: `setReceiveAssetsGate` and `setAdapterRegistry` are permanently abdicated on `OUSDh-V2`.
+
+   For a Yearn allocation decision this is an internal counterparty rather than a third-party trust assumption — the same team already curates the Morpho vaults behind several Yearn products. It is recorded here because it is a real concentration (Yearn curation sits under ~80% of OUSD's TVL) and because the HyperEVM configuration is worth tightening, not because it is an external dependency to be priced.
 4. **Origin OETH / superOETHb (Critical)** — ~54% of TVL is lent against Origin's own LSTs, priced by oracles that assume a fixed 1:1 ETH peg. A sustained OETH depeg produces bad debt in the markets OUSD supplies without triggering liquidations first.
 5. **Curve (High)** — AMO yield generation (~16% of TVL) and the primary on-Ethereum DEX exit (~$1.10M pool TVL, ~$505K USDC side). 92.5% of that pool's LP is the AMO itself.
 6. **Circle CCTP (High)** — Cross-chain strategies use Circle CCTP V2 to bridge USDC to Base and HyperEVM, and also to carry the balance and withdrawal messages the mainnet accounting depends on. ~36% of TVL is held on remote chains.
@@ -291,7 +293,7 @@ There is no single dependency whose failure stops the protocol, but the dependen
 
 ## Monitoring
 
-- **HyperEVM Morpho vault (highest priority):** Watch `OUSDh-V1` [`0x0fb7e41A…2B2E`](https://hyperevmscan.io/address/0x0fb7e41A0A85Eb0BcA55172b73942cc6685e2B2E) for `SetSupplyQueue`, `SetWithdrawQueue`, `SubmitCap` / `SetCap`, `ReallocateSupply`, `SetTimelock`, `SetGuardian`, `SetCurator`, and `SetOwner`. Because `timelock()` is 0 and no guardian is set, a cap change and a reallocation can land in the same block — detection is the only control available. Do the same for `OUSDh-V2` [`0xE90959cb…D2B1`](https://hyperevmscan.io/address/0xE90959cbE7E56b5eBFF9AD12de611A4976F2d2B1) (`SetIsAdapter`, `SetIsAllocator`, `Submit`/`Accept`). Alert on any change to `owner()`, `curator()`, `guardian()`, or `timelock()`.
+- **Morpho curation (all three chains):** Track owner, curator, guardian, timelock, cap submissions, and supply-queue changes on `OUSD-V2` / `OUSD-V1` (Ethereum), `OUSDb-V2` / `OUSDb-V1` (Base), and `OUSDh-V2` / `OUSDh-V1` (HyperEVM). The HyperEVM pair warrants tighter watch than the other two: `timelock()` is 0 and no guardian is set, so a cap change and a reallocation can land in the same block and detection is the only control. Alert on any change of `owner()`, `curator()`, `guardian()`, or `timelock()` on any of the six vaults.
 - **Governance:** Monitor Timelock events (`CallScheduled`, `CallExecuted`, `Cancelled`) on [`0x35918cDE7233F2dD33fA41ae3Cb6aE0e42E0e69F`](https://etherscan.io/address/0x35918cDE7233F2dD33fA41ae3Cb6aE0e42E0e69F). Monitor EIP-1967 implementation slot changes on Vault and OUSD Token proxies. Monitor Origin DeFi Governance proposals.
 - **Vault Parameters:** Track `totalValue()` on the vault ([`0xE75D…F70`](https://etherscan.io/address/0xE75D77B1865Ae93c7eaa3040B038D7aA7BC02F70)) and `totalSupply()` on the OUSD token ([`0x2A8e…E86`](https://etherscan.io/address/0x2A8e1E676Ec238d8A992307B495b45B3fEAa5e86)). Alert on >1% divergence. **Note:** `totalValue()` and `checkBalance(asset)` already subtract the withdrawal-queue reserve (`queued − claimed`); reconstruct components from the per-strategy `checkBalance()` calls, the vault's raw USDC balance, and `withdrawalQueueMetadata()` separately. Monitor `rebasePaused()` / `capitalPaused()`. Track `maxSupplyDiff`, `vaultBuffer`, `defaultStrategy`, `dripDuration`, `rebasePerSecondMax`, and `operatorAddr` changes.
 - **AMO:** Monitor `mintForStrategy()` calls and the OUSD supply vs vault value ratio. Alert if solvency drops below 99.5%. Track `isMintWhitelistedStrategy` changes (requires governance).
@@ -299,7 +301,6 @@ There is no single dependency whose failure stops the protocol, but the dependen
 - **Cross-chain balance freshness:** The mainnet `checkBalance()` for both remote legs is a cached `remoteStrategyBalance` accepted up to `MAX_BALANCE_CHECK_AGE` (1 day) old. Compare it against the live remote-side `checkBalance()` on Base and HyperEVM; alert on divergence >1% or on a cache older than a day.
 - **Morpho market oracles:** The OETH/USDC (Ethereum) and superOETHb/USDC (Base) markets price collateral as Chainlink ETH/USD ÷ USDC/USD with no LST-specific feed. Monitor the OETH and superOETHb secondary-market prices against ETH directly; a depeg is invisible to those markets. Monitor Chainlink ETH/USD ([`0x5f4eC3Df…8419`](https://etherscan.io/address/0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419)) and USDC/USD ([`0x8fFfFfd4…18f6`](https://etherscan.io/address/0x8fFfFfd4AfB6115b954Bd326cbe7B4BA576818f6)) for staleness, and the RedStone `kHYPE_FUNDAMENTAL` / `HYPE` feeds on HyperEVM.
 - **Morpho market liquidity:** Track `totalSupplyAssets − totalBorrowAssets` for the OETH/USDC and superOETHb/USDC markets. Alert when free liquidity in the Ethereum OETH market falls below the vault's likely redemption need, or when the Base superOETHb market's free liquidity stays near zero.
-- **Morpho curation (Ethereum + Base):** Track curator, owner, guardian, timelock, cap submissions, and supply-queue changes on `OUSD-V2` / `OUSD-V1` and `OUSDb-V2` / `OUSDb-V1`.
 - **Liquidity:** Monitor the Curve OUSD/USDC pool balance ratio; alert on imbalance beyond 60/40. Track the AMO's share of the pool's LP supply — a fall would signal the AMO is unwinding OUSD's own DEX depth.
 - **Strategist:** Monitor role changes on vault `strategistAddr()`. Track AMO operation frequency and size. Monitor `YieldDelegated` / `YieldUndelegated` events on the OUSD token. Monitor `withdrawAllFromStrategies`, `setVaultBuffer`, `setDefaultStrategy`, `setDripDuration`, `setRebaseRateMax` calls.
 - **Withdrawal Queue:** Track `withdrawalQueueMetadata()` and compute the live backlog as `queued − claimed` — `queued` and `claimable` on their own are lifetime cumulative totals and will look alarming if read as a depth. Alert when the backlog exceeds vault idle plus free Ethereum Morpho liquidity.
@@ -315,23 +316,22 @@ There is no single dependency whose failure stops the protocol, but the dependen
 5. AMO minting constrained by the 99.8% solvency check, the pool-balance-improvement modifier, and a governance-controlled whitelist that still contains only the Curve AMO
 6. The withdrawal queue is fully drained (14 USDC outstanding across 161 lifetime requests) and the vault is unpaused
 7. Rebase is rate-limited by construction: supply only ratchets up, never above `totalValue()`, capped at ≈7.87% APR and 2% per rebase
+8. The Morpho curation layer under ~80% of TVL is Yearn's own, so the largest dependency is an internal counterparty rather than an unknown third party; the Ethereum and Base stacks additionally run 3-day timelocks with guardians set, and the HyperEVM V2 vault has permanently abdicated the two selectors that could gate withdrawals
 
 ### Key Risks
 
-1. **A single EOA with no timelock and no guardian controls ~16.7% of TVL.** The HyperEVM MetaMorpho vault holding the $1.04M leg is owned and curated by one keypair with `timelock() = 0`; it can reallocate the entire position into an arbitrary Morpho market in one transaction. This dependency sits wholly outside Origin's governance.
-2. **~54% of TVL is credit exposure to Origin's own LSTs.** USDC is lent against OETH (Ethereum) and superOETHb (Base) in Morpho markets whose oracles hard-assume a 1:1 ETH peg — a depeg produces bad debt without first producing liquidations.
-3. **Morpho concentration and depth.** ~80% of TVL routes through Morpho Blue via six intermediating vault contracts on three chains; the Ethereum leg alone is 47.6% of TVL in a single market at 84.6% utilization, leaving ~$1.59M withdrawable on demand.
-4. AMO `mintForStrategy()` can mint OUSD without direct backing (constrained to ~0.2% of supply by the strategy-level solvency check); the historical vault-level cap is deprecated
-5. Strategist (2-of-8 multisig) has broad untimelocked power: AMO operations, strategy allocation, vault parameters, pause controls, remote-strategy deposits/withdrawals, **and yield delegation** (`delegateYield` / `undelegateYield` can redirect any account's rebase yield)
-6. Single collateral dependency on USDC (Circle) — a centralized stablecoin with freeze capability, now held on three chains
-7. Cross-chain strategies (~36% of TVL) add bridge risk, and mainnet accounting for them is a CCTP-pushed cached balance up to a day stale by design
-8. Thin and non-independent exit depth: the Curve pool holds only ~$505K of USDC and 92.5% of its LP is Origin's own AMO; `vaultBuffer` = 0 leaves ~$6K idle; redemptions flow through an async queue with no on-chain upper bound on claim time
-9. TVL ~$6.24M, down ~22% over the quarter and ~98% from the $298M peak — small enough that a single large redeemer dominates the exit path
+1. **~54% of TVL is credit exposure to Origin's own LSTs.** USDC is lent against OETH (Ethereum) and superOETHb (Base) in Morpho markets whose oracles hard-assume a 1:1 ETH peg — a depeg produces bad debt without first producing liquidations.
+2. **Morpho concentration and depth.** ~80% of TVL routes through Morpho Blue via six intermediating vault contracts on three chains; the Ethereum leg alone is 47.6% of TVL in a single market at 84.6% utilization, leaving ~$1.59M withdrawable on demand. The curation layer across all three chains is Yearn's own, so for a Yearn allocation this is internal concentration rather than third-party counterparty risk.
+3. AMO `mintForStrategy()` can mint OUSD without direct backing (constrained to ~0.2% of supply by the strategy-level solvency check); the historical vault-level cap is deprecated
+4. Strategist (2-of-8 multisig) has broad untimelocked power: AMO operations, strategy allocation, vault parameters, pause controls, remote-strategy deposits/withdrawals, **and yield delegation** (`delegateYield` / `undelegateYield` can redirect any account's rebase yield)
+5. Single collateral dependency on USDC (Circle) — a centralized stablecoin with freeze capability, now held on three chains
+6. Cross-chain strategies (~36% of TVL) add bridge risk, and mainnet accounting for them is a CCTP-pushed cached balance up to a day stale by design
+7. Thin and non-independent exit depth: the Curve pool holds only ~$505K of USDC and 92.5% of its LP is Origin's own AMO; `vaultBuffer` = 0 leaves ~$6K idle; redemptions flow through an async queue with no on-chain upper bound on claim time
+8. TVL ~$6.24M, down ~22% over the quarter and ~98% from the $298M peak — small enough that a single large redeemer dominates the exit path
 
 ### Critical Risks
 
-- **No gate is triggered for OUSD itself.** OUSD is governed by an on-chain DAO plus a 48h timelock, its contracts are source-verified, and reserves are fully readable on-chain.
-- The single-EOA HyperEVM Morpho vault would trigger the "total centralization" gate if it were the assessed protocol. It is a dependency rather than the subject of this assessment, so it is priced into the dependency and collateralization scores instead — but it is the finding a reader should carry away.
+- **None identified. All critical gates pass.** OUSD is governed by an on-chain DAO plus a 48h timelock, its contracts are source-verified, and reserves are fully readable on-chain.
 - Historical $7.7M hack (November 2020) was on a different codebase; the protocol was completely relaunched with audited contracts.
 
 ---
@@ -343,7 +343,7 @@ There is no single dependency whose failure stops the protocol, but the dependen
 - [ ] **Unverified contract source** → **PASS** (vault, token, strategies, and every Morpho vault in the chain are source-verified)
 - [ ] **No audit** → **PASS** (9 OUSD-specific audits including Trail of Bits, OpenZeppelin, Sigma Prime, Certora)
 - [ ] **Unverifiable reserves** → **PASS** (fully on-chain via `totalValue()` and per-strategy `checkBalance()`, though the cross-chain legs read a CCTP-pushed cache and full reconstruction spans three chains)
-- [ ] **Total centralization** → **PASS** (xOGN governance + 48h Timelock; strategist is a 2-of-8 multisig, not an EOA). The gate is scoped to the assessed protocol; the single-EOA HyperEVM Morpho vault is scored as a dependency in Categories 2C and 3A.
+- [ ] **Total centralization** → **PASS** (xOGN governance + 48h Timelock; strategist is a 2-of-8 multisig, not an EOA)
 
 ### Category Scores
 
@@ -371,7 +371,7 @@ There is no single dependency whose failure stops the protocol, but the dependen
 
 **Score: (1.0 + 2.0) / 2 = 1.5**
 
-#### Category 2: Centralization & Control Risks (Weight: 30%) — **2.33**
+#### Category 2: Centralization & Control Risks (Weight: 30%) — **2.17**
 
 **Subcategory A: Governance — 1.0**
 - On-chain xOGN token governance with a ~5-day cycle (24h delay + 48h voting + 48h timelock); `getMinDelay()` = 172,800s
@@ -384,21 +384,20 @@ There is no single dependency whose failure stops the protocol, but the dependen
 - An operator EOA can call `rebase()` and push cross-chain balance updates — bounded, but it means live accounting for 36% of TVL depends on an off-chain keeper doing its job
 - Cross-chain strategy management and AMO rebalancing require manual intervention; reward harvesting is semi-automated via CoW Protocol
 
-**Subcategory C: External Dependencies — 3.5**
+**Subcategory C: External Dependencies — 3.0**
 - Critical: USDC/Circle (sole asset, three chains); Morpho Blue (~80% of TVL); three independent Morpho curation regimes; Origin's own OETH/superOETHb as the collateral behind ~54% of TVL
-- One of those curation regimes — HyperEVM, ~16.7% of TVL — is a single EOA with a zero timelock, no curator separation, and no guardian, i.e. an unmitigated single-key path to the funds
+- The Morpho curation layer on all three chains is Yearn's own, so it is not scored as an external trust assumption; the HyperEVM leg is nonetheless configured more loosely than Ethereum and Base (EOA key, no guardian, zero timelock)
 - High: Curve (AMO yield plus the only meaningful on-Ethereum DEX exit, 92.5% AMO-owned), Circle CCTP (asset transport *and* the accounting message bus), Chainlink (prices the OETH/superOETHb markets)
 - Medium: RedStone (prices the HyperEVM markets). Low: CoW Protocol (reward swaps)
 - The vault's own oracle dependency is gone — the price-provider slot is deprecated and no code path reads a feed — but the dependency moved down a layer rather than away
 
-**Score: (1.0 + 2.5 + 3.5) / 3 = 2.33**
+**Score: (1.0 + 2.5 + 3.0) / 3 = 2.17**
 
-#### Category 3: Funds Management (Weight: 30%) — **2.5**
+#### Category 3: Funds Management (Weight: 30%) — **2.25**
 
-**Subcategory A: Collateralization — 3.0**
+**Subcategory A: Collateralization — 2.5**
 - 100% on-chain backing, ratio 100.34%, single high-quality asset (USDC)
 - But the backing is deployed as lending claims, not held: ~80% of TVL is USDC supplied to Morpho Blue and ~16% is an AMO LP position. Collateral quality behind those claims is mixed — Origin's own OETH/superOETHb (~54% of TVL) priced at an assumed 1:1 ETH peg, cbXRP (~12.6%), and HYPE/kHYPE (~16.7%)
-- ~16.7% of TVL sits under a Morpho vault whose owner-curator is a single EOA with no timelock — collateral that is over-collateralized on paper but whose custody path has a one-key failure mode
 - AMO can temporarily create up to ~0.2% unbacked OUSD (solvency check)
 - `vaultBuffer` = 0; effective idle USDC ~$6,432
 
@@ -407,7 +406,7 @@ There is no single dependency whose failure stops the protocol, but the dependen
 - But reconstruction is genuinely involved: `totalValue()` nets out the queue reserve, and each cross-chain leg requires walking a master strategy, a remote strategy, two Morpho vault layers, and the underlying markets on a second chain
 - 36% of reported TVL is a **cached** `remoteStrategyBalance` refreshed by CCTP messages and accepted up to a day old, rather than a live read. It tracked the remote side to within ~$23 at the snapshot block, but the accounting is push-based
 
-**Score: (3.0 + 2.0) / 2 = 2.5**
+**Score: (2.5 + 2.0) / 2 = 2.25**
 
 #### Category 4: Liquidity Risk (Weight: 15%) — **2.5**
 
@@ -429,19 +428,19 @@ There is no single dependency whose failure stops the protocol, but the dependen
 
 ```
 Final Score = (Audits × 0.20) + (Centralization × 0.30) + (Funds Mgmt × 0.30) + (Liquidity × 0.15) + (Operational × 0.05)
-            = (1.5 × 0.20) + (2.33 × 0.30) + (2.5 × 0.30) + (2.5 × 0.15) + (1.0 × 0.05)
-            = 0.300 + 0.699 + 0.750 + 0.375 + 0.050
-            = 2.174
+            = (1.5 × 0.20) + (2.17 × 0.30) + (2.25 × 0.30) + (2.5 × 0.15) + (1.0 × 0.05)
+            = 0.300 + 0.650 + 0.675 + 0.375 + 0.050
+            = 2.050
 ```
 
 | Category | Score | Weight | Weighted |
 |----------|-------|--------|----------|
 | Audits & Historical | 1.5 | 20% | 0.300 |
-| Centralization & Control | 2.33 | 30% | 0.699 |
-| Funds Management | 2.5 | 30% | 0.750 |
+| Centralization & Control | 2.17 | 30% | 0.650 |
+| Funds Management | 2.25 | 30% | 0.675 |
 | Liquidity Risk | 2.5 | 15% | 0.375 |
 | Operational Risk | 1.0 | 5% | 0.050 |
-| **Final Score** | | | **2.17 / 5.0** |
+| **Final Score** | | | **2.05 / 5.0** |
 
 ### Risk Tier
 
@@ -462,8 +461,7 @@ Final Score = (Audits × 0.20) + (Centralization × 0.30) + (Funds Mgmt × 0.30)
 - **Time-based:** Quarterly (next: November 2026)
 - **Incident-based:** Any security incident, AMO solvency anomaly, USDC depeg/freeze, OETH or superOETHb depeg, bad debt in any Morpho market OUSD supplies, or a CCTP outage
 - **Change-based:**
-  - Any change to `owner()`, `curator()`, `guardian()`, or `timelock()` on the HyperEVM `OUSDh-V1` / `OUSDh-V2` vaults — in particular, a non-zero timelock or a real guardian being set would materially reduce Key Risk 1
-  - Curator, owner, guardian, or timelock changes on the Ethereum or Base Morpho vault stacks
+  - Curator, owner, guardian, or timelock changes on any of the six OUSD Morpho vaults — in particular, the Morpho curation passing out of Yearn's hands would turn an internal concentration into a third-party dependency and warrant a re-score
   - Supply-queue or cap changes that move a Morpho leg into a new collateral type
   - New strategy added to the mint whitelist, or a new cross-chain deployment
   - Governance parameter changes on the vault (`setStrategistAddr`, `setOperatorAddr`, `setMaxSupplyDiff`, `setWithdrawalClaimDelay`, proxy upgrades)
@@ -476,7 +474,7 @@ Final Score = (Audits × 0.20) + (Centralization × 0.30) + (Funds Mgmt × 0.30)
 | Date | Score | Notes |
 |------|-------|-------|
 | [June 25, 2026](https://github.com/yearn/risk-score/pull/136) | 1.85 | Initial assessment |
-| [August 31, 2026](https://github.com/yearn/risk-score/pull/434) | 2.17 | TVL $6.24M (−16%). Traced the Morpho legs three vault layers deep on three chains: ~54% of TVL is USDC lent against Origin's own OETH / superOETHb in markets whose oracles assume a 1:1 ETH peg, and the HyperEVM leg (~16.7% of TVL) sits under a MetaMorpho vault owned and curated by a single EOA with `timelock() = 0` and no guardian. Corrected the withdrawal-queue reading — `queued` / `claimable` are lifetime counters, outstanding demand is 14 USDC. Vault uses no oracle (`_deprecated_priceProvider`) and rebase is permissioned and rate-capped. Governance, roles, thresholds, proxies, and the mint whitelist unchanged. Dependencies 2.5 → 3.5, Collateralization 2.0 → 3.0, Provability 1.5 → 2.0. |
+| [August 31, 2026](https://github.com/yearn/risk-score/pull/434) | 2.05 | TVL $6.24M (−16%). Traced the Morpho legs three vault layers deep across Ethereum, Base, and HyperEVM: ~80% of TVL now sits in Morpho Blue markets, and ~54% of TVL is USDC lent against Origin's own OETH / superOETHb in markets whose oracles assume a 1:1 ETH peg with no LST feed. Morpho curation on all three chains is Yearn's own, so it is treated as an internal counterparty rather than an external dependency; the HyperEVM leg is configured more loosely (EOA key, no guardian, `timelock()` = 0) and is called out for monitoring. Corrected the withdrawal-queue reading — `queued` / `claimable` are lifetime counters, so outstanding demand is 14 USDC, not the ~$1.68M implied previously. Vault uses no oracle (`_deprecated_priceProvider`) and rebase is permissioned and rate-capped. Bug bounty reconfirmed live at $1M. Governance, roles, thresholds, proxies, and the mint whitelist unchanged. Dependencies 2.5 → 3.0, Collateralization 2.0 → 2.5, Provability 1.5 → 2.0. |
 
 ---
 
@@ -559,8 +557,8 @@ Final Score = (Audits × 0.20) + (Centralization × 0.30) + (Funds Mgmt × 0.30)
 │ │92.5% LP  │ │ │ = Yearn Sec  │ │      ▼       │ │      ▼               │
 │ │ is AMO   │ │ │   (4-of-7)   │ │ OUSDb-V2 →   │ │ OUSDh-V2 →           │
 │ └──────────┘ │ │      ▼       │ │ OUSDb-V1     │ │ OUSDh-V1             │
-│       │      │ │  adapter →   │ │ owner 4-of-8 │ │ owner = curator      │
-│   Gauge      │ │  OUSD-V1     │ │ curator 2/3  │ │ = ONE EOA            │
+│       │      │ │  adapter →   │ │ owner 4-of-8 │ │ owner = Yearn key    │
+│   Gauge      │ │  OUSD-V1     │ │ curator 2/3  │ │ (EOA, also curator)  │
 │  (0x1eF8..)  │ │ (0x5B8b...)  │ │ guardian set │ │ guardian: none       │
 │   → CRV      │ │ MetaMorpho   │ │ timelock 3d  │ │ timelock: 0          │
 │   rewards    │ │ 3d timelock  │ │      ▼       │ │      ▼               │

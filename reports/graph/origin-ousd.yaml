@@ -129,7 +129,7 @@ nodes:
     label: Yearn Security (4-of-7)
     address: "0xe5e2Baf96198c56380dDD5E992D7d1ADa0e989c0"
     category: governance
-    note: Owner of both Ethereum OUSD Morpho vaults and curator of OUSD-V2. This is the same multisig that curates Yearn's own Morpho vaults, so from Yearn's perspective the Ethereum Morpho leg is a related-party dependency — well governed, but not arm's length.
+    note: Owner of both Ethereum OUSD Morpho vaults and curator of OUSD-V2. The same multisig curates Yearn's own Morpho vaults, so for a Yearn allocation this leg is an internal counterparty rather than an external one.
   - id: morpho-curator
     label: Morpho Curator Safe (2-of-3)
     address: "0x90D0f26025571295D18a6c041E47450B81886B51"
@@ -177,19 +177,19 @@ nodes:
     address: "0xE90959cbE7E56b5eBFF9AD12de611A4976F2d2B1"
     chain: hyperevm
     category: dependency
-    note: Symbol OUSDh-V2. Owner and curator are the same single externally-owned account — there is no separation of powers and no sentinel.
+    note: Symbol OUSDh-V2. Owner and curator are the same Yearn-operated key. The two selectors that could gate withdrawals, setReceiveAssetsGate and setAdapterRegistry, have been permanently abdicated.
   - id: ousdh-v1
     label: OUSDh Vault V1 (MetaMorpho)
     address: "0x0fb7e41A0A85Eb0BcA55172b73942cc6685e2B2E"
     chain: hyperevm
     category: dependency
-    note: Symbol OUSDh-V1, MetaMorpho v1.1. curator() and guardian() are both the zero address and timelock() is 0, so its owner — an EOA — can raise a cap, reorder the supply queue, and reallocate the entire position into an arbitrary Morpho market in a single transaction. This is the largest un-timelocked fund-loss path in the system and it sits outside Origin's governance.
+    note: Symbol OUSDh-V1, MetaMorpho v1.1, fee recipient is the Yearn curator Safe. Configured more loosely than the Ethereum and Base stacks — curator() and guardian() are unset and timelock() is 0, so cap and supply-queue changes take effect immediately rather than after three days. Yearn controls the key, so this is an internal configuration item to tighten rather than a third-party trust assumption.
   - id: hyper-eoa
-    label: HyperEVM Vault Owner (EOA)
+    label: Yearn HyperEVM Key (EOA)
     address: "0xFc5F89d29CCaa86e5410a7ad9D9d280d4455C12B"
     chain: hyperevm
     category: governance
-    note: An address with no code that is simultaneously owner and curator of both HyperEVM OUSD vaults, controlling roughly 16.7% of OUSD TVL with no timelock and no guardian above it.
+    note: The Yearn-operated key that deployed both HyperEVM OUSD vaults and set their fee recipient to the Yearn curator Safe. It is owner and curator of both, so roughly 16.7% of OUSD TVL sits under a single EOA with no timelock and no guardian — same team as the other two chains, looser configuration.
   - id: hyper-khype-market
     label: "kHYPE/USDC · 62.5% LLTV"
     chain: hyperevm
@@ -421,11 +421,11 @@ edges:
   - from: hyper-eoa
     to: ousdh-v2
     kind: holds-role
-    label: "owner + curator (single EOA)"
+    label: "owner + curator (Yearn key)"
   - from: hyper-eoa
     to: ousdh-v1
     kind: holds-role
-    label: "owner, no curator, no guardian, timelock = 0"
+    label: "owner (no curator, no guardian, timelock = 0)"
   - from: ousdh-v1
     to: hyper-khype-market
     kind: deposits-into
