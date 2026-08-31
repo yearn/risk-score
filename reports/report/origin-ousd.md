@@ -476,6 +476,7 @@ Final Score = (Audits × 0.20) + (Centralization × 0.30) + (Funds Mgmt × 0.30)
 | Date | Score | Notes |
 |------|-------|-------|
 | [June 25, 2026](https://github.com/yearn/risk-score/pull/136) | 1.85 | Initial assessment |
+| [August 31, 2026](https://github.com/yearn/risk-score/pull/434) | 2.17 | TVL $6.24M (−16%). Traced the Morpho legs three vault layers deep on three chains: ~54% of TVL is USDC lent against Origin's own OETH / superOETHb in markets whose oracles assume a 1:1 ETH peg, and the HyperEVM leg (~16.7% of TVL) sits under a MetaMorpho vault owned and curated by a single EOA with `timelock() = 0` and no guardian. Corrected the withdrawal-queue reading — `queued` / `claimable` are lifetime counters, outstanding demand is 14 USDC. Vault uses no oracle (`_deprecated_priceProvider`) and rebase is permissioned and rate-capped. Governance, roles, thresholds, proxies, and the mint whitelist unchanged. Dependencies 2.5 → 3.5, Collateralization 2.0 → 3.0, Provability 1.5 → 2.0. |
 
 ---
 
