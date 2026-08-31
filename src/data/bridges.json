@@ -173,7 +173,7 @@
           "kind": "direct",
           "model": "transport",
           "integration": "CCTP V2",
-          "detail": "Cross-chain strategies bridge ~42% of TVL to Base and HyperEVM"
+          "detail": "Cross-chain strategies bridge ~36% of TVL to Base and HyperEVM, and CCTP messaging also carries the balance updates the mainnet accounting relies on"
         },
         {
           "slug": "yearn-yvusd",

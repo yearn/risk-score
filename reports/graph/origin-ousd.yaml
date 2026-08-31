@@ -20,7 +20,7 @@ nodes:
     label: OUSD Token (Proxy)
     address: "0x2A8e1E676Ec238d8A992307B495b45B3fEAa5e86"
     category: vault
-    note: EIP-1967 rebasing ERC-20 (1e18 base units, 1:1 USDC)
+    note: EIP-1967 rebasing ERC-20 (1e18 base units, 1:1 USDC). Supply ~6.22M OUSD against ~$6.24M of vault value — a 100.34% backing ratio.
   - id: ousd-impl
     label: OUSD Token Implementation
     address: "0xA7B7c59a1705e4a624ea8a4ad8a06f9de22dcc33"
@@ -29,22 +29,22 @@ nodes:
     label: wOUSD (ERC-4626 Wrapper)
     address: "0xD2af830E8CBdFed6CC11Bab697bB25496ed6FA62"
     category: vault
-    note: Appreciating wrapper for DeFi composability
+    note: Appreciating wrapper for DeFi composability; holds ~1.54M OUSD, about a quarter of total supply.
   - id: vault
     label: OUSD Vault (Proxy)
     address: "0xE75D77B1865Ae93c7eaa3040B038D7aA7BC02F70"
     category: vault
-    note: Holds USDC; 4 strategies; async withdrawal queue
+    note: Holds USDC only; four strategies; async withdrawal queue with a 600-second claim delay. The vault reads no oracle — its price-provider storage slot is deprecated, since a single 1:1 asset needs no pricing.
   - id: vault-impl
     label: OUSD Vault Implementation
     address: "0x82948060c4b72684bededec342350ab344975145"
     category: vault
-    note: Upgraded 2026 (block 25106912) post-Feb 2026 Sigma Prime audit
+    note: Upgraded 2026 (block 25106912) after the February 2026 Sigma Prime review of the vault upgrade and cross-chain strategies.
   - id: trustee
     label: Trustee Safe (1/3, fee collector)
     address: "0xBB077E716A5f1F1B63ed5244eBFf5214E50fec8c"
     category: vault
-    note: Receives 20% performance fee
+    note: Receives the 20% performance fee.
 
   # === Governance ===
   - id: xogn
@@ -61,7 +61,7 @@ nodes:
     label: Timelock Controller (48h)
     address: "0x35918cDE7233F2dD33fA41ae3Cb6aE0e42E0e69F"
     category: governance
-    note: Self-administered TIMELOCK_ADMIN_ROLE
+    note: Self-administered TIMELOCK_ADMIN_ROLE; getMinDelay() = 172,800 seconds.
   - id: gov-multisig
     label: GOV Multisig (5/8, cancel-only)
     address: "0xbe2AB3d3d8F6a32b96414ebbd865dBD276d3d899"
@@ -70,73 +70,177 @@ nodes:
     label: 'Strategist Safe (2/8, "Origin: Guardian")'
     address: "0x4FF1b9D9ba8558F5EAfCec096318eA0d8b541971"
     category: governance
-    note: 'Untimelocked — AMO ops, strategy allocation, vault params, delegateYield'
+    note: 'Untimelocked — AMO ops, strategy allocation, vault params, remote-strategy deposits and withdrawals, and delegateYield over any account.'
+  - id: operator
+    label: Operator (EOA)
+    address: "0x739212d5bAfE6AAC8Be49a60B7d003bD41DBf38b"
+    category: governance
+    note: Calls rebase() on the vault and pushes cross-chain balance updates from both remote strategies. Bounded — rebase only ratchets supply upward, never above totalValue(), and is capped at roughly 7.87% APR.
 
   # === Protocol infra ===
-  - id: oracle
-    label: Oracle Router (Chainlink USDC/USD)
-    address: "0x36CFB852d3b84afB3909BCf4ea0dbe8C82eE1C3c"
-    category: infra
-    note: Non-upgradeable; hardcoded Chainlink feeds
   - id: cow-harvester
     label: CoW Harvester (reward swaps)
     address: "0xD400341aEfED0BC75176714cFdE82e8BDAA2D3b8"
     category: infra
-    note: Sells CRV + MORPHO rewards → USDC
+    note: Sells CRV and MORPHO rewards into USDC and returns them to the vault.
 
   # === Active strategies (4) ===
   - id: morpho-strategy
-    label: Morpho V2 Strategy (~45%)
+    label: Morpho V2 Strategy (47.6%)
     address: "0x3643cafA6eF3dd7Fcc2ADaD1cabf708075AFFf6e"
     category: strategy
+    note: The vault's defaultStrategy — deposits above the 25,000 USDC auto-allocate threshold land here.
   - id: amo-strategy
-    label: Curve USDC AMO Strategy (~14%)
+    label: Curve USDC AMO Strategy (16.3%)
     address: "0x26a02ec47ACC2A3442b757F45E0A82B8e993Ce11"
     category: strategy
-    note: ONLY mint-whitelisted strategy; mintForStrategy OUSD
+    note: The only mint-whitelisted strategy. AMO operations must keep totalValue/totalSupply at or above 99.8% and must improve the pool's balance; maxSlippage is 0.2%.
   - id: cc-base
-    label: Cross-Chain Strategy (Base, ~28%)
+    label: Cross-Chain Master (Base, 19.4%)
     address: "0xB1d624fc40824683e2bFBEfd19eB208DbBE00866"
     category: strategy
+    note: Reports a cached remoteStrategyBalance pushed over CCTP messaging and accepted up to one day old, rather than a live read.
   - id: cc-hyperevm
-    label: Cross-Chain Strategy (HyperEVM, ~13%)
+    label: Cross-Chain Master (HyperEVM, 16.7%)
     address: "0xE0228DB13F8C4Eb00fD1e08e076b09eF5cD0EA1e"
     category: strategy
+    note: Same cached-balance design as the Base leg; the peer strategy shares the address on HyperEVM.
 
-  # === External dependencies ===
+  # === Ethereum Morpho stack ===
   - id: morphousd-vault
-    label: MetaMorpho Vault mOUSD-V2
+    label: OUSD Vault V2 (Morpho V2)
     address: "0xFB154c729A16802c4ad1E8f7FF539a8b9f49c960"
     category: dependency
     link: "https://app.morpho.org/ethereum/vault/0xFB154c729A16802c4ad1E8f7FF539a8b9f49c960/"
-    note: Largest single dependency; nested MetaMorpho adapter (not expandable)
+    note: Symbol OUSD-V2, zero fees. The Morpho V2 strategy owns effectively all of its shares. Holds a single adapter that forwards 100% of assets into the MetaMorpho vault below.
+  - id: morpho-v1-adapter
+    label: Morpho Vault V1 Adapter
+    address: "0xD8F093dCE8504F10Ac798A978eF9E0C230B2f5fF"
+    category: infra
+    note: Sole adapter of OUSD-V2. Adding an adapter carries no timelock on this vault, but allocating to one requires a cap increase, which does — three days.
+  - id: ousd-v1
+    label: OUSD Vault V1 (MetaMorpho)
+    address: "0x5B8b9FA8e4145eE06025F642cAdB1B47e5F39F04"
+    category: dependency
+    morphoVault: v1
+    link: "https://app.morpho.org/ethereum/vault/0x5B8b9FA8e4145eE06025F642cAdB1B47e5F39F04/"
+    note: Symbol OUSD-V1. Three-day timelock, guardian set, 5% performance fee to the Yearn Security multisig. Effectively all of its assets sit in the OETH/USDC market.
   - id: security
-    label: Security (4-of-7)
+    label: Yearn Security (4-of-7)
     address: "0xe5e2Baf96198c56380dDD5E992D7d1ADa0e989c0"
     category: governance
-    note: Yearn Security multisig — owner + curator of the mOUSD-V2 MetaMorpho vault
+    note: Owner of both Ethereum OUSD Morpho vaults and curator of OUSD-V2. This is the same multisig that curates Yearn's own Morpho vaults, so from Yearn's perspective the Ethereum Morpho leg is a related-party dependency — well governed, but not arm's length.
+  - id: morpho-curator
+    label: Morpho Curator Safe (2-of-3)
+    address: "0x90D0f26025571295D18a6c041E47450B81886B51"
+    category: governance
+    note: Curator of the Ethereum OUSD-V1 vault and of both Base vaults; also the fee recipient of the HyperEVM vault.
+
+  # === Base Morpho stack ===
+  - id: cc-base-remote
+    label: Remote Strategy (Base)
+    address: "0xB1d624fc40824683e2bFBEfd19eB208DbBE00866"
+    chain: base
+    category: strategy
+    note: Same address as the mainnet master. Deposits bridged USDC into the Base Morpho Vault V2 stack; strategist is the Origin Guardian Safe, operator is the same EOA as on mainnet.
+  - id: ousdb-v2
+    label: OUSDb Vault V2 (Morpho V2)
+    address: "0x2Ba14b2e1E7D2189D3550b708DFCA01f899f33c1"
+    chain: base
+    category: dependency
+    link: "https://app.morpho.org/base/vault/0x2Ba14b2e1E7D2189D3550b708DFCA01f899f33c1/"
+    note: Symbol OUSDb-V2, zero fees. Single adapter forwarding everything into OUSDb-V1.
+  - id: ousdb-v1
+    label: OUSDb Vault V1 (MetaMorpho)
+    address: "0x581Cc9a73Ec7431723A4a80699B8f801205841F1"
+    chain: base
+    category: dependency
+    morphoVault: v1
+    link: "https://app.morpho.org/base/vault/0x581Cc9a73Ec7431723A4a80699B8f801205841F1/"
+    note: Symbol OUSDb-V1. Three-day timelock, guardian set, 5% performance fee. Roughly a third of its assets sit in the superOETHb market, which is 88% utilized and leaves only about $50K withdrawable on demand.
+  - id: base-owner
+    label: Base Vault Owner (4-of-8)
+    address: "0xFEaE2F855250c36A77b8C68dB07C4dD9711fE36F"
+    chain: base
+    category: governance
+    note: Owner of both Base OUSD Morpho vaults and fee recipient of OUSDb-V1; signer set overlaps the Yearn Security multisig on Ethereum.
+
+  # === HyperEVM Morpho stack ===
+  - id: cc-hyper-remote
+    label: Remote Strategy (HyperEVM)
+    address: "0xE0228DB13F8C4Eb00fD1e08e076b09eF5cD0EA1e"
+    chain: hyperevm
+    category: strategy
+    note: Same address as the mainnet master. Deposits bridged USDC into the HyperEVM Morpho Vault V2 stack.
+  - id: ousdh-v2
+    label: OUSDh Vault V2 (Morpho V2)
+    address: "0xE90959cbE7E56b5eBFF9AD12de611A4976F2d2B1"
+    chain: hyperevm
+    category: dependency
+    note: Symbol OUSDh-V2. Owner and curator are the same single externally-owned account — there is no separation of powers and no sentinel.
+  - id: ousdh-v1
+    label: OUSDh Vault V1 (MetaMorpho)
+    address: "0x0fb7e41A0A85Eb0BcA55172b73942cc6685e2B2E"
+    chain: hyperevm
+    category: dependency
+    note: Symbol OUSDh-V1, MetaMorpho v1.1. curator() and guardian() are both the zero address and timelock() is 0, so its owner — an EOA — can raise a cap, reorder the supply queue, and reallocate the entire position into an arbitrary Morpho market in a single transaction. This is the largest un-timelocked fund-loss path in the system and it sits outside Origin's governance.
+  - id: hyper-eoa
+    label: HyperEVM Vault Owner (EOA)
+    address: "0xFc5F89d29CCaa86e5410a7ad9D9d280d4455C12B"
+    chain: hyperevm
+    category: governance
+    note: An address with no code that is simultaneously owner and curator of both HyperEVM OUSD vaults, controlling roughly 16.7% of OUSD TVL with no timelock and no guardian above it.
+  - id: hyper-khype-market
+    label: "kHYPE/USDC · 62.5% LLTV"
+    chain: hyperevm
+    category: dependency
+    note: "Morpho market 0xe7aa046832007a975d4619260d221229e99cc27da2e6ef162881202b4cd2349b — about $957K of OUSD exposure, priced by the RedStone kHYPE_FUNDAMENTAL and HYPE feeds."
+  - id: hyper-whype-market
+    label: "WHYPE/USDC · 62.5% LLTV"
+    chain: hyperevm
+    category: dependency
+    note: "Morpho market 0xd13b1bad542045a8dc729fa0ffcc4f538b9771592c2666e1f09667dcf85804fc — about $84K of OUSD exposure, priced by the RedStone HYPE feed."
+
+  # === Other external dependencies ===
   - id: curve-pool
     label: Curve OUSD/USDC Pool
     address: "0x6d18E1a7faeB1F0467A77C0d293872ab685426dc"
     category: dependency
-    note: StableSwapNG; ~$1.10M TVL; AMO venue + DEX exit
+    note: StableSwapNG holding roughly 593K OUSD and 505K USDC. The AMO owns 92.5% of the pool's LP supply, so this is largely OUSD's own capital rather than third-party depth.
   - id: curve-gauge
     label: Curve Gauge
     address: "0x1eF8B6Ea6434e722C916314caF8Bf16C81cAF2f9"
     category: dependency
-    note: LP staking; CRV rewards
-  - id: cctp-base
-    label: Circle CCTP V2 → Base USDC
-    address: "0xB1d624fc40824683e2bFBEfd19eB208DbBE00866"
-    chain: base
+    note: LP staking for CRV rewards.
+  - id: cctp
+    label: Circle CCTP V2
     category: dependency
-    note: Destination-side USDC; peer strategy is the same address
-  - id: cctp-hyperevm
-    label: Circle CCTP V2 → HyperEVM USDC
-    address: "0xE0228DB13F8C4Eb00fD1e08e076b09eF5cD0EA1e"
-    chain: hyperevm
+    link: "https://www.circle.com/cross-chain-transfer-protocol"
+    note: Carries both the USDC itself and the balance and withdrawal messages that the mainnet accounting for 36% of TVL depends on.
+  - id: usdc
+    label: USDC (Circle)
+    address: "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"
     category: dependency
-    note: Destination-side USDC; peer strategy is the same address
+    note: The vault's only asset, held on three chains. Circle can freeze or blacklist any holder.
+
+# BEGIN GENERATED MORPHO MARKET NODES
+# Managed by scripts/update_morpho_graph_markets.mjs — do not edit.
+  - id: morpho-market-b8fef900b383
+    label: "OETH/USDC · 86% LLTV"
+    category: dependency
+    link: "https://app.morpho.org/ethereum/market/0xb8fef900b383db2dbbf4458c7f46acf5b140f26d603a6d1829963f241b82510e/"
+    note: "Morpho market 0xb8fef900b383db2dbbf4458c7f46acf5b140f26d603a6d1829963f241b82510e"
+  - id: morpho-market-d4a903dc6d94
+    label: "cbXRP/USDC · 62.5% LLTV"
+    category: dependency
+    link: "https://app.morpho.org/base/market/0xd4a903dc6d949519060c7707f9604fdc9772c046e05c2e3a8fce0bd7196e4109/"
+    note: "Morpho market 0xd4a903dc6d949519060c7707f9604fdc9772c046e05c2e3a8fce0bd7196e4109"
+  - id: morpho-market-67a66cbacb2f
+    label: "superOETHb/USDC · 77% LLTV"
+    category: dependency
+    link: "https://app.morpho.org/base/market/0x67a66cbacb2fe48ec4326932d4528215ad11656a86135f2795f5b90e501eb538/"
+    note: "Morpho market 0x67a66cbacb2fe48ec4326932d4528215ad11656a86135f2795f5b90e501eb538"
+# END GENERATED MORPHO MARKET NODES
 
 edges:
   # === Governance flow: xOGN → Origin Gov → Timelock → Vault ===
@@ -155,13 +259,13 @@ edges:
   - from: timelock
     to: vault
     kind: controls
-    label: governor (upgrade, approveStrategy, setTrusteeFeeBps, ...)
+    label: governor (upgrade, approveStrategy, setTrusteeFeeBps, setOperatorAddr, ...)
   - from: timelock
     to: ousd-token
     kind: controls
     label: governor (governanceRebaseOptIn)
 
-  # === Strategist roles (untimelocked) ===
+  # === Untimelocked Origin roles ===
   - from: strategist
     to: vault
     kind: holds-role
@@ -174,6 +278,18 @@ edges:
     to: amo-strategy
     kind: controls
     label: "operator (mintAndAdd / removeAndBurn / harvest)"
+  - from: operator
+    to: vault
+    kind: holds-role
+    label: "operatorAddr (rebase)"
+  - from: operator
+    to: cc-base
+    kind: holds-role
+    label: "operator (sendBalanceUpdate)"
+  - from: operator
+    to: cc-hyperevm
+    kind: holds-role
+    label: "operator (sendBalanceUpdate)"
 
   # === Proxy implementations ===
   - from: ousd-impl
@@ -186,14 +302,14 @@ edges:
     label: EIP-1967 implementation
 
   # === Internal vault wiring ===
-  - from: oracle
-    to: vault
-    kind: routes-through
-    label: Chainlink USDC/USD price
   - from: vault
     to: trustee
     kind: routes-fees-to
     label: 20% performance fee
+  - from: usdc
+    to: vault
+    kind: deposits-into
+    label: sole collateral asset
 
   # === Mint authority: AMO is the only mint-whitelisted strategy ===
   - from: amo-strategy
@@ -211,31 +327,115 @@ edges:
   - from: vault
     to: morpho-strategy
     kind: allocates-to
-    label: "44.8%"
+    label: "47.6%"
   - from: vault
     to: amo-strategy
     kind: allocates-to
-    label: "13.7%"
+    label: "16.3%"
   - from: vault
     to: cc-base
     kind: allocates-to
-    label: "28.4%"
+    label: "19.4%"
   - from: vault
     to: cc-hyperevm
     kind: allocates-to
-    label: "13.2%"
+    label: "16.7%"
 
-  # === Strategies → external dependencies ===
+  # === Ethereum Morpho stack ===
   - from: morpho-strategy
     to: morphousd-vault
     kind: deposits-into
     label: USDC supply
-
-  # === Morpho vault governance — Yearn Security owns + curates ===
+  - from: morphousd-vault
+    to: morpho-v1-adapter
+    kind: routes-through
+    label: sole adapter
+  - from: morpho-v1-adapter
+    to: ousd-v1
+    kind: deposits-into
+    label: "100%"
   - from: security
     to: morphousd-vault
     kind: holds-role
     label: "owner + curator"
+  - from: security
+    to: ousd-v1
+    kind: holds-role
+    label: "owner (3-day timelock, guardian set)"
+  - from: morpho-curator
+    to: ousd-v1
+    kind: holds-role
+    label: "curator"
+
+  # === Base Morpho stack ===
+  - from: cc-base
+    to: cctp
+    kind: routes-through
+    label: "CCTP V2 bridge + balance messages"
+  - from: cctp
+    to: cc-base-remote
+    kind: routes-through
+    label: "USDC minted on Base"
+  - from: cc-base-remote
+    to: ousdb-v2
+    kind: deposits-into
+    label: USDC supply
+  - from: ousdb-v2
+    to: ousdb-v1
+    kind: deposits-into
+    label: "100% via sole adapter"
+  - from: base-owner
+    to: ousdb-v2
+    kind: holds-role
+    label: "owner"
+  - from: base-owner
+    to: ousdb-v1
+    kind: holds-role
+    label: "owner (3-day timelock, guardian set)"
+  - from: morpho-curator
+    to: ousdb-v2
+    kind: holds-role
+    label: "curator"
+  - from: morpho-curator
+    to: ousdb-v1
+    kind: holds-role
+    label: "curator"
+
+  # === HyperEVM Morpho stack ===
+  - from: cc-hyperevm
+    to: cctp
+    kind: routes-through
+    label: "CCTP V2 bridge + balance messages"
+  - from: cctp
+    to: cc-hyper-remote
+    kind: routes-through
+    label: "USDC minted on HyperEVM"
+  - from: cc-hyper-remote
+    to: ousdh-v2
+    kind: deposits-into
+    label: USDC supply
+  - from: ousdh-v2
+    to: ousdh-v1
+    kind: deposits-into
+    label: "100% via sole adapter"
+  - from: hyper-eoa
+    to: ousdh-v2
+    kind: holds-role
+    label: "owner + curator (single EOA)"
+  - from: hyper-eoa
+    to: ousdh-v1
+    kind: holds-role
+    label: "owner, no curator, no guardian, timelock = 0"
+  - from: ousdh-v1
+    to: hyper-khype-market
+    kind: deposits-into
+    label: "~92%"
+  - from: ousdh-v1
+    to: hyper-whype-market
+    kind: deposits-into
+    label: "~8%"
+
+  # === Curve AMO ===
   - from: amo-strategy
     to: curve-gauge
     kind: deposits-into
@@ -245,18 +445,8 @@ edges:
     kind: routes-through
     label: "claim CRV → CoW swap"
 
-  # === Cross-chain bridges ===
-  - from: cc-base
-    to: cctp-base
-    kind: routes-through
-    label: "CCTP V2 bridge"
-  - from: cc-hyperevm
-    to: cctp-hyperevm
-    kind: routes-through
-    label: "CCTP V2 bridge"
-
   # === Reward harvesting fan-in ===
-  - from: morphousd-vault
+  - from: ousd-v1
     to: cow-harvester
     kind: routes-fees-to
     label: MORPHO rewards
@@ -274,3 +464,19 @@ edges:
     to: curve-pool
     kind: routes-through
     label: "secondary DEX exit"
+
+# BEGIN GENERATED MORPHO MARKET EDGES
+# Managed by scripts/update_morpho_graph_markets.mjs — do not edit.
+  - from: ousd-v1
+    to: morpho-market-b8fef900b383
+    kind: deposits-into
+    label: "100.0%"
+  - from: ousdb-v1
+    to: morpho-market-d4a903dc6d94
+    kind: deposits-into
+    label: "65.1%"
+  - from: ousdb-v1
+    to: morpho-market-67a66cbacb2f
+    kind: deposits-into
+    label: "34.8%"
+# END GENERATED MORPHO MARKET EDGES
