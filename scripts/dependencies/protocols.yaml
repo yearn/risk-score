@@ -916,3 +916,24 @@ protocols:
       - Chainlink CCIP
       - Free Tunnel
       - Merlin Bridge
+
+  pareto_falconx:
+    name: Pareto FalconX Credit Vault (AA_FalconXUSDC)
+    chain: ethereum
+    type: private_credit
+    address: "0xC26A6Fa2C37b38E549a4a1807543801Db684f99C"
+    base_asset: USDC
+    report: reports/report/pareto-falconx.md
+    collateral:
+      # Uncollateralized: the only backing is an unsecured receivable from the
+      # borrower. No junior tranche exists (BB supply is 0), so the senior
+      # class absorbs the first dollar of loss.
+      - asset: FalconX unsecured receivable
+    yield_sources:
+      - protocol: falconx
+        assets:
+          - USDC
+        label: fixed-rate unsecured loan to a FalconX-controlled EOA (offchain deployment)
+    infrastructure:
+      - Keyring
+      - LayerZero
