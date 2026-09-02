@@ -883,12 +883,16 @@ protocols:
     name: Flex yvUSD/USDC Lender
     chain: ethereum
     type: lending_market
-    address: '0x33C45216E121E31f1a8CD24C7E9d0d0C9e29B732'
+    address: '0xD93Dade7Ac8b5d1687da5d074835cB4404Dee8bA'
     base_asset: USDC
     report: reports/report/flex.md
     collateral:
     - asset: yvUSD
       address: '0x696d02Db93291651ED510704c9b286841d506987'
+    - asset: ysyBOLD
+      address: '0x23346B04a7f55b8760E5860AA5A77383D63491cD'
+    - asset: yvcrvUSD-2
+      address: '0xBF319dDC2Edc1Eb6FDf9910E39b37Be221C8805F'
     infrastructure: []
 
   bedrock_unibtc:
