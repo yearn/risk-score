@@ -42,6 +42,7 @@ UPSTREAM_PROTOCOLS = {
     "aave_v3_core",
     "compound_v3_usdc",
     "compound_v3_weth",
+    "curvance_markets_ausd",
     "spark",
 }
 

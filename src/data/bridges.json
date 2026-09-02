@@ -143,6 +143,16 @@
           "model": "mint",
           "integration": "PST collateral (Chainlink CCIP BurnMintTokenPool)",
           "detail": "Fluid accepts Huma PST as collateral. Ethereum PST [`0x22ae…d4c7`](https://etherscan.io/address/0x22ae3d9a738471f405169af055d31c687087d4c7) is minted by CCIP pool [`0xBE77…0D3d`](https://etherscan.io/address/0xBE776C85FE1f35BE8341167A6305230075F30D3d), whose only configured remote chain is Solana; a CCIP compromise could mint unbacked PST against Fluid positions"
+        },
+        {
+          "slug": "curvance-hyausd",
+          "name": "Curvance hyAUSD",
+          "kind": "indirect",
+          "model": "mint",
+          "integration": "savUSD collateral (Chainlink CCIP BurnMintTokenPool; Monad)",
+          "detail": "hyAUSD lends AUSD into a Curvance market that accepts Avant savUSD as collateral at 92% LTV. Monad savUSD [`0x9648…06c6`](https://monadscan.com/address/0x9648dB94F1e6B19e7D755585542981F97dc806c6) is a `FactoryBurnMintERC20` whose sole minter/burner is pool [`0xc5cA…8D3E`](https://monadscan.com/address/0xc5cAAC64Dd93b6E2B369d52610Fdae069e568D3E) (`BurnMintTokenPool 1.5.1`). The Avalanche lane's inbound capacity is 44.88M savUSD against 15.36M posted as collateral, so the rate limiter is not a meaningful throttle; a CCIP or pool-owner compromise could mint unbacked savUSD, post it and borrow out the market's AUSD, socialising bad debt into hyAUSD. Seizure is not possible — `burnFrom` still spends allowance (simulated: reverts `ERC20: insufficient allowance`). Full custody analysis in the report's Appendix B. Verified onchain August 17–18, 2026.",
+          "icon": "protocol:curvance",
+          "owner": "Pool owner + token owner + CCIP admin: [`0xd4d2…57cb`](https://snowtrace.io/address/0xd4d23209aaE8630bf386b7393763a5b7865e57cb) — no code on either chain, so not an onchain multisig and not timelocked; also owner/admin of avUSD, savUSD and AvantMintingV2 on Avalanche. `getRateLimitAdmin()` is unset, so limits are owner-only."
         }
       ]
     },
