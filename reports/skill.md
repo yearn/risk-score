@@ -34,4 +34,5 @@ Always mark sections as "TODO" if information is unavailable or not found, never
 - use etherscan to fetch blockchain data, usage defined in skill etherscan in `reports/etherscan/SKILL.md`
 - for fetching TVL, use defillama api. Docs: https://api-docs.defillama.com/ or use script: `uv run reports/scripts/fetch_defillama_tvl.py [protocol]`
 - if you use some script multiple times, add it to the `reports/scripts` folder but first ask for permission before committing it.
-- check .env file for environment variables and secrets.
+- check .env file for environment variables and secrets. if you can't access .env exit asap.
+- use https://evmchronicle.io/ to get contracts/tokens storage data.
