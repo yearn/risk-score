@@ -774,6 +774,23 @@ protocols:
       label: Steakhouse Prime / Gauntlet USDC Prime
     infrastructure:
     - Symbiotic
+  d2_hypeplus:
+    name: D2 HYPE++
+    chain: arbitrum
+    type: yield_vault
+    address: '0x75288264FDFEA8ce68e6D852696aB1cE2f3E5004'
+    report: reports/report/d2-hypeplus.md
+    collateral:
+    - asset: USDC
+      address: '0xaf88d065e77c8cC2239327C5EDb3A432268e5831'
+    yield_sources:
+    - protocol: dgnhype
+      assets:
+      - USDC
+      label: Nested D2 dgnHYPE strategy
+    infrastructure:
+    - Hyperliquid
+    - Circle CCTP
   gauntlet:
     name: Gauntlet USD Alpha (gtUSDa)
     chain: ethereum
