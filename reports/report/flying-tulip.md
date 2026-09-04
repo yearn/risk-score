@@ -1,18 +1,18 @@
 # Protocol Risk Assessment: Flying Tulip — FT Lend (ftDNMM)
 
-- **Assessment Date:** August 7, 2026 (team-response update: September 4, 2026)
+- **Assessment Date:** August 7, 2026 (team-response and TRS update: September 4, 2026)
 - **Token:** FT Lend market — supply / borrow positions (internal balances, not tokenised)
 - **Chain:** Ethereum Mainnet
 - **Core Contract:** PositionsManager [`0xbe4050a73a7Fb384c65E885a15C33461A4B20055`](https://etherscan.io/address/0xbe4050a73a7Fb384c65E885a15C33461A4B20055)
 - **Final Score: 3.0/5.0**
-- **Medium Risk** — approved with enhanced monitoring. A 3-of-5 Safe with no timelock can upgrade every contract and override every price. **35.1% of the market's TVL is the protocol's own ftUSD backing collateral supplied back into itself**, and only three genuinely third-party addresses hold 96% of the remainder. The audit package was privately reviewed and is strong but remains non-public; a live $1M Sherlock bounty covers deployed Flying Tulip contracts through the dynamic production-contract list incorporated by its Additional Scope. See [Risk Score Assessment](#risk-score-assessment). (Also deployed on Sonic; this report covers Ethereum.)
+- **Medium Risk** — approved with enhanced monitoring. A 3-of-5 Safe with no timelock can upgrade every core protocol contract and override every price. **35.1% of the market's TVL is the protocol's own ftUSD backing collateral supplied back into itself**, and only three genuinely third-party addresses hold 96% of the remainder. The newly live TRS product uses this same account, borrowing, margin and liquidation infrastructure and adds permissioned RFQ execution, but does not change the score by itself. The audit package was privately reviewed and is strong but remains non-public; a live $1M Sherlock bounty covers deployed Flying Tulip contracts through the dynamic production-contract list incorporated by its Additional Scope. See [Risk Score Assessment](#risk-score-assessment). (Also deployed on Sonic; this report covers Ethereum.)
 - **Companion report:** ftUSD and staked ftUSD are assessed separately in **[Flying Tulip — ftUSD & Staked ftUSD](./flying-tulip-ftusd.md)**.
 
-> **Scope.** Yearn's interest (issue [yearn/risk-score#234](https://github.com/yearn/risk-score/issues/234)) is the risk of supplying ("just lend") and/or borrowing in the **FT Lend** market. This report covers the lending engine and the assets it touches. **Holding ftUSD and staking ftUSD are out of scope** and are assessed in the companion report [Flying Tulip — ftUSD & Staked ftUSD](./flying-tulip-ftusd.md). ftUSD appears here only as an accepted collateral asset and because the contract holding its backing is this market's largest supplier. Nothing in this report should be used to size an ftUSD or sftUSD position. The unrelated `tulip.garden` protocol on Solana is **not** Flying Tulip and is excluded. Original values were verified **June 7, 2026 at block `25264957`**; this revision re-verified everything on **August 6, 2026 at block `25697429`** via `cast` and Etherscan. Bug-bounty scope and Curve context were refreshed **September 4, 2026 at block `25903824`** in response to team comments.
+> **Scope.** Yearn's interest (issue [yearn/risk-score#234](https://github.com/yearn/risk-score/issues/234)) is the risk of supplying ("just lend") and/or borrowing in the **FT Lend** market. This report covers the lending engine and the assets it touches. TRS is covered only where its shared account, borrowing, execution and liquidation paths can affect FT Lend suppliers; the return profile of a direct TRS position is not separately scored. **Holding ftUSD and staking ftUSD are out of scope** and are assessed in the companion report [Flying Tulip — ftUSD & Staked ftUSD](./flying-tulip-ftusd.md). ftUSD appears here only as an accepted collateral asset and because the contract holding its backing is this market's largest supplier. Nothing in this report should be used to size an ftUSD or sftUSD position. The unrelated `tulip.garden` protocol on Solana is **not** Flying Tulip and is excluded. Original values were verified **June 7, 2026 at block `25264957`**; this revision re-verified everything on **August 6, 2026 at block `25697429`** via `cast` and Etherscan. Bug-bounty scope, Curve context and the live Ethereum TRS configuration were refreshed **September 4, 2026**, with TRS engine registration verified through block `25904682`.
 
 ## Overview + Links
 
-**Flying Tulip** is Andre Cronje's "on-chain financial system that standardizes pricing, credit, and risk across a suite of products" — a hybrid AMM-CLOB spot exchange, a lending market (FT Lend), perpetual futures, and a yield stablecoin (ftUSD). The products share collateral and pricing so "a single deposit can back a loan, serve as collateral for a limit order, and support a future position simultaneously."
+**Flying Tulip** is Andre Cronje's "on-chain financial system that standardizes pricing, credit, and risk across a suite of products" — an integrated lending market, spot/RFQ execution, Total Return Swaps (TRS), and a yield stablecoin (ftUSD). The products share collateral and pricing so the same account can supply assets, borrow, swap collateral, and support leveraged exposure.
 
 **FT Lend** (the contract suite is labelled **ftDNMM** in the protocol's address registry) works as follows:
 
@@ -21,18 +21,19 @@
 - **Borrow side.** Borrowers post collateral and borrow against it. **LTV is dynamic and snapshotted** at position open based on AMM depth and multi-timeframe volatility. Onchain, each asset carries a **maintenance-margin rate (`mmBps`)** in the `ConfigRegistry`, and account health is enforced against `marginHfTargetBps`/`marginHfSafeBps`.
 - **Pricing.** An onchain `OracleRouterChainlink` — Chainlink-anchored, with Aave-style adapters for WBTC and wstETH, and a protocol-internal redemption oracle for ftUSD.
 - **Liquidations.** Module-gated through `RfqEngine` (`rfqFill` / `rfqFillFlash` → `liquidateFlash`), designed as time-sliced / RFQ-routed soft liquidations. Anyone can liquidate using partial liquidation.
+- **TRS / leveraged execution.** [TRS](https://blog.flyingtulip.com/introducing-total-return-swaps-trs-perps-built-differently/) is now live on Ethereum. It constructs long/short exposure by borrowing through FT Lend, executing against spot liquidity through RFQ, and retaining collateral, debt and P&L in the same margin account; ftUSD is a settlement asset. There is no separate perp order book or insurance fund.
 
 **Links:**
 
 - [Protocol Documentation](https://docs.flyingtulip.com/) · [FT Lend docs](https://docs.flyingtulip.com/product-suite/ft-lend/) · [Contract Addresses](https://docs.flyingtulip.com/contract-addresses/) · [Risks page](https://docs.flyingtulip.com/risks/)
-- [App](https://flyingtulip.com/) · [Lend dashboard](https://flyingtulip.com/lend/dashboard/) · [Blog](https://blog.flyingtulip.com/)
+- [App](https://flyingtulip.com/) · [Lend dashboard](https://flyingtulip.com/lend/dashboard/) · [TRS app](https://flyingtulip.com/trs/swap/) · [TRS overview](https://blog.flyingtulip.com/introducing-total-return-swaps-trs-perps-built-differently/) · [Blog](https://blog.flyingtulip.com/)
 - [GitHub org `flyingtulipdotcom`](https://github.com/flyingtulipdotcom) (only `ft`, `escrow`, `supporter-whitelist` are public; the lending/ftUSD repos are private)
 - [DeFiLlama — Flying Tulip](https://defillama.com/protocol/flying-tulip) (slug `flying-tulip`)
 - [Sherlock bug bounty #248](https://audits.sherlock.xyz/bug-bounties/248) · [Sherlock contest #1223 (ftPUT)](https://audits.sherlock.xyz/contests/1223) · [CoinList sale](https://coinlist.co/flying-tulip)
 
 ## Contract Addresses
 
-All addresses verified onchain at block `25675412` (August 3, 2026). Every contract listed is **source-verified on Etherscan**, including each proxy implementation.
+Original addresses were verified onchain at block `25675412` (August 3, 2026); the TRS additions below were verified September 4 through block `25904682`. Core lending contracts and the two new engine implementations are source-verified. The EIP-7702 executor's delegated implementation was not verified on Etherscan or Blockscout at the check and is called out separately.
 
 ### Core Lending Contracts (Ethereum)
 
@@ -41,8 +42,10 @@ All addresses verified onchain at block `25675412` (August 3, 2026). Every contr
 | PositionsManager | [`0xbe4050a73a7Fb384c65E885a15C33461A4B20055`](https://etherscan.io/address/0xbe4050a73a7Fb384c65E885a15C33461A4B20055) | UUPS proxy | [`0xaa3d5fc8…a23b`](https://etherscan.io/address/0xaa3d5fc84b43219391539714be5f0681aefca23b) |
 | ConfigRegistry | [`0xA8777c3D446fa7F0b0FC97a80C1Ea1d37F1ca33E`](https://etherscan.io/address/0xA8777c3D446fa7F0b0FC97a80C1Ea1d37F1ca33E) | UUPS proxy | [`0xd25f964e…47e5`](https://etherscan.io/address/0xd25f964ead7bfbf07858b5bfede58f11a5a947e5) |
 | PMWrapper (PM admin) | [`0xBDD80028c9e4b9A2D268D2cF62Fb54Ec8697C68B`](https://etherscan.io/address/0xBDD80028c9e4b9A2D268D2cF62Fb54Ec8697C68B) | admin wrapper | — |
-| RfqEngine (**sole liquidation module**) | [`0xEB00B335Ca52216Fb60fdFFA361397367C39Dc32`](https://etherscan.io/address/0xEB00B335Ca52216Fb60fdFFA361397367C39Dc32) | engine | — |
-| LeverageRfqEngine | [`0x8263a07504d93cB95e0a74f3627bb15faaf140e2`](https://etherscan.io/address/0x8263a07504d93cB95e0a74f3627bb15faaf140e2) | engine | — |
+| RfqEngine (legacy liquidation module) | [`0xEB00B335Ca52216Fb60fdFFA361397367C39Dc32`](https://etherscan.io/address/0xEB00B335Ca52216Fb60fdFFA361397367C39Dc32) | engine + liquidation module | — |
+| LeverageRfqEngine (legacy / ftUSD hedge) | [`0x8263a07504d93cB95e0a74f3627bb15faaf140e2`](https://etherscan.io/address/0x8263a07504d93cB95e0a74f3627bb15faaf140e2) | engine | — |
+| **RfqEngine v2 (Trade / liquidation)** | [`0xc64516d58f8b83bc256448bc69d7bf2361557fdb`](https://etherscan.io/address/0xc64516d58f8b83bc256448bc69d7bf2361557fdb) | ERC-1967 proxy; engine + liquidation module | [`0xD5b3B315…4bB4`](https://etherscan.io/address/0xD5b3B315635A8c3c56b8284b6927573b2F554bB4) |
+| **LeverageRfqEngine v2 (TRS)** | [`0x93496075909f56d93b33302DF5D1655568Eb6e70`](https://etherscan.io/address/0x93496075909f56d93b33302DF5D1655568Eb6e70) | UUPS proxy; engine | [`0x6595C190…8734`](https://etherscan.io/address/0x6595C1907df6cC7ae81a80C5DcaaB43FD9068734) |
 | MetaActions | [`0x3633eb60d08756674472e2d34d6ffb5f4c1c29f2`](https://etherscan.io/address/0x3633eb60d08756674472e2d34d6ffb5f4c1c29f2) | engine + meta-module | — |
 | MetaSessionActions | [`0x4f83ac5c8a79986d0916a8849730d9cef63a3497`](https://etherscan.io/address/0x4f83ac5c8a79986d0916a8849730d9cef63a3497) | engine + meta-module | — |
 | RelayerAuth | [`0x823a97a2c32985e0f5457fc8103F36698D1F53F4`](https://etherscan.io/address/0x823a97a2c32985e0f5457fc8103F36698D1F53F4) | session layer | — |
@@ -51,6 +54,16 @@ All addresses verified onchain at block `25675412` (August 3, 2026). Every contr
 | Stable IRM | [`0x3253739A68640E308c8209384bb44E4ADA38710d`](https://etherscan.io/address/0x3253739A68640E308c8209384bb44E4ADA38710d) | `pure` rate model | — |
 | Major IRM | [`0x07eC8583B1bC7D97646409a2b51DdBed6725D12F`](https://etherscan.io/address/0x07eC8583B1bC7D97646409a2b51DdBed6725D12F) | `pure` rate model | — |
 | LongTail IRM | [`0x09cd852f47aCa224eE6B4AccC29BD2694F29Ef69`](https://etherscan.io/address/0x09cd852f47aCa224eE6B4AccC29BD2694F29Ef69) | `pure` rate model | — |
+
+### Live TRS Execution Contracts (Ethereum)
+
+| Contract | Address | Role |
+|---|---|---|
+| SessionManager v2 | [`0x880A371CE2C5Dbb2EB47EC0023b358e8aE80071b`](https://etherscan.io/address/0x880A371CE2C5Dbb2EB47EC0023b358e8aE80071b) | Delegated session authorization used by the live TRS frontend |
+| LeverageRfqBatchModule | [`0x91Ecc9c9E9B32fe198a3e2c7F2FCB27C0A57Bf24`](https://etherscan.io/address/0x91Ecc9c9E9B32fe198a3e2c7F2FCB27C0A57Bf24) | Batch-matches leverage orders; delegate-called by the TRS engine |
+| Permissioned executor | [`0xa505815A526f1200c17B7ffaE0067318d734b9d8`](https://etherscan.io/address/0xa505815A526f1200c17B7ffaE0067318d734b9d8) | Authorized RFQ filler; EIP-7702 delegates to [`0x4428809A…a5c`](https://etherscan.io/address/0x4428809A80082E826FA336521258973Da1251a5c), whose source was not verified at the check |
+
+The live [TRS API](https://api.flyingtulip.com/trs/) identifies the v2 engine, session manager and executor above. Onchain, `LeverageRfqEngine.permissionedFillers(executor)` is `true`, the Admin Safe is also an authorized filler, and both new engines were registered on `PositionsManager` in block `25812534` (August 22, 2026). This is a material post-snapshot privilege change, not merely a frontend release.
 
 ### ftUSD Contracts (summary — see the dedicated report)
 
@@ -276,11 +289,11 @@ Settlement history by asset (latest settled epoch, read from `astate` and `epoch
 
 Three structural observations:
 
-- **Not keeper-protected — module-gated and mostly permissionless.** `PositionsManager.liquidateFlash` is callable only by the registered module (`RfqEngine`), but `RfqEngine.rfqFill` / `rfqFillFlash` themselves have **no general liquidator whitelist**. Anyone can liquidate a normal underwater account. The only exception is `privilegedAccounts`: those may be liquidated only by `permissionedLiquidators`. Today the sole privileged account is the ftUSD strategy [`0xe0E445…1A59`](https://etherscan.io/address/0xe0E445967256EE60111e243e0F0F94DD1D351A59), and **zero** permissioned liquidators are set — so that account is currently unliquidatable via this path. No `rfqFill*` / `liquidateFlash` execution has occurred yet.
+- **Two RFQ liquidation modules now exist.** The legacy module remains mostly permissionless for normal underwater accounts; its sole privileged account, the ftUSD strategy [`0xe0E445…1A59`](https://etherscan.io/address/0xe0E445967256EE60111e243e0F0F94DD1D351A59), has no permissioned liquidator there. The v2 module [`0xc645…7fdb`](https://etherscan.io/address/0xc64516d58f8b83bc256448bc69d7bf2361557fdb) was authorized on August 22, also marks that strategy privileged, and authorizes the Admin Safe as both ordinary and privileged liquidator. The strategy is therefore no longer unliquidatable across all available paths, but its v2 liquidation availability depends on the same Safe that governs it.
 - **No liq bonus or close factor in `PositionsManager`.** Seize/repay sizing lives in `RfqEngine` (onchain module, not the core ledger). Core only requires HF ≥1.25 after — bounds under-liquidation, not how much collateral value the borrower loses per unit of debt repaid.
 - **The insolvency exception is an explicit bad-debt path.** It permits a position to end with all collateral seized and debt outstanding. The debt remains technically repayable, but without collateral there is no liquidator incentive or funded backstop; unless the borrower or protocol supplies the missing asset, the economic shortfall falls on suppliers against reserves of essentially zero.
 
-Because the liquidation module is swappable by the admin (`setLiquidationModule`), the economics of liquidation are a governance parameter, not a code invariant. To date the module has never been changed since deployment.
+Because liquidation modules are admin-authorized through `setLiquidationModule`, liquidation access and economics are governance parameters, not code invariants. The allowed set expanded post-launch from one module to two. Both currently expose a 7.5% maximum bonus and 10% protocol share of that bonus, but either implementation or authorization can change without a timelock.
 
 ### Reflexive supply: ftUSD backing lent into FT Lend
 
@@ -310,7 +323,7 @@ Full derivation of the backing chain, the collateral reconciliation, the strateg
 | Supply to FT Lend | permissionless | yes, same tx | none | per-asset `supplyCap` |
 | Withdraw from FT Lend | permissionless | yes, if wrapper liquidity available | none | `withdrawPaused`, CircuitBreaker, available liquidity |
 | Borrow | permissionless, over-collateralized | yes | interest per IRM | `borrowCap`, `mmBps`, HF ≥ 1.25, $250 min equity |
-| Liquidate | **module-gated** (`RfqEngine.rfqFill`/`rfqFillFlash`); callers permissionless except for `privilegedAccounts` | yes | module-defined (`liqBonusBps` etc. on `RfqEngine`) | HF < 1.25 |
+| Liquidate | **module-gated** through either authorized `RfqEngine`; legacy callers permissionless except for `privilegedAccounts`, v2 has permissioned liquidator roles | yes | module-defined (`liqBonusBps` etc.) | HF < 1.25 |
 
 There are **no withdrawal queues, cooldowns, or lockups** on the lending path in normal operation — a genuine strength, and a real difference from the staked-ftUSD product, which is rate-limited. All gating here is either liquidity-based or admin-flippable.
 
@@ -326,8 +339,8 @@ The relevant mint authority is ftUSD's, because ftUSD is 11.4% of this market's 
 
 - **Backing.** Borrowing is over-collateralized and enforced onchain via per-asset maintenance margins (`ConfigRegistry.assetCfg`) and account health (Hf - health factor): `marginHfSafeBps = 15000` (1.50), `marginHfTargetBps = 12500` (1.25), `marginMinEquityUSDWad = 250e18` ($250 minimum position equity).
 - **Collateral quality.** Blue-chip (WETH, WBTC, wstETH, USDC, USDT) plus ftUSD. The blue-chip leg is genuinely high quality; ftUSD (11.4% of TVL) carries the reflexivity above.
-- **Maintenance margins are thin on stables.** `mmBps = 150` implies a 1.5% maintenance floor — ~66× theoretical leverage before the dynamic-LTV haircut. The protocol states effective LTV is reduced from this floor by AMM depth and volatility and snapshotted at position open, but that reduction is computed off the Spot AMM/CLOB and is **not independently verifiable onchain**. The floor is what the contract enforces.
-- **Liquidations.** Onchain, module-gated through `RfqEngine` [`0xEB00B335…Dc32`](https://etherscan.io/address/0xEB00B335Ca52216Fb60fdFFA361397367C39Dc32) (`rfqFill` / `rfqFillFlash` → `liquidateFlash`; set at deployment, never changed). **Not keeper-whitelisted** — any address may call those entrypoints for normal accounts; only `privilegedAccounts` require `permissionedLiquidators`. Time-sliced / RFQ-routed by design, novel and untested at scale. Per the team's own accepted-risk list there is **no protocol-level loss backstop / insurance fund** for bad debt.
+- **Maintenance margins are thin on stables.** `mmBps = 150` implies a 1.5% maintenance floor. The documented AMM-depth/volatility dynamic-LTV haircut is not implemented in the deployed `ConfigRegistry` or `PositionsManager`; the admin-set constant and account-health target are what the contracts enforce. TRS therefore adds live leveraged use without adding the documented dynamic risk input.
+- **Liquidations.** Onchain, module-gated through the legacy `RfqEngine` [`0xEB00B335…Dc32`](https://etherscan.io/address/0xEB00B335Ca52216Fb60fdFFA361397367C39Dc32) and v2 [`0xc64516d5…7fdb`](https://etherscan.io/address/0xc64516d58f8b83bc256448bc69d7bf2361557fdb), added August 22. Both are RFQ-routed, module-defined and untested at scale. The v2 path introduces permissioned liquidator roles and makes the Admin Safe the privileged liquidator for the ftUSD strategy. Per the team's own accepted-risk list there is **no protocol-level loss backstop / insurance fund** for bad debt.
 - **Reserves are negligible.** `astate.reserves` across all assets: 7.72 USDC, 13.16 USDT, 0.0000257 WETH, 303.01 ftUSD, 0 WBTC. There is effectively no protocol-side buffer to absorb a shortfall.
 - **Curation.** The 3/5 Safe sets every risk parameter — which assets are enabled/collateral/borrowable, maintenance margins, supply/borrow caps, IRMs, and the oracle.
 
@@ -422,18 +435,24 @@ With **no delay**, the 3/5 Safe can: upgrade any contract to arbitrary code, cha
 
 ### Privileged engines and modules
 
-Four contracts are whitelisted on the `PositionsManager` and can move user balances via `engineDebitAllowanceOf` / `engineHeld`. All were set in the **deployment block `24974967`** and none has changed since — a genuine positive (no post-launch privilege drift):
+Six contracts are now whitelisted on the `PositionsManager` and can move user balances subject to user/session approvals through `engineDebitAllowanceOf` / `engineHeld`. The original four were set in deployment block `24974967`; the v2 Trade and TRS engines were added in block `25812534` on August 22. The earlier conclusion that engine privileges had not changed since launch is therefore no longer true:
 
 | Contract | Address | Engine | MetaModule | Liquidation module |
 |---|---|:---:|:---:|:---:|
-| `RfqEngine` | [`0xEB00B335…Dc32`](https://etherscan.io/address/0xEB00B335Ca52216Fb60fdFFA361397367C39Dc32) | ✓ | — | **✓ (sole)** |
-| `LeverageRfqEngine` | [`0x8263a075…40e2`](https://etherscan.io/address/0x8263a07504d93cB95e0a74f3627bb15faaf140e2) | ✓ | — | — |
+| `RfqEngine` (legacy) | [`0xEB00B335…Dc32`](https://etherscan.io/address/0xEB00B335Ca52216Fb60fdFFA361397367C39Dc32) | ✓ | — | ✓ |
+| `LeverageRfqEngine` (legacy) | [`0x8263a075…40e2`](https://etherscan.io/address/0x8263a07504d93cB95e0a74f3627bb15faaf140e2) | ✓ | — | — |
 | `MetaActions` | [`0x3633eb60…29f2`](https://etherscan.io/address/0x3633eb60d08756674472e2d34d6ffb5f4c1c29f2) | ✓ | ✓ | — |
 | `MetaSessionActions` | [`0x4f83ac5c…3497`](https://etherscan.io/address/0x4f83ac5c8a79986d0916a8849730d9cef63a3497) | ✓ | ✓ | — |
+| `RfqEngine` v2 | [`0xc64516d5…7fdb`](https://etherscan.io/address/0xc64516d58f8b83bc256448bc69d7bf2361557fdb) | ✓ | — | ✓ |
+| `LeverageRfqEngine` v2 | [`0x93496075…6e70`](https://etherscan.io/address/0x93496075909f56d93b33302DF5D1655568Eb6e70) | ✓ | — | — |
+
+The v2 leverage engine handles OPEN, CLOSE and collateral-SWAP orders. Its verified implementation requires a user or session signature, consumes borrow/engine allowances, enforces the signed minimum buy amount and checks the account health factor after execution. It also restricts fills to admin-selected `permissionedFillers`; currently the Admin Safe and the EIP-7702 executor are authorized. That is not direct custody of every lender balance, but it centralizes order availability and execution routing and adds a new way leveraged activity can create debt requiring liquidation.
+
+**Execution timing is bounded by expiry, not guaranteed settlement.** The current frontend signs TRS orders with `validTo = now + 3,600 seconds`. The engine rejects a fill only once `block.timestamp > validTo` and defines no relative minimum or maximum lifetime, so an admin/frontend revision could choose another deadline. A quote can fill in seconds and settles atomically in the fill transaction; an unmatched order may remain pending until cancelled or expiry. There is no protocol guarantee that an RFQ receives a bid within the one-hour window.
 
 ### Programmability
 
-Lending accounting (supply/borrow indices, health factors) is onchain and the oracle is Chainlink-anchored — good. The offchain/operator surface is nonetheless substantial: an RFQ/relayer/session layer (`RelayerAuth` [`0x823a97a2…53F4`](https://etherscan.io/address/0x823a97a2c32985e0f5457fc8103F36698D1F53F4), `SessionManager` [`0xF9f3ddF2…60f8`](https://etherscan.io/address/0xF9f3ddF2E96Cabef94e2634c326DC6dde99360f8), `MetaActions`/`MetaSessionActions`), a module-gated but mostly permissionless RFQ liquidation path, admin-settable oracle prices, epoch settlement by a privileged collector, and — uniquely here — a **discretionary strategy contract that decides where ftUSD's backing sits**.
+Lending accounting (supply/borrow indices, health factors) is onchain and the oracle is Chainlink-anchored — good. The offchain/operator surface is nonetheless substantial: the legacy RFQ/relayer/session layer, the new TRS `SessionManager`, permissioned fillers, the EIP-7702 executor, external quote/routing services, RFQ liquidation, admin-settable oracle prices, epoch settlement by a privileged collector, and — uniquely here — a **discretionary strategy contract that decides where ftUSD's backing sits**. TRS execution is signed and health-checked onchain, but order discovery, route construction and timely fills remain operational dependencies.
 
 ### External Dependencies
 
@@ -441,16 +460,18 @@ Lending accounting (supply/borrow indices, health factors) is onchain and the or
 - **Chainlink** — **low counterparty risk**. Canonical feeds price solvency for USDC/USDT/ETH; WBTC/wstETH use Chainlink bases plus Aave's audited peg/cap adapters (immutable). Ordinary residual: single feed per asset, no fallback oracle. The high-impact price risk in this system is the admin `setLastGoodPrice` override, scored under Governance — not Chainlink itself.
 - **Aave price adapters** — `CLSynchronicityPriceAdapterPegToBase` (WBTC) and `WstETHPriceCapAdapter` (wstETH) sit in the pricing path for 39.5% of TVL; sound, audited construction.
 - **FT Lend itself (reflexive)** — ftUSD's backing (~$4.38M) is supplied into this market by the Delta-Neutral strategy, and ftUSD is also accepted as collateral here, so the stablecoin and the money market cannot fail independently. See [Reflexive supply](#reflexive-supply-ftusd-backing-lent-into-ft-lend). This is the unusual dependency — not Spark/Aave/Chainlink.
-- **The Spot AMM / CLOB — verified absent from the deployed contracts.** The docs describe dynamic LTV "snapshotted from AMM depth and volatility," and earlier revisions of this report carried that as an unverified critical dependency. It is not wired in. `ConfigRegistry`'s entire risk surface is `assetCfg` (IRM, `mmBps`, enabled/borrowable/collateral flags, wrapper), the three margin thresholds and the oracle pointer — **no depth input, no volatility input, no LTV machinery**. The `PositionsManager` contains no AMM or order-book reference beyond a comment on the `engines` mapping (`// PositionsManager, RFQ, ftLP, OrderBook, AMM, etc`), and all four registered engines are RFQ/meta-action contracts. The `RfqEngine`'s only "Uniswap" string is an MIT licence header on a copied math library. *Caveat: the lending repos are private, so this is established from deployed ABIs, source and event logs, not from the team's source of truth.*
+- **TRS / Trade execution — now wired into FT Lend.** The new `RfqEngine` and `LeverageRfqEngine` are registered directly on the assessed `PositionsManager`; the former is also an approved liquidation module. TRS therefore reuses lender-funded borrowing and account-level margin rather than operating as an isolated perp venue. It can increase utilization and the volume of accounts that must be liquidated, while successful liquidations still depend on executable RFQ bids.
+- **External execution venues.** The live configuration exposes KyberSwap, Velora and 0x routes, plus internal self-fill and ftUSD `MintAndRedeem` adapters. A route failure, API outage or loss of permissioned-filler availability can prevent a trade or delay a close; it does not by itself transfer lender assets. The signed minimum output and post-fill health check are the onchain protections. `pricingFailureMode = fail_open` in the frontend session configuration warrants monitoring because route/pricing-service failure handling is partly offchain.
+- **Dynamic LTV remains absent.** Although Trade/TRS now sources execution from spot liquidity, the deployed `ConfigRegistry` and `PositionsManager` still have no AMM-depth, order-book-depth or volatility input. `mmBps` and the account health thresholds remain admin-set constants. The existence of the new execution engines must not be confused with implementation of the documented dynamic-LTV model.
 - **Lido / wstETH** — a live component of the Delta-Neutral strategy's hedge at the August 6 snapshot (76.54 wstETH financed by 95.01 WETH debt).
-- **Curve** — a StableSwap-NG [ftUSD/USDC pool](https://etherscan.io/address/0xafec61e7a604f8f81f7cab64ec75bfa07c542630) is the **only secondary-market** exit and external ftUSD price reference. Primary exit is protocol redemption. After the former dominant EOA exited on August 28, pool liquidity fell by more than 85% to ~$249K. Current gauge custody is 87.1% through the Convex voter proxy, 7.1% through an EOA, and 5.6% through `CurveYCRVVoter`; Convex aggregation does not establish beneficial ownership. Full analysis in the [ftUSD report](./flying-tulip-ftusd.md).
+- **Curve** — a StableSwap-NG [ftUSD/USDC pool](https://etherscan.io/address/0xafec61e7a604f8f81f7cab64ec75bfa07c542630) is the independently executable secondary market and external ftUSD price reference. Primary exit is protocol redemption. TRS also exposes ftUSD swap routes, but those are conditional RFQ/adapter routes and are not counted as independent liquidity without a funded executable quote. After the former dominant EOA exited on August 28, pool liquidity fell by more than 85% to ~$249K. Current gauge custody is 87.1% through the Convex voter proxy, 7.1% through an EOA, and 5.6% through `CurveYCRVVoter`; Convex aggregation does not establish beneficial ownership. Full analysis in the [ftUSD report](./flying-tulip-ftusd.md).
 
 ## Operational Risk
 
 - **Team:** Founder **Andre Cronje** (public; founded Yearn, Keep3r, co-founded Sonic/Fantom) strong founder, but mixed reputation on other projects.
 - **Legal entity / jurisdiction:** **NOT FOUND** / undisclosed (docs reference a "Foundation" with no domicile). CoinList sale excluded the US, Canada and ~21 other jurisdictions.
 - **Funding:** ~$200M seed (Sep 2025, $1B FDV), ~$25.5M Series A (Jan 2026), public sale; the official sale-update blog reports total raised ≈ **$184M** (below the "$200M seed" headline — a reconciliation gap). FT token (Aug 3, 2026): max supply 10B, mainnet `totalSupply()` **1,197,190,528**, circulating ~547M, price ~**$0.0994**, **market cap ~$54.5M**, FDV ~$119M ([CoinGecko](https://www.coingecko.com/en/coins/flying-tulip)). FT is an OFT, so mainnet supply is not the cross-chain total.
-- **Documentation vs. reality gap.** Beyond the usual omissions (oracle design, risk parameters, multisig setup), the public material does not clearly disclose that **ftUSD's backing is lent into FT Lend**. The hedge was inactive at the June snapshot and active by August 6, showing that strategy state can change materially between reviews. The docs' own transparency principle commits to publishing audit reports, which has not happened.
+- **Documentation vs. reality gap.** Beyond the usual omissions (oracle design, risk parameters, multisig setup), the public material does not clearly disclose that **ftUSD's backing is lent into FT Lend**. The hedge was inactive at the June snapshot and active by August 6, showing that strategy state can change materially between reviews. TRS's public launch article explains the high-level Lend/Trade/ftUSD relationship, but operational parameters such as the permissioned executor, route set and order lifetime are exposed through the live app/API and contracts rather than durable documentation. The docs' own transparency principle commits to publishing audit reports, which has not happened.
 - **Incident response:** the docs claim "continuous monitoring and formal incident runbooks" and list "incident post-mortems" as a published artefact. **No runbook, no post-mortem, and no security contact are public**, and there have been no incidents to test the claim. Onchain emergency capability genuinely exists and is broad — per-asset pause, the `CircuitBreaker`, guardian `disablePrice`, ftUSD `pause` and `blacklist`. The live Sherlock bounty provides a public reporting channel covering deployed Flying Tulip production contracts through the dynamic contract list incorporated by its Additional Scope; Safe Harbor enrolment remains absent.
 - **Other deployments:** Flying Tulip also runs on **Sonic**, which DeFiLlama puts at **$0.52M — 3.8%** of protocol TVL against Ethereum's $12.99M ([API](https://api.llama.fi/protocol/flying-tulip)). It is a separate deployment: none of the contracts assessed here exists on Sonic, so **nothing in this report transfers to it**, and no Ethereum position is exposed to it. Deliberately out of scope rather than pending — a Sonic allocation would need its own assessment, and at 3.8% of a $13M protocol that is not currently worth the effort.
 - **Governance transparency:** no DAO, no forum/Snapshot, multisig signer identities undisclosed.
@@ -477,6 +498,9 @@ Recommended frequency: **hourly** for pause/circuit-breaker, oracle overrides, a
 | MintAndRedeem | [`0xAa48EcBC…D23C`](https://etherscan.io/address/0xAa48EcBC843cF7E9A29155D112b8Cb27902bD23C) | `addCollateral`, `setCollateralCapFtUSD`, fee changes, `sweepExcess`, `recoverERC20` |
 | **Delta-Neutral strategy** | [`0xe0E44596…1A59`](https://etherscan.io/address/0xe0E445967256EE60111e243e0F0F94DD1D351A59) | **Reflexivity ratio** — its FT Lend position as % of TVL; any move of ftUSD backing to a new venue |
 | FT Lend yield wrappers ×7 | see Funds Management table | `setStrategy`/`confirmStrategy` (no delay!), `setCircuitBreaker`, `execute`, available liquidity |
+| **TRS LeverageRfqEngine v2** | [`0x93496075…6e70`](https://etherscan.io/address/0x93496075909f56d93b33302DF5D1655568Eb6e70) | `Upgraded`, `AdminTransferred`, `PermissionedFillerUpdated`, session/batch-module changes, orders and fills |
+| **RfqEngine v2** | [`0xc64516d5…7fdb`](https://etherscan.io/address/0xc64516d58f8b83bc256448bc69d7bf2361557fdb) | Upgrades, RFQ liquidations and fee-parameter changes; now an engine and liquidation module |
+| TRS SessionManager / executor | [`0x880A371C…071b`](https://etherscan.io/address/0x880A371CE2C5Dbb2EB47EC0023b358e8aE80071b) / [`0xa505815A…b9d8`](https://etherscan.io/address/0xa505815A526f1200c17B7ffaE0067318d734b9d8) | Session creation/revocation/expiry; executor delegation code, availability and route outcomes |
 
 ### Governance monitoring — immediate alert, no timelock means zero warning
 
@@ -487,7 +511,7 @@ Recommended frequency: **hourly** for pause/circuit-breaker, oracle overrides, a
 | `AddedOwner` / `RemovedOwner` / `ChangedThreshold` | all three Safes | Signer-set change on the root of trust |
 | `MinterConfigured` / `MinterRemoved` / `MasterMinterChanged` | ftUSD | Privileged mint-authority change; verify that the resulting path enforces collateral |
 | module enablement | ftUSD Core | Verify immediately whether the new module independently enforces collateral before minting |
-| `EngineSet` / `MetaModuleSet` / `LiquidationModuleSet` | PositionsManager | Changes who can move user balances or set liquidation economics. **None has fired since the deploy block — any occurrence is novel** |
+| `EngineSet` / `MetaModuleSet` / `LiquidationModuleSet` | PositionsManager | Changes who can move approved user balances or set liquidation economics. Two engines and one liquidation-module authorization were added in block `25812534`; alert on every further occurrence |
 
 ### Oracle monitoring
 
@@ -508,8 +532,17 @@ Recommended frequency: **hourly** for pause/circuit-breaker, oracle overrides, a
 
 - Poll each funded wrapper's `deployed()` and `capital()`. They are currently equal — alert if Spark or Aave utilization exceeds 95% while that holds, which is the precise condition under which lender exits begin to fail.
 - Poll `astate(asset).cash` per asset as the true instantaneous exit capacity.
+- Attribute new borrowing and utilization to TRS where events permit. A sharp rise in TRS open interest can consume the same cash needed by ordinary FT Lend withdrawals; a TRS swap screen is not a substitute exit for a lender's internal supply balance.
 - Alert on `setWithdrawPaused`, `setDepositPaused`, `setBorrowPaused`, any CircuitBreaker trip, `setCircuitBreaker` (especially to `address(0)`), and any flip of `marginRestrictWithdrawToSettlement` or `marginWithdrawRequiresNoDebt` to `true`.
 - Alert on `setStrategy` / `confirmStrategy` on any wrapper — `strategyDelayConfig` is `0`, so these can land in the same block with no warning.
+
+### TRS / RFQ execution monitoring
+
+- Alert immediately on `PermissionedFillerUpdated`, `AdminTransferred`, `SessionManagerSet`, batch-module changes, or `Upgraded` on the v2 leverage engine. Re-read executor bytecode after any EIP-7702 delegation change.
+- Track `OrderBroadcast`, `PendingOrderOpened`, `OrderCancelled`, `OrderFill`, and `LeverageFillSettled`. Measure quote-to-fill latency, expired/unfilled share, partial fills, and realised output versus the signed minimum and contemporaneous external spot price.
+- Poll the live configuration for engine, session-manager, executor, aggregator-code, `minBuyAmountBps` and `pricingFailureMode` changes. At the September 4 check the defaults were 8,000 bps and `fail_open`; these are frontend/session guardrails, not immutable engine constants.
+- Track fill routes separately: KyberSwap, Velora, 0x, internal self-fill, `mintredeem`, and composite ftUSD routes. Alert if retired/test/unknown codes execute in production, if one venue dominates, or if an external route fails repeatedly.
+- Monitor TRS accounts' health and liquidations alongside ordinary borrowers. Alert if v2 `RfqEngine` liquidations fail to restore target health, if collateral seizure/repayment diverges from previews, or if bad debt/reserves move after a TRS liquidation.
 
 ### Position and solvency monitoring
 
@@ -527,6 +560,7 @@ Recommended frequency: **hourly** for pause/circuit-breaker, oracle overrides, a
 - **Concentration:** track [`0xef6953…ae0d`](https://etherscan.io/address/0xef6953954e9c753da43da41136d41a754cd5ae0d) (38% of supply, 73% of debt), [`0x666130…701c`](https://etherscan.io/address/0x66613091b75e54954f77746e160c98391f99701c), [`0x0d5dc6…4e83`](https://etherscan.io/address/0x0d5dc686d0a2abbfdafdfb4d0533e886517d4e83) via `getBalance`; alert on any withdrawal >25% of a position.
 - **Exit capacity:** alert if wrapper `deployed()` remains equal to `capital()` while Spark or Aave utilization exceeds 95% — that is the condition under which exits fail.
 - **Solvency:** monitor liquidations and `astate.reserves` (currently negligible); alert on any bad-debt socialization event.
+- **TRS execution:** alert on any permissioned-filler or executor-delegation change, >10% expired/unfilled orders over 24h, repeated quote failures, or realised output materially below contemporaneous external spot after fees.
 
 ## Appendix A: Contract Architecture
 
@@ -548,10 +582,11 @@ TOKEN / STABLE LAYER                                   PositionsManager (UUPS)
                                     │                   │    ├─ wstETH → CL ETH/USD + Aave cap adapter
                                     │                   │    └─ ftUSD → MintAndRedeem redeem factor ⟲
                                     │                   ├─ IRMs: Stable / Major / LongTail
-                                    │                   ├─ engines: RfqEngine* / LeverageRfqEngine
-                                    │                   │           MetaActions / MetaSessionActions
-                                    │                   │           (*sole liquidation module)
-                                    │                   ├─ session: RelayerAuth / SessionManager
+                                    │                   ├─ engines: legacy RFQ/leverage + MetaActions
+                                    │                   │           v2 RfqEngine* + TRS LeverageRfqEngine
+                                    │                   │           (*second liquidation module)
+                                    │                   ├─ sessions: legacy + TRS SessionManager
+                                    │                   ├─ TRS permissioned executor (EIP-7702)
                                     │                   └─ CircuitBreaker (owned by Admin Safe)
                                     │                          ▲
    ftUSD-USDC wrapper 0x6aaf…837D ──┤                          │
@@ -565,11 +600,17 @@ LEND SUPPLY ROUTING (third-party lenders)          UNDERLYING YIELD
   USDC / USDT / WETH wrappers ──────────────────►  Spark   (deployed == capital, no buffer)
   WBTC wrapper ─────────────────────────────────►  Aave    (deployed == capital, no buffer)
   ftUSD / wstETH / FT wrappers ─────────────────►  no strategy configured
+
+TRS / TRADE (live post-snapshot)
+  signed OPEN / CLOSE / SWAP ─► permissioned RFQ executor ─► Kyber / Velora / 0x
+                 │                         ├─ internal self-fill
+                 │                         └─ ftUSD mint/redeem + composite routes
+                 └──────────────► same PM balances, borrows, health checks and liquidations
 ```
 
 ## Appendix B: Source-verification check
 
-All contracts in the trust surface were checked via Etherscan `getsourcecode` on August 3, 2026. **Every one is source-verified**, so the "Unverified contract source" critical gate does not trigger.
+The original trust surface was checked via Etherscan `getsourcecode` on August 3, 2026; the new TRS contracts were checked September 4. Core lending contracts, the v2 engine proxies and their implementations, SessionManager and batch module are source-verified. The permissioned executor is an EIP-7702 account delegating to `0x4428809A…a5c`; that delegated implementation was not source-verified on Etherscan or Blockscout at the check. This ancillary execution component does not custody arbitrary lender balances and cannot fill without user/session allowances, so it is treated as an external execution dependency rather than triggering the core-contract gate.
 
 | Contract | Address | Implementation (if proxy) |
 |---|---|---|
@@ -581,6 +622,11 @@ All contracts in the trust surface were checked via Etherscan `getsourcecode` on
 | MultiCollateralDeltaNeutralStakingStrategy | [`0xe0E44596…1A59`](https://etherscan.io/address/0xe0E445967256EE60111e243e0F0F94DD1D351A59) | — |
 | RfqEngine | [`0xEB00B335…Dc32`](https://etherscan.io/address/0xEB00B335Ca52216Fb60fdFFA361397367C39Dc32) | — |
 | LeverageRfqEngine | [`0x8263a075…40e2`](https://etherscan.io/address/0x8263a07504d93cB95e0a74f3627bb15faaf140e2) | — |
+| RfqEngine v2 | [`0xc64516d5…7fdb`](https://etherscan.io/address/0xc64516d58f8b83bc256448bc69d7bf2361557fdb) | [`0xD5b3B315…4bB4`](https://etherscan.io/address/0xD5b3B315635A8c3c56b8284b6927573b2F554bB4) |
+| LeverageRfqEngine v2 | [`0x93496075…6e70`](https://etherscan.io/address/0x93496075909f56d93b33302DF5D1655568Eb6e70) | [`0x6595C190…8734`](https://etherscan.io/address/0x6595C1907df6cC7ae81a80C5DcaaB43FD9068734) |
+| TRS SessionManager | [`0x880A371C…071b`](https://etherscan.io/address/0x880A371CE2C5Dbb2EB47EC0023b358e8aE80071b) | — |
+| LeverageRfqBatchModule | [`0x91Ecc9c9…7Bf24`](https://etherscan.io/address/0x91Ecc9c9E9B32fe198a3e2c7F2FCB27C0A57Bf24) | — |
+| Permissioned executor (EIP-7702) | [`0xa505815A…b9d8`](https://etherscan.io/address/0xa505815A526f1200c17B7ffaE0067318d734b9d8) | delegates to **unverified** [`0x4428809A…a5c`](https://etherscan.io/address/0x4428809A80082E826FA336521258973Da1251a5c) |
 | MetaActions | [`0x3633eb60…29f2`](https://etherscan.io/address/0x3633eb60d08756674472e2d34d6ffb5f4c1c29f2) | — |
 | MetaSessionActions | [`0x4f83ac5c…3497`](https://etherscan.io/address/0x4f83ac5c8a79986d0916a8849730d9cef63a3497) | — |
 | RelayerAuth | [`0x823a97a2…53F4`](https://etherscan.io/address/0x823a97a2c32985e0f5457fc8103F36698D1F53F4) | — |
@@ -603,7 +649,7 @@ All contracts in the trust surface were checked via Etherscan `getsourcecode` on
 - **Accounting is honest and independently verifiable.** Every reserve figure reconciles exactly: supplier balances sum to `astate.totalSupplied` ($12,127,035), debt shares sum to `astate.borrows` ($780,125), and the four-hop ftUSD backing chain reconciles to the wei at a 101.03% collateral ratio. This is better than most protocols at this size.
 - **Genuine onchain over-collateralization with blue-chip collateral** (WETH, WBTC, wstETH, USDC, USDT) and enforced health factors.
 - **Oracle construction is more careful than it first appears** — canonical Chainlink for USDC/USDT/ETH, plus Aave's audited peg and cap adapters for WBTC and wstETH, all wired **immutably** so the owner cannot repoint them.
-- **No privilege drift since launch.** All four engines, both meta-modules and the sole liquidation module were set in the deployment block and have never changed.
+- **TRS fills retain onchain bounds.** Orders require user/session authorization, encode a minimum output and expiry, and finish with account-health enforcement; the executor cannot fill arbitrary unsigned orders.
 - **ftUSD has a genuine external market**, but it is now thin: the Curve pool fell from ~$1.87M to ~$249K after the initial review. It remains a market-based price signal and exit for the ftUSD leg; ftUSD is separately accepted as Morpho collateral.
 - **Conservative caps and a small footprint** limit blast radius today.
 
@@ -615,6 +661,7 @@ All contracts in the trust surface were checked via Etherscan `getsourcecode` on
 - **Audit quality is good but non-public** — the private package was reviewed for this assessment, while firm/date/scope/finding details remain unavailable to public depositors. A live $1M Sherlock bounty covers FT Lend and the other deployed production contracts through the dynamic contract list incorporated by its Additional Scope.
 - **Very new** (engine ~3.2 months) with **no stress history**, an untested novel liquidation engine, and negligible reserves. The current book's blue-chip collateral and 1.25 target health factor reduce expected bad-debt risk, but any residual bad debt would be borne by suppliers.
 - **Reflexive collateral.** A loss event in FT Lend impairs ftUSD's backing, which impairs ftUSD, which is 11.8% of FT Lend's collateral; the backing-blind feed would not register that impairment.
+- **TRS extends the same lending risk surface.** Two new engines were authorized post-launch, RFQ fills are limited to admin-selected fillers, route construction depends on offchain services and external aggregators, and the executor delegates to unverified EIP-7702 implementation code. TRS can increase utilization and liquidation demand without adding a lender backstop.
 
 ### Critical Risks
 
@@ -628,7 +675,7 @@ All contracts in the trust surface were checked via Etherscan `getsourcecode` on
 
 ### Critical Risk Gates
 
-- [ ] **Unverified contract source** — **PASS.** All 20 contracts in the trust surface, including every proxy implementation, are source-verified on Etherscan (Appendix B).
+- [ ] **Unverified contract source** — **PASS for the core custody/accounting system, with a reservation.** Core contracts and both new engine implementations are verified. The permissioned EIP-7702 executor's delegated implementation is not; it is an ancillary, allowance-gated filler rather than the contract holding or accounting for lender funds. See Appendix B.
 - [ ] **No audit** — **PASS, with material reservation.** A structured audit registry demonstrably exists in the investor portal, so "no audit" would be a false statement. However it is access-code gated and **zero audits are independently confirmable** for the assessed contracts. The two publicly confirmable reviews (token-sale `Escrow`; ftPUT via Sherlock) cover neither the lending engine nor ftUSD. Scored down hard in Category 1 rather than gated.
 - [ ] **Unverifiable reserves** — **PASS.** Reserves are fully onchain and were reconciled exactly, twice, including the complete ftUSD backing chain.
 - [ ] **Total centralization (single EOA)** — **PASS, marginally.** Control is a 3/5 multisig, not a lone EOA. But all three Safes share one signer set and there is no timelock, so the practical distance from the gate is small. Reflected as a 5.0 in Category 2A.
@@ -643,13 +690,14 @@ All contracts in the trust surface were checked via Etherscan `getsourcecode` on
 - The privately reviewed audit package provides good in-scope coverage from reputable firms including ChainSecurity, MixBytes, and Cantina; the audit quality itself maps to rubric row 2.
 - The live Sherlock bounty has a maximum reward of 1,000,000 USDC and covers Flying Tulip's deployed production contracts through the dynamic contract list incorporated by the bounty's Additional Scope, including `PositionsManager`, `ConfigRegistry`, the IRMs, and the RFQ engines.
 - The only two publicly confirmable reviews cover the token-sale `Escrow` and the separate ftPUT product — **neither touches `PositionsManager`, `ConfigRegistry`, the IRMs, the RFQ engines, ftUSD, ftUSD Core, or `MintAndRedeem`.**
-- Contract surface is large and novel: dynamic snapshot LTV, RFQ/relayer/session layer, flash liquidation, epoch settlement, cross-product shared collateral, and a discretionary backing strategy. The rubric notes simple surfaces score better than complex ones.
+- Contract surface is large and novel: RFQ/relayer/session authorization, permissioned TRS execution, flash liquidation, epoch settlement, cross-product shared collateral, and a discretionary backing strategy. The rubric notes simple surfaces score better than complex ones.
 - The reports and finding-level details remain non-public, Safe Harbor enrolment was not found, and complexity is high. Those facts prevent a stronger row-1 score but do not justify an extra half-point above rubric row 2.
 
 **Subcategory B: Historical Track Record — 4.0**
 - Time in production: the assessed `PositionsManager` was deployed **April 27, 2026** with first deposit **April 29, 2026** — **3.2 months**. The wider protocol is 5.4 months. Rubric band "3–6 months" = 4.
 - Scale: headline TVL $12.13M would sit in the ">$10M" band (3), but **$4.18M of it is the protocol's own recycled ftUSD collateral**. Genuine third-party TVL is **$8.11M**, which is the "<$10M" band (4).
 - No incidents, exploits, or depegs — but also no stress event of any kind, no drawdown, and no liquidation cascade. The clean record carries little information at this age and size.
+- TRS launched publicly on September 3 and its v2 engines were authorized only on August 22, so this new leverage/execution path has essentially no operating or stress history. It does not reset the age of the underlying PositionsManager, but it weakens confidence in extrapolating the earlier clean record.
 - Both columns land on 4. **4.0.**
 
 **Score: 3.0/5** — (2.0 + 4.0) / 2 = 3.0. Multiple reputable reviews plus the $1M all-production-contract bounty satisfy rubric row 2; the market's limited history remains the riskier half of this category.
@@ -667,14 +715,14 @@ All contracts in the trust surface were checked via Etherscan `getsourcecode` on
 
 **Subcategory B: Programmability — 3.0**
 - Positives: supply/borrow indices, health factors and liquidation eligibility are computed onchain; IRM curves are `pure` functions; the supply index accrues without operator action.
-- Offsetting: admin-settable prices; instant proxy upgrades; four whitelisted engines holding debit allowances over user balances; a module-gated, mostly permissionless, time-sliced RFQ liquidation path (`rfqFill`/`rfqFillFlash`) that still depends on offchain callers sourcing repayment; epoch settlement performed by a privileged collector; and a **discretionary strategy contract that decides where ftUSD's backing is deployed** with no onchain rule constraining it.
+- Offsetting: admin-settable prices; instant proxy upgrades; six whitelisted engines able to consume approved allowances; a permissioned-filler TRS path using sessions and offchain route construction; RFQ liquidation that depends on callers sourcing repayment; epoch settlement by a privileged collector; and a **discretionary strategy contract that decides where ftUSD's backing is deployed** with no onchain rule constraining it. Signed minimum output, expiry and post-fill health checks prevent this from warranting a score increase by themselves.
 
 **Subcategory C: External Dependencies — 2.5**
 - **Spark, Aave, and Chainlink are not high-risk counterparties.** They are mature, heavily audited infrastructure — among the best external deps a money market can pick. Individual counterparty risk is low (~1.5–2.0 band).
 - What elevates this subcategory is **exposure design**, not venue quality: wrappers keep `deployed() == capital()`, so lender exits inherit Spark/Aave cash and pause state with **no idle buffer**. That is concentrated exit-path risk on otherwise sound venues.
 - Chainlink (plus immutable Aave peg/cap adapters for WBTC/wstETH) is sound oracle construction; single-feed residual is ordinary. Arbitrary-price risk sits on the admin router override and is scored under Governance.
 - **The unusual dependency is reflexive FT Lend via ftUSD's backing** — correlated failure of the stablecoin and this market — not Spark/Aave/Chainlink.
-- Spot AMM/CLOB is **not wired** into the deployed contracts (no score credit or debit).
+- TRS/Trade is now wired directly into the PositionsManager. Its external routing through KyberSwap, Velora and 0x adds availability and execution dependencies, but users retain signed minimum-output protection and failed quotes do not directly impair lender custody. The primary unusual dependency remains the reflexive ftUSD backing position.
 
 **Score: 3.50/5** — (5.0 + 3.0 + 2.5) / 3 = 3.50. Governance remains the ceiling; external deps no longer treat blue-chip venues as if they were risky protocols.
 
@@ -707,6 +755,7 @@ Framed for an **FT Lend supplier**. Exit is protocol `withdraw` against availabl
 - **Underlying venue is a second utilization gate.** Wrappers keep `deployed() == capital()` into Spark (USDC/USDT/WETH) and Aave (WBTC), so even low FT Lend utilization still requires those venues to have withdrawable cash / not be paused. That is dependency risk expressed as liquidity, not a separate market-depth story.
 - **Concentration can force utilization.** Three third-party addresses hold 96.1% of third-party TVL; a large simultaneous withdrawal (or the Delta-Neutral strategy unwinding its 35.1%) is the realistic path to an unavailable-cash state on a thin book ($4.79M WBTC / $3.14M USDC largest pools).
 - **No stress history** — exit under high utilization has not been observed.
+- **TRS is an additional utilization driver, not a new lender exit.** Leveraged openings borrow from the same cash pool and can reduce immediate withdrawal capacity; the TRS swap interface cannot redeem a lender's internal supply balance.
 
 **Score: 2.0/5** — The money-market withdrawal path is permissionless and same-block at current low utilization. It is not scored lower because Spark/Aave sit under every funded wrapper with no idle buffer, and supplier concentration makes a utilization spike plausible. Admin-triggered withdrawal pauses are captured under centralization rather than treated as an active liquidity throttle. Curve depth is out of scope for this lender score.
 
@@ -714,7 +763,7 @@ Framed for an **FT Lend supplier**. Exit is protocol `withdraw` against availabl
 
 - **Team:** founder is public and well known (Andre Cronje — Yearn, Keep3r, Sonic/Fantom), which is a genuine positive. His track record is mixed, with a documented history of abandoned or incomplete launches. The remaining ~15 team members are anonymous.
 - **Legal:** **no disclosed legal entity or jurisdiction** — docs reference a "Foundation" with no domicile.
-- **Documentation:** conceptually reasonable, but omits oracle design, risk parameters and the multisig setup. The docs do not clearly disclose that ftUSD's backing is lent into FT Lend. The strategy's hedge was inactive at the June snapshot and active by August 6. The docs' own transparency principle promises published audit reports that do not exist.
+- **Documentation:** conceptually reasonable, but omits oracle design, risk parameters and the multisig setup. The docs do not clearly disclose that ftUSD's backing is lent into FT Lend. The TRS launch article explains the product architecture, while permissioned-filler, executor and route details must be reconstructed from the live API and contracts. The strategy's hedge was inactive at the June snapshot and active by August 6. The docs' own transparency principle promises published audit reports that do not exist.
 - **Governance transparency:** no DAO, no forum, no Snapshot, signers undisclosed.
 - **Incident response:** docs reference "formal incident runbooks"; none is public. Emergency capability exists onchain (pause, circuit breaker, `disablePrice`) and has never been exercised.
 
@@ -749,14 +798,15 @@ Framed for an **FT Lend supplier**. Exit is protocol `withdraw` against availabl
 
 The composite is 3.0, in the Medium band. The determining factors are:
 
-- **Governance is the dominant term** (Category 2A at 5.0, carrying 10% of the total weight on its own). A 3/5 Safe with no timelock holds upgrade authority over every contract, arbitrary oracle-price authority, and a privileged path to authorize an ftUSD issuance module that need not enforce collateral. The current production mint path is collateralized and no evidence of privileged unbacked issuance was found, but no invariant survives an adverse governance action. Three Safes with one signer set provide no meaningful separation.
+- **Governance is the dominant term** (Category 2A at 5.0, carrying 10% of the total weight on its own). A 3/5 Safe with no timelock holds upgrade authority over every core protocol contract, arbitrary oracle-price authority, and a privileged path to authorize an ftUSD issuance module that need not enforce collateral. The current production mint path is collateralized and no evidence of privileged unbacked issuance was found, but no core invariant survives an adverse governance action. Three Safes with one signer set provide no meaningful separation.
 - **Reflexive collateral.** 35.1% of TVL is the protocol's own ftUSD backing; ftUSD is 11.4% of this market's collateral; and ftUSD's price feed is blind to that backing, so an impairment would not surface in liquidation pricing. FT Lend and ftUSD cannot fail independently.
 - **Concentration.** Three third-party addresses are 96.1% of third-party TVL; one EOA is 38% of supply and 73% of debt.
 - **Lender exit is utilization-bound**, with a second gate at Spark/Aave because wrappers hold zero idle buffer. Liquidity score is not driven by Curve — that venue is for ftUSD holders, not FT Lend suppliers.
 - **Audit evidence is not publicly inspectable** for any in-scope contract. A live $1M Sherlock bounty covers deployed production contracts, but there is no Safe Harbor enrolment.
 - **Negligible loss reserves** and a novel, untested liquidation engine; blue-chip collateral and the 1.25 target health factor mitigate expected bad-debt risk but do not absorb residual losses.
+- **TRS is not isolated from Lend.** It borrows from the same pools and relies on permissioned RFQ execution and the same account-level liquidation system. The new surface is monitored, but does not change the score because signed output bounds and post-fill health checks constrain individual fills and current lender liquidity remains ample.
 
-Offsetting these, and the reason this is not High Risk: the accounting is honest and fully reconcilable onchain, the collateral is genuinely blue-chip and over-collateralized, the oracle construction uses canonical Chainlink plus audited Aave adapters wired immutably, privileges have not drifted since deployment, every contract is source-verified, and current utilization leaves ample cash for same-block lender exits.
+Offsetting these, and the reason this is not High Risk: the accounting is honest and fully reconcilable onchain, the collateral is genuinely blue-chip and over-collateralized, the oracle construction uses canonical Chainlink plus audited Aave adapters wired immutably, core custody/accounting contracts and engine implementations are source-verified, and current utilization leaves ample cash for same-block lender exits. The post-launch engine additions and unverified executor delegation remove the earlier "no privilege drift / every contract verified" positives, but are not enough to move the weighted score under the rubric.
 
 **Recommendation for Yearn:** if an allocation proceeds, size it against **third-party TVL ($7.95M), not headline TVL**, cap exposure well below the position of the dominant EOA, avoid ftUSD as a supplied asset (it is the reflexive leg), and treat any admin Safe execution or proxy upgrade as an immediate exit trigger given the absence of a timelock.
 
@@ -767,13 +817,13 @@ Offsetting these, and the reason this is not High Risk: the accounting is honest
 - **Audit status:** reassess if any in-scope audit report is published with firm, date and scope, if Sherlock removes or narrows the dynamic production-contract coverage incorporated by the bounty's Additional Scope, or if the protocol enrols in SEAL Safe Harbor.
 - **Governance hardening:** reassess if a timelock is added, if the admin Safe threshold or signer independence materially improves, or if the three Safes are given genuinely distinct signer sets.
 - **Reflexivity:** reassess if the Delta-Neutral strategy's share of FT Lend TVL exceeds 40% or falls below 10%, if ftUSD backing is redeployed to a venue outside FT Lend, or if the hedge target or position changes materially.
-- **Dynamic LTV:** reassess if an AMM or order-book contract is ever registered via `EngineSet`, or if `ConfigRegistry` gains a depth/volatility input — that would introduce the risk engine the docs already describe and change the collateralization analysis.
+- **TRS / execution:** reassess on any engine, liquidation-module, permissioned-filler, session-manager, batch-module or executor-delegation change; if expired/unfilled orders exceed 10% over 24h; if one route becomes dominant; or after the first material TRS liquidation. Separately, reassess if `ConfigRegistry` gains a depth/volatility input—the current Trade/TRS engines do not implement the documented dynamic-LTV model.
 - **Time-based:** reassess in **2 months**. Shortened from 3: the hedge leg activating mid-assessment showed this market's state can move materially in days on one actor's decision.
 - **TVL/usage-based:** using the August 3 baseline of $7.95M *third-party* lending TVL, reassess if it grows above ~$24M, falls below ~$2.6M, or if any of the three dominant third-party suppliers exits.
 - **ftUSD market-based:** the prior >50% Curve-liquidity trigger has occurred. For the ftUSD companion report, reassess on another 25% decline from the September 4 baseline, material imbalance (>70/30), or spot divergence >0.5% from `priceUSD(ftUSD)`. This remains context only for most FT Lend suppliers.
 - **Cap-based:** reassess if `supplyCap` is materially raised on any asset — ftUSD is already 95% subscribed against a 1.5M cap.
 - **Concentration:** reassess if the dominant EOA's share of supply or debt moves by more than 15 percentage points in either direction.
-- **Incident-based:** reassess after any exploit, bad-debt event, oracle override (`setLastGoodPrice`), oracle-wrapper pause, proxy upgrade, ftUSD depeg or unbacked mint, new ftUSD Core module enablement, or any Spark/Aave incident affecting a configured strategy.
+- **Incident-based:** reassess after any exploit, bad-debt event, failed TRS/RFQ settlement, oracle override (`setLastGoodPrice`), oracle-wrapper pause, proxy upgrade, ftUSD depeg or unbacked mint, new ftUSD Core module enablement, or any Spark/Aave/aggregator incident affecting an active route or strategy.
 
 ---
 
@@ -781,5 +831,5 @@ Offsetting these, and the reason this is not High Risk: the accounting is honest
 
 | Date | Score | Notes |
 | --- | --- | --- |
-| [September 4, 2026](https://github.com/yearn/risk-score/pull/237) | 3.0 | $1M all-production-contract bounty scored at rubric row 2; team-response wording and ftUSD context refreshed |
+| [September 4, 2026](https://github.com/yearn/risk-score/pull/237) | 3.0 | $1M all-production-contract bounty scored at rubric row 2; team-response wording, ftUSD context, and live TRS/Trade engines, execution dependencies and monitoring incorporated |
 | [August 7, 2026](https://github.com/yearn/risk-score/pull/237) | 3.1 | Initial assessment |

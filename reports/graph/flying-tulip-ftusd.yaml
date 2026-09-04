@@ -53,6 +53,21 @@ nodes:
     address: "0x8263a07504d93cB95e0a74f3627bb15faaf140e2"
     category: infra
     note: Executes hedge orders. broadcastOrder has no oracle and no price bound
+  - id: trs-leverage-engine
+    label: TRS LeverageRfqEngine v2
+    address: "0x93496075909f56d93b33302DF5D1655568Eb6e70"
+    category: infra
+    note: Signed OPEN/CLOSE/SWAP orders; registered on the same FT Lend PositionsManager
+  - id: trs-session-manager
+    label: TRS SessionManager
+    address: "0x880A371CE2C5Dbb2EB47EC0023b358e8aE80071b"
+    category: infra
+    note: Delegated session authorization for TRS orders
+  - id: trs-executor
+    label: TRS Permissioned Executor
+    address: "0xa505815A526f1200c17B7ffaE0067318d734b9d8"
+    category: infra
+    note: Permissioned filler; EIP-7702 delegation target source unverified at September 4 check
 
   # === Backing custody ===
   - id: ftusd-usdc-wrapper
@@ -81,7 +96,7 @@ nodes:
     label: Admin Safe (3/5)
     address: "0x1118e1c057211306a40A4d7006C040dbfE1370Cb"
     category: governance
-    note: No timelock. ftUSD owner + masterMinter + pauser + blacklister; owner of every contract here
+    note: No timelock. ftUSD owner + masterMinter + pauser + blacklister; admin of core ftUSD and TRS engine contracts
   - id: strategy-operator-safe
     label: Strategy Operator Safe (3/5)
     address: "0x5557729b169082f07d3131D560E2f2cb5e6c48f6"
@@ -134,6 +149,10 @@ nodes:
     address: "0x8fFfFfd4AfB6115b954Bd326cbe7B4BA576818f6"
     category: dependency
     note: Base leg of the ftUSD oracle
+  - id: dep-trs-routes
+    label: TRS Conditional Swap Routes
+    category: dependency
+    note: KyberSwap, Velora, 0x, self-fill and ftUSD mint/redeem composite routes; no funded independent exit depth verified
 
 edges:
   # === Governance ===
@@ -165,6 +184,10 @@ edges:
     to: ftusd-oracle
     kind: controls
     label: owner - pause, bounds, staleness
+  - from: admin-safe
+    to: trs-leverage-engine
+    kind: controls
+    label: admin - upgrade, permissioned fillers and session configuration
   - from: epoch-settler
     to: sftusd
     kind: holds-role
@@ -255,6 +278,26 @@ edges:
     to: dep-curve
     kind: routes-through
     label: thin secondary exit and external price reference
+  - from: ftusd
+    to: trs-leverage-engine
+    kind: routes-through
+    label: conditional signed collateral swap
+  - from: trs-leverage-engine
+    to: trs-session-manager
+    kind: routes-through
+    label: delegated user authorization
+  - from: trs-executor
+    to: trs-leverage-engine
+    kind: holds-role
+    label: permissioned filler
+  - from: trs-executor
+    to: dep-trs-routes
+    kind: routes-through
+    label: sources RFQ execution
+  - from: dep-trs-routes
+    to: mint-and-redeem
+    kind: routes-through
+    label: mintredeem/composite path reuses queue capacity
   - from: ftusd
     to: dep-morpho
     kind: routes-through

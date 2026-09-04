@@ -1,6 +1,6 @@
 # Asset Risk Assessment: Flying Tulip — ftUSD & Staked ftUSD (sftUSD)
 
-- **Assessment Date:** August 7, 2026 (team-response update: September 4, 2026)
+- **Assessment Date:** August 7, 2026 (team-response and TRS update: September 4, 2026)
 - **Token:** ftUSD (stablecoin) and sftUSD (staked ftUSD)
 - **Chain:** Ethereum Mainnet
 - **Token Address:** ftUSD [`0xF7D85EC4E7710f71992752eac2111312e73E9C9C`](https://etherscan.io/address/0xF7D85EC4E7710f71992752eac2111312e73E9C9C) · sftUSD [`0xeb48218a4c35C814C7678cBcae88C6Ee037F7625`](https://etherscan.io/address/0xeb48218a4c35C814C7678cBcae88C6Ee037F7625)
@@ -8,7 +8,7 @@
 - **Medium Risk** — approved with enhanced monitoring. ftUSD is fully collateralized (100.05%), but that backing is **not idle cash — it is lent into Flying Tulip's own money market** by a strategy whose `operators[]` include a plain EOA with `onlyManager` rights to pre-sign hedge trades (no onchain price bound). Normal minting through the current production module is collateralized; separately, the 3/5 Admin Safe retains a technically available privileged path to authorize unbacked issuance. No evidence that path has been used was found. Protocol redemption remains permissionless: sells above available instant capacity enter a six-hour queue, and ultimate settlement depends on FT Lend cash. Curve liquidity fell by more than 85% after the initial assessment, weakening the secondary exit but not removing the primary queued-redemption route. See [Risk Score Assessment](#risk-score-assessment).
 - **Companion report:** the lending market itself is assessed in **[Flying Tulip — FT Lend](./flying-tulip.md)**.
 
-> **Scope.** This report covers **holding ftUSD** and **staking it as sftUSD**. It is a separate risk from supplying to the FT Lend market — different loss paths, different exit mechanics, different concentration profile — and the two should be sized independently. Unless expressly marked as an update, values were verified **August 6, 2026 at block `25697429`** via `cast` and Etherscan. Bug-bounty scope, redemption availability, and Curve liquidity were refreshed **September 4, 2026**, with the latest breaker checks at block `25904377`, in response to team comments.
+> **Scope.** This report covers **holding ftUSD** and **staking it as sftUSD**. It is a separate risk from supplying to the FT Lend market — different loss paths, different exit mechanics, different concentration profile — and the two should be sized independently. Direct TRS position risk is out of scope; TRS is included here only as a new source of ftUSD demand, borrowing, settlement and conditional swap/exit routing. Unless expressly marked as an update, values were verified **August 6, 2026 at block `25697429`** via `cast` and Etherscan. Bug-bounty scope, redemption availability, Curve liquidity and the live Ethereum TRS configuration were refreshed **September 4, 2026**, with the latest breaker checks at block `25904377` and TRS checks through block `25904682`.
 
 ## Overview + Links
 
@@ -16,16 +16,18 @@
 
 **sftUSD** is the staked form — an ERC-4626-style vault at [`0xeb48218a…7625`](https://etherscan.io/address/0xeb48218a4c35C814C7678cBcae88C6Ee037F7625) holding 1,324,455 ftUSD across 107 holders. Critically, **sftUSD does not appreciate in ftUSD terms**; its yield is paid separately in FT tokens.
 
+**TRS** is now live and uses FT Lend for financing, RFQ/Trade for execution and ftUSD as a settlement rail. The Ethereum app exposes ftUSD as collateral and borrowable and lists WBTC-ftUSD, wstETH-ftUSD, USDC-ftUSD and WETH-ftUSD markets. This creates a new use and propagation channel for ftUSD, but not automatically a new independent redemption reserve.
+
 **Links:**
 
 - [Protocol Documentation](https://docs.flyingtulip.com/) · [Contract Addresses](https://docs.flyingtulip.com/contract-addresses/) · [Risks page](https://docs.flyingtulip.com/risks/)
-- [App](https://flyingtulip.com/) · [Blog](https://blog.flyingtulip.com/)
+- [App](https://flyingtulip.com/) · [TRS app](https://flyingtulip.com/trs/swap/) · [TRS overview](https://blog.flyingtulip.com/introducing-total-return-swaps-trs-perps-built-differently/) · [Live TRS configuration](https://api.flyingtulip.com/trs/) · [Blog](https://blog.flyingtulip.com/)
 - [GitHub org `flyingtulipdotcom`](https://github.com/flyingtulipdotcom) (ftUSD repos are **private**)
 - [DeFiLlama — Flying Tulip](https://defillama.com/protocol/flying-tulip) · [Curve ftUSD/USDC pool](https://etherscan.io/address/0xafec61e7a604f8f81f7cab64ec75bfa07c542630)
 
 ## Contract Addresses
 
-All source-verified on Etherscan, including proxy implementations.
+All core ftUSD custody/accounting contracts and the two new engine implementations are source-verified on Etherscan. The ancillary TRS permissioned executor delegates through EIP-7702 to an implementation that was not source-verified at the September 4 check; it is identified explicitly below.
 
 ### ftUSD Core
 
@@ -44,6 +46,17 @@ All source-verified on Etherscan, including proxy implementations.
 | ftUSD USDT wrapper | [`0x28CCa8eEA2cD0498cE91A9da15772A1ce42347D6`](https://etherscan.io/address/0x28CCa8eEA2cD0498cE91A9da15772A1ce42347D6) | 1,417,610 USDT |
 | **Delta-Neutral strategy** | [`0xe0E445967256EE60111e243e0F0F94DD1D351A59`](https://etherscan.io/address/0xe0E445967256EE60111e243e0F0F94DD1D351A59) | `MultiCollateralDeltaNeutralStakingStrategy` — deploys the above into FT Lend |
 | LeverageRfqEngine | [`0x8263a07504d93cB95e0a74f3627bb15faaf140e2`](https://etherscan.io/address/0x8263a07504d93cB95e0a74f3627bb15faaf140e2) | Executes the strategy's hedge orders |
+
+### TRS integration (holder-relevant dependencies)
+
+| Contract | Address | Relevance to ftUSD |
+|---|---|---|
+| LeverageRfqEngine v2 | [`0x93496075909f56d93b33302DF5D1655568Eb6e70`](https://etherscan.io/address/0x93496075909f56d93b33302DF5D1655568Eb6e70) | Executes signed TRS OPEN/CLOSE/SWAP orders; UUPS impl [`0x6595C190…8734`](https://etherscan.io/address/0x6595C1907df6cC7ae81a80C5DcaaB43FD9068734) |
+| RfqEngine v2 | [`0xc64516d58f8b83bc256448bc69d7bf2361557fdb`](https://etherscan.io/address/0xc64516d58f8b83bc256448bc69d7bf2361557fdb) | Trade/RFQ engine and additional FT Lend liquidation module |
+| SessionManager v2 | [`0x880A371CE2C5Dbb2EB47EC0023b358e8aE80071b`](https://etherscan.io/address/0x880A371CE2C5Dbb2EB47EC0023b358e8aE80071b) | Delegated TRS session permissions |
+| Permissioned executor | [`0xa505815A526f1200c17B7ffaE0067318d734b9d8`](https://etherscan.io/address/0xa505815A526f1200c17B7ffaE0067318d734b9d8) | Authorized filler; EIP-7702 delegates to unverified [`0x4428809A…a5c`](https://etherscan.io/address/0x4428809A80082E826FA336521258973Da1251a5c) |
+
+Both v2 engines are registered directly on the same `PositionsManager` that holds ftUSD backing; the new `RfqEngine` is also a liquidation module. The TRS engine requires a user/session signature and approved allowances, applies the signed minimum output, and checks health after execution. Fills are nevertheless restricted to admin-selected permissioned fillers, currently the Admin Safe and the executor above.
 
 ### Staking (sftUSD)
 
@@ -80,7 +93,7 @@ All source-verified on Etherscan, including proxy implementations.
 | 9 | **Rate-limited exit (sftUSD)** | 10% of TVL per window, 6h settlement, admin-settable to **7 days** | 3/5 Safe | Temporary lockup |
 | 10 | **Rewards simply stop** | FT emissions are discretionary; sftUSD's exchange rate is fixed at 1.0, so no emissions means zero yield | epoch settler | Opportunity loss |
 | 11 | **`recoverERC20` / `sweepExcess`** | Owner-callable token recovery on MintAndRedeem and sftUSD | 3/5 Safe | Partial |
-| 12 | **Curve pool flight** | The only secondary-market ftUSD exit and external price reference lost more than 85% of its liquidity after the initial review | market | Exit degradation |
+| 12 | **Curve pool flight** | The only independently verified secondary-market ftUSD exit and external price reference lost more than 85% of its liquidity after the initial review | market | Exit degradation |
 
 ## Audits and Due Diligence Disclosures
 
@@ -90,7 +103,7 @@ The team provides gated portal access to the in-scope ftUSD, ftUSD Position Mana
 |---|---|
 | Public bug bounty | **LIVE** — [Sherlock Flying Tulip Bug Bounty #248](https://audits.sherlock.xyz/bug-bounties/248?tab=scope), max reward 1,000,000 USDC; the bounty's **Additional Scope** incorporates Flying Tulip's dynamic list of all deployed production contracts, including the assessed ftUSD / sftUSD stack (see below) |
 | SEAL Safe Harbor enrolment | **Not enrolled** (absent from the `security-alliance/safe-harbor` registry) |
-| Contract source verification on Etherscan | **PASS** — all contracts above verified |
+| Contract source verification on Etherscan | **PASS for core ftUSD and engine contracts** — ancillary TRS executor delegation target unverified |
 
 - The docs' [Risks page](https://docs.flyingtulip.com/risks/) states a policy of "external audits before enabling capital-bearing features" and lists "Transparency. Publish parameters, addresses, **audit reports**, and incident post-mortems" as a security principle. The audit reports are not public.
 - Only two reviews are publicly confirmable, and **neither covers the assessed contracts**: the token-sale `Escrow` (PeckShield #2025-170, Oct 2025; Cantina Managed, Oct 2025) and the separate **ftPUT** product ([Sherlock contest #1223](https://audits.sherlock.xyz/contests/1223), Jan 2026).
@@ -135,12 +148,15 @@ Global gates: ftUSD `maxSupply` 100M, Core `globalDebtCeiling` 100M, `minTVLForM
 | **Mint ftUSD** | permissionless | ✓ one tx — collateral in, `wrapper.deposit()`, `core.mint()` | 7 bps | per-collateral cap 100M; `minTVLForMint` 5M; `globalDebtCeiling` 100M; `maxSupply` 100M; mint price hardcapped at $1.00 |
 | **Redeem / sell ftUSD through the app** | permissionless | queued when above available instant capacity | 7 bps | breaker has a 10% configured window capacity and 6h queue settlement (admin-settable to 7 days); at the observed frontend state, any sell above 0 ftUSD would enter the queue. Ultimate capacity is capped by FT Lend cash; USDT cash covered 89.2% of wrapper capital |
 | **Swap ftUSD on Curve** | permissionless | ✓ | Curve 0.2% + slippage | secondary exit: ~$100K at 0.38%; slippage rises to ~13.75% at $150K |
+| **Swap ftUSD inside TRS** | signed by user/session; filled by permissioned executor | conditional RFQ; atomic if filled | quoted route + protocol fee | app/config supports ftUSD collateral swaps through external aggregators, self-fill, `mintredeem`, or composite routes; no guaranteed bid or depth, and a funded ftUSD→USDC executable quote was not verified |
 | **Stake (sftUSD)** | permissionless | ✓ | none | `minDepositAmount` 0 |
 | **Unstake (sftUSD)** | permissionless | **✗ above the limit** | none | **10% of TVL per window; excess queued for 6h (`settlementDelay`), admin-settable to 7 days** |
 | **Claim FT rewards** | permissionless | ✓ | none | only if the epoch settler has funded an epoch |
 | Blacklist / burn | 3/5 Safe | ✓ | — | applies at both the ftUSD and sftUSD layers |
 
 **Redemption is permissionless even when it is not immediate.** The breaker can allow same-transaction execution from its available buffer; otherwise the sell enters a six-hour queue. At the September 4 frontend observation, the app reported that any sell above 0 ftUSD would queue. This is delayed withdrawal liquidity, not an unavailable exit. Final settlement remains bounded by FT Lend's available cash for the chosen asset (see [Redemption capacity](#redemption-capacity--the-cascade)).
+
+**TRS is a conditional swap path, not proven independent exit liquidity.** The current frontend creates leverage/collateral-swap orders with a one-hour `validTo`; the engine itself enforces only the signed expiry and has no protocol-level relative minimum or maximum lifetime. A quoted order may fill and settle in seconds, or remain unfilled until cancellation/expiry. If the selected route is `mintredeem`, it inherits ftUSD's redemption capacity and queue; an external-aggregator or self-fill route could add incremental immediate liquidity, but it should not be counted until a funded executable quote demonstrates size, output and withdrawal from the TRS account.
 
 ### Collateralization — the backing chain
 
@@ -451,7 +467,7 @@ Morpho still consumes Flying Tulip's own oracle rather than independently pricin
 
 ### Governance
 
-The same 3-of-5 Gnosis Safe [`0x1118…70Cb`](https://etherscan.io/address/0x1118e1c057211306a40A4d7006C040dbfE1370Cb) with **no timelock** owns every contract in this report. Over ftUSD specifically it is `owner` + `masterMinter` + `pauser` + `blacklister`.
+The same 3-of-5 Gnosis Safe [`0x1118…70Cb`](https://etherscan.io/address/0x1118e1c057211306a40A4d7006C040dbfE1370Cb) with **no timelock** owns every core ftUSD contract and administers the TRS engines. Over ftUSD specifically it is `owner` + `masterMinter` + `pauser` + `blacklister`; it is also an authorized TRS filler. The separate permissioned executor is not owned by the Safe onchain, but the Safe controls whether it remains authorized.
 
 ### Token Mint Authority
 
@@ -469,7 +485,7 @@ The same 3-of-5 Gnosis Safe [`0x1118…70Cb`](https://etherscan.io/address/0x111
 
 ### Programmability
 
-Mint/redeem accounting, the collateral reconciliation and the sftUSD share math are all onchain and verifiable. Against that: proxy upgrades are instant, oracle prices are admin-overridable at the router, FT emissions are entirely discretionary, and the backing strategy's `operators[]` (including a plain EOA) can pre-sign hedge orders with **no price bound** via `onlyManager`. The staking exit is a governed rate limiter, not a programmatic guarantee.
+Mint/redeem accounting, the collateral reconciliation and the sftUSD share math are all onchain and verifiable. Against that: proxy upgrades are instant, oracle prices are admin-overridable at the router, FT emissions are entirely discretionary, and the backing strategy's `operators[]` (including a plain EOA) can pre-sign hedge orders with **no price bound** via `onlyManager`. TRS adds signed session authorization and minimum-output checks, but relies on permissioned fillers and offchain route construction. The staking exit is a governed rate limiter, not a programmatic guarantee.
 
 ### External Dependencies
 
@@ -477,9 +493,10 @@ Mint/redeem accounting, the collateral reconciliation and the sftUSD share math 
 - **Spark & Aave** — FT Lend's wrappers hold zero idle buffer, so redemption capacity ultimately depends on these venues.
 - **Lido / wstETH** — now a live component of the hedge (76.54 wstETH).
 - **Chainlink** — USDC/USD feeds the ftUSD oracle's base leg.
-- **Curve** — the only secondary-market ftUSD exit and external price reference. Its liquidity fell by more than 85% after the initial snapshot; most gauge custody now routes through Convex, so beneficial LP ownership cannot be inferred from the gauge balance alone. Assessed.
+- **Curve** — the only independently verified secondary-market ftUSD exit and external price reference. Its liquidity fell by more than 85% after the initial snapshot; most gauge custody now routes through Convex, so beneficial LP ownership cannot be inferred from the gauge balance alone. Assessed.
+- **TRS / Trade** — a new ftUSD use, borrowing and conditional swap channel built on the same FT Lend account system. The live configuration can route through KyberSwap, Velora, 0x, internal self-fill, `MintAndRedeem`, and composite ftUSD routes. This can improve executable exits only when an independent route actually quotes; `mintredeem` inherits the existing breaker/queue and none of these routes changes the assets backing ftUSD.
 - **Morpho** — two USDC/ftUSD Blue markets holding 629,675 ftUSD (15.0% of supply); the live one is at 86% LLTV and 90.1% utilization. Its oracle reads Flying Tulip's own ftUSD feed, so this is an outward **propagation** channel rather than an independent price check, and pausing the FT oracle proxy would freeze these markets.
-- **CoW Protocol — not a dependency.** An earlier revision listed this after seeing `GPv2Settlement` and a `CowSwapBurner` in ftUSD transfer history and CoW-style naming (`setPreSignature`, `PreSignature`) in the engine. Both were misleading: `preSignature` is `LeverageRfqEngine`'s own `mapping(bytes32 => bool)`, the engine contains **zero** references to GPv2/CoWSwap/vaultRelayer across its 250KB of source, and neither the strategy nor the engine has any allowance to CoW's vault relayer. The `CowSwapBurner` is Curve's fee burner for the ftUSD/USDC pool. Fills go through the engine's own flash-fill path with a caller-supplied `fillTarget` and `fillData`.
+- **CoW Protocol — not a dependency.** `preSignature` is the engines' own order-authorization mapping, not GPv2; the observed `CowSwapBurner` is Curve's fee burner. Current TRS routes are the ones enumerated above, not CoW.
 
 ## Operational Risk
 
@@ -515,6 +532,14 @@ Recommended frequency: **hourly** for peg, oracle divergence and governance; **d
 
 - Track total pool reserves and the gauge's depositor mix. The former dominant EOA exited on August 28; 87.1% of current gauge deposits route through the Convex voter proxy, so monitor both aggregate liquidity and underlying beneficial concentration where observable.
 - Alert on pool imbalance beyond 70/30 and on `A` ramp initiation (`future_A_time` becoming non-zero) — a ramp changes slippage materially and the pool has an admin able to start one.
+
+### TRS / conditional swap liquidity
+
+- Poll the live Ethereum TRS configuration for changes to the engine, SessionManager, permissioned executor, aggregator codes, `minBuyAmountBps`, and `pricingFailureMode`; alert immediately on executor EIP-7702 delegation changes or unverified implementation changes.
+- Sample funded ftUSD→USDC quotes at standard notionals and record route, output, quote-to-fill latency and whether proceeds are withdrawable from the shared account. Do not add quoted TRS depth to Curve or redemption capacity unless the complete route is executable.
+- Separate `mintredeem` and composite mint/redeem fills from external-aggregator/self-fill volume. The former consumes the same breaker/redemption capacity and is not independent liquidity; the latter may be incremental.
+- Track `PermissionedFillerUpdated`, `OrderBroadcast`, `PendingOrderOpened`, `OrderCancelled`, `OrderFill`, and `LeverageFillSettled` on the v2 leverage engine. Alert on >10% expired/unfilled orders over 24h, repeated quote failures, or material execution-price divergence from external spot.
+- Track ftUSD supplied and borrowed by TRS accounts, TRS-related FT Lend utilization, and RFQ liquidations. A rise can increase redemption queue pressure because both TRS and `MintAndRedeem` draw on the same underlying lending cash.
 
 ### Morpho exposure
 
@@ -581,6 +606,12 @@ Recommended frequency: **hourly** for peg, oracle divergence and governance; **d
 
    EXTERNAL:  Curve ftUSD/USDC ~$249K (thin secondary exit + external price reference)
               Morpho 629,675 ftUSD collateral
+
+   TRS / TRADE (conditional holder exit, not counted as independent depth)
+     ftUSD in shared Lend account ─► signed SWAP ─► permissioned RFQ executor
+                                           ├─ Kyber / Velora / 0x
+                                           ├─ internal self-fill
+                                           └─ MintAndRedeem / composite route ─► same queue capacity
 ```
 
 ---
@@ -595,18 +626,19 @@ Recommended frequency: **hourly** for peg, oracle divergence and governance; **d
 - **External acceptance** — 629,675 ftUSD (15.0% of supply) held as collateral in two Morpho Blue markets, the live one comfortably collateralized at ~64.5% LTV against an 86% threshold.
 - **sftUSD holder distribution is healthy** — 107 holders, largest 12.1%.
 - **Currently fully liquid**: sftUSD `availableToWithdraw` is 100% of TVL and no withdrawals are queued.
-- All contracts source-verified; the transient `totalDebt` drift has resolved.
+- Core ftUSD custody, accounting and engine contracts are source-verified; the transient `totalDebt` drift has resolved. The ancillary TRS executor's EIP-7702 delegation target is the exception and is monitored separately.
 
 ### Key Risks
 
 - **The backing is lent into Flying Tulip's own money market** (100% of it, 35.1% of that market's TVL), so ftUSD cannot fail independently of FT Lend, while its price feed is blind to that backing.
 - **A plain EOA in `operators[]` can pre-sign hedge open/close/swap orders with no price or slippage bound** in either the strategy or the execution engine (`onlyManager`, not `onlyOwner`).
-- **A 3/5 Safe with no timelock retains a privileged path to unbacked issuance**, and can blacklist and burn balances at both the token and vault layers and upgrade every contract. The current production mint module is collateralized, and no evidence that the privileged issuance path has been used was found.
+- **A 3/5 Safe with no timelock retains a privileged path to unbacked issuance**, and can blacklist and burn balances at both the token and vault layers and upgrade every core ftUSD contract. The current production mint module is collateralized, and no evidence that the privileged issuance path has been used was found.
 - **sftUSD pays zero yield in ftUSD terms** — the rate is fixed at 1.0 and all return is discretionary FT emissions in a token with ~$28K of DEX liquidity.
 - **sftUSD's exit is rate-limited** at 10% of TVL per window with a 6h delay that the admin can extend to 7 days.
 - **Audit status is unverifiable** for every contract here, with an unconfirmed report of an open medium finding on the redemption path specifically.
 - **The price feed is structurally blind to the backing, and that blindness propagates outside the protocol.** ftUSD is priced off the USDC price and cumulative mint history — nothing in the path reads the collateral. Morpho's ftUSD markets consume that same feed rather than pricing ftUSD independently, and the FT admin Safe can freeze those markets by pausing it.
 - **Redemption remains available through the queue.** The breaker is configured around 10% of wrapper capital per window with six-hour settlement for queued sells. At the observed frontend state every non-zero sell was shown as queued, while current USDT cash covered 89.2% of capital. The restriction delays exit; it does not remove the redemption route. Queued settlement still depends on FT Lend liquidity.
+- **TRS does not yet justify liquidity credit.** It exposes conditional ftUSD swaps through permissioned RFQ execution, external aggregators, self-fill and mint/redeem adapters. No funded executable ftUSD exit was verified; mint/redeem-routed fills reuse the same breaker and queue rather than adding capacity.
 
 ### Critical Risks
 
@@ -622,7 +654,7 @@ Recommended frequency: **hourly** for peg, oracle divergence and governance; **d
 
 ### Critical Risk Gates
 
-- [ ] **Unverified contract source** — **PASS.** All contracts, including proxy implementations, are source-verified.
+- [ ] **Unverified contract source** — **PASS for the assessed ftUSD custody/accounting stack, with a reservation.** Those contracts and both new engine implementations are verified. The ancillary TRS permissioned executor delegates to unverified implementation code, but it does not mint, custody or account for ftUSD and requires signed user/session allowances.
 - [ ] **No audit** — **PASS, with material reservation.** A real audit registry exists but is access-code gated; **zero audits are independently confirmable** for any contract here. Scored down hard in Category 1 rather than gated.
 - [ ] **Unverifiable reserves** — **PASS.** Backing reconciles exactly across four hops at 100.054%.
 - [ ] **Total centralization (single EOA)** — **PASS, marginally.** Root control is a 3/5 multisig. Note however that a plain EOA holds live `onlyManager` operator rights on the Delta-Neutral strategy (hedge order pre-sign), separate from `owner`.
@@ -634,7 +666,7 @@ Recommended frequency: **hourly** for peg, oracle divergence and governance; **d
 #### Category 1: Audits & Historical Track Record (Weight: 20%)
 
 **Subcategory A: Audits — 2.0**
-The privately reviewed audit package provides good coverage from reputable firms, and the live Sherlock bounty has a maximum reward of 1,000,000 USDC and covers Flying Tulip's deployed production contracts through the dynamic contract list incorporated by the bounty's Additional Scope, including the ftUSD / sftUSD stack assessed here. This directly satisfies rubric row 2: multiple reputable reviews and a bounty above $200K. The reports and finding-level details remain non-public, Safe Harbor enrolment was not found, and complexity is high, which prevent a stronger row-1 score; they do not justify an additional half-point penalty above row 2.
+The privately reviewed audit package provides good coverage from reputable firms, and the live Sherlock bounty has a maximum reward of 1,000,000 USDC and covers Flying Tulip's deployed production contracts through the dynamic contract list incorporated by the bounty's Additional Scope, including the ftUSD / sftUSD stack and newly deployed TRS engines. This directly satisfies rubric row 2: multiple reputable reviews and a bounty above $200K. The reports and finding-level details remain non-public, Safe Harbor enrolment was not found, and complexity is high, which prevent a stronger row-1 score; they do not justify an additional half-point penalty above row 2.
 
 **Subcategory B: Historical — 4.0**
 ftUSD is ~5.4 months live with no depeg and no incident, which is clean but uninformative at this age. Supply is $4.2M — the `<$10M` band (4). The peg has a market-based Curve reference, though current depth is thin, and 220 reward epochs have settled, which is a real operating record. The "delta-neutral" mechanism, however, only started working days before the initial snapshot, so the yield strategy itself has **no** meaningful track record.
@@ -654,6 +686,7 @@ Same rule as the [FT Lend report](./flying-tulip.md): **Spark, Aave, Chainlink, 
 What elevates this subcategory is **where principal sits**:
 - **100% of ftUSD backing is a supply claim on FT Lend** (sibling product, Medium/Elevated risk profile, same admin Safe). That is the single unusual dependency — correlated failure of the stablecoin and the money market.
 - Curve is a secondary-market exit / price reference only; primary redeem is `MintAndRedeem`. Current Curve depth is thin, and Convex aggregation obscures beneficial LP ownership. CoW is not a dependency.
+- TRS adds permissioned RFQ execution and KyberSwap/Velora/0x routing to the same account system. This is a new availability and propagation dependency, but it neither changes the backing assets nor supersedes the primary redemption queue.
 
 **Score: 4.5/5** — (5.0 + 4.5 + 4.0) / 3.
 
@@ -670,10 +703,11 @@ Reserves and liabilities are fully onchain, update in real time, and reconcile e
 #### Category 4: Liquidity Risk (Weight: 15%)
 
 - **ftUSD:** permissionless 7 bps protocol redemption remains the primary exit. Amounts above available instant capacity enter a six-hour queue; at the observed frontend state, every non-zero sell was shown as queued. This is delayed withdrawal liquidity, not a missing exit. Ultimate settlement still depends on FT Lend cash. Curve is the immediate secondary route, but fell from ~$1.87M to **~$249K**; a $100K sale clears at about 0.38%, while $150K incurs about 13.75% slippage.
+- **TRS Swap:** a signed ftUSD collateral swap can settle atomically if the permissioned executor obtains a route. The current frontend uses a one-hour order expiry and supports aggregator, self-fill and mint/redeem routes, but no funded executable exit or persistent depth was verified. `mintredeem` routes reuse the existing breaker/queue, so no independent liquidity credit is assigned.
 - **sftUSD:** materially worse. Exit is **rate-limited to 10% of TVL per window with a 6h settlement delay, admin-extendable to 7 days**, and there is no secondary market for sftUSD itself. That is squarely the rubric's "withdrawal queues or restrictions" row (4).
 - Above roughly the Curve pool's $130K USDC reserve, queued protocol redemption is the practical route. At the onchain check, the breaker had no active queue; the frontend nevertheless displayed a zero instant threshold, so current execution should be assumed queued unless a live quote shows otherwise.
 
-**Score: 3.5/5** — the six-hour permissionless redemption queue materially offsets the thin Curve market: a holder can exit without accepting Curve's double-digit large-trade impact, subject to delayed settlement and FT Lend cash. The score remains between rubric rows 3 and 4 because both ftUSD and sftUSD are queue-gated at size, the secondary market is below $1M, and governance can extend settlement to seven days without a timelock.
+**Score: 3.5/5** — the six-hour permissionless redemption queue materially offsets the thin Curve market: a holder can exit without accepting Curve's double-digit large-trade impact, subject to delayed settlement and FT Lend cash. TRS is monitored as a potential additional route but does not lower the score until funded quotes demonstrate repeatable, independent capacity. The score remains between rubric rows 3 and 4 because both ftUSD and sftUSD are queue-gated at size, the verified secondary market is below $1M, and governance can extend settlement to seven days without a timelock.
 
 #### Category 5: Operational Risk (Weight: 5%)
 
@@ -696,7 +730,7 @@ Same team, entity and governance-transparency profile as the lending report (pub
 
 **Optional modifiers:** none apply — the asset is <1 year old and supply is far below $500M.
 
-Category 1 is aligned with FT Lend. Cat 2C scores the **FT Lend backing concentration**, not Spark/Aave/Chainlink as high-risk venues. The gap versus lending is driven by Programmability, FT Lend-as-backing, the leveraged collateral structure, and staked-exit liquidity.
+Category 1 is aligned with FT Lend. Cat 2C scores the **FT Lend backing concentration**, not Spark/Aave/Chainlink as high-risk venues. TRS adds an execution and propagation dependency but no score movement because it does not alter reserves and has not yet demonstrated independent exit depth. The gap versus lending is driven by Programmability, FT Lend-as-backing, the leveraged collateral structure, and staked-exit liquidity.
 
 ### Risk Tier
 
@@ -728,6 +762,7 @@ Category 1 is aligned with FT Lend. Cat 2C scores the **FT Lend backing concentr
 - **Hedge:** the leg went live around August 3–6, 2026. Reassess after 30 days of live operation, or immediately if `targetLeverageBps` is raised above 1.05×.
 - **Mint authority:** reassess on any new ftUSD Core module, `masterMinter` change, or `maxSupply`/`globalDebtCeiling` increase.
 - **Redeemability:** reassess if queued claims exceed available FT Lend cash, any claim remains unsettled beyond 6h, the frontend and onchain breaker capacity remain materially inconsistent, or `settlementDelay` is raised.
+- **TRS liquidity:** reassess after a funded ftUSD→USDC route is verified at material size, if external/self-fill becomes a repeatable independent exit, if >10% of orders expire unfilled over 24h, or after any engine/filler/executor-delegation change or failed settlement.
 - **Peg:** reassess if the Curve spot price diverges >0.5% from `priceUSD(ftUSD)` for more than 24h or the pool goes >70/30 imbalanced.
 - **Staking:** reassess if `settlementDelay` is raised, if `convertToAssets(1e6)` ever deviates from `1000000`, or if FT emissions stall for more than two epoch periods.
 - **Audit status:** reassess if any ftUSD audit is published, if the redemption finding is confirmed or refuted, or if Sherlock removes or narrows the dynamic production-contract coverage incorporated by the bounty's Additional Scope.
@@ -740,5 +775,5 @@ Category 1 is aligned with FT Lend. Cat 2C scores the **FT Lend backing concentr
 
 | Date | Score | Notes |
 | --- | --- | --- |
-| [September 4, 2026](https://github.com/yearn/risk-score/pull/237) | 3.4 | Bounty scored at rubric row 2; queued protocol redemption incorporated; Curve liquidity and bounty scope refreshed |
+| [September 4, 2026](https://github.com/yearn/risk-score/pull/237) | 3.4 | Bounty scored at rubric row 2; queued redemption and Curve liquidity refreshed; TRS added as a conditional, not-yet-credited ftUSD swap and propagation path |
 | [August 7, 2026](https://github.com/yearn/risk-score/pull/237) | 3.5 | Initial assessment |

@@ -44,10 +44,30 @@ nodes:
     category: infra
     note: Chainlink-anchored prices; owner can override last good price
   - id: rfq-engine
-    label: RFQ Engines
+    label: Legacy RFQ Engine
     address: "0xEB00B335Ca52216Fb60fdFFA361397367C39Dc32"
     category: infra
-    note: RfqEngine plus LeverageRfqEngine for routed liquidations
+    note: Original RfqEngine liquidation module; remains authorized
+  - id: rfq-engine-v2
+    label: RFQ Engine v2
+    address: "0xc64516d58f8b83bc256448bc69d7bf2361557fdb"
+    category: infra
+    note: Added August 22, 2026 as PositionsManager engine and second liquidation module
+  - id: trs-leverage-engine
+    label: TRS LeverageRfqEngine v2
+    address: "0x93496075909f56d93b33302DF5D1655568Eb6e70"
+    category: infra
+    note: Signed OPEN/CLOSE/SWAP orders; permissioned fillers; user/session allowances and post-fill health checks
+  - id: trs-session-manager
+    label: TRS SessionManager
+    address: "0x880A371CE2C5Dbb2EB47EC0023b358e8aE80071b"
+    category: infra
+    note: Delegated session authorization used by the live TRS frontend
+  - id: trs-executor
+    label: TRS Permissioned Executor
+    address: "0xa505815A526f1200c17B7ffaE0067318d734b9d8"
+    category: infra
+    note: Authorized filler; EIP-7702 delegation target source unverified at September 4 check
   - id: lend-circuit-breaker
     label: Lend CircuitBreaker
     address: "0x9676E697399581AB288844cDE5F73d0887eC18e0"
@@ -187,10 +207,10 @@ nodes:
     address: "0xBBBBBbbBBb9cC5e90e3b3Af64bdAF62C37EEFFCb"
     category: dependency
     note: Holds 629,675 ftUSD as collateral. Third-party acceptance and an outward propagation channel
-  - id: dep-spot-clob
-    label: FT Spot AMM / CLOB (not wired in)
+  - id: dep-trs-routes
+    label: TRS Execution Routes
     category: dependency
-    note: Verified absent from the deployed contracts - no depth or volatility input exists in ConfigRegistry or PositionsManager, and no AMM is registered as an engine. The documented dynamic LTV is not implemented onchain
+    note: KyberSwap, Velora, 0x, internal self-fill, ftUSD MintAndRedeem and composite routes. Dynamic LTV remains unimplemented
   - id: dep-permit2
     label: Permit2
     address: "0xEB450d21ae68D3303Cf5775A54Cc84EE7c3fC8eC"
@@ -234,6 +254,14 @@ edges:
     to: lend-circuit-breaker
     kind: controls
     label: owner - can pause or reconfigure the breaker
+  - from: admin-safe
+    to: rfq-engine-v2
+    kind: controls
+    label: admin - upgrade, liquidator roles and liquidation parameters
+  - from: admin-safe
+    to: trs-leverage-engine
+    kind: controls
+    label: admin - upgrade, fillers, sessions and batch module
   - from: admin-safe
     to: usdc-wrapper
     kind: controls
@@ -361,15 +389,35 @@ edges:
   - from: positions-manager
     to: rfq-engine
     kind: routes-through
-    label: liquidations / RFQ
+    label: legacy liquidations
+  - from: positions-manager
+    to: rfq-engine-v2
+    kind: routes-through
+    label: v2 RFQ liquidations and Trade
+  - from: positions-manager
+    to: trs-leverage-engine
+    kind: routes-through
+    label: TRS borrowing and collateral swaps
   - from: positions-manager
     to: relayer-session
     kind: manages
-    label: meta-actions / session layer
-  - from: rfq-engine
-    to: dep-spot-clob
+    label: legacy meta-actions / session layer
+  - from: trs-leverage-engine
+    to: trs-session-manager
     kind: routes-through
-    label: liquidation venue
+    label: delegated user authorization
+  - from: trs-executor
+    to: trs-leverage-engine
+    kind: holds-role
+    label: permissioned filler
+  - from: trs-executor
+    to: dep-trs-routes
+    kind: routes-through
+    label: constructs and executes spot route
+  - from: dep-trs-routes
+    to: mint-and-redeem
+    kind: routes-through
+    label: ftUSD mint/redeem and composite routes
   - from: relayer-session
     to: dep-permit2
     kind: routes-through
