@@ -4,7 +4,7 @@
 - **Token:** FT Lend market — supply / borrow positions (internal balances, not tokenised)
 - **Chain:** Ethereum Mainnet
 - **Core Contract:** PositionsManager [`0xbe4050a73a7Fb384c65E885a15C33461A4B20055`](https://etherscan.io/address/0xbe4050a73a7Fb384c65E885a15C33461A4B20055)
-- **Final Score: 3.1/5.0**
+- **Final Score: 3.0/5.0**
 - **Medium Risk** — approved with enhanced monitoring. A 3-of-5 Safe with no timelock can upgrade every contract and override every price. **35.1% of the market's TVL is the protocol's own ftUSD backing collateral supplied back into itself**, and only three genuinely third-party addresses hold 96% of the remainder. The audit package was privately reviewed and is strong but remains non-public; a live $1M Sherlock bounty covers deployed Flying Tulip contracts through the dynamic production-contract list incorporated by its Additional Scope. See [Risk Score Assessment](#risk-score-assessment). (Also deployed on Sonic; this report covers Ethereum.)
 - **Companion report:** ftUSD and staked ftUSD are assessed separately in **[Flying Tulip — ftUSD & Staked ftUSD](./flying-tulip-ftusd.md)**.
 
@@ -485,8 +485,8 @@ Recommended frequency: **hourly** for pause/circuit-breaker, oracle overrides, a
 | `ExecutionSuccess` | all three Safes | Every privileged action in the system flows through one of these. There is no delay window in which to react after the fact |
 | `Upgraded` | PositionsManager, ConfigRegistry, ftUSD, ftUSD Core, MintAndRedeem, all 7 wrappers, fee collector, treasury | Arbitrary code replacement |
 | `AddedOwner` / `RemovedOwner` / `ChangedThreshold` | all three Safes | Signer-set change on the root of trust |
-| `MinterConfigured` / `MinterRemoved` / `MasterMinterChanged` | ftUSD | Unbacked-mint path |
-| module enablement | ftUSD Core | A new module with a ceiling is an unbacked-mint path |
+| `MinterConfigured` / `MinterRemoved` / `MasterMinterChanged` | ftUSD | Privileged mint-authority change; verify that the resulting path enforces collateral |
+| module enablement | ftUSD Core | Verify immediately whether the new module independently enforces collateral before minting |
 | `EngineSet` / `MetaModuleSet` / `LiquidationModuleSet` | PositionsManager | Changes who can move user balances or set liquidation economics. **None has fired since the deploy block — any occurrence is novel** |
 
 ### Oracle monitoring
@@ -495,7 +495,7 @@ Recommended frequency: **hourly** for pause/circuit-breaker, oracle overrides, a
 - Alert on `setPriceFeed`, `setStaleFallback`, `setPriceDeviation`, `setOwner`, `setGuardian` on the router, and `disablePrice` from the guardian.
 - Alert on `PausedSet`, `AnswerBoundsSet`, `MaxStalenessSet` on the three protocol-owned wrapper proxies — a pause denies pricing for that asset entirely.
 - Poll `priceUSD(asset)` against the corresponding Chainlink feed; alert on >0.5% divergence (detects a router override even without catching the event).
-- Watch the ftUSD feed specially: it is derived from the USDC price and mint history rather than from ftUSD's collateral, and carries a **0 bps** deviation tolerance — it will not register a genuine ftUSD discount or a backing impairment. **Compare `priceUSD(ftUSD)` against the Curve pool's spot price** ([`0xafec61e7…2630`](https://etherscan.io/address/0xafec61e7a604f8f81f7cab64ec75bfa07c542630), `get_dy(0,1,1e6)`) — this is the only external reference for ftUSD and the only way to detect the protocol feed drifting from reality. Alert on >0.5% divergence, and on the Curve pool becoming materially imbalanced (>70/30) or losing >50% of its TVL.
+- Watch the ftUSD feed specially: it is derived from the USDC price and mint history rather than from ftUSD's collateral, and carries a **0 bps** deviation tolerance — it will not register a genuine ftUSD discount or a backing impairment. **Compare `priceUSD(ftUSD)` against the Curve pool's spot price** ([`0xafec61e7…2630`](https://etherscan.io/address/0xafec61e7a604f8f81f7cab64ec75bfa07c542630), `get_dy(0,1,1e6)`) — this is the only external reference for ftUSD and the only way to detect the protocol feed drifting from reality. Alert on >0.5% divergence, pool imbalance above 70/30, another 25% liquidity decline from the September 4 baseline, or a $100K quote exceeding 2% impact.
 
 ### Reflexive-supplier monitoring
 
@@ -639,12 +639,12 @@ All contracts in the trust surface were checked via Etherscan `getsourcecode` on
 
 #### Category 1: Audits & Historical Track Record (Weight: 20%)
 
-**Subcategory A: Audits & Security Reviews — 2.5**
+**Subcategory A: Audits & Security Reviews — 2.0**
 - The privately reviewed audit package provides good in-scope coverage from reputable firms including ChainSecurity, MixBytes, and Cantina; the audit quality itself maps to rubric row 2.
-- **+0.5** because the reports and finding-level detail remain behind an access-code wall rather than being publicly inspectable.
 - The live Sherlock bounty has a maximum reward of 1,000,000 USDC and covers Flying Tulip's deployed production contracts through the dynamic contract list incorporated by the bounty's Additional Scope, including `PositionsManager`, `ConfigRegistry`, the IRMs, and the RFQ engines.
 - The only two publicly confirmable reviews cover the token-sale `Escrow` and the separate ftPUT product — **neither touches `PositionsManager`, `ConfigRegistry`, the IRMs, the RFQ engines, ftUSD, ftUSD Core, or `MintAndRedeem`.**
 - Contract surface is large and novel: dynamic snapshot LTV, RFQ/relayer/session layer, flash liquidation, epoch settlement, cross-product shared collateral, and a discretionary backing strategy. The rubric notes simple surfaces score better than complex ones.
+- The reports and finding-level details remain non-public, Safe Harbor enrolment was not found, and complexity is high. Those facts prevent a stronger row-1 score but do not justify an extra half-point above rubric row 2.
 
 **Subcategory B: Historical Track Record — 4.0**
 - Time in production: the assessed `PositionsManager` was deployed **April 27, 2026** with first deposit **April 29, 2026** — **3.2 months**. The wider protocol is 5.4 months. Rubric band "3–6 months" = 4.
@@ -652,7 +652,7 @@ All contracts in the trust surface were checked via Etherscan `getsourcecode` on
 - No incidents, exploits, or depegs — but also no stress event of any kind, no drawdown, and no liquidation cascade. The clean record carries little information at this age and size.
 - Both columns land on 4. **4.0.**
 
-**Score: 3.25/5** — (2.5 + 4.0) / 2 = 3.25. The audit work and bounty coverage are good, while the non-public reports and the market's limited age and scale keep the category above the low-risk bands.
+**Score: 3.0/5** — (2.0 + 4.0) / 2 = 3.0. Multiple reputable reviews plus the $1M all-production-contract bounty satisfy rubric row 2; the market's limited history remains the riskier half of this category.
 
 #### Category 2: Centralization & Control Risks (Weight: 30%)
 
@@ -724,14 +724,14 @@ Framed for an **FT Lend supplier**. Exit is protocol `withdraw` against availabl
 
 | Category | Score | Weight | Weighted |
 |----------|-------|--------|----------|
-| Audits & Historical | 3.25 | 20% | 0.650 |
+| Audits & Historical | 3.00 | 20% | 0.600 |
 | Centralization & Control | 3.50 | 30% | 1.050 |
 | Funds Management | 3.00 | 30% | 0.900 |
 | Liquidity Risk | 2.00 | 15% | 0.300 |
 | Operational Risk | 3.50 | 5% | 0.175 |
-| **Final Score** | | | **3.075** |
+| **Final Score** | | | **3.025** |
 
-**Final Score: 3.1** (3.075 weighted)
+**Final Score: 3.0** (3.025 weighted, displayed to one decimal)
 
 **Optional modifiers:** none apply. Protocol is <1 year old (no −0.5 for >2 years incident-free) and TVL is far below $500M (no −0.5 for scale).
 
@@ -747,7 +747,7 @@ Framed for an **FT Lend supplier**. Exit is protocol `withdraw` against availabl
 
 **Final Risk Tier: MEDIUM RISK — approved with enhanced monitoring.**
 
-The composite is 3.1, in the Medium band. The determining factors are:
+The composite is 3.0, in the Medium band. The determining factors are:
 
 - **Governance is the dominant term** (Category 2A at 5.0, carrying 10% of the total weight on its own). A 3/5 Safe with no timelock holds upgrade authority over every contract, arbitrary oracle-price authority, and a privileged path to authorize an ftUSD issuance module that need not enforce collateral. The current production mint path is collateralized and no evidence of privileged unbacked issuance was found, but no invariant survives an adverse governance action. Three Safes with one signer set provide no meaningful separation.
 - **Reflexive collateral.** 35.1% of TVL is the protocol's own ftUSD backing; ftUSD is 11.4% of this market's collateral; and ftUSD's price feed is blind to that backing, so an impairment would not surface in liquidation pricing. FT Lend and ftUSD cannot fail independently.
@@ -781,5 +781,5 @@ Offsetting these, and the reason this is not High Risk: the accounting is honest
 
 | Date | Score | Notes |
 | --- | --- | --- |
-| [September 4, 2026](https://github.com/yearn/risk-score/pull/237) | 3.1 | Bounty scope corrected; team-response wording and ftUSD Curve context refreshed; score unchanged |
+| [September 4, 2026](https://github.com/yearn/risk-score/pull/237) | 3.0 | $1M all-production-contract bounty scored at rubric row 2; team-response wording and ftUSD context refreshed |
 | [August 7, 2026](https://github.com/yearn/risk-score/pull/237) | 3.1 | Initial assessment |

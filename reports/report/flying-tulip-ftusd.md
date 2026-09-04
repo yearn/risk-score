@@ -4,11 +4,11 @@
 - **Token:** ftUSD (stablecoin) and sftUSD (staked ftUSD)
 - **Chain:** Ethereum Mainnet
 - **Token Address:** ftUSD [`0xF7D85EC4E7710f71992752eac2111312e73E9C9C`](https://etherscan.io/address/0xF7D85EC4E7710f71992752eac2111312e73E9C9C) · sftUSD [`0xeb48218a4c35C814C7678cBcae88C6Ee037F7625`](https://etherscan.io/address/0xeb48218a4c35C814C7678cBcae88C6Ee037F7625)
-- **Final Score: 3.5/5.0**
-- **Elevated Risk** — limited approval, strict limits. ftUSD is fully collateralized (100.05%), but that backing is **not idle cash — it is lent into Flying Tulip's own money market** by a strategy whose `operators[]` include a plain EOA with `onlyManager` rights to pre-sign hedge trades (no onchain price bound). Normal minting through the current production module is collateralized; separately, the 3/5 Admin Safe retains a technically available privileged path to authorize unbacked issuance. No evidence that path has been used was found. Redemption is permissionless but first rate-limited to 10% per window; ultimate settlement depends on FT Lend cash. Curve liquidity fell by more than 85% after the initial assessment, materially weakening the secondary exit. See [Risk Score Assessment](#risk-score-assessment).
+- **Final Score: 3.4/5.0**
+- **Medium Risk** — approved with enhanced monitoring. ftUSD is fully collateralized (100.05%), but that backing is **not idle cash — it is lent into Flying Tulip's own money market** by a strategy whose `operators[]` include a plain EOA with `onlyManager` rights to pre-sign hedge trades (no onchain price bound). Normal minting through the current production module is collateralized; separately, the 3/5 Admin Safe retains a technically available privileged path to authorize unbacked issuance. No evidence that path has been used was found. Protocol redemption remains permissionless: sells above available instant capacity enter a six-hour queue, and ultimate settlement depends on FT Lend cash. Curve liquidity fell by more than 85% after the initial assessment, weakening the secondary exit but not removing the primary queued-redemption route. See [Risk Score Assessment](#risk-score-assessment).
 - **Companion report:** the lending market itself is assessed in **[Flying Tulip — FT Lend](./flying-tulip.md)**.
 
-> **Scope.** This report covers **holding ftUSD** and **staking it as sftUSD**. It is a separate risk from supplying to the FT Lend market — different loss paths, different exit mechanics, different concentration profile — and the two should be sized independently. Unless expressly marked as an update, values were verified **August 6, 2026 at block `25697429`** via `cast` and Etherscan. Bug-bounty scope, redemption availability, and Curve liquidity were refreshed **September 4, 2026 at block `25903824`** in response to team comments.
+> **Scope.** This report covers **holding ftUSD** and **staking it as sftUSD**. It is a separate risk from supplying to the FT Lend market — different loss paths, different exit mechanics, different concentration profile — and the two should be sized independently. Unless expressly marked as an update, values were verified **August 6, 2026 at block `25697429`** via `cast` and Etherscan. Bug-bounty scope, redemption availability, and Curve liquidity were refreshed **September 4, 2026**, with the latest breaker checks at block `25904377`, in response to team comments.
 
 ## Overview + Links
 
@@ -133,14 +133,14 @@ Global gates: ftUSD `maxSupply` 100M, Core `globalDebtCeiling` 100M, `minTVLForM
 | Action | Who | Atomic? | Fees | Limits / gating |
 |---|---|:---:|---|---|
 | **Mint ftUSD** | permissionless | ✓ one tx — collateral in, `wrapper.deposit()`, `core.mint()` | 7 bps | per-collateral cap 100M; `minTVLForMint` 5M; `globalDebtCeiling` 100M; `maxSupply` 100M; mint price hardcapped at $1.00 |
-| **Redeem ftUSD** | permissionless | ✓ up to the window cap | 7 bps | **10% of wrapper capital per window, 6h settlement beyond that** (admin-settable to 7 days); ultimate capacity is capped by FT Lend cash. On September 4, USDT cash covered 89.2% of wrapper capital. Priced off `min(spot, avgMint)` factors, not flat 1:1 |
-| **Sell ftUSD** | permissionless | ✓ | Curve 0.2% + slippage | ~$100K at 0.38%; slippage rises to ~13.75% at $150K |
+| **Redeem / sell ftUSD through the app** | permissionless | queued when above available instant capacity | 7 bps | breaker has a 10% configured window capacity and 6h queue settlement (admin-settable to 7 days); at the observed frontend state, any sell above 0 ftUSD would enter the queue. Ultimate capacity is capped by FT Lend cash; USDT cash covered 89.2% of wrapper capital |
+| **Swap ftUSD on Curve** | permissionless | ✓ | Curve 0.2% + slippage | secondary exit: ~$100K at 0.38%; slippage rises to ~13.75% at $150K |
 | **Stake (sftUSD)** | permissionless | ✓ | none | `minDepositAmount` 0 |
 | **Unstake (sftUSD)** | permissionless | **✗ above the limit** | none | **10% of TVL per window; excess queued for 6h (`settlementDelay`), admin-settable to 7 days** |
 | **Claim FT rewards** | permissionless | ✓ | none | only if the epoch settler has funded an epoch |
 | Blacklist / burn | 3/5 Safe | ✓ | — | applies at both the ftUSD and sftUSD layers |
 
-**Redemption is permissionless and same-transaction up to the window cap.** Beyond ~10% of wrapper capital it queues for 6 hours, and total redeemable size is bounded by FT Lend's available cash for that asset — a constraint that is **already binding on USDT** (see [Redemption capacity](#redemption-capacity--the-cascade)). "Atomic" is a property of the transaction, not a guarantee of capacity.
+**Redemption is permissionless even when it is not immediate.** The breaker can allow same-transaction execution from its available buffer; otherwise the sell enters a six-hour queue. At the September 4 frontend observation, the app reported that any sell above 0 ftUSD would queue. This is delayed withdrawal liquidity, not an unavailable exit. Final settlement remains bounded by FT Lend's available cash for the chosen asset (see [Redemption capacity](#redemption-capacity--the-cascade)).
 
 ### Collateralization — the backing chain
 
@@ -301,18 +301,18 @@ MintAndRedeem  (holds ~0 collateral — only wrapper shares)
                  └─ FT Lend wrapper → Spark   (zero idle buffer)
 ```
 
-Refreshed September 4, 2026 at block `25903824`:
+Refreshed September 4, 2026, with breaker state checked at block `25904377`:
 
 | | USDC | USDT |
 |---|---:|---:|
-| ftUSD wrapper `capital()` | 2,698,054.90 | 1,493,055.91 |
-| ftUSD wrapper `availableToWithdraw()` | 2,698,054.90 | **1,331,789.52** |
+| ftUSD wrapper `capital()` | 2,695,057.68 | 1,493,055.91 |
+| ftUSD wrapper `availableToWithdraw()` | 2,695,057.68 | **1,331,789.52** |
 | **Shortfall** | 0 | **161,266.39 (10.8%)** |
-| Breaker instant capacity (10%) | 269,805.49 | 149,305.59 |
+| Breaker `withdrawalCapacity(asset, capital)` | 269,505.77 | 149,305.59 |
 
-The USDT wrapper's `availableToWithdraw` confirms that the ultimate constraint is the lending market's liquidity. On September 4, cash covered **89.2%** of USDT wrapper capital. This does not constrain an ordinary immediate redemption first: the circuit breaker limits instant redemptions to 10% of wrapper capital per window, below available cash. Requests beyond the window cap queue, and their ultimate settlement still depends on FT Lend cash. The 10.8% cash gap is normal utilization, not evidence of stress or undercollateralization.
+The USDT wrapper's `availableToWithdraw` confirms that the ultimate constraint is the lending market's liquidity. On September 4, cash covered **89.2%** of USDT wrapper capital. The contract's per-asset `withdrawalCapacity` read returned 10% of capital and the shared breaker had no active queue, while the frontend reported a 0 ftUSD instant threshold and routed every non-zero sell to the six-hour queue. These are different layers of the route and should be monitored together rather than treating the configured 10% value as a guaranteed user-facing instant quote. The 10.8% cash gap is normal utilization, not evidence of stress or undercollateralization.
 
-**On top of that, redemption is rate-limited.** Both ftUSD backing wrappers are protected by the same `CircuitBreaker` [`0xCB210509…7355`](https://etherscan.io/address/0xCB210509F5AE2b3843B7Fb8Bb90bAFF9cE4f7355) that gates sftUSD unstaking: **10% of wrapper capital per window**, with a **6h `settlementDelay`** (admin-settable 5 min – 7 days) beyond that.
+**Redemption is rate-limited, but the queue remains a valid exit.** Both ftUSD backing wrappers are protected by the same `CircuitBreaker` [`0xCB210509…7355`](https://etherscan.io/address/0xCB210509F5AE2b3843B7Fb8Bb90bAFF9cE4f7355) that gates sftUSD unstaking: **10% configured capacity per window**, with a **6h `settlementDelay`** (admin-settable 5 min – 7 days) for queued sells.
 
 **How the redeem factor behaves over time.** `avgMintFactorWad` is derived from `cinfo.totalFtUSDMinted / cinfo.totalIn`. Both are **cumulative mint-side counters that only ever increase** (`+=` at `MintAndRedeem` lines 1581–1582); redemptions increment separate counters (`totalOut`, `totalFtUSDBurned`) that do not enter the calculation. Live for USDC: `totalIn` 4,218,502 and `totalFtUSDMinted` 4,217,456 → ratio 0.999752, matching the observed factor.
 
@@ -327,11 +327,11 @@ The asymmetry itself is conservative for solvency (appreciation retained, deprec
 
 | Size | Best route | Cost | Binding constraint |
 |---|---|---|---|
-| < ~$149K | Redeem | 7 bps, instant | lower USDT breaker window |
-| $149K – $270K | Split collateral routes or queue | 7 bps + possible 6h wait | per-wrapper breaker window |
-| > ~$270K | Queued redemption | 7 bps + settlement delay | breaker window, then FT Lend cash |
+| Any size within available frontend capacity | Redeem | 7 bps, same transaction | live breaker buffer and chosen collateral route |
+| Above available frontend capacity | Queued redemption | 7 bps + 6h settlement delay | breaker queue, then FT Lend cash |
+| Secondary immediate exit | Curve | 0.2% + slippage | ~$100K at 0.38%; depth deteriorates sharply by $150K |
 
-**Note the interaction with the oracle.** Reported price and available redemption cash are separate quantities: the feed cannot reflect a liquidity gap because it does not read FT Lend cash. The circuit breaker's 10% window currently binds before USDT cash does, but queued settlement would still inherit any FT Lend liquidity constraint.
+**Note the interaction with the oracle.** Reported price, current instant breaker capacity, queue state, and available redemption cash are separate quantities. The feed cannot reflect a liquidity or queue constraint because it does not read any of them. Queued settlement still inherits any FT Lend liquidity constraint.
 
 ### The Morpho ftUSD markets
 
@@ -504,11 +504,11 @@ Recommended frequency: **hourly** for peg, oracle divergence and governance; **d
 
 - **Compare the Curve spot price against `priceUSD(ftUSD)` from the router.** This is the only external market signal on a feed that cannot see the backing. Alert on >0.5% divergence.
 - Alert on `PausedSet` / `AnswerBoundsSet` / `MaxStalenessSet` on the ftUSD oracle proxy, and on any `setLastGoodPrice(ftUSD, …)` at the router.
-- Alert if the Curve pool becomes >70/30 imbalanced or loses >50% of its TVL — that removes the only external market signal.
+- Alert if the Curve pool becomes >70/30 imbalanced, loses another 25% from the September 4 baseline, or a $100K quote exceeds 2% impact.
 - Poll `previewMint(USDC, 1e6)` and `previewRedeem(USDC, 1e6)` directly — these are the oracle's two inputs, and they propagate to FT Lend *and* Morpho.
 - Alert on `redeemPriceBreakdown(USDC)` when `spotFactorWad` falls below `avgMintFactorWad` — the point at which redeemers start absorbing collateral depreciation.
 - **Do not rely on the oracle to detect a backing problem.** It reads the USDC price and mint history, not the collateral, so it will report par through an impairment. The reconciliation below and the Curve comparison are the only signals that would move.
-- **Poll `availableToWithdraw()` vs `capital()` on both ftUSD wrappers.** This is the live measure of redeemability and it is already short on USDT. Alert if the gap exceeds 25% on either asset, or if it appears on USDC (currently zero).
+- **Poll the complete redemption path:** frontend instant-sell threshold, breaker `withdrawalCapacity` / `getAssetHealth`, `activeQueueCount`, queued notional and age, and each wrapper's `availableToWithdraw()` vs `capital()`. Alert if a queue remains unsettled past 6h, if the frontend and contract capacity disagree materially, or if available FT Lend cash falls below queued claims.
 - **Alert on `setPaused` on the ftUSD oracle proxy.** It halts pricing in FT Lend and simultaneously freezes both Morpho markets.
 
 ### Curve liquidity
@@ -525,7 +525,7 @@ Recommended frequency: **hourly** for peg, oracle divergence and governance; **d
 ### Mint authority — immediate alert
 
 - `MinterConfigured`, `MinterRemoved`, `MasterMinterChanged` on ftUSD.
-- **Any new module enablement on ftUSD Core** — this is the unbacked-mint path.
+- **Any new module enablement on ftUSD Core** — investigate immediately whether the module independently enforces collateral before minting.
 - `setMaxSupply`, `globalDebtCeiling` changes, `Blacklisted`, `wipeBlacklistedAddress`.
 - `Upgraded` on ftUSD, Core, MintAndRedeem, sftUSD, and both wrappers.
 
@@ -606,7 +606,7 @@ Recommended frequency: **hourly** for peg, oracle divergence and governance; **d
 - **sftUSD's exit is rate-limited** at 10% of TVL per window with a 6h delay that the admin can extend to 7 days.
 - **Audit status is unverifiable** for every contract here, with an unconfirmed report of an open medium finding on the redemption path specifically.
 - **The price feed is structurally blind to the backing, and that blindness propagates outside the protocol.** ftUSD is priced off the USDC price and cumulative mint history — nothing in the path reads the collateral. Morpho's ftUSD markets consume that same feed rather than pricing ftUSD independently, and the FT admin Safe can freeze those markets by pausing it.
-- **Redemption is rate-limited before cash becomes the constraint.** The breaker permits 10% of wrapper capital per window with a 6h delay beyond it; current USDT cash covers 89.2% of capital, so ordinary instant redemptions fit inside available cash, while queued settlement still depends on FT Lend liquidity.
+- **Redemption remains available through the queue.** The breaker is configured around 10% of wrapper capital per window with six-hour settlement for queued sells. At the observed frontend state every non-zero sell was shown as queued, while current USDT cash covered 89.2% of capital. The restriction delays exit; it does not remove the redemption route. Queued settlement still depends on FT Lend liquidity.
 
 ### Critical Risks
 
@@ -633,13 +633,13 @@ Recommended frequency: **hourly** for peg, oracle divergence and governance; **d
 
 #### Category 1: Audits & Historical Track Record (Weight: 20%)
 
-**Subcategory A: Audits — 2.5**
-The privately reviewed audit package provides good coverage from reputable firms, while the reports remain non-public. The live Sherlock bounty has a maximum reward of 1,000,000 USDC and covers Flying Tulip's deployed production contracts through the dynamic contract list incorporated by the bounty's Additional Scope, including the ftUSD / sftUSD stack assessed here. The 2.5 subscore reflects strong audit and bounty coverage, with a half-point above rubric row 2 because the audit reports and finding-level details remain non-public. No Safe Harbor enrolment was found. Complexity is high (module-gated minting, a leveraged hedging strategy, and a queued staking vault).
+**Subcategory A: Audits — 2.0**
+The privately reviewed audit package provides good coverage from reputable firms, and the live Sherlock bounty has a maximum reward of 1,000,000 USDC and covers Flying Tulip's deployed production contracts through the dynamic contract list incorporated by the bounty's Additional Scope, including the ftUSD / sftUSD stack assessed here. This directly satisfies rubric row 2: multiple reputable reviews and a bounty above $200K. The reports and finding-level details remain non-public, Safe Harbor enrolment was not found, and complexity is high, which prevent a stronger row-1 score; they do not justify an additional half-point penalty above row 2.
 
 **Subcategory B: Historical — 4.0**
 ftUSD is ~5.4 months live with no depeg and no incident, which is clean but uninformative at this age. Supply is $4.2M — the `<$10M` band (4). The peg has a market-based Curve reference, though current depth is thin, and 220 reward epochs have settled, which is a real operating record. The "delta-neutral" mechanism, however, only started working days before the initial snapshot, so the yield strategy itself has **no** meaningful track record.
 
-**Score: 3.25/5** — (2.5 + 4.0) / 2.
+**Score: 3.0/5** — (2.0 + 4.0) / 2.
 
 #### Category 2: Centralization & Control Risks (Weight: 30%)
 
@@ -669,12 +669,11 @@ Reserves and liabilities are fully onchain, update in real time, and reconcile e
 
 #### Category 4: Liquidity Risk (Weight: 15%)
 
-- **ftUSD:** the Curve venue fell from ~$1.87M to **~$249K** after the initial assessment. A $100K sale still clears at about 0.38%, but a $150K sale incurs about 13.75% slippage. Permissionless 7 bps redemption remains the practical large-exit route, subject to the 10%-per-window breaker and then FT Lend cash.
+- **ftUSD:** permissionless 7 bps protocol redemption remains the primary exit. Amounts above available instant capacity enter a six-hour queue; at the observed frontend state, every non-zero sell was shown as queued. This is delayed withdrawal liquidity, not a missing exit. Ultimate settlement still depends on FT Lend cash. Curve is the immediate secondary route, but fell from ~$1.87M to **~$249K**; a $100K sale clears at about 0.38%, while $150K incurs about 13.75% slippage.
 - **sftUSD:** materially worse. Exit is **rate-limited to 10% of TVL per window with a 6h settlement delay, admin-extendable to 7 days**, and there is no secondary market for sftUSD itself. That is squarely the rubric's "withdrawal queues or restrictions" row (4).
-- Above ~$900K the Curve USDC side is exhausted and redemption becomes the only route, which depends on FT Lend and then Spark/Aave liquidity.
-- Currently no queue is active and 100% is withdrawable — the throttle is real but untested at scale.
+- Above roughly the Curve pool's $130K USDC reserve, queued protocol redemption is the practical route. At the onchain check, the breaker had no active queue; the frontend nevertheless displayed a zero instant threshold, so current execution should be assumed queued unless a live quote shows otherwise.
 
-**Score: 4.0/5** — the combined position has withdrawal restrictions, less than $1M of secondary liquidity, and double-digit impact for an exit large enough to matter. ftUSD redemption is permissionless but rate-limited and ultimately depends on FT Lend cash. sftUSD adds the same 10%-per-window throttle and no secondary market; excess withdrawals currently wait 6 hours, while an admin can extend the delay to 7 days without a timelock.
+**Score: 3.5/5** — the six-hour permissionless redemption queue materially offsets the thin Curve market: a holder can exit without accepting Curve's double-digit large-trade impact, subject to delayed settlement and FT Lend cash. The score remains between rubric rows 3 and 4 because both ftUSD and sftUSD are queue-gated at size, the secondary market is below $1M, and governance can extend settlement to seven days without a timelock.
 
 #### Category 5: Operational Risk (Weight: 5%)
 
@@ -686,14 +685,14 @@ Same team, entity and governance-transparency profile as the lending report (pub
 
 | Category | Score | Weight | Weighted |
 |----------|-------|--------|----------|
-| Audits & Historical | 3.25 | 20% | 0.650 |
+| Audits & Historical | 3.00 | 20% | 0.600 |
 | Centralization & Control | 4.50 | 30% | 1.350 |
 | Funds Management | 2.50 | 30% | 0.750 |
-| Liquidity Risk | 4.00 | 15% | 0.600 |
+| Liquidity Risk | 3.50 | 15% | 0.525 |
 | Operational Risk | 3.50 | 5% | 0.175 |
-| **Final Score** | | | **3.525** |
+| **Final Score** | | | **3.400** |
 
-**Final Score: 3.5** (3.525 weighted, displayed to one decimal)
+**Final Score: 3.4** (3.400 weighted)
 
 **Optional modifiers:** none apply — the asset is <1 year old and supply is far below $500M.
 
@@ -705,13 +704,13 @@ Category 1 is aligned with FT Lend. Cat 2C scores the **FT Lend backing concentr
 |------------|-----------|----------------|
 | 1.0-1.5 | Minimal Risk | Approved, high confidence |
 | 1.5-2.5 | Low Risk | Approved with standard monitoring |
-| 2.5-3.5 | Medium Risk | Approved with enhanced monitoring |
-| **3.5-4.5** | **Elevated Risk** | **Limited approval, strict limits** |
+| **2.5-3.5** | **Medium Risk** | **Approved with enhanced monitoring** |
+| 3.5-4.5 | Elevated Risk | Limited approval, strict limits |
 | 4.5-5.0 | High Risk | Not recommended |
 
-**Final Risk Tier: ELEVATED RISK — limited approval, strict limits.** The unrounded 3.525 score is above the 3.5 boundary even though the displayed one-decimal score is 3.5.
+**Final Risk Tier: MEDIUM RISK — approved with enhanced monitoring.**
 
-**This scores worse than the lending market (3.1).** Both reports score Audits & Historical at 3.25 after recognizing that the live Sherlock bounty covers all deployed Flying Tulip production contracts through its incorporated dynamic contract list. ftUSD's higher overall score is instead driven by four things a lender does not face:
+**This scores worse than the lending market (3.0).** Both reports score Audits & Historical at 3.0 after recognizing that the live Sherlock bounty covers all deployed Flying Tulip production contracts through its incorporated dynamic contract list. ftUSD's higher overall score is instead driven by four things a lender does not face:
 
 1. **Principal concentration into the reflexive asset.** Lending USDC, ftUSD is 11.4% of the collateral behind other people's loans. Holding ftUSD, 100% of principal is the reflexive asset.
 2. **An EOA in `operators[]` with unbounded hedge order pre-sign** (`approveOpenOrder` / `approveCloseOrder` / `approveSwapCollateralOrder`; no onchain price bound).
@@ -728,7 +727,7 @@ Category 1 is aligned with FT Lend. Cat 2C scores the **FT Lend backing concentr
 - **Operator model:** reassess on any `OperatorSet` event, and immediately if a price or slippage bound is *not* added to order validation within the next review cycle.
 - **Hedge:** the leg went live around August 3–6, 2026. Reassess after 30 days of live operation, or immediately if `targetLeverageBps` is raised above 1.05×.
 - **Mint authority:** reassess on any new ftUSD Core module, `masterMinter` change, or `maxSupply`/`globalDebtCeiling` increase.
-- **Redeemability:** reassess if either wrapper's `availableToWithdraw()` falls below 75% of `capital()`, or if `settlementDelay` on the backing circuit breaker is raised.
+- **Redeemability:** reassess if queued claims exceed available FT Lend cash, any claim remains unsettled beyond 6h, the frontend and onchain breaker capacity remain materially inconsistent, or `settlementDelay` is raised.
 - **Peg:** reassess if the Curve spot price diverges >0.5% from `priceUSD(ftUSD)` for more than 24h or the pool goes >70/30 imbalanced.
 - **Staking:** reassess if `settlementDelay` is raised, if `convertToAssets(1e6)` ever deviates from `1000000`, or if FT emissions stall for more than two epoch periods.
 - **Audit status:** reassess if any ftUSD audit is published, if the redemption finding is confirmed or refuted, or if Sherlock removes or narrows the dynamic production-contract coverage incorporated by the bounty's Additional Scope.
@@ -741,5 +740,5 @@ Category 1 is aligned with FT Lend. Cat 2C scores the **FT Lend backing concentr
 
 | Date | Score | Notes |
 | --- | --- | --- |
-| [September 4, 2026](https://github.com/yearn/risk-score/pull/237) | 3.5 | Liquidity reassessment after >85% Curve LP decline; bounty scope corrected |
+| [September 4, 2026](https://github.com/yearn/risk-score/pull/237) | 3.4 | Bounty scored at rubric row 2; queued protocol redemption incorporated; Curve liquidity and bounty scope refreshed |
 | [August 7, 2026](https://github.com/yearn/risk-score/pull/237) | 3.5 | Initial assessment |

@@ -37,7 +37,7 @@ nodes:
     label: MintAndRedeem
     address: "0xAa48EcBC843cF7E9A29155D112b8Cb27902bD23C"
     category: infra
-    note: Only enabled mint module; collateralized. 7 bps in/out. Redemption first rate-limited 10%/window with 6h delay; USDT cash covers 89.2% of capital
+    note: Only enabled mint module; collateralized. 7 bps in/out. Sells above live instant capacity enter a 6h queue; observed frontend threshold was 0 ftUSD. USDT cash covers 89.2% of capital
   - id: ftusd-oracle
     label: ftUSD Oracle Proxy
     address: "0xA69f7a38B6c91a4bc2477f097DC8a1F16DAADFf8"
