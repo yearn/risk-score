@@ -46,6 +46,10 @@ nodes:
     label: Security (4-of-7)
     address: "0xe5e2BAf96198c56380DDd5e992D7d1adA0E989C0"
     category: governance
+  - id: curator
+    label: Curator (2-of-3)
+    address: "0x90D0f26025571295D18a6c041E47450B81886B51"
+    category: governance
   - id: timelock
     label: Strategy Manager (7-day Timelock)
     address: "0x88ba032be87d5eF1FbE87336b7090767f367bF73"
@@ -108,6 +112,8 @@ nodes:
     label: Morpho V1 Yearn OG USDC Vault
     address: "0xF9bdDd4A9b3A45f980e11fDDE96e16364dDBEc49"
     category: dependency
+    morphoVault: v1
+    link: "https://app.morpho.org/ethereum/vault/0xF9bdDd4A9b3A45f980e11fDDE96e16364dDBEc49/"
     note: Yearn-curated Morpho V1 vault; low-mid risk (internal score 2.7). 62.4% concentration — largest single point of failure
   - id: morpho-protocol
     label: Morpho Protocol (lending base)
@@ -157,6 +163,50 @@ nodes:
     chain: katana
     category: dependency
     note: Young (2025) L2; remote Yearn yvUSDC vault destination
+
+# BEGIN GENERATED MORPHO MARKET NODES
+# Managed by scripts/update_morpho_graph_markets.mjs — do not edit.
+  - id: morpho-market-b8fef900b383
+    label: "OETH/USDC · 86% LLTV"
+    category: dependency
+    link: "https://app.morpho.org/ethereum/market/0xb8fef900b383db2dbbf4458c7f46acf5b140f26d603a6d1829963f241b82510e/"
+    note: "Morpho market 0xb8fef900b383db2dbbf4458c7f46acf5b140f26d603a6d1829963f241b82510e"
+  - id: morpho-market-e3df58f9d301
+    label: "USD3/USDC · 91.5% LLTV"
+    category: dependency
+    link: "https://app.morpho.org/ethereum/market/0xe3df58f9d3011b7481ff36b939fa5f8da642f34ea5792d25d3958dbf1efa26d7/"
+    note: "Morpho market 0xe3df58f9d3011b7481ff36b939fa5f8da642f34ea5792d25d3958dbf1efa26d7"
+  - id: morpho-market-f8c5aa31ea6b
+    label: "PT-USD3-17DEC2026/USDC · 86% LLTV"
+    category: dependency
+    link: "https://app.morpho.org/ethereum/market/0xf8c5aa31ea6b2a068a9eddb46dd110cae57bf0f12be9583a3f9a818effecba89/"
+    note: "Morpho market 0xf8c5aa31ea6b2a068a9eddb46dd110cae57bf0f12be9583a3f9a818effecba89"
+  - id: morpho-market-bbf7ce1b40d3
+    label: "siUSD/USDC · 91.5% LLTV"
+    category: dependency
+    link: "https://app.morpho.org/ethereum/market/0xbbf7ce1b40d32d3e3048f5cf27eeaa6de8cb27b80194690aab191a63381d8c99/"
+    note: "Morpho market 0xbbf7ce1b40d32d3e3048f5cf27eeaa6de8cb27b80194690aab191a63381d8c99"
+  - id: morpho-market-bf02d6c6852f
+    label: "LBTC/USDC · 86% LLTV"
+    category: dependency
+    link: "https://app.morpho.org/ethereum/market/0xbf02d6c6852fa0b8247d5514d0c91e6c1fbde9a168ac3fd2033028b5ee5ce6d0/"
+    note: "Morpho market 0xbf02d6c6852fa0b8247d5514d0c91e6c1fbde9a168ac3fd2033028b5ee5ce6d0"
+  - id: morpho-market-973e9dd45799
+    label: "YFI/USDC · 77% LLTV"
+    category: dependency
+    link: "https://app.morpho.org/ethereum/market/0x973e9dd45799efe8775417bcc420a3ab84a583587b2108985746e2fe201d0c83/"
+    note: "Morpho market 0x973e9dd45799efe8775417bcc420a3ab84a583587b2108985746e2fe201d0c83"
+  - id: morpho-market-ad656d430bb3
+    label: "WOUSD/USDC · 91.5% LLTV"
+    category: dependency
+    link: "https://app.morpho.org/ethereum/market/0xad656d430bb3d8c1469bf45c8ad4ebae1b04be04757c69fa424eec78d7b3f4dc/"
+    note: "Morpho market 0xad656d430bb3d8c1469bf45c8ad4ebae1b04be04757c69fa424eec78d7b3f4dc"
+  - id: morpho-market-61765602144e
+    label: "weETH/USDC · 86% LLTV"
+    category: dependency
+    link: "https://app.morpho.org/ethereum/market/0x61765602144e91e5ac9f9e98b8584eae308f9951596fd7f5e0f59f21cd2bf664/"
+    note: "Morpho market 0x61765602144e91e5ac9f9e98b8584eae308f9951596fd7f5e0f59f21cd2bf664"
+# END GENERATED MORPHO MARKET NODES
 
 edges:
   # Vault / accountant wiring
@@ -270,6 +320,16 @@ edges:
     to: morpho-protocol
     kind: routes-through
 
+  # MetaMorpho vault governance — owner (Security) + curator
+  - from: security
+    to: morpho-v1-og-vault
+    kind: holds-role
+    label: "owner"
+  - from: curator
+    to: morpho-v1-og-vault
+    kind: holds-role
+    label: "curator"
+
   - from: katana-yvusdc
     to: vault-bridge-token
     kind: deposits-into
@@ -318,3 +378,39 @@ edges:
     to: threejane-usd3
     kind: routes-through
     label: "underlying"
+
+# BEGIN GENERATED MORPHO MARKET EDGES
+# Managed by scripts/update_morpho_graph_markets.mjs — do not edit.
+  - from: morpho-v1-og-vault
+    to: morpho-market-b8fef900b383
+    kind: deposits-into
+    label: "38.7%"
+  - from: morpho-v1-og-vault
+    to: morpho-market-e3df58f9d301
+    kind: deposits-into
+    label: "35.3%"
+  - from: morpho-v1-og-vault
+    to: morpho-market-f8c5aa31ea6b
+    kind: deposits-into
+    label: "15.9%"
+  - from: morpho-v1-og-vault
+    to: morpho-market-bbf7ce1b40d3
+    kind: deposits-into
+    label: "7.9%"
+  - from: morpho-v1-og-vault
+    to: morpho-market-bf02d6c6852f
+    kind: deposits-into
+    label: "1.0%"
+  - from: morpho-v1-og-vault
+    to: morpho-market-973e9dd45799
+    kind: deposits-into
+    label: "0.7%"
+  - from: morpho-v1-og-vault
+    to: morpho-market-ad656d430bb3
+    kind: deposits-into
+    label: "0.1%"
+  - from: morpho-v1-og-vault
+    to: morpho-market-61765602144e
+    kind: deposits-into
+    label: "0.1%"
+# END GENERATED MORPHO MARKET EDGES

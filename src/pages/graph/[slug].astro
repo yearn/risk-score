@@ -66,7 +66,12 @@ const cyData = {
       address: n.address ?? "",
       chain,
       chainLabel: chainLabel(chain),
-      link: n.address ? explorerUrl(n.address, chain) : "",
+      // `link` is the authored external link (e.g. a Morpho market/vault URL);
+      // `explorerLink` is the block-explorer fallback for addressed nodes.
+      // They are kept separate so a node can carry both (a Morpho vault has an
+      // EVM address *and* an app.morpho.org page).
+      link: n.link ?? "",
+      explorerLink: n.address ? explorerUrl(n.address, chain) : "",
       note: n.note ?? "",
       crossLink: crossLinks.get(n.id) ?? null,
       inlinedFromSlug: n._inlinedFromSlug ?? null,
@@ -273,6 +278,7 @@ const heading = graphHeading(title, slug!);
       chain: string;
       chainLabel: string;
       link: string;
+      explorerLink: string;
       note: string;
       crossLink: CrossLink | null;
       inlinedFromSlug: string | null;
@@ -314,6 +320,11 @@ const heading = graphHeading(title, slug!);
         .replace(/"/g, "&quot;");
     }
 
+    /** Whether an external link points at the Morpho app (market or vault). */
+    function isMorphoUrl(url: string): boolean {
+      return url.includes("app.morpho.org");
+    }
+
     /* ---------------------------------------------------------------- cards */
 
     function buildCard(n: CyNode): HTMLElement {
@@ -352,8 +363,17 @@ const heading = graphHeading(title, slug!);
         : "";
       // Extended to every addressed card: the explorer used to be reachable
       // only from cross-linked cards, because plain cards hijacked the click.
-      const extLinkFragment = n.link
-        ? `<a class="card-extlink" href="${n.link}" target="_blank" rel="noopener noreferrer" title="Open on block explorer" tabindex="-1">↗</a>`
+      // Prefer an authored link (Morpho market/vault page) and fall back to
+      // the block explorer for addressed nodes.
+      const extLinkHref = n.link || n.explorerLink;
+      const extLinkTitle = n.link
+        ? (isMorphoUrl(n.link) ? "Open on Morpho" : "Open external link")
+        : "Open on block explorer";
+      // `n.link` is authored YAML data (validated only for an https:// prefix),
+      // so escape it here too — the details panel already escapes it, but this
+      // card fragment interpolates it into innerHTML the same way.
+      const extLinkFragment = extLinkHref
+        ? `<a class="card-extlink" href="${escapeHtml(extLinkHref)}" target="_blank" rel="noopener noreferrer" title="${extLinkTitle}" tabindex="-1">↗</a>`
         : "";
       const eyebrowText = n.inlinedFromSlug
         ? `${n.categoryLabel} · via ${n.inlinedFromSlug}`
@@ -709,17 +729,29 @@ const heading = graphHeading(title, slug!);
         .map(escapeHtml)
         .join(" · ");
 
-      const addressBlock = n.address
-        ? `
+      const addressBlock = (() => {
+        const explorerFragment = n.address
+          ? `
           <div class="panel-section">
             <div class="panel-h">Address</div>
             <div class="panel-addr">
               <code>${escapeHtml(n.address)}</code>
               <button class="panel-copy" type="button" data-copy="${escapeHtml(n.address)}">Copy</button>
             </div>
-            <a class="panel-link" href="${escapeHtml(n.link)}" target="_blank" rel="noopener noreferrer">Open on block explorer ↗</a>
+            <a class="panel-link" href="${escapeHtml(n.explorerLink)}" target="_blank" rel="noopener noreferrer">Open on block explorer ↗</a>
           </div>`
-        : `<div class="panel-section"><div class="panel-note-empty">No onchain address recorded for this node.</div></div>`;
+          : "";
+        const externalFragment = n.link
+          ? `
+          <div class="panel-section">
+            <div class="panel-h">External link</div>
+            <a class="panel-link" href="${escapeHtml(n.link)}" target="_blank" rel="noopener noreferrer">${isMorphoUrl(n.link) ? "Open on Morpho" : "Open external link"} ↗</a>
+          </div>`
+          : "";
+        return explorerFragment || externalFragment
+          ? `${explorerFragment}${externalFragment}`
+          : `<div class="panel-section"><div class="panel-note-empty">No onchain address recorded for this node.</div></div>`;
+      })();
 
       // `note` is authored on a third of all nodes and was previously parsed,
       // shipped to the browser, and then never rendered anywhere.

@@ -42,6 +42,10 @@ nodes:
     label: Security (4-of-7)
     address: "0xe5e2Baf96198c56380dDD5E992D7d1ADa0e989c0"
     category: governance
+  - id: curator
+    label: Curator (2-of-3)
+    address: "0x90D0f26025571295D18a6c041E47450B81886B51"
+    category: governance
   - id: timelock
     label: Strategy Manager (7-day Timelock)
     address: "0x88Ba032be87d5EF1fbE87336b7090767F367BF73"
@@ -83,6 +87,8 @@ nodes:
     label: Yearn OG WETH (2.2% / 9.1% effective)
     address: "0xE89371eAaAC6D46d4C3ED23453241987916224FC"
     category: strategy
+    morphoVault: v1
+    link: "https://app.morpho.org/ethereum/vault/0xE89371eAaAC6D46d4C3ED23453241987916224FC/"
     note: Morpho MetaMorpho vault — confirmed via MORPHO() returning 0xBBBBBbbBBb9cC5e90e3b3Af64bdAF62C37EEFFCb
 
   # External dependencies
@@ -101,10 +107,20 @@ nodes:
   - id: spark-lend
     label: Spark Lend WETH Market (Sky)
     category: dependency
-  - id: morpho
-    label: Morpho Lending Markets
-    address: "0xBBBBBbbBBb9cC5e90e3b3Af64bdAF62C37EEFFCb"
+
+# BEGIN GENERATED MORPHO MARKET NODES
+# Managed by scripts/update_morpho_graph_markets.mjs — do not edit.
+  - id: morpho-market-b8fc70e82bc5
+    label: "wstETH/WETH · 96.5% LLTV"
     category: dependency
+    link: "https://app.morpho.org/ethereum/market/0xb8fc70e82bc5bb53e773626fcc6a23f7eefa036918d7ef216ecfb1950a94a85e/"
+    note: "Morpho market 0xb8fc70e82bc5bb53e773626fcc6a23f7eefa036918d7ef216ecfb1950a94a85e"
+  - id: morpho-market-d0e50cdac92f
+    label: "wstETH/WETH · 94.5% LLTV"
+    category: dependency
+    link: "https://app.morpho.org/ethereum/market/0xd0e50cdac92fe2172043f5e0c36532c6369d24947e40968f34a5e8819ca9ec5d/"
+    note: "Morpho market 0xd0e50cdac92fe2172043f5e0c36532c6369d24947e40968f34a5e8819ca9ec5d"
+# END GENERATED MORPHO MARKET NODES
 
 edges:
   # Deployment / vault infrastructure
@@ -209,12 +225,24 @@ edges:
     to: lido-steth
     kind: routes-through
     label: "WETH → wstETH (collateral)"
-  - from: yearn-og-weth
-    to: morpho
-    kind: deposits-into
-    label: "WETH → Morpho lending (atomic)"
   # Security multisig owns the Yearn OG WETH MetaMorpho vault contract
   - from: security
     to: yearn-og-weth
     kind: controls
     label: "owner()"
+  - from: curator
+    to: yearn-og-weth
+    kind: holds-role
+    label: "curator"
+
+# BEGIN GENERATED MORPHO MARKET EDGES
+# Managed by scripts/update_morpho_graph_markets.mjs — do not edit.
+  - from: yearn-og-weth
+    to: morpho-market-b8fc70e82bc5
+    kind: deposits-into
+    label: "94.6%"
+  - from: yearn-og-weth
+    to: morpho-market-d0e50cdac92f
+    kind: deposits-into
+    label: "5.3%"
+# END GENERATED MORPHO MARKET EDGES

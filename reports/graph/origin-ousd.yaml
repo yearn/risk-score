@@ -108,7 +108,13 @@ nodes:
     label: MetaMorpho Vault mOUSD-V2
     address: "0xFB154c729A16802c4ad1E8f7FF539a8b9f49c960"
     category: dependency
-    note: Largest single dependency; curator 0xe5e2...98c0
+    link: "https://app.morpho.org/ethereum/vault/0xFB154c729A16802c4ad1E8f7FF539a8b9f49c960/"
+    note: Largest single dependency; nested MetaMorpho adapter (not expandable)
+  - id: security
+    label: Security (4-of-7)
+    address: "0xe5e2Baf96198c56380dDD5E992D7d1ADa0e989c0"
+    category: governance
+    note: Yearn Security multisig — owner + curator of the mOUSD-V2 MetaMorpho vault
   - id: curve-pool
     label: Curve OUSD/USDC Pool
     address: "0x6d18E1a7faeB1F0467A77C0d293872ab685426dc"
@@ -224,6 +230,12 @@ edges:
     to: morphousd-vault
     kind: deposits-into
     label: USDC supply
+
+  # === Morpho vault governance — Yearn Security owns + curates ===
+  - from: security
+    to: morphousd-vault
+    kind: holds-role
+    label: "owner + curator"
   - from: amo-strategy
     to: curve-gauge
     kind: deposits-into
