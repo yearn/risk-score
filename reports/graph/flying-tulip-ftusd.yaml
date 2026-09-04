@@ -37,7 +37,7 @@ nodes:
     label: MintAndRedeem
     address: "0xAa48EcBC843cF7E9A29155D112b8Cb27902bD23C"
     category: infra
-    note: Only enabled mint module. 7 bps in/out. Redeem capacity capped by FT Lend cash - USDT ~15% short. Rate-limited 10%/window, 6h delay
+    note: Only enabled mint module; collateralized. 7 bps in/out. Redemption first rate-limited 10%/window with 6h delay; USDT cash covers 89.2% of capital
   - id: ftusd-oracle
     label: ftUSD Oracle Proxy
     address: "0xA69f7a38B6c91a4bc2477f097DC8a1F16DAADFf8"
@@ -113,7 +113,7 @@ nodes:
     label: Curve ftUSD/USDC
     address: "0xafec61e7a604f8f81f7cab64ec75bfa07c542630"
     category: dependency
-    note: StableSwap-NG ~1.87M, 500K clears at 0.30%. NOT independent - 100% of LP is a Curve gauge, 99.998% of the gauge is ONE EOA, gauge manager is an admin Safe signer
+    note: StableSwap-NG ~$249K after >85% decline. 100K clears at ~0.38%; 150K incurs ~13.75%. Gauge custody is 87.1% Convex voter proxy, 7.1% EOA, 5.6% CurveYCRVVoter
   - id: dep-morpho
     label: Morpho (2 ftUSD markets)
     address: "0xBBBBBbbBBb9cC5e90e3b3Af64bdAF62C37EEFFCb"
@@ -254,7 +254,7 @@ edges:
   - from: ftusd
     to: dep-curve
     kind: routes-through
-    label: only external exit and price reference
+    label: thin secondary exit and external price reference
   - from: ftusd
     to: dep-morpho
     kind: routes-through

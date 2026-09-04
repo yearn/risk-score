@@ -1,14 +1,14 @@
 # Protocol Risk Assessment: Flying Tulip — FT Lend (ftDNMM)
 
-- **Assessment Date:** August 7, 2026
+- **Assessment Date:** August 7, 2026 (team-response update: September 4, 2026)
 - **Token:** FT Lend market — supply / borrow positions (internal balances, not tokenised)
 - **Chain:** Ethereum Mainnet
 - **Core Contract:** PositionsManager [`0xbe4050a73a7Fb384c65E885a15C33461A4B20055`](https://etherscan.io/address/0xbe4050a73a7Fb384c65E885a15C33461A4B20055)
 - **Final Score: 3.1/5.0**
-- **Medium Risk** — approved with enhanced monitoring. A 3-of-5 Safe with no timelock can upgrade every contract and override every price. **35.1% of the market's TVL is the protocol's own ftUSD backing collateral supplied back into itself**, and only three genuinely third-party addresses hold 96% of the remainder. The audit package was privately reviewed and is strong, but the reports remain non-public and FT Lend has no in-scope bug bounty. See [Risk Score Assessment](#risk-score-assessment). (Also deployed on Sonic; this report covers Ethereum.)
+- **Medium Risk** — approved with enhanced monitoring. A 3-of-5 Safe with no timelock can upgrade every contract and override every price. **35.1% of the market's TVL is the protocol's own ftUSD backing collateral supplied back into itself**, and only three genuinely third-party addresses hold 96% of the remainder. The audit package was privately reviewed and is strong but remains non-public; a live $1M Sherlock bounty covers deployed Flying Tulip contracts through the dynamic production-contract list incorporated by its Additional Scope. See [Risk Score Assessment](#risk-score-assessment). (Also deployed on Sonic; this report covers Ethereum.)
 - **Companion report:** ftUSD and staked ftUSD are assessed separately in **[Flying Tulip — ftUSD & Staked ftUSD](./flying-tulip-ftusd.md)**.
 
-> **Scope.** Yearn's interest (issue [yearn/risk-score#234](https://github.com/yearn/risk-score/issues/234)) is the risk of supplying ("just lend") and/or borrowing in the **FT Lend** market. This report covers the lending engine and the assets it touches. **Holding ftUSD and staking ftUSD are out of scope** and are assessed in the companion report [Flying Tulip — ftUSD & Staked ftUSD](./flying-tulip-ftusd.md). ftUSD appears here only as an accepted collateral asset and because the contract holding its backing is this market's largest supplier. Nothing in this report should be used to size an ftUSD or sftUSD position. The unrelated `tulip.garden` protocol on Solana is **not** Flying Tulip and is excluded. Original values were verified **June 7, 2026 at block `25264957`**; this revision re-verified everything on **August 6, 2026 at block `25697429`** via `cast` and Etherscan against an Ethereum mainnet RPC.
+> **Scope.** Yearn's interest (issue [yearn/risk-score#234](https://github.com/yearn/risk-score/issues/234)) is the risk of supplying ("just lend") and/or borrowing in the **FT Lend** market. This report covers the lending engine and the assets it touches. **Holding ftUSD and staking ftUSD are out of scope** and are assessed in the companion report [Flying Tulip — ftUSD & Staked ftUSD](./flying-tulip-ftusd.md). ftUSD appears here only as an accepted collateral asset and because the contract holding its backing is this market's largest supplier. Nothing in this report should be used to size an ftUSD or sftUSD position. The unrelated `tulip.garden` protocol on Solana is **not** Flying Tulip and is excluded. Original values were verified **June 7, 2026 at block `25264957`**; this revision re-verified everything on **August 6, 2026 at block `25697429`** via `cast` and Etherscan. Bug-bounty scope and Curve context were refreshed **September 4, 2026 at block `25903824`** in response to team comments.
 
 ## Overview + Links
 
@@ -116,7 +116,7 @@ Enumerated loss paths for a Yearn deposit into FT Lend, ordered by how directly 
 | 4 | **`YieldClaimer` arbitrary call** | `wrapper.execute(strategy, to, value, data)` forwards an arbitrary call through the strategy contract | YieldClaimer contract | Total loss |
 | 5 | **Unbacked ftUSD mint** | Safe registers a new ftUSD Core module (or replaces `minter()`) and issues ftUSD with no collateral; ftUSD is collateral in FT Lend | 3/5 Safe | Severe — dilutes ftUSD collateral |
 | 6 | **ftUSD blacklist / balance wipe** | `blacklist` + `wipeBlacklistedAddress` freezes and burns a holder's ftUSD, including a Yearn position | 3/5 Safe | Severe |
-| 7 | **Bad debt from a failed liquidation** | The novel time-sliced/RFQ liquidation path fails to clear a position; the insolvency exception in `liquidateFlash` explicitly permits seizing all collateral and leaving debt. No backstop; reserves are negligible | permissionless caller via `RfqEngine` | Partial, socialized |
+| 7 | **Bad debt from a failed liquidation** | The novel time-sliced/RFQ liquidation path fails to clear a position; the insolvency exception in `liquidateFlash` explicitly permits seizing all collateral and leaving debt. Blue-chip collateral and a 1.25 target health factor mitigate likelihood, but reserves are negligible | permissionless caller via `RfqEngine` | Partial, socialized |
 | 8 | **Reflexive ftUSD impairment** | ftUSD's backing *is* a supply position in FT Lend; a loss here impairs ftUSD, which is 11.8% of the market's collateral and is priced by a feed blind to that backing | structural | Partial |
 | 9 | **Spark or Aave exit shortfall** | Wrappers hold **zero idle buffer** (`deployed() == capital()`); a freeze or cash shortfall at either *otherwise low-risk* venue blocks or impairs exits | external (concentrated exposure) | Partial to total per-asset |
 | 10 | **Withdrawal pause / breaker** | `setWithdrawPaused`, `CircuitBreaker`, or flipping `marginRestrictWithdrawToSettlement` / `marginWithdrawRequiresNoDebt` to `true` traps funds | 3/5 Safe / guardian | Temporary lockup |
@@ -132,7 +132,7 @@ An investor-relations portal does host a structured **Audits** registry — its 
 
 | Item | Status |
 |---|---|
-| Public bug bounty | **LIVE** — [Sherlock Flying Tulip Bug Bounty #248](https://audits.sherlock.xyz/bug-bounties/248?tab=scope), max reward 1,000,000 USDC; **scope is ftPUT + FT OFT**, not FT Lend / ftUSD (see below) |
+| Public bug bounty | **LIVE** — [Sherlock Flying Tulip Bug Bounty #248](https://audits.sherlock.xyz/bug-bounties/248?tab=scope), max reward 1,000,000 USDC; the bounty's **Additional Scope** incorporates Flying Tulip's dynamic list of all deployed production contracts, including FT Lend (see below) |
 | SEAL Safe Harbor enrolment | **Not enrolled** (absent from the `security-alliance/safe-harbor` registry) |
 | Contract source verification on Etherscan | **PASS** — all 20 contracts checked are verified (see Appendix B) |
 
@@ -144,16 +144,7 @@ An investor-relations portal does host a structured **Audits** registry — its 
 
 ### Bug Bounty
 
-**LIVE.** [Sherlock's Flying Tulip Bug Bounty #248](https://audits.sherlock.xyz/bug-bounties/248?tab=scope) has been live since June 18, 2026 and advertises a maximum reward of **1,000,000 USDC**. The [Scope](https://audits.sherlock.xyz/bug-bounties/248?tab=scope) tab is public: in-scope source is `flyingtulipdotcom/ftPUT` (`PutManager`, `pFT`, `ftYieldWrapper`, `CircuitBreaker`, Aave strategy, oracle/ACL) plus listed onchain deployments of that product and the FT OFT token — the same product family as [Sherlock contest #1223](https://audits.sherlock.xyz/contests/1223).
-
-**Against this report's contracts:** none of `PositionsManager`, `ConfigRegistry`, the RFQ engines, the IRMs, or the ftUSD mint/redeem/staking stack appear in that scope. Two addresses that *are* listed also appear here, but only as shared infrastructure / reward token — not as coverage of the assessed lending path:
-
-| Address | Role in this report | In bounty scope? |
-|---|---|---|
-| [`0x88432bB6…1397`](https://etherscan.io/address/0x88432bB6EA62e774cB6d87995CC5277568d01397) | `YieldClaimer` (wrapper `execute`) | **Yes** |
-| [`0x5DD1A7A3…082c`](https://etherscan.io/address/0x5DD1A7A369e8273371d2DBf9d83356057088082c) | FT token (supplier emissions) | **Yes** (FT OFT) |
-
-So the bounty is a real disclosure channel for adjacent Flying Tulip code, but it does **not** establish bounty coverage for supplying or borrowing in FT Lend.
+**LIVE.** [Sherlock's Flying Tulip Bug Bounty #248](https://audits.sherlock.xyz/bug-bounties/248?tab=scope) has been live since June 18, 2026 and advertises a maximum reward of **1,000,000 USDC**. Its **Additional Scope** states that contracts deployed for the bounty are found either in Sherlock's static Scope section or in Flying Tulip's linked [Contract Addresses](https://docs.flyingtulip.com/contract-addresses/) directory. That directory points to Flying Tulip's Smart Search, the protocol-maintained dynamic list of all deployed production contracts. Accordingly, the live bounty covers the deployed contracts assessed here, including `PositionsManager`, `ConfigRegistry`, the RFQ engines, the IRMs, the wrappers and strategies, and the related ftUSD contracts, even when an address is not duplicated in Sherlock's static address table.
 
 > **Scoring note.** This does **not** trigger the "No audit" critical gate — a real audit registry demonstrably exists, so asserting "no audit" would be false. Audits can be access with team permission.
 
@@ -241,7 +232,7 @@ A lender calls `deposit(asset, amount)` on the `PositionsManager`. Un-borrowed l
 | Lending protocol reserves | `astate.reserves` | 7.72 USDC · 13.16 USDT · 303.01 ftUSD · 0.0000257 WETH · **0 WBTC** | accrued from interest |
 | Reserve withdrawal | `PMWrapper.withdrawReserves` | unrestricted | Admin Safe |
 
-**Protocol reserves are negligible** — a few hundred dollars in total against a $12.48M book. There is no meaningful buffer between a bad-debt event and supplier principal; bad debt is socialized to suppliers of the affected asset. ftUSD mint/redeem fees are covered in the ftUSD report.
+**Protocol reserves are negligible** — a few hundred dollars in total against a $12.48M book. The current book uses blue-chip collateral and a 1.25 target health factor, which reduce expected bad-debt risk. Reserves nevertheless provide no meaningful buffer against any residual loss; bad debt would be borne by suppliers of the affected asset. ftUSD mint/redeem fees are covered in the ftUSD report.
 
 ### Supplier rewards are discretionary FT emissions
 
@@ -379,7 +370,7 @@ Lender-exit frame: a supplier leaves via `withdraw` against available (un-borrow
 
 | Venue | Pool | ftUSD side | Quote side | Notes |
 |---|---|---|---|---|
-| **Curve StableSwap-NG** | [`0xafec61e7…2630`](https://etherscan.io/address/0xafec61e7a604f8f81f7cab64ec75bfa07c542630) | **971,101 ftUSD** | **903,390 USDC** | ~$1.87M, A=1000, fee 0.2%, near-balanced |
+| **Curve StableSwap-NG** | [`0xafec61e7…2630`](https://etherscan.io/address/0xafec61e7a604f8f81f7cab64ec75bfa07c542630) | **118,921 ftUSD** | **130,034 USDC** | ~$249K, A=1000, fee 0.2%; >85% smaller than initial snapshot |
 | Curve Twocrypto | [`0x68102ff5…ad6c`](https://etherscan.io/address/0x68102ff5406475881462880a8da3c9bc9181ad6c) | 48,838 ftUSD | FT | FT/ftUSD pair |
 | Uniswap V3 0.05% | [`0x99986c44…bf2c`](https://etherscan.io/address/0x99986c4473e3C8fF3b31FA8a92fB582d19BdBf2c) | 0.000033 ftUSD | 0.00064 USDC | dust — not a usable venue |
 | Uniswap V3/V2 (other tiers) | — | no pool deployed | — | — |
@@ -388,12 +379,12 @@ Lender-exit frame: a supplier leaves via `withdraw` against available (un-borrow
 
 | Size | Out | Slippage |
 |---|---|---|
-| 10,000 ftUSD | 9,979.15 USDC | 0.209% |
-| 100,000 ftUSD | 99,780.80 USDC | 0.219% |
-| 250,000 ftUSD | 249,398.14 USDC | 0.241% |
-| 500,000 ftUSD | 498,495.41 USDC | 0.301% |
+| 10,000 ftUSD | ~9,979 USDC | ~0.21% |
+| 50,000 ftUSD | 49,880.65 USDC | 0.239% |
+| 100,000 ftUSD | 99,616.85 USDC | 0.383% |
+| 150,000 ftUSD | 129,378.67 USDC | **13.75%** |
 
-  **$500K exits at 0.30% slippage** — better execution than the FT Lend ftUSD market itself could absorb (1.11M ftUSD of wrapper liquidity, but only against protocol redemption). The pool is near-balanced (971K/903K) and `get_virtual_price()` = 1.000464, so **the ftUSD peg is externally corroborated**, not merely self-reported by the protocol's own redemption oracle. ftUSD also circulates as collateral in [Morpho](https://etherscan.io/address/0xbbbbbbbbbb9cc5e90e3b3af64bdaf62c37eeffcb) (629,675 ftUSD), which is independent third-party acceptance of the asset.
+  The initial August 6 snapshot supported a $500K exit at 0.30%, but the dominant LP exited on August 28 and the pool fell from ~$1.87M to ~$249K. On September 4, **$100K exits at about 0.38%, while $150K incurs about 13.75% slippage**. The pool remains an external price signal and exit for ftUSD, but no longer provides deep corroboration. This does not change the FT Lend supplier liquidity score because Curve cannot exit a USDC/WETH/WBTC lending position. ftUSD also circulates as collateral in [Morpho](https://etherscan.io/address/0xbbbbbbbbbb9cc5e90e3b3af64bdaf62c37eeffcb) (629,675 ftUSD), which is independent third-party acceptance of the asset.
 
 - The supply receipts themselves have no secondary market which is normal for lending protocols. A lender's FT Lend position is an internal balance, not a transferable token, so exit is redemption-only against wrapper liquidity — which is a Spark/Aave withdrawal. The Curve venue above is an exit for *ftUSD holders*, not for USDC/WETH/WBTC lenders. This distinction matters: it improves the ftUSD collateral leg and the ftUSD-supplier leg, and does nothing for the other 88% of the market.
 
@@ -412,7 +403,7 @@ Lender-exit frame: a supplier leaves via `withdraw` against available (un-borrow
 - **WBTC strategy-manager Safe:** [`0x5557729b169082f07d3131D560E2f2cb5e6c48f6`](https://etherscan.io/address/0x5557729b169082f07d3131D560E2f2cb5e6c48f6) — a **third** Safe, **3 of 5**, with the *identical five signers* as the admin Safe. `strategyManager` of the WBTC wrapper only. Separate address, zero added independence.
 - **Upgradeability:** every core contract is an OpenZeppelin **UUPS proxy** (EIP-1967 admin slot empty; upgrade gated by `owner()`/`admin()`). `PositionsManager.admin()` is `PMWrapper` [`0xBDD80028…C68B`](https://etherscan.io/address/0xBDD80028c9e4b9A2D268D2cF62Fb54Ec8697C68B), whose `admin()` is the same 3/5 Safe and which can `upgradePM`, `setCaps`, pause, and `withdrawReserves`.
 
-With **no delay**, the 3/5 Safe can: upgrade any contract to arbitrary code, change which assets/caps/margins apply, write an arbitrary oracle price, pause user funds, redirect where lender capital is deployed, and (for ftUSD) mint unbacked supply, blacklist, and burn balances. There is **no timelock, no DAO, and no independent guardian.**
+With **no delay**, the 3/5 Safe can: upgrade any contract to arbitrary code, change which assets/caps/margins apply, write an arbitrary oracle price, pause user funds, redirect where lender capital is deployed, and (for ftUSD) authorize a new issuance path that need not enforce collateral, blacklist, and burn balances. The current production mint module is collateralized and no evidence of privileged unbacked issuance was found. There is **no timelock, no DAO, and no independent guardian.**
 
 ### Admin powers over FT Lend (verified onchain)
 
@@ -451,16 +442,16 @@ Lending accounting (supply/borrow indices, health factors) is onchain and the or
 - **Aave price adapters** — `CLSynchronicityPriceAdapterPegToBase` (WBTC) and `WstETHPriceCapAdapter` (wstETH) sit in the pricing path for 39.5% of TVL; sound, audited construction.
 - **FT Lend itself (reflexive)** — ftUSD's backing (~$4.38M) is supplied into this market by the Delta-Neutral strategy, and ftUSD is also accepted as collateral here, so the stablecoin and the money market cannot fail independently. See [Reflexive supply](#reflexive-supply-ftusd-backing-lent-into-ft-lend). This is the unusual dependency — not Spark/Aave/Chainlink.
 - **The Spot AMM / CLOB — verified absent from the deployed contracts.** The docs describe dynamic LTV "snapshotted from AMM depth and volatility," and earlier revisions of this report carried that as an unverified critical dependency. It is not wired in. `ConfigRegistry`'s entire risk surface is `assetCfg` (IRM, `mmBps`, enabled/borrowable/collateral flags, wrapper), the three margin thresholds and the oracle pointer — **no depth input, no volatility input, no LTV machinery**. The `PositionsManager` contains no AMM or order-book reference beyond a comment on the `engines` mapping (`// PositionsManager, RFQ, ftLP, OrderBook, AMM, etc`), and all four registered engines are RFQ/meta-action contracts. The `RfqEngine`'s only "Uniswap" string is an MIT licence header on a copied math library. *Caveat: the lending repos are private, so this is established from deployed ABIs, source and event logs, not from the team's source of truth.*
-- **Lido / stETH** — referenced by the Delta-Neutral strategy design but **not currently held** (0 balance).
-- **Curve** — a StableSwap-NG [ftUSD/USDC pool](https://etherscan.io/address/0xafec61e7a604f8f81f7cab64ec75bfa07c542630) (~$1.87M) is the **only secondary-market** exit and the only external ftUSD price reference. Primary exit is protocol redeem via [`MintAndRedeem`](https://etherscan.io/address/0xAa48EcBC843cF7E9A29155D112b8Cb27902bD23C) (permissionless, 7 bps, capacity-capped by FT Lend cash). **Curve liquidity is highly concentrated:** 100% of the LP supply sits in a [Curve gauge](https://etherscan.io/address/0x8abf0a7e4b59ace59cb214fcb158285cd7cf7c3f) whose `manager` is [`0x3c427497…1B4E`](https://etherscan.io/address/0x3c42749709BF354B3aE0Db29Fd2dd88089b21B4E) — **an admin Safe signer** — and 99.998% of the gauge is held by a single EOA. `A` = 1000 with no ramp in progress; fee 0.2%; `offpeg_fee_multiplier` 2.5×. Full analysis in the [ftUSD report](./flying-tulip-ftusd.md).
+- **Lido / wstETH** — a live component of the Delta-Neutral strategy's hedge at the August 6 snapshot (76.54 wstETH financed by 95.01 WETH debt).
+- **Curve** — a StableSwap-NG [ftUSD/USDC pool](https://etherscan.io/address/0xafec61e7a604f8f81f7cab64ec75bfa07c542630) is the **only secondary-market** exit and external ftUSD price reference. Primary exit is protocol redemption. After the former dominant EOA exited on August 28, pool liquidity fell by more than 85% to ~$249K. Current gauge custody is 87.1% through the Convex voter proxy, 7.1% through an EOA, and 5.6% through `CurveYCRVVoter`; Convex aggregation does not establish beneficial ownership. Full analysis in the [ftUSD report](./flying-tulip-ftusd.md).
 
 ## Operational Risk
 
 - **Team:** Founder **Andre Cronje** (public; founded Yearn, Keep3r, co-founded Sonic/Fantom) strong founder, but mixed reputation on other projects.
 - **Legal entity / jurisdiction:** **NOT FOUND** / undisclosed (docs reference a "Foundation" with no domicile). CoinList sale excluded the US, Canada and ~21 other jurisdictions.
 - **Funding:** ~$200M seed (Sep 2025, $1B FDV), ~$25.5M Series A (Jan 2026), public sale; the official sale-update blog reports total raised ≈ **$184M** (below the "$200M seed" headline — a reconciliation gap). FT token (Aug 3, 2026): max supply 10B, mainnet `totalSupply()` **1,197,190,528**, circulating ~547M, price ~**$0.0994**, **market cap ~$54.5M**, FDV ~$119M ([CoinGecko](https://www.coingecko.com/en/coins/flying-tulip)). FT is an OFT, so mainnet supply is not the cross-chain total.
-- **Documentation vs. reality gap.** Beyond the usual omissions (oracle design, risk parameters, multisig setup), two deployed behaviours are not disclosed publicly: that **ftUSD's backing is lent into FT Lend**, and that the **"delta-neutral" strategy currently runs no hedge**. The docs' own transparency principle commits to publishing audit reports, which has not happened.
-- **Incident response:** the docs claim "continuous monitoring and formal incident runbooks" and list "incident post-mortems" as a published artefact. **No runbook, no post-mortem, and no security contact are public**, and there have been no incidents to test the claim. Onchain emergency capability genuinely exists and is broad — per-asset pause, the `CircuitBreaker`, guardian `disablePrice`, ftUSD `pause` and `blacklist`. The live Sherlock bounty provides a public reporting channel for **ftPUT**, but Safe Harbor enrolment remains absent and the bounty scope does not cover the assessed FT Lend / ftUSD contracts.
+- **Documentation vs. reality gap.** Beyond the usual omissions (oracle design, risk parameters, multisig setup), the public material does not clearly disclose that **ftUSD's backing is lent into FT Lend**. The hedge was inactive at the June snapshot and active by August 6, showing that strategy state can change materially between reviews. The docs' own transparency principle commits to publishing audit reports, which has not happened.
+- **Incident response:** the docs claim "continuous monitoring and formal incident runbooks" and list "incident post-mortems" as a published artefact. **No runbook, no post-mortem, and no security contact are public**, and there have been no incidents to test the claim. Onchain emergency capability genuinely exists and is broad — per-asset pause, the `CircuitBreaker`, guardian `disablePrice`, ftUSD `pause` and `blacklist`. The live Sherlock bounty provides a public reporting channel covering deployed Flying Tulip production contracts through the dynamic contract list incorporated by its Additional Scope; Safe Harbor enrolment remains absent.
 - **Other deployments:** Flying Tulip also runs on **Sonic**, which DeFiLlama puts at **$0.52M — 3.8%** of protocol TVL against Ethereum's $12.99M ([API](https://api.llama.fi/protocol/flying-tulip)). It is a separate deployment: none of the contracts assessed here exists on Sonic, so **nothing in this report transfers to it**, and no Ethereum position is exposed to it. Deliberately out of scope rather than pending — a Sonic allocation would need its own assessment, and at 3.8% of a $13M protocol that is not currently worth the effort.
 - **Governance transparency:** no DAO, no forum/Snapshot, multisig signer identities undisclosed.
 
@@ -613,21 +604,21 @@ All contracts in the trust surface were checked via Etherscan `getsourcecode` on
 - **Genuine onchain over-collateralization with blue-chip collateral** (WETH, WBTC, wstETH, USDC, USDT) and enforced health factors.
 - **Oracle construction is more careful than it first appears** — canonical Chainlink for USDC/USDT/ETH, plus Aave's audited peg and cap adapters for WBTC and wstETH, all wired **immutably** so the owner cannot repoint them.
 - **No privilege drift since launch.** All four engines, both meta-modules and the sole liquidation module were set in the deployment block and have never changed.
-- **ftUSD has a genuine external market.** A ~$1.87M Curve StableSwap-NG pool clears $500K at 0.30% slippage and sits near-balanced, which both provides a real exit for the ftUSD leg and corroborates the peg independently of the protocol's own oracle. ftUSD is separately accepted as Morpho collateral.
+- **ftUSD has a genuine external market**, but it is now thin: the Curve pool fell from ~$1.87M to ~$249K after the initial review. It remains a market-based price signal and exit for the ftUSD leg; ftUSD is separately accepted as Morpho collateral.
 - **Conservative caps and a small footprint** limit blast radius today.
 
 ### Key Risks
 
 - **34.5% of TVL is the protocol lending to itself.** ftUSD's backing is deployed into FT Lend, so ftUSD and the lending market cannot fail independently, and ftUSD's own price feed cannot register an impairment of that collateral at all.
-- **Single 3/5 multisig controls everything with no timelock** — instant upgrade of any contract, arbitrary oracle price override, pause of user funds, unbacked ftUSD mint, blacklist and seizure. Two further Safes share the identical signer set, so apparent separation of duties is cosmetic.
+- **Single 3/5 multisig controls everything with no timelock** — instant upgrade of any contract, arbitrary oracle price override, pause of user funds, and a privileged path to authorize unbacked ftUSD issuance, plus blacklist and seizure. The current ftUSD mint module is collateralized and no evidence that the privileged issuance path has been used was found. Two further Safes share the identical signer set, so apparent separation of duties is cosmetic.
 - **Extreme lender and borrower concentration:** 25 suppliers total; three third-party addresses are 96.1% of third-party TVL; one EOA is 38% of all supply and 73% of all debt.
-- **Audit quality is good but non-public, and FT Lend has no in-scope bounty** — the private package was reviewed for this assessment, while firm/date/scope/finding details remain unavailable to public depositors. The live $1M Sherlock bounty covers **ftPUT / FT OFT**, not the lending core.
-- **Very new** (engine ~3.2 months) with **no stress history**, an untested novel liquidation engine, and **no loss backstop** (reserves are negligible).
+- **Audit quality is good but non-public** — the private package was reviewed for this assessment, while firm/date/scope/finding details remain unavailable to public depositors. A live $1M Sherlock bounty covers FT Lend and the other deployed production contracts through the dynamic contract list incorporated by its Additional Scope.
+- **Very new** (engine ~3.2 months) with **no stress history**, an untested novel liquidation engine, and negligible reserves. The current book's blue-chip collateral and 1.25 target health factor reduce expected bad-debt risk, but any residual bad debt would be borne by suppliers.
 - **Reflexive collateral.** A loss event in FT Lend impairs ftUSD's backing, which impairs ftUSD, which is 11.8% of FT Lend's collateral; the backing-blind feed would not register that impairment.
 
 ### Critical Risks
 
-- **Unilateral, instant admin control.** A 3/5 multisig — effectively one party, given the identical signer set across all three Safes — can upgrade the engine, rewrite the oracle price via `setLastGoodPrice`, redirect lender capital through a zero-delay `setStrategy`, or mint unbacked ftUSD, with no delay and no independent check. Deployed invariants must be treated as mutable, not durable.
+- **Unilateral, instant admin control.** A 3/5 multisig — effectively one party, given the identical signer set across all three Safes — can upgrade the engine, rewrite the oracle price via `setLastGoodPrice`, redirect lender capital through a zero-delay `setStrategy`, or authorize a new unbacked ftUSD issuance path, with no delay and no independent check. Normal ftUSD minting remains collateralized and no evidence that this path has been used was found. Deployed invariants must be treated as mutable, not durable.
 
 ---
 
@@ -648,10 +639,10 @@ All contracts in the trust surface were checked via Etherscan `getsourcecode` on
 
 #### Category 1: Audits & Historical Track Record (Weight: 20%)
 
-**Subcategory A: Audits & Security Reviews — 3.0**
+**Subcategory A: Audits & Security Reviews — 2.5**
 - The privately reviewed audit package provides good in-scope coverage from reputable firms including ChainSecurity, MixBytes, and Cantina; the audit quality itself maps to rubric row 2.
 - **+0.5** because the reports and finding-level detail remain behind an access-code wall rather than being publicly inspectable.
-- **+0.5 because FT Lend is not covered by the bug bounty.** The live $1M Sherlock program covers ftPUT / FT OFT, not `PositionsManager`, `ConfigRegistry`, the IRMs, or the RFQ engines. This is the explicit reason FT Lend scores worse than ftUSD's 2.5 audit subscore; it is not a negative judgment on the audit quality.
+- The live Sherlock bounty has a maximum reward of 1,000,000 USDC and covers Flying Tulip's deployed production contracts through the dynamic contract list incorporated by the bounty's Additional Scope, including `PositionsManager`, `ConfigRegistry`, the IRMs, and the RFQ engines.
 - The only two publicly confirmable reviews cover the token-sale `Escrow` and the separate ftPUT product — **neither touches `PositionsManager`, `ConfigRegistry`, the IRMs, the RFQ engines, ftUSD, ftUSD Core, or `MintAndRedeem`.**
 - Contract surface is large and novel: dynamic snapshot LTV, RFQ/relayer/session layer, flash liquidation, epoch settlement, cross-product shared collateral, and a discretionary backing strategy. The rubric notes simple surfaces score better than complex ones.
 
@@ -661,7 +652,7 @@ All contracts in the trust surface were checked via Etherscan `getsourcecode` on
 - No incidents, exploits, or depegs — but also no stress event of any kind, no drawdown, and no liquidation cascade. The clean record carries little information at this age and size.
 - Both columns land on 4. **4.0.**
 
-**Score: 3.5/5** — (3.0 + 4.0) / 2 = 3.5. The audit work is good, but FT Lend lacks in-scope bounty coverage and the market is young and small.
+**Score: 3.25/5** — (2.5 + 4.0) / 2 = 3.25. The audit work and bounty coverage are good, while the non-public reports and the market's limited age and scale keep the category above the low-risk bands.
 
 #### Category 2: Centralization & Control Risks (Weight: 30%)
 
@@ -693,7 +684,7 @@ All contracts in the trust surface were checked via Etherscan `getsourcecode` on
 - The direct lending book is strong: 100% onchain, over-collateralized, blue-chip collateral, health factors enforced in-contract (`marginHfSafeBps` 1.50 / `marginHfTargetBps` 1.25 / $250 min equity).
 - Dragging it down: **ftUSD (11.4% of TVL) is collateral whose own backing is a claim on this same market**, at a nominal 101.03% CR with no independent buffer.
 - **Maintenance margins on stables are 1.5%, and there is nothing beneath them.** The dynamic-LTV haircut the docs describe is **not implemented in the deployed contracts** — no depth or volatility input exists in `ConfigRegistry` or the `PositionsManager`. With `mmBps` = 150 and a 1.25 target HF, the contract permits roughly **50× leverage** on a stable position. This is an admin-set constant, not a risk engine, and it is the only thing standing between a borrower and the collateral.
-- **No loss backstop.** Protocol reserves are 7.72 USDC / 13.16 USDT / 303.01 ftUSD / ~0 WETH / 0 WBTC — negligible against $12.13M. Bad debt would be socialized to suppliers.
+- **Limited loss backstop.** Protocol reserves are 7.72 USDC / 13.16 USDT / 303.01 ftUSD / ~0 WETH / 0 WBTC — negligible against $12.13M. Blue-chip collateral and the 1.25 target health factor reduce expected loss probability, but any residual bad debt would be socialized to suppliers.
 - Liquidation engine is novel, module-gated via permissionless `rfqFill(Flash)`, and has never run at scale. **The `PositionsManager` defines no liquidation bonus and no close factor** — the seize/repay split is set by the swappable `RfqEngine`, and the insolvency exception explicitly permits leaving bad debt.
 - **Supplier yield is partly discretionary FT emissions** paid via admin-only `settleEpoch`. WBTC and ftUSD suppliers (51.3% of TVL combined) have received **zero** emissions to date.
 - Admin can override the price that determines whether a position is solvent at all.
@@ -723,7 +714,7 @@ Framed for an **FT Lend supplier**. Exit is protocol `withdraw` against availabl
 
 - **Team:** founder is public and well known (Andre Cronje — Yearn, Keep3r, Sonic/Fantom), which is a genuine positive. His track record is mixed, with a documented history of abandoned or incomplete launches. The remaining ~15 team members are anonymous.
 - **Legal:** **no disclosed legal entity or jurisdiction** — docs reference a "Foundation" with no domicile.
-- **Documentation:** conceptually reasonable, but omits oracle design, risk parameters and the multisig setup. The docs do not disclose that ftUSD's backing is lent into FT Lend, and the "delta-neutral" strategy holds no hedge. The docs' own transparency principle promises published audit reports that do not exist.
+- **Documentation:** conceptually reasonable, but omits oracle design, risk parameters and the multisig setup. The docs do not clearly disclose that ftUSD's backing is lent into FT Lend. The strategy's hedge was inactive at the June snapshot and active by August 6. The docs' own transparency principle promises published audit reports that do not exist.
 - **Governance transparency:** no DAO, no forum, no Snapshot, signers undisclosed.
 - **Incident response:** docs reference "formal incident runbooks"; none is public. Emergency capability exists onchain (pause, circuit breaker, `disablePrice`) and has never been exercised.
 
@@ -733,14 +724,14 @@ Framed for an **FT Lend supplier**. Exit is protocol `withdraw` against availabl
 
 | Category | Score | Weight | Weighted |
 |----------|-------|--------|----------|
-| Audits & Historical | 3.50 | 20% | 0.700 |
+| Audits & Historical | 3.25 | 20% | 0.650 |
 | Centralization & Control | 3.50 | 30% | 1.050 |
 | Funds Management | 3.00 | 30% | 0.900 |
 | Liquidity Risk | 2.00 | 15% | 0.300 |
 | Operational Risk | 3.50 | 5% | 0.175 |
-| **Final Score** | | | **3.125** |
+| **Final Score** | | | **3.075** |
 
-**Final Score: 3.1**
+**Final Score: 3.1** (3.075 weighted)
 
 **Optional modifiers:** none apply. Protocol is <1 year old (no −0.5 for >2 years incident-free) and TVL is far below $500M (no −0.5 for scale).
 
@@ -758,12 +749,12 @@ Framed for an **FT Lend supplier**. Exit is protocol `withdraw` against availabl
 
 The composite is 3.1, in the Medium band. The determining factors are:
 
-- **Governance is the dominant term** (Category 2A at 5.0, carrying 10% of the total weight on its own). A 3/5 Safe with no timelock, holding upgrade authority over every contract, arbitrary oracle-price authority, and an unbacked-mint path on ftUSD, means no invariant in this report survives an adverse governance action. Three Safes with one signer set provide no meaningful separation.
+- **Governance is the dominant term** (Category 2A at 5.0, carrying 10% of the total weight on its own). A 3/5 Safe with no timelock holds upgrade authority over every contract, arbitrary oracle-price authority, and a privileged path to authorize an ftUSD issuance module that need not enforce collateral. The current production mint path is collateralized and no evidence of privileged unbacked issuance was found, but no invariant survives an adverse governance action. Three Safes with one signer set provide no meaningful separation.
 - **Reflexive collateral.** 35.1% of TVL is the protocol's own ftUSD backing; ftUSD is 11.4% of this market's collateral; and ftUSD's price feed is blind to that backing, so an impairment would not surface in liquidation pricing. FT Lend and ftUSD cannot fail independently.
 - **Concentration.** Three third-party addresses are 96.1% of third-party TVL; one EOA is 38% of supply and 73% of debt.
 - **Lender exit is utilization-bound**, with a second gate at Spark/Aave because wrappers hold zero idle buffer. Liquidity score is not driven by Curve — that venue is for ftUSD holders, not FT Lend suppliers.
-- **Audit evidence is not inspectable** for any in-scope contract, with no bounty and no Safe Harbor.
-- **No loss backstop** and a novel, untested liquidation engine.
+- **Audit evidence is not publicly inspectable** for any in-scope contract. A live $1M Sherlock bounty covers deployed production contracts, but there is no Safe Harbor enrolment.
+- **Negligible loss reserves** and a novel, untested liquidation engine; blue-chip collateral and the 1.25 target health factor mitigate expected bad-debt risk but do not absorb residual losses.
 
 Offsetting these, and the reason this is not High Risk: the accounting is honest and fully reconcilable onchain, the collateral is genuinely blue-chip and over-collateralized, the oracle construction uses canonical Chainlink plus audited Aave adapters wired immutably, privileges have not drifted since deployment, every contract is source-verified, and current utilization leaves ample cash for same-block lender exits.
 
@@ -773,13 +764,13 @@ Offsetting these, and the reason this is not High Risk: the accounting is honest
 
 ## Reassessment Triggers
 
-- **Audit status:** reassess if any in-scope audit report is published with firm, date and scope, if the bounty publishes or expands assessed-contract coverage, or if the protocol enrols in SEAL Safe Harbor.
+- **Audit status:** reassess if any in-scope audit report is published with firm, date and scope, if Sherlock removes or narrows the dynamic production-contract coverage incorporated by the bounty's Additional Scope, or if the protocol enrols in SEAL Safe Harbor.
 - **Governance hardening:** reassess if a timelock is added, if the admin Safe threshold or signer independence materially improves, or if the three Safes are given genuinely distinct signer sets.
-- **Reflexivity:** reassess if the Delta-Neutral strategy's share of FT Lend TVL exceeds 40% or falls below 10%, if ftUSD backing is redeployed to a venue outside FT Lend, or if the hedge leg (stETH/WETH) is actually activated at size.
+- **Reflexivity:** reassess if the Delta-Neutral strategy's share of FT Lend TVL exceeds 40% or falls below 10%, if ftUSD backing is redeployed to a venue outside FT Lend, or if the hedge target or position changes materially.
 - **Dynamic LTV:** reassess if an AMM or order-book contract is ever registered via `EngineSet`, or if `ConfigRegistry` gains a depth/volatility input — that would introduce the risk engine the docs already describe and change the collateralization analysis.
 - **Time-based:** reassess in **2 months**. Shortened from 3: the hedge leg activating mid-assessment showed this market's state can move materially in days on one actor's decision.
 - **TVL/usage-based:** using the August 3 baseline of $7.95M *third-party* lending TVL, reassess if it grows above ~$24M, falls below ~$2.6M, or if any of the three dominant third-party suppliers exits.
-- **ftUSD market-based:** reassess if the Curve ftUSD/USDC pool loses >50% of its TVL, becomes materially imbalanced (>70/30), or if its spot price diverges >0.5% from the protocol's `priceUSD(ftUSD)` — that pool is the only external check on the ftUSD feed.
+- **ftUSD market-based:** the prior >50% Curve-liquidity trigger has occurred. For the ftUSD companion report, reassess on another 25% decline from the September 4 baseline, material imbalance (>70/30), or spot divergence >0.5% from `priceUSD(ftUSD)`. This remains context only for most FT Lend suppliers.
 - **Cap-based:** reassess if `supplyCap` is materially raised on any asset — ftUSD is already 95% subscribed against a 1.5M cap.
 - **Concentration:** reassess if the dominant EOA's share of supply or debt moves by more than 15 percentage points in either direction.
 - **Incident-based:** reassess after any exploit, bad-debt event, oracle override (`setLastGoodPrice`), oracle-wrapper pause, proxy upgrade, ftUSD depeg or unbacked mint, new ftUSD Core module enablement, or any Spark/Aave incident affecting a configured strategy.
@@ -790,4 +781,5 @@ Offsetting these, and the reason this is not High Risk: the accounting is honest
 
 | Date | Score | Notes |
 | --- | --- | --- |
+| [September 4, 2026](https://github.com/yearn/risk-score/pull/237) | 3.1 | Bounty scope corrected; team-response wording and ftUSD Curve context refreshed; score unchanged |
 | [August 7, 2026](https://github.com/yearn/risk-score/pull/237) | 3.1 | Initial assessment |

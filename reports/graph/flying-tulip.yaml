@@ -181,7 +181,7 @@ nodes:
     label: Curve ftUSD/USDC
     address: "0xafec61e7a604f8f81f7cab64ec75bfa07c542630"
     category: dependency
-    note: StableSwap-NG ~1.87M. Only external ftUSD exit, but the liquidity is one EOA via a gauge whose manager is an admin Safe signer
+    note: StableSwap-NG ~$249K after >85% decline. Thin ftUSD exit; gauge custody is 87.1% Convex voter proxy, 7.1% EOA, 5.6% CurveYCRVVoter
   - id: dep-morpho
     label: Morpho
     address: "0xBBBBBbbBBb9cC5e90e3b3Af64bdAF62C37EEFFCb"
@@ -378,7 +378,7 @@ edges:
   - from: ftusd
     to: dep-curve
     kind: routes-through
-    label: external exit + peg reference (0.30% at 500K)
+    label: external exit + peg reference (~0.38% at 100K)
   - from: ftusd
     to: dep-morpho
     kind: routes-through
