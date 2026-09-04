@@ -831,5 +831,4 @@ Offsetting these, and the reason this is not High Risk: the accounting is honest
 
 | Date | Score | Notes |
 | --- | --- | --- |
-| [September 4, 2026](https://github.com/yearn/risk-score/pull/237) | 3.0 | $1M all-production-contract bounty scored at rubric row 2; team-response wording, ftUSD context, and live TRS/Trade engines, execution dependencies and monitoring incorporated |
-| [August 7, 2026](https://github.com/yearn/risk-score/pull/237) | 3.1 | Initial assessment |
+| [September 4, 2026](https://github.com/yearn/risk-score/pull/237) | 3.0 | Initial assessment |

@@ -775,5 +775,4 @@ Category 1 is aligned with FT Lend. Cat 2C scores the **FT Lend backing concentr
 
 | Date | Score | Notes |
 | --- | --- | --- |
-| [September 4, 2026](https://github.com/yearn/risk-score/pull/237) | 3.4 | Bounty scored at rubric row 2; queued redemption and Curve liquidity refreshed; TRS added as a conditional, not-yet-credited ftUSD swap and propagation path |
-| [August 7, 2026](https://github.com/yearn/risk-score/pull/237) | 3.5 | Initial assessment |
+| [September 4, 2026](https://github.com/yearn/risk-score/pull/237) | 3.4 | Initial assessment |
