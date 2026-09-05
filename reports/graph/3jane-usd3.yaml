@@ -68,22 +68,31 @@ nodes:
     label: TimelockController (7d, upgrades)
     address: "0x3D3C41419Ab401cd25055E8f9421D7D96d887885"
     category: governance
-    note: Owns all 5 ProxyAdmins; 7-day delay for implementation upgrades; self-administered
+    note: Owns all 5 ProxyAdmins + LCC beacon; 7-day delay for implementation upgrades; self-administered
   - id: emergency-controller
     label: EmergencyController v2
     address: "0x84b31b84917485e221305edf590b8e3660d2e051"
     category: governance
     note: EMERGENCY_AUTHORIZED_ROLE; bypasses both timelocks for binary pause / debt-cap=0
+  - id: lcc-factory
+    label: LCCVaultFactory
+    address: "0x95431c2Fbfe3E0f17a61EF1d7601Eb34aE6cd6ba"
+    category: governance
+    note: "OWNER_ROLE=24h timelock; GUARDIAN_ROLE=multisig+Hypernative; LISTER_ROLE=single ungated EOA"
 
   # === Strategies / Capital deployment ===
   - id: aave-strategy
     label: Aave V3 Idle Reserves
     category: strategy
-    note: Baseline yield on idle USDC (~$7.28M, ~27% of totalAssets)
+    note: Baseline yield on idle USDC (~$12.43M, ~15.5% of totalAssets)
   - id: unsecured-loans
     label: Unsecured Credit Lines
     category: strategy
-    note: ~$19.81M borrowed (~73% utilization); base rate + risk premium
+    note: ~$67.59M borrowed (~84.5% utilization); base rate + risk premium
+  - id: lcc-facilities
+    label: LCC (Levered Callable Capital)
+    category: strategy
+    note: "Live Sept 1, 2026. ~$7.55M staked standby, $0 called. 13.33x leverage, 35-day funded-capital cooldown"
 
   # === External dependencies ===
   - id: aave-v3-usdc
@@ -103,10 +112,14 @@ nodes:
     category: dependency
     note: Verifies zkTLS proofs; early-stage infra
   - id: insurance-fund
-    label: Insurance Fund (~$1.02M USDC)
+    label: Insurance Fund (~$1.03M USDC)
     address: "0x4507B5B23340D248457d955a211C8B0634D29935"
     category: dependency
-    note: First-loss buffer (waEthUSDC); ~39% borrow-book coverage
+    note: First-loss buffer (waEthUSDC); combined with sUSD3, ~12.6% borrow-book coverage
+  - id: margin-oracles
+    label: LCC Margin Oracles
+    category: dependency
+    note: "Fully trusted price feeds for waEthUSDC/waEthUSDT margin; no disclosed fallback"
 
 edges:
   # === Governance flow ===
@@ -142,6 +155,18 @@ edges:
     to: morpho-credit
     kind: holds-role
     label: EMERGENCY_AUTHORIZED_ROLE (bypass both timelocks)
+  - from: timelock-24h
+    to: lcc-factory
+    kind: controls
+    label: OWNER_ROLE (24h delay)
+  - from: timelock-7d
+    to: lcc-factory
+    kind: controls
+    label: beacon owner (7d delay, shared implementation)
+  - from: lcc-factory
+    to: lcc-facilities
+    kind: manages
+    label: deploys/registers facilities; risk caps
 
   # === Internal vault flow ===
   - from: sUSD3
@@ -201,4 +226,12 @@ edges:
   - from: USD3
     to: insurance-fund
     kind: routes-through
-    label: first-loss buffer ($1.02M)
+    label: first-loss buffer ($1.03M)
+  - from: lcc-facilities
+    to: USD3
+    kind: deposits-into
+    label: "capital call funding (none called yet)"
+  - from: lcc-facilities
+    to: margin-oracles
+    kind: routes-through
+    label: "fully-trusted margin pricing"
