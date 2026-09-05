@@ -611,4 +611,4 @@ USCC remains materially higher risk than USTB. Its crypto-basis strategy adds fu
 | Date | Score | Notes |
 |------|------:|-------|
 | [July 3, 2026](https://github.com/yearn/risk-score/pull/230) | 2.95 | Initial assessment |
-| [September 5, 2026](https://github.com/yearn/risk-score/pull/PR_NUMBER) | 2.53 | Updated implementation, portfolio, TVL, cross-chain state, and controls |
+| [September 5, 2026](https://github.com/yearn/risk-score/pull/445) | 2.53 | Updated implementation, portfolio, TVL, cross-chain state, and controls |
