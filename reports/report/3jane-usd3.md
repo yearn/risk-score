@@ -10,7 +10,7 @@
 
 3Jane is a **credit-based money market** on Ethereum that enables **unsecured (uncollateralized) USDC credit lines** underwritten against verifiable proofs of crypto assets, bank assets, future cash flows, and credit scores. The protocol is built as a **modified fork of Morpho Blue**, replacing collateral logic with credit assessment, and uses **Yearn V3 tokenized strategy** architecture for its vault contracts.
 
-USD3's funding base today is idle reserves parked in Aave V3 plus unsecured onchain credit lines. A third, not-yet-utilized channel exists as of September 1, 2026: **Levered Callable Capital (LCC)**, a leveraged capital-commitment primitive that lets third parties stake margin and earn standby fees against a callable obligation to fund USD3 on demand. LCC funding, if and when it is called, mints ordinary USD3 — the same fungible, single share class as any other deposit, with no separate risk tranche. $0 has been called to date, so it currently contributes nothing to USD3's backing (see *Levered Callable Capital (LCC)* under Funds Management and the dedicated appendix below).
+USD3's assets are currently deployed through two channels: idle reserves in Aave V3 and unsecured onchain credit lines. **Levered Callable Capital (LCC)** is a separate inbound funding rail: third parties stake margin and earn standby fees against an obligation to deposit USDC into USD3 when called. The facilities and epoch clock launched September 1, 2026, with ~$7.55M of standby commitment and $0 called, but the funding path is not operational at this snapshot: USD3 is already above its $80M supply cap, `availableDepositLimit()` is zero, and the deployed v1.1.4 implementation lacks the audited v1.2 exemption/ring-fence integration. A supply-cap increase or deployment and configuration of v1.2 is therefore required before LCC can fund USD3.
 
 **USD3** is the **senior tranche** of 3Jane's lending pool. Users deposit USDC to mint USD3, and those funds are allocated into a shared lending pool. Idle capital earns baseline yield via **Aave V3 USDC market**. When borrowers draw down credit lines, funds are withdrawn from Aave and lent at interest rates determined by a base rate + per-borrower risk premium.
 
@@ -73,7 +73,7 @@ The core lending logic is a modified fork of Morpho Blue, which has been extensi
 | OpenZeppelin | Sep–Oct 2023 | Morpho Blue & Speed Jump IRM |
 | Cantina | Nov 2023 – Mar 2024 | Morpho Blue managed review, IRM, Competition, Periphery, Fixed rate IRM |
 
-**Note:** The inherited audits cover the base Morpho Blue logic. 3Jane's modifications (credit-based lending, tranche system, markdown controller) are the novel risk surface covered by the 4 3Jane-specific audits above.
+**Note:** The inherited audits cover the base Morpho Blue logic. 3Jane's modifications (credit-based lending, tranche system, markdown controller) are the novel risk surface covered by the 6 3Jane-specific audits above.
 
 The source code includes a `/certora` directory indicating formal verification efforts for rate math.
 
@@ -105,7 +105,7 @@ The source code includes a `/certora` directory indicating formal verification e
     - **Protocol's framing (per 3Jane DD document, received May 2026):** 3Jane characterizes the action not as an incident but as operational discipline — "3Jane preemptively withdrew its idle USDC from Aave during the Kelp exploit as a precautionary measure" — and states "no prior security incidents have occurred on the 3Jane protocol." The timing supports the precautionary reading: the [KelpDAO/rsETH bridge exploit](https://governance.aave.com/t/rseth-incident-report-april-20-2026/24580) occurred April 18–20, 2026, exactly when idle reserves collapsed. **However**, the protocol's "no incident / routine precaution" framing partially conflicts with the onchain evidence: a precautionary Aave de-risk would not normally require a full `shutdownStrategy()` + a new `restartStrategy()` reinitializer (a 24h-timelocked code upgrade) to reopen deposits/redemptions. Treat the event as a successfully-handled but non-routine stress episode.
     - A related, unfixed-until-recently gap: the May 2026 yAudit found that `USD3._tend()`/`_harvestAndReport()` had no `isShutdown()` guard, so a post-shutdown report could re-wrap and re-supply funds that emergency-withdrawal had just freed — fixed in `9af1400` (see Audits).
   - **July 29 – August 5, 2026 — sharp idle-reserve compression, no shutdown.** Idle `waEthUSDC` held by MorphoCredit fell from ~$9.62M (block near July 29) to ~$2.89M (block near Aug 1) and recovered to ~$9.16M by Aug 5; DeFiLlama's idle-reserve series shows the same pattern at protocol level, bottoming near $3.5M on Aug 1–4 before recovering. Onchain `isShutdown()` was confirmed `false` at all three sampled blocks — unlike April, this was **not** an emergency shutdown, and no corresponding GitHub incident PR exists. It reads as a large, ordinary utilization swing (large draw against credit lines followed by repayment/redeposit), but it is the sharpest non-shutdown compression observed to date and coincides with the run-up to the LCC launch.
-  - **September 1, 2026 — Levered Callable Capital (LCC) goes live.** See *Levered Callable Capital (LCC)* under Funds Management and the dedicated appendix.
+  - **September 1, 2026 — Levered Callable Capital (LCC) epoch clock starts.** The factory, beacon, and two facilities are deployed with ~$7.55M standby commitment, but the USD3 deposit leg is disabled at this snapshot by the exhausted supply cap and missing v1.2 exemption/ring-fence integration. See *Levered Callable Capital (LCC)* under Funds Management and the dedicated appendix.
 - **Peg history:** USD3 is USDC-denominated and redeemable from idle reserves; no public depeg event reported. Note that during the April shutdown window, redemptions were effectively unavailable from the Yearn V3 strategy path.
 - **Phase 1 (bootstrapping):** During initial phase, USD3 operates in a "fully risk-off" configuration where funds are only deposited into Aave's USDC market. The unsecured lending component ramps up over time.
 
@@ -113,11 +113,12 @@ The source code includes a `/certora` directory indicating formal verification e
 
 ## Funds Management
 
-USD3 funds are deployed into three channels:
+USD3 assets are currently deployed through two onchain channels:
 
 1. **Aave V3 USDC market** — baseline yield on idle capital
 2. **Unsecured credit lines** — funds lent to approved borrowers at interest (base rate + risk premium + potential penalty rate)
-3. **Levered Callable Capital (LCC)** — third-party stakers post margin and stand ready to fund USD3 on a capital call; live since September 1, 2026, currently $0 called (see below)
+
+**LCC is an inbound funding rail, not a deployment destination.** Its stakers would supply new USDC into USD3 when called. At block 25,911,887, however, USD3's `availableDepositLimit()` is zero because `totalAssets()` (~$80.0145M) exceeds the $80M supply cap, so LCC cannot currently deliver capital.
 
 ### Accessibility
 
@@ -167,7 +168,7 @@ Any residual loss after the per-loan recovery above is then absorbed in the **lo
 
 ### Levered Callable Capital (LCC)
 
-LCC is a leveraged capital-commitment primitive that went live onchain **September 1, 2026** (`epochConfig().startTimestamp = 1788220800`), audited separately from the core money market by Guardian (Aug 3–26, 2026; 0 High/Critical, 20 Medium, 34 Low/Info — see Audits). It lets third parties ("stakers") post margin against a callable obligation to fund USD3 on demand, in exchange for standby fees — effectively an offchain-callable, onchain-enforced credit facility that gives 3Jane additional capital capacity without holding idle cash drag.
+LCC is a leveraged capital-commitment primitive whose deployed facilities began their epoch clock on **September 1, 2026** (`epochConfig().startTimestamp = 1788220800`), audited separately from the core money market by Guardian (Aug 3–26, 2026; 0 High/Critical, 20 Medium, 34 Low/Info — see Audits). It lets third parties ("stakers") post margin against a callable obligation to fund USD3 on demand, in exchange for standby fees. The contracts and commitments are live, but the deposit leg into USD3 is not enabled at this snapshot.
 
 **Mechanics (per [3Jane's LCC docs](https://docs.3jane.xyz/levered-callable-capital-lcc/mechanism) and onchain `epochConfig()`/`riskConfig()` reads, September 5, 2026):**
 
@@ -176,7 +177,7 @@ LCC is a leveraged capital-commitment primitive that went live onchain **Septemb
 - **Capital calls:** 3Jane (via the `OWNER_ROLE`, held by the 24h TimelockController) can open at most one capital call per epoch, sized up to the total active standby.
 - **Default handling:** a staker who misses a funding obligation has their **full margin slashed into an auction pool**; backstop bidders compete in a rising-price Dutch auction (`maxAuctionAwardBps = 10000`, i.e. up to 100% of the missed amount can be awarded), with any unfilled residual absorbed by 3Jane. `slashFeeBps = 0` (no protocol auction fee).
 - **Exit:** unstaking requires a 2-epoch delay (`exitDelayEpochs = 2`) and is capped at 20% of the facility per epoch (`exitCapBps = 2000`); funded USD3 is additionally locked in a 35-day cooldown vault before it becomes redeemable.
-- **Trust model:** the **margin oracle is "fully trusted"** for pricing non-USDC margin assets into USDC — a new, per-facility oracle dependency (see External Dependencies). 3Jane can also rotate the margin oracle, adjust risk caps, and pause or shut down a facility (pause is one-way; only the timelock-gated beacon upgrade path can restore a shut-down facility).
+- **Trust model:** the **margin oracle is "fully trusted"** for pricing non-USDC margin assets into USDC — a new, per-facility oracle dependency (see External Dependencies). 3Jane can also rotate the margin oracle and adjust risk caps. A guardian or owner can `pause()` a facility, only the owner can `unpause()` it, and owner-triggered `shutdown()` is terminal.
 
 **Deployed contracts (Ethereum, verified onchain September 5, 2026):**
 
@@ -191,16 +192,18 @@ LCC is a leveraged capital-commitment primitive that went live onchain **Septemb
 | Margin oracle — waEthUSDC/USDC | [`0xb6F6BAF2532859e8482A89FF75563426417f70fa`](https://etherscan.io/address/0xb6F6BAF2532859e8482A89FF75563426417f70fa) | Fully-trusted price feed for the USDC facility |
 | Margin oracle — waEthUSDT/USDC | [`0x6e93B9C9a09aD1Fc1Dd5316b525BFFE1ec3a8b91`](https://etherscan.io/address/0x6e93B9C9a09aD1Fc1Dd5316b525BFFE1ec3a8b91) | Fully-trusted price feed for the USDT facility |
 
-**Current state (onchain, block 25,911,887, September 5, 2026):** both facilities are in their genesis epoch (`currentEpoch() = 0`) with **no capital call yet opened** (`calledEpochs() = []`) and the cooldown vault empty (`totalAssets() = 0`). Combined **active standby commitment is ~$7.55M** of the $15M combined cap (~50%): ~$7.15M/$10M on the USDC facility, ~$395K/$5M on the USDT facility, backed by ~$453K and ~$25K of margin respectively. **No USD3 holder is exposed to LCC today** — the facility currently only holds staker margin and unfunded commitments; risk to USD3/sUSD3 activates only once a capital call is opened and funded.
+**Current state (onchain, block 25,911,887, September 5, 2026):** both facilities are in their genesis epoch (`currentEpoch() = 0`) with **no capital call yet opened** (`calledEpochs() = []`) and the cooldown vault empty (`totalAssets() = 0`). Combined **active standby commitment is ~$7.55M** of the $15M combined cap (~50%): ~$7.15M/$10M on the USDC facility and ~$395K/$5M on the USDT facility. The posted margin is **453,224.499765 waEthUSDC shares (~$536,847.55 at the live oracle price)** and **25,266.610486 waEthUSDT shares (~$29,669.87)**, respectively, or about **$566.5K combined**. The 7.5% commitment ratio reflects the price captured when each position was activated, so it need not equal the current oracle-valued margin exactly.
 
-**What LCC does and does not change for an ordinary USD3/sUSD3 holder:** LCC is a parallel capital-raising rail, not a modification to USD3's existing risk. Staker margin sits in the LCC vault contracts, separate from USD3. When (if) a capital call is funded, that USDC is deposited into USD3 exactly like any other depositor's USDC — 1:1, minting ordinary USD3 shares held in the `USD3l` cooldown vault for the staker. Once minted, LCC-derived USD3 is the same ERC-4626 share class as organic USD3 — there is no separate risk tranche, and a passive holder's per-share claim and risk are unaffected by whether the USD3 in circulation was funded organically or via a capital call. The one verified, narrow exception is a code-level one: Guardian's audit scope confirms LCC required new deposit-routing logic inside `USD3.sol` itself (gated to the `DEPOSIT_OPERATOR_ROLE` / `LCCMarginDepositHelper`) — a new function surface on the same contract that holds every USD3 holder's funds, audited with 0 High/Critical findings but new and not yet battle-tested in production.
+The LCC funding path is **not operational at this snapshot**. USD3 uses implementation v1.1.4 (`0xb606fb370eaaad03d71b49ae5e42aa4aec7458d9`), which does not expose `supplyCapExempt`, `ringFenceConduit`, `ringFencedLiquidity`, or `releaseRingFence`; calls to those selectors revert. USD3 `totalAssets()` is ~$80.0145M against an $80M supply cap, and `availableDepositLimit()` returns zero for both LCC vaults. Because `LCCVault._deliverWrapped()` uses the standard `usd3.deposit(...)` path, both direct call funding and auction fills would revert unless governance first raises the cap or deploys and configures the audited v1.2 integration. Opening a call before that remediation could strand stakers through the funding deadline and expose them to slashing. **No USD3 holder has funded LCC exposure today.**
+
+**What LCC does and does not change for an ordinary USD3/sUSD3 holder:** LCC is a parallel capital-raising rail. Staker margin sits in the LCC vault contracts, separate from USD3. `LCCVault._deliverWrapped()` deposits received USDC through USD3's standard ERC-4626 `deposit()` function and sends the resulting fungible USD3 shares to the `USD3l` cooldown vault; `DEPOSIT_OPERATOR_ROLE` belongs to the helper that deposits **margin** into LCC and does not bypass USD3's deposit limit. The audited, intended v1.2 USD3 integration instead adds `supplyCapExempt` and `ringFenceConduit` configuration: accepted conduit deposits increase `ringFencedLiquidity`, which is excluded from ordinary withdrawal capacity until management calls `releaseRingFence()`. Those controls are not present in the deployed v1.1.4 implementation, so this future integration is not yet a live USD3 trust surface.
 
 **Resolved — unfilled-residual mechanics confirmed from source:** `LCCVault.sol` (verified against both the Guardian-audited commit and the live Etherscan-verified bytecode at the beacon implementation `0xf543f3c822b48f833f27e6c41f344012362f1627`) shows the "3Jane absorbs any unfilled residual" language from the docs maps to a fully self-contained mechanism with **no code path into InsuranceFund, MorphoCredit, CreditLine, or USD3 beyond ordinary deposits**:
 
 - `_deliverWrapped()` only ever calls `usd3.deposit(fundingAmount, ...)` for USDC actually received from a staker or auction filler — USD3 is never force-funded or credited for undelivered capital.
 - `_finalizeEpochSlash()` computes `shortfallAmount = callAmount - fundedAmount` (the USDC never delivered) and slashes the defaulting staker's margin to back a Dutch auction for that shortfall.
-- `_settleAuction()` / `_disposeSlashSurplus()` route any slashed margin left over after the auction (unawarded to fillers) to `treasury` — the same 3-of-5 multisig address confirmed via `assetConfig().treasury` — via `sweepTreasury()`. `InsuranceFund` does not appear anywhere in the contract (confirmed by string search on the verified source).
-- Net effect: if a capital call goes fully unfilled, USD3 simply **never receives that portion of the intended funding** — a missed capital raise for 3Jane, not a liability transferred to USD3/sUSD3/the Insurance Fund. The multisig keeps any leftover slashed margin as compensation; existing USD3/sUSD3 holders are not exposed either way.
+- `_settleAuction()` / `_disposeSlashSurplus()` do **not** send every unawarded margin share to `treasury`. The library computes a `returnPool` and recredits that portion to defaulting stakers through `returnCommitment`; treasury receives only `surplus - returnPool`. For auction-eligible defaults, the gross pool's unfilled share plus the auction fee goes to treasury, while residual filled-share value after bidder awards can return to defaulters. A completely unfilled auction sends the full pool to treasury. `InsuranceFund` does not appear anywhere in this path.
+- Net effect: if a capital call goes fully unfilled, USD3 simply **never receives that portion of the intended funding** — a missed capital raise for 3Jane, not a liability transferred to USD3/sUSD3/the Insurance Fund. Slash proceeds are split by the auction accounting above; existing USD3/sUSD3 holders do not inherit the funding shortfall.
 
 ## Liquidity Risk
 
@@ -257,9 +260,10 @@ All core contracts use a **two-tier TimelockController system** (verified onchai
 - `OWNER_ROLE` (count 1): the 24h TimelockController — parameter/risk-cap changes, same governance path as the rest of the protocol.
 - `GUARDIAN_ROLE` (count 2): the 3-of-5 multisig + the Hypernative EOA [`0x48c59b01Af01515E69460B6B5b55E557E914941d`](https://etherscan.io/address/0x48c59b01Af01515E69460B6B5b55E557E914941d) — pause-only, same holders as `EMERGENCY_AUTHORIZED_ROLE` on EmergencyController v2.
 - `DEPOSIT_OPERATOR_ROLE` (count 1): the `LCCMarginDepositHelper` contract — margin deposit entry point.
-- `LISTER_ROLE` (count 1): a single EOA, [`0x485828f6373c5FB1aA1DD8A58D6A6E7803fC5b15`](https://etherscan.io/address/0x485828f6373c5FB1aA1DD8A58D6A6E7803fC5b15) — **held directly by an EOA, not gated by the multisig or a timelock**. Its scope is narrow (registers new official facilities in the factory's registry; per the ABI it does not touch staker margin or funds), but it is a new single-key privilege that did not exist before LCC.
+- `LISTER_ROLE` (count 1): a single EOA, [`0x485828f6373c5FB1aA1DD8A58D6A6E7803fC5b15`](https://etherscan.io/address/0x485828f6373c5FB1aA1DD8A58D6A6E7803fC5b15) — **held directly by an EOA, not gated by the multisig or a timelock**. It can set and clear per-depositor caps, controlling who may enter/top up and at what size; only `OWNER_ROLE` can create vaults. It cannot move deposited margin.
+- `BOUNCER_ROLE` (count 0): currently unassigned. If granted later, a holder could reduce active commitment and return the paired margin immediately, bypassing ordinary exit timing and caps.
 - The beacon controlling both vaults' shared implementation ([`0xa767a51810644dDc34588cB8392EFd2591350302`](https://etherscan.io/address/0xa767a51810644dDc34588cB8392EFd2591350302)) is owned by the same 7-day TimelockController as the core proxies — upgrade risk is symmetric with the rest of the protocol.
-- Each vault's `assetConfig().treasury` is the 3-of-5 multisig directly (not a separate treasury contract) — auction fees and residuals accrue straight to the multisig.
+- Each vault's `assetConfig().treasury` is the 3-of-5 multisig directly (not a separate treasury contract) — auction fees and treasury-allocated surplus accrue to the multisig.
 
 ### Programmability
 
@@ -278,7 +282,7 @@ All core contracts use a **two-tier TimelockController system** (verified onchai
 | **Reclaim Protocol / zkTLS** | High | Offchain data verification for credit scores and bank data. Novel technology with limited battle-testing |
 | **EigenLayer AVS** | High | ZK proof distribution and verification. Early-stage infrastructure |
 | **Hypernative** | Medium-High | Automated monitoring + emergency response (one of two `EMERGENCY_AUTHORIZED_ROLE` holders on EmergencyController v2, and `GUARDIAN_ROLE` on LCCVaultFactory). New runtime trust dependency; failure mode is a missed-or-malicious automated pause |
-| **LCC (Levered Callable Capital)** | None today; monitor | New leveraged capital-commitment facility live since Sept 1, 2026, ~$7.55M staked standby, **$0 called** — no current exposure for USD3/sUSD3 holders. Funded capital would be fungible, ordinary USD3; the facility's own auction/slashing/oracle risk is borne by LCC stakers, not USD3 holders, except via the narrow `USD3.sol` deposit-routing integration (audited, 0 High/Critical) |
+| **LCC (Levered Callable Capital)** | None today; monitor | Contracts and epoch clock live since Sept 1, 2026, ~$7.55M standby, **$0 called**. The funding path is disabled at the snapshot because deployed USD3 v1.1.4 lacks the audited v1.2 exemption/ring-fence integration and the ordinary supply cap is exhausted. A cap increase or v1.2 deployment/configuration would activate this dependency |
 | **Margin oracles (waEthUSDC/USDC, waEthUSDT/USDC)** | Low (confined to LCC) | "Fully trusted" per 3Jane's own LCC risk disclosure — prices *staker margin* for slashing/auction/standby sizing within LCC. Does not price USD3/sUSD3 itself and has no direct read-path into USD3 share price |
 | **Plaid** | Medium | Bank account data access. Centralized offchain dependency |
 | **Credit Karma** | Medium | VantageScore/FICO data. Centralized offchain dependency |
@@ -313,7 +317,7 @@ All core contracts use a **two-tier TimelockController system** (verified onchai
 | Hypernative agent (EOA) | [`0x48c59b01af01515e69460b6b5b55e557e914941d`](https://etherscan.io/address/0x48c59b01af01515e69460b6b5b55e557e914941d) | Automated emergency calls; nonce/activity spikes |
 | InsuranceFund | [`0x4507B5B23340D248457d955a211C8B0634D29935`](https://etherscan.io/address/0x4507B5B23340D248457d955a211C8B0634D29935) | `waEthUSDC` balance (currently ≈$1.03M USDC at `waEthUSDC` rate); `bring()` calls (drain to CreditLine) |
 | MarkdownController | [`0xF0eaE71092F3c9411A9EAb8F81E7d91D29726214`](https://etherscan.io/address/0xF0eaE71092F3c9411A9EAb8F81E7d91D29726214) | Markdown parameter changes, defaulted-position write-downs |
-| LCCVaultFactory | [`0x95431c2Fbfe3E0f17a61EF1d7601Eb34aE6cd6ba`](https://etherscan.io/address/0x95431c2Fbfe3E0f17a61EF1d7601Eb34aE6cd6ba) | New facility registrations (`LISTER_ROLE`), role membership changes, risk-cap updates |
+| LCCVaultFactory | [`0x95431c2Fbfe3E0f17a61EF1d7601Eb34aE6cd6ba`](https://etherscan.io/address/0x95431c2Fbfe3E0f17a61EF1d7601Eb34aE6cd6ba) | Vault creation (`OWNER_ROLE`); depositor-cap changes (`LISTER_ROLE`); role membership, default-cap, and pending-owner changes |
 | LCCVault — LCC-WAETHUSDC-01 | [`0x8350ba7c69aeADD74b891EFc53F52a0f592aD796`](https://etherscan.io/address/0x8350ba7c69aeADD74b891EFc53F52a0f592aD796) | Capital call openings, funding shortfalls/slashes, auction outcomes, standby/margin totals |
 | LCCVault — LCC-WAETHUSDT-01 | [`0xF4ae98CD6ef156aD87C1f004BBF0cdaB6442042f`](https://etherscan.io/address/0xF4ae98CD6ef156aD87C1f004BBF0cdaB6442042f) | Capital call openings, funding shortfalls/slashes, auction outcomes, standby/margin totals |
 | Margin oracles (waEthUSDC, waEthUSDT) | [`0xb6F6BAF2532859e8482A89FF75563426417f70fa`](https://etherscan.io/address/0xb6F6BAF2532859e8482A89FF75563426417f70fa), [`0x6e93B9C9a09aD1Fc1Dd5316b525BFFE1ec3a8b91`](https://etherscan.io/address/0x6e93B9C9a09aD1Fc1Dd5316b525BFFE1ec3a8b91) | Oracle rotation (24h timelock), reported price sanity |
@@ -335,7 +339,7 @@ All core contracts use a **two-tier TimelockController system** (verified onchai
 - Large withdrawal requests and redemption queue depth
 - Aave V3 USDC utilization (affects idle reserve availability)
 - DeFiLlama TVL series for 3Jane — sharp idle-reserve drops are an early signal of a strategy shutdown or mass redemption
-- **LCC:** first `openEpochCall()` on either vault (first exposure of USD3 to LCC-funded capital); auction/slash events (staker default); `LISTER_ROLE` transactions from the EOA holder; margin oracle rotations; beacon (`0xa767a5...`) upgrade schedules; `USD3l` cooldown-vault balance (tracks funded-but-locked LCC capital)
+- **LCC:** any USD3 supply-cap increase or v1.2 upgrade/configuration that enables LCC deposits; first `openEpochCall()` and first successful funding; auction/slash events; depositor-cap changes by `LISTER_ROLE`; any `BOUNCER_ROLE` grant or bounce; margin-oracle rotations; beacon (`0xa767a5...`) upgrade schedules; `USD3l` cooldown-vault balance
 
 ## Appendix: Contract Architecture
 
@@ -393,11 +397,11 @@ All core contracts use a **two-tier TimelockController system** (verified onchai
  │                                          .bring() ⇒ CreditLine      │
  └─────────────────────────────────────────────────────────────────────┘
 
- LCC Layer (Levered Callable Capital — NEW, live Sept 1, 2026)
+ LCC Layer (epoch clock started Sept 1; funding disabled at snapshot)
  ┌─────────────────────────────────────────────────────────────────────┐
  │  LCCVaultFactory  0x95431c2F…  (AccessControlEnumerable)             │
- │   ├─ OWNER_ROLE: 24h Timelock          ├─ GUARDIAN_ROLE: 3/5 Safe +  │
- │   ├─ LISTER_ROLE: single EOA 0x485828… │    Hypernative EOA 0x48c5…  │
+ │   ├─ OWNER_ROLE: 24h Timelock          ├─ GUARDIAN_ROLE: Safe + HN    │
+ │   ├─ LISTER_ROLE: EOA 0x485828… (depositor caps)                    │
  │   └─ DEPOSIT_OPERATOR_ROLE: LCCMarginDepositHelper 0x7C3c37…         │
  │        │ deploys (beacon proxy, owner = 7d Timelock 0xa767a5…)       │
  │        ▼                                                            │
@@ -427,7 +431,7 @@ All core contracts use a **two-tier TimelockController system** (verified onchai
 - `EmergencyController v2` bypasses both timelocks for binary stop controls only (pause / set caps to zero / revoke a credit line). Both the multisig and the Hypernative agent EOA can invoke it.
 - The CreditLine contract trusts an `ozd` for credit-line approval / repayment posting / debt settlement; today this resolves to EmergencyController v2, which is the same address as `emergencyAdmin`. The pending OperationalController (PR #111) is the planned split.
 - The `restartStrategy()` reinitializer added in PR #112 demonstrated that recovery from a Yearn V3 shutdown sits behind the timelock-gated upgrade path — now with the 7-day timelock, worst-case redemption-restart latency is at least 7 days (assuming the upgrade is already coded and ready to schedule).
-- LCC largely reuses the existing trust boundaries (24h timelock for parameters, 7d timelock for the shared beacon, multisig+Hypernative for pause) but adds one boundary that did not exist before: `LISTER_ROLE` on `LCCVaultFactory` is held directly by a single EOA with no timelock or multisig gate. Its documented scope is limited to registering new official facilities, not moving funds, but it is a new unilateral key.
+- LCC largely reuses the existing trust boundaries (24h timelock for parameters, 7d timelock for the shared beacon, multisig+Hypernative for pause) but adds one boundary that did not exist before: `LISTER_ROLE` on `LCCVaultFactory` is held directly by a single EOA with no timelock or multisig gate. It can set or clear per-depositor caps, controlling admission and top-up sizing, but cannot create vaults or move margin. `BOUNCER_ROLE`, which could force an immediate commitment reduction and paired-margin return, has zero holders at this snapshot.
 - The LCC margin oracle is described by 3Jane itself as "fully trusted" — there is no fallback price source or onchain sanity bound disclosed. A stale or manipulated oracle read would misprice staker margin for slashing/auction purposes.
 
 ## Appendix: Default → USD3 Loss Flow
@@ -507,7 +511,7 @@ Key takeaway: the multisig never "reports" a negative value. There is no admin `
 - **Improved emergency tooling:** EmergencyController v2 (deployed Feb 2026) introduces role separation; `EMERGENCY_AUTHORIZED_ROLE` (and the analogous LCC `GUARDIAN_ROLE`) is held by both the multisig and a Hypernative automation agent for 24/7 monitored response
 - **Growing audit surface, all severe findings fixed:** 6 audits to date across the core money market, the USD3/sUSD3 update, and the new LCC facility; every Critical/High finding across all 6 has been fixed, including 3 new Highs on the live USD3/sUSD3 contracts found by yAudit in May 2026
 - **No repeat of the April 2026 shutdown:** a sharp idle-reserve compression in late July/early August 2026 (idle `waEthUSDC` briefly near $2.9M) resolved without `isShutdown()` ever flipping and without any emergency PR — evidence the ordinary utilization mechanics can absorb real stress without invoking emergency powers
-- **LCC audited pre-launch:** the new leveraged capital facility was reviewed by Guardian (Aug 2026, 0 High/Critical, High Confidence 4/5) before its September 1, 2026 launch, and currently carries no funded exposure to USD3/sUSD3 holders ($0 called against ~$7.55M staked standby)
+- **LCC audited before epoch start:** Guardian reviewed the facility and intended USD3 v1.2 integration (Aug 2026, 0 High/Critical, High Confidence 4/5). The contracts hold ~$7.55M standby but $0 has been called, and the USD3 deposit prerequisite remains disabled at the snapshot
 
 ### Key Risks
 
@@ -520,7 +524,7 @@ Key takeaway: the multisig never "reports" a negative value. There is no admin `
 - **EmergencyController outside audit scope:** Per the protocol DD document, the EmergencyController "was added after the audit window" — so the most powerful safety contract (can pause the protocol, zero caps, revoke credit lines, and is partly controlled by a Hypernative hot EOA) is **not covered by any of the six audits**.
 - **Two live, unfixed valuation-integrity gaps (yAudit, May 2026):** 3Jane has explicitly chosen not to code-fix (1) new-depositor capture of unrealized borrower premium at a stale price, and (2) early-redeemer exit at an inflated NAV before a defaulted borrower's markdown is applied — both rely on operational mitigation only. See Provability.
 - **Unverified off-chain ABF sleeve and FCC:** The DD document describes an Asset-Backed Financing sleeve, and 3Jane's own docs separately describe Fintech Credit Conduits (FCC) — both off-chain financing channels routed through unnamed SPVs / a "sponsor entity" that are not yet visible onchain. If activated, either would add a multisig/keeper-attested valuation dependency that can directly move USD3/sUSD3 PPS — see *Provability*.
-- **LCC is a new, separately-scoped facility to watch, not a current risk to USD3 holders:** its "fully trusted" margin oracle, the ungated `LISTER_ROLE` EOA, and its Dutch-auction slashing mechanism are risks borne by LCC stakers and the facility's own integrity, not by passive USD3/sUSD3 holders — LCC-funded capital is fungible, ordinary USD3 with no separate risk tranche, and $0 has been called to date. Source review of `LCCVault.sol` (see Provability) confirms an unfilled capital call simply isn't delivered to USD3 — there is no code path from LCC into the Insurance Fund, MorphoCredit, or USD3 beyond ordinary deposits.
+- **LCC is a new, separately-scoped facility to watch, not a current funded risk to USD3 holders:** its "fully trusted" margin oracle, single-EOA depositor-cap control (`LISTER_ROLE`), potential future `BOUNCER_ROLE`, and Dutch-auction slashing mechanism primarily affect LCC stakers and facility integrity. The deployed USD3 v1.1.4 contract is already over its supply cap and lacks the audited v1.2 exemption/ring-fence controls, so capital-call funding and auction fills cannot currently complete. If enabled, received USDC would mint fungible USD3 into `USD3l`; there remains no InsuranceFund path for an unfilled call.
 
 ### Critical Risks
 
@@ -538,7 +542,7 @@ Key takeaway: the multisig never "reports" a negative value. There is no admin `
 
 - [x] **No audit** — 3Jane has been audited by Veridise, Sherlock x2, Electisec, yAudit (May 2026), and Guardian (LCC, Aug 2026) — 6 audits total. Additionally inherits Morpho Blue audits. ✅ PASS
 - [ ] **Unverifiable reserves** — Outstanding loan values depend on offchain repayment status. Onchain reserves (Aave-backed idle + InsuranceFund `waEthUSDC`) are verifiable, but total asset value including outstanding loans is partially opaque ⚠️ CONDITIONAL PASS
-- [x] **Total centralization** — Uses 3/5 multisig with 24h/7d two-tier timelock; ProxyAdmins and LCC beacon owned by timelock; emergency role split off into AccessControlEnumerable. One new ungated single-EOA role (LCC `LISTER_ROLE`) noted but scoped to facility registration only, not funds ✅ PASS
+- [x] **Total centralization** — Uses 3/5 multisig with 24h/7d two-tier timelock; ProxyAdmins and LCC beacon owned by timelock; emergency role split off into AccessControlEnumerable. The ungated single-EOA LCC `LISTER_ROLE` controls depositor admission/caps, not vault creation or funds; `BOUNCER_ROLE` has zero holders ✅ PASS
 
 **All gates pass (conditional).** Proceed to category scoring.
 
@@ -563,10 +567,10 @@ Key takeaway: the multisig never "reports" a negative value. There is no admin `
 |--------|-----------|
 | Upgradeability | MorphoCredit, USD3, sUSD3, ProtocolConfig, AdaptiveCurveIRM upgradeable via TransparentUpgradeableProxy. As of September 5, 2026: **all five ProxyAdmins are owned by the 7-day TimelockController** (`0x3D3C41419Ab401cd25055E8f9421D7D96d887885`), which also owns the new LCC beacon. USD3/sUSD3 implementations unchanged since v1.1.4 (USD3 → `0xb606fb370eaaad03d71b49ae5e42aa4aec7458d9`, sUSD3 → `0x529cbf11ffbc272d63858ca40a2c7f2695712073`) |
 | Timelock | **Two-tier system** (verified onchain September 5, 2026): (a) **7-day TimelockController** at `0x3D3C41419Ab401cd25055E8f9421D7D96d887885` (`getMinDelay() = 604800`) owns all ProxyAdmins and the LCC beacon — implementation upgrades require 7 days; (b) **24h TimelockController** at `0x1dCcD4628d48a50C1A7adEA3848bcC869f08f8C2` (`getMinDelay() = 86400`) remains `owner()` of MorphoCredit (proxy), CreditLine, ProtocolConfig, MarkdownController, and `OWNER_ROLE` on `LCCVaultFactory` — configuration changes require 24h. Both timelocks are self-administered; the 3-of-5 multisig holds PROPOSER + EXECUTOR + CANCELLER on both. This split materially addresses the Veridise recommendation for different delays by action type. |
-| Privileged roles | Pause, config changes, credit line approval, contract upgrades, debt settlement. EmergencyController v2 (Feb 2026) split emergency role from owner role; OperationalController split (Apr 2026) merged in v1.1.4 but **still not executed onchain** (`ProtocolConfig.emergencyAdmin` and `CreditLine.ozd` still return `0x84b31b8...`), unchanged since July 2026. LCC adds `LISTER_ROLE` on the factory, held directly by a single EOA with no timelock/multisig gate — scoped to facility registration only, not funds. |
+| Privileged roles | Pause, config changes, credit line approval, contract upgrades, debt settlement. EmergencyController v2 (Feb 2026) split emergency role from owner role; OperationalController split (Apr 2026) merged in v1.1.4 but **still not executed onchain** (`ProtocolConfig.emergencyAdmin` and `CreditLine.ozd` still return `0x84b31b8...`), unchanged since July 2026. LCC adds a single-EOA `LISTER_ROLE` that controls depositor admission/caps but cannot create vaults or move margin; `BOUNCER_ROLE` currently has no holders. |
 | Emergency | EmergencyController v2 at `0x84b31b8...` holds `EMERGENCY_AUTHORIZED_ROLE` for the multisig + a Hypernative agent EOA — bypasses both timelocks for binary stop controls only. `LCCVaultFactory.GUARDIAN_ROLE` reuses the same two holders for facility-level pause. |
 
-**Subcategory A Score: 3.0/5** — 3/5 multisig with two-tier timelock: 7-day for implementation upgrades, 24h for configuration changes. Per rubric: 3/5 multisig maps to ~4; the 7-day upgrade delay pulls toward 2 (better), while 24h config delay and pending OperationalController deployment keep this from improving further. The new `LISTER_ROLE` EOA is noted as a new single-key privilege but is narrow enough (registry-only, no fund access) that it does not move this subscore.
+**Subcategory A Score: 3.0/5** — 3/5 multisig with two-tier timelock: 7-day for implementation upgrades, 24h for configuration changes. Per rubric: 3/5 multisig maps to ~4; the 7-day upgrade delay pulls toward 2 (better), while 24h config delay and pending OperationalController deployment keep this from improving further. The `LISTER_ROLE` EOA is a single-key privilege over depositor admission and caps, but not vault creation or funds; documenting its exact scope does not change this subscore.
 
 **Subcategory B: Programmability**
 
@@ -586,7 +590,7 @@ Key takeaway: the multisig never "reports" a negative value. There is no admin `
 | Aave V3 | Critical, blue-chip (held as `waEthUSDC` static-wrapped aToken) |
 | Morpho Blue (forked) | Critical, well-audited base but modifications add risk |
 | Yearn V3 TokenizedStrategy | Critical — April 2026 incident revealed shutdown semantics couple emergency response to governance upgrades |
-| LCC (Levered Callable Capital) | No current USD3/sUSD3 exposure ($0 called); narrow, audited `USD3.sol` integration surface worth tracking, not yet risk-bearing |
+| LCC (Levered Callable Capital) | No current USD3/sUSD3 exposure ($0 called); deposit leg disabled until the supply cap is raised or audited v1.2 exemption/ring-fence controls are deployed and configured |
 | Margin oracles (waEthUSDC/USDC, waEthUSDT/USDC) | High — "fully trusted" per 3Jane's own disclosure, no described fallback |
 | zkTLS / Reclaim / EigenLayer AVS | High criticality, early-stage technologies |
 | Hypernative | Medium-High — new runtime trust dependency for automated emergency response |
@@ -596,7 +600,7 @@ Key takeaway: the multisig never "reports" a negative value. There is no admin `
 
 **Centralization Score = (3.0 + 4 + 4) / 3 = 3.67/5**
 
-**Score: 3.67/5** — 3/5 multisig with two-tier timelock partially addresses the Veridise recommendation, but signers are anonymous and the un-audited EmergencyController holds significant power; the OperationalController remains undeployed. LCC adds a new ungated `LISTER_ROLE` EOA (narrow scope — facility registration only, not funds) and a new, audited `USD3.sol` deposit-routing surface, both noted in Governance above but not scored, since neither currently bears on USD3/sUSD3 holder risk with $0 LCC capital called.
+**Score: 3.67/5** — 3/5 multisig with two-tier timelock partially addresses the Veridise recommendation, but signers are anonymous and the un-audited EmergencyController holds significant power; the OperationalController remains undeployed. LCC adds a single-EOA depositor-admission/cap role, while the audited v1.2 USD3 exemption/ring-fence integration is not deployed. These are documented without changing the score because $0 has been called and the deposit prerequisite is disabled.
 
 #### Category 3: Funds Management (Weight: 30%)
 
@@ -677,7 +681,7 @@ Final Score = (Centralization × 0.30) + (Funds Mgmt × 0.30) + (Audits × 0.20)
 
 **Final Risk Tier: Elevated Risk (3.55/5.0) — Limited approval, strict limits**
 
-The tier is **Elevated** (3.55/5.0), just above the 3.5 boundary with Medium Risk. Risk drivers, none of which involve LCC: (1) the first-loss buffer now covers only ~12.6% of the borrow book (down from ~17%), (2) utilization has risen to ~84.5% with idle reserves demonstrably able to compress under $3M without a declared shutdown, (3) two live valuation-integrity gaps in USD3/sUSD3 remain unfixed by choice, (4) OperationalController is still not deployed, and (5) no bug bounty for an ~$80M protocol. Mitigants: two-tier timelock (7d upgrades, 24h config), EmergencyController v2 + Hypernative automation, no repeat of the April 2026 shutdown despite a real stress episode, and a growing and clean audit trail (all Critical/High findings fixed across 6 audits). **LCC is explicitly not a scoring driver today** — it is a new, separately-audited capital facility with $0 called and no current exposure for USD3/sUSD3 holders; it is tracked as a monitoring item and reassessment trigger (first capital call) rather than a present risk. Because the score sits just above the tier boundary, either the buffer/utilization trend improving or the two unfixed audit findings being resolved could pull this back to Medium Risk at the next reassessment.
+The tier is **Elevated** (3.55/5.0), just above the 3.5 boundary with Medium Risk. Current risk drivers, none of which involve funded LCC exposure: (1) the first-loss buffer now covers only ~12.6% of the borrow book (down from ~17%), (2) utilization has risen to ~84.5% with idle reserves demonstrably able to compress under $3M without a declared shutdown, (3) two live valuation-integrity gaps in USD3/sUSD3 remain unfixed by choice, (4) OperationalController is still not deployed, and (5) no bug bounty for an ~$80M protocol. Mitigants: two-tier timelock (7d upgrades, 24h config), EmergencyController v2 + Hypernative automation, no repeat of the April 2026 shutdown despite a real stress episode, and a growing and clean audit trail (all Critical/High findings fixed across 6 audits). **LCC is explicitly not a scoring driver today** — it has $0 called, no funded USD3/sUSD3 exposure, and its deposit prerequisite is disabled at the snapshot. A supply-cap increase or v1.2 activation, followed by the first successful funding, is the relevant reassessment sequence. Because the score sits just above the tier boundary, either the buffer/utilization trend improving or the two unfixed audit findings being resolved could pull this back to Medium Risk at the next reassessment.
 
 ---
 
@@ -692,7 +696,7 @@ The tier is **Elevated** (3.55/5.0), just above the 3.5 boundary with Medium Ris
 - **Buffer-based:** Reassess if the combined sUSD3 + Insurance Fund buffer falls below 10% of the outstanding borrow book (currently ~12.6%)
 - **Audit-based:** Reassess if additional audits are completed or a bug bounty is established (could improve score)
 - **Dependency-based:** Reassess if Aave V3, EigenLayer AVS, or Hypernative experience significant security events
-- **LCC-based:** Reassess on the first `openEpochCall()` against either LCC facility (first USD3/sUSD3 exposure), on any staker default/slash/auction event, or on any margin-oracle rotation
+- **LCC-based:** Reassess on any supply-cap increase or USD3 v1.2 upgrade/configuration that enables LCC deposits; the first opened call and first successful funding; any staker default/slash/auction event; any `BOUNCER_ROLE` grant/bounce; or any margin-oracle rotation
 - **Phase-based:** Reassess when Phase 1 bootstrapping ends and full unsecured lending is active
 
 ## Assessment History

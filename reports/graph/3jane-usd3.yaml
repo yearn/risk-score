@@ -78,7 +78,12 @@ nodes:
     label: LCCVaultFactory
     address: "0x95431c2Fbfe3E0f17a61EF1d7601Eb34aE6cd6ba"
     category: governance
-    note: "OWNER_ROLE=24h timelock; GUARDIAN_ROLE=multisig+Hypernative; LISTER_ROLE=single ungated EOA"
+    note: "OWNER_ROLE=24h timelock; GUARDIAN_ROLE=multisig+Hypernative; LISTER_ROLE=single EOA controlling depositor caps"
+  - id: lcc-beacon
+    label: LCC UpgradeableBeacon
+    address: "0xa767a51810644dDc34588cB8392EFd2591350302"
+    category: governance
+    note: Shared LCCVault implementation; owned by 7-day timelock
 
   # === Strategies / Capital deployment ===
   - id: aave-strategy
@@ -92,7 +97,7 @@ nodes:
   - id: lcc-facilities
     label: LCC (Levered Callable Capital)
     category: strategy
-    note: "Live Sept 1, 2026. ~$7.55M staked standby, $0 called. 13.33x leverage, 35-day funded-capital cooldown"
+    note: "Epoch clock started Sept 1, 2026; ~$7.55M standby, $0 called; funding disabled by USD3 cap and deployed v1.1.4"
 
   # === External dependencies ===
   - id: aave-v3-usdc
@@ -160,13 +165,17 @@ edges:
     kind: controls
     label: OWNER_ROLE (24h delay)
   - from: timelock-7d
-    to: lcc-factory
+    to: lcc-beacon
     kind: controls
-    label: beacon owner (7d delay, shared implementation)
+    label: owner (7d delay)
   - from: lcc-factory
     to: lcc-facilities
     kind: manages
-    label: deploys/registers facilities; risk caps
+    label: deploys facilities; default risk caps
+  - from: lcc-beacon
+    to: lcc-facilities
+    kind: controls
+    label: shared implementation
 
   # === Internal vault flow ===
   - from: sUSD3
@@ -182,11 +191,11 @@ edges:
   - from: morpho-credit
     to: aave-strategy
     kind: allocates-to
-    label: "idle reserves (~27%)"
+    label: "idle reserves (~15.5%)"
   - from: morpho-credit
     to: unsecured-loans
     kind: allocates-to
-    label: "~73% utilization"
+    label: "~84.5% utilization"
 
   # === Credit underwriting wiring ===
   - from: credit-line
@@ -230,7 +239,7 @@ edges:
   - from: lcc-facilities
     to: USD3
     kind: deposits-into
-    label: "capital call funding (none called yet)"
+    label: "capital call funding ($0; disabled at snapshot)"
   - from: lcc-facilities
     to: margin-oracles
     kind: routes-through
