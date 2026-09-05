@@ -693,5 +693,5 @@ The tier is **Elevated** (3.6/5.0). Risk drivers: (1) the first-loss buffer now 
 | --- | --- | --- |
 | [March 4, 2026](https://github.com/yearn/risk-score/pull/77) | 3.5 | Initial assessment |
 | [July 3, 2026](https://github.com/yearn/risk-score/pull/168) | 3.4 | Reassessment after April 2026 emergency shutdown |
-| September 5, 2026 | 3.6 | Reassessment: Levered Callable Capital (LCC) launch, thinner loss buffer, unfixed valuation-integrity audit findings |
+| [September 5, 2026](https://github.com/yearn/risk-score/pull/444) | 3.6 | Reassessment: Levered Callable Capital (LCC) launch, thinner loss buffer, unfixed valuation-integrity audit findings |
 
