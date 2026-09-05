@@ -1,10 +1,10 @@
 # Protocol Risk Assessment: Superstate USCC
 
-- **Assessment Date:** September 5, 2026
+- **Assessment Date:** July 3, 2026 (Updated: September 5, 2026)
 - **Token:** USCC
 - **Chain:** Ethereum
 - **Token Address:** [`0x14d60E7FDC0D71d8611742720E4C50E7a974020c`](https://etherscan.io/address/0x14d60E7FDC0D71d8611742720E4C50E7a974020c)
-- **Final Score: 2.53/5.0**
+- **Final Score: 2.45/5.0**
 
 ## Overview + Links
 
@@ -18,14 +18,14 @@ Investors must clear KYC/AML, be Qualified Purchasers and Accredited Investors, 
 
 - **Current NAV/Share:** $11.725624 ([Chainlink USCC NAV feed](https://etherscan.io/address/0xAfFd8F5578E8590665de561bdE9E7BAdb99300d9), latest round updated September 4, 2026 13:18 UTC)
 - **Ethereum Supply:** 5,761,292.38 USCC ($67.55M at the current NAV, September 5, 2026)
-- **Total Shares (incl. book-entry):** 12,236,723.87 USCC ([Superstate NAV dataset](https://superstate.com/assets/uscc), September 4, 2026)
-- **Total AUM (incl. book-entry):** $143.48M ([Superstate](https://superstate.com/assets/uscc), September 4, 2026)
+- **NAV-statement Shares (incl. book-entry):** 12,236,723.87 USCC ([Superstate](https://superstate.com/assets/uscc), NAV effective September 3, 2026)
+- **Total AUM:** $143.48M ([Superstate](https://superstate.com/assets/uscc), NAV effective September 3, 2026)
 - **Public TVL:** $103.41M ([DeFiLlama](https://defillama.com/protocol/bitwise-uscc), September 5, 2026), up 74.3% over 30 days from $59.34M
 - **30-day SEC Yield:** 6.68% (variable, depends on basis spread)
 - **Management Fee:** 0.75% annually
 - **Minimum Investment:** $100,000
 
-**TODO — first-party share reconciliation:** the Bitwise network-distribution table totals 12,849,759.44 shares ($150.67M at the displayed NAV), while the same official dataset reports 12,236,723.87 outstanding shares and $143.48M AUM. The Ethereum, Plume, and Solana rows match current onchain supply; the discrepancy is in the reported book-entry balance and requires clarification from Superstate/Bitwise.
+**Share-count timing:** the Bitwise network-distribution table is a realtime balance and totals 12,849,759.44 shares as of September 4, while the 12,236,723.87-share AUM statement is effective September 3. Two Ethereum mints on September 4 added 613,035.402635 USCC ([604,173.998756 USCC](https://etherscan.io/tx/0x3273f52b4a2c587d7310a6dcaff5369122fd7387c644c8f1fba5ff986c13e55f) and [8,861.403879 USCC](https://etherscan.io/tx/0xd66e8791290955f2549e3dbc984146d61ca5ca19a6c0089a404c5c9fa85b160f)), explaining all but 0.164482 USCC of the difference. The figures represent different cutoffs rather than a material reserve inconsistency.
 
 **Links:**
 
@@ -78,7 +78,7 @@ Note that the prior USCC owner was [`0x8c7db8a96d39f76d9f456db23d591c2fdd0e2f8a`
 
 USCC uses the source-verified `FundToken` v1.3.0 implementation and the same shared AllowList V3.1 contract as USTB. The [Superstate Security page](https://docs.superstate.com/investors/security) lists **11 numbered 0xMacro audits**, plus ChainSecurity, Solana/AllowList reviews, and a Certora formal-verification report. Earlier 0xMacro scopes cover USCC/SuperstateToken, redemption, the shared token components, and AllowList V3; however, the published audit list does not map a report explicitly to the integrated `FundToken` v1.2.0/v1.3.0 implementation deployed in July 2026. A-10 and A-11 scope DIP/EquityToken rather than `FundToken`.
 
-**TODO — current implementation audit mapping:** obtain a public audit report or hash-to-scope mapping for `FundToken` v1.2.0/v1.3.0. The implementation is source-verified, and much of its component surface has prior review coverage, but an independent review of the deployed integration and storage migration cannot be confirmed from the published audit scopes.
+**Audit scope limitation:** no published audit report or hash-to-scope mapping explicitly covers the integrated `FundToken` v1.2.0/v1.3.0 deployment. The implementation is source-verified and much of its component surface has prior review coverage, but the deployed integration and storage migration cannot be tied to a public independent-review artifact.
 
 ### Audit History
 
@@ -116,7 +116,7 @@ So **all USCC mint operations are admin-driven** (`mint`/`bulkMint` by the owner
 ## Historical Track Record
 
 - **Fund Launch:** July 15, 2024 onchain (first mint at [block 20312293](https://etherscan.io/tx/0xeefda6ce766bca7c431bb6ef157b4b78925d9a0a3527a811d2ea54e41485fb1b), Unix ts 1721051099). DeFiLlama [first records Sep 9, 2024](https://defillama.com/protocol/bitwise-uscc) at ~$15.7M TVL. The fund has now operated for **more than two years**.
-- **Contract Upgrades:** The token moved from the legacy V5 implementation to `FundToken` v1.2.0 on July 20, 2026 ([upgrade](https://etherscan.io/tx/0xe38fb441aa385cfe91eada867aab14698fbf90acd6ef694e72bfadf1f59f0990), [migration initialization](https://etherscan.io/tx/0x87155971d23c3f2200061ff8fa066ea2ae7382c60d9013a67f196ee37659d883)), then to v1.3.0 on July 21, 2026 ([upgrade](https://etherscan.io/tx/0x73b4604e54b163e843f1631d54e329fbaf1b1f036b43a6d2117580beaf0cbcc5)). The migration enabled book-entry conversion and Plume bridging. No ownership, oracle, redemption, stablecoin-config, pause, accounting-pause, or `AdminBurn` changes were observed since the prior assessment.
+- **Contract Upgrades:** The token moved from the legacy V5 implementation to `FundToken` v1.2.0 on July 20, 2026 ([upgrade](https://etherscan.io/tx/0xe38fb441aa385cfe91eada867aab14698fbf90acd6ef694e72bfadf1f59f0990), [migration initialization](https://etherscan.io/tx/0x87155971d23c3f2200061ff8fa066ea2ae7382c60d9013a67f196ee37659d883)), then to v1.3.0 on July 21, 2026 ([upgrade](https://etherscan.io/tx/0x73b4604e54b163e843f1631d54e329fbaf1b1f036b43a6d2117580beaf0cbcc5)). The migration enabled book-entry conversion and Plume bridging. No ownership, oracle, redemption, stablecoin-config, pause, accounting-pause, or `AdminBurn` events occurred from July 3 through September 5, 2026.
 - **Smart Contract Exploits:** None reported.
 - **Ownership Changes:** USCC token ownership was transferred Oct 31, 2024 from [`0x8c7db8a9…`](https://etherscan.io/address/0x8c7db8a96d39f76d9f456db23d591c2fdd0e2f8a) to [`0x8abC89D9…`](https://etherscan.io/address/0x8abC89D9b56dFD90dA18e8E18CFaC9111100bDd1) via the two-step Ownable flow ([Etherscan tx](https://etherscan.io/tx/0xd2d1c711f5f7ecf9053637145d218e33f0b22d2d26d59a63d94535e88ca46c72)); no subsequent transfer was observed.
 - **TVL History ([DeFiLlama](https://defillama.com/protocol/bitwise-uscc)):**
@@ -219,7 +219,7 @@ The fund "will trade only those digital assets for which the CFTC has permitted 
   - Anchorage Digital (regulated digital-asset custody)
   - SEC regulatory framework (Reg D / Section 3(c)(7))
 - **Reserve Transparency:** Bitwise publishes headline NAV/AUM/yield, network balances, DeFi integrations, and current holdings on [bitwiseinvestments.com/crypto-funds/uscc](https://bitwiseinvestments.com/crypto-funds/uscc). Public holdings now include asset quantities, implied yields, notional values, portfolio weights, and current futures venues, but margin balances, counterparty concentration policy, historical venue usage, and T-Bill / USTB look-through details are still not fully disclosed publicly.
-- **Reconciliation Limitation:** The first-party network-distribution total exceeds the first-party outstanding-share total by 613,035.57 shares. Until Bitwise/Superstate reconciles those figures, public reserve and supply reporting cannot be treated as fully internally consistent.
+- **Share-Supply Reconciliation:** The apparent 613,035.57-share gap is a cutoff difference: the AUM statement is effective September 3, while the realtime network total includes 613,035.402635 USCC minted on Ethereum on September 4. The residual is 0.164482 USCC.
 - **NAV Mark-to-Market Risk:** Because the futures leg is mark-to-market daily, the share price reflects unrealized basis-trade P&L in real time. The protocol explicitly warns of "unrealized losses" during basis expansion. This is fundamentally different from USTB whose underlying T-Bills have a much smoother mark-to-market profile.
 
 ## Liquidity Risk
@@ -468,10 +468,9 @@ EXTERNAL / UNDERLYING LAYER
 4. **No atomic onchain redemption** — `redemptionContract() = 0x0` onchain. Subscribe is also disabled onchain (`OnchainSubscriptionsDisabled`). All mints/redeems flow through offchain operations with T+1/T+2 settlement.
 5. **Sole onchain NAV oracle is Chainlink-OCR-only** — no Superstate-run fallback price feed; between transmissions the onchain price is just stale.
 6. **Small holder base (53 multi-chain wallets per RWA.xyz; 46 Ethereum holders) and no secondary liquidity** — concentrated, expected for a Qualified-Purchaser permissioned fund but a real exit-liquidity constraint. Public TVL is $103.41M.
-7. **First-party supply reporting does not reconcile.** The network-distribution table exceeds reported outstanding shares by 613,035.57 shares.
-8. **Current implementation audit scope is unclear.** Published reports do not explicitly map to the deployed FundToken v1.2/v1.3 migration.
-9. **Manager transition to Bitwise effective Jun 1, 2026** — operational change with continuing post-handoff risk.
-10. **No formal bug bounty rewards.**
+7. **Current implementation audit scope is unclear.** Published reports do not explicitly map to the deployed FundToken v1.2/v1.3 migration.
+8. **Manager transition to Bitwise effective Jun 1, 2026** — operational change with continuing post-handoff risk.
+9. **No formal bug bounty rewards.**
 
 ### Critical Risks
 
@@ -486,8 +485,8 @@ EXTERNAL / UNDERLYING LAYER
 
 ### Critical Risk Gates
 
-- [x] **No audit** → **PASS** — the token family and shared components have substantial independent review coverage. The deployed FundToken integration is source-verified, although a public v1.2/v1.3 audit mapping remains a TODO.
-- [x] **Unverifiable reserves** → **BORDERLINE PASS** — NAV Fund Services, EY, regulated custody, and detailed public holdings provide independent layers, but positions and margin cannot be verified onchain and the current first-party share totals do not reconcile.
+- [x] **No audit** → **PASS** — the token family and shared components have substantial independent review coverage. The deployed FundToken integration is source-verified, although no public v1.2/v1.3 audit mapping is available.
+- [x] **Unverifiable reserves** → **BORDERLINE PASS** — NAV Fund Services, EY, regulated custody, and detailed public holdings provide independent layers, but positions and margin cannot be verified onchain. The different AUM-statement and realtime-supply cutoffs reconcile to the September 4 Ethereum mints.
 - [x] **Total centralization** → **BORDERLINE PASS** — a single EOA controls the token and its ProxyAdmin. Turnkey key-custody claims and regulatory accountability mitigate operational risk but do not reduce the onchain single-key blast radius.
 
 **Result:** Protocol passes critical gates. Category scoring retains a conservative bias on governance and provability.
@@ -529,17 +528,17 @@ Critical dependencies include Anchorage, futures venues, Bitwise, and the Treasu
 
 **Score: (5.0 + 3.0 + 3.0) / 3 = 3.67/5**
 
-#### Category 3: Funds Management (Weight: 30%) — **3.25**
+#### Category 3: Funds Management (Weight: 30%) — **3.0**
 
 **Subcategory A: Collateralization — 3.0**
 
 The portfolio mixes USD collateral and USTB with custodied crypto, staked/liquid-staked assets, and short futures. It is intended to be fully collateralized but is entirely offchain and exposed to custody, margin, venue, staking, and mark-to-market risk. Current public holdings identify CME and Coinbase exposure but not margin balances or concentration policy.
 
-**Subcategory B: Provability — 3.5**
+**Subcategory B: Provability — 3.0**
 
-Daily Chainlink NAV, an independent NAV agent, annual EY audit, and detailed holdings are meaningful evidence. However, holders cannot verify positions onchain, material risk controls remain undisclosed, and the first-party network table exceeds the reported outstanding-share total by 613,035.57 shares. That unresolved internal inconsistency warrants a weaker score than the prior assessment.
+Daily Chainlink NAV, an independent NAV agent, annual EY audit, and detailed holdings are meaningful evidence. Holders still cannot verify positions, margin balances, or counterparty concentration onchain. The AUM-statement and realtime network totals use different cutoffs and reconcile to the September 4 Ethereum mints, so they do not add a separate provability penalty.
 
-**Score: (3.0 + 3.5) / 2 = 3.25/5**
+**Score: (3.0 + 3.0) / 2 = 3.0/5**
 
 #### Category 4: Liquidity Risk (Weight: 15%) — **3.5**
 
@@ -562,28 +561,28 @@ The doxxed team, financing, legal structure, and institutional service providers
 |----------|-------|--------|----------|
 | Audits & Historical | 1.75 | 20% | 0.350 |
 | Centralization & Control | 3.67 | 30% | 1.101 |
-| Funds Management | 3.25 | 30% | 0.975 |
+| Funds Management | 3.0 | 30% | 0.900 |
 | Liquidity Risk | 3.5 | 15% | 0.525 |
 | Operational Risk | 1.5 | 5% | 0.075 |
-| **Raw Score** | | | **3.03 / 5.0** |
+| **Raw Score** | | | **2.95 / 5.0** |
 | Live >2 years without incidents | | | **-0.50** |
-| **Final Score** | | | **2.53 / 5.0** |
+| **Final Score** | | | **2.45 / 5.0** |
 
-The >2-year incident-free modifier now applies. The resulting improvement is partly offset by the current-implementation audit gap and weaker provability arising from unreconciled first-party share data.
+The >2-year incident-free modifier applies. The current-implementation audit gap offsets the improved historical subscore, while the share totals reconcile as different reporting cutoffs.
 
 ### Risk Tier
 
 | Final Score | Risk Tier | Recommendation |
 |------------|-----------|----------------|
 | 1.0-1.5 | Minimal Risk | Approved, high confidence |
-| 1.5-2.5 | Low Risk | Approved with standard monitoring |
-| **2.5-3.5** | **Medium Risk** | **Approved with enhanced monitoring** |
+| **1.5-2.5** | **Low Risk** | **Approved with standard monitoring** |
+| 2.5-3.5 | Medium Risk | Approved with enhanced monitoring |
 | 3.5-4.5 | Elevated Risk | Limited approval, strict limits |
 | 4.5-5.0 | High Risk | Not recommended |
 
-**Final Risk Tier: MEDIUM RISK**
+**Final Risk Tier: LOW RISK**
 
-USCC remains materially higher risk than USTB. Its crypto-basis strategy adds futures-venue, staking, custody, and mark-to-market risks to the shared single-EOA and AllowList control model. It has no atomic onchain subscription or redemption. More than two incident-free years improve the score, while the July implementation migration, incomplete audit mapping, and unresolved first-party share reconciliation prevent a stronger result.
+USCC remains materially higher risk than USTB. Its crypto-basis strategy adds futures-venue, staking, custody, and mark-to-market risks to the shared single-EOA and AllowList control model. It has no atomic onchain subscription or redemption. More than two incident-free years improve the score. The July implementation migration and incomplete public audit mapping prevent a stronger result.
 
 **Key conditions for exposure:**
 
@@ -591,16 +590,15 @@ USCC remains materially higher risk than USTB. Its crypto-basis strategy adds fu
 2. Monitor the token owner for ownership transfer, mint >5% of supply, `adminBurn`, parameter changes, or proxy upgrades.
 3. Monitor the shared AllowList for permission changes affecting any Yearn vault or strategy.
 4. Track Chainlink USCC NAV for day-over-day declines >2%.
-5. Reconcile first-party total shares against the network-distribution table.
-6. Obtain the deployed FundToken v1.2/v1.3 audit-scope mapping and greater disclosure on margin, counterparties, and staking providers before scaling exposure.
+5. Obtain the deployed FundToken v1.2/v1.3 audit-scope mapping and greater disclosure on margin, counterparties, and staking providers before scaling exposure.
 
-**Score-improving triggers:** multisig and timelock adoption; a published audit mapping for the current implementation; reconciled share/reserve reporting; public margin and concentration limits; Proof of Reserves; atomic onchain redemption; or a funded bug bounty.
+**Score-improving triggers:** multisig and timelock adoption; a published audit mapping for the current implementation; public margin and concentration limits; Proof of Reserves; atomic onchain redemption; or a funded bug bounty.
 
 ---
 
 ## Reassessment Triggers
 
-- **Time-based:** Reassess in 3 months (December 2026) due to the FundToken migration, the unresolved share reconciliation, basis-trade NAV volatility, and the ongoing Bitwise post-handoff period.
+- **Time-based:** Reassess in 3 months (December 2026) due to the FundToken migration, basis-trade NAV volatility, and the ongoing Bitwise post-handoff period.
 - **TVL-based:** Reassess if AUM changes by more than 30% (more sensitive than USTB given thinner holder base).
 - **Incident-based:** Reassess after any exploit, admin key compromise, contract upgrade, AllowList policy change, manager transition issue, or any large NAV drawdown (>5% in a single day).
 - **Strategy-based:** Reassess on any change to futures venues, staking / liquid-staking provider policy, leverage policy, or asset mix (e.g., addition of new basis pairs).
@@ -611,4 +609,4 @@ USCC remains materially higher risk than USTB. Its crypto-basis strategy adds fu
 | Date | Score | Notes |
 |------|------:|-------|
 | [July 3, 2026](https://github.com/yearn/risk-score/pull/230) | 2.95 | Initial assessment |
-| [September 5, 2026](https://github.com/yearn/risk-score/pull/445) | 2.53 | Updated implementation, portfolio, TVL, cross-chain state, and controls |
+| [September 5, 2026](https://github.com/yearn/risk-score/pull/445) | 2.45 | Updated implementation, portfolio, TVL, cross-chain state, and controls |
