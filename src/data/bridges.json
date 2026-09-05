@@ -575,6 +575,30 @@
           "detail": "Primary USDS/sUSDS cross-chain route: ~$0.45B USDS + ~812M sUSDS escrowed on L1 and minted 1:1 on Base, Optimism, Unichain (OP Stack) and Arbitrum (Nitro). No bridge holds `wards` on USDS. LayerZero carries only Solana + Avalanche (<0.7% of mainnet USDS supply)"
         }
       ]
+    },
+    {
+      "id": "superstate-issuer-bridge",
+      "name": "Superstate Issuer Bridge",
+      "type": "Issuer-operated burn-and-mint bridge",
+      "url": "https://docs.superstate.com/investors/tokenized-funds/available-funds/bitwise-uscc",
+      "finality": "No fixed public settlement or destination-mint time is documented.",
+      "admin": "The same Superstate EOA controls the USCC token and ProxyAdmin on Ethereum and Plume, with no multisig or timelock.",
+      "description": "USCC burns on Ethereum for an enabled destination and Superstate completes the corresponding mint on Plume. There is no independent messaging or verifier quorum, so the issuer admin and upgrade keys are the bridge trust boundary. Solana USCC is not connected by this bridge; current documentation requires redemption and re-tokenization for SVM network changes.",
+      "keywords": [
+        "issuer-operated burn-and-mint"
+      ],
+      "ignore": [],
+      "dependencies": [
+        {
+          "slug": "superstate-uscc",
+          "name": "Superstate / Bitwise USCC",
+          "kind": "direct",
+          "model": "mint",
+          "integration": "Ethereum ↔ Plume USCC",
+          "detail": "Ethereum USCC enables chain ID 98866 and burns through `bridge()`; Plume USCC is a native FundToken v1.3.0 deployment. Both token proxies and ProxyAdmins are controlled by the same EOA, with no independent message quorum or onchain rate limit.",
+          "owner": "USCC token + ProxyAdmin owner on Ethereum and Plume: EOA [`0x8abC…bDd1`](https://etherscan.io/address/0x8abC89D9b56dFD90dA18e8E18CFaC9111100bDd1)."
+        }
+      ]
     }
   ]
 }
