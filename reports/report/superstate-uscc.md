@@ -25,7 +25,7 @@ Investors must clear KYC/AML, be Qualified Purchasers and Accredited Investors, 
 - **Management Fee:** 0.75% annually
 - **Minimum Investment:** $100,000
 
-**Share-count timing:** the Bitwise network-distribution table is a realtime balance and totals 12,849,759.44 shares as of September 4, while the 12,236,723.87-share AUM statement is effective September 3. Two Ethereum mints on September 4 added 613,035.402635 USCC ([604,173.998756 USCC](https://etherscan.io/tx/0x3273f52b4a2c587d7310a6dcaff5369122fd7387c644c8f1fba5ff986c13e55f) and [8,861.403879 USCC](https://etherscan.io/tx/0xd66e8791290955f2549e3dbc984146d61ca5ca19a6c0089a404c5c9fa85b160f)), explaining all but 0.164482 USCC of the difference. The figures represent different cutoffs rather than a material reserve inconsistency.
+**Share-count timing:** the Bitwise network-distribution table is a realtime balance and totals 12,849,759.44 shares as of September 4, while the 12,236,723.87-share AUM statement is effective September 3. Two Ethereum mints on September 4 added 613,035.402635 USCC ([604,173.998756 USCC](https://etherscan.io/tx/0x3273f52b4a2c587d7310a6dcaff5369122fd7387c644c8f1fba5ff986c13e55f) and [8,861.403879 USCC](https://etherscan.io/tx/0xd66e8791290955f2549e3dbc984146d61ca5ca19a6c0089a404c5c9fa85b160f)), explaining all but 0.167365 USCC of the difference. The figures represent different cutoffs rather than a material reserve inconsistency.
 
 **Links:**
 
@@ -219,7 +219,7 @@ The fund "will trade only those digital assets for which the CFTC has permitted 
   - Anchorage Digital (regulated digital-asset custody)
   - SEC regulatory framework (Reg D / Section 3(c)(7))
 - **Reserve Transparency:** Bitwise publishes headline NAV/AUM/yield, network balances, DeFi integrations, and current holdings on [bitwiseinvestments.com/crypto-funds/uscc](https://bitwiseinvestments.com/crypto-funds/uscc). Public holdings now include asset quantities, implied yields, notional values, portfolio weights, and current futures venues, but margin balances, counterparty concentration policy, historical venue usage, and T-Bill / USTB look-through details are still not fully disclosed publicly.
-- **Share-Supply Reconciliation:** The apparent 613,035.57-share gap is a cutoff difference: the AUM statement is effective September 3, while the realtime network total includes 613,035.402635 USCC minted on Ethereum on September 4. The residual is 0.164482 USCC.
+- **Share-Supply Reconciliation:** The apparent 613,035.57-share gap is a cutoff difference: the AUM statement is effective September 3, while the realtime network total includes 613,035.402635 USCC minted on Ethereum on September 4. The residual is 0.167365 USCC.
 - **NAV Mark-to-Market Risk:** Because the futures leg is mark-to-market daily, the share price reflects unrealized basis-trade P&L in real time. The protocol explicitly warns of "unrealized losses" during basis expansion. This is fundamentally different from USTB whose underlying T-Bills have a much smoother mark-to-market profile.
 
 ## Liquidity Risk
