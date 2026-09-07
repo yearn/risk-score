@@ -69,7 +69,7 @@ nodes:
     category: infra
     note: >-
       Plain EOA holding `hasHarvestPermissions`, and the address that has executed
-      every rebalance to date — 64 of them since June 24, 2026 at a 3-hour median
+      every rebalance to date — 81 of them since June 24, 2026 at a ~3-hour median
       cadence. It can call `rebalance()`, moving AUSD between already-approved
       markets up to the configured caps. It cannot move assets out of the vault, and
       rebalance conserves total assets onchain, but the bounds argument is
@@ -102,34 +102,36 @@ nodes:
     address: "0xaD663aC84052b52BE4ed1b27BA416505e84a00Bf"
     category: vault
     note: >-
-      `LendingOptimizer`, non-proxy and source-verified, 6 decimals. At assessment
-      (block 96,882,186): totalAssets 18,351,894 AUSD, totalSupply 18,206,533
-      shares, exchange rate 1.007984, performance fee 0 BPS, deposits active.
-      Mint is permissionless and atomically collateral-backed; 77,777 dead shares
-      sit at address(0) as inflation protection. Only 21% of NAV (≈3.85M AUSD) is
-      instantly redeemable — withdrawals are capped by the underlying markets'
-      idle cash, and a redeem-pause on any single approved market blocks all exits.
+      `LendingOptimizer`, non-proxy and source-verified, 6 decimals. Refreshed at
+      block 102,741,475 (September 7, 2026): totalAssets 13,391,637 AUSD, totalSupply
+      13,244,081 shares, exchange rate 1.011141, performance fee 0 BPS, deposits
+      active. Mint is permissionless and atomically collateral-backed; 77,777 dead
+      shares sit at address(0) as inflation protection. Only ~18% of NAV (≈2.40M AUSD)
+      is instantly redeemable — withdrawals are capped by the underlying markets' idle
+      cash, and a redeem-pause on any single approved market blocks all exits. NAV fell
+      27% from the August 17 snapshot via ~17.0M of orderly redemptions, with the
+      exchange rate rising throughout — redemption, not loss.
 
   # --- Lending markets ---
   - id: causd-pt
-    label: cAUSD — PT market (60.0%)
+    label: cAUSD — PT market (60.1%)
     address: "0xbDe2459A033f20442CE18483CDD48643D80C6c93"
     category: strategy
     note: >-
       Curvance BorrowableCToken lending AUSD against Pendle PT-AUSD-8OCT2026.
-      Supply 23,366,343 AUSD, debt 21,257,356, idle 2,108,967 — utilisation 90.97%.
+      Supply 11,608,850 AUSD, debt 10,068,390, idle 1,540,457 — utilisation 86.73%.
       Allocation cap 90%. Borrower interest is taxed 10% (`interestFee` 1000 BPS)
       before reaching suppliers. Bad debt here is socialised into the cAUSD
       exchange rate and flows straight into hyAUSD NAV.
 
   - id: causd-savusd
-    label: cAUSD — savUSD market (40.0%)
+    label: cAUSD — savUSD market (39.9%)
     address: "0xD1BFEA1728ffe98F515f26082fACfcc3341691D4"
     category: strategy
     note: >-
       Curvance BorrowableCToken lending AUSD against Avant savUSD. Supply
-      16,881,395 AUSD, debt 15,135,535, idle 1,745,841 — utilisation 89.66%. The
-      vault is at its 40% allocation cap, which was raised from 20% to 30% on
+      15,211,169 AUSD, debt 14,355,112, idle 856,031 — utilisation 94.37%, the
+      tightest leg in the vault. It is at its 40% allocation cap, which was raised from 20% to 30% on
       July 4, 2026 and to 40% on August 13, 2026, both times through the
       Emergency Council rather than the timelock.
 
@@ -158,19 +160,21 @@ nodes:
     address: "0x6eD14BA7d1Ec30a97E21d0D8037867535BA43bF8"
     category: infra
     note: >-
-      Collateral cToken for the PT market. 23,089,873 PT posted ≈ $22.77M at the
-      oracle price of $0.98590, against 21,257,356 AUSD of debt — market-wide
-      collateral ratio ≈107.1% versus a 103% soft-liquidation requirement.
+      Collateral cToken for the PT market. 11,000,931 PT posted ≈ $10.91M at the
+      oracle price of $0.99156, against 10,068,390 AUSD of debt — market-wide
+      collateral ratio ≈108.3% versus a 103% soft-liquidation requirement. PT matures
+      October 8, 2026, about a month out, so this leg needs an operator roll.
 
   - id: csavusd-collateral
     label: csavUSD (collateral)
     address: "0x2552232caBd544b67eEa900A951346D3272c7c2f"
     category: infra
     note: >-
-      Collateral cToken for the savUSD market. 15,364,191 savUSD posted ≈ $18.34M
-      at the oracle price of $1.19363, against 15,135,535 AUSD of debt —
-      market-wide collateral ratio ≈121.2% versus a 104.5% soft-liquidation
-      requirement.
+      Collateral cToken for the savUSD market. 18,545,882 savUSD posted ≈ $22.23M
+      at the oracle price of $1.19862, against 14,355,112 AUSD of debt — market-wide
+      collateral ratio ≈154.9% (up from 121.2% in August) versus a 104.5%
+      soft-liquidation requirement. Collateral cap 20M savUSD leaves 1.45M of headroom,
+      which is what bounds an unbacked-mint attack to ~1.6M AUSD.
 
   # --- External dependencies ---
   - id: pendle-pt
@@ -193,9 +197,9 @@ nodes:
       Not the canonical Avant token — `typeAndVersion()` reports
       "FactoryBurnMintERC20 1.6.2". Its sole minter and burner is a Chainlink CCIP
       BurnMintTokenPool. Tracing the canonical stack on Avalanche shows the backing
-      is ~99.4% offchain: $0.01 of collateral sits in AvantMintingV2 and $741,565 at
-      the sole registered custodian (itself an EOA) against 127,269,028 avUSD
-      outstanding, because collateral is routed straight from depositor to custodian
+      is ~99.3% outside Avant's own contracts: $0.01 sits in AvantMintingV2 and
+      $911,710 at the sole registered custodian (itself an EOA) against 133,978,406
+      avUSD outstanding, because collateral is routed straight from depositor to custodian
       at mint time. One plain EOA (0xd4d23209…57cb, no code on either chain) is
       owner/admin of avUSD, savUSD, the minting contract and this token's CCIP pool,
       and avUSD's setMinter is onlyOwner. Bounded on two counts, both verified:
@@ -317,12 +321,12 @@ edges:
   - { from: mm-savusd,         to: csavusd-collateral, kind: manages,  label: "collateral config" }
 
   # Money flow
-  - { from: hyausd,        to: causd-pt,           kind: allocates-to,   label: "60.0%" }
-  - { from: hyausd,        to: causd-savusd,       kind: allocates-to,   label: "40.0%" }
-  - { from: causd-pt,      to: ausd,               kind: deposits-into,  label: "lends AUSD, 90.97% utilised" }
-  - { from: causd-savusd,  to: ausd,               kind: deposits-into,  label: "lends AUSD, 89.66% utilised" }
-  - { from: cpt-collateral,     to: pendle-pt,     kind: routes-through, label: "23.09M PT posted as collateral" }
-  - { from: csavusd-collateral, to: savusd,        kind: routes-through, label: "15.36M savUSD posted as collateral" }
+  - { from: hyausd,        to: causd-pt,           kind: allocates-to,   label: "60.1%" }
+  - { from: hyausd,        to: causd-savusd,       kind: allocates-to,   label: "39.9%" }
+  - { from: causd-pt,      to: ausd,               kind: deposits-into,  label: "lends AUSD, 86.73% utilised" }
+  - { from: causd-savusd,  to: ausd,               kind: deposits-into,  label: "lends AUSD, 94.37% utilised" }
+  - { from: cpt-collateral,     to: pendle-pt,     kind: routes-through, label: "11.00M PT posted as collateral" }
+  - { from: csavusd-collateral, to: savusd,        kind: routes-through, label: "18.55M savUSD posted as collateral" }
   - { from: pendle-pt,     to: ausd,               kind: routes-through, label: "redeems 1:1 at maturity, Oct 8 2026" }
 
   # Mint authority on the bridged collateral
