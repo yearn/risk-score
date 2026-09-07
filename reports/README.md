@@ -20,9 +20,10 @@ reports/
 │   ├── infinifi.md             # Example: InfiniFi protocol
 │   └── ...
 ├── graph/                # Dependency graph YAML, one per report slug
-├── scripts/              # Report-specific data-fetching scripts
-└── */SKILL.md            # Authoring skills (see AGENTS.md for the index)
+└── scripts/              # Report-specific data-fetching scripts
 ```
+
+Authoring procedures: [shared agent skills](../AGENTS.md#shared-skills-and-commands).
 
 ## How to Use This Framework
 

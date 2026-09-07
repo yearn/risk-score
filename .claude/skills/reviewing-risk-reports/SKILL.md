@@ -1,1 +1,0 @@
-../../../reports/review/SKILL.md

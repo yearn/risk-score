@@ -1,1 +1,0 @@
-../../../reports/bridges/SKILL.md

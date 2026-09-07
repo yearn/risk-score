@@ -1,22 +1,9 @@
-/**
- * Guards the authoring docs against silent drift.
- *
- * Two failure modes this catches:
- *
- *  1. `reports/graph/SKILL.md` hand-mirrors enums that actually live in
- *     `src/lib/graph.ts`. When someone adds an edge kind or a chain to the
- *     validator and not to the doc, graph authors keep writing against the
- *     old vocabulary (and vice versa: a doc-only kind fails the build).
- *
- *  2. The skills in `reports/` are registered twice — `.claude/skills/` for
- *     Claude Code, `.pi/settings.json` for Pi. A rename that updates one
- *     adapter and not the other silently drops the skill for that tool.
- */
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { readFileSync, readdirSync, existsSync, realpathSync } from "node:fs";
+import { readFileSync, readdirSync, existsSync, realpathSync, statSync } from "node:fs";
 import { join, dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import { load } from "js-yaml";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const read = (p) => readFileSync(join(ROOT, p), "utf8");
@@ -31,9 +18,9 @@ function sliceBlock(source, startMarker, endMarker) {
 }
 
 const graphTs = read("src/lib/graph.ts");
-const graphDoc = read("reports/graph/SKILL.md");
+const graphDoc = read(".agents/skills/generating-dependency-graphs/references/schema.md");
 
-test("graph SKILL.md documents exactly the validator's edge kinds", () => {
+test("graph schema reference documents exactly the validator's edge kinds", () => {
   const block = sliceBlock(graphTs, "ALLOWED_EDGE_KINDS = new Set([", "]);");
   const fromCode = new Set([...block.matchAll(/"([a-z-]+)"/g)].map((m) => m[1]));
 
@@ -43,7 +30,7 @@ test("graph SKILL.md documents exactly the validator's edge kinds", () => {
     graphDoc.indexOf("### Edge kinds"),
     graphDoc.indexOf("### Flow kinds"),
   );
-  assert.ok(section.length > 0, "edge-kind section not found in graph SKILL.md");
+  assert.ok(section.length > 0, "edge-kind section not found in graph schema reference");
   const fromDoc = new Set(
     [...section.matchAll(/^\| `([a-z-]+)` \|/gm)]
       .map((m) => m[1])
@@ -53,7 +40,7 @@ test("graph SKILL.md documents exactly the validator's edge kinds", () => {
   assert.deepEqual(
     [...fromDoc].sort(),
     [...fromCode].sort(),
-    "edge kinds in reports/graph/SKILL.md drifted from ALLOWED_EDGE_KINDS",
+    "edge kinds in .agents/skills/generating-dependency-graphs/references/schema.md drifted from ALLOWED_EDGE_KINDS",
   );
 
   // The heading advertises a count; keep it honest too.
@@ -62,89 +49,101 @@ test("graph SKILL.md documents exactly the validator's edge kinds", () => {
   assert.equal(Number(heading[1]), fromCode.size);
 });
 
-test("graph SKILL.md documents exactly the validator's chains", () => {
+test("graph schema reference documents exactly the validator's chains", () => {
   const block = sliceBlock(graphTs, "CHAIN_EXPLORERS: Record<string, string> = {", "};");
   const fromCode = new Set(
     [...block.matchAll(/^\s*([a-z0-9]+):\s*"https/gm)].map((m) => m[1]),
   );
 
   const row = /\| `chain` \| yes \| string \| Default chain for nodes\.(.*)\|/.exec(graphDoc);
-  assert.ok(row, "top-level `chain` row not found in graph SKILL.md schema table");
+  assert.ok(row, "top-level `chain` row not found in graph schema reference schema table");
   const fromDoc = new Set([...row[1].matchAll(/`([a-z0-9]+)`/g)].map((m) => m[1]));
 
   assert.deepEqual(
     [...fromDoc].sort(),
     [...fromCode].sort(),
-    "chains in reports/graph/SKILL.md drifted from CHAIN_EXPLORERS",
+    "chains in .agents/skills/generating-dependency-graphs/references/schema.md drifted from CHAIN_EXPLORERS",
   );
 });
 
-test("every skill is registered for both Claude Code and Pi", () => {
-  const claudeSkillsDir = join(ROOT, ".claude/skills");
-  const dirs = readdirSync(claudeSkillsDir, { withFileTypes: true })
-    .filter((d) => d.isDirectory())
-    .map((d) => d.name);
-  assert.ok(dirs.length > 0, "no skills registered under .claude/skills");
+const skillsDir = join(ROOT, ".agents/skills");
+const skillNames = readdirSync(skillsDir).filter((name) =>
+  existsSync(join(skillsDir, name, "SKILL.md")),
+);
 
-  const piSkills = JSON.parse(read(".pi/settings.json")).skills ?? [];
-  // Pi paths are relative to .pi/; resolve to repo-relative canonical paths.
-  const piTargets = new Set(
-    piSkills.map((p) => realpathSync(resolve(ROOT, ".pi", p))),
+function frontmatter(file) {
+  const match = /^---\n([\s\S]*?)\n---/.exec(readFileSync(file, "utf8"));
+  assert.ok(match, `${file}: missing frontmatter`);
+  return load(match[1]);
+}
+
+function markdownFiles(dir) {
+  return readdirSync(dir).flatMap((name) => {
+    const path = join(dir, name);
+    return statSync(path).isDirectory()
+      ? markdownFiles(path)
+      : path.endsWith(".md") ? [path] : [];
+  });
+}
+
+test("Codex, Claude, and Pi discover the same canonical skills", () => {
+  assert.ok(skillNames.length > 0, "no canonical skills");
+  const claudeDir = join(ROOT, ".claude/skills");
+  assert.equal(realpathSync(claudeDir), realpathSync(skillsDir));
+  const piPaths = JSON.parse(read(".pi/settings.json")).skills;
+  assert.deepEqual(
+    piPaths.map((p) => realpathSync(resolve(ROOT, ".pi", p))),
+    [realpathSync(skillsDir)],
   );
-
-  for (const name of dirs) {
-    const entry = join(claudeSkillsDir, name, "SKILL.md");
-    assert.ok(existsSync(entry), `${name}: .claude/skills/${name}/SKILL.md missing or dangling symlink`);
-
-    // The frontmatter name is the address agents use; it must match the dir.
-    const declared = /^name:\s*(\S+)\s*$/m.exec(readFileSync(entry, "utf8"));
-    assert.ok(declared, `${name}: SKILL.md has no frontmatter name`);
-    assert.equal(
-      declared[1],
-      name,
-      `${name}: frontmatter name '${declared[1]}' does not match its directory`,
-    );
-
-    // Both adapters must point at the same canonical file in reports/.
-    const target = realpathSync(entry);
-    assert.ok(
-      piTargets.has(target),
-      `${name}: registered for Claude Code but missing from .pi/settings.json skills`,
-    );
+  for (const name of skillNames) {
+    const entry = join(skillsDir, name, "SKILL.md");
+    const metadata = frontmatter(entry);
+    assert.equal(metadata.name, name, `${entry}: directory/name mismatch`);
+    assert.ok(typeof metadata.description === "string" && metadata.description.trim());
+    assert.equal(realpathSync(join(claudeDir, name, "SKILL.md")), entry);
   }
-
-  assert.equal(
-    piTargets.size,
-    dirs.length,
-    ".pi/settings.json registers a different number of skills than .claude/skills",
-  );
 });
 
-test("skill cross-references point at files that exist", () => {
-  const skillFiles = [
-    "AGENTS.md",
-    "reports/SKILL.md",
-    "reports/reassessment/SKILL.md",
-    "reports/review/SKILL.md",
-    "reports/graph/SKILL.md",
-    "reports/onchain/SKILL.md",
-    "reports/bridges/SKILL.md",
-    "reports/README.md",
+test("Claude and Pi commands share the canonical prompts", () => {
+  const commandsDir = join(ROOT, ".agents/commands");
+  const names = readdirSync(commandsDir).sort();
+  assert.deepEqual(names, ["graph.md", "reassess.md", "report.md", "review-report.md"]);
+  for (const adapter of [".claude/commands", ".pi/prompts"]) {
+    assert.equal(realpathSync(join(ROOT, adapter)), commandsDir);
+    for (const name of names) {
+      assert.equal(realpathSync(join(ROOT, adapter, name)), join(commandsDir, name));
+    }
+  }
+  for (const file of markdownFiles(join(ROOT, ".pi/agents"))) {
+    for (const name of frontmatter(file).skills ?? []) {
+      assert.ok(skillNames.includes(name), `${file}: unknown skill ${name}`);
+    }
+  }
+});
+
+test("agent links resolve from canonical and adapter paths", () => {
+  const files = [
+    ...markdownFiles(join(ROOT, ".agents")),
+    ...markdownFiles(join(ROOT, ".claude/skills")),
+    ...markdownFiles(join(ROOT, ".claude/commands")),
+    ...markdownFiles(join(ROOT, ".pi/prompts")),
+    ...markdownFiles(join(ROOT, ".pi/agents")),
+    ...["AGENTS.md", "CLAUDE.md", "reports/README.md", "reports/TEMPLATE.md"].map((p) => join(ROOT, p)),
   ];
-
-  for (const file of skillFiles) {
-    const text = read(file);
-    // Backtick-quoted repo paths, e.g. `reports/onchain/SKILL.md`. Skip
-    // globbed/templated paths like reports/graph/<slug>.yaml.
-    const refs = [...text.matchAll(/`((?:reports|src|scripts|tests)\/[^`\s]+|AGENTS\.md)`/g)]
-      .map((m) => m[1])
-      .filter((p) => !p.includes("<") && !p.includes("*"));
-
-    for (const ref of new Set(refs)) {
-      assert.ok(
-        existsSync(join(ROOT, ref)),
-        `${file} references '${ref}', which does not exist`,
-      );
+  for (const file of files) {
+    const content = readFileSync(file, "utf8");
+    const links = [...content.matchAll(/\[[^\]\n]*\]\(([^)\s]+)\)/g)].map((m) => m[1]);
+    for (const href of links) {
+      // Ignore external links and the report template's literal URL placeholders.
+      if (/^[a-z][a-z\d+.-]*:/i.test(href) || href === "URL") continue;
+      const [path, anchor] = href.split("#");
+      const target = path ? resolve(dirname(file), decodeURIComponent(path)) : file;
+      assert.ok(existsSync(target), `${file}: broken link ${href}`);
+      if (anchor && target.endsWith(".md")) {
+        const headings = [...readFileSync(target, "utf8").matchAll(/^#{1,6} (.+)$/gm)]
+          .map((m) => m[1].toLowerCase().replace(/[^\p{L}\p{N} _-]/gu, "").replace(/ /g, "-"));
+        assert.ok(headings.includes(anchor), `${file}: missing heading ${href}`);
+      }
     }
   }
 });

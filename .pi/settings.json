@@ -6,12 +6,7 @@
     "npm:pi-agents"
   ],
   "skills": [
-    "../reports/SKILL.md",
-    "../reports/reassessment/SKILL.md",
-    "../reports/review/SKILL.md",
-    "../reports/graph/SKILL.md",
-    "../reports/onchain/SKILL.md",
-    "../reports/bridges/SKILL.md"
+    "../.agents/skills"
   ],
   "enableSkillCommands": true
 }

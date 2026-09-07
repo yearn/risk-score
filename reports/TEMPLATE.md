@@ -87,7 +87,7 @@ Explain what the protocol does, its usage, and yield sources.
 
 ### Token Mint Authority
 
-Enumerate every address that can mint the assessed token, and the mechanism that gates them. Treat any address with mint authority as part of the trust surface even if it is intended only for a narrow purpose. Onchain enumeration procedure: see `reports/SKILL.md` § "Pass 1.6: Mint authority enumeration".
+Enumerate every address that can mint the assessed token, and the mechanism that gates them. Treat any address with mint authority as part of the trust surface even if it is intended only for a narrow purpose. Onchain enumeration procedure: see [onchain verification](../.agents/skills/verifying-onchain-data/SKILL.md#mint-authority-enumeration-workflow).
 
 **Mint mechanism:** [Open mint via collateral deposit / Role-gated AccessControl / Whitelist mapping / Ownable / Custodial bridge / Other — describe]
 

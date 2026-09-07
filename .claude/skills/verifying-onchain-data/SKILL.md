@@ -1,1 +1,0 @@
-../../../reports/onchain/SKILL.md
