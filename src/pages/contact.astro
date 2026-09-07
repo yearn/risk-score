@@ -21,17 +21,17 @@ const services = [
   {
     num: "01",
     title: "Risk assessments",
-    body: `Independent, published reviews of protocols, vaults and yield-bearing assets, scored 1.0–5.0 on the same rubric behind the ${reportCount} reports on this site. Useful before listing an asset, onboarding a market, or defending an allocation to a risk committee.`,
+    body: `Independent, published reviews of protocols, vaults and yield-bearing assets, scored 1-5 on the same framework behind the ${reportCount} reports on this site. Useful before listing an asset, onboarding a market, or defending an allocation to a risk committee.`,
   },
   {
     num: "02",
     title: "Vault curation",
-    body: "We run curator vaults on Morpho and other lending venues — market selection, supply caps, allocation policy, and the ongoing decisions that keep a vault inside its stated risk envelope.",
+    body: "We run curator vaults on Morpho and other lending venues — market selection, supply caps, allocation policy, and the ongoing decisions that keep a vault inside its stated risk profile.",
   },
   {
     num: "03",
     title: "Curation advice",
-    body: "Working sessions for teams building their own curation practice: what to score, how to weight it, where the hidden fund-loss paths tend to sit, and how to turn all of it into a policy you can actually operate.",
+    body: "Working sessions for teams building their own curation practice: what to score, how to weight it, where the hidden fund-loss paths are, and how to turn all of it into a policy you can actually operate.",
   },
   {
     num: "04",
@@ -43,17 +43,16 @@ const services = [
 
 <BaseLayout
   title="Contact — Yearn Curation"
-  description="Talk to the Yearn Curation team about risk assessments, vault curation, curation advice, and onchain monitoring."
+  description="Talk to the Yearn Curation team about risk assessments, vault curation, curation advice, and monitoring."
   ogUrl="/contact/"
   ogImage="/og/default.png"
   jsonLd={jsonLd}
 >
   <section class="page-hero">
-    <h1>Get in touch</h1>
+    <h1>Let's talk</h1>
     <p class="page-sub">
-      The Yearn Curation team works with protocols, DAOs and allocators on risk
-      assessments, vault curation and onchain monitoring. Tell us what you are
-      building and we will tell you whether we can help.
+      The Yearn Curation team works with protocols, DAOs and allocators on risk assessments, vault curation and monitoring.
+      Tell us what you are building and we will help you secure it.
     </p>
     <div class="hero-cta">
       <a href={`mailto:${EMAIL}`} class="btn btn-primary">
@@ -71,13 +70,11 @@ const services = [
     <div class="card-glow" aria-hidden="true"></div>
     <div class="cred-copy">
       <div class="cred-eyebrow">Track record</div>
-      <h2>We curate $250M+ in TVL</h2>
+      <h2>We manage $250M+ in TVL</h2>
       <p>
         Yearn manages and curates over $250 million across Ethereum, Katana,
-        Arbitrum, Base, Optimism and Polygon — the same book the assessments on
-        this site are written against. Our curation is not theoretical: every
-        framework we would apply for you is one we already run our own capital
-        through.
+        Arbitrum, Base, Optimism and Polygon. Our curation is not theoretical,
+        funds and accounting are onchain. Inhouse monitoring keeps everything inline with defined risk.
       </p>
       <a href={DEFILLAMA_URL} target="_blank" rel="noopener noreferrer" class="cred-link">
         View Yearn on DefiLlama
@@ -120,7 +117,6 @@ const services = [
         <div class="reach-body">
           <div class="reach-title">Email</div>
           <div class="reach-detail">{EMAIL}</div>
-          <p>Best for engagements, scoping a review, or anything with a document attached.</p>
         </div>
       </a>
       <a href={X_URL} target="_blank" rel="noopener noreferrer" class="reach-card">
@@ -131,7 +127,6 @@ const services = [
         <div class="reach-body">
           <div class="reach-title">X</div>
           <div class="reach-detail">@yearnfi</div>
-          <p>Quick questions and DMs. Slower than email for anything detailed.</p>
         </div>
       </a>
     </div>
