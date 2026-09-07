@@ -41,6 +41,14 @@
       "assetCount": 6
     },
     {
+      "id": "sky_stusds",
+      "name": "Sky stUSDS",
+      "chain": "ethereum",
+      "type": "yield_vault",
+      "address": "0x99CD4Ec3f88A45940936F469E4bB72A2A701EEB9",
+      "assetCount": 1
+    },
+    {
       "id": "infinifi",
       "name": "InfiniFi (siUSD)",
       "chain": "ethereum",
@@ -111,6 +119,14 @@
       "type": "yield_vault",
       "address": "0x85B78AcA6Deae198fBF201c82DAF6Ca21942acc6",
       "assetCount": 2
+    },
+    {
+      "id": "origin_ousd",
+      "name": "Origin OUSD",
+      "chain": "ethereum",
+      "type": "stablecoin",
+      "address": "0x2A8e1E676Ec238d8A992307B495b45B3fEAa5e86",
+      "assetCount": 1
     },
     {
       "id": "resolv_wstusr",
@@ -201,6 +217,14 @@
       "assetCount": 2
     },
     {
+      "id": "d2_hypeplus",
+      "name": "D2 HYPE++",
+      "chain": "arbitrum",
+      "type": "yield_vault",
+      "address": "0x75288264FDFEA8ce68e6D852696aB1cE2f3E5004",
+      "assetCount": 1
+    },
+    {
       "id": "gauntlet",
       "name": "Gauntlet USD Alpha (gtUSDa)",
       "chain": "ethereum",
@@ -273,6 +297,14 @@
       "assetCount": 2
     },
     {
+      "id": "superstate_uscc",
+      "name": "Superstate (USCC)",
+      "chain": "ethereum",
+      "type": "tokenized_fund",
+      "address": "0x14d60E7FDC0D71d8611742720E4C50E7a974020c",
+      "assetCount": 4
+    },
+    {
       "id": "saturn",
       "name": "Saturn (USDat)",
       "chain": "ethereum",
@@ -287,6 +319,14 @@
       "type": "lending_market",
       "address": "0x33C45216E121E31f1a8CD24C7E9d0d0C9e29B732",
       "assetCount": 1
+    },
+    {
+      "id": "bedrock_unibtc",
+      "name": "Bedrock (uniBTC)",
+      "chain": "ethereum",
+      "type": "liquid_staking",
+      "address": "0x004E9C3EF86bc1ca1f0bB5C7662861Ee93350568",
+      "assetCount": 5
     }
   ],
   "shared": [
@@ -303,17 +343,20 @@
         "BUCK",
         "Midas (mGLOBAL)",
         "Midas (mHYPER)",
+        "Origin OUSD",
         "Resolv (RLP)",
         "Spark Lending",
         "3Jane (USD3)",
         "Across Protocol (V2 LP Tokens)",
         "Cap (stcUSD)",
+        "D2 HYPE++",
         "Gauntlet USD Alpha (gtUSDa)",
         "Centrifuge (JAAA)",
         "Royco Dawn (srRoyUSDC)",
-        "Superstate (USTB)"
+        "Superstate (USTB)",
+        "Superstate (USCC)"
       ],
-      "count": 18,
+      "count": 21,
       "address": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"
     },
     {
@@ -332,6 +375,22 @@
       ],
       "count": 9,
       "address": "0x7f39C581F595B53c5cb19bD0b3f8dA6c935E2Ca0"
+    },
+    {
+      "asset": "WBTC",
+      "parent": "BitGo",
+      "protocols": [
+        "Aave V3 Core",
+        "Compound V3 USDC",
+        "Compound V3 WETH",
+        "Sky (USDS / sUSDS)",
+        "Spark Lending",
+        "Across Protocol (V2 LP Tokens)",
+        "f(x) Protocol (fxUSD)",
+        "Bedrock (uniBTC)"
+      ],
+      "count": 8,
+      "address": "0x2260fac5e5542a773aa44fbcfedf7c193bc2c599"
     },
     {
       "asset": "USDT",
@@ -363,21 +422,6 @@
       ],
       "count": 7,
       "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2"
-    },
-    {
-      "asset": "WBTC",
-      "parent": "BitGo",
-      "protocols": [
-        "Aave V3 Core",
-        "Compound V3 USDC",
-        "Compound V3 WETH",
-        "Sky (USDS / sUSDS)",
-        "Spark Lending",
-        "Across Protocol (V2 LP Tokens)",
-        "f(x) Protocol (fxUSD)"
-      ],
-      "count": 7,
-      "address": "0x2260fac5e5542a773aa44fbcfedf7c193bc2c599"
     },
     {
       "asset": "DAI",
@@ -419,6 +463,19 @@
       "address": "0x18084fba666a33d37592fa2633fd49a74dd93a88"
     },
     {
+      "asset": "cbBTC",
+      "parent": "Coinbase",
+      "protocols": [
+        "Aave V3 Core",
+        "Compound V3 USDC",
+        "Compound V3 WETH",
+        "Spark Lending",
+        "Bedrock (uniBTC)"
+      ],
+      "count": 5,
+      "address": "0xcbb7c0000ab88b473b1f5afd9ef808440eed33bf"
+    },
+    {
       "asset": "rsETH",
       "parent": "KelpDAO",
       "protocols": [
@@ -430,6 +487,18 @@
       ],
       "count": 5,
       "address": "0xa1290d69c65a6fe4df752f95823fae25cb99e5a7"
+    },
+    {
+      "asset": "T-Bills",
+      "parent": "",
+      "protocols": [
+        "Sky (USDS / sUSDS)",
+        "Paxos (USDG)",
+        "Re Protocol (reUSD)",
+        "Superstate (USTB)",
+        "Superstate (USCC)"
+      ],
+      "count": 5
     },
     {
       "asset": "rETH",
@@ -468,27 +537,16 @@
       "address": "0x9D39A5DE30e57443BfF2A8307A4256c8797A3497"
     },
     {
-      "asset": "cbBTC",
-      "parent": "Coinbase",
-      "protocols": [
-        "Aave V3 Core",
-        "Compound V3 USDC",
-        "Compound V3 WETH",
-        "Spark Lending"
-      ],
-      "count": 4,
-      "address": "0xcbb7c0000ab88b473b1f5afd9ef808440eed33bf"
-    },
-    {
-      "asset": "T-Bills",
+      "asset": "BTC",
       "parent": "",
       "protocols": [
-        "Sky (USDS / sUSDS)",
-        "Paxos (USDG)",
-        "Re Protocol (reUSD)",
-        "Superstate (USTB)"
+        "Maple Finance (syrupUSDC)",
+        "Unit (UBTC)",
+        "Superstate (USCC)",
+        "Bedrock (uniBTC)"
       ],
-      "count": 4
+      "count": 4,
+      "address": "0x2260fac5e5542a773aa44fbcfedf7c193bc2c599"
     },
     {
       "asset": "GHO",
@@ -511,6 +569,17 @@
       ],
       "count": 3,
       "address": "0xA35b1B31Ce002FBF2058D22F30f95D405200A15b"
+    },
+    {
+      "asset": "USDS",
+      "parent": "Sky",
+      "protocols": [
+        "Aave V3 Core",
+        "Sky stUSDS",
+        "Spark Lending"
+      ],
+      "count": 3,
+      "address": "0xdc035d45d973e3ec169d2276ddab16f1e407384f"
     },
     {
       "asset": "LBTC",
@@ -606,16 +675,6 @@
       "address": "0xf1c9acdc66974dfb6decb12aa385b9cd01190e38"
     },
     {
-      "asset": "USDS",
-      "parent": "Sky",
-      "protocols": [
-        "Aave V3 Core",
-        "Spark Lending"
-      ],
-      "count": 2,
-      "address": "0xdc035d45d973e3ec169d2276ddab16f1e407384f"
-    },
-    {
       "asset": "USDtb",
       "parent": "Ethena",
       "protocols": [
@@ -626,6 +685,16 @@
       "address": "0xC139190F447e929f090edF4C5EEa2c5fDa1dcD32"
     },
     {
+      "asset": "FBTC",
+      "parent": "Ignition",
+      "protocols": [
+        "Aave V3 Core",
+        "Bedrock (uniBTC)"
+      ],
+      "count": 2,
+      "address": "0xc96de26018a54d51c097160568752c4e3bd6c364"
+    },
+    {
       "asset": "tETH",
       "parent": "Treehouse",
       "protocols": [
@@ -634,16 +703,6 @@
       ],
       "count": 2,
       "address": "0xd11c452fc99cf405034ee446803b6f6c1f6d5ed8"
-    },
-    {
-      "asset": "BTC",
-      "parent": "",
-      "protocols": [
-        "Maple Finance (syrupUSDC)",
-        "Unit (UBTC)"
-      ],
-      "count": 2,
-      "address": "0x2260fac5e5542a773aa44fbcfedf7c193bc2c599"
     },
     {
       "asset": "sUSDS",
@@ -674,6 +733,16 @@
       ],
       "count": 2,
       "address": "0xae7ab96520DE3A18E5e111B5EaAb095312D7fE84"
+    },
+    {
+      "asset": "ETH",
+      "parent": "",
+      "protocols": [
+        "Resolv (RLP)",
+        "Superstate (USCC)"
+      ],
+      "count": 2,
+      "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2"
     }
   ],
   "dependencies": [
@@ -1578,6 +1647,21 @@
       "allocation": ""
     },
     {
+      "protocol": "Sky stUSDS",
+      "asset": "USDS",
+      "type": "collateral",
+      "parent": "Sky",
+      "allocation": "",
+      "address": "0xdC035D45d973E3EC169d2276DDab16f1e407384F"
+    },
+    {
+      "protocol": "Sky stUSDS",
+      "asset": "LockStake Engine V2 (SKY-backed)",
+      "type": "yield_source",
+      "parent": "USDS",
+      "allocation": ""
+    },
+    {
       "protocol": "InfiniFi (siUSD)",
       "asset": "USDC",
       "type": "collateral",
@@ -1921,6 +2005,35 @@
       "allocation": ""
     },
     {
+      "protocol": "Origin OUSD",
+      "asset": "USDC",
+      "type": "collateral",
+      "parent": "Circle",
+      "allocation": "",
+      "address": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"
+    },
+    {
+      "protocol": "Origin OUSD",
+      "asset": "MetaMorpho mOUSD-V2 (~45% of TVL)",
+      "type": "yield_source",
+      "parent": "USDC",
+      "allocation": ""
+    },
+    {
+      "protocol": "Origin OUSD",
+      "asset": "Curve OUSD/USDC AMO (~14% of TVL)",
+      "type": "yield_source",
+      "parent": "USDC",
+      "allocation": ""
+    },
+    {
+      "protocol": "Origin OUSD",
+      "asset": "Cross-Chain Base + HyperEVM (~42% of TVL)",
+      "type": "yield_source",
+      "parent": "USDC",
+      "allocation": ""
+    },
+    {
       "protocol": "Resolv (wstUSR)",
       "asset": "USR",
       "type": "collateral",
@@ -2258,6 +2371,21 @@
       "allocation": ""
     },
     {
+      "protocol": "D2 HYPE++",
+      "asset": "USDC",
+      "type": "collateral",
+      "parent": "Circle",
+      "allocation": "",
+      "address": "0xaf88d065e77c8cC2239327C5EDb3A432268e5831"
+    },
+    {
+      "protocol": "D2 HYPE++",
+      "asset": "Nested D2 dgnHYPE strategy",
+      "type": "yield_source",
+      "parent": "USDC",
+      "allocation": ""
+    },
+    {
       "protocol": "Gauntlet USD Alpha (gtUSDa)",
       "asset": "USDC",
       "type": "collateral",
@@ -2407,6 +2535,37 @@
       "address": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"
     },
     {
+      "protocol": "Superstate (USCC)",
+      "asset": "BTC",
+      "type": "collateral",
+      "parent": "",
+      "allocation": "",
+      "address": "0x2260fac5e5542a773aa44fbcfedf7c193bc2c599"
+    },
+    {
+      "protocol": "Superstate (USCC)",
+      "asset": "ETH",
+      "type": "collateral",
+      "parent": "",
+      "allocation": "",
+      "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2"
+    },
+    {
+      "protocol": "Superstate (USCC)",
+      "asset": "T-Bills",
+      "type": "collateral",
+      "parent": "",
+      "allocation": ""
+    },
+    {
+      "protocol": "Superstate (USCC)",
+      "asset": "USDC",
+      "type": "collateral",
+      "parent": "Circle",
+      "allocation": "",
+      "address": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"
+    },
+    {
       "protocol": "Saturn (USDat)",
       "asset": "$M",
       "type": "collateral",
@@ -2429,7 +2588,53 @@
       "parent": "",
       "allocation": "",
       "address": "0x696d02Db93291651ED510704c9b286841d506987"
+    },
+    {
+      "protocol": "Bedrock (uniBTC)",
+      "asset": "WBTC",
+      "type": "collateral",
+      "parent": "BitGo",
+      "allocation": "",
+      "address": "0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599"
+    },
+    {
+      "protocol": "Bedrock (uniBTC)",
+      "asset": "FBTC",
+      "type": "collateral",
+      "parent": "Ignition",
+      "allocation": "",
+      "address": "0xC96dE26018A54D51c097160568752c4E3BD6C364"
+    },
+    {
+      "protocol": "Bedrock (uniBTC)",
+      "asset": "cbBTC",
+      "type": "collateral",
+      "parent": "Coinbase",
+      "allocation": "",
+      "address": "0xcbB7C0000aB88B473b1f5aFd9ef808440eed33Bf"
+    },
+    {
+      "protocol": "Bedrock (uniBTC)",
+      "asset": "M-BTC",
+      "type": "collateral",
+      "parent": "",
+      "allocation": ""
+    },
+    {
+      "protocol": "Bedrock (uniBTC)",
+      "asset": "BTC",
+      "type": "collateral",
+      "parent": "",
+      "allocation": "",
+      "address": "0x2260fac5e5542a773aa44fbcfedf7c193bc2c599"
+    },
+    {
+      "protocol": "Bedrock (uniBTC)",
+      "asset": "BTC restaking via custody (proxy staking)",
+      "type": "yield_source",
+      "parent": "BTC",
+      "allocation": ""
     }
   ],
-  "mermaid": "graph LR\n    aave_v3_core[\"Aave V3 Core\\n<small>+40 unique assets</small>\"]\n    compound_v3_usdc[\"Compound V3 USDC\\n<small>+3 unique assets</small>\"]\n    compound_v3_weth[\"Compound V3 WETH\\n<small>+3 unique assets</small>\"]\n    maple[\"Maple Finance (syrupUSDC)\\n<small>+2 unique assets</small>\"]\n    sky[\"Sky (USDS / sUSDS)\"]\n    infinifi[\"InfiniFi (siUSD)\"]\n    strata[\"Strata (srUSDe)\"]\n    reserve_ethplus[\"Reserve Protocol (ETH+)\\n<small>+1 unique assets</small>\"]\n    fluid_lending[\"Fluid Lending\\n<small>+1 unique assets</small>\"]\n    buck[\"BUCK\"]\n    kinetiq[\"Kinetiq (kHYPE)\"]\n    midas_mglobal[\"Midas (mGLOBAL)\"]\n    midas_mhyper[\"Midas (mHYPER)\"]\n    origin_arm[\"Origin ARM (stETH/WETH)\"]\n    resolv_wstusr[\"Resolv (wstUSR)\\n<small>+1 unique assets</small>\"]\n    resolv_rlp[\"Resolv (RLP)\\n<small>+2 unique assets</small>\"]\n    spark[\"Spark Lending\\n<small>+1 unique assets</small>\"]\n    spectra[\"Spectra Finance\"]\n    stakedhype[\"StakedHYPE (stHYPE)\"]\n    unit_ubtc[\"Unit (UBTC)\"]\n    three_jane_usd3[\"3Jane (USD3)\"]\n    aave_sgho[\"Aave (sGHO)\"]\n    across_protocol[\"Across Protocol (V2 LP Tokens)\"]\n    apyx_apxusd[\"Apyx (apxUSD / apyUSD)\\n<small>+1 unique assets</small>\"]\n    cap_stcusd[\"Cap (stcUSD)\\n<small>+1 unique assets</small>\"]\n    gauntlet[\"Gauntlet USD Alpha (gtUSDa)\"]\n    centrifuge_jaaa[\"Centrifuge (JAAA)\\n<small>+1 unique assets</small>\"]\n    fx_fxusd[\"f(x) Protocol (fxUSD)\"]\n    kerneldao_hgeth[\"KernelDAO Kelp Gain (hgETH)\"]\n    mezo_musd[\"Mezo (MUSD)\"]\n    paxos_usdg[\"Paxos (USDG)\\n<small>+1 unique assets</small>\"]\n    re_reusd[\"Re Protocol (reUSD)\"]\n    royco_srroyusdc[\"Royco Dawn (srRoyUSDC)\"]\n    superstate_ustb[\"Superstate (USTB)\"]\n    saturn[\"Saturn (USDat)\\n<small>+1 unique assets</small>\"]\n    flex_lender[\"Flex yvUSD/USDC Lender\\n<small>+1 unique assets</small>\"]\n    BTC([\"BTC\"])\n    DAI[\"DAI\\n<small>(MakerDAO)</small>\"]\n    ETHx[\"ETHx\\n<small>(Stader)</small>\"]\n    GHO[\"GHO\\n<small>(Aave)</small>\"]\n    HYPE([\"HYPE\"])\n    LBTC[\"LBTC\\n<small>(Lombard)</small>\"]\n    LINK[\"LINK\\n<small>(Chainlink)</small>\"]\n    PYUSD[\"PYUSD\\n<small>(PayPal)</small>\"]\n    STRC[\"STRC\\n<small>(Strategy Inc.)</small>\"]\n    T_Bills([\"T-Bills\"])\n    UNI[\"UNI\\n<small>(Uniswap)</small>\"]\n    USDC[\"USDC\\n<small>(Circle)</small>\"]\n    USDS[\"USDS\\n<small>(Sky)</small>\"]\n    USDT[\"USDT\\n<small>(Tether)</small>\"]\n    USDe[\"USDe\\n<small>(Ethena)</small>\"]\n    USDtb[\"USDtb\\n<small>(Ethena)</small>\"]\n    WBTC[\"WBTC\\n<small>(BitGo)</small>\"]\n    WETH([\"WETH\"])\n    cbBTC[\"cbBTC\\n<small>(Coinbase)</small>\"]\n    cbETH[\"cbETH\\n<small>(Coinbase)</small>\"]\n    ezETH[\"ezETH\\n<small>(Renzo)</small>\"]\n    osETH[\"osETH\\n<small>(StakeWise)</small>\"]\n    rETH[\"rETH\\n<small>(Rocket Pool)</small>\"]\n    rsETH[\"rsETH\\n<small>(KelpDAO)</small>\"]\n    sDAI[\"sDAI\\n<small>(MakerDAO)</small>\"]\n    sUSDS[\"sUSDS\\n<small>(Sky)</small>\"]\n    sUSDe[\"sUSDe\\n<small>(Ethena)</small>\"]\n    stETH[\"stETH\\n<small>(Lido)</small>\"]\n    tBTC[\"tBTC\\n<small>(Threshold)</small>\"]\n    tETH[\"tETH\\n<small>(Treehouse)</small>\"]\n    weETH[\"weETH\\n<small>(EtherFi)</small>\"]\n    wstETH[\"wstETH\\n<small>(Lido)</small>\"]\n    aave_v3_core --> WETH\n    aave_v3_core --> wstETH\n    aave_v3_core --> WBTC\n    aave_v3_core --> USDC\n    aave_v3_core --> DAI\n    aave_v3_core --> LINK\n    aave_v3_core --> cbETH\n    aave_v3_core --> USDT\n    aave_v3_core --> rETH\n    aave_v3_core --> UNI\n    aave_v3_core --> GHO\n    aave_v3_core --> sDAI\n    aave_v3_core --> PYUSD\n    aave_v3_core --> weETH\n    aave_v3_core --> osETH\n    aave_v3_core --> USDe\n    aave_v3_core --> ETHx\n    aave_v3_core --> sUSDe\n    aave_v3_core --> tBTC\n    aave_v3_core --> cbBTC\n    aave_v3_core --> USDS\n    aave_v3_core --> rsETH\n    aave_v3_core --> LBTC\n    aave_v3_core --> USDtb\n    aave_v3_core --> tETH\n    aave_v3_core --> ezETH\n    compound_v3_usdc --> WBTC\n    compound_v3_usdc --> WETH\n    compound_v3_usdc --> UNI\n    compound_v3_usdc --> LINK\n    compound_v3_usdc --> wstETH\n    compound_v3_usdc --> cbBTC\n    compound_v3_usdc --> tBTC\n    compound_v3_usdc --> weETH\n    compound_v3_usdc --> rsETH\n    compound_v3_usdc --> USDe\n    compound_v3_weth --> cbETH\n    compound_v3_weth --> wstETH\n    compound_v3_weth --> rETH\n    compound_v3_weth --> rsETH\n    compound_v3_weth --> weETH\n    compound_v3_weth --> osETH\n    compound_v3_weth --> WBTC\n    compound_v3_weth --> ezETH\n    compound_v3_weth --> cbBTC\n    compound_v3_weth --> tBTC\n    compound_v3_weth --> ETHx\n    compound_v3_weth --> tETH\n    compound_v3_weth --> USDC\n    compound_v3_weth --> USDT\n    maple --> BTC\n    maple --> LBTC\n    maple --> weETH\n    maple --> HYPE\n    sky --> USDC\n    sky --> DAI\n    sky --> WETH\n    sky --> wstETH\n    sky --> WBTC\n    sky --> T_Bills\n    infinifi --> USDC\n    infinifi --> USDT\n    infinifi --> USDe\n    infinifi --> sUSDe\n    strata --> USDe\n    strata --> sUSDe\n    strata --> USDT\n    strata --> USDC\n    strata --> DAI\n    reserve_ethplus --> wstETH\n    reserve_ethplus --> rETH\n    reserve_ethplus --> ETHx\n    fluid_lending --> USDC\n    fluid_lending --> USDT\n    fluid_lending --> WETH\n    fluid_lending --> wstETH\n    fluid_lending --> GHO\n    fluid_lending --> sUSDS\n    fluid_lending --> USDtb\n    buck --> USDC\n    buck --> STRC\n    kinetiq --> HYPE\n    midas_mglobal --> USDC\n    midas_mhyper --> USDC\n    origin_arm --> WETH\n    origin_arm --> stETH\n    resolv_rlp --> USDC\n    resolv_rlp --> USDT\n    resolv_rlp --> stETH\n    resolv_rlp --> wstETH\n    spark --> DAI\n    spark --> sDAI\n    spark --> USDC\n    spark --> WETH\n    spark --> wstETH\n    spark --> WBTC\n    spark --> rETH\n    spark --> USDT\n    spark --> weETH\n    spark --> cbBTC\n    spark --> sUSDS\n    spark --> USDS\n    spark --> LBTC\n    spark --> tBTC\n    spark --> ezETH\n    spark --> rsETH\n    spark --> PYUSD\n    stakedhype --> HYPE\n    unit_ubtc --> BTC\n    three_jane_usd3 --> USDC\n    aave_sgho --> GHO\n    across_protocol --> WETH\n    across_protocol --> USDC\n    across_protocol --> USDT\n    across_protocol --> DAI\n    across_protocol --> WBTC\n    apyx_apxusd --> STRC\n    cap_stcusd --> USDC\n    gauntlet --> USDC\n    centrifuge_jaaa --> USDC\n    fx_fxusd --> wstETH\n    fx_fxusd --> WBTC\n    kerneldao_hgeth --> rsETH\n    mezo_musd --> tBTC\n    paxos_usdg --> T_Bills\n    re_reusd --> sUSDe\n    re_reusd --> T_Bills\n    royco_srroyusdc --> USDC\n    superstate_ustb --> T_Bills\n    superstate_ustb --> USDC\n    maple -.->|yield| aave_v3_core\n    maple -.->|yield| sky\n    sky -.->|USDS| spark\n    fluid((\"fluid\"))\n    infinifi -.->|USDC| fluid\n    euler((\"euler\"))\n    infinifi -.->|USDC| euler\n    infinifi -.->|USDC| aave_v3_core\n    infinifi -.->|USDC| spark\n    infinifi -.->|USDC| aave_v3_core\n    pendle((\"pendle\"))\n    infinifi -.->|USDe, sUSDe| pendle\n    ethena((\"ethena\"))\n    infinifi -.->|USDe, sUSDe| ethena\n    infinifi -.->|USDC| gauntlet\n    reservoir((\"reservoir\"))\n    infinifi -.->|USDC| reservoir\n    fasanara((\"fasanara\"))\n    infinifi -.->|USDC| fasanara\n    tokemak((\"tokemak\"))\n    infinifi -.->|USDC| tokemak\n    strata -.->|sUSDe| ethena\n    midas_mglobal -.->|USDC| aave_v3_core\n    midas_mhyper -.->|USDe| aave_v3_core\n    midas_mhyper -.->|USDC| pendle\n    morpho((\"morpho\"))\n    midas_mhyper -.->|USDC| morpho\n    origin_arm -.->|WETH| morpho\n    resolv_rlp -.->|USDC| aave_v3_core\n    resolv_rlp -.->|USDC| fluid_lending\n    three_jane_usd3 -.->|USDC| aave_v3_core\n    aave_sgho -.->|USDC| aave_v3_core\n    cap_stcusd -.->|USDC| morpho\n    gauntlet -.->|USDC| morpho\n    fx_fxusd -.->|USDC, wstETH| aave_v3_core\n    kerneldao_hgeth -.->|USDe, ETH| aave_v3_core\n    kerneldao_hgeth -.->|rsETH| pendle\n    kerneldao_hgeth -.->|WETH| morpho\n    royco_srroyusdc -.->|USDC| aave_v3_core\n    classDef protocol fill:#0675F9,color:#fff,stroke:#0675F9\n    class aave_v3_core compound_v3_usdc compound_v3_weth maple sky infinifi strata reserve_ethplus fluid_lending buck kinetiq midas_mglobal midas_mhyper origin_arm resolv_wstusr resolv_rlp spark spectra stakedhype unit_ubtc three_jane_usd3 aave_sgho across_protocol apyx_apxusd cap_stcusd gauntlet centrifuge_jaaa fx_fxusd kerneldao_hgeth mezo_musd paxos_usdg re_reusd royco_srroyusdc superstate_ustb saturn flex_lender protocol"
+  "mermaid": "graph LR\n    aave_v3_core[\"Aave V3 Core\\n<small>+39 unique assets</small>\"]\n    compound_v3_usdc[\"Compound V3 USDC\\n<small>+3 unique assets</small>\"]\n    compound_v3_weth[\"Compound V3 WETH\\n<small>+3 unique assets</small>\"]\n    maple[\"Maple Finance (syrupUSDC)\\n<small>+2 unique assets</small>\"]\n    sky[\"Sky (USDS / sUSDS)\"]\n    sky_stusds[\"Sky stUSDS\"]\n    infinifi[\"InfiniFi (siUSD)\"]\n    strata[\"Strata (srUSDe)\"]\n    reserve_ethplus[\"Reserve Protocol (ETH+)\\n<small>+1 unique assets</small>\"]\n    fluid_lending[\"Fluid Lending\\n<small>+1 unique assets</small>\"]\n    buck[\"BUCK\"]\n    kinetiq[\"Kinetiq (kHYPE)\"]\n    midas_mglobal[\"Midas (mGLOBAL)\"]\n    midas_mhyper[\"Midas (mHYPER)\"]\n    origin_arm[\"Origin ARM (stETH/WETH)\"]\n    origin_ousd[\"Origin OUSD\"]\n    resolv_wstusr[\"Resolv (wstUSR)\\n<small>+1 unique assets</small>\"]\n    resolv_rlp[\"Resolv (RLP)\\n<small>+1 unique assets</small>\"]\n    spark[\"Spark Lending\\n<small>+1 unique assets</small>\"]\n    spectra[\"Spectra Finance\"]\n    stakedhype[\"StakedHYPE (stHYPE)\"]\n    unit_ubtc[\"Unit (UBTC)\"]\n    three_jane_usd3[\"3Jane (USD3)\"]\n    aave_sgho[\"Aave (sGHO)\"]\n    across_protocol[\"Across Protocol (V2 LP Tokens)\"]\n    apyx_apxusd[\"Apyx (apxUSD / apyUSD)\\n<small>+1 unique assets</small>\"]\n    cap_stcusd[\"Cap (stcUSD)\\n<small>+1 unique assets</small>\"]\n    d2_hypeplus[\"D2 HYPE++\"]\n    gauntlet[\"Gauntlet USD Alpha (gtUSDa)\"]\n    centrifuge_jaaa[\"Centrifuge (JAAA)\\n<small>+1 unique assets</small>\"]\n    fx_fxusd[\"f(x) Protocol (fxUSD)\"]\n    kerneldao_hgeth[\"KernelDAO Kelp Gain (hgETH)\"]\n    mezo_musd[\"Mezo (MUSD)\"]\n    paxos_usdg[\"Paxos (USDG)\\n<small>+1 unique assets</small>\"]\n    re_reusd[\"Re Protocol (reUSD)\"]\n    royco_srroyusdc[\"Royco Dawn (srRoyUSDC)\"]\n    superstate_ustb[\"Superstate (USTB)\"]\n    superstate_uscc[\"Superstate (USCC)\"]\n    saturn[\"Saturn (USDat)\\n<small>+1 unique assets</small>\"]\n    flex_lender[\"Flex yvUSD/USDC Lender\\n<small>+1 unique assets</small>\"]\n    bedrock_unibtc[\"Bedrock (uniBTC)\\n<small>+1 unique assets</small>\"]\n    BTC([\"BTC\"])\n    DAI[\"DAI\\n<small>(MakerDAO)</small>\"]\n    ETH([\"ETH\"])\n    ETHx[\"ETHx\\n<small>(Stader)</small>\"]\n    FBTC[\"FBTC\\n<small>(Ignition)</small>\"]\n    GHO[\"GHO\\n<small>(Aave)</small>\"]\n    HYPE([\"HYPE\"])\n    LBTC[\"LBTC\\n<small>(Lombard)</small>\"]\n    LINK[\"LINK\\n<small>(Chainlink)</small>\"]\n    PYUSD[\"PYUSD\\n<small>(PayPal)</small>\"]\n    STRC[\"STRC\\n<small>(Strategy Inc.)</small>\"]\n    T_Bills([\"T-Bills\"])\n    UNI[\"UNI\\n<small>(Uniswap)</small>\"]\n    USDC[\"USDC\\n<small>(Circle)</small>\"]\n    USDS[\"USDS\\n<small>(Sky)</small>\"]\n    USDT[\"USDT\\n<small>(Tether)</small>\"]\n    USDe[\"USDe\\n<small>(Ethena)</small>\"]\n    USDtb[\"USDtb\\n<small>(Ethena)</small>\"]\n    WBTC[\"WBTC\\n<small>(BitGo)</small>\"]\n    WETH([\"WETH\"])\n    cbBTC[\"cbBTC\\n<small>(Coinbase)</small>\"]\n    cbETH[\"cbETH\\n<small>(Coinbase)</small>\"]\n    ezETH[\"ezETH\\n<small>(Renzo)</small>\"]\n    osETH[\"osETH\\n<small>(StakeWise)</small>\"]\n    rETH[\"rETH\\n<small>(Rocket Pool)</small>\"]\n    rsETH[\"rsETH\\n<small>(KelpDAO)</small>\"]\n    sDAI[\"sDAI\\n<small>(MakerDAO)</small>\"]\n    sUSDS[\"sUSDS\\n<small>(Sky)</small>\"]\n    sUSDe[\"sUSDe\\n<small>(Ethena)</small>\"]\n    stETH[\"stETH\\n<small>(Lido)</small>\"]\n    tBTC[\"tBTC\\n<small>(Threshold)</small>\"]\n    tETH[\"tETH\\n<small>(Treehouse)</small>\"]\n    weETH[\"weETH\\n<small>(EtherFi)</small>\"]\n    wstETH[\"wstETH\\n<small>(Lido)</small>\"]\n    aave_v3_core --> WETH\n    aave_v3_core --> wstETH\n    aave_v3_core --> WBTC\n    aave_v3_core --> USDC\n    aave_v3_core --> DAI\n    aave_v3_core --> LINK\n    aave_v3_core --> cbETH\n    aave_v3_core --> USDT\n    aave_v3_core --> rETH\n    aave_v3_core --> UNI\n    aave_v3_core --> GHO\n    aave_v3_core --> sDAI\n    aave_v3_core --> PYUSD\n    aave_v3_core --> weETH\n    aave_v3_core --> osETH\n    aave_v3_core --> USDe\n    aave_v3_core --> ETHx\n    aave_v3_core --> sUSDe\n    aave_v3_core --> tBTC\n    aave_v3_core --> cbBTC\n    aave_v3_core --> USDS\n    aave_v3_core --> rsETH\n    aave_v3_core --> LBTC\n    aave_v3_core --> USDtb\n    aave_v3_core --> FBTC\n    aave_v3_core --> tETH\n    aave_v3_core --> ezETH\n    compound_v3_usdc --> WBTC\n    compound_v3_usdc --> WETH\n    compound_v3_usdc --> UNI\n    compound_v3_usdc --> LINK\n    compound_v3_usdc --> wstETH\n    compound_v3_usdc --> cbBTC\n    compound_v3_usdc --> tBTC\n    compound_v3_usdc --> weETH\n    compound_v3_usdc --> rsETH\n    compound_v3_usdc --> USDe\n    compound_v3_weth --> cbETH\n    compound_v3_weth --> wstETH\n    compound_v3_weth --> rETH\n    compound_v3_weth --> rsETH\n    compound_v3_weth --> weETH\n    compound_v3_weth --> osETH\n    compound_v3_weth --> WBTC\n    compound_v3_weth --> ezETH\n    compound_v3_weth --> cbBTC\n    compound_v3_weth --> tBTC\n    compound_v3_weth --> ETHx\n    compound_v3_weth --> tETH\n    compound_v3_weth --> USDC\n    compound_v3_weth --> USDT\n    maple --> BTC\n    maple --> LBTC\n    maple --> weETH\n    maple --> HYPE\n    sky --> USDC\n    sky --> DAI\n    sky --> WETH\n    sky --> wstETH\n    sky --> WBTC\n    sky --> T_Bills\n    sky_stusds --> USDS\n    infinifi --> USDC\n    infinifi --> USDT\n    infinifi --> USDe\n    infinifi --> sUSDe\n    strata --> USDe\n    strata --> sUSDe\n    strata --> USDT\n    strata --> USDC\n    strata --> DAI\n    reserve_ethplus --> wstETH\n    reserve_ethplus --> rETH\n    reserve_ethplus --> ETHx\n    fluid_lending --> USDC\n    fluid_lending --> USDT\n    fluid_lending --> WETH\n    fluid_lending --> wstETH\n    fluid_lending --> GHO\n    fluid_lending --> sUSDS\n    fluid_lending --> USDtb\n    buck --> USDC\n    buck --> STRC\n    kinetiq --> HYPE\n    midas_mglobal --> USDC\n    midas_mhyper --> USDC\n    origin_arm --> WETH\n    origin_arm --> stETH\n    origin_ousd --> USDC\n    resolv_rlp --> USDC\n    resolv_rlp --> USDT\n    resolv_rlp --> ETH\n    resolv_rlp --> stETH\n    resolv_rlp --> wstETH\n    spark --> DAI\n    spark --> sDAI\n    spark --> USDC\n    spark --> WETH\n    spark --> wstETH\n    spark --> WBTC\n    spark --> rETH\n    spark --> USDT\n    spark --> weETH\n    spark --> cbBTC\n    spark --> sUSDS\n    spark --> USDS\n    spark --> LBTC\n    spark --> tBTC\n    spark --> ezETH\n    spark --> rsETH\n    spark --> PYUSD\n    stakedhype --> HYPE\n    unit_ubtc --> BTC\n    three_jane_usd3 --> USDC\n    aave_sgho --> GHO\n    across_protocol --> WETH\n    across_protocol --> USDC\n    across_protocol --> USDT\n    across_protocol --> DAI\n    across_protocol --> WBTC\n    apyx_apxusd --> STRC\n    cap_stcusd --> USDC\n    d2_hypeplus --> USDC\n    gauntlet --> USDC\n    centrifuge_jaaa --> USDC\n    fx_fxusd --> wstETH\n    fx_fxusd --> WBTC\n    kerneldao_hgeth --> rsETH\n    mezo_musd --> tBTC\n    paxos_usdg --> T_Bills\n    re_reusd --> sUSDe\n    re_reusd --> T_Bills\n    royco_srroyusdc --> USDC\n    superstate_ustb --> T_Bills\n    superstate_ustb --> USDC\n    superstate_uscc --> BTC\n    superstate_uscc --> ETH\n    superstate_uscc --> T_Bills\n    superstate_uscc --> USDC\n    bedrock_unibtc --> WBTC\n    bedrock_unibtc --> FBTC\n    bedrock_unibtc --> cbBTC\n    bedrock_unibtc --> BTC\n    maple -.->|yield| aave_v3_core\n    maple -.->|yield| sky\n    sky -.->|USDS| spark\n    sky_stusds -.->|USDS| sky\n    fluid((\"fluid\"))\n    infinifi -.->|USDC| fluid\n    euler((\"euler\"))\n    infinifi -.->|USDC| euler\n    infinifi -.->|USDC| aave_v3_core\n    infinifi -.->|USDC| spark\n    infinifi -.->|USDC| aave_v3_core\n    pendle((\"pendle\"))\n    infinifi -.->|USDe, sUSDe| pendle\n    ethena((\"ethena\"))\n    infinifi -.->|USDe, sUSDe| ethena\n    infinifi -.->|USDC| gauntlet\n    reservoir((\"reservoir\"))\n    infinifi -.->|USDC| reservoir\n    fasanara((\"fasanara\"))\n    infinifi -.->|USDC| fasanara\n    tokemak((\"tokemak\"))\n    infinifi -.->|USDC| tokemak\n    strata -.->|sUSDe| ethena\n    midas_mglobal -.->|USDC| aave_v3_core\n    midas_mhyper -.->|USDe| aave_v3_core\n    midas_mhyper -.->|USDC| pendle\n    morpho((\"morpho\"))\n    midas_mhyper -.->|USDC| morpho\n    origin_arm -.->|WETH| morpho\n    origin_ousd -.->|USDC| morpho\n    curve((\"curve\"))\n    origin_ousd -.->|USDC| curve\n    circle_cctp((\"circle_cctp\"))\n    origin_ousd -.->|USDC| circle_cctp\n    resolv_rlp -.->|USDC| aave_v3_core\n    resolv_rlp -.->|USDC| fluid_lending\n    three_jane_usd3 -.->|USDC| aave_v3_core\n    aave_sgho -.->|USDC| aave_v3_core\n    cap_stcusd -.->|USDC| morpho\n    dgnhype((\"dgnhype\"))\n    d2_hypeplus -.->|USDC| dgnhype\n    gauntlet -.->|USDC| morpho\n    fx_fxusd -.->|USDC, wstETH| aave_v3_core\n    kerneldao_hgeth -.->|USDe, ETH| aave_v3_core\n    kerneldao_hgeth -.->|rsETH| pendle\n    kerneldao_hgeth -.->|WETH| morpho\n    royco_srroyusdc -.->|USDC| aave_v3_core\n    babylon((\"babylon\"))\n    bedrock_unibtc -.->|BTC| babylon\n    classDef protocol fill:#0675F9,color:#fff,stroke:#0675F9\n    class aave_v3_core compound_v3_usdc compound_v3_weth maple sky sky_stusds infinifi strata reserve_ethplus fluid_lending buck kinetiq midas_mglobal midas_mhyper origin_arm origin_ousd resolv_wstusr resolv_rlp spark spectra stakedhype unit_ubtc three_jane_usd3 aave_sgho across_protocol apyx_apxusd cap_stcusd d2_hypeplus gauntlet centrifuge_jaaa fx_fxusd kerneldao_hgeth mezo_musd paxos_usdg re_reusd royco_srroyusdc superstate_ustb superstate_uscc saturn flex_lender bedrock_unibtc protocol"
 }

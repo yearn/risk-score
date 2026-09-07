@@ -73,6 +73,32 @@ export interface HistoryEntry {
   notesHtml: string;
 }
 
+/** One category's written justification, pulled from "### Category Scores". */
+export interface ScoreRationale {
+  /** Long-form name from the heading, e.g. "Centralization & Control Risks". */
+  category: string;
+  weight: string;
+  /** null only when no score can be recovered from the heading, body, or table. */
+  score: number | null;
+  html: string;
+}
+
+/**
+ * The "## Risk Score Assessment" section, split into its parts so the page can
+ * show *why* each category scored what it did — the reasoning that
+ * `extractFullBody` deliberately drops.
+ */
+export interface ScoreDetails {
+  /** Preamble before the first "### " (the scoring-guidelines note). */
+  guidelinesHtml: string;
+  gatesHtml: string;
+  rationales: ScoreRationale[];
+  calculationHtml: string;
+  tierHtml: string;
+  /** Whole section, flat. Non-empty only when `rationales` is empty. */
+  fallbackHtml: string;
+}
+
 export interface ReportData extends ReportMeta {
   overviewHtml: string;
   scoreTable: CategoryScore[];
@@ -80,6 +106,8 @@ export interface ReportData extends ReportMeta {
   fullReportHtml: string;
   /** Chronological score history (oldest first). Synthesized from meta when the report has no table yet. */
   history: HistoryEntry[];
+  /** null when the report has no "## Risk Score Assessment" section at all. */
+  scoreDetails: ScoreDetails | null;
 }
 
 const TYPE_OVERRIDES: Record<string, "Protocol" | "Asset"> = {
@@ -242,6 +270,14 @@ function extractSection(content: string, heading: string): string {
   return lines.slice(1).join("\n").trim();
 }
 
+/** extractSection one heading level down: a "### " block inside a "## " section. */
+function extractSubsection(section: string, heading: string): string {
+  const parts = section.split(/(?=^### )/m);
+  const part = parts.find((s) => s.startsWith(`### ${heading}`));
+  if (!part) return "";
+  return part.split("\n").slice(1).join("\n").trim();
+}
+
 function parseScoreTable(content: string): CategoryScore[] {
   // Try standard table format: | Category | Score | Weight | Weighted |
   const tableMatch = content.match(
@@ -308,6 +344,8 @@ function extractFullBody(content: string): string {
     "Overview + Links",
     "Risk Summary",
     "Risk Score Assessment",
+    // Sibling-section variant of the tier block, surfaced in Score Details.
+    "Overall Risk Score",
     "Assessment History",
   ];
   const bodySections = sections
@@ -353,6 +391,84 @@ function parseHistory(content: string, meta: ReportMeta): HistoryEntry[] {
   ];
 }
 
+// "#### Category 2: Centralization & Control Risks (Weight: 30%)", with the
+// optional " — **3.5**" score suffix a minority of reports append.
+const CATEGORY_HEADING =
+  /^#### Category \d+:\s*(.+?)\s*\(Weight:\s*(\d+%)\)(?:\s*[—–-]+\s*\*\*([\d.]+)\*\*)?\s*$/;
+
+// A category block's score lines. Covers "**Score: 3.5/5**", "**Score: 1.5 / 5**"
+// and the computed "**Score: (1 + 1) / 2 = 1.0**" form — the optional group only
+// engages when a "=" appears before the number, and it cannot cross a "*", so it
+// never swallows a trailing "— (2.5 + 4.0) / 2 = …".
+// Some reports emit one of these per subcategory *and* a rollup for the category;
+// the rollup is always last, so the last match is the category's own score.
+const SCORE_LINE = /^\*\*Score:\s*(?:[^*]*?=\s*)?([\d.]+)\s*(?:\/\s*5)?/gm;
+
+/**
+ * Splits "## Risk Score Assessment" into gates, per-category justification, and
+ * the closing calculation/tier blocks. Reports vary in how they mark up
+ * subcategories, so only the "#### Category N: …" heading is relied on; the
+ * body under each is passed through as prose.
+ */
+function parseScoreDetails(
+  content: string,
+  scoreTable: CategoryScore[],
+): ScoreDetails | null {
+  // Trailing "---" rules separate this section from the next one; drop it so it
+  // does not render as a stray divider (or worse, a setext heading).
+  const section = extractSection(content, "Risk Score Assessment")
+    .replace(/\n+-{3,}\s*$/, "")
+    .trim();
+  if (!section) return null;
+
+  const md = (s: string) =>
+    s ? (marked.parse(s, { async: false }) as string) : "";
+
+  const rationales: ScoreRationale[] = [];
+  for (const block of extractSubsection(section, "Category Scores").split(
+    /(?=^#### )/m,
+  )) {
+    const heading = block.split("\n")[0].match(CATEGORY_HEADING);
+    if (!heading) continue;
+    const [, category, weight, headingScore] = heading;
+    // Score, most to least reliable: the heading suffix, the block's own
+    // "**Score:**" line, then the weighted table parsed elsewhere by position.
+    const lines = [...block.matchAll(SCORE_LINE)];
+    const raw = headingScore ?? lines[lines.length - 1]?.[1];
+    const parsed = raw != null ? parseFloat(raw) : NaN;
+    rationales.push({
+      category,
+      weight,
+      score: Number.isFinite(parsed)
+        ? parsed
+        : (scoreTable[rationales.length]?.score ?? null),
+      html: md(block.split("\n").slice(1).join("\n").trim()),
+    });
+  }
+
+  // Preamble before the first "### ". A zero-width split match at index 0 is
+  // ignored by String.split, so when the section opens straight into a
+  // subsection this first chunk *is* that subsection — not an empty preamble.
+  const first = section.split(/(?=^### )/m)[0];
+
+  return {
+    guidelinesHtml: first.startsWith("### ") ? "" : md(first.trim()),
+    gatesHtml: md(extractSubsection(section, "Critical Risk Gates")),
+    rationales,
+    calculationHtml: md(extractSubsection(section, "Final Score Calculation")),
+    // Four reports carry the tier in a sibling "## Overall Risk Score" section
+    // instead of a "### Risk Tier" subsection. extractFullBody skips that
+    // heading too, so it stays in exactly one place on the page.
+    tierHtml: md(
+      extractSubsection(section, "Risk Tier") ||
+        extractSection(content, "Overall Risk Score"),
+    ),
+    // A couple of reports have no "### Category Scores" block, so there is
+    // nothing to split into rows — render the section flat rather than empty.
+    fallbackHtml: rationales.length === 0 ? md(section) : "",
+  };
+}
+
 export function parseReport(slug: string, content: string): ReportData {
   const meta = parseMeta(slug, content);
 
@@ -369,5 +485,6 @@ export function parseReport(slug: string, content: string): ReportData {
     riskSummaryHtml: marked.parse(riskSummaryMd, { async: false }) as string,
     fullReportHtml: marked.parse(fullBodyMd, { async: false }) as string,
     history,
+    scoreDetails: parseScoreDetails(content, scoreTable),
   };
 }
