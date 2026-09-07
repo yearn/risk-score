@@ -23,9 +23,8 @@ nodes:
     note: >-
       Yearn V3 allocator vault holding $1,111,920 of USDC, 81.0% of it in Flex. Role manager is the
       Yearn Strategist MultiSig, with a handover to Yearn's RoleManager pending. 90.9% of shares are held
-      by the Yearn Treasury and the vault is absent from yDaemon's index, so this is Treasury-seeded
-      pilot capital rather than a listed retail vault. Only 19.0% is instantly withdrawable, and none of
-      that comes from the Flex legs.
+      by the Yearn Treasury; a public FlexUSDC listing is expected. Users exit Flex legs through the
+      FlexExitRouter; the Sky USDS leg holds the vault's idle cash.
   - id: lender-yvusd
     label: Flex yvUSD/USDC Lender (ysUSDC)
     address: "0xD93Dade7Ac8b5d1687da5d074835cB4404Dee8bA"
@@ -56,27 +55,26 @@ nodes:
     address: "0x7501EAE6b5C2Cb0A6EDAC908E3A679B20eDd737b"
     category: strategy
     note: >-
-      Deposit-gated Yearn strategy; only the allow-listed yvFlexUSDC vault may deposit. Its
-      availableWithdrawLimit is idle USDC in the strategy plus idle USDC in the Lender, currently 0, so
-      freeing funds requires management forceFreeFunds or an ExitRouter exit. Reporting reverts while a
-      redemption auction is unsettled.
+      Deposit-gated Yearn strategy; only the allow-listed yvFlexUSDC vault may deposit. Lenders stay
+      fully deployed (availableWithdrawLimit is idle cash, currently 0) by design; users exit through
+      the FlexExitRouter. Reporting reverts while a redemption auction is unsettled.
   - id: strat-ysybold
     label: FlexLenderStrategy — ysyBOLD (18.0%)
     address: "0xDd58AeFE74585DA2C7Ad3D3dF0F3aeEAb05b5176"
     category: strategy
-    note: Same strategy code and constraints as the yvUSD leg; availableWithdrawLimit is also 0.
+    note: Same strategy code as the yvUSD leg; idle cash is 0 by design, exit is via FlexExitRouter.
   - id: strat-yvcrvusd
     label: FlexLenderStrategy — yvcrvUSD-2 (9.0%)
     address: "0xC818A0Be1BB2cE820CfdefAD5f890667e885f39d"
     category: strategy
-    note: Same strategy code and constraints as the other two Flex legs; availableWithdrawLimit is 0.
+    note: Same strategy code as the other two Flex legs; idle cash is 0 by design, exit is via FlexExitRouter.
   - id: strat-sky
     label: USDC → SKY USDS Depositor (19.0%)
     address: "0xfb4F83c3923eab7B6254cD2399C206109970F95e"
     category: strategy
     note: >-
-      Not a Flex position. The entirety of the allocator vault's instantly withdrawable liquidity
-      ($211,491), which is why it matters to the vault's liquidity picture.
+      Not a Flex position. Holds the allocator vault's idle USDC (~$211,491). Flex legs stay deployed
+      and exit through FlexExitRouter.
 
   # Protocol machinery
   - id: tm-yvusd
@@ -111,8 +109,8 @@ nodes:
     note: >-
       Converts yvcrvUSD-2 to crvUSD through the vault rate, then prices crvUSD/USDC off the Curve
       pool's EMA oracle. Capped at 1.01 with no floor and no privileged switch — structurally the
-      soundest of the three market oracles. Its source has never been merged to flex-contracts master
-      (pull request #23) and was in no audit's scope.
+      soundest of the three market oracles. Source lives on pull request #23; reviewed by Yearn
+      security and Zero Cool.
   - id: oracle-yvusd
     label: Price Oracle — yvUSD/USDC
     address: "0xDB8DBB6c0548341Aea85ebAAFa681B4A8c077D2e"
@@ -129,8 +127,8 @@ nodes:
       Converts ysyBOLD to BOLD through the two vault exchange rates, then prices BOLD/USDC off the Curve
       pool's EMA oracle. The BOLD leg is capped at 1.01, and a 0.99 floor applies unless Daddy sets
       set_depeg_mode — which it did on August 24, 2026, so the floor is currently lifted and a real BOLD
-      depeg registers. The same key can switch it back with no timelock. Its source has never been merged
-      to flex-contracts master (pull request #22) and was in no audit's scope.
+      depeg registers. The same key can switch it back with no timelock. Source lives on pull request
+      #22; reviewed by Yearn security and Zero Cool.
   - id: registry
     label: Registry (endorsed markets)
     address: "0x9117440a7D03238905d1C8908157Bd7a547c77c8"
@@ -145,9 +143,9 @@ nodes:
     address: "0xe8a511403B0C83e7b85513e00Ed39996B48c2aeD"
     category: infra
     note: >-
-      The working exit path while the Lenders hold no idle cash. Sets a proceeds receiver on the
-      strategy so the withdrawal goes straight to the exiting user — idle liquidity atomically, the rest
-      asynchronously via a redemption auction — with the shortfall booked as a loss on that user's withdrawal.
+      Permissionless user exit. Sets a proceeds receiver on the strategy so the withdrawal goes
+      straight to the exiting user — idle liquidity atomically, the rest asynchronously via a
+      redemption auction. Lenders stay fully deployed by design; this is the intended exit path.
 
   # Governance
   - id: daddy
@@ -166,15 +164,14 @@ nodes:
     category: governance
     note: >-
       Safe v1.4.1. Threshold raised from 2 to 3 on June 24, 2026 and a fifth owner added on August 13, 2026.
-      Reported to be Flex developer keys plus pseudonymous Yearn-ecosystem reviewers; the fifth signer is
-      not publicly mapped. No timelock sits in front of it.
+      No timelock sits in front of it.
   - id: yearn-sms
     label: Yearn Strategist MultiSig (SMS)
     address: "0x16388463d60FFE0661Cf7F1f31a7D658aC790ff7"
     category: governance
     note: >-
-      Holds all 14 roles on the yvFlexUSDC vault and is management on both Flex strategies, so it alone
-      decides when forceFreeFunds is called to unwind a Flex position.
+      Holds all 14 roles on the yvFlexUSDC vault and is management on the Flex strategies. forceFreeFunds
+      is an optional curator unwind; depositors exit through the FlexExitRouter.
 
   # External dependencies
   - id: dep-yvusd
@@ -183,7 +180,7 @@ nodes:
     category: dependency
     note: >-
       Sole collateral of the largest market and, through the Morpho oracle, its only price input. A yvUSD
-      impairment feeds straight into Flex solvency across a book with roughly one point of CR buffer.
+      impairment feeds straight into Flex solvency. Both legs are USD, so the market runs near a 110% MCR by design.
   - id: dep-morpho-oracle
     label: Morpho ChainlinkOracleV2 (feedless)
     address: "0xC44Ee741C22957e6b3d40022894Eb50e6a7069EF"
@@ -284,6 +281,6 @@ edges:
   - { from: oracle-yvcrvusd, to: dep-curve-crvusd, kind: routes-through, label: "crvUSD/USDC EMA, capped at 1.01" }
   - { from: oracle-yvusd, to: dep-morpho-oracle, kind: routes-through, label: "price() passthrough" }
   - { from: oracle-ysybold, to: dep-curve-bold-usdc, kind: routes-through, label: "BOLD/USDC EMA, floored at 0.99" }
-  - { from: exit-router, to: strat-yvusd, kind: routes-through, label: "setProceedsReceiver — async, loss-bearing exit" }
-  - { from: exit-router, to: strat-ysybold, kind: routes-through, label: "setProceedsReceiver — async, loss-bearing exit" }
-  - { from: exit-router, to: strat-yvcrvusd, kind: routes-through, label: "setProceedsReceiver — async, loss-bearing exit" }
+  - { from: exit-router, to: strat-yvusd, kind: routes-through, label: "setProceedsReceiver — permissionless async exit" }
+  - { from: exit-router, to: strat-ysybold, kind: routes-through, label: "setProceedsReceiver — permissionless async exit" }
+  - { from: exit-router, to: strat-yvcrvusd, kind: routes-through, label: "setProceedsReceiver — permissionless async exit" }
