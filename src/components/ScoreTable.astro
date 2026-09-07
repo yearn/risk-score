@@ -5,9 +5,21 @@ import type { CategoryScore } from "../lib/parseReport";
 interface Props {
   scores: CategoryScore[];
   finalScore: number | null;
+  /**
+   * id of a <details> panel explaining the score. When given, the risk-tier
+   * badge becomes a link that opens and scrolls to it; otherwise it stays a
+   * plain badge, so the component still works on pages with no such panel.
+   */
+  detailsId?: string;
 }
 
-const { scores, finalScore } = Astro.props;
+const { scores, finalScore, detailsId } = Astro.props;
+
+const tierLabel = finalScore != null ? scoreTier(finalScore) : "Not Rated";
+const tierStyle =
+  finalScore != null
+    ? `background:${scoreColor(finalScore)};color:${scoreTextColor(finalScore)}`
+    : "background:#dc2626;color:#fff";
 
 // Build pie chart segments (sized by weight, colored by score)
 const totalWeight = scores.reduce((sum, s) => sum + parseFloat(s.weight), 0);
@@ -69,12 +81,40 @@ function labelPos(cx: number, cy: number, r: number, start: number, end: number)
               <td colspan="2">
                 <strong>Final Score</strong>
               </td>
-              {finalScore != null ? (
-                <td style={`color:${scoreColor(finalScore)};font-weight:700;`}>
-                  {finalScore.toFixed(1)} / 5.0
+              {finalScore == null ? (
+                <td style="font-weight:700;">N/A</td>
+              ) : detailsId ? (
+                <td>
+                  <a
+                    href={`#${detailsId}`}
+                    class="final-score final-score-link"
+                    style={`color:${scoreColor(finalScore)}`}
+                    data-opens-details={detailsId}
+                    title="See how this score was derived"
+                  >
+                    <span>{finalScore.toFixed(1)} / 5.0</span>
+                    <svg
+                      class="score-arrow"
+                      width="15"
+                      height="15"
+                      viewBox="0 0 20 20"
+                      fill="none"
+                      aria-hidden="true"
+                    >
+                      <path
+                        d="M6 8l4 4 4-4"
+                        stroke="currentColor"
+                        stroke-width="2.5"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                      />
+                    </svg>
+                  </a>
                 </td>
               ) : (
-                <td style="font-weight:700;">N/A</td>
+                <td class="final-score" style={`color:${scoreColor(finalScore)}`}>
+                  {finalScore.toFixed(1)} / 5.0
+                </td>
               )}
             </tr>
           </tfoot>
@@ -109,15 +149,8 @@ function labelPos(cx: number, cy: number, r: number, start: number, end: number)
           </svg>
           <div class="chart-tooltip" id="chart-tooltip"></div>
         </div>
-        <div
-          class="risk-tier-badge"
-          style={
-            finalScore != null
-              ? `background:${scoreColor(finalScore)};color:${scoreTextColor(finalScore)}`
-              : "background:#dc2626;color:#fff"
-          }
-        >
-          {finalScore != null ? scoreTier(finalScore) : "Not Rated"}
+        <div class="risk-tier-badge" style={tierStyle}>
+          {tierLabel}
         </div>
       </div>
     </div>
@@ -196,6 +229,35 @@ function labelPos(cx: number, cy: number, r: number, start: number, end: number)
     letter-spacing: 0.03em;
     white-space: nowrap;
   }
+  .final-score {
+    font-weight: 700;
+    white-space: nowrap;
+  }
+  /* The final score doubles as the way into the Score Details panel. */
+  .final-score-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    cursor: pointer;
+    transition: opacity 0.15s;
+  }
+  .final-score-link:hover {
+    text-decoration: underline;
+    opacity: 0.85;
+  }
+  .final-score-link:focus-visible {
+    outline: 2px solid var(--brand-blue);
+    outline-offset: 3px;
+    border-radius: 3px;
+  }
+  .score-arrow {
+    flex-shrink: 0;
+    opacity: 0.7;
+    transition: transform 0.15s;
+  }
+  .final-score-link:hover .score-arrow {
+    transform: translateY(2px);
+  }
   @media (max-width: 640px) {
     .score-section {
       flex-direction: column;
@@ -234,4 +296,45 @@ function labelPos(cx: number, cy: number, r: number, start: number, end: number)
       });
     });
   });
+</script>
+
+<script is:inline>
+  // The risk-tier badge links to a <details> panel further down the page.
+  // A plain anchor jump would leave that panel collapsed, so open it first.
+  (function () {
+    function reveal(panel, smooth) {
+      if (!panel) return false;
+      panel.open = true;
+      var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      panel.scrollIntoView({
+        behavior: smooth && !reduce ? 'smooth' : 'auto',
+        block: 'start',
+      });
+      return true;
+    }
+
+    function init() {
+      document.querySelectorAll('[data-opens-details]').forEach(function (link) {
+        link.addEventListener('click', function (e) {
+          var id = link.getAttribute('data-opens-details');
+          // No panel on this page? Leave the anchor to its default behaviour.
+          if (!reveal(document.getElementById(id), true)) return;
+          e.preventDefault();
+          history.replaceState(null, '', '#' + id);
+        });
+      });
+
+      // Arriving on /report/<slug>/#score-details should land open too.
+      var hash = decodeURIComponent(location.hash.slice(1));
+      if (!hash) return;
+      var target = document.getElementById(hash);
+      if (target && target.tagName === 'DETAILS') reveal(target, false);
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', init);
+    } else {
+      init();
+    }
+  })();
 </script>

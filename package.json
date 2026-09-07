@@ -13,15 +13,15 @@
   },
   "dependencies": {
     "@astrojs/sitemap": "3.7.3",
-    "@astrojs/vercel": "11.0.4",
-    "@plausible-analytics/tracker": "0.4.5",
+    "@astrojs/vercel": "11.0.8",
+    "@plausible-analytics/tracker": "0.4.6",
     "@resvg/resvg-js": "2.6.2",
-    "astro": "7.1.6",
-    "cytoscape": "3.33.4",
+    "astro": "7.2.6",
+    "cytoscape": "3.34.1",
     "cytoscape-dagre": "4.0.0",
     "cytoscape-dom-node": "2.1.0",
     "js-yaml": "4.3.0",
-    "marked": "18.0.9",
-    "satori": "0.29.0"
+    "marked": "18.0.11",
+    "satori": "0.33.4"
   }
 }

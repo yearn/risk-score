@@ -1,6 +1,6 @@
 # Protocol Risk Assessment: Centrifuge JAAA
 
-- **Assessment Date:** May 28, 2026 (Updated: July 14, 2026)
+- **Assessment Date:** May 28, 2026 (Updated: August 20, 2026)
 - **Token:** JAAA (Janus Henderson Anemoy AAA CLO Fund Token)
 - **Chain:** Ethereum
 - **Token Address:** [`0x5a0F93D040De44e78F251b03c43be9CF317Dcf64`](https://etherscan.io/address/0x5a0F93D040De44e78F251b03c43be9CF317Dcf64)
@@ -23,9 +23,9 @@ Current onchain values:
 - **Management fee / expense ratio:** **0.50%** p.a. in the current onchain pool metadata and on [rwa.xyz](https://app.rwa.xyz/assets/JAAA). **Performance fee:** 0%. The April 2025 factsheet's 0.40% management-fee figure is treated as superseded.
 - **Settlement:** Daily subscriptions and redemptions, **usually T+3** per factsheet
 - **Holders (Ethereum + multichain):** 32 onchain holders per rwa.xyz — institutional only
-- **Holdings (offchain CLO portfolio):** **36 CLO positions, ~$673.61M total market value** per the current onchain [JAAA pool metadata IPFS](https://ipfs.io/ipfs/bafkreifdw6nqnafeerd4xgmuyhad7jhzu6prd77lr2fmxvll3ax6soym5m) pointer. No cash row is present in this snapshot. The ~2.1% gap to rwa.xyz's asset value is consistent with different reporting times and fund-level cash/liabilities. Top three positions are **Ares Loan Funding II (4.9%)**, **CTM CLO 2025-2 (4.8%)**, and **Madison Park Funding XXX (4.6%)**.
+- **Holdings (offchain CLO portfolio):** **36 CLO positions, ~$673.61M total market value** per the current onchain [JAAA pool metadata IPFS](https://bafkreifdw6nqnafeerd4xgmuyhad7jhzu6prd77lr2fmxvll3ax6soym5m.ipfs.dweb.link/) pointer. No cash row is present in this snapshot. The ~2.1% gap to rwa.xyz's asset value is consistent with different reporting times and fund-level cash/liabilities. Top three positions are **Ares Loan Funding II (4.9%)**, **CTM CLO 2025-2 (4.8%)**, and **Madison Park Funding XXX (4.6%)**.
 - **Target APY:** 4.26% (current metadata) | **7-day APY:** 3.53% | **30-day APY:** 3.93% ([rwa.xyz](https://app.rwa.xyz/assets/JAAA), 2026-07-14)
-- **Third-party rating:** **Particula AAA** ([per current onchain pool metadata](https://ipfs.io/ipfs/bafkreifdw6nqnafeerd4xgmuyhad7jhzu6prd77lr2fmxvll3ax6soym5m))
+- **Third-party rating:** **Particula AAA** ([per current onchain pool metadata](https://bafkreifdw6nqnafeerd4xgmuyhad7jhzu6prd77lr2fmxvll3ax6soym5m.ipfs.dweb.link/))
 - **Minimum initial investment:** $500,000 USDC (per on-chain pool metadata)
 
 A separate, **freely-transferable** wrapper of the same fund — **deJAAA** ([`0xAAA0008C8CF3A7Dca931adaF04336A5D808C82Cc`](https://etherscan.io/address/0xAAA0008C8CF3A7Dca931adaF04336A5D808C82Cc), poolId `281474976710659`) — exists for permissionless DeFi integrations. deJAAA has total supply ~5.65M tokens (18 decimals) and a live vault conversion rate of ~1.039397 USDC/deJAAA. This report focuses on the KYC-gated JAAA primary share class but documents deJAAA where relevant.
@@ -43,7 +43,7 @@ A separate, **freely-transferable** wrapper of the same fund — **deJAAA** ([`0
 - [Janus Henderson press release – Anemoy partnership](https://www.janushenderson.com/corporate/press-releases/janus-henderson-to-partner-with-anemoy-and-centrifuge-on-its-first-tokenized-fund/)
 - [DefiLlama – Centrifuge](https://defillama.com/protocol/centrifuge)
 - [JAAA factsheet (April 2025, IPFS-linked from on-chain pool metadata)](https://gateway.pinata.cloud/ipfs/QmcWwvqnoUkH1bMYktnMdEywmUkUeK3PPex2i763zVNUmm)
-- [JAAA pool metadata (IPFS, current HubRegistry pointer)](https://ipfs.io/ipfs/bafkreifdw6nqnafeerd4xgmuyhad7jhzu6prd77lr2fmxvll3ax6soym5m)
+- [JAAA pool metadata (IPFS, current HubRegistry pointer)](https://bafkreifdw6nqnafeerd4xgmuyhad7jhzu6prd77lr2fmxvll3ax6soym5m.ipfs.dweb.link/)
 
 ## Contract Addresses
 
@@ -187,16 +187,16 @@ The four live JAAA BalanceSheet managers are two Gnosis Safes ([`0x02eb…5bc7`]
 ### Collateralization
 
 - **Backing:** 1:1 by the **Janus Henderson Anemoy AAA CLO Fund** — a portfolio of AAA-rated, floating-rate CLO tranches. Cash and short-duration AAA CLO debt of multiple underlying CLO issuers.
-- **Specific CLO holdings (issuer mix):** **36 CLO positions totaling ~$673.61M** per the public [current onchain pool metadata](https://ipfs.io/ipfs/bafkreifdw6nqnafeerd4xgmuyhad7jhzu6prd77lr2fmxvll3ax6soym5m), with CUSIP/ISIN/ticker/market-value/% for each position. This snapshot has no cash row. Its value is ~2.1% below rwa.xyz's ~$688.24M total asset value, a reasonable timing and fund-level cash/liability difference. Independent per-tranche verification still requires an institutional pricing service. Top five:
+- **Specific CLO holdings (issuer mix):** **36 CLO positions totaling ~$673.61M** per the public [current onchain pool metadata](https://bafkreifdw6nqnafeerd4xgmuyhad7jhzu6prd77lr2fmxvll3ax6soym5m.ipfs.dweb.link/), with CUSIP/ISIN/ticker/market-value/% for each position. This snapshot has no cash row. Its value is ~2.1% below rwa.xyz's ~$688.24M total asset value, a reasonable timing and fund-level cash/liability difference. Independent per-tranche verification still requires an institutional pricing service. Top five:
   - ARES LOAN FUNDING II LTD (ARES 2022-ALF2A) — $33.00M / 4.9%
   - CTM CLO 2025-2 LTD — $32.02M / 4.8%
   - MADISON PARK FUNDING XXX LTD (MDPK 2018-30A) — $30.85M / 4.6%
   - AMMC CLO 27 LTD (AMMC 2022-27A) — $30.00M / 4.5%
   - CBAM 2017-1 LTD (CBAMR 2017-1A AR2) — $29.32M / 4.4%
-- **Asset quality:** 100% AAA tranches at the senior end of the CLO capital stack. The portfolio is diversified across 36 positions; no position exceeds 4.9% in the current metadata. Third-party rating: **Particula AAA** ([pool metadata](https://ipfs.io/ipfs/bafkreifdw6nqnafeerd4xgmuyhad7jhzu6prd77lr2fmxvll3ax6soym5m)).
+- **Asset quality:** 100% AAA tranches at the senior end of the CLO capital stack. The portfolio is diversified across 36 positions; no position exceeds 4.9% in the current metadata. Third-party rating: **Particula AAA** ([pool metadata](https://bafkreifdw6nqnafeerd4xgmuyhad7jhzu6prd77lr2fmxvll3ax6soym5m.ipfs.dweb.link/)).
 - **Custody / service providers (offchain):**
   - **Custodian / traditional broker:** J.P. Morgan per [rwa.xyz](https://app.rwa.xyz/assets/JAAA), replacing the earlier StoneX disclosure.
-  - **Fund administrator:** Trident Trust **Cayman** (per [factsheet](https://gateway.pinata.cloud/ipfs/QmcWwvqnoUkH1bMYktnMdEywmUkUeK3PPex2i763zVNUmm) and [current pool metadata](https://ipfs.io/ipfs/bafkreifdw6nqnafeerd4xgmuyhad7jhzu6prd77lr2fmxvll3ax6soym5m))
+  - **Fund administrator:** Trident Trust **Cayman** (per [factsheet](https://gateway.pinata.cloud/ipfs/QmcWwvqnoUkH1bMYktnMdEywmUkUeK3PPex2i763zVNUmm) and [current pool metadata](https://bafkreifdw6nqnafeerd4xgmuyhad7jhzu6prd77lr2fmxvll3ax6soym5m.ipfs.dweb.link/))
   - **Auditor:** MHA Cayman
   - **Crypto-asset custodian:** Circle (per rwa.xyz)
   - **Regulator:** BVI Financial Services Commission (FSC) — fund is an open-ended BVI Professional Fund
@@ -222,7 +222,7 @@ The four live JAAA BalanceSheet managers are two Gnosis Safes ([`0x02eb…5bc7`]
 - **DeFi integrations providing secondary liquidity:**
   - **Aave Horizon** (institutional market) — JAAA selected as launch collateral; reached ~$100M in first week. ([Centrifuge Q3 2025 recap](https://centrifuge.io/blog/centrifuge-q3-2025-recap))
   - **Resolv × Aave Horizon** — Up to $100M JAAA as actively-managed leveraged collateral (80% LTV). ([Centrifuge blog](https://centrifuge.io/blog/resolv-aave-centrifuge-partnership))
-  - **Falcon Finance** — JAAA accepted as collateral to mint USDf. ([Falcon Finance](https://falcon.finance/news/falcon-finance-adds-centrifuges-jaaa-as-collateral-unlocking-onchain-liquidity-for-institutional-grade-credit))
+  - **Falcon Finance** — JAAA accepted as collateral to mint USDf. ([Falcon Finance](https://www.linkedin.com/posts/falconstable_tokenized-jaaa-when-structured-credit-becomes-activity-7433023390728454145-DFRV))
   - **3F (Morpho)** — Leveraged exposure product on JAAA. ([The Block](https://www.theblock.co/post/398686/3f-morpho-funding-leveraged-exposure-tokenized-assets))
 - **Concentration risk:** **Holder count = 32** (rwa.xyz). This remains highly concentrated and institutional. A single large redemption could materially exceed onchain settlement float, in which case Anemoy may delay or partially fulfil rather than force-sell. Any underlying CLO liquidation happens offchain through the fund and its J.P. Morgan custody/brokerage arrangement.
 - **Withdrawal queue / throttle:** No explicit fixed-cap throttle on `requestRedeem`. Anemoy retains discretion to delay or partially fulfil redemptions if portfolio liquidity is insufficient (typical for open-end credit funds).
@@ -252,12 +252,30 @@ The four live JAAA BalanceSheet managers are two Gnosis Safes ([`0x02eb…5bc7`]
 
 - **Share-price update:** Manager-pushed (offchain → onchain). Currently ~1× per ~24h based on `priceLastUpdated`. PPS is therefore **stale between pushes** and admin-controlled.
 - **Issuance:** Programmatic *given* a pool-manager approval — the manager must explicitly `approveDeposits` and `issueShares` for each batch.
-- **Cross-chain:** All multi-chain operations (issuing JAAA on Avalanche, Stellar, etc., recognizing redemptions, propagating prices) route through a **2-of-2** MultiAdapter quorum — both LayerZero V2 and Chainlink CCIP must sign each message. Failure or compromise of either single adapter does not unilaterally execute a message; failure of both temporarily breaks cross-chain settlement. Recovery flows exist via `initiateRecovery` / `disputeRecovery` on the Guardian.
+- **Cross-chain:** All active multi-chain operations (issuing JAAA on Avalanche, Base, etc., recognizing redemptions, propagating prices) route through a **2-of-2** MultiAdapter quorum — two independent adapters must deliver a matching payload before a message executes. On JAAA's four highest-supply remote chains (Base, Arbitrum, Avalanche, BNB) the pair is **LayerZero V2 + Axelar**; on Monad the second adapter is Chainlink CCIP. Failure or compromise of either single adapter does not unilaterally execute a message; failure of both temporarily breaks cross-chain settlement. Recovery flows exist via `initiateRecovery` / `disputeRecovery` on the Guardian. Pharos and X Layer are configured but inactive with zero JAAA supply.
 - **Accounting:** V3.1 introduced full onchain double-entry accounting in `BalanceSheet` [`0x12a110cE5f0FC871cC72Bc7ECaF35cf39DD0f43e`](https://etherscan.io/address/0x12a110cE5f0FC871cC72Bc7ECaF35cf39DD0f43e). However, the *valuation* of the offchain CLO holdings still depends on the pool manager's price push.
 
 ### External Dependencies
 
-- **Cross-chain messaging — 2/2 threshold with LayerZero V2 + Chainlink CCIP.** The [`MultiAdapter`](https://etherscan.io/address/0x35C837F0A54B715a23D193E1476BFC9BC30073BE) configuration was rechecked for JAAA's destinations. Each uses quorum 2 / threshold 2 with [LayerZero V2 adapter `0xD517…0295`](https://etherscan.io/address/0xD517BC7ba17271A8D87bE7355B2523bf5c750295) plus a Chainlink CCIP adapter (`0x34e9…6484` on destination IDs 2/3/5/6; `0x39CF…D955` on 11/12). Both must attest to a non-Ethereum message. The six live LayerZero inbound routes use 15 confirmations and require Deutsche Telekom + Canary plus 2-of-3 P2P/Nansen/Nethermind DVNs (**4-of-5 effective DVN quorum**).
+- **Cross-chain messaging — 2/2 threshold, LayerZero V2 paired with Axelar or Chainlink CCIP.** The [`MultiAdapter`](https://etherscan.io/address/0x35C837F0A54B715a23D193E1476BFC9BC30073BE) (live: `Gateway 0x19a5…3172 .adapter()`) was re-read per destination for the **JAAA pool specifically** — `adapters(centrifugeId, 281474976710663, i)`, `quorum`, `threshold` — at block 25796082. Adapter identity was taken from verified source, not from the address alone: [`0xD517…0295`](https://etherscan.io/address/0xD517BC7ba17271a8D87BE7355B2523bF5c750295) is `LayerZeroAdapter`, [`0x34e9…6484`](https://etherscan.io/address/0x34e904237341C3de02D4447C3fF0ca8880ca6484) is **`AxelarAdapter`** (`axelarGateway()` / `axelarGasService()`), and [`0x39CF…D955`](https://etherscan.io/address/0x39CF679Eb0Ac9075CFb5f94930A367Ba1557D955) is `ChainlinkAdapter` (`ccipRouter()` / `ccipReceive()`). A prior version of this report misattributed `0x34e9…6484` to Chainlink CCIP.
+
+  | centrifugeId | Chain | JAAA-pool adapters | quorum / threshold | JAAA supply |
+  |---|---|---|---|---|
+  | 2 | Base | LayerZero V2 + **Axelar** | 2 / 2 | 48,207,417.68 |
+  | 3 | Arbitrum | LayerZero V2 + **Axelar** | 2 / 2 | 3,553.00 |
+  | 5 | Avalanche | LayerZero V2 + **Axelar** | 2 / 2 | 250,000,001.00 |
+  | 6 | BNB Chain | LayerZero V2 + **Axelar** | 2 / 2 | 497,554.41 |
+  | 11 | Monad | LayerZero V2 + Chainlink CCIP | 2 / 2 | 483,418.08 |
+
+  **Configured but inactive routes:** Pharos (centrifugeId 12) uses LayerZero V2 + Chainlink CCIP at 2 / 2 and has **0 JAAA supply**; `totalSupply()` on Pharos JAAA `0xAD48F183E586e92A591A610397ebf534609DF797` returned 0 through the public Pharos RPC on August 24, 2026. X Layer (13) uses **LayerZero V2 only** at **1 / 1** and also has 0 supply. Plume / HyperEVM / Optimism (4 / 9 / 10) have no JAAA-pool adapter set and no deployment for this share class.
+
+  Chain identification is onchain, not assumed: `AxelarAdapter.destinations(centrifugeId)` returns human-readable Axelar IDs (`"base"`, `"arbitrum"`, `"Avalanche"`, `"binance"`, `"hyperliquid"`, `"optimism"`, `"plume"`), and the LayerZero eids (30184/30110/30106/30102/30390/30407/30274) resolve via the [LayerZero metadata API](https://metadata.layerzero-api.com/v1/metadata) to Base/Arbitrum/Avalanche/BNB/Monad/Pharos/X Layer. Supply is each deployed share token's `totalSupply()` (6 decimals; Ethereum itself holds 369,311,490.07).
+
+  X Layer's inactive route is the sole configuration exception: it uses LayerZero alone at quorum 1, protected internally by the same 15 confirmations and 4-of-5 effective DVN quorum as the other LayerZero routes. With zero JAAA supply and no current economic activity, it is treated as a pre-wired route rather than a current risk; activation or nonzero supply is a reassessment trigger.
+
+  The LayerZero leg itself is uniform across **all ten** configured inbound routes: `EndpointV2.getConfig(0xD517…0295, 0xc02A…24C2, eid, 2)` decodes to 15 confirmations, 2 required DVNs and 2-of-3 optional DVNs — Deutsche Telekom [`0x373a…AfF4`](https://etherscan.io/address/0x373a6E5c0C4E89E24819f00AA37ea370917AAfF4) and Canary [`0xa4fE…c2cd`](https://etherscan.io/address/0xa4fE5A5B9A846458a70Cd0748228aED3bF65c2cd) required, plus 2-of-3 from P2P / Nansen / Nethermind (**4-of-5 effective DVN quorum**), DVN names resolved via the LayerZero metadata API.
+
+- **Axelar (new named dependency).** On JAAA's four highest-supply remote chains (Base, Arbitrum, Avalanche, BNB) the second attestation comes from Axelar's proof-of-stake validator set, not from Chainlink. Chainlink CCIP remains a live dependency in parallel — Monad holds real JAAA supply behind a LayerZero + CCIP pair. The Ethereum [`AxelarGateway 0x4F44…56A5`](https://etherscan.io/address/0x4F4495243837681061C4743b74B3eEdf548D56A5) is an upgradeable proxy (`implementation() = 0x99B5…4098`) whose `governance()` is [`0x7Acb…2525`](https://etherscan.io/address/0x7Acbae6CBa67d78AAf69e47000884aE00F9B2525) and whose message authentication is delegated to `authModule() = AxelarAuthWeighted` [`0xE3B8…8AD0`](https://etherscan.io/address/0xE3B83f79Fbf01B25659f8A814945aB82186A8AD0). Unlike LayerZero there is no per-integration verifier set to inspect — the trust anchor is Axelar's stake-weighted operator quorum ([Axelarscan](https://axelarscan.io/validators) listed 49 bonded validators of 151 registered at this check). Centrifuge's 2-of-2 quorum is what keeps an Axelar compromise alone from forging a JAAA mint.
 - **Stablecoin settlement (USDC, USDT, USDS)** — JAAA accepts multiple subscription / redemption assets per Centrifuge. USDC inherits Circle's freeze list and reserve risk; USDT inherits Tether's; USDS inherits Sky's. Multi-asset settlement reduces single-issuer concentration.
 - **Anemoy Capital SPC Limited (BVI)** — fund issuer of record. The legal wrapper that holds the underlying CLOs. BVI insolvency or regulatory action against Anemoy would constitute an existential risk for token holders.
 - **Janus Henderson** — sub-advisor; selects and manages the CLO portfolio.
@@ -506,7 +524,7 @@ Fordefi multiuser MPC wallet `0x7bf090b9…02ec` is the **sole current Hub manag
 
 Citation for the Overview's "Centrifuge JAAA ≠ NYSE JAAA" note. They share a sub-advisor (Janus Henderson Global Securitized team) and an investment mandate (AAA-rated floating-rate CLO tranches) but hold **different specific tranches**.
 
-**Sources:** Centrifuge JAAA — full current holdings list from the onchain pool-metadata pointer [`bafkrei…soym5m`](https://ipfs.io/ipfs/bafkreifdw6nqnafeerd4xgmuyhad7jhzu6prd77lr2fmxvll3ax6soym5m). NYSE JAAA — top 25 visible at [stockanalysis.com/etf/jaaa/holdings](https://stockanalysis.com/etf/jaaa/holdings/) (data via Finnhub, snapshot 2026-05-29); positions 26–604 are subscriber-gated.
+**Sources:** Centrifuge JAAA — full current holdings list from the onchain pool-metadata pointer [`bafkrei…soym5m`](https://bafkreifdw6nqnafeerd4xgmuyhad7jhzu6prd77lr2fmxvll3ax6soym5m.ipfs.dweb.link/). NYSE JAAA — top 25 visible at [stockanalysis.com/etf/jaaa/holdings](https://stockanalysis.com/etf/jaaa/holdings/) (data via Finnhub, snapshot 2026-05-29); positions 26–604 are subscriber-gated.
 
 #### Aggregate profile
 
@@ -529,7 +547,7 @@ Centrifuge JAAA remains more concentrated than the NYSE ETF, but diversification
 - **Heavy and ongoing audit cadence:** 20+ V3 audits in 14 months from Cantina/Spearbit, yAudit/Electisec, BurraSec, xmxanuel, Recon, plus a Sherlock public contest — far above the median for tokenized-RWA protocols. Active Cantina bug bounty with $250k Critical payout.
 - **Institutional-grade offchain stack:** Janus Henderson (subadvisor), Anemoy (BVI-regulated manager), J.P. Morgan (custodian/traditional broker), Trident Trust (administrator), MHA Cayman (auditor), and Circle (crypto custody).
 - **Best-in-class collateral class for tokenized RWA:** AAA-rated floating-rate CLO tranches — top of the credit stack, low historical loss rates, large institutional secondary market.
-- **Material onchain protection:** 48h Root timelock, Guardian pause (no delay), a single live 4-of-9 ProtocolAdminSafe (the legacy V3.0 4-of-8 path is `Deny`'d on Root at block 24376326), and a **2-of-2 MultiAdapter cross-chain quorum** (LayerZero V2 + Chainlink CCIP, verified onchain via `quorum() = 2`) with dispute window.
+- **Material onchain protection:** 48h Root timelock, Guardian pause (no delay), a single live 4-of-9 ProtocolAdminSafe (the legacy V3.0 4-of-8 path is `Deny`'d on Root at block 24376326), and a **2-of-2 MultiAdapter cross-chain quorum on every supply-carrying destination** (LayerZero V2 paired with Axelar on Base/Arbitrum/Avalanche/BNB and with Chainlink CCIP on Monad) with dispute window.
 - **Independent third-party attestation:** [Chronicle Labs publishes a Proof-of-Asset / Proof-of-Holdings dashboard for JAAA](https://chroniclelabs.org/dashboard/proofofasset/janus-henderson-anemoy-aaa-clo-fund), giving an out-of-band cryptographic attestation of NAV and underlying holdings — uncommon for tokenized RWA funds and meaningfully strengthens Provability.
 - **Significant institutional adoption:** Grove ($1B initial seed), Aave Horizon (~$100M in first week), Falcon Finance, 3F/Morpho — demonstrates real demand and provides secondary liquidity routes via the deJAAA wrapper.
 
@@ -542,7 +560,6 @@ Centrifuge JAAA remains more concentrated than the NYSE ETF, but diversification
 - **Multiple offchain trust principals — with a Trident dual-role concentration.** Failure or adversarial action by Anemoy, Janus Henderson, J.P. Morgan, Trident Trust, or the BVI regulatory environment is existential for holders. Trident remains both fund administrator and KYC/AML provider.
 - **V3.1 is recent (Feb 2026)** and the V3.2 Onchain Portfolio Manager only audited Mar–Apr 2026. New code paths continue to ship.
 - **Pool manager signer identities not publicly disclosed.** Standard for institutional-RWA, but reduces verifiability of "who can move my money."
-
 ### Critical Risks `[If Any]`
 
 - **Unbounded NAV-push function + full pool-management API behind one opaque MPC authority.** Fordefi [`0x7bf090b9…02ec`](https://etherscan.io/address/0x7bf090b97f896fb77e852cc98aa52a8cb7dc02ec) is now the sole JAAA Hub manager and can call `updateSharePrice`, batch issuance/redemption functions, allowlist updates, and `updateHubManager` without a timelock. `ShareClassManager.updateSharePrice` checks only that the share class exists and `computedAt <= block.timestamp`; there is no deviation cap, per-epoch limit, or Guardian pause on large changes. Chronicle remains an external attestation layer, not an enforced bound on this direct path.
@@ -610,11 +627,11 @@ Centrifuge JAAA remains more concentrated than the NYSE ETF, but diversification
 
 **Subcategory C: External Dependencies**
 
-- **Cross-chain:** **2-of-2 MultiAdapter quorum** — LayerZero V2 + Chainlink CCIP. Live destination configurations require both adapters. The LayerZero leg's six inbound routes use 15 confirmations and a 4-of-5 effective DVN quorum (Deutsche Telekom + Canary required, plus 2-of-3 P2P/Nansen/Nethermind), materially stronger than the prior single-Wormhole setup.
+- **Cross-chain:** **2-of-2 MultiAdapter quorum on every supply-carrying destination** — LayerZero V2 + **Axelar** on Base, Arbitrum, Avalanche and BNB; LayerZero V2 + Chainlink CCIP on Monad. The LayerZero leg's configured inbound routes each use 15 confirmations and a 4-of-5 effective DVN quorum (Deutsche Telekom + Canary required, plus 2-of-3 P2P/Nansen/Nethermind), materially stronger than the prior single-Wormhole setup. Pharos and X Layer remain configured but inactive at zero supply.
 - **Stablecoin settlement:** USDC, USDT and USDS are all supported subscription / redemption assets (per Centrifuge team).
 - **Offchain stack:** Janus Henderson sub-advisor, Anemoy issuer, J.P. Morgan custody/brokerage, Trident Trust admin+KYC (dual role), and MHA Cayman audit.
 
-→ **Subcategory C: 2.5** — 2-of-2 cross-chain bridge with two top-tier providers and multi-stablecoin settlement materially reduce onchain-dependency concentration. Held above 2.0 by the Trident Trust dual-role concentration (see Provability) and the still-newer Anemoy partnership (~12 months onchain).
+→ **Subcategory C: 2.5** — 2-of-2 cross-chain quorums with top-tier providers on every supply-carrying destination, plus multi-stablecoin settlement, materially reduce onchain-dependency concentration. Held above 2.0 by the Trident Trust dual-role concentration (see Provability) and the still-newer Anemoy partnership (~12 months onchain). The inactive X Layer configuration does not affect the score while its JAAA supply remains zero.
 
 **Centralization Score = (3.0 + 3.5 + 2.5) / 3 ≈ 3.00**
 
@@ -677,7 +694,7 @@ Centrifuge JAAA remains more concentrated than the NYSE ETF, but diversification
 - Protocol live >2 years with no incidents: **not eligible** (V3 is just under one year old).
 - TVL maintained >$500M for >1 year: **not yet demonstrated** at the JAAA level despite current ~$688.24M asset value; protocol-level TVL >$1B has been sustained <1 year. No modifier applied.
 
-**Final Score: 2.6/5.0** — unchanged. Removing a parallel manager is directionally positive, while current TVL/AUM and broader holdings also strengthen the profile. Those improvements do not yet overcome the score-driving issue: the sole, offchain-attested Fordefi MPC can still set an unbounded canonical NAV and exercise untimelocked pool powers. Morpho's Chronicle feed is useful attestation protection for that market, but it does not make direct JAAA exposure low risk or enforce a dynamic bound on Centrifuge's price.
+**Final Score: 2.6/5.0** — unchanged. The August 20, 2026 cross-chain re-verification corrected the second adapter from Chainlink CCIP to Axelar on the four highest-supply remote chains; every supply-carrying destination remains 2-of-2. Removing a parallel manager is directionally positive, while current TVL/AUM and broader holdings also strengthen the profile. Those improvements do not yet overcome the score-driving issue: the sole, offchain-attested Fordefi MPC can still set an unbounded canonical NAV and exercise untimelocked pool powers. Morpho's Chronicle feed is useful attestation protection for that market, but it does not make direct JAAA exposure low risk or enforce a dynamic bound on Centrifuge's price.
 
 ### Risk Tier
 
@@ -700,7 +717,7 @@ Centrifuge JAAA remains more concentrated than the NYSE ETF, but diversification
 - **Governance:** Reassess on any new `Rely` on Root (new admin principal), any change to the current ProtocolAdminSafe threshold/signer set, or any `UpdateManager` event on the current HubRegistry [`0x19f46…ADE93`](https://etherscan.io/address/0x19f46D8130e610C6C0f0116EA40Fb781dEFaDE93) for poolId `281474976710663` (add/remove of a JAAA Pool Manager — Safe or MPC wallet).
 - **Pricing:** Reassess if the JAAA pool migrates to V3.2's onchain `NAVManager`/`PriceManager`, or conversely if the NAV stops being refreshed at least every 48 hours during business days.
 - **Onchain guardrails ship:** Reassess (Programmability) when Centrifuge's planned **pool-management timelock + price circuit breaker + volume-based mint/burn circuit breaker** go live and JAAA is migrated to them — material score-reducer.
-- **Cross-chain adapter set changes:** Reassess if the active MultiAdapter quorum changes (e.g., a Chainlink CCIP or LayerZero V2 adapter is added/removed for JAAA), or if `quorum()` is lowered.
+- **Cross-chain adapter set changes:** Reassess if the active MultiAdapter quorum changes (e.g., an Axelar, Chainlink CCIP or LayerZero V2 adapter is added/removed for the JAAA pool), if `quorum()` is lowered on any supply-carrying destination, or if a `SetAdapters` event fires for poolId `281474976710663`. Reassess X Layer (centrifugeId 13) if JAAA supply or economic activity becomes nonzero.
 - **Counterparty:** Reassess on any material change to Anemoy, Janus Henderson sub-advisory, J.P. Morgan custody/brokerage, Trident Trust administration (admin or KYC role), Chronicle Labs attestation availability, or MHA Cayman audit relationships.
 - **Incident-based:** Reassess after any Centrifuge protocol exploit, any pause event, any token recovery action via `TokenRecoverer`, or any depeg / NAV-discontinuity > 1%.
 
@@ -710,3 +727,4 @@ Centrifuge JAAA remains more concentrated than the NYSE ETF, but diversification
 |------|------:|--------|
 | [May 28, 2026](https://github.com/yearn/risk-score/pull/173) | 2.60 | Initial assessment |
 | [July 14, 2026](https://github.com/yearn/risk-score/pull/320) | 2.60 | Refreshed management, TVL/AUM, holdings, custody, mint authority, related contracts, and cross-chain configuration; score unchanged |
+| [August 20, 2026](https://github.com/yearn/risk-score/pull/418) | 2.60 | Corrected the MultiAdapter second leg from Chainlink CCIP to Axelar on Base/Arbitrum/Avalanche/BNB (adapter identity read from verified source); documented the inactive X Layer quorum-1 configuration; re-verified the LayerZero DVN set across all ten inbound routes; score unchanged |
