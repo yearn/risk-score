@@ -524,7 +524,6 @@ Rationale:
 - DeFiLlama Kinetiq: https://defillama.com/protocol/kinetiq
 - Hyperliquid staking docs: https://hyperliquid.gitbook.io/hyperliquid-docs/hypercore/staking
 - Hyperliquid validator prison docs: https://hyperliquid.gitbook.io/hyperliquid-docs/hypercore/staking
-- Hyperliquid risks docs: https://hyperliquid.gitbook.io/hyperliquid-docs/risks
 - Onchain verification via `cast` against HyperEVM RPC (`rpc.hyperliquid.xyz/evm`)
 - Hyperliquid L1 API: `POST https://api.hyperliquid.xyz/info` (validator summaries, delegations)
 - Kinetiq GitHub org: https://github.com/kinetiq-research
