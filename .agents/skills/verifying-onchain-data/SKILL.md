@@ -16,6 +16,19 @@ Endpoints below use the v2 multichain form, `GET /v2/api?...&chainid=<id>`; a
 single API key works across all supported chains. Responses are JSON with
 `status` (`"1"` success, `"0"` failure), `message`, and `result`.
 
+## Snapshot
+
+Confirm the RPC chain ID and choose a fixed block for related supply, balance,
+role, and proxy reads. Record its number, hash, and timestamp once in the report's
+snapshot provenance. Pass `--rpc-url "$RPC_URL" --block "$SNAPSHOT_BLOCK"` to
+`cast call` and `cast storage`; end log scans at that block. Examples below omit
+these shared flags.
+
+For cross-chain checks, choose a block per chain near the same timestamp and
+record each separately. Never reuse a block number across chains. If an API only
+serves current data or historical reads fail, label the different timestamp or
+unverified check; do not present mixed states as one snapshot.
+
 ## Role and permission enumeration
 
 For contracts using OpenZeppelin `AccessControl` / `AccessControlEnumerable` —

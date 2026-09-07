@@ -10,7 +10,9 @@ messaging layer — LayerZero/OFT, Chainlink CCIP, Circle CCTP, AggLayer (LxLy),
 Wormhole, Axelar, Stargate, native rollup bridges.
 
 Use the [agent guide](../../../AGENTS.md) for evidence and environment.
-Record findings in the report's Token Mint Authority section and bridge index.
+Follow the [snapshot procedure](../verifying-onchain-data/SKILL.md#snapshot)
+for chain reads. Record findings in the report's Token Mint Authority section
+and bridge index.
 
 ## 1. Classify the bridge model
 
@@ -27,15 +29,10 @@ controller does. **A compromise of the required bridge trust path can mint
 unbacked native supply and dilute every holder, including on mainnet.** Record
 the quorum requirement rather than implying one provider can act alone.
 
-Worked examples:
-
-- Midas mHYPER — the LayerZero OFT adapter holds `M_HYPER_MINT_OPERATOR_ROLE`
-  ([example report](../../../reports/report/midas-mhyper.md)).
-- Paxos USDG — the `OFTWrapper` is Supply Controller SC3 with a 45M USDG mint
-  capacity ([example report](../../../reports/report/paxos-usdg.md)).
-- Centrifuge JAAA — the Spoke holds `wards`, and a 2-of-2 MultiAdapter
-  authenticates the message before the Spoke mints
-  ([example report](../../../reports/report/centrifuge-jaaa.md)).
+Worked examples: [Midas mHYPER](../../../reports/report/midas-mhyper.md),
+[Paxos USDG](../../../reports/report/paxos-usdg.md), and
+[Centrifuge JAAA](../../../reports/report/centrifuge-jaaa.md).
+Read the reports for dated authority, limit, and quorum evidence.
 
 ### `lock` — the remote token is a bridged claim
 
@@ -43,8 +40,7 @@ The canonical token is locked/escrowed on its origin chain; the remote token is
 only a claim on that escrow. Blast radius is bounded by remote supply plus
 locked collateral.
 
-Worked example: Sky USDS — the OFT Adapter locks USDS and **does not hold
-`wards` on USDS**, so it cannot mint native ([example report](../../../reports/report/sky-usds.md)).
+Worked example: [Sky USDS](../../../reports/report/sky-usds.md).
 
 ### `transport` — an underlying asset moves, not the assessed token
 
@@ -54,7 +50,7 @@ assets are remote and can include bridge-dependent custody, accounting
 callbacks, and return paths — it is **not** necessarily limited to funds in
 transit.
 
-Worked example: [example report](../../../reports/report/yearn-yvusd.md).
+Worked example: [Yearn yvUSD](../../../reports/report/yearn-yvusd.md).
 
 ## 2. Find the adapter
 
@@ -65,8 +61,8 @@ and miss it:
 | Check | Why it misses |
 |-------|---------------|
 | "The mainnet token isn't an OFT" (`endpoint()` reverts) | Expected under this shape — the adapter is a different contract |
-| [LayerZero's OFT registry](https://metadata.layerzero-api.com/v1/metadata/experiment/ofts/list) | Useful when it hits, but **incomplete** — it lists Resolv, but not Cap or InfiniFi |
-| DeFiLlama `chains` | Tracks **protocol TVL by chain, not token deployments** — reported "Ethereum only" for protocols live on Katana |
+| [LayerZero's OFT registry](https://metadata.layerzero-api.com/v1/metadata/experiment/ofts/list) | A missing registry entry alone does not prove absence |
+| DeFiLlama `chains` | Tracks **protocol TVL by chain, not token deployments** |
 
 **Work backwards from the remote chain instead.** Find the token on the
 destination explorer (a same-address CREATE2/vanity deployment is a strong
@@ -89,8 +85,7 @@ A negative LayerZero result is not a negative bridge result.
 ## 3. Read the LayerZero DVN quorum onchain
 
 For LayerZero rows this is required, not optional. The DVN quorum is how many
-independent verifiers must attest; a `1-of-1` is a single point of failure —
-the April 2026 rsETH failure mode.
+independent verifiers must attest; a `1-of-1` is a single point of failure.
 
 ```bash
 # receive-side library for this route

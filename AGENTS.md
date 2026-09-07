@@ -20,7 +20,7 @@ Canonical skills live in `.agents/skills/`. Codex discovers them there;
 
 In Codex, use `$<skill-name> <target>`; in pi, `/skill:<skill-name> <target>`
 also works. Claude commands and pi prompts link to the same files in
-`.agents/commands/`. Pi model profiles remain in `.pi/agents/` and are optional.
+`.agents/commands/`. No agent extension is required.
 
 Markdown links resolve relative to their containing file. Backtick paths and
 shell commands are relative to the repository root; run commands there.
@@ -62,6 +62,8 @@ uv run scripts/check_defillama_links.py <files>
 Resolve warnings introduced by the change; report unrelated existing failures
 without expanding the task. For Python changes, run the relevant checks and
 `uv run -m ruff format <files>`. If validation cannot run, state what remains unverified.
+
+Optional behavioral checks: [manual smoke cases](tests/skill_scenarios.md).
 
 ## Environment
 

@@ -2,9 +2,6 @@
   "defaultProvider": "opencode-go",
   "defaultModel": "deepseek-v4-pro",
   "defaultThinkingLevel": "high",
-  "packages": [
-    "npm:pi-agents"
-  ],
   "skills": [
     "../.agents/skills"
   ],

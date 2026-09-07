@@ -114,11 +114,6 @@ test("Claude and Pi commands share the canonical prompts", () => {
       assert.equal(realpathSync(join(ROOT, adapter, name)), join(commandsDir, name));
     }
   }
-  for (const file of markdownFiles(join(ROOT, ".pi/agents"))) {
-    for (const name of frontmatter(file).skills ?? []) {
-      assert.ok(skillNames.includes(name), `${file}: unknown skill ${name}`);
-    }
-  }
 });
 
 test("agent links resolve from canonical and adapter paths", () => {
@@ -127,8 +122,7 @@ test("agent links resolve from canonical and adapter paths", () => {
     ...markdownFiles(join(ROOT, ".claude/skills")),
     ...markdownFiles(join(ROOT, ".claude/commands")),
     ...markdownFiles(join(ROOT, ".pi/prompts")),
-    ...markdownFiles(join(ROOT, ".pi/agents")),
-    ...["AGENTS.md", "CLAUDE.md", "reports/README.md", "reports/TEMPLATE.md"].map((p) => join(ROOT, p)),
+    ...["AGENTS.md", "CLAUDE.md", "reports/README.md", "reports/TEMPLATE.md", "tests/skill_scenarios.md"].map((p) => join(ROOT, p)),
   ];
   for (const file of files) {
     const content = readFileSync(file, "utf8");
