@@ -30,7 +30,7 @@ nodes:
     label: InstantUnstakePool
     address: "0x665b67793594fc5C251a3C95cbEb4B6245Cd2123"
     category: vault
-    note: Instant-unstake liquidity pool (~42K HYPE)
+    note: Instant-unstake liquidity pool (~32K HYPE)
 
   # === Protocol infra ===
   - id: staking-accountant
@@ -89,12 +89,16 @@ nodes:
     label: PauserRegistry ProxyAdmin
     address: "0xd26c2c4a8bd4f78c64212318424ed794be120ea6"
     category: governance
+  - id: staking-accountant-proxyadmin
+    label: StakingAccountant ProxyAdmin
+    address: "0x7957de697ea42238f53f60ca7ad55b7b03cc0bda"
+    category: governance
 
   # === External dependencies (validators / Hyperliquid L1) ===
   - id: hyperliquid-l1
-    label: Hyperliquid L1 Validators (15)
+    label: Hyperliquid L1 Validators (14)
     category: dependency
-    note: Delegations spread across 15 validators; 0% to Hyper Foundation
+    note: Delegations spread across 14 validators; 0% to Hyper Foundation
 
 edges:
   # === Governance ===
@@ -120,6 +124,14 @@ edges:
     label: upgradeable proxy
   - from: pauser-proxyadmin
     to: pauser-registry
+    kind: manages
+    label: upgradeable proxy
+  - from: multisig
+    to: staking-accountant-proxyadmin
+    kind: controls
+    label: owner (no timelock)
+  - from: staking-accountant-proxyadmin
+    to: staking-accountant
     kind: manages
     label: upgradeable proxy
   - from: multisig
@@ -183,4 +195,4 @@ edges:
   - from: staking-pool
     to: hyperliquid-l1
     kind: deposits-into
-    label: "HYPE → validators (15)"
+    label: "HYPE → validators (14)"
