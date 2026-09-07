@@ -1,7 +1,6 @@
 ---
 name: generating-dependency-graphs
 description: Procedure for authoring contract dependency graph YAML files (reports/graph/<slug>.yaml) from a completed risk assessment report.
-allowed-tools: Read Write Edit Grep Glob Bash(npm:*) Bash(git:*)
 ---
 
 # Generating contract dependency graphs
@@ -27,7 +26,7 @@ Each risk report in `reports/report/` documents a protocol's contracts and their
 
 This skill turns a finished risk report into the corresponding YAML.
 
-Follow the project workflow in `CLAUDE.md`: pull latest `master` before starting and open a draft PR when the graph task is ready.
+Follow the workflow in `AGENTS.md`: pull latest `master` before starting and open a draft PR when the graph task is ready.
 
 ## When to invoke
 

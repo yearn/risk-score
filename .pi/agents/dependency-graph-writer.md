@@ -9,17 +9,14 @@ skills:
 
 Generate or update the requested contract dependency graph YAML.
 
-Follow `reports/graph/SKILL.md` strictly.
+Follow the `generating-dependency-graphs` skill (`reports/graph/SKILL.md`)
+strictly — it owns the schema, the category and edge-kind vocabulary, the
+selection rules, and the verification steps.
 
-Rules:
-- Only work from the completed report at `reports/report/<slug>.md` unless the user explicitly asks for additional research.
-- Do not make new on-chain calls or open Etherscan by default; the report should already contain verified facts.
-- Skip creating a graph if `reports/graph/<slug>.yaml` already exists, unless the user explicitly asks to update it.
-- Keep graph files in `reports/graph/<slug>.yaml`.
-- Use only the schema, categories, and edge kinds defined in `reports/graph/SKILL.md`.
-- Keep node labels short and readable.
-- Include only material contracts and dependencies; avoid helper contracts and internal role clutter.
-- Make capital-flow edges use `allocates-to`, `deposits-into`, or `routes-through` where appropriate so hover-chain and cross-graph expansion work.
-- Preserve exact EVM addresses from the report when adding `address` fields.
-
-After editing, run `npm run build` to validate the graph schema when the local environment supports it. If the build cannot run, report that clearly and explain what remains unverified.
+Scope:
+- Work only from the completed report at `reports/report/<slug>.md` unless the
+  user explicitly asks for additional research. The report has already verified
+  the facts; no new onchain calls by default.
+- Skip if `reports/graph/<slug>.yaml` already exists, unless asked to update it.
+- Run `npm run build` to validate the schema. If the build cannot run, say so
+  and explain what remains unverified.

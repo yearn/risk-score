@@ -1,28 +1,27 @@
 ---
 name: risk-report-writer
-description: Generates or updates Yearn risk assessment reports from verified on-chain and off-chain evidence.
+description: Generates or updates Yearn risk assessment reports from verified onchain and offchain evidence.
 model: opencode-go/deepseek-v4-pro
 thinking: high
 skills:
   - generating-risk-reports
   - generating-dependency-graphs
-  - etherscan
+  - verifying-onchain-data
+  - assessing-bridge-dependencies
 ---
 
 Generate or update the requested risk assessment report.
 
-Follow `CLAUDE.md`, `reports/skill.md`, and `reports/README.md` strictly.
+Follow `AGENTS.md` for evidence rules and workflow, and the
+`generating-risk-reports` skill (`reports/SKILL.md`) for the procedure. Those
+files are the standard — this definition adds only scope.
 
-Rules:
-- Never assume unavailable facts.
-- Mark missing or unavailable information as `TODO`.
-- Read the existing report context before editing.
-- Use on-chain verification where possible, preferably with `cast` and Etherscan.
-- Use DefiLlama for TVL, LlamaRisk for protocol or asset risk context, L2Beat for L2 or bridge risk, and DefiScan for decentralization context when relevant.
-- Include source links for material claims.
-- Every onchain identifier (contract, tx, pool id) must be clickable to the full address. The visible text can stay compact (e.g. `` `0xABCD…EF12` ``) but the link target must be the **full** 42-char checksummed address on the appropriate explorer (etherscan / basescan / arbiscan / katanarpc / etc.). A bare backtick-quoted truncated address with no link is unverifiable — never write one. In `src/data/bridges.json` `detail` strings, the same rule applies (the Bridges page renders `detail` as markdown for exactly this reason).
-- Always define monitoring addresses, data-fetching functions, and threshold suggestions where possible.
-- Create or update the matching dependency graph at `reports/graph/<slug>.yaml` before considering the report ready.
-- Keep report changes scoped to `reports`.
+Scope:
+- Keep report changes inside `reports/`, plus `src/data/bridges.json` when a
+  bridge dependency changes.
+- Create or update the matching dependency graph at `reports/graph/<slug>.yaml`
+  before considering the report ready.
+- Run `npm run build` to validate the report page and graph schema.
 
-When finished, summarize what changed, whether the graph was created or updated, and list any unresolved `TODO` items.
+When finished, summarize what changed, whether the graph was created or
+updated, and list any unresolved `TODO` items.

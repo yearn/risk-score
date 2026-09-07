@@ -1,7 +1,6 @@
 ---
-name: risk-report-reassessment
-description: Focused procedure for refreshing existing risk reports by validating mutable on-chain roles, proxy implementations, TVL, strategy allocations, and other current-state data without rewriting the full assessment.
-allowed-tools: Read Write Edit Grep Glob Bash(cast:*) Bash(curl:*) Bash(uv:*) Bash(npm:*) Bash(git:*) Bash(gh:*)
+name: reassessing-risk-reports
+description: Focused procedure for refreshing existing risk reports by validating mutable onchain roles, proxy implementations, TVL, strategy allocations, and other current-state data without rewriting the full assessment.
 ---
 
 # Risk Report Reassessment
@@ -10,7 +9,7 @@ Use this skill when reassessing an existing report in `reports/report/<slug>.md`
 
 The goal is a focused refresh, not a new assessment. Update current-state facts, identify material changes, and only adjust risk reasoning or scores when the verified changes justify it.
 
-Follow the project workflow in `CLAUDE.md`: pull latest `master` before starting and open a draft PR when the reassessment task is ready.
+Follow the evidence rules and workflow in `AGENTS.md`: pull latest `master` before starting, verify onchain rather than from docs, link every changed fact, and open a draft PR when the task is ready.
 
 ## Scope
 
@@ -25,7 +24,15 @@ Always check:
 - Existing dependency graph at `reports/graph/<slug>.yaml`, if present.
 - Reassessment triggers listed in the report.
 
-Do not spend time redoing static background unless a mutable fact changed. Do not check Safe signer identities; only update threshold and signer count.
+Do not spend time redoing static background unless a mutable fact changed.
+
+**Multisigs:** refresh `getThreshold()` and `getOwners()` count only. Do not
+re-derive whether signers are publicly named or anonymous, and do not re-check
+signer overlap between Safes — that characterization is established in the
+original assessment (`reports/SKILL.md` § *Governance and multisig
+documentation*) and is expensive to redo. The exception is when the threshold
+or the owner set actually changed: then the composition question is live again,
+and the full rule applies.
 
 ## Procedure
 
@@ -37,10 +44,10 @@ Do not spend time redoing static background unless a mutable fact changed. Do no
    - TVL and allocation values
    - monitoring thresholds and reassessment triggers
 3. Verify mutable facts from primary sources:
-   - on-chain calls with `cast` for roles, proxy slots, allocation, balances, and protocol-specific getters
+   - onchain calls with `cast` for roles, proxy slots, allocation, balances, and protocol-specific getters
    - Etherscan or block explorer links for verified source, proxy status, and transactions
    - DeFiLlama for protocol TVL when applicable
-   - protocol dashboards or APIs only when on-chain data is unavailable or the report already depends on those sources
+   - protocol dashboards or APIs only when onchain data is unavailable or the report already depends on those sources
 4. Compare current values to the report.
 5. Check whether graph-relevant facts changed:
    - strategy/farm/collateral allocations
@@ -49,7 +56,7 @@ Do not spend time redoing static background unless a mutable fact changed. Do no
    - governance path, timelocks, role managers, or proxy admins
    - mint authority or privileged supply paths
    - cross-chain bridge / messaging dependencies (LayerZero/OFT, Chainlink CCIP, CCTP, Wormhole, Axelar, Stargate, etc.)
-   If any changed, update `reports/graph/<slug>.yaml` using `reports/graph/SKILL.md`. If no graph exists, create one when the report has enough data; otherwise mark the missing graph inputs as `TODO`. If a bridge dependency was added, removed, or changed, also update `src/data/bridges.json` so the `/bridges/` page stays in sync (see the "Bridge dependencies" bullet in `reports/skill.md`); `npm run build` runs `scripts/check_bridges.mjs` and will warn about any bridge the report mentions but that isn't listed.
+   If any changed, update `reports/graph/<slug>.yaml` using `reports/graph/SKILL.md`. If no graph exists, create one when the report has enough data; otherwise mark the missing graph inputs as `TODO`. If a bridge dependency was added, removed, or changed, also update `src/data/bridges.json` so the `/bridges/` page stays in sync (`reports/bridges/SKILL.md`); `npm run build` runs `scripts/check_bridges.mjs` and will warn about any bridge the report mentions but that isn't listed.
 6. Patch only affected sections **in place**. Do not add a "Reassessment Notes", changelog, or "what changed" section to the report body. Common sections:
    - header assessment date: keep the original date and append the latest one in
      parentheses with the "Updated:" prefix, showing ONLY the single most
@@ -83,11 +90,11 @@ Do not spend time redoing static background unless a mutable fact changed. Do no
    - scoring changes, if any
    - remaining TODOs
 
-## On-chain checks
+## Onchain checks
 
-Use `.env` for RPC URLs and API keys. For Ethereum mainnet, use `RPC_1` first and `RPC_2` as fallback. For other chains, use the chain-specific `RPC_<chain_id>` variable when available, for example `RPC_8453` for Base.
-
-For Python scripts, use `scripts/env.py`: call `load_repo_env()` once, then `get_rpc_url(chain_id)` or `get_explorer_api_key(name)`. Do not duplicate `.env` discovery or env-var alias logic in reassessment scripts.
+RPC URLs, API keys, and `scripts/env.py` conventions are in `AGENTS.md`. Role
+and mint-authority enumeration mechanics are in `reports/onchain/SKILL.md`. The
+checks below are the ones a reassessment runs every time.
 
 ### Proxy implementation/admin
 
@@ -130,7 +137,7 @@ Use DeFiLlama first when the report cites protocol-level TVL:
 uv run reports/scripts/fetch_defillama_tvl.py <defillama-slug> --days 30
 ```
 
-For vault or strategy allocations, prefer on-chain values:
+For vault or strategy allocations, prefer onchain values:
 
 - Yearn V3 vaults: `totalAssets()`, `strategies(address)`, `totalDebt`, `maxDebt`, strategy `totalAssets()`.
 - ERC-4626 dependencies: `totalAssets()`, `totalSupply()`, `convertToAssets(...)`.
