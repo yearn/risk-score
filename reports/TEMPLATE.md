@@ -406,6 +406,7 @@ Not Rated: for terminal reports (Status: HACKED / DEAD), set Final Score to
 ## Assessment History
 
 <!--
+  If history is absent, seed the original assessment before adding the update.
   One row per PR, oldest first. Add a row for each reassessment PR. If you
   correct the report within the same PR, update that PR's row in place — do
   not append a new row. The website renders this table at the bottom of the

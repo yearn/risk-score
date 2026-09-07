@@ -63,5 +63,4 @@ For TVL, use `uv run reports/scripts/fetch_defillama_tvl.py <slug>`.
 Read [source-fetching recipes](references/fetching-sources.md) only when a linked
 Google Doc, Notion page, or GitBook page cannot be retrieved normally.
 
-Create or update the [dependency graph](../generating-dependency-graphs/SKILL.md),
-then finish through the [authoring workflow](../../../AGENTS.md#report-and-graph-authoring-workflow).
+Create or update the [dependency graph](../generating-dependency-graphs/SKILL.md).

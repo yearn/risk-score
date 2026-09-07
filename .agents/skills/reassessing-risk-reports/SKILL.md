@@ -40,18 +40,13 @@ to keep the index consistent.
 - Keep the original assessment date and one latest update date:
   `- **Assessment Date:** May 27, 2026 (Updated: June 17, 2026)`.
   Never overwrite the original date or stack update dates; the site reads both.
-- Follow the [template's Assessment History](../../../reports/TEMPLATE.md#assessment-history):
-  one row per PR, Date linked to that PR, with `Date | Score | Notes` columns.
-  Update an existing row for this PR; otherwise append one. Seed the original
-  assessment if history is absent. Match the header date and final score/status.
-- Use compact contract tables. Audit entries need firm/date/scope; bug bounty
-  coverage needs the highest reward. Omit implementation trivia unless material.
+- Maintain [Assessment History](../../../reports/TEMPLATE.md#assessment-history)
+  using the template's rules.
 - Keep incidents, depegs, and large historical TVL changes as dated facts in
   Historical Track Record, not comparisons with the previous assessment.
 - Change scores only under the [scoring framework](../../../reports/README.md).
   Update dependent summaries, final tier, concentration discussion, and
   graph-related appendices when their supporting facts change.
 
-Finish through the [authoring workflow](../../../AGENTS.md#report-and-graph-authoring-workflow).
 In the task/PR summary, give the snapshot date, changed facts, graph status,
 unchanged critical controls, score changes, and remaining unverified facts.
