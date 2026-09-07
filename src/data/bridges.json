@@ -97,6 +97,7 @@
         "aave-sgho",
         "infinifi",
         "fx-fxusd",
+        "midas-mglobal",
         "superstate-ustb"
       ],
       "dependencies": [
