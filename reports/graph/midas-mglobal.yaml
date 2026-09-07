@@ -20,7 +20,7 @@ nodes:
     label: mGLOBAL (LYT Stablecoin)
     address: "0x7433806912Eae67919e66aea853d46Fa0aef98A8"
     category: vault
-    note: Subordinated debt instrument; TransparentUpgradeableProxy. ~52.63M supply @ $1.00 (Jun 23 2026, block 25382793)
+    note: Subordinated debt instrument; TransparentUpgradeableProxy. 68.10M supply @ $1.01664609 = ~$69.23M NAV (Aug 24 2026, block 25822232)
   - id: deposit-vault
     label: MGlobalDepositVaultWithAave
     address: "0xce29c36c6d4556f2d01d79414c1354b968dddef1"
@@ -30,12 +30,17 @@ nodes:
     label: RedemptionVaultWithAave
     address: "0xa0fc8bdfb1e6a705c1375810989b1d70a982b01b"
     category: vault
-    note: Primary redemption vault. Idle capital → Aave
+    note: Primary redemption vault. Holds $6,237,620 aUSDC (~9.0% of NAV) — verifiable instant-redemption float. 2M/day cap, 50 bps fee
   - id: redemption-vault-swapper
     label: RedemptionVaultWithSwapper
     address: "0x1e0fd66753198c7b8ba64edee8d41d8628bf20d7"
     category: vault
-    note: Secondary redemption vault with swapper
+    note: Secondary redemption vault. Holds 2,000,001.74 mGLOBAL swap inventory. 2M/day cap, 50 bps fee
+  - id: redemption-vault-swapper-2
+    label: 2nd SwapperVault (staged)
+    address: "0xdbd621e67d9cffffcdcd316a27285f657c178e76"
+    category: vault
+    note: "Holds M_GLOBAL_BURN_OPERATOR_ROLE (granted Aug 12 2026) but is unfunded and unconfigured: sentinel 0xFFfF..FFfF addresses, 0 fee, uncapped daily limit"
 
   # === Protocol infra ===
   - id: access-control
@@ -47,7 +52,7 @@ nodes:
     label: MGlobalCustomAggregatorFeedGrowth (NAV)
     address: "0x66aa9fcd63df74e1f67a9452e6e59fbc67f75e38"
     category: infra
-    note: "Admin-set NAV oracle. Price $1.00. maxAnswerDeviation=100% (very loose). Impl: 0x96ac55...5e49"
+    note: "Admin-set NAV oracle. Price $1.01664609 (round 5, Aug 20 2026). maxAnswerDeviation=100% and NOT enforced on the admin-callable setRoundData path; onlyUp=true blocks markdowns on the guarded path. Impl: 0x96ac55...5e49"
   - id: oracle-raised
     label: PriceRaised Feed (inactive)
     address: "0x494f142c35167cfbdd3887e8d7897822e63c9618"
@@ -72,24 +77,24 @@ nodes:
     label: Mint/Burn/Pause Operator EOA
     address: "0x76e350c5a674db787918e5f728466c7356d4d361"
     category: infra
-    note: Fordefi MPC (nonce 3); holds MINT/BURN/PAUSE/BLACKLIST/GREENLIST
+    note: Fordefi MPC (nonce 8); holds MINT/BURN/PAUSE/BLACKLIST/GREENLIST
   - id: oracle-updater-eoa
     label: Oracle Updater EOA
     address: "0x088a74de7df74e6a6eb832d28878a9f134ee4f05"
     category: infra
-    note: Single EOA, no timelock on price updates (nonce 4)
+    note: Single EOA, no timelock (nonce 12). Via setRoundData can set any price in $0.10-$1,000 in one tx, bypassing deviation cap and onlyUp
   - id: greenlist-blacklist-eoa
     label: Greenlist/Blacklist Operator EOA
     address: "0x9ba8c38ae60e6e6311d53f8a85e5cf4004d3c987"
     category: infra
-    note: Generic GREENLIST_OP + BLACKLIST_OP. Nonce 0 — never transacted
+    note: One of 53 EOAs holding both GREENLIST_OPERATOR_ROLE and BLACKLIST_OPERATOR_ROLE platform-wide. Any one can freeze a holder, untimelocked
 
   # === Governance ===
   - id: admin-safe
     label: Admin Safe (1/3)
     address: "0xB60842E9DaBCd1C52e354ac30E82a97661cB7E89"
     category: governance
-    note: Gnosis Safe; DEFAULT_ADMIN + Timelock proposer/executor
+    note: Gnosis Safe 1-of-3; DEFAULT_ADMIN + Timelock proposer/executor/canceller
   - id: admin-eoa-fordefi
     label: DEFAULT_ADMIN EOA (Fordefi MPC)
     address: "0xd4195cf4df289a4748c1a7b6ddbe770e27ba1227"
@@ -124,7 +129,7 @@ nodes:
   - id: fasanara
     label: Fasanara Capital (Strategy Mgr)
     category: dependency
-    note: "$4B+ AUM, 15yr, London, MIFIDPRU. 88.61% of NAV Unclassified"
+    note: "$4B+ AUM, 15yr, London, MIFIDPRU, FCA FRN 551020. 97.03% of NAV Unclassified"
   - id: fordefi
     label: Fordefi MPC Custody
     category: dependency
@@ -141,22 +146,22 @@ nodes:
     label: vlayer (Notarization)
     category: dependency
   - id: infinifi
-    label: InfiniFi (~58% holder — renewed)
-    address: "0xf4ea3ec87b1c254f17a2fb68164db0caf6c4cecf"
+    label: InfiniFi RWAEscrowRouter (30.29%)
+    address: "0x7912Eaff92B2f5Bc64Cdd21C76d79FFC12eA855E"
     category: dependency
-    note: "Original farm matured Jun 15 2026 and renewed into new MidasFarm (0xf4ea3ec, maturity Jul 21 2026). $30.49M position (57.94%), 4.5/5 internal risk"
+    note: "Largest holder: 20,627,291.44 mGLOBAL (30.29%). MidasFarm 0xf4ea3ec transferred the whole position here Aug 17 2026; core()=InfiniFiCore, keeper()=RWAEscrowRateManager. Marked offchain, liquidity()=0, and no maturity date — an exit would give no advance notice"
   - id: aave-horizon
     label: Aave Horizon (collateral mkt)
     address: "0xAe05Cd22df81871bc7cC2a04BeCfb516bFe332C8"
     category: dependency
-    note: "mGLOBAL listed as collateral reserve (Jun 2026). $19.85M supplied (37.71%); LTV 0.05% — near-zero credit. aMGLOBAL 0x49d3...B985"
+    note: "Collateral reserve SATURATED at its cap: 29,999,999 of 30,000,000 (44.05% of supply). Cap cut 50M -> 30M on Jul 2 2026. LTV 0.05% / LT 0.10% — near-zero credit. aMGLOBAL 0x49d3...B985"
 
 edges:
   # === Governance chain ===
   - from: admin-safe
     to: timelock
     kind: proposes-on
-    label: PROPOSER + EXECUTOR (1/3)
+    label: PROPOSER + EXECUTOR + CANCELLER (1/3)
   - from: timelock
     to: proxy-admin
     kind: controls
@@ -173,6 +178,9 @@ edges:
     kind: manages
   - from: proxy-admin
     to: redemption-vault-swapper
+    kind: manages
+  - from: proxy-admin
+    to: redemption-vault-swapper-2
     kind: manages
   - from: proxy-admin
     to: oracle
@@ -220,6 +228,10 @@ edges:
     to: mGLOBAL
     kind: holds-role
     label: M_GLOBAL_BURN_OPERATOR_ROLE
+  - from: redemption-vault-swapper-2
+    to: mGLOBAL
+    kind: holds-role
+    label: M_GLOBAL_BURN_OPERATOR_ROLE (staged, unconfigured)
 
   # === Oracle → vault flow ===
   - from: oracle
@@ -268,7 +280,7 @@ edges:
   - from: fasanara
     to: fasanara
     kind: allocates-to
-    label: "100% (TODO: verify allocation)"
+    label: "97.03% Unclassified (TODO: verify allocation)"
 
   # === Aave integration (idle capital in vaults) ===
   - from: deposit-vault
@@ -278,7 +290,7 @@ edges:
   - from: redemption-vault-aave
     to: aave
     kind: deposits-into
-    label: idle USDC → aUSDC
+    label: $6,237,620 aUSDC (~9.0% of NAV)
 
   # === Redemption flow ===
   - from: redemption-vault-aave
@@ -326,10 +338,10 @@ edges:
   - from: infinifi
     to: mGLOBAL
     kind: manages
-    label: 57.94% holder ($30.49M). Renewed; new maturity Jul 21 2026
+    label: 30.29% holder (20.63M mGLOBAL, ~$21M). No maturity date
 
   # === Aave Horizon collateral listing ===
   - from: aave-horizon
     to: mGLOBAL
     kind: manages
-    label: 37.71% holder ($19.85M supplied as collateral; LTV 0.05%)
+    label: 44.05% holder (30M supplied; at cap; LTV 0.05%)

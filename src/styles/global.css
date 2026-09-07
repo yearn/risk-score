@@ -85,3 +85,85 @@ th {
   font-size: 0.75rem;
   letter-spacing: 0.05em;
 }
+
+/*
+ * Rendered-markdown blocks. Global rather than page-scoped because more than
+ * one component now sets:html report markdown (the report body and the score
+ * rationale panels) and they must render identically.
+ */
+.prose p {
+  margin-bottom: 0.75rem;
+}
+.prose ul,
+.prose ol {
+  margin-bottom: 0.75rem;
+  padding-left: 1.5rem;
+}
+.prose li {
+  margin-bottom: 0.25rem;
+}
+/* GFM task lists (the critical-gate checklists) draw their own checkbox —
+   drop the bullet so the item carries one marker, not two. */
+.prose li:has(> input[type="checkbox"]) {
+  list-style: none;
+}
+.prose li > input[type="checkbox"] {
+  margin-right: 0.4rem;
+}
+.prose a {
+  color: var(--brand-blue);
+}
+.prose strong {
+  color: var(--text-primary);
+}
+.prose code {
+  background: var(--bg-secondary);
+  padding: 0.15rem 0.35rem;
+  border-radius: 3px;
+  font-size: 0.85em;
+}
+.prose pre {
+  background: var(--bg-secondary);
+  padding: 1rem;
+  border-radius: 6px;
+  overflow-x: auto;
+  margin-bottom: 0.75rem;
+}
+.prose pre code {
+  background: none;
+  padding: 0;
+}
+.prose h3,
+.prose h4,
+.prose h5 {
+  margin-top: 1.5rem;
+  margin-bottom: 0.5rem;
+  font-size: 1.05rem;
+}
+.prose blockquote {
+  border-left: 3px solid var(--border);
+  padding-left: 1rem;
+  margin-bottom: 0.75rem;
+  color: var(--text-secondary);
+}
+.prose table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 0.75rem;
+  font-size: 0.85rem;
+  display: block;
+  overflow-x: auto;
+}
+.prose th,
+.prose td {
+  padding: 0.4rem 0.6rem;
+  border-bottom: 1px solid var(--border);
+  text-align: left;
+}
+.prose th {
+  background: var(--bg-secondary);
+  color: var(--text-secondary);
+  font-weight: 600;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+}
