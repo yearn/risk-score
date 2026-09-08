@@ -19,10 +19,11 @@ reports/
 │   ├── origin-arm.md           # Example: Origin ARM protocol
 │   ├── infinifi.md             # Example: InfiniFi protocol
 │   └── ...
-└── old/                  # Legacy documentation (deprecated format)
+├── graph/                # Dependency graph YAML, one per report slug
+└── scripts/              # Report-specific data-fetching scripts
 ```
 
-**Legacy documents are in `reports/old/` for reference only. Do not use them as templates.**
+Authoring procedures: [shared agent skills](../AGENTS.md#shared-skills-and-commands).
 
 ## How to Use This Framework
 
