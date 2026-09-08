@@ -49,21 +49,34 @@ nodes:
     category: infra
     note: Owned by Admin Timelock; can upgrade USDat implementation
   - id: swap-facility
-    label: M0 Swap Facility
-    address: "0xB6807116b3B1B321a390594e31ECD6e0076f6278"
+    label: M0 Swap Facility (current)
+    address: "0x0bC305e7e13113cAEd3f5486849e9518a1cC4173"
     category: infra
-    note: Sole mint/redeem contract; onlySwapFacility on wrap/unwrap
+    note: Sole mint/redeem contract since Aug 19, 2026; onlySwapFacility on wrap/unwrap. Replaced 0xB680…6278.
 
   # === External Dependencies ===
+  - id: pyusdx
+    label: M0 PYUSDx Token
+    address: "0xeBDB0942cE16386Ab90718C7BD10C91CDb66b14d"
+    category: dependency
+    note: USDat's backing asset since Aug 19, 2026 (replaced $M); M0-framework extension backed 1:1 by PYUSD
+  - id: pyusd
+    label: PYUSD (PayPal USD, Paxos)
+    category: dependency
+    note: Issued by Paxos Trust Company; backs PYUSDx 1:1 via the MoonPay/M0 PYUSDx framework (launched Feb 27, 2026)
+  - id: paxos-reserves
+    label: Paxos Trust Reserves (cash/T-bills)
+    category: dependency
+    note: Off-chain PYUSD reserves; regulated (NYDFS-chartered trust company) attestation regime, separate from M0's own Treasury reserves
   - id: m0-m-token
-    label: M0 $M Token
+    label: M0 $M Token (retired for USDat)
     address: "0x866A2BF4E572CbcF37D5071A7a58503Bfb36be1b"
     category: dependency
-    note: Tokenized U.S. Treasuries; USDat 1:1 backing asset
+    note: Former USDat backing asset through Aug 19, 2026. isAllowedAsset($M)=false, assetCap($M)=0, balance=0 as of Sep 8, 2026 — retained for historical context only
   - id: m0-treasury
     label: M0 Treasury (US Treasuries)
     category: dependency
-    note: Off-chain M0 reserves backing $M; attested by M0 governance
+    note: Off-chain M0 reserves backing $M; attested by M0 governance. No longer USDat's backing chain (see pyusdx/pyusd)
   - id: strc
     label: STRC (Strategy Perpetual Preferred)
     category: dependency
@@ -100,13 +113,25 @@ edges:
 
   # Capital flow
   - from: usdat
-    to: m0-m-token
+    to: pyusdx
     kind: deposits-into
-    label: "1:1 $M backing"
+    label: "1:1 PYUSDx backing (since Aug 19, 2026)"
+  - from: pyusdx
+    to: pyusd
+    kind: deposits-into
+    label: "1:1 PYUSD backing (MoonPay/M0 framework)"
+  - from: pyusd
+    to: paxos-reserves
+    kind: deposits-into
+    label: "backed by Paxos cash/T-bill reserves"
+  - from: usdat
+    to: m0-m-token
+    kind: routes-through
+    label: "retired Aug 19, 2026 — balance now 0"
   - from: m0-m-token
     to: m0-treasury
     kind: deposits-into
-    label: backed by US Treasuries
+    label: backed by US Treasuries (historical)
   - from: susdat
     to: usdat
     kind: deposits-into
