@@ -397,7 +397,7 @@ CROSS-CHAIN (new as of this reassessment, bridge mechanism not scored)
 | Date | Score | Notes |
 | --- | --- | --- |
 | [June 17, 2026](https://github.com/yearn/risk-score/pull/225) | 2.825 | Initial assessment |
-| [September 8, 2026](https://github.com/yearn/risk-score/pull/PR_NUMBER_PLACEHOLDER) | 3.15 | Reassessment: backing migrated `$M` → PYUSDx via a new MultiMint/PYUSDX base architecture (Aug 19, 2026 upgrade); new M0 Swap Facility (M0-controlled, not Saturn's timelock); supply -46% with redemption pace tripling post-migration (286 burns vs 42 mints); Curve liquidity roughly halved; Monad deployment found to carry ~46% of mainnet supply; unaddressed third-party Critical/High sUSDat disclosure (Innora, Apr 2026) surfaced; governance roles unchanged |
+| [September 8, 2026](https://github.com/yearn/risk-score/pull/455) | 3.15 | Reassessment: backing migrated `$M` → PYUSDx via a new MultiMint/PYUSDX base architecture (Aug 19, 2026 upgrade); new M0 Swap Facility (M0-controlled, not Saturn's timelock); supply -46% with redemption pace tripling post-migration (286 burns vs 42 mints); Curve liquidity roughly halved; Monad deployment found to carry ~46% of mainnet supply; unaddressed third-party Critical/High sUSDat disclosure (Innora, Apr 2026) surfaced; governance roles unchanged |
 
 ---
 
