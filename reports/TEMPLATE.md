@@ -87,7 +87,7 @@ Explain what the protocol does, its usage, and yield sources.
 
 ### Token Mint Authority
 
-Enumerate every address that can mint the assessed token, and the mechanism that gates them. Treat any address with mint authority as part of the trust surface even if it is intended only for a narrow purpose. Onchain enumeration procedure: see `reports/skill.md` § "Pass 1.6: Mint authority enumeration".
+Enumerate every address that can mint the assessed token, and the mechanism that gates them. Treat any address with mint authority as part of the trust surface even if it is intended only for a narrow purpose. Onchain enumeration procedure: see [onchain verification](../.agents/skills/verifying-onchain-data/SKILL.md#mint-authority-enumeration-workflow).
 
 **Mint mechanism:** [Open mint via collateral deposit / Role-gated AccessControl / Whitelist mapping / Ownable / Custodial bridge / Other — describe]
 
@@ -406,6 +406,7 @@ Not Rated: for terminal reports (Status: HACKED / DEAD), set Final Score to
 ## Assessment History
 
 <!--
+  If history is absent, seed the original assessment before adding the update.
   One row per PR, oldest first. Add a row for each reassessment PR. If you
   correct the report within the same PR, update that PR's row in place — do
   not append a new row. The website renders this table at the bottom of the

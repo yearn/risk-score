@@ -30,7 +30,7 @@ PROTOCOLS_URL = "https://api.llama.fi/protocols"
 REQUEST_TIMEOUT = 60  # /protocols payload is ~5MB, give it room
 
 # Mirror lychee.toml's exclude_path so dir-walks scan the same set lychee does.
-EXCLUDE_PATHS = ("reports/TEMPLATE.md", "reports/old")
+EXCLUDE_PATHS = ("reports/TEMPLATE.md",)
 
 logging.basicConfig(level=logging.INFO, format="%(message)s")
 logger = logging.getLogger(__name__)
