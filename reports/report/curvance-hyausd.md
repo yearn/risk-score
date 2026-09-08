@@ -1,10 +1,10 @@
 # Protocol Risk Assessment: Curvance High Yield AUSD (hyAUSD)
 
-- **Assessment Date:** August 17, 2026 (Updated: September 7, 2026)
+- **Assessment Date:** August 17, 2026 (Updated: September 8, 2026)
 - **Token:** hyAUSD (High Yield AUSD Vault)
 - **Chain:** Monad (chain id 143)
 - **Token Address:** [`0xaD663aC84052b52BE4ed1b27BA416505e84a00Bf`](https://monadscan.com/address/0xaD663aC84052b52BE4ed1b27BA416505e84a00Bf)
-- **Final Score: 3.4/5.0**
+- **Final Score: 3.1/5.0**
 
 ## Overview + Links
 
@@ -64,7 +64,7 @@ Curvance has six published reports. Firm names, dates and scope were read direct
 
 ## Historical Track Record
 
-- **Vault time in production: 76 days.** `LendingOptimizer` was deployed June 23, 2026 16:28 UTC (block 83,204,988, tx [`0x8cca706e…57f8`](https://monadscan.com/tx/0x8cca706e7d9641d29a0389f8c781314696921e6591a568c83666d04a38c057f8)) by deployer [`0x029cf33e…7b5c`](https://monadscan.com/address/0x029cf33e40f779e3632cba317bd43a836e117b5c). The two markets it lends into are barely older: market B June 8, 2026; market A June 20, 2026.
+- **Vault time in production: 76 days.** `LendingOptimizer` was deployed June 23, 2026 16:28 UTC (block 83,204,988, tx [`0x8cca706e…57f8`](https://monadscan.com/tx/0x8cca706e7d9641d29a0389f8c781314696921e6591a568c83666d04a38c057f8)) by deployer [`0x029cf33e…7b5c`](https://monadscan.com/address/0x029Cf33E40f779e3632CBa317bd43a836e117B5C). The two markets it lends into are barely older: market B June 8, 2026; market A June 20, 2026.
 - **Protocol time in production on Monad: ~9.5 months.** `CentralRegistry` was deployed November 25, 2025 (tx [`0xe05befec…db89`](https://monadscan.com/tx/0xe05befec0c3db9a8a17712e0d5b185a2fafbd5ca03330e2bda61d03de411db89)). Curvance itself was founded in 2022 and ran a long Monad testnet campaign before mainnet.
 - **Security incidents:** one — a **frontend/DNS attack on February 16, 2026**, detected by security partners and blocked before any user funds or approvals were compromised; core contracts were unaffected ([report](https://ourcryptotalk.com/news/curvance-protocol-detects-and-blocks-malicious-frontend-attack)). No smart-contract exploit is known.
 - **Protocol TVL history** ([DefiLlama](https://api.llama.fi/protocol/curvance)): $8.0M (Nov 28, 2025) → $43M (Jan 2026) → dip to $32M (Feb 2026) → $57M (Apr) → $99.5M peak (Aug 7, 2026) → **$130.09M supplied / $78.74M borrowed** (September 6, 2026). Growth has been steady with one ~25% drawdown in Jan–Feb 2026, and the protocol grew ~47% over the three weeks the vault itself shrank. Curvance is a Monad-only deployment.
@@ -72,13 +72,13 @@ Curvance has six published reports. Firm names, dates and scope were read direct
 
 | Rank | Holder | Balance | Share | Type |
 |---|---|---|---|---|
-| 1 | [`0x6cc60a0b…c4bd`](https://monadscan.com/address/0x6cc60a0b57bc882a0471980d0e2d4ad7ddf3c4bd) | 2,405,906 | **18.17%** | EOA |
-| 2 | [`0x1cde180f…d891`](https://monadscan.com/address/0x1cde180fd33935c744623d655696eb3a77e5d891) | 2,214,496 | 16.72% | Safe (2-of-N) |
-| 3 | [`0x4f87de7d…0545`](https://monadscan.com/address/0x4f87de7d21aef48090958f7342e1f69dff790545) | 1,983,626 | 14.98% | — |
-| 4 | [`0xa1226872…e7c6`](https://monadscan.com/address/0xa122687285dc5012141055a801045f069112e7c6) | 1,983,508 | 14.98% | — |
-| 5 | [`0xa5190552…c6bd`](https://monadscan.com/address/0xa5190552e8a7902812c6f6df07813bf6aebfc6bd) | 1,785,009 | 13.48% | "FUSDE Boring Vault" |
+| 1 | [`0x6cc60a0b…c4bd`](https://monadscan.com/address/0x6CC60A0b57bc882A0471980D0e2D4aD7DDf3C4bD) | 2,405,906 | **18.17%** | EOA |
+| 2 | [`0x1cde180f…d891`](https://monadscan.com/address/0x1Cde180fd33935C744623D655696eb3A77e5d891) | 2,214,496 | 16.72% | Safe (2-of-N) |
+| 3 | [`0x4f87de7d…0545`](https://monadscan.com/address/0x4F87De7d21aeF48090958f7342E1F69Dff790545) | 1,983,626 | 14.98% | — |
+| 4 | [`0xa1226872…e7c6`](https://monadscan.com/address/0xa122687285dC5012141055A801045f069112E7c6) | 1,983,508 | 14.98% | — |
+| 5 | [`0xa5190552…c6bd`](https://monadscan.com/address/0xa5190552e8A7902812C6F6Df07813BF6AEBfc6bd) | 1,785,009 | 13.48% | "FUSDE Boring Vault" |
 
-  **Top 5 = 78.32%**, down from 89.6% on August 17. The former 45.97% whale [`0x9f1a1479…bd1a`](https://monadscan.com/address/0x9f1a1479191af103ff82fead23e950b6b3b2bd1a) has fully exited — which both removed the single largest concentration and demonstrated that a position several times larger than instant liquidity can in fact be unwound. The largest remaining holder (2.41M) still roughly matches total instantly-available exit liquidity (≈2.40M AUSD, see Liquidity Risk), so the structural constraint has narrowed rather than disappeared.
+  **Top 5 = 78.32%**, down from 89.6% on August 17. The former 45.97% whale [`0x9f1a1479…bd1a`](https://monadscan.com/address/0x9F1a1479191Af103Ff82FeAD23e950B6B3B2bD1a) has fully exited — which both removed the single largest concentration and demonstrated that a position several times larger than instant liquidity can in fact be unwound. The largest remaining holder (2.41M) still roughly matches total instantly-available exit liquidity (≈2.40M AUSD, see Liquidity Risk), so the structural constraint has narrowed rather than disappeared.
 - **Peg / NAV history:** hyAUSD is a non-rebasing yield share, not a pegged token. Exchange rate has moved monotonically from 1.000000 to 1.011141 since inception — including through the 27% redemption wave of late August, the strongest available evidence that redemptions are priced fairly; `PerformanceFeeAccrued` has never fired (fee is 0) and `ExcessRecovered` (skim) has never fired.
 
 ## Funds Management
@@ -136,7 +136,7 @@ Sum = **13,391,775.13 AUSD** against a cached `totalAssets()` of 13,391,636.97 (
 
 Monitoring hooks: `Rebalanced`, `MarketAdded`, `MarketRemoved`, `AllocationCapUpdated` events on the vault (see Monitoring). `getApprovedMarkets()` and `allocationCaps(cToken)` give current state in two calls.
 
-**Rebalance cadence.** 81 `Rebalanced` events between June 24, 2026 and September 7, 2026, **median gap ~3 hours**. Every one was sent by harvester EOA [`0xd21dc65f…cbc7`](https://monadscan.com/address/0xd21dc65f42fb039a1c403a38c18c2731211ecbc7). Rebalance plans are computed offchain by the `OptimizerReader` "route planner" described in the [Earn Vaults docs](https://docs.curvance.com/app/protocol-overview/earn-vaults), including a defensive path that excludes markets with stale oracle feeds or breached price guards.
+**Rebalance cadence.** 81 `Rebalanced` events between June 24, 2026 and September 7, 2026, **median gap ~3 hours**. Every one was sent by harvester EOA [`0xd21dc65f…cbc7`](https://monadscan.com/address/0xD21DC65f42fB039A1c403a38C18C2731211eCBC7). Rebalance plans are computed offchain by the `OptimizerReader` "route planner" described in the [Earn Vaults docs](https://docs.curvance.com/app/protocol-overview/earn-vaults), including a defensive path that excludes markets with stale oracle feeds or breached price guards.
 
 **Cap history.** Market B's cap has been raised twice, both times executed **directly through the Emergency Council Safe, not the 5-day timelock**: 2000 → 3000 BPS on July 4, 2026 (tx [`0x9addc49d…942f`](https://monadscan.com/tx/0x9addc49dbe6b28de75b197a98f8dbd7161061e85ee21f0295d3d11b3f9bd942f)) and 3000 → 4000 BPS on August 13, 2026 (tx [`0x1312c516…d373d`](https://monadscan.com/tx/0x1312c516ac9ecb9074e4876dc994ca38762f1f0b5bdae1a5df1e8c18490d373d)). The vault is currently **at** its market-B cap.
 
@@ -270,12 +270,12 @@ Net: the savUSD/avUSD *ratio* is sound and onchain-verifiable; what is neither s
 | [`0x0Acb7eF4…5C02`](https://monadscan.com/address/0x0Acb7eF4D8733C719d60e0992B489b629bc55C02) | ✓ | — | — | — | **DAO Safe, 3-of-4** (Safe v1.4.1) |
 | [`0x379D4a8F…399c`](https://monadscan.com/address/0x379D4a8FBc23A8Fd8c2b3738Dbf1fEBe9a64399c) | ✓ | ✓ | ✓ | — | **Emergency Council Safe, 4-of-5** |
 | [`0x26777386…8C08`](https://monadscan.com/address/0x2677738657F27e1A3591E00AD7E5a78807688C08) | ✓ | ✓ | ✓ | — | **DAOTimelock**, `getMinDelay()` = 432,000 s = **5 days** |
-| [`0x1482192D…3e4c`](https://monadscan.com/address/0x1482192deb828a870f7e9b99d75d1dafda973e4c) | — | — | ✓ | — | `ProtocolManagerDeployment`, owner = EIP-7702 EOA [`0x6D3DA13B…bCE8`](https://monadscan.com/address/0x6D3DA13B41E18Dc7bd1c084De0034fBcB1fDbCE8) |
-| [`0xbb82aee1…ad73`](https://monadscan.com/address/0xbb82aee16936fb2232f3c0d700b6fc832d7ead73) | — | — | ✓ | — | `ProtocolManagerMassPause`, owner = Emergency Council, `canUnpause` = **true** |
-| [`0x89d2253b…7803`](https://monadscan.com/address/0x89d2253b13c718d06b78fcce3d973a520bd07803) | — | — | ✓ | — | `ProtocolManagerMassPause`, owner = [`0x25D41348…0902`](https://monadscan.com/address/0x25D4134861b30Ba7215d2A280DD84C57c5780902) (**Safe, threshold 1-of-5**), `canUnpause` = **false** |
-| [`0xc3a29745…21a1`](https://monadscan.com/address/0xc3a2974593bb729e5a62fe74a8ab091fed5321a1), [`0x7d89822c…4441`](https://monadscan.com/address/0x7d89822c41191541d6a02aebc23f4f398d6e4441), [`0x4dad55e3…a012`](https://monadscan.com/address/0x4dad55e314cf2fbb8e65b2aac7d6010cc1b6a012), [`0xb68f3241…c3a4`](https://monadscan.com/address/0xb68f32416471a6f7a5753ba9e5bae5710219c3a4), [`0x1cfeaa99…38cc`](https://monadscan.com/address/0x1cfeaa998b271228c6f4e090b8e5a007a08c38cc) | — | — | ✓ | — | Five `ProtocolManager` instances, each with one immutable bot caller and per-parameter limits. **None manages this vault's markets.** |
-| [`0x97f6886d…4521`](https://monadscan.com/address/0x97f6886d04c804a278caf904e1adf5864b384521) | — | — | — | ✓ | **EOA** (original deployer) |
-| [`0xd21dc65f…cbc7`](https://monadscan.com/address/0xd21dc65f42fb039a1c403a38c18c2731211ecbc7) | — | — | — | ✓ | **EOA** (active rebalance keeper) |
+| [`0x1482192D…3e4c`](https://monadscan.com/address/0x1482192DeB828a870f7E9B99d75D1DaFda973e4c) | — | — | ✓ | — | `ProtocolManagerDeployment`, owner = EIP-7702 EOA [`0x6D3DA13B…bCE8`](https://monadscan.com/address/0x6D3DA13B41E18Dc7bd1c084De0034fBcB1fDbCE8) |
+| [`0xbb82aee1…ad73`](https://monadscan.com/address/0xBB82Aee16936fB2232F3c0d700b6fc832D7Ead73) | — | — | ✓ | — | `ProtocolManagerMassPause`, owner = Emergency Council, `canUnpause` = **true** |
+| [`0x89d2253b…7803`](https://monadscan.com/address/0x89D2253b13c718d06B78fCcE3d973a520bD07803) | — | — | ✓ | — | `ProtocolManagerMassPause`, owner = [`0x25D41348…0902`](https://monadscan.com/address/0x25D4134861b30Ba7215d2A280DD84C57c5780902) (**Safe, threshold 1-of-5**), `canUnpause` = **false** |
+| [`0xc3a29745…21a1`](https://monadscan.com/address/0xC3a2974593BB729e5A62fE74a8ab091Fed5321A1), [`0x7d89822c…4441`](https://monadscan.com/address/0x7D89822C41191541D6A02AebC23f4F398D6E4441), [`0x4dad55e3…a012`](https://monadscan.com/address/0x4DaD55E314CF2FbB8e65B2AAC7d6010cc1b6A012), [`0xb68f3241…c3a4`](https://monadscan.com/address/0xB68F32416471a6f7a5753BA9e5baE5710219C3A4), [`0x1cfeaa99…38cc`](https://monadscan.com/address/0x1Cfeaa998b271228c6f4E090B8E5A007a08C38Cc) | — | — | ✓ | — | Five `ProtocolManager` instances, each with one immutable bot caller and per-parameter limits. **None manages this vault's markets.** |
+| [`0x97f6886d…4521`](https://monadscan.com/address/0x97f6886d04C804A278Caf904e1aDF5864B384521) | — | — | — | ✓ | **EOA** (original deployer) |
+| [`0xd21dc65f…cbc7`](https://monadscan.com/address/0xD21DC65f42fB039A1c403a38C18C2731211eCBC7) | — | — | — | ✓ | **EOA** (active rebalance keeper) |
 
 **Privileged-role harm matrix on hyAUSD:**
 
@@ -293,7 +293,7 @@ Net: the savUSD/avUSD *ratio* is sound and onchain-verifiable; what is neither s
 
 **Critical path 1 — a 4-of-5 multisig can drain the vault with no delay.** `addApprovedAsset` only checks that the candidate cToken (a) has `asset() == AUSD`, (b) is `isBorrowable()`, (c) has a `marketManager` registered in `CentralRegistry.isMarketManager`, and (d) is listed there. `addMarketManager` is itself gated by the same `_checkElevatedPermissions()`. So an actor with elevated permissions can register a market manager it controls, list a cToken it controls, `addApprovedAsset` it, then `rebalance` the vault's AUSD into it and withdraw. Both the Emergency Council Safe (**4-of-5, instant**) and the DAOTimelock (5-day delay) hold elevated permissions. The 5-day timelock is therefore **not** a binding constraint on this path — it is one of two parallel routes, and the observed operating practice (both cap changes) uses the EC route.
 
-**Critical path 2 — a 1-of-5 Safe can freeze all hyAUSD withdrawals.** `ProtocolManagerMassPause` [`0x89d2253b…7803`](https://monadscan.com/address/0x89d2253b13c718d06b78fcce3d973a520bd07803) holds market permissions and exposes `pauseAll(markets)` / `pauseTokenLevelEntryActions(...)`, with an empty array meaning *every registered market*. Its `owner()` is a Safe with **`getThreshold()` = 1** over five signers, and `canUnpause` = false. So **any single one of five signers** can set `redeemPaused` on the markets behind hyAUSD, which makes `_checkRedeemPaused()` revert every withdraw and redeem — and that key cannot itself undo the pause. Unpausing requires the second mass-pause key (owned by the 4-of-5 EC) or the EC/timelock directly. The design intent is clearly a fast, low-friction emergency brake with a deliberate asymmetry, and the pause is recoverable — but it is a genuine single-signer freeze of user funds and should be scored as one.
+**Critical path 2 — a 1-of-5 Safe can freeze all hyAUSD withdrawals.** `ProtocolManagerMassPause` [`0x89d2253b…7803`](https://monadscan.com/address/0x89D2253b13c718d06B78fCcE3d973a520bD07803) holds market permissions and exposes `pauseAll(markets)` / `pauseTokenLevelEntryActions(...)`, with an empty array meaning *every registered market*. Its `owner()` is a Safe with **`getThreshold()` = 1** over five signers, and `canUnpause` = false. So **any single one of five signers** can set `redeemPaused` on the markets behind hyAUSD, which makes `_checkRedeemPaused()` revert every withdraw and redeem — and that key cannot itself undo the pause. Unpausing requires the second mass-pause key (owned by the 4-of-5 EC) or the EC/timelock directly. The design intent is clearly a fast, low-friction emergency brake with a deliberate asymmetry, and the pause is recoverable — but it is a genuine single-signer freeze of user funds and should be scored as one.
 
 **Critical path 3 — transitive dependency safety is an offchain operator control, not an onchain check.** `_validateCToken()` rejects only a *direct* sibling whose immediate `asset()` is the optimizer. The repo doc states plainly: *"It does not walk nested receipt tokens, vaults, LP components, or oracle dependencies. Operators must separately reject every transitive dependency path that reaches this optimizer."* Two Foundry verifier scripts (`VerifyLendingOptimizerLaunch.s.sol`, `VerifyOptimizerShareDeScope.s.sol`) exist for this, and the doc requires archiving their output before every `addApprovedAsset`. **No public attestation that these were run for this vault was located** — marked **TODO**; Curvance would need to publish the verifier output and terminal-asset manifest for the June 23, 2026 launch.
 
@@ -311,7 +311,7 @@ Net: the savUSD/avUSD *ratio* is sound and onchain-verifiable; what is neither s
 | Dependency | Role | Criticality | Failure mode for hyAUSD |
 |---|---|---|---|
 | **Curvance isolated markets** (2× `BorrowableCToken` + `MarketManagerIsolated`) | Where 100% of AUSD sits | **Total** | Bad debt socialises directly into NAV; redeem-pause freezes exits |
-| **Agora AUSD** [`0x00000000…012a`](https://monadscan.com/address/0x00000000eFE302BEAA2b3e6e1b18d08D69a9012a) | The underlying itself | **Total** | Upgradeable ERC-1967 proxy (impl [`0xc1e3c7d4…12da`](https://monadscan.com/address/0xc1e3c7d486d6a92fbe920232e439eec2ceb112da), admin [`0xB8fCC66d…dedee`](https://monadscan.com/address/0xB8fCC66d613e5f54ee6A425DDbf4a2fDBE4Dedee)). Monad supply 132,763,800 AUSD. Roles read onchain: `MINTER_ROLE` [`0x65e28662…D7fF`](https://monadscan.com/address/0x65e28662b0DCD6D89d4652A61FB0896d4F58D7fF) (**EOA**), `FREEZER_ROLE` [`0xcF7D2a52…4681`](https://monadscan.com/address/0xcF7D2a525057555d7b4816941185b7ae10E94681) (**EOA**), `ACCESS_CONTROL_MANAGER_ROLE` [`0x68898B77…30e2`](https://monadscan.com/address/0x68898B77EbF7b55dCA8A2e62d6Fd74959a2930e2) (**EOA**), `BRIDGE_MINTER_ROLE` [`0x9CaB7Ede…689b`](https://monadscan.com/address/0x9CaB7Ede13dc56652E44D2404E969C212f22689b) (contract). `isFreezingPaused()` = false, so the freezer can freeze the vault's or the markets' AUSD balances |
+| **Agora AUSD** [`0x00000000…012a`](https://monadscan.com/address/0x00000000eFE302BEAA2b3e6e1b18d08D69a9012a) | The underlying itself | **Total** | Upgradeable ERC-1967 proxy (impl [`0xc1e3c7d4…12da`](https://monadscan.com/address/0xc1e3C7D486d6A92fBE920232E439EeC2cEb112dA), admin [`0xB8fCC66d…dedee`](https://monadscan.com/address/0xB8fCC66d613e5f54ee6A425DDbf4a2fDBE4Dedee)). Monad supply 132,763,800 AUSD. Roles read onchain: `MINTER_ROLE` [`0x65e28662…D7fF`](https://monadscan.com/address/0x65e28662b0DCD6D89d4652A61FB0896d4F58D7fF) (**EOA**), `FREEZER_ROLE` [`0xcF7D2a52…4681`](https://monadscan.com/address/0xcF7D2a525057555d7b4816941185b7ae10E94681) (**EOA**), `ACCESS_CONTROL_MANAGER_ROLE` [`0x68898B77…30e2`](https://monadscan.com/address/0x68898B77EbF7b55dCA8A2e62d6Fd74959a2930e2) (**EOA**), `BRIDGE_MINTER_ROLE` [`0x9CaB7Ede…689b`](https://monadscan.com/address/0x9CaB7Ede13dc56652E44D2404E969C212f22689b) (contract). `isFreezingPaused()` = false, so the freezer can freeze the vault's or the markets' AUSD balances |
 | **Pendle (Monad)** — PT-AUSD-8OCT2026, SY AUSD, YT | Collateral in market A | High | PT/SY contract failure, or a PT market-price gap vs the model oracle, impairs market A's collateral |
 | **Avant avUSD/savUSD** | Collateral in market B | **Critical** | ~99.4% of avUSD backing sits outside Avant's contracts, partially traceable via 23 published strategy addresses but unattested; the sole registered custodian is an EOA; one EOA holds every admin key across avUSD, savUSD, the minting contract and the CCIP pool, and can mint unbacked avUSD via `setMinter`. A strategy loss or a key compromise impairs market B, and the Curvance oracle has no avUSD/USD feed to see it |
 | **Chainlink CCIP** (`BurnMintTokenPool` [`0xc5cAAC64…8D3E`](https://monadscan.com/address/0xc5cAAC64Dd93b6E2B369d52610Fdae069e568D3E)) | Mints savUSD on Monad | High | A CCIP-path compromise or a malicious pool owner can mint unbacked savUSD, post it as collateral, and borrow out market B's AUSD, leaving socialised bad debt. Inbound capacity from the Avalanche lane is 44.88M savUSD — ~3× current posted collateral |
@@ -375,7 +375,7 @@ Net: the savUSD/avUSD *ratio* is sound and onchain-verifiable; what is neither s
 | Governance addresses | `daoAddress()`, `emergencyCouncil()`, `timelock()` | Any change | Daily |
 | Safe composition | `getOwners()` / `getThreshold()` on [`0x0Acb7eF4…5C02`](https://monadscan.com/address/0x0Acb7eF4D8733C719d60e0992B489b629bc55C02), [`0x379D4a8F…399c`](https://monadscan.com/address/0x379D4a8FBc23A8Fd8c2b3738Dbf1fEBe9a64399c), and the 1-of-5 pause Safe [`0x25D41348…0902`](https://monadscan.com/address/0x25D4134861b30Ba7215d2A280DD84C57c5780902) | Any signer or threshold change | Daily |
 | Timelock queue | `DAOTimelock` [`0x26777386…8C08`](https://monadscan.com/address/0x2677738657F27e1A3591E00AD7E5a78807688C08) scheduled-operation events | Any queued operation touching the optimizer or its markets — 5 days of warning, *when this route is used* | Every block |
-| Mass-pause keys | `ProtocolManagerMassPause` events `MassPauseExecuted`, `MarketPauseFailed` on [`0xbb82aee1…ad73`](https://monadscan.com/address/0xbb82aee16936fb2232f3c0d700b6fc832d7ead73) and [`0x89d2253b…7803`](https://monadscan.com/address/0x89d2253b13c718d06b78fcce3d973a520bd07803) | Any execution | Every block |
+| Mass-pause keys | `ProtocolManagerMassPause` events `MassPauseExecuted`, `MarketPauseFailed` on [`0xbb82aee1…ad73`](https://monadscan.com/address/0xBB82Aee16936fB2232F3c0d700b6fc832D7Ead73) and [`0x89d2253b…7803`](https://monadscan.com/address/0x89D2253b13c718d06B78fCcE3d973a520bD07803) | Any execution | Every block |
 
 **Offchain / cross-chain**
 
@@ -534,7 +534,7 @@ no redundant pricing route.
 to the CombinedAggregator; and that aggregator's two legs report `description()` of **`"USDC / USD"`**
 and **`"SAVUSD / AVUSD Exchange Rate"`** — neither is avUSD/USD. Stronger still:
 `getPricingAdaptors()` for the **bridged avUSD on Monad**
-[`0x0d9d741f…3ba4`](https://monadscan.com/address/0x0d9d741fe423cd5419e4bcb6cb2ffa87afa93ba4) returns
+[`0x0d9d741f…3ba4`](https://monadscan.com/address/0x0D9D741FE423Cd5419e4BCb6cB2FfA87AFa93bA4) returns
 an **empty array** — Curvance has no avUSD price source registered at all, on any route.
 
 ### B.3 One key holds every admin power
@@ -677,13 +677,13 @@ Stated for balance, because these are real and were checked:
 - **Fully onchain, permissionlessly provable NAV.** Reserves reconcile in two calls; `accrueIfNeeded()` is open to anyone; there is no admin-set price, no offchain accountant, no keeper-submitted unit price. Reserves (13,391,775 AUSD) exceed shares (13,244,081) with zero idle dust.
 - **No unbacked-mint path.** Mint is permissionless and atomically collateral-backed, shares are derived from post-rounding *recoverable* value, and 77,777 dead shares block inflation attacks. The only privileged mint is a performance-fee share mint that is currently disabled (`fee()` = 0).
 - **Unusually candid operator documentation.** Curvance self-discloses the loss-recognition race, the fact that caps are not continuous limits, the fee-dust forgiveness, and the transitive-dependency gap — including in the deployed contract's own NatSpec. That is materially better disclosure hygiene than most curated-vault products.
-- **Audited stack underneath, with real emergency tooling.** The isolated-market layer carries three 2025 reviews (Sherlock, TrustSec ×2) plus Trail of Bits and Cantina on the core; purpose-built mass-pause contracts and a defensive-routing planner exist and are deployed.
+- **Audited stack underneath, with real emergency tooling.** The isolated-market layer is covered by Sherlock and TrustSec ×2, the Trail of Bits invariant-development engagement, and Cantina's public competition; purpose-built mass-pause contracts and a defensive-routing planner exist and are deployed.
 
 ### Key Risks
 
 - **The contract holding the money has never been audited.** `LendingOptimizer` appears zero times across all six published reports, the newest of which predates its deployment by seven months — and it is simultaneously **outside the bug-bounty scope**, because the bounty is defined by a docs page that does not list it.
 - **A 4-of-5 multisig can drain the vault instantly.** Elevated permissions allow registering a market manager and adding an approved market with no delay; a harvester can then rebalance into it. The 5-day timelock is a parallel route, not a gate, and observed practice uses the Emergency Council route.
-- **A 1-of-5 Safe can freeze 100% of withdrawals.** `ProtocolManagerMassPause` [`0x89d2253b…7803`](https://monadscan.com/address/0x89d2253b13c718d06b78fcce3d973a520bd07803) can redeem-pause every market; the optimizer reverts all withdrawals if *any* approved market is redeem-paused; and that key cannot unpause itself.
+- **A 1-of-5 Safe can freeze 100% of withdrawals.** `ProtocolManagerMassPause` [`0x89d2253b…7803`](https://monadscan.com/address/0x89D2253b13c718d06B78fCcE3d973a520bD07803) can redeem-pause every market; the optimizer reverts all withdrawals if *any* approved market is redeem-paused; and that key cannot unpause itself.
 - **Only ~18% of the vault can exit instantly**, and the savUSD market is now at 94.37% utilisation. Instantly available liquidity is 2.40M AUSD against 13.39M NAV. The mechanism has been stress-tested since the original assessment — ~17.0M of withdrawals cleared over three weeks, including the full exit of a 46% holder, with the exchange rate rising throughout — but that resolved over weeks, not blocks.
 - **40% of the vault is lent at 92% LTV against collateral whose backing sits ~99.4% outside Avant's own contracts.** $0.01 of collateral sits in `AvantMintingV2` and $911,710 at the sole registered custodian — itself an **EOA** — against 133,978,406 avUSD outstanding, because collateral is routed straight from depositor to custodian at mint time and never touches a protocol contract. Avant does publish its 23 avUSD strategy addresses, and those were checked: they hold ~$1.19M in stablecoins on Avalanche, essentially all of it the custodian already counted, with the remainder on Solana, Stacks and the Lighter perp DEX. So the backing is **partially traceable but not consolidated or attested** — Chainlink Proof of Reserve is described in Avant's docs as "actively developing", i.e. not live. The Curvance oracle then prices savUSD as `USDC/USD × savUSD/avUSD` with **no avUSD/USD feed anywhere in the route**, so neither the backing nor a depeg is observable from Monad. A ~14% junior-tranche + Reserve Fund buffer sits beneath savUSD, which is real but thin against a 92% LTV book. Bad debt in either market socialises straight into hyAUSD's exchange rate.
 - **76 days of production history**, still-elevated concentration (top 5 = 78.32%, improved from 89.6%), and a hard calendar event now close at hand: **PT-AUSD matures October 8, 2026 — roughly a month away** — requiring an operator roll of the 60% leg.
@@ -712,7 +712,7 @@ Stated for balance, because these are real and were checked:
 If ANY gate is triggered, the protocol automatically receives a score of **5** (High Risk).
 
 - [ ] **Unverified contract source** — **PASSES.** Every contract on the path is source-verified and non-proxy on chain 143: `LendingOptimizer`, both `BorrowableCToken`s, both `MarketManagerIsolated`s, `CentralRegistry`, `DAOTimelock`, `OracleManager`, `ChainlinkAdaptor`, `PendlePTAggregator`, `CombinedAggregator`. Confirmed via Etherscan V2 `getsourcecode` (`Proxy: 0`, empty `Implementation`).
-- [ ] **No audit** — **PASSES, narrowly and with a caveat.** The gate is written at protocol level, and the Curvance lending stack the vault sits on has been reviewed by Sherlock (Sept 2025), TrustSec (Oct + Nov 2025), Trail of Bits (May 2025) and Cantina (Apr 2025). The gate is therefore not triggered. **But the assessed contract itself has no audit coverage**, so this is carried as the dominant penalty in Category 1 (scored 4.5) and as Critical Risk #1 rather than as a gate.
+- [ ] **No audit** — **PASSES.** The gate is written at protocol level, and the Curvance lending stack the vault sits on has been reviewed by Sherlock (Sept 2025), TrustSec (Oct + Nov 2025), Trail of Bits (May 2025 + invariant development) and Cantina (Apr 2025). The gate is therefore not triggered. **But the assessed contract itself has no audit coverage**, so it is carried in Category 1 (1A scored 2 rather than 1) and as Critical Risk #1 rather than as a gate.
 - [ ] **Unverifiable reserves** — **PASSES.** 100% onchain, two-call reconciliation, permissionless forced accrual.
 - [ ] **Total centralization** — **PASSES.** Control sits with a 3-of-4 Safe, a 4-of-5 Safe and a 5-day timelock, not a single EOA. (The 1-of-5 *pause-only* Safe and the two harvester EOAs are real weaknesses but are not unilateral control of funds; they are scored in Category 2.)
 
@@ -722,17 +722,17 @@ If ANY gate is triggered, the protocol automatically receives a score of **5** (
 
 #### Category 1: Audits & Historical Track Record (Weight: 20%)
 
-**Subcategory A: Audits & Security Reviews — 4.5/5**
+**Subcategory A: Audits & Security Reviews — 2/5**
 
-Six audits exist and three of them (Sherlock, TrustSec ×2) genuinely cover the lending markets the vault deposits into. But the rubric asks about the assessed thing, and the assessed thing is a 1,513-line custody contract with **zero** audit coverage — verified by full-text search of all six PDFs — that is also **excluded from the bug bounty** because it is missing from the scope-defining docs page. The self-run bounty (max $250K critical, email intake, no hosted platform) is weaker than a comparable Immunefi program. Remediation discipline on the audits that *were* done is a genuine positive — Trail of Bits records all 17 issues resolved, and Sherlock and both TrustSec reports carry fixed/acknowledged statuses with nothing left open and unacknowledged — but it does not extend coverage to the contract being assessed. The contract surface is moderately complex at the vault level and substantially complex underneath. Scored between "1 audit by lesser-known firm or dated" (4) and "no audit" (5): **4.5**.
+Six audits exist and five of them touch the lending layer the vault deposits into: Sherlock and TrustSec ×2 directly cover `BorrowableCToken`/`MarketManagerIsolated`, the Trail of Bits invariant-development engagement built the `MarketManager` invariant suite, and Cantina's public competition exercises the market contracts in its test material. By firm quality this is the rubric's "3+ audits by top firms" band (1). The bounty pays **Critical $250,000 / High $50,000 / Medium $5,000**, which is the rubric's "max payout >$200K" band (2). Docking from 1 to **2** reflects the two verified caveats that the audit-count bands do not capture: the 1,513-line `LendingOptimizer` custody contract itself appears **zero times** in all six PDFs, and it is **excluded from the bug bounty** because it is missing from the scope-defining docs page. The self-run email intake is noted but does not change the payout band. Remediation discipline is a genuine positive — Trail of Bits records all 17 issues resolved, and Sherlock and both TrustSec reports carry fixed/acknowledged statuses with nothing left open and unacknowledged — but it does not extend coverage to the contract being assessed. The contract surface is moderately complex at the vault level and substantially complex underneath. **2**.
 
-**Subcategory B: Historical Track Record — 4.5/5**
+**Subcategory B: Historical Track Record — 4/5**
 
-Vault deployed **June 23, 2026 — 76 days ago**, still "<3 months" (5). Scale is $13.39M, which is "≥$10M" (3). The protocol beneath is 9 months live on Monad with $88.46M TVL and one non-contract incident handled cleanly, which pulls the blend up; holder concentration (top 5 = 89.6%) and the fact that the two markets are themselves only ~2 months old push it back down. **4.5**.
+Vault deployed **June 23, 2026 — 76 days ago**, still "<3 months" (5). Scale is $13.39M, which is "≥$10M" (3). The protocol beneath is 9 months live on Monad with $130.09M supplied TVL (September 6, 2026) and one non-contract incident handled cleanly, which pulls the blend up; holder concentration (top 5 = 78.32%) and the fact that the two markets are themselves only ~2 months old push it back down. **4**.
 
-**Audits & Historical Score = (4.5 + 4.5) / 2 = 4.5**
+**Audits & Historical Score = (2 + 4) / 2 = 3.0**
 
-**Score: 4.5/5** — audited stack, unaudited and out-of-bounty vault, two months of history.
+**Score: 3.0/5** — heavily audited stack, an unaudited and out-of-bounty vault, two months of history.
 
 #### Category 2: Centralization & Control Risks (Weight: 30%)
 
@@ -748,7 +748,7 @@ PPS is computed onchain from real cToken balances, re-synced from ground truth a
 
 Six critical dependencies, most of them young: two Curvance isolated markets (total criticality), Agora AUSD (upgradeable, EOA minter/freezer/access-control-manager on Monad), Pendle on Monad, Avant avUSD/savUSD (~99.4% offchain backing, single-EOA admin across every contract), Chainlink CCIP as the *mint* authority for market B's collateral, Chainlink OCR2 feeds through a single non-redundant adaptor, and Monad itself. Failure of any one of the first five impairs or freezes the vault. "Many or newer protocol dependencies / critical functionality depends on them": **4**.
 
-**Why 4 and not 5 (or 4.5).** The band above is defined as *"Single point of failure dependency / Failure breaks entire protocol"* — a structurally different claim from "many critical dependencies," which is the 4 band and describes this vault exactly. No single dependency here breaks the protocol on its own: the Avant leg is capped at 40% and sits behind a 10.5% first-loss buffer; the CCIP mint path is bounded by the collateral cap and cannot seize; Pendle PT redeems at par in weeks; the oracle feeds are Chainlink OCR2 with fresh heartbeats. AUSD is the closest thing to a true single point of failure, but it is the vault's *denomination* rather than an external dependency — an AUSD vault failing when AUSD fails is definitional, not a dependency defect. Seven critical-but-independent dependencies is the 4 band; concentrating the score upward would double-count the Avant leg, which is already priced in Category 3 as Critical Risk #1.
+**Why 4 and not 5 (or 4.5).** The band above is defined as *"Single point of failure dependency / Failure breaks entire protocol"* — a structurally different claim from "many critical dependencies," which is the 4 band and describes this vault exactly. No single dependency here breaks the protocol on its own: the Avant leg is capped at 40% and sits behind a ~14% first-loss buffer; the CCIP mint path is bounded by the collateral cap and cannot seize; Pendle PT redeems at par in weeks; the oracle feeds are Chainlink OCR2 with fresh heartbeats. AUSD is the closest thing to a true single point of failure, but it is the vault's *denomination* rather than an external dependency — an AUSD vault failing when AUSD fails is definitional, not a dependency defect. Seven critical-but-independent dependencies is the 4 band; concentrating the score upward would double-count the Avant leg, which is already priced in Category 3 as Critical Risk #1.
 
 **Centralization Score = (4 + 2 + 4) / 3 = 3.333**
 
@@ -773,7 +773,7 @@ Fully onchain and anyone can verify; accrual is permissionless; no attestations 
 
 **Funds Management Score = (3.5 + 2) / 2 = 2.75**
 
-**Score: 2.75/5** — impeccable accounting over collateral that is thinner, worse-priced and far less verifiable than the accounting implies, partly offset by a real 10.5% first-loss buffer beneath the weaker leg.
+**Score: 2.75/5** — impeccable accounting over collateral that is thinner, worse-priced and far less verifiable than the accounting implies, partly offset by a real ~14% first-loss buffer beneath the weaker leg.
 
 #### Category 4: Liquidity Risk (Weight: 15%)
 
@@ -791,12 +791,12 @@ Team is public and named (Chris Carapola, Michael Butcher), with $7.6M raised ac
 
 | Category | Score | Weight | Weighted |
 |----------|-------|--------|----------|
-| Audits & Historical | 4.5 | 20% | 0.900 |
+| Audits & Historical | 3.0 | 20% | 0.600 |
 | Centralization & Control | 3.333 | 30% | 1.000 |
 | Funds Management | 2.75 | 30% | 0.825 |
 | Liquidity Risk | 3.5 | 15% | 0.525 |
 | Operational Risk | 2.5 | 5% | 0.125 |
-| **Final Score** | | | **3.4/5.0** |
+| **Final Score** | | | **3.1/5.0** |
 
 **Optional Modifiers:**
 - Protocol live >2 years with no incidents: **not applicable** (76 days for the vault, ~9.5 months on Monad)
@@ -814,12 +814,12 @@ Team is public and named (Chris Carapola, Michael Butcher), with $7.6M raised ac
 | **4.5-5.0** | **High Risk** | Not recommended |
 | **N/A** | **Not Rated** | Terminal — do not use (exploited or wound down) |
 
-**Final Risk Tier: Medium Risk** (weighted total 3.375, reported as 3.4 — the upper half of the Medium band. Any deterioration in the savUSD leg — a new avUSD minter, a further cap increase, erosion of the 10.5% junior buffer, or a lapse in reserve reporting — pushes this toward Elevated rather than down.)
+**Final Risk Tier: Medium Risk** (weighted total 3.075, reported as 3.1 — the middle of the Medium band. Any deterioration in the savUSD leg — a new avUSD minter, a further cap increase, erosion of the ~14% first-loss buffer, or a lapse in reserve reporting — pushes this toward Elevated rather than down.)
 
-**Integration notes for a Yearn strategy.** The score sits at the ceiling of Medium and is held up by good accounting, not by good risk isolation — the vault's own machinery is sound, while the collateral two layers down is custodial and single-key. If Yearn proceeds:
+**Integration notes for a Yearn strategy.** The score sits in the middle of Medium and is held up by good accounting, not by good risk isolation — the vault's own machinery is sound, while the collateral two layers down is custodial and single-key. If Yearn proceeds:
 
 - **Size the position against exit liquidity, not TVL.** Cap allocation at a fraction of `_availableWithdrawLiquidity()` (currently 2.40M AUSD), not of the 13.39M NAV, and re-check before every deposit — that figure moved 3.85M → 2.40M in three weeks.
-- **Treat Critical Risk #1 as a precondition.** An audit of `LendingOptimizer` and the addition of [`0xaD663aC8…00Bf`](https://monadscan.com/address/0xaD663aC84052b52BE4ed1b27BA416505e84a00Bf) plus both markets to the Monad Contract Addresses page (which puts them in the $250K bounty scope) would materially move Category 1 and, with it, the tier.
+- **Treat Critical Risk #1 as a precondition.** An audit of `LendingOptimizer` and the addition of [`0xaD663aC8…00Bf`](https://monadscan.com/address/0xaD663aC84052b52BE4ed1b27BA416505e84a00Bf) plus both markets to the Monad Contract Addresses page (which puts them in the $250K bounty scope) would materially move Category 1 and the final score.
 - **Force accrual atomically.** Never value the position from a raw `totalAssets()`/`exchangeRate()` read; call `accrueIfNeeded()` in the same transaction, per Curvance's own integration guidance.
 - **Do not rely on the timelock.** Every governance action relevant to this vault has a zero-delay Emergency Council route. Block-level alerting on `PermissionsUpdated`, `MarketAdded`, `MarketRemoved` and `FeeUpdated` with an automated withdrawal trigger is the only meaningful defence.
 - **Treat market B's 40% as custodial exposure, not DeFi collateral.** Its backing cannot be verified onchain and its entire admin surface is one EOA. If Yearn's mandate excludes single-key custodial dependencies, that alone caps the acceptable position size well below the vault's liquidity ceiling — or rules it out until Avant moves those keys to a multisig and publishes reserve attestations.
@@ -843,3 +843,4 @@ Team is public and named (Chris Carapola, Michael Butcher), with $7.6M raised ac
 | --- | --- | --- |
 | [August 17, 2026](https://github.com/yearn/risk-score/pull/412) | 3.4 | Initial assessment. Snapshot at block 96,882,186: NAV 18.35M AUSD, exit liquidity 21.0%, top-5 concentration 89.6%. |
 | [September 7, 2026](https://github.com/yearn/risk-score/pull/412) | 3.4 | Refreshed at review to block 102,741,475 after external review flagged stale figures. NAV 18.35M → 13.39M (−27%) via ~17.0M of orderly redemptions — exchange rate rose 1.007984 → 1.011141, so no impairment — including the full exit of the former 45.97% holder. Top-5 concentration 89.6% → 78.32%; exit liquidity 21.0% → 17.9% with the savUSD market at 94.37% utilisation; market-B CR 121.2% → 154.9%; Avant first-loss buffer 12.99% → 14.19%. Added Appendix B.6b quantifying the savUSD loss bounds (~2.2–4.2% of NAV for the fast path; ~44% loss on Avant's book required for the slow path). Also corrected three findings from @ctmotox2's review and fixed four nested-markdown links. Score unchanged at 3.4. |
+| [September 8, 2026](https://github.com/yearn/risk-score/pull/412) | 3.1 | Scoring correction after review. Category 1A (Audits & Security Reviews) 4.5 → 2.0: six published reviews (Trail of Bits ×2 incl. invariant development, Sherlock, Cantina, TrustSec ×2) meet the rubric's "3+ top firms" audit band and the $250K critical bounty is the ">$200K" band; the unaudited, out-of-bounty `LendingOptimizer` stays Critical Risk #1 but no longer drives Category 1. Category 1B 4.5 → 4.0 using refreshed protocol TVL ($130.09M) and top-5 concentration (78.32%). Removed the "weaker than Immunefi" bounty characterization and checksummed address links. Weighted total 3.375 → 3.075, reported 3.1; tier unchanged (Medium). |

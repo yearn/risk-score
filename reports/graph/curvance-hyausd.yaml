@@ -56,7 +56,7 @@ nodes:
 
   - id: mass-pause
     label: ProtocolManagerMassPause (pause-only)
-    address: "0x89d2253b13c718d06b78fcce3d973a520bd07803"
+    address: "0x89D2253b13c718d06B78fCcE3d973a520bD07803"
     category: infra
     note: >-
       Holds `hasMarketPermissions`. `pauseAll([])` pauses every registered market;
@@ -65,7 +65,7 @@ nodes:
 
   - id: harvester-keeper
     label: Harvest keeper EOA (active)
-    address: "0xd21dc65f42fb039a1c403a38c18c2731211ecbc7"
+    address: "0xD21DC65f42fB039A1c403a38C18C2731211eCBC7"
     category: infra
     note: >-
       Plain EOA holding `hasHarvestPermissions`, and the address that has executed
@@ -77,7 +77,7 @@ nodes:
 
   - id: harvester-deployer
     label: Harvest keeper EOA (dormant)
-    address: "0x97f6886d04c804a278caf904e1adf5864b384521"
+    address: "0x97f6886d04C804A278Caf904e1aDF5864B384521"
     category: infra
     note: >-
       Second plain EOA with `hasHarvestPermissions` — the original protocol deployer,
