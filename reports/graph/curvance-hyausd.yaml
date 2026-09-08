@@ -102,15 +102,15 @@ nodes:
     address: "0xaD663aC84052b52BE4ed1b27BA416505e84a00Bf"
     category: vault
     note: >-
-      `LendingOptimizer`, non-proxy and source-verified, 6 decimals. Refreshed at
+      `LendingOptimizer`, non-proxy and source-verified, 6 decimals. Snapshot at
       block 102,741,475 (September 7, 2026): totalAssets 13,391,637 AUSD, totalSupply
       13,244,081 shares, exchange rate 1.011141, performance fee 0 BPS, deposits
       active. Mint is permissionless and atomically collateral-backed; 77,777 dead
       shares sit at address(0) as inflation protection. Only ~18% of NAV (≈2.40M AUSD)
       is instantly redeemable — withdrawals are capped by the underlying markets' idle
       cash, and a redeem-pause on any single approved market blocks all exits. NAV fell
-      27% from the August 17 snapshot via ~17.0M of orderly redemptions, with the
-      exchange rate rising throughout — redemption, not loss.
+      27% in the three weeks to September 7 via ~17.0M of orderly redemptions, with
+      the exchange rate rising throughout — redemption, not loss.
 
   # --- Lending markets ---
   - id: causd-pt

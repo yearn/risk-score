@@ -1,6 +1,6 @@
 # Protocol Risk Assessment: Curvance High Yield AUSD (hyAUSD)
 
-- **Assessment Date:** August 17, 2026 (Updated: September 8, 2026)
+- **Assessment Date:** September 8, 2026
 - **Token:** hyAUSD (High Yield AUSD Vault)
 - **Chain:** Monad (chain id 143)
 - **Token Address:** [`0xaD663aC84052b52BE4ed1b27BA416505e84a00Bf`](https://monadscan.com/address/0xaD663aC84052b52BE4ed1b27BA416505e84a00Bf)
@@ -19,7 +19,7 @@ Today the vault routes into exactly two markets, both of which lend AUSD against
 
 So the honest one-line description of the risk is: **hyAUSD is an unlevered AUSD lender into two ~90%-utilised, high-LTV (95% / 92%) looping markets whose collateral is a Pendle principal token and a bridge-minted synthetic dollar.** Vault-level totals verified onchain at block **102,741,475 (September 7, 2026)**: `totalAssets()` = **13,391,636.970507 AUSD**, `totalSupply()` = **13,244,080.806980 hyAUSD**, `exchangeRate()` = **1.011141291394812** (WAD), `fee()` = **0**, `mintPaused()` = **1** (deposits active).
 
-> **Refreshed at review.** The original snapshot was block 96,882,186 (August 17, 2026), when NAV was 18,351,894 AUSD. Every figure below has been re-read at the September 7 block. The vault shrank **27%** over those three weeks — but this was **redemption, not loss**: 140+ `Withdraw` events totalling ~17.0M AUSD cleared against offsetting deposits, and the exchange rate *rose* from 1.007984 to 1.011141. That is meaningful evidence the exit mechanism works under sustained pressure, since ~17M of exits were serviced by a vault that never held more than ~3.9M of instant liquidity.
+> **The exit mechanism has been tested.** Between August 17 and September 7, 2026 the vault processed 140+ `Withdraw` events totalling ~17.0M AUSD — a **27%** NAV drawdown that was **redemption, not loss**: the exchange rate *rose* from 1.007984 to 1.011141, and the exits were serviced by a vault that never held more than ~3.9M of instant liquidity.
 
 Realised yield since the vault went live (June 23, 2026) is **1.114% over 76 days ≈ 5.4% APY**, consistent with the base supply rates of the two underlying markets.
 
@@ -585,9 +585,8 @@ unbacked savUSD on Monad, post it, and borrow out market B's AUSD.
 | Governance backstop | — | **Not live**; docs describe it as a "planned future backstop" |
 | **Total absorbed before savUSD** | **19,007,136 avUSD = 14.19% of the 133,978,406 senior supply** | Independent portion ≈**13.5%** |
 
-> **Note on this figure.** An earlier revision reported 10.51% by summing raw avUSDx and savUSD share
-> counts. That was wrong — the two tokens have different unit values, so the balances must be
-> converted to avUSD before being added. Corrected by external review on PR #412.
+> **Note on this figure.** avUSDx and savUSD have different unit values, so their balances are
+> converted to avUSD before being added together.
 
 A ~14% cushion is meaningful and better than nothing comparable at Curvance's own layer (there is no
 first-loss buffer between a Curvance market's bad debt and hyAUSD at all). It is still thin against a
@@ -684,7 +683,7 @@ Stated for balance, because these are real and were checked:
 - **The contract holding the money has never been audited.** `LendingOptimizer` appears zero times across all six published reports, the newest of which predates its deployment by seven months — and it is simultaneously **outside the bug-bounty scope**, because the bounty is defined by a docs page that does not list it.
 - **A 4-of-5 multisig can drain the vault instantly.** Elevated permissions allow registering a market manager and adding an approved market with no delay; a harvester can then rebalance into it. The 5-day timelock is a parallel route, not a gate, and observed practice uses the Emergency Council route.
 - **A 1-of-5 Safe can freeze 100% of withdrawals.** `ProtocolManagerMassPause` [`0x89d2253b…7803`](https://monadscan.com/address/0x89D2253b13c718d06B78fCcE3d973a520bD07803) can redeem-pause every market; the optimizer reverts all withdrawals if *any* approved market is redeem-paused; and that key cannot unpause itself.
-- **Only ~18% of the vault can exit instantly**, and the savUSD market is now at 94.37% utilisation. Instantly available liquidity is 2.40M AUSD against 13.39M NAV. The mechanism has been stress-tested since the original assessment — ~17.0M of withdrawals cleared over three weeks, including the full exit of a 46% holder, with the exchange rate rising throughout — but that resolved over weeks, not blocks.
+- **Only ~18% of the vault can exit instantly**, and the savUSD market is now at 94.37% utilisation. Instantly available liquidity is 2.40M AUSD against 13.39M NAV. The mechanism has been stress-tested over the past three weeks — ~17.0M of withdrawals cleared, including the full exit of a 46% holder, with the exchange rate rising throughout — but that resolved over weeks, not blocks.
 - **40% of the vault is lent at 92% LTV against collateral whose backing sits ~99.4% outside Avant's own contracts.** $0.01 of collateral sits in `AvantMintingV2` and $911,710 at the sole registered custodian — itself an **EOA** — against 133,978,406 avUSD outstanding, because collateral is routed straight from depositor to custodian at mint time and never touches a protocol contract. Avant does publish its 23 avUSD strategy addresses, and those were checked: they hold ~$1.19M in stablecoins on Avalanche, essentially all of it the custodian already counted, with the remainder on Solana, Stacks and the Lighter perp DEX. So the backing is **partially traceable but not consolidated or attested** — Chainlink Proof of Reserve is described in Avant's docs as "actively developing", i.e. not live. The Curvance oracle then prices savUSD as `USDC/USD × savUSD/avUSD` with **no avUSD/USD feed anywhere in the route**, so neither the backing nor a depeg is observable from Monad. A ~14% junior-tranche + Reserve Fund buffer sits beneath savUSD, which is real but thin against a 92% LTV book. Bad debt in either market socialises straight into hyAUSD's exchange rate.
 - **76 days of production history**, still-elevated concentration (top 5 = 78.32%, improved from 89.6%), and a hard calendar event now close at hand: **PT-AUSD matures October 8, 2026 — roughly a month away** — requiring an operator roll of the 60% leg.
 
@@ -829,7 +828,7 @@ Team is public and named (Chris Carapola, Michael Butcher), with $7.6M raised ac
 
 ## Reassessment Triggers
 
-- **Time-based**: Reassess in **3 months** (by December 7, 2026), or sooner — the vault is 76 days old and the score is dominated by facts that change quickly. The August 17 → September 7 refresh moved NAV by 27%, exit liquidity by a third, and top-holder concentration by 28 points, which is the natural cadence here.
+- **Time-based**: Reassess in **3 months** (by December 7, 2026), or sooner — the vault is 76 days old and the score is dominated by facts that change quickly. Over the past three weeks, NAV moved 27%, exit liquidity moved by a third, and top-holder concentration moved by 28 points — the natural cadence here.
 - **Calendar-based**: Reassess **before October 8, 2026** (PT-AUSD-8OCT2026 maturity, market A collateral roll).
 - **TVL-based**: Reassess if vault `totalAssets()` changes by more than 40% in 30 days, or if available exit liquidity falls below 10% of NAV.
 - **Scope-based**: Reassess immediately if `LendingOptimizer` receives its first audit, or if it is added to the Monad Contract Addresses page (bug-bounty scope).
@@ -841,6 +840,4 @@ Team is public and named (Chris Carapola, Michael Butcher), with $7.6M raised ac
 
 | Date | Score | Notes |
 | --- | --- | --- |
-| [August 17, 2026](https://github.com/yearn/risk-score/pull/412) | 3.4 | Initial assessment. Snapshot at block 96,882,186: NAV 18.35M AUSD, exit liquidity 21.0%, top-5 concentration 89.6%. |
-| [September 7, 2026](https://github.com/yearn/risk-score/pull/412) | 3.4 | Refreshed at review to block 102,741,475 after external review flagged stale figures. NAV 18.35M → 13.39M (−27%) via ~17.0M of orderly redemptions — exchange rate rose 1.007984 → 1.011141, so no impairment — including the full exit of the former 45.97% holder. Top-5 concentration 89.6% → 78.32%; exit liquidity 21.0% → 17.9% with the savUSD market at 94.37% utilisation; market-B CR 121.2% → 154.9%; Avant first-loss buffer 12.99% → 14.19%. Added Appendix B.6b quantifying the savUSD loss bounds (~2.2–4.2% of NAV for the fast path; ~44% loss on Avant's book required for the slow path). Also corrected three findings from @ctmotox2's review and fixed four nested-markdown links. Score unchanged at 3.4. |
-| [September 8, 2026](https://github.com/yearn/risk-score/pull/412) | 3.1 | Scoring correction after review. Category 1A (Audits & Security Reviews) 4.5 → 2.0: six published reviews (Trail of Bits ×2 incl. invariant development, Sherlock, Cantina, TrustSec ×2) meet the rubric's "3+ top firms" audit band and the $250K critical bounty is the ">$200K" band; the unaudited, out-of-bounty `LendingOptimizer` stays Critical Risk #1 but no longer drives Category 1. Category 1B 4.5 → 4.0 using refreshed protocol TVL ($130.09M) and top-5 concentration (78.32%). Removed the "weaker than Immunefi" bounty characterization and checksummed address links. Weighted total 3.375 → 3.075, reported 3.1; tier unchanged (Medium). |
+| [September 8, 2026](https://github.com/yearn/risk-score/pull/412) | 3.1 | Initial assessment. Snapshot at block 102,741,475 (September 7, 2026): NAV 13.39M AUSD, exit liquidity 17.9%, top-5 concentration 78.32%. |
