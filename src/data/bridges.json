@@ -395,7 +395,7 @@
           "kind": "direct",
           "model": "lock",
           "integration": "LayerZero V2 OFT Adapter (Solana + Avalanche only)",
-          "detail": "Minor route: LayerZero handles only Solana + Avalanche (~48.7M locked, <0.7% of mainnet USDS supply) and does not hold `wards` on USDS. The bulk of USDS/sUSDS bridges via native rollup bridges — see the Native Rollup Bridges row",
+          "detail": "Minor route: LayerZero handles only Solana + Avalanche (~6.67M locked, ~0.1% of mainnet USDS supply) and does not hold `wards` on USDS. The bulk of USDS/sUSDS bridges via native rollup bridges — see the Native Rollup Bridges row",
           "security": {
             "label": "2-of-2",
             "confirmations": 12,
@@ -573,7 +573,7 @@
           "kind": "direct",
           "model": "lock",
           "integration": "OP Stack + Arbitrum Nitro canonical bridges (SkyLink)",
-          "detail": "Primary USDS/sUSDS cross-chain route: ~$0.45B USDS + ~812M sUSDS escrowed on L1 and minted 1:1 on Base, Optimism, Unichain (OP Stack) and Arbitrum (Nitro). No bridge holds `wards` on USDS. LayerZero carries only Solana + Avalanche (<0.7% of mainnet USDS supply)"
+          "detail": "Primary USDS/sUSDS cross-chain route: ~102M USDS + ~343M sUSDS escrowed on L1 and minted 1:1 on Base, Optimism, Unichain (OP Stack) and Arbitrum (Nitro), ~97% of it in the Arbitrum escrow after the July 2026 Spark Liquidity Layer repatriation. No bridge holds `wards` on USDS. LayerZero carries only Solana + Avalanche (~0.1% of mainnet USDS supply)"
         }
       ]
     }
