@@ -5,9 +5,8 @@ in `src/`; validators and onchain/API tooling are in `scripts/`.
 
 ## Shared skills and commands
 
-Canonical skills live in `.agents/skills/`. Codex discovers them there;
-`.claude/skills` links to that directory, and `.pi/settings.json` loads it.
-`CLAUDE.md` links to this guide. Edit canonical files, not separate adapter copies.
+Edit canonical skills in `.agents/skills/` and commands in `.agents/commands/`;
+Claude and pi share them. `CLAUDE.md` links to this guide.
 
 | Task | Skill | Claude / pi command |
 |------|-------|---------------------|
@@ -18,9 +17,7 @@ Canonical skills live in `.agents/skills/`. Codex discovers them there;
 | Onchain verification | [verifying-onchain-data](.agents/skills/verifying-onchain-data/SKILL.md) | — |
 | Bridge dependencies | [assessing-bridge-dependencies](.agents/skills/assessing-bridge-dependencies/SKILL.md) | — |
 
-In Codex, use `$<skill-name> <target>`; in pi, `/skill:<skill-name> <target>`
-also works. Claude commands and pi prompts link to the same files in
-`.agents/commands/`. No agent extension is required.
+Codex: `$<skill-name> <target>`. Pi also supports `/skill:<skill-name> <target>`.
 
 Markdown links resolve relative to their containing file. Backtick paths and
 shell commands are relative to the repository root; run commands there.
@@ -40,9 +37,7 @@ shell commands are relative to the repository root; run commands there.
 - Start from current `origin/master`, preserving any work already in progress.
 - Read an existing report end-to-end before editing it. Keep report work within
   `reports/`, plus `src/data/bridges.json` for bridge dependency changes.
-- A new report needs `reports/graph/<slug>.yaml`; updates must keep companion
-  artifacts consistent. If required graph facts are unavailable, identify the
-  missing inputs as `TODO` and explain the limitation.
+- New reports require `reports/graph/<slug>.yaml`; keep companion artifacts consistent.
 - Run the [validation](#validation) appropriate to the changed files. When the
   requested authoring task is ready, open a draft PR with a concise summary,
   validation results, and unresolved facts. Review-only tasks return findings.
@@ -50,6 +45,7 @@ shell commands are relative to the repository root; run commands there.
 ## Validation
 
 Node ≥22.12 is required. The build validates reports, graph schema, and bridge data.
+Run relevant checks for changed or reviewed artifacts.
 
 ```bash
 npm run build       # update_stats → check_bridges → check_graphs → astro build
@@ -67,13 +63,17 @@ Optional behavioral checks: [manual smoke cases](tests/skill_scenarios.md).
 
 ## Environment
 
-Use Foundry `cast` for onchain reads. Configuration may come from the process
-environment or `.env`; never print or commit RPC credentials or API keys.
-For Ethereum, use `RPC_1` then `RPC_2`; other chains use `RPC_<chain_id>`.
-Python entrypoints use [scripts/env.py](scripts/env.py): `load_repo_env()`,
-then `get_rpc_url(chain_id)` / `get_explorer_api_key(name)` for aliases and discovery.
+For tasks requiring RPC or explorer access, load the repository-root `.env`
+at task start; [.env.example](.env.example) documents the variables.
+Use [scripts/env.py](scripts/env.py): `load_repo_env()`, then
+`get_rpc_url(chain_id)` / `get_explorer_api_key("etherscan")` for configured
+values and aliases, including `ETHERSCAN_TOKEN`. Preserve existing environment
+values; in worktrees, load `.env` from the original checkout if needed.
 
-Missing `.env` is not a blocker if the required configuration is already
-available. If credentials or RPC access needed for a check are unavailable,
-mark that check unverified and report the blocker; continue independent work.
-Batch and cache RPC calls to conserve quota.
+If required RPC or Etherscan/explorer access is missing or unusable, **stop
+immediately**, ask the user to configure or restore it in `.env`, and wait.
+Never fall back to public RPCs or continue the assessment with unverified claims.
+Never print or commit secrets; report missing variable names only.
+
+Use Foundry `cast` for onchain reads. Pass resolved configuration to subprocesses;
+loading `.env` in one process does not configure another. Batch and cache RPC calls.

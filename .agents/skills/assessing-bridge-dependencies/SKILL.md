@@ -5,7 +5,7 @@ description: Procedure for finding a token's cross-chain bridge dependency, clas
 
 # Assessing bridge dependencies
 
-Follow the [agent guide](../../../AGENTS.md) and
+Follow [AGENTS.md](../../../AGENTS.md) and the
 [snapshot procedure](../verifying-onchain-data/SKILL.md#snapshot).
 Record findings in the report's Token Mint Authority section and bridge index.
 
@@ -40,4 +40,4 @@ addresses involved; a bridge provider may not be able to act alone.
 Use the [index schema](references/schema.md) when changing
 `src/data/bridges.json`. Resolve bridge-mention warnings by recording actual
 dependencies or adding genuine non-dependency mentions to the bridge's `ignore`
-list. Validation follows the agent guide.
+list.
