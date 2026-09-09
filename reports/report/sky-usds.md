@@ -791,4 +791,4 @@ Snapshot block 25939320 (September 9, 2026).
 | Date | Score | Notes |
 | --- | --- | --- |
 | [June 18, 2026](https://github.com/yearn/risk-score/pull/204) | 1.3 | Initial assessment |
-| September 9, 2026 | 1.3 | Reassessment. Supply contraction (USDS 7.82B → 6.65B, sUSDS assets 5.88B → 4.67B); LitePSM `buf` doubled to 800M DAI; Spark Liquidity Layer repatriated Base/Optimism/Unichain bridge positions to mainnet (escrowed USDS 448M → 102M). Collateralization restated to show Prime allocator vaults (~49.5% of VAT debt). Proxies, `wards`, 48 h GSM delay, and 2-of-2 DVN config unchanged; score held at 1.3 |
+| [September 9, 2026](https://github.com/yearn/risk-score/pull/457) | 1.3 | Reassessment. Supply contraction (USDS 7.82B → 6.65B, sUSDS assets 5.88B → 4.67B); LitePSM `buf` doubled to 800M DAI; Spark Liquidity Layer repatriated Base/Optimism/Unichain bridge positions to mainnet (escrowed USDS 448M → 102M). Collateralization restated to show Prime allocator vaults (~49.5% of VAT debt). Proxies, `wards`, 48 h GSM delay, and 2-of-2 DVN config unchanged; score held at 1.3 |
