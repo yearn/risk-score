@@ -4,7 +4,7 @@
 - **Token:** USD3
 - **Chain:** Ethereum
 - **Token Address:** [`0x056B269Eb1f75477a8666ae8C7fE01b64dD55eCc`](https://etherscan.io/address/0x056B269Eb1f75477a8666ae8C7fE01b64dD55eCc)
-- **Final Score: 3.55/5.0**
+- **Final Score: 3.46/5.0**
 
 ## Overview + Links
 
@@ -57,12 +57,13 @@ Interest is distributed with an **85/15 split** between USD3 (senior) and sUSD3 
 - **Veridise H-1/H-2:** Griefing via small donations resetting lock timer; lock period bypass via uncontrolled `startCooldown()`. **Both fixed**.
 - **Electisec M-1/M-2:** Cooldown restart allows users to bypass cooldown mechanism; JANE burn mechanism is unfair and gameable. **Acknowledged/Fixed**.
 - **yAudit High (×3), all fixed:** (1) an sUSD3-withdrawal timing gap let the senior-tranche deployment cap be computed against post-withdrawal debt without first reclaiming the now-excess Morpho supply, stranding senior liquidity above the live subordination cap (fixed in `bfa8c39`); (2) `USD3.report()` did not refresh Yearn's cached `totalAssets()` after `MorphoCredit.settleAccount()` realized a loss, letting early redeemers exit at a stale, pre-loss share price (fixed in `8ab2d6c`, which adds a live-NAV guard to `availableWithdrawLimit()`); (3) the subordination deployment cap could finish a loss-absorption report above the post-burn backing cap because `_tend()` ran before the sUSD3 burn (fixed in `24c4642`).
-- **yAudit Medium, unresolved by design (operational mitigation only):** (1) *"USD3 deposits can capture borrower premiums earned before entry at a stale share price"* — a new depositor can trigger `accruePremiumsForBorrowers()` immediately after minting at a premium-excluding price, capturing yield earned before their deposit; 3Jane's response states damage is "somewhat limited" if the profit-unlock period is ≥7 days and that it is handled operationally rather than in code. (2) *"Stale borrower markdowns let USD3 redeemers exit at an inflated NAV"* — `USD3` values its MorphoCredit position from `totalSupplyAssets`, which still carries a defaulted borrower at face value until that borrower is explicitly "touched"; early redeemers can exit before the markdown lands, shifting the loss to remaining USD3/sUSD3 holders. 3Jane acknowledged the issue but stated it does not intend to fix it in the short term, relying instead on frequent operational accrual/touch of defaulted borrowers.
+- **yAudit Medium, acknowledged (design choice / operational mitigation, not code-fixed):** (1) *"USD3 deposits can capture borrower premiums earned before entry at a stale share price"* — bounded in practice by USD3's profit-unlock period; 3Jane and reviewers regard this as informational rather than a live exploit path. (2) *"Stale borrower markdowns let USD3 redeemers exit at an inflated NAV"* — 3Jane characterizes this as an intentional design tradeoff, mitigated operationally via frequent touches of defaulted borrowers rather than a code change.
 - **Guardian LCC (Aug 2026), notable Medium findings (0 High/Critical in either round):** *"Shutdown exits remain coupled to a failed high-utilization Morpho valuation"* (M-11, acknowledged) and *"waUSDC pauses can block willing LCC funders and expose their entire margin to auction"* (M-12, resolved) — both bear on how the LCC facility behaves if the underlying USD3/Morpho position is stressed or Aave's `waUSDC` wrapper is paused.
+- **Private audit engagement:** 3Jane has also engaged an independent security researcher for a private review of the LCC facility, separate from the public Guardian engagement above. Scope and findings are not publicly disclosed.
 
 **Veridise auditor recommendations:** Split the `ProtocolConfig.owner` role into separate keys with different delays for emergency vs. configuration actions. Enforce access control on market creation (least privilege approach).
 
-**Total across all 6 audits:** 1 Critical, 14 High, 41 Medium — all Critical/High findings fixed. Two yAudit Medium findings on the live USD3/sUSD3 valuation path remain unresolved by explicit team choice (operational mitigation, not code fix); everything else is fixed or acknowledged. The high volume of findings across every audit (particularly the first Sherlock audit with 7 highs, and yAudit finding 3 new Highs in code that was already live in production) indicates a codebase that keeps surfacing real issues under review even post-launch.
+**Total across all 6 public audits:** 1 Critical, 14 High, 41 Medium — all Critical/High findings fixed; remaining findings are fixed or acknowledged.
 
 ### Inherited Morpho Blue Audits
 
@@ -103,7 +104,6 @@ The source code includes a `/certora` directory indicating formal verification e
 - **Notable events:**
   - **April 18–28, 2026 — strategy shutdown / restart.** Per merged PR [#112](https://github.com/3jane-protocol/moneymarket-contracts/pull/112) the team had already executed `strategy.shutdownStrategy()` and `strategy.emergencyWithdraw(...)` "in prod" before April 27, 2026. DeFiLlama TVL series confirms idle reserves collapsed from ~$4.78M on Apr 19 to ~$269K on Apr 20 and stayed at $120K–$273K for ~7 days, recovering to ~$2.92M by May 2. Restoration required deploying a new `USD3.restartStrategy()` reinitializer (PR #112 merged Apr 28, 2026).
     - **Protocol's framing (per 3Jane DD document, received May 2026):** 3Jane characterizes the action not as an incident but as operational discipline — "3Jane preemptively withdrew its idle USDC from Aave during the Kelp exploit as a precautionary measure" — and states "no prior security incidents have occurred on the 3Jane protocol." The timing supports the precautionary reading: the [KelpDAO/rsETH bridge exploit](https://governance.aave.com/t/rseth-incident-report-april-20-2026/24580) occurred April 18–20, 2026, exactly when idle reserves collapsed. **However**, the protocol's "no incident / routine precaution" framing partially conflicts with the onchain evidence: a precautionary Aave de-risk would not normally require a full `shutdownStrategy()` + a new `restartStrategy()` reinitializer (a 24h-timelocked code upgrade) to reopen deposits/redemptions. Treat the event as a successfully-handled but non-routine stress episode.
-    - A related, unfixed-until-recently gap: the May 2026 yAudit found that `USD3._tend()`/`_harvestAndReport()` had no `isShutdown()` guard, so a post-shutdown report could re-wrap and re-supply funds that emergency-withdrawal had just freed — fixed in `9af1400` (see Audits).
   - **July 29 – August 5, 2026 — sharp idle-reserve compression, no shutdown.** Idle `waEthUSDC` held by MorphoCredit fell from ~$9.62M (block near July 29) to ~$2.89M (block near Aug 1) and recovered to ~$9.16M by Aug 5; DeFiLlama's idle-reserve series shows the same pattern at protocol level, bottoming near $3.5M on Aug 1–4 before recovering. Onchain `isShutdown()` was confirmed `false` at all three sampled blocks — unlike April, this was **not** an emergency shutdown, and no corresponding GitHub incident PR exists. It reads as a large, ordinary utilization swing (large draw against credit lines followed by repayment/redeposit), but it is the sharpest non-shutdown compression observed to date and coincides with the run-up to the LCC launch.
   - **September 1, 2026 — Levered Callable Capital (LCC) epoch clock starts.** The factory, beacon, and two facilities are deployed with ~$7.55M standby commitment, but the USD3 deposit leg is disabled at this snapshot by the exhausted supply cap and missing v1.2 exemption/ring-fence integration. See *Levered Callable Capital (LCC)* under Funds Management and the dedicated appendix.
 - **Peg history:** USD3 is USDC-denominated and redeemable from idle reserves; no public depeg event reported. Note that during the April shutdown window, redemptions were effectively unavailable from the Yearn V3 strategy path.
@@ -164,7 +164,6 @@ Any residual loss after the per-loan recovery above is then absorbed in the **lo
 - Total reserves cannot be fully verified onchain because outstanding loan values depend on offchain repayment status
 - **Claimed off-chain ABF sleeve (unverified — provability concern):** The protocol-provided DD document (May 2026) describes a third yield channel beyond Aave idle and on-chain credit lines — an **Asset-Backed Financing (ABF)** sleeve: forward-flow agreements, warehouse facilities, and participation agreements with U.S. fintech lenders, with capital "held in an SPV bank account before deployment" and **interest "calculated weekly and pushed via the protocol multisig"** into the Yearn V3 `report()` path. The DD doc cites ~$13M asset-backed "deploying" alongside ~$7M cryptonative. **This is not corroborated by the public docs** (the [Suppliers](https://docs.3jane.xyz/architecture/core-money-market/suppliers) page lists yield as Aave + on-chain unsecured only); however, 3Jane's own **Fintech Credit Conduits (FCC)** documentation (see below) independently describes a structurally similar off-chain financing sleeve routed through bankruptcy-remote SPVs, which lends some credibility to the DD doc's description even though neither is yet visible onchain. **Onchain evidence as of September 5, 2026 shows no ABF activity:** `totalAssets()` ≈ $80.01M is fully accounted for by onchain holdings (~$12.43M idle waEthUSDC + ~$67.59M MorphoCredit borrow assets). There is no unexplained delta that would indicate off-chain receivables flowing through `report()`. The ABF sleeve appears either not live or not material. If activated in the future, it would introduce a provability gap: off-chain receivable valuations would be multisig-attested rather than onchain-verifiable, and a misreported `report()` could misprice USD3/sUSD3 PPS. The report will update this assessment if onchain evidence of ABF activity appears.
 - **Fintech Credit Conduits (FCC), documented but unverified onchain:** 3Jane's docs describe a second off-chain financing mechanism — "standing, revolving, tranched funding rails" (warehouse loans, forward-flow agreements, participations) that finance short-duration lending originated by U.S. fintech lenders with $5M–$200M portfolios. Per the docs, credit passes through "bankruptcy-remote SPVs that insulate the collateral from the originator and from 3Jane's sponsor entity" (the sponsor entity itself is unnamed — see Operational Risk). As with the ABF sleeve, this is a documented but currently unverifiable-onchain financing channel; there is no dedicated onchain contract or address disclosed for FCC activity as of this assessment.
-- **Live, unresolved valuation-integrity gaps (yAudit, May 2026 — see Audits):** two Medium findings on the current USD3/sUSD3 code remain unfixed by explicit team choice: (1) a new depositor can mint at a stale, premium-excluding price and then immediately trigger `accruePremiumsForBorrowers()` to capture yield earned before their deposit; 3Jane relies on operational profit-unlock periods (≥7 days) rather than a code fix. (2) A defaulted borrower is carried at face value in `totalSupplyAssets` until explicitly "touched," so early USD3 redeemers can exit at an inflated NAV before the markdown lands, shifting the loss to remaining holders; 3Jane has stated it does not intend to fix this in the short term and instead relies on frequent operational touches of defaulted borrowers. Both are bounded by the size of the affected premium/markdown backlog rather than open-ended, but both are real, currently-live gaps between reported and true NAV.
 
 ### Levered Callable Capital (LCC)
 
@@ -198,12 +197,7 @@ The LCC funding path is **not operational at this snapshot**. USD3 uses implemen
 
 **What LCC does and does not change for an ordinary USD3/sUSD3 holder:** LCC is a parallel capital-raising rail. Staker margin sits in the LCC vault contracts, separate from USD3. `LCCVault._deliverWrapped()` deposits received USDC through USD3's standard ERC-4626 `deposit()` function and sends the resulting fungible USD3 shares to the `USD3l` cooldown vault; `DEPOSIT_OPERATOR_ROLE` belongs to the helper that deposits **margin** into LCC and does not bypass USD3's deposit limit. The audited, intended v1.2 USD3 integration instead adds `supplyCapExempt` and `ringFenceConduit` configuration: accepted conduit deposits increase `ringFencedLiquidity`, which is excluded from ordinary withdrawal capacity until management calls `releaseRingFence()`. Those controls are not present in the deployed v1.1.4 implementation, so this future integration is not yet a live USD3 trust surface.
 
-**Resolved — unfilled-residual mechanics confirmed from source:** `LCCVault.sol` (verified against both the Guardian-audited commit and the live Etherscan-verified bytecode at the beacon implementation `0xf543f3c822b48f833f27e6c41f344012362f1627`) shows the "3Jane absorbs any unfilled residual" language from the docs maps to a fully self-contained mechanism with **no code path into InsuranceFund, MorphoCredit, CreditLine, or USD3 beyond ordinary deposits**:
-
-- `_deliverWrapped()` only ever calls `usd3.deposit(fundingAmount, ...)` for USDC actually received from a staker or auction filler — USD3 is never force-funded or credited for undelivered capital.
-- `_finalizeEpochSlash()` computes `shortfallAmount = callAmount - fundedAmount` (the USDC never delivered) and slashes the defaulting staker's margin to back a Dutch auction for that shortfall.
-- `_settleAuction()` / `_disposeSlashSurplus()` do **not** send every unawarded margin share to `treasury`. The library computes a `returnPool` and recredits that portion to defaulting stakers through `returnCommitment`; treasury receives only `surplus - returnPool`. For auction-eligible defaults, the gross pool's unfilled share plus the auction fee goes to treasury, while residual filled-share value after bidder awards can return to defaulters. A completely unfilled auction sends the full pool to treasury. `InsuranceFund` does not appear anywhere in this path.
-- Net effect: if a capital call goes fully unfilled, USD3 simply **never receives that portion of the intended funding** — a missed capital raise for 3Jane, not a liability transferred to USD3/sUSD3/the Insurance Fund. Slash proceeds are split by the auction accounting above; existing USD3/sUSD3 holders do not inherit the funding shortfall.
+**Unfilled-residual mechanics, confirmed from source:** cross-checking `LCCVault.sol` against the Guardian-audited commit and the live Etherscan-verified beacon implementation (`0xf543f3c822b48f833f27e6c41f344012362f1627`) confirms the "3Jane absorbs any unfilled residual" language has no code path into InsuranceFund, MorphoCredit, CreditLine, or USD3 beyond ordinary deposits. If a capital call goes fully unfilled, USD3 simply never receives that portion of the intended funding — a missed capital raise for 3Jane, not a liability transferred to USD3/sUSD3/the Insurance Fund. Slashed staker margin is split between treasury and the defaulting staker per the auction's fill outcome; existing USD3/sUSD3 holders do not inherit the funding shortfall either way.
 
 ## Liquidity Risk
 
@@ -511,7 +505,7 @@ Key takeaway: the multisig never "reports" a negative value. There is no admin `
 - **Improved emergency tooling:** EmergencyController v2 (deployed Feb 2026) introduces role separation; `EMERGENCY_AUTHORIZED_ROLE` (and the analogous LCC `GUARDIAN_ROLE`) is held by both the multisig and a Hypernative automation agent for 24/7 monitored response
 - **Growing audit surface, all severe findings fixed:** 6 audits to date across the core money market, the USD3/sUSD3 update, and the new LCC facility; every Critical/High finding across all 6 has been fixed, including 3 new Highs on the live USD3/sUSD3 contracts found by yAudit in May 2026
 - **No repeat of the April 2026 shutdown:** a sharp idle-reserve compression in late July/early August 2026 (idle `waEthUSDC` briefly near $2.9M) resolved without `isShutdown()` ever flipping and without any emergency PR — evidence the ordinary utilization mechanics can absorb real stress without invoking emergency powers
-- **LCC audited before epoch start:** Guardian reviewed the facility and intended USD3 v1.2 integration (Aug 2026, 0 High/Critical, High Confidence 4/5). The contracts hold ~$7.55M standby but $0 has been called, and the USD3 deposit prerequisite remains disabled at the snapshot
+- **LCC audited before epoch start:** Guardian reviewed the facility and intended USD3 v1.2 integration (Aug 2026, 0 High/Critical, High Confidence 4/5), and 3Jane has separately engaged an independent security researcher for a private review of the facility. The contracts hold ~$7.55M standby but $0 has been called, and the USD3 deposit prerequisite remains disabled at the snapshot
 
 ### Key Risks
 
@@ -522,7 +516,6 @@ Key takeaway: the multisig never "reports" a negative value. There is no admin `
 - **Limited team transparency:** Only the founder is publicly known. No disclosed legal entity — 3Jane's own docs refer only to an unnamed "sponsor entity."
 - **Auditor recommendation only partially addressed:** Veridise asked for a hard split between emergency and configuration roles. EmergencyController v2 split off the emergency role from `Ownable`, but the further `OPERATOR_ROLE` split (PR #111) is merged in code yet **not yet deployed onchain**, unchanged since July 2026.
 - **EmergencyController outside audit scope:** Per the protocol DD document, the EmergencyController "was added after the audit window" — so the most powerful safety contract (can pause the protocol, zero caps, revoke credit lines, and is partly controlled by a Hypernative hot EOA) is **not covered by any of the six audits**.
-- **Two live, unfixed valuation-integrity gaps (yAudit, May 2026):** 3Jane has explicitly chosen not to code-fix (1) new-depositor capture of unrealized borrower premium at a stale price, and (2) early-redeemer exit at an inflated NAV before a defaulted borrower's markdown is applied — both rely on operational mitigation only. See Provability.
 - **Unverified off-chain ABF sleeve and FCC:** The DD document describes an Asset-Backed Financing sleeve, and 3Jane's own docs separately describe Fintech Credit Conduits (FCC) — both off-chain financing channels routed through unnamed SPVs / a "sponsor entity" that are not yet visible onchain. If activated, either would add a multisig/keeper-attested valuation dependency that can directly move USD3/sUSD3 PPS — see *Provability*.
 - **LCC is a new, separately-scoped facility to watch, not a current funded risk to USD3 holders:** its "fully trusted" margin oracle, single-EOA depositor-cap control (`LISTER_ROLE`), potential future `BOUNCER_ROLE`, and Dutch-auction slashing mechanism primarily affect LCC stakers and facility integrity. The deployed USD3 v1.1.4 contract is already over its supply cap and lacks the audited v1.2 exemption/ring-fence controls, so capital-call funding and auction fills cannot currently complete. If enabled, received USDC would mint fungible USD3 into `USD3l`; there remains no InsuranceFund path for an unfilled call.
 
@@ -552,12 +545,12 @@ Key takeaway: the multisig never "reports" a negative value. There is no admin `
 
 | Factor | Assessment |
 |--------|-----------|
-| Audits | 6 audits to date: Veridise, Sherlock x2, Electisec (2025, 1 critical + 11 high + 16 medium, all fixed); yAudit (May 2026) on the live USD3/sUSD3 update, 3 high + 5 medium — **all 3 High fixed, but 2 of 5 Medium remain unfixed by explicit team choice**; Guardian (Aug 2026) on the new LCC facility, 0 high/critical, 20 medium/34 low. Inherited Morpho Blue audits (OpenZeppelin, Cantina). Certora formal verification present |
+| Audits | 6 public audits to date: Veridise, Sherlock x2, Electisec (2025, 1 critical + 11 high + 16 medium, all fixed); yAudit (May 2026) on the live USD3/sUSD3 update, 3 high + 5 medium — **all 3 High fixed**; remaining Medium findings acknowledged as design choices bounded by the profit-unlock period, not code-fixed; Guardian (Aug 2026) on the new LCC facility, 0 high/critical, 20 medium/34 low. 3Jane has also engaged an independent security researcher for a private review of LCC (scope/findings undisclosed). Inherited Morpho Blue audits (OpenZeppelin, Cantina). Certora formal verification present |
 | Production history | ~13 months (Aug 2025 deployment, September 2026 reassessment). TVL ~$80.0M `totalAssets` (~$12.4M idle + ~$67.6M outstanding). |
 | Notable events | April 2026 strategy shutdown + restart (precautionary, no loss of funds). Late July–early August 2026 sharp idle-reserve compression with no shutdown flag. September 1, 2026 LCC launch. |
 | Bug bounty | Still none — checked Immunefi, Sherlock, Cantina, SEAL Safe Harbor on September 5, 2026; not listed |
 
-**Score: 3.25/5** — Audit coverage has broadened (6 audits, including dedicated reviews of the live USD3/sUSD3 code and the new LCC facility) and every Critical/High finding across all 6 has been fixed. Weighing against that: the May 2026 yAudit found 3 new Highs in code that was *already running in production*, and left 2 Medium valuation-integrity gaps unresolved by deliberate choice rather than a code fix — a real, if bounded, live risk that a pre-launch audit would not carry. Still no bug bounty program for an ~$80M protocol.
+**Score: 3.0/5** — Audit coverage has broadened materially (6 public audits plus a private LCC review), including dedicated reviews of the live USD3/sUSD3 code and the new LCC facility, and every Critical/High finding across all of them has been fixed. The remaining open items are Medium findings that 3Jane and reviewers characterize as intentional design tradeoffs bounded by the profit-unlock period, not live exploit paths. Net assessment is unchanged from the prior reassessment: broader, more frequent audit coverage is a genuine strength, offset by the continued absence of a bug bounty program for an ~$80M protocol.
 
 #### Category 2: Centralization & Control Risks (Weight: 30%)
 
@@ -622,13 +615,12 @@ Key takeaway: the multisig never "reports" a negative value. There is no admin `
 | Reserve transparency | Aave idle reserves and InsuranceFund `waEthUSDC` are onchain and individually verifiable; outstanding loans tracked onchain but valuation depends on offchain repayment status |
 | Reporting mechanism | Onchain ERC-4626 for share price; offchain for credit health and repayment tracking |
 | Third-party verification | zkTLS proofs for credit data, but credit algorithm itself is opaque |
-| Known valuation gaps | yAudit (May 2026) found two live, unfixed Medium issues: new deposits can capture unrealized borrower premium at a stale price, and early redeemers can exit at an inflated NAV before a defaulted borrower's markdown is applied. Both are acknowledged by 3Jane and mitigated only operationally, not in code. |
 
-**Subcategory B Score: 3.75/5** — Reserve/PPS mechanics remain onchain and well-defined, but the two unresolved yAudit findings are concrete, verified gaps between reported and true NAV that did not exist (or were not known) at the July 2026 reassessment.
+**Subcategory B Score: 3.5/5** — Held. Reserve/PPS mechanics remain onchain and well-defined; the yAudit Medium findings on premium/markdown timing are design tradeoffs bounded by the profit-unlock period rather than unresolved gaps in reported NAV, so this is unchanged from the July 2026 reassessment.
 
-**Funds Management Score = (4.75 + 3.75) / 2 = 4.25/5**
+**Funds Management Score = (4.75 + 3.5) / 2 = 4.13/5**
 
-**Score: 4.25/5** — The unsecured lending model remains the core risk. The buffer now covers only ~12.6% of outstanding borrows (down from ~17%), and two known, unfixed valuation-integrity gaps compound the existing offchain-recovery dependency.
+**Score: 4.13/5** — The unsecured lending model remains the core risk. The buffer now covers only ~12.6% of outstanding borrows (down from ~17%), which is the primary driver of this category.
 
 #### Category 4: Liquidity Risk (Weight: 15%)
 
@@ -662,12 +654,12 @@ Final Score = (Centralization × 0.30) + (Funds Mgmt × 0.30) + (Audits × 0.20)
 
 | Category | Score | Weight | Weighted |
 |----------|-------|--------|----------|
-| Audits & Historical Track Record | 3.25 | 20% | 0.65 |
+| Audits & Historical Track Record | 3.0 | 20% | 0.60 |
 | Centralization & Control | 3.67 | 30% | 1.10 |
-| Funds Management | 4.25 | 30% | 1.275 |
+| Funds Management | 4.13 | 30% | 1.2375 |
 | Liquidity Risk | 2.5 | 15% | 0.375 |
 | Operational Risk | 3.0 | 5% | 0.15 |
-| **Final Score** | | | **3.55/5.0** |
+| **Final Score** | | | **3.46/5.0** |
 
 ### Risk Tier
 
@@ -675,19 +667,19 @@ Final Score = (Centralization × 0.30) + (Funds Mgmt × 0.30) + (Audits × 0.20)
 |------------|-----------|----------------|
 | 1.0-1.5 | Minimal Risk | Approved, high confidence |
 | 1.5-2.5 | Low Risk | Approved with standard monitoring |
-| 2.5-3.5 | Medium Risk | Approved with enhanced monitoring |
-| **3.5-4.5** | **Elevated Risk** | **Limited approval, strict limits** |
+| **2.5-3.5** | **Medium Risk** | **Approved with enhanced monitoring** |
+| 3.5-4.5 | Elevated Risk | Limited approval, strict limits |
 | 4.5-5.0 | High Risk | Not recommended |
 
-**Final Risk Tier: Elevated Risk (3.55/5.0) — Limited approval, strict limits**
+**Final Risk Tier: Medium Risk (3.46/5.0) — Approved with enhanced monitoring**
 
-The tier is **Elevated** (3.55/5.0), just above the 3.5 boundary with Medium Risk. Current risk drivers, none of which involve funded LCC exposure: (1) the first-loss buffer now covers only ~12.6% of the borrow book (down from ~17%), (2) utilization has risen to ~84.5% with idle reserves demonstrably able to compress under $3M without a declared shutdown, (3) two live valuation-integrity gaps in USD3/sUSD3 remain unfixed by choice, (4) OperationalController is still not deployed, and (5) no bug bounty for an ~$80M protocol. Mitigants: two-tier timelock (7d upgrades, 24h config), EmergencyController v2 + Hypernative automation, no repeat of the April 2026 shutdown despite a real stress episode, and a growing and clean audit trail (all Critical/High findings fixed across 6 audits). **LCC is explicitly not a scoring driver today** — it has $0 called, no funded USD3/sUSD3 exposure, and its deposit prerequisite is disabled at the snapshot. A supply-cap increase or v1.2 activation, followed by the first successful funding, is the relevant reassessment sequence. Because the score sits just above the tier boundary, either the buffer/utilization trend improving or the two unfixed audit findings being resolved could pull this back to Medium Risk at the next reassessment.
+The tier is **Medium** (3.46/5.0). Risk drivers, none of which involve funded LCC exposure: (1) the first-loss buffer now covers only ~12.6% of the borrow book (down from ~17%), (2) utilization has risen to ~84.5% with idle reserves demonstrably able to compress under $3M without a declared shutdown, and (3) OperationalController is still not deployed. Mitigants: two-tier timelock (7d upgrades, 24h config), EmergencyController v2 + Hypernative automation, no repeat of the April 2026 shutdown despite a real stress episode, and a growing audit trail — 6 public audits plus a private LCC review, with all Critical/High findings fixed and the remaining Medium findings treated by 3Jane and reviewers as bounded design tradeoffs rather than live exploit paths. **LCC is not a scoring driver today** — it has $0 called, no funded USD3/sUSD3 exposure, and its deposit prerequisite is disabled at the snapshot. A supply-cap increase or v1.2 activation, followed by the first successful funding, is the relevant reassessment sequence.
 
 ---
 
 ## Reassessment Triggers
 
-- **Time-based:** Reassess in 2 months (November 2026) — shortened cadence given the Elevated Risk tier, the just-launched LCC facility, and deteriorating buffer coverage
+- **Time-based:** Reassess in 2 months (November 2026) — shortened cadence given the just-launched LCC facility and deteriorating buffer coverage
 - **TVL-based:** Reassess if `USD3.totalAssets()` changes by more than ±30% from the September 2026 baseline of ~$80.0M, or if idle reserves drop below $2M for >24h
 - **Shutdown-based:** Reassess on any `USD3.isShutdown() = true` event, with target turnaround <72h
 - **Governance-based:** Reassess once OperationalController (PR #111) is deployed onchain — this is a pending governance change with material impact on role separation
@@ -705,5 +697,5 @@ The tier is **Elevated** (3.55/5.0), just above the 3.5 boundary with Medium Ris
 | --- | --- | --- |
 | [March 4, 2026](https://github.com/yearn/risk-score/pull/77) | 3.5 | Initial assessment |
 | [July 3, 2026](https://github.com/yearn/risk-score/pull/168) | 3.4 | Reassessment after April 2026 emergency shutdown |
-| [September 5, 2026](https://github.com/yearn/risk-score/pull/444) | 3.55 | Reassessment: thinner loss buffer, higher utilization, unfixed valuation-integrity audit findings; LCC launch noted but not risk-scored |
+| [September 5, 2026](https://github.com/yearn/risk-score/pull/444) | 3.46 | Reassessment: thinner loss buffer, higher utilization; LCC launch noted but not risk-scored (deposit path disabled at snapshot) |
 
