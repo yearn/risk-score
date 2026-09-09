@@ -138,6 +138,15 @@
           "owner": "Pool owner: Maple governance contract [`0x4483…9449`](https://etherscan.io/address/0x44835bBBA9D40DEDa9b64858095EcFB2693c9449)."
         },
         {
+          "slug": "saturn-usdat",
+          "name": "Saturn USDat",
+          "kind": "direct",
+          "model": "mint",
+          "integration": "Chainlink CCIP (LockReleaseTokenPool on Ethereum; BurnWithFromMintTokenPool on BNB Chain and Monad)",
+          "detail": "Mixed model, verified September 9, 2026. `TokenAdminRegistry.getPool` maps Ethereum USDat to [`0xA0dE…0D86`](https://etherscan.io/address/0xA0dE671eb84dE9dEe1d311d996d25c41F63a0D86) (`LockReleaseTokenPool 1.6.1`), holding **31,965,633.03 USDat** — comfortably covering the ~29.59M USDat circulating across the remote chains. On the remote chains, USDat is a `SaturnOFT`-based token minted/burned by a **`BurnWithFromMintTokenPool`**: BNB Chain [`0x9049…0C61`](https://bscscan.com/address/0x904939A965eDc2Efbd44Fd4db223f07680510C61) (holds `MINTER_ROLE`+`BURNER_ROLE` on BNB USDat [`0x0Bb1…64eF`](https://bscscan.com/address/0x0Bb150DFa86EA5d7742F07FEfCD8E8edA81D64eF), ~$2.0M circulating) and Monad [`0x8ab4…70F0`](https://explorer.monad.xyz/address/0x8ab40e2dabCd24dCFf0A06A68eB59990405270F0) (same role holder pattern on Monad USDat, same address, ~$27.6M circulating — the larger of the two remote deployments). Because the mint-side pools can create canonical supply independent of the Ethereum lockbox's real-time balance, this is classified `mint` per the skill's route-prioritization rule, even though the measured Ethereum leg is itself a `lock`.",
+          "owner": "Ethereum pool owner: `RBACTimelock` [`0x4483…9449`](https://etherscan.io/address/0x44835bBBA9D40DEDa9b64858095EcFB2693c9449), `getMinDelay()` = 10,800s (3h). **Same address as this file's `maple-syrupusdc` pool owner** (labeled there as Maple's own governance contract) — this repo has not independently reconciled whether that address is Maple-specific, Saturn-specific, or a shared Chainlink-operated administrative timelock reused across integrations; flagged, not resolved. Remote-chain (BNB/Monad) admin: `SaturnTimelock` [`0xF023…FF0C`](https://bscscan.com/address/0xF0237a1cb794eA830129966049eF99243082FF0C), `getMinDelay()` = 172,800s (2d) — identical address on both chains, shorter delay than Saturn's own Ethereum Admin Timelock (5d)."
+        },
+        {
           "slug": "fluid",
           "name": "Fluid (PST)",
           "kind": "indirect",
@@ -247,7 +256,8 @@
         "midas-mglobal",
         "resolv-rlp",
         "resolv-wstusr",
-        "superstate-ustb"
+        "superstate-ustb",
+        "saturn-usdat"
       ],
       "dependencies": [
         {

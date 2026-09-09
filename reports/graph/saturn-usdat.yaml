@@ -53,6 +53,23 @@ nodes:
     address: "0x0bC305e7e13113cAEd3f5486849e9518a1cC4173"
     category: infra
     note: Sole mint/redeem contract since Aug 19, 2026; onlySwapFacility on wrap/unwrap. Replaced 0xB680…6278.
+  - id: ccip-lock-pool
+    label: CCIP LockReleaseTokenPool
+    address: "0xA0dE671eb84dE9dEe1d311d996d25c41F63a0D86"
+    category: infra
+    note: Chainlink CCIP; escrows USDat on Ethereum to back BNB Chain/Monad supply (31,965,633.03 held, verified Sep 9 2026)
+
+  # === Cross-chain governance ===
+  - id: ccip-pool-owner
+    label: CCIP Pool Owner (RBACTimelock)
+    address: "0x44835bBBA9D40DEDa9b64858095EcFB2693c9449"
+    category: governance
+    note: Owns Ethereum LockReleaseTokenPool; getMinDelay=10,800s (3h). Same address also owns Maple syrupUSDC's CCIP pool per this repo's bridges.json — unreconciled whether protocol-specific or shared
+  - id: saturn-timelock-remote
+    label: Saturn Timelock (BNB/Monad, 2d)
+    address: "0xF0237a1cb794eA830129966049eF99243082FF0C"
+    category: governance
+    note: Admin of BurnWithFromMintTokenPool on both BNB Chain and Monad (same address both chains); getMinDelay=172,800s (2d) — shorter than Ethereum's 5d Admin Timelock
 
   # === External Dependencies ===
   - id: pyusdx
@@ -81,6 +98,11 @@ nodes:
     label: STRC (Strategy Perpetual Preferred)
     category: dependency
     note: Off-chain BTC-backed preferred equity; custodied at Clear Street; sUSDat yield source
+  - id: usdat-remote
+    label: USDat on BNB Chain / Monad
+    category: dependency
+    link: "https://bscscan.com/address/0x0Bb150DFa86EA5d7742F07FEfCD8E8edA81D64eF"
+    note: "SaturnOFT contract (same address both chains); MINTER_ROLE/BURNER_ROLE held by a BurnWithFromMintTokenPool per chain. BNB ~$2.0M, Monad ~$27.6M circulating (verified Sep 9 2026) — Monad alone is ~46% of Ethereum's own USDat supply"
 
 edges:
   # Governance wiring
@@ -140,3 +162,21 @@ edges:
     to: strc
     kind: deposits-into
     label: STRC yield source
+
+  # Cross-chain (Chainlink CCIP)
+  - from: ccip-pool-owner
+    to: ccip-lock-pool
+    kind: controls
+    label: "owner(); 3h timelock"
+  - from: saturn-timelock-remote
+    to: usdat-remote
+    kind: controls
+    label: "admin of BurnWithFromMintTokenPool; 2d timelock"
+  - from: usdat
+    to: ccip-lock-pool
+    kind: deposits-into
+    label: "locked to back remote-chain supply"
+  - from: ccip-lock-pool
+    to: usdat-remote
+    kind: routes-through
+    label: "CCIP message → mint on BNB Chain / Monad"
