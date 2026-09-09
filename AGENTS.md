@@ -34,7 +34,9 @@ shell commands are relative to the repository root; run commands there.
 
 ## Report and graph authoring workflow
 
-- Start from current `origin/master`, preserving any work already in progress.
+- Before report work, fetch `origin`. Create a new branch from `origin/master`,
+  or merge `origin/master` into the existing report branch, including in worktrees.
+  Preserve uncommitted work and resolve merge conflicts before editing the report.
 - Read an existing report end-to-end before editing it. Keep report work within
   `reports/`, plus `src/data/bridges.json` for bridge dependency changes.
 - New reports require `reports/graph/<slug>.yaml`; keep companion artifacts consistent.
