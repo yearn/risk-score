@@ -86,6 +86,29 @@ nodes:
     label: Chainlink / Chronicle
     category: dependency
     note: "Oracle infrastructure for collateral pricing through MCD_SPOT."
+  # Prime allocator vaults draw USDS against a VAT ilk and deploy it downstream.
+  # ~49.8% of VAT debt at the September 9, 2026 snapshot, so their counterparties
+  # are material to USDS solvency even though they sit off the swap path.
+  - id: allocator-spark
+    label: Spark Prime (ALLOCATOR-SPARK-A)
+    category: infra
+    note: "~$3.06B drawn at September 9, 2026. Deploys into SparkLend markets, Uniswap V4 USDS pairs, and stablecoin reserves (RLUSD, PYUSD)."
+  - id: allocator-grove
+    label: Grove Prime (ALLOCATOR-BLOOM-A)
+    category: infra
+    note: "~$2.50B drawn at September 9, 2026. Largest offchain-credit allocator: Janus Henderson Treasury Fund, BlackRock BUIDL, Anemoy/Securitize AAA CLO funds, Galaxy OTC."
+  - id: allocator-obex
+    label: Obex Prime (ALLOCATOR-OBEX-A)
+    category: infra
+    note: "~$403M drawn at September 9, 2026. Predominantly OTC crypto lending via Syrup USDC (Maple)."
+  - id: dep-offchain-credit
+    label: Tokenized Treasury / Credit Issuers
+    category: dependency
+    note: "~29.3% of Observatory loan-coverage backing (~$2.90B): Janus Henderson Treasury Fund (~$758.7M), BlackRock BUIDL (~$568.7M), Maple Syrup USDC (~$398.6M), Galaxy Warehouse (~$320.0M), Anemoy/Securitize AAA CLO (~$496M combined), Anchorage (~$220.0M), Apollo Diversified Credit (~$20.7M). Reported by Observatory with periodic attestation; not verifiable by contract read."
+  - id: dep-onchain-lending
+    label: SparkLend / Morpho / Uniswap
+    category: dependency
+    note: "~21.4% of backing (~$2.12B) reached through the Prime allocators: SparkLend USDS/USDT/USDC/DAI/PYUSD markets, Steakhouse-curated Morpho vaults, Uniswap V3/V4 stablecoin pools. Onchain-verifiable but carries smart-contract and market risk."
 edges:
   - { from: usds, to: susds, kind: deposits-into, label: "USDS -> sUSDS" }
   - { from: wrapper, to: lite-psm, kind: routes-through, label: "USDS <-> USDC" }
@@ -97,6 +120,18 @@ edges:
   - { from: pocket, to: circle-usdc, kind: deposits-into, label: "USDC" }
   - { from: dai-usds, to: dai, kind: routes-through, label: "1:1 converter" }
   - { from: vat, to: chainlink, kind: routes-through, label: "oracle-priced ilks" }
+  # Allocators draw USDS debt against the VAT, then deploy it downstream. Losses
+  # at a downstream counterparty flow back to the ilk and settle as sin at the Vow.
+  - { from: vat, to: allocator-spark, kind: allocates-to, label: "ALLOCATOR-SPARK-A (25.4%)" }
+  - { from: vat, to: allocator-grove, kind: allocates-to, label: "ALLOCATOR-BLOOM-A (20.7%)" }
+  - { from: vat, to: allocator-obex, kind: allocates-to, label: "ALLOCATOR-OBEX-A (3.3%)" }
+  - { from: allocator-grove, to: dep-offchain-credit, kind: deposits-into, label: "tokenized treasury + CLO" }
+  - { from: allocator-obex, to: dep-offchain-credit, kind: deposits-into, label: "OTC crypto lending" }
+  - { from: allocator-spark, to: dep-onchain-lending, kind: deposits-into, label: "lending markets + LPs" }
+  - { from: allocator-grove, to: dep-onchain-lending, kind: deposits-into, label: "Morpho vaults" }
+  - { from: pause-proxy, to: allocator-spark, kind: controls, label: "sets ilk debt ceiling" }
+  - { from: pause-proxy, to: allocator-grove, kind: controls, label: "sets ilk debt ceiling" }
+  - { from: pause-proxy, to: allocator-obex, kind: controls, label: "sets ilk debt ceiling" }
   - { from: usds, to: layerzero, kind: routes-through, label: "OFT bridge (adapter: 0x1e1D...01B8)" }
   - { from: usds, to: skylink, kind: routes-through, label: "SkyLink bridge" }
   - { from: sky, to: chief, kind: deposits-into, label: "locked voting" }

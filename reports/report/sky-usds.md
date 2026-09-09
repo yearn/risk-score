@@ -4,7 +4,7 @@
 - **Token:** USDS (Sky Dollar) and sUSDS (Savings USDS)
 - **Chain:** Ethereum
 - **Token Address:** [`0xdC035D45d973E3EC169d2276DDab16f1e407384F`](https://etherscan.io/address/0xdC035D45d973E3EC169d2276DDab16f1e407384F) (USDS) · [`0xa3931d71877C0E7a3148CB7Eb4463524FEc27fbD`](https://etherscan.io/address/0xa3931d71877C0E7a3148CB7Eb4463524FEc27fbD) (sUSDS)
-- **Final Score: 1.4/5.0**
+- **Final Score: 1.5/5.0**
 
 ## Overview + Links
 
@@ -246,7 +246,7 @@ USDS does **not** have a clean "this collateral backs this token" picture — it
 
 | Class | Ilk(s) | Debt at snapshot | Share of VAT debt | Role in backing |
 |-------|--------|-----------------:|------------------:|-----------------|
-| **USDC PSM (LitePSM)** | `LITE-PSM-USDC-A` | **~$4.73B** | 39.3% | Pocket holds ~3.95B USDC 1:1 plus ~786.5M DAI in the `buf`. Largest single backing line and the source of USDS-USDC swap capacity |
+| **USDC PSM (LitePSM)** | `LITE-PSM-USDC-A` | **~$4.73B** | 39.3% | Only ~$3.95B of this is external collateral (USDC in the Pocket); the other ~$786.5M is system-issued DAI pre-minted into the PSM as swap inventory, so it backs nothing on its own. Observatory books this line at the Pocket value (~$3.95B), not the ilk debt. Largest single backing line and the source of USDS-USDC swap capacity |
 | **Prime allocator vaults** | `ALLOCATOR-SPARK-A` (~$3.06B), `ALLOCATOR-BLOOM-A` / Grove (~$2.50B), `ALLOCATOR-OBEX-A` (~$403M), `ALLOCATOR-PRYSM-A` (~$25.0M), `ALLOCATOR-GROVE-A` (~$16.6M), `ALLOCATOR-NOVA-A` / Keel and three others (0) | **~$6.01B** | 49.8% | USDS drawn by allocators and deployed into onchain lending, tokenized treasuries, and credit strategies. Backing quality is the quality of those downstream positions, not of a liquidatable onchain CDP |
 | Crypto-backed CDPs | `ETH-A`, `ETH-B`, `ETH-C`, `WSTETH-A`, `WSTETH-B`, `WBTC-A`, `WBTC-B`, `WBTC-C` | ~$388M | 3.2% | Over-collateralized loans, ~145–170% liquidation ratio. Volatile but onchain-liquidatable |
 | LockStake (SKY staked) | `LSEV2-SKY-A` | ~$159M | 1.3% | Borrow against locked SKY — governance-token-backed, reflexive |
@@ -259,7 +259,9 @@ The table reconciles exactly against the VAT identity `debt = Σ(Art × rate) + 
 
 **The Vow's net position is a deficit, not a surplus.** At the snapshot the Vow holds **$633.2M** of surplus DAI (`vat.dai(vow)`) against **$690.1M** of unbacked debt (`vat.sin(vow)`, all of the system's `vice`), leaving a **net −$56.9M**. Of that debt, $228.2M is queued for `flog` (`vow.Sin()`) and none is on auction (`vow.Ash() = 0`). The legacy surplus-auction path is disabled — `vow.bump() = 0` and `vow.hump() = 2^256−1` make `flap()` unreachable — so surplus is handled outside the Vow's own auction machinery. Observatory books the same −$56,940,271 as its "Operating Cash Balance" liability line.
 
-Cutting the same book by *underlying asset* rather than by ilk, SkyEco / Observatory's [USDS collateral-backing API](https://observatory.data.blockanalitica.com/sky/backed/items/) reports at 2026-09-09 10:50 UTC: stablecoins ~$4.89B, onchain crypto lending ~$2.12B, short-duration Treasury bills ~$1.33B, OTC crypto lending ~$956M, AAA corporate debt ~$496M, legacy RWA ~$77.6M, private credit ~$20.7M, basis trade ~$20.4M. **Offchain or tokenized credit exposure therefore totals ~$2.90B — ~24.0% of VAT debt** and ~29.3% of Observatory's ~$9.91B loan-coverage backing. Maintenance-coverage backing is ~$10.58B and total collateral value ~$15.81B.
+Cutting the same book by *underlying asset* rather than by ilk, SkyEco / Observatory's [USDS collateral-backing API](https://observatory.data.blockanalitica.com/sky/backed/items/) reports at 2026-09-09 10:50 UTC: stablecoins ~$4.89B, onchain crypto lending ~$2.12B, short-duration Treasury bills ~$1.33B, OTC crypto lending ~$956M, AAA corporate debt ~$496M, legacy RWA ~$77.6M, private credit ~$20.7M, basis trade ~$20.4M. **Offchain or tokenized credit exposure therefore totals ~$2.90B — ~29.3% of Observatory's ~$9.91B loan-coverage backing**, leaving ~70.7% onchain. Maintenance-coverage backing is ~$10.58B and total collateral value ~$15.81B, the latter ~131% of VAT debt.
+
+**A note on denominators.** The table above is expressed as a share of `VAT.debt()` because that is the issuance side of the ledger, and it is the only view derivable purely onchain. It is *not* a backing denominator: it includes $690.1M of `vice` (which is unbacked by construction) and prices the PSM at ilk debt rather than at the Pocket's USDC. Any claim about the *composition of collateral* uses Observatory's ~$9.91B loan-coverage backing instead. The same offchain exposure is ~24.0% of VAT debt but ~29.3% of backing; the backing figure is the meaningful one, and this report uses it wherever collateral quality is being characterised. Observatory's per-asset figures are reported holdings with periodic attestation for the offchain slice, not independently verified reserves — only the ~$3.95B Pocket USDC and the onchain lending and LP positions can be confirmed by direct contract reads.
 
 **System-level overcollateralization** is not directly readable from a single onchain call — it requires aggregating per-ilk `Art × rate` (debt) and `ink × oracle price × liquidation-ratio` (locked collateral value). Observatory's [balance-sheet aggregate](https://observatory.data.blockanalitica.com/financials/balance-sheet/aggregates/?group_by=month) reports **~$11.49B assets** against **~$11.42B liabilities** for the September 2026 snapshot — a positive but thin ~$68M margin. Note that this is a wider accounting frame than the Vow: it counts the $157M Sky Capital Buffer and other reserves as assets, which is why it shows a small positive margin while the Vow itself is $56.9M net negative. Onchain VAT debt is ~12.06B against ~11.22B Ethereum DAI + USDS issued supply.
 
@@ -270,7 +272,7 @@ Cutting the same book by *underlying asset* rather than by ilk, SkyEco / Observa
 - **sUSDS exchange rate:** `convertToAssets(shares)` is fully onchain via `chi` accumulator and `ssr` rate. Continuous accrual is a pure function of `ssr` and elapsed time since `rho` (last `drip` timestamp). At snapshot: `chi = 1.1090`, `ssr = 1.0000000011214…`, `rho = 1788950867` (2026-09-09)
 - **System debt (VAT):** Readable onchain via `MCD_VAT.debt()` and per-ilk `urns(ilk, urn)`, `ilks(ilk).Art`, `ilks(ilk).rate`. Full reserve audit requires aggregating dozens of ilks but is mechanically possible from public RPC
 - **USDC PSM Pocket:** `USDC.balanceOf(pocket)` is publicly callable — at snapshot returns 3.95B USDC
-- **RWA / offchain-credit backing:** Less transparent. Legacy `RWA00x` ilks total only **~$77.6M** at the snapshot, but broader Observatory categories with offchain/tokenized credit exposure total **~$2.90B**: short-duration Treasury bills (~$1.33B), OTC crypto lending (~$956M), AAA corporate debt (~$496M), legacy RWA (~$77.6M), private credit (~$20.7M), and basis trade (~$20.4M). The underlying assets sit at TradFi custodians or offchain credit venues, so this remains the least directly verifiable slice of backing. Because ~49.8% of VAT debt is drawn by **Prime allocator vaults**, the ilk-level view alone does not reveal what backs it — that requires trusting Observatory's look-through into each allocator's positions
+- **RWA / offchain-credit backing:** Less transparent. Legacy `RWA00x` ilks total only **~$77.6M** at the snapshot, but broader Observatory categories with offchain/tokenized credit exposure total **~$2.90B**: short-duration Treasury bills (~$1.33B), OTC crypto lending (~$956M), AAA corporate debt (~$496M), legacy RWA (~$77.6M), private credit (~$20.7M), and basis trade (~$20.4M). The underlying assets sit at TradFi custodians or offchain credit venues, so this remains the least directly verifiable slice of backing. Because ~49.8% of VAT debt is drawn by **Prime allocator vaults**, the ilk-level view alone does not reveal what backs it — that requires trusting Observatory's look-through into each allocator's positions. Measured on the backing side rather than the debt side, the offchain slice is ~29.3% of Observatory's ~$9.91B loan-coverage backing
 - **Can admins mint USDS out of thin air?** Yes, by definition — Sky governance (PauseProxy) can `usds.rely(addr)` to grant `wards = 1` to any address, which then has unrestricted minting via the underlying contract. This change must go through Chief vote + 48 h GSM delay. At the snapshot, the *only* non-governance ward is `USDS_JOIN`, which itself only mints in response to a corresponding `vat.suck` / `vat.move` settled through valid collateral
 
 ## Liquidity Risk
@@ -390,7 +392,9 @@ System operations are dominated by programmatic onchain logic. The governance to
 |-----------|---------|-------------|-------|
 | **Circle / USDC** | LitePSM Wrapper, Pocket holds 3.95B USDC | **Critical** for USDS-USDC swap path. A USDC freeze/blacklist on the Pocket or a USDC depeg would directly impair USDS-USDC convertibility | Circle has blacklisted addresses before (TornadoCash, OFAC sanctions). The Pocket has not been blacklisted but is on-chain visible and bounded by Circle's policy |
 | **DAI / MakerDAO core (VAT, Join, Pot, Pause, Chief)** | All conversion paths | **Critical** — USDS shares the VAT with DAI. A bug in any MCD core contract impairs USDS | 8+ years of production with documented incidents (Black Thursday) but no exploit since |
-| **RWA / offchain-credit custodians** | Legacy `RWA00x` ilks are ~0.6% of VAT debt; broader tokenized treasury / corporate credit / private-credit / OTC credit backing is ~24.0% of VAT debt, most of it reached through the Prime allocator vaults | High but indirect for the USDC→USDS user | Custodians and credit venues include TradFi/tokenized-credit issuers such as BlackRock BUIDL, Janus Henderson Anemoy/Centrifuge, Securitize, Maple, Anchorage, and legacy RWA vault parties. Failures propagate to system solvency but do not directly impair PSM swap atomicity |
+| **Offchain / tokenized-credit issuers and custodians** (via Prime allocators) | ~29.3% of backing (~$2.90B). Largest named positions at the snapshot: Janus Henderson Treasury Fund (~$758.7M), BlackRock BUIDL I Class (~$568.7M), Syrup USDC / Maple (~$398.6M), Galaxy Warehouse OTC (~$320.0M), Janus Henderson Anemoy AAA CLO (~$262.2M), Anchorage OTC (~$220.0M), Janus Henderson AAA CLO (~$130.9M), Securitize Tokenized AAA CLO (~$103.2M), Anemoy/Apollo Diversified Credit (~$20.7M), plus legacy `RWA00x` (~$77.6M: HVB, New Silver, FortunaFi, Harbor Trade) | **High** for solvency; indirect for the USDC→USDS user | Impairment at any of these flows into the allocator's ilk, then to the Vow as `sin`, degrading USDS backing. It does not impair PSM swap atomicity while the Pocket holds USDC. Positions are reported by [Observatory](https://observatory.data.blockanalitica.com/sky/backed/items/) with periodic attestation, not verifiable by contract read |
+| **Onchain lending markets and DEXs** (via Prime allocators) | ~21.4% of backing (~$2.12B). SparkLend USDS/USDT/USDC/DAI/PYUSD markets (~$1.25B combined), Morpho vaults curated by Steakhouse (Steakhouse Prime Instant ~$179.8M, Grove x Steakhouse USDC High Yield ~$81.3M), Uniswap V4 PYUSD/USDS (~$100.1M) and USDT/USDS (~$50.0M), Uniswap V3 AUSD/USDC (~$26.0M) | **Medium-high** for solvency | Established DeFi protocols, onchain-verifiable, but they carry smart-contract and market risk that propagates to USDS backing through the same allocator path |
+| **Third-party stablecoins held as backing** | RLUSD (Ripple, ~$307.7M), PayPal USD (Paxos, ~$240.0M), plus USDC beyond the Pocket | **Medium** for solvency | A depeg or freeze at any of these reduces allocator backing. Smaller and more diversified than the USDC PSM exposure |
 | **LayerZero V2 (USDS_OFT)** | Cross-chain bridging to **Solana + Avalanche only** (~$6.67M); EVM L2s use native bridges, not LayerZero | **Nil** for Ethereum-mainnet-only user; **Low** for cross-chain users | OFT channels verified to require **2 independent DVNs** (LayerZero Labs + Nethermind) — not the single-DVN config exploited at KelpDAO. See expanded section below |
 | **Native L2 canonical bridges** (Base/Optimism/Unichain OP Stack; Arbitrum Nitro) | SkyLink cross-chain transport for USDS + sUSDS (~102M USDS + ~343M sUSDS) | **Nil** for Ethereum-mainnet-only user | ERC-1967 proxies governed by PauseProxy; security inherits each rollup's canonical bridge. Not LayerZero |
 | **Chainlink / Oracle price feeds (MCD_SPOT)** | Sets per-ilk liquidation prices for collateral CDPs | Indirect — bad oracle → bad liquidations → solvency hit | Mature oracle setup with multi-source feeds |
@@ -586,7 +590,7 @@ Snapshot block 25939320 (September 9, 2026).
 - **USDC dependency** — the largest single backing line for the USDS-USDC swap path is Circle's USDC (~$3.95B in Pocket). A USDC depeg or Pocket blacklisting by Circle would directly impair USDS-USDC convertibility, as happened to DAI during the March 2023 SVB event
 - **Governance can do anything to USDS / sUSDS** — PauseProxy can upgrade either contract's implementation, add new minters via `rely`, change the SSR, or halt PSM swaps via Mom. All require 48 h GSM delay except Mom-halt. SKY token-weighted voting introduces concentration risk if a small set of SKY holders dominates Chief
 - **48 h GSM delay is at the low end** — many newer DeFi systems use 7-day timelocks. 48 h gives a tight reaction window for catching malicious spells
-- **Offchain and tokenized-credit backing** — ~24.0% of VAT debt (~$2.90B: Treasury bills, OTC crypto lending, AAA corporate debt, private credit, legacy RWA) sits with offchain custodians and credit venues and depends on attestations and Observatory reporting, not direct onchain visibility
+- **Offchain and tokenized-credit backing** — ~29.3% of backing (~$2.90B: Treasury bills, OTC crypto lending, AAA corporate debt, private credit, legacy RWA) sits with offchain custodians and credit venues and depends on attestations and Observatory reporting, not direct onchain visibility. Named counterparties are in [External Dependencies](#external-dependencies)
 - **Prime allocator concentration** — ~49.8% of VAT debt is drawn by Prime allocators, and ~49.5 points of that sit in just three (Spark ~$3.06B, Grove ~$2.50B, Obex ~$403M). The ilk itself shows only the debt; what backs it is whatever those allocators hold, so USDS solvency now depends heavily on allocator mandate discipline and Sky's ability to unwind those positions
 - **RWA legal/jurisdiction exposure** — Sky's RWA program inherits TradFi regulatory and counterparty risk that is not transparent at the contract level
 - **Chained contract dependency for USDC→USDS** — the swap path traverses USDC → LitePSM → DAI Join → USDS Join → DAI-USDS Converter → USDS. A fault in any link halts the wrapper
@@ -671,14 +675,15 @@ Snapshot block 25939320 (September 9, 2026).
 
 | Factor | Assessment |
 |--------|-----------|
-| True external dependencies | USDC (Circle) — Pocket holds 3.95B USDC; Chainlink oracles (multi-source) for collateral pricing; LayerZero (cross-chain OFT — non-critical for mainnet user) |
+| Swap-path dependencies | USDC (Circle) — Pocket holds 3.95B USDC; Chainlink/Chronicle oracles for collateral pricing; LayerZero (cross-chain OFT — non-critical for mainnet user) |
+| Solvency-path dependencies (via Prime allocators, ~49.8% of VAT debt) | **Offchain/tokenized credit (~29.3% of backing):** Janus Henderson/Anemoy, BlackRock BUIDL, Maple (Syrup), Galaxy, Anchorage, Securitize, Apollo, legacy RWA parties. **Onchain (~21.4%):** SparkLend, Morpho (Steakhouse-curated vaults), Uniswap V3/V4. **Third-party stablecoins:** RLUSD (Ripple), PayPal USD (Paxos) |
 | Not counted as external | MCD core (VAT, Chief, Pause, Join) — this *is* Sky's own infrastructure, not a third-party dependency |
-| Quality | USDC is blue-chip (Circle survived March 2023 SVB depeg without halting); Chainlink is multi-source mature oracle |
-| Single point of failure | A USDC freeze/depeg directly impairs the USDS-USDC swap, but the DAI-USDS converter path still works without USDC |
+| Quality | Predominantly established: Circle, BlackRock, Janus Henderson, Chainlink, Spark, Morpho, Uniswap. Newer or less-liquid venues (Maple, Galaxy, Apollo private credit) are individually ≤~$400M |
+| Single point of failure | None. A USDC freeze/depeg impairs the USDS-USDC swap but the DAI-USDS converter still works; no single allocator counterparty exceeds ~7.7% of backing |
 
-**Dependencies Score: 1.5 / 5** — One critical blue-chip external dependency (USDC) and one mature mid-criticality dependency (Chainlink). MCD core was previously double-counted as both internal architecture *and* external dependency — removing that, the residual external surface is small. Score 1.5 (between Score 1 "no external dependencies" and Score 2 "1-2 blue-chip non-critical") reflects that USDC is blue-chip but criticality is non-trivial.
+**Dependencies Score: 3.0 / 5** — the rubric's Score 3 is "2-3 established protocol dependencies; some critical functions depend on them", and the honest count is higher than that once the allocator book is enumerated: a dozen-plus established counterparties, of which USDC is critical to the swap path and the offchain-credit set is critical to solvency. The prior 1.5 was derived from a dependency list that stopped at USDC, Chainlink and LayerZero, and is not defensible now that ~49.8% of VAT debt is documented as sitting in allocator vaults with named downstream exposure. It is held at 3.0 rather than 4.0 because the dependencies are mostly blue-chip rather than "newer", no single allocator counterparty exceeds ~7.7% of backing (the largest is the Janus Henderson Treasury Fund at ~$758.7M), and the *core user functions* — holding USDS, converting to DAI, accruing SSR in sUSDS — depend on none of them; only solvency does.
 
-**Cat 2 Score = (1.0 + 1.0 + 1.5) / 3 ≈ 1.17 → 1.2 / 5** (conservative round-up to one decimal)
+**Cat 2 Score = (1.0 + 1.0 + 3.0) / 3 ≈ 1.67 → 1.7 / 5** (conservative round-up to one decimal)
 
 #### Category 3: Funds Management (Weight: 30%)
 
@@ -691,9 +696,11 @@ Snapshot block 25939320 (September 9, 2026).
 | Verifiability | Per-ilk debt and ink readable onchain. Prime allocator and RWA fractions require Observatory look-through / attestations |
 | Leverage | None at USDS holder level. CDP borrowers are leveraged by design |
 
-**Collateralization Score: 2.5 / 5** — 100% collateralized, but not by the rubric's Score-2 standard of "100% **onchain** collateral". About 24.0% of VAT debt (~$2.90B in tokenized treasury, AAA corporate, private and OTC credit) sits offchain and is confirmed by periodic attestation, which is the Score-3 backing and verifiability profile. Against that, ~76% of backing genuinely is onchain and verifiable in real time — the USDC PSM alone is 39.3% of VAT debt — and the collateral is extensively documented and historically robust, which is better than a flat Score 3.
+**Collateralization Score: 2.5 / 5** — collateralized in aggregate (total collateral value ~$15.81B, ~131% of VAT debt), but not by the rubric's Score-2 standard of "100% **onchain** collateral". Measured against Observatory's ~$9.91B loan-coverage backing, **~29.3% (~$2.90B) is offchain** tokenized treasury, AAA corporate, private and OTC credit, confirmed by periodic attestation rather than contract reads — that is the Score-3 backing and verifiability profile. Against that, ~70.7% is onchain, and the single largest line — ~$3.95B of USDC in the PSM Pocket, ~39.9% of backing — is instantly verifiable by a `balanceOf` call.
 
-The deciding factor for the 0.5 uplift from the prior 2.0 is **allocator opacity**: ~49.8% of VAT debt is drawn by Prime allocator vaults (Spark, Grove, Obex and three smaller ones) where the ilk exposes only the drawn debt, not the assets standing behind it. Reconstructing that backing requires trusting Block Analitica's Observatory look-through rather than reading the VAT. That structure was not documented in the June 2026 assessment; it is a correction to how this subcategory was scored, not a deterioration in the protocol — the offchain share has in fact fallen from ~25.9% to ~24.0% over the period. Scoring 2.5 rather than 3.0 follows the framework's rule of choosing the higher score when genuinely between two marks, without overstating an offchain share that is still under a quarter of the book.
+The deciding factor for the 0.5 uplift from the prior 2.0 is **allocator opacity**: ~49.8% of VAT debt is drawn by Prime allocator vaults (Spark, Grove, Obex and three smaller ones) where the ilk exposes only the drawn debt, not the assets standing behind it. Reconstructing that backing requires trusting Block Analitica's Observatory look-through rather than reading the VAT. That structure was not documented in the June 2026 assessment; it is a correction to how this subcategory was scored, not a deterioration in the protocol.
+
+A reader applying the rubric strictly could argue for 3.0: the backing column ("some offchain") and the verifiability column ("periodic custodian attestation") both match Score 3 outright, and only the quality column pulls toward 2. The case for holding at 2.5 is that roughly seven-tenths of backing is onchain and the largest single line is a real-time-verifiable USDC reserve — a materially better position than the Score-3 archetype. This is the least settled judgment in the report.
 
 **Subcategory B: Provability**
 
@@ -740,13 +747,13 @@ The deciding factor for the 0.5 uplift from the prior 2.0 is **allocator opacity
 | Category | Score | Weight | Weighted |
 |----------|------:|-------:|---------:|
 | Audits & Historical | 1.0 | 20% | 0.200 |
-| Centralization & Control | 1.2 | 30% | 0.360 |
+| Centralization & Control | 1.7 | 30% | 0.510 |
 | Funds Management | 2.0 | 30% | 0.600 |
 | Liquidity Risk | 1.0 | 15% | 0.150 |
 | Operational Risk | 1.0 |  5% | 0.050 |
-| **Final Score** | | | **1.360 → 1.4 / 5.0** |
+| **Final Score** | | | **1.510 → 1.5 / 5.0** |
 
-**Final Score: 1.4 / 5.0** — inside the Minimal-Risk tier (1.0–1.5).
+**Final Score: 1.5 / 5.0** — at the top of the Minimal-Risk tier (1.0–1.5).
 
 ### Risk Tier
 
@@ -758,7 +765,7 @@ The deciding factor for the 0.5 uplift from the prior 2.0 is **allocator opacity
 | 3.5–4.5 | Elevated Risk | Limited approval, strict limits |
 | 4.5–5.0 | High Risk | Not recommended |
 
-**Final Risk Tier: Minimal Risk (1.4 / 5.0) — Approved, high confidence**
+**Final Risk Tier: Minimal Risk (1.5 / 5.0) — Approved, high confidence**
 
 ---
 
@@ -796,4 +803,4 @@ The deciding factor for the 0.5 uplift from the prior 2.0 is **allocator opacity
 | Date | Score | Notes |
 | --- | --- | --- |
 | [June 18, 2026](https://github.com/yearn/risk-score/pull/204) | 1.3 | Initial assessment |
-| [September 9, 2026](https://github.com/yearn/risk-score/pull/457) | 1.4 | Reassessment. Supply contraction (USDS 7.82B → 6.65B, sUSDS assets 5.88B → 4.67B); LitePSM `buf` doubled to 800M DAI; Spark Liquidity Layer repatriated Base/Optimism/Unichain bridge positions to mainnet (escrowed USDS 448M → 102M). Collateralization restated from onchain per-ilk debt: Prime allocator vaults are ~49.8% of VAT debt and were previously undocumented, and the ~$690M `vice` was previously mischaracterised as Vow surplus. Proxies, `wards`, 48 h GSM delay, and 2-of-2 DVN config unchanged. Collateralization subscore 2.0 → 2.5 for allocator opacity, moving the final score 1.3 → 1.4 (tier unchanged) |
+| [September 9, 2026](https://github.com/yearn/risk-score/pull/457) | 1.5 | Reassessment. Supply contraction (USDS 7.82B → 6.65B, sUSDS assets 5.88B → 4.67B); LitePSM `buf` doubled to 800M DAI; Spark Liquidity Layer repatriated Base/Optimism/Unichain bridge positions to mainnet (escrowed USDS 448M → 102M). Collateralization restated from onchain per-ilk debt: Prime allocator vaults are ~49.8% of VAT debt and were previously undocumented, and the ~$690M `vice` was previously mischaracterised as Vow surplus. Proxies, `wards`, 48 h GSM delay, and 2-of-2 DVN config unchanged. Collateralization subscore 2.0 → 2.5 for allocator opacity and External Dependencies 1.5 → 3.0 once the allocator counterparty set (BlackRock BUIDL, Janus Henderson, Maple, Galaxy, Anchorage, SparkLend, Morpho, Uniswap) is enumerated, moving the final score 1.3 → 1.5 (tier unchanged) |
