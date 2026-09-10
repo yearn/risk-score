@@ -14,13 +14,15 @@ JSON structure:
       "review": 3,
       "testing": 1,
       ...
-    }
+    },
+    "report": "https://curation.yearn.fi/report/yearn-yvusdc/"
   }
 }
 ```
 
 - `riskLevel` is the final risk of the vault displayed on Yearn frontend.
 - `riskScore` is object with detailed values of each risk category.
+- `report` is an optional URL linking to the full risk assessment report for the vault (e.g. `https://curation.yearn.fi/report/<slug>/`). Only add it for vaults that have a dedicated report in [`reports/report/`](../reports/report/); do not add it for single strategies.
 
 This data is used by [yDaemon](https://github.com/yearn/ydaemon). yDaemon fetches the vaults from blockchain registry and creates new JSON item for each vault. yDaemon was extended in [this commit](https://github.com/yearn/ydaemon/commit/b8296457af78cf97f41ef15cb502ff0744fd0a8b) to fetch the vault risk score from this folder.
 
@@ -33,6 +35,7 @@ TODO: Make Kong use this data and reference the file/commit where this repo is u
 3. The value must contain `riskLevel` and `riskScore` fields assigned by the SAM team.
    - Multistrategy vaults contain `riskLevel` field, `riskScore` fields are all 0 and should not be used.
    - Single-strategy vaults contains both `riskLevel` and `riskScore` fields. `riskScore` fields should be filled with the risk score for the strategy. Check [RISK_FRAMEWORK.md](./RISK_FRAMEWORK.md) for more information on how to fill the `riskScore` fields.
-4. Keep addresses sorted alphabetically for easier maintenance.
+4. Optionally add a `report` field with the URL to the vault's risk assessment report. The report slug must match a file in `reports/report/` (e.g. `yearn-yvusdc` for `yearn-yvusdc.md`).
+5. Keep addresses sorted alphabetically for easier maintenance.
 
 For reference, check [1.json](./1.json) for examples of vault entries.
