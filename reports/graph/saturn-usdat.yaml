@@ -64,7 +64,7 @@ nodes:
     label: CCIP Pool Owner (RBACTimelock)
     address: "0x44835bBBA9D40DEDa9b64858095EcFB2693c9449"
     category: governance
-    note: Owns Ethereum LockReleaseTokenPool; getMinDelay=10,800s (3h). Same address also owns Maple syrupUSDC's CCIP pool per this repo's bridges.json — unreconciled whether protocol-specific or shared
+    note: Owns Ethereum LockReleaseTokenPool; getMinDelay=10,800s (3h)
   - id: saturn-timelock-remote
     label: Saturn Timelock (BNB/Monad, 2d)
     address: "0xF0237a1cb794eA830129966049eF99243082FF0C"
