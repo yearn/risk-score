@@ -96,6 +96,7 @@ export const GET: APIRoute = async () => {
     `- [Token exposures](${SITE}/tokens/): shared-asset overlap across curated protocols`,
     `- [Bridge dependencies](${SITE}/bridges/): cross-chain bridge risk`,
     `- [Live monitoring](${SITE}/monitoring/): real-time protocol alerts (governance, oracle, owner changes)`,
+    `- [Contact](${SITE}/contact/): work with Yearn Curation on risk assessments, vault curation, curation advice, and monitoring — curation@yearn.fi`,
     "- [Yearn Curation introduction](https://docs.yearn.fi/getting-started/products/curating/introduction)",
     "- [Source repository](https://github.com/yearn/risk-score)",
     "",

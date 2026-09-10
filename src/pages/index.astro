@@ -28,6 +28,7 @@ const excerpt = (html: string, maxLen = 180): string => {
 const reportCount = stats.reportCount;
 
 const morphoUrl = "https://app.morpho.org/ethereum/curator/yearn";
+const defillamaUrl = "https://defillama.com/protocol/yearn";
 
 // Homepage highlights scored assessments; Not Rated (terminal) reports live on /reports.
 const recent = getAllReports()
@@ -249,6 +250,28 @@ const followups = recent.slice(1);
     <a href={morphoUrl} target="_blank" rel="noopener noreferrer" class="btn btn-primary">
       Open Yearn vaults on Morpho
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+    </a>
+  </section>
+
+  <section class="contact-cta">
+    <div class="contact-copy">
+      <div class="contact-eyebrow">Work with us</div>
+      <h2>Get in touch</h2>
+      <p>
+        Yearn manages and curates <a href={defillamaUrl} target="_blank" rel="noopener noreferrer">$250M+ in TVL</a>.
+        We take on risk assessments, vault curation, curation advice and onchain
+        monitoring for protocols, DAOs and allocators.
+      </p>
+      <div class="contact-tags">
+        <span>Risk assessments</span>
+        <span>Vault curation</span>
+        <span>Curation advice</span>
+        <span>Monitoring</span>
+      </div>
+    </div>
+    <a href="/contact/" class="btn btn-primary contact-btn">
+      Contact us
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
     </a>
   </section>
 </BaseLayout>
@@ -689,9 +712,71 @@ const followups = recent.slice(1);
     max-width: 60ch;
   }
 
+  /* === Work-with-us CTA === */
+  .contact-cta {
+    margin: 3rem 0 1rem;
+    padding: 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    background:
+      linear-gradient(135deg, rgba(6, 117, 249, 0.1), transparent 60%),
+      color-mix(in srgb, var(--bg-card) 65%, transparent);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+  }
+  .contact-copy {
+    min-width: 0;
+    flex: 1 1 22rem;
+  }
+  .contact-eyebrow {
+    font-size: 0.72rem;
+    color: var(--brand-blue);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-weight: 600;
+  }
+  .contact-cta h2 {
+    font-size: 1.25rem;
+    margin-top: 0.1rem;
+  }
+  .contact-cta p {
+    color: var(--text-secondary);
+    max-width: 60ch;
+    margin-top: 0.35rem;
+  }
+  .contact-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin-top: 1rem;
+  }
+  .contact-tags span {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    padding: 0.2rem 0.6rem;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--bg-secondary) 40%, transparent);
+  }
+  .contact-btn {
+    flex-shrink: 0;
+  }
+
   @media (max-width: 720px) {
     .features {
       grid-template-columns: 1fr;
+    }
+    .contact-cta {
+      padding: 1.5rem;
+    }
+    .contact-btn {
+      width: 100%;
+      justify-content: center;
     }
     .hero {
       padding: 2rem 0 1.5rem;
