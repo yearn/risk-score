@@ -39,6 +39,13 @@ exclude_path = ["reports/TEMPLATE.md"]
 # - github.com/resolv-im/resolv-contracts-public returns 404 (repo is private or
 #   removed). Referenced by the Resolv reports (now HACKED / Not Rated), which we
 #   are intentionally not modifying; excluded so the dead link doesn't fail CI.
+# - superstate.com/assets/ (bare apex domain, e.g. /assets/uscc, /assets/ustb)
+#   intermittently raises the same "HTTP/2 protocol error" as businesswire.com
+#   above; curl and browsers negotiate HTTP/2 with it fine. Because it's a plain
+#   connection error (no HTTP status code), cache_exclude_status can't filter it
+#   from the cache, so one bad run poisons results for up to max_cache_age.
+#   Scope kept to the apex /assets/ path; docs.superstate.com and
+#   api.superstate.com are unaffected and still checked.
 exclude = [
     '^https?://(www\.)?rekt\.news',
     '^https?://(blue-api|api)\.morpho\.org/graphql',
@@ -49,4 +56,5 @@ exclude = [
     '^https?://(www\.)?maple\.finance/syrup',
     '^https?://(www\.)?businesswire\.com/news/',
     '^https?://github\.com/resolv-im/resolv-contracts-public',
+    '^https?://(www\.)?superstate\.com/assets/',
 ]
