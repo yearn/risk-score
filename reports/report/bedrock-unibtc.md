@@ -5,7 +5,7 @@
 - **Chain:** Ethereum
 - **Token Address:** [`0x004E9C3EF86bc1ca1f0bB5C7662861Ee93350568`](https://etherscan.io/address/0x004E9C3EF86bc1ca1f0bB5C7662861Ee93350568)
 - **Final Score: 3.8/5.0**
-- **Snapshot:** Ethereum block [25,970,228](https://etherscan.io/block/25970228), hash `0xd28de57e194e0ab8774a712caeec3975fe0cd265c661f8efb403759512b2066f`, September 13, 2026 18:11:59 UTC. Contract reads are pinned to this block. Bedrock reserve API: 18:10:07 UTC; CoinGecko: 18:10:40 UTC; CoW quotes: approximately 18:16 UTC; DeFiLlama: September 13 API snapshot. These independently timed sources are not a single reconciled ledger. [Cached observations and role evidence](../data/bedrock-unibtc-2026-09-13.json).
+- **Snapshot:** Ethereum block [25,970,228](https://etherscan.io/block/25970228), hash `0xd28de57e194e0ab8774a712caeec3975fe0cd265c661f8efb403759512b2066f`, September 13, 2026 18:11:59 UTC. Contract reads are pinned to this block. Bedrock reserve API: 18:10:07 UTC; CoinGecko: 18:10:40 UTC; CoW quotes: approximately 18:16 UTC; DeFiLlama: September 13 API snapshot. These independently timed sources are not a single reconciled ledger. [Cached observations and role evidence](https://github.com/yearn/risk-score/blob/9457f23a5be5fc62032e9a94dc1a9b16bc46d264/reports/data/bedrock-unibtc-2026-09-13.json).
 
 ## Overview + Links
 
@@ -220,7 +220,7 @@ Address visibility also does not prove the full operational state:
 
 ### Delegated control paths
 
-Full role-event reconstruction and `hasRole` confirmation establish the following additional authorities. [Snapshot evidence](../data/bedrock-unibtc-2026-09-13.json) records every holder and role-admin getter; all listed AccessControl roles are governed by their contract's `DEFAULT_ADMIN_ROLE`.
+Full role-event reconstruction and `hasRole` confirmation establish the following additional authorities. [Snapshot evidence](https://github.com/yearn/risk-score/blob/9457f23a5be5fc62032e9a94dc1a9b16bc46d264/reports/data/bedrock-unibtc-2026-09-13.json) records every holder and role-admin getter; all listed AccessControl roles are governed by their contract's `DEFAULT_ADMIN_ROLE`.
 
 | Contract / role | Holders | Effective control |
 |-----------------|---------|-------------------|
@@ -553,7 +553,7 @@ The current M-BTC allocation (21.35%) is below the 25% trigger; Chainlink reserv
 - M-BTC holder distribution: https://scan.merlinchain.io/token/0xB880fd278198bd590252621d4CD071b1842E9Bcd
 - Independent Merlin trust-model analysis: https://www.spark.money/research/merlin-chain-bitcoin-l2-analysis
 - EVMbench smart-contract security agent research (2026): https://openai.com/index/introducing-evmbench/
-- [September 13, 2026 evidence](../data/bedrock-unibtc-2026-09-13.json): pinned Ethereum contract/proxy/role/allowlist reads, full paginated role histories, Safe continuity, CCIP inbound/outbound lane buckets, live redemption parameters and debts, and unsigned CoW quotes. `totalTokenSupply()` is the supply getter used by the Vault; `totalSupply()` on that feeder reverts.
+- [September 13, 2026 evidence](https://github.com/yearn/risk-score/blob/9457f23a5be5fc62032e9a94dc1a9b16bc46d264/reports/data/bedrock-unibtc-2026-09-13.json): pinned Ethereum contract/proxy/role/allowlist reads, full paginated role histories, Safe continuity, CCIP inbound/outbound lane buckets, live redemption parameters and debts, and unsigned CoW quotes. `totalTokenSupply()` is the supply getter used by the Vault; `totalSupply()` on that feeder reverts.
 - [Bedrock reserve API](https://affiliate-api-eosin.vercel.app/api/v1/third/stats/unibtc), [DeFiLlama API](https://api.llama.fi/protocol/bedrock-unibtc), and [CoinGecko](https://www.coingecko.com/en/coins/universal-btc): independently timed market/reserve snapshots recorded in the evidence.
 - Reserve/Merlin verification on August 8, 2026: Bedrock dashboard reserve composition and linked addresses; M-BTC `totalSupply()`, `bridgeAddress()`, Bedrock reserve balance and holder rank; main bridge `version()`, admin and mint-relayer reads; EIP-1967 implementation slots; and bytecode-presence checks via Merlin RPC.
 
@@ -562,4 +562,4 @@ The current M-BTC allocation (21.35%) is below the 25% trigger; Chainlink reserv
 | Date | Score | Notes |
 | --- | --- | --- |
 | [August 10, 2026](https://github.com/yearn/risk-score/pull/303) | 3.6 | Initial uniBTC assessment |
-| September 13, 2026 | 3.8 | Verified manual supply reporting and unresolved denominator discrepancy; refreshed roles, deposit limits, redemption liquidity, reserves, and indicative exit quotes. Elevated Risk. |
+| [September 13, 2026](https://github.com/yearn/risk-score/pull/468) | 3.8 | Verified manual supply reporting and unresolved denominator discrepancy; refreshed roles, deposit limits, redemption liquidity, reserves, and indicative exit quotes. Elevated Risk. |
