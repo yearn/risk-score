@@ -49,25 +49,60 @@ nodes:
     category: infra
     note: Owned by Admin Timelock; can upgrade USDat implementation
   - id: swap-facility
-    label: M0 Swap Facility
-    address: "0xB6807116b3B1B321a390594e31ECD6e0076f6278"
+    label: M0 Swap Facility (current)
+    address: "0x0bC305e7e13113cAEd3f5486849e9518a1cC4173"
     category: infra
-    note: Sole mint/redeem contract; onlySwapFacility on wrap/unwrap
+    note: Sole mint/redeem contract since Aug 19, 2026; onlySwapFacility on wrap/unwrap. Replaced 0xB680…6278.
+  - id: ccip-lock-pool
+    label: CCIP LockReleaseTokenPool
+    address: "0xA0dE671eb84dE9dEe1d311d996d25c41F63a0D86"
+    category: infra
+    note: Chainlink CCIP; escrows USDat on Ethereum to back BNB Chain/Monad supply (31,965,633.03 held, verified Sep 9 2026)
+
+  # === Cross-chain governance ===
+  - id: ccip-pool-owner
+    label: CCIP Pool Owner (RBACTimelock)
+    address: "0x44835bBBA9D40DEDa9b64858095EcFB2693c9449"
+    category: governance
+    note: Owns Ethereum LockReleaseTokenPool; getMinDelay=10,800s (3h)
+  - id: saturn-timelock-remote
+    label: Saturn Timelock (BNB/Monad, 2d)
+    address: "0xF0237a1cb794eA830129966049eF99243082FF0C"
+    category: governance
+    note: Admin of BurnWithFromMintTokenPool on both BNB Chain and Monad (same address both chains); getMinDelay=172,800s (2d) — shorter than Ethereum's 5d Admin Timelock
 
   # === External Dependencies ===
+  - id: pyusdx
+    label: M0 PYUSDx Token
+    address: "0xeBDB0942cE16386Ab90718C7BD10C91CDb66b14d"
+    category: dependency
+    note: USDat's backing asset since Aug 19, 2026 (replaced $M); M0-framework extension backed 1:1 by PYUSD
+  - id: pyusd
+    label: PYUSD (PayPal USD, Paxos)
+    category: dependency
+    note: Issued by Paxos Trust Company; backs PYUSDx 1:1 via the MoonPay/M0 PYUSDx framework (launched Feb 27, 2026)
+  - id: paxos-reserves
+    label: Paxos Trust Reserves (cash/T-bills)
+    category: dependency
+    note: Off-chain PYUSD reserves; regulated (NYDFS-chartered trust company) attestation regime, separate from M0's own Treasury reserves
   - id: m0-m-token
-    label: M0 $M Token
+    label: M0 $M Token (retired for USDat)
     address: "0x866A2BF4E572CbcF37D5071A7a58503Bfb36be1b"
     category: dependency
-    note: Tokenized U.S. Treasuries; USDat 1:1 backing asset
+    note: Former USDat backing asset through Aug 19, 2026. isAllowedAsset($M)=false, assetCap($M)=0, balance=0 as of Sep 8, 2026 — retained for historical context only
   - id: m0-treasury
     label: M0 Treasury (US Treasuries)
     category: dependency
-    note: Off-chain M0 reserves backing $M; attested by M0 governance
+    note: Off-chain M0 reserves backing $M; attested by M0 governance. No longer USDat's backing chain (see pyusdx/pyusd)
   - id: strc
     label: STRC (Strategy Perpetual Preferred)
     category: dependency
     note: Off-chain BTC-backed preferred equity; custodied at Clear Street; sUSDat yield source
+  - id: usdat-remote
+    label: USDat on BNB Chain / Monad
+    category: dependency
+    link: "https://bscscan.com/address/0x0Bb150DFa86EA5d7742F07FEfCD8E8edA81D64eF"
+    note: "SaturnOFT contract (same address both chains); MINTER_ROLE/BURNER_ROLE held by a BurnWithFromMintTokenPool per chain. BNB ~$2.0M, Monad ~$27.6M circulating (verified Sep 9 2026) — Monad alone is ~46% of Ethereum's own USDat supply"
 
 edges:
   # Governance wiring
@@ -100,13 +135,25 @@ edges:
 
   # Capital flow
   - from: usdat
-    to: m0-m-token
+    to: pyusdx
     kind: deposits-into
-    label: "1:1 $M backing"
+    label: "1:1 PYUSDx backing (since Aug 19, 2026)"
+  - from: pyusdx
+    to: pyusd
+    kind: deposits-into
+    label: "1:1 PYUSD backing (MoonPay/M0 framework)"
+  - from: pyusd
+    to: paxos-reserves
+    kind: deposits-into
+    label: "backed by Paxos cash/T-bill reserves"
+  - from: usdat
+    to: m0-m-token
+    kind: routes-through
+    label: "retired Aug 19, 2026 — balance now 0"
   - from: m0-m-token
     to: m0-treasury
     kind: deposits-into
-    label: backed by US Treasuries
+    label: backed by US Treasuries (historical)
   - from: susdat
     to: usdat
     kind: deposits-into
@@ -115,3 +162,21 @@ edges:
     to: strc
     kind: deposits-into
     label: STRC yield source
+
+  # Cross-chain (Chainlink CCIP)
+  - from: ccip-pool-owner
+    to: ccip-lock-pool
+    kind: controls
+    label: "owner(); 3h timelock"
+  - from: saturn-timelock-remote
+    to: usdat-remote
+    kind: controls
+    label: "admin of BurnWithFromMintTokenPool; 2d timelock"
+  - from: usdat
+    to: ccip-lock-pool
+    kind: deposits-into
+    label: "locked to back remote-chain supply"
+  - from: ccip-lock-pool
+    to: usdat-remote
+    kind: routes-through
+    label: "CCIP message → mint on BNB Chain / Monad"
