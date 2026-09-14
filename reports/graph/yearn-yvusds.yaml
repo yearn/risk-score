@@ -67,12 +67,12 @@ nodes:
 
   # Strategies
   - id: susds-lender
-    label: sUSDS Lender (84.08%)
+    label: sUSDS Lender (queued, 0%)
     address: "0x3F2dE801629116A83B9734bB72012A554e01CfC1"
     category: strategy
     note: "EIP-1967 proxy (admin = 0x0); impl 0x254a93feff3beef9ca004e913bb5443754e8ab19 (TokenizedStrategy); management = Brain 3-of-8"
   - id: spark-usds-compounder
-    label: Spark USDS Compounder (15.92%)
+    label: Spark USDS Compounder (100%)
     address: "0xc9f01b5c6048B064E6d925d1c2d7206d4fEeF8a3"
     category: strategy
     note: "EIP-1967 proxy (admin = 0x0); impl 0xd377919fa87120584b21279a491f82d5265a139c (TokenizedStrategy); management = Brain 3-of-8"
@@ -113,11 +113,11 @@ edges:
   - from: yvUSDS
     to: susds-lender
     kind: allocates-to
-    label: "84.08%"
+    label: "queued"
   - from: yvUSDS
     to: spark-usds-compounder
     kind: allocates-to
-    label: "15.92%"
+    label: "100%"
   - from: yvUSDS
     to: usds-sky-rewards-compounder
     kind: allocates-to
