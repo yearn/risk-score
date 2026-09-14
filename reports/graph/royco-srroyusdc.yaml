@@ -1,0 +1,247 @@
+slug: royco-srroyusdc
+title: Royco Dawn (srRoyUSDC) — Contract Dependency Graph
+chain: ethereum
+
+categories:
+  - id: vault
+    label: Vault / Token
+  - id: strategy
+    label: Strategy / Market
+  - id: governance
+    label: Governance / Multisig
+  - id: infra
+    label: Protocol Infra
+  - id: dependency
+    label: External Dependency
+
+nodes:
+  # === Vault / token layer ===
+  - id: srroyusdc
+    label: srRoyUSDC (Senior Vault)
+    address: "0xcD9f5907F92818bC06c9Ad70217f089E190d2a32"
+    category: vault
+    note: ERC-4626 / ERC-7540 async vault; ERC-1967 proxy
+  - id: vault-impl
+    label: ConcreteAsyncVaultImpl
+    address: "0x1b5cd91e61505d431d2a61192a1006146bd9bb28"
+    category: vault
+
+  # === Governance ===
+  - id: owner-safe
+    label: Owner Safe (3-of-5)
+    address: "0x85de42e5697d16b853ea24259c42290dace35190"
+    category: governance
+    note: Vault owner; ADMIN_UPGRADER on RoycoFactory; owns MultisigStrategy ProxyAdmin
+  - id: vault-mgr
+    label: VAULT_MANAGER Safe (3-of-4)
+    address: "0x7c405bbD131e42af506d14e752f2e59B19D49997"
+    category: governance
+    note: Fee / queue management
+  - id: treasury-safe
+    label: Treasury Safe (3-of-5, same signers as Owner)
+    address: "0x170ff06326eBb64BF609a848Fc143143994AF6c8"
+    category: governance
+    note: Holds Senior Tranche tokens; calls adjustTotalAssets
+  - id: concrete-factory-owner
+    label: ConcreteFactory Owner (Concrete team 3-of-5)
+    address: "0xdc29BD10CB9000dffBb5aAcD30606c66f07c866C"
+    category: governance
+    note: Approves vault implementation upgrades
+
+  # === Protocol infra ===
+  - id: multisig-strategy
+    label: MultisigStrategy (full-custody handoff)
+    address: "0xd3F8Edff57570c4F9B11CC95eA65117e2D7A6C2D"
+    category: infra
+    note: Forwards USDC to Treasury Safe; adjustTotalAssets admin-reported
+  - id: makina-strategy
+    label: RoycoVaultMakinaStrategy (secondary, ~1K USDC)
+    address: "0xc5FeF644d59415cec65049e0653CA10eD9Cba778"
+    category: infra
+  - id: concrete-factory
+    label: ConcreteFactory (Vault Proxy Admin)
+    address: "0x0265d73a8e61f698d8eb0dfeb91ddce55516844c"
+    category: infra
+  - id: royco-factory
+    label: RoycoFactory (AccessManager, 5d setback)
+    address: "0xD567cCbb336Eb71eC2537057E2bCF6DB840bB71d"
+    category: infra
+  - id: royco-factory-proxy
+    label: RoycoFactory Proxy (Dawn Market Factory)
+    address: "0x7cC6fB28eC7b5e7afC3cB3986141797ffc27253C"
+    category: infra
+  - id: adaptive-ydm
+    label: AdaptiveCurveYDM (immutable)
+    address: "0x071B0FA065774b403B8dae0aE93A09Df5DE3DFAc"
+    category: infra
+    note: Yield distribution model; no admin
+
+  # === Strategy: Dawn markets (Senior Tranche tokens held by Treasury) ===
+  - id: st-snusd
+    label: ROY-ST-sNUSD (Senior)
+    address: "0x2070Af1C865f5d764F673Baf5654822947e71243"
+    category: strategy
+    note: Neutrl sNUSD market; PERPETUAL (fixedTermDuration=0)
+  - id: st-snusd-legacy
+    label: ROY-ST-sNUSD legacy (Senior)
+    address: "0x3b2df77f0eaa0ca98aaabffa96b03eaf08ec6c8e"
+    category: strategy
+  - id: st-autousd
+    label: ROY-ST-autoUSD (Senior)
+    address: "0x73C641fe41EB0270C7f473f3c3E4A40eb97fd8dE"
+    category: strategy
+    note: 2-day Fixed-Term protection
+  - id: st-savusd
+    label: ROY-ST-savUSD (Senior, Avalanche)
+    category: strategy
+    note: Avalanche chain; address 0xDA7bf1788aecb94fE6D5D3f739358De94f43E5C9
+  - id: kernel-snusd
+    label: Neutrl sNUSD Kernel
+    address: "0x0aE0978B868804929fd4C06B3B22D9197B8cd3c6"
+    category: infra
+  - id: kernel-autousd
+    label: Tokemak autoUSD Kernel
+    address: "0x8748D1c21CC550B435487F473d9Aaf6C84dA46A6"
+    category: infra
+  - id: aave-position
+    label: Aave aUSDC position
+    address: "0x98c23e9d8f34fefb1b7bd6a91b7ff122f4e16f5c"
+    category: strategy
+    note: ~$2.1M liquidity reserve
+
+  # === External dependencies (underlying yield protocols) ===
+  - id: dep-neutrl
+    label: Neutrl sNUSD
+    category: dependency
+    note: ~29% of vault
+  - id: dep-tokemak
+    label: Tokemak autoUSD
+    category: dependency
+    note: ~11% of vault
+  - id: dep-avant
+    label: Avant savUSD (Avalanche)
+    category: dependency
+    note: ~40% of vault (concentration cap)
+  - id: dep-aave
+    label: Aave v3 Core USDC
+    category: dependency
+    note: ~20% liquidity reserve
+
+edges:
+  # === Governance flow ===
+  - from: owner-safe
+    to: srroyusdc
+    kind: holds-role
+    label: vault owner
+  - from: vault-mgr
+    to: srroyusdc
+    kind: holds-role
+    label: fee / queue management
+  - from: owner-safe
+    to: multisig-strategy
+    kind: manages
+    label: ProxyAdmin (no timelock)
+  - from: owner-safe
+    to: royco-factory
+    kind: holds-role
+    label: ADMIN_UPGRADER (1d delay)
+  - from: concrete-factory-owner
+    to: concrete-factory
+    kind: controls
+    label: owner
+  - from: concrete-factory
+    to: srroyusdc
+    kind: manages
+    label: proxy admin (impl upgrade)
+  - from: treasury-safe
+    to: multisig-strategy
+    kind: controls
+    label: adjustTotalAssets (admin-reported NAV)
+  - from: royco-factory
+    to: royco-factory-proxy
+    kind: manages
+  - from: royco-factory-proxy
+    to: kernel-snusd
+    kind: deploys
+  - from: royco-factory-proxy
+    to: kernel-autousd
+    kind: deploys
+
+  # === Vault internal wiring ===
+  - from: vault-impl
+    to: srroyusdc
+    kind: manages
+    label: ERC-1967 implementation
+
+  # === Capital flow: vault → MultisigStrategy → Treasury → Senior Tranches ===
+  - from: srroyusdc
+    to: multisig-strategy
+    kind: allocates-to
+    label: ~100% (full-custody handoff)
+  - from: srroyusdc
+    to: makina-strategy
+    kind: allocates-to
+    label: ~$1K (secondary)
+  - from: multisig-strategy
+    to: treasury-safe
+    kind: routes-through
+    label: safeTransfer to multisig
+
+  # === Treasury → Senior Tranche allocations ===
+  - from: treasury-safe
+    to: st-snusd
+    kind: allocates-to
+    label: "~11% (Neutrl)"
+  - from: treasury-safe
+    to: st-snusd-legacy
+    kind: allocates-to
+    label: "~18% (Neutrl legacy)"
+  - from: treasury-safe
+    to: st-autousd
+    kind: allocates-to
+    label: "~11% (Tokemak)"
+  - from: treasury-safe
+    to: st-savusd
+    kind: allocates-to
+    label: "~40% (Avant, Avalanche)"
+  - from: treasury-safe
+    to: aave-position
+    kind: allocates-to
+    label: "~20% (Aave reserve)"
+
+  # === Senior Tranche → Kernel → Underlying ===
+  - from: st-snusd
+    to: kernel-snusd
+    kind: deposits-into
+  - from: st-snusd-legacy
+    to: kernel-snusd
+    kind: deposits-into
+  - from: st-autousd
+    to: kernel-autousd
+    kind: deposits-into
+  - from: kernel-snusd
+    to: dep-neutrl
+    kind: deposits-into
+    label: sNUSD wrap
+  - from: kernel-autousd
+    to: dep-tokemak
+    kind: deposits-into
+    label: autoUSD wrap
+  - from: st-savusd
+    to: dep-avant
+    kind: deposits-into
+    label: savUSD wrap
+  - from: aave-position
+    to: dep-aave
+    kind: deposits-into
+    label: aUSDC supply
+
+  # === Yield distribution model wiring ===
+  - from: adaptive-ydm
+    to: kernel-snusd
+    kind: manages
+    label: ST/JT yield split
+  - from: adaptive-ydm
+    to: kernel-autousd
+    kind: manages
+    label: ST/JT yield split

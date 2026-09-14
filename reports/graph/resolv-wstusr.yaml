@@ -1,0 +1,282 @@
+slug: resolv-wstusr
+title: Resolv wstUSR — Contract Dependency Graph
+chain: ethereum
+
+categories:
+  - id: vault
+    label: Vault / Token
+  - id: strategy
+    label: Strategy / Custody Leg
+  - id: governance
+    label: Governance
+  - id: infra
+    label: Protocol Infra
+  - id: dependency
+    label: External Dependency
+
+nodes:
+  # === Vault / token layer ===
+  - id: wstUSR
+    label: wstUSR (Wrapped Staked USR)
+    address: "0x1202F5C7b4B9E47a1A484E8B270be34dbbC75055"
+    category: vault
+    note: ERC-4626 wrapper of stUSR; non-rebasing
+  - id: stUSR
+    label: stUSR (Staked USR)
+    address: "0x6c8984bc7DBBeDAf4F6b2FD766f16eBB7d10AAb4"
+    category: vault
+    note: Rebasing ERC-20; 1:1 USR backing
+  - id: USR
+    label: USR (Stablecoin)
+    address: "0x66a1e37c9b0eaddca17d3662d6c05f4decf3e110"
+    category: vault
+    note: Underlying stablecoin; collateral compromised 2026-03-22
+  - id: RLP
+    label: RLP (Junior Tranche)
+    address: "0x4956b52aE2fF65D74CA2d61207523288e4528f96"
+    category: vault
+    note: First-loss capital protecting USR/stUSR/wstUSR
+
+  # === Internal infra ===
+  - id: usr-requests-manager
+    label: USR Requests Manager
+    address: "0xAC85eF29192487E0a109b7f9E40C267a9ea95f2e"
+    category: infra
+    note: Mint/burn flow for USR (requires whitelist)
+  - id: usr-counter
+    label: USR Counter (TheCounter)
+    address: "0xa27a69Ae180e202fDe5D38189a3F24Fe24E55861"
+    category: infra
+    note: completeSwap() exploited 2026-03-22 — ~80M USR unbacked mint
+  - id: reward-distributor
+    label: RewardDistributor
+    address: "0xbE23BB6D817C08E7EC4Cd0adB0E23156189c1bA9"
+    category: infra
+    note: Drips USR rewards into stUSR (SERVICE_ROLE revoked 2025-05-26)
+  - id: whitelist
+    label: Whitelist
+    address: "0x5943026E21E3936538620ba27e01525bBA311255"
+    category: infra
+    note: Gates USR mint/redeem (not wstUSR wrapping)
+  - id: fee-collector
+    label: Fee Collector
+    address: "0x6E02e225329E32c854178d7c865cF70fE1617f02"
+    category: infra
+  - id: treasury
+    label: Treasury (onchain wallet)
+    address: "0xacb7027f271b03b502d65feba617a0d817d62b8e"
+    category: infra
+
+  # === Governance ===
+  - id: multisig
+    label: Gnosis Safe (3-of-5)
+    address: "0xd6889f307be1b83bb355d5da7d4478fb0d2af547"
+    category: governance
+    note: DEFAULT_ADMIN_ROLE on all core contracts; 5 anonymous EOAs
+  - id: timelock
+    label: TimelockController (3-day)
+    address: "0x290d9544669c9c7a64f6899a0a3b28d563f6ebee"
+    category: governance
+    note: Owns all ProxyAdmins; upgrades only
+  - id: stusr-proxy-admin
+    label: stUSR ProxyAdmin
+    address: "0xeb88058615eaf3e4833af053484012c4d6cbfa37"
+    category: governance
+  - id: wstusr-proxy-admin
+    label: wstUSR ProxyAdmin
+    address: "0xD89784610EefD4d11444788F7A85AaDfd57AF7E5"
+    category: governance
+
+  # === Strategy / custody legs (offchain hedge) ===
+  - id: fireblocks-deribit
+    label: Fireblocks (Deribit) Wallet
+    address: "0x22062B644aADD7e7Bb11e58C37BC1b022f4Ec3aC"
+    category: strategy
+  - id: fireblocks-bybit
+    label: Fireblocks (Bybit) Wallet
+    address: "0x2a144e059cd8a8200298976ce55e8938f33b1d3b"
+    category: strategy
+  - id: ceffu-binance
+    label: Ceffu (Binance) Custody
+    category: strategy
+    note: Omnibus wallet for Binance perp margin
+  - id: defi-allocations
+    label: DeFi / RWA Allocations
+    category: strategy
+    note: Aave v3, Lido, EtherFi, Superstate USCC
+
+  # === External dependencies ===
+  - id: dep-binance
+    label: Binance (Perp Futures)
+    category: dependency
+  - id: dep-deribit
+    label: Deribit (Perp Futures)
+    category: dependency
+  - id: dep-bybit
+    label: Bybit (Perp Futures)
+    category: dependency
+  - id: dep-hyperliquid
+    label: Hyperliquid (Perp DEX)
+    category: dependency
+  - id: dep-aave
+    label: Aave v3
+    category: dependency
+  - id: dep-lido
+    label: Lido (stETH)
+    category: dependency
+  - id: dep-etherfi
+    label: EtherFi (weETH)
+    category: dependency
+  - id: dep-uscc
+    label: Superstate USCC + Aave Horizon RWA
+    category: dependency
+
+edges:
+  # === Governance ===
+  - from: multisig
+    to: timelock
+    kind: proposes-on
+    label: PROPOSER + EXECUTOR (sole)
+  - from: timelock
+    to: stusr-proxy-admin
+    kind: controls
+    label: owner (3d delay)
+  - from: timelock
+    to: wstusr-proxy-admin
+    kind: controls
+    label: owner (3d delay)
+  - from: stusr-proxy-admin
+    to: stUSR
+    kind: manages
+    label: upgrades
+  - from: wstusr-proxy-admin
+    to: wstUSR
+    kind: manages
+    label: upgrades
+  - from: multisig
+    to: wstUSR
+    kind: holds-role
+    label: DEFAULT_ADMIN_ROLE
+  - from: multisig
+    to: stUSR
+    kind: holds-role
+    label: DEFAULT_ADMIN_ROLE
+  - from: multisig
+    to: USR
+    kind: holds-role
+    label: DEFAULT_ADMIN_ROLE + SERVICE_ROLE (added 2026-03-22)
+  - from: multisig
+    to: reward-distributor
+    kind: holds-role
+    label: DEFAULT_ADMIN_ROLE
+  - from: multisig
+    to: whitelist
+    kind: manages
+    label: allowlist control
+
+  # === Mint authority on USR (the compromised surface) ===
+  - from: usr-counter
+    to: USR
+    kind: mints
+    label: SERVICE_ROLE (exploited 2026-03-22)
+  - from: usr-requests-manager
+    to: USR
+    kind: mints
+    label: SERVICE_ROLE (whitelist gated)
+  - from: multisig
+    to: USR
+    kind: mints
+    label: SERVICE_ROLE — uncapped, post-incident
+  - from: reward-distributor
+    to: USR
+    kind: mints
+    label: SERVICE_ROLE (revoked 2025-05-26)
+
+  # === Wrapping flow: USR → stUSR → wstUSR ===
+  - from: wstUSR
+    to: stUSR
+    kind: deposits-into
+    label: ERC-4626 wrap (~344.9M stUSR)
+  - from: stUSR
+    to: USR
+    kind: deposits-into
+    label: 1:1 staked (~347.2M USR)
+
+  # === Yield: rewards drip into stUSR (mint authority shown above) ===
+  - from: reward-distributor
+    to: stUSR
+    kind: routes-through
+    label: USR drip (vested)
+
+  # === USR mint/redeem entry ===
+  - from: usr-requests-manager
+    to: USR
+    kind: routes-through
+    label: requestMint/Burn (whitelist)
+  - from: whitelist
+    to: usr-requests-manager
+    kind: manages
+    label: allowlist check
+  - from: USR
+    to: fee-collector
+    kind: routes-fees-to
+
+  # === Senior/junior tranche: RLP absorbs losses before USR ===
+  - from: RLP
+    to: USR
+    kind: routes-through
+    label: first-loss tranche
+
+  # === USR collateral pool → strategy/custody legs ===
+  - from: USR
+    to: fireblocks-deribit
+    kind: allocates-to
+    label: "Deribit margin"
+  - from: USR
+    to: fireblocks-bybit
+    kind: allocates-to
+    label: "Bybit margin"
+  - from: USR
+    to: ceffu-binance
+    kind: allocates-to
+    label: "Binance margin"
+  - from: USR
+    to: defi-allocations
+    kind: allocates-to
+    label: "DeFi + RWA"
+  - from: USR
+    to: treasury
+    kind: routes-through
+    label: onchain custody
+
+  # === Custody legs → hedging venues ===
+  - from: fireblocks-deribit
+    to: dep-deribit
+    kind: deposits-into
+    label: short perps
+  - from: fireblocks-bybit
+    to: dep-bybit
+    kind: deposits-into
+    label: short perps
+  - from: ceffu-binance
+    to: dep-binance
+    kind: deposits-into
+    label: short perps
+  - from: treasury
+    to: dep-hyperliquid
+    kind: deposits-into
+    label: short perps (DEX)
+
+  # === DeFi allocations → individual venues ===
+  - from: defi-allocations
+    to: dep-aave
+    kind: deposits-into
+  - from: defi-allocations
+    to: dep-lido
+    kind: deposits-into
+  - from: defi-allocations
+    to: dep-etherfi
+    kind: deposits-into
+  - from: defi-allocations
+    to: dep-uscc
+    kind: deposits-into

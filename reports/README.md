@@ -19,8 +19,11 @@ reports/
 │   ├── origin-arm.md           # Example: Origin ARM protocol
 │   ├── infinifi.md             # Example: InfiniFi protocol
 │   └── ...
-└── old/                  # Legacy documentation (deprecated format)
+├── graph/                # Dependency graph YAML, one per report slug
+└── scripts/              # Report-specific data-fetching scripts
 ```
+
+Authoring procedures: [shared agent skills](../AGENTS.md#shared-skills-and-commands).
 
 ## How to Use This Framework
 
@@ -84,7 +87,7 @@ Each category receives a score from 1-5 (1 = safest, 5 = highest risk), which ar
 
 **Technical Safety**
 - Audited and battle-tested code
-- On-chain verifiability of reserves
+- Onchain verifiability of reserves
 - Programmatic operations (minimal admin intervention)
 - Robust liquidation and peg stability mechanisms
 
@@ -92,7 +95,6 @@ Each category receives a score from 1-5 (1 = safest, 5 = highest risk), which ar
 - Transparent team and operations
 - Strong documentation and communication
 - Proven incident response capabilities
-- Active development and maintenance
 
 **Systemic Resilience**
 - Limited dependencies on external protocols
@@ -102,25 +104,16 @@ Each category receives a score from 1-5 (1 = safest, 5 = highest risk), which ar
 
 ### Red Flags
 
+- Unverified contract source (bytecode cannot be independently reviewed)
 - Unaudited or poorly audited code
 - Unlimited admin powers without timelocks
-- Opaque reserves or off-chain dependencies
+- Opaque reserves or offchain dependencies
 - History of incidents with poor response
 - Insufficient liquidity for expected TVL
 - Single points of failure in critical infrastructure
 
-## Migration from Legacy Format
-
-Previously, protocols and assets were documented separately with different formats. The new framework provides:
-- Unified assessment methodology
-- Quantitative risk scoring (1-5 scale)
-- Weighted category scoring
-- Standardized monitoring requirements
-
-**Legacy documents are in `reports/old/` for reference only. Do not use them as templates.**
-
 ## Related Resources
 
-- [Yearn Monitoring Scripts](https://github.com/yearn/monitoring-scripts-py)
-- [Safe Multisig Monitoring](https://github.com/yearn/monitoring-scripts-py/blob/main/safe/main.py)
-- [Workflow Definitions](https://github.com/yearn/monitoring-scripts-py/tree/main/.github/workflows)
+- [Yearn Monitoring Scripts](https://github.com/yearn/monitoring)
+- [Safe Multisig Monitoring](https://github.com/yearn/monitoring/blob/main/protocols/safe/main.py)
+- [Job Definitions](https://github.com/yearn/monitoring/blob/main/automation/jobs.yaml)

@@ -1,0 +1,219 @@
+slug: yearn-yvusdt
+title: yvUSDT-1 — Contract Dependency Graph
+chain: ethereum
+
+categories:
+  - id: vault
+    label: Vault
+  - id: strategy
+    label: Strategy
+  - id: governance
+    label: Governance / Multisig
+  - id: infra
+    label: Yearn Infra / Bot
+  - id: dependency
+    label: External Dependency
+
+nodes:
+  # Vault layer
+  - id: yvUSDT
+    label: yvUSDT-1
+    address: "0x310B7Ea7475A0B449Cfd73bE81522F1B88eFAFaa"
+    category: vault
+  - id: accountant
+    label: Accountant (0% mgmt, 10% perf)
+    address: "0x5A74Cb32D36f2f517DB6f7b0A0591e09b22cDE69"
+    category: infra
+  - id: dumper
+    label: Fee Recipient (Dumper)
+    address: "0x590Dd9399bB53f1085097399C3265C7137c1C4Cf"
+    category: infra
+
+  # Governance
+  - id: daddy
+    label: Daddy / ySafe (6-of-9)
+    address: "0xFEB4acf3df3cDEA7399794D0869ef76A6EfAff52"
+    category: governance
+  - id: brain
+    label: Brain (3-of-8)
+    address: "0x16388463d60FFE0661Cf7F1f31a7D658aC790ff7"
+    category: governance
+  - id: security
+    label: Security (4-of-7)
+    address: "0xe5e2Baf96198c56380dDD5E992D7d1ADa0e989c0"
+    category: governance
+  - id: curator
+    label: Curator (2-of-3)
+    address: "0x90D0f26025571295D18a6c041E47450B81886B51"
+    category: governance
+  - id: timelock
+    label: Strategy Manager (7-day Timelock)
+    address: "0x88Ba032be87d5EF1fbE87336b7090767F367BF73"
+    category: governance
+  - id: role-manager
+    label: Yearn V3 Role Manager
+    address: "0xb3bd6B2E61753C311EFbCF0111f75D29706D9a41"
+    category: governance
+
+  # Infra / bots
+  - id: keeper
+    label: Keeper (yHaaSRelayer)
+    address: "0x604e586F17cE106B64185A7a0d2c1Da5bAce711E"
+    category: infra
+  - id: debt-allocator
+    label: Debt Allocator
+    address: "0x1e9eB053228B1156831759401dE0E115356b8671"
+    category: infra
+  - id: vault-factory
+    label: Vault Factory (v3.0.2)
+    address: "0x444045c5C13C246e117eD36437303cac8E250aB0"
+    category: infra
+
+  # Strategies
+  - id: spark-usdt-lender
+    label: Spark USDT Lender (56.06%)
+    address: "0x176Caf15f1793fc16898458E0ba295ec6523E9E2"
+    category: strategy
+  - id: metamorpo-usdt
+    label: MetaMorpho Vault (ymv-USDT) (43.94%)
+    address: "0x0963232eB842BAF53E8e517691f81745C1F228a0"
+    category: strategy
+    morphoVault: v1
+    link: "https://app.morpho.org/ethereum/vault/0x0963232eB842BAF53E8e517691f81745C1F228a0/"
+
+  # External dependencies
+  - id: spark-lend-usdt
+    label: Spark Lend USDT Market
+    address: "0xC13e21B648A5Ee794902342038FF3aDAB66BE987"
+    category: dependency
+    note: Sky sub-DAO; admin keys live under Sky governance
+
+# BEGIN GENERATED MORPHO MARKET NODES
+# Managed by scripts/update_morpho_graph_markets.mjs — do not edit.
+  - id: morpho-market-a921ef34e2fc
+    label: "WBTC/USDT · 86% LLTV"
+    category: dependency
+    link: "https://app.morpho.org/ethereum/market/0xa921ef34e2fc7a27ccc50ae7e4b154e16c9799d3387076c421423ef52ac4df99/"
+    note: "Morpho market 0xa921ef34e2fc7a27ccc50ae7e4b154e16c9799d3387076c421423ef52ac4df99"
+  - id: morpho-market-e7e9694b754c
+    label: "wstETH/USDT · 86% LLTV"
+    category: dependency
+    link: "https://app.morpho.org/ethereum/market/0xe7e9694b754c4d4f7e21faf7223f6fa71abaeb10296a4c43a54a7977149687d2/"
+    note: "Morpho market 0xe7e9694b754c4d4f7e21faf7223f6fa71abaeb10296a4c43a54a7977149687d2"
+  - id: morpho-market-3274643db77a
+    label: "sUSDS/USDT · 96.5% LLTV"
+    category: dependency
+    link: "https://app.morpho.org/ethereum/market/0x3274643db77a064abd3bc851de77556a4ad2e2f502f4f0c80845fa8f909ecf0b/"
+    note: "Morpho market 0x3274643db77a064abd3bc851de77556a4ad2e2f502f4f0c80845fa8f909ecf0b"
+  - id: morpho-market-b7843fe78e7e
+    label: "XAUt/USDT · 77% LLTV"
+    category: dependency
+    link: "https://app.morpho.org/ethereum/market/0xb7843fe78e7e7fd3106a1b939645367967d1f986c2e45edb8932ad1896450877/"
+    note: "Morpho market 0xb7843fe78e7e7fd3106a1b939645367967d1f986c2e45edb8932ad1896450877"
+# END GENERATED MORPHO MARKET NODES
+
+edges:
+  # Deployment / vault infrastructure
+  - from: vault-factory
+    to: yvUSDT
+    kind: deploys
+    label: minimal proxy
+  - from: yvUSDT
+    to: accountant
+    kind: routes-fees-to
+  - from: accountant
+    to: dumper
+    kind: routes-fees-to
+
+  # Vault → strategies (allocation)
+  - from: yvUSDT
+    to: spark-usdt-lender
+    kind: allocates-to
+    label: "56.06%"
+  - from: yvUSDT
+    to: metamorpo-usdt
+    kind: allocates-to
+    label: "43.94%"
+
+  # Governance roles on vault
+  - from: daddy
+    to: yvUSDT
+    kind: holds-role
+    label: "12 of 14 roles"
+  - from: brain
+    to: yvUSDT
+    kind: holds-role
+    label: "QUEUE / DEBT / EMERGENCY"
+  - from: security
+    to: yvUSDT
+    kind: holds-role
+    label: "DEBT / MAX_DEBT / EMERGENCY"
+  - from: timelock
+    to: yvUSDT
+    kind: holds-role
+    label: "ADD_STRATEGY (7d)"
+  - from: keeper
+    to: yvUSDT
+    kind: holds-role
+    label: "REPORTING"
+  - from: debt-allocator
+    to: yvUSDT
+    kind: holds-role
+    label: "REPORTING + DEBT_MANAGER"
+
+  # MetaMorpho vault ownership — Security is the owner
+  - from: security
+    to: metamorpo-usdt
+    kind: controls
+    label: "MetaMorpho owner"
+  - from: curator
+    to: metamorpo-usdt
+    kind: holds-role
+    label: "curator"
+
+  # Role manager wiring
+  - from: daddy
+    to: role-manager
+    kind: controls
+  - from: security
+    to: role-manager
+    kind: controls
+  - from: role-manager
+    to: yvUSDT
+    kind: manages
+
+  # Timelock flow
+  - from: daddy
+    to: timelock
+    kind: proposes-on
+    label: PROPOSER + EXECUTOR
+  - from: brain
+    to: timelock
+    kind: cancels-on
+    label: CANCELLER
+
+  # Strategy → underlying protocol
+  - from: spark-usdt-lender
+    to: spark-lend-usdt
+    kind: deposits-into
+    label: "USDT supply"
+
+# BEGIN GENERATED MORPHO MARKET EDGES
+# Managed by scripts/update_morpho_graph_markets.mjs — do not edit.
+  - from: metamorpo-usdt
+    to: morpho-market-a921ef34e2fc
+    kind: deposits-into
+    label: "67.2%"
+  - from: metamorpo-usdt
+    to: morpho-market-e7e9694b754c
+    kind: deposits-into
+    label: "23.5%"
+  - from: metamorpo-usdt
+    to: morpho-market-3274643db77a
+    kind: deposits-into
+    label: "5.8%"
+  - from: metamorpo-usdt
+    to: morpho-market-b7843fe78e7e
+    kind: deposits-into
+    label: "3.3%"
+# END GENERATED MORPHO MARKET EDGES

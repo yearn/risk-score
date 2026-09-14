@@ -1,14 +1,27 @@
 {
   "name": "risk-score-frontend",
+  "license": "AGPL-3.0-only",
   "type": "module",
   "scripts": {
-    "dev": "astro dev",
-    "build": "astro build",
-    "preview": "astro preview"
+    "dev": "node scripts/update_stats.mjs && node scripts/check_bridges.mjs && node scripts/check_graphs.mjs && astro dev",
+    "build": "node scripts/update_stats.mjs && node scripts/check_bridges.mjs && node scripts/check_graphs.mjs && astro build",
+    "preview": "astro preview",
+    "test": "node --test tests/*.test.mjs",
+    "update-stats": "node scripts/update_stats.mjs",
+    "check-bridges": "node scripts/check_bridges.mjs --strict",
+    "check-graphs": "node scripts/check_graphs.mjs --strict"
   },
   "dependencies": {
-    "astro": "^5.3.0",
-    "@astrojs/vercel": "^8.1.0",
-    "marked": "^15.0.0"
+    "@astrojs/sitemap": "3.7.4",
+    "@astrojs/vercel": "11.0.9",
+    "@plausible-analytics/tracker": "0.4.6",
+    "@resvg/resvg-js": "2.6.2",
+    "astro": "7.2.10",
+    "cytoscape": "3.34.2",
+    "cytoscape-dagre": "4.0.0",
+    "cytoscape-dom-node": "2.1.0",
+    "js-yaml": "4.3.0",
+    "marked": "18.0.11",
+    "satori": "0.33.4"
   }
 }

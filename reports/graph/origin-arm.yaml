@@ -1,0 +1,198 @@
+slug: origin-arm
+title: Origin ARM (ARM-WETH-stETH) — Contract Dependency Graph
+chain: ethereum
+
+categories:
+  - id: vault
+    label: Vault / Token
+  - id: strategy
+    label: Strategy / Market
+  - id: governance
+    label: Governance
+  - id: infra
+    label: Protocol Infra
+  - id: dependency
+    label: External Dependency
+
+nodes:
+  # === Vault / token layer ===
+  - id: arm
+    label: ARM-WETH-stETH (LidoARM Proxy)
+    address: "0x85B78AcA6Deae198fBF201c82DAF6Ca21942acc6"
+    category: vault
+    note: EIP-1967 proxy; ERC-4626 LP token
+  - id: arm-impl
+    label: ARM Implementation (LidoARM)
+    address: "0x850da2e21f1f71479e2a307edab114777d9f6217"
+    category: vault
+  - id: fee-collector
+    label: Fee Collector (Safe 1/3)
+    address: "0xBB077E716A5f1F1B63ed5244eBFf5214E50fec8c"
+    category: vault
+
+  # === Governance ===
+  - id: xogn
+    label: xOGN Governance Token
+    address: "0x63898b3b6Ef3d39332082178656E9862bee45C57"
+    category: governance
+    note: Staked OGN — proposes via Origin DeFi Governance
+  - id: origin-gov
+    label: Origin DeFi Governance
+    address: "0x1D3fBD4d129Ddd2372EA85c5Fa00b2682081c9EC"
+    category: governance
+    note: PROPOSER + EXECUTOR + CANCELLER on Timelock
+  - id: timelock
+    label: Timelock Controller (48h)
+    address: "0x35918cDE7233F2dD33fA41ae3Cb6aE0e42E0e69F"
+    category: governance
+    note: Self-administered TIMELOCK_ADMIN_ROLE
+  - id: gov-multisig
+    label: GOV Multisig (5/8, cancel-only)
+    address: "0xbe2AB3d3d8F6a32b96414ebbd865dBD276d3d899"
+    category: governance
+
+  # === Protocol infra ===
+  - id: operator
+    label: Operator EOA (price setter)
+    address: "0x39878253374355DBcc15C86458F084fb6f2d6DE7"
+    category: infra
+    note: No timelock; sets traderate0/1, bounded by crossPrice
+  - id: morpho-wrapper
+    label: MorphoMarket Wrapper
+    address: "0xB7CeFE4CB483Be80C2963D3D9Edb991e69ff39cf"
+    category: infra
+    note: Abstract4626MarketWrapper; owner = Timelock
+  - id: harvester
+    label: Harvester Safe (MORPHO rewards)
+    address: "0x4FF1b9D9ba8558F5EAfCec096318eA0d8b541971"
+    category: infra
+
+  # === Strategy / external markets ===
+  - id: lido-wq
+    label: Lido Withdrawal Queue
+    address: "0x889edC2eDab5f40e902b864aD4d7AdE8E412F9B1"
+    category: dependency
+    note: Core yield mechanism — stETH 1:1 redemption
+  - id: morpho-vault
+    label: WETH ARM Morpho Vault (Yearn-curated)
+    address: "0x3Dfe70B05657949A5dB340754aD664810ac63b21"
+    category: dependency
+    morphoVault: v1
+    link: "https://app.morpho.org/ethereum/vault/0x3Dfe70B05657949A5dB340754aD664810ac63b21/"
+    note: MetaMorpho v1.1; idle WETH lending
+
+  # MetaMorpho vault governance — Yearn Security + Curator
+  - id: security
+    label: Security (4-of-7)
+    address: "0xe5e2Baf96198c56380dDD5E992D7d1ADa0e989c0"
+    category: governance
+  - id: curator
+    label: Curator (2-of-3)
+    address: "0x90D0f26025571295D18a6c041E47450B81886B51"
+    category: governance
+
+  # === Secondary liquidity ===
+  - id: curve-pool
+    label: Curve OETH / ARM-WETH-stETH
+    address: "0x95753095f15870acc0cb0ed224478ea61aeb0b8e"
+    category: dependency
+    note: ~$222K TVL secondary exit venue
+
+# BEGIN GENERATED MORPHO MARKET NODES
+# Managed by scripts/update_morpho_graph_markets.mjs — do not edit.
+  - id: morpho-market-b8fc70e82bc5
+    label: "wstETH/WETH · 96.5% LLTV"
+    category: dependency
+    link: "https://app.morpho.org/ethereum/market/0xb8fc70e82bc5bb53e773626fcc6a23f7eefa036918d7ef216ecfb1950a94a85e/"
+    note: "Morpho market 0xb8fc70e82bc5bb53e773626fcc6a23f7eefa036918d7ef216ecfb1950a94a85e"
+  - id: morpho-market-d0e50cdac92f
+    label: "wstETH/WETH · 94.5% LLTV"
+    category: dependency
+    link: "https://app.morpho.org/ethereum/market/0xd0e50cdac92fe2172043f5e0c36532c6369d24947e40968f34a5e8819ca9ec5d/"
+    note: "Morpho market 0xd0e50cdac92fe2172043f5e0c36532c6369d24947e40968f34a5e8819ca9ec5d"
+# END GENERATED MORPHO MARKET NODES
+
+edges:
+  # === Governance flow: xOGN → Origin Gov → Timelock → ARM ===
+  - from: xogn
+    to: origin-gov
+    kind: controls
+    label: voting token
+  - from: origin-gov
+    to: timelock
+    kind: proposes-on
+    label: PROPOSER + EXECUTOR + CANCELLER
+  - from: gov-multisig
+    to: timelock
+    kind: cancels-on
+    label: CANCELLER only
+  - from: timelock
+    to: arm
+    kind: controls
+    label: owner (upgrade, setCrossPrice, setFee, setOperator)
+  - from: timelock
+    to: morpho-wrapper
+    kind: controls
+    label: owner
+
+  # === Operator role on vault (no timelock) ===
+  - from: operator
+    to: arm
+    kind: holds-role
+    label: operator (setPrices, requestLidoWithdrawals, setActiveMarket)
+
+  # === Vault internal wiring ===
+  - from: arm-impl
+    to: arm
+    kind: manages
+    label: EIP-1967 implementation
+  - from: arm
+    to: fee-collector
+    kind: routes-fees-to
+    label: 20% performance fee
+
+  # === Capital flow: ARM → strategies → external dependencies ===
+  - from: arm
+    to: lido-wq
+    kind: deposits-into
+    label: ~99% (request → claim 1-3d)
+  - from: arm
+    to: morpho-wrapper
+    kind: allocates-to
+    label: idle WETH buffer
+  - from: morpho-wrapper
+    to: morpho-vault
+    kind: deposits-into
+    label: WETH supply
+  - from: morpho-vault
+    to: harvester
+    kind: routes-fees-to
+    label: MORPHO rewards
+
+  # === Secondary liquidity ===
+  - from: arm
+    to: curve-pool
+    kind: routes-through
+    label: secondary DEX exit
+
+  # MetaMorpho vault governance — owner (Security) + curator
+  - from: security
+    to: morpho-vault
+    kind: holds-role
+    label: "owner"
+  - from: curator
+    to: morpho-vault
+    kind: holds-role
+    label: "curator"
+
+# BEGIN GENERATED MORPHO MARKET EDGES
+# Managed by scripts/update_morpho_graph_markets.mjs — do not edit.
+  - from: morpho-vault
+    to: morpho-market-b8fc70e82bc5
+    kind: deposits-into
+    label: "60.5%"
+  - from: morpho-vault
+    to: morpho-market-d0e50cdac92f
+    kind: deposits-into
+    label: "39.4%"
+# END GENERATED MORPHO MARKET EDGES

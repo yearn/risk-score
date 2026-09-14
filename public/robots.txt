@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+
+# Edge proxy and API endpoints are not documents.
+Disallow: /api/
+Disallow: /cdn/
+Disallow: /proxy/
+
+Sitemap: https://curation.yearn.fi/sitemap-index.xml

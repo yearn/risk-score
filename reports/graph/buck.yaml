@@ -1,0 +1,222 @@
+slug: buck
+title: BUCK (Bitcoin Dollar SavingsCoin) — Contract Dependency Graph
+chain: ethereum
+
+categories:
+  - id: vault
+    label: Vault / Token
+  - id: strategy
+    label: Reserve
+  - id: governance
+    label: Governance
+  - id: infra
+    label: Protocol Infra
+  - id: dependency
+    label: External Dependency
+
+nodes:
+  # === Vault / token layer ===
+  - id: BUCK
+    label: BUCK Token (UUPS Proxy)
+    address: "0xdb13997f4D83EF343845d0bAEb27d1173dF8c224"
+    category: vault
+    note: Yield-bearing ERC-20; ~$1.00 entry price
+
+  # === Protocol infra ===
+  - id: liquidity-window
+    label: Liquidity Window (Mint/Refund)
+    address: "0x6E87adb23ac0e150Ca9F76C33Df2AdCae508548E"
+    category: infra
+    note: Access-gated mint/refund entrypoint
+  - id: policy-manager
+    label: Policy Manager (Band State)
+    address: "0x79f86b9E0ac84C7580575089E453431D77905E36"
+    category: infra
+    note: GREEN/YELLOW/RED band logic; fees + caps
+  - id: oracle-adapter
+    label: Oracle Adapter (non-strict)
+    address: "0xa6c5f4D041192C2019E77f679eA02e9684235Fd9"
+    category: infra
+    note: Falls back to admin-set $1.00; Pyth onchain stale 46+ days
+  - id: rewards-engine
+    label: Rewards Engine
+    address: "0x159c1C0F796a02111334cC280eE001b091a9580C"
+    category: infra
+    note: Distributes monthly STRC dividends as BUCK; upgraded 3x in 8wk
+  - id: collateral-attestation
+    label: Collateral Attestation
+    address: "0x1aEEEf99704258947A9ea77eF021d5e0551c0428"
+    category: infra
+    note: Stores STRC valuation posted by attestor EOA
+  - id: access-registry
+    label: Access Registry (Allowlist)
+    address: "0xbCc6de2423B496cb36C3278dC487EfD9c5C550B6"
+    category: infra
+    note: Merkle allowlist; revoke() denylists addresses
+
+  # === Reserve legs ===
+  - id: liquidity-reserve
+    label: Liquidity Reserve (USDC)
+    address: "0x1A426E3a87368a4851f7443Ff656A054Af872f66"
+    category: strategy
+    note: ~$124K USDC (8% of reserves); 24h queued withdrawals
+  - id: strc-reserve
+    label: STRC Reserve (Offchain Custody)
+    category: strategy
+    note: ~$1.52M STRC (92% of reserves); held in Fireblocks MPC
+
+  # === Governance ===
+  - id: admin-eoa
+    label: Admin / Owner (Single EOA)
+    address: "0x376269214bB78b3D4f31d17600499b439c1aCB4b"
+    category: governance
+    note: Sole owner of all 8 contracts; NO multisig, NO timelock
+  - id: treasury-eoa
+    label: Treasury (EOA)
+    address: "0x5d105791469064cA0764cfaCfc577c286351CFAD"
+    category: governance
+  - id: attestor-eoa
+    label: Attestor (EOA)
+    address: "0x6f31810c8e6bfaf3ba486b4b7ce651b023423fa3"
+    category: governance
+    note: Single EOA posts STRC valuations
+
+  # === External dependencies ===
+  - id: strc
+    label: STRC (Strategy Inc. Preferred)
+    category: dependency
+    note: NASDAQ:STRC; 9% par dividends; sole yield source
+  - id: pyth
+    label: Pyth Oracle (STRC/USD)
+    address: "0x4305fb66699c3b2702d4d05cf36551390a4c69c6"
+    category: dependency
+    note: Pull oracle; onchain price stale since Jan 15, 2026
+  - id: fireblocks
+    label: Fireblocks MPC Custody
+    category: dependency
+    note: Offchain STRC custody; not onchain-verifiable
+  - id: network-firm
+    label: The Network Firm (Attestation)
+    category: dependency
+    note: Monthly AICPA reserve attestation
+  - id: uniswap-pool
+    label: Uniswap V2 BUCK/USDC
+    address: "0xaab3e2a7908f557c2c28cadf7556353c9a08f82e"
+    category: dependency
+    note: ~$61K USDC depth; deployer-supplied liquidity
+  - id: curve-pool
+    label: Curve StableSwap BUCK/USDC
+    address: "0x42cb0274c6492e3991bde2ce75abf8cdf7f11d66"
+    category: dependency
+    note: ~$47K USDC depth; treasury-supplied liquidity
+
+edges:
+  # === Governance: single EOA owns everything ===
+  - from: admin-eoa
+    to: BUCK
+    kind: controls
+    label: owner (Ownable2Step, no timelock)
+  - from: admin-eoa
+    to: liquidity-window
+    kind: controls
+    label: owner — instant upgradeToAndCall
+  - from: admin-eoa
+    to: liquidity-reserve
+    kind: controls
+    label: DEFAULT_ADMIN
+  - from: admin-eoa
+    to: policy-manager
+    kind: controls
+    label: DEFAULT_ADMIN
+  - from: admin-eoa
+    to: rewards-engine
+    kind: controls
+    label: DEFAULT_ADMIN
+  - from: admin-eoa
+    to: collateral-attestation
+    kind: controls
+    label: DEFAULT_ADMIN
+  - from: admin-eoa
+    to: oracle-adapter
+    kind: controls
+    label: owner (sets internal price)
+  - from: admin-eoa
+    to: access-registry
+    kind: controls
+    label: owner — revoke() can freeze any address
+  - from: attestor-eoa
+    to: collateral-attestation
+    kind: holds-role
+    label: posts STRC valuation
+  - from: treasury-eoa
+    to: curve-pool
+    kind: deploys
+    label: deployed pool
+
+  # === Mint authority: who can mint BUCK ===
+  - from: liquidity-window
+    to: BUCK
+    kind: mints
+    label: MINTER (mint/refund)
+  - from: rewards-engine
+    to: BUCK
+    kind: mints
+    label: yield distribution
+
+  # === Internal flow ===
+  - from: BUCK
+    to: liquidity-window
+    kind: routes-through
+    label: mint / refund (access-gated)
+  - from: liquidity-window
+    to: liquidity-reserve
+    kind: deposits-into
+    label: USDC reserve (~8%)
+  - from: liquidity-window
+    to: policy-manager
+    kind: routes-through
+    label: band state / fees
+  - from: liquidity-window
+    to: access-registry
+    kind: routes-through
+    label: allowlist check
+  - from: liquidity-window
+    to: oracle-adapter
+    kind: routes-through
+    label: STRC price gate
+
+  # === Reserve allocation ===
+  - from: BUCK
+    to: liquidity-reserve
+    kind: allocates-to
+    label: "USDC ~8%"
+  - from: BUCK
+    to: strc-reserve
+    kind: allocates-to
+    label: "STRC ~92%"
+
+  # === Reserve → external dependencies ===
+  - from: strc-reserve
+    to: strc
+    kind: deposits-into
+    label: open-market purchase
+  - from: strc-reserve
+    to: fireblocks
+    kind: routes-through
+    label: MPC custody
+  - from: oracle-adapter
+    to: pyth
+    kind: routes-through
+    label: pull-feed (stale)
+  - from: collateral-attestation
+    to: network-firm
+    kind: routes-through
+    label: monthly attestation
+  - from: BUCK
+    to: uniswap-pool
+    kind: routes-through
+    label: secondary DEX exit
+  - from: BUCK
+    to: curve-pool
+    kind: routes-through
+    label: secondary DEX exit

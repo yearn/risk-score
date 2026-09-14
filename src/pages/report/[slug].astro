@@ -2,8 +2,10 @@
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import ScoreBadge from "../../components/ScoreBadge.astro";
 import ScoreTable from "../../components/ScoreTable.astro";
+import ScoreDetails from "../../components/ScoreDetails.astro";
 import { getAllSlugs, getReportBySlug } from "../../lib/reports";
-
+import { hasGraph } from "../../lib/graph";
+import { scoreTier } from "../../lib/colors";
 
 export function getStaticPaths() {
   return getAllSlugs().map((slug) => ({ params: { slug } }));
@@ -11,11 +13,124 @@ export function getStaticPaths() {
 
 const { slug } = Astro.params;
 const report = getReportBySlug(slug!);
-if (!report) return Astro.redirect("/");
+if (!report) return Astro.redirect("/reports/");
+const ogDescription =
+  report.finalScore != null
+    ? `${report.name} — Score: ${report.finalScore.toFixed(1)}/5.0 (${scoreTier(report.finalScore)}). ${report.token} on ${report.chain}.`
+    : `${report.name} — ${report.status ?? "Not Rated"} (Not Rated). ${report.token} on ${report.chain}.`;
+const graphAvailable = hasGraph(slug!);
+
+const reportIssueUrl = (() => {
+  const title = `Report Inaccuracy: ${report.name}`;
+  const body = [
+    `**Report:** ${report.name}`,
+    `**Link:** [${report.slug}](https://curation.yearn.fi/report/${report.slug})`,
+    `**GitHub:** [${report.slug}.md](https://github.com/yearn/risk-score/blob/master/reports/report/${report.slug}.md)`,
+    "",
+    "## Issue Description",
+    "",
+    "<!-- Describe what is wrong or outdated in this report -->",
+    "",
+  ].join("\n");
+  const params = new URLSearchParams({ title, body, labels: "report-issue" });
+  return `https://github.com/yearn/risk-score/issues/new?${params}`;
+})();
+
+// Structured data: an Article carrying the editorial risk rating, so report
+// pages are eligible for rich results. author/publisher reference the
+// Organization node BaseLayout emits site-wide via @id; BaseLayout merges what
+// we return here into that same @graph so those references resolve.
+// Astro.url.origin is a plain string, so it has to be wrapped before .href.
+const origin = (Astro.site ?? new URL(Astro.url.origin)).href;
+const orgId = `${origin}#organization`;
+const toIsoDate = (human: string): string | undefined => {
+  // Assessment dates are human strings ("April 2, 2026") that Date.parse reads
+  // as *local* midnight, so going back out through toISOString() (UTC) would
+  // shift the date a day earlier on any build machine ahead of UTC. Read the
+  // components back in the same frame they were parsed in.
+  const iso = human.trim().match(/^\d{4}-\d{2}-\d{2}/);
+  if (iso) return iso[0];
+  const t = Date.parse(human);
+  if (Number.isNaN(t)) return undefined;
+  const d = new Date(t);
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+};
+const published = toIsoDate(report.originalDate);
+const modified = toIsoDate(report.latestDate);
+const reportUrl = new URL(`/report/${report.slug}/`, origin).href;
+const articleSchema = {
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": report.name,
+  "description": ogDescription,
+  "url": reportUrl,
+  "mainEntityOfPage": reportUrl,
+  "image": new URL(`/og/${report.slug}.png`, origin).href,
+  ...(published ? { datePublished: published } : {}),
+  ...(modified ? { dateModified: modified } : {}),
+  "author": { "@id": orgId },
+  "publisher": { "@id": orgId },
+  ...(report.finalScore != null ? { mainEntity: { "@id": `${reportUrl}#review` } } : {}),
+};
+
+// The review covers the asset, not this article, so it is its own node with an
+// explicit itemReviewed. The lower-is-better risk score is a product property,
+// not a schema.org Rating, whose bestRating must be the highest scale value.
+const reviewSchema =
+  report.finalScore != null
+    ? {
+        "@context": "https://schema.org",
+        "@type": "Review",
+        "@id": `${reportUrl}#review`,
+        "url": reportUrl,
+        "author": { "@id": orgId },
+        "itemReviewed": {
+          "@type": ["FinancialProduct", "Product"],
+          "name": report.name,
+          "description": `${report.token} on ${report.chain}`,
+          "additionalProperty": {
+            "@type": "PropertyValue",
+            "name": "Yearn Curation risk score",
+            "value": report.finalScore.toFixed(1),
+            "minValue": 1,
+            "maxValue": 5,
+            "description": "Lower values indicate lower risk.",
+            "alternateName": scoreTier(report.finalScore),
+          },
+        },
+      }
+    : null;
+const jsonLd = reviewSchema ? [articleSchema, reviewSchema] : [articleSchema];
 ---
 
-<BaseLayout title={`${report.name} — Yearn Risk`}>
-  <a href="/" class="back-link">&larr; All Reports</a>
+<BaseLayout
+  title={`${report.name} — Yearn Curation`}
+  description={ogDescription}
+  ogImage={`/og/${report.slug}.png`}
+  ogUrl={`/report/${report.slug}/`}
+  bare
+  jsonLd={jsonLd}
+>
+  <a href="/reports/" class="back-link">&larr; All Reports</a>
+
+  <div class:list={["assessment-badge", report.isUpdated ? "updated" : "new"]}>
+    <span class="dot" aria-hidden="true"></span>
+    <strong>{report.isUpdated ? "Updated report" : "New report"}</strong>
+  </div>
+
+  {report.status && (
+    <div class:list={["status-banner", report.statusKind]}>
+      <strong>
+        &#9888; {report.status}
+        {report.statusKind === "terminal"
+          ? " — Not Rated (superseded by a terminal event)"
+          : report.status === "GATED"
+            ? " — score capped by a critical gate"
+            : ""}
+      </strong>
+    </div>
+  )}
 
   <div class="report-header">
     <div class="header-top">
@@ -25,29 +140,77 @@ if (!report) return Astro.redirect("/");
         )}
         <h1>{report.name}</h1>
       </div>
-      <ScoreBadge score={report.finalScore} size="large" />
+      {report.finalScore != null ? (
+        <ScoreBadge score={report.finalScore} size="large" />
+      ) : (
+        <span class="na-badge">Not Rated</span>
+      )}
     </div>
     <div class="meta">
       <span>{report.token}</span>
       <span class="sep">/</span>
       <span>{report.chain}</span>
       <span class="sep">/</span>
-      <span>{report.date}</span>
+      {report.isUpdated ? (
+        <>
+          <span>Latest: {report.latestDate}</span>
+          {report.originalDate !== report.latestDate && (
+            <>
+              <span class="sep">/</span>
+              <span>Original: {report.originalDate}</span>
+            </>
+          )}
+        </>
+      ) : (
+        <span>{report.latestDate}</span>
+      )}
     </div>
-    <a
-      href={`https://github.com/yearn/risk-score/blob/master/reports/report/${report.slug}.md`}
-      class="github-link"
-      target="_blank"
-      rel="noopener noreferrer"
-    >
-      View full report on GitHub &rarr;
-    </a>
+    <div class="header-links">
+      <a
+        href={`https://github.com/yearn/risk-score/blob/master/reports/report/${report.slug}.md`}
+        class="github-link"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        View full report on GitHub &rarr;
+      </a>
+      {graphAvailable && (
+        <a href={`/graph/${report.slug}/`} class="graph-link">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="5" cy="6" r="2.5"/>
+            <circle cx="19" cy="6" r="2.5"/>
+            <circle cx="12" cy="18" r="2.5"/>
+            <line x1="6.8" y1="7.6" x2="10.2" y2="16.4"/>
+            <line x1="17.2" y1="7.6" x2="13.8" y2="16.4"/>
+            <line x1="7.5" y1="6" x2="16.5" y2="6"/>
+          </svg>
+          <span>View dependency graph</span>
+          <span class="arrow" aria-hidden="true">&rarr;</span>
+        </a>
+      )}
+    </div>
   </div>
 
-  <section class="section">
-    <h2>Score Breakdown</h2>
-    <ScoreTable scores={report.scoreTable} finalScore={report.finalScore} />
-  </section>
+  {report.finalScore != null ? (
+    <section class="section">
+      <h2>Score Breakdown</h2>
+      <ScoreTable
+        scores={report.scoreTable}
+        finalScore={report.finalScore}
+        detailsId={report.scoreDetails ? "score-details" : undefined}
+      />
+    </section>
+  ) : (
+    <section class="section">
+      <h2>Score</h2>
+      <div class="not-rated-note">
+        <strong>Not Rated{report.status ? ` — ${report.status}` : ""}.</strong>
+        This assessment sits off the 1–5 risk scale: a terminal event (exploit
+        or wind-down) supersedes a forward-looking risk score. See the Risk
+        Summary and full report below for details.
+      </div>
+    </section>
+  )}
 
   <section class="section">
     <h2>Overview</h2>
@@ -59,8 +222,8 @@ if (!report) return Astro.redirect("/");
     <div class="prose" set:html={report.riskSummaryHtml} />
   </section>
 
-  <details class="full-report">
-    <summary class="full-report-toggle">
+  <details class="disclosure">
+    <summary class="disclosure-toggle">
       <span>Full Report</span>
       <svg class="chevron" width="20" height="20" viewBox="0 0 20 20" fill="none">
         <path d="M6 8l4 4 4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -68,12 +231,136 @@ if (!report) return Astro.redirect("/");
     </summary>
     <div class="prose" set:html={report.fullReportHtml} />
   </details>
+
+  {report.scoreDetails && (
+    <details class="disclosure" id="score-details">
+      <summary class="disclosure-toggle">
+        <span>Score Details</span>
+        <svg class="chevron" width="20" height="20" viewBox="0 0 20 20" fill="none">
+          <path d="M6 8l4 4 4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </summary>
+      <div class="disclosure-body">
+        <ScoreDetails details={report.scoreDetails} />
+      </div>
+    </details>
+  )}
+
+  {report.history.length > 0 && (
+    <section class="section">
+      <h2>Assessment History</h2>
+      <div class="history-wrap">
+        <table class="history-table">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Score</th>
+              <th>Notes</th>
+            </tr>
+          </thead>
+          <tbody>
+            {report.history.map((h) => (
+              <tr>
+                <td class="history-date" set:html={h.dateHtml} />
+                <td class="history-score">{h.score}</td>
+                <td set:html={h.notesHtml} />
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </section>
+  )}
+
+  <div class="report-footer">
+    <a href={reportIssueUrl} class="report-issue-btn" target="_blank" rel="noopener noreferrer">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+        <path d="M8 9.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3Z"/>
+        <path d="M8 0a8 8 0 1 1 0 16A8 8 0 0 1 8 0ZM1.5 8a6.5 6.5 0 1 0 13 0 6.5 6.5 0 0 0-13 0Z"/>
+      </svg>
+      Submit report inaccuracy
+    </a>
+  </div>
 </BaseLayout>
 
 <style>
+  .assessment-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+    padding: 0.4rem 0.85rem;
+    border-radius: 999px;
+    font-size: 0.85rem;
+    line-height: 1.3;
+    border: 1px solid var(--border);
+    background: var(--bg-secondary);
+    color: var(--text-secondary);
+  }
+  .assessment-badge strong {
+    color: var(--text-primary);
+  }
+  .assessment-badge .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    background: var(--text-secondary);
+  }
+  .assessment-badge.updated {
+    border-color: color-mix(in srgb, var(--brand-blue) 40%, transparent);
+    background: color-mix(in srgb, var(--brand-blue) 10%, transparent);
+  }
+  .assessment-badge.updated .dot {
+    background: var(--brand-blue);
+  }
+  .assessment-badge.new {
+    border-color: color-mix(in srgb, #16a34a 40%, transparent);
+    background: color-mix(in srgb, #16a34a 10%, transparent);
+  }
+  .assessment-badge.new .dot {
+    background: #16a34a;
+  }
+  .status-banner {
+    background: #dc2626;
+    color: #fff;
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+    font-size: 1rem;
+    text-align: center;
+  }
+  .status-banner.caution {
+    background: #b45309;
+  }
+  .na-badge {
+    display: inline-flex;
+    align-items: center;
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--text-secondary);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0.4rem 0.8rem;
+  }
+  .not-rated-note {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-left: 3px solid #dc2626;
+    border-radius: 8px;
+    padding: 1rem 1.25rem;
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+    line-height: 1.55;
+  }
+  .not-rated-note strong {
+    color: var(--text-primary);
+  }
   .back-link {
     display: inline-block;
     margin-bottom: 1.5rem;
+    /* Separates it from the new/updated badge that follows on the same line. */
+    margin-right: 1rem;
     color: var(--text-secondary);
     font-size: 0.9rem;
   }
@@ -110,15 +397,49 @@ if (!report) return Astro.redirect("/");
     margin: 0 0.25rem;
     opacity: 0.4;
   }
+  .header-links {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 1rem;
+    margin-top: 0.75rem;
+  }
   .github-link {
     display: inline-block;
-    margin-top: 0.75rem;
     font-size: 1.1rem;
     font-weight: 600;
     color: var(--brand-blue);
   }
   .github-link:hover {
     text-decoration: underline;
+  }
+  .graph-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 0.9rem;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--brand-blue);
+    background: color-mix(in srgb, var(--brand-blue) 10%, transparent);
+    border: 1px solid color-mix(in srgb, var(--brand-blue) 35%, transparent);
+    border-radius: 999px;
+    transition: background 0.2s, border-color 0.2s, transform 0.2s;
+  }
+  .graph-link:hover {
+    background: color-mix(in srgb, var(--brand-blue) 18%, transparent);
+    border-color: var(--brand-blue);
+    text-decoration: none;
+    transform: translateY(-1px);
+  }
+  .graph-link svg {
+    flex-shrink: 0;
+  }
+  .graph-link .arrow {
+    transition: transform 0.2s;
+  }
+  .graph-link:hover .arrow {
+    transform: translateX(2px);
   }
   .section {
     margin-bottom: 2.5rem;
@@ -129,12 +450,15 @@ if (!report) return Astro.redirect("/");
     padding-bottom: 0.5rem;
     border-bottom: 1px solid var(--border);
   }
-  .full-report {
+  /* Shared by the "Full Report" and "Score Details" panels. */
+  .disclosure {
     margin-bottom: 2.5rem;
     border: 1px solid var(--border);
     border-radius: 8px;
+    /* Breathing room when the tier badge scrolls this panel into view. */
+    scroll-margin-top: 1rem;
   }
-  .full-report-toggle {
+  .disclosure-toggle {
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -148,81 +472,86 @@ if (!report) return Astro.redirect("/");
     background: var(--bg-secondary);
     border-radius: 8px;
   }
-  .full-report[open] .full-report-toggle {
+  .disclosure[open] .disclosure-toggle {
     border-radius: 8px 8px 0 0;
     border-bottom: 1px solid var(--border);
   }
-  .full-report-toggle::-webkit-details-marker {
+  .disclosure-toggle::-webkit-details-marker {
     display: none;
   }
-  .full-report-toggle .chevron {
+  .disclosure-toggle .chevron {
     transition: transform 0.2s ease;
     flex-shrink: 0;
   }
-  .full-report[open] .full-report-toggle .chevron {
+  .disclosure[open] .disclosure-toggle .chevron {
     transform: rotate(180deg);
   }
-  .full-report > .prose {
+  .disclosure > .prose,
+  .disclosure-body {
     padding: 1.25rem;
   }
-  .prose :global(p) {
-    margin-bottom: 0.75rem;
-  }
-  .prose :global(ul),
-  .prose :global(ol) {
-    margin-bottom: 0.75rem;
-    padding-left: 1.5rem;
-  }
-  .prose :global(li) {
-    margin-bottom: 0.25rem;
-  }
-  .prose :global(a) {
-    color: var(--brand-blue);
-  }
-  .prose :global(strong) {
-    color: var(--text-primary);
-  }
-  .prose :global(code) {
-    background: var(--bg-secondary);
-    padding: 0.15rem 0.35rem;
-    border-radius: 3px;
-    font-size: 0.85em;
-  }
-  .prose :global(pre) {
-    background: var(--bg-secondary);
-    padding: 1rem;
-    border-radius: 6px;
+  /* .prose rules live in global.css — shared with ScoreDetails.astro. */
+  .history-wrap {
     overflow-x: auto;
-    margin-bottom: 0.75rem;
   }
-  .prose :global(pre code) {
-    background: none;
-    padding: 0;
-  }
-  .prose :global(h3) {
-    margin-top: 1.5rem;
-    margin-bottom: 0.5rem;
-    font-size: 1.05rem;
-  }
-  .prose :global(table) {
+  .history-table {
     width: 100%;
     border-collapse: collapse;
-    margin-bottom: 0.75rem;
-    font-size: 0.85rem;
-    display: block;
-    overflow-x: auto;
+    font-size: 0.9rem;
   }
-  .prose :global(th),
-  .prose :global(td) {
-    padding: 0.4rem 0.6rem;
+  .history-table th,
+  .history-table td {
+    padding: 0.6rem 0.75rem;
     border-bottom: 1px solid var(--border);
     text-align: left;
+    vertical-align: top;
   }
-  .prose :global(th) {
+  .history-table th {
     background: var(--bg-secondary);
     color: var(--text-secondary);
     font-weight: 600;
-    font-size: 0.75rem;
+    font-size: 0.7rem;
     text-transform: uppercase;
+    letter-spacing: 0.03em;
+  }
+  .history-date {
+    white-space: nowrap;
+    color: var(--text-secondary);
+  }
+  .history-score {
+    white-space: nowrap;
+    font-weight: 700;
+    color: var(--text-primary);
+    font-variant-numeric: tabular-nums;
+  }
+  .history-table tbody tr:last-child td {
+    border-bottom: none;
+  }
+  .report-footer {
+    margin-top: 1rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: center;
+  }
+  .report-issue-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.625rem;
+    padding: 0.875rem 1.75rem;
+    font-size: 1rem;
+    font-weight: 600;
+    color: #fff;
+    background: var(--brand-blue);
+    border: 1px solid var(--brand-blue);
+    border-radius: 8px;
+    transition: background 0.2s, border-color 0.2s, transform 0.2s;
+  }
+  .report-issue-btn:hover {
+    background: #0560d4;
+    border-color: #0560d4;
+    color: #fff;
+    text-decoration: none;
+    transform: translateY(-1px);
   }
 </style>

@@ -1,0 +1,430 @@
+slug: gauntlet-gusda
+title: Gauntlet USD Alpha (gtUSDa) — Contract Dependency Graph
+chain: ethereum
+
+categories:
+  - id: vault
+    label: Vault / Token
+  - id: governance
+    label: Governance
+  - id: infra
+    label: Protocol Infra
+  - id: dependency
+    label: External Dependency
+
+nodes:
+  # === Vault layer ===
+  - id: gtusda-vault
+    label: gtUSDa Vault
+    address: "0x3bd9248048df95db4fbd748c6cd99c1baa40bad0"
+    category: vault
+    note: MultiDepositorVault; non-proxy (immutable)
+
+  # === Infra ===
+  - id: provisioner
+    label: Provisioner
+    address: "0x74C4A66CE4F4779B11E7c63D42e51EEef3A80D11"
+    category: infra
+    note: Sole mint authority; deposit/withdrawal handler
+  - id: price-fee-calculator
+    label: Price & Fee Calculator
+    address: "0x8F3FfA11CD5915f0E869192663b905504A2Ef4a5"
+    category: infra
+    note: Admin-set unit price; fee calculator
+  - id: keeper-eoa
+    label: Keeper EOA
+    address: "0xdd998274ed12bb12d818800915cfb8f87cbc2801"
+    category: infra
+    note: Example offchain bot that submits unit-price updates
+  - id: forwarder-accountant
+    label: Forwarder Accountant
+    address: "0xc219d47B645e3446b81889F18B34238310c792d0"
+    category: infra
+    note: Vault accountant; relays keeper PPS updates to PriceAndFeeCalculator
+  - id: min-update-guard
+    label: Min Update Guard
+    address: "0xbfb2040d37f5da34938a367ef3ae0786fd6a861a"
+    category: infra
+    note: Pre-checks minimum update interval; soft guard only
+  - id: guardian-eoa
+    label: Guardian EOA
+    address: "0x42141d0291e1e62993faf0dc2fc6371bd928c9b2"
+    category: infra
+    note: Single hot key that executes every vault operation — rebalancing, reward claims, and swaps — through the two guardian Forwarders
+  - id: guardian-forwarder-1
+    label: Guardian Forwarder 1
+    address: "0x4F169C3A6545CE65Ecb26502218f90eEd610bEbf"
+    category: infra
+    note: Active guardian; owned by the vault timelock and grants submit(bytes) on the vault to the guardian EOA
+  - id: guardian-forwarder-2
+    label: Guardian Forwarder 2
+    address: "0x249759B13879515219c482F3f2700fCC696293F9"
+    category: infra
+    note: Active guardian; owned by the vault timelock and grants submit(bytes) on the vault to the guardian EOA
+  - id: transfer-hook
+    label: Transfer Blacklist Hook
+    address: "0x1703a1B0fee4D507CA8a743f04E168BCd4862d24"
+    category: infra
+    note: Vault's beforeTransfer hook. isVaultUnitTransferable(gtUSDa) is false, so gtUSDa units are non-transferable outside mint, burn, and Provisioner escrow; also screens sanctioned addresses.
+
+  # === Governance ===
+  - id: gauntlet-multisig
+    label: Gauntlet Multisig (3/9)
+    address: "0xCa75ab43dABD026466f8DA9CC0938eD7bDea0a6f"
+    category: governance
+    note: Gnosis Safe; PROPOSER_ROLE + EXECUTOR_ROLE on vault timelock; feeRecipient
+  - id: timelock-vault
+    label: Vault Timelock (1-day)
+    address: "0x72820eA60C344186465152e4b11e260CAE391d77"
+    category: governance
+    note: Owner of vault, provisioner, and RolesAuthority (Vault)
+  - id: aera-multisig
+    label: Aera Multisig (3/7)
+    address: "0x5cc25c6b59c551d15941144ca060d330eb02fc62"
+    category: governance
+    note: Gnosis Safe holding PROPOSER, EXECUTOR, and CANCELLER on the FeeCalc timelock; Aera protocol-level governance shared across Aera vaults
+  - id: timelock-feecalc
+    label: FeeCalc Timelock (1-day)
+    address: "0xce75E223E6DbB0503D2B6f55bC5907d1A0372E2B"
+    category: governance
+    note: Owner of PriceAndFeeCalculator, RolesAuthority (FeeCalc), and the Whitelist
+  - id: roles-authority-vault
+    label: RolesAuthority (Vault)
+    address: "0xC14604f43ED73011B60426FE6c48317d6583e67e"
+    category: governance
+    note: Access-control root for vault functions
+  - id: roles-authority-feecalc
+    label: RolesAuthority (FeeCalc)
+    address: "0xA83C037DF3b27bF7224AB0a40a2c4531FF1B2f40"
+    category: governance
+    note: Access-control root for fee calculator
+
+  # === External dependencies ===
+  - id: cross-chain-bridge
+    label: Circle CCTP v2
+    address: "0xfd78ee919681417d192449715b2594ab58f5d002"
+    category: dependency
+    note: "Circle CCTP v2 (native USDC burn-and-mint via TokenMinterV2). Routes USDC to Base, Arbitrum, Optimism. Verified onchain from vault USDC flows."
+  - id: morpho
+    label: Morpho Lending Markets
+    category: dependency
+    note: Multi-chain USDC lending markets (Ethereum, Base, Arbitrum, Optimism)
+  - id: gauntlet-frontier
+    label: Gauntlet USDC Frontier (Morpho V2)
+    address: "0x9a1D6bd5b8642C41F25e0958129B85f8E1176F3e"
+    category: dependency
+    morphoVault: v2
+    link: "https://app.morpho.org/ethereum/vault/0x9a1D6bd5b8642C41F25e0958129B85f8E1176F3e/"
+    note: Largest Ethereum-mainnet allocation at 72.9% of vault assets. 93.05% of the vault sits in the AA_FalconXUSDC market.
+  - id: gauntlet-rwa
+    label: Gauntlet USDC RWA (MetaMorpho V1.1)
+    address: "0xA8875aaeBc4f830524e35d57F9772FfAcbdD6C45"
+    category: dependency
+    morphoVault: v1
+    link: "https://app.morpho.org/ethereum/vault/0xA8875aaeBc4f830524e35d57F9772FfAcbdD6C45/"
+    note: Second Ethereum-mainnet allocation at 27.0% of vault assets, 99.76% of it in the AA_FalconXUSDC market. Carries a 3-day curator timelock.
+  - id: pareto-falconx-cdo
+    label: Pareto FalconX IdleCDO
+    address: "0x433D5B175148dA32Ffe1e1A37a939E1b7e79be4d"
+    category: dependency
+    link: "https://etherscan.io/address/0x433D5B175148dA32Ffe1e1A37a939E1b7e79be4d"
+    note: Upgradeable TransparentUpgradeableProxy that issues the AA_FalconXUSDC senior tranche used as collateral behind ~94.8% of the Ethereum vault's assets. It both supplies the collateral price (virtualPrice, passed through a TranchesChainlinkOracle with no staleness metadata) and gates redemption behind a ~28.5-day epoch.
+  - id: falconx
+    label: FalconX (credit borrower)
+    category: dependency
+    note: Offchain credit counterparty of the Pareto FalconX USDC vault. The senior tranche gtUSDa holds is an unsecured claim on FalconX repayment, subordinated only by the vault's BB junior tranche.
+  - id: merkl-distributor
+    label: Merkl Distributor
+    address: "0x3Ef3D8bA38EBe18DB133cEc108f4D14CE00Dd9Ae"
+    category: dependency
+    note: Pays RLUSD and USDT reward incentives that the guardian claims and swaps to USDC; exposure is transient and sized in the hundreds of dollars
+  - id: gauntlet-vault-owner
+    label: Gauntlet Vault Owner (4-of-7)
+    address: "0xC684c6587712e5E7BDf9fD64415F23Bd2b05fAec"
+    category: governance
+  - id: gauntlet-vault-curator
+    label: Gauntlet Vault Curator (3-of-7)
+    address: "0x9E33faAE38ff641094fa68c65c2cE600b3410585"
+    category: governance
+
+# BEGIN GENERATED MORPHO MARKET NODES
+# Managed by scripts/update_morpho_graph_markets.mjs — do not edit.
+  - id: morpho-market-e83d72fa5b00
+    label: "AA_FalconXUSDC/USDC · 77% LLTV"
+    category: dependency
+    link: "https://app.morpho.org/ethereum/market/0xe83d72fa5b00dcd46d9e0e860d95aa540d5ec106da5833108a9f826f21f36f52/"
+    note: "Morpho market 0xe83d72fa5b00dcd46d9e0e860d95aa540d5ec106da5833108a9f826f21f36f52"
+  - id: morpho-market-64d65c9a2d91
+    label: "cbBTC/USDC · 86% LLTV"
+    category: dependency
+    link: "https://app.morpho.org/ethereum/market/0x64d65c9a2d91c36d56fbc42d69e979335320169b3df63bf92789e2c8883fcc64/"
+    note: "Morpho market 0x64d65c9a2d91c36d56fbc42d69e979335320169b3df63bf92789e2c8883fcc64"
+  - id: morpho-market-bf02d6c6852f
+    label: "LBTC/USDC · 86% LLTV"
+    category: dependency
+    link: "https://app.morpho.org/ethereum/market/0xbf02d6c6852fa0b8247d5514d0c91e6c1fbde9a168ac3fd2033028b5ee5ce6d0/"
+    note: "Morpho market 0xbf02d6c6852fa0b8247d5514d0c91e6c1fbde9a168ac3fd2033028b5ee5ce6d0"
+  - id: morpho-market-755f954513d3
+    label: "PRIME/USDC · 86% LLTV"
+    category: dependency
+    link: "https://app.morpho.org/ethereum/market/0x755f954513d31d5f24aaf3d0cdc5e913a28383f8ea8ff85be9ffffa7371fb64d/"
+    note: "Morpho market 0x755f954513d31d5f24aaf3d0cdc5e913a28383f8ea8ff85be9ffffa7371fb64d"
+  - id: morpho-market-f02d2e8f427a
+    label: "PT-sUSDD-27AUG2026/USDC · 91.5% LLTV"
+    category: dependency
+    link: "https://app.morpho.org/ethereum/market/0xf02d2e8f427a2b91785b3d09690ef9d3811bf674ba97b00bafc7665004a6dd97/"
+    note: "Morpho market 0xf02d2e8f427a2b91785b3d09690ef9d3811bf674ba97b00bafc7665004a6dd97"
+  - id: morpho-market-5cebfae10f5e
+    label: "PT-USDG-28MAY2026/USDC · 94.5% LLTV"
+    category: dependency
+    link: "https://app.morpho.org/ethereum/market/0x5cebfae10f5e88d33df2421923f3d9f32359429fda2f78edacc9b4fdb09b0553/"
+    note: "Morpho market 0x5cebfae10f5e88d33df2421923f3d9f32359429fda2f78edacc9b4fdb09b0553"
+  - id: morpho-market-61765602144e
+    label: "weETH/USDC · 86% LLTV"
+    category: dependency
+    link: "https://app.morpho.org/ethereum/market/0x61765602144e91e5ac9f9e98b8584eae308f9951596fd7f5e0f59f21cd2bf664/"
+    note: "Morpho market 0x61765602144e91e5ac9f9e98b8584eae308f9951596fd7f5e0f59f21cd2bf664"
+  - id: morpho-market-ad73d5e139a9
+    label: "sUSDD/USDC · 91.5% LLTV"
+    category: dependency
+    link: "https://app.morpho.org/ethereum/market/0xad73d5e139a939a0c7dc7b821e5a103a3a9cf45c4352b373b1dabc421c7f3d59/"
+    note: "Morpho market 0xad73d5e139a939a0c7dc7b821e5a103a3a9cf45c4352b373b1dabc421c7f3d59"
+  - id: morpho-market-bbf7ce1b40d3
+    label: "siUSD/USDC · 91.5% LLTV"
+    category: dependency
+    link: "https://app.morpho.org/ethereum/market/0xbbf7ce1b40d32d3e3048f5cf27eeaa6de8cb27b80194690aab191a63381d8c99/"
+    note: "Morpho market 0xbbf7ce1b40d32d3e3048f5cf27eeaa6de8cb27b80194690aab191a63381d8c99"
+  - id: morpho-market-729badf297ee
+    label: "syrupUSDC/USDC · 91.5% LLTV"
+    category: dependency
+    link: "https://app.morpho.org/ethereum/market/0x729badf297ee9f2f6b3f717b96fd355fc6ec00422284ce1968e76647b258cf44/"
+    note: "Morpho market 0x729badf297ee9f2f6b3f717b96fd355fc6ec00422284ce1968e76647b258cf44"
+  - id: morpho-market-526d6d2e334a
+    label: "SPYon/USDC · 62.5% LLTV"
+    category: dependency
+    link: "https://app.morpho.org/ethereum/market/0x526d6d2e334afcb8ffc183eba1bdb1ed58e5a71fa9bd1a75a95eb71c6808081f/"
+    note: "Morpho market 0x526d6d2e334afcb8ffc183eba1bdb1ed58e5a71fa9bd1a75a95eb71c6808081f"
+  - id: morpho-market-d3c7b3668b91
+    label: "QQQon/USDC · 62.5% LLTV"
+    category: dependency
+    link: "https://app.morpho.org/ethereum/market/0xd3c7b3668b91b90f7571817009503826025159111743b95f542730b42c94d3ea/"
+    note: "Morpho market 0xd3c7b3668b91b90f7571817009503826025159111743b95f542730b42c94d3ea"
+# END GENERATED MORPHO MARKET NODES
+
+edges:
+  # === Governance: multisig → timelock ===
+  - from: gauntlet-multisig
+    to: timelock-vault
+    kind: proposes-on
+    label: PROPOSER + EXECUTOR + CANCELLER
+  - from: aera-multisig
+    to: timelock-feecalc
+    kind: proposes-on
+    label: PROPOSER + EXECUTOR + CANCELLER
+
+  # === Governance: timelocks control their owned contracts ===
+  - from: timelock-vault
+    to: gtusda-vault
+    kind: controls
+    label: owner
+  - from: timelock-vault
+    to: provisioner
+    kind: controls
+    label: owner
+  - from: timelock-vault
+    to: roles-authority-vault
+    kind: controls
+    label: owner
+  - from: timelock-vault
+    to: forwarder-accountant
+    kind: controls
+    label: owner
+  - from: timelock-vault
+    to: guardian-forwarder-1
+    kind: controls
+    label: owner
+  - from: timelock-vault
+    to: guardian-forwarder-2
+    kind: controls
+    label: owner
+  - from: timelock-vault
+    to: transfer-hook
+    kind: controls
+    label: setIsVaultUnitsTransferable
+  - from: timelock-feecalc
+    to: price-fee-calculator
+    kind: controls
+    label: owner
+  - from: timelock-feecalc
+    to: roles-authority-feecalc
+    kind: controls
+    label: owner
+
+  # === Mint authority ===
+  - from: provisioner
+    to: gtusda-vault
+    kind: mints
+    label: onlyProvisioner
+
+  # === Guardian authority: EOA → Forwarder → vault submit() ===
+  - from: guardian-eoa
+    to: guardian-forwarder-1
+    kind: routes-through
+    label: execute
+  - from: guardian-eoa
+    to: guardian-forwarder-2
+    kind: routes-through
+    label: execute
+  - from: guardian-forwarder-1
+    to: gtusda-vault
+    kind: holds-role
+    label: guardian / submit(bytes)
+  - from: guardian-forwarder-2
+    to: gtusda-vault
+    kind: holds-role
+    label: guardian / submit(bytes)
+  - from: transfer-hook
+    to: gtusda-vault
+    kind: manages
+    label: transfers disabled
+
+  # === PPS authority: keeper → Forwarder → guard / PriceAndFeeCalculator ===
+  - from: keeper-eoa
+    to: forwarder-accountant
+    kind: routes-through
+    label: submit PPS
+  - from: forwarder-accountant
+    to: min-update-guard
+    kind: routes-through
+    label: pre-check interval
+  - from: forwarder-accountant
+    to: price-fee-calculator
+    kind: holds-role
+    label: vaultAccountant / setUnitPrice
+  - from: forwarder-accountant
+    to: provisioner
+    kind: holds-role
+    label: solveRequestsVault
+  - from: price-fee-calculator
+    to: gtusda-vault
+    kind: manages
+    label: unit price
+
+  # === Capital flow: vault → bridge → Morpho ===
+  - from: gtusda-vault
+    to: cross-chain-bridge
+    kind: routes-through
+  - from: cross-chain-bridge
+    to: morpho
+    kind: deposits-into
+    label: USDC
+  - from: gtusda-vault
+    to: gauntlet-frontier
+    kind: deposits-into
+    label: "72.9%"
+  - from: gtusda-vault
+    to: gauntlet-rwa
+    kind: deposits-into
+    label: "27.0%"
+  - from: gtusda-vault
+    to: merkl-distributor
+    kind: routes-through
+    label: reward claims
+
+  # === MetaMorpho vault governance ===
+  - from: gauntlet-vault-owner
+    to: gauntlet-frontier
+    kind: holds-role
+    label: "owner"
+  - from: gauntlet-vault-curator
+    to: gauntlet-frontier
+    kind: holds-role
+    label: "curator"
+  - from: gauntlet-vault-owner
+    to: gauntlet-rwa
+    kind: holds-role
+    label: "owner"
+  - from: gauntlet-vault-curator
+    to: gauntlet-rwa
+    kind: holds-role
+    label: "curator"
+
+  # === Dominant credit exposure ===
+  - from: morpho-market-e83d72fa5b00
+    to: pareto-falconx-cdo
+    kind: routes-through
+    label: "AA_FalconXUSDC collateral + virtualPrice oracle"
+  - from: pareto-falconx-cdo
+    to: falconx
+    kind: deposits-into
+    label: "USDC credit line"
+
+  # === Fee flow ===
+  - from: gtusda-vault
+    to: gauntlet-multisig
+    kind: routes-fees-to
+    label: feeRecipient
+
+# BEGIN GENERATED MORPHO MARKET EDGES
+# Managed by scripts/update_morpho_graph_markets.mjs — do not edit.
+  - from: gauntlet-frontier
+    to: morpho-market-e83d72fa5b00
+    kind: deposits-into
+    label: "93.0%"
+  - from: gauntlet-frontier
+    to: morpho-market-64d65c9a2d91
+    kind: deposits-into
+    label: "5.6%"
+  - from: gauntlet-frontier
+    to: morpho-market-bf02d6c6852f
+    kind: deposits-into
+    label: "1.1%"
+  - from: gauntlet-frontier
+    to: morpho-market-755f954513d3
+    kind: deposits-into
+    label: "0.1%"
+  - from: gauntlet-frontier
+    to: morpho-market-f02d2e8f427a
+    kind: deposits-into
+    label: "<0.1%"
+  - from: gauntlet-frontier
+    to: morpho-market-5cebfae10f5e
+    kind: deposits-into
+    label: "<0.1%"
+  - from: gauntlet-frontier
+    to: morpho-market-61765602144e
+    kind: deposits-into
+    label: "<0.1%"
+  - from: gauntlet-frontier
+    to: morpho-market-ad73d5e139a9
+    kind: deposits-into
+    label: "<0.1%"
+  - from: gauntlet-frontier
+    to: morpho-market-bbf7ce1b40d3
+    kind: deposits-into
+    label: "<0.1%"
+  - from: gauntlet-frontier
+    to: morpho-market-729badf297ee
+    kind: deposits-into
+    label: "<0.1%"
+  - from: gauntlet-rwa
+    to: morpho-market-e83d72fa5b00
+    kind: deposits-into
+    label: "99.5%"
+  - from: gauntlet-rwa
+    to: morpho-market-64d65c9a2d91
+    kind: deposits-into
+    label: "0.3%"
+  - from: gauntlet-rwa
+    to: morpho-market-755f954513d3
+    kind: deposits-into
+    label: "<0.1%"
+  - from: gauntlet-rwa
+    to: morpho-market-526d6d2e334a
+    kind: deposits-into
+    label: "<0.1%"
+  - from: gauntlet-rwa
+    to: morpho-market-d3c7b3668b91
+    kind: deposits-into
+    label: "<0.1%"
+# END GENERATED MORPHO MARKET EDGES

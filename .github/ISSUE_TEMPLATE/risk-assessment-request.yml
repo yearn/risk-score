@@ -1,7 +1,7 @@
 name: Risk Assessment Request
 description: Request a risk assessment for a protocol or asset
 title: "Risk Assessment: "
-labels: ["risk-assessment"]
+labels: ["Report Requested"]
 body:
   - type: markdown
     attributes:

@@ -1,10 +1,10 @@
 # Protocol Risk Assessment: Spectra Finance
 
-- **Assessment Date:** February 21, 2026
+- **Assessment Date:** May 19, 2026
 - **Token:** PT (Principal Token) / MetaVault shares
 - **Chain:** Ethereum (+ Base, Arbitrum, and others)
 - **Token Address:** N/A (permissionless protocol — multiple PT and MetaVault deployments)
-- **Final Score: 2.25/5.0**
+- **Final Score: 2.33/5.0**
 
 ## Overview + Links
 
@@ -59,20 +59,20 @@ The smart contract architecture involves: PrincipalToken, YieldToken, AMBeacon, 
 ## Historical Track Record
 
 - **Production time:** Spectra V2 live since early 2024 (~2 years); APWine V1 launched 2021 (~5 years total development)
-- **TVL:** ~$40.69M across chains (Spectra V2), historically peaked ~$100M+ (August 2025)
+- **TVL:** ~$45.65M across chains (Spectra V2, source: [DefiLlama](https://defillama.com/protocol/spectra-v2)), historically peaked ~$100M+ (August 2025)
 - **Token:** SPECTRA (launched December 2024, replacing APW via SIP3), max supply 876.7M
 
-**Chain Deployments:**
+**Chain Deployments (source: [DefiLlama](https://defillama.com/protocol/spectra-v2), May 2026):**
 
 | Chain | TVL |
 |-------|-----|
-| Hemi | $20.39M |
-| Katana | $6.5M |
-| Ethereum | $5.71M |
-| Flare | $5.25M |
-| Base | $1.12M |
-| Arbitrum | $100K |
-| Others (Avalanche, Sonic, BSC, OP) | Minimal |
+| Flare | $20.52M |
+| Hemi | $16.62M |
+| Ethereum | $3.72M |
+| Avalanche | $2.00M |
+| Katana | $1.26M |
+| Base | $0.64M |
+| Sonic / Binance / Hyperliquid / Arbitrum / Optimism / Monad | Minimal (<$100K each) |
 
 **Security Incidents:**
 
@@ -80,7 +80,7 @@ The smart contract architecture involves: PrincipalToken, YieldToken, AMBeacon, 
 
 2. **APWine Critical Delegation Bug (pre-rebrand):** Discovered by whitehat `setuid0` via Immunefi before exploitation. Incorrect check in PT `beforeTokenTransfer` allowed bypassing delegation amount checks when burning tokens (since `to == address(0)`). Could have enabled yield theft after ~6 months. **$100,000 bounty paid**. Patched before any exploitation.
 
-No concentration risk data available for the specific MetaVault (not yet deployed). Existing MetaVaults (Gami Spectra USDC on Base: $637K TVL, vbUSDC Katana: $905K TVL) are small-scale with limited depositor data.
+No concentration risk data available for the specific MetaVault (not yet deployed). Existing MetaVaults (Gami Spectra USDC on Base: ~$636K TVL, vbUSDC Katana: ~$1.26M TVL — source: [DefiLlama](https://defillama.com/protocol/spectra-v2), May 2026) are small-scale with limited depositor data.
 
 ## Funds Management
 
@@ -114,19 +114,19 @@ Spectra itself does not custody or delegate funds — it provides a permissionle
 - PTs are **fully backed** by the deposited IBT
 - 1 PT represents a claim on 1 unit of underlying at maturity
 - **Negative yield risk:** If the underlying IBT loses value (e.g., vault exploit), the PT backing decreases proportionally. The `ptRate` can only decrease, never increase. `_computeYield()` reconciles losses fairly across all holders
-- All collateral is verifiable on-chain through the PrincipalToken contract
+- All collateral is verifiable onchain through the PrincipalToken contract
 
 **The quality of PT collateral depends entirely on the underlying IBT** — Spectra is agnostic to what IBT is used. If the IBT comes from a risky vault, PTs inherit that risk. Risk assessment of the specific IBT should be done separately (see respective asset reports).
 
 ### Provability
 
-- All PT/YT balances and rates are on-chain and programmatically computed
+- All PT/YT balances and rates are onchain and programmatically computed
 - `ptRate` and `ibtRate` are transparent contract state variables
 - Exchange rates computed algorithmically — no privileged role updates
 - Anyone can verify reserves by reading the PrincipalToken contract
 - Revenue: 3% yield fee + 3% points fee to Spectra DAO treasury
 
-## Liquidity Riskx
+## Liquidity Risk
 
 **Note:** When the MetaVault is newly deployed and liquidity data will not be available initially. This section assesses structural liquidity characteristics rather than current depth.
 
@@ -145,12 +145,12 @@ Spectra itself does not custody or delegate funds — it provides a permissionle
 - PT holders can always wait until maturity for 1:1 redemption (subject to negative yield risk)
 - Same-value assets (e.g., USDC-denominated PTs) can tolerate longer exit times
 
-**Existing MetaVault Liquidity Data (for reference):**
+**Existing MetaVault Liquidity Data (for reference, source: [DefiLlama](https://defillama.com/protocol/spectra-v2), May 2026):**
 
 | MetaVault | Chain | TVL | Curator |
 |-----------|-------|-----|---------|
-| Gami Spectra USDC | Base | $637K | Gami Labs |
-| vbUSDC Katana | Katana | $905K | Clearstar |
+| Gami Spectra USDC | Base | ~$636K | Gami Labs |
+| vbUSDC Katana | Katana | ~$1.26M | Clearstar |
 
 ## Centralization & Control Risks
 
@@ -160,10 +160,10 @@ Spectra itself does not custody or delegate funds — it provides a permissionle
 
 - **Token:** $SPECTRA with veSPECTRA for governance voting, gauge allocation, and fee sharing
 - **Core contracts** use AMProxyAdmin and AMTransparentUpgradeableProxy — **upgradeable**
-- **AccessManager**: [`0x7EA3097E2AF59eA705398544e0f58EdDb7bd1852`](https://etherscan.io/address/0x7EA3097E2AF59eA705398544e0f58EdDb7bd1852) — central authority controlling upgrade permissions via OpenZeppelin 5.0 AccessManager with 11 defined roles
-- **DAO Multisig**: [`0xDbbfc051D200438dd5847b093B22484B842de9E7`](https://etherscan.io/address/0xDbbfc051D200438dd5847b093B22484B842de9E7) — Gnosis Safe v1.3.0, **3-of-5 threshold**, holds UPGRADE_ROLE (role 1) without timelock
-- **Signers**: 5 EOAs — [`0x3152D7e6B0eE11F4F945376b269A65A6c883711F`](https://etherscan.io/address/0x3152D7e6B0eE11F4F945376b269A65A6c883711F), [`0x4B05aC062981D229e8a47DDeAf286eAf65FB4ee0`](https://etherscan.io/address/0x4B05aC062981D229e8a47DDeAf286eAf65FB4ee0), [`0x54E939c5134F237510e1a21b0d42a00D70Ab8213`](https://etherscan.io/address/0x54E939c5134F237510e1a21b0d42a00D70Ab8213), [`0x01Aa68b18960109C34644362F9d619517f864489`](https://etherscan.io/address/0x01Aa68b18960109C34644362F9d619517f864489), [`0xA7499Aa6464c078EeB940da2fc95C6aCd010c3Cc`](https://etherscan.io/address/0xA7499Aa6464c078EeB940da2fc95C6aCd010c3Cc). Identities not publicly labeled on Etherscan. No modules or guard set on Safe
-- **Deployer removed**: Original deployer (`0x020d5ca8bd6451d4c44f784e594f02f352903e61`) has been fully removed from all AccessManager roles — positive security practice
+- **AccessManager**: [`0x7EA3097E2AF59eA705398544e0f58EdDb7bd1852`](https://etherscan.io/address/0x7EA3097E2AF59eA705398544e0f58EdDb7bd1852) — central authority controlling upgrade permissions via OpenZeppelin 5.0 AccessManager. Onchain `RoleGranted` events reveal roles 0–11, 14, and 101 ever used; admin (role 0) and upgrade (role 1) are both held by the DAO multisig with **0-second grant/execution delay** (`getRoleGrantDelay(1) = 0`, verified onchain)
+- **DAO Multisig**: [`0xDbbfc051D200438dd5847b093B22484B842de9E7`](https://etherscan.io/address/0xDbbfc051D200438dd5847b093B22484B842de9E7) — Gnosis Safe v1.3.0, **3-of-5 threshold** (`getThreshold() = 3`, verified onchain), holds ADMIN_ROLE (0), UPGRADE_ROLE (1), and additional operational roles (2, 3, 4, 5, 6, 7, 8, 11, 14, 101) without timelock
+- **Signers** (verified onchain via `getOwners()`, May 2026): 5 EOAs — [`0x3152D7e6B0eE11F4F945376b269A65A6c883711F`](https://etherscan.io/address/0x3152D7e6B0eE11F4F945376b269A65A6c883711F), [`0x4B05aC062981D229e8a47DDeAf286eAf65FB4ee0`](https://etherscan.io/address/0x4B05aC062981D229e8a47DDeAf286eAf65FB4ee0), [`0x54E939c5134F237510e1a21b0d42a00D70Ab8213`](https://etherscan.io/address/0x54E939c5134F237510e1a21b0d42a00D70Ab8213), [`0x01Aa68b18960109C34644362F9d619517f864489`](https://etherscan.io/address/0x01Aa68b18960109C34644362F9d619517f864489), [`0xdE67547C0B29758fEAc7bc888EbCadD77e302F05`](https://etherscan.io/address/0xdE67547C0B29758fEAc7bc888EbCadD77e302F05). Identities not publicly labeled on Etherscan. No modules or guard set on Safe (verified onchain). **Signer rotation observed:** on 2026-04-06 (block 24821269, tx [`0x231d468d2dcf46b7898b318846a99be9763d05c30d950bf462de96626a27f82e`](https://etherscan.io/tx/0x231d468d2dcf46b7898b318846a99be9763d05c30d950bf462de96626a27f82e)) signer `0xA7499Aa6464c078EeB940da2fc95C6aCd010c3Cc` was swapped for `0xdE67547C0B29758fEAc7bc888EbCadD77e302F05`
+- **Deployer removed**: Original deployer ([`0x020d5ca8bd6451d4c44f784e594f02f352903e61`](https://etherscan.io/address/0x020d5ca8bd6451d4c44f784e594f02f352903e61)) confirmed removed from **all** AccessManager roles (0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 14, 101) — verified via `hasRole()` calls in May 2026
 - Revenue sharing: 60% swap fees to veSPECTRA voters, 20% to LPs, 20% to Curve DAO
 - Pool creation is **permissionless** — anyone can create a Spectra market for any ERC-4626 token
 
@@ -186,7 +186,7 @@ Spectra itself does not custody or delegate funds — it provides a permissionle
 ### Programmability
 
 **Spectra Core:**
-- Fully programmatic — PT/YT minting, yield calculation, and rate computation are all on-chain
+- Fully programmatic — PT/YT minting, yield calculation, and rate computation are all onchain
 - Exchange rates (`ptRate`, `ibtRate`) computed algorithmically
 - No keeper or relayer dependencies for core protocol
 
@@ -277,7 +277,7 @@ Existing MetaVaults are on Base (Gami Spectra USDC) and Katana (vbUSDC). Once de
 
 - **Zero high-severity audit findings** across three professional audits (Code4rena, Pashov, Sherlock)
 - **~5 years of continuous development** (APWine 2020 → Spectra 2023 → MetaVaults 2025) with ~2 years Spectra V2 in production
-- **Fully on-chain PT/YT mechanics** — rates computed algorithmically, no privileged role updates
+- **Fully onchain PT/YT mechanics** — rates computed algorithmically, no privileged role updates
 - **Robust oracle architecture** — three oracle types (Deterministic, TWAP, Hybrid) following Chainlink standard, with manipulation resistance via Curve
 - **Doxxed team** with established reputation, transparent incident response, and $3.6M in funding from reputable VCs
 - **MetaVault curator constraints** — whitelisted actions, receiver restrictions, DelegateCall disabled, time-locked sensitive operations
@@ -302,7 +302,7 @@ Existing MetaVaults are on Base (Gami Spectra USDC) and Katana (vbUSDC). Once de
 ### Critical Risk Gates
 
 - [x] **No audit** — Spectra has been audited by 3 reputable firms (Code4rena, Pashov, Sherlock) ✅ PASS
-- [x] **Unverifiable reserves** — PT reserves are fully on-chain and verifiable via PrincipalToken contract ✅ PASS
+- [x] **Unverifiable reserves** — PT reserves are fully onchain and verifiable via PrincipalToken contract ✅ PASS
 - [x] **Total centralization** — Uses multisig governance with Zodiac role constraints ✅ PASS
 
 **All gates pass.** Proceed to category scoring.
@@ -332,17 +332,17 @@ Existing MetaVaults are on Base (Gami Spectra USDC) and Katana (vbUSDC). Once de
 | Pause capability | SAFE can pause/unpause AsyncVault — significant control over user funds |
 | Pool creation | Permissionless — anyone can create Spectra markets |
 
-**Subcategory A Score: 2.5/5** — Zodiac-based MetaVault governance is well-designed with strict curator constraints. Core protocol governed by 3-of-5 DAO multisig via AccessManager — deployer properly removed. However, **no timelock on upgrades** means the multisig can push changes immediately, and pause capability gives significant control over user funds. Signer identities are not publicly labeled.
+**Subcategory A Score: 2.5/5** — Zodiac-based MetaVault governance is well-designed with strict curator constraints. Core protocol governed by 3-of-5 DAO multisig via AccessManager — deployer properly removed (verified onchain). However, **no timelock on upgrades** (`getRoleGrantDelay = 0`, verified onchain) means the multisig can push changes immediately, and pause capability gives significant control over user funds. Signer identities are not publicly labeled, and one signer was rotated in April 2026 without public attribution.
 
 **Subcategory B: Programmability**
 
 | Factor | Assessment |
 |--------|-----------|
-| Spectra PT/YT | Fully programmatic — rates computed on-chain algorithmically |
+| Spectra PT/YT | Fully programmatic — rates computed onchain algorithmically |
 | MetaVault | Hybrid — automated contracts + manual curator decisions for allocation/rollover/settlement |
-| PPS | On-chain, algorithmically computed via `ptRate` and `ibtRate` |
+| PPS | Onchain, algorithmically computed via `ptRate` and `ibtRate` |
 
-**Subcategory B Score: 2.0/5** — Core protocol is highly programmatic with on-chain rate computation. MetaVault curator introduces manual intervention for strategy, but share pricing remains algorithmic.
+**Subcategory B Score: 2.0/5** — Core protocol is highly programmatic with onchain rate computation. MetaVault curator introduces manual intervention for strategy, but share pricing remains algorithmic.
 
 **Subcategory C: External Dependencies**
 
@@ -363,25 +363,25 @@ Existing MetaVaults are on Base (Gami Spectra USDC) and Katana (vbUSDC). Once de
 
 | Factor | Assessment |
 |--------|-----------|
-| PT backing | Fully backed by deposited IBT, verifiable on-chain, 1:1 at maturity |
+| PT backing | Fully backed by deposited IBT, verifiable onchain, 1:1 at maturity |
 | Negative yield | PT backing decreases proportionally if IBT loses value — no protocol-level backstop |
 | Collateral quality | Depends entirely on IBT selected — Spectra is agnostic |
 
-**Subcategory A Score: 2.0/5** — Full on-chain collateralization with transparent backing. Negative yield mechanism is well-designed (fair loss distribution). Score assumes the IBT risk is assessed separately.
+**Subcategory A Score: 2.0/5** — Full onchain collateralization with transparent backing. Negative yield mechanism is well-designed (fair loss distribution). Score assumes the IBT risk is assessed separately.
 
 **Subcategory B: Provability**
 
 | Factor | Assessment |
 |--------|-----------|
-| Reserve transparency | Fully on-chain — `ptRate`, `ibtRate` are contract state variables |
+| Reserve transparency | Fully onchain — `ptRate`, `ibtRate` are contract state variables |
 | Reporting mechanism | Programmatic, real-time, anyone can verify |
-| Third-party verification | On-chain by design — no off-chain components in core protocol |
+| Third-party verification | Onchain by design — no offchain components in core protocol |
 
-**Subcategory B Score: 1.5/5** — Good provability. All rates are computed algorithmically on-chain. Anyone can verify PT backing at any time by reading the PrincipalToken contract.
+**Subcategory B Score: 1.5/5** — Good provability. All rates are computed algorithmically onchain. Anyone can verify PT backing at any time by reading the PrincipalToken contract.
 
 **Funds Management Score = (2.0 + 1.5) / 2 = 1.75/5**
 
-**Score: 1.75/5** — Strong on-chain collateralization and provability. PT backing is transparent and programmatically verifiable.
+**Score: 1.75/5** — Strong onchain collateralization and provability. PT backing is transparent and programmatically verifiable.
 
 #### Category 4: Liquidity Risk (Weight: 15%)
 
@@ -434,13 +434,20 @@ Final Score = (Centralization × 0.30) + (Funds Mgmt × 0.30) + (Audits × 0.20)
 
 **Final Risk Tier: Low Risk (2.33/5.0) — Approved with standard monitoring**
 
+### Changes since last assessment (2026-02-21 → 2026-05-19)
+
+- Onchain re-verification of AccessManager state: DAO multisig (`0xDbbf...9E7`) still holds ADMIN (role 0) and UPGRADE (role 1); grant/execution delay remains **0 seconds** (no timelock added). Original deployer (`0x020d...3e61`) confirmed revoked from every observed role (0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 14, 101).
+- Safe ownership change: signer `0xA749...c3Cc` swapped for `0xdE67...2F05` on 2026-04-06 (tx `0x231d4...7f82e`). Threshold unchanged at 3-of-5. No modules or guard.
+- TVL refreshed: $40.69M → $45.65M (source: DefiLlama). Chain mix shifted (Flare and Hemi now dominate; Katana shrank vs. February figures, but Katana MetaVault TVL grew from $905K to ~$1.26M).
+- Header score corrected from 2.25 → 2.33 to match the weighted calculation; underlying category scores unchanged.
+
 **Important caveat:** This score assesses Spectra Finance protocol risk only. The total risk of any MetaVault position includes the underlying IBT risk (assessed separately) which propagates through PT tokens. The overall position risk will be the higher of Spectra's score and the underlying asset's score.
 
 ---
 
 ## Reassessment Triggers
 
-- **Time-based:** Reassess in 6 months (August 2026)
+- **Time-based:** Reassess in 6 months (November 2026)
 - **TVL-based:** Reassess if protocol TVL changes by more than ±50%
 - **Incident-based:** Reassess after any exploit affecting Spectra core or MetaVault contracts
 - **Governance-based:** Reassess if core ProxyAdmin ownership changes or MetaVault governance structure is modified

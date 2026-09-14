@@ -7,7 +7,7 @@ Maps asset dependencies per protocol to identify shared exposure and contagion p
 Requires `ETHERSCAN_API_KEY` in `.env`.
 
 ```bash
-# Fetch on-chain data and generate protocols.yaml
+# Fetch onchain data and generate protocols.yaml
 uv run scripts/dependencies/fetch_protocols.py
 
 # Render all views (Mermaid graph + tables)
@@ -23,20 +23,20 @@ uv run scripts/dependencies/render.py shared    # shared exposure / contagion ta
 
 | File | Purpose |
 |------|---------|
-| `fetch_protocols.py` | Fetches collateral assets on-chain via Etherscan API, outputs `protocols.yaml` |
+| `fetch_protocols.py` | Fetches collateral assets onchain via Etherscan API, outputs `protocols.yaml` |
 | `render.py` | Reads `protocols.yaml`, outputs Mermaid graph and markdown tables |
 | `protocols.yaml` | Generated source of truth for all protocol dependency data |
 
 ## Adding a new protocol
 
-### On-chain fetcher (lending markets)
+### Onchain fetcher (lending markets)
 
 Add a new fetcher function in `fetch_protocols.py` and call it from `main()`:
 
 ```python
 def fetch_my_protocol() -> dict:
     """Fetch collateral from MyProtocol contract."""
-    # Use eth_call() for on-chain reads, get_symbol() for token names
+    # Use eth_call() for onchain reads, get_symbol() for token names
     raw = eth_call(contract_address, selector)
     # ... decode and collect assets ...
     return {
