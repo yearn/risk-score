@@ -81,6 +81,7 @@ const CHAIN_EXPLORERS: Record<string, string> = {
   sonic: "https://sonicscan.org/address/",
   katana: "https://explorer.katanarpc.com/address/",
   hyperevm: "https://hyperevmscan.io/address/",
+  plume: "https://explorer.plume.org/address/",
 };
 
 export function explorerUrl(address: string, chain = "ethereum"): string {

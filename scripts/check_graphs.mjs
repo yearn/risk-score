@@ -37,6 +37,7 @@ export const KNOWN_CHAINS = new Set([
   "sonic",
   "katana",
   "hyperevm",
+  "plume",
 ]);
 
 /**
