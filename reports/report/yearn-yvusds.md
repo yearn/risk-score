@@ -4,7 +4,7 @@
 - **Token:** yvUSDS-1 (USDS-1 yVault)
 - **Chain:** Ethereum
 - **Token Address:** [`0x182863131F9a4630fF9E27830d945B1413e347E8`](https://etherscan.io/address/0x182863131F9a4630fF9E27830d945B1413e347E8)
-- **Final Score: 1.5/5.0**
+- **Final Score: 1.3/5.0**
 
 ## Overview + Links
 
@@ -452,11 +452,11 @@ Yearn maintains an active monitoring system via the [`monitoring`](https://githu
 | Concentration | 100% in a single Sky venue (single point of failure for yield and redemption) |
 | Quality | Top-tier — Sky has $10M bounty, ~$578M staked in USDS Staking Rewards, and 8+ years of MakerDAO heritage |
 
-**Dependencies Score: 3.0 / 5** — the funded capital is now concentrated in a single venue (Sky USDS Staking Rewards) with critical functionality (yield + redemption) fully dependent on it. Per the rubric this is the critical end of "established protocol dependencies": a single blue-chip dependency whose failure would impair the entire deployed capital. This hardens from the prior 2.5 (two-venue split) per the report's own reassessment trigger.
+**Dependencies Score: 2.5 / 5** — the vault depends on a single blue-chip ecosystem (Sky) plus the underlying USDS token. At this snapshot capital sits in one Sky venue (USDS Staking Rewards) rather than two, but the prior sUSDS leg and the current staking leg are both first-party Sky contracts, so the ecosystem-level coupling is unchanged and the number of distinct dependency surfaces actually decreased. Per the rubric, one blue-chip dependency maps to 2.0; the +0.5 reflects the 100% single-venue concentration (yield and redemption now rest on one contract) and the now-100% SPK yield source, roughly offset by the removed sUSDS surface. Holds at 2.5.
 
-**Centralization Score = (1.0 + 1.0 + 3.0) / 3 ≈ 1.67**
+**Centralization Score = (1.0 + 1.0 + 2.5) / 3 ≈ 1.5**
 
-**Score: 1.67 / 5** — Immutable vault with named-signer multisig and 7-day timelock. Fully programmatic. Single-venue Sky concentration is now the dominant subcategory driver.
+**Score: 1.5 / 5** — Immutable vault with named-signer multisig and 7-day timelock. Fully programmatic. Single-ecosystem (Sky) coupling is the dominant subcategory driver, unchanged from the prior snapshot.
 
 #### Category 3: Funds Management (Weight: 30%)
 
@@ -495,9 +495,9 @@ Yearn maintains an active monitoring system via the [`monitoring`](https://githu
 | Large holder impact | 7.29M vault vs ~$578M staking pool — negligible |
 | Same-value asset | USDS-denominated — no price-divergence risk |
 | Withdrawal restrictions | None — atomic redemption, no cooldown |
-| Venue diversification | Single venue (100% Sky USDS Staking Rewards) — a pause / migration blocks 100% of redemptions |
+| Venue diversification | Single venue (100% Sky USDS Staking Rewards) — a pause / migration would block 100% of redemptions, but this is a dependency/availability risk, not exit liquidity |
 
-**Score: 2.0 / 5** — Still highly liquid against deep underlying capacity and atomic 1:1, but the unwind path is now a single venue: a pause or migration of the USDS Staking Rewards contract would block 100% of redemptions (previously the sUSDS Lender leg absorbed ~84%). This hardens from the prior 1.5 two-venue posture. Cascading-withdrawal pressure from yvDAI-1 (~28.7% of yvDAI routes here) settles atomically but multi-step.
+**Score: 1.5 / 5** — Highly liquid against deep underlying capacity; atomic 1:1 unstake with no queue or cooldown. The exit mechanism, depth, and speed are materially unchanged from the prior snapshot (both the sUSDS leg and the current staking leg are instant atomic redemptions against deep Sky pools). The single-venue concentration is captured as a dependency/availability risk in Cat 2C, not as exit liquidity. Cascading-withdrawal pressure from yvDAI-1 (~28.7% of yvDAI routes here) settles atomically but multi-step.
 
 #### Category 5: Operational Risk (Weight: 5%)
 
@@ -517,13 +517,13 @@ Yearn maintains an active monitoring system via the [`monitoring`](https://githu
 | Category | Score | Weight | Weighted |
 |----------|------:|-------:|---------:|
 | Audits & Historical | 1.5 | 20% | 0.300 |
-| Centralization & Control | 1.67 | 30% | 0.501 |
+| Centralization & Control | 1.5 | 30% | 0.450 |
 | Funds Management | 1.0 | 30% | 0.300 |
-| Liquidity Risk | 2.0 | 15% | 0.300 |
+| Liquidity Risk | 1.5 | 15% | 0.225 |
 | Operational Risk | 1.0 | 5% | 0.050 |
-| **Final Score** | | | **1.451 → 1.5 / 5.0** |
+| **Final Score** | | | **1.325 → 1.3 / 5.0** |
 
-**Change from prior snapshot (July 13 = 1.3):** the allocation inverted from an ~84/16 two-venue split (sUSDS Lender / Spark Compounder) to a 100% single-venue posture in the Spark USDS Compounder (Sky USDS Staking Rewards), after the sUSDS Lender was drained to zero on August 22, 2026. This drove two score changes: Cat 2C dependencies 2.5 → 3.0 (single-venue critical dependency) and Cat 4 liquidity 1.5 → 2.0 (single-venue redemption path). Governance, proxy implementations, timelock, and audit coverage are all unchanged. Final score moves from **1.3 to 1.5**.
+**Change from prior snapshot (July 13 = 1.3):** the allocation inverted from an ~84/16 two-venue split (sUSDS Lender / Spark Compounder) to a 100% single-venue posture in the Spark USDS Compounder (Sky USDS Staking Rewards), after the sUSDS Lender was drained to zero on August 22, 2026. No category score changes: both the prior sUSDS leg and the current staking leg are first-party Sky contracts, so the ecosystem-level dependency and liquidity profiles are materially unchanged (and the number of distinct dependency surfaces actually decreased). The main new consideration — 100% of yield now sourced from SPK rewards rather than ~84% from the Sky Savings Rate — is captured as a key risk and monitoring item but does not move a category score. Final score remains **1.3**.
 
 ### Risk Tier
 
@@ -535,7 +535,7 @@ Yearn maintains an active monitoring system via the [`monitoring`](https://githu
 | 3.5–4.5 | Elevated Risk | Limited approval, strict limits |
 | 4.5–5.0 | High Risk | Not recommended |
 
-**Final Risk Tier: Low Risk (1.5 / 5.0) — Approved with standard monitoring**
+**Final Risk Tier: Minimal Risk (1.3 / 5.0) — Approved, high confidence**
 
 ---
 
@@ -544,8 +544,8 @@ Yearn maintains an active monitoring system via the [`monitoring`](https://githu
 - **Time-based:** Reassess in 6 months (March 2027) or annually
 - **TVL-based:** Reassess if TVL exceeds 50M USDS or changes by more than ±50% from the September 14 snapshot of 7.29M (would indicate either material upstream re-routing back into this vault or further contraction)
 - **Allocation / diversification:**
-  - if Brain re-funds the sUSDS Lender (restoring a second venue), Cat 2C dependencies should soften back toward 2.5 and Cat 4 liquidity back toward 1.5
-  - if the queued USDS Sky Rewards Compounder is removed from the queue or shut down, Cat 2C should also harden (note: it targets the same venue, so it is implementation redundancy only)
+  - if Brain re-funds the sUSDS Lender, this re-diversifies contract-level concentration but does not change ecosystem-level coupling (both are Sky contracts); reassess only if a non-Sky venue is introduced
+  - if the queued USDS Sky Rewards Compounder is removed from the queue or shut down, Cat 2C should harden (note: it targets the same venue, so it is implementation redundancy only)
   - if the Spark Compounder itself is shut down or its debt is re-routed with no funded replacement, reassess immediately
 - **Strategy changes (`addStrategy()` proposals at the Strategy Manager TimelockController, [`0x88Ba032be87d5EF1fbE87336b7090767F367BF73`](https://etherscan.io/address/0x88Ba032be87d5EF1fbE87336b7090767F367BF73), 7-day delay):**
   - any new strategy proposed for inclusion — re-review during the 7-day timelock window
@@ -643,4 +643,4 @@ To shorten the delay, an attacker would need to (1) control Daddy 6/9 to **propo
 | --- | --- | --- |
 | [May 11, 2026](https://github.com/yearn/risk-score/pull/148) | 1.3 | Initial assessment |
 | [July 13, 2026](https://github.com/yearn/risk-score/pull/314) | 1.3 | Reassessment: TVL $6.23M (down 9.7% since May 11); allocations drifted to 84/16 sUSDS/Spark; all governance roles, multisig thresholds, and timelock parameters confirmed unchanged; strategies identified as EIP-1967 proxy-upgradeable under Brain (3-of-8) — standard Yearn V3 Tokenized Strategy pattern; strategy proxy admin slots confirmed 0x0 (upgrades via management() only); Spark Compounder last_report corrected; sUSDS TVL drifted to ~$5.28B; USDS Staking Rewards ~$556M staked. No score or tier change |
-| [September 14, 2026](https://github.com/yearn/risk-score/pull/470) | 1.5 | Reassessment: allocation inverted to 100% Spark USDS Compounder (Sky USDS Staking Rewards); sUSDS Lender drained to 0 on Aug 22 (not shut down); TVL $7.29M (+16.9%); PPS 1.108567; governance roles, multisig thresholds (6-of-9 / 3-of-8 / 4-of-7), 7-day timelock, proxy implementations all confirmed unchanged; single-venue concentration → Cat 2C dependencies 2.5→3.0 and Cat 4 liquidity 1.5→2.0; final score 1.3→1.5 (Low Risk) |
+| [September 14, 2026](https://github.com/yearn/risk-score/pull/470) | 1.3 | Reassessment: allocation inverted to 100% Spark USDS Compounder (Sky USDS Staking Rewards); sUSDS Lender drained to 0 on Aug 22 (not shut down); TVL $7.29M (+16.9%); PPS 1.108567; governance roles, multisig thresholds (6-of-9 / 3-of-8 / 4-of-7), 7-day timelock, proxy implementations all confirmed unchanged; 100% of yield now SPK-based (was ~84% SSR). No score or tier change — both legs are Sky contracts so ecosystem-level dependency/liquidity are materially unchanged |
