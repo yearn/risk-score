@@ -1,31 +1,31 @@
 # Protocol Risk Assessment: Yearn — yvUSDC-1
 
-- **Assessment Date:** March 13, 2026
+- **Assessment Date:** March 13, 2026 (Updated: September 14, 2026)
 - **Token:** yvUSDC-1 (USDC-1 yVault)
 - **Chain:** Ethereum
 - **Token Address:** [`0xBe53A109B494E5c9f97b9Cd39Fe969BE68BF6204`](https://etherscan.io/address/0xBe53A109B494E5c9f97b9Cd39Fe969BE68BF6204)
-- **Final Score: 1.3/5.0**
+- **Final Score: 1.5/5.0**
 
 ## Overview + Links
 
-yvUSDC-1 is a **USDC-denominated Yearn V3 vault** (ERC-4626) that deploys deposited USDC into yield strategies on Ethereum mainnet. The vault currently uses **two active strategies** — "USDC to USDS Depositor" (~79%) and "USDC to sUSDS Lender" (~21%) — both earning yield through the **Sky/MakerDAO ecosystem** by converting USDC into USDS-denominated yield-bearing positions.
+yvUSDC-1 is a **USDC-denominated Yearn V3 vault** (ERC-4626) that deploys deposited USDC into yield strategies on Ethereum mainnet. The vault currently uses **four active strategies** — "Yearn USDC" (~35.6%), "stcUSD/USDC Pawn Broker Market" (~30.3%), "USDC to sUSDS Lender" (~22.2%), and "USDC to USDS Depositor" (~11.9%) — deploying across the **Morpho**, **Cap Finance**, and **Sky/MakerDAO** ecosystems.
 
 **Key architecture:**
 
 - **Vault:** Standard Yearn V3 vault (v3.0.2) accepting USDC deposits, issuing yvUSDC-1 shares. Deployed as an immutable Vyper minimal proxy (EIP-1167) via the Yearn V3 Vault Factory
 - **Strategy pipelines:** Both active strategies share the same entry path: USDC → DAI (via MakerDAO PSM Lite at 1:1, 0 fee) → USDS (via DAI-USDS Exchanger at 1:1). The USDS Depositor then deposits into a **yvUSDS vault** (Yearn V3 ERC-4626), while the sUSDS Lender deposits into **sUSDS** (Sky Savings vault) directly
 - **Governance:** Managed via the standard **Yearn V3 Role Manager** contract, governed by the **Yearn 6-of-9 global multisig (ySafe)**
-- **Multi-strategy capable:** 9 strategies in the default queue (including Morpho, Aave V3, Fluid, Spark), with debt currently split between the USDS Depositor (~79%) and sUSDS Lender (~21%)
+- **Multi-strategy capable:** 4 strategies in the default queue, with debt split across Yearn USDC (~35.6%), stcUSD/USDC Pawn Broker (~30.3%), sUSDS Lender (~22.2%), and USDS Depositor (~11.9%)
 
 **Key metrics (March 13, 2026):**
 
-- **TVL:** ~$31,869,296 USDC
-- **Total Supply:** ~28,811,012 yvUSDC-1
-- **Price Per Share:** 1.099235 USDC/yvUSDC-1 (~9.9% cumulative appreciation over ~12 months)
-- **Total Debt:** ~99.4% deployed (~$177K USDC idle)
+- **TVL:** ~$19,845,547 USDC
+- **Total Supply:** ~17,748,605 yvUSDC-1
+- **Price Per Share:** 1.118144 USDC/yvUSDC-1 (~11.8% cumulative appreciation over ~18 months)
+- **Total Debt:** ~99.4% deployed (~$8K USDC idle)
 - **Deposit Limit:** $50,000,000
 - **Profit Max Unlock Time:** 10 days
-- **Net APR:** ~2.37% (after 10% performance fee)
+- **Net APR:** ~3.74% (after 10% performance fee)
 - **Fees:** 0% management fee, 10% performance fee
 
 **Links:**
@@ -71,27 +71,24 @@ yvUSDC-1 is a **USDC-denominated Yearn V3 vault** (ERC-4626) that deploys deposi
 
 | # | Strategy | Name | Current Debt (USDC) | Allocation |
 |---|----------|------|--------------------:|-----------:|
-| 1 | [`0x00C8a649C9837523ebb406Ceb17a6378Ab5C74cF`](https://etherscan.io/address/0x00C8a649C9837523ebb406Ceb17a6378Ab5C74cF) | USDC Fluid Lender | 0 | 0% |
-| 2 | [`0x39c0aEc5738ED939876245224aFc7E09C8480a52`](https://etherscan.io/address/0x39c0aEc5738ED939876245224aFc7E09C8480a52) | **USDC to USDS Depositor** | **25,152,715** | **~79%** |
-| 3 | [`0x694E47AFD14A64661a04eee674FB331bCDEF3737`](https://etherscan.io/address/0x694E47AFD14A64661a04eee674FB331bCDEF3737) | Morpho Gauntlet USDC Prime Compounder | 0 | 0% |
-| 4 | [`0x074134A2784F4F66b6ceD6f68849382990Ff3215`](https://etherscan.io/address/0x074134A2784F4F66b6ceD6f68849382990Ff3215) | Morpho Steakhouse USDC Compounder | 0 | 0% |
-| 5 | [`0x25f893276544d86a82b1ce407182836F45cb6673`](https://etherscan.io/address/0x25f893276544d86a82b1ce407182836F45cb6673) | Spark USDC Lender | 0 | 0% |
-| 6 | [`0x522478B54046aB7197880F2626b74a96d45B9B02`](https://etherscan.io/address/0x522478B54046aB7197880F2626b74a96d45B9B02) | Aave V3 Lido USDC Lender | 0 | 0% |
-| 7 | [`0x888239Ffa9a0613F9142C808aA9F7d1948a14f75`](https://etherscan.io/address/0x888239Ffa9a0613F9142C808aA9F7d1948a14f75) | Morpho OEV-boosted USDC Compounder | 0 | 0% |
-| 8 | [`0x694cdD19EBee7A974BA8fE3AF8B383bb256F2858`](https://etherscan.io/address/0x694cdD19EBee7A974BA8fE3AF8B383bb256F2858) | Aave V3 USDC Lender | 0 | 0% |
-| 9 | [`0x7130570BCEfCedBe9d15B5b11A33006156460f8f`](https://etherscan.io/address/0x7130570BCEfCedBe9d15B5b11A33006156460f8f) | **USDC to sUSDS Lender** | **6,539,182** | **~21%** |
+| 1 | [`0x39c0aEc5738ED939876245224aFc7E09C8480a52`](https://etherscan.io/address/0x39c0aEc5738ED939876245224aFc7E09C8480a52) | **USDC to USDS Depositor** | **2,363,490** | **~11.9%** |
+| 2 | [`0x7130570BCEfCedBe9d15B5b11A33006156460f8f`](https://etherscan.io/address/0x7130570BCEfCedBe9d15B5b11A33006156460f8f) | **USDC to sUSDS Lender** | **4,406,968** | **~22.2%** |
+| 3 | [`0x68Aea7b82Df6CcdF76235D46445Ed83f85F845A3`](https://etherscan.io/address/0x68Aea7b82Df6CcdF76235D46445Ed83f85F845A3) | **Yearn USDC** | **7,058,255** | **~35.6%** |
+| 4 | [`0xe63A2aBC24cD9538398d825a4bFe5778D25687dF`](https://etherscan.io/address/0xe63A2aBC24cD9538398d825a4bFe5778D25687dF) | **stcUSD/USDC Pawn Broker Market** | **6,015,991** | **~30.3%** |
 
-**Note:** 15 strategies have been added over the vault's 12-month lifetime with 6 revoked, demonstrating active portfolio management. The vault has rotated through strategies including Aave V3, Compound V3, Morpho, Spark, Fluid, and Sky/sUSDS. Debt is currently split between the USDS Depositor (~79%) and sUSDS Lender (~21%) strategies — both route through the Sky/MakerDAO ecosystem.
+**Note:** 21 strategies have been added over the vault's ~18-month lifetime with 7 revoked, demonstrating active portfolio management. The vault has rotated through strategies including Aave V3, Compound V3, Morpho, Spark, Fluid, Sky/sUSDS, and Cap Finance. Debt is currently split across Yearn USDC (~35.6%), stcUSD/USDC Pawn Broker (~30.3%), sUSDS Lender (~22.2%), and USDS Depositor (~11.9%).
 
-**Score impact of strategy diversification:** Both active strategies and all available idle strategies (Aave V3, Morpho, Spark, Fluid) lend into minimal-risk, blue-chip protocols. The dependency score remains at 2/5 (blue-chip dependencies), and collateral quality remains at 1/5 (top-tier DeFi protocols). Diversification across these strategies would **not change** the final risk score.
+**Score impact of strategy diversification:** The vault now deploys into three protocol ecosystems: Morpho (blue-chip), Cap Finance (newer, single-borrower pawn broker), and Sky/MakerDAO (blue-chip). The PawnBroker strategy introduces single-borrower counterparty risk and non-blue-chip collateral (stcUSD). This increases the dependency score from 2 to 2.5 and the collateralization score from 1 to 1.5.
 
 ### Strategy Protocol Dependencies
 
 | Protocol | Strategy | TVL |
 |----------|----------|-----|
-| **Sky/MakerDAO (yvUSDS)** | USDC to USDS Depositor | ~79% of current allocation |
-| **Sky/MakerDAO (sUSDS)** | USDC to sUSDS Lender | ~21% of current allocation |
-| Morpho | 3 strategies (0% current allocation) | Blue-chip, $6.6B+ TVL, 25+ audits |
+| **Morpho (MetaMorpho)** | Yearn USDC | ~35.6% of current allocation |
+| **Cap Finance (PawnBroker)** | stcUSD/USDC Pawn Broker Market | ~30.3% of current allocation |
+| **Sky/MakerDAO (sUSDS)** | USDC to sUSDS Lender | ~22.2% of current allocation |
+| **Sky/MakerDAO (yvUSDS)** | USDC to USDS Depositor | ~11.9% of current allocation |
+| Morpho | 3 additional strategies (0% current allocation) | Blue-chip, $6.6B+ TVL, 25+ audits |
 | Aave V3 | 2 strategies (0% current allocation) | Blue-chip, $30B+ TVL |
 | Fluid | 1 strategy (0% current allocation) | [Report score 1.1/5](../report/fluid.md) |
 | Spark | 1 strategy (0% current allocation) | Part of Sky ecosystem |
@@ -154,14 +151,14 @@ The yvUSDC-1 system is **low complexity**:
 ## Historical Track Record
 
 - **Vault deployed:** March 12, 2024 (block 19,419,991) — **~12 months** in production
-- **TVL:** ~$31.87M USDC — established with a $50M deposit limit
-- **PPS trend:** 1.000000 → 1.099235 (~9.9% cumulative return over 12 months, ~9.9% annualized)
+- **TVL:** ~$19.85M USDC — down from ~$31.87M peak, well within the $50M deposit limit
+- **PPS trend:** 1.000000 → 1.118144 (~11.8% cumulative return over ~18 months, ~7.9% annualized)
 - **Security incidents:** None known for this vault or Yearn V3 generally
-- **Strategy changes:** 15 strategies added over lifetime, 6 revoked — active portfolio management. Has used Aave V3, Compound V3, Morpho, Spark, Fluid, and Sky strategies
-- **Current allocation:** Debt split between USDC to USDS Depositor (~79%, depositing into yvUSDS) and USDC to sUSDS Lender (~21%) — both activated March 3, 2026
-- **Yearn V3 track record:** V3 framework has been live since May 2024 (~22 months). No V3 vault exploits
+- **Strategy changes:** 21 strategies added over lifetime, 7 revoked — active portfolio management. Has used Aave V3, Compound V3, Morpho, Spark, Fluid, Sky, and Cap Finance strategies
+- **Current allocation:** Debt split across Yearn USDC (~35.6%, Morpho MetaMorpho), stcUSD/USDC Pawn Broker (~30.3%, Cap Finance), USDC to sUSDS Lender (~22.2%), and USDC to USDS Depositor (~11.9%, yvUSDS)
+- **Yearn V3 track record:** V3 framework has been live since May 2024 (~28 months). No V3 vault exploits
 
-**Yearn protocol TVL:** ~$240M total across all chains (DeFi Llama, March 2026).
+**Yearn protocol TVL:** ~$188M total across all chains (DeFi Llama, September 2026).
 
 **Sky/sUSDS track record:**
 - sUSDS launched as part of Sky Endgame (2024)
@@ -174,7 +171,7 @@ The yvUSDC-1 system is **low complexity**:
 
 yvUSDC-1 deploys deposited USDC into yield strategies with ~99.4% capital utilization. Debt is currently split between two strategies, both routing through the Sky/MakerDAO ecosystem.
 
-### Strategy 1: USDC to USDS Depositor (~79% allocation)
+### Strategy 1: USDC to USDS Depositor (~11.9% allocation)
 
 **Contract:** [`0x39c0aEc5738ED939876245224aFc7E09C8480a52`](https://etherscan.io/address/0x39c0aEc5738ED939876245224aFc7E09C8480a52)
 
@@ -192,7 +189,7 @@ yvUSDC-1 deploys deposited USDC into yield strategies with ~99.4% capital utiliz
 - Management: Brain multisig (3-of-8)
 - Keeper: yHaaSRelayer ([`0x604e586F17cE106B64185A7a0d2c1Da5bAce711E`](https://etherscan.io/address/0x604e586F17cE106B64185A7a0d2c1Da5bAce711E))
 
-### Strategy 2: USDC to sUSDS Lender (~21% allocation)
+### Strategy 2: USDC to sUSDS Lender (~22.2% allocation)
 
 **Contract:** [`0x7130570BCEfCedBe9d15B5b11A33006156460f8f`](https://etherscan.io/address/0x7130570BCEfCedBe9d15B5b11A33006156460f8f)
 
@@ -206,6 +203,40 @@ yvUSDC-1 deploys deposited USDC into yield strategies with ~99.4% capital utiliz
 
 **Strategy parameters:** Same as USDS Depositor (100M deposit limit, 0.05% max PSM fee, Brain multisig management)
 
+### Strategy 3: Yearn USDC (~35.6% allocation)
+
+**Contract:** [`0x68Aea7b82Df6CcdF76235D46445Ed83f85F845A3`](https://etherscan.io/address/0x68Aea7b82Df6CcdF76235D46445Ed83f85F845A3)
+
+This strategy deposits USDC into a **Yearn-managed Morpho MetaMorpho vault** ([`0x68Aea7b82Df6CcdF76235D46445Ed83f85F845A3`](https://etherscan.io/address/0x68Aea7b82Df6CcdF76235D46445Ed83f85F845A3)), which allocates across curated Morpho Blue lending markets. The vault is owned by the Yearn Security multisig (4-of-7) with curator [`0x90D0f26025571295D18a6c041E47450B81886B51`](https://etherscan.io/address/0x90D0f26025571295D18a6c041E47450B81886B51).
+
+**Underlying markets** (verified September 2026): cbBTC/USDC (86% LLTV), WBTC/USDC (86% LLTV), wstETH/USDC (86% LLTV) — all over-collateralized Morpho Blue markets with blue-chip collateral assets.
+
+**Strategy parameters:**
+- Deposit limit: 50,000,000 USDC
+- Management: Yearn Security multisig (owner), 3-day timelock on parameter changes
+- Keeper: yHaaSRelayer
+
+### Strategy 4: stcUSD/USDC Pawn Broker Market (~30.3% allocation)
+
+**Contract:** [`0xe63A2aBC24cD9538398d825a4bFe5778D25687dF`](https://etherscan.io/address/0xe63A2aBC24cD9538398d825a4bFe5778D25687dF)
+
+This is a **single-borrower pawn broker strategy** built on the Yearn V3 `BaseHooks` framework. The strategy lends USDC to a single borrower ([`0xd362EFc75eF1879f37a900823495F402cFdB0986`](https://etherscan.io/address/0xd362EFc75eF1879f37a900823495F402cFdB0986)) secured by **stcUSD** (Staked cap USDC, [`0x88887bE419578051FF9F4eb6C858A951921D8888`](https://etherscan.io/address/0x88887bE419578051FF9F4eb6C858A951921D8888)) collateral.
+
+**Key parameters (verified onchain, September 2026):**
+- **LLTV:** 91.25% — borrower must maintain collateral value above this threshold
+- **Current LTV:** ~87.4% (healthy, `isHealthy() = true`)
+- **Liquidation bonus:** 1% (100 bps)
+- **Interest rate:** 4.50% APR (450 bps)
+- **Collateral asset:** stcUSD from Cap Finance protocol (ERC-4626, upgradeable UUPS proxy)
+- **Oracle:** Morpho Oracle for stcUSD/USDC pricing
+
+**Risk considerations:** This strategy introduces single-borrower counterparty risk and dependency on Cap Finance's stcUSD token. stcUSD is an ERC-4626 vault token from the Cap Finance protocol, trading at ~$1.078 (September 2026). The tight LLTV buffer (~3.85% to liquidation) means a significant stcUSD depeg could trigger liquidation events. The strategy is not in the vault's default withdrawal queue, meaning emergency exits may require manual intervention.
+
+**Strategy parameters:**
+- Deposit limit: 10,000,000 USDC
+- Management: Brain multisig (3-of-8)
+- Keeper: yHaaSRelayer
+
 ### Accessibility
 
 - **Deposits:** Permissionless — anyone can deposit USDC and receive yvUSDC-1 (ERC-4626 standard). Subject to $50M deposit limit
@@ -215,10 +246,13 @@ yvUSDC-1 deploys deposited USDC into yield strategies with ~99.4% capital utiliz
 
 ### Collateralization
 
-- **100% on-chain USDC backing** — all deposits are USDC, converted through blue-chip protocols to yvUSDS and sUSDS
-- **Collateral quality:** Both strategies route into the Sky/MakerDAO ecosystem — sUSDS is backed by over-collateralized loans and RWA (Treasury bills); yvUSDS is a Yearn V3 vault that itself deploys into Sky/MakerDAO yield sources
-- **No leverage** — unlike yvUSD's looper strategies, these are simple deposits into savings rate products
-- **Both positions are fully redeemable** — sUSDS and yvUSDS are ERC-4626 vaults, and USDS converts 1:1 to DAI via the Exchanger
+- **100% on-chain USDC backing** — all deposits are USDC, deployed across Morpho MetaMorpho, Cap Finance PawnBroker, and Sky/MakerDAO yield sources
+- **Collateral quality:**
+  - **Yearn USDC (Morpho):** Allocates to over-collateralized Morpho Blue markets (cbBTC/USDC, WBTC/USDC, wstETH/USDC) with blue-chip collateral — highest quality
+  - **sUSDS Lender:** Routes into Sky/MakerDAO — sUSDS is backed by over-collateralized loans and RWA (Treasury bills); yvUSDS deploys into Sky/MakerDAO yield sources
+  - **PawnBroker:** Secured by stcUSD (Cap Finance) collateral at 91.25% LLTV. stcUSD is an ERC-4626 vault token from the Cap Finance protocol, trading at ~$1.078. This is **non-blue-chip collateral** with a tight liquidation buffer (~3.85%)
+- **No leverage** in the vault itself — strategies are simple deposits or secured lending
+- **Positions are redeemable** — sUSDS and yvUSDS are ERC-4626 vaults; MetaMorpho shares are redeemable; PawnBroker collateral can be liquidated if the borrower becomes unhealthy
 
 ### Provability
 
@@ -274,12 +308,14 @@ The yvUSDC-1 vault uses the **standard Yearn V3 governance pattern** via the Yea
 
 | Dependency | Criticality | Notes |
 |-----------|-------------|-------|
-| **Sky/MakerDAO (yvUSDS + sUSDS)** | Critical | 100% of current allocation (~79% via yvUSDS, ~21% via sUSDS). ~$6.18B TVL in sUSDS. Blue-chip, extensively audited, $10M bug bounty. One of the oldest DeFi protocols |
+| **Morpho Blue (MetaMorpho)** | Critical | ~35.6% of current allocation via Yearn USDC strategy. Blue-chip lending protocol, $6.6B+ TVL, 25+ audits. MetaMorpho vault is curated by Yearn |
+| **Cap Finance (stcUSD + PawnBroker)** | Critical | ~30.3% of current allocation via PawnBroker strategy. Single-borrower lending secured by stcUSD collateral. stcUSD is an ERC-4626 vault token from Cap Finance (upgradeable UUPS proxy). Tighter risk profile than blue-chip protocols |
+| **Sky/MakerDAO (yvUSDS + sUSDS)** | Critical | ~34.1% of current allocation (~22.2% via sUSDS, ~11.9% via yvUSDS). ~$6.18B TVL in sUSDS. Blue-chip, extensively audited, $10M bug bounty. One of the oldest DeFi protocols |
 | **MakerDAO PSM Lite** | Critical | USDC ↔ DAI conversion at 1:1. 0% fee. Deep liquidity (billions of USDC capacity). Audited by ChainSecurity and Cantina |
 | **Sky DAI-USDS Exchanger** | Critical | DAI ↔ USDS 1:1 conversion. Core Sky infrastructure |
 | **Uniswap V3 (fallback)** | Low | Only used if PSM fee exceeds 0.05%. Currently not active (PSM fee is 0%) |
 
-**Dependency quality:** All current dependencies are on Sky/MakerDAO — a single blue-chip protocol ecosystem with 8+ years of history, extensive audit coverage, and $10M bug bounty. The USDS Depositor adds a layer of Yearn V3 vault risk (yvUSDS), but this uses the same audited V3 infrastructure. While this is a concentration risk (100% in one protocol family), the protocol quality is among the highest in DeFi.
+**Dependency quality:** The vault now spreads across three protocol ecosystems. Morpho and Sky/MakerDAO are blue-chip with extensive audit histories. The Cap Finance PawnBroker introduces a newer, less battle-tested dependency with single-borrower counterparty risk and non-blue-chip collateral (stcUSD). This diversification away from a single blue-chip ecosystem increases complexity but also reduces Sky-only concentration risk. The Cap Finance exposure (~30%) is the primary driver of the increased dependency score.
 
 ## Operational Risk
 
@@ -337,18 +373,18 @@ Yearn maintains an active monitoring system via the [`monitoring-scripts-py`](ht
 
 ### Key Strengths
 
-- **Battle-tested Yearn V3 infrastructure:** V3 framework audited by Statemind, ChainSecurity, and yAcademy. No V3 exploits in ~22 months of production. Immutable vault contracts eliminate proxy upgrade risk
-- **Blue-chip single ecosystem dependency:** 100% allocated to Sky/MakerDAO (~79% via yvUSDS, ~21% via sUSDS) — one of DeFi's oldest and most audited protocols with $10M bug bounty and ~$6.18B in sUSDS deposits
+- **Battle-tested Yearn V3 infrastructure:** V3 framework audited by Statemind, ChainSecurity, and yAcademy. No V3 exploits in ~28 months of production. Immutable vault contracts eliminate proxy upgrade risk
+- **Diversified blue-chip allocation:** ~58% of the vault is allocated to blue-chip protocols (Morpho ~35.6%, Sky/MakerDAO ~34.1%) — both are among DeFi's most extensively audited ecosystems
 - **Standard Yearn governance:** Uses the Yearn V3 Role Manager with the 6-of-9 ySafe multisig (named, prominent DeFi signers). No EOA role concentration. Strategy additions go through 24-hour timelock
-- **Simple, low-complexity strategies:** USDC → DAI → USDS → yvUSDS/sUSDS pipelines with three 1:1 conversions. No leverage, no cross-chain bridging, no looper mechanics
-- **Established track record:** 12 months in production with $31.87M TVL, ~9.9% cumulative return, zero incidents
+- **Established track record:** ~18 months in production with $19.85M TVL, ~11.8% cumulative return, zero incidents
 - **Active monitoring:** yvUSDC-1 is in Yearn's hourly monitoring system with Telegram alerts for large flows
 
 ### Key Risks
 
-- **Single-ecosystem concentration:** 100% of vault funds in two strategies (yvUSDS ~79%, sUSDS ~21%), both routing through Sky/MakerDAO. If Sky/MakerDAO experiences an issue, the entire vault is affected
+- **Cap Finance PawnBroker exposure (~30.3%):** Single-borrower lending secured by stcUSD collateral from the Cap Finance protocol. stcUSD is not a blue-chip asset (upgradeable UUPS proxy, newer protocol). The 91.25% LLTV leaves only ~3.85% buffer to liquidation — a significant stcUSD depeg could trigger liquidation events
+- **Single-borrower counterparty risk:** The PawnBroker strategy lends to a single borrower. If the borrower defaults and collateral liquidation fails to cover the debt, the strategy could realize losses
 - **Sky Savings Rate variability:** SSR has been reduced from 15% → 6.5% → 4.5% → 4.0% over the past year. Further reductions would decrease vault yield but do not affect principal
-- **PSM fee risk:** Currently 0%, but Sky Governance can set fees. If fees exceed 0.05%, the strategy falls back to Uniswap V3 with 0.5% slippage tolerance, which could cause minor losses on large withdrawals
+- **PSM fee risk:** Currently 0%, but Sky Governance can set fees. If fees exceed 0.05%, the Sky strategies fall back to Uniswap V3 with 0.5% slippage tolerance, which could cause minor losses on large withdrawals
 
 ### Critical Risks
 
@@ -384,7 +420,7 @@ Yearn maintains an active monitoring system via the [`monitoring-scripts-py`](ht
 | Security incidents | None on V3. None on sUSDS |
 | Strategy review | Rigorous 12-metric framework with ySec security review |
 
-**Score: 1.5/5** — 3+ audits by top firms on the vault infrastructure, plus 7+ auditors on the underlying protocol. 12 months of production history with $31.87M TVL and zero incidents. V3 framework has 22 months of clean track record. The high-quality audit coverage on both layers (vault + underlying) warrant a score between 1 and 2.
+**Score: 1.5/5** — 3+ audits by top firms on the vault infrastructure, plus 7+ auditors on the underlying Sky protocol and 25+ audits on Morpho. ~18 months of production history with $19.85M TVL and zero incidents. V3 framework has ~28 months of clean track record. The Cap Finance PawnBroker strategy audit status is TODO — this keeps the score from dropping to 1.
 
 #### Category 2: Centralization & Control Risks (Weight: 30%)
 
@@ -415,15 +451,15 @@ Yearn maintains an active monitoring system via the [`monitoring-scripts-py`](ht
 
 | Factor | Assessment |
 |--------|-----------|
-| Protocol count | 1 active ecosystem dependency (Sky/MakerDAO via 2 strategies), 4+ available (Morpho, Aave V3, Fluid, Spark) |
-| Criticality | Sky/MakerDAO: 100% of current allocation (~79% yvUSDS, ~21% sUSDS) |
-| Quality | Blue-chip: 8+ years history, $6.18B sUSDS TVL, $10M bug bounty, 7+ auditors |
+| Protocol count | 3 active ecosystem dependencies (Morpho, Cap Finance, Sky/MakerDAO), 4+ additional available (Aave V3, Fluid, Spark) |
+| Criticality | Morpho: ~35.6%; Cap Finance: ~30.3%; Sky/MakerDAO: ~34.1% |
+| Quality | Morpho + Sky = blue-chip; Cap Finance = newer protocol with single-borrower counterparty risk and non-blue-chip collateral |
 
-**Dependencies Score: 2/5** — Single active dependency on a blue-chip protocol. Sky/MakerDAO is among the highest-quality DeFi dependencies possible. Per rubric, "1-2 blue-chip dependencies" = score 2. The 100% concentration in one protocol is a concern, but the protocol quality is exceptional.
+**Dependencies Score: 2.5/5** — Three active dependencies. Morpho and Sky/MakerDAO are blue-chip. Cap Finance (~30.3% allocation) is a newer protocol with a single-borrower pawn broker model and stcUSD collateral that is not blue-chip. Per rubric, "2-3 established protocol dependencies" = score 3, but two of the three are blue-chip and the Cap Finance position is over-collateralized with liquidation mechanisms, warranting 2.5.
 
-**Centralization Score = (1.5 + 1 + 2) / 3 = 1.5**
+**Centralization Score = (1.5 + 1 + 2.5) / 3 = 1.67**
 
-**Score: 1.5/5** — Immutable vault with 6/9 named-signer multisig. 24h timelock on the most critical action (strategy additions). Fully programmatic operations with all funds on-chain. Single blue-chip dependency. Minor gap: no timelock on direct vault parameter changes.
+**Score: 1.7/5** — Immutable vault with 6/9 named-signer multisig. 24h timelock on the most critical action (strategy additions). Fully programmatic operations with all funds on-chain. Multiple dependencies including one non-blue-chip protocol (Cap Finance). Minor gap: no timelock on direct vault parameter changes.
 
 #### Category 3: Funds Management (Weight: 30%)
 
@@ -436,7 +472,7 @@ Yearn maintains an active monitoring system via the [`monitoring-scripts-py`](ht
 | Leverage | None |
 | Verifiability | ERC-4626, all positions on-chain |
 
-**Collateralization Score: 1/5** — 100% on-chain USDC backing deployed to the highest-quality DeFi savings protocols (Sky/MakerDAO via yvUSDS and sUSDS). No leverage. Fully verifiable. Blue-chip collateral backed by over-collateralized loans and Treasury bills. Real-time on-chain verification.
+**Collateralization Score: 1.5/5** — 100% on-chain USDC backing. ~65% deployed to blue-chip protocols (Morpho over-collateralized lending markets, Sky/MakerDAO savings products). ~30% deployed to Cap Finance PawnBroker with stcUSD collateral — a non-blue-chip ERC-4626 vault token with a tight 91.25% LLTV and only ~3.85% buffer to liquidation. No leverage in the vault itself. Fully verifiable on-chain. The non-blue-chip collateral quality and tight liquidation buffer prevent a score of 1.
 
 **Subcategory B: Provability**
 
@@ -482,19 +518,19 @@ Yearn maintains an active monitoring system via the [`monitoring-scripts-py`](ht
 
 ```
 Final Score = (Centralization × 0.30) + (Funds Mgmt × 0.30) + (Audits × 0.20) + (Liquidity × 0.15) + (Operational × 0.05)
-            = (1.5 × 0.30) + (1.0 × 0.30) + (1.5 × 0.20) + (1.5 × 0.15) + (1.0 × 0.05)
-            = 0.45 + 0.30 + 0.30 + 0.225 + 0.05
-            = 1.33
+            = (1.67 × 0.30) + (1.25 × 0.30) + (1.5 × 0.20) + (1.5 × 0.15) + (1.0 × 0.05)
+            = 0.501 + 0.375 + 0.30 + 0.225 + 0.05
+            = 1.451
 ```
 
 | Category | Score | Weight | Weighted |
 |----------|-------|--------|----------|
 | Audits & Historical | 1.5 | 20% | 0.30 |
-| Centralization & Control | 1.5 | 30% | 0.45 |
-| Funds Management | 1.0 | 30% | 0.30 |
+| Centralization & Control | 1.7 | 30% | 0.51 |
+| Funds Management | 1.3 | 30% | 0.39 |
 | Liquidity Risk | 1.5 | 15% | 0.225 |
 | Operational Risk | 1.0 | 5% | 0.05 |
-| **Final Score** | | | **1.3/5.0** |
+| **Final Score** | | | **1.5/5.0** |
 
 ### Risk Tier
 
@@ -506,15 +542,23 @@ Final Score = (Centralization × 0.30) + (Funds Mgmt × 0.30) + (Audits × 0.20)
 | 3.5-4.5 | Elevated Risk | Limited approval, strict limits |
 | 4.5-5.0 | High Risk | Not recommended |
 
-**Final Risk Tier: Minimal Risk (1.3/5.0) — Approved, high confidence**
+**Final Risk Tier: Minimal Risk (1.5/5.0) — Approved, high confidence**
 
 ---
 
 ## Reassessment Triggers
 
-- **Time-based:** Reassess in 6 months (September 2026) or annually
+- **Time-based:** Reassess in 6 months (March 2027) or annually
 - **TVL-based:** Reassess if TVL exceeds $100M or changes by more than ±50%
-- **Incident-based:** Reassess after any exploit, strategy loss, governance change, or Sky/MakerDAO incident
-- **Strategy-based:** Reassess if the vault reallocates away from Sky/MakerDAO strategies into riskier strategies (e.g., leveraged positions). The current score assumes 100% allocation to blue-chip Sky/MakerDAO ecosystem (yvUSDS + sUSDS) — a shift to riskier strategies would significantly change the risk profile
+- **Incident-based:** Reassess after any exploit, strategy loss, governance change, or material incident affecting Morpho, Cap Finance, or Sky/MakerDAO
+- **Strategy-based:** Reassess if the vault materially changes allocations away from the current mix. The current score reflects ~36% Morpho, ~30% Cap Finance PawnBroker, ~22% sUSDS, ~12% yvUSDS — a significant shift to riskier strategies or concentration in Cap Finance would change the risk profile
+- **PawnBroker-based:** Reassess if the PawnBroker borrower becomes unhealthy, stcUSD depegs significantly (>3%), or Cap Finance governance makes material changes to stcUSD
 - **SSR-based:** Reassess if Sky Savings Rate drops below 2% (may indicate Sky governance issues) or if PSM fees are introduced
 - **Governance-based:** Reassess if ySafe composition changes (signer additions/removals, threshold changes)
+
+## Assessment History
+
+| Date | Score | Notes |
+| --- | --- | --- |
+| [March 13, 2026](https://github.com/yearn/risk-score/pull/XXX) | 1.3 | Initial assessment — 100% Sky/MakerDAO allocation |
+| [September 14, 2026](https://github.com/yearn/risk-score/pull/YYY) | 1.5 | Reassessment — added Morpho MetaMorpho (~35.6%) and Cap Finance PawnBroker (~30.3%) strategies; TVL dropped to ~$19.85M; score increased due to non-blue-chip collateral and single-borrower counterparty risk |
