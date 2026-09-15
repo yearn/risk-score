@@ -67,26 +67,26 @@ nodes:
 
   # Strategies
   - id: susds-lender
-    label: USDC → sUSDS Lender (77.9%)
+    label: USDC → sUSDS Lender (22.2%)
     address: "0x7130570BCEfCedBe9d15B5b11A33006156460f8f"
     category: strategy
   - id: yearn-usdc
-    label: Yearn USDC — Morpho (7.2%)
+    label: Yearn USDC — Morpho (35.6%)
     address: "0x68Aea7b82Df6CcdF76235D46445Ed83f85F845A3"
     category: strategy
     morphoVault: v1
     link: "https://app.morpho.org/ethereum/vault/0x68Aea7b82Df6CcdF76235D46445Ed83f85F845A3/"
   - id: pawn-broker
-    label: stcUSD/USDC Pawn Broker (14.9%, not in queue, self-contained)
+    label: stcUSD/USDC Pawn Broker (30.3%, not in queue, self-contained)
     address: "0xe63a2abc24cd9538398d825a4bfe5778d25687df"
     note: Self-contained Yearn V3 TokenizedStrategy (v3.0.4). Holds stcUSD directly as borrower collateral, lends USDC from own balance. Does NOT route through Morpho Blue.
     category: strategy
   - id: spark-usdc-lender
-    label: Spark USDC Lender (queued)
+    label: Spark USDC Lender (queued, 0%)
     address: "0x654a7c4Ae5ac3C853a99F8dbEAD2bC85090F753a"
     category: strategy
   - id: usds-depositor
-    label: USDC → USDS Depositor (queued, 0%)
+    label: USDC → USDS Depositor (11.9%)
     address: "0x39c0aEc5738ED939876245224aFc7E09C8480a52"
     category: strategy
 
@@ -158,23 +158,23 @@ edges:
   - from: yvUSDC
     to: susds-lender
     kind: allocates-to
-    label: "77.9%"
+    label: "22.2%"
   - from: yvUSDC
     to: yearn-usdc
     kind: allocates-to
-    label: "7.2%"
+    label: "35.6%"
   - from: yvUSDC
     to: pawn-broker
     kind: allocates-to
-    label: "14.9% (not in default queue)"
+    label: "30.3% (not in default queue)"
   - from: yvUSDC
     to: usds-depositor
     kind: allocates-to
-    label: "queued"
+    label: "11.9%"
   - from: yvUSDC
     to: spark-usdc-lender
     kind: allocates-to
-    label: "queued"
+    label: "queued (0%)"
 
   # Governance roles on vault
   - from: daddy
