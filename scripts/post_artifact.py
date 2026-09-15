@@ -63,6 +63,7 @@ def _headers(api_key: str, provenance: dict[str, str]) -> dict[str, str]:
     headers = {
         "Authorization": f"Bearer {api_key}",
         "Content-Type": "application/octet-stream",
+        "User-Agent": "yearn-risk-score/post-artifact",
     }
     for field in PROVENANCE_FIELDS:
         value = provenance.get(field)

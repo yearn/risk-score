@@ -83,6 +83,7 @@ class PostArtifactTests(unittest.TestCase):
         self.assertEqual(body, self.file.read_bytes())
         self.assertEqual(headers["Authorization"], "Bearer test-key")
         self.assertEqual(headers["Content-Type"], "application/octet-stream")
+        self.assertEqual(headers["User-Agent"], "yearn-risk-score/post-artifact")
         self.assertEqual(headers["X-Report-Repository"], "yearn/risk-score")
         self.assertEqual(headers["X-Report-Scanner"], "risk")
         self.assertEqual(headers["X-Report-Ref"], "main")
