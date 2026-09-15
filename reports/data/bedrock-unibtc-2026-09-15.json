@@ -1,0 +1,1657 @@
+{
+ "snapshot": {
+  "chain_id": 1,
+  "number": 25981132,
+  "hash": "0xd075dc01ebc4ac5172ddb58b33fae6ee3d4d1386ef2f543cab82ec09e44ab020",
+  "timestamp": "2026-09-15T06:40:23Z"
+ },
+ "method": {
+  "rpc": "Configured RPC_1 via scripts/env.py; endpoint omitted",
+  "contract_reads": "cast call/storage --block 25981132; view calls only",
+  "logs": "Etherscan v2 getLogs through block 25981132, paginated at 1000; supply feeder, asset feeder and ProxyAdmin from block 0; token RoleGranted/RoleRevoked from block 0; other contracts and uniBTC mints from block 25765132 (~30 days)",
+  "fork_simulation": "anvil fork at block 25981132; impersonated accounts; no transaction broadcast to mainnet",
+  "offchain": "Bedrock reserve API 2026-09-15T06:55:00Z; CoinGecko 06:55:40Z; CoW quote API 06:55:00Z; DeFiLlama API 07:02:09Z; Merlin Blockscout API 07:02:12Z"
+ },
+ "proxies": {
+  "token": {
+   "proxy": "0x004E9C3EF86bc1ca1f0bB5C7662861Ee93350568",
+   "impl": "0xe0e6a124d500be28bbdc47e6123e68b23b039cad",
+   "admin": "0x029e4fbdaa31de075dd74b2238222a08233978f6",
+   "name": "uniBTC",
+   "verified": true,
+   "status": "1"
+  },
+  "vault": {
+   "proxy": "0x047D41F2544B7F63A8e991aF2068a363d210d6Da",
+   "impl": "0x01e9161d1621466eb086651fd514d3efb8c3752e",
+   "admin": "0x029e4fbdaa31de075dd74b2238222a08233978f6",
+   "name": "VaultWithoutNative",
+   "verified": true,
+   "status": "1"
+  },
+  "peer": {
+   "proxy": "0x55a67cf07b8a9A09FB6D565279287cfE4Ab60eDc",
+   "impl": "0xd498e4aee5585ff8099158e641c025a761acc656",
+   "admin": "0x029e4fbdaa31de075dd74b2238222a08233978f6",
+   "name": "CCIPPeer",
+   "verified": true,
+   "status": "1"
+  },
+  "tunnel": {
+   "proxy": "0x70aF4743F85E5E74E3b6dDFa38926c0a762Ad21C",
+   "impl": "0x06b4660a3b7999a4817cd2ff3c1832f08fc95dd9",
+   "admin": "0x0000000000000000000000000000000000000000",
+   "name": "TunnelContract",
+   "verified": true,
+   "status": "1"
+  },
+  "supply": {
+   "proxy": "0xE542919E4b281f10b437F947c8Ba224DdfaBc716",
+   "impl": "0xf50dbaf3d057164fc79c1aa435ffa011c6bcdae9",
+   "admin": "0x899c284a89e113056a72dc9ade5b60e80dd3c94f",
+   "name": "uniBTCRate",
+   "verified": true,
+   "status": "1"
+  },
+  "router": {
+   "proxy": "0xAA732c9c110A84d090a72da230eAe1E779f89246",
+   "impl": "0x720081e3ee2b1542e341afc793de20b08beb859d",
+   "admin": "0x029e4fbdaa31de075dd74b2238222a08233978f6",
+   "name": "DelayRedeemRouter",
+   "verified": true,
+   "status": "1"
+  },
+  "legacyRouter": {
+   "proxy": "0xbb45b3a09bffc15747d1a331775fa408e587f38d",
+   "impl": "0x6e542567d4744d648f6ab47ac80becd02e47ac09",
+   "admin": "0x3eea50ba10952e5e0dfaa50ecfcc5ab19ad591ef",
+   "name": "DelayRedeemRouter",
+   "verified": true,
+   "status": "1"
+  },
+  "assetFeeder": {
+   "proxy": "0x94C7F81E3B0458daa721Ca5E29F6cEd05CCCE2B3",
+   "impl": "0x18d0d914913ac720a6421cc809f3f44697d021b5",
+   "admin": "0x029e4fbdaa31de075dd74b2238222a08233978f6",
+   "name": "Sigma",
+   "verified": true,
+   "status": "1"
+  },
+  "burnProxy": {
+   "proxy": "0x4519c8e32b080a778f2ae188d5fdcd98175f0caf",
+   "impl": "0x0000000000000000000000000000000000000000",
+   "admin": "0x0000000000000000000000000000000000000000",
+   "name": "BurnProxy",
+   "verified": true,
+   "status": "1"
+  },
+  "fbtcProxy": {
+   "proxy": "0xa3a30f627dbc02aff3c0a736a065443a0e85b1ae",
+   "impl": "0x0000000000000000000000000000000000000000",
+   "admin": "0x0000000000000000000000000000000000000000",
+   "name": "FBTCProxy",
+   "verified": true,
+   "status": "1"
+  },
+  "transferProxy": {
+   "proxy": "0xf0ab759d3a1a4956e8c3c52c71ccb50f20bc342b",
+   "impl": "0x0000000000000000000000000000000000000000",
+   "admin": "0x0000000000000000000000000000000000000000",
+   "name": "TransferProxy",
+   "verified": true,
+   "status": "1"
+  },
+  "pool": {
+   "proxy": "0x1689C22eD5435e49071CFc208D1Ac6F2A2274490",
+   "impl": "0x0000000000000000000000000000000000000000",
+   "admin": "0x0000000000000000000000000000000000000000",
+   "name": "BurnMintTokenPool",
+   "verified": true,
+   "status": "1"
+  },
+  "directBTC": {
+   "proxy": "0xA700992A9815d3bfECEDfE51B030fD294Bc0b090",
+   "impl": "0x11964b366f794ae56717e8efa05d31ab2a09954b",
+   "admin": "0x029e4fbdaa31de075dd74b2238222a08233978f6",
+   "name": "directBTC",
+   "verified": true,
+   "status": "1"
+  }
+ },
+ "reads": {
+  "token.totalSupply": "298112556288 [2.981e11]",
+  "token.freezeToRecipient": "0x899c284A89E113056a72dC9ade5b60E80DD3c94f",
+  "token.MINTER.0x047D41": "true",
+  "token.MINTER.0x1689C2": "true",
+  "token.MINTER.0x55a67c": "true",
+  "token.MINTER.0x70aF47": "true",
+  "token.MINTER.0xC9dA98": "false",
+  "token.MINTER.0x9251fd": "false",
+  "token.ADMIN.ops": "true",
+  "token.FREEZER.ops": "true",
+  "vault.chainlinkReserveFeeder()(address)": "0xc590D9fb8eE78a0909dFF341ccf717000b7b7fF2",
+  "vault.uniBTCSupplyFeeder()(address)": "0xE542919E4b281f10b437F947c8Ba224DdfaBc716",
+  "vault.supplyFeeder()(address)": "0x94C7F81E3B0458daa721Ca5E29F6cEd05CCCE2B3",
+  "vault.feederHeartbeat()(uint256)": "86400 [8.64e4]",
+  "vault.adequacyRatio()(uint256)": "900",
+  "vault.outOfService()(bool)": "false",
+  "vault.paused()(bool)": "false",
+  "vault.WBTC.allowed": "true",
+  "vault.WBTC.paused": "false",
+  "vault.WBTC.cap": "5000000000 [5e9]",
+  "assetFeeder.WBTC.totalSupply": "46065725 [4.606e7]",
+  "vault.WBTC.bal": "46065725 [4.606e7]",
+  "router.WBTC.btclisted": "true",
+  "router.WBTC.tokenDebts": "54579187034 [5.457e10]\n54504034436 [5.45e10]",
+  "router.WBTC.maxQuota": "50000000 [5e7]",
+  "router.WBTC.quotaRate": "2315",
+  "router.WBTC.currentCap": "50000000 [5e7]",
+  "legacyRouter.WBTC.tokenDebts": "0\n0",
+  "vault.cbBTC.allowed": "true",
+  "vault.cbBTC.paused": "false",
+  "vault.cbBTC.cap": "5000000000 [5e9]",
+  "assetFeeder.cbBTC.totalSupply": "315141 [3.151e5]",
+  "vault.cbBTC.bal": "315141 [3.151e5]",
+  "router.cbBTC.btclisted": "false",
+  "router.cbBTC.tokenDebts": "0\n0",
+  "router.cbBTC.maxQuota": "0",
+  "router.cbBTC.quotaRate": "0",
+  "router.cbBTC.currentCap": "0",
+  "legacyRouter.cbBTC.tokenDebts": "0\n0",
+  "vault.FBTC.allowed": "true",
+  "vault.FBTC.paused": "false",
+  "vault.FBTC.cap": "130000000000 [1.3e11]",
+  "assetFeeder.FBTC.totalSupply": "128374292562 [1.283e11]",
+  "vault.FBTC.bal": "6802893 [6.802e6]",
+  "router.FBTC.btclisted": "false",
+  "router.FBTC.tokenDebts": "0\n0",
+  "router.FBTC.maxQuota": "50000000 [5e7]",
+  "router.FBTC.quotaRate": "2315",
+  "router.FBTC.currentCap": "0",
+  "legacyRouter.FBTC.tokenDebts": "0\n0",
+  "vault.directBTC.allowed": "true",
+  "vault.directBTC.paused": "false",
+  "vault.directBTC.cap": "145899980000 [1.458e11]",
+  "assetFeeder.directBTC.totalSupply": "145899980000 [1.458e11]",
+  "vault.directBTC.bal": "145899980000 [1.458e11]",
+  "router.directBTC.btclisted": "false",
+  "router.directBTC.tokenDebts": "0\n0",
+  "router.directBTC.maxQuota": "0",
+  "router.directBTC.quotaRate": "0",
+  "router.directBTC.currentCap": "0",
+  "legacyRouter.directBTC.tokenDebts": "0\n0",
+  "vault.target.uniBTC": "true",
+  "vault.target.WBTC": "true",
+  "vault.target.cbBTC": "true",
+  "vault.target.FBTC": "true",
+  "vault.target.directBTC": "true",
+  "vault.MANAGER.opEOA": "true",
+  "vault.ADMIN.ops": "true",
+  "assetFeeder.ListLeadingTokens": "[0xC96dE26018A54D51c097160568752c4E3BD6C364, 0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599, 0xcbB7C0000aB88B473b1f5aFd9ef808440eed33Bf, 0xA700992A9815d3bfECEDfE51B030fD294Bc0b090]",
+  "assetFeeder.NATIVE_BTC": "0xbeDFFfFfFFfFfFfFFfFfFFFFfFFfFFffffFFFFFF",
+  "supply.totalTokenSupply()(uint256)": "384574449304 [3.845e11]",
+  "supply.totalReserve()(uint256)": "396111682784 [3.961e11]",
+  "supply.getRate()(uint256)": "1030000000002288243 [1.03e18]",
+  "supply.OPERATOR.opEOA": "true",
+  "supply.OPERATOR.upd2": "true",
+  "supply.ADMIN.opEOA": "true",
+  "por.latestRoundData": "18446744073709552302 [1.844e19]\n4640515622996713140279 [4.64e21]\n1789415889 [1.789e9]\n1789415903 [1.789e9]\n18446744073709552302 [1.844e19]",
+  "por.decimals": "18",
+  "por.description": "\"uniBTC PoR\"",
+  "por.aggregator": "0xbBaf2F253Dec10c17eF9531bc8Cd7A7C708A10Bc",
+  "router.redeemDelay()(uint256)": "691201 [6.912e5]",
+  "router.redeemPrincipalDelay()(uint256)": "2592000 [2.592e6]",
+  "router.redeemFeeRate()(uint256)": "50",
+  "router.paused()(bool)": "false",
+  "router.whitelistEnabled()(bool)": "false",
+  "router.managementFee()(uint256)": "138526657 [1.385e8]",
+  "router.vault()(address)": "0x047D41F2544B7F63A8e991aF2068a363d210d6Da",
+  "router.NATIVE_BTC.tokenDebts": "0\n0",
+  "legacyRouter.paused()(bool)": "false",
+  "legacyRouter.totalDebt()(uint256)": "0",
+  "legacyRouter.dayCap()(uint256)": "0",
+  "legacyRouter.whitelistEnabled()(bool)": "true",
+  "legacyRouter.redeemDelayTimestamp()(uint256)": "691200 [6.912e5]",
+  "legacyRouter.vault()(address)": "0x047D41F2544B7F63A8e991aF2068a363d210d6Da",
+  "legacyProxyAdmin.owner": "ERR:Error: contract 0x3eea50ba10952e5e0dfaa50ecfcc5ab19ad591ef does not have any code",
+  "proxyadmin.owner": "0xC9dA980fFABbE2bbe15d4734FDae5761B86b5Fc3",
+  "tunnel.getAdmin()(address)": "0x0014Eb4Ac6Dd1473b258d088E6EF214b2BCdc53C",
+  "tunnel.getActiveExecutors()(address[])": "[0x9E498DD03c5E984C105E83221AA911DEC4844dB5, 0xdE9a5Ab522959091d07D022d4C8922b63D9adA0c, 0xa5ED5Aa26d95A11C33E2A3650a2c9dc6CA00375c, 0xdA084147EEe60866C5487E1f7464a5B1c559bC03]",
+  "tunnel.getSupportedTokens()(uint8[],address[])": "[1753069069805541538974281688073727228127806824 [1.753e45], 266973133622705857547265490257424200329675630150 [2.669e47]]\n[0x00000000000000000000000000000000000000c2, 0x00000000000000000000000000000000000000c5]",
+  "tunnel.IS_LOCK_MODE()(bool)": "false",
+  "tunnel.HUB_ID()(uint8)": "0",
+  "tunnel.VERSION()(uint64)": "20250105 [2.025e7]",
+  "tunnel.getTunnelName()(string)": "\"Bedrock Bridge\"",
+  "tunnel.getVault()(address)": "0x0000000000000000000000000000000000000000",
+  "tunnel.exeThresholdForIndex0": "3",
+  "tunnel.lockedBalanceOf(uniBTC)": "0",
+  "tunnel.exeActiveSince0": "1",
+  "tunnel.exeThresholdForIndex1": "3",
+  "tunnel.exeActiveSince1": "1751472000 [1.751e9]",
+  "tunnel.exeThresholdForIndex2": "ERR:c: array out-of-bounds access (0x32), data: \"0x4e487b710000000000000000000000000000000000000000000000000000000000000032\"",
+  "tunnel.exeActiveSince2": "ERR:c: array out-of-bounds access (0x32), data: \"0x4e487b710000000000000000000000000000000000000000000000000000000000000032\"",
+  "tunnel.exeThresholdForIndex3": "ERR:c: array out-of-bounds access (0x32), data: \"0x4e487b710000000000000000000000000000000000000000000000000000000000000032\"",
+  "tunnel.exeActiveSince3": "ERR:c: array out-of-bounds access (0x32), data: \"0x4e487b710000000000000000000000000000000000000000000000000000000000000032\"",
+  "peer.sysSigner()(address)": "0x9ffB3beFBfBe535E68b2d1DDd79aa0e1ef8dC863",
+  "peer.paused()(bool)": "false",
+  "peer.minTransferAmt()(uint256)": "1",
+  "peer.getRouter()(address)": "0x80226fc0Ee2b096224EeAc085Bb9a8cba1146f7D",
+  "pool.owner": "0xAeE017052DF6Ac002647229D58B786E380B9721A",
+  "pool.rateLimitAdmin": "0x9251fd3D79522bB2243a58FFf1dB43E25A495aaB",
+  "pool.chains": "[4949039107694359620 [4.949e18], 11344663589394136015 [1.134e19], 1923510103922296319 [1.923e18], 3734403246176062136 [3.734e18], 1556008542357238666 [1.556e18], 5406759801798337480 [5.406e18], 3016212468291539606 [3.016e18], 3461204551265785888 [3.461e18], 1294465214383781161 [1.294e18], 15971525489660198786 [1.597e19], 3849287863852499584 [3.849e18], 2442541497099098535 [2.442e18], 4741433654826277614 [4.741e18], 124615329519749607 [1.246e17]]",
+  "pool.router": "0x80226fc0Ee2b096224EeAc085Bb9a8cba1146f7D",
+  "registry.getPool": "ERR:Error: server returned an error response: error code 3: execution reverted",
+  "registry.tokenConfig": "ERR:Error: server returned an error response: error code 3: execution reverted",
+  "pool.4949039107694359620.in": "(200000000 [2e8], 1789454423 [1.789e9], true, 200000000 [2e8], 231428 [2.314e5])",
+  "pool.4949039107694359620.out": "(200000000 [2e8], 1789454423 [1.789e9], true, 200000000 [2e8], 231428 [2.314e5])",
+  "peer.src.4949039107694359620": "false",
+  "peer.dst.4949039107694359620": "false",
+  "pool.11344663589394136015.in": "(200000000 [2e8], 1789454423 [1.789e9], true, 200000000 [2e8], 2315)",
+  "pool.11344663589394136015.out": "(200000000 [2e8], 1789454423 [1.789e9], true, 200000000 [2e8], 2315)",
+  "peer.src.11344663589394136015": "true",
+  "peer.dst.11344663589394136015": "true",
+  "pool.1923510103922296319.in": "(2, 1789454423 [1.789e9], true, 2, 1)",
+  "pool.1923510103922296319.out": "(2, 1789454423 [1.789e9], true, 2, 1)",
+  "peer.src.1923510103922296319": "false",
+  "peer.dst.1923510103922296319": "false",
+  "pool.3734403246176062136.in": "(200000000 [2e8], 1789454423 [1.789e9], true, 200000000 [2e8], 11574 [1.157e4])",
+  "pool.3734403246176062136.out": "(200000000 [2e8], 1789454423 [1.789e9], true, 200000000 [2e8], 11574 [1.157e4])",
+  "peer.src.3734403246176062136": "false",
+  "peer.dst.3734403246176062136": "false",
+  "pool.1556008542357238666.in": "(200000000 [2e8], 1789454423 [1.789e9], true, 200000000 [2e8], 11574 [1.157e4])",
+  "pool.1556008542357238666.out": "(200000000 [2e8], 1789454423 [1.789e9], true, 200000000 [2e8], 11574 [1.157e4])",
+  "peer.src.1556008542357238666": "false",
+  "peer.dst.1556008542357238666": "false",
+  "pool.5406759801798337480.in": "(2, 1789454423 [1.789e9], true, 2, 1)",
+  "pool.5406759801798337480.out": "(2, 1789454423 [1.789e9], true, 2, 1)",
+  "peer.src.5406759801798337480": "false",
+  "peer.dst.5406759801798337480": "false",
+  "pool.3016212468291539606.in": "(2, 1789454423 [1.789e9], true, 2, 1)",
+  "pool.3016212468291539606.out": "(2, 1789454423 [1.789e9], true, 2, 1)",
+  "peer.src.3016212468291539606": "false",
+  "peer.dst.3016212468291539606": "false",
+  "pool.3461204551265785888.in": "(2, 1789454423 [1.789e9], true, 2, 1)",
+  "pool.3461204551265785888.out": "(2, 1789454423 [1.789e9], true, 2, 1)",
+  "peer.src.3461204551265785888": "false",
+  "peer.dst.3461204551265785888": "false",
+  "pool.1294465214383781161.in": "(200000000 [2e8], 1789454423 [1.789e9], true, 200000000 [2e8], 2315)",
+  "pool.1294465214383781161.out": "(200000000 [2e8], 1789454423 [1.789e9], true, 200000000 [2e8], 2315)",
+  "peer.src.1294465214383781161": "false",
+  "peer.dst.1294465214383781161": "false",
+  "pool.15971525489660198786.in": "(200000000 [2e8], 1789454423 [1.789e9], true, 200000000 [2e8], 2315)",
+  "pool.15971525489660198786.out": "(200000000 [2e8], 1789454423 [1.789e9], true, 200000000 [2e8], 2315)",
+  "peer.src.15971525489660198786": "false",
+  "peer.dst.15971525489660198786": "false",
+  "pool.3849287863852499584.in": "(50000000 [5e7], 1789454423 [1.789e9], true, 50000000 [5e7], 2315)",
+  "pool.3849287863852499584.out": "(50000000 [5e7], 1789454423 [1.789e9], true, 50000000 [5e7], 2315)",
+  "peer.src.3849287863852499584": "true",
+  "peer.dst.3849287863852499584": "true",
+  "pool.2442541497099098535.in": "(2, 1789454423 [1.789e9], true, 2, 1)",
+  "pool.2442541497099098535.out": "(2, 1789454423 [1.789e9], true, 2, 1)",
+  "peer.src.2442541497099098535": "false",
+  "peer.dst.2442541497099098535": "false",
+  "pool.4741433654826277614.in": "(200000000 [2e8], 1789454423 [1.789e9], true, 200000000 [2e8], 2315)",
+  "pool.4741433654826277614.out": "(200000000 [2e8], 1789454423 [1.789e9], true, 200000000 [2e8], 2315)",
+  "peer.src.4741433654826277614": "false",
+  "peer.dst.4741433654826277614": "false",
+  "pool.124615329519749607.in": "(200000000 [2e8], 1789454423 [1.789e9], true, 200000000 [2e8], 232)",
+  "pool.124615329519749607.out": "(200000000 [2e8], 1789454423 [1.789e9], true, 200000000 [2e8], 232)",
+  "peer.src.124615329519749607": "false",
+  "peer.dst.124615329519749607": "false",
+  "ops.threshold": "3",
+  "ops.owners": "[0x3Ef94316B19e3bbe00F3363e76Ca445c065d31DC, 0xBeD4C1c8d266e9B5841F7F0409D936E2Fe58EE68, 0x720C505aA281e6B41C2f3F5C82AFd6A518bbCFe1, 0x09610d4239c8f3413509202DCcC7e27C6B0a47A3, 0x1fc76b7C6F092e0566Ce9Bbb9c6803Ba5e45Ba32]",
+  "ops.nonce": "101",
+  "ops.modules": "[]\n0x0000000000000000000000000000000000000001",
+  "ops.guard": "0x0000000000000000000000000000000000000000000000000000000000000000",
+  "admin.threshold": "3",
+  "admin.owners": "[0xBeD4C1c8d266e9B5841F7F0409D936E2Fe58EE68, 0xDD77C787F2f89C71791d6630B926701f98F2e735, 0xb585Db3D8142A9DFB864DcaACF33dFf300bf15f8, 0x09610d4239c8f3413509202DCcC7e27C6B0a47A3, 0xEd707d4458b4e7e746051034CAe06c7367A09537]",
+  "admin.nonce": "104",
+  "admin.modules": "[]\n0x0000000000000000000000000000000000000001",
+  "admin.guard": "0x0000000000000000000000000000000000000000000000000000000000000000",
+  "wbtc.ops": "1000000 [1e6]",
+  "directBTC.totalSupply": "145899980000 [1.458e11]",
+  "burnProxy.owner": "0xAeE017052DF6Ac002647229D58B786E380B9721A",
+  "transferProxy.owner": "0xAeE017052DF6Ac002647229D58B786E380B9721A",
+  "fbtcProxy.owner": "ERR:Error: server returned an error response: error code 3: execution reverted"
+ },
+ "legacy_router": {
+  "proxy": "0xbb45b3a09bffc15747d1a331775fa408e587f38d",
+  "type": "TransparentUpgradeableProxy (verified)",
+  "implementation": "0x6e542567d4744d648f6ab47ac80becd02e47ac09",
+  "eip1967_admin": "0x3eea50ba10952e5e0dfaa50ecfcc5ab19ad591ef",
+  "admin_code_at_snapshot": "0x",
+  "admin_nonce_at_snapshot": 29,
+  "created_by_admin_tx": "0xb7d6612425fd42030e638f78864c6764750de3c873cc52c24771463431207249",
+  "created_block": 20789026,
+  "admin_changed_events": [
+   {
+    "block": 20789026,
+    "previous": "0x0000000000000000000000000000000000000000",
+    "new": "0x3eea50ba10952e5e0dfaa50ecfcc5ab19ad591ef"
+   }
+  ],
+  "admin_last_outgoing_tx": {
+   "date": "2026-08-10",
+   "nonce": 28,
+   "hash": "0xec68b97d5ae2f8bf86e4968f151f4db0a7c1c809a843f77eebb6ee6aaa06fe65",
+   "call": "transferOwnership on 0x56707c33f84f340c39542be820dedf5fe0409fe4"
+  },
+  "vault_OPERATOR_ROLE": true,
+  "router_DEFAULT_ADMIN_and_PAUSER": "0x1fc76b7C6F092e0566Ce9Bbb9c6803Ba5e45Ba32",
+  "legacy_tokenDebts_WBTC": "0|0",
+  "totalDebt": 0,
+  "vault_execute_allowed_targets_true": [
+   "0x004E9C3EF86bc1ca1f0bB5C7662861Ee93350568",
+   "0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599",
+   "0xcbB7C0000aB88B473b1f5aFd9ef808440eed33Bf",
+   "0xC96dE26018A54D51c097160568752c4E3BD6C364",
+   "0xA700992A9815d3bfECEDfE51B030fD294Bc0b090",
+   "0xC9dA980fFABbE2bbe15d4734FDae5761B86b5Fc3",
+   "0xd681C5574b7F4E387B608ed9AF5F5Fc88662b37c"
+  ],
+  "fork_simulation": {
+   "OPERATOR_ROLE held by legacy router": "true",
+   "supply_before": 298112556288,
+   "upgradeTo_from_admin_EOA": "success; implementation slot changed to 0x720081e3ee2b1542e341afc793de20b08beb859d",
+   "vault.execute(uniBTC, mint(0x...dEaD, 100000000000)) from legacy router": "success",
+   "supply_after": 398112556288,
+   "control_upgrade_from_random_address": "failed; implementation unchanged"
+  },
+  "fork_simulation_oversized": {
+   "block": 25981132,
+   "por_reserves_btc": "4640.515622996713140279",
+   "max_supply_allowed_by_0.9_check": "~5156.13 (reserves / 0.9)",
+   "vault.execute(uniBTC, mint(0x...dEaD, 10000000000000)) from legacy router after EOA upgrade": "success",
+   "supply_before": 298112556288,
+   "supply_after": 10298112556288,
+   "control": "supply feeder update(0, 10000000000000) by operational EOA; Vault.mint(WBTC, 1000000) from a WBTC holder reverted SYS013; the same Vault.execute mint path still succeeded"
+  },
+  "role_history": {
+   "vault_OPERATOR_ROLE_granted": "2024-09-20 tx 0xeca14e82f7e0ab5f2b34c0b94e04d5ba59555a297acc1f94b08edd6011ce787b",
+   "vault_MINTER_ROLE_on_token_granted": "2024-04-13 tx 0x549c37e07be58e4c024c5e106a66eb974558f9fc7f78d90b8cbfb99c0df21a6d"
+  }
+ },
+ "free_tunnel": {
+  "hub": "0x690357e684F7661911CED0f857a5920E983853aB",
+  "hub_owner": "0xb58F7aC2d503cEa14B3582C21d72e9817839DcBA",
+  "hub_owner_threshold": 3,
+  "hub_owner_owner_count": 4,
+  "currentTBM": "0xa39989ca154733f022a44A1d89E3102B71868564",
+  "currentTBMVersion": 20250105,
+  "tunnel_VERSION": 20250105,
+  "upgrade_path": "TunnelContract.upgradeTunnel(version) onlyAdmin; implementation supplied by hub's current TunnelBoringMachine; upgradeToAndCall disabled",
+  "events_30d": 0
+ },
+ "supply_feeder": {
+  "implementation_source_update": "update(uint256 _totalReserve, uint256 _totalTokenSupply) onlyRole(OPERATOR_ROLE); no timestamp",
+  "update_count": 653,
+  "cadence_hours_all": {
+   "median": 24.0,
+   "p95": 27.7,
+   "max": 185.5
+  },
+  "cadence_hours_90d": {
+   "n": 90,
+   "median": 24.0,
+   "p95": 24.0,
+   "max": 40.5
+  },
+  "last40_update_sender": "0x2C62803181243Fa99C659DE0d2A0530879a79911",
+  "step_changes_over_5pct": [
+   {
+    "prev": 217150144610,
+    "new": 237194916752,
+    "tx": "0x5e1c287dd6ef7ffd3cabf53b7f06077c26b34d61f7160060d111934a6ed9d6cd",
+    "timestamp": 1729380827
+   },
+   {
+    "prev": 237828007246,
+    "new": 1000,
+    "tx": "0x26b695d1205d45cba657f421a6f97c9e497effff5d2aa0986f345cc9fb432ff8",
+    "timestamp": 1729650695
+   },
+   {
+    "prev": 1000,
+    "new": 237876385744,
+    "tx": "0xc1428ae2e36cefac1ef9d4aa47399d9cc5d822ace4e5d0a6853379d3ccc86816",
+    "timestamp": 1729744835
+   },
+   {
+    "prev": 237876385744,
+    "new": 277902971489,
+    "tx": "0xb3000939e035fa9ce99b6566ab5d0b4be0e4d9351073e60012fc993d4142bd06",
+    "timestamp": 1729842047
+   },
+   {
+    "prev": 292118116699,
+    "new": 312162190581,
+    "tx": "0xd7ff7ba662e3b0ff857ad62ead7e5ae7bb8a191ca55737181669b5b797eb74a3",
+    "timestamp": 1731798107
+   },
+   {
+    "prev": 312162190581,
+    "new": 373943636515,
+    "tx": "0xb436e6d584434023376c5cbefe65023f445537277a9492cd6f7bcda6d87d2215",
+    "timestamp": 1731884519
+   },
+   {
+    "prev": 373943636515,
+    "new": 293953145883,
+    "tx": "0x8bcb3eafc624a84553db4eb1e5035073828a060551a5cfe13e6d4647fc59e871",
+    "timestamp": 1731979103
+   },
+   {
+    "prev": 293953145883,
+    "new": 391173145882,
+    "tx": "0xb8afc4859903a71533e6f2ad8a39d738c8fb862a1fa9f854665c67acddf44122",
+    "timestamp": 1731979967
+   },
+   {
+    "prev": 394837374375,
+    "new": 418301145752,
+    "tx": "0x480d95a6f822bf5920293c30b2b3409d75bdcf2e1ad3f18a9fda5ef611764da2",
+    "timestamp": 1734602123
+   },
+   {
+    "prev": 431046448980,
+    "new": 471217776207,
+    "tx": "0xd52adc83508f07b6ff5f2c50113faf32e3430d1883885d551d75315d8345fa63",
+    "timestamp": 1737431207
+   },
+   {
+    "prev": 457664245357,
+    "new": 401594947472,
+    "tx": "0x0bc2f064452e961273af4d6325d932205fcf2f6695b8c1a7a135447d463defce",
+    "timestamp": 1738749131
+   },
+   {
+    "prev": 401594947472,
+    "new": 381330618529,
+    "tx": "0xfe67c95c298c660a133d147026785ea6cdf10704c66c9dea38e9c613529cbdda",
+    "timestamp": 1738835591
+   },
+   {
+    "prev": 381330618529,
+    "new": 468431484634,
+    "tx": "0x75b4acc76f103a43b603eb36ee71dff45c1e142f504fb15f776d85ccad12fdc5",
+    "timestamp": 1738899959
+   },
+   {
+    "prev": 443684705164,
+    "new": 483785823172,
+    "tx": "0xac4e3bc25a39829345cc0a646a745278647e933a103df34424f53fa867932cda",
+    "timestamp": 1746166115
+   },
+   {
+    "prev": 437235293514,
+    "new": 486079128818,
+    "tx": "0xeef514e07c2ca5ae8276c7a77d4d756ae401e44e5de990ff1a7e0145c480f537",
+    "timestamp": 1749813059
+   },
+   {
+    "prev": 466786892968,
+    "new": 496725846412,
+    "tx": "0x56e74f06f650b053812d84e010649d4a322c088cba399476018a3c0dc11a6fb8",
+    "timestamp": 1753182995
+   },
+   {
+    "prev": 477792420776,
+    "new": 396282721360,
+    "tx": "0x2dbf96654d7d90e3f23380a9463f5a53f387fb6c84efdd24ee48e146733086bf",
+    "timestamp": 1757775083
+   },
+   {
+    "prev": 396282721360,
+    "new": 477635739496,
+    "tx": "0x57ad9dda493df6a122aa665ffe94b593984f563aa209325a189f411d8322cf8e",
+    "timestamp": 1757861495
+   },
+   {
+    "prev": 471193533845,
+    "new": 519132484030,
+    "tx": "0xc9a47ffcef0a33a204bc3353dd651daf7f8299e18d41cc7c8945b5132ff00747",
+    "timestamp": 1758950315
+   },
+   {
+    "prev": 518745061688,
+    "new": 437488881615,
+    "tx": "0xc40e62ff6d3bb3a927d08ab38b84600e16d8a262ac45d09dfb5658c69b87c659",
+    "timestamp": 1759558739
+   },
+   {
+    "prev": 437488881615,
+    "new": 518776588242,
+    "tx": "0xed62c23fe53825cea0bedb3dfc8851ebf050c6f031319b6297095a54b690918d",
+    "timestamp": 1759645151
+   },
+   {
+    "prev": 518600203895,
+    "new": 488579595282,
+    "tx": "0x2e6d286938e56dd1a6b2f0998658214fbfbdb7fafcd3c7f48db5cfb79cc0a6ad",
+    "timestamp": 1760626019
+   },
+   {
+    "prev": 488579595282,
+    "new": 558579573703,
+    "tx": "0x7b5fcd661fab0548b02f45cc95b9d720f80cf5239423db049da74285590f008a",
+    "timestamp": 1760680895
+   },
+   {
+    "prev": 544946109061,
+    "new": 474890507305,
+    "tx": "0x673f68e0239005d0c32f3ce108ed7716895c49db7eb4fd199d08f4a857ae927f",
+    "timestamp": 1763637551
+   },
+   {
+    "prev": 474115524715,
+    "new": 388926716707,
+    "tx": "0x16f4fb0d292e1547c62167e2593302802c5f2f4d69545ea91cd5cbcc010ce319",
+    "timestamp": 1765639739
+   },
+   {
+    "prev": 388927718372,
+    "new": 474049682614,
+    "tx": "0xaa3abebe4a0a5577667f1269d7eff0cb82984f9710f80ed2625f1f264bfaef71",
+    "timestamp": 1765812563
+   },
+   {
+    "prev": 474049682614,
+    "new": 388915875626,
+    "tx": "0x1200f34719106631e928e391706dd5cd679e14a9d7928d308ab26260b0f33d6d",
+    "timestamp": 1765898975
+   },
+   {
+    "prev": 388915875626,
+    "new": 473996705919,
+    "tx": "0x23a5228ab82d6018b3329290f11e98acdb8983e34c59ec805811292cf139c953",
+    "timestamp": 1765985387
+   },
+   {
+    "prev": 473593145698,
+    "new": 388472193332,
+    "tx": "0x174b6986bf25155edd8776f05cadb6f014d59c7bb108b0e4345ea6760d60ef13",
+    "timestamp": 1766417459
+   },
+   {
+    "prev": 388472193332,
+    "new": 473574960645,
+    "tx": "0xf6acafac779ec6db107a9f4a723b39afed84cd561b3f3c4b61d5f89f9c922b1d",
+    "timestamp": 1766503871
+   },
+   {
+    "prev": 468377843235,
+    "new": 383186406401,
+    "tx": "0x703493c0594edf1a0d643b204837fa74b7136ea35573bc8ee71fdc611ccbfad3",
+    "timestamp": 1767022331
+   },
+   {
+    "prev": 383186406401,
+    "new": 468294066174,
+    "tx": "0x5a398d66fdf94dfe364e512b23107240cec16bd83d7c8840ca7229ce33582539",
+    "timestamp": 1767108743
+   },
+   {
+    "prev": 468161583416,
+    "new": 382955527610,
+    "tx": "0x50da561fc7cbe5fe4923950f1ef7d35313f9df1aed8da5648352af8492ebdd16",
+    "timestamp": 1767714971
+   },
+   {
+    "prev": 382955527610,
+    "new": 467890762295,
+    "tx": "0xa0eee614bbd90f663e91979e9ddbf7f3814154a203a296e4927b9de8b6d6ee79",
+    "timestamp": 1767801383
+   },
+   {
+    "prev": 467890762295,
+    "new": 380029368756,
+    "tx": "0x5fb5f2cba749927d73c3f52fb47180fc86026f98ca4cd8c7fab6e290550be278",
+    "timestamp": 1767887795
+   },
+   {
+    "prev": 380029368756,
+    "new": 465123307197,
+    "tx": "0x19d1e7588ebc03a37af2ae8ef8b8002e67d767cd612563b1c6fd6ca76abb8043",
+    "timestamp": 1767974195
+   },
+   {
+    "prev": 465073657198,
+    "new": 379956916938,
+    "tx": "0x265fd2dba19e6d79a23164da7ce2bebdaa76a76c25517769b4f556efc7727349",
+    "timestamp": 1768233431
+   },
+   {
+    "prev": 379956916938,
+    "new": 464999535902,
+    "tx": "0x535908b0381cd3048f02ce9e3020bd74efe17bcfcb6e197d42e3fae2fd6216e4",
+    "timestamp": 1768323455
+   },
+   {
+    "prev": 464970168345,
+    "new": 379870659862,
+    "tx": "0xe832be2b8405665d692afaf1715f4656c006e60881e54d633b38f4d8ef9175c0",
+    "timestamp": 1768502375
+   },
+   {
+    "prev": 379870659862,
+    "new": 464979925444,
+    "tx": "0x49299c585ac6e420644103640a1b7f70b61fe2f2c0c5bd3285f137a3223cf247",
+    "timestamp": 1768588787
+   },
+   {
+    "prev": 464979925444,
+    "new": 379849592030,
+    "tx": "0xafc1574fee60aba1c9ff2e0a64547607057bb011c21c3d6d2fcdc910189ec823",
+    "timestamp": 1768675187
+   },
+   {
+    "prev": 379849592030,
+    "new": 464918263518,
+    "tx": "0x7a77083ab4b5dae81ff4f67522bd2b69d359790b6261385a961830548162118a",
+    "timestamp": 1768761587
+   },
+   {
+    "prev": 464781429996,
+    "new": 379688729508,
+    "tx": "0xa7b8097c776c99843025a48d7e63af6fe7f9266b8fd42c7e41100019697e1e25",
+    "timestamp": 1769107211
+   },
+   {
+    "prev": 379688729508,
+    "new": 464788327755,
+    "tx": "0x1f462997c561b9fdb27a39153d3c77d13e9c2595e47778db5ae5359c86b9bc6e",
+    "timestamp": 1769193623
+   },
+   {
+    "prev": 464788327755,
+    "new": 379667249305,
+    "tx": "0xa3c175cd3d069dfef17866f52df840d7a3144d307a13ef45bf4e1150150e45c0",
+    "timestamp": 1769280023
+   },
+   {
+    "prev": 379667249305,
+    "new": 464734110072,
+    "tx": "0xebe260eb6f2829d2e750d66fd60dcc3ff9619137b7d97d3782fbdb30e4216020",
+    "timestamp": 1769366435
+   },
+   {
+    "prev": 459726232075,
+    "new": 427185990352,
+    "tx": "0xf29c35009f6c922085bdd08c3acd27bf03c9da52e0068733f4cd8ea85d1740cb",
+    "timestamp": 1770327623
+   },
+   {
+    "prev": 427173562066,
+    "new": 342088453312,
+    "tx": "0x9a2dad93cbe3b2a50d802558718ac437a37c98aa4932a228fac58fee81f8bd7c",
+    "timestamp": 1770589679
+   },
+   {
+    "prev": 342088453312,
+    "new": 427168361324,
+    "tx": "0xc5947f7a0338f5af436970ce4e7a65396aae9696ccde5d8c46e5c3290b84bdd3",
+    "timestamp": 1770676091
+   },
+   {
+    "prev": 427237605871,
+    "new": 459779877564,
+    "tx": "0x926411f74b46e0442b026c87c7960ce4b1a354c87a5546c83c0845be2b487ff1",
+    "timestamp": 1771143035
+   },
+   {
+    "prev": 459767396877,
+    "new": 374702208726,
+    "tx": "0x3ec50ab302589639302ec4a8079cfa602e86a451a9ba75a7555358a6e78405ba",
+    "timestamp": 1771575131
+   },
+   {
+    "prev": 374702208726,
+    "new": 459662464072,
+    "tx": "0xa0f48d630d9e975ac234154835a0617fdcc0800ce704f37b803586cc82f95495",
+    "timestamp": 1771661555
+   },
+   {
+    "prev": 456488905722,
+    "new": 386416788815,
+    "tx": "0x8428b4a7d58c22fd987309ff33a7226c9dd6ffe80c7f7789f0b2fc7d32044721",
+    "timestamp": 1776444191
+   },
+   {
+    "prev": 386416788815,
+    "new": 456635307809,
+    "tx": "0x252dba441c77f0ed1d2335e3c9f947e39fe1219b70a37a06dbb4d8e7cee1ded9",
+    "timestamp": 1776530603
+   },
+   {
+    "prev": 456213409421,
+    "new": 386036354154,
+    "tx": "0x3bc1b902b46b3287be3e425c54722cdb0a7b368f1670d0805b82bf8843038d6f",
+    "timestamp": 1777519319
+   },
+   {
+    "prev": 386036354154,
+    "new": 456201022368,
+    "tx": "0x7e19dd065bfbbc478db6a55bfe74718721ac10774608456dc0efe489822523c7",
+    "timestamp": 1777605731
+   },
+   {
+    "prev": 455999112473,
+    "new": 385824154417,
+    "tx": "0xd9628ec7f2c84d3d6544c695216dfdf6549669ccb213315900660ba5d93f9996",
+    "timestamp": 1778903051
+   },
+   {
+    "prev": 385824154417,
+    "new": 455948997215,
+    "tx": "0x76f60abd6eeb380a90f77aacc675d6618e33309ae516ae45cbde263edfa979d1",
+    "timestamp": 1778989463
+   },
+   {
+    "prev": 455948879805,
+    "new": 385776145857,
+    "tx": "0xd9bf40f4c6c5d7765b4e9fa5c528af3375634a60f54c0fc3f8300e8673a60fad",
+    "timestamp": 1779163355
+   },
+   {
+    "prev": 385776145857,
+    "new": 455947857550,
+    "tx": "0x3b749db8884a4e27016825bbc6344a1fe1c9f3f00f7ee13821ce6ca4f7a9ff31",
+    "timestamp": 1779249755
+   },
+   {
+    "prev": 455677611076,
+    "new": 385392079556,
+    "tx": "0xb1bfb84da4a60be1e533d2592a3f81b391afffbfb7c5aeaa6c2d3a426e0b2bba",
+    "timestamp": 1782303371
+   },
+   {
+    "prev": 385392079556,
+    "new": 455563076735,
+    "tx": "0xe9e5e9dd05091152318a974a4eb07b33e153b89005d813e85a01ddaf03770903",
+    "timestamp": 1782389807
+   },
+   {
+    "prev": 455341522084,
+    "new": 385176195203,
+    "tx": "0x21ca81f5ee54b119528ce53d3f972e87bcaef952c9d98832e8afa26a5bda98f1",
+    "timestamp": 1784268047
+   },
+   {
+    "prev": 385176195203,
+    "new": 455339290044,
+    "tx": "0xb01f50709022d3f4b687a476d3944c8eb4409fe3c7fffddb92be1b1078bee93a",
+    "timestamp": 1784354483
+   },
+   {
+    "prev": 455239188630,
+    "new": 385076271342,
+    "tx": "0x3ea09eee10fe99bbde6fd9fe42b616061ab424bac12db909976b96f6badb1a34",
+    "timestamp": 1784786639
+   },
+   {
+    "prev": 385076271342,
+    "new": 455239276702,
+    "tx": "0xd1e796cbeea3c586951abb7c7a70d3eb2d9109c06ebf0d1a128c632bf585db94",
+    "timestamp": 1784873075
+   },
+   {
+    "prev": 454968198557,
+    "new": 384834527944,
+    "tx": "0xccfef805061d55f358855abaebc135e566c7ff828dcd08bbe3c34f75d4391b47",
+    "timestamp": 1787471303
+   },
+   {
+    "prev": 384834527944,
+    "new": 454993306038,
+    "tx": "0x6b4157f33036faf1a77c2de1667b925e8eb8974b39d006947afe83ced6a46a82",
+    "timestamp": 1787557703
+   },
+   {
+    "prev": 454745892811,
+    "new": 384574449305,
+    "tx": "0xb8863ddf91d75d7be2feaf66f69a2e91ca531189768b5cef449803097ff8c1a5",
+    "timestamp": 1789285811
+   }
+  ],
+  "last_20_updates": [
+   {
+    "timestamp": 1787730515,
+    "totalReserve": 464157094747,
+    "totalTokenSupply": 455011785621,
+    "tx": "0xc7a0f89a6e1a774dfc5b50ec185663ccb1184d40bd267b2dfcf8bfcbe5da9844",
+    "block": 25837993
+   },
+   {
+    "timestamp": 1787816927,
+    "totalReserve": 464156565284,
+    "totalTokenSupply": 454992832912,
+    "tx": "0x3a9ae021de9652b0775bdfc0b04d0a5e642d526dd29f350faa3ca5c13356739b",
+    "block": 25845166
+   },
+   {
+    "timestamp": 1787903327,
+    "totalReserve": 464156554557,
+    "totalTokenSupply": 455011245431,
+    "tx": "0xfd73f97abe9e35f170a03237f5c65a8386d462d5397ad48aae593e9efadfe92e",
+    "block": 25852346
+   },
+   {
+    "timestamp": 1787989739,
+    "totalReserve": 464155235417,
+    "totalTokenSupply": 454998253229,
+    "tx": "0x59773620871536491c996e2fb0a584c1be6fe715e685ed23e405f25025ce6f5f",
+    "block": 25859519
+   },
+   {
+    "timestamp": 1788076139,
+    "totalReserve": 464154240417,
+    "totalTokenSupply": 454997258229,
+    "tx": "0xd2ab32d17b31c707470cfda82eb7148df8aab6637022dab3b344b6644f5c72d8",
+    "block": 25866695
+   },
+   {
+    "timestamp": 1788162539,
+    "totalReserve": 464145235699,
+    "totalTokenSupply": 454833725987,
+    "tx": "0xb1704cdf94fb28db557a8787b10f87e432e548aba3f6a49d4866c0ee58507a67",
+    "block": 25873872
+   },
+   {
+    "timestamp": 1788248951,
+    "totalReserve": 464160293938,
+    "totalTokenSupply": 454852212515,
+    "tx": "0x970c902056aeae4e086e496db68ec4efdfd667212ad7d5d7e85dcef1b9abd1b1",
+    "block": 25881040
+   },
+   {
+    "timestamp": 1788335351,
+    "totalReserve": 464039646834,
+    "totalTokenSupply": 454731535411,
+    "tx": "0x1f38311aeb61eb1aa0d703bbf16cc65cb577207682f26c253dbaa6831c01afb1",
+    "block": 25888219
+   },
+   {
+    "timestamp": 1788421763,
+    "totalReserve": 464039646834,
+    "totalTokenSupply": 454743238473,
+    "tx": "0xf457b38fa90f375c7a2fddc03b60e430c2d545d0ed30d9afa98d7a205100895b",
+    "block": 25895391
+   },
+   {
+    "timestamp": 1788508163,
+    "totalReserve": 464039646834,
+    "totalTokenSupply": 454743238472,
+    "tx": "0x31cb82a4f3f9c368feee7ee781db6971dd3b0186836a475f2bceafa1773f9fb8",
+    "block": 25902563
+   },
+   {
+    "timestamp": 1788594563,
+    "totalReserve": 464039579182,
+    "totalTokenSupply": 454743170821,
+    "tx": "0xa5e2754bdd7743754c07928dc872ed3fa37a4b358f0c3a28aa5e2d1b6e71b971",
+    "block": 25909739
+   },
+   {
+    "timestamp": 1788680975,
+    "totalReserve": 464042487813,
+    "totalTokenSupply": 454746079452,
+    "tx": "0x54aefc4196c5b4d429dee4605ebf093e925e791579959341e85d4e51fb167328",
+    "block": 25916916
+   },
+   {
+    "timestamp": 1788767375,
+    "totalReserve": 464042101208,
+    "totalTokenSupply": 454745692847,
+    "tx": "0x7d1641b6bf4cd1ba53659f08932830ce29cb0297db94b44ed6d30bbf577aa914",
+    "block": 25924091
+   },
+   {
+    "timestamp": 1788853787,
+    "totalReserve": 464041906701,
+    "totalTokenSupply": 454745498339,
+    "tx": "0x56845bd9bc243978bb4a708b2b04a3a1962a7a62e1a722e4bee7bb2f488e76d8",
+    "block": 25931262
+   },
+   {
+    "timestamp": 1788940187,
+    "totalReserve": 464041906701,
+    "totalTokenSupply": 454745498340,
+    "tx": "0xa1f7506fa213c5df94229fcd08737ceafbe5da7b8e9478aef4197f6bec4dac5c",
+    "block": 25938428
+   },
+   {
+    "timestamp": 1789026599,
+    "totalReserve": 464042287899,
+    "totalTokenSupply": 454745879536,
+    "tx": "0xe13fbc13dfd4d076b4706c74bfdf194196e543d728e0298b9bcc7896c5aade56",
+    "block": 25945604
+   },
+   {
+    "timestamp": 1789112999,
+    "totalReserve": 464042287899,
+    "totalTokenSupply": 454745879537,
+    "tx": "0x653a870d81db7b224e5692afefa0e913754658978c8402db0fce4de32e355e9d",
+    "block": 25952773
+   },
+   {
+    "timestamp": 1789199411,
+    "totalReserve": 464042301174,
+    "totalTokenSupply": 454745892811,
+    "tx": "0x0dafecebbb6d7e78bc443773c2464b2a77c3fc69ced2055768925fcadadea18c",
+    "block": 25959944
+   },
+   {
+    "timestamp": 1789285811,
+    "totalReserve": 396111682784,
+    "totalTokenSupply": 384574449305,
+    "tx": "0xb8863ddf91d75d7be2feaf66f69a2e91ca531189768b5cef449803097ff8c1a5",
+    "block": 25967125
+   },
+   {
+    "timestamp": 1789372223,
+    "totalReserve": 396111682784,
+    "totalTokenSupply": 384574449304,
+    "tx": "0xeabbb96fd1842029c9c3bcf437a5470e9b9b28e86e4df5cc668b6dfe104644b6",
+    "block": 25974308
+   }
+  ],
+  "post_snapshot_updates_checked_at": "2026-09-15T07:08:03Z (none yet)"
+ },
+ "mints_30d": {
+  "from_block": 25765132,
+  "to_block": 25981132,
+  "ccip_pool": {
+   "count": 71,
+   "uniBTC": 3.00640757,
+   "largest": {
+    "amount": 1.31983465,
+    "tx": "0x01801d25d8e95970aa68461415fbfbc93372e09da5d230b9da5a9af351f77846"
+   }
+  },
+  "vault": {
+   "count": 2,
+   "uniBTC": 0.06402319,
+   "all_with_Minted_event": true,
+   "txs": [
+    "0x77175ec10edf3505b22f4316c21bfd79be33e631257b72bac698322bc1657bd8",
+    "0x3302bbae9d065c8d7b7ad7d3f59b8cc9460cc58ef9284ae0f9a6f5d53443b09f"
+   ]
+  },
+  "ccip_peer": 0,
+  "free_tunnel": 0,
+  "pool_event_counts": {
+   "TokensConsumed": 104,
+   "Minted": 71,
+   "Burned": 33
+  }
+ },
+ "router_30d": {
+  "DelayedRedeemCreated": 17,
+  "created_WBTC_after_fee": 0.33008,
+  "largest_request": {
+   "amount": 0.20001448,
+   "created": "2026-09-14T05:54Z"
+  },
+  "DelayedRedeemsClaimed": 20,
+  "claimed_WBTC": 0.27122798,
+  "config_events": 0,
+  "tokenDebts_WBTC": {
+   "totalDebts": 545.79187034,
+   "totalCleared": 545.04034436,
+   "uncleared": 0.75152598
+  },
+  "vault_WBTC": 0.46065725,
+  "wbtc_replenishment": {
+   "amount": 0.3001,
+   "from": "0xa4b9569bf942c3aad23c0c2d322fe4aff8e1bf30",
+   "tx": "0x3cd2b52a3bc8e613e101108d0301550c99e7765e4e1731e0041cbd41139ca6a0",
+   "time": "2026-08-21T03:30:11Z"
+  }
+ },
+ "vault_flows_30d": {
+  "WBTC_out": {
+   "count": 20,
+   "total": 0.27122798
+  },
+  "WBTC_in": {
+   "count": 1,
+   "total": 0.3001
+  },
+  "FBTC_in": {
+   "count": 2,
+   "total": 0.06402319
+  },
+  "FBTC_out": 0,
+  "cbBTC": 0,
+  "directBTC": 0
+ },
+ "governance_30d": {
+  "ops_safe_events": 0,
+  "ops_safe_nonce": 101,
+  "admin_safe_events": [
+   {
+    "event": "ExecutionSuccess",
+    "tx": "0x71a1afa4a8209bfe60f1cca73c50f628da268670bf946f938c5384478c0d76a9",
+    "call": "withdrawReward on 0x3f4eaceb930b0edfa78a1dfcbae5c5494e6e9850 (not a uniBTC contract)"
+   }
+  ],
+  "admin_safe_nonce": 104,
+  "owner_sets": "identical to reports/data/bedrock-unibtc-2026-09-13.json",
+  "token_role_events_all_time": 26,
+  "proxyadmin_OwnershipTransferred_last": "2024-05-22 to ops Safe",
+  "vault_config_events_30d": 0
+ },
+ "ccip_lanes": {
+  "4949039107694359620": "Arbitrum One",
+  "11344663589394136015": "BNB Chain",
+  "1923510103922296319": "Unichain",
+  "3734403246176062136": "Optimism",
+  "1556008542357238666": "Mantle",
+  "5406759801798337480": "B2",
+  "3016212468291539606": "X Layer",
+  "3461204551265785888": "Ink",
+  "1294465214383781161": "Berachain",
+  "15971525489660198786": "Base",
+  "3849287863852499584": "BOB",
+  "2442541497099098535": "HyperEVM",
+  "4741433654826277614": "Aptos",
+  "124615329519749607": "Solana",
+  "source": "https://github.com/smartcontractkit/chain-selectors",
+  "ccip_peer_allowlisted": [
+   "BNB Chain",
+   "BOB"
+  ]
+ },
+ "bedrock_reserve_api": {
+  "code": 200,
+  "message": "success",
+  "data": {
+   "reserves": [
+    {
+     "balance": "3647.635638",
+     "details": [
+      {
+       "address": "bc1qwgnhe6vn5zzu7csukavhfatzdasvmkavktqe4udzx96dk602ghsqaz8vt6",
+       "balance": "1130.00101207",
+       "chain_id": 0
+      },
+      {
+       "address": "bc1qf2lqvumkq2l2d3qej7u6w9u84djfnmy7kfcqdulfpcm7zqxl330smc0mkj",
+       "balance": "804.00101207",
+       "chain_id": 0
+      },
+      {
+       "address": "16LG8SjUg9iRWY1ZwJtEJrUXLMqawk5djx",
+       "balance": "275.99780546",
+       "chain_id": 0
+      },
+      {
+       "address": "1FezX8fEuSU3LDsjxRKpAeyyrPUjyCs3ac",
+       "balance": "250.99780746",
+       "chain_id": 0
+      },
+      {
+       "address": "12Xr79sgjXoVD9vJsUF8FT6phq2SaHgf17",
+       "balance": "172.73579846",
+       "chain_id": 0
+      },
+      {
+       "address": "17HsQGwZ6oLj2Kf1iD1XvG4APTVSCDjSzT",
+       "balance": "162.99827046",
+       "chain_id": 0
+      },
+      {
+       "address": "bc1p3cnzs79yv5er8adt3sa545ym2zxrafuf98r7lghzauaqnmngunqq2mjct5",
+       "balance": "150.01",
+       "chain_id": 0
+      },
+      {
+       "address": "bc1q4qp5gtlwkmsn887yxpygn732ejx73ua8f29ves",
+       "balance": "146.09537294",
+       "chain_id": 0
+      },
+      {
+       "address": "bc1qp647qghqay74dpgw6h800eae92l0uvxr8v37v9",
+       "balance": "139.73278121",
+       "chain_id": 0
+      },
+      {
+       "address": "bc1qf7dvr5dgne9rt4zj0e56v53curn6qdc0vc6pqf",
+       "balance": "115.47150194",
+       "chain_id": 0
+      },
+      {
+       "address": "bc1qdhmuyv8jzpf6upcf3egc35uzk0d9j2s9r7qj4s",
+       "balance": "102.83613866",
+       "chain_id": 0
+      },
+      {
+       "address": "bc1qvwcec22a0zkukpm48zpgedj9fl85fdwyzyvs5k",
+       "balance": "102.68513771",
+       "chain_id": 0
+      },
+      {
+       "address": "bc1qaaz2uxmr76vdhrzcwywl7eqn99yxlvlf7a0jfn",
+       "balance": "91.25671586",
+       "chain_id": 0
+      },
+      {
+       "address": "bc1pyc4sqfffkam8y9ljuzm8w3wlu8jvkls6zxxqvxgrtjzrjxpmv87shm78ah",
+       "balance": "2.80696372",
+       "chain_id": 0
+      },
+      {
+       "address": "bc1pwlc5262lurajmej06edepwu4yzdahrlnv4ge0q5dqykf90vuhnks562s90",
+       "balance": "0.00929859",
+       "chain_id": 0
+      },
+      {
+       "address": "14vgxN1zcTUFjkS6opUpMHzkRq5bj7L79D",
+       "balance": "5.46e-06",
+       "chain_id": 0
+      },
+      {
+       "address": "1JtH8psu7ChTQy6LKxPEuji8vcb6VAKLaA",
+       "balance": "5.46e-06",
+       "chain_id": 0
+      },
+      {
+       "address": "1D8c6mKnbb7werdaC1NjQWZHaD2Augbwkr",
+       "balance": "5.46e-06",
+       "chain_id": 0
+      },
+      {
+       "address": "14e3hmymWBKYsjMCQJgnadLhHbECKetZFo",
+       "balance": "5.46e-06",
+       "chain_id": 0
+      },
+      {
+       "address": "bc1paew2r3hqqnwhatttwx3qe3f837vvhwx7jhv228py9u3t7s22ltmqenjdym",
+       "balance": "0",
+       "chain_id": 0
+      },
+      {
+       "address": "bc1p94j8r24zm409k8wgqylh0z9p66mwuwgk5nkz9525mug7kda40hcqc0qdmc",
+       "balance": "0",
+       "chain_id": 0
+      },
+      {
+       "address": "bc1p93qry6vdxutmtnqk0n48hs9au54xha6ywr9a8fryy2a3ctqcn0hqt5s0cv",
+       "balance": "0",
+       "chain_id": 0
+      },
+      {
+       "address": "bc1p9x5v5r03059a30xluu7wghhytevw7f9k579ym5a6mantmee20tcsncgmqn",
+       "balance": "0",
+       "chain_id": 0
+      },
+      {
+       "address": "bc1pd6y052rx8h8hd5p7vwmdq74c48tr40znhp3cjfw2hfardvemg3pq69mtft",
+       "balance": "0",
+       "chain_id": 0
+      },
+      {
+       "address": "bc1p9x5v5r03059a30xluu7wghhytevw7f9k579ym5a6mantmee20tcsncgmqn",
+       "balance": "0",
+       "chain_id": 0
+      },
+      {
+       "address": "bc1ph2wugt6767uhkdypphke3pn7gaq4tax4hzk0mw5ltww6wyme0xvqdx6lkf",
+       "balance": "0",
+       "chain_id": 0
+      },
+      {
+       "address": "bc1ph2wugt6767uhkdypphke3pn7gaq4tax4hzk0mw5ltww6wyme0xvqdx6lkf",
+       "balance": "0",
+       "chain_id": 0
+      },
+      {
+       "address": "bc1paew2r3hqqnwhatttwx3qe3f837vvhwx7jhv228py9u3t7s22ltmqenjdym",
+       "balance": "0",
+       "chain_id": 0
+      },
+      {
+       "address": "bc1pqvr425a6h2ztmy7vke4sfpk74e023h5yayx63at9n6g8eqfqpmzs0l2aj9",
+       "balance": "0",
+       "chain_id": 0
+      },
+      {
+       "address": "bc1pqvr425a6h2ztmy7vke4sfpk74e023h5yayx63at9n6g8eqfqpmzs0l2aj9",
+       "balance": "0",
+       "chain_id": 0
+      },
+      {
+       "address": "bc1pwqzyehmpczhn804x0zz63c5h9t55ew09r8v4lmhdy0cpla8q90rqtvmsp6",
+       "balance": "0",
+       "chain_id": 0
+      },
+      {
+       "address": "bc1pwqzyehmpczhn804x0zz63c5h9t55ew09r8v4lmhdy0cpla8q90rqtvmsp6",
+       "balance": "0",
+       "chain_id": 0
+      },
+      {
+       "address": "bc1p93qry6vdxutmtnqk0n48hs9au54xha6ywr9a8fryy2a3ctqcn0hqt5s0cv",
+       "balance": "0",
+       "chain_id": 0
+      },
+      {
+       "address": "bc1pmjcg79u2quppamjtekfns5pqmdlpd0gqlwvksq9tzrua0f3vq7hsdmfcs9",
+       "balance": "0",
+       "chain_id": 0
+      },
+      {
+       "address": "bc1purqv24xky3l7yf2gf48lsd3et7yc2gw38fj3laflf4g0fdm8xelq4u95fh",
+       "balance": "0",
+       "chain_id": 0
+      },
+      {
+       "address": "bc1phhfsdcts2lqkc44ver6v24460x5kx5dpg364elxd8jzfjpg5q4yqt8saty",
+       "balance": "0",
+       "chain_id": 0
+      },
+      {
+       "address": "bc1p784hthye4yjed726d68dgrm9mdd8x3p4zygteltxsp8gjy6pytmqfdjkju",
+       "balance": "0",
+       "chain_id": 0
+      },
+      {
+       "address": "bc1p0tsy45wav45req0ltwlca56m2wss9dd26g3wpdjujwmhtk0q79dq7d8fhp",
+       "balance": "0",
+       "chain_id": 0
+      },
+      {
+       "address": "bc1purqv24xky3l7yf2gf48lsd3et7yc2gw38fj3laflf4g0fdm8xelq4u95fh",
+       "balance": "0",
+       "chain_id": 0
+      },
+      {
+       "address": "bc1phhfsdcts2lqkc44ver6v24460x5kx5dpg364elxd8jzfjpg5q4yqt8saty",
+       "balance": "0",
+       "chain_id": 0
+      },
+      {
+       "address": "bc1p784hthye4yjed726d68dgrm9mdd8x3p4zygteltxsp8gjy6pytmqfdjkju",
+       "balance": "0",
+       "chain_id": 0
+      },
+      {
+       "address": "bc1p0tsy45wav45req0ltwlca56m2wss9dd26g3wpdjujwmhtk0q79dq7d8fhp",
+       "balance": "0",
+       "chain_id": 0
+      },
+      {
+       "address": "bc1p94j8r24zm409k8wgqylh0z9p66mwuwgk5nkz9525mug7kda40hcqc0qdmc",
+       "balance": "0",
+       "chain_id": 0
+      },
+      {
+       "address": "bc1pmjcg79u2quppamjtekfns5pqmdlpd0gqlwvksq9tzrua0f3vq7hsdmfcs9",
+       "balance": "0",
+       "chain_id": 0
+      }
+     ],
+     "symbol": "NativeBTC"
+    },
+    {
+     "balance": "990.8738333",
+     "details": [
+      {
+       "address": "0xB880fd278198bd590252621d4CD071b1842E9Bcd",
+       "balance": "990.873833252856884215",
+       "chain_id": 4200
+      },
+      {
+       "address": "0x59889b7021243dB5B1e065385F918316cD90D46c",
+       "balance": "0",
+       "chain_id": 34443
+      }
+     ],
+     "symbol": "M-BTC"
+    },
+    {
+     "balance": "0.5280265978",
+     "details": [
+      {
+       "address": "0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599",
+       "balance": "0.46065725",
+       "chain_id": 1
+      },
+      {
+       "address": "0x68f180fcCe6836688e9084f035309E29Bf0A2095",
+       "balance": "0.03672151",
+       "chain_id": 10
+      },
+      {
+       "address": "0x4200000000000000000000000000000000000006",
+       "balance": "0.029948547841076299",
+       "chain_id": 223
+      },
+      {
+       "address": "0xcDd475325D6F564d27247D1DddBb0DAc6fA0a5CF",
+       "balance": "0.00063283",
+       "chain_id": 34443
+      },
+      {
+       "address": "0x0555E30da8f98308EdB960aa94C0Db47230d2B9c",
+       "balance": "6.606e-05",
+       "chain_id": 60808
+      },
+      {
+       "address": "0x0555E30da8f98308EdB960aa94C0Db47230d2B9c",
+       "balance": "3.8e-07",
+       "chain_id": 80094
+      },
+      {
+       "address": "0x2f2a2543B76A4166549F7aaB2e75Bef0aefC5B0f",
+       "balance": "2e-08",
+       "chain_id": 42161
+      },
+      {
+       "address": "0xF6D226f9Dc15d9bB51182815b320D3fBE324e1bA",
+       "balance": "0",
+       "chain_id": 4200
+      },
+      {
+       "address": "0x03C7054BCB39f7b2e5B2c7AcB37583e32D70Cfa3",
+       "balance": "0",
+       "chain_id": 60808
+      }
+     ],
+     "symbol": "WBTC"
+    },
+    {
+     "balance": "0.1877147409",
+     "details": [
+      {
+       "address": "0xbeDFFfFfFFfFfFfFFfFfFFFFfFFfFFffffFFFFFF",
+       "balance": "0.1671854346856139",
+       "chain_id": 4200
+      },
+      {
+       "address": "0xbeDFFfFfFFfFfFfFFfFfFFFFfFFfFFffffFFFFFF",
+       "balance": "0.010976800426999998",
+       "chain_id": 30
+      },
+      {
+       "address": "0xbeDFFfFfFFfFfFfFFfFfFFFFfFFfFFffffFFFFFF",
+       "balance": "0.00955250578758674",
+       "chain_id": 223
+      }
+     ],
+     "symbol": "L2 BTC"
+    },
+    {
+     "balance": "0.15100552",
+     "details": [
+      {
+       "address": "0xC96dE26018A54D51c097160568752c4E3BD6C364",
+       "balance": "0.07876491",
+       "chain_id": 5000
+      },
+      {
+       "address": "0xC96dE26018A54D51c097160568752c4E3BD6C364",
+       "balance": "0.06802893",
+       "chain_id": 1
+      },
+      {
+       "address": "0xC96dE26018A54D51c097160568752c4E3BD6C364",
+       "balance": "0.00270387",
+       "chain_id": 56
+      },
+      {
+       "address": "0xC96dE26018A54D51c097160568752c4E3BD6C364",
+       "balance": "0.00150781",
+       "chain_id": 60808
+      },
+      {
+       "address": "0xC96dE26018A54D51c097160568752c4E3BD6C364",
+       "balance": "0",
+       "chain_id": 42161
+      }
+     ],
+     "symbol": "FBTC"
+    },
+    {
+     "balance": "0.02461836",
+     "details": [
+      {
+       "address": "0x13A0c5930C028511Dc02665E7285134B6d11A5f4",
+       "balance": "0.02461836",
+       "chain_id": 7000
+      }
+     ],
+     "symbol": "BTC.BTC"
+    },
+    {
+     "balance": "0.01339126",
+     "details": [
+      {
+       "address": "0xcbB7C0000aB88B473b1f5aFd9ef808440eed33Bf",
+       "balance": "0.01023985",
+       "chain_id": 8453
+      },
+      {
+       "address": "0xcbB7C0000aB88B473b1f5aFd9ef808440eed33Bf",
+       "balance": "0.00315141",
+       "chain_id": 1
+      },
+      {
+       "address": "0xcbB7C0000aB88B473b1f5aFd9ef808440eed33Bf",
+       "balance": "0",
+       "chain_id": 42161
+      }
+     ],
+     "symbol": "cbBTC"
+    },
+    {
+     "balance": "0.002786452734",
+     "details": [
+      {
+       "address": "0x7130d2A12B9BCbFAe4f2634d864A1Ee1Ce3Ead9c",
+       "balance": "0.002786452733822625",
+       "chain_id": 56
+      }
+     ],
+     "symbol": "BTCB"
+    }
+   ],
+   "supplies": [
+    {
+     "addr": "0x047D41F2544B7F63A8e991aF2068a363d210d6Da",
+     "chain_id": 1,
+     "name": "Ethereum-uniBTC",
+     "supply": "2981.125563"
+    },
+    {
+     "addr": "0xF9775085d726E782E83585033B58606f7731AB18",
+     "chain_id": 10,
+     "name": "Optimism-uniBTC",
+     "supply": "3.66435741"
+    },
+    {
+     "addr": "0x3376eBCa0A85fC8d791b1001A571c41FDd61514A",
+     "chain_id": 30,
+     "name": "RootStock-uniBTC",
+     "supply": "1.6561039"
+    },
+    {
+     "addr": "0x84E5C854A7fF9F49c888d69DECa578D406C26800",
+     "chain_id": 56,
+     "name": "Binance-uniBTC",
+     "supply": "187.36303"
+    },
+    {
+     "addr": "0x20D70277aFC6e1304b89FC1A30D84130f1634510",
+     "chain_id": 146,
+     "name": "Sonic-uniBTC",
+     "supply": "0.0003"
+    },
+    {
+     "addr": "0xF9775085d726E782E83585033B58606f7731AB18",
+     "chain_id": 223,
+     "name": "B2-uniBTC",
+     "supply": "5.66818735"
+    },
+    {
+     "addr": "0x0000000000000000000000000000000000000000",
+     "chain_id": 239,
+     "name": "Tac-uniBTC",
+     "supply": "0.11673062"
+    },
+    {
+     "addr": "0xF9775085d726E782E83585033B58606f7731AB18",
+     "chain_id": 4200,
+     "name": "Merlin-uniBTC",
+     "supply": "4.76274063"
+    },
+    {
+     "addr": "0x0000000000000000000000000000000000000000",
+     "chain_id": 4689,
+     "name": "IoTeX-uniBTC",
+     "supply": "0.0011"
+    },
+    {
+     "addr": "0xF9775085d726E782E83585033B58606f7731AB18",
+     "chain_id": 5000,
+     "name": "Mantle-uniBTC",
+     "supply": "3.35804978"
+    },
+    {
+     "addr": "0x84E5C854A7fF9F49c888d69DECa578D406C26800",
+     "chain_id": 7000,
+     "name": "Zeta-uniBTC",
+     "supply": "0.02461641"
+    },
+    {
+     "addr": "0x9f283B0401d9698e86097fdC44820BcBE5DcfeFb",
+     "chain_id": 8453,
+     "name": "Base-uniBTC",
+     "supply": "496.3873782"
+    },
+    {
+     "addr": "0x84E5C854A7fF9F49c888d69DECa578D406C26800",
+     "chain_id": 34443,
+     "name": "Mode-uniBTC",
+     "supply": "0.18486528"
+    },
+    {
+     "addr": "0x84E5C854A7fF9F49c888d69DECa578D406C26800",
+     "chain_id": 42161,
+     "name": "Arbitrum-uniBTC",
+     "supply": "1.30307482"
+    },
+    {
+     "addr": "0x0000000000000000000000000000000000000000",
+     "chain_id": 43111,
+     "name": "Hemi-uniBTC",
+     "supply": "0.111336"
+    },
+    {
+     "addr": "0x2ac98DB41Cbd3172CB7B8FD8A8Ab3b91cFe45dCf",
+     "chain_id": 60808,
+     "name": "BOB-uniBTC",
+     "supply": "701.5560332"
+    },
+    {
+     "addr": "0xE0240d05Ae9eF703E2b71F3f4Eb326ea1888DEa3",
+     "chain_id": 80094,
+     "name": "Bera-uniBTC",
+     "supply": "151.6242213"
+    },
+    {
+     "addr": "0x0000000000000000000000000000000000000000",
+     "chain_id": 167000,
+     "name": "Taiko-uniBTC",
+     "supply": "0.042935"
+    },
+    {
+     "addr": "0x0000000000000000000000000000000000000000",
+     "chain_id": 981141,
+     "name": "Aptos-uniBTC",
+     "supply": "0.15403966"
+    },
+    {
+     "addr": "0x0000000000000000000000000000000000000000",
+     "chain_id": 98114115,
+     "name": "Solana-uniBTC",
+     "supply": "7.57326742"
+    }
+   ],
+   "time": 1789455234151,
+   "total_holders": 84535,
+   "total_reserve": "4639.417015",
+   "total_supply": "4546.67793"
+  }
+ },
+ "coingecko": {
+  "time": "2026-09-15T06:55:40Z",
+  "price_btc": 0.9924171,
+  "volume_24h_usd": 4587.36,
+  "largest_ticker": "Kodiak V3 $4,030",
+  "ethereum_uniswap_v3_usd": 200
+ },
+ "cow_quotes": {
+  "time": "2026-09-15T06:55:00Z",
+  "sell": "uniBTC",
+  "buy": "WBTC",
+  "quotes": [
+   {
+    "sell": 1,
+    "buy": 0.99253745,
+    "id": 1327533126
+   },
+   {
+    "sell": 13,
+    "buy": 11.02803585,
+    "id": 1327533155
+   },
+   {
+    "sell": 65,
+    "buy": 11.02805981,
+    "id": 1327533188
+   }
+  ]
+ },
+ "defillama": {
+  "time": "2026-09-15T07:02:09Z",
+  "tvl_usd": 357920062,
+  "chains_musd": {
+   "Bitcoin": 132.75,
+   "Ethereum": 99.51,
+   "Merlin": 74.67,
+   "BOB": 31.0,
+   "Binance": 19.14,
+   "Mantle": 0.85
+  },
+  "30d_range": [
+   236322976,
+   385898803
+  ],
+  "2026-08-16_or_nearest": 292951588
+ },
+ "merlin": {
+  "time": "2026-09-15T07:02:12Z",
+  "mbtc_total_supply": 5697.446487340238,
+  "top_holders": [
+   {
+    "rank": 1,
+    "address": "0x79af88101aB5589aB0f92a2bbAbe2bAe1c602806",
+    "pct": 58.87
+   },
+   {
+    "rank": 2,
+    "address": "0xF9775085d726E782E83585033B58606f7731AB18",
+    "amount": 990.8738,
+    "pct": 17.39
+   },
+   {
+    "rank": 3,
+    "address": "0xA6E02b4445dB933FCD125a449448326d6505B189",
+    "pct": 16.38
+   }
+  ],
+  "bridge_proxy": "0x28AD6b7dfD79153659cb44C2155cf7C0e1CeEccC",
+  "bridge_implementation": "0xBd467cBa33fDb6A2660999e1FE1bFf79098FbCaA (BTCLayer2Bridge)"
+ }
+}
