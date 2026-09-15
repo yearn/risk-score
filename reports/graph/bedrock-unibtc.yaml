@@ -36,7 +36,7 @@ nodes:
     label: CCIP BurnMintTokenPool
     address: "0x1689C22eD5435e49071CFc208D1Ac6F2A2274490"
     category: infra
-    note: Registered uniBTC pool in CCIP TokenAdminRegistry; holds MINTER_ROLE; owner is Bedrock admin Safe; rate limits enabled on all 14 lanes
+    note: Registered uniBTC pool in CCIP TokenAdminRegistry; holds MINTER_ROLE; owner is Bedrock admin Safe; inbound/outbound limits on 14 lanes; eight 2-BTC buckets, one 0.5-BTC bucket, five 2-satoshi buckets; delegated EOA can reconfigure
   - id: ccip-peer
     label: Bedrock CCIPPeer
     address: "0x55a67cf07b8a9A09FB6D565279287cfE4Ab60eDc"
@@ -51,14 +51,14 @@ nodes:
     label: uniBTC Supply Feeder
     address: "0xE542919E4b281f10b437F947c8Ba224DdfaBc716"
     category: infra
-    note: Aggregates global uniBTC supply for PoR comparison
+    note: Manual totalTokenSupply = 3845.74449305; dashboard supply = 4547.485392; completeness/freshness not enforced by Vault (2026-09-13)
 
   # === Governance ===
   - id: uniBTC-safe
     label: uniBTC Ops Safe (3/5)
     address: "0xC9dA980fFABbE2bbe15d4734FDae5761B86b5Fc3"
     category: governance
-    note: Owns uniBTC ProxyAdmin; DEFAULT_ADMIN_ROLE on Vault and token; FREEZER_ROLE on token; no guard/module (verified 2026-08-10)
+    note: Owns uniBTC ProxyAdmin; DEFAULT_ADMIN_ROLE on Vault and token; FREEZER_ROLE on token; no guard/module (verified 2026-09-13)
   - id: bedrock-admin-safe
     label: Bedrock Admin Safe (3/5)
     address: "0xAeE017052DF6Ac002647229D58B786E380B9721A"
@@ -69,7 +69,7 @@ nodes:
   - id: btc-custody-restaking
     label: BTC Custody / Restaking
     category: strategy
-    note: Wrapped/native BTC backing; custodian/signers not publicly named; DeFiLlama uniBTC TVL $294.4M on 2026-08-10
+    note: Wrapped/native BTC backing; custodian/signers not publicly named; DeFiLlama uniBTC TVL $349.51M on 2026-09-13; dashboard native BTC 78.63%, M-BTC 21.35%
 
   # === Accepted input assets ===
   - id: dep-wbtc
@@ -86,9 +86,9 @@ nodes:
     note: Accepted wrapped BTC asset
   - id: dep-mbtc
     label: M-BTC
-    address: "0xB880fd278198bd590252621d4CD071b1842E9Bcd"
+    link: "https://scan.merlinchain.io/address/0xB880fd278198bd590252621d4CD071b1842E9Bcd"
     category: dependency
-    note: ~21.3% of reported uniBTC reserves on 2026-08-08; Bedrock reserve wallet is second-largest holder
+    note: 21.35% of dashboard reserves on 2026-09-13; holder rank and Merlin control verification remain dated 2026-08-08
 
   # === External dependencies ===
   - id: dep-bitcoin
@@ -101,9 +101,9 @@ nodes:
     note: BTC restaking dependency
   - id: dep-merlin-bridge
     label: Merlin M-BTC Bridge
-    address: "0x28AD6b7dfD79153659cb44C2155cf7C0e1CeEccC"
+    link: "https://scan.merlinchain.io/address/0x28AD6b7dfD79153659cb44C2155cf7C0e1CeEccC"
     category: dependency
-    note: Mints/burns M-BTC through authorized relayers; official docs disclose upgradeability, multisig control, and no timelock
+    note: M-BTC bridge on Merlin; historical 2026-08-08 controls show authorized relayers and upgradeability; current admin/implementation continuity TODO
   - id: dep-merlin-chain
     label: Merlin Chain
     category: dependency
@@ -122,6 +122,37 @@ nodes:
     address: "0x70aF4743F85E5E74E3b6dDFa38926c0a762Ad21C"
     category: dependency
     note: Third-party Free Protocol bridge; holds MINTER_ROLE on uniBTC (and brBTC); 3-of-4 executor signatures, EOA admin; not documented in Bedrock bridge docs
+
+  - id: operational-eoa
+    label: Operational EOA
+    address: "0x9251fd3d79522bb2243a58fff1db43e25a495aab"
+    category: governance
+    note: Vault MANAGER_ROLE and PAUSER_ROLE; supply feeder admin/updater; CCIP pool rate-limit admin; redemption pauser
+  - id: supply-updater
+    label: Supply Updater
+    address: "0x2c62803181243fa99c659de0d2a0530879a79911"
+    category: governance
+    note: Second OPERATOR_ROLE holder on supply feeder; can write reported supply
+  - id: supply-proxy-admin
+    label: Supply Proxy Admin
+    address: "0x899c284a89e113056a72dc9ade5b60e80dd3c94f"
+    category: governance
+    note: Direct EIP-1967 admin of supply feeder; outside the ops Safe ProxyAdmin path
+  - id: redeem-router
+    label: Ethereum Withdrawal Router
+    address: "0xaa732c9c110a84d090a72da230eae1e779f89246"
+    category: infra
+    note: 8 days + 1 second; 0.5% fee; 0.5-WBTC quota bucket at ~2 WBTC/day; 0.52221750 uncleared debt vs 0.46121325 WBTC in Vault (2026-09-13)
+  - id: transfer-proxy
+    label: Vault TransferProxy
+    address: "0xf0ab759d3a1a4956e8c3c52c71ccb50f20bc342b"
+    category: infra
+    note: Admin Safe owns; can transfer allowed Vault assets to immutable ops Safe recipient
+  - id: dep-directbtc
+    label: directBTC Accounting Token
+    address: "0xA700992A9815d3bfECEDfE51B030fD294Bc0b090"
+    category: infra
+    note: Ethereum deposit allowlist; cap 1458.9998 BTC units fully used; not independent Bitcoin backing
 
 edges:
   # === Governance and upgrade control ===
@@ -145,10 +176,10 @@ edges:
   - { from: uniBTC-vault, to: dep-wbtc, kind: routes-through, label: accepted input asset }
   - { from: uniBTC-vault, to: dep-fbtc, kind: routes-through, label: accepted input asset }
   - { from: uniBTC-vault, to: dep-cbbtc, kind: routes-through, label: accepted input asset }
-  - { from: uniBTC-vault, to: dep-mbtc, kind: routes-through, label: accepted input asset }
-  - { from: btc-custody-restaking, to: dep-bitcoin, kind: deposits-into, label: native BTC custody }
+  - { from: uniBTC-vault, to: dep-directbtc, kind: routes-through, label: "allowlisted accounting token; no remaining cap" }
+  - { from: btc-custody-restaking, to: dep-bitcoin, kind: deposits-into, label: "78.63% of dashboard reserves; custody" }
   - { from: btc-custody-restaking, to: dep-babylon, kind: deposits-into, label: BTC restaking }
-  - { from: btc-custody-restaking, to: dep-mbtc, kind: allocates-to, label: ~21.3% of reserves on 2026-08-08 }
+  - { from: btc-custody-restaking, to: dep-mbtc, kind: allocates-to, label: 21.35% of dashboard reserves on 2026-09-13 }
   - { from: dep-mbtc, to: dep-merlin-bridge, kind: routes-through, label: mint / burn and BTC redemption }
   - { from: dep-merlin-bridge, to: dep-merlin-chain, kind: routes-through, label: relayers / chain liveness / data availability }
 
@@ -160,3 +191,18 @@ edges:
 
   # === Downstream use ===
   - { from: uniBTC, to: dep-brbtc, kind: routes-through, label: accepted by brBTC }
+
+  # === Delegated reporting and withdrawal controls (2026-09-13) ===
+  - { from: operational-eoa, to: uniBTC-vault, kind: holds-role, label: "MANAGER_ROLE + PAUSER_ROLE; feeders and adequacy" }
+  - { from: operational-eoa, to: supply-feeder, kind: holds-role, label: "DEFAULT_ADMIN_ROLE + OPERATOR_ROLE; manual supply input" }
+  - { from: supply-updater, to: supply-feeder, kind: holds-role, label: OPERATOR_ROLE }
+  - { from: supply-proxy-admin, to: supply-feeder, kind: controls, label: EIP-1967 proxy admin }
+  - { from: operational-eoa, to: ccip-token-pool, kind: controls, label: getRateLimitAdmin() }
+  - { from: bedrock-admin-safe, to: ccip-peer, kind: holds-role, label: DEFAULT_ADMIN_ROLE }
+  - { from: uniBTC, to: redeem-router, kind: routes-through, label: queued Ethereum exit }
+  - { from: redeem-router, to: uniBTC-vault, kind: holds-role, label: "OPERATOR_ROLE; settlement / burn" }
+  - { from: uniBTC-proxyadmin, to: redeem-router, kind: manages, label: router upgrade authority }
+  - { from: uniBTC-safe, to: redeem-router, kind: holds-role, label: DEFAULT_ADMIN_ROLE }
+  - { from: operational-eoa, to: redeem-router, kind: holds-role, label: PAUSER_ROLE }
+  - { from: bedrock-admin-safe, to: transfer-proxy, kind: controls, label: owner() }
+  - { from: transfer-proxy, to: uniBTC-vault, kind: holds-role, label: "OPERATOR_ROLE; transfer to ops Safe" }

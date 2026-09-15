@@ -117,7 +117,7 @@
           "kind": "direct",
           "model": "mint",
           "integration": "Chainlink CCIP (BurnMintTokenPool; 14 lanes)",
-          "detail": "TokenAdminRegistry maps uniBTC to pool [`0x1689…4490`](https://etherscan.io/address/0x1689C22eD5435e49071CFc208D1Ac6F2A2274490) (BurnMintTokenPool 1.5.1), which holds `MINTER_ROLE` on uniBTC — the CCIP message path can mint native supply. Pool `owner()` is the Bedrock admin Safe (3/5) [`0xAeE0…721A`](https://etherscan.io/address/0xAeE017052DF6Ac002647229D58B786E380B9721A); outbound rate limits are enabled on all 14 configured lanes (bucket 2 uniBTC, ≈200 uniBTC/day on the sampled lane). A legacy Bedrock `CCIPPeer` [`0x55a6…0eDc`](https://etherscan.io/address/0x55a67cf07b8a9A09FB6D565279287cfE4Ab60eDc) also holds `MINTER_ROLE` (upgradeable proxy under the uniBTC ProxyAdmin). Verified onchain August 10, 2026."
+          "detail": "TokenAdminRegistry maps uniBTC to pool [`0x1689…4490`](https://etherscan.io/address/0x1689C22eD5435e49071CFc208D1Ac6F2A2274490) (BurnMintTokenPool 1.5.1), which holds `MINTER_ROLE` on uniBTC — the CCIP message path can mint native supply. Pool `owner()` is the Bedrock admin Safe (3/5) [`0xAeE0…721A`](https://etherscan.io/address/0xAeE017052DF6Ac002647229D58B786E380B9721A); inbound and outbound limits are enabled on all 14 lanes: eight 2-uniBTC buckets, one 0.5-uniBTC bucket, and five 2-satoshi buckets. Refill rates vary by lane; the largest is 199.953792 uniBTC/day. Rate-limit admin is the [operational EOA](https://etherscan.io/address/0x9251fd3d79522bb2243a58fff1db43e25a495aab), which can reconfigure the limits. A legacy Bedrock `CCIPPeer` [`0x55a6…0eDc`](https://etherscan.io/address/0x55a67cf07b8a9A09FB6D565279287cfE4Ab60eDc) also holds `MINTER_ROLE` (upgradeable proxy under the uniBTC ProxyAdmin). Verified at Ethereum block [25,970,228](https://etherscan.io/block/25970228), September 13, 2026."
         },
         {
           "slug": "centrifuge-jaaa",
@@ -233,7 +233,7 @@
           "kind": "direct",
           "model": "mint",
           "integration": "Free Tunnel (TunnelContract; 3-of-4 executors)",
-          "detail": "Tunnel proxy [`0x70aF…d21C`](https://etherscan.io/address/0x70aF4743F85E5E74E3b6dDFa38926c0a762Ad21C) holds `MINTER_ROLE` on uniBTC; mints require 3-of-4 executor signatures (`getActiveExecutors()`), admin is EOA [`0x0014…c53C`](https://etherscan.io/address/0x0014Eb4Ac6Dd1473b258d088E6EF214b2BCdc53C). Not mentioned in Bedrock's uniBTC bridge documentation. The same contract also holds `MINTER_ROLE` on Bedrock brBTC. Verified onchain August 10, 2026."
+          "detail": "Tunnel proxy [`0x70aF…d21C`](https://etherscan.io/address/0x70aF4743F85E5E74E3b6dDFa38926c0a762Ad21C) holds `MINTER_ROLE` on uniBTC; mints require 3-of-4 executor signatures (`getActiveExecutors()`), admin is EOA [`0x0014…c53C`](https://etherscan.io/address/0x0014Eb4Ac6Dd1473b258d088E6EF214b2BCdc53C). Not mentioned in Bedrock's uniBTC bridge documentation. The same contract also holds `MINTER_ROLE` on Bedrock brBTC. Verified at Ethereum block [25,970,228](https://etherscan.io/block/25970228), September 13, 2026."
         }
       ]
     },
@@ -557,8 +557,8 @@
           "name": "Bedrock uniBTC",
           "kind": "indirect",
           "model": "mint",
-          "integration": "M-BTC reserve exposure (~21.3% of uniBTC reserves)",
-          "detail": "uniBTC does not bridge through Merlin itself, but ~21.3% of reported uniBTC reserves were M-BTC on August 8, 2026 (Bedrock statistics dashboard), and Bedrock's Merlin reserve wallet [`0xF977…AB18`](https://scan.merlinchain.io/address/0xF9775085d726E782E83585033B58606f7731AB18) is the second-largest M-BTC holder. The M-BTC token restricts mint/burn to its configured bridge [`0x28AD…ccCC`](https://scan.merlinchain.io/address/0x28AD6b7dfD79153659cb44C2155cf7C0e1CeEccC); a bridge compromise can mint unbacked M-BTC beneath uniBTC's backing."
+          "integration": "M-BTC reserve exposure (~21.35% of dashboard uniBTC reserves)",
+          "detail": "The [Bedrock reserve API](https://affiliate-api-eosin.vercel.app/api/v1/third/stats/unibtc) reports 990.87383330 M-BTC, or 21.35% of 4,640.449475 BTC reserves on September 13, 2026. The published Merlin reserve wallet is [`0xF977…AB18`](https://scan.merlinchain.io/address/0xF9775085d726E782E83585033B58606f7731AB18). M-BTC mint/burn restriction to bridge [`0x28AD…ccCC`](https://scan.merlinchain.io/address/0x28AD6b7dfD79153659cb44C2155cf7C0e1CeEccC) and the wallet's second-largest-holder rank were checked on August 8, 2026; current Merlin admin, implementation and holder-rank continuity remain TODO. A bridge compromise can impair uniBTC backing."
         }
       ]
     },
