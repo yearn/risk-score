@@ -6,8 +6,7 @@ description: Procedure for reviewing an existing Yearn risk report for factual c
 # Reviewing risk reports
 
 Review `reports/report/<slug>.md`. Return findings; edit only if the user asks
-for corrections. Use the [agent guide](../../../AGENTS.md#evidence) as the
-shared evidence standard.
+for corrections. Follow [AGENTS.md](../../../AGENTS.md).
 
 ## Check
 
@@ -27,7 +26,6 @@ shared evidence standard.
 - Concrete monitoring addresses, getters, thresholds, and observable triggers.
 - Companion graph consistency with contracts, allocations, and mint authority;
   bridge-index completeness using the [bridge skill](../assessing-bridge-dependencies/SKILL.md).
-  Use the relevant [validators](../../../AGENTS.md#validation) to check artifacts.
 
 ## Output
 

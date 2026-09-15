@@ -5,7 +5,7 @@ description: Reading roles, permissions, and mint authority directly from contra
 
 # Verifying onchain data
 
-Use the [agent guide](../../../AGENTS.md#environment) for RPC/key configuration
+First follow the [environment requirements](../../../AGENTS.md#environment)
 and the [Etherscan reference](https://docs.etherscan.io/llms.txt) for current
 endpoint parameters, supported chains, and response handling.
 

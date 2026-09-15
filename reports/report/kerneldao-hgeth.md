@@ -1,13 +1,15 @@
 # Protocol Risk Assessment: KernelDAO (Kelp Gain)
 
-- **Assessment Date:** June 29, 2026
+- **Assessment Date:** September 9, 2026
 - **Token:** hgETH (High Growth ETH)
 - **Chain:** Ethereum
 - **Token Address:** [`0xc824A08dB624942c5E5F330d56530cD1598859fD`](https://etherscan.io/address/0xc824A08dB624942c5E5F330d56530cD1598859fD)
-- **Final Score: 3.80/5.0** (Elevated Risk; up from 3.75/5.0 in April 2026 — the realized share-value loss and collapsed buffer raise risk despite the vault unpause)
-- **Losses:** **~$763K direct hgETH share-value loss** (~4.1% exchange-rate decrease × 11,343 hgETH supply, onchain verified). **~$292M ecosystem loss** from the April 18, 2026 KelpDAO LayerZero bridge exploit (~116,500 rsETH / ~18% of rsETH supply released from escrow to attacker)
+- **Final Score: 3.80/5.0** (Elevated Risk; unchanged from June 29, 2026)
+- **Previous Score:** 3.80/5.0 (June 29, 2026)
+- **Previous Assessment:** [kerneldao-hgeth.md@`a6b21f5`](https://github.com/yearn/risk-score/blob/a6b21f5/reports/report/kerneldao-hgeth.md)
+- **Losses:** **~$763K direct hgETH share-value loss** (~4.1% exchange-rate decrease × 11,343 hgETH supply, onchain verified, as of June 29). **~$292M ecosystem loss** from the April 18, 2026 KelpDAO LayerZero bridge exploit (~116,500 rsETH / ~18% of rsETH supply released from escrow to attacker)
 
-> **Status (June 29, 2026):** hgETH vault is **UNPAUSED** for both deposits and withdrawals (verified onchain via `depositsPaused()` = false and `withdrawalsPaused()` = false). The vault was paused from April 18, 2026 until sometime between late April and late June 2026 in response to the **KelpDAO LayerZero bridge exploit** (~$292M / ~116,500 rsETH). The vault is now operational, but the hgETH exchange rate has **decreased** from 1.0368 rsETH/hgETH (April 27) to 0.9941 rsETH/hgETH (June 29), representing a realized ~4.1% loss in share value (~$763K across remaining 11,343 hgETH supply at current ETH prices). The management fee has been cut to 0%, total supply has fallen 23%, and the vault buffer is nearly exhausted at 0.745 rsETH.
+> **Status (September 9, 2026):** hgETH vault is **UNPAUSED** for both deposits and withdrawals (verified onchain via `depositsPaused()` = false and `withdrawalsPaused()` = false). Since the June 29, 2026 assessment, the situation has continued to deteriorate: total supply has fallen a further **53%** (from 11,343 to 5,343 hgETH), vault TVL has dropped from ~$19M to ~$14.5M, and the exchange rate has declined from 0.9941 to **0.9981 rsETH/hgETH** (a slight recovery from the June low but still below pre-exploit levels). The redemption period has been extended to **15–18 days** (from 3–4 days previously). The Morpho market is effectively dead (0.06 WETH supply, down from 756 WETH in March 2026).
 
 ## Overview + Links
 
@@ -28,18 +30,19 @@ Users deposit ETH, LSTs (stETH, ETHx), or rsETH into the vault. All deposits are
 
 Each layer introduces additional smart contract risk, oracle risk, and counterparty risk.
 
-**Key metrics (onchain verified, June 29, 2026):**
-- hgETH total supply: 11,343.37 hgETH (`totalSupply()` onchain) — down ~23% from 14,752.14 in April (net redemptions after unpause)
-- hgETH total assets: 11,275.93 rsETH (`totalAssets()` onchain) — down ~26% from 15,294.54 in April
-- hgETH exchange rate: 1 hgETH = 0.9941 rsETH (`convertToAssets(1e18)` = 994,054,642,151,219,421) — **decreased** from 1.0368 in April (~4.1% loss in share value, onchain verified)
-- Vault buffer (rsETH held directly by hgETH): 0.745 rsETH (~0.007% of total assets) — down from 117.13 rsETH (0.77%) in April; **effectively zero**
-- Active loans/strategy positions: 172 (was 169 in April)
+**Key metrics (onchain verified, September 9, 2026):**
+- hgETH total supply: 5,342.88 hgETH (`totalSupply()` onchain) — down **53%** from 11,343.37 in June 2026, down **66%** from 14,752.14 in April 2026
+- hgETH total assets: 5,332.92 rsETH (`totalAssets()` onchain) — down **53%** from 11,275.93 in June 2026
+- hgETH exchange rate: 1 hgETH = 0.9981 rsETH (`convertToAssets(1e18)` = 998,134,410,229,185,536) — **slight recovery** from 0.9941 in June but still **~3.8% below** pre-exploit 1.0368 (April 2026)
+- Vault buffer (rsETH held directly by hgETH): 152.74 rsETH (~2.86% of total assets) — improved from 0.745 rsETH in June, but largely due to the 53% reduction in total assets rather than increased liquidity
+- Active loans/strategy positions: not independently verified (was 172 in June, 169 in April)
 - **Vault deposits and withdrawals UNPAUSED** — `depositsPaused()` = false, `withdrawalsPaused()` = false (verified onchain)
 - Underlying asset: rsETH ([`0xA1290d69c65A6Fe4DF752f95823fae25cB99e5A7`](https://etherscan.io/address/0xA1290d69c65A6Fe4DF752f95823fae25cB99e5A7))
-- rsETHPrice (Kelp LRT oracle): 1.0748 ETH per rsETH (slightly up from 1.0696 in April)
-- hgETH market cap: ~$19.0M (using ETH/USD ≈ $1,576 and onchain hgETH/ETH rate from Morpho oracle ≈ 1.0685; April was ~$37M)
-- Kelp protocol TVL: ~$870M (DeFiLlama, June 29, 2026), down from ~$1.54B in April; continues to decline
-- Gain protocol TVL: ~$33.6M (DeFiLlama, June 29, 2026), near all-time low
+- hgETH vault TVL: ~$14.5M (KernelDAO website, September 2026)
+- Kelp protocol TVL: ~$1.1B (DeFiLlama, September 2026), recovered slightly from ~$870M in June but still down from ~$1.54B in April
+- Gain protocol TVL: ~$31.7M (DeFiLlama, September 2026), near all-time low
+- Estimated APR: 3.56% (1-month realised, per KernelDAO website) — down from 8.5–14% claimed previously
+- **Redemption period: 15–18 days** (per KernelDAO website, September 2026) — extended from 3–4 days reported in earlier assessments
 
 **Yearn use case per issue #65:**
 - Accept hgETH as collateral, or use in a strategy
@@ -97,6 +100,8 @@ Each layer introduces additional smart contract risk, oracle risk, and counterpa
 - ProxyAdmin multisig `getThreshold()` → 3, `getOwners()` → 5 signers (same set, unchanged)
 - No proxy upgrade since deployment (implementation slot still points to `0x4FFe25598489C7259DC9686a2Cba0507177bcf7F`)
 - `depositsPaused()` → false, `withdrawalsPaused()` → false (vault UNPAUSED as of June 29, 2026; originally paused on April 18, 2026 via [tx `0xec9de389a42cc3213fd1d95243a1caa3812574acb0a8012407a57411aa48fcef`](https://etherscan.io/tx/0xec9de389a42cc3213fd1d95243a1caa3812574acb0a8012407a57411aa48fcef))
+- **⚠️ ABI Mismatch Alert (new, September 2026):** The Etherscan-verified GainLendingPool ABI lists `WithdrawalRequested` and `WithdrawalProcessed` events with 4 parameters each. However, on-chain event logs show `WithdrawalRequested(address,address,uint256,uint256,uint256,uint256,uint256,uint256)` (8 parameters) and `WithdrawalProcessed(uint256,uint256,address,uint256,bool)` (5 parameters). No proxy upgrade events were detected, suggesting the verified source code may not match the deployed implementation
+- **Governance dormancy (new, September 2026):** The vault owner multisig has executed only 1 transaction since ~June 2025; the proxy owner multisig has executed 0 transactions in the same period
 
 ## Audits and Due Diligence Disclosures
 
@@ -193,32 +198,31 @@ The architecture is **highly complex** with multiple layers:
 
 ```
 hgETH → rsETH → ETH
- 3-4 days    instant (DEX) or 2+ days (Kelp unstake)
+ 15-18 days    instant (DEX) or 2+ days (Kelp unstake)
 ```
 
-**Step 1: hgETH → rsETH (3-4 days)**
-1. User calls `requestRedeem(shares, receiver, holder)` on the hgETH vault — emits `WithdrawalRequested` with a scheduled claim date (year/month/day)
-2. Withdrawal epoch processes daily (`getWithdrawalEpoch()` = 2026/3/1 on March 1, 2026)
-3. Operator recalls assets from deployed strategy positions (162 active loans, 98.4% of assets deployed)
-4. Operator calls `processWithdrawal(account, shares)` or `processAllClaimsByDate(year, month, day, maxLimit)` to settle
+**Step 1: hgETH → rsETH (15-18 days)**
+1. User calls `requestRedeem(shares, receiver, holder)` on the hgETH vault
+2. Withdrawal epoch processes on a scheduled basis
+3. Operator recalls assets from deployed strategy positions
+4. Operator calls `processAllClaimsByDate(year, month, day, maxLimit)` to settle
 5. User calls `claim(year, month, day, receiver)` to receive rsETH
 6. `maxRedeem()` = 0 (direct ERC-4626 redemption disabled — must use `requestRedeem()` flow)
-7. `maxWithdrawalAmount()` = 100,000 rsETH per request (onchain verified)
 
 **Step 2: rsETH → ETH (two options)**
-- **Option A — DEX swap (instant)**: Sell rsETH on Curve/Balancer (~$79M liquidity). Instant with slippage on large amounts
+- **Option A — DEX swap (instant)**: Sell rsETH on Curve/Balancer. Instant with slippage on large amounts
 - **Option B — Kelp unstaking (2+ days)**: Submit withdrawal via LRTWithdrawalManager ([`0x62De59c08eB5dAE4b7E6F7a8cAd3006d6965ec16`](https://etherscan.io/address/0x62De59c08eB5dAE4b7E6F7a8cAd3006d6965ec16)) → wait for processing → claim ETH
 
-**Total time: 3-4 days** (vault + DEX) or **5-6+ days** (vault + Kelp unstake). Note: near-zero buffer (0.745 rsETH) means even small withdrawals require strategy recall.
+**Total time: 15-18 days** (vault + DEX) or **17-20+ days** (vault + Kelp unstake). Note: the redemption period has been extended from 3-4 days to 15-18 days per the KernelDAO website (September 2026).
 
-**Vault buffer (onchain verified, June 29, 2026):**
+**Vault buffer (onchain verified, September 9, 2026):**
 
 | Metric | Value |
 |--------|-------|
-| Total assets | 11,275.93 rsETH |
-| Deployed in strategies (`globalLoansAmount`) | 11,273.42 rsETH (**~99.99%**) |
-| **Vault buffer (rsETH balance held by hgETH)** | **0.745 rsETH (~0.007%)** |
-| Active loan/strategy positions (`getTotalLoansDeployed`) | 172 (was 169 in April) |
+| Total assets | 5,332.92 rsETH |
+| rsETH balance in vault contract | 152.74 rsETH |
+| **Vault buffer (rsETH balance held by hgETH)** | **152.74 rsETH (~2.86%)** |
+| Active loan/strategy positions | not independently verified (was 172 in June, 169 in April) |
 | Settlement account (`settlementAccount`) | [`0x66Bee721697BF17D9Eea28c51C828a43ba597B0b`](https://etherscan.io/address/0x66Bee721697BF17D9Eea28c51C828a43ba597B0b) (vault owner multisig) |
 | Loans operator (`loansOperator`) | [`0x416e26e331Fc0b77386e9dDB5Ed9AdE73F1241F4`](https://etherscan.io/address/0x416e26e331Fc0b77386e9dDB5Ed9AdE73F1241F4) |
 | Loans deployer (`loansDeployerAddress`) | [`0x9E053AAA3C435e94C1663a428cdC4ea91F23C556`](https://etherscan.io/address/0x9E053AAA3C435e94C1663a428cdC4ea91F23C556) |
@@ -227,13 +231,13 @@ hgETH → rsETH → ETH
 | Max supply cap (`maxSupply`) | 100,000 hgETH (unchanged) |
 | Max deposit cap (`maxDepositAmount`) | 100,000 rsETH (unchanged) |
 
-Only **~0.007% of assets** are available as buffer (0.745 rsETH, down from 117.13 rsETH / 0.77% in April). The remaining ~99.99% is deployed across 172 strategy positions. **Withdrawals are now unpaused**, but the near-zero buffer means even small redemptions require recalling assets from strategies (3-4 day processing).
+The vault buffer has increased from 0.745 rsETH (0.007%) in June to 152.74 rsETH (~2.86%) in September. However, this is largely due to the **53% reduction in total assets** (from 11,275.93 to 5,332.92 rsETH) rather than an increase in liquidity. The remaining ~97% of assets are deployed in strategies. **Withdrawals are unpaused**, but the 15-18 day redemption period is a 4x increase from the 3-4 days reported in earlier assessments.
 
 ### Accessibility
 
 - **Deposits**: **Unpaused** — open to anyone; deposit ETH/LSTs/rsETH, receive hgETH. Management fee is 0%
-- **Withdrawals**: **Unpaused** — 3-4 day processing period via `requestRedeem()` → `claim()` flow (not instant). Assets recalled from 172 deployed strategy positions; only 0.745 rsETH (~0.007%) buffer available — any withdrawal >0.745 rsETH requires strategy recall
-- **Composability**: hgETH can be used across DeFi (Morpho, Euler, Pendle) for additional yield, but secondary markets are extremely thin and the underlying rsETH peg is currently stressed
+- **Withdrawals**: **Unpaused** — 15-18 day processing period via `requestRedeem()` → `claim()` flow (not instant). This is a **4x increase** from the 3-4 days reported in earlier assessments
+- **Composability**: hgETH can be used across DeFi for additional yield, but secondary markets are extremely thin
 
 ### Fees (onchain verified, June 29, 2026)
 
@@ -241,7 +245,7 @@ Only **~0.007% of assets** are available as buffer (0.745 rsETH, down from 117.1
 |-----|-------|-----------|
 | Management fee | **0%** (`managementFeePercent()` = 0, changed from 150/1.5% in April) | Management fee was cut to zero by vault governance. `managementFeeLastKnownTimestamp` = 1774371695 (March 24, 2026 17:01:35 UTC) — fee has not been charged since. No ongoing dilution |
 | Withdrawal fee | **0%** (`withdrawalFee()` = 0, unchanged) | — |
-| Performance fee | **20%** (per Edge Capital proposal: "Fee Structure (management/performance): 1.5/20%") | Applied to profits above baseline; not independently verified onchain |
+| Performance fee | **0%** (was 20%; per KernelDAO website, September 2026) | Both management and performance fees eliminated |
 | Fee collector (`feesCollector`) | [`0x2151A97C7819782fD99efF020CdfE0aE838Ad378`](https://etherscan.io/address/0x2151A97C7819782fD99efF020CdfE0aE838Ad378) | Receives minted hgETH shares |
 | Daily fee accrual | 0 rsETH/day | Management fee set to 0% as of June 2026 |
 | Annual fee | 0 rsETH | Management fee eliminated |
@@ -251,7 +255,7 @@ Only **~0.007% of assets** are available as buffer (0.745 rsETH, down from 117.1
 
 - **Underlying asset**: rsETH (Kelp liquid restaked ETH)
 - **rsETH backing**: ETH (~59.5%), ETHx from Stader (~32.5%), wstETH from Lido (~8%) — restaked on EigenLayer
-- **hgETH backing**: 1 hgETH = 1.035 rsETH (onchain, March 1, 2026). rsETH is deployed across 12+ DeFi protocols
+- **hgETH backing**: 1 hgETH = 0.9981 rsETH (onchain, September 9, 2026). This is a **decrease** from 1.035 rsETH/hgETH in March 2026 and 0.9941 in June 2026, representing a cumulative ~3.6% loss in NAV from pre-exploit levels
 - **Non-custodial vault**: Per Upshift documentation, neither Upshift nor the Curator can withdraw user funds to an external EOA. Funds only move between whitelisted strategy contracts and the vault
 - **Withdrawal Liquidity Buffer**: Configurable percentage of assets held in buffer for immediate redemptions (per Upshift docs)
 - **No over-collateralization**: hgETH is a 1:1 receipt token for vault shares, not an over-collateralized position
@@ -274,15 +278,15 @@ Only **~0.007% of assets** are available as buffer (0.745 rsETH, down from 117.1
 
 ### Liquidity Assessment
 
-- **Primary liquidity (restored)**: Vault withdrawals are unpaused as of June 2026. `maxRedeem()` = 0 (direct ERC-4626 redemption disabled — must use `requestRedeem()` flow). `maxWithdrawalAmount()` = 100,000 rsETH per request. However, vault buffer is 0.745 rsETH (~0.007% of assets), so any withdrawal >0.745 rsETH requires recalling funds from deployed strategy positions (3-4 day processing)
-- **rsETH secondary market (post-exploit)**: Pre-exploit rsETH had ~$79M across major DEX pools and traded above ETH. Post-exploit liquidity is materially diminished. Kelp TVL has continued to decline from ~$1.54B (April) to ~$870M (June 29, 2026), reflecting ongoing ecosystem stress
-- **hgETH secondary market (verified)**: **Effectively zero.** Only one DEX pool existed previously (Uniswap V4 hgETH/ETH, ~$311K). Current DEX liquidity for hgETH has not been reverified in this reassessment but is presumed negligible given the ~40% decline in Gain protocol TVL
-- **rsETH depeg risk (now realized)**: The April 18, 2026 LayerZero bridge exploit created a structural rsETH depeg. While rsETH's LRT oracle price has increased slightly (1.0748 ETH/rsETH vs 1.0696 in April), the bridge-induced under-collateralization (~18% on wrapped rsETH) remains unresolved and the market price of rsETH likely still trades at a discount to the oracle
-- **Morpho hgETH/WETH market (resolved)**: The Morpho market previously at 99.5% utilization has been **almost entirely unwound**. Current state (June 29, 2026): ~0.10 WETH supply, ~0.05 WETH borrow, 50.7% utilization. The earlier concern about a liquidation cascade against frozen exit paths no longer applies — there is essentially no position left to unwind
+- **Primary liquidity**: Vault withdrawals are unpaused. `maxRedeem()` = 0 (direct ERC-4626 redemption disabled — must use `requestRedeem()` flow). However, the redemption period has been extended to **15–18 days** (per KernelDAO website, September 2026) — a **4x increase** from the 3-4 days reported previously. The vault buffer is 152.74 rsETH (~2.86% of assets), but this is largely due to the 53% reduction in total assets rather than increased liquidity
+- **rsETH secondary market (post-exploit)**: Pre-exploit rsETH had ~$79M across major DEX pools. Post-exploit liquidity is materially diminished. Kelp TVL has recovered slightly from ~$870M (June) to ~$1.1B (September 2026) but remains down from ~$1.54B (April)
+- **hgETH secondary market**: **Effectively zero.** No meaningful DEX liquidity for hgETH. Any collateral use depends entirely on vault redemption
+- **rsETH depeg risk (now realized)**: The April 18, 2026 LayerZero bridge exploit created a structural rsETH depeg. The bridge-induced under-collateralization (~18% on wrapped rsETH) remains unresolved
+- **Morpho hgETH/WETH market (dead)**: The market has been **almost entirely unwound**. Current state (September 9, 2026): ~0.06 WETH supply, ~0.05 WETH borrow, ~83.5% utilization. The earlier concern about a liquidation cascade is resolved — there is essentially no position left to unwind. The market is effectively dormant
 
 ### Morpho Market (hgETH/WETH)
 
-| Parameter | Value (June 29, 2026) |
+| Parameter | Value (September 9, 2026) |
 |-----------|-------|
 | Market ID | `0xec97655fab06b53bfad9d8c2358768aed5a1c97b204d3e51e2a7cb0cb786a264` |
 | Collateral | hgETH ([`0xc824A08dB624942c5E5F330d56530cD1598859fD`](https://etherscan.io/address/0xc824A08dB624942c5E5F330d56530cD1598859fD)) |
@@ -290,13 +294,12 @@ Only **~0.007% of assets** are available as buffer (0.745 rsETH, down from 117.1
 | Oracle | MorphoChainlinkOracleV2 ([`0x56dbc0f2784cd959e57fcc9cd83c3b7a24ee678c`](https://etherscan.io/address/0x56dbc0f2784cd959e57fcc9cd83c3b7a24ee678c)) |
 | IRM | AdaptiveCurveIrm ([`0x870aC11D48B15DB9a138Cf899d20F13F79Ba00BC`](https://etherscan.io/address/0x870aC11D48B15DB9a138Cf899d20F13F79Ba00BC)) |
 | LLTV | 91.5% (immutable per Morpho design) |
-| Total Supply | ~0.10 WETH (was ~495.82 WETH in April) |
-| Total Borrow | ~0.05 WETH (was ~493.58 WETH in April) |
-| **Utilization** | **~50.7%** (was ~99.5% in April — market almost entirely unwound) |
-| Last update | block timestamp 1782527399 (June 29, 2026) |
+| Total Supply | ~0.06 WETH (was ~495.82 WETH in April, ~0.10 in June) |
+| Total Borrow | ~0.05 WETH (was ~493.58 WETH in April, ~0.05 in June) |
+| **Utilization** | **~83.5%** (was ~99.5% in April, ~50.7% in June) |
 | Fee | 0% |
 
-**Note:** The hgETH/WETH Morpho market has been almost completely exited since April. The market previously held ~495 WETH in supply and ~493 WETH in borrow at 99.5% utilization. Current positions are <0.1 WETH on both sides — effectively dormant. The earlier critical risk of a liquidation cascade against frozen exit paths **no longer applies**.
+**Note:** The hgETH/WETH Morpho market is **effectively dead**. Current positions are ~0.06 WETH supply and ~0.05 WETH borrow — negligible. The earlier critical risk of a liquidation cascade against frozen exit paths **no longer applies** because there is essentially no position left to liquidate.
 
 ### Morpho Oracle Analysis (onchain verified, June 29, 2026)
 
@@ -306,14 +309,14 @@ The oracle is a `MorphoChainlinkOracleV2` that uses two price feeds (no vault co
 |-----------|---------|-------------|---------------|
 | BASE_VAULT | `0x0` | Not used | — |
 | BASE_VAULT_CONVERSION_SAMPLE | — | — | 1 |
-| BASE_FEED_1 | [`0x70cf192d6b76d57a46aafc9285ced110034eb013`](https://etherscan.io/address/0x70cf192d6b76d57a46aafc9285ced110034eb013) | EOMultiFeedAdapter (hgETH/USD, 18 decimals) — **TransparentUpgradeableProxy** | ~$1,683.68 |
+| BASE_FEED_1 | [`0x70cf192d6b76d57a46aafc9285ced110034eb013`](https://etherscan.io/address/0x70cf192d6b76d57a46aafc9285ced110034eb013) | EOMultiFeedAdapter (hgETH/USD, 18 decimals) — **TransparentUpgradeableProxy** | ~$2,699.51 |
 | BASE_FEED_2 | `0x0` | Not set | — |
-| QUOTE_FEED_1 | [`0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419`](https://etherscan.io/address/0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419) | Chainlink ETH/USD (8 decimals) | ~$1,575.80 |
+| QUOTE_FEED_1 | [`0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419`](https://etherscan.io/address/0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419) | Chainlink ETH/USD (8 decimals) | ~$2,504.92 |
 | QUOTE_FEED_2 | `0x0` | Not set | — |
 | SCALE_FACTOR | — | Decimal adjustment | 1e26 |
-| **price()** | — | **Final oracle price** | **~1.0685 (hgETH/ETH ratio, was ~1.1089 in April)** |
+| **price()** | — | **Final oracle price** | **~1.078 (hgETH/ETH ratio)** |
 
-Values above are onchain verified at block 25422618 (timestamp 1782727619). The hgETH/USD feed `latestAnswer()` reverts (possibly decommissioned or deprecated); `latestRoundData()` continues to return data with roundId=0 and startedAt=0 — the feed appears partially degraded. The ETH/USD Chainlink feed is operating normally.
+Values above are onchain verified at block 25938993 (September 9, 2026). The hgETH/USD feed `latestRoundData()` returns data with roundId=0, answer=~$2,699.51, and updatedAt=1788947087 (Sep 9, 2026). The ETH/USD Chainlink feed is operating normally.
 
 **Oracle architecture:**
 - `price = baseFeed1 * SCALE_FACTOR / quoteFeed1` → hgETH/USD ÷ ETH/USD = hgETH/ETH
@@ -322,9 +325,10 @@ Values above are onchain verified at block 25422618 (timestamp 1782727619). The 
 - ProxyAdmin owner: [`0x266f15c63d5D3dE038F2E05D1fA397d92BCB013E`](https://etherscan.io/address/0x266f15c63d5D3dE038F2E05D1fA397d92BCB013E) (3-of-5 Gnosis Safe — different signers from vault multisig, onchain verified)
 
 **Oracle concerns:**
-- **Upgradeable oracle feed (unchanged)**: The hgETH/USD feed is a TransparentUpgradeableProxy (EOMultiFeedAdapter). The proxy admin multisig (3-of-5) could upgrade the oracle implementation. Implementation at [`0x8a1bae36ee0e7b7d6ced3ffea250914bfca09292`](https://etherscan.io/address/0x8a1bae36ee0e7b7d6ced3ffea250914bfca09292) is unchanged from April. However, `latestAnswer()` now reverts (onchain verified, June 29, 2026) — the feed may be partially deprecated. `latestRoundData()` returns data but with roundId=0 and startedAt=0, suggesting degraded functionality
-- **No vault conversion (unchanged)**: The oracle does NOT use the onchain ERC-4626 exchange rate. The onchain vault exchange rate (0.9941 rsETH/hgETH) is now below 1 — the oracle's hgETH/USD feed still reports ~$1,683.68/hgETH, implying a valuation that may not fully reflect the vault's internal accounting
-- **Morpho liquidation cascade risk (no longer applicable)**: As of June 2026, the Morpho hgETH/WETH market has been almost completely unwound (<0.1 WETH supply, <0.05 WETH borrow). The earlier concern about mass liquidations against frozen exit paths is resolved — there is essentially no position left to liquidate
+- **Upgradeable oracle feed (unchanged)**: The hgETH/USD feed is a TransparentUpgradeableProxy (EOMultiFeedAdapter). The proxy admin multisig (3-of-5) could upgrade the oracle implementation. Implementation at [`0x8a1bae36ee0e7b7d6ced3ffea250914bfca09292`](https://etherscan.io/address/0x8a1bae36ee0e7b7d6ced3ffea250914bfca09292) is unchanged
+- **Oracle–NAV divergence (new, September 2026)**: The oracle prices hgETH at ~1.078 ETH while the actual vault NAV is 0.9981 rsETH/hgETH — an **~8% overvaluation**. If this market were still active, borrowers would be over-collateralized on paper but under-collateralized in reality
+- **No vault conversion (unchanged)**: The oracle does NOT use the onchain ERC-4626 exchange rate
+- **Morpho liquidation cascade risk (no longer applicable)**: The Morpho hgETH/WETH market is effectively dead (~0.06 WETH supply). The earlier concern about mass liquidations is resolved — there is essentially no position left to liquidate
 - **Oracle proxy admin (different multisig, unchanged)**: ProxyAdmin owner is [`0x266f15c63d5D3dE038F2E05D1fA397d92BCB013E`](https://etherscan.io/address/0x266f15c63d5D3dE038F2E05D1fA397d92BCB013E) (3-of-5 Gnosis Safe with 5 different signers from the vault multisig — onchain verified). Signers unchanged
 - **Positive (unchanged)**: The ETH/USD quote feed is standard Chainlink with normal roundId, timestamps, and heartbeat
 
@@ -360,7 +364,7 @@ The rsETH layer has notably better governance than the hgETH vault layer (higher
 
 - **hgETH exchange rate**: Onchain via ERC-4626 `convertToAssets()`. Programmatic
 - **Strategy execution**: Curators execute strategies within Upshift's August subaccount infrastructure. Strategies are policy-constrained (whitelisted protocols and contract calls only). **Curator-managed, not fully programmatic**
-- **Withdrawal**: 3-4 days, requires assets to be recalled from deployed strategies. **Not instant, involves operational steps**
+- **Withdrawal**: 15-18 days, requires assets to be recalled from deployed strategies. **Not instant, involves operational steps. 4x longer than reported in earlier assessments**
 - **NAV updates**: Upshift enforces Max Percentage Change constraint per update cycle. Bounds checking exists
 - **Emergency functions**: Multi-sig controlled pause for deposits/withdrawals; can instantly return all strategy funds to vault
 
@@ -395,11 +399,12 @@ The rsETH layer has notably better governance than the hgETH vault layer (higher
 ### hgETH Vault Monitoring
 
 - **hgETH contract**: [`0xc824A08dB624942c5E5F330d56530cD1598859fD`](https://etherscan.io/address/0xc824A08dB624942c5E5F330d56530cD1598859fD)
-  - Monitor `convertToAssets(1e18)` for exchange rate changes (should only increase)
-  - **Alert**: If exchange rate **decreases** — indicates potential loss event in underlying strategies
+  - Monitor `convertToAssets(1e18)` for exchange rate changes
+  - **Alert**: If exchange rate **decreases further** from current 0.9981 rsETH/hgETH — indicates potential loss event in underlying strategies
   - Monitor `totalAssets()` for large changes relative to `totalSupply()`
-  - Monitor `Deposit`, `Withdraw` events for large movements
-  - **Alert**: Single deposits/withdrawals >$2M (given ~$48M market cap)
+  - Monitor `Transfer` events for large movements
+  - **Alert**: Single deposits/withdrawals >$500K (given ~$14.5M vault TVL)
+  - **Alert**: ABI mismatch — verified source code event signatures do not match on-chain events
 
 ### rsETH Monitoring
 
@@ -600,16 +605,22 @@ The rsETH layer has notably better governance than the hgETH vault layer (higher
 Final Score = (Centralization × 0.30) + (Funds Mgmt × 0.30) + (Audits × 0.20) + (Liquidity × 0.15) + (Operational × 0.05)
 ```
 
-| Category | Score (Jun 2026) | Score (Apr 2026) | Weight | Weighted (Jun 2026) |
-|----------|------------------|------------------|--------|---------------------|
-| Audits & Historical | 3.5 | 3.5 | 20% | 0.700 |
-| Centralization & Control | 3.67 | 3.67 | 30% | 1.101 |
-| Funds Management | 4.0 | 3.75 | 30% | 1.200 |
-| Liquidity Risk | 4.25 | 4.5 | 15% | 0.638 |
-| Operational Risk | 3.25 | 3.0 | 5% | 0.163 |
-| **Final Score** | | | | **3.80** |
+| Category | Score (Sep 2026) | Score (Jun 2026) | Score (Apr 2026) | Weight | Weighted (Sep 2026) |
+|----------|------------------|------------------|------------------|--------|---------------------|
+| Audits & Historical | 3.5 | 3.5 | 3.5 | 20% | 0.700 |
+| Centralization & Control | 3.67 | 3.67 | 3.67 | 30% | 1.101 |
+| Funds Management | 4.0 | 4.0 | 3.75 | 30% | 1.200 |
+| Liquidity Risk | 4.25 | 4.25 | 4.5 | 15% | 0.638 |
+| Operational Risk | 3.25 | 3.25 | 3.0 | 5% | 0.163 |
+| **Final Score** | | | | | **3.80** |
 
-**Final Score: 3.80/5.0** (was 3.75/5.0 in April 2026, 2.8/5.0 in March 2026). Subcategory means are used directly; no half-point bucketing. The score **rises** from April: while the vault unpause and Morpho market unwinding are genuine positives (and partially reduce Liquidity risk), they are outweighed by a *realized*, onchain-confirmed ~4.1% per-share loss of undocumented cause, a ~150× collapse in the instant-exit buffer (117 → 0.745 rsETH), a degraded hgETH/USD oracle feed, an unexplained fee restructuring, and continued TVL decline. A realized loss should raise risk, not leave it flat — the prior "essentially flat" framing understated the period's adverse developments. The rsETH bridge exploit's ~$292M impact on the underlying asset ecosystem also remains unresolved.
+**Final Score: 3.80/5.0** (was 3.80/5.0 in June 2026, 3.75/5.0 in April 2026, 2.8/5.0 in March 2026). Subcategory means are used directly; no half-point bucketing.
+
+**September 2026 assessment**: The score is **unchanged** from June 2026. Mixed developments since June:
+- **Positive**: Exchange rate slightly recovered (0.9941 → 0.9981 rsETH/hgETH). Kelp TVL recovered from ~$870M to ~$1.1B
+- **Negative**: Total supply collapsed a further 53% (11,343 → 5,343 hgETH). Redemption period extended 4x (3-4 days → 15-18 days). Both management and performance fees eliminated. Morpho market further declined (0.10 → 0.06 WETH supply). New findings: ABI mismatch between verified source and on-chain events, governance dormancy (minimal multisig activity for 6+ months), and oracle-NAV divergence (~8%)
+
+The 15-18 day redemption period is a material deterioration in liquidity risk that offsets the slight exchange rate improvement. The fee elimination may signal curator distress. The ABI mismatch and governance dormancy raise new transparency concerns.
 
 ### Risk Tier
 
@@ -623,7 +634,7 @@ Final Score = (Centralization × 0.30) + (Funds Mgmt × 0.30) + (Audits × 0.20)
 
 **Final Risk Tier: Elevated Risk**
 
-**Practical recommendation**: The vault is now unpaused and operational, but the near-zero buffer, unexplained exchange-rate decrease, and unresolved rsETH bridge situation warrant continued caution. Any Yearn exposure should be (a) small relative to total vault assets given the buffer constraint, (b) account for the 3-4 day withdrawal lag, and (c) remain ready to exit if the rsETH situation deteriorates further. The Morpho hgETH/WETH market is essentially dormant and should not be relied upon as a liquidation venue.
+**Practical recommendation**: The vault is unpaused and operational, but the extended 15-18 day redemption period, continued supply collapse, and unresolved rsETH bridge situation warrant continued caution. Any Yearn exposure should (a) account for the 15-18 day withdrawal lag, (b) remain ready to exit if the rsETH situation deteriorates further, and (c) be sized conservatively given the ~$14.5M vault TVL. The Morpho hgETH/WETH market is effectively dead and should not be relied upon as a liquidation venue.
 
 ---
 
@@ -653,31 +664,34 @@ The original assessment (March 2026, score 2.8 — Medium Risk) flagged three co
 **Key conditions for any exposure:**
 
 - Monitor `depositsPaused()` / `withdrawalsPaused()` (currently false, false — vault operational)
-- Monitor hgETH exchange rate (`convertToAssets(1e18)`) for further decreases — currently 0.9941 rsETH/hgETH
-- Monitor vault buffer (`rsETH.balanceOf(hgETH)`) — currently 0.745 rsETH, extremely low
-- Monitor rsETH/ETH market vs. `rsETHPrice()` from Kelp's LRT oracle (currently 1.0748 ETH/rsETH)
+- Monitor hgETH exchange rate (`convertToAssets(1e18)`) for further decreases — currently **0.9981 rsETH/hgETH**
+- Monitor vault buffer (`rsETH.balanceOf(hgETH)`) — currently **152.74 rsETH** (~2.86% of assets)
+- Monitor rsETH/ETH market vs. `rsETHPrice()` from Kelp's LRT oracle
 - Monitor hgETH proxy for implementation upgrades (no verified timelock — instant once executed)
-- Monitor the hgETH/USD Morpho oracle feed proxy ([`0x70cf192d6b76d57a46aafc9285ced110034eb013`](https://etherscan.io/address/0x70cf192d6b76d57a46aafc9285ced110034eb013)) for implementation upgrades — note `latestAnswer()` currently reverts
-- Monitor both vault and oracle Safes for signer/threshold changes
+- Monitor the hgETH/USD Morpho oracle feed proxy ([`0x70cf192d6b76d57a46aafc9285ced110034eb013`](https://etherscan.io/address/0x70cf192d6b76d57a46aafc9285ced110034eb013)) for implementation upgrades
+- **Investigate the ABI mismatch** — verified source code event signatures do not match on-chain events
+- Monitor both vault and oracle Safes for signer/threshold changes — note governance dormancy (minimal activity for 6+ months)
 - Note: **No onchain timelock exists** on hgETH ProxyAdmin despite Upshift documentation claims — proxy upgrades are instant
-- Management fee is 0%, performance fee was 20% per Edge Capital proposal (not re-verified in this reassessment); management fee elimination is confirmed onchain
-- Position sizing should remain very conservative; current hgETH supply is ~11,343 hgETH (~$19M market cap)
+- **Both management and performance fees are now 0%** (was 1.5%/20%)
+- Position sizing should remain very conservative; current hgETH supply is ~5,343 hgETH (~$14.5M vault TVL)
 
 ---
 
 ## Reassessment Triggers
 
-- **Time-based**: Reassess every 90 days while rsETH bridge remediation is unresolved; thereafter every 6 months
+- **Time-based**: Reassess in 3 months (December 2026) given elevated risk tier
 - **Pause-state**: Reassess immediately if `depositsPaused()` or `withdrawalsPaused()` flips to true again
-- **Exchange-rate**: Reassess immediately if hgETH `convertToAssets(1e18)` decreases further (currently 0.9941), or if it recovers above 1.0
+- **Exchange-rate**: Reassess immediately if hgETH `convertToAssets(1e18)` decreases further from current **0.9981**, or if it recovers above 1.0
 - **rsETH bridge remediation**: Reassess on (a) Kelp publishing a final post-mortem with concrete numbers, (b) any movement on the Constitutional AIP / "DeFi United" recovery vehicle, (c) socialization or recovery transactions executed onchain
 - **rsETH peg**: Reassess if rsETH/ETH market price returns within 1% of Kelp's `rsETHPrice()` for 30 consecutive days, OR if Kelp's LRT oracle updates to reflect a new lower peg
+- **Redemption period**: Reassess if the redemption period changes from current 15-18 days
 - **Vault buffer**: Reassess if vault buffer (rsETH balance of hgETH) exceeds 5% of total assets
-- **Governance-based**: Reassess if an onchain timelock is verified/added for hgETH vault upgrades (would improve Centralization score)
-- **Oracle-based**: Reassess immediately if the hgETH/USD oracle feed proxy is upgraded or if the feed is restored to full functionality
-- **Management fee**: Reassess if management fee is reinstated (currently 0%)
+- **TVL-based**: Reassess if hgETH vault TVL changes by >25% (below ~$11M or above ~$18M)
+- **Governance-based**: Reassess if an onchain timelock is verified/added for hgETH vault upgrades, or if the ABI mismatch is resolved
+- **Oracle-based**: Reassess immediately if the hgETH/USD oracle feed proxy is upgraded or if the oracle–NAV divergence widens
+- **Fee change**: Reassess if management or performance fees are reinstated (currently 0%/0%)
 - **Audit-based**: Reassess if additional hgETH/Gain or rsETH bridge-layer audits by tier-1 firms are completed
-- **Bug bounty scope**: Reassess if hgETH/Gain vault contracts are explicitly added to the Immunefi program scope, and if cross-chain messaging configuration is brought into auditable scope
+- **Bug bounty scope**: Reassess if hgETH/Gain vault contracts are explicitly added to the Immunefi program scope
 
 ## Appendix A — Related Protocol Audits
 

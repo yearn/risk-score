@@ -5,8 +5,7 @@ description: Procedure for producing a new or substantially updated Yearn risk a
 
 # Generating risk assessment reports
 
-Use the [agent guide](../../../AGENTS.md) for evidence, environment, and workflow;
-[scoring framework](../../../reports/README.md) and
+Follow [AGENTS.md](../../../AGENTS.md). The [scoring framework](../../../reports/README.md) and
 [template](../../../reports/TEMPLATE.md) define the output and scoring rules.
 Create `reports/report/<slug>.md`.
 

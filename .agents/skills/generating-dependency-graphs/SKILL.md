@@ -6,9 +6,8 @@ description: Generate or update contract dependency graph YAML from a completed 
 # Generating contract dependency graphs
 
 Produce `reports/graph/<slug>.yaml` from a completed
-`reports/report/<slug>.md`. Use the [agent guide](../../../AGENTS.md) for shared
-workflow and validation. Skip an existing graph unless the task requests an
-update or changed report facts require one.
+`reports/report/<slug>.md`. Follow [AGENTS.md](../../../AGENTS.md).
+Skip an existing graph unless requested or changed report facts require an update.
 
 Work from the report's verified facts. Make new onchain calls only when the user
 requests additional research; identify missing report evidence explicitly.
@@ -41,7 +40,6 @@ requests additional research; identify missing report evidence explicitly.
 
 ## Verification
 
-Apply the [project validation](../../../AGENTS.md#validation). When browser
-access is available, inspect `/graph/<slug>/` for readable layout, allocation
+When browser access is available, inspect `/graph/<slug>/` for readable layout, allocation
 labels, control paths, and detail links; confirm `/report/<slug>/` links to it.
 Report any visual checks that could not run.

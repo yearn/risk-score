@@ -5,8 +5,7 @@ description: Focused procedure for refreshing existing risk reports by validatin
 
 # Reassessing risk reports
 
-Refresh an existing `reports/report/<slug>.md` in place. Use the
-[agent guide](../../../AGENTS.md) for shared evidence, environment, and workflow.
+Refresh `reports/report/<slug>.md` in place. Follow [AGENTS.md](../../../AGENTS.md).
 Re-derive static background or scores only when verified changes justify it.
 
 ## Check current state
@@ -33,10 +32,8 @@ to keep the index consistent.
 
 ## Editing
 
-- Preserve the report's structure and update affected sections in place.
-  State current facts without “previously,” “now X (was Y),” `(NEW)`, or
-  `(unchanged)` annotations. Do not add a reassessment-notes/changelog section
-  or narrate verification in the body; snapshot provenance belongs in the header.
+- Preserve structure and update affected sections in place. Describe current facts
+  without change narration or a changelog; put snapshot provenance in the header.
 - Keep the original assessment date and one latest update date:
   `- **Assessment Date:** May 27, 2026 (Updated: June 17, 2026)`.
   Never overwrite the original date or stack update dates; the site reads both.
