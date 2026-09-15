@@ -3,8 +3,9 @@
 import argparse
 import json
 import os
+from http.client import HTTPException, InvalidURL
 from pathlib import Path
-from urllib.error import HTTPError, URLError
+from urllib.error import HTTPError
 from urllib.parse import quote, urlsplit
 from urllib.request import HTTPRedirectHandler, Request, build_opener
 
@@ -12,6 +13,8 @@ from scripts.env import load_repo_env, required_env
 
 DEFAULT_URL = "https://artifacts.yearn.dev"
 RETENTIONS = ("1d", "7d", "30d", "90d", "1y", "archive")
+PROVENANCE_FIELDS = ("repository", "scanner", "ref", "commit")
+UNCERTAIN_UPLOAD = "The upload may have succeeded; do not retry automatically."
 
 
 class NoRedirects(HTTPRedirectHandler):
@@ -40,6 +43,12 @@ def publish_url(file: Path, service_url: str, retention: str) -> str:
     parsed = urlsplit(service_url)
     if parsed.scheme not in ("http", "https") or not parsed.hostname:
         raise ValueError("ARTIFACTS_URL must be an absolute HTTP(S) service URL")
+    if parsed.scheme == "http" and parsed.hostname not in (
+        "localhost",
+        "127.0.0.1",
+        "::1",
+    ):
+        raise ValueError("ARTIFACTS_URL must use HTTPS outside localhost")
     if parsed.username or parsed.password or parsed.query or parsed.fragment:
         raise ValueError(
             "ARTIFACTS_URL must not contain credentials, a query, or a fragment"
@@ -55,19 +64,13 @@ def _headers(api_key: str, provenance: dict[str, str]) -> dict[str, str]:
         "Authorization": f"Bearer {api_key}",
         "Content-Type": "application/octet-stream",
     }
-    for field in ("repository", "scanner", "ref", "commit"):
+    for field in PROVENANCE_FIELDS:
         value = provenance.get(field)
         if value:
             headers[f"X-Report-{field}"] = value
-    try:
-        for value in headers.values():
-            value.encode("latin-1")
-            if "\r" in value or "\n" in value:
-                raise ValueError
-    except (UnicodeError, ValueError):
-        raise ValueError(
-            "API key and metadata must be single-line HTTP header values"
-        ) from None
+    for value in headers.values():
+        if not value.isascii() or not value.isprintable():
+            raise ValueError("API key and metadata must contain only printable ASCII")
     return headers
 
 
@@ -77,19 +80,25 @@ def _send(request: Request) -> object:
             return json.load(response)
     except HTTPError as error:
         error.close()
+        if error.code >= 500:
+            raise ValueError(
+                f"Artifact service returned HTTP {error.code}. {UNCERTAIN_UPLOAD}"
+            ) from None
         raise ValueError(
             f"Artifact publish failed (HTTP {error.code}); check credentials, URL, and service. "
             "No retry was made."
         ) from None
-    except (URLError, OSError):
+    except InvalidURL:
         raise ValueError(
-            "Artifact upload connection failed; check the service and network. "
-            "The upload may have succeeded; do not retry automatically."
+            "Invalid ARTIFACTS_URL; check its host, port, and path"
         ) from None
-    except (ValueError, UnicodeError):
+    except (OSError, HTTPException):
         raise ValueError(
-            "Artifact service returned invalid JSON; the upload may have succeeded. "
-            "Do not retry automatically."
+            f"Artifact upload connection or response failed. {UNCERTAIN_UPLOAD}"
+        ) from None
+    except ValueError:
+        raise ValueError(
+            f"Artifact service returned invalid JSON. {UNCERTAIN_UPLOAD}"
         ) from None
 
 
@@ -130,8 +139,7 @@ def post_artifact(
         for field in ("key", "url")
     ):
         raise ValueError(
-            "Artifact response is missing a key or URL; the upload may have succeeded. "
-            "Do not retry automatically."
+            f"Artifact response is missing a key or URL. {UNCERTAIN_UPLOAD}"
         )
     return {"key": result["key"], "url": result["url"]}
 
@@ -141,7 +149,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--file", type=Path, required=True)
     parser.add_argument("--retention", choices=RETENTIONS, default="30d")
-    for field in ("repository", "scanner", "ref", "commit"):
+    for field in PROVENANCE_FIELDS:
         parser.add_argument(f"--{field}")
     args = parser.parse_args()
     load_repo_env(Path(__file__))
@@ -151,10 +159,7 @@ def main() -> None:
             api_key=required_env("ARTIFACTS_API_KEY"),
             service_url=os.getenv("ARTIFACTS_URL") or DEFAULT_URL,
             retention=args.retention,
-            provenance={
-                field: getattr(args, field)
-                for field in ("repository", "scanner", "ref", "commit")
-            },
+            provenance={field: getattr(args, field) for field in PROVENANCE_FIELDS},
         )
     except ValueError as error:
         parser.exit(1, f"{error}\n")

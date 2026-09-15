@@ -45,7 +45,8 @@ The helper uses `scripts.env.load_repo_env()` and preserves existing environment
 values. In a worktree, load the original checkout's `.env` into the publishing
 process if needed. Never print the key or pass it on the command line.
 
-`ARTIFACTS_URL` optionally overrides `https://artifacts.yearn.dev`. Use an override
+`ARTIFACTS_URL` optionally overrides `https://artifacts.yearn.dev`. HTTPS is required
+except for local testing at `localhost`, `127.0.0.1`, or `::1`. Use an override
 only for the destination intended by the user. Missing credentials block the
 upload; ask the user to configure `ARTIFACTS_API_KEY` without exposing its value.
 
@@ -68,8 +69,8 @@ uv run python -m scripts.post_artifact \
   --retention 7d
 ```
 
-Additional metadata flags are `--scanner`, `--ref`, and `--commit`. Include only
-values that describe the artifact.
+Additional metadata flags are `--scanner`, `--ref`, and `--commit`. Values must use
+printable ASCII. Include only values that describe the artifact.
 
 ## Result and failures
 
@@ -79,9 +80,9 @@ names are random and there is no index. Non-default retention can add a tier
 prefix; never reconstruct or shorten the returned URL.
 
 Each upload creates a new artifact, including repeat uploads of identical bytes.
-The helper makes one attempt and does not follow redirects. After a timeout or
-invalid response, report that publication is uncertain and do not retry
-automatically. On failure, provide the error without claiming a URL exists.
+The helper makes one attempt and does not follow redirects. After a timeout,
+invalid response, or server error (HTTP 5xx), report that publication is uncertain
+and do not retry automatically. On failure, provide the error without claiming a URL exists.
 
 Deleting an artifact requires a separate user request: the service accepts
 `DELETE` at the returned URL with the same bearer key.

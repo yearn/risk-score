@@ -7,6 +7,7 @@ import os
 import tempfile
 import threading
 import unittest
+from http.client import BadStatusLine, IncompleteRead
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from pathlib import Path
 from typing import TypedDict
@@ -52,7 +53,11 @@ class PostArtifactTests(unittest.TestCase):
         ArtifactHandler.received = []
         self.server = HTTPServer(("127.0.0.1", 0), ArtifactHandler)
         self.addCleanup(self.server.server_close)
-        thread = threading.Thread(target=self.server.serve_forever, daemon=True)
+        thread = threading.Thread(
+            target=self.server.serve_forever,
+            kwargs={"poll_interval": 0.01},
+            daemon=True,
+        )
         thread.start()
         self.addCleanup(thread.join)
         self.addCleanup(self.server.shutdown)
@@ -103,6 +108,9 @@ class PostArtifactTests(unittest.TestCase):
             {"api_key": ""},
             {"api_key": "key\r\ninjected: value"},
             {"provenance": {"ref": "bad\nheader"}},
+            {"provenance": {"ref": "bad\x00header"}},
+            {"provenance": {"ref": "bad\x7fheader"}},
+            {"provenance": {"ref": "café"}},
             {"provenance": {"ref": "\u2603"}},
             {"retention": "forever"},
             {"service_url": "file:///tmp/artifacts"},
@@ -125,7 +133,7 @@ class PostArtifactTests(unittest.TestCase):
         self.assertEqual(ArtifactHandler.received, [])
 
     def test_http_failures_and_redirects_are_not_retried_or_echoed(self):
-        for status in (301, 307, 401, 413, 500):
+        for status in (301, 307, 401, 413, 500, 502, 504):
             with self.subTest(status=status):
                 ArtifactHandler.status = status
                 ArtifactHandler.response_body = b"sensitive server details"
@@ -133,6 +141,8 @@ class PostArtifactTests(unittest.TestCase):
                 with self.assertRaisesRegex(ValueError, f"HTTP {status}") as error:
                     post_artifact(self.file, api_key="test-key", service_url=self.url)
                 self.assertNotIn("sensitive", str(error.exception))
+                if status >= 500:
+                    self.assertIn("may have succeeded", str(error.exception))
                 self.assertEqual(len(ArtifactHandler.received), 1)
 
     def test_invalid_response_reports_uncertainty_without_retry(self):
@@ -144,12 +154,32 @@ class PostArtifactTests(unittest.TestCase):
                     post_artifact(self.file, api_key="test-key", service_url=self.url)
                 self.assertEqual(len(ArtifactHandler.received), 1)
 
-    def test_timeout_reports_uncertainty_without_retry(self):
-        with patch("scripts.post_artifact.build_opener") as opener:
-            opener.return_value.open.side_effect = TimeoutError
-            with self.assertRaisesRegex(ValueError, "may have succeeded"):
-                post_artifact(self.file, api_key="test-key", service_url=self.url)
-            self.assertEqual(opener.return_value.open.call_count, 1)
+    def test_network_errors_report_uncertainty_without_retry(self):
+        for error in (TimeoutError(), IncompleteRead(b"{", 10), BadStatusLine("bad")):
+            with (
+                self.subTest(error=type(error).__name__),
+                patch("scripts.post_artifact.build_opener") as opener,
+            ):
+                opener.return_value.open.side_effect = error
+                with self.assertRaisesRegex(ValueError, "may have succeeded"):
+                    post_artifact(self.file, api_key="test-key", service_url=self.url)
+                self.assertEqual(opener.return_value.open.call_count, 1)
+
+    def test_invalid_url_reports_configuration_error(self):
+        for url in ("http://127.0.0.1:abc", self.url + "/bad path"):
+            with (
+                self.subTest(url=url),
+                self.assertRaisesRegex(ValueError, "ARTIFACTS_URL"),
+            ):
+                post_artifact(self.file, api_key="test-key", service_url=url)
+        self.assertEqual(ArtifactHandler.received, [])
+
+    def test_plain_http_requires_local_destination(self):
+        with self.assertRaisesRegex(ValueError, "HTTPS"):
+            publish_url(self.file, "http://artifacts.yearn.dev", "30d")
+        for host in ("localhost", "127.0.0.1", "[::1]"):
+            url = f"http://{host}:8000"
+            self.assertTrue(publish_url(self.file, url, "30d").startswith(url))
 
     def test_cli_loads_env_and_prints_json(self):
         env_file = self.file.parent / ".env"
