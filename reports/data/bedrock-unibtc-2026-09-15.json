@@ -356,6 +356,19 @@
    "vault.execute(uniBTC, mint(0x...dEaD, 100000000000)) from legacy router": "success",
    "supply_after": 398112556288,
    "control_upgrade_from_random_address": "failed; implementation unchanged"
+  },
+  "fork_simulation_oversized": {
+   "block": 25981132,
+   "por_reserves_btc": "4640.515622996713140279",
+   "max_supply_allowed_by_0.9_check": "~5156.13 (reserves / 0.9)",
+   "vault.execute(uniBTC, mint(0x...dEaD, 10000000000000)) from legacy router after EOA upgrade": "success",
+   "supply_before": 298112556288,
+   "supply_after": 10298112556288,
+   "control": "supply feeder update(0, 10000000000000) by operational EOA; Vault.mint(WBTC, 1000000) from a WBTC holder reverted SYS013; the same Vault.execute mint path still succeeded"
+  },
+  "role_history": {
+   "vault_OPERATOR_ROLE_granted": "2024-09-20 tx 0xeca14e82f7e0ab5f2b34c0b94e04d5ba59555a297acc1f94b08edd6011ce787b",
+   "vault_MINTER_ROLE_on_token_granted": "2024-04-13 tx 0x549c37e07be58e4c024c5e106a66eb974558f9fc7f78d90b8cbfb99c0df21a6d"
   }
  },
  "free_tunnel": {
