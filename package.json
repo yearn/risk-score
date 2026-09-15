@@ -18,7 +18,7 @@
     "@resvg/resvg-js": "2.6.2",
     "astro": "7.2.10",
     "cytoscape": "3.34.2",
-    "cytoscape-dagre": "4.0.0",
+    "cytoscape-dagre": "4.0.1",
     "cytoscape-dom-node": "2.1.0",
     "js-yaml": "4.3.0",
     "marked": "18.0.11",
