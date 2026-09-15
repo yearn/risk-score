@@ -67,7 +67,7 @@ This report is scoped to **uniBTC only**. Bedrock brBTC is a separate codebase a
 | Legacy DelayRedeemRouter | [`0xbb45b3a09bffc15747d1a331775fa408e587f38d`](https://etherscan.io/address/0xbb45b3a09bffc15747d1a331775fa408e587f38d) | Superseded router with zero debt that still holds Vault `OPERATOR_ROLE`; implementation [`0x6e542567d4744d648f6ab47ac80becd02e47ac09`](https://etherscan.io/address/0x6e542567d4744d648f6ab47ac80becd02e47ac09); EIP-1967 admin is EOA [`0x3eea50ba…`](https://etherscan.io/address/0x3eea50ba10952e5e0dfaa50ecfcc5ab19ad591ef) |
 | BurnProxy | [`0x4519c8e32b080a778f2ae188d5fdcd98175f0caf`](https://etherscan.io/address/0x4519c8e32b080a778f2ae188d5fdcd98175f0caf) | Vault operator; `burn` only; owned by admin Safe |
 | TransferProxy | [`0xf0ab759d3a1a4956e8c3c52c71ccb50f20bc342b`](https://etherscan.io/address/0xf0ab759d3a1a4956e8c3c52c71ccb50f20bc342b) | Vault operator; transfers allowed assets to the ops Safe; owned by admin Safe |
-| FBTCProxy | [`0xa3a30f627dbc02aff3c0a736a065443a0e85b1ae`](https://etherscan.io/address/0xa3a30f627dbc02aff3c0a736a065443a0e85b1ae) | Vault operator; non-upgradeable; LockedFBTC mint/redeem calls; operational EOA holds its admin and operator roles |
+| FBTCProxy | [`0xa3a30f627dbc02aff3c0a736a065443a0e85b1ae`](https://etherscan.io/address/0xa3a30f627dbc02aff3c0a736a065443a0e85b1ae) | Vault operator; non-upgradeable; LockedFBTC mint/redeem calls; operational EOA [`0x9251fd3d79522bb2243a58fff1db43e25a495aab`](https://etherscan.io/address/0x9251fd3d79522bb2243a58fff1db43e25a495aab) holds its admin and operator roles |
 | Supply feeder implementation | [`0xf50dbaf3d057164fc79c1aa435ffa011c6bcdae9`](https://etherscan.io/address/0xf50dbaf3d057164fc79c1aa435ffa011c6bcdae9#code) | `uniBTCRate`: operators write supply and reserve values; no supply-update timestamp checked by the Vault |
 | Vault asset supply feeder | [`0x94C7F81E3B0458daa721Ca5E29F6cEd05CCCE2B3`](https://etherscan.io/address/0x94C7F81E3B0458daa721Ca5E29F6cEd05CCCE2B3) | `Sigma`; per-token `totalSupply(address)` input to deposit-cap checks |
 | directBTC | [`0xA700992A9815d3bfECEDfE51B030fD294Bc0b090`](https://etherscan.io/address/0xA700992A9815d3bfECEDfE51B030fD294Bc0b090) | Bedrock accounting token accepted by the Vault; `MINTER_ROLE` held by the Vault and contract [`0x91fd8c7a…`](https://etherscan.io/address/0x91fd8c7a5fda7d52ab41bbe423eedd3a65d64500); admin Safe is `DEFAULT_ADMIN_ROLE` |
@@ -104,7 +104,7 @@ Onchain verification at the snapshot read Safe thresholds/owners via `getThresho
 
 **Mint requires backing:** No — at the token level any `MINTER_ROLE` holder can issue unbacked uniBTC. Backing checks live in the callers: the Vault `mint()` path is PoR-gated (to 90% adequacy), the Vault `execute()` path is not, and the bridge paths rely on burn/lock on the source chain.
 
-**Current Ethereum `MINTER_ROLE` holders (verified September 15, 2026):**
+**Current uniBTC token `MINTER_ROLE` holders on Ethereum (verified September 15, 2026; read on the [token contract](https://etherscan.io/address/0x004E9C3EF86bc1ca1f0bB5C7662861Ee93350568#readProxyContract), not on the holders):**
 
 | Minter / Role Holder | Address | Notes |
 |----------------------|---------|-------|
@@ -113,14 +113,16 @@ Onchain verification at the snapshot read Safe thresholds/owners via `getThresho
 | Bedrock CCIPPeer | [`0x55a67cf07b8a9A09FB6D565279287cfE4Ab60eDc`](https://etherscan.io/address/0x55a67cf07b8a9A09FB6D565279287cfE4Ab60eDc) | Bedrock-custom CCIP messaging contract predating the token pool. Upgradeable proxy administered by the uniBTC ProxyAdmin (i.e. the 3/5 ops Safe). Source and destination allowlists are enabled only for BNB Chain and BOB among the pool's lanes; no messages in the 30 days to the snapshot. |
 | Free Tunnel bridge | [`0x70aF4743F85E5E74E3b6dDFa38926c0a762Ad21C`](https://etherscan.io/address/0x70aF4743F85E5E74E3b6dDFa38926c0a762Ad21C) | Third-party Free Protocol bridge (`TunnelContract` behind `DelayedERC1967Proxy`, mint mode). Mints require 3-of-4 executor signatures; admin is EOA [`0x0014Eb4A…`](https://etherscan.io/address/0x0014Eb4Ac6Dd1473b258d088E6EF214b2BCdc53C); `upgradeTunnel` installs only the hub's current implementation (version 20250105) and `upgradeToAndCall` is disabled; executor rotation has a built-in 36h–5d delay. No events in the 30 days to the snapshot. **Not mentioned in Bedrock's uniBTC bridge docs.** The same contract also holds `MINTER_ROLE` on Bedrock's brBTC. |
 
-**Token admin / freeze authority:** the ops Safe [`0xC9dA980f…`](https://etherscan.io/address/0xC9dA980fFABbE2bbe15d4734FDae5761B86b5Fc3) (3/5) holds `DEFAULT_ADMIN_ROLE` (can grant `MINTER_ROLE` to any address with no timelock — an unbacked-mint escalation path) and `FREEZER_ROLE` (token-level user freezing; `freezeToRecipient` is the [EOA](https://etherscan.io/address/0x899c284A89E113056a72dC9ade5b60E80DD3c94f)).
+**Token admin / freeze authority:** the ops Safe [`0xC9dA980f…`](https://etherscan.io/address/0xC9dA980fFABbE2bbe15d4734FDae5761B86b5Fc3) (3/5) holds `DEFAULT_ADMIN_ROLE` (can grant `MINTER_ROLE` to any address with no timelock — an unbacked-mint escalation path) and `FREEZER_ROLE` (token-level user freezing; `freezeToRecipient` is EOA [`0x899c284A89E113056a72dC9ade5b60E80DD3c94f`](https://etherscan.io/address/0x899c284A89E113056a72dC9ade5b60E80DD3c94f)).
 
 ### Single-EOA mint path through the legacy router
+
+**Which EOA:** [`0x3eea50ba10952e5e0dfaa50ecfcc5ab19ad591ef`](https://etherscan.io/address/0x3eea50ba10952e5e0dfaa50ecfcc5ab19ad591ef). It is the EIP-1967 proxy admin of the [legacy withdrawal router](https://etherscan.io/address/0xbb45b3a09bffc15747d1a331775fa408e587f38d). The Vault holds uniBTC token `MINTER_ROLE`, and the legacy router holds Vault `OPERATOR_ROLE`. By upgrading the router, this EOA can make the Vault call `uniBTC.mint` for any amount.
 
 Five contracts hold Vault `OPERATOR_ROLE`: BurnProxy, TransferProxy, FBTCProxy, the live router and the legacy router. The first four are owned by a Safe, non-upgradeable with fixed call patterns, or upgradeable only through the ops-Safe ProxyAdmin. The legacy router is different:
 
 - [`0xbb45b3a0…`](https://etherscan.io/address/0xbb45b3a09bffc15747d1a331775fa408e587f38d) is a verified OpenZeppelin `TransparentUpgradeableProxy`. Its EIP-1967 admin slot is [`0x3eea50ba…`](https://etherscan.io/address/0x3eea50ba10952e5e0dfaa50ecfcc5ab19ad591ef), an address with no code and nonce 29.
-- That EOA [deployed the proxy](https://etherscan.io/tx/0xb7d6612425fd42030e638f78864c6764750de3c873cc52c24771463431207249) on September 20, 2024. The only `AdminChanged` event is the one at creation.
+- EOA [`0x3eea50ba10952e5e0dfaa50ecfcc5ab19ad591ef`](https://etherscan.io/address/0x3eea50ba10952e5e0dfaa50ecfcc5ab19ad591ef) [deployed the proxy](https://etherscan.io/tx/0xb7d6612425fd42030e638f78864c6764750de3c873cc52c24771463431207249) on September 20, 2024. The only `AdminChanged` event is the one at creation.
 - The key is in active general use: its latest outgoing transaction was a [contract ownership transfer on August 10, 2026](https://etherscan.io/tx/0xec68b97d5ae2f8bf86e4968f151f4db0a7c1c809a843f77eebb6ee6aaa06fe65), and its history includes trading-order, bridge and token-transfer calls.
 - The router has no remaining debt (`totalDebt = 0`) and no allowlisted redemption tokens, so its role serves no current redemption function.
 - The Vault's `allowedTargetList` includes the uniBTC token, WBTC, cbBTC, FBTC, directBTC, the ops Safe and LockedFBTC [`0xd681C557…`](https://etherscan.io/address/0xd681C5574b7F4E387B608ed9AF5F5Fc88662b37c).
@@ -128,13 +130,13 @@ Five contracts hold Vault `OPERATOR_ROLE`: BurnProxy, TransferProxy, FBTCProxy, 
 
 The PoR limit (`feederSupply * 0.9 <= Chainlink reserves`) is the `checkReserve` modifier on Vault `mint()` only; neither `uniBTC.mint` (plain `onlyRole(MINTER_ROLE)`) nor `Vault.execute` applies it. Local anvil forks at the snapshot block confirmed the path end to end:
 
-- Impersonating the admin EOA, `upgradeTo` on the legacy router succeeded; the same upgrade from an unrelated address failed.
+- Impersonating EOA [`0x3eea50ba10952e5e0dfaa50ecfcc5ab19ad591ef`](https://etherscan.io/address/0x3eea50ba10952e5e0dfaa50ecfcc5ab19ad591ef), `upgradeTo` on the legacy router succeeded; the same upgrade from an unrelated address failed.
 - From the router, `Vault.execute(uniBTC, mint(0x…dEaD, 100,000 uniBTC), 0)` succeeded and raised Ethereum supply from 2,981.12556288 to 102,981.12556288 uniBTC — about 21 times the 4,640.52 BTC Chainlink reserves, far above the ~5,156 uniBTC the 0.9 check would permit.
 - Control: after setting the supply feeder to 100,000 uniBTC so the check fails, a WBTC deposit through `Vault.mint()` reverted with `SYS013`, while the same `execute` mint still succeeded.
 
 No mainnet transaction was sent.
 
-A compromise or misuse of this one key can therefore mint arbitrary unbacked uniBTC on Ethereum and transfer the Vault's allowlisted assets, with no multisig, timelock, PoR check or cap. The dilution would affect every uniBTC holder and every venue accepting uniBTC, and bridged supply could propagate it within CCIP rate limits. Revoking the legacy router's Vault `OPERATOR_ROLE` (ops Safe as Vault admin) or moving its proxy admin to the ops-Safe ProxyAdmin would close this path.
+A compromise or misuse of EOA [`0x3eea50ba10952e5e0dfaa50ecfcc5ab19ad591ef`](https://etherscan.io/address/0x3eea50ba10952e5e0dfaa50ecfcc5ab19ad591ef) can therefore mint arbitrary unbacked uniBTC on Ethereum and transfer the Vault's allowlisted assets, with no multisig, timelock, PoR check or cap. The dilution would affect every uniBTC holder and every venue accepting uniBTC, and bridged supply could propagate it within CCIP rate limits. Revoking the legacy router's Vault `OPERATOR_ROLE` (ops Safe as Vault admin) or moving its proxy admin to the ops-Safe ProxyAdmin would close this path.
 
 **Observed minting (30 days to the snapshot, blocks 25,765,132–25,981,132):** 73 uniBTC mints. The CCIP pool minted 3.00640757 uniBTC across 71 transfers (largest [1.31983465](https://etherscan.io/tx/0x01801d25d8e95970aa68461415fbfbc93372e09da5d230b9da5a9af351f77846)); the Vault minted 0.06402319 uniBTC across two FBTC deposits, each with a Vault `Minted` event. CCIPPeer and Free Tunnel minted nothing. No mint was attributable to any other address.
 
@@ -267,9 +269,9 @@ Address visibility also does not prove the full operational state:
 - uniBTC token and uniBTC Vault are upgradeable transparent proxies.
 - The uniBTC ops Safe is 3-of-5 and owns the ProxyAdmin.
 - The same Safe holds `DEFAULT_ADMIN_ROLE` on the uniBTC Vault.
-- No Safe Guard or Delay module is configured on either Safe (verified September 15, 2026). A 3-of-5 signature can therefore upgrade implementations, grant `MINTER_ROLE`, or freeze user balances without an onchain delay.
-- The ops Safe additionally holds `DEFAULT_ADMIN_ROLE` and `FREEZER_ROLE` on the uniBTC token itself: it can grant mint authority to any address and freeze arbitrary user balances, with `freezeToRecipient` set to an EOA.
-- **A single EOA can mint unbacked uniBTC.** The legacy router's proxy admin EOA can upgrade a contract holding Vault `OPERATOR_ROLE` and mint through `Vault.execute`, bypassing both the Safe and the PoR gate (fork-verified; see Token Mint Authority).
+- No Safe Guard or Delay module is configured on either Safe (verified September 15, 2026). A 3-of-5 signature can therefore upgrade implementations, grant uniBTC token `MINTER_ROLE`, or freeze user balances without an onchain delay.
+- The ops Safe additionally holds `DEFAULT_ADMIN_ROLE` and `FREEZER_ROLE` on the uniBTC token itself: it can grant mint authority to any address and freeze arbitrary user balances, with `freezeToRecipient` set to EOA [`0x899c284A89E113056a72dC9ade5b60E80DD3c94f`](https://etherscan.io/address/0x899c284A89E113056a72dC9ade5b60E80DD3c94f).
+- **A single EOA can mint unbacked uniBTC.** The legacy router's proxy admin, EOA [`0x3eea50ba10952e5e0dfaa50ecfcc5ab19ad591ef`](https://etherscan.io/address/0x3eea50ba10952e5e0dfaa50ecfcc5ab19ad591ef), can upgrade a contract holding Vault `OPERATOR_ROLE` and mint through `Vault.execute`, bypassing both the Safe and the PoR gate (fork-verified; see Token Mint Authority).
 - Two bridge contracts and one Bedrock messaging contract hold live `MINTER_ROLE` (CCIP token pool, CCIPPeer, Free Tunnel); the Free Tunnel path is absent from Bedrock's public documentation.
 - Signer overlap across Bedrock Safes weakens practical separation between product lines.
 
@@ -281,19 +283,19 @@ Full role-event reconstruction and `hasRole` confirmation establish the followin
 |-----------------|---------|-------------------|
 | Vault `DEFAULT_ADMIN_ROLE` | Ops Safe (1) | Token/target allowlists, caps, asset feeder, and operator role grants and revocations |
 | Vault `MANAGER_ROLE` | [Operational EOA](https://etherscan.io/address/0x9251fd3d79522bb2243a58fff1db43e25a495aab) (1) | Changes reserve/supply feeder addresses, heartbeat and adequacy ratio without a Safe transaction |
-| Vault `PAUSER_ROLE` | Six EOAs | Stops service or pauses individual assets; includes the operational EOA and an ops Safe signer |
+| Vault `PAUSER_ROLE` | Six EOAs: [`0x0961…47A3`](https://etherscan.io/address/0x09610d4239c8f3413509202DCcC7e27C6B0a47A3), [`0x9251…5aab`](https://etherscan.io/address/0x9251fd3d79522bb2243a58fff1db43e25a495aab), [`0xaa0b…e034`](https://etherscan.io/address/0xaa0b7c44eaa5ed1cf811b35ddd11875576ace034), [`0xae4a…2973`](https://etherscan.io/address/0xae4a2ffeed8eeda4698bbf4a36f01d1f86602973), [`0xeea6…761f`](https://etherscan.io/address/0xeea6f790f18563e91b18df00b89d9f79b2e6761f), [`0xf6a4…8615`](https://etherscan.io/address/0xf6a43475cffb2a05cf2b8d0d930abc3e1fe08615) | Stops service or pauses individual assets; includes the operational EOA and an ops Safe signer |
 | Vault `OPERATOR_ROLE` | Five contracts | [BurnProxy](https://etherscan.io/address/0x4519c8e32b080a778f2ae188d5fdcd98175f0caf), [FBTCProxy](https://etherscan.io/address/0xa3a30f627dbc02aff3c0a736a065443a0e85b1ae), [live withdrawal router](https://etherscan.io/address/0xaa732c9c110a84d090a72da230eae1e779f89246), [legacy withdrawal router](https://etherscan.io/address/0xbb45b3a09bffc15747d1a331775fa408e587f38d), and [TransferProxy](https://etherscan.io/address/0xf0ab759d3a1a4956e8c3c52c71ccb50f20bc342b) call `execute` on allowed targets, including uniBTC |
-| Legacy router proxy admin | [EOA](https://etherscan.io/address/0x3eea50ba10952e5e0dfaa50ecfcc5ab19ad591ef) (1) | Replaces the legacy router implementation at will; through its Vault operator role, mints uniBTC and moves allowlisted Vault assets |
-| Supply feeder admin / operators | Operational EOA administers; it and [second updater](https://etherscan.io/address/0x2c62803181243fa99c659de0d2a0530879a79911) hold `OPERATOR_ROLE` | Directly writes the PoR comparison's supply denominator; proxy admin slot is the [EOA](https://etherscan.io/address/0x899c284a89e113056a72dc9ade5b60e80dd3c94f), outside the ops Safe ProxyAdmin |
-| CCIP pool rate-limit admin | Operational EOA (1) | Reconfigures per-lane throttles |
-| CCIPPeer admin / pauser | Admin Safe / operational EOA | Configures accepted source peers / pauses messages; proxy upgrades remain with ops Safe |
-| Live withdrawal router admin / pauser | Ops Safe / operational EOA | Changes fees, delays, quotas and permission lists / pauses redemptions |
+| Legacy router proxy admin | EOA [`0x3eea50ba10952e5e0dfaa50ecfcc5ab19ad591ef`](https://etherscan.io/address/0x3eea50ba10952e5e0dfaa50ecfcc5ab19ad591ef) (1) | Replaces the legacy router implementation at will; through its Vault operator role, mints uniBTC and moves allowlisted Vault assets |
+| Supply feeder admin / operators | Operational EOA [`0x9251fd3d79522bb2243a58fff1db43e25a495aab`](https://etherscan.io/address/0x9251fd3d79522bb2243a58fff1db43e25a495aab) administers; it and [second updater](https://etherscan.io/address/0x2c62803181243fa99c659de0d2a0530879a79911) hold `OPERATOR_ROLE` | Directly writes the PoR comparison's supply denominator; proxy admin slot is EOA [`0x899c284A89E113056a72dC9ade5b60E80DD3c94f`](https://etherscan.io/address/0x899c284A89E113056a72dC9ade5b60E80DD3c94f), outside the ops Safe ProxyAdmin |
+| CCIP pool rate-limit admin | Operational EOA [`0x9251fd3d79522bb2243a58fff1db43e25a495aab`](https://etherscan.io/address/0x9251fd3d79522bb2243a58fff1db43e25a495aab) (1) | Reconfigures per-lane throttles |
+| CCIPPeer admin / pauser | Admin Safe / operational EOA [`0x9251fd3d79522bb2243a58fff1db43e25a495aab`](https://etherscan.io/address/0x9251fd3d79522bb2243a58fff1db43e25a495aab) | Configures accepted source peers / pauses messages; proxy upgrades remain with ops Safe |
+| Live withdrawal router admin / pauser | Ops Safe / operational EOA [`0x9251fd3d79522bb2243a58fff1db43e25a495aab`](https://etherscan.io/address/0x9251fd3d79522bb2243a58fff1db43e25a495aab) | Changes fees, delays, quotas and permission lists / pauses redemptions |
 
 The admin Safe owns both BurnProxy and TransferProxy. TransferProxy can move allowlisted Vault assets to its immutable recipient, the ops Safe; it is not a user redemption queue. FBTCProxy can only issue LockedFBTC mint/redeem calls through the Vault. Legacy router `DEFAULT_ADMIN_ROLE` and `PAUSER_ROLE` are held by an individual ops Safe signer.
 
 ### Programmability
 
-`mint()` is programmatic and PoR-gated, which is a major strength relative to opaque custody wrappers. The gate combines Chainlink reserves with a manually updated supply denominator that is currently 700.93 uniBTC below the dashboard and has repeatedly dropped by a similar amount for a day. The Vault's operator `execute()` path sits outside the gate. Upgradeability, delegated EOA control over reporting and adequacy parameters, role-controlled outflows, and the explicit 90% threshold materially limit this assurance.
+`mint()` is programmatic and PoR-gated, which is a major strength relative to opaque custody wrappers. The gate combines Chainlink reserves with a manually updated supply denominator that is currently 700.93 uniBTC below the dashboard and has repeatedly dropped by a similar amount for a day. The Vault's operator `execute()` path sits outside the gate. Upgradeability, control by operational EOA [`0x9251fd3d79522bb2243a58fff1db43e25a495aab`](https://etherscan.io/address/0x9251fd3d79522bb2243a58fff1db43e25a495aab) over reporting and adequacy parameters, role-controlled outflows, and the explicit 90% threshold materially limit this assurance.
 
 ### External Dependencies
 
@@ -301,7 +303,7 @@ The admin Safe owns both BurnProxy and TransferProxy. TransferProxy can move all
 |-----------|----------------|-------------|
 | Chainlink PoR feed | Mint reserve gate | High - stale data halts `mint()`; wrong data can weaken mint safety |
 | Chainlink CCIP | Cross-chain routing - BurnMintTokenPool + CCIPPeer both hold `MINTER_ROLE`; 14 lanes, per-lane rate limits enabled | High - bridge security affects multi-chain supply/peg, partially mitigated by rate limits |
-| Free Tunnel (Free Protocol) | Cross-chain routing - bridge contract holds `MINTER_ROLE`, undocumented in Bedrock docs | High - third-party bridge with mint rights; 3-of-4 executor signatures, EOA admin, hub-supplied upgrades |
+| Free Tunnel (Free Protocol) | Cross-chain routing - bridge contract holds `MINTER_ROLE`, undocumented in Bedrock docs | High - third-party bridge with mint rights; 3-of-4 executor signatures, EOA admin [`0x0014Eb4Ac6Dd1473b258d088E6EF214b2BCdc53C`](https://etherscan.io/address/0x0014Eb4Ac6Dd1473b258d088E6EF214b2BCdc53C), hub-supplied upgrades |
 | WBTC / FBTC / cbBTC | Accepted deposit assets | High - issuer/custody risk |
 | M-BTC / Merlin bridge | ~21.36% of dashboard reserves on September 15, 2026 | High - bridge custody, relayer, upgrade, no-timelock, chain-liveness and redemption risk |
 | Bitcoin network / native BTC custody | Backing assets | Critical |
@@ -314,7 +316,7 @@ The admin Safe owns both BurnProxy and TransferProxy. TransferProxy can move all
 - **Legal structure:** Per Bedrock [Terms of Use](https://docs.bedrock.technology/legal/terms-of-use.md), the website and protocol are operated by **Golden Bull Enterprises Limited**, formed under the laws of the **British Virgin Islands**.
 - **Documentation:** Public docs cover minting, unstaking, audits, and PoR at a high level. Custodian identity, full signing model, operator contracts, supply-reporting methodology, and restitution txs remain undisclosed.
 - **Incident handling:** The Sept 2024 response was credible (pause, patch, re-audit, PoR hardening, users made whole through Fuzzland reimbursement), but the incident remains a meaningful historical risk marker because it affected the same vault proxy still in production.
-- **Key hygiene:** a deployer EOA used for unrelated transactions has kept upgrade authority over a Vault operator for about two years after the router was superseded, and a second EOA remains proxy admin of the supply feeder.
+- **Key hygiene:** deployer EOA [`0x3eea50ba10952e5e0dfaa50ecfcc5ab19ad591ef`](https://etherscan.io/address/0x3eea50ba10952e5e0dfaa50ecfcc5ab19ad591ef), used for unrelated transactions, has kept upgrade authority over a Vault operator for about two years after the router was superseded, and EOA [`0x899c284A89E113056a72dC9ade5b60E80DD3c94f`](https://etherscan.io/address/0x899c284A89E113056a72dC9ade5b60E80DD3c94f) remains proxy admin of the supply feeder.
 
 ## Monitoring
 
@@ -324,7 +326,7 @@ Monitoring coverage was checked on September 15, 2026: a GitHub code search of [
 
 | Signal | Source / detection | Baseline | Alert when |
 |--------|--------------------|----------|------------|
-| Legacy router upgrade or admin use | `Upgraded(address)` / `AdminChanged(address,address)` on [legacy router](https://etherscan.io/address/0xbb45b3a09bffc15747d1a331775fa408e587f38d); EIP-1967 implementation slot; any transaction sent by [admin EOA](https://etherscan.io/address/0x3eea50ba10952e5e0dfaa50ecfcc5ab19ad591ef) | Implementation `0x6e542567d4744d648f6ab47ac80becd02e47ac09`; no `AdminChanged` since creation; last admin tx Aug 10, 2026 | Any event, implementation change, or admin-EOA transaction |
+| Legacy router upgrade or admin use | `Upgraded(address)` / `AdminChanged(address,address)` on [legacy router](https://etherscan.io/address/0xbb45b3a09bffc15747d1a331775fa408e587f38d); EIP-1967 implementation slot; any transaction sent by admin EOA [`0x3eea50ba10952e5e0dfaa50ecfcc5ab19ad591ef`](https://etherscan.io/address/0x3eea50ba10952e5e0dfaa50ecfcc5ab19ad591ef) | Implementation `0x6e542567d4744d648f6ab47ac80becd02e47ac09`; no `AdminChanged` since creation; last admin tx Aug 10, 2026 | Any event, implementation change, or admin-EOA transaction |
 | Mint outside the reserve gate | uniBTC `Transfer(from = 0x0)` where the [Vault](https://etherscan.io/address/0x047D41F2544B7F63A8e991aF2068a363d210d6Da) is the caller but the transaction has no Vault `Minted(address,uint256)` event (i.e. `execute()` path) | 2 Vault mints in 30 days, both with `Minted` | Any occurrence |
 | Unknown minter | uniBTC `Transfer(from = 0x0)` not accompanied by an event from the Vault, [CCIP pool](https://etherscan.io/address/0x1689C22eD5435e49071CFc208D1Ac6F2A2274490), [CCIPPeer](https://etherscan.io/address/0x55a67cf07b8a9A09FB6D565279287cfE4Ab60eDc) or [Free Tunnel](https://etherscan.io/address/0x70aF4743F85E5E74E3b6dDFa38926c0a762Ad21C) | 73 mints in 30 days, all attributed | Any occurrence |
 | Token role change | `RoleGranted` / `RoleRevoked` on [uniBTC](https://etherscan.io/address/0x004E9C3EF86bc1ca1f0bB5C7662861Ee93350568) for `MINTER_ROLE`, `DEFAULT_ADMIN_ROLE`, `FREEZER_ROLE` | 4 minters; last event May 7, 2026 | Any event |
@@ -347,7 +349,7 @@ Monitoring coverage was checked on September 15, 2026: a GitHub code search of [
 | Vault asset outflows | WBTC / FBTC / cbBTC / directBTC `Transfer(from = Vault)` | 20 WBTC outflows (0.27122798), all router claims; no FBTC, cbBTC or directBTC outflows | Any non-WBTC outflow; any WBTC outflow without a router `DelayedRedeemsClaimed` in the same tx |
 | Redemption solvency | Router `tokenDebts(WBTC)` uncleared minus immature requests (from `DelayedRedeemCreated` timestamps) vs Vault WBTC `balanceOf` | 0.75152598 uncleared; ~0.4916 matured; 0.46065725 in Vault | Matured debt > Vault WBTC for > 24h; a matured claim reverts |
 | Redemption controls | Router `Paused`, `TokensPaused`, `RateSet`, `MaxQuotaSet`, `RedeemDelaySet`, `RedeemFeeRateSet`, `BlacklistAdded`, `WhitelistEnabledSet`, `BtclistRemoved` | Unpaused; 0.5 WBTC max quota; 2,315 sats/s; 691,201s delay; 50 bps fee | Any event |
-| Operational EOA actions | Transactions from the [operational EOA](https://etherscan.io/address/0x9251fd3d79522bb2243a58fff1db43e25a495aab) to the Vault, supply feeder, CCIP pool, routers, CCIPPeer or FBTCProxy | Holds the delegated roles above | Any call, decoded |
+| Operational EOA actions | Transactions from operational EOA [`0x9251fd3d79522bb2243a58fff1db43e25a495aab`](https://etherscan.io/address/0x9251fd3d79522bb2243a58fff1db43e25a495aab) to the Vault, supply feeder, CCIP pool, routers, CCIPPeer or FBTCProxy | Holds the delegated roles above | Any call, decoded |
 
 ### Medium — daily review
 
@@ -438,23 +440,23 @@ Public restitution txs for Sept 2024 exploit
 
 ### Key Risks
 
-1. **A single EOA can mint unbacked uniBTC.** The legacy router's proxy admin can upgrade it and use its Vault `OPERATOR_ROLE` to call `uniBTC.mint` through `Vault.execute`, bypassing the Safe, PoR gate and caps (fork-verified).
+1. **A single EOA can mint unbacked uniBTC.** The legacy router's proxy admin, EOA [`0x3eea50ba10952e5e0dfaa50ecfcc5ab19ad591ef`](https://etherscan.io/address/0x3eea50ba10952e5e0dfaa50ecfcc5ab19ad591ef), can upgrade it and use its Vault `OPERATOR_ROLE` to call `uniBTC.mint` through `Vault.execute`, bypassing the Safe, PoR gate and caps (fork-verified).
 2. **Prior exploit on the same vault proxy.** The Sept 2024 mint-validation exploit occurred on the uniBTC Vault still in use.
 3. **Audit coverage is dated.** All published uniBTC audits were completed in 2024, two reactively after the exploit. They do not establish coverage of today's full dependency and operational trust boundary, and they predate current AI-assisted and automated exploit-validation capabilities; no current independent review or public bug bounty was found.
 4. **Supply reporting is manual and unreliable.** The Vault denominator is 700.93 uniBTC below dashboard supply; the feeder has dropped by a similar amount for a day eight times since April 2026, and the current dip has persisted through two updates.
 5. **Material M-BTC concentration.** About 21.36% of reported reserves are M-BTC, adding Merlin bridge/custody and chain-liveness risk beneath uniBTC.
-6. **PoR is not a strict 1:1 mint gate.** `adequacyRatio = 900` permits minting while reserves are at least 90% of the feeder's supply value, and an EOA manager can change the ratio and feeders.
+6. **PoR is not a strict 1:1 mint gate.** `adequacyRatio = 900` permits minting while reserves are at least 90% of the feeder's supply value, and operational EOA [`0x9251fd3d79522bb2243a58fff1db43e25a495aab`](https://etherscan.io/address/0x9251fd3d79522bb2243a58fff1db43e25a495aab) (Vault `MANAGER_ROLE`) can change the ratio and feeders.
 7. **No timelock.** The 3-of-5 Safe can upgrade token/vault implementations, grant `MINTER_ROLE`, or freeze user balances without onchain delay.
-8. **Undocumented third-party bridge holds mint authority.** The Free Tunnel contract can mint uniBTC (3-of-4 executor signatures, EOA admin) and appears nowhere in Bedrock's uniBTC documentation; the Bedrock-custom CCIPPeer is a second non-pool mint path.
-9. **Token-level freeze authority.** `FREEZER_ROLE` (held by the ops Safe) with `freezeToRecipient` set to an EOA is a governance-controlled censorship/seizure path, and freezes emit no events.
+8. **Undocumented third-party bridge holds mint authority.** The Free Tunnel contract can mint uniBTC (3-of-4 executor signatures, EOA admin [`0x0014Eb4Ac6Dd1473b258d088E6EF214b2BCdc53C`](https://etherscan.io/address/0x0014Eb4Ac6Dd1473b258d088E6EF214b2BCdc53C)) and appears nowhere in Bedrock's uniBTC documentation; the Bedrock-custom CCIPPeer is a second non-pool mint path.
+9. **Token-level freeze authority.** `FREEZER_ROLE` (held by the ops Safe) with `freezeToRecipient` set to EOA [`0x899c284A89E113056a72dC9ade5b60E80DD3c94f`](https://etherscan.io/address/0x899c284A89E113056a72dC9ade5b60E80DD3c94f) is a governance-controlled censorship/seizure path, and freezes emit no events.
 10. **Custody opacity.** Reserve addresses are visible, but Bedrock does not publicly name the BTC custodian/signers or prove unencumbered control and Babylon state.
 11. **Secondary liquidity is extremely thin.** $4.6K daily volume, ≈15% loss versus parity on a ~$1M indicative exit, and ≈83% at ~$5M leave large holders dependent on the delayed queue and backing replenishment.
 12. **No public bug bounty found.** Current SEAL Safe Harbor status remains unverified.
 
 ### Critical Risks
 
-- **Single-EOA unbacked-mint path (verified).** The legacy router admin EOA can mint arbitrary uniBTC through the Vault's `execute()` without the Safe, PoR, caps or delay. This is a live control weakness, not an observed exploit; no such mint has occurred in the 30-day scan. It does not trigger the template's "Total centralization" gate because token, Vault and ProxyAdmin governance remain with 3-of-5 Safes, but it drives Governance to the maximum score. New or increased uniBTC exposure should wait until the legacy router's Vault `OPERATOR_ROLE` is revoked or its proxy admin moves under the ops-Safe ProxyAdmin.
-- Other High concerns: inconsistent supply reporting, delegated EOA reporting control, dated audit coverage, M-BTC/Merlin concentration, custody opacity, and constrained exits. The supply discrepancy is not proof of missing reserves.
+- **Single-EOA unbacked-mint path (verified).** The legacy router admin, EOA [`0x3eea50ba10952e5e0dfaa50ecfcc5ab19ad591ef`](https://etherscan.io/address/0x3eea50ba10952e5e0dfaa50ecfcc5ab19ad591ef), can mint arbitrary uniBTC through the Vault's `execute()` without the Safe, PoR, caps or delay. This is a live control weakness, not an observed exploit; no such mint has occurred in the 30-day scan. It does not trigger the template's "Total centralization" gate because token, Vault and ProxyAdmin governance remain with 3-of-5 Safes, but it drives Governance to the maximum score. New or increased uniBTC exposure should wait until the legacy router's Vault `OPERATOR_ROLE` is revoked or its proxy admin moves under the ops-Safe ProxyAdmin.
+- Other High concerns: inconsistent supply reporting, delegated reporting control by operational EOA [`0x9251fd3d79522bb2243a58fff1db43e25a495aab`](https://etherscan.io/address/0x9251fd3d79522bb2243a58fff1db43e25a495aab), dated audit coverage, M-BTC/Merlin concentration, custody opacity, and constrained exits. The supply discrepancy is not proof of missing reserves.
 
 ---
 
@@ -465,7 +467,7 @@ Public restitution txs for Sept 2024 exploit
 - [ ] **Unverified contract source** - PASS. uniBTC token, Vault, routers, feeders, operator proxies and their implementations are source-verified on Etherscan.
 - [ ] **No audit** - PASS. uniBTC has three public audits, including post-exploit audits.
 - [ ] **Unverifiable reserves** - PASS, with caveats. Chainlink PoR is wired into the Vault, but it depends on a self-declared address set and allows 90% adequacy against an operator-reported supply value.
-- [ ] **Total centralization** - PASS, borderline. Token, Vault and ProxyAdmin governance uses 3-of-5 Safes, but one EOA holds a verified unbacked-mint path through the legacy router. That path is scored under Governance rather than as protocol-wide single-EOA control.
+- [ ] **Total centralization** - PASS, borderline. Token, Vault and ProxyAdmin governance uses 3-of-5 Safes, but EOA [`0x3eea50ba10952e5e0dfaa50ecfcc5ab19ad591ef`](https://etherscan.io/address/0x3eea50ba10952e5e0dfaa50ecfcc5ab19ad591ef) holds a verified unbacked-mint path through the legacy router. That path is scored under Governance rather than as protocol-wide single-EOA control.
 
 **No gate triggered.** Proceed to category scoring.
 
@@ -495,13 +497,13 @@ Public restitution txs for Sept 2024 exploit
 
 **Subcategory A: Governance**
 - 3-of-5 Safe controls ProxyAdmin, Vault admin role, and token `DEFAULT_ADMIN_ROLE` / `FREEZER_ROLE` (can grant minters and freeze balances), with no timelock or Safe Delay module.
-- A single EOA can upgrade a Vault operator and mint unbacked uniBTC (fork-verified at block 25,981,132). EOAs also hold the Vault manager role, supply feeder admin and proxy admin, and CCIP rate-limit admin.
+- EOA [`0x3eea50ba10952e5e0dfaa50ecfcc5ab19ad591ef`](https://etherscan.io/address/0x3eea50ba10952e5e0dfaa50ecfcc5ab19ad591ef) can upgrade a Vault operator and mint unbacked uniBTC (fork-verified at block 25,981,132). Operational EOA [`0x9251fd3d79522bb2243a58fff1db43e25a495aab`](https://etherscan.io/address/0x9251fd3d79522bb2243a58fff1db43e25a495aab) also holds the Vault manager role, supply feeder admin and CCIP rate-limit admin, and EOA [`0x899c284A89E113056a72dC9ade5b60E80DD3c94f`](https://etherscan.io/address/0x899c284A89E113056a72dC9ade5b60E80DD3c94f) is the supply feeder proxy admin.
 - Rubric row 5: EOA upgrade authority, no timelock, and effectively unlimited mint power on this path.
 - **Score: 5.0**
 
 **Subcategory B: Programmability**
 - Deposit mint execution is programmatic, but its supply denominator is manually reported, differs materially from the dashboard, and has recurring one-day reporting dips.
-- A delegated EOA can change feeders and adequacy settings; supply freshness/completeness is not enforced. This falls between hybrid admin-updated operation (3) and offchain accounting with periodic reporting (4).
+- Operational EOA [`0x9251fd3d79522bb2243a58fff1db43e25a495aab`](https://etherscan.io/address/0x9251fd3d79522bb2243a58fff1db43e25a495aab) can change feeders and adequacy settings; supply freshness/completeness is not enforced. This falls between hybrid admin-updated operation (3) and offchain accounting with periodic reporting (4).
 - **Score: 3.5**
 
 **Subcategory C: External Dependencies**
@@ -544,7 +546,7 @@ Public restitution txs for Sept 2024 exploit
 
 - Doxxed leadership and legal entity are positives.
 - Prior incident response was credible.
-- Custodian/signing, operator-contract and supply-reporting disclosure remain incomplete. The stale EOA upgrade authority is scored under Governance to avoid double counting.
+- Custodian/signing, operator-contract and supply-reporting disclosure remain incomplete. The stale upgrade authority of EOA [`0x3eea50ba10952e5e0dfaa50ecfcc5ab19ad591ef`](https://etherscan.io/address/0x3eea50ba10952e5e0dfaa50ecfcc5ab19ad591ef) is scored under Governance to avoid double counting.
 - **Score: 2.25**
 
 **Score: 2.25/5**
@@ -579,7 +581,7 @@ Weights use unrounded category means.
 
 **Final Risk Tier: Elevated Risk**
 
-uniBTC is stronger than a purely admin-attested wrapper on reserve provability because Chainlink PoR is wired into the deposit mint path. It is Elevated Risk, near the upper half of the band, because one EOA can mint unbacked uniBTC around that gate, the gate itself relies on an unreconciled and repeatedly faulty manual supply report and allows 90% adequacy, governance has no onchain timelock, an undocumented third-party bridge holds live mint rights, approximately 21.36% of reported reserves are M-BTC, backing control and Babylon position state are incompletely disclosed, and large exits are constrained by both redemption caps and near-zero secondary liquidity. Until the legacy operator path is closed, strict limits should mean no new or increased exposure.
+uniBTC is stronger than a purely admin-attested wrapper on reserve provability because Chainlink PoR is wired into the deposit mint path. It is Elevated Risk, near the upper half of the band, because EOA [`0x3eea50ba10952e5e0dfaa50ecfcc5ab19ad591ef`](https://etherscan.io/address/0x3eea50ba10952e5e0dfaa50ecfcc5ab19ad591ef) can mint unbacked uniBTC around that gate, the gate itself relies on an unreconciled and repeatedly faulty manual supply report and allows 90% adequacy, governance has no onchain timelock, an undocumented third-party bridge holds live mint rights, approximately 21.36% of reported reserves are M-BTC, backing control and Babylon position state are incompletely disclosed, and large exits are constrained by both redemption caps and near-zero secondary liquidity. Until the legacy operator path is closed, strict limits should mean no new or increased exposure.
 
 ---
 
@@ -589,7 +591,7 @@ uniBTC is stronger than a purely admin-attested wrapper on reserve provability b
 - **TVL / supply-based:** Reassess if uniBTC TVL or supply changes by more than +/-40% from the September 15, 2026 baseline: $357.92M TVL, 2,981.12556288 Ethereum uniBTC, and 4,546.67793 dashboard global uniBTC (dashboard supply remains unreconciled).
 - **Incident-based:** Any exploit, depeg >2% sustained >1h, PoR reserve shortfall, redemption queue freeze, bridge failure, or governance compromise.
 - **Specific triggers:**
-  1. **Any transaction from the legacy router admin EOA, any legacy router upgrade, or any mint through `Vault.execute`.** Conversely, revocation of the legacy router's Vault `OPERATOR_ROLE` or moving its proxy admin to the ops-Safe ProxyAdmin warrants a prompt rescore of Governance.
+  1. **Any transaction from the legacy router admin EOA [`0x3eea50ba10952e5e0dfaa50ecfcc5ab19ad591ef`](https://etherscan.io/address/0x3eea50ba10952e5e0dfaa50ecfcc5ab19ad591ef), any legacy router upgrade, or any mint through `Vault.execute`.** Conversely, revocation of the legacy router's Vault `OPERATOR_ROLE` or moving its proxy admin to the ops-Safe ProxyAdmin warrants a prompt rescore of Governance.
   2. Chainlink uniBTC PoR feed reports backing below independently reconciled supply; supply feeder gap to dashboard supply above 2% for more than one further daily update (currently firing), or resolution of its cause.
   3. PoR feed stale beyond heartbeat.
   4. `adequacyRatio` is lowered or PoR feeder / supply feeder is changed.
@@ -608,7 +610,7 @@ At the snapshot, M-BTC (21.36%) is below the 25% trigger, and Chainlink reserves
 
 ## Open TODOs (Items Not Verifiable This Session)
 
-- **Legacy operator remediation:** confirm with Bedrock the intended status of the legacy router and its admin EOA, and whether revocation is planned.
+- **Legacy operator remediation:** confirm with Bedrock the intended status of the legacy router and its admin EOA [`0x3eea50ba10952e5e0dfaa50ecfcc5ab19ad591ef`](https://etherscan.io/address/0x3eea50ba10952e5e0dfaa50ecfcc5ab19ad591ef), and whether revocation is planned.
 - **Supply reconciliation:** explain the 700.93 uniBTC difference between feeder and dashboard and the recurring one-day dips (consistent with, but not confirmed as, BOB supply dropping out), and verify complete global liabilities and feed-update methodology.
 - **Redemption maturity and throughput:** reconstruct pre-window requests individually and verify replenishment commitments; a live unpaused router alone does not prove prompt settlement.
 - **Merlin continuity:** M-BTC bridge administrators and mint-relayers were not reverified; the historical onchain basis remains August 8, 2026.
