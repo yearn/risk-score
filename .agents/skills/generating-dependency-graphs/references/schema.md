@@ -9,7 +9,7 @@ For complete examples, read [yearn-yvusdc.yaml](../../../../reports/graph/yearn-
 |-----------|----------|------|-------|
 | `slug` | yes | string | Matches the filename and report slug. |
 | `title` | no | string | Defaults to the slug. |
-| `chain` | yes | string | Default chain for nodes. `ethereum`, `polygon`, `base`, `arbitrum`, `sonic`, `katana`, `hyperevm`. |
+| `chain` | yes | string | Default chain for nodes. `ethereum`, `polygon`, `base`, `arbitrum`, `sonic`, `katana`, `hyperevm`, `monad`, `avalanche`. |
 | `categories` | yes | list | Entries with `id` and display `label`; declare only categories used. |
 | `nodes` | yes | list | Node fields below. |
 | `edges` | yes | list | Edge fields below. |
