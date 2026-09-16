@@ -191,7 +191,15 @@ Second, the security-review capability available in 2026 is materially different
 - **Peak TVL:** Bedrock uniBTC peaked at **$638.3M** on July 15, 2025.
 - **Minimum after launch:** $109.4M on Nov 2, 2024, shortly after the Sept 2024 exploit.
 - **Ethereum total supply:** **2,981.12556288 uniBTC** (`298,112,556,288` sats) at the snapshot.
-- **Supply and reserves:** the [Vault supply feeder](https://etherscan.io/address/0xE542919E4b281f10b437F947c8Ba224DdfaBc716#readProxyContract) reports **3,845.74449304 uniBTC** through `totalTokenSupply()`. [Chainlink PoR](https://etherscan.io/address/0xc590D9fb8eE78a0909dFF341ccf717000b7b7fF2#readContract) reports **4,640.515622996713140279 BTC**, updated September 14 at 19:58:09 UTC, 38,534 seconds before the block (within the 86,400-second heartbeat). The Vault's resulting ratio is **120.67%**. The [Bedrock reserve API](https://affiliate-api-eosin.vercel.app/api/v1/third/stats/unibtc) reports **4,546.67793 uniBTC** across 20 listed chains and **4,639.417015 BTC** reserves (**102.04%**); Chainlink reserves over API supply are **102.06%**. Neither ratio proves complete liabilities.
+- **Supply and reserves:** [Chainlink PoR](https://etherscan.io/address/0xc590D9fb8eE78a0909dFF341ccf717000b7b7fF2#readContract) reports **4,640.515622996713140279 BTC**, updated September 14 at 19:58:09 UTC, 38,534 seconds before the block (within the 86,400-second heartbeat). The reserve ratio depends on which supply figure is used:
+
+  | Supply figure | uniBTC | Chainlink reserves ÷ supply |
+  |---|---|---|
+  | Ethereum uniBTC `totalSupply()` only | 2,981.12556288 | ~155.7% |
+  | [Vault supply feeder](https://etherscan.io/address/0xE542919E4b281f10b437F947c8Ba224DdfaBc716#readProxyContract) `totalTokenSupply()` (what the Vault checks) | 3,845.74449304 | 120.67% |
+  | [Bedrock reserve API](https://affiliate-api-eosin.vercel.app/api/v1/third/stats/unibtc) `total_supply`, sum of 20 chains | 4,546.67793 | **102.06%** |
+
+  The supply feeder is meant to hold global supply, not Ethereum supply. It matched the all-chain total until the September 13 update and is now 700.93 uniBTC short (see Provability). The **~102% all-chain ratio is the meaningful coverage figure**; 120.67% comes only from the feeder's missing supply. The API's own reserves are 4,639.417015 BTC (102.04% of its supply). Per-chain supplies are Bedrock-reported and were not verified onchain, and double counting through lock-mode bridges on other chains was not ruled out, so neither ratio proves complete liabilities.
 
 ### Security Incident: September 27, 2024 - uniBTC Mint Exploit
 
