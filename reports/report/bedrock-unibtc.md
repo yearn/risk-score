@@ -117,7 +117,14 @@ Onchain verification at the snapshot read Safe thresholds/owners via `getThresho
 
 ### Single-EOA mint path through the legacy router
 
-**Which EOA:** [`0x3eea50ba10952e5e0dfaa50ecfcc5ab19ad591ef`](https://etherscan.io/address/0x3eea50ba10952e5e0dfaa50ecfcc5ab19ad591ef). It is the EIP-1967 proxy admin of the [legacy withdrawal router](https://etherscan.io/address/0xbb45b3a09bffc15747d1a331775fa408e587f38d). The Vault holds uniBTC token `MINTER_ROLE`, and the legacy router holds Vault `OPERATOR_ROLE`. By upgrading the router, this EOA can make the Vault call `uniBTC.mint` for any amount.
+**Which EOA:** [`0x3eea50ba10952e5e0dfaa50ecfcc5ab19ad591ef`](https://etherscan.io/address/0x3eea50ba10952e5e0dfaa50ecfcc5ab19ad591ef). It is the EIP-1967 proxy admin of the [legacy withdrawal router](https://etherscan.io/address/0xbb45b3a09bffc15747d1a331775fa408e587f38d). The Vault holds uniBTC token `MINTER_ROLE`, and the legacy router holds Vault `OPERATOR_ROLE`.
+
+**Not exploitable through the current router code; exploitable after an upgrade that only this EOA can perform:**
+
+- The current [router implementation](https://etherscan.io/address/0x6e542567d4744d648f6ab47ac80becd02e47ac09#code) calls `Vault.execute` in one place only, to `burnFrom` uniBTC during redemption claims. No function lets a caller choose the target or calldata. The router's `DEFAULT_ADMIN_ROLE` holder, ops Safe signer [`0x1fc76b7C6F092e0566Ce9Bbb9c6803Ba5e45Ba32`](https://etherscan.io/address/0x1fc76b7C6F092e0566Ce9Bbb9c6803Ba5e45Ba32), can change only router settings (token list, whitelist, day cap, delay), none of which mints.
+- The router is a `TransparentUpgradeableProxy` whose admin slot holds [`0x3eea50ba10952e5e0dfaa50ecfcc5ab19ad591ef`](https://etherscan.io/address/0x3eea50ba10952e5e0dfaa50ecfcc5ab19ad591ef) directly. There is no ProxyAdmin contract or Safe above it. That EOA alone can call `upgradeTo` at any time, with no delay, and install code that passes `uniBTC.mint` calldata to `Vault.execute`.
+- Rechecked at block [25,990,808](https://etherscan.io/block/25990808): same admin (no code, nonce 29), same implementation, Vault `OPERATOR_ROLE` still held, uniBTC still an allowed target.
+- Closing the path: the ops Safe, as Vault `DEFAULT_ADMIN_ROLE`, can revoke the router's `OPERATOR_ROLE`; or the EOA can move the proxy admin to the Safe-owned ProxyAdmin.
 
 Five contracts hold Vault `OPERATOR_ROLE`: BurnProxy, TransferProxy, FBTCProxy, the live router and the legacy router. The first four are owned by a Safe, non-upgradeable with fixed call patterns, or upgradeable only through the ops-Safe ProxyAdmin. The legacy router is different:
 
