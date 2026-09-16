@@ -242,9 +242,17 @@ All four are allowlisted and individually unpaused. directBTC is an internal acc
 
 The [withdrawal router](https://etherscan.io/address/0xAA732c9c110A84d090a72da230eAe1E779f89246#readProxyContract) reports WBTC `tokenDebts = (545.79187034, 545.04034436)` BTC units, leaving **0.75152598** uncleared against **0.46065725 WBTC** in the Vault. In the 30 days to the snapshot, the router recorded 17 new requests (0.33008 WBTC after fees, including a 0.20001448 WBTC request on September 14) and 20 completed claims (0.27122798 WBTC). The Vault received one 0.3001 WBTC [replenishment](https://etherscan.io/tx/0x3cd2b52a3bc8e613e101108d0301550c99e7765e4e1731e0041cbd41139ca6a0) on August 21. Reconstructing the 30-day requests, 0.25991240 WBTC was still inside the delay; the remaining 0.49161358 WBTC was past the 8-day delay (0.02402138 WBTC from requests in the window, plus older requests that were not individually reconstructed). That exceeds Vault WBTC by about 0.031 WBTC, so all matured requests could not be settled at once without replenishment. The amounts are small, completions continued through September 14, and this does not by itself prove a freeze. The 30-day `claimPrincipals` path returns uniBTC and does not satisfy an exit into BTC.
 
-#### M-BTC / Merlin concentration
+#### Reserve composition: native BTC and M-BTC
 
-The [Bedrock reserve API](https://affiliate-api-eosin.vercel.app/api/v1/third/stats/unibtc) reports **990.8738333 M-BTC**, or **21.36%** of **4,639.417015 BTC** in total reserves. Native BTC across 44 published addresses represents **3,647.635638 BTC (78.62%)**; all other wrapped/L2 BTC balances together are about **0.91 BTC (0.02%)**. These are dashboard classifications, not an independent reconciliation of Babylon positions or encumbrances. The published Merlin reserve address [`0xF977…AB18`](https://scan.merlinchain.io/address/0xF9775085d726E782E83585033B58606f7731AB18) is the [second-largest M-BTC holder](https://scan.merlinchain.io/token/0xB880fd278198bd590252621d4CD071b1842E9Bcd), with **17.39%** of 5,697.45 M-BTC supply on September 15, 2026.
+The [Bedrock reserve API](https://affiliate-api-eosin.vercel.app/api/v1/third/stats/unibtc) reports **4,639.417015 BTC** in total reserves at the snapshot:
+
+| Reserve type | BTC | Share |
+|---|---|---|
+| Native BTC on Bitcoin (44 published addresses) | 3,647.635638 | 78.62% |
+| M-BTC on Merlin | 990.8738333 | 21.36% |
+| Other wrapped / L2 BTC | ~0.91 | 0.02% |
+
+Most reserves are native BTC held directly on Bitcoin, so that portion carries no wrapped-token issuer or bridge risk. These are dashboard classifications, not an independent reconciliation of Babylon positions or encumbrances. The M-BTC portion depends on Merlin's bridge, described below. The published Merlin reserve address [`0xF977…AB18`](https://scan.merlinchain.io/address/0xF9775085d726E782E83585033B58606f7731AB18) is the [second-largest M-BTC holder](https://scan.merlinchain.io/token/0xB880fd278198bd590252621d4CD071b1842E9Bcd), with 17.39% of 5,697.45 M-BTC supply on September 15, 2026.
 
 M-BTC is not native BTC; Merlin documents it as a receipt minted against Bitcoin Layer 1 assets deposited through Merlin's bridge. This adds Merlin bridge custody, relayer, chain-liveness, and redemption risk beneath uniBTC. Merlin launched mainnet in February 2024 and M-BTC claims opened in March 2024, so the product is no longer brand new but remains materially younger and less trust-minimized than established wrapped-BTC rails. Merlin's official bridge documentation states that the bridge is upgradeable, multisig-managed, and has **no timelock**. Merlin's data-availability documentation also describes public DA as a "coming" solution, while the current design relies on its oracle/DAC layer and offchain proof-verification machinery rather than Bitcoin enforcing the full L2 state transition.
 
@@ -371,7 +379,6 @@ Monitoring coverage was checked on September 15, 2026: a GitHub code search of [
 
 | Signal | Source / detection | Baseline | Alert when |
 |--------|--------------------|----------|------------|
-| M-BTC concentration | Reserve API `M-BTC` balance / `total_reserve`; Merlin explorer holder share of [M-BTC](https://scan.merlinchain.io/token/0xB880fd278198bd590252621d4CD071b1842E9Bcd) | 21.36%; 17.39% of M-BTC supply | > 25% of reserves; any fall in the reserve wallet balance > 5% |
 | Reserve address set | Reserve API native-BTC address list and balances | 44 addresses; 3,647.635638 BTC | Address added/removed; balance change > 1% |
 | Peg | CoinGecko uniBTC/BTC; CoW quote for 1 uniBTC → WBTC | 0.992417 BTC; 0.75% below parity | Price < 0.98 BTC for > 1h (depeg trigger); 1 uniBTC quote > 3% below parity |
 | Exit depth | CoW quotes for 13 and 65 uniBTC; CoinGecko 24h volume | ~11.03 WBTC max fill; $4,587 volume | Max fill < 5 WBTC |
@@ -451,8 +458,9 @@ Public restitution txs for Sept 2024 exploit
 2. **Three uniBTC-specific audits** including two post-exploit re-audits.
 3. **Verified source; core token, Vault and ProxyAdmin governed by 3-of-5 Safes** with unchanged owner sets (verified onchain September 15, 2026).
 4. **Large ecosystem scale** with $357.92M DeFiLlama uniBTC TVL; the dashboard reports ≈102.04% reserve coverage, subject to unresolved supply reconciliation.
-5. **CCIP mint path has inbound and outbound throttles** on all 14 lanes, five of them effectively closed; CCIPPeer and Free Tunnel have been dormant for 30 days.
-6. **Public team and known legal entity** via Bedrock/RockX leadership and Bedrock Terms of Use.
+5. **Reserves are mostly native BTC.** 78.62% of dashboard reserves sit in 44 published Bitcoin addresses rather than wrapped or bridged tokens.
+6. **CCIP mint path has inbound and outbound throttles** on all 14 lanes, five of them effectively closed; CCIPPeer and Free Tunnel have been dormant for 30 days.
+7. **Public team and known legal entity** via Bedrock/RockX leadership and Bedrock Terms of Use.
 
 ### Key Risks
 
@@ -460,7 +468,7 @@ Public restitution txs for Sept 2024 exploit
 2. **Prior exploit on the same vault proxy.** The Sept 2024 mint-validation exploit occurred on the uniBTC Vault still in use.
 3. **Audit coverage is dated.** All published uniBTC audits were completed in 2024, two reactively after the exploit. They do not establish coverage of today's full dependency and operational trust boundary, and they predate current AI-assisted and automated exploit-validation capabilities; no current independent review or public bug bounty was found.
 4. **Supply reporting is manual and unreliable.** The Vault denominator is 700.93 uniBTC below dashboard supply; the feeder has dropped by a similar amount for a day eight times since April 2026, and the current dip has persisted through two updates.
-5. **Material M-BTC concentration.** About 21.36% of reported reserves are M-BTC, adding Merlin bridge/custody and chain-liveness risk beneath uniBTC.
+5. **M-BTC / Merlin bridge dependency.** About 21.36% of reported reserves are M-BTC, so that portion depends on Merlin bridge custody and chain liveness; the other 78.62% is native BTC.
 6. **PoR is not a strict 1:1 mint gate.** `adequacyRatio = 900` permits minting while reserves are at least 90% of the feeder's supply value, and operational EOA [`0x9251fd3d79522bb2243a58fff1db43e25a495aab`](https://etherscan.io/address/0x9251fd3d79522bb2243a58fff1db43e25a495aab) (Vault `MANAGER_ROLE`) can change the ratio and feeders.
 7. **No timelock.** The 3-of-5 Safe can upgrade token/vault implementations, grant `MINTER_ROLE`, or freeze user balances without onchain delay.
 8. **Undocumented third-party bridge holds mint authority.** The Free Tunnel contract can mint uniBTC (3-of-4 executor signatures, EOA admin [`0x0014Eb4Ac6Dd1473b258d088E6EF214b2BCdc53C`](https://etherscan.io/address/0x0014Eb4Ac6Dd1473b258d088E6EF214b2BCdc53C)) and appears nowhere in Bedrock's uniBTC documentation; the Bedrock-custom CCIPPeer is a second non-pool mint path.
@@ -472,7 +480,7 @@ Public restitution txs for Sept 2024 exploit
 ### Critical Risks
 
 - **Single-EOA unbacked-mint path (verified).** The legacy router admin, EOA [`0x3eea50ba10952e5e0dfaa50ecfcc5ab19ad591ef`](https://etherscan.io/address/0x3eea50ba10952e5e0dfaa50ecfcc5ab19ad591ef), can mint arbitrary uniBTC through the Vault's `execute()` without the Safe, PoR, caps or delay. This is a live control weakness, not an observed exploit; no such mint has occurred in the 30-day scan. It does not trigger the template's "Total centralization" gate because token, Vault and ProxyAdmin governance remain with 3-of-5 Safes, but it drives Governance to the maximum score. New or increased uniBTC exposure should wait until the legacy router's Vault `OPERATOR_ROLE` is revoked or its proxy admin moves under the ops-Safe ProxyAdmin.
-- Other High concerns: inconsistent supply reporting, delegated reporting control by operational EOA [`0x9251fd3d79522bb2243a58fff1db43e25a495aab`](https://etherscan.io/address/0x9251fd3d79522bb2243a58fff1db43e25a495aab), dated audit coverage, M-BTC/Merlin concentration, custody opacity, and constrained exits. The supply discrepancy is not proof of missing reserves.
+- Other High concerns: inconsistent supply reporting, delegated reporting control by operational EOA [`0x9251fd3d79522bb2243a58fff1db43e25a495aab`](https://etherscan.io/address/0x9251fd3d79522bb2243a58fff1db43e25a495aab), dated audit coverage, the M-BTC/Merlin bridge dependency, custody opacity, and constrained exits. The supply discrepancy is not proof of missing reserves.
 
 ---
 
@@ -534,7 +542,7 @@ Public restitution txs for Sept 2024 exploit
 
 **Subcategory A: Collateralization**
 - Dashboard coverage is ≈102.04%; the Vault feeder produces 120.67% against a lower supply denominator, not independently reconciled global liabilities.
-- M-BTC is 21.36% of dashboard reserves, creating material Merlin bridge/custody concentration.
+- 78.62% of dashboard reserves are native BTC; the 21.36% held as M-BTC depends on Merlin bridge custody.
 - Mixed collateral issuer quality and offchain/native BTC custody opacity.
 - Explicit 90% adequacy threshold weakens the mint gate.
 - **Score: 4.0**
@@ -581,7 +589,7 @@ Weights use unrounded category means.
 | **Subtotal** | | | **3.875** |
 
 **Modifiers:**
-- **None.** The prior exploit is captured in Historical Track Record; the single-EOA mint path in Governance; M-BTC concentration and custody opacity in Funds Management and External Dependencies. Applying an additional modifier would double count them.
+- **None.** The prior exploit is captured in Historical Track Record; the single-EOA mint path in Governance; the M-BTC dependency and custody opacity in Funds Management and External Dependencies. Applying an additional modifier would double count them.
 
 **Final Score: ~3.9 / 5.0**
 
@@ -597,7 +605,7 @@ Weights use unrounded category means.
 
 **Final Risk Tier: Elevated Risk**
 
-uniBTC is stronger than a purely admin-attested wrapper on reserve provability because Chainlink PoR is wired into the deposit mint path. It is Elevated Risk, near the upper half of the band, because EOA [`0x3eea50ba10952e5e0dfaa50ecfcc5ab19ad591ef`](https://etherscan.io/address/0x3eea50ba10952e5e0dfaa50ecfcc5ab19ad591ef) can mint unbacked uniBTC around that gate, the gate itself relies on an unreconciled and repeatedly faulty manual supply report and allows 90% adequacy, governance has no onchain timelock, an undocumented third-party bridge holds live mint rights, approximately 21.36% of reported reserves are M-BTC, backing control and Babylon position state are incompletely disclosed, and large exits are constrained by both redemption caps and near-zero secondary liquidity. Until the legacy operator path is closed, strict limits should mean no new or increased exposure.
+uniBTC is stronger than a purely admin-attested wrapper on reserve provability because Chainlink PoR is wired into the deposit mint path. It is Elevated Risk, near the upper half of the band, because EOA [`0x3eea50ba10952e5e0dfaa50ecfcc5ab19ad591ef`](https://etherscan.io/address/0x3eea50ba10952e5e0dfaa50ecfcc5ab19ad591ef) can mint unbacked uniBTC around that gate, the gate itself relies on an unreconciled and repeatedly faulty manual supply report and allows 90% adequacy, governance has no onchain timelock, an undocumented third-party bridge holds live mint rights, about a fifth of reserves (M-BTC) depends on Merlin's bridge, backing control and Babylon position state are incompletely disclosed, and large exits are constrained by both redemption caps and near-zero secondary liquidity. Until the legacy operator path is closed, strict limits should mean no new or increased exposure.
 
 ---
 
@@ -617,12 +625,12 @@ uniBTC is stronger than a purely admin-attested wrapper on reserve provability b
   8. Disclosure of BTC custodian/signers or of the supply-reporting methodology.
   9. Introduction of an onchain timelock / Safe Delay module.
   10. New top-tier audit or bug bounty publication.
-  11. M-BTC exceeds 25% of uniBTC reserves, depegs, pauses redemption, changes bridge administrators, or changes its mint/burn implementation.
+  11. M-BTC depegs, pauses redemption, changes bridge administrators, or changes its mint/burn implementation.
   12. Any `RoleGranted` for `MINTER_ROLE`, `DEFAULT_ADMIN_ROLE`, or `FREEZER_ROLE` on the uniBTC token, any Vault `OPERATOR_ROLE` or `MANAGER_ROLE` grant, any freeze call, or any change to `freezeToRecipient`.
   13. Change of CCIP token pool, CCIPPeer upgrade or first mint in 30+ days, Free Tunnel executor/admin/version change or mint, or a mint from an address outside the four known minters.
   14. Supply feeder updater/admin change or proxy upgrade; withdrawal router upgrade, blacklist/whitelist change, quota reduction, or matured debt exceeding available WBTC for more than 24 hours.
 
-At the snapshot, M-BTC (21.36%) is below the 25% trigger, and Chainlink reserves are within the heartbeat and exceed both reported supply figures. No token role grants or revocations since May 7, 2026, no Vault configuration events and no governance Safe owner or threshold changes appeared in the scans. The supply-feeder gap trigger is active, and matured redemption debt slightly exceeds Vault WBTC. Point-in-time prices do not establish whether a sustained depeg occurred between observations.
+At the snapshot, Chainlink reserves are within the heartbeat and exceed both reported supply figures. No token role grants or revocations since May 7, 2026, no Vault configuration events and no governance Safe owner or threshold changes appeared in the scans. The supply-feeder gap trigger is active, and matured redemption debt slightly exceeds Vault WBTC. Point-in-time prices do not establish whether a sustained depeg occurred between observations.
 
 ## Open TODOs (Items Not Verifiable This Session)
 
