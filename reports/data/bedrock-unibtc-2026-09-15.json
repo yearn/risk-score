@@ -369,6 +369,34 @@
   "role_history": {
    "vault_OPERATOR_ROLE_granted": "2024-09-20 tx 0xeca14e82f7e0ab5f2b34c0b94e04d5ba59555a297acc1f94b08edd6011ce787b",
    "vault_MINTER_ROLE_on_token_granted": "2024-04-13 tx 0x549c37e07be58e4c024c5e106a66eb974558f9fc7f78d90b8cbfb99c0df21a6d"
+  },
+  "live_eth_call_verification": {
+   "block": 25990834,
+   "method": "eth_call against configured mainnet RPC with from overrides; no transactions sent",
+   "admin_slot": "0x3eea50ba10952e5e0dfaa50ecfcc5ab19ad591ef",
+   "admin_code": "0x",
+   "admin_nonce": 29,
+   "admin_signed_tx": {
+    "hash": "0xec68b97d5ae2f8bf86e4968f151f4db0a7c1c809a843f77eebb6ee6aaa06fe65",
+    "from": "0x3eea50ba10952e5e0dfaa50ecfcc5ab19ad591ef",
+    "date": "2026-08-10"
+   },
+   "proxy_admin_selectors_in_runtime_bytecode": {
+    "note": "stored as negated constants by the optimizer",
+    "upgradeTo 0x3659cfe6": "0xc9a6301a",
+    "upgradeToAndCall 0x4f1ef286": "0xb0e10d7a",
+    "changeAdmin 0x8f283970": "0x70d7c690",
+    "implementation 0x5c60da1b": "0xa39f25e5",
+    "admin 0xf851a440": "0x07ae5bc0"
+   },
+   "admin() from admin": "0x3eea50ba10952E5e0dFAa50EcFCc5AB19aD591Ef",
+   "upgradeTo(0x720081e3ee2b1542e341afc793de20b08beb859d) from admin": "success (0x)",
+   "upgradeTo(...) from 0x1111111111111111111111111111111111111111": "reverted",
+   "vault OPERATOR_ROLE(router)": true,
+   "vault allowedTargetList(uniBTC)": true,
+   "token MINTER_ROLE(vault)": true,
+   "Vault.execute(uniBTC, mint(0x...dEaD, 10000000000000), 0) from router": "success",
+   "Vault.execute(...) from 0x1111111111111111111111111111111111111111": "reverted: AccessControl"
   }
  },
  "free_tunnel": {
