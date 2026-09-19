@@ -274,11 +274,14 @@ If ANY gate is triggered, the protocol automatically receives a score of **5** (
 
 | Score | Contract Upgradeability | Timelock | Privileged Roles |
 |-------|------------------------|----------|-----------------|
-| **1** | Immutable or fully decentralized DAO | 7+ days timelock on critical operations | Multisig above 3/5 threshold, no EOA roles. Multi-party approval required |
-| **2** | Multisig 7/11+ with timelock | 24+ hours | Limited roles, cannot seize funds |
-| **3** | Multisig 5/9 with timelock | 24+ hours | Some powerful roles, constrained by timelock |
+| **1** | Immutable or fully decentralized DAO | 48h+ timelock on critical operations | Multisig above 3/5 threshold, no EOA roles. Multi-party approval required |
+| **2** | Multisig 7/11+ with timelock | 24-48 hours | Limited roles, cannot seize funds |
+| **3** | Multisig 5/9 with timelock | 12-24 hours | Some powerful roles, constrained by timelock |
 | **4** | Multisig 3/5 or low threshold | <12 hours | Powerful admin roles with limited constraints |
 | **5** | EOA or <3 signers (CRITICAL GATE) | No timelock | Unlimited admin powers |
+
+- **Timelock** is measured on the path that can change the protocol - upgrades, role changes, and parameter authority - end-to-end from proposal to execution. A 48h delay clears the score-1 bar on its own; there is no extra credit above it.
+- Operational roles bounded by governance-approved constraints (moving funds between already-approved strategies, pausing, keeper calls such as rebase or harvest) are scored in **Subcategory B: Programmability**, not here. Score this subcategory on who can change the protocol itself.
 
 **Subcategory B: Programmability**
 

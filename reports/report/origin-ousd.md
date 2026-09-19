@@ -374,9 +374,10 @@ There is no single dependency whose failure stops the protocol, but the dependen
 #### Category 2: Centralization & Control Risks (Weight: 30%) — **2.17**
 
 **Subcategory A: Governance — 1.0**
-- On-chain xOGN token governance with a ~5-day cycle (24h delay + 48h voting + 48h timelock); `getMinDelay()` = 172,800s
-- Self-administered Timelock (TIMELOCK_ADMIN_ROLE held by itself); Origin DeFi Governance holds PROPOSER/EXECUTOR/CANCELLER; GOV Multisig (5-of-8) is CANCELLER-only
-- No admin backdoor, and no EOA holds a fund-moving role on Origin's own contracts. Same governance as Origin ARM.
+- **Upgrades are DAO-gated end to end.** `upgradeTo` / `upgradeToAndCall` are `onlyGovernor` on both proxies, and `governor()` on the OUSD token, the vault, and all four strategies is the Timelock [`0x35918cDE…E69F`](https://etherscan.io/address/0x35918cDE7233F2dD33fA41ae3Cb6aE0e42E0e69F). `transferGovernance` is `onlyGovernor` with a two-step `claimGovernance`.
+- **Only the Governor can drive the Timelock.** Enumerating every `RoleGranted` / `RoleRevoked` since deployment: PROPOSER and EXECUTOR are held solely by Origin DeFi Governance [`0x1D3fBD4d…C9EC`](https://etherscan.io/address/0x1D3fBD4d129Ddd2372EA85c5Fa00b2682081c9EC). The two earlier proposers — a 5/8 multisig and the GOV multisig — were both revoked in 2024. The GOV multisig (5-of-8) retains CANCELLER only, and TIMELOCK_ADMIN_ROLE is held by the Timelock itself.
+- **Latency:** `getMinDelay()` = 172,800s (48h); `votingDelay` 7,200 blocks (24.0h) + `votingPeriod` 14,416 blocks (48.1h) gives exactly **5.00 days** from proposal to execution, with no shorter path. This clears the rubric's 48h+ score-1 bar on the Timelock alone.
+- No admin backdoor. The 2-of-8 strategist and the operator EOA hold operational powers bounded by the governor-approved strategy list and the AMO solvency check, and are scored under Programmability below rather than here. Same governance as Origin ARM.
 
 **Subcategory B: Programmability — 2.5**
 - Minting, `requestWithdrawal`, `claimWithdrawal`, `allocate`, and `addWithdrawalQueueLiquidity` are permissionless; rebase is algorithmic, rate-capped, and can only ratchet supply upward within `totalValue()`
