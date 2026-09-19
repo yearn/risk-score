@@ -1,0 +1,421 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import stats from "../data/stats.json";
+
+const EMAIL = "curation@yearn.fi";
+const X_URL = "https://x.com/yearnfi";
+const DEFILLAMA_URL = "https://defillama.com/protocol/yearn";
+
+const reportCount = stats.reportCount;
+
+// ContactPage schema so search engines can surface the enquiry route directly.
+const jsonLd = {
+  "@type": "ContactPage",
+  name: "Contact Yearn Curation",
+  description:
+    "Get in touch with the Yearn Curation team about risk assessments, vault curation, and monitoring.",
+  url: "https://curation.yearn.fi/contact/",
+};
+
+const services = [
+  {
+    num: "01",
+    title: "Risk assessments",
+    body: `Independent, published reviews of protocols, vaults and yield-bearing assets, scored 1-5 on the same framework behind the ${reportCount} reports on this site. Useful before listing an asset, onboarding a market, or defending an allocation to a risk committee.`,
+  },
+  {
+    num: "02",
+    title: "Vault curation",
+    body: "We run curator vaults on Morpho and other lending venues — market selection, supply caps, allocation policy, and the ongoing decisions that keep a vault inside its stated risk profile.",
+  },
+  {
+    num: "03",
+    title: "Curation advice",
+    body: "Working sessions for teams building their own curation practice: what to score, how to weight it, where the hidden fund-loss paths are, and how to turn all of it into a policy you can actually operate.",
+  },
+  {
+    num: "04",
+    title: "Monitoring",
+    body: "Design and deployment of onchain monitors — governance actions, oracle changes, owner and role transfers, collateralization and peg drift — streamed to the channel your team already watches.",
+  },
+];
+---
+
+<BaseLayout
+  title="Contact — Yearn Curation"
+  description="Talk to the Yearn Curation team about risk assessments, vault curation, curation advice, and monitoring."
+  ogUrl="/contact/"
+  ogImage="/og/default.png"
+  jsonLd={jsonLd}
+>
+  <section class="page-hero">
+    <h1>Let's talk</h1>
+    <p class="page-sub">
+      The Yearn Curation team works with protocols, DAOs and allocators on risk assessments, vault curation and monitoring.
+      Tell us what you are building and we will help you secure it.
+    </p>
+    <div class="hero-cta">
+      <a href={`mailto:${EMAIL}`} class="btn btn-primary">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="4" width="20" height="16" rx="2"/><polyline points="2 6 12 13 22 6"/></svg>
+        {EMAIL}
+      </a>
+      <a href={X_URL} target="_blank" rel="noopener noreferrer" class="btn btn-secondary">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+        Message us on X
+      </a>
+    </div>
+  </section>
+
+  <section class="cred" data-mouse-glow>
+    <div class="card-glow" aria-hidden="true"></div>
+    <div class="cred-copy">
+      <div class="cred-eyebrow">Track record</div>
+      <h2>We manage $250M+ in TVL</h2>
+      <p>
+        Yearn manages and curates over $250 million across Ethereum, Katana,
+        Arbitrum, Base, Optimism and Polygon. Our curation is not theoretical,
+        funds and accounting are onchain. Inhouse monitoring keeps everything inline with defined risk.
+      </p>
+      <a href={DEFILLAMA_URL} target="_blank" rel="noopener noreferrer" class="cred-link">
+        View Yearn on DefiLlama
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+      </a>
+    </div>
+    <dl class="cred-stats">
+      <div>
+        <dt>TVL curated</dt>
+        <dd>$250M+</dd>
+      </div>
+      <div>
+        <dt>Public reports</dt>
+        <dd>{reportCount}</dd>
+      </div>
+    </dl>
+  </section>
+
+  <section class="services">
+    <h2 class="section-title">What we can help with</h2>
+    <div class="service-grid">
+      {services.map((s) => (
+        <div class="service">
+          <div class="service-num">{s.num}</div>
+          <h3>{s.title}</h3>
+          <p>{s.body}</p>
+        </div>
+      ))}
+    </div>
+  </section>
+
+  <section class="reach">
+    <h2 class="section-title">How to reach us</h2>
+    <div class="reach-grid">
+      <a href={`mailto:${EMAIL}`} class="reach-card">
+        <div class="card-glow" aria-hidden="true"></div>
+        <div class="reach-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><polyline points="2 6 12 13 22 6"/></svg>
+        </div>
+        <div class="reach-body">
+          <div class="reach-title">Email</div>
+          <div class="reach-detail">{EMAIL}</div>
+        </div>
+      </a>
+      <a href={X_URL} target="_blank" rel="noopener noreferrer" class="reach-card">
+        <div class="card-glow" aria-hidden="true"></div>
+        <div class="reach-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+        </div>
+        <div class="reach-body">
+          <div class="reach-title">X</div>
+          <div class="reach-detail">@yearnfi</div>
+        </div>
+      </a>
+    </div>
+    <p class="reach-note">
+      Spotted something wrong in a report? Open an issue on <a href="https://github.com/yearn/risk-score/issues" target="_blank" rel="noopener noreferrer">GitHub</a> — corrections are handled in public.
+    </p>
+  </section>
+
+  <script is:inline>
+    // Mouse-tracking glow, matching the report cards on the homepage.
+    (() => {
+      document.querySelectorAll(".cred, .reach-card").forEach((card) => {
+        card.addEventListener("pointermove", (e) => {
+          const r = card.getBoundingClientRect();
+          card.style.setProperty("--mx", `${e.clientX - r.left}px`);
+          card.style.setProperty("--my", `${e.clientY - r.top}px`);
+        });
+        card.addEventListener("pointerleave", () => {
+          card.style.removeProperty("--mx");
+          card.style.removeProperty("--my");
+        });
+      });
+    })();
+  </script>
+</BaseLayout>
+
+<style>
+  .page-hero {
+    padding: 3rem 0 2rem;
+    text-align: center;
+  }
+  .page-hero h1 {
+    font-size: clamp(1.9rem, 4vw, 2.8rem);
+    letter-spacing: -0.02em;
+    margin: 0 auto 0.9rem;
+    line-height: 1.15;
+  }
+  .page-sub {
+    color: var(--text-secondary);
+    max-width: 58ch;
+    margin: 0 auto 2rem;
+    font-size: 1.02rem;
+    line-height: 1.55;
+  }
+  .hero-cta {
+    display: flex;
+    gap: 0.75rem;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.4rem;
+    font-size: 0.95rem;
+    font-weight: 600;
+    border-radius: 8px;
+    transition: transform 0.15s, background 0.15s, border-color 0.15s;
+    text-decoration: none;
+  }
+  .btn-primary {
+    background: var(--brand-blue);
+    color: #fff;
+    border: 1px solid var(--brand-blue);
+  }
+  .btn-primary:hover {
+    background: #0560d4;
+    border-color: #0560d4;
+    color: #fff;
+    text-decoration: none;
+    transform: translateY(-1px);
+  }
+  .btn-secondary {
+    background: color-mix(in srgb, var(--bg-secondary) 70%, transparent);
+    border: 1px solid var(--border);
+    color: var(--text-primary);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+  }
+  .btn-secondary:hover {
+    border-color: var(--text-secondary);
+    text-decoration: none;
+    transform: translateY(-1px);
+  }
+
+  /* Shared frosted-card recipe (see reports.astro / index.astro). */
+  .cred,
+  .reach-card {
+    --mx: 50%;
+    --my: 50%;
+    position: relative;
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    background: color-mix(in srgb, var(--bg-card) 65%, transparent);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    overflow: hidden;
+    isolation: isolate;
+  }
+  .card-glow {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    opacity: 0;
+    background: radial-gradient(
+      300px circle at var(--mx, 50%) var(--my, 50%),
+      color-mix(in srgb, var(--brand-blue) 16%, transparent),
+      transparent 60%
+    );
+    transition: opacity 0.25s;
+  }
+  .cred:hover .card-glow,
+  .reach-card:hover .card-glow {
+    opacity: 1;
+  }
+
+  /* === Track record === */
+  .cred {
+    display: grid;
+    grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+    gap: 2rem;
+    align-items: center;
+    margin: 3rem 0 0;
+    padding: 2rem;
+    background:
+      linear-gradient(135deg, rgba(6, 117, 249, 0.1), transparent 60%),
+      color-mix(in srgb, var(--bg-card) 65%, transparent);
+  }
+  .cred-eyebrow {
+    font-size: 0.72rem;
+    color: var(--brand-blue);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-weight: 600;
+  }
+  .cred-copy h2 {
+    font-size: 1.35rem;
+    letter-spacing: -0.01em;
+    margin: 0.15rem 0 0.75rem;
+  }
+  .cred-copy p {
+    color: var(--text-secondary);
+    font-size: 0.92rem;
+    line-height: 1.6;
+    margin-bottom: 1rem;
+  }
+  .cred-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--brand-blue);
+  }
+  .cred-stats {
+    display: grid;
+    gap: 0.75rem;
+  }
+  .cred-stats > div {
+    padding: 0.85rem 1rem;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: color-mix(in srgb, var(--bg-secondary) 40%, transparent);
+  }
+  .cred-stats dt {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-secondary);
+  }
+  .cred-stats dd {
+    font-size: 1.35rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* === Services === */
+  .section-title {
+    font-size: 1.3rem;
+    letter-spacing: -0.01em;
+    margin-bottom: 1.25rem;
+  }
+  .services,
+  .reach {
+    margin: 3.5rem 0 0;
+  }
+  .service-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+  }
+  .service {
+    padding: 1.5rem;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: color-mix(in srgb, var(--bg-card) 55%, transparent);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+  .service-num {
+    font-family: "SF Mono", "Fira Code", monospace;
+    font-size: 0.75rem;
+    color: var(--brand-blue);
+    margin-bottom: 0.5rem;
+    letter-spacing: 0.1em;
+  }
+  .service h3 {
+    font-size: 1.05rem;
+    margin-bottom: 0.5rem;
+  }
+  .service p {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    line-height: 1.55;
+  }
+
+  /* === Reach === */
+  .reach-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+  }
+  .reach-card {
+    display: flex;
+    gap: 1rem;
+    padding: 1.4rem;
+    color: var(--text-primary);
+    text-decoration: none;
+    transition: transform 0.2s ease, border-color 0.2s ease;
+  }
+  .reach-card:hover {
+    text-decoration: none;
+    transform: translateY(-2px);
+    border-color: color-mix(in srgb, var(--brand-blue) 65%, var(--border));
+  }
+  .reach-icon {
+    flex-shrink: 0;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: color-mix(in srgb, var(--bg-secondary) 50%, transparent);
+    color: var(--brand-blue);
+  }
+  .reach-title {
+    font-weight: 600;
+    font-size: 1rem;
+  }
+  .reach-detail {
+    font-family: "SF Mono", "Fira Code", monospace;
+    font-size: 0.85rem;
+    color: var(--brand-blue);
+    word-break: break-all;
+  }
+  .reach-body p {
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    line-height: 1.5;
+    margin-top: 0.4rem;
+  }
+  .reach-note {
+    margin-top: 1rem;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+  }
+
+  @media (max-width: 720px) {
+    .cred {
+      grid-template-columns: 1fr;
+      gap: 1.5rem;
+    }
+    .cred-stats {
+      grid-template-columns: repeat(2, 1fr);
+    }
+    .service-grid,
+    .reach-grid {
+      grid-template-columns: 1fr;
+    }
+    .hero-cta {
+      flex-direction: column;
+      align-items: stretch;
+    }
+    .btn {
+      justify-content: center;
+    }
+  }
+</style>
