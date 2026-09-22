@@ -1681,5 +1681,49 @@
   ],
   "bridge_proxy": "0x28AD6b7dfD79153659cb44C2155cf7C0e1CeEccC",
   "bridge_implementation": "0xBd467cBa33fDb6A2660999e1FE1bFf79098FbCaA (BTCLayer2Bridge)"
+ },
+ "uniswap_ethereum": {
+  "block": 25981132,
+  "v3_pools": {
+   "100": {
+    "pool": "0x28ca828AEed693cE5bB89964c2B8cD1FE1bbB8cd",
+    "uniBTC_sats": 3,
+    "WBTC_sats": 2
+   },
+   "500": {
+    "pool": "0x3a32F5040Bc4d8417e78E236eb2C48c90e003FDa",
+    "uniBTC_sats": 3381879472,
+    "WBTC_sats": 1102957078
+   },
+   "3000": {
+    "pool": "0x2912868c7aC9b14dD3F64ec1713cbd8f44A17dfd",
+    "uniBTC_sats": 964,
+    "WBTC_sats": 3024
+   },
+   "10000": {
+    "pool": "0x109707Ad4AbD299b3cF6F2b011c2bff88523E2f0",
+    "uniBTC_sats": 476,
+    "WBTC_sats": 531
+   }
+  },
+  "v2_pair": {
+   "pair": "0xCde5d40F312b9BCf704BabcDb6713D2547a277C4",
+   "reserves": [
+    2057,
+    2032
+   ]
+  },
+  "quoterV2": {
+   "quoter": "0x61fFE014bA17989E743c5F6cB21bF9697530B21e",
+   "fee500": {
+    "1_uniBTC": 99273912,
+    "13_uniBTC": 1102672935,
+    "65_uniBTC": 1102672935
+   },
+   "fee3000": {
+    "1_uniBTC": 1585
+   }
+  },
+  "not_checked": "Curve and Balancer pools"
  }
 }
