@@ -351,21 +351,6 @@ The admin Safe owns both BurnProxy and TransferProxy. TransferProxy can move all
 | Vault asset outflows | WBTC / FBTC / cbBTC / directBTC `Transfer(from = Vault)` | 20 WBTC outflows (0.27122798), all router claims; no FBTC, cbBTC or directBTC outflows | Any non-WBTC outflow; any WBTC outflow without a router `DelayedRedeemsClaimed` in the same tx |
 | Redemption solvency | Router `tokenDebts(WBTC)` uncleared minus immature requests (from `DelayedRedeemCreated` timestamps) vs Vault WBTC `balanceOf` | 0.75152598 uncleared; ~0.4916 matured; 0.46065725 in Vault | Matured debt > Vault WBTC for > 24h; a matured claim reverts |
 | Redemption controls | Router `Paused`, `TokensPaused`, `RateSet`, `MaxQuotaSet`, `RedeemDelaySet`, `RedeemFeeRateSet`, `BlacklistAdded`, `WhitelistEnabledSet`, `BtclistRemoved` | Unpaused; 0.5 WBTC max quota; 2,315 sats/s; 691,201s delay; 50 bps fee | Any event |
-<<<<<<< HEAD
-=======
-| Operational EOA actions | Transactions from operational EOA [`0x9251fd3d79522bb2243a58fff1db43e25a495aab`](https://etherscan.io/address/0x9251fd3d79522bb2243a58fff1db43e25a495aab) to the Vault, supply feeder, CCIP pool, routers, CCIPPeer or FBTCProxy | Holds the delegated roles above | Any call, decoded |
-
-### Medium — daily review
-
-| Signal | Source / detection | Baseline | Alert when |
-|--------|--------------------|----------|------------|
-| Reserve address set | Reserve API native-BTC address list and balances | 44 addresses; 3,647.635638 BTC | Address added/removed; balance change > 1% |
-| Peg | CoinGecko uniBTC/BTC; CoW quote for 1 uniBTC → WBTC | 0.992417 BTC; 0.75% below parity | Price < 0.98 BTC for > 1h (depeg trigger); 1 uniBTC quote > 3% below parity |
-| Exit depth | CoW quotes for 13 and 65 uniBTC; CoinGecko 24h volume | ~11.03 WBTC max fill; $4,587 volume | Max fill < 5 WBTC |
-| Deposit caps | Vault `caps(token)` (no event) and asset feeder `totalSupply(token)` | Table in Funds Management | Any cap change; directBTC cap or supply change |
-| directBTC minting | directBTC `RoleGranted` / `Transfer(from = 0x0)` | Minters: Vault and [`0x91fd8c7a…`](https://etherscan.io/address/0x91fd8c7a5fda7d52ab41bbe423eedd3a65d64500); supply 1,458.9998 | Any mint or role change |
-| TVL and supply | DeFiLlama TVL; reserve API `total_supply`; Ethereum `totalSupply()` | $357.92M; 4,546.67793; 2,981.12556288 | ±40% from baseline (reassessment trigger); Ethereum supply ±5% in 24h |
->>>>>>> 0912d1c9f747f7faed42f9670037fd328fe4cbef
 
 ### Recommended Frequency
 
