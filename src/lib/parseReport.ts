@@ -53,6 +53,8 @@ export interface ReportMeta {
   status?: string;
   /** Whether the status pulls the report off the scale ("terminal") or just flags it ("caution"). */
   statusKind?: StatusKind;
+  /** True when the header carries "**Visibility:** Hidden" — kept out of the site's listings. */
+  hidden: boolean;
 }
 
 export interface CategoryScore {
@@ -229,6 +231,9 @@ function parseMeta(slug: string, content: string): ReportMeta {
     header.match(/\*\*Status:\*\*\s*(.+)/) ??
     header.match(/\*\*Warning:\*\*\s*(.+)/);
   const { status, statusKind } = classifyStatus(statusMatch?.[1]);
+  // "**Visibility:** Hidden" unlists a report: it drops out of /reports/ and the
+  // homepage highlights, but its own page still builds and stays reachable.
+  const hidden = /\*\*Visibility:\*\*\s*hidden\b/i.test(header);
 
   // Not Rated when explicitly "N/A" or when a terminal event supersedes the score.
   const finalScore =
@@ -259,6 +264,7 @@ function parseMeta(slug: string, content: string): ReportMeta {
     chainIconUrl: chainIconUrl(chainStr),
     status,
     statusKind,
+    hidden,
   };
 }
 

@@ -1,7 +1,7 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
 import ScoreBadge from "../components/ScoreBadge.astro";
-import { getAllReports } from "../lib/reports";
+import { getListedReports } from "../lib/reports";
 import type { ReportData } from "../lib/parseReport";
 import { scoreColor, scoreTier } from "../lib/colors";
 
@@ -17,7 +17,7 @@ const formatRelative = (ts: number): string => {
   return `${Math.round(days / 365)}y ago`;
 };
 
-const reports = getAllReports();
+const reports = getListedReports();
 const scored = reports.filter(
   (r): r is ScoredReport => r.finalScore != null,
 );

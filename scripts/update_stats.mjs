@@ -8,8 +8,19 @@ const ROOT = path.resolve(__dirname, "..");
 const REPORTS_DIR = path.join(ROOT, "reports", "report");
 const OUT = path.join(ROOT, "src", "data", "stats.json");
 
+// Mirrors src/lib/parseReport.ts: "**Visibility:** Hidden" in the header block
+// (everything before the first "## " section) unlists a report, so it must not be
+// counted in the report total the site displays either.
+function isHidden(file) {
+  const content = fs.readFileSync(path.join(REPORTS_DIR, file), "utf-8");
+  const header = content.split(/\n## /)[0];
+  return /\*\*Visibility:\*\*\s*hidden\b/i.test(header);
+}
+
 function countReports() {
-  return fs.readdirSync(REPORTS_DIR).filter((f) => f.endsWith(".md")).length;
+  return fs
+    .readdirSync(REPORTS_DIR)
+    .filter((f) => f.endsWith(".md") && !isHidden(f)).length;
 }
 
 async function main() {

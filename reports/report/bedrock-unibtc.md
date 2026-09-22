@@ -5,6 +5,7 @@
 - **Chain:** Ethereum
 - **Token Address:** [`0x004E9C3EF86bc1ca1f0bB5C7662861Ee93350568`](https://etherscan.io/address/0x004E9C3EF86bc1ca1f0bB5C7662861Ee93350568)
 - **Final Score: 3.9/5.0**
+- **Visibility:** Hidden
 - **Snapshot:** Ethereum block [25,981,132](https://etherscan.io/block/25981132), September 15, 2026 06:40:23 UTC
 
 ## Overview + Links
