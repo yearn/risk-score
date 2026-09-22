@@ -25,6 +25,8 @@ exclude_path = ["reports/TEMPLATE.md"]
 # Excludes for non-403 false-positive cases:
 # - rekt.news intermittently returns 500 to crawlers
 # - Morpho GraphQL endpoints are POST-only and 400 on GET
+# - CoW Protocol's order-book quote endpoint is POST-only and returns 405 on GET.
+#   Scope is the quote path; other api.cow.fi URLs stay checked.
 # - Twitter/X often produces connection errors / soft-blocks
 # - LinkedIn requires auth (returns 999/other non-403 codes)
 # - trust-security.xyz returns 405 on HEAD requests
@@ -49,6 +51,7 @@ exclude_path = ["reports/TEMPLATE.md"]
 exclude = [
     '^https?://(www\.)?rekt\.news',
     '^https?://(blue-api|api)\.morpho\.org/graphql',
+    '^https?://api\.cow\.fi/[^/]+/api/v1/quote$',
     '^https?://(www\.)?(twitter|x)\.com',
     '^https?://(www\.)?linkedin\.com',
     '^https?://(www\.)?trust-security\.xyz',
