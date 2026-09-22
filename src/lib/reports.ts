@@ -29,6 +29,16 @@ export function getReportBySlug(slug: string): ReportData | undefined {
   return parseReport(slug, content);
 }
 
+/**
+ * Reports shown in the site's listings: the /reports/ index and the homepage
+ * highlights. Reports marked "**Visibility:** Hidden" in their header are
+ * dropped here only — their page, OG image, graph and bridge rows still build,
+ * so a direct link keeps working and nothing else on the site degrades.
+ */
+export function getListedReports(): ReportData[] {
+  return getAllReports().filter((r) => !r.hidden);
+}
+
 export function getAllSlugs(): string[] {
   return fs
     .readdirSync(REPORTS_DIR)
@@ -37,7 +47,7 @@ export function getAllSlugs(): string[] {
 }
 
 export function getRecentReports(n = 5): ReportData[] {
-  return getAllReports()
+  return getListedReports()
     .slice()
     .sort((a, b) => b.dateSortable - a.dateSortable)
     .slice(0, n);

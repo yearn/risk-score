@@ -15,6 +15,17 @@
 - **Token Address:** [`[Token Address]`]([Token Explorer Link])
 - **Final Score: X/5.0**
 <!-- Status: omit this line entirely for normal/active reports. See the Status comment below. -->
+<!-- Visibility: omit this line entirely for listed reports. See the Visibility comment below. -->
+
+<!--
+Visibility field (optional — omit for listed reports):
+  Add a "- **Visibility:** Hidden" line to keep a report out of the site's
+  listings: the /reports/ index, the homepage highlights, and the report count
+  shown on the site. The report is unlisted, not unpublished — its
+  /report/<slug>/ page, OG image, graph page and bridge rows still build, so a
+  direct link keeps working and nothing else on the site degrades. Remove the
+  line to list it again.
+-->
 
 <!--
 Status field (optional — omit for active reports):
