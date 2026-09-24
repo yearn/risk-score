@@ -1,61 +1,54 @@
 /**
- * Scores are shown to one decimal, always rounded down.
- * 2.48 → 2.4, 2.54 → 2.5. Color, tier, and the list bars use that
- * same displayed value, so a badge and its color cannot disagree.
+ * Scores are always rounded down: two decimals everywhere, one decimal on the
+ * reports list (2.459 → "2.45" / "2.4").
  *
- * The epsilon keeps values that are already on a tenth (2.3 is
- * 2.2999… in IEEE) from dropping an extra tenth.
+ * Tier bands are lower-inclusive hard lines (2.5 is Medium). Every boundary
+ * sits on a tenth, so the floored value is always in the same tier as the full
+ * score: color, tier, and bars take the raw score and agree with any shown
+ * number.
  */
-export function displayScore(score: number): number {
-  return Math.floor(score * 10 + 1e-8) / 10;
+function floorTo(score: number, digits: number): string {
+  const f = 10 ** digits;
+  // Epsilon keeps values already on the grid (2.3 is 2.2999… in IEEE) from
+  // dropping a step.
+  return (Math.floor(score * f + 1e-8) / f).toFixed(digits);
 }
 
+/** Two-decimal score used on report pages, graphs, and OG images. */
 export function formatScore(score: number): string {
-  return displayScore(score).toFixed(1);
+  return floorTo(score, 2);
 }
 
-/** How many of the five list-bar segments to fill. Integer part of the displayed score. */
-export function scoreSegments(score: number): number {
-  return Math.min(5, Math.max(0, Math.floor(displayScore(score) + 1e-8)));
+/** Reports list only: floored one-decimal score. */
+export function formatListScore(score: number): string {
+  return floorTo(score, 1);
 }
 
-function colorFor(s: number): string {
-  if (s <= 1.5) return "#22C55E";
-  if (s <= 2.5) return "#86EFAC";
-  if (s <= 3.5) return "#FACC15";
-  if (s <= 4.5) return "#FB923C";
-  return "#EF4444";
+const BANDS = [
+  { below: 1.5, tier: "Minimal Risk", color: "#22C55E", text: "#0C0C0C" },
+  { below: 2.5, tier: "Low Risk", color: "#86EFAC", text: "#0C0C0C" },
+  { below: 3.5, tier: "Medium Risk", color: "#FACC15", text: "#0C0C0C" },
+  { below: 4.5, tier: "Elevated Risk", color: "#FB923C", text: "#FFFFFF" },
+  { below: Infinity, tier: "High Risk", color: "#EF4444", text: "#FFFFFF" },
+];
+
+function bandIndex(score: number): number {
+  return BANDS.findIndex((b) => score < b.below);
 }
 
-function tierFor(s: number): string {
-  if (s <= 1.5) return "Minimal Risk";
-  if (s <= 2.5) return "Low Risk";
-  if (s <= 3.5) return "Medium Risk";
-  if (s <= 4.5) return "Elevated Risk";
-  return "High Risk";
-}
-
-/** Color and tier for a final score: bands apply to the floored one-decimal value. */
 export function scoreColor(score: number): string {
-  return colorFor(displayScore(score));
+  return BANDS[bandIndex(score)].color;
 }
 
 export function scoreTier(score: number): string {
-  return tierFor(displayScore(score));
+  return BANDS[bandIndex(score)].tier;
 }
 
 export function scoreTextColor(score: number): string {
-  return displayScore(score) <= 3.5 ? "#0C0C0C" : "#FFFFFF";
+  return BANDS[bandIndex(score)].text;
 }
 
-/**
- * Color for a figure shown at full precision (category rows print two decimals).
- * Bands use that printed value, not the floored final-score tenth.
- */
-export function exactScoreColor(score: number): string {
-  return colorFor(score);
-}
-
-export function exactScoreTextColor(score: number): string {
-  return score <= 3.5 ? "#0C0C0C" : "#FFFFFF";
+/** How many of the five list-bar segments to fill: one per tier, Minimal = 1. */
+export function scoreSegments(score: number): number {
+  return bandIndex(score) + 1;
 }

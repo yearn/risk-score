@@ -1,5 +1,5 @@
 ---
-import { exactScoreColor, exactScoreTextColor, formatScore, scoreColor, scoreTier, scoreTextColor } from "../lib/colors";
+import { formatScore, scoreColor, scoreTier, scoreTextColor } from "../lib/colors";
 import type { CategoryScore } from "../lib/parseReport";
 
 interface Props {
@@ -29,7 +29,7 @@ const segments = scores.map((s) => {
   const startAngle = (accumulated / totalWeight) * 360;
   accumulated += weightNum;
   const endAngle = (accumulated / totalWeight) * 360;
-  return { ...s, startAngle, endAngle, color: exactScoreColor(s.score) };
+  return { ...s, startAngle, endAngle, color: scoreColor(s.score) };
 });
 
 function polarToCartesian(cx: number, cy: number, r: number, angle: number) {
@@ -66,12 +66,12 @@ function labelPos(cx: number, cy: number, r: number, start: number, end: number)
             {scores.map((s) => (
               <tr>
                 <td>
-                  <span class="color-dot" style={`background:${exactScoreColor(s.score)}`} />
+                  <span class="color-dot" style={`background:${scoreColor(s.score)}`} />
                   {s.category}
                 </td>
                 <td>{s.weight}</td>
-                <td style={`color:${exactScoreColor(s.score)}`}>
-                  {s.score.toFixed(2)}
+                <td style={`color:${scoreColor(s.score)}`}>
+                  {formatScore(s.score)}
                 </td>
               </tr>
             ))}
@@ -141,7 +141,7 @@ function labelPos(cx: number, cy: number, r: number, start: number, end: number)
               const weightNum = parseFloat(seg.weight);
               if (weightNum < 10) return null;
               return (
-                <text x={pos.x} y={pos.y} text-anchor="middle" dominant-baseline="central" fill={exactScoreTextColor(seg.score)} font-size="11" font-weight="600" class="pie-label">
+                <text x={pos.x} y={pos.y} text-anchor="middle" dominant-baseline="central" fill={scoreTextColor(seg.score)} font-size="11" font-weight="600" class="pie-label">
                   {seg.weight}
                 </text>
               );

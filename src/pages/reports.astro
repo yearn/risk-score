@@ -116,7 +116,7 @@ const tierCounts = tierOrder.map((t) => ({
               <span>{r.status}</span>
             </div>
           )}
-          <ScoreBadge score={r.finalScore} />
+          <ScoreBadge score={r.finalScore} list />
         </div>
         <div class="card-foot">
           <span class="tier-sm" style={`color:${scoreColor(r.finalScore)};`}>

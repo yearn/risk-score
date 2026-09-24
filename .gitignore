@@ -50,6 +50,7 @@ node_modules/
 # Lychee link checker cache
 .lycheecache
 
-# Foundry
-cache/
-out/
+# Foundry build output and deps inside report evidence folders
+reports/data/**/cache/
+reports/data/**/out/
+reports/data/**/lib/
