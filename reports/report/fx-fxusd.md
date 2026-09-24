@@ -4,7 +4,7 @@
 - **Token:** fxUSD (f(x) USD)
 - **Chain:** Ethereum
 - **Token Address:** [`0x085780639CC2cACd35E474e71f4d000e2405d8f6`](https://etherscan.io/address/0x085780639CC2cACd35E474e71f4d000e2405d8f6)
-- **Final Score: 2.2/5.0**
+- **Final Score: 2.15/5.0**
 
 ## Overview + Links
 
@@ -643,7 +643,7 @@ What holds the subcategory at 3.0 rather than better is that the timelock does n
 - Protocol live >2 years with no incidents: **-0.5** → Does not fully apply due to ChainSecurity vulnerability disclosure (though no exploitation occurred). Not applied.
 - TVL maintained >$500M for >1 year: Not applicable
 
-**Final Score: 2.2/5.0** — Raw weighted score **2.15**, conservatively rounded to one decimal. Relative to the May assessment, the verified $500K bounty and removal of the unsupported $0.953 depeg support lowering Historical Track Record from 2.0 to 1.5. The other issue #387 corrections improve factual accuracy without crossing a scoring threshold: the corrected AladdinDAO attribution does not justify Operational Risk 2.0, and Chainlink plus Curve remain critical dependencies even though Aave exposure is negligible and the LayerZero route is optional and bounded. These improvements are offset by the newly verified non-timelocked oracle-control path, which raises Governance from 2.5 to 3.0. Liquidity remains 3.0 because the recovered 10.65% Stability Pool USDC buffer and strong current Curve execution are balanced by depeg-gated redemption and 89.35% supply concentration.
+**Final Score: 2.15/5.0** — Raw weighted score **2.15**. Relative to the May assessment, the verified $500K bounty and removal of the unsupported $0.953 depeg support lowering Historical Track Record from 2.0 to 1.5. The other issue #387 corrections improve factual accuracy without crossing a scoring threshold: the corrected AladdinDAO attribution does not justify Operational Risk 2.0, and Chainlink plus Curve remain critical dependencies even though Aave exposure is negligible and the LayerZero route is optional and bounded. These improvements are offset by the newly verified non-timelocked oracle-control path, which raises Governance from 2.5 to 3.0. Liquidity remains 3.0 because the recovered 10.65% Stability Pool USDC buffer and strong current Curve execution are balanced by depeg-gated redemption and 89.35% supply concentration.
 
 ### Risk Tier
 

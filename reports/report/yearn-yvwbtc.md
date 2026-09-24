@@ -4,7 +4,7 @@
 - **Token:** yvWBTC-1 (WBTC-1 yVault)
 - **Chain:** Ethereum
 - **Token Address:** [`0x751F0cC6115410A3eE9eC92d08f46Ff6Da98b708`](https://etherscan.io/address/0x751F0cC6115410A3eE9eC92d08f46Ff6Da98b708)
-- **Final Score: 1.4/5.0**
+- **Final Score: 1.36/5.0**
 
 ## Overview + Links
 
@@ -384,7 +384,7 @@ Other monitoring that does cover yvWBTC-1 implicitly via the broader Yearn V3 se
 - Be conservative: when uncertain between two scores, choose the higher (riskier) one
 - Use decimals when a subcategory falls between scores
 - Prioritize on-chain evidence over documentation claims
-- **Rounding rule:** the weighted sum is rounded to one decimal place using standard nearest-0.1 rounding; when the value is exactly halfway between two 0.1 marks (X.X50), round UP to the higher (riskier) score per the conservative principle
+- **Rounding rule:** the weighted sum is recorded to two decimal places. The site shows that figure as-is and floors it to one decimal on the reports list.
 - **Score reflects current snapshot state (July 12, 2026):** 100% deployed through MetaMorpho → Morpho Blue, with 82% idle and 18% in WBTC/LBTC lending market.
 
 ### Critical Risk Gates
@@ -514,9 +514,9 @@ Other monitoring that does cover yvWBTC-1 implicitly via the broader Yearn V3 se
 | Funds Management | 1.25 | 30% | 0.375 |
 | Liquidity Risk | 1.5 | 15% | 0.225 |
 | Operational Risk | 1.5 | 5% | 0.075 |
-| **Final Score** | | | **1.365 → 1.4 / 5.0** |
+| **Final Score** | | | **1.36 / 5.0** |
 
-1.365 rounds to 1.4 under the standard nearest-0.1 rule. This is up from the previous 1.2, reflecting the newly-attached strategy and expanded dependency surface. However, 1.4 remains well within the **Minimal Risk** tier. The primary drivers of the +0.2 increase are: (a) Dependencies expanded from WBTC-only (1.0) to 7-component dependency chain including newer LBTC collateral (2.0); (b) Liquidity moved from trivially atomic (1.0) to mostly-idle with constrained deployed portion (1.5).
+1.365 is recorded as 1.36 (two decimals, rounded down). This is up from the previous 1.2, reflecting the newly-attached strategy and expanded dependency surface. However, 1.36 remains well within the **Minimal Risk** tier. The primary drivers of the +0.2 increase are: (a) Dependencies expanded from WBTC-only (1.0) to 7-component dependency chain including newer LBTC collateral (2.0); (b) Liquidity moved from trivially atomic (1.0) to mostly-idle with constrained deployed portion (1.5).
 
 ### Risk Tier
 
@@ -528,7 +528,7 @@ Other monitoring that does cover yvWBTC-1 implicitly via the broader Yearn V3 se
 | 3.5–4.5 | Elevated Risk | Limited approval, strict limits |
 | 4.5–5.0 | High Risk | Not recommended |
 
-**Final Risk Tier: Minimal Risk (1.4 / 5.0) — Approved, high confidence**
+**Final Risk Tier: Minimal Risk (1.36 / 5.0) — Approved, high confidence**
 
 ---
 

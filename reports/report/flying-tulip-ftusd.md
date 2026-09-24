@@ -4,7 +4,7 @@
 - **Token:** ftUSD (stablecoin) and sftUSD (staked ftUSD)
 - **Chain:** Ethereum Mainnet
 - **Token Address:** ftUSD [`0xF7D85EC4E7710f71992752eac2111312e73E9C9C`](https://etherscan.io/address/0xF7D85EC4E7710f71992752eac2111312e73E9C9C) · sftUSD [`0xeb48218a4c35C814C7678cBcae88C6Ee037F7625`](https://etherscan.io/address/0xeb48218a4c35C814C7678cBcae88C6Ee037F7625)
-- **Final Score: 3.4/5.0**
+- **Final Score: 3.40/5.0**
 - **Medium Risk** — approved with enhanced monitoring. ftUSD is fully collateralized (100.05%), but that backing is **not idle cash — it is lent into Flying Tulip's own money market** by a strategy whose `operators[]` include a plain EOA with `onlyManager` rights to pre-sign hedge trades (no onchain price bound). Normal minting through the current production module is collateralized; separately, the 3/5 Admin Safe retains a technically available privileged path to authorize unbacked issuance. No evidence that path has been used was found. Protocol redemption remains permissionless: sells above available instant capacity enter a six-hour queue, and ultimate settlement depends on FT Lend cash. Curve liquidity fell by more than 85% after the initial assessment, weakening the secondary exit but not removing the primary queued-redemption route. See [Risk Score Assessment](#risk-score-assessment).
 - **Companion report:** the lending market itself is assessed in **[Flying Tulip — FT Lend](./flying-tulip.md)**.
 
@@ -724,9 +724,9 @@ Same team, entity and governance-transparency profile as the lending report (pub
 | Funds Management | 2.50 | 30% | 0.750 |
 | Liquidity Risk | 3.50 | 15% | 0.525 |
 | Operational Risk | 3.50 | 5% | 0.175 |
-| **Final Score** | | | **3.400** |
+| **Final Score** | | | **3.40** |
 
-**Final Score: 3.4** (3.400 weighted)
+**Final Score: 3.40**
 
 **Optional modifiers:** none apply — the asset is <1 year old and supply is far below $500M.
 

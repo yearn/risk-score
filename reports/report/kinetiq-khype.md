@@ -4,7 +4,7 @@
 - **Token:** kHYPE
 - **Chain:** HyperEVM (Hyperliquid L1 ecosystem)
 - **Token Address:** [`0xfd739d4e423301ce9385c1fb8850539d657c296d`](https://hyperevmscan.io/address/0xfd739d4e423301ce9385c1fb8850539d657c296d)
-- **Final Score: 2.30/5.0**
+- **Final Score: 2.31/5.0**
 
 ## Overview + Links
 
@@ -479,9 +479,9 @@ Funds management score = (2.0 + 1.5) / 2 = **1.75**
 | Funds Management | 1.75 | 30% | 0.525 |
 | Liquidity Risk | 2.0 | 15% | 0.30 |
 | Operational Risk | 2.0 | 5% | 0.10 |
-| **Final Score** | | | **2.315 / 5.0** |
+| **Final Score** | | | **2.31 / 5.0** |
 
-## Overall Risk Score: **2.3 / 5.0**
+## Overall Risk Score: **2.31 / 5.0**
 
 ### Risk Tier: **LOW RISK**
 

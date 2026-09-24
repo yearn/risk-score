@@ -4,7 +4,7 @@
 - **Token:** siUSD (Staked iUSD)
 - **Chain:** Ethereum Mainnet
 - **Token Address:** [`0xDBDC1Ef57537E34680B898E1FEBD3D68c7389bCB`](https://etherscan.io/address/0xDBDC1Ef57537E34680B898E1FEBD3D68c7389bCB)
-- **Final Score: 3.2/5.0**
+- **Final Score: 3.19/5.0**
 
 ## Overview + Links
 
@@ -539,9 +539,9 @@ Autonomous events triggered by protocol state, not governance actions.
 | Funds Management | 4.0 | 30% | 1.200 |
 | Liquidity Risk | 3.0 | 15% | 0.450 |
 | Operational Risk | 2.5 | 5% | 0.125 |
-| **Final Score** | | | **3.195** |
+| **Final Score** | | | **3.19** |
 
-**Final Score: 3.2**
+**Final Score: 3.19**
 
 ### Risk Tier
 

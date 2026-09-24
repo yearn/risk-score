@@ -4,7 +4,7 @@
 - **Token:** yvUSDT-1 (USDT-1 yVault)
 - **Chain:** Ethereum
 - **Token Address:** [`0x310B7Ea7475A0B449Cfd73bE81522F1B88eFAFaa`](https://etherscan.io/address/0x310B7Ea7475A0B449Cfd73bE81522F1B88eFAFaa)
-- **Final Score: 1.3/5.0**
+- **Final Score: 1.25/5.0**
 
 ## Overview + Links
 
@@ -344,7 +344,7 @@ Yearn maintains the [`monitoring`](https://github.com/yearn/monitoring) reposito
 - Be conservative: when uncertain between two scores, choose the higher (riskier) one
 - Use decimals when a subcategory falls between scores
 - Prioritize on-chain evidence over documentation claims
-- **Rounding rule:** the weighted sum is rounded to one decimal place using standard nearest-0.1 rounding; when the value is exactly halfway between two 0.1 marks (X.X50), round UP to the higher (riskier) score per the conservative principle
+- **Rounding rule:** the weighted sum is recorded to two decimal places. The site shows that figure as-is and floors it to one decimal on the reports list.
 - **Score reflects July 13 snapshot — 100% deployed across MetaMorpho (Morpho) + Spark (~44/56).**
 
 ### Critical Risk Gates
@@ -472,7 +472,7 @@ Yearn maintains the [`monitoring`](https://github.com/yearn/monitoring) reposito
 | Funds Management | 1.0 | 30% | 0.300 |
 | Liquidity Risk | 1.0 | 15% | 0.150 |
 | Operational Risk | 1.0 | 5% | 0.050 |
-| **Final Score** | | | **1.250 → 1.3 / 5.0** |
+| **Final Score** | | | **1.25 / 5.0** |
 
 1.250 rounds to 1.3 under the conservative rule (X.X50 ties break UP). The Centralization score (1.5) reflects the Sky-governance concentration on ~50% of debt; otherwise the vault is a clean two-venue blue-chip stablecoin deployment.
 

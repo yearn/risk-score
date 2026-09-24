@@ -4,7 +4,7 @@
 - **Token:** USDS (Sky Dollar) and sUSDS (Savings USDS)
 - **Chain:** Ethereum
 - **Token Address:** [`0xdC035D45d973E3EC169d2276DDab16f1e407384F`](https://etherscan.io/address/0xdC035D45d973E3EC169d2276DDab16f1e407384F) (USDS) · [`0xa3931d71877C0E7a3148CB7Eb4463524FEc27fbD`](https://etherscan.io/address/0xa3931d71877C0E7a3148CB7Eb4463524FEc27fbD) (sUSDS)
-- **Final Score: 1.3/5.0**
+- **Final Score: 1.30/5.0**
 
 ## Overview + Links
 
@@ -719,7 +719,7 @@ Snapshot block 25345569 (June 18, 2026).
 
 ### Final Score Calculation
 
-**Rounding rule:** category scores use one-decimal precision; when a subcategory average falls between two 0.1 marks, round **up** (conservative). The weighted sum is then rounded to one decimal place with standard nearest-0.1 rounding, with ties broken up.
+**Rounding rule:** the weighted sum is recorded to two decimal places. The site shows that figure as-is and floors it to one decimal on the reports list.
 
 | Category | Score | Weight | Weighted |
 |----------|------:|-------:|---------:|
@@ -728,9 +728,9 @@ Snapshot block 25345569 (June 18, 2026).
 | Funds Management | 1.8 | 30% | 0.540 |
 | Liquidity Risk | 1.0 | 15% | 0.150 |
 | Operational Risk | 1.0 |  5% | 0.050 |
-| **Final Score** | | | **1.300 → 1.3 / 5.0** |
+| **Final Score** | | | **1.30 / 5.0** |
 
-**Final Score: 1.3 / 5.0** — well inside the Minimal-Risk tier (1.0–1.5).
+**Final Score: 1.30 / 5.0** — well inside the Minimal-Risk tier (1.0–1.5).
 
 ### Risk Tier
 

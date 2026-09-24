@@ -4,7 +4,7 @@
 - **Token:** FT Lend market — supply / borrow positions (internal balances, not tokenised)
 - **Chain:** Ethereum Mainnet
 - **Core Contract:** PositionsManager [`0xbe4050a73a7Fb384c65E885a15C33461A4B20055`](https://etherscan.io/address/0xbe4050a73a7Fb384c65E885a15C33461A4B20055)
-- **Final Score: 3.0/5.0**
+- **Final Score: 3.02/5.0**
 - **Medium Risk** — approved with enhanced monitoring. A 3-of-5 Safe with no timelock can upgrade every core protocol contract and override every price. **35.1% of the market's TVL is the protocol's own ftUSD backing collateral supplied back into itself**, and only three genuinely third-party addresses hold 96% of the remainder. The newly live TRS product uses this same account, borrowing, margin and liquidation infrastructure and adds permissioned RFQ execution, but does not change the score by itself. The audit package was privately reviewed and is strong but remains non-public; a live $1M Sherlock bounty covers deployed Flying Tulip contracts through the dynamic production-contract list incorporated by its Additional Scope. See [Risk Score Assessment](#risk-score-assessment). (Also deployed on Sonic; this report covers Ethereum.)
 - **Companion report:** ftUSD and staked ftUSD are assessed separately in **[Flying Tulip — ftUSD & Staked ftUSD](./flying-tulip-ftusd.md)**.
 
@@ -778,9 +778,9 @@ Framed for an **FT Lend supplier**. Exit is protocol `withdraw` against availabl
 | Funds Management | 3.00 | 30% | 0.900 |
 | Liquidity Risk | 2.00 | 15% | 0.300 |
 | Operational Risk | 3.50 | 5% | 0.175 |
-| **Final Score** | | | **3.025** |
+| **Final Score** | | | **3.02** |
 
-**Final Score: 3.0** (3.025 weighted, displayed to one decimal)
+**Final Score: 3.02**
 
 **Optional modifiers:** none apply. Protocol is <1 year old (no −0.5 for >2 years incident-free) and TVL is far below $500M (no −0.5 for scale).
 

@@ -4,7 +4,7 @@
 - **Token:** mHYPER
 - **Chain:** Ethereum (also deployed on Monad, Plasma, and Katana)
 - **Token Address:** [`0x9b5528528656DBC094765E2abB79F293c21191B9`](https://etherscan.io/token/0x9b5528528656dbc094765e2abb79f293c21191b9)
-- **Final Score: 2.9/5.0**
+- **Final Score: 2.91/5.0**
 
 ## Overview + Links
 
@@ -225,7 +225,7 @@ Both teams are public and established, documentation is substantial, and Hyperit
 | Funds Management | 2.9 | 30% | 0.87 |
 | Liquidity Risk | 3.0 | 15% | 0.45 |
 | Operational Risk | 1.8 | 5% | 0.09 |
-| **Final Score** | | | **2.91 ≈ 2.9/5.0** |
+| **Final Score** | | | **2.91/5.0** |
 
 ### Risk Tier
 

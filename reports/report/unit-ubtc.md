@@ -5,7 +5,7 @@
 - **Chain:** HyperEVM (Hyperliquid L1 ecosystem)
 - **Token Address:** [`0x9FDBdA0A5e284c32744D2f17Ee5c74B284993463`](https://hyperevmscan.io/address/0x9FDBdA0A5e284c32744D2f17Ee5c74B284993463)
 - **HyperCore Token ID:** [`0x8f254b963e8468305d409b33aa137c67`](https://app.hyperliquid.xyz/explorer/token/0x8f254b963e8468305d409b33aa137c67)
-- **Final Score: 5.0/5.0** (unchanged — critical gate "no audit" still triggered)
+- **Final Score: 5.00/5.0** (unchanged — critical gate "no audit" still triggered)
 - **Status:** GATED — score capped by the "no audit" critical gate; ungated weighted score is 3.19 (Medium). No realized loss event.
 
 ## Overview + Links
@@ -452,7 +452,7 @@ For reference, the weighted score without the critical gate would be:
 | Operational Risk | 3.0 | 5% | 0.15 |
 | **Weighted Score** | | | **3.12 / 5.0** |
 
-**But critical gate applies → Final Score: 5.0 / 5.0**
+**But critical gate applies → Final Score: 5.00 / 5.0**
 
 ## Overall Risk Score: **5.0 / 5.0**
 

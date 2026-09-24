@@ -4,7 +4,7 @@
 - **Token:** ETH+
 - **Chain:** Ethereum Mainnet
 - **Token Address:** [`0xE72B141DF173b999AE7c1aDcbF60Cc9833Ce56a8`](https://etherscan.io/address/0xE72B141DF173b999AE7c1aDcbF60Cc9833Ce56a8)
-- **Final Score: 1.8/5.0**
+- **Final Score: 1.76/5.0**
 
 ## Overview + Links
 
@@ -538,14 +538,14 @@ Base score 2 (rubric: ">$5M, <1% slippage, 1-3 days"); +0.5 for throttle ≈ **2
 | Funds Management | 1.5 | 30% | 0.45 |
 | Liquidity Risk | 2.0 | 15% | 0.30 |
 | Operational Risk | 1.3 | 5% | 0.07 |
-| **Final Score** | | | **1.77** |
+| **Final Score** | | | **1.76** |
 
 **Modifiers:**
 - Protocol live >2 years with no incidents: **−0.5** would apply, but offset by:
   - Major version upgrade (v4.2.0) and full governance rotation 25 days before assessment: **+0.5** for the still-young (under 30-day) post-rotation governance state
 - Net modifier: **0**
 
-**Final score (rounded): 1.8**
+**Final score: 1.76**
 
 The deployer EOA holding PAUSER is documented as a role-holder watch item, not as a discrete numeric penalty: the condition has existed since 2023 deployment without incident and PAUSER is bounded (no freeze, no fund seizure).
 

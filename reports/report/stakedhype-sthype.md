@@ -4,7 +4,7 @@
 - **Token:** stHYPE
 - **Chain:** HyperEVM (Hyperliquid L1 ecosystem)
 - **Token Address:** [`0xfFaa4a3D97fE9107Cef8a3F48c069F577Ff76cC1`](https://hyperevmscan.io/address/0xfFaa4a3D97fE9107Cef8a3F48c069F577Ff76cC1)
-- **Final Score: 2.86/5.0**
+- **Final Score: 2.85/5.0**
 
 > **Reassessment note (May 19, 2026):** Governance posture improved materially since the Feb 2026 assessment — multisig moved from 3-of-5 to **4-of-6** (2026-04-07), and a **48-hour OpenZeppelin TimelockController** ([`0xc5DEd4F7F53919c714059a17d31371aE847E23D2`](https://hyperevmscan.io/address/0xc5DEd4F7F53919c714059a17d31371aE847E23D2)) was inserted between the Safe and all three ProxyAdmin contracts (2026-04-10). The `setSelfDisableTransfer()` admin function was removed in the same upgrade window. Two new audits added (Guardian Jan 2026, Obsidian Apr 2026). Offsetting risks: OverseerV1 liquid HYPE reserve dropped from 261,729 HYPE to **5,127 HYPE** (0.15% of backing) with no docs-disclosed buffer relocation; Morpho wstHYPE collateral collapsed from ~$44M to ~$4M (~$65M total wstHYPE lending exposure remains, with HyperLend now dominant at $56.9M).
 
@@ -490,17 +490,17 @@ Funds management score = (2.5 + 2.0) / 2 = **2.25**
 |----------|-------|--------|----------|
 | Audits & Historical | 2.5 | 20% | 0.50 |
 | Centralization & Control | 3.33 | 30% | 1.00 |
-| Funds Management | 2.25 | 30% | 0.68 |
-| Liquidity Risk | 3.5 | 15% | 0.53 |
+| Funds Management | 2.25 | 30% | 0.675 |
+| Liquidity Risk | 3.5 | 15% | 0.525 |
 | Operational Risk | 3.0 | 5% | 0.15 |
-| **Final Score** | | | **2.86 / 5.0** |
+| **Final Score** | | | **2.85 / 5.0** |
 
-## Overall Risk Score: **2.86 / 5.0**
+## Overall Risk Score: **2.85 / 5.0**
 
 ### Risk Tier: **MEDIUM RISK**
 
 Rationale:
-- Governance posture improved materially since Feb 2026: multisig 3-of-5 → 4-of-6, 48-hour upgrade timelock added, `setSelfDisableTransfer()` removed. Score improvement from 3.03 → 2.86.
+- Governance posture improved materially since Feb 2026: multisig 3-of-5 → 4-of-6, 48-hour upgrade timelock added, `setSelfDisableTransfer()` removed. Score improvement from 3.03 → 2.85.
 - Audit coverage now 6 firms across 4 distinct review windows; still no bug bounty (explicit per Valantis docs).
 - DEX liquidity materially better thanks to Pendle markets (~$6.3M on stHYPE side), but wstHYPE→stablecoin onchain exit remains absent; protocol unstaking queue (7+ days) is still the realistic exit path for any meaningful size.
 - ~$65M wstHYPE lending collateral concentrated in HyperLend (~$57M, 87%) — single-venue counterparty risk introduced as Morpho exposure collapsed.

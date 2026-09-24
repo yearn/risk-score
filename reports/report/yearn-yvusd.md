@@ -4,7 +4,7 @@
 - **Token:** yvUSD (USD yVault)
 - **Chain:** Ethereum (with cross-chain strategies on Arbitrum, Katana, and Base)
 - **Token Address:** [`0x696d02Db93291651ED510704c9b286841d506987`](https://etherscan.io/address/0x696d02Db93291651ED510704c9b286841d506987)
-- **Final Score: 2.5/5.0**
+- **Final Score: 2.45/5.0**
 
 ## Overview + Links
 
@@ -658,7 +658,7 @@ Additionally, Yearn provides a dedicated **yvUSD APR API** ([yvusd-api.yearn.fi]
 | Funds Management | 2.5 | 30% | 0.75 |
 | Liquidity Risk | 3.5 | 15% | 0.525 |
 | Operational Risk | 1.5 | 5% | 0.075 |
-| **Final Score** | | | **2.45 → 2.5/5.0** |
+| **Final Score** | | | **2.45/5.0** |
 
 ### Risk Tier
 
@@ -670,9 +670,9 @@ Additionally, Yearn provides a dedicated **yvUSD APR API** ([yvusd-api.yearn.fi]
 | 3.5-4.5 | Elevated Risk | Limited approval, strict limits |
 | 4.5-5.0 | High Risk | Not recommended |
 
-**Final Risk Tier: Low Risk (2.5/5.0) — at the top of the tier; enhanced monitoring recommended**
+**Final Risk Tier: Low Risk (2.45/5.0) — enhanced monitoring recommended**
 
-The weighted score of 2.45 rounds to 2.5, which sits at the **upper boundary of the Low Risk tier** (the repository's tier mapping in `src/lib/colors.ts` assigns 2.5 to Low Risk). This is a full 0.3 worse than the prior 2.2 assessment and one increment away from Medium Risk. Given the 7.9x leveraged position with ~4.5% of liquidation headroom and the 10.7% of TVL that is currently non-withdrawable, the monitoring posture set out above — hourly LTV and stcUSD price alerting, daily withdrawability and queue checks — should be treated as a condition of the approval rather than optional.
+The weighted score is 2.45, inside the Low Risk tier (scores below 2.50). The reports list floors it to 2.4. This is a full 0.3 worse than the prior 2.2 assessment. Given the 7.9x leveraged position with ~4.5% of liquidation headroom and the 10.7% of TVL that is currently non-withdrawable, the monitoring posture set out above — hourly LTV and stcUSD price alerting, daily withdrawability and queue checks — should be treated as a condition of the approval rather than optional.
 
 **Score rationale:** The vault retains battle-tested Yearn V3 infrastructure (~27 months, no exploits), an immutable design, strong governance with a 7-day timelock, and excellent onchain verifiability — the six funded debts reconcile to the wei with `totalDebt()` and are independently reproduced by the public APR API. Single-venue concentration has genuinely improved, with Morpho V1 OG down from ~77% to 62.4%.
 

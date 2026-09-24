@@ -4,7 +4,7 @@
 - **Token:** stcUSD (Staked cap USD)
 - **Chain:** Ethereum
 - **Token Address:** [`0x88887bE419578051FF9F4eb6C858A951921D8888`](https://etherscan.io/address/0x88887bE419578051FF9F4eb6C858A951921D8888)
-- **Final Score: 2.4/5.0**
+- **Final Score: 2.39/5.0**
 
 ## Overview + Links
 
@@ -510,7 +510,7 @@ Final Score = (Centralization × 0.30) + (Funds Mgmt × 0.30) + (Audits × 0.20)
 | Funds Management | 2.3 | 30% | 0.69 |
 | Liquidity Risk | 3.0 | 15% | 0.45 |
 | Operational Risk | 2.0 | 5% | 0.10 |
-| **Final Score** | | | **2.4/5.0** |
+| **Final Score** | | | **2.39/5.0** |
 
 ### Risk Tier
 

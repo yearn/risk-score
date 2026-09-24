@@ -4,7 +4,7 @@
 - **Token:** USDG (Global Dollar)
 - **Chain:** Ethereum
 - **Token Address:** [`0xe343167631d89B6Ffc58B88d6b7fB0228795491D`](https://etherscan.io/address/0xe343167631d89B6Ffc58B88d6b7fB0228795491D)
-- **Final Score: 2.2/5.0**
+- **Final Score: 2.16/5.0**
 
 ## Overview + Links
 
@@ -678,7 +678,6 @@ Final Score = (Centralization × 0.30) + (Funds Mgmt × 0.30) + (Audits × 0.20)
             = (2.7 × 0.30) + (2.5 × 0.30) + (1.5 × 0.20) + (1.5 × 0.15) + (1.5 × 0.05)
             = 0.81 + 0.75 + 0.30 + 0.225 + 0.075
             = 2.16
-            ≈ 2.2
 ```
 
 | Category | Score | Weight | Weighted |
@@ -688,7 +687,7 @@ Final Score = (Centralization × 0.30) + (Funds Mgmt × 0.30) + (Audits × 0.20)
 | Funds Management | 2.5 | 30% | 0.75 |
 | Liquidity Risk | 1.5 | 15% | 0.225 |
 | Operational Risk | 1.5 | 5% | 0.075 |
-| **Final Score** | | | **2.2/5.0** |
+| **Final Score** | | | **2.16/5.0** |
 
 ### Risk Tier
 

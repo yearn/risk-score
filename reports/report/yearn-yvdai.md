@@ -4,7 +4,7 @@
 - **Token:** yvDAI-1 (DAI-1 yVault)
 - **Chain:** Ethereum
 - **Token Address:** [`0x028eC7330ff87667b6dfb0D94b954c820195336c`](https://etherscan.io/address/0x028eC7330ff87667b6dfb0D94b954c820195336c)
-- **Final Score: 1.3/5.0**
+- **Final Score: 1.32/5.0**
 
 ## Overview + Links
 
@@ -423,7 +423,7 @@ Yearn maintains the [`monitoring`](https://github.com/yearn/monitoring) reposito
 - Be conservative: when uncertain between two scores, choose the higher (riskier) one
 - Use decimals when a subcategory falls between scores
 - Prioritize on-chain evidence over documentation claims
-- **Rounding rule:** the weighted sum is rounded to one decimal place using standard nearest-0.1 rounding; when the value is exactly halfway between two 0.1 marks (X.X50), round UP to the higher (riskier) score per the conservative principle
+- **Rounding rule:** the weighted sum is recorded to two decimal places. The site shows that figure as-is and floors it to one decimal on the reports list.
 
 ### Critical Risk Gates
 
@@ -550,7 +550,7 @@ Yearn maintains the [`monitoring`](https://github.com/yearn/monitoring) reposito
 | Funds Management | 1.0 | 30% | 0.300 |
 | Liquidity Risk | 1.5 | 15% | 0.225 |
 | Operational Risk | 1.0 | 5% | 0.050 |
-| **Final Score** | | | **1.325 → 1.3 / 5.0** |
+| **Final Score** | | | **1.32 / 5.0** |
 
 ### Risk Tier
 
@@ -562,7 +562,7 @@ Yearn maintains the [`monitoring`](https://github.com/yearn/monitoring) reposito
 | 3.5–4.5 | Elevated Risk | Limited approval, strict limits |
 | 4.5–5.0 | High Risk | Not recommended |
 
-**Final Risk Tier: Minimal Risk (1.3 / 5.0) — Approved, high confidence**
+**Final Risk Tier: Minimal Risk (1.32 / 5.0) — Approved, high confidence**
 
 ---
 

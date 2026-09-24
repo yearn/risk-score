@@ -4,7 +4,7 @@
 - **Token:** syrupUSDC
 - **Chain:** Ethereum Mainnet
 - **Token Address:** [`0x80ac24aA929eaF5013f6436cdA2a7ba190f5Cc0b`](https://etherscan.io/address/0x80ac24aA929eaF5013f6436cdA2a7ba190f5Cc0b)
-- **Final Score: 2.33/5.0**
+- **Final Score: 2.32/5.0**
 
 ## Overview + Links
 
@@ -489,7 +489,7 @@ Final Score = (Audits × 0.20) + (Centralization × 0.30) + (Funds Mgmt × 0.30)
             = (1.5 × 0.20) + (2.50 × 0.30) + (2.75 × 0.30) + (2.5 × 0.15) + (1.5 × 0.05)
             = 0.30 + 0.75 + 0.825 + 0.375 + 0.075
             = 2.325
-            ≈ 2.33
+            → 2.32 (two decimals, rounded down)
 ```
 
 | Category | Score | Weight | Weighted |
@@ -499,7 +499,7 @@ Final Score = (Audits × 0.20) + (Centralization × 0.30) + (Funds Mgmt × 0.30)
 | Funds Management | 2.75 | 30% | 0.825 |
 | Liquidity Risk | 2.5 | 15% | 0.375 |
 | Operational Risk | 1.5 | 5% | 0.075 |
-| **Final Score** | | | **2.33 / 5.0** |
+| **Final Score** | | | **2.32 / 5.0** |
 
 ### Risk Tier
 

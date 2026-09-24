@@ -4,7 +4,7 @@
 - **Token:** ARM-WETH-stETH
 - **Chain:** Ethereum Mainnet
 - **Token Address:** [`0x85B78AcA6Deae198fBF201c82DAF6Ca21942acc6`](https://etherscan.io/address/0x85B78AcA6Deae198fBF201c82DAF6Ca21942acc6)
-- **Final Score: 1.50/5.0**
+- **Final Score: 1.49/5.0**
 
 ## Overview + Links
 
@@ -251,7 +251,7 @@ Final Score = (Audits × 0.20) + (Centralization × 0.30) + (Funds Mgmt × 0.30)
             = (1.5 × 0.20) + (1.33 × 0.30) + (1.25 × 0.30) + (2.5 × 0.15) + (1.0 × 0.05)
             = 0.30 + 0.399 + 0.375 + 0.375 + 0.05
             = 1.499
-            ≈ 1.50
+            → 1.49 (two decimals, rounded down)
 ```
 
 | Category | Score | Weight | Weighted |
@@ -261,7 +261,7 @@ Final Score = (Audits × 0.20) + (Centralization × 0.30) + (Funds Mgmt × 0.30)
 | Funds Management | 1.25 | 30% | 0.375 |
 | Liquidity Risk | 2.5 | 15% | 0.375 |
 | Operational Risk | 1.0 | 5% | 0.05 |
-| **Final Score** | | | **1.50 / 5.0** |
+| **Final Score** | | | **1.49 / 5.0** |
 
 ### Risk Tier
 

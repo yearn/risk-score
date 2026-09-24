@@ -553,7 +553,7 @@ Final Score = (Centralization × 0.30) + (Funds Mgmt × 0.30) + (Audits × 0.20)
 | Funds Management | 2.0 | 30% | 0.60 |
 | Liquidity Risk | 2.0 | 15% | 0.30 |
 | Operational Risk | 2.0 | 5% | 0.10 |
-| **Final Score** | | | **2.101** |
+| **Final Score** | | | **2.10** |
 
 **Final Score: 2.10**
 

@@ -4,7 +4,7 @@
 - **Token:** stUSDS (Staked USDS)
 - **Chain:** Ethereum
 - **Token Address:** [`0x99CD4Ec3f88A45940936F469E4bB72A2A701EEB9`](https://etherscan.io/address/0x99CD4Ec3f88A45940936F469E4bB72A2A701EEB9)
-- **Final Score: 2.6/5.0**
+- **Final Score: 2.55/5.0**
 
 ## Overview + Links
 
@@ -862,7 +862,7 @@ This falls between the rubric's Score-3 mixed-quality collateral band and Score-
 
 ### Final Score Calculation
 
-**Rounding rule:** category scores use one-decimal precision; when a subcategory average falls between two 0.1 marks, round **up** (conservative). The weighted sum is then rounded to one decimal place with standard nearest-0.1 rounding, with ties broken up.
+**Rounding rule:** the weighted sum is recorded to two decimal places. The site shows that figure as-is and floors it to one decimal on the reports list.
 
 | Category | Score | Weight | Weighted |
 |----------|------:|-------:|---------:|
@@ -871,7 +871,7 @@ This falls between the rubric's Score-3 mixed-quality collateral band and Score-
 | Funds Management | 2.5 | 30% | 0.750 |
 | Liquidity Risk | 4.0 | 15% | 0.600 |
 | Operational Risk | 1.0 |  5% | 0.050 |
-| **Final Score** | | | **2.550 → 2.6 / 5.0** |
+| **Final Score** | | | **2.55 / 5.0** |
 
 **Score justification notes:**
 - **Audits & Historical (2.0):** Top-tier audits earn 1.0, while ~11 months of production directly matches the rubric's 3.0 band. Average = 2.0.
@@ -882,7 +882,7 @@ This falls between the rubric's Score-3 mixed-quality collateral band and Score-
 
 The unrounded weighted result is **2.550**, which rounds conservatively to **2.6 / 5.0** under the stated tie-breaking rule.
 
-**Final Score: 2.6 / 5.0 — Medium Risk.** The largest current risk is the disabled auction backstop: at the snapshot, 44.8% of LSE debt sat in unsafe urns under the configured feed while the sole Clipper was fully stopped. No unsafe SKY collateral could be sold to recover USDS, restart required governance plus the 48 h Pause delay, and thin SKY market depth would remain a clearing constraint after restart. Strong audits, governance, and onchain transparency prevent a higher score. The separate Morpho USDC-lender exposure requires the enhanced controls described in this report and the monitoring plan.
+**Final Score: 2.55 / 5.0 — Medium Risk.** The largest current risk is the disabled auction backstop: at the snapshot, 44.8% of LSE debt sat in unsafe urns under the configured feed while the sole Clipper was fully stopped. No unsafe SKY collateral could be sold to recover USDS, restart required governance plus the 48 h Pause delay, and thin SKY market depth would remain a clearing constraint after restart. Strong audits, governance, and onchain transparency prevent a higher score. The separate Morpho USDC-lender exposure requires the enhanced controls described in this report and the monitoring plan.
 
 ### Risk Tier
 

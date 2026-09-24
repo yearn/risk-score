@@ -4,7 +4,7 @@
 - **Token:** uniBTC
 - **Chain:** Ethereum
 - **Token Address:** [`0x004E9C3EF86bc1ca1f0bB5C7662861Ee93350568`](https://etherscan.io/address/0x004E9C3EF86bc1ca1f0bB5C7662861Ee93350568)
-- **Final Score: 3.9/5.0**
+- **Final Score: 3.85/5.0**
 - **Visibility:** Hidden
 - **Snapshot:** Ethereum block [25,981,132](https://etherscan.io/block/25981132), September 15, 2026 06:40:23 UTC
 
@@ -528,7 +528,7 @@ Weights use unrounded category means.
 | Funds Management | 4.0 | 30% | 1.2000 |
 | Liquidity Risk | 4.25 | 15% | 0.6375 |
 | Operational Risk | 2.25 | 5% | 0.1125 |
-| **Subtotal** | | | **3.850** |
+| **Subtotal** | | | **3.85** |
 
 **Modifiers:**
 - **None.** The prior exploit is captured in Historical Track Record; the single-EOA mint path in Governance; the M-BTC dependency and custody opacity in Funds Management and External Dependencies. Applying an additional modifier would double count them.

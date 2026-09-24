@@ -4,7 +4,7 @@
 - **Token:** gtUSDa (Gauntlet USD Alpha)
 - **Chain:** Ethereum (also deployed on Base, Optimism, Arbitrum)
 - **Token Address:** [`0x3bd9248048df95db4fbd748c6cd99c1baa40bad0`](https://etherscan.io/token/0x3bd9248048df95db4fbd748c6cd99c1baa40bad0)
-- **Final Score: 3.1/5.0**
+- **Final Score: 3.15/5.0**
 
 ## Overview + Links
 
@@ -575,9 +575,9 @@ Score: **1.5/5** — Strong reputation, extensive documentation, identified lega
 | Funds Management | 3.5 | 30% | 1.05 |
 | Liquidity Risk | 3.5 | 15% | 0.525 |
 | Operational Risk | 1.5 | 5% | 0.075 |
-| **Final Score** | | | **3.149/5.0** |
+| **Final Score** | | | **3.15/5.0** |
 
-**Final Score: 3.1/5.0** (rounded from 3.149)
+**Final Score: 3.15/5.0**
 
 ### Risk Tier
 

@@ -4,7 +4,7 @@
 - **Token:** yvUSDC-1 (USDC-1 yVault)
 - **Chain:** Ethereum
 - **Token Address:** [`0xBe53A109B494E5c9f97b9Cd39Fe969BE68BF6204`](https://etherscan.io/address/0xBe53A109B494E5c9f97b9Cd39Fe969BE68BF6204)
-- **Final Score: 1.5/5.0**
+- **Final Score: 1.47/5.0**
 
 ## Overview + Links
 
@@ -465,7 +465,7 @@ Yearn maintains an active monitoring system via the [`monitoring`](https://githu
 - Be conservative: when uncertain between two scores, choose the higher (riskier) one
 - Use decimals (e.g., 2.5) when a subcategory falls between scores
 - Prioritize onchain evidence over documentation claims
-- **Rounding rule:** the weighted sum is rounded to one decimal place using standard nearest-0.1 rounding; when the value is exactly halfway between two 0.1 marks (X.X50), round UP to the higher (riskier) score per the conservative principle
+- **Rounding rule:** the weighted sum is recorded to two decimal places. The site shows that figure as-is and floors it to one decimal on the reports list.
 
 ### Critical Risk Gates
 
@@ -592,9 +592,9 @@ Yearn maintains an active monitoring system via the [`monitoring`](https://githu
 | Funds Management | 1.5 | 30% | 0.450 |
 | Liquidity Risk | 1.5 | 15% | 0.225 |
 | Operational Risk | 1.0 | 5% | 0.050 |
-| **Final Score** | | | **1.475 → 1.5 / 5.0** |
+| **Final Score** | | | **1.47 / 5.0** |
 
-1.475 rounds to 1.5 under the standard nearest-0.1 rule. Three distinct protocol ecosystems — Sky (~77.9%), Morpho Blue (~7.2%), Cap (~14.9%). Cat 2C dependency subscore 2.5 (Cap's weaker governance). Cat 3A collateralization increased from 1.0 to 2.0 (~15% Cap stcUSD collateral carries governance risk). Funds Management up from 1.0 to 1.5. Final score 1.5 (Minimal Risk).
+1.475 is recorded as 1.47 (two decimals, rounded down). Three distinct protocol ecosystems — Sky (~77.9%), Morpho Blue (~7.2%), Cap (~14.9%). Cat 2C dependency subscore 2.5 (Cap's weaker governance). Cat 3A collateralization increased from 1.0 to 2.0 (~15% Cap stcUSD collateral carries governance risk). Funds Management up from 1.0 to 1.5. Final score 1.47 (Minimal Risk).
 
 ### Risk Tier
 
@@ -606,7 +606,7 @@ Yearn maintains an active monitoring system via the [`monitoring`](https://githu
 | 3.5-4.5 | Elevated Risk | Limited approval, strict limits |
 | 4.5-5.0 | High Risk | Not recommended |
 
-**Final Risk Tier: Minimal Risk (1.5 / 5.0) — Approved, high confidence**
+**Final Risk Tier: Minimal Risk (1.47 / 5.0) — Approved, high confidence**
 
 ---
 

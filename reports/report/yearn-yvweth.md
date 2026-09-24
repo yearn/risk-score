@@ -4,7 +4,7 @@
 - **Token:** yvWETH-1 (WETH-1 yVault)
 - **Chain:** Ethereum
 - **Token Address:** [`0xc56413869c6CDf96496f2b1eF801fEDBdFA7dDB0`](https://etherscan.io/address/0xc56413869c6CDf96496f2b1eF801fEDBdFA7dDB0)
-- **Final Score: 1.5/5.0**
+- **Final Score: 1.49/5.0**
 
 ## Overview + Links
 
@@ -409,7 +409,7 @@ Yearn maintains the [`monitoring`](https://github.com/yearn/monitoring) reposito
 - Be conservative: when uncertain between two scores, choose the higher (riskier) one
 - Use decimals when a subcategory falls between scores
 - Prioritize on-chain evidence over documentation claims
-- **Rounding rule:** the weighted sum is rounded to one decimal place using standard nearest-0.1 rounding; when the value is exactly halfway between two 0.1 marks (X.X50), round UP to the higher (riskier) score per the conservative principle
+- **Rounding rule:** the weighted sum is recorded to two decimal places. The site shows that figure as-is and floors it to one decimal on the reports list.
 
 ### Critical Risk Gates
 
@@ -542,7 +542,7 @@ Yearn maintains the [`monitoring`](https://github.com/yearn/monitoring) reposito
 | Funds Management | 1.3 | 30% | 0.390 |
 | Liquidity Risk | 2.0 | 15% | 0.300 |
 | Operational Risk | 1.0 | 5% | 0.050 |
-| **Final Score** | | | **1.49 → 1.5 / 5.0** |
+| **Final Score** | | | **1.49 / 5.0** |
 
 ### Risk Tier
 

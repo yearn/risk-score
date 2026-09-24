@@ -4,7 +4,7 @@
 - **Token:** apxUSD
 - **Chain:** Ethereum + Base + BNB Chain
 - **Token Address:** [`0x98a878B1CD98131b271883b390F68d2c90674665`](https://etherscan.io/address/0x98a878B1CD98131b271883b390F68d2c90674665)
-- **Final Score: 3.73/5.0**
+- **Final Score: 3.72/5.0**
 
 ## Overview + Links
 
@@ -748,7 +748,7 @@ Final Score = (Centralization × 0.30) + (Funds Mgmt × 0.30) + (Audits × 0.20)
 | Funds Management | 3.5 | 30% | 1.05 |
 | Liquidity Risk | 4.5 | 15% | 0.675 |
 | Operational Risk | 3.0 | 5% | 0.15 |
-| **Final Score** | | | **3.725/5.0 (~3.73)** |
+| **Final Score** | | | **3.72/5.0** |
 
 ### Risk Tier
 
@@ -763,7 +763,7 @@ Final Score = (Centralization × 0.30) + (Funds Mgmt × 0.30) + (Audits × 0.20)
 
 **Final Risk Tier: Elevated Risk — Limited approval, strict limits**
 
-> The final score is 3.73 (Elevated), driven by the June 2026 depeg, current 92.24% Accountable collateral ratio, and collapse of Ethereum exit capacity. The transparent Accountable feed and four readable Wolf examination reports clear the unverifiable-reserves gate and improve Provability; the current shortfall remains reflected directly in Collateralization.
+> The final score is 3.72 (Elevated), driven by the June 2026 depeg, current 92.24% Accountable collateral ratio, and collapse of Ethereum exit capacity. The transparent Accountable feed and four readable Wolf examination reports clear the unverifiable-reserves gate and improve Provability; the current shortfall remains reflected directly in Collateralization.
 
 ---
 
@@ -771,7 +771,7 @@ Apyx's apxUSD is a novel "Dividend-Backed Stablecoin" bridging offchain corporat
 
 What the June 2026 stress test showed is that the governance was never the binding constraint. A record STRC drawdown transmitted directly into the apxUSD market price; the deepest dislocations landed overnight while Nasdaq was closed and collateral marks were stale; the public NAV dashboard was displaying inflated numbers throughout; and the Guardian Safe withdrew the bulk of the only permissionless Ethereum exit venue in the same week. The apyUSD ratchet and absence of Morpho liquidations are observable onchain. Accountable now makes the reserve position independently inspectable and reports 92.24% asset-reserve coverage, consistent with redemption below par rather than a dollar-solvent stablecoin. apxUSD has not traded at par since, and at eight weeks the discount is a repricing rather than a dislocation.
 
-**Residual concerns underlying the 3.73 score:**
+**Residual concerns underlying the 3.72 score:**
 - **Sustained depeg.** apxUSD at $0.881 (−11.9%), below par continuously since early June, low of ~$0.75. Not recovering on its own without a deeper venue or an open redemption path.
 - **No meaningful Ethereum exit at par.** Curve is drained (~$11.9K); Uniswap V4 inventory is ~5.07M tokens against ~312M supply (~61×) and overstates executable depth. Whitelisted apxUSD redemption is manual and priced at redemption value, not $1; the 20-day cooldown applies only when exiting apyUSD.
 - **POL is withdrawable at the issuer's discretion, and was withdrawn under stress.** No admin gate, no timelock — a 3-of-6 Safe transaction. Any future venue Apyx seeds carries the same property.

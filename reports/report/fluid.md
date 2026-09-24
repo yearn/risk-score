@@ -4,7 +4,7 @@
 - **Token:** fTokens (fUSDC, fUSDT, fWETH, etc.)
 - **Chain:** Ethereum Mainnet
 - **Token Address:** [`0x9Fb7b4477576Fe5B32be4C1843aFB1e55F251B33`](https://etherscan.io/address/0x9Fb7b4477576Fe5B32be4C1843aFB1e55F251B33) (fUSDC)
-- **Final Score: 2.6/5.0**
+- **Final Score: 2.57/5.0**
 
 ## Reassessment Summary (July 2026)
 
@@ -618,9 +618,9 @@ Final Score = (Centralization × 0.30) + (Funds Mgmt × 0.30) + (Audits × 0.20)
 | Funds Management | 3.25 | 30% | 0.975 |
 | Liquidity Risk | 2.5  | 15% | 0.375 |
 | Operational Risk | 1.5  | 5% | 0.075 |
-| **Subtotal** | | | **2.575** |
+| **Subtotal** | | | **2.57** |
 
-**Final Score: 2.575** → rounded to **2.6** Underlying weighted subtotal moved 1.94 → 2.575 driven by: (a) sUSDai concentration crossing and holding above the 30% trigger, sUSDai issuer and Arbitrum source chain identified as USD.AI, extreme exit illiquidity, and the LayerZero `OAdapter` path capable of minting canonical Arbitrum sUSDai — Funds Mgmt § A (Collateralization) 2.75 → 4.0; (b) Funds Mgmt § B (Provability) 1.0 → 2.5 (~37% of lending supply TVL depends on offchain/admin-side value inputs — reUSD `setSharePrice`, USD.AI loan-book NAV — while sUSDai adds a privileged canonical-supply mint path); (c) Category 2 § C (Dependencies) 2.5 → 4.0 (single novel issuer USD.AI + reUSD cross-reference to the 3.51-rated Elevated Risk assessment); and (d) Liquidity 2.0 → 2.5 because protocol withdrawals return the underlying but cannot provide an economically viable exit from Fluid's dominant sUSDai position. The USDai T1 hard-peg oracle remains a specific structural issue, but its currently tiny vault debt is not attributed to the $199.2M sUSDai supply position. The -0.5 TVL modifier is not applied (the protocol had a material Mar-2026 bad-debt incident, and lost TVL).
+**Final Score: 2.57** Underlying weighted subtotal moved 1.94 → 2.575 driven by: (a) sUSDai concentration crossing and holding above the 30% trigger, sUSDai issuer and Arbitrum source chain identified as USD.AI, extreme exit illiquidity, and the LayerZero `OAdapter` path capable of minting canonical Arbitrum sUSDai — Funds Mgmt § A (Collateralization) 2.75 → 4.0; (b) Funds Mgmt § B (Provability) 1.0 → 2.5 (~37% of lending supply TVL depends on offchain/admin-side value inputs — reUSD `setSharePrice`, USD.AI loan-book NAV — while sUSDai adds a privileged canonical-supply mint path); (c) Category 2 § C (Dependencies) 2.5 → 4.0 (single novel issuer USD.AI + reUSD cross-reference to the 3.51-rated Elevated Risk assessment); and (d) Liquidity 2.0 → 2.5 because protocol withdrawals return the underlying but cannot provide an economically viable exit from Fluid's dominant sUSDai position. The USDai T1 hard-peg oracle remains a specific structural issue, but its currently tiny vault debt is not attributed to the $199.2M sUSDai supply position. The -0.5 TVL modifier is not applied (the protocol had a material Mar-2026 bad-debt incident, and lost TVL).
 
 ### Risk Tier
 
@@ -632,7 +632,7 @@ Final Score = (Centralization × 0.30) + (Funds Mgmt × 0.30) + (Audits × 0.20)
 | 3.5–4.5 | Elevated Risk | Limited approval, strict limits |
 | 4.5–5.0 | High Risk | Not recommended |
 
-**Final Risk Tier: MEDIUM RISK** (moved from Minimal Risk; final score 1.4 → 2.6; driven by sUSDai concentration above the 30% trigger, sUSDai issuer and Arbitrum source chain identified as USD.AI, a LayerZero path capable of minting canonical Arbitrum sUSDai, ~37% of lending supply TVL relying on offchain/admin-side value inputs, reUSD 3.51 Elevated Risk cross-reference, economically constrained sUSDai exit liquidity, and non-application of the -0.5 TVL modifier due to the Mar 2026 incident and lost TVL)
+**Final Risk Tier: MEDIUM RISK** (moved from Minimal Risk; final score 1.4 → 2.57; driven by sUSDai concentration above the 30% trigger, sUSDai issuer and Arbitrum source chain identified as USD.AI, a LayerZero path capable of minting canonical Arbitrum sUSDai, ~37% of lending supply TVL relying on offchain/admin-side value inputs, reUSD 3.51 Elevated Risk cross-reference, economically constrained sUSDai exit liquidity, and non-application of the -0.5 TVL modifier due to the Mar 2026 incident and lost TVL)
 
 ---
 

@@ -4,7 +4,7 @@
 - **Token:** MUSD
 - **Chain:** Ethereum (bridged from Mezo chain via Wormhole NTT)
 - **Token Address:** [`0xdD468A1DDc392dcdbEf6db6e34E89AA338F9F186`](https://etherscan.io/address/0xdD468A1DDc392dcdbEf6db6e34E89AA338F9F186)
-- **Final Score: 3.1/5.0**
+- **Final Score: 3.11/5.0**
 
 ## Overview + Links
 

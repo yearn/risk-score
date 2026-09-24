@@ -4,7 +4,7 @@
 - **Token:** sGho (GHO Savings Vault)
 - **Chain:** Ethereum
 - **Token Address:** [`0xE1753F2e00940cC31213dd92013cF019DFE4ca1d`](https://etherscan.io/address/0xE1753F2e00940cC31213dd92013cF019DFE4ca1d)
-- **Final Score: 2.5/5.0**
+- **Final Score: 2.50/5.0**
 
 > **STATUS (July 27, 2026, block 25,622,129):** sGho is live on Ethereum mainnet with **72 days of production history** and `totalAssets() = 136,466,586 GHO` (~$136.3M). The vault is operating to the [AIP 484](https://app.aave.com/governance/v3/proposal/?proposalId=484) spec — `targetRate() = 425` bps, `supplyCap() = 4e26` (400M GHO), `paused() = false`, implementation and ProxyAdmin unchanged, no `TargetRateUpdated`, `SupplyCapUpdated`, `Paused`, `Upgraded`, or `RoleGranted`/`RoleRevoked` events since launch. **Two live conditions dominate this assessment:**
 >
@@ -781,7 +781,7 @@ Final Score = (Centralization × 0.30) + (Funds Mgmt × 0.30) + (Audits × 0.20)
 | Funds Management | 2.0 | 30% | 0.60 |
 | Liquidity Risk | 3.5 | 15% | 0.525 |
 | Operational Risk | 2.0 | 5% | 0.10 |
-| **Final Score** | | | **2.5/5.0** |
+| **Final Score** | | | **2.50/5.0** |
 
 ### Risk Tier
 

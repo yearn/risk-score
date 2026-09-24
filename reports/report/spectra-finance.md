@@ -4,7 +4,7 @@
 - **Token:** PT (Principal Token) / MetaVault shares
 - **Chain:** Ethereum (+ Base, Arbitrum, and others)
 - **Token Address:** N/A (permissionless protocol — multiple PT and MetaVault deployments)
-- **Final Score: 2.33/5.0**
+- **Final Score: 2.32/5.0**
 
 ## Overview + Links
 
@@ -420,7 +420,7 @@ Final Score = (Centralization × 0.30) + (Funds Mgmt × 0.30) + (Audits × 0.20)
 | Funds Management | 1.75 | 30% | 0.525 |
 | Liquidity Risk | 2.5 | 15% | 0.375 |
 | Operational Risk | 1.5 | 5% | 0.075 |
-| **Final Score** | | | **2.33/5.0** |
+| **Final Score** | | | **2.32/5.0** |
 
 ### Risk Tier
 
@@ -432,7 +432,7 @@ Final Score = (Centralization × 0.30) + (Funds Mgmt × 0.30) + (Audits × 0.20)
 | 3.5-4.5 | Elevated Risk | Limited approval, strict limits |
 | 4.5-5.0 | High Risk | Not recommended |
 
-**Final Risk Tier: Low Risk (2.33/5.0) — Approved with standard monitoring**
+**Final Risk Tier: Low Risk (2.32/5.0) — Approved with standard monitoring**
 
 ### Changes since last assessment (2026-02-21 → 2026-05-19)
 
