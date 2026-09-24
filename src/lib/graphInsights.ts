@@ -8,7 +8,7 @@
  */
 
 import type { Graph } from "./graph";
-import { scoreColor, scoreTier, scoreTextColor } from "./colors";
+import { formatScore, scoreColor, scoreTier, scoreTextColor } from "./colors";
 
 /**
  * A selection the metric strip can project onto the canvas. Expressed as a
@@ -124,7 +124,7 @@ export function buildMetrics(
   if (finalScore != null && finalScore > 0) {
     metrics.push({
       label: "Final score",
-      value: finalScore.toFixed(1),
+      value: formatScore(finalScore),
       sub: scoreTier(finalScore),
       chipColor: scoreColor(finalScore),
       chipTextColor: scoreTextColor(finalScore),
@@ -161,7 +161,7 @@ export function buildMetrics(
       label: "External dependencies",
       value: `${deps.length}`,
       sub: worst
-        ? `${assessed} assessed · worst ${worst.score.toFixed(1)} ${worst.tier.replace(" Risk", "")}`
+        ? `${assessed} assessed · worst ${formatScore(worst.score)} ${worst.tier.replace(" Risk", "")}`
         : "none separately assessed",
       lens: { type: "nodeCategory", category: "dependency" },
     });

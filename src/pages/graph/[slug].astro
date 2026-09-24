@@ -13,7 +13,7 @@ import {
   type GraphNode,
 } from "../../lib/graph";
 import { getReportBySlug } from "../../lib/reports";
-import { scoreColor, scoreTier, scoreTextColor } from "../../lib/colors";
+import { displayScore, scoreColor, scoreTier, scoreTextColor } from "../../lib/colors";
 import { kindLabel, chainLabel, graphHeading, EDGE_GROUPS } from "../../lib/graphStyle";
 import { buildMetrics, type CrossLinkInfo } from "../../lib/graphInsights";
 
@@ -44,7 +44,7 @@ for (const n of graph.nodes) {
   if (!report || report.finalScore == null || report.finalScore <= 0) continue;
   crossLinks.set(n.id, {
     slug: entry.slug,
-    score: report.finalScore,
+    score: displayScore(report.finalScore),
     tier: scoreTier(report.finalScore),
     color: scoreColor(report.finalScore),
     textColor: scoreTextColor(report.finalScore),

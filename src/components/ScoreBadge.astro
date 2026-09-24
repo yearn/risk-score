@@ -1,5 +1,5 @@
 ---
-import { scoreColor, scoreTextColor } from "../lib/colors";
+import { formatScore, scoreColor, scoreTextColor } from "../lib/colors";
 
 interface Props {
   score: number;
@@ -12,7 +12,7 @@ const fg = scoreTextColor(score);
 ---
 
 <span class:list={["score-badge", `score-${size}`]} style={`background:${bg};color:${fg};`}>
-  {score.toFixed(1)}
+  {formatScore(score)}
 </span>
 
 <style>

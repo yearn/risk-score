@@ -4,7 +4,7 @@ import ScoreBadge from "../components/ScoreBadge.astro";
 import stats from "../data/stats.json";
 import { getListedReports } from "../lib/reports";
 import type { ReportData } from "../lib/parseReport";
-import { scoreColor, scoreTier } from "../lib/colors";
+import { scoreColor, scoreSegments, scoreTier } from "../lib/colors";
 
 const formatRelative = (ts: number): string => {
   if (!ts) return "—";
@@ -121,8 +121,8 @@ const followups = recent.slice(1);
             <div class="score-bar" aria-hidden="true">
               {[1, 2, 3, 4, 5].map((seg) => (
                 <span
-                  class:list={["score-seg", { active: seg <= Math.round(featured.finalScore) }]}
-                  style={seg <= Math.round(featured.finalScore) ? `background:${scoreColor(featured.finalScore)};` : ""}
+                  class:list={["score-seg", { active: seg <= scoreSegments(featured.finalScore) }]}
+                  style={seg <= scoreSegments(featured.finalScore) ? `background:${scoreColor(featured.finalScore)};` : ""}
                 />
               ))}
             </div>
@@ -165,8 +165,8 @@ const followups = recent.slice(1);
                 <div class="score-bar" aria-hidden="true">
                   {[1, 2, 3, 4, 5].map((seg) => (
                     <span
-                      class:list={["score-seg", { active: seg <= Math.round(r.finalScore) }]}
-                      style={seg <= Math.round(r.finalScore) ? `background:${scoreColor(r.finalScore)};` : ""}
+                      class:list={["score-seg", { active: seg <= scoreSegments(r.finalScore) }]}
+                      style={seg <= scoreSegments(r.finalScore) ? `background:${scoreColor(r.finalScore)};` : ""}
                     />
                   ))}
                 </div>
