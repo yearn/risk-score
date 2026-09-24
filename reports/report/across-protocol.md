@@ -25,7 +25,7 @@ Across is an intent-based cross-chain bridge built by Risk Labs (the team that a
 - [Bug Bounty Page](https://docs.across.to/introduction/bug-bounty)
 - [DefiLlama — Across](https://defillama.com/protocol/across)
 - [Risk Labs Foundation](https://risklabs.foundation/)
-- [Across blog — "Why Across Has Never Been Hacked"](https://across.to/blog/why-across-has-never-been-hacked)
+- [Across blog — "Why Security and Decentralization Matter Now More Than Ever"](https://across.to/blog/why-security-and-decentralization-matter)
 - [Across blog — "A Deep Dive Into Across Protocol's Security"](https://across.to/blog/A-Deep-Dive-Into-Across-Protocols-Security)
 - [UMA case study on Across](https://blog.uma.xyz/articles/case-study-how-uma-secures-across-protocol)
 - LlamaRisk: no dedicated Across report found on [llamarisk.com/research](https://www.llamarisk.com/research) at the time of this assessment.
@@ -72,7 +72,7 @@ All formal audits to date have been performed by a single firm — **OpenZeppeli
 
 **Past security incidents (bridge contracts):**
 
-- **No direct exploits of Across bridge contracts** since the May 2022 launch, corroborated by the Across blog ["Why Across Has Never Been Hacked"](https://across.to/blog/why-across-has-never-been-hacked), the DefiLlama bridge incident database (no entry for Across), and the absence of any postmortem in the Across forum or GitHub.
+- **No direct exploits of Across bridge contracts** since the May 2022 launch, corroborated by the Across blog ["Why Security and Decentralization Matter Now More Than Ever"](https://across.to/blog/why-security-and-decentralization-matter), the DefiLlama bridge incident database (no entry for Across), and the absence of any postmortem in the Across forum or GitHub.
 
 **Operational / governance incident (June 2025, NOT a smart-contract exploit):**
 

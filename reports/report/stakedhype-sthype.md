@@ -543,7 +543,7 @@ Rationale:
 - DeFiLlama stHYPE: https://defillama.com/protocol/sthype
 - DeFiLlama pools API: https://yields.llama.fi/pools
 - Hyperliquid staking docs: https://hyperliquid.gitbook.io/hyperliquid-docs/hypercore/staking
-- Hyperliquid risks docs: https://hyperliquid.gitbook.io/hyperliquid-docs/risks
+- Hyperliquid risks docs: https://hyperliquid.gitbook.io/hyperliquid-docs/risks.md
 - ASXN HyperScreener (LST data): https://hyperscreener.asxn.xyz/liquid-staking
 - Onchain verification: `cast` against `https://rpc.hyperliquid.xyz/evm` (chain ID 999, block 35,538,934 at assessment time)
 
