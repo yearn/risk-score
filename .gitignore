@@ -49,3 +49,7 @@ node_modules/
 
 # Lychee link checker cache
 .lycheecache
+
+# Foundry
+cache/
+out/
