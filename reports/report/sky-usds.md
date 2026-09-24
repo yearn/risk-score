@@ -1,10 +1,10 @@
 # Protocol Risk Assessment: Sky — USDS & sUSDS
 
-- **Assessment Date:** June 18, 2026
+- **Assessment Date:** June 18, 2026 (Updated: September 9, 2026)
 - **Token:** USDS (Sky Dollar) and sUSDS (Savings USDS)
 - **Chain:** Ethereum
 - **Token Address:** [`0xdC035D45d973E3EC169d2276DDab16f1e407384F`](https://etherscan.io/address/0xdC035D45d973E3EC169d2276DDab16f1e407384F) (USDS) · [`0xa3931d71877C0E7a3148CB7Eb4463524FEc27fbD`](https://etherscan.io/address/0xa3931d71877C0E7a3148CB7Eb4463524FEc27fbD) (sUSDS)
-- **Final Score: 1.3/5.0**
+- **Final Score: 1.5/5.0**
 
 ## Overview + Links
 
@@ -15,25 +15,25 @@ USDS does **not** have its own dedicated collateral system. There are **two perm
 1. **DAI ↔ USDS Converter** ([`0x3225737a9Bbb6473CB4a45b7244ACa2BeFdB276A`](https://etherscan.io/address/0x3225737a9Bbb6473CB4a45b7244ACa2BeFdB276A)) — anyone with DAI can swap 1:1 to USDS (and back) at zero fees in a single transaction. This rails USDS's peg directly to DAI.
 2. **USDS-USDC LitePSM Wrapper** ([`0xA188EEC8F81263234dA3622A406892F3D630f98c`](https://etherscan.io/address/0xA188EEC8F81263234dA3622A406892F3D630f98c)) — a thin wrapper around the existing **DAI LitePSM** ([`0xf6e72Db5454dd049d0788e411b06CfAF16853042`](https://etherscan.io/address/0xf6e72Db5454dd049d0788e411b06CfAF16853042)) that lets anyone swap USDC ↔ USDS 1:1 with **zero fees** (`tin = tout = 0`), atomically. Backing USDC is held in a dedicated **Pocket** contract ([`0x37305B1cD40574E4C5Ce33f8e8306Be057fD7341`](https://etherscan.io/address/0x37305B1cD40574E4C5Ce33f8e8306Be057fD7341)).
 
-In addition, USDS supply can also be *issued* (not swapped) through governance-mediated channels: **D3M (Direct-Deposit Modules)** that mint USDS into lending markets (e.g. Spark, Aave-Lido) up to per-market debt ceilings, and **CDP/LockStake borrowers** who post collateral and draw DAI which then routes through the converter into USDS. These additional channels are detailed in the [Funds Management → How USDS Is Issued](#how-usds-is-issued) section.
+In addition, USDS supply can also be *issued* (not swapped) through governance-mediated channels: **Prime allocator vaults** (Spark, Grove, Obex) that mint USDS against a governance-set debt ceiling for deployment by an allocator, **D3M (Direct-Deposit Modules)** that mint USDS into lending markets (e.g. Spark, Aave-Lido) up to per-market debt ceilings, and **CDP/LockStake borrowers** who post collateral and draw DAI which then routes through the converter into USDS. These additional channels are detailed in the [Funds Management → How USDS Is Issued](#how-usds-is-issued) section.
 
 Because every USDS is fungible with a DAI (via the converter), the total system collateral securing USDS is the **entire Sky/MakerDAO collateral book** sitting in MCD_VAT — a mix of crypto-backed CDPs (ETH, wstETH, WBTC), USDC PSM reserves, Real-World Asset (RWA) tokenized US Treasury bills, and D3M positions.
 
-**sUSDS** is the tokenized Sky Savings Rate vault — an ERC-4626 wrapper deployed September 4, 2024 with a `chi` accumulator that grows continuously at the Sky Savings Rate (**SSR**). Depositing USDS into sUSDS is atomic, fee-free, and so is withdrawal. The SSR is a parameter set by Sky Governance via Chief + PauseProxy (currently a per-second `ssr` of `1.00000000112…` → **~3.60% APY** at the June 18, 2026 snapshot).
+**sUSDS** is the tokenized Sky Savings Rate vault — an ERC-4626 wrapper deployed September 4, 2024 with a `chi` accumulator that grows continuously at the Sky Savings Rate (**SSR**). Depositing USDS into sUSDS is atomic, fee-free, and so is withdrawal. The SSR is a parameter set by Sky Governance via Chief + PauseProxy (currently a per-second `ssr` of `1.00000000112…` → **~3.60% APY** at the September 9, 2026 snapshot).
 
-**Key onchain metrics (June 18, 2026, block 25345447):**
+**Key onchain metrics (September 9, 2026, block 25939320):**
 
 | Metric | Value |
 |--------|-------|
-| USDS total supply (Ethereum mainnet) | **7,821,339,325 USDS** (~$7.82B) |
-| USDS total supply (cross-chain, all bridges) | ~8,177,298,635 USDS ([DefiLlama](https://stablecoins.llama.fi/stablecoincharts/all?stablecoin=209)); ~$0.50B is bridged off mainnet (~$0.45B native L2 bridges + ~$48.7M LayerZero) |
-| sUSDS supply (shares) | 5,339,985,406 sUSDS |
-| sUSDS `totalAssets()` | **5,875,069,384 USDS** (~75.1% of mainnet USDS supply) |
-| sUSDS price-per-share (`chi`) | 1.1002 USDS/sUSDS |
+| USDS total supply (Ethereum mainnet) | **6,645,559,216 USDS** (~$6.65B) |
+| USDS total supply (all chains) | ≈ mainnet `totalSupply()`, since every bridge is lock-and-mint: ~109.1M of the mainnet supply is escrowed on L1 (~102.4M native L2 escrows + ~6.7M LayerZero) and re-issued 1:1 on the destination chains, not added on top. [DefiLlama](https://stablecoins.llama.fi/stablecoincharts/all?stablecoin=209) aggregates the per-chain balances to ~6,637,875,749 USDS, ~0.12% below the onchain total |
+| sUSDS supply (shares) | 4,215,586,844 sUSDS |
+| sUSDS `totalAssets()` | **4,674,942,773 USDS** (~70.3% of mainnet USDS supply) |
+| sUSDS price-per-share (`chi`) | 1.1090 USDS/sUSDS |
 | Sky Savings Rate (SSR) | `1.000000001121484…` per second → **~3.60% APY** (unchanged) |
-| USDC held in LitePSM Pocket | **4,109,011,415 USDC** (~$4.11B) |
-| MCD_VAT total system debt | ~12.76B (DAI + USDS combined) |
-| 1-year USDS peg range | 0.9953 (2025-10-11) – 1.0008 (2026-04-29); current 0.9997 |
+| USDC held in LitePSM Pocket | **3,948,440,886 USDC** (~$3.95B) |
+| MCD_VAT total system debt | ~12.06B (DAI + USDS combined) |
+| 1-year USDS peg range (daily series) | 0.9975 (2025-10-11) – 1.0011 (2026-02-23); current 0.9999 |
 
 **Links:**
 
@@ -53,7 +53,7 @@ Because every USDS is fungible with a DAI (via the converter), the total system 
 
 ## Contract Addresses
 
-All addresses retrieved from the live Sky Chainlog and verified onchain. Snapshot block: **25345447** (June 18, 2026).
+All addresses retrieved from the live Sky Chainlog and verified onchain. Snapshot block: **25939320** (September 9, 2026).
 
 ### Tokens & Conversion Layer
 
@@ -67,7 +67,7 @@ All addresses retrieved from the live Sky Chainlog and verified onchain. Snapsho
 | USDC | [`0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48`](https://etherscan.io/address/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48) | Circle USDC, gem for the LitePSM Wrapper |
 | **DAI-USDS Converter** | [`0x3225737a9Bbb6473CB4a45b7244ACa2BeFdB276A`](https://etherscan.io/address/0x3225737a9Bbb6473CB4a45b7244ACa2BeFdB276A) | `DAI_USDS`. Atomic, fee-free 1:1 conversion |
 | USDS Join | [`0x3C0f895007CA717Aa01c8693e59DF1e8C3777FEB`](https://etherscan.io/address/0x3C0f895007CA717Aa01c8693e59DF1e8C3777FEB) | Mints/burns USDS against VAT internal balances. `wards[MCD_PAUSE_PROXY] == 1`; `wards[USDS] == 1` |
-| USDS LayerZero OFT Adapter | [`0x1e1D42781FC170EF9da004Fb735f56F0276d01B8`](https://etherscan.io/address/0x1e1D42781FC170EF9da004Fb735f56F0276d01B8) | LayerZero V2 OApp (OFT Adapter). Locks USDS for bridging to **Solana and Avalanche only** (~48.7M USDS locked). `owner = PauseProxy`, `endpoint = 0x1a44…728c` (LZ V2). Does NOT hold `wards` on USDS. See [Cross-Chain Bridges](#cross-chain-bridges-skylink) |
+| USDS LayerZero OFT Adapter | [`0x1e1D42781FC170EF9da004Fb735f56F0276d01B8`](https://etherscan.io/address/0x1e1D42781FC170EF9da004Fb735f56F0276d01B8) | LayerZero V2 OApp (OFT Adapter). Locks USDS for bridging to **Solana and Avalanche only** (~6.67M USDS locked). `owner = PauseProxy`, `endpoint = 0x1a44…728c` (LZ V2). Does NOT hold `wards` on USDS. See [Cross-Chain Bridges](#cross-chain-bridges-skylink) |
 | sUSDS LayerZero OFT Adapter | [`0x85A3FE4DA2a6cB98A5bdF62458B0dB8471B9f0f1`](https://etherscan.io/address/0x85A3FE4DA2a6cB98A5bdF62458B0dB8471B9f0f1) | LayerZero V2 OApp for sUSDS. Avalanche peer configured but **0 sUSDS currently locked** — sUSDS bridges via the native L2 token bridges instead. `owner = PauseProxy`. Does NOT hold `wards` on sUSDS |
 
 ### Cross-Chain Bridges (SkyLink)
@@ -83,13 +83,13 @@ USDS and sUSDS reach other chains through **two independent bridge systems** und
 | Unichain | [`0xDF05…81d2`](https://etherscan.io/address/0xDF0535a4C96c9Cd8921d8FeC92A7680b281681d2) | [`0x1196…566A`](https://etherscan.io/address/0x1196F688C585D3E5C895Ef8954FFB0dCDAfc566A) | OP Stack canonical bridge |
 | Arbitrum | [`0x84b9…079E`](https://etherscan.io/address/0x84b9700E28B23F873b82c1BEb23d86C091b6079E) | [`0xA10c…9400`](https://etherscan.io/address/0xA10c7CE4b876998858b1a9E12b10092229539400) | Arbitrum Nitro canonical gateway |
 
-L1 tokens are locked in the per-chain escrow and minted 1:1 on the L2 by the canonical rollup bridge. These do **not** use LayerZero, so they do not appear on LayerZero Scan. Escrow balances at the snapshot (onchain `balanceOf`): Base **147.9M USDS / 202.8M sUSDS**, Arbitrum **99.8M USDS / 327.0M sUSDS**, Optimism **100.3M USDS / 187.2M sUSDS**, Unichain **100.0M USDS / 94.9M sUSDS**. **This is how sUSDS reaches Arbitrum** (~327M sUSDS via the Arbitrum gateway), which is why sUSDS-on-Arbitrum is absent from LayerZero Scan.
+L1 tokens are locked in the per-chain escrow and minted 1:1 on the L2 by the canonical rollup bridge. These do **not** use LayerZero, so they do not appear on LayerZero Scan. Escrow balances at the snapshot (onchain `balanceOf`): Base **2.59M USDS / 10.83M sUSDS**, Arbitrum **99.8M USDS / 327.0M sUSDS**, Optimism **0.010M USDS / 4.62M sUSDS**, Unichain **0.010M USDS / 0.15M sUSDS**. **This is how sUSDS reaches Arbitrum** (~327M sUSDS via the Arbitrum gateway), which is why sUSDS-on-Arbitrum is absent from LayerZero Scan. Arbitrum now holds ~97% of escrowed USDS and ~95% of escrowed sUSDS: on July 13, 2026 the Spark Liquidity Layer withdrew its Base, Optimism and Unichain positions back to its mainnet ALM Proxy ([`0x1601843c5E9bC251A3272907010AFa41Fa18347E`](https://etherscan.io/address/0x1601843c5E9bC251A3272907010AFa41Fa18347E)) through the canonical bridges — e.g. [146.6M USDS out of the Base escrow](https://etherscan.io/tx/0xac90aa7e2dc4035c921324e3a10ad3ba6c39f21826375b1558ee6acc27964a22) and [192.0M sUSDS in the same block range](https://etherscan.io/tx/0xb2c9215da24ae539d7a3fe9b65b731d079f0aaf0229e51e885e35d319e05c9e8).
 
 **2. LayerZero V2 OFT Adapters** (USDS to Solana + Avalanche only; security analyzed in [LayerZero V2 Dependency](#layerzero-v2-dependency)):
 
 | Token | OFT Adapter | Chains (peers) | Locked at snapshot |
 |-------|-------------|----------------|--------------------|
-| USDS | [`0x1e1D…01B8`](https://etherscan.io/address/0x1e1D42781FC170EF9da004Fb735f56F0276d01B8) | Solana (EID 30168), Avalanche (EID 30106) | ~48.7M USDS |
+| USDS | [`0x1e1D…01B8`](https://etherscan.io/address/0x1e1D42781FC170EF9da004Fb735f56F0276d01B8) | Solana (EID 30168), Avalanche (EID 30106) | ~6.67M USDS |
 | sUSDS | [`0x85A3…f0f1`](https://etherscan.io/address/0x85A3FE4DA2a6cB98A5bdF62458B0dB8471B9f0f1) | Avalanche (EID 30106) | 0 |
 
 The legacy DAI **Teleport** fast-withdrawal bridges (`ARBITRUM_TELEPORT_BRIDGE`, `OPTIMISM_TELEPORT_BRIDGE`, `STARKNET_TELEPORT_BRIDGE`) also exist in the chainlog but are DAI-era infrastructure and out of scope for USDS/sUSDS.
@@ -99,8 +99,8 @@ The legacy DAI **Teleport** fast-withdrawal bridges (`ARBITRUM_TELEPORT_BRIDGE`,
 | Contract | Address | Role |
 |----------|---------|------|
 | **USDS LitePSM Wrapper** | [`0xA188EEC8F81263234dA3622A406892F3D630f98c`](https://etherscan.io/address/0xA188EEC8F81263234dA3622A406892F3D630f98c) | `WRAPPER_USDS_LITE_PSM_USDC_A`. User-facing USDC↔USDS swap (`buyGem` / `sellGem`). Atomic. Deployed 2024-09-03 |
-| Underlying LitePSM (DAI-USDC) | [`0xf6e72Db5454dd049d0788e411b06CfAF16853042`](https://etherscan.io/address/0xf6e72Db5454dd049d0788e411b06CfAF16853042) | `MCD_LITE_PSM_USDC_A`. Holds the swap logic. `tin = 0`, `tout = 0`, `buf = 400,000,000 DAI` |
-| USDC Pocket | [`0x37305B1cD40574E4C5Ce33f8e8306Be057fD7341`](https://etherscan.io/address/0x37305B1cD40574E4C5Ce33f8e8306Be057fD7341) | `MCD_LITE_PSM_USDC_A_POCKET`. Custodies the USDC reserves (~4.11B USDC at snapshot) |
+| Underlying LitePSM (DAI-USDC) | [`0xf6e72Db5454dd049d0788e411b06CfAF16853042`](https://etherscan.io/address/0xf6e72Db5454dd049d0788e411b06CfAF16853042) | `MCD_LITE_PSM_USDC_A`. Holds the swap logic. `tin = 0`, `tout = 0`, `buf = 800,000,000 DAI` (786.5M DAI held at snapshot) |
+| USDC Pocket | [`0x37305B1cD40574E4C5Ce33f8e8306Be057fD7341`](https://etherscan.io/address/0x37305B1cD40574E4C5Ce33f8e8306Be057fD7341) | `MCD_LITE_PSM_USDC_A_POCKET`. Custodies the USDC reserves (~3.95B USDC at snapshot) |
 | LitePSM Jar | [`0x69cA348Bd928A158ADe7aa193C133f315803b06e`](https://etherscan.io/address/0x69cA348Bd928A158ADe7aa193C133f315803b06e) | `MCD_LITE_PSM_USDC_A_JAR`. Receives swap fees (currently zero) |
 | **LitePSM Mom (emergency halt)** | [`0x467b32b0407Ad764f56304420Cddaa563bDab425`](https://etherscan.io/address/0x467b32b0407Ad764f56304420Cddaa563bDab425) | `LITE_PSM_MOM`. Authority = Chief, owner = PauseProxy. Lets the elected Chief hat instantly halt PSM swaps without the 48 h GSM delay |
 | Emergency Halt Spell Factory | [`0xB261b73698F6dBC03cB1E998A3176bdD81C3514A`](https://etherscan.io/address/0xB261b73698F6dBC03cB1E998A3176bdD81C3514A) | `EMSP_LITE_PSM_HALT_FAB` |
@@ -110,12 +110,12 @@ The legacy DAI **Teleport** fast-withdrawal bridges (`ARBITRUM_TELEPORT_BRIDGE`,
 
 | Contract | Address | Role |
 |----------|---------|------|
-| MCD VAT (core ledger) | [`0x35D1b3F3D7966A1DFe207aa4514C12a259A0492B`](https://etherscan.io/address/0x35D1b3F3D7966A1DFe207aa4514C12a259A0492B) | The accounting nucleus of the Sky/Maker system. `debt()` ≈ 12.76B (rad-normalized) |
+| MCD VAT (core ledger) | [`0x35D1b3F3D7966A1DFe207aa4514C12a259A0492B`](https://etherscan.io/address/0x35D1b3F3D7966A1DFe207aa4514C12a259A0492B) | The accounting nucleus of the Sky/Maker system. `debt()` ≈ 12.06B (rad-normalized) |
 | MCD Vow (surplus / sin buffer) | [`0xA950524441892A31ebddF91d3cEEFa04Bf454466`](https://etherscan.io/address/0xA950524441892A31ebddF91d3cEEFa04Bf454466) | Stability fee accumulator; receives the SSR drip differential |
 | MCD Pot (DSR) | [`0x197E90f9FAD81970bA7976f33CbD77088E5D7cf7`](https://etherscan.io/address/0x197E90f9FAD81970bA7976f33CbD77088E5D7cf7) | DAI Savings Rate pot — predates sUSDS, parallel rate accumulator |
 | **MCD Pause** | [`0xbE286431454714F511008713973d3B053A2d38f3`](https://etherscan.io/address/0xbE286431454714F511008713973d3B053A2d38f3) | DSPause with `delay() = 172800` seconds (**48 hours GSM delay**). `owner = address(0)`; only spells elected by Chief can schedule |
 | **MCD PauseProxy** | [`0xBE8E3e3618f7474F8cB1d074A26afFef007E98FB`](https://etherscan.io/address/0xBE8E3e3618f7474F8cB1d074A26afFef007E98FB) | The address governance executes as. Holds `wards[USDS]==1`, `wards[sUSDS]==1`, and is the upgrade authority for both proxies |
-| **MCD Chief (governance vote)** | [`0x929d9A1435662357F54AdcF64DcEE4d6b867a6f9`](https://etherscan.io/address/0x929d9A1435662357F54AdcF64DcEE4d6b867a6f9) | DSChief. Continuous-approval voting over SKY token. Current `hat()` = [`0x0aE3371e9C4e37515259D124C685fe6722c5e253`](https://etherscan.io/address/0x0aE3371e9C4e37515259D124C685fe6722c5e253) (active spell) |
+| **MCD Chief (governance vote)** | [`0x929d9A1435662357F54AdcF64DcEE4d6b867a6f9`](https://etherscan.io/address/0x929d9A1435662357F54AdcF64DcEE4d6b867a6f9) | DSChief. Continuous-approval voting over SKY token. Current `hat()` = [`0x2bf5132EC2F21B079D7591c86D9817f1f18a2E05`](https://etherscan.io/address/0x2bf5132EC2F21B079D7591c86D9817f1f18a2E05) (executed spell) |
 | MCD Spot (price feed router) | [`0x65C79fcB50Ca1594B025960e539eD7A9a6D434A3`](https://etherscan.io/address/0x65C79fcB50Ca1594B025960e539eD7A9a6D434A3) | Price oracles for VAT collateral types |
 | SKY governance token | [`0x56072C95FAA701256059aa122697B133aDEd9279`](https://etherscan.io/address/0x56072C95FAA701256059aa122697B133aDEd9279) | `MCD_GOV`. Total supply ~23.46B SKY |
 | SPK token | [`0xc20059e0317DE91738d13af027DfC4a50781b066`](https://etherscan.io/address/0xc20059e0317DE91738d13af027DfC4a50781b066) | Spark/Sky governance subsystem token (USDS Staking Rewards) |
@@ -169,9 +169,9 @@ Sky/MakerDAO is one of the most extensively audited DeFi protocols. Coverage for
 
 ### Bug Bounty
 
-- **Sky on Immunefi** ([immunefi.com/bug-bounty/sky](https://immunefi.com/bug-bounty/sky/)) — live since Feb 10, 2022, last updated Feb 26, 2026
+- **Sky on Immunefi** ([immunefi.com/bug-bounty/sky](https://immunefi.com/bug-bounty/sky/)) — live since Feb 10, 2022, last updated Sep 4, 2026
 - **Maximum payout: $10,000,000** for critical smart-contract vulnerabilities. Minimum critical: $150K. Reward = 10% of funds at risk, capped at $10M
-- **216 assets in scope**, including USDS, sUSDS, LitePSM, DAI-USDS Converter, Chief, Pause, VAT
+- **255 assets in scope**, including USDS, sUSDS, LitePSM, DAI-USDS Converter, Chief, Pause, VAT
 - Proof-of-concept required for all severities. Payouts in DAI or USDS at $1:1
 
 ### Safe Harbor (SEAL)
@@ -180,22 +180,23 @@ Sky/MakerDAO is one of the most extensively audited DeFi protocols. Coverage for
 
 ## Historical Track Record
 
-- **USDS contract deployed:** September 2, 2024 ([tx `0xdf7d4ba4…b21c`](https://etherscan.io/tx/0xdf7d4ba4114f654a4ef64f74099be3fc91358610078febe5be68af6cf257b21c)) — **~21.5 months** in production
+- **USDS contract deployed:** September 2, 2024 ([tx `0xdf7d4ba4…b21c`](https://etherscan.io/tx/0xdf7d4ba4114f654a4ef64f74099be3fc91358610078febe5be68af6cf257b21c)) — **~24 months** in production
 - **sUSDS deployed:** September 4, 2024 ([tx `0xe1be00c4…2c00`](https://etherscan.io/tx/0xe1be00c4ea3c21cf536b98ac082a5bba8485cf75d6b2b94f4d6e3edd06472c00))
 - **LitePSM Wrapper deployed:** September 3, 2024 ([tx `0x43ddae74…8585`](https://etherscan.io/tx/0x43ddae74123936f6737b78fcf785547f7f6b7b27e280fe7fbf98c81b3c018585))
-- **Underlying MakerDAO system:** live since December 2017 (Multi-Collateral DAI) — **~8.5 years**. Single-Collateral DAI launched November 2017.
-- **TVL growth (USDS, DefiLlama stablecoin id 209):** $98.5M on launch day → **~$8.19B at the June 18, 2026 snapshot** (cross-chain); ~$7.84B on Ethereum mainnet by raw ERC-20 `totalSupply()`
-- **Sky Lending TVL** ([DefiLlama](https://defillama.com/protocol/sky-lending)): ~$5.81B (Ethereum-only)
-- **sUSDS adoption:** ~5.89B USDS locked in sUSDS — **about 75% of mainnet USDS supply** is staked in the savings vault, indicating very heavy "yield seeker" capture
-- **Peg history (USDS, past 365 days via CoinGecko):**
-  - Min: **0.9953** (October 11, 2025) — likely market-wide stablecoin stress, USDS only ~0.5% off peg
-  - Max: **1.0008** (April 29, 2026)
-  - Latest: 0.9997 (within peg)
+- **Underlying MakerDAO system:** live since December 2017 (Multi-Collateral DAI) — **~8.75 years**. Single-Collateral DAI launched November 2017.
+- **TVL growth (USDS, DefiLlama stablecoin id 209):** $98.5M on launch day → **~$6.64B at the September 9, 2026 snapshot** (cross-chain); ~$6.65B on Ethereum mainnet by raw ERC-20 `totalSupply()`
+- **Sky Lending TVL** ([DefiLlama](https://defillama.com/protocol/sky-lending)): ~$5.51B (Ethereum-only)
+- **sUSDS adoption:** ~4.67B USDS locked in sUSDS — **about 70% of mainnet USDS supply** is staked in the savings vault, indicating very heavy "yield seeker" capture. A further ~209M USDS sits in the newer **stUSDS** staking module ([`0x99CD4Ec3f88A45940936F469E4bB72A2A701EEB9`](https://etherscan.io/address/0x99CD4Ec3f88A45940936F469E4bB72A2A701EEB9)), assessed separately in [sky-stusds.md](sky-stusds.md)
+- **Peg history (USDS, past 365 days via CoinGecko daily series):**
+  - Min: **0.9975** (October 11, 2025) — market-wide stablecoin stress; the hourly series bottoms at **0.9947** on October 6, 2025, still under 0.6% off peg
+  - Max: **1.0011** (February 23, 2026)
+  - Latest: 0.9999 (within peg)
 - **Past security incidents (relevant to USDS path):**
   - **Black Thursday (March 12, 2020) — DAI/MCD:** Cascading ETH price crash combined with mempool congestion caused some liquidation auctions to be won at $0 bids. ~$6M of system shortfall was absorbed by minting MKR to recapitalize. Affected users were later partly compensated via DAO vote. The liquidation system was redesigned (Liquidations 2.0, audited by Quantstamp). USDS did not exist yet
   - **USDC depeg (March 11, 2023):** Circle's USDC briefly traded as low as ~$0.88 following Silicon Valley Bank exposure. DAI traded down with it (~$0.88 floor) because of the USDC PSM dependency. Sky/Maker responded by widening PSM fees temporarily and accelerating diversification into RWAs. USDS would inherit the same USDC peg exposure today — a USDC depeg is the largest non-bug peg risk to USDS
-  - **No USDS/sUSDS/LitePSM-specific incidents** since their respective launches (~21.5 months at this snapshot)
-- **TVL stability:** USDS remains multi-billion scale and has held a tight peg, though supply declined from the May 2026 snapshot (~8.84B cross-chain) to ~8.19B cross-chain at this reassessment. No forced unwind or USDS-specific incident was identified.
+  - **No USDS/sUSDS/LitePSM-specific incidents** since their respective launches (~24 months at this snapshot)
+- **TVL trend:** USDS remains multi-billion scale and has held a tight peg. Cross-chain supply has contracted steadily through 2026: ~8.84B (May 2026) → ~8.19B (June 2026) → **~6.64B (September 2026)**, a ~19% decline over the last quarter, with sUSDS `totalAssets()` falling from ~5.88B to ~4.67B over the same period. The contraction is gradual and continuous rather than event-driven; no forced unwind, redemption failure, or USDS-specific incident was identified, and the LitePSM absorbed the outflow without fee changes or a halt.
+- **Cross-chain repatriation (July 13, 2026):** the Spark Liquidity Layer withdrew its Base, Optimism and Unichain USDS/sUSDS positions to mainnet through the canonical rollup bridges, cutting native-escrow USDS from ~448M to ~102M and escrowed sUSDS from ~812M to ~343M. This was an allocator rebalance executed over the ordinary bridge path, not a bridge failure; escrow contracts, `wards`, and bridge ownership were unchanged.
 
 ## Funds Management
 
@@ -212,24 +213,26 @@ USDS has no dedicated CDP system. Every USDS in existence has come from one of t
 2. **USDC → USDS via the LitePSM Wrapper** ([`0xA188EEC8…0f98c`](https://etherscan.io/address/0xA188EEC8F81263234dA3622A406892F3D630f98c))
    - User calls `sellGem(usr, gemAmt)`: wrapper pulls USDC → calls underlying LitePSM `sellGem()` → DAI minted to wrapper → wrapper calls `daiUsds.daiToUsds()` → USDS delivered to user
    - Reverse (`buyGem(usr, gemAmt)`): user sends USDS → converter swaps to DAI → LitePSM `buyGem()` exchanges DAI for USDC out of the Pocket → USDC delivered to user
-   - **Fees:** `tin = tout = 0` (zero). The LitePSM `buf` (400M DAI) acts as a hot supply buffer so user swaps do not have to wait for VAT bookkeeping
+   - **Fees:** `tin = tout = 0` (zero). The LitePSM `buf` (800M DAI) acts as a hot supply buffer so user swaps do not have to wait for VAT bookkeeping. 786.5M DAI was held against that target at the snapshot
    - **Capacity:**
-     - USDC → USDS direction: bounded by `buf` (400M DAI per refill cycle, keeper-replenished) and ultimately by the Sky governance-set `line` for the PSM ilk in the VAT
-     - USDS → USDC direction: bounded by the **Pocket USDC balance** (currently **~4.11B USDC**)
+     - USDC → USDS direction: bounded by `buf` (800M DAI per refill cycle, keeper-replenished) and ultimately by the Sky governance-set `line` for the PSM ilk in the VAT
+     - USDS → USDC direction: bounded by the **Pocket USDC balance** (currently **~3.95B USDC**)
    - **Atomic:** yes — entire path completes in one transaction
 
-3. **D3M (Direct Deposit Module)** — Sky governance can mint USDS directly to lending markets (Spark, Aave-Lido) up to per-market debt ceilings, where the USDS is borrowed by users. At the snapshot, the Spark Aave-Lido USDS pool ([`DIRECT_SPK_AAVE_LIDO_USDS_POOL`](https://etherscan.io/address/0xbf674d0cD6841C1d7f9b8E809B967B3C5E867653)) holds 0 USDS, so this channel is currently dormant for that specific pool
+3. **Prime allocator vaults** — the largest issuance channel after the PSM. Sky governance grants an allocator (a "Prime" or "Star") a VAT ilk with a debt ceiling; the allocator draws USDS and deploys it into onchain lending, tokenized treasuries, and credit strategies. At the snapshot, per-ilk debt (`Art × rate` from `MCD_VAT.ilks`): **Spark** (`ALLOCATOR-SPARK-A`) **~$3.06B**, **Grove** (`ALLOCATOR-BLOOM-A`) **~$2.50B**, **Obex** (`ALLOCATOR-OBEX-A`) **~$403M**, plus `ALLOCATOR-PRYSM-A` (~$25.0M) and `ALLOCATOR-GROVE-A` (~$16.6M); **Keel** (`ALLOCATOR-NOVA-A`), `ALLOCATOR-PATTERN-A` and `ALLOCATOR-INTERVAL-A` are at 0. Together ~$6.01B, ~49.8% of VAT debt. What backs these positions is discussed under [Collateralization](#collateralization)
 
-4. **MakerDAO/Sky CDPs (ETH-A, ETH-B, wstETH-A, WBTC-A, USDC-A vault, RWA-* vaults, LockStake)** — borrowers post collateral, draw DAI (which they can then swap to USDS via the converter). These vaults are over-collateralized at the ilk level (typical liquidation ratios 145–170% for crypto, 100%+ for RWAs)
+4. **D3M (Direct Deposit Module)** — Sky governance can mint USDS directly to lending markets (Spark, Aave-Lido) up to per-market debt ceilings, where the USDS is borrowed by users. At the snapshot the `DIRECT-SPK-AAVE-LIDO-USDS` ilk carries **zero** debt and the Spark Aave-Lido USDS pool ([`DIRECT_SPK_AAVE_LIDO_USDS_POOL`](https://etherscan.io/address/0xbf674d0cD6841C1d7f9b8E809B967B3C5E867653)) holds 0 USDS, so this channel is dormant
 
-All four channels ultimately settle through **MCD_VAT** ([`0x35D1b3F3…492B`](https://etherscan.io/address/0x35D1b3F3D7966A1DFe207aa4514C12a259A0492B)), which at the snapshot reports `debt()` in rad units → **~12.76B normalized debt**. The corresponding DAI + USDS issued supply (Ethereum mainnet) is ~4.20B + ~7.84B ≈ **~12.04B**, and the difference represents stability-fee accrual and surplus in MCD_VOW.
+5. **MakerDAO/Sky CDPs (ETH-A, ETH-B, ETH-C, wstETH-A, wstETH-B, WBTC-C, RWA-* vaults, LockStake)** — borrowers post collateral, draw DAI (which they can then swap to USDS via the converter). These vaults are over-collateralized at the ilk level (typical liquidation ratios 145–170% for crypto, 100%+ for RWAs). Combined crypto-CDP and LockStake debt is now **~$547M**, ~4.5% of VAT debt
+
+All channels ultimately settle through **MCD_VAT** ([`0x35D1b3F3…492B`](https://etherscan.io/address/0x35D1b3F3D7966A1DFe207aa4514C12a259A0492B)), which at the snapshot reports `debt()` in rad units → **~12.06B normalized debt**. The corresponding DAI + USDS issued supply (Ethereum mainnet) is ~4.58B + ~6.65B ≈ **~11.22B**, and the difference represents stability-fee accrual and surplus in MCD_VOW.
 
 ### Accessibility
 
 | Operation | Permission | Atomic? | Fees | Limits |
 |-----------|-----------|---------|------|--------|
-| USDC → USDS (LitePSM Wrapper) | Permissionless | Yes (1 tx) | 0 | `buf = 400M DAI` per fill; capped by PSM `line` in VAT |
-| USDS → USDC (LitePSM Wrapper) | Permissionless | Yes (1 tx) | 0 | Pocket USDC balance (~4.11B) |
+| USDC → USDS (LitePSM Wrapper) | Permissionless | Yes (1 tx) | 0 | `buf = 800M DAI` per fill; capped by PSM `line` in VAT |
+| USDS → USDC (LitePSM Wrapper) | Permissionless | Yes (1 tx) | 0 | Pocket USDC balance (~3.95B) |
 | DAI ↔ USDS (Converter) | Permissionless | Yes (1 tx) | 0 | None — direct mint/burn through USDS_JOIN |
 | Deposit USDS → sUSDS | Permissionless | Yes (1 tx) | 0 | None (sUSDS is unbounded ERC-4626) |
 | Withdraw USDS ← sUSDS | Permissionless | Yes (1 tx) | 0 | None |
@@ -239,28 +242,37 @@ There is **no whitelist on swaps**, no KYC requirement, **no cooldown**, and **n
 
 ### Collateralization
 
-USDS does **not** have a clean "this collateral backs this token" picture — it inherits the full Sky/MakerDAO collateral book. Backing comes from these MCD_VAT ilks (publicly reported in the chainlog):
+USDS does **not** have a clean "this collateral backs this token" picture — it inherits the full Sky/MakerDAO collateral book. Per-ilk debt below is `Art × rate` read from `MCD_VAT.ilks(ilk)` at the snapshot block, against total VAT `debt()` of ~12.06B:
 
-| Class | Description | Approximate role in backing |
-|-------|-------------|----------------------------|
-| Crypto-backed CDPs (ETH-A, ETH-B, wstETH-A, RETH-A, WBTC-A, etc.) | Over-collateralized loans, ~145–170% liquidation ratio | Volatile, on-chain liquidatable. Historically the dominant backing in early MCD |
-| **USDC PSM (LitePSM)** | Pocket holds USDC 1:1 | **~$4.11B USDC** at snapshot (largest single backing line for USDS-USDC swap capacity) |
-| RWA / offchain-credit exposure | Legacy `RWA00x` ilks plus Prime/Grove/Spark tokenized treasury, AAA CLO, private-credit, and OTC credit allocations | Legacy `RWA00x` ilks are now small (**~$94.0M**, ~0.7% of VAT debt). Broader offchain/tokenized treasury and credit backing tracked by Observatory is **~$3.30B** (~25.9% of VAT debt; ~32.6% of Observatory loan-coverage backing) and remains **offchain custody / credit risk** |
-| LockStake (SKY token staked) | Borrow against locked SKY | Smaller, governance-token-backed |
-| D3M (Spark/Aave Direct Deposit Modules) | USDS minted into lending pools where it's borrowed against external collateral | Capacity-extension mechanism rather than primary backing |
-| GUSD-A PSM | Gemini USD-backed PSM | Smaller secondary PSM |
-| PAX-A PSM (`MCD_PSM_PAX_A`) | Paxos USD-backed PSM | Smaller secondary PSM |
+| Class | Ilk(s) | Debt at snapshot | Share of VAT debt | Role in backing |
+|-------|--------|-----------------:|------------------:|-----------------|
+| **USDC PSM (LitePSM)** | `LITE-PSM-USDC-A` | **~$4.73B** | 39.3% | Only ~$3.95B of this is external collateral (USDC in the Pocket); the other ~$786.5M is system-issued DAI pre-minted into the PSM as swap inventory, so it backs nothing on its own. Observatory books this line at the Pocket value (~$3.95B), not the ilk debt. Largest single backing line and the source of USDS-USDC swap capacity |
+| **Prime allocator vaults** | `ALLOCATOR-SPARK-A` (~$3.06B), `ALLOCATOR-BLOOM-A` / Grove (~$2.50B), `ALLOCATOR-OBEX-A` (~$403M), `ALLOCATOR-PRYSM-A` (~$25.0M), `ALLOCATOR-GROVE-A` (~$16.6M), `ALLOCATOR-NOVA-A` / Keel and three others (0) | **~$6.01B** | 49.8% | USDS drawn by allocators and deployed into onchain lending, tokenized treasuries, and credit strategies. Backing quality is the quality of those downstream positions, not of a liquidatable onchain CDP |
+| Crypto-backed CDPs | `ETH-A`, `ETH-B`, `ETH-C`, `WSTETH-A`, `WSTETH-B`, `WBTC-A`, `WBTC-B`, `WBTC-C` | ~$388M | 3.2% | Over-collateralized loans, ~145–170% liquidation ratio. Volatile but onchain-liquidatable |
+| LockStake (SKY staked) | `LSEV2-SKY-A` | ~$159M | 1.3% | Borrow against locked SKY — governance-token-backed, reflexive |
+| Legacy RWA vaults | `RWA002-A` (New Silver, ~$23.7M), `RWA004-A` (Harbor Trade, ~$1.5M), `RWA005-A` (FortunaFi, ~$2.8M), `RWA009-A` (HVB, ~$49.6M) | ~$77.6M | 0.6% | Offchain custody / credit risk; the residual of the original RWA program |
+| **System unbacked debt (`vice`)** | not an ilk — `MCD_VAT.vice()`, all attributed to MCD_VOW | **~$690.1M** | 5.7% | The `sin` side of the ledger. Structurally generated by savings accrual: `sUSDS.drip()` and `Pot.drip()` call `vat.suck(vow, …)` to mint SSR/DSR interest, which creates unbacked debt at the Vow. See the Vow position below |
+| D3M (Spark/Aave Direct Deposit) | `DIRECT-SPK-AAVE-LIDO-USDS` and four legacy D3M ilks | **0** | 0% | Dormant at the snapshot |
+| GUSD-A / PAX-A PSMs | `PSM-GUSD-A`, `PSM-PAX-A` | **dust (~$0.57 / ~$0.38)** | 0% | Effectively retired; no longer a meaningful backing or swap route |
 
-**System-level overcollateralization** is not directly readable from a single onchain call — it requires aggregating per-ilk `Art × rate` (debt) and `ink × oracle price × liquidation-ratio` (locked collateral value). SkyEco / Observatory's [USDS collateral-backing API](https://observatory.data.blockanalitica.com/sky/backed/items/) reports **~$10.13B loan-coverage backing**, **~$10.80B maintenance-coverage backing**, and **~$14.17B total collateral value** at 2026-06-18 11:30 UTC. Its [balance-sheet aggregate](https://observatory.data.blockanalitica.com/financials/balance-sheet/aggregates/?group_by=month) reports **~$12.33B assets** against **~$12.26B liabilities** for the June 2026 snapshot. At the same time, onchain VAT debt is ~12.76B against ~12.04B Ethereum DAI + USDS issued supply, with the buffer in MCD_VOW absorbing accounting differences.
+The table reconciles exactly against the VAT identity `debt = Σ(Art × rate) + vice`: summing all 35 registered ilks gives **$11,367,876,592.81**, plus `vice()` of **$690,101,841.19**, equals `debt()` of **$12,057,978,434.00** to the cent.
 
-**Key takeaway for the USDS holder:** the collateral mix is far better than a fiat-only stablecoin (no single banking dependency), but worse than a pure crypto-collateralized model (RWA is not fully transparent). **For a USDC→USDS→sUSDS user specifically**, the relevant backing slice is overwhelmingly the **USDC PSM pocket** (4.11B USDC), with the rest of the Sky book acting as a *secondary* solvency buffer. As long as the PSM peg arbitrage works, USDS effectively trades at the lower of `peg(DAI)` and `peg(USDC)`.
+**The Vow's net position is a deficit, not a surplus.** At the snapshot the Vow holds **$633.2M** of surplus DAI (`vat.dai(vow)`) against **$690.1M** of unbacked debt (`vat.sin(vow)`, all of the system's `vice`), leaving a **net −$56.9M**. Of that debt, $228.2M is queued for `flog` (`vow.Sin()`) and none is on auction (`vow.Ash() = 0`). The legacy surplus-auction path is disabled — `vow.bump() = 0` and `vow.hump() = 2^256−1` make `flap()` unreachable — so surplus is handled outside the Vow's own auction machinery. Observatory books the same −$56,940,271 as its "Operating Cash Balance" liability line.
+
+Cutting the same book by *underlying asset* rather than by ilk, SkyEco / Observatory's [USDS collateral-backing API](https://observatory.data.blockanalitica.com/sky/backed/items/) reports at 2026-09-09 10:50 UTC: stablecoins ~$4.89B, onchain crypto lending ~$2.12B, short-duration Treasury bills ~$1.33B, OTC crypto lending ~$956M, AAA corporate debt ~$496M, legacy RWA ~$77.6M, private credit ~$20.7M, basis trade ~$20.4M. **Offchain or tokenized credit exposure therefore totals ~$2.90B — ~29.3% of Observatory's ~$9.91B loan-coverage backing**, leaving ~70.7% onchain. Maintenance-coverage backing is ~$10.58B and total collateral value ~$15.81B, the latter ~131% of VAT debt.
+
+**A note on denominators.** The table above is expressed as a share of `VAT.debt()` because that is the issuance side of the ledger, and it is the only view derivable purely onchain. It is *not* a backing denominator: it includes $690.1M of `vice` (which is unbacked by construction) and prices the PSM at ilk debt rather than at the Pocket's USDC. Any claim about the *composition of collateral* uses Observatory's ~$9.91B loan-coverage backing instead. The same offchain exposure is ~24.0% of VAT debt but ~29.3% of backing; the backing figure is the meaningful one, and this report uses it wherever collateral quality is being characterised. Observatory's per-asset figures are reported holdings with periodic attestation for the offchain slice, not independently verified reserves — only the ~$3.95B Pocket USDC and the onchain lending and LP positions can be confirmed by direct contract reads.
+
+**System-level overcollateralization** is not directly readable from a single onchain call — it requires aggregating per-ilk `Art × rate` (debt) and `ink × oracle price × liquidation-ratio` (locked collateral value). Observatory's [balance-sheet aggregate](https://observatory.data.blockanalitica.com/financials/balance-sheet/aggregates/?group_by=month) reports **~$11.49B assets** against **~$11.42B liabilities** for the September 2026 snapshot — a positive but thin ~$68M margin. Note that this is a wider accounting frame than the Vow: it counts the $157M Sky Capital Buffer and other reserves as assets, which is why it shows a small positive margin while the Vow itself is $56.9M net negative. Onchain VAT debt is ~12.06B against ~11.22B Ethereum DAI + USDS issued supply.
+
+**Key takeaway for the USDS holder:** the collateral mix is far better than a fiat-only stablecoin (no single banking dependency), but worse than a pure crypto-collateralized model — direct crypto-CDP backing is now only ~3.2% of VAT debt, and roughly half of issuance sits in Prime allocator vaults whose assets are a mix of onchain lending, tokenized treasuries, and offchain credit. **For a USDC→USDS→sUSDS user specifically**, the relevant backing slice is overwhelmingly the **USDC PSM pocket** (~3.95B USDC), with the rest of the Sky book acting as a *secondary* solvency buffer. As long as the PSM peg arbitrage works, USDS effectively trades at the lower of `peg(DAI)` and `peg(USDC)`.
 
 ### Provability
 
-- **sUSDS exchange rate:** `convertToAssets(shares)` is fully onchain via `chi` accumulator and `ssr` rate. Continuous accrual is a pure function of `ssr` and elapsed time since `rho` (last `drip` timestamp). At snapshot: `chi = 1.1001`, `ssr = 1.0000000011214…`, `rho = 1781695355` (2026-06-18)
+- **sUSDS exchange rate:** `convertToAssets(shares)` is fully onchain via `chi` accumulator and `ssr` rate. Continuous accrual is a pure function of `ssr` and elapsed time since `rho` (last `drip` timestamp). At snapshot: `chi = 1.1090`, `ssr = 1.0000000011214…`, `rho = 1788950867` (2026-09-09)
 - **System debt (VAT):** Readable onchain via `MCD_VAT.debt()` and per-ilk `urns(ilk, urn)`, `ilks(ilk).Art`, `ilks(ilk).rate`. Full reserve audit requires aggregating dozens of ilks but is mechanically possible from public RPC
-- **USDC PSM Pocket:** `USDC.balanceOf(pocket)` is publicly callable — at snapshot returns 4.11B USDC
-- **RWA / offchain-credit backing:** Less transparent. Legacy `RWA00x` ilks total only **~$94.0M** at the snapshot, but broader Observatory categories with offchain/tokenized credit exposure total **~$3.30B**: short-duration Treasury bills (~$1.57B), OTC crypto lending (~$1.10B), AAA corporate debt (~$491M), private credit (~$32.8M), basis trade (~$20.1M), and other legacy RWA (~$94.0M). The underlying assets sit at TradFi custodians or offchain credit venues, so this remains the least directly verifiable slice of backing
+- **USDC PSM Pocket:** `USDC.balanceOf(pocket)` is publicly callable — at snapshot returns 3.95B USDC
+- **RWA / offchain-credit backing:** Less transparent. Legacy `RWA00x` ilks total only **~$77.6M** at the snapshot, but broader Observatory categories with offchain/tokenized credit exposure total **~$2.90B**: short-duration Treasury bills (~$1.33B), OTC crypto lending (~$956M), AAA corporate debt (~$496M), legacy RWA (~$77.6M), private credit (~$20.7M), and basis trade (~$20.4M). The underlying assets sit at TradFi custodians or offchain credit venues, so this remains the least directly verifiable slice of backing. Because ~49.8% of VAT debt is drawn by **Prime allocator vaults**, the ilk-level view alone does not reveal what backs it — that requires trusting Observatory's look-through into each allocator's positions. Measured on the backing side rather than the debt side, the offchain slice is ~29.3% of Observatory's ~$9.91B loan-coverage backing
 - **Can admins mint USDS out of thin air?** Yes, by definition — Sky governance (PauseProxy) can `usds.rely(addr)` to grant `wards = 1` to any address, which then has unrestricted minting via the underlying contract. This change must go through Chief vote + 48 h GSM delay. At the snapshot, the *only* non-governance ward is `USDS_JOIN`, which itself only mints in response to a corresponding `vat.suck` / `vat.move` settled through valid collateral
 
 ## Liquidity Risk
@@ -268,9 +280,9 @@ USDS does **not** have a clean "this collateral backs this token" picture — it
 ### Primary Exit Path: LitePSM Wrapper (USDS → USDC)
 
 - **Direct 1:1 redemption** with zero fee. Atomic in a single transaction
-- **Capacity (USDS → USDC):** bounded by **USDC balance in the Pocket = 4,107,503,934 USDC** at snapshot. That is ~4.11B exit capacity in a single tx with **0% slippage**
+- **Capacity (USDS → USDC):** bounded by **USDC balance in the Pocket = 3,948,440,886 USDC** at snapshot. That is ~3.95B exit capacity in a single tx with **0% slippage**
 - **No cooldown, no queue, no per-user cap**. Anyone holding USDS can swap to USDC by calling `WRAPPER_USDS_LITE_PSM_USDC_A.buyGem(usr, gemAmt)`
-- **Reverse direction (USDC → USDS)** is also atomic and zero-fee, bounded by the `buf` (400M DAI) per refill cycle. A CRON keeper job ([`CRON_LITE_PSM_JOB`](https://etherscan.io/address/0x0C86162ba3E507592fC8282b07cF18c7F902C401)) regularly refills the buffer; under heavy demand the buffer can be refilled multiple times per day
+- **Reverse direction (USDC → USDS)** is also atomic and zero-fee, bounded by the `buf` (800M DAI) per refill cycle. A CRON keeper job ([`CRON_LITE_PSM_JOB`](https://etherscan.io/address/0x0C86162ba3E507592fC8282b07cF18c7F902C401)) regularly refills the buffer; under heavy demand the buffer can be refilled multiple times per day
 
 ### Secondary Path: DAI-USDS Converter
 
@@ -288,32 +300,34 @@ USDS DEX liquidity on Ethereum mainnet is meaningful but **not** the primary exi
 
 | Project | Pool | TVL ($) |
 |---------|------|--------:|
-| Sky Lending | sUSDS | ~$5.89B |
-| Centrifuge | USDS | ~$867M |
-| SparkLend | USDS | ~$590M |
-| Curve | PYUSD-USDS | ~$100M |
-| Morpho Blue | sUSDS market | ~$62M |
-| Curve | sUSDS-USDT | ~$40M |
-| Uniswap V3 | OHM-sUSDS | ~$9.2M |
-| Curve | USDS-stUSDS | ~$6.6M |
-| Curve | DOLA-sUSDS | ~$6.0M |
+| Sky Lending | sUSDS | ~$4.67B |
+| Centrifuge | USDS | ~$775M |
+| SparkLend | USDS (two markets) | ~$592M + ~$276M |
+| Sky Lending | stUSDS | ~$209M |
+| Sky Lending | USDS | ~$164M |
+| Uniswap V4 | PYUSD-USDS | ~$100M |
+| f(x) Protocol | fxUSD stability pool (USDS) | ~$76M |
+| Morpho Blue | sUSDS market | ~$63M |
+| Uniswap V4 | USDT-USDS | ~$50M |
+| Morpho Blue | Sky Money USDS Flagship | ~$40M |
+| Uniswap V4 | RLUSD-USDS | ~$20M |
 
-Direct **USDS-USDC** DEX liquidity is small (no significant Curve/Uniswap USDS-USDC pool sits above $10M at the snapshot). This is because the **PSM Wrapper provides zero-fee 1:1 USDC↔USDS swaps**, so DEX routes cannot meaningfully out-price the PSM — there is no incentive for LPs to build deep USDS-USDC pools. For any reasonable Yearn integration size, the PSM (with ~$4.11B Pocket depth) is the dominant exit path; DEX liquidity is a secondary concern only at the multi-hundred-million-dollar scale.
+Direct **USDS-USDC** DEX liquidity is small (no Uniswap/Curve USDS-USDC pool sits above $10M at the snapshot). This is because the **PSM Wrapper provides zero-fee 1:1 USDC↔USDS swaps**, so DEX routes cannot meaningfully out-price the PSM — there is no incentive for LPs to build deep USDS-USDC pools. For any reasonable Yearn integration size, the PSM (with ~$3.95B Pocket depth) is the dominant exit path; DEX liquidity is a secondary concern only at the multi-hundred-million-dollar scale.
 
 ### Cross-Chain Liquidity
 
 USDS and sUSDS reach other chains via **two separate bridge systems** (full contract list in [Cross-Chain Bridges](#cross-chain-bridges-skylink)):
 
-1. **Native canonical L2 token bridges (SkyLink)** — Base, Optimism, Unichain (OP Stack) and Arbitrum (Arbitrum Nitro gateway). L1 tokens are locked in a per-chain escrow and minted 1:1 on the L2 by that chain's own canonical bridge. These carry the **bulk** of cross-chain supply: ~448M USDS and ~812M sUSDS across the four escrows at the snapshot. Security rests on each rollup's canonical bridge (battle-tested L1↔L2 messaging) plus PauseProxy governance; L2→L1 exits inherit the chain's challenge window (up to ~7 days on optimistic rollups). **No LayerZero / DVN trust assumption applies to these chains.**
-2. **LayerZero V2 OFT Adapters** — USDS to **Solana + Avalanche only** (~48.7M USDS locked); the sUSDS OFT adapter currently locks 0. This is the only Sky bridge that appears on LayerZero Scan (Ethereum + Solana + Avalanche) and the only one carrying third-party-verifier (DVN) trust — analyzed in [LayerZero V2 Dependency](#layerzero-v2-dependency).
+1. **Native canonical L2 token bridges (SkyLink)** — Base, Optimism, Unichain (OP Stack) and Arbitrum (Arbitrum Nitro gateway). L1 tokens are locked in a per-chain escrow and minted 1:1 on the L2 by that chain's own canonical bridge. These carry the **bulk** of cross-chain supply: ~102M USDS and ~343M sUSDS across the four escrows at the snapshot, ~97% and ~95% of it in the Arbitrum escrow after the July 2026 Spark repatriation. Security rests on each rollup's canonical bridge (battle-tested L1↔L2 messaging) plus PauseProxy governance; L2→L1 exits inherit the chain's challenge window (up to ~7 days on optimistic rollups). **No LayerZero / DVN trust assumption applies to these chains.**
+2. **LayerZero V2 OFT Adapters** — USDS to **Solana + Avalanche only** (~6.67M USDS locked); the sUSDS OFT adapter currently locks 0. This is the only Sky bridge that appears on LayerZero Scan (Ethereum + Solana + Avalanche) and the only one carrying third-party-verifier (DVN) trust — analyzed in [LayerZero V2 Dependency](#layerzero-v2-dependency).
 
 Onchain verification confirms **neither the OFT adapters nor any native bridge holds `wards` on USDS/sUSDS** — none can mint the underlying token; all lock-and-mint against escrowed supply, and all are owned/warded by PauseProxy.
 
-In total ~$0.50B of USDS (and ~812M sUSDS shares, ~$0.89B at `chi`) sits outside Ethereum mainnet — matching DefiLlama's per-chain balances. For an Ethereum-mainnet-only Yearn strategy, cross-chain bridge exposure is operationally none.
+In total ~109M USDS (and ~343M sUSDS shares, ~$380M at `chi`) sits outside Ethereum mainnet — matching DefiLlama's per-chain balances (Arbitrum ~99.8M, Solana ~6.7M, Base ~2.6M, Optimism/Unichain/Avalanche dust). For an Ethereum-mainnet-only Yearn strategy, cross-chain bridge exposure is operationally none.
 
 ### Historical Liquidity Under Stress
 
-- During the October 2025 stablecoin stress event (USDS min price 0.9953), USDS-USDC swaps via the PSM remained available throughout — the peg deviation was driven by secondary AMM markets, not by Pocket depletion
+- During the October 2025 stablecoin stress event (USDS hourly low 0.9947 on October 6, 2025), USDS-USDC swaps via the PSM remained available throughout — the peg deviation was driven by secondary AMM markets, not by Pocket depletion
 - **`LITE_PSM_MOM.halt(...)` has never been invoked.** Full event-log scan of [`0x467b32b0407Ad764f56304420Cddaa563bDab425`](https://etherscan.io/address/0x467b32b0407Ad764f56304420Cddaa563bDab425) returns exactly **4 events** since deployment, none of which are `Halt(address indexed psm, Flow indexed what)` (topic `0x495feb065552316a79c594a4305afbd632955a68b2c6f65ad8b2f62d150fea92`). The 4 events are 2× `SetOwner` and 2× `SetAuthority` from initial deployment (final owner = PauseProxy, final authority = Chief). The emergency-halt channel exists but has never been used
 
 ## Centralization & Control Risks
@@ -338,22 +352,21 @@ Sky uses **token-weighted continuous-approval voting** rather than a multisig:
 
 **Weaknesses:**
 - **SKY token concentration risk:** voting weight is proportional to SKY locked. Onchain at the snapshot:
-  - Total SKY locked in Chief: **7,023,149,881 SKY** (~29.9% of the 23.46B SKY supply)
-  - Approvals for the current hat ([`0x0aE3…e253`](https://etherscan.io/address/0x0aE3371e9C4e37515259D124C685fe6722c5e253)): **6,517,630,357 SKY** (~27.8% of total supply; **~92.8% of locked SKY votes for the hat**)
-  - Sky's [current-hat API](https://vote.sky.money/api/executive/hat?network=mainnet) and [supporter API](https://vote.sky.money/api/executive/supporters?network=mainnet) show high supporter concentration for the current hat. The largest supporter, **cloaky**, has **3.17B SKY** (**48.59%** of hat approvals). The top 3 supporters have **~95.95%** of hat approvals; the top 5 have **~98.46%**. No single supporter currently exceeds 50%, but two aligned delegates can exceed a majority of current-hat approvals.
+  - Total SKY locked in Chief: **7,172,789,081 SKY** (~30.6% of the 23.46B SKY supply)
+  - Approvals for the current hat ([`0x2bf5…2E05`](https://etherscan.io/address/0x2bf5132EC2F21B079D7591c86D9817f1f18a2E05)): **7,051,808,326 SKY** (~30.1% of total supply; **~98.3% of locked SKY votes for the hat**)
+  - Sky's [current-hat API](https://vote.sky.money/api/executive/hat?network=mainnet) and [supporter API](https://vote.sky.money/api/executive/supporters?network=mainnet) show high supporter concentration for the current hat. The largest supporter, **cloaky**, has **3.18B SKY** (**45.07%** of hat approvals). The top 3 supporters have **~90.6%** of hat approvals; the top 5 have **~98.0%**. No single supporter currently exceeds 50%, but two aligned delegates can exceed a majority of current-hat approvals.
 
-| Rank | Supporter | Address | SKY approving current hat | % of hat approvals |
-|------|-----------|---------|---------------------------|--------------------|
-| 1 | cloaky | [`0x0f23…cc86`](https://etherscan.io/address/0x0f23de72e1581857eacd6308aebb69cf3a49cc86) | 3,166,779,061 | 48.59% |
-| 2 | BLUE | [`0x173a…9558`](https://etherscan.io/address/0x173a1c04b79ed9266721c1154daa29addc0b9558) | 2,081,236,730 | 31.93% |
-| 3 | Bonapublica | [`0xfc48…753d`](https://etherscan.io/address/0xfc48fbca739079aab08216c4d5e506b96593753d) | 1,005,445,631 | 15.43% |
-| 4 | aegisD | [`0xd260…bf5e`](https://etherscan.io/address/0xd260762e442ea1893e5ed5e7d28984e19aafbf5e) | 88,209,870 | 1.35% |
-| 5 | Max Staking Yield | [`0xff76…e2f`](https://etherscan.io/address/0xff7615e05ec1c8d5ded24ab50bf74432666bee2f) | 75,384,957 | 1.16% |
-| 6 | PBG | [`0x5552…b850`](https://etherscan.io/address/0x555230eca835a808518ec3ea3082f05502bab850) | 47,979,232 | 0.74% |
-| 7 | Brendan Navigator | [`0x8a8d…8f11`](https://etherscan.io/address/0x8a8d131502bb4868a0777bef604547a8316a8f11) | 20,904,484 | 0.32% |
-| 8 | WBC | [`0x4bed…ae90`](https://etherscan.io/address/0x4bed44a9839b8778f69bb6a6d9f843414377ae90) | 20,538,420 | 0.32% |
-| 9 | Shadow Delegate | [`0x2c89…521c`](https://etherscan.io/address/0x2c89024c13a80bc1b662a3db990524652c15221c) | 11,150,654 | 0.17% |
-| 10 | Shadow Delegate | [`0x9689…d2f3`](https://etherscan.io/address/0x9689619f0ccec172207743f8a74cc490853cd2f3) | 1,295 | 0.00% |
+| Rank | Supporter | Vote-delegate address | SKY approving current hat | % of hat approvals |
+|------|-----------|-----------------------|---------------------------|--------------------|
+| 1 | cloaky | [`0x0f23…cc86`](https://etherscan.io/address/0x0f23de72e1581857eacd6308aebb69cf3a49cc86) | 3,178,061,490 | 45.07% |
+| 2 | BLUE | [`0x173a…9558`](https://etherscan.io/address/0x173a1c04b79ed9266721c1154daa29addc0b9558) | 2,084,056,374 | 29.55% |
+| 3 | Bonapublica | [`0xfc48…753d`](https://etherscan.io/address/0xfc48fbca739079aab08216c4d5e506b96593753d) | 1,130,024,047 | 16.02% |
+| 4 | Tango | [`0x550e…72ad`](https://etherscan.io/address/0x550e5ec00b9d26a3517ce772ddfe73e8ed1672ad) | 427,461,785 | 6.06% |
+| 5 | aegisD | [`0xd260…bf5e`](https://etherscan.io/address/0xd260762e442ea1893e5ed5e7d28984e19aafbf5e) | 89,304,798 | 1.27% |
+| 6 | Max Staking Yield | [`0xff76…ee2f`](https://etherscan.io/address/0xff7615e05ec1c8d5ded24ab50bf74432666bee2f) | 72,160,815 | 1.02% |
+| 7 | PBG | [`0x5552…b850`](https://etherscan.io/address/0x555230eca835a808518ec3ea3082f05502bab850) | 48,416,057 | 0.69% |
+| 8 | WBC | [`0x4bed…ae90`](https://etherscan.io/address/0x4bed44a9839b8778f69bb6a6d9f843414377ae90) | 20,569,425 | 0.29% |
+| 9 | Shadow Delegate | [`0xb263…bc23`](https://etherscan.io/address/0xb26338c1f190ddf5b7fe61fa6198b06547a5bc23) | 1,753,534 | 0.02% |
 
 - **48 h delay is at the low end** for upgradeable stablecoin systems (compared to 7-day on many newer protocols). A determined attacker with sufficient SKY could theoretically push through harmful changes if they can hold the hat for 48 h without being out-voted
 - **Privileged role: PauseProxy can mint USDS to anyone** by granting `wards = 1` to a new address. This is the same "governance can do anything" property all DAO-controlled stablecoins share. The 48 h delay + onchain visibility is the only constraint
@@ -377,11 +390,13 @@ System operations are dominated by programmatic onchain logic. The governance to
 
 | Dependency | Used By | Criticality | Notes |
 |-----------|---------|-------------|-------|
-| **Circle / USDC** | LitePSM Wrapper, Pocket holds 4.11B USDC | **Critical** for USDS-USDC swap path. A USDC freeze/blacklist on the Pocket or a USDC depeg would directly impair USDS-USDC convertibility | Circle has blacklisted addresses before (TornadoCash, OFAC sanctions). The Pocket has not been blacklisted but is on-chain visible and bounded by Circle's policy |
+| **Circle / USDC** | LitePSM Wrapper, Pocket holds 3.95B USDC | **Critical** for USDS-USDC swap path. A USDC freeze/blacklist on the Pocket or a USDC depeg would directly impair USDS-USDC convertibility | Circle has blacklisted addresses before (TornadoCash, OFAC sanctions). The Pocket has not been blacklisted but is on-chain visible and bounded by Circle's policy |
 | **DAI / MakerDAO core (VAT, Join, Pot, Pause, Chief)** | All conversion paths | **Critical** — USDS shares the VAT with DAI. A bug in any MCD core contract impairs USDS | 8+ years of production with documented incidents (Black Thursday) but no exploit since |
-| **RWA / offchain-credit custodians** | Legacy `RWA00x` ilks are ~0.7% of VAT debt; broader tokenized treasury / corporate credit / private-credit / OTC credit backing is ~25.9% of VAT debt | High but indirect for the USDC→USDS user | Custodians and credit venues include TradFi/tokenized-credit issuers such as BlackRock BUIDL, Janus Henderson Anemoy/Centrifuge, Securitize, Maple, Anchorage, and legacy RWA vault parties. Failures propagate to system solvency but do not directly impair PSM swap atomicity |
-| **LayerZero V2 (USDS_OFT)** | Cross-chain bridging to **Solana + Avalanche only** (~$48.7M); EVM L2s use native bridges, not LayerZero | **Nil** for Ethereum-mainnet-only user; **Low** for cross-chain users | OFT channels verified to require **2 independent DVNs** (LayerZero Labs + Nethermind) — not the single-DVN config exploited at KelpDAO. See expanded section below |
-| **Native L2 canonical bridges** (Base/Optimism/Unichain OP Stack; Arbitrum Nitro) | SkyLink cross-chain transport for USDS + sUSDS (~$0.5B USDS + ~812M sUSDS) | **Nil** for Ethereum-mainnet-only user | ERC-1967 proxies governed by PauseProxy; security inherits each rollup's canonical bridge. Not LayerZero |
+| **Offchain / tokenized-credit issuers and custodians** (via Prime allocators) | ~29.3% of backing (~$2.90B). Largest named positions at the snapshot: Janus Henderson Treasury Fund (~$758.7M), BlackRock BUIDL I Class (~$568.7M), Syrup USDC / Maple (~$398.6M), Galaxy Warehouse OTC (~$320.0M), Janus Henderson Anemoy AAA CLO (~$262.2M), Anchorage OTC (~$220.0M), Janus Henderson AAA CLO (~$130.9M), Securitize Tokenized AAA CLO (~$103.2M), Anemoy/Apollo Diversified Credit (~$20.7M), plus legacy `RWA00x` (~$77.6M: HVB, New Silver, FortunaFi, Harbor Trade) | **High** for solvency; indirect for the USDC→USDS user | Impairment at any of these flows into the allocator's ilk, then to the Vow as `sin`, degrading USDS backing. It does not impair PSM swap atomicity while the Pocket holds USDC. Positions are reported by [Observatory](https://observatory.data.blockanalitica.com/sky/backed/items/) with periodic attestation, not verifiable by contract read |
+| **Onchain lending markets and DEXs** (via Prime allocators) | ~21.4% of backing (~$2.12B). SparkLend USDS/USDT/USDC/DAI/PYUSD markets (~$1.25B combined), Morpho vaults curated by Steakhouse (Steakhouse Prime Instant ~$179.8M, Grove x Steakhouse USDC High Yield ~$81.3M), Uniswap V4 PYUSD/USDS (~$100.1M) and USDT/USDS (~$50.0M), Uniswap V3 AUSD/USDC (~$26.0M) | **Medium-high** for solvency | Established DeFi protocols, onchain-verifiable, but they carry smart-contract and market risk that propagates to USDS backing through the same allocator path |
+| **Third-party stablecoins held as backing** | RLUSD (Ripple, ~$307.7M), PayPal USD (Paxos, ~$240.0M), plus USDC beyond the Pocket | **Medium** for solvency | A depeg or freeze at any of these reduces allocator backing. Smaller and more diversified than the USDC PSM exposure |
+| **LayerZero V2 (USDS_OFT)** | Cross-chain bridging to **Solana + Avalanche only** (~$6.67M); EVM L2s use native bridges, not LayerZero | **Nil** for Ethereum-mainnet-only user; **Low** for cross-chain users | OFT channels verified to require **2 independent DVNs** (LayerZero Labs + Nethermind) — not the single-DVN config exploited at KelpDAO. See expanded section below |
+| **Native L2 canonical bridges** (Base/Optimism/Unichain OP Stack; Arbitrum Nitro) | SkyLink cross-chain transport for USDS + sUSDS (~102M USDS + ~343M sUSDS) | **Nil** for Ethereum-mainnet-only user | ERC-1967 proxies governed by PauseProxy; security inherits each rollup's canonical bridge. Not LayerZero |
 | **Chainlink / Oracle price feeds (MCD_SPOT)** | Sets per-ilk liquidation prices for collateral CDPs | Indirect — bad oracle → bad liquidations → solvency hit | Mature oracle setup with multi-source feeds |
 | **LITE_PSM_MOM emergency halter** | Can pause USDC-USDS PSM swaps instantly | Trust dependency: the elected hat can halt PSM at will | Visible onchain; governance can override |
 
@@ -389,7 +404,7 @@ System operations are dominated by programmatic onchain logic. The governance to
 
 **What LayerZero Is:** LayerZero is a cross-chain interoperability protocol that provides a generic messaging layer between blockchains. It uses a modular verification architecture where each OApp (Omnichain Application) configures one or more **DVNs** (Decentralized Verifier Networks) to attest to cross-chain messages. When a message receives sufficient attestations (as configured by the OApp's security settings), the destination contract executes the payload.
 
-**What Sky Uses It For:** Sky uses LayerZero **only for chains that lack a native canonical bridge to Ethereum** — currently **Solana and Avalanche**. USDS deploys an **OFT Adapter** (Omnichain Fungible Token) on Ethereum (`0x1e1D…01B8`) that locks USDS and authorizes minting of a corresponding OFT on those chains (~48.7M USDS locked at the snapshot). The sUSDS OFT adapter (`0x85A3…f0f1`) has an Avalanche peer configured but currently locks 0. **The EVM L2s — Base, Arbitrum, Optimism, Unichain — do NOT use LayerZero**; they use native canonical rollup bridges (see [Cross-Chain Bridges](#cross-chain-bridges-skylink)). The OFT adapters are owned by PauseProxy; changes require Chief vote + 48 h GSM delay.
+**What Sky Uses It For:** Sky uses LayerZero **only for chains that lack a native canonical bridge to Ethereum** — currently **Solana and Avalanche**. USDS deploys an **OFT Adapter** (Omnichain Fungible Token) on Ethereum (`0x1e1D…01B8`) that locks USDS and authorizes minting of a corresponding OFT on those chains (~6.67M USDS locked at the snapshot). The sUSDS OFT adapter (`0x85A3…f0f1`) has an Avalanche peer configured but currently locks 0. **The EVM L2s — Base, Arbitrum, Optimism, Unichain — do NOT use LayerZero**; they use native canonical rollup bridges (see [Cross-Chain Bridges](#cross-chain-bridges-skylink)). The OFT adapters are owned by PauseProxy; changes require Chief vote + 48 h GSM delay.
 
 **KelpDAO Incident Context (April 18, 2026):** On April 18, 2026, the KelpDAO rsETH bridge — also built on LayerZero — was attacked by the DPRK-affiliated TraderTraitor threat actor, resulting in a loss of ~$292M. The attacker socially engineered a LayerZero Labs developer, pivoted into LayerZero's cloud environment, and poisoned internal RPC nodes to forge DVN attestations for a malicious cross-chain message. The critical vulnerability was that the affected OApp had a **single-verifier configuration** — it relied on the LayerZero Labs DVN alone without requiring a second, independent DVN to confirm. The forged attestation was therefore sufficient to unlock rsETH on the destination chain.
 
@@ -402,10 +417,10 @@ System operations are dominated by programmatic onchain logic. The governance to
 
 **Mitigating factors specific to Sky:**
 - Sky governance controls the OFT adapters via PauseProxy and can upgrade or pause them through the same Chief + 48 h GSM delay used for all other protocol changes.
-- LayerZero-bridged supply is tiny: ~$48.7M of USDS (Solana + Avalanche), <0.7% of mainnet supply. The larger cross-chain supply (~$0.45B USDS + ~812M sUSDS) rides native canonical bridges, not LayerZero.
+- LayerZero-bridged supply is tiny: ~$6.67M of USDS (Solana + Avalanche), ~0.1% of mainnet supply. The larger cross-chain supply (~102M USDS + ~343M sUSDS) rides native canonical bridges, not LayerZero.
 - Sky's channels already use a verified **2-DVN configuration** (LayerZero Labs + Nethermind), so they were not exposed to the single-DVN vector even before LayerZero Labs' post-KelpDAO policy enforcing multi-DVN baselines.
 
-**Quality:** dependencies are predominantly **blue-chip** (Circle, MakerDAO core, Chainlink). The most material concentration is the **USDC dependency**: the on-chain USDC reserve currently makes up ~30%+ of the direct backing of USDS issued via the swap path, and *any* USDS holder who plans to exit to USDC implicitly trusts Circle.
+**Quality:** dependencies are predominantly **blue-chip** (Circle, MakerDAO core, Chainlink). The most material concentration is the **USDC dependency**: the LitePSM ilk is ~39.3% of VAT debt, of which the on-chain USDC reserve itself is ~32.7%, and *any* USDS holder who plans to exit to USDC implicitly trusts Circle.
 
 ## Operational Risk
 
@@ -440,6 +455,7 @@ System operations are dominated by programmatic onchain logic. The governance to
 | USDS LayerZero OFT Adapter | [`0x1e1D42781FC170EF9da004Fb735f56F0276d01B8`](https://etherscan.io/address/0x1e1D42781FC170EF9da004Fb735f56F0276d01B8) | `owner()` (should always equal PauseProxy), `endpoint()`, any `Upgraded` events on underlying token; **DVN config via `getUlnConfig` — alert if `requiredDVNCount` drops below 2** |
 | sUSDS LayerZero OFT Adapter | [`0x85A3FE4DA2a6cB98A5bdF62458B0dB8471B9f0f1`](https://etherscan.io/address/0x85A3FE4DA2a6cB98A5bdF62458B0dB8471B9f0f1) | `owner()` (should always equal PauseProxy), `endpoint()`; any cross-chain supply anomalies |
 | Native L2 bridge escrows (Base/Optimism/Unichain/Arbitrum) | [`0x7F31…9Ef3`](https://etherscan.io/address/0x7F311a4D48377030bD810395f4CCfC03bdbe9Ef3) · [`0x4671…6C65`](https://etherscan.io/address/0x467194771dAe2967Aef3ECbEDD3Bf9a310C76C65) · [`0x1196…566A`](https://etherscan.io/address/0x1196F688C585D3E5C895Ef8954FFB0dCDAfc566A) · [`0xA10c…9400`](https://etherscan.io/address/0xA10c7CE4b876998858b1a9E12b10092229539400) | `USDS.balanceOf(escrow)` / `sUSDS.balanceOf(escrow)` should equal the minted L2 supply; `wards[PauseProxy]` on each token bridge |
+| Prime allocator ilks (Spark, Grove, Obex, Keel) | [`MCD_VAT.ilks(ilk)`](https://etherscan.io/address/0x35D1b3F3D7966A1DFe207aa4514C12a259A0492B) for `ALLOCATOR-SPARK-A`, `ALLOCATOR-BLOOM-A`, `ALLOCATOR-OBEX-A`, `ALLOCATOR-NOVA-A` | `Art × rate` (drawn debt) and `line` (debt ceiling) per allocator — ~49.8% of VAT debt is issued here |
 
 ### Critical Values, Thresholds, and Frequency
 
@@ -447,6 +463,7 @@ System operations are dominated by programmatic onchain logic. The governance to
 |--------|--------|---------------------|-----------|
 | USDS spot price | DEX TWAP / CoinGecko | < $0.995 or > $1.005 (>0.5% deviation) | 15 min |
 | USDC Pocket balance | onchain | < $500M (would signal heavy redemption load) | Hourly |
+| Prime allocator ilk debt | `MCD_VAT.ilks` | Any allocator's drawn debt rises >20% in 7 days, or a new `ALLOCATOR-*` ilk is onboarded | Daily |
 | LitePSM `tin`, `tout`, `buf` | onchain | Any change | On `Rely`/`File` event |
 | LitePSM Halt | event log | Any `Halt` event | Real time |
 | `MCD_PAUSE` scheduled spells | `Plot` event | Any spell touching USDS / sUSDS / PSM / Pocket | Behind timelock |
@@ -456,7 +473,7 @@ System operations are dominated by programmatic onchain logic. The governance to
 
 ## Appendix: Contract Architecture
 
-Snapshot block 25345569 (June 18, 2026).
+Snapshot block 25939320 (September 9, 2026).
 
 ```
 ┌──────────────────────────────────────────────────────────────────────────┐
@@ -473,21 +490,21 @@ Snapshot block 25345569 (June 18, 2026).
 │                    ▼                      ▼                              │
 │   ┌──────────────────┐         ┌──────────────────────┐                  │
 │   │ DAI_USDS         │         │  MCD_LITE_PSM_USDC_A │                  │
-│   │ 0x3225…F276A     │◄────────│  0xf6e7…3042         │  buf=400M DAI    │
+│   │ 0x3225…F276A     │◄────────│  0xf6e7…3042         │  buf=800M DAI    │
 │   │ 1:1 DAI↔USDS     │         │  tin=tout=0          │                  │
 │   └─────────┬────────┘         └──────────┬───────────┘                  │
 │             │                             │                              │
 │             │  usdsJoin / daiJoin         │  pocket holds USDC           │
 │             ▼                             ▼                              │
 │   ┌──────────────────┐         ┌──────────────────────┐                  │
-│   │ USDS_JOIN        │         │  POCKET              │ 4.11B USDC       │
+│   │ USDS_JOIN        │         │  POCKET              │ 3.95B USDC       │
 │   │ 0x3C0f…7FEB      │         │  0x3730…7341         │                  │
 │   │ wards[USDS] = 1  │         └──────────────────────┘                  │
 │   └─────────┬────────┘                                                   │
 │             │                                                             │
 │             ▼                                                             │
 │   ┌──────────────────────────────────────────────────┐                   │
-│   │              MCD_VAT (core ledger)                │  ~12.76B debt    │
+│   │              MCD_VAT (core ledger)                │  ~12.06B debt    │
 │   │              0x35D1…492B                          │  (DAI+USDS)      │
 │   │  Holds all ilk debt: ETH-A, wstETH-A, RWA-*,     │                  │
 │   │  PSM-USDC-A, LockStake, D3M Spark, etc.          │                  │
@@ -507,9 +524,9 @@ Snapshot block 25345569 (June 18, 2026).
 │   ┌──────────────────────────────────────────────────┐                   │
 │   │  sUSDS  (0xa393…7fbD)  — ERC-4626                │                   │
 │   │  implementation 0x4e79…61e0                       │                   │
-│   │  chi = 1.1001   ssr = ~3.60% APY                 │                   │
-│   │  totalAssets() = 5.89B USDS                      │                   │
-│   │  totalSupply()  = 5.31B sUSDS                    │                   │
+│   │  chi = 1.1090   ssr = ~3.60% APY                 │                   │
+│   │  totalAssets() = 4.67B USDS                      │                   │
+│   │  totalSupply()  = 4.22B sUSDS                    │                   │
 │   └──────────────┬───────────────────────────────────┘                   │
 │                  │  drip() accrues from USDS_JOIN via VAT/VOW            │
 │                  ▼                                                        │
@@ -524,7 +541,7 @@ Snapshot block 25345569 (June 18, 2026).
 │         │  lock + approve                                                 │
 │         ▼                                                                 │
 │   ┌──────────────────────┐                                                │
-│   │   MCD_ADM  (Chief)   │  hat() = 0x0aE3…e253                          │
+│   │   MCD_ADM  (Chief)   │  hat() = 0x2bf5…2E05                          │
 │   │   0x929d…6f9         │  continuous-approval                          │
 │   └──────────┬───────────┘                                                │
 │              │                                                            │
@@ -560,20 +577,21 @@ Snapshot block 25345569 (June 18, 2026).
 ### Key Strengths
 
 - **Battle-tested infrastructure** — the underlying MCD system (VAT, Pause, Chief, Join) has been live since December 2017 with >8 years of production, multiple major audits, and a $10M Immunefi bounty
-- **Fee-free, atomic, deep liquidity for USDC ↔ USDS** — the LitePSM Wrapper provides a 1:1 swap with no slippage, backed by ~$4.11B USDC in the Pocket. Exit capacity is orders of magnitude larger than any reasonable Yearn vault size
+- **Fee-free, atomic, deep liquidity for USDC ↔ USDS** — the LitePSM Wrapper provides a 1:1 swap with no slippage, backed by ~$3.95B USDC in the Pocket. Exit capacity is orders of magnitude larger than any reasonable Yearn vault size
 - **Fully onchain accounting** — USDS supply, sUSDS `chi`/`ssr`, PSM pocket balance, and VAT debt are all publicly readable. ERC-4626 standard for sUSDS
 - **No EOAs in privileged roles** — all sensitive wards point to PauseProxy or audited Sky contracts; governance is token-weighted Chief vote with 48 h GSM delay
-- **Diverse backing** — combination of overcollateralized crypto CDPs, RWA Treasury bills, USDC PSM, and D3M lending, reducing single-asset concentration risk
+- **Diverse backing** — combination of the USDC PSM (~39.3% of VAT debt), Prime allocator vaults deploying into onchain lending and tokenized treasuries (~49.8%), overcollateralized crypto CDPs, LockStake, and legacy RWA, reducing single-asset concentration risk
 - **Excellent documentation, public team, and incident-response history** — Sky has demonstrably handled Black Thursday and USDC-depeg events under governance vote
-- **High SSR adoption** — ~75% of USDS supply is staked in sUSDS, showing strong user confidence
+- **High SSR adoption** — ~70% of USDS supply is staked in sUSDS, showing strong user confidence
 - **USDS ↔ DAI fungibility** — converter rails USDS's peg directly to DAI, with full DAI DEX-liquidity universe as secondary exit
 
 ### Key Risks
 
-- **USDC dependency** — the largest single backing line for the USDS-USDC swap path is Circle's USDC (~$4.11B in Pocket). A USDC depeg or Pocket blacklisting by Circle would directly impair USDS-USDC convertibility, as happened to DAI during the March 2023 SVB event
+- **USDC dependency** — the largest single backing line for the USDS-USDC swap path is Circle's USDC (~$3.95B in Pocket). A USDC depeg or Pocket blacklisting by Circle would directly impair USDS-USDC convertibility, as happened to DAI during the March 2023 SVB event
 - **Governance can do anything to USDS / sUSDS** — PauseProxy can upgrade either contract's implementation, add new minters via `rely`, change the SSR, or halt PSM swaps via Mom. All require 48 h GSM delay except Mom-halt. SKY token-weighted voting introduces concentration risk if a small set of SKY holders dominates Chief
 - **48 h GSM delay is at the low end** — many newer DeFi systems use 7-day timelocks. 48 h gives a tight reaction window for catching malicious spells
-- **Real-World Asset backing is offchain** — a meaningful fraction of system collateral sits at TradFi custodians (Monetalis, BlockTower, Centrifuge) and depends on attestations, not direct onchain visibility
+- **Offchain and tokenized-credit backing** — ~29.3% of backing (~$2.90B: Treasury bills, OTC crypto lending, AAA corporate debt, private credit, legacy RWA) sits with offchain custodians and credit venues and depends on attestations and Observatory reporting, not direct onchain visibility. Named counterparties are in [External Dependencies](#external-dependencies)
+- **Prime allocator concentration** — ~49.8% of VAT debt is drawn by Prime allocators, and ~49.5 points of that sit in just three (Spark ~$3.06B, Grove ~$2.50B, Obex ~$403M). The ilk itself shows only the debt; what backs it is whatever those allocators hold, so USDS solvency now depends heavily on allocator mandate discipline and Sky's ability to unwind those positions
 - **RWA legal/jurisdiction exposure** — Sky's RWA program inherits TradFi regulatory and counterparty risk that is not transparent at the contract level
 - **Chained contract dependency for USDC→USDS** — the swap path traverses USDC → LitePSM → DAI Join → USDS Join → DAI-USDS Converter → USDS. A fault in any link halts the wrapper
 - **SSR is governance-controlled** — sUSDS yield can be changed at any time by Sky governance (with 48 h delay). Historical range: ~5–15% during DAI era; currently ~3.60% APY
@@ -608,7 +626,7 @@ Snapshot block 25345569 (June 18, 2026).
 | Factor | Assessment |
 |--------|-----------|
 | Audit firms | **ChainSecurity** (USDS, sUSDS, LitePSM, Endgame, plus 9 audits historically), **Cantina** (USDS, sUSDS, LitePSM, plus 10 audits historically), **Sherlock** contest, plus legacy Trail of Bits, PeckShield, Quantstamp on MCD core |
-| Bug bounty | $10M Immunefi (Sky), live 4+ years, 216 assets in scope |
+| Bug bounty | $10M Immunefi (Sky), live 4+ years, 255 assets in scope |
 | Contract surface | Thin tokens (USDS ERC-20, sUSDS ERC-4626). Chained PSM path adds complexity |
 
 **Audits Score: 1.0 / 5** — 3+ top-tier audits per module, $10M bounty, multi-year coverage.
@@ -617,12 +635,12 @@ Snapshot block 25345569 (June 18, 2026).
 
 | Factor | Assessment |
 |--------|-----------|
-| Time in production | USDS: **21.5 months** (Sept 2024). Underlying MCD: **8.5 years** |
-| TVL | USDS: ~$7.84B mainnet (~$8.19B total). sUSDS holds 5.89B USDS (~75% staked). Sky Lending TVL ~$5.81B |
+| Time in production | USDS: **24 months** (Sept 2024). Underlying MCD: **8.75 years** |
+| TVL | USDS: ~$6.65B mainnet (~$6.64B total). sUSDS holds 4.67B USDS (~70% staked). Sky Lending TVL ~$5.51B |
 | Security incidents on USDS / sUSDS / LitePSM | **None** since launch |
 | Legacy incidents | Black Thursday (March 2020), USDC depeg (March 2023) — both handled by governance |
 
-**Historical Score: 1.0 / 5** — USDS-specific track record is just shy of 2 years (would map to 2.0), but the underlying MCD core has been multi-billion-dollar production for 8 years with no recent incidents makes is top score.
+**Historical Score: 1.0 / 5** — USDS-specific track record has now passed 2 years with no incident, and the underlying MCD core has been multi-billion-dollar production for 8.75 years with no recent incidents. The ~19% supply contraction over the last quarter was orderly — the deepest depeg over that 90-day window was 0.08% (hourly low 0.9992 on 2026-07-09), with no PSM halt and no fee change — so it does not warrant a harsher score.
 
 **Cat 1 Score = (1.0 + 1.0) / 2 = 1.0 / 5**
 
@@ -657,14 +675,15 @@ Snapshot block 25345569 (June 18, 2026).
 
 | Factor | Assessment |
 |--------|-----------|
-| True external dependencies | USDC (Circle) — Pocket holds 4.11B USDC; Chainlink oracles (multi-source) for collateral pricing; LayerZero (cross-chain OFT — non-critical for mainnet user) |
+| Swap-path dependencies | USDC (Circle) — Pocket holds 3.95B USDC; Chainlink/Chronicle oracles for collateral pricing; LayerZero (cross-chain OFT — non-critical for mainnet user) |
+| Solvency-path dependencies (via Prime allocators, ~49.8% of VAT debt) | **Offchain/tokenized credit (~29.3% of backing):** Janus Henderson/Anemoy, BlackRock BUIDL, Maple (Syrup), Galaxy, Anchorage, Securitize, Apollo, legacy RWA parties. **Onchain (~21.4%):** SparkLend, Morpho (Steakhouse-curated vaults), Uniswap V3/V4. **Third-party stablecoins:** RLUSD (Ripple), PayPal USD (Paxos) |
 | Not counted as external | MCD core (VAT, Chief, Pause, Join) — this *is* Sky's own infrastructure, not a third-party dependency |
-| Quality | USDC is blue-chip (Circle survived March 2023 SVB depeg without halting); Chainlink is multi-source mature oracle |
-| Single point of failure | A USDC freeze/depeg directly impairs the USDS-USDC swap, but the DAI-USDS converter path still works without USDC |
+| Quality | Predominantly established: Circle, BlackRock, Janus Henderson, Chainlink, Spark, Morpho, Uniswap. Newer or less-liquid venues (Maple, Galaxy, Apollo private credit) are individually ≤~$400M |
+| Single point of failure | None. A USDC freeze/depeg impairs the USDS-USDC swap but the DAI-USDS converter still works; no single allocator counterparty exceeds ~7.7% of backing |
 
-**Dependencies Score: 1.5 / 5** — One critical blue-chip external dependency (USDC) and one mature mid-criticality dependency (Chainlink). MCD core was previously double-counted as both internal architecture *and* external dependency — removing that, the residual external surface is small. Score 1.5 (between Score 1 "no external dependencies" and Score 2 "1-2 blue-chip non-critical") reflects that USDC is blue-chip but criticality is non-trivial.
+**Dependencies Score: 3.0 / 5** — the rubric's Score 3 is "2-3 established protocol dependencies; some critical functions depend on them", and the honest count is higher than that once the allocator book is enumerated: a dozen-plus established counterparties, of which USDC is critical to the swap path and the offchain-credit set is critical to solvency. The prior 1.5 was derived from a dependency list that stopped at USDC, Chainlink and LayerZero, and is not defensible now that ~49.8% of VAT debt is documented as sitting in allocator vaults with named downstream exposure. It is held at 3.0 rather than 4.0 because the dependencies are mostly blue-chip rather than "newer", no single allocator counterparty exceeds ~7.7% of backing (the largest is the Janus Henderson Treasury Fund at ~$758.7M), and the *core user functions* — holding USDS, converting to DAI, accruing SSR in sUSDS — depend on none of them; only solvency does.
 
-**Cat 2 Score = (1.0 + 1.0 + 1.5) / 3 ≈ 1.17 → 1.2 / 5** (conservative round-up to one decimal)
+**Cat 2 Score = (1.0 + 1.0 + 3.0) / 3 ≈ 1.67 → 1.7 / 5** (conservative round-up to one decimal)
 
 #### Category 3: Funds Management (Weight: 30%)
 
@@ -672,36 +691,40 @@ Snapshot block 25345569 (June 18, 2026).
 
 | Factor | Assessment |
 |--------|-----------|
-| Backing model | Inherits MCD_VAT collateral book: crypto CDPs (overcollateralized), USDC PSM (~$4.11B), RWA Treasury bills (offchain custodians), LockStake, D3M |
-| System-wide CR | VAT `debt() ≈ 12.76B` vs DAI+USDS supply ≈ 12.04B (Ethereum mainnet) — thin direct surplus, with per-ilk overcollateralization (145–170% on crypto ilks) as the safety margin |
-| Verifiability | Per-ilk debt and ink readable onchain. RWA fraction requires attestations |
+| Backing model | Inherits MCD_VAT collateral book: USDC PSM (~$4.73B, 39.3%), Prime allocator vaults (~$6.01B, 49.8%), crypto CDPs (~$388M, 3.2%), LockStake (~$159M), legacy RWA (~$77.6M), `vice` (~$690M, 5.7%), D3M (dormant) |
+| System-wide CR | VAT `debt() ≈ 12.06B` vs DAI+USDS supply ≈ 11.22B (Ethereum mainnet). Vow net position **−$56.9M** (surplus $633.2M vs unbacked debt $690.1M). Observatory balance sheet: ~$11.49B assets vs ~$11.42B liabilities — thin margin, with per-ilk overcollateralization (145–170% on crypto ilks) as the safety buffer |
+| Verifiability | Per-ilk debt and ink readable onchain. Prime allocator and RWA fractions require Observatory look-through / attestations |
 | Leverage | None at USDS holder level. CDP borrowers are leveraged by design |
 
-**Collateralization Score: 2.0 / 5** — 100% backed by a *mix* of onchain (crypto, USDC PSM, D3M) and offchain-custody (RWA) assets. Mixed quality but extensively documented and historically robust.
+**Collateralization Score: 2.5 / 5** — collateralized in aggregate (total collateral value ~$15.81B, ~131% of VAT debt), but not by the rubric's Score-2 standard of "100% **onchain** collateral". Measured against Observatory's ~$9.91B loan-coverage backing, **~29.3% (~$2.90B) is offchain** tokenized treasury, AAA corporate, private and OTC credit, confirmed by periodic attestation rather than contract reads — that is the Score-3 backing and verifiability profile. Against that, ~70.7% is onchain, and the single largest line — ~$3.95B of USDC in the PSM Pocket, ~39.9% of backing — is instantly verifiable by a `balanceOf` call.
+
+The deciding factor for the 0.5 uplift from the prior 2.0 is **allocator opacity**: ~49.8% of VAT debt is drawn by Prime allocator vaults (Spark, Grove, Obex and three smaller ones) where the ilk exposes only the drawn debt, not the assets standing behind it. Reconstructing that backing requires trusting Block Analitica's Observatory look-through rather than reading the VAT. That structure was not documented in the June 2026 assessment; it is a correction to how this subcategory was scored, not a deterioration in the protocol.
+
+A reader applying the rubric strictly could argue for 3.0: the backing column ("some offchain") and the verifiability column ("periodic custodian attestation") both match Score 3 outright, and only the quality column pulls toward 2. The case for holding at 2.5 is that roughly seven-tenths of backing is onchain and the largest single line is a real-time-verifiable USDC reserve — a materially better position than the Score-3 archetype. This is the least settled judgment in the report.
 
 **Subcategory B: Provability**
 
 | Factor | Assessment |
 |--------|-----------|
 | Onchain transparency | USDS supply, sUSDS chi/totalAssets, USDC Pocket balance, VAT per-ilk debt all readable |
-| RWA attestations | Published monthly on Sky governance forum and dashboards; offchain custodian reports |
+| RWA / allocator attestations | Published monthly on Sky governance forum and dashboards; offchain custodian reports. Observatory provides a daily look-through of Prime allocator holdings |
 | Exchange rate | `chi` and `ssr` are pure functions; permissionless `drip()` keeps `chi` current |
 | Admin minting | Governance can grant new wards (48 h delay); current ward set is small and audited |
 
 **Provability Score: 1.5 / 5** — Excellent onchain transparency for the live-swap path; mild offchain dependence for RWA fraction.
 
-**Cat 3 Score = (2.0 + 1.5) / 2 = 1.75 → 1.8 / 5** (conservative round-up to one decimal)
+**Cat 3 Score = (2.5 + 1.5) / 2 = 2.0 / 5**
 
 #### Category 4: Liquidity Risk (Weight: 15%)
 
 | Factor | Assessment |
 |--------|-----------|
 | Exit mechanism | Direct 1:1 atomic redemption via LitePSM Wrapper (USDS → USDC), zero fee. sUSDS withdrawal via ERC-4626, zero fee, atomic |
-| Liquidity depth | USDC Pocket: ~4.11B USDC → multi-hundred-million-dollar exits with 0% slippage |
+| Liquidity depth | USDC Pocket: ~3.95B USDC → multi-hundred-million-dollar exits with 0% slippage |
 | Same-value asset | USDS is a 1:1 stablecoin; no PPS divergence risk |
 | Withdrawal restrictions | None — no cooldown, no queue, no per-user cap |
-| Historical stress behavior | PSM remained functional during October 2025 stablecoin stress; max 1-year USDS depeg was 0.47% |
-| Single-tx exit capacity | Pocket balance ($4.11B) far exceeds any plausible Yearn integration size |
+| Historical stress behavior | PSM remained functional during October 2025 stablecoin stress; max 1-year USDS depeg was 0.53% on the hourly series (0.25% on the daily series) |
+| Single-tx exit capacity | Pocket balance ($3.95B) far exceeds any plausible Yearn integration size |
 
 **Score: 1.0 / 5** — Textbook score-1 liquidity profile. Atomic 1:1 redemption with multi-billion-dollar depth and no friction.
 
@@ -724,13 +747,13 @@ Snapshot block 25345569 (June 18, 2026).
 | Category | Score | Weight | Weighted |
 |----------|------:|-------:|---------:|
 | Audits & Historical | 1.0 | 20% | 0.200 |
-| Centralization & Control | 1.2 | 30% | 0.360 |
-| Funds Management | 1.8 | 30% | 0.540 |
+| Centralization & Control | 1.7 | 30% | 0.510 |
+| Funds Management | 2.0 | 30% | 0.600 |
 | Liquidity Risk | 1.0 | 15% | 0.150 |
 | Operational Risk | 1.0 |  5% | 0.050 |
-| **Final Score** | | | **1.300 → 1.3 / 5.0** |
+| **Final Score** | | | **1.510 → 1.5 / 5.0** |
 
-**Final Score: 1.3 / 5.0** — well inside the Minimal-Risk tier (1.0–1.5).
+**Final Score: 1.5 / 5.0** — at the top of the Minimal-Risk tier (1.0–1.5).
 
 ### Risk Tier
 
@@ -742,19 +765,20 @@ Snapshot block 25345569 (June 18, 2026).
 | 3.5–4.5 | Elevated Risk | Limited approval, strict limits |
 | 4.5–5.0 | High Risk | Not recommended |
 
-**Final Risk Tier: Minimal Risk (1.3 / 5.0) — Approved, high confidence**
+**Final Risk Tier: Minimal Risk (1.5 / 5.0) — Approved, high confidence**
 
 ---
 
 ## Reassessment Triggers
 
-- **Time-based:** Reassess in 6 months (December 2026) or annually
+- **Time-based:** Reassess in 6 months (March 2027) or annually
 - **TVL-based:**
-  - USDS supply drops >25% from snapshot (~$7.82B → <$5.9B) — would indicate material loss of confidence or large policy event
-  - sUSDS share of USDS supply drops below 50% (currently ~75.1%) — would indicate SSR has been cut materially or savers are exiting
+  - USDS supply drops >25% from snapshot (~$6.65B → <$5.0B) — would indicate material loss of confidence or large policy event. Supply has contracted ~15% since June 2026, so this trend deserves attention even short of the threshold
+  - sUSDS share of USDS supply drops below 50% (currently ~70.3%) — would indicate SSR has been cut materially or savers are exiting
   - USDC Pocket balance drops below $500M — would indicate sustained exit pressure and compromise of the deep-redemption story
-  - Total cross-chain USDS supply (currently ~$0.50B across all bridges) spikes >$2B, or LayerZero-bridged supply (currently ~$48.7M, Solana + Avalanche) grows materially — would indicate rising bridge dependency exposure
+  - Total cross-chain USDS supply (currently ~109M across all bridges) spikes >$1B, or LayerZero-bridged supply (currently ~6.67M, Solana + Avalanche) grows materially — would indicate rising bridge dependency exposure
 - **Parameter-based:**
+  - Any Prime allocator ilk (`ALLOCATOR-SPARK-A`, `ALLOCATOR-BLOOM-A`, `ALLOCATOR-OBEX-A`, `ALLOCATOR-NOVA-A`) grows >20% in 7 days, or a new `ALLOCATOR-*` ilk is onboarded → re-review the backing look-through
   - `LITE_PSM_USDC_A.tin` or `tout` changes from zero (fees introduced) → harden Liquidity score
   - `LITE_PSM_USDC_A.buf` changes materially → re-evaluate exit capacity for USDC→USDS direction
   - `sUSDS.ssr` changes by >50 bps APY → not a risk event but warrants user-facing notice
@@ -770,6 +794,13 @@ Snapshot block 25345569 (June 18, 2026).
   - Any exploit or governance attack on the Sky/MCD core (Chief, Pause, VAT, USDS, sUSDS, LitePSM, USDS_JOIN, DAI_USDS, Pocket, OFT)
   - Any blacklisting of the USDC Pocket by Circle
 - **Governance-based:**
-  - SKY voter concentration changes materially: single supporter exceeds 50% of `Chief.approvals(hat)`, top-3 current-hat concentration rises materially from the June 18, 2026 baseline of ~95.95%, or top-5 concentration remains near-total while the hat margin narrows
+  - SKY voter concentration changes materially: single supporter exceeds 50% of `Chief.approvals(hat)`, top-3 current-hat concentration rises materially from the September 9, 2026 baseline of ~90.6%, or top-5 concentration remains near-total while the hat margin narrows
   - New USDS / sUSDS implementation deployed (would reset the audit baseline)
-  - RWA program changes materially (new custodians, large reallocations, custodian incidents)
+  - RWA or Prime allocator program changes materially (new custodians or allocators, large reallocations, custodian incidents)
+
+## Assessment History
+
+| Date | Score | Notes |
+| --- | --- | --- |
+| [June 18, 2026](https://github.com/yearn/risk-score/pull/204) | 1.3 | Initial assessment |
+| [September 9, 2026](https://github.com/yearn/risk-score/pull/457) | 1.5 | Reassessment. Supply contraction (USDS 7.82B → 6.65B, sUSDS assets 5.88B → 4.67B); LitePSM `buf` doubled to 800M DAI; Spark Liquidity Layer repatriated Base/Optimism/Unichain bridge positions to mainnet (escrowed USDS 448M → 102M). Collateralization restated from onchain per-ilk debt: Prime allocator vaults are ~49.8% of VAT debt and were previously undocumented, and the ~$690M `vice` was previously mischaracterised as Vow surplus. Proxies, `wards`, 48 h GSM delay, and 2-of-2 DVN config unchanged. Collateralization subscore 2.0 → 2.5 for allocator opacity and External Dependencies 1.5 → 3.0 once the allocator counterparty set (BlackRock BUIDL, Janus Henderson, Maple, Galaxy, Anchorage, SparkLend, Morpho, Uniswap) is enumerated, moving the final score 1.3 → 1.5 (tier unchanged) |
