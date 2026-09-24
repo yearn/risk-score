@@ -693,13 +693,13 @@ Final Score = (Centralization × 0.30) + (Funds Mgmt × 0.30) + (Audits × 0.20)
 
 | Final Score | Risk Tier | Recommendation |
 |------------|-----------|----------------|
-| 1.0-1.5 | Minimal Risk | Approved, high confidence |
-| **1.5-2.5** | **Low Risk** | **Approved with standard monitoring** |
-| 2.5-3.5 | Medium Risk | Approved with enhanced monitoring |
-| 3.5-4.5 | Elevated Risk | Limited approval, strict limits |
-| 4.5-5.0 | High Risk | Not recommended |
+| 1.00–1.49 | Minimal Risk | Approved, high confidence |
+| **1.50–2.49** | **Low Risk** | **Approved with standard monitoring** |
+| 2.50–3.49 | Medium Risk | Approved with enhanced monitoring |
+| 3.50–4.49 | Elevated Risk | Limited approval, strict limits |
+| 4.50–5.00 | High Risk | Not recommended |
 
-**Final Risk Tier: Low Risk (2.2/5.0) — Approved with standard monitoring**
+**Final Risk Tier: Low Risk (2.16/5.0) — Approved with standard monitoring**
 
 USDG benefits from Paxos's established stablecoin track record, highest-quality collateral (U.S. Treasuries), a strong regulatory framework (MAS for the issuer, OCC federal supervision for the US group entity, MiCA in the EU), solid audit coverage backed by a live $1M bug bounty, and deep exit liquidity — a $10M Ethereum exit clears at 0.023% slippage. Onchain control is consolidated into a single MPC wallet with key sharding across multiple parties, and the 24h timelock on upgrades is demonstrably exercised rather than nominal.
 
@@ -741,7 +741,7 @@ For an integrator, the practical implications are to monitor `PeerSet`, `Ownersh
 | [March 20, 2026](https://github.com/yearn/risk-score/pull/102) | 2.4 | Initial assessment |
 | [June 26, 2026](https://github.com/yearn/risk-score/pull/270) | 2.4 | Reassessment: governance restructured to a single MPC wallet, timelock 3h → 24h; score unchanged |
 | [July 30, 2026](https://github.com/yearn/risk-score/pull/366) | 2.4 | Reassessment: supply/chain refresh (Robinhood Chain added, 6 chains with material supply), LayerZero peer set and DVN quorum enumerated onchain; score unchanged |
-| [August 15, 2026](https://github.com/yearn/risk-score/pull/406) | 2.2 | Full review, resolving [#388](https://github.com/yearn/risk-score/issues/388). **Corrections:** US regulator NYDFS → OCC (Paxos Trust Company, N.A., Charter 25379, Dec 12 2025); the supply-controller `Allow Any Address` column was inverted (SC1/SC2 are whitelist-bound and can only burn their own balance); SC3 bridge capacity is 200M USDG/24h, not 45M; the LayerZero Labs DVN address was malformed. **New findings:** the previously-unreported V3 rewards system (5 facets, 118 selectors, 6 roles, 28 payout groups holding ~80% of Ethereum supply, no new mint authority); MPC ownership of the OFT wrapper and its DVN config, not behind timelock — the largest residual risk; and **no independent canceller** on the timelock (MPC wallet is sole proposer/executor/canceller), making the 24h delay a monitoring and exit window rather than a circuit breaker. **Refreshed:** supply to $3.468B read onchain, DEX/CEX liquidity, peg history, and slippage replaced with onchain `get_dy` measurements ($10M at 0.023%). **Appendix B:** every major Ethereum venue assigns USDG a collateral factor of zero, so max LTV cut 90% → 80%. Audits 2.0→1.5, Centralization 2.8→2.7 (Governance 3.5→3.0, Programmability 3.5→3.0, Dependencies 1.5→2.0), Funds Mgmt 2.75→2.5, Liquidity 2.0→1.5; Operational held at 1.5 |
+| [August 15, 2026](https://github.com/yearn/risk-score/pull/406) | 2.16 | Full review, resolving [#388](https://github.com/yearn/risk-score/issues/388). **Corrections:** US regulator NYDFS → OCC (Paxos Trust Company, N.A., Charter 25379, Dec 12 2025); the supply-controller `Allow Any Address` column was inverted (SC1/SC2 are whitelist-bound and can only burn their own balance); SC3 bridge capacity is 200M USDG/24h, not 45M; the LayerZero Labs DVN address was malformed. **New findings:** the previously-unreported V3 rewards system (5 facets, 118 selectors, 6 roles, 28 payout groups holding ~80% of Ethereum supply, no new mint authority); MPC ownership of the OFT wrapper and its DVN config, not behind timelock — the largest residual risk; and **no independent canceller** on the timelock (MPC wallet is sole proposer/executor/canceller), making the 24h delay a monitoring and exit window rather than a circuit breaker. **Refreshed:** supply to $3.468B read onchain, DEX/CEX liquidity, peg history, and slippage replaced with onchain `get_dy` measurements ($10M at 0.023%). **Appendix B:** every major Ethereum venue assigns USDG a collateral factor of zero, so max LTV cut 90% → 80%. Audits 2.0→1.5, Centralization 2.8→2.7 (Governance 3.5→3.0, Programmability 3.5→3.0, Dependencies 1.5→2.0), Funds Mgmt 2.75→2.5, Liquidity 2.0→1.5; Operational held at 1.5 |
 
 ---
 

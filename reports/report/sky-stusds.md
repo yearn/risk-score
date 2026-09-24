@@ -108,7 +108,7 @@ Across the five markets, total loan-token supply was **~$22.74M** and total borr
 
 The primary stUSDS/USDC market's utilization rose from **82.14% at the report snapshot** to **89.07% at [live recheck block 25603427](https://etherscan.io/block/25603427)**. Supply fell from ~$20.950M to ~$19.324M while borrowing remained near $17.212M, reducing immediately available USDC from ~$3.742M to **~$2.112M**. This is lender exit liquidity, not borrower LTV. The market uses Morpho's AdaptiveCurveIRM, whose [configured target utilization is 90%](https://github.com/morpho-org/morpho-blue-irm/blob/main/src/adaptive-curve-irm/libraries/ConstantsLib.sol#L337-L346), so utilization near 90% is expected equilibrium rather than an abnormal condition; it still leaves only about 10% of supply immediately available to exiting lenders.
 
-**Risk-scope distinction:** The final **2.6 / 5.0 Medium Risk** score assesses stUSDS as an asset held directly. Supplying USDC to a Morpho market backed by stUSDS is a separate lending exposure: the supplier's exit depends on free USDC, and a sufficiently large stUSDS `chi` cut can propagate through borrower liquidations into Morpho lender bad debt. A small USDC-lender position may be defensible only when it is capped relative to free USDC, can be withdrawn in a tested transaction, and is protected by real-time governance, SKY-price, stUSDS-redemption, and PSM monitoring. That venue-specific operational conclusion does not re-score the stUSDS asset.
+**Risk-scope distinction:** The final **2.55 / 5.0 Medium Risk** score assesses stUSDS as an asset held directly. Supplying USDC to a Morpho market backed by stUSDS is a separate lending exposure: the supplier's exit depends on free USDC, and a sufficiently large stUSDS `chi` cut can propagate through borrower liquidations into Morpho lender bad debt. A small USDC-lender position may be defensible only when it is capped relative to free USDC, can be withdrawn in a tested transaction, and is protected by real-time governance, SKY-price, stUSDS-redemption, and PSM monitoring. That venue-specific operational conclusion does not re-score the stUSDS asset.
 
 **Oracle type for all stUSDS Morpho markets:** All five oracle contracts return price values based on the stUSDS `chi()` rate accumulator. The stUSDS/USDS oracle returns the `chi` value directly at 1e36 scale (~1.065e36). The stUSDS/USDC oracles return `chi` scaled to the loan-token's decimals (~1.065e24 for USDC markets, ~1.065e24 for USDT). These are **rate-feeding oracles** (no Chainlink component) — the price is derived from stUSDS's onchain `chi` accumulator, not from an external market-data feed. For the USDC and USDT pairs, a separate conversion layer maps the stUSDS/USD rate into the loan-token unit. Verified onchain at block 25595151.
 
@@ -862,7 +862,7 @@ This falls between the rubric's Score-3 mixed-quality collateral band and Score-
 
 ### Final Score Calculation
 
-**Rounding rule:** the weighted sum is recorded to two decimal places. The site shows that figure as-is and floors it to one decimal on the reports list.
+**Rounding rule:** the weighted sum is recorded to two decimal places, rounded down (1.475 → 1.47). The reports list rounds it down again to one decimal.
 
 | Category | Score | Weight | Weighted |
 |----------|------:|-------:|---------:|
@@ -888,13 +888,13 @@ The unrounded weighted result is **2.550**, which rounds conservatively to **2.6
 
 | Final Score | Risk Tier | Recommendation |
 |------------|-----------|----------------|
-| 1.0–1.5 | Minimal Risk | Approved, high confidence |
-| >1.5–2.5 | Low Risk | Approved with standard asset monitoring |
-| **>2.5–3.5** | **Medium Risk** | **Approved with enhanced monitoring** |
-| >3.5–4.5 | Elevated Risk | Limited approval, strict limits |
-| >4.5–5.0 | High Risk | Not recommended |
+| 1.00–1.49 | Minimal Risk | Approved, high confidence |
+| 1.50–2.49 | Low Risk | Approved with standard asset monitoring |
+| **2.50–3.49** | **Medium Risk** | **Approved with enhanced monitoring** |
+| 3.50–4.49 | Elevated Risk | Limited approval, strict limits |
+| 4.50–5.00 | High Risk | Not recommended |
 
-**Final Risk Tier: Medium Risk (2.6 / 5.0) — Approved with enhanced monitoring**
+**Final Risk Tier: Medium Risk (2.55 / 5.0) — Approved with enhanced monitoring**
 
 ---
 
@@ -1063,4 +1063,4 @@ This comparison does **not** assume all ~$70.03M of unsafe debt is auctioned or 
 | Date | Score | Notes |
 | --- | --- | --- |
 | [July 25, 2026](https://github.com/yearn/risk-score/pull/344) | 2.5 | Initial and corrected assessment. All 6,244 opened LSE urns and 15,571 stUSDS transfers were reconstructed at block 25595151. Eleven unsafe urns carried ~$70.01M debt while `Clip.stopped() = 3` had disabled `kick`, `redo`, and `take` since Sep 8, 2025. Holder concentration: top-1 15.71%, top-5 45.41%. Confirmed `Clip.stopped() = 3` persisted through block 25609984; restart requires PauseProxy governance spell + 48 h Pause delay. SKY DEX depth: ~$19.11M headline Ethereum liquidity, ~$0.80M 24 h volume, ~$4.14M USDS in dominant pool; $250K sale modeled ~5.97% impact. Score raised to 2.5 (Low Risk, upper boundary under the repository-wide tier convention). Reviewer follow-up: compounded `str` APY to 6.48%, production age ~11 months, exact Morpho market IDs and stUSDS-holder/USDC-lender scope distinction, LitePSM USDS→USDC liquidation route, ChainSecurity bad-debt/slashing/withdrawal-risk notes, decoded-spell and Curve stUSDS/USDS executable-depth monitoring, primary Morpho market 90% IRM utilization target. |
-| [July 27, 2026](https://github.com/yearn/risk-score/pull/350) | 2.6 | Liquidity Risk increased from 3.5 to 4.0. The report now identifies the persistent level-3 Clipper stop as the largest current risk: already-unsafe SKY positions could not be auctioned to recover USDS or restore withdrawal capacity, restart required governance plus the 48 h Pause delay, and thin SKY market depth remained a post-restart clearing constraint. A fresh full scan at block 25624658 found 36 debt-bearing urns, including 11 unsafe urns carrying ~$70.064M debt; only two were below principal parity at the capped feed, with about $11,590 of idealized shortfall. |
+| [July 27, 2026](https://github.com/yearn/risk-score/pull/350) | 2.55 | Liquidity Risk increased from 3.5 to 4.0. The report now identifies the persistent level-3 Clipper stop as the largest current risk: already-unsafe SKY positions could not be auctioned to recover USDS or restore withdrawal capacity, restart required governance plus the 48 h Pause delay, and thin SKY market depth remained a post-restart clearing constraint. A fresh full scan at block 25624658 found 36 debt-bearing urns, including 11 unsafe urns carrying ~$70.064M debt; only two were below principal parity at the capped feed, with about $11,590 of idealized shortfall. |

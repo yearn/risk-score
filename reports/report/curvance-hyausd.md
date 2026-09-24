@@ -806,11 +806,11 @@ Team is public and named (Chris Carapola, Michael Butcher), with $7.6M raised ac
 
 | Final Score | Risk Tier | Recommendation |
 |------------|-----------|----------------|
-| **1.0-1.5** | **Minimal Risk** | Approved, high confidence |
-| **1.5-2.5** | **Low Risk** | Approved with standard monitoring |
-| **2.5-3.5** | **Medium Risk** | Approved with enhanced monitoring |
-| **3.5-4.5** | **Elevated Risk** | Limited approval, strict limits |
-| **4.5-5.0** | **High Risk** | Not recommended |
+| **1.00–1.49** | **Minimal Risk** | Approved, high confidence |
+| **1.50–2.49** | **Low Risk** | Approved with standard monitoring |
+| **2.50–3.49** | **Medium Risk** | Approved with enhanced monitoring |
+| **3.50–4.49** | **Elevated Risk** | Limited approval, strict limits |
+| **4.50–5.00** | **High Risk** | Not recommended |
 | **N/A** | **Not Rated** | Terminal — do not use (exploited or wound down) |
 
 **Final Risk Tier: Medium Risk** (weighted total 3.075, recorded as 3.07 — the middle of the Medium band. Any deterioration in the savUSD leg — a new avUSD minter, a further cap increase, erosion of the ~14% first-loss buffer, or a lapse in reserve reporting — pushes this toward Elevated rather than down.)
@@ -840,4 +840,4 @@ Team is public and named (Chris Carapola, Michael Butcher), with $7.6M raised ac
 
 | Date | Score | Notes |
 | --- | --- | --- |
-| [September 8, 2026](https://github.com/yearn/risk-score/pull/412) | 3.1 | Initial assessment. Snapshot at block 102,741,475 (September 7, 2026): NAV 13.39M AUSD, exit liquidity 17.9%, top-5 concentration 78.32%. |
+| [September 8, 2026](https://github.com/yearn/risk-score/pull/412) | 3.07 | Initial assessment. Snapshot at block 102,741,475 (September 7, 2026): NAV 13.39M AUSD, exit liquidity 17.9%, top-5 concentration 78.32%. |

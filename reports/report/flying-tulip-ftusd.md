@@ -736,11 +736,11 @@ Category 1 is aligned with FT Lend. Cat 2C scores the **FT Lend backing concentr
 
 | Final Score | Risk Tier | Recommendation |
 |------------|-----------|----------------|
-| 1.0-1.5 | Minimal Risk | Approved, high confidence |
-| 1.5-2.5 | Low Risk | Approved with standard monitoring |
-| **2.5-3.5** | **Medium Risk** | **Approved with enhanced monitoring** |
-| 3.5-4.5 | Elevated Risk | Limited approval, strict limits |
-| 4.5-5.0 | High Risk | Not recommended |
+| 1.00–1.49 | Minimal Risk | Approved, high confidence |
+| 1.50–2.49 | Low Risk | Approved with standard monitoring |
+| **2.50–3.49** | **Medium Risk** | **Approved with enhanced monitoring** |
+| 3.50–4.49 | Elevated Risk | Limited approval, strict limits |
+| 4.50–5.00 | High Risk | Not recommended |
 
 **Final Risk Tier: MEDIUM RISK — approved with enhanced monitoring.**
 
@@ -775,4 +775,4 @@ Category 1 is aligned with FT Lend. Cat 2C scores the **FT Lend backing concentr
 
 | Date | Score | Notes |
 | --- | --- | --- |
-| [September 4, 2026](https://github.com/yearn/risk-score/pull/237) | 3.4 | Initial assessment |
+| [September 4, 2026](https://github.com/yearn/risk-score/pull/237) | 3.40 | Initial assessment |

@@ -370,11 +370,11 @@ CROSS-CHAIN (new as of this reassessment, bridge mechanism not scored)
 
 | Final Score | Risk Tier | Recommendation |
 |------------|-----------|----------------|
-| 1.0-1.5 | Minimal Risk | Approved, high confidence |
-| 1.5-2.5 | Low Risk | Approved with standard monitoring |
-| **2.5-3.5** | **Medium Risk** | **Approved with enhanced monitoring** |
-| 3.5-4.5 | Elevated Risk | Limited approval, strict limits |
-| 4.5-5.0 | High Risk | Not recommended |
+| 1.00–1.49 | Minimal Risk | Approved, high confidence |
+| 1.50–2.49 | Low Risk | Approved with standard monitoring |
+| **2.50–3.49** | **Medium Risk** | **Approved with enhanced monitoring** |
+| 3.50–4.49 | Elevated Risk | Limited approval, strict limits |
+| 4.50–5.00 | High Risk | Not recommended |
 
 **Final Risk Tier: MEDIUM RISK (3.15/5.0) — Approved with enhanced monitoring.** The score moved up from 2.8/5.0 (June 17, 2026) primarily because of an unaudited backing-asset migration, an expanded external-dependency chain (M0 + MoonPay + Paxos), and thinner secondary-market liquidity — not because of any realized loss, depeg, or governance failure. The protocol remains inside the Medium Risk band; this is not a critical-gate or tier-boundary event.
 

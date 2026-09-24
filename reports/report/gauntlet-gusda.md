@@ -583,11 +583,11 @@ Score: **1.5/5** — Strong reputation, extensive documentation, identified lega
 
 | Final Score | Risk Tier | Recommendation |
 |------------|-----------|----------------|
-| 1.0-1.5 | Minimal Risk | Approved, high confidence |
-| 1.5-2.5 | Low Risk | Approved with standard monitoring |
-| **2.5-3.5** | **Medium Risk** | Approved with enhanced monitoring |
-| 3.5-4.5 | Elevated Risk | Limited approval, strict limits |
-| 4.5-5.0 | High Risk | Not recommended |
+| 1.00–1.49 | Minimal Risk | Approved, high confidence |
+| 1.50–2.49 | Low Risk | Approved with standard monitoring |
+| **2.50–3.49** | **Medium Risk** | Approved with enhanced monitoring |
+| 3.50–4.49 | Elevated Risk | Limited approval, strict limits |
+| 4.50–5.00 | High Risk | Not recommended |
 
 **Final Risk Tier: Medium Risk**
 
@@ -612,4 +612,4 @@ Score: **1.5/5** — Strong reputation, extensive documentation, identified lega
 | Date | Score | Notes |
 |------|-------|-------|
 | [June 23, 2026](https://github.com/yearn/risk-score/pull/266) | 2.9 | Initial assessment. Aera V3 MultiDepositorVault, dual 1-day timelocks, keeper-submitted PPS with soft-guard-only limits, Circle CCTP v2 cross-chain routing. |
-| [August 31, 2026](https://github.com/yearn/risk-score/pull/435) | 3.1 | 69-day reassessment. Look-through allocation concentrated to ~94.7% in the `AA_FalconXUSDC` Morpho market (Pareto senior tranche of a FalconX loan, issuer-priced, epoch-gated redemption). Established that gtUSDa is non-transferable and that sync deposits are disabled, so the redeem queue is the only exit and both entry and exit are solver-dependent. Ethereum vault holds ~$14.00M of assets against $1.58M of local units under a single global unit price. FeeCalc timelock is governed by a 3/7 Aera Safe, not frozen. Guardians resolve to two timelock-owned Forwarders granting `submit(bytes)` to one EOA. Fees 0/0 bps. Aggregate TVL $58.4M. Funds Management 3.0 → 3.5, Liquidity 3.0 → 3.5, External Dependencies 3.0 → 3.5. |
+| [August 31, 2026](https://github.com/yearn/risk-score/pull/435) | 3.15 | 69-day reassessment. Look-through allocation concentrated to ~94.7% in the `AA_FalconXUSDC` Morpho market (Pareto senior tranche of a FalconX loan, issuer-priced, epoch-gated redemption). Established that gtUSDa is non-transferable and that sync deposits are disabled, so the redeem queue is the only exit and both entry and exit are solver-dependent. Ethereum vault holds ~$14.00M of assets against $1.58M of local units under a single global unit price. FeeCalc timelock is governed by a 3/7 Aera Safe, not frozen. Guardians resolve to two timelock-owned Forwarders granting `submit(bytes)` to one EOA. Fees 0/0 bps. Aggregate TVL $58.4M. Funds Management 3.0 → 3.5, Liquidity 3.0 → 3.5, External Dependencies 3.0 → 3.5. |

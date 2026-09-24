@@ -754,11 +754,11 @@ Final Score = (Centralization × 0.30) + (Funds Mgmt × 0.30) + (Audits × 0.20)
 
 | Final Score | Risk Tier | Recommendation |
 |------------|-----------|----------------|
-| **1.0-1.5** | **Minimal Risk** | Approved, high confidence |
-| **1.5-2.5** | **Low Risk** | Approved with standard monitoring |
-| **2.5-3.5** | **Medium Risk** | Approved with enhanced monitoring |
-| **3.5-4.5** | **Elevated Risk** | Limited approval, strict limits |
-| **4.5-5.0** | **High Risk** | Not recommended |
+| **1.00–1.49** | **Minimal Risk** | Approved, high confidence |
+| **1.50–2.49** | **Low Risk** | Approved with standard monitoring |
+| **2.50–3.49** | **Medium Risk** | Approved with enhanced monitoring |
+| **3.50–4.49** | **Elevated Risk** | Limited approval, strict limits |
+| **4.50–5.00** | **High Risk** | Not recommended |
 | **N/A** | **Not Rated** | Terminal — do not use (exploited or wound down) |
 
 **Final Risk Tier: Elevated Risk — Limited approval, strict limits**
@@ -838,4 +838,4 @@ What the June 2026 stress test showed is that the governance was never the bindi
 | [March 26, 2026](https://github.com/yearn/risk-score/pull/110) | 5.0 (Gated) | Initial assessment. Failed Critical Risk Gates (no audit, unverifiable reserves, total centralization). |
 | [April 19, 2026](https://github.com/yearn/risk-score/pull/140) | 3.5 | All critical gates cleared after governance restructure and attestation publication. Supply ~175M. |
 | [May 29, 2026](https://github.com/yearn/risk-score/pull/227) | 3.66 | Tier raised to Elevated Risk. POL concentration (99.96% Curve LP), supply growth outpacing attestation (524M vs 67M attested). |
-| [August 1, 2026](https://github.com/yearn/risk-score/pull/373) | 3.73 | June 2026 depeg recorded: apxUSD below par since early June, low ~$0.75, $0.881 at eight weeks. Guardian Safe withdrew ~88% of Curve LP June 1–5 and the remainder by July 6 (~$29M → ~$11.9K). Ethereum supply contracted 524M → 312M via onchain burns; Base and BNB Chain routes are live through CCIP. The 20-day cooldown applies to apyUSD, not direct apxUSD redemption. The deny list controls apxUSD transfers, apyUSD, and the unlock queue. Playwright retrieved Accountable's public API (92.24% asset-reserve coverage, $0.9131 redemption value, 100% dashboard verifiability, Nitro attestation) and all four Wolf examination reports for March–June. The Wolf opinions verify asset existence, ownership, custody, and valuation and name Alpaca for offchain STRC/SATA, but do not attest liabilities or coverage. Audits & Historical 3.5→4.0; Liquidity 4.0→4.5; Funds Management 3.875→3.5. |
+| [August 1, 2026](https://github.com/yearn/risk-score/pull/373) | 3.72 | June 2026 depeg recorded: apxUSD below par since early June, low ~$0.75, $0.881 at eight weeks. Guardian Safe withdrew ~88% of Curve LP June 1–5 and the remainder by July 6 (~$29M → ~$11.9K). Ethereum supply contracted 524M → 312M via onchain burns; Base and BNB Chain routes are live through CCIP. The 20-day cooldown applies to apyUSD, not direct apxUSD redemption. The deny list controls apxUSD transfers, apyUSD, and the unlock queue. Playwright retrieved Accountable's public API (92.24% asset-reserve coverage, $0.9131 redemption value, 100% dashboard verifiability, Nitro attestation) and all four Wolf examination reports for March–June. The Wolf opinions verify asset existence, ownership, custody, and valuation and name Alpaca for offchain STRC/SATA, but do not attest liabilities or coverage. Audits & Historical 3.5→4.0; Liquidity 4.0→4.5; Funds Management 3.875→3.5. |

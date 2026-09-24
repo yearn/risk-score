@@ -423,7 +423,7 @@ Yearn maintains the [`monitoring`](https://github.com/yearn/monitoring) reposito
 - Be conservative: when uncertain between two scores, choose the higher (riskier) one
 - Use decimals when a subcategory falls between scores
 - Prioritize on-chain evidence over documentation claims
-- **Rounding rule:** the weighted sum is recorded to two decimal places. The site shows that figure as-is and floors it to one decimal on the reports list.
+- **Rounding rule:** the weighted sum is recorded to two decimal places, rounded down (1.475 → 1.47). The reports list rounds it down again to one decimal.
 
 ### Critical Risk Gates
 
@@ -556,11 +556,11 @@ Yearn maintains the [`monitoring`](https://github.com/yearn/monitoring) reposito
 
 | Final Score | Risk Tier | Recommendation |
 |------------|-----------|----------------|
-| **1.0–1.5** | **Minimal Risk** | **Approved, high confidence** |
-| 1.5–2.5 | Low Risk | Approved with standard monitoring |
-| 2.5–3.5 | Medium Risk | Approved with enhanced monitoring |
-| 3.5–4.5 | Elevated Risk | Limited approval, strict limits |
-| 4.5–5.0 | High Risk | Not recommended |
+| **1.00–1.49** | **Minimal Risk** | **Approved, high confidence** |
+| 1.50–2.49 | Low Risk | Approved with standard monitoring |
+| 2.50–3.49 | Medium Risk | Approved with enhanced monitoring |
+| 3.50–4.49 | Elevated Risk | Limited approval, strict limits |
+| 4.50–5.00 | High Risk | Not recommended |
 
 **Final Risk Tier: Minimal Risk (1.32 / 5.0) — Approved, high confidence**
 
@@ -667,4 +667,4 @@ To shorten the delay, Daddy 6/9 must propose `updateDelay()`, wait 7 days during
 | Date | Score | Notes |
 |------|-------|-------|
 | [May 11, 2026](https://github.com/yearn/risk-score/pull/148) | 1.3/5.0 | Initial assessment. yvDAI-1 with vault-of-vaults composition routing ~100% into Sky ecosystem via yvUSDC-1 (73%) and yvUSDS-1 (27%). Spark Lend USDC and sUSDS legs. |
-| [July 12, 2026](https://github.com/yearn/risk-score/pull/311) | 1.3/5.0 | Reassessment: TVL stable at ~$9.50M. yvUSDC-1 added new "Yearn USDC" strategy (8.41% tracked debt) — verified as a Yearn-curated Morpho MetaMorpho vault supplying USDC into Morpho Blue (cbBTC, WBTC, wstETH collateral, LLTV 86%). Old Spark USDC Lender replaced. yvUSDS-1 added v3.0.3 "USDS Sky Rewards Compounder" (currently near-zero debt). Sky-ecosystem concentration dropped from ~100% to ~93.9%. Effective endpoint mix: ~89.6% sUSDS / ~6.2% Morpho Blue / ~4.3% Sky USDS Staking. All governance roles, multisig thresholds, and timelock delay unchanged. Score unchanged at 1.3. |
+| [July 12, 2026](https://github.com/yearn/risk-score/pull/311) | 1.32/5.0 | Reassessment: TVL stable at ~$9.50M. yvUSDC-1 added new "Yearn USDC" strategy (8.41% tracked debt) — verified as a Yearn-curated Morpho MetaMorpho vault supplying USDC into Morpho Blue (cbBTC, WBTC, wstETH collateral, LLTV 86%). Old Spark USDC Lender replaced. yvUSDS-1 added v3.0.3 "USDS Sky Rewards Compounder" (currently near-zero debt). Sky-ecosystem concentration dropped from ~100% to ~93.9%. Effective endpoint mix: ~89.6% sUSDS / ~6.2% Morpho Blue / ~4.3% Sky USDS Staking. All governance roles, multisig thresholds, and timelock delay unchanged. Score unchanged at 1.3. |

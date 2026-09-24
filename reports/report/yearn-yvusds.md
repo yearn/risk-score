@@ -408,7 +408,7 @@ Yearn maintains an active monitoring system via the [`monitoring`](https://githu
 - Be conservative: when uncertain between two scores, choose the higher (riskier) one
 - Use decimals (e.g., 2.5) when a subcategory falls between scores
 - Prioritize on-chain evidence over documentation claims
-- **Rounding rule:** the weighted sum is recorded to two decimal places. The site shows that figure as-is and floors it to one decimal on the reports list.
+- **Rounding rule:** the weighted sum is recorded to two decimal places, rounded down (1.475 → 1.47). The reports list rounds it down again to one decimal.
 
 ### Critical Risk Gates
 
@@ -545,11 +545,11 @@ Yearn maintains an active monitoring system via the [`monitoring`](https://githu
 
 | Final Score | Risk Tier | Recommendation |
 |------------|-----------|----------------|
-| **1.0–1.5** | **Minimal Risk** | **Approved, high confidence** |
-| 1.5–2.5 | Low Risk | Approved with standard monitoring |
-| 2.5–3.5 | Medium Risk | Approved with enhanced monitoring |
-| 3.5–4.5 | Elevated Risk | Limited approval, strict limits |
-| 4.5–5.0 | High Risk | Not recommended |
+| **1.00–1.49** | **Minimal Risk** | **Approved, high confidence** |
+| 1.50–2.49 | Low Risk | Approved with standard monitoring |
+| 2.50–3.49 | Medium Risk | Approved with enhanced monitoring |
+| 3.50–4.49 | Elevated Risk | Limited approval, strict limits |
+| 4.50–5.00 | High Risk | Not recommended |
 
 **Final Risk Tier: Minimal Risk (1.32 / 5.0) — Approved, high confidence**
 
@@ -659,4 +659,4 @@ To shorten the delay, an attacker would need to (1) control Daddy 6/9 to **propo
 | Date | Score | Notes |
 | --- | --- | --- |
 | [May 11, 2026](https://github.com/yearn/risk-score/pull/148) | 1.3 | Initial assessment |
-| [July 13, 2026](https://github.com/yearn/risk-score/pull/314) | 1.3 | Reassessment: TVL $6.23M (down 9.7% since May 11); allocations drifted to 84/16 sUSDS/Spark; all governance roles, multisig thresholds, and timelock parameters confirmed unchanged; strategies identified as EIP-1967 proxy-upgradeable under Brain (3-of-8) — standard Yearn V3 Tokenized Strategy pattern; strategy proxy admin slots confirmed 0x0 (upgrades via management() only); Spark Compounder last_report corrected; sUSDS TVL drifted to ~$5.28B; USDS Staking Rewards ~$556M staked. No score or tier change |
+| [July 13, 2026](https://github.com/yearn/risk-score/pull/314) | 1.32 | Reassessment: TVL $6.23M (down 9.7% since May 11); allocations drifted to 84/16 sUSDS/Spark; all governance roles, multisig thresholds, and timelock parameters confirmed unchanged; strategies identified as EIP-1967 proxy-upgradeable under Brain (3-of-8) — standard Yearn V3 Tokenized Strategy pattern; strategy proxy admin slots confirmed 0x0 (upgrades via management() only); Spark Compounder last_report corrected; sUSDS TVL drifted to ~$5.28B; USDS Staking Rewards ~$556M staked. No score or tier change |

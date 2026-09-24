@@ -459,15 +459,15 @@ All gates pass; proceeding to category scoring.
 
 | Final Score | Risk Tier | Recommendation |
 |------------|-----------|----------------|
-| **1.0-1.5** | **Minimal Risk** | Approved, high confidence |
-| **1.5-2.5** | **Low Risk** | Approved with standard monitoring |
-| **2.5-3.5** | **Medium Risk** | Approved with enhanced monitoring |
-| **3.5-4.5** | **Elevated Risk** | Limited approval, strict limits |
-| **4.5-5.0** | **High Risk** | Not recommended |
+| **1.00–1.49** | **Minimal Risk** | Approved, high confidence |
+| **1.50–2.49** | **Low Risk** | Approved with standard monitoring |
+| **2.50–3.49** | **Medium Risk** | Approved with enhanced monitoring |
+| **3.50–4.49** | **Elevated Risk** | Limited approval, strict limits |
+| **4.50–5.00** | **High Risk** | Not recommended |
 
 **Final Risk Tier: Elevated Risk** (just above the 3.50 boundary).
 
-**Interpretation:** Across LP tokens represent a medium-risk integration target sitting on the boundary with Elevated Risk. The protocol's core technical design — immutable HubPool, fully onchain NAV, atomic permissionless redemption, four years without a bridge exploit — is genuinely strong. What pulls the score from Low Risk into Medium Risk is the governance configuration: a 3-of-5 multisig of related parties with no timelock, holding both the `haircutReserves` power on LP NAV and cross-chain SpokePool upgrade authority **and** the BondToken's proposer allowlist (so the canonical dataworker is admin-gated, not permissionless), against the backdrop of an unresolved June 2025 ACX-treasury controversy involving those same parties. The custom modifiers above reflect this concentration. Note: if a timelock were added between the multisig and the HubPool, and if the June 2025 governance issue were resolved through an external review or remediation, the score would naturally move back into Low Risk territory.
+**Interpretation:** Across LP tokens represent an Elevated-risk integration target sitting just above the Medium Risk boundary: limited approval with strict exposure limits. The protocol's core technical design — immutable HubPool, fully onchain NAV, atomic permissionless redemption, four years without a bridge exploit — is genuinely strong. What pulls the score from Low Risk into Elevated Risk is the governance configuration: a 3-of-5 multisig of related parties with no timelock, holding both the `haircutReserves` power on LP NAV and cross-chain SpokePool upgrade authority **and** the BondToken's proposer allowlist (so the canonical dataworker is admin-gated, not permissionless), against the backdrop of an unresolved June 2025 ACX-treasury controversy involving those same parties. The custom modifiers above reflect this concentration. Note: if a timelock were added between the multisig and the HubPool, and if the June 2025 governance issue were resolved through an external review or remediation, the two custom modifiers (+1.0 and +0.5) would fall away and the score would move back into Low Risk territory (2.01).
 
 ---
 

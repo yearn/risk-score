@@ -539,11 +539,11 @@ Weights use unrounded category means.
 
 | Final Score | Risk Tier | Recommendation |
 |------------|-----------|----------------|
-| 1.0-1.5 | Minimal Risk | Approved, high confidence |
-| 1.5-2.5 | Low Risk | Approved with standard monitoring |
-| 2.5-3.5 | Medium Risk | Approved with enhanced monitoring |
-| **3.5-4.5** | **Elevated Risk** | **Limited approval, strict limits** |
-| 4.5-5.0 | High Risk | Not recommended |
+| 1.00–1.49 | Minimal Risk | Approved, high confidence |
+| 1.50–2.49 | Low Risk | Approved with standard monitoring |
+| 2.50–3.49 | Medium Risk | Approved with enhanced monitoring |
+| **3.50–4.49** | **Elevated Risk** | **Limited approval, strict limits** |
+| 4.50–5.00 | High Risk | Not recommended |
 
 **Final Risk Tier: Elevated Risk**
 
@@ -620,4 +620,4 @@ At the snapshot, Chainlink reserves are within the heartbeat and exceed both rep
 | Date | Score | Notes |
 | --- | --- | --- |
 | [August 10, 2026](https://github.com/yearn/risk-score/pull/303) | 3.6 | Initial uniBTC assessment |
-| [September 15, 2026](https://github.com/yearn/risk-score/pull/468) | 3.9 | Fork-verified single-EOA unbacked-mint path via the legacy withdrawal router (Governance 4.0 → 5.0); documented recurring supply-feeder dips and the unresolved denominator gap; expanded monitoring with baselines and thresholds; refreshed roles, limits, redemption liquidity, reserves, and exit quotes. Elevated Risk. |
+| [September 15, 2026](https://github.com/yearn/risk-score/pull/468) | 3.85 | Fork-verified single-EOA unbacked-mint path via the legacy withdrawal router (Governance 4.0 → 5.0); documented recurring supply-feeder dips and the unresolved denominator gap; expanded monitoring with baselines and thresholds; refreshed roles, limits, redemption liquidity, reserves, and exit quotes. Elevated Risk. |

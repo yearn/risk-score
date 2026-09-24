@@ -267,11 +267,11 @@ Final Score = (Audits × 0.20) + (Centralization × 0.30) + (Funds Mgmt × 0.30)
 
 | Final Score | Risk Tier | Recommendation |
 |------------|-----------|----------------|
-| **1.0-1.5** | **Minimal Risk** | **Approved, high confidence** |
-| 1.5-2.5 | Low Risk | Approved with standard monitoring |
-| 2.5-3.5 | Medium Risk | Approved with enhanced monitoring |
-| 3.5-4.5 | Elevated Risk | Limited approval, strict limits |
-| 4.5-5.0 | High Risk | Not recommended |
+| **1.00–1.49** | **Minimal Risk** | **Approved, high confidence** |
+| 1.50–2.49 | Low Risk | Approved with standard monitoring |
+| 2.50–3.49 | Medium Risk | Approved with enhanced monitoring |
+| 3.50–4.49 | Elevated Risk | Limited approval, strict limits |
+| 4.50–5.00 | High Risk | Not recommended |
 
 **Final Risk Tier: MINIMAL RISK**
 
@@ -290,7 +290,7 @@ Final Score = (Audits × 0.20) + (Centralization × 0.30) + (Funds Mgmt × 0.30)
 | Date | Score | Notes |
 |------|-------|-------|
 | May 18, 2026 | 1.50 | Initial assessment |
-| Aug 6, 2026 | 1.50 | Implementation upgraded to [`0x850d…6217`](https://etherscan.io/address/0x850da2e21f1f71479e2a307edab114777d9f6217) — [changes](https://gist.github.com/spalen0/54b015bb1c98089f0abb963459a57219); TVL ~$8.8M. New pause mechanism is in line with existing operator controls and bounded by governance-only unpause; protocol cannot block users indefinitely. Score unchanged. |
+| Aug 6, 2026 | 1.49 | Implementation upgraded to [`0x850d…6217`](https://etherscan.io/address/0x850da2e21f1f71479e2a307edab114777d9f6217) — [changes](https://gist.github.com/spalen0/54b015bb1c98089f0abb963459a57219); TVL ~$8.8M. New pause mechanism is in line with existing operator controls and bounded by governance-only unpause; protocol cannot block users indefinitely. Score unchanged. |
 
 ---
 

@@ -156,14 +156,14 @@ Several underlying protocols have been previously assessed in this repository:
 
 | Protocol | Report Score | yvUSD Allocation |
 |----------|-------------|-----------------|
-| [Cap (stcUSD)](./cap-stcusd.md) | **2.4/5** (Low Risk) | **9.5%** equity — ~$6.87M stcUSD collateral notional at 7.90x leverage |
+| [Cap (stcUSD)](./cap-stcusd.md) | **2.39/5** (Low Risk) | **9.5%** equity — ~$6.87M stcUSD collateral notional at 7.90x leverage |
 | [3Jane USD3](./3jane-usd3.md) | **3.4/5** (Medium Risk) | **4.4%** via `PT-USD3-17DEC2026` |
 | [Sky USDS](./sky-usds.md) | **1.3/5** (Minimal Risk) | **13.6%** — 7.3% direct sUSDS + 6.3% via `PT-sUSDS-26NOV2026` |
-| [Yearn yvUSDC-1](./yearn-yvusdc.md) | **1.5/5** (Minimal Risk) | Counterparty — yvUSDC-1 funds the Pawn Broker Market this vault borrows from |
-| [Spectra](./spectra-finance.md) | **2.33/5** (Low Risk) | 0% — PT infrastructure only |
-| [InfiniFi](./infinifi.md) | **3.2/5** (Medium Risk) | 0% (active, unfunded) |
-| [Maple syrupUSDC](./maple-syrupusdc.md) | **2.33/5** (Low Risk) | 0% (active, unfunded) |
-| [Fluid](./fluid.md) | **2.6/5** (Medium Risk) | 0% (revoked) |
+| [Yearn yvUSDC-1](./yearn-yvusdc.md) | **1.47/5** (Minimal Risk) | Counterparty — yvUSDC-1 funds the Pawn Broker Market this vault borrows from |
+| [Spectra](./spectra-finance.md) | **2.32/5** (Low Risk) | 0% — PT infrastructure only |
+| [InfiniFi](./infinifi.md) | **3.19/5** (Medium Risk) | 0% (active, unfunded) |
+| [Maple syrupUSDC](./maple-syrupusdc.md) | **2.32/5** (Low Risk) | 0% (active, unfunded) |
+| [Fluid](./fluid.md) | **2.57/5** (Medium Risk) | 0% (revoked) |
 
 Underlying venues **without** an existing repository report — **Morpho V1** (62.4%), **Katana L2 + AggLayer LxLy bridge** (10.1%), and **Pendle** (10.7% of TVL held as PTs) — are assessed inline in this report and flagged as uncovered-dependency risk.
 
@@ -210,7 +210,7 @@ All 12 scores are summed and mapped to risk levels (Level 1-4). ySec can make ex
 |----------|---------------|-------|
 | Morpho (V1) | 25+ audits (Trail of Bits, Spearbit, OpenZeppelin, ChainSecurity, Certora) | Formal verification by Certora. The Yearn OG USDC vault is rated low-mid risk. **62.4% of TVL**. Morpho Blue is also the flashloan venue for the Pawn Broker Looper |
 | Pendle | 6+ audits (Ackee, Dedaub, ChainSecurity, Spearbit, Code4rena) | Well-established. **10.7% of TVL** now held as fixed-maturity PTs (Nov 26 and Dec 17, 2026) |
-| Cap (stcUSD) | 8 audit firms / 9 reports (Trail of Bits, Spearbit, Zellic, Electisec, Certora), $1M Sherlock bug bounty | **9.5% of TVL as equity, ~$6.87M collateral notional at 7.90x leverage.** Assessed internally at [2.4/5.0](./cap-stcusd.md). Governance is a 3-of-5 anonymous multisig → 24h timelock, all core contracts upgradeable UUPS proxies |
+| Cap (stcUSD) | 8 audit firms / 9 reports (Trail of Bits, Spearbit, Zellic, Electisec, Certora), $1M Sherlock bug bounty | **9.5% of TVL as equity, ~$6.87M collateral notional at 7.90x leverage.** Assessed internally at [2.39/5.0](./cap-stcusd.md). Governance is a 3-of-5 anonymous multisig → 24h timelock, all core contracts upgradeable UUPS proxies |
 | Sky/MakerDAO | Extensively audited across many years | Blue-chip. 13.6% combined (7.3% direct sUSDS + 6.3% via PT-sUSDS) |
 | 3Jane (USD3) | See [3Jane USD3 report](./3jane-usd3.md) (3.4/5) | 4.4% via PT-USD3. Credit-based lending, medium risk |
 | Polygon AggLayer (LxLy) + VaultBridgeToken | AggLayer/zkEVM bridge audited; VaultBridgeToken wrapper is **newer infrastructure** | ~10.1% Katana exposure. Katana is a young (2025) L2; bridge + wrapper not yet covered by an existing repo report — flagged as novel |
@@ -281,7 +281,7 @@ Onchain state at the snapshot:
 | `getLiquidateCollateralFactor()` | **91.50%** |
 | Headroom to liquidation | **~4.5%** decline in stcUSD/USDC |
 
-**Leverage risk:** This is the vault's highest-risk position by a wide margin. A ~4.5% adverse move in the stcUSD/USDC price — a Cap depeg, a reserve loss, an operator default, or an oracle disagreement — would push the position into liquidation and can wipe out most or all of the 9.5% equity. Cap governs stcUSD through a **3-of-5 anonymous Gnosis Safe multisig → 24h timelock**, with all core contracts on **upgradeable UUPS proxies** (see the [Cap stcUSD report](./cap-stcusd.md), 2.4/5.0). The position was opened only ~6 weeks before this snapshot.
+**Leverage risk:** This is the vault's highest-risk position by a wide margin. A ~4.5% adverse move in the stcUSD/USDC price — a Cap depeg, a reserve loss, an operator default, or an oracle disagreement — would push the position into liquidation and can wipe out most or all of the 9.5% equity. Cap governs stcUSD through a **3-of-5 anonymous Gnosis Safe multisig → 24h timelock**, with all core contracts on **upgradeable UUPS proxies** (see the [Cap stcUSD report](./cap-stcusd.md), 2.39/5.0). The position was opened only ~6 weeks before this snapshot.
 
 **Inter-vault coupling:** the Pawn Broker Market held $6,170,257 of total assets at the snapshot, of which this strategy has borrowed $5,997,837 — **~97%**. The Market is itself a funded strategy of [yvUSDC-1](./yearn-yvusdc.md) (~14.9% of that vault). yvUSD's leveraged borrower is therefore effectively the sole counterparty to a material yvUSDC-1 position, and the two vaults' risk is correlated through a single Cap-collateralised credit book.
 
@@ -408,7 +408,7 @@ The yvUSD vault uses the **standard Yearn V3 governance pattern** via the Yearn 
 | **Sky/MakerDAO** | High | **13.6%** | 7.3% direct sUSDS + 6.3% via PT-sUSDS. Blue-chip, extensively audited ([report 1.3/5](./sky-usds.md)) |
 | **Katana L2 + AggLayer (LxLy) + VaultBridgeToken** | Critical | **10.1%** | Newer stack — young (2025) L2, AggLayer bridge, no existing repo report. Effectively non-withdrawable without a bridge round-trip |
 | **Pendle** | Critical | **10.7%** | Fixed-maturity PTs (Nov 26 / Dec 17, 2026). Oracle-valued, currently non-withdrawable. 6+ audits, $2B+ TVL |
-| **Cap (stcUSD)** | Critical | **9.5% equity / ~$6.87M notional** | [Report 2.4/5](./cap-stcusd.md). 3-of-5 anonymous multisig, upgradeable UUPS proxies, 24h timelock. Levered 7.9x with ~4.5% liquidation headroom |
+| **Cap (stcUSD)** | Critical | **9.5% equity / ~$6.87M notional** | [Report 2.39/5](./cap-stcusd.md). 3-of-5 anonymous multisig, upgradeable UUPS proxies, 24h timelock. Levered 7.9x with ~4.5% liquidation headroom |
 | **3Jane (USD3)** | High | **4.4%** | [Report 3.4/5](./3jane-usd3.md), medium-risk credit-based lending, held via PT until Dec 17, 2026 |
 | **yvUSDC-1 / Pawn Broker Market** | High | Counterparty | The looper's $6.0M USDC borrow is ~97% of the Market's book; the Market is a 14.9% strategy of [yvUSDC-1](./yearn-yvusdc.md) |
 | **Circle CCTP / Spark / Maple / InfiniFi / Origin** | Low | 0% (active, unfunded) | Endorsed and re-fundable by the Debt Allocator without a timelock |
@@ -664,11 +664,11 @@ Additionally, Yearn provides a dedicated **yvUSD APR API** ([yvusd-api.yearn.fi]
 
 | Final Score | Risk Tier | Recommendation |
 |------------|-----------|----------------|
-| 1.0-1.5 | Minimal Risk | Approved, high confidence |
-| **1.5-2.5** | **Low Risk** | **Approved with standard monitoring** |
-| 2.5-3.5 | Medium Risk | Approved with enhanced monitoring |
-| 3.5-4.5 | Elevated Risk | Limited approval, strict limits |
-| 4.5-5.0 | High Risk | Not recommended |
+| 1.00–1.49 | Minimal Risk | Approved, high confidence |
+| **1.50–2.49** | **Low Risk** | **Approved with standard monitoring** |
+| 2.50–3.49 | Medium Risk | Approved with enhanced monitoring |
+| 3.50–4.49 | Elevated Risk | Limited approval, strict limits |
+| 4.50–5.00 | High Risk | Not recommended |
 
 **Final Risk Tier: Low Risk (2.45/5.0) — enhanced monitoring recommended**
 
@@ -703,7 +703,7 @@ The score nonetheless rises from the prior 2.2 because the June 26, 2026 realloc
 | [March 13, 2026](https://github.com/yearn/risk-score/pull/89) | 2.6 | Initial assessment |
 | [April 3, 2026](https://github.com/yearn/risk-score/pull/126) | 2.3 | Reassessment: governance maturation — 7-day TimelockController confirmed, deployer EOA at 0 vault roles |
 | [June 8, 2026](https://github.com/yearn/risk-score/pull/241) | 2.4 | Reassessment: TVL +187% to ~$11.56M; Morpho V2 Sentora PYUSD/RLUSD convertors and Katana cross-chain leg funded |
-| [August 8, 2026](https://github.com/yearn/risk-score/pull/390) | 2.5 | Reassessment: convertors and Arbitrum looper de-funded; Morpho V1 OG to 62.4%; three June 26 strategies funded at 20.2% — 7.90x leveraged Cap stcUSD looper (9.5%) and two Pendle PT positions (10.7%) that are currently non-withdrawable. Collateralization, Provability, Programmability and Liquidity subscores all raised |
+| [August 8, 2026](https://github.com/yearn/risk-score/pull/390) | 2.45 | Reassessment: convertors and Arbitrum looper de-funded; Morpho V1 OG to 62.4%; three June 26 strategies funded at 20.2% — 7.90x leveraged Cap stcUSD looper (9.5%) and two Pendle PT positions (10.7%) that are currently non-withdrawable. Collateralization, Provability, Programmability and Liquidity subscores all raised |
 
 ---
 

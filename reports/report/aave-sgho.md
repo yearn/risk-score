@@ -787,11 +787,11 @@ Final Score = (Centralization × 0.30) + (Funds Mgmt × 0.30) + (Audits × 0.20)
 
 | Final Score | Risk Tier | Recommendation |
 |------------|-----------|----------------|
-| 1.0-1.5 | Minimal Risk | Approved, high confidence |
-| 1.5-2.5 | Low Risk | Approved with standard monitoring |
-| **2.5-3.5** | **Medium Risk** | **Approved with enhanced monitoring** |
-| 3.5-4.5 | Elevated Risk | Limited approval, strict limits |
-| 4.5-5.0 | High Risk | Not recommended |
+| 1.00–1.49 | Minimal Risk | Approved, high confidence |
+| 1.50–2.49 | Low Risk | Approved with standard monitoring |
+| **2.50–3.49** | **Medium Risk** | **Approved with enhanced monitoring** |
+| 3.50–4.49 | Elevated Risk | Limited approval, strict limits |
+| 4.50–5.00 | High Risk | Not recommended |
 
 **Risk Tier: Medium Risk (2.5/5.0) — Approved with enhanced monitoring**
 
@@ -872,4 +872,4 @@ Step-by-step view of the Yearn USDC strategy's two flows, with explicit fees at 
 | --- | --- | --- |
 | April 2, 2026 | 2.1 | Pre-deployment assessment from ARFC/audit material; rechecked April 22, 2026 |
 | May 19, 2026 | 2.3 | Post-deployment refresh after AIP 484. On-chain roles, ProxyAdmin, rate, and supply cap verified. Centralization 2.0 → 2.5 (Risk Council holds unrate-limited sGhoSteward roles); Collateralization 2.0 → 2.5 (late-withdrawer impairment path) |
-| July 27, 2026 (updated Aug 6) | 2.5 | 72-day reassessment. sGho contract itself unchanged and clean; TVL 37.3M → 136.5M GHO. Live 205,146 GHO unfunded-yield gap (AFC Safe funding lapsed 28 days); GSM USDC exit inventory exhausted (111.25M → 9.95 waEthUSDC); GSM buy fee 7 → 10 bps. The funding gap, GSM USDC exhaustion, and exit fee are classified as medium-severity strategy risks, not high-severity protocol failures. Liquidity 2.5 → 3.5, Centralization 2.5 → 2.75, Funds Mgmt remains 2.0 after Collateralization 2.5 → 2.75 and Provability 1.5 → 1.25 (TokenLogic dashboard), Operational 1.5 → 2.0, Audits 2.5 → 2.25 |
+| July 27, 2026 (updated Aug 6) | 2.50 | 72-day reassessment. sGho contract itself unchanged and clean; TVL 37.3M → 136.5M GHO. Live 205,146 GHO unfunded-yield gap (AFC Safe funding lapsed 28 days); GSM USDC exit inventory exhausted (111.25M → 9.95 waEthUSDC); GSM buy fee 7 → 10 bps. The funding gap, GSM USDC exhaustion, and exit fee are classified as medium-severity strategy risks, not high-severity protocol failures. Liquidity 2.5 → 3.5, Centralization 2.5 → 2.75, Funds Mgmt remains 2.0 after Collateralization 2.5 → 2.75 and Provability 1.5 → 1.25 (TokenLogic dashboard), Operational 1.5 → 2.0, Audits 2.5 → 2.25 |
