@@ -1,10 +1,11 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
 import ScoreBadge from "../components/ScoreBadge.astro";
+import ScoreBar from "../components/ScoreBar.astro";
 import stats from "../data/stats.json";
 import { getListedReports } from "../lib/reports";
 import type { ReportData } from "../lib/parseReport";
-import { scoreColor, scoreSegments, scoreTier } from "../lib/colors";
+import { scoreColor, scoreTier } from "../lib/colors";
 
 const formatRelative = (ts: number): string => {
   if (!ts) return "—";
@@ -118,14 +119,7 @@ const followups = recent.slice(1);
             <span class="tier" style={`color:${scoreColor(featured.finalScore)};`}>
               {scoreTier(featured.finalScore)}
             </span>
-            <div class="score-bar" aria-hidden="true">
-              {[1, 2, 3, 4, 5].map((seg) => (
-                <span
-                  class:list={["score-seg", { active: seg <= scoreSegments(featured.finalScore) }]}
-                  style={seg <= scoreSegments(featured.finalScore) ? `background:${scoreColor(featured.finalScore)};` : ""}
-                />
-              ))}
-            </div>
+            <ScoreBar score={featured.finalScore} size="large" />
           </div>
         </a>
 
@@ -162,14 +156,7 @@ const followups = recent.slice(1);
                 <span class="tier-sm" style={`color:${scoreColor(r.finalScore)};`}>
                   {scoreTier(r.finalScore)}
                 </span>
-                <div class="score-bar" aria-hidden="true">
-                  {[1, 2, 3, 4, 5].map((seg) => (
-                    <span
-                      class:list={["score-seg", { active: seg <= scoreSegments(r.finalScore) }]}
-                      style={seg <= scoreSegments(r.finalScore) ? `background:${scoreColor(r.finalScore)};` : ""}
-                    />
-                  ))}
-                </div>
+                <ScoreBar score={r.finalScore} />
               </div>
             </a>
           ))}
@@ -574,21 +561,6 @@ const followups = recent.slice(1);
   .tier-sm {
     font-size: 0.75rem;
     font-weight: 600;
-  }
-  .score-bar {
-    display: flex;
-    gap: 3px;
-  }
-  .score-seg {
-    width: 14px;
-    height: 5px;
-    border-radius: 2px;
-    background: var(--border);
-    transition: background 0.2s;
-  }
-  .report-card--compact .score-seg {
-    width: 10px;
-    height: 4px;
   }
 
   @media (max-width: 880px) {

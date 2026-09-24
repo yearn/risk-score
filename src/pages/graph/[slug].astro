@@ -13,7 +13,7 @@ import {
   type GraphNode,
 } from "../../lib/graph";
 import { getReportBySlug } from "../../lib/reports";
-import { scoreColor, scoreTier, scoreTextColor } from "../../lib/colors";
+import { formatScore, scoreColor, scoreTier, scoreTextColor } from "../../lib/colors";
 import { kindLabel, chainLabel, graphHeading, EDGE_GROUPS } from "../../lib/graphStyle";
 import { buildMetrics, type CrossLinkInfo } from "../../lib/graphInsights";
 
@@ -45,6 +45,7 @@ for (const n of graph.nodes) {
   crossLinks.set(n.id, {
     slug: entry.slug,
     score: report.finalScore,
+    label: formatScore(report.finalScore),
     tier: scoreTier(report.finalScore),
     color: scoreColor(report.finalScore),
     textColor: scoreTextColor(report.finalScore),
@@ -359,7 +360,7 @@ const heading = graphHeading(title, slug!);
         ? `<span class="card-addr">${truncAddr(n.address)}</span>`
         : "";
       const riskFragment = hasCrossLink
-        ? `<span class="card-risk" style="background:${n.crossLink!.color};color:${n.crossLink!.textColor}">${n.crossLink!.score.toFixed(2)} · ${n.crossLink!.tier.replace(" Risk", "")}</span>`
+        ? `<span class="card-risk" style="background:${n.crossLink!.color};color:${n.crossLink!.textColor}">${n.crossLink!.label} · ${n.crossLink!.tier.replace(" Risk", "")}</span>`
         : "";
       // Extended to every addressed card: the explorer used to be reachable
       // only from cross-linked cards, because plain cards hijacked the click.
@@ -764,7 +765,7 @@ const heading = graphHeading(title, slug!);
           <div class="panel-section panel-cross" style="--cl-color:${n.crossLink.color}">
             <div class="panel-h">Separately assessed</div>
             <div class="panel-cross-row">
-              <span class="card-risk" style="background:${n.crossLink.color};color:${n.crossLink.textColor}">${n.crossLink.score.toFixed(2)} · ${escapeHtml(n.crossLink.tier)}</span>
+              <span class="card-risk" style="background:${n.crossLink.color};color:${n.crossLink.textColor}">${escapeHtml(n.crossLink.label)} · ${escapeHtml(n.crossLink.tier)}</span>
             </div>
             <a class="panel-link" href="/graph/${escapeHtml(n.crossLink.slug)}/">Open ${escapeHtml(n.crossLink.slug)} graph →</a>
             <a class="panel-link" href="/report/${escapeHtml(n.crossLink.slug)}/">Read risk report →</a>

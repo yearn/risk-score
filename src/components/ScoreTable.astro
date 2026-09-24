@@ -133,7 +133,7 @@ function labelPos(cx: number, cy: number, r: number, start: number, end: number)
                 class="pie-segment"
                 data-category={seg.category}
                 data-weight={seg.weight}
-                data-score={seg.score.toFixed(2)}
+                data-score={formatScore(seg.score)}
               />
             ))}
             {segments.map((seg) => {

@@ -37,6 +37,8 @@ export interface GraphMetric {
 export interface CrossLinkInfo {
   slug: string;
   score: number;
+  /** `score` as shown: two decimals, rounded down. */
+  label: string;
   tier: string;
   color: string;
   /** Foreground that stays legible on `color` — see `scoreTextColor`. */
