@@ -687,24 +687,24 @@ Centrifuge JAAA remains more concentrated than the NYSE ETF, but diversification
 | Funds Management | 2.75 | 30% | 0.825 |
 | Liquidity Risk | 3.0 | 15% | 0.45 |
 | Operational Risk | 1.5 | 5% | 0.075 |
-| **Final Score** | | | **2.6/5.0** |
+| **Final Score** | | | **2.60/5.0** |
 
 **Optional Modifiers:**
 
 - Protocol live >2 years with no incidents: **not eligible** (V3 is just under one year old).
 - TVL maintained >$500M for >1 year: **not yet demonstrated** at the JAAA level despite current ~$688.24M asset value; protocol-level TVL >$1B has been sustained <1 year. No modifier applied.
 
-**Final Score: 2.6/5.0** — unchanged. The August 20, 2026 cross-chain re-verification corrected the second adapter from Chainlink CCIP to Axelar on the four highest-supply remote chains; every supply-carrying destination remains 2-of-2. Removing a parallel manager is directionally positive, while current TVL/AUM and broader holdings also strengthen the profile. Those improvements do not yet overcome the score-driving issue: the sole, offchain-attested Fordefi MPC can still set an unbounded canonical NAV and exercise untimelocked pool powers. Morpho's Chronicle feed is useful attestation protection for that market, but it does not make direct JAAA exposure low risk or enforce a dynamic bound on Centrifuge's price.
+**Final Score: 2.60/5.0** — unchanged. The August 20, 2026 cross-chain re-verification corrected the second adapter from Chainlink CCIP to Axelar on the four highest-supply remote chains; every supply-carrying destination remains 2-of-2. Removing a parallel manager is directionally positive, while current TVL/AUM and broader holdings also strengthen the profile. Those improvements do not yet overcome the score-driving issue: the sole, offchain-attested Fordefi MPC can still set an unbounded canonical NAV and exercise untimelocked pool powers. Morpho's Chronicle feed is useful attestation protection for that market, but it does not make direct JAAA exposure low risk or enforce a dynamic bound on Centrifuge's price.
 
 ### Risk Tier
 
 | Final Score | Risk Tier | Recommendation |
 |------------|-----------|----------------|
-| **1.0-1.5** | **Minimal Risk** | Approved, high confidence |
-| **1.5-2.5** | **Low Risk** | Approved with standard monitoring |
-| **2.5-3.5** | **Medium Risk** | Approved with enhanced monitoring |
-| **3.5-4.5** | **Elevated Risk** | Limited approval, strict limits |
-| **4.5-5.0** | **High Risk** | Not recommended |
+| **1.00–1.49** | **Minimal Risk** | Approved, high confidence |
+| **1.50–2.49** | **Low Risk** | Approved with standard monitoring |
+| **2.50–3.49** | **Medium Risk** | Approved with enhanced monitoring |
+| **3.50–4.49** | **Elevated Risk** | Limited approval, strict limits |
+| **4.50–5.00** | **High Risk** | Not recommended |
 
 **Final Risk Tier: Medium Risk**
 

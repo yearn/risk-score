@@ -1,6 +1,7 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
 import ScoreBadge from "../components/ScoreBadge.astro";
+import ScoreBar from "../components/ScoreBar.astro";
 import stats from "../data/stats.json";
 import { getListedReports } from "../lib/reports";
 import type { ReportData } from "../lib/parseReport";
@@ -84,9 +85,9 @@ const followups = recent.slice(1);
           <div class="card-glow" aria-hidden="true"></div>
           <div class="card-scan" aria-hidden="true"></div>
           <div class="card-top">
-            <span class="latest-badge">
-              <span class="latest-badge-dot"></span>
-              Latest
+            <span class:list={["assess-tag", featured.isUpdated ? "updated" : "new"]}>
+              <span class="assess-tag-dot"></span>
+              {featured.isUpdated ? "Updated" : "New"}
             </span>
             <span class="card-date" title={featured.date}>{formatRelative(featured.dateSortable)}</span>
           </div>
@@ -109,7 +110,7 @@ const followups = recent.slice(1);
                 <span>{featured.chain}</span>
               </div>
             </div>
-            <ScoreBadge score={featured.finalScore} size="large" />
+            <ScoreBadge score={featured.finalScore} size="large" list />
           </div>
           {featured.riskSummaryHtml && (
             <p class="card-excerpt">{excerpt(featured.riskSummaryHtml, 220)}</p>
@@ -118,14 +119,7 @@ const followups = recent.slice(1);
             <span class="tier" style={`color:${scoreColor(featured.finalScore)};`}>
               {scoreTier(featured.finalScore)}
             </span>
-            <div class="score-bar" aria-hidden="true">
-              {[1, 2, 3, 4, 5].map((seg) => (
-                <span
-                  class:list={["score-seg", { active: seg <= Math.round(featured.finalScore) }]}
-                  style={seg <= Math.round(featured.finalScore) ? `background:${scoreColor(featured.finalScore)};` : ""}
-                />
-              ))}
-            </div>
+            <ScoreBar score={featured.finalScore} size="large" />
           </div>
         </a>
 
@@ -156,20 +150,18 @@ const followups = recent.slice(1);
                     <span title={r.date}>{formatRelative(r.dateSortable)}</span>
                   </div>
                 </div>
-                <ScoreBadge score={r.finalScore} />
+                <ScoreBadge score={r.finalScore} list />
               </div>
               <div class="card-foot">
-                <span class="tier-sm" style={`color:${scoreColor(r.finalScore)};`}>
-                  {scoreTier(r.finalScore)}
+                <span class="foot-left">
+                  <span class="tier-sm" style={`color:${scoreColor(r.finalScore)};`}>
+                    {scoreTier(r.finalScore)}
+                  </span>
+                  <span class:list={["assess-tag", "assess-tag--sm", r.isUpdated ? "updated" : "new"]}>
+                    {r.isUpdated ? "Updated" : "New"}
+                  </span>
                 </span>
-                <div class="score-bar" aria-hidden="true">
-                  {[1, 2, 3, 4, 5].map((seg) => (
-                    <span
-                      class:list={["score-seg", { active: seg <= Math.round(r.finalScore) }]}
-                      style={seg <= Math.round(r.finalScore) ? `background:${scoreColor(r.finalScore)};` : ""}
-                    />
-                  ))}
-                </div>
+                <ScoreBar score={r.finalScore} />
               </div>
             </a>
           ))}
@@ -335,9 +327,9 @@ const followups = recent.slice(1);
     flex-wrap: wrap;
   }
   @keyframes pulse {
-    0% { box-shadow: 0 0 0 0 rgba(6, 117, 249, 0.6); }
-    70% { box-shadow: 0 0 0 8px rgba(6, 117, 249, 0); }
-    100% { box-shadow: 0 0 0 0 rgba(6, 117, 249, 0); }
+    0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--tag) 60%, transparent); }
+    70% { box-shadow: 0 0 0 8px transparent; }
+    100% { box-shadow: 0 0 0 0 transparent; }
   }
   .latest-head h2 {
     font-size: 1.4rem;
@@ -459,26 +451,41 @@ const followups = recent.slice(1);
     align-items: center;
     font-size: 0.78rem;
   }
-  .latest-badge {
+  /* New / Updated tag — same colors as the badge on the report page. */
+  .assess-tag {
+    --tag: var(--brand-blue);
     display: inline-flex;
     align-items: center;
     gap: 0.4rem;
-    color: var(--brand-blue);
+    color: var(--tag);
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.08em;
     font-size: 0.7rem;
     padding: 0.2rem 0.55rem;
-    border: 1px solid color-mix(in srgb, var(--brand-blue) 40%, transparent);
+    border: 1px solid color-mix(in srgb, var(--tag) 40%, transparent);
     border-radius: 999px;
-    background: color-mix(in srgb, var(--brand-blue) 10%, transparent);
+    background: color-mix(in srgb, var(--tag) 10%, transparent);
+    white-space: nowrap;
   }
-  .latest-badge-dot {
+  .assess-tag.new {
+    --tag: #16a34a;
+  }
+  .foot-left {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .assess-tag--sm {
+    font-size: 0.6rem;
+    letter-spacing: 0.06em;
+    padding: 0.05rem 0.4rem;
+  }
+  .assess-tag-dot {
     width: 5px;
     height: 5px;
     border-radius: 50%;
-    background: var(--brand-blue);
-    box-shadow: 0 0 0 0 rgba(6, 117, 249, 0.5);
+    background: var(--tag);
     animation: pulse 2s ease-out infinite;
   }
   .card-date {
@@ -575,21 +582,6 @@ const followups = recent.slice(1);
     font-size: 0.75rem;
     font-weight: 600;
   }
-  .score-bar {
-    display: flex;
-    gap: 3px;
-  }
-  .score-seg {
-    width: 14px;
-    height: 5px;
-    border-radius: 2px;
-    background: var(--border);
-    transition: background 0.2s;
-  }
-  .report-card--compact .score-seg {
-    width: 10px;
-    height: 4px;
-  }
 
   @media (max-width: 880px) {
     .latest-grid {
@@ -608,7 +600,7 @@ const followups = recent.slice(1);
     }
   }
   @media (prefers-reduced-motion: reduce) {
-    .latest-badge-dot {
+    .assess-tag-dot {
       animation: none;
     }
     .report-card--featured:hover .card-scan {

@@ -412,11 +412,11 @@ Pseudonymous but Yearn-ecosystem-known lead dev; mechanics docs are accurate and
 
 | Final Score | Risk Tier | Recommendation |
 |------------|-----------|----------------|
-| **1.0-1.5** | **Minimal Risk** | Approved, high confidence |
-| **1.5-2.5** | **Low Risk** | Approved with standard monitoring |
-| **2.5-3.5** | **Medium Risk** | Approved with enhanced monitoring |
-| **3.5-4.5** | **Elevated Risk** | Limited approval, strict limits |
-| **4.5-5.0** | **High Risk** | Not recommended |
+| **1.00–1.49** | **Minimal Risk** | Approved, high confidence |
+| **1.50–2.49** | **Low Risk** | Approved with standard monitoring |
+| **2.50–3.49** | **Medium Risk** | Approved with enhanced monitoring |
+| **3.50–4.49** | **Elevated Risk** | Limited approval, strict limits |
+| **4.50–5.00** | **High Risk** | Not recommended |
 
 **Final Risk Tier: Medium Risk** — *Approved with enhanced monitoring*, in the lower half of the band. The remaining constraints are a 3-of-5 multisig with no timelock, a dependency chain reaching two unassessed protocols (Liquity V2/BOLD and Curve/crvUSD), a young production history, and a switchable ysyBOLD oracle floor. These are offset by non-upgradeable market clones, a clean Dedaub audit of the v2 upgrade, fully programmatic Yearn TokenizedStrategy accounting, permissionless `FlexExitRouter` exits, and transparent onchain over-collateralization in alike USD assets. Recommend keeping position size limited while TVL and track record are still small, and treating a `DepegModeSet` back to `false` as an immediate reassessment.
 

@@ -649,11 +649,11 @@ Combined ~$41.5M of Re reUSD (direct, unwrapped) is supplied into Fluid + Morpho
 
 | Final Score | Risk Tier | Recommendation |
 |------------|-----------|----------------|
-| **1.0-1.5** | **Minimal Risk** | Approved, high confidence |
-| **1.5-2.5** | **Low Risk** | Approved with standard monitoring |
-| **2.5-3.5** | **Medium Risk** | Approved with enhanced monitoring |
-| **3.5-4.5** | **Elevated Risk** | Limited approval, strict limits |
-| **4.5-5.0** | **High Risk** | Not recommended |
+| **1.00–1.49** | **Minimal Risk** | Approved, high confidence |
+| **1.50–2.49** | **Low Risk** | Approved with standard monitoring |
+| **2.50–3.49** | **Medium Risk** | Approved with enhanced monitoring |
+| **3.50–4.49** | **Elevated Risk** | Limited approval, strict limits |
+| **4.50–5.00** | **High Risk** | Not recommended |
 
 **Final Risk Tier: Medium Risk** (score **3.45** sits below the 3.5 Medium/Elevated boundary; this report's convention treats 3.5 as the bottom of Elevated). The protocol sits near the top of Medium: continued growth in plain-EOA custody dollars, further sUSDe concentration, or vault instant-pay exhaustion without refill could push back to Elevated. **The dominant open risk is EOA custody** (three independent wallets; per-wallet max ~$93.50M), not the Timelock migration — that migration executed Sep 9, 2026.
 

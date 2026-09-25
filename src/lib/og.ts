@@ -3,7 +3,7 @@ import { Resvg } from "@resvg/resvg-js";
 import sharp from "sharp";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
-import { scoreColor, scoreTier, scoreTextColor } from "./colors";
+import { formatScore, scoreColor, scoreTier, scoreTextColor } from "./colors";
 
 const WIDTH = 1200;
 const HEIGHT = 630;
@@ -28,7 +28,7 @@ export async function generateReportOgImage(report: {
   const tier = isRated ? scoreTier(report.finalScore!) : "Not Rated";
   const textColor = isRated ? scoreTextColor(report.finalScore!) : "#ffffff";
   const scoreLabel = isRated
-    ? `${report.finalScore!.toFixed(1)} / 5.0`
+    ? `${formatScore(report.finalScore!)} / 5.0`
     : (report.status ?? "NOT RATED");
 
   let iconDataUri: string | undefined;

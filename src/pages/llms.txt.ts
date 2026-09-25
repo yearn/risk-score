@@ -1,7 +1,7 @@
 import type { APIRoute } from "astro";
 import { getAllReports } from "../lib/reports";
 import { getGraphSummaries } from "../lib/graph";
-import { scoreTier } from "../lib/colors";
+import { formatScore, scoreTier } from "../lib/colors";
 
 // llms.txt — a markdown briefing for LLMs and AI search engines, served at the
 // site root by convention. Generated at build time so the report count, score
@@ -33,13 +33,13 @@ export const GET: APIRoute = async () => {
     "- Liquidity Risk — 15%",
     "- Operational Risk — 5%",
     "",
-    "Final scores map to risk tiers (the tier is computed from the full-precision weighted average; the displayed score is rounded to one decimal place):",
+    "Final scores are shown to two decimals, always rounded down; the home page and reports list round down to one decimal (2.49 → 2.4). Tier boundaries are lower-inclusive, so a score of exactly 2.5 is Medium:",
     "",
-    "- at most 1.5 — Minimal Risk",
-    "- at most 2.5 — Low Risk",
-    "- at most 3.5 — Medium Risk",
-    "- at most 4.5 — Elevated Risk",
-    "- above 4.5 — High Risk",
+    "- below 1.5 — Minimal Risk",
+    "- 1.5 to below 2.5 — Low Risk",
+    "- 2.5 to below 3.5 — Medium Risk",
+    "- 3.5 to below 4.5 — Elevated Risk",
+    "- 4.5 and above — High Risk",
     "",
     "Assets affected by a terminal event (exploit or wind-down) are listed as **Not Rated** and excluded from the numeric scale.",
     "",
@@ -54,7 +54,7 @@ export const GET: APIRoute = async () => {
   for (const r of reports) {
     const label =
       r.finalScore != null
-        ? `${r.name} — ${r.finalScore.toFixed(1)}/5.0 ${scoreTier(r.finalScore)}`
+        ? `${r.name} — ${formatScore(r.finalScore)}/5.0 ${scoreTier(r.finalScore)}`
         : `${r.name} — Not Rated`;
     lines.push(`- [${label}](${SITE}/report/${r.slug}/): ${r.token} on ${r.chain}`);
   }

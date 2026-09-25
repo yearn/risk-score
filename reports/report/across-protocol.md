@@ -4,7 +4,7 @@
 - **Token:** Across V2 LP Tokens (Av2-WETH-LP, Av2-USDC-LP, Av2-USDT-LP, Av2-DAI-LP, Av2-WBTC-LP)
 - **Chain:** Ethereum Mainnet
 - **HubPool Address:** [`0xc186fA914353c44b2E33eBE05f21846F1048bEda`](https://etherscan.io/address/0xc186fA914353c44b2E33eBE05f21846F1048bEda)
-- **Final Score: 3.5/5.0**
+- **Final Score: 3.51/5.0**
 
 > The issue (yearn/risk-score#169) lists "Across Protocol" as both protocol and asset. For a Yearn integration, the only yield-bearing Across asset is the per-pool **LP token** minted by the HubPool when LPs deposit underlying. This assessment focuses on those LP tokens. The ACX governance token is **not** a yield-bearing asset and is out of scope; it is referenced only where it bears on operational risk.
 
@@ -25,7 +25,7 @@ Across is an intent-based cross-chain bridge built by Risk Labs (the team that a
 - [Bug Bounty Page](https://docs.across.to/introduction/bug-bounty)
 - [DefiLlama — Across](https://defillama.com/protocol/across)
 - [Risk Labs Foundation](https://risklabs.foundation/)
-- [Across blog — "Why Across Has Never Been Hacked"](https://across.to/blog/why-across-has-never-been-hacked)
+- [Across blog — "Why Security and Decentralization Matter Now More Than Ever"](https://across.to/blog/why-security-and-decentralization-matter)
 - [Across blog — "A Deep Dive Into Across Protocol's Security"](https://across.to/blog/A-Deep-Dive-Into-Across-Protocols-Security)
 - [UMA case study on Across](https://blog.uma.xyz/articles/case-study-how-uma-secures-across-protocol)
 - LlamaRisk: no dedicated Across report found on [llamarisk.com/research](https://www.llamarisk.com/research) at the time of this assessment.
@@ -72,7 +72,7 @@ All formal audits to date have been performed by a single firm — **OpenZeppeli
 
 **Past security incidents (bridge contracts):**
 
-- **No direct exploits of Across bridge contracts** since the May 2022 launch, corroborated by the Across blog ["Why Across Has Never Been Hacked"](https://across.to/blog/why-across-has-never-been-hacked), the DefiLlama bridge incident database (no entry for Across), and the absence of any postmortem in the Across forum or GitHub.
+- **No direct exploits of Across bridge contracts** since the May 2022 launch, corroborated by the Across blog ["Why Security and Decentralization Matter Now More Than Ever"](https://across.to/blog/why-security-and-decentralization-matter), the DefiLlama bridge incident database (no entry for Across), and the absence of any postmortem in the Across forum or GitHub.
 
 **Operational / governance incident (June 2025, NOT a smart-contract exploit):**
 
@@ -445,7 +445,7 @@ All gates pass; proceeding to category scoring.
 | Funds Management | 1.5 | 30% | 0.45 |
 | Liquidity Risk | 3.0 | 15% | 0.45 |
 | Operational Risk | 2.5 | 5% | 0.125 |
-| **Subtotal** | | | **2.52** |
+| **Subtotal** | | | **2.51** |
 
 **Optional Modifiers:**
 - Protocol live >2 years with no incidents: **−0.5** (qualifies — ~4 years live, no bridge-contract exploit).
@@ -453,21 +453,21 @@ All gates pass; proceeding to category scoring.
 - Unresolved June 2025 governance controversy involving the same parties that hold the HubPool multisig keys: **+0.5** (custom risk modifier; not in standard rubric but material to the centralization picture).
 - No timelock on a multisig with `haircutReserves` + cross-chain upgrade authority: **+1.0** (custom risk modifier; the LP has no exit window if signers act adversely).
 
-**Adjusted Final Score: 2.52 − 0.5 + 0.5 + 1.0 = 3.52 ≈ 3.5**
+**Adjusted Final Score: 2.51 − 0.5 + 0.5 + 1.0 = 3.51**
 
 ### Risk Tier
 
 | Final Score | Risk Tier | Recommendation |
 |------------|-----------|----------------|
-| **1.0-1.5** | **Minimal Risk** | Approved, high confidence |
-| **1.5-2.5** | **Low Risk** | Approved with standard monitoring |
-| **2.5-3.5** | **Medium Risk** | Approved with enhanced monitoring |
-| **3.5-4.5** | **Elevated Risk** | Limited approval, strict limits |
-| **4.5-5.0** | **High Risk** | Not recommended |
+| 1.00–1.49 | Minimal Risk | Approved, high confidence |
+| 1.50–2.49 | Low Risk | Approved with standard monitoring |
+| 2.50–3.49 | Medium Risk | Approved with enhanced monitoring |
+| **3.50–4.49** | **Elevated Risk** | **Limited approval, strict limits** |
+| 4.50–5.00 | High Risk | Not recommended |
 
-**Final Risk Tier: Medium Risk** (at the upper boundary of the 2.5–3.5 range).
+**Final Risk Tier: Elevated Risk** (just above the 3.50 boundary).
 
-**Interpretation:** Across LP tokens represent a medium-risk integration target sitting on the boundary with Elevated Risk. The protocol's core technical design — immutable HubPool, fully onchain NAV, atomic permissionless redemption, four years without a bridge exploit — is genuinely strong. What pulls the score from Low Risk into Medium Risk is the governance configuration: a 3-of-5 multisig of related parties with no timelock, holding both the `haircutReserves` power on LP NAV and cross-chain SpokePool upgrade authority **and** the BondToken's proposer allowlist (so the canonical dataworker is admin-gated, not permissionless), against the backdrop of an unresolved June 2025 ACX-treasury controversy involving those same parties. The custom modifiers above reflect this concentration. Note: if a timelock were added between the multisig and the HubPool, and if the June 2025 governance issue were resolved through an external review or remediation, the score would naturally move back into Low Risk territory.
+**Interpretation:** Across LP tokens represent an Elevated-risk integration target sitting just above the Medium Risk boundary: limited approval with strict exposure limits. The protocol's core technical design — immutable HubPool, fully onchain NAV, atomic permissionless redemption, four years without a bridge exploit — is genuinely strong. What pulls the score from Low Risk into Elevated Risk is the governance configuration: a 3-of-5 multisig of related parties with no timelock, holding both the `haircutReserves` power on LP NAV and cross-chain SpokePool upgrade authority **and** the BondToken's proposer allowlist (so the canonical dataworker is admin-gated, not permissionless), against the backdrop of an unresolved June 2025 ACX-treasury controversy involving those same parties. The custom modifiers above reflect this concentration. Note: if a timelock were added between the multisig and the HubPool, and if the June 2025 governance issue were resolved through an external review or remediation, the two custom modifiers (+1.0 and +0.5) would fall away and the score would move back into Low Risk territory (2.01).
 
 ---
 

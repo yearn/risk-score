@@ -1,4 +1,5 @@
 import { marked } from "marked";
+import { formatScore } from "./colors";
 import { protocolIconUrl, chainIconUrl, defillamaIconUrl } from "./icons";
 
 // Override the default GFM del (strikethrough) tokenizer to only match
@@ -387,7 +388,7 @@ function parseHistory(content: string, meta: ReportMeta): HistoryEntry[] {
 
   // Fallback: seed a single row from the current header.
   const score =
-    meta.finalScore != null ? meta.finalScore.toFixed(1) : (meta.status ?? "N/A");
+    meta.finalScore != null ? formatScore(meta.finalScore) : (meta.status ?? "N/A");
   return [
     historyEntry(
       meta.latestDate,

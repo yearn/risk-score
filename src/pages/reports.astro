@@ -1,6 +1,7 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
 import ScoreBadge from "../components/ScoreBadge.astro";
+import ScoreBar from "../components/ScoreBar.astro";
 import { getListedReports } from "../lib/reports";
 import type { ReportData } from "../lib/parseReport";
 import { scoreColor, scoreTier } from "../lib/colors";
@@ -116,20 +117,13 @@ const tierCounts = tierOrder.map((t) => ({
               <span>{r.status}</span>
             </div>
           )}
-          <ScoreBadge score={r.finalScore} />
+          <ScoreBadge score={r.finalScore} list />
         </div>
         <div class="card-foot">
           <span class="tier-sm" style={`color:${scoreColor(r.finalScore)};`}>
             {scoreTier(r.finalScore)}
           </span>
-          <div class="score-bar" aria-hidden="true">
-            {[1, 2, 3, 4, 5].map((seg) => (
-              <span
-                class:list={["score-seg", { active: seg <= Math.round(r.finalScore) }]}
-                style={seg <= Math.round(r.finalScore) ? `background:${scoreColor(r.finalScore)};` : ""}
-              />
-            ))}
-          </div>
+          <ScoreBar score={r.finalScore} />
         </div>
       </a>
     ))}
@@ -667,17 +661,6 @@ const tierCounts = tierOrder.map((t) => ({
   .tier-sm {
     font-size: 0.74rem;
     font-weight: 600;
-  }
-  .score-bar {
-    display: flex;
-    gap: 3px;
-  }
-  .score-seg {
-    width: 10px;
-    height: 4px;
-    border-radius: 2px;
-    background: var(--border);
-    transition: background 0.2s;
   }
 
   .empty-state {

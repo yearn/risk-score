@@ -4,7 +4,7 @@
 - **Token:** siUSD (Staked iUSD)
 - **Chain:** Ethereum Mainnet
 - **Token Address:** [`0xDBDC1Ef57537E34680B898E1FEBD3D68c7389bCB`](https://etherscan.io/address/0xDBDC1Ef57537E34680B898E1FEBD3D68c7389bCB)
-- **Final Score: 3.2/5.0**
+- **Final Score: 3.19/5.0**
 
 ## Overview + Links
 
@@ -70,7 +70,7 @@ All contracts verified on Etherscan. Compiled with Solidity 0.8.28 (except Gnosi
 
 InfiniFi has undergone extensive security review via Certora, Spearbit/Cantina Code, and a Cantina public competition, plus multiple ongoing upgrade reviews.
 
-- **Spearbit / Cantina Code** (March-April 2025): Main protocol security review. Report published April 1, 2025. Findings: **8 High, 6 Medium, 25 Low, 4 Gas, 24 Informational**. Auditors: Noah Marconi (Lead), R0bert (Lead), Slowfi, Jonatas Martins. [Report PDF](https://raw.githubusercontent.com/spearbit/portfolio/master/pdfs/InfiniFi-Spearbit-Security-Review-March-2025.pdf).
+- **Spearbit / Cantina Code** (March-April 2025): Main protocol security review. Report published April 1, 2025. Findings: **8 High, 6 Medium, 25 Low, 4 Gas, 24 Informational**. Auditors: Noah Marconi (Lead), R0bert (Lead), Slowfi, Jonatas Martins. [Report PDF](https://r0bert-ethack.github.io/pdfs/report-cantinacode-infinifi-0303.pdf).
 - **Certora**: Formal Verification & Security Assessment (March 21 – May 20, 2025). Report published June 4, 2025. Covers formal verification via Certora Prover and manual review. [Report](https://www.certora.com/reports/infinifi-protocol-formal-verification-report).
 - **Cantina Public Competition** (April 2025): Public audit competition. [Competition link](https://cantina.xyz/competitions/2ac7f906-1661-47eb-bfd6-519f5db0d36b). Reward pool claimed ~$40,000 ($35k + $5k) — amount unconfirmed via automation.
 - **Ongoing Cantina Code / Spearbit Managed Reviews** (6+ additional reviews of upgrades):
@@ -539,23 +539,23 @@ Autonomous events triggered by protocol state, not governance actions.
 | Funds Management | 4.0 | 30% | 1.200 |
 | Liquidity Risk | 3.0 | 15% | 0.450 |
 | Operational Risk | 2.5 | 5% | 0.125 |
-| **Final Score** | | | **3.195** |
+| **Final Score** | | | **3.19** |
 
-**Final Score: 3.2**
+**Final Score: 3.19**
 
 ### Risk Tier
 
 | Final Score | Risk Tier | Recommendation |
 |-------------|-----------|----------------|
-| 1.0-1.5 | Minimal Risk | Approved, high confidence |
-| 1.5-2.5 | Low Risk | Approved with standard monitoring |
-| 2.5-3.5 | Medium Risk | Approved with enhanced monitoring |
-| 3.5-4.5 | Elevated Risk | Limited approval, strict limits |
-| 4.5-5.0 | High Risk | Not recommended |
+| 1.00–1.49 | Minimal Risk | Approved, high confidence |
+| 1.50–2.49 | Low Risk | Approved with standard monitoring |
+| 2.50–3.49 | Medium Risk | Approved with enhanced monitoring |
+| 3.50–4.49 | Elevated Risk | Limited approval, strict limits |
+| 4.50–5.00 | High Risk | Not recommended |
 
 **Final Risk Tier: MEDIUM RISK**
 
-The composite score is 3.2, in the MEDIUM tier. The key risks at this reassessment are:
+The composite score is 3.19, in the MEDIUM tier. The key risks at this reassessment are:
 - **84.4% of TVL is offchain-custodied / NAV-attested**: Midas mGLOBAL (51.4%) plus four RWA escrow farms (33.0%), $50.97M whose backing cannot be verified onchain.
 - **Concentration in Midas-Fasanara mGLOBAL** (51.4% of TVL): single largest position, tokenized hedge-fund exposure, offchain custody and valuation — 1.57× the entire liUSD first-loss buffer ($19.71M).
 - **First-loss buffer thin relative to exposure**: $19.71M covers 39% of offchain exposure, with ~$8.85M of liUSD still mid-unwind.
@@ -767,4 +767,4 @@ Treat current InfiniFi exposure as a credit exposure to **(a) a tokenized Fasana
 | [February 4, 2026](https://github.com/yearn/risk-score/pull/22) | 2.3 | Initial assessment |
 | [May 18, 2026](https://github.com/yearn/risk-score/pull/192) | 3.2 | Reassessment — Liquidity 2.0→4.0: iUSD redemption queue-only pending maturity wave |
 | [July 4, 2026](https://github.com/yearn/risk-score/pull/288) | 3.4 | Reassessment — offchain concentration up, TVL down |
-| [July 29, 2026](https://github.com/yearn/risk-score/pull/357) | 3.2 | Reassessment — offchain exposure restated to 84.4% with a fourth RWA escrow; farm-bucket semantics corrected (`FarmTypes.LIQUID` = bucket 1): instant-exit capacity is $5.45M and the redemption queue has never been used (Liquidity 4.0→3.0) |
+| [July 29, 2026](https://github.com/yearn/risk-score/pull/357) | 3.19 | Reassessment — offchain exposure restated to 84.4% with a fourth RWA escrow; farm-bucket semantics corrected (`FarmTypes.LIQUID` = bucket 1): instant-exit capacity is $5.45M and the redemption queue has never been used (Liquidity 4.0→3.0) |

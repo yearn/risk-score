@@ -4,7 +4,7 @@
 - **Token:** stcUSD (Staked cap USD)
 - **Chain:** Ethereum
 - **Token Address:** [`0x88887bE419578051FF9F4eb6C858A951921D8888`](https://etherscan.io/address/0x88887bE419578051FF9F4eb6C858A951921D8888)
-- **Final Score: 2.4/5.0**
+- **Final Score: 2.39/5.0**
 
 ## Overview + Links
 
@@ -510,19 +510,19 @@ Final Score = (Centralization × 0.30) + (Funds Mgmt × 0.30) + (Audits × 0.20)
 | Funds Management | 2.3 | 30% | 0.69 |
 | Liquidity Risk | 3.0 | 15% | 0.45 |
 | Operational Risk | 2.0 | 5% | 0.10 |
-| **Final Score** | | | **2.4/5.0** |
+| **Final Score** | | | **2.39/5.0** |
 
 ### Risk Tier
 
 | Final Score | Risk Tier | Recommendation |
 |------------|-----------|----------------|
-| 1.0-1.5 | Minimal Risk | Approved, high confidence |
-| **1.5-2.5** | **Low Risk** | **Approved with standard monitoring** |
-| 2.5-3.5 | Medium Risk | Approved with enhanced monitoring |
-| 3.5-4.5 | Elevated Risk | Limited approval, strict limits |
-| 4.5-5.0 | High Risk | Not recommended |
+| 1.00–1.49 | Minimal Risk | Approved, high confidence |
+| **1.50–2.49** | **Low Risk** | **Approved with standard monitoring** |
+| 2.50–3.49 | Medium Risk | Approved with enhanced monitoring |
+| 3.50–4.49 | Elevated Risk | Limited approval, strict limits |
+| 4.50–5.00 | High Risk | Not recommended |
 
-**Final Risk Tier: Low Risk (2.4/5.0) — Approved with standard monitoring**
+**Final Risk Tier: Low Risk (2.39/5.0) — Approved with standard monitoring**
 
 The score is unchanged from the March 2026 assessment. Strong audit coverage (now 8 firms / 9 reports with the added Octane review), institutional backing, novel security model (Symbiotic restaking), and onchain-verified 1:1 backing remain the primary positives. The key risk drivers are unchanged: upgradeable contracts with a 3-of-5 anonymous multisig, offchain operator strategy opacity, and the relatively short production history (~9 months). The shift from 67/33 Morpho/Aave deployment to 100% Morpho is flagged as a watch-item — it raises Morpho-specific risk but is partly offset by curator diversification (Steakhouse + Gauntlet) and is not severe enough on its own to move the score. Enhanced monitoring is recommended, particularly around operator positions, multisig transactions, FRV queue changes (potential Aave V3 reactivation or new strategies), and contract upgrade proposals.
 
@@ -544,4 +544,4 @@ The score is unchanged from the March 2026 assessment. Strong audit coverage (no
 | --- | --- | --- |
 | [March 20, 2026](https://github.com/yearn/risk-score/pull/101) | 2.4 | Initial assessment |
 | [May 23, 2026](https://github.com/yearn/risk-score/pull/214) | 2.4 | Reassessment: USDC Fractional Reserve rebalanced to 100% Morpho (Steakhouse + Gauntlet); Aave V3 leg drained; LayerZero stcUSD/Katana OFT integration documented |
-| [July 31, 2026](https://github.com/yearn/risk-score/pull/369) | 2.4 | LayerZero OFT escrow figures corrected (~26.1M stcUSD escrowed, ~38% of ~68.3M supply); Dependencies score unchanged |
+| [July 31, 2026](https://github.com/yearn/risk-score/pull/369) | 2.39 | LayerZero OFT escrow figures corrected (~26.1M stcUSD escrowed, ~38% of ~68.3M supply); Dependencies score unchanged |
