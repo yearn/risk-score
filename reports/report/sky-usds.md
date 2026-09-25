@@ -719,7 +719,7 @@ Snapshot block 25345569 (June 18, 2026).
 
 ### Final Score Calculation
 
-**Rounding rule:** the weighted sum is recorded to two decimal places, rounded down (1.475 → 1.47). The reports list rounds it down again to one decimal.
+**Rounding rule:** the weighted sum is recorded to two decimal places, rounded down (1.475 → 1.47). The home page and reports list round it down again to one decimal.
 
 | Category | Score | Weight | Weighted |
 |----------|------:|-------:|---------:|

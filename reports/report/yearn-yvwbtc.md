@@ -384,7 +384,7 @@ Other monitoring that does cover yvWBTC-1 implicitly via the broader Yearn V3 se
 - Be conservative: when uncertain between two scores, choose the higher (riskier) one
 - Use decimals when a subcategory falls between scores
 - Prioritize on-chain evidence over documentation claims
-- **Rounding rule:** the weighted sum is recorded to two decimal places, rounded down (1.475 → 1.47). The reports list rounds it down again to one decimal.
+- **Rounding rule:** the weighted sum is recorded to two decimal places, rounded down (1.475 → 1.47). The home page and reports list round it down again to one decimal.
 - **Score reflects current snapshot state (July 12, 2026):** 100% deployed through MetaMorpho → Morpho Blue, with 82% idle and 18% in WBTC/LBTC lending market.
 
 ### Critical Risk Gates

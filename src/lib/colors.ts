@@ -1,6 +1,6 @@
 /**
  * Scores are always rounded down: two decimals everywhere, one decimal on the
- * reports list (2.459 → "2.45" / "2.4").
+ * home page and reports list cards (2.459 → "2.45" / "2.4").
  *
  * Tier bands are lower-inclusive hard lines (2.5 is Medium). Every boundary
  * sits on a tenth, so the floored value is always in the same tier as the full
@@ -19,7 +19,7 @@ export function formatScore(score: number): string {
   return floorTo(score, 2);
 }
 
-/** Reports list only: floored one-decimal score. */
+/** Home page and reports list cards: floored one-decimal score. */
 export function formatListScore(score: number): string {
   return floorTo(score, 1);
 }

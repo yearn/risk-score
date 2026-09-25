@@ -33,7 +33,7 @@ export const GET: APIRoute = async () => {
     "- Liquidity Risk — 15%",
     "- Operational Risk — 5%",
     "",
-    "Final scores are shown to two decimals, always rounded down; the reports list rounds down to one decimal (2.49 → 2.4). Tier boundaries are lower-inclusive, so a score of exactly 2.5 is Medium:",
+    "Final scores are shown to two decimals, always rounded down; the home page and reports list round down to one decimal (2.49 → 2.4). Tier boundaries are lower-inclusive, so a score of exactly 2.5 is Medium:",
     "",
     "- below 1.5 — Minimal Risk",
     "- 1.5 to below 2.5 — Low Risk",

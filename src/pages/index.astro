@@ -110,7 +110,7 @@ const followups = recent.slice(1);
                 <span>{featured.chain}</span>
               </div>
             </div>
-            <ScoreBadge score={featured.finalScore} size="large" />
+            <ScoreBadge score={featured.finalScore} size="large" list />
           </div>
           {featured.riskSummaryHtml && (
             <p class="card-excerpt">{excerpt(featured.riskSummaryHtml, 220)}</p>
@@ -150,7 +150,7 @@ const followups = recent.slice(1);
                     <span title={r.date}>{formatRelative(r.dateSortable)}</span>
                   </div>
                 </div>
-                <ScoreBadge score={r.finalScore} />
+                <ScoreBadge score={r.finalScore} list />
               </div>
               <div class="card-foot">
                 <span class="tier-sm" style={`color:${scoreColor(r.finalScore)};`}>

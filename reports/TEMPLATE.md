@@ -402,7 +402,7 @@ If ANY gate is triggered, the protocol automatically receives a score of **5** (
 Record the Final Score to two decimals, rounded down (1.475 → 1.47); never
 round it to one decimal. Boundaries are lower-inclusive: a Final Score of
 exactly 2.50 is Medium Risk.
-The site shows scores rounded down (two decimals; one on the reports list).
+The site shows scores rounded down (two decimals; one on the home page and reports list).
 
 **Final Risk Tier: [TIER]**
 
