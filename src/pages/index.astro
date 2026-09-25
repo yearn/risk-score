@@ -85,9 +85,9 @@ const followups = recent.slice(1);
           <div class="card-glow" aria-hidden="true"></div>
           <div class="card-scan" aria-hidden="true"></div>
           <div class="card-top">
-            <span class="latest-badge">
-              <span class="latest-badge-dot"></span>
-              Latest
+            <span class:list={["assess-tag", featured.isUpdated ? "updated" : "new"]}>
+              <span class="assess-tag-dot"></span>
+              {featured.isUpdated ? "Updated" : "New"}
             </span>
             <span class="card-date" title={featured.date}>{formatRelative(featured.dateSortable)}</span>
           </div>
@@ -153,8 +153,13 @@ const followups = recent.slice(1);
                 <ScoreBadge score={r.finalScore} list />
               </div>
               <div class="card-foot">
-                <span class="tier-sm" style={`color:${scoreColor(r.finalScore)};`}>
-                  {scoreTier(r.finalScore)}
+                <span class="foot-left">
+                  <span class="tier-sm" style={`color:${scoreColor(r.finalScore)};`}>
+                    {scoreTier(r.finalScore)}
+                  </span>
+                  <span class:list={["assess-tag", "assess-tag--sm", r.isUpdated ? "updated" : "new"]}>
+                    {r.isUpdated ? "Updated" : "New"}
+                  </span>
                 </span>
                 <ScoreBar score={r.finalScore} />
               </div>
@@ -322,9 +327,9 @@ const followups = recent.slice(1);
     flex-wrap: wrap;
   }
   @keyframes pulse {
-    0% { box-shadow: 0 0 0 0 rgba(6, 117, 249, 0.6); }
-    70% { box-shadow: 0 0 0 8px rgba(6, 117, 249, 0); }
-    100% { box-shadow: 0 0 0 0 rgba(6, 117, 249, 0); }
+    0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--tag) 60%, transparent); }
+    70% { box-shadow: 0 0 0 8px transparent; }
+    100% { box-shadow: 0 0 0 0 transparent; }
   }
   .latest-head h2 {
     font-size: 1.4rem;
@@ -446,26 +451,41 @@ const followups = recent.slice(1);
     align-items: center;
     font-size: 0.78rem;
   }
-  .latest-badge {
+  /* New / Updated tag — same colors as the badge on the report page. */
+  .assess-tag {
+    --tag: var(--brand-blue);
     display: inline-flex;
     align-items: center;
     gap: 0.4rem;
-    color: var(--brand-blue);
+    color: var(--tag);
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.08em;
     font-size: 0.7rem;
     padding: 0.2rem 0.55rem;
-    border: 1px solid color-mix(in srgb, var(--brand-blue) 40%, transparent);
+    border: 1px solid color-mix(in srgb, var(--tag) 40%, transparent);
     border-radius: 999px;
-    background: color-mix(in srgb, var(--brand-blue) 10%, transparent);
+    background: color-mix(in srgb, var(--tag) 10%, transparent);
+    white-space: nowrap;
   }
-  .latest-badge-dot {
+  .assess-tag.new {
+    --tag: #16a34a;
+  }
+  .foot-left {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .assess-tag--sm {
+    font-size: 0.6rem;
+    letter-spacing: 0.06em;
+    padding: 0.05rem 0.4rem;
+  }
+  .assess-tag-dot {
     width: 5px;
     height: 5px;
     border-radius: 50%;
-    background: var(--brand-blue);
-    box-shadow: 0 0 0 0 rgba(6, 117, 249, 0.5);
+    background: var(--tag);
     animation: pulse 2s ease-out infinite;
   }
   .card-date {
@@ -580,7 +600,7 @@ const followups = recent.slice(1);
     }
   }
   @media (prefers-reduced-motion: reduce) {
-    .latest-badge-dot {
+    .assess-tag-dot {
       animation: none;
     }
     .report-card--featured:hover .card-scan {
