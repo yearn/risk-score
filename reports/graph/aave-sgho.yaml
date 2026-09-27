@@ -25,19 +25,19 @@ nodes:
     label: GHO (Aave Stablecoin)
     address: "0x40D16FC0246aD3160Ccc09B8D0D3A2cD28aE6C2f"
     category: vault
-    note: ERC-20, upgradeable
+    note: GhoToken ERC-20, not a proxy on Ethereum
 
   # === Strategy / module legs ===
   - id: gsm-usdc
     label: GSM USDC (Gsm4626)
     address: "0x3A3868898305f04beC7FEa77BecFf04C13444112"
     category: strategy
-    note: waEthUSDC ↔ GHO at 1:1; exit inventory exhausted (0.03 waEthUSDC); 15 bps buy fee
+    note: 1 USDC = 1 GHO after waEthUSDC share conversion; exit inventory exhausted (≈0.035 USDC); 15 bps buy fee
   - id: gsm-usdt
     label: GSM USDT (Gsm4626)
     address: "0x882285E62656b9623AF136Ce3078c6BdCc33F5E3"
     category: strategy
-    note: Fallback GHO exit — 16.09M waEthUSDT available, exits to USDT; 10 bps buy fee
+    note: Fallback GHO exit — 16.09M waEthUSDT shares ≈ 18.94M USDT; exits to USDT; 10 bps buy fee
   - id: gho-reserve
     label: GHO Reserve (GSM Facilitator)
     address: "0x54C58157DeF387A880AE62332D1445f03adbE7E9"
