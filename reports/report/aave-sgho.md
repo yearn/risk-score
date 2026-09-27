@@ -9,7 +9,7 @@
 > **STATUS (September 27, 2026, block 26,070,292):** sGho is live on Ethereum mainnet with **134 days of production history** and `totalAssets() = 165,833,498 GHO` (~$165.7M). Implementation, ProxyAdmin, supply cap, pause state, and role assignments are unchanged since [AIP 484](https://app.aave.com/governance/v3/proposal/?proposalId=484) (no `Upgraded`, `SupplyCapUpdated`, `Paused`, or `RoleGranted`/`RoleRevoked` events). The Aave Savings Rate is **4.50%** (`targetRate() = 450`), raised from 4.25% by the GHO Risk Council on September 1, 2026 in a single sGhoSteward execution (tx [`0x7aa9fd…001f`](https://etherscan.io/tx/0x7aa9fd1ced00357442edddc4011fb3c11886fecbe3ab90f3cfd5c1ebec63001f)). **Current conditions:**
 >
 > 1. **Yield backing is funded, but only a thin, discretionary buffer ahead of accrual.** `IERC20(GHO).balanceOf(sGho) = 165,985,676` against `totalAssets() = 165,833,498` — a **152,179 GHO surplus (0.09% of `totalAssets`)**, about 7.4 days of accrual at ~20,445 GHO/day. Eleven top-ups totalling **2,364,000 GHO** have been made since launch, all executed by the **Aave Finance Committee Safe** ([`0x2274…1bFa`](https://etherscan.io/address/0x22740deBa78d5a0c24C58C740e3715ec29de1bFa), 2-of-3); since August 11, 2026 the GHO is pulled directly from the Aave Collector through an AFC GHO allowance. The vault ran a deficit of up to ~269,000 GHO before the July 31 top-up and briefly again around September 6–8 (peak ~32,600 GHO). No contract enforces or schedules the funding.
-> 2. **The GSM USDC exit route remains exhausted, and the USDT fallback has shrunk.** GSM USDC `getAvailableLiquidity()` is **0.03 waEthUSDC** — `buyAsset()` has been unusable since mid-June 2026 — and its buy fee was raised **10 → 15 bps** on September 17, 2026 (tx [`0xe967a8…b0b6`](https://etherscan.io/tx/0xe967a8ea12c94ed48deffa425dfb2ec2bfa2da1d0063b8d7d29d6dfb5df7b0b6)). GSM USDT, the deepest deterministic exit, holds **16.09M waEthUSDT**, against 165.8M of sGho claims.
+> 2. **The GSM USDC exit route remains exhausted, and the USDT fallback has shrunk.** GSM USDC `getAvailableLiquidity()` is **0.03 waEthUSDC** — `buyAsset()` has been unusable since mid-June 2026 — and its buy fee was raised **10 → 15 bps** on September 17, 2026 (tx [`0xe967a8…b0b6`](https://etherscan.io/tx/0xe967a8ea12c94ed48deffa425dfb2ec2bfa2da1d0063b8d7d29d6dfb5df7b0b6)). GSM USDT, the deepest deterministic exit, holds **16.09M waEthUSDT shares, worth ≈18.94M USDT / GHO**, against 165.8M GHO of sGho claims.
 > 3. **The GHO Risk Council was reconstituted as a 2-of-3 Safe** on August 23, 2026 (tx [`0x9f0f43…5e3e`](https://etherscan.io/tx/0x9f0f435d8d37f9e3446fad0737b57ba37ac00ac841da1bd432085b481bd15e3e)). Its signers are organisation-controlled nested Safes for Aave Labs, LlamaRisk, and TokenLogic ([ARFC](https://governance.aave.com/t/arfc-gho-stewards-signer-update/25452)), the **same three signers as the AFC Safe**. The parties that set the sGho rate also control its funding.
 >
 > **The new sGho contract remains separate from the legacy stkGHO proxy** ([`0x1a88…885d`](https://etherscan.io/address/0x1a88Df1cFe15Af22B3c4c783D4e6F7F9e0C1885d)), which holds 31.17M stkGHO. The `GhoRouter` is **still not deployed**: [gho-origin PR #34](https://github.com/aave-dao/gho-origin/pull/34) is open (not merged, last commit September 16, 2026), there is no `GHO_ROUTER` entry in the [Aave Address Book](https://github.com/bgd-labs/aave-address-book/blob/main/src/GhoEthereum.sol), and no router proposal exists in [`aave-proposals-v3`](https://github.com/aave-dao/aave-proposals-v3/tree/main/src).
@@ -29,7 +29,7 @@ sGHO is an **ERC-4626 compliant yield-bearing savings vault** for GHO, Aave's na
 
 - **sGHO Vault:** Upgradeable ERC-4626 vault (TransparentUpgradeableProxy) with internal index-based yield accounting. GHO deposited remains in the contract — no rehypothecation, no external strategy deployment
 - **GhoRouter:** Not deployed. A routing contract for multi-step USDC↔GHO↔sGHO conversions with slippage protection is drafted in [gho-origin PR #34](https://github.com/aave-dao/gho-origin/pull/34) but is not merged, not audited under any published report, and not in the Address Book. All conversions must be composed manually
-- **GSM USDC (Gsm4626):** GHO Stability Module that converts waEthUSDC (wrapped Aave USDC) to/from GHO at a fixed 1:1 price. Uses a pre-minted GHO reserve (does not mint GHO directly). Its underlying-asset inventory is a **shared pool with no per-depositor reservation** — capacity created by one participant's `sellAsset` can be consumed by any other participant's `buyAsset`
+- **GSM USDC (Gsm4626):** GHO Stability Module that converts waEthUSDC (wrapped Aave USDC) to/from GHO at a fixed 1 USDC = 1 GHO price. Each waEthUSDC share is priced at the USDC it redeems for (`FixedPriceStrategy4626` applies the vault's share conversion: 1 share = 1.187281 GHO at the snapshot), so share amounts and GHO amounts are not 1:1. Uses a pre-minted GHO reserve (does not mint GHO directly). Its underlying-asset inventory is a **shared pool with no per-depositor reservation** — capacity created by one participant's `sellAsset` can be consumed by any other participant's `buyAsset`
 - **Yield source:** The Aave Savings Rate (ASR) is set by governance and the GHO Risk Council. Yield is **virtual** — the yield index grows over time, but the actual GHO to back it must be transferred into the vault by the Aave Finance Committee Safe, currently from Aave Collector funds. No strategy or lending is involved, and no on-chain mechanism enforces or schedules the funding
 - **Governance:** Aave DAO on-chain governance via Executor Level 1, with GHO Stewards (Risk Council 2-of-3 Safe of organisation-controlled nested Safes) for rate adjustments
 
@@ -84,7 +84,7 @@ Source-of-truth references: [`aave-address-book/GhoEthereum.sol`](https://github
 
 | Contract | Address | Type |
 |----------|---------|------|
-| GHO Token | [`0x40D16FC0246aD3160Ccc09B8D0D3A2cD28aE6C2f`](https://etherscan.io/address/0x40D16FC0246aD3160Ccc09B8D0D3A2cD28aE6C2f) | ERC-20, upgradeable |
+| GHO Token | [`0x40D16FC0246aD3160Ccc09B8D0D3A2cD28aE6C2f`](https://etherscan.io/address/0x40D16FC0246aD3160Ccc09B8D0D3A2cD28aE6C2f) | `GhoToken` ERC-20, **not a proxy** on Ethereum; Executor L1 holds `DEFAULT_ADMIN`, `FACILITATOR_MANAGER`, and `BUCKET_MANAGER` roles |
 | Legacy stkGHO | [`0x1a88Df1cFe15Af22B3c4c783D4e6F7F9e0C1885d`](https://etherscan.io/address/0x1a88Df1cFe15Af22B3c4c783D4e6F7F9e0C1885d) | Legacy staking (being sunset) |
 | GHO Reserve | [`0x54C58157DeF387A880AE62332D1445f03adbE7E9`](https://etherscan.io/address/0x54C58157DeF387A880AE62332D1445f03adbE7E9) | Pre-minted GHO pool for GSMs |
 
@@ -97,8 +97,9 @@ Source-of-truth references: [`aave-address-book/GhoEthereum.sol`](https://github
 | GSM USDC ProxyAdmin | [`0x51bbc06d0032f8fea31f4f7a39e369c5e282cc21`](https://etherscan.io/address/0x51bbc06d0032f8fea31f4f7a39e369c5e282cc21) | EIP-1967 admin slot |
 | waEthUSDC (Underlying) | [`0xD4fa2D31b7968E448877f69A96DE69f5de8cD23E`](https://etherscan.io/address/0xD4fa2D31b7968E448877f69A96DE69f5de8cD23E) | Wrapped Aave USDC (ERC-4626); `convertToAssets(1e6) = 1.187280` USDC |
 | GSM USDC Fee Strategy | [`0xfDB0090A92d20EE39d82ac680477b1F58f0A23dE`](https://etherscan.io/address/0xfDB0090A92d20EE39d82ac680477b1F58f0A23dE) | FixedFeeStrategy (0 bps sell, 15 bps buy) — live value from `GSM.getFeeStrategy()` |
-| GSM USDC Price Strategy | [`0xEE73e0c5Cc8E4cAf400baB5239860696Ff44D64f`](https://etherscan.io/address/0xEE73e0c5Cc8E4cAf400baB5239860696Ff44D64f) | FixedPriceStrategy (1:1) |
-| GSM USDT (Gsm4626) | [`0x882285E62656b9623AF136Ce3078c6BdCc33F5E3`](https://etherscan.io/address/0x882285E62656b9623AF136Ce3078c6BdCc33F5E3) | Alternative GHO exit — 16.09M waEthUSDT available, 85M exposure cap, 10 bps buy fee (strategy [`0x06fb…AcC1`](https://etherscan.io/address/0x06fbDE909B43f01202E3C6207De1D27cC208AcC1)) |
+| GSM USDC Price Strategy | [`0xEE73e0c5Cc8E4cAf400baB5239860696Ff44D64f`](https://etherscan.io/address/0xEE73e0c5Cc8E4cAf400baB5239860696Ff44D64f) | FixedPriceStrategy4626 — 1 USDC = 1 GHO after converting waEthUSDC shares to USDC (`getAssetPriceInGho(1e6, true) = 1.187281e18`) |
+| GSM USDT Price Strategy | [`0x19804d58eF1721E199E59e10A028991ED1CfaCE9`](https://etherscan.io/address/0x19804d58eF1721E199E59e10A028991ED1CfaCE9) | FixedPriceStrategy4626 — 1 USDT = 1 GHO after converting waEthUSDT shares ([`0x7Bc3…3Af8`](https://etherscan.io/address/0x7Bc3485026Ac48b6cf9BaF0A377477Fff5703Af8)) to USDT (`getAssetPriceInGho(1e6, true) = 1.176839e18`) |
+| GSM USDT (Gsm4626) | [`0x882285E62656b9623AF136Ce3078c6BdCc33F5E3`](https://etherscan.io/address/0x882285E62656b9623AF136Ce3078c6BdCc33F5E3) | Alternative GHO exit — 16.09M waEthUSDT shares available (≈18.94M USDT / GHO value), 85M-share exposure cap (≈100.0M GHO), 10 bps buy fee (strategy [`0x06fb…AcC1`](https://etherscan.io/address/0x06fbDE909B43f01202E3C6207De1D27cC208AcC1)) |
 | Oracle Swap Freezer | [`0x6e51936e0ED4256f9dA4794B536B619c88Ff0047`](https://etherscan.io/address/0x6e51936e0ED4256f9dA4794B536B619c88Ff0047) | Chainlink-based auto-freeze |
 | GSM Registry | [`0x167527DB01325408696326e3580cd8e55D99Dc1A`](https://etherscan.io/address/0x167527DB01325408696326e3580cd8e55D99Dc1A) | GSM registry |
 
@@ -150,11 +151,11 @@ Source-of-truth references: [`aave-address-book/GhoEthereum.sol`](https://github
 | **GHO Risk Council Safe** | **2-of-3** (was 3-of-4). All four prior signers were removed and three nested organisation Safes added on 2026-08-23 — Aave Labs ([`0x4b75…1a74`](https://etherscan.io/address/0x4b752551fC6345A7de82F76fd7a5015CA16d1a74), internal 2-of-6), LlamaRisk ([`0xb291…Afef`](https://etherscan.io/address/0xb291232F480F41c75802C4a60F1D2AC03404Afef), internal **1-of-3**), TokenLogic ([`0x9DE1…1193`](https://etherscan.io/address/0x9DE1d45e2786b03498289959203F25b29B4D1193), internal 2-of-5). No modules, no guard | [tx `0x9f0f43…5e3e`](https://etherscan.io/tx/0x9f0f435d8d37f9e3446fad0737b57ba37ac00ac841da1bd432085b481bd15e3e), [ARFC](https://governance.aave.com/t/arfc-gho-stewards-signer-update/25452) |
 | **AFC Safe** | 2-of-3, unchanged threshold; one signer replaced on 2026-08-04 (TokenLogic nested Safe added). Its signer set is now **identical** to the Risk Council's | [tx `0x523d68…f761`](https://etherscan.io/tx/0x523d6801929e300a7ce2208b8a60f8c976cb60125af6b0ae37095c28aebdf761), [ARFC](https://governance.aave.com/t/arfc-june-update-signers-and-safe-configuration/25023) |
 | Protocol Guardian | 4-of-7, owner set unchanged since July 27. The LlamaRisk nested Safe is also one of its signers | `getOwners()` at both snapshot blocks |
-| **GSM USDC underlying inventory** | **0.03 waEthUSDC** — `buyAsset()` (GHO → USDC) reverts above this size. `getAvailableUnderlyingExposure() = 174,999,999.97` (deposit direction unaffected) | `cast call GSM getAvailableLiquidity()` |
+| **GSM USDC underlying inventory** | **0.03 waEthUSDC shares (≈0.035 USDC / GHO value)** — `buyAsset()` (GHO → USDC) reverts above this size. `getAvailableUnderlyingExposure() = 174,999,999.97` shares (≈207.8M GHO; deposit direction unaffected) | `cast call GSM getAvailableLiquidity()` |
 | GSM USDC frozen / seized | **No / No** — no `SwapFreeze` or `Seized` event; the exit route is exhausted, not administratively blocked | `getIsFrozen()`, `getIsSeized()` |
 | GSM USDC fee strategy | **Changed 2026-09-17**: [`0x06fb…AcC1`](https://etherscan.io/address/0x06fbDE909B43f01202E3C6207De1D27cC208AcC1) (10 bps buy) → [`0xfDB0…23dE`](https://etherscan.io/address/0xfDB0090A92d20EE39d82ac680477b1F58f0A23dE) (15 bps buy, 0 bps sell) via GhoGsmSteward, executed by the Risk Council Safe | [`FeeStrategyUpdated` tx](https://etherscan.io/tx/0xe967a8ea12c94ed48deffa425dfb2ec2bfa2da1d0063b8d7d29d6dfb5df7b0b6) |
 | GSM USDT fee strategy | 10 bps buy. Raised to 15 bps on 2026-09-04 ([tx](https://etherscan.io/tx/0xf322e1d6ae63f205e624efca7c0288a7b90922dce34966f305652ebb00194671)) and returned to 10 bps on 2026-09-17 (same tx as the USDC change) | `getFeeStrategy()` |
-| GSM USDC exposure cap | **Unchanged at 175M** — no `ExposureCapUpdated` event | `cast call GSM getExposureCap()` |
+| GSM USDC exposure cap | **Unchanged at 175M waEthUSDC shares** (≈207.8M GHO at the snapshot share price) — no `ExposureCapUpdated` event | `cast call GSM getExposureCap()` |
 | GSM implementation | GSM USDC impl slot unchanged at [`0x320be9…7e8e`](https://etherscan.io/address/0x320be97b4d10b6d20a05cae53a479fa2a0187e8e); no `Upgraded` event on either GSM | `cast storage GSM 0x3608…2bbc` |
 | GSM `LIQUIDATOR_ROLE` | **Never granted** — zero `RoleGranted`/`RoleRevoked` logs on either GSM since the prior snapshot; zero for `LIQUIDATOR_ROLE` over full history | Etherscan `getLogs` on GSM |
 | Legacy stkGHO | Separate contract, `totalSupply() = 31,165,312` stkGHO — down from 216.75M in May | [`0x1a88…885d`](https://etherscan.io/address/0x1a88Df1cFe15Af22B3c4c783D4e6F7F9e0C1885d) |
@@ -400,8 +401,8 @@ All on-chain numbers below from block 26,070,292 (2026-09-27 17:30 UTC) unless n
 - **GHO stablecoin:** Launched July 2023 — **~3.2 years** in production
 - **GHO mainnet supply:** 699.0M GHO (on-chain `totalSupply()`), up from 649.0M on July 27 and 584.0M in May
 - **GHO market price:** $0.9990 ([DeFiLlama](https://coins.llama.fi/prices/current/ethereum:0x40D16FC0246aD3160Ccc09B8D0D3A2cD28aE6C2f)); 30-day daily range $0.9984–$0.9994. TokenLogic attributes the persistent ~10 bps discount mainly to Horizon looping activity ([September parameter update](https://governance.aave.com/t/gho-stewards-september-2026-gho-parameter-update/25644))
-- **GSM USDC:** Operational but drained. `getAvailableLiquidity() = 0.03` waEthUSDC against a 175M exposure cap; `getAvailableUnderlyingExposure() = 174,999,999.97`; `getUsed() = 0.03` GHO of a 210M facilitator limit; not frozen, not seized. Inventory fell from 111.25M waEthUSDC on May 19 to ~27 by June 12 and has stayed near zero since, a **~3.5-month** period with no GHO → USDC redemption capacity
-- **GSM USDT:** `getAvailableLiquidity() = 16.09M` waEthUSDT against an 85M exposure cap (43.42M on July 27); `getUsed() = 18.93M` GHO of a 100M limit; not frozen. TokenLogic reports the module fell from 40.8M to 18.6M over the 30 days before September 15 because GHO traded below the redemption threshold ([source](https://governance.aave.com/t/gho-stewards-september-2026-gho-parameter-update/25644)). It remains the only GSM route with meaningful exit depth
+- **GSM USDC:** Operational but drained. `getAvailableLiquidity() = 0.03` waEthUSDC shares (≈0.035 USDC) against a 175M-share exposure cap; `getAvailableUnderlyingExposure() = 174,999,999.97`; `getUsed() = 0.03` GHO of a 210M facilitator limit; not frozen, not seized. Inventory fell from 111.25M waEthUSDC shares on May 19 to ~27 by June 12 and has stayed near zero since, a **~3.5-month** period with no GHO → USDC redemption capacity
+- **GSM USDT:** `getAvailableLiquidity() = 16.09M` waEthUSDT shares, worth **18.94M USDT / GHO** through the price strategy (`convertToAssets` = 1.176838 USDT per share), against an 85M-share exposure cap. On July 27 it held 43.42M shares, worth 50.81M GHO; `getUsed() = 18.93M` GHO of a 100M limit; not frozen. TokenLogic reports the module fell from 40.8M to 18.6M over the 30 days before September 15 because GHO traded below the redemption threshold ([source](https://governance.aave.com/t/gho-stewards-september-2026-gho-parameter-update/25644)). It remains the only GSM route with meaningful exit depth
 - **GHO Reserve (GSM facilitator):** GHO balance = **291.07M**. The pre-minted pool available to GSMs is ample; the GSM constraint is underlying-asset inventory, not GHO
 - **Legacy stkGHO:** Holds **31.17M stkGHO**, down from 42.03M on July 27 and 216.75M in May. Still on the legacy staking implementation (no proxy upgrade; sGho was launched as a separate ERC-4626 contract)
 - **Aave V3 USDC market:** aEthUSDC holds 187.01M USDC of underlying liquidity. The final `waEthUSDC → USDC` unwrap leg is unconstrained today (`waEthUSDC.convertToAssets(1e6) = 1.187280` USDC)
@@ -419,13 +420,13 @@ USDC is deposited into the Aave V3 USDC market and wrapped as waEthUSDC ([`0xD4f
 
 **Step 2: waEthUSDC → GHO (via GSM USDC)**
 
-waEthUSDC is sold to the GSM USDC ([`0x3A3868898305f04beC7FEa77BecFf04C13444112`](https://etherscan.io/address/0x3A3868898305f04beC7FEa77BecFf04C13444112)) at a fixed 1:1 price (FixedPriceStrategy, no oracle). The GSM draws GHO from the GHO Reserve ([`0x54C58157DeF387A880AE62332D1445f03adbE7E9`](https://etherscan.io/address/0x54C58157DeF387A880AE62332D1445f03adbE7E9)) and transfers it to the caller. Sell fee: 0 bps. Deposit-direction headroom is currently the full 175M cap.
+waEthUSDC is sold to the GSM USDC ([`0x3A3868898305f04beC7FEa77BecFf04C13444112`](https://etherscan.io/address/0x3A3868898305f04beC7FEa77BecFf04C13444112)) at a fixed 1 USDC = 1 GHO price with no oracle. The price strategy converts each waEthUSDC share to its USDC value first, so the GHO received equals the USDC value of the shares, not the share count. The GSM draws GHO from the GHO Reserve ([`0x54C58157DeF387A880AE62332D1445f03adbE7E9`](https://etherscan.io/address/0x54C58157DeF387A880AE62332D1445f03adbE7E9)) and transfers it to the caller. Sell fee: 0 bps. Deposit-direction headroom is currently the full 175M cap.
 
 **Step 3: GHO → sGHO (deposit)**
 
 GHO is deposited into the sGHO ERC-4626 vault. Shares are issued based on the current `yieldIndex`. No fee.
 
-**Withdrawal pipeline:** Reverse path (sGHO → GHO → waEthUSDC → USDC), GSM buy fee 15 bps. **Step 2 of this path is currently blocked**: GSM USDC holds 0.03 waEthUSDC, so `buyAsset()` reverts with `INSUFFICIENT_AVAILABLE_EXOGENOUS_ASSET_LIQUIDITY` (Gsm.sol `_buyAsset`) for any size above that. See *Liquidity Risk* for the working alternatives.
+**Withdrawal pipeline:** Reverse path (sGHO → GHO → waEthUSDC → USDC), GSM buy fee 15 bps. **Step 2 of this path is currently blocked**: GSM USDC holds 0.03 waEthUSDC shares (≈0.035 USDC), so `buyAsset()` reverts with `INSUFFICIENT_AVAILABLE_EXOGENOUS_ASSET_LIQUIDITY` (Gsm.sol `_buyAsset`) for any size above that. See *Liquidity Risk* for the working alternatives.
 
 > **Shared-pool caveat.** The GSM's underlying inventory (`_currentExposure`) is a single shared pool. Depositing via `sellAsset` raises it and creates exit capacity, but grants the depositor **no reserved claim** — any other participant can consume that capacity with `buyAsset`. A strategy that sizes its exit on the capacity its own deposit created is exposed to exactly the drain that emptied the GSM between May 19 and June 12, 2026.
 
@@ -433,14 +434,14 @@ GHO is deposited into the sGHO ERC-4626 vault. Shares are issued based on the cu
 
 - **Deposits:** Permissionless — anyone can deposit GHO and receive sGHO shares (ERC-4626). Subject to supply cap (400M GHO; 165.8M used, 234.2M headroom)
 - **Withdrawals:** Permissionless, atomic, no cooldown. Capped by actual GHO balance in vault (see Virtual Yield section above) — 165.99M GHO available today
-- **GSM:** Permissionless — `sellAsset` and `buyAsset` available to anyone. Subject to exposure cap (175M waEthUSDC) and, on the `buyAsset` side, to available inventory. Can be frozen by oracle or governance
+- **GSM:** Permissionless — `sellAsset` and `buyAsset` available to anyone. Subject to exposure cap (175M waEthUSDC shares) and, on the `buyAsset` side, to available inventory. Can be frozen by oracle or governance
 - **Fees:** 0% on sGHO deposit/withdrawal. 0 bps GSM sell fee (waEthUSDC → GHO). 15 bps GSM USDC buy fee (GHO → waEthUSDC); 10 bps on GSM USDT
 
 ### Collateralization
 
 - **sGHO:** GHO deposited remains in the contract — **no rehypothecation**. `balanceOf(sGho) = 165.99M` covers `totalAssets() = 165.83M` (152,179 GHO surplus) and exceeds net principal deposits of 163.62M. Yield backing still depends on discretionary AFC Safe transfers. The buffer is about a week of accrual, and deficits occurred in July and September. During a deficit, withdrawals do not preserve principal for late users
 - **GSM USDC:** Holds waEthUSDC (wrapped Aave USDC supply position). Each waEthUSDC is redeemable for USDC from Aave V3 (subject to Aave V3 liquidity, currently 187.01M USDC). Present waEthUSDC inventory: **0.03**
-- **GSM USDT:** 16.09M waEthUSDT — the deepest currently available GSM redemption route for GHO
+- **GSM USDT:** 16.09M waEthUSDT shares (≈18.94M USDT) — the deepest currently available GSM redemption route for GHO
 - **No leverage** in the pipeline
 - **GHO itself:** Backed by over-collateralized Aave V3 loans and GSM stablecoin reserves; 699.0M mainnet supply
 
@@ -461,23 +462,23 @@ GHO is deposited into the sGHO ERC-4626 vault. Shares are issued based on the cu
 
 | Route | Observed liquidity (September 27, 2026) | Cost | Notes |
 |---|---|---|---|
-| **GSM USDC** `buyAsset` | **0.03 waEthUSDC** | 15 bps | Effectively dead. Reverts with `INSUFFICIENT_AVAILABLE_EXOGENOUS_ASSET_LIQUIDITY` above inventory. Not frozen, not seized — drained by other participants between May 19 and June 12, 2026 and near zero since |
-| **GSM USDT** `buyAsset` | **16.09M waEthUSDT** (85M cap) | 10 bps | The deepest deterministic route, down from 43.42M on July 27. Exits to **USDT**, not USDC — a USDC-denominated strategy pays an additional USDT→USDC conversion |
+| **GSM USDC** `buyAsset` | **0.03 waEthUSDC shares (≈0.035 USDC)** | 15 bps | Effectively dead. Reverts with `INSUFFICIENT_AVAILABLE_EXOGENOUS_ASSET_LIQUIDITY` above inventory. Not frozen, not seized — drained by other participants between May 19 and June 12, 2026 and near zero since |
+| **GSM USDT** `buyAsset` | **16.09M waEthUSDT shares ≈ 18.94M USDT / GHO** (85M-share cap ≈ 100.0M GHO) | 10 bps | The deepest deterministic route, down from ≈50.81M GHO of value (43.42M shares) on July 27. Buying the full inventory costs 18.96M GHO including the fee (`getGhoAmountForBuyAsset`). Exits to **USDT**, not USDC — a USDC-denominated strategy pays an additional USDT→USDC conversion |
 | Fluid DEX GHO-USDC | ~$21.2M aggregate pool TVL | swap fee + slippage | Largest direct GHO→USDC venue by reported TVL ([DeFiLlama yields](https://yields.llama.fi/pools)); TVL is not executable USDC capacity |
 | Uniswap v4 GHO-USDC | ~$3.0M aggregate pool TVL | swap fee + slippage | TVL is not executable USDC capacity |
 | Curve GHO-crvUSD | ~$1.5M aggregate pool TVL | swap fee + slippage | Routes via crvUSD, not USDC |
 
-The direct GHO→USDC pools report roughly **$24M of aggregate TVL** against a $166M vault. That figure includes both sides of each pool and is not $24M of withdrawable USDC. Executable exit capacity depends on reserve composition, concentrated-liquidity ranges, trade size, and acceptable slippage, so it must be measured with route-specific quotes. The only deterministic fallback is the 16.09M waEthUSDT in GSM USDT, which requires a USDT→USDC conversion and is being drained by the same sub-peg arbitrage that emptied GSM USDC.
+The direct GHO→USDC pools report roughly **$24M of aggregate TVL** against a $166M vault. That figure includes both sides of each pool and is not $24M of withdrawable USDC. Executable exit capacity depends on reserve composition, concentrated-liquidity ranges, trade size, and acceptable slippage, so it must be measured with route-specific quotes. The only deterministic fallback is GSM USDT's ≈18.94M USDT of inventory (16.09M waEthUSDT shares), about 11% of sGho claims, which requires a USDT→USDC conversion and is being drained by the same sub-peg arbitrage that emptied GSM USDC.
 
-**Why the GSMs are emptying.** `sellAsset` (USDC → GHO) raises `_currentExposure`; `buyAsset` (GHO → USDC) lowers it. Between mid-May and mid-June, GHO holders redeemed roughly 111M waEthUSDC out of GSM USDC, and between mid-August and mid-September about 22M waEthUSDT left GSM USDT. A module refills only when selling stablecoins into it is profitable, which requires GHO at or above $1 net of fees. GHO has traded at $0.9984–$0.9994 for the past 30 days, so there is no refill incentive. The Risk Council's response has been to raise the GSM USDC redemption fee to 15 bps and lower GSM USDT to 10 bps ([rationale](https://governance.aave.com/t/gho-stewards-september-2026-gho-parameter-update/25644)). The same post proposes raising the Horizon GHO base rate from 3.00% to 3.25% to reduce looping; that rate change was not verified on-chain for this snapshot. This state is self-reinforcing, not transient.
+**Why the GSMs are emptying.** `sellAsset` (USDC → GHO) raises `_currentExposure`; `buyAsset` (GHO → USDC) lowers it. Between mid-May and mid-June, GHO holders redeemed roughly 111M waEthUSDC shares out of GSM USDC, and TokenLogic reports GSM USDT falling from 40.8M to 18.6M (USD value) in the 30 days before September 15. A module refills only when selling stablecoins into it is profitable, which requires GHO at or above $1 net of fees. GHO has traded at $0.9984–$0.9994 for the past 30 days, so there is no refill incentive. The Risk Council's response has been to raise the GSM USDC redemption fee to 15 bps and lower GSM USDT to 10 bps ([rationale](https://governance.aave.com/t/gho-stewards-september-2026-gho-parameter-update/25644)). The same post proposes raising the Horizon GHO base rate from 3.00% to 3.25% to reduce looping; that rate change was not verified on-chain for this snapshot. This state is self-reinforcing, not transient.
 
 **Other liquidity factors:**
 
 - **GSM freeze risk:** Oracle auto-freezes if USDC depegs outside [$0.99, $1.01]. Manual freeze possible by governance. During freeze, no `buyAsset` or `sellAsset`. Currently `getIsFrozen() = false` on both GSMs — the exit blockage is inventory exhaustion, not a freeze
 - **GSM buy fee:** 15 bps on GSM USDC and 10 bps on GSM USDT. At the 4.50% ASR, breakeven against simply holding USDC requires holding sGho for ≥ **~12.2 days** via GSM USDC (~8.1 days via GSM USDT, before the USDT→USDC conversion)
 - **Aave V3 USDC market:** the final `waEthUSDC → USDC` unwrap is unconstrained today (187.01M USDC of underlying liquidity), though Aave V3 USDC has previously pinned near 100% utilization
-- **Deposit limit:** 400M GHO supply cap on sGho (234.2M headroom); 175M waEthUSDC exposure cap on GSM USDC (essentially all available on the deposit side)
-- **Largest risk:** the strategy's documented USDC exit route has been unavailable for ~3.5 months, and the USDT fallback fell by 63% over the last two months while sGho grew 22%. Reopening either depends on third-party arbitrage flow that the current GHO price does not support. A Yearn USDC strategy would need to accept a USDT hop, accept DEX slippage, or hold GHO until GSM capacity returns
+- **Deposit limit:** 400M GHO supply cap on sGho (234.2M headroom); 175M-share (≈207.8M GHO) exposure cap on GSM USDC (essentially all available on the deposit side)
+- **Largest risk:** the strategy's documented USDC exit route has been unavailable for ~3.5 months, and the USDT fallback fell by 63% in value (≈50.81M → ≈18.94M GHO) over the last two months while sGho grew 22%. Reopening either depends on third-party arbitrage flow that the current GHO price does not support. A Yearn USDC strategy would need to accept a USDT hop, accept DEX slippage, or hold GHO until GSM capacity returns
 
 ## Centralization & Control Risks
 
@@ -513,7 +514,7 @@ sGHO and the GSM are governed through the **Aave DAO governance framework** — 
 |----------|-------------|-------------------|
 | sGho Vault | **YES** (TransparentUpgradeableProxy) | Aave Governance Executor L1 (via ProxyAdmin [`0xc15700631020eba02317964550365b95a9a28adb`](https://etherscan.io/address/0xc15700631020eba02317964550365b95a9a28adb), `owner()` = [`0x5300…192A`](https://etherscan.io/address/0x5300A1a15135EA4dc7aD5a167152C01EFc9b192A)). Implementation slot unchanged at [`0xff229a…7c04`](https://etherscan.io/address/0xff229a0bbb614a284de8ae0e41e5974878fd7c04) |
 | GSM USDC | **YES** (TransparentUpgradeableProxy) | Aave Governance Executor L1 (via ProxyAdmin [`0x51bbc06d0032f8fea31f4f7a39e369c5e282cc21`](https://etherscan.io/address/0x51bbc06d0032f8fea31f4f7a39e369c5e282cc21)). Implementation slot unchanged at [`0x320be9…7e8e`](https://etherscan.io/address/0x320be97b4d10b6d20a05cae53a479fa2a0187e8e) |
-| GHO Token | **YES** (upgradeable) | Aave Governance |
+| GHO Token | **No** — Ethereum `GhoToken` is not a proxy (Etherscan proxy flag 0, empty EIP-1967 slot). The Certora "Upgradeable GHO" audit covers the upgradeable deployment used on other chains | Aave Governance controls facilitators and bucket capacities (mint authority), not the code |
 | GhoRouter | N/A — not deployed | (Draft is non-upgradeable with an owner-managed GSM allowlist) |
 | GHO Reserve | **YES** (TransparentUpgradeableProxy) | Aave Governance |
 
@@ -525,7 +526,7 @@ sGHO and the GSM are governed through the **Aave DAO governance framework** — 
 |--------|-----------|
 | sGHO exchange rate | On-chain, algorithmic (yieldIndex-based), no admin input |
 | sGHO yield rate | Set by YIELD_MANAGER_ROLE, max 50% APR (constant), updates index before changing. Currently 4.50% |
-| GSM price | Fixed 1:1 (immutable FixedPriceStrategy), no oracle manipulation possible |
+| GSM price | Fixed 1 stablecoin = 1 GHO, applied after converting wrapped shares to stablecoins (immutable FixedPriceStrategy4626). No price oracle; the share conversion reads the Aave static-aToken's own exchange rate |
 | GSM fees | Set by CONFIGURATOR_ROLE, rate-limited via steward (GSM USDC buy fee changed twice since launch: 7 → 10 → 15 bps) |
 | GSM freeze | Automatic (oracle-based) or manual (SWAP_FREEZER_ROLE) |
 | Vault operations | Permissionless ERC-4626 deposit/withdraw |
@@ -534,11 +535,11 @@ sGHO and the GSM are governed through the **Aave DAO governance framework** — 
 
 | Dependency | Criticality | Notes |
 |-----------|-------------|-------|
-| **Aave DAO Governance** | Critical | Controls all upgrades, roles, and emergency actions across sGHO, GSM, and GHO Token |
-| **GHO Token** | Critical | The underlying asset. Upgradeable by governance |
+| **Aave DAO Governance** | Critical | Controls upgrades of sGHO, GSM, and GHO Reserve, GHO facilitator (mint) roles, and emergency actions |
+| **GHO Token** | Critical | The underlying asset. Not upgradeable on Ethereum, but governance can add facilitators and change their mint buckets |
 | **AFC Safe (2-of-3)** | Critical | **Only party that has ever topped up the vault.** No contract enforces it. Funding lapsed for 32 days in June–July; since then it has been regular (every 11–16 days) and the vault holds a ~7-day buffer. Same signers as the Risk Council |
 | **GSM USDC** | Critical | USDC↔GHO conversion path. Upgradeable, freezeable, and currently exhausted on the exit side |
-| **GSM USDT** | High | Currently the deepest working GHO exit route (16.09M, down from 43.42M in July), but exits to USDT and is draining |
+| **GSM USDT** | High | Currently the deepest working GHO exit route (≈18.94M USDT of value, down from ≈50.81M in July), but exits to USDT and is draining |
 | **GHO Reserve** | Critical | Pre-minted GHO pool for GSM operations. 291.07M GHO held — ample |
 | **Aave V3 USDC Market** | Critical | waEthUSDC (underlying for GSM) is an Aave V3 supply position; 187.01M USDC of underlying liquidity |
 | **GHO DEX liquidity** | High | With the GSM USDC route dry, direct GHO→USDC pools report ~$24M aggregate TVL, but executable USDC output is lower and size/slippage-dependent |
@@ -567,7 +568,7 @@ sGHO and the GSM are governed through the **Aave DAO governance framework** — 
 | **AFC Safe** | [`0x22740deBa78d5a0c24C58C740e3715ec29de1bFa`](https://etherscan.io/address/0x22740deBa78d5a0c24C58C740e3715ec29de1bFa) | GHO `Transfer` logs with `to = sGho` not matched by a `Deposit` — the yield top-ups (token source may be the AFC or the Collector). Alert on days-since-last-top-up; threshold + signer-set changes |
 | Aave Collector | [`0x464C71f6c2F760DdA6093dCB91C24c39e5d6e18c`](https://etherscan.io/address/0x464C71f6c2F760DdA6093dCB91C24c39e5d6e18c) | `GHO.allowance(Collector, AFC)` — remaining pre-approved funding (7.626M GHO) |
 | GSM USDC | [`0x3A3868898305f04beC7FEa77BecFf04C13444112`](https://etherscan.io/address/0x3A3868898305f04beC7FEa77BecFf04C13444112) | `getAvailableLiquidity()` (**exit capacity — currently ~0.03**), `getAvailableUnderlyingExposure()`, `getUsed()`, `getLimit()`, `getIsFrozen()`, `getIsSeized()`, `getFeeStrategy()`, FeeStrategyUpdated events |
-| GSM USDT | [`0x882285E62656b9623AF136Ce3078c6BdCc33F5E3`](https://etherscan.io/address/0x882285E62656b9623AF136Ce3078c6BdCc33F5E3) | `getAvailableLiquidity()` — the fallback exit route's remaining depth (16.09M, falling) |
+| GSM USDT | [`0x882285E62656b9623AF136Ce3078c6BdCc33F5E3`](https://etherscan.io/address/0x882285E62656b9623AF136Ce3078c6BdCc33F5E3) | `getAvailableLiquidity()` in waEthUSDT shares; convert with the price strategy's `getAssetPriceInGho(shares, false)` — the fallback exit route's remaining depth (≈18.94M GHO, falling) |
 | GHO Reserve | [`0x54C58157DeF387A880AE62332D1445f03adbE7E9`](https://etherscan.io/address/0x54C58157DeF387A880AE62332D1445f03adbE7E9) | GHO balance, limit vs used for GSM USDC |
 | GHO Risk Council | [`0x8513e6F37dBc52De87b166980Fa3F50639694B60`](https://etherscan.io/address/0x8513e6F37dBc52De87b166980Fa3F50639694B60) | Signer/threshold changes on the Council and on its three nested signer Safes (the LlamaRisk Safe is internally 1-of-3) |
 | Oracle Swap Freezer | [`0x6e51936e0ED4256f9dA4794B536B619c88Ff0047`](https://etherscan.io/address/0x6e51936e0ED4256f9dA4794B536B619c88Ff0047) | Freeze/unfreeze events |
@@ -628,15 +629,15 @@ sGHO and the GSM are governed through the **Aave DAO governance framework** — 
 
 - **Rate-setting and funding are controlled by the same 2-of-3 signer set (MEDIUM):** since August 23, 2026 the GHO Risk Council, which can set the ASR anywhere in `[0, 5000]` bps in one transaction, and the AFC Safe, which funds that rate, are both 2-of-3 Safes over the same three nested organisation Safes (Aave Labs, LlamaRisk, TokenLogic). The Council threshold was lowered from 3-of-4 to 2-of-3, and the LlamaRisk nested Safe is internally 1-of-3. The Council used the unrate-limited sGhoSteward power for the first time on September 1, 2026 to raise the ASR to 4.50%. The signers are publicly attributed and the change followed a public [ARFC](https://governance.aave.com/t/arfc-gho-stewards-signer-update/25452). Still, rate increases and their funding now depend on the same small group, and no DAO vote is needed for either
 
-- **The documented USDC exit route is exhausted, and the USDT fallback is draining (MEDIUM):** GSM USDC holds **0.03 waEthUSDC**. `buyAsset()` — step 2 of the withdrawal pipeline — has reverted above that size since roughly June 12, 2026. The module is **not** frozen or seized; other participants drained 111M waEthUSDC out of it between May 19 and June 12. GSM USDT fell from 43.42M to **16.09M** waEthUSDT between July 27 and September 27 while sGho grew to 165.8M. Refill requires third-party arbitrage that GHO's ~$0.999 price does not support. GSM USDT and DEX routes remain usable, so this is a medium-severity execution and liquidity constraint rather than a total loss of exitability. Implications for Yearn:
-  - A USDC-denominated strategy has no 1:1 GSM path back to USDC today
-  - GSM USDT offers 16.09M of capacity at 10 bps but delivers **USDT**, adding a cross-stable conversion
+- **The documented USDC exit route is exhausted, and the USDT fallback is draining (MEDIUM):** GSM USDC holds **0.03 waEthUSDC shares (≈0.035 USDC)**. `buyAsset()` — step 2 of the withdrawal pipeline — has reverted above that size since roughly June 12, 2026. The module is **not** frozen or seized; other participants drained 111M waEthUSDC out of it between May 19 and June 12. GSM USDT fell from 43.42M to **16.09M** waEthUSDT shares between July 27 and September 27 — from ≈50.81M to **≈18.94M GHO of value** — while sGho grew to 165.8M. Refill requires third-party arbitrage that GHO's ~$0.999 price does not support. GSM USDT and DEX routes remain usable, so this is a medium-severity execution and liquidity constraint rather than a total loss of exitability. Implications for Yearn:
+  - A USDC-denominated strategy has no fixed-price GSM path back to USDC today
+  - GSM USDT offers ≈18.94M USDT of capacity (16.09M shares) at 10 bps but delivers **USDT**, adding a cross-stable conversion
   - Direct GHO→USDC pools report roughly **$24M aggregate TVL**, not $24M of executable USDC capacity; size-specific quotes are required
   - GSM capacity created by a Yearn deposit is **not reserved** for Yearn — it is a shared pool that any participant can consume
 
 - **15 bps GSM USDC exit fee on every USDC withdrawal (MEDIUM):** Exiting from sGho back to USDC through GSM USDC requires a `GSM.buyAsset()` call charging **15 bps (0.15%)** on the GHO→waEthUSDC leg (verified on-chain at fee strategy [`0xfDB0090A92d20EE39d82ac680477b1F58f0A23dE`](https://etherscan.io/address/0xfDB0090A92d20EE39d82ac680477b1F58f0A23dE): `getBuyFee(1_000_000) = 1500`). The Risk Council raised it from 7 to 10 bps on May 23, 2026 ([tx](https://etherscan.io/tx/0xd47810e272039dea4b03d90a1352e9e405e9fee6fdd75b3fd8f733030d83f0d8)) and to 15 bps on September 17, 2026 ([tx](https://etherscan.io/tx/0xe967a8ea12c94ed48deffa425dfb2ec2bfa2da1d0063b8d7d29d6dfb5df7b0b6)). It applies on **every** withdrawal, so partial rebalances pay it repeatedly. At the 4.50% ASR, breakeven against holding raw USDC requires holding sGho for ≥**~12.2 days** (15 / 450 of a year). Implications for Yearn:
-  - The strategy must batch withdrawals to amortize the fee
-  - Frequent rebalancing or harvests that touch USDC will compound this drag
+  - The fee is a flat percentage (`getBuyFee(1_000_000) = 1500`, `getBuyFee(10_000_000) = 15000`), so batching or splitting the same total does not change it; batching only saves gas
+  - Every GHO → USDC conversion pays it, so rebalancing or harvest flows that round-trip through USDC add to the drag
   - Deposit direction is fee-free (`sellAsset` charges 0 bps), so the cost is purely on the exit path
   - **A GhoRouter would NOT eliminate this fee** — the router is a UX wrapper; it still calls `GSM.buyAsset()` under the hood
   - The fee is multisig-adjustable via the GhoGsmSteward (rate-limited to ±0.5%/day, max 50% per FixedFeeStrategy), and the Risk Council has moved it twice
@@ -646,7 +647,7 @@ sGHO and the GSM are governed through the **Aave DAO governance framework** — 
 - **Still-short production history:** sGho went live on May 16, 2026 — 134 days of mainnet usage. Clean, but no stress event (depeg, mass redemption, pause) has been observed
 - **sGho outside the bug-bounty scope:** a $166M vault that Immunefi's "Sub-systems of GHO" enumeration does not cover
 - **GhoRouter not deployed:** the launch AIP marketed single-tx USDC→sGho onboarding, but no router exists. Yearn's USDC strategy must compose the GSM USDC + sGho deposit steps itself. Even when it ships, it would not change the GSM exit fee or the GSM's empty inventory — both sit at the GSM layer. A router audit has been paid for ([AIP 492](https://github.com/aave-dao/aave-proposals-reports/blob/master/reports/v3-492-aave-v3-MayJune-2026-Funding-Update.md)) but not published
-- **Upgradeable contracts (rug via governance):** sGho, GSM, GHO Token, and GHO Reserve are all upgradeable proxies controlled by Aave Governance. A malicious governance proposal could drain all funds. Mitigated by Aave's established governance framework and community oversight; implementation slots verified unchanged
+- **Upgradeable contracts (rug via governance):** sGho, the GSMs, and GHO Reserve are upgradeable proxies controlled by Aave Governance, and governance can grant GHO facilitator (mint) roles. A malicious governance proposal could drain all funds or dilute GHO. Mitigated by Aave's established governance framework and community oversight; implementation slots verified unchanged
 - **Unrate-limited Steward multisig:** the Risk Council 2-of-3 Safe can set the ASR anywhere in `[0, 5000]` bps and change the supply cap in a single execution, with no per-day limit. Used once so far (4.25% → 4.50% on September 1, 2026)
 - **GSM freeze can trap funds:** oracle auto-freezes on USDC depeg, manual freeze by governance. Distinct from — and additive to — the current inventory exhaustion
 - **Pause can freeze sGho:** PAUSE_GUARDIAN (Protocol Guardian and Executor L1) can freeze all sGho token operations (deposits, withdrawals, transfers). Mitigated by governance ability to revoke the guardian role
@@ -672,6 +673,7 @@ sGHO and the GSM are governed through the **Aave DAO governance framework** — 
 - [x] **No audit** — 12+ audits including sGHO-specific Certora audit with formal verification. ✅ PASS
 - [x] **Unverifiable reserves** — sGHO is ERC-4626, on-chain verifiable. GSM exposure on-chain. ✅ PASS
 - [x] **Total centralization** — Aave DAO on-chain governance with timelock, stewards, and guardian. ✅ PASS
+- [x] **Unverified contract source** — every contract in the deposit and withdrawal paths has verified source on Etherscan (checked September 27, 2026): sGho implementation [`0xff22…7c04`](https://etherscan.io/address/0xff229a0bbb614a284de8ae0e41e5974878fd7c04) (`sGho`), sGho ProxyAdmin, `sGhoSteward`, GHO token (`GhoToken`), GHO Reserve implementation [`0x4f38…efe6`](https://etherscan.io/address/0x4f381f0827cb081b3ce2b7d7062402d43c4efbe6) (`GhoReserve`), GSM USDC and GSM USDT implementations [`0x320b…7e8e`](https://etherscan.io/address/0x320be97b4d10b6d20a05cae53a479fa2a0187e8e) / [`0x31fe…8788`](https://etherscan.io/address/0x31fe806ead0a800e68627aa49bab478d20a28788) (`Gsm4626`), waEthUSDC/waEthUSDT implementation [`0x487c…9ad1`](https://etherscan.io/address/0x487c2c53c0866f0a73ae317bd1a28f63adcd9ad1) (`StataTokenV2`), both fee strategies (`FixedFeeStrategy`), both price strategies (`FixedPriceStrategy4626`), `GhoGsmSteward`, and `ChainlinkOracleSwapFreezer`. ✅ PASS
 
 **All gates pass.** Proceed to category scoring.
 
@@ -715,7 +717,7 @@ Counterweight: the signers are publicly attributed service providers adopted thr
 |--------|-----------|
 | sGHO PPS | On-chain, algorithmic (yieldIndex-based ERC-4626) |
 | sGHO yield | Set by YIELD_MANAGER_ROLE — admin-controlled rate (not market-driven) |
-| GSM price | Fixed 1:1 (immutable), fully deterministic |
+| GSM price | Fixed 1 stablecoin = 1 GHO after wrapped-share conversion (immutable FixedPriceStrategy4626), fully deterministic |
 | Vault operations | Permissionless ERC-4626 deposit/withdraw |
 | Yield funding | **Off-chain and discretionary** — a 2-of-3 Safe must manually transfer GHO; `totalAssets()` never reads the balance, so the protocol accrues obligations regardless. Currently funded with a ~7-day buffer |
 
@@ -753,7 +755,7 @@ Counterweight: the signers are publicly attributed service providers adopted thr
 | Factor | Assessment |
 |--------|-----------|
 | Reserve transparency | sGHO: on-chain (ERC-4626). GSM: on-chain (`getAvailableLiquidity()`, `getUsed()`, `getLimit()`). GHO Reserve: on-chain |
-| Exchange rate | sGHO: on-chain via yieldIndex. GSM: fixed 1:1 |
+| Exchange rate | sGHO: on-chain via yieldIndex. GSM: fixed 1 stablecoin = 1 GHO after on-chain share conversion |
 | Funding gap | Detectable: compare `balanceOf(GHO, sGHO)` vs `totalAssets()`; funding history reconstructible by differencing `Transfer` against `Deposit` logs |
 | Third-party | Chainlink oracle for GSM freeze. [TokenLogic's GHO dashboard](https://aave.tokenlogic.xyz/gho) provides live sGHO supply, rate, mint/burn, holder, user-activity, GHO, and Stability Module analytics. All data remains independently verifiable on-chain |
 
@@ -768,15 +770,15 @@ Counterweight: the signers are publicly attributed service providers adopted thr
 | Factor | Assessment |
 |--------|-----------|
 | sGHO exit (leg 1) | Atomic ERC-4626 redemption, no cooldown. 165.99M GHO backs 165.83M of claims; during a deficit, early users exit in full and the last claims absorb it |
-| GHO → USDC via GSM USDC (leg 2) | **0.03 waEthUSDC available — route effectively dead since ~June 12, 2026 (~3.5 months)** |
-| GHO → USDT via GSM USDT | 16.09M available at 10 bps (43.42M on July 27), delivers USDT not USDC |
+| GHO → USDC via GSM USDC (leg 2) | **0.03 waEthUSDC shares (≈0.035 USDC) available — route effectively dead since ~June 12, 2026 (~3.5 months)** |
+| GHO → USDT via GSM USDT | 16.09M waEthUSDT shares ≈ 18.94M USDT / GHO at 10 bps (≈50.81M GHO on July 27), delivers USDT not USDC — ~11% of sGho claims |
 | GHO → USDC via DEX | Direct pools report ~$24M aggregate TVL (Fluid $21.2M, Uni v4 $3.0M), but executable USDC output is lower and must be quoted by size/slippage |
 | Exit fee | 15 bps at GSM USDC (7 → 10 bps May 23, 10 → 15 bps September 17, 2026); ~12.2-day breakeven at the 4.50% ASR. 10 bps at GSM USDT |
 | Freeze risk | GSM auto-freezes on USDC depeg [$0.99, $1.01]. Manual freeze possible. Additive to the current exhaustion |
 | Pause risk | sGHO pause blocks all token operations including withdrawal |
-| Supply cap | 400M GHO (sGHO, 234.2M headroom), 175M waEthUSDC (GSM, essentially all available on the deposit side only) |
+| Supply cap | 400M GHO (sGHO, 234.2M headroom), 175M waEthUSDC shares ≈ 207.8M GHO (GSM, essentially all available on the deposit side only) |
 
-**Score: 3.75/5** — Leg 1 (sGho → GHO) is atomic and currently fully backed, but the strategy is denominated in USDC and **the documented USDC exit route has been unavailable for ~3.5 months**. The deterministic fallback has shrunk: GSM USDT fell 63% to 16.09M while sGho grew 22% to 165.8M, which the prior assessment named as a downgrade condition. The DEX alternatives report ~$24M of aggregate pool TVL, and their executable USDC output is smaller and slippage-dependent. The USDC exit fee rose to 15 bps, and the DAO's published response protects GSM inventory rather than refilling it. Recovery depends on third-party arbitrage that GHO's sub-$1 price does not support, and capacity created by a Yearn deposit is not reserved for Yearn. Score would return toward 3.0–2.5 if GSM USDC inventory recovers to a multiple of the intended position size and holds there. It worsens to 4.0 if GSM USDT also falls below the intended position size.
+**Score: 3.75/5** — Leg 1 (sGho → GHO) is atomic and currently fully backed, but the strategy is denominated in USDC and **the documented USDC exit route has been unavailable for ~3.5 months**. The deterministic fallback has shrunk: GSM USDT's inventory fell 63% in value, from ≈50.81M to ≈18.94M GHO (16.09M waEthUSDT shares), while sGho grew 22% to 165.8M. It now covers about 11% of sGho claims, down from about 37% in July, which the prior assessment named as a downgrade condition. The DEX alternatives report ~$24M of aggregate pool TVL, and their executable USDC output is smaller and slippage-dependent. The USDC exit fee rose to 15 bps, and the DAO's published response protects GSM inventory rather than refilling it. Recovery depends on third-party arbitrage that GHO's sub-$1 price does not support, and capacity created by a Yearn deposit is not reserved for Yearn. Score would return toward 3.0–2.5 if GSM USDC inventory recovers to a multiple of the intended position size and holds there. It worsens to 4.0 if GSM USDT also falls below the intended position size.
 
 #### Category 5: Operational Risk (Weight: 5%)
 
@@ -840,7 +842,7 @@ Step-by-step view of the Yearn USDC strategy's two flows, with explicit fees at 
 | # | From → To | Contract | Call | Fee | Notes |
 |---|---|---|---|---|---|
 | 1 | USDC → waEthUSDC | Aave V3 USDC market + static-aToken wrapper [`0xD4fa…D23E`](https://etherscan.io/address/0xD4fa2D31b7968E448877f69A96DE69f5de8cD23E) | `deposit(usdc, receiver)` | **0%** | USDC starts earning Aave V3 supply APY while held as waEthUSDC |
-| 2 | waEthUSDC → GHO | GSM USDC [`0x3A38…4112`](https://etherscan.io/address/0x3A3868898305f04beC7FEa77BecFf04C13444112) | `sellAsset(waEthUSDC_amount, receiver)` | **0 bps (0%)** | Fixed 1:1 price (FixedPriceStrategy [`0xEE73…D64f`](https://etherscan.io/address/0xEE73e0c5Cc8E4cAf400baB5239860696Ff44D64f)); fee strategy [`0xfDB0…23dE`](https://etherscan.io/address/0xfDB0090A92d20EE39d82ac680477b1F58f0A23dE) returns 0 for sell side. 174,999,999.97 waEthUSDC of headroom under the 175M exposure cap |
+| 2 | waEthUSDC → GHO | GSM USDC [`0x3A38…4112`](https://etherscan.io/address/0x3A3868898305f04beC7FEa77BecFf04C13444112) | `sellAsset(waEthUSDC_amount, receiver)` | **0 bps (0%)** | Fixed 1 USDC = 1 GHO after share conversion (FixedPriceStrategy4626 [`0xEE73…D64f`](https://etherscan.io/address/0xEE73e0c5Cc8E4cAf400baB5239860696Ff44D64f)), so 1 waEthUSDC share yields ≈1.187 GHO; fee strategy [`0xfDB0…23dE`](https://etherscan.io/address/0xfDB0090A92d20EE39d82ac680477b1F58f0A23dE) returns 0 for sell side. 174,999,999.97 waEthUSDC of headroom under the 175M exposure cap |
 | 3 | GHO → sGho | sGho [`0xE175…ca1d`](https://etherscan.io/address/0xE1753F2e00940cC31213dd92013cF019DFE4ca1d) | `deposit(gho_amount, receiver)` | **0%** | Standard ERC-4626 — no deposit fee. 234.2M GHO of headroom under the 400M supply cap |
 
 **Total deposit-side fees: 0%.** The deposit direction is entirely unconstrained today. Costs are gas + any GSM unavailability (oracle freeze) + sGho pause. Note that step 2 *creates* GSM exit capacity that any other participant may consume before the strategy tries to use it.
@@ -859,7 +861,7 @@ Step-by-step view of the Yearn USDC strategy's two flows, with explicit fees at 
 
 | Route | Call | Liquidity indicator | Cost | Output |
 |---|---|---|---|---|
-| GSM USDT | `buyAsset` on [`0x8822…F5E3`](https://etherscan.io/address/0x882285E62656b9623AF136Ce3078c6BdCc33F5E3) | 16.09M waEthUSDT | 10 bps + USDT→USDC conversion | USDT |
+| GSM USDT | `buyAsset` on [`0x8822…F5E3`](https://etherscan.io/address/0x882285E62656b9623AF136Ce3078c6BdCc33F5E3) | 16.09M waEthUSDT shares ≈ 18.94M USDT | 10 bps + USDT→USDC conversion | USDT |
 | Fluid DEX GHO-USDC | swap | ~$21.2M aggregate pool TVL; quote required | swap fee + slippage | USDC |
 | Uniswap v4 GHO-USDC | swap | ~$3.0M aggregate pool TVL; quote required | swap fee + slippage | USDC |
 
@@ -869,8 +871,8 @@ Step-by-step view of the Yearn USDC strategy's two flows, with explicit fees at 
 |---|---|---|
 | `sGho.paused = true` | Steps 1+3 of deposit (the sGho `deposit` call) and step 1 of withdrawal | Protocol Guardian or DAO `unpause()` |
 | `GSM.isFrozen() = true` (oracle auto-freeze on USDC depeg outside [$0.99, $1.01], or manual governance freeze) | Step 2 of both flows | Oracle unfreezes when USDC returns to [$0.995, $1.005]; or DAO unfreezes manually |
-| **`GSM.getAvailableLiquidity()` below the requested size — ACTIVE, 0.03 waEthUSDC** | Step 2 of withdrawal (`buyAsset` reverts) | Only refills when a third party calls `sellAsset`, which requires GHO ≥ $1 after sell-side costs. GHO is at $0.9990, so there is no current incentive. The September 17, 2026 increase of the `buyAsset` fee to 15 bps is meant to slow further drains, not to refill the module. Governance could seed the module or create a sell-side refill incentive; lowering the `buyAsset` fee would instead make inventory draining cheaper |
-| GSM exposure at 175M cap | Step 2 of deposit only (`sellAsset`) | Wait for withdrawals to free capacity, or DAO raises cap. Not binding today (~175M available) |
+| **`GSM.getAvailableLiquidity()` below the requested size — ACTIVE, 0.03 waEthUSDC shares (≈0.035 USDC)** | Step 2 of withdrawal (`buyAsset` reverts) | Only refills when a third party calls `sellAsset`, which requires GHO ≥ $1 after sell-side costs. GHO is at $0.9990, so there is no current incentive. The September 17, 2026 increase of the `buyAsset` fee to 15 bps is meant to slow further drains, not to refill the module. Governance could seed the module or create a sell-side refill incentive; lowering the `buyAsset` fee would instead make inventory draining cheaper |
+| GSM exposure at 175M-share cap (≈207.8M GHO) | Step 2 of deposit only (`sellAsset`) | Wait for withdrawals to free capacity, or DAO raises cap. Not binding today (~175M available) |
 | sGho `supplyCap` (400M GHO) reached | Step 3 of deposit | DAO raises cap via Steward `SUPPLY_CAP_MANAGER_ROLE`. Not binding today (234.2M headroom) |
 | `IERC20(GHO).balanceOf(sGho) < totalAssets()` — **not active** (+152,179 GHO buffer); occurred mid/late July and September 6–8, 2026 | Step 1 of withdrawal for the last claims out — **any deficit can become principal loss for late redeemers after earlier users take their full indexed claims** | AFC Safe tops up GHO from the Collector allowance (last done September 20, 2026). Yearn-side mitigation: treat any negative buffer as principal risk; track its ratio and slope and size or exit before it widens |
 | Aave V3 USDC pool at high utilization | Step 3 of withdrawal | Wait for borrowers to repay, or use DEX path. Not binding today (187.01M USDC available) |
@@ -881,7 +883,7 @@ Step-by-step view of the Yearn USDC strategy's two flows, with explicit fees at 
 
 - **Time-based:** Reassess by late November 2026, or sooner if any trigger below fires
 - **Funding-based:** Reassess if `balanceOf(GHO, sGho) < totalAssets()` for more than 5 consecutive days, if the deficit exceeds **0.25%** of `totalAssets()`, if no top-up occurs for **21 days** after September 20, 2026, or if the Collector → AFC GHO allowance (7.626M) is revoked or exhausted without replacement
-- **Liquidity-based (currently firing):** GSM USDC `getAvailableLiquidity()` has been ~0 for ~3.5 months. Re-review if it recovers above the intended position size and holds for 30 days (upgrade case), or if GSM USDT capacity (16.09M) falls below the intended position size (downgrade case)
+- **Liquidity-based (currently firing):** GSM USDC `getAvailableLiquidity()` has been ~0 for ~3.5 months. Re-review if it recovers above the intended position size and holds for 30 days (upgrade case), or if GSM USDT capacity (≈18.94M GHO of value; 16.09M shares) falls below the intended position size (downgrade case)
 - **TVL-based:** Reassess if sGho TVL changes by more than ±50% from 165.8M GHO, or if it approaches the 400M supply cap
 - **Incident-based:** Reassess after any exploit, governance attack, or Aave protocol incident
 - **Peg-based:** Reassess if GHO trades below $0.99 for more than 48 hours — this both removes the GSM refill incentive and stresses the exit path
@@ -901,4 +903,4 @@ Step-by-step view of the Yearn USDC strategy's two flows, with explicit fees at 
 | April 2, 2026 | 2.1 | Pre-deployment assessment from ARFC/audit material; rechecked April 22, 2026 |
 | May 19, 2026 | 2.3 | Post-deployment refresh after AIP 484. On-chain roles, ProxyAdmin, rate, and supply cap verified. Centralization 2.0 → 2.5 (Risk Council holds unrate-limited sGhoSteward roles); Collateralization 2.0 → 2.5 (late-withdrawer impairment path) |
 | July 27, 2026 (updated Aug 6) | 2.50 | 72-day reassessment. sGho contract itself unchanged and clean; TVL 37.3M → 136.5M GHO. Live 205,146 GHO unfunded-yield gap (AFC Safe funding lapsed 28 days); GSM USDC exit inventory exhausted (111.25M → 9.95 waEthUSDC); GSM buy fee 7 → 10 bps. The funding gap, GSM USDC exhaustion, and exit fee are classified as medium-severity strategy risks, not high-severity protocol failures. Liquidity 2.5 → 3.5, Centralization 2.5 → 2.75, Funds Mgmt remains 2.0 after Collateralization 2.5 → 2.75 and Provability 1.5 → 1.25 (TokenLogic dashboard), Operational 1.5 → 2.0, Audits 2.5 → 2.25 |
-| [September 27, 2026](https://github.com/yearn/risk-score/pull/494) | 2.48 | 134-day reassessment. sGho contract code, admin, and roles unchanged; TVL 136.5M → 165.8M GHO. ASR raised 4.25% → 4.50% by the Risk Council (September 1). Yield funding resumed July 31; AFC now pulls from a Collector allowance and the vault holds a 152,179 GHO buffer, with a short deficit around September 6–8. Risk Council reconstituted 3-of-4 → 2-of-3 with the same nested-Safe signers as the AFC. GSM USDC still empty (fee 10 → 15 bps); GSM USDT 43.42M → 16.09M. Audits 2.25 → 2.0 (passed 90 clean days), Governance subscore 3.0 → 3.25 (Centralization unchanged at 2.75), Liquidity 3.5 → 3.75; Funds Mgmt and Operational unchanged |
+| [September 27, 2026](https://github.com/yearn/risk-score/pull/494) | 2.48 | 134-day reassessment. sGho contract code, admin, and roles unchanged; TVL 136.5M → 165.8M GHO. ASR raised 4.25% → 4.50% by the Risk Council (September 1). Yield funding resumed July 31; AFC now pulls from a Collector allowance and the vault holds a 152,179 GHO buffer, with a short deficit around September 6–8. Risk Council reconstituted 3-of-4 → 2-of-3 with the same nested-Safe signers as the AFC. GSM USDC still empty (fee 10 → 15 bps); GSM USDT ≈50.81M → ≈18.94M GHO of value (43.42M → 16.09M waEthUSDT shares). GHO token corrected to non-upgradeable on Ethereum. Audits 2.25 → 2.0 (passed 90 clean days), Governance subscore 3.0 → 3.25 (Centralization unchanged at 2.75), Liquidity 3.5 → 3.75; Funds Mgmt and Operational unchanged |
