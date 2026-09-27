@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 
-const SNAPSHOT_BLOCK = 25_595_151;
+const SNAPSHOT_BLOCK = Number(process.env.SNAPSHOT_BLOCK ?? 26_069_994);
 const TOKEN = "0x99cd4ec3f88a45940936f469e4bb72a2a701eeb9";
-const LOG_API = "https://eth.blockscout.com/api";
+const LOG_API = process.env.LOG_API ?? "https://eth.blockscout.com/api";
 const TRANSFER_TOPIC =
   "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef";
 const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000";
@@ -36,6 +36,8 @@ async function fetchLogs(fromBlock, toBlock) {
   for (const [key, value] of Object.entries(params)) {
     url.searchParams.set(key, value);
   }
+  // Stay under explorer per-second rate limits.
+  await new Promise((resolve) => setTimeout(resolve, 400));
   const payload = await fetchJson(url);
   if (payload.status !== "1" || !Array.isArray(payload.result)) {
     throw new Error(`Log API error: ${JSON.stringify(payload)}`);

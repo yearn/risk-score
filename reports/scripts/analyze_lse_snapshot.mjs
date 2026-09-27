@@ -1,11 +1,11 @@
 #!/usr/bin/env node
 
-const SNAPSHOT_BLOCK = 25_595_151;
+const SNAPSHOT_BLOCK = Number(process.env.SNAPSHOT_BLOCK ?? 26_069_994);
 const ENGINE = "0xce01c90de7fd1bcfa39e237fe6d8d9f569e8a6a3";
 const VAT = "0x35d1b3f3d7966a1dfe207aa4514c12a259a0492b";
 const MULTICALL3 = "0xca11bde05977b3631167028862be2a173976ca11";
-const LOG_API = "https://eth.blockscout.com/api";
-const RPC_URL = "https://eth.blockscout.com/api/eth-rpc";
+const LOG_API = process.env.LOG_API ?? "https://eth.blockscout.com/api";
+const RPC_URL = process.env.RPC_URL ?? "https://eth.blockscout.com/api/eth-rpc";
 const DEPLOYMENT_BLOCK = 22_370_185;
 const OPEN_TOPIC =
   "0xdde6dd354074cad07a2dacbb612a6d2bac55ac537264d73250bf5c76bc15d64d";
@@ -15,11 +15,13 @@ const AGGREGATE3_SELECTOR = "82ad56cb";
 const ILK =
   "4c534556322d534b592d41000000000000000000000000000000000000000000";
 const MAT = 1.2;
-const STUSDS_TOTAL_ASSETS = 187_538_897.3038364;
-const PRICE_POINTS = [0.025, 0.0184, 0.0153, 0.01086, 0.00905];
+const STUSDS_TOTAL_ASSETS = Number(
+  process.env.STUSDS_TOTAL_ASSETS ?? 206_995_464.4297254,
+);
+const PRICE_POINTS = [0.025, 0.0227, 0.019, 0.0152, 0.01097, 0.00914];
 const MORPHO_CHI_THRESHOLDS = {
-  firstLiquidation: 0.0103145056,
-  firstBadDebt: 0.1115558192,
+  firstLiquidation: 0.0093952964,
+  firstBadDebt: 0.1107306419,
 };
 
 function word(value) {
@@ -116,6 +118,8 @@ async function fetchOpenLogs() {
       url.searchParams.set(key, value);
     }
 
+    // Stay under explorer per-second rate limits.
+    await new Promise((resolve) => setTimeout(resolve, 400));
     const payload = await fetchJson(url);
     if (payload.status !== "1" || !Array.isArray(payload.result)) {
       throw new Error(`Log API error: ${JSON.stringify(payload)}`);
