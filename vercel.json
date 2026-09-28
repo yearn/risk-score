@@ -19,5 +19,8 @@
       "destination": "https://plausible.io/:path*"
     }
   ],
-  "installCommand": "npm ci"
+  "installCommand": "npm ci",
+  "git": {
+    "deploymentEnabled": false
+  }
 }

@@ -4,7 +4,7 @@
 - **Token:** yvUSDS-1 (USDS-1 yVault)
 - **Chain:** Ethereum
 - **Token Address:** [`0x182863131F9a4630fF9E27830d945B1413e347E8`](https://etherscan.io/address/0x182863131F9a4630fF9E27830d945B1413e347E8)
-- **Final Score: 1.3/5.0**
+- **Final Score: 1.32/5.0**
 
 ## Overview + Links
 
@@ -108,9 +108,9 @@ The underlying vault infrastructure (v3.0.0 baseline) has been audited by 3 repu
 
 | Auditor | Date | Scope | Report |
 |---------|------|-------|--------|
-| [Statemind](https://github.com/yearn/yearn-security/blob/master/audits/20240502_Statemind_Yearn_V3/Yearn%20V3%20report.pdf) | May 2, 2024 | V3 Vaults (v3.0.0) | PDF |
-| [ChainSecurity](https://github.com/yearn/yearn-security/blob/master/audits/20240504_ChainSecurity_Yearn_V3/) | May 4, 2024 | V3 Vaults + Tokenized Strategy (v3.0.0) | 2 PDFs |
-| [yAcademy](https://github.com/yearn/yearn-security/blob/master/audits/20240601_YAcademy_Yearn_V3/06-2023-Yearn-Vault-V3_yAcademy_Reports.pdf) | Jun 2024 | V3 Vaults (v3.0.1) | PDF |
+| [Statemind](https://github.com/yearn/yearn-security/blob/master/audits/20240301_Statemind_Yearn_V3.0.2/Yearn%20V3%20report.pdf) | May 2, 2024 | V3 Vaults (v3.0.0) | PDF |
+| [ChainSecurity](https://github.com/yearn/yearn-security/tree/master/audits/20230504_ChainSecurity_Yearn_V3) | May 4, 2024 | V3 Vaults + Tokenized Strategy (v3.0.0) | 2 PDFs |
+| [yAcademy](https://github.com/yearn/yearn-security/blob/master/audits/20230728_YAcademy_Yearn_V3.0.1/07-2023-Yearn-Vault-V3_yAcademy_Report.pdf) | Jun 2024 | V3 Vaults (v3.0.1) | PDF |
 
 The v3.0.3 patch release used by yvUSDS-1 was reviewed **internally** by the Yearn team rather than re-engaging external auditors. The diff from v3.0.2 is a minor patch-level change; the external audits cover the core architecture. Source: [yearn-vaults-v3 GitHub releases](https://github.com/yearn/yearn-vaults-v3/releases).
 
@@ -408,7 +408,7 @@ Yearn maintains an active monitoring system via the [`monitoring`](https://githu
 - Be conservative: when uncertain between two scores, choose the higher (riskier) one
 - Use decimals (e.g., 2.5) when a subcategory falls between scores
 - Prioritize on-chain evidence over documentation claims
-- **Rounding rule:** the weighted sum is rounded to one decimal place using standard nearest-0.1 rounding; when the value is exactly halfway between two 0.1 marks (X.X50), round UP to the higher (riskier) score per the conservative principle
+- **Rounding rule:** the weighted sum is recorded to two decimal places, rounded down (1.475 → 1.47). The home page and reports list round it down again to one decimal.
 
 ### Critical Risk Gates
 
@@ -537,7 +537,7 @@ Yearn maintains an active monitoring system via the [`monitoring`](https://githu
 | Funds Management | 1.0 | 30% | 0.300 |
 | Liquidity Risk | 1.5 | 15% | 0.225 |
 | Operational Risk | 1.0 | 5% | 0.050 |
-| **Final Score** | | | **1.325 → 1.3 / 5.0** |
+| **Final Score** | | | **1.32 / 5.0** |
 
 **Change from prior snapshot (May 11 = 1.3):** No category score changed. TVL drifted modestly (6.90M → 6.23M) and allocations shifted from 80/20 to 84/16, but the two-venue dependency profile is unchanged. Strategy proxy upgradeability (all three strategies are EIP-1967 proxies under Brain 3-of-8) was identified as a new finding but does not change the governance score — Brain already holds operational vault roles and the pattern is the standard Yearn V3 Tokenized Strategy design. Final score remains **1.3**.
 
@@ -545,13 +545,13 @@ Yearn maintains an active monitoring system via the [`monitoring`](https://githu
 
 | Final Score | Risk Tier | Recommendation |
 |------------|-----------|----------------|
-| **1.0–1.5** | **Minimal Risk** | **Approved, high confidence** |
-| 1.5–2.5 | Low Risk | Approved with standard monitoring |
-| 2.5–3.5 | Medium Risk | Approved with enhanced monitoring |
-| 3.5–4.5 | Elevated Risk | Limited approval, strict limits |
-| 4.5–5.0 | High Risk | Not recommended |
+| **1.00–1.49** | **Minimal Risk** | **Approved, high confidence** |
+| 1.50–2.49 | Low Risk | Approved with standard monitoring |
+| 2.50–3.49 | Medium Risk | Approved with enhanced monitoring |
+| 3.50–4.49 | Elevated Risk | Limited approval, strict limits |
+| 4.50–5.00 | High Risk | Not recommended |
 
-**Final Risk Tier: Minimal Risk (1.3 / 5.0) — Approved, high confidence**
+**Final Risk Tier: Minimal Risk (1.32 / 5.0) — Approved, high confidence**
 
 ---
 
@@ -659,4 +659,4 @@ To shorten the delay, an attacker would need to (1) control Daddy 6/9 to **propo
 | Date | Score | Notes |
 | --- | --- | --- |
 | [May 11, 2026](https://github.com/yearn/risk-score/pull/148) | 1.3 | Initial assessment |
-| [July 13, 2026](https://github.com/yearn/risk-score/pull/314) | 1.3 | Reassessment: TVL $6.23M (down 9.7% since May 11); allocations drifted to 84/16 sUSDS/Spark; all governance roles, multisig thresholds, and timelock parameters confirmed unchanged; strategies identified as EIP-1967 proxy-upgradeable under Brain (3-of-8) — standard Yearn V3 Tokenized Strategy pattern; strategy proxy admin slots confirmed 0x0 (upgrades via management() only); Spark Compounder last_report corrected; sUSDS TVL drifted to ~$5.28B; USDS Staking Rewards ~$556M staked. No score or tier change |
+| [July 13, 2026](https://github.com/yearn/risk-score/pull/314) | 1.32 | Reassessment: TVL $6.23M (down 9.7% since May 11); allocations drifted to 84/16 sUSDS/Spark; all governance roles, multisig thresholds, and timelock parameters confirmed unchanged; strategies identified as EIP-1967 proxy-upgradeable under Brain (3-of-8) — standard Yearn V3 Tokenized Strategy pattern; strategy proxy admin slots confirmed 0x0 (upgrades via management() only); Spark Compounder last_report corrected; sUSDS TVL drifted to ~$5.28B; USDS Staking Rewards ~$556M staked. No score or tier change |

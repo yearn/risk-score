@@ -38,8 +38,8 @@
           "name": "Flex",
           "kind": "indirect",
           "model": "transport",
-          "integration": "Collateral is yvUSD",
-          "detail": "yvUSD has strategy that bridges funds to Katana. Protocol doesn't use bridges"
+          "integration": "yvUSD collateral (54.0% of Yearn's Flex exposure)",
+          "detail": "Flex itself uses no bridge. Its largest market takes yvUSD as collateral, and yvUSD runs a Katana strategy that bridges USDC through the AggLayer LxLy unified bridge via a VaultBridgeToken — yvUSD's only active cross-chain position with material debt. A loss there propagates into Flex through the collateral's price per share, which is also that market's oracle input."
         },
         {
           "slug": "spectra-finance",
@@ -117,7 +117,7 @@
           "kind": "direct",
           "model": "mint",
           "integration": "Chainlink CCIP (BurnMintTokenPool; 14 lanes)",
-          "detail": "TokenAdminRegistry maps uniBTC to pool [`0x1689…4490`](https://etherscan.io/address/0x1689C22eD5435e49071CFc208D1Ac6F2A2274490) (BurnMintTokenPool 1.5.1), which holds `MINTER_ROLE` on uniBTC — the CCIP message path can mint native supply. Pool `owner()` is the Bedrock admin Safe (3/5) [`0xAeE0…721A`](https://etherscan.io/address/0xAeE017052DF6Ac002647229D58B786E380B9721A); outbound rate limits are enabled on all 14 configured lanes (bucket 2 uniBTC, ≈200 uniBTC/day on the sampled lane). A legacy Bedrock `CCIPPeer` [`0x55a6…0eDc`](https://etherscan.io/address/0x55a67cf07b8a9A09FB6D565279287cfE4Ab60eDc) also holds `MINTER_ROLE` (upgradeable proxy under the uniBTC ProxyAdmin). Verified onchain August 10, 2026."
+          "detail": "TokenAdminRegistry maps uniBTC to pool [`0x1689…4490`](https://etherscan.io/address/0x1689C22eD5435e49071CFc208D1Ac6F2A2274490) (BurnMintTokenPool 1.5.1), which holds `MINTER_ROLE` on uniBTC — the CCIP message path can mint native supply. Pool `owner()` and the registry token administrator are the Bedrock admin Safe (3/5) [`0xAeE0…721A`](https://etherscan.io/address/0xAeE017052DF6Ac002647229D58B786E380B9721A); inbound and outbound limits are enabled on all 14 lanes: 2-uniBTC buckets for Arbitrum, BNB Chain, Optimism, Mantle, Berachain, Base, Aptos and Solana, a 0.5-uniBTC bucket for BOB, and 2-satoshi buckets for Unichain, B², X Layer, Ink and HyperEVM. Refill rates vary by lane; the largest (Arbitrum) is 199.953792 uniBTC/day. The pool minted 3.00640757 uniBTC across 71 inbound transfers in the 30 days to the snapshot. Rate-limit admin is the [operational EOA](https://etherscan.io/address/0x9251fd3d79522bb2243a58fff1db43e25a495aab), which can reconfigure the limits. A legacy Bedrock `CCIPPeer` [`0x55a6…0eDc`](https://etherscan.io/address/0x55a67cf07b8a9A09FB6D565279287cfE4Ab60eDc) also holds `MINTER_ROLE` (upgradeable proxy under the uniBTC ProxyAdmin; source/destination allowlist limited to BNB Chain and BOB; no messages in the 30 days to the snapshot). Verified at Ethereum block [25,981,132](https://etherscan.io/block/25981132), September 15, 2026."
         },
         {
           "slug": "centrifuge-jaaa",
@@ -138,12 +138,31 @@
           "owner": "Pool owner: Maple governance contract [`0x4483…9449`](https://etherscan.io/address/0x44835bBBA9D40DEDa9b64858095EcFB2693c9449)."
         },
         {
+          "slug": "saturn-usdat",
+          "name": "Saturn USDat",
+          "kind": "direct",
+          "model": "mint",
+          "integration": "Chainlink CCIP (LockReleaseTokenPool on Ethereum; BurnWithFromMintTokenPool on BNB Chain and Monad)",
+          "detail": "Mixed model, verified September 9, 2026. `TokenAdminRegistry.getPool` maps Ethereum USDat to [`0xA0dE…0D86`](https://etherscan.io/address/0xA0dE671eb84dE9dEe1d311d996d25c41F63a0D86) (`LockReleaseTokenPool 1.6.1`), holding **31,965,633.03 USDat** — comfortably covering the ~29.59M USDat circulating across the remote chains. On the remote chains, USDat is a `SaturnOFT`-based token minted/burned by a **`BurnWithFromMintTokenPool`**: BNB Chain [`0x9049…0C61`](https://bscscan.com/address/0x904939A965eDc2Efbd44Fd4db223f07680510C61) (holds `MINTER_ROLE`+`BURNER_ROLE` on BNB USDat [`0x0Bb1…64eF`](https://bscscan.com/address/0x0Bb150DFa86EA5d7742F07FEfCD8E8edA81D64eF), ~$2.0M circulating) and Monad [`0x8ab4…70F0`](https://explorer.monad.xyz/address/0x8ab40e2dabCd24dCFf0A06A68eB59990405270F0) (same role holder pattern on Monad USDat, same address, ~$27.6M circulating — the larger of the two remote deployments). Because the mint-side pools can create canonical supply independent of the Ethereum lockbox's real-time balance, this is classified `mint` per the skill's route-prioritization rule, even though the measured Ethereum leg is itself a `lock`.",
+          "owner": "Ethereum pool owner: `RBACTimelock` [`0x4483…9449`](https://etherscan.io/address/0x44835bBBA9D40DEDa9b64858095EcFB2693c9449), `getMinDelay()` = 10,800s (3h). Remote-chain (BNB/Monad) admin: `SaturnTimelock` [`0xF023…FF0C`](https://bscscan.com/address/0xF0237a1cb794eA830129966049eF99243082FF0C), `getMinDelay()` = 172,800s (2d) — identical address on both chains, shorter delay than Saturn's own Ethereum Admin Timelock (5d)."
+        },
+        {
           "slug": "fluid",
           "name": "Fluid (PST)",
           "kind": "indirect",
           "model": "mint",
           "integration": "PST collateral (Chainlink CCIP BurnMintTokenPool)",
           "detail": "Fluid accepts Huma PST as collateral. Ethereum PST [`0x22ae…d4c7`](https://etherscan.io/address/0x22ae3d9a738471f405169af055d31c687087d4c7) is minted by CCIP pool [`0xBE77…0D3d`](https://etherscan.io/address/0xBE776C85FE1f35BE8341167A6305230075F30D3d), whose only configured remote chain is Solana; a CCIP compromise could mint unbacked PST against Fluid positions"
+        },
+        {
+          "slug": "curvance-hyausd",
+          "name": "Curvance hyAUSD",
+          "kind": "indirect",
+          "model": "mint",
+          "integration": "savUSD collateral (Chainlink CCIP BurnMintTokenPool; Monad)",
+          "detail": "hyAUSD lends AUSD into a Curvance market that accepts Avant savUSD as collateral at 92% LTV. Monad savUSD [`0x9648…06c6`](https://monadscan.com/address/0x9648dB94F1e6B19e7D755585542981F97dc806c6) is a `FactoryBurnMintERC20` whose sole minter/burner is pool [`0xc5cA…8D3E`](https://monadscan.com/address/0xc5cAAC64Dd93b6E2B369d52610Fdae069e568D3E) (`BurnMintTokenPool 1.5.1`). The Avalanche lane's inbound capacity is 44.88M savUSD against 18.55M posted as collateral, so the rate limiter is not a meaningful throttle; a CCIP or pool-owner compromise could mint unbacked savUSD, post it and borrow out the market's AUSD, socialising bad debt into hyAUSD. Seizure is not possible — `burnFrom` still spends allowance (simulated: reverts `ERC20: insufficient allowance`). Full custody analysis in the report's Appendix B. Verified onchain September 7, 2026.",
+          "icon": "protocol:curvance",
+          "owner": "Pool owner + token owner + CCIP admin: [`0xd4d2…57cb`](https://snowtrace.io/address/0xd4d23209aaE8630bf386b7393763a5b7865e57cb) — no code on either chain, so not an onchain multisig and not timelocked; also owner/admin of avUSD, savUSD and AvantMintingV2 on Avalanche. `getRateLimitAdmin()` is unset, so limits are owner-only."
         }
       ]
     },
@@ -174,7 +193,7 @@
           "kind": "direct",
           "model": "transport",
           "integration": "CCTP V2",
-          "detail": "Cross-chain strategies bridge ~42% of TVL to Base and HyperEVM"
+          "detail": "Cross-chain strategies bridge ~36% of TVL to Base and HyperEVM, and CCTP messaging also carries the balance updates the mainnet accounting relies on"
         },
         {
           "slug": "yearn-yvusd",
@@ -189,8 +208,8 @@
           "name": "Flex",
           "kind": "indirect",
           "model": "transport",
-          "integration": "Collateral is yvUSD",
-          "detail": "yvUSD has strategy that bridges funds to Base. Protocol doesn't use bridges"
+          "integration": "yvUSD collateral (54.0% of Yearn's Flex exposure)",
+          "detail": "Flex itself uses no bridge. Its largest market takes yvUSD as collateral, and yvUSD holds CCTP strategies for Arbitrum and Base. Both are active but currently carry 0 debt, so the CCTP lane is a dormant rather than live exposure for Flex."
         },
         {
           "slug": "d2-hypeplus",
@@ -224,7 +243,7 @@
           "kind": "direct",
           "model": "mint",
           "integration": "Free Tunnel (TunnelContract; 3-of-4 executors)",
-          "detail": "Tunnel proxy [`0x70aF…d21C`](https://etherscan.io/address/0x70aF4743F85E5E74E3b6dDFa38926c0a762Ad21C) holds `MINTER_ROLE` on uniBTC; mints require 3-of-4 executor signatures (`getActiveExecutors()`), admin is EOA [`0x0014…c53C`](https://etherscan.io/address/0x0014Eb4Ac6Dd1473b258d088E6EF214b2BCdc53C). Not mentioned in Bedrock's uniBTC bridge documentation. The same contract also holds `MINTER_ROLE` on Bedrock brBTC. Verified onchain August 10, 2026."
+          "detail": "Tunnel proxy [`0x70aF…d21C`](https://etherscan.io/address/0x70aF4743F85E5E74E3b6dDFa38926c0a762Ad21C) holds `MINTER_ROLE` on uniBTC; mints require 3-of-4 executor signatures (`getActiveExecutors()`), admin is EOA [`0x0014…c53C`](https://etherscan.io/address/0x0014Eb4Ac6Dd1473b258d088E6EF214b2BCdc53C). The admin can call `upgradeTunnel` only for the implementation published by the Free Tunnel hub [`0x6903…53aB`](https://etherscan.io/address/0x690357e684F7661911CED0f857a5920E983853aB), whose owner is a 3-of-4 multisig [`0xb58F…DcBA`](https://etherscan.io/address/0xb58F7aC2d503cEa14B3582C21d72e9817839DcBA). No Tunnel events occurred in the 30 days to the snapshot. Not mentioned in Bedrock's uniBTC bridge documentation. The same contract also holds `MINTER_ROLE` on Bedrock brBTC. Verified at Ethereum block [25,981,132](https://etherscan.io/block/25981132), September 15, 2026."
         }
       ]
     },
@@ -247,7 +266,8 @@
         "midas-mglobal",
         "resolv-rlp",
         "resolv-wstusr",
-        "superstate-ustb"
+        "superstate-ustb",
+        "saturn-usdat"
       ],
       "dependencies": [
         {
@@ -547,8 +567,8 @@
           "name": "Bedrock uniBTC",
           "kind": "indirect",
           "model": "mint",
-          "integration": "M-BTC reserve exposure (~21.3% of uniBTC reserves)",
-          "detail": "uniBTC does not bridge through Merlin itself, but ~21.3% of reported uniBTC reserves were M-BTC on August 8, 2026 (Bedrock statistics dashboard), and Bedrock's Merlin reserve wallet [`0xF977…AB18`](https://scan.merlinchain.io/address/0xF9775085d726E782E83585033B58606f7731AB18) is the second-largest M-BTC holder. The M-BTC token restricts mint/burn to its configured bridge [`0x28AD…ccCC`](https://scan.merlinchain.io/address/0x28AD6b7dfD79153659cb44C2155cf7C0e1CeEccC); a bridge compromise can mint unbacked M-BTC beneath uniBTC's backing."
+          "integration": "M-BTC reserve exposure (~21.36% of dashboard uniBTC reserves)",
+          "detail": "The [Bedrock reserve API](https://affiliate-api-eosin.vercel.app/api/v1/third/stats/unibtc) reports 990.8738333 M-BTC, or 21.36% of 4,639.417015 BTC reserves on September 15, 2026. The published Merlin reserve wallet [`0xF977…AB18`](https://scan.merlinchain.io/address/0xF9775085d726E782E83585033B58606f7731AB18) is the second-largest M-BTC holder with 17.39% of 5,697.45 M-BTC supply (Merlin explorer, September 15, 2026). M-BTC mint/burn is restricted to bridge [`0x28AD…ccCC`](https://scan.merlinchain.io/address/0x28AD6b7dfD79153659cb44C2155cf7C0e1CeEccC) (checked August 8, 2026); the bridge currently points to implementation [`0xBd46…bCaA`](https://scan.merlinchain.io/address/0xBd467cBa33fDb6A2660999e1FE1bFf79098FbCaA). Current Merlin admin and relayer continuity remain TODO. A bridge compromise can impair uniBTC backing."
         }
       ]
     },
@@ -574,6 +594,30 @@
           "model": "lock",
           "integration": "OP Stack + Arbitrum Nitro canonical bridges (SkyLink)",
           "detail": "Primary USDS/sUSDS cross-chain route: ~$0.45B USDS + ~812M sUSDS escrowed on L1 and minted 1:1 on Base, Optimism, Unichain (OP Stack) and Arbitrum (Nitro). No bridge holds `wards` on USDS. LayerZero carries only Solana + Avalanche (<0.7% of mainnet USDS supply)"
+        }
+      ]
+    },
+    {
+      "id": "superstate-issuer-bridge",
+      "name": "Superstate Issuer Bridge",
+      "type": "Issuer-operated burn-and-mint bridge",
+      "url": "https://docs.superstate.com/investors/tokenized-funds/available-funds/bitwise-uscc",
+      "finality": "No fixed public settlement or destination-mint time is documented.",
+      "admin": "The same Superstate EOA controls the USCC token and ProxyAdmin on Ethereum and Plume, with no multisig or timelock.",
+      "description": "USCC burns on Ethereum for an enabled destination and Superstate completes the corresponding mint on Plume. There is no independent messaging or verifier quorum, so the issuer admin and upgrade keys are the bridge trust boundary. Solana USCC is not connected by this bridge; current documentation requires redemption and re-tokenization for SVM network changes.",
+      "keywords": [
+        "issuer-operated burn-and-mint"
+      ],
+      "ignore": [],
+      "dependencies": [
+        {
+          "slug": "superstate-uscc",
+          "name": "Superstate / Bitwise USCC",
+          "kind": "direct",
+          "model": "mint",
+          "integration": "Ethereum ↔ Plume USCC",
+          "detail": "Ethereum USCC enables chain ID 98866 and burns through `bridge()`; Plume USCC is a native FundToken v1.3.0 deployment. Both token proxies and ProxyAdmins are controlled by the same EOA, with no independent message quorum or onchain rate limit.",
+          "owner": "USCC token + ProxyAdmin owner on Ethereum and Plume: EOA [`0x8abC…bDd1`](https://etherscan.io/address/0x8abC89D9b56dFD90dA18e8E18CFaC9111100bDd1)."
         }
       ]
     }

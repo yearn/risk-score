@@ -5,7 +5,7 @@ import ScoreTable from "../../components/ScoreTable.astro";
 import ScoreDetails from "../../components/ScoreDetails.astro";
 import { getAllSlugs, getReportBySlug } from "../../lib/reports";
 import { hasGraph } from "../../lib/graph";
-import { scoreTier } from "../../lib/colors";
+import { formatScore, scoreTier } from "../../lib/colors";
 
 export function getStaticPaths() {
   return getAllSlugs().map((slug) => ({ params: { slug } }));
@@ -16,7 +16,7 @@ const report = getReportBySlug(slug!);
 if (!report) return Astro.redirect("/reports/");
 const ogDescription =
   report.finalScore != null
-    ? `${report.name} — Score: ${report.finalScore.toFixed(1)}/5.0 (${scoreTier(report.finalScore)}). ${report.token} on ${report.chain}.`
+    ? `${report.name} — Score: ${formatScore(report.finalScore)}/5.0 (${scoreTier(report.finalScore)}). ${report.token} on ${report.chain}.`
     : `${report.name} — ${report.status ?? "Not Rated"} (Not Rated). ${report.token} on ${report.chain}.`;
 const graphAvailable = hasGraph(slug!);
 
@@ -92,7 +92,7 @@ const reviewSchema =
           "additionalProperty": {
             "@type": "PropertyValue",
             "name": "Yearn Curation risk score",
-            "value": report.finalScore.toFixed(1),
+            "value": formatScore(report.finalScore),
             "minValue": 1,
             "maxValue": 5,
             "description": "Lower values indicate lower risk.",

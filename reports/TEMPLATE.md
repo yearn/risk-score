@@ -15,6 +15,17 @@
 - **Token Address:** [`[Token Address]`]([Token Explorer Link])
 - **Final Score: X/5.0**
 <!-- Status: omit this line entirely for normal/active reports. See the Status comment below. -->
+<!-- Visibility: omit this line entirely for listed reports. See the Visibility comment below. -->
+
+<!--
+Visibility field (optional — omit for listed reports):
+  Add a "- **Visibility:** Hidden" line to keep a report out of the site's
+  listings: the /reports/ index, the homepage highlights, and the report count
+  shown on the site. The report is unlisted, not unpublished — its
+  /report/<slug>/ page, OG image, graph page and bridge rows still build, so a
+  direct link keeps working and nothing else on the site degrades. Remove the
+  line to list it again.
+-->
 
 <!--
 Status field (optional — omit for active reports):
@@ -274,11 +285,14 @@ If ANY gate is triggered, the protocol automatically receives a score of **5** (
 
 | Score | Contract Upgradeability | Timelock | Privileged Roles |
 |-------|------------------------|----------|-----------------|
-| **1** | Immutable or fully decentralized DAO | 7+ days timelock on critical operations | Multisig above 3/5 threshold, no EOA roles. Multi-party approval required |
-| **2** | Multisig 7/11+ with timelock | 24+ hours | Limited roles, cannot seize funds |
-| **3** | Multisig 5/9 with timelock | 24+ hours | Some powerful roles, constrained by timelock |
+| **1** | Immutable or fully decentralized DAO | 48h+ timelock on critical operations | Multisig above 3/5 threshold, no EOA roles. Multi-party approval required |
+| **2** | Multisig 7/11+ with timelock | 24-48 hours | Limited roles, cannot seize funds |
+| **3** | Multisig 5/9 with timelock | 12-24 hours | Some powerful roles, constrained by timelock |
 | **4** | Multisig 3/5 or low threshold | <12 hours | Powerful admin roles with limited constraints |
 | **5** | EOA or <3 signers (CRITICAL GATE) | No timelock | Unlimited admin powers |
+
+- **Timelock** is measured on the path that can change the protocol - upgrades, role changes, and parameter authority - end-to-end from proposal to execution. A 48h delay clears the score-1 bar on its own; there is no extra credit above it.
+- Operational roles bounded by governance-approved constraints (moving funds between already-approved strategies, pausing, keeper calls such as rebase or harvest) are scored in **Subcategory B: Programmability**, not here. Score this subcategory on who can change the protocol itself.
 
 **Subcategory B: Programmability**
 
@@ -378,12 +392,17 @@ If ANY gate is triggered, the protocol automatically receives a score of **5** (
 
 | Final Score | Risk Tier | Recommendation |
 |------------|-----------|----------------|
-| **1.0-1.5** | **Minimal Risk** | Approved, high confidence |
-| **1.5-2.5** | **Low Risk** | Approved with standard monitoring |
-| **2.5-3.5** | **Medium Risk** | Approved with enhanced monitoring |
-| **3.5-4.5** | **Elevated Risk** | Limited approval, strict limits |
-| **4.5-5.0** | **High Risk** | Not recommended |
+| **1.00–1.49** | **Minimal Risk** | Approved, high confidence |
+| **1.50–2.49** | **Low Risk** | Approved with standard monitoring |
+| **2.50–3.49** | **Medium Risk** | Approved with enhanced monitoring |
+| **3.50–4.49** | **Elevated Risk** | Limited approval, strict limits |
+| **4.50–5.00** | **High Risk** | Not recommended |
 | **N/A** | **Not Rated** | Terminal — do not use (exploited or wound down) |
+
+Record the Final Score to two decimals, rounded down (1.475 → 1.47); never
+round it to one decimal. Boundaries are lower-inclusive: a Final Score of
+exactly 2.50 is Medium Risk.
+The site shows scores rounded down (two decimals; one on the home page and reports list).
 
 **Final Risk Tier: [TIER]**
 

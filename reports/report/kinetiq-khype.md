@@ -4,7 +4,7 @@
 - **Token:** kHYPE
 - **Chain:** HyperEVM (Hyperliquid L1 ecosystem)
 - **Token Address:** [`0xfd739d4e423301ce9385c1fb8850539d657c296d`](https://hyperevmscan.io/address/0xfd739d4e423301ce9385c1fb8850539d657c296d)
-- **Final Score: 2.30/5.0**
+- **Final Score: 2.31/5.0**
 
 ## Overview + Links
 
@@ -479,9 +479,9 @@ Funds management score = (2.0 + 1.5) / 2 = **1.75**
 | Funds Management | 1.75 | 30% | 0.525 |
 | Liquidity Risk | 2.0 | 15% | 0.30 |
 | Operational Risk | 2.0 | 5% | 0.10 |
-| **Final Score** | | | **2.315 / 5.0** |
+| **Final Score** | | | **2.31 / 5.0** |
 
-## Overall Risk Score: **2.3 / 5.0**
+## Overall Risk Score: **2.31 / 5.0**
 
 ### Risk Tier: **LOW RISK**
 
@@ -543,4 +543,4 @@ Rationale:
 | --- | --- | --- |
 | [February 17, 2026](https://github.com/yearn/risk-score/pull/36) | 2.30 | Initial assessment |
 | [May 19, 2026](https://github.com/yearn/risk-score/pull/198) | 2.30 | Reassessment: documented the April 2026 StakingPool Diamond/facet upgrade and instant-unstake architecture |
-| [September 7, 2026](https://github.com/yearn/risk-score/pull/449) | 2.30 | Reassessment: protocol TVL ~$932M → ~$1.27B as HYPE appreciated ~$49 → ~$86, while kHYPE supply fell 17.4M → 12.76M (net backing 17.72M → 13.07M HYPE) and the exchange rate rose 1.0183 → 1.0243. Hyper Foundation validator stake 54.83% → 48.13%; Kinetiq delegations 16.93M → 12.72M HYPE across 14 validators (network share ~3.96% → ~2.89%). DEX liquidity ~$8.6M → ~$12.6M across 80 pools. Documented the StakingAccountant's fourth ProxyAdmin (`0x7957de…b0bda`). Bug bounty corrected $5M → $1M max (410 findings). Roles, proxy implementations, timelock, and score unchanged. |
+| [September 7, 2026](https://github.com/yearn/risk-score/pull/449) | 2.31 | Reassessment: protocol TVL ~$932M → ~$1.27B as HYPE appreciated ~$49 → ~$86, while kHYPE supply fell 17.4M → 12.76M (net backing 17.72M → 13.07M HYPE) and the exchange rate rose 1.0183 → 1.0243. Hyper Foundation validator stake 54.83% → 48.13%; Kinetiq delegations 16.93M → 12.72M HYPE across 14 validators (network share ~3.96% → ~2.89%). DEX liquidity ~$8.6M → ~$12.6M across 80 pools. Documented the StakingAccountant's fourth ProxyAdmin (`0x7957de…b0bda`). Bug bounty corrected $5M → $1M max (410 findings). Roles, proxy implementations, timelock, and score unchanged. |
