@@ -612,4 +612,4 @@ To shorten the delay, Daddy 6/9 must propose `updateDelay()`, wait 7 days during
 |------|-------|-------|
 | [May 11, 2026](https://github.com/yearn/risk-score/pull/148) | 1.3 | Initial assessment; ~46/54 Spark/Morpho Gauntlet split |
 | [July 13, 2026](https://github.com/yearn/risk-score/pull/315) | 1.25 | Strategy-queue replacement: MetaMorpho vault + new Spark USDT Lender; ~44/56 split; Sky dependency increased to ~56% |
-| September 28, 2026 | 1.25 | Refresh: TVL $5.74M; unchanged queue and governance; continuous allocator rebalancing documented; MetaMorpho market collateral mapped |
+| [September 28, 2026](https://github.com/yearn/risk-score/pull/496) | 1.25 | Refresh: TVL $5.74M; unchanged queue and governance; continuous allocator rebalancing documented; MetaMorpho market collateral mapped |
