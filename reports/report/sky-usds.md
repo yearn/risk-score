@@ -4,7 +4,7 @@
 - **Token:** USDS (Sky Dollar) and sUSDS (Savings USDS)
 - **Chain:** Ethereum
 - **Token Address:** [`0xdC035D45d973E3EC169d2276DDab16f1e407384F`](https://etherscan.io/address/0xdC035D45d973E3EC169d2276DDab16f1e407384F) (USDS) · [`0xa3931d71877C0E7a3148CB7Eb4463524FEc27fbD`](https://etherscan.io/address/0xa3931d71877C0E7a3148CB7Eb4463524FEc27fbD) (sUSDS)
-- **Final Score: 1.3/5.0**
+- **Final Score: 1.30/5.0**
 
 ## Overview + Links
 
@@ -719,7 +719,7 @@ Snapshot block 25345569 (June 18, 2026).
 
 ### Final Score Calculation
 
-**Rounding rule:** category scores use one-decimal precision; when a subcategory average falls between two 0.1 marks, round **up** (conservative). The weighted sum is then rounded to one decimal place with standard nearest-0.1 rounding, with ties broken up.
+**Rounding rule:** the weighted sum is recorded to two decimal places, rounded down (1.475 → 1.47). The home page and reports list round it down again to one decimal.
 
 | Category | Score | Weight | Weighted |
 |----------|------:|-------:|---------:|
@@ -728,19 +728,19 @@ Snapshot block 25345569 (June 18, 2026).
 | Funds Management | 1.8 | 30% | 0.540 |
 | Liquidity Risk | 1.0 | 15% | 0.150 |
 | Operational Risk | 1.0 |  5% | 0.050 |
-| **Final Score** | | | **1.300 → 1.3 / 5.0** |
+| **Final Score** | | | **1.30 / 5.0** |
 
-**Final Score: 1.3 / 5.0** — well inside the Minimal-Risk tier (1.0–1.5).
+**Final Score: 1.30 / 5.0** — well inside the Minimal-Risk tier (1.00–1.49).
 
 ### Risk Tier
 
 | Final Score | Risk Tier | Recommendation |
 |------------|-----------|----------------|
-| **1.0–1.5** | **Minimal Risk** | **Approved, high confidence** |
-| 1.5–2.5 | Low Risk | Approved with standard monitoring |
-| 2.5–3.5 | Medium Risk | Approved with enhanced monitoring |
-| 3.5–4.5 | Elevated Risk | Limited approval, strict limits |
-| 4.5–5.0 | High Risk | Not recommended |
+| **1.00–1.49** | **Minimal Risk** | **Approved, high confidence** |
+| 1.50–2.49 | Low Risk | Approved with standard monitoring |
+| 2.50–3.49 | Medium Risk | Approved with enhanced monitoring |
+| 3.50–4.49 | Elevated Risk | Limited approval, strict limits |
+| 4.50–5.00 | High Risk | Not recommended |
 
 **Final Risk Tier: Minimal Risk (1.3 / 5.0) — Approved, high confidence**
 

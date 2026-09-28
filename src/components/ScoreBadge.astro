@@ -1,18 +1,20 @@
 ---
-import { scoreColor, scoreTextColor } from "../lib/colors";
+import { formatListScore, formatScore, scoreColor, scoreTextColor } from "../lib/colors";
 
 interface Props {
   score: number;
   size?: "small" | "large";
+  /** Report cards (home page, reports list): floor to one decimal. Everywhere else shows two decimals. */
+  list?: boolean;
 }
 
-const { score, size = "small" } = Astro.props;
+const { score, size = "small", list = false } = Astro.props;
 const bg = scoreColor(score);
 const fg = scoreTextColor(score);
 ---
 
 <span class:list={["score-badge", `score-${size}`]} style={`background:${bg};color:${fg};`}>
-  {score.toFixed(1)}
+  {list ? formatListScore(score) : formatScore(score)}
 </span>
 
 <style>

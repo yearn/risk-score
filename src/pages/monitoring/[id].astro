@@ -448,39 +448,46 @@ const apiProtocol = protocol.apiProtocol ?? "";
     padding: 0.3rem 0.5rem 0.5rem;
     white-space: nowrap;
   }
-  .alert-row {
+  /* Rows are injected via innerHTML and lack Astro's scope attribute, so style them globally. */
+  .alert-table :global(.alert-row) {
     border-bottom: 1px solid color-mix(in srgb, var(--border) 30%, transparent);
   }
-  .alert-row:last-child {
+  .alert-table :global(.alert-row:last-child) {
     border-bottom: none;
   }
-  .alert-cell {
+  .alert-table :global(.alert-cell) {
     padding: 0.55rem 0.5rem;
     vertical-align: top;
   }
-  .alert-cell--msg {
+  .alert-table :global(.alert-cell--msg) {
     color: var(--text-primary);
     line-height: 1.45;
-    word-break: break-word;
+    /* `anywhere` lowers the cell's min-content width so long hashes can't widen the table. */
+    overflow-wrap: anywhere;
   }
-  .alert-cell--msg p {
+  .alert-table :global(.alert-cell--msg p) {
     margin: 0;
   }
-  .alert-cell--msg code {
+  .alert-table :global(.alert-cell--msg code) {
     font-size: 0.8rem;
     background: color-mix(in srgb, var(--bg-secondary) 70%, transparent);
     padding: 0.1em 0.35em;
     border-radius: 4px;
   }
-  .alert-cell--msg a {
+  .alert-table :global(.alert-cell--msg pre) {
+    max-width: 100%;
+    overflow-x: auto;
+    white-space: pre-wrap;
+  }
+  .alert-table :global(.alert-cell--msg a) {
     color: var(--brand-blue);
   }
-  .alert-cell--sev {
+  .alert-table :global(.alert-cell--sev) {
     white-space: nowrap;
     font-size: 0.8rem;
     color: var(--text-secondary);
   }
-  .alert-cell--time {
+  .alert-table :global(.alert-cell--time) {
     white-space: nowrap;
     text-align: right;
     font-size: 0.78rem;
