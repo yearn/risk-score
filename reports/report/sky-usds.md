@@ -4,7 +4,7 @@
 - **Token:** USDS (Sky Dollar) and sUSDS (Savings USDS)
 - **Chain:** Ethereum
 - **Token Address:** [`0xdC035D45d973E3EC169d2276DDab16f1e407384F`](https://etherscan.io/address/0xdC035D45d973E3EC169d2276DDab16f1e407384F) (USDS) · [`0xa3931d71877C0E7a3148CB7Eb4463524FEc27fbD`](https://etherscan.io/address/0xa3931d71877C0E7a3148CB7Eb4463524FEc27fbD) (sUSDS)
-- **Final Score: 1.5/5.0**
+- **Final Score: 1.67/5.0**
 
 ## Overview + Links
 
@@ -225,7 +225,7 @@ USDS has no dedicated CDP system. Every USDS in existence has come from one of t
 
 5. **MakerDAO/Sky CDPs (ETH-A, ETH-B, ETH-C, wstETH-A, wstETH-B, WBTC-C, RWA-* vaults, LockStake)** — borrowers post collateral, draw DAI (which they can then swap to USDS via the converter). These vaults are over-collateralized at the ilk level (typical liquidation ratios 145–170% for crypto, 100%+ for RWAs). Combined crypto-CDP and LockStake debt is now **~$547M**, ~4.5% of VAT debt
 
-All channels ultimately settle through **MCD_VAT** ([`0x35D1b3F3…492B`](https://etherscan.io/address/0x35D1b3F3D7966A1DFe207aa4514C12a259A0492B)), which at the snapshot reports `debt()` in rad units → **~12.06B normalized debt**. The corresponding DAI + USDS issued supply (Ethereum mainnet) is ~4.58B + ~6.65B ≈ **~11.22B**, and the difference represents stability-fee accrual and surplus in MCD_VOW.
+All channels ultimately settle through **MCD_VAT** ([`0x35D1b3F3…492B`](https://etherscan.io/address/0x35D1b3F3D7966A1DFe207aa4514C12a259A0492B)), which at the snapshot reports `debt()` in rad units → **~12.06B normalized debt**. The corresponding DAI + USDS issued supply (Ethereum mainnet) is ~4.58B + ~6.65B ≈ **~11.22B**. The ~$837M difference is internal `vat.dai` that has not been exited to ERC-20: the Vow's **$633.2M** surplus (`vat.dai(MCD_VOW)`) and **$203.5M** of DSR deposits held by [MCD_POT](https://etherscan.io/address/0x197E90f9FAD81970bA7976f33CbD77088E5D7cf7) (`vat.dai(MCD_POT)`), with ~$0.5M in other internal balances.
 
 ### Accessibility
 
@@ -292,7 +292,7 @@ Cutting the same book by *underlying asset* rather than by ilk, SkyEco / Observa
 
 ### Tertiary: sUSDS ERC-4626 Withdrawal
 
-- `redeem(shares, receiver, owner)` returns USDS at the current `chi` rate, atomic, zero fee. Underlying USDS is minted on-demand via `USDS_JOIN` — there is no per-block withdrawal cap
+- `redeem(shares, receiver, owner)` returns USDS at the current `chi` rate, atomic, zero fee. It first calls `drip()`, which mints only the yield accrued since the last `rho` (`vat.suck(vow, sUSDS, diff)` then `usdsJoin.exit(sUSDS, diff)`), then burns the shares and transfers USDS the vault already holds (`usds.transfer(receiver, assets)` in the deployed [`SUsds` implementation](https://etherscan.io/address/0x4e7991e5C547ce825BdEb665EE14a3274f9F61e0#code)). Principal is not minted on withdrawal: at the snapshot the vault held [4,674,942,458 USDS](https://etherscan.io/address/0xdC035D45d973E3EC169d2276DDab16f1e407384F#readContract) (`USDS.balanceOf(sUSDS)`) against `totalAssets()` of 4,674,942,773 — the ~315 USDS difference is yield accrued but not yet dripped. There is no per-block withdrawal cap or queue; every share is redeemable from the vault's own USDS balance
 
 ### DEX Liquidity
 
@@ -345,7 +345,7 @@ Sky uses **token-weighted continuous-approval voting** rather than a multisig:
 
 **Strengths:**
 - Token-weighted vote in Chief is fully on-chain and continuously contestable — voters can re-deposit and shift weight at any time, providing fast response to malicious spells during the 48 h delay
-- The 48 h `MCD_PAUSE.delay()` is **shorter than the typical 7-day timelock** assumed in the rubric (a score-1 criterion), but it has historically been sufficient for Sky's stakeholders to react and rotate the hat if needed. It can only be reduced through a passed spell that itself takes 48 h
+- The 48 h `MCD_PAUSE.delay()` applies to every upgrade, ward change, and parameter change, meeting the rubric's 48h+ Score-1 timelock bar, and it has historically been sufficient for Sky's stakeholders to react and rotate the hat if needed. It can only be reduced through a passed spell that itself takes 48 h
 - MCD_PAUSE has `owner = address(0)` — no admin shortcut
 - Upgrades to USDS/sUSDS proxies require the PauseProxy to call `upgradeToAndCall` on the implementation. Same 48 h delay applies
 - No EOA holds direct admin powers on USDS, sUSDS, LitePSM, or the Pocket. All sensitive `wards` mappings point to PauseProxy or other audited Sky contracts
@@ -652,12 +652,12 @@ Snapshot block 25939320 (September 9, 2026).
 |--------|-----------|
 | Upgradeability | USDS and sUSDS are **UUPS upgradeable**. Upgrades gated by `wards[PauseProxy]=1` and a 48 h GSM delay |
 | Vote / consensus | **SKY token-weighted continuous voting in Chief**. No multisig. Functionally more decentralized than a typical 3/5 safe but exposes governance to SKY holder concentration |
-| Timelock | **48 h** GSM delay on MCD_PAUSE (`delay = 172800`). Below the 7-day threshold for a rubric-1 score |
+| Timelock | **48 h** GSM delay on MCD_PAUSE (`delay = 172800`) on every upgrade, `rely`, and parameter change. Meets the rubric's Score-1 bar ("48h+ timelock on critical operations") with no margin above it |
 | Emergency channel | LITE_PSM_MOM can halt PSM swaps **without** the 48 h delay (authority = Chief, owner = PauseProxy) |
 | Privileged roles | PauseProxy holds direct wards on USDS, sUSDS, all PSM components, and can `rely` new minters |
 | EOA risk | None |
 
-**Governance Score: 1.0 / 5** — Sky's Chief is one of the most decentralized governance systems in DeFi: token-weighted continuous-approval voting with **no multisig at all**, no EOA roles, and all wards held by PauseProxy. The rubric awards Score 1 to "Immutable OR fully decentralized DAO" with "Multisig above 3/5 threshold, no EOA roles, multi-party approval" — Sky meets the decentralized-DAO criterion and *exceeds* the multisig criterion (the entire SKY-holder set is the approver). The only column where Sky is below Score 1 is the timelock — 48 h vs the 7-day rubric criterion — but the live re-vote capability in Chief (a contentious spell must maintain hat status throughout the delay) extends the effective defense window beyond a static 7-day timelock. **Caveat:** the LITE_PSM_MOM emergency channel lets the elected hat halt PSM swaps *without* the 48 h delay. This is a one-sided emergency mechanism (it can pause but not extract value), and it has never been invoked since deployment.
+**Governance Score: 1.0 / 5** — Sky's Chief is one of the most decentralized governance systems in DeFi: token-weighted continuous-approval voting with **no multisig at all**, no EOA roles, and all wards held by PauseProxy. The rubric awards Score 1 to "Immutable OR fully decentralized DAO" with "Multisig above 3/5 threshold, no EOA roles, multi-party approval" — Sky meets the decentralized-DAO criterion and *exceeds* the multisig criterion (the entire SKY-holder set is the approver). The timelock column is met exactly: every upgrade, `rely`, and parameter change passes the 48 h `MCD_PAUSE` delay, which is the rubric's Score-1 threshold ("48h+"; the rubric gives no extra credit above it). Continuous re-voting in Chief lets holders replace a malicious hat during the delay, but it does not lengthen the 48 h window and is not relied on for this score. Governance powers are broad — PauseProxy can upgrade both proxies and `rely` new minters — and SKY approval is concentrated (top-3 supporters ~90.6% of hat approvals), so any reduction of `delay()` below 48 h would drop the timelock column to Score 2, and a single supporter exceeding 50% of hat approvals triggers a governance re-review (see [Reassessment Triggers](#reassessment-triggers)). **Caveat:** the LITE_PSM_MOM emergency channel lets the elected hat halt PSM swaps *without* the 48 h delay. This is a one-sided emergency mechanism (it can pause but not extract value), and it has never been invoked since deployment.
 
 **Subcategory B: Programmability**
 
@@ -681,9 +681,9 @@ Snapshot block 25939320 (September 9, 2026).
 | Quality | Predominantly established: Circle, BlackRock, Janus Henderson, Chainlink, Spark, Morpho, Uniswap. Newer or less-liquid venues (Maple, Galaxy, Apollo private credit) are individually ≤~$400M |
 | Single point of failure | None. A USDC freeze/depeg impairs the USDS-USDC swap but the DAI-USDS converter still works; no single allocator counterparty exceeds ~7.7% of backing |
 
-**Dependencies Score: 3.0 / 5** — the rubric's Score 3 is "2-3 established protocol dependencies; some critical functions depend on them", and the honest count is higher than that once the allocator book is enumerated: a dozen-plus established counterparties, of which USDC is critical to the swap path and the offchain-credit set is critical to solvency. The prior 1.5 was derived from a dependency list that stopped at USDC, Chainlink and LayerZero, and is not defensible now that ~49.8% of VAT debt is documented as sitting in allocator vaults with named downstream exposure. It is held at 3.0 rather than 4.0 because the dependencies are mostly blue-chip rather than "newer", no single allocator counterparty exceeds ~7.7% of backing (the largest is the Janus Henderson Treasury Fund at ~$758.7M), and the *core user functions* — holding USDS, converting to DAI, accruing SSR in sUSDS — depend on none of them; only solvency does.
+**Dependencies Score: 4.0 / 5** — the rubric's Score 4 is "Many or newer protocol dependencies; critical functionality depends on them", and that is what the enumerated allocator book shows: a dozen-plus counterparties (Circle for the swap path; Janus Henderson/Anemoy, BlackRock BUIDL, Maple, Galaxy, Anchorage, Securitize and Apollo for offchain credit; SparkLend, Morpho and Uniswap for onchain deployment; Ripple and Paxos stablecoins), and USDS solvency — a core requirement of a stablecoin — depends on them collectively. Score 3 ("2-3 established protocol dependencies") understates the count. The prior 1.5 was derived from a dependency list that stopped at USDC, Chainlink and LayerZero, and is not defensible now that ~49.8% of VAT debt is documented as sitting in allocator vaults with named downstream exposure. Mitigants are real but do not change the rubric row: the counterparties are predominantly established, no single allocator counterparty exceeds ~7.7% of backing (the largest is the Janus Henderson Treasury Fund at ~$758.7M), and holding USDS, converting to DAI, and accruing SSR remain mechanically operational even if backing is impaired. No single dependency's failure breaks the protocol, so Score 5 does not apply.
 
-**Cat 2 Score = (1.0 + 1.0 + 3.0) / 3 ≈ 1.67 → 1.7 / 5** (conservative round-up to one decimal)
+**Cat 2 Score = (1.0 + 1.0 + 4.0) / 3 = 2.00 / 5**
 
 #### Category 3: Funds Management (Weight: 30%)
 
@@ -696,11 +696,11 @@ Snapshot block 25939320 (September 9, 2026).
 | Verifiability | Per-ilk debt and ink readable onchain. Prime allocator and RWA fractions require Observatory look-through / attestations |
 | Leverage | None at USDS holder level. CDP borrowers are leveraged by design |
 
-**Collateralization Score: 2.5 / 5** — collateralized in aggregate (total collateral value ~$15.81B, ~131% of VAT debt), but not by the rubric's Score-2 standard of "100% **onchain** collateral". Measured against Observatory's ~$9.91B loan-coverage backing, **~29.3% (~$2.90B) is offchain** tokenized treasury, AAA corporate, private and OTC credit, confirmed by periodic attestation rather than contract reads — that is the Score-3 backing and verifiability profile. Against that, ~70.7% is onchain, and the single largest line — ~$3.95B of USDC in the PSM Pocket, ~39.9% of backing — is instantly verifiable by a `balanceOf` call.
+**Collateralization Score: 3.0 / 5** — collateralized in aggregate (total collateral value ~$15.81B, ~131% of VAT debt), but not by the rubric's Score-2 standard of "100% **onchain** collateral". Measured against Observatory's ~$9.91B loan-coverage backing, **~29.3% (~$2.90B) is offchain** tokenized treasury, AAA corporate, private and OTC credit, confirmed by periodic attestation rather than contract reads. Two of the rubric's three columns match Score 3 outright — backing ("100% collateral, some offchain") and verifiability ("periodic custodian attestation") — and the onchain majority does not remove the dependence on that offchain slice.
 
-The deciding factor for the 0.5 uplift from the prior 2.0 is **allocator opacity**: ~49.8% of VAT debt is drawn by Prime allocator vaults (Spark, Grove, Obex and three smaller ones) where the ilk exposes only the drawn debt, not the assets standing behind it. Reconstructing that backing requires trusting Block Analitica's Observatory look-through rather than reading the VAT. That structure was not documented in the June 2026 assessment; it is a correction to how this subcategory was scored, not a deterioration in the protocol.
+**Allocator opacity** reinforces this: ~49.8% of VAT debt is drawn by Prime allocator vaults (Spark, Grove, Obex and three smaller ones) where the ilk exposes only the drawn debt, not the assets standing behind it. Reconstructing that backing requires trusting Block Analitica's Observatory look-through rather than reading the VAT. That structure was not documented in the June 2026 assessment; the move from 2.0 is a correction to how this subcategory was scored, not a deterioration in the protocol — the offchain share actually fell from ~32.6% to ~29.3% of Observatory loan-coverage backing (~25.9% → ~24.0% of VAT debt).
 
-A reader applying the rubric strictly could argue for 3.0: the backing column ("some offchain") and the verifiability column ("periodic custodian attestation") both match Score 3 outright, and only the quality column pulls toward 2. The case for holding at 2.5 is that roughly seven-tenths of backing is onchain and the largest single line is a real-time-verifiable USDC reserve — a materially better position than the Score-3 archetype. This is the least settled judgment in the report.
+Mitigants keep this at 3.0 rather than higher: ~70.7% of backing is onchain, and the single largest line — ~$3.95B of USDC in the PSM Pocket, ~39.9% of backing — is instantly verifiable by a `balanceOf` call.
 
 **Subcategory B: Provability**
 
@@ -713,7 +713,7 @@ A reader applying the rubric strictly could argue for 3.0: the backing column ("
 
 **Provability Score: 1.5 / 5** — Excellent onchain transparency for the live-swap path; mild offchain dependence for RWA fraction.
 
-**Cat 3 Score = (2.5 + 1.5) / 2 = 2.0 / 5**
+**Cat 3 Score = (3.0 + 1.5) / 2 = 2.25 / 5**
 
 #### Category 4: Liquidity Risk (Weight: 15%)
 
@@ -742,30 +742,30 @@ A reader applying the rubric strictly could argue for 3.0: the backing column ("
 
 ### Final Score Calculation
 
-**Rounding rule:** category scores use one-decimal precision; when a subcategory average falls between two 0.1 marks, round **up** (conservative). The weighted sum is then rounded to one decimal place with standard nearest-0.1 rounding, with ties broken up.
+**Rounding rule:** the weighted sum is recorded to two decimal places, rounded down (1.475 → 1.47). The home page and reports list round it down again to one decimal.
 
 | Category | Score | Weight | Weighted |
 |----------|------:|-------:|---------:|
 | Audits & Historical | 1.0 | 20% | 0.200 |
-| Centralization & Control | 1.7 | 30% | 0.510 |
-| Funds Management | 2.0 | 30% | 0.600 |
+| Centralization & Control | 2.00 | 30% | 0.600 |
+| Funds Management | 2.25 | 30% | 0.675 |
 | Liquidity Risk | 1.0 | 15% | 0.150 |
 | Operational Risk | 1.0 |  5% | 0.050 |
-| **Final Score** | | | **1.510 → 1.5 / 5.0** |
+| **Final Score** | | | **1.67/5.0** |
 
-**Final Score: 1.5 / 5.0** — at the top of the Minimal-Risk tier (1.0–1.5).
+**Final Score: 1.67 / 5.0** — in the Low-Risk tier (1.50–2.49). The move out of Minimal Risk comes from scoring the Prime-allocator backing and counterparty set that the June 2026 assessment did not document, not from a deterioration in the protocol.
 
 ### Risk Tier
 
 | Final Score | Risk Tier | Recommendation |
 |------------|-----------|----------------|
-| **1.0–1.5** | **Minimal Risk** | **Approved, high confidence** |
-| 1.5–2.5 | Low Risk | Approved with standard monitoring |
-| 2.5–3.5 | Medium Risk | Approved with enhanced monitoring |
-| 3.5–4.5 | Elevated Risk | Limited approval, strict limits |
-| 4.5–5.0 | High Risk | Not recommended |
+| 1.00–1.49 | Minimal Risk | Approved, high confidence |
+| **1.50–2.49** | **Low Risk** | **Approved with standard monitoring** |
+| 2.50–3.49 | Medium Risk | Approved with enhanced monitoring |
+| 3.50–4.49 | Elevated Risk | Limited approval, strict limits |
+| 4.50–5.00 | High Risk | Not recommended |
 
-**Final Risk Tier: Minimal Risk (1.5 / 5.0) — Approved, high confidence**
+**Final Risk Tier: Low Risk (1.67 / 5.0) — Approved with standard monitoring**
 
 ---
 
@@ -803,4 +803,4 @@ A reader applying the rubric strictly could argue for 3.0: the backing column ("
 | Date | Score | Notes |
 | --- | --- | --- |
 | [June 18, 2026](https://github.com/yearn/risk-score/pull/204) | 1.3 | Initial assessment |
-| [September 9, 2026](https://github.com/yearn/risk-score/pull/457) | 1.5 | Reassessment. Supply contraction (USDS 7.82B → 6.65B, sUSDS assets 5.88B → 4.67B); LitePSM `buf` doubled to 800M DAI; Spark Liquidity Layer repatriated Base/Optimism/Unichain bridge positions to mainnet (escrowed USDS 448M → 102M). Collateralization restated from onchain per-ilk debt: Prime allocator vaults are ~49.8% of VAT debt and were previously undocumented, and the ~$690M `vice` was previously mischaracterised as Vow surplus. Proxies, `wards`, 48 h GSM delay, and 2-of-2 DVN config unchanged. Collateralization subscore 2.0 → 2.5 for allocator opacity and External Dependencies 1.5 → 3.0 once the allocator counterparty set (BlackRock BUIDL, Janus Henderson, Maple, Galaxy, Anchorage, SparkLend, Morpho, Uniswap) is enumerated, moving the final score 1.3 → 1.5 (tier unchanged) |
+| [September 9, 2026](https://github.com/yearn/risk-score/pull/457) | 1.67 | Reassessment. Supply contraction (USDS 7.82B → 6.65B, sUSDS assets 5.88B → 4.67B); LitePSM `buf` doubled to 800M DAI; Spark Liquidity Layer repatriated Base/Optimism/Unichain bridge positions to mainnet (escrowed USDS 448M → 102M). Collateralization restated from onchain per-ilk debt: Prime allocator vaults are ~49.8% of VAT debt and were previously undocumented, and the ~$690M `vice` was previously mischaracterised as Vow surplus. Proxies, `wards`, 48 h GSM delay, and 2-of-2 DVN config unchanged. Collateralization subscore 2.0 → 3.0 (~29.3% of backing offchain under periodic attestation, plus allocator opacity) and External Dependencies 1.5 → 4.0 once the allocator counterparty set (BlackRock BUIDL, Janus Henderson, Maple, Galaxy, Anchorage, SparkLend, Morpho, Uniswap) is enumerated; Governance stays 1.0 under the 48h+ Score-1 timelock bar. Final score 1.3 → 1.67, Minimal Risk → Low Risk |

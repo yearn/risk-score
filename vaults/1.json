@@ -65,7 +65,8 @@
             "review": 0,
             "riskExposure": 0,
             "testing": 0
-        }
+        },
+        "report": "https://curation.yearn.fi/report/yearn-yvdai/"
     },
     "0x05329aab081b125eef7fbbc8b857428d478e692b": {
         "riskLevel": 2,
@@ -269,7 +270,8 @@
             "review": 0,
             "riskExposure": 0,
             "testing": 0
-        }
+        },
+        "report": "https://curation.yearn.fi/report/yearn-yvusds/"
     },
     "0x1d0bcbf0f80cc47e7766d48d61c5fe7ad8a19640": {
         "riskLevel": 1,
@@ -456,7 +458,8 @@
             "review": 0,
             "riskExposure": 0,
             "testing": 0
-        }
+        },
+        "report": "https://curation.yearn.fi/report/yearn-yvusdt/"
     },
     "0x378ffd482c767f847d48818552f8438b17335c89": {
         "riskLevel": 1,
@@ -781,6 +784,24 @@
             "testing": 1
         }
     },
+    "0x696d02db93291651ed510704c9b286841d506987": {
+        "riskLevel": 2,
+        "riskScore": {
+            "centralizationRisk": 0,
+            "comment": "",
+            "complexity": 0,
+            "externalProtocolAudit": 0,
+            "externalProtocolCentralisation": 0,
+            "externalProtocolLongevity": 0,
+            "externalProtocolTvl": 0,
+            "externalProtocolType": 0,
+            "protocolIntegration": 0,
+            "review": 0,
+            "riskExposure": 0,
+            "testing": 0
+        },
+        "report": "https://curation.yearn.fi/report/yearn-yvusd/"
+    },
     "0x6aceda98725505737c0f00a3da0d047304052948": {
         "riskLevel": 1,
         "riskScore": {
@@ -847,7 +868,8 @@
             "review": 0,
             "riskExposure": 0,
             "testing": 0
-        }
+        },
+        "report": "https://curation.yearn.fi/report/yearn-yvwbtc/"
     },
     "0x75f35498e0d053d0dbd2472bc06e7cba1f0c7d3a": {
         "riskLevel": 2,
@@ -934,23 +956,6 @@
             "testing": 0
         }
     },
-    "0x696d02db93291651ed510704c9b286841d506987": {
-        "riskLevel": 2,
-        "riskScore": {
-            "centralizationRisk": 0,
-            "comment": "",
-            "complexity": 0,
-            "externalProtocolAudit": 0,
-            "externalProtocolCentralisation": 0,
-            "externalProtocolLongevity": 0,
-            "externalProtocolTvl": 0,
-            "externalProtocolType": 0,
-            "protocolIntegration": 0,
-            "review": 0,
-            "riskExposure": 0,
-            "testing": 0
-        }
-    },
     "0x832c30802054f60f0cedb5be1f9a0e3da2a0cab4": {
         "riskLevel": 1,
         "riskScore": {
@@ -984,6 +989,24 @@
             "riskExposure": 4,
             "testing": 1
         }
+    },
+    "0x863687e4e9751b57f38b4b0eba04744c72d0f7b8": {
+        "riskLevel": 3,
+        "riskScore": {
+            "centralizationRisk": 0,
+            "comment": "",
+            "complexity": 0,
+            "externalProtocolAudit": 0,
+            "externalProtocolCentralisation": 0,
+            "externalProtocolLongevity": 0,
+            "externalProtocolTvl": 0,
+            "externalProtocolType": 0,
+            "protocolIntegration": 0,
+            "review": 0,
+            "riskExposure": 0,
+            "testing": 0
+        },
+        "report": "https://curation.yearn.fi/report/flex/"
     },
     "0x888239ffa9a0613f9142c808aa9f7d1948a14f75": {
         "riskLevel": 1,
@@ -1510,7 +1533,8 @@
             "review": 0,
             "riskExposure": 0,
             "testing": 0
-        }
+        },
+        "report": "https://curation.yearn.fi/report/yearn-yvusdc/"
     },
     "0xbf2e5bed692c09af8b39677e315f36adf39bd685": {
         "riskLevel": 2,
@@ -1595,7 +1619,8 @@
             "review": 0,
             "riskExposure": 0,
             "testing": 0
-        }
+        },
+        "report": "https://curation.yearn.fi/report/yearn-yvweth/"
     },
     "0xc5ab829b2f7cb3e869949747bc8c6f66ef2250cc": {
         "riskLevel": 1,

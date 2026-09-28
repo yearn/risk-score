@@ -158,6 +158,7 @@ const schemaJson = JSON.stringify(schema)
           <a href="/monitoring/">Monitoring</a>
         </nav>
         </div>
+        <a href="/contact/" class="nav-contact">Contact</a>
         <button id="theme-toggle" class="theme-toggle" aria-label="Toggle light mode">
           <svg class="icon-sun" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <circle cx="12" cy="12" r="5" />
@@ -182,6 +183,7 @@ const schemaJson = JSON.stringify(schema)
     <footer class="site-footer">
       <div class="container">
         <p>Risk Assessments by <a href="https://docs.yearn.fi/getting-started/products/curating/introduction" target="_blank" rel="noopener noreferrer">Yearn Curation</a></p>
+        <p class="footer-contact">Need curation, monitoring or a risk assessment? <a href="/contact/">Get in touch</a></p>
       </div>
     </footer>
     <script is:inline>
@@ -384,6 +386,32 @@ const schemaJson = JSON.stringify(schema)
     color: var(--text-primary);
     text-decoration: none;
   }
+  /* Contact is the one nav item asking for an action, so it reads as a chip
+     rather than a plain link. It sits outside .header-nav because that list
+     scrolls horizontally on narrow screens — inside it, the CTA would be the
+     first thing to disappear off the right edge on a phone. */
+  .nav-contact {
+    flex-shrink: 0;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--brand-blue);
+    text-decoration: none;
+    white-space: nowrap;
+    padding: 0.3rem 0.75rem;
+    border: 1px solid color-mix(in srgb, var(--brand-blue) 40%, transparent);
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--brand-blue) 10%, transparent);
+    transition: background 0.2s, border-color 0.2s;
+  }
+  .nav-contact:hover {
+    color: var(--brand-blue);
+    text-decoration: none;
+    background: color-mix(in srgb, var(--brand-blue) 18%, transparent);
+    border-color: var(--brand-blue);
+  }
+  .footer-contact {
+    margin-top: 0.4rem;
+  }
   .nav-external {
     display: inline-flex;
     align-items: center;
@@ -409,7 +437,7 @@ const schemaJson = JSON.stringify(schema)
     display: block;
   }
   .theme-toggle {
-    margin-left: auto;
+    flex-shrink: 0;
     background: none;
     border: 1px solid var(--border);
     border-radius: 6px;
@@ -456,6 +484,10 @@ const schemaJson = JSON.stringify(schema)
     }
     .header-nav {
       gap: 0.75rem;
+    }
+    .nav-contact {
+      padding: 0.25rem 0.6rem;
+      font-size: 0.8rem;
     }
   }
   .site-footer {
