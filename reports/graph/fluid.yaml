@@ -178,7 +178,7 @@ nodes:
     label: sUSDai Capped Rate Oracle (USDai = $1)
     address: "0xC5D27C5d356479b681328351F1583c63051E76a0"
     category: dependency
-    note: FluidChainlinkCappedRate over Chainlink SUSDAI/USDAI exchange rate; source for all eight Ethereum sUSDai vault oracles since IGP-136 (Jul 21 2026); USDai leg fixed 1:1 — ~$45.2M T1 debt not liquidated by a USDai depeg
+    note: FluidChainlinkCappedRate over Chainlink SUSDAI/USDAI exchange rate; source for all eight Ethereum sUSDai vault oracles since IGP-136 (Jul 21 2026); USDai leg fixed 1:1; Arbitrum (FluidERC4626CappedRate) and Base (FluidChainlinkCappedRateL2) sUSDai oracles use the same peg — ~$214.3M of sUSDai-backed debt across the three chains is not liquidated by a USDai depeg
   - id: agi3-fluid-wallet
     label: AGI3 FLUID Allocation (5M, undelegated)
     address: "0xcabebc7f76d53582a4be7d9972a2b4f531753fd7"
