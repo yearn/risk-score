@@ -2,7 +2,7 @@
 
 - **Assessment Date:** September 29, 2026
 - **Token:** USDY (Ondo U.S. Dollar Yield)
-- **Chain:** Ethereum (also Solana, Sei, BNB Chain, Arbitrum, Mantle, Sui, Aptos, Noble, Stellar, Tempo)
+- **Chain:** Ethereum (also Stellar, Sei, Solana, BNB Chain, Sui, Arbitrum, Aptos, Tempo, Mantle, Noble; Immunefi also lists X Layer and Plume deployments)
 - **Token Address:** [`0x96F6eF951840721AdBF46Ac996b59E0235CB985C`](https://etherscan.io/address/0x96F6eF951840721AdBF46Ac996b59E0235CB985C)
 - **Final Score: 2.47/5.0**
 
@@ -14,7 +14,15 @@ USDY is a tokenized, yield-bearing note secured by short-dated US Treasury bills
 
 **Scope for Yearn.** The issue requests an assessment of (1) holding USDY and (2) a strategy that swaps USDC→USDY, holds, and redeems when needed. The practical path for (2) is the `USDY_InstantManager`. It mints and redeems atomically at the oracle price with currently zero fees. The calling address must be registered in Ondo's ID registry, so the strategy contract must pass KYC as a non-US entity. Redemptions are capped by rate limits and a manually funded USDC buffer (see [Liquidity Risk](#liquidity-risk)).
 
-**Snapshot provenance.** Ethereum reads are at block [`26084693`](https://etherscan.io/block/26084693) (hash `0x48261da9f4180a3c18ffcd765c3ebc6a390e8d3889b737c3eec535b9ad8b4616`, timestamp 1790703827 = September 29, 2026 17:43 UTC). Mantle, Sei, and Arbitrum supplies are Etherscan-API `latest` reads taken minutes later (Mantle block 101286972, Sei block 234822172, Arbitrum block 510102060). Solana, BNB Chain, Sui, Aptos, Noble, Stellar and Tempo were not read: no configured RPC or explorer access.
+**Snapshot provenance.** Ethereum reads are at block [`26084693`](https://etherscan.io/block/26084693) (hash `0x48261da9f4180a3c18ffcd765c3ebc6a390e8d3889b737c3eec535b9ad8b4616`, timestamp 1790703827 = September 29, 2026 17:43 UTC). Arbitrum, BNB Chain and Mantle reads are pinned to the block at the same timestamp:
+
+| Chain | Block | Hash |
+|-------|-------|------|
+| Arbitrum | [`510100459`](https://arbiscan.io/block/510100459) | `0x1d72a4728424b797db915a8cc805e2f9fe0ce69171bf0b77d87c97a585be61a3` |
+| BNB Chain | [`124758689`](https://bscscan.com/block/124758689) | `0x47cc145784f6d1490225c910dd25048b12ade9ec2bbeea98f42163848de28f94` |
+| Mantle | [`101286758`](https://explorer.mantle.xyz/block/101286758) | `0xb226a1ead2b2e57cdbb9f26ec48f281a97692b8e048c564e61cac339835c6c75` |
+
+Sei reads are Etherscan-API `latest` reads taken minutes later (block 234822172). Solana supply comes from the Jupiter token indexer, not an onchain read. Stellar, Sui, Aptos, Noble, Tempo, X Layer and Plume were not read directly: no configured RPC or explorer access. Their figures come from Ondo's per-chain TVL data.
 
 **Links:**
 
@@ -48,17 +56,21 @@ Ondo lists the following audits for "Ondo Funds and USDY (Ethereum)" ([audits pa
 
 Noble USDY was audited by Halborn (June and July 2024). The Ondo Stocks/OGM stack, including the October 2025 Cantina review of the USDon converter and bridge registrar, has a separate audit list of 13 reports from Cantina, Spearbit, Cyfrin, Zellic and FYEO.
 
-**Coverage gaps:**
+**Coverage gaps (checked against the report texts):**
 
-- The `USDY_InstantManager` was deployed on December 8, 2025 ([creation tx](https://etherscan.io/tx/0xa65d7e9c8f7c7cc9bf341f3b14d3effce5151842da5fdca19adbc72afc11bb53)). It inherits the audited xManager `BaseRWAManager` (the OUSG instant-manager architecture reviewed in early 2025). Whether the USDY-specific subclass and the rUSDY wrap path were covered by a published report is **TODO**; no report names `USDY_InstantManager` explicitly.
-- The `OndoMintBurnAdapter` (LayerZero) was deployed August 21, 2024. Its audit coverage is **TODO**; the bridge docs mention review by "a leading Web3 security firm" without naming it.
+- **`USDY_InstantManager`** was deployed on December 8, 2025 ([creation tx](https://etherscan.io/tx/0xa65d7e9c8f7c7cc9bf341f3b14d3effce5151842da5fdca19adbc72afc11bb53)). Its source is published in [ondoprotocol/rwa-contracts](https://github.com/ondoprotocol/rwa-contracts) under `contracts/xManager/rwaManagers/usdyInstantManager/`.
+  - The shared xManager stack it inherits was audited through `OUSG_InstantManager`. [Halborn (Nov 2024 – Jan 2025)](https://docs-v2-git-prod-ondo-docs.vercel.app/pdf/Ondo-Halborn-Audit-Feb-2025.pdf) covered `BaseRWAManager`, `OndoTokenRouter`, `OndoRateLimiter`, `OndoFees`, `OndoCompliance`, `OndoIDRegistry`, `PauseManager` and token sources/recipients. [Spearbit (Feb–Mar 2025)](https://cdn.cantina.xyz/reports/Ondo-Spearbit-Security-Review-March-2025.pdf) also reviewed `BaseRWAManager` and `OndoTokenRouter`.
+  - **No published report names the USDY subclass** or its rUSDY wrap path. The subclass is small (288 lines) and mostly delegates to the audited base.
+- **`OndoMintBurnAdapter`** (LayerZero) was deployed August 21, 2024. It is **not** named in any report on Ondo's audit page and is not in `rwa-contracts`. The bridge docs only mention review by "a leading Web3 security firm". It is in the Immunefi bounty scope on Ethereum, Arbitrum, Mantle, Sei and Solana.
+- **Legacy stack.** The legacy token, `USDYManager`, rUSDY and `RWADynamicOracle` were covered by the 2023–2024 Code4rena, Cyfrin and NetherMind reviews.
 
 **Complexity.** The token is a simple OpenZeppelin `ERC20PresetMinterPauserUpgradeable` with blocklist, allowlist (currently an `AllowlistStub` that returns `true`) and Chainalysis sanctions hooks, plus an unrestricted `BURNER_ROLE` burn. The surrounding system is more complex: two mint managers, a router with pluggable token sources and recipients, an oracle registry, a rate limiter, fee modules, an admin-subscription allowance contract and a LayerZero adapter.
 
 ### Bug Bounty
 
 - [Immunefi](https://immunefi.com/bug-bounty/ondofinance/), live since March 7, 2023. Critical smart-contract bugs pay 10% of funds affected, **up to $1,000,000**, with a $50,000 minimum.
-- SEAL Safe Harbor: not found in the [Safe Harbor registry](https://safeharbor.securityalliance.org/) at the time of writing (**TODO** confirm).
+- **Scope** includes the USDY token (Ethereum, Arbitrum, Mantle, Sei, Plume, X Layer, Solana, Aptos, Noble), rUSDY, `USDY Instant RWA Manager`, `USDY Manager`, the USDY price oracle and wrapper, the xManager stack, and all `OndoMintBurnAdapter` deployments. The page was last updated September 29, 2026.
+- **SEAL Safe Harbor:** not adopted. The Immunefi program data reports `isSafeHarborActive: false`, and no scope asset is marked Safe Harbor.
 
 ## Historical Track Record
 
@@ -76,7 +88,7 @@ Noble USDY was audited by Halborn (June and July 2024). The Ondo Stocks/OGM stac
 USDY holders do not deposit into onchain strategies. Subscription USDC leaves the chain to the issuer, which buys T-bills held at brokers and custodians. Onchain, the relevant flows are:
 
 1. **Subscription (OGM, `USDY_InstantManager`).** USDC → [`OndoTokenRouter`](https://etherscan.io/address/0x99B8d1D1c17a10CD1A878d1A44c11fd7E4daD7bC) → [`BasicRecipient`](https://etherscan.io/address/0x14dd822e1b75253525A209e3cC917Cd0d54B6cAe) → 3-of-6 Safe [`0x3312cc371Fe0Dd5171878630A1E5cf69778E8fa5`](https://etherscan.io/address/0x3312cc371Fe0Dd5171878630A1E5cf69778E8fa5). USDY is minted to the caller in the same transaction.
-2. **Redemption (OGM).** USDY is burned. USDC is pulled via [`BasicSource`](https://etherscan.io/address/0x95feCDD21D48426d3bAd195c6A3f0686e6b4d635) from the same Safe [`0x3312…8fa5`](https://etherscan.io/address/0x3312cc371Fe0Dd5171878630A1E5cf69778E8fa5), which holds **24,987,673.71 USDC** with unlimited allowance to the source.
+2. **Redemption (OGM).** USDY is burned. USDC is pulled via [`BasicSource`](https://etherscan.io/address/0x95feCDD21D48426d3bAd195c6A3f0686e6b4d635) from the same Safe [`0x3312cc371Fe0Dd5171878630A1E5cf69778E8fa5`](https://etherscan.io/address/0x3312cc371Fe0Dd5171878630A1E5cf69778E8fa5), which holds **24,987,673.71 USDC** with unlimited allowance to the source.
 3. **Legacy issuance (Ondo USDY LLC, `USDYManager`).** USDC or USD is wired offchain (historically to the Coinbase Prime address [`0xbDa73A0F13958ee444e0782E1768aB4B76EdaE28`](https://etherscan.io/address/0xbDa73A0F13958ee444e0782E1768aB4B76EdaE28), which holds 0 USDC). A relayer posts a deposit "proof", a price ID and claim timestamp are set, and USDY is minted when claimed.
 
 **Monitoring delegation changes:** the router's `depositTokenRecipient(USDY, USDC)` and `withdrawTokenSources(USDY, USDC, i)`, the `BasicSource.withdrawAddress()`, and the offchain custodian mix in daily Ankura reports.
@@ -106,14 +118,14 @@ USDY holders do not deposit into onchain strategies. Subscription USDC leaves th
 
 **Mint requires backing:** No, for three of the four Ethereum minters. Only the `USDY_InstantManager.subscribe` path moves collateral (USDC) in the same transaction. Even that USDC goes to an Ondo Safe, not to a verifiable reserve.
 
-**Per-address mint authority** (verified onchain at block 26084693 via `getRoleMemberCount` / `getRoleMember` on [`0x96F6…985C`](https://etherscan.io/address/0x96F6eF951840721AdBF46Ac996b59E0235CB985C)):
+**Per-address mint authority** (verified onchain at block 26084693 via `getRoleMemberCount` / `getRoleMember` on [`0x96F6eF951840721AdBF46Ac996b59E0235CB985C`](https://etherscan.io/address/0x96F6eF951840721AdBF46Ac996b59E0235CB985C)):
 
 | Address | Can Mint | Can Burn | Role / Mechanism | Notes |
 |---------|:--------:|:--------:|------------------|-------|
 | [`0xa42613C243b67BF6194Ac327795b926B4b491f15`](https://etherscan.io/address/0xa42613C243b67BF6194Ac327795b926B4b491f15) | ✓ | own balance | `MINTER_ROLE` — `USDY_InstantManager` (OGM) | `subscribe` mints against USDC. **`adminSubscribe` mints without any deposit.** It is gated by `ADMIN_SUBSCRIPTION_ROLE` (3-of-6 Safe [`0x505ff4462bA5E62ed529FA836D768ECd7B85439c`](https://etherscan.io/address/0x505ff4462bA5E62ed529FA836D768ECd7B85439c)) and a USD allowance in [`AdminSubscriptionChecker`](https://etherscan.io/address/0x1cb2Dcc325615d02ae384941149d1dA6521fa018) (currently **$25,000,000** remaining). The allowance is re-settable by the 3-of-5 Safe [`0x5AE21c99FC5f1584D8Cb09a298CFFd92B5d178eF`](https://etherscan.io/address/0x5AE21c99FC5f1584D8Cb09a298CFFd92B5d178eF). 8 admin subscriptions totalling 42.16M USDY ($48.05M) since April 8, 2026. |
-| [`0x25A103A1D6AeC5967c1A4fe2039cdc514886b97e`](https://etherscan.io/address/0x25A103A1D6AeC5967c1A4fe2039cdc514886b97e) | ✓ | — | `MINTER_ROLE` — legacy `USDYManager` (Ondo USDY LLC) | Mints on `claimMint` after `RELAYER_ROLE` posts an offchain deposit proof (`addProof`), `PRICE_ID_SETTER_ROLE` sets its price and `TIMESTAMP_SETTER_ROLE` sets the claim time. Relayer and price-ID setter: 2-of-6 Safe [`0x8D52a385D19F13Ef5A544E0514c62f0A44ff31bf`](https://etherscan.io/address/0x8D52a385D19F13Ef5A544E0514c62f0A44ff31bf) and admin Safe. Timestamp setter: 3-of-6 Safe [`0x505f…439c`](https://etherscan.io/address/0x505ff4462bA5E62ed529FA836D768ECd7B85439c) and admin Safe. The two operational Safes have the **same six owners**. Still active: ~1,251.4M USDY minted through this path in 2026, e.g. [344.9M in one batch on March 9, 2026](https://etherscan.io/tx/0x997879d88c4c5c9afa8a1156e485b704e1e8ae3e1050525cc5febfd18f6cb032) and [493.4M on May 11, 2026](https://etherscan.io/tx/0x5a08b28c8e6f6ed33ce42da3879339603769824bec867a9e6be8feff87fa3d6c). Legacy redemptions are paused (`redemptionPaused = true`). |
+| [`0x25A103A1D6AeC5967c1A4fe2039cdc514886b97e`](https://etherscan.io/address/0x25A103A1D6AeC5967c1A4fe2039cdc514886b97e) | ✓ | — | `MINTER_ROLE` — legacy `USDYManager` (Ondo USDY LLC) | Mints on `claimMint` after `RELAYER_ROLE` posts an offchain deposit proof (`addProof`), `PRICE_ID_SETTER_ROLE` sets its price and `TIMESTAMP_SETTER_ROLE` sets the claim time. Relayer and price-ID setter: 2-of-6 Safe [`0x8D52a385D19F13Ef5A544E0514c62f0A44ff31bf`](https://etherscan.io/address/0x8D52a385D19F13Ef5A544E0514c62f0A44ff31bf) and admin Safe. Timestamp setter: 3-of-6 Safe [`0x505ff4462bA5E62ed529FA836D768ECd7B85439c`](https://etherscan.io/address/0x505ff4462bA5E62ed529FA836D768ECd7B85439c) and admin Safe. The two operational Safes have the **same six owners**. Still active: ~1,251.4M USDY minted through this path in 2026, e.g. [344.9M in one batch on March 9, 2026](https://etherscan.io/tx/0x997879d88c4c5c9afa8a1156e485b704e1e8ae3e1050525cc5febfd18f6cb032) and [493.4M on May 11, 2026](https://etherscan.io/tx/0x5a08b28c8e6f6ed33ce42da3879339603769824bec867a9e6be8feff87fa3d6c). Legacy redemptions are paused (`redemptionPaused = true`). |
 | [`0xa6275720b3fB1Efe3E6EF2b5BF2293148852307D`](https://etherscan.io/address/0xa6275720b3fB1Efe3E6EF2b5BF2293148852307D) | ✓ | ✓ | `MINTER_ROLE` — LayerZero `OndoMintBurnAdapter` | Burns on send, mints on receive. Inbound is capped at 500,000 USDY/24h per EVM route and 300,000/24h from Solana; BNB Chain and Plume inbound limits are 0. See [External Dependencies](#external-dependencies). Owner/delegate: admin Safe. |
-| [`0x1a694A09494E214a3Be3652e4B343B7B81A73ad7`](https://etherscan.io/address/0x1a694A09494E214a3Be3652e4B343B7B81A73ad7) | ✓ | via grant | `MINTER_ROLE` + `DEFAULT_ADMIN_ROLE` — 4-of-7 Safe (Ondo admin) | Can mint any amount directly, grant `MINTER_ROLE` or `BURNER_ROLE` to anyone, and upgrade the token via [ProxyAdmin `0x3ed61633057da0bc58f84b2b9002845e56f94c19`](https://etherscan.io/address/0x3ed61633057da0bc58f84b2b9002845e56f94c19), which it owns. No timelock, module or guard. **Used in practice:** 17 direct `mint` calls in 2026 totalling 95.96M USDY, including [92.14M on May 29, 2026](https://etherscan.io/tx/0x5ef005ec88ea5f40a805a2791690e5f7028205a7ea48bf983beb648ac4dafb72) to top holder [`0xc392…5041`](https://etherscan.io/address/0xc392749b6ff2cd95e5a4e3ed396c93f813395041) and recurring ~0.2–0.3M mints (latest [September 28, 2026](https://etherscan.io/tx/0xf2c0c3df54f9e06674b87189dc8ba1eee010d24d6343e40983d7bfbf7f703cdb)). The purpose and offchain backing of these mints are not disclosed (**TODO**). |
+| [`0x1a694A09494E214a3Be3652e4B343B7B81A73ad7`](https://etherscan.io/address/0x1a694A09494E214a3Be3652e4B343B7B81A73ad7) | ✓ | via grant | `MINTER_ROLE` + `DEFAULT_ADMIN_ROLE` — 4-of-7 Safe (Ondo admin) | Can mint any amount directly, grant `MINTER_ROLE` or `BURNER_ROLE` to anyone, and upgrade the token via [ProxyAdmin `0x3ed61633057da0bc58f84b2b9002845e56f94c19`](https://etherscan.io/address/0x3ed61633057da0bc58f84b2b9002845e56f94c19), which it owns. No timelock, module or guard. **Used in practice:** 17 direct `mint` calls in 2026 totalling 95.96M USDY, including [92.14M on May 29, 2026](https://etherscan.io/tx/0x5ef005ec88ea5f40a805a2791690e5f7028205a7ea48bf983beb648ac4dafb72) to top holder [`0xc392749b6ff2cd95e5a4e3ed396c93f813395041`](https://etherscan.io/address/0xc392749b6ff2cd95e5a4e3ed396c93f813395041) and recurring ~0.2–0.3M mints (latest [September 28, 2026](https://etherscan.io/tx/0xf2c0c3df54f9e06674b87189dc8ba1eee010d24d6343e40983d7bfbf7f703cdb)). The 92.14M mint is **not** recorded as LLC issuance: the LLC's digital-token count is unchanged at 1,873,710,038.64 in the daily Ankura reports for May 27 – June 2, 2026. No offsetting burn exists on Ethereum, Sei, Arbitrum or Mantle. The recurring small mints (2.71M in total) went to EOA [`0x5cec0b5e7cd0eaffa2c5d802767f35976224c72f`](https://etherscan.io/address/0x5cec0b5e7cd0eaffa2c5d802767f35976224c72f). The purpose and backing of these mints is undisclosed (**TODO**). It may be OGM issuance or a migration from Solana/BNB Chain/Stellar, which could not be checked. |
 
 `BURNER_ROLE` (burn **from any address**) currently has 0 holders. The admin Safe can grant it at any time.
 
@@ -121,15 +133,21 @@ USDY holders do not deposit into onchain strategies. Subscription USDC leaves th
 
 **Backing check at mint time:** Atomic USDC transfer for `USDY_InstantManager.subscribe` only. The legacy manager and `adminSubscribe` settle offchain, and the admin Safe needs no backing at all.
 
-**Remote chains.** On [Sei](https://seiscan.io/address/0x54cD901491AeF397084453F4372B93c33260e2A6), [Mantle](https://explorer.mantle.xyz/address/0x5bE26527e817998A7206475496fDE1E68957c5A6) and [Arbitrum](https://arbiscan.io/address/0x35e050d3C0eC2d29D269a8EcEa763a183bDF9A9D), `MINTER_ROLE` has exactly two holders each: the chain's LayerZero adapter and a 4-of-7 Ondo Safe.
+**Remote EVM chains.** Each remote token is an upgradeable proxy whose ProxyAdmin is owned by that chain's 4-of-7 Ondo admin Safe. That Safe also holds `DEFAULT_ADMIN_ROLE` and `MINTER_ROLE`, so it can mint directly. `BURNER_ROLE` is empty on every chain. Each chain also has a 1-of-9 pauser Safe.
 
-| Chain | Admin Safe |
-|-------|------------|
-| Sei | [`0x17813b63cc706111894190ae25d10af5cf586e58`](https://seiscan.io/address/0x17813b63cc706111894190ae25d10af5cf586e58) |
-| Mantle | [`0xc8a7870ffe41054612f7f3433e173d8b5bfca8e3`](https://explorer.mantle.xyz/address/0xc8a7870ffe41054612f7f3433e173d8b5bfca8e3) |
-| Arbitrum | [`0xc4ac5c2fa461901b4d91832d03a7018092edcb4d`](https://arbiscan.io/address/0xc4ac5c2fa461901b4d91832d03a7018092edcb4d) |
+| Chain | Token | Supply | `MINTER_ROLE` holders | Admin Safe (4/7) | Pauser Safe (1/9) |
+|-------|-------|-------:|-----------------------|------------------|-------------------|
+| BNB Chain | [`0x608593d17A2decBbc4399e4185bE4922F97eD32E`](https://bscscan.com/address/0x608593d17A2decBbc4399e4185bE4922F97eD32E) | 72.20M | admin Safe; LayerZero adapter [`0xAE6a049cDda7536Af3875B3dAAF34f24Be5cF00c`](https://bscscan.com/address/0xAE6a049cDda7536Af3875B3dAAF34f24Be5cF00c); `USDY_InstantManager` [`0x9bA360087075A4Cef548eeD71Eed197bf4cFA4E2`](https://bscscan.com/address/0x9bA360087075A4Cef548eeD71Eed197bf4cFA4E2) | [`0x79dfe7e9A32a9aB32aA77ccF46d788e7290aFA3d`](https://bscscan.com/address/0x79dfe7e9A32a9aB32aA77ccF46d788e7290aFA3d) | [`0x80120C4d44fFD6f86716FD8DaCd5E395d8BBbe97`](https://bscscan.com/address/0x80120C4d44fFD6f86716FD8DaCd5E395d8BBbe97) |
+| Sei | [`0x54cD901491AeF397084453F4372B93c33260e2A6`](https://seiscan.io/address/0x54cD901491AeF397084453F4372B93c33260e2A6) | 225.83M | admin Safe; LayerZero adapter [`0x6f04b655d5209e85e47d3920a2ef407a66e83f6c`](https://seiscan.io/address/0x6f04b655d5209e85e47d3920a2ef407a66e83f6c) | [`0x17813b63cc706111894190ae25d10af5cf586e58`](https://seiscan.io/address/0x17813b63cc706111894190ae25d10af5cf586e58) | not read |
+| Arbitrum | [`0x35e050d3C0eC2d29D269a8EcEa763a183bDF9A9D`](https://arbiscan.io/address/0x35e050d3C0eC2d29D269a8EcEa763a183bDF9A9D) | 2.73M | admin Safe; LayerZero adapter [`0x0bE393DC46248E4285dc5CAcA3084bc7e9bfbB41`](https://arbiscan.io/address/0x0bE393DC46248E4285dc5CAcA3084bc7e9bfbB41) | [`0xC4ac5c2fA461901b4D91832d03A7018092eDCb4D`](https://arbiscan.io/address/0xC4ac5c2fA461901b4D91832d03A7018092eDCb4D) | [`0x3AE96235C9F99ABE9D36E60ff79f8D3C8844D196`](https://arbiscan.io/address/0x3AE96235C9F99ABE9D36E60ff79f8D3C8844D196) |
+| Mantle | [`0x5bE26527e817998A7206475496fDE1E68957c5A6`](https://explorer.mantle.xyz/address/0x5bE26527e817998A7206475496fDE1E68957c5A6) | 0.32M | admin Safe; LayerZero adapter [`0x0bE393DC46248E4285dc5CAcA3084bc7e9bfbB41`](https://explorer.mantle.xyz/address/0x0bE393DC46248E4285dc5CAcA3084bc7e9bfbB41) | [`0xC8A7870fFe41054612F7f3433E173D8b5bFcA8E3`](https://explorer.mantle.xyz/address/0xC8A7870fFe41054612F7f3433E173D8b5bFcA8E3) | [`0xC04E1818932f24Ec03457763deF23475D575A44C`](https://explorer.mantle.xyz/address/0xC04E1818932f24Ec03457763deF23475D575A44C) |
 
-Sei supply (225.83M USDY) was minted natively on Sei, not bridged. For example, [133.74M on May 1, 2026](https://seiscan.io/tx/0x3f775e74879c5a8d4dc98ae2cbb386e57be835cce0deb8d4b9524ab2634b39e3) went to a single address, [`0xbbc97fa7898bfc6e387c66b42ec243573d2f8027`](https://seiscan.io/address/0xbbc97fa7898bfc6e387c66b42ec243573d2f8027). Solana, BNB Chain, Sui, Aptos, Noble, Stellar and Tempo mint authorities were not verified (**TODO**).
+- **Sei.** The 225.83M supply was minted natively on Sei, not bridged: Ethereum's outbound limit of 450k USDY/day could not have moved it. For example, [133.74M on May 1, 2026](https://seiscan.io/tx/0x3f775e74879c5a8d4dc98ae2cbb386e57be835cce0deb8d4b9524ab2634b39e3) went to a single address, [`0xbbc97fa7898bfc6e387c66b42ec243573d2f8027`](https://seiscan.io/address/0xbbc97fa7898bfc6e387c66b42ec243573d2f8027).
+- **BNB Chain** has its own OGM `USDY_InstantManager`, which subscribes and redeems in USDT. Its admin is 4-of-7 Safe [`0xa307e57ca7f9712af3557Af8c5624BeF214aa913`](https://bscscan.com/address/0xa307e57ca7f9712af3557Af8c5624BeF214aa913); `adminSubscribe` is held by 3-of-6 Safe [`0x4d25d4790B4eC8B40605dA55509479047a3D4728`](https://bscscan.com/address/0x4d25d4790B4eC8B40605dA55509479047a3D4728), with **$34.97M** of admin-mint allowance remaining.
+  - The BNB LayerZero adapter's **outbound** limits are 0 on every route, and Ethereum's inbound limit from BNB is 0. BNB USDY therefore cannot be bridged out.
+  - A full BNB mint/burn history was not reconstructed: the configured BNB RPC limits `eth_getLogs` to 10-block ranges.
+- **Solana.** Mint authority `BB7W8gZouRNRGyr8Djx8zyoRcgckrDXkKiMjNMtPwaAQ`; freeze authority `51QVCuHfL1FeNjd8BDeffCKhCcAYoULnVB3yjNhShiuK`. Both come from the Jupiter token indexer, and who controls them is **TODO**.
+- **Stellar, Sui, Aptos, Noble, Tempo, X Layer, Plume:** mint authorities not verified (**TODO**: no configured RPC or explorer access). Stellar carries the second-largest supply (see [Provability](#provability)).
 
 **Ethereum supply history.** All 2,226 mint and 1,408 burn events net to exactly `totalSupply` = **1,044,977,484.60 USDY**. Since December 15, 2025 the InstantManager has processed:
 
@@ -165,7 +183,7 @@ The four 3-of-5 Safes holding 81% of Ethereum supply received their USDY via the
 
 **OGM-issued USDY (~$216M, ~9.4%).** Ondo's page lists "Ondo Stocks issued USDY – USD Value $216,275,570" as an *underlying asset*. The daily Ankura report states it "reflects only USDY issued by Ondo USDY LLC, and does not account for USDY issued by Ondo Global Markets (BVI) Limited." No attestation of the reserves behind OGM-issued USDY was found.
 
-The Ondo Stocks framework describes the OGM issuer as a bankruptcy-remote SPV with Ankura as security agent and daily attestations of *stock* holdings ([Trust & Transparency](https://docs.ondo.finance/ondo-stocks/trust-and-transparency)). Whether that framework covers USDY reserves is **TODO**. The USDC from OGM subscriptions is routed to Safe [`0x3312…8fa5`](https://etherscan.io/address/0x3312cc371Fe0Dd5171878630A1E5cf69778E8fa5), which held only $24.99M at the snapshot.
+The Ondo Stocks framework describes the OGM issuer as a bankruptcy-remote SPV with Ankura as security agent and daily attestations of *stock* holdings ([Trust & Transparency](https://docs.ondo.finance/ondo-stocks/trust-and-transparency)). Whether that framework covers USDY reserves is **TODO**. The USDC from OGM subscriptions is routed to Safe [`0x3312cc371Fe0Dd5171878630A1E5cf69778E8fa5`](https://etherscan.io/address/0x3312cc371Fe0Dd5171878630A1E5cf69778E8fa5), which held only $24.99M at the snapshot.
 
 **Headline ratio.** Ondo's 121.95% "Collateralization Ratio" does not follow from its own published figures ($2.30B / $2.07B = 111%). The $2.30B includes OGM-issued USDY valued at face as an asset. The verifiable figure is the LLC's **100.4–100.8%** in recent daily and monthly reports.
 
@@ -179,17 +197,24 @@ The Ondo Stocks framework describes the OGM issuer as a bankruptcy-remote SPV wi
 
 - **Reserves:** offchain. Ankura Trust, as Verification Agent, reviews market values, CUSIPs and maturities daily through read-only access to the deposit, brokerage, operating and exchange accounts. It publishes daily and monthly PDFs; the latest monthly report (August 2026) was uploaded September 3, 2026. There is no Chainlink PoR or other onchain reserve feed.
 - **Coverage gap:** OGM-issued USDY (~9%) is not covered by the Ankura reports, and the Marex opt-out sleeve (~93% of LLC assets) is excluded from the covenant test.
-- **Supply reconciliation:** the LLC reports **1,801.36M digital tokens** (September 24). Verified onchain supplies:
+- **Supply reconciliation.** Ondo's USDY page embeds per-chain TVL (`tvlUsd`, total $2,278,091,841.77 at price $1.14785599). Converted to tokens and compared with direct reads:
 
-| Chain | USDY supply |
-|-------|------------:|
-| Ethereum | 1,044.98M |
-| Sei | 225.83M |
-| Arbitrum | 2.73M |
-| Mantle | 0.32M |
-| **Total verified** | **1,273.86M** |
+| Chain | Ondo-reported (tokens) | Independent read | Source |
+|-------|-----------------------:|-----------------:|--------|
+| Ethereum | 1,044.98M | 1,044.98M | onchain `totalSupply` |
+| Stellar | 467.50M | — | not read (**TODO**) |
+| Sei | 225.83M | 225.83M | onchain (Etherscan API) |
+| Solana | 155.99M | 156.47M | Jupiter token indexer |
+| BNB Chain | 72.20M | 72.20M | onchain `totalSupply` |
+| Sui | 12.49M | — | not read |
+| Arbitrum | 2.73M | 2.73M | onchain `totalSupply` |
+| Aptos | 1.85M | — | not read |
+| Tempo / Mantle / Noble | 0.70M / 0.32M / 0.06M | Mantle 0.32M | Mantle onchain |
+| **Total** | **1,984.65M** | | |
 
-That leaves ~527.5M tokens that should sit on unread chains, mainly Solana, BNB Chain, Aptos, Sui, Noble, Stellar and Tempo, **plus** any OGM-issued supply, which the LLC report excludes. A full cross-chain reconciliation of LLC plus OGM supply against both issuers' reports is **TODO**.
+  Where independent reads exist they match Ondo's figures. The total of 1,984.65M tokens is within **−0.26%** of the two issuers combined: LLC 1,801.36M digital tokens (September 24 report) plus ~188.4M OGM tokens (Ondo's $216.28M "Ondo Stocks issued USDY" line at $1.1479). The small difference is consistent with the gap between the report and snapshot dates. The supply therefore reconciles at the aggregate level.
+
+  Stellar (23.6% of supply) and the other non-EVM chains rest on Ondo's own figures. Splitting the supply by issuer on each chain is not possible onchain.
 - **Price / yield:** calculated onchain by [`RWADynamicOracle`](https://etherscan.io/address/0xA0219AA5B31e65Bc920B5b6DFb8EdF0988121De0) as a daily-compounding rate over monthly ranges (38 ranges; current range ends October 1, 2026 00:00 UTC). Anyone can compute it.
   - The rate itself is chosen by Ondo's `SETTER_ROLE`: the admin Safe and 4-of-8 Safe [`0x19c114B7c6Ff86482cEbFc6AE3cef894e6793Db8`](https://etherscan.io/address/0x19c114B7c6Ff86482cEbFc6AE3cef894e6793Db8). `setRange` rejects rates below 1.0, so it cannot lower the price.
   - The admin Safe can call `overrideRange` to rewrite any range, including the price, and can pause the oracle. A paused oracle makes `getPrice()` revert, which blocks InstantManager mint and redeem.
@@ -202,11 +227,13 @@ That leaves ~527.5M tokens that should sit on unread chains, mainly Solana, BNB 
 
 - Global redemption rate limit: **$15.0M per 24h** (fully available at the snapshot)
 - Per-user default limit: **$10.0M per 24h**
-- USDC available from `BasicSource` (balance of Safe [`0x3312…8fa5`](https://etherscan.io/address/0x3312cc371Fe0Dd5171878630A1E5cf69778E8fa5)): **$24.99M**
+- USDC available from `BasicSource` (balance of Safe [`0x3312cc371Fe0Dd5171878630A1E5cf69778E8fa5`](https://etherscan.io/address/0x3312cc371Fe0Dd5171878630A1E5cf69778E8fa5)): **$24.99M**
 
-The buffer is manually topped up by Ondo; there is no onchain link between the buffer and the T-bill reserves. A Yearn strategy that is registered could therefore exit about $10M per day. A $50M position would take at least 5 days if no other user competes for the $15M global limit and Ondo refills the buffer. Beyond the buffer, redemption requires Ondo to sell T-bills offchain; timing is not contractually specified onchain (**TODO**: OGM redemption terms).
+The buffer is manually topped up by Ondo; there is no onchain link between the buffer and the T-bill reserves. A Yearn strategy that is registered could therefore exit about $10M per day. A $50M position would take at least 5 days if no other user competes for the $15M global limit and Ondo refills the buffer. Beyond the buffer, redemption requires Ondo to sell T-bills offchain. Neither the onchain contracts nor Ondo's docs specify a settlement time for that case (**TODO**: OGM sales terms, available only after KYC).
 
-**Legacy exit:** `USDYManager` redemptions are paused onchain. LLC holders redeem by USD wire to non-US bank accounts ([USDY Basics](https://docs.ondo.finance/general-access-products/usdy/basics)); timing is **TODO**.
+**BNB Chain exit:** the BNB `USDY_InstantManager` redeems into USDT with the same limits: $15M/24h global, $10M/24h per user, zero fees. USDT comes from [`BasicSource` `0xcf234Acac91fCb0390b4CFfb2D8cbb50be5FC245`](https://bscscan.com/address/0xcf234Acac91fCb0390b4CFfb2D8cbb50be5FC245), backed by 3-of-6 Safe [`0xb33A6BDF4192Ebd826ee14967C48F08D3B889fAd`](https://bscscan.com/address/0xb33A6BDF4192Ebd826ee14967C48F08D3B889fAd) holding **25.90M USDT**. BNB USDY cannot be bridged out (outbound limits are 0), so this manager and BNB DEXs are its only exits.
+
+**Legacy exit:** `USDYManager` redemptions are paused onchain. LLC holders redeem by USD wire to non-US bank accounts ([USDY Basics](https://docs.ondo.finance/general-access-products/usdy/basics)). Non-EVM chains (Sui, Aptos, Noble, Stellar) redeem by sending tokens to a per-chain "USDY Redemptions Account" ([addresses](https://docs.ondo.finance/addresses#usdy)). Ondo's docs publish no settlement timing for these offchain paths (**TODO**).
 
 **Secondary markets (non-KYC holders):**
 
@@ -230,7 +257,12 @@ No Uniswap V2 USDY pair exists on Ethereum.
 | 1,000,000 USDY | 1,139,320 | 1.13932 | −0.74% |
 | 2,000,000 USDY | 1,339,120 | 0.66956 | −41.7% |
 
-A non-whitelisted holder cannot exit more than ~$1M without heavy loss. Ethereum has no usable secondary liquidity. LP concentration in the Orca and DragonSwap pools was not analysed (**TODO**).
+A non-whitelisted holder cannot exit more than ~$1M without heavy loss. Ethereum has no usable secondary liquidity.
+
+**LP concentration: not determined.**
+- The Sei DragonSwap V2 pool is a concentrated-liquidity pool with ~87K `Mint`/`Burn` events. Reconstructing positions from the Etherscan log API gave inconsistent totals (more burns than mints), so no ownership split is reported.
+- The Orca pool is on Solana, which has no configured RPC.
+- Treat both pools' liquidity as removable at short notice (**TODO**).
 
 **Stress history:** no observed stress event for USDY's redemption path. The December 2025 issuer change and the January 2026 covenant breach did not show up as onchain redemption failures.
 
@@ -240,32 +272,32 @@ A non-whitelisted holder cannot exit more than ~$1M without heavy loss. Ethereum
 
 | Contract | Upgrade / admin authority | Timelock |
 |----------|---------------------------|----------|
-| USDY token (TransparentUpgradeableProxy → impl [`0xea0f7eebdc2ae40edfe33bf03d332f8a7f617528`](https://etherscan.io/address/0xea0f7eebdc2ae40edfe33bf03d332f8a7f617528)) | ProxyAdmin [`0x3ed6…4c19`](https://etherscan.io/address/0x3ed61633057da0bc58f84b2b9002845e56f94c19) owned by 4-of-7 Safe [`0x1a69…3ad7`](https://etherscan.io/address/0x1a694A09494E214a3Be3652e4B343B7B81A73ad7); same Safe is `DEFAULT_ADMIN_ROLE`, `MINTER_ROLE`, `PAUSER_ROLE`, `LIST_CONFIGURER_ROLE` | None |
-| rUSDY (proxy → impl [`0x58910371d0b52dcf9d2e0a1af4e0078c58436908`](https://etherscan.io/address/0x58910371d0b52dcf9d2e0a1af4e0078c58436908)) | ProxyAdmin [`0xd037a4c1c6b7368cad2537c67e0dc75369d252e9`](https://etherscan.io/address/0xd037a4c1c6b7368cad2537c67e0dc75369d252e9) owned by [`0x1a69…3ad7`](https://etherscan.io/address/0x1a694A09494E214a3Be3652e4B343B7B81A73ad7) | None |
-| `USDY_InstantManager`, `OndoTokenRouter`, `OndoOracle`, `OndoRateLimiter`, `AdminSubscriptionChecker`, `OndoCompliance`, `OndoFees` | `DEFAULT_ADMIN_ROLE` = 3-of-5 Safe [`0x5AE2…78eF`](https://etherscan.io/address/0x5AE21c99FC5f1584D8Cb09a298CFFd92B5d178eF) (not upgradeable, but admin can swap the router, oracle, compliance, ID registry, rate limiter and fee modules, and `retrieveTokens`) | None |
-| `OndoIDRegistry` ([proxy `0xcf6958D69d535FD03BD6Df3F4fe6CDcd127D97df`](https://etherscan.io/address/0xcf6958D69d535FD03BD6Df3F4fe6CDcd127D97df)) | ProxyAdmin [`0x988d740a4365d9d8106fc71aa691ddd2527c07ff`](https://etherscan.io/address/0x988d740a4365d9d8106fc71aa691ddd2527c07ff) owned by [`0x5AE2…78eF`](https://etherscan.io/address/0x5AE21c99FC5f1584D8Cb09a298CFFd92B5d178eF) | None |
-| `RWADynamicOracle` | `DEFAULT_ADMIN_ROLE`/`PAUSER_ROLE` = [`0x1a69…3ad7`](https://etherscan.io/address/0x1a694A09494E214a3Be3652e4B343B7B81A73ad7); `SETTER_ROLE` also 4-of-8 Safe [`0x19c1…3Db8`](https://etherscan.io/address/0x19c114B7c6Ff86482cEbFc6AE3cef894e6793Db8) | None |
-| `USDYOracleWrapper` [`0x87b126e5518b6a1Bb8465779b4607C45C643DF90`](https://etherscan.io/address/0x87b126e5518b6a1Bb8465779b4607C45C643DF90) | `Ownable2Step` owner [`0x5AE2…78eF`](https://etherscan.io/address/0x5AE21c99FC5f1584D8Cb09a298CFFd92B5d178eF) (`setRwaOracle`) | None |
+| USDY token (TransparentUpgradeableProxy → impl [`0xea0f7eebdc2ae40edfe33bf03d332f8a7f617528`](https://etherscan.io/address/0xea0f7eebdc2ae40edfe33bf03d332f8a7f617528)) | ProxyAdmin [`0x3ed61633057da0bc58f84b2b9002845e56f94c19`](https://etherscan.io/address/0x3ed61633057da0bc58f84b2b9002845e56f94c19) owned by 4-of-7 Safe [`0x1a694A09494E214a3Be3652e4B343B7B81A73ad7`](https://etherscan.io/address/0x1a694A09494E214a3Be3652e4B343B7B81A73ad7); same Safe is `DEFAULT_ADMIN_ROLE`, `MINTER_ROLE`, `PAUSER_ROLE`, `LIST_CONFIGURER_ROLE` | None |
+| rUSDY (proxy → impl [`0x58910371d0b52dcf9d2e0a1af4e0078c58436908`](https://etherscan.io/address/0x58910371d0b52dcf9d2e0a1af4e0078c58436908)) | ProxyAdmin [`0xd037a4c1c6b7368cad2537c67e0dc75369d252e9`](https://etherscan.io/address/0xd037a4c1c6b7368cad2537c67e0dc75369d252e9) owned by [`0x1a694A09494E214a3Be3652e4B343B7B81A73ad7`](https://etherscan.io/address/0x1a694A09494E214a3Be3652e4B343B7B81A73ad7) | None |
+| `USDY_InstantManager`, `OndoTokenRouter`, `OndoOracle`, `OndoRateLimiter`, `AdminSubscriptionChecker`, `OndoCompliance`, `OndoFees` | `DEFAULT_ADMIN_ROLE` = 3-of-5 Safe [`0x5AE21c99FC5f1584D8Cb09a298CFFd92B5d178eF`](https://etherscan.io/address/0x5AE21c99FC5f1584D8Cb09a298CFFd92B5d178eF) (not upgradeable, but admin can swap the router, oracle, compliance, ID registry, rate limiter and fee modules, and `retrieveTokens`) | None |
+| `OndoIDRegistry` ([proxy `0xcf6958D69d535FD03BD6Df3F4fe6CDcd127D97df`](https://etherscan.io/address/0xcf6958D69d535FD03BD6Df3F4fe6CDcd127D97df)) | ProxyAdmin [`0x988d740a4365d9d8106fc71aa691ddd2527c07ff`](https://etherscan.io/address/0x988d740a4365d9d8106fc71aa691ddd2527c07ff) owned by [`0x5AE21c99FC5f1584D8Cb09a298CFFd92B5d178eF`](https://etherscan.io/address/0x5AE21c99FC5f1584D8Cb09a298CFFd92B5d178eF) | None |
+| `RWADynamicOracle` | `DEFAULT_ADMIN_ROLE`/`PAUSER_ROLE` = [`0x1a694A09494E214a3Be3652e4B343B7B81A73ad7`](https://etherscan.io/address/0x1a694A09494E214a3Be3652e4B343B7B81A73ad7); `SETTER_ROLE` also 4-of-8 Safe [`0x19c114B7c6Ff86482cEbFc6AE3cef894e6793Db8`](https://etherscan.io/address/0x19c114B7c6Ff86482cEbFc6AE3cef894e6793Db8) | None |
+| `USDYOracleWrapper` [`0x87b126e5518b6a1Bb8465779b4607C45C643DF90`](https://etherscan.io/address/0x87b126e5518b6a1Bb8465779b4607C45C643DF90) | `Ownable2Step` owner [`0x5AE21c99FC5f1584D8Cb09a298CFFd92B5d178eF`](https://etherscan.io/address/0x5AE21c99FC5f1584D8Cb09a298CFFd92B5d178eF) (`setRwaOracle`) | None |
 | Blocklist [`0xd8c8174691d936E2C80114EC449037b13421B0a8`](https://etherscan.io/address/0xd8c8174691d936E2C80114EC449037b13421B0a8) | Owner **1-of-2 Safe** [`0x99ca4f54F6Bb1c36C662e7C404f517D150FD1173`](https://etherscan.io/address/0x99ca4f54F6Bb1c36C662e7C404f517D150FD1173) | None |
-| LayerZero adapter [`0xa627…307D`](https://etherscan.io/address/0xa6275720b3fB1Efe3E6EF2b5BF2293148852307D) | Owner and endpoint delegate [`0x1a69…3ad7`](https://etherscan.io/address/0x1a694A09494E214a3Be3652e4B343B7B81A73ad7) (peers, DVNs, rate limits) | None |
+| LayerZero adapter [`0xa6275720b3fB1Efe3E6EF2b5BF2293148852307D`](https://etherscan.io/address/0xa6275720b3fB1Efe3E6EF2b5BF2293148852307D) | Owner and endpoint delegate [`0x1a694A09494E214a3Be3652e4B343B7B81A73ad7`](https://etherscan.io/address/0x1a694A09494E214a3Be3652e4B343B7B81A73ad7) (peers, DVNs, rate limits) | None |
 
 **Multisigs:**
 
 | Safe | Threshold | Role |
 |------|-----------|------|
-| [`0x1a69…3ad7`](https://etherscan.io/address/0x1a694A09494E214a3Be3652e4B343B7B81A73ad7) | 4/7 | Admin |
+| [`0x1a694A09494E214a3Be3652e4B343B7B81A73ad7`](https://etherscan.io/address/0x1a694A09494E214a3Be3652e4B343B7B81A73ad7) | 4/7 | Admin |
 | [`0x2e55b738F5969Eea10fB67e326BEE5e2fA15A2CC`](https://etherscan.io/address/0x2e55b738F5969Eea10fB67e326BEE5e2fA15A2CC) | **1/9** | Pauser |
-| [`0x5AE2…78eF`](https://etherscan.io/address/0x5AE21c99FC5f1584D8Cb09a298CFFd92B5d178eF) | 3/5 | xManager admin |
-| [`0x505f…439c`](https://etherscan.io/address/0x505ff4462bA5E62ed529FA836D768ECd7B85439c) | 3/6 | Admin subscriptions, legacy timestamp setter |
-| [`0x8D52…31bf`](https://etherscan.io/address/0x8D52a385D19F13Ef5A544E0514c62f0A44ff31bf) | **2/6** | Legacy relayer / pricer |
-| [`0x3312…8fa5`](https://etherscan.io/address/0x3312cc371Fe0Dd5171878630A1E5cf69778E8fa5) | 3/6 | USDC treasury |
-| [`0x19c1…3Db8`](https://etherscan.io/address/0x19c114B7c6Ff86482cEbFc6AE3cef894e6793Db8) | 4/8 | Oracle setter |
-| [`0x99ca…1173`](https://etherscan.io/address/0x99ca4f54F6Bb1c36C662e7C404f517D150FD1173) | **1/2** | Blocklist owner |
+| [`0x5AE21c99FC5f1584D8Cb09a298CFFd92B5d178eF`](https://etherscan.io/address/0x5AE21c99FC5f1584D8Cb09a298CFFd92B5d178eF) | 3/5 | xManager admin |
+| [`0x505ff4462bA5E62ed529FA836D768ECd7B85439c`](https://etherscan.io/address/0x505ff4462bA5E62ed529FA836D768ECd7B85439c) | 3/6 | Admin subscriptions, legacy timestamp setter |
+| [`0x8D52a385D19F13Ef5A544E0514c62f0A44ff31bf`](https://etherscan.io/address/0x8D52a385D19F13Ef5A544E0514c62f0A44ff31bf) | **2/6** | Legacy relayer / pricer |
+| [`0x3312cc371Fe0Dd5171878630A1E5cf69778E8fa5`](https://etherscan.io/address/0x3312cc371Fe0Dd5171878630A1E5cf69778E8fa5) | 3/6 | USDC treasury |
+| [`0x19c114B7c6Ff86482cEbFc6AE3cef894e6793Db8`](https://etherscan.io/address/0x19c114B7c6Ff86482cEbFc6AE3cef894e6793Db8) | 4/8 | Oracle setter |
+| [`0x99ca4f54F6Bb1c36C662e7C404f517D150FD1173`](https://etherscan.io/address/0x99ca4f54F6Bb1c36C662e7C404f517D150FD1173) | **1/2** | Blocklist owner |
 
 - Signers are not publicly named.
 - All seven admin-Safe owners also sit on the 1-of-9 pauser Safe.
-- Three owners of [`0x5AE2…78eF`](https://etherscan.io/address/0x5AE21c99FC5f1584D8Cb09a298CFFd92B5d178eF) are admin-Safe owners.
-- The six owners of [`0x505f…439c`](https://etherscan.io/address/0x505ff4462bA5E62ed529FA836D768ECd7B85439c) and [`0x8D52…31bf`](https://etherscan.io/address/0x8D52a385D19F13Ef5A544E0514c62f0A44ff31bf) are identical and largely match [`0x3312…8fa5`](https://etherscan.io/address/0x3312cc371Fe0Dd5171878630A1E5cf69778E8fa5).
+- Three owners of [`0x5AE21c99FC5f1584D8Cb09a298CFFd92B5d178eF`](https://etherscan.io/address/0x5AE21c99FC5f1584D8Cb09a298CFFd92B5d178eF) are admin-Safe owners.
+- The six owners of [`0x505ff4462bA5E62ed529FA836D768ECd7B85439c`](https://etherscan.io/address/0x505ff4462bA5E62ed529FA836D768ECd7B85439c) and [`0x8D52a385D19F13Ef5A544E0514c62f0A44ff31bf`](https://etherscan.io/address/0x8D52a385D19F13Ef5A544E0514c62f0A44ff31bf) are identical and largely match [`0x3312cc371Fe0Dd5171878630A1E5cf69778E8fa5`](https://etherscan.io/address/0x3312cc371Fe0Dd5171878630A1E5cf69778E8fa5).
 
 **Powers that can harm holders:**
 
@@ -300,7 +332,20 @@ A non-whitelisted holder cannot exit more than ~$1M without heavy loss. Ethereum
 | BNB Chain → Ethereum | [`0xae6a049cdda7536af3875b3daaf34f24be5cf00c`](https://bscscan.com/address/0xae6a049cdda7536af3875b3daaf34f24be5cf00c) | 3-of-3: Ondo, LayerZero Labs, Canary | 70 | **0** (inbound disabled) |
 | Plume → Ethereum | [`0x944acfc05062339c6862555b42f12d3fb03f8122`](https://explorer.plume.org/address/0x944acfc05062339c6862555b42f12d3fb03f8122) | 3-of-3 | 1,800 | **0** (limit unset) |
 
-DVN names are from the [LayerZero metadata API](https://metadata.layerzero-api.com/v1/metadata). The rate limits bound the daily damage from a DVN-quorum or peer compromise to at most ~0.5M USDY per route on Ethereum. They are the owner's configuration, however: the admin Safe can raise them or change DVNs without a timelock. Remote-chain supply also depends on each remote chain's own DVN config and 4-of-7 admin Safe (**TODO** read remote receive configs).
+DVN names are from the [LayerZero metadata API](https://metadata.layerzero-api.com/v1/metadata). The rate limits bound the daily damage from a DVN-quorum or peer compromise to at most ~0.5M USDY per route on Ethereum. They are the owner's configuration, however: the admin Safe can raise them or change DVNs without a timelock.
+
+**Remote receive side (mint on the remote chain).** Receive-side ULN configs were read on the remote adapters at the snapshot blocks:
+
+| Route | Adapter | Required DVNs | Inbound limit / 24h |
+|-------|---------|---------------|--------------------:|
+| Ethereum → Arbitrum | [`0x0bE393DC46248E4285dc5CAcA3084bc7e9bfbB41`](https://arbiscan.io/address/0x0bE393DC46248E4285dc5CAcA3084bc7e9bfbB41) | 4-of-4: Ondo, LayerZero Labs, Canary, Fidelity (FCAT); 65 confirmations | 500,000 USDY |
+| Ethereum → BNB Chain | [`0xAE6a049cDda7536Af3875B3dAAF34f24Be5cF00c`](https://bscscan.com/address/0xAE6a049cDda7536Af3875B3dAAF34f24Be5cF00c) | 3-of-3: Ondo, LayerZero Labs, Canary; 65 confirmations | 500,000 USDY |
+| Ethereum → Mantle | [`0x0bE393DC46248E4285dc5CAcA3084bc7e9bfbB41`](https://explorer.mantle.xyz/address/0x0bE393DC46248E4285dc5CAcA3084bc7e9bfbB41) | 3-of-3: Ondo, LayerZero Labs, Canary; 65 confirmations | 500,000 USDY |
+
+- The remote adapters also peer with each other (Arbitrum, BNB Chain, Mantle, Sei, Solana, Tempo). Routes use 3-of-3 or 4-of-4 quorums, and every route from BNB Chain has a 0 inbound limit.
+- All adapters are owned by their chain's 4-of-7 admin Safe.
+- No remote adapter was paused at the snapshot.
+- Sei, Solana and Tempo receive configs were not read (**TODO**).
 
 - **Fallbacks:** none onchain. If Ondo's backend, Marex or the treasury Safe is unavailable, instant redemptions stop at the remaining buffer and rate limits.
 
@@ -321,19 +366,22 @@ DVN names are from the [LayerZero metadata API](https://metadata.layerzero-api.c
 
 | Target | Address | What to watch | Threshold / action | Frequency |
 |--------|---------|---------------|--------------------|-----------|
-| USDY token | [`0x96F6…985C`](https://etherscan.io/address/0x96F6eF951840721AdBF46Ac996b59E0235CB985C) | `RoleGranted`/`RoleRevoked` (esp. `MINTER_ROLE`, `BURNER_ROLE`), `Upgraded`, `Paused`, `AllowlistSet`/`BlocklistSet`/`SanctionsListSet`, `totalSupply()` | Any role/impl change → alert; supply change >5% in 24h → alert | Real-time |
-| ProxyAdmin | [`0x3ed6…4c19`](https://etherscan.io/address/0x3ed61633057da0bc58f84b2b9002845e56f94c19) | `OwnershipTransferred`, `upgrade` calls | Any → alert | Real-time |
-| Admin Safe | [`0x1a69…3ad7`](https://etherscan.io/address/0x1a694A09494E214a3Be3652e4B343B7B81A73ad7) | Executed txs, owner/threshold changes, direct `mint` calls | Any mint by Safe → alert | Real-time |
-| Legacy USDYManager | [`0x25A1…b97e`](https://etherscan.io/address/0x25A103A1D6AeC5967c1A4fe2039cdc514886b97e) | `DepositProofAdded`, `MintCompleted`, `ClaimableTimestampSet` | Mint >$25M → alert | Real-time |
-| USDY_InstantManager | [`0xa426…1f15`](https://etherscan.io/address/0xa42613C243b67BF6194Ac327795b926B4b491f15) | `subscribePaused()`, `redeemPaused()`, `AdminSubscription`, setter events (router/oracle/compliance/fees) | Redeem paused, or any setter → alert | Real-time |
-| Redemption buffer | [`0x3312…8fa5`](https://etherscan.io/address/0x3312cc371Fe0Dd5171878630A1E5cf69778E8fa5) | `USDC.balanceOf` / `BasicSource.availableToWithdraw(USDC)` | < $10M → warn; < $2M → alert | Hourly |
-| Rate limiter | [`0x98Db…003c`](https://etherscan.io/address/0x98Db502215Da1ad9F626D4a0090A8A2f4971003c) | `getCurrentGlobalRedemptionLimit(USDY)`, `GlobalRateLimitSet` | Available < $5M or limit lowered → alert | Hourly |
-| Admin-subscription allowance | [`0x1cb2…a018`](https://etherscan.io/address/0x1cb2Dcc325615d02ae384941149d1dA6521fa018) | `adminSubscriptionAllowance(0x505f…439c)`, `AdminSubscriptionAllowanceSet` | Any increase → alert | Real-time |
-| Fees | [`0xEaC2…54e6`](https://etherscan.io/address/0xEaC2181075BA0FC53D5141B17943Ea9F913954e6), [`0xE1cb…D20C`](https://etherscan.io/address/0xE1cb24077d77d2fE763fCAC63e5653D97dc8D20C) | `DefaultFeeConfigUpdated` | Any non-zero fee → alert | Real-time |
-| Price oracle | [`0xA021…1De0`](https://etherscan.io/address/0xA0219AA5B31e65Bc920B5b6DFb8EdF0988121De0) | `RangeSet`, `RangeOverriden`, `Paused`; `getPrice()` monotonicity | Any `RangeOverriden`, pause, or price decrease → alert. No new range by 1st of month → warn | Daily |
-| Oracle wrapper | [`0x87b1…DF90`](https://etherscan.io/address/0x87b126e5518b6a1Bb8465779b4607C45C643DF90) | `rwaOracle()` changes | Any → alert | Daily |
-| Blocklist | [`0xd8c8…B0a8`](https://etherscan.io/address/0xd8c8174691d936E2C80114EC449037b13421B0a8) | `BlockedAddressesAdded` for Yearn strategy addresses | Strategy blocked → critical | Real-time |
-| LayerZero adapter | [`0xa627…307D`](https://etherscan.io/address/0xa6275720b3fB1Efe3E6EF2b5BF2293148852307D) | `PeerSet`, `RateLimitsChanged`, endpoint `setConfig` (DVNs) | Any → alert; inbound limit > 1M/day → alert | Real-time |
+| USDY token | [`0x96F6eF951840721AdBF46Ac996b59E0235CB985C`](https://etherscan.io/address/0x96F6eF951840721AdBF46Ac996b59E0235CB985C) | `RoleGranted`/`RoleRevoked` (esp. `MINTER_ROLE`, `BURNER_ROLE`), `Upgraded`, `Paused`, `AllowlistSet`/`BlocklistSet`/`SanctionsListSet`, `totalSupply()` | Any role/impl change → alert; supply change >5% in 24h → alert | Real-time |
+| ProxyAdmin | [`0x3ed61633057da0bc58f84b2b9002845e56f94c19`](https://etherscan.io/address/0x3ed61633057da0bc58f84b2b9002845e56f94c19) | `OwnershipTransferred`, `upgrade` calls | Any → alert | Real-time |
+| Admin Safe | [`0x1a694A09494E214a3Be3652e4B343B7B81A73ad7`](https://etherscan.io/address/0x1a694A09494E214a3Be3652e4B343B7B81A73ad7) | Executed txs, owner/threshold changes, direct `mint` calls | Any mint by Safe → alert | Real-time |
+| Legacy USDYManager | [`0x25A103A1D6AeC5967c1A4fe2039cdc514886b97e`](https://etherscan.io/address/0x25A103A1D6AeC5967c1A4fe2039cdc514886b97e) | `DepositProofAdded`, `MintCompleted`, `ClaimableTimestampSet` | Mint >$25M → alert | Real-time |
+| USDY_InstantManager | [`0xa42613C243b67BF6194Ac327795b926B4b491f15`](https://etherscan.io/address/0xa42613C243b67BF6194Ac327795b926B4b491f15) | `subscribePaused()`, `redeemPaused()`, `AdminSubscription`, setter events (router/oracle/compliance/fees) | Redeem paused, or any setter → alert | Real-time |
+| Redemption buffer | [`0x3312cc371Fe0Dd5171878630A1E5cf69778E8fa5`](https://etherscan.io/address/0x3312cc371Fe0Dd5171878630A1E5cf69778E8fa5) | `USDC.balanceOf` / `BasicSource.availableToWithdraw(USDC)` | < $10M → warn; < $2M → alert | Hourly |
+| BNB redemption buffer | [`0xb33A6BDF4192Ebd826ee14967C48F08D3B889fAd`](https://bscscan.com/address/0xb33A6BDF4192Ebd826ee14967C48F08D3B889fAd) | `USDT.balanceOf` / `BasicSource.availableToWithdraw(USDT)` on [`0xcf234Acac91fCb0390b4CFfb2D8cbb50be5FC245`](https://bscscan.com/address/0xcf234Acac91fCb0390b4CFfb2D8cbb50be5FC245) | < $10M → warn | Hourly |
+| Remote admin Safes | BNB [`0x79dfe7e9A32a9aB32aA77ccF46d788e7290aFA3d`](https://bscscan.com/address/0x79dfe7e9A32a9aB32aA77ccF46d788e7290aFA3d), Sei [`0x17813b63cc706111894190ae25d10af5cf586e58`](https://seiscan.io/address/0x17813b63cc706111894190ae25d10af5cf586e58), Arbitrum [`0xC4ac5c2fA461901b4D91832d03A7018092eDCb4D`](https://arbiscan.io/address/0xC4ac5c2fA461901b4D91832d03A7018092eDCb4D), Mantle [`0xC8A7870fFe41054612F7f3433E173D8b5bFcA8E3`](https://explorer.mantle.xyz/address/0xC8A7870fFe41054612F7f3433E173D8b5bFcA8E3) | Direct `mint` calls, role grants, adapter `setPeer`/`RateLimitsChanged` | Any → alert | Real-time |
+| Per-chain supply | Ondo `tvlUsd` per chain vs onchain `totalSupply` | Sum vs LLC digital tokens + OGM line | Divergence > 1% → alert | Daily |
+| Rate limiter | [`0x98Db502215Da1ad9F626D4a0090A8A2f4971003c`](https://etherscan.io/address/0x98Db502215Da1ad9F626D4a0090A8A2f4971003c) | `getCurrentGlobalRedemptionLimit(USDY)`, `GlobalRateLimitSet` | Available < $5M or limit lowered → alert | Hourly |
+| Admin-subscription allowance | [`0x1cb2Dcc325615d02ae384941149d1dA6521fa018`](https://etherscan.io/address/0x1cb2Dcc325615d02ae384941149d1dA6521fa018) | `adminSubscriptionAllowance(0x505ff4462bA5E62ed529FA836D768ECd7B85439c)`, `AdminSubscriptionAllowanceSet` | Any increase → alert | Real-time |
+| Fees | [`0xEaC2181075BA0FC53D5141B17943Ea9F913954e6`](https://etherscan.io/address/0xEaC2181075BA0FC53D5141B17943Ea9F913954e6), [`0xE1cb24077d77d2fE763fCAC63e5653D97dc8D20C`](https://etherscan.io/address/0xE1cb24077d77d2fE763fCAC63e5653D97dc8D20C) | `DefaultFeeConfigUpdated` | Any non-zero fee → alert | Real-time |
+| Price oracle | [`0xA0219AA5B31e65Bc920B5b6DFb8EdF0988121De0`](https://etherscan.io/address/0xA0219AA5B31e65Bc920B5b6DFb8EdF0988121De0) | `RangeSet`, `RangeOverriden`, `Paused`; `getPrice()` monotonicity | Any `RangeOverriden`, pause, or price decrease → alert. No new range by 1st of month → warn | Daily |
+| Oracle wrapper | [`0x87b126e5518b6a1Bb8465779b4607C45C643DF90`](https://etherscan.io/address/0x87b126e5518b6a1Bb8465779b4607C45C643DF90) | `rwaOracle()` changes | Any → alert | Daily |
+| Blocklist | [`0xd8c8174691d936E2C80114EC449037b13421B0a8`](https://etherscan.io/address/0xd8c8174691d936E2C80114EC449037b13421B0a8) | `BlockedAddressesAdded` for Yearn strategy addresses | Strategy blocked → critical | Real-time |
+| LayerZero adapter | [`0xa6275720b3fB1Efe3E6EF2b5BF2293148852307D`](https://etherscan.io/address/0xa6275720b3fB1Efe3E6EF2b5BF2293148852307D) | `PeerSet`, `RateLimitsChanged`, endpoint `setConfig` (DVNs) | Any → alert; inbound limit > 1M/day → alert | Real-time |
 | Ankura reports | Dropbox folders above | Daily Permitted Assets / Token Principal; monthly Portfolio Default flags; Marex share | Ratio < 1.005 or any "Default: YES" → alert; no daily report for 3 business days → warn | Daily |
 | Ondo reserve page | [ondo.finance/usdy](https://ondo.finance/usdy) | "Ondo Stocks issued USDY" value; collateral mix | OGM share > 20% without attestation → reassess | Weekly |
 
@@ -341,17 +389,17 @@ DVN names are from the [LayerZero metadata API](https://metadata.layerzero-api.c
 
 ```
                          ┌───────────────────────── GOVERNANCE (no timelocks) ──────────────────────────┐
-                         │ Admin Safe 4/7 0x1a69…3ad7 ── owns ProxyAdmins, DEFAULT_ADMIN on USDY/rUSDY/     │
+                         │ Admin Safe 4/7 0x1a694A09494E214a3Be3652e4B343B7B81A73ad7 ── owns ProxyAdmins, DEFAULT_ADMIN on USDY/rUSDY/     │
                          │   oracle/USDYManager/pricer, MINTER on USDY, LZ adapter owner+delegate          │
-                         │ Pauser Safe 1/9 0x2e55…A2CC ── pause USDY/rUSDY/InstantManager/legacy manager   │
-                         │ xManager Admin Safe 3/5 0x5AE2…78eF ── router/oracle registry/rate limits/fees  │
-                         │ Ops Safes 3/6 0x505f…439c + 2/6 0x8D52…31bf (same 6 owners) ── admin subs,      │
-                         │   legacy relayer/price-id/timestamp; Oracle setter 4/8 0x19c1…3Db8              │
-                         │ Blocklist owner 1/2 0x99ca…1173                                                  │
+                         │ Pauser Safe 1/9 0x2e55b738F5969Eea10fB67e326BEE5e2fA15A2CC ── pause USDY/rUSDY/InstantManager/legacy manager   │
+                         │ xManager Admin Safe 3/5 0x5AE21c99FC5f1584D8Cb09a298CFFd92B5d178eF ── router/oracle registry/rate limits/fees  │
+                         │ Ops Safes 3/6 0x505ff4462bA5E62ed529FA836D768ECd7B85439c + 2/6 0x8D52a385D19F13Ef5A544E0514c62f0A44ff31bf (same 6 owners) ── admin subs,      │
+                         │   legacy relayer/price-id/timestamp; Oracle setter 4/8 0x19c114B7c6Ff86482cEbFc6AE3cef894e6793Db8              │
+                         │ Blocklist owner 1/2 0x99ca4f54F6Bb1c36C662e7C404f517D150FD1173                                                  │
                          └───────────────────────────────────────────────────────────────────────────────┘
                                                     │ MINTER_ROLE / admin
    ┌────────────────────────────────── TOKEN LAYER ─┴──────────────────────────────────┐
-   │  USDY (proxy 0x96F6…985C) ←wrap── rUSDY (0xaf37…b879)                               │
+   │  USDY (proxy 0x96F6eF951840721AdBF46Ac996b59E0235CB985C) ←wrap── rUSDY (0xaf37c1167910ebC994e266949387d2c7C326b879)                               │
    │   hooks: AllowlistStub (always true) · Blocklist · Chainalysis SanctionsList        │
    └──────▲──────────────────▲────────────────────▲─────────────────────▲──────────────┘
           │ mint/burn         │ mint (claimMint)   │ mint/burn            │ mint (direct)
@@ -364,7 +412,7 @@ DVN names are from the [LayerZero metadata API](https://metadata.layerzero-api.c
     │ USDC     │ oracle      │ USDYPricer          │ Arbitrum · Mantle · Sei · Solana · Tempo
     ▼          ▼             ▼                     ▼ (BNB/Plume inbound 0); remote 4/7 Safes mint too
  OndoTokenRouter   OndoOracle → USDYOracleWrapper → RWADynamicOracle (monthly rate ranges)
-    │  ├─ BasicRecipient → Safe 3/6 0x3312…8fa5 (USDC treasury, $24.99M)
+    │  ├─ BasicRecipient → Safe 3/6 0x3312cc371Fe0Dd5171878630A1E5cf69778E8fa5 (USDC treasury, $24.99M)
     │  └─ BasicSource   ← same Safe (redemption buffer)
     ▼
  ───────────── OFFCHAIN ─────────────────────────────────────────────────────────────────
@@ -436,7 +484,7 @@ All gates pass; proceed to category scoring.
   - a thin 0.3–0.8% cushion;
   - ~93% of LLC assets in a structured-financing sleeve excluded from the covenant test under unpublished terms;
   - ~9% of value (OGM-issued USDY) with no verified reserve attestation.
-- **Provability: 3.0.** Daily and monthly Ankura verification of LLC accounts. Price is computable onchain, but reserves are fully offchain. Ondo's headline ratio is not reproducible, and cross-chain supply cannot be fully reconciled against both issuers.
+- **Provability: 3.0.** Daily and monthly Ankura verification of LLC accounts. Price is computable onchain, but reserves are fully offchain. Ondo's headline ratio is not reproducible. Aggregate cross-chain supply reconciles to LLC plus OGM within 0.26%, but Stellar (23.6% of supply) and other non-EVM chains rely on Ondo-reported figures, and the per-issuer split is not visible onchain.
 
 **Funds Management Score = (3.5 + 3.0) / 2 = 3.25**
 
