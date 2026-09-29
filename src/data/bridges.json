@@ -478,6 +478,31 @@
           "owner": "Mint authority: Spoke [`0xEC35…25aB`](https://etherscan.io/address/0xEC3582fcDc34078a4B7a8c75a5a3AE46f48525aB), governed by Centrifuge Root — 48h timelock [`0x7Ed4…368f`](https://etherscan.io/address/0x7Ed48C31f2fdC40d37407cBaBf0870B2b688368f)."
         },
         {
+          "slug": "ondo-usdy",
+          "name": "Ondo USDY",
+          "kind": "direct",
+          "model": "mint",
+          "integration": "LayerZero V2 burn/mint adapter (OndoMintBurnAdapter)",
+          "detail": "Adapter [`0xa627…307D`](https://etherscan.io/address/0xa6275720b3fB1Efe3E6EF2b5BF2293148852307D) holds `MINTER_ROLE` on canonical Ethereum USDY [`0x96F6…985C`](https://etherscan.io/address/0x96F6eF951840721AdBF46Ac996b59E0235CB985C) and mints on inbound messages, capped at **500,000 USDY / 24h** per EVM route (Arbitrum, Mantle, Sei, Tempo) and 300,000 from Solana; BNB Chain and Plume inbound limits are 0. Peers: Arbitrum/Mantle [`0x0be3…bb41`](https://arbiscan.io/address/0x0be393dc46248e4285dc5caca3084bc7e9bfbb41), Sei [`0x6f04…3f6c`](https://seiscan.io/address/0x6f04b655d5209e85e47d3920a2ef407a66e83f6c), BNB Chain [`0xae6a…f00c`](https://bscscan.com/address/0xae6a049cdda7536af3875b3daaf34f24be5cf00c). Remote tokens on Sei [`0x54cD…e2A6`](https://seiscan.io/address/0x54cD901491AeF397084453F4372B93c33260e2A6), Mantle [`0x5bE2…c5A6`](https://explorer.mantle.xyz/address/0x5bE26527e817998A7206475496fDE1E68957c5A6) and Arbitrum [`0x35e0…9A9D`](https://arbiscan.io/address/0x35e050d3C0eC2d29D269a8EcEa763a183bDF9A9D) are also mintable directly by 4-of-7 Ondo Safes, so remote supply is not purely bridge-backed.",
+          "icon": "token:0x96F6eF951840721AdBF46Ac996b59E0235CB985C",
+          "security": {
+            "label": "4-of-4",
+            "confirmations": 3600,
+            "providers": [
+              "Ondo",
+              "LayerZero Labs",
+              "Canary",
+              "Fidelity Center for Applied Technology"
+            ],
+            "route": "Arbitrum→Ethereum (inbound mint path)",
+            "note": "Solana→Ethereum and Tempo→Ethereum also 4-of-4 (same providers); Mantle→Ethereum, Sei→Ethereum and BNB Chain→Ethereum are 3-of-3 (Ondo, LayerZero Labs, Canary). Ondo operates one required DVN. Quorum, peers and rate limits are mutable by the adapter owner without a timelock",
+            "weak": false,
+            "verifiedAt": "2026-09-29",
+            "link": "https://etherscan.io/address/0xa6275720b3fB1Efe3E6EF2b5BF2293148852307D"
+          },
+          "owner": "Adapter owner and LayerZero delegate: Ondo admin 4-of-7 Safe [`0x1a69…3ad7`](https://etherscan.io/address/0x1a694A09494E214a3Be3652e4B343B7B81A73ad7), no timelock."
+        },
+        {
           "slug": "fluid",
           "name": "Fluid (sUSDai)",
           "kind": "indirect",
