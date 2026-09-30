@@ -249,7 +249,7 @@ The weETH market adds a small ether.fi collateral exposure (~142 WETH, ~1.8% of 
 - MetaMorpho `owner()`: Yearn Security multisig 4-of-7 [`0xe5e2Baf96198c56380dDD5E992D7d1ADa0e989c0`](https://etherscan.io/address/0xe5e2Baf96198c56380dDD5E992D7d1ADa0e989c0)
 - `curator()`: 2-of-3 Safe [`0x90D0f26025571295D18a6c041E47450B81886B51`](https://etherscan.io/address/0x90D0f26025571295D18a6c041E47450B81886B51)
 - `guardian()`: Yearn ySafe 6-of-9 [`0xFEB4acf3df3cDEA7399794D0869ef76A6EfAff52`](https://etherscan.io/address/0xFEB4acf3df3cDEA7399794D0869ef76A6EfAff52)
-- MetaMorpho `timelock()`: 3 days (259,200 s); supply queue 3 markets, withdraw queue 5 markets
+- MetaMorpho `timelock()`: 3 days (259,200 s); supply queue 3 markets, withdraw queue 5 markets. Supply/withdraw queues also list enabled zero-allocation markets ([`0x58e212…72284`](https://app.morpho.org/ethereum/market/0x58e212060645d18eab6d9b2af3d56fbc906a92ff5667385f616f662c70372284/) idle WETH/no-collateral, also in the supply queue; [`0x138eec…288a40`](https://app.morpho.org/ethereum/market/0x138eec0e4a1937eb92ebc70043ed539661dd7ed5a89fb92a720b341650288a40/) WBTC collateral, withdraw queue only); funded exposure remains the three tabulated markets
 
 ### Accessibility
 
@@ -448,6 +448,7 @@ Yearn maintains the [`monitoring`](https://github.com/yearn/monitoring) reposito
 
 ### Critical Risk Gates
 
+- [x] **Unverified contract source** — Vault, strategies, and TokenizedStrategy implementation are source-verified on Etherscan. ✅ PASS
 - [x] **No audit** — Yearn V3 core audited by 3 top firms. Lido audited by multiple firms. Spark Lend (Sky) and Morpho are established blue-chip protocols with audit histories. ✅ PASS
 - [x] **Unverifiable reserves** — ERC-4626 + onchain balances verifiable for all four strategies (stETH, Spark Lend supply and looper position, Morpho MetaMorpho shares). Strategy debt sum covers 100% of totalDebt. ✅ PASS
 - [x] **Total centralization** — 6-of-9 multisig, 7-day timelock on critical roles. ✅ PASS
@@ -535,7 +536,7 @@ Yearn maintains the [`monitoring`](https://github.com/yearn/monitoring) reposito
 
 **Score: 1.0 / 5** — reserves are fully transparent across all four strategies and reconcile to 100% of totalDebt.
 
-**Funds Management Score = (1.75 + 1.0) / 2 = 1.375**
+**Funds Management Score = (1.75 + 1.0) / 2 = 1.375 → 1.4** (category averages shown/used at 1 decimal before weighting; same convention as July's 1.25 → 1.3)
 
 **Score: 1.4 / 5** — high-quality collateral, fully transparent and verifiable onchain. The ~8x looper on 14.3% of totalDebt is the main collateral-side risk.
 
@@ -634,7 +635,7 @@ Yearn maintains the [`monitoring`](https://github.com/yearn/monitoring) reposito
 | Date | Score | Notes |
 |------|------:|-------|
 | [May 11, 2026](https://github.com/yearn/risk-score/pull/148) | 1.5 | Initial assessment. 3 funded strategies (Morpho ~71%, stETH ~25%, Spark ~4%). 6-of-9 ySafe, 7-day timelock, immutable vault. Minimal Risk tier. |
-| [July 22, 2026](https://github.com/yearn/risk-score/pull/335) | 1.49 | Reassessment. Strategy mix: stETH Accumulator (59%), Spark WETH Lender (31%), Yearn OG WETH (Morpho MetaMorpho, 2%/~9% effective), wstETH/WETH Spark Looper (~11% of totalDebt; not in default queue) — an LSTAaveLooper that leverages wstETH as collateral to borrow WETH on Spark Lend, the first leveraged strategy in this vault. Strategy debt fully reconciles to 100% of totalDebt (~8,927 WETH). All strategies mapped to verified blue-chip protocols. Governance unchanged. Score returned to 1.5 (Minimal Risk). |
+| [July 22, 2026](https://github.com/yearn/risk-score/pull/335) | 1.49 | Reassessment. Strategy mix: stETH Accumulator (59%), Spark WETH Lender (31%), Yearn OG WETH (Morpho MetaMorpho, 2%/~9% effective), wstETH/WETH Spark Looper (~11% of totalDebt; not in default queue) — an LSTAaveLooper that leverages wstETH as collateral to borrow WETH on Spark Lend, the first leveraged strategy in this vault. Strategy debt fully reconciles to 100% of totalDebt (~8,927 WETH). All strategies mapped to verified blue-chip protocols. Governance unchanged. Score returned to 1.49 (Minimal Risk). |
 | [September 28, 2026](https://github.com/yearn/risk-score/pull/495) | 1.52 | Reassessment at block 26078406. TVL 7,249 WETH. Allocation: Spark WETH Lender 40.6%, stETH Accumulator 38.2%, wstETH/WETH Spark Looper 14.3%, Yearn OG WETH 6.9%. Spark Lend combined ~55% (above the prior 50% trigger). Looper verified at ~8x leverage (health factor 1.063, exchange-rate oracle) and not upgradeable. Yearn OG WETH exposure restated from share value. Holders mapped: Alchemix mixWETH strategy ~52%, yETH Recovery Vault ~27%. Governance unchanged. Collateralization 1.5 → 1.75; tier moves from Minimal to Low Risk. |
 
 ---
