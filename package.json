@@ -1,21 +1,27 @@
 {
   "name": "risk-score-frontend",
+  "license": "AGPL-3.0-only",
   "type": "module",
   "scripts": {
-    "dev": "node scripts/update_stats.mjs && astro dev",
-    "build": "node scripts/update_stats.mjs && astro build",
+    "dev": "node scripts/update_stats.mjs && node scripts/check_bridges.mjs && node scripts/check_graphs.mjs && astro dev",
+    "build": "node scripts/update_stats.mjs && node scripts/check_bridges.mjs && node scripts/check_graphs.mjs && astro build",
     "preview": "astro preview",
-    "update-stats": "node scripts/update_stats.mjs"
+    "test": "node --experimental-strip-types --test tests/*.test.mjs",
+    "update-stats": "node scripts/update_stats.mjs",
+    "check-bridges": "node scripts/check_bridges.mjs --strict",
+    "check-graphs": "node scripts/check_graphs.mjs --strict"
   },
   "dependencies": {
-    "@astrojs/vercel": "10.0.7",
+    "@astrojs/sitemap": "3.7.4",
+    "@astrojs/vercel": "11.0.10",
+    "@plausible-analytics/tracker": "0.4.6",
     "@resvg/resvg-js": "2.6.2",
-    "astro": "6.2.2",
-    "cytoscape": "3.33.4",
-    "cytoscape-dagre": "3.0.0",
+    "astro": "7.3.2",
+    "cytoscape": "3.34.3",
+    "cytoscape-dagre": "4.0.1",
     "cytoscape-dom-node": "2.1.0",
-    "js-yaml": "4.1.1",
-    "marked": "18.0.4",
-    "satori": "0.26.0"
+    "js-yaml": "4.3.0",
+    "marked": "18.0.13",
+    "satori": "0.33.4"
   }
 }

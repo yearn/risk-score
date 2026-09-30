@@ -20,12 +20,13 @@ accept = ['200..=299', '403', '429']
 cache_exclude_status = ['429', '500..=599']
 
 # TEMPLATE.md contains literal `URL` placeholders in markdown link syntax.
-# reports/old/ is archived/legacy material that we don't actively maintain.
-exclude_path = ["reports/TEMPLATE.md", "reports/old"]
+exclude_path = ["reports/TEMPLATE.md"]
 
 # Excludes for non-403 false-positive cases:
 # - rekt.news intermittently returns 500 to crawlers
 # - Morpho GraphQL endpoints are POST-only and 400 on GET
+# - CoW Protocol's order-book quote endpoint is POST-only and returns 405 on GET.
+#   Scope is the quote path; other api.cow.fi URLs stay checked.
 # - Twitter/X often produces connection errors / soft-blocks
 # - LinkedIn requires auth (returns 999/other non-403 codes)
 # - trust-security.xyz returns 405 on HEAD requests
@@ -34,12 +35,33 @@ exclude_path = ["reports/TEMPLATE.md", "reports/old"]
 # - maple.finance/syrup Cloudflare returns 404 to bots on this subpath despite
 #   the page existing (verified via Wayback); no other maple.finance subpath
 #   exhibits this so the exclude is kept narrow
+# - businesswire.com/news raises "HTTP/2 protocol error" from lychee's reqwest
+#   client (server-side TLS/HTTP-2 quirk on Businesswire's CDN). URLs resolve
+#   200 in a browser; the failure is checker-specific. Scope kept to /news/.
+# - globenewswire.com/news-release raises the same lychee reqwest
+#   "HTTP/2 protocol error" (URL returns 200 via curl/browser). Scope
+#   kept to /news-release/.
+# - github.com/resolv-im/resolv-contracts-public returns 404 (repo is private or
+#   removed). Referenced by the Resolv reports (now HACKED / Not Rated), which we
+#   are intentionally not modifying; excluded so the dead link doesn't fail CI.
+# - superstate.com/assets/ (bare apex domain, e.g. /assets/uscc, /assets/ustb)
+#   intermittently raises the same "HTTP/2 protocol error" as businesswire.com
+#   above; curl and browsers negotiate HTTP/2 with it fine. Because it's a plain
+#   connection error (no HTTP status code), cache_exclude_status can't filter it
+#   from the cache, so one bad run poisons results for up to max_cache_age.
+#   Scope kept to the apex /assets/ path; docs.superstate.com and
+#   api.superstate.com are unaffected and still checked.
 exclude = [
     '^https?://(www\.)?rekt\.news',
     '^https?://(blue-api|api)\.morpho\.org/graphql',
+    '^https?://api\.cow\.fi/[^/]+/api/v1/quote$',
     '^https?://(www\.)?(twitter|x)\.com',
     '^https?://(www\.)?linkedin\.com',
     '^https?://(www\.)?trust-security\.xyz',
     '^https?://(www\.)?defillama\.com/protocol/',
     '^https?://(www\.)?maple\.finance/syrup',
+    '^https?://(www\.)?businesswire\.com/news/',
+    '^https?://(www\.)?globenewswire\.com/news-release/',
+    '^https?://github\.com/resolv-im/resolv-contracts-public',
+    '^https?://(www\.)?superstate\.com/assets/',
 ]

@@ -18,7 +18,7 @@ If the strategy is created using factory, the strategy risk score file should be
 2. JSON file must contain `riskLevel` and `riskScore` fields assigned by the SAM team.
 3. JSON file must contain `deployment` object which contains `eventAbi` and `eventStrategyParamName` fields. `eventAbi` is abi of the event that is emitted when the strategy is deployed. `eventStrategyParamName` is the name of the parameter in the event that contains deployed strategy address.
 
-For the reference check [file](./1/0x000000000000000000000000000000000000dead.json) or [MorphoCompounderFactory](./1/0x90E46590c1f18Bb8aAF73b5A3a377f74B0eE2d83.json). MorphoCompounderFactory is not used in the production because each Morpho vault must be evaluated individually. Morpho Vaults can have different currators and different markets, collaterals.
+For the reference check [file](./1/0x000000000000000000000000000000000000dead.json) or [MorphoCompounderFactory](./1/0x90E46590c1f18Bb8aAF73b5A3a377f74B0eE2d83.json). MorphoCompounderFactory is not used in the production because each Morpho vault must be evaluated individually. Morpho Vaults can have different curators and different markets, collaterals.
 
 ## Strategy Scanner
 

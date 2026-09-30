@@ -1,0 +1,479 @@
+slug: flying-tulip
+title: Flying Tulip FT Lend - Contract Dependency Graph
+chain: ethereum
+
+categories:
+  - id: vault
+    label: Market / Token
+  - id: strategy
+    label: Yield Wrapper
+  - id: governance
+    label: Governance
+  - id: infra
+    label: Protocol Infra
+  - id: dependency
+    label: External Dependency
+
+nodes:
+  # === Market / token layer ===
+  - id: positions-manager
+    label: PositionsManager
+    address: "0xbe4050a73a7Fb384c65E885a15C33461A4B20055"
+    category: vault
+    note: Core FT Lend engine; UUPS proxy
+  - id: ftusd
+    label: ftUSD
+    address: "0xF7D85EC4E7710f71992752eac2111312e73E9C9C"
+    category: vault
+    note: FiatToken-style stablecoin; collateral asset in FT Lend
+  - id: ft-token
+    label: FT Token
+    address: "0x5DD1A7A369e8273371d2DBf9d83356057088082c"
+    category: vault
+    note: Enabled long-tail asset; not borrowable/collateral in assessed market
+
+  # === Internal protocol infra ===
+  - id: config-registry
+    label: ConfigRegistry
+    address: "0xA8777c3D446fa7F0b0FC97a80C1Ea1d37F1ca33E"
+    category: infra
+    note: Asset configs, margins, caps, IRMs, oracle pointer
+  - id: oracle-router
+    label: OracleRouterChainlink
+    address: "0xe4372dB43D2814750a19b93950157AD81D93674A"
+    category: infra
+    note: Chainlink-anchored prices; owner can override last good price
+  - id: rfq-engine
+    label: Legacy RFQ Engine
+    address: "0xEB00B335Ca52216Fb60fdFFA361397367C39Dc32"
+    category: infra
+    note: Original RfqEngine liquidation module; remains authorized
+  - id: rfq-engine-v2
+    label: RFQ Engine v2
+    address: "0xc64516d58f8b83bc256448bc69d7bf2361557fdb"
+    category: infra
+    note: Added August 22, 2026 as PositionsManager engine and second liquidation module
+  - id: trs-leverage-engine
+    label: TRS LeverageRfqEngine v2
+    address: "0x93496075909f56d93b33302DF5D1655568Eb6e70"
+    category: infra
+    note: Signed OPEN/CLOSE/SWAP orders; permissioned fillers; user/session allowances and post-fill health checks
+  - id: trs-session-manager
+    label: TRS SessionManager
+    address: "0x880A371CE2C5Dbb2EB47EC0023b358e8aE80071b"
+    category: infra
+    note: Delegated session authorization used by the live TRS frontend
+  - id: trs-executor
+    label: TRS Permissioned Executor
+    address: "0xa505815A526f1200c17B7ffaE0067318d734b9d8"
+    category: infra
+    note: Authorized filler; EIP-7702 delegation target source unverified at September 4 check
+  - id: lend-circuit-breaker
+    label: Lend CircuitBreaker
+    address: "0x9676E697399581AB288844cDE5F73d0887eC18e0"
+    category: infra
+    note: Emergency flow halt; owned by the admin Safe, guardian can trip it. Wrappers can unset it (setCircuitBreaker to address zero)
+  - id: pm-wrapper
+    label: PMWrapper
+    address: "0xBDD80028c9e4b9A2D268D2cF62Fb54Ec8697C68B"
+    category: infra
+    note: Admin wrapper for PositionsManager upgrades, caps, pauses, reserves
+  - id: ftusd-core
+    label: ftUSD Core
+    address: "0x56c5892B0cF41B792217CCDD208f0FA85B178ca9"
+    category: infra
+    note: Sole ftUSD minter at assessment block
+  - id: mint-and-redeem
+    label: MintAndRedeem
+    address: "0xAa48EcBC843cF7E9A29155D112b8Cb27902bD23C"
+    category: infra
+    note: User collateral in, ftUSD out
+  - id: ftusd-usdc-wrapper
+    label: ftUSD USDC YieldWrapper
+    address: "0x6aaf84563Cdb03a22Cd92EE2553698beE87E837D"
+    category: strategy
+    note: Holds ftUSD USDC backing (2.77M); separate from the FT Lend USDC wrapper
+  - id: ftusd-usdt-wrapper
+    label: ftUSD USDT YieldWrapper
+    address: "0x28CCa8eEA2cD0498cE91A9da15772A1ce42347D6"
+    category: strategy
+    note: Holds ftUSD USDT backing (1.42M)
+  - id: delta-neutral
+    label: Delta Neutral Strategy
+    address: "0xe0E445967256EE60111e243e0F0F94DD1D351A59"
+    category: strategy
+    note: MultiCollateralDeltaNeutralStakingStrategy - deploys ftUSD backing INTO FT Lend (35.1% of TVL). Hedge leg live since ~Aug 3 - 76.5 wstETH collateral, 95.0 WETH borrowed
+  - id: relayer-session
+    label: Relayer / Sessions
+    address: "0x823a97a2c32985e0f5457fc8103F36698D1F53F4"
+    category: infra
+    note: RelayerAuth plus SessionManager and meta-action modules
+
+  # === Yield wrappers / strategies ===
+  - id: usdc-wrapper
+    label: USDC YieldWrapper
+    address: "0xD2e4A5ac4B4Da102317cF7C9A1289aDF082639E2"
+    category: strategy
+  - id: weth-wrapper
+    label: WETH YieldWrapper
+    address: "0x460494aF61BcB92B59797B4e09C26A5ADecb2da2"
+    category: strategy
+  - id: usdt-wrapper
+    label: USDT YieldWrapper
+    address: "0x28b0905d83BCe5FFA6c54651F25858828A38123B"
+    category: strategy
+  - id: wbtc-wrapper
+    label: WBTC YieldWrapper
+    address: "0x1A5730c71576D77048E9FdC79DD40e4B1E8Fe042"
+    category: strategy
+  - id: ftusd-wrapper
+    label: ftUSD YieldWrapper
+    address: "0xc67D966f761e8cf13Faa0a1E774425290c8453d9"
+    category: strategy
+    note: No strategy configured at assessment block; idle ftUSD held in wrapper
+  - id: wsteth-wrapper
+    label: wstETH YieldWrapper
+    address: "0x01980BD1B58313bD3767f6adc75Af8b6464f3db7"
+    category: strategy
+    note: No strategy configured; zero balance at assessment block
+  - id: ft-wrapper
+    label: FT YieldWrapper
+    address: "0x7127BB9d9ad0f47B8dA9087e634D67F3946F840E"
+    category: strategy
+    note: No strategy configured; circuit breaker unset (address zero)
+
+  # === Governance ===
+  - id: admin-safe
+    label: Admin Safe (3/5)
+    address: "0x1118e1c057211306a40A4d7006C040dbfE1370Cb"
+    category: governance
+    note: No timelock; root owner/masterMinter/pauser/blacklister
+  - id: guardian-safe
+    label: Guardian Safe (3/4)
+    address: "0x22246a9183cE2CE6e2c2a9973F94aEA91435017C"
+    category: governance
+    note: Signers overlap with admin Safe; pause/oracle guardian
+  - id: fee-collector
+    label: Fee Collector
+    address: "0x5cd6Abe67f8af1C0c699dF36d90a6469Eaf1958a"
+    category: governance
+    note: Receives reserves/fees and settles epochs
+  - id: wbtc-strategy-manager
+    label: WBTC Strategy Mgr Safe (3/5)
+    address: "0x5557729b169082f07d3131D560E2f2cb5e6c48f6"
+    category: governance
+    note: Third Safe with the same five signers as the admin Safe; strategyManager of the WBTC wrapper only
+  - id: yield-claimer
+    label: YieldClaimer
+    address: "0x88432bB6EA62e774cB6d87995CC5277568d01397"
+    category: governance
+    note: Holds wrapper execute() arbitrary-call and forceWithdrawToWrapper
+
+  # === External dependencies ===
+  - id: dep-aave
+    label: Aave
+    category: dependency
+    note: Idle supply venue for yield wrappers
+  - id: dep-spark
+    label: Spark
+    category: dependency
+    note: Idle supply venue for yield wrappers
+  - id: oracle-wrapper-wbtc
+    label: WBTC Oracle Wrapper
+    address: "0x183dB475d8184aA7a018ed2164e11A887afBDA55"
+    category: infra
+    note: ChainlinkLatestAnswerProxy - immutable base feed (CL BTC/USD) + Aave peg adapter; owner can pause but not repoint
+  - id: oracle-wrapper-wsteth
+    label: wstETH Oracle Wrapper
+    address: "0x000bb128a8aBCFa05B871C97CC9C5f88e7Dcf35a"
+    category: infra
+    note: ChainlinkLatestAnswerProxy - immutable base feed (CL ETH/USD) + Aave WstETHPriceCapAdapter
+  - id: oracle-wrapper-ftusd
+    label: ftUSD Oracle Wrapper
+    address: "0xA69f7a38B6c91a4bc2477f097DC8a1F16DAADFf8"
+    category: infra
+    note: FtUsdMintRedeemOracleProxy - prices ftUSD from the USDC price and cumulative mint history. Does NOT read ftUSD collateral; 0 bps deviation tolerance
+  - id: dep-chainlink
+    label: Chainlink Feeds
+    category: dependency
+    note: Canonical EACAggregatorProxy feeds for USDC, USDT and ETH
+  - id: dep-curve
+    label: Curve ftUSD/USDC
+    address: "0xafec61e7a604f8f81f7cab64ec75bfa07c542630"
+    category: dependency
+    note: StableSwap-NG ~$249K after >85% decline. Thin ftUSD exit; gauge custody is 87.1% Convex voter proxy, 7.1% EOA, 5.6% CurveYCRVVoter
+  - id: dep-morpho
+    label: Morpho
+    address: "0xBBBBBbbBBb9cC5e90e3b3Af64bdAF62C37EEFFCb"
+    category: dependency
+    note: Holds 629,675 ftUSD as collateral. Third-party acceptance and an outward propagation channel
+  - id: dep-trs-routes
+    label: TRS Execution Routes
+    category: dependency
+    note: KyberSwap, Velora, 0x, internal self-fill, ftUSD MintAndRedeem and composite routes. Dynamic LTV remains unimplemented
+  - id: dep-permit2
+    label: Permit2
+    address: "0xEB450d21ae68D3303Cf5775A54Cc84EE7c3fC8eC"
+    category: dependency
+
+edges:
+  # === Governance and control ===
+  - from: admin-safe
+    to: config-registry
+    kind: controls
+    label: owner - asset config, margins, IRMs
+  - from: admin-safe
+    to: oracle-router
+    kind: controls
+    label: owner - feeds and price override
+  - from: admin-safe
+    to: pm-wrapper
+    kind: controls
+    label: admin - upgrades, caps, pauses
+  - from: pm-wrapper
+    to: positions-manager
+    kind: controls
+    label: upgradePM / setCaps / pauses
+  - from: admin-safe
+    to: ftusd
+    kind: controls
+    label: owner + masterMinter + pauser + blacklister
+  - from: admin-safe
+    to: mint-and-redeem
+    kind: controls
+    label: owner
+  - from: guardian-safe
+    to: oracle-router
+    kind: holds-role
+    label: disablePrice guardian
+  - from: guardian-safe
+    to: lend-circuit-breaker
+    kind: holds-role
+    label: emergency pause
+  - from: admin-safe
+    to: lend-circuit-breaker
+    kind: controls
+    label: owner - can pause or reconfigure the breaker
+  - from: admin-safe
+    to: rfq-engine-v2
+    kind: controls
+    label: admin - upgrade, liquidator roles and liquidation parameters
+  - from: admin-safe
+    to: trs-leverage-engine
+    kind: controls
+    label: admin - upgrade, fillers, sessions and batch module
+  - from: admin-safe
+    to: usdc-wrapper
+    kind: controls
+    label: owner + strategyManager - setStrategy, no delay
+  - from: admin-safe
+    to: weth-wrapper
+    kind: controls
+    label: owner + strategyManager - setStrategy, no delay
+  - from: admin-safe
+    to: usdt-wrapper
+    kind: controls
+    label: owner + strategyManager - setStrategy, no delay
+  - from: admin-safe
+    to: wbtc-wrapper
+    kind: controls
+    label: owner - upgrades wrapper proxy
+  - from: admin-safe
+    to: ftusd-wrapper
+    kind: controls
+    label: owner + strategyManager
+  - from: admin-safe
+    to: wsteth-wrapper
+    kind: controls
+    label: owner + strategyManager
+  - from: admin-safe
+    to: ft-wrapper
+    kind: controls
+    label: owner + strategyManager
+  - from: wbtc-strategy-manager
+    to: wbtc-wrapper
+    kind: controls
+    label: strategyManager - setStrategy, setCircuitBreaker
+  - from: yield-claimer
+    to: usdc-wrapper
+    kind: holds-role
+    label: yieldClaimer - execute() arbitrary call
+  - from: yield-claimer
+    to: usdt-wrapper
+    kind: holds-role
+    label: yieldClaimer - execute() arbitrary call
+  - from: yield-claimer
+    to: weth-wrapper
+    kind: holds-role
+    label: yieldClaimer - execute() arbitrary call
+  - from: yield-claimer
+    to: wbtc-wrapper
+    kind: holds-role
+    label: yieldClaimer - execute() arbitrary call
+  - from: fee-collector
+    to: positions-manager
+    kind: holds-role
+    label: collector / epoch settler
+
+  # === ftUSD mint / redeem path ===
+  - from: mint-and-redeem
+    to: ftusd-core
+    kind: routes-through
+    label: collateralized mint/redeem entry
+  - from: ftusd-core
+    to: ftusd
+    kind: mints
+    label: sole minter
+  - from: admin-safe
+    to: ftusd
+    kind: mints
+    label: masterMinter can configure arbitrary minter
+
+  # === ftUSD collateral custody and the reflexivity loop ===
+  - from: mint-and-redeem
+    to: ftusd-usdc-wrapper
+    kind: allocates-to
+    label: deposits USDC collateral on mint
+  - from: mint-and-redeem
+    to: ftusd-usdt-wrapper
+    kind: allocates-to
+    label: deposits USDT collateral on mint
+  - from: ftusd-usdc-wrapper
+    to: delta-neutral
+    kind: deposits-into
+    label: "2.77M USDC"
+  - from: ftusd-usdt-wrapper
+    to: delta-neutral
+    kind: deposits-into
+    label: "1.42M USDT"
+  - from: delta-neutral
+    to: positions-manager
+    kind: deposits-into
+    label: REFLEXIVE - ftUSD backing supplied into FT Lend (35.1% of TVL)
+  - from: admin-safe
+    to: delta-neutral
+    kind: controls
+    label: strategyManager of the ftUSD wrappers
+
+  # === Oracle wiring ===
+  - from: oracle-router
+    to: oracle-wrapper-wbtc
+    kind: routes-through
+    label: WBTC price
+  - from: oracle-router
+    to: oracle-wrapper-wsteth
+    kind: routes-through
+    label: wstETH price
+  - from: oracle-router
+    to: oracle-wrapper-ftusd
+    kind: routes-through
+    label: ftUSD price
+  - from: oracle-wrapper-wbtc
+    to: dep-chainlink
+    kind: routes-through
+    label: immutable base feed BTC/USD
+  - from: oracle-wrapper-wsteth
+    to: dep-chainlink
+    kind: routes-through
+    label: immutable base feed ETH/USD
+  - from: oracle-wrapper-ftusd
+    to: mint-and-redeem
+    kind: routes-through
+    label: reads redeem factors (USDC price + mint history), not collateral
+
+  # === Lending engine wiring ===
+  - from: oracle-router
+    to: dep-chainlink
+    kind: manages
+    label: configured price feeds
+  - from: positions-manager
+    to: rfq-engine
+    kind: routes-through
+    label: legacy liquidations
+  - from: positions-manager
+    to: rfq-engine-v2
+    kind: routes-through
+    label: v2 RFQ liquidations and Trade
+  - from: positions-manager
+    to: trs-leverage-engine
+    kind: routes-through
+    label: TRS borrowing and collateral swaps
+  - from: positions-manager
+    to: relayer-session
+    kind: manages
+    label: legacy meta-actions / session layer
+  - from: trs-leverage-engine
+    to: trs-session-manager
+    kind: routes-through
+    label: delegated user authorization
+  - from: trs-executor
+    to: trs-leverage-engine
+    kind: holds-role
+    label: permissioned filler
+  - from: trs-executor
+    to: dep-trs-routes
+    kind: routes-through
+    label: constructs and executes spot route
+  - from: dep-trs-routes
+    to: mint-and-redeem
+    kind: routes-through
+    label: ftUSD mint/redeem and composite routes
+  - from: relayer-session
+    to: dep-permit2
+    kind: routes-through
+    label: token approvals
+
+  - from: ftusd
+    to: dep-curve
+    kind: routes-through
+    label: external exit + peg reference (~0.38% at 100K)
+  - from: ftusd
+    to: dep-morpho
+    kind: routes-through
+    label: accepted as Morpho collateral
+
+  # === Asset supply routing ===
+  - from: positions-manager
+    to: usdc-wrapper
+    kind: allocates-to
+    label: "~25.9% TVL"
+  - from: positions-manager
+    to: weth-wrapper
+    kind: allocates-to
+    label: "~11.3% TVL"
+  - from: positions-manager
+    to: usdt-wrapper
+    kind: allocates-to
+    label: "~11.6% TVL"
+  - from: positions-manager
+    to: wbtc-wrapper
+    kind: allocates-to
+    label: "~39.5% TVL"
+  - from: usdc-wrapper
+    to: dep-spark
+    kind: deposits-into
+    label: Spark strategy
+  - from: weth-wrapper
+    to: dep-spark
+    kind: deposits-into
+    label: Spark strategy
+  - from: usdt-wrapper
+    to: dep-spark
+    kind: deposits-into
+    label: Spark strategy
+  - from: wbtc-wrapper
+    to: dep-aave
+    kind: deposits-into
+    label: Aave strategy
+  - from: positions-manager
+    to: ftusd-wrapper
+    kind: allocates-to
+    label: "~11.8% TVL"
+  - from: positions-manager
+    to: wsteth-wrapper
+    kind: allocates-to
+    label: enabled, 0 supplied
+  - from: positions-manager
+    to: ft-wrapper
+    kind: allocates-to
+    label: enabled, unpriced

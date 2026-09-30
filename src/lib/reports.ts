@@ -13,7 +13,13 @@ export function getAllReports(): ReportData[] {
       const content = fs.readFileSync(path.join(REPORTS_DIR, file), "utf-8");
       return parseReport(slug, content);
     })
-    .sort((a, b) => a.finalScore - b.finalScore);
+    .sort((a, b) => {
+      // Not Rated (null score) reports sort to the end.
+      if (a.finalScore == null && b.finalScore == null) return 0;
+      if (a.finalScore == null) return 1;
+      if (b.finalScore == null) return -1;
+      return a.finalScore - b.finalScore;
+    });
 }
 
 export function getReportBySlug(slug: string): ReportData | undefined {
@@ -21,6 +27,16 @@ export function getReportBySlug(slug: string): ReportData | undefined {
   if (!fs.existsSync(file)) return undefined;
   const content = fs.readFileSync(file, "utf-8");
   return parseReport(slug, content);
+}
+
+/**
+ * Reports shown in the site's listings: the /reports/ index and the homepage
+ * highlights. Reports marked "**Visibility:** Hidden" in their header are
+ * dropped here only — their page, OG image, graph and bridge rows still build,
+ * so a direct link keeps working and nothing else on the site degrades.
+ */
+export function getListedReports(): ReportData[] {
+  return getAllReports().filter((r) => !r.hidden);
 }
 
 export function getAllSlugs(): string[] {
@@ -31,7 +47,7 @@ export function getAllSlugs(): string[] {
 }
 
 export function getRecentReports(n = 5): ReportData[] {
-  return getAllReports()
+  return getListedReports()
     .slice()
     .sort((a, b) => b.dateSortable - a.dateSortable)
     .slice(0, n);

@@ -5,6 +5,8 @@ chain: ethereum
 categories:
   - id: vault
     label: Vault
+  - id: strategy
+    label: Strategy
   - id: governance
     label: Governance / Multisig
   - id: infra
@@ -15,17 +17,26 @@ categories:
 nodes:
   # Vault layer
   - id: yvWBTC
-    label: yvWBTC-1 (100% idle, empty queue)
+    label: yvWBTC-1 (100% deployed)
     address: "0x751F0cC6115410A3eE9eC92d08f46Ff6Da98b708"
     category: vault
   - id: accountant
     label: Accountant (0% mgmt, 10% perf)
     address: "0x5A74Cb32D36f2f517DB6f7b0A0591e09b22cDE69"
-    category: vault
+    category: infra
   - id: dumper
     label: Fee Recipient (Dumper)
     address: "0x590Dd9399bB53f1085097399C3265C7137c1C4Cf"
-    category: vault
+    category: infra
+
+  # Strategy
+  - id: ymv-wbtc
+    label: ymv-WBTC (MetaMorpho)
+    address: "0x2bB005127069A0F0325Fb7370967E8A2b64FB77E"
+    category: strategy
+    morphoVault: v1
+    link: "https://app.morpho.org/ethereum/vault/0x2bB005127069A0F0325Fb7370967E8A2b64FB77E/"
+    note: "Immutable MetaMorpho V1_1 ERC-4626 vault. Owner: Security 4-of-7 / Guardian: ySafe 6-of-9 / Curator: 2-of-3 Safe. Fee: 0%, 3-day curator timelock."
 
   # Governance
   - id: daddy
@@ -48,6 +59,10 @@ nodes:
     label: Yearn V3 Role Manager
     address: "0xb3bd6B2E61753C311EFbCF0111f75D29706D9a41"
     category: governance
+  - id: curator
+    label: Curator (2-of-3)
+    address: "0x90D0f26025571295D18a6c041E47450B81886B51"
+    category: governance
 
   # Infra / bots
   - id: keeper
@@ -63,12 +78,30 @@ nodes:
     address: "0x770D0d1Fb036483Ed4AbB6d53c1C88fb277D812F"
     category: infra
 
-  # Underlying asset (only dependency at snapshot)
+  # External dependencies
   - id: wbtc
     label: WBTC (BitGo-custodied)
     address: "0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599"
     category: dependency
-    note: Underlying asset only — no strategies attached at the snapshot
+    note: Underlying asset for vault and Morpho market loan token
+
+# BEGIN GENERATED MORPHO MARKET NODES
+# Managed by scripts/update_morpho_graph_markets.mjs — do not edit.
+  - id: morpho-idle-wbtc
+    label: "Idle WBTC"
+    category: dependency
+    note: "Idle WBTC held in Yearn WBTC"
+  - id: morpho-market-f6a056627a51
+    label: "LBTC/WBTC · 94.5% LLTV"
+    category: dependency
+    link: "https://app.morpho.org/ethereum/market/0xf6a056627a51e511ec7f48332421432ea6971fc148d8f3c451e14ea108026549/"
+    note: "Morpho market 0xf6a056627a51e511ec7f48332421432ea6971fc148d8f3c451e14ea108026549"
+  - id: morpho-market-39d6cc9211d0
+    label: "cbBTC/WBTC · 94.5% LLTV"
+    category: dependency
+    link: "https://app.morpho.org/ethereum/market/0x39d6cc9211d023cc16708a2378d821d394d8cfaa3640e3a4d4638d292e10035d/"
+    note: "Morpho market 0x39d6cc9211d023cc16708a2378d821d394d8cfaa3640e3a4d4638d292e10035d"
+# END GENERATED MORPHO MARKET NODES
 
 edges:
   # Deployment / vault infrastructure
@@ -83,17 +116,17 @@ edges:
     to: dumper
     kind: routes-fees-to
 
-  # Vault holds underlying directly (100% idle)
+  # Capital flow: vault → strategy → Morpho markets
   - from: yvWBTC
-    to: wbtc
-    kind: deposits-into
-    label: "100% idle (held at vault)"
+    to: ymv-wbtc
+    kind: allocates-to
+    label: "100%"
 
   # Governance roles on vault
   - from: daddy
     to: yvWBTC
     kind: holds-role
-    label: "all 14 roles"
+    label: "12 of 14 roles"
   - from: brain
     to: yvWBTC
     kind: holds-role
@@ -135,3 +168,33 @@ edges:
     to: timelock
     kind: cancels-on
     label: CANCELLER
+
+  # MetaMorpho governance
+  - from: security
+    to: ymv-wbtc
+    kind: holds-role
+    label: "owner"
+  - from: daddy
+    to: ymv-wbtc
+    kind: holds-role
+    label: "guardian"
+  - from: curator
+    to: ymv-wbtc
+    kind: holds-role
+    label: "curator"
+
+# BEGIN GENERATED MORPHO MARKET EDGES
+# Managed by scripts/update_morpho_graph_markets.mjs — do not edit.
+  - from: ymv-wbtc
+    to: morpho-idle-wbtc
+    kind: deposits-into
+    label: "81.9%"
+  - from: ymv-wbtc
+    to: morpho-market-f6a056627a51
+    kind: deposits-into
+    label: "18.0%"
+  - from: ymv-wbtc
+    to: morpho-market-39d6cc9211d0
+    kind: deposits-into
+    label: "<0.1%"
+# END GENERATED MORPHO MARKET EDGES

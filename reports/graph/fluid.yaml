@@ -17,24 +17,24 @@ categories:
 nodes:
   # === fToken layer (user-facing) ===
   - id: fUSDC
-    label: fUSDC (~$193M)
+    label: fUSDC (~$134M)
     address: "0x9Fb7b4477576Fe5B32be4C1843aFB1e55F251B33"
     category: vault
     note: ERC-4626 USDC lending vault
   - id: fUSDT
-    label: fUSDT (~$130M)
+    label: fUSDT (~$131M)
     address: "0x5C20B550819128074FD538Edf79791733ccEdd18"
     category: vault
   - id: fWETH
-    label: fWETH (~2,533 WETH)
+    label: fWETH (~1,600 WETH)
     address: "0x90551c1795392094FE6D29B758EcCD233cFAa260"
     category: vault
   - id: fwstETH
-    label: fwstETH (~1,768 wstETH)
+    label: fwstETH (~360 wstETH)
     address: "0x2411802D8BEA09be0aF8fD8D08314a63e706b29C"
     category: vault
   - id: fGHO
-    label: fGHO (~$12M)
+    label: fGHO (~$15M)
     address: "0x6A29A46E21C730DcA1d8b23d637c101cec605C5B"
     category: vault
   - id: fsUSDS
@@ -68,7 +68,7 @@ nodes:
     note: Tick-based liquidations; generates fToken yield
   - id: rebalancer
     label: Rebalancer (fUSDC/fUSDT)
-    address: "0x724d0c9497Fa89B2C6A4585e08380c91a92ab9b6"
+    address: "0x264786EF916af64a1DB19F513F24a3681734ce92"
     category: infra
     note: Deposits underlying as rewards; cannot withdraw
 
@@ -79,10 +79,10 @@ nodes:
     category: governance
     note: 100M max supply; 4M quorum, 1M propose
   - id: governor-bravo
-    label: GovernorBravo (128 proposals)
+    label: GovernorBravo (135 proposals)
     address: "0x0204Cd037B2ec03605CFdFe482D8e257C765fA1B"
     category: governance
-    note: 1d delay, 2d voting; 120 executed
+    note: 1d delay, 2d voting; 127 of 135 executed (3 Canceled, 3 Defeated, 2 Expired)
   - id: timelock
     label: Timelock (1-day delay)
     address: "0x2386DC45AdDed673317eF068992F19421B481F4c"
@@ -102,11 +102,11 @@ nodes:
   - id: borrow-stable-wrappers
     label: Yield-Bearing Stable Wrappers
     category: strategy
-    note: SUSDAI / reUSD / sUSDe — wrap-ratio amplification risk
+    note: sUSDai / reUSD / sUSDe — wrap-ratio amplification risk
   - id: borrow-btc
     label: BTC Borrow Markets
     category: strategy
-    note: WBTC / cbBTC (~10% of Eth supply)
+    note: WBTC / cbBTC (~9% of Eth supply)
   - id: borrow-stables
     label: Stablecoin Borrow Markets
     category: strategy
@@ -114,26 +114,66 @@ nodes:
 
   # === External dependencies ===
   - id: dep-susdai
-    label: SUSDAI (19.9% top supply)
+    label: Canonical sUSDai (Arbitrum)
+    address: "0x0b2b2b2076d95dda7817e785989fe353fe955ef9"
+    chain: arbitrum
     category: dependency
-    note: Sky yield-bearing stable wrapper; #1 supply asset
+    note: USD.AI ERC-4626 vault backed by USDai; the Arbitrum OAdapter's authenticated receive path can mint this canonical supply; Fluid holds ~2/3 of total sUSDai supply
+  - id: susdai-ethereum
+    label: Ethereum sUSDai OToken
+    address: "0x0b2b2b2076d95dda7817e785989fe353fe955ef9"
+    category: dependency
+    note: Bridged representation, not an ERC-4626 vault; Fluid held ~96% of mainnet supply when checked Jul 22, 2026
+  - id: susdai-oadapter-ethereum
+    label: Ethereum sUSDai OAdapter
+    address: "0xffB20098FD7B8E84762eea4609F299D101427f24"
+    category: infra
+    note: Sole BRIDGE_ADMIN_ROLE holder on Ethereum sUSDai; Arbitrum→Ethereum route is 3-of-3 DVNs with 20 confirmations
+  - id: susdai-oadapter-arbitrum
+    label: Arbitrum sUSDai OAdapter
+    address: "0xffB20098FD7B8E84762eea4609F299D101427f24"
+    chain: arbitrum
+    category: infra
+    note: Authenticated receive path can mint canonical sUSDai; Ethereum→Arbitrum route is 3-of-3 DVNs with 15 confirmations; 10M/hour limiter is outbound-only
+  - id: susdai-admin-safe-ethereum
+    label: Ethereum USD.AI Admin Safe (3-of-3)
+    address: "0x5F0BC72FB5952b2f3F2E11404398eD507B25841F"
+    category: governance
+    note: Owns the Ethereum OAdapter and holds Ethereum sUSDai DEFAULT_ADMIN_ROLE
+  - id: susdai-admin-safe-arbitrum
+    label: Arbitrum USD.AI Admin Safe (3-of-3)
+    address: "0x5F0BC72FB5952b2f3F2E11404398eD507B25841F"
+    chain: arbitrum
+    category: governance
+    note: Owns the Arbitrum OAdapter; threshold and all three owners match the Ethereum Safe
+  - id: susdai-upgrade-timelock
+    label: sUSDai Upgrade Timelock (48h)
+    address: "0x0EEA1EE08611fF4A4E83BFe3916712751995639b"
+    category: governance
+    note: Owns ProxyAdmin 0x0b3296b6f50611B28d466a6D5A49754dAd4D8d9F, which can upgrade the Ethereum sUSDai proxy
   - id: dep-reusd
-    label: reUSD (Re Protocol)
+    label: reUSD (3.51 Elevated Risk)
     address: "0x5086bf358635B81D8C47C66d1C8b9E567Db70c72"
     category: dependency
-    note: Yield-bearing stable wrapper; structurally similar to wstUSR
+    note: 6.1% of Fluid TVL (~26.7% of reUSD supply); ~50% offchain backing, admin-written price, EOA custody, no bug bounty
+    ref: reports/report/re-reusd.md
   - id: dep-wsteth
     label: wstETH (Lido)
     address: "0x7f39C581F595B53c5cb19bD0b3f8dA6c935E2Ca0"
     category: dependency
-    note: 16.8% of all-chain supply
+    note: 20.8% of all-chain supply
   - id: dep-weeth
     label: weETH (ether.fi)
     category: dependency
-    note: 12.9% of all-chain supply
+    note: 3.2% of all-chain supply (was 12.9%)
   - id: dep-wbtc
     label: WBTC / cbBTC
     category: dependency
+  - id: dep-pst
+    label: PST (Huma PayFi, ~4.2%)
+    address: "0x22ae3d9a738471f405169af055d31c687087d4c7"
+    category: dependency
+    note: Non-blue-chip RWA — off-chain PayFi receivables backing; Ethereum PST is a Chainlink CCIP BurnMintERC20 bridged solely from Solana (pool 0xBE77…0D3d), carrying RWA credit + CCIP + Solana source-chain risk
   - id: dep-chainlink
     label: Chainlink Oracles
     category: dependency
@@ -248,25 +288,57 @@ edges:
   - from: vault-protocol
     to: borrow-stable-wrappers
     kind: allocates-to
-    label: "~32% (SUSDAI + reUSD)"
+    label: "~37% (sUSDai + reUSD)"
   - from: vault-protocol
     to: borrow-btc
     kind: allocates-to
-    label: "~10% Eth supply"
+    label: "~9% Eth supply"
   - from: vault-protocol
     to: borrow-stables
     kind: allocates-to
-    label: "~17% Eth supply"
+    label: "~13% Eth supply"
 
   # === Borrow markets → collateral / external dependencies ===
   - from: borrow-stable-wrappers
     to: dep-susdai
     kind: deposits-into
-    label: "19.9% top asset"
+    label: "31.2% cross-chain (USD.AI)"
+  - from: borrow-stable-wrappers
+    to: susdai-ethereum
+    kind: deposits-into
+    label: "15.2% of Ethereum supply"
+  - from: susdai-ethereum
+    to: dep-susdai
+    kind: routes-through
+    label: LayerZero burn/mint supply correspondence
+  - from: susdai-oadapter-ethereum
+    to: susdai-ethereum
+    kind: mints
+    label: BRIDGE_ADMIN_ROLE
+  - from: susdai-oadapter-arbitrum
+    to: dep-susdai
+    kind: mints
+    label: authenticated LayerZero receive
+  - from: susdai-admin-safe-ethereum
+    to: susdai-oadapter-ethereum
+    kind: controls
+    label: owner
+  - from: susdai-admin-safe-arbitrum
+    to: susdai-oadapter-arbitrum
+    kind: controls
+    label: owner
+  - from: susdai-admin-safe-ethereum
+    to: susdai-ethereum
+    kind: holds-role
+    label: DEFAULT_ADMIN_ROLE
+  - from: susdai-upgrade-timelock
+    to: susdai-ethereum
+    kind: controls
+    label: owns ProxyAdmin; 48-hour delay
   - from: borrow-stable-wrappers
     to: dep-reusd
     kind: deposits-into
-    label: "12.7%"
+    label: "6.1%"
   - from: borrow-eth
     to: dep-wsteth
     kind: deposits-into
@@ -276,6 +348,10 @@ edges:
   - from: borrow-btc
     to: dep-wbtc
     kind: deposits-into
+  - from: vault-protocol
+    to: dep-pst
+    kind: deposits-into
+    label: PST collateral (Solana/CCIP RWA)
   - from: vault-protocol
     to: dep-chainlink
     kind: routes-through

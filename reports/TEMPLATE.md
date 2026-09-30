@@ -1,19 +1,53 @@
 # Protocol Risk Assessment: [Protocol Name]
 
 - **Assessment Date:** [Month Day, Year]
+<!--
+  Keep the ORIGINAL assessment date here. When a report is reassessed/updated,
+  do NOT overwrite it — append the latest date in parentheses using the
+  "Updated:" prefix, showing ONLY the single most recent date:
+    - **Assessment Date:** March 20, 2026 (Updated: July 31, 2026)
+  The website reads both: the earliest date becomes "Original", the latest
+  becomes "Latest", and the page is tagged "Updated report". Overwriting the
+  single date loses that history and the report shows as brand new.
+-->
 - **Token:** [Token Name]
 - **Chain:** [Chain Name]
 - **Token Address:** [`[Token Address]`]([Token Explorer Link])
 - **Final Score: X/5.0**
+<!-- Status: omit this line entirely for normal/active reports. See the Status comment below. -->
+<!-- Visibility: omit this line entirely for listed reports. See the Visibility comment below. -->
 
 <!--
+Visibility field (optional — omit for listed reports):
+  Add a "- **Visibility:** Hidden" line to keep a report out of the site's
+  listings: the /reports/ index, the homepage highlights, and the report count
+  shown on the site. The report is unlisted, not unpublished — its
+  /report/<slug>/ page, OG image, graph page and bridge rows still build, so a
+  direct link keeps working and nothing else on the site degrades. Remove the
+  line to list it again.
+-->
+
+<!--
+Status field (optional — omit for active reports):
+  Add a "- **Status:** <TAG>" line only when a report is an exception. The
+  taxonomy is:
+    - GATED   — score is retained but was capped by a critical gate (e.g. no
+                audit) rather than earned organically. Keep the numeric
+                "Final Score: X/5.0"; the site shows it with an amber GATED chip.
+    - HACKED  — confirmed exploit / unbacked mint / realized loss event.
+    - DEAD    — deprecated, wind-down, or discretionary-only redemption.
+  HACKED and DEAD are "terminal": a realized event supersedes a forward-looking
+  score, so set the header to "- **Final Score: N/A**" (the site renders these
+  off the 1–5 scale under a separate "Not Rated" section). Retain the gate/
+  override derivation in the Risk Score Assessment section for the record.
+
 Assessment Date format:
   - Use full English month name and four-digit year, e.g. "March 4, 2026".
-  - When a report is reassessed, append the new date in parentheses on the
-    same line, e.g.
+  - When a report is reassessed, append the latest update date in parentheses
+    with the "Updated:" prefix, showing ONLY the single most recent date:
         **Assessment Date:** February 8, 2026 (Updated: March 22, 2026)
-    or, when reassessing in response to an event:
-        **Assessment Date:** April 27, 2026 (reassessment after April 18, 2026 exploit)
+    Do NOT stack multiple dates or add prose like "rechecked," "reassessed,"
+    or "corrected" — collapse all prior updates into the single latest date.
   - The reassessment-scan workflow parses every "Month Day, Year" date on this
     line and uses the latest one to decide whether the report is stale, so the
     appended date keeps the staleness clock honest.
@@ -64,7 +98,7 @@ Explain what the protocol does, its usage, and yield sources.
 
 ### Token Mint Authority
 
-Enumerate every address that can mint the assessed token, and the mechanism that gates them. Treat any address with mint authority as part of the trust surface even if it is intended only for a narrow purpose. Onchain enumeration procedure: see `reports/skill.md` § "Pass 1.6: Mint authority enumeration".
+Enumerate every address that can mint the assessed token, and the mechanism that gates them. Treat any address with mint authority as part of the trust surface even if it is intended only for a narrow purpose. Onchain enumeration procedure: see [onchain verification](../.agents/skills/verifying-onchain-data/SKILL.md#mint-authority-enumeration-workflow).
 
 **Mint mechanism:** [Open mint via collateral deposit / Role-gated AccessControl / Whitelist mapping / Ownable / Custodial bridge / Other — describe]
 
@@ -148,7 +182,7 @@ See `reports/report/mezo-musd.md` for a worked example.
 List key contracts and events to monitor. At minimum, cover governance changes and backing ratio.
 
 - Key contract addresses to monitor, always define which addresses should be monitored.
-- Critical values or events to watch like parameter changes, governance actions, redeption liquidity, collateral allocation.
+- Critical values or events to watch like parameter changes, governance actions, redemption liquidity, collateral allocation.
 - If protocol is using trenches or some kind of loss coverage define which contracts should be monitored to track the coverage ratio.
 - Define which functions can be used to get specific data.
 - If data can't be fetched onchain then fallback to using offchain data.
@@ -199,11 +233,21 @@ Show the data/fund flow between layers. Note key admin powers and trust boundari
 
 If ANY gate is triggered, the protocol automatically receives a score of **5** (High Risk).
 
+- [ ] **Unverified contract source** - The assessed contract, or its implementation behind a proxy, is not source-verified on a public block explorer (bytecode cannot be independently reviewed)
 - [ ] **No audit** - Protocol has not been audited by reputable firms
 - [ ] **Unverifiable reserves** - Reserves cannot be verified onchain or through transparent attestation
 - [ ] **Total centralization** - Controlled by a single EOA with no multisig or governance
 
 **If ALL gates pass**, proceed to category scoring.
+
+> **A triggered gate is not the same as a realized loss.** A gate on an
+> otherwise-live protocol caps the score at 5.0 — set `Status: GATED` in the
+> header and keep the number so it stays comparable on the scale. Reserve
+> `N/A` / the "Not Rated" bucket for **terminal** states (`HACKED` / `DEAD`),
+> where an actual exploit or wind-down has occurred. Do not let a gate flatten
+> a distinguishable, still-live protocol into the same cell as a corpse — record
+> the ungated weighted score in the reasoning so the underlying risk stays
+> visible.
 
 ### Category Scores
 
@@ -241,11 +285,14 @@ If ANY gate is triggered, the protocol automatically receives a score of **5** (
 
 | Score | Contract Upgradeability | Timelock | Privileged Roles |
 |-------|------------------------|----------|-----------------|
-| **1** | Immutable or fully decentralized DAO | 7+ days timelock on critical operations | Multisig above 3/5 threshold, no EOA roles. Multi-party approval required |
-| **2** | Multisig 7/11+ with timelock | 24+ hours | Limited roles, cannot seize funds |
-| **3** | Multisig 5/9 with timelock | 24+ hours | Some powerful roles, constrained by timelock |
+| **1** | Immutable or fully decentralized DAO | 48h+ timelock on critical operations | Multisig above 3/5 threshold, no EOA roles. Multi-party approval required |
+| **2** | Multisig 7/11+ with timelock | 24-48 hours | Limited roles, cannot seize funds |
+| **3** | Multisig 5/9 with timelock | 12-24 hours | Some powerful roles, constrained by timelock |
 | **4** | Multisig 3/5 or low threshold | <12 hours | Powerful admin roles with limited constraints |
 | **5** | EOA or <3 signers (CRITICAL GATE) | No timelock | Unlimited admin powers |
+
+- **Timelock** is measured on the path that can change the protocol - upgrades, role changes, and parameter authority - end-to-end from proposal to execution. A 48h delay clears the score-1 bar on its own; there is no extra credit above it.
+- Operational roles bounded by governance-approved constraints (moving funds between already-approved strategies, pausing, keeper calls such as rebase or harvest) are scored in **Subcategory B: Programmability**, not here. Score this subcategory on who can change the protocol itself.
 
 **Subcategory B: Programmability**
 
@@ -345,13 +392,27 @@ If ANY gate is triggered, the protocol automatically receives a score of **5** (
 
 | Final Score | Risk Tier | Recommendation |
 |------------|-----------|----------------|
-| **1.0-1.5** | **Minimal Risk** | Approved, high confidence |
-| **1.5-2.5** | **Low Risk** | Approved with standard monitoring |
-| **2.5-3.5** | **Medium Risk** | Approved with enhanced monitoring |
-| **3.5-4.5** | **Elevated Risk** | Limited approval, strict limits |
-| **4.5-5.0** | **High Risk** | Not recommended |
+| **1.00–1.49** | **Minimal Risk** | Approved, high confidence |
+| **1.50–2.49** | **Low Risk** | Approved with standard monitoring |
+| **2.50–3.49** | **Medium Risk** | Approved with enhanced monitoring |
+| **3.50–4.49** | **Elevated Risk** | Limited approval, strict limits |
+| **4.50–5.00** | **High Risk** | Not recommended |
+| **N/A** | **Not Rated** | Terminal — do not use (exploited or wound down) |
+
+Record the Final Score to two decimals, rounded down (1.475 → 1.47); never
+round it to one decimal. Boundaries are lower-inclusive: a Final Score of
+exactly 2.50 is Medium Risk.
+The site shows scores rounded down (two decimals; one on the home page and reports list).
 
 **Final Risk Tier: [TIER]**
+
+<!--
+Not Rated: for terminal reports (Status: HACKED / DEAD), set Final Score to
+"N/A" and Final Risk Tier to "Not Rated". These are excluded from the numeric
+1–5 ranking and grouped separately on the site.
+-->
+
+
 
 ---
 
@@ -360,3 +421,23 @@ If ANY gate is triggered, the protocol automatically receives a score of **5** (
 - **Time-based**: Reassess in [X months]
 - **TVL-based**: Reassess if TVL changes by more than [X%]
 - **Incident-based**: Reassess after any exploit, governance change, or collateral modification
+
+## Assessment History
+
+<!--
+  If history is absent, seed the original assessment before adding the update.
+  One row per PR, oldest first. Add a row for each reassessment PR. If you
+  correct the report within the same PR, update that PR's row in place — do
+  not append a new row. The website renders this table at the bottom of the
+  report so score changes are traceable over time. Keep the date format
+  consistent with the header "Assessment Date". Score is the Final Score at that
+  point in time (or the status tag, e.g. HACKED, for Not Rated reports).
+
+  Use exactly three columns: | Date | Score | Notes |. The Date cell is a
+  hyperlink to the PR (e.g. `[July 13, 2026](https://github.com/.../pull/313)`).
+  Do not add a separate PR column.
+-->
+
+| Date | Score | Notes |
+| --- | --- | --- |
+| [Month Day, Year] | [X.X] | Initial assessment |

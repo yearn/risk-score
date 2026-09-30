@@ -3,7 +3,7 @@ import { Resvg } from "@resvg/resvg-js";
 import sharp from "sharp";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
-import { scoreColor, scoreTier, scoreTextColor } from "./colors";
+import { formatScore, scoreColor, scoreTier, scoreTextColor } from "./colors";
 
 const WIDTH = 1200;
 const HEIGHT = 630;
@@ -17,14 +17,19 @@ const fonts = {
 
 export async function generateReportOgImage(report: {
   name: string;
-  finalScore: number;
+  finalScore: number | null;
   token: string;
   chain: string;
   iconUrl?: string;
+  status?: string;
 }): Promise<Buffer> {
-  const color = scoreColor(report.finalScore);
-  const tier = scoreTier(report.finalScore);
-  const textColor = scoreTextColor(report.finalScore);
+  const isRated = report.finalScore != null;
+  const color = isRated ? scoreColor(report.finalScore!) : "#dc2626";
+  const tier = isRated ? scoreTier(report.finalScore!) : "Not Rated";
+  const textColor = isRated ? scoreTextColor(report.finalScore!) : "#ffffff";
+  const scoreLabel = isRated
+    ? `${formatScore(report.finalScore!)} / 5.0`
+    : (report.status ?? "NOT RATED");
 
   let iconDataUri: string | undefined;
   if (report.iconUrl) {
@@ -84,7 +89,7 @@ export async function generateReportOgImage(report: {
                       fontSize: "32px",
                       fontWeight: 700,
                     },
-                    children: `${report.finalScore.toFixed(1)} / 5.0`,
+                    children: scoreLabel,
                   },
                 },
                 {

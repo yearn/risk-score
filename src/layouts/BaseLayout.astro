@@ -5,6 +5,8 @@ interface Props {
   ogImage?: string;
   ogUrl?: string;
   bare?: boolean;
+  /** Page-specific JSON-LD object(s); each rendered as its own ld+json block. */
+  jsonLd?: object | object[];
 }
 const {
   title,
@@ -12,9 +14,50 @@ const {
   ogImage = "/og/default.png",
   ogUrl,
   bare = false,
+  jsonLd,
 } = Astro.props;
-const canonicalUrl = ogUrl ? new URL(ogUrl, Astro.site ?? Astro.url.origin).href : (Astro.site ?? Astro.url.origin).toString();
-const ogImageUrl = new URL(ogImage, Astro.site ?? Astro.url.origin).href;
+// Astro.url.origin is a plain string, so it has to be wrapped before .href.
+const origin = (Astro.site ?? new URL(Astro.url.origin)).href;
+const canonicalUrl = ogUrl ? new URL(ogUrl, origin).href : origin;
+const ogImageUrl = new URL(ogImage, origin).href;
+
+// Site-wide structured data. Identifies the publisher (Yearn Curation) and the
+// website so search engines can attach a knowledge-graph entity. Page-specific
+// schema (e.g. Article on report pages) arrives via the `jsonLd` prop and joins
+// the *same* @graph: consumers only resolve @id references reliably within one
+// block, so splitting them across blocks would leave author/publisher dangling.
+const orgId = `${origin}#organization`;
+const pageSchemas = (jsonLd ? (Array.isArray(jsonLd) ? jsonLd : [jsonLd]) : []).map(
+  // A node inside a @graph inherits the top-level @context.
+  ({ "@context": _ctx, ...node }: Record<string, unknown>) => node,
+);
+const schema = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      "@id": orgId,
+      "name": "Yearn Curation",
+      "url": "https://docs.yearn.fi/getting-started/products/curating/introduction",
+      "logo": { "@type": "ImageObject", "url": `${origin}yearn-logo.svg` },
+    },
+    {
+      "@type": "WebSite",
+      "@id": `${origin}#website`,
+      "url": origin,
+      "name": "Yearn Curation",
+      "description": "Risk evaluations for DeFi protocols and assets",
+      "publisher": { "@id": orgId },
+    },
+    ...pageSchemas,
+  ],
+};
+// <script> is raw-text: a "</script>" inside any report-authored string would
+// close the element early, so escape "<" (and the JS-only line separators).
+const schemaJson = JSON.stringify(schema)
+  .replace(/</g, "\\u003c")
+  .replace(/\u2028/g, "\\u2028")
+  .replace(/\u2029/g, "\\u2029");
 ---
 
 <!doctype html>
@@ -22,6 +65,34 @@ const ogImageUrl = new URL(ogImage, Astro.site ?? Astro.url.origin).href;
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <!--
+      Avoid the "broken render then snap to correct" flash: mark the document
+      as .loading before first paint and hide the body until the render-blocking
+      stylesheets in <head> have applied. The reveal script at the end of <body>
+      (which a browser only runs after preceding stylesheets load) clears it, so
+      the user sees a themed blank page, then the fully styled page.
+
+      The class is added via JS so no-JS clients fall back to visible content,
+      and a 4s failsafe guarantees the page can never stay blank.
+    -->
+    <script is:inline>
+      document.documentElement.classList.add("loading");
+      setTimeout(function () {
+        document.documentElement.classList.remove("loading");
+      }, 4000);
+    </script>
+    <!--
+      Critical inline styles: applied on the first paint with no network fetch,
+      so the page starts as a correct themed (dark/light) blank instead of
+      flashing unstyled white. Matches the design tokens in styles/global.css.
+    -->
+    <style is:inline>
+      html { background: #0c0c0c; color-scheme: dark; }
+      html.light { background: #ffffff; color-scheme: light; }
+      body { background: #0c0c0c; color: #f4f4f4; }
+      html.light body { background: #ffffff; color: #0c0c0c; }
+      html.loading body { visibility: hidden; }
+    </style>
     <meta name="description" content={description} />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="canonical" href={canonicalUrl} />
@@ -47,6 +118,11 @@ const ogImageUrl = new URL(ogImage, Astro.site ?? Astro.url.origin).href;
         document.documentElement.classList.add("light");
       }
     </script>
+    <script>
+      import "../scripts/plausible";
+    </script>
+    <!-- Structured data: site-wide graph + any page-specific schema -->
+    <script type="application/ld+json" is:inline set:html={schemaJson} />
   </head>
   <body class={bare ? "is-bare" : "has-bg"}>
     {!bare && (
@@ -64,7 +140,7 @@ const ogImageUrl = new URL(ogImage, Astro.site ?? Astro.url.origin).href;
       <div class="container header-row">
         <div class="header-left">
         <a href="https://yearn.fi" class="logo-link" aria-label="Yearn Home" target="_blank" rel="noopener noreferrer">
-          <svg viewBox="85 100 390 115" fill="none" xmlns="http://www.w3.org/2000/svg" class="logo-img">
+          <svg width="95" height="28" viewBox="85 100 390 115" fill="none" xmlns="http://www.w3.org/2000/svg" class="logo-img">
             <path d="M307.601 124.989C303.535 122.91 298.842 121.867 293.509 121.867C288.177 121.867 283.623 122.973 279.626 125.191C275.63 127.409 272.52 130.544 270.297 134.601C268.074 138.658 266.966 143.41 266.966 148.864C266.966 154.318 268.106 158.969 270.398 163.026C272.685 167.084 275.966 170.199 280.234 172.386C284.503 174.566 289.576 175.659 295.454 175.659C299.963 175.659 303.96 174.857 307.443 173.258C310.927 171.659 313.726 169.46 315.848 166.66C317.963 163.867 319.299 160.726 319.844 157.25H305.6C304.986 159.702 303.706 161.56 301.756 162.824C299.811 164.088 297.367 164.714 294.428 164.714C290.735 164.714 287.835 163.627 285.719 161.44C283.597 159.26 282.369 156.258 282.027 152.441V152.03H320.25C320.522 150.596 320.661 148.965 320.661 147.12C320.592 142.008 319.413 137.559 317.127 133.779C314.841 129.994 311.661 127.068 307.595 124.989H307.601ZM282.343 142.627C282.755 139.562 284.034 137.122 286.188 135.315C288.341 133.508 290.989 132.604 294.13 132.604C297.272 132.604 300.122 133.476 302.275 135.208C304.428 136.946 305.739 139.416 306.221 142.621H282.343V142.627Z" fill="currentColor"/>
             <path d="M252.43 122.48L239.928 160.214L227.115 122.48H211.744L232.036 175.343L230.706 178.819C229.953 180.589 229.167 181.783 228.35 182.396C227.533 183.009 226.197 183.319 224.354 183.319H216.361V195.49H230.402C233.069 195.49 235.235 195.029 236.907 194.113C238.579 193.19 239.966 191.831 241.055 190.024C242.145 188.216 243.31 185.714 244.539 182.51L267.903 122.486H252.43V122.48Z" fill="currentColor"/>
             <path d="M465.065 127.593C461.101 123.776 456.047 121.867 449.897 121.867C446.071 121.867 442.86 122.499 440.263 123.757C437.667 125.02 435.45 126.771 433.601 129.021L432.27 122.474H419.667V175.04H434.114V148.15C434.114 143.581 435.14 140.036 437.185 137.514C439.237 134.993 442.138 133.729 445.894 133.729C453 133.729 456.553 138.266 456.553 147.329V175.04H471V146.513C471 137.717 469.018 131.416 465.059 127.599L465.065 127.593Z" fill="currentColor"/>
@@ -78,9 +154,11 @@ const ogImageUrl = new URL(ogImage, Astro.site ?? Astro.url.origin).href;
           <a href="/">Home</a>
           <a href="/reports/">Reports</a>
           <a href="/tokens/">Tokens</a>
+          <a href="/bridges/">Bridges</a>
           <a href="/monitoring/">Monitoring</a>
         </nav>
         </div>
+        <a href="/contact/" class="nav-contact">Contact</a>
         <button id="theme-toggle" class="theme-toggle" aria-label="Toggle light mode">
           <svg class="icon-sun" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <circle cx="12" cy="12" r="5" />
@@ -105,9 +183,15 @@ const ogImageUrl = new URL(ogImage, Astro.site ?? Astro.url.origin).href;
     <footer class="site-footer">
       <div class="container">
         <p>Risk Assessments by <a href="https://docs.yearn.fi/getting-started/products/curating/introduction" target="_blank" rel="noopener noreferrer">Yearn Curation</a></p>
+        <p class="footer-contact">Need curation, monitoring or a risk assessment? <a href="/contact/">Get in touch</a></p>
       </div>
     </footer>
     <script is:inline>
+      // This parser-inserted script runs only after the <head> stylesheets
+      // have loaded and applied, so the page is fully styled here — safe to
+      // reveal it (clears the .loading hide set in <head>).
+      document.documentElement.classList.remove("loading");
+
       document.getElementById("theme-toggle").addEventListener("click", () => {
         const html = document.documentElement;
         html.classList.toggle("light");
@@ -302,6 +386,32 @@ const ogImageUrl = new URL(ogImage, Astro.site ?? Astro.url.origin).href;
     color: var(--text-primary);
     text-decoration: none;
   }
+  /* Contact is the one nav item asking for an action, so it reads as a chip
+     rather than a plain link. It sits outside .header-nav because that list
+     scrolls horizontally on narrow screens — inside it, the CTA would be the
+     first thing to disappear off the right edge on a phone. */
+  .nav-contact {
+    flex-shrink: 0;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--brand-blue);
+    text-decoration: none;
+    white-space: nowrap;
+    padding: 0.3rem 0.75rem;
+    border: 1px solid color-mix(in srgb, var(--brand-blue) 40%, transparent);
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--brand-blue) 10%, transparent);
+    transition: background 0.2s, border-color 0.2s;
+  }
+  .nav-contact:hover {
+    color: var(--brand-blue);
+    text-decoration: none;
+    background: color-mix(in srgb, var(--brand-blue) 18%, transparent);
+    border-color: var(--brand-blue);
+  }
+  .footer-contact {
+    margin-top: 0.4rem;
+  }
   .nav-external {
     display: inline-flex;
     align-items: center;
@@ -327,7 +437,7 @@ const ogImageUrl = new URL(ogImage, Astro.site ?? Astro.url.origin).href;
     display: block;
   }
   .theme-toggle {
-    margin-left: auto;
+    flex-shrink: 0;
     background: none;
     border: 1px solid var(--border);
     border-radius: 6px;
@@ -374,6 +484,10 @@ const ogImageUrl = new URL(ogImage, Astro.site ?? Astro.url.origin).href;
     }
     .header-nav {
       gap: 0.75rem;
+    }
+    .nav-contact {
+      padding: 0.25rem 0.6rem;
+      font-size: 0.8rem;
     }
   }
   .site-footer {

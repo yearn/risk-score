@@ -1,0 +1,325 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import { FALLBACK_PROTOCOLS } from "../../data/monitoring";
+
+// Static snapshot of the site's protocol registry + the API join key. The client compares this
+// against the live GET /v1/protocols to surface drift between the two repos.
+const siteProtocols = FALLBACK_PROTOCOLS.map((p) => ({
+  id: p.id,
+  name: p.name,
+  apiProtocol: p.apiProtocol ?? null,
+}));
+const noJob = siteProtocols.filter((p) => !p.apiProtocol);
+// Escape `<` so a future protocol name/id containing `</script>` can't break out of the
+// embedded JSON block below. The `<` escape parses back to `<` via JSON.parse.
+const siteJson = JSON.stringify(siteProtocols).replace(/</g, "\\u003c");
+---
+
+<BaseLayout
+  title="Monitoring integration status — Yearn Curation"
+  description="Drift between the site's monitored-protocol list and the live alerts API registry."
+  ogUrl="/monitoring/status/"
+  ogImage="/og/default.png"
+>
+  <a href="/monitoring/" class="back-link">&larr; All monitors</a>
+
+  <div class="status-header">
+    <h1>API integration status</h1>
+    <p class="status-sub">
+      Compares the site's monitored-protocol list (<code>src/data/monitoring.ts</code>) against the
+      live registry from <code>GET /v1/protocols</code>. Use it to confirm every protocol's
+      <code>apiProtocol</code> join key resolves to a real backend job.
+    </p>
+  </div>
+
+  <section class="section">
+    <div class="section-head">
+      <h2>Live mapping</h2>
+      <span class="status-pill" id="map-status">Loading…</span>
+    </div>
+    <div id="map-body">
+      <div class="status-empty">Checking the live registry…</div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-head">
+      <h2>In the API, not on the site</h2>
+      <span class="status-pill" id="extra-status"></span>
+    </div>
+    <p class="section-note">
+      Backend jobs with no protocol card on <a href="/monitoring/">/monitoring</a>. Expected for
+      cross-cutting jobs (e.g. <code>safe</code>, <code>timelock</code>, <code>stables</code>).
+    </p>
+    <div id="extra-body">
+      <div class="status-empty">Checking the live registry…</div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-head">
+      <h2>Paused jobs</h2>
+      <span class="status-pill status-pill--muted">{noJob.length}</span>
+    </div>
+    <p class="section-note">
+      Protocol cards with no <code>apiProtocol</code> — monitored elsewhere but not (yet) emitting
+      alerts through the API, so they show static info only.
+    </p>
+    {noJob.length > 0 ? (
+      <ul class="chip-list">
+        {noJob.map((p) => (
+          <li class="chip">{p.name} <span class="chip-id">{p.id}</span></li>
+        ))}
+      </ul>
+    ) : (
+      <div class="status-empty">Every protocol card is mapped to a backend job.</div>
+    )}
+  </section>
+
+  <script type="application/json" id="site-protocols" set:html={siteJson} />
+
+  <script>
+    import { fetchProtocols, escapeHtml, type ProtocolEntry } from "../../lib/monitoring";
+
+    type SiteProtocol = { id: string; name: string; apiProtocol: string | null };
+
+    const raw = document.getElementById("site-protocols")?.textContent || "[]";
+    const site: SiteProtocol[] = JSON.parse(raw);
+
+    const mapBody = document.getElementById("map-body");
+    const mapStatus = document.getElementById("map-status");
+    const extraBody = document.getElementById("extra-body");
+    const extraStatus = document.getElementById("extra-status");
+
+    function fail(message: string) {
+      const html = `<div class="status-error">${escapeHtml(message)}</div>`;
+      if (mapBody) mapBody.innerHTML = html;
+      if (extraBody) extraBody.innerHTML = html;
+      if (mapStatus) mapStatus.textContent = "unavailable";
+      if (extraStatus) extraStatus.textContent = "";
+    }
+
+    async function run() {
+      let resp;
+      try {
+        resp = await fetchProtocols();
+      } catch {
+        fail("Couldn't reach the alerts API. Is MONITORING_API_URL set and the backend deployed?");
+        return;
+      }
+
+      const byName = new Map<string, ProtocolEntry>();
+      for (const entry of resp.data) byName.set(entry.name, entry);
+      const siteApi = new Set(site.filter((p) => p.apiProtocol).map((p) => p.apiProtocol as string));
+
+      // Live mapping table: every mapped site protocol, flagged live vs. drift.
+      const mapped = site.filter((p) => p.apiProtocol);
+      let drift = 0;
+      const rows = mapped
+        .map((p) => {
+          const entry = byName.get(p.apiProtocol as string);
+          const live = Boolean(entry);
+          if (!live) drift++;
+          const status = live
+            ? '<span class="tag tag--ok">live</span>'
+            : '<span class="tag tag--bad">drift</span>';
+          return `<tr>
+            <td>${escapeHtml(p.name)}</td>
+            <td><code>${escapeHtml(p.id)}</code></td>
+            <td><code>${escapeHtml(p.apiProtocol as string)}</code></td>
+            <td>${status}</td>
+          </tr>`;
+        })
+        .join("");
+
+      if (mapBody) {
+        mapBody.innerHTML = `<div class="table-wrap"><table class="status-table">
+          <thead><tr><th>Protocol</th><th>Site id</th><th>apiProtocol</th><th>Status</th></tr></thead>
+          <tbody>${rows}</tbody></table></div>`;
+      }
+      if (mapStatus) {
+        mapStatus.textContent = drift ? `${drift} drift` : `${mapped.length} mapped`;
+        mapStatus.className = `status-pill ${drift ? "status-pill--bad" : "status-pill--ok"}`;
+      }
+
+      // API protocols with no site card.
+      const extra = resp.data.filter((e) => !siteApi.has(e.name));
+      if (extraBody) {
+        if (!extra.length) {
+          extraBody.innerHTML = '<div class="status-empty">Every API protocol has a site card.</div>';
+        } else {
+          const extraRows = extra
+            .map(
+              (e) => `<tr>
+                <td><code>${escapeHtml(e.name)}</code></td>
+                <td>${e.tasks.length}</td>
+              </tr>`,
+            )
+            .join("");
+          extraBody.innerHTML = `<div class="table-wrap"><table class="status-table">
+            <thead><tr><th>API protocol</th><th>Tasks</th></tr></thead>
+            <tbody>${extraRows}</tbody></table></div>`;
+        }
+      }
+      if (extraStatus) extraStatus.textContent = extra.length ? `${extra.length}` : "0";
+    }
+
+    run();
+  </script>
+</BaseLayout>
+
+<style>
+  .back-link {
+    display: inline-block;
+    margin-bottom: 1.5rem;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+  }
+  .status-header {
+    margin-bottom: 2rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .status-header h1 {
+    font-size: 1.5rem;
+    margin: 0 0 0.5rem;
+    letter-spacing: -0.01em;
+  }
+  .status-sub {
+    color: var(--text-secondary);
+    font-size: 0.92rem;
+    line-height: 1.55;
+    max-width: 70ch;
+    margin: 0;
+  }
+  code {
+    background: var(--bg-secondary);
+    padding: 0.1rem 0.35rem;
+    border-radius: 4px;
+    font-size: 0.85em;
+  }
+
+  .section {
+    margin-bottom: 2.5rem;
+  }
+  .section-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.75rem;
+    margin-bottom: 0.5rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .section-head h2 {
+    font-size: 1.15rem;
+    margin: 0;
+  }
+  .section-note {
+    color: var(--text-secondary);
+    font-size: 0.84rem;
+    line-height: 1.5;
+    margin: 0 0 1rem;
+  }
+  .section-note a {
+    color: var(--brand-blue);
+  }
+
+  .status-pill {
+    font-size: 0.76rem;
+    color: var(--text-secondary);
+    padding: 0.2rem 0.6rem;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+  }
+  .status-pill--ok {
+    color: #86efac;
+    border-color: color-mix(in srgb, #22c55e 40%, var(--border));
+  }
+  .status-pill--bad {
+    color: #fca5a5;
+    border-color: color-mix(in srgb, #ef4444 40%, var(--border));
+  }
+  .status-pill--muted {
+    opacity: 0.8;
+  }
+
+  .table-wrap {
+    overflow-x: auto;
+  }
+  .status-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.85rem;
+  }
+  .status-table th,
+  .status-table td {
+    padding: 0.5rem 0.7rem;
+    text-align: left;
+    border-bottom: 1px solid color-mix(in srgb, var(--border) 55%, transparent);
+    white-space: nowrap;
+  }
+  .status-table th {
+    color: var(--text-secondary);
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    font-weight: 600;
+  }
+  .tag {
+    display: inline-block;
+    padding: 0.1rem 0.5rem;
+    border-radius: 999px;
+    font-size: 0.72rem;
+    font-weight: 600;
+  }
+  .tag--ok {
+    color: #86efac;
+    background: color-mix(in srgb, #22c55e 14%, transparent);
+  }
+  .tag--bad {
+    color: #fca5a5;
+    background: color-mix(in srgb, #ef4444 16%, transparent);
+  }
+
+  .chip-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.3rem 0.7rem;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    background: color-mix(in srgb, var(--bg-card) 50%, transparent);
+    font-size: 0.84rem;
+  }
+  .chip-id {
+    color: var(--text-secondary);
+    font-size: 0.74rem;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  }
+
+  .status-empty,
+  .status-error {
+    padding: 1.25rem;
+    text-align: center;
+    color: var(--text-secondary);
+    font-size: 0.88rem;
+    border: 1px dashed var(--border);
+    border-radius: 10px;
+    background: color-mix(in srgb, var(--bg-card) 40%, transparent);
+  }
+  .status-error {
+    color: #fca5a5;
+    border-color: color-mix(in srgb, #ef4444 35%, var(--border));
+  }
+</style>

@@ -4,7 +4,7 @@
 - **Token:** ETH+
 - **Chain:** Ethereum Mainnet
 - **Token Address:** [`0xE72B141DF173b999AE7c1aDcbF60Cc9833Ce56a8`](https://etherscan.io/address/0xE72B141DF173b999AE7c1aDcbF60Cc9833Ce56a8)
-- **Final Score: 1.8/5.0**
+- **Final Score: 1.76/5.0**
 
 ## Overview + Links
 
@@ -324,7 +324,7 @@ The primary spot pool (Curve ETH+/WETH) has ~$12.6M TVL. With Convex/Beefy/Stake
 | Guardian Safe | `0xd5fe2780eb882d1da78f2136b81c2a4395488c98` | Owner changes, threshold changes, all executions (yearn safe-monitoring) |
 | Main (`hasRole`) | `0xb6A7d481719E97e142114e905E86a39a2Fa0dfD2` | `RoleGranted`, `RoleRevoked` for OWNER / PAUSER / SHORT_FREEZER / LONG_FREEZER |
 
-**Action:** add to [yearn/monitoring-scripts-py](https://github.com/yearn/monitoring-scripts-py). Recommended cadence: hourly poll for queued timelock calls; immediate alert on any RoleGranted/Revoked or Guardian Safe execution.
+**Action:** add to [yearn/monitoring](https://github.com/yearn/monitoring). Recommended cadence: hourly poll for queued timelock calls; immediate alert on any RoleGranted/Revoked or Guardian Safe execution.
 
 **Important:** the deployer EOA `0xe3e34fa93575af41bef3476236e1a3cdb3f60b85` still has PAUSER. Add to the role-watch list and alert on any transaction from it.
 
@@ -538,14 +538,14 @@ Base score 2 (rubric: ">$5M, <1% slippage, 1-3 days"); +0.5 for throttle ≈ **2
 | Funds Management | 1.5 | 30% | 0.45 |
 | Liquidity Risk | 2.0 | 15% | 0.30 |
 | Operational Risk | 1.3 | 5% | 0.07 |
-| **Final Score** | | | **1.77** |
+| **Final Score** | | | **1.76** |
 
 **Modifiers:**
 - Protocol live >2 years with no incidents: **−0.5** would apply, but offset by:
   - Major version upgrade (v4.2.0) and full governance rotation 25 days before assessment: **+0.5** for the still-young (under 30-day) post-rotation governance state
 - Net modifier: **0**
 
-**Final score (rounded): 1.8**
+**Final score: 1.76**
 
 The deployer EOA holding PAUSER is documented as a role-holder watch item, not as a discrete numeric penalty: the condition has existed since 2023 deployment without incident and PAUSER is bounded (no freeze, no fund seizure).
 
@@ -553,13 +553,13 @@ The deployer EOA holding PAUSER is documented as a role-holder watch item, not a
 
 | Final Score | Risk Tier | Recommendation |
 |------------|-----------|----------------|
-| 1.0–1.5 | Minimal Risk | Approved, high confidence |
-| **1.5–2.5** | **Low Risk** | **Approved with standard monitoring** ← **ETH+ is here** |
-| 2.5–3.5 | Medium Risk | Approved with enhanced monitoring |
-| 3.5–4.5 | Elevated Risk | Limited approval, strict limits |
-| 4.5–5.0 | High Risk | Not recommended |
+| 1.00–1.49 | Minimal Risk | Approved, high confidence |
+| **1.50–2.49** | **Low Risk** | **Approved with standard monitoring** ← **ETH+ is here** |
+| 2.50–3.49 | Medium Risk | Approved with enhanced monitoring |
+| 3.50–4.49 | Elevated Risk | Limited approval, strict limits |
+| 4.50–5.00 | High Risk | Not recommended |
 
-## Overall Risk Score: **1.8 / 5.0**
+## Overall Risk Score: **1.76 / 5.0**
 
 ### Risk Tier: **LOW RISK**
 

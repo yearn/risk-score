@@ -23,11 +23,11 @@ nodes:
   - id: accountant
     label: Accountant (0% mgmt, 10% perf)
     address: "0x5A74Cb32D36f2f517DB6f7b0A0591e09b22cDE69"
-    category: vault
+    category: infra
   - id: dumper
     label: Fee Recipient (Dumper)
     address: "0x590Dd9399bB53f1085097399C3265C7137c1C4Cf"
-    category: vault
+    category: infra
 
   # Governance
   - id: daddy
@@ -41,6 +41,10 @@ nodes:
   - id: security
     label: Security (4-of-7)
     address: "0xe5e2Baf96198c56380dDD5E992D7d1ADa0e989c0"
+    category: governance
+  - id: curator
+    label: Curator (2-of-3)
+    address: "0x90D0f26025571295D18a6c041E47450B81886B51"
     category: governance
   - id: timelock
     label: Strategy Manager (7-day Timelock)
@@ -67,11 +71,11 @@ nodes:
 
   # Strategies
   - id: dai-to-usdc-depositor
-    label: DAI → yvUSDC-1 Depositor (72.97%)
+    label: DAI → yvUSDC-1 Depositor (71.16%)
     address: "0xfF03Dce6d95aa7a30B75EFbaFD11384221B9f9B5"
     category: strategy
   - id: dai-to-usds-depositor
-    label: DAI → yvUSDS-1 Depositor (27.03%)
+    label: DAI → yvUSDS-1 Depositor (28.84%)
     address: "0xAeDF7d5F3112552E110e5f9D08c9997Adce0b78d"
     category: strategy
 
@@ -84,6 +88,30 @@ nodes:
     label: yvUSDS-1 (intermediate vault)
     address: "0x182863131F9a4630fF9E27830d945B1413e347E8"
     category: dependency
+    note: As of Sept 14 2026 routes 100% via Spark USDS Compounder → Sky USDS Staking (sUSDS Lender drained).
+
+  # External dependencies (Morpho MetaMorpho, downstream of yvUSDC-1)
+  - id: yearn-usdc-metamorpho
+    label: Yearn USDC (Morpho MetaMorpho)
+    address: "0x68Aea7b82Df6CcdF76235D46445Ed83f85F845A3"
+    category: dependency
+    morphoVault: v1
+    link: "https://app.morpho.org/ethereum/vault/0x68Aea7b82Df6CcdF76235D46445Ed83f85F845A3/"
+  - id: pawn-broker
+    label: stcUSD/USDC Pawn Broker (30.3% of yvUSDC-1, not in queue)
+    address: "0xe63a2abc24cd9538398d825a4bfe5778d25687df"
+    category: dependency
+    note: Self-contained Yearn V3 TokenizedStrategy (v3.0.4). Lends USDC against stcUSD (Cap) collateral held on its own balance sheet. Does NOT route through Morpho Blue. Not in yvUSDC-1's default withdrawal queue.
+  - id: stcUSD
+    label: stcUSD — Cap (ERC-4626)
+    address: "0x88887bE419578051FF9F4eb6C858A951921D8888"
+    category: dependency
+    note: Cap staked USD vault token. Collateral in Pawn Broker market. 3-of-5 anonymous multisig, upgradeable UUPS proxy, 24h timelock, 8 audits.
+  - id: cap-governance
+    label: Cap Multisig (3-of-5)
+    address: "0xb8FC49402dF3ee4f8587268FB89fda4d621a8793"
+    category: governance
+    note: 3-of-5 anonymous Gnosis Safe → 24h Timelock → Access Control. Governs all Cap core contracts including stcUSD.
 
   # External dependencies (Sky conversion infrastructure)
   - id: psm-lite
@@ -94,6 +122,30 @@ nodes:
     label: Sky DAI ↔ USDS Exchanger
     address: "0x3225737a9Bbb6473CB4a45b7244ACa2BeFdB276A"
     category: dependency
+
+# BEGIN GENERATED MORPHO MARKET NODES
+# Managed by scripts/update_morpho_graph_markets.mjs — do not edit.
+  - id: morpho-market-64d65c9a2d91
+    label: "cbBTC/USDC · 86% LLTV"
+    category: dependency
+    link: "https://app.morpho.org/ethereum/market/0x64d65c9a2d91c36d56fbc42d69e979335320169b3df63bf92789e2c8883fcc64/"
+    note: "Morpho market 0x64d65c9a2d91c36d56fbc42d69e979335320169b3df63bf92789e2c8883fcc64"
+  - id: morpho-market-3a85e6197511
+    label: "WBTC/USDC · 86% LLTV"
+    category: dependency
+    link: "https://app.morpho.org/ethereum/market/0x3a85e619751152991742810df6ec69ce473daef99e28a64ab2340d7b7ccfee49/"
+    note: "Morpho market 0x3a85e619751152991742810df6ec69ce473daef99e28a64ab2340d7b7ccfee49"
+  - id: morpho-market-b323495f7e41
+    label: "wstETH/USDC · 86% LLTV"
+    category: dependency
+    link: "https://app.morpho.org/ethereum/market/0xb323495f7e4148be5643a4ea4a8221eef163e4bccfdedc2a6f4696baacbc86cc/"
+    note: "Morpho market 0xb323495f7e4148be5643a4ea4a8221eef163e4bccfdedc2a6f4696baacbc86cc"
+  - id: morpho-market-ba3ba077d9c8
+    label: "cbBTC/USDC · 86% LLTV"
+    category: dependency
+    link: "https://app.morpho.org/ethereum/market/0xba3ba077d9c838696b76e29a394ae9f0d1517a372e30fd9a0fc19c516fb4c5a7/"
+    note: "Morpho market 0xba3ba077d9c838696b76e29a394ae9f0d1517a372e30fd9a0fc19c516fb4c5a7"
+# END GENERATED MORPHO MARKET NODES
 
 edges:
   # Deployment / vault infrastructure
@@ -112,17 +164,17 @@ edges:
   - from: yvDAI
     to: dai-to-usdc-depositor
     kind: allocates-to
-    label: "72.97%"
+    label: "71.16%"
   - from: yvDAI
     to: dai-to-usds-depositor
     kind: allocates-to
-    label: "27.03%"
+    label: "28.84%"
 
   # Governance roles on vault
   - from: daddy
     to: yvDAI
     kind: holds-role
-    label: "all 14 roles"
+    label: "12 of 14 roles"
   - from: brain
     to: yvDAI
     kind: holds-role
@@ -182,3 +234,52 @@ edges:
     to: yvUSDS
     kind: deposits-into
     label: "USDS → yvUSDS-1"
+
+  # yvUSDC-1 downstream: sUSDS Lender (~22.2%), Yearn USDC MetaMorpho (~35.6%),
+  # stcUSD/USDC Pawn Broker Market (~30.3%, not in queue), USDC→USDS Depositor (~11.9%)
+  - from: yvUSDC
+    to: yearn-usdc-metamorpho
+    kind: deposits-into
+    label: "~35.6% via Yearn USDC"
+  - from: yvUSDC
+    to: pawn-broker
+    kind: deposits-into
+    label: "~30.3% via Pawn Broker (not in queue)"
+  - from: pawn-broker
+    to: stcUSD
+    kind: deposits-into
+    label: "stcUSD as collateral"
+  - from: cap-governance
+    to: stcUSD
+    kind: controls
+    label: "Governs (via Timelock)"
+
+  # MetaMorpho vault governance — owner (Security) + curator
+  - from: security
+    to: yearn-usdc-metamorpho
+    kind: holds-role
+    label: "owner"
+  - from: curator
+    to: yearn-usdc-metamorpho
+    kind: holds-role
+    label: "curator"
+
+# BEGIN GENERATED MORPHO MARKET EDGES
+# Managed by scripts/update_morpho_graph_markets.mjs — do not edit.
+  - from: yearn-usdc-metamorpho
+    to: morpho-market-64d65c9a2d91
+    kind: deposits-into
+    label: "64.7%"
+  - from: yearn-usdc-metamorpho
+    to: morpho-market-3a85e6197511
+    kind: deposits-into
+    label: "28.6%"
+  - from: yearn-usdc-metamorpho
+    to: morpho-market-b323495f7e41
+    kind: deposits-into
+    label: "6.5%"
+  - from: yearn-usdc-metamorpho
+    to: morpho-market-ba3ba077d9c8
+    kind: deposits-into
+    label: "<0.1%"
+# END GENERATED MORPHO MARKET EDGES

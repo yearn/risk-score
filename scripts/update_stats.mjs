@@ -8,54 +8,31 @@ const ROOT = path.resolve(__dirname, "..");
 const REPORTS_DIR = path.join(ROOT, "reports", "report");
 const OUT = path.join(ROOT, "src", "data", "stats.json");
 
-const DEFILLAMA_URL = "https://api.llama.fi/protocol/yearn";
-
-function countReports() {
-  return fs.readdirSync(REPORTS_DIR).filter((f) => f.endsWith(".md")).length;
+// Mirrors src/lib/parseReport.ts: "**Visibility:** Hidden" in the header block
+// (everything before the first "## " section) unlists a report, so it must not be
+// counted in the report total the site displays either.
+function isHidden(file) {
+  const content = fs.readFileSync(path.join(REPORTS_DIR, file), "utf-8");
+  const header = content.split(/\n## /)[0];
+  return /\*\*Visibility:\*\*\s*hidden\b/i.test(header);
 }
 
-async function fetchTvl() {
-  const res = await fetch(DEFILLAMA_URL);
-  if (!res.ok) throw new Error(`DefiLlama responded ${res.status}`);
-  const data = await res.json();
-  const chainTvls = data.currentChainTvls ?? {};
-  const total = Object.values(chainTvls).reduce(
-    (sum, v) => sum + (typeof v === "number" ? v : 0),
-    0,
-  );
-  return { total, byChain: chainTvls };
+function countReports() {
+  return fs
+    .readdirSync(REPORTS_DIR)
+    .filter((f) => f.endsWith(".md") && !isHidden(f)).length;
 }
 
 async function main() {
   const reportCount = countReports();
-  let tvl = { total: 0, byChain: {} };
-  let tvlSource = "live";
-  try {
-    tvl = await fetchTvl();
-  } catch (err) {
-    console.warn("[update_stats] DefiLlama fetch failed:", err.message);
-    if (fs.existsSync(OUT)) {
-      const prev = JSON.parse(fs.readFileSync(OUT, "utf-8"));
-      tvl = prev.tvl ?? tvl;
-      tvlSource = "cached";
-    } else {
-      tvlSource = "fallback";
-    }
-  }
 
   const stats = {
     reportCount,
-    tvl,
-    chainCount: Object.keys(tvl.byChain).length,
-    updatedAt: new Date().toISOString(),
-    tvlSource,
   };
 
   fs.mkdirSync(path.dirname(OUT), { recursive: true });
   fs.writeFileSync(OUT, JSON.stringify(stats, null, 2) + "\n");
-  console.log(
-    `[update_stats] reports=${reportCount} tvl=$${(tvl.total / 1e6).toFixed(2)}M chains=${stats.chainCount} (${tvlSource})`,
-  );
+  console.log(`[update_stats] reports=${reportCount}`);
 }
 
 main().catch((e) => {

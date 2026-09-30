@@ -1,6 +1,8 @@
 import fs from "node:fs";
 import path from "node:path";
 import yaml from "js-yaml";
+import { getReportBySlug } from "./reports";
+import { FLOW_KINDS, graphHeading } from "./graphStyle";
 
 const GRAPH_DIR = path.resolve("reports/graph");
 
@@ -17,6 +19,14 @@ export interface GraphNode {
   category: string;
   link?: string;
   note?: string;
+  /**
+   * Marks this node as a Morpho vault whose per-market allocations are
+   * expanded by `scripts/update_morpho_graph_markets.mjs`. The value records
+   * the vault contract's generation (`v1` = Morpho Vault / MetaMorpho,
+   * `v2` = Morpho Vault V2), which is immutable at a given address. Only
+   * explicitly tagged nodes are probed — never detected from labels or IDs.
+   */
+  morphoVault?: "v1" | "v2";
   /** Set at build time by expandCrossLinks; never present in YAML. */
   _inlinedFromSlug?: string;
 }
@@ -71,6 +81,9 @@ const CHAIN_EXPLORERS: Record<string, string> = {
   sonic: "https://sonicscan.org/address/",
   katana: "https://explorer.katanarpc.com/address/",
   hyperevm: "https://hyperevmscan.io/address/",
+  monad: "https://monadscan.com/address/",
+  avalanche: "https://snowtrace.io/address/",
+  plume: "https://explorer.plume.org/address/",
 };
 
 export function explorerUrl(address: string, chain = "ethereum"): string {
@@ -99,6 +112,26 @@ function validate(slug: string, raw: unknown): Graph {
     if (!catIds.has(n.category))
       throw new Error(
         `[graph:${slug}] node '${n.id}' has unknown category '${n.category}'`,
+      );
+    if (
+      n.morphoVault !== undefined &&
+      n.morphoVault !== "v1" &&
+      n.morphoVault !== "v2"
+    )
+      throw new Error(
+        `[graph:${slug}] node '${n.id}' has invalid morphoVault '${n.morphoVault}' (expected "v1" or "v2")`,
+      );
+    if (n.morphoVault !== undefined && !n.address)
+      throw new Error(
+        `[graph:${slug}] node '${n.id}' is tagged morphoVault but has no address`,
+      );
+    if (n.morphoVault !== undefined && n.id.startsWith("morpho-market-"))
+      throw new Error(
+        `[graph:${slug}] generated Morpho market node '${n.id}' must not carry morphoVault`,
+      );
+    if (n.link !== undefined && !/^https:\/\//.test(n.link))
+      throw new Error(
+        `[graph:${slug}] node '${n.id}' has a non-https link '${n.link}'`,
       );
   }
   for (const e of g.edges) {
@@ -149,30 +182,112 @@ export interface CrossLinkEntry {
 
 /**
  * Build an address → owning-graph index across every YAML in reports/graph/.
- * "Owning" graph means the graph where a contract appears as something OTHER
- * than a dependency (i.e. it's the protocol's own vault / strategy / etc).
- * Used at build time to detect cross-graph references — when a dependency
- * node's address matches a non-dependency node in another graph, the
- * dependency card becomes a drill-down link.
+ * "Owning" graph means one of the graph's user-facing `vault` tokens, not every
+ * addressed contract in it. Used at build time to detect cross-graph
+ * references — when a dependency node's address matches a vault node in another
+ * report-backed graph, the dependency card becomes a drill-down link.
  *
- * Key is `<chain>:<address-lowercased>`. First write wins (a contract is
- * normally only "owned" by one graph).
+ * **Every** addressed `vault` node is indexed, not just the first. A protocol
+ * routinely exposes more than one user-facing token (sky-usds declares both
+ * sUSDS and USDS), and indexing only the first meant a graph that referenced
+ * the second one silently got no cross-link — which is what happened to
+ * sky-stusds' USDS node.
+ *
+ * Key is `<chain>:<address-lowercased>`. First write wins across graphs (a
+ * token is normally only "owned" by one), and `check_graphs.mjs` warns when two
+ * graphs claim the same address so the ambiguity can't go unnoticed.
  */
+let graphIndexCache: Map<string, CrossLinkEntry> | undefined;
+
 export function getGraphIndex(): Map<string, CrossLinkEntry> {
+  // Memoized: this reads and parses every YAML in the corpus, and it is called
+  // once per graph page *and* again inside expandCrossLinks() — without the
+  // cache that is O(pages × graphs) parses for a static, build-time-constant
+  // result.
+  if (graphIndexCache) return graphIndexCache;
   const index = new Map<string, CrossLinkEntry>();
   for (const slug of getGraphSlugs()) {
+    if (!getReportBySlug(slug)) continue;
     const g = getGraphBySlug(slug);
     if (!g) continue;
-    for (const n of g.nodes) {
-      if (n.category === "dependency") continue;
-      if (!n.address) continue;
-      const key = `${(n.chain ?? g.chain).toLowerCase()}:${n.address.toLowerCase()}`;
+    for (const owner of g.nodes) {
+      if (owner.category !== "vault" || !owner.address) continue;
+      const key = `${(owner.chain ?? g.chain).toLowerCase()}:${owner.address.toLowerCase()}`;
       if (!index.has(key)) {
-        index.set(key, { slug, label: n.label });
+        index.set(key, { slug, label: owner.label });
       }
     }
   }
+  graphIndexCache = index;
   return index;
+}
+
+/**
+ * Inverse of `getGraphIndex()`: for each graph slug, which *other* graphs name
+ * it as a dependency. The forward index answers "what does this graph sit on
+ * top of"; this answers "how much of the book is exposed to this protocol",
+ * which is the more interesting question for a curator.
+ */
+let reverseIndexCache: Map<string, CrossLinkEntry[]> | undefined;
+
+export function getReverseGraphIndex(): Map<string, CrossLinkEntry[]> {
+  if (reverseIndexCache) return reverseIndexCache;
+  const forward = getGraphIndex();
+  const reverse = new Map<string, CrossLinkEntry[]>();
+  for (const slug of getGraphSlugs()) {
+    const g = getGraphBySlug(slug);
+    if (!g) continue;
+    const seen = new Set<string>();
+    for (const n of g.nodes) {
+      const entry = resolveCrossLink(n, g.chain, slug, forward);
+      if (!entry || seen.has(entry.slug)) continue;
+      seen.add(entry.slug);
+      const list = reverse.get(entry.slug) ?? [];
+      list.push({ slug, label: graphHeading(g.title, slug) });
+      reverse.set(entry.slug, list);
+    }
+  }
+  for (const list of reverse.values()) list.sort((a, b) => a.slug.localeCompare(b.slug));
+  reverseIndexCache = reverse;
+  return reverse;
+}
+
+/** One row of the `/graph/` index. */
+export interface GraphSummary {
+  slug: string;
+  title: string;
+  chain: string;
+  nodeCount: number;
+  edgeCount: number;
+  /** Graphs this one depends on (outbound cross-links). */
+  dependsOn: string[];
+  /** Graphs that depend on this one (inbound cross-links). */
+  referencedBy: string[];
+}
+
+export function getGraphSummaries(): GraphSummary[] {
+  const forward = getGraphIndex();
+  const reverse = getReverseGraphIndex();
+  return getGraphSlugs()
+    .map((slug) => {
+      const g = getGraphBySlug(slug);
+      if (!g) return undefined;
+      const dependsOn = new Set<string>();
+      for (const n of g.nodes) {
+        const entry = resolveCrossLink(n, g.chain, slug, forward);
+        if (entry) dependsOn.add(entry.slug);
+      }
+      return {
+        slug,
+        title: graphHeading(g.title, slug),
+        chain: g.chain,
+        nodeCount: g.nodes.length,
+        edgeCount: g.edges.length,
+        dependsOn: [...dependsOn].sort(),
+        referencedBy: (reverse.get(slug) ?? []).map((e) => e.slug),
+      };
+    })
+    .filter((s): s is GraphSummary => s !== undefined);
 }
 
 /** Resolve a cross-link target for a single node, or `undefined` when none applies. */
@@ -183,13 +298,12 @@ export function resolveCrossLink(
   index: Map<string, CrossLinkEntry>,
 ): CrossLinkEntry | undefined {
   if (!node.address) return undefined;
+  if (node.category !== "dependency") return undefined;
   const key = `${(node.chain ?? graphChain).toLowerCase()}:${node.address.toLowerCase()}`;
   const entry = index.get(key);
   if (!entry || entry.slug === currentSlug) return undefined;
   return entry;
 }
-
-const FLOW_KINDS = new Set(["allocates-to", "deposits-into", "routes-through"]);
 
 /**
  * For every cross-linked node in `graph`, inline the downstream subgraph from
@@ -215,6 +329,7 @@ export function expandCrossLinks(graph: Graph, currentSlug: string): Graph {
 
   for (const hostNode of graph.nodes) {
     if (!hostNode.address) continue;
+    if (hostNode.category !== "dependency") continue;
     const key = `${(hostNode.chain ?? graph.chain).toLowerCase()}:${hostNode.address.toLowerCase()}`;
     const entry = index.get(key);
     if (!entry || entry.slug === currentSlug) continue;
@@ -261,6 +376,10 @@ export function expandCrossLinks(graph: Graph, currentSlug: string): Graph {
             mergedNodes.push({
               ...targetNode,
               id: mergedId,
+              // Pin the chain explicitly: the renderer falls back to the *host*
+              // graph's chain, which would point a cross-chain inlined node at
+              // the wrong block explorer.
+              chain: targetNode.chain ?? linked.chain,
               _inlinedFromSlug: entry.slug,
             });
             seenIds.add(mergedId);

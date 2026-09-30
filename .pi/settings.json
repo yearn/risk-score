@@ -1,0 +1,9 @@
+{
+  "defaultProvider": "opencode-go",
+  "defaultModel": "deepseek-v4-pro",
+  "defaultThinkingLevel": "high",
+  "skills": [
+    "../.agents/skills"
+  ],
+  "enableSkillCommands": true
+}
