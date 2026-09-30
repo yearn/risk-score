@@ -93,7 +93,7 @@ These are design trade-offs rather than live bugs, but H-5's redeemability/accou
 - **LBTC proxy deployed:** May 17, 2024 (block tx [`0xf5cccb…3ea8b`](https://etherscan.io/tx/0xf5cccb27295295cb2655bdcdea55a2aaf855272c578a91e2f0df55a223d3ea8b)); public mainnet launch ~August 2024 (V1 audits). ~28 months in production as of September 30, 2026.
 - **Protocol TVL (DefiLlama, September 30, 2026):** parent [Lombard](https://defillama.com/protocol/lombard) **~$957M**; dedicated [Lombard LBTC](https://defillama.com/protocol/lombard-lbtc) (Bitcoin-chain staked-BTC product) **~$708M**. Peak **~$2.2B on May 23, 2025**. TVL first crossed **$500M on ~Oct 5, 2024**; it has been above $500M for the large majority of days since (~24 months), with a **brief 2-day dip below $500M on Jul 15–16, 2026** (DefiLlama timeseries). The optional ">$500M TVL for >1 year" modifier still qualifies on longevity — see scoring.
 - **Market data (CoinGecko, September 30, 2026 ~16:20 UTC):** price ~$84,482; **LBTC/BTC ≈ 1.0039**; market cap ~$866M; circulating supply ~10,252 LBTC (all chains).
-- **Onchain supply (Ethereum, block 26091460):** `totalSupply()` ≈ **7,677.34 LBTC** (8 decimals). Base LBTC ([`0xecAc…11c1`](https://basescan.org/token/0xecAc9C5F704e954931349Da37F60E39f515c11c1)) ≈ **140.25 LBTC** at Base block 51997998. LBTC is multichain — also on BSC, Avalanche, Solana, Sui, Starknet, and others; see *Supply vs Reserves Reconciliation*.
+- **Onchain supply (Ethereum, block 26091460):** `totalSupply()` ≈ **7,677.34 LBTC** (8 decimals). Base uses a **distinct** LBTC token at [`0xecAc9C5F704e954931349Da37F60E39f515c11c1`](https://basescan.org/token/0xecAc9C5F704e954931349Da37F60E39f515c11c1) ≈ **140.25 LBTC** at Base block 51997998 (not the Ethereum address). LBTC is multichain — also on BSC, Avalanche, Solana, Sui, Starknet, and others; **BSC (`RPC_56`) / Avalanche (`RPC_43114`) supplies were not re-read** this refresh (RPC/API limits) — remainder left as CoinGecko gap; see *Supply vs Reserves Reconciliation*.
 - **Peg history:** LBTC/BTC has traded both above and below parity. CoinGecko all-time range is **ATH 1.2748 BTC / ATL 0.9439 BTC** — i.e. a worst-case ~6% discount to BTC has occurred. Spot ≈0.39% premium to BTC at this refresh (onchain `getRate()` ≈1.0046).
 - **Incidents:** No exploits or protocol-level depeg events found for LBTC. Standing risk factors (not realized): Babylon slashing (a new, relatively untested mechanism), and off-chain custody/consortium collusion.
 - **Third-party risk coverage:** [Chaos Labs published a "Lombard BTC Risk Assessment"](https://governance.ether.fi/t/lombard-btc-risk-assessment/2308) on the ether.fi governance forum (Sep 13, 2024), flagging limited transparency around consortium membership/decision-making and CubeSigner reliance. **No standalone LlamaRisk report on LBTC was found** — LlamaRisk has only covered LBTC within Aave v3 and Curve governance contexts (collateral onboarding / debt-ceiling methodology). **No Steakhouse Financial report found.**
@@ -157,7 +157,7 @@ The **BridgeV2 mint path IS rate-limited in the deployed contract** (correcting 
 ### Provability
 
 - **Onchain reserve registry (verified):** Lombard publishes its BTC reserve addresses through a **`PoR` registry contract on Base** at [`0xe7Ebc588F4EC9297d9867aD75a9b5D86848c8018`](https://basescan.org/address/0xe7Ebc588F4EC9297d9867aD75a9b5D86848c8018) (TransparentUpgradeableProxy → impl `PoR` `0x0bb6…70cc`). It exposes the **Chainlink Proof-of-Reserve standard interface** (`getPoRAddressListLength()`, `getPoRAddressSignatureMessages()`, plus `addAddresses`/`addRootPubkey` gated by `OPERATOR_ROLE`). As of September 30, 2026 (Base block 51997998) it lists **29,304 reserve addresses**. This registry is the data source Chainlink/RedStone PoR feeds consume.
-- **Rate feeds vs reserve quantity:** The Ethereum feeds — RedStone [`0xb415…0bc81`](https://etherscan.io/address/0xb415eAA355D8440ac7eCB602D3fb67ccC1f0bc81) and Chainlink [`0x5c29…3212`](https://etherscan.io/address/0x5c29868C58b6e15e2b962943278969Ab6a7D3212) — report the **LBTC/BTC exchange rate** (~1.004, matching `getRate()`), **not** an absolute BTC reserve quantity. There is **no dedicated Chainlink reserve-quantity PoR feed** listed for Ethereum; reserve-quantity provability runs through the Base `PoR` address registry above.
+- **Rate feeds vs reserve quantity:** Both Ethereum feeds report the **LBTC/BTC exchange rate**, **not** an absolute BTC reserve quantity. At the September 30, 2026 snapshot they **diverged**: RedStone [`0xb415…0bc81`](https://etherscan.io/address/0xb415eAA355D8440ac7eCB602D3fb67ccC1f0bc81) `latestRoundData` ≈ **1.00462** (matches onchain `getRate()` = 1.004616); Chainlink LBTC/BTC [`0x5c29…3212`](https://etherscan.io/address/0x5c29868C58b6e15e2b962943278969Ab6a7D3212) ≈ **1.00182** (~28 bps below `getRate`/RedStone). **Which feed is used where:** protocol redemption/accounting uses `getRate()`; Morpho LBTC/USDC, LBTC/WBTC, and LBTC/PYUSD oracles wire **RedStone** LBTC/BTC as `BASE_FEED_1`; Morpho LBTC/EURCV wires **Chainlink** LBTC/BTC instead (verified onchain Sep 30, 2026). There is **no dedicated Chainlink reserve-quantity PoR feed** listed for Ethereum; reserve-quantity provability runs through the Base `PoR` address registry above.
 - **Caveat:** reconciling circulating LBTC against custodied BTC still requires trusting (a) the consortium's reported deposit-address set in the registry and (b) the off-chain BTC actually held at those addresses. This is **registry/attestation-based provability**, stronger than a bare oracle but not trustless onchain verification. Sherlock **H-5** (acknowledged-won't-fix) further notes that permissioned CBBTC/BTCB-swap mints are not notarized, which can make the LBTC/BTC ratio incorrect and some LBTC unredeemable.
 - The LBTC/BTC rate is updated by a privileged oracle/operator role rather than derived algorithmically from onchain reserves.
 
@@ -193,7 +193,7 @@ LBTC remains deeply integrated as **lending collateral** (Aave, Spark; Morpho mu
 | [LBTC/EURCV](https://app.morpho.org/ethereum/market/0x9551f52490815c3dd64dcd349050ce6f42ef64d70f5805c14920b4fd6d3b2544) | 86.0% | $0.29M | $0.08M | 85.0% |
 | [LBTC/PYUSD](https://app.morpho.org/ethereum/market/0x6a7e36eb088bd501d73f7ab4c5b8671358559341a78ce521c9e499dc0bc642b9) | 86.0% | $0.05M | <$0.01M | 95.7% |
 
-For Morpho liquidations, what matters is the LBTC/BTC oracle behaving correctly and DEX depth to unwind seized collateral. The historical ~6% discount (ATL 0.944 BTC) and high LLTVs (86–94.5%) mean an LBTC depeg is the primary liquidation-risk vector for these markets.
+For Morpho liquidations, what matters is the LBTC/BTC oracle behaving correctly and DEX depth to unwind seized collateral. Most material Morpho LBTC markets (USDC/WBTC/PYUSD) price via **RedStone** LBTC/BTC (aligned with `getRate()`); the smaller EURCV market uses **Chainlink** LBTC/BTC, which read ~28 bps lower at this snapshot — consumers should not assume a single shared rate. The historical ~6% discount (ATL 0.944 BTC) and high LLTVs (86–94.5%) mean an LBTC depeg is the primary liquidation-risk vector for these markets.
 
 ## Centralization & Control Risks
 
@@ -221,7 +221,7 @@ For Morpho liquidations, what matters is the LBTC/BTC oracle behaving correctly 
 2. **Bitcoin network** — custody and settlement.
 3. **Lombard Consortium infrastructure** — 12-of-16 notary signing (CubeSigner/Cubist HSMs).
 4. **Bascule / Cubist** — independent attestation layer.
-5. **Oracles** — Chainlink + RedStone for LBTC/BTC rate and PoR; downstream lending markets (Morpho, Aave) depend on these for liquidation pricing.
+5. **Oracles** — RedStone LBTC/BTC (matches `getRate()`) and Chainlink LBTC/BTC (diverged ~28 bps lower at snapshot) for the exchange rate; Base `PoR` registry for reserve addresses. Morpho markets mostly consume RedStone LBTC/BTC (EURCV uses Chainlink); Aave/Spark depend on their own oracle adapters for liquidation pricing.
 
 Failure or compromise of Babylon, the consortium custody, or the rate oracle would each materially impair LBTC.
 
@@ -238,7 +238,7 @@ Recommended monitored addresses, signals, and frequency.
 
 ### 1. Backing / Proof of Reserve (MANDATORY)
 - Compare total LBTC supply (Ethereum `LBTC.totalSupply()` + cross-chain) against custodied BTC via the Base `PoR` registry [`0xe7Eb…8018`](https://basescan.org/address/0xe7Ebc588F4EC9297d9867aD75a9b5D86848c8018) — `getPoRAddressListLength()` (29,304 as of September 30, 2026 snapshot) and the listed addresses; watch `addAddresses`/`deleteAddresses`/`addRootPubkey` events for registry changes.
-- RedStone feed [`0xb415…0bc81`](https://etherscan.io/address/0xb415eAA355D8440ac7eCB602D3fb67ccC1f0bc81) and Chainlink LBTC/BTC [`0x5c29…3212`](https://etherscan.io/address/0x5c29868C58b6e15e2b962943278969Ab6a7D3212) — alert if `getRate()`/feed deviates sharply or stops updating.
+- RedStone feed [`0xb415…0bc81`](https://etherscan.io/address/0xb415eAA355D8440ac7eCB602D3fb67ccC1f0bc81) (should track `getRate()`) and Chainlink LBTC/BTC [`0x5c29…3212`](https://etherscan.io/address/0x5c29868C58b6e15e2b962943278969Ab6a7D3212) (diverged to 1.00182 vs getRate 1.00462 at Sep 30 snapshot) — alert if either feed stops updating, or if RedStone/`getRate()` diverge, or if Chainlink–RedStone spread widens further.
 - **Threshold:** flag if reported reserve < circulating LBTC, or rate feed staleness > expected heartbeat.
 
 ### 2. Upgrades & Role Changes (MANDATORY)
@@ -288,7 +288,7 @@ PROTOCOL / TRUST LAYER                          │
 UNDERLYING / EXTERNAL                            │
   Babylon Bitcoin staking (slashing)  ◄── staked BTC delegated
   Native BTC custody (consortium notaries, Cubist HSM threshold, off-chain)
-  Rate feeds: Chainlink 0x5c29…3212 + RedStone 0xb415…0bc81  (LBTC/BTC rate)
+  Rate feeds: RedStone 0xb415…0bc81 (= getRate ~1.00462) ; Chainlink 0x5c29…3212 (~1.00182, diverged)
   Reserve registry: PoR 0xe7Eb…8018 on Base (29,304 addrs, Chainlink PoR std)
 
 DOWNSTREAM (Yearn interest)
@@ -327,6 +327,7 @@ DOWNSTREAM (Yearn interest)
 
 ### Critical Risk Gates
 
+- [x] **Unverified contract source** → PASS — LBTC proxy and `StakedLBTC` implementation are source-verified on Etherscan; AssetRouter, BridgeV2, Consortium, and Bascule are likewise verified.
 - [x] **No audit** → PASS — extensively audited (OZ, Sherlock, Veridise, Halborn, ABDK).
 - [x] **Unverifiable reserves** → PASS (qualified) — BTC custody is off-chain but attested by an onchain `PoR` address registry (29,304 addresses on Base at this refresh) and consumed by Chainlink + RedStone feeds. DefiLlama aggregates are imperfect proxies (see *Supply vs Reserves Reconciliation*); **an exact, independent 1:1 reserve-vs-supply sum was not reproduced**. Gate passes on attestation + order-of-magnitude consistency, not trustless proof.
 - [x] **Total centralization** → PASS — 24-h timelock + multisig + 12-of-16 consortium; not a single EOA.
@@ -396,11 +397,12 @@ DOWNSTREAM (Yearn interest)
 
 | Final Score | Risk Tier | Recommendation |
 |------------|-----------|----------------|
-| **1.0-1.5** | **Minimal Risk** | Approved, high confidence |
-| **1.5-2.5** | **Low Risk** | Approved with standard monitoring |
-| **2.5-3.5** | **Medium Risk** | Approved with enhanced monitoring |
-| **3.5-4.5** | **Elevated Risk** | Limited approval, strict limits |
-| **4.5-5.0** | **High Risk** | Not recommended |
+| **1.00–1.49** | **Minimal Risk** | Approved, high confidence |
+| **1.50–2.49** | **Low Risk** | Approved with standard monitoring |
+| **2.50–3.49** | **Medium Risk** | Approved with enhanced monitoring |
+| **3.50–4.49** | **Elevated Risk** | Limited approval, strict limits |
+| **4.50–5.00** | **High Risk** | Not recommended |
+| **N/A** | **Not Rated** | Terminal — do not use (exploited or wound down) |
 
 **Final Risk Tier: Medium Risk** (2.80/5.0) — approved with enhanced monitoring. Strong audit posture and native-BTC backing are offset by off-chain custodial trust (no independent 1:1 reserve proof reproduced), Babylon slashing exposure, the open H-2/H-5 audit findings, and centralization/liquidity frictions that matter for high-LLTV Morpho collateral use. (If the −0.5 TVL-longevity modifier is applied, the score is 2.30 / Low Risk; held conservatively at Medium.)
 
@@ -420,7 +422,7 @@ DOWNSTREAM (Yearn interest)
 
 | Date | Score | Notes |
 | --- | --- | --- |
-| [May 26, 2026](https://github.com/yearn/risk-score/pull/217) | 2.80 | Initial LBTC assessment for Morpho collateral (issue #216). September 30, 2026 refresh within same draft PR: TVL/supply/rate/Morpho/PoR metrics updated; category scores and Final 2.80 unchanged; −0.5 TVL-longevity modifier still withheld. |
+| [May 26, 2026](https://github.com/yearn/risk-score/pull/217) | 2.80 | Initial LBTC assessment for Morpho collateral (issue #216). Same draft PR: Sep 30 TVL refresh; added companion graph + Lombard BridgeV2 bridge index; template hygiene (unverified-source gate, tier bands); clarified Chainlink vs RedStone/`getRate()` and Morpho oracle wiring; longevity wording notes Jul 15–16 2026 DefiLlama dip. Category scores and Final **2.80** unchanged; −0.5 TVL-longevity still withheld (open H-2/H-5 + reserve gap); live>2y noted as calendar-eligible only. |
 
 ## Open TODOs (for follow-up)
 

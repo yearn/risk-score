@@ -1,0 +1,160 @@
+slug: lombard-lbtc
+title: Lombard LBTC — Contract Dependency Graph
+chain: ethereum
+
+categories:
+  - id: vault
+    label: Vault / Token
+  - id: strategy
+    label: Strategy / Custody
+  - id: governance
+    label: Governance
+  - id: infra
+    label: Protocol Infra
+  - id: dependency
+    label: External Dependency
+
+nodes:
+  # === User-facing token ===
+  - id: LBTC
+    label: LBTC (StakedLBTC)
+    address: "0x8236a87084f8B84306f72007F36F2618A5634494"
+    category: vault
+    note: "TransparentUpgradeableProxy → StakedLBTC 0x0720…2bd9; value-accruing via getRate() ≈1.0046 (2026-09-30); ETH supply ~7,677 LBTC"
+
+  # === Mint / attestation infra ===
+  - id: asset-router
+    label: AssetRouter (MINTER)
+    address: "0x9eCe5fB1aB62d9075c4ec814b321e24D8EA021ac"
+    category: infra
+    note: "Primary mint/redeem router; holds MINTER_ROLE; ProxyAdmin 0xBf42…6754 owned by Timelock"
+  - id: bridge-v2
+    label: BridgeV2 (MINTER)
+    address: "0x451C54981C7da5d95901B770c540547cf5FE0a2D"
+    category: infra
+    note: "Cross-chain LBTC mint path; holds MINTER_ROLE; rate-limited ~100 LBTC / 3h per destination; ProxyAdmin 0x6B06…cbB1 owned by Timelock"
+  - id: consortium
+    label: Consortium (12-of-16)
+    address: "0xdAD58DfA5c1a7a34419AFdBE1f0d610efeea95E4"
+    category: infra
+    note: "Notary signature verification; epoch 21 threshold 12-of-16 (docs list 14 members / 10-of-14 — discrepancy open)"
+  - id: bascule
+    label: Bascule (GMPBasculeV1)
+    address: "0xC3ecFE771564e3f28CFB7a9b203F4d10279338eD"
+    category: infra
+    note: "Independent deposit attestation; dual-auth with Consortium for mint"
+  - id: por-registry
+    label: PoR Reserve Registry
+    address: "0xe7Ebc588F4EC9297d9867aD75a9b5D86848c8018"
+    chain: base
+    category: infra
+    note: "Chainlink PoR-standard address list; 29,304 BTC reserve addresses (Base block 51997998)"
+
+  # === Governance ===
+  - id: timelock
+    label: Lombard Timelock (24h)
+    address: "0x055E84e7FE8955E2781010B866f10Ef6E1E77e59"
+    category: governance
+    note: "Owns all three ProxyAdmins; holds DEFAULT_ADMIN_ROLE on LBTC"
+  - id: lbtc-proxyadmin
+    label: LBTC ProxyAdmin
+    address: "0xbAE061C73876952aA2C5e483b74dfA785425f879"
+    category: governance
+  - id: asset-router-proxyadmin
+    label: AssetRouter ProxyAdmin
+    address: "0xBf4202c8a0d852D432266dfE112ED624a1a36754"
+    category: governance
+  - id: bridge-v2-proxyadmin
+    label: BridgeV2 ProxyAdmin
+    address: "0x6B06CC8D89aD50962563bC5cFE1FF80Ec0b8cbB1"
+    category: governance
+  - id: treasury-safe
+    label: Treasury Safe (3-of-5)
+    address: "0x251a604E8E8f6906d60f8dedC5aAeb8CD38F4892"
+    category: governance
+    note: "Timelock PROPOSER + EXECUTOR + CANCELLER; fee treasury"
+  - id: pauser-safe
+    label: Pauser Safe (2-of-11)
+    address: "0xad67Ba2795770C8e0B70E2896C0F81F9d313FD44"
+    category: governance
+    note: "PAUSER_ROLE — can freeze transfers and mint/burn"
+  - id: deployer-eoa
+    label: Deployer EOA (proposer)
+    address: "0x3f6bf1c36ccbb59eaf8415301a0cec73c344a079"
+    category: governance
+    note: "Timelock PROPOSER only — not canceller/executor"
+
+  # === Custody / staking ===
+  - id: btc-custody-staking
+    label: BTC Custody + Babylon Staking
+    category: strategy
+    note: "Off-chain native BTC via Consortium threshold (Cubist/CubeSigner HSMs); staked through Babylon; ~$708M DefiLlama lombard-lbtc"
+
+  # === Rate feeds ===
+  - id: redstone-lbtc-btc
+    label: RedStone LBTC/BTC
+    address: "0xb415eAA355D8440ac7eCB602D3fb67ccC1f0bc81"
+    category: dependency
+    note: "Matches getRate() ≈1.00462; used by Morpho LBTC/USDC, LBTC/WBTC, LBTC/PYUSD oracles"
+  - id: chainlink-lbtc-btc
+    label: Chainlink LBTC/BTC
+    address: "0x5c29868C58b6e15e2b962943278969Ab6a7D3212"
+    category: dependency
+    note: "Snapshot 1.00182 (~28 bps below getRate/RedStone); used by Morpho LBTC/EURCV oracle"
+
+  # === External dependencies ===
+  - id: dep-bitcoin
+    label: Bitcoin Network
+    category: dependency
+    note: "Native BTC settlement / custody chain"
+  - id: dep-babylon
+    label: Babylon Staking
+    category: dependency
+    note: "BTC staking + slashing; ~9-day unbonding drives redeem window"
+  - id: dep-cubist
+    label: Cubist / CubeSigner
+    category: dependency
+    note: "HSM key generation for Consortium notaries"
+  - id: dep-morpho
+    label: Morpho Blue (LBTC collateral)
+    category: dependency
+    note: "~$5.2M LBTC collateral; LBTC/USDC 86% LLTV dominant (~$4.2M)"
+  - id: dep-aave-spark
+    label: Aave v3 + SparkLend
+    category: dependency
+    note: "~$227M / ~$219M LBTC collateral (Sep 30, 2026)"
+
+edges:
+  # === Governance / upgrades ===
+  - { from: treasury-safe, to: timelock, kind: proposes-on, label: "PROPOSER + EXECUTOR + CANCELLER" }
+  - { from: deployer-eoa, to: timelock, kind: proposes-on, label: "PROPOSER only" }
+  - { from: treasury-safe, to: timelock, kind: cancels-on, label: CANCELLER_ROLE }
+  - { from: timelock, to: lbtc-proxyadmin, kind: controls, label: owner() }
+  - { from: timelock, to: asset-router-proxyadmin, kind: controls, label: owner() }
+  - { from: timelock, to: bridge-v2-proxyadmin, kind: controls, label: owner() }
+  - { from: lbtc-proxyadmin, to: LBTC, kind: manages, label: token upgrade authority }
+  - { from: asset-router-proxyadmin, to: asset-router, kind: manages, label: router upgrade authority }
+  - { from: bridge-v2-proxyadmin, to: bridge-v2, kind: manages, label: bridge upgrade authority }
+  - { from: timelock, to: LBTC, kind: holds-role, label: DEFAULT_ADMIN_ROLE }
+  - { from: pauser-safe, to: LBTC, kind: holds-role, label: PAUSER_ROLE }
+
+  # === Mint authority ===
+  - { from: asset-router, to: LBTC, kind: mints, label: "MINTER_ROLE (Consortium + Bascule gated)" }
+  - { from: bridge-v2, to: LBTC, kind: mints, label: "MINTER_ROLE (cross-chain; rate-limited)" }
+  - { from: consortium, to: asset-router, kind: holds-role, label: "12-of-16 notary auth" }
+  - { from: bascule, to: asset-router, kind: holds-role, label: "deposit attestation" }
+  - { from: consortium, to: bridge-v2, kind: holds-role, label: "12-of-16 notary auth" }
+  - { from: bascule, to: bridge-v2, kind: holds-role, label: "deposit attestation" }
+
+  # === Capital / custody flow ===
+  - { from: LBTC, to: btc-custody-staking, kind: allocates-to, label: "native BTC backing (off-chain)" }
+  - { from: btc-custody-staking, to: dep-bitcoin, kind: deposits-into, label: "Consortium threshold custody" }
+  - { from: btc-custody-staking, to: dep-babylon, kind: deposits-into, label: "Babylon staking / slashing" }
+  - { from: consortium, to: dep-cubist, kind: routes-through, label: "CubeSigner HSM keys" }
+  - { from: por-registry, to: dep-bitcoin, kind: routes-through, label: "29,304 reserve addresses listed" }
+
+  # === Rate / downstream ===
+  - { from: LBTC, to: redstone-lbtc-btc, kind: routes-through, label: "getRate()-aligned feed" }
+  - { from: LBTC, to: chainlink-lbtc-btc, kind: routes-through, label: "alternate LBTC/BTC feed (diverged)" }
+  - { from: LBTC, to: dep-morpho, kind: deposits-into, label: "~$5.2M collateral" }
+  - { from: LBTC, to: dep-aave-spark, kind: deposits-into, label: "~$446M collateral combined" }
