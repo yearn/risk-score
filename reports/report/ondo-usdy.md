@@ -125,7 +125,7 @@ USDY holders do not deposit into onchain strategies. Subscription USDC leaves th
 | [`0xa42613C243b67BF6194Ac327795b926B4b491f15`](https://etherscan.io/address/0xa42613C243b67BF6194Ac327795b926B4b491f15) | ✓ | own balance | `MINTER_ROLE` — `USDY_InstantManager` (OGM) | `subscribe` mints against USDC. **`adminSubscribe` mints without any deposit.** It is gated by `ADMIN_SUBSCRIPTION_ROLE` (3-of-6 Safe [`0x505ff4462bA5E62ed529FA836D768ECd7B85439c`](https://etherscan.io/address/0x505ff4462bA5E62ed529FA836D768ECd7B85439c)) and a USD allowance in [`AdminSubscriptionChecker`](https://etherscan.io/address/0x1cb2Dcc325615d02ae384941149d1dA6521fa018) (currently **$25,000,000** remaining). The allowance is re-settable by the 3-of-5 Safe [`0x5AE21c99FC5f1584D8Cb09a298CFFd92B5d178eF`](https://etherscan.io/address/0x5AE21c99FC5f1584D8Cb09a298CFFd92B5d178eF). 8 admin subscriptions totalling 42.16M USDY ($48.05M) since April 8, 2026. |
 | [`0x25A103A1D6AeC5967c1A4fe2039cdc514886b97e`](https://etherscan.io/address/0x25A103A1D6AeC5967c1A4fe2039cdc514886b97e) | ✓ | — | `MINTER_ROLE` — legacy `USDYManager` (Ondo USDY LLC) | Mints on `claimMint` after `RELAYER_ROLE` posts an offchain deposit proof (`addProof`), `PRICE_ID_SETTER_ROLE` sets its price and `TIMESTAMP_SETTER_ROLE` sets the claim time. Relayer and price-ID setter: 2-of-6 Safe [`0x8D52a385D19F13Ef5A544E0514c62f0A44ff31bf`](https://etherscan.io/address/0x8D52a385D19F13Ef5A544E0514c62f0A44ff31bf) and admin Safe. Timestamp setter: 3-of-6 Safe [`0x505ff4462bA5E62ed529FA836D768ECd7B85439c`](https://etherscan.io/address/0x505ff4462bA5E62ed529FA836D768ECd7B85439c) and admin Safe. The two operational Safes have the **same six owners**. Still active: ~1,251.4M USDY minted through this path in 2026, e.g. [344.9M in one batch on March 9, 2026](https://etherscan.io/tx/0x997879d88c4c5c9afa8a1156e485b704e1e8ae3e1050525cc5febfd18f6cb032) and [493.4M on May 11, 2026](https://etherscan.io/tx/0x5a08b28c8e6f6ed33ce42da3879339603769824bec867a9e6be8feff87fa3d6c). Legacy redemptions are paused (`redemptionPaused = true`). |
 | [`0xa6275720b3fB1Efe3E6EF2b5BF2293148852307D`](https://etherscan.io/address/0xa6275720b3fB1Efe3E6EF2b5BF2293148852307D) | ✓ | ✓ | `MINTER_ROLE` — LayerZero `OndoMintBurnAdapter` | Burns on send, mints on receive. Inbound is capped at 500,000 USDY/24h per EVM route and 300,000/24h from Solana; BNB Chain and Plume inbound limits are 0. See [External Dependencies](#external-dependencies). Owner/delegate: admin Safe. |
-| [`0x1a694A09494E214a3Be3652e4B343B7B81A73ad7`](https://etherscan.io/address/0x1a694A09494E214a3Be3652e4B343B7B81A73ad7) | ✓ | via grant | `MINTER_ROLE` + `DEFAULT_ADMIN_ROLE` — 4-of-7 Safe (Ondo admin) | Can mint any amount directly, grant `MINTER_ROLE` or `BURNER_ROLE` to anyone, and upgrade the token via [ProxyAdmin `0x3ed61633057da0bc58f84b2b9002845e56f94c19`](https://etherscan.io/address/0x3ed61633057da0bc58f84b2b9002845e56f94c19), which it owns. No timelock, module or guard. **Used in practice:** 17 direct `mint` calls in 2026 totalling 95.96M USDY, including [92.14M on May 29, 2026](https://etherscan.io/tx/0x5ef005ec88ea5f40a805a2791690e5f7028205a7ea48bf983beb648ac4dafb72) to top holder [`0xc392749b6ff2cd95e5a4e3ed396c93f813395041`](https://etherscan.io/address/0xc392749b6ff2cd95e5a4e3ed396c93f813395041) and recurring ~0.2–0.3M mints (latest [September 28, 2026](https://etherscan.io/tx/0xf2c0c3df54f9e06674b87189dc8ba1eee010d24d6343e40983d7bfbf7f703cdb)). The 92.14M mint is **not** recorded as LLC issuance: the LLC's digital-token count is unchanged at 1,873,710,038.64 in the daily Ankura reports for May 27 – June 2, 2026 ([D6, D7](#appendix-attestation-documents), p. 1). It is not in OGM's attested USDY balance either, which fell from 17.12M to 14.91M during May 2026. No offsetting burn exists on Ethereum, Sei, Arbitrum or Mantle. The recurring small mints (2.71M in total) went to EOA [`0x5cec0b5e7cd0eaffa2c5d802767f35976224c72f`](https://etherscan.io/address/0x5cec0b5e7cd0eaffa2c5d802767f35976224c72f). Aggregate supply still reconciles with LLC plus OGM attested liabilities within 0.02% (see [Provability](#provability)), so the mint was most likely offset by a burn on Stellar, Solana or BNB Chain, which could not be checked. The admin Safe's purpose and the route are undisclosed (**TODO**). |
+| [`0x1a694A09494E214a3Be3652e4B343B7B81A73ad7`](https://etherscan.io/address/0x1a694A09494E214a3Be3652e4B343B7B81A73ad7) | ✓ | via grant | `MINTER_ROLE` + `DEFAULT_ADMIN_ROLE` — 4-of-7 Safe (Ondo admin) | Can mint any amount directly, grant `MINTER_ROLE` or `BURNER_ROLE` to anyone, and upgrade the token via [ProxyAdmin `0x3ed61633057da0bc58f84b2b9002845e56f94c19`](https://etherscan.io/address/0x3ed61633057da0bc58f84b2b9002845e56f94c19), which it owns. No timelock, module or guard. **Used in practice:** 17 direct `mint` calls in 2026 totalling 95.96M USDY, including [92.14M on May 29, 2026](https://etherscan.io/tx/0x5ef005ec88ea5f40a805a2791690e5f7028205a7ea48bf983beb648ac4dafb72) to [`0xc392749b6ff2cd95e5a4e3ed396c93f813395041`](https://etherscan.io/address/0xc392749b6ff2cd95e5a4e3ed396c93f813395041) and recurring ~0.2–0.3M mints (latest [September 28, 2026](https://etherscan.io/tx/0xf2c0c3df54f9e06674b87189dc8ba1eee010d24d6343e40983d7bfbf7f703cdb)). The 92.14M mint is **not** recorded as LLC issuance: the LLC's digital-token count is unchanged at 1,873,710,038.64 in the daily Ankura reports for May 27 – June 2, 2026 ([D6, D7](#appendix-attestation-documents), p. 1). It is not in OGM's attested USDY balance either, which fell from 17.12M to 14.91M during May 2026. No offsetting burn exists on Ethereum, Sei, Arbitrum or Mantle. The recurring small mints (2.71M in total) went to EOA [`0x5cec0b5e7cd0eaffa2c5d802767f35976224c72f`](https://etherscan.io/address/0x5cec0b5e7cd0eaffa2c5d802767f35976224c72f). Aggregate onchain supply matches LLC plus OGM attested liabilities within 0.02% (see [Provability](#provability)). That fits two explanations the available data cannot tell apart: the tokens were later brought into one issuer's attested balance, or they were offset by a burn on an unread chain (Stellar, Solana, BNB Chain). OGM's attested USDY rose by 141.7M between August 31 and September 25 against ~74.7M of Ethereum InstantManager net issuance, which is consistent with the first explanation but does not prove it. Purpose and route are undisclosed (**TODO**). The recipient [`0xc392749b6ff2cd95e5a4e3ed396c93f813395041`](https://etherscan.io/address/0xc392749b6ff2cd95e5a4e3ed396c93f813395041) is the fourth-largest Ethereum holder (83.4M USDY at the snapshot). |
 
 `BURNER_ROLE` (burn **from any address**) currently has 0 holders. The admin Safe can grant it at any time.
 
@@ -233,9 +233,11 @@ What this means for OGM-issued USDY:
 | Tempo / Mantle / Noble | 0.70M / 0.32M / 0.06M | Mantle 0.32M | Mantle onchain |
 | **Total** | **1,984.65M** | | |
 
-  Where independent reads exist they match Ondo's figures. The total of **1,984.65M** tokens reconciles with the two issuers' Ankura-attested liabilities: LLC 1,801,360,567.99 digital tokens (September 24, [D5](#appendix-attestation-documents), p. 1) plus OGM 183,770,426.35 USDY (September 25, [D8](#appendix-attestation-documents)). Together they total 1,985.13M, a difference of −0.02%.
+  The EVM reads (Ethereum, Sei, BNB Chain, Arbitrum, Mantle) match Ondo's per-chain figures to the token. The Solana indexer figure (156.47M) is 0.48M above Ondo's (155.99M). Stellar and the other non-EVM chains have no independent read.
 
-  At the aggregate level, no onchain USDY is outside both attestations. This implies the admin Safe's unexplained 92.14M Ethereum mint (May 29, 2026) was offset by a burn on a chain not read here.
+  The total of **1,984.65M** tokens reconciles with the two issuers' Ankura-attested liabilities: LLC 1,801,360,567.99 digital tokens (September 24, [D5](#appendix-attestation-documents), p. 1) plus OGM 183,770,426.35 USDY (September 25, [D8](#appendix-attestation-documents)). Together they total 1,985.13M, a difference of −0.02% (using the Jupiter Solana figure instead gives +0.00%).
+
+  The match covers aggregate supply only. It shows no material onchain USDY outside the two attested balances at these dates. It does not show where the admin Safe's 92.14M Ethereum mint of May 29, 2026 ended up: either it was later included in one issuer's attested balance, or it was offset by a burn on a chain not read here.
 
   Stellar (23.6% of supply) and the other non-EVM chains rest on Ondo's own figures. Splitting the supply by issuer on each chain is not possible onchain.
 - **Price / yield:** calculated onchain by [`RWADynamicOracle`](https://etherscan.io/address/0xA0219AA5B31e65Bc920B5b6DFb8EdF0988121De0) as a daily-compounding rate over monthly ranges (38 ranges; current range ends October 1, 2026 00:00 UTC). Anyone can compute it.
@@ -536,7 +538,7 @@ All gates pass; proceed to category scoring.
   - a thin 0.3–0.8% cushion;
   - ~93% of LLC assets in a structured-financing sleeve excluded from the covenant test under unpublished terms;
   - ~9% of value (OGM-issued USDY) is backed by OGM's pooled equity/stablecoin balance sheet (106.64%) rather than T-bills, with attested balances that do not track onchain issuance.
-- **Provability: 3.0.** Daily and monthly Ankura verification of LLC accounts. Price is computable onchain, but reserves are fully offchain. Ondo's headline ratio is not reproducible. Aggregate cross-chain supply reconciles to LLC plus OGM within 0.26%, but Stellar (23.6% of supply) and other non-EVM chains rely on Ondo-reported figures, and the per-issuer split is not visible onchain.
+- **Provability: 3.0.** Daily and monthly Ankura verification of LLC accounts. Price is computable onchain, but reserves are fully offchain. Ondo's headline ratio is not reproducible. Aggregate cross-chain supply reconciles to LLC plus OGM attested liabilities within 0.02%, but Stellar (23.6% of supply) and other non-EVM chains rely on Ondo-reported figures, and the per-issuer split is not visible onchain.
 
 **Funds Management Score = (3.5 + 3.0) / 2 = 3.25**
 
@@ -544,8 +546,15 @@ All gates pass; proceed to category scoring.
 
 #### Category 4: Liquidity Risk (Weight: 15%)
 
-- For a whitelisted Yearn strategy: direct, atomic, oracle-priced redemption, but throttled to $10M/day per user and $15M/day globally. It is backed by a ~$25M manually refilled buffer (base 2.5, +0.5 throttle).
-- Non-whitelisted holders face ~$4M of secondary liquidity: ~0.74% slippage at 1M USDY, ~42% at 2M, and none on Ethereum.
+Scored per rubric column, for a KYC-registered holder such as the Yearn strategy:
+
+| Column | Score | Basis |
+|--------|------:|-------|
+| Exit mechanism | 2 | Direct, atomic, oracle-priced redemption; capped at $10M/day per user and $15M/day globally. It is paid from a ~$25M manually refilled buffer. |
+| Liquidity depth | 3 | Secondary liquidity is ~$4M in total (Solana Orca ~$2.9M, Sei ~$1.0M, none on Ethereum). A 1M USDY sale costs 0.74% and 2M USDY costs ~42%. This is >$1M but below the $5M score-2 threshold. |
+| Large holder impact | 3 | A $50M exit takes ≥5 days at the per-user cap, if the buffer is refilled (3–7 days). |
+
+The column average is 2.67, rounded up to 3.0 under the template's conservative rule. The separate "throttle +0.5" adjustment is **not** applied: the rate limits are already reflected in the large-holder column, and adding it would count them twice.
 
 **Score: 3.0/5**
 
@@ -561,7 +570,7 @@ All gates pass; proceed to category scoring.
 | Category | Score | Weight | Weighted |
 |----------|-------|--------|----------|
 | Audits & Historical | 1.75 | 20% | 0.350 |
-| Centralization & Control | 3.83 | 30% | 1.150 |
+| Centralization & Control | 3.83 | 30% | 1.150 (unrounded 3.833 × 0.30) |
 | Funds Management | 3.25 | 30% | 0.975 |
 | Liquidity Risk | 3.0 | 15% | 0.450 |
 | Operational Risk | 2.0 | 5% | 0.100 |
@@ -598,4 +607,4 @@ All gates pass; proceed to category scoring.
 
 | Date | Score | Notes |
 | --- | --- | --- |
-| September 29, 2026 | 2.52 | Initial assessment |
+| [September 29, 2026](https://github.com/yearn/risk-score/pull/502) | 2.52 | Initial assessment |
