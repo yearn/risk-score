@@ -4,7 +4,7 @@
 - **Token:** USDY (Ondo U.S. Dollar Yield)
 - **Chain:** Ethereum (also Stellar, Sei, Solana, BNB Chain, Sui, Arbitrum, Aptos, Tempo, Mantle, Noble; Immunefi also lists X Layer and Plume deployments)
 - **Token Address:** [`0x96F6eF951840721AdBF46Ac996b59E0235CB985C`](https://etherscan.io/address/0x96F6eF951840721AdBF46Ac996b59E0235CB985C)
-- **Final Score: 2.52/5.0**
+- **Final Score: 2.45/5.0**
 
 ## Overview + Links
 
@@ -554,9 +554,9 @@ Scored per rubric column, for a KYC-registered holder such as the Yearn strategy
 | Liquidity depth | 3 | Secondary liquidity is ~$4M in total (Solana Orca ~$2.9M, Sei ~$1.0M, none on Ethereum). A 1M USDY sale costs 0.74% and 2M USDY costs ~42%. This is >$1M but below the $5M score-2 threshold. |
 | Large holder impact | 3 | A $50M exit takes ≥5 days at the per-user cap, if the buffer is refilled (3–7 days). |
 
-The column average is 2.67, rounded up to 3.0 under the template's conservative rule. The separate "throttle +0.5" adjustment is **not** applied: the rate limits are already reflected in the large-holder column, and adding it would count them twice.
+The column average is 2.67. The score is set at **2.5**. The exit mechanism for the intended holder (a KYC-registered strategy) is direct, atomic and oracle-priced. The weaker depth column mainly affects non-registered holders, and the large-holder column already reflects the rate limits. The separate "throttle +0.5" adjustment is **not** applied, because it would count the rate limits twice. Revisit if the buffer or rate limits shrink, or if the strategy position approaches the multi-day exit range.
 
-**Score: 3.0/5**
+**Score: 2.5/5**
 
 #### Category 5: Operational Risk (Weight: 5%)
 
@@ -572,18 +572,18 @@ The column average is 2.67, rounded up to 3.0 under the template's conservative 
 | Audits & Historical | 1.75 | 20% | 0.350 |
 | Centralization & Control | 3.83 | 30% | 1.150 (unrounded 3.833 × 0.30) |
 | Funds Management | 3.25 | 30% | 0.975 |
-| Liquidity Risk | 3.0 | 15% | 0.450 |
+| Liquidity Risk | 2.5 | 15% | 0.375 |
 | Operational Risk | 2.0 | 5% | 0.100 |
-| **Subtotal** | | | **3.025** |
+| **Subtotal** | | | **2.950** |
 | TVL modifier (>$500M for >1 year) | | | **−0.5** |
-| **Final Score** | | | **2.52/5.0** |
+| **Final Score** | | | **2.45/5.0** |
 
 **Optional Modifiers:**
 
 - Protocol live >2 years with no incidents: **not applied.** No exploit occurred, but the January 2026 portfolio-default flag is a covenant incident.
 - TVL maintained >$500M for >1 year: **applied (−0.5).** LLC principal has been >$500M every month since February 2025.
 
-**Final Risk Tier: Medium Risk** (2.52, just above the 2.50 boundary; 2.525 rounded down)
+**Final Risk Tier: Low Risk** (2.45, just below the 2.50 Medium boundary)
 
 **Yearn strategy note.** The score assumes the strategy is KYC-registered in `OndoIDRegistry`, since it cannot subscribe or redeem otherwise. Without registration the liquidity score would be ~4.0 and the final score ~2.67 (Medium). Recommended strategy guardrails:
 
@@ -607,4 +607,4 @@ The column average is 2.67, rounded up to 3.0 under the template's conservative 
 
 | Date | Score | Notes |
 | --- | --- | --- |
-| [September 29, 2026](https://github.com/yearn/risk-score/pull/502) | 2.52 | Initial assessment |
+| [September 29, 2026](https://github.com/yearn/risk-score/pull/502) | 2.45 | Initial assessment |
