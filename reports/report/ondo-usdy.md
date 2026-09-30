@@ -4,7 +4,7 @@
 - **Token:** USDY (Ondo U.S. Dollar Yield)
 - **Chain:** Ethereum (also Stellar, Sei, Solana, BNB Chain, Sui, Arbitrum, Aptos, Tempo, Mantle, Noble; Immunefi also lists X Layer and Plume deployments)
 - **Token Address:** [`0x96F6eF951840721AdBF46Ac996b59E0235CB985C`](https://etherscan.io/address/0x96F6eF951840721AdBF46Ac996b59E0235CB985C)
-- **Final Score: 2.47/5.0**
+- **Final Score: 2.52/5.0**
 
 ## Overview + Links
 
@@ -75,11 +75,11 @@ Noble USDY was audited by Halborn (June and July 2024). The Ondo Stocks/OGM stac
 ## Historical Track Record
 
 - **In production since August 2023.** The token proxy was created July 11, 2023 ([tx](https://etherscan.io/tx/0xad49610a1f99fac0b77b42ec9e3e21f986fc765349481278d52fcb96c12e3fb7)); the oracle's first range starts August 1, 2023; the first Ethereum mint was September 18, 2023.
-- **Scale (Ondo USDY LLC token principal, monthly Ankura reports):** $71.5M (Jan 2024) → $450.7M (Dec 2024) → $559.3M (Feb 2025) → $705.9M (Dec 2025) → $1,406.5M (Jan 2026) → $2,120.9M (Apr 2026) → **$2,138.6M (Aug 2026)**. The latest daily report shows **$2,066.7M** on September 24, 2026. Principal has stayed above $500M since February 2025 (19 months).
+- **Scale (Ondo USDY LLC token principal, p. 1 "Token Principal Outstanding" of each monthly Ankura report; files named `YYYY/Ondo USDY LLC_MonthlyRpt_YYYYMM.pdf` through 2025 and `2026/YYYYMM Ondo USDY LLC_ATC Attest.pdf` in 2026 in the [LLC monthly folder](https://www.dropbox.com/scl/fo/fk5t99zyihshuak3u1u9v/AMYiYSUwvoL6osa2FX_G_M8?rlkey=0ttmb4ifhdg4ebvhbh8aa3juc&st=fyoof4cu&dl=0)):** $71.5M (Jan 2024) → $450.7M (Dec 2024) → $559.3M (Feb 2025) → $705.9M (Dec 2025) → $1,406.5M (Jan 2026) → $2,120.9M (Apr 2026) → **$2,138.6M (Aug 2026)**. The latest daily report shows **$2,066.7M** on September 24, 2026. Principal has stayed above $500M since February 2025 (19 months; first month $559,346,802.83 in [D10](#appendix-attestation-documents), and every later monthly report above $500M).
 - **Ondo's headline figures** ([USDY page](https://ondo.finance/usdy), September 28, 2026): TVL $2.20B; "Value of USDY Outstanding" $2.07B; "Value of Underlying Assets" $2.30B; "Collateralization Ratio" 121.95%. The ratio cannot be reproduced from the page's own figures (2.30/2.07 = 111%); see [Collateralization](#collateralization).
 - **Security incidents:** no smart-contract exploit, unbacked mint or loss of funds found.
-- **Covenant event, January 2026.** The January 2026 monthly Ankura report shows Permitted Assets / Token Principal of **1.0042**, below the 100.5% threshold. The report records **"Portfolio Default Test: FAIL"** and **"Portfolio Default: YES"**. The month included a $700M certificate issuance. February 2026 was back to 1.0055 (PASS). No public incident communication was found (**TODO**).
-- **Shrinking cushion.** From September to December 2025 the LLC held ~2.9–3.0% excess collateral, consistent with the historical 3% first-loss buffer described by [LlamaRisk](https://llamarisk.com/research/archive-llamarisk-asset-overview-u-s-dollar-token-usdy). Since January 2026 the excess has been 0.31–0.78%.
+- **Covenant event, January 2026.** The January 2026 monthly Ankura report ([D1](#appendix-attestation-documents), p. 1 and p. 3) shows Permitted Assets / Token Principal of **1.0041555**, below the 100.5% threshold. Page 3 records **"Portfolio Default Test (@100.5%): FAIL"** and **"2. Portfolio Default: YES"**. The month included a $700M certificate issuance. February 2026 was back to 1.0055 (PASS). No public incident communication was found (**TODO**).
+- **Shrinking cushion.** In December 2025 the LLC held 2.94% excess collateral: ratio 1.029351393 ([D2](#appendix-attestation-documents), p. 1). This is consistent with the historical 3% first-loss buffer described by [LlamaRisk](https://llamarisk.com/research/archive-llamarisk-asset-overview-u-s-dollar-token-usdy). Since January 2026 the excess has been 0.31–0.78%.
 - **Holder concentration (Ethereum, reconstructed from all 19,838 `Transfer` events to the snapshot block; balances sum exactly to `totalSupply`).** 1,265 holders. The top four addresses hold **81.2%**: 359.0M, 298.8M, 107.8M and 83.4M USDY, all in 3-of-5 Safes. These Safes have never sent a transaction, share no signers with each other or with Ondo's governance Safes, and received their USDY from the legacy `USDYManager` in 2026 batch mints. Their owners are not publicly identified.
 - **Peg / price behaviour:** USDY is not pegged; it accrues at the oracle rate. DeFiLlama's market price ($1.14558) was 0.2% below the oracle price ($1.14786) at the snapshot.
 
@@ -125,7 +125,7 @@ USDY holders do not deposit into onchain strategies. Subscription USDC leaves th
 | [`0xa42613C243b67BF6194Ac327795b926B4b491f15`](https://etherscan.io/address/0xa42613C243b67BF6194Ac327795b926B4b491f15) | ✓ | own balance | `MINTER_ROLE` — `USDY_InstantManager` (OGM) | `subscribe` mints against USDC. **`adminSubscribe` mints without any deposit.** It is gated by `ADMIN_SUBSCRIPTION_ROLE` (3-of-6 Safe [`0x505ff4462bA5E62ed529FA836D768ECd7B85439c`](https://etherscan.io/address/0x505ff4462bA5E62ed529FA836D768ECd7B85439c)) and a USD allowance in [`AdminSubscriptionChecker`](https://etherscan.io/address/0x1cb2Dcc325615d02ae384941149d1dA6521fa018) (currently **$25,000,000** remaining). The allowance is re-settable by the 3-of-5 Safe [`0x5AE21c99FC5f1584D8Cb09a298CFFd92B5d178eF`](https://etherscan.io/address/0x5AE21c99FC5f1584D8Cb09a298CFFd92B5d178eF). 8 admin subscriptions totalling 42.16M USDY ($48.05M) since April 8, 2026. |
 | [`0x25A103A1D6AeC5967c1A4fe2039cdc514886b97e`](https://etherscan.io/address/0x25A103A1D6AeC5967c1A4fe2039cdc514886b97e) | ✓ | — | `MINTER_ROLE` — legacy `USDYManager` (Ondo USDY LLC) | Mints on `claimMint` after `RELAYER_ROLE` posts an offchain deposit proof (`addProof`), `PRICE_ID_SETTER_ROLE` sets its price and `TIMESTAMP_SETTER_ROLE` sets the claim time. Relayer and price-ID setter: 2-of-6 Safe [`0x8D52a385D19F13Ef5A544E0514c62f0A44ff31bf`](https://etherscan.io/address/0x8D52a385D19F13Ef5A544E0514c62f0A44ff31bf) and admin Safe. Timestamp setter: 3-of-6 Safe [`0x505ff4462bA5E62ed529FA836D768ECd7B85439c`](https://etherscan.io/address/0x505ff4462bA5E62ed529FA836D768ECd7B85439c) and admin Safe. The two operational Safes have the **same six owners**. Still active: ~1,251.4M USDY minted through this path in 2026, e.g. [344.9M in one batch on March 9, 2026](https://etherscan.io/tx/0x997879d88c4c5c9afa8a1156e485b704e1e8ae3e1050525cc5febfd18f6cb032) and [493.4M on May 11, 2026](https://etherscan.io/tx/0x5a08b28c8e6f6ed33ce42da3879339603769824bec867a9e6be8feff87fa3d6c). Legacy redemptions are paused (`redemptionPaused = true`). |
 | [`0xa6275720b3fB1Efe3E6EF2b5BF2293148852307D`](https://etherscan.io/address/0xa6275720b3fB1Efe3E6EF2b5BF2293148852307D) | ✓ | ✓ | `MINTER_ROLE` — LayerZero `OndoMintBurnAdapter` | Burns on send, mints on receive. Inbound is capped at 500,000 USDY/24h per EVM route and 300,000/24h from Solana; BNB Chain and Plume inbound limits are 0. See [External Dependencies](#external-dependencies). Owner/delegate: admin Safe. |
-| [`0x1a694A09494E214a3Be3652e4B343B7B81A73ad7`](https://etherscan.io/address/0x1a694A09494E214a3Be3652e4B343B7B81A73ad7) | ✓ | via grant | `MINTER_ROLE` + `DEFAULT_ADMIN_ROLE` — 4-of-7 Safe (Ondo admin) | Can mint any amount directly, grant `MINTER_ROLE` or `BURNER_ROLE` to anyone, and upgrade the token via [ProxyAdmin `0x3ed61633057da0bc58f84b2b9002845e56f94c19`](https://etherscan.io/address/0x3ed61633057da0bc58f84b2b9002845e56f94c19), which it owns. No timelock, module or guard. **Used in practice:** 17 direct `mint` calls in 2026 totalling 95.96M USDY, including [92.14M on May 29, 2026](https://etherscan.io/tx/0x5ef005ec88ea5f40a805a2791690e5f7028205a7ea48bf983beb648ac4dafb72) to top holder [`0xc392749b6ff2cd95e5a4e3ed396c93f813395041`](https://etherscan.io/address/0xc392749b6ff2cd95e5a4e3ed396c93f813395041) and recurring ~0.2–0.3M mints (latest [September 28, 2026](https://etherscan.io/tx/0xf2c0c3df54f9e06674b87189dc8ba1eee010d24d6343e40983d7bfbf7f703cdb)). The 92.14M mint is **not** recorded as LLC issuance: the LLC's digital-token count is unchanged at 1,873,710,038.64 in the daily Ankura reports for May 27 – June 2, 2026. No offsetting burn exists on Ethereum, Sei, Arbitrum or Mantle. The recurring small mints (2.71M in total) went to EOA [`0x5cec0b5e7cd0eaffa2c5d802767f35976224c72f`](https://etherscan.io/address/0x5cec0b5e7cd0eaffa2c5d802767f35976224c72f). The purpose and backing of these mints is undisclosed (**TODO**). It may be OGM issuance or a migration from Solana/BNB Chain/Stellar, which could not be checked. |
+| [`0x1a694A09494E214a3Be3652e4B343B7B81A73ad7`](https://etherscan.io/address/0x1a694A09494E214a3Be3652e4B343B7B81A73ad7) | ✓ | via grant | `MINTER_ROLE` + `DEFAULT_ADMIN_ROLE` — 4-of-7 Safe (Ondo admin) | Can mint any amount directly, grant `MINTER_ROLE` or `BURNER_ROLE` to anyone, and upgrade the token via [ProxyAdmin `0x3ed61633057da0bc58f84b2b9002845e56f94c19`](https://etherscan.io/address/0x3ed61633057da0bc58f84b2b9002845e56f94c19), which it owns. No timelock, module or guard. **Used in practice:** 17 direct `mint` calls in 2026 totalling 95.96M USDY, including [92.14M on May 29, 2026](https://etherscan.io/tx/0x5ef005ec88ea5f40a805a2791690e5f7028205a7ea48bf983beb648ac4dafb72) to top holder [`0xc392749b6ff2cd95e5a4e3ed396c93f813395041`](https://etherscan.io/address/0xc392749b6ff2cd95e5a4e3ed396c93f813395041) and recurring ~0.2–0.3M mints (latest [September 28, 2026](https://etherscan.io/tx/0xf2c0c3df54f9e06674b87189dc8ba1eee010d24d6343e40983d7bfbf7f703cdb)). The 92.14M mint is **not** recorded as LLC issuance: the LLC's digital-token count is unchanged at 1,873,710,038.64 in the daily Ankura reports for May 27 – June 2, 2026 ([D6, D7](#appendix-attestation-documents), p. 1). It is not in OGM's attested USDY balance either, which fell from 17.12M to 14.91M during May 2026. No offsetting burn exists on Ethereum, Sei, Arbitrum or Mantle. The recurring small mints (2.71M in total) went to EOA [`0x5cec0b5e7cd0eaffa2c5d802767f35976224c72f`](https://etherscan.io/address/0x5cec0b5e7cd0eaffa2c5d802767f35976224c72f). Aggregate supply still reconciles with LLC plus OGM attested liabilities within 0.02% (see [Provability](#provability)), so the mint was most likely offset by a burn on Stellar, Solana or BNB Chain, which could not be checked. The admin Safe's purpose and the route are undisclosed (**TODO**). |
 
 `BURNER_ROLE` (burn **from any address**) currently has 0 holders. The admin Safe can grant it at any time.
 
@@ -159,7 +159,7 @@ That leaves ~149.3M USDY (~$171M) net OGM issuance on Ethereum, broadly consiste
 
 ### Collateralization
 
-**Ondo USDY LLC (legacy issuer, ~90% of value).** The [daily Ankura report for September 24, 2026](https://www.dropbox.com/scl/fo/375wdvar3rbc7o23nxsgp/AOFY8jhpENaNx9WAw-WPnbY?rlkey=4icqn1z9bez725wywr30fx52a&st=bsxeh8j5&dl=0) shows:
+**Ondo USDY LLC (legacy issuer, ~90% of value).** The daily Ankura report for September 24, 2026 ([D5](#appendix-attestation-documents), p. 1 for the summary and p. 2 for holdings) shows:
 
 | Item | Value |
 |------|-------|
@@ -171,7 +171,7 @@ That leaves ~149.3M USDY (~$171M) net OGM issuance on Ethereum, broadly consiste
 | Brokerage cash | $10,080 |
 | Custody split | Marex $1,994.7M (95.8%); StoneX (BNY Mellon custody) $87.6M |
 
-**Opt-Out Lender structure.** The monthly reports footnote that the Marex balance "includes securities used for structured financing and which constitute Opt-Out Lender Underlyings under the **Amended and Restated** Tokenized Credit and Security Agreement". Since the July 2026 report, "**Marex is not subject to Portfolio Default Test**". In August 2026 the 100.5% test covered only $154.7M of assets against $147.0M of token value (ratio 1.053); the remaining ~$1.99B of principal is outside it. Ondo's page (footnote 5) likewise excludes these securities from its collateralization ratio.
+**Opt-Out Lender structure.** The monthly reports footnote that the Marex balance "includes securities used for structured financing and which constitute Opt-Out Lender Underlyings under the **Amended and Restated** Tokenized Credit and Security Agreement" ([D4](#appendix-attestation-documents), p. 3). Since the July 2026 report ([D3](#appendix-attestation-documents), p. 3), "**Marex is not subject to Portfolio Default Test**". In August 2026 the 100.5% test covered only $154,672,752.99 of assets against $146,955,814.61 of token value, a ratio of 1.053 ([D4](#appendix-attestation-documents), p. 3). The remaining ~$1.99B of principal is outside it. Ondo's page (footnote 5) likewise excludes these securities from its collateralization ratio.
 
 The amended TCSA is not public, so it is unverified:
 
@@ -181,11 +181,32 @@ The amended TCSA is not public, so it is unverified:
 
 The four 3-of-5 Safes holding 81% of Ethereum supply received their USDY via the same 2026 batch mints. This suggests, but does not prove, that they are the Opt-Out Lenders. **TODO:** obtain the amended TCSA or an Ondo statement.
 
-**OGM-issued USDY (~$216M, ~9.4%).** Ondo's page lists "Ondo Stocks issued USDY – USD Value $216,275,570" as an *underlying asset*. The daily Ankura report states it "reflects only USDY issued by Ondo USDY LLC, and does not account for USDY issued by Ondo Global Markets (BVI) Limited." No attestation of the reserves behind OGM-issued USDY was found.
+**OGM-issued USDY (~$211–216M, ~9%).** Ondo's page lists "Ondo Stocks issued USDY – USD Value $216,275,570" as an *underlying asset*. The LLC's daily Ankura report excludes it: the report "reflects only USDY issued by Ondo USDY LLC, and does not account for USDY issued by Ondo Global Markets (BVI) Limited" ([D5](#appendix-attestation-documents), p. 2, footnote 1).
 
-The Ondo Stocks framework describes the OGM issuer as a bankruptcy-remote SPV with Ankura as security agent and daily attestations of *stock* holdings ([Trust & Transparency](https://docs.ondo.finance/ondo-stocks/trust-and-transparency)). Whether that framework covers USDY reserves is **TODO**. The USDC from OGM subscriptions is routed to Safe [`0x3312cc371Fe0Dd5171878630A1E5cf69778E8fa5`](https://etherscan.io/address/0x3312cc371Fe0Dd5171878630A1E5cf69778E8fa5), which held only $24.99M at the snapshot.
+OGM-issued USDY is instead attested **inside OGM's pooled Ondo Stocks report**. The USDY app page links to it as "Daily/Monthly Attestation Reports – Ondo Global Markets (BVI) Limited" ([daily folder](https://www.dropbox.com/scl/fo/jzkrw308mrhsasauqrjqq/AJxJak0F90kcwkADSN3DCD4?rlkey=nik1v5slekrzx5fbi0zan5sk3&st=t5vbvab8&dl=0), [monthly folder](https://www.dropbox.com/scl/fo/7rlmba8f49nvbp3xwz1of/ABv0vSjd6cIDAUTIlwm2KwA?rlkey=hokf0tffqvezfmsto25cvpovs&st=7ohgw8sv&dl=0)). Ankura acts as Verification Agent under the OGM Sales Terms dated July 17, 2025.
 
-**Headline ratio.** Ondo's 121.95% "Collateralization Ratio" does not follow from its own published figures ($2.30B / $2.07B = 111%). The $2.30B includes OGM-issued USDY valued at face as an asset. The verifiable figure is the LLC's **100.4–100.8%** in recent daily and monthly reports.
+The September 25, 2026 daily report ([D8](#appendix-attestation-documents), p. 1) shows:
+
+| Item | Value |
+|------|------:|
+| Total USDY Tokens Outstanding (OGM) | 183,770,426.35 USDY / **$210,860,243.59** |
+| Ondo Stocks outstanding (market value) | $1,209,233,824.61 |
+| **Total Liabilities** | **$1,440,479,664.49** |
+| Long equity positions at Alpaca | $1,219,308,796.70 |
+| "Ondo Stocks in Custodian Wallet – BitGo" | $211,729,143.70 |
+| Stablecoins (PSM USDC $25.85M, PSM BSC-USDT $24.62M, PSM SOL-USDC $10.00M, Coinbase USDC $11.42M, other) | ~$71.99M |
+| USD cash (Alpaca trading $27.94M, SVB $0.50M, other) | ~$28.53M |
+| Ondo Stocks for OIP – Anchorage | $4,513,687.84 |
+| **Total Assets** | **$1,536,079,599.97** |
+| **Asset-to-Obligation Ratio** | **106.64%** |
+
+What this means for OGM-issued USDY:
+
+- **Reserves are attested, but not as a segregated Treasury portfolio.** OGM's USDY is a liability of a pooled balance sheet whose assets are mainly US equities, OGM's own tokenized stocks and stablecoins. No T-bill line appears. Cash and stablecoins (~$100.5M) cover less than half of the OGM USDY liability. The remainder is covered only by the pool-wide 6.64% excess over equity-tracking liabilities. How OGM hedges or funds USDY yield is not disclosed (**TODO**).
+- **Reported balances do not track onchain issuance.** OGM's month-end USDY figures ([D9](#appendix-attestation-documents) and earlier monthly reports) were 7.42M (Feb), 17.12M (Apr), 14.91M (May), 27.14M (Jun), 17.67M (Jul) and 42.06M (Aug 2026). They then jump to 183.77M on September 25. By contrast, cumulative net issuance through the Ethereum `USDY_InstantManager` alone (subscriptions + admin subscriptions − redemptions) was 46.04M at end-April, 57.06M at end-June, 74.59M at end-August and 149.27M at the snapshot, before BNB Chain and Tempo issuance. The attested OGM liability was therefore below Ethereum-only onchain issuance for several months, and the attestation does not reconcile issuance chain by chain (**TODO**: Ondo explanation).
+- USDC from OGM subscriptions is routed to Safe [`0x3312cc371Fe0Dd5171878630A1E5cf69778E8fa5`](https://etherscan.io/address/0x3312cc371Fe0Dd5171878630A1E5cf69778E8fa5), which held $24.99M at the snapshot. That appears in D8 only as part of stablecoin balances.
+
+**Headline ratio.** Ondo's 121.95% "Collateralization Ratio" does not follow from its own published figures ($2.30B / $2.07B = 111%). Ondo's CMS record behind the page (`usdyHoldings`, as of September 28, 2026) also carries a `leveredTvl` of $1,995,168,169.01, but neither figure reproduces 121.95%. The $2.30B counts OGM-issued USDY at face value as an LLC asset. The verifiable figures are the LLC's **100.4–100.8%** in recent daily and monthly reports, and OGM's pool-wide 106.64%.
 
 **Collateral quality:** high. Short T-bills (maturities October 2026 – September 2027) and small bank deposits; no credit or duration risk beyond ~1 year.
 
@@ -196,7 +217,7 @@ The Ondo Stocks framework describes the OGM issuer as a bankruptcy-remote SPV wi
 ### Provability
 
 - **Reserves:** offchain. Ankura Trust, as Verification Agent, reviews market values, CUSIPs and maturities daily through read-only access to the deposit, brokerage, operating and exchange accounts. It publishes daily and monthly PDFs; the latest monthly report (August 2026) was uploaded September 3, 2026. There is no Chainlink PoR or other onchain reserve feed.
-- **Coverage gap:** OGM-issued USDY (~9%) is not covered by the Ankura reports, and the Marex opt-out sleeve (~93% of LLC assets) is excluded from the covenant test.
+- **Coverage:** both issuers publish Ankura-verified daily and monthly reports. OGM-issued USDY (~9%) is attested only as one liability in OGM's pooled equity/stablecoin balance sheet (106.64% asset-to-obligation, [D8](#appendix-attestation-documents)), and its reported balance does not reconcile with onchain issuance. The Marex opt-out sleeve (~93% of LLC assets) is excluded from the LLC covenant test.
 - **Supply reconciliation.** Ondo's USDY page embeds per-chain TVL (`tvlUsd`, total $2,278,091,841.77 at price $1.14785599). Converted to tokens and compared with direct reads:
 
 | Chain | Ondo-reported (tokens) | Independent read | Source |
@@ -212,7 +233,9 @@ The Ondo Stocks framework describes the OGM issuer as a bankruptcy-remote SPV wi
 | Tempo / Mantle / Noble | 0.70M / 0.32M / 0.06M | Mantle 0.32M | Mantle onchain |
 | **Total** | **1,984.65M** | | |
 
-  Where independent reads exist they match Ondo's figures. The total of 1,984.65M tokens is within **−0.26%** of the two issuers combined: LLC 1,801.36M digital tokens (September 24 report) plus ~188.4M OGM tokens (Ondo's $216.28M "Ondo Stocks issued USDY" line at $1.1479). The small difference is consistent with the gap between the report and snapshot dates. The supply therefore reconciles at the aggregate level.
+  Where independent reads exist they match Ondo's figures. The total of **1,984.65M** tokens reconciles with the two issuers' Ankura-attested liabilities: LLC 1,801,360,567.99 digital tokens (September 24, [D5](#appendix-attestation-documents), p. 1) plus OGM 183,770,426.35 USDY (September 25, [D8](#appendix-attestation-documents)). Together they total 1,985.13M, a difference of −0.02%.
+
+  At the aggregate level, no onchain USDY is outside both attestations. This implies the admin Safe's unexplained 92.14M Ethereum mint (May 29, 2026) was offset by a burn on a chain not read here.
 
   Stellar (23.6% of supply) and the other non-EVM chains rest on Ondo's own figures. Splitting the supply by issuer on each chain is not possible onchain.
 - **Price / yield:** calculated onchain by [`RWADynamicOracle`](https://etherscan.io/address/0xA0219AA5B31e65Bc920B5b6DFb8EdF0988121De0) as a daily-compounding rate over monthly ranges (38 ranges; current range ends October 1, 2026 00:00 UTC). Anyone can compute it.
@@ -419,8 +442,27 @@ DVN names are from the [LayerZero metadata API](https://metadata.layerzero-api.c
  Ondo USDY LLC (TCSA, Ankura Verification/Collateral Agent): $2.08B T-bills
      Marex ~96% (incl. "Opt-Out Lender" structured-financing sleeve, excluded from test)
      StoneX/BNY Mellon ~4% · First Citizens deposits
- Ondo Global Markets (BVI) Ltd: OGM-issued USDY (~$216M) — reserves not covered by Ankura USDY reports
+ Ondo Global Markets (BVI) Ltd: OGM-issued USDY (~$211M) — liability in pooled Ondo Stocks balance sheet (Ankura, 106.64%)
 ```
+
+## Appendix: Attestation Documents
+
+Ondo publishes the Ankura reports only as shared Dropbox folders. Dropbox does not expose working per-file links for these folders: every per-file URL form tested returned the folder view, not the PDF. Each cited report is therefore identified by folder link, path inside the folder, page, and the SHA-256 of the downloaded PDF (downloaded September 29–30, 2026), so readers can locate and verify the exact document.
+
+| ID | Report | Folder | Path in folder | Page(s) cited | SHA-256 |
+|----|--------|--------|----------------|---------------|---------|
+| D1 | LLC monthly, January 2026 | [LLC monthly](https://www.dropbox.com/scl/fo/fk5t99zyihshuak3u1u9v/AMYiYSUwvoL6osa2FX_G_M8?rlkey=0ttmb4ifhdg4ebvhbh8aa3juc&st=fyoof4cu&dl=0) | `2026/202601 Ondo USDY LLC _ATC Attest.pdf` | 1 (ratio 1.0041555); 3 (Portfolio Default Test FAIL, Portfolio Default YES) | `4cf3a07f84f947d0e7a1ec948f66b11526a823efaddad3006842b588b984d17b` |
+| D2 | LLC monthly, December 2025 | [LLC monthly](https://www.dropbox.com/scl/fo/fk5t99zyihshuak3u1u9v/AMYiYSUwvoL6osa2FX_G_M8?rlkey=0ttmb4ifhdg4ebvhbh8aa3juc&st=fyoof4cu&dl=0) | `2025/Ondo USDY LLC_MonthlyRpt_202512.pdf` | 1 (ratio 1.029351393) | `28a625aa879e8a430018253d757280fb48ff0e00bc3fa001ca8ee1938cb7e550` |
+| D3 | LLC monthly, July 2026 | [LLC monthly](https://www.dropbox.com/scl/fo/fk5t99zyihshuak3u1u9v/AMYiYSUwvoL6osa2FX_G_M8?rlkey=0ttmb4ifhdg4ebvhbh8aa3juc&st=fyoof4cu&dl=0) | `2026/202607 Ondo USDY LLC_ATC Attest.pdf` | 3 ("Marex is not subject to Portfolio Default Test") | `82fd623c985f3372a2004b471f41a8804369b0d11fd96ca43f8dc23f768c22e6` |
+| D4 | LLC monthly, August 2026 | [LLC monthly](https://www.dropbox.com/scl/fo/fk5t99zyihshuak3u1u9v/AMYiYSUwvoL6osa2FX_G_M8?rlkey=0ttmb4ifhdg4ebvhbh8aa3juc&st=fyoof4cu&dl=0) | `2026/202608 Ondo USDY LLC_ATC Attest.pdf` | 1 (summary, ratio 1.003608428); 3 (Marex holdings, Opt-Out Lender note 3, performance test); 5 ("Marex is not subject to Portfolio Default Test") | `5fa80b1cdb66bc11a5851051356636bf2a1c40fc22c3e491dba98e914265aecb` |
+| D5 | LLC daily, September 24, 2026 | [LLC daily](https://www.dropbox.com/scl/fo/375wdvar3rbc7o23nxsgp/AOFY8jhpENaNx9WAw-WPnbY?rlkey=4icqn1z9bez725wywr30fx52a&st=bsxeh8j5&dl=0) | `2026/09 September/Ondo USDY LLC_ATCAttest_260924.pdf` | 1 (principal, permitted assets, ratio 1.007844); 2 (holdings, footnote 1 excluding OGM USDY) | `3cd1d2f05156b38712f45cf6ef3ee626a81f037ecde6b1516d58fd182745f998` |
+| D6 | LLC daily, May 27, 2026 | [LLC daily](https://www.dropbox.com/scl/fo/375wdvar3rbc7o23nxsgp/AOFY8jhpENaNx9WAw-WPnbY?rlkey=4icqn1z9bez725wywr30fx52a&st=bsxeh8j5&dl=0) | `2026/05 May/Ondo USDY LLC_ATCAttest_260527.pdf` | 1 (1,873,710,038.638710 digital tokens) | `9a9e210bbd52495d4599ae9e6c088a9e6bb7a03f8a525888d4d3c851bc5fc472` |
+| D7 | LLC daily, June 2, 2026 | [LLC daily](https://www.dropbox.com/scl/fo/375wdvar3rbc7o23nxsgp/AOFY8jhpENaNx9WAw-WPnbY?rlkey=4icqn1z9bez725wywr30fx52a&st=bsxeh8j5&dl=0) | `2026/06 June/Ondo USDY LLC_ATCAttest_260602.pdf` | 1 (1,873,710,038.638710 digital tokens) | `40c3a01818621625c7811e706a17eaf6ade86f70423eb4f8017f9f4b02b990db` |
+| D8 | OGM (Ondo Stocks) daily, September 25, 2026 | [OGM daily](https://www.dropbox.com/scl/fo/jzkrw308mrhsasauqrjqq/AJxJak0F90kcwkADSN3DCD4?rlkey=nik1v5slekrzx5fbi0zan5sk3&st=t5vbvab8&dl=0) | `2026/09 September/Daily Report - Ondo Stocks - 2026-09-25_20_00_ET - Ankura Attestation.pdf` | 1 (single page: USDY outstanding, assets, liabilities, 106.64%) | `e0a8016998ef4fb8c522366d6ad0631a948e68fe14629c18c80e02ab519c0ca8` |
+| D9 | OGM (Ondo Stocks) monthly, August 2026 | [OGM monthly](https://www.dropbox.com/scl/fo/7rlmba8f49nvbp3xwz1of/ABv0vSjd6cIDAUTIlwm2KwA?rlkey=hokf0tffqvezfmsto25cvpovs&st=7ohgw8sv&dl=0) | `Monthly Ankura - Ondo Stocks - Aug 2026_Ankura Attestation.pdf` | 1 (single page: 42,059,531.08 USDY outstanding, 107.94%) | `933439fd60c422173eecba5ed18c64e7b3e3b9b55d5035e5ffe30ecd7d6bfdd2` |
+| D10 | LLC monthly, February 2025 | [LLC monthly](https://www.dropbox.com/scl/fo/fk5t99zyihshuak3u1u9v/AMYiYSUwvoL6osa2FX_G_M8?rlkey=0ttmb4ifhdg4ebvhbh8aa3juc&st=fyoof4cu&dl=0) | `2025/Ondo USDY LLC_MonthlyRpt_202502.pdf` | 1 (Token Principal Outstanding 559,346,802.833300) | `d46f3d08f02f3488c54d2ad39267329e88adb9bc71c2fcc79c66cacc37b93b95` |
+
+Folder links are the ones Ondo publishes on [ondo.finance/usdy](https://ondo.finance/usdy) (LLC) and on the [USDY app page](https://app.ondo.finance/assets/usdy) ("Attestation Reports – Ondo Global Markets (BVI) Limited").
 
 ---
 
@@ -431,12 +473,12 @@ DVN names are from the [LayerZero metadata API](https://metadata.layerzero-api.c
 - **High-quality collateral:** ~99.97% short-dated US T-bills (WAM ~167 days) for the LLC portfolio. Daily and monthly third-party verification by Ankura Trust against custodian and broker account data.
 - **Track record and scale:** three years in production, LLC principal >$500M for 19 months and ~$2.07B now. No smart-contract exploit or unbacked mint found.
 - **Atomic, fee-free primary market** for KYC'd holders via `USDY_InstantManager`, at the oracle price, with ~$10M/day per user and $15M/day global redemption capacity.
-- **Extensive audit history** (8 USDY/Funds audits from Code4rena, Spearbit, Cyfrin, Halborn, NetherMind, Zokyo) and a $1M Immunefi bounty.
+- **Extensive audit history** (8 USDY/Funds audits from Code4rena, Spearbit, Cyfrin, Halborn, NetherMind, Zokyo) and an Immunefi bounty of up to $1M.
 - **Bridge hardening:** 3–4 required DVNs (including Ondo's own DVN and Fidelity FCAT on some routes) and ≤0.5M USDY/day inbound limits bound LayerZero mint risk.
 
 ### Key Risks
 
-- **Two issuers, one token, partial attestation.** ~$216M of OGM-issued USDY is fungible with LLC-issued USDY but is excluded from the Ankura reports. Ondo's headline 121.95% collateralization ratio cannot be reproduced.
+- **Two issuers, one token, uneven backing.** ~$211M of OGM-issued USDY is fungible with LLC-issued USDY but sits outside the LLC's T-bill attestation. It is attested only as a liability of OGM's pooled equity/stablecoin balance sheet (106.64%), and those balances did not track onchain issuance through August 2026. Ondo's headline 121.95% collateralization ratio cannot be reproduced.
 - **Thin and partly exempted cushion.** LLC excess collateral fell from ~3% (2025) to 0.3–0.8% (2026). A portfolio-default flag was raised in January 2026. Since July 2026, ~93% of LLC assets (Marex "Opt-Out Lender" structured-financing sleeve) are excluded from the 100.5% covenant test under an unpublished amended TCSA.
 - **Unbounded mint authority without timelock.** The 4/7 admin Safe can mint, upgrade, grant burn-from-any-address, and rewrite the oracle. It actively mints directly: 95.96M USDY in 2026, including 92.14M in one transaction. The legacy `USDYManager` mints on offchain proofs from Safes with the same six owners (2/6 relayer). `adminSubscribe` mints without deposit up to a re-settable $25M allowance.
 - **Concentration:** four unidentified 3/5 Safes hold 81% of Ethereum USDY (~$974M). Most of the Sei supply (≥223M USDY) was minted to a single address.
@@ -444,7 +486,7 @@ DVN names are from the [LayerZero metadata API](https://metadata.layerzero-api.c
 
 ### Critical Risks
 
-- None triggers a critical gate. The combination of an offchain, ~0.8% cushion, an unattested OGM sleeve, and untimelocked unbacked-mint authority means holders rely almost entirely on Ondo's operational integrity and legal structure.
+- None triggers a critical gate. The combination of an offchain, ~0.8% cushion, an OGM sleeve backed by a pooled equity/stablecoin balance sheet, and untimelocked unbacked-mint authority means holders rely almost entirely on Ondo's operational integrity and legal structure.
 
 ---
 
@@ -454,7 +496,11 @@ DVN names are from the [LayerZero metadata API](https://metadata.layerzero-api.c
 
 - [x] **Unverified contract source** — PASS. Token proxy and implementation, rUSDY, InstantManager, USDYManager, router, oracle stack and LayerZero adapter are all verified on Etherscan.
 - [x] **No audit** — PASS. Multiple audits from reputable firms.
-- [x] **Unverifiable reserves** — PASS, with caveat. LLC reserves (~90%) are independently verified daily by Ankura; the OGM sleeve (~9%) is not.
+- [x] **Unverifiable reserves** — PASS. Both issuers' obligations appear in daily and monthly Ankura-verified reports, based on Ankura's read-only access to the collateral accounts:
+  - **LLC (~91% of supply):** T-bill reserves attested against 1,801.36M digital tokens ([D5](#appendix-attestation-documents)).
+  - **OGM (~9%):** 183.77M USDY attested as a liability of OGM's pooled balance sheet ([D8](#appendix-attestation-documents)).
+  - Together those attested liabilities match total onchain supply within 0.02%.
+  - The gate asks whether reserves *can* be verified through transparent attestation, and they can. The weaknesses of that attestation are scored in Funds Management rather than as a gate failure: the OGM sleeve is backed by a pooled equity/stablecoin balance sheet (106.64%) rather than segregated T-bills, its month-end balances do not track onchain issuance, and 93% of LLC assets are exempt from the covenant test.
 - [x] **Total centralization** — PASS. No single-EOA control over the token; admin is a 4/7 Safe. The 1/2 blocklist and 1/9 pauser Safes are low-threshold, but their powers are limited to freezing and pausing.
 
 All gates pass; proceed to category scoring.
@@ -463,10 +509,16 @@ All gates pass; proceed to category scoring.
 
 #### Category 1: Audits & Historical Track Record (Weight: 20%)
 
-- **Audits: 1.5.** 8 USDY/Funds audits from top firms plus a $1M Immunefi bounty would score 1. Raised by 0.5 because the newest mint surfaces (`USDY_InstantManager`, LayerZero adapter) have no explicitly named published audit and the multi-manager system is complex.
+- **Audits: 2.0.**
+  - Audit coverage alone meets the score-1 row: 8 USDY/Funds audits by top firms, including Spearbit, Cyfrin, Code4rena and Halborn.
+  - The bug bounty does not. The rubric's score-1 band requires "max payout >$1M", and Immunefi's maximum is exactly $1,000,000, which falls in the score-2 band (>$200K).
+  - Under the template's conservative rule, the split resolves to 2.
+  - No further penalty is added. The USDY-specific InstantManager subclass and the LayerZero adapter have no named audit, but the subclass is thin over an audited base and both are in bounty scope.
 - **Historical: 1.5.** More than 3 years in production with >$500M sustained for 19 months (score 1), minus the January 2026 covenant default flag and the undisclosed 2026 restructuring of collateral terms.
 
-**Score: 1.5/5**
+**Audits & Historical Score = (2.0 + 1.5) / 2 = 1.75**
+
+**Score: 1.75/5**
 
 #### Category 2: Centralization & Control Risks (Weight: 30%)
 
@@ -483,7 +535,7 @@ All gates pass; proceed to category scoring.
 - **Collateralization: 3.5.** Top-quality T-bill collateral held offchain with custodian attestation (score 3 baseline). Worsened by:
   - a thin 0.3–0.8% cushion;
   - ~93% of LLC assets in a structured-financing sleeve excluded from the covenant test under unpublished terms;
-  - ~9% of value (OGM-issued USDY) with no verified reserve attestation.
+  - ~9% of value (OGM-issued USDY) is backed by OGM's pooled equity/stablecoin balance sheet (106.64%) rather than T-bills, with attested balances that do not track onchain issuance.
 - **Provability: 3.0.** Daily and monthly Ankura verification of LLC accounts. Price is computable onchain, but reserves are fully offchain. Ondo's headline ratio is not reproducible. Aggregate cross-chain supply reconciles to LLC plus OGM within 0.26%, but Stellar (23.6% of supply) and other non-EVM chains rely on Ondo-reported figures, and the per-issuer split is not visible onchain.
 
 **Funds Management Score = (3.5 + 3.0) / 2 = 3.25**
@@ -508,23 +560,23 @@ All gates pass; proceed to category scoring.
 
 | Category | Score | Weight | Weighted |
 |----------|-------|--------|----------|
-| Audits & Historical | 1.5 | 20% | 0.300 |
+| Audits & Historical | 1.75 | 20% | 0.350 |
 | Centralization & Control | 3.83 | 30% | 1.150 |
 | Funds Management | 3.25 | 30% | 0.975 |
 | Liquidity Risk | 3.0 | 15% | 0.450 |
 | Operational Risk | 2.0 | 5% | 0.100 |
-| **Subtotal** | | | **2.975** |
+| **Subtotal** | | | **3.025** |
 | TVL modifier (>$500M for >1 year) | | | **−0.5** |
-| **Final Score** | | | **2.47/5.0** |
+| **Final Score** | | | **2.52/5.0** |
 
 **Optional Modifiers:**
 
 - Protocol live >2 years with no incidents: **not applied.** No exploit occurred, but the January 2026 portfolio-default flag is a covenant incident.
 - TVL maintained >$500M for >1 year: **applied (−0.5).** LLC principal has been >$500M every month since February 2025.
 
-**Final Risk Tier: Low Risk** (2.47, just below the 2.50 Medium boundary)
+**Final Risk Tier: Medium Risk** (2.52, just above the 2.50 boundary; 2.525 rounded down)
 
-**Yearn strategy note.** The score assumes the strategy is KYC-registered in `OndoIDRegistry`, since it cannot subscribe or redeem otherwise. Without registration the liquidity score would be ~4.0 and the final score ~2.62 (Medium). Recommended strategy guardrails:
+**Yearn strategy note.** The score assumes the strategy is KYC-registered in `OndoIDRegistry`, since it cannot subscribe or redeem otherwise. Without registration the liquidity score would be ~4.0 and the final score ~2.67 (Medium). Recommended strategy guardrails:
 
 - keep the position below the per-user $10M/day redemption limit multiplied by the intended exit window;
 - read `BasicSource.availableToWithdraw(USDC)` and `getCurrentUserRedemptionLimit` before redeeming;
@@ -546,4 +598,4 @@ All gates pass; proceed to category scoring.
 
 | Date | Score | Notes |
 | --- | --- | --- |
-| September 29, 2026 | 2.47 | Initial assessment |
+| September 29, 2026 | 2.52 | Initial assessment |

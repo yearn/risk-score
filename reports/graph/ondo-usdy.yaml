@@ -118,7 +118,7 @@ nodes:
     label: Ondo Global Markets (BVI) — OGM USDY
     category: dependency
     link: https://docs.ondo.finance/general-access-products/usdy/important-notes
-    note: Issuer of InstantManager USDY (~$216M); reserves not covered by Ankura USDY reports
+    note: Issuer of InstantManager USDY (183.77M USDY / $210.86M on Sep 25, 2026); attested by Ankura as a liability of the pooled Ondo Stocks balance sheet (106.64%), not segregated T-bills
   - id: dep-ankura
     label: Ankura Trust (Verification/Collateral Agent)
     category: dependency
@@ -250,7 +250,7 @@ edges:
   - from: usdy
     to: dep-ogm
     kind: deposits-into
-    label: ~9% of value (OGM-issued, unattested)
+    label: ~9% of value (OGM-issued, pooled OGM attestation)
 
   # Dependencies
   - from: instant-manager
