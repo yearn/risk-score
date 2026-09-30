@@ -362,8 +362,8 @@ edges:
     to: dep-pst
     kind: deposits-into
     label: PST collateral (Solana/CCIP RWA)
-  - from: susdai-capped-rate
-    to: vault-protocol
+  - from: vault-protocol
+    to: susdai-capped-rate
     kind: routes-through
     label: sUSDai vault pricing (USDai fixed 1:1)
   - from: agi3-fluid-wallet
