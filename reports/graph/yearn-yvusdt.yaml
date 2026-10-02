@@ -71,11 +71,11 @@ nodes:
 
   # Strategies
   - id: spark-usdt-lender
-    label: Spark USDT Lender (56.06%)
+    label: Spark USDT Lender (27.88%)
     address: "0x176Caf15f1793fc16898458E0ba295ec6523E9E2"
     category: strategy
   - id: metamorpo-usdt
-    label: MetaMorpho Vault (ymv-USDT) (43.94%)
+    label: MetaMorpho Vault (ymv-USDT) (72.12%)
     address: "0x0963232eB842BAF53E8e517691f81745C1F228a0"
     category: strategy
     morphoVault: v1
@@ -90,26 +90,26 @@ nodes:
 
 # BEGIN GENERATED MORPHO MARKET NODES
 # Managed by scripts/update_morpho_graph_markets.mjs — do not edit.
-  - id: morpho-market-a921ef34e2fc
-    label: "WBTC/USDT · 86% LLTV"
-    category: dependency
-    link: "https://app.morpho.org/ethereum/market/0xa921ef34e2fc7a27ccc50ae7e4b154e16c9799d3387076c421423ef52ac4df99/"
-    note: "Morpho market 0xa921ef34e2fc7a27ccc50ae7e4b154e16c9799d3387076c421423ef52ac4df99"
   - id: morpho-market-e7e9694b754c
     label: "wstETH/USDT · 86% LLTV"
     category: dependency
     link: "https://app.morpho.org/ethereum/market/0xe7e9694b754c4d4f7e21faf7223f6fa71abaeb10296a4c43a54a7977149687d2/"
     note: "Morpho market 0xe7e9694b754c4d4f7e21faf7223f6fa71abaeb10296a4c43a54a7977149687d2"
-  - id: morpho-market-3274643db77a
-    label: "sUSDS/USDT · 96.5% LLTV"
+  - id: morpho-market-a921ef34e2fc
+    label: "WBTC/USDT · 86% LLTV"
     category: dependency
-    link: "https://app.morpho.org/ethereum/market/0x3274643db77a064abd3bc851de77556a4ad2e2f502f4f0c80845fa8f909ecf0b/"
-    note: "Morpho market 0x3274643db77a064abd3bc851de77556a4ad2e2f502f4f0c80845fa8f909ecf0b"
+    link: "https://app.morpho.org/ethereum/market/0xa921ef34e2fc7a27ccc50ae7e4b154e16c9799d3387076c421423ef52ac4df99/"
+    note: "Morpho market 0xa921ef34e2fc7a27ccc50ae7e4b154e16c9799d3387076c421423ef52ac4df99"
   - id: morpho-market-b7843fe78e7e
     label: "XAUt/USDT · 77% LLTV"
     category: dependency
     link: "https://app.morpho.org/ethereum/market/0xb7843fe78e7e7fd3106a1b939645367967d1f986c2e45edb8932ad1896450877/"
     note: "Morpho market 0xb7843fe78e7e7fd3106a1b939645367967d1f986c2e45edb8932ad1896450877"
+  - id: morpho-market-3274643db77a
+    label: "sUSDS/USDT · 96.5% LLTV"
+    category: dependency
+    link: "https://app.morpho.org/ethereum/market/0x3274643db77a064abd3bc851de77556a4ad2e2f502f4f0c80845fa8f909ecf0b/"
+    note: "Morpho market 0x3274643db77a064abd3bc851de77556a4ad2e2f502f4f0c80845fa8f909ecf0b"
 # END GENERATED MORPHO MARKET NODES
 
 edges:
@@ -129,11 +129,11 @@ edges:
   - from: yvUSDT
     to: spark-usdt-lender
     kind: allocates-to
-    label: "56.06%"
+    label: "27.88%"
   - from: yvUSDT
     to: metamorpo-usdt
     kind: allocates-to
-    label: "43.94%"
+    label: "72.12%"
 
   # Governance roles on vault
   - from: daddy
@@ -143,7 +143,7 @@ edges:
   - from: brain
     to: yvUSDT
     kind: holds-role
-    label: "QUEUE / DEBT / EMERGENCY"
+    label: "REVOKE / QUEUE / DEBT / EMERGENCY"
   - from: security
     to: yvUSDT
     kind: holds-role
@@ -170,6 +170,10 @@ edges:
     to: metamorpo-usdt
     kind: holds-role
     label: "curator"
+  - from: daddy
+    to: metamorpo-usdt
+    kind: holds-role
+    label: "MetaMorpho guardian"
 
   # Role manager wiring
   - from: daddy
@@ -201,19 +205,19 @@ edges:
 # BEGIN GENERATED MORPHO MARKET EDGES
 # Managed by scripts/update_morpho_graph_markets.mjs — do not edit.
   - from: metamorpo-usdt
-    to: morpho-market-a921ef34e2fc
-    kind: deposits-into
-    label: "67.2%"
-  - from: metamorpo-usdt
     to: morpho-market-e7e9694b754c
     kind: deposits-into
-    label: "23.5%"
+    label: "66.3%"
   - from: metamorpo-usdt
-    to: morpho-market-3274643db77a
+    to: morpho-market-a921ef34e2fc
     kind: deposits-into
-    label: "5.8%"
+    label: "26.3%"
   - from: metamorpo-usdt
     to: morpho-market-b7843fe78e7e
     kind: deposits-into
-    label: "3.3%"
+    label: "4.8%"
+  - from: metamorpo-usdt
+    to: morpho-market-3274643db77a
+    kind: deposits-into
+    label: "2.4%"
 # END GENERATED MORPHO MARKET EDGES
