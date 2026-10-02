@@ -569,6 +569,7 @@ Other monitoring that does cover yvWBTC-1 implicitly via the broader Yearn V3 se
 |------|-------|-------|
 | [May 11, 2026](https://github.com/yearn/risk-score/pull/148) | 1.2 | Initial assessment: 100% idle, empty strategy queue, no protocol dependencies beyond WBTC |
 | [July 12, 2026](https://github.com/yearn/risk-score/pull/312) | 1.36 | Reassessment: MetaMorpho V1_1 strategy activated May 24, 2026 deploying 18% to WBTC/LBTC Morpho Blue market (82% idle). Dependency surface expanded to Morpho Blue + Chainlink + LBTC. Score +0.2 on dependencies (+1.0) and liquidity (+0.5), offset by continued excellent governance and collateralization. Still Minimal Risk tier |
+| [October 2, 2026](https://github.com/yearn/risk-score/pull/503) | 1.36 | Reassessment (issue #467, snapshot block 26104314): TVL 47.5156 WBTC (~$4.11M), PPS 1.000442. MetaMorpho supply queue `[WBTC/cbBTC, idle]`, withdraw queue `[idle, WBTC/cbBTC, WBTC/LBTC]` — LBTC demoted to wind-down. LBTC utilization 68.1%, strategy share 95.6%. Corrected Brain vault roles to the onchain bitmask. Score unchanged; still Minimal Risk tier |
 
 ---
 
