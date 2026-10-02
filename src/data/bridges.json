@@ -573,6 +573,34 @@
       ]
     },
     {
+      "id": "lombard-bridgev2",
+      "name": "Lombard BridgeV2",
+      "type": "Issuer Consortium + Bascule burn/mint bridge",
+      "url": "https://docs.lombard.finance/learn/transparency/smart-contracts",
+      "finality": "Cross-chain mint gated by Consortium 12-of-16 notary signatures plus independent Bascule deposit attestation; BridgeV2 enforces per-destination rate limits (~100 LBTC / 3 h on most chains).",
+      "admin": "BridgeV2 is a TransparentUpgradeableProxy; ProxyAdmin owned by Lombard Timelock (24 h). Timelock DEFAULT_ADMIN can also grant/revoke MINTER_ROLE on LBTC.",
+      "description": "Lombard's native BridgeV2 moves LBTC across EVM deployments by burning on the source chain and minting on the destination. Mint authority is the BridgeV2 contract's MINTER_ROLE on LBTC, further gated by the Lombard Security Consortium notary quorum and the Bascule drawbridge attestation layer. This is an issuer-operated mint path, not LayerZero/CCIP/CCTP.",
+      "keywords": [
+        "bascule",
+        "gmpbascule",
+        "lombard bridge",
+        "bridgev2 (minter)",
+        "bridgev2 mint path"
+      ],
+      "ignore": [],
+      "dependencies": [
+        {
+          "slug": "lombard-lbtc",
+          "name": "Lombard LBTC",
+          "kind": "direct",
+          "model": "mint",
+          "integration": "BridgeV2 TransparentUpgradeableProxy (MINTER_ROLE)",
+          "detail": "Ethereum BridgeV2 [`0x451C…0a2D`](https://etherscan.io/address/0x451C54981C7da5d95901B770c540547cf5FE0a2D) holds `MINTER_ROLE` on LBTC [`0x8236…4494`](https://etherscan.io/address/0x8236a87084f8B84306f72007F36F2618A5634494). ProxyAdmin [`0x6B06…cbB1`](https://etherscan.io/address/0x6B06CC8D89aD50962563bC5cFE1FF80Ec0b8cbB1) is owned by Lombard Timelock [`0x055E…7e59`](https://etherscan.io/address/0x055E84e7FE8955E2781010B866f10Ef6E1E77e59) (24 h). Dual auth: Consortium [`0xdAD5…95E4`](https://etherscan.io/address/0xdAD58DfA5c1a7a34419AFdBE1f0d610efeea95E4) (12-of-16) + Bascule [`0xC3ec…38eD`](https://etherscan.io/address/0xC3ecFE771564e3f28CFB7a9b203F4d10279338eD). Onchain `RateLimitsSet` caps LBTC mints at ~100 LBTC / 3 h per destination (one chain 250 LBTC / 3 h). Sherlock H-1 (no rate limits) mitigated onchain; H-2/H-5 remain open. Verified in report assessment (May 26, 2026; metrics refresh Sep 30, 2026).",
+          "owner": "Lombard Timelock [`0x055E…7e59`](https://etherscan.io/address/0x055E84e7FE8955E2781010B866f10Ef6E1E77e59) via BridgeV2 ProxyAdmin; Treasury Safe 3-of-5 is timelock proposer/executor/canceller."
+        }
+      ]
+    },
+    {
       "id": "merlin-btc-bridge",
       "name": "Merlin BTC Bridge (BTCLayer2Bridge)",
       "type": "Bitcoin L1 ↔ Merlin L2 custody bridge",
