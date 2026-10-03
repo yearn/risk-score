@@ -184,6 +184,17 @@ const schemaJson = JSON.stringify(schema)
       <div class="container">
         <p>Risk Assessments by <a href="https://docs.yearn.fi/getting-started/products/curating/introduction" target="_blank" rel="noopener noreferrer">Yearn Curation</a></p>
         <p class="footer-contact">Need curation, monitoring or a risk assessment? <a href="/contact/">Get in touch</a></p>
+        <nav class="footer-social" aria-label="Yearn Curation elsewhere">
+          <a href="https://github.com/yearn/risk-score" target="_blank" rel="noopener noreferrer" aria-label="GitHub" title="GitHub">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 .3a12 12 0 0 0-3.8 23.38c.6.12.83-.26.83-.57v-2c-3.34.72-4.04-1.61-4.04-1.61-.55-1.39-1.34-1.76-1.34-1.76-1.08-.74.09-.73.09-.73 1.2.09 1.83 1.24 1.83 1.24 1.07 1.83 2.81 1.3 3.49 1 .1-.78.42-1.31.76-1.61-2.67-.3-5.47-1.33-5.47-5.93 0-1.31.47-2.38 1.24-3.22-.14-.3-.54-1.52.1-3.18 0 0 1-.32 3.3 1.23a11.5 11.5 0 0 1 6 0c2.28-1.55 3.29-1.23 3.29-1.23.64 1.66.24 2.88.12 3.18a4.65 4.65 0 0 1 1.23 3.22c0 4.61-2.8 5.63-5.48 5.92.42.36.81 1.1.81 2.22v3.29c0 .32.21.7.82.58A12 12 0 0 0 12 .3"/></svg>
+          </a>
+          <a href="https://x.com/yearnfi" target="_blank" rel="noopener noreferrer" aria-label="X (Twitter)" title="X">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M18.9 1.15h3.68l-8.04 9.19L24 22.85h-7.41l-5.8-7.58-6.64 7.58H.47l8.6-9.83L0 1.15h7.59l5.24 6.93 6.07-6.93Zm-1.29 19.5h2.04L6.48 3.24H4.3l13.31 17.41Z"/></svg>
+          </a>
+          <a href="https://docs.yearn.fi/getting-started/products/curating/introduction" target="_blank" rel="noopener noreferrer" aria-label="Docs" title="Docs">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+          </a>
+        </nav>
       </div>
     </footer>
     <script is:inline>
@@ -411,6 +422,28 @@ const schemaJson = JSON.stringify(schema)
   }
   .footer-contact {
     margin-top: 0.4rem;
+  }
+  .footer-social {
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-top: 1rem;
+  }
+  .footer-social a {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.25rem;
+    height: 2.25rem;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    color: var(--text-secondary);
+    transition: color 0.2s, border-color 0.2s;
+  }
+  .footer-social a:hover {
+    color: var(--text-primary);
+    border-color: var(--text-secondary);
+    text-decoration: none;
   }
   .nav-external {
     display: inline-flex;

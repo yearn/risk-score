@@ -38,7 +38,7 @@ nodes:
     label: Morpho Blue
     address: "0xBBBBBbbBBb9cC5e90e3b3Af64bdAF62C37EEFFCb"
     category: dependency
-    note: stUSDS used as collateral in five Morpho Blue markets (~$22.74M supplied, ~$18.81M borrowed). This is leverage exposure, not spot exit liquidity.
+    note: stUSDS used as collateral in five Morpho Blue markets (~$11.97M supplied, ~$10.41M borrowed at block 26069994). This is leverage exposure, not spot exit liquidity.
 
   # Infra (Sky internal machinery)
   - id: rate-setter
@@ -53,7 +53,7 @@ nodes:
     label: Clip (LSEV2-SKY-A)
     address: "0x836F56750517b1528B5078Cba4Ac4B94fBE4A399"
     category: infra
-    note: "Liquidation and loss-realization module. stopped() = 3 at block 25595151, disabling kick, redo, and take since Sep 8, 2025."
+    note: "Liquidation and loss-realization module. stopped() = 3 and kicks() = 0 at block 26069994: kick, redo, and take have been disabled since Sep 8, 2025, and no auction has ever started."
   - id: pause
     label: MCD Pause (48h GSM)
     address: "0xbE286431454714F511008713973d3B053A2d38f3"
@@ -68,6 +68,11 @@ nodes:
     label: MCD Chief
     address: "0x929d9A1435662357F54AdcF64DcEE4d6b867a6f9"
     category: governance
+  - id: rate-setter-bud
+    label: RateSetter Bud Safe (2/3)
+    address: "0xBB865F94B8A92E57f79fCc89Dfd4dcf0D3fDEA16"
+    category: governance
+    note: Safe v1.4.1, 2-of-3, no modules or guard. Only active RateSetter facilitator (Kiss on Sep 8, 2025). Calls set() every 16h at most to move str/duty within 2%–50% bounds (≤15% step) and set line/cap up to maxLine/maxCap. Not listed in the Sky chainlog.
 
 edges:
   # Capital flow
@@ -78,7 +83,7 @@ edges:
   - from: stusds
     to: lockstake
     kind: allocates-to
-    label: "~83.4% utilization"
+    label: "~77.1% utilization"
   - from: stusds
     to: vat
     kind: routes-through
@@ -88,6 +93,7 @@ edges:
   - from: chief
     to: pause
     kind: proposes-on
+    label: "hat spell plot"
   - from: pause
     to: pause-proxy
     kind: controls
@@ -106,6 +112,15 @@ edges:
     kind: controls
     label: "owner"
 
+  - from: rate-setter-bud
+    to: rate-setter
+    kind: holds-role
+    label: "buds=1 (set)"
+  - from: mom
+    to: stusds
+    kind: holds-role
+    label: "wards=1 (zero cap/line)"
+
   # RateSetter manages stUSDS parameters
   - from: rate-setter
     to: stusds
@@ -116,7 +131,7 @@ edges:
   - from: mom
     to: rate-setter
     kind: controls
-    label: "halt, zero params"
+    label: "halt, diss buds, zero params"
 
   # Clip can socialize losses to stUSDS
   - from: clip

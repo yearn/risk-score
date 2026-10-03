@@ -39,6 +39,7 @@ protocol_tokens:
   wstUSR: Resolv
   USCC: Superstate
   STRC: Strategy Inc.
+  USDY: Ondo
   LBTC: Lombard
   tBTC: Threshold
   cbBTC: Coinbase
@@ -1018,3 +1019,19 @@ protocols:
       - Chainlink CCIP
       - Free Tunnel
       - Merlin Bridge
+  ondo_usdy:
+    name: Ondo (USDY)
+    chain: ethereum
+    type: tokenized_treasury
+    address: '0x96F6eF951840721AdBF46Ac996b59E0235CB985C'
+    report: reports/report/ondo-usdy.md
+    collateral:
+    - asset: T-Bills
+    - asset: US Equities
+    - asset: USDC
+      address: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'
+    - asset: USDT
+      address: '0xdAC17F958D2ee523a2206206994597C13D831ec7'
+    infrastructure:
+    - LayerZero
+    - Chainlink
