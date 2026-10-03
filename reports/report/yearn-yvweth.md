@@ -4,7 +4,7 @@
 - **Token:** yvWETH-1 (WETH-1 yVault)
 - **Chain:** Ethereum
 - **Token Address:** [`0xc56413869c6CDf96496f2b1eF801fEDBdFA7dDB0`](https://etherscan.io/address/0xc56413869c6CDf96496f2b1eF801fEDBdFA7dDB0)
-- **Final Score: 1.52/5.0**
+- **Final Score: 1.59/5.0**
 
 ## Overview + Links
 
@@ -20,7 +20,7 @@ The vault's `totalDebt()` (7,248.82 WETH) fully reconciles with strategy debt: S
   - **stETH Accumulator** ([`0x470e0e048F85CFD72EEf325895e02c8D297E7435`](https://etherscan.io/address/0x470e0e048F85CFD72EEf325895e02c8D297E7435)) — 2,771.26 WETH current_debt (38.2% of totalDebt; 2,773.25 WETH strategy totalAssets, held entirely as stETH)
   - **wstETH/WETH Spark Looper** ([`0x68A14629cb07c74259f481382fE8b6cFD8970121`](https://etherscan.io/address/0x68A14629cb07c74259f481382fE8b6cFD8970121)) — 1,033.63 WETH current_debt (14.3% of totalDebt; 1,034.40 WETH strategy totalAssets). An `LSTAaveLooper` Yearn V3 TokenizedStrategy (API 3.0.4) that supplies wstETH as collateral and borrows WETH on Spark Lend in the ETH-correlated E-Mode at **~8x target leverage** (87.5% LTV, health factor 1.063). **Not in the default queue** but holds active debt.
   - **Yearn OG WETH** ([`0xE89371eAaAC6D46d4C3ED23453241987916224FC`](https://etherscan.io/address/0xE89371eAaAC6D46d4C3ED23453241987916224FC)) — 500.89 WETH current_debt (6.9% of totalDebt; the vault's shares are worth 501.08 WETH, 94.5% of the MetaMorpho vault's 530.46 WETH totalAssets). This is a **Morpho MetaMorpho vault** (confirmed by `MORPHO()` returning [`0xBBBBBbbBBb9cC5e90e3b3Af64bdAF62C37EEFFCb`](https://etherscan.io/address/0xBBBBBbbBBb9cC5e90e3b3Af64bdAF62C37EEFFCb)). Listed at https://app.morpho.org/ethereum/vault/0xE89371eAaAC6D46d4C3ED23453241987916224FC/yearn-og-weth
-- **Withdrawal mechanics:** The stETH Accumulator (38.2% of totalDebt) **does not auto-unwind on user withdrawal** — `availableWithdrawLimit()` returns only the strategy's loose WETH balance (0 at the snapshot). Redemptions touching the Accumulator portion are management-paced (manual unwind via Curve or the Lido withdrawal queue). The default queue can serve ~3,444 WETH (47.5% of TVL) atomically from the Spark WETH Lender and Yearn OG WETH. The looper can fully delever through a Morpho flash loan (`maxWithdraw` = full 1,034.40 WETH), but because it is outside the default queue and `use_default_queue = true`, its debt is reachable only after the Debt Allocator or Brain moves it with `update_debt`.
+- **Withdrawal mechanics:** The stETH Accumulator (38.2% of totalDebt) **does not auto-unwind on user withdrawal** — `availableWithdrawLimit()` returns only its loose WETH (0). Its redemptions are management-paced via Curve or the Lido queue. The default queue can serve ~3,444 WETH (47.5% of TVL) atomically from the Spark WETH Lender and Yearn OG WETH. The looper's 14.3% is outside the default queue and **its simulated exits revert with `!slippage` at the snapshot**, despite `maxWithdraw` returning 1,034.40 WETH. Management must restore an executable exit before Brain or the Debt Allocator can recover its debt with `update_debt`; it contributes no verified immediate withdrawal liquidity at this snapshot.
 - **Governance:** Standard **Yearn V3 Role Manager** ([`0xb3bd6B2E61753C311EFbCF0111f75D29706D9a41`](https://etherscan.io/address/0xb3bd6B2E61753C311EFbCF0111f75D29706D9a41)) governed by the **Yearn 6-of-9 ySafe** with **7-day TimelockController** for strategy additions
 
 **Key metrics (September 28, 2026, snapshot at block [26078406](https://etherscan.io/block/26078406), hash `0xdad743cbc7789b3716b62ac1ed046849e3b93fa247ac84602e7b8e75d2e1890e`, timestamp 1790628071 = 20:41 UTC):**
@@ -95,7 +95,7 @@ Default queue order: stETH Accumulator → Yearn OG WETH → Spark WETH Lender (
 | **Spark Lend (Sky)** | Spark WETH Lender + wstETH/WETH Spark Looper | **54.9% of vault totalDebt** (40.6% lender + 14.3% looper equity; the looper carries ~8,260 WETH of wstETH collateral against ~7,224 WETH of Spark WETH debt) |
 | **Lido (stETH / wstETH)** | stETH Accumulator; looper collateral | **38.2% direct** (Accumulator) + looper's leveraged wstETH position (14.3% equity) |
 | **Morpho** | Yearn OG WETH (MetaMorpho vault); looper flash-loan source | 6.9% of vault totalDebt, supplied to wstETH/WETH (94.5% and 96.5% LLTV) and weETH/WETH (94.5% LLTV) markets |
-| **Curve ETH/stETH pool** | stETH Accumulator (stake / unwind path) | Indirect dependency |
+| **Curve ETH/stETH pool** | stETH Accumulator; looper exchange | Unwind dependency for 38.2% Accumulator + 14.3% looper equity; full looper exit sells ~8,260 stETH |
 | **Lido withdrawal queue** | stETH Accumulator (unwind path) | Indirect dependency |
 
 Spark Lend is the largest venue at ~55% of totalDebt across two strategies. Lido stETH is the largest single strategy (38.2%) and also underlies the looper's collateral and the Morpho wstETH/WETH markets.
@@ -139,7 +139,7 @@ All strategies pass through Yearn's **12-metric risk-scoring framework** ([RISK_
 - **One strategy uses high leverage** (wstETH/WETH Spark Looper, ~8x, 14.3% of totalDebt). The other three strategies use simple stake / lend patterns
 - **No cross-chain bridging**
 - **Standard ERC-4626** deposit / withdrawal at the vault level
-- **Mixed unwind pattern** — the stETH Accumulator (38.2%) requires management-paced unwind; the Spark WETH Lender (40.6%) and Yearn OG WETH (6.9%) are atomic through the default queue; the looper (14.3%) can delever atomically via Morpho flash loan but sits outside the default queue
+- **Mixed unwind pattern** — the stETH Accumulator (38.2%) requires management-paced unwind; the Spark WETH Lender (40.6%) and Yearn OG WETH (6.9%) are atomic through the default queue; the looper (14.3%) sits outside the default queue and its flash-loan/Curve exit reverts under the snapshot slippage configuration
 - **Vault is immutable** (non-upgradeable Vyper minimal proxy). The strategies are Yearn V3 TokenizedStrategies that delegate to the constant `TokenizedStrategy` implementation [`0xD377919FA87120584B21279a491F82D5265A139c`](https://etherscan.io/address/0xD377919FA87120584B21279a491F82D5265A139c); the EIP-1967 slot is written only for explorer display, and there is no upgrade path
 
 ## Historical Track Record
@@ -230,7 +230,19 @@ The leverage target was already 8.0x on July 22, 2026 (7.0x actual that day). It
 
 **Controls:** `setExchange()` is restricted to `GOVERNANCE`, which is the 7-day Strategy Manager TimelockController [`0x88Ba032be87d5EF1fbE87336b7090767F367BF73`](https://etherscan.io/address/0x88Ba032be87d5EF1fbE87336b7090767F367BF73). Leverage parameters, slippage, and E-Mode category are set by `management` (Brain 3-of-8). Emergency delever/unwind functions (`manualFullUnwind`, `manualDelever`, `manualRepay`, etc.) are callable by `emergencyAdmin` (Security 4-of-7, [`0xe5e2Baf96198c56380dDD5E992D7d1ADa0e989c0`](https://etherscan.io/address/0xe5e2Baf96198c56380dDD5E992D7d1ADa0e989c0)) and management. Keeper: [`0x706EAcfC476f46547200a73709e2EFE1522c80e3`](https://etherscan.io/address/0x706EAcfC476f46547200a73709e2EFE1522c80e3).
 
-**Withdrawal:** `availableWithdrawLimit()` returns the full equity when Morpho's WETH balance covers the debt, which it does at the snapshot (13,140 WETH vs 7,224 WETH debt). An exit flash-borrows WETH, repays Spark, withdraws wstETH and swaps it back to WETH through the exchange contract. The exit is atomic but subject to swap slippage.
+**Withdrawal:** `availableWithdrawLimit()` checks position equity and Morpho flash-loan liquidity, but does not quote the exchange or enforce its slippage checks. It advertises the full equity at the snapshot (13,140 WETH flash-loan liquidity vs 7,224 WETH debt; `maxWithdraw(vault) = 1,034.40 WETH`) even though the exit reverts. The exit flash-borrows WETH, repays Spark, withdraws wstETH and swaps it back to WETH through [`WETHWstETHExchange`](https://etherscan.io/address/0x706AA50385C51596b6d9cBcf97645C6a98940c03#code). Its `_swapCollateralToAsset()` unwraps wstETH and sells stETH in the [Curve ETH/stETH pool](https://etherscan.io/address/0xDC24316b9AE028F1497c275EB9192a3Ea0f67022#code); this automatic exchange path has no Lido-queue fallback.
+
+**Executable-exit checks at block [26078406](https://etherscan.io/block/26078406):** the [looper's verified `BaseLooper` source](https://etherscan.io/address/0x68A14629cb07c74259f481382fE8b6cFD8970121#code) applies both a per-swap slippage check and a one-day cumulative loss cap in `_recordSlippage()`.
+
+| Check | Snapshot result |
+|-------|-----------------|
+| Looper `slippage()` | 2 basis points (0.02%) |
+| [wstETH](https://etherscan.io/address/0x7f39C581F595B53c5cb19bD0b3f8dA6c935E2Ca0#readContract) `getStETHByWstETH(balanceOfCollateral())` | 8,259.572826873716439801 stETH from 6,633.688089818713173784 wstETH |
+| Curve `get_dy(1, 0, 8259572826873716439801)` | 8,252.628172354073083636 ETH; 6.94465 ETH shortfall (~8.41 bps), exceeding the 2-bps limit |
+| Looper `withdraw(uint256,address,address,uint256)` via read-only `eth_call`, sender/receiver/owner set to the [yvWETH-1 vault](https://etherscan.io/address/0xc56413869c6CDf96496f2b1eF801fEDBdFA7dDB0), `maxLoss = 10000` | 1, 100, 500 WETH and full `maxWithdraw` (1034397690617856368678 wei) each revert with `!slippage` |
+| Vault `update_debt(looper, 0, 10000)` via read-only `eth_call`, sender set to [Brain](https://etherscan.io/address/0x16388463d60FFE0661Cf7F1f31a7D658aC790ff7) | Reverts with `!slippage`; a debt-manager call alone cannot recover the position |
+
+The looper's 14.3% is **restricted exit liquidity**, requiring management intervention or improved Curve quotes before the flash-loan route can execute. Brain controls `setSlippage()`; relaxing it accepts swap losses amplified relative to equity, and both swap and daily loss checks must still pass. **TODO:** establish successful exit size and timing after remediation with pinned-block withdrawal and `update_debt` simulations. Do not count advertised `maxWithdraw()` as executable liquidity until those checks succeed.
 
 ### Strategy 4: Yearn OG WETH (6.9% of vault totalDebt)
 
@@ -254,7 +266,7 @@ The weETH market adds a small ether.fi collateral exposure (~142 WETH, ~1.8% of 
 ### Accessibility
 
 - **Deposits:** Permissionless ERC-4626 — anyone can deposit WETH and receive yvWETH-1. Subject to 15,000 WETH deposit limit
-- **Withdrawals:** ERC-4626 through the default queue (Accumulator → Yearn OG WETH → Spark WETH Lender). The stETH Accumulator (38.2%) does NOT auto-unwind — `availableWithdrawLimit()` returns only its loose WETH (0). Yearn OG WETH (6.9%) and the Spark WETH Lender (40.6%) are atomic. The looper (14.3%) is outside the default queue and needs a debt-manager `update_debt` call before users can reach it. **See the "Liquidity Risk" section below**
+- **Withdrawals:** ERC-4626 through the default queue (Accumulator → Yearn OG WETH → Spark WETH Lender). The Accumulator (38.2%) does NOT auto-unwind — `availableWithdrawLimit()` returns only its loose WETH (0). Yearn OG WETH (6.9%) and Spark WETH Lender (40.6%) are atomic. The looper (14.3%) is outside the default queue and its simulated exits revert with `!slippage`; management must restore an executable exit before a debt-manager `update_debt` call can recover it. **See the "Liquidity Risk" section below**
 - **No cooldown or lock period** at the vault level
 - **Fees:** 0% management, 10% performance
 - **Profit unlock:** 10 days
@@ -264,7 +276,7 @@ The weETH market adds a small ether.fi collateral exposure (~142 WETH, ~1.8% of 
 - **100% backing** in Spark Lend WETH supply, stETH, a leveraged wstETH/WETH Spark position, and Morpho lending positions
 - **Collateral quality:** Lido stETH is the largest LST. Spark Lend and Morpho are established lending venues on Ethereum mainnet; Yearn OG WETH lends against wstETH and weETH collateral
 - **High leverage on one strategy** — the wstETH/WETH Spark Looper (14.3% of totalDebt) runs at ~8x (87.5% LTV, health factor 1.063) in Spark's ETH E-Mode. Liquidation is driven by the wstETH exchange rate, not the stETH market price. A ~6% drop in the wstETH exchange rate would trigger it, and each 1% drop costs about 8% of looper equity. The other three strategies (85.7% of totalDebt) use simple stake / lend patterns with no leverage
-- **Redeemability:** stETH can be unwound via Curve (subject to peg slippage; `get_dy` returned 0.9998 ETH per stETH at the snapshot) or via the Lido withdrawal queue (1–7 days under normal load, 1:1). Spark WETH Lender and Yearn OG WETH positions are redeemable against lending-market liquidity. The looper exits atomically via a Morpho flash loan and a wstETH → WETH swap
+- **Redeemability:** stETH can be unwound via Curve (subject to peg slippage; `get_dy` returned 0.9998 ETH per stETH at the snapshot) or via the Lido withdrawal queue (1–7 days under normal load, 1:1). Spark WETH Lender and Yearn OG WETH positions are redeemable against lending-market liquidity. The looper's Morpho flash-loan/Curve exit is blocked by its 2-bps slippage configuration at the snapshot
 
 ### Provability
 
@@ -280,18 +292,19 @@ The weETH market adds a small ether.fi collateral exposure (~142 WETH, ~1.8% of 
 |--------|--------|
 | Vault-level idle | 0 WETH (vault is 100% deployed) |
 | Atomic via default queue | 47.5% of TVL — Spark WETH Lender (2,943.37 WETH withdrawable) + Yearn OG WETH (501.08 WETH withdrawable) |
-| Atomic via debt manager | 14.3% — wstETH/WETH Spark Looper (1,034.40 WETH `maxWithdraw`, delevered via Morpho flash loan); outside the default queue, so Brain or the Debt Allocator must call `update_debt` first |
+| Restricted looper exit | 14.3% — advertises 1,034.40 WETH `maxWithdraw`, but sampled withdrawals and full debt-manager exit revert with `!slippage`; outside the default queue |
 | Manual-unwind portion | 38.2% — stETH Accumulator (2,771.26 WETH debt); `availableWithdrawLimit()` returns only its loose WETH (0 at this snapshot) |
 | Manual unwind paths (stETH) | (a) Curve ETH/stETH (immediate, peg-dependent), (b) Lido queue (1–7 days, 1:1) |
-| Curve ETH/stETH pool depth | 18,491 ETH + 20,280 stETH; `get_dy(1 stETH)` = 0.9998 ETH |
+| Curve ETH/stETH pool depth | 18,491 ETH + 20,280 stETH; `get_dy(1 stETH)` = 0.9998 ETH. Full looper collateral sale: 8,259.57 stETH → 8,252.63 ETH (~8.41-bps loss vs 2-bps limit) |
 | Spark WETH available liquidity | ~113,944 WETH (~80.9% utilization) |
 | Morpho markets (Yearn OG WETH) | 89–91% utilization; ~5,520 WETH combined free liquidity vs 530 WETH supplied by Yearn OG WETH |
 | Holder concentration | Largest holder (Alchemix mixWETH strategy) ~52% of supply (~3,804 WETH); yETH Recovery Vault ~27% |
-| Cooldown / restrictions | None at the vault level |
+| Cooldown / restrictions | No vault cooldown; 38.2% management-paced and 14.3% restricted by looper slippage checks |
 
 **Practical implications:**
 
-- **Mixed unwind profile** — 47.5% atomic through the default queue, 14.3% atomic once moved by the debt manager, 38.2% management-paced (stETH Accumulator)
+- **Mixed unwind profile** — 47.5% atomic through the default queue, 14.3% restricted until looper slippage checks permit an exit, 38.2% management-paced (stETH Accumulator)
+- **Shared Curve exit dependency** — Accumulator and looper together represent 52.5% of totalDebt by equity allocation. A full looper flash-loan exit sells ~8,260 stETH; quote the gross collateral sale rather than its ~1,034 WETH equity
 - **Lido queue can extend** under stress (large coordinated unstake events)
 - **Same-asset:** vault token is WETH-denominated; no price-divergence risk on the share
 - **Deposit limit:** 15,000 WETH cap vs 7,249 WETH TVL
@@ -341,7 +354,7 @@ Thresholds and owner counts, role bitmasks, the 7-day `getMinDelay()`, and Role 
 | **Spark Lend (Sky)** | High — ~55% of vault totalDebt | Spark WETH Lender (40.6%) supplies WETH; the looper (14.3% equity) borrows 7,224 WETH against wstETH in E-Mode. Spark oracle configuration (wstETH exchange-rate oracle) directly governs looper liquidation |
 | **Lido (stETH / wstETH)** | Critical — 38.2% direct plus the looper's ~8x wstETH collateral | Largest LST. Shapella-enabled withdrawals work 1:1 within 1–7 days. Exchange-rate losses hit the looper at ~8x |
 | **Morpho** | Low–Medium — 6.9% via Yearn OG WETH; flash-loan liquidity for the looper | MetaMorpho vault lending into wstETH/WETH and weETH/WETH markets. The looper's full exit relies on Morpho holding enough WETH for a flash loan (13,140 WETH at the snapshot) |
-| **Curve ETH/stETH pool** | Medium (unwind path for 38.2%) | Used for both staking (when better than 1:1) and manual unwind |
+| **Curve ETH/stETH pool** | Material exit dependency — 38.2% Accumulator + 14.3% looper equity | Accumulator can use the Lido queue instead. Looper exchange's automatic exit unwraps wstETH and sells stETH through Curve with no automatic queue fallback; full collateral sale ~8,260 stETH. Snapshot looper exits revert with `!slippage` |
 | **Lido withdrawal queue** | Medium (unwind path for 38.2%) | 1:1 redemption, 1–7 days normal load |
 | **ether.fi (weETH)** | Low — ~1.8% of TVL | Collateral in one Morpho market used by Yearn OG WETH |
 
@@ -353,7 +366,7 @@ Thresholds and owner counts, role bitmasks, the 7-day `getMinDelay()`, and Role 
 - **Legal:** Yearn BORG via [YIP-87](https://gov.yearn.fi/t/yip-87-convert-ychad-eth-into-a-borg/14540)
 - **Incident response:** 4 historical V1 events handled. V3 framework not yet stress-tested by an exploit. $200K Immunefi bug bounty for responsible disclosure
 - **V3 immutability:** vault cannot be upgraded — eliminates proxy upgrade risk but means a critical bug requires deploying a new vault and migrating
-- **Strategy-level operational risk:** Brain must pace the stETH Accumulator unwind (38.2% of totalDebt) and keep the ~8x looper within its leverage bounds via keeper `tend()` calls. The Spark WETH Lender (40.6%) and Yearn OG WETH (6.9%) provide atomic withdrawal paths
+- **Strategy-level operational risk:** Brain must pace Accumulator unwind (38.2%), restore executable looper exits (14.3%) and keep the ~8x position within leverage bounds. Keeper `tend()` deleveraging also uses the exchange and its slippage checks; a healthy reported health factor does not establish that a protective unwind can execute. Spark WETH Lender (40.6%) and Yearn OG WETH (6.9%) provide atomic withdrawal paths
 
 ## Monitoring
 
@@ -372,11 +385,11 @@ Yearn maintains the [`monitoring`](https://github.com/yearn/monitoring) reposito
 | yvWETH-1 Vault | [`0xc56413869c6CDf96496f2b1eF801fEDBdFA7dDB0`](https://etherscan.io/address/0xc56413869c6CDf96496f2b1eF801fEDBdFA7dDB0) | PPS (`convertToAssets(1e18)`), `totalAssets()`, `totalDebt()`, `totalIdle()`, Deposit / Withdraw events. **Also reconcile totalDebt against strategy debt sum** |
 | stETH Accumulator | [`0x470e0e048F85CFD72EEf325895e02c8D297E7435`](https://etherscan.io/address/0x470e0e048F85CFD72EEf325895e02c8D297E7435) | `totalAssets()`, `estimatedTotalAssets()`, `pendingRedemptions`, `balanceOfAsset()`, `isShutdown()`, keeper report frequency |
 | Spark WETH Lender | [`0xfca3F21D60d5bC8B4C5c35F169bb5B6402510151`](https://etherscan.io/address/0xfca3F21D60d5bC8B4C5c35F169bb5B6402510151) | `totalAssets()`, `totalSupply()`, PPS, `isShutdown()`, keeper report frequency |
-| wstETH/WETH Spark Looper | [`0x68A14629cb07c74259f481382fE8b6cFD8970121`](https://etherscan.io/address/0x68A14629cb07c74259f481382fE8b6cFD8970121) | `totalAssets()`, `getCurrentLeverageRatio()` (target 8.0x, max 8.5x), `getCurrentLTV()`, Spark `getUserAccountData()` health factor (1.063 at snapshot), `maxFlashloan()` vs `balanceOfDebt()`, `pendingRedemptions()`, `exchange()`, `isShutdown()`, tend/report frequency |
+| wstETH/WETH Spark Looper | [`0x68A14629cb07c74259f481382fE8b6cFD8970121`](https://etherscan.io/address/0x68A14629cb07c74259f481382fE8b6cFD8970121) | `totalAssets()`, `getCurrentLeverageRatio()` (target 8.0x, max 8.5x), `getCurrentLTV()`, Spark `getUserAccountData()` health factor (1.063 at snapshot), `maxFlashloan()` vs `balanceOfDebt()`, `pendingRedemptions()`, `exchange()`, `slippage()` (2 bps), daily slippage budget, simulated partial/full exits, `isShutdown()`, tend/report frequency |
 | Yearn OG WETH | [`0xE89371eAaAC6D46d4C3ED23453241987916224FC`](https://etherscan.io/address/0xE89371eAaAC6D46d4C3ED23453241987916224FC) | `totalAssets()`, vault's share balance, supply/withdraw queues and market allocations, curator/owner/guardian and `timelock()` changes. Morpho MetaMorpho vault |
 | Lido stETH | [`0xae7ab96520DE3A18E5e111B5EaAb095312D7fE84`](https://etherscan.io/address/0xae7ab96520DE3A18E5e111B5EaAb095312D7fE84) | Total supply, exchange rate, pause state |
 | Lido Withdrawal Queue | [`0x889edC2eDab5f40e902b864aD4d7AdE8E412F9B1`](https://etherscan.io/address/0x889edC2eDab5f40e902b864aD4d7AdE8E412F9B1) | Strategy's outstanding withdrawal request status |
-| Curve ETH/stETH | [`0xDC24316b9AE028F1497c275EB9192a3Ea0f67022`](https://etherscan.io/address/0xDC24316b9AE028F1497c275EB9192a3Ea0f67022) | stETH/ETH peg, pool depth |
+| Curve ETH/stETH | [`0xDC24316b9AE028F1497c275EB9192a3Ea0f67022`](https://etherscan.io/address/0xDC24316b9AE028F1497c275EB9192a3Ea0f67022) | stETH/ETH peg, pool depth; `get_dy(1,0,amount)` for planned Accumulator sales and looper gross collateral, compared with looper slippage limits |
 | ySafe (Daddy) | [`0xFEB4acf3df3cDEA7399794D0869ef76A6EfAff52`](https://etherscan.io/address/0xFEB4acf3df3cDEA7399794D0869ef76A6EfAff52) | Signer / threshold changes |
 | Accountant | [`0x5A74Cb32D36f2f517DB6f7b0A0591e09b22cDE69`](https://etherscan.io/address/0x5A74Cb32D36f2f517DB6f7b0A0591e09b22cDE69) | Fee changes |
 
@@ -385,7 +398,8 @@ Yearn maintains the [`monitoring`](https://github.com/yearn/monitoring) reposito
 - **PPS decrease** — should only increase outside of explicit loss events
 - **Strategy debt reconciliation** — monitor the gap between `totalDebt()` and strategy debt sum (currently fully reconciled at 100%)
 - **Allocation drift** — currently 40.6% Spark lender / 38.2% stETH / 14.3% Spark looper / 6.9% Yearn OG WETH of totalDebt
-- **stETH/ETH peg deviation** — affects Curve exit pricing for the 38.2% Accumulator portion (the looper's Spark liquidation uses the exchange-rate oracle, not the market peg)
+- **stETH/ETH peg deviation** — affects Curve exit pricing for the 38.2% Accumulator and 14.3% looper equity; Spark liquidation uses the exchange-rate oracle, while the looper's automatic unwind uses market pricing
+- **Looper exit executability** — alert on simulated withdrawal or debt-reduction reverts, including `!slippage`, and size-aware Curve quotes breaching per-swap or remaining daily loss budgets; already breached at the snapshot
 - **wstETH exchange-rate decrease** (`stEthPerToken`) or Spark wstETH oracle change — directly moves the looper health factor
 - **Lido withdrawal queue length** — extended queue degrades the 1:1 unwind path (affects 38.2% of totalDebt)
 - **`pendingRedemptions` not draining** after expected finalization — points to stuck or slow Lido withdrawal (currently 0 at the snapshot)
@@ -405,7 +419,9 @@ Yearn maintains the [`monitoring`](https://github.com/yearn/monitoring) reposito
 | `pendingRedemptions()` | Strategy | In-flight Lido withdrawal value | Daily |
 | `balanceOfAsset()` | Strategy | Loose WETH available for user withdrawals | Hourly |
 | Lido `getWithdrawalStatus(...)` | Lido queue | Track pending request finalization | Daily until finalized |
-| Curve `get_dy(0,1,1e18)` | Curve pool | stETH/ETH spot exchange rate | Hourly |
+| Curve `get_dy(1,0,amount)` | Curve pool | stETH → ETH quotes for 1 stETH, planned Accumulator sales and full looper collateral | Hourly |
+| `slippage()` / `slippagePeriodStart()` / `slippagePeriodLoss()` / `slippagePeriodLossLimit()` | Looper | Per-swap limit and daily loss budget; account for period rollover when predicting a swap | Hourly |
+| Read-only `eth_call` of looper `withdraw(...)` and vault `update_debt(looper,0,10000)` with the authorized sender | Looper / Vault | Verify executable partial/full exits at the same pinned block as liquidity and quote reads | Hourly |
 | `getThreshold()` / `getOwners()` | ySafe | Governance integrity | Weekly |
 | `getMinDelay()` | Strategy Manager timelock | Delay change detection | Weekly |
 | `getUserAccountData(looper)` | Spark Pool [`0xC13e21B648A5Ee794902342038FF3aDAB66BE987`](https://etherscan.io/address/0xC13e21B648A5Ee794902342038FF3aDAB66BE987) | Looper health factor | Hourly |
@@ -417,7 +433,7 @@ Yearn maintains the [`monitoring`](https://github.com/yearn/monitoring) reposito
 - **Battle-tested Yearn V3 infrastructure:** V3 framework audited by 3 top firms, ~28 months of clean V3 production. Immutable vault contract; strategies use the constant TokenizedStrategy implementation with no upgrade path
 - **Standard Yearn governance:** Yearn V3 Role Manager + 6-of-9 ySafe + 7-day self-governed timelock, re-verified at block 26078406
 - **Conservative LST integration:** the stETH Accumulator's design (no auto-unwind, `pendingRedemptions` blocks reporting, peg buffer) deliberately avoids forced-sale of stETH at a discount during peg events
-- **Atomic liquidity for ~48% of TVL** through the default queue (Spark WETH Lender + Yearn OG WETH), plus a further 14.3% that the debt manager can pull atomically from the looper
+- **Atomic liquidity for ~48% of TVL** through the default queue (Spark WETH Lender + Yearn OG WETH)
 - **No outstanding Lido withdrawals:** accounting-lag mechanism dormant
 - **Yearn recovery capital:** the Yearn yETH Recovery Vault [`0xd7a540ba3626c0aa66e7DB4088971d0CD64695B6`](https://etherscan.io/address/0xd7a540ba3626c0aa66e7DB4088971d0CD64695B6) holds ~27% of supply (~1,957 WETH). This is the Treasury ETH that [YIP-90](https://snapshot.org/#/s:veyfi.eth/proposal/0xe76f57663ce9311eb830ef097812702cbbb55fccbb280d254cdfc1f2c11c261a) earmarked for yETH recovery, and it is intended to stay until recovery is complete
 - **Active monitoring** via Yearn's monitoring-scripts repo
@@ -429,7 +445,8 @@ Yearn maintains the [`monitoring`](https://github.com/yearn/monitoring) reposito
 - **High leverage in the looper:** 14.3% of totalDebt sits in a ~8x wstETH/WETH position with a 1.063 health factor. The exchange-rate oracle removes market-depeg liquidation risk. A ~6% loss in the wstETH exchange rate, an adverse Spark oracle or E-Mode change, or prolonged negative carry could still liquidate the position. Loss is bounded by looper equity
 - **Manual-unwind exposure:** 38.2% of totalDebt requires management-paced unwind via Lido queue (1–7 days normal) or Curve (peg-dependent)
 - **Lido exposure:** 38.2% unlevered stETH plus the looper's leveraged wstETH collateral. A Lido slashing event would be amplified ~8x on the looper portion
-- **Looper outside the default queue:** its 14.3% is not directly reachable by user withdrawals
+- **Restricted looper exit:** its 14.3% is outside the default queue and simulated exits revert with `!slippage`. The flash-loan/Curve path requires management remediation or better quotes before it can execute; `maxWithdraw()` overstates executable liquidity
+- **Shared Curve exit dependency:** the 38.2% Accumulator and 14.3% looper equity both use Curve for market exits. Full looper exit sells ~8,260 stETH; market discounts can block deleveraging even while the oracle-based health factor remains above 1
 - **Holder concentration:** one Alchemix mixWETH strategy holds ~52% of supply (~3,804 WETH), more than the ~3,444 WETH available atomically through the default queue
 
 ### Critical Risks
@@ -492,9 +509,9 @@ Yearn maintains the [`monitoring`](https://github.com/yearn/monitoring) reposito
 | Vault operations | Permissionless deposits / withdrawals onchain |
 | Strategy reporting | Programmatic via keeper |
 | Debt allocation | Automated (Debt Allocator) + manual (Brain) |
-| LST unwind | **Management-paced** (manual functions) for the 38.2% Accumulator portion; Spark WETH Lender and Yearn OG WETH atomic for 47.5%; looper delevers programmatically via flash loan (14.3%) |
+| LST unwind | **Management-paced** for the 38.2% Accumulator; Spark WETH Lender and Yearn OG WETH atomic for 47.5%; looper's programmatic flash-loan/Curve exit (14.3%) is blocked by slippage checks |
 
-**Programmability Score: 1.5 / 5** — fully programmatic at the vault level. The LST Accumulator's manual unwind remains a mild factor; the looper's leverage is maintained by keeper `tend()` calls against onchain triggers.
+**Programmability Score: 1.5 / 5** — programmatic vault accounting with management-paced Accumulator unwind and keeper `tend()` calls against onchain triggers. The looper's verified exit restriction is scored in Liquidity Risk; keeper automation alone does not resolve it.
 
 **Subcategory C: External Dependencies**
 
@@ -546,15 +563,15 @@ Yearn maintains the [`monitoring`](https://github.com/yearn/monitoring) reposito
 |--------|-----------|
 | Vault-level idle | 0 WETH (vault is 100% deployed) |
 | Atomic via default queue | 47.5% of TVL — Spark WETH Lender (40.6%) + Yearn OG WETH (6.9%) |
-| Atomic via debt manager | 14.3% — looper delevers via Morpho flash loan, but is outside the default queue |
+| Restricted looper exit | 14.3% — flash-loan capacity sufficient, but sampled withdrawals and full `update_debt` exit revert with `!slippage`; outside the default queue |
 | Manual-unwind portion | 38.2% in stETH Accumulator; `availableWithdrawLimit()` returns only loose WETH (0 at this snapshot) |
 | Unknown portion | 0% — fully reconciled |
 | Underlying liquidity | Curve ETH/stETH ~38.8k combined balance; Lido queue 1–7 days normal load. Spark WETH ~113.9k WETH available. Morpho markets ~89–91% utilized |
 | Same-asset | WETH-denominated share token |
-| Withdrawal restrictions | None at vault level; effective restriction is `availableWithdrawLimit() = balanceOfAsset()` of the Accumulator strategy and the looper's absence from the default queue |
+| Withdrawal restrictions | Accumulator `availableWithdrawLimit() = balanceOfAsset()`; looper outside default queue and its 2-bps slippage limit blocks simulated exits |
 | Holder concentration | ~52% Alchemix mixWETH strategy; ~27% Yearn yETH Recovery Vault (long-horizon) |
 
-**Score: 2.0 / 5** — the manual-unwind portion is smaller (38.2%), and 47.5% is atomic through the default queue. The score stays at 2.0 because idle is zero, the looper needs debt-manager action, the Accumulator still depends on the Lido queue or Curve, and a single holder (~52%) could request more than the atomic liquidity. The ~27% held by the yETH Recovery Vault is long-horizon capital.
+**Score: 2.5 / 5** — base 2.0 for ~47.5% atomic liquidity, management-paced Accumulator exits, zero idle, queue exclusion and a single holder (~52%) exceeding immediate liquidity. Apply the rubric's **+0.5 modifier for mechanisms delaying large exits** to the looper's additional verified slippage restriction: even an authorized debt-manager call cannot recover its 14.3% at the snapshot. The same restriction is not penalized again in Programmability. The ~27% yETH Recovery Vault holding is long-horizon capital; it does not restore executable exit capacity. Successful exit size and remediation timing remain TODO.
 
 #### Category 5: Operational Risk (Weight: 5%)
 
@@ -566,7 +583,7 @@ Yearn maintains the [`monitoring`](https://github.com/yearn/monitoring) reposito
 | Legal | BORG (Cayman foundation) |
 | Incident response | 4 historical V1 events, $200K Immunefi. Strategy rotations in May–June 2026 and debt reallocation since show active management capability |
 | Monitoring | Active hourly alerts, vault in monitored list. Strategy debt reconciliation at 100% of totalDebt |
-| Strategy unwind ops | Brain must pre-position WETH for the 38.2% Accumulator portion and keep the looper within leverage bounds |
+| Strategy unwind ops | Brain must pre-position WETH for the 38.2% Accumulator, restore executable looper exits and keep it within leverage bounds; exit restriction scored in Liquidity Risk |
 
 **Score: 1.0 / 5** — operational maturity remains high for the Yearn V3 infrastructure. Active monitoring, standard governance, and demonstrated management capability.
 
@@ -577,9 +594,11 @@ Yearn maintains the [`monitoring`](https://github.com/yearn/monitoring) reposito
 | Audits & Historical | 1.5 | 20% | 0.300 |
 | Centralization & Control | 1.5 | 30% | 0.450 |
 | Funds Management | 1.4 | 30% | 0.420 |
-| Liquidity Risk | 2.0 | 15% | 0.300 |
+| Liquidity Risk | 2.5 | 15% | 0.375 |
 | Operational Risk | 1.0 | 5% | 0.050 |
-| **Final Score** | | | **1.52 / 5.0** |
+| **Final Score** | | | **1.59 / 5.0** |
+
+Weighted subtotal **1.595**, rounded down to **1.59** under the final-score rule.
 
 ### Risk Tier
 
@@ -591,7 +610,7 @@ Yearn maintains the [`monitoring`](https://github.com/yearn/monitoring) reposito
 | 3.50–4.49 | Elevated Risk | Limited approval, strict limits |
 | 4.50–5.00 | High Risk | Not recommended |
 
-**Final Risk Tier: Low Risk (1.52 / 5.0) — Approved with standard monitoring**
+**Final Risk Tier: Low Risk (1.59 / 5.0) — Approved with standard monitoring, including immediate alerts for the unresolved looper exit restriction**
 
 ---
 
@@ -610,7 +629,7 @@ Yearn maintains the [`monitoring`](https://github.com/yearn/monitoring) reposito
   - any new strategy with leverage, looping, cross-chain bridging, or non-blue-chip routing
 - **Lido-specific:**
   - extended Lido withdrawal queue (>14 days) — degrades the 1:1 unwind path for the Accumulator portion
-  - stETH/ETH peg deviation > 1% sustained — affects Curve exit pricing for the Accumulator portion
+  - stETH/ETH peg deviation > 1% sustained — affects Curve exit pricing for Accumulator and looper; looper exit failures trigger action even below this peg threshold
   - any decrease in wstETH `stEthPerToken` (slashing or oracle loss) — directly reduces the looper health factor
   - any Lido contract upgrade or oracle change
   - any new `initiateLSTWithdrawal()` from the Accumulator — re-engages the `pendingRedemptions` accounting-lag mechanism
@@ -618,7 +637,9 @@ Yearn maintains the [`monitoring`](https://github.com/yearn/monitoring) reposito
   - looper health factor on Spark Lend drops below 1.04 (1.063 at the 8x target), or `targetLeverageRatio` / `maxLeverageRatio` raised above 8.0x / 8.5x
   - any liquidation, or a deleveraging event (forced or management-initiated)
   - `setExchange()` proposal at the 7-day timelock, change to Spark E-Mode category 1 parameters, or a change to Spark's wstETH oracle source
-  - Morpho WETH flash-loan liquidity falling below the looper's WETH debt (full exit no longer atomic)
+  - Morpho WETH flash-loan liquidity falling below the looper's WETH debt (insufficient full flash-loan exit capacity, independently of swap restrictions)
+  - any simulated partial/full withdrawal or `update_debt` exit reverting, or a size-aware Curve quote exceeding `slippage()` / the remaining daily loss budget — already triggered at the snapshot; requires immediate management review
+  - any `setSlippage()` change; reassess accepted exit losses and repeat exit simulations before counting restored liquidity
   - looper added to the default queue
 - **Strategy-specific:**
   - `pendingRedemptions` failing to drain after expected Lido finalization
@@ -636,7 +657,7 @@ Yearn maintains the [`monitoring`](https://github.com/yearn/monitoring) reposito
 |------|------:|-------|
 | [May 11, 2026](https://github.com/yearn/risk-score/pull/148) | 1.5 | Initial assessment. 3 funded strategies (Morpho ~71%, stETH ~25%, Spark ~4%). 6-of-9 ySafe, 7-day timelock, immutable vault. Minimal Risk tier. |
 | [July 22, 2026](https://github.com/yearn/risk-score/pull/335) | 1.49 | Reassessment. Strategy mix: stETH Accumulator (59%), Spark WETH Lender (31%), Yearn OG WETH (Morpho MetaMorpho, 2%/~9% effective), wstETH/WETH Spark Looper (~11% of totalDebt; not in default queue) — an LSTAaveLooper that leverages wstETH as collateral to borrow WETH on Spark Lend, the first leveraged strategy in this vault. Strategy debt fully reconciles to 100% of totalDebt (~8,927 WETH). All strategies mapped to verified blue-chip protocols. Governance unchanged. Score returned to 1.49 (Minimal Risk). |
-| [September 28, 2026](https://github.com/yearn/risk-score/pull/495) | 1.52 | Reassessment at block 26078406. TVL 7,249 WETH. Allocation: Spark WETH Lender 40.6%, stETH Accumulator 38.2%, wstETH/WETH Spark Looper 14.3%, Yearn OG WETH 6.9%. Spark Lend combined ~55% (above the prior 50% trigger). Looper verified at ~8x leverage (health factor 1.063, exchange-rate oracle) and not upgradeable. Yearn OG WETH exposure restated from share value. Holders mapped: Alchemix mixWETH strategy ~52%, yETH Recovery Vault ~27%. Governance unchanged. Collateralization 1.5 → 1.75; tier moves from Minimal to Low Risk. |
+| [September 28, 2026](https://github.com/yearn/risk-score/pull/495) | 1.59 | Reassessment at block 26078406. TVL 7,249 WETH. Allocation: Spark WETH Lender 40.6%, stETH Accumulator 38.2%, wstETH/WETH Spark Looper 14.3%, Yearn OG WETH 6.9%. Spark Lend combined ~55%. Looper ~8x (health factor 1.063, exchange-rate oracle), not upgradeable. Simulated exits revert with !slippage (2-bps limit vs ~8.41-bps full Curve sale); graph includes exchange's Curve route. Yearn OG WETH exposure restated from share value. Holders: Alchemix mixWETH strategy ~52%, yETH Recovery Vault ~27%. Governance unchanged. Collateralization 1.5 → 1.75; liquidity 2.0 → 2.5; tier moves from Minimal to Low Risk. |
 
 ---
 
@@ -670,8 +691,8 @@ Snapshot at block [26078406](https://etherscan.io/block/26078406) (September 28,
 │ │ Stake: WETH→ETH→stETH│ │              │ │ ~8x, HF 1.063│ │        ││
 │ │ via Curve or Lido    │ │ Atomic:      │ │ E-Mode 1     │ │Atomic: ││
 │ │ Unwind (mgmt-only):  │ │ Spark Lend   │ │ Morpho flash │ │Morpho  ││
-│ │  manualSwapToAsset() │ │ supply       │ │ loan exit    │ │markets ││
-│ │  initiateLSTWithdr.  │ │              │ │              │ │        ││
+│ │  manualSwapToAsset() │ │ supply       │ │ + Curve exit │ │markets ││
+│ │  initiateLSTWithdr.  │ │              │ │ !slippage    │ │        ││
 │ │  manualClaimWithdr.  │ │              │ │ NOT in queue │ │owner:  ││
 │ │ pendingRedemptions=0 │ │              │ │              │ │Security││
 │ └──────────────────────┘ └──────────────┘ └──────────────┘ └────────┘│
@@ -683,7 +704,7 @@ Snapshot at block [26078406](https://etherscan.io/block/26078406) (September 28,
 │  ┌────────────────────────┐  ┌────────────────────────┐               │
 │  │ Lido stETH / wstETH    │  │ Curve ETH/stETH pool   │               │
 │  │ Multi-operator         │  │ Stake-on-better-quote, │               │
-│  │ Shapella withdrawals   │  │ manual unwind venue    │               │
+│  │ Shapella withdrawals   │  │ both strategy exits   │               │
 │  └────────────────────────┘  └────────────────────────┘               │
 │  ┌────────────────────────┐  ┌────────────────────────┐               │
 │  │ Lido Withdrawal Queue  │  │ Spark Lend WETH Market │               │

@@ -82,7 +82,7 @@ nodes:
     label: wstETH/WETH Spark Looper (14.3%, ~8x)
     address: "0x68A14629cb07c74259f481382fE8b6cFD8970121"
     category: strategy
-    note: LSTAaveLooper TokenizedStrategy (not upgradeable) — wstETH collateral, WETH borrow on Spark Lend E-Mode 1 at ~8x (HF 1.063). Morpho flash loans for lever/delever. NOT in default queue.
+    note: LSTAaveLooper TokenizedStrategy (not upgradeable) — Spark E-Mode 1 at ~8x (HF 1.063). Morpho flash loans and Curve swaps for deleveraging. At block 26078406, simulated exits revert with !slippage (2-bps limit vs ~8.41-bps full collateral sale), despite maxWithdraw reporting full equity. NOT in default queue.
   - id: yearn-og-weth
     label: Yearn OG WETH (6.9%)
     address: "0xE89371eAaAC6D46d4C3ED23453241987916224FC"
@@ -116,6 +116,7 @@ nodes:
     label: WETHWstETHExchange
     address: "0x706AA50385C51596b6d9cBcf97645C6a98940c03"
     category: dependency
+    note: Automatic exit unwraps wstETH and sells stETH through Curve ETH/stETH; no automatic Lido-queue fallback. Full looper collateral sale is ~8,260 stETH at block 26078406.
 
 # BEGIN GENERATED MORPHO MARKET NODES
 # Managed by scripts/update_morpho_graph_markets.mjs — do not edit.
@@ -243,6 +244,10 @@ edges:
     to: looper-exchange
     kind: routes-through
     label: "WETH ↔ wstETH swaps"
+  - from: looper-exchange
+    to: curve-steth-pool
+    kind: routes-through
+    label: "wstETH → stETH → ETH (exit)"
   - from: wsteth-weth-looper
     to: morpho-blue
     kind: routes-through
