@@ -522,4 +522,4 @@ The material risks are direct Safe configuration authority, concentrated operato
 | [March 20, 2026](https://github.com/yearn/risk-score/pull/101) | 2.4 | Initial assessment |
 | [May 23, 2026](https://github.com/yearn/risk-score/pull/214) | 2.4 | Reassessment: USDC Fractional Reserve rebalanced to 100% Morpho (Steakhouse + Gauntlet); Aave V3 leg drained; LayerZero stcUSD/Katana OFT integration documented |
 | [July 31, 2026](https://github.com/yearn/risk-score/pull/369) | 2.39 | LayerZero OFT escrow figures corrected (~26.1M stcUSD escrowed, ~38% of ~68.3M supply); Dependencies score unchanged |
-| October 3, 2026 | 2.72 | Reassessment: Aave/Ondo reserve allocation, concentrated operator debt and thin exit buffer, direct Safe authority, current implementations and multi-peer LayerZero escrow; Medium Risk |
+| [October 3, 2026](https://github.com/yearn/risk-score/pull/509) | 2.72 | Reassessment: Aave/Ondo reserve allocation, concentrated operator debt and thin exit buffer, direct Safe authority, current implementations and multi-peer LayerZero escrow; Medium Risk |

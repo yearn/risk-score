@@ -781,6 +781,12 @@
       "sourceVerified": true,
       "sourceSHA256": "a318512ebf064842873da7fb8bcac04b99f4af6d8a7965a4103b559a6842673c",
       "explorer": "https://etherscan.io/address/0xe65c3eccd18879e103dbc96d854e376ced4cc7dd#code"
+    },
+    "0x1a44076050125825900e736c501f859c50fe728c": {
+      "contractName": "EndpointV2",
+      "sourceVerified": true,
+      "sourceSHA256": "81eade5e245e64ce45f5f2279067e9676dfea71dfc4f839c648f2774f870f832",
+      "explorer": "https://etherscan.io/address/0x1a44076050125825900e736c501f859c50fe728c#code"
     }
   },
   "apiSnapshots": {
