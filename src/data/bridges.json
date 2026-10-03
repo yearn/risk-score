@@ -276,7 +276,7 @@
           "kind": "direct",
           "model": "lock",
           "integration": "LayerZero OFT Adapter (\"LayerZero vault\")",
-          "detail": "Adapter [`0x983a…4137`](https://etherscan.io/address/0x983AEAaA0d0426839158435C43725EA7F45d4137) escrows ~26.1M stcUSD (~38% of the ~68.3M supply). Katana runs a native OFT at the same vanity address [`0x8888…8888`](https://explorer.katanarpc.com/address/0x88887bE419578051FF9F4eb6C858A951921D8888)",
+          "detail": "Adapter [`0x983a…4137`](https://etherscan.io/address/0x983AEAaA0d0426839158435C43725EA7F45d4137) escrows 10.287M stcUSD (18.64% of 55.198M Ethereum supply), pooled across configured Katana, MegaETH, and Tempo peers at Ethereum block 26,114,512 (October 3, 2026). It transfers existing canonical stcUSD and cannot mint canonical supply. All three active remote→Ethereum escrow-release routes require LayerZero Labs, Canary, and Nethermind (3-of-3, 15 confirmations); remote supplies and outbound mint configurations were not reverified.",
           "security": {
             "label": "3-of-3",
             "confirmations": 15,
@@ -285,12 +285,12 @@
               "Canary",
               "Nethermind"
             ],
-            "route": "Ethereum→Katana (mint side)",
+            "route": "Katana / MegaETH / Tempo→Ethereum (escrow release)",
             "weak": false,
-            "verifiedAt": "2026-07-16",
-            "link": "https://explorer.katanarpc.com/address/0x88887bE419578051FF9F4eb6C858A951921D8888"
+            "verifiedAt": "2026-10-03",
+            "link": "https://etherscan.io/address/0x983AEAaA0d0426839158435C43725EA7F45d4137"
           },
-          "owner": "Adapter owner: 24h Timelock [`0xD823…29ab`](https://etherscan.io/address/0xD8236031d8279d82E615aF2BFab5FC0127A329ab)."
+          "owner": "Owner/UUPS upgrades: 24h Timelock [`0xD823…29ab`](https://etherscan.io/address/0xD8236031d8279d82E615aF2BFab5FC0127A329ab). Endpoint delegate: Safe [`0xb8FC…8793`](https://etherscan.io/address/0xb8FC49402dF3ee4f8587268FB89fda4d621a8793), with direct security-configuration authority."
         },
         {
           "slug": "fx-fxusd",
