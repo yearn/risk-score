@@ -4,7 +4,7 @@
 - **Token:** USDS (Sky Dollar) and sUSDS (Savings USDS)
 - **Chain:** Ethereum
 - **Token Address:** [`0xdC035D45d973E3EC169d2276DDab16f1e407384F`](https://etherscan.io/address/0xdC035D45d973E3EC169d2276DDab16f1e407384F) (USDS) · [`0xa3931d71877C0E7a3148CB7Eb4463524FEc27fbD`](https://etherscan.io/address/0xa3931d71877C0E7a3148CB7Eb4463524FEc27fbD) (sUSDS)
-- **Final Score: 1.67/5.0**
+- **Final Score: 1.75/5.0**
 
 ## Overview + Links
 
@@ -455,7 +455,7 @@ System operations are dominated by programmatic onchain logic. The governance to
 | USDS LayerZero OFT Adapter | [`0x1e1D42781FC170EF9da004Fb735f56F0276d01B8`](https://etherscan.io/address/0x1e1D42781FC170EF9da004Fb735f56F0276d01B8) | `owner()` (should always equal PauseProxy), `endpoint()`, any `Upgraded` events on underlying token; **DVN config via `getUlnConfig` — alert if `requiredDVNCount` drops below 2** |
 | sUSDS LayerZero OFT Adapter | [`0x85A3FE4DA2a6cB98A5bdF62458B0dB8471B9f0f1`](https://etherscan.io/address/0x85A3FE4DA2a6cB98A5bdF62458B0dB8471B9f0f1) | `owner()` (should always equal PauseProxy), `endpoint()`; any cross-chain supply anomalies |
 | Native L2 bridge escrows (Base/Optimism/Unichain/Arbitrum) | [`0x7F31…9Ef3`](https://etherscan.io/address/0x7F311a4D48377030bD810395f4CCfC03bdbe9Ef3) · [`0x4671…6C65`](https://etherscan.io/address/0x467194771dAe2967Aef3ECbEDD3Bf9a310C76C65) · [`0x1196…566A`](https://etherscan.io/address/0x1196F688C585D3E5C895Ef8954FFB0dCDAfc566A) · [`0xA10c…9400`](https://etherscan.io/address/0xA10c7CE4b876998858b1a9E12b10092229539400) | `USDS.balanceOf(escrow)` / `sUSDS.balanceOf(escrow)` should equal the minted L2 supply; `wards[PauseProxy]` on each token bridge |
-| Prime allocator ilks (Spark, Grove, Obex, Keel) | [`MCD_VAT.ilks(ilk)`](https://etherscan.io/address/0x35D1b3F3D7966A1DFe207aa4514C12a259A0492B) for `ALLOCATOR-SPARK-A`, `ALLOCATOR-BLOOM-A`, `ALLOCATOR-OBEX-A`, `ALLOCATOR-NOVA-A` | `Art × rate` (drawn debt) and `line` (debt ceiling) per allocator — ~49.8% of VAT debt is issued here |
+| Prime allocator ilks (all `ALLOCATOR-*`, including Spark, Grove, Obex, Prysm and Keel) | [`MCD_VAT.ilks(ilk)`](https://etherscan.io/address/0x35D1b3F3D7966A1DFe207aa4514C12a259A0492B) for every registered `ALLOCATOR-*` ilk | `Art × rate` (drawn debt) and `line` (debt ceiling) per allocator — ~49.8% of VAT debt is issued here; reconcile with downstream backing, since debt can stay unchanged after an asset loss |
 
 ### Critical Values, Thresholds, and Frequency
 
@@ -464,12 +464,25 @@ System operations are dominated by programmatic onchain logic. The governance to
 | USDS spot price | DEX TWAP / CoinGecko | < $0.995 or > $1.005 (>0.5% deviation) | 15 min |
 | USDC Pocket balance | onchain | < $500M (would signal heavy redemption load) | Hourly |
 | Prime allocator ilk debt | `MCD_VAT.ilks` | Any allocator's drawn debt rises >20% in 7 days, or a new `ALLOCATOR-*` ilk is onboarded | Daily |
+| Allocator asset/debt coverage | Position valuations and `MCD_VAT.ilks`; methodology and open measurements below | Coverage <100%, or falls ≥5 percentage points in 7 days after accounting for flows | Daily |
+| Material counterparty impairment | [Observatory backing items](https://observatory.data.blockanalitica.com/sky/backed/items/), position contracts, issuer notices and attestations | Any confirmed default, write-down, or redemption suspension; unexplained ≥5% value drop in 24 h for a position ≥1% of reported system backing | Daily; immediately on incident notice |
+| Backing-data and attestation freshness | Observatory `updated_at`; dated custodian reports | Any monitored position absent or >24 h stale; attestation overdue against its published schedule, or >45 days old where the expected cadence is monthly | Daily |
 | LitePSM `tin`, `tout`, `buf` | onchain | Any change | On `Rely`/`File` event |
 | LitePSM Halt | event log | Any `Halt` event | Real time |
 | `MCD_PAUSE` scheduled spells | `Plot` event | Any spell touching USDS / sUSDS / PSM / Pocket | Behind timelock |
 | sUSDS `ssr` rate | onchain | Any change >50 bps APY | Behind timelock |
 | USDS / sUSDS implementation slot | EIP-1967 slot | Any change → `Upgraded` event | Behind timelock |
 | USDS total supply (cross-chain, all chains) | DefiLlama API | Sudden >5% drop in 24 h | Hourly |
+
+### Allocator Backing Checks
+
+Read all registered `ALLOCATOR-*` ilks, including the smaller active `ALLOCATOR-PRYSM-A` and `ALLOCATOR-GROVE-A`. Cache each debt read (`Art × rate`, normalized from rad) with its block and timestamp. A counterparty loss need not change this debt, so the debt-growth alert is insufficient on its own.
+
+Use [Observatory backing items](https://observatory.data.blockanalitica.com/sky/backed/items/) to locate positions by `star`, `name`, `network`, `wallet_address`, and `token_address`. Spark corresponds to `ALLOCATOR-SPARK-A`; Grove to `ALLOCATOR-BLOOM-A`; Obex to `ALLOCATOR-OBEX-A`. Archive each response and its per-item `updated_at`. Track reported `backed`, `backed_lt`, and `backed_total` separately: these are loan coverage, maintenance coverage, and gross collateral values, not interchangeable measures of an allocator's net assets. A decline or missing row requires reconciliation with transfers, repayments and mandate changes before being classified as a loss. A fresh API timestamp does not establish that the underlying custodian attestation is fresh.
+
+For asset/debt coverage, value the allocator's actual claims and cash in USD at the same timestamp as its VAT debt, deduct downstream liabilities, and divide net asset value by drawn debt. Confirm onchain cash with `balanceOf(wallet)` and ERC-4626 claims with `convertToAssets(balanceOf(wallet))`, then assess the underlying assets for impairment; an unchanged share price can conceal a credit loss. Use dated issuer valuations and custodian attestations for offchain claims. Count each claim once; do not add borrower gross collateral to the lending claim's value or count the same assets through both a vault and its look-through. Check changes in coverage and each material counterparty even when drawn debt is unchanged.
+
+**TODO — monitoring measurements:** record the full position-contract/getter inventory, downstream liabilities, valuation sources, allocator-to-ilk mapping for the smaller allocators, and initial net-asset/debt coverage per allocator. Catalog the dated attestation URLs, reporting periods, and publication schedules for the offchain positions named in [External Dependencies](#external-dependencies). Until these are recorded, per-allocator coverage and attestation freshness are **unverified**, not healthy by default; raise a data-availability alert for an unresolved position or report. The thresholds above define the required monitoring policy, not an already deployed monitor.
 
 ## Appendix: Contract Architecture
 
@@ -711,9 +724,9 @@ Mitigants keep this at 3.0 rather than higher: ~70.7% of backing is onchain, and
 | Exchange rate | `chi` and `ssr` are pure functions; permissionless `drip()` keeps `chi` current |
 | Admin minting | Governance can grant new wards (48 h delay); current ward set is small and audited |
 
-**Provability Score: 1.5 / 5** — Excellent onchain transparency for the live-swap path; mild offchain dependence for RWA fraction.
+**Provability Score: 2.0 / 5** — Mostly onchain reserves (~70.7% of Observatory loan-coverage backing), with programmatic supply and savings-rate accounting, match the rubric's Score 2 ("Mostly onchain, some offchain" with periodic updates and a single reliable source). The ~29.3% offchain slice (~$2.90B) depends on periodic custodian reporting, and the Prime allocator book needs Observatory look-through; this prevents a score between 1 and 2, since Score 1 requires fully onchain reserves and multiple verification sources. The offchain slice has Score-3 characteristics, but the aggregate remains predominantly onchain. Swap-path transparency alone does not establish reserve transparency for the entire backing book.
 
-**Cat 3 Score = (3.0 + 1.5) / 2 = 2.25 / 5**
+**Cat 3 Score = (3.0 + 2.0) / 2 = 2.50 / 5**
 
 #### Category 4: Liquidity Risk (Weight: 15%)
 
@@ -748,12 +761,12 @@ Mitigants keep this at 3.0 rather than higher: ~70.7% of backing is onchain, and
 |----------|------:|-------:|---------:|
 | Audits & Historical | 1.0 | 20% | 0.200 |
 | Centralization & Control | 2.00 | 30% | 0.600 |
-| Funds Management | 2.25 | 30% | 0.675 |
+| Funds Management | 2.50 | 30% | 0.750 |
 | Liquidity Risk | 1.0 | 15% | 0.150 |
 | Operational Risk | 1.0 |  5% | 0.050 |
-| **Final Score** | | | **1.67/5.0** |
+| **Final Score** | | | **1.75/5.0** |
 
-**Final Score: 1.67 / 5.0** — in the Low-Risk tier (1.50–2.49). The move out of Minimal Risk comes from scoring the Prime-allocator backing and counterparty set that the June 2026 assessment did not document, not from a deterioration in the protocol.
+**Final Score: 1.75 / 5.0** — in the Low-Risk tier (1.50–2.49). The move out of Minimal Risk comes from scoring the Prime-allocator backing and counterparty set that the June 2026 assessment did not document, not from a deterioration in the protocol.
 
 ### Risk Tier
 
@@ -765,7 +778,7 @@ Mitigants keep this at 3.0 rather than higher: ~70.7% of backing is onchain, and
 | 3.50–4.49 | Elevated Risk | Limited approval, strict limits |
 | 4.50–5.00 | High Risk | Not recommended |
 
-**Final Risk Tier: Low Risk (1.67 / 5.0) — Approved with standard monitoring**
+**Final Risk Tier: Low Risk (1.75 / 5.0) — Approved with standard monitoring**
 
 ---
 
@@ -778,13 +791,17 @@ Mitigants keep this at 3.0 rather than higher: ~70.7% of backing is onchain, and
   - USDC Pocket balance drops below $500M — would indicate sustained exit pressure and compromise of the deep-redemption story
   - Total cross-chain USDS supply (currently ~109M across all bridges) spikes >$1B, or LayerZero-bridged supply (currently ~6.67M, Solana + Avalanche) grows materially — would indicate rising bridge dependency exposure
 - **Parameter-based:**
-  - Any Prime allocator ilk (`ALLOCATOR-SPARK-A`, `ALLOCATOR-BLOOM-A`, `ALLOCATOR-OBEX-A`, `ALLOCATOR-NOVA-A`) grows >20% in 7 days, or a new `ALLOCATOR-*` ilk is onboarded → re-review the backing look-through
+  - Any registered `ALLOCATOR-*` ilk grows >20% in 7 days, or a new `ALLOCATOR-*` ilk is onboarded → re-review the backing look-through
   - `LITE_PSM_USDC_A.tin` or `tout` changes from zero (fees introduced) → harden Liquidity score
   - `LITE_PSM_USDC_A.buf` changes materially → re-evaluate exit capacity for USDC→USDS direction
   - `sUSDS.ssr` changes by >50 bps APY → not a risk event but warrants user-facing notice
   - `MCD_PAUSE.delay()` is reduced below 48 h → governance score worsens
   - `USDS.wards()` grants a ward outside the current set (USDS_JOIN, PauseProxy) → re-review mint authority
   - `USDS_OFT.owner()` or `SUSDS_OFT.owner()` changes from PauseProxy → re-review OFT adapter governance
+- **Backing-based:**
+  - Any allocator's net-asset/debt coverage falls below 100% or drops ≥5 percentage points in 7 days after accounting for flows
+  - Any confirmed allocator-counterparty default, write-down, or redemption suspension, or an unexplained ≥5% daily value drop in a position ≥1% of system backing
+  - A monitored backing item is missing or >24 h stale, or a required custodian attestation is overdue (monthly reports >45 days old) → review reserve provability; unresolved measurements remain `TODO`
 - **Incident-based:**
   - Any `LITE_PSM_MOM.HALT()` invocation (emergency PSM halt)
   - Any USDS depeg deeper than ±1% sustained for >24 h
@@ -803,4 +820,4 @@ Mitigants keep this at 3.0 rather than higher: ~70.7% of backing is onchain, and
 | Date | Score | Notes |
 | --- | --- | --- |
 | [June 18, 2026](https://github.com/yearn/risk-score/pull/204) | 1.3 | Initial assessment |
-| [September 9, 2026](https://github.com/yearn/risk-score/pull/457) | 1.67 | Reassessment. Supply contraction (USDS 7.82B → 6.65B, sUSDS assets 5.88B → 4.67B); LitePSM `buf` doubled to 800M DAI; Spark Liquidity Layer repatriated Base/Optimism/Unichain bridge positions to mainnet (escrowed USDS 448M → 102M). Collateralization restated from onchain per-ilk debt: Prime allocator vaults are ~49.8% of VAT debt and were previously undocumented, and the ~$690M `vice` was previously mischaracterised as Vow surplus. Proxies, `wards`, 48 h GSM delay, and 2-of-2 DVN config unchanged. Collateralization subscore 2.0 → 3.0 (~29.3% of backing offchain under periodic attestation, plus allocator opacity) and External Dependencies 1.5 → 4.0 once the allocator counterparty set (BlackRock BUIDL, Janus Henderson, Maple, Galaxy, Anchorage, SparkLend, Morpho, Uniswap) is enumerated; Governance stays 1.0 under the 48h+ Score-1 timelock bar. Final score 1.3 → 1.67, Minimal Risk → Low Risk |
+| [September 9, 2026](https://github.com/yearn/risk-score/pull/457) | 1.75 | Reassessment. Supply contraction (USDS 7.82B → 6.65B, sUSDS assets 5.88B → 4.67B); LitePSM `buf` doubled to 800M DAI; Spark Liquidity Layer repatriated Base/Optimism/Unichain bridge positions to mainnet (escrowed USDS 448M → 102M). Collateralization restated from onchain per-ilk debt: Prime allocator vaults are ~49.8% of VAT debt and were previously undocumented, and the ~$690M `vice` was previously mischaracterised as Vow surplus. Proxies, `wards`, 48 h GSM delay, and 2-of-2 DVN config unchanged. Collateralization subscore 2.0 → 3.0 (~29.3% of backing offchain under periodic attestation, plus allocator opacity) and Provability 1.5 → 2.0 (mostly onchain reserves with periodic offchain reporting and a single allocator look-through source); External Dependencies 1.5 → 4.0 once the allocator counterparty set (BlackRock BUIDL, Janus Henderson, Maple, Galaxy, Anchorage, SparkLend, Morpho, Uniswap) is enumerated; Governance stays 1.0 under the 48h+ Score-1 timelock bar. Added allocator coverage, counterparty-impairment and reporting-freshness monitoring, with missing measurements marked TODO. Final score 1.3 → 1.75, Minimal Risk → Low Risk |
