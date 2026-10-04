@@ -1,4 +1,4 @@
-# Snapshot: Ethereum block 26114512, October 3, 2026. See report evidence.
+# Snapshot: October 3, 2026, 21:29:59 UTC; Ethereum and matching remote blocks. Follow-up evidence October 4.
 slug: cap-stcusd
 title: Cap (stcUSD) — Contract Dependency Graph
 chain: ethereum
@@ -48,12 +48,14 @@ nodes:
   label: OndoHolder USDC
   category: strategy
   address: '0x9939009295eAD3c67259aF3b93C284079ffE931e'
-  note: 100K current debt; 15M max debt; external compliance/redemption gates; Safe can change exchange
+  note: 100K current debt; 15M max debt; external compliance/redemption gates; Safe can change exchange; full 100K
+    zero-loss eth_call withdrawal succeeded at snapshot
 - id: multisig
   label: Multisig (3-of-5)
   category: governance
   address: '0xb8FC49402dF3ee4f8587268FB89fda4d621a8793'
-  note: Same five anonymous EOA owners as May baseline; direct parameter, vault, and bridge-delegate powers
+  note: Same five anonymous EOA owners as May baseline; direct parameter, vault, and bridge-delegate powers; remote
+    Safes have the identical current five-owner set and threshold
 - id: timelock
   label: Timelock (24h)
   category: governance
@@ -117,12 +119,13 @@ nodes:
   label: Symbiotic Network Middleware
   category: dependency
   address: '0x09A3976d8D63728d20DCDFEe1e531C206Ba91225'
-  note: 98.49% of accrued USDC debt; isolated borrower collateral
+  note: 98.49% of accrued USDC debt; isolated borrower collateral; all 34 mapped vaults use 7-day epochs
 - id: eigenlayer
   label: EigenLayer Service Manager
   category: dependency
   address: '0xE65c3eccd18879E103dBC96D854e376Ced4cC7dd'
-  note: 838K / 1.51% of accrued USDC debt; isolated borrower collateral
+  note: 838K / 1.51% of accrued USDC debt; isolated borrower collateral; withdrawal/deallocation delays 100800 Ethereum
+    blocks
 - id: usdc
   label: USDC (Circle)
   category: dependency
@@ -132,8 +135,42 @@ nodes:
   label: LayerZero Endpoint V2
   category: dependency
   address: '0x1a44076050125825900e736c501f859c50fE728c'
-  note: 'All three active remote-to-Ethereum release routes: 3-of-3 LayerZero Labs/Canary/Nethermind, 15 confirmations;
-    Safe delegate can reconfigure'
+  note: 'Four-chain peer mesh: all 12 receive configurations and matching send settings require 3-of-3 LayerZero
+    Labs/Canary/Nethermind, 15 confirmations; Safe delegates can reconfigure directly'
+- id: katana-stcusd
+  label: Katana stcUSD OFT
+  category: vault
+  chain: katana
+  address: '0x88887bE419578051FF9F4eb6C858A951921D8888'
+  link: https://katanascan.com/address/0x88887be419578051ff9f4eb6c858a951921d8888
+  note: 90,917.176288 shares; verified OFT receive mint/send burn; owner remote 24h timelock
+- id: megaeth-stcusd
+  label: MegaETH stcUSD OFT
+  category: vault
+  link: https://mega.etherscan.io/address/0x88887be419578051ff9f4eb6c858a951921d8888
+  note: Remote MegaETH token; 10,171,828.083819 shares; verified OFT receive mint/send burn; address 0x88887be419578051ff9f4eb6c858a951921d8888
+- id: tempo-bridge
+  label: Tempo stcUSD Mint Adapter
+  category: infra
+  link: https://explore.tempo.xyz/address/0x4eec5b8fdfbcdd45dfb29f666d9c34ad38c7afa5
+  note: Remote Tempo adapter; sole TIP-20 ISSUER_ROLE holder; verified receive mint/send burn; owner can replace token
+- id: tempo-stcusd
+  label: Tempo stcUSD TIP-20
+  category: vault
+  link: https://explore.tempo.xyz/address/0x20c0000000000000000000008ee4fcff88888888
+  note: Remote Tempo token; 23,872.216376 shares, 6 decimals; sole admin remote timelock; unpaused, always-allow transfer policy
+- id: remote-timelocks
+  label: Remote Timelocks (24h)
+  category: governance
+  link: https://github.com/yearn/risk-score/blob/master/reports/report/cap-stcusd.md#token-mint-authority
+  note: 'Katana/MegaETH/Tempo: 0x0000000035A7744F94e6949431CE20EA77312a55; identical source-verified runtime; sole
+    admin self, Safe sole proposer/canceller/executor'
+- id: remote-layerzero
+  label: Remote LayerZero Endpoints
+  category: dependency
+  link: https://github.com/yearn/risk-score/blob/master/reports/data/cap-stcusd-followup-2026-10-04.json
+  note: Three chain-local endpoints; all nine inbound/outbound remote routes use 3 required DVNs, 15 confirmations;
+    local Safe delegates share Ethereum signer set
 edges:
 - from: multisig
   to: timelock
@@ -299,3 +336,47 @@ edges:
   to: layerzero
   kind: routes-through
   label: authenticated peers; canonical escrow release
+- from: multisig
+  to: remote-timelocks
+  kind: proposes-on
+  label: chain-local Safe; same signer set
+- from: multisig
+  to: remote-layerzero
+  kind: holds-role
+  label: local endpoint delegates; direct security settings
+- from: oft-lockbox
+  to: remote-layerzero
+  kind: routes-through
+  label: pooled escrow backs remote claims
+- from: remote-layerzero
+  to: katana-stcusd
+  kind: mints
+  label: authenticated receive _credit; self ERC-20 mint
+- from: remote-layerzero
+  to: megaeth-stcusd
+  kind: mints
+  label: authenticated receive _credit; self ERC-20 mint
+- from: remote-layerzero
+  to: tempo-bridge
+  kind: routes-through
+  label: authenticated peer/message
+- from: tempo-bridge
+  to: tempo-stcusd
+  kind: mints
+  label: sole ISSUER_ROLE; TIP-20 mint
+- from: remote-timelocks
+  to: katana-stcusd
+  kind: controls
+  label: owner / UUPS / peers, 24h
+- from: remote-timelocks
+  to: megaeth-stcusd
+  kind: controls
+  label: owner / UUPS / peers, 24h
+- from: remote-timelocks
+  to: tempo-bridge
+  kind: controls
+  label: owner / UUPS / token replacement, 24h
+- from: remote-timelocks
+  to: tempo-stcusd
+  kind: holds-role
+  label: sole DEFAULT_ADMIN; can grant issuer, 24h
