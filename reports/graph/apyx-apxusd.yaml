@@ -142,6 +142,16 @@ nodes:
     address: "0x0e9cA42Bc60bE25F9A67f52173067Cc0Bb405BB5"
     category: dependency
     note: LockReleaseTokenPool escrows ~18.22M canonical apxUSD for Base, BNB Chain, and Solana representations; owner Guardian Safe
+  - id: solana-apxusd
+    label: apxUSD (Solana)
+    category: dependency
+    link: https://solscan.io/token/HAYQtfJEQ9DbDbaHEhxfGsWbSZ3ywthdsVB3PuB72DYe
+    note: ~6.01M supply; mint authority is a 1-of-2 SPL multisig (CCIP pool signer PDA or Apyx Squads vault); freeze authority is the Squads vault
+  - id: solana-squads
+    label: Solana Squads (3-of-7, no time lock)
+    category: governance
+    link: https://solscan.io/account/4RkAxZdhbLKxTi3G7okdMG7xqBZPi9QfemDUtHgZRMp5
+    note: Squads v4 multisig, 6 voting members, time_lock 0; vault 5CcTTUPtSxF1iB5d2fGR7gYHbUBHL1orwzbuZdQGJ1CG administers the Solana CCIP pool
   - id: alq-family
     label: alqUSD / aptUSD (shared AccessManager)
     address: "0x15c91ebccb2c659b3a208214a103cbcb9d5f9671"
@@ -311,3 +321,11 @@ edges:
     to: ops-safe
     kind: routes-through
     label: self-custody (713,088 STRCx)
+  - from: dep-ccip
+    to: solana-apxusd
+    kind: mints
+    label: CCIP pool signer PDA (1-of-2 SPL multisig)
+  - from: solana-squads
+    to: solana-apxusd
+    kind: mints
+    label: Squads vault co-signer (1-of-2), no time lock; freeze authority

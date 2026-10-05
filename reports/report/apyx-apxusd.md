@@ -4,8 +4,8 @@
 - **Token:** apxUSD
 - **Chain:** Ethereum + Base + BNB Chain + Solana
 - **Token Address:** [`0x98a878B1CD98131b271883b390F68d2c90674665`](https://etherscan.io/address/0x98a878B1CD98131b271883b390F68d2c90674665)
-- **Final Score: 3.52/5.0**
-- **Snapshot:** Ethereum block [26,126,833](https://etherscan.io/block/26126833), October 5, 2026 14:42 UTC; Accountable API snapshot October 5, 2026 14:46 UTC
+- **Final Score: 3.57/5.0**
+- **Snapshot:** Ethereum block [26,126,833](https://etherscan.io/block/26126833), October 5, 2026 14:42 UTC; Accountable API snapshot October 5, 2026 14:46 UTC; Solana slot 453,623,391 (public RPC `api.mainnet-beta.solana.com`, used at the reviewer's request because no Solana RPC is configured)
 
 ## Overview + Links
 
@@ -35,7 +35,7 @@ apyUSD inherits the same risk because it is redeemable into apxUSD. Its exchange
 - Chainlink [APXUSD / USD Exchange Rate](https://etherscan.io/address/0x651b101f72f82630cf59c68e6ee4305afbd3b1f5) feed: **1.000000** (last updated October 4, 2026, 19:00 UTC)
 - Base supply: ~9.64M apxUSD and ~0.35M apyUSD via Chainlink CCIP
 - BNB Chain supply: ~2.57M apxUSD via Chainlink CCIP ([token](https://bscscan.com/token/0x6b3788fd6604bbf03c5378d24e57bb334baad4af))
-- Solana: live CCIP route; remote supply **TODO** (no Solana RPC configured). Ethereum escrow less Base and BNB supply implies ~6.01M.
+- Solana supply: ~6.01M apxUSD via Chainlink CCIP ([mint](https://solscan.io/token/HAYQtfJEQ9DbDbaHEhxfGsWbSZ3ywthdsVB3PuB72DYe)). Its mint authority includes an Apyx Squads 3-of-7 vault with **no time lock**, outside the CCIP path (see *Solana Mint Authority*).
 - apyUSD vault totalAssets: ~167.18M apxUSD; exchange rate: ~1.4375 apxUSD per apyUSD
 - Curve apxUSD-USDC v3 Pool: **3.12M apxUSD + 1.66M USDC** ([pool](https://etherscan.io/address/0x6f63deedc9870d6c16fc644c6654748352cdc87c)); 85.3% of LP is held by an Apyx 2-of-4 Safe. The original Curve pool remains drained (~$5.7K).
 - Uniswap V4 PoolManager: ~10.20M apxUSD (singleton balance, not tradable depth)
@@ -101,10 +101,15 @@ apyUSD inherits the same risk because it is redeemable into apxUSD. Its exchange
 | apyUSD (Base) | [`0x2c271ddf484ac0386d216eb7eb9ff02d4dc0f6aa`](https://basescan.org/address/0x2c271ddf484ac0386d216eb7eb9ff02d4dc0f6aa) | Base deployment of apyUSD |
 | Base AccessManager | [`0x8AFDE6a90d2396A64eB97e8E69e7548289f78A1D`](https://basescan.org/address/0x8AFDE6a90d2396A64eB97e8E69e7548289f78A1D) | AccessManager returned by Base token `authority()` |
 | apxUSD (BNB Chain) | [`0x6b3788fd6604bbf03c5378d24e57bb334baad4af`](https://bscscan.com/token/0x6b3788fd6604bbf03c5378d24e57bb334baad4af) | BNB Chain apxUSD representation; ~2.57M supply at the October 5 snapshot; `getCCIPAdmin()` returns the Guardian Safe |
-| apxUSD (Solana) | [`HAYQtfJEQ9DbDbaHEhxfGsWbSZ3ywthdsVB3PuB72DYe`](https://solscan.io/token/HAYQtfJEQ9DbDbaHEhxfGsWbSZ3ywthdsVB3PuB72DYe) | Solana mint returned by `getRemoteToken(124615329519749607)` (decoded from bytes32); remote pool [`AuWWEJVQFesgLLZtbjFTR3wne35tqxWfdoC4zhBdkHPe`](https://solscan.io/account/AuWWEJVQFesgLLZtbjFTR3wne35tqxWfdoC4zhBdkHPe). Supply and mint authority **TODO**. |
+| apxUSD (Solana) | [`HAYQtfJEQ9DbDbaHEhxfGsWbSZ3ywthdsVB3PuB72DYe`](https://solscan.io/token/HAYQtfJEQ9DbDbaHEhxfGsWbSZ3ywthdsVB3PuB72DYe) | Solana mint returned by `getRemoteToken(124615329519749607)` (decoded from bytes32); remote pool config [`AuWWEJVQFesgLLZtbjFTR3wne35tqxWfdoC4zhBdkHPe`](https://solscan.io/account/AuWWEJVQFesgLLZtbjFTR3wne35tqxWfdoC4zhBdkHPe) (PDA `ccip_tokenpool_config` of token-pool program [`41FG…MGVB`](https://solscan.io/account/41FGToCmdaWa1dgZLKFAjvmx6e6AjVTX7SVRibvsMGVB)). Supply **6,013,497.10** (6 decimals). Mint authority is the SPL-Token **1-of-2 multisig** [`pVrU…zkRE`](https://solscan.io/account/pVrU5baovRPoQfaqHMvB1E1HdQvx6dBBFvheN8MzkRE). Its signers are the pool's `ccip_tokenpool_signer` PDA [`DNJ8…CqS`](https://solscan.io/account/DNJ8S3C93eeKS7cTG6uMDX5QTp22b4pjAcYxc4vFrCqS) and the Apyx Squads vault [`5CcT…J1CG`](https://solscan.io/account/5CcTTUPtSxF1iB5d2fGR7gYHbUBHL1orwzbuZdQGJ1CG). The freeze authority is that same Squads vault. |
+| Apyx Solana Squads multisig | [`4RkAx…RMp5`](https://solscan.io/account/4RkAxZdhbLKxTi3G7okdMG7xqBZPi9QfemDUtHgZRMp5) | Squads v4, **threshold 3 of 7 members** (6 with vote permission, 1 proposer-only), `time_lock = 0`, no config authority. Vault 0 is [`5CcT…J1CG`](https://solscan.io/account/5CcTTUPtSxF1iB5d2fGR7gYHbUBHL1orwzbuZdQGJ1CG), which has executed `SetChainRateLimit` on the Solana CCIP pool. |
 | Ethereum CCIP LockReleaseTokenPool | [`0x0e9cA42Bc60bE25F9A67f52173067Cc0Bb405BB5`](https://etherscan.io/address/0x0e9cA42Bc60bE25F9A67f52173067Cc0Bb405BB5) | Escrows canonical apxUSD (**~18.22M** at the snapshot) and maps CCIP routes to the Base, BNB Chain, and Solana remote tokens; `owner()` = Guardian Safe |
 
-**Bridge / interoperability:** Apyx uses **Chainlink CCIP** with a lock/release model on Ethereum. The Ethereum TokenAdminRegistry maps apxUSD to the LockReleaseTokenPool above. Its onchain `getSupportedChains()` returns three selectors, resolved through Chainlink's [chain-selectors registry](https://github.com/smartcontractkit/chain-selectors): Base `15971525489660198786`, BNB Chain `11344663589394136015`, and **Solana mainnet `124615329519749607`**. `getRemoteToken` maps each selector to the remote token listed above. Canonical apxUSD is escrowed on Ethereum, and remote tokens are bridged representations. Inbound and outbound rate limits are enabled on every lane. Base and BNB Chain have 5M-apxUSD buckets in each direction. Solana has a 5.5M outbound bucket and a 2M inbound bucket. The pool owner and the BNB token's `getCCIPAdmin()` are both the Guardian Safe. Escrow of ~18.22M exceeds the verified Base and BNB Chain supply (~12.21M combined), leaving ~6.01M attributable to Solana if escrow and remote supply reconcile. That Solana figure is **TODO** until it is read directly.
+**Bridge / interoperability:** Apyx uses **Chainlink CCIP** with a lock/release model on Ethereum. The Ethereum TokenAdminRegistry maps apxUSD to the LockReleaseTokenPool above. Its onchain `getSupportedChains()` returns three selectors, resolved through Chainlink's [chain-selectors registry](https://github.com/smartcontractkit/chain-selectors): Base `15971525489660198786`, BNB Chain `11344663589394136015`, and **Solana mainnet `124615329519749607`**. `getRemoteToken` maps each selector to the remote token listed above. Canonical apxUSD is escrowed on Ethereum, and remote tokens are bridged representations. Inbound and outbound rate limits are enabled on every lane. Base and BNB Chain have 5M-apxUSD buckets in each direction. Solana has a 5.5M outbound bucket and a 2M inbound bucket. The pool owner and the BNB token's `getCCIPAdmin()` are both the Guardian Safe. **Escrow reconciles:** Ethereum escrow of 18,224,305.94 apxUSD matches Base (9,636,755.81) + BNB Chain (2,574,051.78) + Solana (6,013,497.10) = 18,224,304.69 to within ~1.25 apxUSD.
+
+#### Solana Mint Authority
+
+The Solana apxUSD mint can be minted by **either** the CCIP pool signer PDA **or** the Apyx Squads vault (SPL multisig, 1 of 2 required). The Squads multisig is 3-of-7 (six voting members) with `time_lock = 0`. This is a mint path that bypasses CCIP, the Ethereum AccessManager, MinterV0's delays, and the 750M Ethereum supply cap. Tokens minted this way would have no Ethereum escrow behind them. If bridged back to Ethereum, they would release real escrowed apxUSD at the expense of other remote holders. That path is bounded by the Ethereum pool's Solana **inbound rate limit**: a 2M bucket refilling at ~23.15 apxUSD/s (~2M/day), set by the Ethereum pool owner (Guardian Safe). It is also bounded by the escrow itself (~18.22M, ~6% of supply). Ethereum apxUSD supply cannot be created this way. The Squads vault also holds the **freeze authority** over every Solana apxUSD account.
 
 ### Governance & Multisig Contracts
 
@@ -242,7 +247,7 @@ The architecture is moderately complex:
   - Ethereum apxUSD `totalSupply`: **~302.47M** (supply cap 750M)
   - Base supply: ~9.64M apxUSD and ~0.35M apyUSD
   - BNB Chain supply: ~2.57M apxUSD
-  - Solana supply: **TODO** (~6.01M implied by Ethereum escrow less Base and BNB supply)
+  - Solana supply: ~6.01M apxUSD
   - apyUSD vault totalAssets: ~167.18M apxUSD
   - Curve v3 pool: ~3.12M apxUSD + ~1.66M USDC; original Curve pool ~$5.7K
   - Guardian/Upgrader Safe: **~13.49M apxUSD + ~6.93M apyUSD**, 0 USDC
@@ -307,7 +312,7 @@ Snapshot at block [26,126,833](https://etherscan.io/block/26126833) (October 5, 
 
 Notes: the apyUSD vault row is `totalAssets()`, which includes apxUSD held directly by the vault **plus** vested apxUSD claimable from LinearVestV0 — it is not purely a token balance. The original Curve pool was drained by the Guardian Safe in two stages: ~88% of the LP between June 1 and June 5, 2026, and the remainder by July 6 (LP balance 40,890,164 → 0).
 
-Base apxUSD totalSupply is ~9,636,756, Base apyUSD totalSupply is ~346,931, and BNB Chain apxUSD supply is ~2,574,052 as of October 5. These are claims on the CCIP escrow row above, not additional Ethereum supply. Solana supply could not be read (**TODO**). A full cross-chain liability-versus-escrow reconciliation remains **TODO** because Accountable's `supply_split` itemizes Ethereum only.
+Base apxUSD totalSupply is ~9,636,756, Base apyUSD totalSupply is ~346,931, and BNB Chain apxUSD supply is ~2,574,052 as of October 5. These are claims on the CCIP escrow row above, not additional Ethereum supply. Solana supply is ~6,013,497 (public RPC, slot 453,623,391). Together, the three remote supplies match the Ethereum escrow to within ~1.25 apxUSD at the snapshot. Accountable's `supply_split` still itemizes Ethereum only, so this reconciliation is not published by Apyx.
 
 ## Funds Management
 
@@ -321,6 +326,7 @@ Minting uses EIP-712 structured data signing via MinterV0 with onchain safeguard
 - **MinterV0** ([`0x2c36e1adfaa80ee0324b04cc814f5207bb7ba76e`](https://etherscan.io/address/0x2c36e1adfaa80ee0324b04cc814f5207bb7ba76e)): Holds `MINT_STRAT_ROLE` (role 1) with **60-second execution delay**, and role 4 with **4-hour execution delay**. `getTargetFunctionRole(apxUSD, mint(address,uint256,uint256))` = 4, so the 4-hour path is the live apxUSD mint gate.
 - On August 26, 2026, role 4 was granted to the new alqUSD MinterV0 [`0xcbaf…ca15`](https://etherscan.io/address/0xcbaf4ac85710bc0b678de6a25b33eed85fd1ca15). Because of the role's 3-day grant delay, the `RoleGranted` event set it to take effect on August 29. It was revoked on August 27 in tx [`0x4d8e…6a7e`](https://etherscan.io/tx/0x4d8e37233ada3d9c82ac5bd0a734908a8b8461945a4ee73cd2ba426c6f816a7e), before it became active. This was the grant delay working as designed. That contract now holds only role 51, which mints alqUSD. MinterV0 is the only verified apxUSD mint-role holder.
 - **Current Admin Safe** ([`0xabdd8c8ee69e5f5180eb9352aeffc5ceead65e96`](https://etherscan.io/address/0xabdd8c8ee69e5f5180eb9352aeffc5ceead65e96)): Holds ADMIN_ROLE with 0 execution delay. `getRoleGrantDelay` is 3 days for roles 1 and 4, and `getTargetAdminDelay(apxUSD)` is 3 days. The admin therefore cannot instantly create a new minter path without running into role-grant or target-admin-delay timelocks (see Governance section).
+- **Solana (remote) mint**: the Solana apxUSD mint authority is a 1-of-2 SPL multisig. Its signers are the CCIP pool signer PDA and an Apyx Squads 3-of-7 vault with `time_lock = 0` (see *Solana Mint Authority*). It cannot create Ethereum apxUSD, but it can mint Solana apxUSD that could release up to the ~18.22M Ethereum escrow at the Solana inbound rate limit (~2M/day).
 - **Supply cap**: `setSupplyCap` on apxUSD is gated to role 23, held by the Guardian Safe with a 1-day execution delay. The cap is 750M.
 
 General users acquire apxUSD through secondary markets (Curve, Uniswap, CoW Protocol).
@@ -367,7 +373,7 @@ General users acquire apxUSD through secondary markets (Curve, Uniswap, CoW Prot
 - **Yield distribution**: Semi-programmatic. Authorized operators/admins can initiate the amount of apxUSD yield sent into YieldDistributor/LinearVestV0; there is no onchain oracle that independently verifies the offchain dividend amount before it is distributed. Once apxUSD is deposited into LinearVestV0, vesting is programmatic (~17-day linear), and the apyUSD vault pulls vested yield, increasing `totalAssets()` and therefore the ERC-4626 exchange rate. This means the **PPS formula is onchain-verifiable**, but the **correctness of the yield amount relative to real offchain dividends remains trust/attestation-based**.
 - **Rate oracle**: The ApxUSDRateOracle is **manually set** by a role-0 caller via `setRate()`. Currently 1.000000. No onchain price feed, no TWAP, no staleness check. **Crucially, `getTargetFunctionRole(oracle, setRate)` is 0 (ADMIN_ROLE) and `getTargetAdminDelay(oracle)` is 0 — the current Admin Safe can change the oracle rate instantly with no timelock.** It prices the original, now-drained Curve pool. The Curve v3 pool was [deployed](https://etherscan.io/tx/0x54cba1d2047ad9fd74a965ed23b4ac76376788d87b54eae6154845193d353705) by `deploy_plain_pool` with zero oracle addresses and method IDs, so the v3 pool does **not** read this oracle.
 - **Chainlink NAV feed**: The [APXUSD / USD Exchange Rate](https://etherscan.io/address/0x651b101f72f82630cf59c68e6ee4305afbd3b1f5) Chainlink feed (631 rounds since April 23, 2026) publishes an apxUSD NAV/redemption rate onchain. Feed history tracks the depeg and recovery: 0.951185 on June 5, 0.798653 on June 26, 0.913 on July 28, and 1.000000 from September 16. The feed improves observability. Accountable's registry lists `oracle = chainlink` for Apyx, so Accountable is the likely upstream. The feed reads 1.000000 while the API's `redemption_value` is 0.9984. Any capping logic is **TODO**.
-- **Cross-chain supply**: apxUSD and apyUSD trade on Base, and apxUSD is also live on BNB Chain and Solana. The Ethereum CCIP LockReleaseTokenPool maps all three remote tokens and escrows canonical apxUSD. This adds a bridge/infrastructure dependency: remote liquidity and cross-chain supply accounting depend on CCIP operation, token-pool/admin configuration, and escrow remaining reconciled to remote supply. Accountable's API currently itemizes Ethereum only in `supply_split`, so full route-by-route reconciliation remains **TODO**.
+- **Cross-chain supply**: apxUSD and apyUSD trade on Base, and apxUSD is also live on BNB Chain and Solana. The Ethereum CCIP LockReleaseTokenPool maps all three remote tokens and escrows canonical apxUSD. This adds a bridge/infrastructure dependency: remote liquidity and cross-chain supply accounting depend on CCIP operation, token-pool/admin configuration, and escrow remaining reconciled to remote supply. Escrow matched Base + BNB + Solana supply to within ~1.25 apxUSD at the snapshot, but Accountable's API itemizes Ethereum only in `supply_split`. The Solana mint also has a non-CCIP minter (the Squads vault), so reconciliation can break without any Ethereum-side event.
 
 ## Liquidity Risk
 
@@ -469,6 +475,7 @@ Roles 42–44 and 51–54 have **0-second grant delays**, and roles 42–44 are 
 - Admin-Safe-to-Upgrader-Safe separation prevents the 4-of-6 current Admin Safe from unilaterally upgrading the core stablecoin contracts without waiting through timelocks: it would have to either (a) schedule a `setTargetFunctionRole` change on apxUSD/apyUSD (3-day target-admin-delay), or (b) grant role 24 to a new address (7-day role-grant delay) and then still wait the 3-day execution delay. This is a substantial improvement over the prior zero-delay configuration.
 - **The Rate Oracle remains a zero-delay control, now with a narrower blast radius.** ADMIN_ROLE can upgrade the oracle and call `setRate()` with zero delay. It prices only the original, drained Curve pool (~$5.7K). The live Curve v3 pool was deployed without any rate oracle.
 - Admin Safe and Guardian Safe are not independent. All six Admin Safe owners are also owners of the Guardian Safe, which adds one further owner. The 4-of-7 threshold can therefore be met entirely by Admin Safe signers.
+- **Solana mint authority without a time lock.** A Squads 3-of-7 vault (six voting members) can mint Solana apxUSD outside CCIP and freeze Solana accounts immediately. Escrow drain via the bridge is capped by the Ethereum-side Solana inbound rate limit (~2M/day) and the ~18.22M escrow. This is the only identified apxUSD-family mint path with no time lock.
 - **Shared AccessManager across products.** The alqUSD/aptUSD family, its MinterV0, and two new oracles are governed by the same AccessManager. These targets have a 0-second target-admin delay, and their roles 51–54 have 0-second grant delays. They do not carry apxUSD mint authority, but an Admin Safe compromise now reaches a larger contract set.
 - **apyUSD implementation history** (`Upgraded(address)` events on the proxy): block 24495109 → `0x1c40…531e`; block 24770480 (Mar 30, 2026, tx [`0xd2d6…6eee`](https://etherscan.io/tx/0xd2d6402c540a482a267fa10a168bd6df8d4b53a9fecde093a40cae66a67f6eee)) → `0x2085…cacf`; block 25124599 (May 18, 2026, tx [`0x064b…d441`](https://etherscan.io/tx/0x064b70ff07a642edf4807731e0c4f69fec509eee3bd6a2d8c013f52e2ad7d441)) → `0x6f4d…3173`; block 25188571 (May 27, 2026, tx [`0x4e5b…696d`](https://etherscan.io/tx/0x4e5b0a6da667cef27e23745f7fd217baa6242b6365ad18b894720cbfb3b4696d)) → current [`0xfd61…b112`](https://etherscan.io/address/0xfd616567ecc1607f61073951a1e822f7315bb112). Four upgrades in ~3.5 months, two of them nine days apart, on a contract holding the majority of circulating apxUSD. Every upgrade routed through the Guardian Safe under the 3-day execution delay, so the timelock is functioning as designed. No further apxUSD, apyUSD, or rate-oracle upgrades occurred between May 27 and the October 5 snapshot; implementations are unchanged.
 
@@ -632,6 +639,7 @@ apxUSD has recovered to ~$0.988 but has not held $0.99; these are the primary us
 - **Ethereum LockReleaseTokenPool**: [`0x0e9cA42Bc60bE25F9A67f52173067Cc0Bb405BB5`](https://etherscan.io/address/0x0e9cA42Bc60bE25F9A67f52173067Cc0Bb405BB5) — escrow ~18.22M apxUSD
 - Monitor Chainlink CCIP status for the Ethereum/Base, Ethereum/BNB, and Ethereum/Solana routes, remote token supply, token-pool configuration, rate limits, remote-token mappings, and escrow-versus-remote-supply reconciliation.
 - **Alert (Critical)**: If Base + BNB + Solana apxUSD supply exceeds Ethereum escrow.
+- **Solana mint authority**: monitor `MintTo` on [`HAYQ…2DYe`](https://solscan.io/token/HAYQtfJEQ9DbDbaHEhxfGsWbSZ3ywthdsVB3PuB72DYe) signed by the Squads vault [`5CcT…J1CG`](https://solscan.io/account/5CcTTUPtSxF1iB5d2fGR7gYHbUBHL1orwzbuZdQGJ1CG) rather than the CCIP pool signer PDA. **Alert (Critical)** on any such mint, on any `SetAuthority` change to the mint, freeze authority, or SPL multisig, and on any `FreezeAccount`. **Alert** on Squads [`4RkAx…RMp5`](https://solscan.io/account/4RkAxZdhbLKxTi3G7okdMG7xqBZPi9QfemDUtHgZRMp5) member, threshold, or time-lock changes.
 - **Alert**: If any route is paused, rate-limited, reconfigured, or if remote supply changes without a matching lock/release accounting path.
 
 ### Monitoring Frequency
@@ -647,6 +655,7 @@ apxUSD has recovered to ~$0.988 but has not held $0.99; these are the primary us
 | **Mint pass-through 0xcca1af4d outflow destination** | Real-time | **Critical** |
 | Accountable PoR dashboard freshness / registry status | Real-time | Critical |
 | Chainlink CCIP / Base + BNB + Solana supply reconciliation | Real-time | Critical |
+| **Solana non-CCIP mints / authority changes** (Squads vault) | Real-time | **Critical** |
 | **Curve v3 LP held by the Liquidity Safe** (POL withdrawal) | Real-time | **Critical** |
 | Chainlink APXUSD / USD feed answer and staleness | Real-time | High |
 | Peg-liquidity / CoW contract balances and withdrawals | Real-time | High |
@@ -694,7 +703,7 @@ apxUSD has recovered to ~$0.988 but has not held $0.99; these are the primary us
 - **Issuer concentration**: asset reserves are ~86.6% STRC, a single issuer's preferred stock; SATA is $0.
 - **Unverified contracts holding funds**: the peg-liquidity and CoW order contracts hold ~1.1M apxUSD and ~0.46M USDC without verified source.
 - **Shared AccessManager with new products**: alqUSD/aptUSD and two new oracles share apxUSD's Admin Safe and AccessManager, with 0-second target-admin delays.
-- **CCIP / remote-chain dependency**: apxUSD is live on Base, BNB Chain, and Solana, while apyUSD is live on Base. Remote supply depends on the Ethereum LockReleaseTokenPool (~18.22M escrow) and route configuration. Solana supply is unverified.
+- **CCIP / remote-chain dependency**: apxUSD is live on Base, BNB Chain, and Solana, while apyUSD is live on Base. Remote supply depends on the Ethereum LockReleaseTokenPool (~18.22M escrow) and route configuration. On Solana, a 3-of-7 Squads multisig with no time lock can mint and freeze apxUSD outside CCIP.
 - **Young protocol**: ~229 days in production, with its only stress test producing a four-month depeg.
 - **DFDV concentration**: all six founding contributors are executives at DeFi Development Corp. (Nasdaq: DFDV), which is also the protocol's first institutional investor. BVI legal entity with $100 liability cap.
 - **No bug bounty program**: notable absence for a protocol with >$300M Ethereum apxUSD supply.
@@ -747,9 +756,10 @@ apxUSD has recovered to ~$0.988 but has not held $0.99; these are the primary us
 - 7-day role-grant delay for ADMIN_ROLE and roles 21–25; 3-day grant delay on apxUSD mint roles 1 and 4. 5-day `minSetback`. 3-day `targetAdminDelay` on core contracts.
 - Rate Oracle has **no timelock**: ADMIN_ROLE can upgrade the oracle or call `setRate()` with 0-second delay. It now prices only the drained original Curve pool.
 - The same AccessManager now governs the alqUSD/aptUSD family and two new oracles with 0-second target-admin delays. There is no apxUSD mint path from those targets.
+- **Solana**: an Apyx Squads 3-of-7 vault with `time_lock = 0` is a co-signer on the Solana apxUSD mint authority (1-of-2) and holds the freeze authority. It can mint remote supply outside CCIP, bounded on the Ethereum side by a ~2M/day inbound rate limit against the ~18.22M escrow.
 - No independent Guardian with a veto on upgrades; the Admin Safe can in principle reroute upgrades by creating a new role and granting it (subject to the 7-day grant delay and 3-day target-admin-delay).
 
-**Governance Score: 3.0** -- Between score 3 (moderate multisig with short timelock, several admin functions centralized) and score 4 (low threshold, <12h timelock). Core stablecoin proxy upgrades and mint-role grants have meaningful multi-day timelocks. The August revocation of a pending role-4 grant shows the grant delay functioning. The Guardian threshold increase helps, but signer overlap with the Admin Safe limits its value. The rate oracle remains zero-delay, though its blast radius has shrunk.
+**Governance Score: 3.5** -- Raised from 3.0. Core stablecoin proxy upgrades and Ethereum mint-role grants have meaningful multi-day timelocks. The August revocation of a pending role-4 grant shows the grant delay functioning. The Guardian threshold increase helps, but signer overlap with the Admin Safe limits its value. The rate oracle remains zero-delay, though its blast radius has shrunk. The score moves toward band 4 ("powerful admin roles with limited constraints", <12h timelock) because a 3-of-7 Squads vault can mint Solana apxUSD and freeze Solana holders with **no time lock**. The Ethereum-side inbound rate limit (~2M/day) and the ~18.22M escrow bound how far that can reach canonical apxUSD.
 
 **Subcategory B: Programmability**
 
@@ -771,9 +781,9 @@ apxUSD has recovered to ~$0.988 but has not held $0.99; these are the primary us
 
 **Dependencies Score: 4.0** -- Critical dependency on offchain and tokenized equity custody, concentrated in a single issuer's preferred stock (~86.6% of asset reserves). No fallback mechanism if custody providers fail. Exit liquidity depends on issuer-owned venues, and remote supply on three CCIP lanes adds route and escrow-reconciliation dependencies.
 
-**Centralization Score = (3.0 + 3.5 + 4.0) / 3 = 3.5**
+**Centralization Score = (3.5 + 3.5 + 4.0) / 3 = 3.67**
 
-**Score: 3.5/5** -- Held at 3.5. Timelocks on core upgrades and role grants remain a material strength; core implementations are unchanged since May 27. Two facts push against holding: the deny list is wired into apxUSD transfers, apyUSD, and the redemption queue, while Apyx 2.0 prices redemption at protocol-computed redemption value rather than par. These capabilities would support Programmability 4.0 — `(3.0 + 4.0 + 4.0) / 3 = 3.67` — but no punitive deny-list use was observed, and the Chainlink NAV feed now makes the redemption value publicly observable. The shared AccessManager and new EOA operator roles are noted but do not change subcategory anchors. Held at 3.5; see *Reassessment Triggers*.
+**Score: 3.67/5** -- Raised from 3.5 by the zero-timelock Solana mint/freeze authority. Timelocks on core upgrades and role grants remain a material strength; core implementations are unchanged since May 27. The deny list (wired into apxUSD transfers, apyUSD, and the redemption queue) and Apyx 2.0's redemption-value pricing would also support Programmability 4.0. Programmability is held at 3.5 because no punitive deny-list use was observed and the Chainlink NAV feed now makes the redemption value publicly observable. The shared AccessManager and new EOA operator roles are noted but do not change subcategory anchors. See *Reassessment Triggers*.
 
 #### Category 3: Funds Management (Weight: 30%)
 
@@ -837,11 +847,11 @@ Final Score = (Centralization × 0.30) + (Funds Mgmt × 0.30) + (Audits × 0.20)
 | Category | Score | Weight | Weighted |
 |----------|-------|--------|----------|
 | Audits & Historical | 3.75 | 20% | 0.75 |
-| Centralization & Control | 3.5 | 30% | 1.05 |
+| Centralization & Control | 3.67 | 30% | 1.10 |
 | Funds Management | 3.25 | 30% | 0.975 |
 | Liquidity Risk | 4.0 | 15% | 0.60 |
 | Operational Risk | 3.0 | 5% | 0.15 |
-| **Final Score** | | | **3.52/5.0** |
+| **Final Score** | | | **3.57/5.0** |
 
 ### Risk Tier
 
@@ -856,7 +866,7 @@ Final Score = (Centralization × 0.30) + (Funds Mgmt × 0.30) + (Audits × 0.20)
 
 **Final Risk Tier: Elevated Risk — Limited approval, strict limits**
 
-> The final score is 3.52 (Elevated, just above the Medium boundary). apxUSD has recovered to ~$0.988, Accountable coverage is back at 100.70%, and Curve v3 restores ~$1M of exit depth. The score stays Elevated because that depth is issuer-owned and withdrawable, the over-par buffer is under 1%, coverage depends on excluding ~41.6% of supply as protocol-held, and the four-month depeg remains the protocol's only stress-test result.
+> The final score is 3.57 (Elevated, just above the Medium boundary). apxUSD has recovered to ~$0.988, Accountable coverage is back at 100.70%, and Curve v3 restores ~$1M of exit depth. The score stays Elevated because that depth is issuer-owned and withdrawable, the over-par buffer is under 1%, coverage depends on excluding ~41.6% of supply as protocol-held, and the four-month depeg remains the protocol's only stress-test result.
 
 ---
 
@@ -864,7 +874,7 @@ Apyx's apxUSD is a novel "Dividend-Backed Stablecoin" bridging offchain corporat
 
 The June 2026 stress test showed that governance was never the binding constraint. A record STRC drawdown transmitted directly into the apxUSD market price, and the deepest dislocations landed overnight while Nasdaq was closed and collateral marks were stale. The public NAV dashboard displayed inflated numbers throughout, and the Guardian Safe withdrew the bulk of the only permissionless Ethereum exit venue in the same week. The recovery since then has three drivers: STRC marks recovered, circulating supply contracted to ~176.5M through burns and growth in protocol-held inventory (~29.4M → ~60.7M since August 10), and Apyx re-seeded issuer-owned venues — Curve v3, a NAV-bounded peg contract, and CoW orders. Accountable coverage crossed 100% on September 20 and the Chainlink NAV feed returned to 1.0 on September 16. apxUSD itself has not yet held $0.99.
 
-**Residual concerns underlying the 3.52 score:**
+**Residual concerns underlying the 3.57 score:**
 - **Incomplete peg recovery.** apxUSD at $0.988 (−1.2%) after four months below par, low of ~$0.75.
 - **Issuer-owned exit depth.** Curve v3 absorbs ~1M apxUSD at ~2.5% below par, but 85.3% of its LP is in a 2-of-4 Safe. The CoW and peg-contract inventory is EOA-operated, and none of it is timelocked — the same property that failed in June. Whitelisted apxUSD redemption is manual and priced at redemption value, not $1; the 20-day cooldown applies only when exiting apyUSD.
 - **Coverage at par with no buffer.** Accountable shows 100.70% asset-reserve coverage (a ~$1.23M cushion), which relies on classifying ~$125.9M of Apyx-held apxUSD as non-circulating. Only ~$43M of that was reconciled to addresses.
@@ -873,7 +883,7 @@ The June 2026 stress test showed that governance was never the binding constrain
 - **Rate Oracle has no timelock.** ADMIN_ROLE can upgrade the oracle and call `setRate()` with zero delay, though it now prices only the drained original Curve pool.
 - **Admin discretion over transfers and the exit.** The deny list is wired into apxUSD, apyUSD, and the redemption queue; apxUSD redemption is permissioned and uses redemption-value pricing.
 - **Shared governance with new products and unverified peg contracts.** alqUSD/aptUSD share the AccessManager and Admin Safe, and the peg-liquidity and CoW contracts are unverified.
-- **Cross-chain reconciliation remains incomplete.** Base, BNB Chain, and Solana supplies depend on Ethereum CCIP escrow (~18.22M); Solana supply is unverified, and Accountable's `supply_split` itemizes only Ethereum.
+- **Zero-timelock Solana mint authority.** A 3-of-7 Squads vault can mint Solana apxUSD outside CCIP and freeze Solana holders. Bridging such tokens back could drain up to ~2M/day of the ~18.22M Ethereum escrow. Escrow reconciled at the snapshot, but Accountable's `supply_split` itemizes only Ethereum.
 - **Custody disclosure remains incomplete.** Alpaca is named for offchain STRC, but the cash-account custodian, the remaining STRCx wallets, and the Preference Foundation's relationship to the BVI entity are undisclosed.
 - **No bug bounty program** at >$300M Ethereum apxUSD supply.
 
@@ -882,12 +892,13 @@ The June 2026 stress test showed that governance was never the binding constrain
 1. **Restore a credible onchain exit.** Third-party liquidity that Apyx cannot unilaterally withdraw, deep enough to absorb a meaningful position near par. Protocol-owned liquidity does not satisfy this — June demonstrated why. At minimum, move issuer LP behind a timelock or a higher-threshold Safe.
 2. **Peg recovery.** apxUSD sustained above $0.99 for 30 days.
 3. **Rebuild an over-par buffer** that survives a plausible STRC drawdown, and reconcile inventory/POL to published addresses.
-4. **Add a non-zero execution delay or target-admin-delay to the Rate Oracle** (`ApxUSDRateOracle`) so `setRate()` and `upgradeToAndCall` cannot execute instantly.
-5. **Extend the examination scope** to cash, liabilities, and collateral coverage, not only securities balances.
-6. **Verify the peg-liquidity and CoW order contracts** on Etherscan and document their pricing rules.
-7. **Complete the transparency-stack remediation**: publish the NAV pricing methodology (including how STRC is marked outside Nasdaq hours and how the Chainlink feed relates to `redemption_value`), and expose source-level freshness in the Accountable API.
-8. **Complete custody disclosure** by naming the bank/custodian for cash and cash equivalents, every STRCx wallet, and the Preference Foundation's legal relationship to the BVI entity.
-9. **Launch a bug bounty program** (Immunefi / Cantina / Safe Harbor).
+4. **Remove the Squads vault from the Solana mint authority** (leaving only the CCIP pool signer), or put it behind a Squads time lock, and drop the freeze authority.
+5. **Add a non-zero execution delay or target-admin-delay to the Rate Oracle** (`ApxUSDRateOracle`) so `setRate()` and `upgradeToAndCall` cannot execute instantly.
+6. **Extend the examination scope** to cash, liabilities, and collateral coverage, not only securities balances.
+7. **Verify the peg-liquidity and CoW order contracts** on Etherscan and document their pricing rules.
+8. **Complete the transparency-stack remediation**: publish the NAV pricing methodology (including how STRC is marked outside Nasdaq hours and how the Chainlink feed relates to `redemption_value`), and expose source-level freshness in the Accountable API.
+9. **Complete custody disclosure** by naming the bank/custodian for cash and cash equivalents, every STRCx wallet, and the Preference Foundation's legal relationship to the BVI entity.
+10. **Launch a bug bounty program** (Immunefi / Cantina / Safe Harbor).
 
 **Monitoring priorities:**
 - **apxUSD market price** — the primary user-impact signal until the peg holds. Not the Curve virtual price.
@@ -915,7 +926,7 @@ The June 2026 stress test showed that governance was never the binding constrain
 - **Redemption mechanics**: Reassess if the Apyx 2.0 redemption value is enforced onchain in apxUSD mint/redeem, if the deny list is used against a non-sanctions counterparty, if `setUnlockingFee` or `unlockingDelay` change, or if apxUSD redemption is opened beyond the whitelist. The second and third would support raising Programmability from 3.5 to 4.0; the last would be a material improvement to Liquidity.
 - **Accountable verification**: Reassess if the dashboard/API becomes unavailable or stale, asset-reserve coverage falls below 100% on two consecutive daily reports, inventory + POL moves by more than $10M in a day, Accountable removes or downgrades the Apyx registry entry, connector count decreases, or verifiability level decreases.
 - **Chainlink NAV feed**: Reassess if the APXUSD / USD Exchange Rate feed answers below 0.99, goes stale for more than 26 hours, or diverges materially from Accountable's `redemption_value`.
-- **Cross-chain / CCIP**: Reassess if any Ethereum/Base, Ethereum/BNB, or Ethereum/Solana CCIP lane is paused or impaired, token-pool/admin configuration or rate limits change materially, remote apxUSD/apyUSD supply diverges from Ethereum escrow accounting, or Apyx migrates to a different bridge provider.
+- **Cross-chain / CCIP**: Reassess if any Ethereum/Base, Ethereum/BNB, or Ethereum/Solana CCIP lane is paused or impaired, token-pool/admin configuration or rate limits change materially (including a higher Ethereum-side Solana inbound limit), the Solana Squads vault mints outside CCIP or the Squads threshold/time lock changes, remote apxUSD/apyUSD supply diverges from Ethereum escrow accounting, or Apyx migrates to a different bridge provider.
 - **Governance-based**: Reassess on any ownership/threshold change to the Admin, Guardian, or Liquidity Safe, any change to `targetAdminDelay` or `roleGrantDelay` on AccessManager, any grant of apxUSD mint roles 1/4, any rate-oracle change (upgrade or `setRate`), or any further apxUSD/apyUSD implementation upgrades.
 - **Shared-product**: Reassess if alqUSD/aptUSD contracts gain any apxUSD mint, burn, or reserve-sharing path, or if the peg-liquidity/CoW contracts are upgraded, replaced, or verified.
 - **Time-based**: Reassess in 1 month (early November 2026).
@@ -935,4 +946,4 @@ The June 2026 stress test showed that governance was never the binding constrain
 | [April 19, 2026](https://github.com/yearn/risk-score/pull/140) | 3.5 | All critical gates cleared after governance restructure and attestation publication. Supply ~175M. |
 | [May 29, 2026](https://github.com/yearn/risk-score/pull/227) | 3.66 | Tier raised to Elevated Risk. POL concentration (99.96% Curve LP), supply growth outpacing attestation (524M vs 67M attested). |
 | [August 1, 2026](https://github.com/yearn/risk-score/pull/373) | 3.72 | June 2026 depeg recorded: apxUSD below par since early June, low ~$0.75, $0.881 at eight weeks. Guardian Safe withdrew ~88% of Curve LP June 1–5 and the remainder by July 6 (~$29M → ~$11.9K). Ethereum supply contracted 524M → 312M via onchain burns; Base and BNB Chain routes are live through CCIP. The 20-day cooldown applies to apyUSD, not direct apxUSD redemption. The deny list controls apxUSD transfers, apyUSD, and the unlock queue. Playwright retrieved Accountable's public API (92.24% asset-reserve coverage, $0.9131 redemption value, 100% dashboard verifiability, Nitro attestation) and all four Wolf examination reports for March–June. The Wolf opinions verify asset existence, ownership, custody, and valuation and name Alpaca for offchain STRC/SATA, but do not attest liabilities or coverage. Audits & Historical 3.5→4.0; Liquidity 4.0→4.5; Funds Management 3.875→3.5. |
-| [October 5, 2026](https://github.com/yearn/risk-score/pull/511) | 3.52 | apxUSD recovered from $0.881 to $0.988. Accountable asset-reserve coverage rose from 92.24% to 100.70% (above 100% since September 20), with ~$125.9M of Apyx inventory/POL excluded from circulating supply. Chainlink APXUSD/USD NAV feed returned to 1.0 on September 16. Apyx re-seeded issuer-owned liquidity: Curve v3 (~$4.8M, 85.3% LP in a 2-of-4 Safe; ~1M clears ~2.5% below par), an unverified NAV-bounded peg contract, and CoW orders. Wolf July/August reports are securities-only and show SATA at $0. Guardian Safe raised to 4-of-7. The Solana CCIP lane is live. alqUSD/aptUSD launched on the shared AccessManager without an apxUSD mint path. Audits & Historical 4.0→3.75; Funds Management 3.5→3.25; Liquidity 4.5→4.0. |
+| [October 5, 2026](https://github.com/yearn/risk-score/pull/511) | 3.57 | apxUSD recovered from $0.881 to $0.988. Accountable asset-reserve coverage rose from 92.24% to 100.70% (above 100% since September 20), with ~$125.9M of Apyx inventory/POL excluded from circulating supply. Chainlink APXUSD/USD NAV feed returned to 1.0 on September 16. Apyx re-seeded issuer-owned liquidity: Curve v3 (~$4.8M, 85.3% LP in a 2-of-4 Safe; ~1M clears ~2.5% below par), an unverified NAV-bounded peg contract, and CoW orders. Wolf July/August reports are securities-only and show SATA at $0. Guardian Safe raised to 4-of-7. The Solana CCIP lane is live (~6.01M; escrow reconciles). Its mint authority includes a 3-of-7 Squads vault with no time lock, which can mint outside CCIP and freeze holders (read via public Solana RPC). alqUSD/aptUSD launched on the shared AccessManager without an apxUSD mint path. Audits & Historical 4.0→3.75; Centralization 3.5→3.67 (Governance 3.0→3.5); Funds Management 3.5→3.25; Liquidity 4.5→4.0. |
