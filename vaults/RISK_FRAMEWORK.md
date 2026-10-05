@@ -186,7 +186,4 @@ Current risk levels of live strategies are available [here](https://docs.google.
 
 ## Automation
 
-About the automation of attaching risk scores to vaults see following:
-
-- [Vault](./VAULT.md) - assign risk scores to specific vaults
-- [Factory](./factory/FACTORY.md) - assign risk score to factory. All vaults deployed by the factory will inherit the risk score of the factory.
+See [Vault](./VAULT.md) for how risk scores are attached to specific vaults.
