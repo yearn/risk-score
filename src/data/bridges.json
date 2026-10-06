@@ -508,7 +508,7 @@
           "kind": "indirect",
           "model": "mint",
           "integration": "sUSDai collateral (USD.AI OAdapter)",
-          "detail": "OAdapter [`0xffB2…7f24`](https://arbiscan.io/address/0xffB20098FD7B8E84762eea4609F299D101427f24) burns and mints sUSDai on both chains; its authenticated receive path can mint canonical Arbitrum sUSDai. Fluid held ~96% of the Ethereum OToken supply at the Jul 22 check. The 10M/hour limiter is outbound-only and does not cap `_credit` on a forged inbound message",
+          "detail": "OAdapter [`0xffB2…7f24`](https://arbiscan.io/address/0xffB20098FD7B8E84762eea4609F299D101427f24) burns and mints sUSDai on both chains; its authenticated receive path can mint canonical Arbitrum sUSDai. Fluid held ~80.5% of the Ethereum OToken supply and ~42% of circulating sUSDai at the Sep 29 check. The 10M/hour limiters are outbound-only and do not cap `_credit` on a forged inbound message",
           "security": {
             "label": "3-of-3",
             "confirmations": 15,
@@ -518,8 +518,9 @@
               "Canary"
             ],
             "route": "Ethereum→Arbitrum (canonical sUSDai mint side)",
+            "note": "Same 3-of-3 DVN set on all five inbound routes to the Arbitrum OAdapter (Ethereum, Plasma, Base, Solana, Arc); Solana and Arc peers added Aug 14 and Sep 10, 2026. Confirmations: Ethereum 15, Plasma 20, Base 10, Solana 32, Arc 10.",
             "weak": false,
-            "verifiedAt": "2026-07-22",
+            "verifiedAt": "2026-09-29",
             "link": "https://arbiscan.io/address/0xffB20098FD7B8E84762eea4609F299D101427f24"
           },
           "owner": "Adapter owner: 3-of-3 Safe [`0x5F0B…841F`](https://arbiscan.io/address/0x5F0BC72FB5952b2f3F2E11404398eD507B25841F)."
