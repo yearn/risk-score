@@ -25,24 +25,24 @@ nodes:
     label: GHO (Aave Stablecoin)
     address: "0x40D16FC0246aD3160Ccc09B8D0D3A2cD28aE6C2f"
     category: vault
-    note: ERC-20, upgradeable
+    note: GhoToken ERC-20, not a proxy on Ethereum
 
   # === Strategy / module legs ===
   - id: gsm-usdc
     label: GSM USDC (Gsm4626)
     address: "0x3A3868898305f04beC7FEa77BecFf04C13444112"
     category: strategy
-    note: waEthUSDC ↔ GHO at 1:1; exit inventory exhausted (9.95 waEthUSDC)
+    note: 1 USDC = 1 GHO after waEthUSDC share conversion; exit inventory exhausted (≈0.035 USDC); 15 bps buy fee
   - id: gsm-usdt
     label: GSM USDT (Gsm4626)
     address: "0x882285E62656b9623AF136Ce3078c6BdCc33F5E3"
     category: strategy
-    note: Fallback GHO exit — 43.42M waEthUSDT available, exits to USDT
+    note: Fallback GHO exit — 16.09M waEthUSDT shares ≈ 18.94M USDT; exits to USDT; 10 bps buy fee
   - id: gho-reserve
     label: GHO Reserve (GSM Facilitator)
     address: "0x54C58157DeF387A880AE62332D1445f03adbE7E9"
     category: strategy
-    note: Pre-minted GHO pool drawn by GSMs (259.21M GHO)
+    note: Pre-minted GHO pool drawn by GSMs (291.07M GHO)
 
   # === Infra ===
   - id: sgho-proxy-admin
@@ -67,9 +67,10 @@ nodes:
     category: governance
     note: Decomposes YIELD_MANAGER (rate, supply cap)
   - id: risk-council
-    label: GHO Risk Council (3-of-4 Safe)
+    label: GHO Risk Council (2-of-3 Safe)
     address: "0x8513e6F37dBc52De87b166980Fa3F50639694B60"
     category: governance
+    note: Signers are Aave Labs, LlamaRisk, and TokenLogic nested Safes — same set as the AFC Safe
   - id: protocol-guardian
     label: Aave Protocol Guardian
     address: "0x2CFe3ec4d5a6811f4B8067F0DE7e47DfA938Aa30"
@@ -79,12 +80,18 @@ nodes:
     label: GHO GSM Steward
     address: "0xD1E856a947CdF56b4f000ee29d34F5808E0A6848"
     category: governance
-    note: CONFIGURATOR on GSMs (rate-limited); buy fee raised 7→10 bps 2026-05-23
+    note: CONFIGURATOR on GSMs (rate-limited); GSM USDC buy fee 10→15 bps 2026-09-17
   - id: afc-safe
     label: Aave Finance Committee Safe (2-of-3)
     address: "0x22740deBa78d5a0c24C58C740e3715ec29de1bFa"
     category: governance
-    note: Sole funder of sGho yield backing — 840k GHO in 6 discretionary transfers
+    note: Operates all sGho yield top-ups — 2.364M GHO in 11 discretionary transfers; same signer set as the Risk Council
+
+  - id: aave-collector
+    label: Aave Collector (DAO Treasury)
+    address: "0x464C71f6c2F760DdA6093dCB91C24c39e5d6e18c"
+    category: governance
+    note: Source of sGho yield GHO since Aug 2026; AFC spends via a GHO allowance
 
   # === External dependencies ===
   - id: dep-waEthUSDC
@@ -139,6 +146,14 @@ edges:
     to: gsm-usdt
     kind: holds-role
     label: CONFIGURATOR (rate-limited)
+  - from: risk-council
+    to: gho-gsm-steward
+    kind: holds-role
+    label: RISK_COUNCIL
+  - from: afc-safe
+    to: aave-collector
+    kind: holds-role
+    label: GHO spender allowance
   - from: oracle-swap-freezer
     to: gsm-usdc
     kind: holds-role
@@ -155,6 +170,10 @@ edges:
     to: sGho
     kind: deposits-into
     label: "GHO yield top-ups (discretionary)"
+  - from: aave-collector
+    to: sGho
+    kind: deposits-into
+    label: "GHO yield top-ups (pulled by AFC)"
 
   # === Money flow: USDC pipeline → sGho ===
   - from: sGho
