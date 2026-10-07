@@ -8,14 +8,21 @@ import { scoreColor, scoreTier } from "../lib/colors";
 
 type ScoredReport = ReportData & { finalScore: number };
 
-const formatRelative = (ts: number): string => {
-  if (!ts) return "—";
-  const days = Math.max(0, Math.round((Date.now() - ts) / 86_400_000));
-  if (days <= 1) return "today";
-  if (days < 7) return `${days}d ago`;
-  if (days < 30) return `${Math.round(days / 7)}w ago`;
-  if (days < 365) return `${Math.round(days / 30)}mo ago`;
-  return `${Math.round(days / 365)}y ago`;
+// Most recent assessment/reassessment time, used for the date sort. Prefers
+// `latestDate` (any dated update wording) over `dateSortable` ("(Updated: …)" only).
+const latestTs = (r: ReportData): number => {
+  const t = Date.parse(r.latestDate);
+  return Number.isNaN(t) ? r.dateSortable : t;
+};
+
+const formatDate = (r: ReportData): string => {
+  const ts = latestTs(r);
+  if (!ts) return r.latestDate || "—";
+  return new Date(ts).toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
 };
 
 const reports = getListedReports();
@@ -49,6 +56,10 @@ const tierCounts = tierOrder.map((t) => ({
       <div class="search-wrap">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="search-icon"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
         <input type="text" id="report-search" placeholder="Search by protocol, token, or risk tier…" autocomplete="off" />
+      </div>
+      <div class="sort-toggle" role="group" aria-label="Sort by">
+        <button class="sort-btn is-active" data-sort="score" type="button" aria-pressed="true" title="Sort by score, lowest risk first">Score</button>
+        <button class="sort-btn" data-sort="date" type="button" aria-pressed="false" title="Sort by assessment date, newest first">Date</button>
       </div>
       <div class="view-toggle" role="group" aria-label="View mode">
         <button class="view-btn is-active" data-view="list" type="button" aria-label="List view" title="List view">
@@ -90,6 +101,8 @@ const tierCounts = tierOrder.map((t) => ({
         data-name={r.name.toLowerCase()}
         data-token={r.token.toLowerCase()}
         data-tier={scoreTier(r.finalScore)}
+        data-score={r.finalScore}
+        data-date={latestTs(r)}
       >
         <div class="card-glow" aria-hidden="true"></div>
         <div class="card-head">
@@ -108,7 +121,7 @@ const tierCounts = tierOrder.map((t) => ({
             <div class="card-meta">
               <span class="mono">{r.token}</span>
               <span class="sep">·</span>
-              <span title={r.date}>{formatRelative(r.dateSortable)}</span>
+              <time title={r.date}>{formatDate(r)}</time>
             </div>
           </div>
           {r.status && (
@@ -145,6 +158,7 @@ const tierCounts = tierOrder.map((t) => ({
             data-name={r.name.toLowerCase()}
             data-token={r.token.toLowerCase()}
             data-tier="Danger Zone"
+            data-date={latestTs(r)}
           >
             <div class="card-glow" aria-hidden="true"></div>
             <div class="card-head">
@@ -163,7 +177,7 @@ const tierCounts = tierOrder.map((t) => ({
                 <div class="card-meta">
                   <span class="mono">{r.token}</span>
                   <span class="sep">·</span>
-                  <span title={r.date}>{formatRelative(r.dateSortable)}</span>
+                  <time title={r.date}>{formatDate(r)}</time>
                 </div>
               </div>
               {r.status && (
@@ -225,10 +239,42 @@ const tierCounts = tierOrder.map((t) => ({
         try { localStorage.setItem("reports-view", mode); } catch {}
       }
 
-      // Restore preference (default "list")
+      // Build order is by score; remember it so "score" restores it exactly.
+      cards.forEach((card, i) => { card.dataset.order = String(i); });
+      const sortBtns = Array.from(document.querySelectorAll(".sort-btn"));
+      const sortGrids = Array.from(document.querySelectorAll(".reports-grid"));
+
+      function setSort(mode) {
+        const byDate = mode === "date";
+        sortGrids.forEach((g) => {
+          const items = Array.from(g.querySelectorAll(":scope > .report-card"));
+          items.sort((a, b) =>
+            byDate
+              ? Number(b.dataset.date) - Number(a.dataset.date) ||
+                Number(a.dataset.order) - Number(b.dataset.order)
+              : Number(a.dataset.order) - Number(b.dataset.order),
+          );
+          g.append(...items);
+        });
+        sortBtns.forEach((b) => {
+          const active = b.dataset.sort === (byDate ? "date" : "score");
+          b.classList.toggle("is-active", active);
+          b.setAttribute("aria-pressed", String(active));
+        });
+        try { localStorage.setItem("reports-sort", byDate ? "date" : "score"); } catch {}
+      }
+
+      // Restore preferences (defaults "list" and "score")
       let savedView = "list";
       try { savedView = localStorage.getItem("reports-view") || "list"; } catch {}
       setView(savedView);
+      let savedSort = "score";
+      try { savedSort = localStorage.getItem("reports-sort") || "score"; } catch {}
+      if (savedSort === "date") setSort("date");
+
+      sortBtns.forEach((b) => {
+        b.addEventListener("click", () => setSort(b.dataset.sort));
+      });
 
       search.addEventListener("input", apply);
       pills.forEach((p) => {
@@ -406,6 +452,40 @@ const tierCounts = tierOrder.map((t) => ({
   }
   .view-btn + .view-btn { border-left: 1px solid var(--border); }
 
+  .sort-toggle {
+    display: inline-flex;
+    margin-left: auto;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: color-mix(in srgb, var(--bg-card) 50%, transparent);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+  .sort-btn {
+    height: 36px;
+    padding: 0 0.8rem;
+    border: none;
+    background: transparent;
+    color: var(--text-secondary);
+    font-size: 0.82rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: color 0.15s, background 0.15s;
+    font-family: inherit;
+  }
+  .sort-btn:hover { color: var(--text-primary); }
+  .sort-btn.is-active {
+    color: var(--text-primary);
+    background: color-mix(in srgb, var(--brand-blue) 22%, transparent);
+  }
+  .sort-btn + .sort-btn { border-left: 1px solid var(--border); }
+  @media (max-width: 540px) {
+    .tools-row { flex-wrap: wrap; }
+    .search-wrap { flex-basis: 100%; max-width: none; }
+  }
+
   .reports-grid {
     display: grid;
     gap: 0.85rem;
@@ -564,6 +644,16 @@ const tierCounts = tierOrder.map((t) => ({
     margin-top: 0.1rem;
   }
   .card-meta .sep { opacity: 0.4; }
+  .card-meta .mono {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .card-meta time {
+    flex-shrink: 0;
+    white-space: nowrap;
+  }
   .mono {
     font-family: "SF Mono", "Fira Code", monospace;
     font-size: 0.92em;
