@@ -4,7 +4,7 @@
 - **Token:** sGho (GHO Savings Vault)
 - **Chain:** Ethereum
 - **Token Address:** [`0xE1753F2e00940cC31213dd92013cF019DFE4ca1d`](https://etherscan.io/address/0xE1753F2e00940cC31213dd92013cF019DFE4ca1d)
-- **Final Score: 2.48/5.0**
+- **Final Score: 2.68/5.0**
 
 > **STATUS (September 27, 2026, block 26,070,292):** sGho is live on Ethereum mainnet with **134 days of production history** and `totalAssets() = 165,833,498 GHO` (~$165.7M). Implementation, ProxyAdmin, supply cap, pause state, and role assignments are unchanged since [AIP 484](https://app.aave.com/governance/v3/proposal/?proposalId=484) (no `Upgraded`, `SupplyCapUpdated`, `Paused`, or `RoleGranted`/`RoleRevoked` events). The Aave Savings Rate is **4.50%** (`targetRate() = 450`), raised from 4.25% by the GHO Risk Council on September 1, 2026 in a single sGhoSteward execution (tx [`0x7aa9fd…001f`](https://etherscan.io/tx/0x7aa9fd1ced00357442edddc4011fb3c11886fecbe3ab90f3cfd5c1ebec63001f)). **Current conditions:**
 >
@@ -196,7 +196,7 @@ GHO is one of the most extensively audited DeFi stablecoin systems:
   - **0 Critical, 0 High, 0 Medium**
   - **1 Low (L-01):** Users can DoS vault actions by triggering `maxAction()` requires — Status: **Acknowledged**
   - **1 Informational (I-01):** Lack of pausability mechanism — Status: **Fixed** (pausability added)
-- **Formal verification:** Certora ran multiple formal verification proof suites covering sGHO, stewards, GHO token, GSM, and ERC-4626 compliance
+- **Formal verification:** The published Certora sGHO engagement is a **manual code review** (September 3–8, 2025), not a formal-verification report. Separate Certora Prover suites exist under `certora/` for GHO token, GSM/GSM4626, and stewards; there is **no `certora/sgho` suite** and no published sGHO FV report. Do not treat the sGHO audit as formal verification.
 
 ### TokenLogic Collaborative Audit (February 2026, report dated March 4, 2026)
 
@@ -610,7 +610,7 @@ sGHO and the GSM are governed through the **Aave DAO governance framework** — 
 
 ### Key Strengths
 
-- **Extensive audit coverage:** 12+ audits since 2022 by top firms (OpenZeppelin, Certora, Sigma Prime, ABDK). Certora formal verification. sGHO-specific audit found 0 critical/high/medium issues
+- **Extensive audit coverage:** 12+ audits since 2022 by top firms (OpenZeppelin, Certora, Sigma Prime, ABDK). Two sGHO-specific reviews (Certora Sep 2025 manual audit; TokenLogic Collaborative Mar 2026) found 0 critical/high/medium issues. Certora FV exists for GHO/GSM/stewards, not for sGHO itself
 - **Stable contract surface for 134 days:** no upgrade, supply-cap change, pause, or role grant or revocation on sGho or sGhoSteward since AIP 484 executed. The only parameter change is the September 1, 2026 rate increase (4.25% → 4.50%), made under the Risk Council's existing authority
 - **Aave DAO governance:** One of DeFi's most established on-chain governance systems. Upgrades and role changes require a DAO vote with timelock. Stewards handle day-to-day parameter management, rate-limited on the GSMs
 - **Simple sGHO design:** No rehypothecation, no external strategies, no leverage. GHO stays in the vault. Yield is purely accounting-based
@@ -644,7 +644,7 @@ sGHO and the GSM are governed through the **Aave DAO governance framework** — 
 
 ### Other Key Risks
 
-- **Still-short production history:** sGho went live on May 16, 2026 — 134 days of mainnet usage. Clean, but no stress event (depeg, mass redemption, pause) has been observed
+- **Still-short production history:** sGho went live on May 16, 2026 — 134 days (≈4.4 months) of mainnet usage, TEMPLATE History band **3–6 months**. Clean, but no stress event (depeg, mass redemption, pause) has been observed
 - **sGho outside the bug-bounty scope:** a $166M vault that Immunefi's "Sub-systems of GHO" enumeration does not cover
 - **GhoRouter not deployed:** the launch AIP marketed single-tx USDC→sGho onboarding, but no router exists. Yearn's USDC strategy must compose the GSM USDC + sGho deposit steps itself. Even when it ships, it would not change the GSM exit fee or the GSM's empty inventory — both sit at the GSM layer. A router audit has been paid for ([AIP 492](https://github.com/aave-dao/aave-proposals-reports/blob/master/reports/v3-492-aave-v3-MayJune-2026-Funding-Update.md)) but not published
 - **Upgradeable contracts (rug via governance):** sGho, the GSMs, and GHO Reserve are upgradeable proxies controlled by Aave Governance, and governance can grant GHO facilitator (mint) roles. A malicious governance proposal could drain all funds or dilute GHO. Mitigated by Aave's established governance framework and community oversight; implementation slots verified unchanged
@@ -670,7 +670,7 @@ sGHO and the GSM are governed through the **Aave DAO governance framework** — 
 
 ### Critical Risk Gates
 
-- [x] **No audit** — 12+ audits including sGHO-specific Certora audit with formal verification. ✅ PASS
+- [x] **No audit** — 12+ GHO-ecosystem audits plus two sGHO-specific reviews (Certora manual audit; TokenLogic Collaborative). ✅ PASS
 - [x] **Unverifiable reserves** — sGHO is ERC-4626, on-chain verifiable. GSM exposure on-chain. ✅ PASS
 - [x] **Total centralization** — Aave DAO on-chain governance with timelock, stewards, and guardian. ✅ PASS
 - [x] **Unverified contract source** — every contract in the deposit and withdrawal paths has verified source on Etherscan (checked September 27, 2026): sGho implementation [`0xff22…7c04`](https://etherscan.io/address/0xff229a0bbb614a284de8ae0e41e5974878fd7c04) (`sGho`), sGho ProxyAdmin, `sGhoSteward`, GHO token (`GhoToken`), GHO Reserve implementation [`0x4f38…efe6`](https://etherscan.io/address/0x4f381f0827cb081b3ce2b7d7062402d43c4efbe6) (`GhoReserve`), GSM USDC and GSM USDT implementations [`0x320b…7e8e`](https://etherscan.io/address/0x320be97b4d10b6d20a05cae53a479fa2a0187e8e) / [`0x31fe…8788`](https://etherscan.io/address/0x31fe806ead0a800e68627aa49bab478d20a28788) (`Gsm4626`), waEthUSDC/waEthUSDT implementation [`0x487c…9ad1`](https://etherscan.io/address/0x487c2c53c0866f0a73ae317bd1a28f63adcd9ad1) (`StataTokenV2`), both fee strategies (`FixedFeeStrategy`), both price strategies (`FixedPriceStrategy4626`), `GhoGsmSteward`, and `ChainlinkOracleSwapFreezer`. ✅ PASS
@@ -681,15 +681,29 @@ sGHO and the GSM are governed through the **Aave DAO governance framework** — 
 
 #### Category 1: Audits & Historical Track Record (Weight: 20%)
 
+**Subcategory A: Audits & Security Reviews — 2.0**
+
 | Factor | Assessment |
 |--------|-----------|
-| Audits | GHO: 12+ audits by top firms (OpenZeppelin, Certora, Sigma Prime, ABDK). sGHO: 2 audits (Certora + TokenLogic). Formal verification |
-| Bug bounty | $1,000,000 on Immunefi — **sGho vault and sGho Steward remain outside the enumerated "Sub-systems of GHO"** (re-verified September 27, 2026) |
-| Production history | **sGho: 134 days, incident-free** (activated by AIP 484 on May 16, 2026), 3,017 deposits / 1,902 withdrawals, no upgrade, pause, or role change. GHO: ~3.2 years. Aave V3: ~6.7 years |
-| TVL | sGho: 165.8M GHO (~$165.7M). GHO mainnet supply: 699.0M. Aave V3: ~$18.24B |
+| Audits | sGHO: **2 protocol-specific reviews** — Certora (Sep 2025, manual code review of `sGho.sol`) and TokenLogic Collaborative via Sherlock (Feb–Mar 2026, `sGho` + `sGhoSteward`). Broader GHO stack has 12+ audits by top firms (OpenZeppelin, Certora, Sigma Prime, ABDK). **No published sGHO formal-verification suite** (Certora Prover covers GHO/GSM/stewards under `certora/`; no `certora/sgho`) |
+| Bug bounty | Aave Immunefi max payout **$1,000,000**, but **sGho vault is still outside** the enumerated "Sub-systems of GHO" (re-verified September 27, 2026; program last updated April 17, 2026). Vault bounty coverage is therefore unconfirmed for scoring purposes |
+
+→ **Audit score 2.0** — two reputable sGHO-specific reviews clear the rubric's "2+ audits" row. Held at 2 (rather than 1) because vault bounty coverage is unconfirmed and the sGHO engagement is a manual audit, not formal verification. This is the generous read of the audit column given those caveats.
+
+**Subcategory B: Historical Track Record — 4.0**
+
+| Factor | Assessment |
+|--------|-----------|
+| Production history | **sGho: 134 days** from AIP 484 activation (May 16, 2026) to snapshot (September 27, 2026) ≈ **4.4 months** → TEMPLATE band **3–6 months = 4**. Incident-free: 3,017 deposits / 1,902 withdrawals; no upgrade, pause, or role change |
+| Scale (TVL) | sGho: 165.8M GHO (~$165.7M) — well above the <$10M band, but age of the **assessed vault** binds the History subscore |
+| Parent longevity | GHO ~3.2 years / Aave V3 ~6.7 years do **not** establish this vault's reliability, especially its discretionary AFC funding mechanism |
 | Security incidents | None on GHO, GSM, sGho, or Aave V3 |
 
-**Score: 2.0/5** — Exceptional audit coverage and formal verification, and the vault has now run 134 days without an incident, a pause, or an upgrade while growing to $166M. It has passed the 90-clean-day threshold the prior assessment set for moving to 2.0. It stays at 2.0 rather than lower because sGho's own production history is still under six months and a $166M vault sits outside the enumerated Immunefi bounty scope. Improves below 2.0 only if sGho is added to Immunefi or after six months of clean operation.
+→ **History score 4.0** — rubric age bracket for the vault itself. High TVL and parent-protocol age are noted but do not pull History below 4 while sGho remains under six months with an unenforced funding path.
+
+**Audits & Historical Score = (2.0 + 4.0) / 2 = 3.00**
+
+**Score: 3.00/5** — Conservative TEMPLATE application: strong-but-caveated audits averaged with a 3–6 month vault age. An optimistic read that weighted parent GHO/Aave history more heavily could still argue for Low Risk on the Final; this report takes the conservative path. Improves if sGho is added to Immunefi and/or after six months of clean vault operation (History → 3).
 
 #### Category 2: Centralization & Control Risks (Weight: 30%)
 
@@ -799,37 +813,37 @@ Counterweight: the signers are publicly attributed service providers adopted thr
 
 ```
 Final Score = (Centralization × 0.30) + (Funds Mgmt × 0.30) + (Audits × 0.20) + (Liquidity × 0.15) + (Operational × 0.05)
-            = (2.75 × 0.30) + (2.0 × 0.30) + (2.0 × 0.20) + (3.75 × 0.15) + (2.0 × 0.05)
-            = 0.825 + 0.60 + 0.40 + 0.5625 + 0.10
-            = 2.4875
+            = (2.75 × 0.30) + (2.0 × 0.30) + (3.0 × 0.20) + (3.75 × 0.15) + (2.0 × 0.05)
+            = 0.825 + 0.60 + 0.60 + 0.5625 + 0.10
+            = 2.6875
 ```
 
 | Category | Score | Weight | Weighted |
 |----------|-------|--------|----------|
-| Audits & Historical | 2.0 | 20% | 0.40 |
+| Audits & Historical | 3.00 | 20% | 0.60 |
 | Centralization & Control | 2.75 | 30% | 0.825 |
 | Funds Management | 2.0 | 30% | 0.60 |
 | Liquidity Risk | 3.75 | 15% | 0.5625 |
 | Operational Risk | 2.0 | 5% | 0.10 |
-| **Final Score** | | | **2.48/5.0** |
+| **Final Score** | | | **2.68/5.0** |
 
 ### Risk Tier
 
 | Final Score | Risk Tier | Recommendation |
 |------------|-----------|----------------|
 | 1.00–1.49 | Minimal Risk | Approved, high confidence |
-| **1.50–2.49** | **Low Risk** | **Approved with standard monitoring** |
-| 2.50–3.49 | Medium Risk | Approved with enhanced monitoring |
+| 1.50–2.49 | Low Risk | Approved with standard monitoring |
+| **2.50–3.49** | **Medium Risk** | **Approved with enhanced monitoring** |
 | 3.50–4.49 | Elevated Risk | Limited approval, strict limits |
 | 4.50–5.00 | High Risk | Not recommended |
 
-**Risk Tier: Low Risk (2.48/5.0) — Approved with standard monitoring**
+**Risk Tier: Medium Risk (2.68/5.0) — Approved with enhanced monitoring**
 
-> The sGho contract itself has been clean: 134 days, 4,919 user operations, growth to $166M, and no upgrade, pause, or role change. The score sits just below the Medium-risk line because two movements roughly offset each other. Yield funding resumed and the vault passed 90 clean days, but GSM exit depth fell and rate-setting and funding control consolidated in one 2-of-3 signer set.
+> The sGho contract itself has been clean: 134 days, 4,919 user operations, growth to $166M, and no upgrade, pause, or role change. Audits & Historical is scored **(Audit 2 + History 4) / 2 = 3.00** under the TEMPLATE: two sGHO-specific reviews support Audit 2 (generous given unconfirmed vault bounty coverage and no sGHO formal verification), while 134 days (≈4.4 months) places History in the 3–6 month band. That alone moves the Final from the prior draft's 2.48 Low to **2.68 Medium** (floored). Remaining drivers: thin discretionary funding, exhausted GSM USDC exit inventory, and rate-setting/funding consolidated in one 2-of-3 signer set. An optimistic weighting of parent Aave/GHO longevity could still argue Low; this report takes the conservative vault-age path.
 >
-> **Standard monitoring for this position must still cover the two event-less conditions:** poll the signed buffer `(balanceOf − totalAssets) / totalAssets` and days since the last top-up daily, treating any negative buffer as active late-redeemer principal risk; and poll `GSM.getAvailableLiquidity()` on both GSMs at least every 6 hours, sizing any position against observed inventory plus size-specific DEX quotes rather than exposure caps or aggregate pool TVL.
+> **Enhanced monitoring for this position must cover the two event-less conditions:** poll the signed buffer `(balanceOf − totalAssets) / totalAssets` and days since the last top-up daily, treating any negative buffer as active late-redeemer principal risk; and poll `GSM.getAvailableLiquidity()` on both GSMs at least every 6 hours, sizing any position against observed inventory plus size-specific DEX quotes rather than exposure caps or aggregate pool TVL.
 >
-> Score improves toward ~2.2 if GSM USDC exit inventory recovers and holds and the funding buffer stays positive for a quarter; further improvement requires Immunefi scope coverage and GhoGsmSteward-style per-day rate limits on sGhoSteward. Score moves back into Medium risk if the funding gap reopens for more than a few days, if GSM USDT falls below the intended position size, if the ASR is raised again without matching funding, if the cross-chain CCIP ARFC is revived and ships without a re-review, or if a GhoRouter is deployed with broad token-rescue powers.
+> Score improves toward Low Risk (~2.4–2.5) if GSM USDC exit inventory recovers and holds, the funding buffer stays positive for a quarter, and/or sGho enters Immunefi scope; History improves to 3 after six months of clean vault operation. Score worsens if the funding gap reopens for more than a few days, if GSM USDT falls below the intended position size, if the ASR is raised again without matching funding, if the cross-chain CCIP ARFC is revived and ships without a re-review, or if a GhoRouter is deployed with broad token-rescue powers.
 
 ---
 
@@ -903,4 +917,4 @@ Step-by-step view of the Yearn USDC strategy's two flows, with explicit fees at 
 | April 2, 2026 | 2.1 | Pre-deployment assessment from ARFC/audit material; rechecked April 22, 2026 |
 | May 19, 2026 | 2.3 | Post-deployment refresh after AIP 484. On-chain roles, ProxyAdmin, rate, and supply cap verified. Centralization 2.0 → 2.5 (Risk Council holds unrate-limited sGhoSteward roles); Collateralization 2.0 → 2.5 (late-withdrawer impairment path) |
 | July 27, 2026 (updated Aug 6) | 2.50 | 72-day reassessment. sGho contract itself unchanged and clean; TVL 37.3M → 136.5M GHO. Live 205,146 GHO unfunded-yield gap (AFC Safe funding lapsed 28 days); GSM USDC exit inventory exhausted (111.25M → 9.95 waEthUSDC); GSM buy fee 7 → 10 bps. The funding gap, GSM USDC exhaustion, and exit fee are classified as medium-severity strategy risks, not high-severity protocol failures. Liquidity 2.5 → 3.5, Centralization 2.5 → 2.75, Funds Mgmt remains 2.0 after Collateralization 2.5 → 2.75 and Provability 1.5 → 1.25 (TokenLogic dashboard), Operational 1.5 → 2.0, Audits 2.5 → 2.25 |
-| [September 27, 2026](https://github.com/yearn/risk-score/pull/494) | 2.48 | 134-day reassessment. sGho contract code, admin, and roles unchanged; TVL 136.5M → 165.8M GHO. ASR raised 4.25% → 4.50% by the Risk Council (September 1). Yield funding resumed July 31; AFC now pulls from a Collector allowance and the vault holds a 152,179 GHO buffer, with a short deficit around September 6–8. Risk Council reconstituted 3-of-4 → 2-of-3 with the same nested-Safe signers as the AFC. GSM USDC still empty (fee 10 → 15 bps); GSM USDT ≈50.81M → ≈18.94M GHO of value (43.42M → 16.09M waEthUSDT shares). GHO token corrected to non-upgradeable on Ethereum. Audits 2.25 → 2.0 (passed 90 clean days), Governance subscore 3.0 → 3.25 (Centralization unchanged at 2.75), Liquidity 3.5 → 3.75; Funds Mgmt and Operational unchanged |
+| [September 27, 2026](https://github.com/yearn/risk-score/pull/494) | 2.68 | 134-day reassessment (review-corrected). sGho contract code, admin, and roles unchanged; TVL 136.5M → 165.8M GHO. ASR raised 4.25% → 4.50% by the Risk Council (September 1). Yield funding resumed July 31; AFC now pulls from a Collector allowance and the vault holds a 152,179 GHO buffer, with a short deficit around September 6–8. Risk Council reconstituted 3-of-4 → 2-of-3 with the same nested-Safe signers as the AFC. GSM USDC still empty (fee 10 → 15 bps); GSM USDT ≈50.81M → ≈18.94M GHO of value (43.42M → 16.09M waEthUSDT shares). GHO token corrected to non-upgradeable on Ethereum. **Audits & Historical 2.25 → 3.00** (Audit 2 + History 4 per TEMPLATE 3–6 month vault age; prior draft had incorrectly used a 90-clean-day shortcut to 2.0 and an unsupported sGHO formal-verification claim). Governance subscore 3.0 → 3.25 (Centralization unchanged at 2.75), Liquidity 3.5 → 3.75; Funds Mgmt and Operational unchanged. Final 2.50 → **2.68 Medium** |
