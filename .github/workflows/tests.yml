@@ -1,0 +1,51 @@
+name: Tests
+
+on:
+  pull_request:
+    paths:
+      - 'api/**'
+      - 'scripts/**'
+      - 'src/lib/**'
+      - 'tests/**'
+      - '.agents/**'
+      - '.claude/**'
+      - '.pi/**'
+      - 'AGENTS.md'
+      - 'CLAUDE.md'
+      - 'reports/README.md'
+      - 'reports/TEMPLATE.md'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'pyproject.toml'
+      - 'uv.lock'
+      - '.github/workflows/tests.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: tests-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+
+      - run: npm ci
+
+      - name: Node tests
+        run: npm test
+
+      - name: Python tests
+        run: uv run python -m unittest discover -s tests

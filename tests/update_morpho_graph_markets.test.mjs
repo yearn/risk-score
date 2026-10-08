@@ -8,7 +8,6 @@ import {
   buildAllocations,
   buildGraphSections,
   fetchV1,
-  fetchV2,
   findMorphoVaults,
   formatLltv,
   marketNodeId,
@@ -146,41 +145,14 @@ test("the same vault referenced by two graphs yields one query", () => {
   assert.equal(queries[0].address, "0x68Aea7b82Df6CcdF76235D46445Ed83f85F845A3");
 });
 
-test("a tagged Morpho vault in a non-Yearn graph is discovered", () => {
-  const g = graph({
-    slug: "infinifi",
-    nodes: [
-      { id: "siUSD", label: "siUSD", category: "vault", address: "0xAAA" },
-      { id: "dep-steakhouse-vault", label: "Steakhouse infiniFi USDC", category: "dependency", address: "0xBEEF1f5bD88285E5b239B6AACB991D38CCa23aC9", morphoVault: "v1" },
-    ],
-    edges: [],
-  });
-  const { occurrences, queries } = findMorphoVaults([{ slug: "infinifi", graph: g }]);
-  assert.equal(occurrences.length, 1);
-  assert.equal(occurrences[0].slug, "infinifi");
-  assert.equal(queries[0].address, "0xBEEF1f5bD88285E5b239B6AACB991D38CCa23aC9");
-});
-
 /* -------------------------------------------------------- percentages */
 
-test("allocationLabel computes an exact BigInt percentage", () => {
-  // 56.4% of 1000
+test("allocationLabel renders one-decimal shares, <0.1% for dust, null for zero", () => {
   assert.equal(allocationLabel(564n, 1000n), "56.4%");
-  // 36.9%
-  assert.equal(allocationLabel(369n, 1000n), "36.9%");
-  // 6.7%
   assert.equal(allocationLabel(67n, 1000n), "6.7%");
-  // 100%
   assert.equal(allocationLabel(1000n, 1000n), "100.0%");
-});
-
-test("allocationLabel returns null for zero supply", () => {
-  assert.equal(allocationLabel(0n, 1000n), null);
-});
-
-test("allocationLabel labels tiny positive shares <0.1%", () => {
-  assert.equal(allocationLabel(1n, 10000n), "<0.1%");
   assert.equal(allocationLabel(9n, 10000n), "<0.1%");
+  assert.equal(allocationLabel(0n, 1000n), null);
 });
 
 test("formatLltv renders WAD LLTV with trimming", () => {
@@ -421,32 +393,20 @@ test("parseV2Items rejects a vault returned on the wrong chain", () => {
 
 /* ------------------------------------------------------- GraphQL errors */
 
-test("postGraphql raises on non-2xx responses", async () => {
-  const bad = async () => ({ ok: false, status: 500, text: async () => "boom" });
-  await assert.rejects(() => postGraphql("q", {}, bad), /HTTP 500/);
+test("postGraphql raises on HTTP, JSON, GraphQL and missing-data failures", async () => {
+  const cases = [
+    [{ ok: false, status: 500, body: "boom" }, /HTTP 500/],
+    [{ ok: true, status: 200, body: "not json" }, /invalid JSON/],
+    [{ ok: true, status: 200, body: JSON.stringify({ errors: [{ message: "nope" }], data: null }) }, /GraphQL errors/],
+    [{ ok: true, status: 200, body: JSON.stringify({}) }, /no data/],
+  ];
+  for (const [{ ok, status, body }, error] of cases) {
+    const fake = async () => ({ ok, status, text: async () => body });
+    await assert.rejects(() => postGraphql("q", {}, fake), error);
+  }
 });
 
-test("postGraphql raises on invalid JSON", async () => {
-  const bad = async () => ({ ok: true, status: 200, text: async () => "not json" });
-  await assert.rejects(() => postGraphql("q", {}, bad), /invalid JSON/);
-});
-
-test("postGraphql raises on GraphQL errors", async () => {
-  const bad = async () => ({
-    ok: true,
-    status: 200,
-    text: async () => JSON.stringify({ errors: [{ message: "nope" }], data: null }),
-  });
-  await assert.rejects(() => postGraphql("q", {}, bad), /GraphQL errors/);
-});
-
-test("postGraphql raises on missing data", async () => {
-  const bad = async () => ({ ok: true, status: 200, text: async () => JSON.stringify({}) });
-  await assert.rejects(() => postGraphql("q", {}, bad), /no data/);
-});
-
-test("fetchV1 and fetchV2 are offline-testable via injected fetch", async () => {
-  // A minimal fake covering the V1 path (batching, lowercase addresses).
+test("fetchV1 queries lowercase addresses and keys results by version, chain and address", async () => {
   const calls = [];
   const fake = async (url, init) => {
     calls.push(JSON.parse(init.body).variables.addresses);

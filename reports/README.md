@@ -25,44 +25,10 @@ reports/
 
 Authoring procedures: [shared agent skills](../AGENTS.md#shared-skills-and-commands).
 
-## How to Use This Framework
+## Scoring
 
-### Conducting a New Assessment
-
-1. **Copy the Template**
-   ```bash
-   cp reports/TEMPLATE.md reports/report/[name].md
-   ```
-
-2. **Fill Out Each Section**
-   - Work through each category systematically
-   - Provide evidence and links for claims (Etherscan links, documentation)
-   - Be specific with addresses, transaction hashes, and dates
-   - Sections marked `[Required]` must be completed; `[If Applicable]` sections can be skipped
-   - Flag unknowns as TODO rather than assuming
-
-3. **Calculate Risk Score**
-   - The scoring rubrics are embedded in the template itself
-   - Check critical gates first (auto-fail criteria)
-   - Score each category, then compute the weighted final score
-   - Document reasoning for each category score
-
-4. **Review and Update**
-   - Have another team member review the assessment
-   - Update when protocol parameters change
-   - Reassess based on triggers defined in the report
-
-### Template Structure
-
-The template is self-contained with embedded scoring rubrics. Reports follow this structure:
-
-1. **Analysis Sections** - Investigation and evidence gathering
-   - Overview, Audits, Historical Track Record, Funds Management, Liquidity Risk, Centralization & Control, Operational Risk, Monitoring
-2. **Risk Summary** - Synthesis of key strengths, risks, and critical concerns
-3. **Risk Score Assessment** - Critical gates check, category scoring (1-5 scale), weighted final score, and risk tier classification
-4. **Reassessment Triggers** - Conditions that warrant re-evaluation
-
-### Scoring Categories
+[TEMPLATE.md](TEMPLATE.md) is self-contained: copy it to `reports/report/<slug>.md`,
+check the critical gates first, then score each category with its embedded rubric.
 
 | Category | Weight | What it evaluates |
 |----------|--------|-------------------|

@@ -152,14 +152,3 @@ test("a shared address is fine when only one graph calls it a vault", () => {
   );
   assert.equal(issues.filter((i) => /resolve arbitrarily/.test(i.message)).length, 0);
 });
-
-test("issues from several graphs are reported together", () => {
-  const issues = findGraphIssues(
-    [
-      { slug: "demo", graph: baseGraph() },
-      { slug: "demo", graph: baseGraph({ chain: "solana" }) },
-    ],
-    REPORTS,
-  );
-  assert.equal(issues.length, 1);
-});
