@@ -276,7 +276,7 @@
           "kind": "direct",
           "model": "lock",
           "integration": "LayerZero OFT Adapter (\"LayerZero vault\")",
-          "detail": "Adapter [`0x983a…4137`](https://etherscan.io/address/0x983AEAaA0d0426839158435C43725EA7F45d4137) escrows ~26.1M stcUSD (~38% of the ~68.3M supply). Katana runs a native OFT at the same vanity address [`0x8888…8888`](https://explorer.katanarpc.com/address/0x88887bE419578051FF9F4eb6C858A951921D8888)",
+          "detail": "Adapter [`0x983a…4137`](https://etherscan.io/address/0x983AEAaA0d0426839158435C43725EA7F45d4137) escrows 10.287M stcUSD (18.64% of Ethereum supply), pooled across Katana, MegaETH, and Tempo at matching-time October 3 blocks. It cannot mint canonical stcUSD. All 12 receive routes in the fully enumerated four-chain mesh, with matching send configurations, require LayerZero Labs, Canary, and Nethermind (3-of-3, 15 confirmations). Remote supplies total 10,286,617.476483 stcUSD, 3.000000 below canonical escrow. Tempo uses a separate TIP-20 token; its sole issuer is the [adapter](https://explore.tempo.xyz/address/0x4eec5b8fdfbcdd45dfb29f666d9c34ad38c7afa5), with remote timelock admin.",
           "security": {
             "label": "3-of-3",
             "confirmations": 15,
@@ -285,12 +285,12 @@
               "Canary",
               "Nethermind"
             ],
-            "route": "Ethereum→Katana (mint side)",
+            "route": "Ethereum↔Katana / MegaETH / Tempo, including remote↔remote peer routes",
             "weak": false,
-            "verifiedAt": "2026-07-16",
-            "link": "https://explorer.katanarpc.com/address/0x88887bE419578051FF9F4eb6C858A951921D8888"
+            "verifiedAt": "2026-10-04",
+            "link": "https://etherscan.io/address/0x983AEAaA0d0426839158435C43725EA7F45d4137"
           },
-          "owner": "Adapter owner: 24h Timelock [`0xD823…29ab`](https://etherscan.io/address/0xD8236031d8279d82E615aF2BFab5FC0127A329ab)."
+          "owner": "Owner/UUPS upgrades: 24h Timelock [`0xD823…29ab`](https://etherscan.io/address/0xD8236031d8279d82E615aF2BFab5FC0127A329ab). Endpoint delegate: Safe [`0xb8FC…8793`](https://etherscan.io/address/0xb8FC49402dF3ee4f8587268FB89fda4d621a8793), with direct security-configuration authority. Remote owners/Tempo role admin: 24h timelocks; local endpoint delegate Safes share the Ethereum Safe’s exact five owners and 3-of-5 threshold. Upgrades, issuer grants, or Tempo token replacement can impair canonical escrow backing."
         },
         {
           "slug": "fx-fxusd",
