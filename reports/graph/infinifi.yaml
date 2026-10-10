@@ -1,431 +1,448 @@
 slug: infinifi
 title: InfiniFi (siUSD) — Contract Dependency Graph
 chain: ethereum
-
 categories:
-  - id: vault
-    label: Vault / Token
-  - id: strategy
-    label: Farm (Strategy)
-  - id: governance
-    label: Governance
-  - id: infra
-    label: Protocol Infra
-  - id: dependency
-    label: External Dependency
-
+- id: vault
+  label: Vault / Token
+- id: strategy
+  label: Farm (Strategy)
+- id: governance
+  label: Governance
+- id: infra
+  label: Protocol Infra
+- id: dependency
+  label: External Dependency
 nodes:
-  # === Vault / token layer ===
-  - id: siUSD
-    label: siUSD (Staked iUSD)
-    address: "0xDBDC1Ef57537E34680B898E1FEBD3D68c7389bCB"
-    category: vault
-  - id: iUSD
-    label: iUSD (Receipt Token)
-    address: "0x48f9e38f3070AD8945DFEae3FA70987722E3D89c"
-    category: vault
-  - id: gateway
-    label: Gateway (Proxy)
-    address: "0x3f04b65Ddbd87f9CE0A2e7Eb24d80e7fb87625b5"
-    category: vault
-    note: TransparentUpgradeableProxy → InfiniFiGatewayV3
-  - id: locking-controller
-    label: LockingController (liUSD)
-    address: "0x1d95cC100D6Cd9C7BbDbD7Cb328d99b3D6037fF7"
-    category: vault
-    note: First-loss tranche
-  - id: unwinding-module
-    label: UnwindingModule
-    address: "0x7092A43aE5407666C78dBEA657a1891f42b3dFcc"
-    category: vault
-    note: Settles liUSD early exits
-
-  # === Internal infra ===
-  - id: mint-controller
-    label: MintController
-    address: "0x49877d937B9a00d50557bdC3D87287b5c3a4C256"
-    category: infra
-    note: User-facing mint entry; holds RECEIPT_TOKEN_MINTER
-  - id: migration-controller
-    label: MigrationController
-    address: "0x5F5403656E4Db95aCcF1064A714B1bcE351839F8"
-    category: infra
-    note: ENTRY_POINT + RECEIPT_TOKEN_MINTER (migrations)
-  - id: yield-sharing
-    label: YieldSharing
-    address: "0x90E91f5bfD9a0a4d925BF30b512add8cD2bbAE3b"
-    category: infra
-    note: Distributes farm yield; holds RECEIPT_TOKEN_MINTER + BURNER
-  - id: pl-smoother
-    label: PLSmoother
-    address: "0xC324569141697045B9EdE54B5d4623a691ed57A4"
-    category: infra
-    note: Smooths P&L across siUSD epochs; holds RECEIPT_TOKEN_MINTER + BURNER
-  - id: redeem-controller
-    label: RedeemController
-    address: "0xCb1747E89a43DEdcF4A2b831a0D94859EFeC7601"
-    category: infra
-
-  # === Governance ===
-  - id: multisig
-    label: Team Multisig (4/8)
-    address: "0x80608f852D152024c0a2087b16939235fEc2400c"
-    category: governance
-    note: Gnosis Safe v1.4.1, 8 EOA signers
-  - id: long-timelock
-    label: Long Timelock (7d)
-    address: "0x3D18480CC32B6AB3B833dCabD80E76CfD41c48a9"
-    category: governance
-  - id: short-timelock
-    label: Short Timelock (1h)
-    address: "0x4B174afbeD7b98BA01F50E36109EEE5e6d327c32"
-    category: governance
-    note: >-
-      PROTOCOL_PARAMETERS + ORACLE_MANAGER (setPrice/setOracle, addFarms/removeFarms).
-      Delay is only 1 hour — a narrow early-warning window for these changes.
-  - id: core
-    label: InfiniFiCore (AccessControl)
-    address: "0xF6d48735EcCf12bDC1DF2674b1ce3fcb3bD25490"
-    category: governance
-    note: AccessControlEnumerable, 19 roles; DEFAULT_ADMIN renounced
-
-  # === Funded farms (>99.9% of TVL, 2026-07-29) ===
-  # Bucket names follow the FarmTypes library: LIQUID = instant principal withdrawal,
-  # MATURITY = rolling notice period (maturity() returns block.timestamp + duration).
-  - id: farm-midas
-    label: MidasFarm — MATURITY 28d (51.4%)
-    address: "0xF4Ea3Ec87B1c254f17a2Fb68164dB0CAf6c4cecF"
-    category: strategy
-    note: >-
-      $31.02M. mGLOBAL tokenized Fasanara hedge fund; offchain NAV.
-      28-day rolling notice period; 1.57x the liUSD first-loss buffer.
-  - id: farm-rwa-escrow-1
-    label: RWAEscrowFarm — MATURITY 7d (17.0%)
-    address: "0x04d5521ac09F8823338e8163Dd8BAdAEE39F3271"
-    category: strategy
-    note: >-
-      $10.29M. Escrow receiver = Team Multisig. 7-day rolling notice.
-  - id: farm-rwa-escrow-2
-    label: RWAEscrowFarm — MATURITY 28d (4.3%)
-    address: "0x9E5efC5F387D8661C1AFB2469B7EeF6972451852"
-    category: strategy
-    note: >-
-      $2.58M. Offchain EOA counterparty. 28-day rolling notice.
-  - id: farm-rwa-escrow-3
-    label: RWAEscrowFarm — MATURITY 56d (8.4%)
-    address: "0x277FdF6Dc5c53C5c2828188Da84B9593A50884C1"
-    category: strategy
-    note: >-
-      $5.09M. Offchain EOA counterparty. 56-day rolling notice.
-  - id: farm-swap-pyusd
-    label: SwapFarm — MATURITY 7d (1.0%)
-    address: "0x75381e9Bc6B908a2e9bC31A535fC48CeCeAc568E"
-    category: strategy
-    note: >-
-      $0.59M. PYUSD and USDC legs fully withdrawn; holds only
-      residual Sentora PRIME. 7-day rolling notice.
-  - id: farm-cap
-    label: CapFarm — LIQUID (7.3%)
-    address: "0xAc21B22B5aEb11bc32De4ecF59E4538fCa48b694"
-    category: strategy
-    note: >-
-      $4.41M. LIQUID bucket — liquidity() equals full balance, withdrawn
-      same-block inside a user redemption. 81% of instant-exit capacity.
-  - id: farm-aave-v4
-    label: AaveV4Farm — MATURITY 7d (3.7%)
-    address: "0x2CdF51ca20C2DD56480c35adEA667A6653Fb7657"
-    category: strategy
-    note: >-
-      $2.25M. Aave V4 Global Dollar market. 7-day rolling notice.
-  - id: farm-steakhouse
-    label: Steakhouse MetaMorpho — MATURITY 7d (1.9%)
-    address: "0x76D2E84009dAE457f8667D823c7c96e9A7c35B78"
-    category: strategy
-    note: $1.13M. 7-day rolling notice.
-  - id: farm-rwa-escrow-4
-    label: RWAEscrowFarm — MATURITY 7d (3.3%)
-    address: "0xe919C66475f2F30d285c768853E6B5b23ef181Cf"
-    category: strategy
-    note: >-
-      $2.00M. Offchain EOA counterparty. 7-day rolling notice.
-  - id: farm-spark
-    label: SparkSUSDCFarm — LIQUID (1.7%)
-    address: "0xd880D7C5CaFdbE2AEc281250995abF612235e563"
-    category: strategy
-    note: >-
-      $1.04M. LIQUID bucket — unwinds sUSDC to USDS/DAI to the Sky
-      LitePSM for USDC, same-block inside a user redemption.
-
-  # === External dependencies ===
-  - id: dep-mglobal
-    label: mGLOBAL (Midas / Fasanara)
-    address: "0x7433806912Eae67919e66aea853d46Fa0aef98A8"
-    category: dependency
-    note: Tokenized hedge-fund strategy; offchain NAV
-  - id: dep-rwa-cp-multisig
-    label: RWA Escrow Receiver — Team Multisig
-    address: "0x80608f852D152024c0a2087b16939235fEc2400c"
-    category: dependency
-    note: Escrow receiver is the protocol's own multisig
-  - id: dep-rwa-cp-1
-    label: RWA Escrow Counterparty (EOA)
-    address: "0x4831C121879d3DE0E2B181d9d55E9B0724f5D926"
-    category: dependency
-    note: EOA receiver; identity undisclosed
-  - id: dep-rwa-cp-2
-    label: RWA Escrow Counterparty (EOA)
-    address: "0xa03B88D7985E1C6A847Cfb123C786c1d7eA8d211"
-    category: dependency
-    note: EOA receiver; identity undisclosed
-  - id: dep-sentora
-    label: Sentora PRIME (senPYUSDPRIMEv2)
-    address: "0xC21b08C16458202593D4D9B26b9984Ee67b38BbD"
-    category: dependency
-    note: PYUSD credit-vault wrapper; $0.59M residual
-  - id: dep-stcusd
-    label: stcUSD (Cap Protocol)
-    address: "0x88887bE419578051FF9F4eb6C858A951921D8888"
-    category: dependency
-    note: 2025-vintage stablecoin issuer
-  - id: dep-usdg
-    label: USDG (Global Dollar) via Aave V4
-    address: "0xe343167631d89B6Ffc58B88d6b7fB0228795491D"
-    category: dependency
-    note: Paxos/Global Dollar Network stablecoin
-  - id: dep-rwa-cp-3
-    label: RWA Escrow Counterparty (EOA)
-    address: "0xf7583D86D9fB25391Af6e30ad17786572792d83c"
-    category: dependency
-    note: EOA receiver; identity undisclosed
-  - id: dep-rwa-rate-manager
-    label: RWAEscrowRateManager (keeper)
-    address: "0x11F6FAb3f4D8635880C3e80cbae8AEF8136D4189"
-    category: dependency
-    note: >-
-      Sole keeper attesting the value of all four RWA escrows —
-      33.0% of TVL valued by one offchain attester.
-  - id: dep-sky-psm
-    label: Sky LitePSM USDC pocket
-    address: "0x37305B1cD40574E4C5Ce33f8e8306Be057fD7341"
-    category: dependency
-    note: USDC source when the Spark farm unwinds
-  - id: dep-steakhouse-vault
-    label: Steakhouse infiniFi USDC (MetaMorpho)
-    address: "0xBEEF1f5bD88285E5b239B6AACB991D38CCa23aC9"
-    category: dependency
-    morphoVault: v1
-    link: "https://app.morpho.org/ethereum/vault/0xBEEF1f5bD88285E5b239B6AACB991D38CCa23aC9/"
-
-  # MetaMorpho vault governance (Waterline owner / Steakhouse curator)
-  - id: dep-steakhouse-owner
-    label: MetaMorpho Owner (5-of-8)
-    address: "0xd6086925EABDA100409Da2adaDFDea08EAB1081A"
-    category: governance
-  - id: dep-steakhouse-curator
-    label: MetaMorpho Curator (2-of-7)
-    address: "0xC5fA35a7DA6798211d4AcD6b1D36F2f3E8c6dBdB"
-    category: governance
-
-# BEGIN GENERATED MORPHO MARKET NODES
-# Managed by scripts/update_morpho_graph_markets.mjs — do not edit.
-  - id: morpho-market-bbf7ce1b40d3
-    label: "siUSD/USDC · 91.5% LLTV"
-    category: dependency
-    link: "https://app.morpho.org/ethereum/market/0xbbf7ce1b40d32d3e3048f5cf27eeaa6de8cb27b80194690aab191a63381d8c99/"
-    note: "Morpho market 0xbbf7ce1b40d32d3e3048f5cf27eeaa6de8cb27b80194690aab191a63381d8c99"
-  - id: morpho-market-6df56abb95e9
-    label: "iUSD/USDC · 91.5% LLTV"
-    category: dependency
-    link: "https://app.morpho.org/ethereum/market/0x6df56abb95e9f3f96049448e1c98d208deb1add8a3d0c7a23e5e5466dba4edbd/"
-    note: "Morpho market 0x6df56abb95e9f3f96049448e1c98d208deb1add8a3d0c7a23e5e5466dba4edbd"
-  - id: morpho-market-a94d7d784ecd
-    label: "PT-siUSD-20AUG2026/USDC · 91.5% LLTV"
-    category: dependency
-    link: "https://app.morpho.org/ethereum/market/0xa94d7d784ecd1194f23f82f6b1c1acbf1d5982bab63362d094710638d2b770dc/"
-    note: "Morpho market 0xa94d7d784ecd1194f23f82f6b1c1acbf1d5982bab63362d094710638d2b770dc"
-# END GENERATED MORPHO MARKET NODES
-
+- id: siUSD
+  label: siUSD (Staked iUSD)
+  category: vault
+  address: '0xDBDC1Ef57537E34680B898E1FEBD3D68c7389bCB'
+- id: iUSD
+  label: iUSD (Receipt Token)
+  category: vault
+  address: '0x48f9e38f3070AD8945DFEae3FA70987722E3D89c'
+- id: gateway
+  label: Gateway V4 (Proxy)
+  category: infra
+  address: '0x3f04b65Ddbd87f9CE0A2e7Eb24d80e7fb87625b5'
+  note: Verified implementation 0x750136ac021a7149f0ee38141d0ba920cca1fc5d; 7-day upgrade delay.
+- id: multisig
+  label: Team Safe (4/8)
+  category: governance
+  address: '0x80608f852D152024c0a2087b16939235fEc2400c'
+- id: long-timelock
+  label: Long Timelock (7d)
+  category: governance
+  address: '0x3D18480CC32B6AB3B833dCabD80E76CfD41c48a9'
+- id: short-timelock
+  label: Short Timelock (24h)
+  category: governance
+  address: '0x4B174afbeD7b98BA01F50E36109EEE5e6d327c32'
+- id: core
+  label: InfiniFiCore
+  category: governance
+  address: '0xF6d48735EcCf12bDC1DF2674b1ce3fcb3bD25490'
+- id: registry
+  label: FarmRegistry / Accounting
+  category: infra
+  address: '0xF5f2718708f471e43968271956CC01aaA8c46119'
+  note: 19 registered farms. Snapshot October 3, 2026; $44.20M accounted assets. RWA values are not reserve
+    proof.
+- id: locking-controller
+  label: liUSD first-loss ($14.00M)
+  category: infra
+  address: '0x1d95cC100D6Cd9C7BbDbD7Cb328d99b3D6037fF7'
+- id: redeem-controller
+  label: RedeemController / liquid hook
+  category: infra
+  address: '0xCb1747E89a43DEdcF4A2b831a0D94859EFeC7601'
+  note: $4.94M liquid capacity; empty redemption queue.
+- id: mint-controller
+  label: MintController
+  category: infra
+  address: '0x49877d937B9a00d50557bdC3D87287b5c3a4C256'
+- id: migration-controller
+  label: MigrationController
+  category: infra
+  address: '0x5F5403656E4Db95aCcF1064A714B1bcE351839F8'
+- id: yield-sharing
+  label: YieldSharing V3 (Proxy)
+  category: infra
+  address: '0x90E91f5bfD9a0a4d925BF30b512add8cD2bbAE3b'
+- id: pl-smoother
+  label: PLSmoother
+  category: infra
+  address: '0xC324569141697045B9EdE54B5d4623a691ed57A4'
+- id: outland-base
+  label: Base OutlandVault (native minter)
+  category: infra
+  address: '0x4197F2ADFCe9fDeB36B02e96737Ddf646C841e45'
+  note: Native iUSD mint/burn based on authenticated remote reports; position size is not a mint cap.
+- id: outland-monad
+  label: Monad OutlandVault (native minter)
+  category: infra
+  address: '0x77776F422B7EB0A95ccD35fBd088A5957D4408eA'
+  note: Native iUSD mint/burn based on authenticated remote reports; position size is not a mint cap.
+- id: gdadf
+  label: GDADF escrow — 28d (48.2%)
+  category: strategy
+  address: '0x2fa5E6C5549BEdF98A935Cac3BB4337459c74897'
+- id: fxsave
+  label: f(x) fxSAVE — 7d (18.3%)
+  category: strategy
+  address: '0x78A31bD6cAca12BdF83F8A608076006C1F58F363'
+- id: new-silver
+  label: New Silver — 56d (11.8%)
+  category: strategy
+  address: '0x277FdF6Dc5c53C5c2828188Da84B9593A50884C1'
+- id: genesis
+  label: Genesis escrow — 28d (5.9%)
+  category: strategy
+  address: '0x9E5efC5F387D8661C1AFB2469B7EeF6972451852'
+- id: cap
+  label: Cap stcUSD — LIQUID (5.0%)
+  category: strategy
+  address: '0xAc21B22B5aEb11bc32De4ecF59E4538fCa48b694'
+- id: aave
+  label: Aave V3 USDC — LIQUID (5.0%)
+  category: strategy
+  address: '0xbFd5FC8DecA3C6128bfCE0FE46c25616811c3580'
+- id: falconx
+  label: FalconX — 7d (4.6%)
+  category: strategy
+  address: '0xe919C66475f2F30d285c768853E6B5b23ef181Cf'
+- id: spark
+  label: Spark sUSDC — LIQUID (1.1%)
+  category: strategy
+  address: '0xd880D7C5CaFdbE2AEc281250995abF612235e563'
+- id: fasanara
+  label: Fasanara — combined 54.1%
+  category: dependency
+  note: GDADF $21.29M + Genesis $2.61M; correlated issuer. Current holding/NAV and custody reconciliation
+    TODO; GATED reserve proof.
+  link: https://docs.infinifi.xyz/vaults
+- id: new-silver-credit
+  label: New Silver private credit
+  category: dependency
+  note: Current reserve/holding reconciliation TODO; 56-day notice.
+  link: https://docs.infinifi.xyz/vaults
+- id: falconx-credit
+  label: FalconX institutional lending
+  category: dependency
+  note: Current reserve/holding reconciliation TODO; 7-day notice.
+  link: https://docs.infinifi.xyz/vaults
+- id: rate-manager
+  label: RWAEscrowRateManager
+  category: infra
+  address: '0x11F6FAb3f4D8635880C3e80cbae8AEF8136D4189'
+  note: Configured-rate accrual/override of $31.12M (70.4%). Fresh timestamps are not reserve attestations.
+- id: fxsave-token
+  label: fxSAVE / fxUSD base pool
+  category: dependency
+  address: '0x7743e50F534a7f9F1791DdE7dCD89F7783Eefc39'
+- id: stcusd
+  label: Cap stcUSD
+  category: dependency
+  address: '0x88887bE419578051FF9F4eb6C858A951921D8888'
+- id: aave-pool
+  label: Aave V3 Ethereum
+  category: dependency
+  address: '0x87870Bca3F3fD6335C3F4ce8392D69350B4fA4E2'
+- id: susdc
+  label: Spark savings USDC
+  category: dependency
+  address: '0xBc65ad17c5C0a2A4D159fa5a503f4992c7B545FE'
+- id: portal
+  label: PortalHub (Proxy)
+  category: infra
+  address: '0x13025F34C1ec2A16bF68f3a3c4e986a3E85CED61'
+  note: 7-day upgrade delay. Bridge initiation paused; inbound processing remains enabled and requires
+    OUTLAND_KEEPER.
+- id: ccip
+  label: ConnectorCCIP (Base)
+  category: dependency
+  address: '0x65805D838a3504d283B92a623081E4b8c5583502'
+  note: CCIP-authenticated asset/supply reports → keeper → native mint; not capped to current Base assets.
+- id: cctp-ccip
+  label: CCTP + CCIP (Monad)
+  category: dependency
+  address: '0x3373784A7a52A07F9339aA8F60403420cC602c52'
+  note: CCIP reports authorize native mint via PortalHub; CCTP V2 transports USDC. Monad remote verification
+    excluded by request.
+- id: base-farm
+  label: Base OutlandFarm — $68,060
+  category: strategy
+  address: '0xbD6c2d1C4809a5D8847FbA3a3cf7d6BDf6b6C3bA'
+  note: 0.154% of L1 book; Base snapshot $68,166; underlying maxWithdraw is zero. Retained for native
+    mint path.
+- id: monad-farm
+  label: Monad OutlandFarm — L1 book $23
+  category: strategy
+  address: '0xA7c1DAEAA5D97e1319B4Ff6Cdf658F5C4582A27E'
+  note: Remote state unverified by request; L1 book amount does not prove remote backing. Retained for
+    native mint authority.
+- id: lz-iusd
+  label: iUSD OFT Adapter (escrow only)
+  category: dependency
+  address: '0xdd1cb2e1aa483e1d94e3e22e70cfbb634fcb3005'
+  note: '4.329349 iUSD escrowed. Katana→Ethereum: 4-of-4 DVNs, 20 confirmations; no native minter role.'
+- id: lz-siusd
+  label: siUSD OFT Adapter (escrow only)
+  category: dependency
+  address: '0x5f2106bb2a5aba6a783dbf29c8d3b09c175bc3c0'
+  note: 3,186.529708 siUSD escrowed. Same inbound quorum; no native minter role.
 edges:
-  # === Governance ===
-  - from: multisig
-    to: long-timelock
-    kind: proposes-on
-    label: PROPOSER + CANCELLER
-  - from: multisig
-    to: short-timelock
-    kind: proposes-on
-    label: PROPOSER + CANCELLER
-  - from: long-timelock
-    to: core
-    kind: controls
-    label: "GOVERNOR (7d)"
-  - from: short-timelock
-    to: core
-    kind: controls
-    label: "PARAMETERS / ORACLE (1h)"
-  - from: multisig
-    to: core
-    kind: holds-role
-    label: "UNPAUSE + EMERGENCY + EXECUTOR"
-  - from: core
-    to: gateway
-    kind: manages
-
-  # === Vault / token internal flow ===
-  - from: gateway
-    to: mint-controller
-    kind: routes-through
-  - from: gateway
-    to: redeem-controller
-    kind: routes-through
-  # === Mint authority: who holds RECEIPT_TOKEN_MINTER on iUSD ===
-  - from: mint-controller
-    to: iUSD
-    kind: mints
-    label: RECEIPT_TOKEN_MINTER
-  - from: migration-controller
-    to: iUSD
-    kind: mints
-    label: RECEIPT_TOKEN_MINTER
-  - from: yield-sharing
-    to: iUSD
-    kind: mints
-    label: RECEIPT_TOKEN_MINTER
-  - from: pl-smoother
-    to: iUSD
-    kind: mints
-    label: RECEIPT_TOKEN_MINTER
-  - from: redeem-controller
-    to: iUSD
-    kind: manages
-    label: burns + FIFO queue
-  - from: siUSD
-    to: iUSD
-    kind: deposits-into
-    label: ERC-4626 stake
-  - from: locking-controller
-    to: iUSD
-    kind: deposits-into
-    label: liUSD (first-loss)
-  - from: locking-controller
-    to: unwinding-module
-    kind: routes-through
-    label: early exit
-
-  # === Allocation: iUSD's backing into farms (2026-07-29) ===
-  - from: iUSD
-    to: farm-midas
-    kind: allocates-to
-    label: "51.4%"
-  - from: iUSD
-    to: farm-rwa-escrow-1
-    kind: allocates-to
-    label: "17.0%"
-  - from: iUSD
-    to: farm-rwa-escrow-3
-    kind: allocates-to
-    label: "8.4%"
-  - from: iUSD
-    to: farm-cap
-    kind: allocates-to
-    label: "7.3%"
-  - from: iUSD
-    to: farm-rwa-escrow-2
-    kind: allocates-to
-    label: "4.3%"
-  - from: iUSD
-    to: farm-aave-v4
-    kind: allocates-to
-    label: "3.7%"
-  - from: iUSD
-    to: farm-rwa-escrow-4
-    kind: allocates-to
-    label: "3.3%"
-  - from: iUSD
-    to: farm-steakhouse
-    kind: allocates-to
-    label: "1.9%"
-  - from: iUSD
-    to: farm-spark
-    kind: allocates-to
-    label: "1.7%"
-  - from: iUSD
-    to: farm-swap-pyusd
-    kind: allocates-to
-    label: "1.0%"
-
-  # === Farms → external dependencies ===
-  - from: farm-midas
-    to: dep-mglobal
-    kind: deposits-into
-  - from: farm-rwa-escrow-1
-    to: dep-rwa-cp-multisig
-    kind: deposits-into
-  - from: farm-rwa-escrow-2
-    to: dep-rwa-cp-1
-    kind: deposits-into
-  - from: farm-rwa-escrow-3
-    to: dep-rwa-cp-2
-    kind: deposits-into
-  - from: farm-rwa-escrow-4
-    to: dep-rwa-cp-3
-    kind: deposits-into
-  - from: dep-rwa-rate-manager
-    to: farm-rwa-escrow-1
-    kind: controls
-    label: attests value
-  - from: dep-rwa-rate-manager
-    to: farm-rwa-escrow-2
-    kind: controls
-    label: attests value
-  - from: dep-rwa-rate-manager
-    to: farm-rwa-escrow-3
-    kind: controls
-    label: attests value
-  - from: dep-rwa-rate-manager
-    to: farm-rwa-escrow-4
-    kind: controls
-    label: attests value
-  - from: farm-swap-pyusd
-    to: dep-sentora
-    kind: deposits-into
-    label: residual
-  - from: farm-cap
-    to: dep-stcusd
-    kind: deposits-into
-  - from: farm-spark
-    to: dep-sky-psm
-    kind: routes-through
-    label: USDC on unwind
-  - from: farm-aave-v4
-    to: dep-usdg
-    kind: deposits-into
-  - from: farm-steakhouse
-    to: dep-steakhouse-vault
-    kind: deposits-into
-
-  # MetaMorpho vault governance
-  - from: dep-steakhouse-owner
-    to: dep-steakhouse-vault
-    kind: holds-role
-    label: "owner"
-  - from: dep-steakhouse-curator
-    to: dep-steakhouse-vault
-    kind: holds-role
-    label: "curator"
-
-# BEGIN GENERATED MORPHO MARKET EDGES
-# Managed by scripts/update_morpho_graph_markets.mjs — do not edit.
-  - from: dep-steakhouse-vault
-    to: morpho-market-bbf7ce1b40d3
-    kind: deposits-into
-    label: "99.4%"
-  - from: dep-steakhouse-vault
-    to: morpho-market-6df56abb95e9
-    kind: deposits-into
-    label: "0.5%"
-  - from: dep-steakhouse-vault
-    to: morpho-market-a94d7d784ecd
-    kind: deposits-into
-    label: "<0.1%"
-# END GENERATED MORPHO MARKET EDGES
+- from: mint-controller
+  to: iUSD
+  kind: mints
+  label: RECEIPT_TOKEN_MINTER
+- from: core
+  to: mint-controller
+  kind: controls
+  label: Core role checks
+- from: migration-controller
+  to: iUSD
+  kind: mints
+  label: RECEIPT_TOKEN_MINTER
+- from: core
+  to: migration-controller
+  kind: controls
+  label: Core role checks
+- from: yield-sharing
+  to: iUSD
+  kind: mints
+  label: RECEIPT_TOKEN_MINTER
+- from: core
+  to: yield-sharing
+  kind: controls
+  label: Core role checks
+- from: pl-smoother
+  to: iUSD
+  kind: mints
+  label: RECEIPT_TOKEN_MINTER
+- from: core
+  to: pl-smoother
+  kind: controls
+  label: Core role checks
+- from: outland-base
+  to: iUSD
+  kind: mints
+  label: RECEIPT_TOKEN_MINTER
+- from: core
+  to: outland-base
+  kind: controls
+  label: Core role checks
+- from: outland-monad
+  to: iUSD
+  kind: mints
+  label: RECEIPT_TOKEN_MINTER
+- from: core
+  to: outland-monad
+  kind: controls
+  label: Core role checks
+- from: iUSD
+  to: gdadf
+  kind: allocates-to
+  label: 48.2%
+- from: registry
+  to: gdadf
+  kind: manages
+- from: iUSD
+  to: fxsave
+  kind: allocates-to
+  label: 18.3%
+- from: registry
+  to: fxsave
+  kind: manages
+- from: iUSD
+  to: new-silver
+  kind: allocates-to
+  label: 11.8%
+- from: registry
+  to: new-silver
+  kind: manages
+- from: iUSD
+  to: genesis
+  kind: allocates-to
+  label: 5.9%
+- from: registry
+  to: genesis
+  kind: manages
+- from: iUSD
+  to: cap
+  kind: allocates-to
+  label: 5.0%
+- from: registry
+  to: cap
+  kind: manages
+- from: iUSD
+  to: aave
+  kind: allocates-to
+  label: 5.0%
+- from: registry
+  to: aave
+  kind: manages
+- from: iUSD
+  to: falconx
+  kind: allocates-to
+  label: 4.6%
+- from: registry
+  to: falconx
+  kind: manages
+- from: iUSD
+  to: spark
+  kind: allocates-to
+  label: 1.1%
+- from: registry
+  to: spark
+  kind: manages
+- from: gdadf
+  to: fasanara
+  kind: deposits-into
+- from: rate-manager
+  to: gdadf
+  kind: controls
+  label: Keeper accrual / governance override
+- from: genesis
+  to: fasanara
+  kind: deposits-into
+- from: rate-manager
+  to: genesis
+  kind: controls
+  label: Keeper accrual / governance override
+- from: new-silver
+  to: new-silver-credit
+  kind: deposits-into
+- from: rate-manager
+  to: new-silver
+  kind: controls
+  label: Keeper accrual / governance override
+- from: falconx
+  to: falconx-credit
+  kind: deposits-into
+- from: rate-manager
+  to: falconx
+  kind: controls
+  label: Keeper accrual / governance override
+- from: fxsave
+  to: fxsave-token
+  kind: deposits-into
+- from: cap
+  to: stcusd
+  kind: deposits-into
+- from: aave
+  to: aave-pool
+  kind: deposits-into
+- from: spark
+  to: susdc
+  kind: deposits-into
+- from: iUSD
+  to: base-farm
+  kind: allocates-to
+  label: 0.15%
+- from: iUSD
+  to: monad-farm
+  kind: allocates-to
+  label: <0.1%
+- from: base-farm
+  to: outland-base
+  kind: deposits-into
+- from: monad-farm
+  to: outland-monad
+  kind: deposits-into
+- from: ccip
+  to: portal
+  kind: controls
+  label: Authenticated Base report; keeper processing required
+- from: cctp-ccip
+  to: portal
+  kind: controls
+  label: Authenticated Monad report; keeper processing required
+- from: portal
+  to: outland-base
+  kind: holds-role
+  label: OUTLAND_PORTAL
+- from: portal
+  to: outland-monad
+  kind: holds-role
+  label: OUTLAND_PORTAL
+- from: iUSD
+  to: lz-iusd
+  kind: routes-through
+  label: Escrows canonical iUSD
+- from: siUSD
+  to: lz-siusd
+  kind: routes-through
+  label: Escrows canonical siUSD
+- from: multisig
+  to: long-timelock
+  kind: proposes-on
+  label: PROPOSER_ROLE
+- from: multisig
+  to: long-timelock
+  kind: cancels-on
+  label: CANCELLER_ROLE
+- from: multisig
+  to: short-timelock
+  kind: proposes-on
+  label: PROPOSER_ROLE
+- from: multisig
+  to: short-timelock
+  kind: cancels-on
+  label: CANCELLER_ROLE
+- from: long-timelock
+  to: core
+  kind: holds-role
+  label: GOVERNOR
+- from: short-timelock
+  to: core
+  kind: holds-role
+  label: PROTOCOL_PARAMETERS / ORACLE_MANAGER
+- from: multisig
+  to: core
+  kind: holds-role
+  label: Direct operational roles / minor-role administration
+- from: long-timelock
+  to: gateway
+  kind: controls
+  label: ProxyAdmin owner; 7-day delay
+- from: long-timelock
+  to: yield-sharing
+  kind: controls
+  label: ProxyAdmin owner; 7-day delay
+- from: long-timelock
+  to: portal
+  kind: controls
+  label: ProxyAdmin owner; 7-day delay
+- from: short-timelock
+  to: registry
+  kind: controls
+  label: PROTOCOL_PARAMETERS; 24h delay
+- from: short-timelock
+  to: rate-manager
+  kind: controls
+  label: PROTOCOL_PARAMETERS; 24h delay
+- from: short-timelock
+  to: ccip
+  kind: controls
+  label: PROTOCOL_PARAMETERS; 24h delay
+- from: short-timelock
+  to: cctp-ccip
+  kind: controls
+  label: PROTOCOL_PARAMETERS; 24h delay
+- from: short-timelock
+  to: portal
+  kind: controls
+  label: PROTOCOL_PARAMETERS; 24h delay
+- from: siUSD
+  to: iUSD
+  kind: deposits-into
+  label: ERC-4626 stake
+- from: iUSD
+  to: locking-controller
+  kind: routes-through
+  label: liUSD first-loss
+- from: iUSD
+  to: redeem-controller
+  kind: routes-through
+  label: USDC redemption

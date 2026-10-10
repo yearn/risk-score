@@ -95,7 +95,6 @@
       ],
       "ignore": [
         "aave-sgho",
-        "infinifi",
         "fx-fxusd",
         "midas-mglobal",
         "superstate-ustb"
@@ -145,6 +144,15 @@
           "integration": "Chainlink CCIP (LockReleaseTokenPool on Ethereum; BurnWithFromMintTokenPool on BNB Chain and Monad)",
           "detail": "Mixed model, verified September 9, 2026. `TokenAdminRegistry.getPool` maps Ethereum USDat to [`0xA0dE…0D86`](https://etherscan.io/address/0xA0dE671eb84dE9dEe1d311d996d25c41F63a0D86) (`LockReleaseTokenPool 1.6.1`), holding **31,965,633.03 USDat** — comfortably covering the ~29.59M USDat circulating across the remote chains. On the remote chains, USDat is a `SaturnOFT`-based token minted/burned by a **`BurnWithFromMintTokenPool`**: BNB Chain [`0x9049…0C61`](https://bscscan.com/address/0x904939A965eDc2Efbd44Fd4db223f07680510C61) (holds `MINTER_ROLE`+`BURNER_ROLE` on BNB USDat [`0x0Bb1…64eF`](https://bscscan.com/address/0x0Bb150DFa86EA5d7742F07FEfCD8E8edA81D64eF), ~$2.0M circulating) and Monad [`0x8ab4…70F0`](https://explorer.monad.xyz/address/0x8ab40e2dabCd24dCFf0A06A68eB59990405270F0) (same role holder pattern on Monad USDat, same address, ~$27.6M circulating — the larger of the two remote deployments). Because the mint-side pools can create canonical supply independent of the Ethereum lockbox's real-time balance, this is classified `mint` per the skill's route-prioritization rule, even though the measured Ethereum leg is itself a `lock`.",
           "owner": "Ethereum pool owner: `RBACTimelock` [`0x4483…9449`](https://etherscan.io/address/0x44835bBBA9D40DEDa9b64858095EcFB2693c9449), `getMinDelay()` = 10,800s (3h). Remote-chain (BNB/Monad) admin: `SaturnTimelock` [`0xF023…FF0C`](https://bscscan.com/address/0xF0237a1cb794eA830129966049eF99243082FF0C), `getMinDelay()` = 172,800s (2d) — identical address on both chains, shorter delay than Saturn's own Ethereum Admin Timelock (5d)."
+        },
+        {
+          "slug": "infinifi",
+          "name": "InfiniFi",
+          "kind": "direct",
+          "model": "mint",
+          "integration": "CCIP → PortalHub → OutlandVault native supply reconciliation",
+          "detail": "Verified Ethereum PortalHub [`0x1302…ED61`](https://etherscan.io/address/0x13025F34C1ec2A16bF68f3a3c4e986a3E85CED61) accepts remote reports via Base CCIP connector [`0x6580…3502`](https://etherscan.io/address/0x65805D838a3504d283B92a623081E4b8c5583502) and Monad CCTP/CCIP connector [`0x3373…2c52`](https://etherscan.io/address/0x3373784A7a52A07F9339aA8F60403420cC602c52). Keeper processing of an authenticated payload calls native minters [`0x4197…1e45`](https://etherscan.io/address/0x4197F2ADFCe9fDeB36B02e96737Ddf646C841e45) / [`0x7777…08eA`](https://etherscan.io/address/0x77776F422B7EB0A95ccD35fBd088A5957D4408eA), which reconcile remote supply by minting canonical iUSD. Bridge initiation is paused but inbound processing remains enabled. L1 books are $68,060.48 Base and $23.01 Monad; no mint cap is inferred from these amounts. Monad remote state was excluded by request. Snapshot: October 3, 2026.",
+          "owner": "PortalHub upgrades require the 7-day Long Timelock; connector/peer configuration uses 24h parameter authority. Processing additionally requires OUTLAND_KEEPER."
         },
         {
           "slug": "fluid",
@@ -218,8 +226,17 @@
           "model": "transport",
           "integration": "Nested dgnHYPE strategy routes USDC to HyperCore via CCTP",
           "detail": "dgnHYPE operational EOA [`0x11A6…006A`](https://arbiscan.io/address/0x11A691612BD108e57cC04ea42B006C9CB1ff006A) deposits USDC into the Circle HyperCore CCTP extension [`0xA95d…4fcE`](https://arbiscan.io/address/0xA95d9c1F655341597C94393fDdc30cf3c08E4fcE) for Hyperliquid trading"
+        },
+        {
+          "slug": "infinifi",
+          "name": "InfiniFi",
+          "kind": "indirect",
+          "model": "transport",
+          "integration": "CCTP V2 underlying USDC transport + CCIP accounting notification",
+          "detail": "Ethereum connector [`0x3373…2c52`](https://etherscan.io/address/0x3373784A7a52A07F9339aA8F60403420cC602c52) burns underlying USDC via TokenMessengerV2 [`0x28b5…cf5d`](https://etherscan.io/address/0x28b5a0e9C621a5BadaA536219b3a228C8168cf5d), configured for Monad domain 15. CCIP separately authenticates accounting notifications; a keeper processes them. CCTP itself does not authorize native iUSD minting. The Monad farm is $23.01 in Ethereum accounting; remote reserves are unverified by requester instruction. Snapshot: October 3, 2026."
         }
-      ]
+      ],
+      "ignore": []
     },
     {
       "id": "free-tunnel",
@@ -324,20 +341,20 @@
           "kind": "direct",
           "model": "lock",
           "integration": "LayerZero OFT Adapters (siUSD + iUSD)",
-          "detail": "siUSD adapter [`0x5f21…c3c0`](https://etherscan.io/address/0x5f2106bb2A5ABa6a783DBF29c8D3b09C175BC3C0) escrows siUSD and iUSD adapter [`0xdd1c…3005`](https://etherscan.io/address/0xDd1cb2E1AA483E1D94E3e22e70CFbb634fcB3005) escrows iUSD; both mint native OFTs on Katana. Neither adapter holds RECEIPT_TOKEN_MINTER, so they cannot mint native supply",
+          "detail": "Ethereum siUSD adapter [`0x5f21…c3c0`](https://etherscan.io/address/0x5f2106bb2a5aba6a783dbf29c8d3b09c175bc3c0) escrows 3,186.529708 siUSD; iUSD adapter [`0xdd1c…3005`](https://etherscan.io/address/0xdd1cb2e1aa483e1d94e3e22e70cfbb634fcb3005) escrows 4.329349 iUSD. Neither holds native mint authority. This lock model is specific to the OFT route; separate CCIP/Outland paths can mint canonical iUSD.",
           "security": {
             "label": "4-of-4",
-            "confirmations": 15,
+            "confirmations": 20,
             "providers": [
               "LayerZero Labs",
+              "Horizen",
               "Canary",
-              "Nethermind",
               "Deutsche Telekom"
             ],
-            "route": "Ethereum→Katana (siUSD mint side; iUSD verified separately with the same quorum)",
+            "route": "Katana→Ethereum (escrow-release side; both iUSD and siUSD)",
             "weak": false,
-            "verifiedAt": "2026-07-16",
-            "link": "https://explorer.katanarpc.com/address/0x68943c066747690ecDAEB027fa722B090ee6F92D"
+            "verifiedAt": "2026-10-03",
+            "link": "https://etherscan.io/address/0x5f2106bb2a5aba6a783dbf29c8d3b09c175bc3c0"
           },
           "owner": "Adapter owner: 4-of-8 Safe [`0x8060…400c`](https://safe.yaudit.dev/1/0x80608f852D152024c0a2087b16939235fEc2400c/)."
         },
