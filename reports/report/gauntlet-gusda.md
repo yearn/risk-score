@@ -5,6 +5,7 @@
 - **Chain:** Ethereum (also deployed on Base, Optimism, Arbitrum)
 - **Token Address:** [`0x3bd9248048df95db4fbd748c6cd99c1baa40bad0`](https://etherscan.io/token/0x3bd9248048df95db4fbd748c6cd99c1baa40bad0)
 - **Final Score: 3.15/5.0**
+- **Visibility:** Hidden
 
 ## Overview + Links
 
