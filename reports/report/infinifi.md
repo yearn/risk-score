@@ -1,11 +1,10 @@
 # Protocol Risk Assessment: InfiniFi
 
 - **Assessment Date:** February 4, 2026 (Updated: October 4, 2026)
-- **Status:** GATED
 - **Token:** siUSD (Staked iUSD)
 - **Chain:** Ethereum Mainnet
 - **Token Address:** [`0xDBDC1Ef57537E34680B898E1FEBD3D68c7389bCB`](https://etherscan.io/address/0xDBDC1Ef57537E34680B898E1FEBD3D68c7389bCB)
-- **Final Score: 5.00/5.0**
+- **Final Score: 3.25/5.0**
 - **Snapshot:** Ethereum block [26,114,509](https://etherscan.io/block/26114509), hash [`0xf6c5…0829`](https://etherscan.io/block/0xf6c5a914df3d9a526db026ff2c731220772c285fd542c9a8eaaeed9172340829), October 3, 2026 at 21:29:23 UTC. Base block [52,136,808](https://basescan.org/block/52136808), hash [`0x412b…2e`](https://basescan.org/block/0x412b15be13eefbfbeb4fea7c75c858b6e1de38af71f8b651a717da5383d2a52e), same timestamp. Roles, balances, farms and proxies are pinned to these blocks; event scans end at the Ethereum block. API/DEX observations are separately timestamped in [snapshot evidence](https://github.com/yearn/risk-score/blob/master/reports/data/infinifi-2026-10-03.json). Monad RPC verification was excluded at the requester's direction: its $23.01 figure below is an Ethereum-mirrored book value, not proof of remote reserves.
 
 ## Overview + Links
@@ -14,7 +13,7 @@ InfiniFi accepts enabled deposit assets to mint iUSD and deploys the backing thr
 
 The current accounted asset book is **$44.20M**. Four funded RWA escrow positions account for **$31.12M (70.4%)**, all valued through one configured-rate manager. Fasanara GDADF, labelled mGLOBAL by the protocol, is **48.2%** and Fasanara Genesis is **5.9%**; their combined issuer concentration is **54.1%**. The largest onchain position is f(x) fxSAVE (**18.3%**). The LIQUID bucket provides **$4.94M (11.2%)** of reported immediate liquidity through Cap, Aave V3 and Spark. The first-loss notional is **$14.00M**. See [snapshot evidence](https://github.com/yearn/risk-score/blob/master/reports/data/infinifi-2026-10-03.json) and Appendix A.
 
-**Reserve-proof gate:** the ledger is observable, but current backing of the dominant RWA book is not established by current transparent reserve attestations. `RWAEscrowRateManager.harvest()` accrues configured returns and updates timestamps; it is not a NAV or custody verification. The largest farm's escrow holds **zero mGLOBAL tokens**. Public fund statements linked in the [current vault disclosures](https://docs.infinifi.xyz/vaults) are dated April 27, 2026 (GDADF) and February 26, 2026 (Genesis). **TODO:** obtain current holding/NAV and custody evidence for all four RWA positions, reconciled to InfiniFi's claims. The report is **GATED at 5.00** pending that proof; the ungated weighted score is **3.40**. This reflects missing reserve verification, not an observed exploit or realized loss.
+**Reserve-proof gap:** the ledger is observable, but current backing of the dominant RWA book is not established by current transparent reserve attestations. `RWAEscrowRateManager.harvest()` accrues configured returns and updates timestamps; it is not a NAV or custody verification. The largest farm's escrow holds **zero mGLOBAL tokens**. Public fund statements linked in the [current vault disclosures](https://docs.infinifi.xyz/vaults) are dated April 27, 2026 (GDADF) and February 26, 2026 (Genesis). **TODO:** obtain current holding/NAV and custody evidence for all four RWA positions, reconciled to InfiniFi's claims. Disclosed counterparties and dated issuer statements are periodic, stale reporting rather than no verification at all, so the unverifiable-reserves gate is not triggered. The gap is scored as Collateralization 4.0 (opaque or infrequent reporting), giving a final score of **3.25**. If current statements stop being published or a counterparty cannot evidence its holdings, reapply the gate.
 
 **Farm notice periods:** `RWAEscrowFarm` and `RWAEscrowRouterFarm` use rolling `block.timestamp + duration`; FxSaveFarm returns `now + 7 days`, and OutlandFarm uses `maturityOffset()` (7 days for both current instances). These are accounting/notice horizons, not guaranteed calendar settlement dates. Cash requires an actual counterparty return, unstaking/claim operation or cross-chain transfer.
 
@@ -176,7 +175,7 @@ Accounted assets exceed receipt supply by approximately $179.48, a **book backin
 
 All registered farm identities, allocations and onchain DeFi balances are observable. The **economic backing of 70.4% is not verified**. `RWAEscrow.totalAssets()` is an administrative ledger. All four funded escrows share [RWAEscrowRateManager](https://etherscan.io/address/0x11F6FAb3f4D8635880C3e80cbae8AEF8136D4189#code): permissionless `harvest()` accrues governance-configured annual rates (6.20% GDADF, 11.25% New Silver, 7.51% Genesis, 6.05% FalconX), then refreshes `lastUpdatedAt`. The same parameter authority can use `governanceUpdateTotalAssets` to override a value. All four timestamps are October 3 at 18:37:59 UTC; this proves recent accounting execution, not custodian confirmation.
 
-The latest GDADF document linked by the public vault page is a [holding/accrued-interest statement dated April 27](https://raw.githubusercontent.com/InfiniFi-Labs/documents/master/fasanara/gdadf-nav/2026-04-27-gdadf-nav.pdf), describing a $30M note plus accrued interest at that date. It does not reconcile the current $21.29M book. Genesis has a [performance statement dated February 26](https://raw.githubusercontent.com/InfiniFi-Labs/documents/master/fasanara/genesis-nav/2026-02-26-genesis-nav.pdf). New Silver material is an investor summary and press release; no current holding/reserve reconciliation for New Silver or FalconX was established. Counterparty names are disclosed, but current ownership, custody and recoverability of InfiniFi's claims remain **TODO**. This is the basis of the reserve-proof gate.
+The latest GDADF document linked by the public vault page is a [holding/accrued-interest statement dated April 27](https://raw.githubusercontent.com/InfiniFi-Labs/documents/master/fasanara/gdadf-nav/2026-04-27-gdadf-nav.pdf), describing a $30M note plus accrued interest at that date. It does not reconcile the current $21.29M book. Genesis has a [performance statement dated February 26](https://raw.githubusercontent.com/InfiniFi-Labs/documents/master/fasanara/genesis-nav/2026-02-26-genesis-nav.pdf). New Silver material is an investor summary and press release; no current holding/reserve reconciliation for New Silver or FalconX was established. Counterparty names are disclosed, but current ownership, custody and recoverability of InfiniFi's claims remain **TODO**. This is the basis of the Collateralization 4.0 and Provability 4.0 scores.
 
 ## Liquidity Risk
 
@@ -403,7 +402,7 @@ Autonomous events triggered by protocol state, not governance actions.
 
 ### Critical Risks
 
-**Unverifiable-reserves gate:** onchain accounting and identity disclosure are insufficient to verify current reserve existence and value for the dominant RWA book. Obtain current counterparty holding/NAV and custody attestations, reconcile them to the four escrow balances and review the legal claims before lifting GATED status. No exploit or realized-loss status is assigned by this gate.
+**Stale reserve evidence:** onchain accounting and identity disclosure do not verify current reserve existence and value for the dominant RWA book; the latest issuer statements are dated April and February 2026. Obtain current counterparty holding/NAV and custody attestations, reconcile them to the four escrow balances and review the legal claims. If that evidence cannot be produced, apply the unverifiable-reserves gate.
 
 ## Risk Score Assessment
 
@@ -411,10 +410,10 @@ Autonomous events triggered by protocol state, not governance actions.
 
 - [x] **Unverified contract source — PASSED:** assessed siUSD, all registered Ethereum farms, six Ethereum minters and the three material proxy implementations have verified source. Monad remote coverage is explicitly excluded.
 - [x] **No audit — PASSED:** reputable base-protocol audits exist; deployed Gateway V4/PortalHub/OutlandVault upgrade coverage is TODO.
-- [ ] **Unverifiable reserves — TRIGGERED:** 70.4% of the current book is keeper-accrued RWA value without established current reserve proof. GDADF/Genesis public statements are dated April/February, and no current New Silver/FalconX reserve reconciliation was established. See Provability and Appendix A.
+- [x] **Unverifiable reserves — PASSED (conditional):** 70.4% of the current book is keeper-accrued RWA value without current reserve proof. Counterparties are disclosed and GDADF/Genesis issuer statements exist, but they are dated April/February and no current New Silver/FalconX reconciliation was established. This is infrequent, stale reporting, scored as Collateralization 4.0 rather than the gate. See Provability and Appendix A.
 - [x] **Total centralization — PASSED:** 4-of-8 Safe and dual timelocks, with operational roles separately identified.
 
-The triggered gate sets **Final Score = 5.00** and **Status = GATED**. The category calculation below remains visible for comparability and does not override the gate.
+All gates pass; proceed to category scoring. Reapply the reserves gate if current reserve evidence cannot be obtained at the next reassessment.
 
 ### Category Scores
 
@@ -434,14 +433,14 @@ The triggered gate sets **Final Score = 5.00** and **Status = GATED**. The categ
 
 #### Category 3: Funds Management (Weight: 30%)
 
-- **Collateralization — 5.0:** book backing is 100.0004%, but current economic backing of the dominant RWA book is unverified; this is also the critical gate.
+- **Collateralization — 4.0:** book backing is 100.0004%, but 70.4% is offchain RWA value whose current economic backing rests on infrequent, stale issuer reporting (opaque or infrequent reporting).
 - **Provability — 4.0:** allocation and accounting are transparent, but current RWA values are self-reported/configured-rate accrual. Dated fund statements and investor material do not independently establish today's reserves. The first-loss notional covers 45.0% of the RWA book and 58.6% of combined Fasanara exposure.
 
-**Score: 4.5/5** — (5.0 + 4.0) / 2.0.
+**Score: 4.0/5** — (4.0 + 4.0) / 2.
 
 #### Category 4: Liquidity Risk (Weight: 15%)
 
-**Score: 3.0/5** — $4.94M reported immediate liquidity across three venues and an observed no-queue redemption record support functional exits. The buffer covers only 16.6% of siUSD-held iUSD, 88.8% of assets depend on non-instant exits, Base's small vault has zero `maxWithdraw`, and no substantial secondary-market exit is established. Notice horizons do not guarantee cash. The reserve-proof gate is scored separately.
+**Score: 3.0/5** — $4.94M reported immediate liquidity across three venues and an observed no-queue redemption record support functional exits. The buffer covers only 16.6% of siUSD-held iUSD, 88.8% of assets depend on non-instant exits, Base's small vault has zero `maxWithdraw`, and no substantial secondary-market exit is established. Notice horizons do not guarantee cash. Reserve evidence is scored under Funds Management.
 
 #### Category 5: Operational Risk (Weight: 5%)
 
@@ -453,22 +452,21 @@ The triggered gate sets **Final Score = 5.00** and **Status = GATED**. The categ
 |---|---:|---:|---:|
 | Audits & Historical | 2.25 | 20% | 0.450 |
 | Centralization & Control | 3.43 | 30% | 1.029 |
-| Funds Management | 4.50 | 30% | 1.350 |
+| Funds Management | 4.00 | 30% | 1.200 |
 | Liquidity Risk | 3.00 | 15% | 0.450 |
 | Operational Risk | 2.50 | 5% | 0.125 |
-| **Ungated weighted score (rounded down)** | | | **3.40** |
-| **Final Score (reserve-proof gate)** | | | **5.00** |
+| **Final Score (rounded down)** | | | **3.25/5.0** |
 
 ### Risk Tier
 
-**Final Risk Tier: HIGH RISK (GATED)**
+**Final Risk Tier: MEDIUM RISK**
 
-The ungated weighted score falls in the Medium band. The final score is 5.00 because current reserve existence/value has not been verified for the dominant RWA exposure. This is a live-protocol evidence gate, not a terminal HACKED/DEAD classification.
+Approved with enhanced monitoring. Current reserve evidence for the dominant RWA exposure is stale; failure to obtain it at the next reassessment should trigger the unverifiable-reserves gate.
 
 ## Reassessment Triggers
 
 - **Time-based:** reassess within 30 days (November 3, 2026), or immediately when current reserve evidence becomes available.
-- **Reserve-proof:** current counterparty holding/NAV, custody and enforceable-claim evidence reconciled to every funded RWA escrow is required to consider lifting GATED status. A keeper timestamp or API label alone is insufficient.
+- **Reserve-proof:** request current counterparty holding/NAV, custody and enforceable-claim evidence reconciled to every funded RWA escrow. Apply the unverifiable-reserves gate (score 5.00, GATED) if it cannot be produced by the next reassessment. A keeper timestamp or API label alone is insufficient.
 - **Liquidity:** any nonzero queue/pending claims; reported liquid capacity below 5% of TVL for seven days; underlying liquid-farm pause or withdrawal restriction.
 - **TVL:** >30% movement from $44.20M, or another >10% daily withdrawal wave.
 - **Concentration / coverage:** Fasanara above 60%, total RWA above 80%, any other issuer above 40%, first-loss coverage below 50% of Fasanara or 40% of RWA exposure.
@@ -550,4 +548,4 @@ LayerZero OFT adapters → escrow existing iUSD/siUSD (no native mint role)
 | [May 18, 2026](https://github.com/yearn/risk-score/pull/192) | 3.2 | Reassessment — Liquidity 2.0→4.0: iUSD redemption queue-only pending maturity wave |
 | [July 4, 2026](https://github.com/yearn/risk-score/pull/288) | 3.4 | Reassessment — offchain concentration up, TVL down |
 | [July 29, 2026](https://github.com/yearn/risk-score/pull/357) | 3.19 | Reassessment — offchain exposure restated to 84.4% with a fourth RWA escrow; farm-bucket semantics corrected (`FarmTypes.LIQUID` = bucket 1): instant-exit capacity is $5.45M and the redemption queue has never been used (Liquidity 4.0→3.0) |
-| [October 4, 2026](https://github.com/yearn/risk-score/pull/510) | 5.00 | Reassessment — GATED for missing current reserve proof: 70.4% keeper-accrued RWA book; 24h Short Timelock, Gateway V4, six minters and CCIP/CCTP paths verified; Monad remote state excluded by request. Ungated weighted score 3.40. |
+| [October 4, 2026](https://github.com/yearn/risk-score/pull/510) | 3.25 | Reassessment — stale reserve evidence for the 70.4% keeper-accrued RWA book scored as Collateralization 4.0 (gate not triggered); 24h Short Timelock, Gateway V4, six minters and CCIP/CCTP paths verified; Monad remote state excluded by request. |

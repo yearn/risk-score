@@ -119,7 +119,7 @@ nodes:
   label: Fasanara — combined 54.1%
   category: dependency
   note: GDADF $21.29M + Genesis $2.61M; correlated issuer. Current holding/NAV and custody reconciliation
-    TODO; GATED reserve proof.
+    TODO; stale reserve evidence.
   link: https://docs.infinifi.xyz/vaults
 - id: new-silver-credit
   label: New Silver private credit
