@@ -503,6 +503,29 @@
           "owner": "Adapter owner and LayerZero delegate: Ondo admin 4-of-7 Safe [`0x1a69…3ad7`](https://etherscan.io/address/0x1a694A09494E214a3Be3652e4B343B7B81A73ad7), no timelock."
         },
         {
+          "slug": "strata-srusde",
+          "name": "Strata srUSDe",
+          "kind": "direct",
+          "model": "lock",
+          "integration": "LayerZero OFT Adapter (`StrataOFTAdapter`)",
+          "detail": "Adapter [`0x9802…f45a`](https://etherscan.io/address/0x98020c586807681b577f5ee0a6444d4c22f0f45a) escrows 5.1 srUSDe (<0.01% of the ~16.9M supply). Plasma OFT [`0xa651…72b0`](https://plasmascan.to/address/0xa651b7605350386e37b11e85c9cb5e85702072b0) supply is 0.1 srUSDe. Ethereum and Plasma receive routes both require 4-of-4 DVNs",
+          "security": {
+            "label": "4-of-4",
+            "confirmations": 15,
+            "providers": [
+              "LayerZero Labs",
+              "Canary",
+              "Nethermind",
+              "Horizen"
+            ],
+            "route": "Plasma→Ethereum (escrow release)",
+            "weak": false,
+            "verifiedAt": "2026-10-11",
+            "link": "https://etherscan.io/address/0x98020c586807681b577f5ee0a6444d4c22f0f45a"
+          },
+          "owner": "Adapter owner and ProxyAdmin owner: 48h Timelock [`0xb2A3…B706`](https://etherscan.io/address/0xb2A3CF69C97AFD4dE7882E5fEE120e4efC77B706); LayerZero endpoint delegate: 24h Reserve Timelock [`0x90de…aff4`](https://etherscan.io/address/0x90de209907c5a4BF527A75fC16aBD639c77aaff4)."
+        },
+        {
           "slug": "fluid",
           "name": "Fluid (sUSDai)",
           "kind": "indirect",

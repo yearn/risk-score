@@ -20,12 +20,17 @@ nodes:
     label: srUSDe (Senior Tranche)
     address: "0x3d7d6fdf07EE548B939A80edbc9B2256d0cdc003"
     category: vault
-    note: ERC-4626 Meta Vault; principal-protected by junior tranche
+    note: ERC-4626 Meta Vault; principal-protected by junior tranche; ~17.5M USDe
+  - id: oft-adapter
+    label: srUSDe OFT Adapter (Plasma)
+    address: "0x98020c586807681b577f5ee0a6444d4c22f0f45a"
+    category: vault
+    note: LayerZero lock adapter; 5.1 srUSDe escrowed
   - id: jrUSDe
     label: jrUSDe (Junior Tranche)
     address: "0xC58D044404d8B14e953C115E67823784dEA53d8F"
     category: vault
-    note: ERC-4626 first-loss capital; ~$6.64M backing (11.23% of senior)
+    note: ERC-4626 first-loss capital; ~$7.18M backing (41.04% of senior)
   - id: tranche-depositor
     label: TrancheDepositor
     address: "0x50E850641F43F65BF8fB3a7d0CF082a1D252F47e"
@@ -100,12 +105,22 @@ nodes:
     label: Timelock (24h)
     address: "0x4f2682b78F37910704fB1AFF29358A1da07E022d"
     category: governance
-    note: Strategy config / reserves; NO EXECUTOR — inoperative
+    note: Strategy config; NO EXECUTOR — inoperative
+  - id: reserve-timelock
+    label: Reserve Timelock (24h)
+    address: "0x90de209907c5a4BF527A75fC16aBD639c77aaff4"
+    category: governance
+    note: RESERVE_MANAGER_ROLE + LZ delegate; open executor; no Guardian veto
+  - id: reserve-treasury
+    label: Reserve Treasury (2/4)
+    address: "0x40c5C15Ec27526Ad769b04E767cD319551f7F4e4"
+    category: governance
+    note: Gnosis Safe; receives reserve withdrawals only
   - id: guardian
     label: Guardian (Patrick Collins)
     address: "0x277D26a45Add5775F21256159F089769892CEa5B"
     category: governance
-    note: Cyfrin CEO; CANCELLER on 48h timelock
+    note: Cyfrin CEO; CANCELLER on 48h timelock; EIP-7702-delegated EOA
   - id: access-control-manager
     label: AccessControlManager
     address: "0x1d19E18ECaC4ef332a0d5d6Aa3a0f0f772605f60"
@@ -135,6 +150,10 @@ nodes:
     label: ERC20Cooldown ProxyAdmin
     address: "0xeD6c7b379F73DF0618406d263b13b2386E398166"
     category: governance
+  - id: oft-adapter-proxyadmin
+    label: OFT Adapter ProxyAdmin
+    address: "0xda03a8cbe263da994e309ccd06fe50a0bff1d158"
+    category: governance
 
   # === External dependencies ===
   - id: ethena-susde
@@ -149,7 +168,11 @@ nodes:
     label: Pendle PT-srUSDe-22OCT2026
     address: "0x66ec657c59cdcaf171ab43b83da3942758bf8a97"
     category: dependency
-    note: Secondary liquidity venue ($4.60M LP, ~7.8% of senior TVL)
+    note: Secondary venue ($3.68M LP; expires Oct 22, 2026); SY holds 95.3% of srUSDe
+  - id: dep-layerzero
+    label: LayerZero V2 (Plasma)
+    category: dependency
+    note: 4-of-4 DVN quorum both directions; escrow 5.1 srUSDe
 
 edges:
   # === Governance ===
@@ -241,10 +264,38 @@ edges:
     to: tranche-depositor
     kind: holds-role
     label: DEPOSITOR_CONFIG_ROLE
-  - from: timelock-24h
+  - from: admin-multisig
+    to: reserve-timelock
+    kind: proposes-on
+    label: PROPOSER
+  - from: admin-multisig
+    to: reserve-timelock
+    kind: cancels-on
+    label: CANCELLER
+  - from: reserve-timelock
     to: strata-cdo
     kind: holds-role
-    label: RESERVE_MANAGER_ROLE (blocked)
+    label: RESERVE_MANAGER_ROLE (24h)
+  - from: strata-cdo
+    to: reserve-treasury
+    kind: routes-fees-to
+    label: reduceReserve (bounded by reserve)
+  - from: timelock-48h
+    to: oft-adapter-proxyadmin
+    kind: controls
+    label: owner (48h delay)
+  - from: oft-adapter-proxyadmin
+    to: oft-adapter
+    kind: manages
+    label: upgradeable proxy
+  - from: timelock-48h
+    to: oft-adapter
+    kind: controls
+    label: owner (peers)
+  - from: reserve-timelock
+    to: oft-adapter
+    kind: controls
+    label: LZ endpoint delegate (24h)
   - from: access-control-manager
     to: strata-cdo
     kind: manages
@@ -319,3 +370,11 @@ edges:
     to: pendle-srusde
     kind: routes-through
     label: PT market (secondary exit, holder-level)
+  - from: srUSDe
+    to: oft-adapter
+    kind: routes-through
+    label: lock-and-bridge (holder-level)
+  - from: oft-adapter
+    to: dep-layerzero
+    kind: routes-through
+    label: OFT messages to Plasma
