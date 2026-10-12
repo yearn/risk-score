@@ -41,7 +41,7 @@ nodes:
     label: Brain (3-of-8)
     address: "0x16388463d60FFE0661Cf7F1f31a7D658aC790ff7"
     category: governance
-    note: Also `management` on every funded strategy and ysUSDS — controls PT openWithdrawals, looper leverage targets, and Grove manual redeem/PSM swap
+    note: QUEUE_MANAGER on vault (can change default queue / use_default_queue, no timelock). Also `management` on every funded strategy and ysUSDS — controls PT openWithdrawals, looper leverage targets, and Grove manual redeem/PSM swap
   - id: security
     label: Security (4-of-7)
     address: "0xe5e2BAf96198c56380DDd5e992D7d1adA0E989C0"
@@ -73,7 +73,7 @@ nodes:
     label: Debt Allocator
     address: "0x1E9eB053228B1156831759401DE0E115356b8671"
     category: infra
-    note: Can re-fund any of the 10 active-but-unfunded strategies with no timelock delay; with use_default_queue = true, also gates when out-of-queue debt (24.2%) moves to idle
+    note: Can re-fund any of the 10 active-but-unfunded strategies with no timelock delay; DEBT_MANAGER can move out-of-queue debt (24.2%) to idle
 
   # Funded strategies (October 12, 2026 — 7 funded, verified onchain at block 26,177,300)
   - id: morpho-yearn-og
@@ -159,7 +159,7 @@ nodes:
     label: Sky LitePSM (USDC ↔ USDS)
     address: "0xf6e72Db5454dd049d0788e411b06CfAF16853042"
     category: dependency
-    note: 1:1 swap; tin/tout = 0 at snapshot; ~$4.34B USDC in pocket
+    note: 1:1 swap; tin/tout = 0 at snapshot; ~$4.34B USDC in pocket. Any nonzero tout makes Grove withdrawals revert (strategy redeems only the principal USDS, not the fee)
   - id: grove-farm
     label: Sky GROVE StakingRewards (USDS)
     address: "0x4E41488C19cD35EB4de3083Fc3e204854c75c86a"
