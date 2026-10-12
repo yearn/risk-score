@@ -4,7 +4,7 @@
 - **Token:** yvUSD (USD yVault)
 - **Chain:** Ethereum (with cross-chain strategies on Arbitrum, Katana, and Base)
 - **Token Address:** [`0x696d02Db93291651ED510704c9b286841d506987`](https://etherscan.io/address/0x696d02Db93291651ED510704c9b286841d506987)
-- **Final Score: 2.45/5.0**
+- **Final Score: 2.46/5.0**
 
 ## Overview + Links
 
@@ -620,11 +620,11 @@ Additionally, Yearn provides a dedicated **yvUSD APR API** ([yvusd-api.yearn.fi]
 | Cross-chain | One active bridge — Polygon AggLayer LxLy + VaultBridgeToken (Katana, 8.0%); CCTP lanes dormant but re-fundable |
 | Coupling | Looper is ~100% of the Pawn Broker Market's book; the Market is ~30.7% of yvUSDC-1 |
 
-**Dependencies Score: 3.0/5** — Blue-chip Sky exposure rose to 19.9% with the Grove leg, and the Cap, Pendle, and Katana shares were diluted by TVL growth. Offsetting this, the OG vault's 3Jane collateral share rose to 60.4%, so ~40% of yvUSD TVL depends on 3Jane (3.46/5) on a look-through basis. The yvUSDC-1 coupling also deepened: the Market is now ~30.7% of that vault. Cap (2.4/5, anonymous governance, upgradeable proxies, held at 7.8x leverage) remains in the book. Score held at 3.0.
+**Dependencies Score: 3.5/5** — The OG vault's 3Jane collateral share rose to 60.4%. Including the direct PT-USD3 position, ~40% of yvUSD TVL now depends on a single medium-risk credit protocol (3Jane, 3.46/5). The Morpho path gives limited protection. The USD3 market's 91.5% LLTV leaves ~8.5% of buffer, and liquidating USD3 or PT-USD3 collateral needs buyers for an illiquid credit token during exactly the scenario in which 3Jane is stressed. The yvUSDC-1 coupling also deepened: the Market is now ~30.7% of that vault. Cap (2.4/5, anonymous governance, upgradeable proxies, held at 7.8x leverage) remains in the book. The Grove leg lifts blue-chip Sky exposure to 19.9%, but at 8.6% it does not offset the 3Jane concentration. Score raised from 3.0.
 
-**Centralization Score = (1.0 + 2.0 + 3.0) / 3 = 2.0/5**
+**Centralization Score = (1.0 + 2.0 + 3.5) / 3 ≈ 2.17/5**
 
-**Score: 2.0/5** — Governance confirmed onchain (unchanged roles and Safe owner sets since August 8, 2026; standard RoleManager, 7-day timelock, Daddy 6/9 sole proposer, no EOA vault roles, immutable vault) and remains a genuine strength. Programmability carries an oracle-marked, management-gated PT book and a parameterized levered strategy. Dependency quality is mixed, with 3Jane the largest look-through concentration.
+**Score: 2.17/5** — Governance confirmed onchain (unchanged roles and Safe owner sets since August 8, 2026; standard RoleManager, 7-day timelock, Daddy 6/9 sole proposer, no EOA vault roles, immutable vault) and remains a genuine strength. Programmability carries an oracle-marked, management-gated PT book and a parameterized levered strategy. Dependency quality weakened, with ~40% of TVL dependent on 3Jane on a look-through basis.
 
 #### Category 3: Funds Management (Weight: 30%)
 
@@ -669,7 +669,7 @@ Additionally, Yearn provides a dedicated **yvUSD APR API** ([yvusd-api.yearn.fi]
 | Deposit limit | $15M cap (~77.3% utilized) |
 | Locked supply | ~37.8% of yvUSD locked in LockedyvUSD (14-day cooldown) — committed-duration buffer exceeding the 24.2% illiquid tail |
 
-**Score: 3.5/5** — The USDC denomination eliminates price divergence risk, and the ~37.8% locked-supply buffer is a genuine structural mitigant. The Grove leg is in the queue and fully withdrawable, so queue coverage improved to 75.8%. But the funded book and the withdrawal queue still diverge: 8.5% is hard-locked until late November / mid-December 2026 behind a management-controlled flag, 8.0% requires a bridge round-trip, and 7.7% must be deleveraged from a 7.8x position. None of the 24.2% outside the queue can be reached by redeemers until a DEBT_MANAGER moves it to idle or a QUEUE_MANAGER changes the queue. The 8.6% Grove leg is in the queue but reverts on exit if Sky sets a nonzero PSM `tout`. Sustained redemptions would drain the liquid tranche first and leave remaining holders concentrated in the illiquid, levered residue. Score held; the PT maturities are a natural point to revisit.
+**Score: 3.25/5** — The USDC denomination eliminates price divergence risk, and the ~37.8% locked-supply buffer is a genuine structural mitigant that now clearly exceeds the 24.2% held outside the queue. The Grove leg is in the queue and fully withdrawable, so queue coverage improved to 75.8%. The PT positions mature within ~2 months. But the funded book and the withdrawal queue still diverge: 8.5% is hard-locked until late November / mid-December 2026 behind a management-controlled flag, 8.0% requires a bridge round-trip, and 7.7% must be deleveraged from a 7.8x position. None of the 24.2% outside the queue can be reached by redeemers until a DEBT_MANAGER moves it to idle or a QUEUE_MANAGER changes the queue. The 8.6% Grove leg is in the queue but reverts on exit if Sky sets a nonzero PSM `tout`. Sustained redemptions would drain the liquid tranche first and leave remaining holders concentrated in the illiquid, levered residue. Score lowered from 3.5; the PT maturities are a natural point to revisit.
 
 #### Category 5: Operational Risk (Weight: 5%)
 
@@ -690,11 +690,11 @@ Additionally, Yearn provides a dedicated **yvUSD APR API** ([yvusd-api.yearn.fi]
 | Category | Score | Weight | Weighted |
 |----------|-------|--------|----------|
 | Audits & Historical | 2.5 | 20% | 0.50 |
-| Centralization & Control | 2.0 | 30% | 0.60 |
+| Centralization & Control | 2.17 | 30% | 0.65 |
 | Funds Management | 2.5 | 30% | 0.75 |
-| Liquidity Risk | 3.5 | 15% | 0.525 |
+| Liquidity Risk | 3.25 | 15% | 0.49 |
 | Operational Risk | 1.5 | 5% | 0.075 |
-| **Final Score** | | | **2.45/5.0** |
+| **Final Score** | | | **2.46/5.0** |
 
 ### Risk Tier
 
@@ -706,13 +706,13 @@ Additionally, Yearn provides a dedicated **yvUSD APR API** ([yvusd-api.yearn.fi]
 | 3.50–4.49 | Elevated Risk | Limited approval, strict limits |
 | 4.50–5.00 | High Risk | Not recommended |
 
-**Final Risk Tier: Low Risk (2.45/5.0) — enhanced monitoring recommended**
+**Final Risk Tier: Low Risk (2.46/5.0) — enhanced monitoring recommended**
 
-The weighted score is 2.45, inside the Low Risk tier (scores below 2.50). The reports list floors it to 2.4. Given the 7.8x leveraged position with ~4.7% of liquidation headroom and the 8.5% of TVL that is currently non-withdrawable, the monitoring posture set out above — hourly LTV and stcUSD price alerting, daily withdrawability and queue checks — should be treated as a condition of the approval rather than optional.
+The weighted score is 2.46, inside the Low Risk tier (scores below 2.50) but only 0.04 from Medium Risk. The reports list floors it to 2.4. Given the 7.8x leveraged position with ~4.7% of liquidation headroom and the 8.5% of TVL that is currently non-withdrawable, the monitoring posture set out above — hourly LTV and stcUSD price alerting, daily withdrawability and queue checks — should be treated as a condition of the approval rather than optional.
 
 **Score rationale:** The vault retains battle-tested Yearn V3 infrastructure (~29 months, no exploits), an immutable design, strong governance with a 7-day timelock, and excellent onchain verifiability — the seven funded debts reconcile to the wei with `totalDebt()` and are independently reproduced by the public APR API.
 
-The score is unchanged at 2.45. The new Grove leg (8.6%) is in the default queue, keeps principal in USDS inside a Sky-owned farm, and lifts blue-chip exposure to 19.9% and queue coverage to 75.8%. TVL growth also diluted the levered Cap position to 7.7% and the non-withdrawable PT book to 8.5%. These improvements are offset by a higher 3Jane concentration inside the Morpho V1 OG vault: 60.4% of that vault, or ~40% of yvUSD TVL including the direct PT-USD3 position. The yvUSDC-1 coupling also deepened, with the Pawn Broker Market at ~30.7% of that vault. The **7.79x leveraged Cap stcUSD position with ~4.7% of liquidation headroom** and the PT positions that the vault cannot withdraw from remain in place. The ~37.8% locked-supply buffer is the main structural offset to the liquidity mismatch.
+The score moves from 2.45 to 2.46, but the drivers have shifted. **3Jane concentration is now the main risk.** 60.4% of the Morpho V1 OG vault lends against 3Jane collateral, so ~40% of yvUSD TVL depends on 3Jane including the direct PT-USD3 position. The Dependencies subscore rises to 3.5. Liquidity improved, and that subscore falls to 3.25. The new Grove leg (8.6%) is in the default queue and keeps principal in USDS inside a Sky-owned farm, lifting blue-chip exposure to 19.9% and queue coverage to 75.8%. The locked-supply buffer (37.8%) now clearly exceeds the out-of-queue tail (24.2%). TVL growth also diluted the levered Cap position to 7.7% and the non-withdrawable PT book to 8.5%. The yvUSDC-1 coupling also deepened, with the Pawn Broker Market at ~30.7% of that vault. The **7.79x leveraged Cap stcUSD position with ~4.7% of liquidation headroom** and the PT positions that the vault cannot withdraw from remain in place. The ~37.8% locked-supply buffer is the main structural offset to the liquidity mismatch.
 
 ---
 
@@ -740,7 +740,7 @@ The score is unchanged at 2.45. The new Grove leg (8.6%) is in the default queue
 | [April 3, 2026](https://github.com/yearn/risk-score/pull/126) | 2.3 | Reassessment: governance maturation — 7-day TimelockController confirmed, deployer EOA at 0 vault roles |
 | [June 8, 2026](https://github.com/yearn/risk-score/pull/241) | 2.4 | Reassessment: TVL +187% to ~$11.56M; Morpho V2 Sentora PYUSD/RLUSD convertors and Katana cross-chain leg funded |
 | [August 8, 2026](https://github.com/yearn/risk-score/pull/390) | 2.45 | Reassessment: convertors and Arbitrum looper de-funded; Morpho V1 OG to 62.4%; three June 26 strategies funded at 20.2% — 7.90x leveraged Cap stcUSD looper (9.5%) and two Pendle PT positions (10.7%) that are currently non-withdrawable. Collateralization, Provability, Programmability and Liquidity subscores all raised |
-| [October 12, 2026](https://github.com/yearn/risk-score/pull/523) | 2.45 | Reassessment: TVL to ~$11.60M; new Grove USDS Compounder funded at 8.6% (Sky GROVE farm, in default queue), lifting queue coverage to 75.8% and Sky exposure to 19.9%; Morpho V1 OG 3Jane collateral share up to 60.4% (~40% look-through); Pawn Broker Market now ~30.7% of yvUSDC-1. All subscores held |
+| [October 12, 2026](https://github.com/yearn/risk-score/pull/523) | 2.46 | Reassessment: TVL to ~$11.60M; new Grove USDS Compounder funded at 8.6% (Sky GROVE farm, in default queue), lifting queue coverage to 75.8% and Sky exposure to 19.9%; Morpho V1 OG 3Jane collateral share up to 60.4% (~40% look-through); Pawn Broker Market now ~30.7% of yvUSDC-1. Dependencies raised to 3.5 (3Jane concentration); Liquidity lowered to 3.25 |
 
 ---
 
