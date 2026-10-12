@@ -735,7 +735,7 @@ The score is unchanged at 2.45. The new Grove leg (8.6%) is in the default queue
 | [April 3, 2026](https://github.com/yearn/risk-score/pull/126) | 2.3 | Reassessment: governance maturation — 7-day TimelockController confirmed, deployer EOA at 0 vault roles |
 | [June 8, 2026](https://github.com/yearn/risk-score/pull/241) | 2.4 | Reassessment: TVL +187% to ~$11.56M; Morpho V2 Sentora PYUSD/RLUSD convertors and Katana cross-chain leg funded |
 | [August 8, 2026](https://github.com/yearn/risk-score/pull/390) | 2.45 | Reassessment: convertors and Arbitrum looper de-funded; Morpho V1 OG to 62.4%; three June 26 strategies funded at 20.2% — 7.90x leveraged Cap stcUSD looper (9.5%) and two Pendle PT positions (10.7%) that are currently non-withdrawable. Collateralization, Provability, Programmability and Liquidity subscores all raised |
-| [October 12, 2026](PRLINK) | 2.45 | Reassessment: TVL to ~$11.60M; new Grove USDS Compounder funded at 8.6% (Sky GROVE farm, in default queue), lifting queue coverage to 75.8% and Sky exposure to 19.9%; Morpho V1 OG 3Jane collateral share up to 60.4% (~40% look-through); Pawn Broker Market now ~30.7% of yvUSDC-1. All subscores held |
+| [October 12, 2026](https://github.com/yearn/risk-score/pull/523) | 2.45 | Reassessment: TVL to ~$11.60M; new Grove USDS Compounder funded at 8.6% (Sky GROVE farm, in default queue), lifting queue coverage to 75.8% and Sky exposure to 19.9%; Morpho V1 OG 3Jane collateral share up to 60.4% (~40% look-through); Pawn Broker Market now ~30.7% of yvUSDC-1. All subscores held |
 
 ---
 
