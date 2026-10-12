@@ -522,4 +522,4 @@ Documentation covers architecture, risk, and legal structure (BVI investment man
 | Date | Score | Notes |
 | --- | --- | --- |
 | [August 10, 2026](https://github.com/yearn/risk-score/pull/393) | 3.85 | Initial assessment |
-| October 12, 2026 | 4.10 | Epoch 23 (~105-day lock to Jan 15, 2027); TVL $11.69M → $8.66M; dgnHYPE 69.27% of assets; Aave V3 position added; epoch 22 PnL credited via trader-role EOA; third operational EOA and CCTP return path traced. Rescored Audits & Historical (2.25 → 2.75), Programmability (4.0 → 4.5), Liquidity (4.0 → 4.5), Operational (3.0 → 3.5). |
+| [October 12, 2026](https://github.com/yearn/risk-score/pull/524) | 4.10 | Epoch 23 (~105-day lock to Jan 15, 2027); TVL $11.69M → $8.66M; dgnHYPE 69.27% of assets; Aave V3 position added; epoch 22 PnL credited via trader-role EOA; third operational EOA and CCTP return path traced. Rescored Audits & Historical (2.25 → 2.75), Programmability (4.0 → 4.5), Liquidity (4.0 → 4.5), Operational (3.0 → 3.5). |
