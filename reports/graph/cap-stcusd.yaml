@@ -1,4 +1,4 @@
-# Snapshot: Ethereum block 26128579, October 5, 2026, 20:32:23 UTC. Remote-chain nodes carry October 3 reads (escrow unchanged).
+# Snapshot: Ethereum block 26180755, October 13, 2026, 03:02:47 UTC. Katana re-read October 13; MegaETH/Tempo nodes carry October 3 reads.
 slug: cap-stcusd
 title: Cap (stcUSD) — Contract Dependency Graph
 chain: ethereum
@@ -18,43 +18,43 @@ nodes:
   label: stcUSD (Staked cUSD)
   category: vault
   address: '0x88887bE419578051FF9F4eb6C858A951921D8888'
-  note: ERC-4626 UUPS proxy; fixed snapshot October 5, 2026, block 26128579
+  note: ERC-4626 UUPS proxy; fixed snapshot October 13, 2026, block 26180755
 - id: cUSD
   label: cUSD (Cap Stablecoin)
   category: vault
   address: '0xcCcc62962d17b8914c62D74FfB843d73B2a3cccC'
-  note: 70.91M supply; nominal reserve accounting 99.89% USDC / 0.11% wWTGXX; includes operator credit
+  note: 73.85M supply; nominal reserve accounting 99.89% USDC / 0.11% wWTGXX; includes operator credit
 - id: usdc-frv
   label: USDC Fractional Reserve (Yearn V3)
   category: strategy
   address: '0x3Ed6aa32c930253fc990dE58fF882B9186cd0072'
-  note: 11.451M USDC; zero idle; revoked Morpho strategies have zero debt
+  note: 18.308M USDC; zero idle; revoked Morpho strategies have zero debt
 - id: wwtgxx-frv
   label: wWTGXX Fractional Reserve
   category: strategy
   address: '0xb1c1C80FDbBde5B40264e1410550F3C864113bF8'
-  note: 76,015.64 total tokens; cUSD owns 71,588.34 tokens of share value
+  note: 72,463.39 total tokens; cUSD owns 71,625.08 tokens of share value
 - id: lender
   label: Lender (Operator Borrowing)
   category: strategy
   address: '0x15622c3dbbc5614E6DFa9446603c1779647f01FC'
-  note: 55.369M USDC principal; 55.420M including per-agent interest
+  note: 55.462M USDC principal; 55.514M including per-agent interest
 - id: aave-strategy
   label: Aave V3 USDC Lender
   category: strategy
   address: '0x7D7F72d393F242DA6e22D3b970491C06742984Ff'
-  note: 11.351M current debt; 50M max debt; active first withdrawal-queue leg
+  note: 18.208M current debt; 50M max debt; active first withdrawal-queue leg
 - id: ondo-holder
   label: OndoHolder USDC
   category: strategy
   address: '0x9939009295eAD3c67259aF3b93C284079ffE931e'
-  note: 100.02K current debt; 15M max debt; external compliance/redemption gates; Safe can change exchange; full 100K
+  note: 100.09K current debt; 15M max debt; external compliance/redemption gates; Safe can change exchange; full 100K
     zero-loss eth_call withdrawal succeeded at the October 3 block
 - id: multisig
   label: Multisig (3-of-5)
   category: governance
   address: '0xb8FC49402dF3ee4f8587268FB89fda4d621a8793'
-  note: Same five anonymous EOA owners as May baseline; direct parameter, vault, and bridge-delegate powers; remote
+  note: Same five anonymous EOA owners as May baseline; direct parameter, vault, borrower-onboarding, and bridge-delegate powers; remote
     Safes have the identical current five-owner set and threshold
 - id: timelock
   label: Timelock (24h)
@@ -85,17 +85,17 @@ nodes:
   label: Delegation
   category: infra
   address: '0xF3E3Eae671000612CE3Fd15e1019154C1a4d693F'
-  note: 43 agents, 17 with USDC debt; borrower health and security-network mapping
+  note: 44 agents, 17 with USDC debt; borrower health, collateral asset, and security-network mapping
 - id: oracle
   label: Reserve Oracle
   category: infra
   address: '0xcD7f45566bc0E7303fB92A93969BB4D3f6e662bb'
-  note: RedStone USDC primary / Chainlink backup; wWTGXX fixed at 1 USD; Safe can change staleness
+  note: RedStone USDC primary / Chainlink backup; wWTGXX fixed at 1 USD; also prices borrower collateral (OETH has no backup); Safe can change staleness
 - id: oft-lockbox
   label: LayerZero stcUSD Lockbox
   category: infra
   address: '0x983aeaaa0d0426839158435c43725ea7f45d4137'
-  note: Pooled 10.287M stcUSD escrow (16.13%); Katana, MegaETH, Tempo peers; no canonical mint authority
+  note: Pooled 6.787M stcUSD escrow (10.21%); Katana, MegaETH, Tempo peers; no canonical mint authority
 - id: aave
   label: Aave V3 Core Ethereum
   category: dependency
@@ -105,7 +105,7 @@ nodes:
   label: Ondo rUSDY
   category: dependency
   address: '0xaf37c1167910ebC994e266949387d2c7C326b879'
-  note: 100.02K tokens; source-verified proxy/implementation; issuer/compliance and fixed-dollar strategy valuation
+  note: 100.10K tokens; source-verified proxy/implementation; issuer/compliance and fixed-dollar strategy valuation
 - id: ondo-exchange
   label: Ondo USDY InstantManager
   category: dependency
@@ -115,21 +115,27 @@ nodes:
   label: wWTGXX (WisdomTree Gov MMF)
   category: dependency
   address: '0x434558CB1EBe9950e8A66f1ef8A15A473Dce7D8c'
-  note: About 76.8K accounted backing; fixed-price oracle does not observe fund impairment
+  note: About 80.3K accounted backing; fixed-price oracle does not observe fund impairment
 - id: operators
   label: Covered Operator Loans
   category: dependency
-  note: Largest agent is 53.75% of accrued USDC debt; proprietary positions and institutional attribution unresolved
+  note: Largest agent is 53.76% of accrued USDC debt (LBTC collateral, health 1.298); proprietary positions and institutional attribution unresolved
 - id: symbiotic
   label: Symbiotic Network Middleware
   category: dependency
   address: '0x09A3976d8D63728d20DCDFEe1e531C206Ba91225'
-  note: 98.49% of accrued USDC debt; isolated borrower collateral; all 34 mapped vaults use 7-day epochs
+  note: 98.49% of accrued USDC debt; isolated borrower collateral; mapped vaults use 7-day epochs
+- id: borrower-collateral
+  label: Borrower Collateral Tokens
+  category: dependency
+  link: https://github.com/yearn/risk-score/blob/master/reports/data/cap-stcusd-2026-10-13.json
+  note: 'Share of USDC debt: LBTC 53.76%, wstETH 25.23%, weETH 9.64%, SolvBTC 6.66%, uniBTC 3.21%, OETH 1.51%;
+    priced by the Timelock-controlled Oracle'
 - id: eigenlayer
   label: EigenLayer Service Manager
   category: dependency
   address: '0xE65c3eccd18879E103dBC96D854e376Ced4cC7dd'
-  note: 839K / 1.51% of accrued USDC debt; isolated borrower collateral; withdrawal/deallocation delays 100800 Ethereum
+  note: 840K / 1.51% of accrued USDC debt, all OETH collateral; isolated borrower collateral; withdrawal/deallocation delays 100800 Ethereum
     blocks
 - id: usdc
   label: USDC (Circle)
@@ -320,7 +326,7 @@ edges:
 - from: lender
   to: operators
   kind: deposits-into
-  label: 'largest agent: 53.75% of accrued debt'
+  label: 'largest agent: 53.76% of accrued debt'
 - from: lender
   to: delegation
   kind: routes-through
@@ -333,6 +339,18 @@ edges:
   to: eigenlayer
   kind: routes-through
   label: 1.51% of accrued USDC debt
+- from: symbiotic
+  to: borrower-collateral
+  kind: routes-through
+  label: slashable vault collateral
+- from: eigenlayer
+  to: borrower-collateral
+  kind: routes-through
+  label: OETH strategy collateral
+- from: multisig
+  to: delegation
+  kind: holds-role
+  label: direct addAgent via Symbiotic AgentManager
 - from: cUSD
   to: oracle
   kind: routes-through
