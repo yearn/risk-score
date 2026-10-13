@@ -128,7 +128,7 @@ nodes:
 - id: borrower-collateral
   label: Borrower Collateral Tokens
   category: dependency
-  link: https://github.com/yearn/risk-score/blob/master/reports/data/cap-stcusd-2026-10-13.json
+  link: https://github.com/yearn/risk-score/blob/9e81a7e1542fe7b255840857eb2a7c3b59d543e2/reports/data/cap-stcusd-2026-10-13.json
   note: 'Share of USDC debt: LBTC 53.76%, wstETH 25.23%, weETH 9.64%, SolvBTC 6.66%, uniBTC 3.21%, OETH 1.51%;
     priced by the Timelock-controlled Oracle'
 - id: eigenlayer
@@ -146,8 +146,9 @@ nodes:
   label: LayerZero Endpoint V2
   category: dependency
   address: '0x1a44076050125825900e736c501f859c50fE728c'
-  note: 'Four-chain peer mesh: all 12 receive configurations and matching send settings require 3-of-3 LayerZero
-    Labs/Canary/Nethermind, 15 confirmations; Safe delegates can reconfigure directly'
+  note: 'Four-chain mesh read October 3/4: 12 receive configs and matching sends are 3-of-3 LayerZero
+    Labs/Canary/Nethermind, 15 confirmations. Ethereum receive routes re-read October 13. Safe delegates
+    can reconfigure directly'
 - id: katana-stcusd
   label: Katana stcUSD OFT
   category: vault
@@ -173,20 +174,21 @@ nodes:
 - id: remote-timelocks
   label: Remote Timelocks (24h)
   category: governance
-  link: https://github.com/yearn/risk-score/blob/master/reports/report/cap-stcusd.md#token-mint-authority
+  link: https://github.com/yearn/risk-score/blob/9e81a7e1542fe7b255840857eb2a7c3b59d543e2/reports/report/cap-stcusd.md#token-mint-authority
   note: 'Katana/MegaETH/Tempo: 0x0000000035A7744F94e6949431CE20EA77312a55; identical source-verified runtime; sole
     admin self, Safe sole proposer/canceller/executor'
 - id: remote-layerzero
   label: Remote LayerZero Endpoints
   category: dependency
-  link: https://github.com/yearn/risk-score/blob/master/reports/data/cap-stcusd-followup-2026-10-04.json
-  note: Three chain-local endpoints; all nine inbound/outbound remote routes use 3 required DVNs, 15 confirmations;
-    local Safe delegates share Ethereum signer set
+  link: https://github.com/yearn/risk-score/blob/9e81a7e1542fe7b255840857eb2a7c3b59d543e2/reports/data/cap-stcusd-followup-2026-10-04.json
+  note: Nine remote routes read October 3/4 require 3 DVNs and 15 confirmations. MegaETH and Tempo inbound
+    receive routes were re-read October 13. Katana's remote DVN config was not repeated. Local Safe delegates
+    share the Ethereum signer set
 edges:
 - from: multisig
   to: timelock
   kind: proposes-on
-  label: sole proposer/canceller; executor
+  label: sole proposer; canceller and executor
 - from: deployer-eoa
   to: timelock
   kind: holds-role
@@ -286,31 +288,31 @@ edges:
 - from: stcUSD
   to: cUSD
   kind: deposits-into
-  label: 59.801M cUSD; 97.06% of cUSD supply
+  label: 72.130M cUSD; 97.67% of cUSD supply
 - from: cUSD
   to: usdc-frv
   kind: allocates-to
-  label: 6.186M USDC
+  label: 18.308M USDC
 - from: cUSD
   to: lender
   kind: allocates-to
-  label: 55.346M USDC principal
+  label: 55.462M USDC principal
 - from: cUSD
   to: wwtgxx-frv
   kind: allocates-to
-  label: 71,578 wWTGXX share value
+  label: 71,625 wWTGXX share value
 - from: usdc-frv
   to: aave-strategy
   kind: allocates-to
-  label: 98.38%
+  label: 99.45%
 - from: usdc-frv
   to: ondo-holder
   kind: allocates-to
-  label: 1.62%
+  label: 0.55%
 - from: aave-strategy
   to: aave
   kind: deposits-into
-  label: 6.086M USDC
+  label: 18.208M USDC
 - from: ondo-holder
   to: rusdy
   kind: deposits-into
@@ -362,7 +364,7 @@ edges:
 - from: stcUSD
   to: oft-lockbox
   kind: deposits-into
-  label: 18.64% of canonical supply escrowed
+  label: 10.21% of canonical supply escrowed
 - from: oft-lockbox
   to: layerzero
   kind: routes-through
