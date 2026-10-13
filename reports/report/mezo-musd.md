@@ -4,7 +4,7 @@
 - **Token:** MUSD
 - **Chain:** Ethereum (bridged from Mezo chain via Wormhole NTT)
 - **Token Address:** [`0xdD468A1DDc392dcdbEf6db6e34E89AA338F9F186`](https://etherscan.io/address/0xdD468A1DDc392dcdbEf6db6e34E89AA338F9F186)
-- **Final Score: 3.1/5.0**
+- **Final Score: 3.11/5.0**
 
 ## Overview + Links
 
@@ -435,13 +435,13 @@ Final Score = (Centralization × 0.30) + (Funds Mgmt × 0.30) + (Audits × 0.20)
 
 | Final Score | Risk Tier | Recommendation |
 |------------|-----------|----------------|
-| **1.0-1.5** | **Minimal Risk** | Approved, high confidence |
-| **1.5-2.5** | **Low Risk** | Approved with standard monitoring |
-| **2.5-3.5** | **Medium Risk** | Approved with enhanced monitoring |
-| **3.5-4.5** | **Elevated Risk** | Limited approval, strict limits |
-| **4.5-5.0** | **High Risk** | Not recommended |
+| **1.00–1.49** | **Minimal Risk** | Approved, high confidence |
+| **1.50–2.49** | **Low Risk** | Approved with standard monitoring |
+| **2.50–3.49** | **Medium Risk** | Approved with enhanced monitoring |
+| **3.50–4.49** | **Elevated Risk** | Limited approval, strict limits |
+| **4.50–5.00** | **High Risk** | Not recommended |
 
-**Final Risk Tier: Medium Risk (3.1/5.0)**
+**Final Risk Tier: Medium Risk (3.11/5.0)**
 
 The protocol benefits from a battle-tested Liquity V1 codebase and an experienced team, but the short production history (~2 months), cross-chain complexity (Mezo chain + tBTC + Wormhole NTT), deteriorating Ethereum liquidity (two pools drained, volume collapsed 90%), and lack of bug bounty place it firmly in the medium risk category. Enhanced monitoring is recommended, particularly around bridge operations, peg stability, liquidity depth, and Mezo chain health.
 

@@ -1,5 +1,5 @@
 ---
-import { scoreColor } from "../lib/colors";
+import { formatScore, scoreColor } from "../lib/colors";
 import type { ScoreDetails } from "../lib/parseReport";
 
 interface Props {
@@ -44,7 +44,7 @@ const { details } = Astro.props;
                       class="cat-score"
                       style={r.score != null ? `color:${scoreColor(r.score)}` : ""}
                     >
-                      {r.score != null ? r.score.toFixed(2) : "—"}
+                      {r.score != null ? formatScore(r.score) : "—"}
                     </span>
                     <svg
                       class="chevron"

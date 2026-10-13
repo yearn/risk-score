@@ -1,0 +1,283 @@
+slug: ondo-usdy
+title: Ondo USDY — Contract Dependency Graph
+chain: ethereum
+
+categories:
+  - id: vault
+    label: Token
+  - id: governance
+    label: Governance / Owners
+  - id: infra
+    label: Protocol Infra
+  - id: dependency
+    label: External Dependency
+
+nodes:
+  # === Token layer ===
+  - id: usdy
+    label: USDY (Ondo U.S. Dollar Yield)
+    address: "0x96F6eF951840721AdBF46Ac996b59E0235CB985C"
+    category: vault
+    note: TransparentUpgradeableProxy → USDY impl 0xea0f7eebdc2ae40edfe33bf03d332f8a7f617528; 1,044.98M supply on Ethereum
+  - id: rusdy
+    label: rUSDY (rebasing wrapper)
+    address: "0xaf37c1167910ebC994e266949387d2c7C326b879"
+    category: vault
+    note: Wraps ~1.79M USDY; price pinned to $1.00 via RWADynamicOracle
+
+  # === Protocol infra ===
+  - id: instant-manager
+    label: USDY_InstantManager (OGM)
+    address: "0xa42613C243b67BF6194Ac327795b926B4b491f15"
+    category: infra
+    note: Atomic USDC subscribe/redeem at oracle price; adminSubscribe mints without deposit (allowance $25M)
+  - id: usdy-manager
+    label: USDYManager (legacy LLC)
+    address: "0x25A103A1D6AeC5967c1A4fe2039cdc514886b97e"
+    category: infra
+    note: Labelled deprecated but still mints via offchain deposit proofs (>1.2B USDY in 2026); redemptions paused
+  - id: lz-adapter
+    label: OndoMintBurnAdapter (LayerZero)
+    address: "0xa6275720b3fB1Efe3E6EF2b5BF2293148852307D"
+    category: infra
+    note: Burn/mint OFT adapter; ≤500k USDY/day inbound per EVM route; 3–4 required DVNs
+  - id: token-router
+    label: OndoTokenRouter
+    address: "0x99B8d1D1c17a10CD1A878d1A44c11fd7E4daD7bC"
+    category: infra
+    note: Routes USDC to BasicRecipient and pulls redemptions from BasicSource
+  - id: usdc-treasury
+    label: USDC Treasury Safe 3/6
+    address: "0x3312cc371Fe0Dd5171878630A1E5cf69778E8fa5"
+    category: infra
+    note: Receives subscription USDC; redemption buffer (24.99M USDC at snapshot)
+  - id: ondo-oracle
+    label: OndoOracle (price registry)
+    address: "0x9Cad45a8BF0Ed41Ff33074449B357C7a1fAb4094"
+    category: infra
+    note: USDY → USDYOracleWrapper; USDC hardcoded at $1.00
+  - id: dynamic-oracle
+    label: RWADynamicOracle (USDY price)
+    address: "0xA0219AA5B31e65Bc920B5b6DFb8EdF0988121De0"
+    category: infra
+    note: Monthly admin-set daily rate; admin can overrideRange and pause
+  - id: rate-limiter
+    label: OndoRateLimiter
+    address: "0x98Db502215Da1ad9F626D4a0090A8A2f4971003c"
+    category: infra
+    note: $15M/24h global and $10M/24h per-user redemption limits
+  - id: blocklist
+    label: USDY Blocklist
+    address: "0xd8c8174691d936E2C80114EC449037b13421B0a8"
+    category: infra
+    note: Blocked addresses cannot send or receive USDY
+
+  # === Governance ===
+  - id: admin-safe
+    label: Ondo Admin Safe 4/7
+    address: "0x1a694A09494E214a3Be3652e4B343B7B81A73ad7"
+    category: governance
+    note: Owns USDY/rUSDY ProxyAdmins; DEFAULT_ADMIN + MINTER on USDY; oracle admin; LZ adapter owner; no timelock
+  - id: xmanager-admin
+    label: xManager Admin Safe 3/5
+    address: "0x5AE21c99FC5f1584D8Cb09a298CFFd92B5d178eF"
+    category: governance
+    note: DEFAULT_ADMIN on InstantManager, router, OndoOracle, rate limiter, admin-subscription checker
+  - id: ops-safe
+    label: Ops Safe 3/6 (admin subs)
+    address: "0x505ff4462bA5E62ed529FA836D768ECd7B85439c"
+    category: governance
+    note: ADMIN_SUBSCRIPTION_ROLE on InstantManager; TIMESTAMP_SETTER on USDYManager
+  - id: relayer-safe
+    label: Legacy Relayer Safe 2/6
+    address: "0x8D52a385D19F13Ef5A544E0514c62f0A44ff31bf"
+    category: governance
+    note: RELAYER + PRICE_ID_SETTER on USDYManager; same six owners as ops Safe
+  - id: oracle-setter
+    label: Oracle Setter Safe 4/8
+    address: "0x19c114B7c6Ff86482cEbFc6AE3cef894e6793Db8"
+    category: governance
+    note: SETTER_ROLE on RWADynamicOracle (monthly ranges)
+  - id: pauser-safe
+    label: Pauser Safe 1/9
+    address: "0x2e55b738F5969Eea10fB67e326BEE5e2fA15A2CC"
+    category: governance
+    note: PAUSER on USDY, rUSDY, InstantManager; PAUSER_ADMIN on USDYManager
+  - id: blocklist-owner
+    label: Blocklist Owner Safe 1/2
+    address: "0x99ca4f54F6Bb1c36C662e7C404f517D150FD1173"
+    category: governance
+
+  # === External dependencies ===
+  - id: dep-llc-reserves
+    label: Ondo USDY LLC T-bill reserves
+    category: dependency
+    link: https://ondo.finance/usdy
+    note: $2.08B T-bills (Marex ~96% incl. opt-out structured-financing sleeve; StoneX/BNY ~4%); Ankura daily attestation; ratio 1.0078
+  - id: dep-ogm
+    label: Ondo Global Markets (BVI) — OGM USDY
+    category: dependency
+    link: https://docs.ondo.finance/general-access-products/usdy/important-notes
+    note: Issuer of InstantManager USDY (183.77M USDY / $210.86M on Sep 25, 2026); attested by Ankura as a liability of the pooled Ondo Stocks balance sheet (106.64%), not segregated T-bills
+  - id: dep-ankura
+    label: Ankura Trust (Verification/Collateral Agent)
+    category: dependency
+    link: https://ondo.finance/usdy
+  - id: dep-usdc
+    label: Circle USDC
+    address: "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"
+    category: dependency
+  - id: dep-layerzero
+    label: LayerZero V2 EndpointV2
+    address: "0x1a44076050125825900e736c501f859c50fE728c"
+    category: dependency
+    note: DVNs Ondo, LayerZero Labs, Canary (+ Fidelity FCAT on Arbitrum/Solana/Tempo routes)
+  - id: dep-chainalysis
+    label: Chainalysis Sanctions Oracle
+    address: "0x40C57923924B5c5c5455c48D93317139ADDaC8fb"
+    category: dependency
+
+edges:
+  # Mint authority on USDY
+  - from: instant-manager
+    to: usdy
+    kind: mints
+    label: MINTER_ROLE (subscribe / adminSubscribe)
+  - from: usdy-manager
+    to: usdy
+    kind: mints
+    label: MINTER_ROLE (claimMint on offchain proofs)
+  - from: lz-adapter
+    to: usdy
+    kind: mints
+    label: MINTER_ROLE (LayerZero inbound)
+  - from: admin-safe
+    to: usdy
+    kind: mints
+    label: MINTER_ROLE (direct mint)
+
+  # Governance / control
+  - from: admin-safe
+    to: usdy
+    kind: controls
+    label: ProxyAdmin owner + DEFAULT_ADMIN_ROLE
+  - from: admin-safe
+    to: rusdy
+    kind: controls
+    label: ProxyAdmin owner + DEFAULT_ADMIN_ROLE
+  - from: admin-safe
+    to: dynamic-oracle
+    kind: controls
+    label: DEFAULT_ADMIN_ROLE (overrideRange, pause)
+  - from: admin-safe
+    to: usdy-manager
+    kind: controls
+    label: DEFAULT_ADMIN_ROLE / MANAGER_ADMIN
+  - from: admin-safe
+    to: lz-adapter
+    kind: controls
+    label: Owner + endpoint delegate
+  - from: xmanager-admin
+    to: instant-manager
+    kind: controls
+    label: DEFAULT_ADMIN_ROLE
+  - from: xmanager-admin
+    to: token-router
+    kind: controls
+    label: DEFAULT_ADMIN_ROLE
+  - from: xmanager-admin
+    to: ondo-oracle
+    kind: controls
+    label: DEFAULT_ADMIN_ROLE + setter roles
+  - from: xmanager-admin
+    to: rate-limiter
+    kind: controls
+    label: DEFAULT_ADMIN_ROLE
+  - from: ops-safe
+    to: instant-manager
+    kind: holds-role
+    label: ADMIN_SUBSCRIPTION_ROLE
+  - from: ops-safe
+    to: usdy-manager
+    kind: holds-role
+    label: TIMESTAMP_SETTER_ROLE
+  - from: relayer-safe
+    to: usdy-manager
+    kind: holds-role
+    label: RELAYER_ROLE + PRICE_ID_SETTER_ROLE
+  - from: oracle-setter
+    to: dynamic-oracle
+    kind: holds-role
+    label: SETTER_ROLE
+  - from: pauser-safe
+    to: usdy
+    kind: holds-role
+    label: PAUSER_ROLE
+  - from: pauser-safe
+    to: instant-manager
+    kind: holds-role
+    label: PAUSER_ROLE
+  - from: blocklist-owner
+    to: blocklist
+    kind: controls
+    label: Owner (add/remove blocked addresses)
+  - from: blocklist
+    to: usdy
+    kind: controls
+    label: Transfer blocklist hook
+
+  # Capital flows
+  - from: rusdy
+    to: usdy
+    kind: deposits-into
+    label: Wraps 1.79M USDY
+  - from: instant-manager
+    to: token-router
+    kind: routes-through
+    label: USDC subscriptions / redemptions
+  - from: token-router
+    to: usdc-treasury
+    kind: routes-through
+    label: BasicRecipient / BasicSource
+  - from: usdc-treasury
+    to: dep-ogm
+    kind: routes-through
+    label: OGM issuance proceeds
+  - from: usdy
+    to: dep-llc-reserves
+    kind: deposits-into
+    label: ~90% of value (LLC-issued)
+  - from: usdy
+    to: dep-ogm
+    kind: deposits-into
+    label: ~9% of value (OGM-issued, pooled OGM attestation)
+
+  # Dependencies
+  - from: instant-manager
+    to: ondo-oracle
+    kind: routes-through
+    label: getAssetPrice
+  - from: ondo-oracle
+    to: dynamic-oracle
+    kind: routes-through
+    label: via USDYOracleWrapper
+  - from: instant-manager
+    to: rate-limiter
+    kind: routes-through
+    label: checkAndUpdateRateLimit
+  - from: instant-manager
+    to: dep-usdc
+    kind: routes-through
+    label: Accepted subscription/redemption token
+  - from: lz-adapter
+    to: dep-layerzero
+    kind: routes-through
+    label: OApp endpoint
+  - from: usdy
+    to: dep-chainalysis
+    kind: routes-through
+    label: Sanctions check on transfers
+  - from: dep-ankura
+    to: dep-llc-reserves
+    kind: controls
+    label: Verification + Collateral Agent

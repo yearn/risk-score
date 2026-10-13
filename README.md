@@ -58,6 +58,13 @@ Vault addresses are case-insensitive and normalized to lowercase.
 | Arbitrum | 42161 |
 | Katana | 747474 |
 
+## Publishing to Yearn Artifacts
+
+Set `ARTIFACTS_API_KEY` in `.env`, then run
+`uv run python -m scripts.post_artifact --file ./REPORT.md`. Uploads are public to
+anyone with the URL and expire after 30 days by default; see the
+[post-artifact skill](.agents/skills/post-artifact/SKILL.md) for options.
+
 ## License
 
 This repository is licensed under the GNU Affero General Public License v3.0. See [LICENSE](./LICENSE).

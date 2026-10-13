@@ -16,6 +16,7 @@ Claude and pi share them. `CLAUDE.md` links to this guide.
 | Dependency graph | [generating-dependency-graphs](.agents/skills/generating-dependency-graphs/SKILL.md) | `/graph <slug>` |
 | Onchain verification | [verifying-onchain-data](.agents/skills/verifying-onchain-data/SKILL.md) | — |
 | Bridge dependencies | [assessing-bridge-dependencies](.agents/skills/assessing-bridge-dependencies/SKILL.md) | — |
+| Publish a file to Yearn Artifacts | [post-artifact](.agents/skills/post-artifact/SKILL.md) | — |
 
 Codex: `$<skill-name> <target>`. Pi also supports `/skill:<skill-name> <target>`.
 

@@ -1,0 +1,36 @@
+---
+import { scoreColor, scoreSegments } from "../lib/colors";
+
+interface Props {
+  score: number;
+  size?: "small" | "large";
+}
+
+const { score, size = "small" } = Astro.props;
+const filled = scoreSegments(score);
+const color = scoreColor(score);
+---
+
+<div class:list={["score-bar", `score-bar--${size}`]} aria-hidden="true">
+  {[1, 2, 3, 4, 5].map((seg) => (
+    <span class="score-seg" style={seg <= filled ? `background:${color};` : ""} />
+  ))}
+</div>
+
+<style>
+  .score-bar {
+    display: flex;
+    gap: 3px;
+  }
+  .score-seg {
+    width: 10px;
+    height: 4px;
+    border-radius: 2px;
+    background: var(--border);
+    transition: background 0.2s;
+  }
+  .score-bar--large .score-seg {
+    width: 14px;
+    height: 5px;
+  }
+</style>

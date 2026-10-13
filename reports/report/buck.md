@@ -490,11 +490,11 @@ The category-weighted score (shown below for reference) would have been 4.22, co
 
 | Final Score | Risk Tier | Recommendation |
 |------------|-----------|----------------|
-| 1.0-1.5 | Minimal Risk | Approved, high confidence |
-| 1.5-2.5 | Low Risk | Approved with standard monitoring |
-| 2.5-3.5 | Medium Risk | Approved with enhanced monitoring |
-| 3.5-4.5 | Elevated Risk | Limited approval, strict limits |
-| **4.5-5.0** | **High Risk** | **Not recommended** |
+| 1.00–1.49 | Minimal Risk | Approved, high confidence |
+| 1.50–2.49 | Low Risk | Approved with standard monitoring |
+| 2.50–3.49 | Medium Risk | Approved with enhanced monitoring |
+| 3.50–4.49 | Elevated Risk | Limited approval, strict limits |
+| **4.50–5.00** | **High Risk** | **Not recommended** |
 
 **Final Risk Tier: HIGH RISK — Not recommended**
 

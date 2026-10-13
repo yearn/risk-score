@@ -1,8 +1,9 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
 import ScoreBadge from "../components/ScoreBadge.astro";
+import ScoreBar from "../components/ScoreBar.astro";
 import stats from "../data/stats.json";
-import { getAllReports } from "../lib/reports";
+import { getListedReports } from "../lib/reports";
 import type { ReportData } from "../lib/parseReport";
 import { scoreColor, scoreTier } from "../lib/colors";
 
@@ -28,9 +29,10 @@ const excerpt = (html: string, maxLen = 180): string => {
 const reportCount = stats.reportCount;
 
 const morphoUrl = "https://app.morpho.org/ethereum/curator/yearn";
+const defillamaUrl = "https://defillama.com/protocol/yearn";
 
 // Homepage highlights scored assessments; Not Rated (terminal) reports live on /reports.
-const recent = getAllReports()
+const recent = getListedReports()
   .filter((r): r is ReportData & { finalScore: number } => r.finalScore != null)
   .sort((a, b) => b.dateSortable - a.dateSortable)
   .slice(0, 4);
@@ -84,9 +86,9 @@ const followups = recent.slice(1);
           <div class="card-glow" aria-hidden="true"></div>
           <div class="card-scan" aria-hidden="true"></div>
           <div class="card-top">
-            <span class="latest-badge">
-              <span class="latest-badge-dot"></span>
-              Latest
+            <span class:list={["assess-tag", featured.isUpdated ? "updated" : "new"]}>
+              <span class="assess-tag-dot"></span>
+              {featured.isUpdated ? "Updated" : "New"}
             </span>
             <span class="card-date" title={featured.date}>{formatRelative(featured.dateSortable)}</span>
           </div>
@@ -109,7 +111,7 @@ const followups = recent.slice(1);
                 <span>{featured.chain}</span>
               </div>
             </div>
-            <ScoreBadge score={featured.finalScore} size="large" />
+            <ScoreBadge score={featured.finalScore} size="large" list />
           </div>
           {featured.riskSummaryHtml && (
             <p class="card-excerpt">{excerpt(featured.riskSummaryHtml, 220)}</p>
@@ -118,14 +120,7 @@ const followups = recent.slice(1);
             <span class="tier" style={`color:${scoreColor(featured.finalScore)};`}>
               {scoreTier(featured.finalScore)}
             </span>
-            <div class="score-bar" aria-hidden="true">
-              {[1, 2, 3, 4, 5].map((seg) => (
-                <span
-                  class:list={["score-seg", { active: seg <= Math.round(featured.finalScore) }]}
-                  style={seg <= Math.round(featured.finalScore) ? `background:${scoreColor(featured.finalScore)};` : ""}
-                />
-              ))}
-            </div>
+            <ScoreBar score={featured.finalScore} size="large" />
           </div>
         </a>
 
@@ -156,20 +151,18 @@ const followups = recent.slice(1);
                     <span title={r.date}>{formatRelative(r.dateSortable)}</span>
                   </div>
                 </div>
-                <ScoreBadge score={r.finalScore} />
+                <ScoreBadge score={r.finalScore} list />
               </div>
               <div class="card-foot">
-                <span class="tier-sm" style={`color:${scoreColor(r.finalScore)};`}>
-                  {scoreTier(r.finalScore)}
+                <span class="foot-left">
+                  <span class="tier-sm" style={`color:${scoreColor(r.finalScore)};`}>
+                    {scoreTier(r.finalScore)}
+                  </span>
+                  <span class:list={["assess-tag", "assess-tag--sm", r.isUpdated ? "updated" : "new"]}>
+                    {r.isUpdated ? "Updated" : "New"}
+                  </span>
                 </span>
-                <div class="score-bar" aria-hidden="true">
-                  {[1, 2, 3, 4, 5].map((seg) => (
-                    <span
-                      class:list={["score-seg", { active: seg <= Math.round(r.finalScore) }]}
-                      style={seg <= Math.round(r.finalScore) ? `background:${scoreColor(r.finalScore)};` : ""}
-                    />
-                  ))}
-                </div>
+                <ScoreBar score={r.finalScore} />
               </div>
             </a>
           ))}
@@ -249,6 +242,28 @@ const followups = recent.slice(1);
     <a href={morphoUrl} target="_blank" rel="noopener noreferrer" class="btn btn-primary">
       Open Yearn vaults on Morpho
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+    </a>
+  </section>
+
+  <section class="contact-cta">
+    <div class="contact-copy">
+      <div class="contact-eyebrow">Work with us</div>
+      <h2>Get in touch</h2>
+      <p>
+        Yearn manages and curates <a href={defillamaUrl} target="_blank" rel="noopener noreferrer">$250M+ in TVL</a>.
+        We take on risk assessments, vault curation, curation advice and onchain
+        monitoring for protocols, DAOs and allocators.
+      </p>
+      <div class="contact-tags">
+        <span>Risk assessments</span>
+        <span>Vault curation</span>
+        <span>Curation advice</span>
+        <span>Monitoring</span>
+      </div>
+    </div>
+    <a href="/contact/" class="btn btn-primary contact-btn">
+      Contact us
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
     </a>
   </section>
 </BaseLayout>
@@ -335,9 +350,9 @@ const followups = recent.slice(1);
     flex-wrap: wrap;
   }
   @keyframes pulse {
-    0% { box-shadow: 0 0 0 0 rgba(6, 117, 249, 0.6); }
-    70% { box-shadow: 0 0 0 8px rgba(6, 117, 249, 0); }
-    100% { box-shadow: 0 0 0 0 rgba(6, 117, 249, 0); }
+    0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--tag) 60%, transparent); }
+    70% { box-shadow: 0 0 0 8px transparent; }
+    100% { box-shadow: 0 0 0 0 transparent; }
   }
   .latest-head h2 {
     font-size: 1.4rem;
@@ -459,26 +474,41 @@ const followups = recent.slice(1);
     align-items: center;
     font-size: 0.78rem;
   }
-  .latest-badge {
+  /* New / Updated tag — same colors as the badge on the report page. */
+  .assess-tag {
+    --tag: var(--brand-blue);
     display: inline-flex;
     align-items: center;
     gap: 0.4rem;
-    color: var(--brand-blue);
+    color: var(--tag);
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.08em;
     font-size: 0.7rem;
     padding: 0.2rem 0.55rem;
-    border: 1px solid color-mix(in srgb, var(--brand-blue) 40%, transparent);
+    border: 1px solid color-mix(in srgb, var(--tag) 40%, transparent);
     border-radius: 999px;
-    background: color-mix(in srgb, var(--brand-blue) 10%, transparent);
+    background: color-mix(in srgb, var(--tag) 10%, transparent);
+    white-space: nowrap;
   }
-  .latest-badge-dot {
+  .assess-tag.new {
+    --tag: #16a34a;
+  }
+  .foot-left {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .assess-tag--sm {
+    font-size: 0.6rem;
+    letter-spacing: 0.06em;
+    padding: 0.05rem 0.4rem;
+  }
+  .assess-tag-dot {
     width: 5px;
     height: 5px;
     border-radius: 50%;
-    background: var(--brand-blue);
-    box-shadow: 0 0 0 0 rgba(6, 117, 249, 0.5);
+    background: var(--tag);
     animation: pulse 2s ease-out infinite;
   }
   .card-date {
@@ -575,21 +605,6 @@ const followups = recent.slice(1);
     font-size: 0.75rem;
     font-weight: 600;
   }
-  .score-bar {
-    display: flex;
-    gap: 3px;
-  }
-  .score-seg {
-    width: 14px;
-    height: 5px;
-    border-radius: 2px;
-    background: var(--border);
-    transition: background 0.2s;
-  }
-  .report-card--compact .score-seg {
-    width: 10px;
-    height: 4px;
-  }
 
   @media (max-width: 880px) {
     .latest-grid {
@@ -608,7 +623,7 @@ const followups = recent.slice(1);
     }
   }
   @media (prefers-reduced-motion: reduce) {
-    .latest-badge-dot {
+    .assess-tag-dot {
       animation: none;
     }
     .report-card--featured:hover .card-scan {
@@ -689,9 +704,71 @@ const followups = recent.slice(1);
     max-width: 60ch;
   }
 
+  /* === Work-with-us CTA === */
+  .contact-cta {
+    margin: 3rem 0 1rem;
+    padding: 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    background:
+      linear-gradient(135deg, rgba(6, 117, 249, 0.1), transparent 60%),
+      color-mix(in srgb, var(--bg-card) 65%, transparent);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+  }
+  .contact-copy {
+    min-width: 0;
+    flex: 1 1 22rem;
+  }
+  .contact-eyebrow {
+    font-size: 0.72rem;
+    color: var(--brand-blue);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-weight: 600;
+  }
+  .contact-cta h2 {
+    font-size: 1.25rem;
+    margin-top: 0.1rem;
+  }
+  .contact-cta p {
+    color: var(--text-secondary);
+    max-width: 60ch;
+    margin-top: 0.35rem;
+  }
+  .contact-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin-top: 1rem;
+  }
+  .contact-tags span {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    padding: 0.2rem 0.6rem;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--bg-secondary) 40%, transparent);
+  }
+  .contact-btn {
+    flex-shrink: 0;
+  }
+
   @media (max-width: 720px) {
     .features {
       grid-template-columns: 1fr;
+    }
+    .contact-cta {
+      padding: 1.5rem;
+    }
+    .contact-btn {
+      width: 100%;
+      justify-content: center;
     }
     .hero {
       padding: 2rem 0 1.5rem;

@@ -4,7 +4,7 @@
 - **Token:** mHYPER
 - **Chain:** Ethereum (also deployed on Monad, Plasma, and Katana)
 - **Token Address:** [`0x9b5528528656DBC094765E2abB79F293c21191B9`](https://etherscan.io/token/0x9b5528528656dbc094765e2abb79f293c21191b9)
-- **Final Score: 2.9/5.0**
+- **Final Score: 2.91/5.0**
 
 ## Overview + Links
 
@@ -225,20 +225,20 @@ Both teams are public and established, documentation is substantial, and Hyperit
 | Funds Management | 2.9 | 30% | 0.87 |
 | Liquidity Risk | 3.0 | 15% | 0.45 |
 | Operational Risk | 1.8 | 5% | 0.09 |
-| **Final Score** | | | **2.91 ≈ 2.9/5.0** |
+| **Final Score** | | | **2.91/5.0** |
 
 ### Risk Tier
 
 | Final Score | Risk Tier | Recommendation |
 | --- | --- | --- |
-| **1.0-1.5** | **Minimal Risk** | Approved, high confidence |
-| **1.5-2.5** | **Low Risk** | Approved with standard monitoring |
-| **2.5-3.5** | **Medium Risk** | Approved with enhanced monitoring |
-| **3.5-4.5** | **Elevated Risk** | Limited approval, strict limits |
-| **4.5-5.0** | **High Risk** | Not recommended |
+| **1.00–1.49** | **Minimal Risk** | Approved, high confidence |
+| **1.50–2.49** | **Low Risk** | Approved with standard monitoring |
+| **2.50–3.49** | **Medium Risk** | Approved with enhanced monitoring |
+| **3.50–4.49** | **Elevated Risk** | Limited approval, strict limits |
+| **4.50–5.00** | **High Risk** | Not recommended |
 | **N/A** | **Not Rated** | Terminal — do not use (exploited or wound down) |
 
-**Final Risk Tier: Medium Risk (2.9/5.0).** Approved with enhanced monitoring and conservative exposure limits.
+**Final Risk Tier: Medium Risk (2.91/5.0).** Approved with enhanced monitoring and conservative exposure limits.
 
 ## Reassessment Triggers
 
@@ -258,7 +258,7 @@ Both teams are public and established, documentation is substantial, and Hyperit
 | [March 20, 2026](https://github.com/yearn/risk-score/pull/103) | 3.2 | Attestation Engine reassessment |
 | [April 13, 2026](https://github.com/yearn/risk-score/pull/133) | 2.9 | Controls and provability reassessment |
 | [June 13, 2026](https://github.com/yearn/risk-score/pull/248) | 2.9 | Allocation and role reassessment |
-| [August 19, 2026](https://github.com/yearn/risk-score/pull/417) | 2.9 | Custody, allocation, and oracle-control reassessment |
+| [August 19, 2026](https://github.com/yearn/risk-score/pull/417) | 2.91 | Custody, allocation, and oracle-control reassessment |
 
 ## Appendix: Current Control Summary
 

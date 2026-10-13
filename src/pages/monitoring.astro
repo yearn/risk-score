@@ -627,49 +627,56 @@ const protocols = await fetchProtocols(API_URL, API_TOKEN);
     padding: 0.3rem 0.5rem 0.5rem;
     white-space: nowrap;
   }
-  .recent-row {
+  /* Rows are injected via innerHTML and lack Astro's scope attribute, so style them globally. */
+  .recent-table :global(.recent-row) {
     border-bottom: 1px solid color-mix(in srgb, var(--border) 30%, transparent);
   }
-  .recent-row:last-child {
+  .recent-table :global(.recent-row:last-child) {
     border-bottom: none;
   }
-  .recent-cell {
+  .recent-table :global(.recent-cell) {
     padding: 0.4rem 0.5rem;
     vertical-align: top;
   }
-  .recent-cell--proto {
+  .recent-table :global(.recent-cell--proto) {
     white-space: nowrap;
     min-width: 120px;
   }
-  .recent-cell--msg {
+  .recent-table :global(.recent-cell--msg) {
     color: var(--text-secondary);
     line-height: 1.4;
-    word-break: break-word;
+    /* `anywhere` lowers the cell's min-content width so long hashes can't widen the table. */
+    overflow-wrap: anywhere;
   }
-  .recent-cell--msg p {
+  .recent-table :global(.recent-cell--msg p) {
     margin: 0;
   }
-  .recent-cell--msg code {
+  .recent-table :global(.recent-cell--msg code) {
     font-size: 0.8rem;
     background: color-mix(in srgb, var(--bg-secondary) 70%, transparent);
     padding: 0.1em 0.35em;
     border-radius: 4px;
   }
-  .recent-cell--msg a {
+  .recent-table :global(.recent-cell--msg pre) {
+    max-width: 100%;
+    overflow-x: auto;
+    white-space: pre-wrap;
+  }
+  .recent-table :global(.recent-cell--msg a) {
     color: var(--brand-blue);
   }
-  .recent-cell--time {
+  .recent-table :global(.recent-cell--time) {
     white-space: nowrap;
     text-align: right;
     min-width: 70px;
   }
-  time {
+  .recent-table :global(time) {
     color: var(--text-secondary);
     font-variant-numeric: tabular-nums;
     font-size: 0.76rem;
   }
 
-  .recent-dot {
+  .recent-table :global(.recent-dot) {
     display: inline-block;
     width: 7px;
     height: 7px;
@@ -678,11 +685,11 @@ const protocols = await fetchProtocols(API_URL, API_TOKEN);
     vertical-align: middle;
     margin-right: 3px;
   }
-  .recent-proto {
+  .recent-table :global(.recent-proto) {
     font-weight: 600;
     color: var(--text-primary);
   }
-  a.recent-proto:hover {
+  .recent-table :global(a.recent-proto:hover) {
     color: var(--brand-blue);
     text-decoration: none;
   }
@@ -691,7 +698,7 @@ const protocols = await fetchProtocols(API_URL, API_TOKEN);
     .recent-sub {
       display: none;
     }
-    .recent-cell--proto {
+    .recent-table :global(.recent-cell--proto) {
       min-width: unset;
       max-width: 80px;
       overflow: hidden;

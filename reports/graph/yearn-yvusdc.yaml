@@ -67,26 +67,26 @@ nodes:
 
   # Strategies
   - id: susds-lender
-    label: USDC → sUSDS Lender (22.2%)
+    label: USDC → sUSDS Lender (10.7%)
     address: "0x7130570BCEfCedBe9d15B5b11A33006156460f8f"
     category: strategy
   - id: yearn-usdc
-    label: Yearn USDC — Morpho (35.6%)
+    label: Yearn USDC — Morpho (30.1%)
     address: "0x68Aea7b82Df6CcdF76235D46445Ed83f85F845A3"
     category: strategy
     morphoVault: v1
     link: "https://app.morpho.org/ethereum/vault/0x68Aea7b82Df6CcdF76235D46445Ed83f85F845A3/"
   - id: pawn-broker
-    label: stcUSD/USDC Pawn Broker (30.3%, not in queue, self-contained)
+    label: stcUSD/USDC Pawn Broker (30.7%, not in queue)
     address: "0xe63a2abc24cd9538398d825a4bfe5778d25687df"
-    note: Self-contained Yearn V3 TokenizedStrategy (v3.0.4). Holds stcUSD directly as borrower collateral, lends USDC from own balance. Does NOT route through Morpho Blue.
+    note: Self-contained single-borrower Yearn V3 TokenizedStrategy (v3.0.4). Holds stcUSD as collateral and lends USDC to yvUSD's Pawn Broker Looper. LTV 87.16% vs 91.5% LLTV at the October 13, 2026 snapshot; idle USDC 1 wei. Does NOT route through Morpho Blue.
     category: strategy
   - id: spark-usdc-lender
     label: Spark USDC Lender (queued, 0%)
     address: "0x654a7c4Ae5ac3C853a99F8dbEAD2bC85090F753a"
     category: strategy
   - id: usds-depositor
-    label: USDC → USDS Depositor (11.9%)
+    label: USDC → USDS Depositor (28.5%)
     address: "0x39c0aEc5738ED939876245224aFc7E09C8480a52"
     category: strategy
 
@@ -113,6 +113,16 @@ nodes:
     address: "0xb8FC49402dF3ee4f8587268FB89fda4d621a8793"
     category: governance
     note: 3-of-5 anonymous Gnosis Safe → 24h Timelock → Access Control. Governs all Cap core contracts including stcUSD.
+  - id: yvusds
+    label: yvUSDS-1 (Yearn USDS vault)
+    address: "0x182863131F9a4630fF9E27830d945B1413e347E8"
+    category: dependency
+    note: 100% allocated to its Grove USDS Compounder (Sky USDS → GROVE farm) at the October 13, 2026 snapshot. The USDS Depositor holds ~54.6% of it.
+  - id: pawn-broker-looper
+    label: yvUSD Pawn Broker Looper (borrower, 7.79x)
+    address: "0xd362efC75Ef1879f37A900823495f402CfdB0986"
+    category: dependency
+    note: Sole borrower of the Pawn Broker. Yearn TokenizedStrategy wholly owned by yvUSD; posts stcUSD collateral using Morpho Blue flashloans. ~$0.89M equity is the first-loss layer.
   - id: spark-lend
     label: Spark Lend USDC Market (Sky sub-DAO)
     category: dependency
@@ -139,6 +149,16 @@ nodes:
     category: dependency
     link: "https://app.morpho.org/ethereum/market/0xb323495f7e4148be5643a4ea4a8221eef163e4bccfdedc2a6f4696baacbc86cc/"
     note: "Morpho market 0xb323495f7e4148be5643a4ea4a8221eef163e4bccfdedc2a6f4696baacbc86cc"
+  - id: morpho-market-6d2fba32b864
+    label: "wstETH/USDC · 86% LLTV"
+    category: dependency
+    link: "https://app.morpho.org/ethereum/market/0x6d2fba32b8649d92432d036c16aa80779034b7469b63abc259b17678857f31c2/"
+    note: "Morpho market 0x6d2fba32b8649d92432d036c16aa80779034b7469b63abc259b17678857f31c2"
+  - id: morpho-market-ba3ba077d9c8
+    label: "cbBTC/USDC · 86% LLTV"
+    category: dependency
+    link: "https://app.morpho.org/ethereum/market/0xba3ba077d9c838696b76e29a394ae9f0d1517a372e30fd9a0fc19c516fb4c5a7/"
+    note: "Morpho market 0xba3ba077d9c838696b76e29a394ae9f0d1517a372e30fd9a0fc19c516fb4c5a7"
 # END GENERATED MORPHO MARKET NODES
 
 edges:
@@ -158,19 +178,19 @@ edges:
   - from: yvUSDC
     to: susds-lender
     kind: allocates-to
-    label: "22.2%"
+    label: "10.7%"
   - from: yvUSDC
     to: yearn-usdc
     kind: allocates-to
-    label: "35.6%"
+    label: "30.1%"
   - from: yvUSDC
     to: pawn-broker
     kind: allocates-to
-    label: "30.3% (not in default queue)"
+    label: "30.7% (not in default queue)"
   - from: yvUSDC
     to: usds-depositor
     kind: allocates-to
-    label: "11.9%"
+    label: "28.5%"
   - from: yvUSDC
     to: spark-usdc-lender
     kind: allocates-to
@@ -185,10 +205,14 @@ edges:
     to: yvUSDC
     kind: holds-role
     label: "QUEUE / DEBT / EMERGENCY"
+  - from: security
+    to: yvUSDC
+    kind: holds-role
+    label: "DEBT / MAX_DEBT / EMERGENCY"
   - from: timelock
     to: yvUSDC
     kind: holds-role
-    label: "ADD_STRATEGY (7d)"
+    label: "ADD_STRATEGY / ACCOUNTANT / MAX_DEBT (7d)"
   - from: keeper
     to: yvUSDC
     kind: holds-role
@@ -238,10 +262,22 @@ edges:
   - from: usds-depositor
     to: dai-usds-exchanger
     kind: routes-through
+  - from: usds-depositor
+    to: yvusds
+    kind: deposits-into
+    label: "USDS → yvUSDS-1"
   - from: pawn-broker
     to: stcUSD
     kind: deposits-into
     label: "stcUSD as collateral (held directly)"
+  - from: pawn-broker
+    to: pawn-broker-looper
+    kind: deposits-into
+    label: "USDC loan (sole borrower)"
+  - from: brain
+    to: pawn-broker
+    kind: holds-role
+    label: "management (callDebt / liquidate)"
   - from: cap-governance
     to: stcUSD
     kind: controls
@@ -270,13 +306,21 @@ edges:
   - from: yearn-usdc
     to: morpho-market-64d65c9a2d91
     kind: deposits-into
-    label: "56.3%"
+    label: "65.7%"
   - from: yearn-usdc
     to: morpho-market-3a85e6197511
     kind: deposits-into
-    label: "36.8%"
+    label: "29.1%"
   - from: yearn-usdc
     to: morpho-market-b323495f7e41
     kind: deposits-into
-    label: "6.7%"
+    label: "5.0%"
+  - from: yearn-usdc
+    to: morpho-market-6d2fba32b864
+    kind: deposits-into
+    label: "<0.1%"
+  - from: yearn-usdc
+    to: morpho-market-ba3ba077d9c8
+    kind: deposits-into
+    label: "<0.1%"
 # END GENERATED MORPHO MARKET EDGES

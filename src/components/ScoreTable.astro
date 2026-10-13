@@ -1,5 +1,5 @@
 ---
-import { scoreColor, scoreTier, scoreTextColor } from "../lib/colors";
+import { formatScore, scoreColor, scoreTier, scoreTextColor } from "../lib/colors";
 import type { CategoryScore } from "../lib/parseReport";
 
 interface Props {
@@ -71,7 +71,7 @@ function labelPos(cx: number, cy: number, r: number, start: number, end: number)
                 </td>
                 <td>{s.weight}</td>
                 <td style={`color:${scoreColor(s.score)}`}>
-                  {s.score.toFixed(2)}
+                  {formatScore(s.score)}
                 </td>
               </tr>
             ))}
@@ -92,7 +92,7 @@ function labelPos(cx: number, cy: number, r: number, start: number, end: number)
                     data-opens-details={detailsId}
                     title="See how this score was derived"
                   >
-                    <span>{finalScore.toFixed(1)} / 5.0</span>
+                    <span>{formatScore(finalScore)} / 5.0</span>
                     <svg
                       class="score-arrow"
                       width="15"
@@ -113,7 +113,7 @@ function labelPos(cx: number, cy: number, r: number, start: number, end: number)
                 </td>
               ) : (
                 <td class="final-score" style={`color:${scoreColor(finalScore)}`}>
-                  {finalScore.toFixed(1)} / 5.0
+                  {formatScore(finalScore)} / 5.0
                 </td>
               )}
             </tr>
@@ -133,7 +133,7 @@ function labelPos(cx: number, cy: number, r: number, start: number, end: number)
                 class="pie-segment"
                 data-category={seg.category}
                 data-weight={seg.weight}
-                data-score={seg.score.toFixed(2)}
+                data-score={formatScore(seg.score)}
               />
             ))}
             {segments.map((seg) => {

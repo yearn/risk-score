@@ -87,6 +87,7 @@ PROTOCOL_TOKENS: dict[str, str] = {
     # RWA
     "USCC": "Superstate",
     "STRC": "Strategy Inc.",
+    "USDY": "Ondo",
     # Wrapped BTC
     "LBTC": "Lombard",
     "tBTC": "Threshold",
@@ -833,6 +834,28 @@ def superstate_ustb_data() -> dict:
     }
 
 
+def ondo_usdy_data() -> dict:
+    """Ondo (USDY) dependency data from risk assessment report (Sep 2026).
+
+    LLC-issued USDY is backed by T-bills; OGM-issued USDY is a liability of the
+    pooled Ondo Stocks balance sheet (US equities, USDC/USDT, cash).
+    """
+    return {
+        "name": "Ondo (USDY)",
+        "chain": "ethereum",
+        "type": "tokenized_treasury",
+        "address": "0x96F6eF951840721AdBF46Ac996b59E0235CB985C",
+        "report": "reports/report/ondo-usdy.md",
+        "collateral": [
+            {"asset": "T-Bills"},
+            {"asset": "US Equities"},
+            {"asset": "USDC", "address": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"},
+            {"asset": "USDT", "address": "0xdAC17F958D2ee523a2206206994597C13D831ec7"},
+        ],
+        "infrastructure": ["LayerZero", "Chainlink"],
+    }
+
+
 def saturn_data() -> dict:
     """Saturn (USDat) dependency data from risk assessment report (May 2026)."""
     return {
@@ -931,6 +954,7 @@ def main():
     data["protocols"]["royco_srroyusdc"] = royco_srroyusdc_data()
     data["protocols"]["superstate_ustb"] = superstate_ustb_data()
     data["protocols"]["saturn"] = saturn_data()
+    data["protocols"]["ondo_usdy"] = ondo_usdy_data()
 
     # Write YAML
     with open(OUTPUT_PATH, "w") as f:
