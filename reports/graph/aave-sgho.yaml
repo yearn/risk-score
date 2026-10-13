@@ -37,12 +37,12 @@ nodes:
     label: GSM USDT (Gsm4626)
     address: "0x882285E62656b9623AF136Ce3078c6BdCc33F5E3"
     category: strategy
-    note: Fallback GHO exit — 16.09M waEthUSDT shares ≈ 18.94M USDT; exits to USDT; 10 bps buy fee
+    note: Fallback GHO exit — 29.35M waEthUSDT shares ≈ 34.60M USDT; exits to USDT; 10 bps buy fee
   - id: gho-reserve
     label: GHO Reserve (GSM Facilitator)
     address: "0x54C58157DeF387A880AE62332D1445f03adbE7E9"
     category: strategy
-    note: Pre-minted GHO pool drawn by GSMs (291.07M GHO)
+    note: Pre-minted GHO pool drawn by GSMs (275.45M GHO)
 
   # === Infra ===
   - id: sgho-proxy-admin
@@ -85,7 +85,7 @@ nodes:
     label: Aave Finance Committee Safe (2-of-3)
     address: "0x22740deBa78d5a0c24C58C740e3715ec29de1bFa"
     category: governance
-    note: Operates all sGho yield top-ups — 2.364M GHO in 11 discretionary transfers; same signer set as the Risk Council
+    note: Operates all sGho yield top-ups — 2.584M GHO in 12 discretionary transfers; same signer set as the Risk Council
 
   - id: aave-collector
     label: Aave Collector (DAO Treasury)
