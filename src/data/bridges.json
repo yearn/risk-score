@@ -276,7 +276,7 @@
           "kind": "direct",
           "model": "lock",
           "integration": "LayerZero OFT Adapter (\"LayerZero vault\")",
-          "detail": "Adapter [`0x983a…4137`](https://etherscan.io/address/0x983AEAaA0d0426839158435C43725EA7F45d4137) escrows 10.287M stcUSD (18.64% of Ethereum supply), pooled across Katana, MegaETH, and Tempo at matching-time October 3 blocks. It cannot mint canonical stcUSD. All 12 receive routes in the fully enumerated four-chain mesh, with matching send configurations, require LayerZero Labs, Canary, and Nethermind (3-of-3, 15 confirmations). Remote supplies total 10,286,617.476483 stcUSD, 3.000000 below canonical escrow. Tempo uses a separate TIP-20 token; its sole issuer is the [adapter](https://explore.tempo.xyz/address/0x4eec5b8fdfbcdd45dfb29f666d9c34ad38c7afa5), with remote timelock admin.",
+          "detail": "Adapter [`0x983a…4137`](https://etherscan.io/address/0x983AEAaA0d0426839158435C43725EA7F45d4137) escrows 10.287M stcUSD (16.13% of Ethereum supply at October 5 block 26,128,579; balance unchanged since October 3), pooled across Katana, MegaETH, and Tempo at matching-time October 3 blocks. It cannot mint canonical stcUSD. All 12 receive routes in the fully enumerated four-chain mesh, with matching send configurations, require LayerZero Labs, Canary, and Nethermind (3-of-3, 15 confirmations). Remote supplies total 10,286,617.476483 stcUSD, 3.000000 below canonical escrow. Tempo uses a separate TIP-20 token; its sole issuer is the [adapter](https://explore.tempo.xyz/address/0x4eec5b8fdfbcdd45dfb29f666d9c34ad38c7afa5), with remote timelock admin.",
           "security": {
             "label": "3-of-3",
             "confirmations": 15,

@@ -1,11 +1,11 @@
 # Protocol Risk Assessment: Cap — stcUSD
 
-- **Assessment Date:** March 20, 2026 (Updated: October 4, 2026)
+- **Assessment Date:** March 20, 2026 (Updated: October 5, 2026)
 - **Token:** stcUSD (Staked cap USD)
 - **Chain:** Ethereum
 - **Token Address:** [`0x88887bE419578051FF9F4eb6C858A951921D8888`](https://etherscan.io/address/0x88887bE419578051FF9F4eb6C858A951921D8888)
-- **Final Score: 2.72/5.0**
-- **Snapshot:** Ethereum block [26,114,512](https://etherscan.io/block/26114512), October 3, 2026 at 21:29:59 UTC; hash `0x948c259667c7b9479d2152bc2068808ab21fc6ffaa50b57a4b363d1b08810c29`. Current Ethereum calls and storage reads use this block; historical Safe continuity reads use block 25,160,215. API data is separately dated. Remote blocks at the same timestamp: Katana [44,320,188](https://katanascan.com/block/44320188), MegaETH [28,265,988](https://mega.etherscan.io/block/28265988), Tempo [42,471,037](https://explore.tempo.xyz/block/42471037); hashes and public-RPC archive reads are in the [October 4 follow-up evidence](https://github.com/yearn/risk-score/blob/master/reports/data/cap-stcusd-followup-2026-10-04.json). [Snapshot reads](https://github.com/yearn/risk-score/blob/master/reports/data/cap-stcusd-2026-10-03.json).
+- **Final Score: 2.67/5.0**
+- **Snapshot:** Ethereum block [26,128,579](https://etherscan.io/block/26128579), October 5, 2026 at 20:32:23 UTC; hash `0x3a924bfecc75cddc06bf02d4927e1dffef213fcf0ad124ae79ea1687ab09cd94` ([October 5 snapshot reads](https://github.com/yearn/risk-score/blob/master/reports/data/cap-stcusd-2026-10-05.json)). Supplies, reserves, strategy debt, agent debt/health, implementations, Safe/Timelock state, and governance/bridge event scans from block 26,114,513 use this block. The complete selector-role matrix, Symbiotic/EigenLayer mappings, Ondo withdrawal simulations, and remote-chain reads are from the October 3 block [26,114,512](https://etherscan.io/block/26114512) ([October 3 reads](https://github.com/yearn/risk-score/blob/master/reports/data/cap-stcusd-2026-10-03.json); [October 4 follow-up](https://github.com/yearn/risk-score/blob/master/reports/data/cap-stcusd-followup-2026-10-04.json)); Access Control emitted no events and the lockbox had no LayerZero activity between the two blocks. Historical Safe continuity reads use block 25,160,215. API data is separately dated.
 
 ## Overview + Links
 
@@ -13,22 +13,23 @@ stcUSD is a **yield-bearing ERC-4626 vault token** issued by Cap. Users stake cU
 
 **Key architecture:**
 
-- **cUSD:** Permissionless mint/burn against two whitelisted reserve assets: USDC (**99.88%** of nominal accounted reserves) and wWTGXX (**0.12%**). The fee configuration has a 33% optimal ratio, but zero fee slopes; this is not a hard concentration ceiling.
-- **stcUSD:** ERC-4626 wrapping cUSD. `totalAssets()` represents **97.06%** of cUSD supply; this measures staked underlying rather than comparing share supply with cUSD supply.
-- **Fractional Reserve:** USDC Yearn V3 vault has **$6.186M** of assets: **$6.086M Aave V3 (98.38%)** and **$100K Ondo rUSDY (1.62%)**. Former Morpho strategies are revoked with zero debt. The wWTGXX vault has **76,915.77 tokens**, of which cUSD's shares convert to **71,578.27 tokens**.
-- **Operator loans:** **$55.346M USDC principal**, **89.94%** of accounted USDC reserves. Per-agent debt including interest totals **$55.393M**. The largest agent has **53.75%** of that debt.
-- **Security networks:** Symbiotic and EigenLayer isolate coverage by borrower. EigenLayer covers **$838K**, or **1.51%** of accrued USDC debt; the remainder is mapped to Symbiotic.
-- **Governance:** 3-of-5 Safe → 24-hour timelock for core upgrades, access grants/revocations, new reserve assets, and selected parameters. The Safe also holds direct configuration and full reserve-vault roles, so the delay does not protect every risk-changing action.
-- **Bridge:** LayerZero lockbox holds **10.287M stcUSD (18.64% of Ethereum supply)** in pooled escrow for configured Katana, MegaETH, and Tempo peers. It transfers existing canonical tokens and cannot mint canonical stcUSD.
+- **cUSD:** Permissionless mint/burn against two whitelisted reserve assets: USDC (**99.89%** of nominal accounted reserves) and wWTGXX (**0.11%**). The fee configuration has a 33% optimal ratio, but zero fee slopes; this is not a hard concentration ceiling.
+- **stcUSD:** ERC-4626 wrapping cUSD. `totalAssets()` represents **97.45%** of cUSD supply; this measures staked underlying rather than comparing share supply with cUSD supply.
+- **Fractional Reserve:** USDC Yearn V3 vault has **$11.451M** of assets: **$11.351M Aave V3 (99.13%)** and **$100.02K Ondo rUSDY (0.87%)**. Former Morpho strategies are revoked with zero debt. The wWTGXX vault has **76,015.64 tokens**, of which cUSD's shares convert to **71,588.34 tokens**.
+- **Operator loans:** **$55.369M USDC principal**, **78.17%** of accounted USDC reserves. Per-agent debt including interest totals **$55.420M**. The largest agent has **53.75%** of that debt.
+- **Security networks:** Symbiotic and EigenLayer isolate coverage by borrower. EigenLayer covers **$839K**, or **1.51%** of accrued USDC debt; the remainder is mapped to Symbiotic.
+- **Governance:** 3-of-5 Safe → 24-hour timelock for core upgrades, access grants/revocations, new reserve assets, and selected parameters. Since October 5, 2026, a separate 3-of-6 Safe can also cancel queued Timelock operations. The Safe also holds direct configuration and full reserve-vault roles, so the delay does not protect every risk-changing action.
+- **Bridge:** LayerZero lockbox holds **10.287M stcUSD (16.13% of Ethereum supply)** in pooled escrow for configured Katana, MegaETH, and Tempo peers. It transfers existing canonical tokens and cannot mint canonical stcUSD.
 
-**Key metrics ([snapshot reads](https://github.com/yearn/risk-score/blob/master/reports/data/cap-stcusd-2026-10-03.json)):**
+**Key metrics ([snapshot reads](https://github.com/yearn/risk-score/blob/master/reports/data/cap-stcusd-2026-10-05.json)):**
 
-- **cUSD supply:** 61,610,362.18 cUSD.
-- **stcUSD supply / assets:** 55,197,514.91 shares / 59,800,669.88 cUSD.
-- **Price per share:** 1.083394 cUSD per stcUSD (`convertToAssets(1e18)`).
-- **Accounted reserves:** 61,534,168.77 USDC + 75,864.86 wWTGXX. These are accounting claims, including operator principal; they are not all liquid custody balances.
-- **USDC outside operator principal:** 6,188,597.98 USDC (**10.06%** of USDC reserve accounting), including 2,879.72 USDC directly held by cUSD.
-- **Protocol TVL:** **$272.70M**, including collateral tracked by [DeFiLlama](https://api.llama.fi/protocol/cap), retrieved October 3, 2026. Latest API point dated October 3; 30 returned observations span September 5–October 3 and decline **19.26%** from $337.73M. This API series is separate from the Ethereum block snapshot.
+- **cUSD supply:** 70,912,508.55 cUSD.
+- **stcUSD supply / assets:** 63,762,340.11 shares / 69,103,894.10 cUSD.
+- **Price per share:** 1.083773 cUSD per stcUSD (`convertToAssets(1e18)`).
+- **Accounted reserves:** 70,835,366.51 USDC + 76,764.98 wWTGXX. These are accounting claims, including operator principal; they are not all liquid custody balances.
+- **USDC outside operator principal:** 15,465,949.27 USDC (**21.83%** of USDC reserve accounting), including 4,015,247.23 USDC directly held by cUSD.
+- **Recent inflow:** 34 mints created 9,353,397.01 cUSD between the October 3 and October 5 blocks. Two contracts account for 9.0M of it, all minted within about six hours before the snapshot and then staked: [Ether.Fi Liquid USD](https://etherscan.io/address/0x08c6f91e2b681faf5e17227f2a44c307b3c1364c) (4.0M) and an unidentified upgradeable proxy, [`0x31b7d5a2b1ce1871dd642f6aecc0ef68d126b95a`](https://etherscan.io/address/0x31b7d5a2b1ce1871dd642f6aecc0ef68d126b95a) (5.0M). The two hold 8.30M stcUSD, or 13.02% of supply.
+- **Protocol TVL:** **$284.72M**, including collateral tracked by [DeFiLlama](https://api.llama.fi/protocol/cap), retrieved October 5, 2026. The latest API point is October 5 at 20:44 UTC. The 30 returned observations span September 7–October 5, including that intraday point, and decline **16.59%** from $341.36M. This API series is separate from the Ethereum block snapshot.
 - **Fees / pauses:** Minimum mint fee 0.10%, mint/burn fee slopes zero, basket redeem fee zero. Global and both reserve-asset pauses are false.
 - **Launch:** August 19, 2025; approximately 13.5 months in production.
 
@@ -61,19 +62,20 @@ stcUSD is a **yield-bearing ERC-4626 vault token** issued by Cap. Users stake cU
 | Delegation | [`0xF3E3Eae671000612CE3Fd15e1019154C1a4d693F`](https://etherscan.io/address/0xF3E3Eae671000612CE3Fd15e1019154C1a4d693F) | Symbiotic / EigenLayer coverage management |
 | Fee Auction | [`0xa1a20aBdc873CF291c22Ce3C8968EC06277324D0`](https://etherscan.io/address/0xa1a20aBdc873CF291c22Ce3C8968EC06277324D0) | Dutch auction for fee conversion |
 | Fee Receiver | [`0x0036c7b9b62c53F47c804a5643F0c09f864beF0b`](https://etherscan.io/address/0x0036c7b9b62c53F47c804a5643F0c09f864beF0b) | Collects protocol fees |
-| USDC Fractional Reserve Vault | [`0x3Ed6aa32c930253fc990dE58fF882B9186cd0072`](https://etherscan.io/address/0x3Ed6aa32c930253fc990dE58fF882B9186cd0072) | Yearn V3 vault — $6.086M Aave V3 + $100K Ondo rUSDY |
-| wWTGXX Fractional Reserve Vault | [`0xb1c1C80FDbBde5B40264e1410550F3C864113bF8`](https://etherscan.io/address/0xb1c1C80FDbBde5B40264e1410550F3C864113bF8) | Yearn V3 vault — 76,915.77 wWTGXX via holder strategy; cUSD owns 71,578.27 tokens of value |
+| USDC Fractional Reserve Vault | [`0x3Ed6aa32c930253fc990dE58fF882B9186cd0072`](https://etherscan.io/address/0x3Ed6aa32c930253fc990dE58fF882B9186cd0072) | Yearn V3 vault — $11.351M Aave V3 + $100.02K Ondo rUSDY |
+| wWTGXX Fractional Reserve Vault | [`0xb1c1C80FDbBde5B40264e1410550F3C864113bF8`](https://etherscan.io/address/0xb1c1C80FDbBde5B40264e1410550F3C864113bF8) | Yearn V3 vault — 76,015.64 wWTGXX via holder strategy; cUSD owns 71,588.34 tokens of value |
 | cUSD Adapter | [`0xAcc9ce4C15A0F6A2bec49C3F81261d60553D2Faf`](https://etherscan.io/address/0xAcc9ce4C15A0F6A2bec49C3F81261d60553D2Faf) | cUSD integration adapter |
 | stcUSD Adapter | [`0xdf48Eb321B38bc19E7F5b2CCA8242Cc6B9a6EcD0`](https://etherscan.io/address/0xdf48Eb321B38bc19E7F5b2CCA8242Cc6B9a6EcD0) | stcUSD integration adapter |
 
 ### Governance Contracts
 
-Verified at the header's fixed block; roles are fully enumerated from Access Control getters and the Timelock's complete grant/revoke event history, with current `hasRole` confirmation ([snapshot reads](https://github.com/yearn/risk-score/blob/master/reports/data/cap-stcusd-2026-10-03.json)).
+Selector roles are fully enumerated from Access Control getters at the October 3 block. Access Control emitted no events through the October 5 block. Timelock roles combine the complete grant/revoke event history with `hasRole` confirmation at the October 5 block ([October 3 reads](https://github.com/yearn/risk-score/blob/master/reports/data/cap-stcusd-2026-10-03.json); [October 5 reads and events](https://github.com/yearn/risk-score/blob/master/reports/data/cap-stcusd-2026-10-05.json)).
 
 | Contract | Address | Configuration |
 |----------|---------|---------------|
 | Timelock | [`0xD8236031d8279d82E615aF2BFab5FC0127A329ab`](https://etherscan.io/address/0xD8236031d8279d82E615aF2BFab5FC0127A329ab) | `getMinDelay() = 86400`; sole DEFAULT_ADMIN on both Access Control and Timelock. Sole Access Control grant/revoke authority and sole core upgrade authority |
-| Multisig | [`0xb8FC49402dF3ee4f8587268FB89fda4d621a8793`](https://etherscan.io/address/0xb8FC49402dF3ee4f8587268FB89fda4d621a8793) | Safe v1.4.1, 3-of-5. Sole Timelock proposer/canceller; one of two executors. Five EOA owners, publicly anonymous; exact owner set and threshold match historical reads at block 25,160,215. Owner sets are preserved in the evidence |
+| Canceller Safe | [`0xfbf18b80569b29c897c6a857456b5adea720b984`](https://etherscan.io/address/0xfbf18b80569b29c897c6a857456b5adea720b984) | Safe v1.5.0, 3-of-6. Owners: the main Safe, two 2-of-5 Safes ([`0x653d5c6CEf72822e7C409ecB5c46C5c2858E5F2A`](https://etherscan.io/address/0x653d5c6CEf72822e7C409ecB5c46C5c2858E5F2A), also a registered Cap agent with zero USDC debt, and [`0x607d0C7e3578802Eb46D388cb86cfba8Ff657306`](https://etherscan.io/address/0x607d0C7e3578802Eb46D388cb86cfba8Ff657306)), and three EOAs. Holds only Timelock `CANCELLER_ROLE`, granted at block [26,125,618](https://etherscan.io/tx/0x77b65415918f7018ff12b84fb82258f63409a3cd76fe603a07c46bd93e6d1d38) after the 24h delay. It cannot propose or execute |
+| Multisig | [`0xb8FC49402dF3ee4f8587268FB89fda4d621a8793`](https://etherscan.io/address/0xb8FC49402dF3ee4f8587268FB89fda4d621a8793) | Safe v1.4.1, 3-of-5. Sole Timelock proposer; one of two cancellers and one of two executors. Five EOA owners, publicly anonymous; exact owner set and threshold match historical reads at block 25,160,215. Owner sets are preserved in the evidence |
 | Deployer EOA | [`0xc1ab5a9593e6e1662a9a44f84df4f31fc8a76b52`](https://etherscan.io/address/0xc1ab5a9593e6e1662a9a44f84df4f31fc8a76b52) | Timelock executor, without proposer/canceller/admin rights. Also direct protocol pause permission and reserve-vault roles; its permissions are broader than Timelock execution |
 | Reserve RoleManager | [`0x2995401cB465F3fbAE64a2D2f78Dfa571F570D24`](https://etherscan.io/address/0x2995401cB465F3fbAE64a2D2f78Dfa571F570D24) | Both Yearn V3 vaults' `role_manager()`. `getGovernance()` = Timelock; `getManagement()` = Safe. Independently, each vault's `roles(Safe) = 16383` (all 14 role bits), `roles(deployer) = 6512`; role-manager governance does not impose a delay on existing vault roles |
 | OFT lockbox | [`0x983aeaaa0d0426839158435c43725ea7f45d4137`](https://etherscan.io/address/0x983aeaaa0d0426839158435c43725ea7f45d4137) | UUPS owner = Timelock; LayerZero endpoint delegate = Safe, which can change endpoint security configuration directly |
@@ -93,25 +95,27 @@ Verified at the header's fixed block; roles are fully enumerated from Access Con
 
 | Contract | Address | Purpose |
 |----------|---------|---------|
-| Primary USDC reserve feed | [`0xeef31c7d9f2e82e8a497b140cc60cc082be4b94e`](https://etherscan.io/address/0xeef31c7d9f2e82e8a497b140cc60cc082be4b94e) | RedStone USDC_V2 feed, queried through ChainlinkAdapter; price $0.99993498, last update October 3, 2026 at 12:08:23 UTC |
+| Primary USDC reserve feed | [`0xeef31c7d9f2e82e8a497b140cc60cc082be4b94e`](https://etherscan.io/address/0xeef31c7d9f2e82e8a497b140cc60cc082be4b94e) | RedStone USDC_V2 feed, queried through ChainlinkAdapter; price $0.99988496, last update October 5, 2026 at 12:38:11 UTC |
 | Backup USDC reserve feed | [`0x8fffffd4afb6115b954bd326cbe7b4ba576818f6`](https://etherscan.io/address/0x8fffffd4afb6115b954bd326cbe7b4ba576818f6) | Chainlink USDC/USD via the same adapter |
 | wWTGXX pricing | [`0xC96d5EC90B07fe2a96253990Dc7eF2df22FDe0b3`](https://etherscan.io/address/0xC96d5EC90B07fe2a96253990Dc7eF2df22FDe0b3) | FixedPriceOracle returns $1 and block timestamp; it does not observe fund impairment |
 
-`Oracle.priceOracleData`, `priceBackupOracleData`, `getPrice`, and `staleness` are in the [snapshot reads](https://github.com/yearn/risk-score/blob/master/reports/data/cap-stcusd-2026-10-03.json). USDC staleness is **86,600 seconds**; wWTGXX staleness is zero. Oracle adapter/payload changes are timelocked, but the Safe can change staleness directly.
+Oracle adapter and payload data are in the [October 3 reads](https://github.com/yearn/risk-score/blob/master/reports/data/cap-stcusd-2026-10-03.json). The Oracle emitted no events through the October 5 block; `getPrice` and `staleness` are re-read in the [October 5 reads](https://github.com/yearn/risk-score/blob/master/reports/data/cap-stcusd-2026-10-05.json). USDC staleness is **86,600 seconds**; wWTGXX staleness is zero. Oracle adapter/payload changes are timelocked, but the Safe can change staleness directly, and `setStaleness` has no bound in the verified source.
+
+**Pending oracle batch:** A Timelock batch scheduled at block [26,125,618](https://etherscan.io/tx/0x77b65415918f7018ff12b84fb82258f63409a3cd76fe603a07c46bd93e6d1d38) would price [OETH](https://etherscan.io/address/0x856c4Efb76C1D1AE02e20CEB03A2A6a08b0b8dC3). It combines Chainlink [ETH/USD](https://etherscan.io/address/0x5f4ec3df9cbd43714fe2740f5e3616155c5b8419) with the [OETH vault lens](https://etherscan.io/address/0xad2b1657e2c3243750b32cb9a51169575945b05b) rate through [adapter `0x7aA9896a606314335A09fE66d069d11ab50D40DF`](https://etherscan.io/address/0x7aA9896a606314335A09fE66d069d11ab50D40DF), with no backup feed. It becomes executable on October 6, 2026 at 10:37:35 UTC. At the snapshot, cUSD's asset list is unchanged and OETH is not a reserve asset. **TODO:** the intended consumer of OETH pricing, whether reserve, Lender, or collateral valuation, is not established.
 
 ### Morpho Markets
 
 (stcUSD / PT-stcUSD / PT-cUSD as collateral)
 
-Ethereum stcUSD markets queried from [Morpho's API](https://api.morpho.org/graphql) on October 3, 2026, separately from the fixed block. Eight matching markets have only **$148.44 supply** and **$35.71 borrowed** in aggregate. This is dust rather than material alternative liquidity; it does not measure DEX or other-chain liquidity. Market IDs and API responses are in the [evidence](https://github.com/yearn/risk-score/blob/master/reports/data/cap-stcusd-2026-10-03.json).
+Ethereum stcUSD markets queried from [Morpho's API](https://api.morpho.org/graphql) on October 5, 2026, separately from the fixed block. Eight matching markets have only **$149.13 supply** and **$36.20 borrowed** in aggregate. This is dust rather than material alternative liquidity; it does not measure DEX or other-chain liquidity. Market IDs and API responses are in the [evidence](https://github.com/yearn/risk-score/blob/master/reports/data/cap-stcusd-2026-10-05.json).
 
 | Market | LLTV | Supply | Utilization |
 |--------|------|--------|-------------|
 | [stcUSD / USDC](https://app.morpho.org/ethereum/market/0x8abcf6d7bb7a4bd8720fef5fa27917ac50a88cf2bf1a97002f43fec3919a373c/) | 86% | $90.00 | 0% |
-| [stcUSD / AUSD](https://app.morpho.org/ethereum/market/0x21181d33ac70b7290592338113e5af6e68c0e623ffaf932515727bb35f5690ef/) | 91.5% | $29.57 | ~100% |
+| [stcUSD / AUSD](https://app.morpho.org/ethereum/market/0x21181d33ac70b7290592338113e5af6e68c0e623ffaf932515727bb35f5690ef/) | 91.5% | $30.07 | ~100% |
 | [stcUSD / USDT](https://app.morpho.org/ethereum/market/0xdbf4bc065d4e76f4505a523f2bba5e5ccdca94c16d67c3a6ff1dadbcbb26d4aa/) | 91.5% | $17.41 | 7.41% |
 
-Other matching stcUSD markets have less than $5 supply each. A fully paginated [Pendle Ethereum registry](https://api-v2.pendle.finance/core/v1/1/markets?limit=100&skip=0) query on October 4 returned 494 markets. Four have canonical cUSD/stcUSD as their underlying, all with January 29 or July 23, 2026 maturities confirmed by `expiry()` at the fixed block; **no unmatured replacement Cap PT market was found in this registry**. This is an indexed-market result, not an exhaustive permissionless-deployment search. A separate [Morpho API](https://api.morpho.org/graphql) query finds 18 markets using these matured PTs, with **$33,623.61 supply / $30,908.50 borrow**. These outstanding matured positions are distinct from the eight direct stcUSD dust markets ([follow-up evidence](https://github.com/yearn/risk-score/blob/master/reports/data/cap-stcusd-followup-2026-10-04.json)).
+Other matching stcUSD markets have less than $5 supply each. A fully paginated [Pendle Ethereum registry](https://api-v2.pendle.finance/core/v1/1/markets?limit=100&skip=0) query on October 5 returned 496 markets. Four have canonical cUSD/stcUSD as their underlying, all with January 29 or July 23, 2026 maturities confirmed by `expiry()` at the October 3 block; **no unmatured replacement Cap PT market was found in this registry**. This is an indexed-market result, not an exhaustive permissionless-deployment search. A separate October 4 [Morpho API](https://api.morpho.org/graphql) query finds 18 markets using these matured PTs, with **$33,623.61 supply / $30,908.50 borrow**. These outstanding matured positions are distinct from the eight direct stcUSD dust markets ([follow-up evidence](https://github.com/yearn/risk-score/blob/master/reports/data/cap-stcusd-followup-2026-10-04.json)).
 
 ## Audits and Due Diligence Disclosures
 
@@ -154,12 +158,14 @@ The Cap system is **high complexity**:
 
 ## Historical Track Record
 
-- **Launch:** August 19, 2025; approximately 13.5 months as of October 3, 2026.
-- **Historical supply:** cUSD was approximately 129M on March 20, 2026 and 97.73M on May 23, 2026; the fixed October snapshot is 61.61M ([snapshot reads](https://github.com/yearn/risk-score/blob/master/reports/data/cap-stcusd-2026-10-03.json)).
-- **Historical PPS snapshots:** 1.0531 on March 20, 2026; 1.0630 on May 23, 2026; 1.083394 at the October snapshot. These observations do not establish that PPS never decreased between snapshots.
-- **TVL peak and drawdown:** [DeFiLlama](https://api.llama.fi/protocol/cap) records $483.79M on January 28, 2026 and $272.70M on October 3, 2026, a **43.63%** decline. In the recent API series, September 24–25 declined from $339.73M to $292.81M (**13.81%**).
+- **Launch:** August 19, 2025; approximately 13.5 months as of October 5, 2026.
+- **Historical supply:** cUSD was approximately 129M on March 20, 2026, 97.73M on May 23, 2026, 61.61M on October 3 ([reads](https://github.com/yearn/risk-score/blob/master/reports/data/cap-stcusd-2026-10-03.json)), and 70.91M at the October 5 snapshot ([reads](https://github.com/yearn/risk-score/blob/master/reports/data/cap-stcusd-2026-10-05.json)).
+- **Historical PPS snapshots:** 1.0531 on March 20, 2026; 1.0630 on May 23, 2026; 1.083394 on October 3; 1.083773 on October 5. These observations do not establish that PPS never decreased between snapshots.
+- **TVL peak and drawdown:** [DeFiLlama](https://api.llama.fi/protocol/cap) records $483.79M on January 28, 2026 and $284.72M on October 5, 2026, a **41.15%** decline. In the recent API series, September 24–25 declined from $339.73M to $292.81M (**13.81%**).
 - **Security incidents:** No confirmed exploit established by the sources reviewed for this refresh. One small undercollateralized operator position is recorded below; this is not proof of a realized protocol loss.
 - **cUSD upgrade:** On September 28, 2026, [transaction](https://etherscan.io/tx/0x8e61ca35d40b6a9d2446554e989d980660d49553a11af05756cb5992597cef62) installed [`0xbdaa34082f1a1a3c32190a672bc9dd1b69791b97`](https://etherscan.io/address/0xbdaa34082f1a1a3c32190a672bc9dd1b69791b97) at block 26,077,312. Current verified source includes cUSD mint-fee issuance to the insurance fund. The transient reentrancy-guard delta matches the PR 273 review; dedicated insurance-fund fee coverage remains unestablished.
+- **Timelock canceller:** The Safe scheduled a `CANCELLER_ROLE` grant to the 3-of-6 canceller Safe at block [26,116,120](https://etherscan.io/tx/0x42207c14f3dac159287a9db9965d8f811cc99b945095132bd92ae6d3271cb17f) on October 3, 2026. The same transaction cancelled an unexecuted oracle batch from May. The grant executed at block [26,125,618](https://etherscan.io/tx/0x77b65415918f7018ff12b84fb82258f63409a3cd76fe603a07c46bd93e6d1d38) on October 5.
+- **Safe composition correction:** The May 23, 2026 report described the Safe as having two dormant owners and a nested 1-of-2 Safe. That was incorrect: all five current owners also had empty code at block 25,160,215, and the owner set and threshold were the same.
 
 **Team track record:**
 
@@ -176,26 +182,26 @@ stcUSD earns yield from two primary sources:
 
 **1. Fractional Reserve Deployment**
 
-The USDC vault and wWTGXX vault are Yearn V3 vaults. Debt, maximum debt, depositor shares, asset conversions, queues, and withdrawal limits were read at the fixed block ([snapshot reads](https://github.com/yearn/risk-score/blob/master/reports/data/cap-stcusd-2026-10-03.json)).
+The USDC vault and wWTGXX vault are Yearn V3 vaults. Debt, maximum debt, depositor shares, asset conversions, queues, and withdrawal limits were read at the October 5 block ([snapshot reads](https://github.com/yearn/risk-score/blob/master/reports/data/cap-stcusd-2026-10-05.json)). The scan range contains `DebtUpdated`, `StrategyReported`, deposit, and withdrawal events, with no role or strategy-set changes.
 
 | USDC reserve strategy | Current debt / share of FRV | Maximum debt | Status |
 |-----------------------|-----------------------------|--------------|--------|
-| [Aave V3 USDC Lender](https://etherscan.io/address/0x7D7F72d393F242DA6e22D3b970491C06742984Ff) | $6,085,718.50 / **98.38%** | $50M | Active, first in default queue |
-| [OndoHolder USDC](https://etherscan.io/address/0x9939009295eAD3c67259aF3b93C284079ffE931e) | $100,000.00 / **1.62%** | $15M | Active, second in default queue |
+| [Aave V3 USDC Lender](https://etherscan.io/address/0x7D7F72d393F242DA6e22D3b970491C06742984Ff) | $11,350,682.10 / **99.13%** | $50M | Active, first in default queue |
+| [OndoHolder USDC](https://etherscan.io/address/0x9939009295eAD3c67259aF3b93C284079ffE931e) | $100,020.17 / **0.87%** | $15M | Active, second in default queue |
 | [Steakhouse Prime Compounder](https://etherscan.io/address/0xBAed9839573d349e42DFbF23a8916e5AB9cAf2E3) | $0 | $0 | Revoked: `strategies()` returns four zeros; strategy supply/assets zero |
 | [Gauntlet Prime Compounder](https://etherscan.io/address/0x8092C20351CF4048B464DF2144Dc8a4DD49ce71D) | $0 | $0 | Revoked: `strategies()` returns four zeros; strategy supply/assets zero |
 
-**USDC FRV:** [`0x3Ed6aa32c930253fc990dE58fF882B9186cd0072`](https://etherscan.io/address/0x3Ed6aa32c930253fc990dE58fF882B9186cd0072), `totalDebt() = totalAssets() = $6,185,718.50`, `totalIdle() = 0`. cUSD owns all reported depositor shares; `convertToAssets(balanceOf(cUSD))` and `maxWithdraw(cUSD)` both return this amount. Both vaults are active (`isShutdown() = false`), have zero minimum idle, and have unlimited vault deposit limits. Maximum debts authorize future allocations; they are not amounts currently invested.
+**USDC FRV:** [`0x3Ed6aa32c930253fc990dE58fF882B9186cd0072`](https://etherscan.io/address/0x3Ed6aa32c930253fc990dE58fF882B9186cd0072), `totalDebt() = totalAssets() = $11,450,702.27`, `totalIdle() = 0`. cUSD owns all reported depositor shares; `convertToAssets(balanceOf(cUSD))` and `maxWithdraw(cUSD)` both return this amount. Both vaults are active (`isShutdown() = false`), have zero minimum idle, and have unlimited vault deposit limits. Maximum debts authorize future allocations; they are not amounts currently invested.
 
-**Ondo leg:** The holder has no idle USDC and holds **100,000.0000003 rUSDY** at [`0xaf37c1167910ebC994e266949387d2c7C326b879`](https://etherscan.io/address/0xaf37c1167910ebC994e266949387d2c7C326b879). Its [verified source](https://etherscan.io/address/0x9939009295eAD3c67259aF3b93C284079ffE931e#code) values rUSDY at 1:1 after decimal conversion and uses [`0xa42613C243b67BF6194Ac327795b926B4b491f15`](https://etherscan.io/address/0xa42613C243b67BF6194Ac327795b926B4b491f15) (USDY_InstantManager) to subscribe/redeem. The strategy must satisfy Ondo identity/compliance checks; redemption depends on token-router liquidity, fees, oracle pricing, and rate limits. `redeemPaused()` is false and USDC is an accepted redemption token. `availableWithdrawLimit()` returns uint256 maximum for its depositor, without measuring those external gates. **Read-only withdrawal simulations succeeded** for **$1, $1,000, and the full $100,000 position**, calling the strategy from its actual depositor vault at the fixed block with zero tolerated loss. The full call returns **99,969,745,256 strategy shares burned**. These `eth_call` results exercise redemption but do not send a transaction or guarantee future execution ([simulation evidence](https://github.com/yearn/risk-score/blob/master/reports/data/cap-stcusd-followup-2026-10-04.json)). The Safe is strategy `management()` and can change `exchange` directly.
+**Ondo leg:** The holder has no idle USDC and holds **100,020.17 rUSDY** at [`0xaf37c1167910ebC994e266949387d2c7C326b879`](https://etherscan.io/address/0xaf37c1167910ebC994e266949387d2c7C326b879). Its [verified source](https://etherscan.io/address/0x9939009295eAD3c67259aF3b93C284079ffE931e#code) values rUSDY at 1:1 after decimal conversion and uses [`0xa42613C243b67BF6194Ac327795b926B4b491f15`](https://etherscan.io/address/0xa42613C243b67BF6194Ac327795b926B4b491f15) (USDY_InstantManager) to subscribe/redeem. The strategy must satisfy Ondo identity/compliance checks; redemption depends on token-router liquidity, fees, oracle pricing, and rate limits. `redeemPaused()` is false and USDC is an accepted redemption token. `availableWithdrawLimit()` returns uint256 maximum for its depositor, without measuring those external gates. **Read-only withdrawal simulations succeeded** for **$1, $1,000, and the full $100,000 position**, calling the strategy from its actual depositor vault at the October 3 block with zero tolerated loss. The full call returns **99,969,745,256 strategy shares burned**. These `eth_call` results exercise redemption but do not send a transaction or guarantee future execution ([simulation evidence](https://github.com/yearn/risk-score/blob/master/reports/data/cap-stcusd-followup-2026-10-04.json)). The Safe is strategy `management()` and can change `exchange` directly.
 
-**wWTGXX FRV:** [`0xb1c1C80FDbBde5B40264e1410550F3C864113bF8`](https://etherscan.io/address/0xb1c1C80FDbBde5B40264e1410550F3C864113bF8) has **76,915.77 wWTGXX** in [Holder wWTGXX](https://etherscan.io/address/0xB0D399E8A11E1c6df00E1Fb5698936B5614e9259). cUSD's shares convert to **71,578.27 wWTGXX**; total vault assets must not be attributed wholly to cUSD. cUSD separately holds **4,348.21 wWTGXX**. WisdomTree fund-token redemption and the fixed $1 valuation remain external trust assumptions.
+**wWTGXX FRV:** [`0xb1c1C80FDbBde5B40264e1410550F3C864113bF8`](https://etherscan.io/address/0xb1c1C80FDbBde5B40264e1410550F3C864113bF8) has **76,015.64 wWTGXX** in [Holder wWTGXX](https://etherscan.io/address/0xB0D399E8A11E1c6df00E1Fb5698936B5614e9259). cUSD's shares convert to **71,588.34 wWTGXX**; total vault assets must not be attributed wholly to cUSD. cUSD separately holds **5,248.33 wWTGXX**. WisdomTree fund-token redemption and the fixed $1 valuation remain external trust assumptions.
 
-**Concentration:** Aave is the principal liquid reserve venue, but its $6.09M position is only about **9.88% of cUSD supply**. Operator principal represents almost 90% of USDC reserve accounting. Neither the inactive Morpho vaults nor their underlying markets are current reserve dependencies.
+**Concentration:** Aave is the principal liquid reserve venue, but its $11.35M position is only about **16.01% of cUSD supply**. Operator principal represents 78.17% of USDC reserve accounting. Neither the inactive Morpho vaults nor their underlying markets are current reserve dependencies.
 
 **2. Operator Borrowing Fees**
 
-Operators borrow at a dynamic benchmark-plus-utilization rate. The current USDC `Oracle.benchmarkRate()` is **3.5%** ([snapshot reads](https://github.com/yearn/risk-score/blob/master/reports/data/cap-stcusd-2026-10-03.json)); the realized yield split and a current 90-day average were not established in this refresh. The hurdle rate is a function of:
+Operators borrow at a dynamic benchmark-plus-utilization rate. The current USDC `Oracle.benchmarkRate()` is **3.5%** ([snapshot reads](https://github.com/yearn/risk-score/blob/master/reports/data/cap-stcusd-2026-10-05.json)); the realized yield split and a current 90-day average were not established in this refresh. The hurdle rate is a function of:
 
 - **Market rate:** Benchmarked against Aave USDC supply rate (competitive floor)
 - **Utilization rate:** Piecewise linear adjustment that escalates sharply at high utilization
@@ -210,26 +216,26 @@ Operators generate yield through proprietary strategies: HFT, private credit, cr
 
 ### Collateralization
 
-**Accounting and custody must be distinguished.** `totalSupplies(USDC)` is **61,534,168.77 USDC**; `totalBorrows(USDC)` is **55,345,570.79 USDC principal**. The difference is **6,188,597.98 USDC**, reconciling to USDC FRV assets plus **2,879.72 USDC** directly held by cUSD, within sub-cent accounting differences. wWTGXX supply accounting is **75,864.86 tokens** = **71,516.65 principal loaned to its FRV** + **4,348.21 tokens** held directly. Its actual cUSD-owned FRV share value is **71,578.27 tokens**, including yield ([snapshot reads](https://github.com/yearn/risk-score/blob/master/reports/data/cap-stcusd-2026-10-03.json)).
+**Accounting and custody must be distinguished.** `totalSupplies(USDC)` is **70,835,366.51 USDC**; `totalBorrows(USDC)` is **55,369,417.24 USDC principal**. The difference is **15,465,949.27 USDC** (`availableBalance`): **11,450,702.27 USDC** loaned to the FRV plus **4,015,247.00 USDC** of accounted idle. cUSD's direct USDC balance is **4,015,247.23**, about **0.23 USDC** above the accounted idle amount. wWTGXX supply accounting is **76,764.98 tokens** = **71,516.65 principal loaned to its FRV** + **5,248.33 tokens** held directly. Its actual cUSD-owned FRV share value is **71,588.34 tokens**, including yield ([snapshot reads](https://github.com/yearn/risk-score/blob/master/reports/data/cap-stcusd-2026-10-05.json)).
 
-At $1 nominal values, reserve accounting totals **61,610,033.63**, versus **61,610,362.18 cUSD supply** (approximately **$328.55 / 0.00053%** difference). These getters do **not** prove exact 1:1 market-value backing: USDC's oracle price is $0.99993498, wWTGXX is fixed at $1, operator debt is a credit claim, and recoverability depends on collateral realization. No confirmed realized shortfall is inferred from this small accounting difference.
+At $1 nominal values, reserve accounting totals **70,912,131.49**, versus **70,912,508.55 cUSD supply** (approximately **$377.05 / 0.00053%** difference). These getters do **not** prove exact 1:1 market-value backing: USDC's oracle price is $0.99988496, wWTGXX is fixed at $1, operator debt is a credit claim, and recoverability depends on collateral realization. No confirmed realized shortfall is inferred from this small accounting difference.
 
-43 agents are enumerable; 17 have positive USDC debt. Per-agent `Lender.debt()` includes accrued restaker interest and totals **$55,392,597.34**, distinct from vault principal. The five largest positions account for **91.78%** of accrued debt:
+43 agents are enumerable; 17 have positive USDC debt. Per-agent `Lender.debt()` includes accrued restaker interest and totals **$55,419,895.99**, distinct from vault principal. The five largest positions account for **91.78%** of accrued debt:
 
 | Agent | USDC debt including interest | Debt share | Configured LTV / liquidation threshold | Current health |
 |-------|------------------------------|------------|---------------------------------------|----------------|
-| [`0x0D35D950FDb0741F11c4384dAd15A07EdB26E21A`](https://etherscan.io/address/0x0D35D950FDb0741F11c4384dAd15A07EdB26E21A) | $29.776M | 53.75% | 60% / 80% | 1.331 |
-| [`0x7F2165014A477f6ABA532000d8088Ed64dD1eBA1`](https://etherscan.io/address/0x7F2165014A477f6ABA532000d8088Ed64dD1eBA1) | $8.430M | 15.22% | 50% / 80% | 1.596 |
-| [`0x3fA0d4Ce8c396B03beB3D8411e10b0126A1B913d`](https://etherscan.io/address/0x3fA0d4Ce8c396B03beB3D8411e10b0126A1B913d) | $5.343M | 9.65% | 50% / 80% | 3.356 |
-| [`0x4Cd7C473985Ca1399810536e0482dF1e4E0672D6`](https://etherscan.io/address/0x4Cd7C473985Ca1399810536e0482dF1e4E0672D6) | $4.809M | 8.68% | 50% / 80% | 2.624 |
-| [`0x624C31fdFB9CcbAF182a3c503Cf245BCa671b860`](https://etherscan.io/address/0x624C31fdFB9CcbAF182a3c503Cf245BCa671b860) | $2.480M | 4.48% | 50% / 80% | 3.226 |
+| [`0x0D35D950FDb0741F11c4384dAd15A07EdB26E21A`](https://etherscan.io/address/0x0D35D950FDb0741F11c4384dAd15A07EdB26E21A) | $29.791M | 53.75% | 60% / 80% | 1.345 |
+| [`0x7F2165014A477f6ABA532000d8088Ed64dD1eBA1`](https://etherscan.io/address/0x7F2165014A477f6ABA532000d8088Ed64dD1eBA1) | $8.435M | 15.22% | 50% / 80% | 1.609 |
+| [`0x3fA0d4Ce8c396B03beB3D8411e10b0126A1B913d`](https://etherscan.io/address/0x3fA0d4Ce8c396B03beB3D8411e10b0126A1B913d) | $5.345M | 9.64% | 50% / 80% | 3.388 |
+| [`0x4Cd7C473985Ca1399810536e0482dF1e4E0672D6`](https://etherscan.io/address/0x4Cd7C473985Ca1399810536e0482dF1e4E0672D6) | $4.811M | 8.68% | 50% / 80% | 2.646 |
+| [`0x624C31fdFB9CcbAF182a3c503Cf245BCa671b860`](https://etherscan.io/address/0x624C31fdFB9CcbAF182a3c503Cf245BCa671b860) | $2.481M | 4.48% | 50% / 80% | 3.225 |
 
-The small agent [`0x77df7B5aBF875894Ffb1443Fd2840b603d3AC1DA`](https://etherscan.io/address/0x77df7B5aBF875894Ffb1443Fd2840b603d3AC1DA) owes **592.24 USDC**, has **$152.22** delegated/slashable collateral, health **0.2056**, and `liquidationStart = 0`. It is below the liquidation threshold despite its small size. All 43 `liquidationStart()` reads are zero; that does not establish a clean historical default/slashing record. Historical reads around the [June 2, 2026 collateral withdrawal](https://etherscan.io/tx/0xc7baeed30ea683141f5cf35bd6422d8bde5485606b49465bceca69499357976c) at block 25,230,395 show **0.853529535 collateral tokens** removed from active stake: delegated value falls from **$2,141.91 to $108.41**, while approximately **$671.67 USDC debt** remains, and health falls **2.552 → 0.129**. Slashable historical collateral remains temporarily available, which does not prevent the immediate coverage decline. The last recorded repayment is a [partial $100 USDC payment on August 19](https://etherscan.io/tx/0x79d13e5010ab662fd1e10143e0c720b7b8ee873a5e34b9464e5343931dd95afe). Complete lender-event scans find no open/close/liquidate events for this borrower through the fixed block. **TODO:** actual repayment or liquidation recovery remains unresolved; partial repayments are not proof of remediation ([history and adjacent-block reads](https://github.com/yearn/risk-score/blob/master/reports/data/cap-stcusd-followup-2026-10-04.json)).
+The small agent [`0x77df7B5aBF875894Ffb1443Fd2840b603d3AC1DA`](https://etherscan.io/address/0x77df7B5aBF875894Ffb1443Fd2840b603d3AC1DA) owes **592.57 USDC**, has **$153.57** delegated/slashable collateral, health **0.2074**, and `liquidationStart = 0`. It is below the liquidation threshold despite its small size. All 43 `liquidationStart()` reads are zero at the October 5 block; that does not establish a clean historical default/slashing record. Historical reads around the [June 2, 2026 collateral withdrawal](https://etherscan.io/tx/0xc7baeed30ea683141f5cf35bd6422d8bde5485606b49465bceca69499357976c) at block 25,230,395 show **0.853529535 collateral tokens** removed from active stake: delegated value falls from **$2,141.91 to $108.41**, while approximately **$671.67 USDC debt** remains, and health falls **2.552 → 0.129**. Slashable historical collateral remains temporarily available, which does not prevent the immediate coverage decline. The last recorded repayment is a [partial $100 USDC payment on August 19](https://etherscan.io/tx/0x79d13e5010ab662fd1e10143e0c720b7b8ee873a5e34b9464e5343931dd95afe). Complete lender-event scans find no open/close/liquidate events for this borrower through the October 3 block; between the October 3 and October 5 blocks the Lender emitted only `RealizeInterest` events. **TODO:** actual repayment or liquidation recovery remains unresolved; partial repayments are not proof of remediation ([history and adjacent-block reads](https://github.com/yearn/risk-score/blob/master/reports/data/cap-stcusd-followup-2026-10-04.json)).
 
 Symbiotic covers 98.49% of current accrued USDC debt; [EigenLayer Service Manager](https://etherscan.io/address/0xE65c3eccd18879E103dBC96D854e376Ced4cC7dd) covers 1.51%. The borrower-address table does not attribute addresses to the historically named institutions. The live largest position uses 60% configured LTV, so a universal 50% LTV claim is incorrect.
 
-- **Liquidation parameters:** 12-hour grace, 3-day expiry, 10% bonus cap, and target health 1.25, verified from Lender getters. The Safe can change grace, expiry, bonus, and agent LTV/thresholds directly.
-- **Slashing:** Permissionless liquidation can call the relevant security-network collateral path; coverage is isolated per borrower. Recoverable value depends on the collateral, oracle, and liquidation execution, not just nominal accounting.
+- **Liquidation parameters:** 12-hour grace, 3-day expiry, 10% bonus cap, and target health 1.25, verified from Lender getters. The Safe can change grace, expiry, bonus, LTV buffer, and agent LTV/thresholds directly, within source-level bounds: liquidation threshold ≤100%, LTV + `ltvBuffer` ≤ threshold, buffer >1% (currently 5%), bonus cap ≤100%, and grace < expiry. These bounds stop configured LTV from exceeding collateral value. They do not stop the Safe from raising a threshold to delay liquidation.
+- **Slashing:** `openLiquidation` and `liquidate` are permissionless once health is below 1 and have no pause check; only the Lender can call `Delegation.slash`. Coverage is isolated per borrower. Recoverable value depends on the collateral, oracle, and liquidation execution, not just nominal accounting.
 
 ### Accessibility
 
@@ -242,7 +248,7 @@ Symbiotic covers 98.49% of current accrued USDC debt; [EigenLayer Service Manage
 
 ### Token Mint Authority
 
-Re-verified against source-verified cUSD implementation [`0xbdaa34082f1a1a3c32190a672bc9dd1b69791b97`](https://etherscan.io/address/0xbdaa34082f1a1a3c32190a672bc9dd1b69791b97) and stcUSD implementation [`0x42c0e0ef7c2f35de073f4d6f9c0e4483429c3d31`](https://etherscan.io/address/0x42c0e0ef7c2f35de073f4d6f9c0e4483429c3d31) ([snapshot reads](https://github.com/yearn/risk-score/blob/master/reports/data/cap-stcusd-2026-10-03.json)).
+Re-verified against source-verified cUSD implementation [`0xbdaa34082f1a1a3c32190a672bc9dd1b69791b97`](https://etherscan.io/address/0xbdaa34082f1a1a3c32190a672bc9dd1b69791b97) and stcUSD implementation [`0x42c0e0ef7c2f35de073f4d6f9c0e4483429c3d31`](https://etherscan.io/address/0x42c0e0ef7c2f35de073f4d6f9c0e4483429c3d31) ([October 3 reads](https://github.com/yearn/risk-score/blob/master/reports/data/cap-stcusd-2026-10-03.json); implementations unchanged and source-verified at the [October 5 block](https://github.com/yearn/risk-score/blob/master/reports/data/cap-stcusd-2026-10-05.json)).
 
 | Caller / path | Mint / burn authority | Backing check |
 |---------------|----------------------|---------------|
@@ -253,11 +259,11 @@ Re-verified against source-verified cUSD implementation [`0xbdaa34082f1a1a3c3219
 
 There is **no privileged standalone unbacked mint function** in these verified implementations. This does not eliminate indirect unbacked issuance: a malicious upgrade, inflated oracle, or worthless whitelisted reserve can impair economic backing. Core upgrades, reserve additions, oracle adapter/payload changes, deposit caps, and fee schedules are timelocked. Emergency/configuration powers outside that delay are detailed below.
 
-Current USDC deposit cap is uint256 maximum; wWTGXX cap is **6M tokens**, with **5,924,135.14 tokens** remaining. Both reserve floors are zero. Fees are denominated in ray: `minMintFee = 1e24` is **0.10%**; slopes are zero and the configured 33% optimal ratio is a fee input, not an enforceable diversification cap.
+Current USDC deposit cap is uint256 maximum; wWTGXX cap is **6M tokens**, with **5,923,235.02 tokens** remaining. Both reserve floors are zero. Fees are denominated in ray: `minMintFee = 1e24` is **0.10%**; slopes are zero and the configured 33% optimal ratio is a fee input, not an enforceable diversification cap.
 
-**LayerZero exposure:** `balanceOf(lockbox)` = **10,286,620.48 stcUSD**, or **18.64%** of canonical supply. Complete `PeerSet` event enumeration plus current `peers()` finds nonzero peers for **Katana (30375)**, **MegaETH (30398)**, and **Tempo (30410)**; endpoint 30390 is disabled. The lockbox's pool cannot be attributed wholly to Katana.
+**LayerZero exposure:** `balanceOf(lockbox)` = **10,286,620.48 stcUSD**, or **16.13%** of canonical supply. The balance is unchanged from the October 3 block. The lockbox emitted no events, and no LayerZero endpoint or Ethereum ULN library log in the scan range references it. Complete `PeerSet` event enumeration plus current `peers()` finds nonzero peers for **Katana (30375)**, **MegaETH (30398)**, and **Tempo (30410)**; endpoint 30390 is disabled. The lockbox's pool cannot be attributed wholly to Katana.
 
-Each active **remote→Ethereum escrow-release** route uses receive library [`0xc02Ab410f0734EFa3F14628780e6e695156024C2`](https://etherscan.io/address/0xc02Ab410f0734EFa3F14628780e6e695156024C2), **15 confirmations**, **3 required DVNs**, and **no optional DVNs**. Providers are [LayerZero Labs](https://etherscan.io/address/0x589dEDbD617e0CBcB916A9223F4d1300c294236b), [Canary](https://etherscan.io/address/0xa4fE5A5B9A846458a70Cd0748228aED3bF65c2cd), and [Nethermind](https://etherscan.io/address/0xa59BA433ac34D2927232918Ef5B2eaAfcF130BA5), attributed using [LayerZero metadata](https://metadata.layerzero-api.com/v1/metadata). Ownership/UUPS upgrades are held by the Timelock, but the endpoint **delegate is the Safe**, allowing direct security-configuration changes. All three Ethereum send configurations and the receive/send configurations for all **nine remote inbound routes** are also read at matching-time blocks, covering the fully enumerated four-chain peer mesh. All 12 receive-library grace entries return the zero address and zero expiry, so no additional old receive library is enabled at the snapshot. Every configured receive path requires **3-of-3 LayerZero Labs / Canary / Nethermind, 15 confirmations, no optional DVNs**; chain-local DVN addresses and raw ULN tuples are in the [follow-up evidence](https://github.com/yearn/risk-score/blob/master/reports/data/cap-stcusd-followup-2026-10-04.json).
+At the October 3 block, each active **remote→Ethereum escrow-release** route used receive library [`0xc02Ab410f0734EFa3F14628780e6e695156024C2`](https://etherscan.io/address/0xc02Ab410f0734EFa3F14628780e6e695156024C2), **15 confirmations**, **3 required DVNs**, and **no optional DVNs**. Providers are [LayerZero Labs](https://etherscan.io/address/0x589dEDbD617e0CBcB916A9223F4d1300c294236b), [Canary](https://etherscan.io/address/0xa4fE5A5B9A846458a70Cd0748228aED3bF65c2cd), and [Nethermind](https://etherscan.io/address/0xa59BA433ac34D2927232918Ef5B2eaAfcF130BA5), attributed using [LayerZero metadata](https://metadata.layerzero-api.com/v1/metadata). Ownership/UUPS upgrades are held by the Timelock, but the endpoint **delegate is the Safe**, allowing direct security-configuration changes. All three Ethereum send configurations and the receive/send configurations for all **nine remote inbound routes** are also read at matching-time blocks, covering the fully enumerated four-chain peer mesh. All 12 receive-library grace entries return the zero address and zero expiry, so no additional old receive library is enabled at the snapshot. Every configured receive path requires **3-of-3 LayerZero Labs / Canary / Nethermind, 15 confirmations, no optional DVNs**; chain-local DVN addresses and raw ULN tuples are in the [follow-up evidence](https://github.com/yearn/risk-score/blob/master/reports/data/cap-stcusd-followup-2026-10-04.json).
 
 | Remote chain / token | Source-verified implementation | Supply in stcUSD units |
 |---------------------|--------------------------------|-----------------------|
@@ -277,40 +283,41 @@ The three remote supplies sum to **10,286,617.476483 stcUSD** versus **10,286,62
 - **Reserve composition:** Onchain — reserve assets held in the vault contracts are verifiable
 - **Fractional reserve positions:** Onchain — Yearn strategy debt, depositor-share conversions, Aave liquidity, and Ondo rUSDY balance are verifiable; RWA redemption and proprietary operator strategies add offchain assumptions
 - **Operator positions:** Partially onchain — borrowing/repayment recorded onchain, but operators' actual yield strategies are offchain and opaque
-- **Slashing conditions:** Onchain verifiable — objective fault conditions, no governance discretion
+- **Slashing conditions:** Onchain verifiable — liquidation opens permissionlessly when health falls below 1. The Safe directly controls the inputs that decide when that happens and how much is recovered: agent LTV/threshold, LTV buffer, grace, expiry, and bonus cap, within code bounds.
 
 ## Liquidity Risk
 
 - **Primary exit:** stcUSD → cUSD through ERC-4626, followed by cUSD burn for a chosen reserve or basket redemption. stcUSD has no staking lock; underlying liquidity still constrains the final exit.
-- **USDC buffer:** **$6.189M**, or **10.06%** of USDC reserve accounting, lies outside operator principal; **$55.346M** is outstanding credit. The active Aave strategy reports approximately **$155.72M** available withdraw liquidity, above its $6.086M position, and the FRV reports `maxWithdraw(cUSD) = $6.186M` at this block ([snapshot reads](https://github.com/yearn/risk-score/blob/master/reports/data/cap-stcusd-2026-10-03.json)). These values can change with Aave utilization and do not accelerate operator repayment.
-- **Ondo gate:** The $100K leg depends on KYC/compliance, rate limits, oracle/fees, and router liquidity. Fixed-block strategy simulations succeeded through the full position; its declared unlimited limit does not guarantee future execution. A small request below the minimum redemption can also fail.
-- **Large exit:** A 20% cUSD exit is about **$12.32M**, exceeding the available non-operator USDC buffer. Larger withdrawals depend on operator repayment or new inflows; a permissionless call can revert for insufficient underlying liquidity rather than enter a guaranteed withdrawal queue. No unconditional full-exit time is established.
-- **Secondary liquidity:** The October 3 [Morpho API](https://api.morpho.org/graphql) snapshot shows only $148.44 across Ethereum stcUSD collateral markets. No current DEX-depth claim is established. The separately dated October 4 registry/API checks find only matured Cap PTs, with $33.62K Morpho supply; no unmatured Ethereum replacement is indexed.
-- **Bridge exits:** The pooled 18.64% escrow exposure adds LayerZero message/security and remote-token risks before canonical redemption.
+- **USDC buffer:** **$15.466M**, or **21.83%** of USDC reserve accounting, lies outside operator principal; **$55.369M** is outstanding credit. The active Aave strategy reports approximately **$108.09M** available withdraw liquidity, above its $11.351M position, and the FRV reports `maxWithdraw(cUSD) = $11.451M` at this block ([snapshot reads](https://github.com/yearn/risk-score/blob/master/reports/data/cap-stcusd-2026-10-05.json)). These values can change with Aave utilization and do not accelerate operator repayment.
+- **Ondo gate:** The $100K leg depends on KYC/compliance, rate limits, oracle/fees, and router liquidity. October 3 fixed-block strategy simulations succeeded through the full position; its declared unlimited limit does not guarantee future execution. A small request below the minimum redemption can also fail.
+- **Large exit:** A 20% cUSD exit is about **$14.18M**, within the current $15.47M non-operator USDC buffer. However, $9.0M of the buffer's growth since October 3 came from two contract depositors within six hours of the snapshot, and they hold 13.02% of stcUSD. If they exited, the buffer would fall back to about the October 3 level of roughly 10%. Withdrawals beyond the buffer depend on operator repayment or new inflows; a permissionless call can revert for insufficient underlying liquidity rather than enter a guaranteed withdrawal queue. No unconditional full-exit time is established.
+- **Secondary liquidity:** The October 5 [Morpho API](https://api.morpho.org/graphql) snapshot shows only $149.13 across Ethereum stcUSD collateral markets. No current DEX-depth claim is established. The October 5 Pendle registry check finds only matured Cap PTs; on October 4, their Morpho markets had $33.62K supply. No unmatured Ethereum replacement is indexed.
+- **Bridge exits:** The pooled 16.13% escrow exposure adds LayerZero message/security and remote-token risks before canonical redemption.
 - **Restaker withdrawals:** Epoch-based withdrawal mechanics remain a separate collateral constraint; they are not an stcUSD withdrawal guarantee.
 
 ## Centralization & Control Risks
 
 ### Governance
 
-Core token upgrades and Access Control administration are protected by the **3-of-5 Safe → 24-hour Timelock** path. Direct operational and parameter powers coexist with that path ([snapshot reads](https://github.com/yearn/risk-score/blob/master/reports/data/cap-stcusd-2026-10-03.json)); [protocol documentation](https://docs.cap.app/concepts/access-controls) describes function-specific roles, not a universal delay.
+Core token upgrades and Access Control administration are protected by the **3-of-5 Safe → 24-hour Timelock** path. A separate 3-of-6 Safe can cancel queued operations. Direct operational and parameter powers coexist with that path ([October 3 role matrix](https://github.com/yearn/risk-score/blob/master/reports/data/cap-stcusd-2026-10-03.json); [October 5 reads and events](https://github.com/yearn/risk-score/blob/master/reports/data/cap-stcusd-2026-10-05.json)); [protocol documentation](https://docs.cap.app/concepts/access-controls) describes function-specific roles, not a universal delay.
 
 | Authority | Current holders | Effect |
 |-----------|-----------------|--------|
 | Core proxy upgrades (`bytes4(0)` role); Access Control DEFAULT_ADMIN and grant/revoke selectors | [`0xD8236031d8279d82E615aF2BFab5FC0127A329ab`](https://etherscan.io/address/0xD8236031d8279d82E615aF2BFab5FC0127A329ab) alone | Can replace token/control logic or grant new permissions after 24h |
 | cUSD `addAsset`, `setDepositCap`, `setFeeData`, `setRedeemFee`, `setFractionalReserveVault`; oracle price/backup/market/utilization adapters | Timelock alone | Reserve addition, caps, fees, destination vault, and oracle configuration after 24h |
-| cUSD `removeAsset`, `setReserve`, `setWhitelist`, `setInsuranceFund`, divest; Lender `setGrace`, `setExpiry`, `setBonusCap`; Delegation `modifyAgent` | [`0xb8FC49402dF3ee4f8587268FB89fda4d621a8793`](https://etherscan.io/address/0xb8FC49402dF3ee4f8587268FB89fda4d621a8793) directly | Can change reserve floor, fee exemption/recipient, liquidity deployment, and liquidation/LTV parameters without scheduling a timelock operation. Asset removal requires zero accounted supply; rescue is restricted to unsupported assets |
-| Oracle `setStaleness` | Safe and Timelock | Safe can relax or tighten stale-price acceptance directly |
+| cUSD `removeAsset`, `setReserve`, `setWhitelist`, `setInsuranceFund`, divest; Lender `setGrace`, `setExpiry`, `setBonusCap`, `pauseAsset`; Delegation `modifyAgent`, `setLtvBuffer`, `registerNetwork` | [`0xb8FC49402dF3ee4f8587268FB89fda4d621a8793`](https://etherscan.io/address/0xb8FC49402dF3ee4f8587268FB89fda4d621a8793) directly | Can change reserve floor, fee exemption/recipient, liquidity deployment, and liquidation/LTV parameters without scheduling a timelock operation. Source bounds: threshold ≤100%, LTV + buffer ≤ threshold, bonus ≤100%, grace < expiry. Lender pause blocks borrowing, not liquidation. Asset removal requires zero accounted supply; rescue is restricted to unsupported assets |
+| Oracle `setStaleness` | Safe and Timelock | Safe can relax or tighten stale-price acceptance directly; no source bound |
 | cUSD `pauseProtocol` | Safe, [`0xc1ab5a9593e6e1662a9a44f84df4f31fc8a76b52`](https://etherscan.io/address/0xc1ab5a9593e6e1662a9a44f84df4f31fc8a76b52), [`0x5143957cfCA5c683a2b6B4Bdb715a9d9aCF6d77a`](https://etherscan.io/address/0x5143957cfCA5c683a2b6B4Bdb715a9d9aCF6d77a) | Direct emergency pause; unpause belongs to Safe |
 | cUSD `investAll` | Safe and [`0x51da1eC8dC52F146e644F5F759D399038CCf7aB4`](https://etherscan.io/address/0x51da1eC8dC52F146e644F5F759D399038CCf7aB4) | Direct investment into the already selected FRV; cannot select a new FRV |
 | cUSD `borrow` / `repay` | [`0x15622c3dbbc5614E6DFa9446603c1779647f01FC`](https://etherscan.io/address/0x15622c3dbbc5614E6DFa9446603c1779647f01FC) alone | Contract-authorized covered loan path |
 | Yearn FRV roles | Safe: 16383; deployer: 6512 on both vaults | Safe has all 14 roles, including strategy/debt/queue configuration. RoleManager governance is Timelock, but current permissions execute directly |
 | OndoHolder `management` | Safe | Direct `setExchange` changes the conversion/redemption venue |
 | LayerZero owner / endpoint delegate | Timelock / Safe respectively | Owner controls UUPS upgrades/peers; delegate can alter receive security settings directly |
+| Timelock `CANCELLER_ROLE` | Safe and [`0xfbf18b80569b29c897c6a857456b5adea720b984`](https://etherscan.io/address/0xfbf18b80569b29c897c6a857456b5adea720b984) | Either can cancel a queued operation during the 24h delay. The 3-of-6 canceller Safe adds a veto path that does not depend on main-Safe consent; it does not affect direct powers |
 
-Every enumerated Access Control selector role has DEFAULT_ADMIN as its role admin; the Timelock is the sole holder. Timelock event history identifies the Safe as sole proposer/canceller, Safe plus deployer as executors, and Timelock itself as sole admin. Address-zero execution is not enabled. The complete current selector-holder matrix is preserved in the evidence.
+Every enumerated Access Control selector role has DEFAULT_ADMIN as its role admin; the Timelock is the sole holder. Timelock event history identifies the Safe as sole proposer; the Safe and the canceller Safe as cancellers; the Safe plus deployer as executors; and the Timelock itself as sole admin. All Safe transactions between the two snapshot blocks were Timelock schedule/cancel/execute calls; none used a direct power. Address-zero execution is not enabled. The complete current selector-holder matrix is preserved in the evidence.
 
-Safe threshold and **exact owner set** match the recorded May 23 baseline at block 25,160,215. All five current owners return empty code (EOAs); no nested Safe is present. Public signer attribution remains anonymous. The Timelock protects core upgrades, but direct reserve-vault, liquidation, oracle-staleness, and bridge-delegate powers materially limit advance warning.
+Safe threshold and **exact owner set** match block 25,160,215, the May 23 baseline. All five owners return empty code (EOAs) at both that block and the snapshot, so the May report's description of dormant owners and a nested 1-of-2 Safe was an error, not a later change. Public signer attribution remains anonymous. The Timelock protects core upgrades, but direct reserve-vault, liquidation, oracle-staleness, and bridge-delegate powers materially limit advance warning.
 
 ### Programmability
 
@@ -321,7 +328,7 @@ Safe threshold and **exact owner set** match the recorded May 23 baseline at blo
 | Reserve deployment | Yearn V3 debt deployment to Aave V3 / Ondo, with direct Safe allocation control |
 | Operator strategies | **Offchain** — operators execute proprietary strategies. Borrowing/repayment recorded onchain, but actual yield generation is opaque |
 | Hurdle rate | Onchain — dynamic function of market rate + utilization |
-| Slashing | Onchain — objective fault conditions, permissionless liquidation |
+| Slashing | Onchain — permissionless liquidation below health 1; Safe-set thresholds, buffer, grace, expiry, and bonus within code bounds |
 
 **Programmability is mixed:** Core vault mechanics (staking, PPS, reserve deployment, slashing) are fully onchain. However, the operator yield generation — which represents a portion of stcUSD yield — is offchain and opaque.
 
@@ -329,22 +336,22 @@ Safe threshold and **exact owner set** match the recorded May 23 baseline at blo
 
 | Dependency | Criticality | Current exposure / loss path |
 |------------|-------------|------------------------------|
-| **Aave V3 Core Ethereum** | High | $6.086M USDC, 98.38% of FRV; pool losses or utilization impair the principal liquid reserve venue |
-| **Ondo rUSDY** | Low current size; expandable | $100K (1.62% of FRV), with $15M maximum strategy debt. Compliance/issuer/oracle/rate-limit/router failure can block redemption or impair value; Safe can change exchange |
+| **Aave V3 Core Ethereum** | High | $11.351M USDC, 99.13% of FRV; pool losses or utilization impair the principal liquid reserve venue |
+| **Ondo rUSDY** | Low current size; expandable | $100.02K (0.87% of FRV), with $15M maximum strategy debt. Compliance/issuer/oracle/rate-limit/router failure can block redemption or impair value; Safe can change exchange |
 | **Symbiotic** | Critical | 98.49% of accrued operator USDC debt mapped to Symbiotic; collateral/slashing failure undermines loan recovery |
-| **EigenLayer** | Material | $838K / 1.51% of accrued operator debt through [`0xE65c3eccd18879E103dBC96D854e376Ced4cC7dd`](https://etherscan.io/address/0xE65c3eccd18879E103dBC96D854e376Ced4cC7dd) |
+| **EigenLayer** | Material | $839K / 1.51% of accrued operator debt through [`0xE65c3eccd18879E103dBC96D854e376Ced4cC7dd`](https://etherscan.io/address/0xE65c3eccd18879E103dBC96D854e376Ced4cC7dd) |
 | **RedStone / Chainlink** | High | RedStone USDC primary feed and Chainlink backup via ChainlinkAdapter. Oracle mispricing changes cUSD mint/burn value; staleness threshold has direct Safe control |
-| **wWTGXX / WisdomTree** | Low current size | About $75.9K accounted backing; fixed $1 price does not track issuer/fund impairment |
-| **USDC / Circle** | Critical concentration | 99.88% of nominal accounted reserves; freeze/depeg exposure propagates to cUSD and stcUSD |
-| **LayerZero V2** | High | Pooled 10.287M stcUSD escrow, 18.64% of supply, for configured Katana/MegaETH/Tempo peers. Current release routes are 3-of-3; Safe can reconfigure endpoint security without an owner timelock |
-| **Institutional operators / underwriters** | Critical | $55.346M principal is offchain credit; largest agent has 53.75% of accrued debt. Address-to-institution mapping is not independently established |
+| **wWTGXX / WisdomTree** | Low current size | About $76.8K accounted backing; fixed $1 price does not track issuer/fund impairment |
+| **USDC / Circle** | Critical concentration | 99.89% of nominal accounted reserves; freeze/depeg exposure propagates to cUSD and stcUSD |
+| **LayerZero V2** | High | Pooled 10.287M stcUSD escrow, 16.13% of supply, for configured Katana/MegaETH/Tempo peers. Current release routes are 3-of-3; Safe can reconfigure endpoint security without an owner timelock |
+| **Institutional operators / underwriters** | Critical | $55.369M principal is offchain credit; largest agent has 53.75% of accrued debt. Address-to-institution mapping is not independently established |
 | **Morpho / Pendle** | No current reserve allocation | Morpho FRV strategies revoked/zero; Ethereum stcUSD markets are dust. All four indexed Ethereum Cap PTs are mature; $33.62K supply remains in associated Morpho markets, with no indexed unmatured replacement |
 
 ## Operational Risk
 
 - **Team:** Cap Labs — Benjamin918 (CEO, ex-QiDAO $400M TVL) and the_weso (CTO, ex-Beefy Finance $1B+ TVL). Experienced DeFi founders but relatively small team
 - **Funding:** $11M raised from tier-1 investors (Franklin Templeton, Kraken Ventures, a16z, Dragonfly, Blockchain Capital, Susquehanna). Strong institutional backing
-- **Governance:** 3-of-5 multisig with anonymous signers and 24-hour timelock. No governance token. Core upgrades are delayed; direct parameter and reserve-vault authority remain
+- **Governance:** 3-of-5 multisig with anonymous signers and 24-hour timelock; separate 3-of-6 Timelock canceller. No governance token. Core upgrades are delayed; direct parameter and reserve-vault authority remain
 - **Documentation:** Comprehensive documentation covering protocol mechanics, operator model, and security network. Contract source code verified on Etherscan
 - **Legal:** [Published platform terms](https://docs.cap.app/resources/terms-and-conditions/platform-terms-of-use), revised March 26, 2025, identify **Covered Agents S.A. (Panama)** as the website/service operator, with broad liability limitations and individual arbitration. This is a published disclosure, not verification of current incorporation or a tokenholder repayment guarantee. **TODO:** private borrower/underwriter agreement terms and enforceability remain unavailable in the reviewed public sources.
 - **Incident response:** Cap currently discloses an ongoing Sherlock bounty up to $1M. Direct emergency pause holders are enumerated above; incident-response effectiveness is not demonstrated by the absence of a confirmed exploit
@@ -362,15 +369,16 @@ Safe threshold and **exact owner set** match the recorded May 23 baseline at blo
 | wWTGXX FRV | [`0xb1c1C80FDbBde5B40264e1410550F3C864113bF8`](https://etherscan.io/address/0xb1c1C80FDbBde5B40264e1410550F3C864113bF8) | cUSD-owned share value separately from total vault assets; fund-token custody and withdrawal limits |
 | OndoHolder | [`0x9939009295eAD3c67259aF3b93C284079ffE931e`](https://etherscan.io/address/0x9939009295eAD3c67259aF3b93C284079ffE931e) | rUSDY balance, exchange changes, management, external redemption pause/compliance/rate limits |
 | Lender / Delegation | [`0x15622c3dbbc5614E6DFa9446603c1779647f01FC`](https://etherscan.io/address/0x15622c3dbbc5614E6DFa9446603c1779647f01FC) / [`0xF3E3Eae671000612CE3Fd15e1019154C1a4d693F`](https://etherscan.io/address/0xF3E3Eae671000612CE3Fd15e1019154C1a4d693F) | Enumerate agents; principal versus interest-bearing debt, coverage, health, configured LTV/thresholds, liquidation start, network mapping |
-| Governance | [`0xb8FC49402dF3ee4f8587268FB89fda4d621a8793`](https://etherscan.io/address/0xb8FC49402dF3ee4f8587268FB89fda4d621a8793) / [`0xD8236031d8279d82E615aF2BFab5FC0127A329ab`](https://etherscan.io/address/0xD8236031d8279d82E615aF2BFab5FC0127A329ab) / [`0x7731129a10d51e18cDE607C5C115F26503D2c683`](https://etherscan.io/address/0x7731129a10d51e18cDE607C5C115F26503D2c683) | Exact owner set/threshold; full role grants/revokes; 24h delay; selector-level direct authority; proxy upgrades |
+| Governance | [`0xb8FC49402dF3ee4f8587268FB89fda4d621a8793`](https://etherscan.io/address/0xb8FC49402dF3ee4f8587268FB89fda4d621a8793) / [`0xD8236031d8279d82E615aF2BFab5FC0127A329ab`](https://etherscan.io/address/0xD8236031d8279d82E615aF2BFab5FC0127A329ab) / [`0x7731129a10d51e18cDE607C5C115F26503D2c683`](https://etherscan.io/address/0x7731129a10d51e18cDE607C5C115F26503D2c683) | Exact owner set/threshold; full role grants/revokes, including the canceller Safe; 24h delay; queued operations such as the pending OETH oracle batch; selector-level direct authority; proxy upgrades |
 | Reserve RoleManager | [`0x2995401cB465F3fbAE64a2D2f78Dfa571F570D24`](https://etherscan.io/address/0x2995401cB465F3fbAE64a2D2f78Dfa571F570D24) | Governance/management holders and each vault's direct role bitmap, especially Safe 16383 and deployer 6512 |
 | LayerZero lockbox | [`0x983aeaaa0d0426839158435c43725ea7f45d4137`](https://etherscan.io/address/0x983aeaaa0d0426839158435c43725ea7f45d4137) | Escrow/supply share, peer list, owner/delegate, per-route receive library/DVNs/confirmations, implementation |
 
 ### Critical Events to Monitor
 
-- **Liquidity:** Alert when USDC outside operator principal falls below 10% of accounted USDC reserves (snapshot: 10.06%), or a 20% cUSD exit exceeds available backing liquidity. Aave withdraw liquidity and successful Ondo redemption need independent checks.
-- **Operator concentration:** Largest current agent has 53.75% of accrued USDC debt. Monitor health below 1.25, all health below 1 immediately, and the ~$592 unhealthy position until repayment/liquidation is evidenced.
+- **Liquidity:** Alert when USDC outside operator principal falls below 10% of accounted USDC reserves (snapshot: 21.83%; 10.06% on October 3), or a 20% cUSD exit exceeds available backing liquidity. Aave withdraw liquidity and successful Ondo redemption need independent checks.
+- **Operator concentration:** Largest current agent has 53.75% of accrued USDC debt. Monitor health below 1.25, all health below 1 immediately, and the ~$593 unhealthy position until repayment/liquidation is evidenced.
 - **Direct parameter changes:** Grace/expiry/bonus, agent LTV/liquidation thresholds, stale-price allowance, reserve floors, FRV strategy/debt/queue roles, and Ondo exchange can change without a Timelock proposal.
+- **Concentrated holders:** Track Ether.Fi Liquid USD and `0x31b7d5a2b1ce1871dd642f6aecc0ef68d126b95a` stcUSD balances (8.30M combined at the snapshot); their exit would consume most of the current buffer.
 - **Mint/backing:** Watch for whitelist/oracle/implementation changes that allow economically unsupported issuance; insurance-fund mint fees must reconcile to deposit value.
 - **PPS / reserves:** Any PPS decrease, unexplained reserve-accounting discrepancy, USDC depeg/freeze, or wWTGXX issuer impairment merits investigation.
 - **Bridge:** Current remote→Ethereum release routes each require 3-of-3 DVNs. All 12 receive routes and corresponding send configurations in the four-chain mesh are verified at matching-time blocks. Monitor remote upgrades, Tempo issuer/admin/token replacement, every active route, and direct Safe delegate changes.
@@ -381,18 +389,18 @@ Safe threshold and **exact owner set** match the recorded May 23 baseline at blo
 ### Key Strengths
 
 - Broad published audit coverage and an ongoing disclosed bounty; assessed core implementations are source-verified.
-- Core upgrades, access escalation, reserve additions, and oracle adapter changes are protected by a 24-hour Timelock with fully enumerated administration.
+- Core upgrades, access escalation, reserve additions, and oracle adapter changes are protected by a 24-hour Timelock with fully enumerated administration and a separate 3-of-6 canceller.
 - Supplies, credit principal, interest-bearing debts, strategy allocations, collateral coverage, and permission holders are inspectable onchain.
 - Current Aave withdrawal liquidity exceeds the active reserve strategy position; borrower collateral is isolated by security network.
 
 ### Key Risks
 
 - **Direct configuration authority:** 3-of-5 anonymous EOA owners control full FRV permissions, liquidation/LTV settings, oracle staleness, and bridge endpoint delegation outside the core upgrade delay.
-- **Credit and liquidity concentration:** 89.94% of USDC reserve accounting is operator principal. One borrower address represents 53.75% of accrued USDC debt; a larger exit depends on repayment.
-- **Reserve quality versus liquidity:** USDC is 99.88% of nominal backing; accounting includes loans rather than exclusively liquid holdings. Aave, issuer, and collateral recovery risks propagate to cUSD/stcUSD.
-- **RWA gate:** Ondo's small current position has $15M debt authorization and externally controlled compliance/redemption dependencies. Full-position withdrawal succeeds in a fixed-block simulation; future redemption remains subject to those gates.
-- **Small unhealthy borrower:** ~$592 USDC debt has health 0.2056 and no started liquidation. Recovery status is unresolved.
-- **Bridge custody:** 18.64% of canonical supply is pooled LayerZero escrow for multiple peers, with mutable delegate-controlled verification settings.
+- **Credit and liquidity concentration:** 78.17% of USDC reserve accounting is operator principal. One borrower address represents 53.75% of accrued USDC debt. The 21.83% buffer depends partly on two recent contract depositors, and exits beyond it depend on repayment.
+- **Reserve quality versus liquidity:** USDC is 99.89% of nominal backing; accounting includes loans rather than exclusively liquid holdings. Aave, issuer, and collateral recovery risks propagate to cUSD/stcUSD.
+- **RWA gate:** Ondo's small current position has $15M debt authorization and externally controlled compliance/redemption dependencies. Full-position withdrawal succeeded in an October 3 fixed-block simulation; future redemption remains subject to those gates.
+- **Small unhealthy borrower:** ~$593 USDC debt has health 0.2074 and no started liquidation. Recovery status is unresolved.
+- **Bridge custody:** 16.13% of canonical supply is pooled LayerZero escrow for multiple peers, with mutable delegate-controlled verification settings.
 - **Audit coverage uncertainty:** The reviewed cUSD reentrancy/rate delta matches deployed verified source; dedicated insurance-fund fee and OndoHolder coverage remains TODO. Approximately 13.5 months of history does not establish stress-tested full-exit or collateral recovery performance.
 
 ### Critical Risks
@@ -427,34 +435,45 @@ No critical gate is triggered by the verified state. Proceed to category scoring
 |--------|------------|
 | Audits / bounty | Eight firms, eleven public reports; cUSD guard/rate delta source-matches PR 273. Critical-only Sherlock bounty capped at $1M / 10% at risk; insurance-fee/Ondo audit coverage unresolved |
 | Production history | Approximately 13.5 months; 1–2-year rubric band |
-| Scale | $272.70M DeFiLlama TVL, including collateral; 61.61M cUSD supply |
+| Scale | $284.72M DeFiLlama TVL, including collateral; 70.91M cUSD supply |
 | Incidents / stress | No confirmed exploit established; small unhealthy loan and full-exit stress performance unresolved |
 
 **Score: 2.0/5** — Audit subscore 2.0 (broad reputable coverage and disclosed $1M bounty, with current-code coverage uncertainty) and historical subscore 2.0 (over one year and TVL above $50M) average to 2.0. No longevity modifier applies before two years.
 
 #### Category 2: Centralization & Control Risks (Weight: 30%)
 
-**Subcategory A: Governance — 4.0/5**
+**Subcategory A: Governance — 3.5/5**
 
-The same anonymous 3-of-5 Safe controls core changes through a 24-hour Timelock, but also directly controls full FRV strategy/debt/queue authority, liquidation/LTV parameters, oracle staleness, and endpoint verification delegation. Those powers can materially change custody, credit risk, or oracle/message acceptance without advance notice. The governance rubric's low-threshold/powerful-admin band applies; the upgrade delay remains a meaningful constraint. Deployer pause and vault permissions add a separate operational trust surface.
+Against the rubric's columns:
+- **Multisig:** The anonymous 3-of-5 Safe falls in row 4.
+- **Timelock:** The 24-hour delay on upgrades, access grants, reserve additions, oracle adapters, caps, and fees falls in rows 2–3. Since October 5, a separate 3-of-6 Safe can also cancel queued operations without main-Safe consent.
+- **Privileged roles:** The direct powers are real but bounded. Liquidation and LTV setters are capped in source, so configured LTV cannot exceed collateral value. Pause blocks borrowing, not liquidation, and FRV debt moves between already-approved strategies are Programmability inputs under the rubric.
+
+What keeps the score above 3.0:
+- The Safe can add an arbitrary strategy to either FRV and allocate the $11.45M USDC FRV to it.
+- It can repoint the Ondo exchange.
+- As LayerZero delegate, it can reconfigure verification for the 10.29M stcUSD escrow.
+- It can relax oracle staleness without a bound.
+
+None of these can mint cUSD or upgrade core logic without the Timelock. Deployer pause and vault permissions add a separate operational trust surface. For comparison, Resolv also scores 3.5 with a 3-of-5 Safe and undelayed operational parameters. Its upgrade delay is longer (3 days); here, the shorter delay is weighed against the separate canceller and the source-level parameter bounds.
 
 **Subcategory B: Programmability — 2.5/5**
 
-PPS, deposits, reserve accounting, credit/coverage, and liquidation are onchain. Allocation is admin-controlled and operators' proprietary strategies remain opaque. This supports the established hybrid-operation subscore.
+The two rubric columns diverge. On PPS/rate definition, ERC-4626 PPS, deposits, reserve accounting, credit/coverage, and permissionless liquidation are calculated onchain, which is row 1–2. On system operations, the system is hybrid (row 3): FRV allocation and liquidation parameters are admin-set, and operators' proprietary strategies are offchain. The midpoint is 2.5. The admin powers that change protocol risk outside approved bounds are scored under Governance rather than counted again here.
 
 **Subcategory C: Dependencies — 3.0/5**
 
 Aave is the principal liquid reserve venue, with no current Morpho strategy debt. Symbiotic, EigenLayer, RedStone/Chainlink, USDC, WisdomTree, Ondo, and the LayerZero pooled escrow form material loss/availability paths. The Ondo leg is small; the multiple-peer escrow is bounded by canonical locked tokens under current logic. These dependencies support a subscore of 3.0, without treating the measured DVNs as immutable.
 
-**Centralization Score = (4.0 + 2.5 + 3.0) / 3 = 3.166666…**
+**Centralization Score = (3.5 + 2.5 + 3.0) / 3 = 3.0**
 
-**Score: 3.1667/5** — Direct parameter and custody-control authority materially limits the protections of the core upgrade timelock. The final calculation uses the unrounded mean.
+**Score: 3.0/5** — Direct strategy, bridge-delegate, and parameter authority materially limits the protection of the core upgrade timelock. Source-level bounds and the separate canceller constrain the rest.
 
 #### Category 3: Funds Management (Weight: 30%)
 
 **Subcategory A: Collateralization — 2.5/5**
 
-Nominal reserve accounting is 99.88% USDC and 0.12% wWTGXX. **89.94%** of accounted USDC is operator principal; the largest borrower address represents **53.75%** of accrued debt, with 60% configured LTV and health 1.331. Collateral remains enumerable and the small unhealthy position is not a demonstrated systemic loss, but concentrated offchain credit and externally realized RWA reserves justify a subscore of 2.5. Accounting equality alone does not establish recoverable backing.
+Nominal reserve accounting is 99.89% USDC and 0.11% wWTGXX. **78.17%** of accounted USDC is operator principal, down from 89.94% on October 3 only because of new deposits; outstanding credit is essentially unchanged. The largest borrower address represents **53.75%** of accrued debt, with 60% configured LTV and health 1.345. Collateral remains enumerable and the small unhealthy position is not a demonstrated systemic loss, but concentrated offchain credit and externally realized RWA reserves justify a subscore of 2.5. Accounting equality alone does not establish recoverable backing.
 
 **Subcategory B: Provability — 2.5/5**
 
@@ -466,7 +485,13 @@ Debt and collateral data, Yearn depositor-share conversions, and ERC-4626 PPS ar
 
 #### Category 4: Liquidity Risk (Weight: 15%)
 
-**Score: 3.5/5** — Approximately $6.19M USDC outside operator principal supports small exits; Aave reports adequate liquidity for its current position. A 20% cUSD exit exceeds this buffer, and full-exit timing is not established because most backing is operator credit. Ondo compliance/redemption gates and negligible measured Ethereum Morpho collateral liquidity reduce alternatives. This sits between the rubric's short-exit and restricted-large-exit bands; it does not assert an observed one-week queue or measured slippage. No drawdown-liquidity modifier is applied without withdrawal execution evidence.
+**Score: 3.5/5** — Approximately $15.47M USDC outside operator principal now covers a 20% cUSD exit, and Aave reports $108M of withdrawal liquidity against its $11.35M position. The score is not lowered for three reasons:
+
+- About $9.0M of that buffer arrived within six hours of the snapshot from two contracts holding 13.02% of stcUSD, and their exit would return it to the October 3 level of roughly 10%.
+- Operator credit, which is not callable on demand, still backs 78% of USDC accounting.
+- Full-exit timing is not established.
+
+A sustained buffer above 20% across later snapshots would support 3.0. Ondo compliance/redemption gates and negligible measured Ethereum Morpho collateral liquidity reduce alternatives. This sits between the rubric's short-exit and restricted-large-exit bands; it does not assert an observed one-week queue or measured slippage. No drawdown-liquidity modifier is applied without withdrawal execution evidence.
 
 #### Category 5: Operational Risk (Weight: 5%)
 
@@ -486,20 +511,20 @@ Debt and collateral data, Yearn depositor-share conversions, and ERC-4626 PPS ar
 The category means are kept unrounded through weighting; the displayed final score is rounded down to two decimals under the scoring framework.
 
 ```
-Final = ((4.0 + 2.5 + 3.0) / 3 × 0.30) + (2.5 × 0.30)
+Final = ((3.5 + 2.5 + 3.0) / 3 × 0.30) + (2.5 × 0.30)
       + (2.0 × 0.20) + (3.5 × 0.15) + (2.0 × 0.05)
-      = 0.95 + 0.75 + 0.40 + 0.525 + 0.10
-      = 2.725 → 2.72/5.0
+      = 0.90 + 0.75 + 0.40 + 0.525 + 0.10
+      = 2.675 → 2.67/5.0
 ```
 
 | Category | Score | Weight | Weighted |
 |----------|-------|--------|----------|
 | Audits & Historical | 2.0 | 20% | 0.40 |
-| Centralization & Control | 3.166666… | 30% | 0.95 |
+| Centralization & Control | 3.0 | 30% | 0.90 |
 | Funds Management | 2.5 | 30% | 0.75 |
 | Liquidity Risk | 3.5 | 15% | 0.525 |
 | Operational Risk | 2.0 | 5% | 0.10 |
-| **Final Score** | | | **2.72/5.0** |
+| **Final Score** | | | **2.67/5.0** |
 
 ### Risk Tier
 
@@ -511,19 +536,27 @@ Final = ((4.0 + 2.5 + 3.0) / 3 × 0.30) + (2.5 × 0.30)
 | 3.50–4.49 | Elevated Risk | Limited approval, strict limits |
 | 4.50–5.00 | High Risk | Not recommended |
 
-**Final Risk Tier: Medium Risk (2.72/5.0) — Approved with enhanced monitoring**
+**Final Risk Tier: Medium Risk (2.67/5.0) — Approved with enhanced monitoring**
 
-The material risks are direct Safe configuration authority, concentrated operator credit, a roughly 10% USDC redemption buffer, RWA realization gates, and mutable bridge verification settings. Core upgrade timelocks and inspectable collateral remain protections. Monitor borrower health/concentration, actual exit liquidity, and direct role/parameter changes alongside scheduled upgrades.
+The material risks are:
+
+- direct Safe strategy, bridge-delegate, and parameter authority
+- concentrated operator credit
+- a USDC redemption buffer that is 21.83% at the snapshot but depends on two recent depositors
+- RWA realization gates
+- mutable bridge verification settings
+
+Core upgrade timelocks with a separate canceller, source-bounded liquidation parameters, and inspectable collateral remain protections. Monitor borrower health/concentration, actual exit liquidity, and direct role/parameter changes alongside scheduled upgrades.
 
 ---
 
 ## Reassessment Triggers
 
-- **Time:** Refresh within 60 days, by December 3, 2026.
-- **TVL / supply:** More than ±25% change from $272.70M protocol TVL or 61.61M cUSD supply.
+- **Time:** Refresh within 60 days, by December 4, 2026.
+- **TVL / supply:** More than ±25% change from $284.72M protocol TVL or 70.91M cUSD supply; exit of the Ether.Fi Liquid USD or `0x31b7d5a2b1ce1871dd642f6aecc0ef68d126b95a` stcUSD positions.
 - **Liquidity:** Non-operator USDC availability below 10% of accounted reserves; failed redemptions; Aave liquidity insufficient for the strategy position; Ondo redemption restrictions.
 - **Credit:** Any material agent health below 1.25, any health below 1, larger borrower concentration, or unresolved unhealthy dust debt; confirm repayment/slashing recovery.
-- **Governance:** Any Safe owner/threshold change, selector role grant/revoke, direct FRV role change, liquidation/LTV/staleness modification, or deployment of a new reserve strategy.
+- **Governance:** Any Safe or canceller-Safe owner/threshold change, Timelock role change, execution of the pending OETH oracle batch or OETH reserve/collateral listing, selector role grant/revoke, direct FRV role change, liquidation/LTV/staleness modification, or deployment of a new reserve strategy.
 - **Bridge:** Peer addition/removal, endpoint delegate change, DVN/library/confirmation changes, or escrow concentration above 25%; separately verify remote implementations and supply before claiming bidirectional security.
 - **Upgrade / audit:** Any core/lockbox/security-network implementation change; establish deployed coverage for the latest cUSD and OndoHolder code.
 - **Incident:** Exploit, oracle/depeg/freeze, collateral recovery failure, operator default, or security-network slashing incident.
@@ -535,4 +568,4 @@ The material risks are direct Safe configuration authority, concentrated operato
 | [March 20, 2026](https://github.com/yearn/risk-score/pull/101) | 2.4 | Initial assessment |
 | [May 23, 2026](https://github.com/yearn/risk-score/pull/214) | 2.4 | Reassessment: USDC Fractional Reserve rebalanced to 100% Morpho (Steakhouse + Gauntlet); Aave V3 leg drained; LayerZero stcUSD/Katana OFT integration documented |
 | [July 31, 2026](https://github.com/yearn/risk-score/pull/369) | 2.39 | LayerZero OFT escrow figures corrected (~26.1M stcUSD escrowed, ~38% of ~68.3M supply); Dependencies score unchanged |
-| [October 4, 2026](https://github.com/yearn/risk-score/pull/509) | 2.72 | Reassessment: Aave/Ondo reserve allocation, concentrated operator debt and thin exit buffer, direct Safe authority, current implementations, full LayerZero peer mesh/mint controls, withdrawal simulations, and unhealthy-loan history; Medium Risk |
+| [October 5, 2026](https://github.com/yearn/risk-score/pull/509) | 2.67 | Reassessment: Aave/Ondo reserve allocation, concentrated operator debt, direct Safe authority (Governance 4.0 → 3.5 after source-bound review and new 3-of-6 Timelock canceller), current implementations, full LayerZero peer mesh/mint controls, withdrawal simulations, and unhealthy-loan history; corrects May nested-Safe description; Medium Risk |
