@@ -969,5 +969,97 @@
    "retrievedAt": "2026-10-13",
    "pdfCount": 11
   }
+ },
+ "auditSourceTrace": {
+  "repository": "https://github.com/cap-labs-dev/cap-contracts",
+  "deployedEqualsCommit224d7c5": [
+   "contracts/vault/Vault.sol",
+   "contracts/vault/libraries/VaultLogic.sol",
+   "contracts/vault/Minter.sol",
+   "contracts/vault/libraries/MinterLogic.sol",
+   "contracts/token/CapToken.sol"
+  ],
+  "deployedEqualsBountyPinned695c828": [
+   "VaultLogic.sol",
+   "Minter.sol",
+   "MinterLogic.sol",
+   "CapToken.sol"
+  ],
+  "vaultDiff695c828to224d7c5": "PR 273 ReentrancyGuardTransient + nonReentrant only",
+  "insuranceFeeMintIntroduced": {
+   "commit": "9fdccae64f7b0d4a68734da7626661f449f8a822",
+   "date": "2025-04-04",
+   "message": "fix issue 19"
+  },
+  "insuranceFeeLinePresentAt": {
+   "947174f (2025-07-11)": true,
+   "9640008 (2025-11-07)": true
+  },
+  "laterFeePathChange": {
+   "commit": "0b6701365eb7d589cf3fc9083a2ab742c6cd500a",
+   "date": "2026-02-25",
+   "pr": 240,
+   "change": "user argument added to Minter amountOut/redeemAmountOut fee calculation"
+  }
+ },
+ "ondoHolderSource": {
+  "repository": "https://github.com/cap-labs-dev/cap-yearn-strategies",
+  "path": "src/strategies/ondo/OndoHolder.sol",
+  "headCommit": "d993380f8fef3e96c2aecd50af1ee5b34fa71e40",
+  "commitDate": "2026-09-25",
+  "byteIdenticalToDeployed": true,
+  "auditsFound": "none in repository or cap-audits"
+ },
+ "eigenAgentManagerRoles": {
+  "address": "0xa82f6f9E67E127621F3e5F3953bEEf926b4B5bA9",
+  "implementation": "0x9dd8da3f46d4b5ba1ea1e1e7421e8106e2777692",
+  "addEigenAgent 0x512e110e": [
+   "0xb8FC49402dF3ee4f8587268FB89fda4d621a8793"
+  ],
+  "setRestakerRate 0xa6cdf98c": [
+   "0xb8FC49402dF3ee4f8587268FB89fda4d621a8793"
+  ],
+  "setServiceManager 0x9b41bf23": [
+   "0xb8FC49402dF3ee4f8587268FB89fda4d621a8793"
+  ],
+  "upgrade": [
+   "0xD8236031d8279d82E615aF2BFab5FC0127A329ab"
+  ],
+  "symbioticSetRestakerRate": [
+   "0xb8FC49402dF3ee4f8587268FB89fda4d621a8793"
+  ]
+ },
+ "lockboxFlowReconciliation": {
+  "deployBlock": 24126303,
+  "deployTx": "0x40cea9ea2f220cf53ee56657ce9203cae2621ede3414aa1a580869667799e46f",
+  "scanTo": 26180755,
+  "transfersIn": {
+   "count": 350,
+   "total": "48016849.147196",
+   "unpairedWithOFTSent": 0
+  },
+  "transfersOut": {
+   "count": 178,
+   "total": "41229999.233967",
+   "unpairedWithOFTReceived": 0
+  },
+  "netByEid": {
+   "30375": {
+    "net": "90916.148288",
+    "remoteSupply": "90917.176288",
+    "netLessSupply": "-1.028000"
+   },
+   "30398": {
+    "net": "6672165.608602",
+    "remoteSupply": "6672058.520565",
+    "netLessSupply": "107.088037"
+   },
+   "30410": {
+    "net": "23768.156339",
+    "remoteSupply": "23871.216376",
+    "netLessSupply": "-103.060037"
+   }
+  },
+  "sumNetLessSupply": "3.000000"
  }
 }
