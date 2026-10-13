@@ -90,7 +90,7 @@ nodes:
   label: Reserve Oracle
   category: infra
   address: '0xcD7f45566bc0E7303fB92A93969BB4D3f6e662bb'
-  note: RedStone USDC primary / Chainlink backup; wWTGXX fixed at 1 USD; also prices borrower collateral (OETH has no backup); Safe can change staleness
+  note: RedStone USDC primary / Chainlink backup; wWTGXX fixed at 1 USD; also prices borrower collateral; Safe can change staleness
 - id: oft-lockbox
   label: LayerZero stcUSD Lockbox
   category: infra

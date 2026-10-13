@@ -519,6 +519,17 @@
     "primary": "(0x7aA9896a606314335A09fE66d069d11ab50D40DF, price(0x5f4ec3df9cbd43714fe2740f5e3616155c5b8419, 0xad2b1657e2c3243750b32cb9a51169575945b05b))",
     "backup": "(0x0000000000000000000000000000000000000000, 0x)",
     "staleness": 86600
+   },
+   "morphoComparison": {
+    "retrievedAt": "2026-10-13",
+    "market": "0xb8fef900b383db2dbbf4458c7f46acf5b140f26d603a6d1829963f241b82510e",
+    "loan": "USDC",
+    "lltv": "0.86",
+    "supplyAssetsUsd": 10684612.45,
+    "oracle": "0xE8aDfF9117151fb5ad7313873780b87cC56EEDB0",
+    "BASE_FEED_1": "0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419 (Chainlink ETH/USD)",
+    "QUOTE_FEED_1": "0x8fFfFfd4AfB6115b954Bd326cbe7B4BA576818f6 (Chainlink USDC/USD)",
+    "BASE_VAULT": "0x0000000000000000000000000000000000000000"
    }
   },
   "LBTC": {
