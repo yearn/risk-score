@@ -60,18 +60,10 @@ Vault addresses are case-insensitive and normalized to lowercase.
 
 ## Publishing to Yearn Artifacts
 
-Use the [post-artifact skill](.agents/skills/post-artifact/SKILL.md), for example:
-`$post-artifact publish reports/report/origin-arm.md`.
-
-Set `ARTIFACTS_API_KEY` in the repository-root `.env`, then run the Python helper
-from this repository root:
-
-```bash
-uv run python -m scripts.post_artifact --file ./REPORT.md
-```
-
-It returns JSON with the artifact URL. Uploads expire after 30 days by default;
-anyone with the URL can read them. See the skill for retention and metadata options.
+Set `ARTIFACTS_API_KEY` in `.env`, then run
+`uv run python -m scripts.post_artifact --file ./REPORT.md`. Uploads are public to
+anyone with the URL and expire after 30 days by default; see the
+[post-artifact skill](.agents/skills/post-artifact/SKILL.md) for options.
 
 ## License
 

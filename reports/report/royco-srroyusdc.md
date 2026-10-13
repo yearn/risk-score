@@ -5,6 +5,7 @@
 - **Chain:** Ethereum Mainnet
 - **Token Address:** [`0xcD9f5907F92818bC06c9Ad70217f089E190d2a32`](https://etherscan.io/address/0xcD9f5907F92818bC06c9Ad70217f089E190d2a32)
 - **Final Score: 3.80/5.0**
+- **Visibility:** Hidden
 
 ## Overview + Links
 
