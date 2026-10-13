@@ -1,4 +1,4 @@
-# Snapshot: Ethereum block 26180755, October 13, 2026, 03:02:47 UTC. Katana re-read October 13; MegaETH/Tempo nodes carry October 3 reads.
+# Snapshot: Ethereum block 26180755, October 13, 2026, 03:02:47 UTC, with matching-time Katana/MegaETH/Tempo reads.
 slug: cap-stcusd
 title: Cap (stcUSD) — Contract Dependency Graph
 chain: ethereum
@@ -159,7 +159,7 @@ nodes:
   label: MegaETH stcUSD OFT
   category: vault
   link: https://mega.etherscan.io/address/0x88887be419578051ff9f4eb6c858a951921d8888
-  note: Remote MegaETH token; 10,171,828.083819 shares; verified OFT receive mint/send burn; address 0x88887be419578051ff9f4eb6c858a951921d8888
+  note: Remote MegaETH token; 6,672,058.520565 shares; verified OFT receive mint/send burn; address 0x88887be419578051ff9f4eb6c858a951921d8888
 - id: tempo-bridge
   label: Tempo stcUSD Mint Adapter
   category: infra
@@ -169,7 +169,7 @@ nodes:
   label: Tempo stcUSD TIP-20
   category: vault
   link: https://explore.tempo.xyz/address/0x20c0000000000000000000008ee4fcff88888888
-  note: Remote Tempo token; 23,872.216376 shares, 6 decimals; sole admin remote timelock; unpaused, always-allow transfer policy
+  note: Remote Tempo token; 23,871.216376 shares, 6 decimals; sole admin remote timelock; unpaused, always-allow transfer policy
 - id: remote-timelocks
   label: Remote Timelocks (24h)
   category: governance

@@ -16,7 +16,7 @@
    "evidence": "reports/data/cap-stcusd-2026-10-03.json"
   }
  ],
- "method": "Configured Ethereum RPC; Foundry cast call/implementation/logs at the finalized block. Event scans cover blocks 26128580-26180755 for the Safe, Timelock, canceller Safe, Access Control, cUSD, both FRVs, Lender, Delegation, Oracle, OFT lockbox, OndoHolder, Reserve RoleManager, and the LayerZero endpoint and Ethereum ULN send/receive libraries (filtered for the lockbox address). Katana read through the configured Katana RPC at latest block 45119032. MegaETH and Tempo have no configured RPC and were not re-read.",
+ "method": "Configured Ethereum RPC; Foundry cast call/implementation/logs at the finalized block. Event scans cover blocks 26128580-26180755 for the Safe, Timelock, canceller Safe, Access Control, cUSD, both FRVs, Lender, Delegation, Oracle, OFT lockbox, OndoHolder, Reserve RoleManager, and the LayerZero endpoint and Ethereum ULN send/receive libraries (filtered for the lockbox address). Katana read through the configured Katana RPC at latest block 45119032. MegaETH (https://mainnet.megaeth.com/rpc) and Tempo (https://rpc.tempo.xyz) read through public RPCs at user request; chain IDs checked.",
  "reads": {
   "cusd.implementation": "0xbdaa34082f1a1a3c32190a672bc9dd1b69791b97",
   "stcusd.implementation": "0x42c0e0ef7c2f35de073f4d6f9c0e4483429c3d31",
@@ -636,13 +636,49 @@
   "delegate": "0xb8FC49402dF3ee4f8587268FB89fda4d621a8793"
  },
  "remote": {
+  "matchingTimestamp": 1791860567,
   "katana": {
-   "block": 45119032,
+   "block": 45117756,
+   "hash": "0xf6219f4aaaf08bee20a7bb994425fe2e16aec6000b755c3439ff0657ecc590b7",
    "totalSupply": "90917.176288",
    "implementation": "0xdf784f64f0498e5d671cd6c50d2ded402959d306"
   },
-  "megaeth": "not re-read (no configured RPC)",
-  "tempo": "not re-read (no configured RPC)"
+  "megaeth": {
+   "rpc": "https://mainnet.megaeth.com/rpc",
+   "chainId": 4326,
+   "block": 29063556,
+   "hash": "0x46d6354098377f064494c8619ddae62a7873ef34ab6c821e09f00679f7ff3ae3",
+   "totalSupply": "6672058.520565",
+   "implementation": "0x3b2bf0834130878e0568b8047061a77e234ef37b",
+   "peer30101": "0x983aeaaa0d0426839158435c43725ea7f45d4137",
+   "owner": "0x0000000035A7744F94e6949431CE20EA77312a55",
+   "endpoint": "0x6F475642a6e85809B1c36Fa62763669b1b48DD5B",
+   "delegate": "0xb8FC49402dF3ee4f8587268FB89fda4d621a8793",
+   "receiveLibrary": "0xe1844c5D63a9543023008D332Bd3d2e6f1FE1043",
+   "receiveConfigIdenticalToOct3": true,
+   "receiveConfig": "(15, 3, 0, 0, 3 required DVNs, no optional)"
+  },
+  "tempo": {
+   "rpc": "https://rpc.tempo.xyz",
+   "chainId": 4217,
+   "block": 43886480,
+   "hash": "0x95f62b29a973a967ee4e810f9cc87bb2eece787e8806d48e40b43d1bd84cbaa7",
+   "totalSupply": "23871.216376",
+   "adapterImplementation": "0x0a1635eacee7dde9792ce2b7ae5bc373878d389b",
+   "adapterIssuerRole": true,
+   "paused": false,
+   "peer30101": "0x983aeaaa0d0426839158435c43725ea7f45d4137",
+   "owner": "0x0000000035A7744F94e6949431CE20EA77312a55",
+   "endpoint": "0x20Bb7C2E2f4e5ca2B4c57060d1aE2615245dCc9C",
+   "delegate": "0xb8FC49402dF3ee4f8587268FB89fda4d621a8793",
+   "receiveLibrary": "0x0B6F08C2D39421Acb49c99abCe82050e356171e5",
+   "receiveConfigIdenticalToOct3": true
+  },
+  "reconciliation": {
+   "ethereumEscrow": "6786849.913229",
+   "remoteSuppliesTotal": "6786846.913229",
+   "escrowLessRemoteSupply": "3.000000"
+  }
  },
  "timelockRoles": {
   "PROPOSER": {
