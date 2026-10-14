@@ -105,10 +105,10 @@
           "name": "Apyx apxUSD",
           "kind": "direct",
           "model": "lock",
-          "integration": "Chainlink CCIP (LockReleaseTokenPool; Base + BNB Chain)",
-          "detail": "TokenAdminRegistry maps apxUSD to pool [`0x0e9c…5BB5`](https://etherscan.io/address/0x0e9cA42Bc60bE25F9A67f52173067Cc0Bb405BB5) (LockReleaseTokenPool 1.6.1). Canonical apxUSD is escrowed on Ethereum; `getRemoteToken` maps the configured Base route to [`0xd993…7228`](https://basescan.org/address/0xd993935e13851dd7517af10687ec7e5022127228) and the BNB Chain route to [`0x6b37…d4af`](https://bscscan.com/token/0x6b3788fd6604bbf03c5378d24e57bb334baad4af)",
+          "integration": "Chainlink CCIP (LockReleaseTokenPool; Base + BNB Chain + Solana)",
+          "detail": "TokenAdminRegistry maps apxUSD to pool [`0x0e9c…5BB5`](https://etherscan.io/address/0x0e9cA42Bc60bE25F9A67f52173067Cc0Bb405BB5) (LockReleaseTokenPool 1.6.1), which escrows **~18.22M** canonical apxUSD. `getRemoteToken` maps Base to [`0xd993…7228`](https://basescan.org/address/0xd993935e13851dd7517af10687ec7e5022127228) (~9.64M), BNB Chain to [`0x6b37…d4af`](https://bscscan.com/token/0x6b3788fd6604bbf03c5378d24e57bb334baad4af) (~2.57M), and Solana mainnet (selector 124615329519749607) to mint [`HAYQ…2DYe`](https://solscan.io/token/HAYQtfJEQ9DbDbaHEhxfGsWbSZ3ywthdsVB3PuB72DYe) (~6.01M); escrow matches the three remote supplies to within ~1.25 apxUSD. On Solana, the mint authority is a 1-of-2 SPL multisig: the CCIP pool signer PDA **or** the Apyx Squads vault [`5CcT…J1CG`](https://solscan.io/account/5CcTTUPtSxF1iB5d2fGR7gYHbUBHL1orwzbuZdQGJ1CG). That vault belongs to Squads [`4RkA…RMp5`](https://solscan.io/account/4RkAxZdhbLKxTi3G7okdMG7xqBZPi9QfemDUtHgZRMp5) (3-of-7, `time_lock` 0) and is also the freeze authority, so it can mint Solana apxUSD outside CCIP. Bridging such tokens back would release Ethereum escrow, bounded by the Solana inbound bucket below. Inbound/outbound rate limits are enabled on all three lanes: 5M buckets for Base and BNB, and 5.5M outbound / 2M inbound for Solana. Verified at Ethereum block [26,126,833](https://etherscan.io/block/26126833) and Solana slot 453,623,391 (public RPC), October 5, 2026.",
           "icon": "protocol:apyx-protocol",
-          "owner": "Pool and remote-token CCIP admin: 3-of-6 Safe [`0xf986…3cE2`](https://safe.yaudit.dev/1/0xf9862EfC1704aC05e687f66E5cD8c130E5663cE2/)."
+          "owner": "Ethereum pool owner and BNB remote-token CCIP admin: 4-of-7 Safe [`0xf986…3cE2`](https://safe.yaudit.dev/1/0xf9862EfC1704aC05e687f66E5cD8c130E5663cE2/). Solana pool admin and mint co-signer: Squads 3-of-7 [`4RkA…RMp5`](https://solscan.io/account/4RkAxZdhbLKxTi3G7okdMG7xqBZPi9QfemDUtHgZRMp5), no time lock."
         },
         {
           "slug": "bedrock-unibtc",
@@ -225,7 +225,7 @@
           "kind": "indirect",
           "model": "transport",
           "integration": "Nested dgnHYPE strategy routes USDC to HyperCore via CCTP",
-          "detail": "dgnHYPE operational EOA [`0x11A6…006A`](https://arbiscan.io/address/0x11A691612BD108e57cC04ea42B006C9CB1ff006A) deposits USDC into the Circle HyperCore CCTP extension [`0xA95d…4fcE`](https://arbiscan.io/address/0xA95d9c1F655341597C94393fDdc30cf3c08E4fcE) for Hyperliquid trading"
+          "detail": "dgnHYPE operational EOAs [`0x0C68…82d0`](https://arbiscan.io/address/0x0C684f333A7e120bce61383DA670bbB0157e82d0) and [`0x11A6…006A`](https://arbiscan.io/address/0x11A691612BD108e57cC04ea42B006C9CB1ff006A) deposit USDC into the Circle HyperCore CCTP extension [`0xA95d…4fcE`](https://arbiscan.io/address/0xA95d9c1F655341597C94393fDdc30cf3c08E4fcE) (2.599M USDC on Oct 12, 2026); withdrawals return as CCTP V2 mints via [`0x81D4…4B64`](https://arbiscan.io/address/0x81D40F21F12A8F0E3252Bccb954D722d4c464B64) to operational EOAs including [`0x4c3d…17fc`](https://arbiscan.io/address/0x4c3d48cbe2186beeafecc6723630ab8eda4117fc)"
         },
         {
           "slug": "infinifi",
@@ -520,12 +520,35 @@
           "owner": "Adapter owner and LayerZero delegate: Ondo admin 4-of-7 Safe [`0x1a69…3ad7`](https://etherscan.io/address/0x1a694A09494E214a3Be3652e4B343B7B81A73ad7), no timelock."
         },
         {
+          "slug": "strata-srusde",
+          "name": "Strata srUSDe",
+          "kind": "direct",
+          "model": "lock",
+          "integration": "LayerZero OFT Adapter (`StrataOFTAdapter`)",
+          "detail": "Adapter [`0x9802…f45a`](https://etherscan.io/address/0x98020c586807681b577f5ee0a6444d4c22f0f45a) escrows 5.1 srUSDe (<0.01% of the ~16.9M supply). Current Plasma OFT [`0xa651…72b0`](https://plasmascan.to/address/0xa651b7605350386e37b11e85c9cb5e85702072b0) supply is 0.1 srUSDe; 5.0 srUSDe sits on the replaced Plasma OFT [`0x6d71…23fd`](https://plasmascan.to/address/0x6d7198b1795fa2078cc81ca60b888a07799223fd), which the adapter no longer peers with. Ethereum and Plasma receive routes both require 4-of-4 DVNs",
+          "security": {
+            "label": "4-of-4",
+            "confirmations": 15,
+            "providers": [
+              "LayerZero Labs",
+              "Canary",
+              "Nethermind",
+              "Horizen"
+            ],
+            "route": "Plasma→Ethereum (escrow release)",
+            "weak": false,
+            "verifiedAt": "2026-10-11",
+            "link": "https://etherscan.io/address/0x98020c586807681b577f5ee0a6444d4c22f0f45a"
+          },
+          "owner": "Adapter owner and ProxyAdmin owner: 48h Timelock [`0xb2A3…B706`](https://etherscan.io/address/0xb2A3CF69C97AFD4dE7882E5fEE120e4efC77B706); LayerZero endpoint delegate: 24h Reserve Timelock [`0x90de…aff4`](https://etherscan.io/address/0x90de209907c5a4BF527A75fC16aBD639c77aaff4). Plasma OFT owner: Plasma 48h timelock [`0xa62b…96ce`](https://plasmascan.to/address/0xa62b204099277762d1669d283732dcc1b3aa96ce)."
+        },
+        {
           "slug": "fluid",
           "name": "Fluid (sUSDai)",
           "kind": "indirect",
           "model": "mint",
           "integration": "sUSDai collateral (USD.AI OAdapter)",
-          "detail": "OAdapter [`0xffB2…7f24`](https://arbiscan.io/address/0xffB20098FD7B8E84762eea4609F299D101427f24) burns and mints sUSDai on both chains; its authenticated receive path can mint canonical Arbitrum sUSDai. Fluid held ~96% of the Ethereum OToken supply at the Jul 22 check. The 10M/hour limiter is outbound-only and does not cap `_credit` on a forged inbound message",
+          "detail": "OAdapter [`0xffB2…7f24`](https://arbiscan.io/address/0xffB20098FD7B8E84762eea4609F299D101427f24) burns and mints sUSDai on both chains; its authenticated receive path can mint canonical Arbitrum sUSDai. Fluid held ~80.5% of the Ethereum OToken supply and ~42% of circulating sUSDai at the Sep 29 check. The 10M/hour limiters are outbound-only and do not cap `_credit` on a forged inbound message",
           "security": {
             "label": "3-of-3",
             "confirmations": 15,
@@ -535,8 +558,9 @@
               "Canary"
             ],
             "route": "Ethereum→Arbitrum (canonical sUSDai mint side)",
+            "note": "Same 3-of-3 DVN set on all five inbound routes to the Arbitrum OAdapter (Ethereum, Plasma, Base, Solana, Arc); Solana and Arc peers added Aug 14 and Sep 10, 2026. Confirmations: Ethereum 15, Plasma 20, Base 10, Solana 32, Arc 10.",
             "weak": false,
-            "verifiedAt": "2026-07-22",
+            "verifiedAt": "2026-09-29",
             "link": "https://arbiscan.io/address/0xffB20098FD7B8E84762eea4609F299D101427f24"
           },
           "owner": "Adapter owner: 3-of-3 Safe [`0x5F0B…841F`](https://arbiscan.io/address/0x5F0BC72FB5952b2f3F2E11404398eD507B25841F)."
