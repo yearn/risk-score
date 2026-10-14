@@ -75,7 +75,7 @@ nodes:
   label: Access Control
   category: governance
   address: '0x7731129a10d51e18cDE607C5C115F26503D2c683'
-  note: Selector/address role IDs; fully enumerated in report evidence; role admin is sole Timelock
+  note: Selector/address role IDs; fully enumerated via getRoleMembers at block 26114512; role admin is sole Timelock
 - id: frv-role-manager
   label: FRV RoleManager
   category: governance
