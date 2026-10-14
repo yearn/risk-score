@@ -46,17 +46,17 @@ nodes:
   label: FarmRegistry / Accounting
   category: infra
   address: '0xF5f2718708f471e43968271956CC01aaA8c46119'
-  note: 17 registered farms. Snapshot October 11, 2026; $58.51M accounted assets. RWA values are not reserve
+  note: 17 registered farms. Snapshot October 14, 2026; $61.58M accounted assets. RWA values are not reserve
     proof.
 - id: locking-controller
-  label: liUSD first-loss ($15.17M)
+  label: liUSD first-loss ($15.21M)
   category: infra
   address: '0x1d95cC100D6Cd9C7BbDbD7Cb328d99b3D6037fF7'
 - id: redeem-controller
   label: RedeemController / liquid hook
   category: infra
   address: '0xCb1747E89a43DEdcF4A2b831a0D94859EFeC7601'
-  note: $12.88M liquid capacity; empty redemption queue.
+  note: $10.60M liquid capacity; empty redemption queue.
 - id: mint-controller
   label: MintController
   category: infra
@@ -84,62 +84,66 @@ nodes:
   address: '0x77776F422B7EB0A95ccD35fBd088A5957D4408eA'
   note: Native iUSD mint/burn based on authenticated remote reports; position size is not a mint cap.
 - id: gdadf
-  label: GDADF escrow — 28d (36.4%)
+  label: GDADF escrow — 28d (34.6%)
   category: strategy
   address: '0x2fa5E6C5549BEdF98A935Cac3BB4337459c74897'
 - id: fxsave
-  label: f(x) fxSAVE — 7d (13.8%)
+  label: f(x) fxSAVE — 7d (13.1%)
   category: strategy
   address: '0x78A31bD6cAca12BdF83F8A608076006C1F58F363'
 - id: new-silver
-  label: New Silver — 56d (8.9%)
+  label: New Silver — 56d (8.5%)
   category: strategy
   address: '0x277FdF6Dc5c53C5c2828188Da84B9593A50884C1'
+- id: new-silver-senior
+  label: New Silver 2 Senior — 7d (2.4%)
+  category: strategy
+  address: '0x79e1B8e45932A7C802eA3dAb3844e5DEa68d971f'
 - id: genesis
-  label: Genesis escrow — 28d (4.5%)
+  label: Genesis escrow — 28d (4.2%)
   category: strategy
   address: '0x9E5efC5F387D8661C1AFB2469B7EeF6972451852'
 - id: cap
-  label: Cap stcUSD — LIQUID (12.7%)
+  label: Cap stcUSD — LIQUID (10.5%)
   category: strategy
   address: '0xAc21B22B5aEb11bc32De4ecF59E4538fCa48b694'
 - id: aave
-  label: Aave V3 USDC — LIQUID (7.1%)
+  label: Aave V3 USDC — LIQUID (5.0%)
   category: strategy
   address: '0xbFd5FC8DecA3C6128bfCE0FE46c25616811c3580'
 - id: falconx
-  label: FalconX — 7d (3.5%)
+  label: FalconX — 7d (3.3%)
   category: strategy
   address: '0xe919C66475f2F30d285c768853E6B5b23ef181Cf'
 - id: spark
-  label: Spark sUSDC — LIQUID (2.2%)
+  label: Spark sUSDC — LIQUID (1.7%)
   category: strategy
   address: '0xd880D7C5CaFdbE2AEc281250995abF612235e563'
 - id: pendle-reusd
-  label: Pendle PT-reUSD — Dec 10, 2026 (10.3%)
+  label: Pendle PT-reUSD — Dec 10, 2026 (11.4%)
   category: strategy
   address: '0xe9E44C0A68C49aDe51CdA5e027909C5996B5c71a'
 - id: fasanara
-  label: Fasanara — combined 40.9%
+  label: Fasanara — combined 38.9%
   category: dependency
-  note: GDADF $21.31M + Genesis $2.61M; correlated issuer. Current holding/NAV and custody reconciliation
+  note: GDADF $21.32M + Genesis $2.61M; correlated issuer. Current holding/NAV and custody reconciliation
     TODO; stale reserve evidence.
   link: https://docs.infinifi.xyz/vaults
 - id: new-silver-credit
   label: New Silver private credit
   category: dependency
-  note: Current reserve/holding reconciliation TODO; 56-day notice.
+  note: No reserve or holding statement published; 56-day (New Silver) and 7-day (New Silver 2 Senior) notice.
   link: https://docs.infinifi.xyz/vaults
 - id: falconx-credit
   label: FalconX institutional lending
   category: dependency
-  note: Current reserve/holding reconciliation TODO; 7-day notice.
+  note: No reserve or holding statement published; 7-day notice.
   link: https://docs.infinifi.xyz/vaults
 - id: rate-manager
   label: RWAEscrowRateManager
   category: infra
   address: '0x11F6FAb3f4D8635880C3e80cbae8AEF8136D4189'
-  note: Configured-rate accrual/override of $31.16M (53.3%). Fresh timestamps are not reserve attestations.
+  note: Configured-rate accrual/override of $32.68M (53.1%). Fresh timestamps are not reserve attestations.
 - id: pendle-pt
   label: Pendle PT-reUSD-10DEC2026 market
   category: dependency
@@ -181,20 +185,31 @@ nodes:
   label: CCTP + CCIP (Monad)
   category: dependency
   address: '0x3373784A7a52A07F9339aA8F60403420cC602c52'
-  note: CCIP reports authorize native mint via PortalHub; CCTP V2 transports USDC. Monad remote verification
-    excluded by request.
+  note: CCIP reports authorize native mint via PortalHub; CCTP V2 transports USDC. Monad AccountingL2 reconciled
+    to the L1 mirror at the October 14 snapshot.
 - id: base-farm
-  label: Base OutlandFarm — $136,887
+  label: Base OutlandFarm — $135,000
   category: strategy
   address: '0xbD6c2d1C4809a5D8847FbA3a3cf7d6BDf6b6C3bA'
-  note: 0.23% of L1 book; Base snapshot $136,887; underlying maxWithdraw is zero. Retained for native
+  note: 0.22% of L1 book; Base snapshot $135,113; underlying maxWithdraw is zero. Retained for native
     mint path.
 - id: monad-farm
-  label: Monad OutlandFarm — L1 book $220,034
+  label: Monad OutlandFarm — $3.07M (5.0%)
   category: strategy
   address: '0xA7c1DAEAA5D97e1319B4Ff6Cdf658F5C4582A27E'
-  note: Remote state unverified by request; L1 book exceeds the $10,000 remote-verification threshold and does not prove remote backing. Retained for
-    native mint authority.
+  note: L1 book $3,074,373; Monad AccountingL2 $3,075,269 (Aave V3 USDC $1.05M, August USDC V2 $2.02M with
+    zero maxWithdraw). Retained for native mint authority.
+- id: monad-aave
+  label: Aave V3 USDC (Monad)
+  category: dependency
+  address: '0x69a5F9AD4f96ebf0a0C792dD42a01cC5C0102fef'
+  note: Monad AaveV3Farm 0xA171c4a6e0d73DB80911A0C003508fB235F29b63 holds $1.05M aMonUSDC with full liquidity.
+- id: august-usdc
+  label: August USDC V2 (Monad)
+  category: dependency
+  address: '0x80017bf0f793ebbe9679cd61ff0e395b62cabb59'
+  note: VaultV2 position $2.02M via SwapFarmV2WithMaturity 0x1330902050dB4edAc0D9D8ca33FdAb5DbE986c9c; maxWithdraw
+    zero; underlying allocations not assessed.
 - id: lz-iusd
   label: iUSD OFT Adapter (escrow only)
   category: dependency
@@ -257,63 +272,63 @@ edges:
 - from: iUSD
   to: gdadf
   kind: allocates-to
-  label: 36.4%
+  label: 34.6%
 - from: registry
   to: gdadf
   kind: manages
 - from: iUSD
   to: fxsave
   kind: allocates-to
-  label: 13.8%
+  label: 13.1%
 - from: registry
   to: fxsave
   kind: manages
 - from: iUSD
   to: new-silver
   kind: allocates-to
-  label: 8.9%
+  label: 8.5%
 - from: registry
   to: new-silver
   kind: manages
 - from: iUSD
   to: genesis
   kind: allocates-to
-  label: 4.5%
+  label: 4.2%
 - from: registry
   to: genesis
   kind: manages
 - from: iUSD
   to: cap
   kind: allocates-to
-  label: 12.7%
+  label: 10.5%
 - from: registry
   to: cap
   kind: manages
 - from: iUSD
   to: aave
   kind: allocates-to
-  label: 7.1%
+  label: 5.0%
 - from: registry
   to: aave
   kind: manages
 - from: iUSD
   to: falconx
   kind: allocates-to
-  label: 3.5%
+  label: 3.3%
 - from: registry
   to: falconx
   kind: manages
 - from: iUSD
   to: spark
   kind: allocates-to
-  label: 2.2%
+  label: 1.7%
 - from: registry
   to: pendle-reusd
   kind: manages
 - from: iUSD
   to: pendle-reusd
   kind: allocates-to
-  label: 10.3%
+  label: 11.4%
 - from: pendle-reusd
   to: pendle-pt
   kind: deposits-into
@@ -366,14 +381,36 @@ edges:
 - from: iUSD
   to: base-farm
   kind: allocates-to
-  label: 0.23%
+  label: 0.22%
 - from: iUSD
   to: monad-farm
   kind: allocates-to
-  label: 0.38%
+  label: 5.0%
 - from: base-farm
   to: outland-base
   kind: deposits-into
+- from: iUSD
+  to: new-silver-senior
+  kind: allocates-to
+  label: 2.4%
+- from: registry
+  to: new-silver-senior
+  kind: manages
+- from: new-silver-senior
+  to: new-silver-credit
+  kind: deposits-into
+- from: rate-manager
+  to: new-silver-senior
+  kind: controls
+  label: Keeper accrual / governance override
+- from: monad-farm
+  to: monad-aave
+  kind: deposits-into
+  label: $1.05M
+- from: monad-farm
+  to: august-usdc
+  kind: deposits-into
+  label: $2.02M
 - from: monad-farm
   to: outland-monad
   kind: deposits-into
