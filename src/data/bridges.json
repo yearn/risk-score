@@ -217,7 +217,7 @@
           "kind": "indirect",
           "model": "transport",
           "integration": "Nested dgnHYPE strategy routes USDC to HyperCore via CCTP",
-          "detail": "dgnHYPE operational EOA [`0x11A6…006A`](https://arbiscan.io/address/0x11A691612BD108e57cC04ea42B006C9CB1ff006A) deposits USDC into the Circle HyperCore CCTP extension [`0xA95d…4fcE`](https://arbiscan.io/address/0xA95d9c1F655341597C94393fDdc30cf3c08E4fcE) for Hyperliquid trading"
+          "detail": "dgnHYPE operational EOAs [`0x0C68…82d0`](https://arbiscan.io/address/0x0C684f333A7e120bce61383DA670bbB0157e82d0) and [`0x11A6…006A`](https://arbiscan.io/address/0x11A691612BD108e57cC04ea42B006C9CB1ff006A) deposit USDC into the Circle HyperCore CCTP extension [`0xA95d…4fcE`](https://arbiscan.io/address/0xA95d9c1F655341597C94393fDdc30cf3c08E4fcE) (2.599M USDC on Oct 12, 2026); withdrawals return as CCTP V2 mints via [`0x81D4…4B64`](https://arbiscan.io/address/0x81D40F21F12A8F0E3252Bccb954D722d4c464B64) to operational EOAs including [`0x4c3d…17fc`](https://arbiscan.io/address/0x4c3d48cbe2186beeafecc6723630ab8eda4117fc)"
         }
       ]
     },
