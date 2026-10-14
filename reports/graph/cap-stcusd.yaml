@@ -128,7 +128,7 @@ nodes:
 - id: borrower-collateral
   label: Borrower Collateral Tokens
   category: dependency
-  link: https://github.com/yearn/risk-score/blob/9e81a7e1542fe7b255840857eb2a7c3b59d543e2/reports/data/cap-stcusd-2026-10-13.json
+  link: https://etherscan.io/block/26180755
   note: 'Share of USDC debt: LBTC 53.76%, wstETH 25.23%, weETH 9.64%, SolvBTC 6.66%, uniBTC 3.21%, OETH 1.51%;
     priced by the Timelock-controlled Oracle'
 - id: eigenlayer
@@ -180,7 +180,7 @@ nodes:
 - id: remote-layerzero
   label: Remote LayerZero Endpoints
   category: dependency
-  link: https://github.com/yearn/risk-score/blob/9e81a7e1542fe7b255840857eb2a7c3b59d543e2/reports/data/cap-stcusd-followup-2026-10-04.json
+  link: https://etherscan.io/block/26114512
   note: Nine remote routes read October 3/4 require 3 DVNs and 15 confirmations. MegaETH and Tempo inbound
     receive routes were re-read October 13. Katana's remote DVN config was not repeated. Local Safe delegates
     share the Ethereum signer set
