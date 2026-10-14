@@ -245,9 +245,9 @@ yvUSDC-1 deploys deposited USDC into yield strategies with ~99.75% capital utili
 
 | Market | Collateral | LLTV | Supplied (USDC) | Share |
 |--------|-----------|-----:|----------------:|------:|
-| [`0x64d65c9a…fcc64`](https://app.morpho.org/ethereum/market/0x64d65c9a2d91c36d56fbc42d69e979335320169b3df63bf92789e2c8883fcc64/) | cbBTC | 86% | ~4,055,911 | ~65.8% |
-| [`0x3a85e619…ee49`](https://app.morpho.org/ethereum/market/0x3a85e619751152991742810df6ec69ce473daef99e28a64ab2340d7b7ccfee49/) | WBTC | 86% | ~1,798,957 | ~29.2% |
-| [`0xb323495f…86cc`](https://app.morpho.org/ethereum/market/0xb323495f7e4148be5643a4ea4a8221eef163e4bccfdedc2a6f4696baacbc86cc/) | wstETH | 86% | ~311,733 | ~5.1% |
+| [`0x64d65c9a2d91c36d56fbc42d69e979335320169b3df63bf92789e2c8883fcc64`](https://app.morpho.org/ethereum/market/0x64d65c9a2d91c36d56fbc42d69e979335320169b3df63bf92789e2c8883fcc64/) | cbBTC | 86% | ~4,055,911 | ~65.8% |
+| [`0x3a85e619751152991742810df6ec69ce473daef99e28a64ab2340d7b7ccfee49`](https://app.morpho.org/ethereum/market/0x3a85e619751152991742810df6ec69ce473daef99e28a64ab2340d7b7ccfee49/) | WBTC | 86% | ~1,798,957 | ~29.2% |
+| [`0xb323495f7e4148be5643a4ea4a8221eef163e4bccfdedc2a6f4696baacbc86cc`](https://app.morpho.org/ethereum/market/0xb323495f7e4148be5643a4ea4a8221eef163e4bccfdedc2a6f4696baacbc86cc/) | wstETH | 86% | ~311,733 | ~5.1% |
 
 Two further cbBTC and wstETH markets hold dust (<$4K each).
 
@@ -303,7 +303,7 @@ Two further cbBTC and wstETH markets hold dust (<$4K each).
 
 **Contract:** [`0x654a7c4Ae5ac3C853a99F8dbEAD2bC85090F753a`](https://etherscan.io/address/0x654a7c4Ae5ac3C853a99F8dbEAD2bC85090F753a)
 
-**Pipeline:** Direct USDC supply to **Spark Lend**'s USDC market. Spark Lend is a Sky sub-DAO governed by Sky / Spark governance. The strategy was activated on June 26, 2026, replacing the old Spark USDC Lender (0x25f893), and has 0 debt.
+**Pipeline:** Direct USDC supply to **Spark Lend**'s USDC market. Spark Lend is a Sky sub-DAO governed by Sky / Spark governance. The strategy was activated on June 26, 2026, replacing the old Spark USDC Lender ([`0x25f893276544d86a82b1ce407182836F45cb6673`](https://etherscan.io/address/0x25f893276544d86a82b1ce407182836F45cb6673)), and has 0 debt.
 
 **Strategy parameters:** Brain multisig management, keeper-driven reporting, ERC-4626 throughout.
 
@@ -380,7 +380,7 @@ The yvUSDC-1 vault uses the **standard Yearn V3 governance pattern** via the Yea
 
 **Governance assessment:**
 1. **No EOA role concentration** — all sensitive vault roles are held by multisigs, the timelock, or Yearn bots
-2. **Strategy additions and accountant changes go through a 7-day timelock** via the TimelockController (delay increased from initial 24h to 7 days on [Feb 22, 2025](https://etherscan.io/tx/0x3319d16bbf1d6f1081bcc18802a49399ccd906d347f3472370d188c33e1ece2e))
+2. **Strategy additions and accountant changes go through a 7-day timelock** via the TimelockController (`MinDelayChange` from 24h to 7 days on [March 12, 2026](https://etherscan.io/tx/0x3319d16bbf1d6f1081bcc18802a49399ccd906d347f3472370d188c33e1ece2e))
 3. **Untimelocked operational powers:** Brain can reorder the queue, move debt between active strategies up to their max debt, and manage the Pawn Broker (debt calls, rate changes after a 7-day delay, liquidation) without a timelock
 4. **Standard Yearn governance** — same setup used across 39 Role Manager vaults, battle-tested pattern
 5. **Immutable vault** — no proxy upgrades possible
@@ -425,8 +425,8 @@ The yvUSDC-1 vault uses the **standard Yearn V3 governance pattern** via the Yea
 Yearn maintains an active monitoring system via the [`monitoring`](https://github.com/yearn/monitoring) repository. **yvUSDC-1 is actively monitored:**
 
 - **Large flow alerts** (`protocols/yearn/alert_large_flows.py`): yvUSDC-1 is in the monitored vault list. Alerts on deposits/withdrawals exceeding threshold via Telegram
-- **Endorsed vault check** (`protocols/yearn/check_endorsed.py`): Runs daily, verifies all Yearn V3 vaults are endorsed onchain via the registry contract
-- **Timelock monitoring** (`protocols/timelock/timelock_alerts.py`): Monitors the Yearn TimelockController (Strategy Manager) across 6 chains
+- **Timelock monitoring** (`protocols/timelock/timelock_alerts.py`): Monitors operations on the Yearn TimelockController (Strategy Manager) across 5 chains
+- **Timelock delay check** (`protocols/yearn/check_timelock_delay.py`): Alerts if the Strategy Manager's `getMinDelay()` falls below 7 days on any of those chains
 
 ### Key Contracts
 
@@ -689,7 +689,6 @@ Yearn maintains an active monitoring system via the [`monitoring`](https://githu
 │  ┌───────────────────────┐                                          │
 │  │  yvUSDC-1 (v3.0.2)    │                                          │
 │  │  ERC-4626, immutable  │                                          │
-│  │  0xBe53...6204        │                                          │
 │  │  deposit() / redeem() │                                          │
 │  └──────────┬────────────┘                                          │
 │             │ 5 active strategies (4 funded, 1 not in queue)        │
@@ -715,7 +714,7 @@ Yearn maintains an active monitoring system via the [`monitoring`](https://githu
 │  │  │  Pipeline: USDC → DAI (PSM 1:1) → USDS → ...             │  │ │
 │  │  └──────────────────────────────────────────────────────────┘  │ │
 │  │                                                                │ │
-│  │  Queued (0 debt): Spark USDC Lender (0x654a7c)                 │ │
+│  │  Queued (0 debt): Spark USDC Lender                            │ │
 │  └────────────────────────────────────────────────────────────────┘ │
 └─────────────────────────────────────────────────────────────────────┘
                                 │
