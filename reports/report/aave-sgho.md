@@ -1,14 +1,14 @@
 # Protocol Risk Assessment: Aave — sGHO
 
-- **Assessment Date:** April 2, 2026 (Updated: October 13, 2026)
+- **Assessment Date:** April 2, 2026 (Updated: October 15, 2026)
 - **Token:** sGho (GHO Savings Vault)
 - **Chain:** Ethereum
 - **Token Address:** [`0xE1753F2e00940cC31213dd92013cF019DFE4ca1d`](https://etherscan.io/address/0xE1753F2e00940cC31213dd92013cF019DFE4ca1d)
 - **Final Score: 2.68/5.0**
 
-> **STATUS (October 13, 2026, block 26,181,150):** sGho is live on Ethereum mainnet with **150 days of production history** and `totalAssets() = 176,935,741 GHO` (~$176.7M). Implementation, ProxyAdmin, supply cap, pause state, and role assignments are unchanged since [AIP 484](https://app.aave.com/governance/v3/proposal/?proposalId=484) (no `Upgraded`, `SupplyCapUpdated`, `Paused`, or `RoleGranted`/`RoleRevoked` events). The Aave Savings Rate is **4.50%** (`targetRate() = 450`), raised from 4.25% by the GHO Risk Council on September 1, 2026 in a single sGhoSteward execution (tx [`0x7aa9fd…001f`](https://etherscan.io/tx/0x7aa9fd1ced00357442edddc4011fb3c11886fecbe3ab90f3cfd5c1ebec63001f)). **Current conditions:**
+> **STATUS (October 13, 2026, block 26,181,150):** sGho is live on Ethereum mainnet with **150 days of production history** and `totalAssets() = 176,935,741 GHO` (~$176.7M). Implementation, ProxyAdmin, supply cap, pause state, and role assignments are unchanged since [AIP 484](https://app.aave.com/governance/v3/proposal/?proposalId=484) (no `Upgraded`, `SupplyCapUpdated`, `Paused`, or `RoleGranted`/`RoleRevoked` events). By October 15 (block 26,198,170) `totalAssets()` had grown to 227,384,901 GHO; funding figures below use that block, all other figures the October 13 snapshot. The Aave Savings Rate is **4.50%** (`targetRate() = 450`), raised from 4.25% by the GHO Risk Council on September 1, 2026 in a single sGhoSteward execution (tx [`0x7aa9fd…001f`](https://etherscan.io/tx/0x7aa9fd1ced00357442edddc4011fb3c11886fecbe3ab90f3cfd5c1ebec63001f)). **Current conditions:**
 >
-> 1. **Yield backing is funded, but the buffer is nearly exhausted.** `IERC20(GHO).balanceOf(sGho) = 176,982,243` against `totalAssets() = 176,935,741` — a **46,502 GHO surplus (0.03% of `totalAssets`)**, about 2.1 days of accrual at ~21,814 GHO/day. The last top-up was 220,000 GHO on September 30 (13 days before the snapshot). Twelve top-ups totalling **2,584,000 GHO** have been made since launch, all executed by the **Aave Finance Committee Safe** ([`0x2274…1bFa`](https://etherscan.io/address/0x22740deBa78d5a0c24C58C740e3715ec29de1bFa), 2-of-3); since August 11, 2026 the GHO is pulled directly from the Aave Collector through an AFC GHO allowance. The vault ran a deficit of up to ~269,000 GHO before the July 31 top-up and briefly again around September 6–8 (peak ~32,600 GHO). No contract enforces or schedules the funding.
+> 1. **Yield backing has slipped into a small deficit.** At the funding refresh (October 15, 2026, block 26,198,170) `IERC20(GHO).balanceOf(sGho) = 227,372,845` against `totalAssets() = 227,384,901` — a **12,056 GHO deficit (−0.005% of `totalAssets`)**, about −0.4 days of accrual at ~28,034 GHO/day. On October 13 (block 26,181,150) the vault still held a +46,502 GHO surplus. No top-up has been made since 220,000 GHO on September 30 (15 days), while TVL rose from 176.9M to 227.4M GHO, mostly from two deposits totalling ~49.5M GHO by one EOA ([`0xb873…313c`](https://etherscan.io/address/0xb8734a14fbd4aa2d44e6aa830405ffc861ba313c)) on October 14. Yield accrues every second on the larger base, but the AFC funds it only in periodic top-ups, so accrual has overtaken the last top-up. Twelve top-ups totalling **2,584,000 GHO** have been made since launch, all executed by the **Aave Finance Committee Safe** ([`0x2274…1bFa`](https://etherscan.io/address/0x22740deBa78d5a0c24C58C740e3715ec29de1bFa), 2-of-3); since August 11, 2026 the GHO is pulled directly from the Aave Collector through an AFC GHO allowance. The vault ran a deficit of up to ~269,000 GHO before the July 31 top-up and briefly again around September 6–8 (peak ~32,600 GHO). No contract enforces or schedules the funding.
 > 2. **The GSM USDC exit route remains exhausted; the USDT fallback has partly recovered.** GSM USDC `getAvailableLiquidity()` is **0.03 waEthUSDC** — `buyAsset()` has been unusable since mid-June 2026 — and its buy fee was raised **10 → 15 bps** on September 17, 2026 (tx [`0xe967a8…b0b6`](https://etherscan.io/tx/0xe967a8ea12c94ed48deffa425dfb2ec2bfa2da1d0063b8d7d29d6dfb5df7b0b6)). GSM USDT, the deepest deterministic exit, holds **29.35M waEthUSDT shares, worth ≈34.60M USDT / GHO** (≈18.94M on September 27; ≈50.81M on July 27), against 176.9M GHO of sGho claims. Aggregator quotes route ~30M GHO to USDC at <0.3% price impact, with a sharp cliff before 40M.
 > 3. **The GHO Risk Council was reconstituted as a 2-of-3 Safe** on August 23, 2026 (tx [`0x9f0f43…5e3e`](https://etherscan.io/tx/0x9f0f435d8d37f9e3446fad0737b57ba37ac00ac841da1bd432085b481bd15e3e)). Its signers are organisation-controlled nested Safes for Aave Labs, LlamaRisk, and TokenLogic ([ARFC](https://governance.aave.com/t/arfc-gho-stewards-signer-update/25452)), the **same three signers as the AFC Safe**. The parties that set the sGho rate also control its funding.
 >
@@ -141,7 +141,7 @@ Source-of-truth references: [`aave-address-book/GhoEthereum.sol`](https://github
 | sGho `paused` | **false** — no `Paused` event since launch | `cast call SGHO paused()` |
 | sGho `totalAssets()` | **176,935,741 GHO** (~$176.7M); `totalSupply() = 173,834,355` shares | `cast call SGHO totalAssets()` |
 | sGho `convertToAssets(1e18)` | `1.017841e18` — 1.78% accrued over 150 days | `cast call SGHO convertToAssets(uint256) 1e18` |
-| **sGho GHO balance vs `totalAssets()`** | **Surplus — `balanceOf(sGho) = 176,982,243` > `totalAssets() = 176,935,741`; buffer 46,502 GHO (0.03%, ~2.1 days of accrual)** | `cast call GHO balanceOf(SGHO)` |
+| **sGho GHO balance vs `totalAssets()`** | **Surplus — `balanceOf(sGho) = 176,982,243` > `totalAssets() = 176,935,741`; buffer 46,502 GHO (0.03%, ~2.1 days of accrual).** Refreshed October 15 (block 26,198,170): **deficit of 12,056 GHO** (227,372,845 vs 227,384,901; ~−0.4 days) | `cast call GHO balanceOf(SGHO)` |
 | sGho implementation unchanged | **Yes** — EIP-1967 impl slot = [`0xff229a…7c04`](https://etherscan.io/address/0xff229a0bbb614a284de8ae0e41e5974878fd7c04); no `Upgraded` event | `cast storage SGHO 0x3608…2bbc` |
 | sGho ProxyAdmin owner | Aave Governance Executor L1 ([`0x5300…192A`](https://etherscan.io/address/0x5300A1a15135EA4dc7aD5a167152C01EFc9b192A)) | `cast call ProxyAdmin owner()` |
 | sGho role assignments changed? | **No** — zero `RoleGranted`/`RoleRevoked` events after the AIP-484 execution block | Etherscan `getLogs` on sGho |
@@ -361,28 +361,30 @@ Enumerating every GHO `Transfer` into sGho since launch (3,220 inbound transfers
 
 No top-up has been executed by the Governance Executor L1 or any party other than the AFC Safe.
 
-### Current funding position (October 13, 2026, block 26,181,150)
+### Current funding position (October 15, 2026, block 26,198,170; October 13 shown for comparison)
 
-| Quantity | Value (GHO) | Derivation |
-|---|---|---|
-| `totalAssets()` (obligation) | 176,935,740.60 | `cast call SGHO totalAssets()` |
-| `GHO.balanceOf(sGho)` (actual) | 176,982,242.82 | `cast call GHO balanceOf(SGHO)` |
-| Net principal (Σ `Deposit` − Σ `Withdraw` assets) | 174,398,242.82 | 454,531,734.08 in − 280,133,491.26 out |
-| Yield obligation accrued since launch | 2,537,497.78 | `totalAssets` − net principal |
-| Yield funded | 2,584,000.00 | twelve transfers above |
-| **Funding buffer** | **+46,502.22** | **0.03% of `totalAssets`; ~2.1 days of accrual** |
+| Quantity | Oct 13 (block 26,181,150) | Oct 15 (block 26,198,170) | Derivation |
+|---|---|---|---|
+| `totalAssets()` (obligation) | 176,935,740.60 | 227,384,901.17 | `cast call SGHO totalAssets()` |
+| `GHO.balanceOf(sGho)` (actual) | 176,982,242.82 | 227,372,845.37 | `cast call GHO balanceOf(SGHO)` |
+| Net principal (Σ `Deposit` − Σ `Withdraw` assets) | 174,398,242.82 | 224,788,845.37 | balance − yield funded (identity below) |
+| Yield obligation accrued since launch | 2,537,497.78 | 2,596,055.80 | `totalAssets` − net principal |
+| Yield funded | 2,584,000.00 | 2,584,000.00 | twelve transfers above; none since September 30 |
+| **Funding buffer** | **+46,502.22** (+0.026%, ~2.1 days) | **−12,055.80** (−0.005%, ~−0.4 days) | `balance − totalAssets` ÷ daily accrual |
 
-The obligation now grows at `totalAssets × 4.50% / 365` ≈ **21,814 GHO/day**, up from ~15,890 GHO/day in July because of both TVL growth and the September 1 rate increase. The last top-up was on September 30 (13 days before this snapshot), so without another top-up the buffer turns negative around October 15, 2026.
+At block 26,198,071 (October 15, 12:59 UTC) the figures were balance 227,372,845.37, `totalAssets` 227,384,515.70, buffer **−11,670.34 GHO** (−0.4 days). `targetRate()` is still 450 (4.50%) at all three blocks. The obligation now grows at `totalAssets × 4.50% / 365` ≈ **28,034 GHO/day** (21,814 on October 13), because ~49.5M GHO of new deposits on October 14 joined the yield base. Between October 13 and 15 there were 19 deposits (51.85M GHO in), 28 outbound transfers (1.46M GHO out), and no top-up: every inbound GHO transfer matched a `Deposit`. The deficit widens by about 28,000 GHO per day until the AFC tops up.
+
+**Can withdrawals still be met?** Yes for almost everyone. `maxWithdraw` is capped by the vault's GHO balance, which covers 99.995% of claims, so every holder except the last ~12,056 GHO of claims can redeem in full today. The shortfall is borne by whoever exits last, not shared pro rata. The deficit is small: about 0.005% of `totalAssets`, and less than one AFC top-up (220,000–500,000 GHO). It is the same accrual-ahead-of-funding pattern as September 6–8, and the October 13 report projected it for about October 15. It becomes material only if top-ups stop for weeks, as in June–July.
 
 **Funding history.** Sampling `balanceOf(sGho) − totalAssets()` about once a day from July 27 to September 27, and every 12 hours from September 27 to October 13, shows:
 
 - The deficit kept widening after the July snapshot and peaked at ~269,000 GHO before the 500,000 GHO top-up on July 31, which ended a **32-day** funding gap
-- Top-ups have since come every 10–16 days (August 11, August 27, September 8, September 20, September 30). The vault stayed in surplus except for a short deficit around **September 6–8, 2026** (peak ~32,600 GHO), which the September 8 transfer closed. From September 27 to October 13 the buffer stayed positive, falling from +152,179 to +93,401 GHO before the September 30 top-up lifted it to ~310,000, then declining steadily to +46,502
+- Top-ups have since come every 10–16 days (August 11, August 27, September 8, September 20, September 30). The vault stayed in surplus except for a short deficit around **September 6–8, 2026** (peak ~32,600 GHO), which the September 8 transfer closed. From September 27 to October 13 the buffer stayed positive, falling from +152,179 to +93,401 GHO before the September 30 top-up lifted it to ~310,000, then declining steadily to +46,502 on October 13. It turned negative around October 14–15 (−12,056 GHO at block 26,198,170), accelerated by ~49.5M GHO of new deposits
 - Top-up sizes approximately cover accrual over each interval, so the buffer never exceeds ~320,000 GHO (~15 days of accrual)
 
-The identity `balance = net principal + funding` holds exactly, so the vault's GHO balance currently covers every indexed claim.
+The identity `balance = net principal + funding` holds exactly. On October 13 the vault's GHO balance covered every indexed claim; on October 15 it covers all but 12,056 GHO of them.
 
-**The mechanism that makes a deficit dangerous is unchanged.** Because `maxWithdraw` lets a single owner extract up to the *full* GHO balance (capped only by the vault total, not by a fair-share-of-shortfall), **early redeemers take their full virtual entitlement out of the shared GHO pool, and the residual is borne entirely by whoever is last**. Whenever the buffer turns negative, as it did in July and again in September, any positive shortfall can reach a late redeemer's principal; historical funding is not a protected cushion.
+**The mechanism that makes a deficit dangerous is unchanged.** Because `maxWithdraw` lets a single owner extract up to the *full* GHO balance (capped only by the vault total, not by a fair-share-of-shortfall), **early redeemers take their full virtual entitlement out of the shared GHO pool, and the residual is borne entirely by whoever is last**. Whenever the buffer turns negative, as it did in July, in September, and again now (October 15), any positive shortfall can reach a late redeemer's principal; historical funding is not a protected cushion.
 
 Illustrative worst case: 100 users each deposit 1 GHO at index 1.0. `yieldIndex` grows to 1.1 (10% virtual accrual) with no top-up — vault holds 100 GHO against 110 GHO of claims. If users 1–90 redeem first they each take 1.1 GHO (99 GHO drained). Users 91–100 then share the remaining 1 GHO — 0.1 GHO each, a **90% principal loss**.
 
@@ -390,7 +392,7 @@ Illustrative worst case: 100 users each deposit 1 GHO at index 1.0. `yieldIndex`
 - The funding is discretionary, manual, unscheduled, and executed by a **2-of-3 multisig**. There is no contract-enforced obligation, no escrow, and no rate limit on how long it can lapse. The Collector allowance improves the source of funds, but a top-up still needs an AFC transaction
 - Since August 23, 2026 the AFC and the Risk Council that sets the ASR share the same three signers. A rate increase is therefore decided by the same parties who must fund it, but no rule links the two actions
 - The buffer is deliberately thin: the observed pattern is roughly "fund accrued yield to date", so a single missed top-up reopens a deficit within days
-- The right monitoring metric is the **signed buffer and its slope**: track `(balance − totalAssets) / totalAssets` and days since the last top-up. Today: +0.03% and 13 days
+- The right monitoring metric is the **signed buffer and its slope**: track `(balance − totalAssets) / totalAssets` and days since the last top-up. Today (October 15): −0.005% and 15 days
 - A negative buffer is a principal-risk signal for a late redeemer. Monitor its size and slope to determine urgency
 - A Yearn strategy holding a large share of sGho would be structurally *late* in any exit race, since unwinding a vault position is slower than an individual EOA redemption
 
@@ -399,7 +401,7 @@ Illustrative worst case: 100 users each deposit 1 GHO at index 1.0. `yieldIndex`
 All on-chain numbers below from block 26,181,150 (2026-10-13 04:22 UTC) unless noted.
 
 - **sGho vault:** **Live since May 16, 2026 (AIP 484 execution) — 150 days of production history, no security incidents.** `totalAssets() = 176,935,741 GHO` (~$176.7M at a GHO price of $0.9984), `totalSupply() = 173,834,355` shares. `convertToAssets(1e18) = 1.017841e18` → 1.78% accrued since launch. The ASR was 4.25% until September 1, 2026 and 4.50% since. The contract was deployed on May 5, 2026 and became operational when AIP 484 wired up the roles and supply cap on May 16. 3,208 deposits and 2,111 withdrawals processed
-- **sGho funding:** 2,584,000 GHO of yield backing transferred in across twelve AFC-executed transactions (May 17 – September 30, 2026). The vault ran an unfunded-yield deficit from mid-July to July 31, 2026 (peak ~269,000 GHO) and briefly around September 6–8, 2026 (peak ~32,600 GHO). It currently holds a 46,502 GHO surplus
+- **sGho funding:** 2,584,000 GHO of yield backing transferred in across twelve AFC-executed transactions (May 17 – September 30, 2026). The vault ran an unfunded-yield deficit from mid-July to July 31, 2026 (peak ~269,000 GHO) and briefly around September 6–8, 2026 (peak ~32,600 GHO). It held a 46,502 GHO surplus on October 13 and a 12,056 GHO deficit on October 15 (block 26,198,170)
 - **GHO stablecoin:** Launched July 2023 — **~3.25 years** in production
 - **GHO mainnet supply:** 699.0M GHO (on-chain `totalSupply()`), up from 649.0M on July 27 and 584.0M in May
 - **GHO market price:** $0.9984 ([DeFiLlama](https://coins.llama.fi/prices/current/ethereum:0x40D16FC0246aD3160Ccc09B8D0D3A2cD28aE6C2f)); 30-day daily range $0.9982–$0.9995. TokenLogic attributes the persistent ~10 bps discount mainly to Horizon looping activity ([September parameter update](https://governance.aave.com/t/gho-stewards-september-2026-gho-parameter-update/25644)). The Horizon GHO base rate was raised from 3.00% to 3.25% on September 16, 2026 (`RateDataUpdate` on Horizon's GHO rate strategy [`0x8759…b521`](https://etherscan.io/address/0x87593272C06f4FC49EC2942eBda0972d2F1Ab521), [tx](https://etherscan.io/tx/0x66ed50895fadfff18313f6a61caa4f6e02738fa86fbf97251b8fa442719a9dc8); `getInterestRateDataBps(GHO) = (9900, 325, 0, 0)`)
@@ -441,7 +443,7 @@ GHO is deposited into the sGHO ERC-4626 vault. Shares are issued based on the cu
 
 ### Collateralization
 
-- **sGHO:** GHO deposited remains in the contract — **no rehypothecation**. `balanceOf(sGho) = 176.98M` covers `totalAssets() = 176.94M` (46,502 GHO surplus) and exceeds net principal deposits of 174.40M. Yield backing still depends on discretionary AFC Safe transfers. The buffer is about two days of accrual, and deficits occurred in July and September. During a deficit, withdrawals do not preserve principal for late users
+- **sGHO:** GHO deposited remains in the contract — **no rehypothecation**. On October 15 (block 26,198,170) `balanceOf(sGho) = 227.37M` is 12,056 GHO short of `totalAssets() = 227.38M` but exceeds net principal deposits of 224.79M (on October 13: 176.98M vs 176.94M, a 46,502 GHO surplus). Yield backing still depends on discretionary AFC Safe transfers. The buffer was about two days of accrual on October 13 and is negative (~−0.4 days) on October 15; deficits also occurred in July and September. During a deficit, withdrawals do not preserve principal for late users
 - **GSM USDC:** Holds waEthUSDC (wrapped Aave USDC supply position). Each waEthUSDC is redeemable for USDC from Aave V3 (subject to Aave V3 liquidity, currently 139.93M USDC). Present waEthUSDC inventory: **0.03 shares**
 - **GSM USDT:** 29.35M waEthUSDT shares (≈34.60M USDT) — the deepest currently available GSM redemption route for GHO
 - **No leverage** in the pipeline
@@ -458,7 +460,7 @@ GHO is deposited into the sGHO ERC-4626 vault. Shares are issued based on the cu
 
 ## Liquidity Risk
 
-**Leg 1 — sGho → GHO: atomic, currently fully backed.** ERC-4626 `withdraw()`/`redeem()` has no cooldown or queue. The vault holds 176.98M GHO against 176.94M of claims. When the funding buffer is negative, early redeemers can still exit in full and the deficit falls on the last claims, including those holders' principal.
+**Leg 1 — sGho → GHO: atomic, backed except for a small yield deficit.** ERC-4626 `withdraw()`/`redeem()` has no cooldown or queue. On October 15 (block 26,198,170) the vault holds 227.37M GHO against 227.38M of claims, 12,056 GHO short. When the funding buffer is negative, early redeemers can still exit in full and the deficit falls on the last claims, including those holders' principal.
 
 **Leg 2 — GHO → stablecoin: impaired, with no direct USDC route.** This is where the exit constraint sits:
 
@@ -551,7 +553,7 @@ sGHO and the GSM are governed through the **Aave DAO governance framework** — 
 |-----------|-------------|-------|
 | **Aave DAO Governance** | Critical | Controls upgrades of sGHO, GSM, and GHO Reserve, GHO facilitator (mint) roles, and emergency actions |
 | **GHO Token** | Critical | The underlying asset. Not upgradeable on Ethereum, but governance can add facilitators and change their mint buckets |
-| **AFC Safe (2-of-3)** | Critical | **Only party that has ever topped up the vault.** No contract enforces it. Funding lapsed for 32 days in June–July; since then it has been regular (every 11–16 days) and the vault holds a ~7-day buffer. Same signers as the Risk Council |
+| **AFC Safe (2-of-3)** | Critical | **Only party that has ever topped up the vault.** No contract enforces it. Funding lapsed for 32 days in June–July; since then it has been regular (every 10–16 days), but no top-up since September 30 and the vault ran a 12,056 GHO deficit on October 15. Same signers as the Risk Council |
 | **GSM USDC** | Critical | USDC↔GHO conversion path. Upgradeable, freezeable, and currently exhausted on the exit side |
 | **GSM USDT** | High | Currently the deepest working GHO exit route (≈18.94M USDT of value, down from ≈50.81M in July), but exits to USDT and is draining |
 | **GHO Reserve** | Critical | Pre-minted GHO pool for GSM operations. 275.45M GHO held — ample |
@@ -589,8 +591,8 @@ sGHO and the GSM are governed through the **Aave DAO governance framework** — 
 
 ### Critical Events to Monitor
 
-- **sGHO funding gap** — `IERC20(GHO).balanceOf(sGHO) < totalAssets()`. Currently **false** (+46,502 GHO buffer, ~2.1 days of accrual). It was true from mid-July to July 31 and around September 6–8, 2026. Monitor the signed ratio `(balance − totalAssets) / totalAssets` and its slope, not just the boolean
-- **Top-up lapse** — no unmatched GHO `Transfer` into sGho (AFC- or Collector-sourced) for > 21 days. Currently **13 days**; the post-July cadence is 10–16 days
+- **sGHO funding gap** — `IERC20(GHO).balanceOf(sGHO) < totalAssets()`. Currently **true** (−12,056 GHO at block 26,198,170 on October 15, ~−0.4 days of accrual; it was false at +46,502 GHO on October 13). It was also true from mid-July to July 31 and around September 6–8, 2026. Monitor the signed ratio `(balance − totalAssets) / totalAssets` and its slope, not just the boolean
+- **Top-up lapse** — no unmatched GHO `Transfer` into sGho (AFC- or Collector-sourced) for > 21 days. Currently **15 days** (October 15); the post-July cadence is 10–16 days
 - **sGHO rate changes** — `TargetRateUpdated` event (yield rate changed by steward or governance). Last fired September 1, 2026 (425 → 450 bps)
 - **sGHO pause/unpause** — `Paused`/`Unpaused` events
 - **GSM exit capacity** — `getAvailableLiquidity()` on both GSMs. This is the metric that failed silently: no event fires when the module drains
@@ -628,7 +630,7 @@ sGHO and the GSM are governed through the **Aave DAO governance framework** — 
 - **Stable contract surface for 150 days:** no upgrade, supply-cap change, pause, or role grant or revocation on sGho or sGhoSteward since AIP 484 executed. The only parameter change is the September 1, 2026 rate increase (4.25% → 4.50%), made under the Risk Council's existing authority
 - **Aave DAO governance:** One of DeFi's most established on-chain governance systems. Upgrades and role changes require a DAO vote with timelock. Stewards handle day-to-day parameter management, rate-limited on the GSMs
 - **Simple sGHO design:** No rehypothecation, no external strategies, no leverage. GHO stays in the vault. Yield is purely accounting-based
-- **Currently fully backed:** the vault's GHO balance (176.98M) covers `totalAssets()` (176.94M) and exceeds net principal deposits (174.40M). Since August 2026, top-ups are drawn from a pre-approved Collector allowance (7.406M GHO remaining) on a 10–16-day cadence
+- **Nearly fully backed:** on October 15 (block 26,198,170) the vault's GHO balance (227.37M) is 12,056 GHO (0.005%) short of `totalAssets()` (227.38M) but exceeds net principal deposits (224.79M); on October 13 it was a 46,502 GHO surplus. Since August 2026, top-ups are drawn from a pre-approved Collector allowance (7.406M GHO remaining) on a 10–16-day cadence
 - **GHO ecosystem maturity:** GHO live since July 2023 (~3.25 years), GSMs operational, 699M mainnet supply, no security incidents. Migration out of legacy stkGHO is well advanced (216.75M → 30.51M)
 - **Aave protocol backing:** ~$17.31B Aave V3 TVL platform (DeFiLlama, October 13, 2026), 6+ years of operation, $1M bug bounty
 - **Token rescue protection:** sGHO `maxRescue()` returns 0 for GHO (underlying asset cannot be rescued by admin). GSM protects user funds tracked in `_currentExposure`
@@ -636,7 +638,7 @@ sGHO and the GSM are governed through the **Aave DAO governance framework** — 
 
 ### Medium-Severity Issues
 
-- **Yield backing is discretionary and runs a thin buffer (MEDIUM):** `IERC20(GHO).balanceOf(sGho) = 176,982,243` against `totalAssets() = 176,935,741` — a **46,502 GHO surplus**, about 2.1 days of accrual at ~21,814 GHO/day, 13 days after the last top-up. Every top-up is a manual AFC Safe transaction ([`0x2274…1bFa`](https://etherscan.io/address/0x22740deBa78d5a0c24C58C740e3715ec29de1bFa), 2-of-3). No contract enforces, schedules, or escrows this funding. The vault ran a deficit of up to ~269,000 GHO before July 31, 2026 and a short one around September 6–8. Since August the funding has been regular and drawn from a Collector allowance, so this is a medium-severity strategy risk rather than a high-severity protocol failure. Implications for Yearn:
+- **Yield backing is discretionary and runs a thin buffer (MEDIUM):** On October 15 (block 26,198,170) `IERC20(GHO).balanceOf(sGho) = 227,372,845` against `totalAssets() = 227,384,901` — a **12,056 GHO deficit**, about −0.4 days of accrual at ~28,034 GHO/day, 15 days after the last top-up (on October 13 it was a 46,502 GHO surplus). Every top-up is a manual AFC Safe transaction ([`0x2274…1bFa`](https://etherscan.io/address/0x22740deBa78d5a0c24C58C740e3715ec29de1bFa), 2-of-3). No contract enforces, schedules, or escrows this funding. The vault ran a deficit of up to ~269,000 GHO before July 31, 2026 and a short one around September 6–8. Since August the funding has been regular and drawn from a Collector allowance, so this is a medium-severity strategy risk rather than a high-severity protocol failure. Implications for Yearn:
   - `maxWithdraw` is capped by the vault's whole GHO balance rather than a pro-rata share. Whenever the buffer turns negative, the entire shortfall lands on whoever exits last. A vault-sized position is structurally slower to unwind than an EOA
   - Top-ups roughly match accrual to date, so one missed top-up reopens a deficit within about a week
   - Treat any negative buffer as an active principal-risk signal; monitor the signed ratio, its slope, and days since the last top-up to size or exit the position
@@ -675,7 +677,7 @@ sGHO and the GSM are governed through the **Aave DAO governance framework** — 
 
 ## Risk Score Assessment
 
-> **Note:** Scores below reflect on-chain state at block 26,181,150 (October 13, 2026). The sGho contract's code, admin, and roles are unchanged. The main penalties are (a) discretionary yield funding with a thin buffer, controlled by the same 2-of-3 signer set that sets the rate, (b) a vault history still under six months, and (c) exhausted GSM USDC exit inventory, with executable USDC depth bounded by a volatile GSM USDT pool.
+> **Note:** Scores below reflect on-chain state at block 26,181,150 (October 13, 2026), with the sGho funding buffer refreshed at block 26,198,170 (October 15, 2026: −12,056 GHO). The sGho contract's code, admin, and roles are unchanged. The main penalties are (a) discretionary yield funding with a thin buffer, controlled by the same 2-of-3 signer set that sets the rate, (b) a vault history still under six months, and (c) exhausted GSM USDC exit inventory, with executable USDC depth bounded by a volatile GSM USDT pool.
 
 **Scoring Guidelines:**
 - Be conservative: when uncertain between two scores, choose the higher (riskier) one
@@ -772,9 +774,9 @@ Counterweight: the signers are publicly attributed service providers adopted thr
 | Backing | GHO deposits stay in sGHO contract (no rehypothecation). GSM holds waEthUSDC (wrapped Aave USDC) |
 | Collateral quality | GHO: backed by over-collateralized Aave V3 loans and GSM stablecoins. waEthUSDC: USDC supply on Aave V3 |
 | Leverage | None |
-| Yield backing | **Virtual, currently funded with a thin buffer** — +46,502 GHO (0.03% of `totalAssets`, ~2.1 days of accrual, 13 days after the last top-up). Deficits occurred in mid/late July (peak ~269,000 GHO) and around September 6–8 (peak ~32,600 GHO) |
+| Yield backing | **Virtual, funded with a thin buffer that is now slightly negative** — +46,502 GHO (~2.1 days) on October 13; −12,056 GHO (−0.005%, ~−0.4 days, 15 days after the last top-up) on October 15 at block 26,198,170. Deficits occurred in mid/late July (peak ~269,000 GHO) and around September 6–8 (peak ~32,600 GHO) |
 
-**Collateralization Score: 2.75/5** — There is no rehypothecation, GHO stays in the vault, the balance currently covers every indexed claim, and the underlying assets are blue-chip with no leverage. The score stays at 2.75 rather than returning to 2.5 because the unfunded-yield condition has proven recurrent, not a one-off. It reappeared in September under the new funding cadence. The observed funding pattern leaves at most about two weeks of buffer, and only about two days at this snapshot. During any deficit, `maxWithdraw` allocates the shortfall to whoever exits last rather than pro rata. Deficits have been small relative to `totalAssets()` and are funded by an Aave DAO-controlled Safe, so this is a medium-severity impairment path, not a high-severity collateral failure. Returns to 2.5 if the buffer stays positive for a full quarter.
+**Collateralization Score: 2.75/5** — There is no rehypothecation, GHO stays in the vault, the balance covered every indexed claim on October 13 and is only 12,056 GHO (0.005%) short on October 15, and the underlying assets are blue-chip with no leverage. The score stays at 2.75 rather than returning to 2.5 because the unfunded-yield condition has proven recurrent, not a one-off. It reappeared in September under the new funding cadence and again on October 15. The observed funding pattern leaves at most about two weeks of buffer, about two days on October 13, and a small deficit (~−0.4 days) by October 15. During any deficit, `maxWithdraw` allocates the shortfall to whoever exits last rather than pro rata. Deficits have been small relative to `totalAssets()` and are funded by an Aave DAO-controlled Safe, so this is a medium-severity impairment path, not a high-severity collateral failure. Returns to 2.5 if the buffer stays positive for a full quarter.
 
 **Subcategory B: Provability**
 
@@ -789,13 +791,13 @@ Counterweight: the signers are publicly attributed service providers adopted thr
 
 **Funds Management Score = (2.75 + 1.25) / 2 = 2.0**
 
-**Score: 2.0/5** — Provability remains a genuine strength and the vault is currently fully backed. Collateralization is held at 2.75 because the funding deficit recurred in September and the buffer is structurally thin. Unchanged.
+**Score: 2.0/5** — Provability remains a genuine strength. The vault was fully backed on October 13 and 12,056 GHO (0.005%) short on October 15. Collateralization is held at 2.75 because that score already prices a recurrent, thin-buffer deficit; the October deficit is small and recent, and the rubric does not require a move unless the gap persists for more than a few days. Unchanged.
 
 #### Category 4: Liquidity Risk (Weight: 15%)
 
 | Factor | Assessment |
 |--------|-----------|
-| sGHO exit (leg 1) | Atomic ERC-4626 redemption, no cooldown. 176.98M GHO backs 176.94M of claims; during a deficit, early users exit in full and the last claims absorb it |
+| sGHO exit (leg 1) | Atomic ERC-4626 redemption, no cooldown. 227.37M GHO backs 227.38M of claims on October 15 (12,056 GHO short); during a deficit, early users exit in full and the last claims absorb it |
 | GHO → USDC via GSM USDC (leg 2) | **0.03 waEthUSDC shares (≈0.035 USDC) available — route effectively dead since ~June 12, 2026 (~4 months)** |
 | GHO → USDT via GSM USDT | 29.35M waEthUSDT shares ≈ 34.60M USDT / GHO at 10 bps (≈50.81M on July 27, ≈18.94M on September 27), delivers USDT not USDC — ~20% of sGho claims |
 | GHO → USDC executable (aggregator) | ~30M GHO at ≤0.30% shortfall; 40M at 10.83% (KyberSwap quotes, October 13, 2026, routing through GSM USDT, LitePSM, Fluid, Curve, Uniswap) |
@@ -907,7 +909,7 @@ Step-by-step view of the Yearn USDC strategy's two flows, with explicit fees at 
 | **`GSM.getAvailableLiquidity()` below the requested size — ACTIVE, 0.03 waEthUSDC shares (≈0.035 USDC)** | Step 2 of withdrawal (`buyAsset` reverts) | Only refills when a third party calls `sellAsset`, which requires GHO ≥ $1 after sell-side costs. GHO is at $0.9990, so there is no current incentive. The September 17, 2026 increase of the `buyAsset` fee to 15 bps is meant to slow further drains, not to refill the module. Governance could seed the module or create a sell-side refill incentive; lowering the `buyAsset` fee would instead make inventory draining cheaper |
 | GSM exposure at 175M-share cap (≈208.1M GHO) | Step 2 of deposit only (`sellAsset`) | Wait for withdrawals to free capacity, or DAO raises cap. Not binding today (~175M available) |
 | sGho `supplyCap` (400M GHO) reached | Step 3 of deposit | DAO raises cap via Steward `SUPPLY_CAP_MANAGER_ROLE`. Not binding today (223.1M headroom) |
-| `IERC20(GHO).balanceOf(sGho) < totalAssets()` — **not active, but about two days away** (+46,502 GHO buffer, 13 days after the last top-up); occurred mid/late July and September 6–8, 2026 | Step 1 of withdrawal for the last claims out — **any deficit can become principal loss for late redeemers after earlier users take their full indexed claims** | AFC Safe tops up GHO from the Collector allowance (last done September 30, 2026). Yearn-side mitigation: treat any negative buffer as principal risk; track its ratio and slope and size or exit before it widens |
+| `IERC20(GHO).balanceOf(sGho) < totalAssets()` — **active since about October 15** (−12,056 GHO at block 26,198,170, 15 days after the last top-up; +46,502 GHO on October 13); occurred mid/late July and September 6–8, 2026 | Step 1 of withdrawal for the last claims out — **any deficit can become principal loss for late redeemers after earlier users take their full indexed claims** | AFC Safe tops up GHO from the Collector allowance (last done September 30, 2026). Yearn-side mitigation: treat any negative buffer as principal risk; track its ratio and slope and size or exit before it widens |
 | Aave V3 USDC pool at high utilization | Step 3 of withdrawal | Wait for borrowers to repay, or use DEX path. Not binding today (139.93M USDC available) |
 
 ---
@@ -936,4 +938,4 @@ Step-by-step view of the Yearn USDC strategy's two flows, with explicit fees at 
 | April 2, 2026 | 2.1 | Pre-deployment assessment from ARFC/audit material; rechecked April 22, 2026 |
 | May 19, 2026 | 2.3 | Post-deployment refresh after AIP 484. On-chain roles, ProxyAdmin, rate, and supply cap verified. Centralization 2.0 → 2.5 (Risk Council holds unrate-limited sGhoSteward roles); Collateralization 2.0 → 2.5 (late-withdrawer impairment path) |
 | July 27, 2026 (updated Aug 6) | 2.50 | 72-day reassessment. sGho contract itself unchanged and clean; TVL 37.3M → 136.5M GHO. Live 205,146 GHO unfunded-yield gap (AFC Safe funding lapsed 28 days); GSM USDC exit inventory exhausted (111.25M → 9.95 waEthUSDC); GSM buy fee 7 → 10 bps. The funding gap, GSM USDC exhaustion, and exit fee are classified as medium-severity strategy risks, not high-severity protocol failures. Liquidity 2.5 → 3.5, Centralization 2.5 → 2.75, Funds Mgmt remains 2.0 after Collateralization 2.5 → 2.75 and Provability 1.5 → 1.25 (TokenLogic dashboard), Operational 1.5 → 2.0, Audits 2.5 → 2.25 |
-| [October 13, 2026](https://github.com/yearn/risk-score/pull/494) | 2.68 | 150-day reassessment (rubric-scored, snapshot rolled forward from September 27). sGho contract code, admin, and roles unchanged; TVL 136.5M → 176.9M GHO. ASR raised 4.25% → 4.50% by the Risk Council (September 1). Yield funding resumed July 31; the AFC now pulls from a Collector allowance (12 top-ups, 2.584M GHO). The vault holds a 46,502 GHO buffer (~2 days), with a short deficit around September 6–8. Risk Council reconstituted 3-of-4 → 2-of-3 with the same nested-Safe signers as the AFC. GSM USDC still empty (fee 10 → 15 bps); GSM USDT ≈50.81M → ≈18.94M (September 27) → ≈34.60M GHO of value. Aggregator quotes show ~30M GHO → USDC at ≤0.3%. GHO token corrected to non-upgradeable on Ethereum; Horizon GHO rate 3.25% verified. **Audits & Historical 2.25 → 3.00** (Audit 2 + History 4 for a 3–6 month vault; no sGHO formal verification). Governance 3.0 → 3.5 (un-timelocked 2-of-3 rate setter that also funds the rate) and Dependencies 2.5 → 3.0 (critical, discretionary or third-party), so Centralization 2.75 → 3.0. Liquidity 3.5 → 3.25 (quoted depth >$10M at <0.5%, but only ~17% of claims). Funds Mgmt and Operational unchanged. Final 2.50 → **2.68 Medium** |
+| [October 13, 2026 (funding refreshed Oct 15)](https://github.com/yearn/risk-score/pull/494) | 2.68 | 150-day reassessment (rubric-scored, snapshot rolled forward from September 27). sGho contract code, admin, and roles unchanged; TVL 136.5M → 176.9M GHO. ASR raised 4.25% → 4.50% by the Risk Council (September 1). Yield funding resumed July 31; the AFC now pulls from a Collector allowance (12 top-ups, 2.584M GHO). The vault held a 46,502 GHO buffer (~2.1 days) on October 13; by October 15 (block 26,198,170), with no top-up since September 30 and ~49.5M GHO of new deposits, it was 12,056 GHO short (−0.4 days), after a short deficit around September 6–8. No score change: Collateralization 2.75 already prices recurrent thin-buffer deficits. Risk Council reconstituted 3-of-4 → 2-of-3 with the same nested-Safe signers as the AFC. GSM USDC still empty (fee 10 → 15 bps); GSM USDT ≈50.81M → ≈18.94M (September 27) → ≈34.60M GHO of value. Aggregator quotes show ~30M GHO → USDC at ≤0.3%. GHO token corrected to non-upgradeable on Ethereum; Horizon GHO rate 3.25% verified. **Audits & Historical 2.25 → 3.00** (Audit 2 + History 4 for a 3–6 month vault; no sGHO formal verification). Governance 3.0 → 3.5 (un-timelocked 2-of-3 rate setter that also funds the rate) and Dependencies 2.5 → 3.0 (critical, discretionary or third-party), so Centralization 2.75 → 3.0. Liquidity 3.5 → 3.25 (quoted depth >$10M at <0.5%, but only ~17% of claims). Funds Mgmt and Operational unchanged. Final 2.50 → **2.68 Medium** |
