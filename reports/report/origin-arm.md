@@ -312,6 +312,7 @@ Final Score = (Audits × 0.20) + (Centralization × 0.30) + (Funds Mgmt × 0.30)
 |------|-------|-------|
 | May 18, 2026 | 1.50 | Initial assessment |
 | Aug 6, 2026 | 1.49 | Implementation upgraded to [`0x850d…6217`](https://etherscan.io/address/0x850da2e21f1f71479e2a307edab114777d9f6217) — [changes](https://gist.github.com/spalen0/54b015bb1c98089f0abb963459a57219); TVL ~$8.8M. New pause mechanism is in line with existing operator controls and bounded by governance-only unpause; protocol cannot block users indefinitely. Score unchanged. |
+| [Oct 19, 2026](https://github.com/yearn/risk-score/pull/540) | 1.49 | Operator EOA rotated via governance; allocation now 52.9% Lido WQ / 38.8% Morpho; Morpho vault adds weETH/WETH exposure (7.5%) and an unfunded WBTC/WETH market; GOV multisig signers rotated (5/8 unchanged). Score unchanged. |
 
 ---
 
