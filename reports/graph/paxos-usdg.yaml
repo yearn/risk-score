@@ -35,18 +35,21 @@ nodes:
       can only mint to the issuance treasury 0x264b…97B5 and can only burn
       its own balance.
   - id: sc2
-    label: Supply Controller 2 (1B/hr cap)
+    label: Supply Controller 2 (1B burst, self-whitelisted)
     address: "0x2fb074FA59c9294c71246825C1c9A0c7782d41a4"
     category: infra
     note: >-
-      EOA; 1B cap refilling over 1h. allowAnyMintAndBurnAddress = false —
-      can only mint to itself and can only burn its own balance.
+      EOA; 1B capacity refilling over 1h. allowAnyMintAndBurnAddress = false,
+      but its only whitelisted destination is itself — the single key can
+      mint 1B immediately (~25B per 24h) and transfer it anywhere (simulated
+      at block 26,221,465). Key custody model unknown.
   - id: oft-wrapper
     label: OFTWrapper (LayerZero V2)
     address: "0x147BdE4F997f0d4C7544ED0C55eAcf1E5E6bf9c4"
     category: infra
     note: >-
-      SC3; 225M USDG per 24h (raised from 45M between Mar and Sep 2026);
+      SC3; 225M USDG token-bucket capacity, 2,604/sec refill — 225M burst,
+      ~450M max per 24h (capacity raised from 45M between Mar and Sep 2026);
       allowAnyMintAndBurnAddress = true. owner() and LayerZero delegate are
       the Operations MPC wallet, with no timelock.
   - id: sc4
@@ -58,12 +61,12 @@ nodes:
       refilling over 1h, whitelisted to the issuance treasury only. Unused
       (nonce 0).
   - id: sc5-bridge
-    label: SC5 Attestor Bridge (100M/24h)
+    label: SC5 Attestor Bridge (100M burst)
     address: "0x40D16A860e295fb4E096Cdb5e99C32721194add4"
     category: infra
     note: >-
       ERC1967 proxy, added Oct 2 2026 directly by the MPC wallet. Implementation
-      0xb9de…362f is NOT source-verified. 100M USDG per 24h,
+      0xb9de…362f is NOT source-verified. 100M USDG burst, ~200M max per 24h,
       allowAnyMintAndBurnAddress = true. One ATTESTOR and one WITNESS EOA.
       Registers USDG, PYUSD, PAXG to an undisclosed chain (id 7). Unused so far.
   - id: facets
@@ -206,11 +209,11 @@ edges:
   - from: sc2
     to: usdg
     kind: mints
-    label: SUPPLY_CONTROLLER (1B/hr, whitelisted dest)
+    label: SUPPLY_CONTROLLER (1B burst; self-whitelisted, transferable)
   - from: oft-wrapper
     to: usdg
     kind: mints
-    label: SUPPLY_CONTROLLER (225M/24h; bridge; any dest)
+    label: SUPPLY_CONTROLLER (225M burst, ~450M/24h; bridge; any dest)
   - from: sc4
     to: usdg
     kind: mints
@@ -218,7 +221,7 @@ edges:
   - from: sc5-bridge
     to: usdg
     kind: mints
-    label: SUPPLY_CONTROLLER (100M/24h; attestor bridge; any dest; unverified source)
+    label: SUPPLY_CONTROLLER (100M burst, ~200M/24h; attestor bridge; any dest; unverified source)
 
   # === Supply controller registry ===
   - from: supply-control

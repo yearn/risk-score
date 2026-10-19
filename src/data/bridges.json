@@ -348,7 +348,7 @@
           "kind": "direct",
           "model": "mint",
           "integration": "LayerZero V2 OFT (OFTWrapper)",
-          "detail": "OFTWrapper is Supply Controller SC3 with **225M USDG / 24h** mint capacity (2,604 USDG/sec refill), raised from 45M in five steps between March and September 2026 — the bridge can mint native USDG to any address (`allowAnyMintAndBurnAddress = true`). Configured peers: Solana, X Layer, Ink, Arbitrum, Robinhood Chain, and Mantle (added Sep 22, 2026). The wrapper's `owner()` and LayerZero delegate are both the Paxos Operations MPC wallet with **no timelock**, so the peer set and DVN quorum can be changed with immediate effect.",
+          "detail": "OFTWrapper [`0x147B…c9f4`](https://etherscan.io/address/0x147BdE4F997f0d4C7544ED0C55eAcf1E5E6bf9c4) is Supply Controller SC3 with a **225M USDG** token-bucket capacity refilling at 2,604 USDG/sec — a 225M burst and up to ~450M in any 24 hours from a full bucket. Capacity was raised from 45M in five steps between March and September 2026 — the bridge can mint native USDG to any address (`allowAnyMintAndBurnAddress = true`). Configured peers: Solana, X Layer, Ink, Arbitrum, Robinhood Chain, and Mantle (added Sep 22, 2026). The wrapper's `owner()` and LayerZero delegate are both the Paxos Operations MPC wallet with **no timelock**, so the peer set and DVN quorum can be changed with immediate effect.",
           "icon": "stablecoin:global-dollar",
           "security": {
             "label": "3-of-3",
@@ -644,6 +644,31 @@
           "model": "lock",
           "integration": "OP Stack + Arbitrum Nitro canonical bridges (SkyLink)",
           "detail": "Primary USDS/sUSDS cross-chain route: ~$0.45B USDS + ~812M sUSDS escrowed on L1 and minted 1:1 on Base, Optimism, Unichain (OP Stack) and Arbitrum (Nitro). No bridge holds `wards` on USDS. LayerZero carries only Solana + Avalanche (<0.7% of mainnet USDS supply)"
+        }
+      ]
+    },
+    {
+      "id": "paxos-attestor-bridge",
+      "name": "Paxos Attestor Bridge (SC5)",
+      "type": "Issuer-operated attestor/witness burn-and-mint bridge",
+      "url": "https://etherscan.io/address/0x40D16A860e295fb4E096Cdb5e99C32721194add4",
+      "finality": "TODO: no public documentation; settlement depends on unverified attestor/witness logic.",
+      "admin": "ERC1967 proxy whose `owner()`/`defaultAdmin()` is a 24h TimelockController [`0xDd05…7683`](https://etherscan.io/address/0xDd05D7769C622Ab60Aed26318B2a5b0308b77683); the Paxos Operations MPC wallet [`0x3Af3…024B`](https://etherscan.io/address/0x3Af3e85f4f97De7AD0f000B724Fb77fE5ffc024B) is that timelock's sole proposer, executor, and canceller, and holds `PAUSE_ROLE` on the bridge.",
+      "description": "Paxos-deployed bridge registered on October 2, 2026 as a USDG supply controller, independent of LayerZero. Mints are authorized by attestor and witness signatures rather than a third-party verifier network. Its implementation is not source-verified and no audit is public, so the signature rule and per-route rate-limit semantics cannot be reviewed. It registers USDG, PYUSD, and PAXG for one remote chain with internal id 7; the destination chain is undisclosed.",
+      "keywords": [
+        "attestor bridge"
+      ],
+      "ignore": [],
+      "dependencies": [
+        {
+          "slug": "paxos-usdg",
+          "name": "Paxos USDG",
+          "kind": "direct",
+          "model": "mint",
+          "integration": "Paxos attestor bridge (SC5) — Ethereum ↔ undisclosed chain (internal id 7)",
+          "detail": "Proxy [`0x40D1…add4`](https://etherscan.io/address/0x40D16A860e295fb4E096Cdb5e99C32721194add4) is Supply Controller SC5 with `allowAnyMintAndBurnAddress = true`. Its SupplyControl bucket is **100M USDG**, refilling at 1,157.4 USDG/sec, so it can mint a 100M burst and up to ~200M in any 24 hours to any address. Implementation [`0xb9de…362f`](https://etherscan.io/address/0xb9de5840469185bc07c217077685fa1eec7b362f) is **not source-verified**. Exactly one `ATTESTOR_ROLE` holder [`0x531f…bfea`](https://etherscan.io/address/0x531f8a5df301199c1a307fdf0353335f0295bfea) and one `WITNESS_ROLE` holder [`0x800a…8025`](https://etherscan.io/address/0x800ac3242a6bacfca4b510be2cc6a156f9c28025) exist, both fresh EOAs. At most two keys can authorize a mint, but whether one or both are required is unresolved. Internal per-route limits for USDG are 100M and 50M. Added directly by the MPC wallet via `SUPPLY_CONTROLLER_MANAGER_ROLE` with no timelock ([tx](https://etherscan.io/tx/0xd36764fe139d60bcdfae02a3b394c2d557ba3d040a81912fcf47497ca35b2fd6)). `burnNonce()` = 0: unused as of 2026-10-19.",
+          "icon": "stablecoin:global-dollar",
+          "owner": "Admin: 24h TimelockController [`0xDd05…7683`](https://etherscan.io/address/0xDd05D7769C622Ab60Aed26318B2a5b0308b77683) (MPC wallet [`0x3Af3…024B`](https://etherscan.io/address/0x3Af3e85f4f97De7AD0f000B724Fb77fE5ffc024B) sole proposer/executor/canceller)."
         }
       ]
     },
