@@ -514,4 +514,4 @@ For lending specifically, size any Morpho market on these tokens to the exit poo
 
 | Date | Score | Notes |
 | --- | --- | --- |
-| October 19, 2026 | 3.77 | Initial assessment of Royco Day Senior tranches (sr-reUSDe live test market; sr-liUSD-13w proposed, not deployed) |
+| [October 19, 2026](https://github.com/yearn/risk-score/pull/541) | 3.77 | Initial assessment of Royco Day Senior tranches (sr-reUSDe live test market; sr-liUSD-13w proposed, not deployed) |
