@@ -21,7 +21,12 @@ srRoyUSDC is the Senior Vault of **Royco Dawn**. It is an async ERC-4626 vault b
 - **Total supply:** 4,726,849.96 srRoyUSDC.
 - **PPS:** 1.030742 USDC per share (`convertToAssets(1e6)`).
 - **Allocation:** 100% to [RoycoVaultMakinaStrategy](https://etherscan.io/address/0xc5FeF644d59415cec65049e0653CA10eD9Cba778), which is now the only strategy (`getStrategies()`); the former MultisigStrategy is no longer attached. The vault holds 979.13 USDC idle.
-- **Deposits:** the last `Deposit` event was on August 6, 2026 (6 USDC). `maxDeposit()` still returns `type(uint256).max`, so the docs' closure is not visible at that getter. **TODO:** confirm the onchain mechanism that blocks deposits, such as a whitelist or KYC hook.
+- **Deposits:** the last `Deposit` event was on August 6, 2026 (6 USDC). **The docs' closure is not enforced onchain.**
+  - Deposits and mints pass through a `WhitelistUserDepositHook` ([`0x5c4952751cf5c9d4ea3ad84f3407c56ba2342f13`](https://etherscan.io/address/0x5c4952751cf5c9d4ea3ad84f3407c56ba2342f13)), configured on January 27, 2026 with the pre-deposit and pre-mint flags.
+  - All 26 addresses ever whitelisted remain whitelisted, and `canUserDeposit` returns `true` for each of them.
+  - Both the vault deposit limits (`getDepositLimits()`) and the hook's per-user cap are `type(uint256).max`.
+  - The hook is owned by the 1-of-4 Safe [`0xb2B80EBcb7EE285806ddcB26E84a444032D1c244`](https://etherscan.io/address/0xb2B80EBcb7EE285806ddcB26E84a444032D1c244).
+  - The wind-down therefore rests on Royco and whitelisted depositors choosing not to deposit.
 - **Withdrawals:** processed through 30-day epochs. Epochs 4–7 were processed on August 10, August 28, September 30, and October 15, 2026.
 - **Fees:** the docs list a 10% performance fee and 0% management fee. `PerformanceFeeAccrued` events were emitted through September 29, 2026. In March 2026, both fees were 0%.
 
@@ -38,7 +43,7 @@ srRoyUSDC is the Senior Vault of **Royco Dawn**. It is an async ERC-4626 vault b
 
 | Contract | Address | Status at snapshot |
 |----------|---------|--------------------|
-| srRoyUSDC (VaultProxy, ERC-4626) | [`0xcD9f5907F92818bC06c9Ad70217f089E190d2a32`](https://etherscan.io/address/0xcD9f5907F92818bC06c9Ad70217f089E190d2a32) | Withdrawal-only |
+| srRoyUSDC (VaultProxy, ERC-4626) | [`0xcD9f5907F92818bC06c9Ad70217f089E190d2a32`](https://etherscan.io/address/0xcD9f5907F92818bC06c9Ad70217f089E190d2a32) | Withdrawal-only per docs; whitelist deposit hook still admits 26 addresses |
 | Implementation (ConcreteAsyncVaultImpl) | [`0x1b5cd91e61505d431d2a61192a1006146bd9bb28`](https://etherscan.io/address/0x1b5cd91e61505d431d2a61192a1006146bd9bb28) | Unchanged since March 2026 |
 | Vault owner (`owner()`) | [`0x7c405bbD131e42af506d14e752f2e59B19D49997`](https://etherscan.io/address/0x7c405bbD131e42af506d14e752f2e59B19D49997) | Safe 3-of-4 (formerly the VAULT_MANAGER Safe). Also root `ADMIN` of the Royco Day AccessManager |
 | ConcreteFactory (vault proxy admin) | [`0x0265d73a8e61f698d8eb0dfeb91ddce55516844c`](https://etherscan.io/address/0x0265d73a8e61f698d8eb0dfeb91ddce55516844c) | Unchanged |
@@ -67,26 +72,34 @@ Dawn audits: Hexens (January 2026, plus March and April 2026 updates), Cantina c
 
 ### Current Allocation
 
-All vault capital sits in the Makina strategy. Its machine reports $4.87M AUM, last globally accounted on September 28, 2026. The hub caliber holds 9 positions:
-- Position marks total ~$3.55M, last updated October 15 and October 19, 2026. The largest marks are ~$2.68M, ~$0.62M, and ~$0.26M.
-- Base-token balances: ~154,418 PYUSD, ~745 frxUSD, and ~120 USDG.
-- `getNetAum()` currently reverts with `PositionAccountingStale`.
-- Machine-level liquidity available to the strategy is $1.21M (`maxWithdraw()`).
+All vault capital sits in the Makina strategy. Its machine reports $4.87M AUM, last globally accounted on September 28, 2026. Positions were mapped by matching each caliber position mark against the caliber's token balances and decoding its `managePosition` transactions:
 
-**TODO:** map each caliber position ID to its protocol and market (requires Makina position decoding). The caliber holds `ST_LP_ROLE` on the Royco Day AccessManager, but it holds **no** Day Senior tranche tokens at the snapshot.
+| Holding | Value (USD) | Share of AUM | Evidence |
+|---------|------------:|-------------:|----------|
+| [Pareto Credit Vault FalconX USDC](https://etherscan.io/address/0x17e9ab2992dfecbe779a06a92a6cdb9fe6aeeef3) (position 5) | 2,677,495 | 55.0% | Caliber balance 2,677,495.153561 = position mark. This is a Pareto credit vault for FalconX, per the token name. |
+| Idle USDC at the Makina machine | 1,206,024 | 24.8% | `USDC.balanceOf(machine)`; equals the strategy's `maxWithdraw()` |
+| Dialectic mGLOBAL machine shares, pending redemption (position 7) | 616,078 | 12.7% | On October 19, 2026 ([tx](https://etherscan.io/tx/0x49ea5f579c4acf017d3694023cce9a4406b56ab533ac16882756c9e3afa287da)), the caliber redeemed its Dawn Senior tranche ROY-ST-DMG ([`0xaC9CF7e8f83C471cA596F4371fF002cdaF9573e6`](https://etherscan.io/address/0xaC9CF7e8f83C471cA596F4371fF002cdaF9573e6)) for 604,168.91 DMG ([`0x761C3B16a5Afdd7A1869C4B979cFF3383d5Fe98B`](https://etherscan.io/address/0x761C3B16a5Afdd7A1869C4B979cFF3383d5Fe98B), a Makina machine share). It then queued that DMG in the `AsyncRedeemerFee` [`0xc4ecaf359a6174f9651c5fcd7b6fe9ae6b682ca5`](https://etherscan.io/address/0xc4ecaf359a6174f9651c5fcd7b6fe9ae6b682ca5) as request #2. That request is unfinalized (`lastFinalizedRequestId` = 1) and carries a 1.3% redeem fee. The underlying is Midas mGLOBAL (Fasanara) exposure via Dialectic's Makina machine [`0xC4fFab8540AC27E40D4e2930517aA711e9C00c5b`](https://etherscan.io/address/0xC4fFab8540AC27E40D4e2930517aA711e9C00c5b). |
+| frxUSD supplied on Aave V4 (position 4) | 256,990 | 5.3% | `getUserSuppliedAssets(12, caliber)` on spoke [`0x94e7a5dcbe816e498b89ab752661904e2f56c485`](https://etherscan.io/address/0x94e7a5dcbe816e498b89ab752661904e2f56c485) = 257,099.57 frxUSD; no debt |
+| PYUSD (idle base token) | 154,418 | 3.2% | Caliber balance |
+| VanEck VBILL, aEthUSDtb, frxUSD, USDG, dust Aave positions | ~3,700 | <0.1% | Caliber balances; positions 0, 1, 2, 3, 6, 8 |
+| **Total** | **~4,914,700** | | vs `lastTotalAum()` 4,871,250. The 0.9% gap reflects AUM last being globally accounted on September 28. |
+
+- `getNetAum()` on the caliber currently reverts with `PositionAccountingStale`.
+- The caliber holds `ST_LP_ROLE` on the Royco Day AccessManager but holds **no** Day Senior tranche tokens at the snapshot.
+- Several unsolicited airdrop tokens held by the caliber (ALPHA, TENDIE, GLAMDOG, ODYSSEY, HEX) are excluded.
 
 ### Accessibility
 
-- **Deposits:** closed per the docs. The last deposit was on August 6, 2026.
+- **Deposits:** closed per the docs, but not onchain: 26 whitelisted addresses can still deposit (see [Overview](#overview--links)). The last deposit was on August 6, 2026.
 - **Withdrawals:** request into the open 30-day epoch. The curator processes it over a ~2-day window, then the user claims. Partially filled or deprioritised requests roll to the next epoch. KYC/KYB is required for direct vault withdrawals ([Deposits and Withdrawals](https://docs.royco.org/deposits-and-withdrawals.md)).
 
 ### Token Mint Authority
 
-**Mint mechanism:** ERC-4626 `deposit`/`mint` (USDC pulled in the same transaction) plus fee-share minting through `accrueYield()`. The implementation is unchanged from the [initial assessment](https://github.com/yearn/risk-score/pull/119). With deposits closed, the only active mint path is performance-fee shares (10% per the docs).
+**Mint mechanism:** ERC-4626 `deposit`/`mint` (USDC pulled in the same transaction) plus fee-share minting through `accrueYield()`. The implementation is unchanged from the [initial assessment](https://github.com/yearn/risk-score/pull/119). Deposit minting remains technically open to the 26 whitelisted addresses. The other active mint path is performance-fee shares (10% per the docs).
 
 ### Collateralization and Provability
 
-`totalAssets()` is reported by the Makina strategy from the machine's AUM. That AUM is recomputed from caliber position marks, and those marks are stale at the snapshot. The underlying positions are not independently mapped in this update (see the TODO above).
+`totalAssets()` is reported by the Makina strategy from the machine's AUM. That AUM is recomputed from caliber position marks, and those marks are stale at the snapshot. The mapped holdings reconcile to within 0.9% of reported AUM (see [Current Allocation](#current-allocation)). **55% of the remaining capital is offchain credit (the Pareto FalconX credit vault)**, and a further 12.7% is a pending Midas mGLOBAL redemption. Their redeemability, not the onchain accounting, now drives how fast the wind-down can pay out.
 
 ## Liquidity Risk
 
@@ -121,7 +134,8 @@ Royco Foundation and Dialectic are winding the product down. Documentation state
 ### Key Risks
 
 - The product is in wind-down. Exits depend on curator epoch processing and a priority order that serves Royco's own vaults first.
-- Makina position marks are stale at the snapshot, and the composition of the $4.87M is not mapped here.
+- 55% of the remaining $4.87M is a Pareto FalconX credit-vault position and 12.7% is an unfinalized mGLOBAL redemption. Only ~$1.21M (24.8%) is idle USDC available for the next epoch. Makina position marks are stale at the snapshot.
+- Deposits are closed by policy only; the whitelist hook still admits 26 addresses.
 - Morpho lenders in the 91.5% LLTV market (~93% utilised) hold exposure to a collateral with no new deposits and epoch-gated redemption.
 
 ### Critical Risks
@@ -166,4 +180,4 @@ That derivation relied on the MultisigStrategy custody path, which the vault no 
 | [March 26, 2026](https://github.com/yearn/risk-score/pull/111) | 3.35 | Onchain Dawn tranching verified (Junior coverage 12.4–12.5% vs 10% required) |
 | [March 26, 2026](https://github.com/yearn/risk-score/pull/118) | 3.65 | MultisigStrategy full-custody handoff to the Treasury Safe identified; Collateralization 3.0 → 5.0 |
 | [March 26, 2026](https://github.com/yearn/risk-score/pull/119) | 3.80 | Provability 4.0 → 5.0 (admin-reported NAV over full-custody handoff); Funds Management 5.0 |
-| [October 19, 2026](https://github.com/yearn/risk-score/pull/541) | DEAD | Vault in withdrawal-only wind-down (Royco docs); no deposits since Aug 6, 2026; TVL $4.87M, 100% via Makina strategy (MultisigStrategy detached); 30-day epochs with requests rolled to epoch 8. Royco's active product assessed separately in [royco-day](royco-day.md). |
+| [October 19, 2026](https://github.com/yearn/risk-score/pull/541) | DEAD | Vault in withdrawal-only wind-down (Royco docs); no deposits since Aug 6, 2026; TVL $4.87M, 100% via Makina strategy (MultisigStrategy detached): 55% Pareto FalconX credit vault, 24.8% idle USDC, 12.7% pending mGLOBAL redemption. Deposit closure is policy only (whitelist hook still admits 26 addresses). 30-day epochs with requests rolled to epoch 8. Royco's active product assessed separately in [royco-day](royco-day.md). |

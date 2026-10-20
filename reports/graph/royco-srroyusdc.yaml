@@ -60,10 +60,27 @@ nodes:
     category: infra
     note: lastTotalAum 4.87M USDC; last global accounting Sep 28, 2026
   - id: makina-caliber
-    label: Makina hub Caliber (9 positions)
+    label: Makina hub Caliber
     address: "0x5476F4E23dAA093Ce6700e1026013c55F7AF9083"
+    category: strategy
+    note: Holds the vault's deployed positions; marks stale (PositionAccountingStale)
+  - id: pareto-falconx
+    label: Pareto Credit Vault FalconX USDC
+    address: "0x17e9ab2992dfecbe779a06a92a6cdb9fe6aeeef3"
     category: dependency
-    note: Position marks ~3.55M USDC; position-to-protocol mapping TODO
+    note: 2.68M USDC (55% of AUM); offchain credit vault
+  - id: dmg-redeemer
+    label: Dialectic mGLOBAL redemption (pending)
+    address: "0xc4ecaf359a6174f9651c5fcd7b6fe9ae6b682ca5"
+    category: dependency
+    note: >-
+      AsyncRedeemerFee request #2, 604,168.91 DMG (~0.62M USD, 12.7%), unfinalized;
+      underlying Midas mGLOBAL via Dialectic Makina machine
+  - id: aave-v4-frxusd
+    label: Aave V4 spoke (frxUSD supply)
+    address: "0x94e7a5dcbe816e498b89ab752661904e2f56c485"
+    category: dependency
+    note: 257,099.57 frxUSD supplied (5.3%), reserve 12
 
 edges:
   - from: owner-safe
@@ -91,8 +108,20 @@ edges:
     kind: routes-through
   - from: makina-machine
     to: makina-caliber
+    kind: allocates-to
+    label: ~3.71M USDC (75%); 1.21M USDC idle at machine
+  - from: makina-caliber
+    to: pareto-falconx
     kind: deposits-into
-    label: ~3.55M USDC marked positions
+    label: 2.68M USDC (55%)
+  - from: makina-caliber
+    to: dmg-redeemer
+    kind: deposits-into
+    label: 0.62M USD pending redemption (12.7%)
+  - from: makina-caliber
+    to: aave-v4-frxusd
+    kind: deposits-into
+    label: 0.26M frxUSD (5.3%)
   - from: makina-council
     to: makina-machine
     kind: holds-role

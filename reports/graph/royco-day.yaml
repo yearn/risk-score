@@ -48,10 +48,12 @@ nodes:
     category: infra
     note: Async deposit/redeem gateway; ST redemption T+1 and oracle-gated
   - id: oracle-adapter
-    label: Collateral oracle adapter (unverified)
+    label: Collateral oracle adapter (immutable)
     address: "0xF8aAd4D54E31EE811Fdc545C7A54D3D624840084"
     category: infra
-    note: Unverified bytecode; reads Re NAVFeedProxy with a 36h staleness limit
+    note: >-
+      Not source-published on Etherscan; bytecode matches audited ChainlinkPriceOracle
+      (commit 92f05aed). Reads Re NAVFeedProxy with a 36h staleness limit.
   - id: factory
     label: RoycoFactory (UUPS)
     address: "0xaAAaaAAAaE46cA12Bf3810DF8C13c5E8A4400812"
