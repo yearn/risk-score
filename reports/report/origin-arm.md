@@ -119,7 +119,7 @@ Supply caps were raised to effectively unlimited levels and the WBTC/WETH market
 
 ## Liquidity Risk
 
-- **Exit Mechanism:** Direct vault redemption with 10-minute delay. PPS locked at request time (no slippage on redemption value). Limited secondary DEX liquidity via Curve pool ([OETH/ARM-WETH-stETH](https://curve.finance/dex/ethereum/pools/factory-stable-ng-641/deposit), [`0x95753095f15870acc0cb0ed224478ea61aeb0b8e`](https://etherscan.io/address/0x95753095f15870acc0cb0ed224478ea61aeb0b8e), ~14.6 ETH / ~$35K of balances).
+- **Exit Mechanism:** Direct vault redemption with 10-minute delay. PPS locked at request time (no slippage on redemption value). Limited secondary DEX liquidity via Curve pool ([OETH/ARM-WETH-stETH](https://curve.finance/dex/ethereum/pools/factory-stable-ng-641/deposit), [`0x95753095f15870acc0cb0ed224478ea61aeb0b8e`](https://etherscan.io/address/0x95753095f15870acc0cb0ed224478ea61aeb0b8e), ~14.6 ETH / ~$35K of balances). Its gauge ([`0xFcaDecfc207e3329a38821E5B04f88029cc4fa62`](https://etherscan.io/address/0xFcaDecfc207e3329a38821E5B04f88029cc4fa62)) is active but has zero CRV weight (`gauge_relative_weight()` = 0 on the GaugeController).
 - **Immediate exits** limited to WETH balance plus withdrawable Morpho position: ~890 ETH (~47% of `totalAssets()`) at the snapshot block
 - **Larger exits** require Lido withdrawal queue processing (1-3 days)
 - No priority mechanism - first-come-first-served
