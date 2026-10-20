@@ -309,25 +309,29 @@ Role holders verified July 27, 2026 via `hasRole` against every governance addre
 
 ### GhoRouter — Can Admin Steal Funds?
 
+Read from the current [PR #34 draft source](https://github.com/TokenLogic-com-au/gho-origin/blob/429f25de96244c2c7c6904d67b662244c5261dc2/src/contracts/misc/GhoRouter.sol) (head `429f25de`, October 20, 2026). `GhoRouter` inherits `Ownable2StepWithGuardian`, `Pausable`, and `ReentrancyGuard`; `GHO` and `sGHO` are immutable. The draft is not deployed, so the owner and guardian are not yet known.
+
 | Vector | Possible? | Details |
 |--------|-----------|---------|
-| **Add malicious GSM to allowlist** | **YES** | Owner can call `setGsmAllowed()` with a malicious contract that passes basic validation (`GHO_TOKEN()` matches, `UNDERLYING_ASSET()` exists). Users calling swap functions through this malicious GSM could lose their tokens |
-| **Drain user wallets** | **No** | Router cannot pull tokens users haven't approved for that specific call |
-| **Rescue stranded tokens** | **YES** | Owner can call `rescueToken()` to transfer any ERC-20 held by the router to any address. The router is intended to avoid persistent balances, but stranded tokens remain an owner-controlled recovery path |
-| **Pause the router** | **Draft-dependent** | The original draft had no router-level pause; later PR #34 revisions add pausability tests. GSM paths can also be disabled by removing GSMs from the allowlist, and direct GHO↔sGHO paths fail if sGHO is paused. Reassess against the deployed source |
+| **Add malicious GSM to allowlist** | **YES** (owner) | `allowGsm()` only checks that the address has code, that `GHO_TOKEN()` returns GHO, and that `UNDERLYING_ASSET()` is non-zero. A malicious contract passing these checks could take tokens from users who route a swap through it. `revokeGsm()` removes an entry |
+| **Map a token to a malicious wrapper** | **YES** (owner) | `setTokenToStata()` only checks that the wrapper's `asset()` returns the token (and that the token is not GHO or sGHO). Paired with a malicious allowlisted GSM whose `UNDERLYING_ASSET()` is that wrapper, user deposits of the token could be wrapped into an attacker contract. An existing mapping cannot be overwritten without first calling `removeTokenToStata()` |
+| **Drain user wallets** | **No** (beyond the swap amount) | The router only pulls the `exactAmountIn` the caller approves for that call. `swap()` takes `minAmountOut` and `deadline`, but the slippage checks compare amounts *returned by* the GSM or wrapper (`sellAsset`, `buyAsset`, `redeem`), not balance changes. Where the router then pays out of its own balance, a falsified return reverts because the router holds nothing. On the GHO → token path through a mapped wrapper, `redeem()` sends output straight to the user, so a malicious owner-approved wrapper could report output it never delivered and keep the user's GHO. User protection on these paths therefore depends on the owner's allowlist and mapping choices |
+| **Rescue stranded tokens** | **YES** (owner) | `rescueToken()` sends any ERC-20 held by the router to any address. The draft returns unused GHO to the user, so the router should not hold balances during normal flow |
+| **Pause the router** | **YES** | `pause()` can be called by the owner or the guardian; `unpause()` by the owner only. Pausing blocks `swap()` and `previewSwap()`; it does not affect funds already in sGho or the GSMs |
+| **Ownership takeover** | Two-step | Ownership transfer requires the new owner to accept (`Ownable2Step`) |
 
-**GhoRouter status (re-verified October 13, 2026): still not deployed.** The powers above are read from the [PR #34](https://github.com/aave-dao/gho-origin/pull/34) draft source and describe what the router *would* be able to do — they are not live risk today. Current facts:
+**GhoRouter status (re-verified October 20, 2026): still not deployed.** The powers above describe what the router *would* be able to do — they are not live risk today. Current facts:
 
-| Gate from [issue #194](https://github.com/yearn/risk-score/issues/194) | Status (October 13, 2026) |
+| Gate from [issue #194](https://github.com/yearn/risk-score/issues/194) | Status (October 20, 2026) |
 |---|---|
-| `GhoRouter` proposal in [`aave-proposals-v3/src`](https://github.com/aave-dao/aave-proposals-v3/tree/main/src) | **No** — a full recursive tree listing of the repo returns no `GhoRouter` path |
+| `GhoRouter` proposal in [`aave-proposals-v3/src`](https://github.com/aave-dao/aave-proposals-v3/tree/main/src) | **No** — a full recursive tree listing of the repo returns no `GhoRouter` path. The Aave governance forum has no GhoRouter ARFC or AIP |
 | `GHO_ROUTER` entry in [`GhoEthereum.sol`](https://github.com/bgd-labs/aave-address-book/blob/main/src/GhoEthereum.sol) | **No** — the library lists `SGHO`, `SGHO_STEWARD`, GSMs, stewards, reserve, and facilitators; no router constant |
-| [gho-origin PR #34](https://github.com/aave-dao/gho-origin/pull/34) merged **and** deployed on mainnet | **No** — PR is open, not draft, and unmerged; latest commit `9c6c2a01` (merge of TokenLogic `main` into `gho-router`, September 16, 2026). It carries a full unit-test suite (`TestGhoRouterSwap`, `TestGhoRouterRescueToken`, `TestGhoRouterPausable`, …) and is still being maintained |
+| [gho-origin PR #34](https://github.com/aave-dao/gho-origin/pull/34) merged **and** deployed on mainnet | **No** — PR is open and blocked from merging. Commits on October 14–20, 2026 added two-step ownership with a guardian, returned unused GHO to the user, and extended tests (`TestGhoRouterGuardian`, `TestGhoRouterOwnership`, `TestGhoRouterSwapRouting`, …). Review is ongoing |
 | Aave Immunefi scope includes `GhoRouter` | **No** — "Sub-systems of GHO" does not enumerate any router |
 
-[AIP 492](https://github.com/aave-dao/aave-proposals-reports/blob/master/reports/v3-492-aave-v3-MayJune-2026-Funding-Update.md) reimbursed TokenLogic 11,655 aEthLidoGHO for a **GhoRouter audit**, and the PR includes a `docs/gho-router.md` and pausability tests that were absent from the original draft. No audit report or deployment payload has been published, and nothing is on-chain.
+[AIP 492](https://github.com/aave-dao/aave-proposals-reports/blob/master/reports/v3-492-aave-v3-MayJune-2026-Funding-Update.md) reimbursed TokenLogic 11,655 aEthLidoGHO for a **GhoRouter audit**. No audit report is in [`gho-origin/audits`](https://github.com/aave-dao/gho-origin/tree/main/audits), no deployment payload has been published, and nothing is on-chain.
 
-**Yearn's USDC → sGho strategy must therefore continue to compose USDC → waEthUSDC → GHO → sGho manually.** Even once deployed, the router would not change the economics: it wraps `GSM.sellAsset()`/`buyAsset()` calls, so the GSM exit fee (15 bps on USDC) and the GSM's exhausted underlying inventory both apply identically. Reassess the router's admin surface (`setGsmAllowed`, `rescueToken`, pause) when a payload actually deploys it.
+**Yearn's USDC → sGho strategy must therefore continue to compose USDC → waEthUSDC → GHO → sGho manually.** Even once deployed, the router would not change the economics: it wraps `GSM.sellAsset()`/`buyAsset()` calls, so the GSM exit fee (15 bps on USDC) and the GSM's exhausted underlying inventory both apply identically. When a payload deploys it, verify the owner and guardian addresses and re-read the admin surface (`allowGsm`, `setTokenToStata`, `rescueToken`, pause) against the deployed source.
 
 ## Critical Design Characteristic: Virtual/Unfunded Yield
 
@@ -531,7 +535,7 @@ sGHO and the GSM are governed through the **Aave DAO governance framework** — 
 | sGho Vault | **YES** (TransparentUpgradeableProxy) | Aave Governance Executor L1 (via ProxyAdmin [`0xc15700631020eba02317964550365b95a9a28adb`](https://etherscan.io/address/0xc15700631020eba02317964550365b95a9a28adb), `owner()` = [`0x5300…192A`](https://etherscan.io/address/0x5300A1a15135EA4dc7aD5a167152C01EFc9b192A)). Implementation slot unchanged at [`0xff229a…7c04`](https://etherscan.io/address/0xff229a0bbb614a284de8ae0e41e5974878fd7c04) |
 | GSM USDC | **YES** (TransparentUpgradeableProxy) | Aave Governance Executor L1 (via ProxyAdmin [`0x51bbc06d0032f8fea31f4f7a39e369c5e282cc21`](https://etherscan.io/address/0x51bbc06d0032f8fea31f4f7a39e369c5e282cc21)). Implementation slot unchanged at [`0x320be9…7e8e`](https://etherscan.io/address/0x320be97b4d10b6d20a05cae53a479fa2a0187e8e) |
 | GHO Token | **No** — Ethereum `GhoToken` is not a proxy (Etherscan proxy flag 0, empty EIP-1967 slot). The Certora "Upgradeable GHO" audit covers the upgradeable deployment used on other chains | Aave Governance controls facilitators and bucket capacities (mint authority), not the code |
-| GhoRouter | N/A — not deployed | (Draft is non-upgradeable with an owner-managed GSM allowlist) |
+| GhoRouter | N/A — not deployed | (Draft is non-upgradeable; `Ownable2StepWithGuardian` owner manages the GSM allowlist and token-to-wrapper mappings) |
 | GHO Reserve | **YES** (TransparentUpgradeableProxy) | Aave Governance |
 
 **All upgradeable contracts can have their implementation replaced by governance, which is the most powerful rug vector.** This is standard for Aave-governed contracts and relies on the trust assumption that Aave DAO governance (on-chain AAVE token voting with timelock) will not pass a malicious proposal.
