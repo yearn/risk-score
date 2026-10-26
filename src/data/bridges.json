@@ -76,7 +76,7 @@
           "kind": "direct",
           "model": "mint",
           "integration": "Axelar GMP (2-of-2 MultiAdapter)",
-          "detail": "Axelar is the second leg on JAAA's **four highest-supply remote chains**. `MultiAdapter` [`0x35C8…73BE`](https://etherscan.io/address/0x35C837F0A54B715a23D193E1476BFC9BC30073BE) `adapters(centrifugeId, 281474976710663, i)` returns LayerZero V2 [`0xD517…0295`](https://etherscan.io/address/0xD517BC7ba17271a8D87BE7355B2523bF5c750295) plus the AxelarAdapter [`0x34e9…6484`](https://etherscan.io/address/0x34e904237341C3de02D4447C3fF0ca8880ca6484) at quorum 2 / threshold 2 for Base (centrifugeId 2), Arbitrum (3), Avalanche (5) and BNB (6). Monad also holds live JAAA supply but pairs LayerZero with Chainlink CCIP, so both are live dependencies — see the Chainlink CCIP row. Both adapters must deliver a matching payload before a JAAA mint message executes, so compromising Axelar alone is not enough; MultiAdapter/admin or Spoke vulnerabilities could still bypass the quorum. Verified onchain August 20, 2026.",
+          "detail": "Axelar is the second leg on JAAA's **four highest-supply remote chains**. `MultiAdapter` [`0x35C8…73BE`](https://etherscan.io/address/0x35C837F0A54B715a23D193E1476BFC9BC30073BE) `adapters(centrifugeId, 281474976710663, i)` returns LayerZero V2 [`0xD517…0295`](https://etherscan.io/address/0xD517BC7ba17271a8D87BE7355B2523bF5c750295) plus the AxelarAdapter [`0x34e9…6484`](https://etherscan.io/address/0x34e904237341C3de02D4447C3fF0ca8880ca6484) at quorum 2 / threshold 2 for Base (centrifugeId 2), Arbitrum (3), Avalanche (5) and BNB (6). Monad, Pharos, X Layer and Arc pair LayerZero with Chainlink CCIP instead — see the Chainlink CCIP row. Both adapters must deliver a matching payload before a JAAA mint message executes, so compromising Axelar alone is not enough. The adapter set is pool-scoped: the Fordefi pool manager [`0x7bf0…02ec`](https://etherscan.io/address/0x7bf090b97f896fb77e852cc98aa52a8cb7dc02ec) can replace it with arbitrary adapters and threshold via `Hub.setAdapters` with no timelock, so the quorum is bounded by that key. Verified onchain October 26, 2026.",
           "owner": "Mint authority: Spoke [`0xEC35…25aB`](https://etherscan.io/address/0xEC3582fcDc34078a4B7a8c75a5a3AE46f48525aB), governed by Centrifuge Root — 48h timelock [`0x7Ed4…368f`](https://etherscan.io/address/0x7Ed48C31f2fdC40d37407cBaBf0870B2b688368f)."
         }
       ]
@@ -124,8 +124,8 @@
           "name": "Centrifuge JAAA",
           "kind": "direct",
           "model": "mint",
-          "integration": "Chainlink CCIP (2-of-2 MultiAdapter, new chains only)",
-          "detail": "CCIP is the second leg on Centrifuge's **newer chains**, one of which carries live supply. Reading `MultiAdapter` [`0x35C8…73BE`](https://etherscan.io/address/0x35C837F0A54B715a23D193E1476BFC9BC30073BE) `adapters(centrifugeId, poolId, i)` for the JAAA pool (`281474976710663`), the ChainlinkAdapter [`0x39CF…D955`](https://etherscan.io/address/0x39CF679Eb0Ac9075CFb5f94930A367Ba1557D955) pairs with LayerZero V2 on Monad (centrifugeId 11) and Pharos (12) at quorum 2 / threshold 2. **Monad holds ~483,418 JAAA**, so this is a live path, not a pre-wired one. JAAA's four highest-supply remote chains (Base, Arbitrum, Avalanche, BNB) use LayerZero + **Axelar**, not CCIP — see the Axelar row. X Layer (13) is configured with LayerZero alone (quorum 1). Verified onchain August 20, 2026.",
+          "integration": "Chainlink CCIP (2-of-2 MultiAdapter, newer chains)",
+          "detail": "CCIP is the second leg on Centrifuge's **newer chains**. Reading `MultiAdapter` [`0x35C8…73BE`](https://etherscan.io/address/0x35C837F0A54B715a23D193E1476BFC9BC30073BE) `adapters(centrifugeId, poolId, i)` for the JAAA pool (`281474976710663`), the ChainlinkAdapter [`0x39CF…D955`](https://etherscan.io/address/0x39CF679Eb0Ac9075CFb5f94930A367Ba1557D955) pairs with LayerZero V2 at quorum 2 / threshold 2 on Monad (centrifugeId 11), Pharos (12), X Layer (13) and Arc (14). X Layer and Arc ran LayerZero-only at 1 / 1 until [tx `0x0a8a…f837`](https://etherscan.io/tx/0x0a8a2e8e3a51a798a7e9af019ddb3df279f93bdb952eb432bcf9ce390044f837) on 2026-09-30. **Monad holds ~483,418 JAAA** (rwa.xyz), so this is a live path; X Layer and Arc supply is unverified (TODO). Base/Arbitrum/Avalanche/BNB use LayerZero + **Axelar** — see the Axelar row. The adapter set is pool-scoped: the Fordefi pool manager [`0x7bf0…02ec`](https://etherscan.io/address/0x7bf090b97f896fb77e852cc98aa52a8cb7dc02ec) can replace it with arbitrary adapters and threshold via `Hub.setAdapters` with no timelock, so the quorum is bounded by that key. Verified onchain October 26, 2026.",
           "owner": "Mint authority: Spoke [`0xEC35…25aB`](https://etherscan.io/address/0xEC3582fcDc34078a4B7a8c75a5a3AE46f48525aB), governed by Centrifuge Root — 48h timelock [`0x7Ed4…368f`](https://etherscan.io/address/0x7Ed48C31f2fdC40d37407cBaBf0870B2b688368f)."
         },
         {
@@ -458,7 +458,7 @@
           "kind": "direct",
           "model": "mint",
           "integration": "LayerZero V2 (2-of-2 MultiAdapter)",
-          "detail": "Spoke [`0xEC35…25aB`](https://etherscan.io/address/0xEC3582fcDc34078a4B7a8c75a5a3AE46f48525aB) holds mint authority on JAAA (`wards = 1`). LayerZero is one leg of a 2-of-2 MultiAdapter quorum; the **second leg is Axelar** on Base/Arbitrum/Avalanche/BNB and Chainlink CCIP on Monad. The LayerZero leg itself requires Deutsche Telekom + Canary plus 2-of-3 P2P/Nansen/Nethermind. Pharos and X Layer are configured but inactive with zero JAAA supply; X Layer is the sole configuration exception at quorum 1 / threshold 1 and should be reassessed if it gains supply or economic activity.",
+          "detail": "Spoke [`0xEC35…25aB`](https://etherscan.io/address/0xEC3582fcDc34078a4B7a8c75a5a3AE46f48525aB) holds mint authority on JAAA (`wards = 1`). LayerZero is one leg of a 2-of-2 MultiAdapter [`0x35C8…73BE`](https://etherscan.io/address/0x35C837F0A54B715a23D193E1476BFC9BC30073BE) quorum on every configured JAAA route; the **second leg is Axelar** on Base/Arbitrum/Avalanche/BNB and Chainlink CCIP on Monad/Pharos/X Layer/Arc. The LayerZero leg requires Deutsche Telekom + Canary plus 2-of-3 P2P/Nansen/Twinstake on every inbound route except Arc, which requires Canary + Twinstake plus 2-of-3 P2P/Horizen/LayerZero Labs. The adapter set is pool-scoped: the Fordefi pool manager [`0x7bf0…02ec`](https://etherscan.io/address/0x7bf090b97f896fb77e852cc98aa52a8cb7dc02ec) can replace it with arbitrary adapters and threshold via `Hub.setAdapters` with no timelock, so the quorum is bounded by that key.",
           "security": {
             "label": "4-of-5",
             "confirmations": 15,
@@ -467,12 +467,12 @@
               "Canary",
               "P2P",
               "Nansen",
-              "Nethermind"
+              "Twinstake"
             ],
-            "route": "10 chains→Ethereum (native-mint side)",
-            "note": "2 required DVNs plus 2-of-3 optional DVNs, identical across all 10 configured inbound routes. LayerZero is one leg of Centrifuge's 2-of-2 MultiAdapter quorum on every supply-carrying destination — paired with Axelar on Base/Arbitrum/Avalanche/BNB and with Chainlink CCIP on Monad. Pharos and X Layer are configured but inactive at zero supply; X Layer is the sole quorum-1 exception.",
+            "route": "Remote chains→Ethereum (native-mint side)",
+            "note": "2 required DVNs plus 2-of-3 optional DVNs on every configured inbound route. Arc (eid 30417) uses a different set: Canary + Twinstake required, 2-of-3 of P2P/Horizen/LayerZero Labs. Optional DVN [`0xa59B…0BA5`](https://etherscan.io/address/0xa59BA433ac34D2927232918Ef5B2eaAfcF130BA5) is listed by the LayerZero metadata as Twinstake (id `nethermind`). LayerZero is one leg of Centrifuge's 2-of-2 MultiAdapter quorum on every JAAA route, paired with Axelar on Base/Arbitrum/Avalanche/BNB and with Chainlink CCIP on Monad/Pharos/X Layer/Arc. The pool manager can change the adapter set without a timelock.",
             "weak": false,
-            "verifiedAt": "2026-08-20",
+            "verifiedAt": "2026-10-26",
             "link": "https://etherscan.io/address/0xD517BC7ba17271a8D87BE7355B2523bF5c750295"
           },
           "owner": "Mint authority: Spoke [`0xEC35…25aB`](https://etherscan.io/address/0xEC3582fcDc34078a4B7a8c75a5a3AE46f48525aB), governed by Centrifuge Root — 48h timelock [`0x7Ed4…368f`](https://etherscan.io/address/0x7Ed48C31f2fdC40d37407cBaBf0870B2b688368f)."

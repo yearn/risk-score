@@ -72,10 +72,10 @@ nodes:
     category: infra
     note: Outgoing cross-chain dispatcher; same-chain calls Spoke synchronously
   - id: multi-adapter
-    label: MultiAdapter (2-of-2, 1 exception)
+    label: MultiAdapter (2-of-2, manager-set)
     address: "0x35C837F0A54B715a23D193E1476BFC9BC30073BE"
     category: infra
-    note: JAAA-pool configs require LayerZero V2 + Axelar (Base/Arbitrum/Avalanche/BNB) or LayerZero V2 + Chainlink CCIP (Monad/Pharos); X Layer is LayerZero-only at quorum 1
+    note: JAAA-pool configs require LayerZero V2 + Axelar (Base/Arbitrum/Avalanche/BNB) or LayerZero V2 + Chainlink CCIP (Monad/Pharos/X Layer/Arc); adapter set changeable by the pool manager via Hub.setAdapters without timelock
   - id: root
     label: Root (48h timelock)
     address: "0x7Ed48C31f2fdC40d37407cBaBf0870B2b688368f"
@@ -110,7 +110,7 @@ nodes:
   - id: balance-sheet-managers
     label: JAAA BalanceSheet Managers
     category: governance
-    note: Two Safes (2-of-7 and 3-of-4), one EOA, and one trusted-call gateway can invoke pool-scoped issue/revoke
+    note: Two Safes (2-of-7 and 3-of-4), one EOA, and one OnOfframpManager can invoke pool-scoped issue/revoke and force-transfer (transferSharesFrom)
 
   # === External dependencies ===
   - id: dep-anemoy
@@ -125,7 +125,7 @@ nodes:
   - id: dep-layerzero
     label: LayerZero V2
     category: dependency
-    note: First leg on every destination; sole adapter on inactive X Layer route (quorum 1, zero JAAA supply)
+    note: First leg on every JAAA route; 4-of-5 effective DVN quorum (Arc uses a distinct DVN set)
   - id: dep-axelar
     label: Axelar GMP
     address: "0x4F4495243837681061C4743b74B3eEdf548D56A5"
@@ -134,7 +134,7 @@ nodes:
   - id: dep-ccip
     label: Chainlink CCIP
     category: dependency
-    note: Second quorum leg on Monad/Pharos; Monad holds live JAAA supply (~483,418)
+    note: Second quorum leg on Monad/Pharos/X Layer/Arc; Monad holds live JAAA supply (~483,418)
 
 edges:
   # === Governance flow → Root (master ward) ===
@@ -172,6 +172,10 @@ edges:
     kind: holds-role
     label: manager(poolId, addr) = true — issue/revoke path
   - from: pool-manager-eoa
+    to: multi-adapter
+    kind: manages
+    label: Hub.setAdapters — pool-scoped adapter set and threshold, no timelock
+  - from: pool-manager-eoa
     to: full-restrictions
     kind: manages
     label: updateMember (KYC allowlist)
@@ -192,7 +196,7 @@ edges:
   - from: multi-adapter
     to: dep-layerzero
     kind: routes-through
-    label: required leg on active routes; sole leg on inactive X Layer
+    label: quorum leg 2/2 (all routes)
   - from: multi-adapter
     to: dep-axelar
     kind: routes-through
@@ -200,7 +204,7 @@ edges:
   - from: multi-adapter
     to: dep-ccip
     kind: routes-through
-    label: quorum leg 2/2 (Monad/Pharos)
+    label: quorum leg 2/2 (Monad/Pharos/X Layer/Arc)
   - from: spoke
     to: jaaa
     kind: mints
