@@ -942,6 +942,27 @@ protocols:
     infrastructure:
     - Concrete
     - Royco
+  royco_day:
+    name: Royco Day (sr-reUSDe)
+    chain: ethereum
+    type: tranched_vault
+    address: '0x01Fe8a0d76D056393d24CC1402f7f852cdaFbAD0'
+    report: reports/report/royco-day.md
+    collateral:
+    - asset: reUSDe
+    yield_sources:
+    - protocol: re_reusd
+      assets:
+      - reUSDe
+      label: 100% collateral, 0% junior coverage
+    - protocol: infinifi
+      assets:
+      - liUSD-13w
+      label: proposed sr-liUSD-13w market (not deployed)
+    infrastructure:
+    - Royco
+    - Balancer
+    - Ethena
   superstate_ustb:
     name: Superstate (USTB)
     chain: ethereum
