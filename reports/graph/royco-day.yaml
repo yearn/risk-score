@@ -200,9 +200,17 @@ edges:
     kind: holds-role
     label: ADMIN_PAUSER (no delay)
   - from: admin-safe
-    to: oracle-adapter
+    to: kernel
     kind: controls
     label: setCollateralAssetOracle (3d)
+  - from: admin-safe
+    to: exit-pool
+    kind: controls
+    label: setStaticSwapFeePercentage (no delay)
+  - from: pauser-safe
+    to: exit-pool
+    kind: holds-role
+    label: pausePool (no delay)
   - from: admin-safe
     to: accountant
     kind: controls

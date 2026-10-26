@@ -27,7 +27,7 @@ srRoyUSDC is the Senior Vault of **Royco Dawn**. It is an async ERC-4626 vault b
   - Both the vault deposit limits (`getDepositLimits()`) and the hook's per-user cap are `type(uint256).max`.
   - The hook is owned by the 1-of-4 Safe [`0xb2B80EBcb7EE285806ddcB26E84a444032D1c244`](https://etherscan.io/address/0xb2B80EBcb7EE285806ddcB26E84a444032D1c244).
   - The wind-down therefore rests on Royco and whitelisted depositors choosing not to deposit.
-- **Withdrawals:** processed through 30-day epochs. Epochs 4–7 were processed on August 10, August 28, September 30, and October 15, 2026.
+- **Withdrawals:** processed through epochs of up to 30 days ([docs](https://docs.royco.org/how-the-vaults-work.md)). Epochs 4–7 closed on August 10, August 28, September 30, and October 15, 2026, gaps of 18, 33, and 15 days.
 - **Fees:** the docs list a 10% performance fee and 0% management fee. `PerformanceFeeAccrued` events were emitted through September 29, 2026. In March 2026, both fees were 0%.
 
 **Links:**
@@ -66,7 +66,7 @@ Dawn audits: Hexens (January 2026, plus March and April 2026 updates), Cantina c
 - **Epoch 7 (October 15, 2026):** 2,134,386.81 shares were processed for 2,199,999.99 USDC ([tx](https://etherscan.io/tx/0xab2dc726949b066e3fc68ca58f2745d144527e5d879526ba3e635d1835e097f2)). Two requests from [`0x2d745a6596d47a0fe28a7db7bd9dc7bdbca4e476`](https://etherscan.io/address/0x2d745a6596d47a0fe28a7db7bd9dc7bdbca4e476) (350,000 shares) and [`0xea0832641d6bc5c3cda3c5cab4f5a0d1a3f0dac0`](https://etherscan.io/address/0xea0832641d6bc5c3cda3c5cab4f5a0d1a3f0dac0) (380,702.61 shares) were **moved to epoch 8** (`RequestMovedToNextEpoch`). Under the documented priority order, Royco's own vaults are served first, then priority partners, then remaining withdrawals.
 - **Dawn accounting limitation:** Royco now documents that Dawn can clear Junior impermanent loss before Junior value is fully restored ([Legacy Deployment](https://docs.royco.org/royco-dawn/legacy-deployment.md)).
 - **Exploits:** none found.
-- **DeFiLlama Royco V2 (Dawn + Day):** $17.58M (October 19, 2026), down from a $25.25M peak on August 6, 2026.
+- **DeFiLlama Royco V2:** $15.97M (October 19, 2026), down from a $25.25M peak on August 6, 2026. This covers Dawn and Day markets, queued EntryPoint deposits, srRoyUSDC, and roywstETH.
 
 ## Funds Management
 
@@ -91,7 +91,7 @@ All vault capital sits in the Makina strategy. Its machine reports $4.87M AUM, l
 ### Accessibility
 
 - **Deposits:** closed per the docs, but not onchain: 26 whitelisted addresses can still deposit (see [Overview](#overview--links)). The last deposit was on August 6, 2026.
-- **Withdrawals:** request into the open 30-day epoch. The curator processes it over a ~2-day window, then the user claims. Partially filled or deprioritised requests roll to the next epoch. KYC/KYB is required for direct vault withdrawals ([Deposits and Withdrawals](https://docs.royco.org/deposits-and-withdrawals.md)).
+- **Withdrawals:** request into the open epoch (up to 30 days). The curator processes it over a ~2-day window, then the user claims. Partially filled or deprioritised requests roll to the next epoch. KYC/KYB is required for direct vault withdrawals ([Deposits and Withdrawals](https://docs.royco.org/deposits-and-withdrawals.md)).
 
 ### Token Mint Authority
 
@@ -103,7 +103,7 @@ All vault capital sits in the Makina strategy. Its machine reports $4.87M AUM, l
 
 ## Liquidity Risk
 
-- **Primary exit:** 30-day epochs, served in priority order. Epoch 7 rolled ~731K shares (~$0.75M) to the next epoch.
+- **Primary exit:** epochs of up to 30 days, served in priority order. Epoch 7 rolled ~731K shares (~$0.75M) to the next epoch.
 - **Secondary exit:** Morpho Blue holds 1,676,242 srRoyUSDC (35.5% of supply) as collateral, mainly in the [srRoyUSDC/USDC 91.5% LLTV market](https://app.morpho.org/ethereum/market/0xacc49fbf58feb1ac971acce68f8adc177c43682d6a7087bbd4991a05cb7a2c67/srroyusdc-usdc). That market has $1.49M supplied, $1.38M borrowed (~93% utilised), and $1.73M of collateral. Its lenders are exposed to a wind-down collateral whose redemption is epoch-gated and priority-ordered.
 
 ## Centralization & Control Risks
@@ -114,7 +114,7 @@ All vault capital sits in the Makina strategy. Its machine reports $4.87M AUM, l
 
 ## Operational Risk
 
-Royco Foundation and Dialectic are winding the product down. Documentation states the wind-down clearly but does not publish a completion date or the epoch schedule beyond the 30-day cadence.
+Royco Foundation and Dialectic are winding the product down. Documentation states the wind-down clearly but does not publish a completion date or the epoch schedule beyond the "up to 30 days" processing window.
 
 ## Monitoring
 
@@ -180,4 +180,4 @@ That derivation relied on the MultisigStrategy custody path, which the vault no 
 | [March 26, 2026](https://github.com/yearn/risk-score/pull/111) | 3.35 | Onchain Dawn tranching verified (Junior coverage 12.4–12.5% vs 10% required) |
 | [March 26, 2026](https://github.com/yearn/risk-score/pull/118) | 3.65 | MultisigStrategy full-custody handoff to the Treasury Safe identified; Collateralization 3.0 → 5.0 |
 | [March 26, 2026](https://github.com/yearn/risk-score/pull/119) | 3.80 | Provability 4.0 → 5.0 (admin-reported NAV over full-custody handoff); Funds Management 5.0 |
-| [October 19, 2026](https://github.com/yearn/risk-score/pull/541) | DEAD | Vault in withdrawal-only wind-down (Royco docs); no deposits since Aug 6, 2026; TVL $4.87M, 100% via Makina strategy (MultisigStrategy detached): 55% Pareto FalconX credit vault, 24.8% idle USDC, 12.7% pending mGLOBAL redemption. Deposit closure is policy only (whitelist hook still admits 26 addresses). 30-day epochs with requests rolled to epoch 8. Royco's active product assessed separately in [royco-day](royco-day.md). |
+| [October 19, 2026](https://github.com/yearn/risk-score/pull/541) | DEAD | Vault in withdrawal-only wind-down (Royco docs); no deposits since Aug 6, 2026; TVL $4.87M, 100% via Makina strategy (MultisigStrategy detached): 55% Pareto FalconX credit vault, 24.8% idle USDC, 12.7% pending mGLOBAL redemption. Deposit closure is policy only (whitelist hook still admits 26 addresses). epochs of up to 30 days with requests rolled to epoch 8. Royco's active product assessed separately in [royco-day](royco-day.md). |

@@ -5,7 +5,7 @@
 - **Token:** sr-reUSDe (Royco Day Senior Tranche on Re reUSDe). The proposed sibling sr-liUSD-13w (Senior Tranche on InfiniFi liUSD-13w) is assessed in the same report; it is **not deployed** at the snapshot.
 - **Chain:** Ethereum
 - **Token Address:** [`0x01Fe8a0d76D056393d24CC1402f7f852cdaFbAD0`](https://etherscan.io/address/0x01Fe8a0d76D056393d24CC1402f7f852cdaFbAD0)
-- **Final Score: 3.73/5.0**
+- **Final Score: 3.83/5.0**
 - **Visibility:** Hidden
 
 ## Overview + Links
@@ -49,7 +49,7 @@ Above the pool's depth, exit reverts to the underlying's own lock (13 weeks for 
   - JT supply 0. LPT raw NAV **$3.00**.
   - The deployer EOA [`0x7c54033a1298c6225ba141F6B38E4f0f360a8aF2`](https://etherscan.io/address/0x7c54033a1298c6225ba141F6B38E4f0f360a8aF2) holds 16.41 of the 18.75 ST shares (87.5%).
 - **All Royco Day markets on Ethereum:** about **$196K** of collateral NAV across 17 deployments. sr-pBedrockStrategies ($170.4K) and sr-liUSD-8w ($25.8K) account for nearly all of it. Two further markets exist on Arbitrum. Base deployments are unverified: the factory is deployed there, but it could not be enumerated with the configured explorer and RPC access.
-- **DeFiLlama Royco V2 (Dawn + Day):** [$17.58M](https://defillama.com/protocol/royco-v2), down from a $25.25M peak on August 6, 2026. This figure is mostly legacy Dawn and vault capital, not Day.
+- **DeFiLlama Royco V2:** [$15.97M](https://defillama.com/protocol/royco-v2) on October 19, 2026, down from a $25.25M peak on August 6, 2026. DeFiLlama's methodology sums Dawn V2 markets, Day markets, deposits still queued at the EntryPoints, srRoyUSDC, and roywstETH (net of double counting). The figure is therefore mostly legacy Dawn and vault capital, not Day. By chain, the latest point is Ethereum $9.88M, Avalanche $6.65M, Base $1.05M, and Arbitrum $7K.
 - **Underlyings:**
   - reUSDe supply 20.86M × $1.4332 ≈ $29.9M.
   - liUSD-13w supply 3.506M shares × exchange rate 1.2556 ≈ 4.40M iUSD (`LockingController.exchangeRate(13)`).
@@ -129,7 +129,7 @@ The live sibling, sr-liUSD-8w, shows how an InfiniFi market is wired today:
 
 ## Audits and Due Diligence Disclosures
 
-The Day codebase ([royco-day](https://github.com/roycoprotocol/royco-day)) is a rewrite of Dawn (repository commit `c006198` "dawn → day", July 7, 2026). It has seven published reviews in [`audit/`](https://github.com/roycoprotocol/royco-day/tree/main/audit):
+The Day codebase ([royco-day](https://github.com/roycoprotocol/royco-day)) is a rewrite of Dawn (repository commit `c006198` "dawn → day", July 7, 2026). It has seven published reviews in [`audit/`](https://github.com/roycoprotocol/royco-day/tree/main/audit). [royco.org/security](https://www.royco.org/security) lists three more: a Verity Labs formal verification ("Royco Day Invariants and Properties", August 2026, report linked); a V12 AI security review (August 2026, no report published); and a Certora Day design review (June 2026, no report published).
 
 | Reviewer | Type | Date (repo commit) | Findings | Status |
 |----------|------|--------------------|----------|--------|
@@ -138,14 +138,15 @@ The Day codebase ([royco-day](https://github.com/roycoprotocol/royco-day)) is a 
 | [Tomer Ganor](https://github.com/roycoprotocol/royco-day/blob/main/audit/Tomer-Royco-Day.pdf) | Manual (latest commit reviewed `92f05aed`) | Aug 10 / Aug 20, 2026 | **1 Critical / 7 High** / 7 M / 8 L / 10 I | All 33 fixed |
 | [Cyfrin Solace](https://github.com/roycoprotocol/royco-day/blob/4eac294e055660d98cc89d14670fd3dd3aa37951/audit/Cyfrin-Solace-Royco-Day.md) | Automated review | Aug 14, 2026 | 0 C/H/M / 8 L / 4 I | Triaged |
 | [Certora Autoprover](https://github.com/roycoprotocol/royco-day/blob/main/audit/Certora-Autoprover-Royco-Day.pdf) | Formal verification (53 properties, 92 CVL rules) | Aug 19, 2026 | 18 violated-rule issues (several Medium) | See report |
-| [Olympix BugPoCer](https://github.com/roycoprotocol/royco-day/blob/main/audit/Olympix-Royco-Day.pdf) | Automated | — | Medium/Low true positives | See report |
+| [Olympix BugPoCer](https://github.com/roycoprotocol/royco-day/blob/main/audit/Olympix-Royco-Day.pdf) | Automated | Jul 20, 2026 (report date) | Medium/Low true positives | See report |
 | [Cantina competition](https://github.com/roycoprotocol/royco-day/blob/main/audit/Cantina-Royco-Day.pdf) | Competitive | Aug 28, 2026 | 0 H / 1 M / 6 I | — |
 
 **Deployed code vs. audited code:** the verified sources of the deployed Accountant, Kernel, and VaultTranche implementations hash-match repository commit `92f05aed` (August 15, 2026, "fix/factory-params"). That commit is the latest one Tomer Ganor reviewed, and it is also the current `main` for those files. The repository changes after it (September 2026) add new oracle adapters only: Discrete/IdleCDO and Stork. No published review covers them. The two collateral oracle adapters used by the assessed markets are not source-verified on Etherscan or Sourcify. Their bytecode was checked instead: both are byte-identical to `ChainlinkPriceOracle` at audited commit `92f05aed` once the 4 immutable slots are masked. That was established by compiling the repo's oracle sources with the repository settings (solc 0.8.35, via-IR, 2,000 runs, Prague, no metadata) against the pinned OpenZeppelin commit. The adapter has no admin functions; its feed, collateral asset, and staleness threshold are construction immutables.
 
 **Open items:**
-- Certora left 1 Medium and 5 Low findings unfixed.
-- Several findings concern admin parameter setters: Certora M-05, "minimum coverage updates can create unearned liquidation bonuses"; Tomer M-03, "`setMinCoverage` lacks post-update safety check"; Solace L-1, "`setDustTolerance` has no upper bound". These matter because the parameters are mutable (see [Governance](#governance)).
+- Certora marks 1 Medium and 5 Lows as Acknowledged rather than fixed: M-11 ("asynchronous requests lack slippage protection"), L-02, L-03, L-04, L-11, and L-14.
+- Solace L-1 ("`setDustTolerance` has no upper bound") remains open: the deployed setter still accepts any value. This matters because market parameters are mutable (see [Governance](#governance)).
+- Setter findings that are marked Fixed include Certora M-05 ("minimum coverage updates can create unearned liquidation bonuses") and Tomer M-03 ("`setMinCoverage` lacks post-update safety check").
 
 **Smart contract complexity: High.** The system comprises:
 - three tranche types and a kernel with modular liquidity-venue logic (Balancer V3 E-CLP with BPT oracle and premium reinvestment);
@@ -168,7 +169,7 @@ Royco is not listed on the [SEAL Safe Harbor registry](https://safeharbor.securi
 - **Scale:** about $196K of collateral NAV across all Ethereum Day markets. sr-reUSDe ST NAV is **$18.92**, and 87.5% of its ST is held by the deployer EOA. There is no meaningful production TVL behind any Senior token proposed as collateral.
 - **Predecessor (Dawn):** live since January 6, 2026, with no exploits found. The docs now flag a [known accounting limitation](https://docs.royco.org/royco-dawn/legacy-deployment.md): Dawn can clear a Junior impermanent-loss balance before Junior is fully restored. Dawn's flagship vault srRoyUSDC is in withdrawal-only wind-down (see [srRoyUSDC report](royco-srroyusdc.md)).
 - **Incidents:** none found for Day.
-- **TVL trend:** DeFiLlama Royco V2 fell from $25.25M (August 6, 2026) to $17.58M (October 19, 2026), consistent with the Dawn wind-down.
+- **TVL trend:** DeFiLlama Royco V2 fell from $25.25M (August 6, 2026) to $15.97M (October 19, 2026), consistent with the Dawn wind-down.
 - **Peg:** sr-reUSDe has no market price history. The E-CLP pool has traded only dust.
 
 ## Funds Management
@@ -187,7 +188,7 @@ A Royco Day Senior token is an ERC-4626-style claim on a kernel-held pool of one
 - **Redemption is in kind.** ST holders receive the collateral asset (reUSDe or liUSD-13w), not USDC. ST redemption is available whenever the market is `PERPETUAL`. Both proposed configurations have `fixedTermDuration = 0`, so they are always `PERPETUAL`.
 - **Secondary exit:** sell ST into the E-CLP pool for the quote asset (sUSDe today).
 - **KYC/blacklist:** no market blacklist is set (`roycoBlacklist = 0x0`). Admin can set one via `setRoycoBlacklist` (`ADMIN_MARKET_OPS`, 3-day delay). Once set, every mint, transfer, and burn screens the caller, sender, and receiver against it and the Chainalysis sanctions list.
-- **Fees:** ST protocol fee 0%; protocol fee of 5% on the JT and LPT yield shares (`jtYieldShareProtocolFeeWAD` = `lptYieldShareProtocolFeeWAD` = 5e16).
+- **Fees:** ST protocol fee 0%; protocol fee of 5% on the JT and LPT yield shares (`jtYieldShareProtocolFeeWAD` = `lptYieldShareProtocolFeeWAD` = 5e16). **This contradicts the docs**, whose [fee table](https://docs.royco.org/governance-and-fees.md) shows 0% "Fee on Yield Share" for Senior, Junior, and LP tranches. The fee is also admin-settable (`ADMIN_PROTOCOL_FEE_SETTER`, 3-day delay).
 
 ### Token Mint Authority
 
@@ -215,7 +216,7 @@ A Royco Day Senior token is an ERC-4626-style claim on a kernel-held pool of one
   - **reUSDe** is Re's mezzanine / second-loss tranche. It absorbs reinsurance losses after Re Capital and ahead of reUSD. Redemption is quarterly with an actuarial gate. Backing is custodied largely at plain EOAs, and the ICL wallet attributed to reUSDe held about $2.87M of sUSDe as of September 2026 ([Re report](re-reusd.md#capital-structure-reusde-mezzanine--second-loss-tranche)).
   - **liUSD-13w** is InfiniFi's first-loss locked capital. It absorbs losses before siUSD. About 84% of InfiniFi TVL is offchain-custodied credit (Midas/Fasanara mGLOBAL and RWA escrows), and the Midas position alone was 1.57× the entire liUSD buffer as of July 2026 ([InfiniFi report](infinifi.md)). The deck itself states "Most of the book can't be exited quickly. $5.75M is liquid."
 - **Protected Exit and self-liquidation bonus** only operate when there is JT capital. They are inert in both proposed markets (`stSelfLiquidationBonusWAD` = 0; `coverageLiquidationUtilizationWAD` = `type(uint256).max` on sr-reUSDe).
-- **Admin can change risk parameters after deployment** (`ADMIN_ACCOUNTANT`, 3-day delay): `setMinCoverage`, `setMinLiquidity`, `setFixedTermDuration`, `setLiquidationCoverageUtilization`, `setMaxYieldShares`, the YDM setters, and `setDustTolerance`. This contradicts the docs' "Royco markets are IMMUTABLE" ([Market Deployment](https://docs.royco.org/market-deployment.md)). In particular, `setMinLiquidity(0)` would remove the SLP withdrawal floor and let SLP capital leave the exit pool entirely.
+- **Admin can change risk parameters after deployment** (`ADMIN_ACCOUNTANT`, plus `ADMIN_MARKET_OPS` for `setDustTolerance`; 3-day delay): `setMinCoverage`, `setMinLiquidity`, `setFixedTermDuration`, `setLiquidationCoverageUtilization`, `setMaxYieldShares`, the YDM setters, and `setDustTolerance`. This contradicts the docs' "Royco markets are IMMUTABLE" ([Market Deployment](https://docs.royco.org/market-deployment.md)). In particular, `setMinLiquidity(0)` would remove the SLP withdrawal floor and let SLP capital leave the exit pool entirely.
 
 ### Provability
 
@@ -253,28 +254,31 @@ A Royco Day Senior token is an ERC-4626-style claim on a kernel-held pool of one
 - At the proposed LLTVs, that is a direct bad-debt path for lenders.
 - **The pause path:** `ADMIN_PAUSER` (1-of-4 Safe, no delay) can pause the kernel. `preTrancheBalanceUpdateHook` is `whenNotPaused`, so a pause freezes every ST transfer, including Morpho collateral seizure and withdrawal. Unpause requires the 3-of-4 root Safe, and pauses have no maximum duration.
 
-**Holder concentration:** 87.5% of sr-reUSDe is held by the deployer EOA [`0x7c54033a1298c6225ba141F6B38E4f0f360a8aF2`](https://etherscan.io/address/0x7c54033a1298c6225ba141F6B38E4f0f360a8aF2), 10.6% by a contract-wallet holder [`0x0197d7FaFCA118Bc91f6854B9A2ceea94E676585`](https://etherscan.io/address/0x0197d7FaFCA118Bc91f6854B9A2ceea94E676585), and 1.6% by the Balancer Vault.
+**Holder concentration:** 87.5% of sr-reUSDe is held by the deployer EOA [`0x7c54033a1298c6225ba141F6B38E4f0f360a8aF2`](https://etherscan.io/address/0x7c54033a1298c6225ba141F6B38E4f0f360a8aF2), 10.6% by an EIP-7702-delegated EOA [`0x0197d7FaFCA118Bc91f6854B9A2ceea94E676585`](https://etherscan.io/address/0x0197d7FaFCA118Bc91f6854B9A2ceea94E676585), and 1.6% by the Balancer Vault.
 
 ## Centralization & Control Risks
 
 ### Governance
 
-**Access control.** Every Day contract uses [RoycoAccessManager](https://etherscan.io/address/0x82EecE4a736db0767370d2DfFdE9BDF6e38AaeB8) (OpenZeppelin AccessManager). Role holders were reconstructed from all `RoleGranted`/`RoleRevoked` events through the snapshot block (1,237 logs) and function mappings from `TargetFunctionRoleUpdated`.
+**Access control.** Every Day contract uses [RoycoAccessManager](https://etherscan.io/address/0x82EecE4a736db0767370d2DfFdE9BDF6e38AaeB8) (OpenZeppelin AccessManager). Role holders were reconstructed from all `RoleGranted`/`RoleRevoked` events through the snapshot block (55 grants and 2 revocations among 1,237 AccessManager logs). Function mappings come from `TargetFunctionRoleUpdated`.
 
 | Power | Role → holder | Delay | Effect on Senior holders |
 |-------|---------------|-------|--------------------------|
 | Upgrade every ST/JT/LPT/Kernel/Accountant (beacons) and the Factory/EntryPoint (UUPS) | `ADMIN_UPGRADER` → protocol-admin Safe (3/4) | 3 days | Arbitrary logic change across all markets at once |
 | Replace collateral oracle / BPT oracle | `ADMIN_ORACLE` → protocol-admin Safe and root Safe | 3 days | Re-marks ST NAV |
-| Change coverage, liquidity, fixed term, YDMs, dust tolerance | `ADMIN_ACCOUNTANT` / `ADMIN_MARKET_OPS` → protocol-admin Safe | 3 days | Can remove the SLP floor (`setMinLiquidity(0)`) |
+| Change coverage, liquidity, fixed term, YDMs (`ADMIN_ACCOUNTANT`); dust tolerance (`ADMIN_MARKET_OPS`) | protocol-admin Safe | 3 days | Can remove the SLP floor (`setMinLiquidity(0)`) |
 | Set market blacklist | `ADMIN_MARKET_OPS` → protocol-admin Safe | 3 days | Can freeze specific holders, including a lending venue |
 | Modify EntryPoint tranche configs (enable flag, delays, expiry, oracle gate) | `ADMIN_ENTRY_POINT` → protocol-admin Safe | **1 day** | Can disable EntryPoint redemption or set a long redemption delay |
-| Pause kernel, tranches, accountant, EntryPoint, Factory | `ADMIN_PAUSER` → **1-of-4 Safe** | **None** | Freezes all ST transfers and redemptions, with no time limit |
+| Pause kernel, tranches, accountant, EntryPoint, Factory, and the Balancer exit pool (`pausePool` via the Vault) | `ADMIN_PAUSER` → **1-of-4 Safe** | **None** | Freezes all ST transfers, redemptions, and exit-pool swaps, with no time limit |
+| Set the exit pool's static swap fee (`setStaticSwapFeePercentage`; the AccessManager is the pool's swap-fee manager) | `ADMIN_BALANCER_POOL_MANAGER` → protocol-admin Safe | **None** | Can raise the cost of the instant exit up to the pool's maximum fee |
 | Unpause | `ADMIN_UNPAUSER` → root Safe (3/4) | None | — |
 | Grant direct-deposit/redeem LP roles | `LP_ROLE_ADMIN` → protocol-admin Safe and a 1-of-4 Safe | None | Lets addresses bypass the EntryPoint delay and oracle gate |
 | Cancel scheduled operations | `GUARDIAN` → root Safe and a 1-of-4 Safe | — | Protective |
 | Root `ADMIN` (grant any role, set function roles) | Root Safe (3/4) | 3 days; 5-day `minSetback` to reduce delays | — |
 
-- **Timelock:** all upgrade, oracle, parameter, and role paths are scheduled through the AccessManager with a ≥3-day execution delay. The exceptions are the EntryPoint config (1 day) and pause and LP-role grants (none). The delay is enforced onchain by the AccessManager.
+- **Timelock:** upgrades, oracle swaps, coverage/liquidity/fee parameters, blacklisting, and root role administration are scheduled through the AccessManager with a ≥3-day execution delay, enforced onchain. Not every path is covered:
+  - EntryPoint tranche config has a **1-day** delay.
+  - These have **no delay**: pause, including the exit pool; the exit-pool swap fee; and grants of the direct deposit/redeem LP roles (`ST_LP`/`JT_LP`/`LPT_LP`). The LP roles are administered by `LP_ROLE_ADMIN`, held by the protocol-admin Safe and the 1-of-4 Safe [`0xb2B80EBcb7EE285806ddcB26E84a444032D1c244`](https://etherscan.io/address/0xb2B80EBcb7EE285806ddcB26E84a444032D1c244).
 - **Pending operation:** at the snapshot, one scheduled operation was still unexecuted: `removeBaseToken(address)` on the srRoyUSDC Makina caliber [`0x5476F4E23dAA093Ce6700e1026013c55F7AF9083`](https://etherscan.io/address/0x5476F4E23dAA093Ce6700e1026013c55F7AF9083), scheduled by the protocol-admin Safe and executable since October 1, 2026. It does not touch Day markets.
 - **Safe structure:**
   - The root Safe is 3-of-4. Its owners are the protocol-admin Safe (3-of-4), a separate 1-of-4 Safe [`0xC4F2b2e9fbD1A121E5A7D176c90224D398eba6BD`](https://etherscan.io/address/0xC4F2b2e9fbD1A121E5A7D176c90224D398eba6BD), and two EOAs, with no signer overlap between those three groups.
@@ -293,7 +297,7 @@ A Royco Day Senior token is an ERC-4626-style claim on a kernel-held pool of one
 
 ### External Dependencies
 
-1. **Underlying issuer (critical, single point of failure).** The Senior token is a pass-through of reUSDe (Re) or liUSD-13w (InfiniFi), with zero subordination. Any impairment, NAV error, redemption gate, or upgrade at the issuer flows directly to ST.
+1. **Underlying issuer (critical; intended exposure, scored under Collateralization).** The Senior token is a pass-through of reUSDe (Re) or liUSD-13w (InfiniFi), with zero subordination. Any impairment, NAV error, redemption gate, or upgrade at the issuer flows directly to ST.
 2. **Royco collateral oracle adapters (critical)** and the issuers' upstream feeds. The adapters are immutable and bytecode-matched to audited source, but are not source-published on Etherscan, and admin can replace them with a 3-day delay.
 3. **Balancer V3 (blue chip)** for the exit pool: the Vault, the Gyro E-CLP pool, and the LP oracle.
 4. **Quote asset:** sUSDe (Ethena) for sr-reUSDe; siUSD (InfiniFi, i.e. the same issuer as the collateral) proposed for sr-liUSD-13w. The latter concentrates both the collateral and the exit cash on one counterparty.
@@ -330,7 +334,7 @@ A Royco Day Senior token is an ERC-4626-style claim on a kernel-held pool of one
 ### Thresholds and Alerts
 
 - **Critical (immediate):**
-  - any `Paused` on the kernel or Senior tranche;
+  - any `Paused` on the kernel or Senior tranche, or `PoolPausedStateChanged` / `SwapFeePercentageChanged` on the Balancer Vault for the exit pool (both changeable with no delay);
   - any `OperationScheduled` targeting a beacon `upgradeTo`, `setCollateralAssetOracle`, `setMinLiquidity`/`setMinCoverage`, `setRoycoBlacklist`, or `modifyTrancheConfigs` (each gives 1–3 days of notice);
   - share price (`convertToAssets(1e18).nav`) decreasing.
 - **High:**
@@ -388,8 +392,8 @@ Exit: (a) swap ST→quote in E-CLP (≤ ~minLiquidity of ST NAV); (b) EntryPoint
 ### Key Strengths
 
 - **Onchain, reconciled backing.** The kernel holds the collateral directly, its ledger matches token balances to the wei, and all NAV, coverage, and liquidity state is readable via `getState()`.
-- **Enforced timelocks on change paths.** Upgrades, oracle swaps, parameter changes, blacklisting, and role grants all go through a ≥3-day AccessManager delay (5-day `minSetback`), and guardians can cancel scheduled operations.
-- **Broad review coverage.** Seven reviews/tools, including Certora manual review plus formal verification and an independent auditor who found and saw fixed 1 Critical and 7 Highs. Deployed core sources match the last reviewed commit.
+- **Enforced timelocks on most change paths.** Upgrades, oracle swaps, risk and fee parameters, blacklisting, and root role administration go through a ≥3-day AccessManager delay (5-day `minSetback`), and guardians can cancel scheduled operations. The exceptions are EntryPoint config (1 day) and pause, exit-pool fee, and LP-role grants (no delay).
+- **Broad review coverage.** Seven published reviews/tools, plus three more listed on royco.org/security, including Certora manual review plus formal verification and an independent auditor who found and saw fixed 1 Critical and 7 Highs. Deployed core sources match the last reviewed commit.
 - **A genuine secondary exit for small positions.** The E-CLP pool lets ST exit up to `minLiquidity` of NAV without waiting for the underlying's lock.
 
 ### Key Risks
@@ -429,14 +433,14 @@ The score below is for **sr-reUSDe** (the deployed token in the header). The pro
 
 #### Category 2: Centralization & Control Risks (Weight: 30%)
 
-- **Governance: 3.0.**
-  - The timelock is ≥3 days on upgrade, oracle, parameter, and role paths, which meets the score-1 timelock bar.
+- **Governance: 3.5.**
+  - The timelock is ≥3 days on upgrade, oracle, and risk-parameter paths, which meets the score-1 timelock bar. It is incomplete: EntryPoint config has a 1-day delay, and LP-role grants and the exit-pool swap fee have none.
   - Control sits with 3-of-4 Safes with unattributed signers (rubric 4 on threshold).
   - Powerful roles with limited constraints: beacon upgrades hit all markets; oracle and liquidity floor are settable; EntryPoint redemption can be disabled with a 1-day delay; and a **no-delay 1-of-4 pause freezes all transfers** (rubric 4).
-- **Programmability: 2.5.** Accounting, loss waterfall, premiums, and venue are onchain and algorithmic. The PPS input, however, is an external NAV that Re pushes daily. EntryPoint execution relies on permissionless keepers.
-- **External Dependencies: 4.0.** The underlying issuer is a critical, newer dependency with zero subordination. The Royco oracle adapters are immutable audited code, replaceable by admin. Balancer V3 and Ethena are established. Collateral quality is scored separately in Category 3.
+- **Programmability: 3.0.** Accounting, loss waterfall, premiums, and venue are onchain and algorithmic. The PPS input, however, is an external NAV that Re's admin pushes daily, matching the rubric's "onchain but reliant on admin updates". EntryPoint execution relies on permissionless keepers.
+- **External Dependencies: 4.0.** The underlying issuer is a critical, newer dependency with zero subordination. Its asset quality is the intended exposure and is scored under Collateralization, so it is not double-counted here. The Royco oracle adapters are immutable audited code, replaceable by admin. Balancer V3 and Ethena are established. Collateral quality is scored separately in Category 3.
 
-**Score: 3.17/5.** `(3.0 + 2.5 + 4.0) / 3 = 3.1667`.
+**Score: 3.5/5.** `(3.5 + 3.0 + 4.0) / 3`.
 
 #### Category 3: Funds Management (Weight: 30%)
 
@@ -466,21 +470,22 @@ The team is public and VC-backed, and development is active. Documentation is go
 | Category | Score | Weight | Weighted |
 |----------|-------|--------|----------|
 | Audits & Historical | 3.75 | 20% | 0.750 |
-| Centralization & Control | 3.17 | 30% | 0.950 |
+| Centralization & Control | 3.5 | 30% | 1.050 |
 | Funds Management | 4.125 | 30% | 1.2375 |
 | Liquidity Risk | 4.5 | 15% | 0.675 |
 | Operational Risk | 2.5 | 5% | 0.125 |
-| **Final Score** | | | **3.73 / 5.0** |
+| **Final Score** | | | **3.83 / 5.0** |
 
 No optional modifiers apply: the protocol is younger than 2 years and its TVL is below $500M.
 
 ### sr-liUSD-13w (Indicative)
 
-**Indicative score: 3.73**, conditional on a deployment matching the deck: 0% coverage, a 10% exit pool in siUSD, `fixedTermDuration = 0`, and the InfiniFi LPT oracle path. The categories map as follows:
+**Indicative score: 3.78**, conditional on a deployment matching the deck: 0% coverage, a 10% exit pool in siUSD, `fixedTermDuration = 0`, and the InfiniFi LPT oracle path. The categories map as follows:
 
-- Categories 1, 2 and 5 are identical: same code, same governance, same team. The InfiniFi oracle is computed onchain (Programmability 2.5), and InfiniFi is the single critical dependency for both collateral and exit cash (Dependencies 4.0).
+- Categories 1 and 5 are identical: same code, same team.
+- Category 2 is 3.33 (`(3.5 + 2.5 + 4.0) / 3`). Governance is the same. The InfiniFi oracle is computed onchain rather than admin-pushed (Programmability 2.5). InfiniFi is the critical dependency for both collateral and exit cash (Dependencies 4.0).
 - Category 3 is 4.125: liUSD-13w is first-loss and InfiniFi is ~84% offchain-custodied (Collateralization 4.5), and its value rests on offchain RWA attestations read through a replaceable Royco adapter (Provability 3.75).
-- Category 4 is 4.5: a 10% pool in siUSD, then a 13-week unwind. It is **5.0 until the market and pool exist.**
+- Category 4 is 4.5: a 10% pool in siUSD, then a 13-week unwind. It is **5.0 until the market and pool exist**, which would make the indicative score 3.86.
 
 Before any listing:
 - **TODO:** the deployed market, oracle, and pool addresses.
@@ -515,4 +520,4 @@ For lending specifically, size any Morpho market on these tokens to the exit poo
 
 | Date | Score | Notes |
 | --- | --- | --- |
-| [October 19, 2026](https://github.com/yearn/risk-score/pull/541) | 3.73 | Initial assessment of Royco Day Senior tranches (sr-reUSDe live test market; sr-liUSD-13w proposed, not deployed) |
+| [October 19, 2026](https://github.com/yearn/risk-score/pull/541) | 3.83 | Initial assessment of Royco Day Senior tranches (sr-reUSDe live test market; sr-liUSD-13w proposed, not deployed) |
