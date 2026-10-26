@@ -176,6 +176,10 @@ edges:
     to: sc5-bridge
     kind: controls
     label: DEFAULT_ADMIN + BRIDGE_MANAGER + RATE_LIMITER (24h delay)
+  - from: ops-mpc
+    to: sc5-bridge
+    kind: holds-role
+    label: PAUSE (no timelock)
   - from: gas-station
     to: ops-mpc
     kind: routes-through
