@@ -1,0 +1,140 @@
+slug: yearn-yvflexusdc
+title: Yearn yvFlexUSDC — Contract Dependency Graph
+chain: ethereum
+
+categories:
+  - id: vault
+    label: Vault
+  - id: strategy
+    label: Strategy
+  - id: governance
+    label: Governance / Multisig
+  - id: dependency
+    label: External Dependency
+
+nodes:
+  - id: yvflexusdc
+    label: yvFlexUSDC (Flex USDC yVault)
+    address: "0x863687e4E9751b57F38b4B0ebA04744C72d0f7B8"
+    category: vault
+    note: >-
+      Yearn V3 vault (v3.0.4) holding $1,118,643 of USDC, fully deployed: 81.0% across three Flex Lender
+      strategies and 19.0% in Sky sUSDS. About 20.6% is withdrawable through a standard redemption; the
+      rest exits through the FlexExitRouter. 90.8% of shares are held by the Yearn Treasury.
+
+  # Strategies
+  - id: strat-sky
+    label: USDC To SKY USDS Depositor (19.0%)
+    address: "0xfb4F83c3923eab7B6254cD2399C206109970F95e"
+    category: strategy
+    note: USDC → USDS via the Sky PSM, then sUSDS. 212,646 USDC withdrawable at the snapshot.
+  - id: strat-yvusd
+    label: Flex yvUSD/USDC Lender (54.0%)
+    address: "0x7501EAE6b5C2Cb0A6EDAC908E3A679B20eDd737b"
+    category: strategy
+    note: >-
+      FlexLenderStrategy, deposit-gated to this vault; holds 99.87% of its Lender. Withdrawable only up to
+      Lender idle cash (0) unless the FlexExitRouter sets a proceeds receiver.
+  - id: strat-ysybold
+    label: Flex ysyBOLD/USDC Lender (18.0%)
+    address: "0xDd58AeFE74585DA2C7Ad3D3dF0F3aeEAb05b5176"
+    category: strategy
+    note: FlexLenderStrategy; holds 99.94% of its Lender, which has $17,594 idle.
+  - id: strat-yvcrvusd
+    label: Flex yvcrvUSD-2/USDC Lender (9.0%)
+    address: "0xC818A0Be1BB2cE820CfdefAD5f890667e885f39d"
+    category: strategy
+    note: FlexLenderStrategy; holds 99.89% of its Lender, which has $798 idle.
+
+  # Governance
+  - id: role-manager
+    label: Yearn RoleManager
+    address: "0xb3bd6B2E61753C311EFbCF0111f75D29706D9a41"
+    category: governance
+    note: role_manager of the vault since September 8, 2026.
+  - id: timelock
+    label: Yearn TimelockController (7 days)
+    address: "0x88ba032be87d5eF1FbE87336B7090767F367BF73"
+    category: governance
+    note: Holds ADD_STRATEGY, REVOKE_STRATEGY, FORCE_REVOKE, ACCOUNTANT and MAX_DEBT; getMinDelay() = 604800.
+  - id: daddy
+    label: Daddy / ySafe (6-of-9)
+    address: "0xFEB4acf3df3cDEA7399794D0869ef76A6EfAff52"
+    category: governance
+    note: All vault roles except ADD_STRATEGY and ACCOUNTANT; sole proposer on the 7-day timelock.
+  - id: brain
+    label: Brain (3-of-6)
+    address: "0x16388463d60FFE0661Cf7F1f31a7D658aC790ff7"
+    category: governance
+    note: >-
+      Revoke, queue, reporting, debt, deposit-limit, profit-unlock, debt-purchaser and emergency roles;
+      management on all four strategies, including forceFreeFunds on the Flex legs.
+  - id: security
+    label: Security (4-of-7)
+    address: "0xe5e2Baf96198c56380dDD5E992D7d1ADa0e989c0"
+    category: governance
+    note: Debt, max-debt and emergency roles.
+  - id: flex-daddy-safe
+    label: Flex governance Safe (3-of-5)
+    address: "0x687b82dA9753C9db280d4D9aBD7BCAC022Ef3B67"
+    category: governance
+    note: >-
+      Owns Flex's Daddy contract, which is management and performance-fee recipient of every Flex Lender,
+      with no timelock. Cannot be overridden by any Yearn role. See the Flex graph.
+
+  # Dependencies
+  - id: lender-yvusd
+    label: Flex Lender — yvUSD/USDC
+    address: "0xD93Dade7Ac8b5d1687da5d074835cB4404Dee8bA"
+    category: dependency
+    note: Flex market backed by yvUSD collateral at 114.97% CR. Expanded in the Flex graph.
+  - id: lender-ysybold
+    label: Flex Lender — ysyBOLD/USDC
+    address: "0xf4996Ca4190A1a3e7CF19AbE2F6eb712abd4a03C"
+    category: dependency
+    note: Flex market backed by ysyBOLD (Liquity V2 BOLD) collateral at 126.70% CR.
+  - id: lender-yvcrvusd
+    label: Flex Lender — yvcrvUSD-2/USDC
+    address: "0xc1f281A3643F219636F97F6E687A33704950eC84"
+    category: dependency
+    note: Flex market backed by yvcrvUSD-2 (Curve crvUSD) collateral at 112.28% CR.
+  - id: exit-router
+    label: FlexExitRouter
+    address: "0xe8a511403B0C83e7b85513e00Ed39996B48c2aeD"
+    category: dependency
+    note: >-
+      Redeems vault shares with the exiting holder set as proceeds receiver on the Flex strategies: idle
+      cash atomically, the rest from Flex redemption auctions. The async portion is booked as a loss on that
+      withdrawal only.
+  - id: susds
+    label: Sky sUSDS
+    address: "0xa3931d71877C0E7a3148CB7Eb4463524FEc27fbD"
+    category: dependency
+    note: Sky Savings vault (4.80B USDS); ~3.80% Sky Savings Rate.
+
+edges:
+  - { from: role-manager, to: yvflexusdc, kind: controls, label: "role_manager" }
+  - { from: daddy, to: timelock, kind: proposes-on, label: "sole proposer" }
+  - { from: timelock, to: yvflexusdc, kind: holds-role, label: "ADD_STRATEGY, REVOKE, FORCE_REVOKE, ACCOUNTANT, MAX_DEBT (7 days)" }
+  - { from: daddy, to: yvflexusdc, kind: holds-role, label: "all roles except ADD_STRATEGY / ACCOUNTANT" }
+  - { from: brain, to: yvflexusdc, kind: holds-role, label: "revoke, queue, debt, deposit limit, emergency" }
+  - { from: security, to: yvflexusdc, kind: holds-role, label: "debt, max debt, emergency" }
+  - { from: brain, to: strat-yvusd, kind: holds-role, label: "management" }
+  - { from: brain, to: strat-ysybold, kind: holds-role, label: "management" }
+  - { from: brain, to: strat-yvcrvusd, kind: holds-role, label: "management" }
+  - { from: brain, to: strat-sky, kind: holds-role, label: "management" }
+  - { from: flex-daddy-safe, to: lender-yvusd, kind: holds-role, label: "via Daddy: management + performanceFeeRecipient" }
+  - { from: flex-daddy-safe, to: lender-ysybold, kind: holds-role, label: "via Daddy: management + performanceFeeRecipient" }
+  - { from: flex-daddy-safe, to: lender-yvcrvusd, kind: holds-role, label: "via Daddy: management + performanceFeeRecipient" }
+
+  - { from: yvflexusdc, to: strat-yvusd, kind: allocates-to, label: "54.0%" }
+  - { from: yvflexusdc, to: strat-sky, kind: allocates-to, label: "19.0%" }
+  - { from: yvflexusdc, to: strat-ysybold, kind: allocates-to, label: "18.0%" }
+  - { from: yvflexusdc, to: strat-yvcrvusd, kind: allocates-to, label: "9.0%" }
+  - { from: strat-yvusd, to: lender-yvusd, kind: deposits-into, label: "USDC → ysUSDC" }
+  - { from: strat-ysybold, to: lender-ysybold, kind: deposits-into, label: "USDC → ysUSDC" }
+  - { from: strat-yvcrvusd, to: lender-yvcrvusd, kind: deposits-into, label: "USDC → ysUSDC" }
+  - { from: strat-sky, to: susds, kind: deposits-into, label: "USDC → USDS → sUSDS" }
+  - { from: exit-router, to: strat-yvusd, kind: routes-through, label: "setProceedsReceiver — async exit" }
+  - { from: exit-router, to: strat-ysybold, kind: routes-through, label: "setProceedsReceiver — async exit" }
+  - { from: exit-router, to: strat-yvcrvusd, kind: routes-through, label: "setProceedsReceiver — async exit" }
