@@ -717,4 +717,4 @@ The tier is **Elevated** because ~98.8% of the borrow book (~77% of `totalAssets
 | [March 4, 2026](https://github.com/yearn/risk-score/pull/77) | 3.5 | Initial assessment |
 | [July 3, 2026](https://github.com/yearn/risk-score/pull/168) | 3.4 | Reassessment after April 2026 emergency shutdown |
 | [September 5, 2026](https://github.com/yearn/risk-score/pull/444) | 3.46 | Reassessment: thinner loss buffer, higher utilization; LCC launch noted but not risk-scored (deposit path disabled at snapshot) |
-| October 27, 2026 | 3.79 | Reassessment: 98.8% of borrows owed by protocol-owned origination account funding off-chain FCC assets; discretionary loss recognition; v1.2 upgrade enables LCC funding; TVL ~$115M |
+| [October 27, 2026](https://github.com/yearn/risk-score/pull/562) | 3.79 | Reassessment: 98.8% of borrows owed by protocol-owned origination account funding off-chain FCC assets; discretionary loss recognition; v1.2 upgrade enables LCC funding; TVL ~$115M |
