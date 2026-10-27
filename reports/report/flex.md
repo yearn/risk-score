@@ -5,7 +5,7 @@
 - **Chain:** Ethereum Mainnet
 - **Token Address:** [`0xD93Dade7Ac8b5d1687da5d074835cB4404Dee8bA`](https://etherscan.io/address/0xD93Dade7Ac8b5d1687da5d074835cB4404Dee8bA)
 - **Snapshot:** Onchain reads at Ethereum block [26285921](https://etherscan.io/block/26285921) (October 27, 2026, 18:43 UTC); USD values for WETH use the Chainlink ETH/USD feed ([`0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419`](https://etherscan.io/address/0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419)) at $2,344.00 at the same block.
-- **Final Score: 2.58/5.0**
+- **Final Score: 2.57/5.0**
 
 ## Overview + Links
 
@@ -452,9 +452,9 @@ Pseudonymous but Yearn-ecosystem-known lead dev; mechanics docs are accurate and
 | Funds Management | 1.75 | 30% | 0.525 |
 | Liquidity Risk | 3.0 | 15% | 0.45 |
 | Operational Risk | 3.0 | 5% | 0.15 |
-| **Final Score** | | | **2.58/5.0** |
+| **Final Score** | | | **2.57/5.0** |
 
-**Optional Modifiers:** None apply (protocol < 2 years; TVL not sustained). Final score ≈ **2.58/5.0**.
+**Optional Modifiers:** None apply (protocol < 2 years; TVL not sustained). Final score 2.575, recorded as **2.57/5.0** (two decimals, rounded down).
 
 ### Risk Tier
 
@@ -495,4 +495,4 @@ These are offset by non-upgradeable market clones, a clean Dedaub audit of the v
 | --- | --- | --- |
 | [June 19, 2026](https://github.com/yearn/risk-score/pull/220) | 2.53 | Initial assessment — single yvUSD/USDC market, ~$0.97M TVL, 120.7% system CR, 2-of-4 Daddy Safe |
 | [September 7, 2026](https://github.com/yearn/risk-score/pull/425) | 2.67 | Reassessment: v1.1/v2 redeploy — original market retired, Yearn migrated to three Lenders (yvUSD, ysyBOLD, yvcrvUSD-2); upfront fee to protocol and 10% lender performance fee live; Safe 3-of-5; ysyBOLD depeg floor lifted. Scores revised after Flex-expert review: Zero Cool items not treated as open blockers, oracles and allocator reviewed, ExitRouter is the designed permissionless exit, alike-asset CR near MCR is intended. Remaining drivers are governance (3-of-5, no timelock), unassessed Liquity/Curve dependencies, and short track record. |
-| [October 27, 2026](https://github.com/yearn/risk-score/pull/563) | 2.58 | Reassessment: TVL ~$1.94M (+78%) after Yearn funded a new yvWETH-2/WETH market (endorsed September 17) through `yvFlexWETH`, 96.8% held by the yETH Recovery Vault; four live markets, 30 Troves, 116.81% book-wide CR, no bad debt or Lender loss; both allocators moved to Yearn's RoleManager. Historical track record 5 → 4 (3–6 months in production). Governance (3-of-5, no timelock) and dependencies unchanged; no Flex-specific monitoring exists. |
+| [October 27, 2026](https://github.com/yearn/risk-score/pull/563) | 2.57 | Reassessment: TVL ~$1.94M (+78%) after Yearn funded a new yvWETH-2/WETH market (endorsed September 17) through `yvFlexWETH`, 96.8% held by the yETH Recovery Vault; four live markets, 30 Troves, 116.81% book-wide CR, no bad debt or Lender loss; both allocators moved to Yearn's RoleManager. Historical track record 5 → 4 (3–6 months in production). Governance (3-of-5, no timelock) and dependencies unchanged; no Flex-specific monitoring exists. |
