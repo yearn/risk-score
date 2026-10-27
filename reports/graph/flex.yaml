@@ -19,9 +19,9 @@ nodes:
   - id: yvflexusdc
     label: yvFlexUSDC (Yearn allocator)
     address: "0x863687e4E9751b57F38b4B0ebA04744C72d0f7B8"
-    category: vault
+    category: dependency
     note: >-
-      Yearn V3 allocator vault holding $1,118,643 of USDC, 81.0% of it in Flex. Governed by Yearn's
+      Assessed in its own report (yearn-yvflexusdc). Yearn V3 allocator vault holding $1,118,643 of USDC, 81.0% of it in Flex. Governed by Yearn's
       standard RoleManager since September 8, 2026, so strategy additions go through the 7-day Yearn
       timelock. 90.8% of shares are held by the Yearn Treasury. Users exit Flex legs through the
       FlexExitRouter; the Sky USDS leg holds the vault's withdrawable cash.
