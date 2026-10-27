@@ -405,7 +405,7 @@ The Centralization score is (1 + 1 + 4.5) / 3 = 2.1667, weighted 0.650. The weig
 
 | Date | Score | Notes |
 |------|------:|-------|
-| [October 27, 2026](https://github.com/yearn/risk-score/pull/TBD) | 2.40 | Initial assessment at block 26285921. $1.12M TVL; 81.0% in three Flex Lender strategies (yvUSD 54.0%, ysyBOLD 18.0%, yvcrvUSD-2 9.0%), 19.0% in sUSDS; standard Yearn RoleManager governance; ~20.6% instantly withdrawable, remainder via FlexExitRouter auctions; 90.8% held by the Yearn Treasury |
+| [October 27, 2026](https://github.com/yearn/risk-score/pull/564) | 2.40 | Initial assessment at block 26285921. $1.12M TVL; 81.0% in three Flex Lender strategies (yvUSD 54.0%, ysyBOLD 18.0%, yvcrvUSD-2 9.0%), 19.0% in sUSDS; standard Yearn RoleManager governance; ~20.6% instantly withdrawable, remainder via FlexExitRouter auctions; 90.8% held by the Yearn Treasury |
 
 ---
 
