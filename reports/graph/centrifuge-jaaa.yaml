@@ -108,9 +108,14 @@ nodes:
     category: governance
     note: Sole JAAA Hub manager since 2026-06-19; offchain-attested threshold; unbounded NAV push and manager delegation
   - id: balance-sheet-managers
-    label: JAAA BalanceSheet Managers
+    label: Unrestricted BalanceSheet Managers
     category: governance
-    note: Two Safes (2-of-7 and 3-of-4), one EOA, and one OnOfframpManager can invoke pool-scoped issue/revoke and force-transfer (transferSharesFrom)
+    note: Two Safes (2-of-7 and 3-of-4) and one EOA; issue/revoke, force-transfer (transferSharesFrom), and escrow withdraw to any receiver (TransferOnly bypasses reservations)
+  - id: onofframp-manager
+    label: OnOfframpManager (restricted)
+    address: "0xf8b1e652453b3c2f0d378a0f7cdac1dee138ece7"
+    category: infra
+    note: BalanceSheet manager limited to deposit (allowlisted assets) and Full-mode withdraw to allowlisted offramp receivers; allowlists set via Hub.updateContract
 
   # === External dependencies ===
   - id: dep-anemoy
@@ -170,7 +175,23 @@ edges:
   - from: balance-sheet-managers
     to: balance-sheet
     kind: holds-role
-    label: manager(poolId, addr) = true — issue/revoke path
+    label: manager(poolId, addr) = true — issue/revoke/force-transfer/withdraw
+  - from: balance-sheet-managers
+    to: pool-escrow
+    kind: manages
+    label: BalanceSheet.withdraw to any receiver; TransferOnly capped only by raw balance
+  - from: onofframp-manager
+    to: balance-sheet
+    kind: holds-role
+    label: manager = true — deposit / Full withdraw to allowlisted receivers only
+  - from: pool-manager-eoa
+    to: balance-sheet
+    kind: manages
+    label: Hub.updateBalanceSheetManager — appoint managers, no timelock
+  - from: pool-manager-eoa
+    to: onofframp-manager
+    kind: manages
+    label: Hub.updateContract → trustedCall (relayer / offramp allowlists, withdraw)
   - from: pool-manager-eoa
     to: multi-adapter
     kind: manages
