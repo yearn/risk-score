@@ -21,17 +21,25 @@ nodes:
     address: "0x863687e4E9751b57F38b4B0ebA04744C72d0f7B8"
     category: vault
     note: >-
-      Yearn V3 allocator vault holding $1,111,920 of USDC, 81.0% of it in Flex. Role manager is the
-      Yearn Strategist MultiSig, with a handover to Yearn's RoleManager pending. 90.9% of shares are held
-      by the Yearn Treasury; a public FlexUSDC listing is expected. Users exit Flex legs through the
-      FlexExitRouter; the Sky USDS leg holds the vault's idle cash.
+      Yearn V3 allocator vault holding $1,118,643 of USDC, 81.0% of it in Flex. Governed by Yearn's
+      standard RoleManager since September 8, 2026, so strategy additions go through the 7-day Yearn
+      timelock. 90.8% of shares are held by the Yearn Treasury. Users exit Flex legs through the
+      FlexExitRouter; the Sky USDS leg holds the vault's withdrawable cash.
+  - id: yvflexweth
+    label: yvFlexWETH (Yearn allocator)
+    address: "0xfaC55fAFD0b55BFb8dD41F735EfCc195adA9891F"
+    category: vault
+    note: >-
+      Yearn V3 allocator vault holding 310.14 WETH, all of it in the Flex yvWETH-2/WETH Lender. Governed by
+      Yearn's RoleManager since September 25, 2026. 96.8% of shares are held by the Yearn yETH Recovery
+      Vault; a Safe holds the remaining 3.2%.
   - id: lender-yvusd
     label: Flex yvUSD/USDC Lender (ysUSDC)
     address: "0xD93Dade7Ac8b5d1687da5d074835cB4404Dee8bA"
     category: vault
     note: >-
-      The assessed token. ERC-4626 Yearn TokenizedStrategy holding $600,901 with a price per share of
-      1.001133 and zero idle USDC. Management and performance-fee recipient are both Daddy; the 10%
+      The assessed token. ERC-4626 Yearn TokenizedStrategy holding $605,486 with a price per share of
+      1.007785 and zero idle USDC. Management and performance-fee recipient are both Daddy; the 10%
       lender performance fee is live and profit unlocks over 4 days. Deposit limit is $2M. There is no
       privileged minter — shares are minted only by permissionless ERC-4626 deposit.
   - id: lender-ysybold
@@ -39,15 +47,23 @@ nodes:
     address: "0xf4996Ca4190A1a3e7CF19AbE2F6eb712abd4a03C"
     category: vault
     note: >-
-      Second Flex position Yearn holds, $200,088 with a price per share of 1.000211 and zero idle USDC.
-      Same Lender code, same Daddy-controlled parameters and same bad-debt socialization as the yvUSD market.
+      $201,122 with a price per share of 1.005018 and 17,594 USDC idle. Same Lender code, same
+      Daddy-controlled parameters and same bad-debt socialization as the yvUSD market.
   - id: lender-yvcrvusd
     label: Flex yvcrvUSD-2/USDC Lender (ysUSDC)
     address: "0xc1f281A3643F219636F97F6E687A33704950eC84"
     category: vault
     note: >-
-      Third Flex position, funded a day after deployment: $100,013 with a price per share of 1.000068
-      and zero idle USDC. Same Lender code and Daddy-controlled parameters as the other two markets.
+      $100,712 with a price per share of 1.006003 and $798 idle. Same Lender code and Daddy-controlled
+      parameters as the other markets.
+  - id: lender-yvweth
+    label: Flex yvWETH-2/WETH Lender (ysWETH)
+    address: "0x0d57098e501D68905fC4B0A3397f7D4Aa4889E36"
+    category: vault
+    note: >-
+      310.24 WETH with a price per share of 1.000689. Endorsed September 17, 2026 and funded by Yearn from
+      September 19 onward. Same Lender code and Daddy-controlled parameters as the USDC markets; deposit
+      limit 10,000 WETH. Isolated from the USDC Lenders.
 
   # Allocator strategies
   - id: strat-yvusd
@@ -62,19 +78,25 @@ nodes:
     label: FlexLenderStrategy — ysyBOLD (18.0%)
     address: "0xDd58AeFE74585DA2C7Ad3D3dF0F3aeEAb05b5176"
     category: strategy
-    note: Same strategy code as the yvUSD leg; idle cash is 0 by design, exit is via FlexExitRouter.
+    note: Same strategy code as the yvUSD leg; idle cash is $17,594, exit is via FlexExitRouter.
   - id: strat-yvcrvusd
     label: FlexLenderStrategy — yvcrvUSD-2 (9.0%)
     address: "0xC818A0Be1BB2cE820CfdefAD5f890667e885f39d"
     category: strategy
-    note: Same strategy code as the other two Flex legs; idle cash is 0 by design, exit is via FlexExitRouter.
+    note: Same strategy code as the other Flex legs; idle cash is $798, exit is via FlexExitRouter.
   - id: strat-sky
     label: USDC → SKY USDS Depositor (19.0%)
     address: "0xfb4F83c3923eab7B6254cD2399C206109970F95e"
     category: strategy
     note: >-
-      Not a Flex position. Holds the allocator vault's idle USDC (~$211,491). Flex legs stay deployed
-      and exit through FlexExitRouter.
+      Not a Flex position. Holds $212,584, all withdrawable. Flex legs stay deployed and exit through
+      FlexExitRouter.
+  - id: strat-yvweth
+    label: FlexLenderStrategy — yvWETH-2 (100%)
+    address: "0x7E4a6A89583e117C641aB3ce8897209800A3F2E3"
+    category: strategy
+    note: >-
+      Same strategy code as the USDC legs, deposit-gated to yvFlexWETH. Yearn security is emergencyAdmin.
 
   # Protocol machinery
   - id: tm-yvusd
@@ -83,34 +105,44 @@ nodes:
     category: infra
     note: >-
       Deployed August 5, 2026 as an EIP-1167 clone of an immutable Vyper template. Pledged collateral of
-      666,406 yvUSD ($684,661) against $601,088 of interest-accrued debt — a backing CR of 113.9% versus a
-      110% MCR, across 10 Troves between 110.19% and 171.41%. First-loss reserve $90.74.
+      672,011 yvUSD ($696,457) against $605,779 of interest-accrued debt — a backing CR of 114.97% versus a
+      110% MCR, across 9 Troves between 110.16% and 136.23%. A further 2,497 yvUSD ($2,587) sits in
+      fully-redeemed Troves. First-loss reserve $243.74.
   - id: tm-ysybold
     label: TroveManager — ysyBOLD/USDC
     address: "0xADf4E0226d59aac20272023c04B4DcF5Ade7Fc6E"
     category: infra
     note: >-
-      Deployed August 12, 2026. Pledged collateral of 209,460 ysyBOLD ($229,134) against $200,194 of
-      interest-accrued debt — a backing CR of 114.5% across 6 Troves between 110.09% and 133.21%. The
-      contract holds a further 30,362 ysyBOLD ($33,213) in three fully-redeemed Troves that back no debt,
-      so its naive collateral-to-debt ratio reads a misleading 131.1%. First-loss reserve $80.34.
+      Deployed August 12, 2026. Pledged collateral of 212,265 ysyBOLD ($232,788) against $183,728 of
+      interest-accrued debt — a backing CR of 126.70% across 6 Troves between 110.37% and 154.88%. The
+      contract holds a further 7,036 ysyBOLD ($7,716) in fully-redeemed Troves that back no debt, so its
+      naive collateral-to-debt ratio reads 130.90%. One liquidation (September 16, 2026) cleared without
+      bad debt. First-loss reserve $144.90.
   - id: tm-yvcrvusd
     label: TroveManager — yvcrvUSD-2/USDC
     address: "0x7582b47486F75F5D675f260d357972cD0DbEeA2E"
     category: infra
     note: >-
-      Deployed August 23, 2026 and endorsed the next day. Pledged collateral of 100,993 yvcrvUSD-2
-      ($116,365) against $100,025 of interest-accrued debt — a backing CR of 116.3% across 6 Troves
-      between 110.07% and 124.81%. An EIP-1167 clone of the same template as the other markets.
+      Deployed August 23, 2026. Pledged collateral of 96,512 yvcrvUSD-2 ($112,234) against $99,957 of
+      interest-accrued debt — a backing CR of 112.28% across 6 Troves between 110.25% and 123.33%. 79.8% of
+      debt sits in looped Troves below 110.5%, close to liquidation after the crvUSD EMA slipped to 0.99897.
+  - id: tm-yvweth
+    label: TroveManager — yvWETH-2/WETH
+    address: "0xEe27D81Bd4f54bA978e5dC0C335fC25C00e8334C"
+    category: infra
+    note: >-
+      Deployed September 16, 2026 from the same Factory v1.1.0 and template. Pledged collateral of 330.99
+      yvWETH-2 (361.34 WETH) against 310.24 WETH of interest-accrued debt — a backing CR of 116.47% across
+      9 Troves between 110.18% and 147.24%. First-loss reserve 0.0603 WETH.
   - id: oracle-yvcrvusd
     label: Price Oracle — yvcrvUSD-2/USDC
     address: "0x01821e20e102A9c9878298fde6b87B1885Baa8B2"
     category: infra
     note: >-
       Converts yvcrvUSD-2 to crvUSD through the vault rate, then prices crvUSD/USDC off the Curve
-      pool's EMA oracle. Capped at 1.01 with no floor and no privileged switch — structurally the
-      soundest of the three market oracles. Source lives on pull request #23; reviewed by Yearn
-      security and Zero Cool.
+      pool's EMA oracle. Capped at 1.01 with no floor and no privileged switch, so the current 0.99897
+      reading passes straight through. Source lives on pull request #23; reviewed by Yearn security and
+      Zero Cool.
   - id: oracle-yvusd
     label: Price Oracle — yvUSD/USDC
     address: "0xDB8DBB6c0548341Aea85ebAAFa681B4A8c077D2e"
@@ -119,6 +151,13 @@ nodes:
       Immutable Vyper wrapper over a Morpho oracle. Because the Morpho oracle is configured with yvUSD as
       its base vault and no price feeds, the reported price is yvUSD's own convertToAssets rescaled —
       appropriate here since yvUSD's underlying is USDC and lenders deposit USDC.
+  - id: oracle-yvweth
+    label: Price Oracle — yvWETH-2/WETH
+    address: "0x4E2cAD94B2139f03C65B5677A84C2aeAC259B96C"
+    category: infra
+    note: >-
+      Same morpho_oracle.vy wrapper as the yvUSD market, over a feedless Morpho oracle with yvWETH-2 as
+      base vault. Reads exactly yvWETH-2's convertToAssets (1.091703).
   - id: oracle-ysybold
     label: Price Oracle — ysyBOLD/USDC
     address: "0x405568114Ee8058d0ca1Bbe95DA1f929279BaE65"
@@ -126,16 +165,16 @@ nodes:
     note: >-
       Converts ysyBOLD to BOLD through the two vault exchange rates, then prices BOLD/USDC off the Curve
       pool's EMA oracle. The BOLD leg is capped at 1.01, and a 0.99 floor applies unless Daddy sets
-      set_depeg_mode — which it did on August 24, 2026, so the floor is currently lifted and a real BOLD
-      depeg registers. The same key can switch it back with no timelock. Source lives on pull request
-      #22; reviewed by Yearn security and Zero Cool.
+      set_depeg_mode — which it did on August 24, 2026, and it still reads true, so a real BOLD depeg
+      registers. The same key can switch it back with no timelock. Source lives on pull request #22;
+      reviewed by Yearn security and Zero Cool.
   - id: registry
     label: Registry (endorsed markets)
     address: "0x9117440a7D03238905d1C8908157Bd7a547c77c8"
     category: infra
     note: >-
-      Enumerates five markets, of which three are endorsed (the live ones above) and two were unendorsed
-      on August 24, 2026 — the retired v1 yvUSD/USDC market, which still holds ~$24,975 of yvUSD in a
+      Enumerates six markets, of which four are endorsed (the live ones above) and two were unendorsed
+      on August 24, 2026 — the retired v1 yvUSD/USDC market, which still holds ~$25,193 of yvUSD in a
       zombie Trove, and a never-funded siUSD/USDC market. Only Daddy can endorse or unendorse, with no
       timelock.
   - id: exit-router
@@ -155,32 +194,56 @@ nodes:
     note: >-
       Holds every privileged power in the protocol despite the risks page claiming there are no admin keys.
       It is each Lender's management, the Registry owner, the recipient of both the 10% lender performance
-      fee and the borrower upfront fees, and the only caller of set_depeg_mode on the ysyBOLD oracle. On
-      August 24, 2026 it unendorsed two markets, lifted the ysyBOLD price floor and endorsed a third market
-      in two transactions, all effective immediately. It cannot seize borrower collateral or lender shares.
+      fee and the borrower upfront fees, and the only caller of set_depeg_mode on the ysyBOLD oracle. It
+      acted on August 24, 2026 (two markets unendorsed, ysyBOLD floor lifted, a market endorsed) and on
+      September 17, 2026 (yvWETH-2 market endorsed), all effective immediately. It cannot seize borrower
+      collateral or lender shares.
   - id: daddy-safe
     label: Daddy owner Safe (3-of-5)
     address: "0x687b82dA9753C9db280d4D9aBD7BCAC022Ef3B67"
     category: governance
     note: >-
-      Safe v1.4.1. Threshold raised from 2 to 3 on June 24, 2026 and a fifth owner added on August 13, 2026.
-      No timelock sits in front of it.
+      Safe v1.4.1. Threshold raised from 2 to 3 on June 24, 2026 and a fifth owner added on August 13, 2026;
+      owner set unchanged since. No timelock sits in front of it. Not covered by any Yearn monitor.
+  - id: yearn-role-manager
+    label: Yearn RoleManager
+    address: "0xb3bd6B2E61753C311EFbCF0111f75D29706D9a41"
+    category: governance
+    note: >-
+      Role manager of both allocator vaults. Distributes vault roles to yChad, the Strategist MultiSig,
+      Yearn security, the debt allocator, the yHaaS keeper and the 7-day timelock.
+  - id: yearn-timelock
+    label: Yearn TimelockController (7 days)
+    address: "0x88ba032be87d5eF1FbE87336B7090767F367BF73"
+    category: governance
+    note: >-
+      Holds ADD_STRATEGY, REVOKE_STRATEGY, FORCE_REVOKE, ACCOUNTANT_MANAGER and MAX_DEBT_MANAGER on both
+      allocator vaults, so routing them into a new strategy takes a week.
   - id: yearn-sms
     label: Yearn Strategist MultiSig (SMS)
     address: "0x16388463d60FFE0661Cf7F1f31a7D658aC790ff7"
     category: governance
     note: >-
-      Holds all 14 roles on the yvFlexUSDC vault and is management on the Flex strategies. forceFreeFunds
-      is an optional curator unwind; depositors exit through the FlexExitRouter.
+      Brain role on both allocator vaults (queue, reporting, debt, deposit-limit, emergency roles) and
+      management on all four Flex strategies. forceFreeFunds is an optional curator unwind; depositors exit
+      through the FlexExitRouter.
 
   # External dependencies
+  - id: dep-yeth-recovery
+    label: Yearn yETH Recovery Vault (depositor)
+    address: "0xd7a540ba3626c0aa66e7DB4088971d0CD64695B6"
+    category: dependency
+    note: >-
+      Yearn V3 WETH vault holding 96.8% of yvFlexWETH shares — the source of the WETH market's lending
+      capital and of most of Flex's October TVL growth.
   - id: dep-yvusd
     label: yvUSD (Yearn V3 USDC vault)
     address: "0x696d02Db93291651ED510704c9b286841d506987"
     category: dependency
     note: >-
-      Sole collateral of the largest market and, through the Morpho oracle, its only price input. A yvUSD
-      impairment feeds straight into Flex solvency. Both legs are USD, so the market runs near a 110% MCR by design.
+      Sole collateral of the largest USDC market and, through the Morpho oracle, its only price input. A
+      yvUSD impairment feeds straight into that market's solvency. Also reached indirectly by yvWETH-2's
+      Spark lender-borrower strategies. Both legs are USD, so the market runs near a 110% MCR by design.
   - id: dep-morpho-oracle
     label: Morpho ChainlinkOracleV2 (feedless)
     address: "0xC44Ee741C22957e6b3d40022894Eb50e6a7069EF"
@@ -188,6 +251,19 @@ nodes:
     note: >-
       Immutable Morpho oracle with BASE_VAULT set to yvUSD and no Chainlink feeds configured, so it simply
       rescales the vault's own exchange rate. Well-audited, but an added link in the pricing chain.
+  - id: dep-morpho-oracle-weth
+    label: Morpho ChainlinkOracleV2 — yvWETH-2
+    address: "0xcDf094B6Ba4a90A9d6c06F2b8D00D2a74920Cb52"
+    category: dependency
+    note: Immutable feedless Morpho oracle with BASE_VAULT set to yvWETH-2.
+  - id: dep-yvweth2
+    label: yvWETH-2 (Yearn V3 WETH vault)
+    address: "0xAc37729B76db6438CE62042AE1270ee574CA7571"
+    category: dependency
+    note: >-
+      Collateral of the WETH market. 1,531.58 WETH, of which Flex's market holds ~23.6%. Debt sits 60.6% in a
+      Spark wstETH→yvUSD lender-borrower accumulator, 17.7% in a wstETH/WETH Spark looper, 11.2% in a Spark
+      WETH/USDS (yvUSD) lender-borrower and 10.5% in yvWETH-1. Not assessed in this repository.
   - id: dep-ysybold
     label: ysyBOLD (Staked yBOLD)
     address: "0x23346B04a7f55b8760E5860AA5A77383D63491cD"
@@ -202,30 +278,29 @@ nodes:
     category: dependency
     note: >-
       Terminal dependency of the ysyBOLD collateral chain. Not assessed by Yearn. A BOLD depeg below 0.99
-      is the scenario the ysyBOLD oracle floor is designed around and, until depeg mode is enabled, hides.
+      is the scenario the ysyBOLD oracle floor is designed around and, if depeg mode were switched off, would hide.
   - id: dep-curve-bold-usdc
     label: Curve BOLD/USDC pool (EMA oracle)
     address: "0xEFc6516323FbD28e80B85A497B65A86243a54B3E"
     category: dependency
     note: >-
-      Single price source for the BOLD/USDC leg of the ysyBOLD oracle, read via its EMA price_oracle.
-      The 0.99–1.01 band bounds manipulation impact and equally bounds the oracle's ability to recognize
-      a genuine depeg.
+      Single price source for the BOLD/USDC leg of the ysyBOLD oracle, read via its EMA price_oracle
+      (1.0036 at the snapshot). Capped at 1.01; the 0.99 floor is currently off.
   - id: dep-yvcrvusd
     label: yvcrvUSD-2 (Yearn V3 crvUSD vault)
     address: "0xBF319dDC2Edc1Eb6FDf9910E39b37Be221C8805F"
     category: dependency
     note: >-
-      Collateral of the third market. A publicly-listed Yearn V3 vault holding ~$1.20M of crvUSD, of
-      which Flex's market holds roughly 9.7%. Neither this vault nor crvUSD has a report in this
-      repository.
+      Collateral of the third market. A publicly-listed Yearn V3 vault holding ~1.42M crvUSD, of which
+      Flex's market holds roughly 7.9%. Neither this vault nor crvUSD has a report in this repository.
   - id: dep-curve-crvusd
     label: Curve USDC/crvUSD pool (EMA oracle)
     address: "0x4DEcE678ceceb27446b35C672dC7d61F30bAD69E"
     category: dependency
     note: >-
       Single price source for the crvUSD/USDC leg of the yvcrvUSD-2 oracle, read via its EMA
-      price_oracle. Capped at 1.01 with no floor, so a genuine crvUSD depeg is reflected downward.
+      price_oracle (0.99897 at the snapshot). Capped at 1.01 with no floor, so a genuine crvUSD depeg is
+      reflected downward.
   - id: dep-sky-susds
     label: Sky / sUSDS (Savings Rate)
     address: "0xa3931d71877C0E7a3148CB7Eb4463524FEc27fbD"
@@ -235,7 +310,7 @@ nodes:
     label: USDC (borrow token)
     address: "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"
     category: dependency
-    note: Borrow token in every Flex market, carrying standard Circle centralization and freeze risk.
+    note: Borrow token in the three USDC markets, carrying standard Circle centralization and freeze risk.
 
 edges:
   # Governance
@@ -243,31 +318,45 @@ edges:
   - { from: daddy, to: lender-yvusd, kind: holds-role, label: "management + performanceFeeRecipient" }
   - { from: daddy, to: lender-ysybold, kind: holds-role, label: "management + performanceFeeRecipient" }
   - { from: daddy, to: lender-yvcrvusd, kind: holds-role, label: "management + performanceFeeRecipient" }
+  - { from: daddy, to: lender-yvweth, kind: holds-role, label: "management + performanceFeeRecipient" }
   - { from: daddy, to: registry, kind: holds-role, label: "endorse / unendorse markets" }
   - { from: daddy, to: oracle-ysybold, kind: holds-role, label: "set_depeg_mode — lifts the 0.99 BOLD floor" }
-  - { from: yearn-sms, to: yvflexusdc, kind: holds-role, label: "role_manager, all 14 roles" }
+  - { from: yearn-role-manager, to: yvflexusdc, kind: controls, label: "role_manager" }
+  - { from: yearn-role-manager, to: yvflexweth, kind: controls, label: "role_manager" }
+  - { from: yearn-timelock, to: yvflexusdc, kind: holds-role, label: "ADD_STRATEGY, REVOKE, FORCE_REVOKE, ACCOUNTANT, MAX_DEBT (7-day delay)" }
+  - { from: yearn-timelock, to: yvflexweth, kind: holds-role, label: "ADD_STRATEGY, REVOKE, FORCE_REVOKE, ACCOUNTANT, MAX_DEBT (7-day delay)" }
+  - { from: yearn-sms, to: yvflexusdc, kind: holds-role, label: "Brain: queue, reporting, debt, deposit limit, emergency" }
+  - { from: yearn-sms, to: yvflexweth, kind: holds-role, label: "Brain: queue, reporting, debt, deposit limit, emergency" }
   - { from: yearn-sms, to: strat-yvusd, kind: holds-role, label: "management — sole caller of forceFreeFunds" }
   - { from: yearn-sms, to: strat-ysybold, kind: holds-role, label: "management — sole caller of forceFreeFunds" }
   - { from: yearn-sms, to: strat-yvcrvusd, kind: holds-role, label: "management — sole caller of forceFreeFunds" }
+  - { from: yearn-sms, to: strat-yvweth, kind: holds-role, label: "management — sole caller of forceFreeFunds" }
   - { from: registry, to: tm-yvusd, kind: manages, label: "endorsed market" }
   - { from: registry, to: tm-ysybold, kind: manages, label: "endorsed market" }
   - { from: registry, to: tm-yvcrvusd, kind: manages, label: "endorsed market" }
+  - { from: registry, to: tm-yvweth, kind: manages, label: "endorsed market" }
 
   # Money flow
+  - { from: dep-yeth-recovery, to: yvflexweth, kind: deposits-into, label: "96.8% of shares" }
   - { from: yvflexusdc, to: strat-yvusd, kind: allocates-to, label: "54.0%" }
   - { from: yvflexusdc, to: strat-ysybold, kind: allocates-to, label: "18.0%" }
   - { from: yvflexusdc, to: strat-yvcrvusd, kind: allocates-to, label: "9.0%" }
   - { from: yvflexusdc, to: strat-sky, kind: allocates-to, label: "19.0%" }
+  - { from: yvflexweth, to: strat-yvweth, kind: allocates-to, label: "100%" }
   - { from: strat-yvusd, to: lender-yvusd, kind: deposits-into, label: "USDC → ysUSDC" }
   - { from: strat-ysybold, to: lender-ysybold, kind: deposits-into, label: "USDC → ysUSDC" }
   - { from: strat-yvcrvusd, to: lender-yvcrvusd, kind: deposits-into, label: "USDC → ysUSDC" }
+  - { from: strat-yvweth, to: lender-yvweth, kind: deposits-into, label: "WETH → ysWETH" }
   - { from: strat-sky, to: dep-sky-susds, kind: deposits-into, label: "USDC → sUSDS" }
   - { from: lender-yvusd, to: tm-yvusd, kind: deposits-into, label: "lends USDC to Troves" }
   - { from: lender-ysybold, to: tm-ysybold, kind: deposits-into, label: "lends USDC to Troves" }
   - { from: lender-yvcrvusd, to: tm-yvcrvusd, kind: deposits-into, label: "lends USDC to Troves" }
-  - { from: tm-yvusd, to: dep-yvusd, kind: deposits-into, label: "yvUSD collateral, 113.9% CR" }
-  - { from: tm-ysybold, to: dep-ysybold, kind: deposits-into, label: "ysyBOLD collateral, 114.5% CR" }
-  - { from: tm-yvcrvusd, to: dep-yvcrvusd, kind: deposits-into, label: "yvcrvUSD-2 collateral, 116.3% CR" }
+  - { from: lender-yvweth, to: tm-yvweth, kind: deposits-into, label: "lends WETH to Troves" }
+  - { from: tm-yvusd, to: dep-yvusd, kind: deposits-into, label: "yvUSD collateral, 114.97% CR" }
+  - { from: tm-ysybold, to: dep-ysybold, kind: deposits-into, label: "ysyBOLD collateral, 126.70% CR" }
+  - { from: tm-yvcrvusd, to: dep-yvcrvusd, kind: deposits-into, label: "yvcrvUSD-2 collateral, 112.28% CR" }
+  - { from: tm-yvweth, to: dep-yvweth2, kind: deposits-into, label: "yvWETH-2 collateral, 116.47% CR" }
+  - { from: dep-yvweth2, to: dep-yvusd, kind: routes-through, label: "Spark lender-borrower legs deposit borrowed USDS" }
   - { from: dep-yvcrvusd, to: dep-curve-crvusd, kind: routes-through, label: "crvUSD" }
   - { from: dep-ysybold, to: dep-liquity-bold, kind: deposits-into, label: "ysyBOLD → yBOLD → BOLD" }
   - { from: lender-yvusd, to: dep-usdc, kind: routes-through, label: "borrow token" }
@@ -278,9 +367,12 @@ edges:
   - { from: tm-yvusd, to: oracle-yvusd, kind: routes-through, label: "liquidation / redemption oracle" }
   - { from: tm-ysybold, to: oracle-ysybold, kind: routes-through, label: "liquidation / redemption oracle" }
   - { from: tm-yvcrvusd, to: oracle-yvcrvusd, kind: routes-through, label: "liquidation / redemption oracle" }
+  - { from: tm-yvweth, to: oracle-yvweth, kind: routes-through, label: "liquidation / redemption oracle" }
   - { from: oracle-yvcrvusd, to: dep-curve-crvusd, kind: routes-through, label: "crvUSD/USDC EMA, capped at 1.01" }
   - { from: oracle-yvusd, to: dep-morpho-oracle, kind: routes-through, label: "price() passthrough" }
-  - { from: oracle-ysybold, to: dep-curve-bold-usdc, kind: routes-through, label: "BOLD/USDC EMA, floored at 0.99" }
+  - { from: oracle-yvweth, to: dep-morpho-oracle-weth, kind: routes-through, label: "price() passthrough" }
+  - { from: oracle-ysybold, to: dep-curve-bold-usdc, kind: routes-through, label: "BOLD/USDC EMA, capped at 1.01 (floor off)" }
   - { from: exit-router, to: strat-yvusd, kind: routes-through, label: "setProceedsReceiver — permissionless async exit" }
   - { from: exit-router, to: strat-ysybold, kind: routes-through, label: "setProceedsReceiver — permissionless async exit" }
   - { from: exit-router, to: strat-yvcrvusd, kind: routes-through, label: "setProceedsReceiver — permissionless async exit" }
+  - { from: exit-router, to: strat-yvweth, kind: routes-through, label: "setProceedsReceiver — permissionless async exit" }
