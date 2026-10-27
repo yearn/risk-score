@@ -20,29 +20,29 @@ nodes:
     label: USD3 (Senior Tranche)
     address: "0x056B269Eb1f75477a8666ae8C7fE01b64dD55eCc"
     category: vault
-    note: ERC-4626 senior tranche; TransparentUpgradeableProxy
+    note: ERC-4626 senior tranche; TransparentUpgradeableProxy; ~$115.0M totalAssets; impl 0xd1f1c3f4 (v1.2, Sep 25 2026)
   - id: sUSD3
     label: sUSD3 (Junior / First-Loss)
     address: "0xf689555121e529Ff0463e191F9Bd9d1E496164a7"
     category: vault
-    note: Staked USD3; absorbs losses first; 1-month lock
+    note: Staked USD3; pool-level first-loss tranche (~$8.37M); 30-day cooldown; 7.5% profit share
 
   # === Protocol infra ===
   - id: morpho-credit
     label: MorphoCredit (Lending Engine)
     address: "0xDe6e08ac208088cc62812Ba30608D852c6B0EcBc"
     category: infra
-    note: Morpho Blue fork with credit-based markets
+    note: Morpho Blue fork; single waEthUSDC market; ~$89.91M borrowed (~78% utilization)
   - id: credit-line
     label: CreditLine (Borrower Approval)
     address: "0x26389b03298BA5DA0664FfD6bF78cF3A7820c6A9"
     category: infra
-    note: Approves credit lines, posts minimum repayments
+    note: Sets credit lines; settle() is the only loss-recognition path (markdown inactive)
   - id: protocol-config
     label: ProtocolConfig
     address: "0x6b276A2A7dd8b629adBA8A06AD6573d01C84f34E"
     category: infra
-    note: Pause, debt cap, tranche ratios, IRM bounds
+    note: "Supply cap $115M, DEBT_CAP 95.02M waEthUSDC, TRANCHE_SHARE_VARIANT 750, CYCLE_DURATION max"
   - id: irm
     label: AdaptiveCurveIRM
     address: "0x1d434D2899f81F3C3fdf52C814A6E23318f9C7Df"
@@ -50,15 +50,16 @@ nodes:
     note: Interest rate model proxy
   - id: helper
     label: Helper (Borrower Interactions)
-    address: "0x82736F81A56935c8429ADdbDa4aEBec737444505"
+    address: "0x2A66F992bF227D2e50eF19EDD21503C3c4F3f682"
     category: infra
+    note: Live MorphoCredit.helper(); docs still list superseded 0x82736F81
 
   # === Governance ===
   - id: multisig
     label: Multisig (3-of-5 Safe)
     address: "0x33333333bd7045f1a601a1e289d7ab21036fb5ef"
     category: governance
-    note: PROPOSER + EXECUTOR + CANCELLER on both timelocks
+    note: PROPOSER + EXECUTOR + CANCELLER on both timelocks; sole owner of the origination-account Safe
   - id: timelock-24h
     label: TimelockController (24h, config)
     address: "0x1dCcD4628d48a50C1A7adEA3848bcC869f08f8C2"
@@ -78,7 +79,7 @@ nodes:
     label: LCCVaultFactory
     address: "0x95431c2Fbfe3E0f17a61EF1d7601Eb34aE6cd6ba"
     category: governance
-    note: "OWNER_ROLE=24h timelock; GUARDIAN_ROLE=multisig+Hypernative; LISTER_ROLE=single EOA controlling depositor caps"
+    note: "OWNER_ROLE + BOUNCER_ROLE = 24h timelock; GUARDIAN_ROLE = multisig + Hypernative; LISTER_ROLE = single EOA controlling depositor caps"
   - id: lcc-beacon
     label: LCC UpgradeableBeacon
     address: "0xa767a51810644dDc34588cB8392EFd2591350302"
@@ -89,15 +90,20 @@ nodes:
   - id: aave-strategy
     label: Aave V3 Idle Reserves
     category: strategy
-    note: Baseline yield on idle USDC (~$12.43M, ~15.5% of totalAssets)
-  - id: unsecured-loans
-    label: Unsecured Credit Lines
+    note: Idle waEthUSDC (~$25.15M, ~21.9% of totalAssets)
+  - id: origination-account
+    label: Protocol-Owned Origination Account (1-of-1 Safe)
+    address: "0x3Ff3ff33D20a086834A095ed6ed562c9e189291b"
     category: strategy
-    note: ~$67.59M borrowed (~84.5% utilization); base rate + risk premium
+    note: "~$88.82M borrowed (98.8% of borrows); credit line 94.06M waEthUSDC; premium 0; owner = 3/5 multisig"
+  - id: unsecured-loans
+    label: Legacy Crypto Credit Lines
+    category: strategy
+    note: ~$1.09M residual third-party CCL debt; program retired
   - id: lcc-facilities
     label: LCC (Levered Callable Capital)
     category: strategy
-    note: "Epoch clock started Sept 1, 2026; ~$7.55M standby, $0 called; funding disabled by USD3 cap and deployed v1.1.4"
+    note: "Funding path live (supplyCapExempt + ring-fence conduits); ~$10.92M standby, $0 called through epoch 2"
 
   # === External dependencies ===
   - id: aave-v3-usdc
@@ -105,9 +111,17 @@ nodes:
     category: dependency
     note: Blue-chip lending venue for idle reserves
   - id: borrowers
-    label: Approved Borrowers
+    label: CCL Borrowers
     category: dependency
-    note: Offchain-underwritten credit lines (3CA algorithm)
+    note: Offchain-underwritten credit lines (3CA algorithm); residual only
+  - id: erebor
+    label: Erebor (USD banking rail)
+    category: dependency
+    note: 3Jane USD staging account; FCC wires and collections; balances unverifiable onchain
+  - id: fcc-facilities
+    label: FCC Facilities (SPVs / originators)
+    category: dependency
+    note: "Off-chain warehouse / forward-flow positions; only LendSwift $10M publicly documented"
   - id: zk-tls
     label: zkTLS / Reclaim Protocol
     category: dependency
@@ -120,7 +134,7 @@ nodes:
     label: Insurance Fund (~$1.03M USDC)
     address: "0x4507B5B23340D248457d955a211C8B0634D29935"
     category: dependency
-    note: First-loss buffer (waEthUSDC); combined with sUSD3, ~12.6% borrow-book coverage
+    note: CCL-only first-loss backstop (waEthUSDC); with sUSD3, ~10.5% borrow-book coverage
   - id: margin-oracles
     label: LCC Margin Oracles
     category: dependency
@@ -191,11 +205,31 @@ edges:
   - from: morpho-credit
     to: aave-strategy
     kind: allocates-to
-    label: "idle reserves (~15.5%)"
+    label: "idle reserves (~21.9%)"
+  - from: morpho-credit
+    to: origination-account
+    kind: allocates-to
+    label: "~$88.82M (~77% of totalAssets)"
   - from: morpho-credit
     to: unsecured-loans
     kind: allocates-to
-    label: "~84.5% utilization"
+    label: "~$1.09M residual CCL"
+  - from: multisig
+    to: origination-account
+    kind: controls
+    label: sole Safe owner (draws with no timelock)
+  - from: timelock-24h
+    to: credit-line
+    kind: manages
+    label: setCreditLines / settle()
+  - from: origination-account
+    to: erebor
+    kind: routes-through
+    label: "USDC off-ramp via EOAs (unverified)"
+  - from: erebor
+    to: fcc-facilities
+    kind: deposits-into
+    label: "USD wires to SPVs"
 
   # === Credit underwriting wiring ===
   - from: credit-line
@@ -239,7 +273,7 @@ edges:
   - from: lcc-facilities
     to: USD3
     kind: deposits-into
-    label: "capital call funding ($0; disabled at snapshot)"
+    label: "capital call funding (cap-exempt, ring-fenced; $0 called)"
   - from: lcc-facilities
     to: margin-oracles
     kind: routes-through
