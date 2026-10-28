@@ -120,7 +120,7 @@ Strategies go through Yearn's [risk scoring framework](https://github.com/yearn/
 
 ### Bug Bounty
 
-- **Yearn (Immunefi):** active, max payout $200,000 — [immunefi.com/bounty/yearnfinance](https://immunefi.com/bounty/yearnfinance/). Whether the Flex strategies fall within its scope is not stated: `TODO` — confirm scope with Yearn security.
+- **Yearn (Immunefi):** active, max payout $200,000 — [immunefi.com/bug-bounty/yearnfinance](https://immunefi.com/bug-bounty/yearnfinance/scope/). The listed scope includes the three Yearn components this vault is built from: the [v3.0.4 Vault Factory](https://etherscan.io/address/0x770D0d1Fb036483Ed4AbB6d53c1C88fb277D812F), the [v3.0.4 Tokenized Strategy](https://etherscan.io/address/0xD377919FA87120584B21279a491F82D5265A139c) and the [Accountant](https://etherscan.io/address/0x5A74Cb32D36f2f517DB6f7b0A0591e09b22cDE69). The `FlexLenderStrategy` code and Flex's contracts do not appear among the listed assets, and the program excludes contracts not directly supported by Yearn, so the Flex-specific logic behind 81.0% of debt has no bounty coverage.
 - **Flex:** none (see [Flex report](./flex.md#bug-bounty-if-applicable)).
 - **Sky (Immunefi):** active, max payout $10,000,000 — [immunefi.com/bug-bounty/sky](https://immunefi.com/bug-bounty/sky/).
 
@@ -203,7 +203,7 @@ Flex-side parameters that affect this vault but are not under Yearn's control ar
 - **Flex legs exit through `FlexExitRouter.redeem()` — asynchronous.** The router sets the exiting holder as the *proceeds receiver* on the Flex strategies, redeems vault shares, and clears it. Each Flex strategy then redeems Lender shares to that receiver: idle cash arrives atomically, and the remainder triggers Flex redemptions of the lowest-rate Troves whose collateral is sold in a one-day Dutch auction (starting at 100% of oracle value, floored at 99%). Auction proceeds go straight to the exiting holder as they are taken.
   - The vault books the asynchronous portion as a **loss on that withdrawal** (per the strategy's verified source), so the caller must pass a `maxLoss` high enough to cover it. Remaining holders are unaffected: the shortfall and any auction discount fall on the exiting holder alone.
   - The exiting holder bears auction execution: price drift of the collateral during the auction, up to a ~1% discount at the floor, and re-kick delay if no taker appears.
-  - Whether the yearn.fi interface routes withdrawals through the `FlexExitRouter`: `TODO` — not verified.
+  - **The yearn.fi interface does not use the router.** Its withdraw paths in [`yearn/yearn.fi`](https://github.com/yearn/yearn.fi) (`main` at [`1e0f1b7`](https://github.com/yearn/yearn.fi/commit/1e0f1b7)) are a direct ERC-4626 `withdraw`/`redeem` on the vault, an Enso zap, and the yBOLD and locked-yvUSD zappers; none references `FlexExitRouter` or `setProceedsReceiver`. A holder withdrawing through yearn.fi can therefore reach only the standard-redeemable ~20.6%; exiting the Flex legs requires calling the router directly.
 - **Large holder impact.** The vault is the sole lender in all three Flex USDC markets, so the Yearn Treasury's full exit (~$1.02M, 90.8% of shares) would mean redeeming essentially the entire Flex USDC borrower book — about $889K of Trove debt across three collaterals — through auctions that each clear only in their own collateral. Flex's redemption path has run 60 times across its markets since September 7 without incident, but never at that scale.
 - **Curator unwind.** Brain can also reduce debt on a Flex strategy (`update_debt`) or call `forceFreeFunds`; both use the same redemption-auction path and take at least a day to complete.
 - **Same-value asset:** USDC in, USDC out; the collateral being auctioned is USD-denominated, so short delays carry limited price risk.
@@ -241,7 +241,7 @@ The vault uses the **standard Yearn V3 governance pattern** through the Yearn Ro
 
 - **Vault operator:** Yearn — established since 2020, named Daddy signers, BORG legal wrapper ([YIP-87](https://gov.yearn.fi/t/yip-87-convert-ychad-eth-into-a-borg/14540)).
 - **Underlying operator:** Flex's team is pseudonymous with no legal entity; its risks page denies the admin powers its governance contract holds (see [Flex report](./flex.md#operational-risk)).
-- **Documentation:** Yearn V3 docs are comprehensive. Neither Yearn nor Flex documents this vault's exit path through the `FlexExitRouter` for end users.
+- **Documentation:** Yearn V3 docs are comprehensive. Neither Yearn nor Flex documents this vault's exit path through the `FlexExitRouter` for end users, and the yearn.fi interface does not offer it.
 - **Incident response:** Yearn's demonstrated process and $200K bug bounty cover the vault layer; Flex has no bounty or documented incident process.
 
 ## Monitoring
@@ -288,7 +288,7 @@ Verified against [`yearn/monitoring-scripts-py`](https://github.com/yearn/monito
 ### Key Risks
 
 - **Concentration in one young protocol:** 81.0% of debt is in Flex, whose markets are isolated but share code, oracle designs and an untimelocked 3-of-5 governance contract.
-- **Exit is mostly asynchronous:** only ~20.6% exits through a standard redemption; the rest requires the `FlexExitRouter`, auction execution, and a `maxLoss` that tolerates the asynchronous portion being booked as a loss.
+- **Exit is mostly asynchronous, and not through the UI:** only ~20.6% exits through a standard redemption, which is all yearn.fi offers. The rest requires calling the `FlexExitRouter` directly, auction execution, and a `maxLoss` that tolerates the asynchronous portion being booked as a loss.
 - **The vault is the whole lender side:** it owns 99.9% of every Flex USDC Lender, so its largest holder's exit equals unwinding the entire Flex USDC borrower book.
 - **Partly unassessed collateral:** 27.0% of debt sits on collateral chains ending in Liquity V2 BOLD and Curve crvUSD, which this repository has not assessed.
 - **No protocol-level monitoring:** Yearn monitors only the vault's flows and its own governance.
@@ -319,7 +319,7 @@ Verified against [`yearn/monitoring-scripts-py`](https://github.com/yearn/monito
 
 #### Category 1: Audits & Historical Track Record (Weight: 20%)
 
-**Subcategory A: Audits** — Yearn V3 has three top-firm audits and a $200K Immunefi bounty; Flex, which holds 81.0% of debt, has six reviews (two Dedaub) but no bug bounty. → **2**
+**Subcategory A: Audits** — Yearn V3 has three top-firm audits and a $200K Immunefi bounty covering the vault factory, TokenizedStrategy and accountant this vault uses; Flex, which holds 81.0% of debt, has six reviews (two Dedaub) but no bug bounty, and the Flex strategy logic is outside Yearn's listed scope. → **2**
 
 **Subcategory B: Historical Track Record** — ~5.5 months in production with ~$1.12M TVL: the rubric's 3–6 months / <$10M row. → **4**
 
@@ -351,13 +351,13 @@ Verified against [`yearn/monitoring-scripts-py`](https://github.com/yearn/monito
 
 #### Category 4: Liquidity Risk (Weight: 15%)
 
-About 20.6% of the vault exits atomically through a standard redemption. The rest exits through the `FlexExitRouter`, paid asynchronously from one-day near-par Dutch auctions, with the exiting holder bearing execution and the asynchronous portion booked as a withdrawal loss — a mechanism standard ERC-4626 integrations do not use. Same-value assets allow some delay. The deciding factor is large-holder impact: the vault is the sole lender, so its 90.8% holder's exit means unwinding the entire Flex USDC borrower book. The Flex report scores its Lender's liquidity 3; the vault scores half a point worse for that concentration and for the default path's ~20.6% ceiling. → **3.5**
+About 20.6% of the vault exits atomically through a standard redemption. The rest exits through the `FlexExitRouter`, paid asynchronously from one-day near-par Dutch auctions, with the exiting holder bearing execution and the asynchronous portion booked as a withdrawal loss — a mechanism neither standard ERC-4626 integrations nor the yearn.fi interface use. Same-value assets allow some delay. The deciding factor is large-holder impact: the vault is the sole lender, so its 90.8% holder's exit means unwinding the entire Flex USDC borrower book. The Flex report scores its Lender's liquidity 3; the vault scores half a point worse for that concentration and for the default path's ~20.6% ceiling. → **3.5**
 
 **Score: 3.5/5**
 
 #### Category 5: Operational Risk (Weight: 5%)
 
-Yearn operates the vault (well-known team, BORG entity, comprehensive docs, active vault-level monitoring). The 81.0% underlying is run by a pseudonymous team with no legal entity and no Flex-specific monitoring, and the router exit path is undocumented for users. → **2**
+Yearn operates the vault (well-known team, BORG entity, comprehensive docs, active vault-level monitoring). The 81.0% underlying is run by a pseudonymous team with no legal entity and no Flex-specific monitoring, and the router exit path is undocumented for users and absent from yearn.fi. → **2**
 
 **Score: 2/5**
 
@@ -398,7 +398,7 @@ The Centralization score is (1 + 1 + 4.5) / 3 = 2.1667, weighted 0.650. The weig
 - **TVL-based:** reassess if TVL changes by more than ±50% from ~$1.12M, or if outside depositors exceed 25% of shares.
 - **Allocation-based:** reassess if a strategy is added or revoked, if the Flex share exceeds 90% or falls below 50%, if any single Flex market exceeds 60% of debt, or if the Sky leg is defunded.
 - **Flex-based:** reassess on any Flex score change, `BadDebt` event, Lender loss, new Flex market this vault funds, Flex governance change, or `DepegModeSet` on the ysyBOLD oracle.
-- **Liquidity-based:** reassess if the standard-withdrawable share falls below 10% of `totalAssets`, if the `FlexExitRouter` is changed or disabled, or after any router exit that realizes a material loss.
+- **Liquidity-based:** reassess if the standard-withdrawable share falls below 10% of `totalAssets`, if the `FlexExitRouter` is changed or disabled, if yearn.fi adds or removes router support, or after any router exit that realizes a material loss.
 - **Governance-based:** reassess on any change to the vault's role holders, the Yearn timelock delay, or Daddy / Brain / Security composition.
 
 ## Assessment History
