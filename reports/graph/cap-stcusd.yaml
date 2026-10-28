@@ -114,7 +114,7 @@ nodes:
 - id: operators
   label: Covered Operator Loans
   category: dependency
-  note: Largest agent is 51.59% of accrued USDC debt (LBTC collateral, health 1.289); proprietary positions and institutional attribution unresolved
+  note: Largest agent (Symbiotic metadata label Flow Traders) is 51.59% of accrued USDC debt (LBTC collateral, health 1.289); proprietary positions unverified
 - id: symbiotic
   label: Symbiotic Network Middleware
   category: dependency
