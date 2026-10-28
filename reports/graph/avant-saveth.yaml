@@ -1,0 +1,277 @@
+slug: avant-saveth
+title: Avant (savETH) — Contract Dependency Graph
+chain: ethereum
+
+categories:
+  - id: vault
+    label: Vault / Token
+  - id: strategy
+    label: Strategy
+  - id: governance
+    label: Governance
+  - id: infra
+    label: Protocol Infra
+  - id: dependency
+    label: External Dependency
+
+nodes:
+  # === Vault / token layer ===
+  - id: saveth
+    label: savETH (Senior Tranche)
+    address: "0xDA06eE2dACF9245Aa80072a4407deBDea0D7e341"
+    category: vault
+    note: ERC-4626 over avETH, immutable; 10,110.82 shares / 10,739.35 avETH; rate 1.062164; 24h cooldown (admin 0–90d)
+  - id: aveth
+    label: avETH (Base Token)
+    address: "0x9469470C9878bf3d6d0604831d9A3A366156f7EE"
+    category: vault
+    note: Ownable2Step; 12,211.18 supply; owner can setMinter (unbounded mint)
+  - id: avethx
+    label: avETHx (Junior Tranche)
+    address: "0x2E8b7190eE84E7AC757Ddff42Ba14d4EAe24B865"
+    category: vault
+    note: 1,326.59 × 1.100357 = 1,459.72 avETH first-loss (13.6% of senior); non-upgradeable ERC-1967 proxy
+
+  # === Protocol infra ===
+  - id: minting
+    label: AvantMintingV2
+    address: "0x09becF6E5e297825D19aA14eD6081A03524532D7"
+    category: infra
+    note: RFQ mint/redeem; WETH only; stablesDeltaLimit 0 (1:1); 5,000 avETH/block; WETH routed straight to custodian
+  - id: silo
+    label: AvantCoinSilo (cooldown escrow)
+    address: "0x1a3e690B6EbC3013A89e922167570B2684D238e8"
+    category: infra
+    note: Holds avETH during cooldown (2.45 avETH)
+  - id: requests-manager
+    label: RequestsManagerV2 (junior)
+    address: "0x9362B7986E162E99e5d28969214e5797682D7a39"
+    category: infra
+    note: Junior mint/burn requests; deposits go to junior treasury
+  - id: price-storage
+    label: PriceStorage (junior price)
+    address: "0x985b5eF57dBE19B4EE1eD43b9AdEB1A61f2f6f23"
+    category: infra
+    note: Service-key price; +5% / -33% per update, unlimited updates
+  - id: ccip-pool
+    label: savETH CCIP LockReleaseTokenPool
+    address: "0x43f47a434dadd5a122c42e49378365cca949fa54"
+    category: infra
+    note: Escrows 1,702.10 savETH for Arbitrum/Linea/Avalanche copies
+
+  # === Governance ===
+  - id: admin
+    label: Avant Admin (no code; claimed MPC)
+    address: "0xd4d23209aaE8630bf386b7393763a5b7865e57cb"
+    category: governance
+    note: Owner/DEFAULT_ADMIN of every ETH contract; no multisig onchain, no timelock; Avant states Fordefi MPC quorum
+  - id: service-eoa
+    label: Minter / Redeemer / Service EOA
+    address: "0xaf6fd55a83b0f85b4f330e2b25512c2b669786d2"
+    category: governance
+    note: Hot operational key; cannot mint unbacked via minting contract
+  - id: rewarder
+    label: savETH Rewarder EOA
+    address: "0xdb87e930065bc4c9cc4273672a64bf8e2761f1d8"
+    category: governance
+    note: Pushes daily avETH rewards (8h vesting)
+
+  # === Strategy ===
+  - id: custodian
+    label: Custodian EOA (mint destination)
+    address: "0xd0f02713D9905D4F08512F3305Eee1CAC47D6ac9"
+    category: strategy
+    note: Sole registered custodian; forwards WETH to strategy wallets
+  - id: eth-book
+    label: Avant ETH book (strategy wallets)
+    address: "0x6CC60A0b57bc882A0471980D0e2D4aD7DDf3C4bD"
+    category: strategy
+    note: Self-reported NAV $30.46M (12,192.86 ETH, Oct 13 2026); $30.4M ETH/LST collateral, ~$40M stablecoin debt
+  - id: junior-treasury
+    label: Junior treasury EOA
+    address: "0xdD71CDd615f677E98C604bFF5679294cC7a6089b"
+    category: strategy
+    note: Holds 1,381.46 avETH (+78.23 in 0x29b091B0b70D24FEd3BEC3f511B92CC54307c0F6)
+  - id: reserve-fund
+    label: ETH Reserve Fund
+    address: "0x4a6f696a6F921921dC959D19E911a2034063CFdA"
+    category: strategy
+    note: 38.01 savETH (40.37 avETH) — claim on the pool it protects
+
+  # === External dependencies ===
+  - id: lenders
+    label: Aave / Spark / Morpho / Euler
+    category: dependency
+    note: ETH, weETH, wstETH collateral and stablecoin borrowing
+  - id: lsts
+    label: Lido wstETH / ether.fi weETH
+    category: dependency
+    note: $16.4M of LST collateral
+  - id: savusd
+    label: Avant savUSD / avUSD
+    category: dependency
+    link: https://docs.avantprotocol.com/overview/core-tokens
+    note: $32.7M savUSD + $2.3M avUSD (≈115% of ETH-book NAV); offchain-backed, same admin key
+  - id: curvance
+    label: Curvance hyAUSD / cAUSD (Monad)
+    address: "0xaD663aC84052b52BE4ed1b27BA416505e84a00Bf"
+    chain: monad
+    category: dependency
+    note: $1.79M hyAUSD + $1.27M cAUSD in the ETH book
+  - id: fordefi
+    label: Fordefi MPC custody
+    category: dependency
+    link: https://www.fordefi.com/
+    note: Custody of admin, custodian and strategy wallets (team representation)
+  - id: ccip
+    label: Chainlink CCIP
+    category: dependency
+    link: https://docs.chain.link/ccip
+    note: Lock/release lanes to Avalanche, Linea, Arbitrum
+  - id: dolomite
+    label: Dolomite isolation vault (Arbitrum)
+    address: "0xcd518b638cf13b1d34254450d6a04b99e1a61a5d"
+    chain: arbitrum
+    category: dependency
+    note: Holds 1,702.01 bridged savETH
+  - id: morpho-market
+    label: Morpho WETH/savETH · 91.5% LLTV
+    category: dependency
+    link: https://app.morpho.org/ethereum/variable/0xd98cd88ae5b336086b39fb1d62ba6171282e946105b010143f0e89f8fe7cff36/weth-saveth#market
+    note: Market 0xd98cd88ae5b336086b39fb1d62ba6171282e946105b010143f0e89f8fe7cff36; 1,687.06 savETH collateral, 1,207.84 WETH borrowed
+  - id: morpho-oracle
+    label: MorphoChainlinkOracleV2 (savETH rate)
+    address: "0x943da86D8686f86F0b3b43fF78A92AAE1A6Ed3a7"
+    category: dependency
+    note: BASE_VAULT = savETH only; treats avETH = WETH 1:1
+  - id: gearbox
+    label: Gearbox savETH credit account
+    address: "0x6cc892a7ad2c72b8f0d49ce8660da928f7e6101b"
+    category: dependency
+    note: 3,353.98 savETH (33.2% of supply)
+
+edges:
+  # === Governance / authority ===
+  - from: admin
+    to: aveth
+    kind: controls
+    label: owner (setMinter)
+  - from: admin
+    to: saveth
+    kind: controls
+    label: DEFAULT_ADMIN_ROLE (blacklist, redistributeLockedAmount, setCooldownDuration)
+  - from: admin
+    to: minting
+    kind: controls
+    label: DEFAULT_ADMIN_ROLE + COLLATERAL_MANAGER_ROLE
+  - from: admin
+    to: avethx
+    kind: controls
+    label: defaultAdmin
+  - from: admin
+    to: price-storage
+    kind: controls
+    label: defaultAdmin (price bounds)
+  - from: admin
+    to: requests-manager
+    kind: controls
+    label: defaultAdmin (treasury, fees, emergencyWithdraw)
+  - from: admin
+    to: ccip-pool
+    kind: controls
+    label: owner + CCIP token administrator
+  - from: service-eoa
+    to: minting
+    kind: holds-role
+    label: MINTER_ROLE + REDEEMER_ROLE
+  - from: service-eoa
+    to: price-storage
+    kind: holds-role
+    label: SERVICE_ROLE (setPrice)
+  - from: service-eoa
+    to: requests-manager
+    kind: holds-role
+    label: SERVICE_ROLE + PAUSER_ROLE
+  - from: rewarder
+    to: saveth
+    kind: holds-role
+    label: REWARDER_ROLE (transferInRewards)
+
+  # === Mint authority ===
+  - from: minting
+    to: aveth
+    kind: mints
+    label: minters[] = true (1:1 WETH-backed)
+  - from: requests-manager
+    to: avethx
+    kind: mints
+    label: SERVICE_ROLE
+
+  # === Capital flow ===
+  - from: saveth
+    to: aveth
+    kind: deposits-into
+    label: 10,739.35 avETH staked
+  - from: saveth
+    to: silo
+    kind: routes-through
+    label: cooldown escrow
+  - from: minting
+    to: custodian
+    kind: routes-through
+    label: WETH at mint
+  - from: custodian
+    to: eth-book
+    kind: routes-through
+    label: WETH to strategies
+  - from: eth-book
+    to: lenders
+    kind: deposits-into
+    label: $30.4M ETH/LST collateral
+  - from: eth-book
+    to: lsts
+    kind: deposits-into
+    label: $16.4M weETH + wstETH
+  - from: eth-book
+    to: savusd
+    kind: deposits-into
+    label: $35.0M savUSD/avUSD
+  - from: eth-book
+    to: curvance
+    kind: deposits-into
+    label: $3.06M hyAUSD + cAUSD
+  - from: avethx
+    to: junior-treasury
+    kind: routes-through
+    label: 1,459.7 avETH first-loss
+  - from: reserve-fund
+    to: saveth
+    kind: deposits-into
+    label: 38.01 savETH
+  - from: ccip-pool
+    to: ccip
+    kind: routes-through
+    label: 1,702.10 savETH escrow
+  - from: ccip
+    to: dolomite
+    kind: routes-through
+    label: Arbitrum savETH
+
+  - from: gearbox
+    to: saveth
+    kind: deposits-into
+    label: 3,353.98 savETH (33.2%)
+
+  # === Integrations / oracle ===
+  - from: morpho-oracle
+    to: saveth
+    kind: manages
+    label: reads convertToAssets
+  - from: morpho-market
+    to: morpho-oracle
+    kind: manages
+    label: oracle
+  - from: fordefi
+    to: admin
+    kind: controls
+    label: MPC custody (claimed)
