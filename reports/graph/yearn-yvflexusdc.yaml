@@ -79,7 +79,7 @@ nodes:
     address: "0x687b82dA9753C9db280d4D9aBD7BCAC022Ef3B67"
     category: governance
     note: >-
-      Owns Flex's Daddy contract, which is management and performance-fee recipient of every Flex Lender,
+      Owns Flex's Daddy contract (developer holds two of the five keys), which is management and performance-fee recipient of every Flex Lender,
       with no timelock. Cannot be overridden by any Yearn role. See the Flex graph.
 
   # Dependencies

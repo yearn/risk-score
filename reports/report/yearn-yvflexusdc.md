@@ -18,7 +18,7 @@ yvFlexUSDC is a **USDC-denominated Yearn V3 vault** (ERC-4626, v3.0.4) that lend
 | Flex yvcrvUSD-2/USDC Lender | 9.0% | Flex yvcrvUSD-2/USDC market |
 | USDC To SKY USDS Depositor | 19.0% | Sky sUSDS |
 
-Each Flex strategy deposits USDC into a Flex **Lender** — an ERC-4626 Yearn TokenizedStrategy that lends to borrowers ("Troves") posting yield-bearing USD vault shares as collateral. Lenders earn borrower interest and **absorb bad debt** if a Trove's collateral cannot cover its debt. Flex's markets, Lenders, oracles, governance and collateral chains are assessed in the [Flex report](./flex.md) (score 2.57/5.0, Medium Risk); this report treats Flex as a dependency and does not re-derive those facts. It covers the vault layer: governance, allocation, the Sky leg, how a vault holder exits, and how Flex risk passes through to vault shares.
+Each Flex strategy deposits USDC into a Flex **Lender** — an ERC-4626 Yearn TokenizedStrategy that lends to borrowers ("Troves") posting yield-bearing USD vault shares as collateral. Lenders earn borrower interest and **absorb bad debt** if a Trove's collateral cannot cover its debt. Flex's markets, Lenders, oracles, governance and collateral chains are assessed in the [Flex report](./flex.md) (score 2.62/5.0, Medium Risk); this report treats Flex as a dependency and does not re-derive those facts. It covers the vault layer: governance, allocation, the Sky leg, how a vault holder exits, and how Flex risk passes through to vault shares.
 
 **Key architecture:**
 
@@ -153,7 +153,7 @@ Each `FlexLenderStrategy` deposits USDC into one Flex Lender and reports `idle +
 
 Market CRs are pledged collateral over interest-accrued debt, from the Flex report's Trove walk at the same block. Because the vault owns essentially every Lender share, it is the entire lender side of all three Flex USDC markets.
 
-Flex-side parameters that affect this vault but are not under Yearn's control are set by Flex's governance contract (a 3-of-5 Safe with no timelock): each Lender's performance fee (10% today), keeper, deposit limit and shutdown, market endorsement, and the ysyBOLD oracle's depeg floor. That contract cannot seize Lender assets or borrower collateral. See the [Flex report](./flex.md#governance).
+Flex-side parameters that affect this vault but are not under Yearn's control are set by Flex's governance contract (a 3-of-5 Safe with no timelock, in which the Flex developer holds two of the three required signatures): each Lender's performance fee (10% today), keeper, deposit limit and shutdown, market endorsement, and the ysyBOLD oracle's depeg floor. That contract cannot seize Lender assets or borrower collateral. See the [Flex report](./flex.md#governance).
 
 **Reporting dependency:** `FlexLenderStrategy._harvestAndReport()` reverts while the strategy's last redemption auction is unsettled, so this vault cannot book profit or loss from that leg until the auction clears.
 
@@ -231,7 +231,7 @@ The vault uses the **standard Yearn V3 governance pattern** through the Yearn Ro
 
 | Dependency | Criticality | Notes |
 |---|---|---|
-| **Flex** (three markets) | Critical | 81.0% of debt. ~5.5-month-old protocol, six audits, no bug bounty, governance by a 3-of-5 Safe with no timelock, pseudonymous team. Markets are isolated but share code and governance. [Flex report](./flex.md) score 2.57/5.0 (Medium Risk) |
+| **Flex** (three markets) | Critical | 81.0% of debt. ~5.5-month-old protocol, six audits, no bug bounty, governance by a 3-of-5 Safe with no timelock in which the developer holds two keys (effectively developer plus one signer), pseudonymous team. Markets are isolated but share code and governance. [Flex report](./flex.md) score 2.62/5.0 (Medium Risk) |
 | **Flex collateral chains** | High | yvUSD (54.0% leg; [assessed](./yearn-yvusd.md), 2.46/5.0); ysyBOLD → yBOLD → Liquity V2 BOLD (18.0% leg; unassessed); yvcrvUSD-2 → Curve crvUSD (9.0% leg; unassessed). Two of these are priced off single Curve pool EMAs |
 | **Sky / sUSDS** | Medium | 19.0% of debt; blue-chip. [Sky USDS report](./sky-usds.md) score 1.30/5.0 |
 | **Sky PSM / Uniswap V3 fallback** | Low | USDC ↔ USDS conversion for the Sky leg |
@@ -287,7 +287,7 @@ Verified against [`yearn/monitoring-scripts-py`](https://github.com/yearn/monito
 
 ### Key Risks
 
-- **Concentration in one young protocol:** 81.0% of debt is in Flex, whose markets are isolated but share code, oracle designs and an untimelocked 3-of-5 governance contract.
+- **Concentration in one young protocol:** 81.0% of debt is in Flex, whose markets are isolated but share code, oracle designs and an untimelocked governance Safe that the developer controls with any one other signer.
 - **Exit is mostly asynchronous, and not through the UI:** only ~20.6% exits through a standard redemption, which is all yearn.fi offers. The rest requires calling the `FlexExitRouter` directly, auction execution, and a `maxLoss` that tolerates the asynchronous portion being booked as a loss.
 - **The vault is the whole lender side:** it owns 99.9% of every Flex USDC Lender, so its largest holder's exit equals unwinding the entire Flex USDC borrower book.
 - **Partly unassessed collateral:** 27.0% of debt sits on collateral chains ending in Liquity V2 BOLD and Curve crvUSD, which this repository has not assessed.
@@ -376,7 +376,7 @@ The Centralization score is (1 + 1 + 4.5) / 3 = 2.1667, weighted 0.650. The weig
 
 **Optional Modifiers:** None apply (vault < 2 years).
 
-**Relation to the Flex score (2.57):** this vault scores slightly better than the Flex Lender it is 54.0% concentrated in because its own governance is Yearn's score-1 setup, 19.0% sits in blue-chip sUSDS, and Yearn as curator can unwind or re-weight the Flex legs without Flex's cooperation. Flex's governance, track record and collateral risk pass through in full via the Dependencies (4.5), Collateralization (2.5) and Liquidity (3.5) subscores.
+**Relation to the Flex score (2.62):** this vault scores slightly better than the Flex Lender it is 54.0% concentrated in because its own governance is Yearn's score-1 setup, 19.0% sits in blue-chip sUSDS, and Yearn as curator can unwind or re-weight the Flex legs without Flex's cooperation. Flex's governance, track record and collateral risk pass through in full via the Dependencies (4.5), Collateralization (2.5) and Liquidity (3.5) subscores.
 
 ### Risk Tier
 
