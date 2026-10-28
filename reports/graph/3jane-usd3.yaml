@@ -147,6 +147,15 @@ nodes:
     address: "0x4507B5B23340D248457d955a211C8B0634D29935"
     category: dependency
     note: CCL-only first-loss backstop (waEthUSDC); with sUSD3, ~10.5% borrow-book coverage
+  - id: pendle-sy
+    label: Pendle SY-USD3
+    address: "0xeA3BC608F32847B97965C5e1648BDFCd4C2C40d0"
+    category: dependency
+    note: "Holds 50.0% of USD3 supply; source of PT/YT-USD3"
+  - id: morpho-usd3-markets
+    label: Morpho USD3 / PT-USD3 Markets
+    category: dependency
+    note: "~$51.9M USDC borrowed against USD3 / PT-USD3; USD3 oracle = USD3 PPS; $7.06M debt at HF < 1.01 in the USD3 market"
   - id: margin-oracles
     label: LCC Margin Oracles
     category: dependency
@@ -302,3 +311,15 @@ edges:
     to: margin-oracles
     kind: routes-through
     label: "fully-trusted margin pricing"
+  - from: USD3
+    to: pendle-sy
+    kind: deposits-into
+    label: "50.0% of supply wrapped (PT/YT)"
+  - from: USD3
+    to: morpho-usd3-markets
+    kind: deposits-into
+    label: "22.6% of supply + 76.6% of PT as collateral"
+  - from: pendle-sy
+    to: morpho-usd3-markets
+    kind: deposits-into
+    label: "PT-USD3 collateral"
