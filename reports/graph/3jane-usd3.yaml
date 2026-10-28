@@ -117,11 +117,23 @@ nodes:
   - id: erebor
     label: Erebor (USD banking rail)
     category: dependency
-    note: 3Jane USD staging account; FCC wires and collections; balances unverifiable onchain
+    note: "3Jane USD account; ~$2.68M cash self-reported at snapshot; FCC wires and collections; unverifiable onchain"
   - id: fcc-facilities
-    label: FCC Facilities (SPVs / originators)
+    label: FCC Facilities (SPVs)
     category: dependency
-    note: "Off-chain warehouse / forward-flow positions; only LendSwift $10M publicly documented"
+    note: "Self-reported $85.79M deployed principal at snapshot (forward flow $79.23M, warehouse $6.56M); no third-party attestation"
+  - id: fcc-slope
+    label: Slope (forward flow)
+    category: dependency
+    note: "Trade-credit whole loans, $66.44M (76.6% of deployed FCC, ~58% of totalAssets); no originator first-loss; ~49-day avg remaining term"
+  - id: fcc-settle
+    label: Settle (forward flow)
+    category: dependency
+    note: "Inventory-financing whole loans, $13.71M (15.8%); no originator first-loss; ~86-day avg remaining term"
+  - id: fcc-lendswift
+    label: LendSwift (senior warehouse)
+    category: dependency
+    note: "Consumer installment; $6.56M drawn of $10M limit; 75% advance, 25% originator first-loss; matures Nov 26, 2027"
   - id: zk-tls
     label: zkTLS / Reclaim Protocol
     category: dependency
@@ -230,6 +242,18 @@ edges:
     to: fcc-facilities
     kind: deposits-into
     label: "USD wires to SPVs"
+  - from: fcc-facilities
+    to: fcc-slope
+    kind: allocates-to
+    label: "$66.44M forward flow"
+  - from: fcc-facilities
+    to: fcc-settle
+    kind: allocates-to
+    label: "$13.71M forward flow"
+  - from: fcc-facilities
+    to: fcc-lendswift
+    kind: allocates-to
+    label: "$6.56M senior warehouse"
 
   # === Credit underwriting wiring ===
   - from: credit-line

@@ -5,13 +5,13 @@
 - **Chain:** Ethereum
 - **Token Address:** [`0x056B269Eb1f75477a8666ae8C7fE01b64dD55eCc`](https://etherscan.io/address/0x056B269Eb1f75477a8666ae8C7fE01b64dD55eCc)
 - **Snapshot:** Ethereum block [26,285,884](https://etherscan.io/block/26285884) (hash `0x85f5e71bfa59caeb6e93e74be66795719a9b7c3da062d1ae4ba0a4ea2c24bafd`, October 27, 2026 18:36:35 UTC). All onchain figures below are read at this block unless another block is stated.
-- **Final Score: 3.79/5.0**
+- **Final Score: 3.67/5.0**
 
 ## Overview + Links
 
 3Jane is a **credit-based money market** on Ethereum. It is built as a **modified fork of Morpho Blue** that replaces collateral logic with admin-set credit lines, and it uses the **Yearn V3 tokenized strategy** architecture for its vault contracts. 3Jane's docs describe two credit sleeves behind USD3/sUSD3. **Fintech Credit Conduits (FCC)** are off-chain warehouse loans and forward-flow purchases of U.S. fintech receivables, held through bankruptcy-remote SPVs; the docs call this "the pool's primary backing." **Crypto Credit Lines (CCL)** are unsecured USDC lines to crypto-native borrowers ([Backing overview](https://docs.3jane.xyz/backing/backing.md)).
 
-USD3 deposits sit in one MorphoCredit market, denominated in `waEthUSDC`. Idle reserves earn Aave V3 yield, and the rest is drawn against credit lines. At the snapshot, **~98.8% of the borrow book (~$88.82M of ~$89.91M) is drawn by a single borrower.** That borrower is the 1-of-1 Safe [`0x3Ff3ff33D20a086834A095ed6ed562c9e189291b`](https://etherscan.io/address/0x3Ff3ff33D20a086834A095ed6ed562c9e189291b), and its sole owner is 3Jane's 3-of-5 governance multisig. 3Jane's repository calls it the "protocol-owned origination account" ([moneymarket-contracts `AGENTS.md`](https://github.com/3jane-protocol/moneymarket-contracts/blob/main/AGENTS.md)). Borrowed USDC leaves the chain through EOAs, consistent with the documented FCC flow (off-ramp to 3Jane's Erebor bank account, then wires to originators). The same file states that the third-party CCL program is retired: 75 of 76 borrowers ever issued a line are at zero. Remaining third-party CCL debt is ~$1.09M. **USD3 is now in substance an off-chain asset-backed-finance vehicle, with an onchain senior/junior tranche wrapper.**
+USD3 deposits sit in one MorphoCredit market, denominated in `waEthUSDC`. Idle reserves earn Aave V3 yield, and the rest is drawn against credit lines. At the snapshot, **~98.8% of the borrow book (~$88.82M of ~$89.91M) is drawn by a single borrower.** That borrower is the 1-of-1 Safe [`0x3Ff3ff33D20a086834A095ed6ed562c9e189291b`](https://etherscan.io/address/0x3Ff3ff33D20a086834A095ed6ed562c9e189291b), and its sole owner is 3Jane's 3-of-5 governance multisig. 3Jane's repository calls it the "protocol-owned origination account" ([moneymarket-contracts `AGENTS.md`](https://github.com/3jane-protocol/moneymarket-contracts/blob/main/AGENTS.md)). Borrowed USDC leaves the chain through EOAs, consistent with the documented FCC flow (off-ramp to 3Jane's Erebor bank account, then wires to originators). 3Jane's [FCC dashboard](https://app.3jane.xyz/info/pulls/fcc) reports the matching assets at the snapshot: $85.79M of facility principal (Slope and Settle forward-flow whole loans, plus the LendSwift senior warehouse) and $2.68M of cash at Erebor, 99.6% of the debt. These figures are self-reported and not independently verified. The same file states that the third-party CCL program is retired: 75 of 76 borrowers ever issued a line are at zero. Remaining third-party CCL debt is ~$1.09M. **USD3 is now in substance an off-chain asset-backed-finance vehicle, with an onchain senior/junior tranche wrapper.**
 
 **Levered Callable Capital (LCC)** is a separate inbound funding rail. Third parties stake margin and earn standby fees in exchange for an obligation to deposit USDC into USD3 when called. Since the September 25, 2026 USD3 upgrade, both LCC facilities are `supplyCapExempt` and registered as ring-fence conduits, so the funding path is operational. No capital call has been opened through epoch 2, and the `USD3l` cooldown vault is empty.
 
@@ -110,14 +110,14 @@ The source code includes a `/certora` directory indicating formal verification e
 - **Utilization:** ~$89.91M borrowed / ~$115.06M market supply → ~78.1%. Utilization was ~84–90% through most of October, before the October 26–27 deposits.
 - **Borrower concentration:** the protocol-owned origination account holds 71.543e18 of 72.423e18 borrow shares (**98.8%**), i.e. ~$88.82M. That account already held ~97.4% of borrows (~$65.83M) on September 5, 2026. Its first borrow dates to May 13–14, 2026, and its credit line was 60,000,000 at block 25,741,635 per 3Jane's `AGENTS.md`.
 - **Notable events:**
-  - **April 18–28, 2026 — strategy shutdown / restart.** Per merged PR [#112](https://github.com/3jane-protocol/moneymarket-contracts/pull/112) the team had already executed `strategy.shutdownStrategy()` and `strategy.emergencyWithdraw(...)` "in prod" before April 27, 2026. DeFiLlama TVL series confirms idle reserves collapsed from ~$4.78M on Apr 19 to ~$269K on Apr 20 and stayed at $120K–$273K for ~7 days, recovering to ~$2.92M by May 2. Restoration required deploying a new `USD3.restartStrategy()` reinitializer (PR #112 merged Apr 28, 2026).
-    - **Protocol's framing (per 3Jane DD document, received May 2026):** 3Jane characterizes the action not as an incident but as operational discipline — "3Jane preemptively withdrew its idle USDC from Aave during the Kelp exploit as a precautionary measure" — and states "no prior security incidents have occurred on the 3Jane protocol." The timing supports the precautionary reading: the [KelpDAO/rsETH bridge exploit](https://governance.aave.com/t/rseth-incident-report-april-20-2026/24580) occurred April 18–20, 2026, exactly when idle reserves collapsed. **However**, the protocol's "no incident / routine precaution" framing partially conflicts with the onchain evidence: a precautionary Aave de-risk would not normally require a full `shutdownStrategy()` + a new `restartStrategy()` reinitializer (a 24h-timelocked code upgrade) to reopen deposits/redemptions. Treat the event as a successfully-handled but non-routine stress episode.
+  - **April 19 – May 1, 2026 — strategy shutdown / restart.** `USD3.isShutdown()` flipped `true` at block [24,911,272](https://etherscan.io/tx/0x4c1611d4cad8436f243122a7c30042253c0dacc12995554d825f3a81ef1aab87) (April 19, 03:34 UTC) and back to `false` at block [25,001,386](https://etherscan.io/tx/0x3aaf4b1ed755a946c7b3e9bebd2f6d657f78e50490a629f81b40a6dd974aa9af) (May 1, 16:47 UTC), after the `USD3.restartStrategy()` reinitializer from PR [#112](https://github.com/3jane-protocol/moneymarket-contracts/pull/112) was deployed. `emergencyWithdraw` pulled idle funds out of MorphoCredit/Aave into raw USDC held by USD3: ~$3.81M on April 19, falling to ~$2.60M by April 29. DeFiLlama's idle-reserve series tracks only MorphoCredit's `waEthUSDC`, so it showed a collapse to ~$120K–$273K, but that liquidity had moved rather than disappeared. **Redemptions stayed open.** `availableWithdrawLimit()` remained ~$3.05–3.81M at sampled blocks, and 78 `Withdraw` events totaling ~$2.07M executed during the shutdown (largest ~$505.7K, [tx](https://etherscan.io/tx/0xeda78ddfaad7f9a0522a7ee59a1fc12ce7eef6b2ddfb6df917d47bba7dc6c653)). What shutdown blocked was **deposits and minting**: Yearn TokenizedStrategy 3.0.4 returns zero from `maxDeposit`/`maxMint` while shut down. The real liquidity constraint was that only idle cash (~$2.6–3.8M of ~$11M `totalAssets`) was redeemable; borrowed funds could return only through borrower repayment.
+    - **Protocol's framing (per 3Jane DD document, received May 2026):** 3Jane characterizes the action not as an incident but as operational discipline — "3Jane preemptively withdrew its idle USDC from Aave during the Kelp exploit as a precautionary measure" — and states "no prior security incidents have occurred on the 3Jane protocol." The timing supports the precautionary reading: the [KelpDAO/rsETH bridge exploit](https://governance.aave.com/t/rseth-incident-report-april-20-2026/24580) occurred April 18–20, 2026, exactly when idle reserves were pulled out of Aave. **However**, the protocol's "no incident / routine precaution" framing partially conflicts with the onchain evidence: a precautionary Aave de-risk would not normally require a full `shutdownStrategy()` + a new `restartStrategy()` reinitializer (a 24h-timelocked code upgrade) to reopen deposits and redeploy funds. Treat the event as a successfully-handled but non-routine stress episode.
   - **July 29 – August 5, 2026 — sharp idle-reserve compression, no shutdown.** Idle `waEthUSDC` held by MorphoCredit fell from ~$9.62M (block near July 29) to ~$2.89M (block near Aug 1) and recovered to ~$9.16M by Aug 5; DeFiLlama's idle-reserve series shows the same pattern at protocol level, bottoming near $3.5M on Aug 1–4 before recovering. Onchain `isShutdown()` was confirmed `false` at all three sampled blocks. Unlike April, this was **not** an emergency shutdown, and no corresponding GitHub incident PR exists. The swing was driven by the protocol-owned origination account. It drew ~$8.2M USDC between July 29 and 31, then returned $7.25M through the Helper on August 4, funded by a $7.14M inflow from the off-chain-facing EOA [`0x95ad969cd40be146d46f0ec05439ab9f515c2c7f`](https://etherscan.io/address/0x95ad969cd40be146d46f0ec05439ab9f515c2c7f). The buffer therefore moves with 3Jane's own off-chain deployment and recall decisions.
   - **September 1, 2026 — Levered Callable Capital (LCC) epoch clock starts.** The factory, beacon, and two facilities were deployed with ~$7.55M standby commitment. See *Levered Callable Capital (LCC)* under Funds Management.
   - **September 25, 2026 — USD3/sUSD3 implementation upgrade.** The upgrade was scheduled on the 7-day timelock on September 18 ([tx](https://etherscan.io/tx/0xf07101d3b936d74e603a53fb0bc9e0ab59ba8188a88339621dff8110ea9dd77c)) and executed September 25 ([tx](https://etherscan.io/tx/0xfe5683b394e9ee06378f87a6df75fd668c1193f14d2af752d7facf19f67b8472)). The new implementation adds the `supplyCapExempt` / `ringFenceConduit` / `ringFencedLiquidity` / `releaseRingFence` integration. Both LCC vaults were enabled as ring-fence conduits the same day ([tx](https://etherscan.io/tx/0xf23f9dbd589a901228db474da0c3544c2ad5a18f845cf76859e1655f4e85a149), [tx](https://etherscan.io/tx/0xee2b3db0e6f2d6b213fe80d77a1fff36d70d85123a4f2756dc6b5da5eccf9a9b)).
   - **September 28 – October 27, 2026 — origination-account credit line raised three times**, to 73.0M, 81.5M, and 94.06M (`waEthUSDC` units), each through the 24h timelock ([latest tx](https://etherscan.io/tx/0x35e5d81652c148750079fceb778239f9b7286eba72f69e3bcef686767150e28b)). Each batch temporarily lifts the global `MAX_CREDIT_LINE` (normally 850,911.12) to the new line, sets the line, raises `DEBT_CAP` to just above total borrows plus the new headroom, then restores `MAX_CREDIT_LINE`. The account drew ~$18.6M on September 30 ([tx](https://etherscan.io/tx/0xb5917dc819f1f44a5ce68afebdd50a154248d2e71dca7f863283c022b656d64c)) and ~$1.8M on October 14 ([tx](https://etherscan.io/tx/0x370cd2a1409a2b85b6be65279a27966270f0f0eb03b738a01104728a2ecfc1d7)).
   - **October 8, 2026 — payment cycles disabled and a JANE redistribution.** `CYCLE_DURATION` was set to `type(uint128).max` ([tx](https://etherscan.io/tx/0xe3377143ee6d36f2db46e84b7be3bcb5c094a31abf0554d7d95b270051254757)), so the market can no longer freeze for a missed cycle close. In a separate batch ([tx](https://etherscan.io/tx/0x05facabacbce50e3803c4cd15973bf45e3e38d098641c53755fb0755f011ab5e)), governance temporarily pointed the JANE token's markdown controller at the timelock, redistributed 639,697.68 JANE from CCL borrower [`0x14FAa112a14b70328D2cA17102aAfE398F0c369c`](https://etherscan.io/address/0x14FAa112a14b70328D2cA17102aAfE398F0c369c) to the multisig, and restored the controller. The borrower had repaid ~424,289 `waEthUSDC` on October 7 and has zero debt. The Insurance Fund balance did not change, so no USD3 loss was recognized.
-- **Peg history:** USD3 is USDC-denominated and redeemable from idle reserves; no public depeg event reported. Note that during the April shutdown window, redemptions were effectively unavailable from the Yearn V3 strategy path.
+- **Peg history:** USD3 is USDC-denominated and redeemable from idle reserves; no public depeg event reported. During the April 2026 shutdown, redemptions continued against the emergency-withdrawn USDC (~$2.07M redeemed); deposits were blocked.
 - **Phase 1 (bootstrapping, historical):** At launch USD3 ran "fully risk-off", with funds only in Aave's USDC market. That phase has ended: ~78% of market supply is now drawn, almost all of it by the protocol-owned origination account.
 
 **Funding:** $5.2M seed round (June 2025) led by **Paradigm**, with participation from Coinbase Ventures, Robot Ventures, Wintermute Ventures, Breed VC, and Bodhi Ventures. Andre Cronje listed among backers.
@@ -143,8 +143,29 @@ USD3 assets are deployed through one MorphoCredit market (loan token `waEthUSDC`
 - **Identity and control:** [`0x3Ff3ff33D20a086834A095ed6ed562c9e189291b`](https://etherscan.io/address/0x3Ff3ff33D20a086834A095ed6ed562c9e189291b) is a Gnosis Safe with threshold 1. Its single owner is 3Jane's 3-of-5 multisig [`0x33333333Bd7045F1A601A1E289D7AB21036fB5EF`](https://etherscan.io/address/0x33333333Bd7045F1A601A1E289D7AB21036fB5EF), so the same signers that govern the protocol also operate the pool's dominant borrower. 3Jane's repository names it the "protocol-owned origination account" ([`AGENTS.md`](https://github.com/3jane-protocol/moneymarket-contracts/blob/main/AGENTS.md)). The account is not listed on 3Jane's [Addresses page](https://docs.3jane.xyz/developers/addresses.md).
 - **Credit terms:** credit line 94,063,624.04 `waEthUSDC` (~$112.06M), drawn ~74,556,850 `waEthUSDC` (~$88.82M). `borrowerPremium` rate is **0**, so the account pays only the AdaptiveCurveIRM base rate. `repaymentObligation` is empty. Line increases require the 24h timelock. Draws within the line are executed by the multisig-owned Safe with no timelock. `MorphoCredit._isHealthy` compares the line (stored as position collateral) with borrowed assets in `waEthUSDC` units. The global `DEBT_CAP` is 95,022,415.55 `waEthUSDC` against 75,473,269.65 borrowed. The account can therefore draw a further ~19.5M `waEthUSDC` (**~$23.2M**) without any new governance action, nearly all of the ~$25.15M idle buffer.
 - **Flow of funds:** borrowed `waEthUSDC` is redeemed through Aave and the USDC is sent to the Safe. Since May 2026, the Safe has forwarded ~$94.97M of USDC to the EOA [`0x3835350170db8e093576fab23d5b934fbbb9a42e`](https://etherscan.io/address/0x3835350170db8e093576fab23d5b934fbbb9a42e). That EOA forwarded it to [`0x755bc7104b98ea061197be76d1e49fa84e3e702f`](https://etherscan.io/address/0x755bc7104b98ea061197be76d1e49fa84e3e702f) (14 transfers) and [`0x95ad969cd40be146d46f0ec05439ab9f515c2c7f`](https://etherscan.io/address/0x95ad969cd40be146d46f0ec05439ab9f515c2c7f) (12 transfers). Both are EIP-7702-delegated EOAs with no public Etherscan label; the latter has routed >$1.3B of USDC in total. The Safe's history also contains look-alike zero-value transfers (address-poisoning spam); the figures above count only canonical USDC ([`0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48`](https://etherscan.io/address/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48)).
-- **Interpretation:** this path is consistent with 3Jane's [Erebor flow of funds](https://docs.3jane.xyz/backing/fcc/banking-rail-erebor.md): "Capital deposited into 3Jane is converted from stablecoin to USD and parked in 3Jane's Erebor account", then wired to originators. **TODO:** the off-ramp counterparties, the USD balance held at Erebor ("staging"), and the deployed facility principal cannot be verified onchain. A bank or custodian attestation, or the [FCC dashboard](https://app.3jane.xyz/info/pulls/fcc) figures reconciled to the ~$88.82M draw, is needed.
-- **Disclosed facilities:** the docs name one live facility, a **$10M LendSwift senior warehouse**. It has a 75% advance rate, a 15% coupon, LendSwift's 25% first-loss equity, a DACA-controlled collection account, a revolving period to May 26, 2027, and final maturity November 26, 2027 ([Facilities](https://docs.3jane.xyz/backing/fcc/facilities.md)). A June 2026 press report also cites an $8.5M whole-loan purchase from Slope ([stock3](https://stock3.com/news/3jane-taps-consumer-and-business-loans-to-expand-defi-yield-sources-17115367)). **TODO:** the remaining ~$70M of the draw is not mapped to any publicly disclosed facility. It may be in Erebor staging, in undisclosed facilities, or both.
+- **Interpretation:** this path is consistent with 3Jane's [Erebor flow of funds](https://docs.3jane.xyz/backing/fcc/banking-rail-erebor.md): "Capital deposited into 3Jane is converted from stablecoin to USD and parked in 3Jane's Erebor account", then wired to originators. The identities of the off-ramp EOAs are not public, and the Erebor balance and facility positions cannot be verified onchain.
+- **Self-reported reconciliation (3Jane [FCC dashboard](https://app.3jane.xyz/info/pulls/fcc), hourly series, record at 2026-10-27 17:59 UTC, ~37 minutes before the snapshot):** the dashboard's `tvl` (114,999,979.65), `totalDebt` (89,911,474.04), and `retailTotalDebt` (1,091,732.59) match the onchain `totalAssets`, total borrows, and residual CCL debt exactly. Against the ~$88.82M origination-account debt it reports:
+
+  | Self-reported asset | Amount | Share of origination debt |
+  |---|---|---|
+  | FCC deployed principal (`facilityDeployedPrincipal`) | $85,792,848 | 96.6% |
+  | — forward-flow principal | $79,228,251 | 89.2% |
+  | — LendSwift senior warehouse principal | $6,564,597 | 7.4% |
+  | Cash at Erebor (`ereborTotal`) | $2,684,629 | 3.0% |
+  | **Principal + Erebor cash** | **$88,477,478** | **99.6%** |
+  | Accrued interest (forward flow $1,006,275 + warehouse $78,668) | $1,084,943 | 1.2% |
+  | `facilityVerifiedValue` (principal + accrued, at carrying value) + Erebor | $92,277,288 | 103.9% |
+
+  3Jane labels the dashboard field `facilityVerifiedValue`, but it is a carrying value computed by 3Jane: amortized cost for forward flows, note accrual for the warehouse. **No independent party has verified these balances.**
+- **Disclosed counterparties** (dashboard facility tables, as of October 28, 2026; carrying dates October 22–26):
+
+  | Facility | Structure | Amount | Share of deployed | Loans | Remaining term | Tape status |
+  |---|---|---|---|---|---|---|
+  | **Slope** | Forward flow, back-book purchase, trade credit | $66.44M | 76.6% | 1,709 | ~49 days avg | 96.85% current; 0.71% 1–29d, 0.36% 30–59d, 1.95% 60–89d, 0.13% 90+d late; 0 charged off |
+  | **Settle** | Forward flow, back-book purchase, inventory financing | $13.71M | 15.8% | 574 | ~86 days avg | 100% current |
+  | **LendSwift** | Senior warehouse, consumer installment ($10M limit, 75% advance, 25% originator first-loss) | $6.56M drawn | 7.6% | 22,069 | matures Nov 26, 2027 | collateral value $9.36M (142% backing) |
+
+  The forward-flow facilities, 92.4% of deployed capital, are whole-loan purchases with `forwardFlowWeightedLtv = 1`. They carry **no originator first-loss or overcollateralization**, so 3Jane holds the loans' full credit risk. The dashboard's aggregate `avgCreditEnhancementPct` is ~3.1%. The 25% first-loss / 1.33x OC structure described in 3Jane's docs applies only to the LendSwift warehouse. Single-counterparty concentration is high: Slope alone is ~$66.4M, ~58% of USD3 `totalAssets`.
 - **Operating decisions recorded by 3Jane:** the markdown module "will not be activated." Non-empty repayment obligations are not posted onchain ([operations runbook](https://github.com/3jane-protocol/moneymarket-contracts/blob/main/docs/operations-runbook.md)). Payment cycles were disabled on October 8 (`CYCLE_DURATION = type(uint128).max`). As a result, the onchain market carries no delinquency or default state for the origination account. Its face debt plus IRM interest counts in full in USD3 NAV until governance calls `CreditLine.settle()`.
 
 ### Accessibility
@@ -152,14 +173,14 @@ USD3 assets are deployed through one MorphoCredit market (loan token `waEthUSDC`
 - **Minting:** Deposit USDC → receive USD3 at the current PPS. Anyone can mint while supply-cap headroom exists; headroom is zero at the snapshot ($115M cap reached).
 - **Staking:** Stake USD3 → receive sUSD3 (junior tranche). Onchain `lockDuration() = 0` and `cooldownDuration() = 30 days`.
 - **Redemption:** USD3 is redeemable for USDC **atomically (T+0) against idle reserves** (`availableWithdrawLimit()` = ~$25.15M at the snapshot). The DD document targets a ~15% idle buffer. A **FIFO redemption queue is described as "under development"** and is not live.
-- Redemption is atomic only while idle reserves suffice. Beyond the buffer, redemption depends on the origination account repaying, which means 3Jane recalling USD from Erebor staging or from FCC facilities with ~4-month underlying WAL and 12-month revolving periods. The IRM can raise the base rate, but the origination account is 3Jane itself, so the rate is not an external repayment incentive. During the April 2026 shutdown, `isShutdown()` blocked the path entirely.
+- Redemption is atomic only while idle reserves suffice. Beyond the buffer, redemption depends on the origination account repaying, which means 3Jane recalling USD from Erebor (~$2.68M self-reported) or letting FCC receivables run off. Per the dashboard, forward-flow loans have ~49–86-day average remaining terms; the LendSwift warehouse revolves to May 2027. The IRM can raise the base rate, but the origination account is 3Jane itself, so the rate is not an external repayment incentive. An `isShutdown()` flip blocks deposits, not redemptions: during shutdown `availableWithdrawLimit()` returns all available liquidity and bypasses the ring fence and redemption floors.
 
 ### Collateralization
 
 USD3 is fundamentally different from traditional overcollateralized stablecoins:
 
 - **No onchain collateral:** about 77% of `totalAssets` is a claim on 3Jane's own origination account. Its repayment capacity rests on off-chain assets: USD at Erebor and senior positions in fintech-receivable SPVs. None of these assets are visible or enforceable onchain.
-- **Claimed off-chain credit enhancement (FCC):** for disclosed facilities, 3Jane describes originator first-loss equity (e.g. LendSwift 25%, 1.33x OC), borrowing-base haircuts, reserves and triggers, and DACA control of collections, all ahead of the sUSD3 tranche ([Credit Enhancement & Loss Distribution](https://docs.3jane.xyz/backing/fcc/credit-enhancement-and-loss-distribution.md), [Legal Structuring](https://docs.3jane.xyz/backing/fcc/legal-structuring.md)). These protections are documented by 3Jane only; no third-party attestation or legal documentation is public. **TODO:** facility agreements, SPV entities, and an independent reconciliation of off-chain assets to the ~$88.82M draw.
+- **Off-chain credit enhancement (FCC) — limited to the warehouse:** 3Jane's docs describe originator first-loss equity (LendSwift 25%, 1.33x OC), borrowing-base haircuts, reserves and triggers, and DACA control of collections ([Credit Enhancement & Loss Distribution](https://docs.3jane.xyz/backing/fcc/credit-enhancement-and-loss-distribution.md), [Legal Structuring](https://docs.3jane.xyz/backing/fcc/legal-structuring.md)). Per the dashboard, this structure covers only the $6.56M LendSwift warehouse. The forward-flow purchases (Slope, Settle; ~$80M) are true-sale whole loans with no originator first-loss, protected only by underwriting, short duration, and diversification across ~2,300 obligors. All of this is self-reported; no facility agreements, SPV entities, or third-party attestations are public (**TODO**).
 - **Pool-level loss waterfall:** losses that reach USD3 are absorbed by **sUSD3 (junior) before USD3 (senior)**. The **Insurance Fund** is a CCL-sleeve backstop: 3Jane's [Risks page](https://docs.3jane.xyz/risks.md) lists it as a mitigant for Crypto Credit Lines only, and the FCC loss-order page does not mention it. Order for FCC losses: originator first-loss / OC (off-chain) → sUSD3 → USD3. Order for residual CCL losses: Insurance Fund → sUSD3 → USD3.
 - **Insurance Fund:** [`0x4507B5B23340D248457d955a211C8B0634D29935`](https://etherscan.io/address/0x4507B5B23340D248457d955a211C8B0634D29935) holds **868,288.86 waEthUSDC** (~$1.03M). The token is the static-wrapped Aave V3 USDC at [`0xd4fa2d31b7968e448877f69a96de69f5de8cd23e`](https://etherscan.io/address/0xd4fa2d31b7968e448877f69a96de69f5de8cd23e). The balance is unchanged since the initial seed and grows only through Aave yield.
 - **Onchain first-loss buffer:** sUSD3 holds 7,054,810.26 USD3 (~$8.37M) plus the ~$1.03M fund, ~$9.40M in total. That covers **~10.5%** of the ~$89.91M borrow book.
@@ -168,7 +189,7 @@ USD3 is fundamentally different from traditional overcollateralized stablecoins:
 
 ### Default Recovery Process
 
-This sequence applies to the residual CCL sleeve (~$1.09M). FCC defaults are handled off-chain inside each facility (haircuts, triggers, originator first-loss, DACA collections) and reach USD3 only through a governance `settle()` on the origination account.
+This sequence applies to the residual CCL sleeve (~$1.09M). FCC defaults are handled off-chain: inside the LendSwift warehouse through haircuts, triggers, 25% originator first-loss, and DACA collections; on the Slope and Settle forward flows (whole-loan purchases, no first-loss), directly as 3Jane credit losses on purchased loans, and reach USD3 only through a governance `settle()` on the origination account.
 
 Per-loan recovery sequence applied to a defaulted CCL credit line:
 
@@ -188,7 +209,7 @@ Any residual loss after the per-loan recovery above is then absorbed in the **lo
 
 - **USD3/sUSD3 share prices** are computed onchain via the ERC-4626 standard
 - **Outstanding loans and interest accruals** are tracked onchain in MorphoCredit, but only as face debt plus IRM interest
-- **~77% of `totalAssets` is an off-chain claim.** The origination account's ~$88.82M debt is valued onchain at face plus interest. The assets that back it (Erebor USD balances, warehouse advances, whole loans) are reported only through 3Jane's self-published [FCC dashboard](https://app.3jane.xyz/info/pulls/fcc), which offers weekly surveillance, loan tapes "where a facility publishes it," and no third-party attestation. With markdown inactive, no repayment obligations posted, and payment cycles disabled, an off-chain impairment does not move USD3 PPS until governance chooses to call `CreditLine.settle()`. 3Jane's runbook describes bundling `settle()` with `USD3.report()`/`sUSD3.report()` privately to avoid front-running, which confirms that loss recognition is a discretionary admin action.
+- **~77% of `totalAssets` is an off-chain claim.** The origination account's ~$88.82M debt is valued onchain at face plus interest. The assets behind it are reported only through 3Jane's self-published [FCC dashboard](https://app.3jane.xyz/info/pulls/fcc): hourly aggregate series, per-facility tables, delinquency tapes, and loan tapes "where a facility publishes it." At the snapshot, the self-reported principal plus Erebor cash covers 99.6% of the debt (see *Protocol-Owned Origination Account*). There is no third-party attestation. With markdown inactive, no repayment obligations posted, and payment cycles disabled, an off-chain impairment does not move USD3 PPS until governance chooses to call `CreditLine.settle()`. 3Jane's runbook describes bundling `settle()` with `USD3.report()`/`sUSD3.report()` privately to avoid front-running, which confirms that loss recognition is a discretionary admin action.
 - **Interest without cash:** the origination account pays only the IRM base rate on face debt. Interest accrues as debt rather than being paid in cash: the account's only repayment since May was $7.25M on August 4. USD3 profit therefore includes accrued interest owed by 3Jane's own account. 3Jane's `AGENTS.md` notes that base interest "mints tranche fee shares with no cash behind them."
 - **Credit assessment is offchain:** CCL underwriting (3CA) and FCC facility selection, eligibility, and haircuts are offchain decisions
 - **zkTLS + Reclaim Protocol** provides zero-knowledge proofs of offchain data for CCL borrowers (bank statements, credit scores), verified by **EigenLayer AVS** nodes; this pipeline is now relevant only to the ~$1.09M residual CCL book
@@ -237,8 +258,8 @@ The LCC funding path is **operational**. USD3 implementation [`0xd1f1c3f48506371
 - **Throttling:** No live redemption queue; a FIFO queue is "under development" (per DD doc). Refilling the idle buffer beyond third-party CCL repayments requires 3Jane to repay its own origination account from off-chain FCC assets.
 - **Utilization risk:** If a high percentage of deposited USDC is lent out, idle reserves shrink and redemptions may be delayed. The origination account's undrawn headroom (~$23.2M) nearly equals today's idle buffer, so 3Jane can drain idle liquidity with no governance action.
 - **Current utilization:** ~$89.91M borrowed out of ~$115.06M market supply (~78.1%). Idle `waEthUSDC` is ~$25.15M (~21.9% of `totalAssets`) after the October 26–27 deposits. Through most of October, DeFiLlama's idle series was ~$10.4–13.6M, ~10–12% of `totalAssets`. A pattern recurs: idle reserves spike after a cap raise and are then drawn by the origination account. Idle was ~$29.6–30.4M on September 29–30 and fell to ~$12.2M on October 1 after the $18.6M draw. `isShutdown()` is `false`.
-- **Duration mismatch:** the disclosed FCC facility (LendSwift) has a revolving period to May 26, 2027 and final maturity November 26, 2027. Its underlying receivables have a ~124-day WAL. 3Jane's [Liquidity page](https://docs.3jane.xyz/usd3-susd3/liquidity.md) acknowledges that credit assets are "longer-dated than instant redemption" and lists committed liquidity facilities as roadmap only.
-- **Stress event (April 2026):** During the strategy shutdown, Yearn V3 `isShutdown()=true` blocked the standard `deposit/redeem` paths. DeFiLlama-visible idle reserves collapsed from ~$4.78M to ~$269K and stayed depressed for ~7 days before recovering. This is the protocol's first observed liquidity stress event, and it required a contract upgrade (new `restartStrategy()` reinitializer) — a governance action now behind the 7-day timelock — to fully reopen the strategy.
+- **Duration mismatch:** self-reported forward-flow assets (92% of FCC) have ~49-day (Slope) and ~86-day (Settle) average remaining terms; the LendSwift warehouse revolves to May 26, 2027, with final maturity November 26, 2027. 3Jane's [Liquidity page](https://docs.3jane.xyz/usd3-susd3/liquidity.md) acknowledges that credit assets are "longer-dated than instant redemption" and lists committed liquidity facilities as roadmap only.
+- **Stress event (April 19 – May 1, 2026):** during the strategy shutdown, Yearn TokenizedStrategy blocked deposits and minting, but redemptions stayed open against ~$2.6–3.8M of emergency-withdrawn USDC; ~$2.07M was redeemed across 78 withdrawals. DeFiLlama's idle series dropped to ~$120K–$273K only because it tracks MorphoCredit's `waEthUSDC`, not USD3's raw USDC. Reopening deposits and redeploying funds required a contract upgrade (`restartStrategy()` reinitializer). The current implementation has no such function, so reversing a future shutdown would again need an upgrade behind the 7-day timelock. That delay applies to deposits and redeployment, not to redemptions.
 - **Compression event (late July – early August 2026), no shutdown:** idle `waEthUSDC` fell from ~$9.62M to ~$2.89M onchain (DeFiLlama's series bottomed near $3.5M) over roughly three days before recovering to ~$9.16M by August 5. `isShutdown()` stayed `false` throughout. The compression came from origination-account draws and a later $7.25M repayment, showing that the idle buffer can fall well under $5M in normal operation at 3Jane's discretion.
 - **DEX liquidity:** A Curve frxUSD/USD3 pool exists at [`0x7ba89bc658c07569cfa6d7947adaa80181a24568`](https://etherscan.io/address/0x7ba89bc658c07569cfa6d7947adaa80181a24568) holding **~190,203 USD3 (~$226K)** at the snapshot. A Uniswap V3 USD3/USDC 0.01% pool at [`0x8E12388Ea7366Aa87445d747F83B810aD538a981`](https://etherscan.io/address/0x8E12388Ea7366Aa87445d747F83B810aD538a981) holds dust (1 wei of USD3). No Uniswap V2 pairs exist. Together these provide minimal exit capacity relative to the ~$115M protocol scale; the primary exit path remains direct redemption from idle reserves.
 - **sUSD3 exit:** 30-day cooldown (`cooldownDuration() = 2,592,000`); onchain `lockDuration() = 0`.
@@ -301,8 +322,8 @@ All core contracts use a **two-tier TimelockController system** (verified onchai
 |-----------|-------------|-------|
 | **Aave V3** | Critical | Base yield on idle USDC (held as `waEthUSDC` static-wrapped Aave aToken). Well-audited, blue-chip dependency |
 | **Morpho Blue** (forked) | Critical | Core lending logic. Modifications (credit, tranches, markdown) are the novel risk surface |
-| **Yearn V3 TokenizedStrategy** | Critical | USD3 is a Yearn V3 tokenized strategy proxy; `shutdown`/`emergencyWithdraw`/`reinitializer(...)` semantics on `StrategyData` storage slots are load-bearing — see April 2026 incident which required a `restartStrategy()` reinitializer to clear the shutdown flag (PR #112) |
-| **FCC originators / SPVs** (e.g. LendSwift) | Critical | ~77% of `totalAssets` relies on off-chain originator performance, servicing, SPV bankruptcy remoteness, and DACA enforcement. Only one $10M facility is publicly documented |
+| **Yearn V3 TokenizedStrategy** | Critical | USD3 is a Yearn V3 tokenized strategy proxy (TokenizedStrategy 3.0.4). Shutdown is one-way in TokenizedStrategy: it blocks deposits/mints while withdrawals continue. Reopening deposits required a `restartStrategy()` reinitializer in April 2026 (PR #112); the current implementation has none |
+| **FCC originators / SPVs** (Slope, Settle, LendSwift) | Critical | ~77% of `totalAssets` relies on off-chain originator performance and servicing. Slope alone is ~$66.4M (~58% of `totalAssets`). Forward flows (92% of FCC) are whole-loan purchases with no originator first-loss or OC; only the LendSwift warehouse has first-loss/OC structuring |
 | **Erebor (banking rail)** | Critical | Holds 3Jane's USD staging balance and settles all FCC wires and collections ([docs](https://docs.3jane.xyz/backing/fcc/banking-rail-erebor.md)). Single bank dependency for the dollar leg; balances unverifiable onchain |
 | **Reclaim Protocol / zkTLS** | Medium (CCL only) | Offchain data verification for credit scores and bank data. Novel technology with limited battle-testing |
 | **EigenLayer AVS** | Medium (CCL only) | ZK proof distribution and verification for the ~$1.09M residual CCL book. Early-stage infrastructure |
@@ -318,8 +339,8 @@ All core contracts use a **two-tier TimelockController system** (verified onchai
 - **Team:** Only founder is publicly known. Rest of team not disclosed
 - **Developed in stealth** before the June 2025 funding announcement
 - **Legal entity:** Not publicly disclosed. 3Jane's own docs refer only to an unnamed "3Jane's sponsor entity" in the context of bankruptcy-remote SPVs for offchain financing (see Fintech Credit Conduits under Provability); no Delaware or other jurisdiction filing, LLC/Inc. name, or registered agent could be found in public searches as of October 27, 2026.
-- **Documentation:** Detailed on mechanics: architecture, FCC structure, LCC risk disclosures, and an unusually candid public operations runbook and `AGENTS.md`. Disclosure of the dominant position is weak, however. The protocol-owned origination account is absent from the [Addresses page](https://docs.3jane.xyz/developers/addresses.md), which also still lists a superseded Helper. Only one $10M FCC facility is documented against an ~$88.82M draw.
-- **Incident response:** First real-world test occurred April 18–28, 2026. Team executed `shutdownStrategy()` + `emergencyWithdraw()` and then had to ship new code (`USD3.restartStrategy()` reinitializer in PR #112) before the strategy could be reopened — i.e. the existing v2 `reinitialize()` could not reverse a Yearn V3 shutdown, which is consistent with the runbook in PR #112 stating that "Differs from the v2 multisig pattern". Net read: the team was able to halt and recover, but full recovery required a governance upgrade (now behind the 7-day timelock for upgrades), and idle reserves were depressed (~$120K–$273K) for ~7 days. No second shutdown has occurred since; the late-July/early-August idle-reserve compression (see Historical Track Record) resolved without invoking emergency powers.
+- **Documentation:** Detailed on mechanics: architecture, FCC structure, LCC risk disclosures, and an unusually candid public operations runbook and `AGENTS.md`. The FCC dashboard publishes hourly aggregates, per-facility tables, and delinquency tapes that reconcile to onchain debt. Gaps remain: the protocol-owned origination account is absent from the [Addresses page](https://docs.3jane.xyz/developers/addresses.md), which also lists a superseded Helper, and the docs' Facilities page still describes only LendSwift, even though Slope and Settle hold ~92% of deployed capital.
+- **Incident response:** First real-world test occurred April 19 – May 1, 2026. The team executed `shutdownStrategy()` + `emergencyWithdraw()`, which kept redemptions open against withdrawn USDC while blocking deposits. It then had to ship new code (`USD3.restartStrategy()` reinitializer in PR #112) to reopen deposits, because a Yearn V3 shutdown cannot otherwise be reversed. No second shutdown has occurred since; the late-July/early-August idle-reserve compression (see Historical Track Record) resolved without invoking emergency powers.
 - **Funding:** $5.2M seed from tier-1 investors (Paradigm, Coinbase Ventures)
 
 ## Monitoring
@@ -434,7 +455,8 @@ All core contracts use a **two-tier TimelockController system** (verified onchai
  ┌─────────────────────────────────────────────────────────────────────┐
  │  origination Safe ⇒ EOA 0x38353501… ⇒ EOAs 0x755bc710… / 0x95ad969c…│
  │     ⇒ (per docs) off-ramp to 3Jane's Erebor USD account ("staging") │
- │     ⇒ wires to FCC SPVs: warehouse / forward-flow (e.g. LendSwift)  │
+ │     ⇒ forward flows Slope $66.4M + Settle $13.7M; warehouse         │
+ │       LendSwift $6.6M; Erebor cash $2.7M (self-reported, Oct 27)    │
  │     ⇐ collections via DACA accounts ⇒ onramp ⇒ repay MorphoCredit   │
  └─────────────────────────────────────────────────────────────────────┘
 
@@ -470,7 +492,7 @@ All core contracts use a **two-tier TimelockController system** (verified onchai
 - The 3-of-5 Safe is the PROPOSER/EXECUTOR/CANCELLER on **both** timelocks. The 24h timelock controls configuration (contract owners, parameter changes); the 7-day timelock ([`0x3D3C41419Ab401cd25055E8f9421D7D96d887885`](https://etherscan.io/address/0x3D3C41419Ab401cd25055E8f9421D7D96d887885)) controls implementation upgrades (all five ProxyAdmins). Both timelocks are self-administered (`DEFAULT_ADMIN_ROLE` held by the timelock itself).
 - `EmergencyController v2` bypasses both timelocks for binary stop controls only (pause / set caps to zero / revoke a credit line). Both the multisig and the Hypernative agent EOA can invoke it.
 - The CreditLine contract trusts an `ozd` for credit-line approval / repayment posting / debt settlement; today this resolves to EmergencyController v2, which is the same address as `emergencyAdmin`. The pending OperationalController (PR #111) is the planned split.
-- The `restartStrategy()` reinitializer added in PR #112 demonstrated that recovery from a Yearn V3 shutdown sits behind the timelock-gated upgrade path — now with the 7-day timelock, worst-case redemption-restart latency is at least 7 days (assuming the upgrade is already coded and ready to schedule).
+- The `restartStrategy()` reinitializer added in PR #112 showed that reversing a Yearn V3 shutdown sits behind the upgrade path. The current implementation has no restart function, so reopening **deposits** after a future shutdown would take at least 7 days (the upgrade timelock). Redemptions are not affected: during shutdown `availableWithdrawLimit()` returns all available liquidity.
 - **The largest trust boundary is the origination account.** The governance multisig both sets credit lines (24h timelock) and operates the Safe that draws them (no timelock). It moves ~77% of `totalAssets` off-chain into assets whose existence and value are attested only by 3Jane.
 - LCC largely reuses the existing trust boundaries (24h timelock for parameters and `BOUNCER_ROLE`, 7d timelock for the shared beacon, multisig+Hypernative for pause). It adds `LISTER_ROLE` on `LCCVaultFactory`, held directly by a single EOA with no timelock or multisig gate. That EOA can set or clear per-depositor caps, controlling admission and top-up sizing, but cannot create vaults or move margin.
 - The LCC margin oracle is described by 3Jane itself as "fully trusted" — there is no fallback price source or onchain sanity bound disclosed. A stale or manipulated oracle read would misprice staker margin for slashing/auction purposes.
@@ -486,10 +508,11 @@ USD3 PPS is defined by the ERC-4626 standard: `convertToAssets(1 share) = totalA
   Fintech receivables default
         │
         ▼
-  Originator first-loss / OC / reserves   (self-reported, weekly, 3Jane dashboard)
-  absorb losses inside the SPV
-        │  if exhausted, 3Jane's senior
-        ▼  position is impaired
+  Forward flows (92%): no first-loss; losses accrue to 3Jane directly
+  Warehouse (8%): originator first-loss / OC absorb first
+  (all self-reported on the 3Jane dashboard)
+        │  residual loss reaches 3Jane's
+        ▼  claim on the receivables
   3Jane decides to recognize the loss ────────►  CreditLine.settle()  (owner = 24h
                                                  timelock; EmergencyCtrl v2 as ozd
                                                  exposes no settle() forwarder)
@@ -523,16 +546,17 @@ Key takeaway: the timing and size of any loss on ~77% of the backing is a discre
 - **Tier-1 backing:** $5.2M seed led by Paradigm, with Coinbase Ventures, Robot Ventures, Wintermute Ventures
 - **Two-tier timelock with an unchanged signer set:** 3-of-5 multisig with a 7-day delay on implementation upgrades (proxy admins and the LCC beacon) and a 24h delay on configuration. Credit-line increases, supply-cap raises, and LCC risk caps all went through the 24h timelock, so they were publicly visible in advance. Owner set and threshold are unchanged since September.
 - **Inherited Morpho Blue security:** core lending logic based on the extensively audited Morpho Blue codebase
-- **Documented off-chain structure:** the disclosed FCC facility (LendSwift) sits senior to 25% originator first-loss equity with DACA-controlled collections and weekly surveillance. 3Jane publishes facility-level reporting and loan tapes on its own dashboard.
+- **Granular self-reporting that reconciles to chain:** 3Jane's FCC dashboard publishes hourly aggregates, per-facility tables, and delinquency tapes. At the snapshot its reported principal plus Erebor cash ($88.48M) covers 99.6% of the origination account's debt, and its TVL and debt fields match onchain values exactly. The self-reported book is short-duration (~49–86-day forward-flow remaining terms), with no charge-offs to date and 96.85%+ current.
 - **Audit coverage, all severe findings fixed:** 6 public audits across the core money market, the USD3/sUSD3 update, and the LCC facility; every Critical/High finding fixed. 3Jane also publishes unusually detailed accepted-risk preconditions (`AGENTS.md`, operations runbook).
 - **Recognized loss history is clean:** no `settle()` write-down has been recorded, the Insurance Fund has never been drawn, and the October 2026 CCL delinquency case (JANE redistribution) ended with full repayment.
 
 ### Key Risks
 
 - **Single-borrower concentration in a protocol-controlled account:** 98.8% of borrows (~$88.82M, ~77% of `totalAssets`) are owed by a 1-of-1 Safe owned by the governance multisig. That account pays a zero premium and has made one repayment since May. It can draw ~$23.2M more without new governance action.
-- **Off-chain, self-attested backing:** the assets behind that debt (Erebor USD staging, SPV warehouse/forward-flow positions) are unverifiable onchain and lack any third-party attestation. Only a $10M facility is publicly documented against the ~$88.82M draw (**TODO:** reconciliation).
+- **Off-chain, self-attested backing:** the assets behind that debt (Erebor cash, Slope and Settle forward-flow loans, the LendSwift warehouse) are unverifiable onchain and lack any third-party attestation. The dashboard's "verified value" is 3Jane's own carrying value.
+- **Counterparty concentration without first-loss:** Slope is ~$66.4M (76.6% of deployed FCC, ~58% of `totalAssets`). The forward flows (92% of FCC) are whole-loan purchases with no originator first-loss; documented credit enhancement covers only the $6.56M LendSwift warehouse.
 - **Discretionary loss recognition:** markdown is deliberately inactive, no repayment obligations are posted, and payment cycles are disabled. USD3 PPS accrues interest on face debt until governance chooses to call `CreditLine.settle()`.
-- **Bank and originator dependencies:** a single U.S. bank (Erebor) carries the dollar leg; originator servicing and SPV bankruptcy remoteness are critical and documented only by 3Jane.
+- **Bank and originator dependencies:** a single U.S. bank (Erebor) carries the dollar leg; servicing by Slope, Settle, and LendSwift and SPV bankruptcy remoteness are critical and documented only by 3Jane.
 - **No bug bounty program** despite ~$115M of user funds
 - **Limited team transparency:** only the founder is publicly known, and no legal entity or "sponsor entity" is disclosed even though the FCC structure depends on SPVs and bank accounts
 - **EmergencyController outside audit scope** (per the DD document), and the OperationalController split is still undeployed
@@ -540,10 +564,10 @@ Key takeaway: the timing and size of any loss on ~77% of the backing is a discre
 
 ### Critical Risks
 
-- **Off-chain credit or custody failure:** a loss at Erebor, an SPV, or an originator beyond the originator's first-loss equity hits a pool whose onchain junior buffer (~$8.37M sUSD3 + ~$1.03M Insurance Fund, of which only sUSD3 applies to FCC) covers **~10.5%** of borrows. Because recognition is discretionary, holders may exit or enter at a stale NAV during the gap.
-- **Liquidity dependent on 3Jane's own recall:** beyond the idle buffer (~$25.15M now, ~$10–13M for most of October), redemptions depend on 3Jane recalling USD from off-chain facilities with revolving periods to mid-2027. No committed liquidity facility exists.
-- **Upgrade risk and Yearn V3 shutdown semantics:** recovering from the April 2026 `shutdownStrategy()` required a new `restartStrategy()` reinitializer (PR #112). Future shutdowns may again require upgrades behind the 7-day timelock.
-- **Scale outpacing the verifiable buffer:** TVL grew ~44% in seven weeks, while the onchain junior buffer stayed ~10–11% of borrows and the off-chain asset base remained largely undisclosed.
+- **Off-chain credit or custody failure:** ~92% of FCC capital is forward-flow whole loans with no originator first-loss, and ~77% of it is a single counterparty (Slope). A default spike in those loans, or a failure at Erebor or a servicer, hits a pool whose onchain junior buffer covers **~10.5%** of borrows (~$8.37M sUSD3 + ~$1.03M Insurance Fund, of which only sUSD3 applies to FCC). Because recognition is discretionary, holders may exit or enter at a stale NAV during the gap.
+- **Liquidity dependent on 3Jane's own recall:** beyond the idle buffer (~$25.15M now, ~$10–13M for most of October), redemptions depend on 3Jane recalling USD from Erebor (~$2.68M self-reported) or letting off-chain receivables run off (~49–86-day forward-flow terms; the warehouse revolves to May 2027). No committed liquidity facility exists.
+- **Upgrade risk and Yearn V3 shutdown semantics:** reopening deposits after the April 2026 `shutdownStrategy()` required a new `restartStrategy()` reinitializer (PR #112). A future shutdown would again require an upgrade behind the 7-day timelock to resume deposits and redeployment. Redemptions continue during shutdown.
+- **Scale outpacing the verifiable buffer:** TVL grew ~44% in seven weeks, while the onchain junior buffer stayed ~10–11% of borrows and the off-chain asset base remained only self-reported.
 
 ---
 
@@ -552,7 +576,7 @@ Key takeaway: the timing and size of any loss on ~77% of the backing is a discre
 ### Critical Risk Gates
 
 - [x] **No audit** — Veridise, Sherlock ×2, Electisec, yAudit (May 2026), and Guardian (LCC, Aug 2026): 6 audits total, plus inherited Morpho Blue audits. ✅ PASS
-- [ ] **Unverifiable reserves** — Only ~23% of `totalAssets` (idle `waEthUSDC`) plus the Insurance Fund is verifiable onchain. The remaining ~77% is a claim on 3Jane's own origination account, backed by off-chain assets that 3Jane reports on its own dashboard (facility KPIs, weekly surveillance, loan tapes for some facilities), with no third-party attestation. ⚠️ CONDITIONAL PASS — self-reported attestation exists, so the gate is not triggered, but this is the binding constraint on the score. An independent attestation or reconciliation would firm it up; evidence of a material unreported shortfall would trigger the gate.
+- [ ] **Unverifiable reserves** — Only ~23% of `totalAssets` (idle `waEthUSDC`) plus the Insurance Fund is verifiable onchain. The remaining ~77% is a claim on 3Jane's own origination account, backed by off-chain assets that 3Jane reports on its own dashboard. The dashboard publishes hourly aggregates, per-facility tables, and delinquency tapes; at the snapshot, self-reported principal plus Erebor cash covers 99.6% of that debt. There is no third-party attestation. ⚠️ CONDITIONAL PASS — granular self-reported reporting that reconciles to onchain liabilities exists, so the gate is not triggered, but this is the binding constraint on the score. An independent attestation would firm it up; evidence of a material unreported shortfall would trigger the gate.
 - [x] **Total centralization** — 3/5 multisig with 24h/7d two-tier timelock; ProxyAdmins and LCC beacon owned by timelock. The multisig also directly controls the dominant borrower, but no single EOA controls the protocol. ✅ PASS
 
 **All gates pass (conditional).** Proceed to category scoring.
@@ -565,7 +589,7 @@ Key takeaway: the timing and size of any loss on ~77% of the backing is a discre
 |--------|-----------|
 | Audits | 6 public audits: Veridise, Sherlock ×2, Electisec (2025, 1 critical + 11 high + 16 medium, all fixed); yAudit (May 2026) on the live USD3/sUSD3 update, 3 high + 5 medium, **all 3 High fixed**; Guardian (Aug 2026) on LCC and the v1.2 USD3 integration, 0 high/critical, 20 medium/34 low. A private LCC review is undisclosed. Inherited Morpho Blue audits (OpenZeppelin, Cantina). Certora formal verification present. 3Jane classifies 14 round-3 findings as dormant only while no third-party CCL line is drawn. |
 | Production history | ~14 months (Aug 2025 deployment). TVL ~$115.0M `totalAssets` (~$25.2M idle + ~$89.9M borrowed). |
-| Notable events | April 2026 strategy shutdown + restart (precautionary, no loss of funds). Late July – early August 2026 idle-reserve compression driven by origination-account draws. September 25, 2026 v1.2 upgrade. |
+| Notable events | April 19 – May 1, 2026 strategy shutdown + restart (precautionary, no loss of funds; deposits blocked, ~$2.07M redeemed during shutdown). Late July – early August 2026 idle-reserve compression driven by origination-account draws. September 25, 2026 v1.2 upgrade. |
 | Bug bounty | None — Immunefi 404 (October 27, 2026); not on Sherlock, Cantina, or SEAL Safe Harbor |
 
 **Score: 3.0/5** — Audit coverage is broad and frequent, and the v1.2 USD3 changes that went live in September were inside Guardian's scope. Offsets are the absence of a bug bounty for a ~$115M protocol and 3Jane's own acknowledgment that several audit findings stay dormant only by operating policy.
@@ -590,7 +614,7 @@ Key takeaway: the timing and size of any loss on ~77% of the backing is a discre
 | Onchain | ERC-4626 share price, interest accruals, loan state tracking are programmatic |
 | Offchain | ~77% of `totalAssets` deployed off-chain by a multisig-controlled Safe; off-ramp, wires, facility selection, collections, and valuation run outside the chain |
 | PPS | Onchain math, but the dominant input is face debt; losses enter only via discretionary `settle()` (markdown inactive, no obligations, cycles disabled) |
-| Yearn V3 strategy semantics | `shutdownStrategy()` / `emergencyWithdraw()` / `restartStrategy()` are admin-callable and proved load-bearing in April 2026 |
+| Yearn V3 strategy semantics | `shutdownStrategy()` / `emergencyWithdraw()` are admin-callable; shutdown blocks deposits (not redemptions) and needs an upgrade to reverse |
 
 **Subcategory B Score: 4.5/5** — Under the rubric, the dominant asset now sits between "offchain accounting with periodic reporting" (4) and "fully custodial operations" (5). Deployment is custodial through 3Jane's own Safe and bank account, and its valuation changes only by admin action. The onchain share-price mechanics and the timelocked credit-line limit keep it below 5.
 
@@ -598,15 +622,15 @@ Key takeaway: the timing and size of any loss on ~77% of the backing is a discre
 
 | Factor | Assessment |
 |--------|-----------|
-| FCC originators / SPVs | Critical — ~77% of backing; one $10M facility publicly documented |
+| FCC originators / SPVs | Critical — ~77% of backing across three self-reported facilities; Slope ~77% of deployed FCC; forward flows (92%) carry no originator first-loss |
 | Erebor (bank) | Critical — single bank for staging, wires, and collections |
 | Aave V3 | Critical for idle liquidity; blue-chip |
-| Morpho Blue (forked) / Yearn V3 TokenizedStrategy | Critical; shutdown semantics coupled to upgrades |
+| Morpho Blue (forked) / Yearn V3 TokenizedStrategy | Critical; reopening deposits after shutdown requires an upgrade |
 | Hypernative | Medium-High — automated emergency-response role |
 | LCC + margin oracles | Low today ($0 called); feedless par oracles are an accepted LCC-staker risk |
 | zkTLS / Reclaim / EigenLayer AVS / Plaid / Credit Karma | Now confined to the ~$1.09M residual CCL book |
 
-**Subcategory C Score: 4.5/5** — The critical dependencies have shifted from early-stage onchain infrastructure to off-chain counterparties (originators, SPVs, servicers, one bank). Their failure would impair most of the backing, and none can be monitored onchain. This is close to a single-point-of-failure profile, held below 5 by SPV/DACA structuring, which is documented but not independently verified.
+**Subcategory C Score: 4.5/5** — The critical dependencies have shifted from early-stage onchain infrastructure to off-chain counterparties (originators, SPVs, servicers, one bank). Their failure would impair most of the backing, and none can be monitored onchain. Slope alone backs ~58% of `totalAssets`, which is close to a single-point-of-failure profile. The score is held below 5 by diversification across ~24,000 underlying loans, short duration, and SPV structuring, all self-reported.
 
 **Centralization Score = (3.0 + 4.5 + 4.5) / 3 = 4.0/5**
 
@@ -619,48 +643,48 @@ Key takeaway: the timing and size of any loss on ~77% of the backing is a discre
 | Factor | Assessment |
 |--------|-----------|
 | Backing | **No onchain collateral.** ~77% of `totalAssets` is a claim on 3Jane's own origination account; ~22% idle `waEthUSDC`; ~1% residual CCL |
-| Collateral quality | Per 3Jane: senior positions in fintech consumer/SMB receivables behind originator first-loss equity (LendSwift: 25%, 1.33x OC) plus USD at Erebor. Unverified, and largely undisclosed beyond one $10M facility |
-| Default protection | Pool level: sUSD3 ~$8.37M (+ Insurance Fund ~$1.03M for CCL only) ≈ **~10.5%** of ~$89.91M borrows. Facility level: originator equity / OC / reserves (self-reported) |
-| Verifiability | Idle reserves and Insurance Fund verifiable onchain; dominant asset self-reported only |
+| Collateral quality | Self-reported: Slope trade-credit forward flow $66.44M, Settle inventory-financing forward flow $13.71M, LendSwift senior warehouse $6.56M (25% first-loss, $9.36M collateral), Erebor cash $2.68M. Short duration; 96.85% current on Slope, 100% on Settle; no charge-offs. Forward flows have no originator first-loss or OC (aggregate credit enhancement ~3.1%) |
+| Default protection | Pool level: sUSD3 ~$8.37M (+ Insurance Fund ~$1.03M for CCL only) ≈ **~10.5%** of ~$89.91M borrows. Facility level: originator first-loss only on the $6.56M warehouse (self-reported) |
+| Verifiability | Idle reserves and Insurance Fund verifiable onchain; dominant asset self-reported only (principal + cash = 99.6% of origination debt) |
 
-**Subcategory A Score: 4.75/5** — The onchain buffer covers only ~10.5% of borrows, and the claimed facility-level enhancement cannot be verified for most of the book. Per the rubric this is partially collateralized and custodial with opaque reporting, just short of the critical gate.
+**Subcategory A Score: 4.5/5** — 3Jane's self-reported book maps the origination debt to named, short-duration, currently performing receivables plus bank cash. That rules out a large unexplained gap. The score stays in the 4–5 band because the backing is custodial and off-chain and lacks independent verification. Facility-level first-loss covers only 7.6% of FCC. One counterparty (Slope) is ~58% of `totalAssets`, and the onchain junior buffer is ~10.5% of borrows.
 
 **Subcategory B: Provability**
 
 | Factor | Assessment |
 |--------|-----------|
 | Reserve transparency | ~23% verifiable onchain; ~77% primarily offchain |
-| Reporting mechanism | 3Jane's own FCC dashboard (weekly surveillance, loan tapes where published); onchain NAV reflects face debt, not off-chain performance |
+| Reporting mechanism | 3Jane's own FCC dashboard: hourly aggregate series, per-facility tables, delinquency tapes; aggregate fields reconcile exactly to onchain `totalAssets` and total debt. Onchain NAV reflects face debt, not off-chain performance |
 | Third-party verification | None found — no bank, custodian, or auditor attestation of Erebor balances or SPV assets |
 
-**Subcategory B Score: 4.5/5** — The rubric's "primarily offchain / self-reported only" row is 4. The score goes higher because the onchain NAV is structurally unable to reflect the self-reported data: loss recognition is discretionary and the automatic markdown path is disabled by policy. It stays below 5 because 3Jane does publish frequent facility-level reporting.
+**Subcategory B Score: 4.0/5** — This matches the rubric's "primarily offchain / self-reported only" row. Reporting is frequent and granular, and its aggregates reconcile to chain, which keeps the score from going higher. It does not go lower because no third party verifies the off-chain balances, and the onchain NAV cannot reflect the reported performance: loss recognition is discretionary and the markdown path is disabled by policy.
 
-**Funds Management Score = (4.75 + 4.5) / 2 = 4.63/5**
+**Funds Management Score = (4.5 + 4.0) / 2 = 4.25/5**
 
-**Score: 4.63/5** — USD3 functions as an off-chain asset-backed-finance vehicle whose dominant asset is a self-attested claim on the protocol's own account.
+**Score: 4.25/5** — USD3 functions as an off-chain asset-backed-finance vehicle. Its dominant asset is a claim on the protocol's own account, backed by a self-reported, concentrated, mostly unenhanced receivables book.
 
 #### Category 4: Liquidity Risk (Weight: 15%)
 
 | Factor | Assessment |
 |--------|-----------|
-| Exit mechanism | Redeem USD3 for USDC from idle reserves (`availableWithdrawLimit()` ~$25.15M). No queue. `isShutdown()` would block the path entirely, as in April 2026. |
+| Exit mechanism | Redeem USD3 for USDC from idle reserves (`availableWithdrawLimit()` ~$25.15M). No queue. Shutdown blocks deposits only; in April 2026, ~$2.07M was redeemed during shutdown. |
 | Liquidity depth | ~$25.15M idle now (~21.9%), after ~$10.4–13.6M (~10–12%) for most of October. DEX depth immaterial (Curve frxUSD/USD3 ~$226K; Uniswap V3 dust). |
 | Utilization risk | ~78% now, ~84–90% for most of October. The origination account can draw ~$23.2M more without governance action, and has repeatedly drawn idle down after cap raises. |
-| Refill path | Beyond CCL repayments, refilling requires 3Jane to recall USD from off-chain facilities (disclosed facility revolving to May 2027) |
+| Refill path | Beyond CCL repayments, refilling requires 3Jane to recall Erebor cash (~$2.68M) or run off receivables (self-reported ~49–86-day forward-flow terms; warehouse revolving to May 2027) |
 | Lock periods | sUSD3 30-day cooldown; LCC-funded USD3 35-day cooldown and ring-fenced cash (currently $0) |
 | Same-value asset | USDC-denominated — lower urgency for exit speed |
 
-**Score: 3.0/5** — Direct redemption from idle reserves still works and the asset is same-value. But the buffer beyond idle cash rests on off-chain assets with multi-month duration, and 3Jane itself controls both the drain (origination draws) and the refill (recall). The buffer has repeatedly compressed to ~10% of `totalAssets` in normal operation.
+**Score: 3.0/5** — Direct redemption from idle reserves works, it remained available through the April shutdown, and the asset is same-value. Short-duration receivables would self-liquidate within months. But 3Jane itself controls both the drain (origination draws, ~$23.2M of undrawn headroom) and the refill (recall). The buffer has repeatedly compressed to ~10% of `totalAssets` in normal operation, and no committed liquidity facility exists.
 
 #### Category 5: Operational Risk (Weight: 5%)
 
 | Factor | Assessment |
 |--------|-----------|
 | Team | Founder publicly known (Jacob Chudnovsky, ex-Ribbon/Aevo). Rest of team undisclosed |
-| Documentation | Detailed mechanics, runbook, and accepted-risk register; weak disclosure of the origination account and of most FCC deployments |
+| Documentation | Detailed mechanics, runbook, accepted-risk register, and a granular FCC dashboard; the origination account is undocumented on the Addresses page and the docs' Facilities page lists only LendSwift |
 | Funding | $5.2M seed from Paradigm, Coinbase Ventures, and other reputable investors |
 | Legal | No publicly disclosed legal entity or sponsor entity, despite the SPV/bank structure |
-| Incident response | April 2026 precautionary shutdown and recovery; CCL delinquency in October 2026 resolved with full repayment |
+| Incident response | April 2026 precautionary shutdown (redemptions kept open) and recovery; CCL delinquency in October 2026 resolved with full repayment |
 
 **Score: 3.0/5** — Doxxed founder with strong VC backing and an unusually transparent engineering record. The legal entity is undisclosed and the dominant position is under-disclosed.
 
@@ -674,10 +698,10 @@ Final Score = (Centralization × 0.30) + (Funds Mgmt × 0.30) + (Audits × 0.20)
 |----------|-------|--------|----------|
 | Audits & Historical Track Record | 3.0 | 20% | 0.60 |
 | Centralization & Control | 4.0 | 30% | 1.20 |
-| Funds Management | 4.63 | 30% | 1.389 |
+| Funds Management | 4.25 | 30% | 1.275 |
 | Liquidity Risk | 3.0 | 15% | 0.45 |
 | Operational Risk | 3.0 | 5% | 0.15 |
-| **Final Score** | | | **3.79/5.0** |
+| **Final Score** | | | **3.67/5.0** |
 
 ### Risk Tier
 
@@ -689,9 +713,9 @@ Final Score = (Centralization × 0.30) + (Funds Mgmt × 0.30) + (Audits × 0.20)
 | **3.50–4.49** | **Elevated Risk** | **Limited approval, strict limits** |
 | 4.50–5.00 | High Risk | Not recommended |
 
-**Final Risk Tier: Elevated Risk (3.79/5.0) — Limited approval, strict limits**
+**Final Risk Tier: Elevated Risk (3.67/5.0) — Limited approval, strict limits**
 
-The tier is **Elevated** because ~98.8% of the borrow book (~77% of `totalAssets`) is owed by 3Jane's own multisig-controlled origination account. The account funds off-chain fintech-receivable facilities through a bank account, its backing is self-attested only, and losses on it reach USD3 PPS only when governance chooses to settle. Mitigants: a sound two-tier timelock with unchanged signers, broad audit coverage, documented SPV/DACA/first-loss structuring for the disclosed facility, unusually candid accepted-risk documentation, and no recognized loss to date. An independent attestation of Erebor balances and FCC assets, reconciled to the origination account's debt, is the main item that could lower the score.
+The tier is **Elevated** because ~98.8% of the borrow book (~77% of `totalAssets`) is owed by 3Jane's own multisig-controlled origination account. The account funds off-chain fintech receivables through a bank account. Its backing is self-attested only, it is concentrated in one counterparty (Slope, ~58% of `totalAssets`) without originator first-loss, and losses on it reach USD3 PPS only when governance chooses to settle. Weighted sum is 3.675, reported as 3.67 under the template's round-down rule. Mitigants: a sound two-tier timelock with unchanged signers, broad audit coverage, granular self-reported facility data that reconciles to onchain debt, short-duration receivables, unusually candid accepted-risk documentation, and no recognized loss to date. An independent attestation of the Erebor balances and FCC assets is the main item that could lower the score.
 
 ---
 
@@ -699,9 +723,9 @@ The tier is **Elevated** because ~98.8% of the borrow book (~77% of `totalAssets
 
 - **Time-based:** Reassess in 1 month (late November 2026), given rapid TVL growth and the now-live LCC funding path
 - **TVL-based:** Reassess if `USD3.totalAssets()` changes by more than ±30% from the October 2026 baseline of ~$115.0M, or if idle reserves drop below $5M for >24h
-- **Concentration-based:** Reassess on any origination-account credit-line increase, any `DEBT_CAP` / `USD3_SUPPLY_CAP` increase, or any new third-party credit line
+- **Concentration-based:** Reassess on any origination-account credit-line increase, any `DEBT_CAP` / `USD3_SUPPLY_CAP` increase, any new third-party credit line, any new FCC counterparty, or if any single FCC counterparty exceeds 80% of deployed FCC (Slope: 76.6%)
 - **Loss-based:** Reassess on any `CreditLine.settle()`, any drop in MorphoCredit `totalSupplyAssets`, any sUSD3 share burn, any FCC facility moving to Watch / Trigger Tripped / Default, or any Insurance Fund outflow
-- **Provability-based:** Reassess if 3Jane publishes a third-party attestation of Erebor/SPV assets or a reconciliation of FCC deployed + staged capital to the origination account's debt (could improve score)
+- **Provability-based:** Reassess if 3Jane publishes a third-party attestation of Erebor/SPV assets (could improve score), or if the dashboard's principal + Erebor cash falls below 97% of the origination account's debt (99.6% at the snapshot)
 - **Shutdown-based:** Reassess on any `USD3.isShutdown() = true` event, with target turnaround <72h
 - **Governance-based:** Reassess once OperationalController (PR #111) is deployed onchain, on any multisig signer/threshold change, or on any change to the origination Safe's owners
 - **Buffer-based:** Reassess if the combined sUSD3 + Insurance Fund buffer falls below 10% of the outstanding borrow book (currently ~10.5%)
@@ -717,4 +741,4 @@ The tier is **Elevated** because ~98.8% of the borrow book (~77% of `totalAssets
 | [March 4, 2026](https://github.com/yearn/risk-score/pull/77) | 3.5 | Initial assessment |
 | [July 3, 2026](https://github.com/yearn/risk-score/pull/168) | 3.4 | Reassessment after April 2026 emergency shutdown |
 | [September 5, 2026](https://github.com/yearn/risk-score/pull/444) | 3.46 | Reassessment: thinner loss buffer, higher utilization; LCC launch noted but not risk-scored (deposit path disabled at snapshot) |
-| [October 27, 2026](https://github.com/yearn/risk-score/pull/562) | 3.79 | Reassessment: 98.8% of borrows owed by protocol-owned origination account funding off-chain FCC assets; discretionary loss recognition; v1.2 upgrade enables LCC funding; TVL ~$115M |
+| [October 27, 2026](https://github.com/yearn/risk-score/pull/562) | 3.67 | Reassessment: 98.8% of borrows owed by protocol-owned origination account funding self-reported off-chain FCC assets (Slope-concentrated); discretionary loss recognition; v1.2 upgrade enables LCC funding; TVL ~$115M |
