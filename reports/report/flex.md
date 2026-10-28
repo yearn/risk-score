@@ -5,7 +5,7 @@
 - **Chain:** Ethereum Mainnet
 - **Token Address:** [`0xD93Dade7Ac8b5d1687da5d074835cB4404Dee8bA`](https://etherscan.io/address/0xD93Dade7Ac8b5d1687da5d074835cB4404Dee8bA)
 - **Snapshot:** Onchain reads at Ethereum block [26285921](https://etherscan.io/block/26285921) (October 27, 2026, 18:43 UTC); USD values for WETH use the Chainlink ETH/USD feed ([`0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419`](https://etherscan.io/address/0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419)) at $2,344.00 at the same block.
-- **Final Score: 2.57/5.0**
+- **Final Score: 2.62/5.0**
 
 ## Overview + Links
 
@@ -171,7 +171,13 @@ There is **no privileged minter** — a positive signal. The dependency graph th
 
 ## Liquidity Risk
 
-- **Exit is permissionless via `FlexExitRouter`.** Lenders keep idle cash near zero by design — capital stays deployed in Troves. `FlexLenderStrategy.availableWithdrawLimit()` returns **$0 on the yvUSD leg**, $17,594 on ysyBOLD, $798 on yvcrvUSD-2 and 0.072 WETH on yvWETH-2, which is not a gate on user exit. A user routes through the `FlexExitRouter`, which delivers any idle cash atomically and the remainder asynchronously as the redemption auction is taken. Yearn SMS `forceFreeFunds` is an optional management unwind, not a requirement for depositors to leave. Of `yvFlexUSDC`'s $1,118,643, **$212,584 (19.0%) sits in the non-Flex Sky USDS strategy** and is instantly withdrawable as cash; the Flex legs exit through the router instead. `yvFlexWETH` has no non-Flex leg.
+- **Exit is permissionless via `FlexExitRouter`.** Lenders keep idle cash near zero by design — capital stays deployed in Troves. `FlexLenderStrategy.availableWithdrawLimit()` returns **$0 on the yvUSD leg**, $17,594 on ysyBOLD, $798 on yvcrvUSD-2 and 0.072 WETH on yvWETH-2, which is not a gate on user exit. A user routes through the `FlexExitRouter`, which delivers any idle cash atomically and the remainder asynchronously as the redemption auction is taken. Yearn SMS `forceFreeFunds` is an optional management unwind, not a requirement for depositors to leave. Two paths should be kept apart:
+  - A **direct Lender holder** redeeming `ysUSDC` triggers the collateral redemption itself, with no intermediary.
+  - An **allocator-vault holder** gets past the strategy's idle-cash limit only through `FlexExitRouter.redeem()`, which sets the proceeds receiver on the strategies. A plain vault `withdraw`/`redeem` stops at the liquid legs.
+
+  The yearn.fi interface's withdraw paths (`yearn/yearn.fi` `main` at [`1e0f1b7`](https://github.com/yearn/yearn.fi/commit/1e0f1b7)) do not call the router, so interface users reach only the liquid portion. The original v1 allocator strategy ([`0x467Ce10870747372968ba98463A1d9af9Fb27751`](https://etherscan.io/address/0x467Ce10870747372968ba98463A1d9af9Fb27751), May–August 2026) had no router hook. For it, Yearn management calling `forceFreeFunds` was the only way to start a redemption once idle cash was exhausted. The router was deployed on August 8, 2026 and is wired into all four current strategies.
+
+  Of `yvFlexUSDC`'s $1,118,643, **$212,584 (19.0%) sits in the non-Flex Sky USDS strategy** and is instantly withdrawable as cash; the Flex legs exit through the router instead. `yvFlexWETH` has no non-Flex leg.
 - **Depth:** TVL is small (~$1.94M) and depositor concentration is extreme (90.8% of `yvFlexUSDC` is the Yearn Treasury; 96.8% of `yvFlexWETH` is the yETH Recovery Vault). There is no external DEX market for `ysUSDC` or `ysWETH`. Exit relies on the protocol's redemption machinery — the 60 `RedeemTrove` events since September 7 show it working in every live market — against $1,041,479 of pledged collateral in the three USDC markets (and $846,979 in the WETH market), and on the collateral vaults' own exit liquidity. Each market's auction can only be taken in its own collateral.
 - **Stress behavior:** Auctions run 1 day with 1-minute steps, starting at 100% of oracle value and stopping at 99%, so a taker willing to redeem the collateral vault share for its underlying can clear near par in benign conditions. Under stress the same auction becomes the throttle: redemptions and liquidations can deliver less than 1:1, bad debt is socialized to lenders, and `_harvestAndReport` is blocked while an auction remains unsettled.
 - **Same-value assets:** Every market's collateral and borrow token share a denomination (USD or ETH), so modest exit delays carry limited directional price risk. In the ysyBOLD and yvcrvUSD-2 markets that holds only while BOLD and crvUSD hold their pegs; both oracles now track a depeg downward, so the price feed will register it rather than mask it. Redeeming yvWETH-2 for WETH depends on that vault unwinding Spark lender-borrower and looper positions, so in an ETH stress event its own exit liquidity could slow auction takers.
@@ -187,8 +193,9 @@ There is **no privileged minter** — a positive signal. The dependency graph th
   - It is the **`performanceFeeRecipient`** on all four live Lenders, collecting the live 10% lender performance fee and the borrower upfront fees,
   - It is the sole caller of **`set_depeg_mode`** on the ysyBOLD oracle, a switch that changes how collateral in a live market is valued; it currently reads `true`, the lender-protective setting.
 - **Note on emergency withdrawal:** `Lender.sol` does **not** override `_emergencyWithdraw`, so the inherited Yearn default is a **no-op** — Daddy *cannot* pull a Lender's deployed assets out of its market. Its emergency lever is limited to `shutdownStrategy` (blocks new deposits; existing lenders can still withdraw through the normal redemption path). The `FlexLenderStrategy` *does* implement `_emergencyWithdraw`, but that strategy is controlled by Yearn SMS, not Daddy.
-- **Daddy is owned by a 3-of-5 Safe multisig** ([`0x687b82dA…3B67`](https://etherscan.io/address/0x687b82dA9753C9db280d4D9aBD7BCAC022Ef3B67), Safe v1.4.1). The threshold was raised from 2 to 3 on June 24, 2026 (block 25388899) and a fifth owner added on August 13, 2026 (block 25747928). The owner set and threshold at the snapshot match the set recorded after that change, and the Safe emitted no owner or threshold events afterwards. Signers are pseudonymous; one of them is also the EOA that deployed the markets, oracles and allocator contracts.
-- **No timelock** sits in front of Daddy. A 3-of-5 threshold is a meaningful improvement over the 2-of-4 it replaced, but there is still no delay between a signed transaction and its effect — including for market endorsement and the ysyBOLD depeg switch.
+- **Daddy is owned by a 3-of-5 Safe multisig** ([`0x687b82dA…3B67`](https://etherscan.io/address/0x687b82dA9753C9db280d4D9aBD7BCAC022Ef3B67), Safe v1.4.1). The threshold was raised from 2 to 3 on June 24, 2026 (block 25388899) and a fifth owner ([`0x0Dca0FDC170baA4CA9c1dCd37Ffe01f97bCfD504`](https://etherscan.io/address/0x0Dca0FDC170baA4CA9c1dCd37Ffe01f97bCfD504)) was added on August 13, 2026 (block 25747928). The owner set and threshold at the snapshot match the set recorded after that change, and the Safe emitted no owner or threshold events afterwards. Signers are pseudonymous.
+- **The developer holds two of the three required signatures.** The Flex team stated during review of the [initial assessment](https://github.com/yearn/risk-score/pull/220) that two of the original four keys belong to the Flex developer, one being the deployer EOA [`johnny.flexmeow.eth`](https://etherscan.io/address/0x000005281a2b04A182085D37cC9E6dD552795caa), and the other two to the pseudonymous Yearn-ecosystem reviewers "corn" and Schlagonia. Under the 2-of-4 threshold that applied at the initial assessment, the developer could authorize any Daddy action alone. Under today's 3-of-5 threshold, the developer still needs only **one** other signature. Recovering the signers of all 21 Safe executions (20 transactions) shows the deployer key on every one. The September 17 endorsement was signed by the deployer, the newly added fifth owner and one of the original owners. No public source attributes the fifth owner. If it is also developer-held, the developer again controls a quorum alone: `TODO` — confirm with the Flex team who holds [`0x0Dca0FDC170baA4CA9c1dCd37Ffe01f97bCfD504`](https://etherscan.io/address/0x0Dca0FDC170baA4CA9c1dCd37Ffe01f97bCfD504) and which original owner is the developer's second key.
+- **No timelock** sits in front of Daddy. There is no delay between a signed transaction and its effect — including for market endorsement and the ysyBOLD depeg switch — and the effective independent check is at most one signer other than the developer.
 - **Yearn-side control:** Both allocator vaults now sit under Yearn's standard [`RoleManager`](https://etherscan.io/address/0xb3bd6B2E61753C311EFbCF0111f75D29706D9a41). `yvFlexUSDC` accepted it on September 8, 2026 ([tx](https://etherscan.io/tx/0xddff074807d813fbc600b0d42c23b457da751d422488926ee8971e17541c0d73)) and `yvFlexWETH` on September 25, 2026 ([tx](https://etherscan.io/tx/0x27144919a3b6fc636c9dc0ed2369b82f9cf03c949018ca51979d30010232d788)); both are registered as category 420. The vault roles are distributed the standard way:
   - The **Yearn 7-day TimelockController** ([`0x88ba032be87d5eF1FbE87336B7090767F367BF73`](https://etherscan.io/address/0x88ba032be87d5eF1FbE87336B7090767F367BF73), `getMinDelay() = 604800`) holds `ADD_STRATEGY`, `REVOKE_STRATEGY`, `FORCE_REVOKE`, `ACCOUNTANT_MANAGER` and `MAX_DEBT_MANAGER`. Routing a vault into a new strategy therefore now takes a week.
   - **yChad** ([`0xFEB4acf3df3cDEA7399794D0869ef76A6EfAff52`](https://etherscan.io/address/0xFEB4acf3df3cDEA7399794D0869ef76A6EfAff52)) holds every role except `ADD_STRATEGY` and `ACCOUNTANT_MANAGER`.
@@ -232,7 +239,7 @@ There is **no privileged minter** — a positive signal. The dependency graph th
 
 | Contract | Address | Why monitor |
 |----------|---------|-------------|
-| Lender `ysUSDC` — yvUSD/USDC (assessed token) | [`0xD93Dade7Ac8b5d1687da5d074835cB4404Dee8bA`](https://etherscan.io/address/0xD93Dade7Ac8b5d1687da5d074835cB4404Dee8bA) | `pricePerShare`, `totalAssets`, idle balance, `depositLimit`, `performanceFee`, management/keeper changes, `ReportLoss` |
+| Lender `ysUSDC` — yvUSD/USDC (assessed token) | [`0xD93Dade7Ac8b5d1687da5d074835cB4404Dee8bA`](https://etherscan.io/address/0xD93Dade7Ac8b5d1687da5d074835cB4404Dee8bA) | `pricePerShare`, `totalAssets`, idle balance, `depositLimit`, `performanceFee`, management/keeper changes, `Reported(profit, loss, protocolFees, performanceFees)` with `loss > 0` emitted by the Lender |
 | Lender `ysUSDC` — ysyBOLD/USDC | [`0xf4996Ca4190A1a3e7CF19AbE2F6eb712abd4a03C`](https://etherscan.io/address/0xf4996Ca4190A1a3e7CF19AbE2F6eb712abd4a03C) | same |
 | TroveManager — yvUSD/USDC | [`0x8ee72c388aA73096338EE18CD46a39D98b8983c9`](https://etherscan.io/address/0x8ee72c388aA73096338EE18CD46a39D98b8983c9) | `total_debt`, `collateral_balance`, `unclaimed_protocol_fees`; liquidations / bad-debt events |
 | TroveManager — ysyBOLD/USDC | [`0xADf4E0226d59aac20272023c04B4DcF5Ade7Fc6E`](https://etherscan.io/address/0xADf4E0226d59aac20272023c04B4DcF5Ade7Fc6E) | same |
@@ -358,7 +365,7 @@ Two markets were unendorsed on August 24, 2026 and carry no live exposure: the *
 - **Users lend through the Yearn allocators, not directly to markets.** Direct Lender depositors would bear curator-style risk; `yvFlexUSDC` and `yvFlexWETH` depositors take Yearn's allocation decisions instead.
 - **Growing, loss-free production record** — TVL rose 78% to ~$1.94M as Yearn funded the WETH market. Through September 7 – October 27 the redemption path ran 60 times and one liquidation cleared, with no `BadDebt` event and no reported Lender or strategy loss.
 - **Permissionless exit via `FlexExitRouter`** — Lenders stay essentially fully deployed by design; anyone can still exit at any time through the router.
-- **Governance used in the lender's favour** — the controlling Safe is **3-of-5**, and on August 24 Daddy retired two dead markets and lifted the ysyBOLD oracle's artificial 0.99 price floor, the configuration that lets a real BOLD depeg register. Its powers remain non-custodial: it cannot seize borrower collateral or lender shares.
+- **Governance used in the lender's favour** — on August 24 Daddy retired two dead markets and lifted the ysyBOLD oracle's artificial 0.99 price floor, the configuration that lets a real BOLD depeg register. Its powers remain non-custodial: it cannot seize borrower collateral or lender shares.
 - **Alike-asset over-collateralization** — USD vault shares vs USDC borrow and a WETH vault share vs WETH borrow, with a book-wide debt-weighted collateral ratio of 116.81% on interest-accrued debt and pledged collateral only. Running near a 110% MCR is the intended looping design.
 - **Fully onchain, verifiable** — backing is recomputable by anyone from `total_debt` and `collateral_balance`; **no privileged minter** exists on the lending token.
 - **Transparency improved** — the allocator layer is a public repository, and both August reviews were published.
@@ -367,7 +374,7 @@ Two markets were unendorsed on August 24, 2026 and carry no live exposure: the *
 ### Key Risks
 
 - **A Daddy-controlled oracle floor remains switchable.** The ysyBOLD oracle's 0.99 floor is currently disabled, which is the safe setting, but the same 3-of-5 key can re-enable it with no timelock — at which point a depegging market would again be valued at 0.99.
-- **A 3-of-5 multisig with no timelock**, which the rubric places at the second-riskiest governance tier, controls Lender parameters, both fee streams, market endorsement and the ysyBOLD oracle switch. Its powers are non-custodial, but nothing delays them.
+- **Effectively two-party control with no timelock.** The 3-of-5 Safe behind Daddy needs only one signature beyond the developer's two keys, and the newest owner is unattributed. It controls Lender parameters, both fee streams, market endorsement and the ysyBOLD oracle switch. Its powers are non-custodial, but nothing delays them.
 - **Governance overclaim** — the risks page still advertises "no admin keys, no privileged users, no ability to pause, upgrade, or modify" while Daddy collects both fee streams, endorses and unendorses markets, and holds the depeg switch. The August 24 and September 17 transactions are concrete demonstrations that the surface is live.
 - **Deeper, partly unassessed dependency chain** — two of the three USDC collaterals terminate in protocols this repository has not assessed (Liquity V2/BOLD and Curve/crvUSD), and those two markets take their price from a single Curve pool each. The WETH market's collateral, yvWETH-2, is also unassessed; it is a leveraged Spark/Lido strategy mix with a yvUSD leg, though it concerns only `ysWETH` lenders.
 - **yvcrvUSD-2 borrowers sit at the liquidation edge.** 79.8% of that market's debt is in Troves between 110.25% and 110.47% CR after the crvUSD EMA slipped to 0.99897. This is a borrower-liquidation risk rather than a lender-loss one, but a further 0.25–0.45% fall in the crvUSD EMA would make most of that book liquidatable.
@@ -391,7 +398,7 @@ Two markets were unendorsed on August 24, 2026 and carry no live exposure: the *
 
 - [ ] **No audit** — *Not triggered.* Six reviews; Dedaub (twice) and HHK/adriro reputable, all deployed contracts source-verified.
 - [ ] **Unverifiable reserves** — *Not triggered.* Fully onchain; CR recomputable per market.
-- [ ] **Total centralization** — *Not triggered.* Core immutable; control via 3-of-5 Safe (not a lone EOA), and Daddy cannot seize funds.
+- [ ] **Total centralization** — *Not triggered.* Core immutable; control via a 3-of-5 Safe rather than a lone EOA, and Daddy cannot seize funds. The developer holds two of the three required keys, so this gate would need re-checking if the fifth owner proved developer-held.
 
 **All gates pass.** Proceed to category scoring.
 
@@ -409,17 +416,17 @@ Two markets were unendorsed on August 24, 2026 and carry no live exposure: the *
 
 #### Category 2: Centralization & Control Risks (Weight: 30%)
 
-**Subcategory A: Governance** — The rubric's row 4 reads *"Multisig 3/5 or low threshold | <12 hours | Powerful admin roles with limited constraints"*, and Flex matches it on every axis: a **3-of-5 Safe with no timelock at all**, holding powerful but bounded roles — Lender parameters, both fee streams, market endorsement and unendorsement, keeper, shutdown, and the ysyBOLD oracle's depeg switch. It does not fall to row 5, which requires an EOA or fewer than three signers together with unlimited admin powers; Daddy cannot seize collateral or lender shares, and the market contracts are immutable clones. The August 24 and September 17 transactions confirm the surface is live rather than theoretical — four registry actions and an oracle-parameter change, all effective on signature. The choices made were sane and lender-protective, but that is evidence about the operators, not about the control structure, which still permits the reverse. Docs continue to deny that any of it exists.
+**Subcategory A: Governance** — On paper, the rubric's row 4 (*"Multisig 3/5 or low threshold | <12 hours | Powerful admin roles with limited constraints"*) fits: a 3-of-5 Safe with no timelock, holding powerful but bounded roles — Lender parameters, both fee streams, market endorsement and unendorsement, keeper, shutdown, and the ysyBOLD oracle's depeg switch. Scored on independent controllers, it is weaker than the threshold suggests. The developer holds two of the three required signatures, so every action needs at most one other party. Whether even that holds for the newest key is unconfirmed, since the fifth owner is unattributed and co-signed the September 17 endorsement. At the initial 2-of-4 threshold the developer could act alone. The August 24 and September 17 transactions confirm the surface is live — four registry actions and an oracle-parameter change, all effective on signature. The choices made were sane and lender-protective, but that is evidence about the operators, not about the control structure. It stops short of row 5 because Daddy's powers are bounded, not unlimited: it cannot seize collateral or lender shares, cannot pull Lender assets, and the market contracts are immutable clones. Docs continue to deny that any of it exists. → **4.5** (to **5** if the fifth key is confirmed developer-held)
 
-The score is driven entirely by Daddy. The Yearn allocator layer above the Lenders (`yvFlexUSDC`, `yvFlexWETH`) would score 1 on its own: at the snapshot both vaults carry the same `RoleManager` and role bitmasks as [yvWETH-1](./yearn-yvweth.md) (timelock 143, yChad 16374, Brain 14706, Security 8384, debt allocator 96, keeper 32). That includes the 7-day timelock on `ADD_STRATEGY` and `ACCOUNTANT_MANAGER`. Yearn's roles cannot override Daddy on a Lender; they only govern how much the allocator lends into Flex. → **4**
+The score is driven entirely by Daddy and its effectively two-party signing set. The Yearn allocator layer above the Lenders (`yvFlexUSDC`, `yvFlexWETH`) would score 1 on its own: at the snapshot both vaults carry the same `RoleManager` and role bitmasks as [yvWETH-1](./yearn-yvweth.md) (timelock 143, yChad 16374, Brain 14706, Security 8384, debt allocator 96, keeper 32). That includes the 7-day timelock on `ADD_STRATEGY` and `ACCOUNTANT_MANAGER`. Yearn's roles cannot override Daddy on a Lender; they only govern how much the allocator lends into Flex. → **4**
 
 **Subcategory B: Programmability** — Borrowing, interest, redemptions, liquidations and auctions are fully onchain. Share price is computed onchain from `idle + sync_total_debt`, with cached PPS and 4-day profit unlock as **intended** Yearn TokenizedStrategy accounting, not a keeper-chosen mispricing window. The designated Lender keeper is a hard-coded address. Users exit through the `FlexExitRouter` without a management call. → **1**
 
 **Subcategory C: External Dependencies** — Three USDC-market collaterals. yvUSD (the assessed market) is a Yearn-assessed, USDC-denominated vault priced through an immutable Morpho oracle — a well-understood dependency. ysyBOLD adds a three-layer chain terminating in **Liquity V2** and yvcrvUSD-2 a two-layer chain terminating in **Curve/crvUSD**, neither assessed in this repository, and each priced off a single Curve pool's EMA. Plus the Yearn V3 framework and USDC. The crvUSD oracle's cap-only, no-switch design offsets the added surface rather than compounding it. The new yvWETH-2/WETH market adds a fourth, unassessed chain (Spark lender-borrower and looper strategies, Lido wstETH, yvUSD). It does not move this score: markets are isolated, so that chain can impair only `ysWETH` lenders, and holders of the assessed `ysUSDC` have no mechanical exposure to it. It is tracked as a monitoring and reassessment item. → **3.5**
 
-**Centralization Score = (4 + 1 + 3.5) / 3 = 2.83**
+**Centralization Score = (4.5 + 1 + 3.5) / 3 = 3.0**
 
-**Score: 2.83/5** — Immutable mechanics, fully programmatic accounting, and non-custodial powers, held back by a 3-of-5 multisig with no timelock and a dependency chain reaching two unassessed protocols.
+**Score: 3.0/5** — Immutable mechanics, fully programmatic accounting, and non-custodial powers, held back by an untimelocked Safe that is effectively two-party (developer plus one signer) and a dependency chain reaching unassessed protocols.
 
 #### Category 3: Funds Management (Weight: 30%)
 
@@ -448,13 +455,13 @@ Pseudonymous but Yearn-ecosystem-known lead dev; mechanics docs are accurate and
 | Category | Score | Weight | Weighted |
 |----------|-------|--------|----------|
 | Audits & Historical | 3.0 | 20% | 0.60 |
-| Centralization & Control | 2.83 | 30% | 0.85 |
+| Centralization & Control | 3.0 | 30% | 0.90 |
 | Funds Management | 1.75 | 30% | 0.525 |
 | Liquidity Risk | 3.0 | 15% | 0.45 |
 | Operational Risk | 3.0 | 5% | 0.15 |
-| **Final Score** | | | **2.57/5.0** |
+| **Final Score** | | | **2.62/5.0** |
 
-**Optional Modifiers:** None apply (protocol < 2 years; TVL not sustained). Final score 2.575, recorded as **2.57/5.0** (two decimals, rounded down).
+**Optional Modifiers:** None apply (protocol < 2 years; TVL not sustained). Final score 2.625, recorded as **2.62/5.0** (two decimals, rounded down).
 
 ### Risk Tier
 
@@ -466,9 +473,9 @@ Pseudonymous but Yearn-ecosystem-known lead dev; mechanics docs are accurate and
 | **3.50–4.49** | **Elevated Risk** | Limited approval, strict limits |
 | **4.50–5.00** | **High Risk** | Not recommended |
 
-**Final Risk Tier: Medium Risk** — *Approved with enhanced monitoring*, near the bottom of the band. The remaining constraints are:
+**Final Risk Tier: Medium Risk** — *Approved with enhanced monitoring*, in the lower half of the band. The remaining constraints are:
 
-- a 3-of-5 multisig with no timelock;
+- a 3-of-5 multisig with no timelock in which the developer holds two of the three required signatures;
 - a dependency chain reaching unassessed protocols (Liquity V2/BOLD and Curve/crvUSD, plus yvWETH-2 for the WETH market);
 - a production history that is improving but still under six months;
 - a switchable ysyBOLD oracle floor;
@@ -486,7 +493,7 @@ These are offset by non-upgradeable market clones, a clean Dedaub audit of the v
 - **TVL-based:** Reassess if Flex TVL changes by **>50%** in either direction, if the Yearn Treasury's share of `yvFlexUSDC` or the yETH Recovery Vault's share of `yvFlexWETH` changes materially, if the Flex share of `yvFlexUSDC` exceeds 90%, or if a Lender `depositLimit` is raised.
 - **Collateral/market:** Reassess if a **new market is endorsed** (`Registry.EndorseMarket`) — the open locked-yvUSD, sDOLA and siUSD oracle PRs are candidates — if a live market is unendorsed, or if a market is added whose collateral and borrow token are not the same asset class.
 - **Liquidity:** Reassess after any `ForceFreeFunds` or ExitRouter exit that realizes a material loss, or if the ExitRouter path is disabled.
-- **Governance:** Reassess on any Daddy ownership transfer, Safe signer/threshold change, addition of a timelock, performance-fee change, or keeper change.
+- **Governance:** Reassess on any Daddy ownership transfer, Safe signer/threshold change, addition of a timelock, performance-fee change, or keeper change, and as soon as the Flex team attributes the fifth Safe owner.
 - **Incident-based:** Reassess after any bad-debt socialization event, liquidation failure, auction freeze, collateral depeg or loss, or any exploit affecting Flex, Yearn V3, yvUSD, ysyBOLD/yBOLD/Liquity V2, yvcrvUSD-2/Curve, or yvWETH-2 and its Spark/Lido strategies.
 
 ## Assessment History
@@ -495,4 +502,4 @@ These are offset by non-upgradeable market clones, a clean Dedaub audit of the v
 | --- | --- | --- |
 | [June 19, 2026](https://github.com/yearn/risk-score/pull/220) | 2.53 | Initial assessment — single yvUSD/USDC market, ~$0.97M TVL, 120.7% system CR, 2-of-4 Daddy Safe |
 | [September 7, 2026](https://github.com/yearn/risk-score/pull/425) | 2.67 | Reassessment: v1.1/v2 redeploy — original market retired, Yearn migrated to three Lenders (yvUSD, ysyBOLD, yvcrvUSD-2); upfront fee to protocol and 10% lender performance fee live; Safe 3-of-5; ysyBOLD depeg floor lifted. Scores revised after Flex-expert review: Zero Cool items not treated as open blockers, oracles and allocator reviewed, ExitRouter is the designed permissionless exit, alike-asset CR near MCR is intended. Remaining drivers are governance (3-of-5, no timelock), unassessed Liquity/Curve dependencies, and short track record. |
-| [October 27, 2026](https://github.com/yearn/risk-score/pull/563) | 2.57 | Reassessment: TVL ~$1.94M (+78%) after Yearn funded a new yvWETH-2/WETH market (endorsed September 17) through `yvFlexWETH`, 96.8% held by the yETH Recovery Vault; four live markets, 30 Troves, 116.81% book-wide CR, no bad debt or Lender loss; both allocators moved to Yearn's RoleManager. Historical track record 5 → 4 (3–6 months in production). Governance (3-of-5, no timelock) and dependencies unchanged; no Flex-specific monitoring exists. |
+| [October 27, 2026](https://github.com/yearn/risk-score/pull/563) | 2.62 | Reassessment: TVL ~$1.94M (+78%) after Yearn funded a new yvWETH-2/WETH market (endorsed September 17) through `yvFlexWETH`, 96.8% held by the yETH Recovery Vault; four live markets, 30 Troves, 116.81% book-wide CR, no bad debt or Lender loss; both allocators moved to Yearn's RoleManager. Historical track record 5 → 4 (3–6 months in production). Governance 4 → 4.5: the developer holds two of the three required Safe signatures and the fifth owner is unattributed. Dependencies unchanged; no Flex-specific monitoring exists. |

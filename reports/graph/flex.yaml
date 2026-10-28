@@ -204,7 +204,9 @@ nodes:
     category: governance
     note: >-
       Safe v1.4.1. Threshold raised from 2 to 3 on June 24, 2026 and a fifth owner added on August 13, 2026;
-      owner set unchanged since. No timelock sits in front of it. Not covered by any Yearn monitor.
+      owner set unchanged since. Per the Flex team the developer holds two keys, so any action needs at most
+      one other signer; the fifth owner is unattributed. The deployer key signed all 21 executions. No
+      timelock sits in front of it. Not covered by any Yearn monitor.
   - id: yearn-role-manager
     label: Yearn RoleManager
     address: "0xb3bd6B2E61753C311EFbCF0111f75D29706D9a41"
@@ -314,7 +316,7 @@ nodes:
 
 edges:
   # Governance
-  - { from: daddy-safe, to: daddy, kind: controls, label: "owner, 3-of-5, no timelock" }
+  - { from: daddy-safe, to: daddy, kind: controls, label: "owner, 3-of-5 (developer holds 2), no timelock" }
   - { from: daddy, to: lender-yvusd, kind: holds-role, label: "management + performanceFeeRecipient" }
   - { from: daddy, to: lender-ysybold, kind: holds-role, label: "management + performanceFeeRecipient" }
   - { from: daddy, to: lender-yvcrvusd, kind: holds-role, label: "management + performanceFeeRecipient" }
