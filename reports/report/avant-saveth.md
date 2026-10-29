@@ -73,12 +73,19 @@ Avant publishes eight smart-contract reports on its [audits page](https://docs.a
 
 **Code complexity:** low to moderate. The ETH stack is a near-verbatim Ethena fork plus a small request/price-storage pair for the junior tranche. The real complexity sits offchain, in how the book is run.
 
-**Code-match caveat:** the audits name the avUSD system and the Max contracts. They do not name the ETH deployments. The ETH contracts carry renamed constructor strings (`"Staked avETH"`, `"savETH"`, `"avETH"`) on the same contract names, but no audited commit hash was diffed against the verified ETH bytecode. Treat ETH-specific audit coverage as **inferred from the shared code base**.
+**Code match (ETH deployments vs audited code).** No audit names the ETH deployments, and the audited commits are in a private repository, so no hash-level diff is possible. The Avalanche avUSD contracts are not on Sourcify, and Etherscan's free tier does not serve Avalanche. As a substitute, the verified ETH sources were normalised (asset names mapped back) and diffed against Ethena's public originals: [`StakedUSDeV2`](https://etherscan.io/address/0x9D39A5DE30e57443BfF2A8307A4256c8797A3497) and [`USDe`](https://etherscan.io/address/0x4c9EDD5852cd905f086C759E8383e09bff1E68B3). The remaining differences were then matched to the audit texts:
+
+- **Junior contracts:** `SimpleToken`, `PriceStorage` and `RequestsManagerV2` carry exactly the file names in the Cyfrin/Riley scopes.
+- **savETH / Silo / `SingleAdminAccessControl`:** apart from an OpenZeppelin v5 port (`_update` hook, `_grantRole` return value) and ETH-sized `MIN_SHARES` (0.00001 vs Ethena's 1), every change from Ethena matches a recorded Omniscia avUSD-System remediation. These are `SafeERC20` in the Silo, the zero-amount early return in `unstake()`, and the cached `cooldowns` storage pointer.
+- **`AvantMintingV2`:** the 1:1 ratio check (`_checkCollateralToStablecoinRatio` / `stablesDeltaLimit`) is the code quoted in Omniscia's Minting v2 report.
+- **Unaudited delta — avETH's minter model.** The audited avUSD (Omniscia, July 2024) has a single `address public minter` set by `setMinter(address newMinter)`. avETH instead has a `minters` mapping with `setMinter(address,bool)`, allowing any number of concurrent minters. No reviewed audit covers this change. It does not create the unbacked-mint power, since the owner could repoint the single minter in the audited design too. It does mean a newly added minter would not displace `AvantMintingV2`, so it would be less visible.
+
+Net: the ETH senior stack is audited avUSD code plus recorded remediations. The only unaudited logic change found is in the mint-authority model.
 
 ### Bug Bounty
 
 - **No public bug bounty found.** `immunefi.com/bug-bounty/avant` and `/avantprotocol` return 404, and `cantina.xyz/bounties/avant` shows "Bounty not found". Avant's docs do not mention a bounty.
-- **Safe Harbor:** TODO — the [SEAL Safe Harbor registry](https://safeharbor.securityalliance.org/) is client-rendered and could not be queried in this session.
+- **Safe Harbor: not adopted.** The [SEAL Safe Harbor registry](https://safeharbor.securityalliance.org/)'s data API (`/api/v1/agreements`) lists 33 adopting protocols on October 29, 2026, and Avant is not among them. The `avant`, `avant-protocol` and `avantprotocol` slugs return an empty body, the same as a nonexistent slug. No Avant admin or token address appears in any agreement.
 - **Operational security:** Avant states that Trail of Bits runs an ongoing OPSEC engagement (findings not published) and that Hypernative provides real-time monitoring ([Security Partners](https://docs.avantprotocol.com/security/security-partners)).
 
 ## Historical Track Record
@@ -290,7 +297,7 @@ The full path is therefore **~2 to 8 days and permissioned**. US persons are exc
 
 - Arbitrum `FactoryBurnMintERC20 1.6.2` [`0x23E3df1196b3249c9b0A9476f990F105591872De`](https://arbiscan.io/address/0x23E3df1196b3249c9b0A9476f990F105591872De): 1,702.1034 savETH, of which 1,702.0082 is in a Dolomite isolation vault [`0xcd518b638cf13b1d34254450d6a04b99e1a61a5d`](https://arbiscan.io/address/0xcd518b638cf13b1d34254450d6a04b99e1a61a5d).
 - Linea [`0xA0Fbf835fd24bD1aAFD39a0D4b1779B5B8329770`](https://lineascan.build/address/0xA0Fbf835fd24bD1aAFD39a0D4b1779B5B8329770): 0.0008 savETH.
-- Avalanche [`0x260c0c715A279F239cF44e2F73E964AB550738f3`](https://snowtrace.io/address/0x260c0c715A279F239cF44e2F73E964AB550738f3): TODO, not read (no Avalanche RPC configured; Etherscan v2 proxy call failed). By conservation it holds ≤0.0005 savETH plus anything in flight.
+- Avalanche [`0x260c0c715A279F239cF44e2F73E964AB550738f3`](https://snowtrace.io/address/0x260c0c715A279F239cF44e2F73E964AB550738f3): **0.000474 savETH**, measured from Ethereum because no Avalanche RPC is configured and Etherscan's free tier does not serve Avalanche. The pool's `Locked`/`Released` events record the calling ramp, and the CCIP 1.5 ramps are lane-specific. The Avalanche `EVM2EVMOnRamp 1.5.0` [`0xafd31c0c78785adf53e4c185670bfd5376249d8a`](https://etherscan.io/address/0xafd31c0c78785adf53e4c185670bfd5376249d8a) locked 0.113975 savETH and the Avalanche `EVM2EVMOffRamp 1.5.0` [`0xd98E80C79a15E4dbaF4C40B6cCDF690fe619BFBb`](https://etherscan.io/address/0xd98E80C79a15E4dbaF4C40B6cCDF690fe619BFBb) released 0.113501. The shared CCIP 1.6 `OnRamp` [`0x913814782144864e523c3fdb78e3ca25d2c2aeca`](https://etherscan.io/address/0x913814782144864e523c3fdb78e3ca25d2c2aeca) nets to 1,702.1034, which equals Arbitrum supply, so effectively no Avalanche flow went through 1.6.
 
 A CCIP or pool-owner compromise could release up to the 1,702 savETH escrow in one lane's bucket. That harms remote holders, not Ethereum savETH's backing. The `mint` exposure is on the remote chains (Dolomite), not Ethereum.
 
@@ -397,7 +404,7 @@ A CCIP or pool-owner compromise could release up to the 1,702 savETH escrow in o
 
 #### Category 1: Audits & Historical Track Record (Weight: 20%)
 
-- **Audits: 2.5.** Eight audits by reputable firms, all findings resolved or low-severity. Penalised for no public bug bounty, no confirmed Safe Harbor, and ETH-specific coverage inferred from the shared code base.
+- **Audits: 2.5.** Eight audits by reputable firms, all findings resolved or low-severity. Penalised for no public bug bounty, no Safe Harbor adoption, no audit naming the ETH deployments, and an unaudited change to avETH's minter model. The rest of the ETH code matches audited avUSD code plus recorded remediations.
 - **Historical: 2.5.** savETH has been live ~14.5 months (score 2) at ~$28.8M (score 3). The broader protocol has run since late 2024 at ~$150M with no incidents.
 
 **Score: 2.5/5** — `(2.5 + 2.5) / 2`.
