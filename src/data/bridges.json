@@ -34,6 +34,14 @@
           "detail": "Katana yvUSDC Compounder wraps USDC into vbUSDC [`0x53E8…a765e`](https://etherscan.io/address/0x53E82ABbb12638F09d9e624578ccB666217a765e) and bridges to Katana"
         },
         {
+          "slug": "avant-saveth",
+          "name": "Avant savETH",
+          "kind": "direct",
+          "model": "transport",
+          "integration": "AggLayer unified bridge (backing assets to Katana)",
+          "detail": "Avant's ETH-book strategy wallet [`0x6CC6…C4bD`](https://etherscan.io/address/0x6CC60A0b57bc882A0471980D0e2D4aD7DDf3C4bD) has sent 5,577.1 weETH through `PolygonZkEVMBridgeV2` [`0x2a3D…2EDe`](https://etherscan.io/address/0x2a3DD3EB832aF982ec71669E178424b10Dca2EDe) to Katana over its history. At the October 28–29, 2026 reconciliation the wallet held only 0.016 ETH on Katana, so current remote custody is negligible; exposure arises only while backing assets are in transit or deployed on Katana. savETH itself does not bridge over AggLayer."
+        },
+        {
           "slug": "flex",
           "name": "Flex",
           "kind": "indirect",

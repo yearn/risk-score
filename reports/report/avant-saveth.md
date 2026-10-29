@@ -1,12 +1,11 @@
 # Protocol Risk Assessment: Avant savETH
 
 - **Assessment Date:** October 28, 2026
-- **Onchain Snapshot:** Ethereum block [26294115](https://etherscan.io/block/26294115) (hash `0xb912715c1f481f0ad114b21777b3f988f99d0a7dd0cf13d395aab282d4645e1c`, October 28, 2026 22:06:59 UTC). Arbitrum and Linea remote-supply reads, the Morpho API, DeFiLlama and Avant's transparency API were read the same evening at current state, not at a pinned block.
+- **Onchain Snapshot:** Ethereum block [26294115](https://etherscan.io/block/26294115) (hash `0xb912715c1f481f0ad114b21777b3f988f99d0a7dd0cf13d395aab282d4645e1c`, October 28, 2026 22:06:59 UTC). Arbitrum and Linea remote-supply reads, the Morpho API, DeFiLlama and Avant's transparency API were read the same evening at current state, not at a pinned block. The multi-chain reserve reconciliation (October 29, 2026) used public RPC endpoints for Monad, Sei, Berachain and Avalanche at the requester's instruction.
 - **Token:** savETH (Staked avETH)
 - **Chain:** Ethereum
 - **Token Address:** [`0xDA06eE2dACF9245Aa80072a4407deBDea0D7e341`](https://etherscan.io/address/0xDA06eE2dACF9245Aa80072a4407deBDea0D7e341)
-- **Final Score: 5.00/5.0**
-- **Status:** GATED — score capped by the "unverifiable reserves" critical gate; ungated weighted score is 3.47 (Medium). No realized loss event.
+- **Final Score: 3.47/5.0**
 
 > **Address correction.** The [request issue](https://github.com/yearn/risk-score/issues/565) links [`0xb8D89678E75a973E74698c976716308abB8a46A4`](https://etherscan.io/address/0xb8D89678E75a973E74698c976716308abB8a46A4). Onchain, that contract is `"Staked avUSD"` / `savUSD`, a CCIP-bridged copy of Avant's USD product. Avant's [contract-address page](https://docs.avantprotocol.com/security/contract-addresses) lists it the same way. The issue title, its description and the referenced [WETH/savETH Morpho market](https://app.morpho.org/ethereum/variable/0xd98cd88ae5b336086b39fb1d62ba6171282e946105b010143f0e89f8fe7cff36/weth-saveth#market) all refer to savETH. That market's `collateralToken` is [`0xDA06eE2dACF9245Aa80072a4407deBDea0D7e341`](https://etherscan.io/address/0xDA06eE2dACF9245Aa80072a4407deBDea0D7e341) (`name()` = `"Staked avETH"`, `symbol()` = `"savETH"`). This report assesses that token.
 
@@ -175,24 +174,37 @@ Role enumeration (full `RoleGranted`/`RoleRevoked` scan, confirmed with `hasRole
 
 ### Collateralization
 
-**Where the backing is.** Mint-time WETH goes directly to the **sole registered custodian** [`0xd0f02713D9905D4F08512F3305Eee1CAC47D6ac9`](https://etherscan.io/address/0xd0f02713D9905D4F08512F3305Eee1CAC47D6ac9). That address is an EOA and is also listed as an avETH strategy address. There have been **zero `CustodyTransfer` events**, so collateral never sits in a protocol contract. At the snapshot the custodian held only 0.147 ETH and spam tokens. Avant's published Ethereum strategy wallets were checked. The main live position is in [`0x6CC60A0b57bc882A0471980D0e2D4aD7DDf3C4bD`](https://etherscan.io/address/0x6CC60A0b57bc882A0471980D0e2D4aD7DDf3C4bD):
+**Where the backing is.** Mint-time WETH goes directly to the **sole registered custodian** [`0xd0f02713D9905D4F08512F3305Eee1CAC47D6ac9`](https://etherscan.io/address/0xd0f02713D9905D4F08512F3305Eee1CAC47D6ac9). That address is an EOA and is also listed as an avETH strategy address. There have been **zero `CustodyTransfer` events**, so collateral never sits in a protocol contract. At the snapshot the custodian held only 0.147 ETH and spam tokens. The custodian forwards it: 16,121.8 WETH has gone out to strategy wallet [`0x6CC60A0b57bc882A0471980D0e2D4aD7DDf3C4bD`](https://etherscan.io/address/0x6CC60A0b57bc882A0471980D0e2D4aD7DDf3C4bD) (4,430.4 returned) and 6,780.9 WETH to `AvantMintingV2` for redemptions. From `0x6CC6…` the assets go into Aave V4, Spark, Aave V3 and Morpho on Ethereum, and over bridges (Wormhole NTT, AggLayer, CCIP) to Monad, Sei, Berachain and Base. The positions are itemised in the reconciliation below. That wallet also supplies 40.0 WETH to the very Morpho savETH market under review.
 
-- **Collateral:** 1,100.72 Spark `spwstETH`, 96.42 Aave `aEthweETH`, 73.04 Aave `aEthWETH`.
-- **Debt tokens:** USDS 1.197M, RLUSD 0.671M, USDT 0.251M, PYUSD 0.103M.
-- **Other:** 83.0K Euler `eUSDC-134`, plus 40.0 WETH supplied to the very Morpho savETH market under review.
+**Onchain reconciliation (all chains).** All **60 EVM addresses** Avant publishes were checked: strategy wallets for every product, archived ones, and the Reserve Funds.
 
-**Reconciliation attempt (Ethereum, snapshot block).** All **60 EVM addresses** Avant publishes (strategy wallets for every product, archived ones, and the Reserve Funds) were checked:
+- **Wallet:** essentially the whole ETH book sits in one published wallet, [`0x6CC60A0b57bc882A0471980D0e2D4aD7DDf3C4bD`](https://etherscan.io/address/0x6CC60A0b57bc882A0471980D0e2D4aD7DDf3C4bD), which uses the same address on every chain.
+- **Ethereum reads:** at the snapshot block.
+  - Aave V3 Core/Lido/EtherFi, Spark, and **Aave V4**. The Aave V4 Spoke is [`0x94e7A5dCbE816e498b89aB752661904E2F56c485`](https://etherscan.io/address/0x94e7A5dCbE816e498b89aB752661904E2F56c485); its Hub is [`0xcca852bc40e560adc3b1cc58ca5b55638ce826c9`](https://etherscan.io/address/0xcca852bc40e560adc3b1cc58ca5b55638ce826c9).
+  - Morpho through its API.
+- **Other chains:** read on October 29, 2026 at current state.
+  - Monad, Sei, Berachain and Avalanche were read through their **public RPC endpoints**, used at the requester's instruction because no configured RPC exists for them. Base and Katana used the configured RPCs.
+  - Token discovery used Etherscan v2 `tokentx` (Monad, Sei, Berachain).
+  - Sei and Berachain Morpho positions came from onchain `SupplyCollateral`/`Borrow` events plus `position()`. Curvance used `convertToAssets`/`debtBalance`.
 
-- **Methods:** Aave V3 Core/Lido/EtherFi and Spark `getUserAccountData`; Morpho Blue positions via the Morpho API; token balances via full `tokentx` history.
-- **ETH-book collateral found:** only in [`0x6CC60A0b57bc882A0471980D0e2D4aD7DDf3C4bD`](https://etherscan.io/address/0x6CC60A0b57bc882A0471980D0e2D4aD7DDf3C4bD), plus dust:
-  - Spark: 1,100.72 wstETH × 1.247404 = 1,373.04 ETH.
-  - Aave: 96.42 weETH × 1.106723 = 106.71 ETH, and 73.04 WETH.
-  - Morpho: 40.00 WETH supplied.
-- **Totals:** **1,593.4 ETH gross (13.0% of the 12,211.18 avETH outstanding)**. Against it sits $2.22M of stablecoin debt (Spark $1.97M, Aave $0.25M), leaving **651 ETH net (5.3%)**.
-- **The gap:** Avant's API puts **~$29.16M (≈11,671 ETH) of WETH, weETH, wstETH and ETH on Ethereum alone**, and none of it beyond the above sits in any published address. The large Aave positions at avUSD wallets [`0x3207363359Ca0c11D11073aD48301E8c958B7910`](https://etherscan.io/address/0x3207363359Ca0c11D11073aD48301E8c958B7910) ($84.19M collateral) and [`0xc468315a2df54f9c076bD5Cfe5002BA211F74CA6`](https://etherscan.io/address/0xc468315a2df54f9c076bD5Cfe5002BA211F74CA6) ($29.92M) hold no WETH/weETH/wstETH aTokens; they are avUSD-book positions.
-- **Other chains:** the non-Ethereum legs (Curvance on Monad $10.27M, Sei, Berachain, Base, Avalanche, Movement) could not be read with the configured RPCs.
+| Chain | Assets located | Debt located |
+|---|---|---:|
+| Ethereum | **Aave V4:** 4,167.75 WETH + 550 wstETH + 4,680.81 weETH (10,034.2 ETH). **Spark:** 1,100.72 wstETH. **Aave V3:** 96.42 weETH + 73.04 WETH. **Morpho:** 40 WETH supplied. Together **11,627.6 ETH**. Also $5.69M savUSD (Morpho collateral) and $0.08M Euler eUSDC | Aave V4 $14.22M (12.60M USDG, 1.12M frxUSD, 0.50M USDC; HF 1.37); Spark $1.97M; Aave V3 $0.25M; Morpho USDC $4.80M |
+| Monad | Curvance: 8,682,909 savUSD collateral (two markets), 1.28M AUSD + 0.38M USDC supplied, 1.80M AUSD in hyAUSD; Morpho $0.24M savUSD | Curvance AUSD $4.65M, USDC $0.81M |
+| Sei | Morpho: 6,963,825 savUSD collateral | PYUSD0 $4.18M |
+| Berachain | Morpho: 2,651,425 savUSD + 130 WETH collateral | BUSD $2.57M |
+| Base | Morpho: $2.09M savUSD collateral | USDC $1.72M |
+| Avalanche | 99,000 savUSD | — |
 
-**Net: ~87% of avETH's backing could not be located onchain, and there is no third-party attestation.** The liability side reconciles (supply, junior tranche, Reserve Fund). The asset side rests on Avant's self-reported dashboard. This triggers the [Unverifiable reserves gate](#critical-risk-gates).
+savUSD units are valued at the Avalanche vault rate (1.212211 avUSD) with avUSD at $1; ETH at the snapshot Chainlink price, $2,357.83.
+
+- **Located gross ETH collateral:** **11,757.6 ETH, 96.3% of the 12,211.18 avETH outstanding**. On Ethereum it matches Avant's own ≈11,671 ETH figure to within 0.4%.
+- **Located stablecoin side:** $33.87M of assets against $35.17M of debt. **savUSD alone is $30.32M, 115% of located NAV.**
+- **Located net NAV: 11,203.6 ETH, i.e. 91.75% of avETH supply. Unlocated: ≈1,008 ETH.**
+
+The gap corresponds to dashboard items not found in published wallets at current state: Avalanche WETH.e, Aave and Royco legs; Movement (non-EVM); Berachain Kodiak/Bex LPs and Dolomite; Midas mGLOBAL; and a Stake DAO LP. As of October 13 these totalled ≈$3.4M net (≈1,450 ETH). They could have moved since, or sit in unpublished wallets. **No attestation covers them.**
+
+The reconciliation therefore supports Avant's dashboard rather than contradicting it. Reserves *are* verifiable onchain, but only with multi-chain, multi-protocol work, and the net figure depends on savUSD being worth its avUSD rate (see [Curvance hyAUSD, Appendix B](curvance-hyausd.md)). An earlier version of this report understated located collateral (1,593 ETH) because its scan omitted Aave V4.
 
 **Self-reported book (Avant metrics API, October 13, 2026):**
 
@@ -234,7 +246,7 @@ At the snapshot, the junior buffer is **13.58%** of senior avETH (13.95% includi
 
 - **savETH/avETH ratio:** fully onchain and reproducible (`totalAssets()` = vault avETH balance − unvested). It rose monotonically from 1.000 to 1.062164 over 14 months.
 - **Yield input:** Avant computes the weekly yield offchain and pushes it daily through `transferInRewards`. There were 405 distributions totalling 277.48 avETH; the largest was 1.706 avETH. Nothing onchain checks that a distribution matches realised strategy P&L.
-- **avETH backing:** offchain. Avant publishes 10 ETH strategy addresses (EVM, Aptos, Stellar), and its transparency API reports a weekly NAV and allocation breakdown. The latest period end was October 13, 15 days before this snapshot. There is no third-party attestation, Merkle proof or live PoR.
+- **avETH backing:** offchain-managed but held in onchain DeFi positions. An independent multi-chain reconciliation of the published wallets located 91.75% of avETH supply net (see [Collateralization](#collateralization)). Avant publishes 10 ETH strategy addresses (EVM, Aptos, Stellar), and its transparency API reports a weekly NAV and allocation breakdown. The latest period end was October 13, 15 days before this snapshot. There is no third-party attestation, Merkle proof or live PoR.
 - **Junior price:** set by the service EOA through `PriceStorage.setPrice` within per-update bounds; not computed onchain.
 
 ## Liquidity Risk
@@ -391,7 +403,7 @@ A CCIP or pool-owner compromise could release up to the 1,702 savETH escrow in o
 
 - **Immutable contracts.** No assessed contract can be upgraded; the junior proxies have no upgrade path. Code is a lightly modified Ethena fork with eight published audits (Dedaub, Omniscia ×3, Cyfrin ×3, Riley) and no critical or high findings.
 - **Atomic, 1:1 mint backing through the official path.** `stablesDeltaLimit = 0`, WETH is transferred in the same transaction, and avETH supply reconciles exactly to mint/redeem history (12,211.18).
-- **A real, sizable junior buffer.** 1,459.7 avETH (13.6% of senior) is held as avETH and reconciles to the avETHx price × supply. No junior markdown has ever been recorded, and Avant self-reports a 100.48% NAV/supply ratio (unverified; see the reserves gate).
+- **A real, sizable junior buffer.** 1,459.7 avETH (13.6% of senior) is held as avETH and reconciles to the avETHx price × supply. No junior markdown has ever been recorded, and Avant self-reports a 100.48% NAV/supply ratio, and an independent multi-chain reconciliation located 91.75% of supply net (96.3% gross ETH collateral).
 - **Onchain, monotonic savETH rate.** Staked avETH cannot be rescued out of the vault, and the rate rose 6.2% over ~14 months with no decrease.
 
 ### Key Risks
@@ -404,7 +416,7 @@ A CCIP or pool-owner compromise could release up to the 1,702 savETH escrow in o
 
 ### Critical Risks
 
-- **Reserves are not verifiable (gate triggered).** Only 1,593.4 ETH gross / 651 ETH net of ETH-book collateral was located across all 60 published Avant addresses on Ethereum, against 12,211.18 avETH outstanding. Full backing rests solely on Avant's self-reported dashboard, with no attestation.
+- **Backing is only ~92% located and leans on savUSD.** A multi-chain reconciliation located a net NAV of 11,203.6 ETH against 12,211.18 avETH; the ≈1,008 ETH remainder is unattested. savUSD, whose own backing is ~99% offchain, makes up 115% of the located NAV.
 - **Unbacked mint + rate-blind oracle.** A compromise or misuse of `0xd4d23209aaE8630bf386b7393763a5b7865e57cb` can mint avETH, stake it, post savETH on Morpho/Gearbox and borrow out WETH. It could also seize lending-market collateral via `redistributeLockedAmount`. Nothing onchain delays or caps this.
 
 ---
@@ -415,7 +427,7 @@ A CCIP or pool-owner compromise could release up to the 1,702 savETH escrow in o
 
 - [ ] **Unverified contract source** — all assessed contracts and implementations are verified on Etherscan. **Pass.**
 - [ ] **No audit** — eight reports from reputable firms. **Pass.**
-- [x] **Unverifiable reserves** — **Triggered.** Supply, the junior tranche and the Reserve Fund reconcile onchain, but those establish liabilities, not backing. Checking all 60 published Avant EVM addresses located only **1,593.4 ETH gross / 651 ETH net** of ETH-book collateral on Ethereum, against 12,211.18 avETH outstanding and Avant's own claim of ≈11,671 ETH on Ethereum. The rest of the book is on chains not readable here or in unpublished wallets. The only evidence of full backing is Avant's self-reported weekly NAV; there is no custodian attestation, PoR or Merkle proof. See [Collateralization](#collateralization).
+- [ ] **Unverifiable reserves** — **Pass (borderline).** Reserves can be verified onchain. A full multi-chain reconciliation of the published wallets located **11,757.6 ETH of gross ETH collateral (96.3% of avETH)** and a **net NAV of 11,203.6 ETH (91.75%)**, with the ≈8% remainder matching dashboard legs on chains or venues not read here. There is no third-party attestation, and verification needs work across six chains. The unlocated remainder and the savUSD dependency are penalised in [Collateralization](#collateralization) rather than gated.
 - [ ] **Total centralization** — every admin power sits on one no-code address with no timelock. Avant represents it, in writing to its auditor, as a Fordefi MPC wallet requiring an admin quorum. Consistent with this repository's treatment of the same key in [Curvance hyAUSD](curvance-hyausd.md), this is scored as unverified MPC rather than a single-key EOA. **Pass (borderline); penalised in Governance.**
 
 ### Category Scores
@@ -438,11 +450,11 @@ A CCIP or pool-owner compromise could release up to the 1,702 savETH escrow in o
 #### Category 3: Funds Management (Weight: 30%)
 
 - **Collateralization: 3.5.**
-  - Positives: self-reported 100.48% backing with a verified 13.6% junior buffer; blue-chip ETH/LST collateral on blue-chip lenders.
-  - Negatives: custodial MPC wallets with no onchain allowlist; the yield leg is a levered position in Avant's own offchain-backed savUSD; the loss waterfall is not enforced onchain; the Reserve Fund is circular.
+  - Positives: 96.3% of avETH located as gross ETH/LST collateral on blue-chip lenders; 91.75% located net (Avant self-reports 100.48%); a verified 13.6% junior buffer.
+  - Negatives: ≈8% of net backing unlocated and unattested; custodial MPC wallets with no onchain allowlist; the yield leg is a levered position in Avant's own offchain-backed savUSD; the loss waterfall is not enforced onchain; the Reserve Fund is circular.
 - **Provability: 3.5.**
   - The savETH/avETH ratio and the junior buffer are onchain and reproducible.
-  - avETH backing relies on self-reported weekly NAV and published wallets. Only part of it was traceable onchain here, and there is no attestation or PoR.
+  - avETH backing can be reconciled onchain from published wallets (91.75% located net), but only across six chains and many protocols, against a self-reported weekly NAV. There is no attestation or PoR.
 
 **Score: 3.5/5** — `(3.5 + 3.5) / 2`.
 
@@ -460,7 +472,6 @@ A CCIP or pool-owner compromise could release up to the 1,702 savETH escrow in o
 
 ### Final Score Calculation
 
-The "unverifiable reserves" gate caps the score at **5.00 (GATED)**. The category calculation below is retained as the **ungated** score, so the underlying risk stays comparable.
 
 | Category | Score | Weight | Weighted |
 |---|---|---|---|
@@ -469,8 +480,7 @@ The "unverifiable reserves" gate caps the score at **5.00 (GATED)**. The categor
 | Funds Management | 3.5 | 30% | 1.050 |
 | Liquidity Risk | 4.0 | 15% | 0.600 |
 | Operational Risk | 2.5 | 5% | 0.125 |
-| **Ungated weighted score** | | | **3.47/5.0** |
-| **Final Score (gate applied)** | | | **5.00/5.0 — GATED** |
+| **Final Score** | | | **3.47/5.0** |
 
 No optional modifiers apply: savETH is under 2 years old and below $500M TVL.
 
@@ -484,11 +494,9 @@ No optional modifiers apply: savETH is under 2 years old and below $500M TVL.
 | **3.50–4.49** | **Elevated Risk** | Limited approval, strict limits |
 | **4.50–5.00** | **High Risk** | Not recommended |
 
-**Final Risk Tier: High Risk (GATED)** — not recommended until reserves are verifiable. Ungated, the score would be 3.47 (Medium Risk, top of the band).
+**Final Risk Tier: Medium Risk** (top of the band).
 
-**Gate-clearing condition:** an onchain reconciliation of avETH's assets against supply (Avant publishing every wallet that holds ETH-book assets, across all chains), or a recurring independent attestation or live Proof of Reserve.
-
-If exposure is taken despite the gate, as lending collateral, savETH should be sized against two facts. First, no liquidator can exit it without Avant. Second, the oracle cannot see an avETH impairment. Exposure in the WETH/savETH market should stay small relative to Avant's demonstrated redemption throughput and the ~1,460 avETH junior buffer, with the Monitoring alerts on `setMinter`, blacklist roles, the cooldown and the junior price wired to act on lender positions.
+As lending collateral, savETH should be sized against two facts. First, no liquidator can exit it without Avant. Second, the oracle cannot see an avETH impairment. Exposure in the WETH/savETH market should stay small relative to Avant's demonstrated redemption throughput and the ~1,460 avETH junior buffer, with the Monitoring alerts on `setMinter`, blacklist roles, the cooldown and the junior price wired to act on lender positions.
 
 ---
 
@@ -501,10 +509,11 @@ If exposure is taken despite the gate, as lending collateral, savETH should be s
   - Any savUSD/avUSD loss or depeg.
   - Redemptions not served within 7 days.
   - Movement of the admin key to an onchain multisig and timelock (likely score improvement).
-  - Launch of Chainlink PoR or a savETH exchange-rate feed, or publication of the full set of ETH-book wallets (would allow clearing the reserves gate).
+  - Launch of Chainlink PoR or a savETH exchange-rate feed.
+  - Located onchain NAV falling below 90% of avETH supply on re-reconciliation, which would trigger the unverifiable-reserves gate.
 
 ## Assessment History
 
 | Date | Score | Notes |
 | --- | --- | --- |
-| [October 28, 2026](https://github.com/yearn/risk-score/pull/567) | 5.0 | Initial assessment (GATED: unverifiable reserves; ungated 3.47) |
+| [October 28, 2026](https://github.com/yearn/risk-score/pull/567) | 3.47 | Initial assessment |
