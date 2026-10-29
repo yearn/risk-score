@@ -5,7 +5,8 @@
 - **Token:** savETH (Staked avETH)
 - **Chain:** Ethereum
 - **Token Address:** [`0xDA06eE2dACF9245Aa80072a4407deBDea0D7e341`](https://etherscan.io/address/0xDA06eE2dACF9245Aa80072a4407deBDea0D7e341)
-- **Final Score: 3.47/5.0**
+- **Final Score: 5.00/5.0**
+- **Status:** GATED — score capped by the "unverifiable reserves" critical gate; ungated weighted score is 3.47 (Medium). No realized loss event.
 
 > **Address correction.** The [request issue](https://github.com/yearn/risk-score/issues/565) links [`0xb8D89678E75a973E74698c976716308abB8a46A4`](https://etherscan.io/address/0xb8D89678E75a973E74698c976716308abB8a46A4). Onchain, that contract is `"Staked avUSD"` / `savUSD`, a CCIP-bridged copy of Avant's USD product. Avant's [contract-address page](https://docs.avantprotocol.com/security/contract-addresses) lists it the same way. The issue title, its description and the referenced [WETH/savETH Morpho market](https://app.morpho.org/ethereum/variable/0xd98cd88ae5b336086b39fb1d62ba6171282e946105b010143f0e89f8fe7cff36/weth-saveth#market) all refer to savETH. That market's `collateralToken` is [`0xDA06eE2dACF9245Aa80072a4407deBDea0D7e341`](https://etherscan.io/address/0xDA06eE2dACF9245Aa80072a4407deBDea0D7e341) (`name()` = `"Staked avETH"`, `symbol()` = `"savETH"`). This report assesses that token.
 
@@ -180,7 +181,18 @@ Role enumeration (full `RoleGranted`/`RoleRevoked` scan, confirmed with `hasRole
 - **Debt tokens:** USDS 1.197M, RLUSD 0.671M, USDT 0.251M, PYUSD 0.103M.
 - **Other:** 83.0K Euler `eUSDC-134`, plus 40.0 WETH supplied to the very Morpho savETH market under review.
 
-The remaining ~$20M+ of ETH collateral and the stablecoin side (savUSD on Monad, Sei, Base, Berachain and Avalanche) sit on other chains or in wallets not traced here. **Backing is partially traceable, not reconciled onchain.**
+**Reconciliation attempt (Ethereum, snapshot block).** All **60 EVM addresses** Avant publishes (strategy wallets for every product, archived ones, and the Reserve Funds) were checked:
+
+- **Methods:** Aave V3 Core/Lido/EtherFi and Spark `getUserAccountData`; Morpho Blue positions via the Morpho API; token balances via full `tokentx` history.
+- **ETH-book collateral found:** only in [`0x6CC60A0b57bc882A0471980D0e2D4aD7DDf3C4bD`](https://etherscan.io/address/0x6CC60A0b57bc882A0471980D0e2D4aD7DDf3C4bD), plus dust:
+  - Spark: 1,100.72 wstETH × 1.247404 = 1,373.04 ETH.
+  - Aave: 96.42 weETH × 1.106723 = 106.71 ETH, and 73.04 WETH.
+  - Morpho: 40.00 WETH supplied.
+- **Totals:** **1,593.4 ETH gross (13.0% of the 12,211.18 avETH outstanding)**. Against it sits $2.22M of stablecoin debt (Spark $1.97M, Aave $0.25M), leaving **651 ETH net (5.3%)**.
+- **The gap:** Avant's API puts **~$29.16M (≈11,671 ETH) of WETH, weETH, wstETH and ETH on Ethereum alone**, and none of it beyond the above sits in any published address. The large Aave positions at avUSD wallets [`0x3207363359Ca0c11D11073aD48301E8c958B7910`](https://etherscan.io/address/0x3207363359Ca0c11D11073aD48301E8c958B7910) ($84.19M collateral) and [`0xc468315a2df54f9c076bD5Cfe5002BA211F74CA6`](https://etherscan.io/address/0xc468315a2df54f9c076bD5Cfe5002BA211F74CA6) ($29.92M) hold no WETH/weETH/wstETH aTokens; they are avUSD-book positions.
+- **Other chains:** the non-Ethereum legs (Curvance on Monad $10.27M, Sei, Berachain, Base, Avalanche, Movement) could not be read with the configured RPCs.
+
+**Net: ~87% of avETH's backing could not be located onchain, and there is no third-party attestation.** The liability side reconciles (supply, junior tranche, Reserve Fund). The asset side rests on Avant's self-reported dashboard. This triggers the [Unverifiable reserves gate](#critical-risk-gates).
 
 **Self-reported book (Avant metrics API, October 13, 2026):**
 
@@ -195,7 +207,12 @@ At the October 13 Chainlink price ($2,498.07, block 26187014), the NAV equals **
 
 **Collateral quality and the circular exposure.** The ETH legs are blue-chip LSTs on blue-chip lenders. The yield, however, comes from borrowing ~$40M of dollars against them and holding **Avant-issued savUSD/avUSD and Curvance products (≈$38.7M, 127% of NAV)**. savUSD is itself backed ~99% offchain under the same admin key (see [Curvance hyAUSD, Appendix B](curvance-hyausd.md)). Two consequences follow:
 
-1. A **~13% loss on savUSD would consume the whole first-loss buffer** (next point), and anything beyond that falls on savETH. The ETH and USD products are therefore not isolated, despite the docs' per-asset Reserve Funds.
+1. **An ~11% loss on savUSD would consume the whole first-loss buffer**, and anything beyond that falls on savETH. All figures below are at the October 13, 2026 NAV date (block 26187014, ETH $2,498.07):
+   - **Junior tranche:** 1,313.67 avETHx × 1.097376 = **1,441.59 avETH ($3.60M)**, matching the 1,441.62 avETH then held by the junior treasuries. That is **11.01%** of the $32.71M savUSD position.
+   - **With the reported surplus and Reserve Fund:** adding the 57.74 ETH surplus and the Reserve Fund's 40.31 avETH raises it to 1,539.64 avETH ($3.85M), **11.76%**.
+   - **At a 13% savUSD loss ($4.25M):** this leaves **≈$405.8K of senior impairment**.
+
+   The ETH and USD products are therefore not isolated, despite the docs' per-asset Reserve Funds.
 2. The stablecoin positions are themselves levered (savUSD/cAUSD as collateral on Curvance and Morpho). A savUSD oracle drop could trigger liquidations inside the ETH book.
 
 **First-loss buffer (onchain, snapshot block):**
@@ -207,7 +224,7 @@ At the October 13 Chainlink price ($2,498.07, block 26187014), the NAV equals **
 | Governance backstop | — | "Planned future" per [Fund Protection Layers](https://docs.avantprotocol.com/security/fund-protection-layers) |
 | **Senior avETH** (supply less junior holdings) | 10,751.50 | savETH vault 10,739.35 + silo 2.45 + other holders |
 
-The junior buffer is **13.58%** of senior avETH (13.95% including the circular Reserve Fund). Counting Avant's reported surplus as well, the book can absorb about **12.8%** before savETH is impaired.
+At the snapshot, the junior buffer is **13.58%** of senior avETH (13.95% including the circular Reserve Fund). That ratio measures cover against senior *liabilities*. Measured against the savUSD exposure that drives the main loss scenario, the cover is **11.01% (junior only) / 11.76% (with surplus and Reserve Fund)** at the aligned October 13 figures above.
 
 **The waterfall is not enforced onchain.** savETH's rate is `avETH balance / shares` and cannot fall. A loss would surface instead as avETH being worth less than 1 ETH. The junior tranche absorbs it only if Avant (a) cuts the avETHx price through `PriceStorage` and (b) burns or uses the junior treasury's avETH to restore the backing ratio. Both are discretionary actions by the same admin and service keys. `PriceStorage` bounds each update to +5% / −33%, but there is no limit on how many updates can be chained.
 
@@ -232,7 +249,7 @@ The junior buffer is **13.58%** of senior avETH (13.95% including the circular R
 
 **The only exit to WETH is through Avant:**
 
-1. `cooldownShares`: 24 h (admin-mutable, 0 to 90 days).
+1. `cooldownShares`: 24 h. The admin can set the duration from 0 to 90 days, but a change applies only to cooldowns started (or reset) afterwards. Each request stores its own `cooldownEnd`.
 2. `unstake()` returns avETH.
 3. An RFQ redemption executed by Avant's `REDEEMER_ROLE` EOA, paid from WETH Avant must first move into `AvantMintingV2`. Documented at up to 7 days; per-block cap 5,000 avETH.
 
@@ -263,7 +280,7 @@ The full path is therefore **~2 to 8 days and permissioned**. US persons are exc
 - **Powers exercisable immediately by that key:**
   - `avETH.setMinter`: unbacked avETH mint, unlimited.
   - savETH: grant blacklist roles, freeze any holder (including Morpho Blue), and `redistributeLockedAmount` to seize the frozen balance.
-  - `setCooldownDuration` from 0 to 90 days: can lock all exits for up to 90 days per call, or open instant exits for chosen holders (observed 46 times).
+  - `setCooldownDuration` from 0 to 90 days. Each request's `cooldownEnd` is fixed when `cooldownShares`/`cooldownAssets` is called, so raising the duration does **not** extend requests already pending; they stay claimable at their stored deadline. It does impose up to 90 days on every **newly initiated** cooldown, and on any holder who adds to an existing one (adding resets that holder's whole pending amount to the new deadline). Setting it to 0 makes all pending requests claimable immediately and re-enables instant ERC-4626 `withdraw`/`redeem`. The admin has used short windows (60 s) to give some holders instant exits (observed 46 times).
   - `AvantMintingV2`: add custodians, change per-block limits and `stablesDeltaLimit`.
   - CCIP pool: set rate limits and remote pools.
   - Junior: `emergencyWithdraw`, fees up to 5%, treasury and price-bound changes.
@@ -282,7 +299,7 @@ The full path is therefore **~2 to 8 days and permissioned**. US persons are exc
 
 | Dependency | Role | Criticality |
 |---|---|---|
-| **Avant savUSD / avUSD** (Avalanche + bridged) | ≈$35M of the ETH book's assets (107% of NAV in savUSD alone) | **Critical** — a ~13% savUSD loss exhausts the junior buffer |
+| **Avant savUSD / avUSD** (Avalanche + bridged) | ≈$35M of the ETH book's assets (107% of NAV in savUSD alone) | **Critical** — an ~11.8% savUSD loss exhausts the junior buffer, surplus and Reserve Fund (Oct 13 figures) |
 | **Fordefi MPC** | Custody of admin key, custodian and strategy wallets | **Critical** |
 | Aave V3, Spark, Morpho, Euler | ETH/LST collateral and stablecoin borrowing | High (blue-chip) |
 | Curvance (Monad), Dolomite, Royco, Bex, Hocket | Smaller stablecoin legs; hyAUSD $1.79M, cAUSD $1.27M | Medium |
@@ -342,7 +359,7 @@ A CCIP or pool-owner compromise could release up to the 1,702 savETH escrow in o
                     │ PriceStorage, RequestsManagerV2, savETH CCIP pool        │
                     │ NO multisig onchain · NO timelock                        │
                     └───────┬───────────────┬───────────────┬──────────────────┘
-          setMinter (unbounded)    blacklist+redistribute   cooldown 0–90d
+          setMinter (unbounded)    blacklist+redistribute   cooldown 0–90d (new requests)
                             │               │               │
  TOKEN LAYER   ┌────────────▼───┐   ┌───────▼───────────────▼──┐   ┌────────────────┐
                │ avETH (Ownable)│◄──│ savETH (ERC-4626, immut.)│──►│ AvantCoinSilo  │
@@ -374,19 +391,20 @@ A CCIP or pool-owner compromise could release up to the 1,702 savETH escrow in o
 
 - **Immutable contracts.** No assessed contract can be upgraded; the junior proxies have no upgrade path. Code is a lightly modified Ethena fork with eight published audits (Dedaub, Omniscia ×3, Cyfrin ×3, Riley) and no critical or high findings.
 - **Atomic, 1:1 mint backing through the official path.** `stablesDeltaLimit = 0`, WETH is transferred in the same transaction, and avETH supply reconciles exactly to mint/redeem history (12,211.18).
-- **A real, sizable junior buffer.** 1,459.7 avETH (13.6% of senior) is held as avETH and reconciles to the avETHx price × supply. No junior markdown has ever been recorded, and Avant self-reports a 100.48% NAV/supply ratio.
+- **A real, sizable junior buffer.** 1,459.7 avETH (13.6% of senior) is held as avETH and reconciles to the avETHx price × supply. No junior markdown has ever been recorded, and Avant self-reports a 100.48% NAV/supply ratio (unverified; see the reserves gate).
 - **Onchain, monotonic savETH rate.** Staked avETH cannot be rescued out of the vault, and the rate rose 6.2% over ~14 months with no decrease.
 
 ### Key Risks
 
-- **One no-code address holds every admin power with no timelock.** It can mint unlimited unbacked avETH, freeze and seize any savETH holder (including Morpho Blue's collateral), and lock exits for up to 90 days. MPC quorum is claimed but not verifiable.
-- **The ETH book is levered into Avant's own USD product.** savUSD alone is 107% of NAV, and Avant/Curvance-linked dollar assets are 127%. A ~13% savUSD loss exhausts the first-loss buffer, so savETH's senior protection depends on avUSD's offchain backing.
+- **One no-code address holds every admin power with no timelock.** It can mint unlimited unbacked avETH, freeze and seize any savETH holder (including Morpho Blue's collateral), and impose up to 90-day cooldowns on new exit requests. MPC quorum is claimed but not verifiable.
+- **The ETH book is levered into Avant's own USD product.** savUSD alone is 107% of NAV, and Avant/Curvance-linked dollar assets are 127%. A savUSD loss above ~11.8% exhausts the junior tranche, surplus and Reserve Fund (11.0% for the junior tranche alone, October 13 figures), so savETH's senior protection depends on avUSD's offchain backing.
 - **No permissionless exit.** There is no DEX liquidity. The WETH exit is a 24 h cooldown plus an Avant-executed RFQ redemption (up to 7 days), unavailable to US persons. Morpho liquidators earn a 2.6% bonus for multi-day, counterparty-dependent inventory risk.
 - **The loss waterfall is offchain.** savETH's rate cannot fall, so an impairment surfaces as avETH < 1 ETH, which the Morpho oracle ignores. Junior loss absorption requires discretionary admin actions.
 - **Selective exits.** The admin repeatedly opens unannounced 60-second cooldown windows; 44% of all unstaking used them.
 
 ### Critical Risks
 
+- **Reserves are not verifiable (gate triggered).** Only 1,593.4 ETH gross / 651 ETH net of ETH-book collateral was located across all 60 published Avant addresses on Ethereum, against 12,211.18 avETH outstanding. Full backing rests solely on Avant's self-reported dashboard, with no attestation.
 - **Unbacked mint + rate-blind oracle.** A compromise or misuse of `0xd4d23209aaE8630bf386b7393763a5b7865e57cb` can mint avETH, stake it, post savETH on Morpho/Gearbox and borrow out WETH. It could also seize lending-market collateral via `redistributeLockedAmount`. Nothing onchain delays or caps this.
 
 ---
@@ -397,7 +415,7 @@ A CCIP or pool-owner compromise could release up to the 1,702 savETH escrow in o
 
 - [ ] **Unverified contract source** — all assessed contracts and implementations are verified on Etherscan. **Pass.**
 - [ ] **No audit** — eight reports from reputable firms. **Pass.**
-- [ ] **Unverifiable reserves** — reserves are offchain-managed but disclosed: published strategy addresses, a weekly NAV/allocation API, and onchain-reconcilable junior and supply data. Partially traceable rather than unverifiable. **Pass (borderline).**
+- [x] **Unverifiable reserves** — **Triggered.** Supply, the junior tranche and the Reserve Fund reconcile onchain, but those establish liabilities, not backing. Checking all 60 published Avant EVM addresses located only **1,593.4 ETH gross / 651 ETH net** of ETH-book collateral on Ethereum, against 12,211.18 avETH outstanding and Avant's own claim of ≈11,671 ETH on Ethereum. The rest of the book is on chains not readable here or in unpublished wallets. The only evidence of full backing is Avant's self-reported weekly NAV; there is no custodian attestation, PoR or Merkle proof. See [Collateralization](#collateralization).
 - [ ] **Total centralization** — every admin power sits on one no-code address with no timelock. Avant represents it, in writing to its auditor, as a Fordefi MPC wallet requiring an admin quorum. Consistent with this repository's treatment of the same key in [Curvance hyAUSD](curvance-hyausd.md), this is scored as unverified MPC rather than a single-key EOA. **Pass (borderline); penalised in Governance.**
 
 ### Category Scores
@@ -430,7 +448,7 @@ A CCIP or pool-owner compromise could release up to the 1,702 savETH escrow in o
 
 #### Category 4: Liquidity Risk (Weight: 15%)
 
-**Score: 4.0/5.** There is no secondary-market liquidity at any size. The only route to WETH is a 24 h cooldown plus a permissioned, manually funded RFQ redemption documented at up to 7 days, unavailable to US persons, with the cooldown admin-extendable to 90 days. Capacity has been demonstrated (793 avETH in one redemption, 2,140 avETH in a month), and a same-asset (ETH-denominated) loan tolerates longer exits, so the score is held at 4.0 rather than 4.5.
+**Score: 4.0/5.** There is no secondary-market liquidity at any size. The only route to WETH is a 24 h cooldown plus a permissioned, manually funded RFQ redemption documented at up to 7 days, unavailable to US persons, with the cooldown for new requests admin-extendable to 90 days. Capacity has been demonstrated (793 avETH in one redemption, 2,140 avETH in a month), and a same-asset (ETH-denominated) loan tolerates longer exits, so the score is held at 4.0 rather than 4.5.
 
 #### Category 5: Operational Risk (Weight: 5%)
 
@@ -442,6 +460,8 @@ A CCIP or pool-owner compromise could release up to the 1,702 savETH escrow in o
 
 ### Final Score Calculation
 
+The "unverifiable reserves" gate caps the score at **5.00 (GATED)**. The category calculation below is retained as the **ungated** score, so the underlying risk stays comparable.
+
 | Category | Score | Weight | Weighted |
 |---|---|---|---|
 | Audits & Historical | 2.5 | 20% | 0.500 |
@@ -449,7 +469,8 @@ A CCIP or pool-owner compromise could release up to the 1,702 savETH escrow in o
 | Funds Management | 3.5 | 30% | 1.050 |
 | Liquidity Risk | 4.0 | 15% | 0.600 |
 | Operational Risk | 2.5 | 5% | 0.125 |
-| **Final Score** | | | **3.47/5.0** |
+| **Ungated weighted score** | | | **3.47/5.0** |
+| **Final Score (gate applied)** | | | **5.00/5.0 — GATED** |
 
 No optional modifiers apply: savETH is under 2 years old and below $500M TVL.
 
@@ -463,9 +484,11 @@ No optional modifiers apply: savETH is under 2 years old and below $500M TVL.
 | **3.50–4.49** | **Elevated Risk** | Limited approval, strict limits |
 | **4.50–5.00** | **High Risk** | Not recommended |
 
-**Final Risk Tier: Medium Risk** (top of the band).
+**Final Risk Tier: High Risk (GATED)** — not recommended until reserves are verifiable. Ungated, the score would be 3.47 (Medium Risk, top of the band).
 
-As lending collateral, savETH should be sized against two facts. First, no liquidator can exit it without Avant. Second, the oracle cannot see an avETH impairment. Exposure in the WETH/savETH market should stay small relative to Avant's demonstrated redemption throughput and the ~1,460 avETH junior buffer, with the Monitoring alerts on `setMinter`, blacklist roles, the cooldown and the junior price wired to act on lender positions.
+**Gate-clearing condition:** an onchain reconciliation of avETH's assets against supply (Avant publishing every wallet that holds ETH-book assets, across all chains), or a recurring independent attestation or live Proof of Reserve.
+
+If exposure is taken despite the gate, as lending collateral, savETH should be sized against two facts. First, no liquidator can exit it without Avant. Second, the oracle cannot see an avETH impairment. Exposure in the WETH/savETH market should stay small relative to Avant's demonstrated redemption throughput and the ~1,460 avETH junior buffer, with the Monitoring alerts on `setMinter`, blacklist roles, the cooldown and the junior price wired to act on lender positions.
 
 ---
 
@@ -478,10 +501,10 @@ As lending collateral, savETH should be sized against two facts. First, no liqui
   - Any savUSD/avUSD loss or depeg.
   - Redemptions not served within 7 days.
   - Movement of the admin key to an onchain multisig and timelock (likely score improvement).
-  - Launch of Chainlink PoR or a savETH exchange-rate feed.
+  - Launch of Chainlink PoR or a savETH exchange-rate feed, or publication of the full set of ETH-book wallets (would allow clearing the reserves gate).
 
 ## Assessment History
 
 | Date | Score | Notes |
 | --- | --- | --- |
-| October 28, 2026 | 3.47 | Initial assessment |
+| [October 28, 2026](https://github.com/yearn/risk-score/pull/567) | 5.0 | Initial assessment (GATED: unverifiable reserves; ungated 3.47) |
