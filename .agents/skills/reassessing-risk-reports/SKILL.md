@@ -47,6 +47,9 @@ to keep the index consistent.
 - Keep incidents, depegs, and large historical TVL changes as dated facts in
   Historical Track Record, not comparisons with the previous assessment.
 - Change scores only under the [scoring framework](../../../reports/README.md).
+  If a score changes because the rubric changed rather than the protocol, say
+  so in the Assessment History notes, e.g. `Rescored under weakest-link
+  governance rule; no onchain change`.
   Update dependent summaries, final tier, concentration discussion, and
   graph-related appendices when their supporting facts change.
 

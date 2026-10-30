@@ -23,11 +23,13 @@ unverified check; do not present mixed states as one snapshot.
 
 ## Permission and mint-authority enumeration workflow
 
-Use these steps for every permissioned role on contracts in the assessed fund
-and control paths: token, vault, strategy, custody, redemption, oracle, bridge,
-proxy, access manager, and critical dependency contracts. Include timelock
-proposer/executor/canceller/admin roles. Inventory each role and its holders,
-then identify which capabilities can cause a material loss or block exits.
+Use these steps for every permissioned role on contracts that hold, account
+for, or can move user deposits: token, vault, strategy, custody, redemption,
+oracle, bridge, proxy, access manager, and critical dependency contracts.
+Include timelock proposer/executor/canceller/admin roles. Inventory each role
+and its holders, then identify which capabilities can cause a material loss: a
+loss of the collateral or main asset users deposited. Pause-only roles block
+exits but cannot cause a material loss; record them and accept EOA holders.
 
 1. Read verified source for each privileged entrypoint and its access checks.
    Map direct transfers or withdrawals, unbacked minting, strategy or collateral
@@ -58,8 +60,21 @@ then identify which capabilities can cause a material loss or block exits.
    For each material power, record the target contract and function, current
    holder, effective approval threshold, delay, caps or allowlists, and assets
    exposed. Distinguish a direct ability to move funds from an indirect ability
-   to obtain it through role changes or upgrades. Do not infer unlimited access
-   when code-enforced restrictions exist.
+   to obtain it through role changes or upgrades. Before treating a
+   code-enforced restriction (slippage, allowlist, fixed recipient, cap) as
+   limiting, dig deeper:
+   - Who sets the bound, and is that setter weaker than the caller? A
+     slippage or allowlist setter held by an EOA is itself a material path.
+   - Can the caller manipulate the price reference, such as a spot pool
+     price, a caller-supplied quote, or a stale oracle?
+   - Can repeated calls compound per-call losses, for example swapping back
+     and forth between allowlisted assets at maximum slippage? Look for rate
+     limits, cooldowns, and cumulative caps.
+   - Can an allowlisted router, solver, or target execute arbitrary calldata,
+     or can the caller pick a counterparty it controls?
+   - Do approvals or residual balances outlive the call?
+   Record a bounded role as low-impact only when these checks show its
+   cumulative loss stays immaterial; cite the code that enforces each bound.
 5. Reconcile each privileged minter with a `mints` edge in
    `reports/graph/<slug>.yaml`.
 

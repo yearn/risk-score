@@ -160,29 +160,34 @@ See `reports/report/mezo-musd.md` for a worked example.
 
 ### Critical Permission Paths and Weakest Link
 
-Inventory every permissioned role on contracts in the assessed fund and control
-paths, including token, vault, strategy, custody, redemption, oracle, bridge,
-proxy, access manager, and critical dependencies. For each material capability,
-trace both direct callers and indirect controllers who can grant the role,
-change its constraints, or upgrade the implementation. Follow the
+A **material loss** is a loss of the collateral or main asset that users
+deposited. Inventory every permissioned role on contracts that hold, account
+for, or can move those deposits, including token, vault, strategy, custody,
+redemption, oracle, bridge, proxy, access manager, and critical dependencies.
+For each capability that can cause a material loss, trace both direct callers
+and indirect controllers who can grant the role, change its constraints, or
+upgrade the implementation. Follow the
 [onchain verification procedure](../.agents/skills/verifying-onchain-data/SKILL.md#permission-and-mint-authority-enumeration-workflow).
 
-| Capability and target | Current holder / control path | Safeguards | Assets or function exposed |
-|-----------------------|-------------------------------|------------|----------------------------|
+| Capability and target | Current holder / control path | Safeguards | Assets exposed |
+|-----------------------|-------------------------------|------------|----------------|
 | [e.g. withdraw collateral via `Contract.function`] | [linked EOA, Safe, or contract; role admin and upgrade path] | [threshold, delay, caps, allowlist, or none] | [asset and verified amount, or `TODO` with getter] |
 
 **Weakest credible path to material loss:** [Name the holder and the exact
 direct or indirect action; explain why its effective approval threshold,
 timelock, and code-enforced limits make it the least protected material path.
-State the assets at risk or exit function affected, with links to source and
-onchain evidence. Name comparably weak paths if needed. If the inventory is
-incomplete, mark the missing contracts or role history `TODO`; do not claim
-that no weaker path exists.]
+State the deposited assets at risk, with links to source and onchain evidence.
+Name comparably weak paths if needed. If the inventory is incomplete, mark the
+missing contracts or role history `TODO`; do not claim that no weaker path
+exists.]
 
 An EOA or low-threshold Safe that can move funds, mint unbacked tokens, change
-an oracle, block redemption, or acquire those powers must be called out here
-and in Key or Critical Risks as warranted. A low-impact role does not become a
-critical risk solely because an EOA holds it.
+an oracle, set loss-causing parameters (slippage tolerance, swap or recipient
+allowlists, fees, strategy approvals), or acquire those powers must be called
+out here and in Key or Critical Risks as warranted. An EOA may hold a
+pause-only role: list it for liquidity and monitoring, but it cannot cause a
+material loss and does not set the weakest link. A low-impact role does not
+become a critical risk solely because an EOA holds it.
 
 ### Programmability
 
@@ -320,7 +325,7 @@ If ANY gate is triggered, the protocol automatically receives a score of **5** (
 | **5** | EOA or <3 signers (CRITICAL GATE) | No timelock | Unlimited admin powers |
 
 - **Timelock** is measured on the path that can change the protocol - upgrades, role changes, and parameter authority - end-to-end from proposal to execution. A 48h delay clears the score-1 bar on its own; there is no extra credit above it.
-- Operational roles bounded by governance-approved constraints (moving funds between already-approved strategies, pausing, keeper calls such as rebase or harvest) are scored in **Subcategory B: Programmability**, not here. An unbounded path to move funds or change those constraints is a governance risk regardless of the role's name. Score this subcategory on the weakest material control path, including who can change the protocol itself.
+- Operational roles bounded by governance-approved constraints (moving funds between already-approved strategies, pausing, keeper calls such as rebase or harvest) are scored in **Subcategory B: Programmability**, not here. An EOA may hold a pause-only role without triggering the critical gate. Score this subcategory on the weakest path to a material loss (see Critical Permission Paths and Weakest Link): who can change the protocol itself, move deposited funds outside those constraints, or set the constraints, such as slippage tolerance, swap or recipient allowlists, oracles, fees, or strategy approvals. If an EOA or fewer than 3 signers hold such a path, apply the critical gate.
 
 **Subcategory B: Programmability**
 

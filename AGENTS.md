@@ -33,8 +33,9 @@ shell commands are relative to the repository root; run commands there.
 - Trace indirect loss paths: minting, upgrades, role escalation, oracle control,
   custody, redemption gates, fees, migrations, and dependency failures.
 - Inventory permissioned roles across the assessed fund and control paths.
-  Identify the weakest credible path to a material loss, including direct
-  fund-moving authority and indirect control through role grants or upgrades.
+  Identify the weakest credible path to a material loss (loss of user-deposited
+  collateral or main asset), including direct fund-moving authority and
+  indirect control through role grants or upgrades.
   State the holder, action, enforceable limits, delay, and funds at risk; mark
   incomplete enumeration or unverifiable exposure `TODO`.
 
